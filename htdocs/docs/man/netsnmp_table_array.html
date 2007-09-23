@@ -2,14 +2,14 @@
 <!--#include virtual="/page-top.html" -->
 <!-- CONTENT START -->
     <h1>table_array</h1>Section: net-snmp (3)<br />
-    Updated: 24 Nov 2006<br />
+    Updated: 27 Jul 2007<br />
     <a href="#index">Index</a> <a href="../index.html">Return to Main Contents</a>
     <hr />
-    <a name="lbAB" id="lbAB"> </a>
+    <a name="lbAB" id="lbAB">&nbsp;</a>
 
     <h2>NAME</h2>table_array - Helps you implement a table when data can be stored locally.
 
-    <p><a name="lbAC" id="lbAC"> </a></p>
+    <p><a name="lbAC" id="lbAC">&nbsp;</a></p>
 
     <h3>Functions</h3>
 
@@ -27,7 +27,7 @@
     <i>find the context data used by the table_array helper</i><br />
     int <b>netsnmp_table_array_check_row_status</b> (<b>netsnmp_table_array_callbacks</b> *cb, <b>netsnmp_request_group</b> *ag,
     long *rs_new, long *rs_old)<br />
-    <i>this function is called to validate RowStatus transitions.</i> <a name="lbAD" id="lbAD"> </a></p>
+    <i>this function is called to validate RowStatus transitions.</i> <a name="lbAD" id="lbAD">&nbsp;</a></p>
 
     <h2>Detailed Description</h2>
 
@@ -75,11 +75,11 @@
 
     <p>The generated code contains many TODO comments. Make sure you check each one to see if it applies to your code. Examples
     include checking indices for syntax (ranges, etc), initializing default values in newly created rows, checking for row
-    activation and deactivation requirements, etc. <a name="lbAE" id="lbAE"> </a></p>
+    activation and deactivation requirements, etc. <a name="lbAE" id="lbAE">&nbsp;</a></p>
 
     <h2>Function Documentation</h2>
 
-    <p><a name="lbAF" id="lbAF"> </a></p>
+    <p><a name="lbAF" id="lbAF">&nbsp;</a></p>
 
     <h3><b>netsnmp_container</b>* netsnmp_extract_array_context (<b>netsnmp_request_info</b> * request)</h3>
 
@@ -87,7 +87,7 @@
 
     <p>Definition at line 229 of file table_array.c.</p>
 
-    <p>References netsnmp_request_get_list_data(). <a name="lbAG" id="lbAG"> </a></p>
+    <p>References netsnmp_request_get_list_data(). <a name="lbAG" id="lbAG">&nbsp;</a></p>
 
     <h3><b>netsnmp_mib_handler</b>* netsnmp_find_table_array_handler (<b>netsnmp_handler_registration</b> * reginfo)</h3>
 
@@ -96,7 +96,7 @@
     <p>Definition at line 212 of file table_array.c.</p>
 
     <p>References netsnmp_mib_handler_s::access_method, netsnmp_handler_registration_s::handler, netsnmp_mib_handler_s::next, and
-    NULL. <a name="lbAH" id="lbAH"> </a></p>
+    NULL. <a name="lbAH" id="lbAH">&nbsp;</a></p>
 
     <h3>int netsnmp_table_array_check_row_status (<b>netsnmp_table_array_callbacks</b> * cb, <b>netsnmp_request_group</b> * ag,
     long * rs_new, long * rs_old)</h3>
@@ -107,7 +107,7 @@
 
     <p>References netsnmp_table_array_callbacks_s::can_activate, netsnmp_table_array_callbacks_s::can_deactivate,
     netsnmp_table_array_callbacks_s::can_delete, netsnmp_request_group_s::existing_row, NULL,
-    netsnmp_request_group_s::row_deleted, and netsnmp_request_group_s::undo_info. <a name="lbAI" id="lbAI"> </a></p>
+    netsnmp_request_group_s::row_deleted, and netsnmp_request_group_s::undo_info. <a name="lbAI" id="lbAI">&nbsp;</a></p>
 
     <h3>int netsnmp_table_container_register (<b>netsnmp_handler_registration</b> * reginfo,
     <b>netsnmp_table_registration_info</b> * tabreg, <b>netsnmp_table_array_callbacks</b> * cb, <b>netsnmp_container</b> *
@@ -128,7 +128,7 @@
 
     <p>Referenced by netsnmp_table_array_register().</p>
     <hr />
-    <a name="index" id="index"> </a>
+    <a name="index" id="index">&nbsp;</a>
 
     <h2>Index</h2>
 
@@ -164,7 +164,7 @@
     </dl>
     <hr />
     This document was created by <a href="http://localhost/cgi-bin/man/man2html">man2html</a>, using the manual pages.<br />
-    Time: 16:55:09 GMT, December 09, 2006
+    Time: 13:12:01 GMT, September 23, 2007
 <!-- CONTENT END -->
 <!--#include virtual="/page-bottom.html" -->
 

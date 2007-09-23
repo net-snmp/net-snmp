@@ -5,27 +5,15 @@
     Updated: 08 Feb 2002<br />
     <a href="#index">Index</a> <a href="../index.html">Return to Main Contents</a>
     <hr />
-    <a name="lbAB" id="lbAB"> </a>
+    <a name="lbAB" id="lbAB">&nbsp;</a>
 
-    <h2>NAME</h2>snmpget - communicates with a network entity using SNMP GET requests <a name="lbAC" id="lbAC"> </a>
+    <h2>NAME</h2>snmpget - communicates with a network entity using SNMP GET requests <a name="lbAC" id="lbAC">&nbsp;</a>
 
-    <h2>SYNOPSIS</h2><b>snmpget</b> [COMMON OPTIONS] [-Cf] OID [OID]... <a name="lbAD" id="lbAD"> </a>
+    <h2>SYNOPSIS</h2><b>snmpget</b> [COMMON OPTIONS] [-Cf] OID [OID]... <a name="lbAD" id="lbAD">&nbsp;</a>
 
     <h2>DESCRIPTION</h2><b>snmpget</b> is an SNMP application that uses the SNMP GET request to query for information on a
     network entity. One or more object identifiers (OIDs) may be given as arguments on the command line. Each variable name is
-    given in the format specified in <i><a href="variables.html">variables</a>(5)</i>.
-
-    <p>For example:</p>
-
-    <p>snmpget -c public zeus system.sysDescr.0</p>
-
-    <p>will retrieve the variable system.sysDescr.0:</p>
-
-    <p>system.sysDescr.0 = "SunOS zeus.net.cmu.edu 4.1.3_U1 1 sun4m"</p>
-
-    <p>If the network entity has an error processing the request packet, an error packet will be returned and a message will be
-    shown, helping to pinpoint in what way the request was malformed. If there were other variables in the request, the request
-    will be resent without the bad variable. <a name="lbAE" id="lbAE"> </a></p>
+    given in the format specified in <i><a href="variables.html">variables</a>(5)</i>. <a name="lbAE" id="lbAE">&nbsp;</a>
 
     <h2>OPTIONS</h2>
 
@@ -35,33 +23,60 @@
       <dd>If <b>-Cf</b> is <i>not</i> specified, some applications (<b>snmpdelta</b>, <b>snmpget</b>, <b>snmpgetnext</b> and
       <b>snmpstatus</b>) will try to fix errors returned by the agent that you were talking to and resend the request. The only
       time this is really useful is if you specified a OID that didn't exist in your request and you're using SNMPv1 which
-      requires "all or nothing" kinds of requests. Here is an example (note that system.sysUpTime is an incomplete OID as it
-      needs the .0 index appended to it):</dd>
+      requires "all or nothing" kinds of requests.</dd>
     </dl>
+
+    <p>In addition to this option, <b>snmpget</b> REQUIRES options and agent arguments, as described in the <i><a href=
+    "snmpcmd.html">snmpcmd</a>(1)</i> manual page. <a name="lbAF" id="lbAF">&nbsp;</a></p>
+
+    <h2>EXAMPLES</h2>The command:
+
+    <p><br />
+    &nbsp;&nbsp;&nbsp;&nbsp;snmpget&nbsp;-c&nbsp;public&nbsp;zeus&nbsp;system.sysDescr.0</p>
+
+    <p>will retrieve the variable system.sysDescr.0 from the host <b>zeus</b> using the community string <b>public</b> :</p>
+
+    <p><br />
+    &nbsp;&nbsp;&nbsp;&nbsp;system.sysDescr.0&nbsp;=&nbsp;"SunOS&nbsp;zeus.net.cmu.edu&nbsp;4.1.3_U1&nbsp;1&nbsp;sun4m"</p>
+
+    <p>If the network entity has an error processing the request packet, an error packet will be returned and a message will be
+    shown, helping to pinpoint in what way the request was malformed. If there were other variables in the request, the request
+    will be resent without the bad variable.</p>
+
+    <p>Here is another example. The -c and -v options are defined in the <i><a href="snmpcmd.html">snmpcmd</a>(1)</i> manual
+    page. (Note that system.sysUpTime is an incomplete OID, as it needs the .0 index appended to it):</p>
     <pre>
-snmpget -v1 -Cf -c public localhost system.sysUpTime system.sysContact.0
-<b>Error</b>in<b>packet</b>
-Reason: (noSuchName) There is no such variable name in this MIB.
-This name doesn't exist: system.sysUpTime
-
-snmpget -v1 -c public localhost system.sysUpTime system.sysContact.0
-Error in packet
-Reason: (noSuchName) There is no such variable name in this MIB.
-This name doesn't exist: system.sysUpTime
-
-system.sysContact.0 = STRING: <a href="mailto:root@localhost">root@localhost</a>
+    snmpget -v1 -Cf -c public localhost system.sysUpTime system.sysContact.0
 </pre>
 
-    <dl compact="compact">
-      <dd>With the <b>-Cf</b> specified the application will not try to fix the PDU for you.</dd>
-    </dl>
+    <p>This example will return the following:</p>
+    <pre>
+    Error in packet
+    Reason: (noSuchName) There is no such variable name in this MIB.
+    This name doesn't exist: system.sysUpTime
+</pre>
 
-    <p>In addition to this option, <b>snmpget</b> takes the common options described in the <i><a href=
-    "snmpcmd.html">snmpcmd</a>(1)</i> manual page. <a name="lbAF" id="lbAF"> </a></p>
+    <p>Similarly, the command:</p>
+    <pre>
+    snmpget -v1 -c public localhost system.sysUpTime system.sysContact.0
+</pre>
 
-    <h2>SEE ALSO</h2><a href="snmpcmd.html">snmpcmd</a>(1), <a href="variables.html">variables</a>(5).
+    <p>Will return:</p>
+    <pre>
+    Error in packet
+    Reason: (noSuchName) There is no such variable name in this MIB.
+    This name doesn't exist: system.sysUpTime
+
+    system.sysContact.0 = STRING: <a href="mailto:root@localhost">root@localhost</a>
+</pre>
+
+    <p>With the <b>-Cf</b> flag specified the application will not try to fix the PDU for you. <a name="lbAG" id=
+    "lbAG">&nbsp;</a></p>
+
+    <h2>SEE ALSO</h2><a href="snmpcmd.html">snmpcmd</a>(1), <a href="snmpwalk.html">snmpwalk</a>(1), <a href=
+    "variables.html">variables</a>(5).
     <hr />
-    <a name="index" id="index"> </a>
+    <a name="index" id="index">&nbsp;</a>
 
     <h2>Index</h2>
 
@@ -74,11 +89,13 @@ system.sysContact.0 = STRING: <a href="mailto:root@localhost">root@localhost</a>
 
       <dt><a href="#lbAE">OPTIONS</a></dt>
 
-      <dt><a href="#lbAF">SEE ALSO</a></dt>
+      <dt><a href="#lbAF">EXAMPLES</a></dt>
+
+      <dt><a href="#lbAG">SEE ALSO</a></dt>
     </dl>
     <hr />
     This document was created by <a href="http://localhost/cgi-bin/man/man2html">man2html</a>, using the manual pages.<br />
-    Time: 16:55:08 GMT, December 09, 2006
+    Time: 13:12:00 GMT, September 23, 2007
 <!-- CONTENT END -->
 <!--#include virtual="/page-bottom.html" -->
 

@@ -5,14 +5,14 @@
     Updated: 29 Jun 2005<br />
     <a href="#index">Index</a> <a href="../index.html">Return to Main Contents</a>
     <hr />
-    <a name="lbAB" id="lbAB"> </a>
+    <a name="lbAB" id="lbAB">&nbsp;</a>
 
-    <h2>NAME</h2>snmptrapd.conf - configuration file for the Net-SNMP notification receiver <a name="lbAC" id="lbAC"> </a>
+    <h2>NAME</h2>snmptrapd.conf - configuration file for the Net-SNMP notification receiver <a name="lbAC" id="lbAC">&nbsp;</a>
 
     <h2>DESCRIPTION</h2>The Net-SNMP notification receiver (trap daemon) uses one or more configuration files to control its
     operation and how incoming traps (and INFORM requests) should be processed. This file (<b>snmptrapd.conf</b>) can be located
     in one of several locations, as described in the <i><a href="snmp_config.html">snmp_config</a>(5)</i> manual page. <a name=
-    "lbAD" id="lbAD"> </a>
+    "lbAD" id="lbAD">&nbsp;</a>
 
     <h2>IMPORTANT</h2>Previously, <b>snmptrapd</b> would accept all incoming notifications, and log them automatically (even if
     no explicit configuration was provided). Starting with release 5.3, access control checks will be applied to incoming
@@ -20,7 +20,7 @@
     such traps <b>WILL NOT</b> be processed. See the section <b>ACCESS CONTROL</b> for more details.
 
     <p>As with the agent configuration, the <i>snmptrapd.conf</i> directives can be divided into four distinct groups. <a name=
-    "lbAE" id="lbAE"> </a></p>
+    "lbAE" id="lbAE">&nbsp;</a></p>
 
     <h2>TRAPD BEHAVIOUR</h2>
 
@@ -53,7 +53,7 @@
       <dt>pidFile PATH</dt>
 
       <dd>defines a file in which to store the process ID of the notification receiver. By default, this ID is not saved.</dd>
-    </dl><a name="lbAF" id="lbAF"> </a>
+    </dl><a name="lbAF" id="lbAF">&nbsp;</a>
 
     <h2>ACCESS CONTROL</h2>Starting with release 5.3, it is necessary to explicitly specify who is authorised to send traps and
     informs to the notification receiver (and what types of processing these are allowed to trigger). This uses an extension of
@@ -132,7 +132,7 @@
 
       <dd>will disable the above access control checks, and revert to the previous behaviour of accepting all incoming
       notifications.</dd>
-    </dl><a name="lbAG" id="lbAG"> </a>
+    </dl><a name="lbAG" id="lbAG">&nbsp;</a>
 
     <h2>LOGGING</h2>
 
@@ -178,7 +178,7 @@
       <dt>printEventNumbers yes</dt>
 
       <dd>enables specialised logging of event-related notifications from the (long obsolete) M2M-MIB.</dd>
-    </dl><a name="lbAH" id="lbAH"> </a>
+    </dl><a name="lbAH" id="lbAH">&nbsp;</a>
 
     <h2>NOTIFICATION PROCESSING</h2>As well as logging incoming notifications, they can also be forwarded on to another
     notification receiver, or passed to an external program for specialised processing.
@@ -252,7 +252,7 @@
 
       <dd>See the section <b>LISTENING ADDRESSES</b> in the <i><a href="snmpd.html">snmpd</a>(8)</i> manual page for more
       information about the format of listening addresses.</dd>
-    </dl><a name="lbAI" id="lbAI"> </a>
+    </dl><a name="lbAI" id="lbAI">&nbsp;</a>
 
     <h2>NOTES</h2>
 
@@ -268,15 +268,15 @@
       <i>1</i>, <i>yes</i> or <i>true</i> to enable the corresponding behaviour, or any of <i>0</i>, <i>no</i> or <i>false</i> to
       disable it. The default in each case is for the feature to be turned off, so these directives are typically only used to
       enable the appropriate behaviour.</dd>
-    </dl><a name="lbAJ" id="lbAJ"> </a>
+    </dl><a name="lbAJ" id="lbAJ">&nbsp;</a>
 
-    <h2>FILES</h2>/usr/local/etc/snmp/snmptrapd.conf <a name="lbAK" id="lbAK"> </a>
+    <h2>FILES</h2>/usr/local/etc/snmp/snmptrapd.conf <a name="lbAK" id="lbAK">&nbsp;</a>
 
     <h2>SEE ALSO</h2><a href="snmp_config.html">snmp_config</a>(5), <a href="snmptrapd.html">snmptrapd</a>(8), <a href=
     "syslog.html">syslog</a>(8), <a href="variables.html">variables</a>(5), <a href="snmpd.conf.html">snmpd.conf</a>(5), <a href=
     "read_config.html">read_config</a>(3).
     <hr />
-    <a name="index" id="index"> </a>
+    <a name="index" id="index">&nbsp;</a>
 
     <h2>Index</h2>
 
@@ -303,7 +303,7 @@
     </dl>
     <hr />
     This document was created by <a href="http://localhost/cgi-bin/man/man2html">man2html</a>, using the manual pages.<br />
-    Time: 16:55:09 GMT, December 09, 2006
+    Time: 13:12:01 GMT, September 23, 2007
 <!-- CONTENT END -->
 <!--#include virtual="/page-bottom.html" -->
 

@@ -123,12 +123,6 @@
 
   <table width="100%">
     <tr>
-      <td width="30%"><a href="snmpinform.html">snmpinform</a></td>
-
-      <td>snmptrap,sends an SNMP notification to a manager</td>
-    </tr>
-
-    <tr>
       <td width="30%"><a href="snmptrap.html">snmptrap</a></td>
 
       <td>snmptrap, snmpinform - sends an SNMP notification to a manager</td>
@@ -193,7 +187,7 @@
     <tr>
       <td width="30%"><a href="snmpd.html">snmpd</a></td>
 
-      <td>snmpd.conf - configuration file for the Net-SNMP SNMP agent</td>
+      <td>daemon to respond to SNMP request packets.</td>
     </tr>
 
     <tr>
@@ -270,7 +264,8 @@
     <tr>
       <td width="30%"><a href="variables.html">variables</a></td>
 
-      <td>    variables - Format of specifying variable names to SNMP tools.</td>
+      <td>
+      &nbsp;&nbsp;&nbsp;&nbsp;variables&nbsp;-&nbsp;Format&nbsp;of&nbsp;specifying&nbsp;variable&nbsp;names&nbsp;to&nbsp;SNMP&nbsp;tools.</td>
     </tr>
 
     <tr>
@@ -302,75 +297,48 @@
 
   <table width="100%">
     <tr>
-      <td width="30%"><a href="add_mibdir.html">add_mibdir</a></td>
-
-      <td>init_mib, add_mibdir, init_mib_internals,</td>
-    </tr>
-
-    <tr>
-      <td width="30%"><a href="add_module_replacement.html">add_module_replacement</a></td>
-
-      <td>init_mib, add_mibdir, init_mib_internals,</td>
-    </tr>
-
-    <tr>
-      <td width="30%"><a href="config_perror.html">config_perror</a></td>
-
-      <td>register_config_handler, register_premib_handler</td>
-    </tr>
-
-    <tr>
-      <td width="30%"><a href="config_pwarn.html">config_pwarn</a></td>
-
-      <td>register_config_handler, register_premib_handler</td>
-    </tr>
-
-    <tr>
-      <td width="30%"><a href="fprint_description.html">fprint_description</a></td>
-
-      <td>init_mib, add_mibdir, init_mib_internals,</td>
-    </tr>
-
-    <tr>
-      <td width="30%"><a href="fprint_objid.html">fprint_objid</a></td>
-
-      <td>init_mib, add_mibdir, init_mib_internals,</td>
-    </tr>
-
-    <tr>
-      <td width="30%"><a href="fprint_value.html">fprint_value</a></td>
-
-      <td>init_mib, add_mibdir, init_mib_internals,</td>
-    </tr>
-
-    <tr>
-      <td width="30%"><a href="fprint_variable.html">fprint_variable</a></td>
-
-      <td>init_mib, add_mibdir, init_mib_internals,</td>
-    </tr>
-
-    <tr>
-      <td width="30%"><a href="get_module_node.html">get_module_node</a></td>
-
-      <td>init_mib, add_mibdir, init_mib_internals,</td>
-    </tr>
-
-    <tr>
-      <td width="30%"><a href="init_mib.html">init_mib</a></td>
-
-      <td>init_mib, add_mibdir, init_mib_internals,</td>
-    </tr>
-
-    <tr>
-      <td width="30%"><a href="init_mib_internals.html">init_mib_internals</a></td>
-
-      <td>init_mib, add_mibdir, init_mib_internals,</td>
-    </tr>
-
-    <tr>
       <td width="30%"><a href="netsnmp_agent.html">netsnmp_agent</a></td>
 
       <td>The Net-SNMP agent - The snmp agent responds to SNMP queries from management stations.</td>
+    </tr>
+
+    <tr>
+      <td width="30%"><a href="snmp_agent_api.html">snmp_agent_api</a></td>
+
+      <td>embedding an agent into a external application</td>
+    </tr>
+
+    <tr>
+      <td width="30%"><a href="snmp_trap_api.html">snmp_trap_api</a></td>
+
+      <td>send_easy_trap, send_trap_vars, send_v2trap - send TRAPs or INFORMs from a Net-SNMP MIB module</td>
+    </tr>
+
+    <tr>
+      <td width="30%"><a href="netsnmp_mib_handler_methods.html">netsnmp_mib_handler_methods</a></td>
+
+      <td>mib_handler_methods - Defines the subhandlers to be called by the multiplexer helper.</td>
+    </tr>
+
+    <tr>
+      <td width="30%"><a href="netsnmp_utilities.html">netsnmp_utilities</a></td>
+
+      <td>utility_handlers - Simplify request processing A group of handlers intended to simplify certain aspects of processing a
+      request for a MIB object.</td>
+    </tr>
+
+    <tr>
+      <td width="30%"><a href="netsnmp_handler.html">netsnmp_handler</a></td>
+
+      <td>Net-SNMP Agent handler and extensibility API - The basic theory goes something like this: In the past, with the
+      original mib module api (which derived from the original CMU SNMP code) the underlying mib modules were passed very little
+      information (only the truly most basic information about a request).</td>
+    </tr>
+
+    <tr>
+      <td width="30%"><a href="netsnmp_scalar.html">netsnmp_scalar</a></td>
+
+      <td>scalar - Process scalars easily.</td>
     </tr>
 
     <tr>
@@ -386,75 +354,9 @@
     </tr>
 
     <tr>
-      <td width="30%"><a href="netsnmp_cache_handler.html">netsnmp_cache_handler</a></td>
+      <td width="30%"><a href="netsnmp_scalar_group_group.html">netsnmp_scalar_group_group</a></td>
 
-      <td>cache_handler - Maintains a cache of data for use by lower level handlers.</td>
-    </tr>
-
-    <tr>
-      <td width="30%"><a href="netsnmp_container.html">netsnmp_container</a></td>
-
-      <td>null_container - Helps you implement specialized containers.</td>
-    </tr>
-
-    <tr>
-      <td width="30%"><a href="netsnmp_Container_iterator.html">netsnmp_Container_iterator</a></td>
-
-      <td>Container_iterator -</td>
-    </tr>
-
-    <tr>
-      <td width="30%"><a href="netsnmp_ds_get_boolean.html">netsnmp_ds_get_boolean</a></td>
-
-      <td>default_store - generic storage of global data.</td>
-    </tr>
-
-    <tr>
-      <td width="30%"><a href="netsnmp_ds_get_int.html">netsnmp_ds_get_int</a></td>
-
-      <td>default_store - generic storage of global data.</td>
-    </tr>
-
-    <tr>
-      <td width="30%"><a href="netsnmp_ds_get_string.html">netsnmp_ds_get_string</a></td>
-
-      <td>default_store - generic storage of global data.</td>
-    </tr>
-
-    <tr>
-      <td width="30%"><a href="netsnmp_ds_register_config.html">netsnmp_ds_register_config</a></td>
-
-      <td>default_store - generic storage of global data.</td>
-    </tr>
-
-    <tr>
-      <td width="30%"><a href="netsnmp_ds_register_premib.html">netsnmp_ds_register_premib</a></td>
-
-      <td>default_store - generic storage of global data.</td>
-    </tr>
-
-    <tr>
-      <td width="30%"><a href="netsnmp_ds_set_boolean.html">netsnmp_ds_set_boolean</a></td>
-
-      <td>default_store - generic storage of global data.</td>
-    </tr>
-
-    <tr>
-      <td width="30%"><a href="netsnmp_ds_set_int.html">netsnmp_ds_set_int</a></td>
-
-      <td>default_store - generic storage of global data.</td>
-    </tr>
-
-    <tr>
-      <td width="30%"><a href="netsnmp_ds_set_string.html">netsnmp_ds_set_string</a></td>
-
-      <td>default_store - generic storage of global data.</td>
-    </tr>
-
-    <tr>
-      <td width="30%"><a href="netsnmp_ds_shutdown.html">netsnmp_ds_shutdown</a></td>
-
-      <td>default_store - generic storage of global data.</td>
+      <td>scalar_group - Process groups of scalars.</td>
     </tr>
 
     <tr>
@@ -465,17 +367,9 @@
     </tr>
 
     <tr>
-      <td width="30%"><a href="netsnmp_handler.html">netsnmp_handler</a></td>
+      <td width="30%"><a href="netsnmp_table_dataset.html">netsnmp_table_dataset</a></td>
 
-      <td>Net-SNMP Agent handler and extensibility API - The basic theory goes something like this: In the past, with the
-      original mib module api (which derived from the original CMU SNMP code) the underlying mib modules were passed very little
-      information (only the truly most basic information about a request).</td>
-    </tr>
-
-    <tr>
-      <td width="30%"><a href="netsnmp_instance.html">netsnmp_instance</a></td>
-
-      <td>instance - Process individual MIB instances easily.</td>
+      <td>table_dataset - Helps you implement a table with automatted storage.</td>
     </tr>
 
     <tr>
@@ -486,77 +380,15 @@
     </tr>
 
     <tr>
-      <td width="30%"><a href="netsnmp_leaf.html">netsnmp_leaf</a></td>
-
-      <td>leaf_handlers - Process individual leaf objects A group of handlers to implement individual leaf objects and instances
-      (both scalar objects, and individual objects and instances within a table).</td>
-    </tr>
-
-    <tr>
-      <td width="30%"><a href="netsnmp_mib_handler_methods.html">netsnmp_mib_handler_methods</a></td>
-
-      <td>mib_handler_methods - Defines the subhandlers to be called by the multiplexer helper.</td>
-    </tr>
-
-    <tr>
-      <td width="30%"><a href="netsnmp_mode_end_call.html">netsnmp_mode_end_call</a></td>
-
-      <td>mode_end_call - At the end of a series of requests, call another handler hook.</td>
-    </tr>
-
-    <tr>
-      <td width="30%"><a href="netsnmp_multiplexer.html">netsnmp_multiplexer</a></td>
-
-      <td>multiplexer - Splits mode requests into calls to different handlers.</td>
-    </tr>
-
-    <tr>
       <td width="30%"><a href="netsnmp_old_api.html">netsnmp_old_api</a></td>
 
       <td>old_api - Calls mib module code written in the old style of code.</td>
     </tr>
 
     <tr>
-      <td width="30%"><a href="netsnmp_read_only.html">netsnmp_read_only</a></td>
+      <td width="30%"><a href="netsnmp_watcher.html">netsnmp_watcher</a></td>
 
-      <td>read_only - Make your handler read_only automatically The only purpose of this handler is to return an appropriate
-      error for any requests passed to it in a SET mode.</td>
-    </tr>
-
-    <tr>
-      <td width="30%"><a href="netsnmp_row_merge.html">netsnmp_row_merge</a></td>
-
-      <td>row_merge - Calls sub handlers with request for one row at a time.</td>
-    </tr>
-
-    <tr>
-      <td width="30%"><a href="netsnmp_scalar.html">netsnmp_scalar</a></td>
-
-      <td>scalar - Process scalars easily.</td>
-    </tr>
-
-    <tr>
-      <td width="30%"><a href="netsnmp_scalar_group_group.html">netsnmp_scalar_group_group</a></td>
-
-      <td>scalar_group - Process groups of scalars.</td>
-    </tr>
-
-    <tr>
-      <td width="30%"><a href="netsnmp_serialize.html">netsnmp_serialize</a></td>
-
-      <td>serialize - Calls sub handlers one request at a time.</td>
-    </tr>
-
-    <tr>
-      <td width="30%"><a href="netsnmp_stash_cache.html">netsnmp_stash_cache</a></td>
-
-      <td>stash_cache - Automatically caches data for certain handlers.</td>
-    </tr>
-
-    <tr>
-      <td width="30%"><a href="netsnmp_table.html">netsnmp_table</a></td>
-
-      <td>table - Helps you implement a table.</td>
+      <td>watcher - Watch a specified variable and process it as an instance or scalar object.</td>
     </tr>
 
     <tr>
@@ -566,15 +398,27 @@
     </tr>
 
     <tr>
-      <td width="30%"><a href="netsnmp_table_data.html">netsnmp_table_data</a></td>
+      <td width="30%"><a href="netsnmp_multiplexer.html">netsnmp_multiplexer</a></td>
 
-      <td>table_data - Helps you implement a table with datamatted storage.</td>
+      <td>multiplexer - Splits mode requests into calls to different handlers.</td>
     </tr>
 
     <tr>
-      <td width="30%"><a href="netsnmp_table_dataset.html">netsnmp_table_dataset</a></td>
+      <td width="30%"><a href="netsnmp_serialize.html">netsnmp_serialize</a></td>
 
-      <td>table_dataset - Helps you implement a table with automatted storage.</td>
+      <td>serialize - Calls sub handlers one request at a time.</td>
+    </tr>
+
+    <tr>
+      <td width="30%"><a href="netsnmp_cache_handler.html">netsnmp_cache_handler</a></td>
+
+      <td>cache_handler - Maintains a cache of data for use by lower level handlers.</td>
+    </tr>
+
+    <tr>
+      <td width="30%"><a href="netsnmp_Container_iterator.html">netsnmp_Container_iterator</a></td>
+
+      <td>Container_iterator -</td>
     </tr>
 
     <tr>
@@ -585,375 +429,59 @@
     </tr>
 
     <tr>
-      <td width="30%"><a href="netsnmp_utilities.html">netsnmp_utilities</a></td>
+      <td width="30%"><a href="netsnmp_table.html">netsnmp_table</a></td>
 
-      <td>utility_handlers - Simplify request processing A group of handlers intended to simplify certain aspects of processing a
-      request for a MIB object.</td>
+      <td>table - Helps you implement a table.</td>
     </tr>
 
     <tr>
-      <td width="30%"><a href="netsnmp_watcher.html">netsnmp_watcher</a></td>
+      <td width="30%"><a href="netsnmp_table_data.html">netsnmp_table_data</a></td>
 
-      <td>watcher - Watch a specified variable and process it as an instance or scalar object.</td>
+      <td>table_data - Helps you implement a table with datamatted storage.</td>
     </tr>
 
     <tr>
-      <td width="30%"><a href="print_description.html">print_description</a></td>
+      <td width="30%"><a href="netsnmp_stash_cache.html">netsnmp_stash_cache</a></td>
 
-      <td>init_mib, add_mibdir, init_mib_internals,</td>
+      <td>stash_cache - Automatically caches data for certain handlers.</td>
     </tr>
 
     <tr>
-      <td width="30%"><a href="print_mib.html">print_mib</a></td>
+      <td width="30%"><a href="netsnmp_row_merge.html">netsnmp_row_merge</a></td>
 
-      <td>init_mib, add_mibdir, init_mib_internals,</td>
+      <td>row_merge - Calls sub handlers with request for one row at a time.</td>
     </tr>
 
     <tr>
-      <td width="30%"><a href="print_objid.html">print_objid</a></td>
+      <td width="30%"><a href="netsnmp_read_only.html">netsnmp_read_only</a></td>
 
-      <td>init_mib, add_mibdir, init_mib_internals,</td>
+      <td>read_only - Make your handler read_only automatically The only purpose of this handler is to return an appropriate
+      error for any requests passed to it in a SET mode.</td>
     </tr>
 
     <tr>
-      <td width="30%"><a href="print_value.html">print_value</a></td>
+      <td width="30%"><a href="netsnmp_leaf.html">netsnmp_leaf</a></td>
 
-      <td>init_mib, add_mibdir, init_mib_internals,</td>
+      <td>leaf_handlers - Process individual leaf objects A group of handlers to implement individual leaf objects and instances
+      (both scalar objects, and individual objects and instances within a table).</td>
     </tr>
 
     <tr>
-      <td width="30%"><a href="print_variable.html">print_variable</a></td>
+      <td width="30%"><a href="netsnmp_instance.html">netsnmp_instance</a></td>
 
-      <td>init_mib, add_mibdir, init_mib_internals,</td>
+      <td>instance - Process individual MIB instances easily.</td>
     </tr>
 
     <tr>
-      <td width="30%"><a href="read_all_mibs.html">read_all_mibs</a></td>
+      <td width="30%"><a href="netsnmp_container.html">netsnmp_container</a></td>
 
-      <td>init_mib, add_mibdir, init_mib_internals,</td>
+      <td>null_container - Helps you implement specialized containers.</td>
     </tr>
 
     <tr>
-      <td width="30%"><a href="read_config_print_usage.html">read_config_print_usage</a></td>
+      <td width="30%"><a href="netsnmp_mode_end_call.html">netsnmp_mode_end_call</a></td>
 
-      <td>register_config_handler, register_premib_handler</td>
-    </tr>
-
-    <tr>
-      <td width="30%"><a href="read_configs.html">read_configs</a></td>
-
-      <td>register_config_handler, register_premib_handler</td>
-    </tr>
-
-    <tr>
-      <td width="30%"><a href="read_mib.html">read_mib</a></td>
-
-      <td>init_mib, add_mibdir, init_mib_internals,</td>
-    </tr>
-
-    <tr>
-      <td width="30%"><a href="read_module.html">read_module</a></td>
-
-      <td>init_mib, add_mibdir, init_mib_internals,</td>
-    </tr>
-
-    <tr>
-      <td width="30%"><a href="read_module_node.html">read_module_node</a></td>
-
-      <td>init_mib, add_mibdir, init_mib_internals,</td>
-    </tr>
-
-    <tr>
-      <td width="30%"><a href="read_objid.html">read_objid</a></td>
-
-      <td>init_mib, add_mibdir, init_mib_internals,</td>
-    </tr>
-
-    <tr>
-      <td width="30%"><a href="read_premib_configs.html">read_premib_configs</a></td>
-
-      <td>register_config_handler, register_premib_handler</td>
-    </tr>
-
-    <tr>
-      <td width="30%"><a href="register_app_config_handler.html">register_app_config_handler</a></td>
-
-      <td>register_config_handler, register_premib_handler</td>
-    </tr>
-
-    <tr>
-      <td width="30%"><a href="register_app_premib_handler.html">register_app_premib_handler</a></td>
-
-      <td>register_config_handler, register_premib_handler</td>
-    </tr>
-
-    <tr>
-      <td width="30%"><a href="register_config_handler.html">register_config_handler</a></td>
-
-      <td>register_config_handler, register_premib_handler</td>
-    </tr>
-
-    <tr>
-      <td width="30%"><a href="register_mib_handlers.html">register_mib_handlers</a></td>
-
-      <td>register_config_handler, register_premib_handler</td>
-    </tr>
-
-    <tr>
-      <td width="30%"><a href="register_premib_handler.html">register_premib_handler</a></td>
-
-      <td>register_config_handler, register_premib_handler</td>
-    </tr>
-
-    <tr>
-      <td width="30%"><a href="send_easy_trap.html">send_easy_trap</a></td>
-
-      <td>send_easy_trap, send_trap_vars, send_v2trap - send TRAPs or INFORMs from a Net-SNMP MIB module</td>
-    </tr>
-
-    <tr>
-      <td width="30%"><a href="send_trap_vars.html">send_trap_vars</a></td>
-
-      <td>send_easy_trap, send_trap_vars, send_v2trap - send TRAPs or INFORMs from a Net-SNMP MIB module</td>
-    </tr>
-
-    <tr>
-      <td width="30%"><a href="send_v2trap.html">send_v2trap</a></td>
-
-      <td>send_easy_trap, send_trap_vars,send TRAPs or INFORMs from a Net-SNMP MIB module</td>
-    </tr>
-
-    <tr>
-      <td width="30%"><a href="shutdown_mib.html">shutdown_mib</a></td>
-
-      <td>init_mib, add_mibdir, init_mib_internals,</td>
-    </tr>
-
-    <tr>
-      <td width="30%"><a href="snmp_agent_api.html">snmp_agent_api</a></td>
-
-      <td>embedding an agent into a external application</td>
-    </tr>
-
-    <tr>
-      <td width="30%"><a href="snmp_alarm_register.html">snmp_alarm_register</a></td>
-
-      <td>snmp_alarm_register, snmp_alarm_register_hr, snmp_alarm_unregister - alarm functions</td>
-    </tr>
-
-    <tr>
-      <td width="30%"><a href="snmp_alarm_register_hr.html">snmp_alarm_register_hr</a></td>
-
-      <td>snmp_alarm_register, snmp_alarm_register_hr, snmp_alarm_unregister - alarm functions</td>
-    </tr>
-
-    <tr>
-      <td width="30%"><a href="snmp_alarm_unregister.html">snmp_alarm_unregister</a></td>
-
-      <td>snmp_alarm_register, snmp_alarm_register_hr,alarm functions</td>
-    </tr>
-
-    <tr>
-      <td width="30%"><a href="snmp_api_errstring.html">snmp_api_errstring</a></td>
-
-      <td>snmp_sess_init, snmp_open, snmp_send, snmp_free_pdu, snmp_select_info, snmp_read, snmp_timeout, snmp_close,
-      snmp_perror, snmp_sess_perror, snmp_error,send and receive SNMP messages</td>
-    </tr>
-
-    <tr>
-      <td width="30%"><a href="snmp_close.html">snmp_close</a></td>
-
-      <td>snmp_sess_init, snmp_open, snmp_send, snmp_free_pdu, snmp_select_info, snmp_read, snmp_timeout, snmp_close,
-      snmp_perror, snmp_sess_perror, snmp_error, snmp_api_errstring - send and receive SNMP messages</td>
-    </tr>
-
-    <tr>
-      <td width="30%"><a href="snmp_error.html">snmp_error</a></td>
-
-      <td>snmp_sess_init, snmp_open, snmp_send, snmp_free_pdu, snmp_select_info, snmp_read, snmp_timeout, snmp_close,
-      snmp_perror, snmp_sess_perror, snmp_error, snmp_api_errstring - send and receive SNMP messages</td>
-    </tr>
-
-    <tr>
-      <td width="30%"><a href="snmp_free_pdu.html">snmp_free_pdu</a></td>
-
-      <td>snmp_sess_init, snmp_open, snmp_send, snmp_free_pdu, snmp_select_info, snmp_read, snmp_timeout, snmp_close,
-      snmp_perror, snmp_sess_perror, snmp_error, snmp_api_errstring - send and receive SNMP messages</td>
-    </tr>
-
-    <tr>
-      <td width="30%"><a href="snmp_open.html">snmp_open</a></td>
-
-      <td>snmp_sess_init, snmp_open, snmp_send, snmp_free_pdu, snmp_select_info, snmp_read, snmp_timeout, snmp_close,
-      snmp_perror, snmp_sess_perror, snmp_error, snmp_api_errstring - send and receive SNMP messages</td>
-    </tr>
-
-    <tr>
-      <td width="30%"><a href="snmp_perror.html">snmp_perror</a></td>
-
-      <td>snmp_sess_init, snmp_open, snmp_send, snmp_free_pdu, snmp_select_info, snmp_read, snmp_timeout, snmp_close,
-      snmp_perror, snmp_sess_perror, snmp_error, snmp_api_errstring - send and receive SNMP messages</td>
-    </tr>
-
-    <tr>
-      <td width="30%"><a href="snmp_read.html">snmp_read</a></td>
-
-      <td>snmp_sess_init, snmp_open, snmp_send, snmp_free_pdu, snmp_select_info, snmp_read, snmp_timeout, snmp_close,
-      snmp_perror, snmp_sess_perror, snmp_error, snmp_api_errstring - send and receive SNMP messages</td>
-    </tr>
-
-    <tr>
-      <td width="30%"><a href="snmp_select_info.html">snmp_select_info</a></td>
-
-      <td>snmp_sess_init, snmp_open, snmp_send, snmp_free_pdu, snmp_select_info, snmp_read, snmp_timeout, snmp_close,
-      snmp_perror, snmp_sess_perror, snmp_error, snmp_api_errstring - send and receive SNMP messages</td>
-    </tr>
-
-    <tr>
-      <td width="30%"><a href="snmp_send.html">snmp_send</a></td>
-
-      <td>snmp_sess_init, snmp_open, snmp_send, snmp_free_pdu, snmp_select_info, snmp_read, snmp_timeout, snmp_close,
-      snmp_perror, snmp_sess_perror, snmp_error, snmp_api_errstring - send and receive SNMP messages</td>
-    </tr>
-
-    <tr>
-      <td width="30%"><a href="snmp_sess_async_send.html">snmp_sess_async_send</a></td>
-
-      <td>snmp_sess_init, snmp_sess_open, snmp_sess_session,</td>
-    </tr>
-
-    <tr>
-      <td width="30%"><a href="snmp_sess_close.html">snmp_sess_close</a></td>
-
-      <td>snmp_sess_init, snmp_sess_open, snmp_sess_session,</td>
-    </tr>
-
-    <tr>
-      <td width="30%"><a href="snmp_sess_error.html">snmp_sess_error</a></td>
-
-      <td>snmp_sess_init, snmp_sess_open, snmp_sess_session,</td>
-    </tr>
-
-    <tr>
-      <td width="30%"><a href="snmp_sess_init.html">snmp_sess_init</a></td>
-
-      <td>snmp_sess_init, snmp_sess_open, snmp_sess_session,</td>
-    </tr>
-
-    <tr>
-      <td width="30%"><a href="snmp_sess_open.html">snmp_sess_open</a></td>
-
-      <td>snmp_sess_init, snmp_sess_open, snmp_sess_session,</td>
-    </tr>
-
-    <tr>
-      <td width="30%"><a href="snmp_sess_perror.html">snmp_sess_perror</a></td>
-
-      <td>snmp_sess_init, snmp_open, snmp_send, snmp_free_pdu, snmp_select_info, snmp_read, snmp_timeout, snmp_close,
-      snmp_perror, snmp_sess_perror, snmp_error, snmp_api_errstring - send and receive SNMP messages</td>
-    </tr>
-
-    <tr>
-      <td width="30%"><a href="snmp_sess_read.html">snmp_sess_read</a></td>
-
-      <td>snmp_sess_init, snmp_sess_open, snmp_sess_session,</td>
-    </tr>
-
-    <tr>
-      <td width="30%"><a href="snmp_sess_select_info.html">snmp_sess_select_info</a></td>
-
-      <td>snmp_sess_init, snmp_sess_open, snmp_sess_session,</td>
-    </tr>
-
-    <tr>
-      <td width="30%"><a href="snmp_sess_send.html">snmp_sess_send</a></td>
-
-      <td>snmp_sess_init, snmp_sess_open, snmp_sess_session,</td>
-    </tr>
-
-    <tr>
-      <td width="30%"><a href="snmp_sess_session.html">snmp_sess_session</a></td>
-
-      <td>snmp_sess_init, snmp_sess_open, snmp_sess_session,</td>
-    </tr>
-
-    <tr>
-      <td width="30%"><a href="snmp_sess_timeout.html">snmp_sess_timeout</a></td>
-
-      <td>snmp_sess_init, snmp_sess_open, snmp_sess_session,</td>
-    </tr>
-
-    <tr>
-      <td width="30%"><a href="snmp_set_mib_warnings.html">snmp_set_mib_warnings</a></td>
-
-      <td>init_mib, add_mibdir, init_mib_internals,</td>
-    </tr>
-
-    <tr>
-      <td width="30%"><a href="snmp_set_save_descriptions.html">snmp_set_save_descriptions</a></td>
-
-      <td>init_mib, add_mibdir, init_mib_internals,</td>
-    </tr>
-
-    <tr>
-      <td width="30%"><a href="snmp_timeout.html">snmp_timeout</a></td>
-
-      <td>snmp_sess_init, snmp_open, snmp_send, snmp_free_pdu, snmp_select_info, snmp_read, snmp_timeout, snmp_close,
-      snmp_perror, snmp_sess_perror, snmp_error, snmp_api_errstring - send and receive SNMP messages</td>
-    </tr>
-
-    <tr>
-      <td width="30%"><a href="snmp_trap_api.html">snmp_trap_api</a></td>
-
-      <td>send_easy_trap, send_trap_vars, send_v2trap - send TRAPs or INFORMs from a Net-SNMP MIB module</td>
-    </tr>
-
-    <tr>
-      <td width="30%"><a href="snprint_objid.html">snprint_objid</a></td>
-
-      <td>init_mib, add_mibdir, init_mib_internals,</td>
-    </tr>
-
-    <tr>
-      <td width="30%"><a href="snprint_value.html">snprint_value</a></td>
-
-      <td>init_mib, add_mibdir, init_mib_internals,</td>
-    </tr>
-
-    <tr>
-      <td width="30%"><a href="snprint_variable.html">snprint_variable</a></td>
-
-      <td>init_mib, add_mibdir, init_mib_internals,</td>
-    </tr>
-
-    <tr>
-      <td width="30%"><a href="sprint_realloc_objid.html">sprint_realloc_objid</a></td>
-
-      <td>init_mib, add_mibdir, init_mib_internals,</td>
-    </tr>
-
-    <tr>
-      <td width="30%"><a href="sprint_realloc_value.html">sprint_realloc_value</a></td>
-
-      <td>init_mib, add_mibdir, init_mib_internals,</td>
-    </tr>
-
-    <tr>
-      <td width="30%"><a href="sprint_realloc_variable.html">sprint_realloc_variable</a></td>
-
-      <td>init_mib, add_mibdir, init_mib_internals,</td>
-    </tr>
-
-    <tr>
-      <td width="30%"><a href="unregister_app_config_handler.html">unregister_app_config_handler</a></td>
-
-      <td>register_config_handler, register_premib_handler</td>
-    </tr>
-
-    <tr>
-      <td width="30%"><a href="unregister_config_handler.html">unregister_config_handler</a></td>
-
-      <td>register_config_handler, register_premib_handler</td>
+      <td>mode_end_call - At the end of a series of requests, call another handler hook.</td>
     </tr>
   </table><br />
 <!-- CONTENT END -->

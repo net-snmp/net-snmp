@@ -5,10 +5,10 @@
     Updated: 07 Mar 2002<br />
     <a href="#index">Index</a> <a href="../index.html">Return to Main Contents</a>
     <hr />
-    <a name="lbAB" id="lbAB"> </a>
+    <a name="lbAB" id="lbAB">&nbsp;</a>
 
     <h2>NAME</h2>snmp_alarm_register, snmp_alarm_register_hr, snmp_alarm_unregister - alarm functions <a name="lbAC" id=
-    "lbAC"> </a>
+    "lbAC">&nbsp;</a>
 
     <h2>SYNOPSIS</h2><b>#include &lt;<a href="file:/usr/include/net-snmp/utilities.h">net-snmp/utilities.h</a>&gt;</b>
 
@@ -25,12 +25,12 @@
     <b>void *</b><i>clientarg</i><b>);</b></p>
 
     <p><b>void</b><br />
-    <b>snmp_alarm_unregister(unsigned int</b> <i>reg</i><b>);</b> <a name="lbAD" id="lbAD"> </a></p>
+    <b>snmp_alarm_unregister(unsigned int</b> <i>reg</i><b>);</b> <a name="lbAD" id="lbAD">&nbsp;</a></p>
 
     <h2>DESCRIPTION</h2>
 
     <p>These functions implement support for a generic timer handling mechanism for multiple parts of an application to register
-    function callbacks to happen at a particular time in the future. <a name="lbAE" id="lbAE"> </a></p>
+    function callbacks to happen at a particular time in the future. <a name="lbAE" id="lbAE">&nbsp;</a></p>
 
     <h2>USAGE</h2>
 
@@ -61,11 +61,11 @@
     letters <b>hr</b> stand for "high resolution"). The operation of this function is dependent on the provision of the
     <b><a href="setitimer.html">setitimer</a></b>(2) system call by the operating system. If this system call is not available,
     the alarm will be scheduled as if <b>snmp_alarm_register()</b> had been called with a first argument equal to the value of
-    the <i>tv_sec</i> member of <i>t.</i> See, however, the notes below. <a name="lbAF" id="lbAF"> </a></p>
+    the <i>tv_sec</i> member of <i>t.</i> See, however, the notes below. <a name="lbAF" id="lbAF">&nbsp;</a></p>
 
     <h2>INITIALIZATION</h2>The <b>init_snmp()</b> function initialises the snmp_alarm subsystem by calling
     <b>init_snmp_alarm()</b> and then <b>init_alarm_post_config()</b> to set up the first timer to initialise the callback
-    function. These two functions should not be used directly by applications. <a name="lbAG" id="lbAG"> </a>
+    function. These two functions should not be used directly by applications. <a name="lbAG" id="lbAG">&nbsp;</a>
 
     <h2>NOTES</h2>The default behaviour of the snmp_alarm subsystem is to request <i>SIGALRM</i> signals from the operating
     system via the <b><a href="alarm.html">alarm</a></b>(2) or <b><a href="setitimer.html">setitimer</a></b>(2) system calls.
@@ -86,13 +86,13 @@ netsnmp_ds_set_boolean(NETSNMP_DS_LIBRARY_ID,
     <b><a href="select.html">select</a></b>(2) times out (return value of zero). This is the approach taken in the agent; see
     <i>snmpd.c.</i> Furthermore, when using this method, high resolution alarms do not depend on the presence of the <b><a href=
     "setitimer.html">setitimer</a></b>(2) system call, although overall precision is of course still determined by the underlying
-    operating system. Recommended. <a name="lbAH" id="lbAH"> </a></p>
+    operating system. Recommended. <a name="lbAH" id="lbAH">&nbsp;</a></p>
 
     <h2>SEE ALSO</h2><b><a href="snmp_api.html">snmp_api</a></b>(3), <b><a href="default_store.html">default_store</a></b>(3),
     <b><a href="snmp_select_info.html">snmp_select_info</a></b>(3), <b><a href="alarm.html">alarm</a></b>(2), <b><a href=
     "setitimer.html">setitimer</a></b>(2), <b><a href="select.html">select</a></b>(2)
     <hr />
-    <a name="index" id="index"> </a>
+    <a name="index" id="index">&nbsp;</a>
 
     <h2>Index</h2>
 
@@ -113,7 +113,7 @@ netsnmp_ds_set_boolean(NETSNMP_DS_LIBRARY_ID,
     </dl>
     <hr />
     This document was created by <a href="http://localhost/cgi-bin/man/man2html">man2html</a>, using the manual pages.<br />
-    Time: 16:55:09 GMT, December 09, 2006
+    Time: 13:12:01 GMT, September 23, 2007
 <!-- CONTENT END -->
 <!--#include virtual="/page-bottom.html" -->
 

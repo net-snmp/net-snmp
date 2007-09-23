@@ -1,6 +1,12 @@
 Web site maintenance
 ==================== 
 
+Updating current version show at top right
+------------------------------------------
+
+  Edit page-top.html.  Change 'Current release:' in Header div.
+
+
 Updating About / NEWS
 ---------------------
 
@@ -10,13 +16,13 @@ Updating About / NEWS
 Updating About / Change Log
 ---------------------------
 
-  Replace /docs/readmefiles/NEWS with new text file from the source code.
+  See Updating Documentation / README Files
 
 
 Updating About / License
 ------------------------
 
-  Replace /COPYING with new text file from the source code.
+  See Updating Documentation / README Files
 
 
 Updating Documentation / README Files
@@ -27,8 +33,25 @@ Updating Documentation / README Files
   Each README file has a .html file in /docs/ that has an include of the actual
   text README file from /docs/readmefiles/
 
-  To update existing README files, just copy the updated files to /docs/readmefiles/
-  and run html-textfile-fix.pl.
+  To update existing README files, just copy the updated files to /docs/readmefiles/:
+
+  cp /tmp/net-snmp-x.x.x/CHANGES .
+  cp /tmp/net-snmp-x.x.x/COPYING .
+  cp /tmp/net-snmp-x.x.x/ERRATA .
+  cp /tmp/net-snmp-x.x.x/INSTALL .
+  cp /tmp/net-snmp-x.x.x/NEWS .
+  cp /tmp/net-snmp-x.x.x/PORTING .
+  cp /tmp/net-snmp-x.x.x/README* .
+  cp /tmp/net-snmp-x.x.x/TODO .
+  cp /tmp/net-snmp-x.x.x/perl/SNMP/README perl/README
+  cp /tmp/net-snmp-x.x.x/perl/AnyData_SNMP/README perl/AnyData_SNMP/README
+  cp /tmp/net-snmp-x.x.x/perl/default_store/README perl/default_store/README
+  cp /tmp/net-snmp-x.x.x/perl/OID/README perl/OID/README
+  cp /tmp/net-snmp-x.x.x/perl/SNMP/README perl/SNMP/README
+  cp /tmp/net-snmp-x.x.x/perl/TrapReceiver/README perl/TrapReceiver/README
+
+  Next, run /tmp/net-snmp-x.x.x/local/html-textfile-fix.pl while inside the readmefiles 
+  folder.  This will change all < to &lt;, > to &gt; etc.
 
   To add a new README file:
 
@@ -44,14 +67,15 @@ Updating Documentation / FAQ
  -cd (source dir)
  -./configure
  -make FAQ.html
- -local/html-add-header-footer.pl --section=documentation FAQ.html
- -copy FAQ.html to \docs\
+ -/tmp/net-snmp-x.x.x/local/html-add-header-footer.pl --section=documentation FAQ.html
+ -cd to base of htdocs
+ -cp /tmp/net-snmp-x.x.x/FAQ.html docs/
 
 
 Updating Documentation / INSTALL
 --------------------------------
 
-  Replace /docs/readmefiles/INSTALL with new text file from the source code and run html-textfile-fix.pl.
+  See Updating Documentation / README Files
 
 
 Updating Documentation / Man pages
@@ -65,8 +89,11 @@ Updating Documentation / Man pages
  -mv man/man? ../
  -make html
  -find . -name '*.html' | ../local/html-add-header-footer.pl --section=documentation --body --tidy
- -cp *.html to web site /docs/man
+ -cd to base of htdocs
+ -cp /tmp/net-snmp-x.x.x/man/*.html docs/man/
 
+ While running make html, if you get the error 'missing a filing location for: ...', then the items 
+ listed need to be added to the man_sections.txt file.
 
 Updating Documentation / MIBS
 -----------------------------
@@ -75,10 +102,10 @@ Updating Documentation / MIBS
  -cd (source dir)/mibs
  -make htmldir
  -find html/. -name '*.html' | ../local/html-add-header-footer.pl --section=documentation --body
- -cp html/*.html to web site /docs/mibs
- -cp *.txt to web site /docs/mibs
- -cp *.inc to web site /docs/mibs
-
+ -cd to base of htdocs
+ -cp /tmp/net-snmp-5.4.1/mibs/html/*.html docs/mibs/
+ -cp /tmp/net-snmp-5.4.1/mibs/*.txt docs/mibs/
+ -cp /tmp/net-snmp-5.4.1/mibs/*.inc docs/mibs/
 
 Updating Development / API
 --------------------------

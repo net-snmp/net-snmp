@@ -9,17 +9,9 @@ please post to &lt;net-snmp-coders@lists.sourceforge.net&gt;. Thanks!
 
     - Test 44 (Perl AgentX Subagent) fails.
 
-      - There are 2 issues here. One is the perl can't find the
-        net-snmp shared libraries, because they aren't installed yet.
-        Setting DYLD_LIBRARY_PATH helps here, but one link error
-        remains:
+       - configure with --enable-as-needed for proper libperl linking
 
-           /usr/bin/perl Undefined symbols: _boot_DynaLoader
-
-        Unless you need a perl based AgentX subagent, you can ignore
-        this error.
-
-     - nlist doesn't support icmpstat
+    - nlist doesn't support icmpstat
 
        - disable the icmp module during configure by specifying
          &quot;--with-out-mib-modules=mibII/icmp&quot;, or at startup by adding
@@ -27,7 +19,7 @@ please post to &lt;net-snmp-coders@lists.sourceforge.net&gt;. Thanks!
 
 
   - 10.4.7 (Universal) and Leopard with 5.4 sources:
-        [Supplied by Chris Jalbert]
+        [Supplied by Chris Jalbert, slightly updated]
 
        - build using gcc 4.0 (see below) and configure using:
                         --with-persistent-directory=/var/db/net-snmp \
@@ -35,7 +27,7 @@ please post to &lt;net-snmp-coders@lists.sourceforge.net&gt;. Thanks!
                         --without-rpm \
                         --with-mib-modules=&quot;host ucd-snmp/diskio&quot; \
                         --with-out-mib-modules=&quot;mibII/icmp host/hr_swrun&quot; \
-                        --disable-static \
+                        --enable-as-needed \
                         --without-kmem-usage
 
        The first line sets up persistent storage in the OS X standard location.
@@ -45,8 +37,6 @@ please post to &lt;net-snmp-coders@lists.sourceforge.net&gt;. Thanks!
        The fourth line includes those modules appear to build properly and
        mostly work. The next line is necessary because those sub-modules
        do not build.
-
-       I disable static libraries because we don't use them.
 
        The final line is necessary because /dev/kmem was removed in
        the Intel / Universal builds of the OS, and I believe the APIs will

@@ -207,7 +207,7 @@ and is destroyed when the transport connection is terminated.
 </td><td>
   UNSIGNED32
       <br />Legal values:
-        1 .. -1
+        1 .. 2147483647
 
   </td><td>NoAccess</td>
 <td>
@@ -343,7 +343,7 @@ has terminated or when the subagent session is closed.
 </td><td>
   UNSIGNED32
       <br />Legal values:
-        1 .. -1
+        1 .. 2147483647
 
   </td><td>NoAccess</td>
 <td>
@@ -366,7 +366,7 @@ connection is constant for the lifetime of that connection.
 </td><td>
   UNSIGNED32
       <br />Legal values:
-        0 .. -1
+        0 .. 2147483647
 
   </td><td>NoAccess</td>
 <td>
@@ -573,7 +573,7 @@ or the subagent connection is closed.
 </td><td>
   UNSIGNED32
       <br />Legal values:
-        1 .. -1
+        1 .. 2147483647
 
   </td><td>NoAccess</td>
 <td>
@@ -596,7 +596,7 @@ connection is constant for the lifetime of that connection.
 </td><td>
   UNSIGNED32
       <br />Legal values:
-        0 .. -1
+        0 .. 2147483647
 
   </td><td>NoAccess</td>
 <td>
@@ -620,7 +620,7 @@ to be compatible with the definition of h.sessionId.
 </td><td>
   UNSIGNED32
       <br />Legal values:
-        1 .. -1
+        1 .. 2147483647
 
   </td><td>NoAccess</td>
 <td>
@@ -931,7 +931,7 @@ measured in octets, not characters.
    |  |        |  Index: agentxConnIndex
    |  |        |
    |  |        +-- ---- Unsigned  <a href="#agentxConnIndex">agentxConnIndex</a>(1)
-   |  |        |        Range: 1..-1
+   |  |        |        Range: 1..2147483647
    |  |        +-- -R-- TimeTicks <a href="#agentxConnOpenTime">agentxConnOpenTime</a>(2)
    |  |        |        Textual Convention: <a href="#TimeStamp">TimeStamp</a>
    |  |        +-- -R-- ObjID     <a href="#agentxConnTransportDomain">agentxConnTransportDomain</a>(3)
@@ -951,7 +951,7 @@ measured in octets, not characters.
    |  |        |  Index: agentxConnIndex, agentxSessionIndex
    |  |        |
    |  |        +-- ---- Unsigned  <a href="#agentxSessionIndex">agentxSessionIndex</a>(1)
-   |  |        |        Range: 0..-1
+   |  |        |        Range: 0..2147483647
    |  |        +-- -R-- ObjID     <a href="#agentxSessionObjectID">agentxSessionObjectID</a>(2)
    |  |        +-- -R-- String    <a href="#agentxSessionDescr">agentxSessionDescr</a>(3)
    |  |        |        Textual Convention: <a href="#SnmpAdminString">SnmpAdminString</a>
@@ -976,7 +976,7 @@ measured in octets, not characters.
    |           |  Index: agentxConnIndex, agentxSessionIndex, agentxRegIndex
    |           |
    |           +-- ---- Unsigned  <a href="#agentxRegIndex">agentxRegIndex</a>(1)
-   |           |        Range: 1..-1
+   |           |        Range: 1..2147483647
    |           +-- -R-- String    <a href="#agentxRegContext">agentxRegContext</a>(2)
    |           +-- -R-- ObjID     <a href="#agentxRegStart">agentxRegStart</a>(3)
    |           +-- -R-- Unsigned  <a href="#agentxRegRangeSubId">agentxRegRangeSubId</a>(4)

@@ -5,10 +5,10 @@
     Updated: 07 Mar 2002<br />
     <a href="#index">Index</a> <a href="../index.html">Return to Main Contents</a>
     <hr />
-    <a name="lbAB" id="lbAB"> </a>
+    <a name="lbAB" id="lbAB">&nbsp;</a>
 
     <h2>NAME</h2>register_config_handler, register_premib_handler unregister_config_handler, register_mib_handlers, read_configs,
-    read_premib_configs, config_perror, config_pwarn - read_config functions <a name="lbAC" id="lbAC"> </a>
+    read_premib_configs, config_perror, config_pwarn - read_config functions <a name="lbAC" id="lbAC">&nbsp;</a>
 
     <h2>SYNOPSIS</h2><b>#include &lt;<a href="file:/usr/include/net-snmp/config_api.h">net-snmp/config_api.h</a>&gt;</b>
 
@@ -52,7 +52,7 @@
     <p><b>void config_pwarn(const char *</b><i>string</i><b>);</b><br />
     <b>void config_perror(const char *</b><i>string</i><b>);</b></p>
 
-    <p><a name="lbAD" id="lbAD"> </a></p>
+    <p><a name="lbAD" id="lbAD">&nbsp;</a></p>
 
     <h2>DESCRIPTION</h2>The functions are a fairly extensible system of parsing various configuration files at the run time of an
     application. The configuration file flow is broken into the following phases:
@@ -86,7 +86,7 @@
     <p>The idea is that the calling application is able to register <i>handlers</i> for certain <i>tokens</i> specified in
     certain types of <i>files.</i> The <b>read_configs()</b> function can then be called to look for all the files that it has
     registrations for, find the first word on each line, and pass the remainder to the appropriately registered handler. <a name=
-    "lbAE" id="lbAE"> </a></p>
+    "lbAE" id="lbAE">&nbsp;</a></p>
 
     <h2>TOKEN HANDLERS</h2>
 
@@ -98,14 +98,14 @@
 
     <p>The function will be called with two arguments, the first being the token that triggered the call to this function (which
     would be one of the tokens that the function had been registered for), and the second being the remainder of the
-    configuration file line beyond the white space following the token. <a name="lbAF" id="lbAF"> </a></p>
+    configuration file line beyond the white space following the token. <a name="lbAF" id="lbAF">&nbsp;</a></p>
 
     <h2>RESOURCE FREEING HANDLERS</h2>
 
     <p>If the parameter <i>releaser</i> passed to <b>register_config_handler</b> is non-NULL, then the function specified is
     called if and when the configuration files are re-read. This function should free any resources allocated by the token
     handler function and reset its notion of the configuration to its default. The token handler function will then be called
-    again. No arguments are passed to the resource freeing handler. <a name="lbAG" id="lbAG"> </a></p>
+    again. No arguments are passed to the resource freeing handler. <a name="lbAG" id="lbAG">&nbsp;</a></p>
 
     <h2>REGISTERING A HANDLER</h2>
 
@@ -150,7 +150,7 @@
       <b>unregister_config_handler()</b> but don't require the file type argument (which is filled in by the application). It is
       intended that MIB modules written for the agent use these functions to allow the agent to have more control over which
       configuration files are read (typically the <i>snmpd.conf</i> files).</dd>
-    </dl><a name="lbAH" id="lbAH"> </a>
+    </dl><a name="lbAH" id="lbAH">&nbsp;</a>
 
     <h2>HELP STRINGS</h2>
 
@@ -163,7 +163,7 @@
 
     <p>The <b>init_snmp()</b> function should be called before the <b>read_config_print_usage()</b> function is called, so that
     the library can register its configuration file directives as well for the <b>read_config_print_usage()</b> function to
-    display. <a name="lbAI" id="lbAI"> </a></p>
+    display. <a name="lbAI" id="lbAI">&nbsp;</a></p>
 
     <h2>READING CONFIGURATION FILES</h2>
 
@@ -192,7 +192,7 @@
       <dd>Reads all the configuration files it can find in the <i>SNMPCONFPATH</i> environment variable (or its default value)
       for tokens and appropriately calls the handlers registered to it, or prints a "Unknown token" warning message. It looks for
       any file that it has previously received a registration request for.</dd>
-    </dl><a name="lbAJ" id="lbAJ"> </a>
+    </dl><a name="lbAJ" id="lbAJ">&nbsp;</a>
 
     <h2>CONFIGURATION FILES READ</h2>
 
@@ -201,14 +201,14 @@
     followed by $HOME/.snmp) and reading in the files found that match both the prefix registered and the two suffixes
     <i>.conf</i> and <i>.local.conf.</i> The idea behind the two different suffixes is that the first file can be shared (via
     rdist or an NFS mount) across a large number of machines and the second file can be used to configure local settings for one
-    particular machine. They do not need to be present, and will only be read if found. <a name="lbAK" id="lbAK"> </a></p>
+    particular machine. They do not need to be present, and will only be read if found. <a name="lbAK" id="lbAK">&nbsp;</a></p>
 
     <h2>ERROR HANDLING FUNCTIONS</h2>
 
     <p>The two functions <b>config_pwarn()</b> and <b>config_perror()</b> both take an error string as an argument and print it
     to stderr along with the file and line number that caused the error. A call to the second function will also force
     <b>read_configs()</b> to eventually return with an error code indicating to it's calling function that it should abort the
-    operation of the application. <a name="lbAL" id="lbAL"> </a></p>
+    operation of the application. <a name="lbAL" id="lbAL">&nbsp;</a></p>
 
     <h2>ENVIRONMENT VARIABLES</h2>
 
@@ -217,11 +217,11 @@
 
       <dd>A colon separated list of directories to search for configuration files in. Default:
       /usr/local/etc/snmp:/usr/local/share/snmp:/usr/local/lib/snmp:$HOME/.snmp</dd>
-    </dl><a name="lbAM" id="lbAM"> </a>
+    </dl><a name="lbAM" id="lbAM">&nbsp;</a>
 
     <h2>SEE ALSO</h2><b><a href="mib_api.html">mib_api</a></b>(3), <b><a href="snmp_api.html">snmp_api</a></b>(3)
     <hr />
-    <a name="index" id="index"> </a>
+    <a name="index" id="index">&nbsp;</a>
 
     <h2>Index</h2>
 
@@ -252,7 +252,7 @@
     </dl>
     <hr />
     This document was created by <a href="http://localhost/cgi-bin/man/man2html">man2html</a>, using the manual pages.<br />
-    Time: 16:55:09 GMT, December 09, 2006
+    Time: 13:12:01 GMT, September 23, 2007
 <!-- CONTENT END -->
 <!--#include virtual="/page-bottom.html" -->
 

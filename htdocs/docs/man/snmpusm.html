@@ -5,9 +5,9 @@
     Updated: 22 Oct 2005<br />
     <a href="#index">Index</a> <a href="../index.html">Return to Main Contents</a>
     <hr />
-    <a name="lbAB" id="lbAB"> </a>
+    <a name="lbAB" id="lbAB">&nbsp;</a>
 
-    <h2>NAME</h2>snmpusm - creates and maintains SNMPv3 users on a network entity <a name="lbAC" id="lbAC"> </a>
+    <h2>NAME</h2>snmpusm - creates and maintains SNMPv3 users on a network entity <a name="lbAC" id="lbAC">&nbsp;</a>
 
     <h2>SYNOPSIS</h2><b>snmpusm</b> [COMMON OPTIONS] <b>create</b> USER [CLONEFROM-USER]<br />
     <b>snmpusm</b> [COMMON OPTIONS] <b>delete</b> USER<br />
@@ -16,14 +16,14 @@
     <b>snmpusm</b> [COMMON OPTIONS] &lt;-Ca | -Cx&gt; -Ck <b>passwd</b> OLD-KEY-OR-PASSPHRASE NEW-KEY-OR-PASSPHRASE [USER]<br />
     <b>snmpusm</b> [COMMON OPTIONS] [-Ca] [-Cx] <b>changekey</b> [USER]
 
-    <p><a name="lbAD" id="lbAD"> </a></p>
+    <p><a name="lbAD" id="lbAD">&nbsp;</a></p>
 
     <h2>DESCRIPTION</h2><b>snmpusm</b> is an SNMP application that can be used to do simple maintenance on the users known to an
     SNMP agent, by manipulating the agent's User-based Security Module (USM) table. The user needs write access to the
     usmUserTable MIB table. This tool can be used to create, delete, clone, and change the passphrase of users configured on a
     running SNMP agent.
 
-    <p><a name="lbAE" id="lbAE"> </a></p>
+    <p><a name="lbAE" id="lbAE">&nbsp;</a></p>
 
     <h2>OPTIONS</h2>Common options for all <b>snmpusm</b> commands:
 
@@ -53,7 +53,7 @@
 
       <dd>Allows to use localized key (must start with 0x) instead of passphrase. When this option is used, either the -Ca or -Cx
       option (but not both) must also be used.</dd>
-    </dl><a name="lbAF" id="lbAF"> </a>
+    </dl><a name="lbAF" id="lbAF">&nbsp;</a>
 
     <h2>CREATING USERS</h2>
 
@@ -93,13 +93,13 @@
     least one user for each combination of authentication and privacy protocols. See the <i><a href=
     "snmpd.conf.html">snmpd.conf</a>(5)</i> manual page for details of the <b>createUser</b> configuration directive.</p>
 
-    <p><a name="lbAG" id="lbAG"> </a></p>
+    <p><a name="lbAG" id="lbAG">&nbsp;</a></p>
 
     <h2>DELETING USERS</h2>A user can be deleted from the usmUserTable using the command
 
     <dl compact="compact">
       <dd><b>snmpusm</b> [OPTIONS] delete USER</dd>
-    </dl><a name="lbAH" id="lbAH"> </a>
+    </dl><a name="lbAH" id="lbAH">&nbsp;</a>
 
     <h2>CHANGING PASS PHRASES</h2>User profiles contain private keys that are never transmitted over the wire in clear text
     (regardless of whether the administration requests are encrypted or not). To change the secret key for a user, it is
@@ -136,7 +136,7 @@
     <p>Either the -Ca or the -Cx option must be specified. The OLD-KEY-OR-PASSPHRASE and/or NEW-KEY-OR-PASSPHRASE arguments can
     either be a passphrase or a localized key starting with "0x", e.g. as printed out by the <b>changekey</b> sub-command.</p>
 
-    <p><a name="lbAI" id="lbAI"> </a></p>
+    <p><a name="lbAI" id="lbAI">&nbsp;</a></p>
 
     <h2>EXAMPLES</h2>
 
@@ -160,7 +160,7 @@ createUser initial MD5 setup_passphrase DES
     <p>Note: the "initial" user's setup should be removed after creating a real user that you grant administrative privileges to
     (like the user "wes" we'll be creating in this example.</p>
 
-    <p>Note: passphrases must be 8 characters <i>minimum</i> in length. <a name="lbAJ" id="lbAJ"> </a></p>
+    <p>Note: passphrases must be 8 characters <i>minimum</i> in length. <a name="lbAJ" id="lbAJ">&nbsp;</a></p>
 
     <h3>Create a new user</h3>
 
@@ -169,7 +169,7 @@ createUser initial MD5 setup_passphrase DES
     <dl compact="compact">
       <dd>Creates a new user, here named "wes" using the user "initial" to do it. "wes" is cloned from "initial" in the process,
       so he inherits that user's passphrase ("setup_passphrase").</dd>
-    </dl><a name="lbAK" id="lbAK"> </a>
+    </dl><a name="lbAK" id="lbAK">&nbsp;</a>
 
     <h3>Change the user's passphrase</h3>
 
@@ -178,7 +178,7 @@ createUser initial MD5 setup_passphrase DES
     <dl compact="compact">
       <dd>After creating the user "wes" with the same passphrase as the "initial" user, we need to change his passphrase for him.
       The above command changes it from "setup_passphrase", which was inherited from the initial user, to "new_passphrase".</dd>
-    </dl><a name="lbAL" id="lbAL"> </a>
+    </dl><a name="lbAL" id="lbAL">&nbsp;</a>
 
     <h3>Test the new user</h3>
 
@@ -192,16 +192,16 @@ createUser initial MD5 setup_passphrase DES
     <p>Now, go remove the vacm "group" snmpd.conf entry for the "initial" user and you have a valid user 'wes' that you can use
     for future transactions instead of initial.</p>
 
-    <p><a name="lbAM" id="lbAM"> </a></p>
+    <p><a name="lbAM" id="lbAM">&nbsp;</a></p>
 
     <h2>WARNING</h2>Manipulating the usmUserTable using this command can <i>only</i> be done using SNMPv3. This command will not
     work with the community-based versions, even if they have write access to the table.
 
-    <p><a name="lbAN" id="lbAN"> </a></p>
+    <p><a name="lbAN" id="lbAN">&nbsp;</a></p>
 
     <h2>SEE ALSO</h2><a href="snmpd.conf.html">snmpd.conf</a>(5), <a href="snmp.conf.html">snmp.conf</a>(5), RFC 3414
     <hr />
-    <a name="index" id="index"> </a>
+    <a name="index" id="index">&nbsp;</a>
 
     <h2>Index</h2>
 
@@ -238,7 +238,7 @@ createUser initial MD5 setup_passphrase DES
     </dl>
     <hr />
     This document was created by <a href="http://localhost/cgi-bin/man/man2html">man2html</a>, using the manual pages.<br />
-    Time: 16:55:08 GMT, December 09, 2006
+    Time: 13:12:00 GMT, September 23, 2007
 <!-- CONTENT END -->
 <!--#include virtual="/page-bottom.html" -->
 

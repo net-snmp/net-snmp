@@ -2,12 +2,12 @@
 <!--#include virtual="/page-top.html" -->
 <!-- CONTENT START -->
     <h1>The Net-SNMP library</h1>Section: net-snmp (3)<br />
-    Updated: 24 Nov 2006<br />
+    Updated: 27 Jul 2007<br />
     <a href="#index">Index</a> <a href="../index.html">Return to Main Contents</a>
     <hr />
-    <a name="lbAB" id="lbAB"> </a>
+    <a name="lbAB" id="lbAB">&nbsp;</a>
 
-    <h2>NAME</h2>The Net-SNMP library - <a name="lbAC" id="lbAC"> </a>
+    <h2>NAME</h2>The Net-SNMP library - <a name="lbAC" id="lbAC">&nbsp;</a>
 
     <h3>Modules</h3>
 
@@ -42,7 +42,7 @@
     <b>generic logging for net-snmp</b><br />
     <br />
     <b>Memory Utility Routines</b><br />
-    <a name="lbAD" id="lbAD"> </a></p>
+    <a name="lbAD" id="lbAD">&nbsp;</a></p>
 
     <h3>Data Structures</h3>
 
@@ -50,7 +50,7 @@
     struct <b>snmp_internal_session</b><br />
     <br />
     struct <b>session_list</b><br />
-    <a name="lbAE" id="lbAE"> </a></p>
+    <a name="lbAE" id="lbAE">&nbsp;</a></p>
 
     <h3>Defines</h3>
 
@@ -100,13 +100,13 @@
     #define <b>DEBUGPRINTPDUTYPE</b>(token, type) DEBUGDUMPSECTION(token, snmp_pdu_type(type))<br />
     <br />
     #define <b>ERROR_STAT_LENGTH</b> 11<br />
-    <a name="lbAF" id="lbAF"> </a></p>
+    <a name="lbAF" id="lbAF">&nbsp;</a></p>
 
     <h3>Typedefs</h3>
 
     <p><br />
     typedef long <b>fd_mask</b><br />
-    <a name="lbAG" id="lbAG"> </a></p>
+    <a name="lbAG" id="lbAG">&nbsp;</a></p>
 
     <h3>Functions</h3>
 
@@ -294,7 +294,7 @@
     u_int <b>snmp_get_statistic</b> (int which)<br />
     <br />
     void <b>snmp_init_statistics</b> (void)<br />
-    <a name="lbAH" id="lbAH"> </a></p>
+    <a name="lbAH" id="lbAH">&nbsp;</a></p>
 
     <h3>Variables</h3>
 
@@ -320,11 +320,11 @@
     <b>session_list</b> * <b>Sessions</b> = NULL<br />
     <br />
     int <b>snmp_errno</b> = 0<br />
-    <a name="lbAI" id="lbAI"> </a></p>
+    <a name="lbAI" id="lbAI">&nbsp;</a></p>
 
     <h2>Define Documentation</h2>
 
-    <p><a name="lbAJ" id="lbAJ"> </a></p>
+    <p><a name="lbAJ" id="lbAJ">&nbsp;</a></p>
 
     <h3>#define timercmp(tvp, uvp, cmp)</h3>
 
@@ -335,19 +335,15 @@
 
     <p>Definition at line 148 of file snmp_api.c.</p>
 
-    <p>Referenced by snmp_sess_timeout(). <a name="lbAK" id="lbAK"> </a></p>
+    <p>Referenced by netsnmp_addrcache_add(), and snmp_sess_timeout(). <a name="lbAK" id="lbAK">&nbsp;</a></p>
 
     <h2>Function Documentation</h2>
 
-    <p><a name="lbAL" id="lbAL"> </a></p>
+    <p><a name="lbAL" id="lbAL">&nbsp;</a></p>
 
     <h3>int _sess_read (void * sessp, fd_set * fdset)</h3>
 
-    <p>XXX-rks: why no SNMP_FREE(isp-&gt;packet); ??</p>
-
-    <p>XXX-rks: why no SNMP_FREE(isp-&gt;packet); ??</p>
-
-    <p>Definition at line 5424 of file snmp_api.c.</p>
+    <p>Definition at line 5420 of file snmp_api.c.</p>
 
     <p>References asn_check_packet(), snmp_session::callback, snmp_session::callback_magic, snmp_internal_session::check_packet,
     netsnmp_transport_s::f_accept, netsnmp_transport_s::f_close, netsnmp_transport_s::f_recv, FD_ISSET,
@@ -359,7 +355,7 @@
     SNMP_FREE, snmp_log(), snmp_sess_add_ex(), snmp_set_detail(), netsnmp_transport_s::sock, strerror(), and
     session_list::transport.</p>
 
-    <p>Referenced by snmp_sess_read(). <a name="lbAM" id="lbAM"> </a></p>
+    <p>Referenced by snmp_sess_read(). <a name="lbAM" id="lbAM">&nbsp;</a></p>
 
     <h3>int init_agent (const char * app)</h3>
 
@@ -389,7 +385,7 @@
     <p>Definition at line 270 of file snmp_vars.c.</p>
 
     <p>References _init_agent_callback_transport, init_traps(), netsnmp_ds_get_boolean(), netsnmp_ds_set_boolean(),
-    netsnmp_init_helpers(), NULL, setup_tree(), snmp_log(), and starttime. <a name="lbAN" id="lbAN"> </a></p>
+    netsnmp_init_helpers(), NULL, setup_tree(), snmp_log(), and starttime. <a name="lbAN" id="lbAN">&nbsp;</a></p>
 
     <h3>void init_snmp (const char * type)</h3>
 
@@ -413,11 +409,11 @@
       <dd><b>init_agent</b></dd>
     </dl>
 
-    <p>Definition at line 811 of file snmp_api.c.</p>
+    <p>Definition at line 795 of file snmp_api.c.</p>
 
     <p>References init_callbacks(), init_snmp_alarm(), init_snmp_enums(), init_snmp_logging(), netsnmp_ds_get_string(),
     netsnmp_ds_set_string(), netsnmp_init_mib(), read_configs(), read_premib_configs(), register_mib_handlers(), and
-    snmp_init_statistics(). <a name="lbAO" id="lbAO"> </a></p>
+    snmp_init_statistics(). <a name="lbAO" id="lbAO">&nbsp;</a></p>
 
     <h3>int netsnmp_oid_compare_ll (const oid * in_name1, size_t len1, const oid * in_name2, size_t len2, size_t * offpt)</h3>
 
@@ -431,10 +427,10 @@
       <dd>-1 if name1 &lt; name2, 0 if name1 = name2, 1 if name1 &gt; name2 and offpt = len where name1 != name2</dd>
     </dl>
 
-    <p>Definition at line 6365 of file snmp_api.c.</p>
+    <p>Definition at line 6358 of file snmp_api.c.</p>
 
     <p>Referenced by netsnmp_subtree_change_next(), netsnmp_subtree_change_prev(), and netsnmp_subtree_find_prev(). <a name=
-    "lbAP" id="lbAP"> </a></p>
+    "lbAP" id="lbAP">&nbsp;</a></p>
 
     <h3>int netsnmp_oid_equals (const oid * in_name1, size_t len1, const oid * in_name2, size_t len2)</h3>
 
@@ -458,10 +454,10 @@
       <dd>0 if they are equal, 1 if they are not.</dd>
     </dl>
 
-    <p>Definition at line 6446 of file snmp_api.c.</p>
+    <p>Definition at line 6439 of file snmp_api.c.</p>
 
-    <p>Referenced by netsnmp_cache_find_by_oid(), netsnmp_subtree_free(), netsnmp_subtree_load(), and unregister_mib_context().
-    <a name="lbAQ" id="lbAQ"> </a></p>
+    <p>Referenced by netsnmp_cache_find_by_oid(), netsnmp_old_api_helper(), netsnmp_subtree_free(), netsnmp_subtree_load(),
+    netsnmp_unregister_mib_table_row(), and unregister_mib_context(). <a name="lbAQ" id="lbAQ">&nbsp;</a></p>
 
     <h3>int netsnmp_oid_find_prefix (const oid * in_name1, size_t len1, const oid * in_name2, size_t len2)</h3>
 
@@ -482,11 +478,11 @@
       <dd>length of largest common index of commonality. 1 = first, 0 if none * or -1 on error.</dd>
     </dl>
 
-    <p>Definition at line 6502 of file snmp_api.c.</p>
+    <p>Definition at line 6495 of file snmp_api.c.</p>
 
     <p>References SNMP_MIN.</p>
 
-    <p>Referenced by netsnmp_add_varbind_to_cache(). <a name="lbAR" id="lbAR"> </a></p>
+    <p>Referenced by netsnmp_add_varbind_to_cache(). <a name="lbAR" id="lbAR">&nbsp;</a></p>
 
     <h3>int netsnmp_oid_is_subtree (const oid * in_name1, size_t len1, const oid * in_name2, size_t len2)</h3>
 
@@ -509,7 +505,7 @@
       <dd>0 if one is a common prefix of the other.</dd>
     </dl>
 
-    <p>Definition at line 6482 of file snmp_api.c. <a name="lbAS" id="lbAS"> </a></p>
+    <p>Definition at line 6475 of file snmp_api.c. <a name="lbAS" id="lbAS">&nbsp;</a></p>
 
     <h3>int snmp_oid_compare (const oid * in_name1, size_t len1, const oid * in_name2, size_t len2)</h3>
 
@@ -523,18 +519,18 @@
       <dd>-1 if name1 &lt; name2, 0 if name1 = name2, 1 if name1 &gt; name2</dd>
     </dl>
 
-    <p>Definition at line 6316 of file snmp_api.c.</p>
+    <p>Definition at line 6309 of file snmp_api.c.</p>
 
-    <p>Referenced by convert_v2pdu_to_v1(), find_varbind_in_list(), lookup_cache_find(), netsnmp_bulk_to_next_fix_requests(),
-    netsnmp_check_getnext_reply(), netsnmp_container_table_row_insert(), netsnmp_insert_iterator_context(),
-    netsnmp_insert_table_row(), netsnmp_instance_helper_handler(), netsnmp_iterator_row_get_byoid(),
-    netsnmp_iterator_row_next_byoid(), netsnmp_scalar_group_helper_handler(), netsnmp_scalar_helper_handler(),
-    netsnmp_send_traps(), netsnmp_stash_to_next_helper(), netsnmp_subtree_compare(), netsnmp_subtree_find(),
-    netsnmp_subtree_find_next(), netsnmp_subtree_find_prev(), netsnmp_subtree_load(), netsnmp_subtree_split(),
-    netsnmp_table_data_add_row(), netsnmp_table_data_get_from_oid(), netsnmp_table_data_row_next_byoid(),
-    netsnmp_tdata_compare_oid(), netsnmp_watched_spinlock_handler(), netsnmp_watched_timestamp_handler(),
-    netsnmp_watcher_helper_handler(), snmp_oidsubtree_compare(), snmp_oidtree_compare(), and table_helper_handler(). <a name=
-    "lbAT" id="lbAT"> </a></p>
+    <p>Referenced by check_getnext_results(), convert_v2pdu_to_v1(), find_varbind_in_list(), lookup_cache_find(),
+    netsnmp_bulk_to_next_fix_requests(), netsnmp_check_getnext_reply(), netsnmp_container_table_row_insert(),
+    netsnmp_insert_iterator_context(), netsnmp_insert_table_row(), netsnmp_instance_helper_handler(),
+    netsnmp_iterator_row_get_byoid(), netsnmp_iterator_row_next_byoid(), netsnmp_scalar_group_helper_handler(),
+    netsnmp_scalar_helper_handler(), netsnmp_send_traps(), netsnmp_stash_to_next_helper(), netsnmp_subtree_compare(),
+    netsnmp_subtree_find(), netsnmp_subtree_find_next(), netsnmp_subtree_find_prev(), netsnmp_subtree_load(),
+    netsnmp_subtree_split(), netsnmp_table_data_add_row(), netsnmp_table_data_get_from_oid(),
+    netsnmp_table_data_helper_handler(), netsnmp_table_data_row_next_byoid(), netsnmp_tdata_compare_oid(),
+    netsnmp_watched_spinlock_handler(), netsnmp_watched_timestamp_handler(), netsnmp_watcher_helper_handler(),
+    snmp_oidsubtree_compare(), snmp_oidtree_compare(), and table_helper_handler(). <a name="lbAT" id="lbAT">&nbsp;</a></p>
 
     <h3>int snmp_oidtree_compare (const oid * in_name1, size_t len1, const oid * in_name2, size_t len2)</h3>
 
@@ -555,11 +551,11 @@
       <dd>0 if they are equal, 1 if in_name1 is &gt; in_name2, or -1 if &lt;.</dd>
     </dl>
 
-    <p>Definition at line 6418 of file snmp_api.c.</p>
+    <p>Definition at line 6411 of file snmp_api.c.</p>
 
     <p>References snmp_oid_compare().</p>
 
-    <p>Referenced by netsnmp_query_walk(), and netsnmp_tdata_compare_subtree_oid(). <a name="lbAU" id="lbAU"> </a></p>
+    <p>Referenced by netsnmp_query_walk(), and netsnmp_tdata_compare_subtree_oid(). <a name="lbAU" id="lbAU">&nbsp;</a></p>
 
     <h3>void snmp_shutdown (const char * type)</h3>
 
@@ -577,11 +573,11 @@
       <dd>void</dd>
     </dl>
 
-    <p>Definition at line 880 of file snmp_api.c.</p>
+    <p>Definition at line 864 of file snmp_api.c.</p>
 
     <p>References clear_callback(), netsnmp_ds_shutdown(), NULL, shutdown_mib(), shutdown_snmp_logging(),
     snmp_alarm_unregister_all(), snmp_call_callbacks(), snmp_close_sessions(), snmp_store(), and
-    unregister_all_config_handlers(). <a name="lbAV" id="lbAV"> </a></p>
+    unregister_all_config_handlers(). <a name="lbAV" id="lbAV">&nbsp;</a></p>
 
     <h3>int snmpv3_engineID_probe (struct <b>session_list</b> * slp, <b>netsnmp_session</b> * in_session)</h3>
 
@@ -624,7 +620,7 @@
       </dd>
     </dl>
 
-    <p>Definition at line 1299 of file snmp_api.c.</p>
+    <p>Definition at line 1285 of file snmp_api.c.</p>
 
     <p>References create_user_from_session(), snmp_session::engineBoots, snmp_session::engineTime, snmp_session::flags, NULL,
     snmp_session::s_snmp_errno, snmp_session::securityEngineID, snmp_session::securityEngineIDLen, session_list::session,
@@ -632,7 +628,7 @@
 
     <p>Referenced by snmp_sess_add_ex().</p>
     <hr />
-    <a name="index" id="index"> </a>
+    <a name="index" id="index">&nbsp;</a>
 
     <h2>Index</h2>
 
@@ -700,7 +696,7 @@
     </dl>
     <hr />
     This document was created by <a href="http://localhost/cgi-bin/man/man2html">man2html</a>, using the manual pages.<br />
-    Time: 16:55:09 GMT, December 09, 2006
+    Time: 13:12:01 GMT, September 23, 2007
 <!-- CONTENT END -->
 <!--#include virtual="/page-bottom.html" -->
 

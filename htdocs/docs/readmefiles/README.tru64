@@ -29,10 +29,11 @@ Perl support, do your own Perl installation first.
 -------
 
 Starting with net-snmp 5.4 you can enable the UDPIPv6 and TCPIPv6 transports
-on Tru64 Unix 5.1. There's no support for the IPv6 MIBs, though, so you'll 
-have to configure like this:
+on Tru64 Unix 5.1:
 
-  ./configure --enable-ipv6 --with-out-mib-modules=&quot;mibII/ipv6&quot;
+   ./configure --enable-ipv6
+
+There's no support for the IPv6 MIBs, though.
 
 
 4. Testing

@@ -5,9 +5,9 @@
     Updated: 08 Feb 2002<br />
     <a href="#index">Index</a> <a href="../index.html">Return to Main Contents</a>
     <hr />
-    <a name="lbAB" id="lbAB"> </a>
+    <a name="lbAB" id="lbAB">&nbsp;</a>
 
-    <h2>NAME</h2>snmpd.conf - configuration file for the Net-SNMP SNMP agent <a name="lbAC" id="lbAC"> </a>
+    <h2>NAME</h2>snmpd.conf - configuration file for the Net-SNMP SNMP agent <a name="lbAC" id="lbAC">&nbsp;</a>
 
     <h2>DESCRIPTION</h2>The Net-SNMP agent uses one or more configuration files to control its operation and the management
     information provided. These files (<b>snmpd.conf</b> and <b>snmpd.local.conf</b>) can be located in one of several locations,
@@ -53,7 +53,7 @@
           <dt>snmpd -H</dt>
         </dl>
       </dd>
-    </dl><a name="lbAD" id="lbAD"> </a>
+    </dl><a name="lbAD" id="lbAD">&nbsp;</a>
 
     <h2>AGENT BEHAVIOUR</h2>Although most configuration directives are concerned with the MIB information supplied by the agent,
     there are a handful of directives that control the behaviour of <i>snmpd</i> considered simply as a daemon providing a
@@ -81,7 +81,28 @@
       <dt>leave_pidfile yes</dt>
 
       <dd>instructs the agent to not remove its pid file on shutdown. Equivalent to specifying "-U" on the command line.</dd>
-    </dl><a name="lbAE" id="lbAE"> </a>
+
+      <dt>maxGetbulkRepeats NUM</dt>
+
+      <dd>Sets the maximum number of responses allowed for a single variable in a getbulk request. Set to 0 to enable the default
+      and set it to -1 to enable unlimited. Because memory is allocated ahead of time, sitting this to unlimited is not
+      considered safe if your user population can not be trusted. A repeat number greater than this will be truncated to this
+      value.</dd>
+
+      <dd>This is set by default to -1.</dd>
+
+      <dt>maxGetbulkResponses NUM</dt>
+
+      <dd>Sets the maximum number of responses allowed for a getbulk request. This is set by default to 100. Set to 0 to enable
+      the default and set it to -1 to enable unlimited. Because memory is allocated ahead of time, sitting this to unlimited is
+      not considered safe if your user population can not be trusted.</dd>
+
+      <dd>In general, the total number of responses will not be allowed to exceed the maxGetbulkResponses number and the total
+      number returned will be an integer multiple of the number of variables requested times the calculated number of repeats
+      allow to fit below this number.</dd>
+
+      <dd>Also not that processing of maxGetbulkRepeats is handled first.</dd>
+    </dl><a name="lbAE" id="lbAE">&nbsp;</a>
 
     <h3>SNMPv3 Configuration</h3>SNMPv3 requires an SNMP agent to define a unique "engine ID" in order to respond to SNMPv3
     requests. This ID will normally be determined automatically, using two reasonably non-predictable values - a (pseudo-)random
@@ -104,11 +125,11 @@
       directive has no effect.</dd>
 
       <dd>The default is to use eth0.</dd>
-    </dl><a name="lbAF" id="lbAF"> </a>
+    </dl><a name="lbAF" id="lbAF">&nbsp;</a>
 
     <h2>ACCESS CONTROL</h2><b>snmpd</b> supports the View-Based Access Control Model (VACM) as defined in RFC 2575, to control
     who can retrieve or update information. To this end, it recognizes various directives relating to access control. These fall
-    into four basic groups. <a name="lbAG" id="lbAG"> </a>
+    into four basic groups. <a name="lbAG" id="lbAG">&nbsp;</a>
 
     <h3>SNMPv3 Users</h3>
 
@@ -158,7 +179,7 @@ createUser myuser SHA -m 0x0001020304050607080900010203040506070809 AES -m 0x000
       <dd>Due to the way localization happens, localized privacy keys are expected to be the length needed by the algorithm (128
       bits for all supported algorithms). Master encryption keys, though, need to be the length required by the authentication
       algorithm not the length required by the encrypting algorithm (MD5: 16 bytes, SHA: 20 bytes).</dd>
-    </dl><a name="lbAH" id="lbAH"> </a>
+    </dl><a name="lbAH" id="lbAH">&nbsp;</a>
 
     <h3>Traditional Access Control</h3>Most simple access control requirements can be specified using the directives
     <i>rouser</i>/<i>rwuser</i> (for SNMPv3) or <i>rocommunity</i>/<i>rwcommunity</i> (for SNMPv1 or SNMPv2c).
@@ -203,7 +224,7 @@ createUser myuser SHA -m 0x0001020304050607080900010203040506070809 AES -m 0x000
     <p>More complex access requirements (such as access to two or more distinct OID subtrees, or different views for GET and SET
     requests) should use one of the other access control mechanisms. Note that if several distinct communities or SNMPv3 users
     need to be granted the same level of access, it would also be more efficient to use the main VACM configuration directives.
-    <a name="lbAI" id="lbAI"> </a></p>
+    <a name="lbAI" id="lbAI">&nbsp;</a></p>
 
     <h3>VACM Configuration</h3>The full flexibility of the VACM is available using four configuration directives -
     <i>com2sec</i>, <i>group</i>, <i>view</i> and <i>access</i>. These provide direct configuration of the underlying VACM
@@ -291,7 +312,7 @@ createUser myuser SHA -m 0x0001020304050607080900010203040506070809 AES -m 0x000
       context of the incoming request, either <i>exact</i> or <i>prefix</i>. READ, WRITE and NOTIFY specifies the view to be used
       for GET*, SET and TRAP/INFORM requests (althought the NOTIFY view is not currently used). For v1 or v2c access, LEVEL will
       need to be <i>noauth</i>.</dd>
-    </dl><a name="lbAJ" id="lbAJ"> </a>
+    </dl><a name="lbAJ" id="lbAJ">&nbsp;</a>
 
     <h3>Typed-View Configuration</h3>The final group of directives extend the VACM approach into a more flexible mechanism, which
     can be applied to other access control requirements. Rather than the fixed three views of the standard VACM mechanism, this
@@ -333,12 +354,12 @@ createUser myuser SHA -m 0x0001020304050607080900010203040506070809 AES -m 0x000
       <dd>is a direct equivalent to the original <i>access</i> directive, typically listing the view types as <i>read</i> or
       <i>read,write</i> as appropriate. (or see '<a href="snmptrapd.conf.html">snmptrapd.conf</a>(5)' for other possibilities).
       All other fields have the same interpretation as with <i>access</i>.</dd>
-    </dl><a name="lbAK" id="lbAK"> </a>
+    </dl><a name="lbAK" id="lbAK">&nbsp;</a>
 
     <h2>SYSTEM INFORMATION</h2>Most of the information reported by the Net-SNMP agent is retrieved from the underlying system, or
     dynamically configured via SNMP SET requests (and retained from one run of the agent to the next). However, certain MIB
     objects can be configured or controlled via the <i><a href="snmpd.conf.html">snmpd.conf</a>(5)</i> file. <a name="lbAL" id=
-    "lbAL"> </a>
+    "lbAL">&nbsp;</a>
 
     <h3>System Group</h3>Most of the scalar objects in the 'system' group can be configured in this way:
 
@@ -365,7 +386,7 @@ createUser myuser SHA -m 0x0001020304050607080900010203040506070809 AES -m 0x000
 
       <dd>sets the system description or object ID for the agent. Although these MIB objects are not SNMP-writable, these
       directives can be used by a network administrator to configure suitable values for them.</dd>
-    </dl><a name="lbAM" id="lbAM"> </a>
+    </dl><a name="lbAM" id="lbAM">&nbsp;</a>
 
     <h3>Interfaces Group</h3>
 
@@ -375,7 +396,7 @@ createUser myuser SHA -m 0x0001020304050607080900010203040506070809 AES -m 0x000
       <dd>can be used to provide appropriate type and speed settings for interfaces where the agent fails to determine this
       information correctly. TYPE is a type value as given in the IANAifType-MIB, and can be specified numerically or by name
       (assuming this MIB is loaded).</dd>
-    </dl><a name="lbAN" id="lbAN"> </a>
+    </dl><a name="lbAN" id="lbAN">&nbsp;</a>
 
     <h3>Host Resources Group</h3>This requires that the agent was built with support for the <i>host</i> module (which is now
     included as part of the default build configuration on the major supported platforms).
@@ -415,7 +436,7 @@ createUser myuser SHA -m 0x0001020304050607080900010203040506070809 AES -m 0x000
       <dd>controls how NFS and NFS-like file systems should be reported in the hrStorageTable. as 'Network Disks' (1) or 'Fixed
       Disks' (2) Historically, the Net-SNMP agent has reported such file systems as 'Fixed Disks', and this is still the default
       behaviour. Setting this directive to '1' reports such file systems as</dd>
-    </dl><a name="lbAO" id="lbAO"> </a>
+    </dl><a name="lbAO" id="lbAO">&nbsp;</a>
 
     <h3>Process Monitoring</h3>The hrSWRun group of the Host Resources MIB provides information about individual processes
     running on the local system. The prTable of the UCD-SNMP-MIB complements this by reporting on selected services (which may
@@ -468,7 +489,7 @@ createUser myuser SHA -m 0x0001020304050607080900010203040506070809 AES -m 0x000
     </dl>
 
     <p>If no <i>proc</i> directives are defined, then walking the prTable will fail (<i>noSuchObject).</i> <a name="lbAP" id=
-    "lbAP"> </a></p>
+    "lbAP">&nbsp;</a></p>
 
     <h3>Disk Usage Monitoring</h3>This requires that the agent was built with support for the <i>ucd-snmp/disk</i> module (which
     is included as part of the default build configuration).
@@ -525,7 +546,7 @@ createUser myuser SHA -m 0x0001020304050607080900010203040506070809 AES -m 0x000
     </dl>
 
     <p>If neither any <i>disk</i> directives or <i>includeAllDisks</i> are defined, then walking the dskTable will fail
-    (<i>noSuchObject).</i> <a name="lbAQ" id="lbAQ"> </a></p>
+    (<i>noSuchObject).</i> <a name="lbAQ" id="lbAQ">&nbsp;</a></p>
 
     <h3>System Load Monitoring</h3>This requires that the agent was built with support for either the <i>ucd-snmp/loadave</i>
     module or the <i>ucd-snmp/memory</i> module respectively (both of which are included as part of the default build
@@ -554,6 +575,9 @@ createUser myuser SHA -m 0x0001020304050607080900010203040506070809 AES -m 0x000
       <dd>If the MAX15 threshold is omitted, it will default to the MAX5 value. If both MAX5 and MAX15 are omitted, they will
       default to the MAX1 value. If this directive is not specified, all three thresholds will default to a value of
       DEFMAXLOADAVE.</dd>
+
+      <dd>If a threshold value of 0 is given, the agent will not report errors via the relevant laErrorFlag or laErrMessage
+      instances, regardless of the current load.</dd>
     </dl>
 
     <p>Unlike the <i>proc</i> and <i>disk</i> directives, walking the walking the laTable will succeed (assuming the
@@ -578,7 +602,7 @@ createUser myuser SHA -m 0x0001020304050607080900010203040506070809 AES -m 0x000
           </dd>
         </dl>If this directive is not specified, the default threshold is 16 Mb.
       </dd>
-    </dl><a name="lbAR" id="lbAR"> </a>
+    </dl><a name="lbAR" id="lbAR">&nbsp;</a>
 
     <h3>Log File Monitoring</h3>This requires that the agent was built with support for either the <i>ucd-snmp/file</i> or
     <i>ucd-snmp/logmatch</i> modules respectively (both of which are included as part of the default build configuration).
@@ -617,11 +641,11 @@ createUser myuser SHA -m 0x0001020304050607080900010203040506070809 AES -m 0x000
     </dl>
 
     <p>If no <i>logmatch</i> directives are defined, then walking the logMatchTable will fail (<i>noSuchObject).</i> <a name=
-    "lbAS" id="lbAS"> </a></p>
+    "lbAS" id="lbAS">&nbsp;</a></p>
 
     <h2>ACTIVE MONITORING</h2>The usual behaviour of an SNMP agent is to wait for incoming SNMP requests and respond to them - if
     no requests are received, an agent will typically not initiate any actions. This section describes various directives that
-    can configure <i>snmpd</i> to take a more active role. <a name="lbAT" id="lbAT"> </a>
+    can configure <i>snmpd</i> to take a more active role. <a name="lbAT" id="lbAT">&nbsp;</a>
 
     <h3>Notification Handling</h3>
 
@@ -691,7 +715,7 @@ createUser myuser SHA -m 0x0001020304050607080900010203040506070809 AES -m 0x000
       (<i><a href="disabled.html">disabled</a>(2)</i> - the default). Ordinarily the corresponding MIB object
       (snmpEnableAuthenTraps.0) is read-write, but specifying this directive makes this object read-only, and attempts to set the
       value via SET requests will result in a <i>notWritable</i> error response.</dd>
-    </dl><a name="lbAU" id="lbAU"> </a>
+    </dl><a name="lbAU" id="lbAU">&nbsp;</a>
 
     <h3>DisMan Event MIB</h3>The previous directives can be used to configure where traps should be sent, but are not concerned
     with <i>when</i> to send such traps (or what traps should be generated). This is the domain of the Event MIB - developed by
@@ -717,7 +741,8 @@ createUser myuser SHA -m 0x0001020304050607080900010203040506070809 AES -m 0x000
       <dt>agentSecName NAME</dt>
 
       <dd>specifies the default SNMPv3 username, to be used when making internal queries to retrieve any necessary information
-      (either for evaluating the monitored expression, or building a notification payload).</dd>
+      (either for evaluating the monitored expression, or building a notification payload). These internal queries always use
+      SNMPv3, even if normal querying of the agent is done using SNMPv1 or SNMPv2c.</dd>
 
       <dd>Note that this user must also be explicitly created (<i>createUser</i>) and given appropriate access rights (e.g.
       <i>rouser</i>). This directive is purely concerned with defining <i>which</i> user should be used - not with actually
@@ -729,7 +754,9 @@ createUser myuser SHA -m 0x0001020304050607080900010203040506070809 AES -m 0x000
       corresponding event, and either send a notification or apply a SET assignment (or both). Note that the event will only be
       triggered once, when the expression first matches. This monitor entry will not fire again until the monitored condition
       first becomes false, and then matches again. NAME is an administrative name for this expression, and is used for indexing
-      the mteTriggerTable (and related tables).</dd>
+      the mteTriggerTable (and related tables). Note also that such monitors use an internal SNMPv3 request to retrieve the
+      values being monitored (even if normal agent queries typically use SNMPv1 or SNMPv2c). See the <i>iquerySecName</i> token
+      described above.</dd>
 
       <dt><i>EXPRESSION</i></dt>
 
@@ -739,13 +766,13 @@ createUser myuser SHA -m 0x0001020304050607080900010203040506070809 AES -m 0x000
         <dl compact="compact">
           <dd>
             <dl compact="compact">
-              <dt>OID | !OID | !=OID</dt>
+              <dt>OID | ! OID | != OID</dt>
 
               <dd>defines an <i>existence(0)</i> monitor test. A bare OID specifies a <i>present(0)</i> test, which will fire
-              when (an instance of) the monitored OID is created. An expression of the form <i>!OID</i> specifies an <i><a href=
+              when (an instance of) the monitored OID is created. An expression of the form <i>! OID</i> specifies an <i><a href=
               "absent.html">absent</a>(1)</i> test, which will fire when the monitored OID is delected. An expression of the form
-              <i>!=OID</i> specifies a <i><a href="changed.html">changed</a>(2)</i> test, which will fire whenever the monitored
-              value(s) change.</dd>
+              <i>!= OID</i> specifies a <i><a href="changed.html">changed</a>(2)</i> test, which will fire whenever the monitored
+              value(s) change. Note that there <b>must</b> be whitespace before the OID token.</dd>
 
               <dt>OID OP VALUE</dt>
 
@@ -959,7 +986,7 @@ monitor -o fileName -o fileErrorMsg  "fileTable" fileErrorFlag != 0
     </dl>
 
     <p>In both these latter cases, the snmpd.conf must also contain a <i>iquerySecName</i> directive, together with a
-    corresponding <i>createUser</i> entry and suitable access control configuration. <a name="lbAV" id="lbAV"> </a></p>
+    corresponding <i>createUser</i> entry and suitable access control configuration. <a name="lbAV" id="lbAV">&nbsp;</a></p>
 
     <h3>DisMan Schedule MIB</h3>The DisMan working group also produced a mechanism for scheduling particular actions (a specified
     SET assignment) at given times. This requires that the agent was built with support for the <i>disman/schedule</i> module
@@ -997,7 +1024,7 @@ monitor -o fileName -o fileErrorMsg  "fileTable" fileErrorFlag != 0
 
       <dd>configures a one-shot SET assignment, to be run at the first matching time as specified by the fields MINUTE to
       WEEKDAY. The interpretation of these fields is exactly the same as for the <i>cron</i> directive.</dd>
-    </dl><a name="lbAW" id="lbAW"> </a>
+    </dl><a name="lbAW" id="lbAW">&nbsp;</a>
 
     <h2>EXTENDING AGENT FUNCTIONALITY</h2>One of the first distinguishing features of the original UCD suite was the ability to
     extend the functionality of the agent - not just by recompiling with code for new MIB modules, but also by configuring the
@@ -1015,7 +1042,7 @@ monitor -o fileName -o fileErrorMsg  "fileTable" fileErrorFlag != 0
       <dt>*</dt>
 
       <dd>communicating with other agents (<i>proxy</i>, SMUX, AgentX)</dd>
-    </dl><a name="lbAX" id="lbAX"> </a>
+    </dl><a name="lbAX" id="lbAX">&nbsp;</a>
 
     <h3>Arbitrary Extension Commands</h3>The earliest extension mechanism was the ability to run arbitrary commands or shell
     scripts. Such commands do not need to be aware of SNMP operations, or conform to any particular behaviour - the MIB
@@ -1115,7 +1142,7 @@ monitor -o fileName -o fileErrorMsg  "fileTable" fileErrorFlag != 0
     </dl>
 
     <p>Both <i>extend</i> and <i>extendfix</i> directives can be configured dynamically, using SNMP SET requests to the
-    NET-SNMP-EXTEND-MIB. <a name="lbAY" id="lbAY"> </a></p>
+    NET-SNMP-EXTEND-MIB. <a name="lbAY" id="lbAY">&nbsp;</a></p>
 
     <h3>MIB-Specific Extension Commands</h3>The first group of extension directives invoke arbitrary commands, and rely on the
     MIB structure (and management applications) having the flexibility to accommodate and interpret the output. This is a
@@ -1232,7 +1259,7 @@ monitor -o fileName -o fileErrorMsg  "fileTable" fileErrorFlag != 0
     </dl>
 
     <p><i>pass</i> and <i>pass_persist</i> extensions can only be configured via the snmpd.conf file. They cannot be set up via
-    SNMP SET requests. <a name="lbAZ" id="lbAZ"> </a></p>
+    SNMP SET requests. <a name="lbAZ" id="lbAZ">&nbsp;</a></p>
 
     <h3>Embedded Perl Support</h3>Programs using the previous extension mechanisms can be written in any convenient programming
     language - including perl, which is a common choice for pass-through extensions in particular. However the Net-SNMP agent
@@ -1293,7 +1320,7 @@ perl $agent-&gt;register('mylink', '.1.3.6.1.8765', \&amp;myroutine);
       </dd>
 
       <dd>or perform any other perl-based processing that might be required.</dd>
-    </dl><a name="lbBA" id="lbBA"> </a>
+    </dl><a name="lbBA" id="lbBA">&nbsp;</a>
 
     <h3>Dynamically Loadable Modules</h3>Most of the MIBs supported by the Net-SNMP agent are implemented as C code modules,
     which were compiled and linked into the agent libraries when the suite was first built. Such implementation modules can also
@@ -1321,7 +1348,8 @@ perl $agent-&gt;register('mylink', '.1.3.6.1.8765', \&amp;myroutine);
       </dd>
     </dl>
 
-    <p>This functionality can also be configured using SNMP SET requests to the UCD-DLMOD-MIB. <a name="lbBB" id="lbBB"> </a></p>
+    <p>This functionality can also be configured using SNMP SET requests to the UCD-DLMOD-MIB. <a name="lbBB" id=
+    "lbBB">&nbsp;</a></p>
 
     <h3>Proxy Support</h3>Another mechanism for extending the functionality of the agent is to pass selected requests (or
     selected varbinds) to another SNMP agent, which can be running on the same host (presumably listening on a different port),
@@ -1364,7 +1392,7 @@ perl $agent-&gt;register('mylink', '.1.3.6.1.8765', \&amp;myroutine);
     community strings - see the <i>com2sec</i> directive).</p>
 
     <p>Specifying the REMOID parameter will map the local MIB tree rooted at OID to an equivalent subtree rooted at REMOID on the
-    remote agent. <a name="lbBC" id="lbBC"> </a></p>
+    remote agent. <a name="lbBC" id="lbBC">&nbsp;</a></p>
 
     <h3>SMUX Sub-Agents</h3>The Net-SNMP agent supports the SMUX protocol (RFC 1227) to communicate with SMUX-based subagents
     (such as <i>gated</i>, <i>zebra</i> or <i>quagga</i>). Use of this mechanism requires that the agent was built with support
@@ -1408,7 +1436,7 @@ perl $agent-&gt;register('mylink', '.1.3.6.1.8765', \&amp;myroutine);
     </dl>
 
     <p>Note the Net-SNMP agent will only operate as a SMUX <i>master</i> agent. It does not support acting in a SMUX subagent
-    role. <a name="lbBD" id="lbBD"> </a></p>
+    role. <a name="lbBD" id="lbBD">&nbsp;</a></p>
 
     <h3>AgentX Sub-Agents</h3>The Net-SNMP agent supports the AgentX protocol (RFC 2741) in both master and subagent roles. Use
     of this mechanism requires that the agent was built with support for the <i>agentx</i> module (which is included as part of
@@ -1469,7 +1497,7 @@ perl $agent-&gt;register('mylink', '.1.3.6.1.8765', \&amp;myroutine);
       <dd>defines the number of retries for an AgentX request. Default is 5 retries.</dd>
     </dl>
 
-    <p>net-snmp ships with both C and Perl APIs to develop your own AgentX subagent. <a name="lbBE" id="lbBE"> </a></p>
+    <p>net-snmp ships with both C and Perl APIs to develop your own AgentX subagent. <a name="lbBE" id="lbBE">&nbsp;</a></p>
 
     <h2>OTHER CONFIGURATION</h2>
 
@@ -1530,7 +1558,7 @@ perl $agent-&gt;register('mylink', '.1.3.6.1.8765', \&amp;myroutine);
                 sure to install it before the table_iterator point in the chain, so to do this:
 
                 <p><br />
-                                  injectHandler stash_cache NAME table_iterator</p>
+                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;injectHandler&nbsp;stash_cache&nbsp;NAME&nbsp;table_iterator</p>
 
                 <p>If you want a table to play with, try walking the nsModuleTable with and without this injected.</p>
               </dd>
@@ -1566,7 +1594,7 @@ perl $agent-&gt;register('mylink', '.1.3.6.1.8765', \&amp;myroutine);
 
       <dd>To figure out which modules you can inject things into, run <b>snmpwalk</b> on the nsModuleTable which will give a list
       of all named modules registered within the agent.</dd>
-    </dl><a name="lbBF" id="lbBF"> </a>
+    </dl><a name="lbBF" id="lbBF">&nbsp;</a>
 
     <h3>Internal Data tables</h3>
 
@@ -1574,7 +1602,7 @@ perl $agent-&gt;register('mylink', '.1.3.6.1.8765', \&amp;myroutine);
       <dt>table NAME</dt>
 
       <dt>add_row NAME INDEX(ES) VALUE(S)</dt>
-    </dl><a name="lbBG" id="lbBG"> </a>
+    </dl><a name="lbBG" id="lbBG">&nbsp;</a>
 
     <h2>NOTES</h2>
 
@@ -1591,18 +1619,18 @@ perl $agent-&gt;register('mylink', '.1.3.6.1.8765', \&amp;myroutine);
       <i>1</i>, <i>yes</i> or <i>true</i> to enable the corresponding behaviour, or any of <i>0</i>, <i>no</i> or <i>false</i> to
       disable it. The default in each case is for the feature to be turned off, so these directives are typically only used to
       enable the appropriate behaviour.</dd>
-    </dl><a name="lbBH" id="lbBH"> </a>
+    </dl><a name="lbBH" id="lbBH">&nbsp;</a>
 
     <h2>EXAMPLE CONFIGURATION FILE</h2>See the EXAMPLE.CONF file in the top level source directory for a more detailed example of
-    how the above information is used in real examples. <a name="lbBI" id="lbBI"> </a>
+    how the above information is used in real examples. <a name="lbBI" id="lbBI">&nbsp;</a>
 
-    <h2>FILES</h2>/usr/local/etc/snmp/snmpd.conf <a name="lbBJ" id="lbBJ"> </a>
+    <h2>FILES</h2>/usr/local/etc/snmp/snmpd.conf <a name="lbBJ" id="lbBJ">&nbsp;</a>
 
     <h2>SEE ALSO</h2><a href="snmpconf.html">snmpconf</a>(1), <a href="snmpusm.html">snmpusm</a>(1), <a href=
     "snmp.conf.html">snmp.conf</a>(5), <a href="snmp_config.html">snmp_config</a>(5), <a href="snmpd.html">snmpd</a>(8),
     EXAMPLE.conf, <a href="read_config.html">read_config</a>(3).
     <hr />
-    <a name="index" id="index"> </a>
+    <a name="index" id="index">&nbsp;</a>
 
     <h2>Index</h2>
 
@@ -1703,7 +1731,7 @@ perl $agent-&gt;register('mylink', '.1.3.6.1.8765', \&amp;myroutine);
     </dl>
     <hr />
     This document was created by <a href="http://localhost/cgi-bin/man/man2html">man2html</a>, using the manual pages.<br />
-    Time: 16:55:09 GMT, December 09, 2006
+    Time: 13:12:01 GMT, September 23, 2007
 <!-- CONTENT END -->
 <!--#include virtual="/page-bottom.html" -->
 

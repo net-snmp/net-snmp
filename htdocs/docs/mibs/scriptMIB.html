@@ -979,7 +979,7 @@ map to the same name in non-volatile storage.
 </td><td>
   UNSIGNED32
       <br />Legal values:
-        1 .. -1
+        1 .. 2147483647
 
   </td><td>NoAccess</td>
 <td>
@@ -1216,7 +1216,7 @@ the smRunArgument object.
 </td><td>
   UNSIGNED32
       <br />Legal values:
-        1 .. -1
+        1 .. 2147483647
 
   </td><td>Create</td>
 <td>
@@ -1237,7 +1237,7 @@ that are already executing.
 </td><td>
   UNSIGNED32
       <br />Legal values:
-        1 .. -1
+        1 .. 2147483647
 
   </td><td>Create</td>
 <td>
@@ -2644,7 +2644,7 @@ measured in octets, not characters.
    |  |        |  Index: smScriptOwner, smScriptName, smCodeIndex
    |  |        |
    |  |        +-- ---- Unsigned  <a href="#smCodeIndex">smCodeIndex</a>(1)
-   |  |        |        Range: 1..-1
+   |  |        |        Range: 1..2147483647
    |  |        +-- CR-- String    <a href="#smCodeText">smCodeText</a>(2)
    |  |        |        Size: 1..1024
    |  |        +-- CR-- EnumVal   <a href="#smCodeRowStatus">smCodeRowStatus</a>(3)
@@ -2672,9 +2672,9 @@ measured in octets, not characters.
    |     |     |        Size: 0..32
    |     |     +-- CR-- String    <a href="#smLaunchArgument">smLaunchArgument</a>(5)
    |     |     +-- CR-- Unsigned  <a href="#smLaunchMaxRunning">smLaunchMaxRunning</a>(6)
-   |     |     |        Range: 1..-1
+   |     |     |        Range: 1..2147483647
    |     |     +-- CR-- Unsigned  <a href="#smLaunchMaxCompleted">smLaunchMaxCompleted</a>(7)
-   |     |     |        Range: 1..-1
+   |     |     |        Range: 1..2147483647
    |     |     +-- CR-- INTEGER   <a href="#smLaunchLifeTime">smLaunchLifeTime</a>(8)
    |     |     |        Textual Convention: <a href="#TimeInterval">TimeInterval</a>
    |     |     |        Range: 0..2147483647

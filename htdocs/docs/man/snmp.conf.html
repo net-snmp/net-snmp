@@ -5,16 +5,17 @@
     Updated: 29 Jun 2005<br />
     <a href="#index">Index</a> <a href="../index.html">Return to Main Contents</a>
     <hr />
-    <a name="lbAB" id="lbAB"> </a>
+    <a name="lbAB" id="lbAB">&nbsp;</a>
 
-    <h2>NAME</h2>snmp.conf - configuration files for the Net-SNMP applications <a name="lbAC" id="lbAC"> </a>
+    <h2>NAME</h2>snmp.conf - configuration files for the Net-SNMP applications <a name="lbAC" id="lbAC">&nbsp;</a>
 
     <h2>DESCRIPTION</h2>Applications built using the Net-SNMP libraries typically use one or more configuration files to control
     various aspects of their operation. These files (<b>snmp.conf</b> and <b>snmp.local.conf</b>) can be located in one of
     several locations, as described in the <i><a href="snmp_config.html">snmp_config</a>(5)</i> manual page.
 
     <p>In particular, /usr/local/etc/snmp/snmp.conf is a common file, containing the settings shared by all users of the system.
-    ~/.snmp/snmp.conf is a personal file, with the settings specific to a particular user. <a name="lbAD" id="lbAD"> </a></p>
+    ~/.snmp/snmp.conf is a personal file, with the settings specific to a particular user. <a name="lbAD" id=
+    "lbAD">&nbsp;</a></p>
 
     <h2>IMPORTANT NOTE</h2>Several of these directives may contain sensitive information (such as pass phrases). Configuration
     files that include such settings should only be readable by the user concerned.
@@ -23,7 +24,7 @@
     behaviour, relevant to most Net-SNMP applications. Many of these correspond to standard command-line options, which are
     described in the <i><a href="snmpcmd.html">snmpcmd</a>(1)</i> manual page.</p>
 
-    <p>These directives can be divided into several distinct groups. <a name="lbAE" id="lbAE"> </a></p>
+    <p>These directives can be divided into several distinct groups. <a name="lbAE" id="lbAE">&nbsp;</a></p>
 
     <h2>CLIENT BEHAVIOUR</h2>
 
@@ -116,7 +117,7 @@
 
       <dd>It should not normally be necessary to change this setting, as the encoding is basically the same in either case - but
       working backwards typically produces a slightly more efficient encoding, and hence a smaller network datagram.</dd>
-    </dl><a name="lbAF" id="lbAF"> </a>
+    </dl><a name="lbAF" id="lbAF">&nbsp;</a>
 
     <h2>SNMPv3 SETTINGS</h2>
 
@@ -205,7 +206,7 @@
       engine (agent). The length of the key needs to be appropriate for the authentication or encryption type being used (auth
       keys: MD5=16 bytes, SHA1=20 bytes; priv keys: DES=16 bytes (8 bytes of which is used as an IV and not a key), and AES=16
       bytes).</dd>
-    </dl><a name="lbAG" id="lbAG"> </a>
+    </dl><a name="lbAG" id="lbAG">&nbsp;</a>
 
     <h2>SERVER BEHAVIOUR</h2>
 
@@ -253,7 +254,7 @@
       <dt>serverSendBuf INTEGER</dt>
 
       <dd>is similar to <i>serverRecvBuf</i>, but applies to the size of the buffer used when sending SNMP responses.</dd>
-    </dl><a name="lbAH" id="lbAH"> </a>
+    </dl><a name="lbAH" id="lbAH">&nbsp;</a>
 
     <h2>MIB HANDLING</h2>
 
@@ -283,7 +284,9 @@
 
       <dd>whether MIB parsing should be strict about comment termination. Many MIB writers assume that ASN.1 comments extend to
       the end of the text line, rather than being terminated by the next "--" token. This token can be used to accept such
-      (strictly incorrect) MIBs.</dd>
+      (strictly incorrect) MIBs.<br />
+      Note that this directive is poorly named, since a value of "true" will turn <i>off</i> the strict interpretation of MIB
+      comments.</dd>
 
       <dt>mibAllowUnderline (1|yes|true|0|no|false)</dt>
 
@@ -293,7 +296,7 @@
       <dt>mibWarningLevel INTEGER</dt>
 
       <dd>the minimum warning level of the warnings printed by the MIB parser.</dd>
-    </dl><a name="lbAI" id="lbAI"> </a>
+    </dl><a name="lbAI" id="lbAI">&nbsp;</a>
 
     <h2>OUTPUT CONFIGURATION</h2>
 
@@ -360,15 +363,15 @@
       <dt>noDisplayHint (1|yes|true|0|no|false)</dt>
 
       <dd>Disables the use of DISPLAY-HINT information when parsing indices and values to set. Equivalent to <b>-Ih</b>.</dd>
-    </dl><a name="lbAJ" id="lbAJ"> </a>
+    </dl><a name="lbAJ" id="lbAJ">&nbsp;</a>
 
     <h2>FILES</h2>/usr/local/etc/snmp/snmp.conf, /usr/local/etc/snmp/snmp.local.conf - common configuration settings<br />
-    ~/.snmp/snmp.conf - user-specific configuration settings <a name="lbAK" id="lbAK"> </a>
+    ~/.snmp/snmp.conf - user-specific configuration settings <a name="lbAK" id="lbAK">&nbsp;</a>
 
     <h2>SEE ALSO</h2><a href="snmp_config.html">snmp_config</a>(5), <a href="read_config.html">read_config</a>(3), <a href=
     "snmpcmd.html">snmpcmd</a>(1).
     <hr />
-    <a name="index" id="index"> </a>
+    <a name="index" id="index">&nbsp;</a>
 
     <h2>Index</h2>
 
@@ -395,7 +398,7 @@
     </dl>
     <hr />
     This document was created by <a href="http://localhost/cgi-bin/man/man2html">man2html</a>, using the manual pages.<br />
-    Time: 16:55:09 GMT, December 09, 2006
+    Time: 13:12:01 GMT, September 23, 2007
 <!-- CONTENT END -->
 <!--#include virtual="/page-bottom.html" -->
 

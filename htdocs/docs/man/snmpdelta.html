@@ -5,12 +5,12 @@
     Updated: 25 Jul 2003<br />
     <a href="#index">Index</a> <a href="../index.html">Return to Main Contents</a>
     <hr />
-    <a name="lbAB" id="lbAB"> </a>
+    <a name="lbAB" id="lbAB">&nbsp;</a>
 
-    <h2>NAME</h2>snmpdelta - Monitor delta differences in SNMP Counter values <a name="lbAC" id="lbAC"> </a>
+    <h2>NAME</h2>snmpdelta - Monitor delta differences in SNMP Counter values <a name="lbAC" id="lbAC">&nbsp;</a>
 
     <h2>SYNOPSIS</h2><b>snmpdelta</b> [ common options ] [-Cf] [ -Ct ] [ -Cs ] [ -CS ] [ -Cm ] [ -CF configfile ] [ -Cl ] [ -Cp
-    period ] [ -CP Peaks ] [ -Ck ] [ -CT ] AGENT OID [ OID ... ] <a name="lbAD" id="lbAD"> </a>
+    period ] [ -CP Peaks ] [ -Ck ] [ -CT ] AGENT OID [ OID ... ] <a name="lbAD" id="lbAD">&nbsp;</a>
 
     <h2>DESCRIPTION</h2><b>snmpdelta</b> will monitor the specified integer valued OIDs, and report changes over time.
 
@@ -22,7 +22,7 @@
     <p>OID is an object identifier which uniquely identifies the object type within a MIB. Multiple OIDs can be specified on a
     single snmpdelta command.</p>
 
-    <p><a name="lbAE" id="lbAE"> </a></p>
+    <p><a name="lbAE" id="lbAE">&nbsp;</a></p>
 
     <h2>OPTIONS</h2>
 
@@ -92,7 +92,7 @@
       <dd>Specifies the maximum number of oids allowed to be packaged in a single PDU. Multiple PDUs can be created in a single
       request. The default value of variables per packet is 60. This option is useful if a request response results in an error
       becaues the packet is too big.</dd>
-    </dl><a name="lbAF" id="lbAF"> </a>
+    </dl><a name="lbAF" id="lbAF">&nbsp;</a>
 
     <h2>EXAMPLES</h2>
     <pre>
@@ -131,11 +131,11 @@ localhost       ifInUcastPkts.3 ifOutUcastPkts.3
 $ snmpdelta -c public -v 1 -Ct -Cs -CS -Cm -Cl -Cp 60 -CP 60
   interlink.sw.net.cmu.edu .1.3.6.1.2.1.2.2.1.16.3 .1.3.6.1.2.1.2.2.1.16.4
 fi
-</pre><a name="lbAG" id="lbAG"> </a>
+</pre><a name="lbAG" id="lbAG">&nbsp;</a>
 
     <h2>SEE ALSO</h2><a href="snmpcmd.html">snmpcmd</a>(1), <a href="variables.html">variables</a>(5).
     <hr />
-    <a name="index" id="index"> </a>
+    <a name="index" id="index">&nbsp;</a>
 
     <h2>Index</h2>
 
@@ -154,7 +154,7 @@ fi
     </dl>
     <hr />
     This document was created by <a href="http://localhost/cgi-bin/man/man2html">man2html</a>, using the manual pages.<br />
-    Time: 16:55:09 GMT, December 09, 2006
+    Time: 13:12:00 GMT, September 23, 2007
 <!-- CONTENT END -->
 <!--#include virtual="/page-bottom.html" -->
 

@@ -3,6 +3,61 @@ Please see the CHANGES file for a more detailed list of specific bugs/patches
 that have been fixed/applied, and the ChangeLog file for a comprehensive
 listing of all changes made to the code.
 
+
+*5.4.1*
+
+    snmplib:
+      - [BUG 1619827]: link libraries against needed external libraries
+      - [PATCH 1616912]: fix memory leak in UDP transport code
+      - [PATCH 1592706]: fix memory leak when cloning varbinds
+      - Change snmp_sess_add_ex to consistently close and delete the
+        transport argument on failure, earlier the liveness of the
+        transport argument was undecided.
+
+    snmpd:
+      - [BUG 1558823]: fix ipAddressTable memory leak
+      - [BUG 1596638]: fix memory leak in ipCidrRouteTable, inetCidrRouteTable
+      - [BUG 1611524]: fix tcp connection table file descriptor leak
+      - handle row deletion issues in dataset tables
+      - [BUG 1712988]: default and configurable maximum number of
+        varbinds returnable to a GETBULK request.
+      - [PATCH 1666737]: include ipv6 counts in
+	udpInDatagrams, udpNoPorts, udpInErrors, udpOutDatagrams
+      - [PATCH 1700157]: fixes ordering of exec tokens in the resulting mib tree
+      - [PATCH 1719253]: fix skipNFSInHostResources so it does not break on the
+	second walk of the table.
+
+    perl:
+      - link Perl modules against the exact set of libraries needed
+      - [BUG 1619827]: properly link against libperl when configured with
+	--enable-as-needed
+      - [PATCH 1725049]: fix bulkwalk in cases of non-repeater
+
+    build:
+      - update to libtool 1.5.24 (from 1.5.22)
+
+    python:
+      - [PATCH 1716114]: Let python build in the Net-SNMP source tree
+
+    MacOSX:
+      - [PATCH 1600522]: CPU Hardware Abstraction Layer (HAL)
+        implementation for mach/darwin
+      - IF-MIB rewrite now enabled by default
+
+    Win32:
+      - fix AES support
+      - [PATCH 1706344]: fix compilation with cygwin
+
+    IRIX:
+      - [PATCH 1709748]: Optimized IRIX cpu stats
+
+    AIX:
+      - Fix default shared library building instead of forcing static use
+
+    FreeBSD:
+      - [BUG 1633483]: Support CPU HAL on FreeBSD4.x
+
+
 *5.4*
 
   Important Changes:

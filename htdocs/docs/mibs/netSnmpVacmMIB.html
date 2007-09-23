@@ -28,26 +28,26 @@ document as <b>.1.3.6.1.4.1.8072.1.9</b>.
 <a name="scalar_current" />
 <h2>SCALAR OBJECTS</h2>
 <ul>
-<table border=2 bgcolor="#dddddd">
-<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>OID</th><th>Description</th></tr>
+<table>
+<tr><th>Name</th><th>Type</th><th>Access</th><th>OID</th><th>Description</th></tr>
 </table>
 </ul>
 
 <h2>TABLE OBJECTS</h2>
 <a name="nsVacmAccessTable" /><h3>Table nsVacmAccessTable</h3>
 <ul>
-  <table border=2 bgcolor="#dddddd">
-  <tr><td bgcolor="#bbbbbb">Table Name</td><td>nsVacmAccessTable</td></tr>
-  <tr><td bgcolor="#bbbbbb">In MIB</td><td>NET-SNMP-VACM-MIB</td></tr>
-  <tr><td bgcolor="#bbbbbb">Registered at OID</td><td>.1.3.6.1.4.1.8072.1.9.1</td></tr>
-  <tr><td bgcolor="#bbbbbb">Table Description</td>
+  <table>
+  <tr><td class="label">Table Name</td><td>nsVacmAccessTable</td></tr>
+  <tr><td class="label">In MIB</td><td>NET-SNMP-VACM-MIB</td></tr>
+  <tr><td class="label">Registered at OID</td><td>.1.3.6.1.4.1.8072.1.9.1</td></tr>
+  <tr><td class="label">Table Description</td>
 <td>
 <pre>
 Net-SNMP extensions to vacmAccessTable.
 </pre>
 </td>
 </tr>
-<tr><td bgcolor="#bbbbbb"><a name="nsVacmAccessEntry" />Row Description</td>
+<tr><td class="label"><a name="nsVacmAccessEntry" />Row Description</td>
 <td>
 <pre>
 Net-SNMP extensions to vacmAccessTable.
@@ -58,8 +58,8 @@ Net-SNMP extensions to vacmAccessTable.
 
   <h4>nsVacmAccessTable Indexes:</h4>
 
-<table border=2 bgcolor="#dddddd">
-<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
+<table>
+<tr class="label"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
   <tr>
   <td>
 <a name="vacmGroupName" />
@@ -68,7 +68,8 @@ Net-SNMP extensions to vacmAccessTable.
 
 </td><td>
   OCTETSTR
-
+      <br />Legal Lengths:
+        1 .. 32
  <br>
  <a href="#SnmpAdminString">SnmpAdminString</a>
 
@@ -98,7 +99,8 @@ instance with the value exists in table vacmAccesTable.
 
 </td><td>
   OCTETSTR
-
+      <br />Legal Lengths:
+        0 .. 32
  <br>
  <a href="#SnmpAdminString">SnmpAdminString</a>
 
@@ -126,7 +128,8 @@ object.
 
 </td><td>
   INTEGER
-
+      <br />Legal values:
+        0 .. 2147483647
  <br>
  <a href="#SnmpSecurityModel">SnmpSecurityModel</a>
 
@@ -150,7 +153,6 @@ conceptual row, this securityModel must be in use.
 
 </td><td>
   INTEGER
-
  <br>
  <a href="#SnmpSecurityLevel">SnmpSecurityLevel</a>
      <br>(ENUM list below)
@@ -182,7 +184,8 @@ vacmAccessSecurityLevel is selected.
 
 </td><td>
   OCTETSTR
-
+      <br />Legal Lengths:
+        0 .. 32
  <br>
  <a href="#SnmpAdminString">SnmpAdminString</a>
 
@@ -201,8 +204,8 @@ should be applied to.   See 'snmpd.conf(5)' and
 </table>
 
   <h4>Other nsVacmAccessTable Columns:</h4>
-<table border=2 bgcolor="#dddddd">
-<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
+<table>
+<tr class="label"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
   <tr>
   <td>
 <a name="nsVacmContextMatch" />
@@ -211,8 +214,7 @@ should be applied to.   See 'snmpd.conf(5)' and
 
 </td><td>
   INTEGER
-
-      <table border=2 bgcolor="#cccccc">
+      <table class="enum">
       <tr><th>Value</th><th>Label/Meaning</th></tr>
         <tr><td>1</td><td>exact</td></tr>
         <tr><td>2</td><td>prefix</td></tr>
@@ -245,7 +247,8 @@ row of the vacmAccessTable.
 
 </td><td>
   OCTETSTR
-
+      <br />Legal Lengths:
+        0 .. 32
  <br>
  <a href="#SnmpAdminString">SnmpAdminString</a>
 
@@ -271,7 +274,6 @@ the standard VACM ViewName objects.
 
 </td><td>
   INTEGER
-
  <br>
  <a href="#StorageType">StorageType</a>
      <br>(ENUM list below)
@@ -300,7 +302,6 @@ The value of this object should be consistent across
 
 </td><td>
   INTEGER
-
  <br>
  <a href="#RowStatus">RowStatus</a>
      <br>(ENUM list below)
@@ -330,12 +331,12 @@ The value of this object should be consistent across
   <hr />
   <h1><font color="red">DEPRECATED OR OBSOLETE OR HISTORIC OBJECTS</font></h1>
   <br>
-  <table bgcolor="#ffdddd" border=1><tr><td>
+  <table class="deprecated"><tr><td>
 <a name="scalar_notcurrent" />
 <h2>SCALAR OBJECTS</h2>
 <ul>
-<table border=2 bgcolor="#dddddd">
-<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>OID</th><th>Description</th></tr>
+<table>
+<tr><th>Name</th><th>Type</th><th>Access</th><th>OID</th><th>Description</th></tr>
 </table>
 </ul>
 
@@ -363,8 +364,8 @@ repeatedly by other MIB objects.  Any implementation implementing
 objects that use one of these definitions must follow its DESCRIPTION
 clause as well as the DESCRIPTION clause of the object itself.
 </p>
-<table border=2 bgcolor="#dddddd"><tr bgcolor="bbbbbb"><th>Name</th><th>Type</th><th>Description</th></tr>
-<tr><td><a name="SnmpSecurityLevel">SnmpSecurityLevel</td><td>INTEGER<table border=2 bgcolor="#cccccc"><tr><th>Value</th><th>Label/Meaning</th></tr><tr><td>1</td><td>noAuthNoPriv</td></tr><tr><td>2</td><td>authNoPriv</td></tr><tr><td>3</td><td>authPriv</td></tr></table></td><td><pre>A Level of Security at which SNMP messages can be
+<table><tr class="label"><th>Name</th><th>Type</th><th>Description</th></tr>
+<tr><td><a name="SnmpSecurityLevel">SnmpSecurityLevel</td><td>INTEGER<table class="enums"><tr><th>Value</th><th>Label/Meaning</th></tr><tr><td>1</td><td>noAuthNoPriv</td></tr><tr><td>2</td><td>authNoPriv</td></tr><tr><td>3</td><td>authPriv</td></tr></table></td><td><pre>A Level of Security at which SNMP messages can be
 sent or with which operations are being processed;
 in particular, one of:
 
@@ -379,7 +380,7 @@ These three values are ordered such that
 noAuthNoPriv is less than authNoPriv and
 authNoPriv is less than authPriv.
                 </pre></td></tr>
-<tr><td><a name="StorageType">StorageType</td><td>INTEGER<table border=2 bgcolor="#cccccc"><tr><th>Value</th><th>Label/Meaning</th></tr><tr><td>1</td><td>other</td></tr><tr><td>2</td><td>volatile</td></tr><tr><td>3</td><td>nonVolatile</td></tr><tr><td>4</td><td>permanent</td></tr><tr><td>5</td><td>readOnly</td></tr></table></td><td><pre>Describes the memory realization of a conceptual row.  A
+<tr><td><a name="StorageType">StorageType</td><td>INTEGER<table class="enums"><tr><th>Value</th><th>Label/Meaning</th></tr><tr><td>1</td><td>other</td></tr><tr><td>2</td><td>volatile</td></tr><tr><td>3</td><td>nonVolatile</td></tr><tr><td>4</td><td>permanent</td></tr><tr><td>5</td><td>readOnly</td></tr></table></td><td><pre>Describes the memory realization of a conceptual row.  A
 row which is volatile(2) is lost upon reboot.  A row which
 is either nonVolatile(3), permanent(4) or readOnly(5), is
 backed up by stable storage.  A row which is permanent(4)
@@ -464,7 +465,7 @@ They are as follows:
     2  reserved for SNMPv2c
     3  User-Based Security Model (USM)
                 </pre></td></tr>
-<tr><td><a name="RowStatus">RowStatus</td><td>INTEGER<table border=2 bgcolor="#cccccc"><tr><th>Value</th><th>Label/Meaning</th></tr><tr><td>1</td><td>active</td></tr><tr><td>2</td><td>notInService</td></tr><tr><td>3</td><td>notReady</td></tr><tr><td>4</td><td>createAndGo</td></tr><tr><td>5</td><td>createAndWait</td></tr><tr><td>6</td><td>destroy</td></tr></table></td><td><pre>The RowStatus textual convention is used to manage the
+<tr><td><a name="RowStatus">RowStatus</td><td>INTEGER<table class="enums"><tr><th>Value</th><th>Label/Meaning</th></tr><tr><td>1</td><td>active</td></tr><tr><td>2</td><td>notInService</td></tr><tr><td>3</td><td>notReady</td></tr><tr><td>4</td><td>createAndGo</td></tr><tr><td>5</td><td>createAndWait</td></tr><tr><td>6</td><td>destroy</td></tr></table></td><td><pre>The RowStatus textual convention is used to manage the
 creation and deletion of conceptual rows, and is used as the
 value of the SYNTAX clause for the status column of a
 conceptual row (as described in Section 7.7.1 of [2].)
@@ -617,3 +618,4 @@ measured in octets, not characters.
 </pre>
 <!-- CONTENT END -->
 <!--#include virtual="/page-bottom.html" -->
+

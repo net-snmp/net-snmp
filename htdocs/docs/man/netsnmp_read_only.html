@@ -2,15 +2,15 @@
 <!--#include virtual="/page-top.html" -->
 <!-- CONTENT START -->
     <h1>read_only</h1>Section: net-snmp (3)<br />
-    Updated: 24 Nov 2006<br />
+    Updated: 27 Jul 2007<br />
     <a href="#index">Index</a> <a href="../index.html">Return to Main Contents</a>
     <hr />
-    <a name="lbAB" id="lbAB"> </a>
+    <a name="lbAB" id="lbAB">&nbsp;</a>
 
     <h2>NAME</h2>read_only - Make your handler read_only automatically The only purpose of this handler is to return an
     appropriate error for any requests passed to it in a SET mode.
 
-    <p><a name="lbAC" id="lbAC"> </a></p>
+    <p><a name="lbAC" id="lbAC">&nbsp;</a></p>
 
     <h3>Functions</h3>
 
@@ -22,7 +22,7 @@
     <br />
     void <b>netsnmp_init_read_only_helper</b> (void)<br />
     <i>initializes the read_only helper which then registers a read_only handler as a run-time injectable handler for
-    configuration file use.</i> <a name="lbAD" id="lbAD"> </a></p>
+    configuration file use.</i> <a name="lbAD" id="lbAD">&nbsp;</a></p>
 
     <h2>Detailed Description</h2>
 
@@ -30,11 +30,11 @@
     requests passed to it in a SET mode.</p>
 
     <p>Inserting it into your handler chain will ensure you're never asked to perform a SET request so you can ignore those error
-    conditions. <a name="lbAE" id="lbAE"> </a></p>
+    conditions. <a name="lbAE" id="lbAE">&nbsp;</a></p>
 
     <h2>Function Documentation</h2>
 
-    <p><a name="lbAF" id="lbAF"> </a></p>
+    <p><a name="lbAF" id="lbAF">&nbsp;</a></p>
 
     <h3><b>netsnmp_mib_handler</b>* netsnmp_get_read_only_handler (void)</h3>
 
@@ -46,7 +46,7 @@
     NULL.</p>
 
     <p>Referenced by netsnmp_init_read_only_helper(), netsnmp_register_read_only_instance(), netsnmp_register_read_only_scalar(),
-    and netsnmp_register_read_only_table_data(). <a name="lbAG" id="lbAG"> </a></p>
+    and netsnmp_register_read_only_table_data(). <a name="lbAG" id="lbAG">&nbsp;</a></p>
 
     <h3>void netsnmp_init_read_only_helper (void)</h3>
 
@@ -57,7 +57,7 @@
 
     <p>References netsnmp_get_read_only_handler(), and netsnmp_register_handler_by_name().</p>
     <hr />
-    <a name="index" id="index"> </a>
+    <a name="index" id="index">&nbsp;</a>
 
     <h2>Index</h2>
 
@@ -84,7 +84,7 @@
     </dl>
     <hr />
     This document was created by <a href="http://localhost/cgi-bin/man/man2html">man2html</a>, using the manual pages.<br />
-    Time: 16:55:09 GMT, December 09, 2006
+    Time: 13:12:01 GMT, September 23, 2007
 <!-- CONTENT END -->
 <!--#include virtual="/page-bottom.html" -->
 

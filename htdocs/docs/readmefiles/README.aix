@@ -6,14 +6,19 @@ Some notes for the AIX port
 
 There are the following known problems on AIX:
 
+
 1) Shared libraries / embedded perl
 
-Building net-snmp on AIX with shared libraries is known to either make the
-applications not start at all or segfault. The workaround is to disable shared
-libraries as well as embedded perl (which requires shared libraries):
+Up to (and including) net-snmp 5.4, configure forced a static build
+on AIX which caused embedded Perl to be disabled as well.
 
-   ./configure --disable-shared --disable-embedded-perl
+Starting with net-snmp 5.4.1, we build shared libraries by default on AIX
+(like on any other platform) using run-time linking. configure forces the
+use of the required &quot;-brtl&quot; linker flag. We also recommend
 
+   ./configure --enable-as-needed ...
+
+for proper libperl linking.
 
 2) &quot;grep: capacity exceeded&quot; or &quot;sed: Command line is too long&quot; during configure
 
@@ -31,7 +36,8 @@ configure. The fix is to install GNU sed.
 3) nlist errors with 64-bit kernels
 
 Accessing certain MIB objects on AIX 5.x machines running a 64-bit kernel will
-trigger nlist errors. Starting from net-snmp 5.4, you can avoid those by using
+trigger nlist/klookup errors. Starting from net-snmp 5.4, you can avoid those 
+by using
 
    ./configure --without-kmem-usage ...
   
@@ -39,11 +45,21 @@ trigger nlist errors. Starting from net-snmp 5.4, you can avoid those by using
 4) IPv6
 
 Starting with net-snmp 5.4 you can enable the UDPIPv6 and TCPIPv6 transports 
-on AIX 5.x. There's no support for the IPv6 MIBs, though, so you'll have to 
-configure like this:
+on AIX 5.x:
 
-  ./configure --disable-shared --disable-embedded-perl --enable-ipv6 \
-              --with-out-mib-modules=&quot;mibII/ipv6&quot;
+   ./configure --enable-ipv6
+
+There's no support for the IPv6 MIBs, though.
+
+5) Compiler for Perl
+
+In general, Perl modules need to be compiled with the same compiler and 
+compiler options as Perl itself. configure detects some mismatches (gcc vs. 
+vendor compiler), but treats different incarnations of the same compiler type
+as similar. If your version of Perl (e.g. the one supplied by IBM for AIX 5.x)
+has been compiled with cc_r on AIX, please make sure you also use CC=cc_r when
+building net-snmp. Building with xlc in this case is known to fail (see bug
+#1600099).
 
 
 2. Patches

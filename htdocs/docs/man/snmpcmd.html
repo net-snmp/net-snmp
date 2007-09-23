@@ -5,11 +5,12 @@
     Updated: 29 Jun 2005<br />
     <a href="#index">Index</a> <a href="../index.html">Return to Main Contents</a>
     <hr />
-    <a name="lbAB" id="lbAB"> </a>
+    <a name="lbAB" id="lbAB">&nbsp;</a>
 
-    <h2>NAME</h2>snmpcmd - options and behaviour common to most of the Net-SNMP command-line tools <a name="lbAC" id="lbAC"> </a>
+    <h2>NAME</h2>snmpcmd - options and behaviour common to most of the Net-SNMP command-line tools <a name="lbAC" id=
+    "lbAC">&nbsp;</a>
 
-    <h2>SYNOPSIS</h2><b>snmpcmd</b> [OPTIONS] AGENT [PARAMETERS] <a name="lbAD" id="lbAD"> </a>
+    <h2>SYNOPSIS</h2><b>snmpcmd</b> [OPTIONS] AGENT [PARAMETERS] <a name="lbAD" id="lbAD">&nbsp;</a>
 
     <h2>DESCRIPTION</h2>This manual page describes the common options for the SNMP commands: <b>snmpbulkget</b>,
     <b>snmpbulkwalk</b>, <b>snmpdelta</b>, <b>snmpget</b>, <b>snmpgetnext</b>, <b>snmpnetstat</b>, <b>snmpset</b>,
@@ -18,7 +19,7 @@
     typically (but not necessarily) take additional parameters that are given after the agent specification. These parameters are
     documented in the manual pages for each application.
 
-    <p><a name="lbAE" id="lbAE"> </a></p>
+    <p><a name="lbAE" id="lbAE">&nbsp;</a></p>
 
     <h2>OPTIONS</h2>
 
@@ -181,7 +182,7 @@
       <dd>Allows to specify any token ("name") supported in the <i>snmp.conf</i> file and sets its value to "value". Overrides
       the corresponding token in the <i>snmp.conf</i> file. See <i><a href="snmp.conf.html">snmp.conf</a>(5)</i> for the full
       list of tokens.</dd>
-    </dl><a name="lbAF" id="lbAF"> </a>
+    </dl><a name="lbAF" id="lbAF">&nbsp;</a>
 
     <h2>AGENT SPECIFICATION</h2>
 
@@ -226,12 +227,12 @@
           <dt>udp6 or udpv6 or udpipv6</dt>
 
           <dd>hostname[:port] <i>or</i> IPv6-address:port <i>or</i><br />
-           '['IPv6-address']'[:port]</dd>
+          &nbsp;'['IPv6-address']'[:port]</dd>
 
           <dt>tcp6 or tcpv6 or tcpipv6</dt>
 
           <dd>hostname[:port] <i>or</i> IPv6-address:port <i>or</i><br />
-           '['IPv6-address']'[:port]</dd>
+          &nbsp;'['IPv6-address']'[:port]</dd>
         </dl>
       </dd>
     </dl>
@@ -301,7 +302,7 @@
     will not be able to use udp6 transport addresses, and attempts to do so will result in the error "Unknown host". Likewise,
     since AAL5 PVC support is only currently available on Linux, it will fail with the same error on other platforms.</p>
 
-    <p><a name="lbAG" id="lbAG"> </a></p>
+    <p><a name="lbAG" id="lbAG">&nbsp;</a></p>
 
     <h2>MIB PARSING OPTIONS</h2>The Net-SNMP MIB parser mostly adheres to the Structure of Management Information (SMI). As that
     specification has changed through time, and in recognition of the (ahem) diversity in compliance expressed in MIB files,
@@ -310,20 +311,20 @@
     <dl compact="compact">
       <dt><b>-Pc</b></dt>
 
-      <dd>Allow ASN.1 comments to extend to the end of the MIB source line. Strictly speaking, a second appearance of "--" should
-      terminate the comment, but this breaks some MIB files. This behaviour can also be set with the configuration token
-      <i>strictCommentTerm</i>.</dd>
+      <dd>Toggles whether ASN.1 comments should extend to the end of the MIB source line. Strictly speaking, a second appearance
+      of "--" should terminate the comment, but this breaks some MIB files. The default behaviour (to interpret comments
+      correctly) can also be set with the (misnamed) configuration token <i>strictCommentTerm</i>.</dd>
 
       <dt><b>-Pd</b></dt>
 
-      <dd>Disables saving the DESCRIPTION of MIB objects when parsing MIB files, reducing the amount of memory used by the
+      <dd>Disables the loading of MIB object DESCRIPTIONs when parsing MIB files. This reduces the amount of memory used by the
       running application.</dd>
 
       <dt><b>-Pe</b></dt>
 
-      <dd>Show errors encountered when parsing MIB files. These include references to IMPORTed modules and MIB objects that
-      cannot be located in the MIB directory search list. This can also be set with the configuration token
-      <i>showMibErrors</i>.</dd>
+      <dd>Toggles whether to show errors encountered when parsing MIB files. These include references to IMPORTed modules and MIB
+      objects that cannot be located in the MIB directory search list. The default behaviour can also be set with the
+      configuration token <i>showMibErrors</i>.</dd>
 
       <dt><b>-PR</b></dt>
 
@@ -338,9 +339,9 @@
 
       <dt><b>-Pu</b></dt>
 
-      <dd>Allow the underline character in MIB object names and other symbols. Strictly speaking, this is not valid SMI syntax,
-      but some vendor MIB files define such names. This can also be set with the configuration token
-      <i>mibAllowUnderline</i>.</dd>
+      <dd>Toggles whether to allow the underline character in MIB object names and other symbols. Strictly speaking, this is not
+      valid SMI syntax, but some vendor MIB files define such names. The default behaviour can also be set with the configuration
+      token <i>mibAllowUnderline</i>.</dd>
 
       <dt><b>-Pw</b></dt>
 
@@ -351,7 +352,7 @@
 
       <dd>Show some additional warning messages, mostly relating to parsing individual MIB objects. This can also be set with the
       configuration directive <i>mibWarningLevel 2</i></dd>
-    </dl><a name="lbAH" id="lbAH"> </a>
+    </dl><a name="lbAH" id="lbAH">&nbsp;</a>
 
     <h2>OUTPUT OPTIONS</h2>The format of the output from SNMP commands can be controlled using various parameters of the
     <b>-O</b> flag. The effects of these sub-options can be seen by comparison with the following default output (unless
@@ -539,7 +540,7 @@ SNMPv2-MIB::sysUpTime.0 = Timeticks: (14096763) 1 day, 15:09:27.63
     <p>Most of these options can also be configured via configuration tokens. See the <i><a href=
     "snmp.conf.html">snmp.conf</a>(5)</i> manual page for details.</p>
 
-    <p><a name="lbAI" id="lbAI"> </a></p>
+    <p><a name="lbAI" id="lbAI">&nbsp;</a></p>
 
     <h2>LOGGING OPTIONS</h2>The mechanism and destination to use for logging of warning and error messages can be controlled by
     passing various parameters to the <b>-L</b> flag.
@@ -592,7 +593,7 @@ SNMPv2-MIB::sysUpTime.0 = Timeticks: (14096763) 1 day, 15:09:27.63
 
     <p>Normal output is (or will be!) logged at a priority level of <b>LOG_NOTICE</b></p>
 
-    <p><a name="lbAJ" id="lbAJ"> </a></p>
+    <p><a name="lbAJ" id="lbAJ">&nbsp;</a></p>
 
     <h2>INPUT OPTIONS</h2>The interpretation of input object names and the values to be assigned can be controlled using various
     parameters of the <b>-I</b> flag. The default behaviour will be described at the end of this section.
@@ -619,19 +620,20 @@ SNMPv2-MIB::sysUpTime.0 = Timeticks: (14096763) 1 day, 15:09:27.63
       value:<br />
       snmpset ... HOST-RESOURCES-MIB::hrSystemData.0<br />
       <br />
-                          x "07 D2 0C 0A 02 04 06 08"<br />
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;x&nbsp;"07&nbsp;D2&nbsp;0C&nbsp;0A&nbsp;02&nbsp;04&nbsp;06&nbsp;08"<br />
+
       instead of a formatted version:<br />
       snmpset ... HOST-RESOURCES-MIB::hrSystemDate.0<br />
       <br />
-                          = 2002-12-10,2:4:6.8</dd>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;2002-12-10,2:4:6.8</dd>
 
       <dt><b>-Ir</b></dt>
 
       <dd>disables checking table indexes and the value to be assigned against the relevant MIB definitions. This will
       (hopefully) result in the remote agent reporting an invalid request, rather than checking (and rejecting) this before it is
       sent to the remote agent.<br />
-        Local checks are more efficient (and the diagnostics provided also tend to be more precise), but disabling this behaviour
-      is particularly useful when testing the remote agent.</dd>
+      &nbsp; Local checks are more efficient (and the diagnostics provided also tend to be more precise), but disabling this
+      behaviour is particularly useful when testing the remote agent.</dd>
 
       <dt><b>-IR</b></dt>
 
@@ -680,7 +682,7 @@ SNMPv2-MIB::sysUpTime.0 = Timeticks: (14096763) 1 day, 15:09:27.63
     interpret it as an (implicitly) fully qualified OID, then apply "random access" lookup (<b>-IR</b>), followed by "best match"
     pattern matching (<b>-Ib</b>).</p>
 
-    <p><a name="lbAK" id="lbAK"> </a></p>
+    <p><a name="lbAK" id="lbAK">&nbsp;</a></p>
 
     <h2>ENVIRONMENT VARIABLES</h2>
 
@@ -699,7 +701,7 @@ SNMPv2-MIB::sysUpTime.0 = Timeticks: (14096763) 1 day, 15:09:27.63
 
       <dd>The list of directories to search for MIBs. Defaults to /usr/local/share/snmp/mibs. Overridden by the <b>-M</b>
       option.</dd>
-    </dl><a name="lbAL" id="lbAL"> </a>
+    </dl><a name="lbAL" id="lbAL">&nbsp;</a>
 
     <h2>FILES</h2>
 
@@ -713,7 +715,7 @@ SNMPv2-MIB::sysUpTime.0 = Timeticks: (14096763) 1 day, 15:09:27.63
       <dt>~/.snmp/snmp.conf</dt>
 
       <dd>Application configuration files. See <i><a href="snmp.conf.html">snmp.conf</a>(5)</i>.</dd>
-    </dl><a name="lbAM" id="lbAM"> </a>
+    </dl><a name="lbAM" id="lbAM">&nbsp;</a>
 
     <h2>SEE ALSO</h2><a href="snmpget.html">snmpget</a>(1), <a href="snmpgetnext.html">snmpgetnext</a>(1), <a href=
     "snmpset.html">snmpset</a>(1), <a href="snmpbulkget.html">snmpbulkget</a>(1), <a href=
@@ -722,7 +724,7 @@ SNMPv2-MIB::sysUpTime.0 = Timeticks: (14096763) 1 day, 15:09:27.63
     "snmptrap.html">snmptrap</a>(1), <a href="snmpinform.html">snmpinform</a>(1), <a href="snmpusm.html">snmpusm</a>(1), <a href=
     "snmpstatus.html">snmpstatus</a>(1), <a href="snmptest.html">snmptest</a>(1), <a href="snmp.conf.html">snmp.conf</a>(5).
     <hr />
-    <a name="index" id="index"> </a>
+    <a name="index" id="index">&nbsp;</a>
 
     <h2>Index</h2>
 
@@ -753,7 +755,7 @@ SNMPv2-MIB::sysUpTime.0 = Timeticks: (14096763) 1 day, 15:09:27.63
     </dl>
     <hr />
     This document was created by <a href="http://localhost/cgi-bin/man/man2html">man2html</a>, using the manual pages.<br />
-    Time: 16:55:08 GMT, December 09, 2006
+    Time: 13:12:00 GMT, September 23, 2007
 <!-- CONTENT END -->
 <!--#include virtual="/page-bottom.html" -->
 

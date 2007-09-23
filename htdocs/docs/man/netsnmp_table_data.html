@@ -2,14 +2,14 @@
 <!--#include virtual="/page-top.html" -->
 <!-- CONTENT START -->
     <h1>table_data</h1>Section: net-snmp (3)<br />
-    Updated: 24 Nov 2006<br />
+    Updated: 27 Jul 2007<br />
     <a href="#index">Index</a> <a href="../index.html">Return to Main Contents</a>
     <hr />
-    <a name="lbAB" id="lbAB"> </a>
+    <a name="lbAB" id="lbAB">&nbsp;</a>
 
     <h2>NAME</h2>table_data - Helps you implement a table with datamatted storage.
 
-    <p><a name="lbAC" id="lbAC"> </a></p>
+    <p><a name="lbAC" id="lbAC">&nbsp;</a></p>
 
     <h3>Modules</h3>
 
@@ -17,7 +17,7 @@
     <b>table_dataset</b><br />
     <i>Helps you implement a table with automatted storage.</i></p>
 
-    <p><a name="lbAD" id="lbAD"> </a></p>
+    <p><a name="lbAD" id="lbAD">&nbsp;</a></p>
 
     <h3>Functions</h3>
 
@@ -127,7 +127,7 @@
     void * <b>netsnmp_table_data_entry_get_byoid</b> (<b>netsnmp_table_data</b> *table, oid *instance, size_t len)<br />
     <br />
     void * <b>netsnmp_table_data_entry_next_byoid</b> (<b>netsnmp_table_data</b> *table, oid *instance, size_t len)<br />
-    <a name="lbAE" id="lbAE"> </a></p>
+    <a name="lbAE" id="lbAE">&nbsp;</a></p>
 
     <h2>Detailed Description</h2>
 
@@ -138,11 +138,12 @@
     <p>This helper helps you implement a table where all the indexes are expected to be stored within the agent itself and not in
     some external storage location. It can be used to store a list of rows, where a row consists of the indexes to the table and
     a generic data pointer. You can then implement a subhandler which is passed the exact row definition and data it must return
-    data for or accept data for. Complex GETNEXT handling is greatly simplified in this case. <a name="lbAF" id="lbAF"> </a></p>
+    data for or accept data for. Complex GETNEXT handling is greatly simplified in this case. <a name="lbAF" id=
+    "lbAF">&nbsp;</a></p>
 
     <h2>Function Documentation</h2>
 
-    <p><a name="lbAG" id="lbAG"> </a></p>
+    <p><a name="lbAG" id="lbAG">&nbsp;</a></p>
 
     <h3><b>netsnmp_table_data</b>* netsnmp_create_table_data (const char * name)</h3>
 
@@ -152,7 +153,8 @@
 
     <p>References netsnmp_table_data_s::name, and SNMP_MALLOC_TYPEDEF.</p>
 
-    <p>Referenced by netsnmp_create_table_data_set(), and netsnmp_table_data_create_table(). <a name="lbAH" id="lbAH"> </a></p>
+    <p>Referenced by netsnmp_create_table_data_set(), and netsnmp_table_data_create_table(). <a name="lbAH" id=
+    "lbAH">&nbsp;</a></p>
 
     <h3><b>netsnmp_table_row</b>* netsnmp_create_table_data_row (void)</h3>
 
@@ -165,7 +167,7 @@
     <p>References SNMP_MALLOC_TYPEDEF.</p>
 
     <p>Referenced by netsnmp_config_parse_add_row(), and netsnmp_table_data_set_create_row_from_defaults(). <a name="lbAI" id=
-    "lbAI"> </a></p>
+    "lbAI">&nbsp;</a></p>
 
     <h3><b>netsnmp_table_data</b>* netsnmp_extract_table (<b>netsnmp_request_info</b> * request)</h3>
 
@@ -173,7 +175,7 @@
 
     <p>Definition at line 649 of file table_data.c.</p>
 
-    <p>References netsnmp_request_get_list_data(). <a name="lbAJ" id="lbAJ"> </a></p>
+    <p>References netsnmp_request_get_list_data(). <a name="lbAJ" id="lbAJ">&nbsp;</a></p>
 
     <h3><b>netsnmp_table_row</b>* netsnmp_extract_table_row (<b>netsnmp_request_info</b> * request)</h3>
 
@@ -184,7 +186,7 @@
     <p>References netsnmp_request_get_list_data().</p>
 
     <p>Referenced by netsnmp_extract_table_row_data(), and netsnmp_table_data_set_helper_handler(). <a name="lbAK" id=
-    "lbAK"> </a></p>
+    "lbAK">&nbsp;</a></p>
 
     <h3>void* netsnmp_extract_table_row_data (<b>netsnmp_request_info</b> * request)</h3>
 
@@ -194,7 +196,7 @@
 
     <p>References netsnmp_table_row_s::data, netsnmp_extract_table_row(), and NULL.</p>
 
-    <p>Referenced by netsnmp_extract_table_data_set_column(). <a name="lbAL" id="lbAL"> </a></p>
+    <p>Referenced by netsnmp_extract_table_data_set_column(). <a name="lbAL" id="lbAL">&nbsp;</a></p>
 
     <h3><b>netsnmp_mib_handler</b>* netsnmp_get_table_data_handler (<b>netsnmp_table_data</b> * table)</h3>
 
@@ -205,7 +207,7 @@
     <p>References netsnmp_mib_handler_s::flags, MIB_HANDLER_AUTO_NEXT, netsnmp_mib_handler_s::myvoid, netsnmp_create_handler(),
     netsnmp_table_data_helper_handler(), NULL, and snmp_log().</p>
 
-    <p>Referenced by netsnmp_register_table_data(). <a name="lbAM" id="lbAM"> </a></p>
+    <p>Referenced by netsnmp_register_table_data(). <a name="lbAM" id="lbAM">&nbsp;</a></p>
 
     <h3>NETSNMP_INLINE void netsnmp_insert_table_row (<b>netsnmp_request_info</b> * request, <b>netsnmp_table_row</b> * row)</h3>
 
@@ -215,7 +217,7 @@
 
     <p>References build_oid_noalloc(), netsnmp_table_request_info_s::indexes, netsnmp_create_data_list(),
     netsnmp_extract_table_info(), netsnmp_request_add_list_data(), netsnmp_request_info_s::next, NULL,
-    netsnmp_request_info_s::prev, and snmp_oid_compare(). <a name="lbAN" id="lbAN"> </a></p>
+    netsnmp_request_info_s::prev, and snmp_oid_compare(). <a name="lbAN" id="lbAN">&nbsp;</a></p>
 
     <h3>int netsnmp_register_read_only_table_data (<b>netsnmp_handler_registration</b> * reginfo, <b>netsnmp_table_data</b> *
     table, <b>netsnmp_table_registration_info</b> * table_info)</h3>
@@ -225,7 +227,7 @@
     <p>Definition at line 405 of file table_data.c.</p>
 
     <p>References netsnmp_get_read_only_handler(), netsnmp_inject_handler(), and netsnmp_register_table_data(). <a name="lbAO"
-    id="lbAO"> </a></p>
+    id="lbAO">&nbsp;</a></p>
 
     <h3>int netsnmp_register_table_data (<b>netsnmp_handler_registration</b> * reginfo, <b>netsnmp_table_data</b> * table,
     <b>netsnmp_table_registration_info</b> * table_info)</h3>
@@ -239,7 +241,7 @@
     <p>References netsnmp_get_table_data_handler(), netsnmp_inject_handler(), and netsnmp_register_table().</p>
 
     <p>Referenced by netsnmp_register_read_only_table_data(), and netsnmp_register_table_data_set(). <a name="lbAP" id=
-    "lbAP"> </a></p>
+    "lbAP">&nbsp;</a></p>
 
     <h3>int netsnmp_table_data_add_row (<b>netsnmp_table_data</b> * table, <b>netsnmp_table_row</b> * row)</h3>
 
@@ -257,7 +259,7 @@
     snmp_log(), snmp_oid_compare(), and netsnmp_table_data_s::store_indexes.</p>
 
     <p>Referenced by netsnmp_config_parse_add_row(), netsnmp_table_data_replace_row(), and netsnmp_table_dataset_add_row().
-    <a name="lbAQ" id="lbAQ"> </a></p>
+    <a name="lbAQ" id="lbAQ">&nbsp;</a></p>
 
     <h3><b>netsnmp_table_row</b>* netsnmp_table_data_clone_row (<b>netsnmp_table_row</b> * row)</h3>
 
@@ -269,7 +271,7 @@
 
     <p>References memdup(), NULL, and snmp_clone_varbind().</p>
 
-    <p>Referenced by netsnmp_table_data_set_clone_row(). <a name="lbAR" id="lbAR"> </a></p>
+    <p>Referenced by netsnmp_table_data_set_clone_row(). <a name="lbAR" id="lbAR">&nbsp;</a></p>
 
     <h3>void* netsnmp_table_data_delete_row (<b>netsnmp_table_row</b> * row)</h3>
 
@@ -283,7 +285,7 @@
     snmp_free_varbind().</p>
 
     <p>Referenced by netsnmp_table_data_delete_table(), netsnmp_table_data_remove_and_delete_row(), and
-    netsnmp_table_dataset_delete_row(). <a name="lbAS" id="lbAS"> </a></p>
+    netsnmp_table_dataset_delete_row(). <a name="lbAS" id="lbAS">&nbsp;</a></p>
 
     <h3><b>netsnmp_table_row</b>* netsnmp_table_data_get (<b>netsnmp_table_data</b> * table, <b>netsnmp_variable_list</b> *
     indexes)</h3>
@@ -294,7 +296,7 @@
 
     <p>References build_oid_noalloc(), netsnmp_table_data_get_from_oid(), and NULL.</p>
 
-    <p>Referenced by netsnmp_table_data_row_get_byidx(). <a name="lbAT" id="lbAT"> </a></p>
+    <p>Referenced by netsnmp_table_data_row_get_byidx(). <a name="lbAT" id="lbAT">&nbsp;</a></p>
 
     <h3><b>netsnmp_table_row</b>* netsnmp_table_data_get_first_row (<b>netsnmp_table_data</b> * table)</h3>
 
@@ -305,7 +307,7 @@
     <p>References netsnmp_table_data_s::first_row, and NULL.</p>
 
     <p>Referenced by netsnmp_table_data_entry_first(), netsnmp_table_data_row_first(), and
-    netsnmp_table_data_set_get_first_row(). <a name="lbAU" id="lbAU"> </a></p>
+    netsnmp_table_data_set_get_first_row(). <a name="lbAU" id="lbAU">&nbsp;</a></p>
 
     <h3><b>netsnmp_table_row</b>* netsnmp_table_data_get_from_oid (<b>netsnmp_table_data</b> * table, oid * searchfor, size_t
     searchfor_len)</h3>
@@ -318,7 +320,7 @@
     netsnmp_table_row_s::next, NULL, and snmp_oid_compare().</p>
 
     <p>Referenced by netsnmp_table_data_get(), netsnmp_table_data_row_get(), and netsnmp_table_data_row_get_byoid(). <a name=
-    "lbAV" id="lbAV"> </a></p>
+    "lbAV" id="lbAV">&nbsp;</a></p>
 
     <h3><b>netsnmp_table_row</b>* netsnmp_table_data_get_next_row (<b>netsnmp_table_data</b> * table, <b>netsnmp_table_row</b> *
     row)</h3>
@@ -329,7 +331,8 @@
 
     <p>References netsnmp_table_row_s::next, and NULL.</p>
 
-    <p>Referenced by netsnmp_table_data_row_next(), and netsnmp_table_data_set_get_next_row(). <a name="lbAW" id="lbAW"> </a></p>
+    <p>Referenced by netsnmp_table_data_row_next(), and netsnmp_table_data_set_get_next_row(). <a name="lbAW" id=
+    "lbAW">&nbsp;</a></p>
 
     <h3>void* netsnmp_table_data_remove_and_delete_row (<b>netsnmp_table_data</b> * table, <b>netsnmp_table_row</b> * row)</h3>
 
@@ -342,7 +345,7 @@
     <p>References netsnmp_table_data_delete_row(), netsnmp_table_data_remove_row(), and NULL.</p>
 
     <p>Referenced by netsnmp_table_data_remove_delete_row(), netsnmp_table_dataset_remove_and_delete_row(), and
-    netsnmp_table_dataset_remove_row(). <a name="lbAX" id="lbAX"> </a></p>
+    netsnmp_table_dataset_remove_row(). <a name="lbAX" id="lbAX">&nbsp;</a></p>
 
     <h3><b>netsnmp_table_row</b>* netsnmp_table_data_remove_row (<b>netsnmp_table_data</b> * table, <b>netsnmp_table_row</b> *
     row)</h3>
@@ -357,7 +360,7 @@
     netsnmp_table_row_s::prev.</p>
 
     <p>Referenced by netsnmp_table_data_remove_and_delete_row(), and netsnmp_table_data_replace_row(). <a name="lbAY" id=
-    "lbAY"> </a></p>
+    "lbAY">&nbsp;</a></p>
 
     <h3>NETSNMP_INLINE void netsnmp_table_data_replace_row (<b>netsnmp_table_data</b> * table, <b>netsnmp_table_row</b> *
     origrow, <b>netsnmp_table_row</b> * newrow)</h3>
@@ -372,7 +375,7 @@
 
     <p>Referenced by netsnmp_table_dataset_replace_row().</p>
     <hr />
-    <a name="index" id="index"> </a>
+    <a name="index" id="index">&nbsp;</a>
 
     <h2>Index</h2>
 
@@ -448,7 +451,7 @@
     </dl>
     <hr />
     This document was created by <a href="http://localhost/cgi-bin/man/man2html">man2html</a>, using the manual pages.<br />
-    Time: 16:55:09 GMT, December 09, 2006
+    Time: 13:12:01 GMT, September 23, 2007
 <!-- CONTENT END -->
 <!--#include virtual="/page-bottom.html" -->
 

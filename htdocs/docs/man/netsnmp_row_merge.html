@@ -2,14 +2,14 @@
 <!--#include virtual="/page-top.html" -->
 <!-- CONTENT START -->
     <h1>row_merge</h1>Section: net-snmp (3)<br />
-    Updated: 24 Nov 2006<br />
+    Updated: 27 Jul 2007<br />
     <a href="#index">Index</a> <a href="../index.html">Return to Main Contents</a>
     <hr />
-    <a name="lbAB" id="lbAB"> </a>
+    <a name="lbAB" id="lbAB">&nbsp;</a>
 
     <h2>NAME</h2>row_merge - Calls sub handlers with request for one row at a time.
 
-    <p><a name="lbAC" id="lbAC"> </a></p>
+    <p><a name="lbAC" id="lbAC">&nbsp;</a></p>
 
     <h3>Defines</h3>
 
@@ -21,7 +21,7 @@
     #define <b>ROW_MERGE_DONE</b> 2<br />
     <br />
     #define <b>ROW_MERGE_HEAD</b> 3<br />
-    <a name="lbAD" id="lbAD"> </a></p>
+    <a name="lbAD" id="lbAD">&nbsp;</a></p>
 
     <h3>Functions</h3>
 
@@ -45,7 +45,7 @@
     <i>Implements the row_merge handler.</i><br />
     void <b>netsnmp_init_row_merge</b> (void)<br />
     <i>initializes the row_merge helper which then registers a row_merge handler as a run-time injectable handler for
-    configuration file use.</i> <a name="lbAE" id="lbAE"> </a></p>
+    configuration file use.</i> <a name="lbAE" id="lbAE">&nbsp;</a></p>
 
     <h2>Detailed Description</h2>
 
@@ -53,11 +53,11 @@
 
     <p>This helper splits a whole bunch of requests into chunks based on the row index that they refer to, and passes all
     requests for a given row to the lower handlers. This is useful for handlers that don't want to process multiple rows at the
-    same time, but are happy to iterate through the request list for a single row. <a name="lbAF" id="lbAF"> </a></p>
+    same time, but are happy to iterate through the request list for a single row. <a name="lbAF" id="lbAF">&nbsp;</a></p>
 
     <h2>Function Documentation</h2>
 
-    <p><a name="lbAG" id="lbAG"> </a></p>
+    <p><a name="lbAG" id="lbAG">&nbsp;</a></p>
 
     <h3><b>netsnmp_mib_handler</b>* netsnmp_get_row_merge_handler (int prefix_len)</h3>
 
@@ -67,7 +67,7 @@
 
     <p>References netsnmp_mib_handler_s::myvoid, netsnmp_create_handler(), netsnmp_row_merge_helper_handler(), and NULL.</p>
 
-    <p>Referenced by netsnmp_init_row_merge(), and netsnmp_register_row_merge(). <a name="lbAH" id="lbAH"> </a></p>
+    <p>Referenced by netsnmp_init_row_merge(), and netsnmp_register_row_merge(). <a name="lbAH" id="lbAH">&nbsp;</a></p>
 
     <h3>void netsnmp_init_row_merge (void)</h3>
 
@@ -76,7 +76,8 @@
 
     <p>Definition at line 360 of file row_merge.c.</p>
 
-    <p>References netsnmp_get_row_merge_handler(), and netsnmp_register_handler_by_name(). <a name="lbAI" id="lbAI"> </a></p>
+    <p>References netsnmp_get_row_merge_handler(), and netsnmp_register_handler_by_name(). <a name="lbAI" id=
+    "lbAI">&nbsp;</a></p>
 
     <h3>int netsnmp_register_row_merge (<b>netsnmp_handler_registration</b> * reginfo)</h3>
 
@@ -86,7 +87,7 @@
     <p>Definition at line 42 of file row_merge.c.</p>
 
     <p>References netsnmp_get_row_merge_handler(), netsnmp_inject_handler(), netsnmp_register_handler(), and
-    netsnmp_handler_registration_s::rootoid_len. <a name="lbAJ" id="lbAJ"> </a></p>
+    netsnmp_handler_registration_s::rootoid_len. <a name="lbAJ" id="lbAJ">&nbsp;</a></p>
 
     <h3>int netsnmp_row_merge_helper_handler (<b>netsnmp_mib_handler</b> * handler, <b>netsnmp_handler_registration</b> *
     reginfo, <b>netsnmp_agent_request_info</b> * reqinfo, <b>netsnmp_request_info</b> * requests)</h3>
@@ -95,11 +96,14 @@
 
     <p>Definition at line 154 of file row_merge.c.</p>
 
-    <p>References netsnmp_mib_handler_s::myvoid, variable_list::name, variable_list::name_length, netsnmp_row_merge_status_get(),
-    netsnmp_request_info_s::next, netsnmp_request_info_s::requestvb, netsnmp_handler_registration_s::rootoid, and
-    netsnmp_handler_registration_s::rootoid_len.</p>
+    <p>References netsnmp_row_merge_status_x::count, netsnmp_agent_request_info_s::mode, netsnmp_mib_handler_s::myvoid,
+    variable_list::name, variable_list::name_length, netsnmp_call_next_handler(), netsnmp_row_merge_status_get(),
+    netsnmp_request_info_s::next, NULL, netsnmp_request_info_s::prev, netsnmp_request_info_s::processed,
+    netsnmp_request_info_s::requestvb, netsnmp_handler_registration_s::rootoid, netsnmp_handler_registration_s::rootoid_len,
+    ROW_MERGE_DONE, ROW_MERGE_WAITING, netsnmp_row_merge_status_x::rows, netsnmp_row_merge_status_x::saved_requests,
+    netsnmp_row_merge_status_x::saved_status, and SNMP_FREE.</p>
 
-    <p>Referenced by netsnmp_get_row_merge_handler(). <a name="lbAK" id="lbAK"> </a></p>
+    <p>Referenced by netsnmp_get_row_merge_handler(). <a name="lbAK" id="lbAK">&nbsp;</a></p>
 
     <h3>int netsnmp_row_merge_status_first (<b>netsnmp_handler_registration</b> * reginfo, <b>netsnmp_agent_request_info</b> *
     reqinfo)</h3>
@@ -111,7 +115,7 @@
     <p>Definition at line 110 of file row_merge.c.</p>
 
     <p>References netsnmp_row_merge_status_x::count, netsnmp_row_merge_status_x::current, netsnmp_row_merge_status_get(), and
-    NULL. <a name="lbAL" id="lbAL"> </a></p>
+    NULL. <a name="lbAL" id="lbAL">&nbsp;</a></p>
 
     <h3><b>netsnmp_row_merge_status</b>* netsnmp_row_merge_status_get (<b>netsnmp_handler_registration</b> * reginfo,
     <b>netsnmp_agent_request_info</b> * reqinfo, int create_missing)</h3>
@@ -124,7 +128,7 @@
     SNMP_MALLOC_TYPEDEF.</p>
 
     <p>Referenced by netsnmp_row_merge_helper_handler(), netsnmp_row_merge_status_first(), and netsnmp_row_merge_status_last().
-    <a name="lbAM" id="lbAM"> </a></p>
+    <a name="lbAM" id="lbAM">&nbsp;</a></p>
 
     <h3>int netsnmp_row_merge_status_last (<b>netsnmp_handler_registration</b> * reginfo, <b>netsnmp_agent_request_info</b> *
     reqinfo)</h3>
@@ -138,7 +142,7 @@
     <p>References netsnmp_row_merge_status_x::count, netsnmp_row_merge_status_x::current, netsnmp_row_merge_status_get(), NULL,
     and netsnmp_row_merge_status_x::rows.</p>
     <hr />
-    <a name="index" id="index"> </a>
+    <a name="index" id="index">&nbsp;</a>
 
     <h2>Index</h2>
 
@@ -182,7 +186,7 @@
     </dl>
     <hr />
     This document was created by <a href="http://localhost/cgi-bin/man/man2html">man2html</a>, using the manual pages.<br />
-    Time: 16:55:09 GMT, December 09, 2006
+    Time: 13:12:01 GMT, September 23, 2007
 <!-- CONTENT END -->
 <!--#include virtual="/page-bottom.html" -->
 

@@ -2,14 +2,14 @@
 <!--#include virtual="/page-top.html" -->
 <!-- CONTENT START -->
     <h1>table</h1>Section: net-snmp (3)<br />
-    Updated: 24 Nov 2006<br />
+    Updated: 27 Jul 2007<br />
     <a href="#index">Index</a> <a href="../index.html">Return to Main Contents</a>
     <hr />
-    <a name="lbAB" id="lbAB"> </a>
+    <a name="lbAB" id="lbAB">&nbsp;</a>
 
     <h2>NAME</h2>table - Helps you implement a table.
 
-    <p><a name="lbAC" id="lbAC"> </a></p>
+    <p><a name="lbAC" id="lbAC">&nbsp;</a></p>
 
     <h3>Modules</h3>
 
@@ -42,13 +42,13 @@
     <b>tdata</b><br />
     <i>Implement a table with datamatted storage.</i></p>
 
-    <p><a name="lbAD" id="lbAD"> </a></p>
+    <p><a name="lbAD" id="lbAD">&nbsp;</a></p>
 
     <h3>Defines</h3>
 
     <p><br />
     #define <b>SPARSE_TABLE_HANDLER_NAME</b> 'sparse_table'<br />
-    <a name="lbAE" id="lbAE"> </a></p>
+    <a name="lbAE" id="lbAE">&nbsp;</a></p>
 
     <h3>Functions</h3>
 
@@ -92,7 +92,7 @@
     int <b>netsnmp_check_getnext_reply</b> (<b>netsnmp_request_info</b> *request, oid *prefix, size_t prefix_len,
     <b>netsnmp_variable_list</b> *newvar, <b>netsnmp_variable_list</b> **outvar)<br />
     <i>checks the original request against the current data being passed in if its greater than the request oid but less than the
-    current valid return, set the current valid return to the new value.</i> <a name="lbAF" id="lbAF"> </a></p>
+    current valid return, set the current valid return to the new value.</i> <a name="lbAF" id="lbAF">&nbsp;</a></p>
 
     <h2>Detailed Description</h2>
 
@@ -107,11 +107,11 @@
 
     <p>To do this, the table handler needs to know up front how your table is structured. To inform it about this, you fill in a
     table_registeration_info structure that is passed to the table handler. It contains the asn index types for the table as well
-    as the minimum and maximum column that should be used. <a name="lbAG" id="lbAG"> </a></p>
+    as the minimum and maximum column that should be used. <a name="lbAG" id="lbAG">&nbsp;</a></p>
 
     <h2>Function Documentation</h2>
 
-    <p><a name="lbAH" id="lbAH"> </a></p>
+    <p><a name="lbAH" id="lbAH">&nbsp;</a></p>
 
     <h3>int netsnmp_check_getnext_reply (<b>netsnmp_request_info</b> * request, oid * prefix, size_t prefix_len,
     <b>netsnmp_variable_list</b> * newvar, <b>netsnmp_variable_list</b> ** outvar)</h3>
@@ -126,7 +126,7 @@
     <p>References build_oid_noalloc(), variable_list::name, variable_list::name_length, netsnmp_request_info_s::requestvb,
     snmp_clone_varbind(), snmp_free_varbind(), snmp_oid_compare(), snmp_set_var_objid(), snmp_set_var_typed_value(),
     netsnmp_vardata::string, variable_list::type, variable_list::val, and variable_list::val_len. <a name="lbAI" id=
-    "lbAI"> </a></p>
+    "lbAI">&nbsp;</a></p>
 
     <h3>NETSNMP_INLINE <b>netsnmp_table_request_info</b>* netsnmp_extract_table_info (<b>netsnmp_request_info</b> * request)</h3>
 
@@ -153,7 +153,7 @@
 
     <p>Referenced by _netsnmp_tdata_helper_handler(), netsnmp_container_table_row_insert(), netsnmp_insert_iterator_context(),
     netsnmp_insert_table_row(), netsnmp_table_data_helper_handler(), netsnmp_table_data_set_helper_handler(),
-    netsnmp_table_iterator_helper_handler(), and table_helper_handler(). <a name="lbAJ" id="lbAJ"> </a></p>
+    netsnmp_table_iterator_helper_handler(), and table_helper_handler(). <a name="lbAJ" id="lbAJ">&nbsp;</a></p>
 
     <h3><b>netsnmp_table_registration_info</b>* netsnmp_find_table_registration_info (<b>netsnmp_handler_registration</b> *
     reginfo)</h3>
@@ -165,7 +165,7 @@
     <p>References netsnmp_find_handler_data_by_name().</p>
 
     <p>Referenced by netsnmp_table_data_helper_handler(), and netsnmp_table_iterator_helper_handler(). <a name="lbAK" id=
-    "lbAK"> </a></p>
+    "lbAK">&nbsp;</a></p>
 
     <h3><b>netsnmp_mib_handler</b>* netsnmp_get_table_handler (<b>netsnmp_table_registration_info</b> * tabreq)</h3>
 
@@ -197,7 +197,7 @@
     netsnmp_create_handler(), NULL, netsnmp_table_registration_info_s::number_indexes, snmp_log(), and
     table_helper_handler().</p>
 
-    <p>Referenced by netsnmp_register_table(), and netsnmp_sparse_table_register(). <a name="lbAL" id="lbAL"> </a></p>
+    <p>Referenced by netsnmp_register_table(), and netsnmp_sparse_table_register(). <a name="lbAL" id="lbAL">&nbsp;</a></p>
 
     <h3>int netsnmp_register_table (<b>netsnmp_handler_registration</b> * reginfo, <b>netsnmp_table_registration_info</b> *
     tabreq)</h3>
@@ -210,7 +210,7 @@
     <p>References netsnmp_get_table_handler(), netsnmp_inject_handler(), and netsnmp_register_handler().</p>
 
     <p>Referenced by netsnmp_container_table_register(), netsnmp_register_table_data(), netsnmp_register_table_iterator(),
-    netsnmp_table_container_register(), and netsnmp_table_row_register(). <a name="lbAM" id="lbAM"> </a></p>
+    netsnmp_table_container_register(), and netsnmp_table_row_register(). <a name="lbAM" id="lbAM">&nbsp;</a></p>
 
     <h3><b>netsnmp_mib_handler</b>* netsnmp_sparse_table_handler_get (void)</h3>
 
@@ -218,7 +218,7 @@
 
     <p>Definition at line 722 of file table.c.</p>
 
-    <p>References netsnmp_create_handler(), and SPARSE_TABLE_HANDLER_NAME. <a name="lbAN" id="lbAN"> </a></p>
+    <p>References netsnmp_create_handler(), and SPARSE_TABLE_HANDLER_NAME. <a name="lbAN" id="lbAN">&nbsp;</a></p>
 
     <h3>int netsnmp_sparse_table_register (<b>netsnmp_handler_registration</b> * reginfo, <b>netsnmp_table_registration_info</b>
     * tabreq)</h3>
@@ -229,7 +229,7 @@
     <p>Definition at line 733 of file table.c.</p>
 
     <p>References netsnmp_create_handler(), netsnmp_get_table_handler(), netsnmp_inject_handler(), netsnmp_register_handler(),
-    and SPARSE_TABLE_HANDLER_NAME. <a name="lbAO" id="lbAO"> </a></p>
+    and SPARSE_TABLE_HANDLER_NAME. <a name="lbAO" id="lbAO">&nbsp;</a></p>
 
     <h3>int netsnmp_table_build_oid (<b>netsnmp_handler_registration</b> * reginfo, <b>netsnmp_request_info</b> * reqinfo,
     <b>netsnmp_table_request_info</b> * table_info)</h3>
@@ -245,7 +245,7 @@
     variable_list::name_length, netsnmp_request_info_s::requestvb, netsnmp_handler_registration_s::rootoid, and
     netsnmp_handler_registration_s::rootoid_len.</p>
 
-    <p>Referenced by netsnmp_table_build_result(). <a name="lbAP" id="lbAP"> </a></p>
+    <p>Referenced by netsnmp_table_build_result(). <a name="lbAP" id="lbAP">&nbsp;</a></p>
 
     <h3>int netsnmp_table_build_oid_from_index (<b>netsnmp_handler_registration</b> * reginfo, <b>netsnmp_request_info</b> *
     reqinfo, <b>netsnmp_table_request_info</b> * table_info)</h3>
@@ -260,7 +260,7 @@
     <p>References netsnmp_table_request_info_s::colnum, netsnmp_table_request_info_s::index_oid,
     netsnmp_table_request_info_s::index_oid_len, variable_list::name, variable_list::name_length, variable_list::name_loc,
     netsnmp_request_info_s::requestvb, netsnmp_handler_registration_s::rootoid, netsnmp_handler_registration_s::rootoid_len,
-    snmp_clone_mem(), and SNMP_FREE. <a name="lbAQ" id="lbAQ"> </a></p>
+    snmp_clone_mem(), and SNMP_FREE. <a name="lbAQ" id="lbAQ">&nbsp;</a></p>
 
     <h3>int netsnmp_table_build_result (<b>netsnmp_handler_registration</b> * reginfo, <b>netsnmp_request_info</b> * reqinfo,
     <b>netsnmp_table_request_info</b> * table_info, u_char type, u_char * result, size_t result_len)</h3>
@@ -273,7 +273,7 @@
     <p>Definition at line 751 of file table.c.</p>
 
     <p>References variable_list::name, variable_list::name_loc, netsnmp_table_build_oid(), NULL,
-    netsnmp_request_info_s::requestvb, and snmp_set_var_typed_value(). <a name="lbAR" id="lbAR"> </a></p>
+    netsnmp_request_info_s::requestvb, and snmp_set_var_typed_value(). <a name="lbAR" id="lbAR">&nbsp;</a></p>
 
     <h3>int netsnmp_update_indexes_from_variable_list (<b>netsnmp_table_request_info</b> * tri)</h3>
 
@@ -282,7 +282,7 @@
     <p>Definition at line 866 of file table.c.</p>
 
     <p>References build_oid_noalloc(), netsnmp_table_request_info_s::index_oid, netsnmp_table_request_info_s::index_oid_len,
-    netsnmp_table_request_info_s::indexes, and NULL. <a name="lbAS" id="lbAS"> </a></p>
+    netsnmp_table_request_info_s::indexes, and NULL. <a name="lbAS" id="lbAS">&nbsp;</a></p>
 
     <h3>int netsnmp_update_variable_list_from_index (<b>netsnmp_table_request_info</b> * tri)</h3>
 
@@ -291,7 +291,8 @@
     <p>Definition at line 850 of file table.c.</p>
 
     <p>References netsnmp_table_request_info_s::index_oid, netsnmp_table_request_info_s::index_oid_len,
-    netsnmp_table_request_info_s::indexes, parse_oid_indexes(), and snmp_reset_var_buffers(). <a name="lbAT" id="lbAT"> </a></p>
+    netsnmp_table_request_info_s::indexes, parse_oid_indexes(), and snmp_reset_var_buffers(). <a name="lbAT" id=
+    "lbAT">&nbsp;</a></p>
 
     <h3>int table_helper_handler (<b>netsnmp_mib_handler</b> * handler, <b>netsnmp_handler_registration</b> * reginfo,
     <b>netsnmp_agent_request_info</b> * reqinfo, <b>netsnmp_request_info</b> * requests)</h3>
@@ -323,7 +324,7 @@
 
     <p>Referenced by netsnmp_get_table_handler().</p>
     <hr />
-    <a name="index" id="index"> </a>
+    <a name="index" id="index">&nbsp;</a>
 
     <h2>Index</h2>
 
@@ -387,7 +388,7 @@
     </dl>
     <hr />
     This document was created by <a href="http://localhost/cgi-bin/man/man2html">man2html</a>, using the manual pages.<br />
-    Time: 16:55:09 GMT, December 09, 2006
+    Time: 13:12:01 GMT, September 23, 2007
 <!-- CONTENT END -->
 <!--#include virtual="/page-bottom.html" -->
 

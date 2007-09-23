@@ -38,6 +38,7 @@ Table Style
   A  iterate_access
   S  scalar helper
   G  scalar group helper
+  W  watched scalar 
   M  mfd
 
 Platform Keys
@@ -65,7 +66,7 @@ SNMPv2-MIB
  system.*.0                   A         3.2     O mibII/system_mib.c
  sysORTable                   A         3.4     O mibII/sysORTable.c
  snmp.*.0                     A         3.2     O mibII/snmp_mib.c
- setSerialNo.0                A         5.0     O mibII/setSerialNo.c
+ setSerialNo.0                A         5.0     W mibII/setSerialNo.c
 
 ------------------------------------------------------------------------------
 SNMP-FRAMEWORK-MIB
@@ -130,9 +131,9 @@ IF-MIB
  ifTableLastChange.0          ---
  ifTable (old)                U $2      ~3.5    O mibII/interfaces.c
  ifTable (new)                L         5.2     M if-mib/ifTable/*
- ifTable (new)                 FO       5.4     M if-mib/ifTable/*
+ ifTable (new)                 FOS      5.4     M if-mib/ifTable/*
  ifXTable                     L         5.2     M if-mib/ifXTable/*
- ifXTable                      FO       5.4     M if-mib/ifXTable/*
+ ifXTable                      FOS      5.4     M if-mib/ifXTable/*
  ifStackLastChange.0          ---
  ifStackTable                 ---
  ifTestTable                  ---
@@ -217,11 +218,14 @@ TCP-MIB
  tcp.*.0                      U $2      ~3.2    G mibII/tcp.c
  tcpConnTable (D)             U $2      4.2     I mibII/tcpTable.c
  tcpConnectionTable           L         5.3     M tcp-mib/=/*
+ tcpConnectionTable            S        5.4     M tcp-mib/=/*
  tcpListenerTable             L         5.3     M tcp-mib/=/*
+ tcpListenerTable              S        5.4     M tcp-mib/=/*
 
 ------------------------------------------------------------------------------
 UDP-MIB
  udpEndpointTable             L         5.3     M udp-mib/=/*
+ udpEndpointTable              S        5.4     M udp-mib/=/*
  udp.*.0                      U $2      ~3.2    G mibII/udp.c
  udpTable (D)                 U $2      4.2     I mibII/udpTable.c
 

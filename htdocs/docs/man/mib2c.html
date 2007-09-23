@@ -5,12 +5,12 @@
     Updated: 25 Jul 2003<br />
     <a href="#index">Index</a> <a href="../index.html">Return to Main Contents</a>
     <hr />
-    <a name="lbAB" id="lbAB"> </a>
+    <a name="lbAB" id="lbAB">&nbsp;</a>
 
-    <h2>NAME</h2>mib2c -- generate template code for extending the agent <a name="lbAC" id="lbAC"> </a>
+    <h2>NAME</h2>mib2c -- generate template code for extending the agent <a name="lbAC" id="lbAC">&nbsp;</a>
 
     <h2>SYNOPSIS</h2><b>mib2c</b> [-h] -c CONFIGFILE [-I PATH] [-f OUTNAME] [-i][q][-S VAR=VAL] MIBNODE <a name="lbAD" id=
-    "lbAD"> </a>
+    "lbAD">&nbsp;</a>
 
     <h2>DESCRIPTION</h2>The mib2c tool is designed to take a portion of the MIB tree (as defined by a MIB file) and generate the
     template C code necessary to implement the relevant management objects within it.
@@ -35,13 +35,13 @@
     variable is:</p>
 
     <p><br />
-       MIBS=+NET-SNMP-TUTORIAL-MIB</p>
+    &nbsp;&nbsp;&nbsp;MIBS=+NET-SNMP-TUTORIAL-MIB</p>
 
     <p><br />
-       or</p>
+    &nbsp;&nbsp;&nbsp;or</p>
 
     <p><br />
-       MIBS=ALL</p>
+    &nbsp;&nbsp;&nbsp;MIBS=ALL</p>
 
     <p>The first example ensures that mib2c finds the NET-SNMP-TUTORIAL-MIB mib, in addition to the default MIB modules. The
     default list of MIB modules is set when the suite is first configured and built and basically corresponds to the list of
@@ -52,7 +52,7 @@
     <p>Both the MIB files to be loaded and the MIB file search location can also be configured in the snmp.conf file. Please see
     <a href="snmp.conf.html">snmp.conf</a>(5) for more information.</p>
 
-    <p>The generated *.c and *.h files will be created in the current working directory. <a name="lbAE" id="lbAE"> </a></p>
+    <p>The generated *.c and *.h files will be created in the current working directory. <a name="lbAE" id="lbAE">&nbsp;</a></p>
 
     <h2>OPTIONS</h2>
 
@@ -90,13 +90,13 @@
       <dd>
         If you're writing code for some scalars, run:
 
-        <p><tt>        </tt>mib2c -c mib2c.scalar.conf MIBNODE<br /></p>
+        <p><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt>mib2c -c mib2c.scalar.conf MIBNODE<br /></p>
       </dd>
 
       <dd>
         If you want to magically "tie" integer variables to integer scalars, use:
 
-        <p><tt>        </tt>mib2c -c mib2c.int_watch.conf MIBNODE<br /></p>
+        <p><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt>mib2c -c mib2c.int_watch.conf MIBNODE<br /></p>
       </dd>
 
       <dd>
@@ -107,38 +107,39 @@
         documented configuration file. See the agent/mibgroup/if-mib/ifTable/ifTable*.c files for an example:</p>
 
         <p><br />
-                mib2c -c mib2c.mfd.conf MIBNODE</p>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;mib2c&nbsp;-c&nbsp;mib2c.mfd.conf&nbsp;MIBNODE</p>
 
         <p>If your table data is kept somewhere else (e.g. it's in the kernel and not in the memory of the agent itself) and you
         need to "iterate" over it to find the right data for the SNMP row being accessed. See the
         agent/mibgroup/mibII/vacm_context.c file for an example:</p>
 
-        <p><tt>        </tt>mib2c -c mib2c.iterate.conf MIBNODE<br /></p>
+        <p><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt>mib2c -c mib2c.iterate.conf MIBNODE<br /></p>
 
         <p>If your table data is kept in the agent (i.e. it's not located in an external source) and is purely data driven (i.e.
         you do not need to perform any work when a set occurs). See the agent/mibgroup/examples/data_set.c file for an example of
         such a table:</p>
 
-        <p><tt>        </tt>mib2c -c mib2c.create-dataset.conf MIBNODE<br /></p>
+        <p><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt>mib2c -c mib2c.create-dataset.conf MIBNODE<br /></p>
 
         <p>If your table data is kept in the agent (i.e. it's not located in an external source), and you can keep your data
         sorted by the table index but you do need to perform work when a set occurs:</p>
 
-        <p><tt>        </tt>mib2c -c mib2c.array-user.conf MIBNODE<br /></p>
+        <p><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt>mib2c -c mib2c.array-user.conf MIBNODE<br /></p>
 
         <p>GENERATING HEADER FILE DEFINITIONS</p>
 
         <p>To generate just a header with a define for each column number in your table:</p>
 
-        <p><tt>        </tt>mib2c -c mib2c.column_defines.conf MIBNODE<br /></p>
+        <p><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt>mib2c -c mib2c.column_defines.conf MIBNODE<br /></p>
 
         <p>To generate just a header with a define for each enum for any column containing enums:</p>
 
-        <p><tt>        </tt>mib2c -c mib2c.column_enums.conf MIBNODE<br /></p>
+        <p><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt>mib2c -c mib2c.column_enums.conf MIBNODE<br /></p>
 
-        <p><tt>        </tt>GENERATING CODE FOR THE 4.X LINE OF CODE (THE OLDER API)<br /></p>
+        <p><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt>GENERATING CODE FOR THE 4.X LINE OF CODE (THE OLDER
+        API)<br /></p>
 
-        <p><tt>        </tt>mib2c -c mib2c.old-api.conf MIBNODE<br /></p>
+        <p><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt>mib2c -c mib2c.old-api.conf MIBNODE<br /></p>
       </dd>
 
       <dt><b>-I</b><i>PATH</i></dt>
@@ -164,7 +165,7 @@
       <dd>Preset a variable VAR, in the mib2c.*.conf file, to the value VAL. None of the existing mib2c configuration files
       (mib2c.*.conf) currently makes use of this feature, however, so this option should be considered available only for future
       use.</dd>
-    </dl><a name="lbAF" id="lbAF"> </a>
+    </dl><a name="lbAF" id="lbAF">&nbsp;</a>
 
     <h2>EXAMPLES</h2>
 
@@ -194,13 +195,13 @@
 
     <p>The resulting tcpConnTable.c and tcpConnTable.h files are generated in the current working directory.</p>
 
-    <p><a name="lbAG" id="lbAG"> </a></p>
+    <p><a name="lbAG" id="lbAG">&nbsp;</a></p>
 
     <h2>SEE ALSO</h2>
 
     <p><a href="snmpcmd.html">snmpcmd</a>(1), <a href="snmp.conf.html">snmp.conf</a>(5)</p>
     <hr />
-    <a name="index" id="index"> </a>
+    <a name="index" id="index">&nbsp;</a>
 
     <h2>Index</h2>
 
@@ -219,7 +220,7 @@
     </dl>
     <hr />
     This document was created by <a href="http://localhost/cgi-bin/man/man2html">man2html</a>, using the manual pages.<br />
-    Time: 16:55:09 GMT, December 09, 2006
+    Time: 13:12:00 GMT, September 23, 2007
 <!-- CONTENT END -->
 <!--#include virtual="/page-bottom.html" -->
 

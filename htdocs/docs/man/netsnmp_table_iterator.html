@@ -2,15 +2,15 @@
 <!--#include virtual="/page-top.html" -->
 <!-- CONTENT START -->
     <h1>table_iterator</h1>Section: net-snmp (3)<br />
-    Updated: 24 Nov 2006<br />
+    Updated: 27 Jul 2007<br />
     <a href="#index">Index</a> <a href="../index.html">Return to Main Contents</a>
     <hr />
-    <a name="lbAB" id="lbAB"> </a>
+    <a name="lbAB" id="lbAB">&nbsp;</a>
 
     <h2>NAME</h2>table_iterator - The table iterator helper is designed to simplify the task of writing a table handler for the
     net-snmp agent when the data being accessed is not in an oid sorted form and must be accessed externally.
 
-    <p><a name="lbAC" id="lbAC"> </a></p>
+    <p><a name="lbAC" id="lbAC">&nbsp;</a></p>
 
     <h3>Data Structures</h3>
 
@@ -22,7 +22,7 @@
     and sort it in a SNMP specific manner.</i><br />
     struct <b>netsnmp_iterator_info_s</b><br />
     <i>Holds iterator information containing functions which should be called by the iterator_handler to loop over your data set
-    and sort it in a SNMP specific manner.</i> <a name="lbAD" id="lbAD"> </a></p>
+    and sort it in a SNMP specific manner.</i> <a name="lbAD" id="lbAD">&nbsp;</a></p>
 
     <h3>Defines</h3>
 
@@ -32,27 +32,27 @@
     #define <b>TABLE_ITERATOR_NOTAGAIN</b> 255<br />
     <br />
     #define <b>TABLE_ITERATOR_NAME</b> 'table_iterator'<br />
-    <a name="lbAE" id="lbAE"> </a></p>
+    <a name="lbAE" id="lbAE">&nbsp;</a></p>
 
     <h3>Typedefs</h3>
 
     <p><br />
     typedef <b>ti_cache_info_s</b> <b>ti_cache_info</b><br />
     <br />
-    typedef <b>netsnmp_variable_list</b> *() <b>Netsnmp_First_Data_Point</b> (void **loop_context, void **data_context,
+    typedef <b>netsnmp_variable_list</b> *( <b>Netsnmp_First_Data_Point</b> )(void **loop_context, void **data_context,
     <b>netsnmp_variable_list</b> *, struct <b>netsnmp_iterator_info_s</b> *)<br />
     <br />
-    typedef <b>netsnmp_variable_list</b> *() <b>Netsnmp_Next_Data_Point</b> (void **loop_context, void **data_context,
+    typedef <b>netsnmp_variable_list</b> *( <b>Netsnmp_Next_Data_Point</b> )(void **loop_context, void **data_context,
     <b>netsnmp_variable_list</b> *, struct <b>netsnmp_iterator_info_s</b> *)<br />
     <br />
-    typedef void *() <b>Netsnmp_Make_Data_Context</b> (void *loop_context, struct <b>netsnmp_iterator_info_s</b> *)<br />
+    typedef void *( <b>Netsnmp_Make_Data_Context</b> )(void *loop_context, struct <b>netsnmp_iterator_info_s</b> *)<br />
     <br />
-    typedef void() <b>Netsnmp_Free_Loop_Context</b> (void *, struct <b>netsnmp_iterator_info_s</b> *)<br />
+    typedef void( <b>Netsnmp_Free_Loop_Context</b> )(void *, struct <b>netsnmp_iterator_info_s</b> *)<br />
     <br />
-    typedef void() <b>Netsnmp_Free_Data_Context</b> (void *, struct <b>netsnmp_iterator_info_s</b> *)<br />
+    typedef void( <b>Netsnmp_Free_Data_Context</b> )(void *, struct <b>netsnmp_iterator_info_s</b> *)<br />
     <br />
     typedef <b>netsnmp_iterator_info_s</b> <b>netsnmp_iterator_info</b><br />
-    <i>Typedefs the</i> <b>netsnmp_iterator_info_s</b> struct into netsnmp_iterator_info. <a name="lbAF" id="lbAF"> </a></p>
+    <i>Typedefs the</i> <b>netsnmp_iterator_info_s</b> struct into netsnmp_iterator_info. <a name="lbAF" id="lbAF">&nbsp;</a></p>
 
     <h3>Functions</h3>
 
@@ -92,13 +92,13 @@
     void * <b>netsnmp_iterator_row_next_byoid</b> (<b>netsnmp_iterator_info</b> *iinfo, oid *instance, size_t len)<br />
     <br />
     int <b>netsnmp_iterator_row_count</b> (<b>netsnmp_iterator_info</b> *iinfo)<br />
-    <a name="lbAG" id="lbAG"> </a></p>
+    <a name="lbAG" id="lbAG">&nbsp;</a></p>
 
     <h3>Variables</h3>
 
     <p><br />
     <b>Netsnmp_Node_Handler</b> <b>netsnmp_table_iterator_helper_handler</b><br />
-    <a name="lbAH" id="lbAH"> </a></p>
+    <a name="lbAH" id="lbAH">&nbsp;</a></p>
 
     <h2>Detailed Description</h2>
 
@@ -159,21 +159,21 @@
       once for every iteration.</dd>
     </dl>
 
-    <p><a name="lbAI" id="lbAI"> </a></p>
+    <p><a name="lbAI" id="lbAI">&nbsp;</a></p>
 
     <h2>Typedef Documentation</h2>
 
-    <p><a name="lbAJ" id="lbAJ"> </a></p>
+    <p><a name="lbAJ" id="lbAJ">&nbsp;</a></p>
 
     <h3>struct <b>netsnmp_iterator_info_s</b> <b>netsnmp_iterator_info</b></h3>
 
     <p>Typedefs the <b>netsnmp_iterator_info_s</b> struct into netsnmp_iterator_info.</p>
 
-    <p><a name="lbAK" id="lbAK"> </a></p>
+    <p><a name="lbAK" id="lbAK">&nbsp;</a></p>
 
     <h2>Function Documentation</h2>
 
-    <p><a name="lbAL" id="lbAL"> </a></p>
+    <p><a name="lbAL" id="lbAL">&nbsp;</a></p>
 
     <h3>void * netsnmp_extract_iterator_context (<b>netsnmp_request_info</b> * request)</h3>
 
@@ -198,7 +198,7 @@
 
     <p>Definition at line 234 of file table_iterator.c.</p>
 
-    <p>References netsnmp_request_get_list_data(), and TABLE_ITERATOR_NAME. <a name="lbAM" id="lbAM"> </a></p>
+    <p>References netsnmp_request_get_list_data(), and TABLE_ITERATOR_NAME. <a name="lbAM" id="lbAM">&nbsp;</a></p>
 
     <h3><b>netsnmp_mib_handler</b> * netsnmp_get_table_iterator_handler (<b>netsnmp_iterator_info</b> * iinfo)</h3>
 
@@ -209,7 +209,7 @@
     <p>References netsnmp_mib_handler_s::myvoid, netsnmp_create_handler(), netsnmp_table_iterator_helper_handler, NULL, and
     TABLE_ITERATOR_NAME.</p>
 
-    <p>Referenced by netsnmp_register_table_iterator(). <a name="lbAN" id="lbAN"> </a></p>
+    <p>Referenced by netsnmp_register_table_iterator(). <a name="lbAN" id="lbAN">&nbsp;</a></p>
 
     <h3>void netsnmp_insert_iterator_context (<b>netsnmp_request_info</b> * request, void * data)</h3>
 
@@ -219,7 +219,7 @@
 
     <p>References build_oid_noalloc(), netsnmp_table_request_info_s::indexes, netsnmp_create_data_list(),
     netsnmp_extract_table_info(), netsnmp_request_add_list_data(), netsnmp_request_info_s::next, NULL,
-    netsnmp_request_info_s::prev, snmp_oid_compare(), and TABLE_ITERATOR_NAME. <a name="lbAO" id="lbAO"> </a></p>
+    netsnmp_request_info_s::prev, snmp_oid_compare(), and TABLE_ITERATOR_NAME. <a name="lbAO" id="lbAO">&nbsp;</a></p>
 
     <h3>int netsnmp_register_table_iterator (<b>netsnmp_handler_registration</b> * reginfo, <b>netsnmp_iterator_info</b> *
     iinfo)</h3>
@@ -250,7 +250,7 @@
     netsnmp_handler_registration_s::modes, netsnmp_get_table_iterator_handler(), netsnmp_inject_handler(),
     netsnmp_register_table(), snmp_clone_varbind(), and netsnmp_iterator_info_s::table_reginfo.</p>
     <hr />
-    <a name="index" id="index"> </a>
+    <a name="index" id="index">&nbsp;</a>
 
     <h2>Index</h2>
 
@@ -299,7 +299,7 @@
     </dl>
     <hr />
     This document was created by <a href="http://localhost/cgi-bin/man/man2html">man2html</a>, using the manual pages.<br />
-    Time: 16:55:09 GMT, December 09, 2006
+    Time: 13:12:01 GMT, September 23, 2007
 <!-- CONTENT END -->
 <!--#include virtual="/page-bottom.html" -->
 

@@ -5,10 +5,11 @@
     Updated: 21 Oct 1999<br />
     <a href="#index">Index</a> <a href="../index.html">Return to Main Contents</a>
     <hr />
-    <a name="lbAB" id="lbAB"> </a>
+    <a name="lbAB" id="lbAB">&nbsp;</a>
 
     <h2>NAME</h2>snmp_sess_init, snmp_open, snmp_send, snmp_free_pdu, snmp_select_info, snmp_read, snmp_timeout, snmp_close,
-    snmp_perror, snmp_sess_perror, snmp_error, snmp_api_errstring - send and receive SNMP messages <a name="lbAC" id="lbAC"> </a>
+    snmp_perror, snmp_sess_perror, snmp_error, snmp_api_errstring - send and receive SNMP messages <a name="lbAC" id=
+    "lbAC">&nbsp;</a>
 
     <h2>SYNOPSIS</h2>#include &lt;<a href="file:/usr/include/net-snmp/session_api.h">net-snmp/session_api.h</a>&gt;
 
@@ -60,7 +61,7 @@
       <dd><b>/* all other SNMP library errors */</b></dd>
     </dl>
 
-    <p><a name="lbAD" id="lbAD"> </a></p>
+    <p><a name="lbAD" id="lbAD">&nbsp;</a></p>
 
     <h2>DESCRIPTION</h2><i>Snmp_sess_init</i> prepares a struct snmp_session that sources transport characteristics and common
     information that will be used for a set of SNMP transactions. After this structure is passed to <i>snmp_open</i> to create an
@@ -88,7 +89,7 @@
     <p>After calling <i>snmp_select_info, select</i> is called with the returned data. When select returns, <i>snmp_read</i>
     should be called with the <i>fd_set</i> returned from <i>select</i> to read each SNMP socket that has input. If <i>select</i>
     times out, <i>snmp_timeout</i> should be called to see if the timeout was intended for SNMP. <a name="lbAE" id=
-    "lbAE"> </a></p>
+    "lbAE">&nbsp;</a></p>
 
     <h2>DIAGNOSTICS</h2>
 
@@ -164,11 +165,11 @@
 
     <p>A string representation of the error code can be obtained with <i>snmp_api_errstring</i>, and a standard error message may
     be printed using <i>snmp_perror</i> that functions like the <i>perror</i> standard routine. <a name="lbAF" id=
-    "lbAF"> </a></p>
+    "lbAF">&nbsp;</a></p>
 
     <h2>SEE ALSO</h2><a href="select.html">select</a>(2), snmp_api.h
     <hr />
-    <a name="index" id="index"> </a>
+    <a name="index" id="index">&nbsp;</a>
 
     <h2>Index</h2>
 
@@ -185,7 +186,7 @@
     </dl>
     <hr />
     This document was created by <a href="http://localhost/cgi-bin/man/man2html">man2html</a>, using the manual pages.<br />
-    Time: 16:55:09 GMT, December 09, 2006
+    Time: 13:12:01 GMT, September 23, 2007
 <!-- CONTENT END -->
 <!--#include virtual="/page-bottom.html" -->
 

@@ -5,13 +5,13 @@
     Updated: 06 Mar 2002<br />
     <a href="#index">Index</a> <a href="../index.html">Return to Main Contents</a>
     <hr />
-    <a name="lbAB" id="lbAB"> </a>
+    <a name="lbAB" id="lbAB">&nbsp;</a>
 
     <h2>NAME</h2>init_mib, add_mibdir, init_mib_internals, add_module_replacement, read_module, read_mib, read_all_mibs,
     read_objid, read_module_node, get_module_node, snmp_set_mib_warnings, snmp_set_save_descriptions, shutdown_mib, print_mib,
     print_variable, fprint_variable, snprint_variable, sprint_realloc_variable, print_value, fprint_value, snprint_value,
     sprint_realloc_value, print_objid, fprint_objid, snprint_objid, sprint_realloc_objid, print_description, fprint_description -
-    mib_api functions <a name="lbAC" id="lbAC"> </a>
+    mib_api functions <a name="lbAC" id="lbAC">&nbsp;</a>
 
     <h2>SYNOPSIS</h2><b>#include &lt;<a href="file:/usr/include/net-snmp/mib_api.h">net-snmp/mib_api.h</a>&gt;</b>
 
@@ -65,11 +65,11 @@
     <p><b>void snmp_set_mib_warnings(int</b> <i>level</i><b>);</b><br />
     <b>void snmp_set_save_descriptions(int</b> <i>save</i><b>);</b></p>
 
-    <p><a name="lbAD" id="lbAD"> </a></p>
+    <p><a name="lbAD" id="lbAD">&nbsp;</a></p>
 
     <h2>DESCRIPTION</h2>The functions dealing with MIB modules fall into four groups. Those dealing with initialisation and
     shutdown, those that read in and parse MIB files, those that search the MIB tree, and various output routines. <a name="lbAE"
-    id="lbAE"> </a>
+    id="lbAE">&nbsp;</a>
 
     <h3>Initialisation and Shutdown</h3><b>init_mib</b> is a convenience function that handles all calls to <b>add_mibdir</b>,
     <b>read_module</b> and <b>read_mib</b> for standard applications. It should be called before any other routine that
@@ -88,7 +88,7 @@
 
     <p><b>shutdown_mib</b> will clear the information that was gathered by <b>read_module</b>, <b>add_mibdir</b> and
     <b>add_module_replacement</b>. It is strongly recommended that one does not invoke <b>shutdown_mib</b> while there are SNMP
-    sessions being actively managed. <a name="lbAF" id="lbAF"> </a></p>
+    sessions being actively managed. <a name="lbAF" id="lbAF">&nbsp;</a></p>
 
     <h3>Reading and Parsing MIBs</h3><b>add_module_replacement</b> can be used to allow new MIB modules to obsolete older ones,
     without needing to amend the imports clauses of other modules. It takes the names of the old and new modules, together with
@@ -152,13 +152,13 @@
     form), and transforms this into the corresponding list of sub-identifiers. This is returned in the <i>output</i> parameter,
     with the number of sub-identifiers returned via <i>out_len</i>. When called, <i>out_len</i> must hold the maximum length of
     the <i>output</i> array. This function returns a value of 1 if it succeeds in parsing the string and 0 otherwise. <a name=
-    "lbAG" id="lbAG"> </a></p>
+    "lbAG" id="lbAG">&nbsp;</a></p>
 
     <h3>Searching the MIB Tree</h3><b>get_module_node</b> takes a descriptor and the name of a module, and returns the
     corresponding oid list, in the same way as <b>read_objid</b> above.<br />
     If the module name is specified as "ANY", then this routine will assume that the descriptor given is unique within the tree,
     and will return the matching entry. If this assumption is invalid, then the behaviour as to which variable is returned is
-    implementation dependent. <a name="lbAH" id="lbAH"> </a>
+    implementation dependent. <a name="lbAH" id="lbAH">&nbsp;</a>
 
     <h3>Output</h3><b>print_mib</b> will print out a representation of the currently active MIB tree to the specified FILE
     pointer.
@@ -198,7 +198,7 @@
     "snmp_set_save_descriptions.html">snmp_set_save_descriptions</a>(1)</b>.</p>
 
     <p>In general the parser is silent about what strangenesses it sees in the MIB files. To get warnings reported, call
-    <b>snmp_set_mib_warnings</b> with a <i>level</i> of 1 (or 2 for even more warnings). <a name="lbAI" id="lbAI"> </a></p>
+    <b>snmp_set_mib_warnings</b> with a <i>level</i> of 1 (or 2 for even more warnings). <a name="lbAI" id="lbAI">&nbsp;</a></p>
 
     <h2>ENVIRONMENT VARIABLES</h2>
 
@@ -215,11 +215,11 @@
 
       <dd>A colon separated list of MIB modules to load. Default:
       IP-MIB:IF-MIB:TCP-MIB:UDP-MIB:SNMPv2-MIB:RFC1213-MIB:UCD-SNMP-MIB.</dd>
-    </dl><a name="lbAJ" id="lbAJ"> </a>
+    </dl><a name="lbAJ" id="lbAJ">&nbsp;</a>
 
     <h2>SEE ALSO</h2><b><a href="snmp_api.html">snmp_api</a></b>(3)
     <hr />
-    <a name="index" id="index"> </a>
+    <a name="index" id="index">&nbsp;</a>
 
     <h2>Index</h2>
 
@@ -248,7 +248,7 @@
     </dl>
     <hr />
     This document was created by <a href="http://localhost/cgi-bin/man/man2html">man2html</a>, using the manual pages.<br />
-    Time: 16:55:09 GMT, December 09, 2006
+    Time: 13:12:01 GMT, September 23, 2007
 <!-- CONTENT END -->
 <!--#include virtual="/page-bottom.html" -->
 

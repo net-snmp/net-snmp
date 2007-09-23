@@ -550,7 +550,7 @@ An implementation may allow multiple named logs, up to some
 </td><td>
   UNSIGNED32
       <br />Legal values:
-        1 .. -1
+        1 .. 2147483647
 
   </td><td>NoAccess</td>
 <td>
@@ -841,7 +841,7 @@ An implementation may allow multiple named logs, up to some
 </td><td>
   UNSIGNED32
       <br />Legal values:
-        1 .. -1
+        1 .. 2147483647
 
   </td><td>NoAccess</td>
 <td>
@@ -862,7 +862,7 @@ value back to 1.
 </td><td>
   UNSIGNED32
       <br />Legal values:
-        1 .. -1
+        1 .. 2147483647
 
   </td><td>NoAccess</td>
 <td>
@@ -1450,7 +1450,7 @@ measured in octets, not characters.
    |     |     |  Index: nlmLogName, nlmLogIndex
    |     |     |
    |     |     +-- ---- Unsigned  <a href="#nlmLogIndex">nlmLogIndex</a>(1)
-   |     |     |        Range: 1..-1
+   |     |     |        Range: 1..2147483647
    |     |     +-- -R-- TimeTicks <a href="#nlmLogTime">nlmLogTime</a>(2)
    |     |     |        Textual Convention: <a href="#TimeStamp">TimeStamp</a>
    |     |     +-- -R-- String    <a href="#nlmLogDateAndTime">nlmLogDateAndTime</a>(3)
@@ -1478,7 +1478,7 @@ measured in octets, not characters.
    |           |  Index: nlmLogName, nlmLogIndex, nlmLogVariableIndex
    |           |
    |           +-- ---- Unsigned  <a href="#nlmLogVariableIndex">nlmLogVariableIndex</a>(1)
-   |           |        Range: 1..-1
+   |           |        Range: 1..2147483647
    |           +-- -R-- ObjID     <a href="#nlmLogVariableID">nlmLogVariableID</a>(2)
    |           +-- -R-- EnumVal   <a href="#nlmLogVariableValueType">nlmLogVariableValueType</a>(3)
    |           |        Values: counter32(1), unsigned32(2), timeTicks(3), integer32(4), ipAddress(5), octetString(6), objectId(7), counter64(8), opaque(9)

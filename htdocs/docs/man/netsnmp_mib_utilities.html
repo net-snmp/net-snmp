@@ -2,12 +2,12 @@
 <!--#include virtual="/page-top.html" -->
 <!-- CONTENT START -->
     <h1>mib parsing and datatype manipulation routines.</h1>Section: net-snmp (3)<br />
-    Updated: 24 Nov 2006<br />
+    Updated: 27 Jul 2007<br />
     <a href="#index">Index</a> <a href="../index.html">Return to Main Contents</a>
     <hr />
-    <a name="lbAB" id="lbAB"> </a>
+    <a name="lbAB" id="lbAB">&nbsp;</a>
 
-    <h2>NAME</h2>mib parsing and datatype manipulation routines. - <a name="lbAC" id="lbAC"> </a>
+    <h2>NAME</h2>mib parsing and datatype manipulation routines. - <a name="lbAC" id="lbAC">&nbsp;</a>
 
     <h3>Data Structures</h3>
 
@@ -15,7 +15,7 @@
     struct <b>_PrefixList</b><br />
     <br />
     struct <b>parse_hints</b><br />
-    <a name="lbAD" id="lbAD"> </a></p>
+    <a name="lbAD" id="lbAD">&nbsp;</a></p>
 
     <h3>Typedefs</h3>
 
@@ -23,13 +23,13 @@
     typedef <b>_PrefixList</b> * <b>PrefixListPtr</b><br />
     <br />
     typedef <b>_PrefixList</b> <b>PrefixList</b><br />
-    <a name="lbAE" id="lbAE"> </a></p>
+    <a name="lbAE" id="lbAE">&nbsp;</a></p>
 
     <h3>Enumerations</h3>
 
     <p><br />
     enum <b>inet_address_type</b> { <b>IPV4</b> = 1, <b>IPV6</b> = 2, <b>IPV4Z</b> = 3, <b>IPV6Z</b> = 4, <b>DNS</b> = 16 }<br />
-    <a name="lbAF" id="lbAF"> </a></p>
+    <a name="lbAF" id="lbAF">&nbsp;</a></p>
 
     <h3>Functions</h3>
 
@@ -197,7 +197,13 @@
     int <b>get_module_node</b> (const char *fname, const char *<b>module</b>, oid *objid, size_t *objidlen)<br />
     <br />
     int <b>get_wild_node</b> (const char *name, oid *objid, size_t *objidlen)<br />
-    <br />
+    <b>See also:</b></p>
+
+    <dl compact="compact">
+      <dd>comments on find_best_tree_node for usage after first time.</dd>
+    </dl>
+
+    <p>"<br />
     int <b>get_node</b> (const char *name, oid *objid, size_t *objidlen)<br />
     <br />
     void <b>clear_tree_flags</b> (register struct <b>tree</b> *tp)<br />
@@ -283,7 +289,7 @@
     <br />
     int <b>snprint_badtype</b> (char *buf, size_t buf_len, const <b>netsnmp_variable_list</b> *var, const struct <b>enum_list</b>
     *enums, const char *hint, const char *units)<br />
-    <a name="lbAG" id="lbAG"> </a></p>
+    <a name="lbAG" id="lbAG">&nbsp;</a></p>
 
     <h3>Variables</h3>
 
@@ -295,11 +301,11 @@
     oid <b>RFC1213_MIB</b> [] = { 1, 3, 6, 1, 2, 1 }<br />
     <br />
     <b>PrefixList</b> <b>mib_prefixes</b> []<br />
-    <a name="lbAH" id="lbAH"> </a></p>
+    <a name="lbAH" id="lbAH">&nbsp;</a></p>
 
     <h2>Function Documentation</h2>
 
-    <p><a name="lbAI" id="lbAI"> </a></p>
+    <p><a name="lbAI" id="lbAI">&nbsp;</a></p>
 
     <h3>int _sprint_hexstring_line (u_char ** buf, size_t * buf_len, size_t * out_len, int allow_realloc, const u_char * cp,
     size_t line_len)</h3>
@@ -330,21 +336,19 @@
 
     <p>Definition at line 271 of file mib.c.</p>
 
-    <p>References snmp_realloc().</p>
+    <p>References netsnmp_ds_get_boolean(), and snmp_realloc().</p>
 
-    <p>Referenced by sprint_realloc_hexstring(). <a name="lbAJ" id="lbAJ"> </a></p>
+    <p>Referenced by sprint_realloc_hexstring(). <a name="lbAJ" id="lbAJ">&nbsp;</a></p>
 
     <h3>int build_oid (oid ** out, size_t * out_len, oid * prefix, size_t prefix_len, <b>netsnmp_variable_list</b> *
     indexes)</h3>
 
-    <p>xxx-rks: should free previous value?</p>
-
-    <p>Definition at line 3567 of file mib.c.</p>
+    <p>Definition at line 3569 of file mib.c.</p>
 
     <p>References build_oid_noalloc(), tree::indexes, and snmp_clone_mem().</p>
 
     <p>Referenced by _netsnmp_tdata_generate_index_oid(), netsnmp_table_build_oid(), and netsnmp_table_data_generate_index_oid().
-    <a name="lbAK" id="lbAK"> </a></p>
+    <a name="lbAK" id="lbAK">&nbsp;</a></p>
 
     <h3>int build_oid_segment (<b>netsnmp_variable_list</b> * var)</h3>
 
@@ -362,13 +366,13 @@
       <dd>SNMPERR_SUCCESS or SNMPERR_GENERR</dd>
     </dl>
 
-    <p>Definition at line 3431 of file mib.c.</p>
+    <p>Definition at line 3433 of file mib.c.</p>
 
     <p>References netsnmp_vardata::integer, variable_list::name, variable_list::name_length, variable_list::name_loc, NULL,
     netsnmp_vardata::objid, SNMP_FREE, netsnmp_vardata::string, variable_list::type, variable_list::val, and
     variable_list::val_len.</p>
 
-    <p>Referenced by build_oid_noalloc(). <a name="lbAL" id="lbAL"> </a></p>
+    <p>Referenced by build_oid_noalloc(). <a name="lbAL" id="lbAL">&nbsp;</a></p>
 
     <h3>void fprint_description (FILE * f, oid * objid, size_t objidlen, int width)</h3>
 
@@ -383,11 +387,11 @@
       <i>width</i> Number of subidentifiers.</dd>
     </dl>
 
-    <p>Definition at line 4426 of file mib.c.</p>
+    <p>Definition at line 4428 of file mib.c.</p>
 
     <p>References NULL, SNMP_FREE, and sprint_realloc_description().</p>
 
-    <p>Referenced by print_description(). <a name="lbAM" id="lbAM"> </a></p>
+    <p>Referenced by print_description(). <a name="lbAM" id="lbAM">&nbsp;</a></p>
 
     <h3>void fprint_objid (FILE * f, const oid * objid, size_t objidlen)</h3>
 
@@ -401,11 +405,11 @@
       <i>objidlen</i> The length of oidid.</dd>
     </dl>
 
-    <p>Definition at line 3159 of file mib.c.</p>
+    <p>Definition at line 3161 of file mib.c.</p>
 
     <p>References netsnmp_sprint_realloc_objid_tree(), NULL, and SNMP_FREE.</p>
 
-    <p>Referenced by print_objid(). <a name="lbAN" id="lbAN"> </a></p>
+    <p>Referenced by print_objid(). <a name="lbAN" id="lbAN">&nbsp;</a></p>
 
     <h3>void fprint_variable (FILE * f, const oid * objid, size_t objidlen, const <b>netsnmp_variable_list</b> * variable)</h3>
 
@@ -420,11 +424,11 @@
       <i>variable</i> The variable to print.</dd>
     </dl>
 
-    <p>Definition at line 3306 of file mib.c.</p>
+    <p>Definition at line 3308 of file mib.c.</p>
 
     <p>References NULL, SNMP_FREE, and sprint_realloc_variable().</p>
 
-    <p>Referenced by print_variable(). <a name="lbAO" id="lbAO"> </a></p>
+    <p>Referenced by print_variable(). <a name="lbAO" id="lbAO">&nbsp;</a></p>
 
     <h3>struct <b>tree</b>* get_tree_head (void)</h3>
 
@@ -440,7 +444,7 @@
 
     <p>References tree_head.</p>
 
-    <p>Referenced by netsnmp_config_parse_table_set(), and snmp_add_var(). <a name="lbAP" id="lbAP"> </a></p>
+    <p>Referenced by netsnmp_config_parse_table_set(), and snmp_add_var(). <a name="lbAP" id="lbAP">&nbsp;</a></p>
 
     <h3>int get_wild_node (const char * name, oid * objid, size_t * objidlen)</h3>
 
@@ -450,33 +454,27 @@
       <dd>comments on find_best_tree_node for usage after first time.</dd>
     </dl>
 
-    <p>Definition at line 5434 of file mib.c.</p>
+    <p>Definition at line 5448 of file mib.c.</p>
 
     <p>References get_node(), tree::label, NULL, and tree_head.</p>
 
-    <p>Referenced by snmp_parse_oid(). <a name="lbAQ" id="lbAQ"> </a></p>
+    <p>Referenced by snmp_parse_oid(). <a name="lbAQ" id="lbAQ">&nbsp;</a></p>
 
     <h3>void netsnmp_fixup_mib_directory (void)</h3>
-
-    <p>swap in the new value and repeat</p>
 
     <p>Definition at line 2477 of file mib.c.</p>
 
     <p>References netsnmp_get_mib_directory(), netsnmp_getenv(), netsnmp_set_mib_directory(), NULL, and SNMP_FREE.</p>
 
-    <p>Referenced by netsnmp_init_mib(). <a name="lbAR" id="lbAR"> </a></p>
+    <p>Referenced by netsnmp_init_mib(). <a name="lbAR" id="lbAR">&nbsp;</a></p>
 
     <h3>char* netsnmp_get_mib_directory (void)</h3>
-
-    <p>Check if the environment variable is set</p>
-
-    <p>Not set use hard coded path</p>
 
     <p>Definition at line 2430 of file mib.c.</p>
 
     <p>References netsnmp_ds_get_string(), netsnmp_getenv(), netsnmp_set_mib_directory(), and NULL.</p>
 
-    <p>Referenced by netsnmp_fixup_mib_directory(), and netsnmp_init_mib(). <a name="lbAS" id="lbAS"> </a></p>
+    <p>Referenced by netsnmp_fixup_mib_directory(), and netsnmp_init_mib(). <a name="lbAS" id="lbAS">&nbsp;</a></p>
 
     <h3>void netsnmp_init_mib (void)</h3>
 
@@ -489,7 +487,7 @@
     <p>References tree::child_list, tree::label, _PrefixList::len, Mib, mib_prefixes, netsnmp_fixup_mib_directory(),
     netsnmp_get_mib_directory(), netsnmp_getenv(), NULL, SNMP_FREE, _PrefixList::str, and tree_head.</p>
 
-    <p>Referenced by init_mib(), and init_snmp(). <a name="lbAT" id="lbAT"> </a></p>
+    <p>Referenced by init_mib(), and init_snmp(). <a name="lbAT" id="lbAT">&nbsp;</a></p>
 
     <h3>int netsnmp_oid2chars (char * C, int L, const oid * O)</h3>
 
@@ -513,9 +511,9 @@
 
     <p>length</p>
 
-    <p>Definition at line 6221 of file mib.c.</p>
+    <p>Definition at line 6235 of file mib.c.</p>
 
-    <p>Referenced by netsnmp_oid2str(). <a name="lbAU" id="lbAU"> </a></p>
+    <p>Referenced by netsnmp_oid2str(). <a name="lbAU" id="lbAU">&nbsp;</a></p>
 
     <h3>int netsnmp_oid2str (char * S, int L, oid * O)</h3>
 
@@ -537,23 +535,17 @@
       <dd>0 on Sucess, 1 on failure.</dd>
     </dl>
 
-    <p>Definition at line 6249 of file mib.c.</p>
+    <p>Definition at line 6263 of file mib.c.</p>
 
-    <p>References netsnmp_oid2chars(). <a name="lbAV" id="lbAV"> </a></p>
+    <p>References netsnmp_oid2chars(). <a name="lbAV" id="lbAV">&nbsp;</a></p>
 
     <h3>void netsnmp_set_mib_directory (const char * dir)</h3>
-
-    <p>New dir starts with '+', thus we add it.</p>
-
-    <p>If dir starts with '+' skip '+' it.</p>
-
-    <p>set_string calls strdup, so if we allocated memory, free it</p>
 
     <p>Definition at line 2375 of file mib.c.</p>
 
     <p>References netsnmp_ds_get_string(), netsnmp_ds_set_string(), NULL, and SNMP_FREE.</p>
 
-    <p>Referenced by netsnmp_fixup_mib_directory(), and netsnmp_get_mib_directory(). <a name="lbAW" id="lbAW"> </a></p>
+    <p>Referenced by netsnmp_fixup_mib_directory(), and netsnmp_get_mib_directory(). <a name="lbAW" id="lbAW">&nbsp;</a></p>
 
     <h3>int netsnmp_str2oid (const char * S, oid * O, int L)</h3>
 
@@ -575,7 +567,7 @@
       <dd>0 on Sucess, 1 on failure.</dd>
     </dl>
 
-    <p>Definition at line 6186 of file mib.c. <a name="lbAX" id="lbAX"> </a></p>
+    <p>Definition at line 6200 of file mib.c. <a name="lbAX" id="lbAX">&nbsp;</a></p>
 
     <h3>void print_description (oid * objid, size_t objidlen, int width)</h3>
 
@@ -587,9 +579,9 @@
       <dd><b>fprint_description</b></dd>
     </dl>
 
-    <p>Definition at line 4410 of file mib.c.</p>
+    <p>Definition at line 4412 of file mib.c.</p>
 
-    <p>References fprint_description(). <a name="lbAY" id="lbAY"> </a></p>
+    <p>References fprint_description(). <a name="lbAY" id="lbAY">&nbsp;</a></p>
 
     <h3>void print_mib (FILE * fp)</h3>
 
@@ -601,9 +593,9 @@
       <dd><i>fp</i> The file descriptor to print to.</dd>
     </dl>
 
-    <p>Definition at line 2737 of file mib.c.</p>
+    <p>Definition at line 2739 of file mib.c.</p>
 
-    <p>References tree_head. <a name="lbAZ" id="lbAZ"> </a></p>
+    <p>References tree_head. <a name="lbAZ" id="lbAZ">&nbsp;</a></p>
 
     <h3>void print_objid (const oid * objid, size_t objidlen)</h3>
 
@@ -616,9 +608,9 @@
       <i>objidlen</i> The length of oidid.</dd>
     </dl>
 
-    <p>Definition at line 3145 of file mib.c.</p>
+    <p>Definition at line 3147 of file mib.c.</p>
 
-    <p>References fprint_objid(). <a name="lbBA" id="lbBA"> </a></p>
+    <p>References fprint_objid(). <a name="lbBA" id="lbBA">&nbsp;</a></p>
 
     <h3>void print_variable (const oid * objid, size_t objidlen, const <b>netsnmp_variable_list</b> * variable)</h3>
 
@@ -632,9 +624,9 @@
       <i>variable</i> The variable to print.</dd>
     </dl>
 
-    <p>Definition at line 3290 of file mib.c.</p>
+    <p>Definition at line 3292 of file mib.c.</p>
 
-    <p>References fprint_variable(). <a name="lbBB" id="lbBB"> </a></p>
+    <p>References fprint_variable(). <a name="lbBB" id="lbBB">&nbsp;</a></p>
 
     <h3>int read_objid (const char * input, oid * output, size_t * out_len)</h3>
 
@@ -659,11 +651,11 @@
     <p>If an error occurs, this function returns 0 and MAY set snmp_errno. snmp_errno is NOT set if SET_SNMP_ERROR evaluates to
     nothing. This can make multi-threaded use a tiny bit more robust.</p>
 
-    <p>Definition at line 2835 of file mib.c.</p>
+    <p>Definition at line 2837 of file mib.c.</p>
 
     <p>References get_node(), netsnmp_ds_get_boolean(), NULL, SNMP_FREE, and tree_head.</p>
 
-    <p>Referenced by read_config_read_objid(), and snmp_parse_oid(). <a name="lbBC" id="lbBC"> </a></p>
+    <p>Referenced by read_config_read_objid(), and snmp_parse_oid(). <a name="lbBC" id="lbBC">&nbsp;</a></p>
 
     <h3>void set_function (struct <b>tree</b> * subtree)</h3>
 
@@ -675,13 +667,13 @@
       <dd><i>subtree</i> The subtree to set.</dd>
     </dl>
 
-    <p>Definition at line 2758 of file mib.c.</p>
+    <p>Definition at line 2760 of file mib.c.</p>
 
     <p>References NULL, tree::printer, tree::printomat, sprint_realloc_bitstring(), sprint_realloc_by_type(),
     sprint_realloc_counter(), sprint_realloc_counter64(), sprint_realloc_gauge(), sprint_realloc_integer(),
     sprint_realloc_ipaddress(), sprint_realloc_networkaddress(), sprint_realloc_nsapaddress(), sprint_realloc_null(),
     sprint_realloc_object_identifier(), sprint_realloc_octet_string(), sprint_realloc_opaque(), sprint_realloc_timeticks(),
-    sprint_realloc_uinteger(), and tree::type. <a name="lbBD" id="lbBD"> </a></p>
+    sprint_realloc_uinteger(), and tree::type. <a name="lbBD" id="lbBD">&nbsp;</a></p>
 
     <h3>void shutdown_mib (void)</h3>
 
@@ -691,7 +683,7 @@
 
     <p>References tree::label, Mib, NULL, SNMP_FREE, and tree_head.</p>
 
-    <p>Referenced by snmp_shutdown(). <a name="lbBE" id="lbBE"> </a></p>
+    <p>Referenced by snmp_shutdown(). <a name="lbBE" id="lbBE">&nbsp;</a></p>
 
     <h3>void snmp_in_toggle_options_usage (const char * lead, FILE * outf)</h3>
 
@@ -704,7 +696,7 @@
       <i>outf</i> The file descriptor to write to.</dd>
     </dl>
 
-    <p>Definition at line 2287 of file mib.c. <a name="lbBF" id="lbBF"> </a></p>
+    <p>Definition at line 2287 of file mib.c. <a name="lbBF" id="lbBF">&nbsp;</a></p>
 
     <h3>oid* snmp_parse_oid (const char * argv, oid * root, size_t * rootlen)</h3>
 
@@ -727,12 +719,12 @@
       <dd>The root oid pointer if successful, or NULL otherwise.</dd>
     </dl>
 
-    <p>Definition at line 5792 of file mib.c.</p>
+    <p>Definition at line 5806 of file mib.c.</p>
 
     <p>References clear_tree_flags(), get_node(), get_wild_node(), netsnmp_ds_get_boolean(), netsnmp_ds_get_string(), NULL,
     read_objid(), and tree_head.</p>
 
-    <p>Referenced by netsnmp_config_parse_table_set(), and snmp_add_var(). <a name="lbBG" id="lbBG"> </a></p>
+    <p>Referenced by netsnmp_config_parse_table_set(), and snmp_add_var(). <a name="lbBG" id="lbBG">&nbsp;</a></p>
 
     <h3>int sprint_realloc_asciistring (u_char ** buf, size_t * buf_len, size_t * out_len, int allow_realloc, const u_char * cp,
     size_t len)</h3>
@@ -765,7 +757,8 @@
 
     <p>References snmp_realloc().</p>
 
-    <p>Referenced by asn_build_string(), asn_parse_string(), and snprint_asciistring(). <a name="lbBH" id="lbBH"> </a></p>
+    <p>Referenced by asn_build_string(), asn_parse_string(), snprint_asciistring(), and sprint_realloc_octet_string(). <a name=
+    "lbBH" id="lbBH">&nbsp;</a></p>
 
     <h3>int sprint_realloc_badtype (u_char ** buf, size_t * buf_len, size_t * out_len, int allow_realloc, const
     <b>netsnmp_variable_list</b> * var, const struct <b>enum_list</b> * enums, const char * hint, const char * units)</h3>
@@ -798,7 +791,7 @@
 
     <p>References snmp_strcat().</p>
 
-    <p>Referenced by snprint_badtype(), and sprint_realloc_by_type(). <a name="lbBI" id="lbBI"> </a></p>
+    <p>Referenced by snprint_badtype(), and sprint_realloc_by_type(). <a name="lbBI" id="lbBI">&nbsp;</a></p>
 
     <h3>int sprint_realloc_bitstring (u_char ** buf, size_t * buf_len, size_t * out_len, int allow_realloc, const
     <b>netsnmp_variable_list</b> * var, const struct <b>enum_list</b> * enums, const char * hint, const char * units)</h3>
@@ -833,7 +826,7 @@
     sprint_realloc_by_type(), sprint_realloc_hexstring(), variable_list::type, variable_list::val, variable_list::val_len, and
     enum_list::value.</p>
 
-    <p>Referenced by set_function(), snprint_bitstring(), and sprint_realloc_by_type(). <a name="lbBJ" id="lbBJ"> </a></p>
+    <p>Referenced by set_function(), snprint_bitstring(), and sprint_realloc_by_type(). <a name="lbBJ" id="lbBJ">&nbsp;</a></p>
 
     <h3>int sprint_realloc_by_type (u_char ** buf, size_t * buf_len, size_t * out_len, int allow_realloc, const
     <b>netsnmp_variable_list</b> * var, const struct <b>enum_list</b> * enums, const char * hint, const char * units)</h3>
@@ -873,7 +866,7 @@
     sprint_realloc_counter64(), sprint_realloc_gauge(), sprint_realloc_integer(), sprint_realloc_ipaddress(),
     sprint_realloc_networkaddress(), sprint_realloc_nsapaddress(), sprint_realloc_null(), sprint_realloc_object_identifier(),
     sprint_realloc_octet_string(), sprint_realloc_opaque(), sprint_realloc_timeticks(), sprint_realloc_uinteger(),
-    sprint_realloc_value(), sprint_realloc_variable(), and table_helper_handler(). <a name="lbBK" id="lbBK"> </a></p>
+    sprint_realloc_value(), sprint_realloc_variable(), and table_helper_handler(). <a name="lbBK" id="lbBK">&nbsp;</a></p>
 
     <h3>int sprint_realloc_counter (u_char ** buf, size_t * buf_len, size_t * out_len, int allow_realloc, const
     <b>netsnmp_variable_list</b> * var, const struct <b>enum_list</b> * enums, const char * hint, const char * units)</h3>
@@ -907,7 +900,7 @@
     <p>References netsnmp_vardata::integer, netsnmp_ds_get_boolean(), NULL, snmp_strcat(), sprint_realloc_by_type(),
     variable_list::type, and variable_list::val.</p>
 
-    <p>Referenced by set_function(), snprint_counter(), and sprint_realloc_by_type(). <a name="lbBL" id="lbBL"> </a></p>
+    <p>Referenced by set_function(), snprint_counter(), and sprint_realloc_by_type(). <a name="lbBL" id="lbBL">&nbsp;</a></p>
 
     <h3>int sprint_realloc_counter64 (u_char ** buf, size_t * buf_len, size_t * out_len, int allow_realloc, const
     <b>netsnmp_variable_list</b> * var, const struct <b>enum_list</b> * enums, const char * hint, const char * units)</h3>
@@ -944,7 +937,7 @@
     variable_list::type, and variable_list::val.</p>
 
     <p>Referenced by set_function(), snprint_counter64(), sprint_realloc_by_type(), and sprint_realloc_opaque(). <a name="lbBM"
-    id="lbBM"> </a></p>
+    id="lbBM">&nbsp;</a></p>
 
     <h3>int sprint_realloc_gauge (u_char ** buf, size_t * buf_len, size_t * out_len, int allow_realloc, const
     <b>netsnmp_variable_list</b> * var, const struct <b>enum_list</b> * enums, const char * hint, const char * units)</h3>
@@ -978,7 +971,7 @@
     <p>References netsnmp_vardata::integer, netsnmp_ds_get_boolean(), NULL, snmp_strcat(), sprint_realloc_by_type(),
     sprint_realloc_hinted_integer(), variable_list::type, and variable_list::val.</p>
 
-    <p>Referenced by set_function(), snprint_gauge(), and sprint_realloc_by_type(). <a name="lbBN" id="lbBN"> </a></p>
+    <p>Referenced by set_function(), snprint_gauge(), and sprint_realloc_by_type(). <a name="lbBN" id="lbBN">&nbsp;</a></p>
 
     <h3>int sprint_realloc_hinted_integer (u_char ** buf, size_t * buf_len, size_t * out_len, int allow_realloc, long val, const
     char decimaltype, const char * hint, const char * units)</h3>
@@ -1011,7 +1004,7 @@
 
     <p>References snmp_strcat().</p>
 
-    <p>Referenced by snprint_hinted_integer(), and sprint_realloc_gauge(). <a name="lbBO" id="lbBO"> </a></p>
+    <p>Referenced by snprint_hinted_integer(), and sprint_realloc_gauge(). <a name="lbBO" id="lbBO">&nbsp;</a></p>
 
     <h3>int sprint_realloc_integer (u_char ** buf, size_t * buf_len, size_t * out_len, int allow_realloc, const
     <b>netsnmp_variable_list</b> * var, const struct <b>enum_list</b> * enums, const char * hint, const char * units)</h3>
@@ -1045,7 +1038,7 @@
     <p>References netsnmp_vardata::integer, enum_list::label, netsnmp_ds_get_boolean(), enum_list::next, NULL, snmp_strcat(),
     sprint_realloc_by_type(), variable_list::type, variable_list::val, and enum_list::value.</p>
 
-    <p>Referenced by set_function(), snprint_integer(), and sprint_realloc_by_type(). <a name="lbBP" id="lbBP"> </a></p>
+    <p>Referenced by set_function(), snprint_integer(), and sprint_realloc_by_type(). <a name="lbBP" id="lbBP">&nbsp;</a></p>
 
     <h3>int sprint_realloc_ipaddress (u_char ** buf, size_t * buf_len, size_t * out_len, int allow_realloc, const
     <b>netsnmp_variable_list</b> * var, const struct <b>enum_list</b> * enums, const char * hint, const char * units)</h3>
@@ -1079,7 +1072,7 @@
     <p>References netsnmp_ds_get_boolean(), NULL, snmp_realloc(), snmp_strcat(), sprint_realloc_by_type(),
     netsnmp_vardata::string, variable_list::type, and variable_list::val.</p>
 
-    <p>Referenced by set_function(), snprint_ipaddress(), and sprint_realloc_by_type(). <a name="lbBQ" id="lbBQ"> </a></p>
+    <p>Referenced by set_function(), snprint_ipaddress(), and sprint_realloc_by_type(). <a name="lbBQ" id="lbBQ">&nbsp;</a></p>
 
     <h3>int sprint_realloc_networkaddress (u_char ** buf, size_t * buf_len, size_t * out_len, int allow_realloc, const
     <b>netsnmp_variable_list</b> * var, const struct <b>enum_list</b> * enums, const char * hint, const char * units)</h3>
@@ -1113,7 +1106,7 @@
     <p>References netsnmp_ds_get_boolean(), NULL, snmp_realloc(), snmp_strcat(), sprint_realloc_by_type(),
     netsnmp_vardata::string, variable_list::type, variable_list::val, and variable_list::val_len.</p>
 
-    <p>Referenced by set_function(), and snprint_networkaddress(). <a name="lbBR" id="lbBR"> </a></p>
+    <p>Referenced by set_function(), and snprint_networkaddress(). <a name="lbBR" id="lbBR">&nbsp;</a></p>
 
     <h3>int sprint_realloc_null (u_char ** buf, size_t * buf_len, size_t * out_len, int allow_realloc, const
     <b>netsnmp_variable_list</b> * var, const struct <b>enum_list</b> * enums, const char * hint, const char * units)</h3>
@@ -1146,7 +1139,7 @@
 
     <p>References netsnmp_ds_get_boolean(), NULL, snmp_strcat(), sprint_realloc_by_type(), and variable_list::type.</p>
 
-    <p>Referenced by set_function(), snprint_null(), and sprint_realloc_by_type(). <a name="lbBS" id="lbBS"> </a></p>
+    <p>Referenced by set_function(), snprint_null(), and sprint_realloc_by_type(). <a name="lbBS" id="lbBS">&nbsp;</a></p>
 
     <h3>int sprint_realloc_object_identifier (u_char ** buf, size_t * buf_len, size_t * out_len, int allow_realloc, const
     <b>netsnmp_variable_list</b> * var, const struct <b>enum_list</b> * enums, const char * hint, const char * units)</h3>
@@ -1181,7 +1174,7 @@
     sprint_realloc_by_type(), variable_list::type, variable_list::val, and variable_list::val_len.</p>
 
     <p>Referenced by set_function(), snprint_object_identifier(), and sprint_realloc_by_type(). <a name="lbBT" id=
-    "lbBT"> </a></p>
+    "lbBT">&nbsp;</a></p>
 
     <h3>int sprint_realloc_octet_string (u_char ** buf, size_t * buf_len, size_t * out_len, int allow_realloc, const
     <b>netsnmp_variable_list</b> * var, const struct <b>enum_list</b> * enums, const char * hint, const char * units)</h3>
@@ -1214,12 +1207,12 @@
 
     <p>Definition at line 427 of file mib.c.</p>
 
-    <p>References netsnmp_ds_get_boolean(), NULL, snmp_cstrcat, snmp_realloc(), sprint_realloc_by_type(),
-    sprint_realloc_octet_string(), netsnmp_vardata::string, variable_list::type, variable_list::val, and
-    variable_list::val_len.</p>
+    <p>References netsnmp_ds_get_boolean(), netsnmp_ds_get_int(), NULL, snmp_cstrcat, snmp_realloc(),
+    sprint_realloc_asciistring(), sprint_realloc_by_type(), sprint_realloc_hexstring(), sprint_realloc_octet_string(),
+    netsnmp_vardata::string, variable_list::type, variable_list::val, and variable_list::val_len.</p>
 
     <p>Referenced by set_function(), snprint_octet_string(), sprint_realloc_by_type(), and sprint_realloc_octet_string().
-    <a name="lbBU" id="lbBU"> </a></p>
+    <a name="lbBU" id="lbBU">&nbsp;</a></p>
 
     <h3>int sprint_realloc_opaque (u_char ** buf, size_t * buf_len, size_t * out_len, int allow_realloc, const
     <b>netsnmp_variable_list</b> * var, const struct <b>enum_list</b> * enums, const char * hint, const char * units)</h3>
@@ -1254,7 +1247,7 @@
     sprint_realloc_counter64(), sprint_realloc_hexstring(), netsnmp_vardata::string, variable_list::type, variable_list::val, and
     variable_list::val_len.</p>
 
-    <p>Referenced by set_function(), snprint_opaque(), and sprint_realloc_by_type(). <a name="lbBV" id="lbBV"> </a></p>
+    <p>Referenced by set_function(), snprint_opaque(), and sprint_realloc_by_type(). <a name="lbBV" id="lbBV">&nbsp;</a></p>
 
     <h3>int sprint_realloc_timeticks (u_char ** buf, size_t * buf_len, size_t * out_len, int allow_realloc, const
     <b>netsnmp_variable_list</b> * var, const struct <b>enum_list</b> * enums, const char * hint, const char * units)</h3>
@@ -1288,7 +1281,7 @@
     <p>References netsnmp_vardata::integer, netsnmp_ds_get_boolean(), NULL, snmp_strcat(), sprint_realloc_by_type(),
     variable_list::type, and variable_list::val.</p>
 
-    <p>Referenced by set_function(), snprint_timeticks(), and sprint_realloc_by_type(). <a name="lbBW" id="lbBW"> </a></p>
+    <p>Referenced by set_function(), snprint_timeticks(), and sprint_realloc_by_type(). <a name="lbBW" id="lbBW">&nbsp;</a></p>
 
     <h3>int sprint_realloc_uinteger (u_char ** buf, size_t * buf_len, size_t * out_len, int allow_realloc, const
     <b>netsnmp_variable_list</b> * var, const struct <b>enum_list</b> * enums, const char * hint, const char * units)</h3>
@@ -1322,7 +1315,7 @@
     <p>References netsnmp_vardata::integer, enum_list::label, netsnmp_ds_get_boolean(), enum_list::next, NULL, snmp_strcat(),
     sprint_realloc_by_type(), variable_list::type, variable_list::val, and enum_list::value.</p>
 
-    <p>Referenced by set_function(), snprint_uinteger(), and sprint_realloc_by_type(). <a name="lbBX" id="lbBX"> </a></p>
+    <p>Referenced by set_function(), snprint_uinteger(), and sprint_realloc_by_type(). <a name="lbBX" id="lbBX">&nbsp;</a></p>
 
     <h3>char* uptime_string (u_long timeticks, char * buf)</h3>
 
@@ -1349,13 +1342,13 @@
       <dd>uptimeString</dd>
     </dl>
 
-    <p>Definition at line 5757 of file mib.c.</p>
+    <p>Definition at line 5771 of file mib.c.</p>
 
-    <p>References uptime_string_n(). <a name="lbBY" id="lbBY"> </a></p>
+    <p>References uptime_string_n(). <a name="lbBY" id="lbBY">&nbsp;</a></p>
 
     <h2>Variable Documentation</h2>
 
-    <p><a name="lbBZ" id="lbBZ"> </a></p>
+    <p><a name="lbBZ" id="lbBZ">&nbsp;</a></p>
 
     <h3><b>PrefixList</b> <b>mib_prefixes</b>[]</h3>
 
@@ -1374,9 +1367,9 @@
 
     <p>Definition at line 160 of file mib.c.</p>
 
-    <p>Referenced by netsnmp_init_mib().</p>
+    <p>Referenced by netsnmp_init_mib(), and netsnmp_sprint_realloc_objid_tree().</p>
     <hr />
-    <a name="index" id="index"> </a>
+    <a name="index" id="index">&nbsp;</a>
 
     <h2>Index</h2>
 
@@ -1533,7 +1526,7 @@
     </dl>
     <hr />
     This document was created by <a href="http://localhost/cgi-bin/man/man2html">man2html</a>, using the manual pages.<br />
-    Time: 16:55:09 GMT, December 09, 2006
+    Time: 13:12:01 GMT, September 23, 2007
 <!-- CONTENT END -->
 <!--#include virtual="/page-bottom.html" -->
 

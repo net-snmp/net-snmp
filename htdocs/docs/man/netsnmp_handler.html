@@ -2,16 +2,16 @@
 <!--#include virtual="/page-top.html" -->
 <!-- CONTENT START -->
     <h1>Net-SNMP Agent handler and extensibility API</h1>Section: net-snmp (3)<br />
-    Updated: 24 Nov 2006<br />
+    Updated: 27 Jul 2007<br />
     <a href="#index">Index</a> <a href="../index.html">Return to Main Contents</a>
     <hr />
-    <a name="lbAB" id="lbAB"> </a>
+    <a name="lbAB" id="lbAB">&nbsp;</a>
 
     <h2>NAME</h2>Net-SNMP Agent handler and extensibility API - The basic theory goes something like this: In the past, with the
     original mib module api (which derived from the original CMU SNMP code) the underlying mib modules were passed very little
     information (only the truly most basic information about a request).
 
-    <p><a name="lbAC" id="lbAC"> </a></p>
+    <p><a name="lbAC" id="lbAC">&nbsp;</a></p>
 
     <h3>Modules</h3>
 
@@ -41,7 +41,7 @@
     <b>table</b><br />
     <i>Helps you implement a table.</i></p>
 
-    <p><a name="lbAD" id="lbAD"> </a></p>
+    <p><a name="lbAD" id="lbAD">&nbsp;</a></p>
 
     <h3>Data Structures</h3>
 
@@ -57,7 +57,7 @@
     struct <b>netsnmp_mib_handler_s</b><br />
     <i>the mib handler structure to be registered</i><br />
     struct <b>netsnmp_handler_registration_s</b><br />
-    <i>Root registration info.</i> <a name="lbAE" id="lbAE"> </a></p>
+    <i>Root registration info.</i> <a name="lbAE" id="lbAE">&nbsp;</a></p>
 
     <h3>Defines</h3>
 
@@ -99,7 +99,7 @@
     #define <b>REQUEST_IS_DELEGATED</b> 1<br />
     <br />
     #define <b>REQUEST_IS_NOT_DELEGATED</b> 0<br />
-    <a name="lbAF" id="lbAF"> </a></p>
+    <a name="lbAF" id="lbAF">&nbsp;</a></p>
 
     <h3>Typedefs</h3>
 
@@ -108,13 +108,13 @@
     <i>Typedefs the</i> <b>netsnmp_mib_handler_s</b> struct into netsnmp_mib_handler.<br />
     typedef <b>netsnmp_handler_registration_s</b> <b>netsnmp_handler_registration</b><br />
     <i>Typedefs the</i> <b>netsnmp_handler_registration_s</b> struct into netsnmp_handler_registration.<br />
-    typedef int() <b>Netsnmp_Node_Handler</b> (<b>netsnmp_mib_handler</b> *handler, <b>netsnmp_handler_registration</b> *reginfo,
+    typedef int( <b>Netsnmp_Node_Handler</b> )(<b>netsnmp_mib_handler</b> *handler, <b>netsnmp_handler_registration</b> *reginfo,
     <b>netsnmp_agent_request_info</b> *reqinfo, <b>netsnmp_request_info</b> *requests)<br />
     <br />
     typedef <b>netsnmp_handler_args_s</b> <b>netsnmp_handler_args</b><br />
     <br />
     typedef <b>netsnmp_delegated_cache_s</b> <b>netsnmp_delegated_cache</b><br />
-    <a name="lbAG" id="lbAG"> </a></p>
+    <a name="lbAG" id="lbAG">&nbsp;</a></p>
 
     <h3>Functions</h3>
 
@@ -206,7 +206,7 @@
     void <b>netsnmp_init_handler_conf</b> (void)<br />
     <br />
     void * <b>netsnmp_handler_get_parent_data</b> (<b>netsnmp_request_info</b> *, const char *)<br />
-    <a name="lbAH" id="lbAH"> </a></p>
+    <a name="lbAH" id="lbAH">&nbsp;</a></p>
 
     <h2>Detailed Description</h2>
 
@@ -238,27 +238,27 @@
     this helper instead). The beauty of the <b>table_iterator helper</b>, as well as the <b>instance</b> helper is that they take
     care of the complex GETNEXT processing entirely for you and hand you everything you need to merely return the data as if it
     was a GET request. Much less code and hair pulling. I've pulled all my hair out to help you so that only one of us has to be
-    bald. <a name="lbAI" id="lbAI"> </a></p>
+    bald. <a name="lbAI" id="lbAI">&nbsp;</a></p>
 
     <h2>Typedef Documentation</h2>
 
-    <p><a name="lbAJ" id="lbAJ"> </a></p>
+    <p><a name="lbAJ" id="lbAJ">&nbsp;</a></p>
 
     <h3>struct <b>netsnmp_handler_registration_s</b> <b>netsnmp_handler_registration</b></h3>
 
     <p>Typedefs the <b>netsnmp_handler_registration_s</b> struct into netsnmp_handler_registration.</p>
 
-    <p><a name="lbAK" id="lbAK"> </a></p>
+    <p><a name="lbAK" id="lbAK">&nbsp;</a></p>
 
     <h3>struct <b>netsnmp_mib_handler_s</b> <b>netsnmp_mib_handler</b></h3>
 
     <p>Typedefs the <b>netsnmp_mib_handler_s</b> struct into netsnmp_mib_handler.</p>
 
-    <p><a name="lbAL" id="lbAL"> </a></p>
+    <p><a name="lbAL" id="lbAL">&nbsp;</a></p>
 
     <h2>Function Documentation</h2>
 
-    <p><a name="lbAM" id="lbAM"> </a></p>
+    <p><a name="lbAM" id="lbAM">&nbsp;</a></p>
 
     <h3>int netsnmp_call_handler (<b>netsnmp_mib_handler</b> * next_handler, <b>netsnmp_handler_registration</b> * reginfo,
     <b>netsnmp_agent_request_info</b> * reqinfo, <b>netsnmp_request_info</b> * requests)</h3>
@@ -271,8 +271,8 @@
     MIB_HANDLER_AUTO_NEXT_OVERRIDE_ONCE, netsnmp_agent_request_info_s::mode, netsnmp_mib_handler_s::next, NULL, and
     snmp_log().</p>
 
-    <p>Referenced by netsnmp_call_next_handler(), netsnmp_call_next_handler_one_request(), netsnmp_mode_end_call_helper(), and
-    netsnmp_multiplexer_helper_handler(). <a name="lbAN" id="lbAN"> </a></p>
+    <p>Referenced by netsnmp_call_handlers(), netsnmp_call_next_handler(), netsnmp_call_next_handler_one_request(),
+    netsnmp_mode_end_call_helper(), and netsnmp_multiplexer_helper_handler(). <a name="lbAN" id="lbAN">&nbsp;</a></p>
 
     <h3>int netsnmp_call_next_handler (<b>netsnmp_mib_handler</b> * current, <b>netsnmp_handler_registration</b> * reginfo,
     <b>netsnmp_agent_request_info</b> * reqinfo, <b>netsnmp_request_info</b> * requests)</h3>
@@ -286,9 +286,9 @@
     <p>Referenced by _netsnmp_stash_cache_load(), netsnmp_bulk_to_next_helper(), netsnmp_debug_helper(),
     netsnmp_instance_counter32_handler(), netsnmp_instance_helper_handler(), netsnmp_instance_int_handler(),
     netsnmp_instance_long_handler(), netsnmp_instance_num_file_handler(), netsnmp_instance_uint_handler(),
-    netsnmp_instance_ulong_handler(), netsnmp_mode_end_call_helper(), netsnmp_scalar_group_helper_handler(),
-    netsnmp_scalar_helper_handler(), netsnmp_serialize_helper_handler(), netsnmp_stash_to_next_helper(), and
-    table_helper_handler(). <a name="lbAO" id="lbAO"> </a></p>
+    netsnmp_instance_ulong_handler(), netsnmp_mode_end_call_helper(), netsnmp_row_merge_helper_handler(),
+    netsnmp_scalar_group_helper_handler(), netsnmp_scalar_helper_handler(), netsnmp_serialize_helper_handler(),
+    netsnmp_stash_to_next_helper(), and table_helper_handler(). <a name="lbAO" id="lbAO">&nbsp;</a></p>
 
     <h3>int netsnmp_call_next_handler_one_request (<b>netsnmp_mib_handler</b> * current, <b>netsnmp_handler_registration</b> *
     reginfo, <b>netsnmp_agent_request_info</b> * reqinfo, <b>netsnmp_request_info</b> * requests)</h3>
@@ -298,7 +298,7 @@
     <p>Definition at line 546 of file agent_handler.c.</p>
 
     <p>References netsnmp_call_handler(), netsnmp_mib_handler_s::next, netsnmp_request_info_s::next, NULL, and snmp_log().
-    <a name="lbAP" id="lbAP"> </a></p>
+    <a name="lbAP" id="lbAP">&nbsp;</a></p>
 
     <h3>void netsnmp_clear_handler_list (void)</h3>
 
@@ -308,7 +308,7 @@
 
     <p>References netsnmp_free_all_list_data(), and NULL.</p>
 
-    <p>Referenced by shutdown_agent(). <a name="lbAQ" id="lbAQ"> </a></p>
+    <p>Referenced by shutdown_agent(). <a name="lbAQ" id="lbAQ">&nbsp;</a></p>
 
     <h3>NETSNMP_INLINE <b>netsnmp_delegated_cache</b> * netsnmp_create_delegated_cache (<b>netsnmp_mib_handler</b> * handler,
     <b>netsnmp_handler_registration</b> * reginfo, <b>netsnmp_agent_request_info</b> * reqinfo, <b>netsnmp_request_info</b> *
@@ -325,7 +325,7 @@
     <p>References netsnmp_agent_request_info_s::asp, netsnmp_delegated_cache_s::handler, netsnmp_delegated_cache_s::localinfo,
     netsnmp_agent_session_s::pdu, netsnmp_delegated_cache_s::reginfo, netsnmp_delegated_cache_s::reqinfo,
     netsnmp_delegated_cache_s::requests, SNMP_MALLOC_TYPEDEF, netsnmp_delegated_cache_s::transaction_id, and snmp_pdu::transid.
-    <a name="lbAR" id="lbAR"> </a></p>
+    <a name="lbAR" id="lbAR">&nbsp;</a></p>
 
     <h3><b>netsnmp_mib_handler</b> * netsnmp_create_handler (const char * name, <b>Netsnmp_Node_Handler</b> *
     handler_access_method)</h3>
@@ -373,7 +373,7 @@
     netsnmp_get_tdata_handler(), netsnmp_get_timed_bare_stash_cache_handler(), netsnmp_get_watched_spinlock_handler(),
     netsnmp_get_watched_timestamp_handler(), netsnmp_get_watcher_handler(), netsnmp_sparse_table_handler_get(),
     netsnmp_sparse_table_register(), netsnmp_table_array_register(), and netsnmp_table_row_handler_get(). <a name="lbAS" id=
-    "lbAS"> </a></p>
+    "lbAS">&nbsp;</a></p>
 
     <h3><b>netsnmp_mib_handler</b> * netsnmp_find_handler_by_name (<b>netsnmp_handler_registration</b> * reginfo, const char *
     name)</h3>
@@ -385,7 +385,7 @@
     <p>References netsnmp_handler_registration_s::handler, netsnmp_mib_handler_s::handler_name, netsnmp_mib_handler_s::next, and
     NULL.</p>
 
-    <p>Referenced by netsnmp_find_handler_data_by_name(). <a name="lbAT" id="lbAT"> </a></p>
+    <p>Referenced by netsnmp_find_handler_data_by_name(). <a name="lbAT" id="lbAT">&nbsp;</a></p>
 
     <h3>void * netsnmp_find_handler_data_by_name (<b>netsnmp_handler_registration</b> * reginfo, const char * name)</h3>
 
@@ -398,7 +398,7 @@
 
     <p>References netsnmp_mib_handler_s::myvoid, netsnmp_find_handler_by_name(), and NULL.</p>
 
-    <p>Referenced by netsnmp_find_table_registration_info(). <a name="lbAU" id="lbAU"> </a></p>
+    <p>Referenced by netsnmp_find_table_registration_info(). <a name="lbAU" id="lbAU">&nbsp;</a></p>
 
     <h3>NETSNMP_INLINE void netsnmp_free_delegated_cache (<b>netsnmp_delegated_cache</b> * dcache)</h3>
 
@@ -408,7 +408,7 @@
 
     <p>Definition at line 734 of file agent_handler.c.</p>
 
-    <p>References SNMP_FREE. <a name="lbAV" id="lbAV"> </a></p>
+    <p>References SNMP_FREE. <a name="lbAV" id="lbAV">&nbsp;</a></p>
 
     <h3>NETSNMP_INLINE void netsnmp_free_request_data_set (<b>netsnmp_request_info</b> * request)</h3>
 
@@ -416,7 +416,7 @@
 
     <p>Definition at line 820 of file agent_handler.c.</p>
 
-    <p>References netsnmp_free_list_data(), and netsnmp_request_info_s::parent_data. <a name="lbAW" id="lbAW"> </a></p>
+    <p>References netsnmp_free_list_data(), and netsnmp_request_info_s::parent_data. <a name="lbAW" id="lbAW">&nbsp;</a></p>
 
     <h3>NETSNMP_INLINE void netsnmp_free_request_data_sets (<b>netsnmp_request_info</b> * request)</h3>
 
@@ -427,7 +427,7 @@
     <p>References netsnmp_free_all_list_data(), NULL, and netsnmp_request_info_s::parent_data.</p>
 
     <p>Referenced by free_agent_snmp_session(), get_set_cache(), netsnmp_add_varbind_to_cache(), and
-    netsnmp_delete_request_infos(). <a name="lbAX" id="lbAX"> </a></p>
+    netsnmp_delete_request_infos(). <a name="lbAX" id="lbAX">&nbsp;</a></p>
 
     <h3>NETSNMP_INLINE <b>netsnmp_delegated_cache</b> * netsnmp_handler_check_cache (<b>netsnmp_delegated_cache</b> *
     dcache)</h3>
@@ -442,7 +442,7 @@
     <p>Definition at line 720 of file agent_handler.c.</p>
 
     <p>References netsnmp_check_transaction_id(), NULL, and netsnmp_delegated_cache_s::transaction_id. <a name="lbAY" id=
-    "lbAY"> </a></p>
+    "lbAY">&nbsp;</a></p>
 
     <h3><b>netsnmp_mib_handler</b> * netsnmp_handler_dup (<b>netsnmp_mib_handler</b> * handler)</h3>
 
@@ -453,7 +453,7 @@
     <p>References netsnmp_mib_handler_s::myvoid, netsnmp_handler_free(), netsnmp_mib_handler_s::next, NULL, and
     netsnmp_mib_handler_s::prev.</p>
 
-    <p>Referenced by netsnmp_handler_registration_dup(). <a name="lbAZ" id="lbAZ"> </a></p>
+    <p>Referenced by netsnmp_handler_registration_dup(). <a name="lbAZ" id="lbAZ">&nbsp;</a></p>
 
     <h3>void netsnmp_handler_free (<b>netsnmp_mib_handler</b> * handler)</h3>
 
@@ -470,7 +470,7 @@
 
     <p>Referenced by handler_free_callback(), netsnmp_baby_steps_handler_get(), netsnmp_get_scalar_group_handler(),
     netsnmp_get_timed_bare_stash_cache_handler(), netsnmp_handler_dup(), and netsnmp_handler_registration_free(). <a name="lbBA"
-    id="lbBA"> </a></p>
+    id="lbBA">&nbsp;</a></p>
 
     <h3>void netsnmp_handler_mark_requests_as_delegated (<b>netsnmp_request_info</b> * requests, int isdelegated)</h3>
 
@@ -478,7 +478,7 @@
 
     <p>Definition at line 748 of file agent_handler.c.</p>
 
-    <p>References netsnmp_request_info_s::delegated, and netsnmp_request_info_s::next. <a name="lbBB" id="lbBB"> </a></p>
+    <p>References netsnmp_request_info_s::delegated, and netsnmp_request_info_s::next. <a name="lbBB" id="lbBB">&nbsp;</a></p>
 
     <h3><b>netsnmp_handler_registration</b> * netsnmp_handler_registration_create (const char * name, <b>netsnmp_mib_handler</b>
     * handler, oid * reg_oid, size_t reg_oid_len, int modes)</h3>
@@ -560,7 +560,7 @@
     memdup(), netsnmp_handler_registration_s::modes, NULL, netsnmp_handler_registration_s::priority,
     netsnmp_handler_registration_s::rootoid, netsnmp_handler_registration_s::rootoid_len, and SNMP_MALLOC_TYPEDEF.</p>
 
-    <p>Referenced by netsnmp_create_handler_registration(). <a name="lbBC" id="lbBC"> </a></p>
+    <p>Referenced by netsnmp_create_handler_registration(). <a name="lbBC" id="lbBC">&nbsp;</a></p>
 
     <h3><b>netsnmp_handler_registration</b> * netsnmp_handler_registration_dup (<b>netsnmp_handler_registration</b> *
     reginfo)</h3>
@@ -576,7 +576,7 @@
     netsnmp_handler_registration_s::rootoid, netsnmp_handler_registration_s::rootoid_len, and
     netsnmp_handler_registration_s::timeout.</p>
 
-    <p>Referenced by netsnmp_subtree_deepcopy(). <a name="lbBD" id="lbBD"> </a></p>
+    <p>Referenced by netsnmp_subtree_deepcopy(). <a name="lbBD" id="lbBD">&nbsp;</a></p>
 
     <h3>void netsnmp_handler_registration_free (<b>netsnmp_handler_registration</b> * reginfo)</h3>
 
@@ -588,8 +588,8 @@
     netsnmp_handler_registration_s::handlerName, netsnmp_handler_free(), NULL, netsnmp_handler_registration_s::rootoid,
     netsnmp_handler_registration_s::rootoid_len, and SNMP_FREE.</p>
 
-    <p>Referenced by netsnmp_handler_registration_dup(), netsnmp_register_mib(), netsnmp_subtree_free(), and
-    unregister_mibs_by_session(). <a name="lbBE" id="lbBE"> </a></p>
+    <p>Referenced by netsnmp_handler_registration_dup(), netsnmp_register_mib(), netsnmp_register_mib_table_row(),
+    netsnmp_subtree_free(), and unregister_mibs_by_session(). <a name="lbBE" id="lbBE">&nbsp;</a></p>
 
     <h3>int netsnmp_inject_handler (<b>netsnmp_handler_registration</b> * reginfo, <b>netsnmp_mib_handler</b> * handler)</h3>
 
@@ -608,7 +608,7 @@
     netsnmp_register_table_data(), netsnmp_register_table_data_set(), netsnmp_register_table_iterator(),
     netsnmp_register_watched_instance(), netsnmp_register_watched_scalar(), netsnmp_register_watched_spinlock(),
     netsnmp_sparse_table_register(), netsnmp_table_array_register(), netsnmp_table_row_register(), netsnmp_tdata_register(), and
-    netsnmp_watched_timestamp_register(). <a name="lbBF" id="lbBF"> </a></p>
+    netsnmp_watched_timestamp_register(). <a name="lbBF" id="lbBF">&nbsp;</a></p>
 
     <h3>int netsnmp_inject_handler_before (<b>netsnmp_handler_registration</b> * reginfo, <b>netsnmp_mib_handler</b> * handler,
     const char * before_what)</h3>
@@ -623,7 +623,7 @@
     <p>References netsnmp_handler_registration_s::handler, netsnmp_mib_handler_s::handler_name, netsnmp_mib_handler_s::next,
     NULL, netsnmp_mib_handler_s::prev, and snmp_log().</p>
 
-    <p>Referenced by netsnmp_inject_handler(), and netsnmp_inject_handler_into_subtree(). <a name="lbBG" id="lbBG"> </a></p>
+    <p>Referenced by netsnmp_inject_handler(), and netsnmp_inject_handler_into_subtree(). <a name="lbBG" id="lbBG">&nbsp;</a></p>
 
     <h3>int netsnmp_register_handler (<b>netsnmp_handler_registration</b> * reginfo)</h3>
 
@@ -641,7 +641,7 @@
 
     <p>Referenced by netsnmp_cache_handler_register(), netsnmp_register_cache_handler(), netsnmp_register_old_api(),
     netsnmp_register_row_merge(), netsnmp_register_serialize(), netsnmp_register_table(), netsnmp_sparse_table_register(), and
-    netsnmp_table_row_register(). <a name="lbBH" id="lbBH"> </a></p>
+    netsnmp_table_row_register(). <a name="lbBH" id="lbBH">&nbsp;</a></p>
 
     <h3>void netsnmp_register_handler_by_name (const char * name, <b>netsnmp_mib_handler</b> * handler)</h3>
 
@@ -653,7 +653,7 @@
 
     <p>Referenced by netsnmp_baby_steps_handler_init(), netsnmp_init_bulk_to_next_helper(), netsnmp_init_debug_helper(),
     netsnmp_init_read_only_helper(), netsnmp_init_row_merge(), netsnmp_init_serialize(), and netsnmp_init_stash_cache_helper().
-    <a name="lbBI" id="lbBI"> </a></p>
+    <a name="lbBI" id="lbBI">&nbsp;</a></p>
 
     <h3>int netsnmp_register_handler_nocallback (<b>netsnmp_handler_registration</b> * reginfo)</h3>
 
@@ -665,8 +665,9 @@
     netsnmp_mib_handler_s::handler_name, netsnmp_handler_registration_s::modes, netsnmp_register_mib(),
     netsnmp_mib_handler_s::next, NULL, netsnmp_handler_registration_s::priority, netsnmp_handler_registration_s::range_subid,
     netsnmp_handler_registration_s::range_ubound, netsnmp_handler_registration_s::rootoid,
-    netsnmp_handler_registration_s::rootoid_len, snmp_log(), and netsnmp_handler_registration_s::timeout. <a name="lbBJ" id=
-    "lbBJ"> </a></p>
+    netsnmp_handler_registration_s::rootoid_len, snmp_log(), and netsnmp_handler_registration_s::timeout.</p>
+
+    <p>Referenced by netsnmp_register_mib_table_row(). <a name="lbBJ" id="lbBJ">&nbsp;</a></p>
 
     <h3>NETSNMP_INLINE void netsnmp_request_add_list_data (<b>netsnmp_request_info</b> * request, <b>netsnmp_data_list</b> *
     node)</h3>
@@ -696,7 +697,7 @@
     netsnmp_insert_table_row(), netsnmp_instance_int_handler(), netsnmp_instance_long_handler(),
     netsnmp_instance_num_file_handler(), netsnmp_instance_uint_handler(), netsnmp_instance_ulong_handler(),
     netsnmp_table_data_helper_handler(), netsnmp_table_data_set_helper_handler(), netsnmp_table_iterator_helper_handler(),
-    netsnmp_watcher_helper_handler(), and table_helper_handler(). <a name="lbBK" id="lbBK"> </a></p>
+    netsnmp_watcher_helper_handler(), and table_helper_handler(). <a name="lbBK" id="lbBK">&nbsp;</a></p>
 
     <h3>NETSNMP_INLINE void * netsnmp_request_get_list_data (<b>netsnmp_request_info</b> * request, const char * name)</h3>
 
@@ -727,9 +728,9 @@
     netsnmp_container_table_row_extract(), netsnmp_extract_array_context(), netsnmp_extract_iterator_context(),
     netsnmp_extract_table(), netsnmp_extract_table_data_set(), netsnmp_extract_table_info(), netsnmp_extract_table_row(),
     netsnmp_instance_int_handler(), netsnmp_instance_long_handler(), netsnmp_instance_num_file_handler(),
-    netsnmp_instance_uint_handler(), netsnmp_instance_ulong_handler(), netsnmp_table_row_extract(),
-    netsnmp_tdata_extract_container(), netsnmp_tdata_extract_table(), and netsnmp_watcher_helper_handler(). <a name="lbBL" id=
-    "lbBL"> </a></p>
+    netsnmp_instance_uint_handler(), netsnmp_instance_ulong_handler(), netsnmp_table_iterator_helper_handler(),
+    netsnmp_table_row_extract(), netsnmp_tdata_extract_container(), netsnmp_tdata_extract_table(), and
+    netsnmp_watcher_helper_handler(). <a name="lbBL" id="lbBL">&nbsp;</a></p>
 
     <h3>NETSNMP_INLINE int netsnmp_request_remove_list_data (<b>netsnmp_request_info</b> * request, const char * name)</h3>
 
@@ -750,7 +751,9 @@
 
     <p>Definition at line 789 of file agent_handler.c.</p>
 
-    <p>References netsnmp_remove_list_node(), NULL, and netsnmp_request_info_s::parent_data. <a name="lbBM" id="lbBM"> </a></p>
+    <p>References netsnmp_remove_list_node(), NULL, and netsnmp_request_info_s::parent_data.</p>
+
+    <p>Referenced by netsnmp_table_data_set_helper_handler(). <a name="lbBM" id="lbBM">&nbsp;</a></p>
 
     <h3>int netsnmp_unregister_handler (<b>netsnmp_handler_registration</b> * reginfo)</h3>
 
@@ -762,7 +765,7 @@
     netsnmp_handler_registration_s::range_subid, netsnmp_handler_registration_s::range_ubound,
     netsnmp_handler_registration_s::rootoid, netsnmp_handler_registration_s::rootoid_len, and unregister_mib_context().</p>
     <hr />
-    <a name="index" id="index"> </a>
+    <a name="index" id="index">&nbsp;</a>
 
     <h2>Index</h2>
 
@@ -878,7 +881,7 @@
     </dl>
     <hr />
     This document was created by <a href="http://localhost/cgi-bin/man/man2html">man2html</a>, using the manual pages.<br />
-    Time: 16:55:09 GMT, December 09, 2006
+    Time: 13:12:01 GMT, September 23, 2007
 <!-- CONTENT END -->
 <!--#include virtual="/page-bottom.html" -->
 

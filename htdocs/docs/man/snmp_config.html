@@ -1,16 +1,17 @@
 <!--#set var="section" value="documentation" -->
 <!--#include virtual="/page-top.html" -->
 <!-- CONTENT START -->
-    <h1>SNMP.CONF</h1>Section: Net-SNMP (5)<br />
+    <h1>SNMP_CONFIG</h1>Section: Net-SNMP (5)<br />
     Updated: 5 May 2005<br />
     <a href="#index">Index</a> <a href="../index.html">Return to Main Contents</a>
     <hr />
-    <a name="lbAB" id="lbAB"> </a>
+    <a name="lbAB" id="lbAB">&nbsp;</a>
 
-    <h2>NAME</h2>snmp_config - handling of Net-SNMP configuration files <a name="lbAC" id="lbAC"> </a>
+    <h2>NAME</h2>snmp_config - handling of Net-SNMP configuration files <a name="lbAC" id="lbAC">&nbsp;</a>
 
     <h2>DESCRIPTION</h2>The Net-SNMP package uses various configuration files to configure its applications. This manual page
-    merely describes the overall nature of them, so that the other manual pages don't have to. <a name="lbAD" id="lbAD"> </a>
+    merely describes the overall nature of them, so that the other manual pages don't have to. <a name="lbAD" id=
+    "lbAD">&nbsp;</a>
 
     <h2>DIRECTORIES SEARCHED</h2>First off, there are numerous places that configuration files can be found and read from. By
     default, the applications look for configuration files in the following 4 directories, in order: /usr/local/etc/snmp,
@@ -53,7 +54,7 @@
     </dl>
 
     <p>Note: When using SNMP_PERSISTENT_FILE, the filename should match the application name. For example,
-    /var/net-snmp/snmpd.conf. <a name="lbAE" id="lbAE"> </a></p>
+    /var/net-snmp/snmpd.conf. <a name="lbAE" id="lbAE">&nbsp;</a></p>
 
     <h2>CONFIGURATION FILE TYPES</h2>Each application may use multiple configuration files, which will configure various
     different aspects of the application. For instance, the SNMP agent (<b>snmpd</b>) knows how to understand configuration
@@ -65,7 +66,7 @@
 
     <p>The snmp.conf configuration file is intended to be a application suite wide configuration file that supports directives
     that are useful for controlling the fundamental nature of all of the SNMP applications, such as how they all manipulate and
-    parse the textual SNMP MIB files. <a name="lbAF" id="lbAF"> </a></p>
+    parse the textual SNMP MIB files. <a name="lbAF" id="lbAF">&nbsp;</a></p>
 
     <h2>SWITCHING CONFIGURATION TYPES IN MID-FILE</h2>It's possible to switch in mid-file the configuration type that the parser
     is supposed to be reading. Since that sentence doesn't make much sense, lets give you an example: say that you wanted to turn
@@ -101,21 +102,22 @@ logTimestamp true
 rocommunity mypublic
 </pre>
       </dd>
-    </dl><a name="lbAG" id="lbAG"> </a>
+    </dl><a name="lbAG" id="lbAG">&nbsp;</a>
 
     <h2>COMMENTS</h2>
 
     <p>Any lines beginning with the character '#' in the configuration files are treated as a comment and are not parsed.
-    <a name="lbAH" id="lbAH"> </a></p>
+    <a name="lbAH" id="lbAH">&nbsp;</a></p>
 
     <h2>API INTERFACE</h2>
 
     <p>Information about writing C code that makes use of this system in either the agent's MIB modules or in applications can be
-    found in the <i><a href="read_config.html">read_config</a>(3)</i> manual page. <a name="lbAI" id="lbAI"> </a></p>
+    found in the <i><a href="read_config.html">read_config</a>(3)</i> manual page. <a name="lbAI" id="lbAI">&nbsp;</a></p>
 
-    <h2>SEE ALSO</h2><a href="read_config.html">read_config</a>(3).
+    <h2>SEE ALSO</h2><a href="snmpconf.html">snmpconf</a>(1), <a href="read_config.html">read_config</a>(3), <a href=
+    "snmp.conf.html">snmp.conf</a>(5), <a href="snmpd.conf.html">snmpd.conf</a>(5)
     <hr />
-    <a name="index" id="index"> </a>
+    <a name="index" id="index">&nbsp;</a>
 
     <h2>Index</h2>
 
@@ -138,7 +140,7 @@ rocommunity mypublic
     </dl>
     <hr />
     This document was created by <a href="http://localhost/cgi-bin/man/man2html">man2html</a>, using the manual pages.<br />
-    Time: 16:55:09 GMT, December 09, 2006
+    Time: 13:12:01 GMT, September 23, 2007
 <!-- CONTENT END -->
 <!--#include virtual="/page-bottom.html" -->
 

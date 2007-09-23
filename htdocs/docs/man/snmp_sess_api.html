@@ -5,10 +5,10 @@
     Updated: 07 Mar 2002<br />
     <a href="#index">Index</a> <a href="../index.html">Return to Main Contents</a>
     <hr />
-    <a name="lbAB" id="lbAB"> </a>
+    <a name="lbAB" id="lbAB">&nbsp;</a>
 
     <h2>NAME</h2>snmp_sess_init, snmp_sess_open, snmp_sess_session, snmp_sess_send, snmp_sess_async_send, snmp_sess_select_info,
-    snmp_sess_read, snmp_sess_timeout, snmp_sess_close, snmp_sess_error - session functions <a name="lbAC" id="lbAC"> </a>
+    snmp_sess_read, snmp_sess_timeout, snmp_sess_close, snmp_sess_error - session functions <a name="lbAC" id="lbAC">&nbsp;</a>
 
     <h2>SYNOPSIS</h2><b>#include &lt;<a href="file:/usr/include/net-snmp/session_api.h">net-snmp/session_api.h</a>&gt;</b>
 
@@ -30,14 +30,14 @@
     <b>struct timeval *</b><i>timeout</i><b>,</b><br />
     <b>int *</b><i>block</i><b>);</b></p>
 
-    <p><b>void snmp_sess_read(void *</b><i>handle</i><b>, fd_set *</b><i>fdset</i><b>);</b></p>
+    <p><b>int snmp_sess_read(void *</b><i>handle</i><b>, fd_set *</b><i>fdset</i><b>);</b></p>
 
     <p><b>void snmp_sess_timeout(void *</b><i>handle</i><b>);</b></p>
 
     <p><b>int snmp_sess_close(void *</b><i>handle</i><b>);</b></p>
 
     <p><b>void snmp_sess_error(void *</b><i>handle</i><b>, int *</b><i>pcliberr</i><b>,</b><br />
-    <b>int *</b><i>psnmperr</i><b>, char **</b><i>pperrstring</i><b>);</b> <a name="lbAD" id="lbAD"> </a></p>
+    <b>int *</b><i>psnmperr</i><b>, char **</b><i>pperrstring</i><b>);</b> <a name="lbAD" id="lbAD">&nbsp;</a></p>
 
     <h2>DESCRIPTION</h2>These functions define a subset of the API that can be used to manage single SNMP sessions in a
     multi-threaded application. Except for <b>snmp_sess_session()</b>, these functions are single session versions of the
@@ -82,7 +82,7 @@
     returned data. When it returns, <b>snmp_sess_read()</b> should then be called with the <i>fd_set</i> returned from
     <b><a href="select.html">select</a></b>(2). This will read any input from this session's SNMP socket. If <b><a href=
     "select.html">select</a></b>(2) times out (that is, it returns zero), <b>snmp_sess_timeout()</b> should be called to see if a
-    timeout has occurred on the SNMP session. <a name="lbAE" id="lbAE"> </a></p>
+    timeout has occurred on the SNMP session. <a name="lbAE" id="lbAE">&nbsp;</a></p>
 
     <h2>DIAGNOSTICS</h2>
 
@@ -154,12 +154,12 @@
       </dd>
     </dl>
 
-    <p><a name="lbAF" id="lbAF"> </a></p>
+    <p><a name="lbAF" id="lbAF">&nbsp;</a></p>
 
     <h2>SEE ALSO</h2><b><a href="select.html">select</a></b>(2), <b><a href="snmp_api.html">snmp_api</a></b>(3),
     <b>snmp_api.h</b>
     <hr />
-    <a name="index" id="index"> </a>
+    <a name="index" id="index">&nbsp;</a>
 
     <h2>Index</h2>
 
@@ -176,7 +176,7 @@
     </dl>
     <hr />
     This document was created by <a href="http://localhost/cgi-bin/man/man2html">man2html</a>, using the manual pages.<br />
-    Time: 16:55:09 GMT, December 09, 2006
+    Time: 13:12:01 GMT, September 23, 2007
 <!-- CONTENT END -->
 <!--#include virtual="/page-bottom.html" -->
 

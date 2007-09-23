@@ -2,14 +2,14 @@
 <!--#include virtual="/page-top.html" -->
 <!-- CONTENT START -->
     <h1>instance</h1>Section: net-snmp (3)<br />
-    Updated: 24 Nov 2006<br />
+    Updated: 27 Jul 2007<br />
     <a href="#index">Index</a> <a href="../index.html">Return to Main Contents</a>
     <hr />
-    <a name="lbAB" id="lbAB"> </a>
+    <a name="lbAB" id="lbAB">&nbsp;</a>
 
     <h2>NAME</h2>instance - Process individual MIB instances easily.
 
-    <p><a name="lbAC" id="lbAC"> </a></p>
+    <p><a name="lbAC" id="lbAC">&nbsp;</a></p>
 
     <h3>Functions</h3>
 
@@ -99,17 +99,17 @@
     <br />
     int <b>netsnmp_instance_helper_handler</b> (<b>netsnmp_mib_handler</b> *handler, <b>netsnmp_handler_registration</b>
     *reginfo, <b>netsnmp_agent_request_info</b> *reqinfo, <b>netsnmp_request_info</b> *requests)<br />
-    <a name="lbAD" id="lbAD"> </a></p>
+    <a name="lbAD" id="lbAD">&nbsp;</a></p>
 
     <h2>Detailed Description</h2>
 
     <p>Process individual MIB instances easily.</p>
 
-    <p><a name="lbAE" id="lbAE"> </a></p>
+    <p><a name="lbAE" id="lbAE">&nbsp;</a></p>
 
     <h2>Function Documentation</h2>
 
-    <p><a name="lbAF" id="lbAF"> </a></p>
+    <p><a name="lbAF" id="lbAF">&nbsp;</a></p>
 
     <h3><b>netsnmp_mib_handler</b>* netsnmp_get_instance_handler (void)</h3>
 
@@ -127,12 +127,10 @@
     <p>References netsnmp_create_handler(), and netsnmp_instance_helper_handler().</p>
 
     <p>Referenced by netsnmp_register_instance(), netsnmp_register_read_only_instance(), netsnmp_register_read_only_scalar(),
-    netsnmp_register_scalar(), and netsnmp_register_scalar_group(). <a name="lbAG" id="lbAG"> </a></p>
+    netsnmp_register_scalar(), and netsnmp_register_scalar_group(). <a name="lbAG" id="lbAG">&nbsp;</a></p>
 
     <h3>int netsnmp_instance_num_file_handler (<b>netsnmp_mib_handler</b> * handler, <b>netsnmp_handler_registration</b> *
     reginfo, <b>netsnmp_agent_request_info</b> * reqinfo, <b>netsnmp_request_info</b> * requests)</h3>
-
-    <p>fall through</p>
 
     <p>Definition at line 741 of file instance.c.</p>
 
@@ -143,7 +141,7 @@
     netsnmp_request_info_s::requestvb, snmp_set_var_typed_value(), variable_list::type, netsnmp_num_file_instance_s::type, and
     variable_list::val.</p>
 
-    <p>Referenced by netsnmp_register_num_file_instance(). <a name="lbAH" id="lbAH"> </a></p>
+    <p>Referenced by netsnmp_register_num_file_instance(). <a name="lbAH" id="lbAH">&nbsp;</a></p>
 
     <h3>int netsnmp_register_instance (<b>netsnmp_handler_registration</b> * reginfo)</h3>
 
@@ -175,9 +173,10 @@
     <p>References netsnmp_mib_handler_s::flags, MIB_HANDLER_INSTANCE, netsnmp_get_instance_handler(), netsnmp_inject_handler(),
     and netsnmp_register_serialize().</p>
 
-    <p>Referenced by netsnmp_register_int_instance(), netsnmp_register_long_instance(), netsnmp_register_long_instance_context(),
-    netsnmp_register_num_file_instance(), netsnmp_register_uint_instance(), netsnmp_register_ulong_instance(),
-    netsnmp_register_ulong_instance_context(), and netsnmp_register_watched_instance(). <a name="lbAI" id="lbAI"> </a></p>
+    <p>Referenced by netsnmp_register_int_instance(), netsnmp_register_int_instance_context(), netsnmp_register_long_instance(),
+    netsnmp_register_long_instance_context(), netsnmp_register_num_file_instance(), netsnmp_register_uint_instance(),
+    netsnmp_register_ulong_instance(), netsnmp_register_ulong_instance_context(), and netsnmp_register_watched_instance().
+    <a name="lbAI" id="lbAI">&nbsp;</a></p>
 
     <h3>int netsnmp_register_int_instance (const char * name, oid * reg_oid, size_t reg_oid_len, int * it,
     <b>Netsnmp_Node_Handler</b> * subhandler)</h3>
@@ -206,7 +205,7 @@
     <p>Definition at line 460 of file instance.c.</p>
 
     <p>References HANDLER_CAN_RWRITE, netsnmp_instance_int_handler(), netsnmp_register_instance(), and NULL. <a name="lbAJ" id=
-    "lbAJ"> </a></p>
+    "lbAJ">&nbsp;</a></p>
 
     <h3>int netsnmp_register_read_only_instance (<b>netsnmp_handler_registration</b> * reginfo)</h3>
 
@@ -235,14 +234,13 @@
     <p>References netsnmp_get_instance_handler(), netsnmp_get_read_only_handler(), netsnmp_inject_handler(), and
     netsnmp_register_serialize().</p>
 
-    <p>Referenced by netsnmp_register_int_instance_context(), netsnmp_register_num_file_instance(),
-    netsnmp_register_read_only_counter32_instance(), netsnmp_register_read_only_counter32_instance_context(),
-    netsnmp_register_read_only_int_instance(), netsnmp_register_read_only_int_instance_context(),
-    netsnmp_register_read_only_long_instance(), netsnmp_register_read_only_long_instance_context(),
-    netsnmp_register_read_only_uint_instance(), netsnmp_register_read_only_ulong_instance(), and
-    netsnmp_register_read_only_ulong_instance_context().</p>
+    <p>Referenced by netsnmp_register_num_file_instance(), netsnmp_register_read_only_counter32_instance(),
+    netsnmp_register_read_only_counter32_instance_context(), netsnmp_register_read_only_int_instance(),
+    netsnmp_register_read_only_int_instance_context(), netsnmp_register_read_only_long_instance(),
+    netsnmp_register_read_only_long_instance_context(), netsnmp_register_read_only_uint_instance(),
+    netsnmp_register_read_only_ulong_instance(), and netsnmp_register_read_only_ulong_instance_context().</p>
     <hr />
-    <a name="index" id="index"> </a>
+    <a name="index" id="index">&nbsp;</a>
 
     <h2>Index</h2>
 
@@ -278,7 +276,7 @@
     </dl>
     <hr />
     This document was created by <a href="http://localhost/cgi-bin/man/man2html">man2html</a>, using the manual pages.<br />
-    Time: 16:55:09 GMT, December 09, 2006
+    Time: 13:12:01 GMT, September 23, 2007
 <!-- CONTENT END -->
 <!--#include virtual="/page-bottom.html" -->
 

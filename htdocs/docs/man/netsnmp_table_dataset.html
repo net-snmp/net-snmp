@@ -2,14 +2,14 @@
 <!--#include virtual="/page-top.html" -->
 <!-- CONTENT START -->
     <h1>table_dataset</h1>Section: net-snmp (3)<br />
-    Updated: 24 Nov 2006<br />
+    Updated: 27 Jul 2007<br />
     <a href="#index">Index</a> <a href="../index.html">Return to Main Contents</a>
     <hr />
-    <a name="lbAB" id="lbAB"> </a>
+    <a name="lbAB" id="lbAB">&nbsp;</a>
 
     <h2>NAME</h2>table_dataset - Helps you implement a table with automatted storage.
 
-    <p><a name="lbAC" id="lbAC"> </a></p>
+    <p><a name="lbAC" id="lbAC">&nbsp;</a></p>
 
     <h3>Functions</h3>
 
@@ -88,7 +88,7 @@
     NETSNMP_INLINE void <b>netsnmp_table_dataset_add_index</b> (<b>netsnmp_table_data_set</b> *table, u_char type)<br />
     <i>adds an index to the table.</i><br />
     void <b>netsnmp_table_set_add_indexes</b> (<b>netsnmp_table_data_set</b> *tset,...)<br />
-    <i>adds multiple indexes to a table_dataset helper object.</i> <a name="lbAD" id="lbAD"> </a></p>
+    <i>adds multiple indexes to a table_dataset helper object.</i> <a name="lbAD" id="lbAD">&nbsp;</a></p>
 
     <h2>Detailed Description</h2>
 
@@ -104,11 +104,11 @@
     something which gets triggered via another event.</p>
 
     <p>NOTE NOTE NOTE: This helper isn't complete and is likely to change somewhat over time. Specifically, the way it stores
-    data internally may change drastically. <a name="lbAE" id="lbAE"> </a></p>
+    data internally may change drastically. <a name="lbAE" id="lbAE">&nbsp;</a></p>
 
     <h2>Function Documentation</h2>
 
-    <p><a name="lbAF" id="lbAF"> </a></p>
+    <p><a name="lbAF" id="lbAF">&nbsp;</a></p>
 
     <h3><b>netsnmp_table_data_set</b>* netsnmp_create_table_data_set (const char * table_name)</h3>
 
@@ -120,24 +120,25 @@
 
     <p>References netsnmp_create_table_data(), NULL, SNMP_MALLOC_TYPEDEF, and netsnmp_table_data_set_s::table.</p>
 
-    <p>Referenced by netsnmp_config_parse_table_set(). <a name="lbAG" id="lbAG"> </a></p>
+    <p>Referenced by netsnmp_config_parse_table_set(). <a name="lbAG" id="lbAG">&nbsp;</a></p>
 
     <h3>NETSNMP_INLINE <b>netsnmp_table_data_set</b>* netsnmp_extract_table_data_set (<b>netsnmp_request_info</b> * request)</h3>
 
     <p>extracts a netsnmp_table_data_set pointer from a given request</p>
 
-    <p>Definition at line 796 of file table_dataset.c.</p>
+    <p>Definition at line 816 of file table_dataset.c.</p>
 
-    <p>References netsnmp_request_get_list_data(). <a name="lbAH" id="lbAH"> </a></p>
+    <p>References netsnmp_request_get_list_data(). <a name="lbAH" id="lbAH">&nbsp;</a></p>
 
     <h3><b>netsnmp_table_data_set_storage</b>* netsnmp_extract_table_data_set_column (<b>netsnmp_request_info</b> * request,
     unsigned int column)</h3>
 
     <p>extracts a netsnmp_table_data_set pointer from a given request</p>
 
-    <p>Definition at line 806 of file table_dataset.c.</p>
+    <p>Definition at line 826 of file table_dataset.c.</p>
 
-    <p>References netsnmp_extract_table_row_data(), and netsnmp_table_data_set_find_column(). <a name="lbAI" id="lbAI"> </a></p>
+    <p>References netsnmp_extract_table_row_data(), and netsnmp_table_data_set_find_column(). <a name="lbAI" id=
+    "lbAI">&nbsp;</a></p>
 
     <h3><b>netsnmp_mib_handler</b>* netsnmp_get_table_data_set_handler (<b>netsnmp_table_data_set</b> * data_set)</h3>
 
@@ -148,7 +149,7 @@
     <p>References netsnmp_mib_handler_s::flags, MIB_HANDLER_AUTO_NEXT, netsnmp_mib_handler_s::myvoid, netsnmp_create_handler(),
     netsnmp_table_data_set_helper_handler(), NULL, and snmp_log().</p>
 
-    <p>Referenced by netsnmp_register_table_data_set(). <a name="lbAJ" id="lbAJ"> </a></p>
+    <p>Referenced by netsnmp_register_table_data_set(). <a name="lbAJ" id="lbAJ">&nbsp;</a></p>
 
     <h3>int netsnmp_mark_row_column_writable (<b>netsnmp_table_row</b> * row, int column, int writable)</h3>
 
@@ -156,13 +157,13 @@
 
     <p><b>Examples:</b> <b>data_set.c</b>.</p>
 
-    <p>Definition at line 1167 of file table_dataset.c.</p>
+    <p>Definition at line 1187 of file table_dataset.c.</p>
 
     <p>References netsnmp_table_data_set_storage_s::column, netsnmp_table_row_s::data, netsnmp_table_data_set_find_column(),
     netsnmp_table_data_set_storage_s::next, snmp_log(), SNMP_MALLOC_TYPEDEF, and netsnmp_table_data_set_storage_s::writable.</p>
 
     <p>Referenced by netsnmp_config_parse_add_row(), and netsnmp_table_data_set_create_row_from_defaults(). <a name="lbAK" id=
-    "lbAK"> </a></p>
+    "lbAK">&nbsp;</a></p>
 
     <h3>void netsnmp_register_auto_data_table (<b>netsnmp_table_data_set</b> * table_set, char * registration_name)</h3>
 
@@ -178,12 +179,12 @@
 
     <p><b>Examples:</b> <b>data_set.c</b>.</p>
 
-    <p>Definition at line 833 of file table_dataset.c.</p>
+    <p>Definition at line 853 of file table_dataset.c.</p>
 
     <p>References netsnmp_table_data_s::name, netsnmp_add_list_data(), netsnmp_create_data_list(), NULL, SNMP_MALLOC_TYPEDEF,
     netsnmp_table_data_set_s::table, and data_set_tables_s::table_set.</p>
 
-    <p>Referenced by netsnmp_config_parse_table_set(). <a name="lbAL" id="lbAL"> </a></p>
+    <p>Referenced by netsnmp_config_parse_table_set(). <a name="lbAL" id="lbAL">&nbsp;</a></p>
 
     <h3>int netsnmp_register_table_data_set (<b>netsnmp_handler_registration</b> * reginfo, <b>netsnmp_table_data_set</b> *
     data_set, <b>netsnmp_table_registration_info</b> * table_info)</h3>
@@ -204,7 +205,7 @@
     netsnmp_table_data_set_storage_s::next, NULL, snmp_clone_varbind(), SNMP_MALLOC_TYPEDEF, SNMP_MAX, SNMP_MIN, and
     netsnmp_table_data_set_s::table.</p>
 
-    <p>Referenced by netsnmp_config_parse_table_set(). <a name="lbAM" id="lbAM"> </a></p>
+    <p>Referenced by netsnmp_config_parse_table_set(). <a name="lbAM" id="lbAM">&nbsp;</a></p>
 
     <h3>int netsnmp_set_row_column (<b>netsnmp_table_row</b> * row, unsigned int column, int type, const char * value, size_t
     value_len)</h3>
@@ -215,7 +216,7 @@
 
     <p><b>Examples:</b> <b>data_set.c</b>.</p>
 
-    <p>Definition at line 1202 of file table_dataset.c.</p>
+    <p>Definition at line 1222 of file table_dataset.c.</p>
 
     <p>References netsnmp_table_data_set_storage_s::column, netsnmp_table_row_s::data, netsnmp_table_data_set_storage_s::data,
     netsnmp_table_data_set_storage_s::data_len, memdup(), netsnmp_table_data_set_find_column(),
@@ -223,7 +224,7 @@
     netsnmp_table_data_set_storage_s::type, and netsnmp_table_data_set_storage_s::voidp.</p>
 
     <p>Referenced by netsnmp_config_parse_add_row(), and netsnmp_table_data_set_create_row_from_defaults(). <a name="lbAN" id=
-    "lbAN"> </a></p>
+    "lbAN">&nbsp;</a></p>
 
     <h3><b>netsnmp_table_row</b>* netsnmp_table_data_set_clone_row (<b>netsnmp_table_row</b> * row)</h3>
 
@@ -234,7 +235,7 @@
     <p>References netsnmp_table_row_s::data, memdup(), netsnmp_table_data_clone_row(), netsnmp_table_dataset_delete_row(),
     netsnmp_table_data_set_storage_s::next, and NULL.</p>
 
-    <p>Referenced by netsnmp_table_data_set_helper_handler(). <a name="lbAO" id="lbAO"> </a></p>
+    <p>Referenced by netsnmp_table_data_set_helper_handler(). <a name="lbAO" id="lbAO">&nbsp;</a></p>
 
     <h3><b>netsnmp_table_row</b>* netsnmp_table_data_set_create_row_from_defaults (<b>netsnmp_table_data_set_storage</b> *
     defrow)</h3>
@@ -248,36 +249,37 @@
     netsnmp_set_row_column(), netsnmp_table_data_set_storage_s::next, NULL, netsnmp_table_data_set_storage_s::type,
     netsnmp_table_data_set_storage_s::voidp, and netsnmp_table_data_set_storage_s::writable.</p>
 
-    <p>Referenced by netsnmp_table_data_set_create_newrowstash(). <a name="lbAP" id="lbAP"> </a></p>
+    <p>Referenced by netsnmp_table_data_set_create_newrowstash(). <a name="lbAP" id="lbAP">&nbsp;</a></p>
 
     <h3><b>netsnmp_table_data_set_storage</b>* netsnmp_table_data_set_find_column (<b>netsnmp_table_data_set_storage</b> * start,
     unsigned int column)</h3>
 
     <p>Finds a column within a given storage set, given the pointer to the start of the storage set list.</p>
 
-    <p>Definition at line 1155 of file table_dataset.c.</p>
+    <p>Definition at line 1175 of file table_dataset.c.</p>
 
     <p>References netsnmp_table_data_set_storage_s::column, and netsnmp_table_data_set_storage_s::next.</p>
 
     <p>Referenced by netsnmp_extract_table_data_set_column(), netsnmp_mark_row_column_writable(), netsnmp_set_row_column(),
-    netsnmp_table_data_set_helper_handler(), and netsnmp_table_set_add_default_row(). <a name="lbAQ" id="lbAQ"> </a></p>
+    netsnmp_table_data_set_helper_handler(), and netsnmp_table_set_add_default_row(). <a name="lbAQ" id="lbAQ">&nbsp;</a></p>
 
     <h3><b>netsnmp_table_row</b>* netsnmp_table_data_set_get_first_row (<b>netsnmp_table_data_set</b> * table)</h3>
 
     <p>returns the first row in the table</p>
 
-    <p>Definition at line 1124 of file table_dataset.c.</p>
+    <p>Definition at line 1144 of file table_dataset.c.</p>
 
-    <p>References netsnmp_table_data_get_first_row(), and netsnmp_table_data_set_s::table. <a name="lbAR" id="lbAR"> </a></p>
+    <p>References netsnmp_table_data_get_first_row(), and netsnmp_table_data_set_s::table. <a name="lbAR" id=
+    "lbAR">&nbsp;</a></p>
 
     <h3><b>netsnmp_table_row</b>* netsnmp_table_data_set_get_next_row (<b>netsnmp_table_data_set</b> * table,
     <b>netsnmp_table_row</b> * row)</h3>
 
     <p>returns the next row in the table</p>
 
-    <p>Definition at line 1131 of file table_dataset.c.</p>
+    <p>Definition at line 1151 of file table_dataset.c.</p>
 
-    <p>References netsnmp_table_data_get_next_row(), and netsnmp_table_data_set_s::table. <a name="lbAS" id="lbAS"> </a></p>
+    <p>References netsnmp_table_data_get_next_row(), and netsnmp_table_data_set_s::table. <a name="lbAS" id="lbAS">&nbsp;</a></p>
 
     <h3>NETSNMP_INLINE void netsnmp_table_dataset_add_index (<b>netsnmp_table_data_set</b> * table, u_char type)</h3>
 
@@ -287,11 +289,11 @@
 
     <p><b>Examples:</b> <b>data_set.c</b>.</p>
 
-    <p>Definition at line 1256 of file table_dataset.c.</p>
+    <p>Definition at line 1276 of file table_dataset.c.</p>
 
     <p>References netsnmp_table_data_set_s::table.</p>
 
-    <p>Referenced by netsnmp_table_set_add_indexes(). <a name="lbAT" id="lbAT"> </a></p>
+    <p>Referenced by netsnmp_table_set_add_indexes(). <a name="lbAT" id="lbAT">&nbsp;</a></p>
 
     <h3>NETSNMP_INLINE void netsnmp_table_dataset_add_row (<b>netsnmp_table_data_set</b> * table, <b>netsnmp_table_row</b> *
     row)</h3>
@@ -304,7 +306,7 @@
 
     <p>References netsnmp_table_data_add_row(), and netsnmp_table_data_set_s::table.</p>
 
-    <p>Referenced by netsnmp_table_data_set_helper_handler(). <a name="lbAU" id="lbAU"> </a></p>
+    <p>Referenced by netsnmp_table_data_set_helper_handler(). <a name="lbAU" id="lbAU">&nbsp;</a></p>
 
     <h3>NETSNMP_INLINE void netsnmp_table_dataset_delete_all_data (<b>netsnmp_table_data_set_storage</b> * data)</h3>
 
@@ -315,7 +317,7 @@
     <p>References netsnmp_table_dataset_delete_data().</p>
 
     <p>Referenced by netsnmp_table_dataset_delete_row(), and netsnmp_table_dataset_remove_and_delete_row(). <a name="lbAV" id=
-    "lbAV"> </a></p>
+    "lbAV">&nbsp;</a></p>
 
     <h3>NETSNMP_INLINE <b>netsnmp_table_data_set_storage</b>* netsnmp_table_dataset_delete_data
     (<b>netsnmp_table_data_set_storage</b> * data)</h3>
@@ -329,7 +331,7 @@
     <p>References netsnmp_table_data_set_storage_s::data, netsnmp_table_data_set_storage_s::next, NULL, SNMP_FREE, and
     netsnmp_table_data_set_storage_s::voidp.</p>
 
-    <p>Referenced by netsnmp_table_dataset_delete_all_data(). <a name="lbAW" id="lbAW"> </a></p>
+    <p>Referenced by netsnmp_table_dataset_delete_all_data(). <a name="lbAW" id="lbAW">&nbsp;</a></p>
 
     <h3>NETSNMP_INLINE void netsnmp_table_dataset_delete_row (<b>netsnmp_table_row</b> * row)</h3>
 
@@ -340,7 +342,7 @@
     <p>References netsnmp_table_data_delete_row(), and netsnmp_table_dataset_delete_all_data().</p>
 
     <p>Referenced by netsnmp_table_data_set_clone_row(), and netsnmp_table_data_set_helper_handler(). <a name="lbAX" id=
-    "lbAX"> </a></p>
+    "lbAX">&nbsp;</a></p>
 
     <h3>NETSNMP_INLINE void netsnmp_table_dataset_remove_and_delete_row (<b>netsnmp_table_data_set</b> * table,
     <b>netsnmp_table_row</b> * row)</h3>
@@ -352,7 +354,7 @@
     <p>References netsnmp_table_data_remove_and_delete_row(), netsnmp_table_dataset_delete_all_data(), and
     netsnmp_table_data_set_s::table.</p>
 
-    <p>Referenced by netsnmp_table_data_set_helper_handler(). <a name="lbAY" id="lbAY"> </a></p>
+    <p>Referenced by netsnmp_table_data_set_helper_handler(). <a name="lbAY" id="lbAY">&nbsp;</a></p>
 
     <h3>NETSNMP_INLINE void netsnmp_table_dataset_remove_row (<b>netsnmp_table_data_set</b> * table, <b>netsnmp_table_row</b> *
     row)</h3>
@@ -362,7 +364,7 @@
     <p>Definition at line 192 of file table_dataset.c.</p>
 
     <p>References netsnmp_table_data_remove_and_delete_row(), and netsnmp_table_data_set_s::table. <a name="lbAZ" id=
-    "lbAZ"> </a></p>
+    "lbAZ">&nbsp;</a></p>
 
     <h3>NETSNMP_INLINE void netsnmp_table_dataset_replace_row (<b>netsnmp_table_data_set</b> * table, <b>netsnmp_table_row</b> *
     origrow, <b>netsnmp_table_row</b> * newrow)</h3>
@@ -373,7 +375,7 @@
 
     <p>References netsnmp_table_data_replace_row(), and netsnmp_table_data_set_s::table.</p>
 
-    <p>Referenced by netsnmp_table_data_set_helper_handler(). <a name="lbBA" id="lbBA"> </a></p>
+    <p>Referenced by netsnmp_table_data_set_helper_handler(). <a name="lbBA" id="lbBA">&nbsp;</a></p>
 
     <h3>int netsnmp_table_set_add_default_row (<b>netsnmp_table_data_set</b> * table_set, unsigned int column, int type, int
     writable, void * default_value, size_t default_value_len)</h3>
@@ -395,7 +397,7 @@
     netsnmp_table_data_set_storage_s::writable.</p>
 
     <p>Referenced by netsnmp_config_parse_table_set(), and netsnmp_table_set_multi_add_default_row(). <a name="lbBB" id=
-    "lbBB"> </a></p>
+    "lbBB">&nbsp;</a></p>
 
     <h3>void netsnmp_table_set_add_indexes (<b>netsnmp_table_data_set</b> * tset, ...)</h3>
 
@@ -403,9 +405,9 @@
 
     <p>To end the list, use a 0 after the list of ASN index types.</p>
 
-    <p>Definition at line 1267 of file table_dataset.c.</p>
+    <p>Definition at line 1287 of file table_dataset.c.</p>
 
-    <p>References netsnmp_table_dataset_add_index(). <a name="lbBC" id="lbBC"> </a></p>
+    <p>References netsnmp_table_dataset_add_index(). <a name="lbBC" id="lbBC">&nbsp;</a></p>
 
     <h3>void netsnmp_table_set_multi_add_default_row (<b>netsnmp_table_data_set</b> * tset, ...)</h3>
 
@@ -419,7 +421,7 @@
 
     <p>References netsnmp_table_set_add_default_row().</p>
     <hr />
-    <a name="index" id="index"> </a>
+    <a name="index" id="index">&nbsp;</a>
 
     <h2>Index</h2>
 
@@ -510,7 +512,7 @@
     </dl>
     <hr />
     This document was created by <a href="http://localhost/cgi-bin/man/man2html">man2html</a>, using the manual pages.<br />
-    Time: 16:55:09 GMT, December 09, 2006
+    Time: 13:12:01 GMT, September 23, 2007
 <!-- CONTENT END -->
 <!--#include virtual="/page-bottom.html" -->
 
