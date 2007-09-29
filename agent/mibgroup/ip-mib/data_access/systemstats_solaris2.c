@@ -138,7 +138,7 @@ _insert_entry(netsnmp_container *container, mib2_ipIfStatsEntry_t *ipe)
     ep->stats.HCInReceives.high = ipe->ipIfStatsHCInReceives >> 32;
     ep->stats.HCInOctets.low = 
         ipe->ipIfStatsHCInOctets & 0xffffffff;
-    ep->stats.HCInReceives.high = ipe->ipIfStatsHCInReceives >> 32;
+    ep->stats.HCInOctets.high = ipe->ipIfStatsHCInOctets >> 32;
     ep->stats.InHdrErrors = ipe->ipIfStatsInHdrErrors;
     ep->stats.InAddrErrors = ipe->ipIfStatsInAddrErrors;
     ep->stats.InUnknownProtos = ipe->ipIfStatsInUnknownProtos;
