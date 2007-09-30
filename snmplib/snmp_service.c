@@ -6,10 +6,50 @@
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/library/snmp_transport.h>
 
+static char**
+create_word_array_helper(const char* cptr, size_t idx, char* tmp, size_t tmplen)
+{
+    char* item;
+    char** res;
+    cptr = copy_nword(cptr, tmp, tmplen);
+    item = strdup(tmp);
+    if (cptr)
+        res = create_word_array_helper(cptr, idx + 1, tmp, tmplen);
+    else {
+        res = malloc(sizeof(char*) * (idx + 2));
+        res[idx + 1] = NULL;
+    }
+    res[idx] = item;
+    return res;
+}
+
+static char**
+create_word_array(const char* cptr)
+{
+    size_t tmplen = strlen(cptr);
+    char* tmp = malloc(tmplen + 1);
+    char** res = create_word_array_helper(cptr, 0, tmp, tmplen);
+    free(tmp);
+    return res;
+}
+
+static void
+destroy_word_array(char** arr)
+{
+    if (arr) {
+        char** run = arr;
+        while(*run) {
+            free(*run);
+            ++run;
+        }
+        free(arr);
+    }
+}
+
 struct netsnmp_lookup_domain {
     char* application;
-    char* userDomain;
-    char* domain;
+    char** userDomain;
+    char** domain;
     struct netsnmp_lookup_domain* next;
 };
 
@@ -27,7 +67,7 @@ netsnmp_register_default_domain(const char* application, const char* domain)
     }
     if (run && strcmp(run->application, application) == 0) {
       if (run->domain != NULL) {
-	  free (run->domain);
+          destroy_word_array(run->domain);
 	  run->domain=NULL;
 	  res = 1;
       }
@@ -44,7 +84,7 @@ netsnmp_register_default_domain(const char* application, const char* domain)
 	}
     }
     if (domain) {
-	run->domain = strdup(domain);
+        run->domain = create_word_array(domain);
     } else if (run->userDomain == NULL) {
 	if (prev)
 	    prev->next = run->next;
@@ -63,8 +103,8 @@ netsnmp_clear_default_domain(void)
 	struct netsnmp_lookup_domain *tmp = domains;
 	domains = domains->next;
 	free(tmp->application);
-	free(tmp->userDomain);
-	free(tmp->domain);
+        destroy_word_array(tmp->userDomain);
+        destroy_word_array(tmp->domain);
 	free(tmp);
     }
 }
@@ -75,13 +115,11 @@ netsnmp_register_user_domain(const char* token, char* cptr)
     struct netsnmp_lookup_domain *run = domains, *prev = NULL;
     size_t len = strlen(cptr) + 1;
     char* application = (char*)malloc(len);
-    char* domain = (char*)malloc(len);
+    char** domain;
 
     {
-	char* cp = copy_nword(cptr, application, len);
-	cp = copy_nword(cp, domain, len);
-	if (cp)
-	    config_pwarn("Trailing junk found");
+        char* cp = copy_nword(cptr, application, len);
+        domain = create_word_array(cp);
     }
 
     while (run != NULL && strcmp(run->application, application) < 0) {
@@ -92,7 +130,9 @@ netsnmp_register_user_domain(const char* token, char* cptr)
 	if (run->userDomain != NULL) {
 	    config_perror("Default transport already registered for this "
 			  "application");
-	    goto done;
+            destroy_word_array(domain);
+            free(application);
+	    return;
 	}
     } else {
 	run = SNMP_MALLOC_STRUCT(netsnmp_lookup_domain);
@@ -106,9 +146,7 @@ netsnmp_register_user_domain(const char* token, char* cptr)
 	    domains = run;
 	}
     }
-    run->userDomain = strdup(domain);
- done:
-    free(domain);
+    run->userDomain = domain;
     free(application);
 }
 
@@ -119,7 +157,7 @@ netsnmp_clear_user_domain(void)
 
     while (run) {
 	if (run->userDomain != NULL) {
-	    free(run->userDomain);
+            destroy_word_array(run->userDomain);
 	    run->userDomain = NULL;
 	}
 	if (run->domain == NULL) {
@@ -137,31 +175,46 @@ netsnmp_clear_user_domain(void)
     }
 }
 
-const char*
-netsnmp_lookup_default_domain(const char* application)
+const char* const *
+netsnmp_lookup_default_domains(const char* application)
 {
-    const char *res;
+    const char * const * res;
 
     if (application == NULL)
 	res = NULL;
     else {
-	struct netsnmp_lookup_domain *run = domains;
+        struct netsnmp_lookup_domain *run = domains;
 
 	while (run && strcmp(run->application, application) < 0)
 	    run = run->next;
 	if (run && strcmp(run->application, application) == 0)
 	    if (run->userDomain)
-		res = run->userDomain;
+                res = (const char * const *)run->userDomain;
 	    else
-		res = run->domain;
+                res = (const char * const *)run->domain;
 	else
 	    res = NULL;
     }
     DEBUGMSGTL(("defaults",
-		"netsnmp_lookup_default_domain(\"%s\") -> \"%s\"\n",
-		application ? application : "[NIL]",
-		res ? res : "[NIL]"));
+                "netsnmp_lookup_default_domain(\"%s\") ->",
+                application ? application : "[NIL]"));
+    if (res) {
+        const char * const * r = res;
+        while(*r) {
+            DEBUGMSG(("defaults", " \"%s\"", *r));
+            ++r;
+        }
+        DEBUGMSG(("defaults", "\n"));
+    } else
+        DEBUGMSG(("defaults", " \"[NIL]\"\n"));
     return res;
+}
+
+const char*
+netsnmp_lookup_default_domain(const char* application)
+{
+    const char * const * res = netsnmp_lookup_default_domains(application);
+    return (res ? *res : NULL);
 }
 
 struct netsnmp_lookup_target {

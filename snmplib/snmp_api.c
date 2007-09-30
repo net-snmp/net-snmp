@@ -661,8 +661,8 @@ _init_snmp(void)
     Reqid = tmpReqid;
     Msgid = tmpMsgid;
 
-    netsnmp_register_default_domain("snmp", "udp");
-    netsnmp_register_default_domain("snmptrap", "udp");
+    netsnmp_register_default_domain("snmp", "udp udp6");
+    netsnmp_register_default_domain("snmptrap", "udp udp6");
 
     netsnmp_register_default_target("snmp", "udp", ":161");
     netsnmp_register_default_target("snmp", "tcp", ":161");

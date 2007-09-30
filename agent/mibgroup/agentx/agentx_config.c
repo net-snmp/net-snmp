@@ -200,7 +200,7 @@ agentx_config_init(void)
     /*
      * Common tokens for master/subagent
      */
-    netsnmp_register_default_domain("agentx", "unix");
+    netsnmp_register_default_domain("agentx", "unix tcp");
     netsnmp_register_default_target("agentx", "unix", NETSNMP_AGENTX_SOCKET);
 #define val(x) __STRING(x)
     netsnmp_register_default_target("agentx", "tcp", ":" val(AGENTX_PORT));
