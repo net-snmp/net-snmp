@@ -309,53 +309,58 @@ netsnmp_tdomain_unregister(netsnmp_tdomain *n)
 }
 
 
+static netsnmp_tdomain *
+find_tdomain(const char* spec)
+{
+    netsnmp_tdomain *d;
+    for (d = domain_list; d != NULL; d = d->next) {
+        int i;
+        for (i = 0; d->prefix[i] != NULL; i++)
+            if (strcasecmp(d->prefix[i], spec) == 0) {
+                DEBUGMSGTL(("tdomain",
+                            "Found domain \"%s\" from specifier \"%s\"\n",
+                            d->prefix[0], spec));
+                return d;
+            }
+    }
+    DEBUGMSGTL(("tdomain", "Found no domain from specifier \"%s\"\n", spec));
+    return NULL;
+}
+
 /*
  * Locate the appropriate transport domain and call the create function for
  * it.
  */
 netsnmp_transport *
 netsnmp_tdomain_transport_full(const char *application,
-			       const char *str, int local,
-			       const char *default_domain,
-			       const char *default_target)
+                               const char *str, int local,
+                               const char *default_domain,
+                               const char *default_target)
 {
-    netsnmp_tdomain *d, *match = NULL;
-    netsnmp_transport *t = NULL;
-    const char     *spec, *addr = NULL, *addr2;
-    char           *cp, *mystring = NULL;
-    int             i;
+    netsnmp_tdomain    *match = NULL;
+    const char         *addr = NULL;
+    const char * const *spec = NULL;
+    int                 any_found = 0;
 
     DEBUGMSGTL(("tdomain",
-		"tdomain_transport_full(\"%s\", \"%s\", %d, \"%s\", \"%s\")\n",
-		application, str ? str : "[NIL]", local,
-		default_domain ? default_domain : "[NIL]",
-		default_target ? default_target : "[NIL]"));
+                "tdomain_transport_full(\"%s\", \"%s\", %d, \"%s\", \"%s\")\n",
+                application, str ? str : "[NIL]", local,
+                default_domain ? default_domain : "[NIL]",
+                default_target ? default_target : "[NIL]"));
 
     /* First try - assume that there is a domain in str (domain:target) */
 
     if (str != NULL) {
-	if ((mystring = strdup(str)) == NULL) {
-	    DEBUGMSGTL(("tdomain", "can't strdup(\"%s\")\n", str));
-	    return NULL;
-	}
+        char *cp;
+        if ((cp = strchr(str, ':')) != NULL) {
+            char* mystring = malloc(cp + 1 - str);
+            memcpy(mystring, str, cp - str);
+            mystring[cp - str] = '\0';
+            addr = cp + 1;
 
-	if ((cp = strchr(mystring, ':')) != NULL) {
-	    *cp = '\0';
-	    spec = mystring;
-	    addr = cp + 1;
-
-	    for (d = domain_list; d != NULL && match == NULL; d = d->next)
-		for (i = 0; d->prefix[i] != NULL && match == NULL; i++)
-		    if (strcasecmp(d->prefix[i], spec) == 0)
-			match = d;
-	    if (match != NULL)
-		DEBUGMSGTL(("tdomain",
-			    "Found domain \"%s\" from specifier \"%s\"\n",
-			    match->prefix[0], spec));
-	    else
-		DEBUGMSGTL(("tdomain",
-			    "Found no domain from specifier \"%s\"\n", spec));
-	}
+            match = find_tdomain(mystring);
+            free(mystring);
+        }
     }
 
     /*
@@ -364,66 +369,72 @@ netsnmp_tdomain_transport_full(const char *application,
      */
 
     if (match == NULL) {
-	addr = str;
-	if (addr && *addr == '/') {
-	    spec = "unix";
-	    DEBUGMSGTL(("tdomain",
-			"Address starts with '/', so assume \"unix\" "
-			"domain\n"));
-	} else if (default_domain) {
-	    spec = default_domain;
-	    DEBUGMSGTL(("tdomain",
-			"Use user specified default domain \"%s\"\n", spec));
-	} else {
-	    spec = netsnmp_lookup_default_domain(application);
-	    if (spec == NULL) {
-		spec = "udp";
-		DEBUGMSGTL(("tdomain",
-			    "No default domain found, assume \"udp\"\n"));
-	    } else {
-		DEBUGMSGTL(("tdomain",
-			    "Use application default domain \"%s\"\n", spec));
-	    }
-	}
-	for (d = domain_list; d != NULL && match == NULL; d = d->next)
-	    for (i = 0; d->prefix[i] != NULL && match == NULL; i++)
-		if (strcasecmp(d->prefix[i], spec) == 0)
-		    match = d;
-	if (match != NULL)
-	    DEBUGMSGTL(("tdomain",
-			"Found domain \"%s\" from specifier \"%s\"\n",
-			match->prefix[0], spec));
-	else {
-	    DEBUGMSGTL(("tdomain",
-			"Found no domain from specifier \"%s\"\n", spec));
-	    SNMP_FREE(mystring);
-	    snmp_log(LOG_ERR,
-		     "No support for any checked transport domain\n");
-	    return NULL;
-	}
+        addr = str;
+        if (addr && *addr == '/') {
+            DEBUGMSGTL(("tdomain",
+                        "Address starts with '/', so assume \"unix\" "
+                        "domain\n"));
+            match = find_tdomain("unix");
+        } else if (default_domain) {
+            DEBUGMSGTL(("tdomain",
+                        "Use user specified default domain \"%s\"\n",
+                        default_domain));
+            match = find_tdomain(default_domain);
+        } else {
+            spec = netsnmp_lookup_default_domains(application);
+            if (spec == NULL) {
+                DEBUGMSGTL(("tdomain",
+                            "No default domain found, assume \"udp\"\n"));
+                match = find_tdomain("udp");
+            } else {
+                const char * const * r = spec;
+                DEBUGMSGTL(("tdomain",
+                            "Use application default domains"));
+                while(*r) {
+                    DEBUGMSG(("tdomain", " \"%s\"", *r));
+                    ++r;
+                }
+                DEBUGMSG(("tdomain", "\n"));
+            }
+        }
     }
 
-    /*
-     * Ok, we know what domain to use, lets see what default data that should
-     * be used
-     */
+    for(;;) {
+        if (match) {
+            netsnmp_transport *t = NULL;
+            const char* addr2;
 
-    if (default_target != NULL)
-	addr2 = default_target;
-    else
-	addr2 = netsnmp_lookup_default_target(application, match->prefix[0]);
-
-    DEBUGMSGTL(("tdomain",
-		"domain \"%s\" address \"%s\" default address \"%s\"\n",
-		match->prefix[0], addr ? addr : "[NIL]",
-		addr2 ? addr2 : "[NIL]"));
-
-    if (match->f_create_from_tstring)
-      t = match->f_create_from_tstring(addr, local);
-    else
-      t = match->f_create_from_tstring_new(addr, local, addr2);
-    SNMP_FREE(mystring);
-    return t;
+            any_found = 1;
+            /*
+             * Ok, we know what domain to try, lets see what default data
+             * should be used with it
+             */
+            if (default_target != NULL)
+                addr2 = default_target;
+            else
+                addr2 = netsnmp_lookup_default_target(application,
+                                                      match->prefix[0]);
+            DEBUGMSGTL(("tdomain",
+                        "trying domain \"%s\" address \"%s\" "
+                        "default address \"%s\"\n",
+                        match->prefix[0], addr ? addr : "[NIL]",
+                        addr2 ? addr2 : "[NIL]"));
+            if (match->f_create_from_tstring)
+                t = match->f_create_from_tstring(addr, local);
+            else
+                t = match->f_create_from_tstring_new(addr, local, addr2);
+            if (t)
+                return t;
+        }
+        addr = str;
+        if (spec && *spec)
+            match = find_tdomain(*spec++);
+        else
+            break;
+    }
+    if (!any_found)
+        snmp_log(LOG_ERR, "No support for any checked transport domain\n");
+    return NULL;
 }
 
 

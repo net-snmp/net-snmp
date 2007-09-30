@@ -13,6 +13,9 @@ netsnmp_register_default_domain(const char* application, const char* domain);
 extern const char*
 netsnmp_lookup_default_domain(const char* application);
 
+extern const char* const *
+netsnmp_lookup_default_domains(const char* application);
+
 extern void
 netsnmp_clear_default_domain(void);
 
