@@ -154,6 +154,7 @@ BUILD INFORMATION
   Build date:		
   Built by:		
   Installer Package by: 
+  NSIS Compiler:	Version 2.3
   
   OS:			Windows 2000 SP4
   Compiler:		MSVC++ 6.0 SP5
@@ -162,6 +163,7 @@ BUILD INFORMATION
   REGEX:		gnu_regex.exe (0.12) - http://people.delphiforums.com/gjc/gnu_regex.html
 
   Source: 		net-snmp-x.x.x.tar.gz
+  Patches		
   Destination:  	c:\usr
   Project:		win32sdk.dsw / libdll.dsw
   Library:		netsnmp for applications, netsnmp.dll for Perl modules

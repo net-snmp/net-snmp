@@ -11,11 +11,32 @@ Function AddToPath
   Push $1
   Push $2
   Push $3
+  Push $4
+  Push $5
 
   # don't add if the path doesn't exist
   IfFileExists $0 "" AddToPath_done
-
+  
   ReadEnvStr $1 PATH
+  
+  # If length of PATH returned is 0, we couldn't read the environment variable (unlikely) or
+  # it's empty because it's > 1024 characters long.  NSIS only supports variables up to 1024 
+  # characters unless we're using the 8192 length version, which we are not.  
+  # Note:  On XP (at least), the string read using ReadEnvStr is shorter than we would expect.
+  # During testing, when the PATH was 1020 characters long, StrLen of the path returned 984.
+  # When manipulating the path on XP, use the registry instead.
+  StrLen $4 "$1"
+  # MessageBox MB_ICONINFORMATION|MB_OK "PATH length: $4..."
+  IntCmp $4 0 Path_Too_Short1
+  Goto AddToPath_Cont1
+  
+  Path_Too_Short1:
+  # PATH is empty.  Display warning.
+  MessageBox MB_ICONINFORMATION|MB_OK "Your PATH variable could not be read, probably because it is longer than 1024 characters (installer limitation).  Please add the folder $0 to your PATH using the System Control Panel."
+  goto AddToPath_done
+
+  AddToPath_Cont1:
+  
   Push "$1;"
   Push "$0;"
   Call StrStr
@@ -56,17 +77,41 @@ Function AddToPath
   AddToPath_NT:
     ;ReadRegStr $1 HKCU "Environment" "PATH"
     ReadRegStr $1 HKLM 'SYSTEM\CurrentControlSet\Control\Session Manager\Environment' "PATH"
+
     StrCpy $2 $1 1 -1 # copy last char
     StrCmp $2 ";" 0 +2 # if last char == ;
       StrCpy $1 $1 -1 # remove last char
-    StrCmp $1 "" AddToPath_NTdoIt
-      StrCpy $0 "$1;$0"
-    AddToPath_NTdoIt:
-      ;WriteRegExpandStr HKCU "Environment" "PATH" $0
-      WriteRegExpandStr HKLM 'SYSTEM\CurrentControlSet\Control\Session Manager\Environment' "PATH" $0
-      SendMessage ${HWND_BROADCAST} ${WM_WININICHANGE} 0 "STR:Environment" /TIMEOUT=5000
+
+    # Make sure old PATH is not empty..
+    StrLen $4 "$1"
+    #MessageBox MB_ICONINFORMATION|MB_OK "Reg PATH length: $4..."
+    IntCmp $4 0 Path_Too_Short2
+    Goto AddToPath_Cont2
+    Path_Too_Short2:
+    # PATH is empty.  Display warning.
+    MessageBox MB_ICONINFORMATION|MB_OK "Your PATH variable could not be read, probably because it is longer than 1024 characters (installer limitation).  Please add the folder $0 to your PATH using the System Control Panel."
+    goto AddToPath_done
+    AddToPath_Cont2:
+
+    # Make sure new PATH won't be too long.
+    StrLen $5 "$0"
+    IntOp $4 $4 + $5
+    IntCmp $4 1022 "" "" Path_Too_Long3
+    Goto AddToPath_Cont3
+    Path_Too_Long3:
+    MessageBox MB_ICONINFORMATION|MB_OK "Your new PATH variable could not be set as it would be greater than 1024 characters (installer limitation).  Please add the folder $0 to your PATH using the System Control Panel."
+    goto AddToPath_done
+    AddToPath_Cont3:
+
+    StrCpy $0 "$1;$0"
+
+    ;WriteRegExpandStr HKCU "Environment" "PATH" $0
+    WriteRegExpandStr HKLM 'SYSTEM\CurrentControlSet\Control\Session Manager\Environment' "PATH" $0
+    SendMessage ${HWND_BROADCAST} ${WM_WININICHANGE} 0 "STR:Environment" /TIMEOUT=5000
 
   AddToPath_done:
+    Pop $5
+    Pop $4
     Pop $3
     Pop $2
     Pop $1

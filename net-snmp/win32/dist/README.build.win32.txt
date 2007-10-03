@@ -49,7 +49,7 @@ Note:  All shell steps are using the Window CMD prompt unless otherwise stated.
 Part 1
 ------
 
-1.  Extract source.  The location will be references as (source dir)
+1.  Extract source.  The location will be referenced as (source dir)
 
 2.  Delete c:\usr if it exists and rename Net-SNMP.dll in your %windir% if you 
     have it already (to ensure Perl tests are using the compiled DLL)
@@ -90,7 +90,7 @@ Part 1
     8. Debug mode:           		disabled
     9. IPv6 transports:      		disabled
 
-    10. Link type:                      dynamic
+    10. Link type:                      dynamic		***
 
     11. Install development files   	enabled         ***
     
@@ -110,7 +110,7 @@ Part 2 - Compiling winExtDLL
     a replacement for the Microsoft SNMP service' - 'Compiling Net-SNMP with 
     the winExtDLL extension (MSVC)'.
 
-11.  Set to the following:
+11. Run build.bat and set to the following:
 
     Net-SNMP build and install options
     ==================================
@@ -128,7 +128,7 @@ Part 2 - Compiling winExtDLL
     8. Debug mode:           		disabled
     9. IPv6 transports:      		disabled
 
-    10. Link type:                      dynamic
+    10. Link type:                      dynamic		***
 
     11. Install development files   	disabled
     
@@ -145,6 +145,8 @@ Part 2 - Compiling winExtDLL
 
 14. Test each binary by running each one with -DwinExtDLL.  Make sure only the
     winExtDLL version has debug output.
+
+15. Delete any generated config files from c:\usr\snmp\persist
 
 
 Part 3 - Creating the Perl package
@@ -170,7 +172,7 @@ Part 3 - Creating the Perl package
     VERSION="x,x,x,x" line to the correct values.  Do NOT change 
     * lines in the original file.
 
-<SOFTPKG NAME="NetSNMP" VERSION="5,2,0,0">
+<SOFTPKG NAME="NetSNMP" VERSION="5,4,1,0">
     <TITLE>Net-SNMP</TITLE>
     <ABSTRACT>Object Oriented Interface to Net-SNMP</ABSTRACT>
     <AUTHOR></AUTHOR>
@@ -181,14 +183,16 @@ Part 3 - Creating the Perl package
     </IMPLEMENTATION>
 </SOFTPKG>
 
-9.  Create base directories:
+9.  Copy the win32\dist folder from trunk to the win32 folder of the extracted source.
+
+10. Create base directories:
 
     md "c:\usr\docs"
     md "c:\usr\perl"
     md "c:\usr\perl\x86"
     md "c:\usr\temp"
 
-10. Copy files:
+12. Copy files:
 
     cd (source dir)
     copy COPYING "c:\usr\docs"
@@ -198,7 +202,7 @@ Part 3 - Creating the Perl package
     copy perl\NetSNMP.ppd "c:\usr\Perl"
     copy perl\NetSNMP.tar.gz "c:\usr\Perl\x86"
 
-11. Update the BUILD INFORMATION section of c:\usr\README.txt
+12. Update the BUILD INFORMATION section of c:\usr\README.txt
 
 
 Compiling HTMLHelp file
@@ -469,7 +473,8 @@ Requirements
 3.  Re-build the binary by following the steps in the section 'Building the 
     main binaries' except enable OpenSSL.  Be sure to undo the winExtDLL 
     changes before starting by copying a fresh net-snmp-config.h.in and 
-    netsnmpmibssdk.dsp.
+    netsnmpmibssdk.dsp and then re-build the winExtDLL version.  Also follow
+    the Perl steps to create a new tar file etc.
 
 4.  Copy contents of c:\usr to c:\usr.temp
 
@@ -491,7 +496,7 @@ Requirements
 
     The generated filename would be: net-snmp-5.3.0-ssl-1.win32.exe
 
-9.  In c:\usr\net-snmp.nsi, change:
+9.  Also in c:\usr\net-snmp.nsi, change:
 
     !define OPENSSL_REQUIRED "0"
 
