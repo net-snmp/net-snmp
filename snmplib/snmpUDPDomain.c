@@ -105,11 +105,11 @@ netsnmp_udp_fmtaddr(netsnmp_transport *t, void *data, int len)
         to = (struct sockaddr_in *) &(addr_pair->remote_addr);
         if (to == NULL) {
             sprintf(tmp, "UDP: [%s]->unknown",
-                strdup(inet_ntoa(addr_pair->local_addr)));
+                    inet_ntoa(addr_pair->local_addr));
         } else {
-            sprintf(tmp, "UDP: [%s]->[%s]:%hd",
-                strdup(inet_ntoa(addr_pair->local_addr)),
-                inet_ntoa(to->sin_addr), ntohs(to->sin_port));
+            sprintf(tmp, "UDP: [%s]->", inet_ntoa(addr_pair->local_addr));
+            sprintf(tmp + strlen(tmp), "[%s]:%hd",
+                    inet_ntoa(to->sin_addr), ntohs(to->sin_port));
         }
         return strdup(tmp);
     }
