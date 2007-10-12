@@ -39,7 +39,7 @@
 
 /*
  * NEW_MIB_COMPLIANT is a define used in Solaris 10U4+ to enable additional
- * MIB information (it affects the structs in <inet/mib2.h>
+ * MIB information (it affects the structs in <inet/mib2.h>)
  */ 
  
 #define NEW_MIB_COMPLIANT
