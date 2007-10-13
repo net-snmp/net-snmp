@@ -120,6 +120,12 @@ int                      tcp_estab = 0;
 #define TCP_STATS_CACHE_TIMEOUT	MIB_STATS_CACHE_TIMEOUT
 #endif
 
+#if defined(TCP_PORTS_IN_HOST_ORDER) && TCP_PORTS_IN_HOST_ORDER
+#define TCP_PORT_TO_HOST_ORDER(x) x
+#else
+#define TCP_PORT_TO_HOST_ORDER(x) ntohs(x)
+#endif
+
 oid             tcpTable_oid[] = { SNMP_OID_MIB2, 6, 13 };
 
 void
@@ -155,7 +161,7 @@ init_tcpTable(void)
     iinfo->get_first_data_point = tcpTable_first_entry;
     iinfo->get_next_data_point  = tcpTable_next_entry;
     iinfo->table_reginfo        = table_info;
-#if defined (WIN32) || defined (cygwin) || defined (solaris2)
+#if defined (WIN32) || defined (cygwin)
     iinfo->flags               |= NETSNMP_ITERATOR_FLAG_SORTED;
 #endif /* WIN32 || cygwin || solaris2 */
 
@@ -230,7 +236,7 @@ tcpTable_handler(netsnmp_mib_handler          *handler,
 #endif
                 break;
             case TCPCONNLOCALPORT:
-                port = ntohs((u_short)entry->TCPTABLE_LOCALPORT);
+                port = TCP_PORT_TO_HOST_ORDER((u_short)entry->TCPTABLE_LOCALPORT);
 	        snmp_set_var_typed_value(requestvb, ASN_INTEGER,
                                  (u_char *)&port, sizeof(port));
                 break;
@@ -246,7 +252,7 @@ tcpTable_handler(netsnmp_mib_handler          *handler,
 #endif
                 break;
             case TCPCONNREMOTEPORT:
-                port = ntohs((u_short)entry->TCPTABLE_REMOTEPORT);
+                port = TCP_PORT_TO_HOST_ORDER((u_short)entry->TCPTABLE_REMOTEPORT);
 	        snmp_set_var_typed_value(requestvb, ASN_INTEGER,
                                  (u_char *)&port, sizeof(port));
                 break;
@@ -335,7 +341,7 @@ tcpTable_next_entry( void **loop_context,
                                 sizeof(tcp_head[i].TCPTABLE_LOCALADDRESS));
 #endif
 
-    port = ntohs((u_short)tcp_head[i].TCPTABLE_LOCALPORT);
+    port = TCP_PORT_TO_HOST_ORDER((u_short)tcp_head[i].TCPTABLE_LOCALPORT);
     idx = idx->next_variable;
     snmp_set_var_value(idx, (u_char*)&port, sizeof(port));
 
@@ -349,7 +355,7 @@ tcpTable_next_entry( void **loop_context,
                                 sizeof(tcp_head[i].TCPTABLE_REMOTEADDRESS));
 #endif
 
-    port = ntohs((u_short)tcp_head[i].TCPTABLE_REMOTEPORT);
+    port = TCP_PORT_TO_HOST_ORDER((u_short)tcp_head[i].TCPTABLE_REMOTEPORT);
     idx = idx->next_variable;
     snmp_set_var_value(idx, (u_char*)&port, sizeof(port));
 
@@ -426,7 +432,7 @@ tcpTable_next_entry( void **loop_context,
 #endif
     snmp_set_var_value(idx, (u_char *)&addr, sizeof(addr));
 
-    port = ntohs(entry->TCPTABLE_LOCALPORT);
+    port = TCP_PORT_TO_HOST_ORDER(entry->TCPTABLE_LOCALPORT);
     idx = idx->next_variable;
     snmp_set_var_value(idx, (u_char*)&port, sizeof(port));
 
@@ -438,7 +444,7 @@ tcpTable_next_entry( void **loop_context,
 #endif
     snmp_set_var_value(idx, (u_char *)&addr, sizeof(addr));
 
-    port = ntohs(entry->TCPTABLE_REMOTEPORT);
+    port = TCP_PORT_TO_HOST_ORDER(entry->TCPTABLE_REMOTEPORT);
     idx = idx->next_variable;
     snmp_set_var_value(idx, (u_char*)&port, sizeof(port));
 
@@ -621,6 +627,8 @@ tcpTable_load(netsnmp_cache *cache, void *vmagic)
          * Note that since getMibstat returns rows in sorted order,
          *    we need to retain this order while building the list
          *    so new entries are added onto the end of the list.
+         * Note 2: at least Solaris 8-10 do not return rows in
+         *    sorted order anymore
          */
         nnew = SNMP_MALLOC_TYPEDEF(netsnmp_tcpConnEntry);
         if (nnew == NULL)
