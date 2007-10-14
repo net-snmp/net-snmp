@@ -141,7 +141,7 @@ netsnmp_access_tcpconn_entry_create(void)
      */
     rc = netsnmp_arch_tcpconn_entry_init(entry);
     if (SNMP_ERR_NOERROR != rc) {
-        DEBUGMSGT(("access:tcpconn:create","error %d in arch init\n"));
+        DEBUGMSGT(("access:tcpconn:create","error %d in arch init\n", rc));
         netsnmp_access_tcpconn_entry_free(entry);
     }
 
