@@ -2256,6 +2256,7 @@ _bulkwalk_recv_pdu(walk_context *context, netsnmp_pdu *pdu)
 static int
 _bulkwalk_finish(walk_context *context, int okay)
 {
+   dSP;
    int		npushed = 0;
    int		i;
    int		async = 0;
@@ -2266,9 +2267,23 @@ _bulkwalk_finish(walk_context *context, int okay)
 
    SV **err_str_svp = hv_fetch((HV*)SvRV(context->sess_ref), "ErrorStr", 8, 1);
    SV **err_num_svp = hv_fetch((HV*)SvRV(context->sess_ref), "ErrorNum", 8, 1);
+   
+   async = SvTRUE(context->perl_cb);
+
+   /* XXX
+      _bulkwalk_finish() was originally intended to be called from XS code, and
+      would extend the caller's stack with result. Later it was changed into
+      an asynchronous version that calls perl code instead. These two branches
+      differ significantly in how they treat perl stack. Due to these differences,
+      often implicit (f.ex. dMARK calls POPMARK ), it would be a good idea
+      to write two different procedures, _bulkwalk_finish_sync and _bulkwalk_finish_async
+      for cleaner separation. */
+
+   if (async) PUSHMARK(sp);
+
+   {
 
 #ifdef dITEMS
-   dSP;
    dMARK;
    dITEMS;
 #else
@@ -2276,14 +2291,12 @@ _bulkwalk_finish(walk_context *context, int okay)
    /* older perl versions don't declare dITEMS though and the
       following declars it but also uses dAXMARK instead of dMARK
       which is the bad popping version */
-   dSP;
    dMARK;
 
    /* err...  This is essentially what the newer dITEMS does */
    I32 items = sp - mark;
 #endif
 
-   async = SvTRUE(context->perl_cb);
 
    /* Successfully completed the bulkwalk.  For synchronous calls, push each
    ** of the request value arrays onto the stack, and return the number of
@@ -2391,7 +2404,7 @@ _bulkwalk_finish(walk_context *context, int okay)
    DBPRT(2,(DBOUT "Free() context 0x%p\n", context));
    Safefree(context);
    return npushed;
-}
+}}
 
 /* End of bulkwalk support routines */
 
