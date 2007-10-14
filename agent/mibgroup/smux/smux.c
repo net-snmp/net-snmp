@@ -625,14 +625,14 @@ smux_accept(int sd)
         if ((ptr = asn_parse_header(ptr, &len, &type)) == NULL) {
             smux_send_close(fd, SMUXC_PACKETFORMAT);
             close(fd);
-            DEBUGMSGTL(("smux", "[smux_accept] peer on %d sent bad open"));
+            DEBUGMSGTL(("smux", "[smux_accept] peer on %d sent bad open", fd));
             return -1;
         } else if (type != (u_char) SMUX_OPEN) {
             smux_send_close(fd, SMUXC_PROTOCOLERROR);
             close(fd);
             DEBUGMSGTL(("smux",
                         "[smux_accept] peer on %d did not send open: (%d)\n",
-                        type));
+                        fd, type));
             return -1;
         }
         ptr = smux_open_process(fd, ptr, &len, &fail);
