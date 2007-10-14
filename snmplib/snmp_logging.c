@@ -179,6 +179,9 @@ decode_priority( char *optarg, int *pri_max )
 {
     int pri_low = LOG_DEBUG;
 
+    if (optarg == NULL)
+        return -1;
+
     switch (*optarg) {
         case '0': 
         case '!': 
@@ -384,7 +387,7 @@ snmp_log_options(char *optarg, int argc, char *const *argv)
     case 'S':
         priority = decode_priority( optarg, &pri_max );
         if (priority == -1 || !argv)  return -1;
-        optarg = argv[++optind];
+        optarg++;
         /* Fallthrough */
     case 's':
         if (inc_optind)
