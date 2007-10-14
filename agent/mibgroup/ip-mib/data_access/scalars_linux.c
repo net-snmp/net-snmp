@@ -55,8 +55,8 @@ netsnmp_arch_ip_scalars_ipv6IpForwarding_set(u_long value)
     else if (2 == value)
         value = 0;
     else {
-        DEBUGMSGTL(("access:ipv6IpForwarding", "bad value %ld for %s\n",
-                    value));
+        DEBUGMSGTL(("access:ipv6IpForwarding",
+                    "bad value %ld for ipv6IpForwarding\n", value));
         return SNMP_ERR_WRONGVALUE;
     }
 
