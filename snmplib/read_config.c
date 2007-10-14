@@ -1050,7 +1050,7 @@ read_config_files_in_path(const char *path, struct config_files *ctmp,
                 ctmp->fileHeader, envconfpath, perspath));
     cptr1 = cptr2 = envconfpath;
     done = 0;
-    while ((*cptr2 != 0) && (!done)) {
+    while ((!done) && (*cptr2 != 0)) {
         while (*cptr1 != 0 && *cptr1 != ENV_SEPARATOR_CHAR)
             cptr1++;
         if (*cptr1 == 0)
