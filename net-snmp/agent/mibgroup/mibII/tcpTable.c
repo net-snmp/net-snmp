@@ -163,7 +163,7 @@ init_tcpTable(void)
     iinfo->table_reginfo        = table_info;
 #if defined (WIN32) || defined (cygwin)
     iinfo->flags               |= NETSNMP_ITERATOR_FLAG_SORTED;
-#endif /* WIN32 || cygwin || solaris2 */
+#endif /* WIN32 || cygwin */
 
 
     /*
