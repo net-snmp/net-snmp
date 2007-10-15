@@ -37,6 +37,9 @@ extern          "C" {
 
     void netsnmp_container_binary_array_init(void);
 
+    int netsnmp_binary_array_options_set(netsnmp_container *c, int set, u_int flags);
+
+
 #ifdef __cplusplus
 }
 #endif
