@@ -44,6 +44,7 @@
 
 #include <net-snmp/types.h>
 #include <net-snmp/library/container.h>
+#include <net-snmp/library/container_binary_array.h>
 #include <net-snmp/library/dir_utils.h>
 
 netsnmp_container *
