@@ -207,7 +207,7 @@ NEXT_EXP:
                   *         object being the same length as the wildcarded
                   *         parameter objects.  It ain't necessarily so.
                   */
-                 for ( vp2 = exp->pvars; vp2; vp2->next_variable ) {
+                 for ( vp2 = exp->pvars; vp2; vp2 = vp2->next_variable ) {
                      if ( snmp_oid_compare( vp2->name        + plen,
                                             vp2->name_length - plen,
                                             vp->name,
@@ -253,7 +253,6 @@ expValueTable_handler(netsnmp_mib_handler *handler,
     oid    expValueOID[] = { 1, 3, 6, 1, 2, 1, 90, 1, 3, 1, 1, 99 };
     size_t expValueOID_len = OID_LENGTH(expValueOID);
     oid    name_buf[ MAX_OID_LEN ];
-    oid   *name_ptr = name_buf;
     size_t name_buf_len = MAX_OID_LEN;
 
     DEBUGMSGTL(("disman:expr:mib", "Expression Value Table handler (%d)\n",
