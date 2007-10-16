@@ -142,7 +142,7 @@ netsnmp_scalar_helper_handler(netsnmp_mib_handler *handler,
     cmp = snmp_oid_compare(requests->requestvb->name, namelen,
                            reginfo->rootoid, reginfo->rootoid_len);
 
-    DEBUGMSGTL(("helper:scalar", "  oid:", cmp));
+    DEBUGMSGTL(("helper:scalar", "  oid:"));
     DEBUGMSGOID(("helper:scalar", var->name, var->name_length));
     DEBUGMSG(("helper:scalar", "\n"));
 
