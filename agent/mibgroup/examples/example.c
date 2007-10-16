@@ -598,10 +598,9 @@ write_exampletrap(int action,
          *  (In fact, they can fail, but they return no
          *   indication of this, which is the next best thing!)
          */
-        DEBUGMSGTL(("example", "write_exampletrap sending the trap\n",
-                    action));
+        DEBUGMSGTL(("example", "write_exampletrap sending the trap\n"));
         send_easy_trap(SNMP_TRAP_ENTERPRISESPECIFIC, 99);
-        DEBUGMSGTL(("example", "write_exampletrap trap sent\n", action));
+        DEBUGMSGTL(("example", "write_exampletrap trap sent\n"));
         break;
 
     }
@@ -733,11 +732,9 @@ write_exampletrap2(int action,
         var_obj.type = ASN_OCTET_STR;   /* type of variable */
         var_obj.val.string = example_str;       /* value */
         var_obj.val_len = strlen(example_str);
-        DEBUGMSGTL(("example", "write_exampletrap2 sending the v2 trap\n",
-                    action));
+        DEBUGMSGTL(("example", "write_exampletrap2 sending the v2 trap\n"));
         send_v2trap(&var_trap);
-        DEBUGMSGTL(("example", "write_exampletrap2 v2 trap sent\n",
-                    action));
+        DEBUGMSGTL(("example", "write_exampletrap2 v2 trap sent\n"));
 
         break;
 
