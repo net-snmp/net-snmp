@@ -218,7 +218,7 @@ netsnmp_tdata_add_row(netsnmp_tdata     *table,
      * add this row to the stored table
      */
     CONTAINER_INSERT( table->container, row );
-    DEBUGMSGTL(("tdata_add_row", "added row (%x)\n", row));
+    DEBUGMSGTL(("tdata_add_row", "added row (%p)\n", row));
 
     return SNMPERR_SUCCESS;
 }

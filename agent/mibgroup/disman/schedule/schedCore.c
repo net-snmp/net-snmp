@@ -22,7 +22,7 @@ init_schedule_container(void)
     if (!schedule_table) {
         schedule_table = netsnmp_tdata_create_table("schedTable", 0);
         DEBUGMSGTL(("disman:schedule:init",
-                        "create schedule container(%x)\n", schedule_table));
+                        "create schedule container(%p)\n", schedule_table));
     }
 }
 

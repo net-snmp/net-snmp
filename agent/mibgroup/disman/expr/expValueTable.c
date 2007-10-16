@@ -78,7 +78,7 @@ expValueTable_getEntry(netsnmp_variable_list * indexes,
          */
         if (mode == MODE_GETNEXT || mode == MODE_GETBULK) {
             exp = expExpression_getFirstEntry();
-            DEBUGMSGTL(( "disman:expr:val", "first entry (%x)\n", exp ));
+            DEBUGMSGTL(( "disman:expr:val", "first entry (%p)\n", exp ));
         } else {
             DEBUGMSGTL(( "disman:expr:val", "incomplete request\n" ));
             return NULL;        /* No match */
@@ -86,7 +86,7 @@ expValueTable_getEntry(netsnmp_variable_list * indexes,
     } else {
         exp = expExpression_getEntry( (char*)indexes->val.string,
                                       (char*)indexes->next_variable->val.string);
-        DEBUGMSGTL(( "disman:expr:val", "using entry (%x)\n", exp ));
+        DEBUGMSGTL(( "disman:expr:val", "using entry (%p)\n", exp ));
     }
 
     /*
@@ -101,7 +101,7 @@ expValueTable_getEntry(netsnmp_variable_list * indexes,
         }
 NEXT_EXP:
         exp = expExpression_getNextEntry( exp->expOwner, exp->expName );
-        DEBUGMSGTL(( "disman:expr:val", "using next entry (%x)\n", exp ));
+        DEBUGMSGTL(( "disman:expr:val", "using next entry (%p)\n", exp ));
     }
     if (!exp) {
         DEBUGMSGTL(( "disman:expr:val", "no more entries\n"));
@@ -140,7 +140,7 @@ NEXT_EXP:
                 return NULL;
             }
             res = expValue_evaluateExpression( exp, NULL, 0 );
-            DEBUGMSGTL(( "disman:expr:val", "scalar get returned (%x)\n", res));
+            DEBUGMSGTL(( "disman:expr:val", "scalar get returned (%p)\n", res));
         } else {
             /*
              * Otherwise, skip the leading '.0' and use
@@ -148,7 +148,7 @@ NEXT_EXP:
              */
             res = expValue_evaluateExpression( exp, vp->val.objid+1,
                                            vp->val_len/sizeof(oid)-1);
-            DEBUGMSGTL(( "disman:expr:val", "w/card get returned (%x)\n", res));
+            DEBUGMSGTL(( "disman:expr:val", "w/card get returned (%p)\n", res));
         }
     } else {
         /*
@@ -187,7 +187,7 @@ NEXT_EXP:
             snmp_set_var_typed_value( vp, ASN_PRIV_IMPLIED_OBJECT_ID,
                        (u_char*)nullInstance, 3*sizeof(oid));
             res = expValue_evaluateExpression( exp, NULL, 0 );
-            DEBUGMSGTL(( "disman:expr:val", "scalar next returned (%x)\n", res));
+            DEBUGMSGTL(( "disman:expr:val", "scalar next returned (%p)\n", res));
         } else {
             /*
              * Now comes the interesting case - finding the
@@ -233,7 +233,7 @@ NEXT_EXP:
                       (u_char*)(vp2->name+exp->expPrefix_len), len);
             }
             res = expValue_evaluateExpression( exp, vp->val.objid+1, len-1);
-            DEBUGMSGTL(( "disman:expr:val", "w/card next returned (%x)\n", res));
+            DEBUGMSGTL(( "disman:expr:val", "w/card next returned (%p)\n", res));
         }
     }
     return res;

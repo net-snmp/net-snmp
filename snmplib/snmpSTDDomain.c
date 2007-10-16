@@ -40,7 +40,7 @@ static char *
 netsnmp_std_fmtaddr(netsnmp_transport *t, void *data, int len)
 {
     char *buf;
-    DEBUGMSGTL(("domain:std","formatting addr.  data=%x\n",t->data));
+    DEBUGMSGTL(("domain:std","formatting addr.  data=%p\n",t->data));
     if (t->data) {
         netsnmp_std_data *data = (netsnmp_std_data*)t->data;
         buf = (char*)malloc(SNMP_MAXBUF_MEDIUM);
@@ -67,7 +67,7 @@ netsnmp_std_recv(netsnmp_transport *t, void *buf, int size,
 {
     int rc = -1;
 
-    DEBUGMSGTL(("domain:std","recv on sock %d.  data=%x\n",t->sock, t->data));
+    DEBUGMSGTL(("domain:std","recv on sock %d.  data=%p\n",t->sock, t->data));
     while (rc < 0) {
         rc = read(t->sock, buf, size);
         DEBUGMSGTL(("domain:std","  bytes: %d.\n", rc));
@@ -94,7 +94,7 @@ netsnmp_std_send(netsnmp_transport *t, void *buf, int size,
 {
     int rc = -1;
 
-    DEBUGMSGTL(("domain:std","send on sock.  data=%x\n", t->data));
+    DEBUGMSGTL(("domain:std","send on sock.  data=%p\n", t->data));
     while (rc < 0) {
         if (t->data) {
             netsnmp_std_data *data = (netsnmp_std_data*)t->data;
@@ -113,7 +113,7 @@ netsnmp_std_send(netsnmp_transport *t, void *buf, int size,
 static int
 netsnmp_std_close(netsnmp_transport *t)
 {
-    DEBUGMSGTL(("domain:std","close.  data=%x\n", t->data));
+    DEBUGMSGTL(("domain:std","close.  data=%p\n", t->data));
     if (t->data) {
         netsnmp_std_data *data = (netsnmp_std_data*)t->data;
         close(data->outfd);
@@ -138,7 +138,7 @@ netsnmp_std_close(netsnmp_transport *t)
 static int
 netsnmp_std_accept(netsnmp_transport *t)
 {
-    DEBUGMSGTL(("domain:std"," accept data=%x\n", t->data));
+    DEBUGMSGTL(("domain:std"," accept data=%p\n", t->data));
     /* nothing to do here */
     return 0;
 }
@@ -222,7 +222,7 @@ netsnmp_std_transport(const char *instring, size_t instring_len,
             data->prog = strdup(instring);
             data->outfd = infd[1];
             data->childpid = childpid;
-            DEBUGMSGTL(("domain:std","parent.  data=%x\n", t->data));
+            DEBUGMSGTL(("domain:std","parent.  data=%p\n", t->data));
         } else {
             /* we're in the child */
 

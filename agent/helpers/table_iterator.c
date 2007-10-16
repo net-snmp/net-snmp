@@ -1004,7 +1004,7 @@ netsnmp_iterator_row_get_byoid(  netsnmp_iterator_info *iinfo,
 
     vp1 = snmp_clone_varbind(iinfo->indexes);
     vp2 = iinfo->get_first_data_point( &ctx1, &ctx2, vp1, iinfo );
-    DEBUGMSGTL(("table:iterator:get", "first DP: %x %x %x\n",
+    DEBUGMSGTL(("table:iterator:get", "first DP: %p %p %p\n",
                                        ctx1, ctx2, vp2));
 
     /* XXX - free context ? */
@@ -1023,7 +1023,7 @@ netsnmp_iterator_row_get_byoid(  netsnmp_iterator_info *iinfo,
         }
         
         vp2 = iinfo->get_next_data_point( &ctx1, &ctx2, vp2, iinfo );
-        DEBUGMSGTL(("table:iterator:get", "next DP: %x %x %x\n",
+        DEBUGMSGTL(("table:iterator:get", "next DP: %p %p %p\n",
                                            ctx1, ctx2, vp2));
         /* XXX - free context ? */
     }
@@ -1053,7 +1053,7 @@ netsnmp_iterator_row_next_byoid( netsnmp_iterator_info *iinfo,
 
     vp1 = snmp_clone_varbind(iinfo->indexes);
     vp2 = iinfo->get_first_data_point( &ctx1, &ctx2, vp1, iinfo );
-    DEBUGMSGTL(("table:iterator:get", "first DP: %x %x %x\n",
+    DEBUGMSGTL(("table:iterator:get", "first DP: %p %p %p\n",
                                        ctx1, ctx2, vp2));
 
     if ( !instance || !len ) {
@@ -1090,7 +1090,7 @@ netsnmp_iterator_row_next_byoid( netsnmp_iterator_info *iinfo,
         }
         
         vp2 = iinfo->get_next_data_point( &ctx1, &ctx2, vp2, iinfo );
-        DEBUGMSGTL(("table:iterator:get", "next DP: %x %x %x\n",
+        DEBUGMSGTL(("table:iterator:get", "next DP: %p %p %p\n",
                                            ctx1, ctx2, vp2));
         /* XXX - free context ? */
     }
@@ -1119,7 +1119,7 @@ netsnmp_iterator_row_count( netsnmp_iterator_info *iinfo )
         return 0;
     }
     
-    DEBUGMSGTL(("table:iterator:count", "first DP: %x %x %x\n",
+    DEBUGMSGTL(("table:iterator:count", "first DP: %p %p %p\n",
                                          ctx1, ctx2, vp2));
 
     /* XXX - free context ? */
@@ -1127,7 +1127,7 @@ netsnmp_iterator_row_count( netsnmp_iterator_info *iinfo )
     while (vp2) {
         i++;
         vp2 = iinfo->get_next_data_point( &ctx1, &ctx2, vp2, iinfo );
-        DEBUGMSGTL(("table:iterator:count", "next DP: %x %x %x (%d)\n",
+        DEBUGMSGTL(("table:iterator:count", "next DP: %p %p %p (%d)\n",
                                              ctx1, ctx2, vp2, i));
         /* XXX - free context ? */
     }

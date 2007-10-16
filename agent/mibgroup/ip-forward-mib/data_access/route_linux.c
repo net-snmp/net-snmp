@@ -363,7 +363,7 @@ netsnmp_access_route_container_arch_load(netsnmp_container* container,
     int             rc;
 
     DEBUGMSGTL(("access:route:container",
-                "route_container_arch_load (flags %p)\n", load_flags));
+                "route_container_arch_load (flags %x)\n", load_flags));
 
     if (NULL == container) {
         snmp_log(LOG_ERR, "no container specified/found for access_route\n");

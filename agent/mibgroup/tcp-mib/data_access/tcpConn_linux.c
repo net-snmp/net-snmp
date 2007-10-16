@@ -81,7 +81,7 @@ netsnmp_arch_tcpconn_container_load(netsnmp_container *container,
     int rc = 0;
 
     DEBUGMSGTL(("access:tcpconn:container",
-                "tcpconn_container_arch_load (flags %p)\n", load_flags));
+                "tcpconn_container_arch_load (flags %x)\n", load_flags));
 
     if (NULL == container) {
         snmp_log(LOG_ERR, "no container specified/found for access_tcpconn\n");

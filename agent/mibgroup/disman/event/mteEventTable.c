@@ -49,7 +49,7 @@ init_mteEventTable(void)
 
     /* Register this using the (common) event_table_data container */
     netsnmp_tdata_register(reg, event_table_data, table_info);
-    DEBUGMSGTL(("disman:event:init", "Event Table container (%x)\n",
+    DEBUGMSGTL(("disman:event:init", "Event Table container (%p)\n",
                                       event_table_data));
 }
 
