@@ -210,7 +210,7 @@ send_notifications(int major, int minor, void *serverarg, void *clientarg)
     netsnmp_pdu    *template_pdu = (netsnmp_pdu *) serverarg;
     int             count = 0, send = 0;
 
-    DEBUGMSGTL(("send_notifications", "starting: pdu=%x, vars=%x\n",
+    DEBUGMSGTL(("send_notifications", "starting: pdu=%p, vars=%p\n",
                 template_pdu, template_pdu->variables));
 
     for (hptr = snmpNotifyTableStorage; hptr; hptr = hptr->next) {

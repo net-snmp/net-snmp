@@ -1178,13 +1178,13 @@ snmp_errstring(int errstat)
 static netsnmp_session *_def_query_session = NULL;
 void
 netsnmp_query_set_default_session( netsnmp_session *sess) {
-    DEBUGMSGTL(("iquery", "set default session %x\n", sess));
+    DEBUGMSGTL(("iquery", "set default session %p\n", sess));
     _def_query_session = sess;
 }
 
 netsnmp_session *
 netsnmp_query_get_default_session( void ) {
-    DEBUGMSGTL(("iquery", "get default session %x\n", _def_query_session));
+    DEBUGMSGTL(("iquery", "get default session %p\n", _def_query_session));
     return _def_query_session;
 }
 
@@ -1201,7 +1201,7 @@ static int _query(netsnmp_variable_list *list,
     netsnmp_variable_list *vb1, *vb2, *vtmp;
     int ret;
 
-    DEBUGMSGTL(("iquery", "query on session %x\n", session));
+    DEBUGMSGTL(("iquery", "query on session %p\n", session));
     /*
      * Clone the varbind list into the request PDU...
      */

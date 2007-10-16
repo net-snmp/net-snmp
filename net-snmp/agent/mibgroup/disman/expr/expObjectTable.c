@@ -51,7 +51,7 @@ init_expObjectTable(void)
 
     /* Register this using the common expObject_table_data container */
     netsnmp_tdata_register(reg, expObject_table_data, table_info);
-    DEBUGMSGTL(("disman:expr:init", "Expression Object Table container (%x)\n",
+    DEBUGMSGTL(("disman:expr:init", "Expression Object Table container (%p)\n",
                                      expObject_table_data));
 }
 

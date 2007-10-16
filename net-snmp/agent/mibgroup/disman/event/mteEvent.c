@@ -23,7 +23,7 @@ init_event_table_data(void)
     DEBUGMSGTL(("disman:event:init", "init event container\n"));
     if (!event_table_data) {
         event_table_data = netsnmp_tdata_create_table("mteEventTable", 0);
-        DEBUGMSGTL(("disman:event:init", "create event container (%x)\n",
+        DEBUGMSGTL(("disman:event:init", "create event container (%p)\n",
                                       event_table_data));
     }
 }
@@ -128,7 +128,7 @@ _mteEvent_dump(void)
         DEBUGMSG(("disman:event:dump", "(%s, %s)",
                                          row->indexes->val.string,
                                          row->indexes->next_variable->val.string));
-        DEBUGMSG(("disman:event:dump", ": %x, %x\n", row, entry));
+        DEBUGMSG(("disman:event:dump", ": %p, %p\n", row, entry));
         i++;
     }
     DEBUGMSGTL(("disman:event:dump", "EventTable %d entries\n", i));

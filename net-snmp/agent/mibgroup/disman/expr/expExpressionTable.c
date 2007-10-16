@@ -49,7 +49,7 @@ init_expExpressionTable(void)
 
     /* Register this using the (common) expr_table_data container */
     netsnmp_tdata_register(reg, expr_table_data, table_info);
-    DEBUGMSGTL(("disman:expr:init", "Expression Table container (%x)\n",
+    DEBUGMSGTL(("disman:expr:init", "Expression Table container (%p)\n",
                                      expr_table_data));
 }
 

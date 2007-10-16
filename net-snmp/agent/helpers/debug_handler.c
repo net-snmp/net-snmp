@@ -117,7 +117,7 @@ netsnmp_debug_helper(netsnmp_mib_handler *handler,
     for (hptr = reginfo->handler; hptr; hptr = hptr->next) {
         DEBUGMSG(("helper:debug", " -> %s", hptr->handler_name));
         if (hptr->myvoid)
-            DEBUGMSG(("helper:debug", " [myvoid = %x]", hptr->myvoid));
+            DEBUGMSG(("helper:debug", " [myvoid = %p]", hptr->myvoid));
     }
     DEBUGMSG(("helper:debug", "\n"));
 

@@ -564,7 +564,7 @@ netsnmp_get_traphandler( oid *trapOid, int trapOidLen ) {
         if (!(traph->flags & NETSNMP_TRAPHANDLER_FLAG_MATCH_TREE)) {
             if (snmp_oid_compare(traph->trapoid, traph->trapoid_len,
                                  trapOid, trapOidLen) == 0) {
-                DEBUGMSGTL(( "snmptrapd", "get_traphandler exact match (%x)\n", traph));
+                DEBUGMSGTL(( "snmptrapd", "get_traphandler exact match (%p)\n", traph));
 	        return traph;
             }
 	} else {
@@ -582,11 +582,11 @@ netsnmp_get_traphandler( oid *trapOid, int trapOidLen ) {
                      */
                     if (snmp_oid_compare(traph->trapoid, traph->trapoid_len,
                                          trapOid, trapOidLen) != 0) {
-                        DEBUGMSGTL(( "snmptrapd", "get_traphandler strict subtree match (%x)\n", traph));
+                        DEBUGMSGTL(( "snmptrapd", "get_traphandler strict subtree match (%p)\n", traph));
 	                return traph;
                     }
                 } else {
-                    DEBUGMSGTL(( "snmptrapd", "get_traphandler subtree match (%x)\n", traph));
+                    DEBUGMSGTL(( "snmptrapd", "get_traphandler subtree match (%p)\n", traph));
 	            return traph;
                 }
             }
@@ -596,7 +596,7 @@ netsnmp_get_traphandler( oid *trapOid, int trapOidLen ) {
     /*
      * .... or failing that, return the "default" list (which may be NULL)
      */
-    DEBUGMSGTL(( "snmptrapd", "get_traphandler default (%x)\n",
+    DEBUGMSGTL(( "snmptrapd", "get_traphandler default (%p)\n",
 			    netsnmp_default_traphandlers));
     return netsnmp_default_traphandlers;
 }
