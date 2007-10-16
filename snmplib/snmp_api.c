@@ -5986,7 +5986,7 @@ _sess_selpol_info(void *sessp, struct timeval *timeout, int *block,
                 /* increase array size *2 if it's not big enough */
                 int newfdas = (fdas > 0) ? fdas * 2 : 1;
                 struct pollfd *prev = fdarr->fds;
-                fdarr->fds = (pollfd*)realloc(fdarr->fds,
+                fdarr->fds = (struct pollfd*)realloc(fdarr->fds,
                                               newfdas * sizeof(struct pollfd));
                 if (fdarr->fds == NULL) {
                     /* realloc failed, revert to old list and abort */
