@@ -11,12 +11,12 @@ create_word_array_helper(const char* cptr, size_t idx, char* tmp, size_t tmplen)
 {
     char* item;
     char** res;
-    cptr = copy_nword(cptr, tmp, tmplen);
+    cptr = copy_nword((char*)cptr, tmp, tmplen);
     item = strdup(tmp);
     if (cptr)
         res = create_word_array_helper(cptr, idx + 1, tmp, tmplen);
     else {
-        res = malloc(sizeof(char*) * (idx + 2));
+        res = (char**)malloc(sizeof(char*) * (idx + 2));
         res[idx + 1] = NULL;
     }
     res[idx] = item;
@@ -27,7 +27,7 @@ static char**
 create_word_array(const char* cptr)
 {
     size_t tmplen = strlen(cptr);
-    char* tmp = malloc(tmplen + 1);
+    char* tmp = (char*)malloc(tmplen + 1);
     char** res = create_word_array_helper(cptr, 0, tmp, tmplen);
     free(tmp);
     return res;
