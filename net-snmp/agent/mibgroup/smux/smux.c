@@ -1001,7 +1001,7 @@ smux_rreq_process(int sd, u_char * ptr, size_t * len)
                (operation == SMUX_REGOP_REGISTER_RW)) {
         if (priority < -1) {
             DEBUGMSGTL(("smux",
-                        "[smux_rreq_process] peer fd %d invalid priority",
+                        "[smux_rreq_process] peer fd %d invalid priority %ld",
                         sd, priority));
             smux_send_rrsp(sd, -1);
             return NULL;
