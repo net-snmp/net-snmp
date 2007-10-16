@@ -353,7 +353,7 @@ netsnmp_tdomain_transport_full(const char *application,
     if (str != NULL) {
         char *cp;
         if ((cp = strchr(str, ':')) != NULL) {
-            char* mystring = malloc(cp + 1 - str);
+            char* mystring = (char*)malloc(cp + 1 - str);
             memcpy(mystring, str, cp - str);
             mystring[cp - str] = '\0';
             addr = cp + 1;
