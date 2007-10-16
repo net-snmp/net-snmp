@@ -97,7 +97,7 @@ netsnmp_watcher_helper_handler(netsnmp_mib_handler *handler,
                            requests->requestvb->name_length,
                            reginfo->rootoid, reginfo->rootoid_len);
 
-    DEBUGMSGTL(( "helper:watcher", "  oid:", cmp));
+    DEBUGMSGTL(( "helper:watcher", "  oid:"));
     DEBUGMSGOID(("helper:watcher", requests->requestvb->name,
                                    requests->requestvb->name_length));
     DEBUGMSG((   "helper:watcher", "\n"));
@@ -226,7 +226,7 @@ netsnmp_watched_timestamp_handler(netsnmp_mib_handler *handler,
                            requests->requestvb->name_length,
                            reginfo->rootoid, reginfo->rootoid_len);
 
-    DEBUGMSGTL(( "helper:watcher:timestamp", "  oid:", cmp));
+    DEBUGMSGTL(( "helper:watcher:timestamp", "  oid:"));
     DEBUGMSGOID(("helper:watcher:timestamp", requests->requestvb->name,
                                    requests->requestvb->name_length));
     DEBUGMSG((   "helper:watcher:timestamp", "\n"));
@@ -312,7 +312,7 @@ netsnmp_watched_spinlock_handler(netsnmp_mib_handler *handler,
                            requests->requestvb->name_length,
                            reginfo->rootoid, reginfo->rootoid_len);
 
-    DEBUGMSGTL(( "helper:watcher:spinlock", "  oid:", cmp));
+    DEBUGMSGTL(( "helper:watcher:spinlock", "  oid:"));
     DEBUGMSGOID(("helper:watcher:spinlock", requests->requestvb->name,
                                    requests->requestvb->name_length));
     DEBUGMSG((   "helper:watcher:spinlock", "\n"));

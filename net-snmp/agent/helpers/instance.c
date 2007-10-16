@@ -640,7 +640,7 @@ netsnmp_instance_int_handler(netsnmp_mib_handler *handler,
         /*
          * update current 
          */
-        DEBUGMSGTL(("testhandler", "updated int %d -> %l\n", *it,
+        DEBUGMSGTL(("testhandler", "updated int %d -> %ld\n", *it,
                     *(requests->requestvb->val.integer)));
         *it = (int) *(requests->requestvb->val.integer);
         break;
@@ -680,7 +680,7 @@ netsnmp_instance_helper_handler(netsnmp_mib_handler *handler,
                            requests->requestvb->name_length,
                            reginfo->rootoid, reginfo->rootoid_len);
 
-    DEBUGMSGTL(("helper:instance", "  oid:", cmp));
+    DEBUGMSGTL(("helper:instance", "  oid:"));
     DEBUGMSGOID(("helper:instance", var->name, var->name_length));
     DEBUGMSG(("helper:instance", "\n"));
 
