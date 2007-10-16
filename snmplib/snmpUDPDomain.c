@@ -1244,7 +1244,7 @@ netsnmp_udp_getSecName(void *opaque, int olength,
      * name.  
      */
 
-   DEBUGMSGTL(("netsnmp_udp_getSecName", "opaque = %x (len = %d), sizeof = %d, family = %d (%d)\n",
+   DEBUGMSGTL(("netsnmp_udp_getSecName", "opaque = %p (len = %d), sizeof = %d, family = %d (%d)\n",
    opaque, olength, sizeof(netsnmp_udp_addr_pair), from->sin_family, AF_INET));
     if (opaque == NULL || olength != sizeof(netsnmp_udp_addr_pair) ||
         from->sin_family != AF_INET) {

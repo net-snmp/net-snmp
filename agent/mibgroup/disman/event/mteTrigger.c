@@ -31,7 +31,7 @@ init_trigger_table_data(void)
             snmp_log(LOG_ERR, "failed to create mteTriggerTable");
             return;
         }
-        DEBUGMSGTL(("disman:event:init", "create trigger container (%x)\n",
+        DEBUGMSGTL(("disman:event:init", "create trigger container (%p)\n",
                                           trigger_table_data));
     }
     mteTriggerFailures = 0;
@@ -69,7 +69,7 @@ _mteTrigger_dump(void)
         DEBUGMSG(("disman:event:dump", "(%s, %s)",
                                          row->indexes->val.string,
                                          row->indexes->next_variable->val.string));
-        DEBUGMSG(("disman:event:dump", ": %x, %x\n", row, entry));
+        DEBUGMSG(("disman:event:dump", ": %p, %p\n", row, entry));
         i++;
     }
     DEBUGMSGTL(("disman:event:dump", "TriggerTable %d entries\n", i));

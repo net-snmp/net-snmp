@@ -153,7 +153,7 @@ init_traps(void)
 static void
 free_trap_session(struct trap_sink *sp)
 {
-    DEBUGMSGTL(("trap", "freeing callback trap session (%x, %x)\n", sp, sp->sesp));
+    DEBUGMSGTL(("trap", "freeing callback trap session (%p, %p)\n", sp, sp->sesp));
     snmp_close(sp->sesp);
     free(sp);
 }
@@ -169,7 +169,7 @@ add_trap_session(netsnmp_session * ss, int pdutype, int confirm,
          * something else wants to handle notification registrations 
          */
         struct agent_add_trap_args args;
-        DEBUGMSGTL(("trap", "adding callback trap sink (%x)\n", ss));
+        DEBUGMSGTL(("trap", "adding callback trap sink (%p)\n", ss));
         args.ss = ss;
         args.confirm = confirm;
         snmp_call_callbacks(SNMP_CALLBACK_APPLICATION,
@@ -218,7 +218,7 @@ remove_trap_session(netsnmp_session * ss)
             /*
              * free_trap_session(sp);  
              */
-            DEBUGMSGTL(("trap", "removing trap session (%x, %x)\n", sp, sp->sesp));
+            DEBUGMSGTL(("trap", "removing trap session (%p, %p)\n", sp, sp->sesp));
             free(sp);
             return 1;
         }

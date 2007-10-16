@@ -321,7 +321,7 @@ netsnmp_ds_set_void(int storeid, int which, void *value)
         return SNMPERR_GENERR;
     }
 
-    DEBUGMSGTL(("netsnmp_ds_set_void", "Setting %s:%d = %x\n",
+    DEBUGMSGTL(("netsnmp_ds_set_void", "Setting %s:%d = %p\n",
                 stores[storeid], which, value));
 
     netsnmp_ds_voids[storeid][which] = value;

@@ -446,7 +446,7 @@ netsnmp_arch_interface_container_load(netsnmp_container* container,
     netsnmp_container *addr_container;
 #endif
 
-    DEBUGMSGTL(("access:interface:container:arch", "load (flags %p)\n",
+    DEBUGMSGTL(("access:interface:container:arch", "load (flags %x)\n",
                 load_flags));
 
     if (NULL == container) {

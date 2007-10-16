@@ -475,7 +475,7 @@ header_hrstoreEntry(struct variable *vp,
      */
     DEBUGMSGTL(("host/hr_storage", "var_hrstoreEntry: process "));
     DEBUGMSGOID(("host/hr_storage", name, *length));
-    DEBUGMSG(("host/hr_storage", " (%x)\n", mem));
+    DEBUGMSG(("host/hr_storage", " (%p)\n", mem));
     return (void*)mem;
 }
 
