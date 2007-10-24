@@ -7,6 +7,9 @@ listing of all changes made to the code.
 *5.3.2*     
 
     snmplib:
+      - [BUG ]: Coverity #183: fix memory leak if
+      - [PATCH 1806336]: fix -LS option parsing
+      - [PATCH 1811469]: read_config_files_in_path()
       - Deallocate the confmibs and confmibdirs
       - FEATURES: 1041888: Check directory paths for
       - FEATURES: 851887: Report range information for
@@ -22,6 +25,7 @@ listing of all changes made to the code.
 
 
     snmpd:
+      - [PATCH 1746831]: fix process
       - Revert faulty change to dependency information
       - [BUG 1046327]: Reset "includeAllDisks" flag when
       - [BUG 1073782]: Restore PerfStat values for FreeBSD
@@ -104,12 +108,15 @@ listing of all changes made to the code.
       - fix the -M switch for
 
     perl:
+      - [BUG 1606062]: perl bulkwalk (async) coredump
+      - [PATCH 1811463]: perl async callback coredump
       - fix SNMP SET for IP addresses on 64-bit
       - fix prerequisites for NetSNMP::TrapReceiver
       - install embedded perl init files for
       - patch: 1725049: fix bulkwalk in cases of non-repeater
 
     test:
+      - enhance snmpnetstat test to check tcpTable in TCP
       - support a -n flag to RUNTESTS to print the test
 
     unspecified:
@@ -119,6 +126,9 @@ listing of all changes made to the code.
       - [PATCH 1678306]: from magfr: Deallocate the log in
       - [PATCH 1719244]: fix mfd generating map function
       - [PATCH 1728241]: from mitsuru_chinen: add configure check
+
+    Solaris:
+      - [BUG 1810814]: tcpTable missing entries and
 
     HP:
       - UX: HP-UX needs _REENTRANT defined to pick up
