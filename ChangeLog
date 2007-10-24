@@ -1,3 +1,136 @@
+-------------------------------------------------------------
+   CHANGES: snmplib: PATCH: 1811469: read_config_files_in_path()
+   reads past malloc'd buffer
+
+2007-10-14 20:41  tanders
+
+   *
+
+   CHANGES: perl: PATCH: 1811463: perl async callback coredump
+   CHANGES: perl: BUG: 1606062: perl bulkwalk (async) coredump
+
+2007-10-14 19:07  tanders
+
+   *
+
+   CHANGES: snmplib: PATCH: 1806336: fix -LS option parsing
+
+2007-10-14 12:12  tanders
+
+   *
+
+   fix comment
+
+2007-10-13 23:28  tanders
+
+   *
+
+   CHANGES: test: enhance snmpnetstat test to check tcpTable in TCP
+   mode
+
+2007-10-13 22:28  tanders
+
+   *
+
+   CHANGES: Solaris: BUG: 1810814: tcpTable missing entries and
+   wrong ports
+
+2007-10-11 20:46  magfr
+
+   *
+
+   CHANGES: snmplib: Do not leak memory whenever an udp address is
+   formatted.
+
+2007-09-24 20:43  hardaker
+
+   *
+
+   year update
+
+2007-09-20 21:55  tanders
+
+   *
+
+   CHANGES: snmpd: PATCH: 1746831: from cunnijd: fix process
+   checking race
+   condition under Linux and platform #ifdefs
+
+2007-09-19 21:09  tanders
+
+   *
+
+   CHANGES: snmplib: BUG: Coverity #183: fix memory leak if
+   IP_PKTINFO fails
+
+2007-09-16 09:51  magfr
+
+   *
+
+   Remove bashisms. This is netbsd patch-et from bug 1745404.
+
+2007-09-16 09:45  magfr
+
+   *
+
+   Use const char* for temporary constant string variable. This is
+   netbsd patch-ea from bug 1745404.
+
+2007-09-16 09:40  magfr
+
+   *
+
+   Use the natural type of in_addr_t's for comparisions. This is
+   netbsd patch-ea from bug 1745404.
+
+2007-09-14 14:44  dts12
+
+   *
+
+   Synch with main trunk release script.
+
+2007-09-13 21:25  tanders
+
+   *
+
+   drop obsolete mirrors
+
+2007-09-12 16:53  bshaw666
+
+   *
+
+   - version tag ( 5.3.2.pre1 )
+
+2007-09-12 16:53  bshaw666
+
+   *
+
+   version update
+
+2007-09-12 16:01  bshaw666
+
+   *
+
+   version update
+
+2007-09-11 22:07  bshaw666
+
+   *
+
+   documentation update
+
+2007-09-11 21:19  bshaw666
+
+   *
+
+   - version tag ( 5.3.2.pre1 )
+
+2007-09-11 21:19  bshaw666
+
+   *
+
+   version update
+
 -------------------------------------------------------------------------------
 
 Changes: V5.3.1 -> V5.3.2
