@@ -189,6 +189,8 @@ extern          "C" {
     int             getKstatString(const char *statname, const char *varname,
                                    char *value, size_t value_len);
 
+    int             solaris2_if_nametoindex(const char *, int);
+
 #ifdef _STDC_COMPAT
 #ifdef __cplusplus
 }

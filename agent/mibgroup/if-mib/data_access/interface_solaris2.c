@@ -14,6 +14,7 @@
 #include <sys/ioctl.h>
 #include <sys/sockio.h>
 #include <strings.h>
+#include <string.h>
 
 static int _set_ip_flags_v4(netsnmp_interface_entry *, mib2_ifEntry_t *);
 static int _match_ifname_v4addr(void *ifname, void *ipaddr);
@@ -43,25 +44,7 @@ netsnmp_arch_interface_index_find(const char *name)
 #if defined(HAVE_IF_NAMETOINDEX)
     return if_nametoindex(name);
 #else /* use GIFINDEX */
-    int             sd;
-    struct ifreq    ifr;
-
-    if (name == 0) {
-        return (0);
-    }
-
-    if ((sd = socket(AF_INET, SOCK_DGRAM, 0)) < 0) {
-        return (0);
-    }
-
-    strncpy(ifr.ifr_name, name, IFNAMSIZ);
-    if (ioctl(sd, SIOCGIFINDEX, (char *) &ifr) < 0) {
-        close(sd);
-        return (0);
-    }
-
-    close(sd);
-    return (ifr.ifr_index);
+    return solaris2_if_nametoindex(name, strlen(name));
 #endif /* defined(HAVE_IF_NAMETOINDEX) */
 }
 
