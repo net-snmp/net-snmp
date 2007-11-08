@@ -157,11 +157,14 @@ static int
 getif(mib2_ifEntry_t *ifbuf, size_t size, req_e req_type, mib2_ifEntry_t *resp,
       size_t *length, int (*comp)(void *, void *), void *arg);
 static void 
-set_if_info(mib2_ifEntry_t *ifp, unsigned index, char *name, uint64_t flags,int mtu);
+set_if_info(mib2_ifEntry_t *ifp, unsigned index, char *name, uint64_t flags,
+            int mtu);
 static int get_if_stats(mib2_ifEntry_t *ifp);
 
-static int get_phys_address(mib2_ifEntry_t *ifp);
-static int _dlpi_phys_address(int fd, char *paddr, int maxlen, int *paddrlen);
+static int _dlpi_open(const char *devname);
+static int _dlpi_get_phys_address(int fd, char *paddr, int maxlen,
+                                  int *paddrlen);
+static int _dlpi_get_iftype(int fd, unsigned int *iftype);
 static int _dlpi_attach(int fd, int ppa);
 static int _dlpi_parse_devname(char *devname, int *ppap);
 
@@ -1012,7 +1015,7 @@ getif(mib2_ifEntry_t *ifbuf, size_t size, req_e req_type,
       mib2_ifEntry_t *resp,  size_t *length, int (*comp)(void *, void *),
       void *arg)
 {
-    int             i, ret;
+    int             fd, i, ret;
     int             ifsd, ifsd6 = -1;
     struct lifreq   lifreq, *lifrp;
     mib2_ifEntry_t *ifp;
@@ -1074,6 +1077,15 @@ getif(mib2_ifEntry_t *ifbuf, size_t size, req_e req_type,
 
         memset(ifp, 0, sizeof(mib2_ifEntry_t));
 
+        if ((fd = _dlpi_open(ifnp->if_name)) != -1) {
+            /* Could open DLPI... now try to grab some info */
+            (void) _dlpi_get_phys_address(fd, ifp->ifPhysAddress.o_bytes,
+                                sizeof(ifp->ifPhysAddress.o_bytes),
+                                &ifp->ifPhysAddress.o_length);
+            (void) _dlpi_get_iftype(fd, &ifp->ifType);
+            close(fd);
+        }
+
         set_if_info(ifp, ifnp->if_index, ifnp->if_name, if_flags, 
                     lifrp->lifr_metric);
 
@@ -1081,9 +1093,6 @@ getif(mib2_ifEntry_t *ifbuf, size_t size, req_e req_type,
             DEBUGMSGTL(("kernel_sunos5", "...... get_if_stats failed\n"));
             continue;
         }
-
-        /* try to obtain the physical address */
-        (void) get_phys_address(ifp);
 
         /*
          * Once we reach here we know that all went well, so move to
@@ -1259,8 +1268,11 @@ getif(mib2_ifEntry_t *ifbuf, size_t size, req_e req_type,
 #endif /*defined(HAVE_IF_NAMEINDEX)&&defined(NETSNMP_INCLUDE_IFTABLE_REWRITES)*/
 
 static void
-set_if_info(mib2_ifEntry_t *ifp, unsigned index, char *name, uint64_t flags, int mtu)
+set_if_info(mib2_ifEntry_t *ifp, unsigned index, char *name, uint64_t flags,
+            int mtu)
 { 
+    boolean_t havespeed = B_FALSE;
+
     /*
      * Set basic information 
      */
@@ -1272,6 +1284,25 @@ set_if_info(mib2_ifEntry_t *ifp, unsigned index, char *name, uint64_t flags, int
     ifp->ifLastChange = 0;      /* Who knows ...  */
     ifp->flags = flags;
     ifp->ifMtu = mtu;
+    ifp->ifSpeed = 0;
+
+    /*
+     * Get link speed
+     */
+    if ((getKstatInt(NULL, name, "ifspeed", &ifp->ifSpeed) == 0)) {
+        /*
+         * check for SunOS patch with half implemented ifSpeed 
+         */
+        if (ifp->ifSpeed > 0 && ifp->ifSpeed < 10000) {
+            ifp->ifSpeed *= 1000000;
+        }
+	havespeed = B_TRUE;
+    } else if (getKstatInt(NULL, name, "ifSpeed", &ifp->ifSpeed) == 0) {
+        /*
+         * this is good 
+         */
+	havespeed = B_TRUE;
+    }
 
     /* make ifOperStatus depend on link status if available */
     if (ifp->ifAdminStatus == 1) {
@@ -1279,94 +1310,96 @@ set_if_info(mib2_ifEntry_t *ifp, unsigned index, char *name, uint64_t flags, int
         /* only UPed interfaces get correct link status - if any */
         if (getKstatInt(NULL, name,"link_up",&i_tmp) == 0) {
             ifp->ifOperStatus = i_tmp ? 1 : 2;
-        }
+#ifdef IFF_FAILED
+        } else if (flags & IFF_FAILED) {
+            /*
+	     * If IPMP is used, and if the daemon marks the interface
+	     * as 'failed', then we know for sure something is amiss.
+             */
+            ifp->ifOperStatus = 2;
+#endif
+	} else if (havespeed == B_TRUE && ifp->ifSpeed == 0) {
+	    /* Heuristic */
+	    ifp->ifOperStatus = 2;
+	}
     }
 
     /*
-     * Set link Type and Speed
+     * Set link Type and Speed (if it could not be determined from kstat)
      */
-    ifp->ifType = 1;
-    ifp->ifSpeed = 0;
-
-    if ((getKstatInt(NULL, name, "ifspeed", &ifp->ifSpeed) == 0) &&
-        (ifp->ifSpeed != 0)) {
+    if (ifp->ifType == 24) {
+        ifp->ifSpeed = 127000000;
+    } else if (ifp->ifType == 1 || ifp->ifType == 0) {
         /*
-         * check for SunOS patch with half implemented ifSpeed 
-         */
-        if (ifp->ifSpeed < 10000) {
-            ifp->ifSpeed *= 1000000;
-        }
-    } else if (getKstatInt(NULL, name, "ifSpeed", &ifp->ifSpeed) == 0) {
-        /*
-         * this is good 
-         */
-    }
-
-    switch (name[0]) {
-    case 'a':          /* ath (802.11) */
-        if (name[1] == 't' && name[2] == 'h')
-            ifp->ifType = 71;
-        break;
-    case 'l':          /* le / lo / lane (ATM LAN Emulation) */
-        if (name[1] == 'o') {
-        if (!ifp->ifSpeed)
-            ifp->ifSpeed = 127000000;
-        ifp->ifType = 24;
-        } else if (name[1] == 'e') {
-        if (!ifp->ifSpeed)
-            ifp->ifSpeed = 10000000;
-        ifp->ifType = 6;
-        } else if (name[1] == 'a') {
-        if (!ifp->ifSpeed)
-            ifp->ifSpeed = 155000000;
-        ifp->ifType = 37;
-        }
-        break;
-
-    case 'g':          /* ge (gigabit ethernet card)  */
-    case 'c':          /* ce (Cassini Gigabit-Ethernet (PCI) */
-        if (!ifp->ifSpeed)
-        ifp->ifSpeed = 1000000000;
-        ifp->ifType = 6;
-        break;
-
-    case 'h':          /* hme (SBus card) */
-    case 'e':          /* eri (PCI card) */
-    case 'b':          /* be */
-    case 'd':          /* dmfe -- found on netra X1 */
-        if (!ifp->ifSpeed)
-        ifp->ifSpeed = 100000000;
-        ifp->ifType = 6;
-        break;
-
-    case 'f':          /* fa (Fore ATM) */
-        if (!ifp->ifSpeed)
-        ifp->ifSpeed = 155000000;
-        ifp->ifType = 37;
-        break;
-
-    case 'q':         /* qe (QuadEther)/qa (Fore ATM)/qfe (QuadFastEther) */
-        if (name[1] == 'a') {
-        if (!ifp->ifSpeed)
-            ifp->ifSpeed = 155000000;
-        ifp->ifType = 37;
-        } else if (name[1] == 'e') {
+	 * Could not get the type from DLPI, so lets fall back to the hardcoded
+	 * values.
+	 */
+        switch (name[0]) {
+        case 'a':          /* ath (802.11) */
+            if (name[1] == 't' && name[2] == 'h')
+                ifp->ifType = 71;
+            break;
+        case 'l':          /* le / lo / lane (ATM LAN Emulation) */
+            if (name[1] == 'o') {
+            if (!ifp->ifSpeed)
+                ifp->ifSpeed = 127000000;
+            ifp->ifType = 24;
+            } else if (name[1] == 'e') {
             if (!ifp->ifSpeed)
                 ifp->ifSpeed = 10000000;
             ifp->ifType = 6;
-        } else if (name[1] == 'f') {
+            } else if (name[1] == 'a') {
             if (!ifp->ifSpeed)
-                ifp->ifSpeed = 100000000;
+                ifp->ifSpeed = 155000000;
+            ifp->ifType = 37;
+            }
+            break;
+    
+        case 'g':          /* ge (gigabit ethernet card)  */
+        case 'c':          /* ce (Cassini Gigabit-Ethernet (PCI) */
+            if (!ifp->ifSpeed)
+            ifp->ifSpeed = 1000000000;
             ifp->ifType = 6;
+            break;
+    
+        case 'h':          /* hme (SBus card) */
+        case 'e':          /* eri (PCI card) */
+        case 'b':          /* be */
+        case 'd':          /* dmfe -- found on netra X1 */
+            if (!ifp->ifSpeed)
+            ifp->ifSpeed = 100000000;
+            ifp->ifType = 6;
+            break;
+    
+        case 'f':          /* fa (Fore ATM) */
+            if (!ifp->ifSpeed)
+            ifp->ifSpeed = 155000000;
+            ifp->ifType = 37;
+            break;
+    
+        case 'q':         /* qe (QuadEther)/qa (Fore ATM)/qfe (QuadFastEther) */
+            if (name[1] == 'a') {
+            if (!ifp->ifSpeed)
+                ifp->ifSpeed = 155000000;
+            ifp->ifType = 37;
+            } else if (name[1] == 'e') {
+                if (!ifp->ifSpeed)
+                    ifp->ifSpeed = 10000000;
+                ifp->ifType = 6;
+            } else if (name[1] == 'f') {
+                if (!ifp->ifSpeed)
+                    ifp->ifSpeed = 100000000;
+                ifp->ifType = 6;
+            }
+            break;
+    
+        case 'i':          /* ibd (Infiniband)/ip.tun (IP tunnel) */
+            if (name[1] == 'b')
+                ifp->ifType = 199;
+            else if (name[1] == 'p')
+                ifp->ifType = 131;
+            break;
         }
-        break;
-
-    case 'i':          /* ibd (Infiniband)/ip.tun (IP tunnel) */
-        if (name[1] == 'b')
-            ifp->ifType = 199;
-        else if (name[1] == 'p')
-            ifp->ifType = 131;
-        break;
     }
 }
 
@@ -1456,74 +1489,77 @@ get_if_stats(mib2_ifEntry_t *ifp)
 }
 
 /*
- * Obtain the physical address using DLPI. Pieces of this code is directly
- * taken from libdlpi, which unfortunately is not yet commonly available. 
+ * Open a DLPI device.
+ *
+ * On success the file descriptor is returned.
+ * On error -1 is returned.
  */
-
-static int 
-get_phys_address(mib2_ifEntry_t *ifp)
+static int
+_dlpi_open(const char *devname)
 {
-    char                  *devstr;
-    int                   fd;
-    int                   ppa = -1;
-    int                   rc = -1;
+    char *devstr;
+    int fd = -1;
+    int ppa = -1;
 
-    DEBUGMSGTL(("kernel_sunos5", "get_phys_address called\n"));
+    DEBUGMSGTL(("kernel_sunos5", "_dlpi_open called\n"));
 
-    if ((devstr = malloc(5 + ifp->ifDescr.o_length + 1)) == NULL)
+    if (devname == NULL)
         return (-1);
-    (void) sprintf(devstr, "/dev/%s", ifp->ifDescr.o_bytes);
+
+    if ((devstr = malloc(5 + strlen(devname) + 1)) == NULL)
+        return (-1);
+    (void) sprintf(devstr, "/dev/%s", devname);
     DEBUGMSGTL(("kernel_sunos5:dlpi", "devstr(%s)\n", devstr));
     /*
      * First try opening the device using style 1, if the device does not
      * exist we try style 2. Modules will not be pushed, so something like
      * ip tunnels will not work. 
      */
-    if ((fd = open(devstr, O_RDWR | O_NONBLOCK)) != -1) {
-        DEBUGMSGTL(("kernel_sunos5:dlpi", "style1 open(%s)\n", devstr));
-        rc = _dlpi_phys_address(fd, ifp->ifPhysAddress.o_bytes,
-                                sizeof(ifp->ifPhysAddress.o_bytes),
-                                &ifp->ifPhysAddress.o_length);
-    } else if (_dlpi_parse_devname(devstr, &ppa) == 0) {
-        DEBUGMSGTL(("kernel_sunos5:dlpi", "style2 parse: %s, %d\n", 
-                    devstr, ppa));
-        /* try style 2 */
-        if ((fd = open(devstr, O_RDWR | O_NONBLOCK)) != -1) {
-             DEBUGMSGTL(("kernel_sunos5:dlpi", "style2 open(%s)\n", devstr));
-             if (_dlpi_attach(fd, ppa) == 0) {
-                 DEBUGMSGTL(("kernel_sunos5:dlpi", "attached\n"));
-                 rc = _dlpi_phys_address(fd, ifp->ifPhysAddress.o_bytes,
-                                         sizeof(ifp->ifPhysAddress.o_bytes),
-                                         &ifp->ifPhysAddress.o_length);
-             }
-         } 
-     }
+   
+    DEBUGMSGTL(("kernel_sunos5:dlpi", "style1 open(%s)\n", devstr));
+    if ((fd = open(devstr, O_RDWR | O_NONBLOCK)) < 0) {
+        DEBUGMSGTL(("kernel_sunos5:dlpi", "style1 open failed\n"));
+        if (_dlpi_parse_devname(devstr, &ppa) == 0) {
+            DEBUGMSGTL(("kernel_sunos5:dlpi", "style2 parse: %s, %d\n", 
+                       devstr, ppa));
+            /* try style 2 */
+            DEBUGMSGTL(("kernel_sunos5:dlpi", "style2 open(%s)\n", devstr));
 
-     free(devstr);
-     if (fd != -1)
-         close(fd);
+            if ((fd = open(devstr, O_RDWR | O_NONBLOCK)) != -1) {
+                if (_dlpi_attach(fd, ppa) == 0) {
+                    DEBUGMSGTL(("kernel_sunos5:dlpi", "attached\n"));
+                } else {
+                    DEBUGMSGTL(("kernel_sunos5:dlpi", "attached failed\n"));
+                    close(fd);
+                    fd = -1;
+                }
+            } else {
+                DEBUGMSGTL(("kernel_sunos5:dlpi", "style2 open failed\n"));
+            }
+        } 
+    } else {
+        DEBUGMSGTL(("kernel_sunos5:dlpi", "style1 open succeeded\n"));
+    }
 
-     if (rc == 0) {
-         /* successful */        
-         DEBUGMSGTL(("kernel_sunos5:dlpi", "got phys addr using DLPI\n"));
-         return (0);
-     } else {
-         DEBUGMSGTL(("kernel_sunos5:dlpi", "unable to get phys address\n"));
-         return (-1);
-     }
+    /* clean up */
+    free(devstr);
+
+    return (fd);
 }
 
 /*
- *
+ * Obtain the physical address of the interface using DLPI
  */
 static int
-_dlpi_phys_address(int fd, char *addr, int maxlen, int *addrlen)
+_dlpi_get_phys_address(int fd, char *addr, int maxlen, int *addrlen)
 {
     dl_phys_addr_req_t  paddr_req;
     union DL_primitives *dlp;
     struct strbuf       ctlbuf;
     char                buf[MAX(DL_PHYS_ADDR_ACK_SIZE+64, DL_ERROR_ACK_SIZE)];
     int                 flag = 0;
+
+    DEBUGMSGTL(("kernel_sunos5:dlpi", "_dlpi_get_phys_address\n"));
 
     paddr_req.dl_primitive = DL_PHYS_ADDR_REQ;
     paddr_req.dl_addr_type = DL_CURR_PHYS_ADDR;
@@ -1535,7 +1571,7 @@ _dlpi_phys_address(int fd, char *addr, int maxlen, int *addrlen)
     ctlbuf.maxlen = sizeof(buf);
     ctlbuf.len = 0;
     ctlbuf.buf = buf;
-    if (getmsg(fd, &ctlbuf, NULL, &flag) != 0)
+    if (getmsg(fd, &ctlbuf, NULL, &flag) < 0)
         return (-1);
 
     if (ctlbuf.len < sizeof(uint32_t))
@@ -1545,6 +1581,7 @@ _dlpi_phys_address(int fd, char *addr, int maxlen, int *addrlen)
     case DL_PHYS_ADDR_ACK: {
         dl_phys_addr_ack_t *phyp = (dl_phys_addr_ack_t *)buf;
 
+        DEBUGMSGTL(("kernel_sunos5:dlpi", "got ACK\n"));
         if (ctlbuf.len < DL_PHYS_ADDR_ACK_SIZE || phyp->dl_addr_length > maxlen)
             return (-1); 
         (void) memcpy(addr, buf+phyp->dl_addr_offset, phyp->dl_addr_length);
@@ -1554,11 +1591,132 @@ _dlpi_phys_address(int fd, char *addr, int maxlen, int *addrlen)
     case DL_ERROR_ACK: {
         dl_error_ack_t *errp = (dl_error_ack_t *)buf;
 
+        DEBUGMSGTL(("kernel_sunos5:dlpi", "got ERROR ACK\n"));
         if (ctlbuf.len < DL_ERROR_ACK_SIZE)
             return (-1);
         return (errp->dl_errno);
     }
     default:
+        DEBUGMSGTL(("kernel_sunos5:dlpi", "got type: %x\n", dlp->dl_primitive));
+        return (-1);
+    }
+}
+
+/*
+ * Query the interface about it's type.
+ */
+static int
+_dlpi_get_iftype(int fd, unsigned int *iftype)
+{
+    dl_info_req_t info_req;
+    union DL_primitives *dlp;
+    struct strbuf       ctlbuf;
+    char                buf[MAX(DL_INFO_ACK_SIZE, DL_ERROR_ACK_SIZE)];
+    int                 flag = 0;
+
+    DEBUGMSGTL(("kernel_sunos5:dlpi", "_dlpi_get_iftype\n"));
+
+    info_req.dl_primitive = DL_INFO_REQ;
+    ctlbuf.buf = (char *)&info_req;
+    ctlbuf.len = DL_INFO_REQ_SIZE;
+    if (putmsg(fd, &ctlbuf, NULL, 0) < 0) {
+        DEBUGMSGTL(("kernel_sunos5:dlpi", "putmsg failed: %d\nn", errno));
+        return (-1);
+    }
+    
+    ctlbuf.maxlen = sizeof(buf);
+    ctlbuf.len = 0;
+    ctlbuf.buf = buf;
+    if (getmsg(fd, &ctlbuf, NULL, &flag) < 0) {
+        DEBUGMSGTL(("kernel_sunos5:dlpi", "getmsg failed: %d\n", errno));
+        return (-1);
+    }
+
+    if (ctlbuf.len < sizeof(uint32_t))
+        return (-1);
+    dlp = (union DL_primitives *)buf;
+    switch (dlp->dl_primitive) {
+    case DL_INFO_ACK: {
+        dl_info_ack_t *info = (dl_info_ack_t *)buf;
+
+        if (ctlbuf.len < DL_INFO_ACK_SIZE)
+            return (-1); 
+
+        DEBUGMSGTL(("kernel_sunos5:dlpi", "dl_mac_type: %x\n",
+	           info->dl_mac_type));
+	switch (info->dl_mac_type) {
+	case DL_CSMACD:
+	case DL_ETHER:
+	case DL_ETH_CSMA:
+		*iftype = 6;
+		break;
+	case DL_TPB:	/* Token Passing Bus */
+		*iftype = 8;
+		break;
+	case DL_TPR:	/* Token Passing Ring */
+		*iftype = 9;
+		break;
+	case DL_HDLC:
+		*iftype = 118;
+		break;
+	case DL_FDDI:
+		*iftype = 15;
+		break;
+	case DL_FC:	/* Fibre channel */
+		*iftype = 56;
+		break;
+	case DL_ATM:
+		*iftype = 37;
+		break;
+	case DL_X25:
+	case DL_ISDN:
+		*iftype = 63;
+		break;
+	case DL_HIPPI:
+		*iftype = 47;
+		break;
+#ifdef DL_IB
+	case DL_IB:
+		*iftype = 199;
+		break;
+#endif
+	case DL_FRAME:	/* Frame Relay */
+		*iftype = 32;
+		break;
+	case DL_LOOP:
+		*iftype = 24;
+		break;
+#ifdef DL_WIFI
+	case DL_WIFI:
+		*iftype = 71;
+		break;
+#endif
+#ifdef DL_IPV4	/* then IPv6 is also defined */
+	case DL_IPV4:	/* IPv4 Tunnel */
+	case DL_IPV6:	/* IPv6 Tunnel */
+		*iftype = 131;
+		break;
+#endif
+	default:
+		*iftype = 1;	/* Other */
+		break;
+	}
+	
+        return (0);
+    }
+    case DL_ERROR_ACK: {
+        dl_error_ack_t *errp = (dl_error_ack_t *)buf;
+
+        DEBUGMSGTL(("kernel_sunos5:dlpi",
+                    "got DL_ERROR_ACK: dlpi %d, error %d\n", errp->dl_errno,
+                    errp->dl_unix_errno));
+
+        if (ctlbuf.len < DL_ERROR_ACK_SIZE)
+            return (-1);
+        return (errp->dl_errno);
+    }
+    default:
+        DEBUGMSGTL(("kernel_sunos5:dlpi", "got type %x\n", dlp->dl_primitive));
         return (-1);
     }
 }
@@ -1645,7 +1803,82 @@ Name_cmp(void *ifrp, void *ep)
     } else {
 	return 1;
     }
-}	
+}
+
+/*
+ * Try to determine the index of a particular interface. If mfd-rewrites is
+ * specified, then this function would only be used when the system does not
+ * have if_nametoindex(3SOCKET).
+ */
+int
+solaris2_if_nametoindex(const char *Name, int Len)
+{
+    int             i, sd, lastlen = 0, interfaces = 0;
+    struct ifconf   ifc;
+    struct ifreq   *ifrp = NULL;
+    char           *buf = NULL;
+
+    if (Name == 0) {
+        return 0;
+    }
+    if ((sd = socket(AF_INET, SOCK_DGRAM, 0)) < 0) {
+        return 0;
+    }
+
+    /*
+     * Cope with lots of interfaces and brokenness of ioctl SIOCGIFCONF
+     * on some platforms; see W. R. Stevens, ``Unix Network Programming
+     * Volume I'', p.435.  
+     */
+
+    for (i = 8;; i += 8) {
+        buf = calloc(i, sizeof(struct ifreq));
+        if (buf == NULL) {
+            close(sd);
+            return 0;
+        }
+        ifc.ifc_len = i * sizeof(struct ifreq);
+        ifc.ifc_buf = (caddr_t) buf;
+
+        if (ioctl(sd, SIOCGIFCONF, (char *) &ifc) < 0) {
+            if (errno != EINVAL || lastlen != 0) {
+                /*
+                 * Something has gone genuinely wrong.  
+                 */
+                free(buf);
+                close(sd);
+                return 0;
+            }
+            /*
+             * Otherwise, it could just be that the buffer is too small.  
+             */
+        } else {
+            if (ifc.ifc_len == lastlen) {
+                /*
+                 * The length is the same as the last time; we're done.  
+                 */
+                break;
+            }
+            lastlen = ifc.ifc_len;
+        }
+        free(buf);
+    }
+
+    ifrp = ifc.ifc_req;
+    interfaces = (ifc.ifc_len / sizeof(struct ifreq)) + 1;
+
+    for (i = 1; i < interfaces; i++, ifrp++) {
+        if (strncmp(ifrp->ifr_name, Name, Len) == 0) {
+            free(buf);
+            close(sd);
+            return i;
+        }
+    }
+
+    free(buf);
+    close(sd);
+    return 0;
+}
 
 #ifdef _STDC_COMPAT
 #ifdef __cplusplus

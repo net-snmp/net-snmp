@@ -2242,71 +2242,7 @@ Interface_Scan_Get_Count(void)
 int
 Interface_Index_By_Name(char *Name, int Len)
 {
-    int             i, sd, lastlen = 0, interfaces = 0;
-    struct ifconf   ifc;
-    struct ifreq   *ifrp = NULL;
-    char           *buf = NULL;
-
-    if (Name == 0) {
-        return 0;
-    }
-    if ((sd = socket(AF_INET, SOCK_DGRAM, 0)) < 0) {
-        return 0;
-    }
-
-    /*
-     * Cope with lots of interfaces and brokenness of ioctl SIOCGIFCONF
-     * on some platforms; see W. R. Stevens, ``Unix Network Programming
-     * Volume I'', p.435.  
-     */
-
-    for (i = 8;; i += 8) {
-        buf = calloc(i, sizeof(struct ifreq));
-        if (buf == NULL) {
-            close(sd);
-            return 0;
-        }
-        ifc.ifc_len = i * sizeof(struct ifreq);
-        ifc.ifc_buf = (caddr_t) buf;
-
-        if (ioctl(sd, SIOCGIFCONF, (char *) &ifc) < 0) {
-            if (errno != EINVAL || lastlen != 0) {
-                /*
-                 * Something has gone genuinely wrong.  
-                 */
-                free(buf);
-                close(sd);
-                return 0;
-            }
-            /*
-             * Otherwise, it could just be that the buffer is too small.  
-             */
-        } else {
-            if (ifc.ifc_len == lastlen) {
-                /*
-                 * The length is the same as the last time; we're done.  
-                 */
-                break;
-            }
-            lastlen = ifc.ifc_len;
-        }
-        free(buf);
-    }
-
-    ifrp = ifc.ifc_req;
-    interfaces = (ifc.ifc_len / sizeof(struct ifreq)) + 1;
-
-    for (i = 1; i < interfaces; i++, ifrp++) {
-        if (strncmp(ifrp->ifr_name, Name, Len) == 0) {
-            free(buf);
-            close(sd);
-            return i;
-        }
-    }
-
-    free(buf);
-    close(sd);
-    return 0;
+    return (solaris2_if_nametoindex(Name, Len));
 }
 
 #endif                          /* solaris2 */
