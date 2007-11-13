@@ -32628,7 +32628,7 @@ _ACEOF
 fi
 
 # LM-SENSORS-MIB support
-echo " $module_list " | $GREP " ucd-snmp/lmSensors " > /dev/null
+echo " $module_list " | $GREP -i "ucd-snmp/lmsensor" > /dev/null
 if test $? -eq 0 ; then
         { echo "$as_me:$LINENO: checking for sensors support" >&5
 echo $ECHO_N "checking for sensors support... $ECHO_C" >&6; }

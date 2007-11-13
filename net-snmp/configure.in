@@ -2885,7 +2885,7 @@ if test $? -eq 0 ; then
 fi
 
 # LM-SENSORS-MIB support
-echo " $module_list " | $GREP " ucd-snmp/lmSensors " > /dev/null
+echo " $module_list " | $GREP -i "ucd-snmp/lmsensor" > /dev/null
 if test $? -eq 0 ; then
         AC_MSG_CHECKING([for sensors support])
         case $target_os in
