@@ -51,7 +51,7 @@ void init_hw_sensors( void ) {
     else {
         _sensor_cache = netsnmp_cache_create( 5, netsnmp_sensor_load,
                                                  netsnmp_sensor_free, NULL, 0 );
-        DEBUGMSGTL(("sensors", "Reloading Hardware Sensors automatically (%p)\n",
+        DEBUGMSGTL(("sensors", "Reloading Hardware Sensors on-demand (%p)\n",
                                _sensor_cache));
     }
 }
