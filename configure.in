@@ -230,6 +230,15 @@ fi
 AC_ARG_WITH(privacy,,
 	AC_MSG_ERROR([ Invalid option. Use --enable-privacy/--disable-privacy instead ]) )
 
+AC_ARG_ENABLE(deprecated,
+[  --disable-deprecated            Don't compile in deprecated functions.])
+AC_ARG_WITH(deprecated,,
+	AC_MSG_ERROR([ Invalid option. Use --enable-deprecated/--disable-deprecated instead ]) )
+if test "$enable_deprecated" = no ; then
+   AC_DEFINE([NETSNMP_NO_DEPRECATED_FUNCTIONS], 1,
+             [Define to suppress inclusion of deprecated functions])
+fi
+
 AC_ARG_ENABLE(md5,
 [  --disable-md5                   Do not support MD5 authentication.])
 if test "x$enable_md5" = "xno"; then

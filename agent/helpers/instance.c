@@ -147,12 +147,12 @@ netsnmp_register_read_only_ulong_instance(const char *name,
                                           Netsnmp_Node_Handler *
                                           subhandler)
 {
-    netsnmp_handler_registration *myreg;
-
-    myreg = get_reg(name, "ulong_handler", reg_oid, reg_oid_len, it,
-                    HANDLER_CAN_RONLY, netsnmp_instance_ulong_handler,
-                    subhandler, NULL);
-    return netsnmp_register_read_only_instance(myreg);
+    return netsnmp_register_watched_instance(
+               netsnmp_create_handler_registration(
+                   name, subhandler, reg_oid, reg_oid_len, HANDLER_CAN_RONLY),
+               netsnmp_create_watcher_info(
+                   (void *)it, sizeof(u_long),
+                   ASN_UNSIGNED, WATCHER_FIXED_SIZE));
 }
 
 int
@@ -161,12 +161,12 @@ netsnmp_register_ulong_instance(const char *name,
                                 u_long * it,
                                 Netsnmp_Node_Handler * subhandler)
 {
-    netsnmp_handler_registration *myreg;
-
-    myreg = get_reg(name, "ulong_handler", reg_oid, reg_oid_len, it,
-                    HANDLER_CAN_RWRITE, netsnmp_instance_ulong_handler,
-                    subhandler, NULL);
-    return netsnmp_register_instance(myreg);
+    return netsnmp_register_watched_instance(
+               netsnmp_create_handler_registration(
+                   name, subhandler, reg_oid, reg_oid_len, HANDLER_CAN_RWRITE),
+               netsnmp_create_watcher_info(
+                   (void *)it, sizeof(u_long),
+                   ASN_UNSIGNED, WATCHER_FIXED_SIZE));
 }
 
 int
@@ -177,12 +177,12 @@ netsnmp_register_read_only_counter32_instance(const char *name,
                                               Netsnmp_Node_Handler *
                                               subhandler)
 {
-    netsnmp_handler_registration *myreg;
-
-    myreg = get_reg(name, "counter32_handler", reg_oid, reg_oid_len, it,
-                    HANDLER_CAN_RONLY, netsnmp_instance_counter32_handler,
-                    subhandler, NULL);
-    return netsnmp_register_read_only_instance(myreg);
+    return netsnmp_register_watched_instance(
+               netsnmp_create_handler_registration(
+                   name, subhandler, reg_oid, reg_oid_len, HANDLER_CAN_RONLY),
+               netsnmp_create_watcher_info(
+                   (void *)it, sizeof(u_long),
+                   ASN_COUNTER, WATCHER_FIXED_SIZE));
 }
 
 int
@@ -191,12 +191,11 @@ netsnmp_register_read_only_long_instance(const char *name,
                                          long *it,
                                          Netsnmp_Node_Handler * subhandler)
 {
-    netsnmp_handler_registration *myreg;
-
-    myreg = get_reg(name, "long_handler", reg_oid, reg_oid_len, it,
-                    HANDLER_CAN_RONLY, netsnmp_instance_long_handler,
-                    subhandler, NULL);
-    return netsnmp_register_read_only_instance(myreg);
+    return netsnmp_register_watched_instance(
+               netsnmp_create_handler_registration(
+                   name, subhandler, reg_oid, reg_oid_len, HANDLER_CAN_RONLY),
+               netsnmp_create_watcher_info(
+                   (void *)it, sizeof(long), ASN_INTEGER, WATCHER_FIXED_SIZE));
 }
 
 int
@@ -204,12 +203,11 @@ netsnmp_register_long_instance(const char *name,
                                oid * reg_oid, size_t reg_oid_len,
                                long *it, Netsnmp_Node_Handler * subhandler)
 {
-    netsnmp_handler_registration *myreg;
-
-    myreg = get_reg(name, "long_handler", reg_oid, reg_oid_len, it,
-                    HANDLER_CAN_RWRITE, netsnmp_instance_long_handler,
-                    subhandler, NULL);
-    return netsnmp_register_instance(myreg);
+    return netsnmp_register_watched_instance(
+               netsnmp_create_handler_registration(
+                   name, subhandler, reg_oid, reg_oid_len, HANDLER_CAN_RWRITE),
+               netsnmp_create_watcher_info(
+                   (void *)it, sizeof(long), ASN_INTEGER, WATCHER_FIXED_SIZE));
 }
 
 
@@ -219,12 +217,12 @@ netsnmp_register_read_only_uint_instance(const char *name,
                                          unsigned int *it,
                                          Netsnmp_Node_Handler * subhandler)
 {
-    netsnmp_handler_registration *myreg;
-
-    myreg = get_reg(name, "uint_handler", reg_oid, reg_oid_len, it,
-                    HANDLER_CAN_RONLY, netsnmp_instance_uint_handler,
-                    subhandler, NULL);
-    return netsnmp_register_read_only_instance(myreg);
+    return netsnmp_register_watched_instance(
+               netsnmp_create_handler_registration(
+                   name, subhandler, reg_oid, reg_oid_len, HANDLER_CAN_RONLY),
+               netsnmp_create_watcher_info(
+                   (void *)it, sizeof(unsigned int),
+                   ASN_UNSIGNED, WATCHER_FIXED_SIZE));
 }
 
 int
@@ -232,12 +230,12 @@ netsnmp_register_uint_instance(const char *name,
                                oid * reg_oid, size_t reg_oid_len,
                                unsigned int *it, Netsnmp_Node_Handler * subhandler)
 {
-    netsnmp_handler_registration *myreg;
-
-    myreg = get_reg(name, "uint_handler", reg_oid, reg_oid_len, it,
-                    HANDLER_CAN_RWRITE, netsnmp_instance_uint_handler,
-                    subhandler, NULL);
-    return netsnmp_register_instance(myreg);
+    return netsnmp_register_watched_instance(
+               netsnmp_create_handler_registration(
+                   name, subhandler, reg_oid, reg_oid_len, HANDLER_CAN_RWRITE),
+               netsnmp_create_watcher_info(
+                   (void *)it, sizeof(unsigned int),
+                   ASN_UNSIGNED, WATCHER_FIXED_SIZE));
 }
 
 int
@@ -245,12 +243,11 @@ netsnmp_register_read_only_int_instance(const char *name,
                                 oid * reg_oid, size_t reg_oid_len,
                                 int *it, Netsnmp_Node_Handler * subhandler)
 {
-    netsnmp_handler_registration *myreg;
-
-    myreg = get_reg(name, "int_handler", reg_oid, reg_oid_len, it,
-                    HANDLER_CAN_RONLY, netsnmp_instance_int_handler,
-                    subhandler, NULL);
-    return netsnmp_register_read_only_instance(myreg);
+    return netsnmp_register_watched_instance(
+               netsnmp_create_handler_registration(
+                   name, subhandler, reg_oid, reg_oid_len, HANDLER_CAN_RONLY),
+               netsnmp_create_watcher_info(
+                   (void *)it, sizeof(int), ASN_INTEGER, WATCHER_FIXED_SIZE));
 }
 
   /*
@@ -279,12 +276,14 @@ netsnmp_register_read_only_ulong_instance_context(const char *name,
                                                   subhandler,
                                                   const char *contextName)
 {
-    netsnmp_handler_registration *myreg;
-
-    myreg = get_reg(name, "ulong_handler", reg_oid, reg_oid_len, it,
-                    HANDLER_CAN_RONLY, netsnmp_instance_ulong_handler,
-                    subhandler, contextName);
-    return netsnmp_register_read_only_instance(myreg);
+    netsnmp_handler_registration *myreg =
+      netsnmp_create_handler_registration(
+          name, subhandler, reg_oid, reg_oid_len, HANDLER_CAN_RONLY);
+    if (myreg && contextName)
+      myreg->contextName = strdup(contextName);
+    return netsnmp_register_watched_instance(
+        myreg, netsnmp_create_watcher_info(
+            (void *)it, sizeof(u_long), ASN_UNSIGNED, WATCHER_FIXED_SIZE));
 }
 
 int
@@ -294,12 +293,14 @@ netsnmp_register_ulong_instance_context(const char *name,
                                         Netsnmp_Node_Handler * subhandler,
                                         const char *contextName)
 {
-    netsnmp_handler_registration *myreg;
-
-    myreg = get_reg(name, "ulong_handler", reg_oid, reg_oid_len, it,
-                    HANDLER_CAN_RWRITE, netsnmp_instance_ulong_handler,
-                    subhandler, contextName);
-    return netsnmp_register_instance(myreg);
+    netsnmp_handler_registration *myreg =
+      netsnmp_create_handler_registration(
+          name, subhandler, reg_oid, reg_oid_len, HANDLER_CAN_RWRITE);
+    if (myreg && contextName)
+      myreg->contextName = strdup(contextName);
+    return netsnmp_register_watched_instance(
+        myreg, netsnmp_create_watcher_info(
+            (void *)it, sizeof(u_long), ASN_UNSIGNED, WATCHER_FIXED_SIZE));
 }
 
 int
@@ -311,12 +312,14 @@ netsnmp_register_read_only_counter32_instance_context(const char *name,
                                                       subhandler,
                                                       const char *contextName)
 {
-    netsnmp_handler_registration *myreg;
-
-    myreg = get_reg(name, "counter32_handler", reg_oid, reg_oid_len, it,
-                    HANDLER_CAN_RONLY, netsnmp_instance_counter32_handler,
-                    subhandler, contextName);
-    return netsnmp_register_read_only_instance(myreg);
+    netsnmp_handler_registration *myreg =
+      netsnmp_create_handler_registration(
+          name, subhandler, reg_oid, reg_oid_len, HANDLER_CAN_RONLY);
+    if (myreg && contextName)
+      myreg->contextName = strdup(contextName);
+    return netsnmp_register_watched_instance(
+        myreg, netsnmp_create_watcher_info(
+            (void *)it, sizeof(u_long), ASN_COUNTER, WATCHER_FIXED_SIZE));
 }
 
 int
@@ -328,12 +331,14 @@ netsnmp_register_read_only_long_instance_context(const char *name,
                                                  *subhandler,
                                                  const char *contextName)
 {
-    netsnmp_handler_registration *myreg;
-
-    myreg = get_reg(name, "long_handler", reg_oid, reg_oid_len, it,
-                    HANDLER_CAN_RONLY, netsnmp_instance_long_handler,
-                    subhandler, contextName);
-    return netsnmp_register_read_only_instance(myreg);
+    netsnmp_handler_registration *myreg =
+      netsnmp_create_handler_registration(
+          name, subhandler, reg_oid, reg_oid_len, HANDLER_CAN_RONLY);
+    if (myreg && contextName)
+      myreg->contextName = strdup(contextName);
+    return netsnmp_register_watched_instance(
+        myreg, netsnmp_create_watcher_info(
+            (void *)it, sizeof(long), ASN_INTEGER, WATCHER_FIXED_SIZE));
 }
 
 int
@@ -343,12 +348,14 @@ netsnmp_register_long_instance_context(const char *name,
                                        Netsnmp_Node_Handler * subhandler,
                                        const char *contextName)
 {
-    netsnmp_handler_registration *myreg;
-
-    myreg = get_reg(name, "long_handler", reg_oid, reg_oid_len, it,
-                    HANDLER_CAN_RWRITE, netsnmp_instance_long_handler,
-                    subhandler, contextName);
-    return netsnmp_register_instance(myreg);
+    netsnmp_handler_registration *myreg =
+      netsnmp_create_handler_registration(
+          name, subhandler, reg_oid, reg_oid_len, HANDLER_CAN_RWRITE);
+    if (myreg && contextName)
+      myreg->contextName = strdup(contextName);
+    return netsnmp_register_watched_instance(
+        myreg, netsnmp_create_watcher_info(
+            (void *)it, sizeof(long), ASN_INTEGER, WATCHER_FIXED_SIZE));
 }
 
 int
@@ -359,12 +366,14 @@ netsnmp_register_int_instance_context(const char *name,
                                       Netsnmp_Node_Handler * subhandler,
                                       const char *contextName)
 {
-    netsnmp_handler_registration *myreg;
-
-    myreg = get_reg(name, "int_handler", reg_oid, reg_oid_len, it,
-                    HANDLER_CAN_RWRITE, netsnmp_instance_int_handler,
-                    subhandler, contextName);
-    return netsnmp_register_instance(myreg);
+    netsnmp_handler_registration *myreg =
+      netsnmp_create_handler_registration(
+          name, subhandler, reg_oid, reg_oid_len, HANDLER_CAN_RWRITE);
+    if (myreg && contextName)
+      myreg->contextName = strdup(contextName);
+    return netsnmp_register_watched_instance(
+        myreg, netsnmp_create_watcher_info(
+            (void *)it, sizeof(int), ASN_INTEGER, WATCHER_FIXED_SIZE));
 }
 
 int
@@ -375,12 +384,14 @@ netsnmp_register_read_only_int_instance_context(const char *name,
                                                 Netsnmp_Node_Handler * subhandler,
                                                 const char *contextName)
 {
-    netsnmp_handler_registration *myreg;
-
-    myreg = get_reg(name, "int_handler", reg_oid, reg_oid_len, it,
-                    HANDLER_CAN_RONLY, netsnmp_instance_int_handler,
-                    subhandler, contextName);
-    return netsnmp_register_read_only_instance(myreg);
+    netsnmp_handler_registration *myreg =
+      netsnmp_create_handler_registration(
+          name, subhandler, reg_oid, reg_oid_len, HANDLER_CAN_RONLY);
+    if (myreg && contextName)
+      myreg->contextName = strdup(contextName);
+    return netsnmp_register_watched_instance(
+        myreg, netsnmp_create_watcher_info(
+            (void *)it, sizeof(int), ASN_INTEGER, WATCHER_FIXED_SIZE));
 }
 
 /*
@@ -462,14 +473,18 @@ netsnmp_register_int_instance(const char *name,
                               oid * reg_oid, size_t reg_oid_len,
                               int *it, Netsnmp_Node_Handler * subhandler)
 {
-    netsnmp_handler_registration *myreg;
-
-    myreg = get_reg(name, "int_handler", reg_oid, reg_oid_len, it,
-                    HANDLER_CAN_RWRITE, netsnmp_instance_int_handler,
-                    subhandler, NULL);
-    return netsnmp_register_instance(myreg);
+    return netsnmp_register_watched_instance(
+               netsnmp_create_handler_registration(
+                   name, subhandler, reg_oid, reg_oid_len, HANDLER_CAN_RWRITE),
+               netsnmp_create_watcher_info(
+                   (void *)it, sizeof(int), ASN_INTEGER, WATCHER_FIXED_SIZE));
 }
 
+#ifndef NETSNMP_NO_DEPRECATED_FUNCTIONS
+
+/**
+ * \deprecated This function is unused and scheduled for removal in Net-SNMP 5.6
+ */
 int
 netsnmp_instance_ulong_handler(netsnmp_mib_handler *handler,
                                netsnmp_handler_registration *reginfo,
@@ -547,6 +562,9 @@ netsnmp_instance_ulong_handler(netsnmp_mib_handler *handler,
     return SNMP_ERR_NOERROR;
 }
 
+/**
+ * \deprecated This function is unused and scheduled for removal in Net-SNMP 5.6
+ */
 int
 netsnmp_instance_counter32_handler(netsnmp_mib_handler *handler,
                                    netsnmp_handler_registration *reginfo,
@@ -583,6 +601,9 @@ netsnmp_instance_counter32_handler(netsnmp_mib_handler *handler,
     return SNMP_ERR_NOERROR;
 }
 
+/**
+ * \deprecated This function is unused and scheduled for removal in Net-SNMP 5.6
+ */
 int
 netsnmp_instance_long_handler(netsnmp_mib_handler *handler,
                               netsnmp_handler_registration *reginfo,
@@ -658,6 +679,9 @@ netsnmp_instance_long_handler(netsnmp_mib_handler *handler,
     return SNMP_ERR_NOERROR;
 }
 
+/**
+ * \deprecated This function is unused and scheduled for removal in Net-SNMP 5.6
+ */
 int
 netsnmp_instance_int_handler(netsnmp_mib_handler *handler,
                              netsnmp_handler_registration *reginfo,
@@ -737,6 +761,8 @@ netsnmp_instance_int_handler(netsnmp_mib_handler *handler,
                                          requests);
     return SNMP_ERR_NOERROR;
 }
+
+#endif /* NETSNMP_NO_DEPRECATED_FUNCTIONS */
 
 int
 netsnmp_instance_num_file_handler(netsnmp_mib_handler *handler,
@@ -867,6 +893,11 @@ netsnmp_instance_num_file_handler(netsnmp_mib_handler *handler,
     return SNMP_ERR_NOERROR;
 }
 
+#ifndef NETSNMP_NO_DEPRECATED_FUNCTIONS
+
+/**
+ * \deprecated This function is unused and scheduled for removal in Net-SNMP 5.6
+ */
 int
 netsnmp_instance_uint_handler(netsnmp_mib_handler *handler,
                               netsnmp_handler_registration *reginfo,
@@ -946,6 +977,8 @@ netsnmp_instance_uint_handler(netsnmp_mib_handler *handler,
                                          requests);
     return SNMP_ERR_NOERROR;
 }
+
+#endif /* NETSNMP_NO_DEPRECATED_FUNCTIONS */
 
 int
 netsnmp_instance_helper_handler(netsnmp_mib_handler *handler,
