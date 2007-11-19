@@ -173,12 +173,14 @@ set_if_info(mib2_ifEntry_t *ifp, unsigned index, char *name, uint64_t flags,
             int mtu);
 static int get_if_stats(mib2_ifEntry_t *ifp);
 
+#if defined(HAVE_IF_NAMEINDEX) && defined(NETSNMP_INCLUDE_IFTABLE_REWRITES)
 static int _dlpi_open(const char *devname);
 static int _dlpi_get_phys_address(int fd, char *paddr, int maxlen,
                                   int *paddrlen);
 static int _dlpi_get_iftype(int fd, unsigned int *iftype);
 static int _dlpi_attach(int fd, int ppa);
 static int _dlpi_parse_devname(char *devname, int *ppap);
+#endif
 
 
 
@@ -1044,7 +1046,299 @@ getmib(int groupname, int subgroupname, void **statbuf, size_t *size,
  * Get info for interfaces group. Mimics getmib interface as much as possible
  * to be substituted later if SunSoft decides to extend its mib2 interface.
  */
+
 #if defined(HAVE_IF_NAMEINDEX) && defined(NETSNMP_INCLUDE_IFTABLE_REWRITES)
+
+/*
+ * If IFTABLE_REWRITES is enabled, then we will also rely on DLPI to obtain
+ * information from the NIC.
+ */
+
+/*
+ * Open a DLPI device.
+ *
+ * On success the file descriptor is returned.
+ * On error -1 is returned.
+ */
+static int
+_dlpi_open(const char *devname)
+{
+    char *devstr;
+    int fd = -1;
+    int ppa = -1;
+
+    DEBUGMSGTL(("kernel_sunos5", "_dlpi_open called\n"));
+
+    if (devname == NULL)
+        return (-1);
+
+    if ((devstr = malloc(5 + strlen(devname) + 1)) == NULL)
+        return (-1);
+    (void) sprintf(devstr, "/dev/%s", devname);
+    DEBUGMSGTL(("kernel_sunos5:dlpi", "devstr(%s)\n", devstr));
+    /*
+     * First try opening the device using style 1, if the device does not
+     * exist we try style 2. Modules will not be pushed, so something like
+     * ip tunnels will not work. 
+     */
+   
+    DEBUGMSGTL(("kernel_sunos5:dlpi", "style1 open(%s)\n", devstr));
+    if ((fd = open(devstr, O_RDWR | O_NONBLOCK)) < 0) {
+        DEBUGMSGTL(("kernel_sunos5:dlpi", "style1 open failed\n"));
+        if (_dlpi_parse_devname(devstr, &ppa) == 0) {
+            DEBUGMSGTL(("kernel_sunos5:dlpi", "style2 parse: %s, %d\n", 
+                       devstr, ppa));
+            /* try style 2 */
+            DEBUGMSGTL(("kernel_sunos5:dlpi", "style2 open(%s)\n", devstr));
+
+            if ((fd = open(devstr, O_RDWR | O_NONBLOCK)) != -1) {
+                if (_dlpi_attach(fd, ppa) == 0) {
+                    DEBUGMSGTL(("kernel_sunos5:dlpi", "attached\n"));
+                } else {
+                    DEBUGMSGTL(("kernel_sunos5:dlpi", "attached failed\n"));
+                    close(fd);
+                    fd = -1;
+                }
+            } else {
+                DEBUGMSGTL(("kernel_sunos5:dlpi", "style2 open failed\n"));
+            }
+        } 
+    } else {
+        DEBUGMSGTL(("kernel_sunos5:dlpi", "style1 open succeeded\n"));
+    }
+
+    /* clean up */
+    free(devstr);
+
+    return (fd);
+}
+
+/*
+ * Obtain the physical address of the interface using DLPI
+ */
+static int
+_dlpi_get_phys_address(int fd, char *addr, int maxlen, int *addrlen)
+{
+    dl_phys_addr_req_t  paddr_req;
+    union DL_primitives *dlp;
+    struct strbuf       ctlbuf;
+    char                buf[MAX(DL_PHYS_ADDR_ACK_SIZE+64, DL_ERROR_ACK_SIZE)];
+    int                 flag = 0;
+
+    DEBUGMSGTL(("kernel_sunos5:dlpi", "_dlpi_get_phys_address\n"));
+
+    paddr_req.dl_primitive = DL_PHYS_ADDR_REQ;
+    paddr_req.dl_addr_type = DL_CURR_PHYS_ADDR;
+    ctlbuf.buf = (char *)&paddr_req;
+    ctlbuf.len = DL_PHYS_ADDR_REQ_SIZE;
+    if (putmsg(fd, &ctlbuf, NULL, 0) < 0)
+        return (-1);
+    
+    ctlbuf.maxlen = sizeof(buf);
+    ctlbuf.len = 0;
+    ctlbuf.buf = buf;
+    if (getmsg(fd, &ctlbuf, NULL, &flag) < 0)
+        return (-1);
+
+    if (ctlbuf.len < sizeof(uint32_t))
+        return (-1);
+    dlp = (union DL_primitives *)buf;
+    switch (dlp->dl_primitive) {
+    case DL_PHYS_ADDR_ACK: {
+        dl_phys_addr_ack_t *phyp = (dl_phys_addr_ack_t *)buf;
+
+        DEBUGMSGTL(("kernel_sunos5:dlpi", "got ACK\n"));
+        if (ctlbuf.len < DL_PHYS_ADDR_ACK_SIZE || phyp->dl_addr_length > maxlen)
+            return (-1); 
+        (void) memcpy(addr, buf+phyp->dl_addr_offset, phyp->dl_addr_length);
+        *addrlen = phyp->dl_addr_length;
+        return (0);
+    }
+    case DL_ERROR_ACK: {
+        dl_error_ack_t *errp = (dl_error_ack_t *)buf;
+
+        DEBUGMSGTL(("kernel_sunos5:dlpi", "got ERROR ACK\n"));
+        if (ctlbuf.len < DL_ERROR_ACK_SIZE)
+            return (-1);
+        return (errp->dl_errno);
+    }
+    default:
+        DEBUGMSGTL(("kernel_sunos5:dlpi", "got type: %x\n", dlp->dl_primitive));
+        return (-1);
+    }
+}
+
+/*
+ * Query the interface about it's type.
+ */
+static int
+_dlpi_get_iftype(int fd, unsigned int *iftype)
+{
+    dl_info_req_t info_req;
+    union DL_primitives *dlp;
+    struct strbuf       ctlbuf;
+    char                buf[MAX(DL_INFO_ACK_SIZE, DL_ERROR_ACK_SIZE)];
+    int                 flag = 0;
+
+    DEBUGMSGTL(("kernel_sunos5:dlpi", "_dlpi_get_iftype\n"));
+
+    info_req.dl_primitive = DL_INFO_REQ;
+    ctlbuf.buf = (char *)&info_req;
+    ctlbuf.len = DL_INFO_REQ_SIZE;
+    if (putmsg(fd, &ctlbuf, NULL, 0) < 0) {
+        DEBUGMSGTL(("kernel_sunos5:dlpi", "putmsg failed: %d\nn", errno));
+        return (-1);
+    }
+    
+    ctlbuf.maxlen = sizeof(buf);
+    ctlbuf.len = 0;
+    ctlbuf.buf = buf;
+    if (getmsg(fd, &ctlbuf, NULL, &flag) < 0) {
+        DEBUGMSGTL(("kernel_sunos5:dlpi", "getmsg failed: %d\n", errno));
+        return (-1);
+    }
+
+    if (ctlbuf.len < sizeof(uint32_t))
+        return (-1);
+    dlp = (union DL_primitives *)buf;
+    switch (dlp->dl_primitive) {
+    case DL_INFO_ACK: {
+        dl_info_ack_t *info = (dl_info_ack_t *)buf;
+
+        if (ctlbuf.len < DL_INFO_ACK_SIZE)
+            return (-1); 
+
+        DEBUGMSGTL(("kernel_sunos5:dlpi", "dl_mac_type: %x\n",
+	           info->dl_mac_type));
+	switch (info->dl_mac_type) {
+	case DL_CSMACD:
+	case DL_ETHER:
+	case DL_ETH_CSMA:
+		*iftype = 6;
+		break;
+	case DL_TPB:	/* Token Passing Bus */
+		*iftype = 8;
+		break;
+	case DL_TPR:	/* Token Passing Ring */
+		*iftype = 9;
+		break;
+	case DL_HDLC:
+		*iftype = 118;
+		break;
+	case DL_FDDI:
+		*iftype = 15;
+		break;
+	case DL_FC:	/* Fibre channel */
+		*iftype = 56;
+		break;
+	case DL_ATM:
+		*iftype = 37;
+		break;
+	case DL_X25:
+	case DL_ISDN:
+		*iftype = 63;
+		break;
+	case DL_HIPPI:
+		*iftype = 47;
+		break;
+#ifdef DL_IB
+	case DL_IB:
+		*iftype = 199;
+		break;
+#endif
+	case DL_FRAME:	/* Frame Relay */
+		*iftype = 32;
+		break;
+	case DL_LOOP:
+		*iftype = 24;
+		break;
+#ifdef DL_WIFI
+	case DL_WIFI:
+		*iftype = 71;
+		break;
+#endif
+#ifdef DL_IPV4	/* then IPv6 is also defined */
+	case DL_IPV4:	/* IPv4 Tunnel */
+	case DL_IPV6:	/* IPv6 Tunnel */
+		*iftype = 131;
+		break;
+#endif
+	default:
+		*iftype = 1;	/* Other */
+		break;
+	}
+	
+        return (0);
+    }
+    case DL_ERROR_ACK: {
+        dl_error_ack_t *errp = (dl_error_ack_t *)buf;
+
+        DEBUGMSGTL(("kernel_sunos5:dlpi",
+                    "got DL_ERROR_ACK: dlpi %d, error %d\n", errp->dl_errno,
+                    errp->dl_unix_errno));
+
+        if (ctlbuf.len < DL_ERROR_ACK_SIZE)
+            return (-1);
+        return (errp->dl_errno);
+    }
+    default:
+        DEBUGMSGTL(("kernel_sunos5:dlpi", "got type %x\n", dlp->dl_primitive));
+        return (-1);
+    }
+}
+
+static int
+_dlpi_attach(int fd, int ppa)
+{
+    dl_attach_req_t     attach_req;
+    struct strbuf       ctlbuf;
+    union DL_primitives *dlp;
+    char                buf[MAX(DL_OK_ACK_SIZE, DL_ERROR_ACK_SIZE)];
+    int                 flag = 0;
+   
+    attach_req.dl_primitive = DL_ATTACH_REQ;
+    attach_req.dl_ppa = ppa;
+    ctlbuf.buf = (char *)&attach_req;
+    ctlbuf.len = DL_ATTACH_REQ_SIZE;
+    if (putmsg(fd, &ctlbuf, NULL, 0) != 0)
+        return (-1);
+
+    ctlbuf.buf = buf;
+    ctlbuf.len = 0;
+    ctlbuf.maxlen = sizeof(buf);
+    if (getmsg(fd, &ctlbuf, NULL, &flag) != 0)
+        return (-1);
+
+    if (ctlbuf.len < sizeof(uint32_t))
+        return (-1); 
+
+    dlp = (union DL_primitives *)buf;
+    if (dlp->dl_primitive == DL_OK_ACK && ctlbuf.len >= DL_OK_ACK_SIZE)
+        return (0); 
+    return (-1);
+}
+
+static int
+_dlpi_parse_devname(char *devname, int *ppap)
+{
+    int ppa = 0;
+    int m = 1;
+    int i = strlen(devname) - 1;
+
+    while (i >= 0 && isdigit(devname[i])) {
+        ppa += m * (devname[i] - '0'); 
+        m *= 10;
+        i--;
+    }
+
+    if (m == 1) {
+        return (-1);
+    }
+    *ppap = ppa;
+    devname[i + 1] = '\0';
+
+    return (0);
+}
 static int
 getif(mib2_ifEntry_t *ifbuf, size_t size, req_e req_type,
       mib2_ifEntry_t *resp,  size_t *length, int (*comp)(void *, void *),
@@ -1229,7 +1523,8 @@ getif(mib2_ifEntry_t *ifbuf, size_t size, req_e req_type,
 
 	if (ioctl(ifsd, SIOCGIFFLAGS, ifrp) < 0) {
 	    ret = -1;
-	    snmp_log(LOG_ERR, "SIOCGIFFLAGS %s: %s\n", ifrp->ifr_name, strerror(errno));
+	    snmp_log(LOG_ERR, "SIOCGIFFLAGS %s: %s\n", ifrp->ifr_name,
+                     strerror(errno));
 	    goto Return;
 	}
         if_flags = ifrp->ifr_flags;
@@ -1522,293 +1817,6 @@ get_if_stats(mib2_ifEntry_t *ifp)
                                       ifp->ifHCOutMulticastPkts);
     return(0);
 }
-
-/*
- * Open a DLPI device.
- *
- * On success the file descriptor is returned.
- * On error -1 is returned.
- */
-static int
-_dlpi_open(const char *devname)
-{
-    char *devstr;
-    int fd = -1;
-    int ppa = -1;
-
-    DEBUGMSGTL(("kernel_sunos5", "_dlpi_open called\n"));
-
-    if (devname == NULL)
-        return (-1);
-
-    if ((devstr = malloc(5 + strlen(devname) + 1)) == NULL)
-        return (-1);
-    (void) sprintf(devstr, "/dev/%s", devname);
-    DEBUGMSGTL(("kernel_sunos5:dlpi", "devstr(%s)\n", devstr));
-    /*
-     * First try opening the device using style 1, if the device does not
-     * exist we try style 2. Modules will not be pushed, so something like
-     * ip tunnels will not work. 
-     */
-   
-    DEBUGMSGTL(("kernel_sunos5:dlpi", "style1 open(%s)\n", devstr));
-    if ((fd = open(devstr, O_RDWR | O_NONBLOCK)) < 0) {
-        DEBUGMSGTL(("kernel_sunos5:dlpi", "style1 open failed\n"));
-        if (_dlpi_parse_devname(devstr, &ppa) == 0) {
-            DEBUGMSGTL(("kernel_sunos5:dlpi", "style2 parse: %s, %d\n", 
-                       devstr, ppa));
-            /* try style 2 */
-            DEBUGMSGTL(("kernel_sunos5:dlpi", "style2 open(%s)\n", devstr));
-
-            if ((fd = open(devstr, O_RDWR | O_NONBLOCK)) != -1) {
-                if (_dlpi_attach(fd, ppa) == 0) {
-                    DEBUGMSGTL(("kernel_sunos5:dlpi", "attached\n"));
-                } else {
-                    DEBUGMSGTL(("kernel_sunos5:dlpi", "attached failed\n"));
-                    close(fd);
-                    fd = -1;
-                }
-            } else {
-                DEBUGMSGTL(("kernel_sunos5:dlpi", "style2 open failed\n"));
-            }
-        } 
-    } else {
-        DEBUGMSGTL(("kernel_sunos5:dlpi", "style1 open succeeded\n"));
-    }
-
-    /* clean up */
-    free(devstr);
-
-    return (fd);
-}
-
-/*
- * Obtain the physical address of the interface using DLPI
- */
-static int
-_dlpi_get_phys_address(int fd, char *addr, int maxlen, int *addrlen)
-{
-    dl_phys_addr_req_t  paddr_req;
-    union DL_primitives *dlp;
-    struct strbuf       ctlbuf;
-    char                buf[MAX(DL_PHYS_ADDR_ACK_SIZE+64, DL_ERROR_ACK_SIZE)];
-    int                 flag = 0;
-
-    DEBUGMSGTL(("kernel_sunos5:dlpi", "_dlpi_get_phys_address\n"));
-
-    paddr_req.dl_primitive = DL_PHYS_ADDR_REQ;
-    paddr_req.dl_addr_type = DL_CURR_PHYS_ADDR;
-    ctlbuf.buf = (char *)&paddr_req;
-    ctlbuf.len = DL_PHYS_ADDR_REQ_SIZE;
-    if (putmsg(fd, &ctlbuf, NULL, 0) < 0)
-        return (-1);
-    
-    ctlbuf.maxlen = sizeof(buf);
-    ctlbuf.len = 0;
-    ctlbuf.buf = buf;
-    if (getmsg(fd, &ctlbuf, NULL, &flag) < 0)
-        return (-1);
-
-    if (ctlbuf.len < sizeof(uint32_t))
-        return (-1);
-    dlp = (union DL_primitives *)buf;
-    switch (dlp->dl_primitive) {
-    case DL_PHYS_ADDR_ACK: {
-        dl_phys_addr_ack_t *phyp = (dl_phys_addr_ack_t *)buf;
-
-        DEBUGMSGTL(("kernel_sunos5:dlpi", "got ACK\n"));
-        if (ctlbuf.len < DL_PHYS_ADDR_ACK_SIZE || phyp->dl_addr_length > maxlen)
-            return (-1); 
-        (void) memcpy(addr, buf+phyp->dl_addr_offset, phyp->dl_addr_length);
-        *addrlen = phyp->dl_addr_length;
-        return (0);
-    }
-    case DL_ERROR_ACK: {
-        dl_error_ack_t *errp = (dl_error_ack_t *)buf;
-
-        DEBUGMSGTL(("kernel_sunos5:dlpi", "got ERROR ACK\n"));
-        if (ctlbuf.len < DL_ERROR_ACK_SIZE)
-            return (-1);
-        return (errp->dl_errno);
-    }
-    default:
-        DEBUGMSGTL(("kernel_sunos5:dlpi", "got type: %x\n", dlp->dl_primitive));
-        return (-1);
-    }
-}
-
-/*
- * Query the interface about it's type.
- */
-static int
-_dlpi_get_iftype(int fd, unsigned int *iftype)
-{
-    dl_info_req_t info_req;
-    union DL_primitives *dlp;
-    struct strbuf       ctlbuf;
-    char                buf[MAX(DL_INFO_ACK_SIZE, DL_ERROR_ACK_SIZE)];
-    int                 flag = 0;
-
-    DEBUGMSGTL(("kernel_sunos5:dlpi", "_dlpi_get_iftype\n"));
-
-    info_req.dl_primitive = DL_INFO_REQ;
-    ctlbuf.buf = (char *)&info_req;
-    ctlbuf.len = DL_INFO_REQ_SIZE;
-    if (putmsg(fd, &ctlbuf, NULL, 0) < 0) {
-        DEBUGMSGTL(("kernel_sunos5:dlpi", "putmsg failed: %d\nn", errno));
-        return (-1);
-    }
-    
-    ctlbuf.maxlen = sizeof(buf);
-    ctlbuf.len = 0;
-    ctlbuf.buf = buf;
-    if (getmsg(fd, &ctlbuf, NULL, &flag) < 0) {
-        DEBUGMSGTL(("kernel_sunos5:dlpi", "getmsg failed: %d\n", errno));
-        return (-1);
-    }
-
-    if (ctlbuf.len < sizeof(uint32_t))
-        return (-1);
-    dlp = (union DL_primitives *)buf;
-    switch (dlp->dl_primitive) {
-    case DL_INFO_ACK: {
-        dl_info_ack_t *info = (dl_info_ack_t *)buf;
-
-        if (ctlbuf.len < DL_INFO_ACK_SIZE)
-            return (-1); 
-
-        DEBUGMSGTL(("kernel_sunos5:dlpi", "dl_mac_type: %x\n",
-	           info->dl_mac_type));
-	switch (info->dl_mac_type) {
-	case DL_CSMACD:
-	case DL_ETHER:
-	case DL_ETH_CSMA:
-		*iftype = 6;
-		break;
-	case DL_TPB:	/* Token Passing Bus */
-		*iftype = 8;
-		break;
-	case DL_TPR:	/* Token Passing Ring */
-		*iftype = 9;
-		break;
-	case DL_HDLC:
-		*iftype = 118;
-		break;
-	case DL_FDDI:
-		*iftype = 15;
-		break;
-	case DL_FC:	/* Fibre channel */
-		*iftype = 56;
-		break;
-	case DL_ATM:
-		*iftype = 37;
-		break;
-	case DL_X25:
-	case DL_ISDN:
-		*iftype = 63;
-		break;
-	case DL_HIPPI:
-		*iftype = 47;
-		break;
-#ifdef DL_IB
-	case DL_IB:
-		*iftype = 199;
-		break;
-#endif
-	case DL_FRAME:	/* Frame Relay */
-		*iftype = 32;
-		break;
-	case DL_LOOP:
-		*iftype = 24;
-		break;
-#ifdef DL_WIFI
-	case DL_WIFI:
-		*iftype = 71;
-		break;
-#endif
-#ifdef DL_IPV4	/* then IPv6 is also defined */
-	case DL_IPV4:	/* IPv4 Tunnel */
-	case DL_IPV6:	/* IPv6 Tunnel */
-		*iftype = 131;
-		break;
-#endif
-	default:
-		*iftype = 1;	/* Other */
-		break;
-	}
-	
-        return (0);
-    }
-    case DL_ERROR_ACK: {
-        dl_error_ack_t *errp = (dl_error_ack_t *)buf;
-
-        DEBUGMSGTL(("kernel_sunos5:dlpi",
-                    "got DL_ERROR_ACK: dlpi %d, error %d\n", errp->dl_errno,
-                    errp->dl_unix_errno));
-
-        if (ctlbuf.len < DL_ERROR_ACK_SIZE)
-            return (-1);
-        return (errp->dl_errno);
-    }
-    default:
-        DEBUGMSGTL(("kernel_sunos5:dlpi", "got type %x\n", dlp->dl_primitive));
-        return (-1);
-    }
-}
-
-static int
-_dlpi_attach(int fd, int ppa)
-{
-    dl_attach_req_t     attach_req;
-    struct strbuf       ctlbuf;
-    union DL_primitives *dlp;
-    char                buf[MAX(DL_OK_ACK_SIZE, DL_ERROR_ACK_SIZE)];
-    int                 flag = 0;
-   
-    attach_req.dl_primitive = DL_ATTACH_REQ;
-    attach_req.dl_ppa = ppa;
-    ctlbuf.buf = (char *)&attach_req;
-    ctlbuf.len = DL_ATTACH_REQ_SIZE;
-    if (putmsg(fd, &ctlbuf, NULL, 0) != 0)
-        return (-1);
-
-    ctlbuf.buf = buf;
-    ctlbuf.len = 0;
-    ctlbuf.maxlen = sizeof(buf);
-    if (getmsg(fd, &ctlbuf, NULL, &flag) != 0)
-        return (-1);
-
-    if (ctlbuf.len < sizeof(uint32_t))
-        return (-1); 
-
-    dlp = (union DL_primitives *)buf;
-    if (dlp->dl_primitive == DL_OK_ACK && ctlbuf.len >= DL_OK_ACK_SIZE)
-        return (0); 
-    return (-1);
-}
-
-static int
-_dlpi_parse_devname(char *devname, int *ppap)
-{
-    int ppa = 0;
-    int m = 1;
-    int i = strlen(devname) - 1;
-
-    while (i >= 0 && isdigit(devname[i])) {
-        ppa += m * (devname[i] - '0'); 
-        m *= 10;
-        i--;
-    }
-
-    if (m == 1) {
-        return (-1);
-    }
-    *ppap = ppa;
-    devname[i + 1] = '\0';
-
-    return (0);
-}
-
 /*
  * Always TRUE. May be used as a comparison function in getMibstat
  * to obtain the whole table (GET_FIRST should be used) 
