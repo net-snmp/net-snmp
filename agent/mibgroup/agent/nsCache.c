@@ -272,7 +272,7 @@ handle_nsCacheTable(netsnmp_mib_handler *handler,
 
     case MODE_GET:
         for (request=requests; request; request=request->next) {
-            if (requests->processed != 0)
+            if (request->processed != 0)
                 continue;
 
             cache_entry = (netsnmp_cache*)netsnmp_extract_iterator_context(request);
@@ -316,7 +316,7 @@ handle_nsCacheTable(netsnmp_mib_handler *handler,
 
     case MODE_SET_RESERVE1:
         for (request=requests; request; request=request->next) {
-            if (requests->processed != 0)
+            if (request->processed != 0)
                 continue;
             if ( request->status != 0 ) {
                 return SNMP_ERR_NOERROR;	/* Already got an error */
@@ -369,7 +369,7 @@ handle_nsCacheTable(netsnmp_mib_handler *handler,
 
     case MODE_SET_COMMIT:
         for (request=requests; request; request=request->next) {
-            if (requests->processed != 0)
+            if (request->processed != 0)
                 continue;
             if ( request->status != 0 ) {
                 return SNMP_ERR_NOERROR;	/* Already got an error */
