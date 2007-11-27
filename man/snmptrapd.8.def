@@ -41,6 +41,9 @@ Ignore authenticationFailure traps.
 .TP
 .B -A
 Append to the log file rather than truncating it.
+
+Note that this needs to come \fIbefore\fP any -Lf options
+that it should apply to.
 .TP
 .BI "-c" " FILE"
 Read 
