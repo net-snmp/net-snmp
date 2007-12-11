@@ -1,4 +1,4 @@
-	       README file for net-snmp Version: 5.3.2.rc1
+	       README file for net-snmp Version: 5.3.2
 
 DISCLAIMER
 
@@ -101,8 +101,8 @@ HELPING OUT
   to the net-snmp-coders list described below and mention what you're
   going to work on to make sure no one else is already doing so!
   You'll also need to keep up to date with the latest code snap shot,
-  which can be obtained from CVS using the information found at
-  http://www.net-snmp.org/cvs/.
+  which can be obtained from SVN using the information found at
+  http://www.net-snmp.org/dev/svn.html.
 
   Contributions to the Net-SNMP source code in any form are greatly
   appreciated.  We expect the parties providing such contributions to
