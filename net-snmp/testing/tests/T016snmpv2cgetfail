@@ -8,7 +8,7 @@
 
 HEADER for failure of SNMPv2c get with wrong community
 
-SKIPIF DISABLE_SNMPV2C
+SKIPIF NETSNMP_DISABLE_SNMPV2C
 
 #
 # Begin test

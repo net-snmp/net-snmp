@@ -11,7 +11,7 @@ if test `uname -s` = "HP-UX" ; then
     fi
 fi
 
-SKIPIF DISABLE_SNMPV2C
+SKIPIF NETSNMP_DISABLE_SNMPV2C
 
 # make sure snmpwalk can be executed
 SNMPWALK="${SNMP_UPDIR}/apps/snmpwalk"

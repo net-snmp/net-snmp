@@ -4,7 +4,7 @@
 
 HEADER "extending agent functionality with extend"
 
-SKIPIF DISABLE_SNMPV2C
+SKIPIF NETSNMP_DISABLE_SNMPV2C
 SKIPIFNOT USING_AGENT_EXTEND_MODULE
 
 # make sure snmpget can be executed
