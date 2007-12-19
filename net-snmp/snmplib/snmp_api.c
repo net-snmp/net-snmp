@@ -1123,17 +1123,16 @@ _sess_copy(netsnmp_session * in_session)
             snmp_sess_close(slp);
             return (NULL);
         }
-    } else if ((cp = netsnmp_ds_get_string(NETSNMP_DS_LIBRARY_ID, 
-					   NETSNMP_DS_LIB_CONTEXT)) != NULL) {
-        cp = strdup(cp);
+    } else {
+        if ((cp = netsnmp_ds_get_string(NETSNMP_DS_LIBRARY_ID,
+                                        NETSNMP_DS_LIB_CONTEXT)) != NULL)
+            cp = strdup(cp);
+        else
+            cp = strdup(SNMP_DEFAULT_CONTEXT);
         if (cp == NULL) {
             snmp_sess_close(slp);
             return (NULL);
         }
-        session->contextName = cp;
-        session->contextNameLen = strlen(cp);
-    } else {
-        cp = strdup(SNMP_DEFAULT_CONTEXT);
         session->contextName = cp;
         session->contextNameLen = strlen(cp);
     }
