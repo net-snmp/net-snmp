@@ -162,17 +162,21 @@ netsnmp_watcher_helper_handler(netsnmp_mib_handler *handler,
          * SET requests.  Should only get here if registered RWRITE 
          */
     case MODE_SET_RESERVE1:
-        if (requests->requestvb->type != winfo->type)
+        if (requests->requestvb->type != winfo->type) {
             netsnmp_set_request_error(reqinfo, requests, SNMP_ERR_WRONGTYPE);
-        else if (((winfo->flags & WATCHER_MAX_SIZE) &&
+            handler->flags |= MIB_HANDLER_AUTO_NEXT_OVERRIDE_ONCE;
+        } else if (((winfo->flags & WATCHER_MAX_SIZE) &&
                      requests->requestvb->val_len > winfo->max_size) ||
             ((winfo->flags & WATCHER_FIXED_SIZE) &&
-                requests->requestvb->val_len != get_data_size(winfo)))
+                requests->requestvb->val_len != get_data_size(winfo))) {
             netsnmp_set_request_error(reqinfo, requests, SNMP_ERR_WRONGLENGTH);
-        else if ((winfo->flags & WATCHER_SIZE_STRLEN) &&
+            handler->flags |= MIB_HANDLER_AUTO_NEXT_OVERRIDE_ONCE;
+        } else if ((winfo->flags & WATCHER_SIZE_STRLEN) &&
             (memchr(requests->requestvb->val.string, '\0',
-                requests->requestvb->val_len) != NULL))
+                requests->requestvb->val_len) != NULL)) {
             netsnmp_set_request_error(reqinfo, requests, SNMP_ERR_WRONGVALUE);
+            handler->flags |= MIB_HANDLER_AUTO_NEXT_OVERRIDE_ONCE;
+        }
         break;
 
     case MODE_SET_RESERVE2:
@@ -181,10 +185,11 @@ netsnmp_watcher_helper_handler(netsnmp_mib_handler *handler,
          */
         old_data =
             netsnmp_watcher_cache_create(winfo->data, get_data_size(winfo));
-        if (old_data == NULL)
+        if (old_data == NULL) {
             netsnmp_set_request_error(reqinfo, requests,
                                       SNMP_ERR_RESOURCEUNAVAILABLE);
-        else
+            handler->flags |= MIB_HANDLER_AUTO_NEXT_OVERRIDE_ONCE;
+        } else
             netsnmp_request_add_list_data(requests,
                                           netsnmp_create_data_list
                                           ("watcher", old_data, free));
@@ -231,7 +236,7 @@ netsnmp_get_watched_timestamp_handler(void)
 {
     netsnmp_mib_handler *ret = NULL;
     
-    ret = netsnmp_create_handler("watcher",
+    ret = netsnmp_create_handler("watcher-timestamp",
                                  netsnmp_watched_timestamp_handler);
     if (ret) {
         ret->flags |= MIB_HANDLER_AUTO_NEXT;
@@ -306,6 +311,7 @@ netsnmp_watched_timestamp_handler(netsnmp_mib_handler *handler,
     case MODE_SET_RESERVE1:
         netsnmp_set_request_error(reqinfo, requests,
                                   SNMP_ERR_NOTWRITABLE);
+        handler->flags |= MIB_HANDLER_AUTO_NEXT_OVERRIDE_ONCE;
         return SNMP_ERR_NOTWRITABLE;
     }
 
@@ -325,7 +331,7 @@ netsnmp_get_watched_spinlock_handler(void)
 {
     netsnmp_mib_handler *ret = NULL;
     
-    ret = netsnmp_create_handler("watcher",
+    ret = netsnmp_create_handler("watcher-spinlock",
                                  netsnmp_watched_spinlock_handler);
     if (ret) {
         ret->flags |= MIB_HANDLER_AUTO_NEXT;
@@ -380,6 +386,7 @@ netsnmp_watched_spinlock_handler(netsnmp_mib_handler *handler,
         for (request=requests; request; request=request->next) {
             if (*request->requestvb->val.integer != *spinlock) {
                 netsnmp_set_request_error(reqinfo, requests, SNMP_ERR_WRONGVALUE);
+                handler->flags |= MIB_HANDLER_AUTO_NEXT_OVERRIDE_ONCE;
                 return SNMP_ERR_WRONGVALUE;
 
             }
