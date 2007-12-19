@@ -5,6 +5,9 @@
 #include <net-snmp/library/container_list_ssll.h>
 #include <net-snmp/library/container_null.h>
 
+/** @defgroup container container
+ */
+
 /*------------------------------------------------------------------
  */
 static netsnmp_container *containers = NULL;

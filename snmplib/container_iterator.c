@@ -28,18 +28,14 @@
 
 #include <net-snmp/library/container_iterator.h>
 
-/** @typedef struct iterator_info_s iterator_info
- * Typedefs the iterator_info_s struct into iterator_info */
-
-/** @struct iterator_info_s
-    
-* Holds iterator information containing functions which should be
-called by the iterator_handler to loop over your data set and
-sort it in a SNMP specific manner.
-
-The iterator_info typedef can be used instead of directly
-calling this struct if you would prefer.
-*/
+/**
+ *  Holds iterator information containing functions which should be called
+ *  by the iterator_handler to loop over your data set and sort it in a
+ *  SNMP specific manner.
+ *
+ *  The iterator_info typedef can be used instead of directly calling this
+ *  struct if you would prefer.
+ */
 typedef struct iterator_info_s {
    /*
     * netsnmp_conatiner  must be first
