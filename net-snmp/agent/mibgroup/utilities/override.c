@@ -141,10 +141,36 @@ netsnmp_parse_override(const char *token, char *line)
         return;
     }
 
-    type = se_find_value_in_slist("asntypes", buf);
-    if (!type) {
-        config_perror("unknown type specified");
-        return;
+    {
+        struct { const char* key; int value; } const strings[] = {
+            { "counter", ASN_COUNTER },
+            { "counter64", ASN_COUNTER64 },
+            { "integer", ASN_INTEGER },
+            { "ipaddress", ASN_IPADDRESS },
+            { "nsap", ASN_NSAP },
+            { "null", ASN_NULL },
+            { "object_id", ASN_OBJECT_ID },
+            { "octet_str", ASN_OCTET_STR },
+            { "opaque", ASN_OPAQUE },
+#ifdef NETSNMP_WITH_OPAQUE_SPECIAL_TYPES
+            { "opaque_counter64", ASN_OPAQUE_COUNTER64 },
+            { "opaque_double", ASN_OPAQUE_DOUBLE },
+            { "opaque_float", ASN_OPAQUE_FLOAT },
+            { "opaque_i64", ASN_OPAQUE_I64 },
+            { "opaque_u64", ASN_OPAQUE_U64 },
+#endif
+            { "timeticks", ASN_TIMETICKS },
+            { "uinteger", ASN_GAUGE },
+            { "unsigned", ASN_UNSIGNED },
+            { NULL, 0 }
+        }, * run;
+        for(run = strings; run->key && strcasecmp(run->key, buf) < 0; ++run);
+        if(run->key && strcasecmp(run->key, buf) == 0)
+            type = run->value;
+        else {
+            config_perror("unknown type specified");
+            return;
+        }
     }
 
     if (cp)
