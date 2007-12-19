@@ -33,7 +33,7 @@
 #include <net-snmp/library/tools.h>
 #include <net-snmp/library/snmp_assert.h>
 
-/** @defgroup container null_container
+/** @defgroup null_container null_container
  *  Helps you implement specialized containers
  *  @ingroup container
  *

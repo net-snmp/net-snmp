@@ -257,11 +257,11 @@ register_app_prenetsnmp_mib_handler(const char *token,
  * management of where to put tokens as the module or modules get more complex
  * in regard to handling token registrations.
  *
- * @param type_param the configuration file used, e.g., if snmp.conf is the
+ * @param type     the configuration file used, e.g., if snmp.conf is the
  *                 file where the token is located use "snmp" here.
  *                 Multiple colon separated tokens might be used.
  *                 If NULL or "" then the configuration file used will be
- *                 <application>.conf.
+ *                 \<application\>.conf.
  *
  * @param token    the token being parsed from the file.  Must be non-NULL.
  *
