@@ -309,13 +309,14 @@ netsnmp_save_all_data(netsnmp_data_list *head,
     return SNMP_ERR_NOERROR;
 }
 
-/** @todo make netsnmp_read_data_callback deal with a free routine */
 /** intended to be registerd as a .conf parser
  * It should be registered using:
  *
  * register_app_config_handler("token", netsnmp_read_data_callback, XXX)
  *
- * where INFO_POINTER is a pointer to a netsnmp_data_list_saveinfo object containing apporpriate registration information
+ * where INFO_POINTER is a pointer to a netsnmp_data_list_saveinfo object
+ * containing apporpriate registration information
+ * @todo make netsnmp_read_data_callback deal with a free routine
  */
 void
 netsnmp_read_data_callback(const char *token, char *line) {
