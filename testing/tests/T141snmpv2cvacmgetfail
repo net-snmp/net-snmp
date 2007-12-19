@@ -4,7 +4,7 @@
 
 HEADER SNMPv2 vacm denial support
 
-SKIPIF DISABLE_SNMPV2C
+SKIPIF NETSNMP_DISABLE_SNMPV2C
 
 #
 # Begin test
