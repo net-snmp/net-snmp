@@ -4,7 +4,7 @@
 
 HEADER 'AgentX subagent in Perl (using NetSNMP::agent)'
 
-SKIPIF DISABLE_SNMPV2C
+SKIPIF NETSNMP_DISABLE_SNMPV2C
 SKIPIFNOT USING_AGENTX_MASTER_MODULE
 SKIPIFNOT USING_AGENTX_SUBAGENT_MODULE
 # make sure the toolkit has been configured --with-perl-modules
