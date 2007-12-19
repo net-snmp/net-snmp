@@ -4,7 +4,7 @@
 
 HEADER authentication failure traps are sent by snmpd
 
-SKIPIF DISABLE_SNMPV1
+SKIPIF NETSNMP_DISABLE_SNMPV1
 
 #
 # Begin test

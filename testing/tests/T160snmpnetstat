@@ -27,7 +27,7 @@ case "x`uname -s`" in
   xOSF1)    [ "x`id -u`" != "x0" ] && SKIP;;
 esac
 
-SKIPIF DISABLE_SNMPV2C
+SKIPIF NETSNMP_DISABLE_SNMPV2C
 
 # make sure snmpnetstat can be executed
 SNMPNETSTAT="${SNMP_UPDIR}/apps/snmpnetstat/snmpnetstat"

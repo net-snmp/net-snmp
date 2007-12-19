@@ -4,7 +4,7 @@
 
 HEADER SNMPv2c informs received and sent by tools
 
-SKIPIF DISABLE_SNMPV2C
+SKIPIF NETSNMP_DISABLE_SNMPV2C
 
 #
 # Begin test

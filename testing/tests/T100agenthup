@@ -4,7 +4,7 @@
 
 HEADER that the agent responds properly to a kill -HUP
 
-SKIPIF DISABLE_SNMPV1
+SKIPIF NETSNMP_DISABLE_SNMPV1
 
 SKIPIFNOT HAVE_SIGNAL
 

@@ -3,7 +3,7 @@
 . ../eval_tools.sh
 
 HEADER SNMPv1 vacm acceptance support
-SKIPIF DISABLE_SNMPV1
+SKIPIF NETSNMP_DISABLE_SNMPV1
 
 #
 # Begin test

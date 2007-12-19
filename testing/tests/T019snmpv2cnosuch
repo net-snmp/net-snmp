@@ -4,7 +4,7 @@
 
 HEADER SNMPv2c get of system.sysUpTime.1
 
-SKIPIF DISABLE_SNMPV2C
+SKIPIF NETSNMP_DISABLE_SNMPV2C
 
 #
 # Begin test
