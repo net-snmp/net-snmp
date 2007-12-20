@@ -1335,6 +1335,7 @@ void *cb_data;
 
       sv_bless(varlist_ref, gv_stashpv("SNMP::VarList",0));
       for(vars = (pdu?pdu->variables:NULL); vars; vars = vars->next_variable) {
+         int local_getlabel_flag = getlabel_flag;
          varbind = newAV();
          varbind_ref = newRV_noinc((SV*)varbind);
          sv_bless(varbind_ref, gv_stashpv("SNMP::Varbind",0));
@@ -1350,10 +1351,10 @@ void *cb_data;
          if (__is_leaf(tp)) {
             type = tp->type;
          } else {
-            getlabel_flag |= NON_LEAF_NAME;
+            local_getlabel_flag |= NON_LEAF_NAME;
             type = __translate_asn_type(vars->type);
          }
-         __get_label_iid(str_buf,&label,&iid,getlabel_flag);
+         __get_label_iid(str_buf,&label,&iid,local_getlabel_flag);
          if (label) {
              av_store(varbind, VARBIND_TAG_F,
                       newSVpv(label, strlen(label)));
@@ -3311,6 +3312,7 @@ snmp_get(sess_ref, retry_nosuch, varlist_ref, perl_callback)
               for(vars = (response?response->variables:NULL), varlist_ind = 0;
                   vars && (varlist_ind <= varlist_len);
                   vars = vars->next_variable, varlist_ind++) {
+                 int local_getlabel_flag = getlabel_flag;
                  varbind_ref = av_fetch(varlist, varlist_ind, 0);
                  if (SvROK(*varbind_ref)) {
                     varbind = (AV*) SvRV(*varbind_ref);
@@ -3329,10 +3331,10 @@ snmp_get(sess_ref, retry_nosuch, varlist_ref, perl_callback)
                     if (__is_leaf(tp)) {
                        type = tp->type;
                     } else {
-                       getlabel_flag |= NON_LEAF_NAME;
+                       local_getlabel_flag |= NON_LEAF_NAME;
                        type = __translate_asn_type(vars->type);
                     }
-                    __get_label_iid(str_buf,&label,&iid,getlabel_flag);
+                    __get_label_iid(str_buf,&label,&iid,local_getlabel_flag);
                     if (label) {
                         av_store(varbind, VARBIND_TAG_F,
                                  newSVpv(label, strlen(label)));
@@ -3549,6 +3551,7 @@ snmp_getnext(sess_ref, varlist_ref, perl_callback)
               for(vars = (response?response->variables:NULL), varlist_ind = 0;
                   vars && (varlist_ind <= varlist_len);
                   vars = vars->next_variable, varlist_ind++) {
+                 int local_getlabel_flag = getlabel_flag;
                  varbind_ref = av_fetch(varlist, varlist_ind, 0);
                  if (SvROK(*varbind_ref)) {
                     varbind = (AV*) SvRV(*varbind_ref);
@@ -3574,10 +3577,10 @@ snmp_getnext(sess_ref, varlist_ref, perl_callback)
                     if (__is_leaf(tp)) {
                        type = tp->type;
                     } else {
-                       getlabel_flag |= NON_LEAF_NAME;
+                       local_getlabel_flag |= NON_LEAF_NAME;
                        type = __translate_asn_type(vars->type);
                     }
-                    __get_label_iid(str_buf,&label,&iid,getlabel_flag);
+                    __get_label_iid(str_buf,&label,&iid,local_getlabel_flag);
                     if (label) {
                         av_store(varbind, VARBIND_TAG_F,
                                  newSVpv(label, strlen(label)));
@@ -3787,6 +3790,7 @@ snmp_getbulk(sess_ref, nonrepeaters, maxrepetitions, varlist_ref, perl_callback)
                   vars;
                   vars = vars->next_variable) {
 
+                    int local_getlabel_flag = getlabel_flag;
                     varbind = (AV*) newAV();
                     *str_buf = '.';
                     *(str_buf+1) = '\0';
@@ -3803,10 +3807,10 @@ snmp_getbulk(sess_ref, nonrepeaters, maxrepetitions, varlist_ref, perl_callback)
                     if (__is_leaf(tp)) {
                        type = tp->type;
                     } else {
-                       getlabel_flag |= NON_LEAF_NAME;
+                       local_getlabel_flag |= NON_LEAF_NAME;
                        type = __translate_asn_type(vars->type);
                     }
-                    __get_label_iid(str_buf,&label,&iid,getlabel_flag);
+                    __get_label_iid(str_buf,&label,&iid,local_getlabel_flag);
                     if (label) {
                         av_store(varbind, VARBIND_TAG_F,
                                  newSVpv(label, strlen(label)));
