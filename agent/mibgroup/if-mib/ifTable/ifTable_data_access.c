@@ -161,6 +161,7 @@ _check_interface_entry_for_updates(ifTable_rowreq_ctx * rowreq_ctx,
                                    netsnmp_container *ifcontainer)
 {
     char            oper_changed = 0;
+    int lastchanged = rowreq_ctx->data.ifLastChange;
 
     /*
      * check for matching entry. We can do this directly, since
@@ -245,7 +246,8 @@ _check_interface_entry_for_updates(ifTable_rowreq_ctx * rowreq_ctx,
      */
     if (oper_changed)
         rowreq_ctx->data.ifLastChange = netsnmp_get_agent_uptime();
-
+    else
+        rowreq_ctx->data.ifLastChange = lastchanged;
 }
 
 /**
