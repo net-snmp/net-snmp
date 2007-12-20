@@ -778,6 +778,7 @@ Check_HR_FileSys_NFS (void)
 #if defined(MNTTYPE_AFP)
 	!strcmp( HRFS_entry->HRFS_type, MNTTYPE_AFP) ||
 #endif
+	!strcmp( HRFS_entry->HRFS_type, "cifs") ||
 	    /*
 	     * MVFS is Rational ClearCase's view file system
 	     * it is similiar to NFS file systems in that it is mounted
