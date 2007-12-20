@@ -1216,6 +1216,7 @@ retry:
         snmp_free_pdu(pdu);
         return SNMP_ERR_GENERR;
     }
+    DEBUGMSGTL(("iquery", "query returned %d\n", ret));
 
     /*
      * ....then copy the results back into the
@@ -1236,6 +1237,7 @@ retry:
             ret = response->errstat;
             if (request != SNMP_MSG_SET &&
                 response->errindex != 0) {
+                DEBUGMSGTL(("iquery", "retrying query (%d, %d)\n", ret, response->errindex));
                 pdu = snmp_fix_pdu( response, request );
                 snmp_free_pdu( response );
                 response = NULL;
