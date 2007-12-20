@@ -384,6 +384,9 @@ netsnmp_watched_spinlock_handler(netsnmp_mib_handler *handler,
          */
     case MODE_SET_RESERVE1:
         for (request=requests; request; request=request->next) {
+            if (request->processed)
+                continue;
+
             if (*request->requestvb->val.integer != *spinlock) {
                 netsnmp_set_request_error(reqinfo, requests, SNMP_ERR_WRONGVALUE);
                 handler->flags |= MIB_HANDLER_AUTO_NEXT_OVERRIDE_ONCE;
