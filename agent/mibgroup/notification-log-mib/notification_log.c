@@ -713,6 +713,21 @@ log_notification(netsnmp_pdu *pdu, netsnmp_transport *transport)
                 col = COLUMN_NLMLOGVARIABLEOCTETSTRINGVAL;
                 break;
 
+            case ASN_IPADDRESS:
+                tmpul = 5;
+                col = COLUMN_NLMLOGVARIABLEIPADDRESSVAL;
+                break;
+
+            case ASN_COUNTER64:
+                tmpul = 8;
+                col = COLUMN_NLMLOGVARIABLECOUNTER64VAL;
+                break;
+
+            case ASN_OPAQUE:
+                tmpul = 9;
+                col = COLUMN_NLMLOGVARIABLEOPAQUEVAL;
+                break;
+
             default:
                 /*
                  * unsupported 
