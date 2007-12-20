@@ -220,13 +220,13 @@ SOFTWARE.
             x = 0 - (x & 0xffffffff);                                   \
         }                                                               \
         if (trunc)                                                      \
-            snmp_log(LOG_ERR,"truncating signed value to 32 bits (%d)\n",y); \
+            DEBUGMSG(("asn","truncating signed value to 32 bits (%d)\n",y)); \
     } while(0)
 
 #  define CHECK_OVERFLOW_U(x,y) do {                                    \
         if (x > UINT32_MAX) {                                           \
             x &= 0xffffffff;                                            \
-            snmp_log(LOG_ERR,"truncating unsigned value to 32 bits (%d)\n",y); \
+            DEBUGMSG(("asn","truncating unsigned value to 32 bits (%d)\n",y)); \
         }                                                               \
     } while(0)
 #endif
