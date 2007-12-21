@@ -1088,7 +1088,14 @@ realloc_handle_auth_fmt(u_char ** buf, size_t * buf_len, size_t * out_len,
         break;
 
     case CHR_SNMP_USER:
-        if ( pdu->version == SNMP_VERSION_1 || pdu->version == SNMP_VERSION_2c ) {
+        switch ( pdu->version ) {
+#ifndef NETSNMP_DISABLE_SNMPV1
+        case SNMP_VERSION_1:
+#endif
+#ifndef NETSNMP_DISABLE_SNMPV2C
+        case SNMP_VERSION_2c:
+#endif
+#if !defined(NETSNMP_DISABLE_SNMPV1) || !defined(NETSNMP_DISABLE_SNMPV2C)
             while ((*out_len + pdu->community_len + 1) >= *buf_len) {
                 if (!(allow_realloc && snmp_realloc(buf, buf_len))) {
                     return 0;
@@ -1104,7 +1111,9 @@ realloc_handle_auth_fmt(u_char ** buf, size_t * buf_len, size_t * out_len,
                 (*out_len)++;
             }
             *(*buf + *out_len) = '\0';
-        } else {
+            break;
+#endif
+        default:
             tout_len = snprintf((char*)temp_buf, tbuf_len, "%s", pdu->securityName);
         }
         break;
