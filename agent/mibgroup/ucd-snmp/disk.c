@@ -466,7 +466,12 @@ find_and_add_allDisks(int minpercent)
 #if HAVE_GETMNTENT
 #if HAVE_SETMNTENT
   mntfp = setmntent(ETC_MNTTAB, "r");
-  while (NULL != (mntent = getmntent(mntfp))) {
+  if (!mntfp) {
+      snprintf( tmpbuf, sizeof(tmpbuf), "Can't open %s (setmntent)\n", ETC_MNTTAB );
+      config_perror(tmpbuf);
+      return;
+  }
+  while (mntfp && NULL != (mntent = getmntent(mntfp))) {
     add_device(mntent->mnt_dir, mntent->mnt_fsname, -1, minpercent, 0);
     dummy = 1;
   }
@@ -479,6 +484,11 @@ find_and_add_allDisks(int minpercent)
   }
 #else                           /* getmentent but not setmntent */
   mntfp = fopen(ETC_MNTTAB, "r");
+  if (!mntfp) {
+      snprintf( tmpbuf, sizeof(tmpbuf), "Can't open %s (fopen)\n", ETC_MNTTAB );
+      config_perror(tmpbuf);
+      return;
+  }
   while ((i = getmntent(mntfp, &mnttab)) == 0) {
     add_device(mnttab.mnt_mountp, mnttab.mnt_special, -1, minpercent, 0);
     dummy = 1;
@@ -563,7 +573,12 @@ find_device(char *path)
 #if HAVE_GETMNTENT
 #if HAVE_SETMNTENT
   mntfp = setmntent(ETC_MNTTAB, "r");
-  while (NULL != (mntent = getmntent(mntfp)))
+  if (!mntfp) {
+      snprintf( tmpbuf, sizeof(tmpbuf), "Can't open %s (setmntent)\n", ETC_MNTTAB );
+      config_perror(tmpbuf);
+      return NULL;
+  }
+  while (mntfp && NULL != (mntent = getmntent(mntfp)))
     if (strcmp(path, mntent->mnt_dir) == 0) {
       copy_nword(mntent->mnt_fsname, device,
 		 sizeof(device));
@@ -578,6 +593,11 @@ find_device(char *path)
     endmntent(mntfp);
 #else                           /* getmentent but not setmntent */
   mntfp = fopen(ETC_MNTTAB, "r");
+  if (!mntfp) {
+      snprintf( tmpbuf, sizeof(tmpbuf), "Can't open %s (fopen)\n", ETC_MNTTAB );
+      config_perror(tmpbuf);
+      return NULL;
+  }
   while ((i = getmntent(mntfp, &mnttab)) == 0)
     if (strcmp(path, mnttab.mnt_mountp) == 0)
       break;
