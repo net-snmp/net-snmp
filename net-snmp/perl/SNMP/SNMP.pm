@@ -685,7 +685,7 @@ sub gettable {
 	    if ($parse_indexes) {
 		# get indexes
 		my @indexes =
-		  @{$SNMP::MIB{$textnode}{'children'}[0]{'indexes'}};
+		  @{$SNMP::MIB{$textnode}{'children'}[0]{'indexes'} || [] };
 		# quick translate into a hash
 		map { $indexes{$_} = 1; } @indexes;
 	    }
@@ -701,7 +701,8 @@ sub gettable {
 		# some tables are only indexes, and we need to walk at
 		# least one column.  We pick the last.
 		push @{$state->{'columns'}}, $root_oid . ".1." .
-		  $children->[$#$children]{'subID'};
+		  $children->[$#$children]{'subID'}
+		  if ref($state) eq 'HASH' and ref($children) eq 'HASH';
 	    }
 	}
     } else {
