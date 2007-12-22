@@ -470,14 +470,16 @@ int flag;
            if (flag == USE_ENUMS) {
               for(ep = tp->enums; ep; ep = ep->next) {
                  if (ep->value == *var->val.integer) {
-                    strcpy(buf, ep->label);
+                    strncpy(buf, ep->label, buf_len);
+                    buf[buf_len-1] = '\0';
                     len = strlen(buf);
                     break;
                  }
               }
            }
            if (!len) {
-              sprintf(buf,"%ld", *var->val.integer);
+              snprintf(buf, buf_len, "%ld", *var->val.integer);
+              buf[buf_len-1] = '\0';
               len = strlen(buf);
            }
            break;
@@ -486,21 +488,25 @@ int flag;
         case ASN_COUNTER:
         case ASN_TIMETICKS:
         case ASN_UINTEGER:
-           sprintf(buf,"%lu", (unsigned long) *var->val.integer);
+           snprintf(buf, buf_len, "%lu", (unsigned long) *var->val.integer);
+           buf[buf_len-1] = '\0';
            len = strlen(buf);
            break;
 
         case ASN_OCTET_STR:
         case ASN_OPAQUE:
-           memcpy(buf, (char*)var->val.string, var->val_len);
            len = var->val_len;
+           if ( len > buf_len )
+               len = buf_len;
+           memcpy(buf, (char*)var->val.string, len);
            break;
 
         case ASN_IPADDRESS:
-          ip = (u_char*)var->val.string;
-          sprintf(buf, "%d.%d.%d.%d", ip[0], ip[1], ip[2], ip[3]);
-          len = strlen(buf);
-          break;
+           ip = (u_char*)var->val.string;
+           snprintf(buf, buf_len, "%d.%d.%d.%d", ip[0], ip[1], ip[2], ip[3]);
+           buf[buf_len-1] = '\0';
+           len = strlen(buf);
+           break;
 
         case ASN_NULL:
            break;
@@ -512,14 +518,14 @@ int flag;
           break;
 
 	case SNMP_ENDOFMIBVIEW:
-          sprintf(buf,"%s", "ENDOFMIBVIEW");
-	  break;
+           snprintf(buf, buf_len, "%s", "ENDOFMIBVIEW");
+	   break;
 	case SNMP_NOSUCHOBJECT:
-	  sprintf(buf,"%s", "NOSUCHOBJECT");
-	  break;
+	   snprintf(buf, buf_len, "%s", "NOSUCHOBJECT");
+	   break;
 	case SNMP_NOSUCHINSTANCE:
-	  sprintf(buf,"%s", "NOSUCHINSTANCE");
-	  break;
+	   snprintf(buf, buf_len, "%s", "NOSUCHINSTANCE");
+	   break;
 
         case ASN_COUNTER64:
 #ifdef OPAQUE_SPECIAL_TYPES
@@ -538,19 +544,19 @@ int flag;
 #endif
 
         case ASN_BIT_STR:
-            snprint_bitstring(buf, sizeof(buf), var, NULL, NULL, NULL);
+            snprint_bitstring(buf, buf_len, var, NULL, NULL, NULL);
             len = strlen(buf);
             break;
 #ifdef OPAQUE_SPECIAL_TYPES
         case ASN_OPAQUE_FLOAT:
-	  if (var->val.floatVal)
-	    sprintf(buf,"%f", *var->val.floatVal);
-         break;
+           if (var->val.floatVal)
+              snprintf(buf, buf_len, "%f", *var->val.floatVal);
+           break;
          
         case ASN_OPAQUE_DOUBLE:
-	  if (var->val.doubleVal)
-	    sprintf(buf,"%f", *var->val.doubleVal);
-         break;
+           if (var->val.doubleVal)
+              snprintf(buf, buf_len, "%f", *var->val.doubleVal);
+           break;
 #endif
          
         case ASN_NSAP:
