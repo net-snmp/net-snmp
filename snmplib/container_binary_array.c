@@ -251,35 +251,6 @@ netsnmp_binary_array_get(netsnmp_container *c, const void *key, int exact)
     return t->data[index];
 }
 
-NETSNMP_STATIC_INLINE int
-netsnmp_binary_array_replace(netsnmp_container *c, void *entry)
-{
-    binary_array_table *t = (binary_array_table*)c->container_data;
-    int             index = 0;
-
-    /*
-     * if there is no data, return NULL;
-     */
-    if (!t->count)
-        return 0;
-
-    /*
-     * if the table is dirty, sort it.
-     */
-    if (t->dirty)
-        Sort_Array(c);
-
-    /*
-     * search
-     */
-    if ((index = binary_search(entry, c, 1)) == -1)
-        return 0;
-
-    t->data[index] = entry;
-
-    return 0;
-}
-
 int
 netsnmp_binary_array_remove(netsnmp_container *c, const void *key, void **save)
 {
@@ -408,17 +379,6 @@ netsnmp_binary_array_insert(netsnmp_container *c, const void *entry)
     t->data[t->count++] = entry;
     t->dirty = 1;
     return 0;
-}
-
-NETSNMP_STATIC_INLINE void           *
-netsnmp_binary_array_retrieve(netsnmp_container *c, int *max_oids, int sort)
-{
-    binary_array_table *t = (binary_array_table*)c->container_data;
-    if (sort && t->dirty)
-        Sort_Array(c);
-
-    *max_oids = t->count;
-    return t->data;
 }
 
 /**********************************************************************
