@@ -33,12 +33,6 @@ if (!$opts{'R'} && !$opts{'M'} && !$opts{'C'} && !$opts{'D'}) {
 }
 
 my @exprs = (
-	     # c files with a equal sign and a specific variable
-	     { type => 'c',
-	       expr => 'VersionInfo(\s*=\s*[^"]*)"(.*)"',
-	       repl => 'VersionInfo$1"$VERSION"', 
-	       files => [qw(snmplib/snmp_version.c)]},
-
 	     # documentation files
 	     { type => 'docs',
 	       expr => 'Version: [\.0-9a-zA-Z]+',
@@ -47,25 +41,12 @@ my @exprs = (
 	       not_required => {'dist/net-snmp.spec' => 1}
 	     },
 
-	     # sed files
-	     { type => 'sed',
-	       expr => '^s\/VERSIONINFO\/[^\/]*',
-	       repl => 's\/VERSIONINFO\/$VERSION',
-	       files => [qw(sedscript.in)]},
-
 	     # Makefiles
 	     { type => 'Makefile',
 	       expr => 'VERSION = [\.0-9a-zA-Z]+',
 	       repl => 'VERSION = $VERSION',
 	       files => [qw(dist/Makefile)],
 	       not_required => {'dist/Makefile' => 1}
-	     },
-
-	     # Doxygen config
-	     { type => 'doxygen',
-	       expr => 'PROJECT_NUMBER(\s+)=(\s+)\'(.*)\'',
-	       repl => 'PROJECT_NUMBER$1=$2\'$VERSION\'',
-	       files => [qw(doxygen.conf)]
 	     },
 
 	     # perl files
@@ -95,12 +76,6 @@ my @exprs = (
 	       exfiles => [qw(configure)],
 	     },
 
-	     # configure script files
-	     { type => 'doxygen',
-	       expr => 'PROJECT_NUMBER\s*= (.*)',
-	       repl => 'PROJECT_NUMBER         = $VERSION',
-	       files => [qw(doxygen.conf)],
-	     },
 	    );
 
 #
