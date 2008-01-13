@@ -1098,21 +1098,9 @@ AC_C_CONST
 AC_C_INLINE
 
 
-# get version number.
-AC_MSG_CHECKING([for net-snmp version number])
-VERSION=`$GREP NetSnmpVersionInfo.*= $srcdir/snmplib/snmp_version.c | $SED 's/";.*//;s/.*"//;'`
-
-# create the release version number....  I'm not sure this is used
-# anywhere any longer.
-_release_version=`echo $VERSION | $SED 's/";.*//;s/.*"//;s/pre/0./;'`
-changequote(, )
-RELEASEVERSION=`echo $_release_version | $SED 's/^\([0-9]\)\.\([0-9]\)/\1:\2:0/'`
-changequote([, ])
-
-AC_SUBST(VERSION)
-AC_SUBST(RELEASEVERSION)
-AC_MSG_RESULT($VERSION)
-AC_MSG_CACHE_ADD(Net-SNMP Version:           $VERSION)
+# substitute version number.
+AC_SUBST(VERSION, $PACKAGE_VERSION)
+AC_MSG_CACHE_ADD(Net-SNMP Version:           $PACKAGE_VERSION)
 
 # super type checking
 # WWWXXX

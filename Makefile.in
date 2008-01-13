@@ -94,6 +94,7 @@ snmptrapd:
 #
 sedscript: sedscript.in include/net-snmp/net-snmp-config.h $(srcdir)/agent/mibgroup/mibdefs.h
 	$(CPP) $(srcdir)/sedscript.in | egrep '^s[/#]' | sed 's/REMOVEME//g;s# */#/#g;s/ *#/#/g;s#/ *#/#g;s/# g/#g/;' > sedscript
+	echo 's/VERSIONINFO/$(VERSION)/g' >> sedscript
 	echo 's#DATADIR#$(datadir)#g' >> sedscript
 	echo 's#LIBDIR#$(libdir)#g' >> sedscript
 	echo 's#BINDIR#$(bindir)#g' >> sedscript
@@ -108,7 +109,7 @@ docs: docsdir mancp
 docsdir: docsdox
 
 docsdox: doxygen.conf
-	srcdir=$(srcdir) doxygen $(srcdir)/doxygen.conf
+	srcdir=$(srcdir) VERSION=$(VERSION) doxygen $(srcdir)/doxygen.conf
 	-rm docs/man/man3/todo.3
 	-rm docs/man/man3/deprecated.3
 
