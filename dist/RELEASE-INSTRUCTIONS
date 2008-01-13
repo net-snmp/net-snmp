@@ -99,8 +99,7 @@ RELEASE:
      [Note that this step is omitted when running "makerelease"]
 
  10) Change the version number in various files
-       (README, FAQ, configure.in, sedscript.in, net-snmp.spec,
-        snmplib/version.c and assorted Perl modules).
+       (README, FAQ, configure.in, net-snmp.spec and assorted Perl modules).
      'makerelease' will update and commit these files automatically.
 
  11) Create a tag checkpoint for this release:
