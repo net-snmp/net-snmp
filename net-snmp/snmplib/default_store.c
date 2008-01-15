@@ -514,7 +514,9 @@ netsnmp_ds_shutdown()
     for (drsp = netsnmp_ds_configs; drsp; drsp = netsnmp_ds_configs) {
         netsnmp_ds_configs = drsp->next;
 
-        unregister_config_handler(drsp->ftype, drsp->token);
+        if (drsp->ftype && drsp->token) {
+            unregister_config_handler(drsp->ftype, drsp->token);
+        }
 	if (drsp->ftype != NULL) {
 	    free(drsp->ftype);
 	}
