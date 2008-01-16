@@ -343,10 +343,11 @@ add_device(char *path, char *device, int minspace, int minpercent, int override)
   else if(index == -1){
     /* add if and only if the device was found */
     if(device[0] != 0) {
-      copy_nword(path, disks[numdisks].path, 
-		 sizeof(disks[numdisks].path));
-      copy_nword(device, disks[numdisks].device, 
-		 sizeof(disks[numdisks].device));
+      strncpy(disks[numdisks].path, path, sizeof(disks[numdisks].path) - 1);
+      disks[numdisks].path[sizeof(disks[numdisks].path) - 1] = '\0';
+      strncpy(disks[numdisks].device, device,
+              sizeof(disks[numdisks].device) - 1);
+      disks[numdisks].device[sizeof(disks[numdisks].device) - 1] = '\0';
       disks[numdisks].minimumspace = minspace;
       disks[numdisks].minpercent   = minpercent;
       numdisks++;  
