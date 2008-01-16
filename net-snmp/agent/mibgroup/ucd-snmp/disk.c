@@ -574,8 +574,8 @@ find_device(char *path)
   }
   while (mntfp && NULL != (mntent = getmntent(mntfp)))
     if (strcmp(path, mntent->mnt_dir) == 0) {
-      copy_nword(mntent->mnt_fsname, device,
-		 sizeof(device));
+      strncpy(device, mntent->mnt_fsname, sizeof(device));
+      device[sizeof(device) - 1] = '\0';
       DEBUGMSGTL(("ucd-snmp/disk", "Disk:  %s\n",
 		  mntent->mnt_fsname));
       break;
@@ -601,16 +601,16 @@ find_device(char *path)
     }
   fclose(mntfp);
   if (i == 0) {
-    copy_nword(mnttab.mnt_special, device,
-	       sizeof(device));
+    strncpy(device, mnttab.mnt_special, sizeof(device));
+    device[sizeof(device) - 1] = '\0';
   }
 #endif /* HAVE_SETMNTENT */
 #elif HAVE_FSTAB_H
   stat(path, &stat1);
   setfsent();
   if ((fstab = getfsfile(path))) {
-    copy_nword(fstab->fs_spec, device,
-	       sizeof(device));
+    strncpy(device, fstab->fs_spec, sizeof(device));
+    device[sizeof(device) - 1] = '\0';
   }
   endfsent();
   if (device[0] != '\0') {
@@ -621,7 +621,8 @@ find_device(char *path)
 
 #elif HAVE_STATFS
   if (statfs(path, &statf) == 0) {
-    copy_nword(statf.f_mntfromname, device, sizeof(device));
+    strncpy(device, statf.f_mntfromname, sizeof(device) - 1);
+    device[sizeof(device) - 1] = '\0';
     DEBUGMSGTL(("ucd-snmp/disk", "Disk:  %s\n",
 		statf.f_mntfromname));
   }
