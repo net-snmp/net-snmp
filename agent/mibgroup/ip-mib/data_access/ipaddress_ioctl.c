@@ -212,6 +212,13 @@ _netsnmp_ioctl_ipaddress_container_load_v4(netsnmp_container *container,
             continue;
         }
 
+        /* restore the interface name if we modifed it due to unaliasing
+         * above
+         */
+        if (entry->flags | NETSNMP_ACCESS_IPADDRESS_ISALIAS) {
+            memcpy(ifrp->ifr_name, extras->name, sizeof(extras->name));
+        }
+
         /*
          * get netmask
          */
