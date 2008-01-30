@@ -1856,7 +1856,7 @@ new_module_list="$new_with_mib_modules default_modules"
 # minor modifications
 if test "x$enable_agent" = "xno"; then
    # minimum mib module list for snmptrapd
-   new_module_list="mibII/vacm_vars utilities/execute $new_with_mib_modules"
+   new_module_list="mibII/vacm_vars mibII/vacm_conf utilities/execute $new_with_mib_modules"
    default_mibs=SNMPv2-MIB:RFC1213-MIB
    default_mibs_install=" "
 elif test "x$mini_agent" = "xyes"; then
