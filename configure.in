@@ -417,7 +417,7 @@ AC_ARG_ENABLE(opaque-special-types,,
 	AC_MSG_ERROR([ Invalid option. Use --with-opaque-special-types/--without-opaque-special-types instead ]) )
 
 AC_ARG_WITH(mibdirs,
-[  --with-mibdirs=\"dir1:dir2:\"   Default directories to look for mibs.
+[  --with-mibdirs="dir1:dir2:"   Default directories to look for mibs.
                                   (Default: \$HOME/.snmp/mibs:DATADIR/snmp/mibs)],
     [NETSNMP_DEFAULT_MIBDIRS="$with_mibdirs"
     AC_DEFINE_UNQUOTED(NETSNMP_DEFAULT_MIBDIRS,"$with_mibdirs")])
@@ -425,9 +425,9 @@ AC_ARG_ENABLE(mibdirs,,
 	AC_MSG_ERROR([ Invalid option. Use --with-mibdirs/--without-mibdirs instead ]) )
 
 AC_ARG_WITH(mibs,
-[  --with-mibs=\"item1:item2:\"    Default mib IDs to read.
-                                  (The default list is \"IP-MIB:IF-MIB:
-                                  TCP-MIB:UDP-MIB:SNMPv2-MIB:RFC1213-MIB\"
+[  --with-mibs="item1:item2:"    Default mib IDs to read.
+                                  (The default list is "IP-MIB:IF-MIB:
+                                  TCP-MIB:UDP-MIB:SNMPv2-MIB:RFC1213-MIB"
                                   with the addition of any mibs used
                                   by the mib modules the agent is
                                   configured with)],
@@ -435,7 +435,7 @@ AC_ARG_WITH(mibs,
 # enable-mibs is valid too, but means something else
 
 AC_ARG_WITH(mibfiles,
-[  --with-mibfiles=\"file1:file2\" Default mib files to load.
+[  --with-mibfiles="file1:file2" Default mib files to load.
                                   (Default:  none.  uses IDs above instead.)],
     AC_DEFINE_UNQUOTED(NETSNMP_DEFAULT_MIBFILES,"$with_mibfiles"))
 AC_ARG_ENABLE(mibfiles,,
@@ -526,14 +526,14 @@ AC_ARG_ENABLE(dummy-values,,
 	AC_MSG_ERROR([ Invalid option. Use --with-dummy-values/--without-dummy-values instead ]) )
 
 AC_ARG_WITH(persistent-directory,
-[  --with-persistent-directory=\"directory\"
+[  --with-persistent-directory="directory"
                                   Default directory for persistent data storage.],ac_cv_user_prompt_NETSNMP_PERSISTENT_DIRECTORY="$with_persistent_directory")
 AC_ARG_ENABLE(persistent-directory,,
 	AC_MSG_ERROR([ Invalid option. Use --with-persistent-directory/--without-persistent-directory instead ]) )
 
 default_persistent_mask=077
 AC_ARG_WITH(persistent-mask,
-[  --with-persistent-mask=\"mask\"  Default mask for persistent data storage.
+[  --with-persistent-mask="mask"  Default mask for persistent data storage.
                                   (Default: 077)],[
   if test "$withval" = yes; then
     AC_MSG_ERROR([ Please provide a mask value ]);
@@ -548,8 +548,8 @@ AC_ARG_ENABLE(persistent-mask,,
 	AC_MSG_ERROR([ Invalid option. Use --with-persistent-mask instead ]) )
 
 AC_ARG_WITH(copy_persistent_files,
-[  --with-copy-persistent-files=\"no\" Don't copy persistent files
-                                     (or use \"yes\" to copy them).
+[  --with-copy-persistent-files="no" Don't copy persistent files
+                                     (or use "yes" to copy them).
                                      (Default: yes)],
     ac_cv_user_prompt_COPY_PERSISTENT_FILES="$with_copy_persistent_files")
 AC_ARG_ENABLE(copy_persistent_files,,
@@ -571,7 +571,7 @@ AC_ARG_ENABLE(agentx-socket,,
 	AC_MSG_ERROR([ Invalid option. Use --with-agentx-socket instead ]) )
 
 AC_ARG_WITH(default-snmp-version,
-[  --with-default-snmp-version=\"3\" Default version of SNMP to use.
+[  --with-default-snmp-version="3" Default version of SNMP to use.
                                     (Default: 3)
                                     Legal values: 1, 2 (for SNMPv2c) or 3.],
     ac_cv_user_prompt_NETSNMP_DEFAULT_SNMP_VERSION="$with_default_snmp_version")
@@ -590,21 +590,21 @@ if test "x$ac_cv_user_prompt_NETSNMP_DEFAULT_SNMP_VERSION" != "x"; then
 fi
 
 AC_ARG_WITH(sys_contact,
-[  --with-sys-contact=\"who@where\"  Default system contact.
+[  --with-sys-contact="who@where"  Default system contact.
                                     (Default: LOGIN@DOMAINNAME)],
     ac_cv_user_prompt_NETSNMP_SYS_CONTACT="$with_sys_contact")
 AC_ARG_ENABLE(sys_contact,,
 	AC_MSG_ERROR([ Invalid option. Use --with-sys-contact/--without-sys-contact instead ]) )
 
 AC_ARG_WITH(sys_location,
-[  --with-sys-location=\"location\"  Default system location.
+[  --with-sys-location="location"  Default system location.
                                     (Default: Unknown)],
     ac_cv_user_prompt_NETSNMP_SYS_LOC="$with_sys_location")
 AC_ARG_ENABLE(sys_location,,
 	AC_MSG_ERROR([ Invalid option. Use --with-sys-location/--without-sys-location instead ]) )
 
 AC_ARG_WITH(logfile,
-[  --with-logfile=\"location\"       Default log file location for snmpd.],
+[  --with-logfile="location"       Default log file location for snmpd.],
     ac_cv_user_prompt_NETSNMP_LOGFILE="$with_logfile")
 AC_ARG_ENABLE(logfile,,
 	AC_MSG_ERROR([ Invalid option. Use --with-logfile/--without-logfile instead ]) )
@@ -613,10 +613,10 @@ if test "$ac_cv_user_prompt_NETSNMP_LOGFILE" = "no"; then
 fi
 
 AC_ARG_WITH(transports,
-[  --with-transports=\"t1 t2 ...\"   Compile in the given SNMP transport
+[  --with-transports="t1 t2 ..."   Compile in the given SNMP transport
                                     modules (space separated list).])
 AC_ARG_WITH(out_transports,
-[  --with-out-transports=\"t1 ...\"  Exclude listed SNMP transports
+[  --with-out-transports="t1 ..."  Exclude listed SNMP transports
                                     (space separated list).
 
   Available SNMP transport modules are:
@@ -657,7 +657,7 @@ AC_ARG_WITH(out-transport,,AC_MSG_ERROR([ Invalid option. Use --with-out-transpo
 #
 
 AC_ARG_WITH(security-modules,
-[  --with-security-modules=\"s1 s2 ...\"   Compile in the given SNMP security
+[  --with-security-modules="s1 s2 ..."   Compile in the given SNMP security
                                     module services (space separated list).
 
   Available SNMP security services:
@@ -674,13 +674,13 @@ AC_ARG_ENABLE(security-modules,,
 #
 
 AC_ARG_WITH(mib_modules,
-[  --with-mib-modules=\"item1 ...\"  Compile with additional mib modules
+[  --with-mib-modules="item1 ..."  Compile with additional mib modules
                                     (Space separated list).])
 AC_ARG_ENABLE(mib_modules,,
 	AC_MSG_ERROR([ Invalid option. Use --with-mib-modules/--without-mib-modules instead ]) )
 
 AC_ARG_WITH(out_mib_modules,
-[  --with-out-mib-modules=\"list\"   Compile without these mib modules.
+[  --with-out-mib-modules="list"   Compile without these mib modules.
 
   Default mib modules compiled into the agent (which can be removed):
   
