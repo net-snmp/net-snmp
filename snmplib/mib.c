@@ -3241,19 +3241,26 @@ sprint_realloc_variable(u_char ** buf, size_t * buf_len,
 #ifndef NETSNMP_DISABLE_MIB_LOADING
     } else if (subtree) {
         const char *units = NULL;
+        const char *hint = NULL;
         if (!netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID,
                                     NETSNMP_DS_LIB_DONT_PRINT_UNITS)) {
             units = subtree->units;
         }
+
+		if (!netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID,
+                                    NETSNMP_DS_LIB_NO_DISPLAY_HINT)) {
+			hint = subtree->hint;
+        }
+
         if (subtree->printomat) {
             return (*subtree->printomat) (buf, buf_len, out_len,
                                           allow_realloc, variable,
-                                          subtree->enums, subtree->hint,
+                                          subtree->enums, hint,
                                           units);
         } else {
             return sprint_realloc_by_type(buf, buf_len, out_len,
                                           allow_realloc, variable,
-                                          subtree->enums, subtree->hint,
+                                          subtree->enums, hint,
                                           units);
         }
 #endif /* NETSNMP_DISABLE_MIB_LOADING */
