@@ -352,7 +352,7 @@ var_extensible_mem(struct variable *vp,
 #ifdef darwin
         long_ret = ptok(mem.v_lookups);
 #else
-        long_ret = ptok(mem.v_cache_count);
+        long_ret = ptok(mem.v_cache_count) + ptok(mem.v_inactive_count);
 #endif
         return ((u_char *) (&long_ret));
 #endif
