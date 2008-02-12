@@ -71,6 +71,10 @@
 # endif
 #endif
 
+#if defined(HAVE_REGEX_H) && defined(HAVE_REGCOMP)
+#include <regex.h>
+#endif
+
 #if HAVE_LIMITS_H
 #include <limits.h>
 #endif
@@ -188,6 +192,9 @@ static int _get_type_value( const char *str_type );
 static void     parse_disk_config(const char *, char *);
 static void     free_disk_config(void);
 
+static void     Add_LVM_Disks(void);
+static void     Remove_LVM_Disks(void);
+
         /*********************
 	 *
 	 *  Initialisation & common implementation functions
@@ -225,6 +232,9 @@ init_hr_disk(void)
     Add_HR_Disk_entry("/dev/sd%c%d", -1, -1, 'a', 'p', "/dev/sd%c", 1, 15);
     Add_HR_Disk_entry("/dev/md%d", -1, -1, 0, 3, "/dev/md%d", 0, 0);
     Add_HR_Disk_entry("/dev/fd%d", -1, -1, 0, 1, "/dev/fd%d", 0, 0);
+
+    Add_LVM_Disks();
+
 #elif defined(hpux)
 #if defined(hpux10) || defined(hpux11)
     Add_HR_Disk_entry("/dev/rdsk/c%dt%xd%d", 0, 1, 0, 15,
@@ -268,6 +278,14 @@ init_hr_disk(void)
 
     snmpd_register_config_handler("ignoredisk", parse_disk_config,
                                   free_disk_config, "name");
+}
+
+void
+shutdown_hr_disk()
+{
+#if defined(linux)
+    Remove_LVM_Disks();
+#endif
 }
 
 #define ITEM_STRING	1
@@ -659,7 +677,7 @@ Add_HR_Disk_entry(const char *devpart_string,
 
     while (first_ctl <= last_ctl) {
       for (lodev = first_dev;
-           lodev < last_dev && MAX_NUMBER_DISK_TYPES > HR_number_disk_types;
+           lodev <= last_dev && MAX_NUMBER_DISK_TYPES > HR_number_disk_types;
            lodev += (1+MAX_DISKS_PER_TYPE), HR_number_disk_types++)
       {
         nbr_created++;
@@ -714,7 +732,7 @@ Init_HR_Disk(void)
 int
 Get_Next_HR_Disk(void)
 {
-    char            string[1024];
+    char            string[PATH_MAX+1];
     int             fd, result;
     int             iindex;
     int             max_disks;
@@ -755,6 +773,9 @@ Get_Next_HR_Disk(void)
                         disk_devices[HRD_type_index].disk_controller,
                         disk_devices[HRD_type_index].disk_device_first +
                         HRD_index);
+	    } else if (disk_devices[HRD_type_index].disk_device_first == disk_devices[HRD_type_index].disk_device_last) {
+		/* exact device name */
+		snprintf(string, sizeof(string)-1, "%s", disk_devices[HRD_type_index].disk_devfull_string);
             } else {
                 snprintf(string, sizeof(string),
                         disk_devices[HRD_type_index].disk_devfull_string,
@@ -1011,7 +1032,7 @@ Query_Disk(int fd, const char *devfull)
 #ifdef HAVE_LINUX_HDREG_H
     if (HRD_type_index == 0)    /* IDE hard disk */
         result = ioctl(fd, HDIO_GET_IDENTITY, &HRD_info);
-    else if (HRD_type_index <= 2) {     /* SCSI hard disk and md devices */
+    else if (HRD_type_index != 3) {     /* SCSI hard disk, md and LVM devices */
         long            h;
         result = ioctl(fd, BLKGETSIZE, &h);
         if (result != -1 && HRD_type_index == 2 && h == 0L)
@@ -1019,10 +1040,13 @@ Query_Disk(int fd, const char *devfull)
         if (result != -1) {
             HRD_info.lba_capacity = h;
             if (HRD_type_index == 1)
-                snprintf( HRD_info.model, sizeof(HRD_info.model)-1,
+                snprintf( (char *) HRD_info.model, sizeof(HRD_info.model)-1,
                          "SCSI disk (%s)", devfull);
+	    else if (HRD_type_index >= 4)
+		snprintf( (char *) HRD_info.model, sizeof(HRD_info.model)-1,
+			 "LVM volume (%s)", devfull + strlen("/dev/mapper/"));
             else
-                snprintf( HRD_info.model, sizeof(HRD_info.model)-1,
+                snprintf( (char *) HRD_info.model, sizeof(HRD_info.model)-1,
                         "RAID disk (%s)", devfull);
             HRD_info.model[ sizeof(HRD_info.model)-1 ] = 0;
             HRD_info.config = 0;
@@ -1320,3 +1344,88 @@ static int _get_type_from_protocol( const char *prot )
     return HRDISKSTORAGEMEDIA_UNKNOWN;
 }
 #endif
+
+
+#if defined(linux) && defined(HAVE_REGEX_H) && defined(HAVE_REGCOMP)
+static char    *lvm_device_names[MAX_NUMBER_DISK_TYPES];
+static int      lvm_device_count;
+#endif
+
+static void
+Add_LVM_Disks(void)
+{
+#if defined(HAVE_REGEX_H) && defined(HAVE_REGCOMP)
+    /*
+     * LVM devices are harder because their name can be almost anything (see 
+     * regexp below). Each logical volume is interpreted as its own device with
+     * one partition, even if two logical volumes share common volume group. 
+     */
+    regex_t         lvol;
+    int             res;
+    DIR            *dir;
+    struct dirent  *d;
+
+    res =
+        regcomp(&lvol, "[0-9a-zA-Z+_\\.-]+-[0-9a-zA-Z+_\\.-]+",
+                REG_EXTENDED | REG_NOSUB);
+    if (res != 0) {
+        char            error[200];
+        regerror(res, &lvol, error, sizeof(error)-1);
+        DEBUGMSGTL(("host/hr_disk",
+                    "Add_LVM_Disks: cannot compile regexp: %s", error));
+        return;
+    }
+
+    dir = opendir("/dev/mapper/");
+    if (dir == NULL) {
+        DEBUGMSGTL(("host/hr_disk",
+                    "Add_LVM_Disks: cannot open /dev/mapper"));
+        regfree(&lvol);
+        return;
+    }
+
+    while ((d = readdir(dir)) != NULL) {
+        res = regexec(&lvol, d->d_name, 0, NULL, 0);
+        if (res == 0) {
+            char           *path = malloc(PATH_MAX + 1);
+            if (path == NULL) {
+                DEBUGMSGTL(("host/hr_disk",
+                            "Add_LVM_Disks: cannot allocate memory for device %s",
+                            d->d_name));
+                break;
+            }
+            snprintf(path, PATH_MAX-1, "/dev/mapper/%s", d->d_name);
+            Add_HR_Disk_entry(path, -1, -1, 0, 0, path, 0, 0);
+
+            /*
+             * store the device name so we can free it in Remove_LVM_Disks 
+             */
+            lvm_device_names[lvm_device_count] = path;
+            ++lvm_device_count;
+            if (lvm_device_count >= MAX_NUMBER_DISK_TYPES) {
+                DEBUGMSGTL(("host/hr_disk",
+                            "Add_LVM_Disks: maximum count of LVM devices reached"));
+                break;
+            }
+        }
+    }
+    closedir(dir);
+#endif
+}
+
+static void
+Remove_LVM_Disks(void)
+{
+#if defined(HAVE_REGEX_H) && defined(HAVE_REGCOMP)
+    /*
+     * just free the device names allocated in add_lvm_disks 
+     */
+    int             i;
+    for (i = 0; i < lvm_device_count; i++) {
+        free(lvm_device_names[i]);
+        lvm_device_names[i] = NULL;
+    }
+    lvm_device_count = 0;
+#endif
+}
+
