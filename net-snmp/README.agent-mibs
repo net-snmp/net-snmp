@@ -182,6 +182,9 @@ IP-MIB
  ipv6RouterAdvertSpinLock.0   ---
  ipv6ScopeZoneIndexTable      ---
 
+ ipForwarding.0               L          5.4    S ip-mib/ip_scalars.c
+ ipDefaultTTL.0               L          5.4    S ip-mib/ip_scalars.c
+
 ------------------------------------------------------------------------------
 IPV6-MIB
  ipv6MIBObjects.?.0           U         4.1     O mibII/ipv6.c
