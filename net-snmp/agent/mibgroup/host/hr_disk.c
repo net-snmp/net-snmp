@@ -694,13 +694,13 @@ Get_Next_HR_Disk(void)
              * Construct the full device name in "string" 
              */
             if (disk_devices[HRD_type_index].disk_controller != -1) {
-                snprintf(string, sizeof(string),
+                snprintf(string, sizeof(string)-1,
                         disk_devices[HRD_type_index].disk_devfull_string,
                         disk_devices[HRD_type_index].disk_controller,
                         disk_devices[HRD_type_index].disk_device_first +
                         HRD_index);
             } else {
-                snprintf(string, sizeof(string),
+                snprintf(string, sizeof(string)-1,
                         disk_devices[HRD_type_index].disk_devfull_string,
                         disk_devices[HRD_type_index].disk_device_first +
                         HRD_index);
@@ -779,14 +779,14 @@ Get_Next_HR_Disk_Partition(char *string, size_t str_len, int HRP_index)
      * Construct the partition name in "string" 
      */
     if (disk_devices[HRD_type_index].disk_controller != -1) {
-        snprintf(string, str_len,
+        snprintf(string, str_len-1,
                 disk_devices[HRD_type_index].disk_devpart_string,
                 disk_devices[HRD_type_index].disk_controller,
                 disk_devices[HRD_type_index].disk_device_first + HRD_index,
                 disk_devices[HRD_type_index].disk_partition_first +
                 HRP_index);
     } else {
-        snprintf(string, str_len,
+        snprintf(string, str_len-1,
                 disk_devices[HRD_type_index].disk_devpart_string,
                 disk_devices[HRD_type_index].disk_device_first + HRD_index,
                 disk_devices[HRD_type_index].disk_partition_first +
