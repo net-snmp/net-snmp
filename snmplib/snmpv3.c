@@ -1195,7 +1195,7 @@ version_conf(const char *word, char *cptr)
 }
 
 /*
- * engineID_old_conf(const char *, char *):
+ * oldengineID_conf(const char *, char *):
  * 
  * Reads a octet string encoded engineID into the oldEngineID and
  * oldEngineIDLen pointers.
@@ -1205,6 +1205,31 @@ oldengineID_conf(const char *word, char *cptr)
 {
     read_config_read_octet_string(cptr, &oldEngineID, &oldEngineIDLength);
 }
+
+/*
+ * exactEngineID_conf(const char *, char *):
+ * 
+ * Reads a octet string encoded engineID into the engineID and
+ * engineIDLen pointers.
+ */
+void
+exactEngineID_conf(const char *word, char *cptr)
+{
+    char buf[ 1024 ];
+
+    read_config_read_octet_string(cptr, &engineID, &engineIDLength);
+    if (engineIDLength > MAX_ENGINEID_LENGTH) {
+        snprintf(buf, sizeof(buf),
+                 "exactEngineID '%s' too long; truncating to %d bytes",
+                 cptr, MAX_ENGINEID_LENGTH);
+        config_perror(buf);
+        engineID[MAX_ENGINEID_LENGTH - 1] = '\0';
+        engineIDLength = MAX_ENGINEID_LENGTH;
+    }
+    engineIDIsSet = 1;
+    engineIDType = ENGINEID_TYPE_EXACT;
+}
+
 
 /*
  * merely call 
@@ -1289,6 +1314,8 @@ init_snmpv3(const char *type)
     register_prenetsnmp_mib_handler(type, "engineID", engineID_conf, NULL,
                                     "string");
     register_prenetsnmp_mib_handler(type, "oldEngineID", oldengineID_conf,
+                                    NULL, NULL);
+    register_prenetsnmp_mib_handler(type, "exactEngineID", exactEngineID_conf,
                                     NULL, NULL);
     register_prenetsnmp_mib_handler(type, "engineIDType",
                                     engineIDType_conf, NULL, "num");
