@@ -775,16 +775,16 @@ var_diskio(struct variable * vp,
       *var_len = strlen(head.indices[indx].name);
       return (u_char *) head.indices[indx].name;
     case DISKIO_NREAD:
-      long_ret = head.indices[indx].rsect*512;
+      long_ret = (head.indices[indx].rsect*512) & 0xffffffff;
       return (u_char *) & long_ret;
     case DISKIO_NWRITTEN:
-      long_ret = head.indices[indx].wsect*512;
+      long_ret = (head.indices[indx].wsect*512) & 0xffffffff;
       return (u_char *) & long_ret;
     case DISKIO_READS:
-      long_ret = head.indices[indx].rio;
+      long_ret = head.indices[indx].rio & 0xffffffff;
       return (u_char *) & long_ret;
     case DISKIO_WRITES:
-      long_ret = head.indices[indx].wio;
+      long_ret = head.indices[indx].wio & 0xffffffff;
       return (u_char *) & long_ret;
 
     default:
