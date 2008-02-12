@@ -12,6 +12,18 @@
 #include "ip_scalars.h"
 
 int
+handle_ipForwarding(netsnmp_mib_handler *handler,
+                    netsnmp_handler_registration *reginfo,
+                    netsnmp_agent_request_info *reqinfo,
+                    netsnmp_request_info *requests);
+
+int
+handle_ipDefaultTTL(netsnmp_mib_handler *handler,
+                          netsnmp_handler_registration *reginfo,
+                          netsnmp_agent_request_info *reqinfo,
+                          netsnmp_request_info *requests);
+
+int
 handle_ipv6IpForwarding(netsnmp_mib_handler *handler,
                         netsnmp_handler_registration *reginfo,
                         netsnmp_agent_request_info *reqinfo,
@@ -21,6 +33,8 @@ handle_ipv6IpForwarding(netsnmp_mib_handler *handler,
 void
 init_ip_scalars(void)
 {
+    static oid 	    ipForwarding_oid[] = { 1, 3, 6, 1, 2, 1, 4, 1 };
+    static oid 	    ipDefaultTTL_oid[] = { 1, 3, 6, 1, 2, 1, 4, 2, 0 };
     static oid      ipReasmTimeout_oid[] = { 1, 3, 6, 1, 2, 1, 4, 13, 0 };
     static oid      ipv6IpForwarding_oid[] = { 1, 3, 6, 1, 2, 1, 4, 25 };
     static oid      ipv6IpDefaultHopLimit_oid[] =
@@ -35,6 +49,12 @@ init_ip_scalars(void)
          HANDLER_CAN_RONLY, NULL, NULL);
                                        
     netsnmp_register_scalar(netsnmp_create_handler_registration
+                             ("ipForwarding", handle_ipForwarding,
+                              ipForwarding_oid,
+                              OID_LENGTH(ipForwarding_oid),
+                              HANDLER_CAN_RWRITE));
+
+    netsnmp_register_scalar(netsnmp_create_handler_registration
                             ("ipv6IpForwarding", handle_ipv6IpForwarding,
                              ipv6IpForwarding_oid,
                              OID_LENGTH(ipv6IpForwarding_oid),
@@ -45,8 +65,114 @@ init_ip_scalars(void)
          ipv6IpDefaultHopLimit_oid, OID_LENGTH(ipv6IpDefaultHopLimit_oid),
          "/proc/sys/net/ipv6/conf/default/hop_limit", ASN_INTEGER,
          HANDLER_CAN_RWRITE, NULL, NULL);
+
+     netsnmp_register_num_file_instance
+        ("ipDefaultTTL",
+         ipDefaultTTL_oid, OID_LENGTH(ipDefaultTTL_oid),
+         "/proc/sys/net/ipv4/ip_default_ttl", ASN_INTEGER,
+         HANDLER_CAN_RWRITE, NULL, NULL);
                                        
 }
+
+int
+handle_ipForwarding(netsnmp_mib_handler *handler,
+                          netsnmp_handler_registration *reginfo,
+                          netsnmp_agent_request_info   *reqinfo,
+                          netsnmp_request_info         *requests)
+{
+    int      rc;
+    u_long   value;
+
+    int ret;
+    /* We are never called for a GETNEXT if it's registered as a
+       "instance", as it's "magically" handled for us.  */
+
+    /* a instance handler also only hands us one request at a time, so
+       we don't need to loop over a list of requests; we'll only get one. */
+
+    switch(reqinfo->mode) {
+
+        case MODE_GET:
+            rc = netsnmp_arch_ip_scalars_ipForwarding_get(&value);
+            if (rc != 0) {
+                netsnmp_set_request_error(reqinfo, requests,
+                                      SNMP_NOSUCHINSTANCE);
+            }
+            else {
+                value = value ? 1 : 2;
+                snmp_set_var_typed_value(requests->requestvb, ASN_INTEGER,
+                                     (u_char *)&value, sizeof(value));
+            }
+            break;
+
+        /*
+         * SET REQUEST
+         *
+         * multiple states in the transaction.  See:
+         * http://www.net-snmp.org/tutorial-5/toolkit/mib_module/set-actions.jpg
+         */
+        case MODE_SET_RESERVE1:
+            break;
+
+        case MODE_SET_RESERVE2:
+            /*
+             * store old info for undo later
+             */
+            rc = netsnmp_arch_ip_scalars_ipForwarding_get(&value);
+            if (rc < 0) {
+                netsnmp_set_request_error(reqinfo, requests,
+                                          SNMP_ERR_NOCREATION);
+            } else {
+                u_long *value_save;
+                memdup((u_char **) & value_save, (u_char *) &value,
+                       sizeof(value));
+                if ( NULL == value_save )
+                    netsnmp_set_request_error(reqinfo, requests, SNMP_ERR_RESOURCEUNAVAILABLE);
+                else
+                    netsnmp_request_add_list_data(requests,
+                                                  netsnmp_create_data_list
+                                                  ("ipfw", value_save,
+                                                  free));
+	    }
+            break;
+
+        case MODE_SET_FREE:
+            /* XXX: free resources allocated in RESERVE1 and/or
+               RESERVE2.  Something failed somewhere, and the states
+               below won't be called. */
+            break;
+
+        case MODE_SET_ACTION:
+            /* XXX: perform the value change here */
+            value =  *(requests->requestvb->val.integer);
+            rc = netsnmp_arch_ip_scalars_ipForwarding_set(value);
+            if ( 0 != rc ) {
+                netsnmp_set_request_error(reqinfo, requests, rc);
+            }
+            break;
+
+        case MODE_SET_COMMIT:
+            break;
+
+        case MODE_SET_UNDO:
+             value =
+                 *((u_long *) netsnmp_request_get_list_data(requests,
+                                                            "ipfw"));
+             rc = netsnmp_arch_ip_scalars_ipForwarding_set(value);
+             if ( 0 != rc ) {
+                 netsnmp_set_request_error(reqinfo, requests, SNMP_ERR_UNDOFAILED);
+             }
+             break;
+
+        default:
+            /* we should never get here, so this is a really bad error */
+            snmp_log(LOG_ERR, "unknown mode (%d) in handle_ipForwarding\n", reqinfo->mode );
+            return SNMP_ERR_GENERR;
+    }
+
+    return SNMP_ERR_NOERROR;
+}
+
 
 int
 handle_ipv6IpForwarding(netsnmp_mib_handler *handler,
