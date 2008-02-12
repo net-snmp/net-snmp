@@ -466,7 +466,16 @@ _access_interface_entry_save_name(const char *name, oid index)
                     index, name));
     }
     else
-        netsnmp_assert(index == tmp);
+        if (index != tmp) {
+            static int logged = 0;
+            if (!logged) {
+                snmp_log(LOG_ERR, "IfIndex of an interface changed. Such " \
+                         "interfaces will appear multiple times in IF-MIB.\n");
+                logged = 1;
+            }
+            DEBUGMSGTL(("access:interface:ifIndex", "index %d != tmp for %s\n",
+                         index, name));
+        }
 }
 
 /**
