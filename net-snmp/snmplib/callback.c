@@ -38,6 +38,13 @@
 #include <dmalloc.h>
 #endif
 
+#if HAVE_SYS_SOCKET_H
+#include <sys/socket.h>
+#endif
+#if HAVE_SYS_TIME_H
+#include <sys/time.h>
+#endif
+
 #include <net-snmp/types.h>
 #include <net-snmp/output_api.h>
 #include <net-snmp/utilities.h>
@@ -94,9 +101,9 @@ static const char *lib[MAX_CALLBACK_SUBIDS] = {
 #define LOCK_PER_CALLBACK_SUBID 1
 #ifdef LOCK_PER_CALLBACK_SUBID
 static int _locks[MAX_CALLBACK_IDS][MAX_CALLBACK_SUBIDS];
-#define CALLBACK_LOCK(maj,min) ++_locks[major][minor]
-#define CALLBACK_UNLOCK(maj,min) --_locks[major][minor]
-#define CALLBACK_LOCK_COUNT(maj,min) _locks[major][minor]
+#define CALLBACK_LOCK(maj,min) ++_locks[maj][min]
+#define CALLBACK_UNLOCK(maj,min) --_locks[maj][min]
+#define CALLBACK_LOCK_COUNT(maj,min) _locks[maj][min]
 #else
 static int _lock;
 #define CALLBACK_LOCK(maj,min) ++_lock
@@ -107,6 +114,9 @@ static int _lock;
 NETSNMP_STATIC_INLINE int
 _callback_lock(int major, int minor, const char* warn, int assert)
 {
+    int lock_holded=0;
+    struct timeval lock_time = { 0, 1000 };
+
 #ifdef NETSNMP_PARANOID_LEVEL_HIGH
     if (major >= MAX_CALLBACK_IDS || minor >= MAX_CALLBACK_SUBIDS) {
         netsnmp_assert("bad callback id");
@@ -119,19 +129,21 @@ _callback_lock(int major, int minor, const char* warn, int assert)
                 types[major], (SNMP_CALLBACK_LIBRARY == major) ?
                 SNMP_STRORNULL(lib[minor]) : "null"));
 #endif
-    if (CALLBACK_LOCK(major,minor) > 1)
-        {
+    while (CALLBACK_LOCK_COUNT(major,minor) >= 1 && ++lock_holded < 100)
+	select(0, NULL, NULL, NULL, &lock_time);
+
+    if(lock_holded >= 100) {
         if (NULL != warn)
             snmp_log(LOG_WARNING,
-                     "_callback_lock already locket in %s\n", warn);
+                     "lock in _callback_lock sleeps more than 100 milliseconds in %s\n", warn);
         if (assert)
-            netsnmp_assert(1==CALLBACK_LOCK_COUNT(major,minor));
+            netsnmp_assert(lock_holded < 100);
         
         return 1;
     }
-    else
-        return 0;
-    
+
+    CALLBACK_LOCK(major,minor);
+    return 0;
 }
 
 NETSNMP_STATIC_INLINE void
