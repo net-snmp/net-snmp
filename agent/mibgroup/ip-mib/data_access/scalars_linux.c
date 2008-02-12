@@ -8,7 +8,76 @@
 
 #include <net-snmp/data_access/ip_scalars.h>
 
-const char *ipfw_name = "/proc/sys/net/ipv6/conf/all/forwarding";
+const char *ipfw_name = "/proc/sys/net/ipv4/conf/all/forwarding";
+const char *ipfw6_name = "/proc/sys/net/ipv6/conf/all/forwarding";
+
+int
+netsnmp_arch_ip_scalars_ipForwarding_get(u_long *value)
+{
+    FILE *filep;
+    int rc;
+
+    if (NULL == value)
+        return -1;
+
+
+    filep = fopen(ipfw_name, "r");
+    if (NULL == filep) {
+        DEBUGMSGTL(("access:ipForwarding", "could not open %s\n",
+                    ipfw_name));
+        return -2;
+    }
+
+    rc = fscanf(filep, "%ld", value);
+    fclose(filep);
+    if (1 != rc) {
+        DEBUGMSGTL(("access:ipForwarding", "could not read %s\n",
+                    ipfw_name));
+        return -3;
+    }
+
+    if ((0 != *value) && (1 != *value)) {
+        DEBUGMSGTL(("access:ipForwarding", "unexpected value %ld in %s\n",
+                    *value, ipfw_name));
+        return -4;
+    }
+
+    return 0;
+}
+
+int
+netsnmp_arch_ip_scalars_ipForwarding_set(u_long value)
+{
+    FILE *filep;
+    int rc;
+
+    if (1 == value)
+        ;
+    else if (2 == value)
+        value = 0;
+    else {
+        DEBUGMSGTL(("access:ipForwarding", "bad value %ld for %s\n",
+                    value));
+        return SNMP_ERR_WRONGVALUE;
+    }
+
+    filep = fopen(ipfw_name, "w");
+    if (NULL == filep) {
+        DEBUGMSGTL(("access:ipForwarding", "could not open %s\n",
+                    ipfw_name));
+        return SNMP_ERR_RESOURCEUNAVAILABLE;
+    }
+
+    rc = fprintf(filep, "%ld", value);
+    fclose(filep);
+    if (1 != rc) {
+        DEBUGMSGTL(("access:ipForwarding", "could not write %s\n",
+                    ipfw_name));
+        return SNMP_ERR_GENERR;
+    }
+
+    return 0;
+}
 
 int
 netsnmp_arch_ip_scalars_ipv6IpForwarding_get(u_long *value)
@@ -20,10 +89,10 @@ netsnmp_arch_ip_scalars_ipv6IpForwarding_get(u_long *value)
         return -1;
 
 
-    filep = fopen(ipfw_name, "r");
+    filep = fopen(ipfw6_name, "r");
     if (NULL == filep) {
         DEBUGMSGTL(("access:ipv6IpForwarding", "could not open %s\n",
-                    ipfw_name));
+                    ipfw6_name));
         return -2;
     }
 
@@ -31,13 +100,13 @@ netsnmp_arch_ip_scalars_ipv6IpForwarding_get(u_long *value)
     fclose(filep);
     if (1 != rc) {
         DEBUGMSGTL(("access:ipv6IpForwarding", "could not read %s\n",
-                    ipfw_name));
+                    ipfw6_name));
         return -3;
     }
 
     if ((0 != *value) && (1 != *value)) {
         DEBUGMSGTL(("access:ipv6IpForwarding", "unexpected value %ld in %s\n",
-                    *value, ipfw_name));
+                    *value, ipfw6_name));
         return -4;
     }
 
@@ -60,10 +129,10 @@ netsnmp_arch_ip_scalars_ipv6IpForwarding_set(u_long value)
         return SNMP_ERR_WRONGVALUE;
     }
 
-    filep = fopen(ipfw_name, "w");
+    filep = fopen(ipfw6_name, "w");
     if (NULL == filep) {
         DEBUGMSGTL(("access:ipv6IpForwarding", "could not open %s\n",
-                    ipfw_name));
+                    ipfw6_name));
         return SNMP_ERR_RESOURCEUNAVAILABLE;
     }
 
@@ -71,7 +140,7 @@ netsnmp_arch_ip_scalars_ipv6IpForwarding_set(u_long value)
     fclose(filep);
     if (1 != rc) {
         DEBUGMSGTL(("access:ipv6IpForwarding", "could not write %s\n",
-                    ipfw_name));
+                    ipfw6_name));
         return SNMP_ERR_GENERR;
     }
 
