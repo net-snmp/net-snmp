@@ -798,6 +798,13 @@ netsnmp_send_traps(int trap, int specific,
       *pdu_in_addr_t = get_myaddr();
     }
 
+	/* A context name was provided, so copy it and its length to the v2 pdu
+	 * template. */
+	if (context != NULL)
+	{
+		template_v2pdu->contextName    = strdup(context);
+		template_v2pdu->contextNameLen = strlen(context);
+	}
 
     /*
      *  Now loop through the list of trap sinks
@@ -954,6 +961,21 @@ send_trap_vars(int trap, int specific, netsnmp_variable_list * vars)
                                   OID_LENGTH(trap_version_id), vars);
 }
 
+/* Send a trap under a context */
+void send_trap_vars_with_context(int trap, int specific, 
+              netsnmp_variable_list *vars, char *context)
+{
+    if (trap == SNMP_TRAP_ENTERPRISESPECIFIC)
+        netsnmp_send_traps(trap, specific, objid_enterprisetrap,
+                                  OID_LENGTH(objid_enterprisetrap), vars,
+								  context, 0);
+    else
+        netsnmp_send_traps(trap, specific, trap_version_id,
+                                  OID_LENGTH(trap_version_id), vars, 
+								  context, 0);
+    	
+}
+
 /**
  * Sends an SNMPv1 trap (or the SNMPv2 equivalent) to the list of  
  * configured trap destinations (or "sinks"), using the provided 
@@ -1010,6 +1032,25 @@ void
 send_v2trap(netsnmp_variable_list * vars)
 {
     send_trap_vars(-1, -1, vars);
+}
+
+/**
+ * Similar to send_v2trap(), with the added ability to specify a context.  If
+ * the last parameter is NULL, then this call is equivalent to send_v2trap().
+ *
+ * @param vars is used to supply the list of variable bindings for the trap.
+ * 
+ * @param context is used to specify the context of the trap.
+ *
+ * @return void
+ *
+ * @see send_v2trap
+ */
+void send_v3trap(netsnmp_variable_list *vars, char *context)
+{
+    netsnmp_send_traps(-1, -1, 
+					trap_version_id, OID_LENGTH(trap_version_id),
+                    vars, context, 0);
 }
 
 void
