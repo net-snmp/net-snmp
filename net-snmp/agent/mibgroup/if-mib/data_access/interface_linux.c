@@ -651,6 +651,11 @@ netsnmp_arch_interface_container_load(netsnmp_container* container,
 
             entry->ns_flags |= NETSNMP_INTERFACE_FLAGS_HAS_V6_IFID;
             break;
+
+        case IANAIFTYPE_SOFTWARELOOPBACK:
+            entry->v6_if_id_len = 0;
+            entry->ns_flags |= NETSNMP_INTERFACE_FLAGS_HAS_V6_IFID;
+            break;
         }
 
         if (IANAIFTYPE_ETHERNETCSMACD == entry->type)
