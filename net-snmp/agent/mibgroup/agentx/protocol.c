@@ -698,6 +698,17 @@ _agentx_realloc_build(u_char ** buf, size_t * buf_len, size_t * out_len,
         pdu->flags &= ~(AGENTX_MSG_FLAG_NON_DEFAULT_CONTEXT);
     }
 
+	/* We've received a PDU that has specified a context.  NetSNMP however, uses
+	 * the pdu->community field to specify context when using the AgentX
+	 * protocol.  Therefore we need to copy the context name and length into the
+	 * pdu->community and pdu->community_len fields, respectively. */
+	if (pdu->contextName != NULL && pdu->community == NULL)
+	{	
+		pdu->community     = strdup(pdu->contextName);
+		pdu->community_len = pdu->contextNameLen;
+		pdu->flags |= AGENTX_MSG_FLAG_NON_DEFAULT_CONTEXT;
+	}
+
     /*
      * Build the header (and context if appropriate).  
      */
@@ -1599,6 +1610,17 @@ agentx_parse(netsnmp_session * session, netsnmp_pdu *pdu, u_char * data,
         pdu->community_len = buf_len;
         snmp_clone_mem((void **) &pdu->community,
                        (void *) buffer, (unsigned) buf_len);
+		
+		/* The NetSNMP API stuffs the context into the PDU's community string
+		 * field, when using the AgentX Protocol.  The rest of the code however,
+		 * expects to find the context in the PDU's context field.  Therefore we
+		 * need to copy the context into the PDU's context fields.  */
+		if (pdu->community_len > 0 && pdu->contextName == NULL)
+		{
+			pdu->contextName    = strdup(pdu->community);
+			pdu->contextNameLen = pdu->community_len;
+		}
+
         buf_len = BUFSIZ;
     }
 
