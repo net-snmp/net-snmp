@@ -115,6 +115,7 @@ var_ipRouteEntry(struct variable *vp,
     u_char         *cp;
     u_char         *ap;
     oid            *op;
+    static in_addr_t add_ret;
 
     *write_method = NULL;  /* write_rte;  XXX:  SET support not really implemented */
 
@@ -227,7 +228,7 @@ var_ipRouteEntry(struct variable *vp,
 
     switch (vp->magic) {
     case IPROUTEDEST:
-	*var_len = sizeof(uint32_t);
+    	*var_len = sizeof(addr_ret);
         return (u_char *) get_in_address((struct sockaddr *) (rtp + 1),
                                          rtp->rtm_addrs, RTA_DST);
     case IPROUTEIFINDEX:
@@ -261,8 +262,8 @@ var_ipRouteEntry(struct variable *vp,
         long_return = -1;
         return (u_char *) & long_return;
     case IPROUTENEXTHOP:
-	*var_len = sizeof(uint32_t);
-        return (u_char *) get_in_address((struct sockaddr *) (rtp + 1),
+    	*var_len = sizeof(addr_ret);
+    	return (u_char *) get_in_address((struct sockaddr *) (rtp + 1),
                                          rtp->rtm_addrs, RTA_GATEWAY);
     case IPROUTETYPE:
         if (rtp->rtm_flags & RTF_UP) {
@@ -287,9 +288,10 @@ var_ipRouteEntry(struct variable *vp,
         long_return = 0;
         return (u_char *) & long_return;
     case IPROUTEMASK:
+    	*var_len = sizeof(addr_ret);   	     
         if (rtp->rtm_flags & RTF_HOST) {
-            long_return = 0x00000001;
-            return (u_char *) & long_return;
+            addr_ret = 0x00000001;
+            return (u_char *) & addr_ret;
         } else {
             return (u_char *) get_in_address((struct sockaddr *) (rtp + 1),
                                              rtp->rtm_addrs, RTA_NETMASK);
@@ -434,6 +436,7 @@ var_ipRouteEntry(struct variable * vp,
     static oid      saveName[MAX_OID_LEN], Current[MAX_OID_LEN];
     u_char         *cp;
     oid            *op;
+    static in_addr_t addr_ret;
 #if NEED_KLGETSA
     struct sockaddr_in *sa;
 #endif
@@ -538,13 +541,13 @@ var_ipRouteEntry(struct variable * vp,
 
     switch (vp->magic) {
     case IPROUTEDEST:
-	*var_len = sizeof(uint32_t);
+        *var_len = sizeof(addr_ret);
 #if NEED_KLGETSA
         sa = klgetsa((struct sockaddr_in *) rthead[RtIndex]->rt_dst);
         return (u_char *) & (sa->sin_addr.s_addr);
 #elif defined(hpux11)
-        long_return = rt[RtIndex].Dest;
-        return (u_char *) & long_return;
+        addr_ret = rt[RtIndex].Dest;
+        return (u_char *) & addr_ret;
 #else
         return (u_char *) & ((struct sockaddr_in *) &rthead[RtIndex]->
                              rt_dst)->sin_addr.s_addr;
@@ -597,13 +600,13 @@ var_ipRouteEntry(struct variable * vp,
         long_return = -1;
         return (u_char *) & long_return;
     case IPROUTENEXTHOP:
-	*var_len = sizeof(uint32_t);
+        *var_len = sizeof(addr_ret);
 #if NEED_KLGETSA
         sa = klgetsa((struct sockaddr_in *) rthead[RtIndex]->rt_gateway);
         return (u_char *) & (sa->sin_addr.s_addr);
 #elif defined(hpux11)
-        long_return = rt[RtIndex].NextHop;
-        return (u_char *) & long_return;
+        addr_ret = rt[RtIndex].NextHop;
+        return (u_char *) & addr_ret;
 #else
         return (u_char *) & ((struct sockaddr_in *) &rthead[RtIndex]->
                              rt_gateway)->sin_addr.s_addr;
@@ -640,7 +643,7 @@ var_ipRouteEntry(struct variable * vp,
         long_return = 0;
         return (u_char *) & long_return;
     case IPROUTEMASK:
-        *var_len = 4;
+        *var_len = sizeof(addr_ret);
 #if NEED_KLGETSA
         /*
          * XXX - Almost certainly not right
@@ -649,14 +652,14 @@ var_ipRouteEntry(struct variable * vp,
 #if NETSNMP_NO_DUMMY_VALUES
         return NULL;
 #endif
-        long_return = 0;
+        addr_ret = 0;
 #elif defined(hpux11)
-        long_return = rt[RtIndex].Mask;
-        return (u_char *) & long_return;
+        addr_ret = rt[RtIndex].Mask;
+        return (u_char *) & addr_ret;
 #else                           /* !NEED_KLGETSA && !hpux11 */
         if (((struct sockaddr_in *) &rthead[RtIndex]->rt_dst)->sin_addr.
             s_addr == 0)
-            long_return = 0;    /* Default route */
+            addr_ret = 0;    /* Default route */
         else {
 #ifndef linux
             if (!NETSNMP_KLOOKUP(rthead[RtIndex]->rt_ifp,
@@ -670,7 +673,7 @@ var_ipRouteEntry(struct variable * vp,
                 return NULL;
             }
 
-            long_return = rt_ifnetaddr.ia_subnetmask;
+            addr_ret = rt_ifnetaddr.ia_subnetmask;
 #else                           /* linux */
             cp = (u_char *) &
                 (((struct sockaddr_in *) &(rthead[RtIndex]->rt_dst))->
@@ -681,7 +684,7 @@ var_ipRouteEntry(struct variable * vp,
 #endif                          /* linux */
         }
 #endif                          /* NEED_KLGETSA */
-        return (u_char *) & long_return;
+        return (u_char *) & addr_ret;
     case IPROUTEINFO:
         *var_len = nullOidLen;
         return (u_char *) nullOid;
@@ -738,7 +741,7 @@ var_ipRouteEntry(struct variable * vp,
     mib2_ipRouteEntry_t Lowentry, Nextentry, entry;
     int             Found = 0;
     req_e           req_type;
-    static uint32_t ipaddr_return;
+    static in_addr_t adr_ret;
 
     *write_method = NULL;  /* write_rte;  XXX:  SET support not really implemented */
 
@@ -807,9 +810,9 @@ var_ipRouteEntry(struct variable * vp,
 
     switch (vp->magic) {
     case IPROUTEDEST:
-	*var_len = sizeof(uint32_t);
-        ipaddr_return = Lowentry.ipRouteDest;
-        return (u_char *) & ipaddr_return;
+        *var_len = sizeof(addr_ret);
+        addr_ret = Lowentry.ipRouteDest;
+        return (u_char *) & addr_ret;
     case IPROUTEIFINDEX:
 #ifdef NETSNMP_INCLUDE_IFTABLE_REWRITES
         Lowentry.ipRouteIfIndex.o_bytes[Lowentry.ipRouteIfIndex.o_length] = '\0';
@@ -835,9 +838,9 @@ var_ipRouteEntry(struct variable * vp,
         long_return = Lowentry.ipRouteMetric4;
         return (u_char *) & long_return;
     case IPROUTENEXTHOP:
-	*var_len = sizeof(uint32_t);
-        ipaddr_return = Lowentry.ipRouteNextHop;
-        return (u_char *) & ipaddr_return;
+        *var_len = sizeof(addr_ret);
+        addr_ret = Lowentry.ipRouteNextHop;
+        return (u_char *) & addr_ret;
     case IPROUTETYPE:
         long_return = Lowentry.ipRouteType;
         return (u_char *) & long_return;
@@ -850,9 +853,9 @@ var_ipRouteEntry(struct variable * vp,
         long_return = Lowentry.ipRouteAge;
         return (u_char *) & long_return;
     case IPROUTEMASK:
-	*var_len = sizeof(uint32_t);
-        ipaddr_return = Lowentry.ipRouteMask;
-        return (u_char *) & ipaddr_return;
+        *var_len = sizeof(addr_ret);
+        addr_ret = Lowentry.ipRouteMask;
+        return (u_char *) & addr_ret;
     default:
         DEBUGMSGTL(("snmpd", "unknown sub-id %d in var_ipRouteEntry\n",
                     vp->magic));
@@ -1481,6 +1484,7 @@ var_ipRouteEntry(struct variable *vp,
     static long     Time_Of_Last_Reload = 0;
     u_char          dest_addr[4];
     MIB_IPFORWARDROW temp_row;
+    static in_addr_t addr_ret;
 
 
     /** 
@@ -1612,10 +1616,10 @@ var_ipRouteEntry(struct variable *vp,
 
     switch (vp->magic) {
     case IPROUTEDEST:
-	*var_len = sizeof(uint32_t);
+        *var_len = sizeof(addr_ret);
         *write_method = write_rte;
-        long_return = pIpRtrTable->table[RtIndex].dwForwardDest;
-        return (u_char *) & long_return;
+        addr_ret = pIpRtrTable->table[RtIndex].dwForwardDest;
+        return (u_char *) & addr_ret;
     case IPROUTEIFINDEX:
         *write_method = write_rte;
         long_return = pIpRtrTable->table[RtIndex].dwForwardIfIndex;
@@ -1641,10 +1645,10 @@ var_ipRouteEntry(struct variable *vp,
         long_return = pIpRtrTable->table[RtIndex].dwForwardMetric5;
         return (u_char *) & long_return;
     case IPROUTENEXTHOP:
-	*var_len = sizeof(uint32_t);
+        *var_len = sizeof(addr_ret);
         *write_method = write_rte;
-        long_return = pIpRtrTable->table[RtIndex].dwForwardNextHop;
-        return (u_char *) & long_return;
+        addr_ret = pIpRtrTable->table[RtIndex].dwForwardNextHop;
+        return (u_char *) & addr_ret;
     case IPROUTETYPE:
         *write_method = write_rte;
         long_return = pIpRtrTable->table[RtIndex].dwForwardType;
@@ -1658,8 +1662,9 @@ var_ipRouteEntry(struct variable *vp,
         return (u_char *) & long_return;
     case IPROUTEMASK:
         *write_method = write_rte;
-        long_return = pIpRtrTable->table[RtIndex].dwForwardMask;
-        return (u_char *) & long_return;
+        *var_len = sizeof(addr_ret);
+        addr_ret = pIpRtrTable->table[RtIndex].dwForwardMask;
+        return (u_char *) & addr_ret;
     case IPROUTEINFO:
         *var_len = nullOidLen;
         return (u_char *) nullOid;
@@ -1833,7 +1838,8 @@ var_ipRouteEntry(struct variable * vp,
     static struct snmprt *savert;
     static int      saveNameLen, saveExact;
     static oid      saveName[14], Current[14];
-
+    static in_addr_t addr_ret;
+    
     *write_method = NULL;  /* write_rte;  XXX:  SET support not really implemented */
 
 #if 0
@@ -1909,9 +1915,9 @@ var_ipRouteEntry(struct variable * vp,
 
     switch (vp->magic) {
     case IPROUTEDEST:
-	*var_len = sizeof(uint32_t);
-        long_return = rt->dest.s_addr;
-        return (u_char *) & long_return;
+        addr_ret = rt->dest.s_addr;
+        *var_len = sizeof(addr_ret);
+        return (u_char *) & addr_ret;
 
     case IPROUTEIFINDEX:
         long_return = rt->index;
@@ -1934,14 +1940,14 @@ var_ipRouteEntry(struct variable * vp,
         return (u_char *) & long_return;
 
     case IPROUTENEXTHOP:
-	*var_len = sizeof(uint32_t);
+        *var_len = sizeof(addr_ret);
         if (rt->gateway.s_addr == 0 && rt->ifa.s_addr == 0)
-            long_return = 0;
+            addr_ret = 0;
         else if (rt->gateway.s_addr == 0)
-            long_return = rt->ifa.s_addr;
+            addr_ret = rt->ifa.s_addr;
         else
-            long_return = rt->gateway.s_addr;
-        return (u_char *) & long_return;
+            addr_ret = rt->gateway.s_addr;
+        return (u_char *) & addr_ret;
 
     case IPROUTETYPE:
         if (rt->hdr->rtm_flags & RTF_UP) {
@@ -1967,8 +1973,9 @@ var_ipRouteEntry(struct variable * vp,
         return (u_char *) & long_return;
 
     case IPROUTEMASK:
-        long_return = rt->netmask.s_addr;
-        return (u_char *) & long_return;
+        addr_ret = rt->netmask.s_addr;
+        *var_len = sizeof(addr_ret);
+        return (u_char *) & addr_ret;
 
     case IPROUTEINFO:
         *var_len = nullOidLen;
