@@ -364,27 +364,38 @@ extern "C" {
      * container.c. If you change one, change them both.
      */
     NETSNMP_STATIC_INLINE /* gcc docs recommend static w/inline */
-    int CONTAINER_INSERT(netsnmp_container *x, const void *k)
+    int CONTAINER_INSERT_HELPER(netsnmp_container* x, const void* k)
     {
-        int rc2, rc = 0;
-        
+        while(x && x->insert_filter && x->insert_filter(x,k) == 1)
+            x = x->next;
+        if(x) {
+            int rc = x->insert(x,k);
+            if(rc)
+                snmp_log(LOG_ERR,"error on subcontainer '%s' insert (%d)\n",
+                         x->container_name ? x->container_name : "", rc);
+            else {
+                rc = CONTAINER_INSERT_HELPER(x->next, k);
+                if(rc)
+                    x->remove(x,k);
+            }
+            return rc;
+        }
+        return 0;
+    }
+
+    /*------------------------------------------------------------------
+     * These functions should EXACTLY match the function version in
+     * container.c. If you change one, change them both.
+     */
+    NETSNMP_STATIC_INLINE /* gcc docs recommend static w/inline */
+    int CONTAINER_INSERT(netsnmp_container* x, const void* k)
+    {
         /** start at first container */
         while(x->prev)
             x = x->prev;
-        for(; x; x = x->next) {
-            if ((NULL != x->insert_filter) &&
-                (x->insert_filter(x,k) == 1))
-                continue;
-            rc2 = x->insert(x,k);
-            if (rc2) {
-                snmp_log(LOG_ERR,"error on subcontainer '%s' insert (%d)\n",
-                         x->container_name ? x->container_name : "", rc2);
-                rc = rc2;
-            }
-        }
-        return rc;
+        return CONTAINER_INSERT_HELPER(x, k);
     }
-    
+
     /*------------------------------------------------------------------
      * These functions should EXACTLY match the function version in
      * container.c. If you change one, change them both.
