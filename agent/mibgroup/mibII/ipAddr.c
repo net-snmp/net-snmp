@@ -202,6 +202,7 @@ var_ipAddrEntry(struct variable *vp,
 #endif
     static struct ifnet ifnet;
 #endif                          /* hpux11 */
+    static in_addr_t	addr_ret;
 
     /*
      * fill in object part of name for current (less sizeof instance part) 
@@ -293,12 +294,11 @@ var_ipAddrEntry(struct variable *vp,
     *var_len = sizeof(long_return);
     switch (vp->magic) {
     case IPADADDR:
-	*var_len = sizeof(uint32_t);
+    	*var_len = sizeof(addr_ret);
 #ifdef hpux11
-        long_return = lowin_ifaddr.Addr;
-        return (u_char *) & long_return;
+        addr_ret = lowin_ifaddr.Addr;
+        return (u_char *) & addr_ret;
 #elif defined(linux) || defined(sunV3)
-        *var_len = sizeof(((struct sockaddr_in *) &lowin_ifnet.if_addr)->sin_addr.s_addr);
         return (u_char *) & ((struct sockaddr_in *) &lowin_ifnet.if_addr)->
             sin_addr.s_addr;
 #else
@@ -309,17 +309,16 @@ var_ipAddrEntry(struct variable *vp,
         long_return = lowinterface;
         return (u_char *) & long_return;
     case IPADNETMASK:
-	*var_len = sizeof(uint32_t);
+        *var_len = sizeof(addr_ret);
 #ifdef hpux11
-        long_return = lowin_ifaddr.NetMask;
-        return (u_char *) & long_return;
+        addr_ret = lowin_ifaddr.NetMask;
+        return (u_char *) & addr_ret;
 #elif defined(linux)
-        *var_len = sizeof(((struct sockaddr_in *) &lowin_ifnet.ia_subnetmask)->sin_addr.s_addr);
         return (u_char *) & ((struct sockaddr_in *) &lowin_ifnet.
                              ia_subnetmask)->sin_addr.s_addr;
 #elif !defined(sunV3)
-        long_return = lowin_ifaddr.ia_subnetmask;
-        return (u_char *) & long_return;
+        addr_ret = lowin_ifaddr.ia_subnetmask;
+        return (u_char *) & addr_ret;
 #endif
     case IPADBCASTADDR:
 #ifdef hpux11
@@ -630,7 +629,7 @@ var_ipAddrEntry(struct variable * vp,
     static mib2_ipAddrEntry_t Lowentry;
     int             Found = 0;
     req_e           req_type;
-    static uint32_t ipaddr_return;
+    static in_addr_t addr_ret;
 
     /*
      * fill in object part of name for current (less sizeof instance part) 
@@ -697,9 +696,9 @@ var_ipAddrEntry(struct variable * vp,
     *var_len = sizeof(long_return);
     switch (vp->magic) {
     case IPADADDR:
-	*var_len = sizeof(uint32_t);
-        ipaddr_return = Lowentry.ipAdEntAddr;
-        return (u_char *) & ipaddr_return;
+	*var_len = sizeof(addr_ret);
+        addr_ret = Lowentry.ipAdEntAddr;
+        return (u_char *) & addr_ret;
     case IPADIFINDEX:
 #ifdef NETSNMP_INCLUDE_IFTABLE_REWRITES
         Lowentry.ipAdEntIfIndex.o_bytes[Lowentry.ipAdEntIfIndex.o_length] = '\0';
@@ -713,9 +712,9 @@ var_ipAddrEntry(struct variable * vp,
 #endif
         return (u_char *) & long_return;
     case IPADNETMASK:
-	*var_len = sizeof(uint32_t);
-        ipaddr_return = Lowentry.ipAdEntNetMask;
-        return (u_char *) & ipaddr_return;
+	*var_len = sizeof(addr_ret);
+        addr_ret = Lowentry.ipAdEntNetMask;
+        return (u_char *) & addr_ret;
     case IPADBCASTADDR:
 	long_return = Lowentry.ipAdEntBcastAddr;
 	return (u_char *) & long_return;
@@ -877,7 +876,8 @@ var_ipAddrEntry(struct variable *vp,
     u_char         *cp;
     int             lowinterface = -1;
     int             i, interface;
-
+    static in_addr_t	addr_ret;
+    
     /*
      * fill in object part of name for current (less sizeof instance part) 
      */
@@ -926,18 +926,18 @@ var_ipAddrEntry(struct variable *vp,
     *var_len = sizeof(long_return);
     switch (vp->magic) {
     case IPADADDR:
-	*var_len = sizeof(uint32_t);
-        long_return = ifs[i].addr.s_addr;
-        return (u_char *) & long_return;
+        *var_len = sizeof(addr_ret);
+        addr_ret = ifs[i].addr.s_addr;
+        return (u_char *) & addr_ret;
 
     case IPADIFINDEX:
         long_return = ifs[i].index;
         return (u_char *) & long_return;
 
     case IPADNETMASK:
-	*var_len = sizeof(uint32_t);
-        long_return = ifs[i].mask.s_addr;
-        return (u_char *) & long_return;
+        *var_len = sizeof(addr_ret);
+        addr_ret = ifs[i].mask.s_addr;
+        return (u_char *) & addr_ret;
 
     case IPADBCASTADDR:
         long_return = ntohl(ifs[i].bcast.s_addr) & 1;
@@ -982,7 +982,8 @@ var_ipAddrEntry(struct variable *vp,
     DWORD           status = NO_ERROR;
     DWORD           statusRetry = NO_ERROR;
     DWORD           dwActualSize = 0;
-
+    static in_addr_t 	addr_ret;
+    
     /*
      * fill in object part of name for current (less sizeof instance part) 
      */
@@ -1037,9 +1038,9 @@ var_ipAddrEntry(struct variable *vp,
     *var_len = sizeof(long_return);
     switch (vp->magic) {
     case IPADADDR:
-	*var_len = sizeof(uint32_t);
-        long_return = pIpAddrTable->table[i].dwAddr;
-        return (u_char *) & long_return;
+    	 *var_len = sizeof(addr_ret);
+    	 addr_ret = pIpAddrTable->table[i].dwAddr;
+        return (u_char *) & addr_ret;
 
     case IPADIFINDEX:
         long_return = pIpAddrTable->table[i].dwIndex;
@@ -1047,10 +1048,10 @@ var_ipAddrEntry(struct variable *vp,
         return (u_char *) & long_return;
 
     case IPADNETMASK:
-	*var_len = sizeof(uint32_t);
-        long_return = pIpAddrTable->table[i].dwMask;
+    	 *var_len = sizeof(addr_ret);
+        addr_ret = pIpAddrTable->table[i].dwMask;
         free(pIpAddrTable);
-        return (u_char *) & long_return;
+        return (u_char *) & addr_ret;
 
     case IPADBCASTADDR:
         long_return = pIpAddrTable->table[i].dwBCastAddr;
