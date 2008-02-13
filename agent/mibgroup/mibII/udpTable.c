@@ -188,7 +188,8 @@ udpTable_handler(netsnmp_mib_handler          *handler,
     netsnmp_table_request_info *table_info;
     UDPTABLE_ENTRY_TYPE	  *entry;
     oid      subid;
-    long     port,addr;
+    long     port;
+    in_addr_t addr;
 
     DEBUGMSGTL(("mibII/udpTable", "Handler - mode %s\n",
                     se_find_label_in_slist("agent_mode", reqinfo->mode)));
@@ -360,7 +361,8 @@ udpTable_next_entry( void **loop_context,
                      netsnmp_iterator_info *data)
 {
     UDPTABLE_ENTRY_TYPE	 *entry = (UDPTABLE_ENTRY_TYPE *)*loop_context;
-    long port, addr;
+    long port;
+    in_addr_t addr;
 
     if (!entry)
         return NULL;
@@ -373,7 +375,7 @@ udpTable_next_entry( void **loop_context,
                               (u_char*)&IN6_EXTRACT_V4ADDR(&entry->pcb.inp_laddr),
                                  sizeof(IN6_EXTRACT_V4ADDR(&entry->pcb.inp_laddr)));
 #else
-    addr = UDP_ADDRESS_TO_NETWORK_ORDER((u_long)entry->UDPTABLE_LOCALADDRESS);
+    addr = UDP_ADDRESS_TO_NETWORK_ORDER((in_addr_t)entry->UDPTABLE_LOCALADDRESS);
     snmp_set_var_value(index, (u_char *)&addr,
                                  sizeof(entry->UDPTABLE_LOCALADDRESS));
 #endif

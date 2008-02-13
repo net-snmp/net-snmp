@@ -207,6 +207,7 @@ var_atEntry(struct variable *vp,
     oid             current[16];
     static char     PhysAddr[6], LowPhysAddr[6];
     u_long          Addr, LowAddr, foundone;
+    static in_addr_t      addr_ret;
 #ifdef ARP_SCAN_FOUR_ARGUMENTS
     u_short         ifIndex, lowIfIndex = 0;
 #endif                          /* ARP_SCAN_FOUR_ARGUMENTS */
@@ -316,9 +317,9 @@ var_atEntry(struct variable *vp,
         *var_len = sizeof(LowPhysAddr);
         return (u_char *) LowPhysAddr;
     case IPMEDIANETADDRESS:    /* also ATNETADDRESS */
-	*var_len = sizeof(uint32_t);
-        long_return = LowAddr;
-        return (u_char *) & long_return;
+        *var_len = sizeof(addr_ret);
+        addr_ret = LowAddr;
+        return (u_char *) & addr_ret;
     case IPMEDIATYPE:
         *var_len = sizeof long_return;
         long_return = lowIfType;
@@ -389,6 +390,7 @@ var_atEntry(struct variable * vp,
     int             Found = 0;
     req_e           req_type;
     int             offset, olength;
+    static in_addr_t      addr_ret;
 
     /*
      * fill in object part of name for current (less sizeof instance part) 
@@ -475,8 +477,9 @@ var_atEntry(struct variable * vp,
         *var_len = Lowentry.ipNetToMediaPhysAddress.o_length;
         return Lowentry.ipNetToMediaPhysAddress.o_bytes;
     case IPMEDIANETADDRESS:
-	*var_len = sizeof(uint32_t);
-        return (u_char *) &Lowentry.ipNetToMediaNetAddress;
+        *var_len = sizeof(addr_ret);
+        addr_ret = Lowentry.ipNetToMediaNetAddress;
+        return (u_char *) &addr_ret;
     case IPMEDIATYPE:
         *var_len = sizeof long_return;
         long_return = Lowentry.ipNetToMediaType;
@@ -874,7 +877,8 @@ var_atEntry(struct variable *vp,
     DWORD           dwActualSize = 0;
     UINT            i;
     u_char          dest_addr[4];
-
+    static in_addr_t	addr_ret;
+    
     /*
      * fill in object part of name for current (less sizeof instance part) 
      */
@@ -989,10 +993,10 @@ var_atEntry(struct variable *vp,
         free(pIpNetTable);
         return (u_char *) return_buf;
     case IPMEDIANETADDRESS:    /* also ATNETADDRESS */
-	*var_len = sizeof(uint32_t);
-        long_return = pIpNetTable->table[i].dwAddr;
+        *var_len = sizeof(addr_ret);
+        addr_ret = pIpNetTable->table[i].dwAddr;
         free(pIpNetTable);
-        return (u_char *) & long_return;
+        return (u_char *) & addr_ret;
     case IPMEDIATYPE:
         *var_len = sizeof long_return;
         long_return = pIpNetTable->table[i].dwType;
