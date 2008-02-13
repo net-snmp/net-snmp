@@ -2753,7 +2753,7 @@ init_usm_conf(const char *app)
                                   usm_parse_config_usmUser, NULL, NULL);
     register_config_handler(app, "createUser",
                                   usm_parse_create_usmUser, NULL,
-                                  "username (MD5|SHA) passphrase [DES [passphrase]]");
+                                  "username [-e ENGINEID] (MD5|SHA) authpassphrase [DES [privpassphrase]]");
 
     /*
      * we need to be called back later 
