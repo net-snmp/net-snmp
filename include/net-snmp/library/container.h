@@ -305,24 +305,35 @@ extern "C" {
      * container.c. If you change one, change them both.
      */
     NETSNMP_STATIC_INLINE /* gcc docs recommend static w/inline */
-    int CONTAINER_INSERT(netsnmp_container *x, const void *k)
+    int CONTAINER_INSERT_HELPER(netsnmp_container* x, const void* k)
     {
-        int rc2, rc = 0;
-        
+        if(x) {
+            int rc = x->insert(x,k);
+            if(rc)
+                snmp_log(LOG_ERR,"error on subcontainer insert (%d)\n", rc);
+            else {
+                rc = CONTAINER_INSERT_HELPER(x->next, k);
+                if(rc)
+                    x->remove(x,k);
+            }
+            return rc;
+        }
+        return 0;
+    }
+
+    /*------------------------------------------------------------------
+     * These functions should EXACTLY match the function version in
+     * container.c. If you change one, change them both.
+     */
+    NETSNMP_STATIC_INLINE /* gcc docs recommend static w/inline */
+    int CONTAINER_INSERT(netsnmp_container* x, const void* k)
+    {
         /** start at first container */
         while(x->prev)
             x = x->prev;
-        while(x) {
-            rc2 = x->insert(x,k);
-            if (rc2) {
-                snmp_log(LOG_ERR,"error on subcontainer insert (%d)\n", rc2);
-                rc = rc2;
-            }
-            x = x->next;
-        }
-        return rc;
+        return CONTAINER_INSERT_HELPER(x, k);
     }
-    
+
     /*------------------------------------------------------------------
      * These functions should EXACTLY match the function version in
      * container.c. If you change one, change them both.
