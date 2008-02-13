@@ -206,22 +206,32 @@ netsnmp_container_add_index(netsnmp_container *primary,
  * These functions should EXACTLY match the inline version in
  * container.h. If you chance one, change them both.
  */
-int CONTAINER_INSERT(netsnmp_container *x, const void *k)
-{ 
-    int rc2, rc = 0;
-    
+int CONTAINER_INSERT_HELPER(netsnmp_container* x, const void* k)
+{
+    if(x) {
+        int rc = x->insert(x,k);
+        if(rc)
+            snmp_log(LOG_ERR,"error on subcontainer insert (%d)\n", rc);
+        else {
+            rc = CONTAINER_INSERT_HELPER(x->next, k);
+            if(rc)
+                x->remove(x,k);
+        }
+        return rc;
+    }
+    return 0;
+}
+
+/*------------------------------------------------------------------
+ * These functions should EXACTLY match the inline version in
+ * container.h. If you change one, change them both.
+ */
+int CONTAINER_INSERT(netsnmp_container* x, const void* k)
+{
     /** start at first container */
     while(x->prev)
         x = x->prev;
-    while(x) {
-        rc2 = x->insert(x,k);
-        if (rc2) {
-            snmp_log(LOG_ERR,"error on subcontainer insert (%d)\n", rc2);
-            rc = rc2;
-        }
-        x = x->next;
-    }
-    return rc;
+    return CONTAINER_INSERT_HELPER(x, k);
 }
 
 /*------------------------------------------------------------------
