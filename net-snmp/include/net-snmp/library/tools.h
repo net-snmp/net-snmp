@@ -88,6 +88,17 @@ extern          "C" {
     Computers the minimum of a and b. */
 #define SNMP_MIN(a,b) ((a) > (b) ? (b) : (a))
 
+/** @def SNMP_MACRO_VAL_TO_STR(s)
+ *  Expands to string with value of the s. 
+ *  If s is macro, the resulting string is value of the macro.
+ *  Example: 
+ *   #define TEST 1234
+ *   SNMP_MACRO_VAL_TO_STR(TEST) expands to "1234"
+ *   SNMP_MACRO_VAL_TO_STR(TEST+1) expands to "1234+1"
+ */
+#define SNMP_MACRO_VAL_TO_STR(s) SNMP_MACRO_VAL_TO_STR_PRIV(s)  
+#define SNMP_MACRO_VAL_TO_STR_PRIV(s) #s
+	
 #ifndef FALSE
 #define FALSE 0
 #endif
