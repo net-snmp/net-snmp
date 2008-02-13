@@ -407,6 +407,19 @@ var_hrswinst(struct variable * vp,
     case HRSWINST_NAME:
         {
             strncpy(string, swi->swi_name, sizeof(string) - 1);
+
+/* If we are on a solaris machine, the package names do not include versioning info,
+ * so we must add it manually
+ */
+#ifdef HAVE_PKGINFO
+            char *pver = pkgparam(swi->swi_name, "VERSION");
+            // 1 spot for the terminating null and one for the dash
+            if (strlen(pver) + 2 + strlen(string) <= sizeof(string)) {
+                strcat(string, "-");
+                strcat(string, pver);
+            }
+# endif
+
             /*
              * This will be unchanged from the initial "null"
              * value, if swi->swi_name is not defined 
