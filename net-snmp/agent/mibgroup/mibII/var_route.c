@@ -115,7 +115,7 @@ var_ipRouteEntry(struct variable *vp,
     u_char         *cp;
     u_char         *ap;
     oid            *op;
-    static in_addr_t add_ret;
+    static in_addr_t addr_ret;
 
     *write_method = NULL;  /* write_rte;  XXX:  SET support not really implemented */
 
