@@ -687,10 +687,15 @@ netsnmp_register_mib(const char *moduleName,
             sub2->name_a[range_subid - 1]  = i;
             sub2->start_a[range_subid - 1] = i;
             sub2->end_a[range_subid - 1]   = i;     /* XXX - ???? */
-            if (range_subid == (int)mibloclen)
+            if (range_subid == (int)mibloclen) {
                 ++sub2->end_a[range_subid - 1];
-            res = netsnmp_subtree_load(sub2, context);
+            }
             sub2->flags |= SUBTREE_ATTACHED;
+            sub2->global_cacheid = reginfo->global_cacheid;
+            /* FRQ This is essential for requests to succeed! */
+            sub2->reginfo->rootoid[range_subid - 1]  = i;
+
+            res = netsnmp_subtree_load(sub2, context);
             if (res != MIB_REGISTERED_OK) {
                 unregister_mib_context(mibloc, mibloclen, priority,
                                        range_subid, range_ubound, context);
@@ -970,56 +975,76 @@ unregister_mib_context(oid * name, size_t len, int priority,
     struct register_parameters reg_parms;
     int old_lookup_cache_val = netsnmp_get_lookup_cache_size();
     netsnmp_set_lookup_cache_size(0);
+    int unregistering = 1;
+    int orig_subid_val = -1;
 
-    DEBUGMSGTL(("register_mib", "unregistering "));
-    DEBUGMSGOIDRANGE(("register_mib", name, len, range_subid, range_ubound));
-    DEBUGMSG(("register_mib", "\n"));
+    if ((range_subid != 0) &&  (range_subid <= len))
+        orig_subid_val = name[range_subid-1];
 
-    list = netsnmp_subtree_find(name, len, netsnmp_subtree_find_first(context),
-				context);
-    if (list == NULL) {
-        return MIB_NO_SUCH_REGISTRATION;
-    }
+    while(unregistering){
+        DEBUGMSGTL(("register_mib", "unregistering "));
+        DEBUGMSGOIDRANGE(("register_mib", name, len, range_subid, range_ubound));
+        DEBUGMSG(("register_mib", "\n"));
 
-    for (child = list, prev = NULL; child != NULL;
-         prev = child, child = child->children) {
-        if (netsnmp_oid_equals(child->name_a, child->namelen, name, len) == 0 &&
-            child->priority == priority) {
-            break;              /* found it */
-	}
-    }
-
-    if (child == NULL) {
-        return MIB_NO_SUCH_REGISTRATION;
-    }
-
-    netsnmp_subtree_unload(child, prev, context);
-    myptr = child;              /* remember this for later */
-
-    /*
-     *  Now handle any occurances in the following subtrees,
-     *      as a result of splitting this range.  Due to the
-     *      nature of the way such splits work, the first
-     *      subtree 'slice' that doesn't refer to the given
-     *      name marks the end of the original region.
-     *
-     *  This should also serve to register ranges.
-     */
-
-    for (list = myptr->next; list != NULL; list = next) {
-        next = list->next; /* list gets freed sometimes; cache next */
-        for (child = list, prev = NULL; child != NULL;
-             prev = child, child = child->children) {
-            if ((netsnmp_oid_equals(child->name_a, child->namelen,
-				  name, len) == 0) &&
-		(child->priority == priority)) {
-                netsnmp_subtree_unload(child, prev, context);
-                netsnmp_subtree_free(child);
-                break;
-            }
+        list = netsnmp_subtree_find(name, len, netsnmp_subtree_find_first(context),
+                    context);
+        if (list == NULL) {
+            return MIB_NO_SUCH_REGISTRATION;
         }
-        if (child == NULL)      /* Didn't find the given name */
-            break;
+
+        for (child = list, prev = NULL; child != NULL;
+            prev = child, child = child->children) {
+            if (netsnmp_oid_equals(child->name_a, child->namelen, name, len) == 0 &&
+                child->priority == priority) {
+                break;              /* found it */
+             }
+        }
+
+        if (child == NULL) {
+            return MIB_NO_SUCH_REGISTRATION;
+        }
+
+        netsnmp_subtree_unload(child, prev, context);
+        myptr = child;              /* remember this for later */
+
+        /*
+        *  Now handle any occurances in the following subtrees,
+        *      as a result of splitting this range.  Due to the
+        *      nature of the way such splits work, the first
+        *      subtree 'slice' that doesn't refer to the given
+        *      name marks the end of the original region.
+        *
+        *  This should also serve to register ranges.
+        */
+
+        for (list = myptr->next; list != NULL; list = next) {
+            next = list->next; /* list gets freed sometimes; cache next */
+            for (child = list, prev = NULL; child != NULL;
+                prev = child, child = child->children) {
+                if ((netsnmp_oid_equals(child->name_a, child->namelen,
+                    name, len) == 0) &&
+            (child->priority == priority)) {
+                    netsnmp_subtree_unload(child, prev, context);
+                    netsnmp_subtree_free(child);
+                    break;
+                }
+            }
+            if (child == NULL)      /* Didn't find the given name */
+                break;
+        }
+
+        /* Maybe we are in a range... */
+        if (orig_subid_val != -1){
+            if (++name[range_subid-1] >= orig_subid_val+range_ubound)
+                {
+                unregistering=0;
+                name[range_subid-1] = orig_subid_val;
+                }
+        }
+        else {
+            unregistering=0;
+        }
+        printf("%d %d\n",name[range_subid-1], unregistering);
     }
 
     memset(&reg_parms, 0x0, sizeof(reg_parms));
