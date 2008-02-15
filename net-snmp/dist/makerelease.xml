@@ -1,0 +1,260 @@
+<!-- this is a makerelease script: http://makerelease.sourceforge.net/ -->
+<makerelease>
+  <steps>
+    <step type="system" title="Setup Checck">
+      <text>
+	This should show the last version number published in this
+	branch by looking at the time line in the README file:
+      </text>
+      <commands>
+	<command>head -1 README</command>
+      </commands>
+    </step>
+    <step type="prompt" prompt="Enter the new version number:"
+      title="Pick a Version Number"
+      paprameter="VERSION">
+      <text>
+	Please enter the version number to publish.  Net-SNMP
+	convention dictates that this be a version number like 5.4 or
+	5.4.1.  Pre-releases that occur before a branch freezes should
+	be appended with ".preN" like 5.4.1.pre2.  Release-candidates
+	should be labeled ".rcN" like 5.4.1.rc1.
+      </text>
+    </step>
+    <step type="system" stepname="update" title="update">
+      <commands>
+	<command>svn -u status</command>
+      </commands>
+    </step>
+    <step type="system" stepname="update" title="update">
+      <commands>
+	<command>svn -q update</command>
+      </commands>
+    </step>
+    <step type="informational" pause="true" stepname="version:manualedit" title="version:manualedit">
+      <text>
+  You (may) need to edit Makefile.top to update the library version numbering
+  (usually just for the first pre-release of a given version).
+     See the comments in RELEASE-INSTRUCTIONS
+     about LIBCURRENT, LIBAGE and LIBREVISION.
+
+  I'll commit the file for you after you're done
+
+      </text>
+    </step>
+    <step prompt="true" type="system" stepname="version:commit" title="version:commit">
+      <commands>
+	<command>svn commit -m "version update" Makefile.top</command>
+      </commands>
+    </step>
+    <step type="system" stepname="build:distclean" title="build:distclean">
+      <commands>
+	<command>make distclean</command>
+      </commands>
+    </step>
+    <step type="system" stepname="build:configure" title="build:configure">
+      <commands>
+	<command>./configure --cache=config.cache --with-defaults --with-mib-modules='host examples examples/example     testhandler smux Rmon disman/event-mib'            --with-transports=IPX --enable-ipv6                  --enable-embedded-perl --enable-shared</command>
+      </commands>
+    </step>
+    <step type="system" stepname="build:make" title="build:make">
+      <commands>
+	<command>make</command>
+      </commands>
+    </step>
+    <step type="system" stepname="build:test" title="build:test">
+      <commands>
+	<command>make test TESTOPTS=-n</command>
+      </commands>
+    </step>
+    <step type="system" stepname="docs:doxygenconf"
+    title="docs:doxygenconf">
+      <text>
+	XXX: redo in makerelease mod mechansim
+      </text>
+      <commands>
+	<command>perl local/Version-Munge.pl -v {VERSION} -M -P -C -t doxygen</command>
+      </commands>
+    </step>
+    <step type="system" stepname="docs:make" title="docs:make">
+      <commands>
+	<command>make docs</command>
+      </commands>
+    </step>
+    <step type="system" stepname="docs:mancp" title="docs:mancp">
+      <commands>
+	<command>make mancp</command>
+      </commands>
+    </step>
+    <step type="system" stepname="docs:update" title="docs:update">
+      <commands>
+	<command>svn -u status man</command>
+      </commands>
+    </step>
+    <step type="informational" pause="true" stepname="docs:manualaddnewman" title="docs:manualaddnewman">
+      <text>
+  Update man/Makefile.in with details of any new man pages,
+  and run 'svn add' on them.
+  I'll commit these changes for you after you're done
+
+      </text>
+    </step>
+    <step prompt="true" type="system" stepname="docs:commit" title="docs:commit">
+      <commands>
+	<command>svn commit -m "documentation update" man</command>
+      </commands>
+    </step>
+    <step type="system" stepname="code:checkcomments" title="code:checkcomments">
+      <commands>
+	<command>make checks</command>
+      </commands>
+    </step>
+    <step type="system" stepname="code:makedepend" title="code:makedepend">
+      <commands>
+	<command>make distdepend</command>
+      </commands>
+    </step>
+    <step prompt="true" type="system" stepname="code:commitdepend" title="code:commitdepend">
+      <commands>
+	<command>svn commit -m "make depend" `find . -name Makefile.depend`</command>
+      </commands>
+    </step>
+    <step type="system" stepname="changelog:svn2cl" title="changelog:svn2cl">
+      <commands>
+	<command>svn2cl -f ChangeLog.add --break-before-msg --stop-on-copy</command>
+      </commands>
+    </step>
+    <step type="system" stepname="changelog:changelogfix" title="changelog:changelogfix">
+      <commands>
+	<command>perl dist/changelogfix  &lt; ChangeLog.add &gt; ChangeLog.reallyadd</command>
+      </commands>
+    </step>
+    <step type="informational" pause="true" stepname="changelog:manualedit" title="changelog:manualedit">
+      <text>
+  You need to manually insert the *relevent* portions of
+  'ChangeLog.reallyadd' into the ChangeLog file.
+  I'll commit these changes for you afterwards
+      </text>
+    </step>
+    <step prompt="true" type="system" stepname="changelog:commit" title="changelog:commit">
+      <commands>
+	<command>svn commit -m "version update" ChangeLog</command>
+      </commands>
+    </step>
+    <step type="system" stepname="docs:newnews" title="docs:newnews">
+      <commands>
+	<command>perl dist/extractnews -s ----- -e ----- ChangeLog</command>
+      </commands>
+    </step>
+    <step type="system" stepname="docs:newnews" title="docs:newnews">
+      <commands>
+	<command>perl dist/extractnews -c CHANGES.new2 -n NEWS.new2 ChangeLog.reallyadd</command>
+      </commands>
+    </step>
+    <step type="informational" pause="true" stepname="docs:README" title="docs:README">
+      <text>
+  You need to manually insert the relevent portions of
+  'CHANGES.new' and 'NEWS.new' into the CHANGES and NEWS file.
+  (There are alternative versions in 'CHANGES.new2' and 'NEWS.new2')
+  You may wish to update the README file as well.
+  I'll commit these changes for you afterwards
+      </text>
+    </step>
+    <step prompt="true" type="system" stepname="docs:commit" title="docs:commit">
+      <commands>
+	<command>svn commit -m "version update" README NEWS CHANGES</command>
+      </commands>
+    </step>
+    <step type="system" stepname="release:versionstamp" title="release:versionstamp">
+      <text>
+	XXX: redo in makerelease mod mechansim
+      </text>
+      <commands>
+	<command>perl local/Version-Munge.pl -v {VERSION} -M -P -C</command>
+      </commands>
+    </step>
+    <step prompt="true" type="system" stepname="release:tag" title="release:tag">
+      <text>
+	XXX: need to generate 5-5 syntax in next few steps
+      </text>
+      <commands>
+	<command>svn copy -m "{VERSION} release" https://net-snmp.svn.sourceforge.net/svnroot/net-snmp/trunk https://net-snmp.svn.sourceforge.net/svnroot/net-snmp/tags/Ext-5-5</command>
+      </commands>
+    </step>
+    <step prompt="true" type="system" stepname="release:makedist" title="release:makedist">
+      <commands>
+	<command>svn export https://net-snmp.svn.sourceforge.net/svnroot/net-snmp/tags/Ext-5-5/net-snmp net-snmp-{VERSION}</command>
+      </commands>
+    </step>
+    <step type="system" stepname="release:removefiles" title="release:removefiles">
+      <commands>
+	<command>net-snmp-{VERSION}/remove-files net-snmp-{VERSION}</command>
+      </commands>
+    </step>
+    <step type="system" stepname="release:makedist" title="release:makedist">
+      <commands>
+	<command>star artype=ustar -c -z -f net-snmp-{VERSION}.tar.gz  net-snmp-{VERSION}</command>
+      </commands>
+    </step>
+    <step type="system" stepname="release:makezipclean" title="release:makezipclean">
+      <commands>
+	<command>rm -f net-snmp-{VERSION}.zip</command>
+      </commands>
+    </step>
+    <step type="system" stepname="release:makezip" title="release:makezip">
+      <commands>
+	<command>zip -r net-snmp-{VERSION}.zip  net-snmp-{VERSION}</command>
+      </commands>
+    </step>
+    <step type="system" stepname="release:searching-gpg-keys" title="release:searching-gpg-keys">
+      <commands>
+	<command>gpg --list-secret-keys net-snmp-admin</command>
+      </commands>
+    </step>
+    <step type="system" stepname="release:gpg" title="release:gpg">
+      <commands>
+	<command>gpg -u net-snmp-admin -a --detach-sign net-snmp-{VERSION}.tar.gz</command>
+      </commands>
+    </step>
+    <step type="system" stepname="release:gpg" title="release:gpg">
+      <commands>
+	<command>gpg -u net-snmp-admin -a --detach-sign net-snmp-{VERSION}.zip</command>
+      </commands>
+    </step>
+    <step type="system" stepname="posttest:untar" title="posttest:untar">
+      <commands>
+	<command>rm -rf net-snmp-{VERSION}</command>
+      </commands>
+    </step>
+    <step type="system" stepname="posttest:untar" title="posttest:untar">
+      <commands>
+	<command>tar xzf net-snmp-{VERSION}.tar.gz</command>
+      </commands>
+    </step>
+    <step type="system" stepname="posttest:configure" title="posttest:configure">
+      <commands>
+	<command>./configure --cache=config.cache --with-defaults --with-mib-modules='host examples examples/example     testhandler smux Rmon disman/event-mib'            --with-transports=IPX --enable-ipv6                  --enable-embedded-perl --enable-shared</command>
+      </commands>
+    </step>
+    <step type="system" stepname="posttest:make" title="posttest:make">
+      <commands>
+	<command>make</command>
+      </commands>
+    </step>
+    <step type="system" stepname="posttest:test" title="posttest:test">
+      <commands>
+	<command>make test</command>
+      </commands>
+    </step>
+    <step type="system" stepname="release:update" title="release:update">
+      <commands>
+	<command>svn -u status</command>
+      </commands>
+    </step>
+    <step type="informational">
+      <text>
+	Do other steps like upload to sf, etc
+      </text>
+    </step>
+  </steps>
+</makerelease>
