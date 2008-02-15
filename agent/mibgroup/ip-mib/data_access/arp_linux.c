@@ -262,6 +262,7 @@ _load_v6(netsnmp_container *container, int idx_offset)
          if(fillup_entry_info (entry, nlmp) < 0) {
             snmp_log(LOG_ERR, "filling entry info failed\n");
             netsnmp_access_arp_entry_free(entry);
+            status -= NLMSG_ALIGN(len);
             continue;
          }
          CONTAINER_INSERT(container, entry);
