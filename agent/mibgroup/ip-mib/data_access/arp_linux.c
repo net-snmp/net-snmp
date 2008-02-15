@@ -53,7 +53,7 @@ netsnmp_access_arp_container_arch_load(netsnmp_container *container)
         netsnmp_access_arp_container_free(container, flags);
     }
 
-#if defined (NETSNMP_ENABLE_IPV6) 
+#if defined (NETSNMP_ENABLE_IPV6) && defined(NDA_RTA)
     idx_offset = (rc < 0) ? 0 : rc;
 
     rc = _load_v6(container, idx_offset);
@@ -215,7 +215,7 @@ _load_v4(netsnmp_container *container, int idx_offset)
     return idx_offset;
 }
 
-#if defined (NETSNMP_ENABLE_IPV6)
+#if defined (NETSNMP_ENABLE_IPV6) && defined(NDA_RTA)
 static int
 _load_v6(netsnmp_container *container, int idx_offset)
 {
