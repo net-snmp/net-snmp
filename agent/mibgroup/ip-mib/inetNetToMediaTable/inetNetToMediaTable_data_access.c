@@ -155,7 +155,7 @@ _snarf_arp_entry(netsnmp_arp_entry *arp_entry,
         inetAddressType = INETADDRESSTYPE_IPV4;
         break;
 
-    case 6:
+    case 16:
         inetAddressType = INETADDRESSTYPE_IPV6;
         break;
 
