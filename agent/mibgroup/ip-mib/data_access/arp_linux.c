@@ -417,7 +417,10 @@ fillup_entry_info(netsnmp_arp_entry *entry, struct nlmsghdr *nlmp)
              entry->arp_type = INETNETTOMEDIATYPE_LOCAL;
              break;
        }      
+    } else {
+        return -1;  /* could not create data for this interface */
     }
+    
     return 0;
 }
 #endif
