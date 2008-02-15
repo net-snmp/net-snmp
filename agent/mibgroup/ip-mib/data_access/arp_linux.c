@@ -53,7 +53,7 @@ netsnmp_access_arp_container_arch_load(netsnmp_container *container)
         netsnmp_access_arp_container_free(container, flags);
     }
 
-#if defined (NETSNMP_ENABLE_IPV6) && defined(NDA_RTA)
+#if defined (NETSNMP_ENABLE_IPV6)
     idx_offset = (rc < 0) ? 0 : rc;
 
     rc = _load_v6(container, idx_offset);
@@ -215,7 +215,7 @@ _load_v4(netsnmp_container *container, int idx_offset)
     return idx_offset;
 }
 
-#if defined (NETSNMP_ENABLE_IPV6) && defined(NDA_RTA)
+#if defined (NETSNMP_ENABLE_IPV6)
 static int
 _load_v6(netsnmp_container *container, int idx_offset)
 {
@@ -332,7 +332,9 @@ fillup_entry_info(netsnmp_arp_entry *entry, struct nlmsghdr *nlmp)
     if(rtmp->ndm_state != NUD_NOARP) {
        memset(tb, 0, sizeof(struct rtattr *) * (NDA_MAX + 1));
        length = nlmp->nlmsg_len - NLMSG_LENGTH(sizeof(*rtmp));
-       rta = NDA_RTA(rtmp);
+       /* this is what the kernel-removed NDA_RTA define did */
+       rta = ((struct rtattr*)(((char*)(rtmp)) +
+                               NLMSG_ALIGN(sizeof(struct ndmsg))));
        while (RTA_OK(rta, length)) {
               if (rta->rta_type <= NDA_MAX)
                   tb[rta->rta_type] = rta;
