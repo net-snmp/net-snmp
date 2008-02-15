@@ -6,4 +6,7 @@ config_require(ip-mib/ipAddressTable);
 config_require(ip-mib/inetNetToMediaTable);
 config_require(ip-mib/ipSystemStatsTable);
 config_require(ip-mib/ip_scalars);
+#ifdef linux
+config_require(ip-mib/ipv6ScopeZoneIndexTable);
+#endif
 config_add_mib(IP-MIB)
