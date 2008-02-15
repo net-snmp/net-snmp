@@ -1,7 +1,5 @@
 /*
  *  Interface MIB architecture support
- *
- * $Id$
  */
 #include <net-snmp/net-snmp-config.h>
 #include <net-snmp/net-snmp-includes.h>
@@ -86,7 +84,7 @@ _load_v4(netsnmp_container *container, int idx_offset)
 
 #define PROCFILE "/proc/net/arp"
     if (!(in = fopen(PROCFILE, "r"))) {
-        snmp_log(LOG_ERR,"could not open " PROCFILE "\n");
+        snmp_log(LOG_DEBUG,"could not open " PROCFILE "\n");
         return -2;
     }
 
