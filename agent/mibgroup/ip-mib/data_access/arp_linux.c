@@ -14,9 +14,32 @@
 #include <netinet/in.h>
 #include <net/if_arp.h>
 #include <arpa/inet.h>
+#include <linux/types.h>
+#include <asm/types.h>
+#ifdef NETSNMP_ENABLE_IPV6
+#ifdef HAVE_LINUX_RTNETLINK_H
+#include <linux/rtnetlink.h>
+#define NIP6(addr) \
+        ntohs((addr).s6_addr16[0]), \
+        ntohs((addr).s6_addr16[1]), \
+        ntohs((addr).s6_addr16[2]), \
+        ntohs((addr).s6_addr16[3]), \
+        ntohs((addr).s6_addr16[4]), \
+        ntohs((addr).s6_addr16[5]), \
+        ntohs((addr).s6_addr16[6]), \
+        ntohs((addr).s6_addr16[7])
+#define NIP6_FMT "%04x:%04x:%04x:%04x:%04x:%04x:%04x:%04x"
+#endif
+#endif
 
 int _load_v4(netsnmp_container *container, int idx_offset);
-
+static int _load_v6(netsnmp_container *container, int idx_offset);
+#ifdef HAVE_LINUX_RTNETLINK_H
+int get_translation_table_info (int sd, int *status, 
+                                char *buff, size_t size);
+int fillup_entry_info(netsnmp_arp_entry *entry,
+                      struct nlmsghdr *nlmp);
+#endif
 /**
  */
 int
@@ -28,11 +51,10 @@ netsnmp_access_arp_container_arch_load(netsnmp_container *container)
     if(rc < 0) {
         u_int flags = NETSNMP_ACCESS_ARP_FREE_KEEP_CONTAINER;
         netsnmp_access_arp_container_free(container, flags);
-        return rc;
     }
 
-#if defined (NETSNMP_ENABLE_IPV6) && 0 /* xx-rks: arp for v6? */
-    idx_offset = rc;
+#if defined (NETSNMP_ENABLE_IPV6) 
+    idx_offset = (rc < 0) ? 0 : rc;
 
     rc = _load_v6(container, idx_offset);
     if(rc < 0) {
@@ -192,3 +214,207 @@ _load_v4(netsnmp_container *container, int idx_offset)
 
     return idx_offset;
 }
+
+#if defined (NETSNMP_ENABLE_IPV6)
+static int
+_load_v6(netsnmp_container *container, int idx_offset)
+{
+    char              buffer[16384];
+#if defined(HAVE_LINUX_RTNETLINK_H)
+    struct nlmsghdr   *nlmp;
+#endif
+    int               sd = 0;
+    int               status = 0;
+    int               rc = 0;
+    int               len, req_len;
+    netsnmp_arp_entry *entry;
+
+    netsnmp_assert(NULL != container);
+#if defined(HAVE_LINUX_RTNETLINK_H)
+    if((sd = socket (PF_NETLINK, SOCK_DGRAM, NETLINK_ROUTE)) < 0) {
+        snmp_log(LOG_ERR,"Unable to create netlink socket\n");
+        return -2;
+    }
+
+    if(get_translation_table_info (sd, &status, buffer, sizeof(buffer)) < 0) {
+       snmp_log(LOG_ERR,"Unable to fetch translation table info\n");
+       close(sd);
+       return -2;
+    }
+
+    for (nlmp = (struct nlmsghdr *)buffer; status > sizeof(*nlmp); ) {
+         len = nlmp->nlmsg_len;
+         req_len = len - sizeof(*nlmp);
+         if (req_len < 0 || len > status) {
+             snmp_log(LOG_ERR,"invalid length\n");
+             return -2;
+         }
+         if (!NLMSG_OK (nlmp, status)) {
+             snmp_log(LOG_ERR,"NLMSG not OK\n");
+             return -2;
+         }
+         entry = netsnmp_access_arp_entry_create();
+         if(NULL == entry) {
+            rc = -3;
+            break;
+         }
+         entry->ns_arp_index = ++idx_offset;
+         if(fillup_entry_info (entry, nlmp) < 0) {
+            snmp_log(LOG_ERR, "filling entry info failed\n");
+            netsnmp_access_arp_entry_free(entry);
+            continue;
+         }
+         CONTAINER_INSERT(container, entry);
+         status -= NLMSG_ALIGN(len);
+         nlmp = (struct nlmsghdr*)((char*)nlmp + NLMSG_ALIGN(len));
+    }
+
+    close(sd);
+#endif
+    if(rc<0) {
+        return rc;
+    }
+
+    return idx_offset;
+}
+#if defined(HAVE_LINUX_RTNETLINK_H)
+int 
+get_translation_table_info (int sd, int *status, char *buff, size_t size)
+{
+    struct {
+                struct nlmsghdr n;
+                struct ndmsg r;
+                char   buf[1024];
+    } req;
+    struct rtattr   *rta;
+
+    memset(&req, 0, sizeof(req));
+    req.n.nlmsg_len = NLMSG_LENGTH (sizeof(struct ndmsg));
+    req.n.nlmsg_flags = NLM_F_REQUEST | NLM_F_ROOT;
+    req.n.nlmsg_type = RTM_GETNEIGH;
+
+    req.r.ndm_family = AF_INET6;
+    rta = (struct rtattr *)(((char *)&req) + NLMSG_ALIGN(req.n.nlmsg_len));
+    rta->rta_len = RTA_LENGTH(16);
+
+    if(send(sd, &req, req.n.nlmsg_len, 0) < 0) {
+       snmp_log(LOG_ERR,"Sending request failed\n");
+       return -1;
+    }
+    if((*status = recv(sd, buff, size, 0)) < 0) {
+       snmp_log(LOG_ERR,"Recieving request failed\n");
+       return -1;
+    }
+    if(*status == 0) {
+       snmp_log(LOG_ERR,"End of file\n");
+       return -1;
+    }
+    return 0;
+}
+
+int
+fillup_entry_info(netsnmp_arp_entry *entry, struct nlmsghdr *nlmp)
+{
+    struct ndmsg    *rtmp;
+    struct in6_addr *in6p;
+    struct rtattr   *tb[NDA_MAX+1], *rta;
+    unsigned int    in_len, out_len, i;
+    int             length;
+    char            addr[40];
+    u_char          *buf;
+    u_char          *hwaddr;
+
+    rtmp = (struct ndmsg *)NLMSG_DATA(nlmp);
+    if (nlmp->nlmsg_type != RTM_NEWNEIGH && nlmp->nlmsg_type != RTM_DELNEIGH)
+        return -1;
+
+    if(rtmp->ndm_state != NUD_NOARP) {
+       memset(tb, 0, sizeof(struct rtattr *) * (NDA_MAX + 1));
+       length = nlmp->nlmsg_len - NLMSG_LENGTH(sizeof(*rtmp));
+       rta = NDA_RTA(rtmp);
+       while (RTA_OK(rta, length)) {
+              if (rta->rta_type <= NDA_MAX)
+                  tb[rta->rta_type] = rta;
+              rta = RTA_NEXT(rta,length);
+       }
+       if(length)
+          return -1;
+       /* Fill up the index
+       */
+       entry->if_index = rtmp->ndm_ifindex;
+       /* Fill up ip address */
+       if (tb[NDA_DST]) {
+           memset(&addr, '\0', sizeof(addr));
+           in6p = (struct in6_addr *)RTA_DATA(tb[NDA_DST]);
+           sprintf(addr, NIP6_FMT, NIP6(*in6p));
+           in_len = entry->arp_ipaddress_len = sizeof(entry->arp_ipaddress);
+           netsnmp_assert(16 == in_len);
+           out_len = 0;
+           buf = entry->arp_ipaddress;
+           if(1 != netsnmp_hex_to_binary(&buf, &in_len,
+                                         &out_len, 0, addr, ":")) {
+              snmp_log(LOG_ERR,"error parsing '%s', skipping\n",
+                     entry->arp_ipaddress);
+              return -1;
+           }
+           netsnmp_assert(16 == out_len);
+           entry->arp_ipaddress_len = out_len;
+       }
+       if (tb[NDA_LLADDR]) {
+           memset(&addr, '\0', sizeof(addr));
+           hwaddr = RTA_DATA(tb[NDA_LLADDR]);
+           entry->arp_physaddress_len = RTA_PAYLOAD(tb[NDA_LLADDR]);
+           buf = entry->arp_physaddress;
+           for (i = 0; i < entry->arp_physaddress_len; i++)
+                entry->arp_physaddress[i] = hwaddr[i];
+       }
+
+       switch (rtmp->ndm_state) {
+        case NUD_INCOMPLETE:
+             entry->arp_state = INETNETTOMEDIASTATE_INCOMPLETE;
+             break;
+        case NUD_REACHABLE:
+        case NUD_PERMANENT:
+             entry->arp_state = INETNETTOMEDIASTATE_REACHABLE;
+             break;
+        case NUD_STALE:
+             entry->arp_state = INETNETTOMEDIASTATE_STALE;
+             break;
+        case NUD_DELAY:
+             entry->arp_state = INETNETTOMEDIASTATE_DELAY;
+             break;
+        case NUD_PROBE:
+             entry->arp_state = INETNETTOMEDIASTATE_PROBE;
+             break;
+        case NUD_FAILED:
+            entry->arp_state = INETNETTOMEDIASTATE_INVALID;
+             break;
+        case NUD_NONE:
+             entry->arp_state = INETNETTOMEDIASTATE_UNKNOWN;
+             break;
+       }
+
+       switch (rtmp->ndm_state) {
+        case NUD_INCOMPLETE:
+        case NUD_FAILED    :
+        case NUD_NONE      :
+             entry->arp_type = INETNETTOMEDIATYPE_INVALID;
+             break;
+        case NUD_REACHABLE:
+        case NUD_STALE    :
+        case NUD_DELAY    :
+        case NUD_PROBE    :
+             entry->arp_type = INETNETTOMEDIATYPE_DYNAMIC;
+             break;
+        case NUD_PERMANENT:
+             entry->arp_type = INETNETTOMEDIATYPE_STATIC;
+             break;
+        default:
+             entry->arp_type = INETNETTOMEDIATYPE_LOCAL;
+             break;
+       }      
+    }
+    return 0;
+}
+#endif
+#endif
