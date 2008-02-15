@@ -283,9 +283,7 @@ init_hr_disk(void)
 void
 shutdown_hr_disk(void)
 {
-#if defined(linux)
     Remove_LVM_Disks();
-#endif
 }
 
 #define ITEM_STRING	1
@@ -1346,7 +1344,7 @@ static int _get_type_from_protocol( const char *prot )
 #endif
 
 
-#if defined(linux) && defined(HAVE_REGEX_H) && defined(HAVE_REGCOMP)
+#if defined(HAVE_REGEX_H) && defined(HAVE_REGCOMP)
 static char    *lvm_device_names[MAX_NUMBER_DISK_TYPES];
 static int      lvm_device_count;
 #endif
