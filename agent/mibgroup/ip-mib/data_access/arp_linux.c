@@ -319,7 +319,8 @@ fillup_entry_info(netsnmp_arp_entry *entry, struct nlmsghdr *nlmp)
     struct ndmsg    *rtmp;
     struct in6_addr *in6p;
     struct rtattr   *tb[NDA_MAX+1], *rta;
-    unsigned int    in_len, out_len, i;
+    size_t          in_len, out_len;
+    unsigned int    i;
     int             length;
     char            addr[40];
     u_char          *buf;
