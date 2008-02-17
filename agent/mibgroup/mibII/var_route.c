@@ -741,7 +741,7 @@ var_ipRouteEntry(struct variable * vp,
     mib2_ipRouteEntry_t Lowentry, Nextentry, entry;
     int             Found = 0;
     req_e           req_type;
-    static in_addr_t adr_ret;
+    static in_addr_t addr_ret;
 
     *write_method = NULL;  /* write_rte;  XXX:  SET support not really implemented */
 
