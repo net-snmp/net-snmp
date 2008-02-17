@@ -974,9 +974,10 @@ unregister_mib_context(oid * name, size_t len, int priority,
     netsnmp_subtree *prev, *child, *next; /* loop through children */
     struct register_parameters reg_parms;
     int old_lookup_cache_val = netsnmp_get_lookup_cache_size();
-    netsnmp_set_lookup_cache_size(0);
     int unregistering = 1;
     int orig_subid_val = -1;
+
+    netsnmp_set_lookup_cache_size(0);
 
     if ((range_subid != 0) &&  (range_subid <= len))
         orig_subid_val = name[range_subid-1];
