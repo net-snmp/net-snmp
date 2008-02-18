@@ -784,15 +784,16 @@ alarmTable_handler(netsnmp_mib_handler *handler,
                 case RMON1_ENTRY_VALID:
                     alarmTable_enable( table_entry );
                     break;
-                case RMON1_ENTRY_UNDER_CREATION:
+                case RMON1_ENTRY_UNDER_CREATION: {
+                    netsnmp_session *sess = NULL;
+                    char *secName;
                     alarmTable_disable( table_entry );
 #if 0
                     table_entry->session = (netsnmp_session *)
                         netsnmp_iquery_pdu_session(reqinfo->asp->pdu);
 #else
-                    netsnmp_session *sess = NULL;
-                    char *secName = netsnmp_ds_get_string(NETSNMP_DS_APPLICATION_ID,
-                                                          NETSNMP_DS_AGENT_INTERNAL_SECNAME);
+                    secName = netsnmp_ds_get_string(NETSNMP_DS_APPLICATION_ID,
+                                                    NETSNMP_DS_AGENT_INTERNAL_SECNAME);
                     if (secName) {
                         sess   = netsnmp_iquery_user_session(secName);
                         netsnmp_query_set_default_session(sess);
@@ -811,7 +812,7 @@ alarmTable_handler(netsnmp_mib_handler *handler,
                         }
                     }
 #endif
-                    break;
+                    break; }
 
                 case RMON1_ENTRY_INVALID:
                     table_row = netsnmp_tdata_extract_row(request);
