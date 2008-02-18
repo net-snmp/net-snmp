@@ -185,6 +185,8 @@ When called,
 must hold the maximum length of the
 .I output
 array.
+If multiple object identifiers are being processed, then this
+length should be reset before each call.
 This function returns a value of 1 if it succeeds in parsing the string
 and 0 otherwise.
 .SS Searching the MIB Tree
