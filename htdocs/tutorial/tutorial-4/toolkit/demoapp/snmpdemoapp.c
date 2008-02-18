@@ -18,7 +18,7 @@ int main(int argc, char ** argv)
     struct snmp_pdu *response;
 
     oid anOID[MAX_OID_LEN];
-    size_t anOID_len = MAX_OID_LEN;
+    size_t anOID_len;
 
     struct variable_list *vars;
     int status;
@@ -98,9 +98,14 @@ int main(int argc, char ** argv)
      *   1) We're going to GET the system.sysDescr.0 node.
      */
     pdu = snmp_pdu_create(SNMP_MSG_GET);
+    anOID_len = MAX_OID_LEN;
     read_objid(".1.3.6.1.2.1.1.1.0", anOID, &anOID_len);
 
 #if OTHER_METHODS
+    /*
+     *  These are alternatives to the 'read_objid' call above,
+     *    specifying the OID by name rather than numerically.
+     */
     get_node("sysDescr.0", anOID, &anOID_len);
     read_objid("system.sysDescr.0", anOID, &anOID_len);
 #endif

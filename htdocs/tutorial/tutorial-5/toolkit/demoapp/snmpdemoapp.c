@@ -16,7 +16,7 @@ int main(int argc, char ** argv)
     netsnmp_pdu *response;
 
     oid anOID[MAX_OID_LEN];
-    size_t anOID_len = MAX_OID_LEN;
+    size_t anOID_len;
 
     netsnmp_variable_list *vars;
     int status;
@@ -96,12 +96,17 @@ int main(int argc, char ** argv)
      *   1) We're going to GET the system.sysDescr.0 node.
      */
     pdu = snmp_pdu_create(SNMP_MSG_GET);
+    anOID_len = MAX_OID_LEN;
     if (!snmp_parse_oid(".1.3.6.1.2.1.1.1.0", anOID, &anOID_len)) {
       snmp_perror(".1.3.6.1.2.1.1.1.0");
       SOCK_CLEANUP;
       exit(1);
     }
 #if OTHER_METHODS
+    /*
+     *  These are alternatives to the 'snmp_parse_oid' call above,
+     *    e.g. specifying the OID by name rather than numerically.
+     */
     read_objid(".1.3.6.1.2.1.1.1.0", anOID, &anOID_len);
     get_node("sysDescr.0", anOID, &anOID_len);
     read_objid("system.sysDescr.0", anOID, &anOID_len);
