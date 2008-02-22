@@ -552,6 +552,19 @@ netsnmp_access_interface_entry_update_stats(netsnmp_interface_entry * prev_vals,
                                        &need_wrap_check);
     
     /*
+     * Copy 32 bit counters
+     */
+    prev_vals->stats.ierrors = new_vals->stats.ierrors;
+    prev_vals->stats.idiscards = new_vals->stats.idiscards;
+    prev_vals->stats.iunknown_protos = new_vals->stats.iunknown_protos;
+    prev_vals->stats.inucast = new_vals->stats.inucast;
+    prev_vals->stats.oerrors = new_vals->stats.oerrors;
+    prev_vals->stats.odiscards = new_vals->stats.odiscards;
+    prev_vals->stats.oqlen = new_vals->stats.oqlen;
+    prev_vals->stats.collisions = new_vals->stats.collisions;
+    prev_vals->stats.onucast = new_vals->stats.onucast;
+
+    /*
      * if we've decided we no longer need to check wraps, free old stats
      */
     if (0 == need_wrap_check) {
