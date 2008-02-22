@@ -2876,8 +2876,12 @@ parse_trapDefinition(FILE * fp, char *name)
                  * Get right bracket 
                  */
                 type = get_token(fp, token, MAXTOKEN);
-            } else if (type == LABEL)
+            } else if (type == LABEL) {
                 np->parent = strdup(token);
+            } else {
+                free_node(np);
+                return NULL;
+            }
             break;
         case VARIABLES:
             np->varbinds = getVarbinds(fp, &np->varbinds);
