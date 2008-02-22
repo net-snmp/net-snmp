@@ -41,13 +41,25 @@ netsnmp_access_scopezone_container_arch_load(netsnmp_container* container,
 }
 
 #if defined (NETSNMP_ENABLE_IPV6)
+
+/* scope identifiers, from kernel - include/net/ipv6.h */
+#define IPV6_ADDR_LOOPBACK      0x0010U
+#define IPV6_ADDR_LINKLOCAL     0x0020U
+#define IPV6_ADDR_SITELOCAL     0x0040U
+
 static int
 _scopezone_v6(netsnmp_container* container, int idx_offset)
 {
 
+    /*
+     * On Linux, we support only link-local scope zones.
+     * Each interface, which has link-local address, gets unique scope
+     * zone index.
+     */
     FILE           *in;
     char            line[80], addr[40];
     int             if_index, pfx_len, scope, flags, rc = 0;
+    int             last_if_index = -1;
     netsnmp_v6scopezone_entry *entry;
     static int      log_open_err = 1;
     
@@ -92,8 +104,23 @@ _scopezone_v6(netsnmp_container* container, int idx_offset)
         DEBUGMSGTL(("access:scopezone:container",
                     "addr %s, index %d, pfx %d, scope %d, flags 0x%X\n",
                     addr, if_index, pfx_len, scope, flags));
-        /*
+
+        if (! (scope & IPV6_ADDR_LINKLOCAL)) {
+            DEBUGMSGTL(("access:scopezone:container", 
+                        "The address is not link-local, skipping\n"));
+            continue;
+        }
+        /* 
+         * Check that the interface was not inserted before, just in case
+         * one interface has two or more link-local addresses.
          */
+        if (last_if_index == if_index) {
+            DEBUGMSGTL(("access:scopezone:container", 
+                        "The interface was already inserted, skipping\n"));
+            continue;
+        }
+
+        last_if_index = if_index; 
         entry = netsnmp_access_scopezone_entry_create();
         if(NULL == entry) {
             rc = -3;
