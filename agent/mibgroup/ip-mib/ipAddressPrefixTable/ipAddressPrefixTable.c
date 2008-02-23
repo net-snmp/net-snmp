@@ -392,10 +392,9 @@ ipAddressPrefixOrigin_get(ipAddressPrefixTable_rowreq_ctx * rowreq_ctx,
      * TODO:231:o: |-> Extract the current value of the ipAddressPrefixOrigin data.
      * copy (* ipAddressPrefixOrigin_val_ptr ) from rowreq_ctx->data
      */
-    (*ipAddressPrefixOrigin_val_ptr) =
-        rowreq_ctx->data.ipAddressPrefixOrigin;
-
-    return MFD_SUCCESS;
+          (*ipAddressPrefixOrigin_val_ptr) = rowreq_ctx->data.ipAddressPrefixOrigin;
+    
+           return MFD_SUCCESS;
 }                               /* ipAddressPrefixOrigin_get */
 
 /*---------------------------------------------------------------------

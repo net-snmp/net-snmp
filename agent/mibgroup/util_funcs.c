@@ -100,7 +100,9 @@
 #  include <ndir.h>
 # endif
 #endif
-
+#ifdef HAVE_PTHREAD_H
+#include <pthread.h>
+#endif
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 
@@ -1288,3 +1290,151 @@ get_pid_from_inode(unsigned long long inode)
 }
 
 #endif  /* #ifdef linux */
+
+#if defined(HAVE_PTHREAD_H)
+prefix_cbx *net_snmp_create_prefix_info(unsigned long OnLinkFlag,
+                                        unsigned long AutonomousFlag,
+                                        char *in6ptr)
+{
+   prefix_cbx *node = SNMP_MALLOC_TYPEDEF(prefix_cbx);
+   if(!in6ptr) {
+      free(node);
+      return NULL;
+   }
+   if(!node) {
+      free(node);
+      return NULL;
+   }
+   node->next_info = NULL;
+   node->ipAddressPrefixOnLinkFlag = OnLinkFlag;
+   node->ipAddressPrefixAutonomousFlag = AutonomousFlag;
+   memcpy(node->in6p, in6ptr, sizeof(node->in6p));
+
+   return node;
+}
+
+int net_snmp_find_prefix_info(prefix_cbx **head,
+                              char *address,
+                              prefix_cbx *node_to_find,
+                              pthread_mutex_t *lockid)
+{
+    int iret;
+    memset(node_to_find, 0, sizeof(prefix_cbx));
+    if(!*head)
+       return -1;
+    memcpy(node_to_find->in6p, address, sizeof(node_to_find->in6p));
+
+    iret = net_snmp_search_update_prefix_info(head, node_to_find, 1, lockid);
+    if(iret < 0) {
+       snmp_log(LOG_ERR,"Unable to search the list\n");
+       return -1;
+    } else if (!iret) {
+       snmp_log(LOG_ERR,"Could not find prefix info\n");
+       return -1;
+    } else
+       return 0;
+}
+
+int net_snmp_update_prefix_info(prefix_cbx **head,
+                                prefix_cbx *node_to_update,
+                                pthread_mutex_t *lockid)
+{
+    int iret;
+    iret = net_snmp_search_update_prefix_info(head, node_to_update, 0, lockid);
+    if(iret < 0) {
+       snmp_log(LOG_ERR,"Unable to update prefix info\n");
+       return -1;
+    } else if (!iret) {
+       snmp_log(LOG_ERR,"Unable to find the node to update\n");
+       return -1;
+    } else
+       return 0;
+}
+
+int net_snmp_search_update_prefix_info(prefix_cbx **head,
+                                       prefix_cbx *node_to_use,
+                                       int functionality,
+                                       pthread_mutex_t *lockid)
+{
+
+   /* We define functionality based on need                                                         *
+    * 0 - Need to do a search and update. We have to provide the node_to_use structure filled fully *
+    * 1 - Need to do only search. Provide the node_to_use with in6p value filled                    */
+
+    prefix_cbx *temp_node;
+    netsnmp_assert(NULL != head);
+    netsnmp_assert(NULL != node_to_use);
+
+    if(functionality > 1)
+       return -1;
+    if(!node_to_use)
+       return -1;
+
+
+    if (!functionality) {
+       if (!*head) {
+           *head = node_to_use;
+           return 1;
+       }
+
+       pthread_mutex_lock( lockid );
+       for (temp_node = *head; temp_node->next_info != NULL ; temp_node = temp_node->next_info) {
+            if (0 == strcmp(temp_node->in6p, node_to_use->in6p)) {
+                temp_node->ipAddressPrefixOnLinkFlag = node_to_use->ipAddressPrefixOnLinkFlag;
+                temp_node->ipAddressPrefixAutonomousFlag = node_to_use->ipAddressPrefixAutonomousFlag;
+                pthread_mutex_unlock( lockid );
+                return 2;
+            }
+       }
+       temp_node->next_info = node_to_use;
+       pthread_mutex_unlock( lockid );
+       return 1;
+    } else {
+         pthread_mutex_lock( lockid );
+         for (temp_node = *head; temp_node != NULL ; temp_node = temp_node->next_info) {
+              if (0 == strcmp(temp_node->in6p, node_to_use->in6p)) {
+                /*need yo put sem here as i read here */
+                node_to_use->ipAddressPrefixOnLinkFlag = temp_node->ipAddressPrefixOnLinkFlag;
+                node_to_use->ipAddressPrefixAutonomousFlag = temp_node->ipAddressPrefixAutonomousFlag;
+                pthread_mutex_unlock( lockid );
+                return 1;
+              }
+         }
+         pthread_mutex_unlock( lockid );
+         return 0;
+    }
+}
+
+int net_snmp_delete_prefix_info(prefix_cbx **head,
+                                char *address,
+                                pthread_mutex_t *lockid)
+{
+
+    prefix_cbx *temp_node,*prev_node;
+    if(!address)
+       return -1;
+    if(!head)
+       return -1;
+
+   /*Need to acquire lock here */
+    pthread_mutex_lock( lockid );
+    for (temp_node = *head, prev_node = NULL; temp_node;
+         prev_node = temp_node, temp_node = temp_node->next_info) {
+
+         if (temp_node->in6p && strcmp(temp_node->in6p, address) == 0) {
+            if (prev_node)
+                prev_node->next_info = temp_node->next_info;
+            else
+                *head = temp_node->next_info;
+            free(temp_node);
+            pthread_mutex_unlock( lockid );
+            return 1;
+        }
+
+    }
+   /*Release Lock here */
+    pthread_mutex_unlock( lockid );
+    return 0;
+}
+#endif
+

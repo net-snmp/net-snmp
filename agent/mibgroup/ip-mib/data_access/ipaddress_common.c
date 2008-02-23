@@ -304,6 +304,27 @@ netsnmp_access_ipaddress_entry_update(netsnmp_ipaddress_entry *lhs,
         ++changed;
         lhs->ia_origin = rhs->ia_origin;
     }
+   
+    if (lhs->ia_onlink_flag != rhs->ia_onlink_flag) {
+        ++changed;
+        lhs->ia_onlink_flag = rhs->ia_onlink_flag;
+    }
+
+    if (lhs->ia_autonomous_flag != rhs->ia_autonomous_flag) {
+        ++changed;
+        lhs->ia_autonomous_flag = rhs->ia_autonomous_flag;
+    }
+
+    if (lhs->ia_prefered_lifetime != rhs->ia_prefered_lifetime) {
+        ++changed;
+        lhs->ia_prefered_lifetime = rhs->ia_prefered_lifetime;
+    }
+
+    if (lhs->ia_valid_lifetime != rhs->ia_valid_lifetime) {
+        ++changed;
+        lhs->ia_valid_lifetime = rhs->ia_valid_lifetime;
+    }
+
 
     return changed;
 }
@@ -428,3 +449,49 @@ static int _access_ipaddress_entry_compare_addr(const void *lhs,
      */
     return memcmp(lh->ia_address, rh->ia_address, lh->ia_address_len);
 }
+
+int
+netsnmp_ipaddress_flags_copy(u_long *ipAddressPrefixAdvPreferredLifetime,
+                             u_long *ipAddressPrefixAdvValidLifetime,
+                             u_long *ipAddressPrefixOnLinkFlag,
+                             u_long *ipAddressPrefixAutonomousFlag, 
+                             u_long *ia_prefered_lifetime,
+                             u_long *ia_valid_lifetime,
+                             u_char *ia_onlink_flag,
+                             u_char *ia_autonomous_flag)
+{
+
+    /*Copy all the flags*/
+    *ipAddressPrefixAdvPreferredLifetime = *ia_prefered_lifetime;
+    *ipAddressPrefixAdvValidLifetime = *ia_valid_lifetime;
+    *ipAddressPrefixOnLinkFlag = *ia_onlink_flag;
+    *ipAddressPrefixAutonomousFlag = *ia_autonomous_flag;
+    return 0;
+}
+
+int
+netsnmp_ipaddress_prefix_origin_copy(u_long *ipAddressPrefixOrigin,
+                                     u_char ia_origin,
+                                     int flags,
+                                     u_long ipAddressAddrType)
+{
+    if(ipAddressAddrType == INETADDRESSTYPE_IPV4){
+       if(ia_origin == 6) /*Random*/
+          (*ipAddressPrefixOrigin) = 3 /*IPADDRESSPREFIXORIGINTC_WELLKNOWN*/;
+       else
+          (*ipAddressPrefixOrigin) = ia_origin;
+    } else {
+       if(ia_origin == 5) { /*Link Layer*/
+          if(!flags) /*Global address assigned by router adv*/
+             (*ipAddressPrefixOrigin) = 5 /*IPADDRESSPREFIXORIGINTC_ROUTERADV*/;
+          else
+             (*ipAddressPrefixOrigin) = 3 /*IPADDRESSPREFIXORIGINTC_WELLKNOWN*/;
+       }
+       else if(ia_origin == 6) /*Random*/
+          (*ipAddressPrefixOrigin) = 5 /*IPADDRESSPREFIXORIGINTC_ROUTERADV*/;
+       else
+          (*ipAddressPrefixOrigin) = ia_origin;
+    }
+    return 0;
+}
+
