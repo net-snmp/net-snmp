@@ -29,6 +29,7 @@ typedef __u8 u8;           /* ditto */
 #include <net-snmp/data_access/interface.h>
 #include <net-snmp/data_access/ipaddress.h>
 #include "if-mib/data_access/interface.h"
+#include "mibgroup/util_funcs.h"
 #include "interface_ioctl.h"
 
 #include <sys/types.h>
@@ -42,6 +43,15 @@ typedef __u8 u8;           /* ditto */
 #define IF_NAMESIZE 16
 #endif
 
+#ifdef NETSNMP_ENABLE_IPV6
+#if defined(HAVE_PTHREAD_H) && defined(HAVE_LINUX_RTNETLINK_H)
+#include <pthread.h>
+#include <linux/rtnetlink.h>
+#ifdef RTMGRP_IPV6_PREFIX
+#define SUPPORT_PREFIX_FLAGS 1
+#endif  /* RTMGRP_IPV6_PREFIX */
+#endif  /* HAVE_PTHREAD_H && HAVE_LINUX_RTNETLINK_H */
+#endif  /* NETSNMP_ENABLE_IPV6 */
 unsigned int
 netsnmp_linux_interface_get_if_speed(int fd, const char *name);
 #ifdef HAVE_LINUX_ETHTOOL_H
@@ -59,6 +69,16 @@ static unsigned short retrans_time_factor = 1;
 #define PROC_SYS_NET_IPVx_BASE_REACHABLE_TIME "/proc/sys/net/ipv%d/neigh/%s/base_reachable_time"
 static const char *proc_sys_basereachable_time;
 static unsigned short basereachable_time_ms = 0;
+#ifdef SUPPORT_PREFIX_FLAGS
+prefix_cbx *prefix_head_list = NULL;
+pthread_mutex_t prefix_mutex_lock =  PTHREAD_MUTEX_INITIALIZER;
+netsnmp_prefix_listen_info list_info;
+pthread_t thread1;
+#define IF_PREFIX_ONLINK        0x01
+#define IF_PREFIX_AUTOCONF      0x02
+ 
+void *netsnmp_prefix_listen(netsnmp_prefix_listen_info *listen_info);
+#endif
 void
 netsnmp_arch_interface_init(void)
 {
@@ -91,6 +111,13 @@ netsnmp_arch_interface_init(void)
     else {
         proc_sys_basereachable_time = PROC_SYS_NET_IPVx_BASE_REACHABLE_TIME;
     }
+#ifdef SUPPORT_PREFIX_FLAGS
+    list_info.list_head = &prefix_head_list;
+    list_info.lockinfo = &prefix_mutex_lock;
+    
+    if(pthread_create(&thread1, NULL, netsnmp_prefix_listen, &list_info) < 0)
+       snmp_log(LOG_ERR,"Unable to create thread\n");
+#endif
 }
 
 /*
@@ -878,3 +905,162 @@ netsnmp_linux_interface_get_if_speed(int fd, const char *name)
     }
     return retspeed;
 }
+#ifdef SUPPORT_PREFIX_FLAGS
+void *netsnmp_prefix_listen(netsnmp_prefix_listen_info *listen_info)
+{
+    struct {
+                struct nlmsghdr n;
+                struct ifinfomsg r;
+                char   buf[1024];
+    } req;
+
+    struct rtattr      *rta;
+    int                status;
+    char               buf[16384];
+    struct nlmsghdr    *nlmp;
+    struct rtattr      *rtatp;
+    struct in6_addr    *in6p;
+    struct sockaddr_nl localaddrinfo;
+    struct ifaddrmsg   *ifa;
+    struct prefixmsg   *prefix;
+    unsigned           groups = 0;
+    struct rtattr      *index_table[IFA_MAX+1];
+    char               in6pAddr[40];
+    int                flag1 = 0,flag2 = 0;
+    int                onlink = 2,autonomous = 2; /*Assume as false*/
+    prefix_cbx         *new;
+    int                iret;
+    int                len, req_len, length; 
+    int fd = socket(PF_NETLINK, SOCK_DGRAM, NETLINK_ROUTE);
+
+
+    memset(&localaddrinfo, 0, sizeof(struct sockaddr_nl));
+    memset(&in6pAddr, '\0', sizeof(in6pAddr));
+
+    groups |= RTMGRP_IPV6_IFADDR;
+    groups |= RTMGRP_IPV6_PREFIX;
+    localaddrinfo.nl_family = AF_NETLINK;
+    localaddrinfo.nl_groups = groups;
+
+    if (bind(fd, (struct sockaddr*)&localaddrinfo, sizeof(localaddrinfo)) < 0) {
+        snmp_log(LOG_ERR,"Bind failed. Exiting thread\n");
+        exit(0);
+    }
+
+    memset(&req, 0, sizeof(req));
+    req.n.nlmsg_len = NLMSG_LENGTH(sizeof(struct ifinfomsg));
+    req.n.nlmsg_flags = NLM_F_REQUEST | NLM_F_ROOT;
+    req.n.nlmsg_type = RTM_GETLINK;
+    req.r.ifi_family = AF_INET6;
+    rta = (struct rtattr *)(((char *)&req) + NLMSG_ALIGN(req.n.nlmsg_len));
+    rta->rta_len = RTA_LENGTH(16);
+
+    status = send(fd, &req, req.n.nlmsg_len, 0);
+    if (status < 0) {
+        snmp_log(LOG_ERR,"Send failed. Exiting thread\n");
+        exit(0);
+    }
+
+    while(1) {
+          status = recv(fd, buf, sizeof(buf), 0);
+          if (status < 0) {
+              snmp_log(LOG_ERR,"Recieve failed. Exiting thread\n");
+              exit(0);
+          }
+
+          if(status == 0){
+             snmp_log(LOG_ERR,"End of File\n");
+             continue;
+          }
+
+          for(nlmp = (struct nlmsghdr *)buf; status > sizeof(*nlmp);){
+              len = nlmp->nlmsg_len;
+              req_len = len - sizeof(*nlmp);
+
+              if (req_len < 0 || len > status) {
+                  snmp_log(LOG_ERR,"Error in length. Exiting thread\n");
+                  exit(0);
+              }
+
+              if (!NLMSG_OK(nlmp, status)) {
+                  snmp_log(LOG_ERR,"NLMSG not OK\n");
+                  continue;
+              }
+
+              if (nlmp->nlmsg_type == RTM_NEWADDR || nlmp->nlmsg_type == RTM_DELADDR) {
+                  ifa = NLMSG_DATA(nlmp);
+                  length = nlmp->nlmsg_len;
+                  length -= NLMSG_LENGTH(sizeof(*ifa));
+
+                  if (length < 0) {
+                      snmp_log(LOG_ERR," wrong nlmsg length %d\n", length);
+                      continue;
+                  }
+                  memset(index_table, 0, sizeof(struct rtattr *) * (IFA_MAX + 1));
+                  if(!ifa->ifa_flags) {
+                     rtatp = IFA_RTA(ifa);
+                     while (RTA_OK(rtatp, length)) {
+                            if (rtatp->rta_type <= IFA_MAX)
+                                index_table[rtatp->rta_type] = rtatp;
+                            rtatp = RTA_NEXT(rtatp,length);
+                            }
+                            if (index_table[IFA_ADDRESS]) {
+                                in6p = (struct in6_addr *)RTA_DATA(index_table[IFA_ADDRESS]);
+                                if(nlmp->nlmsg_type == RTM_DELADDR) {
+                                   sprintf(in6pAddr, "%04x%04x%04x%04x%04x%04x%04x%04x", NIP6(*in6p));
+                                   flag1 = -1;
+                                } else {
+                                   sprintf(in6pAddr, "%04x%04x%04x%04x%04x%04x%04x%04x", NIP6(*in6p));
+                                   flag1 = 1;
+                                }
+
+                            }
+                  }
+              }
+
+              if(nlmp->nlmsg_type == RTM_NEWPREFIX) {
+                 prefix = NLMSG_DATA(nlmp);
+                 length = nlmp->nlmsg_len;
+                 length -= NLMSG_LENGTH(sizeof(*prefix));
+
+                 if (length < 0) {
+                     snmp_log(LOG_ERR,"wrong nlmsg length %d\n", length);
+                     continue;
+                 }
+                 flag2 = 1;
+                 if (prefix->prefix_flags & IF_PREFIX_ONLINK)
+                     onlink = 1;
+                 if (prefix->prefix_flags & IF_PREFIX_AUTOCONF)
+                     autonomous = 1;
+              }
+              status -= NLMSG_ALIGN(len);
+              nlmp = (struct nlmsghdr*)((char*)nlmp + NLMSG_ALIGN(len));
+          }
+          if((flag1 == 1) && (flag2 == 1)){
+              if(!(new = net_snmp_create_prefix_info (onlink, autonomous, in6pAddr)))
+                 snmp_log(LOG_ERR,"Unable to create prefix info\n");
+              else {
+                    iret = net_snmp_update_prefix_info (listen_info->list_head, new, listen_info->lockinfo);
+                    if(iret < 0) {
+                       snmp_log(LOG_ERR, "Unable to add/update prefix info\n");
+                       free(new);
+                    }
+                    if(iret == 2) /*Only when enrty already exists and we are only updating*/
+                       free(new);
+              }      
+              flag1 = flag2 = 0;
+              onlink = autonomous = 2; /*Set to defaults again*/
+          } else if (flag1 == -1) {
+              iret = net_snmp_delete_prefix_info (listen_info->list_head, in6pAddr, listen_info->lockinfo);
+              if(iret < 0)
+                 snmp_log(LOG_ERR,"Unable to delete the prefix info\n");
+              if(!iret)
+                 snmp_log(LOG_ERR,"Unable to find the node to delete\n");
+              flag1 = 0;
+          }
+    }
+    
+}      
+#endif          
+   
+

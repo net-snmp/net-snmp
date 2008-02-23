@@ -251,6 +251,23 @@ ipAddressPrefixTable_container_load(netsnmp_container *container)
                                       ia_address_len,
                                       addr_rowreq_ctx->data->
                                       ia_prefix_len);
+        netsnmp_ipaddress_flags_copy(&rowreq_ctx->data.
+                                     ipAddressPrefixAdvPreferredLifetime,
+                                     &rowreq_ctx->data.
+                                     ipAddressPrefixAdvValidLifetime,
+                                     &rowreq_ctx->data.
+                                     ipAddressPrefixOnLinkFlag,
+                                     &rowreq_ctx->data.
+                                     ipAddressPrefixAutonomousFlag,  
+                                     &addr_rowreq_ctx->data->
+                                     ia_prefered_lifetime,
+                                     &addr_rowreq_ctx->data->
+                                     ia_valid_lifetime,
+                                     &addr_rowreq_ctx->data->
+                                     ia_onlink_flag,
+                                     &addr_rowreq_ctx->data->
+                                     ia_autonomous_flag);
+
         if (MFD_SUCCESS !=
             ipAddressPrefixTable_indexes_set(rowreq_ctx,
                                              addr_rowreq_ctx->data->
@@ -277,8 +294,14 @@ ipAddressPrefixTable_container_load(netsnmp_container *container)
          * TODO:352:r: |   |-> populate ipAddressPrefixTable data context.
          * Populate data context here. (optionally, delay until row prep)
          */
-        rowreq_ctx->data.ipAddressPrefixOrigin =
-            addr_rowreq_ctx->data->ia_origin;
+           netsnmp_ipaddress_prefix_origin_copy(&rowreq_ctx->data.
+                                             ipAddressPrefixOrigin,
+                                             addr_rowreq_ctx->data->
+                                             ia_origin,
+                                             addr_rowreq_ctx->data->
+                                             flags,
+                                             addr_rowreq_ctx->tbl_idx.
+                                             ipAddressAddrType);
 
         /** defer the rest til row prep */
 
