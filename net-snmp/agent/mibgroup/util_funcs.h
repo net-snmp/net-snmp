@@ -9,7 +9,18 @@ extern "C" {
 #endif
 
 #include "struct.h"
-
+typedef struct prefix_info
+{
+   struct prefix_info *next_info;
+   unsigned long ipAddressPrefixOnLinkFlag;
+   unsigned long ipAddressPrefixAutonomousFlag;
+   char in6p[40];
+}prefix_cbx;
+typedef struct 
+{
+ prefix_cbx **list_head;
+ pthread_mutex_t *lockinfo;  
+}netsnmp_prefix_listen_info;
 void            Exit(int);
 int             shell_command(struct extensible *);
 int             exec_command(struct extensible *);
@@ -37,6 +48,32 @@ const char     *make_tempfile(void);
 #ifdef linux
 unsigned int    get_pid_from_inode(unsigned long long);
 #endif
+prefix_cbx *net_snmp_create_prefix_info(unsigned long OnLinkFlag,
+                                        unsigned long AutonomousFlag,
+                                        char *in6ptr);
+int net_snmp_find_prefix_info(prefix_cbx **head,
+                              char *address,
+                              prefix_cbx *node_to_find,
+                              pthread_mutex_t *lockid);
+int net_snmp_update_prefix_info(prefix_cbx **head,
+                                prefix_cbx *node_to_update,
+                                pthread_mutex_t *lockid);
+int net_snmp_search_update_prefix_info(prefix_cbx **head,
+                                       prefix_cbx *node_to_use,
+                                       int functionality,
+                                       pthread_mutex_t *lockid);
+int net_snmp_delete_prefix_info(prefix_cbx **head,
+                                char *address,
+                                pthread_mutex_t *lockid);
+#define NIP6(addr) \
+        ntohs((addr).s6_addr16[0]), \
+        ntohs((addr).s6_addr16[1]), \
+        ntohs((addr).s6_addr16[2]), \
+        ntohs((addr).s6_addr16[3]), \
+        ntohs((addr).s6_addr16[4]), \
+        ntohs((addr).s6_addr16[5]), \
+        ntohs((addr).s6_addr16[6]), \
+        ntohs((addr).s6_addr16[7])
 
 #define     satosin(x)      ((struct sockaddr_in *) &(x))
 #define     SOCKADDR(x)     (satosin(x)->sin_addr.s_addr)

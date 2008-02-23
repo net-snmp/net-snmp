@@ -12,6 +12,8 @@
 #include <net-snmp/data_access/interface.h>
 
 #include "ip-mib/ipAddressTable/ipAddressTable_constants.h"
+#include "ip-mib/ipAddressPrefixTable/ipAddressPrefixTable_constants.h"
+#include "mibgroup/util_funcs.h"
 
 #include <errno.h>
 #include <sys/ioctl.h>
@@ -19,15 +21,29 @@
 #if defined (NETSNMP_ENABLE_IPV6)
 #include <linux/types.h>
 #include <asm/types.h>
-#ifdef HAVE_LINUX_RTNETLINK_H
+#if defined(HAVE_PTHREAD_H) && defined(HAVE_LINUX_RTNETLINK_H)
 #include <linux/netlink.h>
+#include <pthread.h>
 #include <linux/rtnetlink.h>
-#endif
+#ifdef RTMGRP_IPV6_PREFIX
+#define SUPPORT_PREFIX_FLAGS 1
+#endif /* RTMGRP_IPV6_PREFIX */
+#endif /* HAVE_PTHREAD_H && HAVE_LINUX_RTNETLINK_H */
 #endif
 
 #include "ipaddress_ioctl.h"
-
+#ifdef SUPPORT_PREFIX_FLAGS
+extern prefix_cbx *prefix_head_list;
+extern pthread_mutex_t prefix_mutex_lock;
+#endif
 int _load_v6(netsnmp_container *container, int idx_offset);
+#ifdef HAVE_LINUX_RTNETLINK_H
+int
+netsnmp_access_ipaddress_extra_prefix_info(int index,
+                                           u_long *preferedlt,
+                                           ulong *validlt,
+                                           char *addr);
+#endif
 
 /*
  * initialize arch specific storage
@@ -194,6 +210,7 @@ _load_v6(netsnmp_container *container, int idx_offset)
     u_char          *buf;
     int             if_index, pfx_len, scope, flags, rc = 0;
     size_t          in_len, out_len;
+    prefix_cbx      prefix_val;
     netsnmp_ipaddress_entry *entry;
     _ioctl_extras           *extras;
     static int      log_open_err = 1;
@@ -251,6 +268,7 @@ _load_v6(netsnmp_container *container, int idx_offset)
         in_len = entry->ia_address_len = sizeof(entry->ia_address);
         netsnmp_assert(16 == in_len);
         out_len = 0;
+        entry->flags = flags;
         buf = entry->ia_address;
         if(1 != netsnmp_hex_to_binary(&buf, &in_len,
                                       &out_len, 0, addr, ":")) {
@@ -345,6 +363,30 @@ _load_v6(netsnmp_container *container, int idx_offset)
             entry->ia_storagetype = STORAGETYPE_PERMANENT;
 
         /* xxx-rks: what can we do with scope? */
+#ifdef HAVE_LINUX_RTNETLINK_H
+        if(netsnmp_access_ipaddress_extra_prefix_info(entry->if_index, &entry->ia_prefered_lifetime
+                                                      ,&entry->ia_valid_lifetime, addr) < 0){
+           snmp_log(LOG_ERR,"unable to fetch extra prefix info\n");
+        }
+#else
+        entry->ia_prefered_lifetime = 0;
+        entry->ia_valid_lifetime = 0;
+#endif
+#ifdef SUPPORT_PREFIX_FLAGS
+        memset(&prefix_val, 0, sizeof(prefix_cbx));
+        if(net_snmp_find_prefix_info(&prefix_head_list, addr, &prefix_val, &prefix_mutex_lock) < 0) {
+           snmp_log(LOG_ERR, "unable to find info\n");
+           entry->ia_onlink_flag = 1;  /*Set by default as true*/
+           entry->ia_autonomous_flag = 2; /*Set by default as false*/
+
+        } else {
+           entry->ia_onlink_flag = prefix_val.ipAddressPrefixOnLinkFlag; 
+           entry->ia_autonomous_flag = prefix_val.ipAddressPrefixAutonomousFlag;
+        }  
+#else
+        entry->ia_onlink_flag = 1;  /*Set by default as true*/
+        entry->ia_autonomous_flag = 2; /*Set by default as false*/
+#endif
 
         /*
          * add entry to container
@@ -448,5 +490,101 @@ netsnmp_access_other_info_get(int index, int family)
     return addr;
 #endif
 }
+
+#ifdef HAVE_LINUX_RTNETLINK_H
+int
+netsnmp_access_ipaddress_extra_prefix_info(int index, u_long *preferedlt,
+                                           ulong *validlt, char *addr)
+{
+
+    struct {
+            struct nlmsghdr nlhdr;
+            struct ifaddrmsg ifaceinfo;
+            char   buf[1024];
+    } req;
+
+    struct rtattr        *rta;
+    int                  status;
+    char                 buf[16384];
+    char                 tmpaddr[40];
+    struct nlmsghdr      *nlmp;
+    struct ifaddrmsg     *rtmp;
+    struct rtattr        *rtatp;
+    struct ifa_cacheinfo *cache_info;
+    struct in6_addr      *in6p;
+    int                  rtattrlen;
+    int                  sd;
+    int                  reqaddr = 0;
+    sd = socket(PF_NETLINK, SOCK_DGRAM, NETLINK_ROUTE);
+    if(sd < 0) {
+       snmp_log(LOG_ERR, "could not open netlink socket\n");
+       return -1;
+    }
+    memset(&req, 0, sizeof(req));
+    req.nlhdr.nlmsg_len = NLMSG_LENGTH(sizeof(struct ifaddrmsg));
+    req.nlhdr.nlmsg_flags = NLM_F_REQUEST | NLM_F_ROOT;
+    req.nlhdr.nlmsg_type = RTM_GETADDR;
+    req.ifaceinfo.ifa_family = AF_INET6;
+    rta = (struct rtattr *)(((char *)&req) + NLMSG_ALIGN(req.nlhdr.nlmsg_len));
+    rta->rta_len = RTA_LENGTH(16); /*For ipv6*/
+
+    status = send (sd, &req, req.nlhdr.nlmsg_len, 0);
+    if (status < 0) {
+        snmp_log(LOG_ERR, "could not send netlink request\n");
+        return -1;
+    }
+    status = recv (sd, buf, sizeof(buf), 0);
+    if (status < 0) {
+        snmp_log (LOG_ERR, "could not recieve netlink request\n");
+        return -1;
+    }
+    if (status == 0) {
+       snmp_log (LOG_ERR, "nothing to read\n");
+       return -1;
+    }
+    for (nlmp = (struct nlmsghdr *)buf; status > sizeof(*nlmp); ){
+
+        int len = nlmp->nlmsg_len;
+        int req_len = len - sizeof(*nlmp);
+
+        if (req_len < 0 || len > status) {
+            snmp_log (LOG_ERR, "invalid netlink message\n");
+            return -1;
+        }
+
+        if (!NLMSG_OK (nlmp, status)) {
+            snmp_log (LOG_ERR, "invalid NLMSG message\n");
+            return -1;
+        }
+        rtmp = (struct ifaddrmsg *)NLMSG_DATA(nlmp);
+        rtatp = (struct rtattr *)IFA_RTA(rtmp);
+        rtattrlen = IFA_PAYLOAD(nlmp);
+        if(index == rtmp->ifa_index) {
+           for (; RTA_OK(rtatp, rtattrlen); rtatp = RTA_NEXT(rtatp, rtattrlen)) {
+                if(rtatp->rta_type == IFA_ADDRESS) {
+                   in6p = (struct in6_addr *)RTA_DATA(rtatp);
+                   sprintf(tmpaddr, "%04x%04x%04x%04x%04x%04x%04x%04x", NIP6(*in6p));
+                   if(!strcmp(tmpaddr ,addr))
+                       reqaddr = 1;
+                }
+                if(rtatp->rta_type == IFA_CACHEINFO) {
+                   cache_info = (struct ifa_cacheinfo *)RTA_DATA(rtatp);
+                   if(reqaddr) {
+                      reqaddr = 0;
+                      *validlt = cache_info->ifa_valid;
+                      *preferedlt = cache_info->ifa_prefered;
+                   }
+
+                }
+
+           }
+        }
+        status -= NLMSG_ALIGN(len);
+        nlmp = (struct nlmsghdr*)((char*)nlmp + NLMSG_ALIGN(len));
+    }
+    close(sd);
+    return 0;
+}
+#endif
 #endif
 
