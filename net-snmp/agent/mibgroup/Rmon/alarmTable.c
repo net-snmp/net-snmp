@@ -324,6 +324,8 @@ alarmTable_handler(netsnmp_mib_handler *handler,
     netsnmp_tdata_row *table_row;
     struct alarmTable_entry *table_entry;
     int             ret;
+    netsnmp_session *sess = NULL;
+    char           *secName;
 
     DEBUGMSGTL(( "rmon:alarmTable", "alarmTable_handler called.\n"));
     switch (reqinfo->mode) {
@@ -784,9 +786,7 @@ alarmTable_handler(netsnmp_mib_handler *handler,
                 case RMON1_ENTRY_VALID:
                     alarmTable_enable( table_entry );
                     break;
-                case RMON1_ENTRY_UNDER_CREATION: {
-                    netsnmp_session *sess = NULL;
-                    char *secName;
+                case RMON1_ENTRY_UNDER_CREATION:
                     alarmTable_disable( table_entry );
 #if 0
                     table_entry->session = (netsnmp_session *)
@@ -812,8 +812,7 @@ alarmTable_handler(netsnmp_mib_handler *handler,
                         }
                     }
 #endif
-                    break; }
-
+                    break;
                 case RMON1_ENTRY_INVALID:
                     table_row = netsnmp_tdata_extract_row(request);
                     table_data = netsnmp_tdata_extract_table(request);
