@@ -8,7 +8,11 @@
 extern "C" {
 #endif
 
+#ifdef HAVE_PTHREAD_H
+#include <pthread.h>
+#endif
 #include "struct.h"
+
 typedef struct prefix_info
 {
    struct prefix_info *next_info;
