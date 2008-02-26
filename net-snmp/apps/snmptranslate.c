@@ -240,6 +240,7 @@ main(int argc, char *argv[])
         }
     }
 
+    snmp_enable_stderrlog();
     init_snmp("snmpapp");
     if (optind < argc)
         current_name = argv[optind];
