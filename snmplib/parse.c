@@ -916,7 +916,6 @@ free_node(struct node *np)
 static void
 print_nodes(FILE * fp, struct node *root)
 {
-    extern void     xmalloc_stats(FILE *);
     struct enum_list *ep;
     struct index_list *ip;
     struct range_list *rp;
@@ -4159,7 +4158,7 @@ new_module(const char *name, const char *file)
 
 
 static void
-scan_objlist(struct node *root, struct objgroup *list, const char *error)
+scan_objlist(struct node *root, struct module *mp, struct objgroup *list, const char *error)
 {
     int             oLine = mibLine;
 
@@ -4174,8 +4173,16 @@ scan_objlist(struct node *root, struct objgroup *list, const char *error)
             else
                 break;
         if (!np) {
-            mibLine = gp->line;
-            print_error(error, gp->name, QUOTESTRING);
+	    int i;
+	    struct module_import *mip;
+	    /* if not local, check if it was IMPORTed */
+	    for (i = 0, mip = mp->imports; i < mp->no_imports; i++, mip++)
+		if (strcmp(mip->label, gp->name) == 0)
+		    break;
+	    if (i == mp->no_imports) {
+		mibLine = gp->line;
+		print_error(error, gp->name, QUOTESTRING);
+	    }
         }
         free(gp->name);
         free(gp);
@@ -4190,6 +4197,9 @@ scan_objlist(struct node *root, struct objgroup *list, const char *error)
 static struct node *
 parse(FILE * fp, struct node *root)
 {
+#ifdef TEST
+    extern void     xmalloc_stats(FILE *);
+#endif
     char            token[MAXTOKEN];
     char            name[MAXTOKEN];
     int             type = LABEL;
@@ -4234,15 +4244,15 @@ parse(FILE * fp, struct node *root)
                 printf("\nNodes for Module %s:\n", name);
                 print_nodes(stdout, root);
 #endif
-                scan_objlist(root, objgroups, "Undefined OBJECT-GROUP");
-                scan_objlist(root, objects, "Undefined OBJECT");
-                scan_objlist(root, notifs, "Undefined NOTIFICATION");
-                objgroups = oldgroups;
-                objects = oldobjects;
-                notifs = oldnotifs;
                 for (mp = module_head; mp; mp = mp->next)
                     if (mp->modid == current_module)
                         break;
+                scan_objlist(root, mp, objgroups, "Undefined OBJECT-GROUP");
+                scan_objlist(root, mp, objects, "Undefined OBJECT");
+                scan_objlist(root, mp, notifs, "Undefined NOTIFICATION");
+                objgroups = oldgroups;
+                objects = oldobjects;
+                notifs = oldnotifs;
                 do_linkup(mp, root);
                 np = root = NULL;
             }
@@ -4250,7 +4260,7 @@ parse(FILE * fp, struct node *root)
 #ifdef TEST
             if (netsnmp_ds_get_int(NETSNMP_DS_LIBRARY_ID, 
 				   NETSNMP_DS_LIB_MIB_WARNINGS)) {
-                xmalloc_stats(stderr);
+                // xmalloc_stats(stderr);
 	    }
 #endif
             continue;
@@ -4847,7 +4857,7 @@ read_all_mibs()
 
 
 #ifdef TEST
-main(int argc, char *argv[])
+int main(int argc, char *argv[])
 {
     int             i;
     struct tree    *tp;
