@@ -17,7 +17,7 @@
                       USA
 
           Tel:    +1  310-823-9358
-          E-Mail: iana@iana.org"
+          E-Mail: iana&iana.org"
       DESCRIPTION
           "The MIB module defines the AddressFamilyNumbers
           textual convention."
@@ -86,10 +86,11 @@
           fibreChannelWWPN(22),  -- Fibre Channel World-Wide Port Name 
           fibreChannelWWNN(23),  -- Fibre Channel World-Wide Node Name
           gwid(24),    -- Gateway Identifier 
+          afi(25),  -- AFI for L2VPN information
           reserved(65535)
 
           Requests for new values should be made to IANA via
-          email (iana@iana.org)."
+          email (iana&iana.org)."
       SYNTAX  INTEGER {
                   other(0),
                   ipV4(1),
@@ -116,6 +117,7 @@
                   fibreChannelWWPN(22),
                   fibreChannelWWNN(23),
                   gwid(24),
+                  afi(25),
                   reserved(65535)
               }
       END
