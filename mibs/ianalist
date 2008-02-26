@@ -1,4 +1,4 @@
-# updated 2005-01-06
+# updated 2007-05-03
 ianaiftype-mib			IANAifType-MIB
 ianalanguage-mib		IANA-LANGUAGE-MIB
 ianaaddressfamilynumbers-mib	IANA-ADDRESS-FAMILY-NUMBERS-MIB
@@ -9,3 +9,5 @@ ianacharset-mib			IANA-CHARSET-MIB
 ianaprinter-mib			IANA-PRINTER-MIB
 ianafinisher-mib		IANA-FINISHER-MIB
 ianaitualarmtc-mib		IANA-ITU-ALARM-TC-MIB
+ianamau-mib			IANA-MAU-MIB
+ianagmplstc-mib			IANA-GMPLS-TC-MIB
