@@ -1,4 +1,3 @@
-
 IANA-RTPROTO-MIB DEFINITIONS ::= BEGIN
 
 IMPORTS
@@ -15,7 +14,7 @@ ianaRtProtoMIB  MODULE-IDENTITY
               Marina del Rey, CA 90292-6601
 
               Phone: +1 310 823 9358
-              EMail: iana@iana.org"
+              EMail: iana&iana.org"
     DESCRIPTION
             "This MIB module defines the IANAipRouteProtocol and
             IANAipMRouteProtocol textual conventions for use in MIBs
@@ -32,12 +31,10 @@ ianaRtProtoMIB  MODULE-IDENTITY
     REVISION     "200009260000Z"  -- September 26, 2000 
     DESCRIPTION  "Original version, published in coordination
                  with RFC 2932."
-
     ::= { mib-2 84 }
 
 IANAipRouteProtocol ::= TEXTUAL-CONVENTION
    STATUS      current
-
    DESCRIPTION
             "A mechanism for learning routes.  Inclusion of values for
             routing protocols is not intended to imply that those
@@ -88,5 +85,3 @@ IANAipMRouteProtocol ::= TEXTUAL-CONVENTION
                }
 
 END
-
-
