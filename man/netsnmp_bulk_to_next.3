@@ -1,4 +1,4 @@
-.TH "bulk_to_next" 3 "12 Apr 2007" "Version 5.2.4" "net-snmp" \" -*- nroff -*-
+.TH "bulk_to_next" 3 "27 Feb 2008" "Version 5.2.4" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -28,7 +28,7 @@ bulk_to_next \- Convert GETBULK requests into GETNEXT requests for the handler.
 .PP 
 Convert GETBULK requests into GETNEXT requests for the handler. 
 .PP
-The only purpose of this handler is to convert a GETBULK request to a GETNEXT request. It is inserted into handler chains where the handler has not set the HANDLER_CAN_GETBULK flag.
+The only purpose of this handler is to convert a GETBULK request to a GETNEXT request. It is inserted into handler chains where the handler has not set the HANDLER_CAN_GETBULK flag. 
 .SH "Function Documentation"
 .PP 
 .SS "void netsnmp_bulk_to_next_fix_requests (\fBnetsnmp_request_info\fP * requests)"
@@ -37,16 +37,14 @@ takes answered requests and decrements the repeat count and updates the requests
 .PP
 Definition at line 46 of file bulk_to_next.c.
 .PP
-References netsnmp_request_info_s::inclusive, variable_list::name, variable_list::name_length, netsnmp_request_info_s::next, variable_list::next_variable, netsnmp_request_info_s::range_end, netsnmp_request_info_s::range_end_len, netsnmp_request_info_s::repeat, netsnmp_request_info_s::requestvb, snmp_oid_compare(), snmp_set_var_objid(), and variable_list::type.
-.PP
-Referenced by netsnmp_bulk_to_next_helper().
+References netsnmp_request_info_s::inclusive, variable_list::name, variable_list::name_length, netsnmp_request_info_s::next, variable_list::next_variable, netsnmp_request_info_s::range_end, netsnmp_request_info_s::range_end_len, netsnmp_request_info_s::repeat, netsnmp_request_info_s::requestvb, snmp_oid_compare(), and variable_list::type.
 .SS "\fBnetsnmp_mib_handler\fP* netsnmp_get_bulk_to_next_handler (void)"
 .PP
 returns a bulk_to_next handler that can be injected into a given handler chain. 
 .PP
 Definition at line 31 of file bulk_to_next.c.
 .PP
-References netsnmp_mib_handler_s::flags, MIB_HANDLER_AUTO_NEXT, netsnmp_bulk_to_next_helper(), netsnmp_create_handler(), and NULL.
+References netsnmp_mib_handler_s::flags, and netsnmp_create_handler().
 .PP
 Referenced by netsnmp_init_bulk_to_next_helper(), and netsnmp_register_handler().
 .SS "void netsnmp_init_bulk_to_next_helper (void)"
@@ -56,3 +54,5 @@ initializes the bulk_to_next helper which then registers a bulk_to_next handler 
 Definition at line 131 of file bulk_to_next.c.
 .PP
 References netsnmp_get_bulk_to_next_handler(), and netsnmp_register_handler_by_name().
+.PP
+Referenced by netsnmp_init_helpers().

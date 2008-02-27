@@ -1,4 +1,4 @@
-.TH "table_array" 3 "12 Apr 2007" "Version 5.2.4" "net-snmp" \" -*- nroff -*-
+.TH "table_array" 3 "27 Feb 2008" "Version 5.2.4" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -9,7 +9,7 @@ table_array \- Helps you implement a table when data can be stored locally.
 
 .in +1c
 .ti -1c
-.RI "int \fBnetsnmp_table_container_register\fP (\fBnetsnmp_handler_registration\fP *reginfo, \fBnetsnmp_table_registration_info\fP *tabreg, \fBnetsnmp_table_array_callbacks\fP *cb, \fBnetsnmp_container\fP *container, int group_rows)"
+.RI "int \fBnetsnmp_table_container_register\fP (\fBnetsnmp_handler_registration\fP *reginfo, \fBnetsnmp_table_registration_info\fP *tabreg, netsnmp_table_array_callbacks *cb, netsnmp_container *container, int group_rows)"
 .br
 .RI "\fIregister specified callbacks for the specified table/oid. \fP"
 .ti -1c
@@ -17,11 +17,11 @@ table_array \- Helps you implement a table when data can be stored locally.
 .br
 .RI "\fIfind the handler for the table_array helper. \fP"
 .ti -1c
-.RI "\fBnetsnmp_container\fP * \fBnetsnmp_extract_array_context\fP (\fBnetsnmp_request_info\fP *request)"
+.RI "netsnmp_container * \fBnetsnmp_extract_array_context\fP (\fBnetsnmp_request_info\fP *request)"
 .br
 .RI "\fIfind the context data used by the table_array helper \fP"
 .ti -1c
-.RI "int \fBnetsnmp_table_array_check_row_status\fP (\fBnetsnmp_table_array_callbacks\fP *cb, \fBnetsnmp_request_group\fP *ag, long *rs_new, long *rs_old)"
+.RI "int \fBnetsnmp_table_array_check_row_status\fP (netsnmp_table_array_callbacks *cb, netsnmp_request_group *ag, long *rs_new, long *rs_old)"
 .br
 .RI "\fIthis function is called to validate RowStatus transitions. \fP"
 .in -1c
@@ -53,10 +53,10 @@ If your table contains a RowStatus object, by default the code will not allow ob
 .PP
 Code will be generated to maintain a secondary index for all rows, stored in a binary tree. This is very useful for finding rows by a key other than the OID index. By default, the functions for maintaining this tree will be based on a character string. NOTE: this will likely be made into a more generic mechanism, using new callback methods, in the near future.
 .PP
-The generated code contains many TODO comments. Make sure you check each one to see if it applies to your code. Examples include checking indices for syntax (ranges, etc), initializing default values in newly created rows, checking for row activation and deactivation requirements, etc.
+The generated code contains many TODO comments. Make sure you check each one to see if it applies to your code. Examples include checking indices for syntax (ranges, etc), initializing default values in newly created rows, checking for row activation and deactivation requirements, etc. 
 .SH "Function Documentation"
 .PP 
-.SS "\fBnetsnmp_container\fP* netsnmp_extract_array_context (\fBnetsnmp_request_info\fP * request)"
+.SS "netsnmp_container* netsnmp_extract_array_context (\fBnetsnmp_request_info\fP * request)"
 .PP
 find the context data used by the table_array helper 
 .PP
@@ -67,22 +67,24 @@ References netsnmp_request_get_list_data().
 .PP
 find the handler for the table_array helper. 
 .PP
+
+.PP
 Definition at line 202 of file table_array.c.
 .PP
-References netsnmp_mib_handler_s::access_method, netsnmp_handler_registration_s::handler, netsnmp_mib_handler_s::next, and NULL.
-.SS "int netsnmp_table_array_check_row_status (\fBnetsnmp_table_array_callbacks\fP * cb, \fBnetsnmp_request_group\fP * ag, long * rs_new, long * rs_old)"
+References netsnmp_mib_handler_s::access_method, netsnmp_handler_registration_s::handler, and netsnmp_mib_handler_s::next.
+.SS "int netsnmp_table_array_check_row_status (netsnmp_table_array_callbacks * cb, netsnmp_request_group * ag, long * rs_new, long * rs_old)"
 .PP
 this function is called to validate RowStatus transitions. 
 .PP
-Definition at line 226 of file table_array.c.
+
 .PP
-References netsnmp_table_array_callbacks_s::can_activate, netsnmp_table_array_callbacks_s::can_deactivate, netsnmp_table_array_callbacks_s::can_delete, netsnmp_request_group_s::existing_row, NULL, netsnmp_request_group_s::row_deleted, and netsnmp_request_group_s::undo_info.
-.SS "int netsnmp_table_container_register (\fBnetsnmp_handler_registration\fP * reginfo, \fBnetsnmp_table_registration_info\fP * tabreg, \fBnetsnmp_table_array_callbacks\fP * cb, \fBnetsnmp_container\fP * container, int group_rows)"
+Definition at line 226 of file table_array.c.
+.SS "int netsnmp_table_container_register (\fBnetsnmp_handler_registration\fP * reginfo, \fBnetsnmp_table_registration_info\fP * tabreg, netsnmp_table_array_callbacks * cb, netsnmp_container * container, int group_rows)"
 .PP
 register specified callbacks for the specified table/oid. 
 .PP
-If the group_rows parameter is set, the row related callbacks will be called once for each unique row index. Otherwise, each callback will be called only once, for all objects.
+If the group_rows parameter is set, the row related callbacks will be called once for each unique row index. Otherwise, each callback will be called only once, for all objects. 
 .PP
 Definition at line 153 of file table_array.c.
 .PP
-References netsnmp_table_array_callbacks_s::can_set, table_container_data_s::cb, netsnmp_container_s::compare, netsnmp_table_array_callbacks_s::delete_row, netsnmp_table_array_callbacks_s::duplicate_row, netsnmp_handler_registration_s::handler, netsnmp_mib_handler_s::myvoid, netsnmp_container_s::ncompare, netsnmp_register_table(), NULL, netsnmp_table_array_callbacks_s::row_copy, snmp_log(), SNMP_MALLOC_TYPEDEF, table_container_data_s::table, and table_container_data_s::tblreg_info.
+References netsnmp_handler_registration_s::handler, netsnmp_mib_handler_s::myvoid, netsnmp_register_table(), snmp_log(), and SNMP_MALLOC_TYPEDEF.

@@ -1,4 +1,4 @@
-.TH "table_iterator" 3 "12 Apr 2007" "Version 5.2.4" "net-snmp" \" -*- nroff -*-
+.TH "table_iterator" 3 "27 Feb 2008" "Version 5.2.4" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -37,7 +37,7 @@ table_iterator \- The table iterator helper is designed to simplify the task of 
 
 .in +1c
 .ti -1c
-.RI "typedef \fBti_cache_info_s\fP \fBti_cache_info\fP"
+.RI "typedef struct ti_cache_info_s \fBti_cache_info\fP"
 .br
 .ti -1c
 .RI "typedef \fBnetsnmp_variable_list\fP *( \fBNetsnmp_First_Data_Point\fP )(void **loop_context, void **data_context, \fBnetsnmp_variable_list\fP *, struct \fBnetsnmp_iterator_info_s\fP *)"
@@ -55,7 +55,7 @@ table_iterator \- The table iterator helper is designed to simplify the task of 
 .RI "typedef void( \fBNetsnmp_Free_Data_Context\fP )(void *, struct \fBnetsnmp_iterator_info_s\fP *)"
 .br
 .ti -1c
-.RI "typedef \fBnetsnmp_iterator_info_s\fP \fBnetsnmp_iterator_info\fP"
+.RI "typedef struct \fBnetsnmp_iterator_info_s\fP \fBnetsnmp_iterator_info\fP"
 .br
 .RI "\fITypedefs the \fBnetsnmp_iterator_info_s\fP struct into netsnmp_iterator_info. \fP"
 .in -1c
@@ -87,7 +87,7 @@ table_iterator \- The table iterator helper is designed to simplify the task of 
 
 .in +1c
 .ti -1c
-.RI "\fBNetsnmp_Node_Handler\fP \fBnetsnmp_table_iterator_helper_handler\fP"
+.RI "Netsnmp_Node_Handler \fBnetsnmp_table_iterator_helper_handler\fP"
 .br
 .in -1c
 .SH "Detailed Description"
@@ -113,7 +113,7 @@ the get_first_data_point hook is called at the beginning of processing. It shoul
 .PP
 .PP
 .IP "\(bu" 2
-the get_next_data_point hook is then called repeatedly and is passed the loop context and the data context for it to update. The indexes, loop context and data context should all be updated if more data is available, otherwise they should be left alone and a NULL should be returned. Ideally, it should update the loop context without the need to reallocate it. If reallocation is necessary for every iterative step, then the free_loop_context function pointer should be set. If not, then the free_loop_context_at_end pointer should be set, which is more efficient since a malloc/free will only be performed once for every iteration.
+the get_next_data_point hook is then called repeatedly and is passed the loop context and the data context for it to update. The indexes, loop context and data context should all be updated if more data is available, otherwise they should be left alone and a NULL should be returned. Ideally, it should update the loop context without the need to reallocate it. If reallocation is necessary for every iterative step, then the free_loop_context function pointer should be set. If not, then the free_loop_context_at_end pointer should be set, which is more efficient since a malloc/free will only be performed once for every iteration. 
 .PP
 
 .SH "Typedef Documentation"
@@ -137,21 +137,21 @@ This function extracts the table iterator specific data from a netsnmp_request_i
 .PP
 \fBReturns:\fP
 .RS 4
-a void pointer(request->parent_data->data), otherwise NULL is returned if request is NULL or request->parent_data is NULL or request->parent_data object is not found.the net
+a void pointer(request->parent_data->data), otherwise NULL is returned if request is NULL or request->parent_data is NULL or request->parent_data object is not found.the net 
 .RE
 .PP
 
 .PP
 Definition at line 169 of file table_iterator.c.
 .PP
-References netsnmp_request_get_list_data(), and TABLE_ITERATOR_NAME.
+References netsnmp_request_get_list_data().
 .SS "\fBnetsnmp_mib_handler\fP * netsnmp_get_table_iterator_handler (\fBnetsnmp_iterator_info\fP * iinfo)"
 .PP
 returns a netsnmp_mib_handler object for the table_iterator helper 
 .PP
 Definition at line 107 of file table_iterator.c.
 .PP
-References netsnmp_mib_handler_s::myvoid, netsnmp_create_handler(), netsnmp_table_iterator_helper_handler, NULL, and TABLE_ITERATOR_NAME.
+References netsnmp_mib_handler_s::myvoid, and netsnmp_create_handler().
 .PP
 Referenced by netsnmp_register_table_iterator().
 .SS "void netsnmp_insert_iterator_context (\fBnetsnmp_request_info\fP * request, void * data)"
@@ -160,7 +160,7 @@ inserts table_iterator specific data for a newly created row into a request
 .PP
 Definition at line 177 of file table_iterator.c.
 .PP
-References build_oid_noalloc(), netsnmp_table_request_info_s::indexes, netsnmp_create_data_list(), netsnmp_extract_table_info(), netsnmp_request_add_list_data(), netsnmp_request_info_s::next, NULL, netsnmp_request_info_s::prev, snmp_oid_compare(), and TABLE_ITERATOR_NAME.
+References netsnmp_table_request_info_s::indexes, netsnmp_create_data_list(), netsnmp_extract_table_info(), netsnmp_request_add_list_data(), netsnmp_request_info_s::next, netsnmp_request_info_s::prev, and snmp_oid_compare().
 .SS "int netsnmp_register_table_iterator (\fBnetsnmp_handler_registration\fP * reginfo, \fBnetsnmp_iterator_info\fP * iinfo)"
 .PP
 Creates and registers a table iterator helper handler calling netsnmp_create_handler with a handler name set to TABLE_ITERATOR_NAME and access method, netsnmp_table_iterator_helper_handler. 
@@ -176,7 +176,7 @@ If NOT_SERIALIZED is not defined the function injects the serialize handler into
 .PP
 \fBReturns:\fP
 .RS 4
-MIB_REGISTERED_OK is returned if the registration was a success. Failures are MIB_REGISTRATION_FAILED, MIB_DUPLICATE_REGISTRATION. If iinfo is NULL, SNMPERR_GENERR is returned.
+MIB_REGISTERED_OK is returned if the registration was a success. Failures are MIB_REGISTRATION_FAILED, MIB_DUPLICATE_REGISTRATION. If iinfo is NULL, SNMPERR_GENERR is returned. 
 .RE
 .PP
 
@@ -190,4 +190,4 @@ implements the table_iterator helper
 .PP
 Definition at line 315 of file table_iterator.c.
 .PP
-References ti_cache_info_s::best_match, ti_cache_info_s::best_match_len, build_oid_noalloc(), netsnmp_table_request_info_s::colnum, netsnmp_data_list_s::data, ti_cache_info_s::data_context, netsnmp_iterator_info_s::flags, netsnmp_iterator_info_s::free_data_context, netsnmp_iterator_info_s::free_loop_context, netsnmp_iterator_info_s::free_loop_context_at_end, netsnmp_iterator_info_s::get_first_data_point, netsnmp_iterator_info_s::get_next_data_point, netsnmp_handler_registration_s::handlerName, netsnmp_table_request_info_s::indexes, netsnmp_table_registration_info_s::max_column, netsnmp_table_registration_info_s::min_column, netsnmp_agent_request_info_s::mode, netsnmp_mib_handler_s::myvoid, variable_list::name, variable_list::name_length, netsnmp_call_next_handler(), netsnmp_check_getnext_reply(), netsnmp_create_data_list(), netsnmp_extract_stash_cache(), netsnmp_extract_table_info(), netsnmp_find_table_registration_info(), netsnmp_free_request_data_sets(), netsnmp_get_list_node(), NETSNMP_ITERATOR_FLAG_SORTED, netsnmp_oid_stash_add_data(), netsnmp_request_add_list_data(), netsnmp_request_get_list_data(), netsnmp_request_info_s::next, NULL, netsnmp_request_info_s::parent_data, netsnmp_request_info_s::processed, netsnmp_request_info_s::requestvb, ti_cache_info_s::results, netsnmp_handler_registration_s::rootoid, netsnmp_handler_registration_s::rootoid_len, snmp_clone_varbind(), SNMP_FREE, snmp_free_var(), snmp_free_varbind(), snmp_log(), SNMP_MALLOC_TYPEDEF, snmp_oid_compare(), snmp_set_var_objid(), netsnmp_request_info_s::subtree, TABLE_ITERATOR_NAME, TABLE_ITERATOR_NOTAGAIN, netsnmp_iterator_info_s::table_reginfo, and TI_REQUEST_CACHE.
+References netsnmp_table_request_info_s::colnum, netsnmp_data_list_s::data, netsnmp_iterator_info_s::flags, netsnmp_iterator_info_s::free_data_context, netsnmp_iterator_info_s::free_loop_context, netsnmp_iterator_info_s::free_loop_context_at_end, netsnmp_iterator_info_s::get_first_data_point, netsnmp_iterator_info_s::get_next_data_point, netsnmp_handler_registration_s::handlerName, netsnmp_table_request_info_s::indexes, netsnmp_table_registration_info_s::max_column, netsnmp_table_registration_info_s::min_column, netsnmp_agent_request_info_s::mode, netsnmp_mib_handler_s::myvoid, variable_list::name, variable_list::name_length, netsnmp_call_next_handler(), netsnmp_check_getnext_reply(), netsnmp_create_data_list(), netsnmp_extract_stash_cache(), netsnmp_extract_table_info(), netsnmp_find_table_registration_info(), netsnmp_free_request_data_sets(), netsnmp_get_list_node(), netsnmp_oid_stash_add_data(), netsnmp_request_add_list_data(), netsnmp_request_get_list_data(), netsnmp_request_info_s::next, netsnmp_request_info_s::parent_data, netsnmp_request_info_s::processed, netsnmp_request_info_s::requestvb, netsnmp_handler_registration_s::rootoid, netsnmp_handler_registration_s::rootoid_len, SNMP_FREE, snmp_log(), SNMP_MALLOC_TYPEDEF, snmp_oid_compare(), netsnmp_request_info_s::subtree, and netsnmp_iterator_info_s::table_reginfo.

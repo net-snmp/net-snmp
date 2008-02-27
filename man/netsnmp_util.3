@@ -1,4 +1,4 @@
-.TH "Memory Utility Routines" 3 "12 Apr 2007" "Version 5.2.4" "net-snmp" \" -*- nroff -*-
+.TH "Memory Utility Routines" 3 "27 Feb 2008" "Version 5.2.4" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -166,35 +166,35 @@ Memory Utility Routines \-
 .RI "char * \fBdump_snmpEngineID\fP (const u_char *buf, size_t *buflen)"
 .br
 .ti -1c
-.RI "\fBmarker_t\fP \fBatime_newMarker\fP (void)"
+.RI "marker_t \fBatime_newMarker\fP (void)"
 .br
 .RI "\fIcreate a new time marker. \fP"
 .ti -1c
-.RI "void \fBatime_setMarker\fP (\fBmarker_t\fP pm)"
+.RI "void \fBatime_setMarker\fP (marker_t pm)"
 .br
 .RI "\fIset a time marker. \fP"
 .ti -1c
-.RI "long \fBatime_diff\fP (\fBmarker_t\fP first, \fBmarker_t\fP second)"
+.RI "long \fBatime_diff\fP (marker_t first, marker_t second)"
 .br
 .RI "\fIReturns the difference (in msec) between the two markers. \fP"
 .ti -1c
-.RI "u_long \fBuatime_diff\fP (\fBmarker_t\fP first, \fBmarker_t\fP second)"
+.RI "u_long \fBuatime_diff\fP (marker_t first, marker_t second)"
 .br
 .RI "\fIReturns the difference (in u_long msec) between the two markers. \fP"
 .ti -1c
-.RI "u_long \fBuatime_hdiff\fP (\fBmarker_t\fP first, \fBmarker_t\fP second)"
+.RI "u_long \fBuatime_hdiff\fP (marker_t first, marker_t second)"
 .br
 .RI "\fIReturns the difference (in u_long 1/100th secs) between the two markers (functionally this is what sysUpTime needs). \fP"
 .ti -1c
-.RI "int \fBatime_ready\fP (\fBmarker_t\fP pm, int deltaT)"
+.RI "int \fBatime_ready\fP (marker_t pm, int deltaT)"
 .br
 .RI "\fITest: Has (marked time plus delta) exceeded current time (in msec) ? Returns 0 if test fails or cannot be tested (no marker). \fP"
 .ti -1c
-.RI "int \fBuatime_ready\fP (\fBmarker_t\fP pm, unsigned int deltaT)"
+.RI "int \fBuatime_ready\fP (marker_t pm, unsigned int deltaT)"
 .br
 .RI "\fITest: Has (marked time plus delta) exceeded current time (in msec) ? Returns 0 if test fails or cannot be tested (no marker). \fP"
 .ti -1c
-.RI "int \fBmarker_tticks\fP (\fBmarker_t\fP pm)"
+.RI "int \fBmarker_tticks\fP (marker_t pm)"
 .br
 .RI "\fIReturn the number of timeTicks since the given marker. \fP"
 .ti -1c
@@ -253,35 +253,43 @@ Frees a pointer only if it is !NULL and sets its value to NULL.
 .PP
 Definition at line 53 of file tools.h.
 .PP
-Referenced by _sess_read(), build_oid_segment(), clear_callback(), clear_context(), clear_lookup_cache(), convert_v2pdu_to_v1(), create_user_from_session(), dump_chunk(), dump_registry(), fprint_description(), fprint_objid(), fprint_value(), fprint_variable(), free_agent_snmp_session(), get_module_node(), get_node(), get_set_cache(), init_mib(), netsnmp_addrcache_add(), netsnmp_agent_check_packet(), netsnmp_agent_check_parse(), netsnmp_cache_reqinfo_extract(), netsnmp_cache_reqinfo_insert(), netsnmp_config_remember_free_list(), netsnmp_create_handler(), netsnmp_deregister_agent_nsap(), netsnmp_fixup_mib_directory(), netsnmp_free_agent_request_info(), netsnmp_free_all_list_data(), netsnmp_free_cachemap(), netsnmp_free_delegated_cache(), netsnmp_free_list_data(), netsnmp_getenv(), netsnmp_handler_free(), netsnmp_handler_registration_free(), netsnmp_reassign_requests(), netsnmp_register_agent_nsap(), netsnmp_register_old_api(), netsnmp_sess_log_error(), netsnmp_set_mib_directory(), netsnmp_set_row_column(), netsnmp_sprint_realloc_objid(), netsnmp_sprint_realloc_objid_tree(), netsnmp_subtree_free(), netsnmp_subtree_join(), netsnmp_subtree_split(), netsnmp_table_build_oid_from_index(), netsnmp_table_data_delete_row(), netsnmp_table_data_set_helper_handler(), netsnmp_table_dataset_delete_data(), netsnmp_table_iterator_helper_handler(), netsnmp_wrap_up_request(), parse_octet_hint(), read_config_files(), read_objid(), shutdown_mib(), snmp_add_var(), snmp_free_pdu(), snmp_free_var(), snmp_sess_close(), snmp_unregister_callback(), snmpv3_make_report(), snmpv3_parse(), table_helper_handler(), unregister_all_config_handlers(), unregister_config_handler(), and unregister_mibs_by_session().
+Referenced by _sess_read(), netsnmp_cache_reqinfo_extract(), netsnmp_cache_reqinfo_insert(), netsnmp_create_handler(), netsnmp_fixup_mib_directory(), netsnmp_free_all_list_data(), netsnmp_free_delegated_cache(), netsnmp_free_list_data(), netsnmp_handler_free(), netsnmp_handler_registration_free(), netsnmp_register_old_api(), netsnmp_set_mib_directory(), netsnmp_set_row_column(), netsnmp_table_build_oid_from_index(), netsnmp_table_data_delete_row(), netsnmp_table_data_set_helper_handler(), netsnmp_table_dataset_delete_data(), netsnmp_table_iterator_helper_handler(), netsnmp_wrap_up_request(), snmp_unregister_callback(), table_helper_handler(), and unregister_config_handler().
 .SS "#define SNMP_MALLOC_STRUCT(s)   (struct s *) calloc(1, sizeof(struct s))"
 .PP
 Mallocs memory of sizeof(struct s), zeros it and returns a pointer to it. 
 .PP
+
+.PP
 Definition at line 64 of file tools.h.
 .PP
-Referenced by netsnmp_config_remember_in_list(), netsnmp_create_subtree_cache(), netsnmp_register_callback(), snmp_alarm_register(), and snmp_alarm_register_hr().
+Referenced by snmp_alarm_register(), and snmp_alarm_register_hr().
 .SS "#define SNMP_MALLOC_TYPEDEF(td)   (td *) calloc(1, sizeof(td))"
 .PP
 Mallocs memory of sizeof(t), zeros it and returns a pointer to it. 
 .PP
+
+.PP
 Definition at line 68 of file tools.h.
 .PP
-Referenced by add_subtree(), get_context_lookup_cache(), init_agent_snmp_session(), netsnmp_baby_steps_handler_get(), netsnmp_cache_create(), netsnmp_container_get_null(), netsnmp_container_iterator_get(), netsnmp_container_table_handler_get(), netsnmp_create_data_list(), netsnmp_create_delegated_cache(), netsnmp_create_handler(), netsnmp_create_table_data(), netsnmp_create_table_data_row(), netsnmp_create_table_data_set(), netsnmp_create_watcher_info(), netsnmp_ds_register_config(), netsnmp_ds_register_premib(), netsnmp_get_new_stash_cache(), netsnmp_get_or_add_local_cachid(), netsnmp_get_scalar_group_handler(), netsnmp_handler_registration_create(), netsnmp_mark_row_column_writable(), netsnmp_mode_end_call_add_mode_callback(), netsnmp_oid_stash_create_sized_node(), netsnmp_old_api_helper(), netsnmp_register_auto_data_table(), netsnmp_register_loghandler(), netsnmp_register_mib_table_row(), netsnmp_register_old_api(), netsnmp_register_save_list(), netsnmp_register_table_data_set(), netsnmp_set_row_column(), netsnmp_table_container_register(), netsnmp_table_data_set_create_newrowstash(), netsnmp_table_data_set_helper_handler(), netsnmp_table_iterator_helper_handler(), netsnmp_table_set_add_default_row(), save_set_cache(), snmp_varlist_add_variable(), and table_helper_handler().
+Referenced by netsnmp_baby_steps_handler_get(), netsnmp_cache_create(), netsnmp_container_table_handler_get(), netsnmp_create_data_list(), netsnmp_create_delegated_cache(), netsnmp_create_handler(), netsnmp_create_table_data(), netsnmp_create_table_data_row(), netsnmp_create_table_data_set(), netsnmp_handler_registration_create(), netsnmp_mark_row_column_writable(), netsnmp_mode_end_call_add_mode_callback(), netsnmp_oid_stash_create_sized_node(), netsnmp_old_api_helper(), netsnmp_register_auto_data_table(), netsnmp_register_mib_table_row(), netsnmp_register_old_api(), netsnmp_register_save_list(), netsnmp_register_table_data_set(), netsnmp_set_row_column(), netsnmp_table_container_register(), netsnmp_table_data_set_helper_handler(), netsnmp_table_iterator_helper_handler(), netsnmp_table_set_add_default_row(), and table_helper_handler().
 .SS "#define SNMP_MAX(a, b)   ((a) > (b) ? (a) : (b))"
 .PP
 Computers the maximum of a and b. 
 .PP
+
+.PP
 Definition at line 85 of file tools.h.
 .PP
-Referenced by netsnmp_config_parse_table_set(), netsnmp_create_subtree_cache(), and netsnmp_register_table_data_set().
+Referenced by netsnmp_register_table_data_set().
 .SS "#define SNMP_MIN(a, b)   ((a) > (b) ? (b) : (a))"
 .PP
 Computers the minimum of a and b. 
 .PP
+
+.PP
 Definition at line 89 of file tools.h.
 .PP
-Referenced by netsnmp_config_parse_table_set(), netsnmp_oid_find_prefix(), netsnmp_register_table_data_set(), netsnmp_scalar_group_helper_handler(), netsnmp_scalar_helper_handler(), and netsnmp_table_data_helper_handler().
+Referenced by netsnmp_register_table_data_set(), and netsnmp_table_data_helper_handler().
 .SS "#define SNMP_SWIPE_MEM(n, s)   do { if (n) free((void *)n); n = s; s=NULL; } while(0)"
 .PP
 Frees pointer n only if it is !NULL, sets n to s and sets s to NULL. 
@@ -291,39 +299,39 @@ Definition at line 57 of file tools.h.
 .PP
 Zeros l bytes of memory starting at s. 
 .PP
+
+.PP
 Definition at line 72 of file tools.h.
 .SH "Function Documentation"
 .PP 
-.SS "long atime_diff (\fBmarker_t\fP first, \fBmarker_t\fP second)"
+.SS "long atime_diff (marker_t first, marker_t second)"
 .PP
 Returns the difference (in msec) between the two markers. 
 .PP
-Definition at line 795 of file tools.c.
+Definition at line 790 of file tools.c.
 .PP
-Referenced by atime_ready(), and marker_tticks().
-.SS "\fBmarker_t\fP atime_newMarker (void)"
+Referenced by marker_tticks().
+.SS "marker_t atime_newMarker (void)"
 .PP
 create a new time marker. 
 .PP
-NOTE: Caller must free time marker when no longer needed.
+NOTE: Caller must free time marker when no longer needed. 
 .PP
-Definition at line 771 of file tools.c.
+Definition at line 766 of file tools.c.
 .PP
-Referenced by atime_ready(), marker_tticks(), netsnmp_stash_cache_update(), and uatime_ready().
-.SS "int atime_ready (\fBmarker_t\fP pm, int deltaT)"
+Referenced by marker_tticks(), and netsnmp_stash_cache_update().
+.SS "int atime_ready (marker_t pm, int deltaT)"
 .PP
 Test: Has (marked time plus delta) exceeded current time (in msec) ? Returns 0 if test fails or cannot be tested (no marker). 
 .PP
-Definition at line 850 of file tools.c.
-.PP
-References atime_diff(), and atime_newMarker().
+Definition at line 845 of file tools.c.
 .PP
 Referenced by netsnmp_cache_check_expired(), and netsnmp_stash_cache_update().
-.SS "void atime_setMarker (\fBmarker_t\fP pm)"
+.SS "void atime_setMarker (marker_t pm)"
 .PP
 set a time marker. 
 .PP
-Definition at line 782 of file tools.c.
+Definition at line 777 of file tools.c.
 .PP
 Referenced by netsnmp_stash_cache_update().
 .SS "u_int binary_to_hex (const u_char * input, size_t len, char ** output)"
@@ -344,13 +352,9 @@ converts binary to hexidecimal
 olen Length of output string not including NULL terminator.
 .RE
 .PP
-FIX Is there already one of these in the UCD SNMP codebase? The old one should be used, or this one should be moved to snmplib/snmp_api.c.
+FIX Is there already one of these in the UCD SNMP codebase? The old one should be used, or this one should be moved to \fBsnmplib/snmp_api.c\fP. 
 .PP
-Definition at line 287 of file tools.c.
-.PP
-References VAL2HEX.
-.PP
-Referenced by dump_chunk().
+Definition at line 282 of file tools.c.
 .SS "void free_zero (void * buf, size_t size)"
 .PP
 zeros memory before freeing it. 
@@ -359,14 +363,12 @@ zeros memory before freeing it.
 .RS 4
 \fI*buf\fP Pointer at bytes to free. 
 .br
-\fIsize\fP Number of bytes in buf.
+\fIsize\fP Number of bytes in buf. 
 .RE
 .PP
 
 .PP
-Definition at line 185 of file tools.c.
-.PP
-Referenced by hex_to_binary2(), and malloc_random().
+Definition at line 180 of file tools.c.
 .SS "int hex_to_binary2 (const u_char * input, size_t len, char ** output)"
 .PP
 hex_to_binary2 
@@ -387,11 +389,9 @@ SNMPERR_GENERR on failure, otherwise length of allocated string.
 .PP
 Input of an odd length is right aligned.
 .PP
-FIX Another version of 'hex-to-binary' which takes odd length input strings. It also allocates the memory to hold the binary data. Should be integrated with the official hex_to_binary() function.
+FIX Another version of 'hex-to-binary' which takes odd length input strings. It also allocates the memory to hold the binary data. Should be integrated with the official hex_to_binary() function. 
 .PP
-Definition at line 324 of file tools.c.
-.PP
-References free_zero(), HEX2VAL, and NULL.
+Definition at line 319 of file tools.c.
 .SS "u_char* malloc_random (size_t * size)"
 .PP
 Returns pointer to allocaed & set buffer on success, size contains number of random bytes filled. 
@@ -405,23 +405,19 @@ buf is NULL and *size set to KMT error value upon failure.
 .PP
 \fBReturns:\fP
 .RS 4
-a malloced buffer
+a malloced buffer 
 .RE
 .PP
 
 .PP
-Definition at line 205 of file tools.c.
-.PP
-References free_zero(), and NULL.
-.SS "int marker_tticks (\fBmarker_t\fP pm)"
+Definition at line 200 of file tools.c.
+.SS "int marker_tticks (marker_t pm)"
 .PP
 Return the number of timeTicks since the given marker. 
 .PP
-Definition at line 898 of file tools.c.
+Definition at line 893 of file tools.c.
 .PP
 References atime_diff(), and atime_newMarker().
-.PP
-Referenced by timeval_tticks().
 .SS "int memdup (u_char ** to, const u_char * from, size_t size)"
 .PP
 Duplicates a memory block. 
@@ -439,27 +435,23 @@ Copies a existing memory location from a pointer to another, newly malloced, poi
 .PP
 \fBReturns:\fP
 .RS 4
-SNMPERR_SUCCESS on success, SNMPERR_GENERR on failure.
+SNMPERR_SUCCESS on success, SNMPERR_GENERR on failure. 
 .RE
 .PP
 
 .PP
-Definition at line 236 of file tools.c.
+Definition at line 231 of file tools.c.
 .PP
-References NULL.
-.PP
-Referenced by convert_v2pdu_to_v1(), create_user_from_session(), netsnmp_handler_registration_create(), netsnmp_handler_registration_dup(), netsnmp_instance_int_handler(), netsnmp_instance_long_handler(), netsnmp_instance_ulong_handler(), netsnmp_register_old_api(), netsnmp_set_row_column(), netsnmp_table_data_clone_row(), netsnmp_table_data_set_clone_row(), netsnmp_table_set_add_default_row(), netsnmp_watcher_helper_handler(), send_trap_to_sess(), and snmpd_parse_config_trapsess().
+Referenced by netsnmp_handler_registration_create(), netsnmp_handler_registration_dup(), netsnmp_register_old_api(), netsnmp_set_row_column(), netsnmp_table_data_clone_row(), netsnmp_table_data_set_clone_row(), and netsnmp_table_set_add_default_row().
 .SS "char* netsnmp_getenv (const char * name)"
 .PP
 Non Windows: Returns a pointer to the desired environment variable or NULL if the environment variable does not exist. 
 .PP
-Windows: Returns a pointer to the desired environment variable if it exists. If it does not, the variable is looked up in the registry in HKCU\\Net-SNMP or HKLM\\Net-SNMP (whichever it finds first) and stores the result in the environment variable. It then returns a pointer to environment variable.
+Windows: Returns a pointer to the desired environment variable if it exists. If it does not, the variable is looked up in the registry in HKCU\\Net-SNMP or HKLM\\Net-SNMP (whichever it finds first) and stores the result in the environment variable. It then returns a pointer to environment variable. 
 .PP
-Definition at line 926 of file tools.c.
+Definition at line 921 of file tools.c.
 .PP
-References NULL, and SNMP_FREE.
-.PP
-Referenced by get_configuration_directory(), init_mib(), netsnmp_fixup_mib_directory(), netsnmp_get_mib_directory(), read_config_files(), and read_config_store().
+Referenced by netsnmp_fixup_mib_directory(), netsnmp_get_mib_directory(), and read_config_store().
 .SS "int netsnmp_hex_to_binary (u_char ** buf, size_t * buf_len, size_t * out_len, int allow_realloc, const char * hex, const char * delim)"
 .PP
 convert an ASCII hex string (with specified delimiters) to binary 
@@ -483,23 +475,17 @@ convert an ASCII hex string (with specified delimiters) to binary
 .RS 4
 \fI1\fP success 
 .br
-\fI0\fP error
+\fI0\fP error 
 .RE
 .PP
 
 .PP
-Definition at line 425 of file tools.c.
-.PP
-References NULL, and snmp_realloc().
-.PP
-Referenced by snmp_hex_to_binary().
+Definition at line 420 of file tools.c.
 .SS "char* netsnmp_strdup_and_null (const u_char * from, size_t from_len)"
 .PP
 copies a (possible) unterminated string of a given length into a new buffer and null terminates it as well (new buffer MAY be one byte longer to account for this 
 .PP
-Definition at line 255 of file tools.c.
-.PP
-References NULL.
+Definition at line 250 of file tools.c.
 .PP
 Referenced by netsnmp_table_data_set_helper_handler().
 .SS "int snmp_hex_to_binary (u_char ** buf, size_t * buf_len, size_t * out_len, int allow_realloc, const char * hex)"
@@ -517,16 +503,12 @@ See netsnmp_hex_to_binary for parameter descriptions.
 .RS 4
 \fI1\fP success 
 .br
-\fI0\fP error
+\fI0\fP error 
 .RE
 .PP
 
 .PP
-Definition at line 485 of file tools.c.
-.PP
-References netsnmp_hex_to_binary().
-.PP
-Referenced by create_user_from_session(), and snmp_add_var().
+Definition at line 480 of file tools.c.
 .SS "int snmp_realloc (u_char ** buf, size_t * buf_len)"
 .PP
 This function increase the size of the buffer pointed at by *buf, which is initially of size *buf_len. 
@@ -542,34 +524,26 @@ Contents are preserved **AT THE BOTTOM END OF THE BUFFER**. If memory can be (re
 .PP
 \fBNote:\fP
 .RS 4
-The current re-allocation algorithm is to increase the buffer size by whichever is the greater of 256 bytes or the current buffer size, up to a maximum increase of 8192 bytes.
+The current re-allocation algorithm is to increase the buffer size by whichever is the greater of 256 bytes or the current buffer size, up to a maximum increase of 8192 bytes. 
 .RE
 .PP
 
 .PP
-Definition at line 121 of file tools.c.
+Definition at line 116 of file tools.c.
 .PP
-References NULL.
-.PP
-Referenced by _sprint_hexstring_line(), asn_realloc(), dump_realloc_oid_to_string(), netsnmp_hex_to_binary(), snmp_add_var(), snmp_decimal_to_binary(), snmp_strcat(), sprint_realloc_asciistring(), sprint_realloc_ipaddress(), sprint_realloc_networkaddress(), and sprint_realloc_octet_string().
-.SS "u_long uatime_diff (\fBmarker_t\fP first, \fBmarker_t\fP second)"
+Referenced by _sprint_hexstring_line(), sprint_realloc_asciistring(), and sprint_realloc_octet_string().
+.SS "u_long uatime_diff (marker_t first, marker_t second)"
 .PP
 Returns the difference (in u_long msec) between the two markers. 
 .PP
-Definition at line 812 of file tools.c.
-.PP
-Referenced by uatime_ready().
-.SS "u_long uatime_hdiff (\fBmarker_t\fP first, \fBmarker_t\fP second)"
+Definition at line 807 of file tools.c.
+.SS "u_long uatime_hdiff (marker_t first, marker_t second)"
 .PP
 Returns the difference (in u_long 1/100th secs) between the two markers (functionally this is what sysUpTime needs). 
 .PP
-Definition at line 830 of file tools.c.
-.PP
-Referenced by netsnmp_marker_uptime().
-.SS "int uatime_ready (\fBmarker_t\fP pm, unsigned int deltaT)"
+Definition at line 825 of file tools.c.
+.SS "int uatime_ready (marker_t pm, unsigned int deltaT)"
 .PP
 Test: Has (marked time plus delta) exceeded current time (in msec) ? Returns 0 if test fails or cannot be tested (no marker). 
 .PP
-Definition at line 872 of file tools.c.
-.PP
-References atime_newMarker(), and uatime_diff().
+Definition at line 867 of file tools.c.
