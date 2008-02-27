@@ -416,7 +416,7 @@ var_hrswinst(struct variable * vp,
  */
 #ifdef HAVE_PKGINFO
             pver = pkgparam(swi->swi_name, "VERSION");
-            // 1 spot for the terminating null and one for the dash
+            /* 1 spot for the terminating null and one for the dash */
             if (strlen(pver) + 2 + strlen(string) <= sizeof(string)) {
                 strcat(string, "-");
                 strcat(string, pver);
