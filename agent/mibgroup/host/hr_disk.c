@@ -1408,6 +1408,7 @@ Add_LVM_Disks(void)
         }
     }
     closedir(dir);
+    regfree(&lvol);
 #endif
 }
 
