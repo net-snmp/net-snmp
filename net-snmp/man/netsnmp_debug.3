@@ -1,4 +1,4 @@
-.TH "debug" 3 "12 Apr 2007" "Version 5.2.4" "net-snmp" \" -*- nroff -*-
+.TH "debug" 3 "27 Feb 2008" "Version 5.2.4" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -62,7 +62,7 @@ to see an example output, try:
 .PP
 injectHandler debug mibII/system
 .PP
-and then run snmpwalk on the 'system' group.
+and then run snmpwalk on the 'system' group. 
 .SH "Function Documentation"
 .PP 
 .SS "\fBnetsnmp_mib_handler\fP* netsnmp_get_debug_handler (void)"
@@ -71,7 +71,7 @@ returns a debug handler that can be injected into a given handler chain.
 .PP
 Definition at line 55 of file debug_handler.c.
 .PP
-References netsnmp_create_handler(), and netsnmp_debug_helper().
+References netsnmp_create_handler().
 .PP
 Referenced by netsnmp_init_debug_helper().
 .SS "void netsnmp_init_bulk_to_next_helper (void)"
@@ -88,13 +88,17 @@ initializes the debug helper which then registers a debug handler as a run-time 
 Definition at line 160 of file debug_handler.c.
 .PP
 References netsnmp_get_debug_handler(), and netsnmp_register_handler_by_name().
+.PP
+Referenced by netsnmp_init_helpers().
 .SS "void netsnmp_init_helpers (void)"
 .PP
 call the initialization sequence for all handlers with init_ routines. 
 .PP
+
+.PP
 Definition at line 36 of file all_helpers.c.
 .PP
-References netsnmp_init_bulk_to_next_helper(), netsnmp_init_debug_helper(), netsnmp_init_read_only_helper(), netsnmp_init_serialize(), netsnmp_init_stash_cache_helper(), and netsnmp_init_table_dataset().
+References netsnmp_init_bulk_to_next_helper(), netsnmp_init_debug_helper(), netsnmp_init_read_only_helper(), netsnmp_init_serialize(), and netsnmp_init_stash_cache_helper().
 .PP
 Referenced by init_agent().
 .SS "void netsnmp_init_read_only_helper (void)"

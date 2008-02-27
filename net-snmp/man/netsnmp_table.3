@@ -1,4 +1,4 @@
-.TH "table" 3 "12 Apr 2007" "Version 5.2.4" "net-snmp" \" -*- nroff -*-
+.TH "table" 3 "27 Feb 2008" "Version 5.2.4" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -107,18 +107,18 @@ This handler helps you implement a table by doing some of the processing for you
 .PP
 This handler truly shows the power of the new handler mechanism. By creating a table handler and injecting it into your calling chain, or by using the \fBnetsnmp_register_table()\fP function to register your table, you get access to some pre-parsed information. Specifically, the table handler pulls out the column number and indexes from the request oid so that you don't have to do the complex work to do that parsing within your own code.
 .PP
-To do this, the table handler needs to know up front how your table is structured. To inform it about this, you fill in a table_registeration_info structure that is passed to the table handler. It contains the asn index types for the table as well as the minimum and maximum column that should be used.
+To do this, the table handler needs to know up front how your table is structured. To inform it about this, you fill in a table_registeration_info structure that is passed to the table handler. It contains the asn index types for the table as well as the minimum and maximum column that should be used. 
 .SH "Function Documentation"
 .PP 
 .SS "int netsnmp_check_getnext_reply (\fBnetsnmp_request_info\fP * request, oid * prefix, size_t prefix_len, \fBnetsnmp_variable_list\fP * newvar, \fBnetsnmp_variable_list\fP ** outvar)"
 .PP
 checks the original request against the current data being passed in if its greater than the request oid but less than the current valid return, set the current valid return to the new value. 
 .PP
-returns 1 if outvar was replaced with the oid from newvar (success). returns 0 if not.
+returns 1 if outvar was replaced with the oid from newvar (success). returns 0 if not. 
 .PP
 Definition at line 888 of file table.c.
 .PP
-References build_oid_noalloc(), variable_list::name, variable_list::name_length, netsnmp_request_info_s::requestvb, snmp_clone_varbind(), snmp_oid_compare(), snmp_set_var_objid(), snmp_set_var_typed_value(), netsnmp_vardata::string, variable_list::type, variable_list::val, and variable_list::val_len.
+References variable_list::name, variable_list::name_length, netsnmp_request_info_s::requestvb, snmp_oid_compare(), snmp_set_var_typed_value(), variable_list::type, variable_list::val, and variable_list::val_len.
 .PP
 Referenced by netsnmp_table_iterator_helper_handler().
 .SS "NETSNMP_INLINE \fBnetsnmp_table_request_info\fP* netsnmp_extract_table_info (\fBnetsnmp_request_info\fP * request)"
@@ -134,7 +134,7 @@ Call this from subhandlers on a request to extract the processed netsnmp_request
 .PP
 \fBReturns:\fP
 .RS 4
-populated netsnmp_table_request_info structure
+populated netsnmp_table_request_info structure 
 .RE
 .PP
 
@@ -168,14 +168,14 @@ The table helper handler pulls out the column number and indexes from the reques
 .PP
 \fBReturns:\fP
 .RS 4
-Returns a pointer to a netsnmp_mib_handler struct which contains the handler's name and the access method
+Returns a pointer to a netsnmp_mib_handler struct which contains the handler's name and the access method 
 .RE
 .PP
 
 .PP
 Definition at line 89 of file table.c.
 .PP
-References count_varbinds(), netsnmp_table_registration_info_s::indexes, netsnmp_mib_handler_s::myvoid, netsnmp_create_handler(), NULL, netsnmp_table_registration_info_s::number_indexes, snmp_log(), and table_helper_handler().
+References netsnmp_table_registration_info_s::indexes, netsnmp_mib_handler_s::myvoid, netsnmp_create_handler(), netsnmp_table_registration_info_s::number_indexes, snmp_log(), and table_helper_handler().
 .PP
 Referenced by netsnmp_register_table(), and netsnmp_sparse_table_register().
 .SS "int netsnmp_register_table (\fBnetsnmp_handler_registration\fP * reginfo, \fBnetsnmp_table_registration_info\fP * tabreq)"
@@ -186,26 +186,26 @@ Definition at line 112 of file table.c.
 .PP
 References netsnmp_get_table_handler(), netsnmp_inject_handler(), and netsnmp_register_handler().
 .PP
-Referenced by netsnmp_container_table_register(), netsnmp_register_table_data(), netsnmp_register_table_iterator(), and netsnmp_table_container_register().
+Referenced by netsnmp_register_table_data(), netsnmp_register_table_iterator(), and netsnmp_table_container_register().
 .SS "\fBnetsnmp_mib_handler\fP* netsnmp_sparse_table_handler_get (void)"
 .PP
 create sparse table handler 
 .PP
 Definition at line 726 of file table.c.
 .PP
-References netsnmp_create_handler(), and SPARSE_TABLE_HANDLER_NAME.
+References netsnmp_create_handler().
 .SS "int netsnmp_sparse_table_register (\fBnetsnmp_handler_registration\fP * reginfo, \fBnetsnmp_table_registration_info\fP * tabreq)"
 .PP
 creates a table handler given the netsnmp_table_registration_info object, inserts it into the request chain and then calls \fBnetsnmp_register_handler()\fP to register the table into the agent. 
 .PP
 Definition at line 737 of file table.c.
 .PP
-References netsnmp_create_handler(), netsnmp_get_table_handler(), netsnmp_inject_handler(), netsnmp_register_handler(), and SPARSE_TABLE_HANDLER_NAME.
+References netsnmp_create_handler(), netsnmp_get_table_handler(), netsnmp_inject_handler(), and netsnmp_register_handler().
 .SS "int netsnmp_table_build_oid (\fBnetsnmp_handler_registration\fP * reginfo, \fBnetsnmp_request_info\fP * reqinfo, \fBnetsnmp_table_request_info\fP * table_info)"
 .PP
 given a registration info object, a request object and the table info object it builds the request->requestvb->name oid from the index values and column information found in the table_info object. 
 .PP
-Index values are extracted from the table_info varbinds.
+Index values are extracted from the table_info varbinds. 
 .PP
 .Entry
 .PP
@@ -220,37 +220,41 @@ Referenced by netsnmp_table_build_result().
 .PP
 given a registration info object, a request object and the table info object it builds the request->requestvb->name oid from the index values and column information found in the table_info object. 
 .PP
-Index values are extracted from the table_info index oid.
+Index values are extracted from the table_info index oid. 
 .PP
 Definition at line 825 of file table.c.
 .PP
-References netsnmp_table_request_info_s::colnum, netsnmp_table_request_info_s::index_oid, netsnmp_table_request_info_s::index_oid_len, variable_list::name, variable_list::name_length, variable_list::name_loc, netsnmp_request_info_s::requestvb, netsnmp_handler_registration_s::rootoid, netsnmp_handler_registration_s::rootoid_len, snmp_clone_mem(), and SNMP_FREE.
+References netsnmp_table_request_info_s::colnum, netsnmp_table_request_info_s::index_oid, netsnmp_table_request_info_s::index_oid_len, variable_list::name, variable_list::name_length, variable_list::name_loc, netsnmp_request_info_s::requestvb, netsnmp_handler_registration_s::rootoid, netsnmp_handler_registration_s::rootoid_len, and SNMP_FREE.
 .SS "int netsnmp_table_build_result (\fBnetsnmp_handler_registration\fP * reginfo, \fBnetsnmp_request_info\fP * reqinfo, \fBnetsnmp_table_request_info\fP * table_info, u_char type, u_char * result, size_t result_len)"
 .PP
 Builds the result to be returned to the agent given the table information. 
 .PP
-Use this function to return results from lowel level handlers to the agent. It takes care of building the proper resulting oid (containing proper indexing) and inserts the result value into the returning varbind.
+Use this function to return results from lowel level handlers to the agent. It takes care of building the proper resulting oid (containing proper indexing) and inserts the result value into the returning varbind. 
 .PP
 Definition at line 755 of file table.c.
 .PP
-References variable_list::name, variable_list::name_loc, netsnmp_table_build_oid(), NULL, netsnmp_request_info_s::requestvb, and snmp_set_var_typed_value().
+References variable_list::name, variable_list::name_loc, netsnmp_table_build_oid(), netsnmp_request_info_s::requestvb, and snmp_set_var_typed_value().
 .SS "int netsnmp_update_indexes_from_variable_list (\fBnetsnmp_table_request_info\fP * tri)"
 .PP
 builds an oid given a set of indexes. 
 .PP
+
+.PP
 Definition at line 870 of file table.c.
 .PP
-References build_oid_noalloc(), netsnmp_table_request_info_s::index_oid, netsnmp_table_request_info_s::index_oid_len, netsnmp_table_request_info_s::indexes, and NULL.
+References netsnmp_table_request_info_s::index_oid, netsnmp_table_request_info_s::index_oid_len, and netsnmp_table_request_info_s::indexes.
 .SS "int netsnmp_update_variable_list_from_index (\fBnetsnmp_table_request_info\fP * tri)"
 .PP
 parses an OID into table indexses 
 .PP
 Definition at line 854 of file table.c.
 .PP
-References netsnmp_table_request_info_s::index_oid, netsnmp_table_request_info_s::index_oid_len, netsnmp_table_request_info_s::indexes, parse_oid_indexes(), and snmp_reset_var_buffers().
+References netsnmp_table_request_info_s::index_oid, netsnmp_table_request_info_s::index_oid_len, and netsnmp_table_request_info_s::indexes.
 .SS "int table_helper_handler (\fBnetsnmp_mib_handler\fP * handler, \fBnetsnmp_handler_registration\fP * reginfo, \fBnetsnmp_agent_request_info\fP * reqinfo, \fBnetsnmp_request_info\fP * requests)"
 .PP
 implements the table helper handler 
+.PP
+
 .PP
 XXX-rks: memory leak. add cleanup handler?
 .PP
@@ -262,6 +266,6 @@ for loop
 .PP
 Definition at line 146 of file table.c.
 .PP
-References netsnmp_table_request_info_s::colnum, netsnmp_mib_handler_s::handler_name, netsnmp_table_request_info_s::index_oid, netsnmp_table_request_info_s::index_oid_len, netsnmp_table_request_info_s::indexes, netsnmp_table_registration_info_s::indexes, netsnmp_table_registration_info_s::max_column, netsnmp_table_registration_info_s::min_column, netsnmp_agent_request_info_s::mode, netsnmp_mib_handler_s::myvoid, variable_list::name, variable_list::name_length, variable_list::name_loc, netsnmp_agent_get_list_data(), netsnmp_call_next_handler(), netsnmp_create_data_list(), netsnmp_extract_table_info(), netsnmp_free_agent_data_sets(), netsnmp_request_add_list_data(), netsnmp_set_request_error(), netsnmp_request_info_s::next, netsnmp_mib_handler_s::next, variable_list::next_variable, NULL, netsnmp_table_registration_info_s::number_indexes, netsnmp_table_request_info_s::number_indexes, parse_one_oid_index(), netsnmp_request_info_s::processed, netsnmp_table_request_info_s::reg_info, netsnmp_request_info_s::requestvb, netsnmp_handler_registration_s::rootoid, netsnmp_handler_registration_s::rootoid_len, snmp_clone_varbind(), SNMP_FREE, snmp_log(), SNMP_MALLOC_TYPEDEF, snmp_oid_compare(), snmp_set_var_objid(), sprint_realloc_by_type(), netsnmp_request_info_s::status, variable_list::type, and netsnmp_table_registration_info_s::valid_columns.
+References netsnmp_table_request_info_s::colnum, netsnmp_mib_handler_s::handler_name, netsnmp_table_request_info_s::index_oid, netsnmp_table_request_info_s::index_oid_len, netsnmp_table_request_info_s::indexes, netsnmp_table_registration_info_s::indexes, netsnmp_table_registration_info_s::max_column, netsnmp_table_registration_info_s::min_column, netsnmp_agent_request_info_s::mode, netsnmp_mib_handler_s::myvoid, variable_list::name, variable_list::name_length, variable_list::name_loc, netsnmp_call_next_handler(), netsnmp_create_data_list(), netsnmp_extract_table_info(), netsnmp_request_add_list_data(), netsnmp_set_request_error(), netsnmp_request_info_s::next, netsnmp_mib_handler_s::next, variable_list::next_variable, netsnmp_table_registration_info_s::number_indexes, netsnmp_table_request_info_s::number_indexes, netsnmp_request_info_s::processed, netsnmp_table_request_info_s::reg_info, netsnmp_request_info_s::requestvb, netsnmp_handler_registration_s::rootoid, netsnmp_handler_registration_s::rootoid_len, SNMP_FREE, snmp_log(), SNMP_MALLOC_TYPEDEF, snmp_oid_compare(), sprint_realloc_by_type(), netsnmp_request_info_s::status, variable_list::type, and netsnmp_table_registration_info_s::valid_columns.
 .PP
 Referenced by netsnmp_get_table_handler().

@@ -1,4 +1,4 @@
-.TH "netsnmp_table_request_info_s" 3 "12 Apr 2007" "Version 5.2.4" "net-snmp" \" -*- nroff -*-
+.TH "netsnmp_table_request_info_s" 3 "27 Feb 2008" "Version 5.2.4" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -48,14 +48,7 @@ Definition at line 102 of file table.h.
 .PP
 Definition at line 104 of file table.h.
 .PP
-Referenced by netsnmp_table_build_oid(), netsnmp_table_build_oid_from_index(), netsnmp_table_data_helper_handler(), netsnmp_table_data_set_helper_handler(), netsnmp_table_iterator_helper_handler(), and table_helper_handler().
-.SS "\fBnetsnmp_variable_list\fP* \fBnetsnmp_table_request_info_s::indexes\fP"
-.PP
-contents freed by helper upon exit 
-.PP
-Definition at line 108 of file table.h.
-.PP
-Referenced by netsnmp_insert_iterator_context(), netsnmp_insert_table_row(), netsnmp_table_build_oid(), netsnmp_table_iterator_helper_handler(), netsnmp_update_indexes_from_variable_list(), netsnmp_update_variable_list_from_index(), and table_helper_handler().
+Referenced by netsnmp_table_build_oid(), netsnmp_table_build_oid_from_index(), netsnmp_table_data_set_helper_handler(), netsnmp_table_iterator_helper_handler(), and table_helper_handler().
 .SS "unsigned int \fBnetsnmp_table_request_info_s::number_indexes\fP"
 .PP
 0 if failure to parse any 
@@ -63,6 +56,13 @@ Referenced by netsnmp_insert_iterator_context(), netsnmp_insert_table_row(), net
 Definition at line 106 of file table.h.
 .PP
 Referenced by table_helper_handler().
+.SS "\fBnetsnmp_variable_list\fP* \fBnetsnmp_table_request_info_s::indexes\fP"
+.PP
+contents freed by helper upon exit 
+.PP
+Definition at line 108 of file table.h.
+.PP
+Referenced by netsnmp_insert_iterator_context(), netsnmp_insert_table_row(), netsnmp_table_build_oid(), netsnmp_table_iterator_helper_handler(), netsnmp_update_indexes_from_variable_list(), netsnmp_update_variable_list_from_index(), and table_helper_handler().
 
 .SH "Author"
 .PP 

@@ -1,4 +1,4 @@
-.TH "storage space for defaults" 3 "12 Apr 2007" "Version 5.2.4" "net-snmp" \" -*- nroff -*-
+.TH "storage space for defaults" 3 "27 Feb 2008" "Version 5.2.4" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -16,7 +16,7 @@ storage space for defaults \- The purpose of the default storage is three-fold:.
 
 .in +1c
 .ti -1c
-.RI "typedef \fBnetsnmp_ds_read_config_s\fP \fBnetsnmp_ds_read_config\fP"
+.RI "typedef struct netsnmp_ds_read_config_s \fBnetsnmp_ds_read_config\fP"
 .br
 .in -1c
 .SS "Functions"
@@ -217,7 +217,7 @@ library strings
 .IP "\(bu" 2
 #define NETSNMP_DS_LIB_AUTHLOCALIZEDKEY 18
 .IP "\(bu" 2
-#define NETSNMP_DS_LIB_PRIVLOCALIZEDKEY 19
+#define NETSNMP_DS_LIB_PRIVLOCALIZEDKEY 19 
 .PP
 
 .SH "Function Documentation"
@@ -237,11 +237,11 @@ Stores 'true' or 'false' given an int value for value into netsnmp_ds_booleans[s
 .PP
 \fBReturns:\fP
 .RS 4
-Returns SNMPPERR_GENERR if the storeid and which parameters do not correspond to a valid slot, or SNMPERR_SUCCESS otherwise.
+Returns SNMPPERR_GENERR if the storeid and which parameters do not correspond to a valid slot, or SNMPERR_SUCCESS otherwise. 
 .RE
 .PP
 
 .PP
 Definition at line 197 of file default_store.c.
 .PP
-Referenced by init_agent(), netsnmp_ds_handle_config(), read_configs(), read_premib_configs(), setup_tree(), and snmp_out_toggle_options().
+Referenced by init_agent().

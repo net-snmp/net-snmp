@@ -1,4 +1,4 @@
-.TH "netsnmp_mib_handler_s" 3 "12 Apr 2007" "Version 5.2.4" "net-snmp" \" -*- nroff -*-
+.TH "netsnmp_mib_handler_s" 3 "27 Feb 2008" "Version 5.2.4" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -27,12 +27,12 @@ netsnmp_mib_handler_s \- the mib handler structure to be registered
 .ti -1c
 .RI "int(* \fBaccess_method\fP )(struct \fBnetsnmp_mib_handler_s\fP *, struct \fBnetsnmp_handler_registration_s\fP *, struct \fBnetsnmp_agent_request_info_s\fP *, struct \fBnetsnmp_request_info_s\fP *)"
 .br
-.RI "\fI_clone_handler in \fBsnmp_agent.c\fP. \fP"
+.RI "\fIif you add more members, you probably also want to update \fP"
 .ti -1c
-.RI "\fBnetsnmp_mib_handler_s\fP * \fBnext\fP"
+.RI "struct \fBnetsnmp_mib_handler_s\fP * \fBnext\fP"
 .br
 .ti -1c
-.RI "\fBnetsnmp_mib_handler_s\fP * \fBprev\fP"
+.RI "struct \fBnetsnmp_mib_handler_s\fP * \fBprev\fP"
 .br
 .in -1c
 .SH "Detailed Description"
@@ -47,25 +47,27 @@ the mib handler structure to be registered
 Definition at line 46 of file agent_handler.h.
 .SH "Field Documentation"
 .PP 
-.SS "int(* \fBnetsnmp_mib_handler_s::access_method\fP)(struct \fBnetsnmp_mib_handler_s\fP *, struct \fBnetsnmp_handler_registration_s\fP *, struct \fBnetsnmp_agent_request_info_s\fP *, struct \fBnetsnmp_request_info_s\fP *)"
-.PP
-_clone_handler in \fBsnmp_agent.c\fP. 
-.PP
-Referenced by netsnmp_call_handler(), netsnmp_create_handler(), netsnmp_find_table_array_handler(), netsnmp_instance_counter32_handler(), netsnmp_instance_int_handler(), netsnmp_instance_long_handler(), and netsnmp_instance_ulong_handler().
-.SS "int \fBnetsnmp_mib_handler_s::flags\fP"
-.PP
-for agent_handler's internal use 
-.PP
-Definition at line 51 of file agent_handler.h.
-.PP
-Referenced by netsnmp_baby_steps_access_multiplexer_get(), netsnmp_bulk_to_next_helper(), netsnmp_cache_handler_get(), netsnmp_cache_helper_handler(), netsnmp_container_table_handler_get(), netsnmp_get_bulk_to_next_handler(), netsnmp_get_read_only_handler(), netsnmp_get_table_data_handler(), netsnmp_get_table_data_set_handler(), netsnmp_get_watched_spinlock_handler(), netsnmp_get_watched_timestamp_handler(), netsnmp_get_watcher_handler(), and netsnmp_table_data_helper_handler().
 .SS "void* \fBnetsnmp_mib_handler_s::myvoid\fP"
 .PP
 for handler's internal use 
 .PP
 Definition at line 49 of file agent_handler.h.
 .PP
-Referenced by dump_registry(), netsnmp_baby_steps_access_multiplexer_get(), netsnmp_baby_steps_handler_get(), netsnmp_cache_handler_get(), netsnmp_cache_helper_handler(), netsnmp_container_table_handler_get(), netsnmp_debug_helper(), netsnmp_find_handler_data_by_name(), netsnmp_get_cache_handler(), netsnmp_get_mode_end_call_handler(), netsnmp_get_multiplexer_handler(), netsnmp_get_row_merge_handler(), netsnmp_get_scalar_group_handler(), netsnmp_get_stash_cache_handler(), netsnmp_get_table_data_handler(), netsnmp_get_table_data_set_handler(), netsnmp_get_table_handler(), netsnmp_get_table_iterator_handler(), netsnmp_handler_dup(), netsnmp_instance_counter32_handler(), netsnmp_instance_int_handler(), netsnmp_instance_long_handler(), netsnmp_instance_ulong_handler(), netsnmp_mode_end_call_helper(), netsnmp_multiplexer_helper_handler(), netsnmp_old_api_helper(), netsnmp_register_mib_table_row(), netsnmp_register_old_api(), netsnmp_register_watched_instance(), netsnmp_register_watched_scalar(), netsnmp_register_watched_spinlock(), netsnmp_register_watched_timestamp(), netsnmp_row_merge_helper_handler(), netsnmp_scalar_group_helper_handler(), netsnmp_stash_cache_helper(), netsnmp_table_container_register(), netsnmp_table_data_helper_handler(), netsnmp_table_data_set_helper_handler(), netsnmp_table_iterator_helper_handler(), netsnmp_watched_timestamp_handler(), netsnmp_watcher_helper_handler(), table_helper_handler(), and unregister_mibs_by_session().
+Referenced by netsnmp_baby_steps_access_multiplexer_get(), netsnmp_baby_steps_handler_get(), netsnmp_cache_handler_get(), netsnmp_cache_helper_handler(), netsnmp_container_table_handler_get(), netsnmp_find_handler_data_by_name(), netsnmp_get_cache_handler(), netsnmp_get_mode_end_call_handler(), netsnmp_get_multiplexer_handler(), netsnmp_get_row_merge_handler(), netsnmp_get_stash_cache_handler(), netsnmp_get_table_data_handler(), netsnmp_get_table_data_set_handler(), netsnmp_get_table_handler(), netsnmp_get_table_iterator_handler(), netsnmp_handler_dup(), netsnmp_multiplexer_helper_handler(), netsnmp_old_api_helper(), netsnmp_register_mib_table_row(), netsnmp_register_old_api(), netsnmp_row_merge_helper_handler(), netsnmp_table_container_register(), netsnmp_table_data_helper_handler(), netsnmp_table_data_set_helper_handler(), netsnmp_table_iterator_helper_handler(), and table_helper_handler().
+.SS "int \fBnetsnmp_mib_handler_s::flags\fP"
+.PP
+for agent_handler's internal use 
+.PP
+Definition at line 51 of file agent_handler.h.
+.PP
+Referenced by netsnmp_baby_steps_access_multiplexer_get(), netsnmp_cache_handler_get(), netsnmp_cache_helper_handler(), netsnmp_container_table_handler_get(), netsnmp_get_bulk_to_next_handler(), netsnmp_get_read_only_handler(), netsnmp_get_table_data_handler(), netsnmp_get_table_data_set_handler(), and netsnmp_table_data_helper_handler().
+.SS "int(* \fBnetsnmp_mib_handler_s::access_method\fP)(struct \fBnetsnmp_mib_handler_s\fP *, struct \fBnetsnmp_handler_registration_s\fP *, struct \fBnetsnmp_agent_request_info_s\fP *, struct \fBnetsnmp_request_info_s\fP *)"
+.PP
+if you add more members, you probably also want to update 
+.PP
+_clone_handler in \fBsnmp_agent.c\fP. 
+.PP
+Referenced by netsnmp_call_handler(), netsnmp_create_handler(), and netsnmp_find_table_array_handler().
 
 .SH "Author"
 .PP 

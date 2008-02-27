@@ -1,4 +1,4 @@
-.TH "read_only" 3 "12 Apr 2007" "Version 5.2.4" "net-snmp" \" -*- nroff -*-
+.TH "read_only" 3 "27 Feb 2008" "Version 5.2.4" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -24,7 +24,7 @@ read_only \- Make your handler read_only automatically The only purpose of this 
 .PP 
 Make your handler read_only automatically The only purpose of this handler is to return an appropriate error for any requests passed to it in a SET mode. 
 .PP
-Inserting it into your handler chain will ensure you're never asked to perform a SET request so you can ignore those error conditions.
+Inserting it into your handler chain will ensure you're never asked to perform a SET request so you can ignore those error conditions. 
 .SH "Function Documentation"
 .PP 
 .SS "\fBnetsnmp_mib_handler\fP* netsnmp_get_read_only_handler (void)"
@@ -33,7 +33,7 @@ returns a read_only handler that can be injected into a given handler chain.
 .PP
 Definition at line 33 of file read_only.c.
 .PP
-References netsnmp_mib_handler_s::flags, MIB_HANDLER_AUTO_NEXT, netsnmp_create_handler(), netsnmp_read_only_helper(), and NULL.
+References netsnmp_mib_handler_s::flags, and netsnmp_create_handler().
 .PP
 Referenced by netsnmp_init_read_only_helper(), netsnmp_register_read_only_instance(), netsnmp_register_read_only_scalar(), and netsnmp_register_read_only_table_data().
 .SS "void netsnmp_init_read_only_helper (void)"
@@ -43,3 +43,5 @@ initializes the read_only helper which then registers a read_only handler as a r
 Definition at line 87 of file read_only.c.
 .PP
 References netsnmp_get_read_only_handler(), and netsnmp_register_handler_by_name().
+.PP
+Referenced by netsnmp_init_helpers().

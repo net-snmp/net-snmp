@@ -1,4 +1,4 @@
-.TH "asn1 parsing and datatype manipulation routines." 3 "12 Apr 2007" "Version 5.2.4" "net-snmp" \" -*- nroff -*-
+.TH "asn1 parsing and datatype manipulation routines." 3 "27 Feb 2008" "Version 5.2.4" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -85,10 +85,10 @@ asn1 parsing and datatype manipulation routines. \- Note on.
 .RI "u_char * \fBasn_build_bitstring\fP (u_char *data, size_t *datalength, u_char type, const u_char *str, size_t strlength)"
 .br
 .ti -1c
-.RI "u_char * \fBasn_parse_unsigned_int64\fP (u_char *data, size_t *datalength, u_char *type, struct \fBcounter64\fP *cp, size_t countersize)"
+.RI "u_char * \fBasn_parse_unsigned_int64\fP (u_char *data, size_t *datalength, u_char *type, struct counter64 *cp, size_t countersize)"
 .br
 .ti -1c
-.RI "u_char * \fBasn_build_unsigned_int64\fP (u_char *data, size_t *datalength, u_char type, const struct \fBcounter64\fP *cp, size_t countersize)"
+.RI "u_char * \fBasn_build_unsigned_int64\fP (u_char *data, size_t *datalength, u_char type, const struct counter64 *cp, size_t countersize)"
 .br
 .ti -1c
 .RI "int \fBasn_realloc\fP (u_char **pkt, size_t *pkt_len)"
@@ -197,7 +197,7 @@ IS EQUIVALENT TO:
  }
 .fi
 .PP
-
+ 
 .SH "Define Documentation"
 .PP 
 .SS "#define CHECK_OVERFLOW_S(x, y)"
@@ -214,13 +214,11 @@ do { int trunc = 0;                     \
             x = 0 - (x & 0xffffffff);                                   \
         }                                                               \
         if (trunc)                                                      \
-            snmp_log(LOG_ERR,'truncating signed value to 32 bits (%d)\n',y); \
+            DEBUGMSG(('asn','truncating signed value to 32 bits (%d)\n',y)); \
     } while(0)
 .fi
 .PP
 Definition at line 214 of file asn1.c.
-.PP
-Referenced by asn_build_int(), and asn_parse_int().
 .SS "#define CHECK_OVERFLOW_U(x, y)"
 .PP
 \fBValue:\fP
@@ -229,11 +227,9 @@ Referenced by asn_build_int(), and asn_parse_int().
 do {                                    \
         if (x > UINT32_MAX) {                                           \
             x &= 0xffffffff;                                            \
-            snmp_log(LOG_ERR,'truncating unsigned value to 32 bits (%d)\n',y); \
+            DEBUGMSG(('asn','truncating unsigned value to 32 bits (%d)\n',y)); \
         }                                                               \
     } while(0)
 .fi
 .PP
 Definition at line 226 of file asn1.c.
-.PP
-Referenced by asn_build_objid(), asn_build_unsigned_int(), asn_build_unsigned_int64(), asn_parse_unsigned_int(), and asn_parse_unsigned_int64().

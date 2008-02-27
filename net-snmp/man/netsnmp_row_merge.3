@@ -1,4 +1,4 @@
-.TH "row_merge" 3 "12 Apr 2007" "Version 5.2.4" "net-snmp" \" -*- nroff -*-
+.TH "row_merge" 3 "27 Feb 2008" "Version 5.2.4" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -42,7 +42,7 @@ row_merge \- Calls sub handlers with request for one row at a time.
 .PP 
 Calls sub handlers with request for one row at a time. 
 .PP
-This helper splits a whole bunch of requests into chunks based on the row index that they refer to, and passes all requests for a given row to the lower handlers. This is useful for handlers that don't want to process multiple rows at the same time, but are happy to iterate through the request list for a single row.
+This helper splits a whole bunch of requests into chunks based on the row index that they refer to, and passes all requests for a given row to the lower handlers. This is useful for handlers that don't want to process multiple rows at the same time, but are happy to iterate through the request list for a single row. 
 .SH "Function Documentation"
 .PP 
 .SS "\fBnetsnmp_mib_handler\fP* netsnmp_get_row_merge_handler (int prefix_len)"
@@ -51,7 +51,7 @@ returns a row_merge handler that can be injected into a given handler chain.
 .PP
 Definition at line 32 of file row_merge.c.
 .PP
-References netsnmp_mib_handler_s::myvoid, netsnmp_create_handler(), netsnmp_row_merge_helper_handler(), and NULL.
+References netsnmp_mib_handler_s::myvoid, netsnmp_create_handler(), and netsnmp_row_merge_helper_handler().
 .PP
 Referenced by netsnmp_init_row_merge(), and netsnmp_register_row_merge().
 .SS "void netsnmp_init_row_merge (void)"
@@ -65,6 +65,8 @@ References netsnmp_get_row_merge_handler(), and netsnmp_register_handler_by_name
 .PP
 functionally the same as calling \fBnetsnmp_register_handler()\fP but also injects a row_merge handler at the same time for you. 
 .PP
+
+.PP
 Definition at line 46 of file row_merge.c.
 .PP
 References netsnmp_get_row_merge_handler(), netsnmp_inject_handler(), netsnmp_register_handler(), and netsnmp_handler_registration_s::rootoid_len.
@@ -74,6 +76,6 @@ Implements the row_merge handler.
 .PP
 Definition at line 59 of file row_merge.c.
 .PP
-References netsnmp_mib_handler_s::myvoid, variable_list::name, variable_list::name_length, netsnmp_call_next_handler(), netsnmp_request_info_s::next, NULL, netsnmp_request_info_s::processed, netsnmp_request_info_s::requestvb, netsnmp_handler_registration_s::rootoid, netsnmp_handler_registration_s::rootoid_len, ROW_MERGE_ACTIVE, ROW_MERGE_DONE, ROW_MERGE_WAITING, and snmp_oid_compare().
+References netsnmp_mib_handler_s::myvoid, variable_list::name, variable_list::name_length, netsnmp_call_next_handler(), netsnmp_request_info_s::next, netsnmp_request_info_s::processed, netsnmp_request_info_s::requestvb, netsnmp_handler_registration_s::rootoid, netsnmp_handler_registration_s::rootoid_len, and snmp_oid_compare().
 .PP
 Referenced by netsnmp_get_row_merge_handler().
