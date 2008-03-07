@@ -3693,7 +3693,7 @@ AC_CHECK_FUNCS(getaddrinfo getipnodebyname gai_strerror)
 AC_CHECK_FUNCS(statvfs statfs)
 AC_CHECK_FUNCS(getdtablesize)
 # freebsd2 checks
-AC_CHECK_FUNCS(getfsstat)
+AC_CHECK_FUNCS(getfsstat getvfsstat)
 AC_CHECK_FUNCS(usleep)
 AC_CHECK_FUNCS(setlocale)
 AC_CHECK_FUNCS(tcgetattr)
