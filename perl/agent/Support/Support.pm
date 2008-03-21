@@ -18,8 +18,6 @@ use NetSNMP::OID (':all');
 use NetSNMP::agent (':all');
 use NetSNMP::ASN (':all');
 use Data::Dumper;
-use XML::Simple;
-use IO::File;
 
 
 use vars qw(@ISA @EXPORT @EXPORT_OK $VERSION);
@@ -59,7 +57,8 @@ my $oidroot = "";
 # Some parts borrowed from the perl cookbook
 ################################################################
 sub buildTree {
-    foreach my $key (keys %$oidtable) {
+    my ($new_oidtable) = @_;
+    foreach my $key (keys %$new_oidtable) {
 	insert($oidtree, $key);
     }
 }
@@ -124,10 +123,12 @@ sub insert {
 sub registerAgent {
     my $agent = shift;
     my $regat = shift;
-    $oidtable = shift;
+    my $new_oidtable = shift;
+
+    foreach (keys %$new_oidtable) { $oidtable->{$_} = $new_oidtable->{$_}; }
 
     print STDERR "Building OID tree\n";
-    buildTree();
+    buildTree($new_oidtable);
 
     doLinks($oidtree);
 
