@@ -415,7 +415,7 @@ var_smux_write(int action,
             return SNMP_ERR_GENERR;
         }
 
-        if (send(rptr->sr_fd, buf, len, 0) < 0) {
+        if (sendto(rptr->sr_fd, buf, len, 0, NULL, 0) < 0) {
             DEBUGMSGTL(("smux", "[var_smux_write] send failed\n"));
             return SNMP_ERR_GENERR;
         }
@@ -424,8 +424,8 @@ var_smux_write(int action,
             /*
              * peek at what's received 
              */
-            if ((len = recv(rptr->sr_fd, buf,
-                            SMUXMAXPKTSIZE, MSG_PEEK)) <= 0) {
+            if ((len = recvfrom(rptr->sr_fd, buf,
+                            SMUXMAXPKTSIZE, MSG_PEEK, NULL, 0)) <= 0) {
                 if ((len == -1) && ((errno == EINTR) || (errno == EAGAIN)))
                 {
                    continue;
@@ -464,7 +464,7 @@ var_smux_write(int action,
             do
             {
                len = tmp_len;
-               len = recv(rptr->sr_fd, buf, len, 0);
+               len = recvfrom(rptr->sr_fd, buf, len, 0, NULL, 0);
             }
             while((len == -1) && ((errno == EINTR) || (errno == EAGAIN)));
 
@@ -548,7 +548,7 @@ var_smux_write(int action,
                         "[var_smux_write] entering FREE - sending Commit \n"));
         }
 
-        if ((send(rptr->sr_fd, sout, 3, 0)) < 0) {
+        if ((sendto(rptr->sr_fd, sout, 3, 0, NULL, 0)) < 0) {
             DEBUGMSGTL(("smux",
                         "[var_smux_write] send rollback/commit failed\n"));
             return SNMP_ERR_GENERR;
@@ -606,7 +606,7 @@ smux_accept(int sd)
          */
         do
         {
-           length = recv(fd, (char *) data, SMUXMAXPKTSIZE, 0);
+           length = recvfrom(fd, (char *) data, SMUXMAXPKTSIZE, 0, NULL, 0);
         }
         while((length == -1) && ((errno == EINTR) || (errno == EAGAIN)));
 
@@ -684,7 +684,7 @@ smux_process(int fd)
 
     do
     {
-       length = recv(fd, (char *) data, SMUXMAXPKTSIZE, MSG_PEEK);
+       length = recvfrom(fd, (char *) data, SMUXMAXPKTSIZE, MSG_PEEK, NULL, 0);
     }
     while((length == -1) && ((errno == EINTR) || (errno == EAGAIN)));
 
@@ -712,7 +712,7 @@ smux_process(int fd)
     do
     {
        length = tmp_length;
-       length = recv(fd, (char *) data, length, 0);
+       length = recvfrom(fd, (char *) data, length, 0, NULL, 0);
     }
     while((length == -1) && ((errno == EINTR) || (errno == EAGAIN)));
 
@@ -912,7 +912,7 @@ smux_send_close(int fd, int reason)
     /*
      * send a response back 
      */
-    if (send(fd, (char *) outpacket, 3, 0) < 0) {
+    if (sendto(fd, (char *) outpacket, 3, 0, NULL, 0) < 0) {
         snmp_log_perror("[smux_snmp_close] send failed");
     }
 }
@@ -1361,7 +1361,7 @@ smux_snmp_process(int exact,
     DEBUGMSGOID(("smux", objid, *len));
     DEBUGMSG(("smux", "\n"));
 
-    if (send(sd, (char *) packet, length, 0) < 0) {
+    if (sendto(sd, (char *) packet, length, 0, NULL, 0) < 0) {
         snmp_log_perror("[smux_snmp_process] send failed");
     }
 
@@ -1373,7 +1373,7 @@ smux_snmp_process(int exact,
         /*
          * peek at what's received 
          */
-        length = recv(sd, (char *) result, SMUXMAXPKTSIZE, MSG_PEEK);
+        length = recvfrom(sd, (char *) result, SMUXMAXPKTSIZE, MSG_PEEK, NULL, 0);
         if (length <= 0) {
             if ((length == -1) && ((errno == EINTR) || (errno == EAGAIN)))
             {
@@ -1412,7 +1412,7 @@ smux_snmp_process(int exact,
         do
         {
            length = tmp_length;
-           length = recv(sd, (char *) result, length, 0);
+           length = recvfrom(sd, (char *) result, length, 0, NULL, 0);
         }
         while((length == -1) && ((errno == EINTR) || (errno == EAGAIN)));
 
@@ -1815,7 +1815,7 @@ smux_send_rrsp(int sd, int pri)
         pri <<= 8;
     }
 
-    sent = send(sd, (char *) outdata, sizeof outdata, 0);
+    sent = sendto(sd, (char *) outdata, sizeof outdata, 0, NULL, 0);
     if (sent < 0) {
         DEBUGMSGTL(("smux", "[smux_send_rrsp] send failed\n"));
     }
