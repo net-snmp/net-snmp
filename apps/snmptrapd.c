@@ -307,6 +307,9 @@ term_handler(int sig)
     extern netsnmp_session *main_session;
 #endif
     netsnmp_running = 0;
+
+    shutdown_perl();
+
 #ifdef WIN32SERVICE
     /*
      * In case of windows, select() in receive() function will not return 
