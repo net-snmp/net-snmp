@@ -134,7 +134,7 @@ netsnmp_unix_recv(netsnmp_transport *t, void *buf, int size,
             return -1;
         };
         while (rc < 0) {
-            rc = recv(t->sock, buf, size, 0);
+            rc = recvfrom(t->sock, buf, size, 0, NULL, 0);
             if (rc < 0 && errno != EINTR) {
                 DEBUGMSGTL(("netsnmp_unix", "recv fd %d err %d (\"%s\")\n",
                             t->sock, errno, strerror(errno)));
@@ -160,7 +160,7 @@ netsnmp_unix_send(netsnmp_transport *t, void *buf, int size,
         DEBUGMSGTL(("netsnmp_unix", "send %d bytes to %p on fd %d\n",
                     size, buf, t->sock));
         while (rc < 0) {
-            rc = send(t->sock, buf, size, 0);
+            rc = sendto(t->sock, buf, size, 0, NULL, 0);
             if (rc < 0 && errno != EINTR) {
                 break;
             }

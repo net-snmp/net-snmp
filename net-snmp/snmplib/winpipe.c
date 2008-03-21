@@ -82,7 +82,7 @@ static int TestUDPSend(SOCKET *sock, struct sockaddr_in *socketaddress)
 	unsigned short port = socketaddress->sin_port;
 	int size = sizeof(struct sockaddr);
 
-	int bytessent = send(*sock, (char *) &port, sizeof(port), 0);
+	int bytessent = sendto(*sock, (char *) &port, sizeof(port), 0, NULL, 0);
 	if(bytessent != sizeof(port))
 	{
 		return -1;
