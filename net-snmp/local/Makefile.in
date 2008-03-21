@@ -28,7 +28,7 @@ DATASRCS=mib2c.conf mib2c.iterate.conf mib2c.iterate_access.conf \
 	mib2c.check_values.conf mib2c.check_values_local.conf \
 	mib2c.access_functions.conf mib2c.notify.conf \
 	mib2c.int_watch.conf mib2c.genhtml.conf \
-	mib2c.table_data.conf mib2c.container.conf
+	mib2c.table_data.conf mib2c.container.conf mib2c.perl.conf
 MIB2CINSTALLDIR=$(snmplibdir)/mib2c-data
 MIB2CDATASRC=mib2c-conf.d
 MIB2CFILES=default-mfd-top.m2c details-enums.m2i details-node.m2i \
