@@ -1326,10 +1326,10 @@ int net_snmp_find_prefix_info(prefix_cbx **head,
 
     iret = net_snmp_search_update_prefix_info(head, node_to_find, 1, lockid);
     if(iret < 0) {
-       snmp_log(LOG_ERR,"Unable to search the list\n");
+       DEBUGMSGTL(("util_funcs:prefix", "Unable to search the list\n"));
        return -1;
     } else if (!iret) {
-       snmp_log(LOG_ERR,"Could not find prefix info\n");
+       DEBUGMSGTL(("util_funcs:prefix", "Could not find prefix info\n"));
        return -1;
     } else
        return 0;
@@ -1342,10 +1342,10 @@ int net_snmp_update_prefix_info(prefix_cbx **head,
     int iret;
     iret = net_snmp_search_update_prefix_info(head, node_to_update, 0, lockid);
     if(iret < 0) {
-       snmp_log(LOG_ERR,"Unable to update prefix info\n");
+       DEBUGMSGTL(("util_funcs:prefix", "Unable to update prefix info\n"));
        return -1;
     } else if (!iret) {
-       snmp_log(LOG_ERR,"Unable to find the node to update\n");
+       DEBUGMSGTL(("util_funcs:prefix", "Unable to find the node to update\n"));
        return -1;
     } else
        return 0;

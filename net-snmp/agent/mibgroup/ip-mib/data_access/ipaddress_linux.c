@@ -366,7 +366,7 @@ _load_v6(netsnmp_container *container, int idx_offset)
 #ifdef HAVE_LINUX_RTNETLINK_H
         if(netsnmp_access_ipaddress_extra_prefix_info(entry->if_index, &entry->ia_prefered_lifetime
                                                       ,&entry->ia_valid_lifetime, addr) < 0){
-           snmp_log(LOG_ERR,"unable to fetch extra prefix info\n");
+           DEBUGMSGTL(("access:ipaddress:container", "unable to fetch extra prefix info\n"));
         }
 #else
         entry->ia_prefered_lifetime = 0;
@@ -375,7 +375,7 @@ _load_v6(netsnmp_container *container, int idx_offset)
 #ifdef SUPPORT_PREFIX_FLAGS
         memset(&prefix_val, 0, sizeof(prefix_cbx));
         if(net_snmp_find_prefix_info(&prefix_head_list, addr, &prefix_val, &prefix_mutex_lock) < 0) {
-           snmp_log(LOG_ERR, "unable to find info\n");
+           DEBUGMSGTL(("access:ipaddress:container", "unable to find info\n"));
            entry->ia_onlink_flag = 1;  /*Set by default as true*/
            entry->ia_autonomous_flag = 2; /*Set by default as false*/
 
