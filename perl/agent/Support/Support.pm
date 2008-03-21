@@ -17,6 +17,7 @@ require Exporter;
 use NetSNMP::OID (':all');
 use NetSNMP::agent (':all');
 use NetSNMP::ASN (':all');
+use NetSNMP::default_store (':all');
 use Data::Dumper;
 
 
@@ -127,11 +128,16 @@ sub registerAgent {
 
     foreach (keys %$new_oidtable) { $oidtable->{$_} = $new_oidtable->{$_}; }
 
+    # This is necessary to avoid problems traversing trees where the
+    # IID index is range-limited to not include .0, which is used as a 
+    # placeholder in the oidtable.
+     netsnmp_ds_set_boolean(NETSNMP_DS_LIBRARY_ID, 
+                            NETSNMP_DS_LIB_DONT_CHECK_RANGE, 1);
+
     print STDERR "Building OID tree\n";
-    buildTree($new_oidtable);
-
+    buildTree($new_oidtable);    
     doLinks($oidtree);
-
+ 
 #    print Dumper($oidtable);
 
     # Debug. Print the list of oids in their next ordering
