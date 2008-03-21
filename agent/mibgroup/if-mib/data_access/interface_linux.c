@@ -943,7 +943,7 @@ void *netsnmp_prefix_listen(netsnmp_prefix_listen_info *listen_info)
     localaddrinfo.nl_groups = groups;
 
     if (bind(fd, (struct sockaddr*)&localaddrinfo, sizeof(localaddrinfo)) < 0) {
-        snmp_log(LOG_ERR,"Bind failed. Exiting thread\n");
+        snmp_log(LOG_ERR,"netsnmp_prefix_listen: Bind failed. Exiting thread.\n");
         exit(0);
     }
 
@@ -957,19 +957,19 @@ void *netsnmp_prefix_listen(netsnmp_prefix_listen_info *listen_info)
 
     status = send(fd, &req, req.n.nlmsg_len, 0);
     if (status < 0) {
-        snmp_log(LOG_ERR,"Send failed. Exiting thread\n");
+        snmp_log(LOG_ERR,"netsnmp_prefix_listen: Send failed. Exiting thread\n");
         exit(0);
     }
 
     while(1) {
           status = recv(fd, buf, sizeof(buf), 0);
           if (status < 0) {
-              snmp_log(LOG_ERR,"Recieve failed. Exiting thread\n");
+              snmp_log(LOG_ERR,"netsnmp_prefix_listen: Recieve failed. Exiting thread\n");
               exit(0);
           }
 
           if(status == 0){
-             snmp_log(LOG_ERR,"End of File\n");
+             DEBUGMSGTL(("access:interface:prefix", "End of File\n"));
              continue;
           }
 
@@ -978,12 +978,12 @@ void *netsnmp_prefix_listen(netsnmp_prefix_listen_info *listen_info)
               req_len = len - sizeof(*nlmp);
 
               if (req_len < 0 || len > status) {
-                  snmp_log(LOG_ERR,"Error in length. Exiting thread\n");
+                  snmp_log(LOG_ERR,"netsnmp_prefix_listen: Error in length. Exiting thread\n");
                   exit(0);
               }
 
               if (!NLMSG_OK(nlmp, status)) {
-                  snmp_log(LOG_ERR,"NLMSG not OK\n");
+                  DEBUGMSGTL(("access:interface:prefix", "NLMSG not OK\n"));
                   continue;
               }
 
@@ -993,7 +993,7 @@ void *netsnmp_prefix_listen(netsnmp_prefix_listen_info *listen_info)
                   length -= NLMSG_LENGTH(sizeof(*ifa));
 
                   if (length < 0) {
-                      snmp_log(LOG_ERR," wrong nlmsg length %d\n", length);
+                      DEBUGMSGTL(("access:interface:prefix", "wrong nlmsg length %d\n", length));
                       continue;
                   }
                   memset(index_table, 0, sizeof(struct rtattr *) * (IFA_MAX + 1));
@@ -1024,7 +1024,7 @@ void *netsnmp_prefix_listen(netsnmp_prefix_listen_info *listen_info)
                  length -= NLMSG_LENGTH(sizeof(*prefix));
 
                  if (length < 0) {
-                     snmp_log(LOG_ERR,"wrong nlmsg length %d\n", length);
+                     DEBUGMSGTL(("access:interface:prefix", "wrong nlmsg length %d\n", length));
                      continue;
                  }
                  flag2 = 1;
@@ -1038,11 +1038,11 @@ void *netsnmp_prefix_listen(netsnmp_prefix_listen_info *listen_info)
           }
           if((flag1 == 1) && (flag2 == 1)){
               if(!(new = net_snmp_create_prefix_info (onlink, autonomous, in6pAddr)))
-                 snmp_log(LOG_ERR,"Unable to create prefix info\n");
+                 DEBUGMSGTL(("access:interface:prefix", "Unable to create prefix info\n"));
               else {
                     iret = net_snmp_update_prefix_info (listen_info->list_head, new, listen_info->lockinfo);
                     if(iret < 0) {
-                       snmp_log(LOG_ERR, "Unable to add/update prefix info\n");
+                       DEBUGMSGTL(("access:interface:prefix", "Unable to add/update prefix info\n"));
                        free(new);
                     }
                     if(iret == 2) /*Only when enrty already exists and we are only updating*/
@@ -1053,9 +1053,9 @@ void *netsnmp_prefix_listen(netsnmp_prefix_listen_info *listen_info)
           } else if (flag1 == -1) {
               iret = net_snmp_delete_prefix_info (listen_info->list_head, in6pAddr, listen_info->lockinfo);
               if(iret < 0)
-                 snmp_log(LOG_ERR,"Unable to delete the prefix info\n");
+                 DEBUGMSGTL(("access:interface:prefix", "Unable to delete the prefix info\n"));
               if(!iret)
-                 snmp_log(LOG_ERR,"Unable to find the node to delete\n");
+                 DEBUGMSGTL(("access:interface:prefix", "Unable to find the node to delete\n"));
               flag1 = 0;
           }
     }
