@@ -790,7 +790,8 @@ nari_setValue(me, type, value)
               break ;
           case ASN_INTEGER:
 	      /* We want an integer here */
-	      if ((SvTYPE(value) == SVt_IV) || (SvTYPE(value) == SVt_PVMG)) {
+	      if ((SvTYPE(value) == SVt_IV) || (SvTYPE(value) == SVt_PVMG) ||
+                   SvIOK(value)) {
 		  /* Good - got a real one (or a blessed object that we hope will turn out OK) */
 		  ltmp = SvIV(value);
 		  snmp_set_var_typed_value(request->requestvb, (u_char)type,
@@ -826,7 +827,8 @@ nari_setValue(me, type, value)
           case ASN_COUNTER64:
           case ASN_TIMETICKS:
 	      /* We want an integer here */
-	      if ((SvTYPE(value) == SVt_IV) || (SvTYPE(value) == SVt_PVMG)) {
+	      if ((SvTYPE(value) == SVt_IV) || (SvTYPE(value) == SVt_PVMG) ||
+                   SvIOK(value)) {
 		  /* Good - got a real one (or a blessed scalar which we have to hope will turn out OK) */
 		  utmp = SvIV(value);
                   snmp_set_var_typed_value(request->requestvb, (u_char)type,
