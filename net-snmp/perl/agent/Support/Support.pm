@@ -408,7 +408,7 @@ sub getNextOid {
 	    my $nextoid = $current->{next};
 	    print "Trying $nextoid\n"   if ($debugging);
 	    $current = $oidtable->{$nextoid};
-	    $curoid = new NetSNMP::OID($nextoid);
+	    $curoid = $current ? new NetSNMP::OID($nextoid) : undef;
 	}
     }
 
@@ -436,7 +436,7 @@ sub getNextOid {
 	    # No not this one so try the next
 	    $nextoid = $current->{next};
 	    $current = $oidtable->{$nextoid};
-	    $curoid = new NetSNMP::OID($nextoid);
+	    $curoid = $current ? new NetSNMP::OID($nextoid) : undef;
 	    print "Trying next $curoid $nextoid\n"   if ($debugging);
 	} else {
 
