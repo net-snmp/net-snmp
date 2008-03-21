@@ -395,6 +395,7 @@ netsnmp_table_iterator_helper_handler(netsnmp_mib_handler *handler,
     int             oldmode = 0;
     netsnmp_iterator_info *iinfo;
     int notdone;
+    int hintok = 0;
     netsnmp_request_info *request, *reqtmp = NULL;
     netsnmp_variable_list *index_search = NULL;
     netsnmp_variable_list *free_this_index_search = NULL;
@@ -514,6 +515,7 @@ netsnmp_table_iterator_helper_handler(netsnmp_mib_handler *handler,
           if (!request->processed)
             request_count++;
         notdone = 1;
+        hintok = 1;
         while(notdone) {
             notdone = 0;
 
@@ -555,7 +557,7 @@ netsnmp_table_iterator_helper_handler(netsnmp_mib_handler *handler,
             }
 
             /* if sorted, pass in a hint */
-            if (iinfo->flags & NETSNMP_ITERATOR_FLAG_SORTED) {
+            if (hintok && (iinfo->flags & NETSNMP_ITERATOR_FLAG_SORTED)) {
                 callback_loop_context = table_info;
             }
             index_search =
@@ -772,7 +774,8 @@ netsnmp_table_iterator_helper_handler(netsnmp_mib_handler *handler,
                             break;
                         } else {
                           table_info->colnum = nc;
-                            notdone = 1;
+                          hintok = 0;
+                          notdone = 1;
                         }
                     }
                 }
