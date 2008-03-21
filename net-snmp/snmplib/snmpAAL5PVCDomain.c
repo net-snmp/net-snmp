@@ -79,7 +79,7 @@ netsnmp_aal5pvc_recv(netsnmp_transport *t, void *buf, int size,
 
     if (t != NULL && t->sock >= 0) {
 	while (rc < 0) {
-	    rc = recv(t->sock, buf, size, 0);
+	    rc = recvfrom(t->sock, buf, size, 0, NULL, 0);
 	    if (rc < 0 && errno != EINTR) {
 		break;
 	    }
@@ -125,7 +125,7 @@ netsnmp_aal5pvc_send(netsnmp_transport *t, void *buf, int size,
 		    size, buf, str, t->sock));
         free(str);
 	while (rc < 0) {
-	    rc = send(t->sock, buf, size, 0);
+	    rc = sendto(t->sock, buf, size, 0, NULL, 0);
 	    if (rc < 0 && errno != EINTR) {
 		break;
 	    }

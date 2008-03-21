@@ -191,7 +191,7 @@ netsnmp_callback_recv(netsnmp_transport *t, void *buf, int size,
 
     while (rc < 0) {
 #ifdef WIN32
-	rc = recv(mystuff->pipefds[0], newbuf, 1, 0);
+	rc = recvfrom(mystuff->pipefds[0], newbuf, 1, 0, NULL, 0);
 #else
 	rc = read(mystuff->pipefds[0], newbuf, 1);
 #endif
@@ -274,7 +274,7 @@ netsnmp_callback_send(netsnmp_transport *t, void *buf, int size,
 
 	while (rc < 0) {
 #ifdef WIN32
-	    rc = send(((netsnmp_callback_info*) other_side->data)->pipefds[1], " ", 1, 0);
+	    rc = sendto(((netsnmp_callback_info*) other_side->data)->pipefds[1], " ", 1, 0, NULL, 0);
 #else
 	    rc = write(((netsnmp_callback_info *)other_side->data)->pipefds[1],
 		       " ", 1);
@@ -311,7 +311,7 @@ netsnmp_callback_send(netsnmp_transport *t, void *buf, int size,
         }
 	while (rc < 0) {
 #ifdef WIN32
-	    rc = send(((netsnmp_callback_info*) other_side->data)->pipefds[1], " ", 1, 0);
+	    rc = sendto(((netsnmp_callback_info*) other_side->data)->pipefds[1], " ", 1, 0, NULL, 0);
 #else
 	    rc = write(((netsnmp_callback_info *)other_side->data)->pipefds[1],
 		       " ", 1);
