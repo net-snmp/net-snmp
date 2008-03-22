@@ -308,7 +308,9 @@ term_handler(int sig)
 #endif
     netsnmp_running = 0;
 
+#ifdef NETSNMP_EMBEDDED_PERL
     shutdown_perl();
+#endif
 
 #ifdef WIN32SERVICE
     /*
