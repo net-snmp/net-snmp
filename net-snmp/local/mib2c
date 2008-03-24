@@ -192,6 +192,7 @@ exit 1;
 
 # setup
 $outputName = $mibnode->{'label'} if (!defined($outputName));
+$outputName =~ s/-/_/g;
 $vars{'name'} = $outputName;
 $vars{'oid'} = $oid;
 $vars{'example_start'} = "    /*\n" .
