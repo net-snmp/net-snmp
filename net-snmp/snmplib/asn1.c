@@ -1325,7 +1325,7 @@ asn_parse_objid(u_char * data,
             subidentifier =
                 (subidentifier << 7) + (*(u_char *) bufp & ~ASN_BIT8);
             length--;
-        } while (*(u_char *) bufp++ & ASN_BIT8);        /* last byte has high bit clear */
+        } while ((*(u_char *) bufp++ & ASN_BIT8) && (length > 0));        /* last byte has high bit clear */
 
 #if defined(EIGHTBIT_SUBIDS) || (SIZEOF_LONG != 4)
         if (subidentifier > (u_long) MAX_SUBID) {
