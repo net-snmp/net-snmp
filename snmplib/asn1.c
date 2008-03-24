@@ -2735,7 +2735,7 @@ asn_realloc_rbuild_int(u_char ** pkt, size_t * pkt_len,
     }
 
     CHECK_OVERFLOW_S(integer,10);
-    testvalue = (*intp < 0) ? -1 : 0;
+    testvalue = (integer < 0) ? -1 : 0;
 
     if (((*pkt_len - *offset) < 1) && !(r && asn_realloc(pkt, pkt_len))) {
         return 0;
