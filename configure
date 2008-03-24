@@ -21327,6 +21327,9 @@ _ACEOF
 
 if test "x$NETSNMP_DEFAULT_MIBDIRS" = "x"; then
   NETSNMP_DEFAULT_MIBDIRS="\$HOME/.snmp/mibs:$SNMPSHAREPATH/mibs"
+  if test "x$PARTIALTARGETOS" = "xmingw32" -o "x$PARTIALTARGETOS" = "xmingw32msvc" -o "x$PARTIALTARGETOS" = "xcygwin"; then
+    NETSNMP_DEFAULT_MIBDIRS=`echo "$NETSNMP_DEFAULT_MIBDIRS" | $SED 's/:/;/g'`
+  fi
   cat >>confdefs.h <<_ACEOF
 #define NETSNMP_DEFAULT_MIBDIRS "$NETSNMP_DEFAULT_MIBDIRS"
 _ACEOF
