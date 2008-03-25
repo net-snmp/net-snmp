@@ -1043,7 +1043,6 @@ unregister_mib_context(oid * name, size_t len, int priority,
         else {
             unregistering=0;
         }
-        printf("%d %d\n",name[range_subid-1], unregistering);
     }
 
     memset(&reg_parms, 0x0, sizeof(reg_parms));
