@@ -323,7 +323,8 @@ netsnmp_container_table_unregister(netsnmp_handler_registration *reginfo)
 
     if (!reginfo)
         return MIB_UNREGISTRATION_FAILED;
-    tad = (container_table_data *)reginfo->handler->myvoid;
+    tad = (container_table_data *)
+        netsnmp_find_handler_data_by_name(reginfo, "table_container");
     if (tad) {
         CONTAINER_FREE( tad->table );
         tad->table = NULL;
