@@ -171,7 +171,8 @@ internal_register_config_handler(const char *type_param,
                 *cptr = '\0';
                 ++cptr;
             }
-            ltmp2 = register_config_handler(c, token, parser, releaser, help);
+            ltmp2 = internal_register_config_handler(c, token, parser,
+                                                     releaser, help, when);
         }
         return ltmp2;
     }
