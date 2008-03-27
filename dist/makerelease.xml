@@ -5,7 +5,7 @@
       <text>
 	This set of steps will do some preliminary "safety" checks to
 	ensure the local environment is ok and setup some important
-	information
+	information.
       </text>
       <steps>
 	<step type="system" title="Setup Checck">
@@ -28,6 +28,39 @@
 	    should be labeled ".rcN" like 5.4.1.rc1.
 	  </text>
 	</step>
+	<step type="perl" title="Defining a second internal version string">
+	  <perl>
+	    <code>
+	      # version number with dashes instead of dots
+	      $self->{'parameters'}{'VERSIONDASHES'} =
+    	          $self->{'parameters'}{'VERSION'};
+	      $self->{'parameters'}{'VERSIONDASHES'} =~ s/\./-/g;
+
+	      # find out the svn path we're in.
+	      open(SVNINFO,"svn info|");
+	      while(&lt;SVNINFO&gt;) {
+		  if (/^URL: *(.*)/) {
+		     $self->{'parameters'}{'BRANCHPATH'} = $1;
+                     last;
+                  }
+              }
+              close(SVNINFO);
+
+	      return 0;
+	    </code>
+	  </perl>
+	</step>
+	<step type="Informational" title="Release Parameter Information" pause="1">
+	  <text>
+	    Here is the configured information we'll be using:
+
+	    VERSION:                 {VERSION}
+
+	    VERSION with dashes:     {VERSIONDASHES}
+
+            SVN Branch URL:          {BRANCHPATH}
+	  </text>
+	</step>
 	<step type="system" stepname="update" title="update">
 	  <text>We need to make sure your code is up to date and
 	  matches the latest sources in this branch.</text>
@@ -35,22 +68,13 @@
 	    <command>svn update</command>
 	  </commands>
 	</step>
-	<step type="system" stepname="update" title="update">
+	<step type="system" stepname="update" title="Check for changes">
 	  <text>This steps looks for outstanding files that have been
 	  modified.  There should be no outstanding modifications!  If
 	  this step finds outstanding modified files you need to check
 	  them in or revert them before continuing!</text>
 	  <commands>
 	    <command>svn -u status | egrep '^[^\?]'</command>
-	  </commands>
-	</step>
-	<step type="system" stepname="update" title="update">
-	  <text>This steps looks for outstanding files that have not
-	  been added to the repository.  This is less critical if
-	  there are unknown files in the repository, but you should
-	  check the list to make sure none of them need to be checked in</text>
-	  <commands>
-	    <command>svn -u status | egrep '^\?'</command>
 	  </commands>
 	</step>
       </steps>
@@ -63,7 +87,7 @@
       </text>
       <steps>
 	<step type="informational" pause="true"
-	  stepname="version:manualedit" title="version:manualedit">
+	  stepname="version:manualedit" title="version:libtoolmanualedit">
 	  <text>
 	    You (may) need to edit Makefile.top to update the library
 	    version numbering (usually just for the first pre-release
@@ -74,32 +98,35 @@
 	    This script will commit the file for you after you're done.
 	  </text>
 	</step>
-	<step prompt="true" type="system" stepname="version:commit"
+	<step prompt="true" type="system" stepname="version:libtoolcommit"
 	  title="version:commit">
+	  <text>We'll now commit the Makefile.top file if you've
+	  modified it.</text>
 	  <commands>
 	    <command>svn commit -m "version update" Makefile.top</command>
 	  </commands>
 	</step>
-	<step type="system" stepname="docs:doxygenconf"
-	  title="docs:doxygenconf">
-	  <text>
-	    XXX: redo in makerelease mod mechansim
-	  </text>
-	  <commands>
-	    <command>perl local/Version-Munge.pl -v {VERSION} -M -P -C -t doxygen</command>
-	  </commands>
-	</step>
 	<step type="system" stepname="docs:make" title="docs:make">
+	  <text>This step will create manual pages from doxygen
+	  instrumented code files.</text>
 	  <commands>
 	    <command>make docs</command>
-	  </commands>
-	</step>
-	<step type="system" stepname="docs:mancp" title="docs:mancp">
-	  <commands>
 	    <command>make mancp</command>
 	  </commands>
 	</step>
 	<step type="system" stepname="docs:update" title="docs:update">
+	  <text>This will run svn status to figure out what files have
+	  changed since the previous man page generation steps were
+	  done.  After this step, we'll commit all the modified files.
+
+	  You may find additional files (marked with a ?) that should
+	  be added to the svn repository and you'll need to do this by
+	  hand before going on to the next step.
+
+	  Note: based on a recent net-snmp-admin discussion, we're no
+	  longer going to be adding the bazillions of man pages that
+	  doxygen generates by default.  Only important ones should be
+	  added.</text>
 	  <commands>
 	    <command>svn -u status man</command>
 	  </commands>
@@ -108,8 +135,8 @@
 	  <text>
 	    Update man/Makefile.in with details of any new man pages,
 	    and run 'svn add' on them.
-	    I'll commit these changes for you after you're done
 
+	    I'll commit these changes for you after you're done.
 	  </text>
 	</step>
 	<step prompt="true" type="system" stepname="docs:commit" title="docs:commit">
@@ -166,22 +193,24 @@
 	per-release basis.  These steps will help set up these files.</text>
       <steps>
 	<step type="system" stepname="code:makedepend" title="code:makedepend">
+          <text>This step creates Makefile dependencies using the
+          "distdepend" rule in the top level Makefile.</text>
 	  <commands>
 	    <command>make distdepend</command>
 	  </commands>
 	</step>
 	<step prompt="true" type="system" stepname="code:commitdepend" title="code:commitdepend">
+          <text>This step commits the dependency changes done in the
+          previous step.</text>
 	  <commands>
 	    <command>svn commit -m "make depend" `find . -name Makefile.depend`</command>
 	  </commands>
 	</step>
 	<step type="system" stepname="changelog:svn2cl" title="changelog:svn2cl">
+          <text>We need to extract the portions of the change logs
+          committed to the repository.</text>
 	  <commands>
 	    <command>svn2cl -f ChangeLog.add --break-before-msg --stop-on-copy</command>
-	  </commands>
-	</step>
-	<step type="system" stepname="changelog:changelogfix" title="changelog:changelogfix">
-	  <commands>
 	    <command>perl dist/changelogfix  &lt; ChangeLog.add &gt; ChangeLog.reallyadd</command>
 	  </commands>
 	</step>
@@ -189,7 +218,8 @@
 	  <text>
 	    You need to manually insert the *relevent* portions of
 	    'ChangeLog.reallyadd' into the ChangeLog file.
-	    I'll commit these changes for you afterwards
+	    I'll commit these changes for you after you finish cutting
+	    out the proper changes.
 	  </text>
 	</step>
 	<step prompt="true" type="system" stepname="changelog:commit" title="changelog:commit">
@@ -221,12 +251,81 @@
 	    <command>svn commit -m "version update" README NEWS CHANGES</command>
 	  </commands>
 	</step>
-	<step type="system" stepname="release:versionstamp" title="release:versionstamp">
+	<step type="modify" title="Modify the source files"
+	  stepname="release:versionstamp">
 	  <text>
-	    XXX: redo in makerelease mod mechansim
+	    We will now modify files through the code to replace the
+	    version number with the newer one.
 	  </text>
+	  <modifications>
+	    <modify
+	      find="VERSION = '(.*)'"
+	      replace="VERSION = \'{VERSION}\'">
+	      <files>
+		<file>perl/SNMP/SNMP.pm</file>
+		<file>perl/agent/agent.pm</file>
+		<file>perl/agent/Support/Support.pm</file>
+		<file>perl/agent/default_store/default_store.pm</file>
+		<file>perl/default_store/default_store.pm</file>
+		<file>perl/OID/OID.pm</file>
+		<file>perl/ASN/ASN.pm</file>
+		<file>perl/AnyData_SNMP/Storage.pm</file>
+		<file>perl/AnyData_SNMP/Format.pm</file>
+		<file>perl/TrapReceiver/TrapReceiver.pm</file>
+	      </files>
+	    </modify>
+	    <modify
+	      find="Version: [\.0-9a-zA-Z]+"
+	      replace="Version: {VERSION}">
+	      <files>
+		<file>README</file>
+		<file>FAQ</file>
+		<file>dist/net-snmp.spec</file>
+	      </files>
+	    </modify>
+	    <modify
+	      find="VERSION = [\.0-9a-zA-Z]+"
+	      replace="VERSION = {VERSION}">
+	      <files>
+		<file>dist/Makefile</file>
+	      </files>
+	    </modify>
+	    <modify
+	      find="AC_INIT\(\[Net-SNMP\], \[([^\]]+)\]"
+	      replace="AC_INIT([Net-SNMP], [{VERSION}]">
+	      <files>
+		<file>configure.in</file>
+	      </files>
+	    </modify>
+	  </modifications>
+	</step>
+	<step type="system" stepname="release:versionautoconf"
+	  title="Running autoconf to rebuild configure">
+	  <text>We modified configure.in, so we now need to run
+	  autoconf to rebuild configure.
+
+	  XXX: in the future we should verify the correct autoconf
+	  version number</text>
 	  <commands>
-	    <command>perl local/Version-Munge.pl -v {VERSION} -M -P -C</command>
+	    <command>autoconf</command>
+	  </commands>
+	</step>
+	<step type="system" stepname="release:versiondiff"
+	  title="Running svn diff to check changes">
+
+	  <text>Check the following changes for proper version number
+	  differences before we commit the chances.</text>
+	  <commands>
+	    <command>svn diff</command>
+	  </commands>
+	</step>
+	<step type="system" stepname="release:versioncommit" prompt="true"
+	  title="Running svn commit to commit the changes">
+
+	  <text>Check the changes in the above diff and then we'll
+	  commit the results here if they look ok.</text>
+	  <commands>
+	    <command>svn commit -m "Version number update"</command>
 	  </commands>
 	</step>
 	<step type="system" stepname="release:update" title="release:update">
@@ -248,15 +347,19 @@
       <steps>
 	<step prompt="true" type="system" stepname="release:tag" title="release:tag">
 	  <text>
-	    XXX: need to generate 5-5 syntax in next few steps
+	    This will actually svn copy the current checked out branch
+	    to the new tag name.  Specifically:
+
+               svn copy .../{BRANCHPATH} .../tags/Ext-{VERSIONDASHES}
+
 	  </text>
 	  <commands>
-	    <command>svn copy -m "{VERSION} release" https://net-snmp.svn.sourceforge.net/svnroot/net-snmp/trunk https://net-snmp.svn.sourceforge.net/svnroot/net-snmp/tags/Ext-5-5</command>
+	    <command>svn copy -m "{VERSION} release" https://net-snmp.svn.sourceforge.net/svnroot/net-snmp/trunk https://net-snmp.svn.sourceforge.net/svnroot/net-snmp/tags/Ext-{VERSIONDASHES}</command>
 	  </commands>
 	</step>
 	<step prompt="true" type="system" stepname="release:makedist" title="release:makedist">
 	  <commands>
-	    <command>svn export https://net-snmp.svn.sourceforge.net/svnroot/net-snmp/tags/Ext-5-5/net-snmp net-snmp-{VERSION}</command>
+	    <command>svn export https://net-snmp.svn.sourceforge.net/svnroot/net-snmp/tags/Ext-{VERSIONDASHES}/net-snmp net-snmp-{VERSION}</command>
 	  </commands>
 	</step>
 	<step type="system" stepname="release:removefiles" title="release:removefiles">
@@ -330,7 +433,17 @@
     </step>
     <step type="informational">
       <text>
-	Do other steps like upload to sf, etc
+	Publish: Do other steps like upload to sf, etc
+      </text>
+    </step>
+    <step type="informational">
+      <text>
+	Binaries: build rpms, .tar.gzs, etc.
+      </text>
+    </step>
+    <step type="informational">
+      <text>
+	Advertise: NEWS upload to sf, publish on -announce, freshmeat, ...
       </text>
     </step>
   </steps>
