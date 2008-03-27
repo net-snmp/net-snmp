@@ -204,11 +204,13 @@ sub System {
     my $name = shift;
     my $cmd = $descr = join(" ", @_);
     my $rc;
-    dostep('system', $name);
-    print "      <commands>
-	<command>$cmd</command>
-      </commands>
-    </step>\n";
+    while (dostep($name)) {
+	print STDERR "  running: ",$cmd,"\n";
+	last if ($opts{'n'});
+	system(@_);
+	$rc = checkresult();
+        last if ($rc == 0);
+    }
 }
 
 sub checkresult {
@@ -225,19 +227,50 @@ sub checkresult {
 }
 
 sub dostep {
-    my ($type,$name) = @_;
-    print "    <step type=\"$type\" stepname=\"$name\" title=\"$name\">\n";
+    my $name = shift;
+    print STDERR "\n********** STEP: $name ******************************\n";
+    if ($descr) {
+	print STDERR "  [$descr]\n";
+	$descr = undef;
+    }
+    print "\n";
+    if ($opts{'s'} && $name ne $opts{'s'}) {
+	print STDERR "      [skipping]\n";
+	return 0;
+    }
+    $opts{'s'} = '';
+    if ($opts{r} && $name =~ /$opts{r}/) {
+	print STDERR "      [skipping]\n";
+	return 0;
+    } elsif ($opts{'i'}) {
+	print STDERR "  Do this step (y/n/q)?  ";
+	my $ans = <STDIN>;
+	if ($ans =~ /^n/) {
+	    print STDERR "      [skipping]\n";
+	    return 0;
+	}
+	if ($ans =~ /^q/) {
+	    print STDERR "      QUITTING\n";
+	    exit;
+	}
+    }
     return 1;
 }
 
 sub manualstep {
-    my ($tag, $text) = @_;
+    my $tag = shift;
 
-    dostep('informational" pause="true',$tag);
-    print "      <text>
-$text
-      </text>
-    </step>\n";
+    if (dostep($tag)) {
+	print STDERR "\n\n",join(" ",@_);
+
+	print STDERR "\n\n  Hit return when done:  ";
+
+	return 1 if ($opts{'n'});
+
+	my $bogus = <STDIN>;
+	return 1;
+    }
+    return 0;
 }
 
 #######################################################################
