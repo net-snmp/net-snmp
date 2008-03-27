@@ -15,7 +15,7 @@ our %opts =
 (
  'd' => $ENV{'HOME'} . "/src/snmp/patme/",
  'b' => 'main,5.4,5.3,5.2',
- 'p' => '-p0',
+ 'p' => '-p1',
 );
 
 # sets the order shown
