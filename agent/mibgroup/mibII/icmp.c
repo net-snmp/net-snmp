@@ -18,10 +18,10 @@
 
 #include <net-snmp/agent/cache_handler.h>
 #include <net-snmp/agent/scalar_group.h>
+#include <net-snmp/agent/sysORTable.h>
 
 #include "util_funcs.h"
 #include "icmp.h"
-#include "sysORTable.h"
 
 #ifndef MIB_STATS_CACHE_TIMEOUT
 #define MIB_STATS_CACHE_TIMEOUT	5

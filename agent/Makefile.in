@@ -25,6 +25,7 @@ INCLUDESUBDIR=agent
 INCLUDESUBDIRHEADERS=agent_read_config.h \
 	agent_registry.h \
 	agent_index.h \
+	agent_sysORTable.h \
 	agent_trap.h \
 	auto_nlist.h \
 	ds_agent.h \
@@ -34,7 +35,8 @@ INCLUDESUBDIRHEADERS=agent_read_config.h \
 	agent_handler.h \
 	net-snmp-agent-includes.h \
 	mib_modules.h \
-	agent_callbacks.h
+	agent_callbacks.h \
+	sysORTable.h
 
 INSTALLBUILTSUBDIRHEADERS=../include/net-snmp/agent/mib_module_config.h \
 			  ../include/net-snmp/agent/agent_module_config.h \
@@ -60,6 +62,7 @@ INSTALLUCDHEADERS= \
 	agent_index.h	\
 	agent_read_config.h \
 	agent_registry.h \
+	agent_sysORTable.h \
 	agent_trap.h	\
 	auto_nlist.h	\
 	ds_agent.h	\
@@ -104,11 +107,11 @@ MIBOBJS		= $(mibgroup_list_o) mib_modules.o auto_nlist.o
 
 # libnetsnmpagent objects
 LIBAGENTOBJS=snmp_agent.o snmp_vars.o agent_read_config.o \
-	agent_registry.o agent_index.o agent_trap.o kernel.o \
-	 agent_handler.o $(agentgroup_list_o) @OTHERAGENTLIBOBJS@
+	agent_registry.o agent_index.o agent_sysORTable.o agent_trap.o \
+	kernel.o agent_handler.o $(agentgroup_list_o) @OTHERAGENTLIBOBJS@
 LLIBAGENTOBJS=snmp_agent.lo snmp_vars.lo agent_read_config.lo \
-	agent_registry.lo agent_index.lo agent_trap.lo kernel.lo \
-	agent_handler.lo $(agentgroup_list_lo) @OTHERAGENTLIBLOBJS@
+	agent_registry.lo agent_index.lo agent_sysORTable.lo agent_trap.lo \
+	kernel.lo agent_handler.lo $(agentgroup_list_lo) @OTHERAGENTLIBLOBJS@
 
 # The agent objects.
 AGENTOBJS=snmpd.o @other_agentobjs@

@@ -307,6 +307,7 @@ init_agent(const char *app)
     netsnmp_init_helpers();
     init_traps();
     netsnmp_container_init_list();
+    init_agent_sysORTable();
 
 #if defined(USING_AGENTX_SUBAGENT_MODULE) || defined(USING_AGENTX_MASTER_MODULE)
     /*
@@ -361,6 +362,7 @@ shutdown_agent(void) {
     netsnmp_clear_callback_list();
     netsnmp_clear_tdomain_list();
     netsnmp_clear_handler_list();
+    shutdown_agent_sysORTable();
     netsnmp_container_free_list();
     clear_sec_mod();
     clear_snmp_enum();

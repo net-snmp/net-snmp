@@ -51,24 +51,6 @@
 #include "vacm_conf.h"
 #include "util_funcs.h"
 
-#ifdef USING_MIBII_SYSORTABLE_MODULE
-#if TIME_WITH_SYS_TIME
-# ifdef WIN32
-#  include <sys/timeb.h>
-# else
-#  include <sys/time.h>
-# endif
-# include <time.h>
-#else
-# if HAVE_SYS_TIME_H
-#  include <sys/time.h>
-# else
-#  include <time.h>
-# endif
-#endif
-#include "sysORTable.h"
-#endif
-
 #include "snmpd.h"
 
 /**

@@ -46,9 +46,7 @@
 #include "agentx/agentx_config.h"
 #include <net-snmp/agent/agent_callbacks.h>
 #include <net-snmp/agent/agent_trap.h>
-#ifdef USING_MIBII_SYSORTABLE_MODULE
-#include "mibII/sysORTable.h"
-#endif
+#include <net-snmp/agent/sysORTable.h>
 
 #include "subagent.h"
 
@@ -638,7 +636,6 @@ agentx_registration_callback(int majorID, int minorID, void *serverarg,
 }
 
 
-#ifdef USING_MIBII_SYSORTABLE_MODULE
 int
 agentx_sysOR_callback(int majorID, int minorID, void *serverarg,
                       void *clientarg)
@@ -656,7 +653,6 @@ agentx_sysOR_callback(int majorID, int minorID, void *serverarg,
                                        reg_parms->name,
                                        reg_parms->namelen);
 }
-#endif
 
 
 static int
@@ -695,14 +691,12 @@ agentx_register_callbacks(netsnmp_session * s)
     snmp_register_callback(SNMP_CALLBACK_APPLICATION,
                            SNMPD_CALLBACK_UNREGISTER_OID,
                            agentx_registration_callback, s);
-#ifdef USING_MIBII_SYSORTABLE_MODULE
     snmp_register_callback(SNMP_CALLBACK_APPLICATION,
                            SNMPD_CALLBACK_REG_SYSOR,
                            agentx_sysOR_callback, s);
     snmp_register_callback(SNMP_CALLBACK_APPLICATION,
                            SNMPD_CALLBACK_UNREG_SYSOR,
                            agentx_sysOR_callback, s);
-#endif
 }
 
 /*
@@ -722,15 +716,12 @@ agentx_unregister_callbacks(netsnmp_session * ss)
     snmp_unregister_callback(SNMP_CALLBACK_APPLICATION,
                              SNMPD_CALLBACK_UNREGISTER_OID,
                              agentx_registration_callback, ss, 1);
-#ifdef USING_MIBII_SYSORTABLE_MODULE
     snmp_unregister_callback(SNMP_CALLBACK_APPLICATION,
                              SNMPD_CALLBACK_REG_SYSOR,
                              agentx_sysOR_callback, ss, 1);
     snmp_unregister_callback(SNMP_CALLBACK_APPLICATION,
                              SNMPD_CALLBACK_UNREG_SYSOR,
                              agentx_sysOR_callback, ss, 1);
-#endif
-
 }
 
 /*
@@ -847,6 +838,11 @@ subagent_open_master_session(void)
     return 0;
 }
 
+static void
+agentx_reopen_sysORTable(const struct sysORTable* data, void* v)
+{
+  agentx_sysOR_callback(0, SNMPD_CALLBACK_REG_SYSOR, data, v);
+}
 
 /*
  * Alarm callback function to open a session to the master agent.  If a
@@ -873,6 +869,11 @@ agentx_reopen_session(unsigned int clientreg, void *clientarg)
          * Reregister all our nodes.  
          */
         register_mib_reattach();
+
+        /*
+         * Reregister all our sysOREntries
+         */
+        netsnmp_sysORTable_foreach(&agentx_reopen_sysORTable, main_session);
 
         /*
          * Register a ping alarm (if need be).  
