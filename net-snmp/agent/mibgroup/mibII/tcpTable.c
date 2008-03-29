@@ -36,7 +36,6 @@
 
 #include "tcp.h"
 #include "tcpTable.h"
-#include "sysORTable.h"
 
 #ifdef hpux11
 #define	TCPTABLE_ENTRY_TYPE	mib_tcpConnEnt 

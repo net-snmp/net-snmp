@@ -33,7 +33,6 @@
 #endif
 #include "udp.h"
 #include "udpTable.h"
-#include "sysORTable.h"
 
 #ifdef hpux11
 #define	UDPTABLE_ENTRY_TYPE	mib_udpLsnEnt 

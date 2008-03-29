@@ -118,7 +118,6 @@
 
 #include "ip.h"
 #include "interfaces.h"
-#include "sysORTable.h"
 
 #ifdef cygwin
 #include <windows.h>

@@ -11,9 +11,9 @@
 
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
+#include <net-snmp/agent/sysORTable.h>
 
 #include "util_funcs.h"
-#include "mibII/sysORTable.h"
 #include "usmStats.h"
 
 struct variable2 usmStats_variables[] = {
@@ -35,12 +35,10 @@ oid             usmStats_variables_oid[] = { 1, 3, 6, 1, 6, 3, 15, 1, 1 };
 void
 init_usmStats(void)
 {
-#ifdef USING_MIBII_SYSORTABLE_MODULE
     static oid      reg[] = { 1, 3, 6, 1, 6, 3, 15, 2, 1, 1 };
-    register_sysORTable(reg, 10,
-                        "The management information definitions for the SNMP User-based Security Model.");
-#endif
-
+    REGISTER_SYSOR_ENTRY(reg,
+                         "The management information definitions for the "
+                         "SNMP User-based Security Model.");
     REGISTER_MIB("snmpv3/usmStats", usmStats_variables, variable2,
                  usmStats_variables_oid);
 }

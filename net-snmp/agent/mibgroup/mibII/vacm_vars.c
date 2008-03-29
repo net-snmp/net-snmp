@@ -48,10 +48,10 @@
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 
 #include <net-snmp/agent/agent_callbacks.h>
+#include <net-snmp/agent/sysORTable.h>
 #include "vacm_vars.h"
 #include "util_funcs.h"
 
-#ifdef USING_MIBII_SYSORTABLE_MODULE
 #if TIME_WITH_SYS_TIME
 # ifdef WIN32
 #  include <sys/timeb.h>
@@ -66,17 +66,14 @@
 #  include <time.h>
 # endif
 #endif
-#include "sysORTable.h"
-#endif
+
 static unsigned int vacmViewSpinLock = 0;
 
 void
 init_vacm_vars(void)
 {
 
-#ifdef USING_MIBII_SYSORTABLE_MODULE
-    static oid      reg[] = { SNMP_OID_SNMPMODULES, 16, 2, 2, 1 };
-#endif
+    oid      reg[] = { SNMP_OID_SNMPMODULES, 16, 2, 2, 1 };
 
 #define PRIVRW	(NETSNMP_SNMPV2ANY | 0x5000)
 
@@ -126,11 +123,7 @@ init_vacm_vars(void)
                  vacm_access_oid);
     REGISTER_MIB("mibII/vacm:view", vacm_view, variable3, vacm_view_oid);
 
-#ifdef USING_MIBII_SYSORTABLE_MODULE
-    register_sysORTable(reg, 10,
-                        "View-based Access Control Model for SNMP.");
-#endif
-
+    REGISTER_SYSOR_ENTRY(reg, "View-based Access Control Model for SNMP.");
 }
 
 

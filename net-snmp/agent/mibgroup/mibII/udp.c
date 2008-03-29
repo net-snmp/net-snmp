@@ -16,6 +16,7 @@
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 #include <net-snmp/agent/auto_nlist.h>
+#include <net-snmp/agent/sysORTable.h>
 
 #include "util_funcs.h"
 
@@ -44,7 +45,6 @@
 #endif
 #include "udp.h"
 #include "udpTable.h"
-#include "sysORTable.h"
 
 #ifdef NETSNMP_CAN_USE_SYSCTL
 #include <sys/sysctl.h>
