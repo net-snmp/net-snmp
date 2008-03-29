@@ -10,9 +10,9 @@
 
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
+#include <net-snmp/agent/sysORTable.h>
 
 #include "util_funcs.h"
-#include "mibII/sysORTable.h"
 #include "snmpEngine.h"
 
 struct variable2 snmpEngine_variables[] = {
@@ -56,10 +56,8 @@ register_snmpEngine_scalars_context(const char *contextName)
 void
 init_snmpEngine(void)
 {
-#ifdef USING_MIBII_SYSORTABLE_MODULE
-    static oid      reg[] = { 1, 3, 6, 1, 6, 3, 10, 3, 1, 1 };
-    register_sysORTable(reg, 10, "The SNMP Management Architecture MIB.");
-#endif
+    oid      reg[] = { 1, 3, 6, 1, 6, 3, 10, 3, 1, 1 };
+    REGISTER_SYSOR_ENTRY(reg, "The SNMP Management Architecture MIB.");
     register_snmpEngine_scalars();
 }
 

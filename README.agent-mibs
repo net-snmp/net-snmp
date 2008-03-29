@@ -40,6 +40,7 @@ Table Style
   G  scalar group helper
   W  watched scalar 
   M  mfd
+  C  container table
 
 Platform Keys
 ------------------
@@ -65,7 +66,7 @@ A number after a platform indicates notes at the bottom of the file.
 SNMPv2-MIB
  system.?.0                   A         5.5     W mibII/system_mib.c
  .sysORLastChange.0           A         5.5     W mibII/sysORTable.c
- sysORTable                   A         3.4     O mibII/sysORTable.c
+ sysORTable                   A         5.5     C mibII/sysORTable.c
  snmp.*.0                     A         5.5     G mibII/snmp_mib.c
  setSerialNo.0                A         5.0     W mibII/setSerialNo.c
 

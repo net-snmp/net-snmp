@@ -19,12 +19,12 @@
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 #include <net-snmp/agent/auto_nlist.h>
+#include <net-snmp/agent/sysORTable.h>
 
 #include "util_funcs.h"
 #include "ip.h"
 #include "ipAddr.h"
 #include "interfaces.h"
-#include "sysORTable.h"
 
 #ifndef MIB_STATS_CACHE_TIMEOUT
 #define MIB_STATS_CACHE_TIMEOUT	5

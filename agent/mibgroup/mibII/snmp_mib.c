@@ -1,10 +1,10 @@
 #include <net-snmp/net-snmp-config.h>
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
+#include <net-snmp/agent/sysORTable.h>
 
 #include "util_funcs.h"
 #include "snmp_mib.h"
-#include "sysORTable.h"
 #include "updates.h"
 
 static oid snmp_oid[] = { 1, 3, 6, 1, 2, 1, 11 };

@@ -197,12 +197,12 @@
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 #include <net-snmp/agent/auto_nlist.h>
+#include <net-snmp/agent/sysORTable.h>
 #include <net-snmp/data_access/interface.h>
 
 #include "interfaces.h"
 #include "struct.h"
 #include "util_funcs.h"
-#include "sysORTable.h"
 
 /* if you want caching enabled for speed retrival purposes, set this to 5?*/
 #define MINLOADFREQ 0                     /* min reload frequency in seconds */

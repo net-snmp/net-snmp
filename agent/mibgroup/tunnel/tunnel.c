@@ -62,6 +62,7 @@
 #include <net-snmp/net-snmp-config.h>
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
+#include <net-snmp/agent/sysORTable.h>
 
 #include "util_funcs.h"
 #include "tunnel.h"
@@ -158,11 +159,7 @@ struct variable4 tunnel_variables[] = {
 
 
 
-extern int      register_sysORTable(oid *, size_t, const char *);
-extern int      unregister_sysORTable(oid *, size_t);
-
 static oid      sysORTable_reg[] = { 1, 3, 6, 1, 2, 1, 10, 131 };
-static size_t   sysORTable_reglen = 8;
 
 static struct tunnel *tunnels;
 
@@ -171,7 +168,7 @@ static struct tunnel *tunnels;
 void
 deinit_tunnel(void)
 {
-    unregister_sysORTable(sysORTable_reg, sysORTable_reglen);
+    UNREGISTER_SYSOR_ENTRY(sysORTable_reg);
 }
 
 
@@ -188,7 +185,7 @@ term_tunnel(int majorID, int minorID, void *serverarg, void *clientarg)
 void
 init_tunnel(void)
 {
-    register_sysORTable(sysORTable_reg, sysORTable_reglen,
+    REGISTER_SYSOR_ENTRY(sysORTable_reg,
                         "RFC 2667 TUNNEL-MIB implementation for "
                         "Linux 2.2.x kernels.");
 
