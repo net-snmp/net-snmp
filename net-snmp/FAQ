@@ -2864,7 +2864,7 @@ The compilation is complaining about missing libraries. Why?
 
   Examples of this that we have come across include:
 
-     -lelf       elfutils-devel 
+     -lelf       elfutils-devel      (later renamed to elfutils-libelf-devel)
      -lbz2       bzip2-devel
      -lselinux   libselinux-devel
      -lcrypto    openssl/openssl-devel
