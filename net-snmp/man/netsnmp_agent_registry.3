@@ -1,4 +1,4 @@
-.TH "Maintain a registry of MIB subtrees, together with related information regarding mibmodule, sessions, etc" 3 "27 Feb 2008" "Version 5.2.4" "net-snmp" \" -*- nroff -*-
+.TH "Maintain a registry of MIB subtrees, together with related information regarding mibmodule, sessions, etc" 3 "3 Apr 2008" "Version 5.2.4" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -276,11 +276,7 @@ If the entire subtree is not-in-view we can use this information to skip calling
 .PP
 
 .PP
-Definition at line 1303 of file agent_registry.c.
-.PP
-References snmp_pdu::flags, snmp_call_callbacks(), and snmp_pdu::version.
-.PP
-Referenced by netsnmp_add_varbind_to_cache().
+Definition at line 1302 of file agent_registry.c.
 .SS "int netsnmp_get_lookup_cache_size (void)"
 .PP
 retrieves the current value of the lookup cache size 
@@ -292,9 +288,7 @@ the current lookup cache size
 .PP
 
 .PP
-Definition at line 1376 of file agent_registry.c.
-.PP
-Referenced by unregister_mib_context().
+Definition at line 1375 of file agent_registry.c.
 .SS "void netsnmp_set_lookup_cache_size (int newsize)"
 .PP
 set the lookup cache size for optimized agent registration performance. 
@@ -306,9 +300,7 @@ set the lookup cache size for optimized agent registration performance.
 .PP
 
 .PP
-Definition at line 1363 of file agent_registry.c.
-.PP
-Referenced by unregister_mib_context().
+Definition at line 1362 of file agent_registry.c.
 .SS "int unregister_mib_context (oid * name, size_t len, int priority, int range_subid, oid range_ubound, const char * context)"
 .PP
 Unregisters an OID that has an associated context name value. 
@@ -337,7 +329,3 @@ Typically used when a module has multiple contexts defined. The parameters prior
 
 .PP
 Definition at line 948 of file agent_registry.c.
-.PP
-References netsnmp_get_lookup_cache_size(), netsnmp_oid_equals(), netsnmp_set_lookup_cache_size(), and snmp_call_callbacks().
-.PP
-Referenced by netsnmp_unregister_handler().

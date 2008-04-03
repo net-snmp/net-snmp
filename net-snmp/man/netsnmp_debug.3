@@ -1,4 +1,4 @@
-.TH "debug" 3 "27 Feb 2008" "Version 5.2.4" "net-snmp" \" -*- nroff -*-
+.TH "debug" 3 "3 Apr 2008" "Version 5.2.4" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -70,26 +70,16 @@ and then run snmpwalk on the 'system' group.
 returns a debug handler that can be injected into a given handler chain. 
 .PP
 Definition at line 55 of file debug_handler.c.
-.PP
-References netsnmp_create_handler().
-.PP
-Referenced by netsnmp_init_debug_helper().
 .SS "void netsnmp_init_bulk_to_next_helper (void)"
 .PP
 initializes the bulk_to_next helper which then registers a bulk_to_next handler as a run-time injectable handler for configuration file use. 
 .PP
 Definition at line 131 of file bulk_to_next.c.
-.PP
-Referenced by netsnmp_init_helpers().
 .SS "void netsnmp_init_debug_helper (void)"
 .PP
 initializes the debug helper which then registers a debug handler as a run-time injectable handler for configuration file use. 
 .PP
 Definition at line 160 of file debug_handler.c.
-.PP
-References netsnmp_get_debug_handler(), and netsnmp_register_handler_by_name().
-.PP
-Referenced by netsnmp_init_helpers().
 .SS "void netsnmp_init_helpers (void)"
 .PP
 call the initialization sequence for all handlers with init_ routines. 
@@ -97,30 +87,18 @@ call the initialization sequence for all handlers with init_ routines.
 
 .PP
 Definition at line 36 of file all_helpers.c.
-.PP
-References netsnmp_init_bulk_to_next_helper(), netsnmp_init_debug_helper(), netsnmp_init_read_only_helper(), netsnmp_init_serialize(), and netsnmp_init_stash_cache_helper().
-.PP
-Referenced by init_agent().
 .SS "void netsnmp_init_read_only_helper (void)"
 .PP
 initializes the read_only helper which then registers a read_only handler as a run-time injectable handler for configuration file use. 
 .PP
 Definition at line 87 of file read_only.c.
-.PP
-Referenced by netsnmp_init_helpers().
 .SS "void netsnmp_init_serialize (void)"
 .PP
 initializes the serialize helper which then registers a serialize handler as a run-time injectable handler for configuration file use. 
 .PP
 Definition at line 97 of file serialize.c.
-.PP
-Referenced by netsnmp_init_helpers().
 .SS "void netsnmp_init_stash_cache_helper (void)"
 .PP
 initializes the stash_cache helper which then registers a stash_cache handler as a run-time injectable handler for configuration file use. 
 .PP
 Definition at line 189 of file stash_cache.c.
-.PP
-References netsnmp_get_stash_cache_handler(), and netsnmp_register_handler_by_name().
-.PP
-Referenced by netsnmp_init_helpers().

@@ -1,4 +1,4 @@
-.TH "baby_steps" 3 "27 Feb 2008" "Version 5.2.4" "net-snmp" \" -*- nroff -*-
+.TH "baby_steps" 3 "3 Apr 2008" "Version 5.2.4" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -35,14 +35,8 @@ Calls your handler in baby_steps for set processing.
 returns a baby_steps handler that can be injected into a given handler chain. 
 .PP
 Definition at line 62 of file baby_steps.c.
-.PP
-References netsnmp_mib_handler_s::myvoid, netsnmp_create_handler(), netsnmp_handler_free(), snmp_log(), and SNMP_MALLOC_TYPEDEF.
-.PP
-Referenced by netsnmp_baby_steps_handler_init().
 .SS "void netsnmp_baby_steps_handler_init (void)"
 .PP
 initializes the baby_steps helper which then registers a baby_steps handler as a run-time injectable handler for configuration file use. 
 .PP
 Definition at line 323 of file baby_steps.c.
-.PP
-References netsnmp_baby_steps_handler_get(), and netsnmp_register_handler_by_name().

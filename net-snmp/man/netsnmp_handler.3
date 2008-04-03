@@ -1,4 +1,4 @@
-.TH "Net-SNMP Agent handler and extensibility API" 3 "27 Feb 2008" "Version 5.2.4" "net-snmp" \" -*- nroff -*-
+.TH "Net-SNMP Agent handler and extensibility API" 3 "3 Apr 2008" "Version 5.2.4" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -67,14 +67,6 @@ Net-SNMP Agent handler and extensibility API \- The basic theory goes something 
 .ti -1c
 .RI "struct \fBnetsnmp_delegated_cache_s\fP"
 .br
-.ti -1c
-.RI "struct \fBnetsnmp_mib_handler_s\fP"
-.br
-.RI "\fIthe mib handler structure to be registered \fP"
-.ti -1c
-.RI "struct \fBnetsnmp_handler_registration_s\fP"
-.br
-.RI "\fIRoot registration info. \fP"
 .in -1c
 .SS "Defines"
 
@@ -317,10 +309,6 @@ calls a handler with with appropriate NULL checking of arguments, etc.
 
 .PP
 Definition at line 382 of file agent_handler.c.
-.PP
-References netsnmp_mib_handler_s::access_method, netsnmp_mib_handler_s::handler_name, netsnmp_agent_request_info_s::mode, netsnmp_mib_handler_s::next, and snmp_log().
-.PP
-Referenced by netsnmp_call_next_handler(), netsnmp_call_next_handler_one_request(), and netsnmp_multiplexer_helper_handler().
 .SS "int netsnmp_call_next_handler (\fBnetsnmp_mib_handler\fP * current, \fBnetsnmp_handler_registration\fP * reginfo, \fBnetsnmp_agent_request_info\fP * reqinfo, \fBnetsnmp_request_info\fP * requests)"
 .PP
 calls the next handler in the chain after the current one with with appropriate NULL checking, etc. 
@@ -328,10 +316,6 @@ calls the next handler in the chain after the current one with with appropriate 
 
 .PP
 Definition at line 512 of file agent_handler.c.
-.PP
-References netsnmp_call_handler(), netsnmp_mib_handler_s::next, and snmp_log().
-.PP
-Referenced by netsnmp_row_merge_helper_handler(), netsnmp_serialize_helper_handler(), netsnmp_stash_cache_update(), netsnmp_table_data_helper_handler(), netsnmp_table_iterator_helper_handler(), and table_helper_handler().
 .SS "int netsnmp_call_next_handler_one_request (\fBnetsnmp_mib_handler\fP * current, \fBnetsnmp_handler_registration\fP * reginfo, \fBnetsnmp_agent_request_info\fP * reqinfo, \fBnetsnmp_request_info\fP * requests)"
 .PP
 calls the next handler in the chain after the current one with with appropriate NULL checking, etc. 
@@ -339,15 +323,11 @@ calls the next handler in the chain after the current one with with appropriate 
 
 .PP
 Definition at line 534 of file agent_handler.c.
-.PP
-References netsnmp_call_handler(), netsnmp_mib_handler_s::next, netsnmp_request_info_s::next, and snmp_log().
 .SS "void netsnmp_clear_handler_list (void)"
 .PP
 clears the entire handler-registration list 
 .PP
 Definition at line 893 of file agent_handler.c.
-.PP
-References netsnmp_free_all_list_data().
 .SS "NETSNMP_INLINE netsnmp_delegated_cache * netsnmp_create_delegated_cache (\fBnetsnmp_mib_handler\fP * handler, \fBnetsnmp_handler_registration\fP * reginfo, \fBnetsnmp_agent_request_info\fP * reqinfo, \fBnetsnmp_request_info\fP * requests, void * localinfo)"
 .PP
 creates a cache of information which can be saved for future reference. 
@@ -359,8 +339,6 @@ Use \fBnetsnmp_handler_check_cache()\fP later to make sure it's still valid befo
 \fBdelayed_instance.c\fP.
 .PP
 Definition at line 684 of file agent_handler.c.
-.PP
-References netsnmp_agent_request_info_s::asp, and SNMP_MALLOC_TYPEDEF.
 .SS "\fBnetsnmp_mib_handler\fP * netsnmp_create_handler (const char * name, Netsnmp_Node_Handler * handler_access_method)"
 .PP
 creates a netsnmp_mib_handler structure given a name and a access method. 
@@ -389,19 +367,11 @@ netsnmp_create_handler_registration()
 
 .PP
 Definition at line 105 of file agent_handler.c.
-.PP
-References netsnmp_mib_handler_s::access_method, netsnmp_mib_handler_s::handler_name, SNMP_FREE, and SNMP_MALLOC_TYPEDEF.
-.PP
-Referenced by get_old_api_handler(), netsnmp_baby_steps_access_multiplexer_get(), netsnmp_baby_steps_handler_get(), netsnmp_cache_handler_get(), netsnmp_container_table_handler_get(), netsnmp_get_bulk_to_next_handler(), netsnmp_get_debug_handler(), netsnmp_get_instance_handler(), netsnmp_get_mode_end_call_handler(), netsnmp_get_multiplexer_handler(), netsnmp_get_read_only_handler(), netsnmp_get_row_merge_handler(), netsnmp_get_scalar_handler(), netsnmp_get_serialize_handler(), netsnmp_get_stash_cache_handler(), netsnmp_get_table_data_handler(), netsnmp_get_table_data_set_handler(), netsnmp_get_table_handler(), netsnmp_get_table_iterator_handler(), netsnmp_sparse_table_handler_get(), and netsnmp_sparse_table_register().
 .SS "\fBnetsnmp_mib_handler\fP * netsnmp_find_handler_by_name (\fBnetsnmp_handler_registration\fP * reginfo, const char * name)"
 .PP
 Returns a handler from a chain based on the name. 
 .PP
 Definition at line 826 of file agent_handler.c.
-.PP
-References netsnmp_handler_registration_s::handler, netsnmp_mib_handler_s::handler_name, and netsnmp_mib_handler_s::next.
-.PP
-Referenced by netsnmp_find_handler_data_by_name().
 .SS "void * netsnmp_find_handler_data_by_name (\fBnetsnmp_handler_registration\fP * reginfo, const char * name)"
 .PP
 Returns a handler's void * pointer from a chain based on the name. 
@@ -409,10 +379,6 @@ Returns a handler's void * pointer from a chain based on the name.
 This probably shouldn't be used by the general public as the void * data may change as a handler evolves. Handlers should really advertise some function for you to use instead. 
 .PP
 Definition at line 843 of file agent_handler.c.
-.PP
-References netsnmp_mib_handler_s::myvoid, and netsnmp_find_handler_by_name().
-.PP
-Referenced by netsnmp_find_table_registration_info().
 .SS "NETSNMP_INLINE void netsnmp_free_delegated_cache (netsnmp_delegated_cache * dcache)"
 .PP
 frees a cache once you're finished using it 
@@ -422,24 +388,16 @@ frees a cache once you're finished using it
 \fBdelayed_instance.c\fP.
 .PP
 Definition at line 722 of file agent_handler.c.
-.PP
-References SNMP_FREE.
 .SS "NETSNMP_INLINE void netsnmp_free_request_data_set (\fBnetsnmp_request_info\fP * request)"
 .PP
 Free the extra data stored in a request. 
 .PP
 Definition at line 808 of file agent_handler.c.
-.PP
-References netsnmp_free_list_data(), and netsnmp_request_info_s::parent_data.
 .SS "NETSNMP_INLINE void netsnmp_free_request_data_sets (\fBnetsnmp_request_info\fP * request)"
 .PP
 Free the extra data stored in a bunch of requests (all data in the chain). 
 .PP
 Definition at line 816 of file agent_handler.c.
-.PP
-References netsnmp_free_all_list_data(), and netsnmp_request_info_s::parent_data.
-.PP
-Referenced by netsnmp_add_varbind_to_cache(), and netsnmp_table_iterator_helper_handler().
 .SS "NETSNMP_INLINE netsnmp_delegated_cache * netsnmp_handler_check_cache (netsnmp_delegated_cache * dcache)"
 .PP
 check's a given cache and returns it if it is still valid (ie, the agent still considers it to be an outstanding request. 
@@ -451,33 +409,21 @@ Returns NULL if it's no longer valid.
 \fBdelayed_instance.c\fP.
 .PP
 Definition at line 708 of file agent_handler.c.
-.PP
-References netsnmp_check_transaction_id().
 .SS "\fBnetsnmp_mib_handler\fP * netsnmp_handler_dup (\fBnetsnmp_mib_handler\fP * handler)"
 .PP
 dulpicates a handler and all subsequent handlers see also _clone_handler 
 .PP
 Definition at line 579 of file agent_handler.c.
-.PP
-References netsnmp_mib_handler_s::myvoid, netsnmp_handler_free(), netsnmp_mib_handler_s::next, and netsnmp_mib_handler_s::prev.
-.PP
-Referenced by netsnmp_handler_registration_dup().
 .SS "void netsnmp_handler_free (\fBnetsnmp_mib_handler\fP * handler)"
 .PP
 free's the resourceses associated with a given handler 
 .PP
 Definition at line 557 of file agent_handler.c.
-.PP
-References netsnmp_mib_handler_s::handler_name, netsnmp_mib_handler_s::next, and SNMP_FREE.
-.PP
-Referenced by netsnmp_baby_steps_handler_get(), netsnmp_handler_dup(), and netsnmp_handler_registration_free().
 .SS "void netsnmp_handler_mark_requests_as_delegated (\fBnetsnmp_request_info\fP * requests, int isdelegated)"
 .PP
 marks a list of requests as delegated (or not if isdelegaded = 0) 
 .PP
 Definition at line 736 of file agent_handler.c.
-.PP
-References netsnmp_request_info_s::delegated, and netsnmp_request_info_s::next.
 .SS "\fBnetsnmp_handler_registration\fP * netsnmp_handler_registration_create (const char * name, \fBnetsnmp_mib_handler\fP * handler, oid * reg_oid, size_t reg_oid_len, int modes)"
 .PP
 creates a handler registration structure given a name, a access_method function, a registration location oid and the modes the handler supports. 
@@ -533,24 +479,16 @@ Returns a pointer to a netsnmp_handler_registration struct. NULL is returned onl
 
 .PP
 Definition at line 163 of file agent_handler.c.
-.PP
-References netsnmp_handler_registration_s::handler, netsnmp_handler_registration_s::handlerName, memdup(), netsnmp_handler_registration_s::modes, netsnmp_handler_registration_s::priority, netsnmp_handler_registration_s::rootoid, netsnmp_handler_registration_s::rootoid_len, and SNMP_MALLOC_TYPEDEF.
 .SS "\fBnetsnmp_handler_registration\fP * netsnmp_handler_registration_dup (\fBnetsnmp_handler_registration\fP * reginfo)"
 .PP
 duplicates the handler registration object 
 .PP
 Definition at line 622 of file agent_handler.c.
-.PP
-References netsnmp_handler_registration_s::contextName, netsnmp_handler_registration_s::handler, netsnmp_handler_registration_s::handlerName, memdup(), netsnmp_handler_registration_s::modes, netsnmp_handler_dup(), netsnmp_handler_registration_free(), netsnmp_handler_registration_s::priority, netsnmp_handler_registration_s::range_subid, netsnmp_handler_registration_s::range_ubound, netsnmp_handler_registration_s::rootoid, netsnmp_handler_registration_s::rootoid_len, and netsnmp_handler_registration_s::timeout.
 .SS "void netsnmp_handler_registration_free (\fBnetsnmp_handler_registration\fP * reginfo)"
 .PP
 free the resources associated with a handler registration object 
 .PP
 Definition at line 608 of file agent_handler.c.
-.PP
-References netsnmp_handler_registration_s::contextName, netsnmp_handler_registration_s::handler, netsnmp_handler_registration_s::handlerName, netsnmp_handler_free(), netsnmp_handler_registration_s::rootoid, netsnmp_handler_registration_s::rootoid_len, and SNMP_FREE.
-.PP
-Referenced by netsnmp_handler_registration_dup(), and netsnmp_register_mib_table_row().
 .SS "int netsnmp_inject_handler (\fBnetsnmp_handler_registration\fP * reginfo, \fBnetsnmp_mib_handler\fP * handler)"
 .PP
 inject a new handler into the calling chain of the handlers definedy by the netsnmp_handler_registration pointer. 
@@ -558,10 +496,6 @@ inject a new handler into the calling chain of the handlers definedy by the nets
 The new handler is injected at the top of the list and hence will be the new handler to be called first. 
 .PP
 Definition at line 374 of file agent_handler.c.
-.PP
-References netsnmp_inject_handler_before().
-.PP
-Referenced by netsnmp_cache_handler_register(), netsnmp_register_cache_handler(), netsnmp_register_handler(), netsnmp_register_instance(), netsnmp_register_read_only_instance(), netsnmp_register_read_only_scalar(), netsnmp_register_read_only_table_data(), netsnmp_register_row_merge(), netsnmp_register_scalar(), netsnmp_register_serialize(), netsnmp_register_table(), netsnmp_register_table_data(), netsnmp_register_table_data_set(), netsnmp_register_table_iterator(), and netsnmp_sparse_table_register().
 .SS "int netsnmp_inject_handler_before (\fBnetsnmp_handler_registration\fP * reginfo, \fBnetsnmp_mib_handler\fP * handler, const char * before_what)"
 .PP
 inject a new handler into the calling chain of the handlers definedy by the netsnmp_handler_registration pointer. 
@@ -569,10 +503,6 @@ inject a new handler into the calling chain of the handlers definedy by the nets
 The new handler is injected after the before_what handler, or if NULL at the top of the list and hence will be the new handler to be called first. 
 .PP
 Definition at line 322 of file agent_handler.c.
-.PP
-References netsnmp_handler_registration_s::handler, netsnmp_mib_handler_s::handler_name, netsnmp_mib_handler_s::next, netsnmp_mib_handler_s::prev, and snmp_log().
-.PP
-Referenced by netsnmp_inject_handler().
 .SS "int netsnmp_register_handler (\fBnetsnmp_handler_registration\fP * reginfo)"
 .PP
 register a handler, as defined by the netsnmp_handler_registration pointer. 
@@ -580,19 +510,11 @@ register a handler, as defined by the netsnmp_handler_registration pointer.
 
 .PP
 Definition at line 202 of file agent_handler.c.
-.PP
-References netsnmp_handler_registration_s::contextName, netsnmp_handler_registration_s::handler, netsnmp_mib_handler_s::handler_name, netsnmp_handler_registration_s::handlerName, netsnmp_handler_registration_s::modes, netsnmp_get_bulk_to_next_handler(), netsnmp_inject_handler(), netsnmp_mib_handler_s::next, netsnmp_handler_registration_s::priority, netsnmp_handler_registration_s::range_subid, netsnmp_handler_registration_s::range_ubound, netsnmp_handler_registration_s::rootoid, netsnmp_handler_registration_s::rootoid_len, snmp_log(), and netsnmp_handler_registration_s::timeout.
-.PP
-Referenced by netsnmp_cache_handler_register(), netsnmp_register_cache_handler(), netsnmp_register_old_api(), netsnmp_register_row_merge(), netsnmp_register_serialize(), netsnmp_register_table(), and netsnmp_sparse_table_register().
 .SS "void netsnmp_register_handler_by_name (const char * name, \fBnetsnmp_mib_handler\fP * handler)"
 .PP
 registers a given handler by name so that it can be found easily later. 
 .PP
 Definition at line 881 of file agent_handler.c.
-.PP
-References netsnmp_add_list_data(), and netsnmp_create_data_list().
-.PP
-Referenced by netsnmp_baby_steps_handler_init(), netsnmp_init_bulk_to_next_helper(), netsnmp_init_debug_helper(), netsnmp_init_read_only_helper(), netsnmp_init_row_merge(), netsnmp_init_serialize(), and netsnmp_init_stash_cache_helper().
 .SS "int netsnmp_register_handler_nocallback (\fBnetsnmp_handler_registration\fP * reginfo)"
 .PP
 register a handler, as defined by the netsnmp_handler_registration pointer. 
@@ -600,10 +522,6 @@ register a handler, as defined by the netsnmp_handler_registration pointer.
 
 .PP
 Definition at line 270 of file agent_handler.c.
-.PP
-References netsnmp_handler_registration_s::contextName, netsnmp_handler_registration_s::handler, netsnmp_mib_handler_s::handler_name, netsnmp_handler_registration_s::modes, netsnmp_mib_handler_s::next, netsnmp_handler_registration_s::priority, netsnmp_handler_registration_s::range_subid, netsnmp_handler_registration_s::range_ubound, netsnmp_handler_registration_s::rootoid, netsnmp_handler_registration_s::rootoid_len, snmp_log(), and netsnmp_handler_registration_s::timeout.
-.PP
-Referenced by netsnmp_register_mib_table_row().
 .SS "NETSNMP_INLINE void netsnmp_request_add_list_data (\fBnetsnmp_request_info\fP * request, \fBnetsnmp_data_list\fP * node)"
 .PP
 add data to a request that can be extracted later by submodules 
@@ -627,10 +545,6 @@ void
 \fBdelayed_instance.c\fP.
 .PP
 Definition at line 756 of file agent_handler.c.
-.PP
-References netsnmp_add_list_data(), and netsnmp_request_info_s::parent_data.
-.PP
-Referenced by netsnmp_insert_iterator_context(), netsnmp_insert_table_row(), netsnmp_old_api_helper(), netsnmp_table_data_helper_handler(), netsnmp_table_data_set_helper_handler(), netsnmp_table_iterator_helper_handler(), and table_helper_handler().
 .SS "NETSNMP_INLINE void * netsnmp_request_get_list_data (\fBnetsnmp_request_info\fP * request, const char * name)"
 .PP
 extract data from a request that was added previously by a parent module 
@@ -654,10 +568,6 @@ a void pointer(request->parent_data->data), otherwise NULL is returned if reques
 \fBdelayed_instance.c\fP.
 .PP
 Definition at line 798 of file agent_handler.c.
-.PP
-References netsnmp_get_list_data(), and netsnmp_request_info_s::parent_data.
-.PP
-Referenced by netsnmp_extract_array_context(), netsnmp_extract_iterator_context(), netsnmp_extract_table(), netsnmp_extract_table_data_set(), netsnmp_extract_table_info(), netsnmp_extract_table_row(), netsnmp_old_api_helper(), and netsnmp_table_iterator_helper_handler().
 .SS "NETSNMP_INLINE int netsnmp_request_remove_list_data (\fBnetsnmp_request_info\fP * request, const char * name)"
 .PP
 remove data from a request 
@@ -677,10 +587,6 @@ remove data from a request
 
 .PP
 Definition at line 777 of file agent_handler.c.
-.PP
-References netsnmp_remove_list_node(), and netsnmp_request_info_s::parent_data.
-.PP
-Referenced by netsnmp_table_data_set_helper_handler().
 .SS "int netsnmp_unregister_handler (\fBnetsnmp_handler_registration\fP * reginfo)"
 .PP
 unregister a handler, as defined by the netsnmp_handler_registration pointer. 
@@ -688,5 +594,3 @@ unregister a handler, as defined by the netsnmp_handler_registration pointer.
 
 .PP
 Definition at line 260 of file agent_handler.c.
-.PP
-References netsnmp_handler_registration_s::contextName, netsnmp_handler_registration_s::priority, netsnmp_handler_registration_s::range_subid, netsnmp_handler_registration_s::range_ubound, netsnmp_handler_registration_s::rootoid, netsnmp_handler_registration_s::rootoid_len, and unregister_mib_context().

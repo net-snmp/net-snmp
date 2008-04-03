@@ -1,4 +1,4 @@
-.TH "old_api" 3 "27 Feb 2008" "Version 5.2.4" "net-snmp" \" -*- nroff -*-
+.TH "old_api" 3 "3 Apr 2008" "Version 5.2.4" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -39,26 +39,16 @@ returns a old_api handler that should be the final calling handler.
 Don't use this function. Use the \fBnetsnmp_register_old_api()\fP function instead. 
 .PP
 Definition at line 41 of file old_api.c.
-.PP
-References netsnmp_create_handler(), and netsnmp_old_api_helper().
-.PP
-Referenced by netsnmp_register_mib_table_row(), and netsnmp_register_old_api().
 .SS "int netsnmp_old_api_helper (\fBnetsnmp_mib_handler\fP * handler, \fBnetsnmp_handler_registration\fP * reginfo, \fBnetsnmp_agent_request_info\fP * reqinfo, \fBnetsnmp_request_info\fP * requests)"
 .PP
 implements the old_api handler 
 .PP
 Definition at line 230 of file old_api.c.
-.PP
-References netsnmp_agent_request_info_s::asp, netsnmp_handler_registration_s::handlerName, netsnmp_agent_request_info_s::mode, netsnmp_mib_handler_s::myvoid, variable_list::name, variable_list::name_length, netsnmp_create_data_list(), netsnmp_oid_equals(), netsnmp_request_add_list_data(), netsnmp_request_get_list_data(), netsnmp_set_request_error(), netsnmp_request_info_s::next, netsnmp_request_info_s::requestvb, netsnmp_handler_registration_s::rootoid, netsnmp_handler_registration_s::rootoid_len, SNMP_MALLOC_TYPEDEF, snmp_set_var_typed_value(), variable_list::type, variable_list::val, and variable_list::val_len.
-.PP
-Referenced by get_old_api_handler().
 .SS "int netsnmp_register_mib_table_row (const char * moduleName, struct variable * var, size_t varsize, size_t numvars, oid * mibloc, size_t mibloclen, int priority, int var_subid, \fBnetsnmp_session\fP * ss, const char * context, int timeout, int flags)"
 .PP
 registers a row within a mib table 
 .PP
 Definition at line 111 of file old_api.c.
-.PP
-References netsnmp_handler_registration_s::contextName, get_old_api_handler(), netsnmp_handler_registration_s::handler, netsnmp_handler_registration_s::handlerName, netsnmp_handler_registration_s::modes, netsnmp_mib_handler_s::myvoid, netsnmp_handler_registration_free(), netsnmp_register_handler_nocallback(), netsnmp_handler_registration_s::priority, netsnmp_handler_registration_s::range_subid, netsnmp_handler_registration_s::range_ubound, netsnmp_handler_registration_s::rootoid, netsnmp_handler_registration_s::rootoid_len, snmp_call_callbacks(), SNMP_MALLOC_TYPEDEF, and netsnmp_handler_registration_s::timeout.
 .SS "int netsnmp_register_old_api (const char * moduleName, struct variable * var, size_t varsize, size_t numvars, oid * mibloc, size_t mibloclen, int priority, int range_subid, oid range_ubound, \fBnetsnmp_session\fP * ss, const char * context, int timeout, int flags)"
 .PP
 Registers an old API set into the mib tree. 
@@ -68,5 +58,3 @@ Functionally this mimics the old register_mib_context() function (and in fact th
 netsnmp_handler_registration_free(reginfo); already freed 
 .PP
 Definition at line 52 of file old_api.c.
-.PP
-References netsnmp_handler_registration_s::contextName, get_old_api_handler(), netsnmp_handler_registration_s::handler, netsnmp_handler_registration_s::handlerName, memdup(), netsnmp_handler_registration_s::modes, netsnmp_mib_handler_s::myvoid, netsnmp_register_handler(), netsnmp_handler_registration_s::priority, netsnmp_handler_registration_s::range_subid, netsnmp_handler_registration_s::range_ubound, netsnmp_handler_registration_s::rootoid, netsnmp_handler_registration_s::rootoid_len, SNMP_FREE, SNMP_MALLOC_TYPEDEF, and netsnmp_handler_registration_s::timeout.

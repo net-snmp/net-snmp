@@ -1,4 +1,4 @@
-.TH "serialize" 3 "27 Feb 2008" "Version 5.2.4" "net-snmp" \" -*- nroff -*-
+.TH "serialize" 3 "3 Apr 2008" "Version 5.2.4" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -37,19 +37,11 @@ This functionally passes in one request at a time into lower handlers rather tha
 returns a serialize handler that can be injected into a given handler chain. 
 .PP
 Definition at line 35 of file serialize.c.
-.PP
-References netsnmp_create_handler(), and netsnmp_serialize_helper_handler().
-.PP
-Referenced by netsnmp_init_serialize(), and netsnmp_register_serialize().
 .SS "void netsnmp_init_serialize (void)"
 .PP
 initializes the serialize helper which then registers a serialize handler as a run-time injectable handler for configuration file use. 
 .PP
 Definition at line 97 of file serialize.c.
-.PP
-References netsnmp_get_serialize_handler(), and netsnmp_register_handler_by_name().
-.PP
-Referenced by netsnmp_init_helpers().
 .SS "int netsnmp_register_serialize (\fBnetsnmp_handler_registration\fP * reginfo)"
 .PP
 functionally the same as calling \fBnetsnmp_register_handler()\fP but also injects a serialize handler at the same time for you. 
@@ -57,16 +49,8 @@ functionally the same as calling \fBnetsnmp_register_handler()\fP but also injec
 
 .PP
 Definition at line 44 of file serialize.c.
-.PP
-References netsnmp_get_serialize_handler(), netsnmp_inject_handler(), and netsnmp_register_handler().
-.PP
-Referenced by netsnmp_register_instance(), netsnmp_register_read_only_instance(), netsnmp_register_read_only_scalar(), and netsnmp_register_scalar().
 .SS "int netsnmp_serialize_helper_handler (\fBnetsnmp_mib_handler\fP * handler, \fBnetsnmp_handler_registration\fP * reginfo, \fBnetsnmp_agent_request_info\fP * reqinfo, \fBnetsnmp_request_info\fP * requests)"
 .PP
 Implements the serial handler. 
 .PP
 Definition at line 52 of file serialize.c.
-.PP
-References netsnmp_call_next_handler(), and netsnmp_request_info_s::next.
-.PP
-Referenced by netsnmp_get_serialize_handler().

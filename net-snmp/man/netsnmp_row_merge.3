@@ -1,4 +1,4 @@
-.TH "row_merge" 3 "27 Feb 2008" "Version 5.2.4" "net-snmp" \" -*- nroff -*-
+.TH "row_merge" 3 "3 Apr 2008" "Version 5.2.4" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -50,17 +50,11 @@ This helper splits a whole bunch of requests into chunks based on the row index 
 returns a row_merge handler that can be injected into a given handler chain. 
 .PP
 Definition at line 32 of file row_merge.c.
-.PP
-References netsnmp_mib_handler_s::myvoid, netsnmp_create_handler(), and netsnmp_row_merge_helper_handler().
-.PP
-Referenced by netsnmp_init_row_merge(), and netsnmp_register_row_merge().
 .SS "void netsnmp_init_row_merge (void)"
 .PP
 initializes the row_merge helper which then registers a row_merge handler as a run-time injectable handler for configuration file use. 
 .PP
 Definition at line 198 of file row_merge.c.
-.PP
-References netsnmp_get_row_merge_handler(), and netsnmp_register_handler_by_name().
 .SS "int netsnmp_register_row_merge (\fBnetsnmp_handler_registration\fP * reginfo)"
 .PP
 functionally the same as calling \fBnetsnmp_register_handler()\fP but also injects a row_merge handler at the same time for you. 
@@ -68,14 +62,8 @@ functionally the same as calling \fBnetsnmp_register_handler()\fP but also injec
 
 .PP
 Definition at line 46 of file row_merge.c.
-.PP
-References netsnmp_get_row_merge_handler(), netsnmp_inject_handler(), netsnmp_register_handler(), and netsnmp_handler_registration_s::rootoid_len.
 .SS "int netsnmp_row_merge_helper_handler (\fBnetsnmp_mib_handler\fP * handler, \fBnetsnmp_handler_registration\fP * reginfo, \fBnetsnmp_agent_request_info\fP * reqinfo, \fBnetsnmp_request_info\fP * requests)"
 .PP
 Implements the row_merge handler. 
 .PP
 Definition at line 59 of file row_merge.c.
-.PP
-References netsnmp_mib_handler_s::myvoid, variable_list::name, variable_list::name_length, netsnmp_call_next_handler(), netsnmp_request_info_s::next, netsnmp_request_info_s::processed, netsnmp_request_info_s::requestvb, netsnmp_handler_registration_s::rootoid, netsnmp_handler_registration_s::rootoid_len, and snmp_oid_compare().
-.PP
-Referenced by netsnmp_get_row_merge_handler().

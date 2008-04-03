@@ -1,4 +1,4 @@
-.TH "variable_list" 3 "27 Feb 2008" "Version 5.2.4" "net-snmp" \" -*- nroff -*-
+.TH "variable_list" 3 "3 Apr 2008" "Version 5.2.4" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -66,30 +66,24 @@ The netsnmp variable list binding structure, it's typedef'd to netsnmp_variable_
 .PP
 \fBnotification.c\fP.
 .PP
-Definition at line 512 of file snmp_api.h.
+Definition at line 515 of file snmp_api.h.
 .SH "Field Documentation"
 .PP 
 .SS "struct \fBvariable_list\fP* \fBvariable_list::next_variable\fP\fC [read]\fP"
 .PP
 NULL for last variable. 
 .PP
-Definition at line 514 of file snmp_api.h.
-.PP
-Referenced by handle_getnext_loop(), handle_pdu(), netsnmp_bulk_to_next_fix_requests(), netsnmp_send_traps(), netsnmp_wrap_up_request(), snmp_set_var_value(), and table_helper_handler().
+Definition at line 517 of file snmp_api.h.
 .SS "oid* \fBvariable_list::name\fP"
 .PP
 Object identifier of variable. 
 .PP
-Definition at line 516 of file snmp_api.h.
-.PP
-Referenced by check_getnext_results(), netsnmp_add_varbind_to_cache(), netsnmp_bulk_to_next_fix_requests(), netsnmp_check_getnext_reply(), netsnmp_old_api_helper(), netsnmp_row_merge_helper_handler(), netsnmp_send_traps(), netsnmp_table_build_oid(), netsnmp_table_build_oid_from_index(), netsnmp_table_build_result(), netsnmp_table_data_set_helper_handler(), netsnmp_table_iterator_helper_handler(), netsnmp_wrap_up_request(), and table_helper_handler().
+Definition at line 519 of file snmp_api.h.
 .SS "size_t \fBvariable_list::name_length\fP"
 .PP
 number of subid's in name 
 .PP
-Definition at line 518 of file snmp_api.h.
-.PP
-Referenced by check_getnext_results(), netsnmp_add_varbind_to_cache(), netsnmp_bulk_to_next_fix_requests(), netsnmp_check_getnext_reply(), netsnmp_old_api_helper(), netsnmp_row_merge_helper_handler(), netsnmp_send_traps(), netsnmp_table_build_oid(), netsnmp_table_build_oid_from_index(), netsnmp_table_data_set_helper_handler(), netsnmp_table_iterator_helper_handler(), netsnmp_wrap_up_request(), and table_helper_handler().
+Definition at line 521 of file snmp_api.h.
 .SS "u_char \fBvariable_list::type\fP"
 .PP
 ASN type of variable. 
@@ -98,9 +92,7 @@ ASN type of variable.
 .in +1c
 \fBdelayed_instance.c\fP.
 .PP
-Definition at line 520 of file snmp_api.h.
-.PP
-Referenced by _request_set_error(), check_getnext_results(), handle_pdu(), netsnmp_add_varbind_to_cache(), netsnmp_bulk_to_next_fix_requests(), netsnmp_check_getnext_reply(), netsnmp_old_api_helper(), netsnmp_table_data_set_helper_handler(), netsnmp_wrap_up_request(), snmp_set_var_typed_value(), snmp_set_var_value(), sprint_realloc_octet_string(), and table_helper_handler().
+Definition at line 523 of file snmp_api.h.
 .SS "netsnmp_vardata \fBvariable_list::val\fP"
 .PP
 value of variable 
@@ -109,39 +101,31 @@ value of variable
 .in +1c
 \fBdelayed_instance.c\fP.
 .PP
-Definition at line 522 of file snmp_api.h.
-.PP
-Referenced by netsnmp_check_getnext_reply(), netsnmp_old_api_helper(), netsnmp_send_traps(), netsnmp_table_data_set_helper_handler(), snmp_set_var_value(), and sprint_realloc_octet_string().
+Definition at line 525 of file snmp_api.h.
 .SS "size_t \fBvariable_list::val_len\fP"
 .PP
 the length of the value to be copied into buf 
 .PP
-Definition at line 524 of file snmp_api.h.
-.PP
-Referenced by netsnmp_check_getnext_reply(), netsnmp_old_api_helper(), netsnmp_table_data_set_helper_handler(), snmp_set_var_value(), and sprint_realloc_octet_string().
+Definition at line 527 of file snmp_api.h.
 .SS "oid \fBvariable_list::name_loc\fP[MAX_OID_LEN]"
 .PP
 90 percentile < 24. 
 .PP
 
 .PP
-Definition at line 526 of file snmp_api.h.
-.PP
-Referenced by netsnmp_table_build_oid_from_index(), netsnmp_table_build_result(), and table_helper_handler().
+Definition at line 529 of file snmp_api.h.
 .SS "u_char \fBvariable_list::buf\fP[40]"
 .PP
 90 percentile < 40. 
 .PP
 
 .PP
-Definition at line 528 of file snmp_api.h.
-.PP
-Referenced by snmp_set_var_value().
+Definition at line 531 of file snmp_api.h.
 .SS "void* \fBvariable_list::data\fP"
 .PP
 (Opaque) hook for additional data 
 .PP
-Definition at line 530 of file snmp_api.h.
+Definition at line 533 of file snmp_api.h.
 .SS "void(* \fBvariable_list::dataFreeHook\fP)(void *)"
 .PP
 callback to free above 

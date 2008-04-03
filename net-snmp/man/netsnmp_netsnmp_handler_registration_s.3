@@ -1,4 +1,4 @@
-.TH "netsnmp_handler_registration_s" 3 "27 Feb 2008" "Version 5.2.4" "net-snmp" \" -*- nroff -*-
+.TH "netsnmp_handler_registration_s" 3 "3 Apr 2008" "Version 5.2.4" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -75,36 +75,26 @@ Definition at line 91 of file agent_handler.h.
 for mrTable listings, and other uses 
 .PP
 Definition at line 94 of file agent_handler.h.
-.PP
-Referenced by netsnmp_cache_helper_handler(), netsnmp_handler_registration_create(), netsnmp_handler_registration_dup(), netsnmp_handler_registration_free(), netsnmp_old_api_helper(), netsnmp_register_handler(), netsnmp_register_mib_table_row(), netsnmp_register_old_api(), and netsnmp_table_iterator_helper_handler().
 .SS "char* \fBnetsnmp_handler_registration_s::contextName\fP"
 .PP
 NULL = default context. 
 .PP
 Definition at line 96 of file agent_handler.h.
-.PP
-Referenced by netsnmp_handler_registration_dup(), netsnmp_handler_registration_free(), netsnmp_register_handler(), netsnmp_register_handler_nocallback(), netsnmp_register_mib_table_row(), netsnmp_register_old_api(), and netsnmp_unregister_handler().
 .SS "oid* \fBnetsnmp_handler_registration_s::rootoid\fP"
 .PP
 where are we registered at? 
 .PP
 Definition at line 101 of file agent_handler.h.
-.PP
-Referenced by netsnmp_cache_helper_handler(), netsnmp_handler_registration_create(), netsnmp_handler_registration_dup(), netsnmp_handler_registration_free(), netsnmp_old_api_helper(), netsnmp_register_cache_handler(), netsnmp_register_handler(), netsnmp_register_handler_nocallback(), netsnmp_register_mib_table_row(), netsnmp_register_old_api(), netsnmp_register_read_only_scalar(), netsnmp_register_scalar(), netsnmp_row_merge_helper_handler(), netsnmp_table_build_oid(), netsnmp_table_build_oid_from_index(), netsnmp_table_data_build_result(), netsnmp_table_data_helper_handler(), netsnmp_table_iterator_helper_handler(), netsnmp_unregister_handler(), and table_helper_handler().
 .SS "\fBnetsnmp_mib_handler\fP* \fBnetsnmp_handler_registration_s::handler\fP"
 .PP
 handler details 
 .PP
 Definition at line 107 of file agent_handler.h.
-.PP
-Referenced by netsnmp_find_handler_by_name(), netsnmp_find_table_array_handler(), netsnmp_handler_registration_create(), netsnmp_handler_registration_dup(), netsnmp_handler_registration_free(), netsnmp_inject_handler_before(), netsnmp_register_handler(), netsnmp_register_handler_nocallback(), netsnmp_register_mib_table_row(), netsnmp_register_old_api(), and netsnmp_table_container_register().
 .SS "int \fBnetsnmp_handler_registration_s::priority\fP"
 .PP
 more optional stuff 
 .PP
 Definition at line 113 of file agent_handler.h.
-.PP
-Referenced by netsnmp_handler_registration_create(), netsnmp_handler_registration_dup(), netsnmp_register_handler(), netsnmp_register_handler_nocallback(), netsnmp_register_mib_table_row(), netsnmp_register_old_api(), and netsnmp_unregister_handler().
 .SS "void* \fBnetsnmp_handler_registration_s::my_reg_void\fP"
 .PP
 void ptr for registeree 

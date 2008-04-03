@@ -1,4 +1,4 @@
-.TH "Trap generation routines for mib modules to use" 3 "27 Feb 2008" "Version 5.2.4" "net-snmp" \" -*- nroff -*-
+.TH "Trap generation routines for mib modules to use" 3 "3 Apr 2008" "Version 5.2.4" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -251,8 +251,6 @@ void
 
 .PP
 Definition at line 640 of file agent_trap.c.
-.PP
-References snmp_pdu::agent_addr, snmp_pdu::command, snmp_pdu::enterprise, snmp_pdu::enterprise_length, snmp_pdu::flags, variable_list::name, variable_list::name_length, variable_list::next_variable, snmp_call_callbacks(), snmp_log(), snmp_oid_compare(), snmp_pdu::specific_type, snmp_pdu::time, snmp_pdu::trap_type, variable_list::val, and snmp_pdu::variables.
 .SS "void send_easy_trap (int trap, int specific)"
 .PP
 Sends an SNMPv1 trap (or the SNMPv2 equivalent) to the list of configured trap destinations (or 'sinks'), using the provided values for the generic trap type and specific trap value. 
@@ -281,8 +279,6 @@ send_enterprise_trap_vars
 
 .PP
 Definition at line 989 of file agent_trap.c.
-.PP
-Referenced by handle_snmp_packet().
 .SS "void send_v2trap (\fBnetsnmp_variable_list\fP * vars)"
 .PP
 Uses the supplied list of variable bindings to form an SNMPv2 trap, which is sent to SNMPv2-capable sinks on the configured list. 
