@@ -1,4 +1,4 @@
-.TH "The Net-SNMP library" 3 "27 Feb 2008" "Version 5.2.4" "net-snmp" \" -*- nroff -*-
+.TH "The Net-SNMP library" 3 "3 Apr 2008" "Version 5.2.4" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -455,9 +455,7 @@ XXX-rks: why no SNMP_FREE(isp->packet); ??
 .PP
 XXX-rks: why no SNMP_FREE(isp->packet); ?? 
 .PP
-Definition at line 5381 of file snmp_api.c.
-.PP
-References snmp_session::callback, snmp_session::callback_magic, snmp_session::s_errno, snmp_session::s_snmp_errno, SNMP_FREE, and snmp_log().
+Definition at line 5383 of file snmp_api.c.
 .SS "int init_agent (const char * app)"
 .PP
 Initialize the agent. 
@@ -481,9 +479,7 @@ Returns non-zero on failure and zero on success.
 .PP
 
 .PP
-Definition at line 271 of file snmp_vars.c.
-.PP
-References netsnmp_ds_set_boolean(), netsnmp_init_helpers(), and snmp_log().
+Definition at line 272 of file snmp_vars.c.
 .SS "void init_snmp (const char * type)"
 .PP
 Calls the functions to do config file loading and mib module parsing in the correct order. 
@@ -506,8 +502,6 @@ void
 
 .PP
 Definition at line 788 of file snmp_api.c.
-.PP
-References init_mib().
 .SS "int netsnmp_oid_equals (const oid * in_name1, size_t len1, const oid * in_name2, size_t len2)"
 .PP
 Compares 2 OIDs to determine if they are exactly equal. 
@@ -532,9 +526,7 @@ This should be faster than doing a snmp_oid_compare for different length OIDs, s
 .PP
 
 .PP
-Definition at line 6333 of file snmp_api.c.
-.PP
-Referenced by netsnmp_cache_find_by_oid(), netsnmp_old_api_helper(), and unregister_mib_context().
+Definition at line 6335 of file snmp_api.c.
 .SS "int netsnmp_oid_find_prefix (const oid * in_name1, size_t len1, const oid * in_name2, size_t len2)"
 .PP
 Given two OIDs, determine the common prefix to them both. 
@@ -557,9 +549,7 @@ length of largest common index of commonality. 1 = first, 0 if none * or -1 on e
 .PP
 
 .PP
-Definition at line 6389 of file snmp_api.c.
-.PP
-Referenced by netsnmp_add_varbind_to_cache().
+Definition at line 6391 of file snmp_api.c.
 .SS "int netsnmp_oid_is_subtree (const oid * in_name1, size_t len1, const oid * in_name2, size_t len2)"
 .PP
 Identical to netsnmp_oid_equals, except only the length up to len1 is compared. 
@@ -584,7 +574,7 @@ Functionally, this determines if in_name2 is equal or a subtree of in_name1
 .PP
 
 .PP
-Definition at line 6369 of file snmp_api.c.
+Definition at line 6371 of file snmp_api.c.
 .SS "int snmp_oid_compare (const oid * in_name1, size_t len1, const oid * in_name2, size_t len2)"
 .PP
 lexicographical compare two object identifiers. 
@@ -598,9 +588,7 @@ Caution: this method is called often by command responder applications (ie, agen
 .PP
 
 .PP
-Definition at line 6265 of file snmp_api.c.
-.PP
-Referenced by check_getnext_results(), netsnmp_bulk_to_next_fix_requests(), netsnmp_check_getnext_reply(), netsnmp_insert_iterator_context(), netsnmp_insert_table_row(), netsnmp_row_merge_helper_handler(), netsnmp_send_traps(), netsnmp_table_data_add_row(), netsnmp_table_data_get_from_oid(), netsnmp_table_data_helper_handler(), netsnmp_table_iterator_helper_handler(), and table_helper_handler().
+Definition at line 6267 of file snmp_api.c.
 .SS "int snmp_oidtree_compare (const oid * in_name1, size_t len1, const oid * in_name2, size_t len2)"
 .PP
 Compares 2 OIDs to determine if they are equal up until the shortest length. 
@@ -623,7 +611,7 @@ Compares 2 OIDs to determine if they are equal up until the shortest length.
 .PP
 
 .PP
-Definition at line 6314 of file snmp_api.c.
+Definition at line 6316 of file snmp_api.c.
 .SS "void snmp_shutdown (const char * type)"
 .PP
 Shuts down the application, saving any needed persistent storage, and appropriate clean up. 
@@ -641,8 +629,6 @@ void
 
 .PP
 Definition at line 856 of file snmp_api.c.
-.PP
-References shutdown_mib(), snmp_alarm_unregister_all(), and snmp_call_callbacks().
 .SS "int snmpv3_engineID_probe (struct session_list * slp, \fBnetsnmp_session\fP * in_session)"
 .PP
 probe for peer engineID 
@@ -675,5 +661,3 @@ the first session in slp should the internal allocated copy of in_session
 
 .PP
 Definition at line 1271 of file snmp_api.c.
-.PP
-References snmp_session::engineBoots, snmp_session::engineTime, snmp_session::flags, snmp_session::s_snmp_errno, snmp_session::securityEngineID, snmp_session::securityEngineIDLen, and snmp_session::version.

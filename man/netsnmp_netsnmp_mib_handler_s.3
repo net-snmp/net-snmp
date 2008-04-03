@@ -1,4 +1,4 @@
-.TH "netsnmp_mib_handler_s" 3 "27 Feb 2008" "Version 5.2.4" "net-snmp" \" -*- nroff -*-
+.TH "netsnmp_mib_handler_s" 3 "3 Apr 2008" "Version 5.2.4" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -52,22 +52,16 @@ Definition at line 46 of file agent_handler.h.
 for handler's internal use 
 .PP
 Definition at line 49 of file agent_handler.h.
-.PP
-Referenced by netsnmp_baby_steps_access_multiplexer_get(), netsnmp_baby_steps_handler_get(), netsnmp_cache_handler_get(), netsnmp_cache_helper_handler(), netsnmp_container_table_handler_get(), netsnmp_find_handler_data_by_name(), netsnmp_get_cache_handler(), netsnmp_get_mode_end_call_handler(), netsnmp_get_multiplexer_handler(), netsnmp_get_row_merge_handler(), netsnmp_get_stash_cache_handler(), netsnmp_get_table_data_handler(), netsnmp_get_table_data_set_handler(), netsnmp_get_table_handler(), netsnmp_get_table_iterator_handler(), netsnmp_handler_dup(), netsnmp_multiplexer_helper_handler(), netsnmp_old_api_helper(), netsnmp_register_mib_table_row(), netsnmp_register_old_api(), netsnmp_row_merge_helper_handler(), netsnmp_table_container_register(), netsnmp_table_data_helper_handler(), netsnmp_table_data_set_helper_handler(), netsnmp_table_iterator_helper_handler(), and table_helper_handler().
 .SS "int \fBnetsnmp_mib_handler_s::flags\fP"
 .PP
 for agent_handler's internal use 
 .PP
 Definition at line 51 of file agent_handler.h.
-.PP
-Referenced by netsnmp_baby_steps_access_multiplexer_get(), netsnmp_cache_handler_get(), netsnmp_cache_helper_handler(), netsnmp_container_table_handler_get(), netsnmp_get_bulk_to_next_handler(), netsnmp_get_read_only_handler(), netsnmp_get_table_data_handler(), netsnmp_get_table_data_set_handler(), and netsnmp_table_data_helper_handler().
 .SS "int(* \fBnetsnmp_mib_handler_s::access_method\fP)(struct \fBnetsnmp_mib_handler_s\fP *, struct \fBnetsnmp_handler_registration_s\fP *, struct \fBnetsnmp_agent_request_info_s\fP *, struct \fBnetsnmp_request_info_s\fP *)"
 .PP
 if you add more members, you probably also want to update 
 .PP
 _clone_handler in \fBsnmp_agent.c\fP. 
-.PP
-Referenced by netsnmp_call_handler(), netsnmp_create_handler(), and netsnmp_find_table_array_handler().
 
 .SH "Author"
 .PP 

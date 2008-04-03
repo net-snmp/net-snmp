@@ -1,4 +1,4 @@
-.TH "netsnmp_request_info_s" 3 "27 Feb 2008" "Version 5.2.4" "net-snmp" \" -*- nroff -*-
+.TH "netsnmp_request_info_s" 3 "3 Apr 2008" "Version 5.2.4" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -88,36 +88,26 @@ variable bindings
 \fBdelayed_instance.c\fP.
 .PP
 Definition at line 58 of file snmp_agent.h.
-.PP
-Referenced by _request_set_error(), check_getnext_results(), netsnmp_add_varbind_to_cache(), netsnmp_bulk_to_next_fix_requests(), netsnmp_check_getnext_reply(), netsnmp_old_api_helper(), netsnmp_row_merge_helper_handler(), netsnmp_table_build_oid(), netsnmp_table_build_oid_from_index(), netsnmp_table_build_result(), netsnmp_table_data_build_result(), netsnmp_table_data_set_helper_handler(), netsnmp_table_iterator_helper_handler(), and table_helper_handler().
 .SS "\fBnetsnmp_data_list\fP* \fBnetsnmp_request_info_s::parent_data\fP"
 .PP
 can be used to pass information on a per-request basis from a helper to the later handlers 
 .PP
 Definition at line 64 of file snmp_agent.h.
-.PP
-Referenced by netsnmp_add_varbind_to_cache(), netsnmp_free_request_data_set(), netsnmp_free_request_data_sets(), netsnmp_request_add_list_data(), netsnmp_request_get_list_data(), netsnmp_request_remove_list_data(), and netsnmp_table_iterator_helper_handler().
 .SS "oid* \fBnetsnmp_request_info_s::range_end\fP"
 .PP
 don't free, reference to (struct tree)->end 
 .PP
 Definition at line 72 of file snmp_agent.h.
-.PP
-Referenced by check_getnext_results(), netsnmp_add_varbind_to_cache(), and netsnmp_bulk_to_next_fix_requests().
 .SS "int \fBnetsnmp_request_info_s::index\fP"
 .PP
 index in original pdu 
 .PP
 Definition at line 84 of file snmp_agent.h.
-.PP
-Referenced by check_getnext_results(), and netsnmp_add_varbind_to_cache().
 .SS "int \fBnetsnmp_request_info_s::repeat\fP"
 .PP
 get-bulk 
 .PP
 Definition at line 87 of file snmp_agent.h.
-.PP
-Referenced by check_getnext_results(), and netsnmp_bulk_to_next_fix_requests().
 
 .SH "Author"
 .PP 

@@ -1,4 +1,4 @@
-.TH "Store and retrieve data referenced by an OID." 3 "27 Feb 2008" "Version 5.2.4" "net-snmp" \" -*- nroff -*-
+.TH "Store and retrieve data referenced by an OID." 3 "3 Apr 2008" "Version 5.2.4" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -82,10 +82,6 @@ SNMPERR_SUCCESS on success, SNMPERR_GENERR if data is already there, SNMPERR_MAL
 
 .PP
 Definition at line 87 of file oid_stash.c.
-.PP
-References netsnmp_oid_stash_create_node().
-.PP
-Referenced by netsnmp_table_data_set_helper_handler(), and netsnmp_table_iterator_helper_handler().
 .SS "NETSNMP_INLINE netsnmp_oid_stash_node* netsnmp_oid_stash_create_node (void)"
 .PP
 Creates a netsnmp_oid_stash_node. 
@@ -100,10 +96,6 @@ NULL on error, otherwise the newly allocated node
 
 .PP
 Definition at line 70 of file oid_stash.c.
-.PP
-References netsnmp_oid_stash_create_sized_node().
-.PP
-Referenced by netsnmp_oid_stash_add_data().
 .SS "netsnmp_oid_stash_node* netsnmp_oid_stash_create_sized_node (size_t mysize)"
 .PP
 Create an netsnmp_oid_stash node. 
@@ -121,10 +113,6 @@ NULL on error, otherwise the newly allocated node
 
 .PP
 Definition at line 50 of file oid_stash.c.
-.PP
-References SNMP_MALLOC_TYPEDEF.
-.PP
-Referenced by netsnmp_oid_stash_create_node().
 .SS "void netsnmp_oid_stash_free (netsnmp_oid_stash_node ** root, NetSNMPStashFreeNode * freefn)"
 .PP
 Frees the contents of a netsnmp_oid_stash tree. 
@@ -139,10 +127,6 @@ Frees the contents of a netsnmp_oid_stash tree.
 
 .PP
 Definition at line 402 of file oid_stash.c.
-.PP
-References netsnmp_oid_stash_free().
-.PP
-Referenced by netsnmp_oid_stash_free(), and netsnmp_stash_cache_update().
 .SS "void* netsnmp_oid_stash_get_data (netsnmp_oid_stash_node * root, oid * lookup, size_t lookup_len)"
 .PP
 returns a data pointer associated with a given OID. 
@@ -161,10 +145,6 @@ This is equivelent to netsnmp_oid_stash_get_node, but returns only the data not 
 
 .PP
 Definition at line 283 of file oid_stash.c.
-.PP
-References netsnmp_oid_stash_get_node().
-.PP
-Referenced by netsnmp_table_data_set_helper_handler().
 .SS "netsnmp_oid_stash_node* netsnmp_oid_stash_get_node (netsnmp_oid_stash_node * root, oid * lookup, size_t lookup_len)"
 .PP
 returns a node associated with a given OID. 
@@ -181,8 +161,6 @@ returns a node associated with a given OID.
 
 .PP
 Definition at line 155 of file oid_stash.c.
-.PP
-Referenced by netsnmp_oid_stash_get_data().
 .SS "netsnmp_oid_stash_node* netsnmp_oid_stash_getnext_node (netsnmp_oid_stash_node * root, oid * lookup, size_t lookup_len)"
 .PP
 returns the next node associated with a given OID. 
@@ -212,10 +190,6 @@ This function can be called to save all data in a stash tree to Net-SNMP's perce
 
 .PP
 Definition at line 335 of file oid_stash.c.
-.PP
-References netsnmp_oid_stash_store(), and read_config_store().
-.PP
-Referenced by netsnmp_oid_stash_store(), and netsnmp_oid_stash_store_all().
 .SS "int netsnmp_oid_stash_store_all (int majorID, int minorID, void * serverarg, void * clientarg)"
 .PP
 a wrapper around netsnmp_oid_stash_store for use with a snmp_alarm. 
@@ -236,8 +210,6 @@ when calling snmp_alarm, you can list this as a callback. The clientarg should b
 
 .PP
 Definition at line 305 of file oid_stash.c.
-.PP
-References netsnmp_oid_stash_store().
 .SS "void oid_stash_dump (netsnmp_oid_stash_node * root, char * prefix)"
 .PP
 For debugging: dump the netsnmp_oid_stash tree to stdout. 

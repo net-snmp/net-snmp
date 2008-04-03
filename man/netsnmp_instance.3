@@ -1,4 +1,4 @@
-.TH "instance" 3 "27 Feb 2008" "Version 5.2.4" "net-snmp" \" -*- nroff -*-
+.TH "instance" 3 "3 Apr 2008" "Version 5.2.4" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -103,10 +103,6 @@ Returns a pointer to a netsnmp_mib_handler struct which contains the handler's n
 
 .PP
 Definition at line 45 of file instance.c.
-.PP
-References netsnmp_create_handler().
-.PP
-Referenced by netsnmp_register_instance(), netsnmp_register_read_only_instance(), netsnmp_register_read_only_scalar(), and netsnmp_register_scalar().
 .SS "int netsnmp_register_instance (\fBnetsnmp_handler_registration\fP * reginfo)"
 .PP
 This function registers an instance helper handler, which is a way of registering an exact OID such that GENEXT requests are handled entirely by the helper. 
@@ -130,10 +126,6 @@ MIB_REGISTERED_OK is returned if the registration was a success. Failures are MI
 \fBdelayed_instance.c\fP.
 .PP
 Definition at line 70 of file instance.c.
-.PP
-References netsnmp_get_instance_handler(), netsnmp_inject_handler(), and netsnmp_register_serialize().
-.PP
-Referenced by netsnmp_register_int_instance().
 .SS "int netsnmp_register_int_instance (const char * name, oid * reg_oid, size_t reg_oid_len, int * it, Netsnmp_Node_Handler * subhandler)"
 .PP
 This function registers an int helper handler to a specified OID. 
@@ -163,8 +155,6 @@ MIB_REGISTERED_OK is returned if the registration was a success. Failures are MI
 \fBscalar_int.c\fP.
 .PP
 Definition at line 387 of file instance.c.
-.PP
-References netsnmp_register_instance().
 .SS "int netsnmp_register_read_only_instance (\fBnetsnmp_handler_registration\fP * reginfo)"
 .PP
 This function injects a 'read only' handler into the handler chain prior to serializing/registering the handler. 
@@ -184,5 +174,3 @@ MIB_REGISTERED_OK is returned if the registration was a success. Failures are MI
 
 .PP
 Definition at line 95 of file instance.c.
-.PP
-References netsnmp_get_instance_handler(), netsnmp_get_read_only_handler(), netsnmp_inject_handler(), and netsnmp_register_serialize().

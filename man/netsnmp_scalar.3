@@ -1,4 +1,4 @@
-.TH "scalar" 3 "27 Feb 2008" "Version 5.2.4" "net-snmp" \" -*- nroff -*-
+.TH "scalar" 3 "3 Apr 2008" "Version 5.2.4" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -49,10 +49,6 @@ Returns a pointer to a netsnmp_mib_handler struct which contains the handler's n
 
 .PP
 Definition at line 50 of file scalar.c.
-.PP
-References netsnmp_create_handler().
-.PP
-Referenced by netsnmp_register_read_only_scalar(), and netsnmp_register_scalar().
 .SS "int netsnmp_register_read_only_scalar (\fBnetsnmp_handler_registration\fP * reginfo)"
 .PP
 This function registers a read only scalar helper handler. 
@@ -79,8 +75,6 @@ MIB_REGISTERED_OK is returned if the registration was a success. Failures are MI
 
 .PP
 Definition at line 113 of file scalar.c.
-.PP
-References netsnmp_get_instance_handler(), netsnmp_get_read_only_handler(), netsnmp_get_scalar_handler(), netsnmp_inject_handler(), netsnmp_register_serialize(), netsnmp_handler_registration_s::rootoid, and netsnmp_handler_registration_s::rootoid_len.
 .SS "int netsnmp_register_scalar (\fBnetsnmp_handler_registration\fP * reginfo)"
 .PP
 This function registers a scalar helper handler. 
@@ -109,5 +103,3 @@ MIB_REGISTERED_OK is returned if the registration was a success. Failures are MI
 
 .PP
 Definition at line 78 of file scalar.c.
-.PP
-References netsnmp_get_instance_handler(), netsnmp_get_scalar_handler(), netsnmp_inject_handler(), netsnmp_register_serialize(), netsnmp_handler_registration_s::rootoid, and netsnmp_handler_registration_s::rootoid_len.

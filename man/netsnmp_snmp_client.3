@@ -1,4 +1,4 @@
-.TH "various PDU processing routines" 3 "27 Feb 2008" "Version 5.2.4" "net-snmp" \" -*- nroff -*-
+.TH "various PDU processing routines" 3 "3 Apr 2008" "Version 5.2.4" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -134,10 +134,6 @@ returns 0 on success and 1 on a malloc error
 \fBdelayed_instance.c\fP.
 .PP
 Definition at line 686 of file snmp_client.c.
-.PP
-References snmp_set_var_value(), and variable_list::type.
-.PP
-Referenced by check_getnext_results(), handle_pdu(), netsnmp_check_getnext_reply(), netsnmp_old_api_helper(), netsnmp_table_build_result(), netsnmp_table_data_build_result(), and snmp_set_var_value().
 .SS "int snmp_set_var_value (\fBnetsnmp_variable_list\fP * vars, const u_char * value, size_t len)"
 .PP
 
@@ -145,7 +141,3 @@ Referenced by check_getnext_results(), handle_pdu(), netsnmp_check_getnext_reply
 FALL THROUGH 
 .PP
 Definition at line 732 of file snmp_client.c.
-.PP
-References variable_list::buf, snmp_session::callback, snmp_session::callback_magic, variable_list::next_variable, snmp_log(), snmp_set_var_typed_value(), variable_list::type, variable_list::val, and variable_list::val_len.
-.PP
-Referenced by snmp_set_var_typed_value().

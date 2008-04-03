@@ -1,4 +1,4 @@
-.TH "A generic callback mechanism" 3 "27 Feb 2008" "Version 5.2.4" "net-snmp" \" -*- nroff -*-
+.TH "A generic callback mechanism" 3 "3 Apr 2008" "Version 5.2.4" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -87,10 +87,6 @@ Returns SNMPERR_GENERR if major is >= MAX_CALLBACK_IDS or minor is >= MAX_CALLBA
 
 .PP
 Definition at line 182 of file callback.c.
-.PP
-References snmp_log().
-.PP
-Referenced by netsnmp_acm_check_subtree(), netsnmp_register_mib_table_row(), netsnmp_send_traps(), snmp_shutdown(), and unregister_mib_context().
 .SS "int snmp_register_callback (int major, int minor, SNMPCallback * new_callback, void * arg)"
 .PP
 This function registers a generic callback function. 
@@ -151,8 +147,6 @@ Returns SNMPERR_GENERR if major is >= MAX_CALLBACK_IDS or minor is >= MAX_CALLBA
 
 .PP
 Definition at line 115 of file callback.c.
-.PP
-Referenced by netsnmp_register_save_list().
 .SS "int snmp_unregister_callback (int major, int minor, SNMPCallback * target, void * arg, int matchargs)"
 .PP
 This function unregisters a specified callback function given a major and minor type. 
@@ -189,5 +183,3 @@ Returns the number of callbacks that were unregistered.
 set cleanup flag? 
 .PP
 Definition at line 295 of file callback.c.
-.PP
-References SNMP_FREE, and snmp_log().

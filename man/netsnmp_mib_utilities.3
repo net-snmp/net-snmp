@@ -1,4 +1,4 @@
-.TH "mib parsing and datatype manipulation routines." 3 "27 Feb 2008" "Version 5.2.4" "net-snmp" \" -*- nroff -*-
+.TH "mib parsing and datatype manipulation routines." 3 "3 Apr 2008" "Version 5.2.4" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -257,12 +257,6 @@ mib parsing and datatype manipulation routines. \-
 .ti -1c
 .RI "int \fBget_wild_node\fP (const char *name, oid *objid, size_t *objidlen)"
 .br
-.RI "\fI\fBSee also:\fP
-.RS 4
-comments on find_best_tree_node for usage after first time. 
-.RE
-.PP
-\fP"
 .ti -1c
 .RI "int \fBget_node\fP (const char *name, oid *objid, size_t *objidlen)"
 .br
@@ -416,18 +410,14 @@ If allow_realloc is true the buffer will be (re)allocated to fit in the needed s
 .PP
 
 .PP
-Definition at line 270 of file mib.c.
-.PP
-References snmp_realloc().
+Definition at line 271 of file mib.c.
 .SS "int build_oid (oid ** out, size_t * out_len, oid * prefix, size_t prefix_len, \fBnetsnmp_variable_list\fP * indexes)"
 .PP
 
 .PP
 xxx-rks: should free previous value? 
 .PP
-Definition at line 3600 of file mib.c.
-.PP
-Referenced by netsnmp_table_build_oid(), and netsnmp_table_data_generate_index_oid().
+Definition at line 3605 of file mib.c.
 .SS "int build_oid_segment (\fBnetsnmp_variable_list\fP * var)"
 .PP
 Takes the value in VAR and turns it into an OID segment in var->name. 
@@ -444,7 +434,7 @@ SNMPERR_SUCCESS or SNMPERR_GENERR
 .PP
 
 .PP
-Definition at line 3464 of file mib.c.
+Definition at line 3469 of file mib.c.
 .SS "void fprint_description (FILE * f, oid * objid, size_t objidlen, int width)"
 .PP
 Prints on oid description into a file descriptor. 
@@ -462,7 +452,7 @@ Prints on oid description into a file descriptor.
 .PP
 
 .PP
-Definition at line 4441 of file mib.c.
+Definition at line 4446 of file mib.c.
 .SS "void fprint_objid (FILE * f, const oid * objid, size_t objidlen)"
 .PP
 Prints an oid to a file descriptor. 
@@ -478,7 +468,7 @@ Prints an oid to a file descriptor.
 .PP
 
 .PP
-Definition at line 3186 of file mib.c.
+Definition at line 3190 of file mib.c.
 .SS "void fprint_variable (FILE * f, const oid * objid, size_t objidlen, const \fBnetsnmp_variable_list\fP * variable)"
 .PP
 Prints a variable to a file descriptor. 
@@ -496,7 +486,7 @@ Prints a variable to a file descriptor.
 .PP
 
 .PP
-Definition at line 3340 of file mib.c.
+Definition at line 3344 of file mib.c.
 .SS "struct tree* get_tree_head (void)\fC [read]\fP"
 .PP
 Retrieves the tree head. 
@@ -508,7 +498,7 @@ the tree head.
 .PP
 
 .PP
-Definition at line 2050 of file mib.c.
+Definition at line 2053 of file mib.c.
 .SS "int get_wild_node (const char * name, oid * objid, size_t * objidlen)"
 .PP
 \fBSee also:\fP
@@ -518,25 +508,21 @@ comments on find_best_tree_node for usage after first time.
 .PP
 
 .PP
-Definition at line 5460 of file mib.c.
+Definition at line 5466 of file mib.c.
 .SS "void init_mib (void)"
 .PP
 Initialises the mib reader. 
 .PP
 Reads in all settings from the environment. 
 .PP
-Definition at line 2562 of file mib.c.
-.PP
-Referenced by init_snmp().
+Definition at line 2565 of file mib.c.
 .SS "void netsnmp_fixup_mib_directory (void)"
 .PP
 
 .PP
 swap in the new value and repeat 
 .PP
-Definition at line 2515 of file mib.c.
-.PP
-References netsnmp_get_mib_directory(), netsnmp_getenv(), netsnmp_set_mib_directory(), and SNMP_FREE.
+Definition at line 2518 of file mib.c.
 .SS "char* netsnmp_get_mib_directory (void)"
 .PP
 
@@ -545,11 +531,7 @@ Check if the environment variable is set
 .PP
 Not set use hard coded path 
 .PP
-Definition at line 2468 of file mib.c.
-.PP
-References netsnmp_getenv(), and netsnmp_set_mib_directory().
-.PP
-Referenced by netsnmp_fixup_mib_directory().
+Definition at line 2471 of file mib.c.
 .SS "int netsnmp_oid2chars (char * C, int L, const oid * O)"
 .PP
 Converts an OID to its character form. 
@@ -574,7 +556,7 @@ in example 5 . 1 . 2 . 3 . 4 . 5 = 12345
 .PP
 length 
 .PP
-Definition at line 6203 of file mib.c.
+Definition at line 6209 of file mib.c.
 .SS "int netsnmp_oid2str (char * S, int L, oid * O)"
 .PP
 Converts an OID to its string form. 
@@ -597,7 +579,7 @@ in example 5 . 'h' . 'e' . 'l' . 'l' . 'o' = 'hello\\0' (null terminated)
 .PP
 
 .PP
-Definition at line 6231 of file mib.c.
+Definition at line 6237 of file mib.c.
 .SS "void netsnmp_set_mib_directory (const char * dir)"
 .PP
 
@@ -608,11 +590,7 @@ If dir starts with '+' skip '+' it.
 .PP
 set_string calls strdup, so if we allocated memory, free it 
 .PP
-Definition at line 2413 of file mib.c.
-.PP
-References SNMP_FREE.
-.PP
-Referenced by netsnmp_fixup_mib_directory(), and netsnmp_get_mib_directory().
+Definition at line 2416 of file mib.c.
 .SS "int netsnmp_str2oid (const char * S, oid * O, int L)"
 .PP
 Converts a string to its OID form. 
@@ -635,7 +613,7 @@ in example 'hello' = 5 . 'h' . 'e' . 'l' . 'l' . 'o'
 .PP
 
 .PP
-Definition at line 6168 of file mib.c.
+Definition at line 6174 of file mib.c.
 .SS "void print_description (oid * objid, size_t objidlen, int width)"
 .PP
 Prints on oid description on stdout. 
@@ -647,7 +625,7 @@ Prints on oid description on stdout.
 .PP
 
 .PP
-Definition at line 4425 of file mib.c.
+Definition at line 4430 of file mib.c.
 .SS "void print_mib (FILE * fp)"
 .PP
 Prints the MIBs to the file fp. 
@@ -659,7 +637,7 @@ Prints the MIBs to the file fp.
 .PP
 
 .PP
-Definition at line 2768 of file mib.c.
+Definition at line 2771 of file mib.c.
 .SS "void print_objid (const oid * objid, size_t objidlen)"
 .PP
 Prints an oid to stdout. 
@@ -673,7 +651,7 @@ Prints an oid to stdout.
 .PP
 
 .PP
-Definition at line 3172 of file mib.c.
+Definition at line 3176 of file mib.c.
 .SS "void print_variable (const oid * objid, size_t objidlen, const \fBnetsnmp_variable_list\fP * variable)"
 .PP
 Prints a variable to stdout. 
@@ -689,7 +667,7 @@ Prints a variable to stdout.
 .PP
 
 .PP
-Definition at line 3324 of file mib.c.
+Definition at line 3328 of file mib.c.
 .SS "int read_objid (const char * input, oid * output, size_t * out_len)"
 .PP
 Reads an object identifier from an input string into internal OID form. 
@@ -712,7 +690,7 @@ When called, out_len must hold the maximum length of the output array.
 .PP
 If an error occurs, this function returns 0 and MAY set snmp_errno. snmp_errno is NOT set if SET_SNMP_ERROR evaluates to nothing. This can make multi-threaded use a tiny bit more robust. 
 .PP
-Definition at line 2866 of file mib.c.
+Definition at line 2869 of file mib.c.
 .SS "void set_function (struct tree * subtree)"
 .PP
 Set's the printing function printomat in a subtree according it's type. 
@@ -724,14 +702,12 @@ Set's the printing function printomat in a subtree according it's type.
 .PP
 
 .PP
-Definition at line 2789 of file mib.c.
+Definition at line 2792 of file mib.c.
 .SS "void shutdown_mib (void)"
 .PP
 Unloads all mibs. 
 .PP
-Definition at line 2743 of file mib.c.
-.PP
-Referenced by snmp_shutdown().
+Definition at line 2746 of file mib.c.
 .SS "void snmp_in_toggle_options_usage (const char * lead, FILE * outf)"
 .PP
 Prints out a help usage for the in* toggle options. 
@@ -745,7 +721,7 @@ Prints out a help usage for the in* toggle options.
 .PP
 
 .PP
-Definition at line 2325 of file mib.c.
+Definition at line 2328 of file mib.c.
 .SS "oid* snmp_parse_oid (const char * argv, oid * root, size_t * rootlen)"
 .PP
 Given a string, parses an oid out of it (if possible). 
@@ -768,7 +744,7 @@ The root oid pointer if successful, or NULL otherwise.
 .PP
 
 .PP
-Definition at line 5774 of file mib.c.
+Definition at line 5780 of file mib.c.
 .SS "int sprint_realloc_asciistring (u_char ** buf, size_t * buf_len, size_t * out_len, int allow_realloc, const u_char * cp, size_t len)"
 .PP
 Prints an ascii string into a buffer. 
@@ -799,11 +775,7 @@ If allow_realloc is true the buffer will be (re)allocated to fit in the needed s
 .PP
 
 .PP
-Definition at line 366 of file mib.c.
-.PP
-References snmp_realloc().
-.PP
-Referenced by sprint_realloc_octet_string().
+Definition at line 367 of file mib.c.
 .SS "int sprint_realloc_badtype (u_char ** buf, size_t * buf_len, size_t * out_len, int allow_realloc, const \fBnetsnmp_variable_list\fP * var, const struct enum_list * enums, const char * hint, const char * units)"
 .PP
 Fallback routine for a bad type, prints 'Variable has bad type' into a buffer. 
@@ -836,7 +808,7 @@ If allow_realloc is true the buffer will be (re)allocated to fit in the needed s
 .PP
 
 .PP
-Definition at line 1935 of file mib.c.
+Definition at line 1938 of file mib.c.
 .SS "int sprint_realloc_bitstring (u_char ** buf, size_t * buf_len, size_t * out_len, int allow_realloc, const \fBnetsnmp_variable_list\fP * var, const struct enum_list * enums, const char * hint, const char * units)"
 .PP
 Prints a bit string into a buffer. 
@@ -869,7 +841,7 @@ If allow_realloc is true the buffer will be (re)allocated to fit in the needed s
 .PP
 
 .PP
-Definition at line 1796 of file mib.c.
+Definition at line 1799 of file mib.c.
 .SS "int sprint_realloc_by_type (u_char ** buf, size_t * buf_len, size_t * out_len, int allow_realloc, const \fBnetsnmp_variable_list\fP * var, const struct enum_list * enums, const char * hint, const char * units)"
 .PP
 Universal print routine, prints a variable into a buffer according to the variable type. 
@@ -902,9 +874,7 @@ If allow_realloc is true the buffer will be (re)allocated to fit in the needed s
 .PP
 
 .PP
-Definition at line 1970 of file mib.c.
-.PP
-Referenced by sprint_realloc_octet_string(), and table_helper_handler().
+Definition at line 1973 of file mib.c.
 .SS "int sprint_realloc_counter (u_char ** buf, size_t * buf_len, size_t * out_len, int allow_realloc, const \fBnetsnmp_variable_list\fP * var, const struct enum_list * enums, const char * hint, const char * units)"
 .PP
 Prints a counter value into a buffer. 
@@ -937,7 +907,7 @@ If allow_realloc is true the buffer will be (re)allocated to fit in the needed s
 .PP
 
 .PP
-Definition at line 1563 of file mib.c.
+Definition at line 1566 of file mib.c.
 .SS "int sprint_realloc_counter64 (u_char ** buf, size_t * buf_len, size_t * out_len, int allow_realloc, const \fBnetsnmp_variable_list\fP * var, const struct enum_list * enums, const char * hint, const char * units)"
 .PP
 Prints a counter into a buffer. 
@@ -972,7 +942,7 @@ If allow_realloc is true the buffer will be (re)allocated to fit in the needed s
 .PP
 
 .PP
-Definition at line 868 of file mib.c.
+Definition at line 871 of file mib.c.
 .SS "int sprint_realloc_gauge (u_char ** buf, size_t * buf_len, size_t * out_len, int allow_realloc, const \fBnetsnmp_variable_list\fP * var, const struct enum_list * enums, const char * hint, const char * units)"
 .PP
 Prints a gauge value into a buffer. 
@@ -1005,7 +975,7 @@ If allow_realloc is true the buffer will be (re)allocated to fit in the needed s
 .PP
 
 .PP
-Definition at line 1490 of file mib.c.
+Definition at line 1493 of file mib.c.
 .SS "int sprint_realloc_hinted_integer (u_char ** buf, size_t * buf_len, size_t * out_len, int allow_realloc, long val, const char decimaltype, const char * hint, const char * units)"
 .PP
 Prints an integer according to the hint into a buffer. 
@@ -1038,7 +1008,7 @@ If allow_realloc is true the buffer will be (re)allocated to fit in the needed s
 .PP
 
 .PP
-Definition at line 1216 of file mib.c.
+Definition at line 1219 of file mib.c.
 .SS "int sprint_realloc_integer (u_char ** buf, size_t * buf_len, size_t * out_len, int allow_realloc, const \fBnetsnmp_variable_list\fP * var, const struct enum_list * enums, const char * hint, const char * units)"
 .PP
 Prints an integer into a buffer. 
@@ -1071,7 +1041,7 @@ If allow_realloc is true the buffer will be (re)allocated to fit in the needed s
 .PP
 
 .PP
-Definition at line 1290 of file mib.c.
+Definition at line 1293 of file mib.c.
 .SS "int sprint_realloc_ipaddress (u_char ** buf, size_t * buf_len, size_t * out_len, int allow_realloc, const \fBnetsnmp_variable_list\fP * var, const struct enum_list * enums, const char * hint, const char * units)"
 .PP
 Prints an ip-address into a buffer. 
@@ -1104,7 +1074,7 @@ If allow_realloc is true the buffer will be (re)allocated to fit in the needed s
 .PP
 
 .PP
-Definition at line 1692 of file mib.c.
+Definition at line 1695 of file mib.c.
 .SS "int sprint_realloc_networkaddress (u_char ** buf, size_t * buf_len, size_t * out_len, int allow_realloc, const \fBnetsnmp_variable_list\fP * var, const struct enum_list * enums, const char * hint, const char * units)"
 .PP
 Prints a network address into a buffer. 
@@ -1137,7 +1107,7 @@ If allow_realloc is true the buffer will be (re)allocated to fit in the needed s
 .PP
 
 .PP
-Definition at line 1626 of file mib.c.
+Definition at line 1629 of file mib.c.
 .SS "int sprint_realloc_null (u_char ** buf, size_t * buf_len, size_t * out_len, int allow_realloc, const \fBnetsnmp_variable_list\fP * var, const struct enum_list * enums, const char * hint, const char * units)"
 .PP
 Prints a null value into a buffer. 
@@ -1170,7 +1140,7 @@ If allow_realloc is true the buffer will be (re)allocated to fit in the needed s
 .PP
 
 .PP
-Definition at line 1752 of file mib.c.
+Definition at line 1755 of file mib.c.
 .SS "int sprint_realloc_object_identifier (u_char ** buf, size_t * buf_len, size_t * out_len, int allow_realloc, const \fBnetsnmp_variable_list\fP * var, const struct enum_list * enums, const char * hint, const char * units)"
 .PP
 Prints an object identifier into a buffer. 
@@ -1203,7 +1173,7 @@ If allow_realloc is true the buffer will be (re)allocated to fit in the needed s
 .PP
 
 .PP
-Definition at line 1072 of file mib.c.
+Definition at line 1075 of file mib.c.
 .SS "int sprint_realloc_octet_string (u_char ** buf, size_t * buf_len, size_t * out_len, int allow_realloc, const \fBnetsnmp_variable_list\fP * var, const struct enum_list * enums, const char * hint, const char * units)"
 .PP
 Prints an octet string into a buffer. 
@@ -1238,11 +1208,7 @@ If allow_realloc is true the buffer will be (re)allocated to fit in the needed s
 .PP
 
 .PP
-Definition at line 426 of file mib.c.
-.PP
-References snmp_realloc(), sprint_realloc_asciistring(), sprint_realloc_by_type(), sprint_realloc_octet_string(), variable_list::type, variable_list::val, and variable_list::val_len.
-.PP
-Referenced by sprint_realloc_octet_string().
+Definition at line 427 of file mib.c.
 .SS "int sprint_realloc_opaque (u_char ** buf, size_t * buf_len, size_t * out_len, int allow_realloc, const \fBnetsnmp_variable_list\fP * var, const struct enum_list * enums, const char * hint, const char * units)"
 .PP
 Prints an object identifier into a buffer. 
@@ -1275,7 +1241,7 @@ If allow_realloc is true the buffer will be (re)allocated to fit in the needed s
 .PP
 
 .PP
-Definition at line 982 of file mib.c.
+Definition at line 985 of file mib.c.
 .SS "int sprint_realloc_timeticks (u_char ** buf, size_t * buf_len, size_t * out_len, int allow_realloc, const \fBnetsnmp_variable_list\fP * var, const struct enum_list * enums, const char * hint, const char * units)"
 .PP
 Prints a timetick variable into a buffer. 
@@ -1308,7 +1274,7 @@ If allow_realloc is true the buffer will be (re)allocated to fit in the needed s
 .PP
 
 .PP
-Definition at line 1142 of file mib.c.
+Definition at line 1145 of file mib.c.
 .SS "int sprint_realloc_uinteger (u_char ** buf, size_t * buf_len, size_t * out_len, int allow_realloc, const \fBnetsnmp_variable_list\fP * var, const struct enum_list * enums, const char * hint, const char * units)"
 .PP
 Prints an unsigned integer into a buffer. 
@@ -1341,7 +1307,7 @@ If allow_realloc is true the buffer will be (re)allocated to fit in the needed s
 .PP
 
 .PP
-Definition at line 1393 of file mib.c.
+Definition at line 1396 of file mib.c.
 .SS "char* uptime_string (u_long timeticks, char * buf)"
 .PP
 Converts timeticks to hours, minutes, seconds string. 
@@ -1367,7 +1333,7 @@ uptimeString
 .PP
 
 .PP
-Definition at line 5745 of file mib.c.
+Definition at line 5751 of file mib.c.
 .SH "Variable Documentation"
 .PP 
 .SS "PrefixList mib_prefixes[]"
@@ -1386,4 +1352,4 @@ Definition at line 5745 of file mib.c.
 }
 .fi
 .PP
-Definition at line 159 of file mib.c.
+Definition at line 160 of file mib.c.

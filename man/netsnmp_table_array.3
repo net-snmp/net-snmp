@@ -1,4 +1,4 @@
-.TH "table_array" 3 "27 Feb 2008" "Version 5.2.4" "net-snmp" \" -*- nroff -*-
+.TH "table_array" 3 "3 Apr 2008" "Version 5.2.4" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -61,8 +61,6 @@ The generated code contains many TODO comments. Make sure you check each one to 
 find the context data used by the table_array helper 
 .PP
 Definition at line 219 of file table_array.c.
-.PP
-References netsnmp_request_get_list_data().
 .SS "\fBnetsnmp_mib_handler\fP* netsnmp_find_table_array_handler (\fBnetsnmp_handler_registration\fP * reginfo)"
 .PP
 find the handler for the table_array helper. 
@@ -70,8 +68,6 @@ find the handler for the table_array helper.
 
 .PP
 Definition at line 202 of file table_array.c.
-.PP
-References netsnmp_mib_handler_s::access_method, netsnmp_handler_registration_s::handler, and netsnmp_mib_handler_s::next.
 .SS "int netsnmp_table_array_check_row_status (netsnmp_table_array_callbacks * cb, netsnmp_request_group * ag, long * rs_new, long * rs_old)"
 .PP
 this function is called to validate RowStatus transitions. 
@@ -86,5 +82,3 @@ register specified callbacks for the specified table/oid.
 If the group_rows parameter is set, the row related callbacks will be called once for each unique row index. Otherwise, each callback will be called only once, for all objects. 
 .PP
 Definition at line 153 of file table_array.c.
-.PP
-References netsnmp_handler_registration_s::handler, netsnmp_mib_handler_s::myvoid, netsnmp_register_table(), snmp_log(), and SNMP_MALLOC_TYPEDEF.

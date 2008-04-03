@@ -1,4 +1,4 @@
-.TH "mode_end_call" 3 "27 Feb 2008" "Version 5.2.4" "net-snmp" \" -*- nroff -*-
+.TH "mode_end_call" 3 "3 Apr 2008" "Version 5.2.4" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -46,8 +46,6 @@ An injectable Net-SNMP handler.
 
 .PP
 Definition at line 49 of file mode_end_call.c.
-.PP
-References netsnmp_mib_handler_s::myvoid, and netsnmp_create_handler().
 .SS "netsnmp_mode_handler_list* netsnmp_mode_end_call_add_mode_callback (netsnmp_mode_handler_list * endlist, int mode, \fBnetsnmp_mib_handler\fP * callbackh)"
 .PP
 adds a mode specific callback to the callback list. 
@@ -69,5 +67,3 @@ the new registration information list upon success.
 
 .PP
 Definition at line 69 of file mode_end_call.c.
-.PP
-References netsnmp_mib_handler_s::next, and SNMP_MALLOC_TYPEDEF.
