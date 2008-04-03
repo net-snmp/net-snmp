@@ -64,7 +64,8 @@ ipe./if.lo: ../../include/net-snmp/library/lcd_time.h
 ipe./if.lo: ../../include/net-snmp/library/snmp_secmod.h
 ipe./if.lo: ../../include/net-snmp/library/snmpv3-security-includes.h
 ipe./if.lo: ../../include/net-snmp/library/snmpusm.h 
-ipe./if.lo:  main.h netstat.h
+ipe./if.lo:   main.h
+ipe./if.lo: netstat.h
 ipe./inet.lo: ../../include/net-snmp/net-snmp-config.h
 ipe./inet.lo: ../../include/net-snmp/system/linux.h
 ipe./inet.lo: ../../include/net-snmp/system/sysv.h
