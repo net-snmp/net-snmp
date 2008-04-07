@@ -3346,9 +3346,9 @@ parse_capabilities(FILE * fp, char *name)
                 print_error("Expected DESCRIPTION", token, type);
                 goto skip;
             }
-            type = get_token(fp, token, MAXTOKEN);
+            type = get_token(fp, quoted_string_buffer, MAXTOKEN);
             if (type != QUOTESTRING) {
-                print_error("Bad DESCRIPTION", token, type);
+                print_error("Bad DESCRIPTION", quoted_string_buffer, type);
                 goto skip;
             }
             type = get_token(fp, token, MAXTOKEN);
