@@ -3213,23 +3213,23 @@ parse_capabilities(FILE * fp, char *name)
         print_error("Expected DESCRIPTION", token, type);
         goto skip;
     }
-    type = get_token(fp, token, MAXTOKEN);
+    type = get_token(fp, quoted_string_buffer, MAXTOKEN);
     if (type != QUOTESTRING) {
-        print_error("Bad DESCRIPTION", token, type);
+        print_error("Bad DESCRIPTION", quoted_string_buffer, type);
         goto skip;
     }
     if (netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID, 
 			       NETSNMP_DS_LIB_SAVE_MIB_DESCRS)) {
-        np->description = strdup(token);
+        np->description = strdup(quoted_string_buffer);
     }
     type = get_token(fp, token, MAXTOKEN);
     if (type == REFERENCE) {
-        type = get_token(fp, token, MAXTOKEN);
+        type = get_token(fp, quoted_string_buffer, MAXTOKEN);
         if (type != QUOTESTRING) {
-            print_error("Bad REFERENCE", token, type);
+            print_error("Bad REFERENCE", quoted_string_buffer, type);
             goto skip;
         }
-        np->reference = strdup(token);
+        np->reference = strdup(quoted_string_buffer);
         type = get_token(fp, token, type);
     }
     while (type == SUPPORTS) {
