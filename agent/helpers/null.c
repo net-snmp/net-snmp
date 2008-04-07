@@ -31,7 +31,7 @@ netsnmp_register_null_context(oid * loc, size_t loc_len,
             netsnmp_create_handler("null", netsnmp_null_handler);
         if (contextName)
             reginfo->contextName = strdup(contextName);
-        reginfo->modes = HANDLER_CAN_DEFAULT;
+        reginfo->modes = HANDLER_CAN_DEFAULT | HANDLER_CAN_GETBULK;
     }
     return netsnmp_register_handler(reginfo);
 }
