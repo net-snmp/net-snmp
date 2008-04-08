@@ -1,5 +1,10 @@
 <!-- this is a makerelease script: http://makerelease.sourceforge.net/ -->
 <makerelease>
+  <!-- TODO:
+  - make mancp below happens before configure is run, which
+    doesn't work if it's a complete work.
+  - configure options should be prompted into a variable and used
+  -->
   <steps>
     <step type="section" title="Setup Steps">
       <text>
@@ -36,6 +41,13 @@
     	          $self->{'parameters'}{'VERSION'};
 	      $self->{'parameters'}{'VERSIONDASHES'} =~ s/\./-/g;
 
+	      # version in floating point form for perl modules
+              my ($major, $minor, $patch, $opps) =
+	          ($self->{'parameters'}{'VERSION'} =~
+                      /^(\d+)\.(\d+)\.?(\d*)\.?(\d*)/);
+	      $self->{'parameters'}{'VERSIONFLOAT'} = 
+                  $major + $minor/100 + $patch/10000 + $opps/100000;
+
 	      # find out the svn path we're in.
 	      open(SVNINFO,"svn info|");
 	      while(&lt;SVNINFO&gt;) {
@@ -57,6 +69,8 @@
 	    VERSION:                 {VERSION}
 
 	    VERSION with dashes:     {VERSIONDASHES}
+
+	    Floating point VERSION:  {VERSIONFLOAT}
 
             SVN Branch URL:          {BRANCHPATH}
 	  </text>
@@ -86,25 +100,129 @@
 	about to be published.
       </text>
       <steps>
-	<step type="informational" pause="true"
-	  stepname="version:manualedit" title="version:libtoolmanualedit">
+	<step type="section" title="Libtool / Library versioning setup">
 	  <text>
-	    You (may) need to edit Makefile.top to update the library
-	    version numbering (usually just for the first pre-release
-	    of a given version).  See the comments in
-	    RELEASE-INSTRUCTIONS about LIBCURRENT, LIBAGE and
-	    LIBREVISION.
-
-	    This script will commit the file for you after you're done.
+	    These steps will modify the various files in the source tree
+	    that contain the version number, show you the changes that
+	    will be made and then check in the resulting changes if you
+	    approve of them.
 	  </text>
+	  <steps>
+	    <step type="informational" pause="true"
+	      stepname="version:manualedit" title="version:libtoolmanualedit">
+	      <text>
+		You (may) need to edit Makefile.top to update the library
+		version numbering (usually just for the first pre-release
+		of a given version).  See the comments in
+		RELEASE-INSTRUCTIONS about LIBCURRENT, LIBAGE and
+		LIBREVISION.
+
+		This script will commit the file for you after you're done.
+	      </text>
+	    </step>
+	    <step prompt="true" type="system" stepname="version:libtoolcommit"
+	      title="version:commit">
+	      <text>We'll now commit the Makefile.top file if you've
+		modified it.</text>
+	      <commands>
+		<command>svn commit -m "version update" Makefile.top</command>
+	      </commands>
+	    </step>
+	  </steps>
 	</step>
-	<step prompt="true" type="system" stepname="version:libtoolcommit"
-	  title="version:commit">
-	  <text>We'll now commit the Makefile.top file if you've
-	  modified it.</text>
-	  <commands>
-	    <command>svn commit -m "version update" Makefile.top</command>
-	  </commands>
+	<step type="section" title="Change The Version Number">
+	  <text>
+	    These steps will modify the various files in the source tree
+	    that contain the version number, show you the changes that
+	    will be made and then check in the resulting changes if you
+	    approve of them.
+	  </text>
+	  <steps>
+	    <step type="modify" title="Modify the source files"
+	      stepname="release:versionstamp">
+	      <text>
+		We will now modify files through the code to replace the
+		version number with the newer one.
+	      </text>
+	      <modifications>
+		<modify
+		  find="VERSION = '(.*)'"
+		  replace="VERSION = \'{VERSIONFLOAT}\'">
+		  <files>
+		    <file>perl/SNMP/SNMP.pm</file>
+		    <file>perl/agent/agent.pm</file>
+		    <file>perl/agent/Support/Support.pm*</file>
+		    <file>perl/agent/default_store/default_store.pm</file>
+		    <file>perl/default_store/default_store.pm</file>
+		    <file>perl/OID/OID.pm</file>
+		    <file>perl/ASN/ASN.pm</file>
+		    <file>perl/AnyData_SNMP/Storage.pm</file>
+		    <file>perl/AnyData_SNMP/Format.pm</file>
+		    <file>perl/TrapReceiver/TrapReceiver.pm</file>
+		  </files>
+		</modify>
+		<modify
+		  find="Version: [\.0-9a-zA-Z]+"
+		  replace="Version: {VERSION}">
+		  <files>
+		    <file>README</file>
+		    <file>FAQ</file>
+		    <file>dist/net-snmp.spec</file>
+		  </files>
+		</modify>
+		<modify
+		  find="VERSION = [\.0-9a-zA-Z]+"
+		  replace="VERSION = {VERSION}">
+		  <files>
+		    <file>dist/Makefile*</file>
+		  </files>
+		</modify>
+		<modify
+		  find="AC_INIT\(\[Net-SNMP\], \[([^\]]+)\]"
+		  replace="AC_INIT([Net-SNMP], [{VERSION}]">
+		  <files>
+		    <file>configure.in</file>
+		  </files>
+		</modify>
+		<modify
+		  find="NetSnmpVersionInfo = &quot;\[^&quot;]+&quot;"
+		  replace="NetSnmpVersionInfo = &quot;{VERSION}&quot;">
+		  <files>
+		    <file>snmplib/snmp_version.c</file>
+		  </files>
+		</modify>
+	      </modifications>
+	    </step>
+	    <step type="system" stepname="release:versionautoconf"
+	      title="Running autoconf to rebuild configure">
+	      <text>We modified configure.in, so we now need to run
+		autoconf to rebuild configure.
+
+		XXX: in the future we should verify the correct autoconf
+		version number</text>
+	      <commands>
+		<command>autoconf</command>
+	      </commands>
+	    </step>
+	    <step type="system" stepname="release:versiondiff"
+	      title="Running svn diff to check changes">
+
+	      <text>Check the following changes for proper version number
+		differences before we commit the chances.</text>
+	      <commands>
+		<command>svn diff</command>
+	      </commands>
+	    </step>
+	    <step type="system" stepname="release:versioncommit" pause="true"
+	      title="Running svn commit to commit the changes">
+
+	      <text>Check the changes in the above diff and then we'll
+		commit the results here if they look ok.</text>
+	      <commands>
+		<command>svn commit -m "Version number update"</command>
+	      </commands>
+	    </step>
+	  </steps>
 	</step>
 	<step type="system" stepname="docs:make" title="docs:make">
 	  <text>This step will create manual pages from doxygen
@@ -249,83 +367,6 @@
 	<step prompt="true" type="system" stepname="docs:commit" title="docs:commit">
 	  <commands>
 	    <command>svn commit -m "version update" README NEWS CHANGES</command>
-	  </commands>
-	</step>
-	<step type="modify" title="Modify the source files"
-	  stepname="release:versionstamp">
-	  <text>
-	    We will now modify files through the code to replace the
-	    version number with the newer one.
-	  </text>
-	  <modifications>
-	    <modify
-	      find="VERSION = '(.*)'"
-	      replace="VERSION = \'{VERSION}\'">
-	      <files>
-		<file>perl/SNMP/SNMP.pm</file>
-		<file>perl/agent/agent.pm</file>
-		<file>perl/agent/Support/Support.pm</file>
-		<file>perl/agent/default_store/default_store.pm</file>
-		<file>perl/default_store/default_store.pm</file>
-		<file>perl/OID/OID.pm</file>
-		<file>perl/ASN/ASN.pm</file>
-		<file>perl/AnyData_SNMP/Storage.pm</file>
-		<file>perl/AnyData_SNMP/Format.pm</file>
-		<file>perl/TrapReceiver/TrapReceiver.pm</file>
-	      </files>
-	    </modify>
-	    <modify
-	      find="Version: [\.0-9a-zA-Z]+"
-	      replace="Version: {VERSION}">
-	      <files>
-		<file>README</file>
-		<file>FAQ</file>
-		<file>dist/net-snmp.spec</file>
-	      </files>
-	    </modify>
-	    <modify
-	      find="VERSION = [\.0-9a-zA-Z]+"
-	      replace="VERSION = {VERSION}">
-	      <files>
-		<file>dist/Makefile</file>
-	      </files>
-	    </modify>
-	    <modify
-	      find="AC_INIT\(\[Net-SNMP\], \[([^\]]+)\]"
-	      replace="AC_INIT([Net-SNMP], [{VERSION}]">
-	      <files>
-		<file>configure.in</file>
-	      </files>
-	    </modify>
-	  </modifications>
-	</step>
-	<step type="system" stepname="release:versionautoconf"
-	  title="Running autoconf to rebuild configure">
-	  <text>We modified configure.in, so we now need to run
-	  autoconf to rebuild configure.
-
-	  XXX: in the future we should verify the correct autoconf
-	  version number</text>
-	  <commands>
-	    <command>autoconf</command>
-	  </commands>
-	</step>
-	<step type="system" stepname="release:versiondiff"
-	  title="Running svn diff to check changes">
-
-	  <text>Check the following changes for proper version number
-	  differences before we commit the chances.</text>
-	  <commands>
-	    <command>svn diff</command>
-	  </commands>
-	</step>
-	<step type="system" stepname="release:versioncommit" prompt="true"
-	  title="Running svn commit to commit the changes">
-
-	  <text>Check the changes in the above diff and then we'll
-	  commit the results here if they look ok.</text>
-	  <commands>
-	    <command>svn commit -m "Version number update"</command>
 	  </commands>
 	</step>
 	<step type="system" stepname="release:update" title="release:update">
