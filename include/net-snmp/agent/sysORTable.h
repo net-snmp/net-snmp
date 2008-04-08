@@ -24,8 +24,12 @@ struct register_sysOR_parameters {
 
 #define REGISTER_SYSOR_TABLE(theoid, len, descr)           \
   do {                                                     \
-    struct sysORTable t = {                                \
-      descr, theoid, len, NULL, 0 };                       \
+    struct sysORTable t;                                   \
+    t.OR_descr = descr;                                    \
+    t.OR_oid = theoid;                                     \
+    t.OR_oidlen = len;                                     \
+    t.OR_sess = NULL;                                      \
+    t.OR_uptime = 0;                                       \
     snmp_call_callbacks(SNMP_CALLBACK_APPLICATION,         \
                         SNMPD_CALLBACK_REQ_REG_SYSOR, &t); \
   } while(0);
@@ -36,8 +40,12 @@ struct register_sysOR_parameters {
 
 #define UNREGISTER_SYSOR_TABLE(theoid, len)                     \
   do {                                                          \
-    struct sysORTable t = {                                     \
-      NULL, theoid, len, NULL, 0 };                             \
+    struct sysORTable t;                                        \
+    t.OR_descr = NULL;                                          \
+    t.OR_oid = theoid;                                          \
+    t.OR_oidlen = len;                                          \
+    t.OR_sess = NULL;                                           \
+    t.OR_uptime = 0;                                            \
     snmp_call_callbacks(SNMP_CALLBACK_APPLICATION,              \
                         SNMPD_CALLBACK_REQ_UNREG_SYSOR, &t);    \
   } while(0);
