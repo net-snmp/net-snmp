@@ -271,8 +271,6 @@ module implements in a perl-way, and a perl specific tutorial at:
     				'Name' => "my_agent_name",
     				'AgentX' => 1
     				);
-	}
-
     	$agent->register("my_agent_name", ".1.3.6.1.4.1.8072.9999.9999.7375",
                          \&myhandler);
 
