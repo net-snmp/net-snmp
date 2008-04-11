@@ -3,6 +3,20 @@ Please see the CHANGES file for a more detailed list of specific bugs/patches
 that have been fixed/applied, and the ChangeLog file for a comprehensive
 listing of all changes made to the code.
 
+*5.2.5*
+    snmplib:
+      - Change CONTAINER_INSERT to not do partial inserts
+      - Corrected registering of
+      - fix potential buffer overflow in sprintf for
+
+    snmpd:
+      - [BUG 1712988]: default and configurable maximum
+      - [PATCH 1893468]: fixed registration of
+      - patch: 1700157: from afrika: fixes ordering of exec
+      - suppress annoying "registration != duplicate"
+
+    perl:
+      - patch: 1725049: fix bulkwalk in cases of non-repeater
 
 *5.2.4*
 

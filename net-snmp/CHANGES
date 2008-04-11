@@ -3,6 +3,115 @@ that have been applied in released versions.  Please see the NEWS file for
 a summary of the major changes, and the ChangeLog file for a comprehensive
 listing of all changes made to the code.
 
+*5.2.5*
+    snmplib:
+      - Change CONTAINER_INSERT to not do partial inserts
+      - Corrected registering of
+      - Deallocate the confmibs and confmibdirs
+      - Do not leak memory whenever an udp address is
+      - FEATURES: 851887: Report range information for
+      - [BUG 1795840]: Signed 32-bit truncation logged
+      - [BUG 1866655]: Handle parsing invalid OID
+      - [BUG ]: Coverity #183: fix memory leak if
+      - [PATCH 1687316]: Don't drop const from casts.
+      - [PATCH 1768285]: Count MIB files correctly in
+      - [PATCH 1775124]: Fix clientaddr functionality
+      - [PATCH 1806336]: fix -LS option parsing
+      - fix forwarding encoding
+      - fix potential buffer overflow in sprintf for
+      - patch: 1645698: fix 64-bit signed integer
+
+    snmpd:
+      - [BUG 1046327]: Reset "includeAllDisks" flag when
+      - [BUG 1602286]: Don't let table holes block later
+      - [BUG 1712988]: default and configurable maximum
+      - [BUG 1745113]: Handle single-line (and zero-line)
+      - [BUG 1748206]: Protect against failures to open
+      - [BUG 1760633]: fix typo in debug message
+      - [BUG 1771221]: Retain ifLastChange information on
+      - [BUG 1792890]: include CIFS mounts when skipping
+      - [BUG 1822360]: Fix spinlock helper error handling.
+      - [PATCH 1687336]: Start using the enhanced
+      - [PATCH 1698184]: Register non-default context
+      - [PATCH 1700730]: Remove unused extern declaration.
+      - [PATCH 1700732]: Fix debug output statements.
+      - [PATCH 1700737]: Tidy up setSerialNo
+      - [PATCH 1716548]: Fix help output so
+      - [PATCH 1744157]: Report duplicate "extend/exec"
+      - [PATCH 1746831]: fix process
+      - [PATCH 1752934]: Fix off-by-one qsort error in
+      - [PATCH 1753437]: Fix error index on failing SET
+      - [PATCH 1753449]: Fix AgentX error propagation
+      - [PATCH 1753463]: Fix AgentX subagent ping alarm
+      - [PATCH 1774612]: More resilient process status
+      - [PATCH 1783733]: Put the package version number
+      - [PATCH 1826088]: Safranek: Use the right
+      - [PATCH 1828839]: to provide better
+      - [PATCH 1866823]: truncate 32 bit
+      - [PATCH 1879261]: Add in inactive
+      - [PATCH 1893468]: fixed registration of
+      - patch: 1225440: Apply intent of patch: to delay
+      - patch: 1595568: from cyril_margaria: fix
+      - patch: 1617255: fix length of the history array
+      - patch: 1700157: from afrika: fixes ordering of exec
+      - patch: 1710632: from mavarley: fix memory leak on
+      - patch: 1719254: from "Christan Jung": update
+      - suppress annoying "registration != duplicate"
+      - Handle device names with embedded spaces in
+      - [BUG 1851047]: Do not try to do more handling of a value
+
+    snmptrapd:
+      - [PATCH 1767725]: Close all non standard file
+      - patch: 1225440: Apply intent of patch: to
+
+    build:
+      - [BUG 1802833]: Ensure snmptrapd builds with
+      - [BUG 1823381]: Valid MIB directory search path on
+      - add "BuildRequires: perl-ExtUtils-Embed" to the
+      - use libtool clean for removing files to ensure we
+
+    building:
+      - Check for support of static inline functions
+      - Disable inlining on solaris as there are some
+
+    library:
+      - FEATURES: 454028: Detect and handle empty MIB
+      - [PATCH 1921861]: Avoid endless loop after
+
+    libsnmp:
+      - [PATCH 1807489]: fix ignoring of display hints.
+      - [PATCH 1898204]: Wescott: fix bug
+
+    mib2c:
+      - [BUG 1874059,1737068]: Handle MIB objects with
+
+    misc:
+      - Avoid calling debug macros with too few arguments.
+      - avoid calling debug macros with too many
+      - fix the -M switch for
+
+    perl:
+      - [BUG 1606062]: perl bulkwalk (async) coredump
+      - [BUG 1747733]: More robust handling of undefined
+      - [BUG 1826174]: Check for buffer overflow when
+      - [BUG 1834539]: Consistent handling of OID parsing.
+      - [PATCH 1811463]: perl async callback coredump
+      - [PATCH 1914643]: fix issues with
+      - fix SNMP SET for IP addresses on 64-bit
+      - fix prerequisites for NetSNMP::TrapReceiver
+      - fixed an extra brace in the docs pointed out by
+      - install embedded perl init files for
+      - patch: 1725049: fix bulkwalk in cases of non-repeater
+
+    test:
+      - support a -n flag to RUNTESTS to print the test
+
+    HP:
+      - UX: HP-UX needs _REENTRANT defined to pick up
+
+    Solaris:
+      - [BUG 1810814]: tcpTable missing entries and
+
 
 *5.2.4*
 
