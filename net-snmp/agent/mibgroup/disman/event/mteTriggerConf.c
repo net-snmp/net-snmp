@@ -743,10 +743,11 @@ parse_linkUpDown_traps(const char *token, char *line)
     if (strncmp( line, "yes", 3) == 0) {
         DEBUGMSGTL(("disman:event:conf", "Registering linkUpDown traps\n"));
 
+        /* ifOperStatus */
         parse_mteMonitor("monitor",
-            "-r 60 -S -e _linkUp   \"linkUp\"   ifOperStatus != 2");
+            "-r 60 -S -e _linkUp   \"linkUp\"   .1.3.6.1.2.1.2.2.1.8 != 2");
         parse_mteMonitor("monitor",
-            "-r 60 -S -e _linkDown \"linkDown\" ifOperStatus == 2");
+            "-r 60 -S -e _linkDown \"linkDown\" .1.3.6.1.2.1.2.2.1.8 == 2");
     }
 }
 
@@ -768,7 +769,7 @@ parse_default_mteMonitors(const char *token, char *line)
         parse_mteMonitor("monitor",
             "-o laNames -o laErrMessage   \"laTable\"       laErrorFlag  != 0");
         parse_mteMonitor("monitor",
-            "-o fileName -o fileErrorMsg  \"fileTable\" fileErrorFlag    != 0");
+            "-o fileName -o fileErrorMsg  \"fileTable\"    fileErrorFlag != 0");
         parse_mteMonitor("monitor",
             "-o snmperrErrMessage         \"snmperrs\"  snmperrErrorFlag != 0");
     }
