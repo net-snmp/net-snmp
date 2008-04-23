@@ -391,11 +391,11 @@
 	    This will actually svn copy the current checked out branch
 	    to the new tag name.  Specifically:
 
-               svn copy .../{BRANCHPATH} .../tags/Ext-{VERSIONDASHES}
+               svn copy {BRANCHPATH} .../tags/Ext-{VERSIONDASHES}
 
 	  </text>
 	  <commands>
-	    <command>svn copy -m "{VERSION} release" https://net-snmp.svn.sourceforge.net/svnroot/net-snmp/trunk https://net-snmp.svn.sourceforge.net/svnroot/net-snmp/tags/Ext-{VERSIONDASHES}</command>
+	    <command>svn copy -m "{VERSION} release" {BRANCHPATH} https://net-snmp.svn.sourceforge.net/svnroot/net-snmp/tags/Ext-{VERSIONDASHES}</command>
 	  </commands>
 	</step>
 	<step prompt="true" type="system" stepname="release:makedist" title="release:makedist">
