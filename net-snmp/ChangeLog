@@ -1,4 +1,10 @@
 -------------------------------------------------------------------------------
+Changes: V5.2.5.pre1 -> V5.2.5.pre2
+
+No differences...  Unfortunately, the .pre1 release was not a proper
+snapshot so consider .pre2 to be the first 5.2.5 pre-release.
+
+-------------------------------------------------------------------------------
 Changes: V5.2.4 -> V5.2.5.pre1
 	
 2008-04-11 16:12  hardaker
