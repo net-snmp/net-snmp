@@ -45,14 +45,6 @@ static int      debug_print_everything = 0;
 
 netsnmp_token_descr dbg_tokens[MAX_DEBUG_TOKENS];
 
-#ifdef NETSNMP_DEBUG_STATS
-netsnmp_container  *dbg_stats = NULL;
- static int _debug_cmp( const void *lhs, const void *rhs );
- static int _save_debug_stat(netsnmp_token_descr *tb, void *type);
- static int _debug_stats_callback(int majorID, int minorID,
-                   void *serverarg, void *clientarg);
-#endif
-
 /*
  * indent debugging:  provide a space padded section to return an indent for 
  */
@@ -108,19 +100,6 @@ snmp_debug_init(void)
     register_prenetsnmp_mib_handler("snmp", "debugTokens",
                                     debug_config_register_tokens, NULL,
                                     "token[,token...]");
-
-#ifdef NETSNMP_DEBUG_STATS
-    /*
-     * debug stats
-     */
-    dbg_stats = netsnmp_container_find("debug_exclude:table_container");
-    if (NULL != dbg_stats) {
-        dbg_stats->compare = _debug_cmp;
-        netsnmp_register_callback(SNMP_CALLBACK_LIBRARY,
-                                  SNMP_CALLBACK_STORE_DATA,
-                                  _debug_stats_callback, dbg_stats, 1024);
-    }
-#endif
 }
 
 void
@@ -270,25 +249,6 @@ debug_is_token_registered(const char *token)
                 return SNMPERR_GENERR; /* excluded */
         }
     }
-
-#ifdef NETSNMP_DEBUG_STATS
-    if ((SNMPERR_SUCCESS == rc) && (NULL != dbg_stats)) {
-        netsnmp_token_descr td, *found;
-
-        td.token_name = token;
-        found = CONTAINER_FIND(dbg_stats, &td);
-        if (NULL == found) {
-            found = SNMP_MALLOC_TYPEDEF(netsnmp_token_descr);
-            netsnmp_assert(NULL != found);
-            found->token_name = strdup(token);
-            netsnmp_assert(0 == found->enabled);
-            CONTAINER_INSERT(dbg_stats, found);
-        }
-        ++found->enabled;
-    /*  snmp_log(LOG_ERR,"tok %s, %d hits\n", token, found->enabled);  */
-    }
-#endif
-
     return rc;
 }
 
@@ -555,63 +515,3 @@ snmp_get_do_debugging(void)
 {
     return dodebug;
 }
-
-#ifdef NETSNMP_DEBUG_STATS
-/************************************************************
- * compare two context pointers here. Return -1 if lhs < rhs,
- * 0 if lhs == rhs, and 1 if lhs > rhs.
- */
-static int
-_debug_cmp( const void *lhs, const void *rhs )
-{
-    netsnmp_token_descr *dbg_l = (netsnmp_token_descr *)lhs;
-    netsnmp_token_descr *dbg_r = (netsnmp_token_descr *)rhs;
-
- /* snmp_log(LOG_ERR,"%s/%s\n",dbg_l->token_name, dbg_r->token_name); */
-    return strcmp(dbg_l->token_name, dbg_r->token_name);
-}
-
-
-static int
-_save_debug_stat(netsnmp_token_descr *tb, void *type)
-{
-    char buf[256];
-
-    snprintf(buf, sizeof(buf), "debug_hits %s %d",
-             tb->token_name, tb->enabled);
-    read_config_store((char *) type, buf);
-
-    return SNMP_ERR_NOERROR;
-}
-
-static int
-_debug_stats_callback(int majorID, int minorID,
-                  void *serverarg, void *clientarg)
-{
-    char            sep[] =
-        "##############################################################";
-    char            buf[] =
-        "#\n" "# debug stats\n" "#";
-    char           *type = netsnmp_ds_get_string(NETSNMP_DS_LIBRARY_ID,
-                                                 NETSNMP_DS_LIB_APPTYPE);
-
-    read_config_store((char *) type, sep);
-    read_config_store((char *) type, buf);
-
-    /*
-     * save all rows
-     */
-    CONTAINER_FOR_EACH((netsnmp_container *) clientarg,
-                       (netsnmp_container_obj_func *)
-                       _save_debug_stat, type);
-
-    read_config_store((char *) type, sep);
-    read_config_store((char *) type, "\n");
-
-    /*
-     * never fails 
-     */
-    return SNMPERR_SUCCESS;
-}
-#endif
-
