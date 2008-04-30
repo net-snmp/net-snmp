@@ -41,7 +41,6 @@
 
 static int      dodebug = NETSNMP_ALWAYS_DEBUG;
 int             debug_num_tokens = 0;
-int             debug_num_excluded = 0;
 static int      debug_print_everything = 0;
 
 netsnmp_token_descr dbg_tokens[MAX_DEBUG_TOKENS];
@@ -253,13 +252,8 @@ debug_is_token_registered(const char *token)
     if (debug_num_tokens == 0 || debug_print_everything) {
         /*
          * no tokens specified, print everything 
-         * (unless something might be excluded)
          */
-        if (debug_num_excluded) {
-            rc = SNMPERR_SUCCESS; /* ! found = success */
-        } else {
-            return SNMPERR_SUCCESS;
-        }
+        return SNMPERR_SUCCESS;
     }
     else
         rc = SNMPERR_GENERR; /* ! found = err */
