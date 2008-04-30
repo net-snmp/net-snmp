@@ -49,14 +49,6 @@ static int      debugindent = 0;
 static char     debugindentchars[] =
     "                                                                                ";
 
-/*
- * Prototype definitions 
- */
-void            debug_config_register_tokens(const char *configtoken,
-                                             char *tokens);
-void            debug_config_turn_on_debugging(const char *configtoken,
-                                               char *line);
-
 char           *
 debug_indent(void)
 {
