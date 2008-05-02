@@ -145,3 +145,11 @@
  */
 #define SNMP_CFRelease(x) do { if (x) { CFRelease(x); x = NULL; } } while(0)
 
+/*
+ * Mac OS X runs on both PPC and Intel hardware,
+ *   which handle udpTable index values differently
+ */
+#include <TargetConditionals.h>
+#ifdef TARGET_RT_LITTLE_ENDIAN
+#define UDP_ADDRESSES_IN_HOST_ORDER 1
+#endif
