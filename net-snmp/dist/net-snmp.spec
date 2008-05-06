@@ -17,11 +17,6 @@
 %if 0%{?netsnmp_embedded_perl} || 0%{?netsnmp_perl_modules}
 %define netsnmp_include_perl 1
 %endif
-#
-# library version (see Makefile.top)
-#
-%define libcurrent 15
-#
 Summary: Tools and servers for the SNMP protocol
 Name: net-snmp
 Version: 5.5.dev
@@ -40,7 +35,7 @@ BuildRequires: perl, beecrypt-devel elfutils-libelf-devel
 # because perl(Tk) is optional, automatic dependencies will never succeed:
 AutoReqProv: no
 Requires: openssl, popt, rpm, zlib, bzip2-libs, beecrypt, elfutils-libelf, glibc
-Provides: net-snmp, net-snmp-utils, libnetsnmp.so.%{libcurrent}, libnetsnmpagent.so.%{libcurrent}, libnetsnmphelpers.so.%{libcurrent}, libnetsnmpmibs.so.%{libcurrent}, libnetsnmptrapd.so.%{libcurrent}
+Provides: net-snmp-utils
 %if %{netsnmp_embedded_perl}
 BuildRequires: perl-ExtUtils-Embed
 Requires: perl
@@ -75,7 +70,6 @@ useful for building SNMP applications, agents, and sub-agents.
 Group: System Environment/Libraries
 Summary: The Perl modules provided with Net-SNMP
 AutoReqProv: no
-Provides: ASN.so, OID.so, SNMP.so, TrapReceiver.so, agent.so, default_store.so, perl(NetSNMP::ASN), perl(NetSNMP::OID), perl(NetSNMP::TrapReceiver), perl(NetSNMP::agent), perl(NetSNMP::agent::default_store), perl(NetSNMP::agent::netsnmp_request_infoPtr), perl(NetSNMP::agent::Support) perl(NetSNMP::default_store), perl(SNMP), perl(SNMP::DEBUGGING), perl(SNMP::DEBUG_INTERNALS), perl(SNMP::DUMP_PACKET), perl(SNMP::MIB), perl(SNMP::MIB::MIB_OPTIONS), perl(SNMP::MIB::NODE), perl(SNMP::MIB::REPLACE_NEWER), perl(SNMP::MIB::SAVE_DESCR), perl(SNMP::Session), perl(SNMP::TrapSession), perl(SNMP::VarList), perl(SNMP::Varbind), net-snmp-perlmods
 Requires: net-snmp = %{version}, perl
 
 %description perlmods
@@ -95,7 +89,7 @@ exit 1
 	--with-mib-modules="smux" \
 	--with-sysconfdir="/etc/net-snmp"               \
 	--enable-shared \
-	%{?netsnmp_perl_modules: --with-perl-modules="PREFIX=$RPM_BUILD_ROOT%{_prefix} INSTALLDIRS=vendor"} \
+	%{?netsnmp_perl_modules: --with-perl-modules} \
 	%{!?netsnmp_perl_modules: --without-perl-modules} \
 	%{?netsnmp_embedded_perl: --enable-embedded-perl} \
 	%{!?netsnmp_embedded_perl: --disable-embedded-perl} \
@@ -109,8 +103,7 @@ make
 # ----------------------------------------------------------------------
 rm -rf $RPM_BUILD_ROOT
 
-%makeinstall ucdincludedir=$RPM_BUILD_ROOT%{_prefix}/include/ucd-snmp \
-             includedir=$RPM_BUILD_ROOT%{_prefix}/include/net-snmp
+make DESTDIR=%{buildroot} install
 
 # Remove 'snmpinform' from the temporary directory because it is a
 # symbolic link, which cannot be handled by the rpm installation process.
@@ -202,6 +195,12 @@ rm -rf $RPM_BUILD_ROOT
 echo "No additional verification is done for net-snmp"
 
 %changelog
+* Tue May  6 2008 Jan Safranek <jsafranek@users.sf.net>
+- remove %{libcurrent}
+- add openssl-devel to build requirements
+- don't use Provides: unless necessary, let rpmbuild compute the provided 
+  libraries
+
 * Tue Jun 19 2007 Thomas Anders <tanders@users.sf.net>
 - add "BuildRequires: perl-ExtUtils-Embed", e.g. for Fedora 7
 
