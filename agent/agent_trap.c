@@ -7,7 +7,7 @@
  */
 /*
  * Portions of this file are copyrighted by:
- * Copyright ï¿½ 2003 Sun Microsystems, Inc. All rights reserved.
+ * Copyright © 2003 Sun Microsystems, Inc. All rights reserved.
  * Use is subject to license terms specified in the COPYING file
  * distributed with the Net-SNMP package.
  */
@@ -58,7 +58,6 @@
 #include <net-snmp/utilities.h>
 
 #include <net-snmp/net-snmp-includes.h>
-#include <net-snmp/agent/net-snmp-agent-includes.h>
 #include <net-snmp/agent/agent_trap.h>
 #include <net-snmp/agent/snmp_agent.h>
 #include <net-snmp/agent/agent_callbacks.h>
@@ -643,8 +642,6 @@ netsnmp_send_traps(int trap, int specific,
     in_addr_t             *pdu_in_addr_t;
     u_long                 uptime;
     struct trap_sink *sink;
-    const char            *trapaddr;
-    int                    res;
 
     DEBUGMSGTL(( "trap", "send_trap %d %d ", trap, specific));
     DEBUGMSGOID(("trap", enterprise, enterprise_length));
@@ -798,18 +795,7 @@ netsnmp_send_traps(int trap, int specific,
      * Ensure that the v1 trap PDU includes the local IP address
      */
        pdu_in_addr_t = (in_addr_t *) template_v1pdu->agent_addr;
-       trapaddr = netsnmp_ds_get_string(NETSNMP_DS_APPLICATION_ID,
-                                      NETSNMP_DS_AGENT_TRAP_ADDR);
-       if (trapaddr != NULL) {
-           /* "trapaddr" was specified in config, try to resolve it */
-           res = get_thisaddr(trapaddr, pdu_in_addr_t);
-       }
-       if (trapaddr == NULL || res < 0) {
-           /* "trapaddr" was not specified in config or the resolution failed,
-            * try any local address */
-           *pdu_in_addr_t = get_myaddr();
-       }
-
+      *pdu_in_addr_t = get_myaddr();
     }
 
 	/* A context name was provided, so copy it and its length to the v2 pdu
