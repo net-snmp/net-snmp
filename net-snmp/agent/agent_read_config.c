@@ -240,6 +240,9 @@ init_agent_read_config(const char *app)
                                 snmpd_free_trapcommunity,
                                 "community-string");
 #endif /* support for community based SNMP */
+    netsnmp_ds_register_config(ASN_OCTET_STR, app, "trapaddr", 
+                               NETSNMP_DS_APPLICATION_ID, 
+                               NETSNMP_DS_AGENT_TRAP_ADDR);
 #ifdef HAVE_UNISTD_H
     register_app_config_handler("agentuser",
                                 snmpd_set_agent_user, NULL, "userid");
