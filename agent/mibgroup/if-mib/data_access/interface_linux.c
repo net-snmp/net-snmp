@@ -767,7 +767,6 @@ netsnmp_linux_interface_get_if_speed(int fd, const char *name)
      */
     ushort *data = (ushort *)(&ifr.ifr_data);
     unsigned phy_id;
-    unsigned char new_ioctl_nums = 0;
     int mii_reg, i;
     ushort mii_val[32];
     ushort bmcr, bmsr, nway_advert, lkpar;
@@ -778,11 +777,11 @@ netsnmp_linux_interface_get_if_speed(int fd, const char *name)
     ifr.ifr_name[ sizeof(ifr.ifr_name)-1 ] = 0;
     data[0] = 0;
     
-    if (ioctl(fd, 0x8947, &ifr) >= 0) {
-        new_ioctl_nums = 1;
-    } else if (ioctl(fd, SIOCDEVPRIVATE, &ifr) >= 0) {
-        new_ioctl_nums = 0;
-    } else {
+    /*
+     * SIOCGMIIPHY has been defined since at least kernel 2.4.10 (Sept 2001).
+     * It's probably safe to drop the interim SIOCDEVPRIVATE handling now!
+     */
+    if (ioctl(fd, SIOCGMIIPHY, &ifr) < 0) {
         DEBUGMSGTL(("mibII/interfaces", "SIOCGMIIPHY on %s failed\n",
                     ifr.ifr_name));
         return retspeed;
@@ -793,7 +792,7 @@ netsnmp_linux_interface_get_if_speed(int fd, const char *name)
     for (mii_reg = 0; mii_reg < 8; mii_reg++){
         data[0] = phy_id;
         data[1] = mii_reg;
-        if(ioctl(fd, new_ioctl_nums ? 0x8948 : SIOCDEVPRIVATE+1, &ifr) <0){
+        if(ioctl(fd, SIOCGMIIREG, &ifr) <0){
             DEBUGMSGTL(("mibII/interfaces", "SIOCGMIIREG on %s failed\n", ifr.ifr_name));
         }
         mii_val[mii_reg] = data[3];		
