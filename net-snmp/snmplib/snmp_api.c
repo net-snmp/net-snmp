@@ -1642,6 +1642,7 @@ create_user_from_session(netsnmp_session * session)
     if (SNMP_FLAGS_USER_CREATED == (session->flags & SNMP_FLAGS_USER_CREATED) ||
         session->securityModel != SNMP_SEC_MODEL_USM ||
         session->version != SNMP_VERSION_3 ||
+        session->securityNameLen == 0 ||
         session->securityEngineIDLen == 0)
         return SNMPERR_SUCCESS;
 
