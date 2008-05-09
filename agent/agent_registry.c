@@ -1285,7 +1285,7 @@ check_access(netsnmp_pdu *pdu)
 {                               /* IN - pdu being checked */
     struct view_parameters view_parms;
     view_parms.pdu = pdu;
-    view_parms.name = 0;
+    view_parms.name = NULL;
     view_parms.namelen = 0;
     view_parms.errorcode = 0;
     view_parms.check_subtree = 0;

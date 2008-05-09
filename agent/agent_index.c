@@ -302,12 +302,12 @@ register_index(netsnmp_variable_list * varbind, int flags,
     if (new_index == NULL)
         return NULL;
 
-    if (0 == snmp_varlist_add_variable(&new_index->varbind,
-                                       varbind->name,
-                                       varbind->name_length,
-                                       varbind->type,
-                                       varbind->val.string,
-                                       varbind->val_len)) {
+    if (NULL == snmp_varlist_add_variable(&new_index->varbind,
+                                          varbind->name,
+                                          varbind->name_length,
+                                          varbind->type,
+                                          varbind->val.string,
+                                          varbind->val_len)) {
         /*
          * if (snmp_clone_var( varbind, new_index->varbind ) != 0 ) 
          */

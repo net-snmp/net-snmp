@@ -869,7 +869,7 @@ header_simple_table(struct variable *vp, oid * name, size_t * length,
 
     memmove(name, newname, (*length) * sizeof(oid));
     if (write_method)
-        *write_method = 0;
+        *write_method = (WriteMethod*)0;
     if (var_len)
         *var_len = sizeof(long);        /* default */
     return (MATCH_SUCCEEDED);
@@ -929,7 +929,7 @@ header_generic(struct variable *vp,
            ((int) vp->namelen + 1) * sizeof(oid));
     *length = vp->namelen + 1;
 
-    *write_method = 0;
+    *write_method = (WriteMethod*)0;
     *var_len = sizeof(long);    /* default to 'long' results */
     return (MATCH_SUCCEEDED);
 }

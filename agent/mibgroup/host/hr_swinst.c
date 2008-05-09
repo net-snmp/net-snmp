@@ -272,7 +272,7 @@ header_hrswinst(struct variable *vp,
            (vp->namelen + 1) * sizeof(oid));
     *length = vp->namelen + 1;
 
-    *write_method = 0;
+    *write_method = (WriteMethod*)0;
     *var_len = sizeof(long);    /* default to 'long' results */
     return (MATCH_SUCCEEDED);
 }
@@ -332,7 +332,7 @@ header_hrswInstEntry(struct variable *vp,
     memcpy((char *) name, (char *) newname,
            (vp->namelen + 1) * sizeof(oid));
     *length = vp->namelen + 1;
-    *write_method = 0;
+    *write_method = (WriteMethod*)0;
     *var_len = sizeof(long);    /* default to 'long' results */
 
     DEBUGMSGTL(("host/hr_inst", "... get installed S/W stats "));
@@ -482,7 +482,7 @@ var_hrswinst(struct variable * vp,
                 time_t          installTime = *rpm_data;
                 ret = date_n_time(&installTime, var_len);
             } else {
-                ret = date_n_time(0, var_len);
+                ret = date_n_time(NULL, var_len);
             }
 #else
             if (swi->swi_directory != NULL) {

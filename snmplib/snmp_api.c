@@ -1848,7 +1848,7 @@ snmp_sess_close(void *sessp)
     }
 
     isp = slp->internal;
-    slp->internal = 0;
+    slp->internal = NULL;
 
     if (isp) {
         netsnmp_request_list *rp, *orp;
@@ -1870,7 +1870,7 @@ snmp_sess_close(void *sessp)
     }
 
     transport = slp->transport;
-    slp->transport = 0;
+    slp->transport = NULL;
 
     if (transport) {
         transport->f_close(transport);
@@ -1878,7 +1878,7 @@ snmp_sess_close(void *sessp)
     }
 
     sesp = slp->session;
-    slp->session = 0;
+    slp->session = NULL;
 
     /*
      * The following is necessary to avoid memory leakage when closing AgentX 
@@ -2146,7 +2146,7 @@ snmpv3_build(u_char ** pkt, size_t * pkt_len, size_t * offset,
             pdu->securityModel = SNMP_SEC_MODEL_USM;
         }
     }
-    if (pdu->securityNameLen == 0 && pdu->securityName == 0) {
+    if (pdu->securityNameLen == 0 && pdu->securityName == NULL) {
         if (session->securityNameLen == 0) {
             session->s_snmp_errno = SNMPERR_BAD_SEC_NAME;
             return -1;
@@ -2731,7 +2731,7 @@ _snmp_build(u_char ** pkt, size_t * pkt_len, size_t * offset,
             netsnmp_session * session, netsnmp_pdu *pdu)
 {
 #if !defined(NETSNMP_DISABLE_SNMPV1) || !defined(NETSNMP_DISABLE_SNMPV2C)
-    u_char         *h0e = 0;
+    u_char         *h0e = NULL;
     size_t          start_offset = *offset;
     long            version;
     int             rc = 0;
@@ -4365,10 +4365,10 @@ snmp_pdu_parse(netsnmp_pdu *pdu, u_char * data, size_t * length)
     while ((int) *length > 0) {
         netsnmp_variable_list *vptemp;
         vptemp = (netsnmp_variable_list *) malloc(sizeof(*vptemp));
-        if (0 == vptemp) {
+        if (NULL == vptemp) {
             return -1;
         }
-        if (0 == vp) {
+        if (NULL == vp) {
             pdu->variables = vptemp;
         } else {
             vp->next_variable = vptemp;
@@ -4378,10 +4378,10 @@ snmp_pdu_parse(netsnmp_pdu *pdu, u_char * data, size_t * length)
         vp->next_variable = NULL;
         vp->val.string = NULL;
         vp->name_length = MAX_OID_LEN;
-        vp->name = 0;
+        vp->name = NULL;
         vp->index = 0;
-        vp->data = 0;
-        vp->dataFreeHook = 0;
+        vp->data = NULL;
+        vp->dataFreeHook = NULL;
         DEBUGDUMPSECTION("recv", "VarBind");
         data = snmp_parse_var_op(data, objid, &vp->name_length, &vp->type,
                                  &vp->val_len, &var_val, length);
@@ -6724,7 +6724,7 @@ snmp_varlist_add_variable(netsnmp_variable_list ** varlist,
     if (( 0 != rc ) ||
         (name != NULL && snmp_set_var_objid(vars, name, name_length))) {
         snmp_free_var(vars);
-        return (0);
+        return NULL;
     }
 
     /*
@@ -7040,7 +7040,7 @@ snmp_add_var(netsnmp_pdu *pdu,
         break;
 
     case 'n':
-        snmp_pdu_add_variable(pdu, name, name_length, ASN_NULL, 0, 0);
+        snmp_pdu_add_variable(pdu, name, name_length, ASN_NULL, NULL, 0);
         break;
 
     case 'b':

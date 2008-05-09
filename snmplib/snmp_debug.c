@@ -109,7 +109,7 @@ debug_register_tokens(char *tokens)
     char           *st = NULL;
     int             status;
 
-    if (tokens == 0 || *tokens == 0)
+    if (tokens == NULL || *tokens == 0)
         return;
 
     newp = strdup(tokens);      /* strtok_r messes it up */

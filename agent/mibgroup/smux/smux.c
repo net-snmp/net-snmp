@@ -425,7 +425,7 @@ var_smux_write(int action,
              * peek at what's received 
              */
             if ((len = recvfrom(rptr->sr_fd, buf,
-                            SMUXMAXPKTSIZE, MSG_PEEK, NULL, 0)) <= 0) {
+                            SMUXMAXPKTSIZE, MSG_PEEK, NULL, NULL)) <= 0) {
                 if ((len == -1) && ((errno == EINTR) || (errno == EAGAIN)))
                 {
                    continue;
@@ -464,7 +464,7 @@ var_smux_write(int action,
             do
             {
                len = tmp_len;
-               len = recvfrom(rptr->sr_fd, buf, len, 0, NULL, 0);
+               len = recvfrom(rptr->sr_fd, buf, len, 0, NULL, NULL);
             }
             while((len == -1) && ((errno == EINTR) || (errno == EAGAIN)));
 
@@ -606,7 +606,7 @@ smux_accept(int sd)
          */
         do
         {
-           length = recvfrom(fd, (char *) data, SMUXMAXPKTSIZE, 0, NULL, 0);
+           length = recvfrom(fd, (char *) data, SMUXMAXPKTSIZE, 0, NULL, NULL);
         }
         while((length == -1) && ((errno == EINTR) || (errno == EAGAIN)));
 
@@ -684,7 +684,8 @@ smux_process(int fd)
 
     do
     {
-       length = recvfrom(fd, (char *) data, SMUXMAXPKTSIZE, MSG_PEEK, NULL, 0);
+       length = recvfrom(fd, (char *) data, SMUXMAXPKTSIZE, MSG_PEEK, NULL,
+                         NULL);
     }
     while((length == -1) && ((errno == EINTR) || (errno == EAGAIN)));
 
@@ -712,7 +713,7 @@ smux_process(int fd)
     do
     {
        length = tmp_length;
-       length = recvfrom(fd, (char *) data, length, 0, NULL, 0);
+       length = recvfrom(fd, (char *) data, length, 0, NULL, NULL);
     }
     while((length == -1) && ((errno == EINTR) || (errno == EAGAIN)));
 
@@ -781,7 +782,7 @@ smux_pdu_process(int fd, u_char * data, size_t length)
             break;
         case SMUX_TRAP:
             snmp_log(LOG_INFO, "Got trap from peer on fd %d\n", fd);
-            if (ptr != 0)
+            if (ptr)
             {
                DEBUGMSGTL(("smux", "[smux_pdu_process] call smux_trap_process.\n"));
                ptr = smux_trap_process(ptr, &len);
@@ -1373,7 +1374,8 @@ smux_snmp_process(int exact,
         /*
          * peek at what's received 
          */
-        length = recvfrom(sd, (char *) result, SMUXMAXPKTSIZE, MSG_PEEK, NULL, 0);
+        length = recvfrom(sd, (char *) result, SMUXMAXPKTSIZE, MSG_PEEK, NULL,
+                          NULL);
         if (length <= 0) {
             if ((length == -1) && ((errno == EINTR) || (errno == EAGAIN)))
             {
@@ -1412,7 +1414,7 @@ smux_snmp_process(int exact,
         do
         {
            length = tmp_length;
-           length = recvfrom(sd, (char *) result, length, 0, NULL, 0);
+           length = recvfrom(sd, (char *) result, length, 0, NULL, NULL);
         }
         while((length == -1) && ((errno == EINTR) || (errno == EAGAIN)));
 

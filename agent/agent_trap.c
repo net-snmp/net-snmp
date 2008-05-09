@@ -198,7 +198,7 @@ add_trap_session(netsnmp_session * ss, int pdutype, int confirm,
 int
 remove_trap_session(netsnmp_session * ss)
 {
-    struct trap_sink *sp = sinks, *prev = 0;
+    struct trap_sink *sp = sinks, *prev = NULL;
 
     DEBUGMSGTL(("trap", "removing trap sessions\n"));
     while (sp) {
