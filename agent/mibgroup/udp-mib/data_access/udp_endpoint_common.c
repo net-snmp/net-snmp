@@ -105,7 +105,8 @@ netsnmp_access_udp_endpoint_container_free(netsnmp_container *container,
          * free all items.
          */
         CONTAINER_CLEAR(container,
-                        (netsnmp_container_obj_func*)free,
+                        (netsnmp_container_obj_func*)
+                        netsnmp_access_udp_endpoint_entry_free,
                         NULL);
     }
 
@@ -153,23 +154,3 @@ netsnmp_access_udp_endpoint_entry_free(netsnmp_udp_endpoint_entry * entry)
 
     free(entry);
 }
-
-
-/**---------------------------------------------------------------------*/
-/*
- * Utility routines
- */
-
-/**
- * \internal
- */
-static void
-_entry_release(netsnmp_udp_endpoint_entry * entry, void *context)
-{
-    netsnmp_access_udp_endpoint_entry_free(entry);
-}
-
-/**---------------------------------------------------------------------*/
-/*
- *
- */
