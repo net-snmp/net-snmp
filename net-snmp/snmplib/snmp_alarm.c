@@ -288,7 +288,7 @@ get_next_alarm_delay_time(struct timeval *delta)
     sa_ptr = sa_find_next();
 
     if (sa_ptr) {
-        gettimeofday(&t_now, 0);
+        gettimeofday(&t_now, NULL);
 
         if ((t_now.tv_sec > sa_ptr->t_next.tv_sec) ||
             ((t_now.tv_sec == sa_ptr->t_next.tv_sec) &&

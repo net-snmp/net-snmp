@@ -599,7 +599,7 @@ agent_check_and_process(int block)
         tvp->tv_usec = 0;
     }
 
-    count = select(numfds, &fdset, 0, 0, tvp);
+    count = select(numfds, &fdset, NULL, NULL, tvp);
 
     if (count > 0) {
         /*

@@ -528,7 +528,7 @@ static struct module_import root_imports[NUMBER_OF_ROOT_NODES];
 
 static int      current_module = 0;
 static int      max_module = 0;
-static char    *last_err_module = 0;    /* no repeats on "Cannot find module..." */
+static char    *last_err_module = NULL; /* no repeats on "Cannot find module..." */
 
 static void     tree_from_node(struct tree *tp, struct node *np);
 static void     do_subtree(struct tree *, struct node **);
@@ -4216,7 +4216,7 @@ parse(FILE * fp, struct node *root)
 
     if (last_err_module)
         free(last_err_module);
-    last_err_module = 0;
+    last_err_module = NULL;
 
     np = root;
     if (np != NULL) {
@@ -5172,9 +5172,7 @@ find_module(int mid)
         if (mp->modid == mid)
             break;
     }
-    if (mp != 0)
-        return mp;
-    return NULL;
+    return mp;
 }
 
 

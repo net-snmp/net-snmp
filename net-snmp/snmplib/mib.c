@@ -2623,7 +2623,7 @@ netsnmp_init_mib(void)
     while (entry) {
         if (strcasecmp(entry, DEBUG_ALWAYS_TOKEN) == 0) {
             read_all_mibs();
-        } else if (strstr(entry, "/") != 0) {
+        } else if (strstr(entry, "/") != NULL) {
             read_mib(entry);
         } else {
             netsnmp_read_module(entry);
@@ -2664,7 +2664,7 @@ netsnmp_init_mib(void)
 #endif
     }
 
-    if (env_var != 0) {
+    if (env_var != NULL) {
         DEBUGMSGTL(("init_mib",
                     "Seen MIBFILES: Looking in '%s' for mib files ...\n",
                     env_var));
@@ -3431,7 +3431,7 @@ sprint_realloc_variable(u_char ** buf, size_t * buf_len,
          * Handle rare case where tree is empty.  
          */
         return sprint_realloc_by_type(buf, buf_len, out_len, allow_realloc,
-                                      variable, 0, 0, 0);
+                                      variable, NULL, NULL, NULL);
     }
 }
 
@@ -5872,7 +5872,7 @@ print_subtree_oid_report(FILE * f, struct tree *tree, int count)
     while (1) {
         register struct tree *ntp;
 
-        tp = 0;
+        tp = NULL;
         for (ntp = tree->child_list; ntp; ntp = ntp->next_peer) {
             if (ntp->reported)
                 continue;

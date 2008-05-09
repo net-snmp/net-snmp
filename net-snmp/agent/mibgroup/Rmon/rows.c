@@ -756,7 +756,7 @@ ROWDATAAPI_locate_new_data(SCROLLER_T * scrlr)
         scrlr->first_data_ptr = bptr->next;
         scrlr->last_data_ptr->next = bptr;
         scrlr->last_data_ptr = (NEXTED_PTR_T *) bptr;
-        bptr->next = 0;
+        bptr->next = NULL;
     } else {
         bptr = scrlr->current_data_ptr;
         scrlr->current_data_ptr = bptr->next;
