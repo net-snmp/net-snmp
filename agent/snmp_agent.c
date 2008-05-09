@@ -545,7 +545,7 @@ _fix_endofmibview(netsnmp_agent_session *asp)
 
 
 int
-getNextSessID()
+getNextSessID(void)
 {
     static int      SessionID = 0;
 

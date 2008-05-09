@@ -395,7 +395,7 @@ unregister_app_config_handler(const char *token)
 }
 
 void
-unregister_all_config_handlers()
+unregister_all_config_handlers(void)
 {
     struct config_files *ctmp, *save;
     struct config_line *ltmp;
@@ -940,7 +940,7 @@ set_configuration_directory(const char *dir)
  * We always retrieve it new, since we have to do it anyway if it is just set.
  */
 const char     *
-get_configuration_directory()
+get_configuration_directory(void)
 {
     char            defaultPath[SPRINT_MAX_LEN];
     char           *homepath;
@@ -988,7 +988,7 @@ set_persistent_directory(const char *dir)
  * We always retrieve it new, since we have to do it anyway if it is just set.
  */
 const char     *
-get_persistent_directory()
+get_persistent_directory(void)
 {
     if (NULL == netsnmp_ds_get_string(NETSNMP_DS_LIBRARY_ID, 
 				      NETSNMP_DS_LIB_PERSISTENT_DIR)) {
@@ -1028,7 +1028,7 @@ set_temp_file_pattern(const char *pattern)
  * We always retrieve it new, since we have to do it anyway if it is just set.
  */
 const char     *
-get_temp_file_pattern()
+get_temp_file_pattern(void)
 {
     if (NULL == netsnmp_ds_get_string(NETSNMP_DS_LIBRARY_ID, 
 				      NETSNMP_DS_LIB_TEMP_FILE_PATTERN)) {

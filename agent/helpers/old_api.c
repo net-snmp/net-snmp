@@ -403,7 +403,7 @@ netsnmp_old_api_helper(netsnmp_mib_handler *handler,
  */
 static netsnmp_agent_session *current_agent_session = NULL;
 netsnmp_agent_session *
-netsnmp_get_current_agent_session()
+netsnmp_get_current_agent_session(void)
 {
     return current_agent_session;
 }
