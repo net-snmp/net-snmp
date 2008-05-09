@@ -2072,7 +2072,7 @@ int smux_snmp_select_list_del(int sd)
    return(0);
 }
 
-int smux_snmp_select_list_get_length()
+int smux_snmp_select_list_get_length(void)
 {
    return(sdlen);
 }

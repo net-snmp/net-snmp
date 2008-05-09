@@ -527,7 +527,7 @@ netsnmp_ds_register_premib(u_char type, const char *ftype, const char *token,
 }
 
 void
-netsnmp_ds_shutdown()
+netsnmp_ds_shutdown(void)
 {
     netsnmp_ds_read_config *drsp;
     int             i, j;

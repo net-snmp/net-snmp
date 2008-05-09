@@ -1018,7 +1018,7 @@ print_ascii_dump_tree(FILE * f, struct tree *tree, int count)
 static int      translation_table[256];
 
 static void
-build_translation_table()
+build_translation_table(void)
 {
     int             count;
 
@@ -1104,7 +1104,7 @@ build_translation_table()
 }
 
 static void
-init_tree_roots()
+init_tree_roots(void)
 {
     struct tree    *tp, *lasttp;
     int             base_modid;
@@ -4041,7 +4041,7 @@ netsnmp_unload_module(const char *name)
  * Clear module map, tree nodes, textual convention table.
  */
 void
-unload_all_mibs()
+unload_all_mibs(void)
 {
     struct module  *mp;
     struct module_compatability *mcp;
@@ -4843,7 +4843,7 @@ read_mib(const char *filename)
 
 
 struct tree    *
-read_all_mibs()
+read_all_mibs(void)
 {
     struct module  *mp;
 
