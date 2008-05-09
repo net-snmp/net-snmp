@@ -1,4 +1,4 @@
-.TH "A generic callback mechanism" 3 "27 Jul 2007" "Version 5.4.1" "net-snmp" \" -*- nroff -*-
+.TH "A generic callback mechanism" 3 "9 May 2008" "Version 5.4.2" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -13,13 +13,13 @@ A generic callback mechanism \-
 .RI "#define \fBLOCK_PER_CALLBACK_SUBID\fP   1"
 .br
 .ti -1c
-.RI "#define \fBCALLBACK_LOCK\fP(maj, min)   ++_locks[major][minor]"
+.RI "#define \fBCALLBACK_LOCK\fP(maj, min)   ++_locks[maj][min]"
 .br
 .ti -1c
-.RI "#define \fBCALLBACK_UNLOCK\fP(maj, min)   --_locks[major][minor]"
+.RI "#define \fBCALLBACK_UNLOCK\fP(maj, min)   --_locks[maj][min]"
 .br
 .ti -1c
-.RI "#define \fBCALLBACK_LOCK_COUNT\fP(maj, min)   _locks[major][minor]"
+.RI "#define \fBCALLBACK_LOCK_COUNT\fP(maj, min)   _locks[maj][min]"
 .br
 .in -1c
 .SS "Functions"
@@ -83,7 +83,7 @@ find and clear client args that match ptr
 .PP
 
 .PP
-Definition at line 462 of file callback.c.
+Definition at line 474 of file callback.c.
 .PP
 References snmp_gen_callback::next, NULL, snmp_gen_callback::sc_callback, and snmp_gen_callback::sc_client_arg.
 .PP
@@ -115,7 +115,7 @@ Returns SNMPERR_GENERR if major is >= MAX_CALLBACK_IDS or minor is >= MAX_CALLBA
 .PP
 
 .PP
-Definition at line 286 of file callback.c.
+Definition at line 298 of file callback.c.
 .PP
 References _callback_lock(), _callback_unlock(), init_callbacks(), snmp_gen_callback::next, NULL, snmp_gen_callback::sc_callback, and snmp_gen_callback::sc_client_arg.
 .PP
@@ -179,7 +179,7 @@ Returns SNMPERR_GENERR if major is >= MAX_CALLBACK_IDS or minor is >= MAX_CALLBA
 .PP
 
 .PP
-Definition at line 218 of file callback.c.
+Definition at line 230 of file callback.c.
 .PP
 References netsnmp_register_callback().
 .PP
@@ -219,6 +219,6 @@ Returns the number of callbacks that were unregistered.
 .PP
 set cleanup flag? 
 .PP
-Definition at line 406 of file callback.c.
+Definition at line 418 of file callback.c.
 .PP
 References _callback_lock(), _callback_unlock(), CALLBACK_LOCK_COUNT, init_callbacks(), snmp_gen_callback::next, NULL, snmp_gen_callback::sc_callback, snmp_gen_callback::sc_client_arg, and SNMP_FREE.

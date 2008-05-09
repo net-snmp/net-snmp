@@ -1,4 +1,4 @@
-.TH "asn1 parsing and datatype manipulation routines." 3 "27 Jul 2007" "Version 5.4.1" "net-snmp" \" -*- nroff -*-
+.TH "asn1 parsing and datatype manipulation routines." 3 "9 May 2008" "Version 5.4.2" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -214,7 +214,7 @@ do { int trunc = 0;                     \
             x = 0 - (x & 0xffffffff);                                   \
         }                                                               \
         if (trunc)                                                      \
-            snmp_log(LOG_ERR,'truncating signed value to 32 bits (%d)\n',y); \
+            DEBUGMSG(('asn','truncating signed value to 32 bits (%d)\n',y)); \
     } while(0)
 .fi
 .PP
@@ -229,7 +229,7 @@ Referenced by asn_build_int(), and asn_parse_int().
 do {                                    \
         if (x > UINT32_MAX) {                                           \
             x &= 0xffffffff;                                            \
-            snmp_log(LOG_ERR,'truncating unsigned value to 32 bits (%d)\n',y); \
+            DEBUGMSG(('asn','truncating unsigned value to 32 bits (%d)\n',y)); \
         }                                                               \
     } while(0)
 .fi
