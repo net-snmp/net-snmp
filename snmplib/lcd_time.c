@@ -295,14 +295,14 @@ void free_enginetime(unsigned char *engineID, size_t engineID_len)
 void free_etimelist(void)
 {
      int index = 0;
-     Enginetime e = 0;
-     Enginetime nextE = 0;
+     Enginetime e = NULL;
+     Enginetime nextE = NULL;
 
      for( ; index < ETIMELIST_SIZE; ++index)
      {
            e = etimelist[index];
 
-           while(e != 0)
+           while(e != NULL)
            {
                  nextE = e->next;
                  SNMP_FREE(e->engineID);
@@ -310,7 +310,7 @@ void free_etimelist(void)
                  e = nextE;
            }
 
-           etimelist[index] = 0;
+           etimelist[index] = NULL;
      }
      return;
 }

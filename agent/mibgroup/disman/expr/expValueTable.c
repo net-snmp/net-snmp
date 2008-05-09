@@ -59,7 +59,7 @@ expValueTable_getEntry(netsnmp_variable_list * indexes,
     if (!indexes || !indexes->next_variable ||
         !indexes->next_variable->next_variable ) {
         /* XXX - Shouldn't happen! */
-        return 0;
+        return NULL;
     }
 
     DEBUGMSGTL(( "disman:expr:val", "get (%d) entry (%s, %s, ", mode,

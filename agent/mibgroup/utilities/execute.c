@@ -159,7 +159,7 @@ tokenize_exec_command( char *command, int *argc )
     if (cp) {
         argv[i++] = strdup( cp );
     }
-    argv[i] = 0;
+    argv[i] = NULL;
     *argc = i;
 
     return argv;
@@ -214,7 +214,7 @@ xx_tokenize_exec_command( char *command, int *argc )
         argv[i] = strdup( cptr2 );
         cptr2  += strlen( cptr2 )+1;
     }
-    argv[count] = 0;
+    argv[count] = NULL;
     *argc       = count;
         
     return argv;

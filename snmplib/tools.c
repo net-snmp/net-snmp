@@ -771,7 +771,7 @@ marker_t
 atime_newMarker(void)
 {
     marker_t        pm = (marker_t) calloc(1, sizeof(struct timeval));
-    gettimeofday((struct timeval *) pm, 0);
+    gettimeofday((struct timeval *) pm, NULL);
     return pm;
 }
 
@@ -784,7 +784,7 @@ atime_setMarker(marker_t pm)
     if (!pm)
         return;
 
-    gettimeofday((struct timeval *) pm, 0);
+    gettimeofday((struct timeval *) pm, NULL);
 }
 
 

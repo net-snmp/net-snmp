@@ -1422,7 +1422,7 @@ vacm_check_view(netsnmp_pdu *pdu, oid * name, size_t namelen,
         return VACM_NOACCESS;
     }
 
-    if (name == 0) {            /* only check the setup of the vacm for the request */
+    if (name == NULL) { /* only check the setup of the vacm for the request */
         DEBUGMSG(("mibII/vacm_vars", ", Done checking setup\n"));
         return VACM_SUCCESS;
     }

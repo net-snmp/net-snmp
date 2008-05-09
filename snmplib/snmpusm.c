@@ -489,7 +489,7 @@ usm_calc_offsets(size_t globalDataLen,  /* SNMPv3Message + HeaderData */
      * Calculate lengths.
      */
     if ((engIDlen = asn_predict_length(ASN_OCTET_STR,
-                                       0, secEngineIDLen)) == -1) {
+                                       NULL, secEngineIDLen)) == -1) {
         return -1;
     }
 
@@ -505,29 +505,31 @@ usm_calc_offsets(size_t globalDataLen,  /* SNMPv3Message + HeaderData */
         return -1;
     }
 
-    if ((namelen = asn_predict_length(ASN_OCTET_STR, 0, secNameLen)) == -1) {
+    if ((namelen = asn_predict_length(ASN_OCTET_STR,
+                                      NULL, secNameLen)) == -1) {
         return -1;
     }
 
     if ((authlen = asn_predict_length(ASN_OCTET_STR,
-                                      0, *msgAuthParmLen)) == -1) {
+                                      NULL, *msgAuthParmLen)) == -1) {
         return -1;
     }
 
     if ((privlen = asn_predict_length(ASN_OCTET_STR,
-                                      0, *msgPrivParmLen)) == -1) {
+                                      NULL, *msgPrivParmLen)) == -1) {
         return -1;
     }
 
     *seq_len =
         engIDlen + engBtlen + engTmlen + namelen + authlen + privlen;
 
-    if ((*otstlen = asn_predict_length(ASN_SEQUENCE, 0, *seq_len)) == -1) {
+    if ((*otstlen = asn_predict_length(ASN_SEQUENCE,
+                                       NULL, *seq_len)) == -1) {
         return -1;
     }
 
     if ((*msgSecParmLen = asn_predict_length(ASN_OCTET_STR,
-                                             0, *otstlen)) == -1) {
+                                             NULL, *otstlen)) == -1) {
         return -1;
     }
 
@@ -555,7 +557,7 @@ usm_calc_offsets(size_t globalDataLen,  /* SNMPv3Message + HeaderData */
         scopedPduLen = ROUNDUP8(scopedPduLen);
 
         if ((*datalen =
-             asn_predict_length(ASN_OCTET_STR, 0, scopedPduLen)) == -1) {
+             asn_predict_length(ASN_OCTET_STR, NULL, scopedPduLen)) == -1) {
             return -1;
         }
     } else {

@@ -282,7 +282,7 @@ header_hrfilesys(struct variable *vp,
     memcpy((char *) name, (char *) newname,
            (vp->namelen + 1) * sizeof(oid));
     *length = vp->namelen + 1;
-    *write_method = 0;
+    *write_method = (WriteMethod*)0;
     *var_len = sizeof(long);    /* default to 'long' results */
 
     DEBUGMSGTL(("host/hr_filesys", "... get filesys stats "));
@@ -679,7 +679,7 @@ const char     *HRFS_ignores[] = {
     "proc",
     "fd",
 #endif
-    0
+    NULL
 };
 
 int

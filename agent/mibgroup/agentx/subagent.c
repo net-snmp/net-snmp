@@ -521,7 +521,7 @@ handle_subagent_response(int op, netsnmp_session * session, int reqid,
                      * set to `endOfMibView'".  
                      */
                     snmp_set_var_objid(v, u->name, u->name_length);
-                    snmp_set_var_typed_value(v, SNMP_ENDOFMIBVIEW, 0, 0);
+                    snmp_set_var_typed_value(v, SNMP_ENDOFMIBVIEW, NULL, 0);
                     DEBUGMSGTL(("agentx/subagent",
                                 "scope violation -- return endOfMibView\n"));
                 }
@@ -878,13 +878,13 @@ agentx_reopen_session(unsigned int clientreg, void *clientarg)
         /*
          * Register a ping alarm (if need be).  
          */
-        subagent_register_ping_alarm(0, 0, 0, main_session);
+        subagent_register_ping_alarm(0, 0, NULL, main_session);
     } else {
         if (clientreg == 0) {
             /*
              * Register a reattach alarm for later 
              */
-            subagent_register_ping_alarm(0, 0, 0, main_session);
+            subagent_register_ping_alarm(0, 0, NULL, main_session);
         }
     }
 }

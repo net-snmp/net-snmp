@@ -232,7 +232,7 @@ netsnmp_binary_array_get(netsnmp_container *c, const void *key, int exact)
      * if there is no data, return NULL;
      */
     if (!t->count)
-        return 0;
+        return NULL;
 
     /*
      * if the table is dirty, sort it.
@@ -245,7 +245,7 @@ netsnmp_binary_array_get(netsnmp_container *c, const void *key, int exact)
      */
     if (key) {
         if ((index = binary_search(key, c, exact)) == -1)
-            return 0;
+            return NULL;
     }
 
     return t->data[index];
@@ -433,7 +433,7 @@ netsnmp_binary_array_get_subset(netsnmp_container *c, void *key, int *len)
      * if there is no data, return NULL;
      */
     if (!t->count || !key)
-        return 0;
+        return NULL;
 
     /*
      * if the table is dirty, sort it.
@@ -446,7 +446,7 @@ netsnmp_binary_array_get_subset(netsnmp_container *c, void *key, int *len)
      */
     start = end = binary_search_for_start((netsnmp_index *)key, c);
     if (start == -1)
-        return 0;
+        return NULL;
 
     for (i = start + 1; i < t->count; ++i) {
         if (0 != c->ncompare(t->data[i], key))

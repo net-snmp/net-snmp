@@ -321,7 +321,7 @@ init_hr_swrun(void)
     auto_nlist(NPROC_SYMBOL, 0, 0);
 #endif
 
-    proc_table = 0;
+    proc_table = NULL;
 
     REGISTER_MIB("host/hr_swrun", hrswrun_variables, variable4,
                  hrswrun_variables_oid);
@@ -364,7 +364,7 @@ header_hrswrun(struct variable *vp,
            (vp->namelen + 1) * sizeof(oid));
     *length = vp->namelen + 1;
 
-    *write_method = 0;
+    *write_method = (WriteMethod*)0;
     *var_len = sizeof(long);    /* default to 'long' results */
     return (MATCH_SUCCEEDED);
 }
@@ -448,7 +448,7 @@ header_hrswrunEntry(struct variable *vp,
     memcpy((char *) name, (char *) newname,
            (vp->namelen + 1) * sizeof(oid));
     *length = vp->namelen + 1;
-    *write_method = 0;
+    *write_method = (WriteMethod*)0;
     *var_len = sizeof(long);    /* default to 'long' results */
 
     DEBUGMSGTL(("host/hr_swrun", "... get process stats "));

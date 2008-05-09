@@ -278,7 +278,7 @@ table_helper_handler(netsnmp_mib_handler *handler,
                 DEBUGMSGOID(("helper:table:set", var->name, var->name_length));
                 out_len = 0;
                 if (sprint_realloc_by_type(&buf, &buf_len, &out_len, 1,
-                                           var, 0, 0, 0)) {
+                                           var, NULL, NULL, NULL)) {
                     DEBUGMSG(("helper:table:set"," type=%d(%02x), value=%s\n",
                               var->type, var->type, buf));
                 } else {
@@ -587,7 +587,7 @@ table_helper_handler(netsnmp_mib_handler *handler,
                      count++, vb = vb->next_variable) {
                     out_len = 0;
                     if (sprint_realloc_by_type(&buf, &buf_len, &out_len, 1,
-                                               vb, 0, 0, 0)) {
+                                               vb, NULL, NULL, NULL)) {
                         DEBUGMSG(("helper:table:results",
                                   "   index: type=%d(%02x), value=%s",
                                   vb->type, vb->type, buf));

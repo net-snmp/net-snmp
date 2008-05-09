@@ -311,12 +311,12 @@ static int      match_disk_config_item(const char *, conf_disk_item *);
 static void
 parse_disk_config(const char *token, char *cptr)
 {
-    conf_disk_list *d_new = 0;
-    conf_disk_item *di_curr = 0;
-    details_set    *d_set = 0;
-    char           *name = 0, *p = 0, *d_str = 0, c;
+    conf_disk_list *d_new = NULL;
+    conf_disk_item *di_curr = NULL;
+    details_set    *d_set = NULL;
+    char           *name = NULL, *p = NULL, *d_str = NULL, c;
     unsigned int    i, neg, c1, c2;
-    char           *st = 0;
+    char           *st = NULL;
 
     name = strtok_r(cptr, " \t", &st);
     if (!name) {
@@ -586,7 +586,7 @@ header_hrdisk(struct variable *vp,
     memcpy((char *) name, (char *) newname,
            ((int) vp->namelen + 1) * sizeof(oid));
     *length = vp->namelen + 1;
-    *write_method = 0;
+    *write_method = (WriteMethod*)0;
     *var_len = sizeof(long);    /* default to 'long' results */
 
     DEBUGMSGTL(("host/hr_disk", "... get disk stats "));

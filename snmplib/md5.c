@@ -434,7 +434,7 @@ MDsign(u_char * data, size_t len, u_char * mac, size_t maclen,
     u_char          extendedAuthKey[HASHKEYLEN];
     u_char          buf[HASHKEYLEN];
     size_t          i;
-    u_char         *cp, *newdata = 0;
+    u_char         *cp, *newdata = NULL;
     int             rc = 0;
 
     /*
