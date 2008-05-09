@@ -353,8 +353,9 @@ oid             ipv6tcp_variables_oid[] = { 1, 3, 6, 1, 2, 1, 6, 16 };
 config_load_mib(1.3 .6 .1 .3 .86 .1, 7, ipv6tcp_variables)
     config_add_mib(IPV6 - TCP - MIB)
 #endif
-     void
-                     init_ipv6()
+
+void
+init_ipv6(void)
 {
     /*
      * register ourselves with the agent to handle our mib tree 
