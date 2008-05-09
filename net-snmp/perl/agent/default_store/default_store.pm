@@ -95,7 +95,7 @@ use vars qw(@ISA %EXPORT_TAGS @EXPORT_OK @EXPORT $VERSION $AUTOLOAD);
 				   NETSNMP_DS_AGENT_MAX_GETBULKREPEATS
 				   NETSNMP_DS_AGENT_MAX_GETBULKRESPONSES
 );
-$VERSION = '5.0401';
+$VERSION = '5.0402';
 
 sub AUTOLOAD {
     # This AUTOLOAD is used to 'autoload' constants from the constant()

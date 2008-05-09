@@ -47,7 +47,7 @@ require NetSNMP::OID;
 	NETSNMPTRAPD_PRE_HANDLER
 );
 
-$VERSION = '5.0401';
+$VERSION = '5.0402';
 
 # sub new {
 #     my $type = shift;
