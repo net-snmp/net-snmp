@@ -1,5 +1,561 @@
 -------------------------------------------------------------------------------
 
+Changes: V5.4.1 -> V5.4.2.pre1
+
+2008-05-09 14:51  dts12
+
+   * documentation update
+
+2008-05-09 14:47  dts12
+
+   * version tag ( 5.4.2 )
+   [Should have been 5.4.2.pre1]
+
+2008-05-09 14:23  dts12
+
+   * version update
+
+2008-05-09 13:58  dts12
+
+   * Debugging messages.
+
+2008-05-08 14:00  dts12
+
+   * Drop support for the interim SIOCDEVPRIVATE-based ioctl calls.
+   SIOCGMIIPHY/SIOCGMIIREG have been defined since at least Sept
+   2001 (kernel 2.4.10),
+   so the risk of calling an inappropriate private ioctl is probably
+   greater than
+   that of missing information from an ancient system.
+
+2008-05-08 09:02  dts12
+
+   * Don't try to automatically create anonymous users.
+   (An invalid trapsess directive may crash the agent)
+
+2008-05-02 10:19  dts12
+
+   * Handle udpTable indexing on both PPC and Intel hardware.
+
+2008-04-30 05:28  magfr
+
+   * Remove unncessary prototypes
+
+2008-04-19 22:20  tanders
+
+   * don't depend on OID resolution for disman linkUpDownNotifications
+
+2008-04-08 20:38  hardaker
+
+   * CHANGES: perl: fixed an extra brace in the docs pointed out by Jason Martin
+
+2008-04-07 14:00  dts12
+
+   * Another over-short DESCRIPTION buffer.
+
+2008-04-07 13:57  dts12
+
+   * Handle longer DESCRIPTION/REFERENCE strings in Capabilities statements.
+   (Consistent processing with other MIB definition macros).
+   Fix provided by Aleksandr Lomanov.
+
+2008-03-26 07:52  magfr
+
+   * CHANGES: snmplib: from "Aleksandr Lomanov": Fix registering of multiple premib config handlers
+   so that all of them get registered as premib handlers as opposed to the earlier behaviour
+   where they always got registered as normal config items.
+
+2008-03-25 06:07  magfr
+
+   * Remove spurious printf from unregister_mib_context
+
+2008-03-24 17:54  dts12
+
+   * CHANGES: mib2c: BUG: 1874059,1737068: Handle MIB objects with embedded hyphens
+
+2008-03-24 17:29  dts12
+
+   * CHANGES: snmplib: BUG: 1866655: Handle parsing invalid OID subidentifiers
+
+2008-03-24 16:53  dts12
+
+   * CHANGES: library: PATCH: 1921861: Avoid endless loop after truncating 64bit int
+
+2008-03-24 15:00  dts12
+
+   * CHANGES: build: BUG: 1823381: Valid MIB directory search path on Windows
+
+2008-03-21 17:55  hardaker
+
+   * CHANGES: libsnmp: PATCH: 1895927: from jhum8111: change obsolete recv/send to recvfrom/sendto
+
+2008-03-21 17:49  hardaker
+
+   * CHANGES: python: PATCH: 1862177: from wafflesouffle: made code more windows/cygwin compiler friendl
+
+2008-03-21 17:45  hardaker
+
+   * CHANGES: python: PATCH: 1877840: fix MIB label and indexing due to slightly broken regexp
+
+2008-03-21 17:39  hardaker
+
+   * CHANGES: perl: PATCH: 1920390: from wilmesj: fix registration of tables with .0 as IIDs
+
+2008-03-21 17:32  hardaker
+
+   * CHANGES: perl: PATCH: 1914645: from wilmesj: better end of mib support
+
+2008-03-21 17:28  hardaker
+
+   * CHANGES: perl: PATCH: 1914643: from wilmesj: fix issues with embedded perl
+   returning 0 being reclassified as a wrong data type when an int works.
+
+2008-03-21 17:22  hardaker
+
+   * CHANGES: mib2c: PATCH 1914398: from wilmesj: install mib2c.perl.conf
+
+2008-03-21 17:02  hardaker
+
+   * CHANGES: perl: PATCH: 1914393: from wilmesj: registerAgent can now be run multiple times
+
+2008-03-21 16:35  hardaker
+
+   * CHANGES: snmpd: PATCH: 1909813: fix table_iterator hint to get_first when SORTED flag is set
+
+2008-02-27 22:12  hardaker
+
+   * Fix C++ style comment
+
+2008-02-22 23:52  hardaker
+
+   * CHANGES: snmpd: PATCH: 1896118: patch from jsafranek: fix ifTable 32bit counters on linux
+
+2008-02-22 23:44  hardaker
+
+   * CHANGES: libsnmp: PATCH: 1898204: from Mike Wescott: fix bug 1898198 in parse.c to avoid a segfault when parsing broken mibs.
+
+2008-02-18 12:11  dts12
+
+   * Clarify the need to reset buffer length when calling 'read_objid' repeatedly.
+
+2008-02-17 18:01  tanders
+
+   * fix typo in variable name
+
+2008-02-17 08:38  tanders
+
+   * portability fix
+
+2008-02-15 13:00  tanders
+
+   * portability fix
+
+2008-02-15 04:39  hardaker
+
+   * CHANGES: snmpd: PATCH: 1716548: from myamato: Fix help output so no space is printed between -D and arguments.
+
+2008-02-15 03:44  hardaker
+
+   * CHANGES: snmpd: PATCH: 1893468: from gkoenig: fixed registration of OIDs with ranges
+
+2008-02-14 21:40  tanders
+
+   * fix typo in variable declaration (unbreaks the build on a few systems)
+
+2008-02-14 00:29  hardaker
+
+   * year update for sparta
+
+2008-02-13 23:37  magfr
+
+   * NEWS: snmplib: Change CONTAINER_INSERT to not do partial inserts in containers with multiple indices when one insert fails.
+
+2008-02-13 23:11  hardaker
+
+   * Fixed the createUser line to specify the -e flag (responding to a complaint about it be missing)
+
+2008-02-13 17:15  hardaker
+
+   * CHANGES: snmpd: PATCH: 1783733: Put the package version number into the hrSWInst table for solaris.
+
+2008-02-13 16:12  hardaker
+
+   * CHANGES: snmpd: PATCH: 1784747: from jsafranek: Fix long usage for ip adresses on 64 bit systems in various MIB-II tables.
+
+2008-02-13 16:02  hardaker
+
+   * CHANGES: snmpd: PATCH: 1826102: from jsafranek: support longer interface names on linux
+
+2008-02-13 09:22  tanders
+
+   * revert to autoconf 2.59 per existing policy
+
+2008-02-12 23:23  hardaker
+
+   * CHANGES: libsnmp: PATCH: 1807489: fix ignoring of display hints.
+
+2008-02-12 22:09  hardaker
+
+   * CHANGES: snmpd: PATCH: 1866823: from jsafranek: truncate 32 bit counter values on 64 bit machines to avoid bogus warnings.
+
+2008-02-12 19:05  hardaker
+
+   * CHANGES: snmpd: PATCH: 1849903: from jsafranek: do not spam log with asserts when XEN is used
+
+2008-02-12 18:50  hardaker
+
+   * CHANGES: libsnmp: PATCH: 1875022: from sem_prg: improve callback locking mechanisms
+
+2008-02-12 17:40  hardaker
+
+   * CHANGES: snmpd: PATCH: 1879261: from amesbury: Add in inactive memory to the cached report for freebsd
+
+2008-02-12 15:22  hardaker
+
+   * Change snprintf print lengths to len-1 to leave 0 in final position for printing
+
+2008-02-11 22:26  hardaker
+
+   * fix quoted strings in help output
+
+2008-01-30 17:29  hardaker
+
+   * added vacm_conf to existing configure files (for trapd too)
+
+2008-01-20 07:55  tanders
+
+   * CHANGES: build: BUG: 1872266: PERLCC check fails for CC with options
+
+2008-01-17 01:13  hardaker
+
+   * fix default mibs to include vacm_conf too
+
+2008-01-17 00:09  magfr
+
+   * CHANGES: snmpd: PATCH: 1826088: from Jan Safranek: Use the right interface t read the netmask
+
+2008-01-16 21:54  magfr
+
+   * CHANGES: Handle device names with embedded spaces in UCD-SNMP-MIB::dskDevice
+
+2008-01-16 00:47  magfr
+
+   * CHANGES: snmpd: PATCH: 1828839: from jsafranek to provide better handling of disks mounted on paths with embedded spaces
+
+2008-01-15 16:47  hardaker
+
+   * coverity bug 205: double check pointer that should never be null
+
+2008-01-09 21:58  magfr
+
+   * Delete unused static functions
+
+2008-01-06 13:01  magfr
+
+   * Make error_string private and readonly
+
+2007-12-22 19:22  dts12
+
+   * CHANGES: perl: BUG: 1826174: Check for buffer overflow when printing values.
+
+2007-12-21 23:19  dts12
+
+   * CHANGES: perl: BUG: 1747733: More robust handling of undefined values.
+   Patch supplied by Matti Linnanvuori
+
+2007-12-21 21:33  dts12
+
+   * CHANGES: snmpd: BUG: 1748206: Protect against failures to open /etc/mtab (or equiv)
+
+2007-12-21 18:42  dts12
+
+   * Bring order of agent library linking into line with agent Makefile.
+   Problem reported by Steve McCarthy.
+   Qn: Should 5.2.x and 5.3.x also use the same order?
+   (for both agent Makefile and net-snmp-config)
+
+2007-12-21 13:11  dts12
+
+   * CHANGES: build: BUG: 1802833: Ensure snmptrapd builds with --disable-snmpv1/2c
+
+2007-12-20 16:26  dts12
+
+   * CHANGES: perl: BUG: 1834539: Consistent handling of OID parsing.
+   Applies patch #1834983, provided by Dmitry Karasik
+
+2007-12-20 14:20  dts12
+
+   * CHANGES: snmpd: BUG: 1822360: Fix spinlock helper error handling.
+
+2007-12-20 14:18  dts12
+
+   * CHANGES: snmplib: BUG: 1795840: Signed 32-bit truncation logged as debug message rather then error.
+
+2007-12-20 14:14  dts12
+
+   * CHANGES: snmpd: BUG: 1792890: include CIFS mounts when skipping remote filesystems
+
+2007-12-20 14:12  dts12
+
+   * CHANGES: snmpd: BUG: 1771221: Retain ifLastChange information on data reload.
+
+2007-12-20 14:08  dts12
+
+   * CHANGES: snmpd: BUG: 1758212: Handling missing variable types (IpAddress,Counter,Opaque)
+
+2007-12-19 22:39  magfr
+
+   * Correct doxygen warnings
+
+2007-12-19 22:31  magfr
+
+   * Use NETSNMP_-prefixed symbols when deciding what tests to run as the compat symbols aren't defined.
+
+2007-12-19 22:06  magfr
+
+   * BUG 1831568: strdup might fail and return NULL - take care of it in this case at least.
+
+2007-12-19 21:49  magfr
+
+   * BUG 1824883: Remove memory leak
+
+2007-12-19 20:46  magfr
+
+   * CHANGES: BUG: 1851047: Do not try to do more handling of a value once it is found to be corrupt by the watcher helper,
+   thus avoiding code that counts on getting the right type.
+   This bug was found by Charlie Miller, Independent Security Evaluators.
+
+2007-11-27 09:56  dts12
+
+   * Clarify use of the -A (log append) option.
+
+2007-11-22 15:42  rstory
+
+   * check request, not requests. reported by ulim on irc
+
+2007-11-22 15:16  rstory
+
+   * check request, not requests. reported by ulim on irc
+
+2007-11-19 21:34  tanders
+
+   * CHANGES: Solaris: PATCH: 1834699: from apersson: Fix 1833294: DLPI problems on Solaris 2.6
+
+2007-11-08 23:17  tanders
+
+   * CHANGES: Solaris: PATCH: 1824196: {ifOperStatus,ipAdEntIfIndex} reported incorrectly
+   Patch supplied by Anders Persson. Fixes Bugs 1822275 and 1819189.
+
+2007-10-16 07:17  magfr
+
+   * CHANGES: misc: avoid calling debug macros with too many arguments.
+
+2007-10-16 06:18  magfr
+
+   * Make the library buildable as C++ again.
+
+2007-10-15 20:39  magfr
+
+   * Convert an infinite loop to a finite one.  Remove an unused variable.
+
+2007-10-14 22:10  magfr
+
+   * CHANGES: misc: Avoid calling debug macros with too few arguments.
+
+2007-10-14 20:51  tanders
+
+   * CHANGES: snmplib: PATCH: 1811469: read_config_files_in_path() reads past malloc'd buffer
+
+2007-10-14 20:41  tanders
+
+   * CHANGES: perl: PATCH: 1811463: perl async callback coredump
+   CHANGES: perl: BUG: 1606062: perl bulkwalk (async) coredump
+
+2007-10-14 19:07  tanders
+
+   * CHANGES: snmplib: PATCH: 1806336: fix -LS option parsing
+
+2007-10-14 12:12  tanders
+
+   * fix comment
+
+2007-10-13 23:28  tanders
+
+   * CHANGES: test: enhance snmpnetstat test to check tcpTable in TCP mode
+
+2007-10-13 22:28  tanders
+
+   * CHANGES: Solaris: BUG: 1810814: tcpTable missing entries and wrong ports
+
+2007-10-12 21:46  tanders
+
+   * CHANGES: Solaris: #define NEW_MIB_COMPLIANT to support Solaris 10U4+
+
+2007-10-11 20:46  magfr
+
+   * CHANGES: snmplib: Do not leak memory whenever an udp address is formatted.
+
+2007-09-30 20:59  magfr
+
+   * CHANGES: BUG: 1801835: Added the ability to have multiple default transports for an application.
+   On open the different transports will be tried in order.
+   As a consequence snmp and snmptrap now will try first udp and then udp6
+   and agentx wil try first unix and then tcp.
+
+2007-09-29 13:10  magfr
+
+   * CHANGES: snmplib: Do not try to look up empty strings as hostnames for IPv6
+   Additinally, print what string filed to resolve using getaddrinfo for IPv6
+
+2007-09-24 20:43  hardaker
+
+   * year update
+
+2007-09-20 21:55  tanders
+
+   * CHANGES: snmpd: PATCH: 1746831: from cunnijd: fix process checking race condition under Linux and platform #ifdefs
+
+2007-09-19 21:09  tanders
+
+   * CHANGES: snmplib: BUG: Coverity #183: fix memory leak if IP_PKTINFO fails
+
+2007-09-16 09:51  magfr
+
+   * Remove bashisms. This is netbsd patch-et from bug 1745404.
+
+2007-09-16 09:45  magfr
+
+   * Use const char* for temporary constant string variable. This is netbsd patch-ea from bug 1745404.
+
+2007-09-16 09:40  magfr
+
+   * Use the natural type of in_addr_t's for comparisions. This is netbsd patch-ea from bug 1745404.
+
+2007-09-16 07:06  magfr
+
+   * CHANGES: BUG: 1793545: Take the name from the sockaddr_un in order to avoid transport specifiers and other decorations.
+
+2007-09-14 14:44  dts12
+
+   * Synch with main trunk release script.
+
+2007-09-13 21:25  tanders
+
+   * drop obsolete mirrors
+
+2007-08-25 14:24  magfr
+
+   * Make most of notification_log static. Minimize the header file.
+
+2007-08-22 21:56  tanders
+
+   * NEWS: agent: suppress annoying "registration != duplicate" warning for root oids
+   (otherwise, you'll get this message on almost every startup)
+
+2007-08-20 08:06  tanders
+
+   * CHANGES: snmplib: fix potential buffer overflow in sprintf for UDP/IPv6
+
+2007-08-17 09:08  dts12
+
+   * Synch with main development (and on-line) FAQ text.
+
+2007-08-17 08:59  dts12
+
+   * Clarify handling of unknown communities
+
+2007-08-16 15:36  dts12
+
+   * Don't just report the problem - it might be sensible to avoid crashing the agent as well!
+
+2007-08-16 15:35  dts12
+
+   * CHANGES: snmpd: PATCH: 1744157: Report duplicate "extend/exec" identifiers.
+
+2007-08-16 15:24  dts12
+
+   * CHANGES: snmptrapd: PATCH: 1746992: Improve snmptrapd access-control error messages.
+
+2007-08-16 14:12  dts12
+
+   * CHANGES: snmpd: PATCH: 1752934: Fix off-by-one qsort error in table utilities.
+
+2007-08-16 13:31  dts12
+
+   * CHANGES: snmpd: PATCH: 1753437: Fix error index on failing SET requests
+
+2007-08-16 13:25  dts12
+
+   * CHANGES: snmpd: PATCH: 1753449: Fix AgentX error propagation
+
+2007-08-16 12:34  dts12
+
+   * CHANGES: snmpd: PATCH: 1753463: Fix AgentX subagent ping alarm handling
+
+2007-08-16 12:13  dts12
+
+   * CHANGES: snmpd: PATCH: 1758208: Fix memory leak
+
+2007-08-16 12:03  dts12
+
+   * CHANGES: snmpd: PATCH: 1774612: More resilient process status handling
+
+2007-08-16 11:58  dts12
+
+   * CHANGES: snmplib: PATCH: 1775124: Fix clientaddr functionality
+
+2007-08-16 09:38  dts12
+
+   * CHANGES: snmplib: PATCH: 1768285: Count MIB files correctly in add_mibdir()
+
+2007-08-16 09:35  dts12
+
+   * CHANGES: snmptrapd: PATCH: 1767725: Close all non standard file handles
+
+2007-08-16 09:00  dts12
+
+   * Declare initialisation routine correctly, and omit unused variables.
+   Patch from Magnus Fromreide.
+
+2007-08-16 08:55  dts12
+
+   * Read in agent configuration settings *before* the header files that might rely on them.
+
+2007-08-02 13:46  dts12
+
+   * It might be slightly less confusing if the netSnmpExampleString
+   MIB object did actually take string values. Picky, I know....
+
+2007-07-27 17:02  hardaker
+
+   * - version tag ( 5.4.1 )
+
+2007-07-27 17:01  hardaker
+
+   * version update
+
+2007-07-27 16:58  hardaker
+
+   * remove bogus empty * lines from the ChangeLog
+
+2007-07-27 16:54  hardaker
+
+   * fix version numbers in ChangeLog
+
+2007-07-27 16:54  hardaker
+
+   * version update
+
+2007-07-27 16:15  hardaker
+
+   * documentation update
+
+2007-07-27 16:13  hardaker
+
+   * - version tag ( 5.4.1 )
+
+-------------------------------------------------------------------------------
+
 Changes: V5.4.1.rc4 -> V5.4.1
 
 2007-07-25 22:41  tanders
