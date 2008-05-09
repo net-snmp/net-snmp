@@ -716,9 +716,13 @@ Get_Next_HR_FileSys(void)
         return -1;
 #endif                          /* solaris2 */
 
+    DEBUGMSGTL(("host/hr_filesys", "Get_Next_HRFS %s\n", HRFS_entry->HRFS_name));
+
     for (cpp = HRFS_ignores; *cpp != NULL; ++cpp)
-        if (!strcmp(HRFS_entry->HRFS_type, *cpp))
+        if (!strcmp(HRFS_entry->HRFS_type, *cpp)) {
+            DEBUGMSGTL(("host/hr_filesys", "Get_Next_HRFS: skipping %s (%s)\n", HRFS_entry->HRFS_type, cpp));
             return Get_Next_HR_FileSys();
+        }
 
     /*
      * Try and ensure that index values are persistent
