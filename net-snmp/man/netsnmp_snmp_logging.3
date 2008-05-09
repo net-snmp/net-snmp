@@ -1,4 +1,4 @@
-.TH "generic logging for net-snmp" 3 "27 Jul 2007" "Version 5.4.1" "net-snmp" \" -*- nroff -*-
+.TH "generic logging for net-snmp" 3 "9 May 2008" "Version 5.4.2" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -190,7 +190,7 @@ generic logging for net-snmp \-
 .PP 
 .SS "void netsnmp_logging_restart (void)"
 .PP
-Definition at line 613 of file snmp_logging.c.
+Definition at line 616 of file snmp_logging.c.
 .PP
 References netsnmp_log_handler_s::enabled, logh_head, netsnmp_enable_filelog(), netsnmp_log_handler_s::next, snmp_disable_filelog_entry(), snmp_disable_syslog_entry(), snmp_enable_syslog_ident(), and netsnmp_log_handler_s::type.
 .SS "int snmp_get_do_logging (void)"
@@ -204,7 +204,7 @@ Returns 0 if logging is off, 1 when it is done.
 .PP
 
 .PP
-Definition at line 470 of file snmp_logging.c.
+Definition at line 473 of file snmp_logging.c.
 .PP
 References netsnmp_log_handler_s::enabled, logh_head, and netsnmp_log_handler_s::next.
 .PP
@@ -226,7 +226,7 @@ Calls the snmp_vlog function. The default logfile this function writes to is /va
 .in +1c
 \fBdelayed_instance.c\fP.
 .PP
-Definition at line 1252 of file snmp_logging.c.
+Definition at line 1255 of file snmp_logging.c.
 .PP
 References snmp_vlog().
 .PP
@@ -287,7 +287,7 @@ Returns 0 on success, -1 when the code could not format the log- string, -2 when
 .PP
 
 .PP
-Definition at line 1191 of file snmp_logging.c.
+Definition at line 1194 of file snmp_logging.c.
 .PP
 References LOGLENGTH, NULL, snmp_log_string(), va_copy, and vsnprintf().
 .PP

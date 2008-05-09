@@ -1,4 +1,4 @@
-.TH "various PDU processing routines" 3 "27 Jul 2007" "Version 5.4.1" "net-snmp" \" -*- nroff -*-
+.TH "various PDU processing routines" 3 "9 May 2008" "Version 5.4.2" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -127,13 +127,6 @@ various PDU processing routines \-
 .RI "int \fBnetsnmp_query_walk\fP (\fBnetsnmp_variable_list\fP *list, \fBnetsnmp_session\fP *session)"
 .br
 .in -1c
-.SS "Variables"
-
-.in +1c
-.ti -1c
-.RI "const char * \fBerror_string\fP [19]"
-.br
-.in -1c
 .SH "Function Documentation"
 .PP 
 .SS "int snmp_set_var_typed_value (\fBnetsnmp_variable_list\fP * newvar, u_char type, const u_char * val_str, size_t val_len)"
@@ -176,34 +169,3 @@ Definition at line 753 of file snmp_client.c.
 References variable_list::buf, netsnmp_vardata::counter64, netsnmp_vardata::integer, NULL, netsnmp_vardata::objid, snmp_log(), snmp_set_detail(), netsnmp_vardata::string, variable_list::type, variable_list::val, and variable_list::val_len.
 .PP
 Referenced by parse_one_oid_index(), snmp_set_var_typed_integer(), snmp_set_var_typed_value(), and snmp_varlist_add_variable().
-.SH "Variable Documentation"
-.PP 
-.SS "const char* \fBerror_string\fP[19]"
-.PP
-\fBInitial value:\fP
-.PP
-.nf
- {
-    '(noError) No Error',
-    '(tooBig) Response message would have been too large.',
-    '(noSuchName) There is no such variable name in this MIB.',
-    '(badValue) The value given has the wrong type or length.',
-    '(readOnly) The two parties used do not have access to use the specified SNMP PDU.',
-    '(genError) A general failure occured',
-    'noAccess',
-    'wrongType (The set datatype does not match the data type the agent expects)',
-    'wrongLength (The set value has an illegal length from what the agent expects)',
-    'wrongEncoding',
-    'wrongValue (The set value is illegal or unsupported in some way)',
-    'noCreation (That table does not support row creation or that object can not ever be created)',
-    'inconsistentValue (The set value is illegal or unsupported in some way)',
-    'resourceUnavailable (This is likely a out-of-memory failure within the agent)',
-    'commitFailed',
-    'undoFailed',
-    'authorizationError (access denied to that object)',
-    'notWritable (That object does not support modification)',
-    'inconsistentName (That object can not currently be created)'
-}
-.fi
-.PP
-Definition at line 1130 of file snmp_client.c.

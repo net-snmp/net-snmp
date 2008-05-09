@@ -1,4 +1,4 @@
-.TH "generic linked-list data handling with a string as a key." 3 "27 Jul 2007" "Version 5.4.1" "net-snmp" \" -*- nroff -*-
+.TH "generic linked-list data handling with a string as a key." 3 "9 May 2008" "Version 5.4.2" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -228,7 +228,14 @@ register_app_config_handler('token', netsnmp_read_data_callback, XXX)
 .PP
 where INFO_POINTER is a pointer to a netsnmp_data_list_saveinfo object containing apporpriate registration information 
 .PP
-Definition at line 332 of file data_list.c.
+\fBTodo\fP
+.RS 4
+make netsnmp_read_data_callback deal with a free routine 
+.RE
+.PP
+
+.PP
+Definition at line 333 of file data_list.c.
 .PP
 References netsnmp_data_list_saveinfo_s::data_list_free_ptr, netsnmp_data_list_saveinfo_s::data_list_read_ptr, netsnmp_data_list_saveinfo_s::datalist, netsnmp_add_list_data(), netsnmp_create_data_list(), netsnmp_get_list_data(), NULL, read_config_read_data(), and snmp_log().
 .PP

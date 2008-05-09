@@ -1,4 +1,4 @@
-.TH "Memory Utility Routines" 3 "27 Jul 2007" "Version 5.4.1" "net-snmp" \" -*- nroff -*-
+.TH "Memory Utility Routines" 3 "9 May 2008" "Version 5.4.2" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -82,6 +82,13 @@ Memory Utility Routines \-
 .RI "#define \fBSNMP_MIN\fP(a, b)   ((a) > (b) ? (b) : (a))"
 .br
 .RI "\fIComputers the minimum of a and b. \fP"
+.ti -1c
+.RI "#define \fBSNMP_MACRO_VAL_TO_STR\fP(s)   SNMP_MACRO_VAL_TO_STR_PRIV(s)"
+.br
+.RI "\fIExpands to string with value of the s. \fP"
+.ti -1c
+.RI "#define \fBSNMP_MACRO_VAL_TO_STR_PRIV\fP(s)   #s"
+.br
 .ti -1c
 .RI "#define \fBFALSE\fP   0"
 .br
@@ -221,7 +228,7 @@ Memory Utility Routines \-
 \fBValue:\fP
 .PP
 .nf
-{                                                    \
+{                                                        \
         now.tv_sec--;                                   \
         now.tv_usec += 1000000L;                        \
         diff.tv_sec  = now.tv_sec  - then.tv_sec;       \
@@ -233,7 +240,7 @@ Memory Utility Routines \-
 }
 .fi
 .PP
-Definition at line 120 of file tools.h.
+Definition at line 131 of file tools.h.
 .SS "#define ISTRANSFORM(ttype, toid)"
 .PP
 \fBValue:\fP
@@ -243,7 +250,7 @@ Definition at line 120 of file tools.h.
                 usm ## toid ## Protocol, USM_LENGTH_OID_TRANSFORM)
 .fi
 .PP
-Definition at line 139 of file tools.h.
+Definition at line 150 of file tools.h.
 .SS "#define QUITFUN(e, l)"
 .PP
 \fBValue:\fP
@@ -255,7 +262,7 @@ if ( (e) != SNMPERR_SUCCESS) {   \
         }
 .fi
 .PP
-Definition at line 107 of file tools.h.
+Definition at line 118 of file tools.h.
 .SS "#define SNMP_FREE(s)   do { if (s) { free((void *)s); s=NULL; } } while(0)"
 .PP
 Frees a pointer only if it is !NULL and sets its value to NULL. 
@@ -263,6 +270,13 @@ Frees a pointer only if it is !NULL and sets its value to NULL.
 Definition at line 53 of file tools.h.
 .PP
 Referenced by _sess_read(), build_oid_segment(), clear_callback(), clear_context(), clear_lookup_cache(), convert_v2pdu_to_v1(), create_user_from_session(), dump_chunk(), fprint_description(), fprint_objid(), fprint_value(), fprint_variable(), free_agent_snmp_session(), get_module_node(), get_node(), get_set_cache(), netsnmp_addrcache_add(), netsnmp_agent_check_packet(), netsnmp_agent_check_parse(), netsnmp_cache_reqinfo_extract(), netsnmp_cache_reqinfo_insert(), netsnmp_config_remember_free_list(), netsnmp_create_handler(), netsnmp_fixup_mib_directory(), netsnmp_free_agent_request_info(), netsnmp_free_all_list_data(), netsnmp_free_cachemap(), netsnmp_free_delegated_cache(), netsnmp_free_list_data(), netsnmp_getenv(), netsnmp_handler_free(), netsnmp_handler_registration_free(), netsnmp_init_mib(), netsnmp_iterator_delete_table(), netsnmp_reassign_requests(), netsnmp_register_agent_nsap(), netsnmp_register_old_api(), netsnmp_remove_loghandler(), netsnmp_row_merge_helper_handler(), netsnmp_sess_log_error(), netsnmp_set_mib_directory(), netsnmp_set_row_column(), netsnmp_sprint_realloc_objid(), netsnmp_sprint_realloc_objid_tree(), netsnmp_subtree_free(), netsnmp_subtree_join(), netsnmp_subtree_split(), netsnmp_table_build_oid_from_index(), netsnmp_table_data_delete_row(), netsnmp_table_data_delete_table(), netsnmp_table_data_set_helper_handler(), netsnmp_table_dataset_delete_data(), netsnmp_tcontainer_create_table(), netsnmp_tcontainer_delete_table(), netsnmp_tdata_clone_row(), netsnmp_tdata_delete_row(), netsnmp_tdata_delete_table(), netsnmp_wrap_up_request(), parse_octet_hint(), read_objid(), shutdown_mib(), snmp_add_var(), snmp_free_pdu(), snmp_free_var(), snmp_sess_close(), snmp_unregister_callback(), snmpv3_make_report(), snmpv3_parse(), table_helper_handler(), unregister_all_config_handlers(), unregister_config_handler(), and unregister_mibs_by_session().
+.SS "#define SNMP_MACRO_VAL_TO_STR(s)   SNMP_MACRO_VAL_TO_STR_PRIV(s)"
+.PP
+Expands to string with value of the s. 
+.PP
+If s is macro, the resulting string is value of the macro. Example: define TEST 1234 \fBSNMP_MACRO_VAL_TO_STR(TEST)\fP expands to '1234' SNMP_MACRO_VAL_TO_STR(TEST+1) expands to '1234+1' 
+.PP
+Definition at line 99 of file tools.h.
 .SS "#define SNMP_MALLOC_STRUCT(s)   (struct s *) calloc(1, sizeof(struct s))"
 .PP
 Mallocs memory of sizeof(struct s), zeros it and returns a pointer to it. 

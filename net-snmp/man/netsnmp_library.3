@@ -1,4 +1,4 @@
-.TH "The Net-SNMP library" 3 "27 Jul 2007" "Version 5.4.1" "net-snmp" \" -*- nroff -*-
+.TH "The Net-SNMP library" 3 "9 May 2008" "Version 5.4.2" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -215,9 +215,6 @@ The Net-SNMP library \-
 .br
 .ti -1c
 .RI "void \fBsnmp_sess_init\fP (\fBnetsnmp_session\fP *session)"
-.br
-.ti -1c
-.RI "void \fBinit_snmp_enums\fP (void)"
 .br
 .ti -1c
 .RI "void \fBinit_snmp\fP (const char *type)"
@@ -458,7 +455,7 @@ Referenced by netsnmp_addrcache_add(), and snmp_sess_timeout().
 .PP 
 .SS "int _sess_read (void * sessp, fd_set * fdset)"
 .PP
-Definition at line 5420 of file snmp_api.c.
+Definition at line 5390 of file snmp_api.c.
 .PP
 References asn_check_packet(), snmp_session::callback, snmp_session::callback_magic, snmp_internal_session::check_packet, netsnmp_transport_s::f_accept, netsnmp_transport_s::f_close, netsnmp_transport_s::f_recv, FD_ISSET, netsnmp_transport_s::flags, snmp_internal_session::hook_build, snmp_internal_session::hook_create_pdu, snmp_internal_session::hook_parse, snmp_internal_session::hook_post, snmp_internal_session::hook_pre, snmp_internal_session::hook_realloc_build, session_list::internal, MAX_PACKET_LENGTH, MAXIMUM_PACKET_SIZE, session_list::next, NULL, snmp_internal_session::packet, snmp_internal_session::packet_len, snmp_internal_session::packet_size, snmp_session::s_errno, snmp_session::s_snmp_errno, session_list::session, Sessions, SNMP_FREE, snmp_log(), snmp_sess_add_ex(), snmp_set_detail(), netsnmp_transport_s::sock, strerror(), and session_list::transport.
 .PP
@@ -510,9 +507,9 @@ void
 .PP
 
 .PP
-Definition at line 795 of file snmp_api.c.
+Definition at line 766 of file snmp_api.c.
 .PP
-References init_callbacks(), init_snmp_alarm(), init_snmp_enums(), init_snmp_logging(), netsnmp_ds_get_string(), netsnmp_ds_set_string(), netsnmp_init_mib(), read_configs(), read_premib_configs(), register_mib_handlers(), and snmp_init_statistics().
+References init_callbacks(), init_snmp_alarm(), init_snmp_logging(), netsnmp_ds_get_string(), netsnmp_ds_set_string(), netsnmp_init_mib(), read_configs(), read_premib_configs(), register_mib_handlers(), and snmp_init_statistics().
 .SS "int netsnmp_oid_compare_ll (const oid * in_name1, size_t len1, const oid * in_name2, size_t len2, size_t * offpt)"
 .PP
 lexicographical compare two object identifiers and return the point where they differ 
@@ -526,7 +523,7 @@ Caution: this method is called often by command responder applications (ie, agen
 .PP
 
 .PP
-Definition at line 6358 of file snmp_api.c.
+Definition at line 6328 of file snmp_api.c.
 .PP
 Referenced by netsnmp_subtree_change_next(), netsnmp_subtree_change_prev(), and netsnmp_subtree_find_prev().
 .SS "int netsnmp_oid_equals (const oid * in_name1, size_t len1, const oid * in_name2, size_t len2)"
@@ -553,7 +550,7 @@ This should be faster than doing a snmp_oid_compare for different length OIDs, s
 .PP
 
 .PP
-Definition at line 6439 of file snmp_api.c.
+Definition at line 6409 of file snmp_api.c.
 .PP
 Referenced by netsnmp_cache_find_by_oid(), netsnmp_old_api_helper(), netsnmp_subtree_free(), netsnmp_subtree_load(), netsnmp_unregister_mib_table_row(), and unregister_mib_context().
 .SS "int netsnmp_oid_find_prefix (const oid * in_name1, size_t len1, const oid * in_name2, size_t len2)"
@@ -578,7 +575,7 @@ length of largest common index of commonality. 1 = first, 0 if none * or -1 on e
 .PP
 
 .PP
-Definition at line 6495 of file snmp_api.c.
+Definition at line 6465 of file snmp_api.c.
 .PP
 References SNMP_MIN.
 .PP
@@ -607,7 +604,7 @@ Functionally, this determines if in_name2 is equal or a subtree of in_name1
 .PP
 
 .PP
-Definition at line 6475 of file snmp_api.c.
+Definition at line 6445 of file snmp_api.c.
 .SS "int snmp_oid_compare (const oid * in_name1, size_t len1, const oid * in_name2, size_t len2)"
 .PP
 lexicographical compare two object identifiers. 
@@ -621,7 +618,7 @@ Caution: this method is called often by command responder applications (ie, agen
 .PP
 
 .PP
-Definition at line 6309 of file snmp_api.c.
+Definition at line 6279 of file snmp_api.c.
 .PP
 Referenced by check_getnext_results(), convert_v2pdu_to_v1(), find_varbind_in_list(), lookup_cache_find(), netsnmp_bulk_to_next_fix_requests(), netsnmp_check_getnext_reply(), netsnmp_container_table_row_insert(), netsnmp_insert_iterator_context(), netsnmp_insert_table_row(), netsnmp_instance_helper_handler(), netsnmp_iterator_row_get_byoid(), netsnmp_iterator_row_next_byoid(), netsnmp_scalar_group_helper_handler(), netsnmp_scalar_helper_handler(), netsnmp_send_traps(), netsnmp_stash_to_next_helper(), netsnmp_subtree_compare(), netsnmp_subtree_find(), netsnmp_subtree_find_next(), netsnmp_subtree_find_prev(), netsnmp_subtree_load(), netsnmp_subtree_split(), netsnmp_table_data_add_row(), netsnmp_table_data_get_from_oid(), netsnmp_table_data_helper_handler(), netsnmp_table_data_row_next_byoid(), netsnmp_tdata_compare_oid(), netsnmp_watched_spinlock_handler(), netsnmp_watched_timestamp_handler(), netsnmp_watcher_helper_handler(), snmp_oidsubtree_compare(), snmp_oidtree_compare(), and table_helper_handler().
 .SS "int snmp_oidtree_compare (const oid * in_name1, size_t len1, const oid * in_name2, size_t len2)"
@@ -646,7 +643,7 @@ Compares 2 OIDs to determine if they are equal up until the shortest length.
 .PP
 
 .PP
-Definition at line 6411 of file snmp_api.c.
+Definition at line 6381 of file snmp_api.c.
 .PP
 References snmp_oid_compare().
 .PP
@@ -667,7 +664,7 @@ void
 .PP
 
 .PP
-Definition at line 864 of file snmp_api.c.
+Definition at line 834 of file snmp_api.c.
 .PP
 References clear_callback(), netsnmp_ds_shutdown(), NULL, shutdown_mib(), shutdown_snmp_logging(), snmp_alarm_unregister_all(), snmp_call_callbacks(), snmp_close_sessions(), snmp_store(), and unregister_all_config_handlers().
 .SS "int snmpv3_engineID_probe (struct \fBsession_list\fP * slp, \fBnetsnmp_session\fP * in_session)"
@@ -701,7 +698,7 @@ the first session in slp should the internal allocated copy of in_session
 .PP
 
 .PP
-Definition at line 1285 of file snmp_api.c.
+Definition at line 1254 of file snmp_api.c.
 .PP
 References create_user_from_session(), snmp_session::engineBoots, snmp_session::engineTime, snmp_session::flags, NULL, snmp_session::s_snmp_errno, snmp_session::securityEngineID, snmp_session::securityEngineIDLen, session_list::session, snmp_api_errstring(), snmp_errstring(), snmp_sess_synch_response(), TRUE, and snmp_session::version.
 .PP
