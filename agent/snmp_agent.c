@@ -1334,7 +1334,7 @@ init_agent_snmp_session(netsnmp_session * session, netsnmp_pdu *pdu)
         return NULL;
     }
 
-    DEBUGMSGTL(("snmp_agent","agent_sesion %08p created\n", asp));
+    DEBUGMSGTL(("snmp_agent","agent_sesion %8p created\n", asp));
     asp->session = session;
     asp->pdu = snmp_clone_pdu(pdu);
     asp->orig_pdu = snmp_clone_pdu(pdu);
@@ -1360,7 +1360,7 @@ free_agent_snmp_session(netsnmp_agent_session *asp)
     if (!asp)
         return;
 
-    DEBUGMSGTL(("snmp_agent","agent_session %08p released\n", asp));
+    DEBUGMSGTL(("snmp_agent","agent_session %8p released\n", asp));
 
     netsnmp_remove_from_delegated(asp);
     
@@ -1432,7 +1432,7 @@ netsnmp_check_for_delegated_and_add(netsnmp_agent_session *asp)
              */
             asp->next = agent_delegated_list;
             agent_delegated_list = asp;
-            DEBUGMSGTL(("snmp_agent", "delegate session == %08p\n", asp));
+            DEBUGMSGTL(("snmp_agent", "delegate session == %8p\n", asp));
         }
         return 1;
     }
@@ -1459,7 +1459,7 @@ netsnmp_remove_from_delegated(netsnmp_agent_session *asp)
         else
             agent_delegated_list = asp->next;
 
-        DEBUGMSGTL(("snmp_agent", "remove delegated session == %08p\n", asp));
+        DEBUGMSGTL(("snmp_agent", "remove delegated session == %8p\n", asp));
 
         return 1;
     }
@@ -1506,7 +1506,7 @@ netsnmp_remove_delegated_requests_for_session(netsnmp_session *sess)
      */
     if(count) {
         DEBUGMSGTL(("snmp_agent", "removed %d delegated request(s) for session "
-                    "%08p\n", count, sess));
+                    "%8p\n", count, sess));
         netsnmp_check_outstanding_agent_requests();
     }
     
@@ -1570,7 +1570,7 @@ netsnmp_wrap_up_request(netsnmp_agent_session *asp, int status)
      * done.
      */
     if (asp == netsnmp_processing_set) {
-        DEBUGMSGTL(("snmp_agent", "SET request complete, asp = %08p\n",
+        DEBUGMSGTL(("snmp_agent", "SET request complete, asp = %8p\n",
                     asp));
         netsnmp_processing_set = NULL;
     }
@@ -1758,7 +1758,7 @@ dump_sess_list(void)
 
     DEBUGMSGTL(("snmp_agent", "DUMP agent_sess_list -> "));
     for (a = agent_session_list; a != NULL; a = a->next) {
-        DEBUGMSG(("snmp_agent", "%08p[session %08p] -> ", a, a->session));
+        DEBUGMSG(("snmp_agent", "%8p[session %8p] -> ", a, a->session));
     }
     DEBUGMSG(("snmp_agent", "[NIL]\n"));
 }
@@ -1768,7 +1768,7 @@ netsnmp_remove_and_free_agent_snmp_session(netsnmp_agent_session *asp)
 {
     netsnmp_agent_session *a, **prevNext = &agent_session_list;
 
-    DEBUGMSGTL(("snmp_agent", "REMOVE session == %08p\n", asp));
+    DEBUGMSGTL(("snmp_agent", "REMOVE session == %8p\n", asp));
 
     for (a = agent_session_list; a != NULL; a = *prevNext) {
         if (a == asp) {
@@ -1797,7 +1797,7 @@ netsnmp_free_agent_snmp_session_by_session(netsnmp_session * sess,
 {
     netsnmp_agent_session *a, *next, **prevNext = &agent_session_list;
 
-    DEBUGMSGTL(("snmp_agent", "REMOVE session == %08p\n", sess));
+    DEBUGMSGTL(("snmp_agent", "REMOVE session == %8p\n", sess));
 
     for (a = agent_session_list; a != NULL; a = next) {
         if (a->session == sess) {
@@ -1916,7 +1916,7 @@ handle_snmp_packet(int op, netsnmp_session * session, int reqid,
     /*
      * done 
      */
-    DEBUGMSGTL(("snmp_agent", "end of handle_snmp_packet, asp = %08p\n",
+    DEBUGMSGTL(("snmp_agent", "end of handle_snmp_packet, asp = %8p\n",
                 asp));
     return rc;
 }
@@ -2734,7 +2734,7 @@ netsnmp_check_outstanding_agent_requests(void)
 
             netsnmp_processing_set = netsnmp_agent_queued_list;
             DEBUGMSGTL(("snmp_agent", "SET request remains queued while "
-                        "delegated requests finish, asp = %08p\n", asp));
+                        "delegated requests finish, asp = %8p\n", asp));
             break;
         }
 
@@ -2744,7 +2744,7 @@ netsnmp_check_outstanding_agent_requests(void)
         asp = netsnmp_agent_queued_list;
         netsnmp_agent_queued_list = asp->next;
         DEBUGMSGTL(("snmp_agent",
-                    "processing queued request, asp = %08p\n", asp));
+                    "processing queued request, asp = %8p\n", asp));
 
         netsnmp_handle_request(asp, asp->status);
 
@@ -2787,7 +2787,7 @@ check_delayed_request(netsnmp_agent_session *asp)
 {
     int             status = SNMP_ERR_NOERROR;
 
-    DEBUGMSGTL(("snmp_agent", "processing delegated request, asp = %08p\n",
+    DEBUGMSGTL(("snmp_agent", "processing delegated request, asp = %8p\n",
                 asp));
 
     switch (asp->mode) {
@@ -3156,7 +3156,7 @@ netsnmp_handle_request(netsnmp_agent_session *asp, int status)
             netsnmp_add_queued(asp);
             DEBUGMSGTL(("snmp_agent",
                         "request queued while processing set, "
-                        "asp = %08p\n", asp));
+                        "asp = %8p\n", asp));
             return 1;
         }
 
@@ -3172,7 +3172,7 @@ netsnmp_handle_request(netsnmp_agent_session *asp, int status)
              */
             if (agent_delegated_list) {
                 DEBUGMSGTL(("snmp_agent", "SET request queued while "
-                            "delegated requests finish, asp = %08p\n",
+                            "delegated requests finish, asp = %8p\n",
                             asp));
                 netsnmp_add_queued(asp);
                 return 1;
