@@ -806,7 +806,7 @@ netsnmp_request_remove_list_data(netsnmp_request_info *request,
  *         returned if request is NULL or request->parent_data is NULL or
  *         request->parent_data object is not found.
  */
-NETSNMP_INLINE void    *
+void    *
 netsnmp_request_get_list_data(netsnmp_request_info *request,
                               const char *name)
 {
