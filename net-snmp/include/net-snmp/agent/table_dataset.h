@@ -77,21 +77,21 @@ extern          "C" {
 
     netsnmp_table_data_set *netsnmp_create_table_data_set(const char *);
     netsnmp_table_row *netsnmp_table_data_set_clone_row( netsnmp_table_row *row);
-    NETSNMP_INLINE void netsnmp_table_dataset_delete_all_data(
+    void netsnmp_table_dataset_delete_all_data(
                             netsnmp_table_data_set_storage *data);
-    NETSNMP_INLINE void netsnmp_table_dataset_delete_row(netsnmp_table_row *row);
+    void netsnmp_table_dataset_delete_row(netsnmp_table_row *row);
 
-    NETSNMP_INLINE void netsnmp_table_dataset_add_row(netsnmp_table_data_set
+    void netsnmp_table_dataset_add_row(netsnmp_table_data_set
                                                   *table,
                                                   netsnmp_table_row *row);
-    NETSNMP_INLINE void    
+    void
         netsnmp_table_dataset_replace_row(netsnmp_table_data_set *table,
                                           netsnmp_table_row *origrow,
                                           netsnmp_table_row *newrow);
-    NETSNMP_INLINE void netsnmp_table_dataset_remove_row(netsnmp_table_data_set
+    void netsnmp_table_dataset_remove_row(netsnmp_table_data_set
                                                      *table,
                                                      netsnmp_table_row *row);
-    NETSNMP_INLINE void    
+    void
         netsnmp_table_dataset_remove_and_delete_row(netsnmp_table_data_set
                                                     *table,
                                                     netsnmp_table_row *row);
@@ -130,7 +130,7 @@ extern          "C" {
     int netsnmp_register_table_data_set(netsnmp_handler_registration *,
                                         netsnmp_table_data_set *,
                                         netsnmp_table_registration_info *);
-    NETSNMP_INLINE netsnmp_table_data_set
+    netsnmp_table_data_set
         *netsnmp_extract_table_data_set(netsnmp_request_info *request);
     netsnmp_table_data_set_storage
         *netsnmp_extract_table_data_set_column(netsnmp_request_info *,
@@ -174,7 +174,7 @@ extern          "C" {
  * DataSet API: Index operations
  * ============================ */
 
-    NETSNMP_INLINE void netsnmp_table_dataset_add_index(netsnmp_table_data_set
+    void netsnmp_table_dataset_add_index(netsnmp_table_data_set
                                                     *table, u_char type);
 #if HAVE_STDARG_H
     void netsnmp_table_set_add_indexes(netsnmp_table_data_set *tset, ...);
