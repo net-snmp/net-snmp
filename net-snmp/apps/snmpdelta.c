@@ -357,7 +357,7 @@ wait_for_period(int period)
     }
     count = 1;
     while (count != 0) {
-        count = select(0, 0, 0, 0, tv);
+        count = select(0, NULL, NULL, NULL, tv);
         switch (count) {
         case 0:
             break;
@@ -439,7 +439,7 @@ main(int argc, char *argv[])
 	    	MAX_ARGS);
 	    exit(1);
 	}
-        varinfo[current_name++].name = 0;
+        varinfo[current_name++].name = NULL;
     }
 
     SOCK_STARTUP;
@@ -731,12 +731,12 @@ main(int argc, char *argv[])
 
         } else if (status == STAT_TIMEOUT) {
             fprintf(stderr, "Timeout: No Response from %s\n", gateway);
-            response = 0;
+            response = NULL;
             exit_code = 1;
             break;
         } else {                /* status == STAT_ERROR */
             snmp_sess_perror("snmpdelta", ss);
-            response = 0;
+            response = NULL;
             exit_code = 1;
             break;
         }

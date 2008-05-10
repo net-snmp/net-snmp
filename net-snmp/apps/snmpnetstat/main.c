@@ -85,30 +85,32 @@ char    *progname = NULL;
      * struct nlist nl[] - Omitted
      */
 
+typedef void (stringfun)(const char*);
+
 struct protox {
         /* pr_index/pr_sindex - Omitted */ 
-	int	pr_wanted;			/* 1 if wanted, 0 otherwise */
-	void	(*pr_cblocks)(const char *);	/* control blocks printing routine */
-	void	(*pr_stats)(const char *);	/* statistics printing routine */
-  const char	*pr_name;			/* well-known name */
+	int		pr_wanted;	/* 1 if wanted, 0 otherwise */
+	stringfun	*pr_cblocks;	/* control blocks printing routine */
+	stringfun	*pr_stats;	/* statistics printing routine */
+	const char	*pr_name;	/* well-known name */
 } protox[] = {
 	{ 1,	tcpprotopr,	tcp_stats,	"tcp" },	
 	{ 1,	udpprotopr,	udp_stats,	"udp" },	
 
-	{ 1,	0,	ip_stats,	"ip" },		/* protopr Omitted */
-	{ 1,	0,	icmp_stats,	"icmp" },	
+	{ 1,	(stringfun*)0,	ip_stats,	"ip" },	/* protopr Omitted */
+	{ 1,	(stringfun*)0,	icmp_stats,	"icmp" },
 	/* igmp/ah/esp/ipencap/etherip/ipcomp/carp/pfsync/pim - Omitted */
-	{ 0,	0,	0,		0 }
+	{ 0,	(stringfun*)0,	(stringfun*)0,	NULL }
 };
 
 struct protox ip6protox[] = {
-	{ 1,	tcp6protopr,	0,	"tcp6" },
-	{ 1,	udp6protopr,	0,	"udp6" },	
+	{ 1,	tcp6protopr,	(stringfun*)0,	"tcp6" },
+	{ 1,	udp6protopr,	(stringfun*)0,	"udp6" },
 
-	{ 1,	0,	ip6_stats,	"ip6" },	/* ip6protopr Omitted */
-	{ 1,	0,	icmp6_stats,	"icmp6" },	
+	{ 1,	(stringfun*)0,	ip6_stats,	"ip6" },/* ip6protopr Omitted */
+	{ 1,	(stringfun*)0,	icmp6_stats,	"icmp6" },
 	/* pim6/rip6 - Omitted */
-	{ 0,	0,	0,		0 }
+	{ 0,	(stringfun*)0,	(stringfun*)0,	NULL }
 };
 
 	/* {ipx,ns,atalk}protox Omitted */
@@ -396,7 +398,7 @@ main(int argc, char *argv[])
 			for (tp = protox; tp->pr_name; tp++)
 				if (strcmp(tp->pr_name, p->p_name) == 0)
 					break;
-			if (tp->pr_name == 0 || tp->pr_wanted == 0)
+			if (tp->pr_name == NULL || tp->pr_wanted == 0)
 				continue;
 			printproto(tp, p->p_name);
 		}

@@ -294,7 +294,7 @@ pass_parse_config(const char *token, char *cptr)
             return;
 
         for (i = 0, ptmp = (struct extensible *) passthrus;
-             i < numpassthrus && ptmp != 0; i++, ptmp = ptmp->next)
+             i < numpassthrus && ptmp != NULL; i++, ptmp = ptmp->next)
             etmp[i] = ptmp;
         qsort(etmp, numpassthrus, sizeof(struct extensible *),
               pass_compare);

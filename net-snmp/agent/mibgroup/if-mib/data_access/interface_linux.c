@@ -638,7 +638,7 @@ netsnmp_arch_interface_container_load(netsnmp_container* container,
                 {IANAIFTYPE_BASICISDN, "ippp"},
                 {IANAIFTYPE_PROPVIRTUAL, "bond"}, /* Bonding driver find fastest slave */
                 {IANAIFTYPE_PROPVIRTUAL, "vad"},  /* ANS driver - ?speed? */
-                {0, 0}                  /* end of list */
+                {0, NULL}                  /* end of list */
             };
 
             int             ii, len;

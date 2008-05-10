@@ -289,7 +289,7 @@ var_ipAddrEntry(struct variable *vp,
         return (NULL);
     memcpy((char *) name, (char *) lowest, 14 * sizeof(oid));
     *length = 14;
-    *write_method = 0;
+    *write_method = (WriteMethod*)0;
     *var_len = sizeof(long_return);
     switch (vp->magic) {
     case IPADADDR:

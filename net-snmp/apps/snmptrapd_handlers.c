@@ -830,7 +830,7 @@ int   command_handler( netsnmp_pdu           *pdu,
         /*
          *  and pass this formatted string to the command specified
          */
-        run_shell_command(handler->token, (char*)rbuf, NULL, 0);   /* Not interested in output */
+        run_shell_command(handler->token, (char*)rbuf, NULL, NULL);   /* Not interested in output */
         snmp_set_quick_print(oldquick);
         if (pdu->command == SNMP_MSG_TRAP)
             snmp_free_pdu(v2_pdu);

@@ -83,11 +83,11 @@ var_snmpEngine(struct variable *vp,
     static long     long_ret;
     static unsigned char engineID[SNMP_MAXBUF];
 
-    *write_method = 0;          /* assume it isnt writable for the time being */
+    *write_method = (WriteMethod*)0;    /* assume it isnt writable for the time being */
     *var_len = sizeof(long_ret);        /* assume an integer and change later if not */
 
     if (header_generic(vp, name, length, exact, var_len, write_method))
-        return 0;
+        return NULL;
 
     /*
      * this is where we do the value assignments for the mib results. 
@@ -123,7 +123,7 @@ var_snmpEngine(struct variable *vp,
         DEBUGMSGTL(("snmpd", "unknown sub-id %d in var_snmpEngine\n",
                     vp->magic));
     }
-    return 0;
+    return NULL;
 }
 
 #ifdef NETSNMP_ENABLE_TESTING_CODE

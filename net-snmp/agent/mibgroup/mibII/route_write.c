@@ -228,7 +228,7 @@ findCacheRTE(u_long dst)
             return (&rtcache[i]);
         }
     }
-    return 0;
+    return NULL;
 }
 
 struct rtent   *
@@ -244,7 +244,7 @@ newCacheRTE(void)
             return (&rtcache[i]);
         }
     }
-    return 0;
+    return NULL;
 
 }
 
@@ -266,7 +266,7 @@ delCacheRTE(u_long dst)
 struct rtent   *
 cacheKernelRTE(u_long dst)
 {
-    return 0;                   /* for now */
+    return NULL;                /* for now */
     /*
      * ...... 
      */

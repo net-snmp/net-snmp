@@ -53,7 +53,7 @@ _sched_callback( unsigned int reg, void *magic )
         DEBUGMSGTL(("disman:schedule:callback", "missing entry\n"));
         return;
     }
-    entry->schedLastRun = time(0);
+    entry->schedLastRun = time(NULL);
     entry->schedTriggers++;
 
     DEBUGMSGTL(( "disman:schedule:callback", "assignment "));
