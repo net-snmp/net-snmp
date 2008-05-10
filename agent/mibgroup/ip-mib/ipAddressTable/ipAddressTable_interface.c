@@ -139,14 +139,6 @@ static Netsnmp_Node_Handler _mfd_ipAddressTable_undo_commit;
 static Netsnmp_Node_Handler _mfd_ipAddressTable_irreversible_commit;
 static Netsnmp_Node_Handler _mfd_ipAddressTable_check_dependencies;
 
-NETSNMP_STATIC_INLINE int
-                _ipAddressTable_undo_column(ipAddressTable_rowreq_ctx * rowreq_ctx,
-                                            netsnmp_variable_list * var,
-                                            int column);
-
-NETSNMP_STATIC_INLINE int
-                _ipAddressTable_check_indexes(ipAddressTable_rowreq_ctx * rowreq_ctx);
-
 /**
  * @internal
  * Initialize the table ipAddressTable 
@@ -677,6 +669,65 @@ _mfd_ipAddressTable_post_request(netsnmp_mib_handler *handler,
     return SNMP_ERR_NOERROR;
 }                               /* _mfd_ipAddressTable_post_request */
 
+NETSNMP_STATIC_INLINE int
+_ipAddressTable_check_indexes(ipAddressTable_rowreq_ctx * rowreq_ctx)
+{
+    int             rc = SNMPERR_SUCCESS;
+
+    DEBUGMSGTL(("internal:ipAddressTable:_ipAddressTable_check_indexes",
+                "called\n"));
+
+    netsnmp_assert(NULL != rowreq_ctx);
+
+
+    /*
+     * (INDEX) ipAddressAddrType(1)/InetAddressType/ASN_INTEGER/long(u_long)//l/a/w/E/r/d/h
+     */
+    /*
+     * check that the value is one of defined enums
+     */
+    if ((SNMPERR_SUCCESS == rc)
+        && (rowreq_ctx->tbl_idx.ipAddressAddrType !=
+            INETADDRESSTYPE_UNKNOWN)
+        && (rowreq_ctx->tbl_idx.ipAddressAddrType != INETADDRESSTYPE_IPV4)
+        && (rowreq_ctx->tbl_idx.ipAddressAddrType != INETADDRESSTYPE_IPV6)
+        && (rowreq_ctx->tbl_idx.ipAddressAddrType != INETADDRESSTYPE_IPV4Z)
+        && (rowreq_ctx->tbl_idx.ipAddressAddrType != INETADDRESSTYPE_IPV6Z)
+        && (rowreq_ctx->tbl_idx.ipAddressAddrType != INETADDRESSTYPE_DNS)
+        ) {
+        rc = SNMP_ERR_WRONGVALUE;
+    }
+    if (MFD_SUCCESS != rc)
+        return rc;
+    rc = ipAddressAddrType_check_index(rowreq_ctx);
+    if (MFD_SUCCESS != rc)
+        return SNMP_ERR_NOCREATION;
+
+    /*
+     * (INDEX) ipAddressAddr(2)/InetAddress/ASN_OCTET_STR/char(char)//L/a/w/e/R/d/h
+     */
+    /*
+     * check defined range(s).
+     */
+    if ((SNMPERR_SUCCESS == rc)
+        && ((rowreq_ctx->tbl_idx.ipAddressAddr_len < 0)
+            || (rowreq_ctx->tbl_idx.ipAddressAddr_len > 255))
+        ) {
+        rc = SNMP_ERR_WRONGLENGTH;
+    }
+    if (MFD_SUCCESS != rc)
+        return rc;
+    rc = ipAddressAddr_check_index(rowreq_ctx);
+    if (MFD_SUCCESS != rc)
+        return SNMP_ERR_NOCREATION;
+
+    /*
+     * if individual parts look ok, check them as a whole
+     */
+    return ipAddressTable_validate_index(ipAddressTable_if_ctx.user_ctx,
+                                         rowreq_ctx);
+}                               /* _ipAddressTable_check_indexes */
+
 /**
  * @internal
  * wrapper
@@ -991,65 +1042,6 @@ _mfd_ipAddressTable_get_values(netsnmp_mib_handler *handler,
 
     return SNMP_ERR_NOERROR;
 }                               /* _mfd_ipAddressTable_get_values */
-
-NETSNMP_STATIC_INLINE int
-_ipAddressTable_check_indexes(ipAddressTable_rowreq_ctx * rowreq_ctx)
-{
-    int             rc = SNMPERR_SUCCESS;
-
-    DEBUGMSGTL(("internal:ipAddressTable:_ipAddressTable_check_indexes",
-                "called\n"));
-
-    netsnmp_assert(NULL != rowreq_ctx);
-
-
-    /*
-     * (INDEX) ipAddressAddrType(1)/InetAddressType/ASN_INTEGER/long(u_long)//l/a/w/E/r/d/h 
-     */
-    /*
-     * check that the value is one of defined enums 
-     */
-    if ((SNMPERR_SUCCESS == rc)
-        && (rowreq_ctx->tbl_idx.ipAddressAddrType !=
-            INETADDRESSTYPE_UNKNOWN)
-        && (rowreq_ctx->tbl_idx.ipAddressAddrType != INETADDRESSTYPE_IPV4)
-        && (rowreq_ctx->tbl_idx.ipAddressAddrType != INETADDRESSTYPE_IPV6)
-        && (rowreq_ctx->tbl_idx.ipAddressAddrType != INETADDRESSTYPE_IPV4Z)
-        && (rowreq_ctx->tbl_idx.ipAddressAddrType != INETADDRESSTYPE_IPV6Z)
-        && (rowreq_ctx->tbl_idx.ipAddressAddrType != INETADDRESSTYPE_DNS)
-        ) {
-        rc = SNMP_ERR_WRONGVALUE;
-    }
-    if (MFD_SUCCESS != rc)
-        return rc;
-    rc = ipAddressAddrType_check_index(rowreq_ctx);
-    if (MFD_SUCCESS != rc)
-        return SNMP_ERR_NOCREATION;
-
-    /*
-     * (INDEX) ipAddressAddr(2)/InetAddress/ASN_OCTET_STR/char(char)//L/a/w/e/R/d/h 
-     */
-    /*
-     * check defined range(s). 
-     */
-    if ((SNMPERR_SUCCESS == rc)
-        && ((rowreq_ctx->tbl_idx.ipAddressAddr_len < 0)
-            || (rowreq_ctx->tbl_idx.ipAddressAddr_len > 255))
-        ) {
-        rc = SNMP_ERR_WRONGLENGTH;
-    }
-    if (MFD_SUCCESS != rc)
-        return rc;
-    rc = ipAddressAddr_check_index(rowreq_ctx);
-    if (MFD_SUCCESS != rc)
-        return SNMP_ERR_NOCREATION;
-
-    /*
-     * if individual parts look ok, check them as a whole
-     */
-    return ipAddressTable_validate_index(ipAddressTable_if_ctx.user_ctx,
-                                         rowreq_ctx);
-}                               /* _ipAddressTable_check_indexes */
 
 /***********************************************************************
  *

@@ -143,16 +143,6 @@ static Netsnmp_Node_Handler _mfd_inetNetToMediaTable_undo_commit;
 static Netsnmp_Node_Handler _mfd_inetNetToMediaTable_irreversible_commit;
 static Netsnmp_Node_Handler _mfd_inetNetToMediaTable_check_dependencies;
 
-NETSNMP_STATIC_INLINE int
-                _inetNetToMediaTable_undo_column(inetNetToMediaTable_rowreq_ctx *
-                                                 rowreq_ctx,
-                                                 netsnmp_variable_list *
-                                                 var, int column);
-
-NETSNMP_STATIC_INLINE int
-                _inetNetToMediaTable_check_indexes(inetNetToMediaTable_rowreq_ctx *
-                                                   rowreq_ctx);
-
 /**
  * @internal
  * Initialize the table inetNetToMediaTable 
@@ -726,6 +716,88 @@ _mfd_inetNetToMediaTable_post_request(netsnmp_mib_handler *handler, netsnmp_hand
     return SNMP_ERR_NOERROR;
 }                               /* _mfd_inetNetToMediaTable_post_request */
 
+NETSNMP_STATIC_INLINE int
+_inetNetToMediaTable_check_indexes(inetNetToMediaTable_rowreq_ctx *
+                                   rowreq_ctx)
+{
+    int             rc = SNMPERR_SUCCESS;
+
+    DEBUGMSGTL(("internal:inetNetToMediaTable:_inetNetToMediaTable_check_indexes", "called\n"));
+
+    netsnmp_assert(NULL != rowreq_ctx);
+
+
+    /*
+     * (INDEX) inetNetToMediaIfIndex(1)/InterfaceIndex/ASN_INTEGER/long(long)//l/a/w/e/R/d/H
+     */
+    /*
+     * check defined range(s).
+     */
+    if ((SNMPERR_SUCCESS == rc)
+        && ((rowreq_ctx->tbl_idx.inetNetToMediaIfIndex < 1)
+            || (rowreq_ctx->tbl_idx.inetNetToMediaIfIndex > 2147483647))
+        ) {
+        rc = SNMP_ERR_WRONGVALUE;
+    }
+    if (MFD_SUCCESS != rc)
+        return rc;
+    rc = inetNetToMediaIfIndex_check_index(rowreq_ctx);
+    if (MFD_SUCCESS != rc)
+        return SNMP_ERR_NOCREATION;
+
+    /*
+     * (INDEX) inetNetToMediaNetAddressType(2)/InetAddressType/ASN_INTEGER/long(u_long)//l/a/w/E/r/d/h
+     */
+    /*
+     * check that the value is one of defined enums
+     */
+    if ((SNMPERR_SUCCESS == rc)
+        && (rowreq_ctx->tbl_idx.inetNetToMediaNetAddressType !=
+            INETADDRESSTYPE_UNKNOWN)
+        && (rowreq_ctx->tbl_idx.inetNetToMediaNetAddressType !=
+            INETADDRESSTYPE_IPV4)
+        && (rowreq_ctx->tbl_idx.inetNetToMediaNetAddressType !=
+            INETADDRESSTYPE_IPV6)
+        && (rowreq_ctx->tbl_idx.inetNetToMediaNetAddressType !=
+            INETADDRESSTYPE_IPV4Z)
+        && (rowreq_ctx->tbl_idx.inetNetToMediaNetAddressType !=
+            INETADDRESSTYPE_IPV6Z)
+        && (rowreq_ctx->tbl_idx.inetNetToMediaNetAddressType !=
+            INETADDRESSTYPE_DNS)
+        ) {
+        rc = SNMP_ERR_WRONGVALUE;
+    }
+    if (MFD_SUCCESS != rc)
+        return rc;
+    rc = inetNetToMediaNetAddressType_check_index(rowreq_ctx);
+    if (MFD_SUCCESS != rc)
+        return SNMP_ERR_NOCREATION;
+
+    /*
+     * (INDEX) inetNetToMediaNetAddress(3)/InetAddress/ASN_OCTET_STR/char(char)//L/a/w/e/R/d/h
+     */
+    /*
+     * check defined range(s).
+     */
+    if ((SNMPERR_SUCCESS == rc)
+        && ((rowreq_ctx->tbl_idx.inetNetToMediaNetAddress_len < 0)
+            || (rowreq_ctx->tbl_idx.inetNetToMediaNetAddress_len > 255))
+        ) {
+        rc = SNMP_ERR_WRONGLENGTH;
+    }
+    if (MFD_SUCCESS != rc)
+        return rc;
+    rc = inetNetToMediaNetAddress_check_index(rowreq_ctx);
+    if (MFD_SUCCESS != rc)
+        return SNMP_ERR_NOCREATION;
+
+    /*
+     * if individual parts look ok, check them as a whole
+     */
+    return inetNetToMediaTable_validate_index(inetNetToMediaTable_if_ctx.
+                                              user_ctx, rowreq_ctx);
+}                               /* _inetNetToMediaTable_check_indexes */
+
 /**
  * @internal
  * wrapper
@@ -1004,88 +1076,6 @@ _mfd_inetNetToMediaTable_get_values(netsnmp_mib_handler *handler,
 
     return SNMP_ERR_NOERROR;
 }                               /* _mfd_inetNetToMediaTable_get_values */
-
-NETSNMP_STATIC_INLINE int
-_inetNetToMediaTable_check_indexes(inetNetToMediaTable_rowreq_ctx *
-                                   rowreq_ctx)
-{
-    int             rc = SNMPERR_SUCCESS;
-
-    DEBUGMSGTL(("internal:inetNetToMediaTable:_inetNetToMediaTable_check_indexes", "called\n"));
-
-    netsnmp_assert(NULL != rowreq_ctx);
-
-
-    /*
-     * (INDEX) inetNetToMediaIfIndex(1)/InterfaceIndex/ASN_INTEGER/long(long)//l/a/w/e/R/d/H 
-     */
-    /*
-     * check defined range(s). 
-     */
-    if ((SNMPERR_SUCCESS == rc)
-        && ((rowreq_ctx->tbl_idx.inetNetToMediaIfIndex < 1)
-            || (rowreq_ctx->tbl_idx.inetNetToMediaIfIndex > 2147483647))
-        ) {
-        rc = SNMP_ERR_WRONGVALUE;
-    }
-    if (MFD_SUCCESS != rc)
-        return rc;
-    rc = inetNetToMediaIfIndex_check_index(rowreq_ctx);
-    if (MFD_SUCCESS != rc)
-        return SNMP_ERR_NOCREATION;
-
-    /*
-     * (INDEX) inetNetToMediaNetAddressType(2)/InetAddressType/ASN_INTEGER/long(u_long)//l/a/w/E/r/d/h 
-     */
-    /*
-     * check that the value is one of defined enums 
-     */
-    if ((SNMPERR_SUCCESS == rc)
-        && (rowreq_ctx->tbl_idx.inetNetToMediaNetAddressType !=
-            INETADDRESSTYPE_UNKNOWN)
-        && (rowreq_ctx->tbl_idx.inetNetToMediaNetAddressType !=
-            INETADDRESSTYPE_IPV4)
-        && (rowreq_ctx->tbl_idx.inetNetToMediaNetAddressType !=
-            INETADDRESSTYPE_IPV6)
-        && (rowreq_ctx->tbl_idx.inetNetToMediaNetAddressType !=
-            INETADDRESSTYPE_IPV4Z)
-        && (rowreq_ctx->tbl_idx.inetNetToMediaNetAddressType !=
-            INETADDRESSTYPE_IPV6Z)
-        && (rowreq_ctx->tbl_idx.inetNetToMediaNetAddressType !=
-            INETADDRESSTYPE_DNS)
-        ) {
-        rc = SNMP_ERR_WRONGVALUE;
-    }
-    if (MFD_SUCCESS != rc)
-        return rc;
-    rc = inetNetToMediaNetAddressType_check_index(rowreq_ctx);
-    if (MFD_SUCCESS != rc)
-        return SNMP_ERR_NOCREATION;
-
-    /*
-     * (INDEX) inetNetToMediaNetAddress(3)/InetAddress/ASN_OCTET_STR/char(char)//L/a/w/e/R/d/h 
-     */
-    /*
-     * check defined range(s). 
-     */
-    if ((SNMPERR_SUCCESS == rc)
-        && ((rowreq_ctx->tbl_idx.inetNetToMediaNetAddress_len < 0)
-            || (rowreq_ctx->tbl_idx.inetNetToMediaNetAddress_len > 255))
-        ) {
-        rc = SNMP_ERR_WRONGLENGTH;
-    }
-    if (MFD_SUCCESS != rc)
-        return rc;
-    rc = inetNetToMediaNetAddress_check_index(rowreq_ctx);
-    if (MFD_SUCCESS != rc)
-        return SNMP_ERR_NOCREATION;
-
-    /*
-     * if individual parts look ok, check them as a whole
-     */
-    return inetNetToMediaTable_validate_index(inetNetToMediaTable_if_ctx.
-                                              user_ctx, rowreq_ctx);
-}                               /* _inetNetToMediaTable_check_indexes */
 
 /***********************************************************************
  *
