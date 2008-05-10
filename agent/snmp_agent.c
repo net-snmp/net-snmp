@@ -116,6 +116,66 @@ int             deny_severity = LOG_WARNING;
 #include "smux/smux.h"
 #endif
 
+NETSNMP_INLINE void
+netsnmp_agent_add_list_data(netsnmp_agent_request_info *ari,
+                            netsnmp_data_list *node)
+{
+    if (ari) {
+	if (ari->agent_data) {
+            netsnmp_add_list_data(&ari->agent_data, node);
+        } else {
+            ari->agent_data = node;
+	}
+    }
+}
+
+NETSNMP_INLINE int
+netsnmp_agent_remove_list_data(netsnmp_agent_request_info *ari,
+                               const char * name)
+{
+    if ((NULL == ari) || (NULL == ari->agent_data))
+        return 1;
+
+    return netsnmp_remove_list_node(&ari->agent_data, name);
+}
+
+NETSNMP_INLINE void    *
+netsnmp_agent_get_list_data(netsnmp_agent_request_info *ari,
+                            const char *name)
+{
+    if (ari) {
+        return netsnmp_get_list_data(ari->agent_data, name);
+    }
+    return NULL;
+}
+
+NETSNMP_INLINE void
+netsnmp_free_agent_data_set(netsnmp_agent_request_info *ari)
+{
+    if (ari) {
+        netsnmp_free_list_data(ari->agent_data);
+    }
+}
+
+NETSNMP_INLINE void
+netsnmp_free_agent_data_sets(netsnmp_agent_request_info *ari)
+{
+    if (ari) {
+        netsnmp_free_all_list_data(ari->agent_data);
+    }
+}
+
+NETSNMP_INLINE void
+netsnmp_free_agent_request_info(netsnmp_agent_request_info *ari)
+{
+    if (ari) {
+        if (ari->agent_data) {
+            netsnmp_free_all_list_data(ari->agent_data);
+	}
+        SNMP_FREE(ari);
+    }
+}
+
 oid      version_sysoid[] = { NETSNMP_SYSTEM_MIB };
 int      version_sysoid_len = OID_LENGTH(version_sysoid);
 
@@ -3572,67 +3632,6 @@ netsnmp_get_agent_uptime(void)
     return netsnmp_timeval_uptime(&now);
 }
 
-
-
-NETSNMP_INLINE void
-netsnmp_agent_add_list_data(netsnmp_agent_request_info *ari,
-                            netsnmp_data_list *node)
-{
-    if (ari) {
-	if (ari->agent_data) {
-            netsnmp_add_list_data(&ari->agent_data, node);
-        } else {
-            ari->agent_data = node;
-	}
-    }
-}
-
-NETSNMP_INLINE int
-netsnmp_agent_remove_list_data(netsnmp_agent_request_info *ari,
-                               const char * name)
-{
-    if ((NULL == ari) || (NULL == ari->agent_data))
-        return 1;
-
-    return netsnmp_remove_list_node(&ari->agent_data, name);
-}
-
-NETSNMP_INLINE void    *
-netsnmp_agent_get_list_data(netsnmp_agent_request_info *ari,
-                            const char *name)
-{
-    if (ari) {
-        return netsnmp_get_list_data(ari->agent_data, name);
-    }
-    return NULL;
-}
-
-NETSNMP_INLINE void
-netsnmp_free_agent_data_set(netsnmp_agent_request_info *ari)
-{
-    if (ari) {
-        netsnmp_free_list_data(ari->agent_data);
-    }
-}
-
-NETSNMP_INLINE void
-netsnmp_free_agent_data_sets(netsnmp_agent_request_info *ari)
-{
-    if (ari) {
-        netsnmp_free_all_list_data(ari->agent_data);
-    }
-}
-
-NETSNMP_INLINE void
-netsnmp_free_agent_request_info(netsnmp_agent_request_info *ari)
-{
-    if (ari) {
-        if (ari->agent_data) {
-            netsnmp_free_all_list_data(ari->agent_data);
-	}
-        SNMP_FREE(ari);
-    }
-}
 
 /*************************************************************************
  *

@@ -215,14 +215,7 @@ static Netsnmp_Node_Handler _mfd_${context}_irreversible_commit;
 static Netsnmp_Node_Handler _mfd_${context}_check_dependencies;
 @      end@
 
-NETSNMP_STATIC_INLINE int _${context}_undo_column( ${context}_rowreq_ctx *rowreq_ctx,
-                                                   netsnmp_variable_list *var, int column );
-
 @   end@ # writable
-@if ($m2c_table_persistent == 1) || ($m2c_table_row_creation == 1)@
-NETSNMP_STATIC_INLINE int _${context}_check_indexes(${context}_rowreq_ctx * rowreq_ctx);
-
-@end@
 @   if ("$m2c_data_context" eq "generated") && (($m2c_undo_embed == 0) || ($m2c_data_allocate == 1))@
 ${context}_data *${context}_allocate_data(void);
 
@@ -653,6 +646,51 @@ _mfd_${context}_post_request(netsnmp_mib_handler *handler,
 ########################################################################
 ##
 @if ($m2c_table_row_creation == 1) || ($m2c_table_persistent == 1)@
+NETSNMP_STATIC_INLINE int
+_${context}_check_indexes(${context}_rowreq_ctx * rowreq_ctx)
+{
+    int                          rc = SNMPERR_SUCCESS;
+
+    DEBUGMSGTL(("internal:${context}:_${context}_check_indexes","called\n"));
+
+    netsnmp_assert(NULL != rowreq_ctx);
+
+##
+@if $m2c_table_external_indexes != 0@
+    /*
+     * check that the corresponding EXTERNAL row exists
+     */
+@   foreach $node externalindex@
+@      include m2c_setup_node.m2i@
+
+    /* (INDEX) $m2c_node_summary */
+    rc = ${context}_${node}_check_index( rowreq_ctx );
+    if(MFD_SUCCESS != rc)
+        return SNMP_ERR_NOCREATION;
+@   end@ # for each nonindex
+
+@end@ # external index
+@   foreach $node internalindex@
+@      include m2c_setup_node.m2i@
+
+    /* (INDEX) $m2c_node_summary */
+@   eval $m2c_nv_val = "rowreq_ctx->tbl_idx.$node"@
+@   eval $m2c_nv_len = "rowreq_ctx->tbl_idx.${node}_len"@
+@   eval $m2c_nv_str = "rowreq_ctx->tbl_idx.$node"@
+@   include node-validate.m2i@
+       if (MFD_SUCCESS != rc)
+          return rc;
+        rc = ${node}_check_index( rowreq_ctx );
+       if(MFD_SUCCESS != rc)
+           return SNMP_ERR_NOCREATION;
+@   end@ # for each internalindex
+
+    /*
+     * if individual parts look ok, check them as a whole
+     */
+    return ${context}_validate_index( ${context}_if_ctx.user_ctx, rowreq_ctx );
+} /* _${context}_check_indexes */
+##----------------------------------------------------------------------
 /**
  * @internal
  * wrapper
@@ -966,54 +1004,6 @@ _mfd_${context}_get_values(netsnmp_mib_handler *handler,
 
     return SNMP_ERR_NOERROR;
 } /* _mfd_${context}_get_values */
-
-##----------------------------------------------------------------------
-@if ($m2c_table_row_creation == 1) || ($m2c_table_persistent == 1)@
-NETSNMP_STATIC_INLINE int
-_${context}_check_indexes(${context}_rowreq_ctx * rowreq_ctx)
-{
-    int                          rc = SNMPERR_SUCCESS;
-
-    DEBUGMSGTL(("internal:${context}:_${context}_check_indexes","called\n"));
-
-    netsnmp_assert(NULL != rowreq_ctx);
-
-##
-@if $m2c_table_external_indexes != 0@
-    /*
-     * check that the corresponding EXTERNAL row exists
-     */
-@   foreach $node externalindex@
-@      include m2c_setup_node.m2i@
-
-    /* (INDEX) $m2c_node_summary */
-    rc = ${context}_${node}_check_index( rowreq_ctx );
-    if(MFD_SUCCESS != rc)
-        return SNMP_ERR_NOCREATION;
-@   end@ # for each nonindex
-
-@end@ # external index
-@   foreach $node internalindex@
-@      include m2c_setup_node.m2i@
-
-    /* (INDEX) $m2c_node_summary */
-@   eval $m2c_nv_val = "rowreq_ctx->tbl_idx.$node"@
-@   eval $m2c_nv_len = "rowreq_ctx->tbl_idx.${node}_len"@
-@   eval $m2c_nv_str = "rowreq_ctx->tbl_idx.$node"@
-@   include node-validate.m2i@
-       if (MFD_SUCCESS != rc)
-          return rc;
-        rc = ${node}_check_index( rowreq_ctx );
-       if(MFD_SUCCESS != rc)
-           return SNMP_ERR_NOCREATION;
-@   end@ # for each internalindex
-
-    /*
-     * if individual parts look ok, check them as a whole
-     */
-    return ${context}_validate_index( ${context}_if_ctx.user_ctx, rowreq_ctx );
-} /* _${context}_check_indexes */
-@end@ # $m2c_table_row_creation
 
 ########################################################################
 ##
