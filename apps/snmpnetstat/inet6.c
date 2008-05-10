@@ -413,7 +413,7 @@ inet6print(unsigned char *in6, int port, const char *proto, int local)
 		(ret) = getservbyport((int)(port), (proto)); \
 	} while (0)
 
-	struct servent *sp = 0;
+	struct servent *sp = NULL;
 	char line[80], *cp;
 	int width;
 	int len = sizeof line;
@@ -470,7 +470,7 @@ inet6name(const unsigned char *in6)
 			domain[0] = '\0';
 	}
 #ifdef NETSNMP_ENABLE_IPV6
-	cp = 0;
+	cp = NULL;
 	if (!nflag && !IN6_IS_ADDR_UNSPECIFIED(in6p)) {
 		hp = gethostbyaddr((const char *)in6p, sizeof(*in6p), AF_INET6);
 		if (hp) {

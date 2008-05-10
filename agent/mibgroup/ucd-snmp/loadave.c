@@ -336,7 +336,7 @@ var_extensible_loadave(struct variable * vp,
     }
     if (try_getloadavg(&avenrun[0], sizeof(avenrun) / sizeof(avenrun[0]))
         == -1)
-        return (0);
+        return NULL;
     switch (vp->magic) {
     case LOADAVE:
 

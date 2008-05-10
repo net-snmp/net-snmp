@@ -279,7 +279,7 @@ disk_parse_config(const char *token, char *cptr)
    * read optional minimum disk usage spec 
    */
   if(cptr != NULL) {
-      if(strchr(cptr, '%') == 0) {
+      if(strchr(cptr, '%') == NULL) {
           minspace = atoi(cptr);
           minpercent = -1;
       }
@@ -334,7 +334,7 @@ disk_parse_config_all(const char *token, char *cptr)
    * read the minimum disk usage percent
    */
   if(cptr != NULL) {
-      if(strchr(cptr, '%') != 0) {
+      if(strchr(cptr, '%') != NULL) {
           minpercent = atoi(cptr);
       }
   }

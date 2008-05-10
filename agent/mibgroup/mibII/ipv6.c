@@ -399,7 +399,7 @@ header_ipv6(register struct variable *vp,
            ((int) vp->namelen + 1) * sizeof(oid));
     *length = vp->namelen + 1;
 
-    *write_method = 0;
+    *write_method = (WriteMethod*)0;
     *var_len = sizeof(long);    /* default to 'long' results */
     return (MATCH_SUCCEEDED);
 }
@@ -439,7 +439,7 @@ header_ipv6_scan(register struct variable *vp,
     memcpy((char *) name, (char *) newname,
            ((int) vp->namelen + 1) * sizeof(oid));
     *length = vp->namelen + 1;
-    *write_method = 0;
+    *write_method = (WriteMethod*)0;
     *var_len = sizeof(long);    /* default to 'long' results */
     return (MATCH_SUCCEEDED);
 }

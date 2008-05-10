@@ -301,7 +301,7 @@ var_usmUser(struct variable * vp,
     if (!vp || !name || !length || !var_len)
         return NULL;
 
-    *write_method = 0;          /* assume it isnt writable for the time being */
+    *write_method = (WriteMethod*)0;    /* assume it isnt writable for the time being */
     *var_len = sizeof(long_ret);        /* assume an integer and change later if not */
 
     if (vp->magic != USMUSERSPINLOCK) {
@@ -315,7 +315,7 @@ var_usmUser(struct variable * vp,
             (exact == 1 && rtest != 0)) {
             if (var_len)
                 *var_len = 0;
-            return 0;
+            return NULL;
         }
         memset(newname, 0, sizeof(newname));
         if (((int) *length) <= (int) vp->namelen || rtest == -1) {
@@ -384,7 +384,7 @@ var_usmUser(struct variable * vp,
         }
     } else {
         if (header_generic(vp, name, length, exact, var_len, write_method))
-            return 0;
+            return NULL;
     }                           /* endif -- vp->magic != USMUSERSPINLOCK */
 
     switch (vp->magic) {
@@ -488,7 +488,7 @@ var_usmUser(struct variable * vp,
         DEBUGMSGTL(("snmpd", "unknown sub-id %d in var_usmUser\n",
                     vp->magic));
     }
-    return 0;
+    return NULL;
 
 }                               /* end var_usmUser() */
 

@@ -136,7 +136,7 @@ typedef long    fd_mask;
 #define FD_ZERO(p)      memset((p), 0, sizeof(*(p)))
 #endif
 
-char           *logfile = 0;
+char           *logfile = NULL;
 extern int      SyslogTrap;
 extern int      dropauth;
 int             reconfig = 0;
@@ -1255,7 +1255,7 @@ main(int argc, char *argv[])
             tvp = NULL;         /* block without timeout */
         netsnmp_external_event_info(&numfds, &readfds, &writefds, &exceptfds);
         count = select(numfds, &readfds, &writefds, &exceptfds, tvp);
-        gettimeofday(&Now, 0);
+        gettimeofday(&Now, NULL);
         if (count > 0) {
             netsnmp_dispatch_external_events(&count, &readfds, &writefds,
                                              &exceptfds);

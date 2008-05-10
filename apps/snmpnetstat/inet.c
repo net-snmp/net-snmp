@@ -449,7 +449,7 @@ udp_stats(const char *name)
 void
 inetprint(struct in_addr *in, int port, const char *proto, int local)
 {
-	struct servent *sp = 0;
+	struct servent *sp = NULL;
 	char line[80], *cp;
 	int width;
 

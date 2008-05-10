@@ -174,13 +174,13 @@ var_vacm_sec2group(struct variable * vp,
         groupSubtree = name + 13;
         groupSubtreeLen = *length - 13;
         if ( name[12] != groupSubtreeLen )
-            return 0;		/* Either extra subids, or an incomplete string */
+            return NULL;	/* Either extra subids, or an incomplete string */
         cp = secname;
         while (groupSubtreeLen-- > 0) {
             if (*groupSubtree > 255)
-                return 0;       /* illegal value */
+                return NULL;    /* illegal value */
             if (cp - secname > VACM_MAX_STRING)
-                return 0;
+                return NULL;
             *cp++ = (char) *groupSubtree++;
         }
         *cp = 0;
@@ -193,9 +193,9 @@ var_vacm_sec2group(struct variable * vp,
         cp = secname;
         while (groupSubtreeLen-- > 0) {
             if (*groupSubtree > 255)
-                return 0;       /* illegal value */
+                return NULL;    /* illegal value */
             if (cp - secname > VACM_MAX_STRING)
-                return 0;
+                return NULL;
             *cp++ = (char) *groupSubtree++;
         }
         *cp = 0;
@@ -308,11 +308,11 @@ var_vacm_access(struct variable * vp,
         op = name + 11;
         len = *op++;
         if (len > VACM_MAX_STRING)
-            return 0;
+            return NULL;
         cp = groupName;
         while (len-- > 0) {
             if (*op > 255)
-                return 0;       /* illegal value */
+                return NULL;    /* illegal value */
             *cp++ = (char) *op++;
         }
         *cp = 0;
@@ -322,11 +322,11 @@ var_vacm_access(struct variable * vp,
          */
         len = *op++;
         if (len > VACM_MAX_STRING)
-            return 0;
+            return NULL;
         cp = contextPrefix;
         while (len-- > 0) {
             if (*op > 255)
-                return 0;       /* illegal value */
+                return NULL;    /* illegal value */
             *cp++ = (char) *op++;
         }
         *cp = 0;
@@ -354,11 +354,11 @@ var_vacm_access(struct variable * vp,
         } else {
             len = *op;
             if (len > VACM_MAX_STRING)
-                return 0;
+                return NULL;
             cp = groupName;
             for (i = 0; i <= len; i++) {
                 if (*op > 255) {
-                    return 0;   /* illegal value */
+                    return NULL;   /* illegal value */
                 }
                 *cp++ = (char) *op++;
             }
@@ -368,11 +368,11 @@ var_vacm_access(struct variable * vp,
         } else {
             len = *op;
             if (len > VACM_MAX_STRING)
-                return 0;
+                return NULL;
             cp = contextPrefix;
             for (i = 0; i <= len; i++) {
                 if (*op > 255) {
-                    return 0;   /* illegal value */
+                    return NULL;   /* illegal value */
                 }
                 *cp++ = (char) *op++;
             }
@@ -521,11 +521,11 @@ var_vacm_view(struct variable * vp,
             op = name + 12;
             len = *op++;
             if (len > VACM_MAX_STRING)
-                return 0;
+                return NULL;
             cp = viewName;
             while (len-- > 0) {
                 if (*op > 255)
-                    return 0;
+                    return NULL;
                 *cp++ = (char) *op++;
             }
             *cp = 0;
@@ -536,7 +536,7 @@ var_vacm_view(struct variable * vp,
             subtree[0] = len = *op++;
             subtreeLen = 1;
             if (len > MAX_OID_LEN)
-                return 0;
+                return NULL;
             if ( (op+len) != (name + *length) )
                 return NULL;     /* Declared length doesn't match what we actually got */
             op1 = &(subtree[1]);
@@ -559,11 +559,11 @@ var_vacm_view(struct variable * vp,
             } else {
                 len = *op;
                 if (len > VACM_MAX_STRING)
-                    return 0;
+                    return NULL;
                 cp = viewName;
                 for (i = 0; i <= len && op < name + *length; i++) {
                     if (*op > 255) {
-                        return 0;
+                        return NULL;
                     }
                     *cp++ = (char) *op++;
                 }

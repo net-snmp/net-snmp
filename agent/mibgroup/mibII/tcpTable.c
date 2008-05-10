@@ -399,7 +399,7 @@ tcpTable_first_entry(void **loop_context,
      * XXX - How can we tell if the cache is valid?
      *       No access to 'reqinfo'
      */
-    if (tcp_head == 0)
+    if (tcp_head == NULL)
         return NULL;
 
     /*
