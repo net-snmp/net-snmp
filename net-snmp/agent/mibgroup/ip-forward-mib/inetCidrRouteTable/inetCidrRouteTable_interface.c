@@ -150,10 +150,6 @@ static Netsnmp_Node_Handler _mfd_inetCidrRouteTable_undo_commit;
 static Netsnmp_Node_Handler _mfd_inetCidrRouteTable_irreversible_commit;
 static Netsnmp_Node_Handler _mfd_inetCidrRouteTable_check_dependencies;
 
-NETSNMP_STATIC_INLINE int
-                _inetCidrRouteTable_check_indexes(inetCidrRouteTable_rowreq_ctx *
-                                                  rowreq_ctx);
-
 /**
  * @internal
  * Initialize the table inetCidrRouteTable 
@@ -829,6 +825,143 @@ _mfd_inetCidrRouteTable_post_request(netsnmp_mib_handler *handler,
     return SNMP_ERR_NOERROR;
 }                               /* _mfd_inetCidrRouteTable_post_request */
 
+NETSNMP_STATIC_INLINE int
+_inetCidrRouteTable_check_indexes(inetCidrRouteTable_rowreq_ctx *
+                                  rowreq_ctx)
+{
+    int             rc = SNMPERR_SUCCESS;
+
+    DEBUGMSGTL(("internal:inetCidrRouteTable:_inetCidrRouteTable_check_indexes", "called\n"));
+
+    netsnmp_assert(NULL != rowreq_ctx);
+
+
+    /*
+     * (INDEX) inetCidrRouteDestType(1)/InetAddressType/ASN_INTEGER/long(u_long)//l/a/w/E/r/d/h
+     */
+    /*
+     * check that the value is one of defined enums
+     */
+    if ((SNMPERR_SUCCESS == rc)
+        && (rowreq_ctx->tbl_idx.inetCidrRouteDestType !=
+            INETADDRESSTYPE_UNKNOWN)
+        && (rowreq_ctx->tbl_idx.inetCidrRouteDestType !=
+            INETADDRESSTYPE_IPV4)
+        && (rowreq_ctx->tbl_idx.inetCidrRouteDestType !=
+            INETADDRESSTYPE_IPV6)
+        && (rowreq_ctx->tbl_idx.inetCidrRouteDestType !=
+            INETADDRESSTYPE_IPV4Z)
+        && (rowreq_ctx->tbl_idx.inetCidrRouteDestType !=
+            INETADDRESSTYPE_IPV6Z)
+        && (rowreq_ctx->tbl_idx.inetCidrRouteDestType !=
+            INETADDRESSTYPE_DNS)
+        ) {
+        rc = SNMP_ERR_WRONGVALUE;
+    }
+    if (MFD_SUCCESS != rc)
+        return rc;
+    rc = inetCidrRouteDestType_check_index(rowreq_ctx);
+    if (MFD_SUCCESS != rc)
+        return SNMP_ERR_NOCREATION;
+
+    /*
+     * (INDEX) inetCidrRouteDest(2)/InetAddress/ASN_OCTET_STR/char(char)//L/a/w/e/R/d/h
+     */
+    /*
+     * check defined range(s).
+     */
+    if ((SNMPERR_SUCCESS == rc)
+        && ((rowreq_ctx->tbl_idx.inetCidrRouteDest_len < 0)
+            || (rowreq_ctx->tbl_idx.inetCidrRouteDest_len > 255))
+        ) {
+        rc = SNMP_ERR_WRONGLENGTH;
+    }
+    if (MFD_SUCCESS != rc)
+        return rc;
+    rc = inetCidrRouteDest_check_index(rowreq_ctx);
+    if (MFD_SUCCESS != rc)
+        return SNMP_ERR_NOCREATION;
+
+    /*
+     * (INDEX) inetCidrRoutePfxLen(3)/InetAddressPrefixLength/ASN_UNSIGNED/u_long(u_long)//l/a/w/e/R/d/H
+     */
+    /*
+     * check defined range(s).
+     */
+    if ((SNMPERR_SUCCESS == rc)
+        && ((rowreq_ctx->tbl_idx.inetCidrRoutePfxLen < 0)
+            || (rowreq_ctx->tbl_idx.inetCidrRoutePfxLen > 2040))
+        ) {
+        rc = SNMP_ERR_WRONGVALUE;
+    }
+    if (MFD_SUCCESS != rc)
+        return rc;
+    rc = inetCidrRoutePfxLen_check_index(rowreq_ctx);
+    if (MFD_SUCCESS != rc)
+        return SNMP_ERR_NOCREATION;
+
+    /*
+     * (INDEX) inetCidrRoutePolicy(4)/OBJECTID/ASN_OBJECT_ID/oid(oid)//L/a/w/e/r/d/h
+     */
+    if (MFD_SUCCESS != rc)
+        return rc;
+    rc = inetCidrRoutePolicy_check_index(rowreq_ctx);
+    if (MFD_SUCCESS != rc)
+        return SNMP_ERR_NOCREATION;
+
+    /*
+     * (INDEX) inetCidrRouteNextHopType(5)/InetAddressType/ASN_INTEGER/long(u_long)/e/l/a/w/E/r/d/h
+     */
+    /*
+     * check that the value is one of defined enums
+     */
+    if ((SNMPERR_SUCCESS == rc)
+        && (rowreq_ctx->tbl_idx.inetCidrRouteNextHopType !=
+            INETADDRESSTYPE_UNKNOWN)
+        && (rowreq_ctx->tbl_idx.inetCidrRouteNextHopType !=
+            INETADDRESSTYPE_IPV4)
+        && (rowreq_ctx->tbl_idx.inetCidrRouteNextHopType !=
+            INETADDRESSTYPE_IPV6)
+        && (rowreq_ctx->tbl_idx.inetCidrRouteNextHopType !=
+            INETADDRESSTYPE_IPV4Z)
+        && (rowreq_ctx->tbl_idx.inetCidrRouteNextHopType !=
+            INETADDRESSTYPE_IPV6Z)
+        && (rowreq_ctx->tbl_idx.inetCidrRouteNextHopType !=
+            INETADDRESSTYPE_DNS)
+        ) {
+        rc = SNMP_ERR_WRONGVALUE;
+    }
+    if (MFD_SUCCESS != rc)
+        return rc;
+    rc = inetCidrRouteNextHopType_check_index(rowreq_ctx);
+    if (MFD_SUCCESS != rc)
+        return SNMP_ERR_NOCREATION;
+
+    /*
+     * (INDEX) inetCidrRouteNextHop(6)/InetAddress/ASN_OCTET_STR/char(char)//L/a/w/e/R/d/h
+     */
+    /*
+     * check defined range(s).
+     */
+    if ((SNMPERR_SUCCESS == rc)
+        && ((rowreq_ctx->tbl_idx.inetCidrRouteNextHop_len < 0)
+            || (rowreq_ctx->tbl_idx.inetCidrRouteNextHop_len > 255))
+        ) {
+        rc = SNMP_ERR_WRONGLENGTH;
+    }
+    if (MFD_SUCCESS != rc)
+        return rc;
+    rc = inetCidrRouteNextHop_check_index(rowreq_ctx);
+    if (MFD_SUCCESS != rc)
+        return SNMP_ERR_NOCREATION;
+
+    /*
+     * if individual parts look ok, check them as a whole
+     */
+    return inetCidrRouteTable_validate_index(inetCidrRouteTable_if_ctx.
+                                             user_ctx, rowreq_ctx);
+}                               /* _inetCidrRouteTable_check_indexes */
+
 /**
  * @internal
  * wrapper
@@ -1163,143 +1296,6 @@ _mfd_inetCidrRouteTable_get_values(netsnmp_mib_handler *handler,
 
     return SNMP_ERR_NOERROR;
 }                               /* _mfd_inetCidrRouteTable_get_values */
-
-NETSNMP_STATIC_INLINE int
-_inetCidrRouteTable_check_indexes(inetCidrRouteTable_rowreq_ctx *
-                                  rowreq_ctx)
-{
-    int             rc = SNMPERR_SUCCESS;
-
-    DEBUGMSGTL(("internal:inetCidrRouteTable:_inetCidrRouteTable_check_indexes", "called\n"));
-
-    netsnmp_assert(NULL != rowreq_ctx);
-
-
-    /*
-     * (INDEX) inetCidrRouteDestType(1)/InetAddressType/ASN_INTEGER/long(u_long)//l/a/w/E/r/d/h 
-     */
-    /*
-     * check that the value is one of defined enums 
-     */
-    if ((SNMPERR_SUCCESS == rc)
-        && (rowreq_ctx->tbl_idx.inetCidrRouteDestType !=
-            INETADDRESSTYPE_UNKNOWN)
-        && (rowreq_ctx->tbl_idx.inetCidrRouteDestType !=
-            INETADDRESSTYPE_IPV4)
-        && (rowreq_ctx->tbl_idx.inetCidrRouteDestType !=
-            INETADDRESSTYPE_IPV6)
-        && (rowreq_ctx->tbl_idx.inetCidrRouteDestType !=
-            INETADDRESSTYPE_IPV4Z)
-        && (rowreq_ctx->tbl_idx.inetCidrRouteDestType !=
-            INETADDRESSTYPE_IPV6Z)
-        && (rowreq_ctx->tbl_idx.inetCidrRouteDestType !=
-            INETADDRESSTYPE_DNS)
-        ) {
-        rc = SNMP_ERR_WRONGVALUE;
-    }
-    if (MFD_SUCCESS != rc)
-        return rc;
-    rc = inetCidrRouteDestType_check_index(rowreq_ctx);
-    if (MFD_SUCCESS != rc)
-        return SNMP_ERR_NOCREATION;
-
-    /*
-     * (INDEX) inetCidrRouteDest(2)/InetAddress/ASN_OCTET_STR/char(char)//L/a/w/e/R/d/h 
-     */
-    /*
-     * check defined range(s). 
-     */
-    if ((SNMPERR_SUCCESS == rc)
-        && ((rowreq_ctx->tbl_idx.inetCidrRouteDest_len < 0)
-            || (rowreq_ctx->tbl_idx.inetCidrRouteDest_len > 255))
-        ) {
-        rc = SNMP_ERR_WRONGLENGTH;
-    }
-    if (MFD_SUCCESS != rc)
-        return rc;
-    rc = inetCidrRouteDest_check_index(rowreq_ctx);
-    if (MFD_SUCCESS != rc)
-        return SNMP_ERR_NOCREATION;
-
-    /*
-     * (INDEX) inetCidrRoutePfxLen(3)/InetAddressPrefixLength/ASN_UNSIGNED/u_long(u_long)//l/a/w/e/R/d/H 
-     */
-    /*
-     * check defined range(s). 
-     */
-    if ((SNMPERR_SUCCESS == rc)
-        && ((rowreq_ctx->tbl_idx.inetCidrRoutePfxLen < 0)
-            || (rowreq_ctx->tbl_idx.inetCidrRoutePfxLen > 2040))
-        ) {
-        rc = SNMP_ERR_WRONGVALUE;
-    }
-    if (MFD_SUCCESS != rc)
-        return rc;
-    rc = inetCidrRoutePfxLen_check_index(rowreq_ctx);
-    if (MFD_SUCCESS != rc)
-        return SNMP_ERR_NOCREATION;
-
-    /*
-     * (INDEX) inetCidrRoutePolicy(4)/OBJECTID/ASN_OBJECT_ID/oid(oid)//L/a/w/e/r/d/h 
-     */
-    if (MFD_SUCCESS != rc)
-        return rc;
-    rc = inetCidrRoutePolicy_check_index(rowreq_ctx);
-    if (MFD_SUCCESS != rc)
-        return SNMP_ERR_NOCREATION;
-
-    /*
-     * (INDEX) inetCidrRouteNextHopType(5)/InetAddressType/ASN_INTEGER/long(u_long)//l/a/w/E/r/d/h 
-     */
-    /*
-     * check that the value is one of defined enums 
-     */
-    if ((SNMPERR_SUCCESS == rc)
-        && (rowreq_ctx->tbl_idx.inetCidrRouteNextHopType !=
-            INETADDRESSTYPE_UNKNOWN)
-        && (rowreq_ctx->tbl_idx.inetCidrRouteNextHopType !=
-            INETADDRESSTYPE_IPV4)
-        && (rowreq_ctx->tbl_idx.inetCidrRouteNextHopType !=
-            INETADDRESSTYPE_IPV6)
-        && (rowreq_ctx->tbl_idx.inetCidrRouteNextHopType !=
-            INETADDRESSTYPE_IPV4Z)
-        && (rowreq_ctx->tbl_idx.inetCidrRouteNextHopType !=
-            INETADDRESSTYPE_IPV6Z)
-        && (rowreq_ctx->tbl_idx.inetCidrRouteNextHopType !=
-            INETADDRESSTYPE_DNS)
-        ) {
-        rc = SNMP_ERR_WRONGVALUE;
-    }
-    if (MFD_SUCCESS != rc)
-        return rc;
-    rc = inetCidrRouteNextHopType_check_index(rowreq_ctx);
-    if (MFD_SUCCESS != rc)
-        return SNMP_ERR_NOCREATION;
-
-    /*
-     * (INDEX) inetCidrRouteNextHop(6)/InetAddress/ASN_OCTET_STR/char(char)//L/a/w/e/R/d/h 
-     */
-    /*
-     * check defined range(s). 
-     */
-    if ((SNMPERR_SUCCESS == rc)
-        && ((rowreq_ctx->tbl_idx.inetCidrRouteNextHop_len < 0)
-            || (rowreq_ctx->tbl_idx.inetCidrRouteNextHop_len > 255))
-        ) {
-        rc = SNMP_ERR_WRONGLENGTH;
-    }
-    if (MFD_SUCCESS != rc)
-        return rc;
-    rc = inetCidrRouteNextHop_check_index(rowreq_ctx);
-    if (MFD_SUCCESS != rc)
-        return SNMP_ERR_NOCREATION;
-
-    /*
-     * if individual parts look ok, check them as a whole
-     */
-    return inetCidrRouteTable_validate_index(inetCidrRouteTable_if_ctx.
-                                             user_ctx, rowreq_ctx);
-}                               /* _inetCidrRouteTable_check_indexes */
 
 /***********************************************************************
  *

@@ -157,16 +157,6 @@ static Netsnmp_Node_Handler _mfd_snmpNotifyFilterTable_undo_commit;
 static Netsnmp_Node_Handler _mfd_snmpNotifyFilterTable_irreversible_commit;
 static Netsnmp_Node_Handler _mfd_snmpNotifyFilterTable_check_dependencies;
 
-NETSNMP_STATIC_INLINE int
-                _snmpNotifyFilterTable_undo_column(snmpNotifyFilterTable_rowreq_ctx *
-                                                   rowreq_ctx,
-                                                   netsnmp_variable_list *
-                                                   var, int column);
-
-NETSNMP_STATIC_INLINE int
-                _snmpNotifyFilterTable_check_indexes(snmpNotifyFilterTable_rowreq_ctx *
-                                                     rowreq_ctx);
-
 snmpNotifyFilterTable_data *snmpNotifyFilterTable_allocate_data(void);
 
 /**
@@ -765,6 +755,46 @@ _mfd_snmpNotifyFilterTable_post_request(netsnmp_mib_handler *handler, netsnmp_ha
     return SNMP_ERR_NOERROR;
 }                               /* _mfd_snmpNotifyFilterTable_post_request */
 
+NETSNMP_STATIC_INLINE int
+_snmpNotifyFilterTable_check_indexes(snmpNotifyFilterTable_rowreq_ctx *
+                                     rowreq_ctx)
+{
+    int             rc = SNMPERR_SUCCESS;
+
+    DEBUGMSGTL(("internal:snmpNotifyFilterTable:_snmpNotifyFilterTable_check_indexes", "called\n"));
+
+    netsnmp_assert(NULL != rowreq_ctx);
+
+    /*
+     * check that the corresponding EXTERNAL row exists
+     */
+
+    /*
+     * (INDEX) snmpNotifyFilterProfileName(1)/SnmpAdminString/ASN_OCTET_STR/char(char)//L/A/W/e/R/d/H
+     */
+    rc = snmpNotifyFilterTable_snmpNotifyFilterProfileName_check_index
+        (rowreq_ctx);
+    if (MFD_SUCCESS != rc)
+        return SNMP_ERR_NOCREATION;
+
+
+    /*
+     * (INDEX) snmpNotifyFilterSubtree(1)/OBJECTID/ASN_OBJECT_ID/oid(oid)//L/a/w/e/r/d/h
+     */
+    if (MFD_SUCCESS != rc)
+        return rc;
+    rc = snmpNotifyFilterSubtree_check_index(rowreq_ctx);
+    if (MFD_SUCCESS != rc)
+        return SNMP_ERR_NOCREATION;
+
+    /*
+     * if individual parts look ok, check them as a whole
+     */
+    return
+        snmpNotifyFilterTable_validate_index(snmpNotifyFilterTable_if_ctx.
+                                             user_ctx, rowreq_ctx);
+}                               /* _snmpNotifyFilterTable_check_indexes */
+
 /**
  * @internal
  * wrapper
@@ -1032,46 +1062,6 @@ _mfd_snmpNotifyFilterTable_get_values(netsnmp_mib_handler *handler, netsnmp_hand
 
     return SNMP_ERR_NOERROR;
 }                               /* _mfd_snmpNotifyFilterTable_get_values */
-
-NETSNMP_STATIC_INLINE int
-_snmpNotifyFilterTable_check_indexes(snmpNotifyFilterTable_rowreq_ctx *
-                                     rowreq_ctx)
-{
-    int             rc = SNMPERR_SUCCESS;
-
-    DEBUGMSGTL(("internal:snmpNotifyFilterTable:_snmpNotifyFilterTable_check_indexes", "called\n"));
-
-    netsnmp_assert(NULL != rowreq_ctx);
-
-    /*
-     * check that the corresponding EXTERNAL row exists
-     */
-
-    /*
-     * (INDEX) snmpNotifyFilterProfileName(1)/SnmpAdminString/ASN_OCTET_STR/char(char)//L/A/W/e/R/d/H 
-     */
-    rc = snmpNotifyFilterTable_snmpNotifyFilterProfileName_check_index
-        (rowreq_ctx);
-    if (MFD_SUCCESS != rc)
-        return SNMP_ERR_NOCREATION;
-
-
-    /*
-     * (INDEX) snmpNotifyFilterSubtree(1)/OBJECTID/ASN_OBJECT_ID/oid(oid)//L/a/w/e/r/d/h 
-     */
-    if (MFD_SUCCESS != rc)
-        return rc;
-    rc = snmpNotifyFilterSubtree_check_index(rowreq_ctx);
-    if (MFD_SUCCESS != rc)
-        return SNMP_ERR_NOCREATION;
-
-    /*
-     * if individual parts look ok, check them as a whole
-     */
-    return
-        snmpNotifyFilterTable_validate_index(snmpNotifyFilterTable_if_ctx.
-                                             user_ctx, rowreq_ctx);
-}                               /* _snmpNotifyFilterTable_check_indexes */
 
 /***********************************************************************
  *

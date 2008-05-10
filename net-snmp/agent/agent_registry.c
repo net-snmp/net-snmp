@@ -69,11 +69,143 @@
 #include "agentx/client.h"
 #endif
 
-static void register_mib_detach_node(netsnmp_subtree *s);
-NETSNMP_STATIC_INLINE void invalidate_lookup_cache(const char *context);
-void netsnmp_set_lookup_cache_size(int newsize);
-int netsnmp_get_lookup_cache_size(void);
+/* Lookup cache code */
 
+#define SUBTREE_DEFAULT_CACHE_SIZE 8
+#define SUBTREE_MAX_CACHE_SIZE     32
+int lookup_cache_size = 0; /*enabled later after registrations are loaded */
+
+typedef struct lookup_cache_s {
+   netsnmp_subtree *next;
+   netsnmp_subtree *previous;
+} lookup_cache;
+
+typedef struct lookup_cache_context_s {
+   char *context;
+   struct lookup_cache_context_s *next;
+   int thecachecount;
+   int currentpos;
+   lookup_cache cache[SUBTREE_MAX_CACHE_SIZE];
+} lookup_cache_context;
+
+static lookup_cache_context *thecontextcache = NULL;
+
+/** set the lookup cache size for optimized agent registration performance.
+ * @param newsize set to the maximum size of a cache for a given
+ * context.  Set to 0 to completely disable caching, or to -1 to set
+ * to the default cache size (8), or to a number of your chosing.  The
+ * rough guide is that it should be equal to the maximum number of
+ * simultanious managers you expect to talk to the agent (M) times 80%
+ * (or so, he says randomly) the average number (N) of varbinds you
+ * expect to receive in a given request for a manager.  ie, M times N.
+ * Bigger does NOT necessarily mean better.  Certainly 16 should be an
+ * upper limit.  32 is the hard coded limit.
+ */
+void
+netsnmp_set_lookup_cache_size(int newsize) {
+    if (newsize < 0)
+        lookup_cache_size = SUBTREE_DEFAULT_CACHE_SIZE;
+    else if (newsize < SUBTREE_MAX_CACHE_SIZE)
+        lookup_cache_size = newsize;
+    else
+        lookup_cache_size = SUBTREE_MAX_CACHE_SIZE;
+}
+
+/** retrieves the current value of the lookup cache size
+ *  @return the current lookup cache size
+ */
+int
+netsnmp_get_lookup_cache_size(void) {
+    return lookup_cache_size;
+}
+
+NETSNMP_STATIC_INLINE lookup_cache_context *
+get_context_lookup_cache(const char *context) {
+    lookup_cache_context *ptr;
+    if (!context)
+        context = "";
+
+    for(ptr = thecontextcache; ptr; ptr = ptr->next) {
+        if (strcmp(ptr->context, context) == 0)
+            break;
+    }
+    if (!ptr) {
+        if (netsnmp_subtree_find_first(context)) {
+            ptr = SNMP_MALLOC_TYPEDEF(lookup_cache_context);
+            ptr->next = thecontextcache;
+            ptr->context = strdup(context);
+            thecontextcache = ptr;
+        } else {
+            return NULL;
+        }
+    }
+    return ptr;
+}
+
+NETSNMP_STATIC_INLINE void
+lookup_cache_add(const char *context,
+                 netsnmp_subtree *next, netsnmp_subtree *previous) {
+    lookup_cache_context *cptr;
+
+    if ((cptr = get_context_lookup_cache(context)) == NULL)
+        return;
+
+    if (cptr->thecachecount < lookup_cache_size)
+        cptr->thecachecount++;
+
+    cptr->cache[cptr->currentpos].next = next;
+    cptr->cache[cptr->currentpos].previous = previous;
+
+    if (++cptr->currentpos >= lookup_cache_size)
+        cptr->currentpos = 0;
+}
+
+NETSNMP_STATIC_INLINE void
+lookup_cache_replace(lookup_cache *ptr,
+                     netsnmp_subtree *next, netsnmp_subtree *previous) {
+
+    ptr->next = next;
+    ptr->previous = previous;
+}
+
+NETSNMP_STATIC_INLINE lookup_cache *
+lookup_cache_find(const char *context, oid *name, size_t name_len,
+                  int *retcmp) {
+    lookup_cache_context *cptr;
+    lookup_cache *ret = NULL;
+    int cmp;
+    int i;
+
+    if ((cptr = get_context_lookup_cache(context)) == NULL)
+        return NULL;
+
+    for(i = 0; i < cptr->thecachecount && i < lookup_cache_size; i++) {
+        if (cptr->cache[i].previous->start_a)
+            cmp = snmp_oid_compare(name, name_len,
+                                   cptr->cache[i].previous->start_a,
+                                   cptr->cache[i].previous->start_len);
+        else
+            cmp = 1;
+        if (cmp >= 0) {
+            *retcmp = cmp;
+            ret = &(cptr->cache[i]);
+        }
+    }
+    return ret;
+}
+
+NETSNMP_STATIC_INLINE void
+invalidate_lookup_cache(const char *context) {
+    lookup_cache_context *cptr;
+    if ((cptr = get_context_lookup_cache(context)) != NULL) {
+        cptr->thecachecount = 0;
+        cptr->currentpos = 0;
+    }
+}
+
+/* End of Lookup cache code */
+
+static void register_mib_detach_node(netsnmp_subtree *s);
 subtree_context_cache *context_subtrees = NULL;
 
 void
@@ -1345,138 +1477,6 @@ netsnmp_acm_check_subtree(netsnmp_pdu *pdu, oid *name, size_t namelen)
         return view_parms.errorcode;
     }
     return 1;
-}
-
-#define SUBTREE_DEFAULT_CACHE_SIZE 8
-#define SUBTREE_MAX_CACHE_SIZE     32
-int lookup_cache_size = 0; /*enabled later after registrations are loaded */
-
-typedef struct lookup_cache_s {
-   netsnmp_subtree *next;
-   netsnmp_subtree *previous;
-} lookup_cache;
-
-typedef struct lookup_cache_context_s {
-   char *context;
-   struct lookup_cache_context_s *next;
-   int thecachecount;
-   int currentpos;
-   lookup_cache cache[SUBTREE_MAX_CACHE_SIZE];
-} lookup_cache_context;
-
-static lookup_cache_context *thecontextcache = NULL;
-
-/** set the lookup cache size for optimized agent registration performance.
- * @param newsize set to the maximum size of a cache for a given
- * context.  Set to 0 to completely disable caching, or to -1 to set
- * to the default cache size (8), or to a number of your chosing.  The
- * rough guide is that it should be equal to the maximum number of
- * simultanious managers you expect to talk to the agent (M) times 80%
- * (or so, he says randomly) the average number (N) of varbinds you
- * expect to receive in a given request for a manager.  ie, M times N.
- * Bigger does NOT necessarily mean better.  Certainly 16 should be an
- * upper limit.  32 is the hard coded limit.
- */
-void
-netsnmp_set_lookup_cache_size(int newsize) {
-    if (newsize < 0)
-        lookup_cache_size = SUBTREE_DEFAULT_CACHE_SIZE;
-    else if (newsize < SUBTREE_MAX_CACHE_SIZE)
-        lookup_cache_size = newsize;
-    else
-        lookup_cache_size = SUBTREE_MAX_CACHE_SIZE;
-}
-
-/** retrieves the current value of the lookup cache size
- *  @return the current lookup cache size
- */
-int
-netsnmp_get_lookup_cache_size(void) {
-    return lookup_cache_size;
-}
-
-NETSNMP_STATIC_INLINE lookup_cache_context *
-get_context_lookup_cache(const char *context) {
-    lookup_cache_context *ptr;
-    if (!context)
-        context = "";
-
-    for(ptr = thecontextcache; ptr; ptr = ptr->next) {
-        if (strcmp(ptr->context, context) == 0)
-            break;
-    }
-    if (!ptr) {
-        if (netsnmp_subtree_find_first(context)) {
-            ptr = SNMP_MALLOC_TYPEDEF(lookup_cache_context);
-            ptr->next = thecontextcache;
-            ptr->context = strdup(context);
-            thecontextcache = ptr;
-        } else {
-            return NULL;
-        }
-    }
-    return ptr;
-}
-
-NETSNMP_STATIC_INLINE void
-lookup_cache_add(const char *context,
-                 netsnmp_subtree *next, netsnmp_subtree *previous) {
-    lookup_cache_context *cptr;
-
-    if ((cptr = get_context_lookup_cache(context)) == NULL)
-        return;
-    
-    if (cptr->thecachecount < lookup_cache_size)
-        cptr->thecachecount++;
-
-    cptr->cache[cptr->currentpos].next = next;
-    cptr->cache[cptr->currentpos].previous = previous;
-
-    if (++cptr->currentpos >= lookup_cache_size)
-        cptr->currentpos = 0;
-}
-
-NETSNMP_STATIC_INLINE void
-lookup_cache_replace(lookup_cache *ptr,
-                     netsnmp_subtree *next, netsnmp_subtree *previous) {
-
-    ptr->next = next;
-    ptr->previous = previous;
-}
-
-NETSNMP_STATIC_INLINE lookup_cache *
-lookup_cache_find(const char *context, oid *name, size_t name_len,
-                  int *retcmp) {
-    lookup_cache_context *cptr;
-    lookup_cache *ret = NULL;
-    int cmp;
-    int i;
-
-    if ((cptr = get_context_lookup_cache(context)) == NULL)
-        return NULL;
-
-    for(i = 0; i < cptr->thecachecount && i < lookup_cache_size; i++) {
-        if (cptr->cache[i].previous->start_a)
-            cmp = snmp_oid_compare(name, name_len,
-                                   cptr->cache[i].previous->start_a,
-                                   cptr->cache[i].previous->start_len);
-        else
-            cmp = 1;
-        if (cmp >= 0) {
-            *retcmp = cmp;
-            ret = &(cptr->cache[i]);
-        }
-    }
-    return ret;
-}
-
-NETSNMP_STATIC_INLINE void
-invalidate_lookup_cache(const char *context) {
-    lookup_cache_context *cptr;
-    if ((cptr = get_context_lookup_cache(context)) != NULL) {
-        cptr->thecachecount = 0;
-        cptr->currentpos = 0;
-    }
 }
 
 netsnmp_subtree *

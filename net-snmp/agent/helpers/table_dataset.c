@@ -77,59 +77,6 @@ netsnmp_init_table_dataset(void) {
  *
  * ================================== */
 
-/** Create a netsnmp_table_data_set structure given a table_data definition */
-netsnmp_table_data_set *
-netsnmp_create_table_data_set(const char *table_name)
-{
-    netsnmp_table_data_set *table_set =
-        SNMP_MALLOC_TYPEDEF(netsnmp_table_data_set);
-    if (!table_set)
-        return NULL;
-    table_set->table = netsnmp_create_table_data(table_name);
-    return table_set;
-}
-
-/** clones a dataset row, including all data. */
-netsnmp_table_row *
-netsnmp_table_data_set_clone_row(netsnmp_table_row *row)
-{
-    netsnmp_table_data_set_storage *data, **newrowdata;
-    netsnmp_table_row *newrow;
-
-    if (!row)
-        return NULL;
-
-    newrow = netsnmp_table_data_clone_row(row);
-    if (!newrow)
-        return NULL;
-
-    data = (netsnmp_table_data_set_storage *) row->data;
-
-    if (data) {
-        for (newrowdata =
-             (netsnmp_table_data_set_storage **) &(newrow->data); data;
-             newrowdata = &((*newrowdata)->next), data = data->next) {
-
-            memdup((u_char **) newrowdata, (u_char *) data,
-                   sizeof(netsnmp_table_data_set_storage));
-            if (!*newrowdata) {
-                netsnmp_table_dataset_delete_row(newrow);
-                return NULL;
-            }
-
-            if (data->data.voidp) {
-                memdup((u_char **) & ((*newrowdata)->data.voidp),
-                       (u_char *) data->data.voidp, data->data_len);
-                if (!(*newrowdata)->data.voidp) {
-                    netsnmp_table_dataset_delete_row(newrow);
-                    return NULL;
-                }
-            }
-        }
-    }
-    return newrow;
-}
-
 /** deletes a single dataset table data.
  *  returns the (possibly still good) next pointer of the deleted data object.
  */
@@ -214,6 +161,59 @@ netsnmp_table_dataset_remove_and_delete_row(netsnmp_table_data_set *table,
         netsnmp_table_data_remove_and_delete_row(table->table, row);
 
     netsnmp_table_dataset_delete_all_data(data);
+}
+
+/** Create a netsnmp_table_data_set structure given a table_data definition */
+netsnmp_table_data_set *
+netsnmp_create_table_data_set(const char *table_name)
+{
+    netsnmp_table_data_set *table_set =
+        SNMP_MALLOC_TYPEDEF(netsnmp_table_data_set);
+    if (!table_set)
+        return NULL;
+    table_set->table = netsnmp_create_table_data(table_name);
+    return table_set;
+}
+
+/** clones a dataset row, including all data. */
+netsnmp_table_row *
+netsnmp_table_data_set_clone_row(netsnmp_table_row *row)
+{
+    netsnmp_table_data_set_storage *data, **newrowdata;
+    netsnmp_table_row *newrow;
+
+    if (!row)
+        return NULL;
+
+    newrow = netsnmp_table_data_clone_row(row);
+    if (!newrow)
+        return NULL;
+
+    data = (netsnmp_table_data_set_storage *) row->data;
+
+    if (data) {
+        for (newrowdata =
+             (netsnmp_table_data_set_storage **) &(newrow->data); data;
+             newrowdata = &((*newrowdata)->next), data = data->next) {
+
+            memdup((u_char **) newrowdata, (u_char *) data,
+                   sizeof(netsnmp_table_data_set_storage));
+            if (!*newrowdata) {
+                netsnmp_table_dataset_delete_row(newrow);
+                return NULL;
+            }
+
+            if (data->data.voidp) {
+                memdup((u_char **) & ((*newrowdata)->data.voidp),
+                       (u_char *) data->data.voidp, data->data_len);
+                if (!(*newrowdata)->data.voidp) {
+                    netsnmp_table_dataset_delete_row(newrow);
+                    return NULL;
+                }
+            }
+        }
+    }
+    return newrow;
 }
 
 /* ==================================

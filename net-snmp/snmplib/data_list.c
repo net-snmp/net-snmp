@@ -6,13 +6,6 @@
 #include <net-snmp/net-snmp-config.h>
 #include <net-snmp/net-snmp-includes.h>
 
-/*
- * prototypes
- */
-NETSNMP_INLINE void
-netsnmp_data_list_add_node(netsnmp_data_list **head, netsnmp_data_list *node);
-
-
 /** @defgroup data_list generic linked-list data handling with a string as a key.
  * @ingroup library
  * @{
@@ -74,18 +67,6 @@ netsnmp_create_data_list(const char *name, void *data,
 }
 
 /** adds data to a datalist
- * @note netsnmp_data_list_add_node is preferred
- * @param head a pointer to the head node of a data_list
- * @param node a node to stash in the data_list
- */
-/**  */
-NETSNMP_INLINE void
-netsnmp_add_list_data(netsnmp_data_list **head, netsnmp_data_list *node)
-{
-    netsnmp_data_list_add_node(head, node);
-}
-
-/** adds data to a datalist
  * @param head a pointer to the head node of a data_list
  * @param node a node to stash in the data_list
  */
@@ -124,6 +105,18 @@ netsnmp_data_list_add_node(netsnmp_data_list **head, netsnmp_data_list *node)
     netsnmp_assert(NULL != ptr);
     if (ptr)                    /* should always be true */
         ptr->next = node;
+}
+
+/** adds data to a datalist
+ * @note netsnmp_data_list_add_node is preferred
+ * @param head a pointer to the head node of a data_list
+ * @param node a node to stash in the data_list
+ */
+/**  */
+NETSNMP_INLINE void
+netsnmp_add_list_data(netsnmp_data_list **head, netsnmp_data_list *node)
+{
+    netsnmp_data_list_add_node(head, node);
 }
 
 /** adds data to a datalist

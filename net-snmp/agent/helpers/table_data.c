@@ -226,7 +226,7 @@ netsnmp_table_data_add_row(netsnmp_table_data *table,
 }
 
 /** swaps out origrow with newrow.  This does *not* delete/free anything! */
-NETSNMP_INLINE void
+void
 netsnmp_table_data_replace_row(netsnmp_table_data *table,
                                netsnmp_table_row *origrow,
                                netsnmp_table_row *newrow)
@@ -682,7 +682,7 @@ netsnmp_extract_table_row_data(netsnmp_request_info *request)
 }
 
 /** inserts a newly created table_data row into a request */
-NETSNMP_INLINE void
+void
 netsnmp_insert_table_row(netsnmp_request_info *request,
                          netsnmp_table_row *row)
 {
