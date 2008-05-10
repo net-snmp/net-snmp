@@ -7,6 +7,9 @@ extern          "C" {
 
 struct sysORTable;
 
+extern void     init_agent_sysORTable(void);
+extern void     shutdown_agent_sysORTable(void);
+
 extern void     netsnmp_sysORTable_foreach(void (*)(const struct sysORTable*,
                                                     void*),
                                            void*);
