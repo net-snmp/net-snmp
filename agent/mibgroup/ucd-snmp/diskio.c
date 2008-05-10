@@ -721,7 +721,7 @@ void devla_getstats(unsigned int regno, void * dummy) {
 
     static double expon1, expon5, expon15;
     double busy_time, busy_percent;
-    int new_entries, idx;
+    int idx;
 
     if (getstats() == 1) {
         ERROR_MSG("can't do diskio getstats()\n");

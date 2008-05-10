@@ -83,7 +83,6 @@ handle_ipForwarding(netsnmp_mib_handler *handler,
     int      rc;
     u_long   value;
 
-    int ret;
     /* We are never called for a GETNEXT if it's registered as a
        "instance", as it's "magically" handled for us.  */
 
