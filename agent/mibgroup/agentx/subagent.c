@@ -47,6 +47,7 @@
 #include <net-snmp/agent/agent_callbacks.h>
 #include <net-snmp/agent/agent_trap.h>
 #include <net-snmp/agent/sysORTable.h>
+#include <net-snmp/agent/agent_sysORTable.h>
 
 #include "subagent.h"
 
