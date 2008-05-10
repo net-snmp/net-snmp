@@ -490,7 +490,7 @@ proxy_got_response(int operation, netsnmp_session * sess, int reqid,
          * WWWXXX: don't leave requests delayed if operation is
          * something like TIMEOUT 
          */
-        DEBUGMSGTL(("proxy", "got timed out... requests = %08p\n", requests));
+        DEBUGMSGTL(("proxy", "got timed out... requests = %8p\n", requests));
 
         netsnmp_handler_mark_requests_as_delegated(requests,
                                                    REQUEST_IS_NOT_DELEGATED);

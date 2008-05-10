@@ -2573,14 +2573,14 @@ asn_realloc(u_char ** pkt, size_t * pkt_len)
     if (pkt != NULL && pkt_len != NULL) {
         size_t          old_pkt_len = *pkt_len;
 
-        DEBUGMSGTL(("asn_realloc", " old_pkt %08p, old_pkt_len %08x\n",
+        DEBUGMSGTL(("asn_realloc", " old_pkt %8p, old_pkt_len %8x\n",
                     *pkt, old_pkt_len));
 
         if (snmp_realloc(pkt, pkt_len)) {
-            DEBUGMSGTL(("asn_realloc", " new_pkt %08p, new_pkt_len %08x\n",
+            DEBUGMSGTL(("asn_realloc", " new_pkt %8p, new_pkt_len %8x\n",
                         *pkt, *pkt_len));
             DEBUGMSGTL(("asn_realloc",
-                        " memmove(%08p + %08x, %08p, %08x)\n", *pkt,
+                        " memmove(%8p + %08x, %8p, %08x)\n", *pkt,
                         (*pkt_len - old_pkt_len), *pkt, old_pkt_len));
             memmove(*pkt + (*pkt_len - old_pkt_len), *pkt, old_pkt_len);
             memset(*pkt, (int) ' ', *pkt_len - old_pkt_len);

@@ -70,7 +70,7 @@ open_agentx_session(netsnmp_session * session, netsnmp_pdu *pdu)
     netsnmp_session *sp;
     struct timeval  now;
 
-    DEBUGMSGTL(("agentx/master", "open %08p\n", session));
+    DEBUGMSGTL(("agentx/master", "open %8p\n", session));
     sp = (netsnmp_session *) malloc(sizeof(netsnmp_session));
     if (sp == NULL) {
         session->s_snmp_errno = AGENTX_ERR_OPEN_FAILED;
@@ -117,7 +117,7 @@ open_agentx_session(netsnmp_session * session, netsnmp_pdu *pdu)
     sp->flags |= (pdu->flags & AGENTX_MSG_FLAG_NETWORK_BYTE_ORDER);
     sp->next = session->subsession;
     session->subsession = sp;
-    DEBUGMSGTL(("agentx/master", "opened %08p = %d with flags = %02x\n",
+    DEBUGMSGTL(("agentx/master", "opened %8p = %d with flags = %02x\n",
                 sp, sp->sessid, sp->flags & AGENTX_MSG_FLAGS_MASK));
 
     return sp->sessid;
@@ -131,7 +131,7 @@ close_agentx_session(netsnmp_session * session, int sessid)
     if (!session)
         return AGENTX_ERR_NOT_OPEN;
 
-    DEBUGMSGTL(("agentx/master", "close %08p, %d\n", session, sessid));
+    DEBUGMSGTL(("agentx/master", "close %8p, %d\n", session, sessid));
     if (sessid == -1) {
         /*
          * The following is necessary to avoid locking up the agent when
@@ -174,7 +174,7 @@ close_agentx_session(netsnmp_session * session, int sessid)
             free(sp);
             sp = NULL;
 
-            DEBUGMSGTL(("agentx/master", "closed %08p, %d okay\n",
+            DEBUGMSGTL(("agentx/master", "closed %8p, %d okay\n",
                         session, sessid));
             return AGENTX_ERR_NOERROR;
         }
@@ -483,7 +483,7 @@ handle_master_agentx_packet(int operation,
 
     if (operation == NETSNMP_CALLBACK_OP_DISCONNECT) {
         DEBUGMSGTL(("agentx/master",
-                    "transport disconnect on session %08p\n", session));
+                    "transport disconnect on session %8p\n", session));
         /*
          * Shut this session down gracefully.  
          */

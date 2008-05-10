@@ -234,7 +234,7 @@ agentx_got_response(int operation,
 
     cache = netsnmp_handler_check_cache(cache);
     if (!cache) {
-        DEBUGMSGTL(("agentx/master", "response too late on session %08p\n",
+        DEBUGMSGTL(("agentx/master", "response too late on session %8p\n",
                     session));
         return 0;
     }
@@ -243,7 +243,7 @@ agentx_got_response(int operation,
     switch (operation) {
     case NETSNMP_CALLBACK_OP_TIMED_OUT:{
             void           *s = snmp_sess_pointer(session);
-            DEBUGMSGTL(("agentx/master", "timeout on session %08p\n",
+            DEBUGMSGTL(("agentx/master", "timeout on session %8p\n",
                         session));
 
             netsnmp_handler_mark_requests_as_delegated(requests,
@@ -281,10 +281,10 @@ agentx_got_response(int operation,
     case NETSNMP_CALLBACK_OP_DISCONNECT:
     case NETSNMP_CALLBACK_OP_SEND_FAILED:
         if (operation == NETSNMP_CALLBACK_OP_DISCONNECT) {
-            DEBUGMSGTL(("agentx/master", "disconnect on session %08p\n",
+            DEBUGMSGTL(("agentx/master", "disconnect on session %8p\n",
                         session));
         } else {
-            DEBUGMSGTL(("agentx/master", "send failed on session %08p\n",
+            DEBUGMSGTL(("agentx/master", "send failed on session %8p\n",
                         session));
         }
         close_agentx_session(session, -1);
