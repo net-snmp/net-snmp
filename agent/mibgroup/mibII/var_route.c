@@ -313,7 +313,7 @@ static int      rtsize = 0;
 static mib_ipRouteEnt *rt = (mib_ipRouteEnt *) 0;
 static void     Route_Scan_Reload(void);
 #elif !defined(solaris2)
-static RTENTRY **rthead = 0;
+static RTENTRY **rthead = NULL;
 static int      rtsize = 0, rtallocate = 0;
 
 static void     Route_Scan_Reload(void);

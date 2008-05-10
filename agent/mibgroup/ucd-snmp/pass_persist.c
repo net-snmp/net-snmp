@@ -173,7 +173,7 @@ pass_persist_parse_config(const char *token, char *cptr)
         if (etmp == NULL)
             return;
         for (i = 0, ptmp = (struct extensible *) persistpassthrus;
-             i < numpersistpassthrus && ptmp != 0; i++, ptmp = ptmp->next)
+             i < numpersistpassthrus && ptmp != NULL; i++, ptmp = ptmp->next)
             etmp[i] = ptmp;
         qsort(etmp, numpersistpassthrus, sizeof(struct extensible *),
               pass_persist_compare);
@@ -808,7 +808,7 @@ close_persist_pipe(int iindex)
 
     if (persist_pipes[iindex].pid != -1) {
 #if HAVE_SYS_WAIT_H
-        waitpid(persist_pipes[iindex].pid, 0, 0);
+        waitpid(persist_pipes[iindex].pid, NULL, 0);
 #endif
         persist_pipes[iindex].pid = -1;
     }

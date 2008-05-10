@@ -300,7 +300,7 @@ var_atEntry(struct variable *vp,
 
     memcpy((char *) name, (char *) lowest, oid_length * sizeof(oid));
     *length = oid_length;
-    *write_method = 0;
+    *write_method = (WriteMethod*)0;
     switch (vp->magic) {
     case IPMEDIAIFINDEX:       /* also ATIFINDEX */
         *var_len = sizeof long_return;

@@ -342,7 +342,7 @@ udpTable_first_entry(void **loop_context,
      * XXX - How can we tell if the cache is valid?
      *       No access to 'reqinfo'
      */
-    if (udp_head == 0)
+    if (udp_head == NULL)
         return NULL;
 
     /*
