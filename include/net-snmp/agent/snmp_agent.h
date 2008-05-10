@@ -282,24 +282,24 @@ extern          "C" {
                                                 *t);
     void            netsnmp_deregister_agent_nsap(int handle);
 
-    NETSNMP_INLINE void
+    void
         netsnmp_agent_add_list_data(netsnmp_agent_request_info *agent,
                                     netsnmp_data_list *node);
 
-    NETSNMP_INLINE int
+    int
         netsnmp_agent_remove_list_data(netsnmp_agent_request_info *ari,
                                        const char * name);
 
-    NETSNMP_INLINE void *
+    void *
             netsnmp_agent_get_list_data(netsnmp_agent_request_info
                                         *agent, const char *name);
 
-    NETSNMP_INLINE void
+    void
             netsnmp_free_agent_data_set(netsnmp_agent_request_info *agent);
 
-    NETSNMP_INLINE void
+    void
            netsnmp_free_agent_data_sets(netsnmp_agent_request_info *agent);
-    NETSNMP_INLINE void    
+    void
         netsnmp_free_agent_request_info(netsnmp_agent_request_info *ari);
 
 #ifdef __cplusplus
