@@ -53,6 +53,8 @@
 	      while(&lt;SVNINFO&gt;) {
 		  if (/^URL: *(.*)/) {
 		     $self->{'parameters'}{'BRANCHPATH'} = $1;
+	             # strip off trailing module name
+	             $self->{'parameters'}{'BRANCHPATH'} =~ s/.net-snmp$//;
                      last;
                   }
               }
