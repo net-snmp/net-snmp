@@ -53,16 +53,30 @@ handle_snmp(netsnmp_mib_handler *handler,
 {
     switch (reqinfo->mode) {
     case MODE_GET:
-        {
-            oid idx = requests->requestvb->name[OID_LENGTH(snmp_oid)];
-            u_int value =
-                snmp_get_statistic(idx - 1 + STAT_SNMPINPKTS);
-            snmp_set_var_typed_value(requests->requestvb, ASN_COUNTER,
-                                     (u_char *)&value, sizeof(value));
-        }
+	{
+	    oid idx = requests->requestvb->name[OID_LENGTH(snmp_oid)];
+	    switch(idx) {
+	    case 7:
+	    case 23:
+            case 30:
+		netsnmp_set_request_error(reqinfo, requests,
+					  SNMP_NOSUCHOBJECT);
+		break;
+	    default:
+		{
+		    u_int value =
+			snmp_get_statistic(idx - 1 + STAT_SNMPINPKTS);
+		    snmp_set_var_typed_value(requests->requestvb, ASN_COUNTER,
+					     (u_char *)&value, sizeof(value));
+		}
+		break;
+	    }
+	}
 	break;
 
     default:
+        snmp_log(LOG_ERR,
+                 "unknown mode (%d) in handle_snmp\n", reqinfo->mode);
         return SNMP_ERR_GENERR;
     }
 
@@ -82,17 +96,9 @@ init_snmp_mib(void)
     DEBUGMSGTL(("snmp", "Initializing\n"));
 
     netsnmp_register_scalar_group(
-        netsnmp_create_handler_registration(
-            "mibII/snmp", handle_snmp, snmp_oid, OID_LENGTH(snmp_oid),
-            HANDLER_CAN_RONLY), 1, 6);
-    netsnmp_register_scalar_group(
-        netsnmp_create_handler_registration(
-            "mibII/snmp", handle_snmp, snmp_oid, OID_LENGTH(snmp_oid),
-            HANDLER_CAN_RONLY), 8, 22);
-    netsnmp_register_scalar_group(
-        netsnmp_create_handler_registration(
-            "mibII/snmp", handle_snmp, snmp_oid, OID_LENGTH(snmp_oid),
-            HANDLER_CAN_RONLY), 24, 29);
+      netsnmp_create_handler_registration(
+	"mibII/snmp", handle_snmp, snmp_oid, OID_LENGTH(snmp_oid),
+	HANDLER_CAN_RONLY), 1, 32);
     {
         oid snmpEnableAuthenTraps_oid[] = { 1, 3, 6, 1, 2, 1, 11, 30, 0 };
         netsnmp_handler_registration *reg =
@@ -108,10 +114,6 @@ init_snmp_mib(void)
                 &snmp_enableauthentraps, sizeof(snmp_enableauthentraps),
                 ASN_INTEGER, WATCHER_FIXED_SIZE));
     }
-    netsnmp_register_scalar_group(
-        netsnmp_create_handler_registration(
-            "mibII/snmp", handle_snmp, snmp_oid, OID_LENGTH(snmp_oid),
-            HANDLER_CAN_RONLY), 31, 32);
 
 #ifdef USING_MIBII_SYSTEM_MIB_MODULE
     if (++system_module_count == 3)
