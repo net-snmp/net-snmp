@@ -638,6 +638,9 @@ AC_ARG_WITH(out_transports,
                 platforms, and may be omitted.
     Callback    support for SNMP over an internal locally connected pair
                 of snmp_sessions.
+    Alias       The alias transport simply lets you define more complex
+                transport strings and alias them to simple names in
+                the snmp.conf file.
     AAL5PVC     support for SNMP over AAL5 PVCs.
                 This transport is presently only available for Linux,
                 is never compiled in by default and may be omitted.
@@ -1567,11 +1570,11 @@ new_with_out_transport_list=`echo $with_out_transports | $SED 's/,/ /g;'`
 # Add the default transports to the list
 #
 if test "x$PARTIALTARGETOS" = "xcygwin"; then
-  transport_default_list="UDP TCP Callback"
+  transport_default_list="UDP TCP Alias Callback"
 elif test "x$PARTIALTARGETOS" = "xmingw32" -o "x$PARTIALTARGETOS" = "xmingw32msvc"; then 
-  transport_default_list="UDP TCP Callback"
+  transport_default_list="UDP TCP Alias Callback"
 else
-  transport_default_list="UDP TCP Unix Callback"
+  transport_default_list="UDP TCP Alias Unix Callback"
 fi
 if test "x$enable_ipv6" = "xyes"; then
   transport_default_list="UDPIPv6 TCPIPv6 $transport_default_list"
