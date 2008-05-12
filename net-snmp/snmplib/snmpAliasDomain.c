@@ -26,7 +26,7 @@
 
 #include <net-snmp/library/snmp_transport.h>
 
-oid netsnmp_snmpALIASDomain[] = { 1,3,6,1,9876 };
+oid netsnmp_snmpALIASDomain[] = { 1,3,6,1,4,1,8072,3,3,7 };
 static netsnmp_tdomain aliasDomain;
 
 /* simple storage mechanism */

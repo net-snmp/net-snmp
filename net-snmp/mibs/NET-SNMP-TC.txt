@@ -119,5 +119,6 @@ netSnmpAAL5PVCDomain	OBJECT IDENTIFIER ::= { netSnmpDomains 3 }
 netSnmpUDPIPv6Domain	OBJECT IDENTIFIER ::= { netSnmpDomains 4 } -- obsolete
 netSnmpTCPIPv6Domain	OBJECT IDENTIFIER ::= { netSnmpDomains 5 } -- obsolete
 netSnmpCallbackDomain	OBJECT IDENTIFIER ::= { netSnmpDomains 6 }
+netSnmpAliasDomain	OBJECT IDENTIFIER ::= { netSnmpDomains 7 }
 
 END
