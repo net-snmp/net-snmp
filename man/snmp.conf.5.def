@@ -46,6 +46,13 @@ This can be overridden using the \fB-v\fR option.
 defines the default community to use for SNMPv1 and SNMPv2c requests.
 This can be overridden using the \fB-c\fR option.
 .\".IP "dumpPacket (1|yes|true|0|no|false)"
+.IP "alias NAME DEFINITION"
+Creates an aliased tied to NAME for a given transport definition.  The
+alias can the be referred to using an alias: prefix.  Eg, a line of
+"alias here udp:127.0.0.1:6161" would allow you to use a destination
+host of "alias:here" instead of "udp:127.0.0.1:6161".  This becomes
+more useful with complex transport addresses involving IPv6 addresses,
+etc.
 .IP "dumpPacket yes"
 defines whether to display a hexadecimal dump of the raw SNMP requests
 sent and received by the application.
