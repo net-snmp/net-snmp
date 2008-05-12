@@ -533,9 +533,13 @@
     available.  */
 #undef NETSNMP_TRANSPORT_TCPIPV6_DOMAIN
 
-/*  This is defined if support for the UDP/IP transport domain is
+/*  This is defined if support for the TLS transport domain is
     available.   */
 #undef NETSNMP_TRANSPORT_TLS_DOMAIN
+
+/*  This is defined if support for the Alias transport domain is
+    available.   */
+#undef NETSNMP_TRANSPORT_ALIAS_DOMAIN
 
 /*  This is defined if support for stdin/out transport domain is available.   */
 #undef NETSNMP_TRANSPORT_STD_DOMAIN
@@ -902,6 +906,10 @@
 
 #ifdef NETSNMP_TRANSPORT_TLS_DOMAIN
 # define SNMP_TRANSPORT_TLS_DOMAIN NETSNMP_TRANSPORT_TLS_DOMAIN
+#endif
+
+#ifdef NETSNMP_TRANSPORT_ALIAS_DOMAIN
+# define SNMP_TRANSPORT_ALIAS_DOMAIN NETSNMP_TRANSPORT_ALIAS_DOMAIN
 #endif
 
 #ifdef NETSNMP_TRANSPORT_STD_DOMAIN
