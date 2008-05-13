@@ -203,6 +203,7 @@ is 5.
 .TP
 .BI -t " timeout"
 Specifies the timeout in seconds between retries. The default is 1.
+Floating point numbers can be used to specify fractions of seconds.
 .TP
 .BI -u " secName"
 Set the securityName used for authenticated SNMPv3 messages.
