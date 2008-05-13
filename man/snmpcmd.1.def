@@ -352,6 +352,16 @@ identical to the previous specification, since the Unix domain is the
 default transport iff the first character of the <transport-address>
 is a '/'.
 .TP 24
+.IR "alias:myname"
+perform a connection to the
+.I myname
+alias which needs to be defined in the snmp.conf file using a line
+like "
+.I "alias myname udp:127.0.0.1:9161"
+".  Any type of transport definition can be used as the alias expansion
+parameter.  Aliases are particularly useful for using repeated complex
+transport strings.
+.TP 24
 .IR "AAL5PVC:100"
 perform the query using AAL5 PDUs sent on the permanent virtual
 circuit with VPI=0 and VCI=100 (decimal) on the first ATM adapter in the
