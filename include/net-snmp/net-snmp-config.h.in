@@ -1751,7 +1751,7 @@
     available.   */
 #undef NETSNMP_TRANSPORT_TLS_DOMAIN
 
-/*  This is defined if support for the UDP/IP transport domain is
+/*  This is defined if support for the Alias transport domain is
     available.   */
 #undef NETSNMP_TRANSPORT_ALIAS_DOMAIN
 
