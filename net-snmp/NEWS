@@ -9,10 +9,13 @@ listing of all changes made to the code.
     administrative:
       - Code repository moved to SVN from CVS on SourceForge.net
 
-    snmplib:
-      - [PATCH 1592706]: Fix memory leak when cloning varbinds.
+    applications:
       - Added the ability to "alias" transports to a more simple name
          (see the "alias" keyword in the snmp.conf manual page)
+      - The -t (timeout) switch will accept floating point numbers (eg: .1)
+
+    snmplib:
+      - [PATCH 1592706]: Fix memory leak when cloning varbinds.
 
     snmpd:
       - [PATCH 1585146]: Extend range of available error codes
