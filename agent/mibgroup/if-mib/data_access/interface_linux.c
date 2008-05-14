@@ -43,6 +43,14 @@ typedef __u8 u8;           /* ditto */
 #define IF_NAMESIZE 16
 #endif
 
+#ifndef SIOCGMIIPHY
+#define SIOCGMIIPHY 0x8947
+#endif
+
+#ifndef SIOCGMIIREG
+#define SIOCGMIIREG 0x8948
+#endif
+
 #ifdef NETSNMP_ENABLE_IPV6
 #if defined(HAVE_PTHREAD_H) && defined(HAVE_LINUX_RTNETLINK_H)
 #include <pthread.h>
