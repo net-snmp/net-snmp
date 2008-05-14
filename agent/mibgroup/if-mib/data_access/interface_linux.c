@@ -126,6 +126,14 @@ _arch_interface_has_ipv6(oid if_index, u_int *flags,
 
     *flags &= ~NETSNMP_INTERFACE_FLAGS_HAS_IPV6;
 
+#ifndef SIOCGMIIPHY
+#define SIOCGMIIPHY 0x8947
+#endif
+
+#ifndef SIOCGMIIREG
+#define SIOCGMIIREG 0x8948
+#endif
+
 #ifdef NETSNMP_ENABLE_IPV6
     /*
      * get ipv6 addresses
