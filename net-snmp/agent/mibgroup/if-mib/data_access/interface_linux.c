@@ -41,6 +41,14 @@ typedef __u8 u8;           /* ditto */
 #define IF_NAMESIZE 16
 #endif
 
+#ifndef SIOCGMIIPHY
+#define SIOCGMIIPHY 0x8947
+#endif
+
+#ifndef SIOCGMIIREG
+#define SIOCGMIIREG 0x8948
+#endif
+
 unsigned int
 netsnmp_linux_interface_get_if_speed(int fd, const char *name);
 #ifdef HAVE_LINUX_ETHTOOL_H
