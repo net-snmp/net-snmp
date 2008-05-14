@@ -34,6 +34,14 @@ typedef __u8 u8;           /* ditto */
 
 #include <linux/sockios.h>
 
+#ifndef SIOCGMIIPHY
+#define SIOCGMIIPHY 0x8947
+#endif
+
+#ifndef SIOCGMIIREG
+#define SIOCGMIIREG 0x8948
+#endif
+
 unsigned int
 netsnmp_arch_interface_get_if_speed(int fd, const char *name);
 #ifdef HAVE_LINUX_ETHTOOL_H
