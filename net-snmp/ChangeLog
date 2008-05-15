@@ -1,4 +1,56 @@
 -------------------------------------------------------------------------------
+Changes: V5.2.5.pre2 -> V5.2.5.pre3
+
+2008-05-15 16:43  hardaker
+
+   *
+
+   Version number update
+
+2008-05-14 13:35  tanders
+
+   *
+
+   fix build failures with earlier Linux kernels (e.g. with RH7.1)
+   introduced by r16909
+
+2008-05-08 14:00  dts12
+
+   *
+
+   Drop support for the interim SIOCDEVPRIVATE-based ioctl calls.
+   SIOCGMIIPHY/SIOCGMIIREG have been defined since at least Sept
+   2001 (kernel 2.4.10),
+   so the risk of calling an inappropriate private ioctl is probably
+   greater than
+   that of missing information from an ancient system.
+
+2008-05-08 09:02  dts12
+
+   *
+
+   Don't try to automatically create anonymous users.
+   (An invalid trapsess directive may crash the agent)
+
+2008-05-02 10:19  dts12
+
+   *
+
+   Handle udpTable indexing on both PPC and Intel hardware.
+
+2008-05-02 10:16  dts12
+
+   *
+
+   Settings for Mac OS X Leopard. (Copied from 5.4.x version)
+
+2008-04-30 05:28  magfr
+
+   *
+
+   Remove unncessary prototypes
+
+-------------------------------------------------------------------------------
 Changes: V5.2.5.pre1 -> V5.2.5.pre2
 
 No differences...  Unfortunately, the .pre1 release was not a proper
