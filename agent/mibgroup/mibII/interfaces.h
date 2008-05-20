@@ -8,7 +8,7 @@
 /***********************************************************************
  * configure macros
  */
-config_require(util_funcs)
+config_require(util_funcs/header_generic)
 
 /*
  * conflicts with the new MFD rewrite

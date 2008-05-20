@@ -10,10 +10,10 @@
 #define _MIBGROUP_SNMPENGINE_H
 
 /*
- * we use header_generic and checkmib from the util_funcs module 
+ * we use header_generic from the util_funcs module
  */
 
-config_require(util_funcs)
+config_require(util_funcs/header_generic)
 config_add_mib(SNMP-FRAMEWORK-MIB)
 
     /*

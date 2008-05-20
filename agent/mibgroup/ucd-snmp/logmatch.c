@@ -38,9 +38,9 @@
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 
 #include "struct.h"
-#include "util_funcs.h"
 #include "logmatch.h"
-#include "util_funcs.h"
+#include "util_funcs/header_generic.h"
+#include "util_funcs/header_simple_table.h"
 
 #define MAXLOGMATCH   50
 

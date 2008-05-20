@@ -10,7 +10,7 @@
 #include "struct.h"
 
 #ifndef USING_UCD_SNMP_EXTENSIBLE_MODULE
-#include "util_funcs.h"
+#include "util_funcs/header_simple_table.h"
 #include "mibdefs.h"
 #define SHELLCOMMAND 3
 #endif

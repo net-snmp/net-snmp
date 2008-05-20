@@ -16,38 +16,13 @@
 #include <strings.h>
 #endif
 
-/*
- * needed by util_funcs.h 
- */
-#if TIME_WITH_SYS_TIME
-# ifdef WIN32
-#  include <sys/timeb.h>
-# else
-#  include <sys/time.h>
-# endif
-# include <time.h>
-#else
-# if HAVE_SYS_TIME_H
-#  include <sys/time.h>
-# else
-#  include <time.h>
-# endif
-#endif
-
-#if HAVE_WINSOCK_H
-#include <winsock.h>
-#endif
-#if HAVE_NETINET_IN_H
-#include <netinet/in.h>
-#endif
-
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 
 /*
  * header_generic() comes from here 
  */
-#include "util_funcs.h"
+#include "util_funcs/header_generic.h"
 
 /*
  * include our .h file 

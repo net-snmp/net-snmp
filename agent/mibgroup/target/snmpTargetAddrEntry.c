@@ -23,7 +23,7 @@
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 
 #include "snmpTargetAddrEntry.h"
-#include "util_funcs.h"
+#include "util_funcs/header_generic.h"
 
 #define snmpTargetAddrOIDLen 11 /*This is base+column, 
                                  * i.e. everything but index */

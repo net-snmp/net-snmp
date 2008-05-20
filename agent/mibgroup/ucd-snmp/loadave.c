@@ -132,7 +132,7 @@
 
 #include "struct.h"
 #include "loadave.h"
-#include "util_funcs.h"
+#include "util_funcs/header_simple_table.h"
 #include "kernel.h"
 
 double          maxload[3];

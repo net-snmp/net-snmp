@@ -13,7 +13,7 @@
 #include <net-snmp/agent/sysORTable.h>
 
 #include "snmpMPDStats.h"
-#include "util_funcs.h"
+#include "util_funcs/header_generic.h"
 
 
 struct variable2 snmpMPDStats_variables[] = {
