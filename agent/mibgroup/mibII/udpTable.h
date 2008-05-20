@@ -6,7 +6,7 @@
 #define _MIBGROUP_UDPTABLE_H
 
 config_arch_require(solaris2, kernel_sunos5)
-config_require(util_funcs mibII/ip)
+config_require(mibII/ip)
 
 extern void     init_udpTable(void);
 extern Netsnmp_Node_Handler udpTable_handler;

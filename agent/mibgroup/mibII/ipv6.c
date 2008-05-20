@@ -134,7 +134,6 @@
 #include <net-snmp/agent/auto_nlist.h>
 
 #include "kernel.h"
-#include "util_funcs.h"
 #include "ipv6.h"
 #include "interfaces.h"
 

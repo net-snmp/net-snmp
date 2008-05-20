@@ -3,7 +3,6 @@
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 #include <net-snmp/agent/hardware/sensors.h>
 
-#include "util_funcs.h"
 #include <time.h>
 
 #include <kstat.h>

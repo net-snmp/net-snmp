@@ -3,7 +3,6 @@
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 #include <net-snmp/agent/sysORTable.h>
 
-#include "util_funcs.h"
 #include "snmp_mib.h"
 #include "updates.h"
 

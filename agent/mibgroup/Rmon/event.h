@@ -21,8 +21,6 @@
 #ifndef _MIBGROUP_EVENT_H
 #define _MIBGROUP_EVENT_H
 
-config_require(util_funcs)
-
     /*
      * function prototypes 
      */

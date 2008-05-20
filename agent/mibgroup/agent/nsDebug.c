@@ -10,9 +10,6 @@
 #endif
 
 #include "agent/nsDebug.h"
-#include "util_funcs.h"
-
-
 
 /*
  * OIDs for the debugging control scalar objects

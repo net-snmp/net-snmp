@@ -11,9 +11,6 @@
 
 #include <net-snmp/library/snmp_logging.h>
 #include "agent/nsLogging.h"
-#include "util_funcs.h"
-
-
 
 /*
  * OID and columns for the logging table.

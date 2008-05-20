@@ -11,8 +11,6 @@
 
 #include <net-snmp/agent/cache_handler.h>
 #include "agent/nsCache.h"
-#include "util_funcs.h"
-
 
 /*
  * use unadvertised function to get cache head. You really should not
