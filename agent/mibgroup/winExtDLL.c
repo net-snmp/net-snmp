@@ -41,9 +41,6 @@
 #include <strings.h>
 #endif
 
-/*
- * needed by util_funcs.h 
- */
 #if TIME_WITH_SYS_TIME
 # ifdef WIN32
 #  include <sys/timeb.h>
@@ -68,8 +65,6 @@
 
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
-
-#include "util_funcs.h"
 
 #include "winExtDLL.h"
 

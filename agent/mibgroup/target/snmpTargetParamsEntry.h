@@ -9,12 +9,6 @@
 #ifndef _MIBGROUP_SNMPTARGETPARAMSENTRY_H
 #define _MIBGROUP_SNMPTARGETPARAMSENTRY_H
 
-/*
- * we use header_generic and checkmib from the util_funcs module 
- */
-
-config_require(util_funcs)
-
     /*
      * Magic number definitions: 
      */

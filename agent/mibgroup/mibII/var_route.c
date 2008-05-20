@@ -61,7 +61,6 @@ PERFORMANCE OF THIS SOFTWARE.
 #include "kernel.h"
 #include "interfaces.h"
 #include "struct.h"
-#include "util_funcs.h"
 
 #ifndef  MIN
 #define  MIN(a,b)                     (((a) < (b)) ? (a) : (b))

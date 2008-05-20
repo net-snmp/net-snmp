@@ -7,7 +7,6 @@
 
 #include <net-snmp/library/vacm.h>
 
-config_require(util_funcs)
 config_belongs_in(agent_module)
 
 #define VACM_CREATE_SIMPLE_V3       1
