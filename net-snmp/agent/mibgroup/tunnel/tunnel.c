@@ -64,7 +64,6 @@
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 #include <net-snmp/agent/sysORTable.h>
 
-#include "util_funcs.h"
 #include "tunnel.h"
 
 #ifndef MIN

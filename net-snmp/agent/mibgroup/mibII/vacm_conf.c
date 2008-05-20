@@ -49,7 +49,6 @@
 
 #include <net-snmp/agent/agent_callbacks.h>
 #include "vacm_conf.h"
-#include "util_funcs.h"
 
 #include "snmpd.h"
 

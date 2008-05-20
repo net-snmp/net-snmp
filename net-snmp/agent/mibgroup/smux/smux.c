@@ -71,7 +71,6 @@
 #include <net-snmp/library/tools.h>
 
 #include "smux.h"
-#include "util_funcs.h"
 #include "mibdefs.h"
 #include "snmpd.h"
 

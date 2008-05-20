@@ -27,8 +27,6 @@
 #include "ip.h"
 #include "kernel.h"
 #include "interfaces.h"
-#include "struct.h"
-#include "util_funcs.h"
 
 #else /* !NETSNMP_CAN_USE_SYSCTL */
 
