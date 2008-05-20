@@ -5,6 +5,7 @@
 #ifndef _MIBGROUP_VMSTAT_H
 #define _MIBGROUP_VMSTAT_H
 
+config_require(util_funcs/header_generic)
 config_require(hardware/cpu)
 
 #include "mibdefs.h"

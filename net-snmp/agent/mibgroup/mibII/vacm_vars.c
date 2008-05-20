@@ -50,7 +50,7 @@
 #include <net-snmp/agent/agent_callbacks.h>
 #include <net-snmp/agent/sysORTable.h>
 #include "vacm_vars.h"
-#include "util_funcs.h"
+#include "util_funcs/header_generic.h"
 
 #if TIME_WITH_SYS_TIME
 # ifdef WIN32

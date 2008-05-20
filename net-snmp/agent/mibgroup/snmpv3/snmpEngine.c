@@ -12,7 +12,7 @@
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 #include <net-snmp/agent/sysORTable.h>
 
-#include "util_funcs.h"
+#include "util_funcs/header_generic.h"
 #include "snmpEngine.h"
 
 struct variable2 snmpEngine_variables[] = {

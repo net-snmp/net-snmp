@@ -7,7 +7,7 @@
 
 void            init_extensible(void);
 
-config_require(util_funcs)
+config_require(util_funcs/header_simple_table)
 config_require(utilities/execute)
 
      extern FindVarMethod var_extensible_shell;

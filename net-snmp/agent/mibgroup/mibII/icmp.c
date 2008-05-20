@@ -20,7 +20,7 @@
 #include <net-snmp/agent/scalar_group.h>
 #include <net-snmp/agent/sysORTable.h>
 
-#include "util_funcs.h"
+#include "util_funcs/MIB_STATS_CACHE_TIMEOUT.h"
 #include "icmp.h"
 
 #ifndef MIB_STATS_CACHE_TIMEOUT
