@@ -73,7 +73,7 @@
  * minimal include directives 
  */
 
-#include "util_funcs.h"
+#include "util_funcs/header_simple_table.h"
 #include <time.h>
 
 /*

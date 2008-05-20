@@ -34,7 +34,7 @@
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 
 #include "mibdefs.h"
-#include "util_funcs.h"
+#include "util_funcs/header_generic.h"
 
 /*
  * Header file for this module 

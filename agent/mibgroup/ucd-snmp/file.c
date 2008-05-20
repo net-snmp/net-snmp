@@ -41,7 +41,7 @@
 
 #include "struct.h"
 #include "file.h"
-#include "util_funcs.h"
+#include "util_funcs/header_simple_table.h"
 
 #define MAXFILE   20
 

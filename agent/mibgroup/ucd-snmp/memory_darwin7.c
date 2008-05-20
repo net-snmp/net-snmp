@@ -44,7 +44,7 @@
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 #include <net-snmp/agent/auto_nlist.h>
 
-#include "util_funcs.h"
+#include "util_funcs/header_generic.h"
 #include "memory.h"
 #include "memory_darwin7.h"
 

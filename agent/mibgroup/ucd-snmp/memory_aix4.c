@@ -30,7 +30,7 @@
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 #include <net-snmp/agent/auto_nlist.h>
 
-#include "util_funcs.h"         /* utility function declarations */
+#include "util_funcs/header_generic.h" /* utility function declarations */
 #include "memory.h"             /* the module-specific header */
 #include "memory_aix4.h"    /* the module-specific header */
 

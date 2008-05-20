@@ -4,6 +4,12 @@
 #ifndef _MIBGROUP_UTIL_FUNCS_H
 #define _MIBGROUP_UTIL_FUNCS_H
 
+config_require(util_funcs/header_generic)
+config_require(util_funcs/header_simple_table)
+
+#include "util_funcs/header_generic.h"
+#include "util_funcs/header_simple_table.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -36,11 +42,6 @@ RETSIGTYPE      restart_doit(int);
 WriteMethod     restart_hook;
 void            print_mib_oid(oid *, size_t);
 void            sprint_mib_oid(char *, oid *, size_t);
-int             header_simple_table(struct variable *, oid *, size_t *,
-                                    int, size_t *,
-                                    WriteMethod ** write_method, int);
-int             header_generic(struct variable *, oid *, size_t *, int,
-                               size_t *, WriteMethod **);
 int             checkmib(struct variable *, oid *, size_t *, int, size_t *,
                          WriteMethod ** write_method, int);
 char           *find_field(char *, int);
@@ -81,9 +82,8 @@ int net_snmp_delete_prefix_info(prefix_cbx **head,
 
 #define     satosin(x)      ((struct sockaddr_in *) &(x))
 #define     SOCKADDR(x)     (satosin(x)->sin_addr.s_addr)
-#ifndef MIB_STATS_CACHE_TIMEOUT
-#define MIB_STATS_CACHE_TIMEOUT 5
-#endif
+
+#include "util_funcs/MIB_STATS_CACHE_TIMEOUT.h"
 
 typedef void   *mib_table_t;
 typedef int     (RELOAD) (mib_table_t);

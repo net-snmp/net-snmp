@@ -21,7 +21,7 @@
 #include <net-snmp/agent/auto_nlist.h>
 #include <net-snmp/agent/sysORTable.h>
 
-#include "util_funcs.h"
+#include "util_funcs/MIB_STATS_CACHE_TIMEOUT.h"
 #include "ip.h"
 #include "ipAddr.h"
 #include "interfaces.h"

@@ -15,10 +15,10 @@
 #define USM_LENGTH_OID_MAX	66
 
 /*
- * we use header_generic and checkmib from the util_funcs module 
+ * we use header_generic from the util_funcs module
  */
 
-config_require(util_funcs)
+config_require(util_funcs/header_generic)
 config_add_mib(SNMP-USER-BASED-SM-MIB)
 
     /*

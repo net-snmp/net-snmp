@@ -1,7 +1,7 @@
 #ifndef NETSNMP_EXTEND_H
 #define NETSNMP_EXTEND_H
 
-config_require( util_funcs )
+config_require( util_funcs/header_simple_table )
 config_require( utilities/execute )
 config_add_mib(NET-SNMP-EXTEND-MIB)
 

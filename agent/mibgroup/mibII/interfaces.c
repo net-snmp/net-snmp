@@ -202,7 +202,7 @@
 
 #include "interfaces.h"
 #include "struct.h"
-#include "util_funcs.h"
+#include "util_funcs/header_generic.h"
 
 /* if you want caching enabled for speed retrival purposes, set this to 5?*/
 #define MINLOADFREQ 0                     /* min reload frequency in seconds */

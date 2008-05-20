@@ -7,7 +7,7 @@
 
 #include <net-snmp/library/vacm.h>
 
-config_require(util_funcs)
+config_require(util_funcs/header_generic)
 config_require(mibII/vacm_context)
 config_require(mibII/vacm_conf)
 config_add_mib(SNMP-VIEW-BASED-ACM-MIB)

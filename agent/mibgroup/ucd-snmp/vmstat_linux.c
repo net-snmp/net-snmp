@@ -108,7 +108,7 @@
 
 #include "mibdefs.h"
 #include "struct.h"
-#include "util_funcs.h"
+#include "util_funcs/header_generic.h"
 #include "vmstat.h"
 
 FindVarMethod var_extensible_vmstat;

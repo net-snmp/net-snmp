@@ -7,7 +7,7 @@
 
 void            init_disk(void);
 
-config_require(util_funcs)
+config_require(util_funcs/header_simple_table)
 
      extern FindVarMethod var_extensible_disk;
 
