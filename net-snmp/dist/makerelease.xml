@@ -486,7 +486,9 @@
     </step>
     <step type="informational">
       <text>
-	Advertise: NEWS upload to sf, publish on -announce, freshmeat, ...
+	Advertise: NEWS upload to sf, publish on -announce, freshmeat,
+	and the GNU FSF directory
+	(http://directory.fsf.org/project/net-snmp/)...
       </text>
     </step>
   </steps>
