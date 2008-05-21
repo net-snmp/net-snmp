@@ -182,8 +182,8 @@ Note:  This is the last stage that is handled by the "makerelease" script
      Also update the IRC topic to include mention of this release.
 
  19) For a release on the most recent development line, start bugging
-     Wes to update the freshmeat entries and the open source developers
-     web page entries. 
+     Wes to update the freshmeat, open source developers and Free
+     Software Directory entries.
 
  20) For a release on the most recent development line, update the
      'htdocs/page-top.html' file (in the main SVN trunk) to reference
