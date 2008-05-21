@@ -23,6 +23,7 @@
 #include <net-snmp/types.h>
 #include <net-snmp/output_api.h>
 #include <net-snmp/utilities.h>
+#include <net-snmp/config_api.h>
 
 #include <net-snmp/library/snmp_transport.h>
 
@@ -65,9 +66,9 @@ netsnmp_transport *
 netsnmp_alias_create_tstring(const char *str, int local,
 			   const char *default_target)
 {
-    char *aliasdata;
+    const char *aliasdata;
 
-    aliasdata = netsnmp_get_list_data(alias_memory, str);
+    aliasdata = (const char*)netsnmp_get_list_data(alias_memory, str);
     if (!aliasdata) {
         snmp_log(LOG_ERR, "No alias found for %s\n", str);
         return NULL;
