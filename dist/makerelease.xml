@@ -474,15 +474,67 @@
 	</step>
       </steps>
     </step>
-    <step type="informational">
-      <text>
-	Publish: Do other steps like upload to sf, etc
-      </text>
+    <step type="section" title="Release the results">
+      <text>Now we'll publish the results to the SF server</text>
+      <steps>
+	<step prompt="true" type="system" stepname="publish:rsync"
+	  title="rsync the new files">
+	  <text>This will copy the results to the SF uploads directory
+	    in your account on frs.sourceforge.net</text>
+	  <commands>
+	    <command>rsync -v net-snmp-{VERSION}.tar.gz net-snmp-{VERSION}.tar.gz.asc net-snmp-{VERSION}.zip net-snmp-{VERSION}.zip.asc frs.sourceforge.net:uploads/</command>
+	  </commands>
+	</step>
+	<step type="system" stepname="publish:editrelease"
+	title="Update the SF release web page">
+	  <commands>
+	    <command>firefox 'http://sourceforge.net/project/admin/editpackages.php?group_id=12694'</command>
+	  </commands>
+	</step>
+      </steps>
     </step>
     <step type="informational">
       <text>
 	Binaries: build rpms, .tar.gzs, etc.
       </text>
+    </step>
+    <step type="section" title="Advertise it!">
+      <steps>
+	<step type="system" pause="1">
+	  <text>Add a note to the source forge news system:
+
+	    http://sourceforge.net/news/submit.php?group_id=12694
+	  </text>
+	  <commands>
+	    <command>firefox 'http://sourceforge.net/news/submit.php?group_id=12694'</command>
+	  </commands>
+	</step>
+	<step type="informational" pause="1">
+	  <text>Send an announcement message to one of the following
+	  mailing lists based on it's type:
+
+          pre:    net-snmp-coders@lists.sourceforge.net
+
+          rc:     net-snmp-users@lists.sourceforge.net
+
+          final:  net-snmp-announce@lists.sourceforge.net
+	  </text>
+	</step>
+	<step type="informational" pause="1">
+	  <text>Update the topic on the #Net-SNMP channel if this is a
+	    trunk based release.
+	  </text>
+	</step>
+	<step type="system" pause="1">
+	  <text>Update the freshmeat listing (Wes needs to do this):
+
+	    http://freshmeat.net/projects/net-snmp/
+	  </text>
+	  <commands>
+	    <command>firefox http://freshmeat.net/projects/net-snmp/</command>
+	  </commands>
+	</step>
+      </steps>
     </step>
     <step type="informational">
       <text>
