@@ -4,6 +4,8 @@
 
 #include "header_simple_table.h"
 
+#include <limits.h>
+
 /*******************************************************************-o-******
  * header_simple_table
  *
