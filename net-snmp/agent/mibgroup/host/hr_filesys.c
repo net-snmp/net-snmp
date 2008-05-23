@@ -138,6 +138,7 @@ struct mntent  *HRFS_entry;
 #define MNTTYPE_MSDOS	"msdos"
 #define MNTTYPE_FAT32	"vfat"
 #define MNTTYPE_NTFS	"ntfs"
+#define MNTTYPE_NFS4	"nfs4"
 #endif	/* linux */
 
 #endif
@@ -441,6 +442,10 @@ var_hrfilesys(struct variable *vp,
         else if (!strcmp(mnt_type, MNTTYPE_NFS3))
             fsys_type_id[fsys_type_len - 1] = 14;
 #endif
+#ifdef MNTTYPE_NFS4
+        else if (!strcmp(mnt_type, MNTTYPE_NFS4))
+            fsys_type_id[fsys_type_len - 1] = 14;
+#endif
 #ifdef MNTTYPE_MFS
         else if (!strcmp(mnt_type, MNTTYPE_MFS))
             fsys_type_id[fsys_type_len - 1] = 8;
@@ -666,6 +671,9 @@ Check_HR_FileSys_NFS (void)
 #endif
 #if defined(MNTTYPE_NFS3)
 	    !strcmp( HRFS_entry->HRFS_type, MNTTYPE_NFS3) ||
+#endif
+#if defined(MNTTYPE_NFS4)
+	    !strcmp( HRFS_entry->HRFS_type, MNTTYPE_NFS4) ||
 #endif
 #if defined(MNTTYPE_SMBFS)
 	    !strcmp( HRFS_entry->HRFS_type, MNTTYPE_SMBFS) ||
