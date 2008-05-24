@@ -30,12 +30,6 @@
 /* got in_addr_t? */
 #undef HAVE_IN_ADDR_T
 
-/* define if you have <netinet/in_pcb.h> */
-#undef HAVE_NETINET_IN_PCB_H
-
-/* define if you have <sys/disklabel.h> */
-#undef HAVE_SYS_DISKLABEL_H
-
 /* define if you have libdb or librpm, respectively */
 #undef HAVE_LIBDB
 #undef HAVE_LIBRPM
@@ -428,6 +422,9 @@
 
 /* Define to 1 if you have the <netinet/in.h> header file. */
 #undef HAVE_NETINET_IN_H
+
+/* Define to 1 if you have the <netinet/in_pcb.h> header file. */
+#undef HAVE_NETINET_IN_PCB_H
 
 /* Define to 1 if you have the <netinet/in_systm.h> header file. */
 #undef HAVE_NETINET_IN_SYSTM_H
@@ -901,6 +898,9 @@
 
 /* Define to 1 if you have the <sys/diskio.h> header file. */
 #undef HAVE_SYS_DISKIO_H
+
+/* Define to 1 if you have the <sys/disklabel.h> header file. */
+#undef HAVE_SYS_DISKLABEL_H
 
 /* Define to 1 if you have the <sys/dkio.h> header file. */
 #undef HAVE_SYS_DKIO_H
@@ -1747,7 +1747,7 @@
     available.  */
 #undef NETSNMP_TRANSPORT_TCPIPV6_DOMAIN
 
-/*  This is defined if support for the UDP/IP transport domain is
+/*  This is defined if support for the TLS transport domain is
     available.   */
 #undef NETSNMP_TRANSPORT_TLS_DOMAIN
 

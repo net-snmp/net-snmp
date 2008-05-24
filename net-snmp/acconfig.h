@@ -29,12 +29,6 @@
 /* got in_addr_t? */
 #undef HAVE_IN_ADDR_T
 
-/* define if you have <netinet/in_pcb.h> */
-#undef HAVE_NETINET_IN_PCB_H
-
-/* define if you have <sys/disklabel.h> */
-#undef HAVE_SYS_DISKLABEL_H
-
 /* define if you have libdb or librpm, respectively */
 #undef HAVE_LIBDB
 #undef HAVE_LIBRPM
