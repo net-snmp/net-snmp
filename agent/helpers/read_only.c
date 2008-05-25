@@ -58,13 +58,10 @@ netsnmp_read_only_helper(netsnmp_mib_handler *handler,
     case MODE_GETBULK:
         /* next handler called automatically - 'AUTO_NEXT' */
         return SNMP_ERR_NOERROR;
-
-    default:
-        netsnmp_request_set_error_all(requests, SNMP_ERR_GENERR);
-        return SNMP_ERR_GENERR;
     }
+
     netsnmp_request_set_error_all(requests, SNMP_ERR_GENERR);
-    return SNMP_ERR_GENERR;     /* should never get here */
+    return SNMP_ERR_GENERR;
 }
 
 /** initializes the read_only helper which then registers a read_only

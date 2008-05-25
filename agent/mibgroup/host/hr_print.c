@@ -177,9 +177,10 @@ var_hrprint(struct variable * vp,
     case HRPRINT_ERROR:
 #if NETSNMP_NO_DUMMY_VALUES
         return NULL;
-#endif
+#else
         long_return = 0;        /* Null string */
         return (u_char *) & long_return;
+#endif
     default:
         DEBUGMSGTL(("host/hr_print", "unknown sub-id %d in var_hrprint\n",
                     vp->magic));

@@ -359,7 +359,6 @@ handle_nsCacheTable(netsnmp_mib_handler *handler,
             default:
                 netsnmp_set_request_error(reqinfo, request, SNMP_ERR_NOCREATION);
                 return SNMP_ERR_NOCREATION;	/* XXX - is this right ? */
-                continue;
 	    }
 	}
 	break;

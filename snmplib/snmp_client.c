@@ -702,7 +702,6 @@ snmp_set_var_typed_integer(netsnmp_variable_list * newvar,
     const long v = val;
     newvar->type = type;
     return snmp_set_var_value(newvar, (const u_char *)&v, sizeof(long));
-    return 0;
 }
 
 int
