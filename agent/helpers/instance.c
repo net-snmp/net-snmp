@@ -589,7 +589,7 @@ netsnmp_instance_long_handler(netsnmp_mib_handler *handler,
                               netsnmp_request_info *requests)
 {
 
-    long           *it = (u_long *) handler->myvoid;
+    long           *it = (long *) handler->myvoid;
     long           *it_save;
 
     DEBUGMSGTL(("netsnmp_instance_long_handler", "Got request:  %d\n",
