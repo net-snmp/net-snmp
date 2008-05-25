@@ -8,7 +8,7 @@
 
 #include <net-snmp/data_access/ip_scalars.h>
 
-const char *ipfw_name = "/proc/sys/net/ipv6/conf/all/forwarding";
+static const char ipfw_name[] = "/proc/sys/net/ipv6/conf/all/forwarding";
 
 int
 netsnmp_arch_ip_scalars_ipv6IpForwarding_get(u_long *value)
