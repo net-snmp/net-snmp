@@ -13,6 +13,7 @@
  */
 
 config_require(util_funcs/header_generic)
+config_exclude(snmpv3/usmStats_5_5)
 config_add_mib(SNMP-USER-BASED-SM-MIB)
 
     /*
