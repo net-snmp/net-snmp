@@ -63,8 +63,8 @@ init_mteEventConf(void)
     /*
      * Find or create the specified event entry
      */
-struct mteEvent *
-_find_mteEvent_entry( char *owner, char *ename )
+static struct mteEvent *
+_find_mteEvent_entry( const char *owner, const char *ename )
 {
     netsnmp_variable_list owner_var, ename_var;
     netsnmp_tdata_row *row;
@@ -90,8 +90,8 @@ _find_mteEvent_entry( char *owner, char *ename )
     return (struct mteEvent *)row->data;
 }
 
-struct mteEvent *
-_find_typed_mteEvent_entry( char *owner, char *ename, int type )
+static struct mteEvent *
+_find_typed_mteEvent_entry( const char *owner, const char *ename, int type )
 {
     struct mteEvent *entry = _find_mteEvent_entry( owner, ename );
     if (!entry)
@@ -121,7 +121,6 @@ _find_typed_mteEvent_entry( char *owner, char *ename, int type )
 void
 parse_notificationEvent( const char *token, char *line )
 {
-    char  *owner = "snmpd.conf";
     char   ename[MTE_STR1_LEN+1];
     char   buf[SPRINT_MAX_LEN];
     oid    name_buf[MAX_OID_LEN];
@@ -229,7 +228,7 @@ parse_notificationEvent( const char *token, char *line )
      *  If the entry has parsed successfully, then create,
      *     populate and activate the new event entry.
      */
-    entry = _find_typed_mteEvent_entry(owner, ename+2,
+    entry = _find_typed_mteEvent_entry("snmpd.conf", ename+2,
                                        MTE_EVENT_NOTIFICATION);
     if (!entry) {
         mteObjects_removeEntries( "snmpd.conf", ename );
@@ -250,7 +249,6 @@ parse_notificationEvent( const char *token, char *line )
 void
 parse_setEvent( const char *token, char *line )
 {
-    char  *owner = "snmpd.conf";
     char   ename[MTE_STR1_LEN+1];
     char   buf[SPRINT_MAX_LEN];
     oid    name_buf[MAX_OID_LEN];
@@ -297,7 +295,7 @@ parse_setEvent( const char *token, char *line )
      *  If the entry has parsed successfully, then create,
      *     populate and activate the new event entry.
      */
-    entry = _find_typed_mteEvent_entry(owner, ename, MTE_EVENT_SET);
+    entry = _find_typed_mteEvent_entry("snmpd.conf", ename, MTE_EVENT_SET);
     if (!entry) {
         return;
     }
