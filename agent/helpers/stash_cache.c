@@ -146,7 +146,6 @@ netsnmp_stash_cache_helper(netsnmp_mib_handler *handler,
                                          cdata->val.string, cdata->val_len);
             }
         }
-        return SNMP_ERR_NOERROR;
         break;
 
     case MODE_GETNEXT:
@@ -169,7 +168,6 @@ netsnmp_stash_cache_helper(netsnmp_mib_handler *handler,
                 }
             }
         }
-        return SNMP_ERR_NOERROR;
         break;
 
     default:
@@ -177,7 +175,8 @@ netsnmp_stash_cache_helper(netsnmp_mib_handler *handler,
         return netsnmp_call_next_handler(handler, reginfo, reqinfo,
                                          requests);
     }
-    return SNMP_ERR_GENERR;     /* should never get here */
+
+    return SNMP_ERR_NOERROR;
 }
 
 /** updates a given cache depending on whether it needs to or not.

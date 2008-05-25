@@ -493,11 +493,12 @@ var_hrswinst(struct variable * vp,
                 ret = date_n_time(&stat_buf.st_mtime, var_len);
             } else {
 #if NETSNMP_NO_DUMMY_VALUES
-                return NULL;
-#endif
+                ret = NULL;
+#else
                 sprintf(string, "back in the mists of time");
                 *var_len = strlen(string);
                 ret = (u_char *) string;
+#endif
             }
 #endif
         }

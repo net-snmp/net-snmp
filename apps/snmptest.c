@@ -127,7 +127,7 @@ main(int argc, char *argv[])
     }
 
     varcount = 0;
-    while (1) {
+    for(;;) {
         vars = NULL;
         for (ret = 1; ret != 0;) {
             vp = (netsnmp_variable_list *)
@@ -277,8 +277,7 @@ main(int argc, char *argv[])
         varcount = 0;
         nonRepeaters = -1;
     }
-    SOCK_CLEANUP;
-    return 0;
+    /* NOTREACHED */
 }
 
 int
