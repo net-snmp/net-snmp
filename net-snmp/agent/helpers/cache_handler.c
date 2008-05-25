@@ -492,7 +492,7 @@ netsnmp_cache_helper_handler(netsnmp_mib_handler * handler,
     case MODE_GET:
     case MODE_GETNEXT:
     case MODE_GETBULK:
-    case MODE_SET_RESERVE1: {
+    case MODE_SET_RESERVE1:
 
         /*
          * only touch cache once per pdu request, to prevent a cache
@@ -503,7 +503,7 @@ netsnmp_cache_helper_handler(netsnmp_mib_handler * handler,
          * maybe use a reference counter?
          */
         if (netsnmp_cache_is_valid(reqinfo, reginfo->handlerName))
-            return SNMP_ERR_NOERROR;
+            break;
 
         /*
          * call the load hook, and update the cache timestamp.
@@ -512,8 +512,7 @@ netsnmp_cache_helper_handler(netsnmp_mib_handler * handler,
         netsnmp_cache_check_and_reload(cache);
         netsnmp_cache_reqinfo_insert(cache, reqinfo, reginfo->handlerName);
         /** next handler called automatically - 'AUTO_NEXT' */
-        }
-        return SNMP_ERR_NOERROR;
+        break;
 
     case MODE_SET_RESERVE2:
     case MODE_SET_FREE:
@@ -521,7 +520,7 @@ netsnmp_cache_helper_handler(netsnmp_mib_handler * handler,
     case MODE_SET_UNDO:
         netsnmp_assert(netsnmp_cache_is_valid(reqinfo, reginfo->handlerName));
         /** next handler called automatically - 'AUTO_NEXT' */
-        return SNMP_ERR_NOERROR;
+        break;
 
         /*
          * A (successful) SET request wouldn't typically trigger a reload of
@@ -535,7 +534,7 @@ netsnmp_cache_helper_handler(netsnmp_mib_handler * handler,
             cache->valid = 0;
         }
         /** next handler called automatically - 'AUTO_NEXT' */
-        return SNMP_ERR_NOERROR;
+        break;
 
     default:
         snmp_log(LOG_WARNING, "cache_handler: Unrecognised mode (%d)\n",
@@ -543,8 +542,7 @@ netsnmp_cache_helper_handler(netsnmp_mib_handler * handler,
         netsnmp_request_set_error_all(requests, SNMP_ERR_GENERR);
         return SNMP_ERR_GENERR;
     }
-    netsnmp_request_set_error_all(requests, SNMP_ERR_GENERR);
-    return SNMP_ERR_GENERR;     /* should never get here */
+    return SNMP_ERR_NOERROR;
 }
 
 static void

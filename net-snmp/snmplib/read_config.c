@@ -1950,7 +1950,6 @@ read_config_read_memory(int type, char *readfrom,
         return readfrom;
 
     case ASN_COUNTER64:
-    {
         if (*len < sizeof(U64))
             return NULL;
         *len = sizeof(U64);
@@ -1959,11 +1958,7 @@ read_config_read_memory(int type, char *readfrom,
         return readfrom;
     }
 
-    default:
-        DEBUGMSGTL(("read_config_read_memory", "Fail: Unknown type: %d",
-                    type));
-        return NULL;
-    }
+    DEBUGMSGTL(("read_config_read_memory", "Fail: Unknown type: %d", type));
     return NULL;
 }
 

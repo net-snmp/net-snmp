@@ -3478,7 +3478,7 @@ _request_set_error(netsnmp_request_info *request, int mode, int error_value)
         case MODE_GETNEXT:
         case MODE_GETBULK:
             request->requestvb->type = error_value;
-            return SNMPERR_SUCCESS;
+            break;
 
             /*
              * These are technically illegal to set by the
@@ -3493,7 +3493,7 @@ _request_set_error(netsnmp_request_info *request, int mode, int error_value)
 
         default:
             request->status = SNMP_ERR_NOSUCHNAME;      /* WWW: correct? */
-            return SNMPERR_SUCCESS;
+            break;
         }
         break;                  /* never get here */
 
@@ -3514,7 +3514,7 @@ _request_set_error(netsnmp_request_info *request, int mode, int error_value)
              */
             request->status = error_value;
         }
-        return SNMPERR_SUCCESS;
+        break;
     }
     return SNMPERR_SUCCESS;
 }

@@ -305,7 +305,6 @@ handle_nsLoggingTable(netsnmp_mib_handler *handler,
             default:
                 netsnmp_set_request_error(reqinfo, request, SNMP_NOSUCHOBJECT);
                 return SNMP_NOSUCHOBJECT;
-                continue;
 	    }
 	}
 	break;

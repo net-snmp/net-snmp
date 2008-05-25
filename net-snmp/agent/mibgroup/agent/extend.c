@@ -1124,7 +1124,6 @@ _extend_find_entry( netsnmp_request_info       *request,
             if (eptr->numlines < line_idx)
                 return NULL;
         }
-        return eptr;
     }
 
         /***
@@ -1241,9 +1240,8 @@ _extend_find_entry( netsnmp_request_info       *request,
             snmp_set_var_value( table_info->indexes->next_variable,
                                 &line_idx, sizeof(line_idx));
         }
-        return eptr;  /* Finally, signal success */
     }
-    return NULL;
+    return eptr;  /* Finally, signal success */
 }
 
 /*
