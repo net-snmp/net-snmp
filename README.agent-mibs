@@ -105,6 +105,7 @@ SNMP-PROXY-MIB
 ------------------------------------------------------------------------------
 SNMP-USER-BASED-SM-MIB
  usmStats.*.0                 A         ~4.0    O snmpv3/usmStats.c
+ usmStats.*.0                 A         5.5     G snmpv3/usmStats_5_5.c
  usmUserTable                 A         ~4.0?   O snmpv3/usmUser.c
 
 ------------------------------------------------------------------------------
