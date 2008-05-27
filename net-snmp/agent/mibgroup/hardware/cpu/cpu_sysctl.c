@@ -114,8 +114,8 @@ void init_cpu_sysctl( void ) {
     #define NS_VM_SWTCH		v_swtch
     #define NS_VM_PAGEIN	v_swappgsin
     #define NS_VM_PAGEOUT	v_swappgsout
-    #define NS_VM_SWAPIN	v_swpin
-    #define NS_VM_SWAPOUT	v_swpout
+    #define NS_VM_SWAPIN	v_swapin
+    #define NS_VM_SWAPOUT	v_swapout
 
 #elif defined(VM_METER)                   /* OpenBSD, NetBSD */
 #define NETSNMP_VM_STATS       VM_METER
