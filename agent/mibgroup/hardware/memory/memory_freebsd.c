@@ -43,7 +43,10 @@ int netsnmp_mem_arch_load( netsnmp_cache *cache, void *magic ) {
 
     u_long         phys_mem;
     u_long         user_mem;
+    unsigned int   bufspace;
+    unsigned int   maxbufspace;
     size_t         mem_size  = sizeof(phys_mem);
+    size_t         buf_size  = sizeof(bufspace);
     int            phys_mem_mib[] = { CTL_HW, HW_PHYSMEM };
     int            user_mem_mib[] = { CTL_HW, HW_USERMEM };
 
@@ -53,6 +56,8 @@ int netsnmp_mem_arch_load( netsnmp_cache *cache, void *magic ) {
     sysctl(total_mib,    2, &total,    &total_size,    NULL, 0);
     sysctl(phys_mem_mib, 2, &phys_mem, &mem_size,      NULL, 0);
     sysctl(user_mem_mib, 2, &user_mem, &mem_size,      NULL, 0);
+    sysctlbyname("vfs.bufspace",    &bufspace,    &buf_size, NULL, 0);
+    sysctlbyname("vfs.maxbufspace", &maxbufspace, &buf_size, NULL, 0);
     auto_nlist(SUM_SYMBOL,      (char *) &vmem,     sizeof(vmem));
 #ifndef freebsd4
     pagesize = 1024;
@@ -141,6 +146,18 @@ int netsnmp_mem_arch_load( netsnmp_cache *cache, void *magic ) {
         mem->size  = swapTotal;
         mem->free  = swapFree;
     }
+
+    mem = netsnmp_memory_get_byIdx( NETSNMP_MEM_TYPE_MBUF, 1 );
+    if (!mem) {
+        snmp_log_perror("No Buffer, etc info entry");
+    } else {
+        if (!mem->descr)
+             mem->descr = strdup("Memory buffers");
+        mem->units = 1024;
+        mem->size  =  maxbufspace / 1024;
+        mem->free  = (maxbufspace - bufspace)/1024;
+    }
+
     return 0;
 }
 
