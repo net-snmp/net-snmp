@@ -161,7 +161,9 @@ netsnmp_scalar_group_helper_handler(netsnmp_mib_handler *handler,
 	/*
 	 * ... always assuming this is (potentially) valid, of course.
 	 */
-	if (subid > sgroup->ubound)
+        if (subid < sgroup->lbound)
+            subid = sgroup->lbound;
+	else if (subid > sgroup->ubound)
             return SNMP_ERR_NOERROR;
         
         root_tmp[reginfo->rootoid_len++] = subid;
