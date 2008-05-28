@@ -130,8 +130,8 @@ int netsnmp_mem_arch_load( netsnmp_cache *cache, void *magic ) {
         if (!mem->descr)
              mem->descr = strdup("Cached memory");
         mem->units = vmem.v_page_size;
-        mem->size  = vmem.v_cache_count;
-        mem->free  = -1;
+        mem->size  = vmem.v_cache_max;
+        mem->free  = vmem.v_cache_max - vmem.v_cache_count;
     }
 
     nswap = swapmode(pagesize);
