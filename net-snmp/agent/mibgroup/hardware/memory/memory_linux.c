@@ -170,7 +170,7 @@ int netsnmp_mem_arch_load( netsnmp_cache *cache, void *magic ) {
              mem->descr = strdup("Cached memory");
         mem->units = 1024;
         mem->size  = cached;
-        mem->free  = -1;
+        mem->free  = 0;     /* Report cached size/used as equal */
         mem->other = -1;
     }
 
@@ -193,8 +193,10 @@ int netsnmp_mem_arch_load( netsnmp_cache *cache, void *magic ) {
         if (!mem->descr)
              mem->descr = strdup("Memory buffers");
         mem->units = 1024;
-        mem->size  = buffers;
-        mem->free  = -1;
+        mem->size  = memtotal;  /* Traditionally we've always regarded
+                                   all memory as potentially available
+                                   for memory buffers. */
+        mem->free  = memtotal - buffers;
         mem->other = -1;
     }
 
