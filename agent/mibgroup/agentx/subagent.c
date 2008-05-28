@@ -587,7 +587,7 @@ handle_subagent_set_response(int op, netsnmp_session * session, int reqid,
          */
         if (!pdu->errstat) {
             asi->mode = pdu->command = SNMP_MSG_INTERNAL_SET_RESERVE2;
-            snmp_async_send(agentx_callback_sess, pdu,
+            result = snmp_async_send(agentx_callback_sess, pdu,
                             handle_subagent_set_response, asi);
             if (result == 0) {
                 snmp_free_pdu( pdu );
