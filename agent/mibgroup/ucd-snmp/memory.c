@@ -176,7 +176,7 @@ handle_memory(netsnmp_mib_handler *handler,
             mem_info = netsnmp_memory_get_byIdx( NETSNMP_MEM_TYPE_MBUF, 0 );
             if (!mem_info || mem_info->size == -1)
                goto NOSUCH;
-            val  =  mem_info->size;      /* buffers */
+            val  = (mem_info->size - mem_info->free);      /* buffers */
             val *= (mem_info->units/1024);
             break;
         case MEMORY_CACHED:
