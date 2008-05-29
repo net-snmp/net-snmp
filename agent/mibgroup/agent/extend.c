@@ -392,7 +392,10 @@ extend_parse_config(const char *token, char *cptr)
     cptr = copy_nword(cptr, exec_name,    sizeof(exec_name));
     if ( *exec_name == '.' ) {
         oid_len = MAX_OID_LEN - 2;
-        read_objid( exec_name, oid_buf, &oid_len );
+        if (0 == read_objid( exec_name, oid_buf, &oid_len )) {
+            config_perror("ERROR: Unrecognised OID" );
+            return;
+        }
         cptr = copy_nword(cptr, exec_name,    sizeof(exec_name));
     } else {
         memcpy( oid_buf, ns_extend_oid, sizeof(ns_extend_oid));

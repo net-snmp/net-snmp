@@ -327,6 +327,11 @@ main(int argc, char *argv[])
         char            csysuptime[20];
 
         pdu = snmp_pdu_create(inform ? SNMP_MSG_INFORM : SNMP_MSG_TRAP2);
+        if ( !pdu ) {
+            fprintf(stderr, "Failed to create notification PDU\n");
+            SOCK_CLEANUP;
+            exit(1);
+        }
         if (arg == argc) {
             fprintf(stderr, "Missing up-time parameter\n");
             usage();
