@@ -480,7 +480,10 @@ input_variable(netsnmp_variable_list * vp)
             if ('\n' == buf[strlen(buf) - 1])
                 buf[strlen(buf) - 1] = '\0';
             vp->val_len = MAX_OID_LEN;;
-            read_objid(buf, (oid *) value, &vp->val_len);
+            if (0 == read_objid(buf, (oid *) value, &vp->val_len)) {
+                printf("Unrecognised OID value\n");
+                goto getValue;
+            }
             vp->val_len *= sizeof(oid);
             vp->val.objid = (oid *) malloc(vp->val_len);
             memmove(vp->val.objid, value, vp->val_len);
