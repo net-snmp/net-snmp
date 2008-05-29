@@ -151,7 +151,7 @@ int netsnmp_mem_arch_load( netsnmp_cache *cache, void *magic ) {
     }
 
    /* Shared memory is not reported by Linux 2.6 kernel */
-   if (0 != netsnmp_os_prematch("Linux","2.6"))
+   if (0 != netsnmp_os_prematch("Linux","2.6")) {
     mem = netsnmp_memory_get_byIdx( NETSNMP_MEM_TYPE_SHARED, 1 );
     if (!mem) {
         snmp_log_perror("No Shared Memory info entry");
