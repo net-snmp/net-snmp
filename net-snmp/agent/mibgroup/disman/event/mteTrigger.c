@@ -609,9 +609,9 @@ mteTrigger_run( unsigned int reg, void *clientarg)
                 snmp_set_var_objid( dvar, entry->mteDeltaDiscontID,
                                           entry->mteDeltaDiscontID_len );
                 if ( entry->flags & MTE_TRIGGER_FLAG_DWILD ) {
-                    netsnmp_query_walk( dvar, entry->session );
+                    n = netsnmp_query_walk( dvar, entry->session );
                 } else {
-                    netsnmp_query_get(  dvar, entry->session );
+                    n = netsnmp_query_get(  dvar, entry->session );
                 }
                 if ( n != SNMP_ERR_NOERROR ) {
                     _mteTrigger_failure( "failed to run mteTrigger delta query" );
