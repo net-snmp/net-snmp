@@ -127,6 +127,10 @@ netsnmp_stash_cache_helper(netsnmp_mib_handler *handler,
     DEBUGMSGTL(("helper:stash_cache", "Got request\n"));
 
     cache = netsnmp_cache_reqinfo_extract( reqinfo, reginfo->handlerName );
+    if (!cache) {
+        DEBUGMSGTL(("helper:stash_cache", "No cache structure\n"));
+        return SNMP_ERR_GENERR;
+    }
     cinfo = (netsnmp_stash_cache_info *) cache->magic;
 
     switch (reqinfo->mode) {

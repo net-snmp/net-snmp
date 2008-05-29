@@ -1559,6 +1559,13 @@ usm_rgenerate_out_msg(int msgProcModel, /* (UNUSED) */
                                                  ASN_PRIMITIVE |
                                                  ASN_OCTET_STR),
                                        ciphertext, ciphertextlen);
+        if (rc == 0) {
+            DEBUGMSGTL(("usm", "Encryption failed.\n"));
+            usm_free_usmStateReference(secStateRef);
+            SNMP_FREE(ciphertext);
+            return SNMPERR_USM_ENCRYPTIONERROR;
+        }
+
 #ifdef NETSNMP_ENABLE_TESTING_CODE
         if (debug_is_token_registered("usm/dump") == SNMPERR_SUCCESS) {
             dump_chunk("usm/dump", "salt + Encrypted form: ", salt,
@@ -3607,7 +3614,8 @@ usm_parse_config_usmUser(const char *token, char *line)
     struct usmUser *uptr;
 
     uptr = usm_read_user(line);
-    usm_add_user(uptr);
+    if ( uptr)
+        usm_add_user(uptr);
 }
 
 

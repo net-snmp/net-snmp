@@ -1780,17 +1780,18 @@ dump_registry(void)
                             struct variable *vp =
                                 myptr2->reginfo->handler->myvoid;
 
-                            sprint_realloc_objid(&s, &sl, &sl_o, 1,
-                                                 vp->name, vp->namelen);
+                            if (!sprint_realloc_objid(&s, &sl, &sl_o, 1,
+                                                 vp->name, vp->namelen)) {
+                                continue;
+                            }
                             printf("\t%s[%s] %p var %s\n", myptr2->label_a,
-                                   myptr2->reginfo->handlerName ? myptr2->
-                                   reginfo->handlerName : "no-name",
+                                   myptr2->reginfo->handlerName ?
+                                   myptr2->reginfo->handlerName : "no-name",
                                    myptr2->reginfo, s);
                         } else {
                             printf("\t%s %s %p\n", myptr2->label_a,
-                                   myptr2->reginfo->handlerName ? myptr2->
-                                   reginfo->
-                                   handlerName : "no-handler-name",
+                                   myptr2->reginfo->handlerName ?
+                                   myptr2->reginfo->handlerName : "no-handler-name",
                                    myptr2->reginfo);
                         }
                     }
