@@ -868,6 +868,10 @@ main(int argc, char *argv[])
 
         /* fetch the needed diffie helman parameters */
         dhpdu = snmp_pdu_create(SNMP_MSG_GET);
+        if (!dhpdu) {
+            fprintf(stderr, "Failed to create request\n");
+            exit(1);
+        }
 
         /* get the current DH parameters */
         snmp_add_null_var(dhpdu, usmDHParameters, usmDHParameters_len);
