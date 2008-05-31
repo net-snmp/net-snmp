@@ -12,9 +12,8 @@
 #include <strings.h>
 #endif
 
-#include <net-snmp/agent/scalar.h>
+#include <net-snmp/agent/instance.h>
 #include <net-snmp/agent/serialize.h>
-#include <net-snmp/agent/read_only.h>
 
 /** @defgroup scalar_group_group scalar_group
  *  Process groups of scalars.
@@ -49,7 +48,6 @@ netsnmp_register_scalar_group(netsnmp_handler_registration *reginfo,
                               oid first, oid last)
 {
     netsnmp_inject_handler(reginfo, netsnmp_get_instance_handler());
-    netsnmp_inject_handler(reginfo, netsnmp_get_scalar_handler());
     netsnmp_inject_handler(reginfo, netsnmp_get_scalar_group_handler(first, last));
     return netsnmp_register_serialize(reginfo);
 }
@@ -129,12 +127,13 @@ netsnmp_scalar_group_helper_handler(netsnmp_mib_handler *handler,
                 netsnmp_set_request_error(reqinfo, requests, ret);
                 return SNMP_ERR_NOERROR;
 	    }
-            root_tmp[reginfo->rootoid_len++] = subid;
+            root_tmp[reginfo->rootoid_len] = subid;
+            reginfo->rootoid_len += 2;
             reginfo->rootoid = root_tmp;
             ret = netsnmp_call_next_handler(handler, reginfo, reqinfo,
                                             requests);
             reginfo->rootoid = root_save;
-            reginfo->rootoid_len--;
+            reginfo->rootoid_len -= 2;
             return ret;
         }
         break;
@@ -163,7 +162,8 @@ netsnmp_scalar_group_helper_handler(netsnmp_mib_handler *handler,
 	else if (subid > sgroup->ubound)
             return SNMP_ERR_NOERROR;
         
-        root_tmp[reginfo->rootoid_len++] = subid;
+        root_tmp[reginfo->rootoid_len] = subid;
+        reginfo->rootoid_len += 2;
         reginfo->rootoid = root_tmp;
         ret = netsnmp_call_next_handler(handler, reginfo, reqinfo,
                                             requests);
@@ -176,12 +176,12 @@ netsnmp_scalar_group_helper_handler(netsnmp_mib_handler *handler,
              requests->requestvb->type == SNMP_NOSUCHOBJECT ||
              requests->requestvb->type == SNMP_NOSUCHINSTANCE)) {
             snmp_set_var_objid(requests->requestvb,
-                               reginfo->rootoid, reginfo->rootoid_len);
-            requests->requestvb->name[reginfo->rootoid_len-1] = ++subid;
+                               reginfo->rootoid, reginfo->rootoid_len - 1);
+            requests->requestvb->name[reginfo->rootoid_len - 2] = ++subid;
             requests->requestvb->type = ASN_PRIV_RETRY;
         }
         reginfo->rootoid = root_save;
-        reginfo->rootoid_len--;
+        reginfo->rootoid_len -= 2;
         return ret;
     }
     /*
