@@ -43,6 +43,13 @@ init_mteEvent(void)
 
     /*
      * Insert fixed events for the default trigger notifications
+     *
+     * NB: internal events (with an owner of "_snmpd") will not in
+     * fact refer to the mteObjectsTable for the payload varbinds.
+     * The routine mteObjects_internal_vblist() hardcodes the
+     * appropriate varbinds for these internal events.
+     *   This routine will need to be updated whenever a new
+     * internal event is added.
      */
     if ( _defaults_init)
         return;
@@ -267,6 +274,7 @@ mteEvent_fire( char *owner, char *event,      /* Event to invoke    */
 }
 
 
+#ifdef __NOT_NEEDED
 void
 _insert_internal_objects( netsnmp_variable_list *vblist, char *oname,
                           struct mteTrigger *trigger)
@@ -322,6 +330,7 @@ _insert_internal_objects( netsnmp_variable_list *vblist, char *oname,
     vp->next_variable     = vblist->next_variable;
     vblist->next_variable = var;
 }
+#endif
 
 int
 _mteEvent_fire_notify( struct mteEvent   *entry,     /* The event to fire  */
@@ -331,6 +340,8 @@ _mteEvent_fire_notify( struct mteEvent   *entry,     /* The event to fire  */
     netsnmp_variable_list *var, *v2;
     oid    snmptrap_oid[]   = { 1,3,6,1,6,3,1,1,4,1,0 };
     size_t snmptrap_oid_len = OID_LENGTH(snmptrap_oid);
+    netsnmp_session *s;
+
          /*
           * The Event-MIB specification says that objects from the
           *   mteEventTable should come after those from the trigger,
@@ -394,9 +405,10 @@ _mteEvent_fire_notify( struct mteEvent   *entry,     /* The event to fire  */
      */
     v2 = var->next_variable;
     if (entry->session)
-        netsnmp_query_get( v2, entry->session );
+        s = entry->session;
     else
-        netsnmp_query_get( v2, trigger->session );
+        s = trigger->session;
+    netsnmp_query_get( v2, s );
 
     /*
      * ... add any "internal" objects...
@@ -405,11 +417,11 @@ _mteEvent_fire_notify( struct mteEvent   *entry,     /* The event to fire  */
     if (strcmp(entry->mteNotifyOwner, "_snmpd") == 0) {
         DEBUGMSGTL(("disman:event:fire", "Adding event objects (internal)\n"));
         if ( !strictOrdering ) {
-            mteObjects_internal_vblist(var, entry->mteNotifyObjects, trigger);
+            mteObjects_internal_vblist(var, entry->mteNotifyObjects, trigger, s);
         } else {
             for (v2 = var; v2 && v2->next_variable; v2=v2->next_variable)
                 ;
-            mteObjects_internal_vblist(v2, entry->mteNotifyObjects, trigger);
+            mteObjects_internal_vblist(v2,  entry->mteNotifyObjects, trigger, s);
         }
     }
 
