@@ -53,6 +53,7 @@ int  mteObjects_vblist(          netsnmp_variable_list *vblist,
                                  char *owner,   char   *oname,
                                  oid  *suffix,  size_t  sfx_len );
 int  mteObjects_internal_vblist( netsnmp_variable_list *vblist,
-                                 char *oname,   struct mteTrigger *trigger);
+                                 char *oname,   struct mteTrigger *trigger,
+                                 netsnmp_session *s);
 
 #endif                          /* MTEOBJECTS_H */

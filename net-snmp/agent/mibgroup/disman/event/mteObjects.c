@@ -335,7 +335,9 @@ mteObjects_vblist( netsnmp_variable_list *vblist,
 
 int
 mteObjects_internal_vblist( netsnmp_variable_list *vblist,
-                            char   *oname, struct mteTrigger *trigger)
+                            char   *oname,
+                            struct mteTrigger *trigger,
+                            netsnmp_session   *sess)
 {
     netsnmp_variable_list *var = NULL, *vp;
     oid mteHotTrigger[] = {1, 3, 6, 1, 2, 1, 88, 2, 1, 1, 0};
@@ -343,6 +345,12 @@ mteObjects_internal_vblist( netsnmp_variable_list *vblist,
     oid mteHotContext[] = {1, 3, 6, 1, 2, 1, 88, 2, 1, 3, 0};
     oid mteHotOID[]     = {1, 3, 6, 1, 2, 1, 88, 2, 1, 4, 0};
     oid mteHotValue[]   = {1, 3, 6, 1, 2, 1, 88, 2, 1, 5, 0};
+
+    oid ifIndexOid[]    = {1, 3, 6, 1, 2, 1, 2, 2, 1, 1, 0};
+    oid ifAdminStatus[] = {1, 3, 6, 1, 2, 1, 2, 2, 1, 7, 0};
+    oid ifOperStatus[]  = {1, 3, 6, 1, 2, 1, 2, 2, 1, 8, 0};
+
+    oid if_index;
 
     /*
      * Construct the varbinds for this (internal) event...
@@ -370,6 +378,41 @@ mteObjects_internal_vblist( netsnmp_variable_list *vblist,
                               trigger->mteTriggerFired->type,
                               trigger->mteTriggerFired->val.string,
                               trigger->mteTriggerFired->val_len);
+    } else if ((!strcmp(oname, "_linkUpDown"  ))) {
+        /*
+         * The ifOperStatus varbind that triggered this entry
+         *  is held in the trigger->mteTriggerFired field
+         *
+         * We can retrieve the ifIndex and ifOperStatus values
+         *  from this varbind.  But first we need to tweak the
+         *  static ifXXX OID arrays to include the correct index.
+         *  (or this could be passed in from the calling routine?)
+         *
+         * Unfortunately we don't have the current AdminStatus value,
+         *  so we'll need to make another query to retrieve that.
+         */
+        if_index = trigger->mteTriggerFired->name[10];
+        ifIndexOid[    10 ] = if_index;
+        ifAdminStatus[ 10 ] = if_index;
+        ifOperStatus[  10 ] = if_index;
+        snmp_varlist_add_variable( &var,
+               ifIndexOid, OID_LENGTH(ifIndexOid),
+               ASN_INTEGER, &if_index, sizeof(if_index));
+
+               /* Set up a dummy varbind for ifAdminStatus... */
+        snmp_varlist_add_variable( &var,
+               ifAdminStatus, OID_LENGTH(ifAdminStatus),
+               ASN_INTEGER,
+               trigger->mteTriggerFired->val.integer,
+               trigger->mteTriggerFired->val_len);
+               /* ... then retrieve the actual value */
+        netsnmp_query_get( var->next_variable, sess );
+
+        snmp_varlist_add_variable( &var,
+               ifOperStatus, OID_LENGTH(ifOperStatus),
+               ASN_INTEGER,
+               trigger->mteTriggerFired->val.integer,
+               trigger->mteTriggerFired->val_len);
     } else {
         DEBUGMSGTL(("disman:event:objects",
                     "Unknown internal objects tag (%s)\n", oname));
