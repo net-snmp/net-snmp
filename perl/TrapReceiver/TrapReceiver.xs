@@ -213,9 +213,7 @@ int   perl_trapd_handler( netsnmp_pdu           *pdu,
     /* Not needed because of the G_DISCARD flag (I think) */
     /* SPAGAIN; */
     /* PUTBACK; */
-#ifndef __x86_64__
-    FREETMPS; /* FIXME: known to cause a segfault on x86-64 */
-#endif
+    FREETMPS;
     LEAVE;
     return NETSNMPTRAPD_HANDLER_OK;
 }
