@@ -689,7 +689,7 @@ snmp_set_var_objid(netsnmp_variable_list * vp,
 
 int
 snmp_set_var_typed_value(netsnmp_variable_list * newvar, u_char type,
-                         const u_char * val_str, size_t val_len)
+                         const void * val_str, size_t val_len)
 {
     newvar->type = type;
     return snmp_set_var_value(newvar, val_str, val_len);
@@ -699,9 +699,8 @@ int
 snmp_set_var_typed_integer(netsnmp_variable_list * newvar,
                            u_char type, long val)
 {
-    const long v = val;
     newvar->type = type;
-    return snmp_set_var_value(newvar, (const u_char *)&v, sizeof(long));
+    return snmp_set_var_value(newvar, &val, sizeof(long));
 }
 
 int
@@ -755,7 +754,7 @@ find_varbind_in_list( netsnmp_variable_list *vblist,
 
 int
 snmp_set_var_value(netsnmp_variable_list * vars,
-                   const u_char * value, size_t len)
+                   const void * value, size_t len)
 {
     int             largeval = 1;
 
@@ -854,7 +853,9 @@ snmp_set_var_value(netsnmp_variable_list * vars,
                         = (const char *) value;
                     *(vars->val.integer) = (long) *val_char;
                 } else {
-                    *(vars->val.integer) = (unsigned long) *value;
+                    const u_char    *val_uchar
+                        = (const u_char *) value;
+                    *(vars->val.integer) = (unsigned long) *val_uchar;
                 }
             }
             else {
