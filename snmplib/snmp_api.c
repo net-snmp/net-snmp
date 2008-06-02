@@ -3970,7 +3970,7 @@ snmpv3_make_report(netsnmp_pdu *pdu, int error)
      * return the appropriate error counter  
      */
     snmp_pdu_add_variable(pdu, err_var, err_var_len,
-                          ASN_COUNTER, (u_char *) & ltmp, sizeof(ltmp));
+                          ASN_COUNTER, & ltmp, sizeof(ltmp));
 
     return SNMPERR_SUCCESS;
 }                               /* end snmpv3_make_report() */
@@ -6692,7 +6692,7 @@ netsnmp_variable_list *
 snmp_pdu_add_variable(netsnmp_pdu *pdu,
                       const oid * name,
                       size_t name_length,
-                      u_char type, const u_char * value, size_t len)
+                      u_char type, const void * value, size_t len)
 {
     return snmp_varlist_add_variable(&pdu->variables, name, name_length,
                                      type, value, len);
@@ -6706,7 +6706,7 @@ netsnmp_variable_list *
 snmp_varlist_add_variable(netsnmp_variable_list ** varlist,
                           const oid * name,
                           size_t name_length,
-                          u_char type, const u_char * value, size_t len)
+                          u_char type, const void * value, size_t len)
 {
     netsnmp_variable_list *vars, *vtmp;
     int rc;
@@ -6871,7 +6871,7 @@ snmp_add_var(netsnmp_pdu *pdu,
             break;
 #endif /* NETSNMP_DISABLE_MIB_LOADING */
         snmp_pdu_add_variable(pdu, name, name_length, ASN_INTEGER,
-                              (u_char *) & ltmp, sizeof(ltmp));
+                              &ltmp, sizeof(ltmp));
         break;
 
     case 'u':
@@ -6885,7 +6885,7 @@ snmp_add_var(netsnmp_pdu *pdu,
         ltmp = strtoul(value, &ecp, 10);
         if (*value && !*ecp)
             snmp_pdu_add_variable(pdu, name, name_length, ASN_UNSIGNED,
-                                  (u_char *) & ltmp, sizeof(ltmp));
+                                  &ltmp, sizeof(ltmp));
         else
             goto fail;
         break;
@@ -6901,7 +6901,7 @@ snmp_add_var(netsnmp_pdu *pdu,
         ltmp = strtoul(value, &ecp, 10);
         if (*value && !*ecp)
             snmp_pdu_add_variable(pdu, name, name_length, ASN_UINTEGER,
-                                  (u_char *) & ltmp, sizeof(ltmp));
+                                  &ltmp, sizeof(ltmp));
         else
             goto fail;
         break;
@@ -6917,7 +6917,7 @@ snmp_add_var(netsnmp_pdu *pdu,
         ltmp = strtoul(value, &ecp, 10);
         if (*value && !*ecp)
             snmp_pdu_add_variable(pdu, name, name_length, ASN_COUNTER,
-                                  (u_char *) & ltmp, sizeof(ltmp));
+                                  &ltmp, sizeof(ltmp));
         else
             goto fail;
         break;
@@ -6932,7 +6932,7 @@ snmp_add_var(netsnmp_pdu *pdu,
 #endif /* NETSNMP_DISABLE_MIB_LOADING */
         if (read64(&c64tmp, value))
             snmp_pdu_add_variable(pdu, name, name_length, ASN_COUNTER64,
-                                  (u_char *) & c64tmp, sizeof(c64tmp));
+                                  &c64tmp, sizeof(c64tmp));
         else
             goto fail;
         break;
@@ -6948,7 +6948,7 @@ snmp_add_var(netsnmp_pdu *pdu,
         ltmp = strtoul(value, &ecp, 10);
         if (*value && !*ecp)
             snmp_pdu_add_variable(pdu, name, name_length, ASN_TIMETICKS,
-                                  (u_char *) & ltmp, sizeof(long));
+                                  &ltmp, sizeof(long));
         else
             goto fail;
         break;
@@ -6964,7 +6964,7 @@ snmp_add_var(netsnmp_pdu *pdu,
         atmp = inet_addr(value);
         if (atmp != (in_addr_t) -1 || !strcmp(value, "255.255.255.255"))
             snmp_pdu_add_variable(pdu, name, name_length, ASN_IPADDRESS,
-                                  (u_char *) & atmp, sizeof(atmp));
+                                  &atmp, sizeof(atmp));
         else
             goto fail;
         break;
@@ -6982,9 +6982,8 @@ snmp_add_var(netsnmp_pdu *pdu,
         } else {
             tint = MAX_OID_LEN;
             if (snmp_parse_oid(value, (oid *) buf, &tint)) {
-                snmp_pdu_add_variable(pdu, name, name_length,
-                                      ASN_OBJECT_ID, buf,
-                                      sizeof(oid) * tint);
+                snmp_pdu_add_variable(pdu, name, name_length, ASN_OBJECT_ID,
+                                      buf, sizeof(oid) * tint);
             } else {
                 result = snmp_errno;    /*MTCRITICAL_RESOURCE */
             }
@@ -7002,8 +7001,8 @@ snmp_add_var(netsnmp_pdu *pdu,
         }
 	if ('s' == type && do_hint && !parse_octet_hint(tp->hint, value, &hintptr, &itmp)) {
             if (_check_range(tp, itmp, &result, "Value does not match DISPLAY-HINT")) {
-                snmp_pdu_add_variable(pdu, name, name_length,
-                                      ASN_OCTET_STR, hintptr, itmp);
+                snmp_pdu_add_variable(pdu, name, name_length, ASN_OCTET_STR,
+                                      hintptr, itmp);
             }
             SNMP_FREE(hintptr);
             hintptr = buf;
@@ -7115,7 +7114,7 @@ snmp_add_var(netsnmp_pdu *pdu,
     case 'U':
         if (read64(&c64tmp, value))
             snmp_pdu_add_variable(pdu, name, name_length, ASN_OPAQUE_U64,
-                                  (u_char *) & c64tmp, sizeof(c64tmp));
+                                  &c64tmp, sizeof(c64tmp));
         else
             goto fail;
         break;
@@ -7123,7 +7122,7 @@ snmp_add_var(netsnmp_pdu *pdu,
     case 'I':
         if (read64(&c64tmp, value))
             snmp_pdu_add_variable(pdu, name, name_length, ASN_OPAQUE_I64,
-                                  (u_char *) & c64tmp, sizeof(c64tmp));
+                                  &c64tmp, sizeof(c64tmp));
         else
             goto fail;
         break;
@@ -7131,16 +7130,15 @@ snmp_add_var(netsnmp_pdu *pdu,
     case 'F':
         if (sscanf(value, "%f", &ftmp) == 1)
             snmp_pdu_add_variable(pdu, name, name_length, ASN_OPAQUE_FLOAT,
-                                  (u_char *) & ftmp, sizeof(ftmp));
+                                  &ftmp, sizeof(ftmp));
         else
             goto fail;
         break;
 
     case 'D':
         if (sscanf(value, "%lf", &dtmp) == 1)
-            snmp_pdu_add_variable(pdu, name, name_length,
-                                  ASN_OPAQUE_DOUBLE, (u_char *) & dtmp,
-                                  sizeof(dtmp));
+            snmp_pdu_add_variable(pdu, name, name_length, ASN_OPAQUE_DOUBLE,
+                                  &dtmp, sizeof(dtmp));
         else
             goto fail;
         break;
