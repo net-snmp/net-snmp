@@ -843,16 +843,22 @@ mteTrigger_run( unsigned int reg, void *clientarg)
              *     to remember whether the trigger has already fired)
              */
             if ( cmp ) {
-                if ((entry->old_results ||
-                     (entry->flags & MTE_TRIGGER_FLAG_BSTART)) &&
-                    (vp1->index & MTE_ARMED_BOOLEAN )) {
+              if (vp1->index & MTE_ARMED_BOOLEAN ) {
+                vp1->index &= ~MTE_ARMED_BOOLEAN;
+                /*
+                 * NB: Clear the trigger armed flag even if the
+                 *   (starting) event dosn't actually fire.
+                 *   Otherwise initially true (but suppressed)
+                 *   triggers will fire on the *second* probe.
+                 */
+                if ( entry->old_results ||
+                    (entry->flags & MTE_TRIGGER_FLAG_BSTART)) {
                     DEBUGMSGTL(( "disman:event:trigger:fire",
                                  "Firing boolean test: "));
                     DEBUGMSGOID(("disman:event:trigger:fire",
                                  vp1->name, vp1->name_length));
                     DEBUGMSG((   "disman:event:trigger:fire", "%s\n",
                                   (entry->old_results ? "" : " (startup)")));
-                    vp1->index &= ~MTE_ARMED_BOOLEAN;
                     entry->mteTriggerXOwner   = entry->mteTBoolObjOwner;
                     entry->mteTriggerXObjects = entry->mteTBoolObjects;
                     /*
@@ -865,6 +871,7 @@ mteTrigger_run( unsigned int reg, void *clientarg)
                     mteEvent_fire(entry->mteTBoolEvOwner, entry->mteTBoolEvent, 
                                   entry, vp1->name+n, vp1->name_length-n);
                 }
+              }
             } else {
                 vp1->index |= MTE_ARMED_BOOLEAN;
             }
@@ -940,17 +947,24 @@ mteTrigger_run( unsigned int reg, void *clientarg)
              */
             cmp = vp1->index;   /* working copy of 'armed' flags */
             if ( value >= entry->mteTThRiseValue ) {
-                if ((entry->old_results ||
-                     (entry->mteTThStartup & MTE_THRESH_START_RISE)) &&
-                    (vp1->index & MTE_ARMED_TH_RISE )) {
+              if (cmp & MTE_ARMED_TH_RISE ) {
+                cmp &= ~MTE_ARMED_TH_RISE;
+                cmp |=  MTE_ARMED_TH_FALL;
+                /*
+                 * NB: Clear the trigger armed flag even if the
+                 *   (starting) event dosn't actually fire.
+                 *   Otherwise initially true (but suppressed)
+                 *   triggers will fire on the *second* probe.
+                 * Similarly for falling thresholds (see below).
+                 */
+                if ( entry->old_results ||
+                    (entry->mteTThStartup & MTE_THRESH_START_RISE)) {
                     DEBUGMSGTL(( "disman:event:trigger:fire",
                                  "Firing rising threshold test: "));
                     DEBUGMSGOID(("disman:event:trigger:fire",
                                  vp1->name, vp1->name_length));
                     DEBUGMSG((   "disman:event:trigger:fire", "%s\n",
                                  (entry->old_results ? "" : " (startup)")));
-                    cmp &= ~MTE_ARMED_TH_RISE;
-                    cmp |=  MTE_ARMED_TH_FALL;
                     /*
                      * If no riseEvent is configured, we need still to
                      *  set the armed flags appropriately, but there's
@@ -966,20 +980,22 @@ mteTrigger_run( unsigned int reg, void *clientarg)
                                       entry, vp1->name+n, vp1->name_length-n);
                     }
                 }
+              }
             }
 
             if ( value <= entry->mteTThFallValue ) {
-                if ((entry->old_results ||
-                     (entry->mteTThStartup & MTE_THRESH_START_FALL)) &&
-                    (vp1->index & MTE_ARMED_TH_FALL )) {
+              if (cmp & MTE_ARMED_TH_FALL ) {
+                cmp &= ~MTE_ARMED_TH_FALL;
+                cmp |=  MTE_ARMED_TH_RISE;
+                /* Clear the trigger armed flag (see above) */
+                if ( entry->old_results ||
+                    (entry->mteTThStartup & MTE_THRESH_START_FALL)) {
                     DEBUGMSGTL(( "disman:event:trigger:fire",
                                  "Firing falling threshold test: "));
                     DEBUGMSGOID(("disman:event:trigger:fire",
                                  vp1->name, vp1->name_length));
                     DEBUGMSG((   "disman:event:trigger:fire", "%s\n",
                                  (entry->old_results ? "" : " (startup)")));
-                    cmp &= ~MTE_ARMED_TH_FALL;
-                    cmp |=  MTE_ARMED_TH_RISE;
                     /*
                      * Similarly, if no fallEvent is configured,
                      *  there's no point in trying to fire it either.
@@ -994,6 +1010,7 @@ mteTrigger_run( unsigned int reg, void *clientarg)
                                       entry, vp1->name+n, vp1->name_length-n);
                     }
                 }
+              }
             }
             vp1->index = cmp;
         }
