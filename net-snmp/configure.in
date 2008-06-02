@@ -2913,6 +2913,11 @@ if test "x$embed_perl" = "xtry" ; then
   if test "x$install_perl" = "xno" ; then
     install_perl="try"
   fi
+  case $target_os in
+    # Don't enable embedded perl on Mac OS/X (unless explicitly requested)
+    # The standard dual-architecture perl binary breaks the default build
+    darwin*) embed_perl="no";;
+  esac
   if test "x$ac_cv_path_PERLPROG" = "x" -o "x$ac_cv_path_PERLPROG" = "xno" ; then
     install_perl="no"
     embed_perl="no"
