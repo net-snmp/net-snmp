@@ -47,6 +47,11 @@ netsnmp_parse_iqueryVersion(const char *token, char *line)
     }
 }
 
+  /*
+   * Set up a default session for running internal queries.
+   * This needs to be done before the config files are read,
+   *  so that it is available for "monitor" directives...
+   */
 int
 _init_default_iquery_session( int majorID, int minorID,
                               void *serverargs, void *clientarg)
@@ -56,6 +61,30 @@ _init_default_iquery_session( int majorID, int minorID,
     if (secName)
         netsnmp_query_set_default_session(
              netsnmp_iquery_user_session(secName));
+    return SNMPERR_SUCCESS;
+}
+
+  /*
+   * ... Unfortunately, the internal engine ID is not set up
+   * until later, so this default session is incomplete.
+   * The resulting engineID probe runs into problems,
+   * causing the very first internal query to time out.
+   *   Updating the default session with the internal engineID
+   * once it has been set, fixes this problem.
+   */
+int
+_tweak_default_iquery_session( int majorID, int minorID,
+                              void *serverargs, void *clientarg)
+{
+    u_char eID[SNMP_MAXBUF_SMALL];
+    size_t elen;
+    netsnmp_session *s = netsnmp_query_get_default_session();
+
+    if (s && s->securityEngineIDLen == 0 ) {
+        elen = snmpv3_get_engineID(eID, sizeof(eID));
+        memdup( &(s->securityEngineID), eID, elen );
+        s->securityEngineIDLen = elen;
+    }
     return SNMPERR_SUCCESS;
 }
 
@@ -87,6 +116,9 @@ void init_iquery(void){
     snmp_register_callback(SNMP_CALLBACK_LIBRARY, 
                            SNMP_CALLBACK_POST_PREMIB_READ_CONFIG,
                            _init_default_iquery_session, NULL);
+    snmp_register_callback(SNMP_CALLBACK_LIBRARY, 
+                           SNMP_CALLBACK_POST_READ_CONFIG,
+                           _tweak_default_iquery_session, NULL);
 }
 
     /**************************
