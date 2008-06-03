@@ -64,3 +64,20 @@ please post to <net-snmp-coders@lists.sourceforge.net>. Thanks!
                    --prefix=/usr --with-persistent-directory=/var/db/ucd-snmp
                    --with-mib-modules=host
 
+-------------------------------------
+
+With Mac OS X 10.5.2, and Net-SNMP 5.4.2, the default configuration
+seems to build and run successfully.   The main tweak needed to get
+things working was to disable "embedded perl" (which is active by
+default in 5.4 and above).
+
+  The issue here is that enabling embedded perl will try to use the
+same CFLAGS used for compiling perl, when compiling the Net-SNMP code
+(which is probably reasonable).  Unfortunately, the default perl binary
+that comes with Mac OS/X 10.5 (at least) is a "universal binary",
+so the CFLAGS that it uses include "-arch i386 -arch ppc".  This
+dual-architecture option confuses the configure script, and means
+that it cannot detect the characteristics of the host system correctly.
+
+Dave
+June 2008
