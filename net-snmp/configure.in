@@ -1039,7 +1039,7 @@ fi
 
 # platform-specific linker flags
 case $target_os in
-    aix4.2*|aix4.3*|aix5*)
+    aix4.2*|aix4.3*|aix5*|aix6*)
         AC_MSG_CHECKING([what linker flags to add to enable runtime linking on AIX])
         for ld_flag in $LDFLAGS; do
             if (test $ld_flag = "-brtl" || test $ld_flag = "-Wl,-brtl"); then

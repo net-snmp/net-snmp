@@ -399,7 +399,7 @@ sh_count_procs(char *procname)
     return ret;
 }
 
-#elif defined(aix4) || defined(aix5)
+#elif defined(aix4) || defined(aix5) || defined(aix6)
 #include <procinfo.h>
 #include <sys/types.h>
 
