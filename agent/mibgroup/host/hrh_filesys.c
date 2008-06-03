@@ -54,7 +54,7 @@
 #include <stdlib.h>
 #endif
 
-#if defined(aix4) || defined(aix5)
+#if defined(aix4) || defined(aix5) || defined(aix6)
 #include <sys/mntctl.h>
 #include <sys/vmount.h>
 #include <sys/statfs.h>
