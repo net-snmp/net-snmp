@@ -112,7 +112,7 @@
 #endif                          /* if HAVE_SYS_SYSCTL_H */
 #endif                          /* ifndef dynix */
 
-#if (defined(aix4) || defined(aix5)) && HAVE_LIBPERFSTAT_H
+#if (defined(aix4) || defined(aix5) || defined(aix6)) && HAVE_LIBPERFSTAT_H
 #include <libperfstat.h>
 #endif
 

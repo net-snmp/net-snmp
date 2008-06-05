@@ -18,7 +18,7 @@ config_require(hardware/cpu/cpu_sysctl)
 #elif (defined(freebsd2) || defined(freebsd3))
 config_require(hardware/cpu/cpu_nlist)
 
-#elif (defined(aix4) || defined(aix5))
+#elif (defined(aix4) || defined(aix5) || defined(aix6))
 config_require(hardware/cpu/cpu_perfstat)
 
 #elif (defined(solaris2))

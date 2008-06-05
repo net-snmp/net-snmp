@@ -119,7 +119,7 @@
 #if defined(hpux10) || defined(hpux11)
 #include <sys/pstat.h>
 #endif
-#if defined(aix4) || defined(aix5)
+#if defined(aix4) || defined(aix5) || defined(aix6)
 #include <libperfstat.h>
 #endif
 #if HAVE_SYS_SYSGET_H
@@ -230,7 +230,7 @@ try_getloadavg(double *r_ave, size_t s_ave)
 #define FIX_TO_DBL(_IN) (((double) _IN)/((double) FSCALE))
 #endif
 #endif
-#if defined(aix4) || defined(aix5)
+#if defined(aix4) || defined(aix5) || defined(aix6)
     int             favenrun[3];
     perfstat_cpu_total_t cs;
 #endif
@@ -268,7 +268,7 @@ try_getloadavg(double *r_ave, size_t s_ave)
     r_ave[0] = pst_buf.psd_avg_1_min;
     r_ave[1] = pst_buf.psd_avg_5_min;
     r_ave[2] = pst_buf.psd_avg_15_min;
-#elif defined(aix4) || defined(aix5)
+#elif defined(aix4) || defined(aix5) || defined(aix6)
     if(perfstat_cpu_total((perfstat_id_t *)NULL, &cs, sizeof(perfstat_cpu_total_t), 1) > 0) {
         r_ave[0] = cs.loadavg[0] / 65536.0;
         r_ave[1] = cs.loadavg[1] / 65536.0;

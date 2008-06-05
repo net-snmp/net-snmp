@@ -1504,7 +1504,7 @@
 #ifdef WIN32
 #define NETSNMP_OSTYPE NETSNMP_WIN32ID
 #endif
-#if defined(aix3) || defined(aix4) || defined(aix5)
+#if defined(aix3) || defined(aix4) || defined(aix5) || defined(aix6)
 #define NETSNMP_OSTYPE NETSNMP_AIXID
 #endif
 #if defined(darwin) && (darwin >= 8)

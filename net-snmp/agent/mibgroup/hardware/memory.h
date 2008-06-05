@@ -12,7 +12,7 @@ config_require(hardware/memory/memory_freebsd)
 #elif (defined(netbsd) || defined(netbsd1) || defined(netbsdelf) || defined(netbsdelf2)|| defined(netbsdelf3) || defined(openbsd2) || defined(openbsd3) || defined(openbsd4))
 config_require(hardware/memory/memory_netbsd)
 
-#elif (defined(aix4) || defined(aix5))
+#elif (defined(aix4) || defined(aix5) || defined(aix6))
 config_require(hardware/memory/memory_aix)
 
 #elif (defined(solaris2))
