@@ -39,7 +39,7 @@
 #include <stdlib.h>
 #endif
 
-#if defined(aix4) || defined(aix5)
+#if defined(aix4) || defined(aix5) || defined(aix6)
 #include <sys/mntctl.h>
 #include <sys/vmount.h>
 #include <sys/statfs.h>
@@ -128,7 +128,7 @@ static int		fscount;
 #define HRFS_statfs	win_statfs
 #define	HRFS_type	f_type
 
-#elif defined(aix4) || defined(aix5)
+#elif defined(aix4) || defined(aix5) || defined(aix6)
 
 struct vmount *aixmnt, *aixcurr;
 struct HRFS_entry {
@@ -203,7 +203,8 @@ init_hr_filesys(void)
 {
     REGISTER_MIB("host/hr_filesys", hrfsys_variables, variable4,
                  hrfsys_variables_oid);
-#if defined(aix4) || defined(aix5) /* something leaks, make it idiot-safe */
+#if defined(aix4) || defined(aix5) || defined(aix6) 
+    /* something leaks, make it idiot-safe */
     aixmnt = NULL;
     aixcurr = NULL;
 #endif
@@ -397,7 +398,7 @@ var_hrfilesys(struct variable *vp,
             break;
 #endif
         }
-#elif defined(aix4) || defined(aix5)
+#elif defined(aix4) || defined(aix5) || defined(aix6)
         switch (HRFS_entry->HRFS_type) {
         case MNT_AIX:
         case MNT_JFS:
@@ -521,7 +522,7 @@ var_hrfilesys(struct variable *vp,
         long_return = HRFS_entry->f_flags & MNT_RDONLY ? 2 : 1;
 #elif defined(cygwin)
         long_return = 1;
-#elif defined(aix4) || defined(aix5)
+#elif defined(aix4) || defined(aix5) || defined(aix6)
         long_return = (HRFS_entry->HRFS_flags & MNT_READONLY) == 0 ? 1 : 2;
 #else
 #if HAVE_HASMNTOPT
@@ -584,7 +585,7 @@ Init_HR_FileSys(void)
     getfsstat(fsstats, fscount * sizeof(*fsstats), MNT_NOWAIT);
 #endif
     HRFS_index = 0;
-#elif defined(aix4) || defined(aix5)
+#elif defined(aix4) || defined(aix5) || defined(aix6)
     int ret;
     uint size;
     ret = 0;
@@ -681,7 +682,7 @@ Get_Next_HR_FileSys(void)
         return -1;
     HRFS_entry = fsstats + HRFS_index;
     return ++HRFS_index;
-#elif defined(aix4) || defined(aix5)
+#elif defined(aix4) || defined(aix5) || defined(aix6)
     if(aixcurr == NULL) {
         if(aixmnt != NULL) free(aixmnt);
         aixmnt = NULL;
@@ -757,7 +758,7 @@ Check_HR_FileSys_NFS (void)
 #if HAVE_GETFSSTAT && !defined(MFSNAMELEN)
     if ((HRFS_entry->HRFS_type == MOUNT_NFS) ||
         (HRFS_entry->HRFS_type == MOUNT_AFS))
-#elif defined(aix4) || defined(aix5)
+#elif defined(aix4) || defined(aix5) || defined(aix6)
     if(HRFS_entry->HRFS_type == MNT_NFS || HRFS_entry->HRFS_type == MNT_NFS3)
 #else /* HAVE_GETFSSTAT */
     if ( HRFS_entry->HRFS_type != NULL && (
@@ -801,7 +802,7 @@ End_HR_FileSys(void)
     if (fsstats)
         free((char *) fsstats);
     fsstats = NULL;
-#elif defined(aix4) || defined(aix5)
+#elif defined(aix4) || defined(aix5) || defined(aix6)
     if(aixmnt != NULL) {
         free(aixmnt);
         aixmnt = NULL;
