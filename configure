@@ -4839,7 +4839,7 @@ echo "${ECHO_T}$netsnmp_aix_ldflags" >&6
 echo "${ECHO_T}none" >&6
 	fi
 	;;
-    darwin8*)
+    darwin8*|darwin9*)
         echo "$as_me:$LINENO: checking whether darwin ld might need -flat_namespace" >&5
 echo $ECHO_N "checking whether darwin ld might need -flat_namespace... $ECHO_C" >&6
 	if test -z "$MACOSX_DEPLOYMENT_TARGET"; then
@@ -32144,7 +32144,7 @@ echo $ECHO_N "checking for Perl CFLAGS... $ECHO_C" >&6
     if test "x$perlcflags" != "x" ; then
       echo "$as_me:$LINENO: result: $perlcflags" >&5
 echo "${ECHO_T}$perlcflags" >&6
-      CPPFLAGS="$CPPFLAGS $perlcflags"
+      CFLAGS="$CFLAGS $perlcflags"
     else
       if test "x$embed_perl" = "xtry" ; then
         embed_perl="no"
