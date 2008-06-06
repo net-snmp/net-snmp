@@ -1059,7 +1059,7 @@ case $target_os in
 	    AC_MSG_RESULT([none])
 	fi
 	;;
-    darwin8*)
+    darwin8*|darwin9*)
         AC_MSG_CHECKING([whether darwin ld might need -flat_namespace])
 	if test -z "$MACOSX_DEPLOYMENT_TARGET"; then
 		LDFLAGS="-flat_namespace $LDFLAGS"
@@ -3109,7 +3109,7 @@ if test "x$embed_perl" != "xno" ; then
     perlcflags=`$myperl -MExtUtils::Embed -e ccopts`
     if test "x$perlcflags" != "x" ; then
       AC_MSG_RESULT([$perlcflags])
-      CPPFLAGS="$CPPFLAGS $perlcflags"
+      CFLAGS="$CFLAGS $perlcflags"
     else
       if test "x$embed_perl" = "xtry" ; then
         embed_perl="no"
