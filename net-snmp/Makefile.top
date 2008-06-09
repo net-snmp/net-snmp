@@ -54,7 +54,7 @@ CC	        = @CC@
 #
 # ok, use libtool proper versioning:
 LIBCURRENT  = 5
-LIBREVISION = 11
+LIBREVISION = 12
 LIBAGE      = 0
 # generally, LIBCURRENT should stay the same unless major changes occur.
 # Increment REVISION every release.  

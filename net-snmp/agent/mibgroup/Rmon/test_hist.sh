@@ -1,6 +1,6 @@
 :
 # Rmon History testing script
-# $Log$
+# $Log: test_hist.sh,v $
 # Revision 5.0  2002/04/20 07:30:01  hardaker
 # cvs file version number change
 #
