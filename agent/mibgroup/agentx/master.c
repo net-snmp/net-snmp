@@ -448,6 +448,7 @@ agentx_master_handler(netsnmp_mib_handler *handler,
     netsnmp_request_info *request = requests;
     netsnmp_pdu    *pdu;
     void           *cb_data;
+    int             result;
 
     DEBUGMSGTL(("agentx/master",
                 "agentx master handler starting, mode = 0x%02x\n",
@@ -610,7 +611,10 @@ agentx_master_handler(netsnmp_mib_handler *handler,
      */
     DEBUGMSGTL(("agentx", "sending pdu (req=0x%x,trans=0x%x,sess=0x%x)\n",
                 pdu->reqid,pdu->transid, pdu->sessid));
-    snmp_async_send(ax_session, pdu, agentx_got_response, cb_data);
+    result = snmp_async_send(ax_session, pdu, agentx_got_response, cb_data);
+    if ( result == 0 ) {
+        snmp_free_pdu(pdu);
+    }
 
     return SNMP_ERR_NOERROR;
 }
