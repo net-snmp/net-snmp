@@ -163,6 +163,15 @@
 		    <file>perl/TrapReceiver/TrapReceiver.pm</file>
 		  </files>
 		</modify>
+		<!-- this will fail (ok) against future versions with
+		configure generated PACKAGE_VERSION usage -->
+		<modify
+		  find="NetSnmpVersionInfo = &quot;[\d\.]+&quot;"
+		  replace="NetSnmpVersionInfo = &quot;{VERSION}&quot;">
+		  <files>
+		    <file>snmplib/snmp_version.c</file>
+		  </files>
+		</modify>
 		<modify
 		  find="Version: [\.0-9a-zA-Z]+"
 		  replace="Version: {VERSION}">
