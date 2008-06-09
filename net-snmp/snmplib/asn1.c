@@ -1299,6 +1299,7 @@ asn_parse_objid(u_char * data,
     register u_long subidentifier;
     register long   length;
     u_long          asn_length;
+    size_t     original_length = *objidlength;;
 
     *type = *bufp++;
     bufp = asn_parse_length(bufp, &asn_length);
@@ -1338,6 +1339,7 @@ asn_parse_objid(u_char * data,
 
     if (0 != length) {
         ERROR_MSG("OID length exceeds buffer size");
+        *objidlength = original_length;
         return NULL;
     }
 
