@@ -254,9 +254,15 @@ main(int argc, char *argv[])
     if (session.version == SNMP_VERSION_1) {
         if (inform) {
             fprintf(stderr, "Cannot send INFORM as SNMPv1 PDU\n");
+            SOCK_CLEANUP;
             exit(1);
         }
         pdu = snmp_pdu_create(SNMP_MSG_TRAP);
+        if ( !pdu ) {
+            fprintf(stderr, "Failed to create trap PDU\n");
+            SOCK_CLEANUP;
+            exit(1);
+        }
         pdu_in_addr_t = (in_addr_t *) pdu->agent_addr;
         if (arg == argc) {
             fprintf(stderr, "No enterprise oid\n");
