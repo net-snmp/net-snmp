@@ -202,6 +202,7 @@ handle_agentx_packet(int operation, netsnmp_session * session, int reqid,
     netsnmp_pdu    *internal_pdu = NULL;
     void           *retmagic = NULL;
     ns_subagent_magic *smagic = NULL;
+    int             result;
 
     if (operation == NETSNMP_CALLBACK_OP_DISCONNECT) {
         struct synch_state *state = (struct synch_state *) magic;
@@ -422,8 +423,11 @@ handle_agentx_packet(int operation, netsnmp_session * session, int reqid,
     internal_pdu->contextNameLen = internal_pdu->community_len;
     internal_pdu->community = NULL;
     internal_pdu->community_len = 0;
-    snmp_async_send(agentx_callback_sess, internal_pdu, mycallback,
+    result = snmp_async_send(agentx_callback_sess, internal_pdu, mycallback,
                     retmagic);
+    if (result == 0) {
+        snmp_free_pdu( internal_pdu );
+    }
     return 1;
 }
 
@@ -516,6 +520,7 @@ handle_subagent_set_response(int op, netsnmp_session * session, int reqid,
 {
     netsnmp_session *retsess;
     struct agent_netsnmp_set_info *asi;
+    int result;
 
     if (op != NETSNMP_CALLBACK_OP_RECEIVED_MESSAGE || magic == NULL) {
         return 1;
@@ -540,8 +545,11 @@ handle_subagent_set_response(int op, netsnmp_session * session, int reqid,
          */
         if (!pdu->errstat) {
             asi->mode = pdu->command = SNMP_MSG_INTERNAL_SET_RESERVE2;
-            snmp_async_send(agentx_callback_sess, pdu,
+            result = snmp_async_send(agentx_callback_sess, pdu,
                             handle_subagent_set_response, asi);
+            if (result == 0) {
+                snmp_free_pdu( pdu );
+            }
             DEBUGMSGTL(("agentx/subagent",
                         "  going from RESERVE1 -> RESERVE2\n"));
             return 1;
