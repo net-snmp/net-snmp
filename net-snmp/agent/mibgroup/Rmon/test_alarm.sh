@@ -1,7 +1,7 @@
 :
 
 # Rmon Alarms/Events testing script
-# $Log$
+# $Log: test_alarm.sh,v $
 # Revision 5.0  2002/04/20 07:30:01  hardaker
 # cvs file version number change
 #
