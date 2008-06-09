@@ -172,8 +172,8 @@ agentx_close_session(netsnmp_session * ss, int why)
     pdu->errstat = why;
     pdu->sessid = ss->sessid;
 
-    (void) agentx_synch_response(ss, pdu, &response);
-    snmp_free_pdu(response);
+    if (agentx_synch_response(ss, pdu, &response) == STAT_SUCCESS)
+        snmp_free_pdu(response);
     DEBUGMSGTL(("agentx/subagent", "closed\n"));
 
     return 1;
