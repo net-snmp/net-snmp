@@ -562,6 +562,9 @@ sc_check_keyed_hash(const oid * authtype, size_t authtypelen,
         QUITFUN(SNMPERR_GENERR, sc_check_keyed_hash_quit);
     }
 
+    if (maclen != USM_MD5_AND_SHA_AUTH_LEN) {
+        QUITFUN(SNMPERR_GENERR, sc_check_keyed_hash_quit);
+    }
 
     /*
      * Generate a full hash of the message, then compare
