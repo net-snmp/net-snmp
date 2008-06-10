@@ -301,6 +301,9 @@ struct snmp_session {
 
     /**
      * use as you want data 
+     *
+     *     used by 'SNMP_FLAGS_RESP_CALLBACK' handling in the agent
+     * XXX: or should we add a new field into this structure?
      */
     void           *myvoid;
 };
@@ -394,6 +397,7 @@ typedef struct request_list {
 
 #define SNMP_DETAIL_SIZE        512
 
+#define SNMP_FLAGS_RESP_CALLBACK   0x400      /* Additional callback on response */
 #define SNMP_FLAGS_USER_CREATED    0x200      /* USM user has been created */
 #define SNMP_FLAGS_DONT_PROBE      0x100      /* don't probe for an engineID */
 #define SNMP_FLAGS_STREAM_SOCKET   0x80

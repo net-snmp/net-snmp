@@ -159,6 +159,8 @@ netsnmp_session *netsnmp_iquery_session(char* secName,   int   version,
             memdup( &(ss->community), secName, strlen(secName));
             ss->community_len = strlen(secName);
         }
+        ss->myvoid = netsnmp_check_outstanding_agent_requests;
+        ss->flags |= SNMP_FLAGS_RESP_CALLBACK;
     }
 #endif
 
