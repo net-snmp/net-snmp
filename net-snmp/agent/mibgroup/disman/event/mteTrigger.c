@@ -336,7 +336,7 @@ mteTrigger_run( unsigned int reg, void *clientarg)
                     if (vp1_prev) {
                         vp1_prev->next_variable = vtmp;
                     } else {
-                        entry->old_results      = vtmp;
+                        var                     = vtmp;
                     }
                     vp1_prev = vtmp;
                     vp2_prev = vp2;
@@ -433,7 +433,7 @@ mteTrigger_run( unsigned int reg, void *clientarg)
              */
             if (entry->mteTExTest & entry->mteTExStartup & MTE_EXIST_ABSENT) {
                 if (!(entry->flags & MTE_TRIGGER_FLAG_VWILD) &&
-                    vp1->type == ASN_NULL ) {
+                    var->type == ASN_NULL ) {
                     DEBUGMSGTL(( "disman:event:trigger:fire",
                                  "Firing initial existence test: "));
                     DEBUGMSGOID(("disman:event:trigger:fire",
@@ -449,10 +449,10 @@ mteTrigger_run( unsigned int reg, void *clientarg)
                      *  to report a NULL value, but this clashes with
                      * the syntax of the mteHotValue MIB object.
                      */
-                    entry->mteTriggerFired    = vp1;
+                    entry->mteTriggerFired    = var;
                     n = entry->mteTriggerValueID_len;
                     mteEvent_fire(entry->mteTExEvOwner, entry->mteTExEvent, 
-                                  entry, vp1->name+n, vp1->name_length-n);
+                                  entry, var->name+n, var->name_length-n);
                 }
             }
         } /* !old_results */
