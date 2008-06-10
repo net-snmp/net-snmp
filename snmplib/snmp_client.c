@@ -1021,7 +1021,7 @@ snmp_synch_response_cb(netsnmp_session * ss,
         count = select(numfds, &fdset, NULL, NULL, tvp);
         if (count > 0) {
             snmp_read(&fdset);
-        } else
+        } else {
             switch (count) {
             case 0:
                 snmp_timeout();
@@ -1047,6 +1047,14 @@ snmp_synch_response_cb(netsnmp_session * ss,
                 state->status = STAT_ERROR;
                 state->waiting = 0;
             }
+        }
+
+        if ( ss->flags &= SNMP_FLAGS_RESP_CALLBACK ) {
+            void (*cb)(void);
+            cb = ss->myvoid;
+            cb();        /* Used to invoke 'netsnmp_check_outstanding_agent_requests();'
+                            on internal AgentX queries.  */
+        }
     }
     *response = state->pdu;
     ss->callback = cbsav;
