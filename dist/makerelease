@@ -61,10 +61,14 @@ System("version:commit",
        "svn commit -m \"version update\" Makefile.top");
 
 # Step 3) configure and build and test it
+my $transportargs = "";
+if ( $^O eq "linux" ) {
+    $transportargs = "--with-transports=IPX";
+}
 my $configureargs = "--cache=config.cache --with-defaults ".
     "--with-mib-modules='host examples examples/example   ".
     "  testhandler smux Rmon disman/event-mib'            ".
-    "--with-transports=IPX --enable-ipv6                  ".
+    " $transportargs        --enable-ipv6                 ".
     "--enable-embedded-perl --enable-shared";
 System("build:distclean","make distclean") if (-f 'Makefile');
 System("build:configure","./configure $configureargs");
