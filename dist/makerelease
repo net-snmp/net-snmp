@@ -66,8 +66,8 @@ if ( $^O eq "linux" ) {
     $transportargs = "--with-transports=IPX";
 }
 my $configureargs = "--cache=config.cache --with-defaults ".
-    "--with-mib-modules='host examples examples/example   ".
-    "  testhandler smux Rmon disman/event-mib'            ".
+    "--with-mib-modules='     examples examples/example   ".
+    "  testhandler smux Rmon'                             ".
     " $transportargs        --enable-ipv6                 ".
     "--enable-embedded-perl --enable-shared";
 System("build:distclean","make distclean") if (-f 'Makefile');
