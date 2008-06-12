@@ -1,6 +1,7 @@
 #!/usr/bin/perl
 
 use strict;
+use Pod::Usage;
 
 
 my %opts;
@@ -13,11 +14,11 @@ LocalGetOptions(\%opts,
 	   ['n|dry-run',     'Dry run only.  Don\'t actually do anything.'],
 	   ['h|help', 'Help']);
 
-
+pod2usage(1) if ($opts{'h'});
 my $version = shift;
-die "No version supplied" if (!$version);
+pod2usage( "No version supplied" ) if (!$version);
 my $extrajunk = shift;
-die "Unexpected argument ($extrajunk)" if ($extrajunk);
+pod2usage( "Unexpected argument ($extrajunk)" ) if ($extrajunk);
 my $vtag   = $version;
 my $branch = "";
 # Ensure we have both numeric and tag-style version labels
@@ -305,3 +306,49 @@ sub LocalOptionsMap {
     }
     return @opts;
 }
+
+__END__
+
+=head1 NAME
+
+makerelease - software package release script
+
+=head1 SYNOPSIS
+
+makerelease [options] version
+
+=head1 ARGUMENTS
+
+For full releases, the version should be specified in the form  I<5.x.y>
+
+For pre-releases, the version should be specified in the form  I<5.x.y.preN>
+
+For release candidates, the version should be specified in the form  I<5.x.y.rcN>
+
+Alternatively, it is also possible to specify versions in the form  Ext-5-x-y
+
+=head1 OPTIONS
+
+=over 8
+
+=item B<-r {step}| --regexp-ignore-steps={step}>
+
+Ignore steps matching the regular expression {step}
+
+=item B<-s {step}| --start-at={step}>
+
+Skip all steps preceding the specified (exact) {step}
+
+=item B<-i | --interactive>
+
+Prompt whether or not to execute each step
+
+=item B<-n | --dry-run>
+
+Print the commands that would be executed, but do not execute them.
+
+=item B<-h | --help>
+
+Display this help message.
+
+=back
