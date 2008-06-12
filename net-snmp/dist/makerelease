@@ -167,6 +167,7 @@ System("release:searching-gpg-keys",
        "gpg --list-secret-keys net-snmp-admin");
 if($? != 0) {
     $sig1 = "${pkg1}.md5";
+    $sig2 = "${pkg2}.md5";
     System("release:md5","md5sum $pkg1 > $sig1");
     System("release:md5","md5sum $pkg2 > $sig2");
 } else {
