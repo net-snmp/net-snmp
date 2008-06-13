@@ -3,6 +3,23 @@
 #
 %define netsnmp_embedded_perl 1
 %define netsnmp_perl_modules 1
+
+# ugly RHEL detector
+# SuSE build service defines rhel_version, RHEL itself defines nothing
+%if 0%{?rhel_version}
+%define rhel %{?rhel_version}
+%else
+%define is_rhel %(grep "Red Hat Enterprise Linux" /etc/redhat-release &>/dev/null && echo 1 || echo 0)
+%if %{is_rhel}
+%define rhel %(sed </etc/redhat-release -e 's/.*release \\(.\\).*/\\1/'  )
+%endif
+%endif
+
+# because perl(Tk) is optional, automatic dependencies will never succeed:
+%define _use_internal_dependency_generator 0
+%define __find_requires %{_builddir}/net-snmp-%{version}/dist/find-requires
+%define __find_provides /usr/lib/rpm/find-provides
+
 #
 # Check for -without embedded_perl
 #
@@ -31,15 +48,26 @@ Prereq: openssl
 Obsoletes: cmu-snmp ucd-snmp ucd-snmp-utils
 BuildRoot: /tmp/%{name}-root
 Packager: The Net-SNMP Coders <http://sourceforge.net/projects/net-snmp/>
-BuildRequires: perl, beecrypt-devel elfutils-libelf-devel
-# because perl(Tk) is optional, automatic dependencies will never succeed:
-AutoReqProv: no
-Requires: openssl, popt, rpm, zlib, bzip2-libs, beecrypt, elfutils-libelf, glibc
-Provides: net-snmp-utils
+Requires: openssl, popt, rpm, zlib, bzip2-libs, elfutils-libelf, glibc
+BuildRequires: perl, elfutils-libelf-devel, openssl-devel, bzip2-devel, rpm-devel
 %if %{netsnmp_embedded_perl}
-BuildRequires: perl-ExtUtils-Embed
+BuildRequires: perl(ExtUtils::Embed)
 Requires: perl
 %endif
+
+%if 0%{?fedora}%{?rhel}
+# Fedora & RHEL specific requires/provides
+Provides: net-snmp-libs, net-snmp-utils
+Obsoletes: net-snmp-libs, net-snmp-utils
+Epoch: 2
+
+%if 0%{?fedora} >= 9
+Provides: net-snmp-gui
+Obsoletes: net-snmp-gui
+%else
+BuildRequires: beecrypt-devel
+%endif
+%endif # RHEL or Fedora
 
 %description
 
@@ -58,7 +86,7 @@ This package includes embedded Perl support within the agent.
 Group: Development/Libraries
 Summary: The includes and static libraries from the Net-SNMP package.
 AutoReqProv: no
-Requires: net-snmp = %{version}
+Requires: net-snmp = %{epoch}:%{version}
 Obsoletes: cmu-snmp-devel ucd-snmp-devel
 
 %description devel
@@ -70,7 +98,12 @@ useful for building SNMP applications, agents, and sub-agents.
 Group: System Environment/Libraries
 Summary: The Perl modules provided with Net-SNMP
 AutoReqProv: no
-Requires: net-snmp = %{version}, perl
+Requires: net-snmp = %{epoch}:%{version}, perl
+
+%if 0%{?fedora}%{?rhel}
+Provides: net-snmp-perl
+Obsoletes: net-snmp-perl
+%endif
 
 %description perlmods
 Net-SNMP provides a number of Perl modules useful when using the SNMP
@@ -89,7 +122,7 @@ exit 1
 	--with-mib-modules="smux" \
 	--with-sysconfdir="/etc/net-snmp"               \
 	--enable-shared \
-	%{?netsnmp_perl_modules: --with-perl-modules} \
+	%{?netsnmp_perl_modules: --with-perl-modules="INSTALLDIRS=vendor"} \
 	%{!?netsnmp_perl_modules: --without-perl-modules} \
 	%{?netsnmp_embedded_perl: --enable-as-needed --enable-embedded-perl} \
 	%{!?netsnmp_embedded_perl: --disable-embedded-perl} \
