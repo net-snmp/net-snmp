@@ -746,12 +746,21 @@ AC_ARG_WITH(out_mib_modules,
 AC_ARG_ENABLE(out_mib_modules,,
 	AC_MSG_ERROR([ Invalid option. Use --with-out-mib-modules/--without-out-mib-modules instead ]) )
 
-AC_ARG_ENABLE(new-features,
-[  --enable-new-features                 Compile in new MIB modules and other experimental features
-                                    which are due to be included in future major releases.])
-AC_ARG_ENABLE(old-features,
-[  --enable-old-features                 Compile in old MIB modules and other deprecated features
-                                    which were replaced in the default build of this major release.])
+AC_ARG_ENABLE([new-features],
+        [AS_HELP_STRING([--enable-new-features],
+                [Compile in new MIB modules and other experimental features
+                 which are due to be included in future releases.])])
+
+AC_ARG_ENABLE([old-features],
+        [AS_HELP_STRING([--enable-old-features],
+                [Compile in old MIB modules and other deprecated features
+                 which were replaced in the default build of this release.])])
+
+AC_ARG_ENABLE([features-of],
+        [AS_HELP_STRING([--with-features-of=version],
+                [Compile in MIB modules and other features as if this was
+                 release "version" (default is ]AC_PACKAGE_VERSION[).])],,
+        [with_features_of=$PACKAGE_VERSION])
    
 #
 AC_ARG_WITH(enterprise-oid,
@@ -2145,44 +2154,48 @@ while test "x$new_module_list" != "x"; do
         AC_MSG_MODULE_DBG(" $i required arch files: $new_list")
 
         #---------------------
-      	# macro: config_new_require(current,replacement)
-      	#  - lists alternative modules - current and upcoming replacement
+      	# macro: config_version_require((base, version, version-modules, ...))
+      	#  - lists alternative modules used from different versions.
         #
-        changequote(, )
-        new_list_alt1=`$MODULECPP module_tmp_header.h | $GREP config_new_require | $SED 's/.*config_new_require( *\([^ ]*\) *, *\([^ ]*\) *).*/\1-xalt1x-\2/'`
-        changequote([, ])
-	if test "x$new_list_alt1" != "x"; then
-          for j in $new_list_alt1
-	    do
-              # XXX: Check for explicitly listed features
-              if test "x$enable_new_features" = "xyes"; then
-	        new_list="$new_list `echo $j | $SED 's/.*-xalt1x-//'`"
-              else
-	        new_list="$new_list `echo $j | $SED 's/-xalt1x-.*//'`"
-              fi
-          done
-        fi
-        AC_MSG_MODULE_DBG(" $i required new features: $new_list")
-
-        #---------------------
-      	# macro: config_old_require(deprecated,current)
-      	#  - lists alternative modules - previous and current replacement
-        #
-        changequote(, )
-        new_list_alt2=`$MODULECPP module_tmp_header.h | $GREP config_old_require | $SED 's/.*config_old_require( *\([^ ]*\) *, *\([^ ]*\) *).*/\1-xalt2x-\2/'`
-        changequote([, ])
-	if test "x$new_list_alt2" != "x"; then
-          for j in $new_list_alt2
-	    do
-              # XXX: Check for explicitly listed features
-              if test "x$enable_old_features" = "xyes"; then
-	        new_list="$new_list `echo $j | $SED 's/-xalt2x-.*//'`"
-              else
-	        new_list="$new_list `echo $j | $SED 's/.*-xalt2x-//'`"
-              fi
-          done
-        fi
-        AC_MSG_MODULE_DBG(" $i required old features: $new_list")
+        [new_list_alt3=`$MODULECPP module_tmp_header.h | \
+            $GREP config_version_require | \
+            $SED -e 's/  */ /g' \
+                 -e 's/.*config_version_require(( *\([^)]*\) *)).*/\1/' \
+                 -e 's/ *, */,/g' | \
+            awk '
+                BEGIN {
+                    if("'"$enable_new_features"'" == "yes")
+                        method="max";
+                    else if("'"$enable_old_features"'" == "yes")
+                        method="max-less";
+                    else
+                        method="max-less-equal";
+                    FS = ".";
+                    split("'"$with_features_of"'", a);
+                    version=sprintf("%03u%03u%03u%03u",
+                                    a[1], a[2], a[3], a[4]);
+                }
+                {
+                    FS = ",";
+                    n = split($0, a);
+                    FS = ".";
+                    actver = "000000000000";
+                    actstr = a[1];
+                    for(i = 2; i < n; i += 2) {
+                        split(a[i], b);
+                        curver=sprintf("%03u%03u%03u%03u",
+                                       b[1], b[2], b[3], b[4]);
+                        if (curver > actver &&
+                            (method != "max-less" || curver < version) &&
+                            (method != "max-less-equal" || curver <= version)) {
+                            actver = curver;
+                            actstr = a[i + 1];
+                        }
+                    }
+                    printf(" %s", actstr);
+                }'`]
+        AC_MSG_MODULE_DBG(" $i required versioned features: $new_list_alt3")
+        new_list="${new_list}${new_list_alt3}"
 
         #---------------------
       	# macro: config_require(modules)
