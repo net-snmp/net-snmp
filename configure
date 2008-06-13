@@ -33930,8 +33930,8 @@ fi
 
 # check needed functions
 if test "x$embed_perl" != "xno" ; then
-    OLDLDFLAGS="$LDFLAGS"
-    LDFLAGS="$LDFLAGS $netsnmp_perlldopts"
+    OLDLIBS="$LIBS"
+    LIBS="$LIBS $netsnmp_perlldopts"
 
     # newer perl vs older perl call functions
 
@@ -34209,7 +34209,7 @@ _ACEOF
 fi
 
 
-    LDFLAGS="$OLDLDFLAGS"
+    LIBS="$OLDLIBS"
 
 
     if test "x$ac_cv_func_perl_eval_pv" != "xyes" -a "x$ac_cv_func_Perl_eval_pv" != "xyes" -a "x$ac_cv_func_eval_pv" != "xyes" ; then
