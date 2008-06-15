@@ -6,11 +6,17 @@ listing of all changes made to the code.
 *5.4.2*
     snmplib:
       - [PATCH 1921861]: Avoid endless loop after truncating 64bit int
-      - Change CONTAINER_INSERT to not do partial inserts in containers
-	with multiple indices when one insert fails.
+      - Better handling of CONTAINER_INSERT failures with multiple indices
 
     snmpd:
       - suppress annoying "registration != duplicate" warning for root oids
+
+    build:
+      - Update to libtool 1.5.26
+
+    AIX:
+      - Add support for AIX 6.x.
+
 
 *5.4.1*
 
