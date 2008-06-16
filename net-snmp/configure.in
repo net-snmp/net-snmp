@@ -2269,7 +2269,7 @@ AC_CHECK_LIB(m, asin)
 AC_ARG_WITH(elf,
 	[AS_HELP_STRING(--without-elf,[use elf libraries])],,
 	[AC_ARG_ENABLE(elf,,
-		[AC_MSG_ERROR([ Invalid option. Use --with-elf/--with-out-elf instead ])])])
+		[AC_MSG_ERROR([ Invalid option. Use --with-elf/--without-elf instead ])])])
 
 if test "x$with_elf" != "xno"; then
 # nlist is needed for uptime on some sytems in the generic library
