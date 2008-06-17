@@ -114,7 +114,6 @@ auto_nlist(const char *string, char *var, int size)
 static void
 init_nlist(struct nlist nl[])
 {
-#ifdef NETSNMP_CAN_USE_NLIST
     int             ret;
 #if HAVE_KVM_OPENFILES
     kvm_t          *kernel;
@@ -187,7 +186,6 @@ init_nlist(struct nlist nl[])
                         (unsigned int) nl[ret].n_value));
         }
     }
-#endif                          /* NETSNMP_CAN_USE_NLIST */
 }
 
 int
