@@ -1,0 +1,232 @@
+    snmplib:
+      - Change snmp_sess_add_ex to consistently close and
+      - Deallocate the confmibs and confmibdirs
+      - FEATURES: 1041888: Check directory paths for
+      - FEATURES: 851887: Report range information for
+      - Read the config parameters defTarget and
+      - Use the default_target argument if it is
+      - [BUG 1600171]: Support longer community strings
+      - [BUG 1619827]: link against needed external
+      - [BUG 1619827]: link net-snmp libraries and binaries
+      - [BUG 1660061]: Validate engineIDs more strictly.
+      - [PATCH 1548670]: Fix range checks for unsigned
+      - [PATCH 1592706]: Fix memory leak when cloning
+      - [PATCH 1616912]: fix
+      - [PATCH 1620424]: Honor
+      - [PATCH 1634620]: Fix leaks from
+      - [PATCH 1640114]: Don't store trailing null
+      - [PATCH 1641895]: Extend short view masks (as per
+      - [PATCH 1641972]: add missing const
+      - [PATCH 1653670]: Consistent SNMPv3 behaviour
+      - [PATCH 1681030]: Better handling of empty
+      - [PATCH 1687316]: Don't drop const from casts.
+      - [PATCH 1687325]: Fix problem with operator
+      - increment "current" and "age" according to
+      - library layering improvements: introduce
+      - patch: 1645698: fix 64-bit signed integer
+
+    snmpapi:
+      - Do not use getservbyname to find default port
+
+    snmpd:
+      - Correct the dependency information for
+      - [BUG 1046327]: Reset "includeAllDisks" flag when
+      - [BUG 1073782]: Restore PerfStat values for FreeBSD
+      - [BUG 1102058]: Skip non-mounted disks (e.g. swap
+      - [BUG 1159908]: Fix memory leak
+      - [BUG 1397895]: include missing interface
+      - [BUG 1413728]: Reference index values in debug
+      - [BUG 1416276]: Handle dependency on MIB parsing
+      - [BUG 1546817]: Fix snmpEnterprise varbind when
+      - [BUG 1558823]: fix ipAddressTable memory leak
+      - [BUG 1600261]: Handle non-x86 /proc/cpuinfo format
+      - [BUG 1602286]: Don't let table holes block later
+      - [BUG 1628613]: Restore memTotalFree.0 on Solaris
+      - [BUG 1633595]: Fix AgentX handling of Counter64
+      - [BUG 1677063]: Check for failed malloc calls.
+      - [BUG 1685067]: More precise handling of
+      - [BUG 1685081]: Check for valid OID on Free/Undo
+      - [BUG 1712988]: default and configurable maximum
+      - [BUG 1745113]: Handle single-line (and zero-line)
+      - [BUG 1760633]: fix typo in debug message
+      - [BUG 902610]: Don't discard pending data following
+      - [BUG 902801]: Fix ordering of SMUX-registered
+      - [PATCH 1601188, ]: BUG: 1600432: Handle signals
+      - [PATCH 1620424]: Fix notification sending so that
+      - [PATCH 1637287]: Handle multiple target tags
+      - [PATCH 1639282]: Save persistent
+      - [PATCH 1639360]: Fix snmpNotifyFilterProfileTable
+      - [PATCH 1639726]: Report physical memory
+      - [PATCH 1641332]: Include missing agent config
+      - [PATCH 1641685]: Handle unresponsive AgentX
+      - [PATCH 1641865]: Don't double check snmpTrapOID
+      - [PATCH 1642255]: Handle saving long
+      - [PATCH 1644280]: Don't automatically probe for
+      - [PATCH 1644280]: Use the correct engineID when
+      - [PATCH 1644714]: replace
+      - [PATCH 1659623]: Handle SMUX peers with an empty
+      - [PATCH 1665549]: Handle creating VACM entries
+      - [PATCH 1665985]: Implement ipReasmTimeout
+      - [PATCH 1666737]: include ipv6 counts in
+      - [PATCH 1668193]: Fix check for v6 ReasmMaxSize
+      - [PATCH 1668193]: Update registration of
+      - [PATCH 1668952]: Ignore zombie processes.
+      - [PATCH 1676478]: fix udpEndpointRemoteAddress
+      - [PATCH 1678788]: Better handling of SMUX socket
+      - [PATCH 1683054]: set udpEndpointInstance to
+      - [PATCH 1687336]: Start using the enhanced
+      - [PATCH 1692768]: Fix copying of non-octet-aligned
+      - [PATCH 1698184]: Register non-default context
+      - [PATCH 1700730]: Remove unused extern declaration.
+      - [PATCH 1700732]: Fix debug output statements.
+      - [PATCH 1700737]: Tidy up setSerialNo
+      - [PATCH 1729629]: Fix memory leak in disman
+      - patch from Wojtek Jawor to handle row deletion
+      - patch: 1225440: Apply intent of patch: to delay
+      - patch: 1595568: from cyril_margaria: fix
+      - patch: 1617255: fix length of the history array
+      - patch: 1700157: from afrika: fixes ordering of exec
+      - patch: 1710632: from mavarley: fix memory leak on
+      - patch: 1719253: from "Christian Jung": fix
+      - patch: 1719254: from "Christan Jung": update
+
+    snmptrapd:
+      - [BUG 1638225]: Fix interpretation of transport
+      - [PATCH 1620424]: Fix notification reception so
+      - patch: 1225440: Apply intent of patch: to
+      - upport for forwarding traps by OID subtree.
+
+    apps:
+      - [PATCH 1529523]: Close SNMP session on failure.
+
+    build:
+      - Link libdl against libnetsnmpmibs instead of
+      - Link libkvm and libwrap to libnetsnmpagent
+      - [BUG 1096166]: Handle --without-logfile correctly.
+      - [BUG 1647976]: Cygwin/MinGW Windows build fails
+      - [PATCH 1625135]: configure location of python
+      - [PATCH 1681073]: #ifdef based config_error instead
+      - [PATCH 1728226]: make sure
+      - [PATCH 1728230]: add
+      - [PATCH 1728237]: Move
+      - [PATCH 1728244]: Add
+      - [PATCH 1728247]: Add type
+      - add "BuildRequires: perl-ExtUtils-Embed" to the
+      - add configure check for hasmntopt to fix the
+      - only enable mibII/ipv6 through --enable-ipv6 on
+      - patch from apple to simplify makefile target
+      - update to libtool 1.5.24 (from 1.5.22)
+      - use LDFLAGS when building agent, helpers and mib
+      - use libtool clean for removing files to ensure we
+      - work around libnetsnmpagent/libnetsnmphelpers
+      - yet another fix to address build issues with
+
+    building:
+      - Check for support of static inline functions
+      - Disable inlining on solaris as there are some
+
+    configure:
+      - [BUG 1567324]: Clarify prompting for
+
+    documentation:
+      - [BUG 1247164]: Document use of OID macros
+      - [BUG 1407476]: Clarify MIB parsing toggle
+      - [BUG 1614104]: broken snmpd(8) manual page
+      - [PATCH 1604580]: SNMP(3) manual page
+
+    irix:
+      - [PATCH 1709748]: Optimized IRIX cpu stats
+
+    library:
+      - FEATURES: 454028: Detect and handle empty MIB
+      - Patch from "Mitsuru Chinen": cleans up the
+      - [PATCH 1642071]: Don't fiddle with the storage
+      - [PATCH 1665543]: Handle VACM checks correctly.
+
+    mib2c:
+      - [BUG 1429472]: Protect against missing instances
+      - [BUG 1582972]: Handle @while@/@end@ properly.
+      - [BUG 833673]: More focused size checks.
+      - [PATCH 1668171]: skip unknown cols in min/max
+
+    misc:
+      - Don't use the legacy symbol
+
+    patch:
+      - fix the -M switch for
+
+    perl:
+      - [BUG 1450669]: PATCH: 1627949: from martin987: a
+      - [BUG 1619827]: link libnetsnmpagent/libnetsnmptrapd
+      - fix SNMP SET for IP addresses on 64-bit
+      - fix prerequisites for NetSNMP::TrapReceiver
+      - fix syntax error in NetSNMP::agent::Support
+      - install embedded perl init files for
+      - patch: 1725049: fix bulkwalk in cases of non-repeater
+
+    ports:
+      - patch: 1706344: from naylor: fix compilation with
+
+    python:
+      - [PATCH 1716114]: Let python build in source tree
+
+    test:
+      - support a -n flag to RUNTESTS to print the test
+
+    unspecified:
+      - [BUG 1596638]: memory leak in ipCidrRouteTable,
+      - [BUG 1600093]: autoconf 2.60 breaks the build
+      - [BUG 1611524]: fix tcp connection table fd leak
+      - [BUG 1633483]: Support CPU HAL on FreeBSD4.x
+      - [BUG 1710910]: initial support for DragonFly BSD
+      - [PATCH 1678298]: from magfr: compile-subagent checks for
+      - [PATCH 1678301]: from magfr: deallocate domain registry
+      - [PATCH 1678302]: from magfr: netsnmp_mibindex_load leaks
+      - [PATCH 1678305]: from magfr: Deallocate the cache in
+      - [PATCH 1678306]: from magfr: Deallocate the log in
+      - [PATCH 1719244]: fix mfd generating map function
+      - [PATCH 1728241]: from mitsuru_chinen: add configure check
+      - patch from apple to fix cross-compile builds in apples
+      - patch from apple to fix minor documentation bugs.
+      - patch from apple to improve memory reporting
+
+    AIX:
+      - [PATCH 1665079]: AIX patches
+      - build fixes for embedded Perl
+      - fix default shared library building instead of forcing
+      - use "-Wl,-brtl" when compiling with gcc
+
+    FreeBSD:
+      - add initial support for upcoming FreeBSD 7
+      - fix configure warning for sys/conf.h
+
+    HP:
+      - UX: BUG: 1742278: compile error on HP-UX 11.23 (IA64)
+      - UX: HP-UX needs _REENTRANT defined to pick up
+
+    IRIX:
+      - [PATCH 1675869]: CPU statistics for IRIX
+
+    Linux:
+      - [BUG 1666005]: Fail to walk ipv6InterfaceTable on
+      - [PATCH 1581294]: 
+      - fix ethtool configure check for recent systems
+
+    MacOSX:
+      - [PATCH 1600453]: OS X
+      - [PATCH 1600522]: CPU HAL
+
+    Perl:
+      - link Perl modules against the exact set of libraries
+
+    Solaris:
+      - IF-MIB fix: add missing return at end of
+      - [BUG 1626153]: no hrSWRun informations on
+      - [PATCH 1623447]: hrSWRun
+
+    Win32:
+      - [BUG 1662987]: compile error on Cygwin
+      - [PATCH 1622080]: A: pass Win32
+      - fix AES support
+      - fix win32/Configure --with-ipv6
+

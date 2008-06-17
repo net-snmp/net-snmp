@@ -1,0 +1,86 @@
+#!/usr/bin/perl
+#
+# This program converts a list of Perl module's POD documentation
+# pages into HTML format.
+#
+# Title:          poddir2html
+# Version:        1.0
+# Written by:     Alex Burger
+# Date:           March 1st, 2004
+# Last modified:  March 20th, 2004
+#
+# Requirements:
+#
+# -pod2html 
+# -tidy (http://tidy.sourceforge.net/)
+#
+################################################################
+# Options
+
+# Output folder to create the HTML files
+$perldoc_dir_html = "/tmp/net-snmp/html/";
+
+# tidy location
+$tidy = "tidy";
+
+# Base dir where Perl .pm files are located.  Leave empty if @files
+# contains the complete path for each file.
+$base_dir = "../../..";
+
+# Files to convert in the format of:
+# filename title
+# filename title
+# filename title
+# etc..
+@files = qw(
+perl/ASN/ASN.pm ASN.pm
+perl/OID/OID.pm OID.pm
+perl/SNMP/SNMP.pm SNMP.pm
+perl/agent/agent.pm Agent.pm
+perl/agent/default_store/default_store.pm Agent-Default_Store.pm
+perl/default_store/default_store.pm Default_store.pm
+perl/TrapReceiver/TrapReceiver.pm TrapReceiver.pm
+);
+
+# Folder separator
+$separator = '-';
+
+################################################################
+
+# Chop off trailing slash
+if ($base_dir =~ /\/$/) {
+  chop $base_dir;
+}
+
+# Chop off trailing slash
+if ($perldoc_dir_html =~ /\/$/) {
+  chop $perldoc_dir_html;
+}
+
+mkdir "$perldoc_dir_html";
+if ($separator eq '/') {
+  # Make output directory structure
+  mkdir "$perldoc_dir_html/perl";
+}
+
+for (my $i=0; $i <= $#files; ) {
+
+  my $file = $files[$i++];
+  my $file_title = $files[$i++];
+
+  chomp $file;
+  chomp $file_title;
+
+  if (! (-f "$base_dir/$file")) {
+    die "Could not open file $base_dir/$file!";
+  }
+
+  $command = "pod2html $base_dir/$file | $tidy -asxhtml > $perldoc_dir_html/perl$separator$file_title.html";
+
+  print "$command\n";
+
+  system "$command";
+  
+}
+
+

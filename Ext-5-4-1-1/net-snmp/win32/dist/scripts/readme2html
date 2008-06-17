@@ -1,0 +1,100 @@
+#!/usr/bin/perl
+#
+# This program converts a list of text documents into HTML format.
+#
+# Title:          readme2html
+# Version:        1.0
+# Written by:     Alex Burger
+# Date:           March 1st, 2004
+# Last modified:  March 20th, 2004
+#
+# Requirements:
+#
+# -tidy (http://tidy.sourceforge.net/)
+#
+################################################################
+# Options
+
+# Output folder to create the HTML files
+$readme_dir_html = "/tmp/net-snmp/html/";
+
+# tidy location
+$tidy = "tidy";
+
+# txt2html location
+$txt2html = "./txt2html";
+
+# Base dir where README files are located.  Leave empty if @files
+# contains the complete path for each file.
+$base_dir = "../../..";
+
+# Files to convert in the format of:
+# filename title
+# filename title
+# filename title
+# etc..
+@files = qw(
+AGENT.txt AGENT.txt 
+CodingStyle CodingStyle 
+COPYING COPYING 
+INSTALL INSTALL
+NEWS NEWS 
+PORTING PORTING 
+README README 
+README.agentx README.agentx 
+README.agent-mibs README.agent-mibs
+README.aix README.aix
+README.hpux11 README.hpux11 
+README.krb5 README.krb5
+README.osX README.osX
+README.Panasonic_AM3X.txt README.Panasonic_AM3X.txt
+README.snmpv3 README.snmpv3 
+README.solaris README.solaris 
+README.thread README.thread 
+README.win32 README.win32 
+TODO TODO 
+README.perl README.perl
+);
+
+# Folder separator
+$separator = '-';
+
+################################################################
+
+# Chop off trailing slash
+if ($base_dir =~ /\/$/) {
+  chop $base_dir;
+}
+
+# Chop off trailing slash
+if ($readme_dir_html =~ /\/$/) {
+  chop $readme_dir_html;
+}
+
+mkdir "$readme_dir_html";
+if ($separator eq '/') {
+  # Make output directory structure
+  mkdir "$readme_dir_html/readme";
+}
+
+for (my $i=0; $i <= $#files; ) {
+
+  my $file = $files[$i++];
+  my $file_title = $files[$i++];
+
+  chomp $file;
+  chomp $file_title;
+ 
+  if (! (-f "$base_dir/$file")) {
+    die "Could not open file $base_dir/$file!";
+  }
+
+  $command = "$txt2html $base_dir/$file | $tidy > $readme_dir_html/readme$separator$file_title.html";
+
+  #print "$command\n";
+
+  system "$command";
+  
+}
+
+
