@@ -1,0 +1,53 @@
+.TH "baby_steps" 3 "23 Mar 2006" "Version 5.1.3" "net-snmp" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+baby_steps \- Calls your handler in baby_steps for set processing.  
+
+.PP
+.SS "Functions"
+
+.in +1c
+.ti -1c
+.RI "\fBnetsnmp_mib_handler\fP * \fBnetsnmp_get_baby_steps_handler\fP (u_long modes)"
+.br
+.RI "\fIreturns a baby_steps handler that can be injected into a given handler chain. \fP"
+.ti -1c
+.RI "int \fBnetsnmp_baby_steps_helper\fP (\fBnetsnmp_mib_handler\fP *handler, \fBnetsnmp_handler_registration\fP *reginfo, \fBnetsnmp_agent_request_info\fP *reqinfo, \fBnetsnmp_request_info\fP *requests)"
+.br
+.ti -1c
+.RI "void \fBnetsnmp_init_baby_steps_helper\fP (void)"
+.br
+.RI "\fIinitializes the baby_steps helper which then registers a baby_steps handler as a run-time injectable handler for configuration file use. \fP"
+.in -1c
+.SH "Detailed Description"
+.PP 
+Calls your handler in baby_steps for set processing. 
+.PP
+.SH "Function Documentation"
+.PP 
+.SS "int netsnmp_baby_steps_helper (\fBnetsnmp_mib_handler\fP * handler, \fBnetsnmp_handler_registration\fP * reginfo, \fBnetsnmp_agent_request_info\fP * reqinfo, \fBnetsnmp_request_info\fP * requests)"
+.PP
+use original mode 
+.PP
+Definition at line 65 of file baby_steps.c.
+.PP
+References netsnmp_agent_request_info_s::mode, netsnmp_call_next_handler(), netsnmp_check_requests_error(), and netsnmp_agent_request_info_s::next_mode_ok.
+.PP
+Referenced by netsnmp_get_baby_steps_handler().
+.SS "\fBnetsnmp_mib_handler\fP* netsnmp_get_baby_steps_handler (u_long modes)"
+.PP
+returns a baby_steps handler that can be injected into a given handler chain. 
+.PP
+Definition at line 50 of file baby_steps.c.
+.PP
+References netsnmp_mib_handler_s::myvoid, netsnmp_baby_steps_helper(), netsnmp_create_handler(), and NULL.
+.PP
+Referenced by netsnmp_init_baby_steps_helper().
+.SS "void netsnmp_init_baby_steps_helper (void)"
+.PP
+initializes the baby_steps helper which then registers a baby_steps handler as a run-time injectable handler for configuration file use. 
+.PP
+Definition at line 200 of file baby_steps.c.
+.PP
+References netsnmp_get_baby_steps_handler(), and netsnmp_register_handler_by_name().

@@ -1,0 +1,1123 @@
+README.solaris
+$Id$
+
+This document describes issues relating to compiling,
+installing and using net-snmp on Solaris.
+
+0.  Introduction
+1.  Things you will need
+2.  Disabling Sun's SNMP daemons
+3.  Compiling net-snmp
+4.  Obtaining and installing binaries
+5.  Creating snmpd.conf and testing
+6.  Creating your own binaries
+7.  Using Sun's SNMP daemon and net-snmp together
+8.  Monitoring disks, processes and execs (DISMAN-EVENT-MIB)
+
+Additional compilation issues:
+
+9.  Files descriptors and fopen
+10.  Perl
+11. sed and $PATH
+12. OpenSSL
+13. Wish list
+
+Other issues:
+
+14.  Known Bugs!!
+15.  Discussion and further information
+
+------------------------------------------------------------
+0.  Introducion
+
+This document is a compilation of information relating to
+running net-snmp (www.net-snmp.org) on Sun SPARC and ULTRA
+hardware under the Solaris operating system.
+
+This can be done either in conjunction with or as a 
+replacement for Sun's SNMP daemons.
+
+This is discussed in detail in the sections below.  Since
+this is the work of several authors, credit is given.
+Discussion, however, should take place on the net-snmp-users
+or net-snmp-coders mailing lists so everybody can
+benefit.  See http://sourceforge.net/mail/?group_id=12694 .
+Use "net-snmp-users" for general usage questions and "net-snmp-coders" for
+discussion of net-snmp source code.  "net-snmp-cvs" is for
+hard-core developers or the obsessed.
+
+No warranty is implied by this document.
+This document is copyright but usage allowed under the same
+licensing as net-snmp in general.  See http://www.net-snmp.org/COPYING.txt.
+------------------------------------------------------------
+1.  Things you will need
+
+A.  Root access
+
+Root access is required to follow pretty much any of
+the steps below.  At a bare minimum, you will need
+to be able to start and stop daemons, which requires root.
+
+B.  Determine existing SNMP functionality
+
+SNMP uses ports 161 and 162 by default.  Only one application
+can use them at a time.  If there is an existing SNMP
+application (eg. Sun's snmpdx daemon) you need to either
+turn this off or work around it.   You may also have
+a previous version of net-snmp, the older ucd-snmp, or
+something completely different.  The following commands:
+
+   ps -ef | grep snm
+   ps -ef | grep mibi
+
+will give you a fairly good idea what is going on.
+
+If you see something like:
+
+  root 643 1 0 Jan 16 ? 5:49 /usr/local/sbin/snmpd
+
+that's probably a version of net-snmp.  The instructions in various
+sections below should give you clues on what to do next.
+
+If you see something like:
+
+  root 16178 1 0 13:16:04 pts/2 0:00 /usr/lib/snmp/snmpdx -y -c /etc/snmp/conf
+
+and/or 
+
+  root 21371 1 0 Feb 07 ? 0:52 mibiisa -r -p 41178
+
+then Sun's SNMP daemons are running.  
+
+If you need this, for example if you use the Solstice Enterprise
+Agent, you may wish to run net-snmp as a sub-agent (see section 7).
+Otherwise, you will need to disable Sun's daemons (see section 2).
+
+Regardless you may wish to compile net-snmp from source
+and install it (see sections 3, 5 and 6) or install
+binaries (see sections 4 and 5).  
+
+If some other SNMP daemon is running, you will need to determine
+where it came from and what it's being used for.  You get clues by
+typing "snmpd -v" or "snmpd --help".  In some cases it may be
+a subagent or agent from another application, such as ORACLE.  If
+you disable its agent, you will need to re-create this functionality
+under net-snmp (eg. by running it as a sub-agent).  ORACLE's SNMP
+functionality is turned on by default and may be unnecessary if
+you aren't using ORACLE's Enterprise Manager.  Refer to ORACLE's
+documentation on how to disable it.
+
+If you have decided to compile your own net-snmp, you will need ...
+
+C.  A compilation environment
+
+-a compiler (gcc or Sun's Forte cc) or the gcc libraries
+   (note, the cc in /usr/ucb is NOT a full-blown compiler)
+-OpenSSL (sunfreeware.com or source www.openssl.org)
+-zlib (sunfreeware.com or source www.gzip.org/zlib/)
+-a community string ("public" is deprecated)
+
+If you are installing on a development machine, it may be best
+to compile openssl and zlib from source, otherwise
+obtain the appropriate zlib for your platform from sunfreeware
+and install (it goes to /usr/local automatically).
+Obtain the appropriate openssl for your platform from sunfreeware
+and install (it goes to /usr/local), you may need the gcc libraries.
+These libraries should not need to be installed if you are using
+binaries, but your mileage may vary.  Note the library problem
+with libcrypto noted below (section 11).
+
+There are two choices for compilers.  Sun has a Forte development
+suite that includes a standalone C compiler.  If you have it, it
+is likely installed in /opt/SUNWspro/bin.  
+
+The more common choice is gcc (currently 2.95.3 or 3.4)
+available from sunfreeware.com.  If you install gcc, you do not
+need the gcc libraries.  3.3.2 or later is recommended.
+
+Given that net-snmp is developed to work on a wide variety of
+platforms, but especially for linux, there's a better chance of
+it working using gcc at any given time.  Hence, gcc may
+simply be the better choice regardless of whether you have
+another compiler.
+
+-- Bruce Shaw <Bruce.Shaw at shaw.ca>
+
+------------------------------------------------------------
+2.  Disabling Sun's SNMP daemons
+
+Note:  Sun has included net-snmp with Solaris 10.  These
+instructions are written with Solaris 8 and previous in mind.
+
+Out of the box, Sun runs four SNMP daemons; mibiisa, idmispd, 
+xnmpXdmid and snmpdx. 
+
+These must be disabled before running net-snmp unless you are planning
+on running them together (see Section 7 below).  Here is the procedure:
+
+   cd /etc/rc3.d
+   ./S76snmpdx stop
+   ./S77dmi stop
+   mv S76snmpdx s76snmpdx
+   mv S77dmi s77dmi
+
+If you are using Solstice Disksuite, you may also be running
+mdlogd.  Leave this alone.
+
+You will need to create a new script to start net-snmp.
+
+Here's an example:
+
+::::: /etc/rc3.d/S78net-snmp ::::::
+
+#!/sbin/sh
+#
+# /etc/rc3.d/S78net-snmp
+#
+# pkill has moved over the years so we need to find it
+#
+X=`which pkill`
+
+case "$1" in
+'start')
+        /usr/local/sbin/snmpd 
+        ;;
+
+'stop')
+        $X -TERM -x -u 0 snmpd
+        ;;
+
+*)
+        echo "Usage: $0 { start | stop }"
+        exit 1
+        ;;
+esac
+exit 0
+::::::::::::::::::::::::::::::::::::
+
+-- Bruce Shaw <Bruce.Shaw at shaw.ca>
+
+------------------------------------------------------------
+3.  Compiling net-snmp
+
+It is strongly recommended that you compile net-snmp from source.
+That way you are guaranteed a working version for your specific 
+configuration of operating system, applications and libraries.
+
+If, for some reason, you cannot compile on a specific machine, 
+there are binaries available for download (see section 4).  
+In addition, you may create your own binaries (see section 6).
+
+You need to set your $PATH.  This is extremely important
+because otherwise there may be conflicts between the various 
+components of the development environment.
+
+If you are using FORTE:
+
+PATH=/usr/bin:/usr/sbin:/usr/ccs/bin:/opt/SUNWspro/bin:/usr/local/bin:
+
+If you are using gcc:
+
+PATH=/usr/sbin:/usr/local/bin:/usr/ccs/bin:/usr/bin
+
+Obtain a current version of net-snmp (which, if you're reading this,
+presumably you have - don't you love recursion?) www.net-snmp.org/download/
+
+Uncompress it and untar it in a working directory eg. /usr/local/src/net-snmp
+
+In order to save a lot of typing, you should create a "configure" 
+script eg. bcc.sh in the directory below eg. /usr/local/src.
+
+   ./configure --with-mib-modules="host disman/event-mib ucd-snmp/diskio \
+      smux agentx mibII/mta_sendmail" --with-cc=gcc
+
+(note, see the long discussion about Perl below)
+(note, subtitute "cc" for "gcc" as appropriate)
+
+then call this script from the net-snmp directory ie ../bcc.sh
+
+and answer the appropriate questions (usually with the default).
+
+When it completes, you should see something like:
+
+---------------------------------------------------------
+            Net-SNMP configuration summary:
+---------------------------------------------------------
+
+  Net-SNMP Version:           5.1
+  Building for:               solaris2
+  Network transport support:  Callback Unix TCP UDP
+  SNMPv3 Security Modules:    usm
+  Agent MIB code:             mibII ucd_snmp snmpv3mibs notification target 
+  \agent_mibs agentx agent_mibs utilities host disman/event-mib 
+  \ucd-snmp/diskio smux agentx mibII/mta_sendmail
+  SNMP Perl modules:          disabled
+  Embedded perl support:      disabled
+  Authentication support:     MD5 SHA1
+  Encryption support:         DES
+
+Type:
+
+   make
+
+and watch for compile errors.  
+
+You will receive numerous warnings.  This is normal,
+a result of the variety of development environments.
+
+Now type:
+
+   make test
+
+and watch for failures.  Also watch for the special tests for Solaris.
+
+If you are satisfied with the tests, stop any snmpd daemons 
+that may be running (see section 2) and type:
+
+   make install
+
+When complete, go on to section 5 below.
+
+-- Bruce Shaw <Bruce.Shaw at shaw.ca>
+
+------------------------------------------------------------
+4.  Obtaining and installing binaries
+
+It is strongly recommended that you compile net-snmp from source.
+That way you are guaranteed a working version for your specific
+configuration of operating system, applications and libraries.
+
+Binaries for Solaris may be found in two locations.
+
+www.sunfreeware.com - this installs as a package.  
+It does not have Perl support.
+
+Therefore, I recommend:
+
+   http://net-snmp.sourceforge.net/download/  (you will be redirected)
+
+This is the official repository for binaries.
+
+To determine which binary you need, you will need several pieces of
+information.
+
+-operating system version
+-hardware platform
+-net-snmp version desired
+
+The first two may be obtained by typing:
+
+   uname -a
+
+It will return something like:
+
+SunOS foo 5.8 Generic_108528-14 sun4u sparc SUNW,Ultra-4
+
+5.8 means Solaris 8
+5.7 means Solaris 7  etc.
+
+"sun4u" is the Ultra hardware platform
+"sun4m" is SuperSPARC  eg. Sparc 5 or Sparc 10
+"sun4d" is older SPARC boxes.  
+
+You can then decode the binary version by its name eg.:
+
+net-snmp_5.0.9-SunOS_5.8_sun4u.tar.gz
+
+means "net-snmp version 5.0.9 for Solaris version 5.8 running on Ultra
+hardware".
+
+Once you have found the appropriate version, download it to a
+distribution directory (making one if necessary) eg. /usr/local/dist
+
+Type the following: (using the sample above)
+
+   cd /
+   tar -xvf /usr/local/dist/net-snmp-5.0.9-SunOS_5.8_sun4u.tar
+
+The binaries, libraries, etc. will be installed in /usr/local.
+
+Remove the tar file to save space.  Create an snmpd.conf (see below)
+or use an existing one from another machine.
+It installs in /usr/local/share/snmp.
+
+Install a startup script (see section 1).
+
+For further information, see README.solaris.binaries.x
+
+--Bruce Shaw <Bruce.Shaw at shaw.ca>
+
+------------------------------------------------------------
+5.  Creating snmpd.conf and testing
+
+When everything is installed, run:
+
+   snmpconf -g basic_setup
+
+and answer the questions appropriately.  If you are using
+the defaults, place the resulting snmpd.conf file in:
+
+/usr/local/share/snmp/snmpd.conf
+
+A security note - use of the "public" community is deprecated.
+This example uses "whatever" as a community.
+
+When you have the daemon running either with the script above or running:
+
+   /usr/local/sbin/snmpd
+
+test the daemon's functionality by typing:
+
+   snmpget -v 1 -c whatever localhost sysUpTime.0
+   snmpwalk -v 2c -c whatever -m ALL localhost .1.3 | more
+
+and paging through the results.  
+
+If you have problems, you can examine diagnostic messages
+by running:
+
+   /usr/local/sbin/snmpd -f -L
+
+or use gdb (available from www.sunsolve.com) as follows:
+
+   cd /usr/local/sbin
+   gdb snmpd
+   run -f -L
+
+and when it blows up:
+
+   bt
+
+to get the backtrace.  
+
+You can use:
+
+   run -f -L -D <modulename>
+
+to display debug messages.
+
+To display all debug messages type:
+
+   run -f -L -D ALL 
+
+but this will be extremely verbose.
+
+-- Bruce Shaw <Bruce.Shaw at shaw.ca> with suggestions by Thushara Wickram
+
+------------------------------------------------------------
+6.  Creating your own binaries
+
+Pick an appropriate name for a tarfile 
+eg. net-snmp-5.1.custom-SunOS_5.8_sun4u.tar (see above)
+(this particular one means "a customized version of
+net-snmp 5.1 that works under Solaris 8 running on Ultra hardware")
+
+Create an empty directory such as /usr/local/dist, then do the following
+from the source directory (using the example above):
+
+   make install prefix=/usr/local/dist/usr/local \
+        exec_prefix=/usr/local/dist/usr/local
+   cd /usr/local/dist
+   tar -cvf net-snmp-5.1.custom-SunOS_5.8_sun4u.tar usr
+
+Transfer this file to the machine where you want to install from binary.
+Place it in a distribution directory eg. /usr/local/dist
+Type the following (using the example above):
+
+   cd /
+   tar -xvf /usr/local/dist/net-snmp-5.1.custom-SunOS_5.8_sun4u.tar
+
+Remove the tar file to save space.  Create an snmpd.conf (see above)
+or use an existing one from another machine.  If you are using
+the defaults, it installs in /usr/local/share/snmp.  Install
+a startup script (see section 2).
+
+Note that if you create a binary with Perl support (see below) an
+identically configured Perl needs to be installed as well.
+
+-- Bruce Shaw <Bruce.Shaw at shaw.ca>
+
+------------------------------------------------------------
+7.  Using Sun's SNMP daemon and net-snmp together
+
+Net-snmp may be used as a sub-agent in conjunction with Sun's snmpdx daemon.
+
+To do this, you will need to modify several files, 
+all located in /etc/snmp/conf.
+
+First, do the following:
+
+   /etc/rc3.d/S76snmpdx stop (assuming you haven't done so already, and...)
+   /etc/rc3.d/S77dmi stop    (...assuming you haven't renamed them)
+
+   cd /etc/snmp/conf
+   cp snmpd.conf snmpd.conf.orig
+   cp snmpdx.acl snmpdx.acl.orig
+   cp snmpdx.reg snmpdx.reg.orig
+   cp snmpdx.rsrc snmpdx.rsrc.orig
+   cp mibiisa.reg mibiisa.reg.orig
+   cp mibiisa.rsrc mibiisa.rsrc.orig
+
+modify snmpd.conf with the correct:
+
+   sysdescr
+   syscontact
+   sysLocation
+   system-group-read-community
+   read-community (in my example below I will use community "whatever")
+   trap 
+   trap-community
+   managers (leave blank for all)
+
+modify snmpd.acl with the correct:
+
+   trap-community
+   trap-recipients
+   communities
+   access
+
+Make sure that in snmpdx.reg the port is 161.
+
+You will now need to add two files - net-snmp.reg and net-snmp.rscs
+
+In this example, "subtrees" is set for HOST-RESOURCES-MIB, and UCD-SNMP-MIB.
+Do not use net-snmp's MIB-2 information as this is already provided by 
+Sun's mib and may cause a conflict.
+
+::::: net-snmp.reg ::::::
+
+# net-snmp.reg
+# mib-2 is already provided by the mibiisa process
+# that is a default sub agent of snmpdx
+# we are specifying only hostmib and ucd 
+##########
+# agents #
+##########
+ 
+agents =
+{
+        {
+                 name = "net-snmp"
+                 subtrees = { 1.3.6.1.2.1.25,1.3.6.1.4.1.2021 } # hostmib, ucd
+                 timeout = 2000000
+                 watch-dog-time = 86400
+        }
+}
+
+::::::::::::::::::
+
+::::: net-snmp.rscs ::::::
+
+# /etc/snmp/conf/net-snmp.rsrc
+
+resource =
+{
+        {
+   registration_file = "/etc/snmp/conf/net-snmp.reg"
+   policy = "spawn"
+   type = "legacy"
+   command = "/usr/local/sbin/snmpd -p $PORT"  
+      }
+ 
+}
+
+::::::::::::::::::
+
+Stop any net-snmp processes that may be running.  
+
+Start Sun's daemons by typing:
+
+   /etc/rc3.d/S76snmpdx start (assuming you haven't renamed it)
+   /etc/rc3.d/S77dmi start    (assuming you haven't renamed it)
+
+Wait a moment for everything to stabilize, then try these two queries:
+
+   snmpget -v 1 -c whatever localhost sysDescr.0
+   snmpget -v 1 -c whatever localhost hrSystemUptime.0
+
+You should see something like:
+
+   SNMPv2-MIB::sysDescr.0 = STRING: SunOS foo 5.6 Generic_105181-30 sun4u
+
+which is Sun's daemon talking, and:
+
+   HOST-RESOURCES-MIB::hrSystemUptime.0 = Timeticks: (78540910) 9 days, 2:10:09.10
+
+which is net-snmp talking.  It is acting as a sub-agent through Sun's daemon.
+
+If Sun's daemons fail, you will need to shut down the snmpd daemons by typing:
+
+   pkill snmpd
+
+Then do the following:
+
+   /etc/rc3.d/S76snmpdx stop  (assuming you haven't renamed it)
+   /etc/rc3.d/S77dmi stop     (assuming you haven't renamed it)
+   /etc/rc3.d/S76snmpdx start (assuming you haven't renamed it)
+   /etc/rc3.d/S77dmi start    (assuming you haven't renamed it)
+
+rather than trying to individually clobber all the various Sun daemons.
+
+This configuration appears to deal properly with snmpgets 
+and handle mistakes gracefully.
+
+Beyond this, your mileage may vary.
+
+You may wish to modify the subtrees in net-snmp.reg as you find things
+that do and don't work.  Remember to keep backup copies of working
+configurations.
+
+-- Bruce Shaw <Bruce.Shaw at shaw.ca> from notes by Stefan Radman and C Wells
+
+------------------------------------------------------------
+8.  Monitoring disks, processes and execs (DISMAN-EVENT-MIB)
+
+For a full explanation of using DISMAN-EVENT-MIB, see:
+
+http://www.net-snmp.org/man/snmpd.conf.html
+
+This discussion concerns its use on Solaris.
+
+There is a bug preventing the use of some of its functionality.  This
+discussion will document what is known to work and how to use it.
+
+The problem revolves around the use of monitors.  The...
+
+defaultMonitors yes
+
+token will NOT work for reasons discussed below.  I suspect that the
+notificationEvent tokens will not work for the same reason but this
+has not been tested.  Your mileage may vary.  Same with includeAllDisks.
+
+The documentation suggests using...
+
+monitor -o prNames -o prErrMessage "process table" prErrorFlag != 0
+
+to monitor all processes.  This will fail with ambiguous results.
+
+To monitor processes, put a separate monitor line for each process.
+
+For example:
+######
+proc smail
+proc mdlogd
+
+monitor -r 30 -i -o prNames.1 -o prErrMessage.1 "Process smail" prErrorFlag.1 !=0
+monitor -r 30 -i -o prNames.2 -o prErrMessage.2 "Process Solstice Disksuite SNMP trap" prErrorFlag.2 !=0
+
+To monitor disks, do the same.  An example:
+
+########
+# This example sends a trap if root has less than 10% available and /usr6 less t
+han 90%
+#
+disk / 10%
+disk /usr6 90%
+
+monitor -i -r 30 -o dskPath.1 -o dskErrorMsg.1 "root file system" dskErrorFlag.1 !=0
+monitor -i -r 30 -o dskPath.2 -o dskErrorMsg.2 "ORACLE file system" dskErrorFlag.2 != 0
+#########
+
+To implement an external program then monitor its results you need to set up your script.
+
+Here is a sample script.
+
+#!//usr/bin/ksh
+xstatus=0
+
+if [ $xstatus -eq 0 ];then
+echo success: $0
+else
+echo FAILURE: $0
+fi
+
+exit $xstatus
+###end of script tester##
+
+Place this script in /usr/local/src and make it executable.  Make copies called
+tester1, tester2 etc.
+and make them executable.
+
+Here is a sample snmpd.conf snippet that makes use of the exec feature:
+##############
+
+exec tester1 /usr/local/src/tester1
+exec tester2 /usr/local/src/tester2
+exec tester3 /usr/local/src/tester3
+exec tester4 /usr/local/src/tester4
+exec tester5 /usr/local/src/tester5
+
+monitor -i -r 60 -o extNames.1 -o extOutput.1 "status table 1" extResult.1 != 0
+monitor -i -r 60 -o extNames.2 -o extOutput.2 "status table 2" extResult.2 != 0
+monitor -i -r 60 -o extNames.3 -o extOutput.3 "status table 3" extResult.3 != 0
+monitor -i -r 60 -o extNames.4 -o extOutput.4 "status table 4" extResult.4 != 0
+monitor -i -r 60 -o extNames.5 -o extOutput.5 "status table 5" extResult.5 != 0
+##############
+
+While snmpd is running, go to /usr/local/src and modify one of the tester programs eg. tester1
+
+xstatus=1
+
+and save the file.  Sometime in the next 60 seconds, a trap will be generated.
+Change the value
+back to 0, then modify another file.
+
+If you are unsure of the correct row number within a specific table, do an snmpwalk eg.
+
+snmpwalk -v 2c -c public -m ALL localhost prNames
+
+The same methodology can presumably be used for fileName and laNames.  Your mileage may vary.
+
+
+-- Bruce Shaw <Bruce.Shaw at shaw.ca>  with Allan McIntosh and Wes Hardaker
+------------------------------------------------------------
+9.  Files descriptors and fopen
+
+Solaris has a limitation on the number of file descriptors (255)
+available in stdio, so that fopen() fails if more than
+255 file descriptors (sockets) are open. This prevents mibs from 
+being loaded after 250 sockets are open, since parse.c uses stdio.
+
+SEan <burke_sp@pacbell.net> investigated this problem, and had this
+report on using the SFIO package to solve this problem.
+
+ - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+The SFIO package ( http://www.research.att.com/sw/tools/sfio/ ) 
+is a buffered streams IO package that is much more more sophisticated 
+than stdio, but it does support stdio API's for backward compatibility,
+and that's the aspect that is important here.
+
+To compile with SFIO, we simply add -I/usr/local/sfio/include to the
+$CPPFLAGS before compiling net-snmp. This causes SFIO's stdio.h to
+preempt Solaris stdio, mapping calls like fopen() and fprintf() to
+the SFIO implementations. This produces a libnetsnmp that does not
+have the fopen() limitation. Any application that links to this 
+libnetsnmp must also be linked to libsfio. 
+
+Here are the two caveats:
+
+A. libsfio exports the functions 'getc' and 'putc', for reasons that
+are not clear. These are the only symbols it exports that conflict
+with stdio. While getc and putc are traditionally macros, Solaris
+makes them functions in multithreaded code (compiled with -mt,
+-pthread, or -D_REENTRANT). If your native stdio code links to the
+libsfio versions, a crash will result.
+
+There are two solutions to this problem. You may remove getc and putc 
+from libsfio, since SFIO defines getc and putc as macros, by doing:
+
+	ar d libsfio.a getc.o
+	ar d libsfio.a putc.o
+
+or link to SFIO's stdio compatibility library, libstdio, ahead of
+libsfio. This library wraps all of the native stdio calls with 
+versions that are safe for native or sfio streams, in case you
+need to share streams between SFIO and native stdio codes.
+
+B. libsfio provides 64-bit offsets in fseek(), ftell(). This is
+a good thing, since SFIO is intened to avoid needless limitations,
+but it means that SFIO's stdio.h defines off_t to be a 64-bit offset. 
+Net-SNMP uses readdir(), which returns a struct dirent containing 
+a 32-bit off_t, so the code compiled for SFIO doesn't access 
+struct dirent's correctly.
+
+There are two solutions to this problem, as well. The first is to
+include <dirent.h> at the start of SFIO's stdio.h. Since SFIO 
+defines a macro substitution for off_t, this leaves struct dirent's 
+definition unchanged.
+
+An alternative, which I haven't verified, is to define _FILE_OFFSET_BITS
+to be 64 when compiling libnetsnmp. According to what I see in Solaris's 
+/usr/include/sys/feature_tests.h, you can select a 64-bit off_t at 
+compile time with this setting, which should make readdir()'s off_t 
+compatible with SFIO's ftell(), fseek().
+ [[ We have received reports that this approach does not in fact work 
+(see Perl discussion below)]]
+
+Finally, thanks to Phong Vo and AT&T Labs for a fast, robust and
+portable package that solves this headache very neatly.
+
+-SEan <burke_sp@pacbell.net>
+
+------------------------------------------------------------
+10.  Perl
+
+Net-snmp may be compiled with Perl support by adding the lines:
+
+   --enable-shared --enable-embedded-perl
+
+to your ./configure invocation.
+
+This should only be done if you are sure you really need Perl, 
+for the following reasons:
+
+Solaris 8 and 9 ship with a version of Perl compiled using sun's cc. 
+
+This causes a problem when attempting to compile net-snmp 
+with Perl functionality ie.:
+
+   ./configure --with-mib-modules="host disman/event-mib ucd-snmp/diskio \
+      smux agents mibII/mta_sendmail" --enable-shared --enable-embedded-perl
+
+because during the Perl section of the compile, it attempts to do so 
+using the methodology used to compile the original Perl, not
+what you're currently using.  This can be discovered by typing:
+
+   perl -V
+
+and it says (among other things)
+
+  Compiler:
+    cc='cc'
+
+and you don't have the full version of Sun's C compiler on your 
+system, it's going to break.
+
+In addition if it was compiled with:
+
+   LFS_CFLAGS      -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64
+
+net-snmp will not compile correctly.
+
+Given that the Perl provided with Solaris 8 (5.005_03)
+and Solaris 9 (5.005_03 and 5.6.1) is somewhat stale, 
+upgrading may be to your advantage.
+
+Perl did not ship with Solaris before version 8.  If you installed a
+version from www.sunfreeware.com, it is compiled with some extra flags
+that cause the net-snmp compile to break.  
+
+In either case, you will need to compile and install Perl.
+
+There are, however, some issues.
+
+A.  Some applications (eg. /usr/bin/kstat) require this exact version 
+of Perl because of libraries.  These instructions below install Perl
+in /usr/local/bin (and optionally /usr/bin/).  The original is left
+intact in /usr/perl5/bin/perl where, in fact, the kstat script looks 
+for it.  If you have version specific scripts, you will need to do
+the same either by invoking /usr/perl5/bin/perl or putting:
+
+#!/usr/perl/bin/perl -w
+
+as the first line of your script and making it executable 
+(see the /usr/bin/kstat source as an example).
+
+B.  The instructions below disable large file support.  
+
+This means that Perl would be unable to deal
+successfully with files larger than 2 Gb.  
+Again, using /usr/perl5/bin/perl or a version compiled
+with this functionality would solve this.
+
+Hence the ideal solution is a net-snmp specific Perl in its own directory.
+
+The following instructions will install a working Perl in /usr/local/net-snmp.
+
+Install gcc version 3.3.2 (or later) from www.sunfreeware.com.
+
+Download the current stable release of Perl
+
+   http://www.cpan.org/src/stable.tar.gz 
+
+and gunzip and untar.  (This document assumes Perl 5.8.3)
+
+cd to the source directory and type the following:
+
+   sh Configure -Dcc=gcc
+
+Accept most of the defaults, with some specific changes:
+
+Operating system name? [solaris]
+Operating system version? [2.6]   (or 2.7, 2.8, 2.9 ...)
+Build Perl for SOCKS? [n] 
+Use the PerlIO abstraction layer? [y]
+Build a threading Perl? [n] 
+Build Perl for multiplicity? [n] 
+Use which C compiler? [/usr/local/bin/gcc] 
+Directories to use for library searches?
+[/usr/local/lib /usr/lib /usr/ccs/lib]
+What is the file extension used for shared libraries? [so]
+Try to use long doubles if available? [n] 
+What libraries to use? [-lsocket -lnsl -ldl -lm -lc]
+What optimizer/debugger flag should be used? [-O]
+Any additional cc flags? [-fno-strict-aliasing -I/usr/local/include] 
+Any additional ld flags (NOT including libraries)? [ -L/usr/local/lib] 
+Try to use 64-bit integers, if available? [y]   (unless you're using 32-bit Solaris)
+Try to use maximal 64-bit support, if available? [n]
+What is your architecture name [sun4-solaris-64int]
+Installation prefix to use? (~name ok) [/usr/local/net-snmp] 
+What installation prefix should I use for installing files? (~name ok)
+[/usr/local/net-snmp] 
+Pathname where the private library files will reside? (~name ok)
+[/usr/local/net-snmp/lib/perl5/5.8.3] 
+Where do you want to put the public architecture-dependent libraries? (~name ok)
+[/usr/local/net-snmp/lib/perl5/5.8.3/sun4-solaris-64int] 
+Do you wish to attempt to use the malloc that comes with perl5? [n] 
+Installation prefix to use for add-on modules and utilities? (~name ok)
+[/usr/local/net-snmp]
+Pathname for the site-specific library files? (~name ok)
+[/usr/local/net-snmp/lib/perl5/site_perl/5.8.3] 
+Pathname for the site-specific architecture-dependent library files? (~name ok)
+[/usr/local/net-snmp/lib/perl5/site_perl/5.8.3/sun4-solaris-64int] 
+Do you want to configure vendor-specific add-on directories? [n] 
+Colon-separated list of additional directories for perl to search? [none]
+Installation prefix to use for add-on modules and utilities? (~name ok)
+[/usr/local/net-snmp] 
+Pathname where the public executables will reside? (~name ok)
+[/usr/local/net-snmp/bin] 
+Install any extra modules (y or n)? [n] 
+Directory for the main Perl5 html pages? (~name ok)
+[/usr/local/net-snmp/doc/html] 
+Directory for the Perl5 module html pages? (~name ok)
+[/usr/local/net-snmp/doc/html/modules]
+List of earlier versions to include in @INC? [none]
+Do you want to install perl as /usr/bin/perl? [n]
+Shall I use /usr/local/bin/nm to extract C symbols from the libraries? [n]
+Do you wish to use dynamic loading? [y] 
+Source file to use for dynamic loading [ext/DynaLoader/dl_dlopen.xs]
+Any special flags to pass to /usr/local/bin/gcc -c to compile shared library modules?
+[-fPIC] 
+What command should be used to create dynamic libraries?
+[/usr/local/bin/gcc] 
+Any special flags to pass to /usr/local/bin/gcc to create a dynamically loaded library?
+[-G -L/usr/local/lib] 
+Any special flags to pass to /usr/local/bin/gcc to use dynamic linking?
+[none] 
+Build a shared libperl.so (y/n) [n]
+Where do the main Perl5 manual pages (source) go? (~name ok)
+[/usr/local/net-snmp/man/man1] 
+What suffix should be used for the main Perl5 man pages? [1]
+Where do the perl5 library man pages (source) go? (~name ok)
+[/usr/local/net-snmp/man/man3] 
+What suffix should be used for the perl5 library man pages? [3]
+Your host name appears to be "foo". Right? [y] 
+What is your domain name? [.bar.com]
+What is your e-mail address? [something.else@foo.bar.com] 
+Perl administrator e-mail address [something.else@foo.bar.com] 
+Do you want to install only the version-specific parts of perl? [n]
+Where do you keep publicly executable scripts? (~name ok)
+[/usr/local/net-snmp/bin] 
+Pathname where the add-on public executables should be installed? (~name ok)
+[/usr/local/net-snmp/bin] 
+Pathname where the site-specific html pages should be installed? (~name ok)
+[/usr/local/net-snmp/doc/html]
+Pathname where the site-specific library html pages should be installed? (~name ok)
+[/usr/local/net-snmp/doc/html/modules] 
+Pathname where the site-specific manual pages should be installed? (~name ok)
+[/usr/local/net-snmp/man/man1]
+Pathname where the site-specific library manual pages should be installed? (~name ok)
+[/usr/local/net-snmp/man/man3] 
+Pathname where add-on public executable scripts should be installed? (~name ok)
+[/usr/local/net-snmp/bin] 
+Use the "fast stdio" if available? [y]
+Try to understand large files, if available? [n]
+What is the extension of dynamically loaded modules [so] 
+Shall I ignore gethostname() from now on? [n] 
+What is the size of a character (in bytes)? [1] 
+Do you still want to use vfork()? [n] 
+Doubles must be aligned on a how-many-byte boundary? [8]
+Use which function to generate random numbers? [drand48]
+What type pointer is the second argument to getgroups() and setgroups()?
+[gid_t] 
+What pager is used on your system? [/usr/bin/more] 
+Which compiler compiler (yacc) shall I use? [yacc]
+What extensions do you wish to load dynamically?[blah..blah..blah]  (use the default)
+What extensions do you wish to load statically? [ ] 
+
+Run make depend now? [y]
+
+When it is finished, do:
+
+   grep cppsymbols config.sh
+
+and make sure "-D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64" does NOT appear.
+
+Then do:
+
+   make
+   make test  (ignore errors)
+   make install
+   /usr/local/net-snmp/bin/perl -V
+
+if everything looks all right, compile net-snmp (see above) but with the following differences:
+
+Set your path to:
+
+PATH=/usr/local/net-snmp/bin:/usr/local/bin:/usr/bin:/usr/sbin:/usr/ccs/bin:
+
+Type:
+
+perl -v
+
+...and...
+
+which perl
+
+to make sure you get the correct version.
+
+Your configure invocation should be...
+
+./configure --with-gnu-ld --enable-shared --enable-embedded-perl --disable-developer \
+--with-mib-modules="host disman/event-mib ucd-snmp/diskio examples/example smux  \
+agentx mibII/mta_sendmail" --with-cc=gcc
+
+Once you have compiled and installed net-snmp you should test its Perl 
+capabilities by doing the following:
+
+Copy the perl_module.pl script found at 
+
+http://www.net-snmp.org/tutorial-5/toolkit/perl/index.html
+
+to /usr/local/net-snmp
+
+and modify your /usr/local/share/snmp/snmpd.conf file to contain the entry:
+
+perl do "/usr/local/net-snmp/perl_module.pl"
+
+then do:
+
+/usr/local/bin/snmpwalk -v 2c -c whatever localhost .1.3.6.1.4.1.8072.999
+
+It should return the following:
+
+NET-SNMP-MIB::netSnmp.999.1.2.1 = STRING: "hello world"
+
+WARNING!!  If you are planning on created binary versions of net-snmp with Perl capability,
+you will also need to ship the Perl which you created in /usr/local/net-snmp.
+
+ -- Bruce Shaw <Bruce.Shaw at shaw.ca>
+
+------------------------------------------------------------
+11.  sed and $PATH
+
+(note, if you have followed the recommendations for $PATH 
+above, this is not an issue -- Bruce Shaw <Bruce.Shaw at shaw.ca>)
+
+The version of sed in /usr/ucb on Solaris 2.5.1 and 2.6 can't
+cope with the size of the subsitution strings used in config.status.
+
+Putting /usr/bin ahead of /usr/ucb in the search path fixes this.
+
+/usr/xpg4/bin/sed is seen to segfault under Solaris 8 when running configure.
+Putting /usr/bin ahead of /usr/xpg4/bin fixes this.
+Thanks to zach dot metzinger at removeme microtune dot com.
+
+------------------------------------------------------------
+12.  OpenSSL
+
+If compiling with OpenSSL (e.g. from sunsolve), it's possible that
+the agent won't successfully load the crypto library (typically
+in /usr/local/ssl/lib) when it is in use and will return a
+cannot find library error message of some sort.
+
+To rectify this, you will need to use the /usr/bin/crle command, which
+did NOT ship with some versions of Solaris, but came as part of later
+patches.  You should make sure the following patches are up to date:
+
+107733 (Solaris 2.6)
+106950 (Solaris 2.7)
+109147 (Solaris 8)
+115838 (Trusted Solaris 8)
+112693 (Solaris 9)
+
+Then type the following:
+
+/usr/bin/crle
+
+It will return something like:
+
+Default configuration file (/var/ld/ld.config) not found
+  Default Library Path (ELF):  /usr/lib (system default)
+  Trusted Directories (ELF):   /usr/lib/secure (system default)
+
+Find the location of the libcrypto libraries by typing:
+
+find /usr -name "libcrypto*" -print
+
+which will probably display:
+
+/usr/local/ssl/lib/libcrypto.a
+/usr/local/ssl/lib/libcrypto.so
+/usr/local/ssl/lib/libcrypto.so.0
+/usr/local/ssl/lib/libcrypto.so.0.9.7
+
+which is the default installation for OpenSSL.
+
+To include this in the loader search path, type:
+
+/usr/bin/crle -u -l /usr/local/ssl/lib
+
+/usr/bin/crle will now display:
+
+Configuration file [3]: /var/ld/ld.config  
+  Default Library Path (ELF):   /usr/lib:/usr/local/ssl/lib
+  Trusted Directories (ELF):    /usr/lib/secure  (system default)
+
+Command line:
+  crle -c /var/ld/ld.config -l /usr/lib:/usr/local/ssl/lib
+
+Thanks to Dave Shield and Johannes Schmidt-Fischer
+-- Bruce Shaw <Bruce.Shaw at shaw.ca>
+
+------------------------------------------------------------
+13.  Wish list
+
+A.  Hardware specific monitoring eg. fan speeds, CPU temperatures, 
+    doors open, lights on or off
+
+This involves accessing the libraries found in:
+
+   /usr/platform/`uname -i`/include/sys
+
+This will be available for net-snmp ver. 5.2 as an implementation of
+LM-SENSORS-MIB.
+
+
+B.  Code cleanup
+
+There may be opportunities for shared code between UCD-SNMP 
+and HOST-RESOURCES-MIB.
+
+There may be opportunities to optimize caching perhaps 
+using the new auto-caching code.
+
+C.  ORACLE
+
+How to get ORACLE's SNMP functionality to work as a sub-agent.
+
+-- Bruce Shaw <Bruce.Shaw at shaw.ca>
+
+------------------------------------------------------------
+14.  Known Bugs!!
+
+A.  hrDeviceTable (HOST-RESOURCES-MIB)
+
+This section of code is only aware of disk controllers 0 through 7.
+Hence, anything on controller c8 and above will be invisible.
+
+B.  hrPartitionTable (HOST-RESOURCES-MIB)
+
+At present, hrPartitionSize data only works for regular ufs
+partitions eg. /dev/dsk/c0t0d0s0 that are mounted.  They
+are displayed in partition order rather than the order
+they are mounted.  Partitions mounted as mirrors, metastate
+database replicas, swap or members of a RAID display size 0.
+
+As a workaround, put entries for disks you are
+interested in in snmpd.conf and examine
+using UCD-SNMP-MIB.  See DISMAN-EVENT-MIB above.
+
+C.  DISMAN-EVENT-MIB
+
+Some of the functionality within DISMAN-EVENT-MIB does not
+work as advertised.  See long discussion under section 8 above.
+
+-- Bruce Shaw <Bruce.Shaw at shaw.ca>
+
+------------------------------------------------------------
+15.  Discussion and further information
+
+For discussion or further information contact the coders and users
+lists at http://sourceforge.net/mail/?group_id=12694 .
