@@ -91,7 +91,7 @@ use vars qw(@ISA %EXPORT_TAGS @EXPORT_OK @EXPORT $VERSION $AUTOLOAD);
 	snmp_oid_compare
         compare
 );
-$VERSION = '5.03021';
+$VERSION = '5.03022';
 
 sub new {
     my $type = shift;
