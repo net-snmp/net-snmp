@@ -199,7 +199,7 @@ use vars qw(@ISA %EXPORT_TAGS @EXPORT_OK @EXPORT $VERSION $AUTOLOAD);
 				   NETSNMP_DS_LIB_KSM_SERVICE_NAME
 				   NETSNMP_DS_LIB_SBSM_LOCAL_PWD
 );
-$VERSION = '5.04011';
+$VERSION = '5.04012';
 
 sub AUTOLOAD {
     # This AUTOLOAD is used to 'autoload' constants from the constant()
