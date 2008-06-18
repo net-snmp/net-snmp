@@ -86,7 +86,7 @@ use vars qw(@ISA %EXPORT_TAGS @EXPORT_OK @EXPORT $VERSION $AUTOLOAD);
 	SNMP_ERR_AUTHORIZATIONERROR
 	SNMP_ERR_NOTWRITABLE
 );
-$VERSION = '5.02041';
+$VERSION = '5.02042';
 
 sub AUTOLOAD {
     # This AUTOLOAD is used to 'autoload' constants from the constant()
