@@ -1,0 +1,20 @@
+This dist directory contains release instructions and scripts as well
+as binary building instructions and helpful scripts.  However, only
+the main line CVS tree ("HEAD") for Net-SNMP contains the maintained
+versions of all of these files.  They have been removed from this
+directory.  Thus, if you would like to see them check out the main
+line CVS tree per the instructions on:
+
+  http://www.net-snmp.org/cvs/
+
+The files that are only available in the CVS HEAD dist tree include:
+
+  net-snmp.spec        	  - RPM specification file
+  Makefile             	  - Makefile for building RPMs
+  RELEASE-INSTRUCTIONS 	  - textual steps for building a release
+  makerelease          	  - A script to automatically create a release tar.gz
+  net-snmp-solaris-build  - A directory housing solaris building script(s)
+  snmpd-init.d            - An init.d script for snmpd
+  snmptrapd-init.d        - An init.d script for snmptrapd
+  nsb-* files             - Generic package building scripts
+  README.build-scripts    - Describes how to use them

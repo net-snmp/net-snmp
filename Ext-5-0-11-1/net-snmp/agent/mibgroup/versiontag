@@ -1,0 +1,57 @@
+#!/bin/sh
+
+QUOTEFILES="snmplib/snmp_version.c"
+SEDFILES="sedscript.in"
+COLONFILES="README FAQ"
+PERLFILES="perl/SNMP/SNMP.pm"
+if [ "x$CVSUSER" = "x" ] ; then
+  CVSUSER=hardaker
+fi
+
+DOIT=
+
+if [ $2 = "reverse" -o $2 = "tag" -o $2 = "tar" ];
+then
+    VERSIONTAG="$1"
+    VERSION=`echo $1 | sed 's/Ext-*//g;s/-/./g;'`
+else
+    case "$1" in
+    Ext*) ;;
+    *)  echo "VERSION must begin with Ext"
+        exit 0 ;;
+    esac
+
+    VERSION="$1"
+    VERSIONTAG=`echo Ext-$1 | sed 's/\./-/g;'`
+fi
+
+if [ $2 = "add" -o $2 = "reverse" ]; then
+  $DOIT perl -p -i.bak -e 's/VersionInfo(\s*=\s*[^"]*)"(.*)"/VersionInfo$1"'$VERSION'"/;' $QUOTEFILES
+  $DOIT perl -p -i.bak -e 's/Version: [\.0-9a-zA-Z]+/Version: '$VERSION'/;' $COLONFILES
+  $DOIT perl -p -i.bak -e 's#^s/VERSIONINFO/.*#s/VERSIONINFO/'$VERSION'/g#;' $SEDFILES
+  $DOIT perl -p -i.bak -e "s/VERSION = \'(.*)\'/VERSION = \'$VERSION\'/;" $PERLFILES
+ if [ "x$3" != "xnocvs" ]; then
+  $DOIT cvs commit -m "- ($QUOTEFILES $SEDFILES): version tag ( $VERSION )" $QUOTEFILES $SEDFILES $COLONFILES $PERLFILES
+ fi
+fi
+
+if [ $2 = "tag" ]; then
+    $DOIT cvs tag $VERSIONTAG
+fi
+
+if [ $2 = "tar" ]; then
+    $DOIT cvs -d $CVSUSER@net-snmp.cvs.sourceforge.net:/cvsroot/net-snmp export -d net-snmp-$VERSION -r $VERSIONTAG net-snmp
+    $DOIT net-snmp-$VERSION/remove-files net-snmp-$VERSION
+    # XXX: we should be testing for existance of star first...
+    # gnu tar (as of 1.15.1) is unable to create portable tar archives, 
+    # especially if long file names (>100 char) are present.
+    # star is a better replacement.
+    $DOIT star -Hustar -c -z -f net-snmp-$VERSION.tar.gz net-snmp-$VERSION
+    $DOIT md5sum net-snmp-$VERSION.tar.gz > net-snmp-$VERSION.tar.gz.md5
+fi
+
+if [ $2 = "clean" ]; then
+    $DOIT rm -fR net-snmp-[0-9]*
+fi
+
+exit 0
