@@ -1,5 +1,26 @@
-Changes: V5.1.3 -> V5.1.4
 -------------------------------------------------------------------------------
+
+Changes: V5.1.4.1 -> V5.1.4.2
+
+    An increment only in the version number that was failing to be
+    reported properly by the tools.
+
+-------------------------------------------------------------------------------
+
+Changes: V5.1.4 -> V5.1.4.1
+
+    SECURITY BUG: A portion of SNMPv3 code had significantly weakened
+    authentication cryptography and unauthenticated access to a system
+    is a possibility.
+
+    It is critical that all users update their installations bases
+    IMMEDIATELY.
+
+    If you were only using SNMPv1 or SNMPv2c you were already insecure
+    beyond a level that this vulnerability affects.
+
+-------------------------------------------------------------------------------
+Changes: V5.1.3 -> V5.1.4
 
 2006-03-23 15:25  hardaker
 
