@@ -1,6 +1,11 @@
 This file contains major changes in released revisions.  Please read
 the ChangeLog file for a more detailed listing of changes/bug fixes.
 
+*5.1.4.2*
+    An increment only in the version number that was failing to be
+    reported properly by the tools.
+
+
 *5.1.4.1*
     SECURITY BUG: A portion of SNMPv3 code had significantly weakened
     authentication cryptography and unauthenticated access to a system
