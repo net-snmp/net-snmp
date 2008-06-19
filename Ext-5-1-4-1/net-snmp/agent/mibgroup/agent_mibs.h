@@ -1,6 +1,0 @@
-config_require(agent/nsTransactionTable)
-config_require(agent/nsModuleTable)
-config_require(agent/nsDebug)
-config_require(agent/nsCache)
-config_require(agent/nsLogging)
-config_add_mib(NET-SNMP-AGENT-MIB)
