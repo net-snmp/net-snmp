@@ -55,7 +55,7 @@ use vars qw(@ISA %EXPORT_TAGS @EXPORT_OK @EXPORT $VERSION $AUTOLOAD);
 				   NETSNMP_DS_AGENT_GROUPID
 				   NETSNMP_DS_AGENT_AGENTX_PING_INTERVAL
 );
-$VERSION = '5.00111';
+$VERSION = '5.00112';
 
 sub AUTOLOAD {
     # This AUTOLOAD is used to 'autoload' constants from the constant()

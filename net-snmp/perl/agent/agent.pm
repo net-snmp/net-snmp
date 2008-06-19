@@ -50,7 +50,7 @@ use vars qw(@ISA %EXPORT_TAGS @EXPORT_OK @EXPORT $VERSION $AUTOLOAD);
 	MODE_SET_RESERVE2
 	MODE_SET_UNDO
 );
-$VERSION = '5.00111';
+$VERSION = '5.00112';
 
 sub AUTOLOAD {
     # This AUTOLOAD is used to 'autoload' constants from the constant()
