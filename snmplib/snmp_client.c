@@ -771,7 +771,7 @@ snmp_set_var_value(netsnmp_variable_list * vars,
     /*
      * use built-in storage for smaller values 
      */
-    if (len <= (sizeof(vars->buf) - 1)) {
+    if (len <= sizeof(vars->buf)) {
         vars->val.string = (u_char *) vars->buf;
         largeval = 0;
     }
@@ -892,7 +892,7 @@ snmp_set_var_value(netsnmp_variable_list * vars,
     case ASN_BIT_STR:
     case ASN_OPAQUE:
     case ASN_NSAP:
-        if (largeval) {
+        if (vars->val_len >= sizeof(vars->buf)) {
             vars->val.string = (u_char *) malloc(vars->val_len + 1);
         }
         if (vars->val.string == NULL) {
