@@ -4,6 +4,8 @@
 
 HEADER SNMPv3 bulkget of system
 
+SKIPIFNOT USING_MIBII_SYSTEM_MIB_MODULE
+
 #
 # Begin test
 #
