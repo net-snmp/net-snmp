@@ -9,6 +9,7 @@
 HEADER for failure of SNMPv2c get with wrong community
 
 SKIPIF NETSNMP_DISABLE_SNMPV2C
+SKIPIFNOT USING_MIBII_SYSTEM_MIB_MODULE
 
 #
 # Begin test
