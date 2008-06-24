@@ -3521,11 +3521,8 @@ usm_save_user(struct usmUser *user, const char *token, const char *type)
                                       user->privKeyLen);
     *cptr++ = ' ';
     cptr = read_config_save_octet_string(cptr, user->userPublicString,
-                                         (user->userPublicString ==
-                                          NULL) ? 0 : strlen((char *)
-                                                             user->
-                                                             userPublicString)
-                                         + 1);
+                                         user->userPublicStringLen);
+
     read_config_store(type, line);
 }
 
@@ -3601,7 +3598,7 @@ usm_read_user(char *line)
     }
 
     line = read_config_read_octet_string(line, &user->userPublicString,
-                                         &len);
+                                         &user->userPublicStringLen);
     return user;
 }
 

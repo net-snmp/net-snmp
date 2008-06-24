@@ -73,6 +73,7 @@ extern          "C" {
         u_char         *privKey;
         size_t          privKeyLen;
         u_char         *userPublicString;
+        size_t          userPublicStringLen;
         int             userStatus;
         int             userStorageType;
        /* these are actually DH * pointers but only if openssl is avail. */

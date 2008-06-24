@@ -458,7 +458,7 @@ var_usmUser(struct variable * vp,
         *write_method = write_usmUserPublic;
         if (uptr) {
             if (uptr->userPublicString) {
-                *var_len = strlen((char *) uptr->userPublicString);
+                *var_len = uptr->userPublicStringLen;
                 return uptr->userPublicString;
             }
             *string = 0;
@@ -1179,14 +1179,15 @@ write_usmUserPublic(int action,
         }
         if (uptr->userPublicString)
             free(uptr->userPublicString);
-        uptr->userPublicString = (u_char *) malloc(var_val_len + 1);
+        uptr->userPublicString = (u_char *) malloc(var_val_len);
         if (uptr->userPublicString == NULL) {
             return SNMP_ERR_GENERR;
         }
         memcpy(uptr->userPublicString, var_val, var_val_len);
-        uptr->userPublicString[var_val_len] = 0;
-        DEBUGMSG(("usmUser", "setting public string: %d - %s\n",
-                  var_val_len, uptr->userPublicString));
+        uptr->userPublicStringLen = var_val_len;
+        DEBUGMSG(("usmUser", "setting public string: %d - ", var_val_len));
+        DEBUGMSGHEX(("usmUser", uptr->userPublicString, var_val_len));
+        DEBUGMSG(("usmUser", "\n"));
     }
     return SNMP_ERR_NOERROR;
 }                               /* end write_usmUserPublic() */
