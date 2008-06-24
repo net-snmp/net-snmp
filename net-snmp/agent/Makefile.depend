@@ -642,7 +642,7 @@ ipe./agent_trap.lo: ../include/net-snmp/system/generic.h
 ipe./agent_trap.lo: ../include/net-snmp/machine/generic.h
 ipe./agent_trap.lo:  ../include/net-snmp/utilities.h
 ipe./agent_trap.lo: ../include/net-snmp/types.h 
-ipe./agent_trap.lo:  ../include/net-snmp/definitions.h
+ipe./agent_trap.lo: ../include/net-snmp/definitions.h
 ipe./agent_trap.lo: ../include/net-snmp/library/snmp_api.h
 ipe./agent_trap.lo: ../include/net-snmp/library/asn1.h
 ipe./agent_trap.lo: ../include/net-snmp/library/snmp_impl.h
