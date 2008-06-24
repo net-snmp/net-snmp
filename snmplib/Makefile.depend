@@ -38,8 +38,8 @@ ipe./callback.lo: ../include/net-snmp/system/linux.h
 ipe./callback.lo: ../include/net-snmp/system/sysv.h
 ipe./callback.lo: ../include/net-snmp/system/generic.h
 ipe./callback.lo: ../include/net-snmp/machine/generic.h
-ipe./callback.lo:  ../include/net-snmp/types.h
-ipe./callback.lo: ../include/net-snmp/definitions.h
+ipe./callback.lo: ../include/net-snmp/types.h 
+ipe./callback.lo:  ../include/net-snmp/definitions.h
 ipe./callback.lo: ../include/net-snmp/library/snmp_api.h
 ipe./callback.lo: ../include/net-snmp/library/asn1.h
 ipe./callback.lo: ../include/net-snmp/library/snmp_impl.h
@@ -637,8 +637,8 @@ ipe./lcd_time.lo: ../include/net-snmp/system/linux.h
 ipe./lcd_time.lo: ../include/net-snmp/system/sysv.h
 ipe./lcd_time.lo: ../include/net-snmp/system/generic.h
 ipe./lcd_time.lo: ../include/net-snmp/machine/generic.h
-ipe./lcd_time.lo: ../include/net-snmp/types.h 
-ipe./lcd_time.lo: ../include/net-snmp/definitions.h
+ipe./lcd_time.lo:  ../include/net-snmp/types.h
+ipe./lcd_time.lo:  ../include/net-snmp/definitions.h
 ipe./lcd_time.lo: ../include/net-snmp/library/snmp_api.h
 ipe./lcd_time.lo: ../include/net-snmp/library/asn1.h
 ipe./lcd_time.lo: ../include/net-snmp/library/snmp_impl.h
@@ -757,7 +757,7 @@ ipe./oid_stash.lo: ../include/net-snmp/system/sysv.h
 ipe./oid_stash.lo: ../include/net-snmp/system/generic.h
 ipe./oid_stash.lo: ../include/net-snmp/machine/generic.h
 ipe./oid_stash.lo: ../include/net-snmp/net-snmp-includes.h
-ipe./oid_stash.lo:  ../include/net-snmp/definitions.h
+ipe./oid_stash.lo: ../include/net-snmp/definitions.h
 ipe./oid_stash.lo: ../include/net-snmp/types.h 
 ipe./oid_stash.lo: ../include/net-snmp/library/snmp_api.h
 ipe./oid_stash.lo: ../include/net-snmp/library/asn1.h
@@ -910,7 +910,7 @@ ipe./scapi.lo: ../include/net-snmp/system/linux.h
 ipe./scapi.lo: ../include/net-snmp/system/sysv.h
 ipe./scapi.lo: ../include/net-snmp/system/generic.h
 ipe./scapi.lo: ../include/net-snmp/machine/generic.h 
-ipe./scapi.lo: ../include/net-snmp/types.h 
+ipe./scapi.lo:  ../include/net-snmp/types.h
 ipe./scapi.lo:  ../include/net-snmp/definitions.h
 ipe./scapi.lo: ../include/net-snmp/library/snmp_api.h
 ipe./scapi.lo: ../include/net-snmp/library/asn1.h
@@ -951,8 +951,8 @@ ipe./snmp-tc.lo: ../include/net-snmp/system/linux.h
 ipe./snmp-tc.lo: ../include/net-snmp/system/sysv.h
 ipe./snmp-tc.lo: ../include/net-snmp/system/generic.h
 ipe./snmp-tc.lo: ../include/net-snmp/machine/generic.h
-ipe./snmp-tc.lo: ../include/net-snmp/types.h 
-ipe./snmp-tc.lo:  ../include/net-snmp/definitions.h
+ipe./snmp-tc.lo:  ../include/net-snmp/types.h
+ipe./snmp-tc.lo: ../include/net-snmp/definitions.h
 ipe./snmp-tc.lo: ../include/net-snmp/library/snmp_api.h
 ipe./snmp-tc.lo: ../include/net-snmp/library/asn1.h
 ipe./snmp-tc.lo: ../include/net-snmp/library/snmp_impl.h
@@ -1190,7 +1190,7 @@ ipe./snmp_alarm.lo: ../include/net-snmp/system/linux.h
 ipe./snmp_alarm.lo: ../include/net-snmp/system/sysv.h
 ipe./snmp_alarm.lo: ../include/net-snmp/system/generic.h
 ipe./snmp_alarm.lo: ../include/net-snmp/machine/generic.h
-ipe./snmp_alarm.lo:  ../include/net-snmp/types.h
+ipe./snmp_alarm.lo: ../include/net-snmp/types.h 
 ipe./snmp_alarm.lo: ../include/net-snmp/definitions.h
 ipe./snmp_alarm.lo: ../include/net-snmp/library/snmp_api.h
 ipe./snmp_alarm.lo: ../include/net-snmp/library/asn1.h

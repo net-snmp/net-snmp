@@ -299,7 +299,8 @@ ipe./util_funcs.lo: ../../include/net-snmp/agent/table_dataset.h
 ipe./util_funcs.lo: ../../include/net-snmp/agent/table_iterator.h
 ipe./util_funcs.lo: ../../include/net-snmp/agent/table_container.h
 ipe./util_funcs.lo: ../../include/net-snmp/agent/mfd.h struct.h util_funcs.h
-ipe./util_funcs.lo: ucd-snmp/errormib.h mibdefs.h
+ipe./util_funcs.lo:  ucd-snmp/errormib.h
+ipe./util_funcs.lo: mibdefs.h
 ipe./Rmon/agutil.lo: ../../include/net-snmp/net-snmp-config.h
 ipe./Rmon/agutil.lo: ../../include/net-snmp/system/linux.h
 ipe./Rmon/agutil.lo: ../../include/net-snmp/system/sysv.h

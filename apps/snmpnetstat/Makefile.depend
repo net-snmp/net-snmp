@@ -72,7 +72,7 @@ ipe./inet.lo: ../../include/net-snmp/system/sysv.h
 ipe./inet.lo: ../../include/net-snmp/system/generic.h
 ipe./inet.lo: ../../include/net-snmp/machine/generic.h 
 ipe./inet.lo: ../../include/net-snmp/net-snmp-includes.h 
-ipe./inet.lo:  ../../include/net-snmp/definitions.h
+ipe./inet.lo: ../../include/net-snmp/definitions.h
 ipe./inet.lo: ../../include/net-snmp/types.h 
 ipe./inet.lo: ../../include/net-snmp/library/snmp_api.h
 ipe./inet.lo: ../../include/net-snmp/library/asn1.h
@@ -137,7 +137,7 @@ ipe./inet6.lo: ../../include/net-snmp/system/sysv.h
 ipe./inet6.lo: ../../include/net-snmp/system/generic.h
 ipe./inet6.lo: ../../include/net-snmp/machine/generic.h 
 ipe./inet6.lo: ../../include/net-snmp/net-snmp-includes.h
-ipe./inet6.lo: ../../include/net-snmp/definitions.h
+ipe./inet6.lo:  ../../include/net-snmp/definitions.h
 ipe./inet6.lo: ../../include/net-snmp/types.h 
 ipe./inet6.lo: ../../include/net-snmp/library/snmp_api.h
 ipe./inet6.lo: ../../include/net-snmp/library/asn1.h
@@ -333,7 +333,7 @@ ipe./route.lo: ../../include/net-snmp/system/sysv.h
 ipe./route.lo: ../../include/net-snmp/system/generic.h
 ipe./route.lo: ../../include/net-snmp/machine/generic.h
 ipe./route.lo: ../../include/net-snmp/net-snmp-includes.h
-ipe./route.lo: ../../include/net-snmp/definitions.h
+ipe./route.lo:  ../../include/net-snmp/definitions.h
 ipe./route.lo: ../../include/net-snmp/types.h 
 ipe./route.lo: ../../include/net-snmp/library/snmp_api.h
 ipe./route.lo: ../../include/net-snmp/library/asn1.h

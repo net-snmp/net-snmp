@@ -620,7 +620,7 @@ ipe./snmpstatus.lo: ../include/net-snmp/system/linux.h
 ipe./snmpstatus.lo: ../include/net-snmp/system/sysv.h
 ipe./snmpstatus.lo: ../include/net-snmp/system/generic.h
 ipe./snmpstatus.lo: ../include/net-snmp/machine/generic.h
-ipe./snmpstatus.lo:  ../include/net-snmp/utilities.h
+ipe./snmpstatus.lo: ../include/net-snmp/utilities.h
 ipe./snmpstatus.lo: ../include/net-snmp/types.h 
 ipe./snmpstatus.lo: ../include/net-snmp/definitions.h
 ipe./snmpstatus.lo: ../include/net-snmp/library/snmp_api.h
@@ -814,7 +814,7 @@ ipe./snmptranslate.lo: ../include/net-snmp/system/linux.h
 ipe./snmptranslate.lo: ../include/net-snmp/system/sysv.h
 ipe./snmptranslate.lo: ../include/net-snmp/system/generic.h
 ipe./snmptranslate.lo: ../include/net-snmp/machine/generic.h
-ipe./snmptranslate.lo:  ../include/net-snmp/utilities.h
+ipe./snmptranslate.lo: ../include/net-snmp/utilities.h
 ipe./snmptranslate.lo: ../include/net-snmp/types.h 
 ipe./snmptranslate.lo: ../include/net-snmp/definitions.h
 ipe./snmptranslate.lo: ../include/net-snmp/library/snmp_api.h
