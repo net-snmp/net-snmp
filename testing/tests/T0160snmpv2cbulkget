@@ -5,6 +5,7 @@
 HEADER SNMPv2c bulkget of system components
 
 SKIPIF NETSNMP_DISABLE_SNMPV2C
+SKIPIFNOT USING_MIBII_SYSTEM_MIB_MODULE
 
 #
 # Begin test
