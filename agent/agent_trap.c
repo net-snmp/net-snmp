@@ -58,6 +58,7 @@
 #include <net-snmp/utilities.h>
 
 #include <net-snmp/net-snmp-includes.h>
+#include <net-snmp/agent/net-snmp-agent-includes.h>
 #include <net-snmp/agent/agent_trap.h>
 #include <net-snmp/agent/snmp_agent.h>
 #include <net-snmp/agent/agent_callbacks.h>
@@ -642,6 +643,8 @@ netsnmp_send_traps(int trap, int specific,
     in_addr_t             *pdu_in_addr_t;
     u_long                 uptime;
     struct trap_sink *sink;
+    const char            *v1trapaddress;
+    int                    res;
 
     DEBUGMSGTL(( "trap", "send_trap %d %d ", trap, specific));
     DEBUGMSGOID(("trap", enterprise, enterprise_length));
@@ -795,7 +798,18 @@ netsnmp_send_traps(int trap, int specific,
      * Ensure that the v1 trap PDU includes the local IP address
      */
        pdu_in_addr_t = (in_addr_t *) template_v1pdu->agent_addr;
-      *pdu_in_addr_t = get_myaddr();
+       v1trapaddress = netsnmp_ds_get_string(NETSNMP_DS_APPLICATION_ID,
+                                      NETSNMP_DS_AGENT_TRAP_ADDR);
+       if (v1trapaddress != NULL) {
+           /* "v1trapaddress" was specified in config, try to resolve it */
+           res = netsnmp_gethostbyname_v4(v1trapaddress, pdu_in_addr_t);
+       }
+       if (v1trapaddress == NULL || res < 0) {
+           /* "v1trapaddress" was not specified in config or the resolution failed,
+            * try any local address */
+           *pdu_in_addr_t = get_myaddr();
+       }
+
     }
 
 	/* A context name was provided, so copy it and its length to the v2 pdu

@@ -104,26 +104,6 @@ snmp_input(int operation,
     return 1;
 }
 
-in_addr_t
-parse_address(char *address)
-{
-    in_addr_t       addr;
-    struct sockaddr_in saddr;
-    struct hostent *hp;
-
-    if ((addr = inet_addr(address)) != -1)
-        return addr;
-    hp = gethostbyname(address);
-    if (hp == NULL) {
-        fprintf(stderr, "unknown host: %s\n", address);
-        exit(1);
-    } else {
-        memcpy(&saddr.sin_addr, hp->h_addr, hp->h_length);
-        return saddr.sin_addr.s_addr;
-    }
-
-}
-
 static void
 optProc(int argc, char *const *argv, int opt)
 {
@@ -296,7 +276,11 @@ main(int argc, char *argv[])
         }
         agent = argv[arg];
         if (agent != NULL && strlen(agent) != 0) {
-            *pdu_in_addr_t = parse_address(agent);
+            int ret = netsnmp_gethostbyname_v4(agent, pdu_in_addr_t);
+            if (ret < 0) {
+                fprintf(stderr, "unknown host: %s\n", agent);
+                exit(1);
+            }
         } else {
             *pdu_in_addr_t = get_myaddr();
         }

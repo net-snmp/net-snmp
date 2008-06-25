@@ -107,6 +107,11 @@ SOFTWARE.
 
 #include <net-snmp/types.h>     /* For definition of in_addr_t */
 
+    /* Simply resolve a hostname and return first IPv4 address.
+     * Returns -1 on error */
+    int             netsnmp_gethostbyname_v4(const char* name,
+                                             in_addr_t *addr_out);
+
     in_addr_t       get_myaddr(void);
     long            get_uptime(void);
 
