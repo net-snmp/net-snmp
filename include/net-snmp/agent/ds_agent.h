@@ -42,6 +42,7 @@
 #define NETSNMP_DS_AGENT_PERL_INIT_FILE    4    /* used by embedded perl */
 #define NETSNMP_DS_SMUX_SOCKET    5     /* ip:port socket addr */
 #define NETSNMP_DS_NOTIF_LOG_CTX  6     /* "" | "snmptrapd" */
+#define NETSNMP_DS_AGENT_TRAP_ADDR      7     /* used as v1 trap agent address */
 
 /*
  * integers 

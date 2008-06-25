@@ -641,6 +641,12 @@ Ordinarily the corresponding MIB
 object (\fCsnmpEnableAuthenTraps.0\fR) is read-write, but specifying
 this directive makes this object read-only, and attempts to set the
 value via SET requests will result in a \fInotWritable\fR error response.
+.RE
+.IP "v1trapaddress HOST"
+defines the agent address, which is inserted into SNMPv1 TRAPs. Arbitrary local 
+IPv4 address is chosen if this option is ommited. This option is useful mainly 
+when the agent is visible from outside world by specific address only (e.g. 
+because of network address translation or firewall).
 .SS "DisMan Event MIB"
 The previous directives can be used to configure where traps should
 be sent, but are not concerned with \fIwhen\fR to send such traps
