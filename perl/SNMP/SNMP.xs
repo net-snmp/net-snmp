@@ -3073,7 +3073,7 @@ snmp_set(sess_ref, varlist_ref, perl_callback)
                     res = __add_var_val_str(pdu, oid_arr, oid_arr_len,
 				     (varbind_val_f && SvOK(*varbind_val_f) ?
 				      SvPV(*varbind_val_f,na):NULL),
-				      (varbind_val_f && SvOK(*varbind_val_f) ?
+				      (varbind_val_f && SvPOK(*varbind_val_f) ?
 				       SvCUR(*varbind_val_f):0), type);
 
 		    if (verbose && res == FAILURE)
@@ -4270,7 +4270,7 @@ snmp_trapV1(sess_ref,enterprise,agent,generic,specific,uptime,varlist_ref)
                     res = __add_var_val_str(pdu, oid_arr, oid_arr_len,
                                   (varbind_val_f && SvOK(*varbind_val_f) ?
                                    SvPV(*varbind_val_f,na):NULL),
-                                  (varbind_val_f && SvOK(*varbind_val_f) ?
+                                  (varbind_val_f && SvPOK(*varbind_val_f) ?
                                    SvCUR(*varbind_val_f):0),
                                   type);
 
@@ -4428,7 +4428,7 @@ snmp_trapV2(sess_ref,uptime,trap_oid,varlist_ref)
                     res = __add_var_val_str(pdu, oid_arr, oid_arr_len,
                                   (varbind_val_f && SvOK(*varbind_val_f) ?
                                    SvPV(*varbind_val_f,na):NULL),
-                                  (varbind_val_f && SvOK(*varbind_val_f) ?
+                                  (varbind_val_f && SvPOK(*varbind_val_f) ?
                                    SvCUR(*varbind_val_f):0),
                                   type);
 
@@ -4567,7 +4567,7 @@ snmp_inform(sess_ref,uptime,trap_oid,varlist_ref,perl_callback)
                     res = __add_var_val_str(pdu, oid_arr, oid_arr_len,
                                   (varbind_val_f && SvOK(*varbind_val_f) ?
                                    SvPV(*varbind_val_f,na):NULL),
-                                  (varbind_val_f && SvOK(*varbind_val_f) ?
+                                  (varbind_val_f && SvPOK(*varbind_val_f) ?
                                    SvCUR(*varbind_val_f):0),
                                   type);
 
