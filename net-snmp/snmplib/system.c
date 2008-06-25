@@ -83,6 +83,10 @@ SOFTWARE.
 #if HAVE_NET_IF_H
 #include <net/if.h>
 #endif
+#if HAVE_NETDB_H
+#include <netdb.h>
+#endif
+
 
 #if HAVE_SYS_SOCKIO_H
 #include <sys/sockio.h>
@@ -870,6 +874,84 @@ get_uptime(void)
 }
 
 #endif                          /* ! WIN32 */
+/*******************************************************************/
+
+int
+netsnmp_gethostbyname_v4(const char* name, in_addr_t *addr_out)
+{
+
+#if HAVE_GETADDRINFO
+    struct addrinfo *addrs = NULL;
+    struct addrinfo hint;
+    int             err;
+
+    memset(&hint, 0, sizeof hint);
+    hint.ai_flags = 0;
+    hint.ai_family = PF_INET;
+    hint.ai_socktype = SOCK_DGRAM;
+    hint.ai_protocol = 0;
+
+    err = getaddrinfo(name, NULL, &hint, &addrs);
+    if (err != 0) {
+#if HAVE_GAI_STRERROR
+        snmp_log(LOG_ERR, "getaddrinfo: %s %s\n", name,
+                 gai_strerror(err));
+#else
+        snmp_log(LOG_ERR, "getaddrinfo: %s (error %d)\n", name,
+                 err);
+#endif
+        return -1;
+    }
+    if (addrs != NULL) {
+        memcpy(addr_out,
+               &((struct sockaddr_in *) addrs->ai_addr)->sin_addr,
+               sizeof(in_addr_t));
+        freeaddrinfo(addrs);
+    } else {
+        DEBUGMSGTL(("get_thisaddr",
+                    "Failed to resolve IPv4 hostname\n"));
+    }
+    return 0;
+
+#elif HAVE_GETHOSTBYNAME
+    struct hostent *hp = NULL;
+
+    hp = gethostbyname(host);
+    if (hp == NULL) {
+        DEBUGMSGTL(("get_thisaddr",
+                    "hostname (couldn't resolve)\n"));
+        return -1;
+    } else if (hp->h_addrtype != AF_INET) {
+        DEBUGMSGTL(("get_thisaddr",
+                    "hostname (not AF_INET!)\n"));
+        return -1;
+    } else {
+        DEBUGMSGTL(("get_thisaddr",
+                    "hostname (resolved okay)\n"));
+        memcpy(addr_out, hp->h_addr, sizeof(in_addr_t));
+    }
+    return 0;
+
+#elif HAVE_GETIPNODEBYNAME
+    struct hostent *hp = NULL;
+    int             err;
+
+    hp = getipnodebyname(peername, AF_INET, 0, &err);
+    if (hp == NULL) {
+        DEBUGMSGTL(("get_thisaddr",
+                    "hostname (couldn't resolve = %d)\n", err));
+        return -1;
+    }
+    DEBUGMSGTL(("get_thisaddr",
+                "hostname (resolved okay)\n"));
+    memcpy(addr_out, hp->h_addr, sizeof(in_addr_t));
+    return 0;
+
+#else /* HAVE_GETIPNODEBYNAME */
+    return -1;
+#endif
+}
+
 /*******************************************************************/
 
 #ifndef HAVE_STRNCASECMP

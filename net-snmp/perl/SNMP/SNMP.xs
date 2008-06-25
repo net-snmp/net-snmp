@@ -108,7 +108,6 @@ typedef struct snmp_xs_cb_data {
 
 static void __recalc_timeout _((struct timeval*,struct timeval*,
                                 struct timeval*,struct timeval*, int* ));
-static in_addr_t __parse_address _((char*));
 static int __is_numeric_oid _((char*));
 static int __is_leaf _((struct tree*));
 static int __translate_appl_type _((char*));
@@ -283,26 +282,6 @@ int *block;
       *tvp = *ctvp; /* use the smaller non-zero timeout */
       timerclear(ctvp); /* used as a flag to let callback fire on timeout */
    }
-}
-
-static in_addr_t
-__parse_address(address)
-char *address;
-{
-    in_addr_t addr;
-    struct sockaddr_in saddr;
-    struct hostent *hp;
-
-    if ((addr = inet_addr(address)) != -1)
-	return addr;
-    hp = gethostbyname(address);
-    if (hp == NULL){
-        return (-1); /* error value */
-    } else {
-	memcpy(&saddr.sin_addr, hp->h_addr, hp->h_length);
-	return saddr.sin_addr.s_addr;
-    }
-
 }
 
 static int
@@ -4307,12 +4286,12 @@ snmp_trapV1(sess_ref,enterprise,agent,generic,specific,uptime,varlist_ref)
 		  agent-address field to that.  Otherwise set it to
 		  our address.  */
               if (agent && strlen(agent)) {
-                 if (__parse_address(agent) == -1 && verbose) {
-		   warn("error:trap:invalid agent address: %s", agent);
-		   goto err;
-                 } else {
-		   *((in_addr_t *)pdu->agent_addr) = __parse_address(agent);
-		 }
+                 if (0 > netsnmp_gethostbyname_v4(agent, 
+                                                 (in_addr_t *)pdu->agent_addr)){
+                     if (verbose)
+                         warn("error:trap:invalid agent address: %s", agent);
+                     goto err;
+                 } 
               } else {
                  *((in_addr_t *)pdu->agent_addr) = get_myaddr();
               }

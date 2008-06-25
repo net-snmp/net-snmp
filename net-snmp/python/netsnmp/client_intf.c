@@ -43,7 +43,6 @@ typedef netsnmp_session SnmpSession;
 typedef struct tree SnmpMibNode;
 static void __recalc_timeout (struct timeval*,struct timeval*,
                                 struct timeval*,struct timeval*, int* );
-static in_addr_t __parse_address (char*);
 static int __is_numeric_oid (char*);
 static int __is_leaf (struct tree*);
 static int __translate_appl_type (char*);
@@ -142,26 +141,6 @@ int *block;
       *tvp = *ctvp; /* use the smaller non-zero timeout */
       timerclear(ctvp); /* used as a flag to let callback fire on timeout */
    }
-}
-
-static in_addr_t
-__parse_address(address)
-char *address;
-{
-    in_addr_t addr;
-    struct sockaddr_in saddr;
-    struct hostent *hp;
-
-    if ((addr = inet_addr(address)) != -1)
-	return addr;
-    hp = gethostbyname(address);
-    if (hp == NULL){
-        return (-1); /* error value */
-    } else {
-	memcpy(&saddr.sin_addr, hp->h_addr, hp->h_length);
-	return saddr.sin_addr.s_addr;
-    }
-
 }
 
 static int
