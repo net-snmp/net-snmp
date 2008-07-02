@@ -230,7 +230,8 @@ _load_ipv6(netsnmp_container* container, u_long *index )
         log_open_err = 1;
     fgets(line,sizeof(line),in); /* skip header */
     while (fgets(line, sizeof(line), in)) {
-        char            c_name[9], c_dest[33], c_src[33], c_next[33];
+        char            c_name[IFNAMSIZ+1];
+        char            c_dest[33], c_src[33], c_next[33];
         int             rc;
         unsigned int    dest_pfx, flags;
         size_t          buf_len, buf_offset;
@@ -253,7 +254,8 @@ _load_ipv6(netsnmp_container* container, u_long *index )
          * [ flags ][dev name]
          * 80200001       lo
          */
-        rc = sscanf(line, "%32s %2x %32s %*x %32s %x %*x %*x %x %8s\n",
+        rc = sscanf(line, "%32s %2x %32s %*x %32s %x %*x %*x %x %"
+                    SNMP_MACRO_VAL_TO_STR(IFNAMSIZ) "s\n",
                     c_dest, &dest_pfx, c_src, /*src_pfx,*/ c_next,
                     &entry->rt_metric1, /** ref,*/ /* use, */ &flags, c_name);
         DEBUGMSGTL(("9:access:route:container", "line |%s|\n", line));
