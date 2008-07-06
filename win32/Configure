@@ -5,13 +5,16 @@
 # March 5th, 2004
 #
 use Getopt::Long;
+use strict;
 
 my $config;
 my $sdk = 0;
 my $linktype;
 my $prefix;
+my $prefixdos;
 my $openssl = 0;
 my $b_ipv6 = 0;
+my $b_winextdll = 0;
 my $help = 0;
 
 GetOptions      ('config=s' => \$config,
@@ -21,11 +24,12 @@ GetOptions      ('config=s' => \$config,
                  'prefix=s' => \$prefix,
                  'with-ssl' => \$openssl,
                  'with-ipv6' => \$b_ipv6,
+                 'with-winextdll' => \$b_winextdll,
                  'help' => \$help);
 
 if ($help == 1)
 {
-$USAGE = qq/
+my $USAGE = qq/
 Usage:
     perl Configure [<options>] 
     
@@ -38,6 +42,7 @@ Options:
     --destdir=\"path\"                 Same as --prefix
     --with-ssl                       Link against OpenSSL
     --with-ipv6                      Build in IPv6 transports (enables SDK)
+    --with-winextdll                 Build winExtDLL agent (enables SDK, see README.win32)
     --help                           This help screen
 /;
 
@@ -67,6 +72,14 @@ $prefix =~ s/\\/\//g;
 $prefixdos = "\"$prefix\"";
 # Make sure prefixdos only contains backward slashes
 $prefixdos =~ s/\//\\/g;
+
+# Enable SDK for IPV6 and winExtDLL
+if ($b_ipv6 == 1) {
+  $sdk = 1;
+}
+if ($b_winextdll == 1) {
+  $sdk = 1;
+}
 
 print "\n\n";
 
@@ -245,7 +258,8 @@ foreach my $progName (@programs) {
     s/^OUTDIR=/OUTDIR=.\\$outdir/;
     s/^INTDIR=/INTDIR=.\\$intdir/;
     s/^SSL=.*/SSL=$openssl/;
-
+    s/#(.*?)\s+# uncomment for winExtDLL.*/$1/;
+    s/^LIB32_FLAGS=(.*)/LIB32_FLAGS=MgmtAPI.lib snmpapi.lib $1/;
     print MAKE_OUT $_ . "\n";
   }
 }
@@ -356,10 +370,9 @@ while (<MAKE_IN>)
     }
     if ($b_ipv6 == 1) {
       s/^.*#undef NETSNMP_ENABLE_IPV6.*/#define NETSNMP_ENABLE_IPV6 1/;
-      if ($sdk == 0) {
-        s/^.*#undef HAVE_WIN32_PLATFORM_SDK.*/#define HAVE_WIN32_PLATFORM_SDK 1/;
-        $sdk = 1;
-      }
+    }
+    if ($b_winextdll == 1) {
+      s/^.*#undef USING_WINEXTDLL_MODULE.*/#define USING_WINEXTDLL_MODULE 1/;
     }
 
     print FILE_OUT $_ . "\n";
@@ -407,6 +420,7 @@ print "  Link type:                  $linktype\n";
 print "  Prefix / Destdir:           " . ($prefix ne "" ? $prefix : "(default)") . "\n";
 print "  OpenSSL:                    " . ($openssl == 1 ? "enabled" : "disabled") . "\n";
 print "  IPv6 transport:             " . ($b_ipv6 == 1 ? "enabled" : "disabled") . "\n";
+print "  winExtDLL agent:            " . ($b_winextdll == 1 ? "enabled" : "disabled") . "\n";
 
 if ($ENV{INCLUDE} eq "") {
   print "\n\nVisual Studio environment not detected.  Please run VCVARS32.BAT before\n";

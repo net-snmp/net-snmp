@@ -151,6 +151,9 @@ Limitations
 Enabling the Windows SNMP extension agents
 ------------------------------------------
 
+When installing Net-SNMP using the binary available from the web site, select 
+'With Windows Extension DLL support' for the 'Net-SNMP Agent Service'.
+
 The recommended way to start snmpd is with the following command line:
 
  snmpd.exe -I-udp,udpTable,tcp,tcpTable,icmp,ip,interfaces,system_mib,sysORTable
@@ -158,6 +161,35 @@ The recommended way to start snmpd is with the following command line:
 The above command will exclude all the Net-SNMP extensions that overlap with 
 the default Windows (2003) extensions included with Windows.  Other Net-SNMP 
 modules take precedence over the modules loaded by winExtDLL.
+
+The binary install of Net-SNMP includes shortcuts in the Start menu for registering 
+and unregistering snmpd and snmptrapd as a service with the correct command line 
+options.
+
+A simple test to see if winExtDLL is working is to get the sysDescr string.
+
+ snmpget -v 1 -c public localhost sysDescr.0
+
+If you see something similar to:
+
+ Hardware: x86 Family 15 Model 12 Stepping 0 AT/AT COMPATIBLE - Software:
+ Windows 2000 Version 5.0 (Build 2195 Uniprocessor Free)
+
+instead of the usual Net-SNMP:
+
+ Windows host1 5.0.2195 Service Pack 4 2000 Server x86 Family 15 Model 12
+ Stepping 0
+
+then it's using the Windows DLLs.  You may also notice that your floppy 
+drive is accessed when starting the service.  This is from one of the 
+Windows extensions.
+
+To see what Windows modules are being loaded, you can shut down the 
+service and then run snmpd.exe from the command line with winExtDLL 
+debugging enabled using (all on one line):
+
+ snmpd.exe -I-udp,udpTable,tcp,tcpTable,icmp,ip,interfaces,system_mib,
+ sysORTable -DwinExtDLL
 
 The Windows DLL snmpmib.dll (SNMPMIB) contains SNMP traffic statistics
 (.1.3.6.1.2.1.11).  As we are using Net-SNMP and not the Windows SNMP Service,
@@ -206,14 +238,7 @@ Microsoft PSDK required.
 
 Configure / nmake:
 
--modify win32\net-snmp\net-snmp-config.h.in and add:
- #define USING_WINEXTDLL_MODULE 1
-
--modify win32\netsnmpmibssdk\Makefile.in:
- uncomment winExtDLL lines
-
- add to lines that contain LIB32_FLAGS (line that contains iphlpapi.lib): 
-  MgmtAPI.lib snmpapi.lib 
+-add --with-winextdll to the Configure command line.
 
 Workspace:
 
@@ -557,28 +582,30 @@ steps to build using build.bat:
 
     Net-SNMP build and install options
     ==================================
-    
-    1.  OpenSSL support:            disabled
-    2.  Platform SDK support:       disabled
-    
-    3.  Install path:               c:/usr
-    4.  Install after build:        enabled
-    
-    5.  Perl modules:               disabled
-    6.  Install perl modules:       disabled
-    
-    7.  Quiet build (logged):       enabled
-    8.  Debug mode:                 disabled
-    9.  IPv6 transports:            disabled
 
-    10. Link type:                  static
-    
-    11. Install development files   disabled
-    
+    1.  OpenSSL support:                disabled
+    2.  Platform SDK support:           disabled
+
+    3.  Install path:                   c:/usr
+    4.  Install after build:            enabled
+
+    5.  Perl modules:                   disabled
+    6.  Install perl modules:           disabled
+
+    7.  Quiet build (logged):           enabled
+    8.  Debug mode:                     disabled
+
+    9.  IPv6 transports (requires SDK): disabled
+    10. winExtDLL agent (requires SDK): disabled
+
+    11. Link type:                      static
+
+    12. Install development files       disabled
+
     F.  Finished - start build
     Q.  Quit - abort build
-    
-    Select option to set / toggle: 
+
+    Select option to set / toggle:  
 
 5.  Toggle the options on and off as desired by typing the line number 
     followed by <enter>.  
@@ -591,6 +618,9 @@ steps to build using build.bat:
     installed.  See the section 'Installing Platform SDK' for details.
 
     To use the IPv6 transports, you must be using Windows 98 or later.
+
+    See the section 'Running Net-SNMP as a replacement for the Microsoft 
+    SNMP service' for important information on using the winExtDLL agent.
 
     If Quiet mode is enabled, all build activity is stored in various *.out 
     files inside of the win32 folder.
@@ -1444,6 +1474,10 @@ Windows 9x/Me do not have the SCM.
 To allow snmpd.exe or snmptrapd.exe to run as a service, the programs need
 to be registered with the SCM.  This is done by running the program once with
 the -register command line switch from a command prompt.
+
+If Net-SNMP was installed using the binary available from the Net-SNMP web site,
+there will be shortcuts in the Start menu for registering and unregistering the 
+agent and snmptrapd.
 
 The synopsis for registering snmpd as a Windows service is:
 

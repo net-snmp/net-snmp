@@ -4,8 +4,10 @@
 # Written by Alex Burger - alex_b@users.sourceforge.net
 # March 12th, 2004
 #
+use strict;
 my $openssl = "disabled";
 my $b_ipv6 = "disabled";
+my $b_winextdll = "disabled";
 my $sdk = "disabled";
 my $default_install_base = "c:/usr";
 my $install_base = $default_install_base;
@@ -18,6 +20,7 @@ my $debug = "disabled";
 my $configOpts = "";
 my $cTmp = "";
 my $linktype = "static";
+my $option;
 
 # Prepend win32\ if running from main directory
 my $current_pwd = `%COMSPEC% /c cd`;
@@ -49,11 +52,13 @@ while (1) {
   print "\n";
   print "7.  Quiet build (logged):           " . $logging . "\n";
   print "8.  Debug mode:                     " . $debug . "\n";
+  print "\n";
   print "9.  IPv6 transports (requires SDK): " . $b_ipv6 . "\n";
+  print "10. winExtDLL agent (requires SDK): " . $b_winextdll . "\n";
   print "\n";
-  print "10. Link type:                      " . $linktype . "\n";
+  print "11. Link type:                      " . $linktype . "\n";
   print "\n";
-  print "11. Install development files       " . $install_devel . "\n";
+  print "12. Install development files       " . $install_devel . "\n";
   print "\nF.  Finished - start build\n";
   print "Q.  Quit - abort build\n\n";
   print "Select option to set / toggle: ";
@@ -87,6 +92,18 @@ while (1) {
       }
     }
   }
+  elsif ($option eq "10") {
+    if ($b_winextdll eq "enabled") {
+      $b_winextdll = "disabled";
+    }
+    else {
+      $b_winextdll = "enabled";
+      if ($sdk = "disabled") {
+        print "\n\n* SDK required for IPv6 and has been automatically enabled";
+        $sdk = "enabled";
+      }
+    }
+  }
   elsif ($option eq "3") {
     print "Please enter the new install path [$default_install_base]: ";
     chomp ($install_base = <>);
@@ -103,7 +120,7 @@ while (1) {
       $install = "enabled";
     }
   }
-  elsif ($option eq "11") {
+  elsif ($option eq "12") {
     if ($install_devel eq "enabled") {
       $install_devel = "disabled";
     }
@@ -143,7 +160,7 @@ while (1) {
       $debug = "enabled";
     }
   }
-  elsif ($option eq "10") {
+  elsif ($option eq "11") {
     if ($linktype eq "static") {
       $linktype = "dynamic";
     }
@@ -165,6 +182,8 @@ $cTmp = ($sdk eq "enabled" ? "--with-sdk" : "" );
 $configOpts = "$configOpts $cTmp";
 $cTmp = ($b_ipv6 eq "enabled" ? "--with-ipv6" : "" );
 $configOpts = "$configOpts $cTmp";
+$cTmp = ($b_winextdll eq "enabled" ? "--with-winextdll" : "" );
+$configOpts = "$configOpts $cTmp";
 $cTmp = ($debug eq "enabled" ? "--config=debug" : "--config=release" );
 $configOpts = "$configOpts $cTmp";
 
@@ -185,7 +204,7 @@ $ENV{MIBDIRS}=$temp_mibdir;
 # the configuration files.
 # See the note about environment variables in the Win32 section of 
 # perl/SNMP/README for details on why this is needed. 
-$ENV{SNMPCONFPATH}=t;$ENV{SNMPCONFPATH};
+$ENV{SNMPCONFPATH}="t";$ENV{SNMPCONFPATH};
 
 print "\nBuilding...\n";
 
@@ -279,7 +298,7 @@ else {
     system("nmake /nologo perl_clean"); # If already cleaned, Makefile is gone so don't worry about errors!
     system("nmake /nologo perl") == 0 || die "Build error (see above)";
 
-    $path_old = $ENV{PATH};
+    my $path_old = $ENV{PATH};
     $ENV{PATH} = "$current_pwd\\bin\\" . ($debug eq "enabled" ? "debug" : "release" ) . ";$ENV{PATH}";
     system("nmake /nologo perl_test"); # Don't die if all the tests don't pass..
     $ENV{PATH} = $path_old;

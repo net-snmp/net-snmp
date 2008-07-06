@@ -77,22 +77,24 @@ Part 1
     Net-SNMP build and install options
     ==================================
     
-    1. OpenSSL support:      		disabled
-    2. Platform SDK support: 		enabled         ***
+    1.  OpenSSL support:      		disabled
+    2.  Platform SDK support: 		enabled         ***
     
-    3. Install path:         		c:/usr
-    4. Install after build:  		enabled
+    3.  Install path:         		c:/usr
+    4.  Install after build:  		enabled
     
-    5. Perl modules:         		enabled         ***
-    6. Install perl modules: 		disabled
+    5.  Perl modules:         		enabled         ***
+    6.  Install perl modules: 		disabled
     
-    7. Quiet build (logged): 		enabled
-    8. Debug mode:           		disabled
-    9. IPv6 transports:      		disabled
+    7.  Quiet build (logged): 		enabled
+    8.  Debug mode:           		disabled
 
-    10. Link type:                      dynamic		***
+    9.  IPv6 transports:      		disabled
+    10. winExtDLL agent (requires SDK): disabled
 
-    11. Install development files   	enabled         ***
+    11. Link type:                      dynamic		***
+
+    12. Install development files   	enabled         ***
     
     F.  Finished - start build
     Q.  Quit - abort build
@@ -106,11 +108,7 @@ Part 1
 Part 2 - Compiling winExtDLL
 ----------------------------
 
-10. Modify files as explained in README.win32 section 'Running Net-SNMP as
-    a replacement for the Microsoft SNMP service' - 'Compiling Net-SNMP with 
-    the winExtDLL extension (MSVC)'.
-
-11. Run build.bat and set to the following:
+10. Run build.bat and set to the following:
 
     Net-SNMP build and install options
     ==================================
@@ -126,27 +124,29 @@ Part 2 - Compiling winExtDLL
     
     7. Quiet build (logged): 		enabled
     8. Debug mode:           		disabled
+
     9. IPv6 transports:      		disabled
+    10. winExtDLL agent (requires SDK): disabled        ***
 
-    10. Link type:                      dynamic		***
+    11. Link type:                      dynamic		***
 
-    11. Install development files   	disabled
+    12. Install development files   	disabled
     
     F.  Finished - start build
     Q.  Quit - abort build
     
     Select option to set / toggle:
 
-12. F to start the build and verify everything was built ok
+11. F to start the build and verify everything was built ok
 
-13. Copy the new binary:
+12. Copy the new binary:
 
     copy bin\release\snmpd.exe c:\usr\bin\snmpd-winExtDLL.exe
 
-14. Test each binary by running each one with -DwinExtDLL.  Make sure only the
+13. Test each binary by running each one with -DwinExtDLL.  Make sure only the
     winExtDLL version has debug output.
 
-15. Delete any generated config files from c:\usr\snmp\persist
+14. Delete any generated config files from c:\usr\snmp\persist
 
 
 Part 3 - Creating the Perl package
@@ -471,10 +471,8 @@ Requirements
 2.  Move c:\usr c:\usr.temp
 
 3.  Re-build the binary by following the steps in the section 'Building the 
-    main binaries' except enable OpenSSL.  Be sure to undo the winExtDLL 
-    changes before starting by copying a fresh net-snmp-config.h.in and 
-    netsnmpmibssdk.dsp and then re-build the winExtDLL version.  Also follow
-    the Perl steps to create a new tar file etc.
+    main binaries' except enable OpenSSL (both regular and WinExtDLL).  Also 
+    follow the Perl steps to create a new tar file etc.
 
 4.  Copy contents of c:\usr to c:\usr.temp
 
