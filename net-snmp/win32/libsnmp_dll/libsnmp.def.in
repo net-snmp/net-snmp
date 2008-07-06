@@ -421,6 +421,7 @@ EXPORTS
         netsnmp_logging_restart
         skip_token
         parse_secLevel_conf
+        netsnmp_query_get_default_session
         netsnmp_query_set_default_session
         netsnmp_ds_parse_boolean
         netsnmp_register_default_target
