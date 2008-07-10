@@ -1,6 +1,17 @@
 -------------------------------------------------------------------------------
 Changes: V5.2.5.rc1 -> V5.2.5.rc2
 
+2008-06-24 22:36  tanders
+
+   *
+
+   CHANGES: building: Disable tests if the agent is built without
+   the mib module they depend on.
+   Backport of r17087.
+
+-------------------------------------------------------------------------------
+Changes: V5.2.5.rc1 -> V5.2.5.rc2
+
 2008-06-23 08:50  hardaker
 
    *
