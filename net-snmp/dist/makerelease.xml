@@ -196,7 +196,7 @@
 		  </files>
 		</modify>
 		<modify
-		  find="NetSnmpVersionInfo = &quot;\[^&quot;]+&quot;"
+		  find="NetSnmpVersionInfo = &quot;[^&quot;]+&quot;"
 		  replace="NetSnmpVersionInfo = &quot;{VERSION}&quot;">
 		  <files>
 		    <file>snmplib/snmp_version.c</file>
