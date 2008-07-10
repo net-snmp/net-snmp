@@ -528,6 +528,7 @@ install_devel ::
         @-xcopy include\net-snmp\*.h $(PREFIX_DOS)\include\net-snmp /s /y > NUL:
         @-copy win32\net-snmp\*.h $(PREFIX_DOS)\include\net-snmp > NUL:
         @-copy win32\net-snmp\agent\*.h $(PREFIX_DOS)\include\net-snmp\agent > NUL:
+        @-copy win32\net-snmp\library\*.h $(PREFIX_DOS)\include\net-snmp\library > NUL:
 
         @-echo Done copying files to $(PREFIX_DOS)
         cd win32
