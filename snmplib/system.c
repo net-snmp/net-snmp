@@ -916,7 +916,7 @@ netsnmp_gethostbyname_v4(const char* name, in_addr_t *addr_out)
 #elif HAVE_GETHOSTBYNAME
     struct hostent *hp = NULL;
 
-    hp = gethostbyname(host);
+    hp = gethostbyname(name);
     if (hp == NULL) {
         DEBUGMSGTL(("get_thisaddr",
                     "hostname (couldn't resolve)\n"));
