@@ -1,6 +1,95 @@
 -------------------------------------------------------------------------------
 Changes: V5.2.5.rc1 -> V5.2.5.rc2
 
+2008-06-23 08:50  hardaker
+
+   *
+
+   Fix potential buffer overflow in sprintf for TCP/IPv6
+
+2008-06-17 16:29  tanders
+
+   *
+
+   version update
+
+2008-06-11 10:16  dts12
+
+   *
+
+   Only enable IPX transport on Linux systems
+
+2008-06-09 19:07  hardaker
+
+   *
+
+   update to match published release
+
+2008-06-09 09:01  dts12
+
+   *
+
+   Various missing error checks, etc.
+   Reported by Boya Sun.
+   Backport of revision 16979
+
+2008-06-09 08:45  dts12
+
+   *
+
+   CHANGES: install: PATCH: 1969627: Handle empty
+   /etc/sysconfig/network file
+   Fix provided by Josh Wilmes
+   Backport of revision 16958
+
+2008-06-09 08:44  dts12
+
+   *
+
+   CHANGES: snmpd: BUG: 1912647: Fix memory leak following failed
+   requests.
+   Fix provided by Anton Pak
+   Backport of revisions 16972/3
+
+2008-06-09 08:43  dts12
+
+   *
+
+   CHANGES: snmpd: PATCH: 1967194: Recognise NFS4 mounts
+   Submitted by Fabrice Bacchella
+   Backport of revision 16957
+
+2008-06-09 08:42  dts12
+
+   *
+
+   Don't change length of OID buffer if parsing the OID fails.
+   Reported by saifulla Mohd Abdul.
+   Backport of revision 16956
+
+2008-06-09 08:41  dts12
+
+   *
+
+   CHANGES: snmplib: BUG: 1958041: Ensure IDs are not truncated.
+   Backport of revision 16971
+
+2008-06-01 06:45  tanders
+
+   *
+
+   NEWS: snmptrapd: BUG: 1955227: Memory leak for embedded Perl on
+   x86_64
+
+2008-05-28 06:56  magfr
+
+   *
+
+   CHANGES: snmpd: Enforce the lower limit on scalar_groups
+   This fixes the case of getnext icmp.0 returning icmp.0.0 instead
+   of the
+   expected icmpInMsgs.0
+
 -------------------------------------------------------------------------------
 Changes: V5.2.5.pre2 -> V5.2.5.rc1
 
