@@ -160,7 +160,7 @@ netsnmp_session *netsnmp_iquery_session(char* secName,   int   version,
             ss->community_len = strlen(secName);
         }
         ss->myvoid = netsnmp_check_outstanding_agent_requests;
-        ss->flags |= SNMP_FLAGS_RESP_CALLBACK;
+        ss->flags |= SNMP_FLAGS_RESP_CALLBACK | SNMP_FLAGS_DONT_PROBE;
     }
 #endif
 
