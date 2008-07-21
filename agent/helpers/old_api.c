@@ -247,6 +247,8 @@ netsnmp_old_api_helper(netsnmp_mib_handler *handler,
     u_char         *access = NULL;
     netsnmp_old_api_cache *cacheptr;
     netsnmp_agent_session *oldasp = NULL;
+    oid             tmp_name[MAX_OID_LEN];
+    size_t          tmp_len;
 
     vp = (struct variable *) handler->myvoid;
 
@@ -281,11 +283,14 @@ netsnmp_old_api_helper(netsnmp_mib_handler *handler,
             /*
              * Actually call the old mib-module function 
              */
-            if (vp && vp->findVar)
-                access = (*(vp->findVar)) (cvp, requests->requestvb->name,
-                                           &(requests->requestvb->
-                                             name_length), exact, &len,
-                                           &write_method);
+            if (vp && vp->findVar) {
+                memcpy(tmp_name, requests->requestvb->name,
+                                 requests->requestvb->name_length*sizeof(oid));
+                tmp_len = requests->requestvb->name_length;
+                access = (*(vp->findVar)) (cvp, tmp_name, &tmp_len,
+                                           exact, &len, &write_method);
+                snmp_set_var_objid( requests->requestvb, tmp_name, tmp_len );
+            }
             else
                 access = NULL;
 
