@@ -38,10 +38,6 @@ Aalgorithm="MD5"
 Xalgorithm="DES"
 token=rwuser
 
-if test "x$1" = "x"; then
-  usage="yes"
-fi
-
 while test "x$done" = "x" -a "x$1" != "x" -a "x$usage" != "xyes"; do
 case "$1" in
     -*=*) optarg=`echo "$1" | sed 's/[-_a-zA-Z0-9]*=//'` ;;
@@ -109,8 +105,6 @@ case $1 in
 	done=1
 	;;
     *)
-        echo "unknown option $1"
-        usage="yes"
         done=1
         ;;
     esac
