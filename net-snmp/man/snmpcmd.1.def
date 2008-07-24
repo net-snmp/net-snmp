@@ -737,7 +737,7 @@ snmpset localhost HOST-RESOURCES-MIB::hrSystemDate.0 = 2002-12-10,2:4:6.8
 .br
 you will have to write
 .br
-snmpset localhost HOST-RESOURCES-MIB::hrSystemData.0 x "07 D2 0C 0A 02 04 06 08"
+snmpset localhost HOST-RESOURCES-MIB::hrSystemDate.0 x "07 D2 0C 0A 02 04 06 08"
 .TP
 .B -Is SUFFIX
 Add the specified suffix to each textual OID given on the command line.
