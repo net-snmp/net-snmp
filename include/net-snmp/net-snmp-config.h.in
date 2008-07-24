@@ -1171,6 +1171,9 @@
 /* Define to suppress inclusion of deprecated functions */
 #undef NETSNMP_NO_DEPRECATED_FUNCTIONS
 
+/* Pattern of temporary files */
+#undef NETSNMP_TEMP_FILE_PATTERN
+
 /* Define to the address where bug reports for this package should be sent. */
 #ifndef PACKAGE_BUGREPORT
 #undef PACKAGE_BUGREPORT
