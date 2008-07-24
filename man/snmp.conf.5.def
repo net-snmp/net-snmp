@@ -223,7 +223,7 @@ defines a filename template for creating temporary files,
 for handling input to and output from external shell commands.
 Used by the \fImkstemp()\fR and \fImktemp()\fR functions.
 .IP
-If not specified, the default pattern is \fC/tmp/snmpdXXXXXX\fR.
+If not specified, the default pattern is \fCNETSNMP_TEMP_FILE_PATTERN\fR.
 .IP "serverRecvBuf INTEGER"
 specifies the desired size of the buffer to be used when receiving
 incoming SNMP requests.
