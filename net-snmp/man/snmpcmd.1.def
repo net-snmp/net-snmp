@@ -704,7 +704,7 @@ Similarly, specifying a MIB module name will not succeed
 disables the use of DISPLAY-HINT information when assigning values.
 This would then require providing the raw value:
 .br
-\fC    snmpset ... HOST-RESOURCES-MIB::hrSystemData.0
+\fC    snmpset ... HOST-RESOURCES-MIB::hrSystemDate.0
 .br
                     x "07 D2 0C 0A 02 04 06 08"\fR
 .br
