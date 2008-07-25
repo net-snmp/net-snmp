@@ -20,6 +20,7 @@
  * local static vars
  */
 static int _swrun_init = 0;
+       int _swrun_max  = 0;
 
 /*
  * local static prototypes
@@ -62,6 +63,43 @@ shutdown_swrun(void)
     DEBUGMSGTL(("swrun:access", "shutdown\n"));
 
 }
+
+int
+swrun_count_processes( void )
+{
+    netsnmp_container *container =
+         netsnmp_container_find("swrun:table_container");
+
+    return ( container ? CONTAINER_SIZE(container) : 0 );
+}
+
+int
+swrun_max_processes( void )
+{
+    return _swrun_max;
+}
+
+int
+swrun_count_processes_by_name( char *name )
+{
+    netsnmp_swrun_entry *entry;
+    netsnmp_iterator  *it;
+    netsnmp_container *container =
+          netsnmp_container_find("swrun:table_container");
+    int i = 0;
+
+    if ( !container || !name )
+        return 0;    /* or -1 */
+
+    while ( entry = ITERATOR_NEXT( it )) {
+        if (0 == strcmp( entry->hrSWRunName, name ))
+            i++;
+    }
+    ITERATOR_RELEASE( it );
+
+    return i;
+}
+
 
 /**---------------------------------------------------------------------*/
 /*
