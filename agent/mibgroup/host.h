@@ -23,6 +23,11 @@
 	config_require(host/hr_disk)
 	config_require(host/hr_partition)
 	config_require(host/hr_filesys)
+
+#if     1  /*   XXX_USING_ENABLE_NEW_FEATURES_MECHANISM_INSTEAD */
+	config_version_require((host/hr_swinst,  5.6, host/hrSWInstalledTable))
+	config_version_require((host/hr_swrun,   5.6, host/hrSWRunTable))
+#else
 #ifndef NETSNMP_INCLUDE_HRSWINST_REWRITES
 	config_require(host/hr_swinst)
 #else
@@ -33,6 +38,7 @@
 #else
 	config_require(host/hrSWRunTable)
 	config_require(host/hrSWRunPerfTable)
+#endif
 #endif
 
 /* add the host resources mib to the default mibs to load */
