@@ -15,37 +15,20 @@
  * all platforms use this generic code
  */
 config_require(host/data_access/swinst)
-
-/**---------------------------------------------------------------------*/
-/*
- * configure required files
- *
- * Notes:
- *
- * 1) prefer functionality over platform, where possible. If a method
- *    is available for multiple platforms, test that first. That way
- *    when a new platform is ported, it won't need a new test here.
- *
- * 2) don't do detail requirements here. If, for example,
- *    HPUX11 had different reuirements than other HPUX, that should
- *    be handled in the *_hpux.h header file.
- */
-
-#ifdef NETSNMP_INCLUDE_HRSWINST_REWRITES
-
 config_exclude(host/hr_swinst)
 
-#   if defined( darwin )
-
+/*
+ * select the appropriate architecture-specific interface code
+ */
+#if   defined( darwin )
     config_require(host/data_access/swinst_darwin)
-
-#   else
-
-    config_error(This platform does not yet support hrSWInstalledTable rewrites)
-
-#   endif
+#elif defined( HAVE_LIBRPM ) || defined( linux )
+    config_require(host/data_access/swinst_rpm)
+#elif defined( HAVE_PKGLOCS_H ) || defined( hpux9 ) || defined( hpux10 ) || defined( hpux11 ) || defined( freebsd2 )
+    config_require(host/data_access/swinst_pkginfo)
 #else
-#   define NETSNMP_ACCESS_SWINST_NOARCH 1
+    config_warning(This platform does not yet support hrSWInstalledTable rewrites)
+    config_require(host/data_access/swinst_null)
 #endif
 
 #endif /* NETSNMP_ACCESS_SWINST_CONFIG_H */

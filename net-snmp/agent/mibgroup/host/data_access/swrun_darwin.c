@@ -1,5 +1,7 @@
 /*
- * swinst.c : hrSWInstalledTable data access
+ * swrun_darwin.c:
+ *     hrSWRunTable data access:
+ *     Darwin
  */
 /*
  * Copyright (C) 2007 Apple, Inc. All rights reserved.
