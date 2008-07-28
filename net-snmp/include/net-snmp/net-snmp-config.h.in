@@ -962,6 +962,9 @@
 /* Define if static inline functions are unsupported */
 #undef NETSNMP_BROKEN_INLINE
 
+/* Pattern of temporary files */
+#undef NETSNMP_TEMP_FILE_PATTERN
+
 /* Define to the address where bug reports for this package should be sent. */
 #ifndef PACKAGE_BUGREPORT
 #undef PACKAGE_BUGREPORT
