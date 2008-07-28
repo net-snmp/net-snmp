@@ -166,10 +166,10 @@ netsnmp_fsys_arch_load( void )
             snmp_log_perror( tmpbuf );
             continue;
         }
-        entry->units = stat_buf.f_bsize;
-        entry->size  = stat_buf.f_blocks;
-        entry->used  = stat_buf.f_bfree;
-        entry->avail = stat_buf.f_bavail;
+        entry->units =  stat_buf.f_bsize;
+        entry->size  =  stat_buf.f_blocks;
+        entry->used  = (stat_buf.f_blocks - stat_buf.f_bfree);
+        entry->avail =  stat_buf.f_bavail;
         entry->inums_total = stat_buf.f_files;
         entry->inums_avail = stat_buf.f_ffree;
     }
