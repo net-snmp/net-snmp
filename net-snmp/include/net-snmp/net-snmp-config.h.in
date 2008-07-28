@@ -1127,6 +1127,9 @@
 /* Define if SNMPv2c code should not be included */
 #undef NETSNMP_DISABLE_SNMPV2C
 
+/* Pattern of temporary files */
+#undef NETSNMP_TEMP_FILE_PATTERN
+
 /* Define to the address where bug reports for this package should be sent. */
 #ifndef PACKAGE_BUGREPORT
 #undef PACKAGE_BUGREPORT
