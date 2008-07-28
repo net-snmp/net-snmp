@@ -18625,8 +18625,8 @@ echo $ECHO_N "checking for perl LDFLAGS... $ECHO_C" >&6
 echo "${ECHO_T}$perlldopts" >&6
     PERLLDOPTS="$perlldopts"
 
-    OLDLDFLAGS="$LDFLAGS"
-    LDFLAGS="$LDFLAGS $PERLLDOPTS"
+    OLDLIBS="$LIBS"
+    LIBS="$LIBS $PERLLDOPTS"
 
     # newer perl vs older perl call functions
 
@@ -18734,7 +18734,7 @@ fi
 done
 
 
-    LDFLAGS="$OLDLDFLAGS"
+    LIBS="$OLDLIBS"
 
     cat >>confdefs.h <<\_ACEOF
 #define NETSNMP_EMBEDDED_PERL 1
