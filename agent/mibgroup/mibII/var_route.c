@@ -868,7 +868,7 @@ var_ipRouteEntry(struct variable * vp,
 static int      qsort_compare(const void *, const void *);
 #endif
 
-#if defined(RTENTRY_4_4) || defined(RTENTRY_RT_NEXT)
+#if defined(RTENTRY_4_4) || defined(RTENTRY_RT_NEXT) || defined (hpux11)
 
 #if defined(RTENTRY_4_4) && !defined(hpux11)
 void
