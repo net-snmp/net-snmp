@@ -81,7 +81,7 @@ usage(void)
     fprintf(stderr,
             "  -C APPOPTS\t\tSet various application specific behaviours:\n");
     fprintf(stderr, "\t\t\t  q:  don't print results on success\n");
-    fprintf(stderr, "\n  TYPE: one of i, u, t, a, o, s, x, d, b, n\n");
+    fprintf(stderr, "\n  TYPE: one of i, u, t, a, o, s, x, d, b\n");
     fprintf(stderr,
             "\ti: INTEGER, u: unsigned INTEGER, t: TIMETICKS, a: IPADDRESS\n");
     fprintf(stderr,
