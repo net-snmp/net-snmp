@@ -2430,13 +2430,13 @@ if test "x$embed_perl" = "xyes"; then
     AC_MSG_RESULT($perlldopts)
     PERLLDOPTS="$perlldopts"
 
-    OLDLDFLAGS="$LDFLAGS"
-    LDFLAGS="$LDFLAGS $PERLLDOPTS"
+    OLDLIBS="$LIBS"
+    LIBS="$LIBS $PERLLDOPTS"
 
     # newer perl vs older perl call functions
     AC_CHECK_FUNCS(Perl_eval_pv eval_pv perl_eval_pv)
 
-    LDFLAGS="$OLDLDFLAGS"
+    LIBS="$OLDLIBS"
 
     AC_DEFINE(NETSNMP_EMBEDDED_PERL)
     OTHERAGENTLIBOBJS="snmp_perl.o"
