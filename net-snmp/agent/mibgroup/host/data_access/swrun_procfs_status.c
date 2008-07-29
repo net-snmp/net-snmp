@@ -83,6 +83,7 @@ netsnmp_arch_swrun_container_load( netsnmp_container *container, u_int flags)
          */
         snprintf( buf2, BUFSIZ, "/proc/%d/status", pid );
         fp = fopen( buf2, "r" );
+        memset(buf, 0, sizeof(buf));
         fgets( buf, BUFSIZ-1, fp );
         fclose(fp);
 
@@ -92,8 +93,10 @@ netsnmp_arch_swrun_container_load( netsnmp_container *container, u_int flags)
             ;
         entry->hrSWRunName_len = snprintf(entry->hrSWRunName,
                                    sizeof(entry->hrSWRunName)-1, "%s", cp);
-        if ( '\n' == entry->hrSWRunName[ entry->hrSWRunName_len-1 ])
+        if ( '\n' == entry->hrSWRunName[ entry->hrSWRunName_len-1 ]) {
+            entry->hrSWRunName[ entry->hrSWRunName_len-1 ] = '\0';
             entry->hrSWRunName_len--;           /* Stamp on trailing newline */
+        }
 
         /*
          *  Command Line:
@@ -101,6 +104,7 @@ netsnmp_arch_swrun_container_load( netsnmp_container *container, u_int flags)
          */
         snprintf( buf2, BUFSIZ, "/proc/%d/cmdline", pid );
         fp = fopen( buf2, "r" );
+        memset(buf, 0, sizeof(buf));
         cp = fgets( buf, BUFSIZ-1, fp );
         fclose(fp);
 
