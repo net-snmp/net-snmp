@@ -249,15 +249,15 @@ netsnmp_arch_swrun_container_load( netsnmp_container *container, u_int flags)
          */
 
         if (PID_STOPPED & curproc.process_state ) {
-            entry->hrSWRunStatus = HWSWRUNSTATUS_NOTRUNNABLE;
+            entry->hrSWRunStatus = HRSWRUNSTATUS_NOTRUNNABLE;
         }
       /*  else if (PID_ZOMBIE & curproc.process_state )  */
           else if (   ~0xffff & curproc.exitcode )
         {
-            entry->hrSWRunStatus = HWSWRUNSTATUS_INVALID;
+            entry->hrSWRunStatus = HRSWRUNSTATUS_INVALID;
         } else {
-        /*  entry->hrSWRunStatus = HWSWRUNSTATUS_RUNNABLE;  ?? */
-            entry->hrSWRunStatus = HWSWRUNSTATUS_RUNNING;
+        /*  entry->hrSWRunStatus = HRSWRUNSTATUS_RUNNABLE;  ?? */
+            entry->hrSWRunStatus = HRSWRUNSTATUS_RUNNING;
         }
 
         if (h) {

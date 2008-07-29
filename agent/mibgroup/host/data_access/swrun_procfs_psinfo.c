@@ -106,22 +106,22 @@ netsnmp_arch_swrun_container_load( netsnmp_container *container, u_int flags)
         /*
          * check for system processes
          */
-        entry->hrSWRunType = ((PR_ISSYS & psinfo.pr_flag)
+        entry->hrSWRunType = (PR_ISSYS & psinfo.pr_flag)
                               ? 2   /* kernel process */
                               : 4   /*  application   */
                               ;
 
         switch (psinfo.pr_lwp.pr_state) {
         case SRUN:
-        case SONPROC: entry->hrSWRunStatus = HWSWRUNSTATUS_RUNNING;
+        case SONPROC: entry->hrSWRunStatus = HRSWRUNSTATUS_RUNNING;
                       break;
-        case SSLEEP:  entry->hrSWRunStatus = HWSWRUNSTATUS_RUNNABLE;
+        case SSLEEP:  entry->hrSWRunStatus = HRSWRUNSTATUS_RUNNABLE;
                       break;
-        case SSTOP:   entry->hrSWRunStatus = HWSWRUNSTATUS_NOTRUNNABLE;
+        case SSTOP:   entry->hrSWRunStatus = HRSWRUNSTATUS_NOTRUNNABLE;
                       break;
         case SIDL:
         case SZOMB:
-        default:      entry->hrSWRunStatus = HWSWRUNSTATUS_INVALID;
+        default:      entry->hrSWRunStatus = HRSWRUNSTATUS_INVALID;
                       break;
         }
         
