@@ -21,6 +21,8 @@
  */
 static int _swrun_init = 0;
        int _swrun_max  = 0;
+static netsnmp_cache     *swrun_cache     = NULL;
+static netsnmp_container *swrun_container = NULL;
 
 /*
  * local static prototypes
@@ -67,10 +69,7 @@ shutdown_swrun(void)
 int
 swrun_count_processes( void )
 {
-    netsnmp_container *container =
-         netsnmp_container_find("swrun:table_container");
-
-    return ( container ? CONTAINER_SIZE(container) : 0 );
+    return ( swrun_container ? CONTAINER_SIZE(swrun_container) : 0 );
 }
 
 int
@@ -84,13 +83,12 @@ swrun_count_processes_by_name( char *name )
 {
     netsnmp_swrun_entry *entry;
     netsnmp_iterator  *it;
-    netsnmp_container *container =
-          netsnmp_container_find("swrun:table_container");
     int i = 0;
 
-    if ( !container || !name )
+    if ( !swrun_container || !name )
         return 0;    /* or -1 */
 
+    it = CONTAINER_ITERATOR( swrun_container );
     while ( entry = ITERATOR_NEXT( it )) {
         if (0 == strcmp( entry->hrSWRunName, name ))
             i++;
@@ -103,13 +101,52 @@ swrun_count_processes_by_name( char *name )
 
 /**---------------------------------------------------------------------*/
 /*
+ * cache functions
+ */
+
+static int
+_cache_load( netsnmp_cache *cache,  void *magic )
+{
+    netsnmp_swrun_container_load( swrun_container, 0 );
+    return 0;
+}
+
+static void
+_cache_free( netsnmp_cache *cache,  void *magic )
+{
+    netsnmp_swrun_container_free_items( swrun_container );
+    return;
+}
+
+/**
+ * create swrun cache
+ */
+netsnmp_cache *
+netsnmp_swrun_cache(void)
+{
+    oid    hrSWRunTable_oid[]   = { 1, 3, 6, 1, 2, 1, 25, 4, 2 };
+    size_t hrSWRunTable_oid_len = OID_LENGTH(hrSWRunTable_oid);
+
+    if ( !swrun_cache ) {
+        swrun_cache = netsnmp_cache_create(30,   /* timeout in seconds */
+                           _cache_load,  _cache_free,
+                           hrSWRunTable_oid, hrSWRunTable_oid_len);
+        if (swrun_cache)
+            swrun_cache->flags = NETSNMP_CACHE_DONT_INVALIDATE_ON_SET;
+    }
+    return swrun_cache;
+}
+
+
+/**---------------------------------------------------------------------*/
+/*
  * container functions
  */
 /**
  * create swrun container
  */
 netsnmp_container *
-netsnmp_swrun_container_create(u_int flags)
+netsnmp_swrun_container(void)
 {
     netsnmp_container *container;
 
@@ -118,13 +155,15 @@ netsnmp_swrun_container_create(u_int flags)
     /*
      * create the container.
      */
-    container = netsnmp_container_find("swrun:table_container");
-    if (NULL == container)
+  if (!swrun_container) {
+    swrun_container = netsnmp_container_find("swrun:table_container");
+    if (NULL == swrun_container)
         return NULL;
 
-    container->container_name = strdup("swrun container");
+    swrun_container->container_name = strdup("swrun container");
+  }
 
-    return container;
+    return swrun_container;
 }
 
 /**
@@ -148,7 +187,7 @@ netsnmp_swrun_container_load(netsnmp_container* user_container, u_int load_flags
     netsnmp_assert(1 == _swrun_init);
 
     if (NULL == container)
-        container = netsnmp_swrun_container_create(load_flags);
+        container = netsnmp_swrun_container();
     if (NULL == container) {
         snmp_log(LOG_ERR, "no container specified/found for swrun\n");
         return NULL;
