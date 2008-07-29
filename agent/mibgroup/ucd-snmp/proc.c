@@ -54,6 +54,9 @@
 
 #include "struct.h"
 #include "proc.h"
+#ifdef USING_HOST_DATA_ACCESS_SWRUN_MODULE
+#include <net-snmp/data_access/swrun.h>
+#endif
 #ifdef USING_UCD_SNMP_ERRORMIB_MODULE
 #include "errormib.h"
 #else
@@ -347,6 +350,14 @@ get_proc_instance(struct myproc *proc, oid inst)
         proc = proc->next;
     return (proc);
 }
+
+#ifdef USING_HOST_DATA_ACCESS_SWRUN_MODULE
+int
+sh_count_procs(char *procname)
+{
+    return swrun_count_processes_by_name( procname );
+}
+#else
 
 #ifdef bsdi2
 #include <sys/param.h>
@@ -852,3 +863,4 @@ sh_count_procs(char *procname)
     return (ret);
 }
 #endif
+#endif   /* !USING_HOST_DATA_ACCESS_SWRUN_MODULE */
