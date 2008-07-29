@@ -44,7 +44,6 @@ initialize_table_hrSWRunPerfTable(void)
         OID_LENGTH(hrSWRunPerfTable_oid);
     netsnmp_handler_registration *reg;
     netsnmp_mib_handler *handler;
-    netsnmp_cache *cache;
     netsnmp_table_registration_info *table_info;
 
     reg =
@@ -72,20 +71,9 @@ initialize_table_hrSWRunPerfTable(void)
 
     /*************************************************
      *
-     * find hrSWRunTable cache
-     */
-    cache =
-        netsnmp_cache_find_by_oid(hrSWRunTable_oid, hrSWRunTable_oid_len);
-    if (NULL == cache) {
-        snmp_log(LOG_ERR, "error creating cache for " MYTABLE "\n");
-        goto bail;
-    }
-
-    /*************************************************
-     *
      * inject container_table helper
      */
-    handler = netsnmp_container_table_handler_get(table_info, (netsnmp_container*)cache->magic,
+    handler = netsnmp_container_table_handler_get(table_info, netsnmp_swrun_container(),
                                                   TABLE_CONTAINER_KEY_NETSNMP_INDEX);
     if (NULL == handler) {
         snmp_log(LOG_ERR,"error allocating table registration for "
@@ -104,7 +92,7 @@ initialize_table_hrSWRunPerfTable(void)
      * inject cache helper
      */
 
-    handler = netsnmp_cache_handler_get(cache);
+    handler = netsnmp_cache_handler_get(netsnmp_swrun_cache());
     if (NULL == handler) {
         snmp_log(LOG_ERR, "error creating cache handler for " MYTABLE "\n");
         goto bail;
@@ -130,9 +118,6 @@ initialize_table_hrSWRunPerfTable(void)
     
     if (handler)
         netsnmp_handler_free(handler);
-
-    if (cache)
-        netsnmp_cache_free(cache);
 
     if (table_info)
         netsnmp_table_registration_info_free(table_info);
