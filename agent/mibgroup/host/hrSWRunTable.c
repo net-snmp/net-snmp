@@ -25,9 +25,6 @@
 
 #define MYTABLE "hrSWRunTable"
 
-static void _cache_free(netsnmp_cache * cache, void *magic);
-static int _cache_load(netsnmp_cache * cache, void *vmagic);
-
 /** Initializes the hrSWRunTable module */
 void
 init_hrSWRunTable(void)
@@ -47,9 +44,7 @@ initialize_table_hrSWRunTable(void)
 {
     netsnmp_handler_registration *reg;
     netsnmp_mib_handler *handler = NULL;
-    netsnmp_container *container = NULL;
     netsnmp_table_registration_info *table_info = NULL;
-    netsnmp_cache  *cache = NULL;
 
 #ifdef NETSNMP_INCLUDE_HRSWRUN_WRITE_SUPPORT
 #  define SWRUN_ACCESS_LEVEL HANDLER_CAN_RWRITE
@@ -69,12 +64,6 @@ initialize_table_hrSWRunTable(void)
     }
     reg->modes |= HANDLER_CAN_NOT_CREATE;
 
-    container = netsnmp_container_find("hrSWRunTable:table_container");
-    if (NULL == container) {
-        snmp_log(LOG_ERR,"error creating container for " MYTABLE "\n");
-        goto bail;
-    }
-
     table_info = SNMP_MALLOC_TYPEDEF(netsnmp_table_registration_info);
     if (NULL == table_info) {
         snmp_log(LOG_ERR,"error allocating table registration for "
@@ -91,7 +80,7 @@ initialize_table_hrSWRunTable(void)
      *
      * inject container_table helper
      */
-    handler = netsnmp_container_table_handler_get(table_info, container,
+    handler = netsnmp_container_table_handler_get(table_info, netsnmp_swrun_container(),
                                                   TABLE_CONTAINER_KEY_NETSNMP_INDEX);
     if (NULL == handler) {
         snmp_log(LOG_ERR,"error allocating table registration for "
@@ -109,18 +98,7 @@ initialize_table_hrSWRunTable(void)
      *
      * inject cache helper
      */
-    cache = netsnmp_cache_create(30,    /* timeout in seconds */
-                                 _cache_load, _cache_free,
-                                 hrSWRunTable_oid, hrSWRunTable_oid_len);
-
-    if (NULL == cache) {
-        snmp_log(LOG_ERR, "error creating cache for " MYTABLE "\n");
-        goto bail;
-    }
-    cache->flags = NETSNMP_CACHE_DONT_INVALIDATE_ON_SET;
-    cache->magic = container;
-
-    handler = netsnmp_cache_handler_get(cache);
+    handler = netsnmp_cache_handler_get(netsnmp_swrun_cache());
     if (NULL == handler) {
         snmp_log(LOG_ERR, "error creating cache handler for " MYTABLE "\n");
         goto bail;
@@ -147,14 +125,8 @@ initialize_table_hrSWRunTable(void)
     if (handler)
         netsnmp_handler_free(handler);
 
-    if (cache)
-        netsnmp_cache_free(cache);
-
     if (table_info)
         netsnmp_table_registration_info_free(table_info);
-
-    if (container)
-        CONTAINER_FREE(container);
 
     if (reg) 
         netsnmp_handler_registration_free(reg);
@@ -359,47 +331,3 @@ hrSWRunTable_handler(netsnmp_mib_handler *handler,
     return SNMP_ERR_NOERROR;
 }
 
-/***********************************************************************
- *
- * DATA ACCESS
- *
- * The data access mechanism here is rather simple: let newsnmp_swrun_*
- * take care of it.
- ***********************************************************************/
-/**
- * @internal
- */
-static int
-_cache_load(netsnmp_cache * cache, void *vmagic)
-{
-    DEBUGMSGTL(("internal:hrSWRunTable:_cache_load", "called\n"));
-
-    if ((NULL == cache) || (NULL == cache->magic)) {
-        snmp_log(LOG_ERR, "invalid cache for hrSWRunTable_cache_load\n");
-        return -1;
-    }
-
-    /** should only be called for an invalid or expired cache */
-    netsnmp_assert((0 == cache->valid) || (1 == cache->expired));
-
-    cache->magic =
-        netsnmp_swrun_container_load((netsnmp_container *) cache->magic,
-                                            0);
-    return 0;
-}                               /* _cache_load */
-
-/**
- * @internal
- */
-static void
-_cache_free(netsnmp_cache * cache, void *magic)
-{
-    DEBUGMSGTL(("internal:hrSWRunTable:_cache_free", "called\n"));
-
-    if ((NULL == cache) || (NULL == cache->magic)) {
-        snmp_log(LOG_ERR, "invalid cache in hrSWRunTable_cache_free\n");
-        return;
-    }
-
-    netsnmp_swrun_container_free_items((netsnmp_container *) cache->magic);
-}                               /* _cache_free */
