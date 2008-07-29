@@ -24,6 +24,9 @@ static int _swrun_init = 0;
 static netsnmp_cache     *swrun_cache     = NULL;
 static netsnmp_container *swrun_container = NULL;
 
+netsnmp_container * netsnmp_swrun_container(void);
+netsnmp_cache     * netsnmp_swrun_cache    (void);
+
 /*
  * local static prototypes
  */
@@ -56,7 +59,9 @@ init_swrun(void)
 
     _swrun_init = 1;
 
+    (void)netsnmp_swrun_container();
     netsnmp_arch_swrun_init();
+    (void) netsnmp_swrun_cache();
 }
 
 void
@@ -69,6 +74,7 @@ shutdown_swrun(void)
 int
 swrun_count_processes( void )
 {
+    netsnmp_cache_check_and_reload(swrun_cache);
     return ( swrun_container ? CONTAINER_SIZE(swrun_container) : 0 );
 }
 
@@ -85,6 +91,7 @@ swrun_count_processes_by_name( char *name )
     netsnmp_iterator  *it;
     int i = 0;
 
+    netsnmp_cache_check_and_reload(swrun_cache);
     if ( !swrun_container || !name )
         return 0;    /* or -1 */
 
