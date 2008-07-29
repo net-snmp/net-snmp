@@ -1539,7 +1539,7 @@ agentx_parse(netsnmp_session * session, netsnmp_pdu *pdu, u_char * data,
     u_char          buffer[BUFSIZ];
     u_char         *prefix_ptr;
     oid             oid_buffer[MAX_OID_LEN], end_oid_buf[MAX_OID_LEN];
-    size_t          buf_len = BUFSIZ;
+    size_t          buf_len = sizeof(buffer);
     size_t          oid_buf_len = MAX_OID_LEN;
     size_t          end_oid_buf_len = MAX_OID_LEN;
 
@@ -1595,8 +1595,7 @@ agentx_parse(netsnmp_session * session, netsnmp_pdu *pdu, u_char * data,
     if (pdu->flags & AGENTX_MSG_FLAG_NON_DEFAULT_CONTEXT) {
         DEBUGDUMPHEADER("recv", "Context");
         bufp = agentx_parse_string(bufp, length, buffer, &buf_len,
-                                   pdu->
-                                   flags &
+                                   pdu->flags &
                                    AGENTX_FLAGS_NETWORK_BYTE_ORDER);
         DEBUGINDENTLESS();
         if (bufp == NULL)
@@ -1605,7 +1604,7 @@ agentx_parse(netsnmp_session * session, netsnmp_pdu *pdu, u_char * data,
         pdu->community_len = buf_len;
         snmp_clone_mem((void **) &pdu->community,
                        (void *) buffer, (unsigned) buf_len);
-        buf_len = BUFSIZ;
+        buf_len = sizeof(buffer);
     }
 
     DEBUGDUMPHEADER("recv", "PDU");
@@ -1622,8 +1621,7 @@ agentx_parse(netsnmp_session * session, netsnmp_pdu *pdu, u_char * data,
         DEBUGDUMPHEADER("recv", "Subagent OID");
         bufp = agentx_parse_oid(bufp, length, NULL,
                                 oid_buffer, &oid_buf_len,
-                                pdu->
-                                flags & AGENTX_FLAGS_NETWORK_BYTE_ORDER);
+                                pdu->flags & AGENTX_FLAGS_NETWORK_BYTE_ORDER);
         DEBUGINDENTLESS();
         if (bufp == NULL) {
             DEBUGINDENTLESS();
@@ -1631,8 +1629,7 @@ agentx_parse(netsnmp_session * session, netsnmp_pdu *pdu, u_char * data,
         }
         DEBUGDUMPHEADER("recv", "Subagent Description");
         bufp = agentx_parse_string(bufp, length, buffer, &buf_len,
-                                   pdu->
-                                   flags &
+                                   pdu->flags &
                                    AGENTX_FLAGS_NETWORK_BYTE_ORDER);
         DEBUGINDENTLESS();
         if (bufp == NULL) {
@@ -1643,7 +1640,7 @@ agentx_parse(netsnmp_session * session, netsnmp_pdu *pdu, u_char * data,
                               ASN_OCTET_STR, buffer, buf_len);
 
         oid_buf_len = MAX_OID_LEN;
-        buf_len = BUFSIZ;
+        buf_len = sizeof(buffer);
         break;
 
     case AGENTX_MSG_CLOSE:
@@ -1678,8 +1675,7 @@ agentx_parse(netsnmp_session * session, netsnmp_pdu *pdu, u_char * data,
         DEBUGDUMPHEADER("recv", "Registration OID");
         bufp = agentx_parse_oid(bufp, length, NULL,
                                 oid_buffer, &oid_buf_len,
-                                pdu->
-                                flags & AGENTX_FLAGS_NETWORK_BYTE_ORDER);
+                                pdu->flags & AGENTX_FLAGS_NETWORK_BYTE_ORDER);
         DEBUGINDENTLESS();
         if (bufp == NULL) {
             DEBUGINDENTLESS();
@@ -1687,9 +1683,7 @@ agentx_parse(netsnmp_session * session, netsnmp_pdu *pdu, u_char * data,
         }
 
         if (pdu->range_subid) {
-            range_bound = agentx_parse_int(bufp,
-                                           pdu->
-                                           flags &
+            range_bound = agentx_parse_int(bufp, pdu->flags &
                                            AGENTX_FLAGS_NETWORK_BYTE_ORDER);
             bufp += 4;
             *length -= 4;
@@ -1713,15 +1707,11 @@ agentx_parse(netsnmp_session * session, netsnmp_pdu *pdu, u_char * data,
 
     case AGENTX_MSG_GETBULK:
         DEBUGDUMPHEADER("recv", "Non-repeaters");
-        pdu->non_repeaters = agentx_parse_short(bufp,
-                                                pdu->
-                                                flags &
+        pdu->non_repeaters = agentx_parse_short(bufp, pdu->flags &
                                                 AGENTX_FLAGS_NETWORK_BYTE_ORDER);
         DEBUGINDENTLESS();
         DEBUGDUMPHEADER("recv", "Max-repeaters");
-        pdu->max_repetitions = agentx_parse_short(bufp + 2,
-                                                  pdu->
-                                                  flags &
+        pdu->max_repetitions = agentx_parse_short(bufp + 2, pdu->flags &
                                                   AGENTX_FLAGS_NETWORK_BYTE_ORDER);
         DEBUGINDENTLESS();
         bufp += 4;
@@ -1741,8 +1731,7 @@ agentx_parse(netsnmp_session * session, netsnmp_pdu *pdu, u_char * data,
         while (*length > 0) {
             bufp = agentx_parse_oid(bufp, length, &inc,
                                     oid_buffer, &oid_buf_len,
-                                    pdu->
-                                    flags &
+                                    pdu->flags &
                                     AGENTX_FLAGS_NETWORK_BYTE_ORDER);
             if (bufp == NULL) {
                 DEBUGINDENTLESS();
@@ -1751,8 +1740,7 @@ agentx_parse(netsnmp_session * session, netsnmp_pdu *pdu, u_char * data,
             }
             bufp = agentx_parse_oid(bufp, length, NULL,
                                     end_oid_buf, &end_oid_buf_len,
-                                    pdu->
-                                    flags &
+                                    pdu->flags &
                                     AGENTX_FLAGS_NETWORK_BYTE_ORDER);
             if (bufp == NULL) {
                 DEBUGINDENTLESS();
@@ -1790,21 +1778,16 @@ agentx_parse(netsnmp_session * session, netsnmp_pdu *pdu, u_char * data,
         /*
          * sysUpTime 
          */
-        pdu->time = agentx_parse_int(bufp,
-                                     pdu->
-                                     flags &
+        pdu->time = agentx_parse_int(bufp, pdu->flags &
                                      AGENTX_FLAGS_NETWORK_BYTE_ORDER);
         bufp += 4;
         *length -= 4;
 
-        pdu->errstat = agentx_parse_short(bufp,
-                                          pdu->
-                                          flags &
+        pdu->errstat = agentx_parse_short(bufp, pdu->flags &
                                           AGENTX_FLAGS_NETWORK_BYTE_ORDER);
         pdu->errindex =
             agentx_parse_short(bufp + 2,
-                               pdu->
-                               flags & AGENTX_FLAGS_NETWORK_BYTE_ORDER);
+                               pdu->flags & AGENTX_FLAGS_NETWORK_BYTE_ORDER);
         bufp += 4;
         *length -= 4;
         /*
@@ -1826,8 +1809,7 @@ agentx_parse(netsnmp_session * session, netsnmp_pdu *pdu, u_char * data,
             bufp = agentx_parse_varbind(bufp, length, &type,
                                         oid_buffer, &oid_buf_len,
                                         buffer, &buf_len,
-                                        pdu->
-                                        flags &
+                                        pdu->flags &
                                         AGENTX_FLAGS_NETWORK_BYTE_ORDER);
             if (bufp == NULL) {
                 DEBUGINDENTLESS();
@@ -1838,7 +1820,7 @@ agentx_parse(netsnmp_session * session, netsnmp_pdu *pdu, u_char * data,
                                   (u_char) type, buffer, buf_len);
 
             oid_buf_len = MAX_OID_LEN;
-            buf_len = BUFSIZ;
+            buf_len = sizeof(buffer);
         }
         DEBUGINDENTLESS();
         break;
@@ -1860,13 +1842,11 @@ agentx_parse(netsnmp_session * session, netsnmp_pdu *pdu, u_char * data,
          */
         bufp = agentx_parse_oid(bufp, length, NULL,
                                 oid_buffer, &oid_buf_len,
-                                pdu->
-                                flags & AGENTX_FLAGS_NETWORK_BYTE_ORDER);
+                                pdu->flags & AGENTX_FLAGS_NETWORK_BYTE_ORDER);
         if (bufp == NULL)
             return SNMPERR_ASN_PARSE_ERR;
         bufp = agentx_parse_string(bufp, length, buffer, &buf_len,
-                                   pdu->
-                                   flags &
+                                   pdu->flags &
                                    AGENTX_FLAGS_NETWORK_BYTE_ORDER);
         if (bufp == NULL)
             return SNMPERR_ASN_PARSE_ERR;
@@ -1874,7 +1854,7 @@ agentx_parse(netsnmp_session * session, netsnmp_pdu *pdu, u_char * data,
                               ASN_OCTET_STR, buffer, buf_len);
 
         oid_buf_len = MAX_OID_LEN;
-        buf_len = BUFSIZ;
+        buf_len = sizeof(buffer);
         break;
 
     case AGENTX_MSG_REMOVE_AGENT_CAPS:
@@ -1883,8 +1863,7 @@ agentx_parse(netsnmp_session * session, netsnmp_pdu *pdu, u_char * data,
          */
         bufp = agentx_parse_oid(bufp, length, NULL,
                                 oid_buffer, &oid_buf_len,
-                                pdu->
-                                flags & AGENTX_FLAGS_NETWORK_BYTE_ORDER);
+                                pdu->flags & AGENTX_FLAGS_NETWORK_BYTE_ORDER);
         if (bufp == NULL)
             return SNMPERR_ASN_PARSE_ERR;
         snmp_add_null_var(pdu, oid_buffer, oid_buf_len);
