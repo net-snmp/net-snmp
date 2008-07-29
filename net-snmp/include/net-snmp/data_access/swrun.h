@@ -31,11 +31,11 @@ extern "C" {
         /*
          * Column values 
          */
-        char            hrSWRunName[65]; /* size per MIB + 1 */
-        char            hrSWRunPath[129]; /* size per MIB + 1 */
-        char            hrSWRunParameters[129]; /* size per MIB + 1 */
+        char            hrSWRunName[ 64+1];  /* size per MIB + 1 */
+        char            hrSWRunPath[128+1];  /* size per MIB + 1 */
+        char            hrSWRunParameters[128+1]; /* size per MIB + 1 */
 #ifdef NETSNMP_SWRUN_HAVE_ID  /* if not defined, will always use nullOid */
-        oid             hrSWRunID[128];
+        oid             hrSWRunID[SNMP_MAXOID];
         u_char          hrSWRunID_len;
 #endif
         u_char          hrSWRunName_len;
@@ -84,6 +84,10 @@ extern "C" {
     netsnmp_swrun_entry_create(int32_t swIndex);
 
     void netsnmp_swrun_entry_free(netsnmp_swrun_entry *entry);
+
+    int  swrun_count_processes( void );
+    int  swrun_max_processes(   void );
+    int  swrun_count_processes_by_name( char *name );
 
 #define NETSNMP_SWRUN_NOFLAGS            0x00000000
 #define NETSNMP_SWRUN_ALL_OR_NONE        0x00000001
