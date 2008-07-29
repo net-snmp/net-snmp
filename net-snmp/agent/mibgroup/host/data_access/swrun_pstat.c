@@ -83,22 +83,22 @@ netsnmp_arch_swrun_container_load( netsnmp_container *container, u_int flags)
                                           "%s", cp1+1);
         *cp1 = ' ';     /* Restore pst_cmd value */
 
-        entry->hrSWRunType = ((PS_SYS & proc_table[i].pst_flag)
+        entry->hrSWRunType = (PS_SYS & proc_table[i].pst_flag)
                               ? 2   /* kernel process */
                               : 4   /*  application   */
                               ;
 
         switch (proc_table[i].pst_stat) {
-        case PS_RUN:   entry->hrSWRunStatus = HWSWRUNSTATUS_RUNNING;
+        case PS_RUN:   entry->hrSWRunStatus = HRSWRUNSTATUS_RUNNING;
                        break;
-        case PS_SLEEP: entry->hrSWRunStatus = HWSWRUNSTATUS_RUNNABLE;
+        case PS_SLEEP: entry->hrSWRunStatus = HRSWRUNSTATUS_RUNNABLE;
                        break;
-        case PS_STOP:  entry->hrSWRunStatus = HWSWRUNSTATUS_NOTRUNNABLE;
+        case PS_STOP:  entry->hrSWRunStatus = HRSWRUNSTATUS_NOTRUNNABLE;
                        break;
         case PS_IDLE:
         case PS_ZOMBIE:
         case PS_OTHER:
-        default:       entry->hrSWRunStatus = HWSWRUNSTATUS_INVALID;
+        default:       entry->hrSWRunStatus = HRSWRUNSTATUS_INVALID;
                        break;
         }
 

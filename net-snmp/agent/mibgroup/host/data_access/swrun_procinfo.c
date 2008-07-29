@@ -95,30 +95,30 @@ netsnmp_arch_swrun_container_load( netsnmp_container *container, u_int flags)
                                          sizeof(entry->hrSWRunParameters)-1,
                                           "%s", cp1+1);
 
-        entry->hrSWRunType = ((SKPROC & proc_table[i].pi_flags)
+        entry->hrSWRunType = (SKPROC & proc_table[i].pi_flags)
                               ? 2   /* kernel process */
                               : 4   /*  application   */
                               ;
 
         switch (proc_table[i].pi_state) {
         case SACTIVE:
-        case SRUN:    entry->hrSWRunStatus = HWSWRUNSTATUS_RUNNING;
+        case SRUN:    entry->hrSWRunStatus = HRSWRUNSTATUS_RUNNING;
                       break;
-        case SSLEEP:  entry->hrSWRunStatus = HWSWRUNSTATUS_RUNNABLE;
+        case SSLEEP:  entry->hrSWRunStatus = HRSWRUNSTATUS_RUNNABLE;
                       break;
-        rase SSTOP:   entry->hrSWRunStatus = HWSWRUNSTATUS_NOTRUNNABLE;
+        case SSTOP:   entry->hrSWRunStatus = HRSWRUNSTATUS_NOTRUNNABLE;
                       break;
         case SIDL:
         case SZOMB:
-        default:      entry->hrSWRunStatus = HWSWRUNSTATUS_INVALID;
+        default:      entry->hrSWRunStatus = HRSWRUNSTATUS_INVALID;
                       break;
         }
 
-        entry->hrSWRunPerfCPU  = proc_table[i].pi_ru.ru_utime.tv_sec * 100);
-        entry->hrSWRunPerfCPU += proc_table[i].pi_ru.ru_utime.tv_usec / 10000000);
-        entry->hrSWRunPerfCPU += proc_table[i].pi_ru.ru_stime.tv_sec * 100);
-        entry->hrSWRunPerfCPU += proc_table[i].pi_ru.ru_stime.tv_usec / 10000000);
-        entry->hrSWRunPerfMem  = proc_table[i].pi_size;
+        entry->hrSWRunPerfCPU  = (proc_table[i].pi_ru.ru_utime.tv_sec * 100);
+        entry->hrSWRunPerfCPU += (proc_table[i].pi_ru.ru_utime.tv_usec / 10000000);
+        entry->hrSWRunPerfCPU += (proc_table[i].pi_ru.ru_stime.tv_sec * 100);
+        entry->hrSWRunPerfCPU += (proc_table[i].pi_ru.ru_stime.tv_usec / 10000000);
+        entry->hrSWRunPerfMem  =  proc_table[i].pi_size;
         entry->hrSWRunPerfMem *= (getpagesize()/1024);  /* in Kb */
     }
     free(proc_table);
