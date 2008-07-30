@@ -4,6 +4,9 @@
  */
 
 #include <net-snmp/net-snmp-config.h>
+#include <net-snmp/net-snmp-includes.h>
+#include <net-snmp/agent/net-snmp-agent-includes.h>
+#include <net-snmp/agent/hardware/memory.h>
 #include "host_res.h"
 #include "hr_filesys.h"
 #include "hr_storage.h"
@@ -541,7 +544,7 @@ var_hrfilesys(struct variable *vp,
             long_return = 2;    /* others probably aren't */
         return (u_char *) & long_return;
     case HRFSYS_STOREIDX:
-        long_return = fsys_idx + HRS_TYPE_FIXED_MAX;
+        long_return = fsys_idx + NETSNMP_MEM_TYPE_MAX;
         return (u_char *) & long_return;
     case HRFSYS_FULLDUMP:
         return when_dumped(HRFS_entry->HRFS_name, FULL_DUMP, var_len);
