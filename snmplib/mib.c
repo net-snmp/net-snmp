@@ -434,7 +434,7 @@ sprint_realloc_octet_string(u_char ** buf, size_t * buf_len,
     const char     *saved_hint = hint;
     int             hex = 0, x = 0;
     u_char         *cp;
-    int             output_format;
+    int             output_format, len_needed;
 
     if ((var->type != ASN_OCTET_STR) && 
         (!netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_QUICKE_PRINT))) {
@@ -528,7 +528,9 @@ sprint_realloc_octet_string(u_char ** buf, size_t * buf_len,
                     break;
                 case 't': /* new in rfc 3411 */
                 case 'a':
-                    while ((*out_len + width + 1) >= *buf_len) {
+                    /* A string hint gives the max size - we may not need this much */
+                    len_needed = SNMP_MIN( width, ecp-cp );
+                    while ((*out_len + len_needed + 1) >= *buf_len) {
                         if (!(allow_realloc && snmp_realloc(buf, buf_len))) {
                             return 0;
                         }
