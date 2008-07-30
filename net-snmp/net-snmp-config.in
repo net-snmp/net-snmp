@@ -58,6 +58,7 @@ else
     *) optarg= ;;
   esac
 
+  unset shifted
   case $1 in
     --prefix=*)
       prefix=$optarg
@@ -201,6 +202,7 @@ else
       Xalgorithm="DES"
       token=rwuser
       shift
+      shifted=1
       while test "x$done" = "x" -a "x$1" != "x" ; do
 	case $1 in
 	    -A|-a)
@@ -315,6 +317,7 @@ else
     ####################################################
     --compile-subagent)
       shift
+      shifted=1
       while test "x$done" = "x" -a "x$1" != "x" ; do
 	case $1 in
             --norm)
@@ -489,7 +492,9 @@ EOF
       usage="yes"
       ;;
   esac
-  shift
+  if [ "x$shifted" = "x" ] ; then
+      shift
+  fi
   done
 fi
 
