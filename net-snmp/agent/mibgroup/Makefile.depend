@@ -311,15 +311,14 @@
 ./util_funcs.lo: ../../include/net-snmp/agent/table_container.h
 ./util_funcs.lo: ../../include/net-snmp/agent/table_array.h
 ./util_funcs.lo: ../../include/net-snmp/agent/mfd.h struct.h util_funcs.h
-./util_funcs.lo: utilities/execute.h 
-./util_funcs.lo: ucd-snmp/errormib.h mibdefs.h
+./util_funcs.lo: utilities/execute.h ucd-snmp/errormib.h mibdefs.h
 ./winExtDLL.lo: ../../include/net-snmp/net-snmp-config.h
 ./winExtDLL.lo: ../../include/net-snmp/system/linux.h
 ./winExtDLL.lo: ../../include/net-snmp/system/sysv.h
 ./winExtDLL.lo: ../../include/net-snmp/system/generic.h
 ./winExtDLL.lo: ../../include/net-snmp/machine/generic.h
 ./winExtDLL.lo: ../../include/net-snmp/net-snmp-includes.h
-./winExtDLL.lo: ../../include/net-snmp/definitions.h
+./winExtDLL.lo:  ../../include/net-snmp/definitions.h
 ./winExtDLL.lo: ../../include/net-snmp/types.h 
 ./winExtDLL.lo: ../../include/net-snmp/library/snmp_api.h
 ./winExtDLL.lo: ../../include/net-snmp/library/asn1.h
@@ -3788,7 +3787,7 @@
 ./host/hr_filesys.lo: ../../include/net-snmp/system/linux.h
 ./host/hr_filesys.lo: ../../include/net-snmp/system/sysv.h
 ./host/hr_filesys.lo: ../../include/net-snmp/system/generic.h
-./host/hr_filesys.lo: ../../include/net-snmp/machine/generic.h host_res.h
+./host/hr_filesys.lo: ../../include/net-snmp/machine/generic.h
 ./host/hr_filesys.lo: ../../include/net-snmp/net-snmp-includes.h
 ./host/hr_filesys.lo: ../../include/net-snmp/definitions.h
 ./host/hr_filesys.lo: ../../include/net-snmp/types.h 
@@ -3850,13 +3849,44 @@
 ./host/hr_filesys.lo: ../../include/net-snmp/library/snmp_secmod.h
 ./host/hr_filesys.lo: ../../include/net-snmp/library/snmpv3-security-includes.h
 ./host/hr_filesys.lo: ../../include/net-snmp/library/snmpusm.h
+./host/hr_filesys.lo: ../../include/net-snmp/agent/net-snmp-agent-includes.h
+./host/hr_filesys.lo: ../../include/net-snmp/agent/mib_module_config.h
+./host/hr_filesys.lo: ../../include/net-snmp/agent/agent_module_config.h
 ./host/hr_filesys.lo: ../../include/net-snmp/agent/snmp_agent.h
-./host/hr_filesys.lo: ../../include/net-snmp/agent/agent_handler.h
 ./host/hr_filesys.lo: ../../include/net-snmp/agent/snmp_vars.h
+./host/hr_filesys.lo: ../../include/net-snmp/agent/agent_handler.h
 ./host/hr_filesys.lo: ../../include/net-snmp/agent/var_struct.h
 ./host/hr_filesys.lo: ../../include/net-snmp/agent/agent_registry.h
 ./host/hr_filesys.lo: ../../include/net-snmp/library/fd_event_manager.h
-./host/hr_filesys.lo:  ./host/hr_filesys.h
+./host/hr_filesys.lo: ../../include/net-snmp/agent/ds_agent.h
+./host/hr_filesys.lo: ../../include/net-snmp/agent/agent_read_config.h
+./host/hr_filesys.lo: ../../include/net-snmp/agent/agent_trap.h
+./host/hr_filesys.lo: ../../include/net-snmp/agent/all_helpers.h
+./host/hr_filesys.lo: ../../include/net-snmp/agent/instance.h
+./host/hr_filesys.lo: ../../include/net-snmp/agent/baby_steps.h
+./host/hr_filesys.lo: ../../include/net-snmp/agent/scalar.h
+./host/hr_filesys.lo: ../../include/net-snmp/agent/scalar_group.h
+./host/hr_filesys.lo: ../../include/net-snmp/agent/watcher.h
+./host/hr_filesys.lo: ../../include/net-snmp/agent/multiplexer.h
+./host/hr_filesys.lo: ../../include/net-snmp/agent/null.h
+./host/hr_filesys.lo: ../../include/net-snmp/agent/debug_handler.h
+./host/hr_filesys.lo: ../../include/net-snmp/agent/cache_handler.h
+./host/hr_filesys.lo: ../../include/net-snmp/agent/old_api.h
+./host/hr_filesys.lo: ../../include/net-snmp/agent/read_only.h
+./host/hr_filesys.lo: ../../include/net-snmp/agent/row_merge.h
+./host/hr_filesys.lo: ../../include/net-snmp/agent/serialize.h
+./host/hr_filesys.lo: ../../include/net-snmp/agent/bulk_to_next.h
+./host/hr_filesys.lo: ../../include/net-snmp/agent/mode_end_call.h
+./host/hr_filesys.lo: ../../include/net-snmp/agent/table.h
+./host/hr_filesys.lo: ../../include/net-snmp/agent/table_data.h
+./host/hr_filesys.lo: ../../include/net-snmp/agent/table_dataset.h
+./host/hr_filesys.lo: ../../include/net-snmp/agent/table_tdata.h
+./host/hr_filesys.lo: ../../include/net-snmp/agent/table_iterator.h
+./host/hr_filesys.lo: ../../include/net-snmp/agent/table_container.h
+./host/hr_filesys.lo: ../../include/net-snmp/agent/table_array.h
+./host/hr_filesys.lo: ../../include/net-snmp/agent/mfd.h
+./host/hr_filesys.lo: ../../include/net-snmp/agent/hardware/memory.h
+./host/hr_filesys.lo: host_res.h  ./host/hr_filesys.h
 ./host/hr_filesys.lo: ./host/hr_storage.h 
 ./host/hr_network.lo: ../../include/net-snmp/net-snmp-config.h
 ./host/hr_network.lo: ../../include/net-snmp/system/linux.h
@@ -4297,7 +4327,7 @@
 ./host/hr_storage.lo: ../../include/net-snmp/system/sysv.h
 ./host/hr_storage.lo: ../../include/net-snmp/system/generic.h
 ./host/hr_storage.lo: ../../include/net-snmp/machine/generic.h
-./host/hr_storage.lo:  host_res.h
+./host/hr_storage.lo: host_res.h  
 ./host/hr_storage.lo: ../../include/net-snmp/net-snmp-includes.h
 ./host/hr_storage.lo: ../../include/net-snmp/definitions.h
 ./host/hr_storage.lo: ../../include/net-snmp/types.h 
@@ -4404,7 +4434,7 @@
 ./host/hr_swinst.lo: ../../include/net-snmp/system/sysv.h
 ./host/hr_swinst.lo: ../../include/net-snmp/system/generic.h
 ./host/hr_swinst.lo: ../../include/net-snmp/machine/generic.h
-./host/hr_swinst.lo:  host_res.h
+./host/hr_swinst.lo:   host_res.h
 ./host/hr_swinst.lo: ../../include/net-snmp/net-snmp-includes.h
 ./host/hr_swinst.lo: ../../include/net-snmp/definitions.h
 ./host/hr_swinst.lo: ../../include/net-snmp/types.h
@@ -5192,7 +5222,7 @@
 ./mibII/ip.lo: ./mibII/mibII_common.h 
 ./mibII/ip.lo:  ../../agent/kernel.h
 ./mibII/ip.lo: ../../include/net-snmp/net-snmp-includes.h
-./mibII/ip.lo:  ../../include/net-snmp/definitions.h
+./mibII/ip.lo: ../../include/net-snmp/definitions.h
 ./mibII/ip.lo: ../../include/net-snmp/types.h 
 ./mibII/ip.lo: ../../include/net-snmp/library/snmp_api.h
 ./mibII/ip.lo: ../../include/net-snmp/library/asn1.h
@@ -6413,7 +6443,7 @@
 ./mibII/tcp.lo: ./mibII/mibII_common.h 
 ./mibII/tcp.lo:  ../../agent/kernel.h
 ./mibII/tcp.lo: ../../include/net-snmp/net-snmp-includes.h
-./mibII/tcp.lo:  ../../include/net-snmp/definitions.h
+./mibII/tcp.lo: ../../include/net-snmp/definitions.h
 ./mibII/tcp.lo: ../../include/net-snmp/types.h 
 ./mibII/tcp.lo: ../../include/net-snmp/library/snmp_api.h
 ./mibII/tcp.lo: ../../include/net-snmp/library/asn1.h
@@ -6626,7 +6656,7 @@
 ./mibII/udp.lo: ./mibII/mibII_common.h 
 ./mibII/udp.lo:  ../../agent/kernel.h
 ./mibII/udp.lo: ../../include/net-snmp/net-snmp-includes.h
-./mibII/udp.lo:  ../../include/net-snmp/definitions.h
+./mibII/udp.lo: ../../include/net-snmp/definitions.h
 ./mibII/udp.lo: ../../include/net-snmp/types.h 
 ./mibII/udp.lo: ../../include/net-snmp/library/snmp_api.h
 ./mibII/udp.lo: ../../include/net-snmp/library/asn1.h

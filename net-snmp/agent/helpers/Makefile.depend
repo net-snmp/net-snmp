@@ -822,7 +822,7 @@
 ./null.lo: ../../include/net-snmp/system/generic.h
 ./null.lo: ../../include/net-snmp/machine/generic.h 
 ./null.lo: ../../include/net-snmp/net-snmp-includes.h 
-./null.lo: ../../include/net-snmp/definitions.h
+./null.lo:  ../../include/net-snmp/definitions.h
 ./null.lo: ../../include/net-snmp/types.h 
 ./null.lo: ../../include/net-snmp/library/snmp_api.h
 ./null.lo: ../../include/net-snmp/library/asn1.h
@@ -1846,7 +1846,7 @@
 ./table.lo: ../../include/net-snmp/system/generic.h
 ./table.lo: ../../include/net-snmp/machine/generic.h 
 ./table.lo: ../../include/net-snmp/net-snmp-includes.h 
-./table.lo: ../../include/net-snmp/definitions.h
+./table.lo:  ../../include/net-snmp/definitions.h
 ./table.lo: ../../include/net-snmp/types.h 
 ./table.lo: ../../include/net-snmp/library/snmp_api.h
 ./table.lo: ../../include/net-snmp/library/asn1.h
