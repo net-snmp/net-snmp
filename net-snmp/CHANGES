@@ -11,6 +11,7 @@ listing of all changes made to the code.
       - [BUG 1801835]: Support multiple default transports for an app.
       - [BUG 1866655]: Handle parsing invalid OID subidentifiers
       - [BUG 1958041]: Ensure IDs are not truncated.
+      - [BUG 2027834]: Extend string print buffer by the minimum necessary
       - [BUG Coverity #183]: fix memory leak if IP_PKTINFO fails
       - [PATCH 1768285]: Count MIB files correctly in add_mibdir()
       - [PATCH 1775124]: Fix clientaddr functionality
@@ -29,16 +30,19 @@ listing of all changes made to the code.
       - Fix potential buffer overflow in sprintf for UDP/IPv6
 
     snmpd:
-      - [BUG 1912647]: Fix memory leak following failed request
-      - [BUG 1931391]: Fix reporting of Memory buffers and cached memory
+      - [BUG 1557372]: Realign hrFSStorageIndex with hrStorageTable
       - [BUG 1748206]: Protect against failures to open /etc/mtab (or equiv)
       - [BUG 1758212]: Handling missing variable types (IpAddress,Counter,Opaque)
       - [BUG 1771221]: Retain ifLastChange information on data reload.
       - [BUG 1792890]: include CIFS mounts when skipping remote filesystems
       - [BUG 1822360]: Fix spinlock helper error handling.
       - [BUG 1851047]: Don't over-process failed watcher requests
-      - [PATCH 1967194]: Recognise NFS4 mounts
-      - [PATCH 1951996]: Fix for CPU stats on FreeBSD
+      - [BUG 1912647]: Fix memory leak following failed request
+      - [BUG 1931391]: Fix reporting of Memory buffers and cached memory
+      - [BUG 2003144]: Increase size of AgentX packet
+      - [BUG 2006786]: Interface name can have more than 8 characters
+      - [BUG 2018031]: Don't probe engineID in internal monitor sessions
+      - [BUG 2023803]: Remove irrelevant configure dependency (HP-UX 11)
       - [PATCH 1716548]: Fix help output for -D
       - [PATCH 1744157]: Report duplicate "extend/exec" identifiers.
       - [PATCH 1746831]: fix process checking race condition
@@ -50,6 +54,7 @@ listing of all changes made to the code.
       - [PATCH 1774612]: More resilient process status handling
       - [PATCH 1783733]: Include version info in hrSWInst table (solaris)
       - [PATCH 1784747]: Fix ip adresses on 64 bit systems
+      - [PATCH 1823800]: release and reload all trap destinations on SIGHUP
       - [PATCH 1826088]: Use the right interface to read the netmask
       - [PATCH 1826102]: support longer interface names on linux
       - [PATCH 1828839]: handle of disk mount paths with embedded spaces
@@ -59,6 +64,9 @@ listing of all changes made to the code.
       - [PATCH 1893468]: fixed registration of OIDs with ranges
       - [PATCH 1896118]: fix ifTable 32bit counters on linux
       - [PATCH 1909813]: fix table_iterator hint for SORTED tables
+      - [PATCH 1944581]: Don't core dump on long string index values.
+      - [PATCH 1951996]: Fix for CPU stats on FreeBSD
+      - [PATCH 1967194]: Recognise NFS4 mounts
       - Enforce the lower limit on scalar_groups
       - suppress annoying "registration != duplicate" warning for root oids
       - Handle device names with embedded spaces in UCD-SNMP-MIB (dskDevice)
@@ -72,12 +80,21 @@ listing of all changes made to the code.
       - [BUG 1802833]: Ensure snmptrapd builds with --disable-snmpv1/2c
       - [BUG 1823381]: Valid MIB directory search path on Windows
       - [BUG 1872266]: PERLCC check fails for CC with options
+      - [BUG 1995172]: fix --without-elf configure usage
+      - [BUG 2014526]: Win32: snmpv3-security-includes.h not installed
+      - [PATCH 1681035]: improve net-snmp-config /bin/sh compatibility
       - [PATCH 1899762]: Tweak embedded_perl configure checks.
+      - add --with-temp-file-pattern configure option
+      - Add support for winExtDLL to build.bat (win32)
+      - Disable agent tests if built without necessary mib modules
       - Update to libtool 1.5.26
 
     mib2c:
       - [BUG 1874059,1737068]: Handle MIB objects with embedded hyphens
       - [PATCH 1914398]: install mib2c.perl.conf
+
+    documentation:
+      - [BUG 2027129]: fix typo in snmpcmd.1
 
     misc:
       - Avoid calling debug macros with too few/many arguments.
@@ -215,6 +232,7 @@ listing of all changes made to the code.
       - upport for forwarding traps by OID subtree.
 
     apps:
+      - [BUG 1964136]: Drop NULL type from snmpset usage
       - [PATCH 1529523]: Close SNMP session on failure.
 
     build:
