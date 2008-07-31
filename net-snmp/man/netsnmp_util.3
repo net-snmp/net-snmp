@@ -1,4 +1,4 @@
-.TH "Memory Utility Routines" 3 "9 May 2008" "Version 5.4.2" "net-snmp" \" -*- nroff -*-
+.TH "Memory Utility Routines" 3 "31 Jul 2008" "Version 5.4.2.rc1" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -304,7 +304,7 @@ Computers the minimum of a and b.
 .PP
 Definition at line 89 of file tools.h.
 .PP
-Referenced by netsnmp_config_parse_table_set(), netsnmp_oid_find_prefix(), netsnmp_register_table_data_set(), netsnmp_scalar_group_helper_handler(), netsnmp_scalar_helper_handler(), netsnmp_stash_to_next_helper(), and netsnmp_table_data_helper_handler().
+Referenced by netsnmp_config_parse_table_set(), netsnmp_oid_find_prefix(), netsnmp_register_table_data_set(), netsnmp_scalar_group_helper_handler(), netsnmp_scalar_helper_handler(), netsnmp_stash_to_next_helper(), netsnmp_table_data_helper_handler(), and sprint_realloc_octet_string().
 .SS "#define SNMP_SWIPE_MEM(n, s)   do { if (n) free((void *)n); n = s; s=NULL; } while(0)"
 .PP
 Frees pointer n only if it is !NULL, sets n to s and sets s to NULL. 

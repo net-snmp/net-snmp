@@ -1,4 +1,4 @@
-.TH "old_api" 3 "9 May 2008" "Version 5.4.2" "net-snmp" \" -*- nroff -*-
+.TH "old_api" 3 "31 Jul 2008" "Version 5.4.2.rc1" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -49,7 +49,7 @@ implements the old_api handler
 .PP
 Definition at line 226 of file old_api.c.
 .PP
-References variable::acl, variable::findVar, netsnmp_handler_registration_s::handlerName, variable::magic, MIB_CLIENTS_ARE_EVIL, netsnmp_agent_request_info_s::mode, netsnmp_mib_handler_s::myvoid, variable_list::name, variable::name, variable_list::name_length, variable::namelen, netsnmp_oid_equals(), netsnmp_request_info_s::next, NULL, netsnmp_request_info_s::requestvb, netsnmp_handler_registration_s::rootoid, netsnmp_handler_registration_s::rootoid_len, snmp_set_var_typed_value(), and variable::type.
+References variable::acl, variable::findVar, variable::magic, MIB_CLIENTS_ARE_EVIL, netsnmp_agent_request_info_s::mode, netsnmp_mib_handler_s::myvoid, variable_list::name, variable::name, variable_list::name_length, variable::namelen, netsnmp_request_info_s::next, NULL, netsnmp_request_info_s::requestvb, netsnmp_handler_registration_s::rootoid, netsnmp_handler_registration_s::rootoid_len, snmp_set_var_objid(), and variable::type.
 .PP
 Referenced by get_old_api_handler().
 .SS "int netsnmp_register_mib_table_row (const char * moduleName, struct \fBvariable\fP * var, size_t varsize, size_t numvars, oid * mibloc, size_t mibloclen, int priority, int var_subid, \fBnetsnmp_session\fP * ss, const char * context, int timeout, int flags)"

@@ -1,4 +1,4 @@
-.TH "stash_cache" 3 "9 May 2008" "Version 5.4.2" "net-snmp" \" -*- nroff -*-
+.TH "stash_cache" 3 "31 Jul 2008" "Version 5.4.2.rc1" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -57,7 +57,7 @@ This handler caches data in an optimized way which may aleviate the need for the
 .PP
 updates a given cache depending on whether it needs to or not. 
 .PP
-Definition at line 190 of file stash_cache.c.
+Definition at line 194 of file stash_cache.c.
 .PP
 References netsnmp_stash_cache_info_s::cache, netsnmp_cache_s::cache_hint, netsnmp_handler_args_s::handler, netsnmp_cache_s::magic, netsnmp_agent_request_info_s::mode, netsnmp_agent_add_list_data(), netsnmp_call_next_handler(), netsnmp_create_data_list(), netsnmp_get_new_stash_cache(), netsnmp_mib_handler_s::next, NULL, netsnmp_handler_args_s::reginfo, netsnmp_handler_args_s::reqinfo, and netsnmp_handler_args_s::requests.
 .PP
@@ -109,7 +109,7 @@ References netsnmp_get_stash_to_next_handler(), netsnmp_get_timed_bare_stash_cac
 .PP
 initializes the stash_cache helper which then registers a stash_cache handler as a run-time injectable handler for configuration file use. 
 .PP
-Definition at line 233 of file stash_cache.c.
+Definition at line 237 of file stash_cache.c.
 .PP
 References netsnmp_get_stash_cache_handler(), and netsnmp_register_handler_by_name().
 .PP

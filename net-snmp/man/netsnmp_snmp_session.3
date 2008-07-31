@@ -1,4 +1,4 @@
-.TH "snmp_session" 3 "9 May 2008" "Version 5.4.2" "net-snmp" \" -*- nroff -*-
+.TH "snmp_session" 3 "31 Jul 2008" "Version 5.4.2.rc1" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -502,7 +502,11 @@ Definition at line 300 of file snmp_api.h.
 .PP
 use as you want data 
 .PP
-Definition at line 305 of file snmp_api.h.
+used by 'SNMP_FLAGS_RESP_CALLBACK' handling in the agent XXX: or should we add a new field into this structure? 
+.PP
+Definition at line 308 of file snmp_api.h.
+.PP
+Referenced by snmp_synch_response_cb().
 
 .SH "Author"
 .PP 
