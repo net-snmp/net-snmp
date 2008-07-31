@@ -1,12 +1,170 @@
 -------------------------------------------------------------------------------
 
-Changes: V5.4.1 -> V5.4.2.pre2
+Changes: V5.4.1 -> V5.4.2.rc1
 
+2008-07-30 17:40  dts12
+
+   * agent/mibgroup/agentx/protocol.c:
+     CHANGES: agent: BUG: 2003144: Increase size of AgentX packet build buffer
+
+2008-07-30 17:28  dts12
+
+   * net-snmp-config.in:
+     CHANGES: build: PATCH: 1681035: from magfr: improve net-snmp-config /bin/sh compatibility
+     Back-port of SVN revision 15961
+
+2008-07-30 09:58  dts12
+
+   * agent/mibgroup/host/hr_filesys.c:
+     CHANGES: agent: BUG: 1557372: Realign hrFSStorageIndex with hrStorageTable
+
+2008-07-30 07:57  dts12
+
+   * snmplib/mib.c:
+     CHANGES: snmplib: BUG: 2027834: Extend string print buffer by the minimum necessary.
+
+2008-07-29 16:19  dts12
+
+   * agent/mibgroup/agentx/protocol.c:
+     a) Fix the size of the buffer in just one place
+     (makes it easier to change if necessary)
+     b) Fix various unfortunate line-breaks (within "pdu->flags")
+
+2008-07-28 14:39  dts12
+
+   * agent/mibgroup/mibII/var_route.c:
+     CHANGES: agent: BUG: 2023803: Ensure compilation is not dependent
+     on an irrelevant configure characteristic for HP-UX 11
+
+2008-07-28 11:41  dts12
+
+   * configure, configure.in, include/net-snmp/net-snmp-config.h.in:
+     NEWS: building: add --with-temp-file-pattern configure option
+     Backport of SVN revision 17121
+
+2008-07-28 10:56  dts12
+
+   * apps/snmpset.c:
+     CHANGES: apps: BUG: 1964136: Drop NULL type from snmpset usage message.
+
+2008-07-24 23:22  tanders
+
+   * man/snmpcmd.1.def:
+     CHANGES: documentation: BUG: 2027129: fix typo in snmpcmd.1
+
+2008-07-24 06:53  jsafranek
+
+   * agent/agent_read_config.c:
+     CHANGES: snmpd: PATCH: 1823800: release and reload all trap destinations on SIGHUP
+
+2008-07-21 13:44  dts12
+
+   * agent/helpers/old_api.c:
+     CHANGES: agent: PATCH 1944581: Protect against core dumps with long string index values.
+
+2008-07-17 15:07  dts12
+
+   * agent/Makefile.depend, agent/helpers/Makefile.depend,
+     agent/mibgroup/Makefile.depend, apps/Makefile.depend,
+     apps/snmpnetstat/Makefile.depend, snmplib/Makefile.depend:
+     make depend
+
+2008-07-17 14:42  dts12
+
+   * doxygen.conf:
+     - version tag ( 5.4.2.rc1 )
+
+2008-07-17 10:05  jsafranek
+
+   * agent/mibgroup/utilities/iquery.c:
+     CHANGES: snmpd: BUG: 2018031: Don't probe engineID in internal monitor sessions.
+
+2008-07-10 13:50  alex_b
+
+   * win32/Makefile.in:
+     CHANGES: building: BUG: 2014526: Win32: snmpv3-security-includes.h not installed
+
+2008-07-06 15:05  alex_b
+
+   * README.win32, win32/Configure, win32/build.pl,
+     win32/netsnmpmibssdk/Makefile.in:
+     CHANGES: bulding: Add support for winExtDLL to build.bat (win32)
+
+2008-07-06 12:38  alex_b
+
+   * win32/libsnmp_dll/libsnmp.def, win32/libsnmp_dll/libsnmp.def.in:
+     Win32 build fixes - add missing function for DLL build.
+
+2008-07-02 12:39  jsafranek
+
+   * agent/mibgroup/ip-forward-mib/data_access/route_linux.c:
+     CHANGES: snmpd: BUG: 2006786: Interface name can have more than 8 characters.
+
+2008-06-25 15:16  jsafranek
+
+   * perl/SNMP/SNMP.xs:
+     fix assertion when used with perl 5.10
+
+2008-06-24 22:36  tanders
+
+   * testing/tests/T001snmpv1get, testing/tests/T014snmpv2cget,
+     testing/tests/T015snmpv2cgetnext,
+     testing/tests/T0160snmpv2cbulkget,
+     testing/tests/T016snmpv2cgetfail,
+     testing/tests/T017snmpv2ctov1getfail,
+     testing/tests/T018snmpv1tov2cgetfail,
+     testing/tests/T019snmpv2cnosuch, testing/tests/T020snmpv3get,
+     testing/tests/T021snmpv3getnext,
+     testing/tests/T0220snmpv3bulkget:
+     CHANGES: building: Disable tests if the agent is built without the mib module they depend on.
+     Backport of r17087.
+
+2008-06-17 08:57  dts12
+
+   * snmplib/snmpTCPIPv6Domain.c:
+     Fix potential buffer overflow in sprintf for TCP/IPv6
+     Cross-port of revision 16668
+
+2008-06-16 23:55  tanders
+
+   * configure.in:
+     CHANGES: build: BUG: 1995172: fix --without-elf configure usage message
+
+2008-06-15 22:15  dts12
+
+   * FAQ, README, configure, configure.in, dist/net-snmp.spec,
+     sedscript.in, snmplib/snmp_version.c:
+     - version tag ( 5.4.2.pre2 )
+
+2008-06-15 22:14  dts12
+
+   * CHANGES, NEWS:
+     version update
+
+2008-06-15 21:55  dts12
+
+   * ChangeLog:
+     Version update
+     
+     Also fix all ChangeLog entries since the CVS->SVN move,
+     which have been omitting information about what files
+     were affected by any given change.
+
+2008-06-15 21:32  dts12
+
+   * agent/Makefile.depend, agent/helpers/Makefile.depend,
+     agent/mibgroup/Makefile.depend, apps/Makefile.depend,
+     apps/snmpnetstat/Makefile.depend, snmplib/Makefile.depend:
+     make depend
+
+2008-06-15 21:06  dts12
+
+   * doxygen.conf:
+     - version tag ( 5.4.2.pre2 )
 2008-06-13 22:16  dts12
 
    * dist/find-requires, dist/net-snmp.spec:
-     CHANGES: build: Improved RPM spec files, for better consistency
-     with vendor-provided packages.
+     CHANGES: build: Improved RPM spec files, for better consistency with vendor-provided packages.
      Provided by Jan Safranek
 
 2008-06-13 21:54  dts12
@@ -18,8 +176,7 @@ Changes: V5.4.1 -> V5.4.2.pre2
 2008-06-13 21:03  dts12
 
    * configure, configure.in:
-     CHANGES: build: PATCH: 1899762: Tweak embedded_perl configure
-     checks.
+     CHANGES: build: PATCH: 1899762: Tweak embedded_perl configure checks.
 
 2008-06-12 12:50  dts12
 
