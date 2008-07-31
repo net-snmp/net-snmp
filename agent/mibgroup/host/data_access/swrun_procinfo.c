@@ -62,7 +62,7 @@ netsnmp_arch_swrun_container_load( netsnmp_container *container, u_int flags)
     }
 
     for ( i=0 ; i<nprocs; i++ ) {
-        if (0 == proc_tablep[i].pi_state)
+        if (0 == proc_table[i].pi_state)
             continue;	/* Skip unused entries */
         entry = netsnmp_swrun_entry_create(proc_table[i].pi_pid);
         if (NULL == entry)
@@ -74,7 +74,7 @@ netsnmp_arch_swrun_container_load( netsnmp_container *container, u_int flags)
          *     argv[0]   is hrSWRunPath
          *     argv[1..] is hrSWRunParameters
          */
-        for ( cp1 = proc_table[i].pst_cmd; ' ' == *cp1; cp1++ )
+        for ( cp1 = proc_table[i].pi_comm; ' ' == *cp1; cp1++ )
             ;
         *cp1 = '\0';    /* End of argv[0] */
         entry->hrSWRunPath_len = snprintf(entry->hrSWRunPath,
