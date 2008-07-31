@@ -6,7 +6,7 @@
 ./agent_handler.lo: ../include/net-snmp/system/generic.h
 ./agent_handler.lo: ../include/net-snmp/machine/generic.h
 ./agent_handler.lo: ../include/net-snmp/net-snmp-includes.h
-./agent_handler.lo:  ../include/net-snmp/definitions.h
+./agent_handler.lo: ../include/net-snmp/definitions.h
 ./agent_handler.lo: ../include/net-snmp/types.h 
 ./agent_handler.lo: ../include/net-snmp/library/snmp_api.h
 ./agent_handler.lo: ../include/net-snmp/library/asn1.h
@@ -834,7 +834,8 @@
 ./agent_trap.lo: ../include/net-snmp/system/sysv.h
 ./agent_trap.lo: ../include/net-snmp/system/generic.h
 ./agent_trap.lo: ../include/net-snmp/machine/generic.h 
-./agent_trap.lo: ../include/net-snmp/utilities.h ../include/net-snmp/types.h
+./agent_trap.lo:  ../include/net-snmp/utilities.h
+./agent_trap.lo: ../include/net-snmp/types.h 
 ./agent_trap.lo: ../include/net-snmp/definitions.h
 ./agent_trap.lo: ../include/net-snmp/library/snmp_api.h
 ./agent_trap.lo: ../include/net-snmp/library/asn1.h
@@ -3773,7 +3774,7 @@
 ./helpers/table.lo: ../include/net-snmp/system/generic.h
 ./helpers/table.lo: ../include/net-snmp/machine/generic.h
 ./helpers/table.lo: ../include/net-snmp/net-snmp-includes.h
-./helpers/table.lo:  ../include/net-snmp/definitions.h
+./helpers/table.lo: ../include/net-snmp/definitions.h
 ./helpers/table.lo: ../include/net-snmp/types.h 
 ./helpers/table.lo: ../include/net-snmp/library/snmp_api.h
 ./helpers/table.lo: ../include/net-snmp/library/asn1.h

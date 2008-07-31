@@ -73,7 +73,7 @@
 ./check_varbind.lo: ../include/net-snmp/system/generic.h
 ./check_varbind.lo: ../include/net-snmp/machine/generic.h
 ./check_varbind.lo: ../include/net-snmp/net-snmp-includes.h
-./check_varbind.lo:  ../include/net-snmp/definitions.h
+./check_varbind.lo: ../include/net-snmp/definitions.h
 ./check_varbind.lo: ../include/net-snmp/types.h 
 ./check_varbind.lo: ../include/net-snmp/library/snmp_api.h
 ./check_varbind.lo: ../include/net-snmp/library/asn1.h
@@ -1044,7 +1044,7 @@
 ./scapi.lo: ../include/net-snmp/system/sysv.h
 ./scapi.lo: ../include/net-snmp/system/generic.h
 ./scapi.lo: ../include/net-snmp/machine/generic.h 
-./scapi.lo:  ../include/net-snmp/types.h
+./scapi.lo: ../include/net-snmp/types.h 
 ./scapi.lo:  ../include/net-snmp/definitions.h
 ./scapi.lo: ../include/net-snmp/library/snmp_api.h
 ./scapi.lo: ../include/net-snmp/library/asn1.h
@@ -1109,7 +1109,7 @@
 ./snmp_alarm.lo: ../include/net-snmp/system/sysv.h
 ./snmp_alarm.lo: ../include/net-snmp/system/generic.h
 ./snmp_alarm.lo: ../include/net-snmp/machine/generic.h 
-./snmp_alarm.lo: ../include/net-snmp/types.h 
+./snmp_alarm.lo:  ../include/net-snmp/types.h
 ./snmp_alarm.lo: ../include/net-snmp/definitions.h
 ./snmp_alarm.lo: ../include/net-snmp/library/snmp_api.h
 ./snmp_alarm.lo: ../include/net-snmp/library/asn1.h
@@ -1297,8 +1297,8 @@
 ./snmp_client.lo: ../include/net-snmp/system/sysv.h
 ./snmp_client.lo: ../include/net-snmp/system/generic.h
 ./snmp_client.lo: ../include/net-snmp/machine/generic.h 
-./snmp_client.lo:  ../include/net-snmp/types.h
-./snmp_client.lo:  ../include/net-snmp/definitions.h
+./snmp_client.lo: ../include/net-snmp/types.h 
+./snmp_client.lo: ../include/net-snmp/definitions.h
 ./snmp_client.lo: ../include/net-snmp/library/snmp_api.h
 ./snmp_client.lo: ../include/net-snmp/library/asn1.h
 ./snmp_client.lo: ../include/net-snmp/library/snmp_impl.h
@@ -1375,8 +1375,8 @@
 ./snmpIPXDomain.lo: ../include/net-snmp/system/sysv.h
 ./snmpIPXDomain.lo: ../include/net-snmp/system/generic.h
 ./snmpIPXDomain.lo: ../include/net-snmp/machine/generic.h
-./snmpIPXDomain.lo: ../include/net-snmp/types.h 
-./snmpIPXDomain.lo:  ../include/net-snmp/definitions.h
+./snmpIPXDomain.lo:  ../include/net-snmp/types.h
+./snmpIPXDomain.lo: ../include/net-snmp/definitions.h
 ./snmpIPXDomain.lo: ../include/net-snmp/library/snmp_api.h
 ./snmpIPXDomain.lo: ../include/net-snmp/library/asn1.h
 ./snmpIPXDomain.lo: ../include/net-snmp/library/snmp_impl.h
@@ -1399,9 +1399,8 @@
 ./snmpksm.lo: ../include/net-snmp/system/sysv.h
 ./snmpksm.lo: ../include/net-snmp/system/generic.h
 ./snmpksm.lo: ../include/net-snmp/machine/generic.h 
-./snmpksm.lo:  ../include/net-snmp/output_api.h
-./snmpksm.lo: ../include/net-snmp/types.h 
-./snmpksm.lo: ../include/net-snmp/definitions.h
+./snmpksm.lo: ../include/net-snmp/output_api.h ../include/net-snmp/types.h
+./snmpksm.lo:  ../include/net-snmp/definitions.h
 ./snmpksm.lo: ../include/net-snmp/library/snmp_api.h
 ./snmpksm.lo: ../include/net-snmp/library/asn1.h
 ./snmpksm.lo: ../include/net-snmp/library/snmp_impl.h
@@ -1512,8 +1511,8 @@
 ./snmp_logging.lo: ../include/net-snmp/system/sysv.h
 ./snmp_logging.lo: ../include/net-snmp/system/generic.h
 ./snmp_logging.lo: ../include/net-snmp/machine/generic.h 
-./snmp_logging.lo: ../include/net-snmp/types.h 
-./snmp_logging.lo: ../include/net-snmp/definitions.h
+./snmp_logging.lo:  ../include/net-snmp/types.h
+./snmp_logging.lo:  ../include/net-snmp/definitions.h
 ./snmp_logging.lo: ../include/net-snmp/library/snmp_api.h
 ./snmp_logging.lo: ../include/net-snmp/library/asn1.h
 ./snmp_logging.lo: ../include/net-snmp/library/snmp_impl.h
@@ -1552,7 +1551,7 @@
 ./snmp_parse_args.lo: ../include/net-snmp/system/sysv.h
 ./snmp_parse_args.lo: ../include/net-snmp/system/generic.h
 ./snmp_parse_args.lo: ../include/net-snmp/machine/generic.h
-./snmp_parse_args.lo:  ../include/net-snmp/types.h
+./snmp_parse_args.lo: ../include/net-snmp/types.h 
 ./snmp_parse_args.lo: ../include/net-snmp/definitions.h
 ./snmp_parse_args.lo: ../include/net-snmp/library/snmp_api.h
 ./snmp_parse_args.lo: ../include/net-snmp/library/asn1.h
@@ -1726,7 +1725,7 @@
 ./snmp-tc.lo: ../include/net-snmp/system/sysv.h
 ./snmp-tc.lo: ../include/net-snmp/system/generic.h
 ./snmp-tc.lo: ../include/net-snmp/machine/generic.h 
-./snmp-tc.lo:  ../include/net-snmp/types.h
+./snmp-tc.lo: ../include/net-snmp/types.h 
 ./snmp-tc.lo:  ../include/net-snmp/definitions.h
 ./snmp-tc.lo: ../include/net-snmp/library/snmp_api.h
 ./snmp-tc.lo: ../include/net-snmp/library/asn1.h
@@ -1738,8 +1737,8 @@
 ./snmpTCPDomain.lo: ../include/net-snmp/system/sysv.h
 ./snmpTCPDomain.lo: ../include/net-snmp/system/generic.h
 ./snmpTCPDomain.lo: ../include/net-snmp/machine/generic.h
-./snmpTCPDomain.lo:  ../include/net-snmp/types.h
-./snmpTCPDomain.lo: ../include/net-snmp/definitions.h
+./snmpTCPDomain.lo: ../include/net-snmp/types.h 
+./snmpTCPDomain.lo:  ../include/net-snmp/definitions.h
 ./snmpTCPDomain.lo: ../include/net-snmp/library/snmp_api.h
 ./snmpTCPDomain.lo: ../include/net-snmp/library/asn1.h
 ./snmpTCPDomain.lo: ../include/net-snmp/library/snmp_impl.h
@@ -1757,7 +1756,7 @@
 ./snmpTCPIPv6Domain.lo: ../include/net-snmp/system/sysv.h
 ./snmpTCPIPv6Domain.lo: ../include/net-snmp/system/generic.h
 ./snmpTCPIPv6Domain.lo: ../include/net-snmp/machine/generic.h
-./snmpTCPIPv6Domain.lo:  ../include/net-snmp/types.h
+./snmpTCPIPv6Domain.lo: ../include/net-snmp/types.h 
 ./snmpTCPIPv6Domain.lo: ../include/net-snmp/definitions.h
 ./snmpTCPIPv6Domain.lo: ../include/net-snmp/library/snmp_api.h
 ./snmpTCPIPv6Domain.lo: ../include/net-snmp/library/asn1.h
@@ -1825,8 +1824,8 @@
 ./snmpUDPDomain.lo: ../include/net-snmp/system/sysv.h
 ./snmpUDPDomain.lo: ../include/net-snmp/system/generic.h
 ./snmpUDPDomain.lo: ../include/net-snmp/machine/generic.h
-./snmpUDPDomain.lo: ../include/net-snmp/types.h 
-./snmpUDPDomain.lo:  ../include/net-snmp/definitions.h
+./snmpUDPDomain.lo:  ../include/net-snmp/types.h
+./snmpUDPDomain.lo: ../include/net-snmp/definitions.h
 ./snmpUDPDomain.lo: ../include/net-snmp/library/snmp_api.h
 ./snmpUDPDomain.lo: ../include/net-snmp/library/asn1.h
 ./snmpUDPDomain.lo: ../include/net-snmp/library/snmp_impl.h
@@ -1851,7 +1850,7 @@
 ./snmpUDPIPv6Domain.lo: ../include/net-snmp/system/sysv.h
 ./snmpUDPIPv6Domain.lo: ../include/net-snmp/system/generic.h
 ./snmpUDPIPv6Domain.lo: ../include/net-snmp/machine/generic.h
-./snmpUDPIPv6Domain.lo: ../include/net-snmp/types.h 
+./snmpUDPIPv6Domain.lo:  ../include/net-snmp/types.h
 ./snmpUDPIPv6Domain.lo: ../include/net-snmp/definitions.h
 ./snmpUDPIPv6Domain.lo: ../include/net-snmp/library/snmp_api.h
 ./snmpUDPIPv6Domain.lo: ../include/net-snmp/library/asn1.h
@@ -1947,8 +1946,8 @@
 ./snmpv3.lo: ../include/net-snmp/system/sysv.h
 ./snmpv3.lo: ../include/net-snmp/system/generic.h
 ./snmpv3.lo: ../include/net-snmp/machine/generic.h 
-./snmpv3.lo:  ../include/net-snmp/types.h
-./snmpv3.lo:  ../include/net-snmp/definitions.h
+./snmpv3.lo: ../include/net-snmp/types.h 
+./snmpv3.lo: ../include/net-snmp/definitions.h
 ./snmpv3.lo: ../include/net-snmp/library/snmp_api.h
 ./snmpv3.lo: ../include/net-snmp/library/asn1.h
 ./snmpv3.lo: ../include/net-snmp/library/snmp_impl.h
@@ -2026,8 +2025,8 @@
 ./system.lo: ../include/net-snmp/system/sysv.h
 ./system.lo: ../include/net-snmp/system/generic.h
 ./system.lo: ../include/net-snmp/machine/generic.h 
-./system.lo:  ../include/net-snmp/types.h
-./system.lo:  ../include/net-snmp/definitions.h
+./system.lo: ../include/net-snmp/types.h 
+./system.lo: ../include/net-snmp/definitions.h
 ./system.lo: ../include/net-snmp/library/snmp_api.h
 ./system.lo: ../include/net-snmp/library/asn1.h
 ./system.lo: ../include/net-snmp/library/snmp_impl.h
@@ -2194,8 +2193,8 @@
 ./tools.lo: ../include/net-snmp/system/sysv.h
 ./tools.lo: ../include/net-snmp/system/generic.h
 ./tools.lo: ../include/net-snmp/machine/generic.h 
-./tools.lo: ../include/net-snmp/types.h 
-./tools.lo: ../include/net-snmp/definitions.h
+./tools.lo:  ../include/net-snmp/types.h
+./tools.lo:  ../include/net-snmp/definitions.h
 ./tools.lo: ../include/net-snmp/library/snmp_api.h
 ./tools.lo: ../include/net-snmp/library/asn1.h
 ./tools.lo: ../include/net-snmp/library/snmp_impl.h
