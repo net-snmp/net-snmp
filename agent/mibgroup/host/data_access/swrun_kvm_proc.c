@@ -21,9 +21,14 @@
 #ifdef HAVE_SYS_TIME_H
 #include <sys/time.h>
 #endif
+#ifdef HAVE_SYS_USER_H
+#include <sys/user.h>
+#endif
 #ifdef HAVE_SYS_PROC_H
 #include <sys/proc.h>
 #endif
+    /* XXX - should really be protected */
+#include <sys/var.h>
 
 #ifdef HAVE_DIRENT_H
 #include <dirent.h>
@@ -40,6 +45,8 @@
 #include <net-snmp/library/container.h>
 #include <net-snmp/library/snmp_debug.h>
 #include <net-snmp/data_access/swrun.h>
+#include "kernel.h"
+#include "kernel_sunos5.h"
 
 /* ---------------------------------------------------------------------
  */
@@ -123,7 +130,7 @@ netsnmp_arch_swrun_container_load( netsnmp_container *container, u_int flags)
         /*
          * check for system processes
          */
-        entry->hrSWRunType = (SSYS & proc_buf->pi_flag)
+        entry->hrSWRunType = (SSYS & proc_buf->p_flag)
                               ? 2   /* kernel process */
                               : 4   /*  application   */
                               ;
