@@ -261,6 +261,7 @@ _load_v6(netsnmp_container *container, int idx_offset)
             DEBUGMSGTL(("access:arp:load_v6", "filling entry info failed\n"));
             netsnmp_access_arp_entry_free(entry);
             status -= NLMSG_ALIGN(len);
+            nlmp = (struct nlmsghdr*)((char*)nlmp + NLMSG_ALIGN(len));
             continue;
          }
          CONTAINER_INSERT(container, entry);
