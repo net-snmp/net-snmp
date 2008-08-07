@@ -962,9 +962,7 @@ does not strictly form a valid MIB structure.  This mechanism is being
 deprecated - please see the \fIextend\fR directive (described below) instead.
 .RE
 .IP
-In either case, the exit statement and output will be cached for 30s
-after the initial query.  This cache can be flushed by a SET request of
-the integer value 1\fR to the MIB instance \fCversionClearCache.0\fR.
+The agent does not cache the exit status or output of the executed program.
 .\"
 .\" XXX - Is this still true ??
 .\"
