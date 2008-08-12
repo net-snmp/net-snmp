@@ -725,11 +725,15 @@ var_hrswrun(struct variable * vp,
             if ((fp = fopen(string, "r")) == NULL)
                 return NULL;
             cp = fgets(buf, sizeof(buf), fp);        /* Name: process name */
-            if ( cp == NULL )
+            if ( cp == NULL ) {
+                fclose(fp);
                 return NULL;    /* the process probably died */
+            }
             cp = strchr(buf, ':');
-            if ( cp == NULL )
+            if ( cp == NULL ) {
+                fclose(fp);
                 return NULL;    /* the process file is malformed */
+            }
             ++cp;
             while (isspace(*cp))
                 ++cp;
