@@ -31,7 +31,8 @@ MIBS =	SNMPv2-TC.txt SNMPv2-TM.txt SNMPv2-SMI.txt SNMPv2-MIB.txt \
 	RMON-MIB.txt \
 	TUNNEL-MIB.txt \
 	TRANSPORT-ADDRESS-MIB.txt \
-	RFC1155-SMI.txt RFC1213-MIB.txt
+	RFC1155-SMI.txt RFC1213-MIB.txt\
+	SCTP-MIB.txt
 
 MIBDEPS = Makefile.mib mibfetch smistrip
 
@@ -192,6 +193,9 @@ RFC1155-SMI.txt:	$(MIBDEPS)
 
 RFC1213-MIB.txt:	$(MIBDEPS)
 	./mibfetch $(RFCHOST) $(RFCDIR) 1213
+
+SCTP-MIB.txt:	$(MIBDEPS)
+	./mibfetch $(RFCHOST) $(RFCDIR) 3873
 
 ianamibs:	ianalist
 	[ -d $(ALLDIR) ] || mkdir $(ALLDIR)
