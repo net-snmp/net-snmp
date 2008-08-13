@@ -94,7 +94,7 @@ _scopezone_v6(netsnmp_container* container, int idx_offset)
          * F: flags (see include/linux/rtnetlink.h, net/ipv6/addrconf.c)
          * I: interface
          */
-        rc = sscanf(line, "%39s %02x %02x %02x %02x\n",
+        rc = sscanf(line, "%39s %04x %02x %02x %02x\n",
                     addr, &if_index, &pfx_len, &scope, &flags);
         if( 5 != rc ) {
             snmp_log(LOG_ERR, PROCFILE " data format error (%d!=5), line ==|%s|\n",
