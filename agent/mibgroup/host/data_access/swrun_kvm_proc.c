@@ -22,6 +22,7 @@
 #include <sys/time.h>
 #endif
 #ifdef HAVE_SYS_USER_H
+#define _KMEMUSER
 #include <sys/user.h>
 #endif
 #ifdef HAVE_SYS_PROC_H
