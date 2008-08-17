@@ -1411,7 +1411,7 @@ agentx_parse_varbind(u_char * data, size_t * length, int *type,
 
         memcpy(data_buf, &tmp64, sizeof(tmp64));
 	*data_len = sizeof(tmp64);
-	bufp += 2 * sizeof(long);
+	bufp    += 8;
 	*length -= 8;
         break;
 
