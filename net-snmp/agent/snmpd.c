@@ -607,8 +607,26 @@ main(int argc, char *argv[])
 #if HAVE_UNISTD_H
         case 'g':
             if (optarg != NULL) {
+                char           *ecp;
+                int             gid;
+
+                gid = strtoul(optarg, &ecp, 10);
+                if (*ecp) {
+#if HAVE_GETPWNAM && HAVE_PWD_H
+                    struct group  *info;
+                    info = getgrnam(optarg);
+                    if (info) {
+                        gid = info->gr_gid;
+                    } else {
+#endif
+                        fprintf(stderr, "Bad group id: %s\n", optarg);
+                        exit(1);
+#if HAVE_GETPWNAM && HAVE_PWD_H
+                    }
+#endif
+                }
                 netsnmp_ds_set_int(NETSNMP_DS_APPLICATION_ID, 
-				   NETSNMP_DS_AGENT_GROUPID, atoi(optarg));
+				   NETSNMP_DS_AGENT_GROUPID, gid);
             } else {
                 usage(argv[0]);
             }
