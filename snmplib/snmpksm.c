@@ -461,7 +461,8 @@ ksm_rgenerate_out_msg(struct snmp_secmod_outgoing_params *parms)
 #endif                          /* MIT_NEW_CRYPTO */
     size_t          blocksize, encrypted_length;
     unsigned char  *encrypted_data = NULL;
-    int             zero = 0, i;
+    long            zero = 0, tmp;
+    int             i;
     u_char         *cksum_pointer, *endp = *parms->wholeMsg;
     krb5_cksumtype  cksumtype;
     krb5_checksum   pdu_checksum;
@@ -997,13 +998,13 @@ ksm_rgenerate_out_msg(struct snmp_secmod_outgoing_params *parms)
         goto error;
     }
 
+    tmp = cksumtype;
     rc = asn_realloc_rbuild_int(wholeMsg, parms->wholeMsgLen,
                                       parms->wholeMsgOffset, 1,
                                       (u_char) (ASN_UNIVERSAL |
                                                 ASN_PRIMITIVE |
                                                 ASN_OCTET_STR),
-                                      (long *) &cksumtype,
-                                      sizeof(cksumtype));
+                                      &tmp, sizeof(tmp));
 
     if (rc == 0) {
         DEBUGMSGTL(("ksm", "Building ksm security parameters failed.\n"));
