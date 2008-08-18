@@ -732,7 +732,7 @@ sub gettable {
     $vbl = $state->{'varbinds'};
 	
     my $repeatcount;
-    if ($this->{Version} == 1 || $state->{'options'}{nogetbulk}) {
+    if ($this->{Version} eq '1' || $state->{'options'}{nogetbulk}) {
 	$state->{'repeatcount'} = 1;
     } elsif ($state->{'options'}{'repeat'}) {
 	$state->{'repeatcount'} = $state->{'options'}{'repeat'};
@@ -754,7 +754,7 @@ sub gettable {
     # call the next processing function ourself.
     #
     if ($state->{'options'}{'callback'}) {
-	if ($this->{Version} > 1 && !$state->{'options'}{'nogetbulk'}) {
+	if ($this->{Version} ne '1' && !$state->{'options'}{'nogetbulk'}) {
 	    $res = $this->getbulk(0, $state->{'repeatcount'}, $vbl,
 				  [\&_gettable_do_it, $this, $vbl,
 				   $parse_indexes, $textnode, $state]);
@@ -764,7 +764,7 @@ sub gettable {
 				   $parse_indexes, $textnode, $state]);
 	}
     } else {
-	if ($this->{Version} > 1 && !$state->{'options'}{'nogetbulk'}) {
+	if ($this->{Version} ne '1' && !$state->{'options'}{'nogetbulk'}) {
 	    $res = $this->getbulk(0, $state->{'repeatcount'}, $vbl);
 	} else {
 	    $res = $this->getnext($vbl);
@@ -846,7 +846,7 @@ sub _gettable_do_it() {
         # call the next processing function ourself.
         #
 	if ($state->{'options'}{'callback'}) {
-	    if ($this->{Version} > 1 && !$state->{'options'}{'nogetbulk'}) {
+	    if ($this->{Version} ne '1' && !$state->{'options'}{'nogetbulk'}) {
 		$res = $this->getbulk(0, $state->{'repeatcount'}, $vbl,
 				      [\&_gettable_do_it, $this, $vbl,
 				       $parse_indexes, $textnode, $state]);
@@ -857,7 +857,7 @@ sub _gettable_do_it() {
 	    }
 	    return;
 	} else {
-	    if ($this->{Version} > 1 && !$state->{'options'}{'nogetbulk'}) {
+	    if ($this->{Version} ne '1' && !$state->{'options'}{'nogetbulk'}) {
 		$res = $this->getbulk(0, $state->{'repeatcount'}, $vbl);
 	    } else {
 		$res = $this->getnext($vbl);
