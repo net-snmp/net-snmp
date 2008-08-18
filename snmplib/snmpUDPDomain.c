@@ -111,7 +111,7 @@ netsnmp_udp_fmtaddr(netsnmp_transport *t, void *data, int len)
 
 
 
-#ifdef IP_PKTINFO
+#if defined(linux) && defined(IP_PKTINFO)
 
 # define netsnmp_dstaddr(x) (&(((struct in_pktinfo *)(CMSG_DATA(x)))->ipi_addr))
 
@@ -180,7 +180,7 @@ static int netsnmp_udp_sendto(int fd, struct in_addr *srcip, struct sockaddr *re
     };
     return sendmsg(fd, &m, MSG_NOSIGNAL|MSG_DONTWAIT);
 }
-#endif /* IP_PKTINFO */
+#endif /* linux && IP_PKTINFO */
 
 /*
  * You can write something into opaque that will subsequently get passed back 
@@ -209,11 +209,11 @@ netsnmp_udp_recv(netsnmp_transport *t, void *buf, int size,
         }
 
 	while (rc < 0) {
-#if defined IP_PKTINFO
+#if defined(linux) && defined(IP_PKTINFO)
             rc = netsnmp_udp_recvfrom(t->sock, buf, size, from, &fromlen, &(addr_pair->local_addr));
 #else
             rc = recvfrom(t->sock, buf, size, 0, from, &fromlen);
-#endif /* IP_PKTINFO */
+#endif /* linux && IP_PKTINFO */
 	    if (rc < 0 && errno != EINTR) {
 		break;
 	    }
@@ -262,11 +262,11 @@ netsnmp_udp_send(netsnmp_transport *t, void *buf, int size,
                     size, buf, str, t->sock));
         free(str);
 	while (rc < 0) {
-#if defined IP_PKTINFO
+#if defined(linux) && defined(IP_PKTINFO)
             rc = netsnmp_udp_sendto(t->sock, addr_pair ? &(addr_pair->local_addr) : NULL, to, buf, size);
 #else
             rc = sendto(t->sock, buf, size, 0, to, sizeof(struct sockaddr));
-#endif /* IP_PKTINFO */
+#endif /* linux && IP_PKTINFO */
 	    if (rc < 0 && errno != EINTR) {
 		break;
 	    }
@@ -637,7 +637,7 @@ netsnmp_udp_transport(struct sockaddr_in *addr, int local)
         t->local[5] = (htons(addr->sin_port) & 0x00ff) >> 0;
         t->local_length = 6;
 
-#ifdef  IP_PKTINFO
+#if defined(linux) && defined(IP_PKTINFO)
         { 
             int sockopt = 1;
             int sockoptlen = sizeof(int);
