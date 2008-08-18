@@ -12,7 +12,7 @@ config_require(sctp-mib/sctpScalars_linux)
  * couldn't determine the correct file!
  * require a bogus file to generate an error.
  */
-config_require(sctp-mib/scalars-unknown - arch)
+config_require(sctp-mib/scalars-unknown-arch)
 #endif
 /*
  * Initialize and register the sctpStats and sctpParams handlers.
