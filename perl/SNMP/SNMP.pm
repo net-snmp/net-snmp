@@ -714,7 +714,7 @@ sub gettable {
     $vbl = $varbinds;
 	
     my $repeatcount;
-    if ($this->{Version} == 1 || $options->{nogetbulk}) {
+    if ($this->{Version} eq '1' || $options->{nogetbulk}) {
 	$repeatcount = 1;
     } elsif ($options->{'repeat'}) {
 	$repeatcount = $options->{'repeat'};
@@ -727,7 +727,7 @@ sub gettable {
 	$repeatcount = int(1000 / 36 / ($#$varbinds + 1));
     }
 
-    if ($this->{Version} > 1 && !$options->{'nogetbulk'}) {
+    if ($this->{Version} ne '1' && !$options->{'nogetbulk'}) {
 	$res = $this->getbulk(0, $repeatcount, $vbl);
     } else {
 	$res = $this->getnext($vbl);
@@ -784,7 +784,7 @@ sub gettable {
 	$vbl = $varbinds;
 	$stopconds = $newstopconds;
 
-	if ($this->{Version} > 1 && !$options->{'nogetbulk'}) {
+	if ($this->{Version} ne '1' && !$options->{'nogetbulk'}) {
 	    $res = $this->getbulk(0, $repeatcount, $vbl);
 	} else {
 	    $res = $this->getnext($vbl);
