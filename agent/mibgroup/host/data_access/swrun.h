@@ -27,6 +27,7 @@ config_exclude(host/hr_swrun)
 #elif defined( dynix )
     config_require(host/data_access/swrun_prpsinfo)
 #elif defined( solaris2 )
+#define _SLASH_PROC_METHOD 1     /* XXX - force use of /proc/%d/psinfo */
 # if _SLASH_PROC_METHOD
     config_require(host/data_access/swrun_procfs_psinfo)
 # else
