@@ -922,10 +922,31 @@ static int
 smux_auth_peer(oid * name, size_t namelen, char *passwd, int fd)
 {
     int             i;
+    oid             oid_name[MAX_OID_LEN];
+    char            passwd[SMUXMAXSTRLEN];
+    char            oid_print[SMUXMAXSTRLEN];
+    size_t          oid_name_len, string_len;
+
+
+    if (snmp_get_do_debugging()) {
+        snprint_objid(oid_print, sizeof(oid_print), name, namelen);
+        DEBUGMSGTL(("smux:auth", "[smux_auth_peer] Authorizing: %s, %s\n",
+                    oid_print, passwd));
+    }
 
     for (i = 0; i < nauths; i++) {
+        if (snmp_get_do_debugging()) {
+            snprint_objid(oid_print, sizeof(oid_print),
+                          Auths[i]->sa_oid, Auths[i]->sa_oid_len);
+            DEBUGMSGTL(("smux:auth", "[smux_auth_peer] Checking OID: %s (%d)\n",
+                    oid_print, i));
+        }
         if (snmp_oid_compare(Auths[i]->sa_oid, Auths[i]->sa_oid_len,
                              name, namelen) == 0) {
+            if (snmp_get_do_debugging()) {
+                DEBUGMSGTL(("smux:auth", "[smux_auth_peer] Checking P/W: %s (%d)\n",
+                        Auths[i]->sa_passwd, Auths[i]->sa_active_fd));
+            }
             if (!(strcmp(Auths[i]->sa_passwd, passwd)) &&
                 (Auths[i]->sa_active_fd == -1)) {
                 /*
