@@ -22,6 +22,7 @@ listing of all changes made to the code.
       - [PATCH 1895927]: change obsolete recv/send to recvfrom/sendto
       - [PATCH 1898204], [BUF 1898198]: fix segfault when parsing broken mibs.
       - [PATCH 1921861]: Avoid endless loop after truncating 64bit int
+      - [PATCH 2003450]: Fix a couple of 64-bit problems
       - Change CONTAINER_INSERT to not do partial inserts in containers
 	with multiple indices when one insert fails.
       - Do not leak memory whenever an udp address is formatted.
@@ -67,6 +68,9 @@ listing of all changes made to the code.
       - [PATCH 1944581]: Don't core dump on long string index values.
       - [PATCH 1951996]: Fix for CPU stats on FreeBSD
       - [PATCH 1967194]: Recognise NFS4 mounts
+      - [PATCH 2014204]: Support -g {groupname}
+      - [PATCH 2022936]: Fix AgentX Counter64 decoding on 64-bit architectures
+      - [PATCH 2023633]: add SCTP-MIB implementation (Linux only)
       - Enforce the lower limit on scalar_groups
       - suppress annoying "registration != duplicate" warning for root oids
       - Handle device names with embedded spaces in UCD-SNMP-MIB (dskDevice)
@@ -110,6 +114,7 @@ listing of all changes made to the code.
       - [PATCH 1914643]: fix issues with embedded perl
       - [PATCH 1914645]: better end of mib support
       - [PATCH 1920390]: fix registration of tables with .0 as IIDs
+      - [PATCH 2021444]: Support SNMPv2c in gettable
       - fixed an extra brace in the docs pointed out by Jason Martin
 
     python:
