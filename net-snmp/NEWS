@@ -9,6 +9,7 @@ listing of all changes made to the code.
       - Better handling of CONTAINER_INSERT failures with multiple indices
 
     snmpd:
+      - [PATCH 2023633]: add SCTP-MIB implementation (Linux only)
       - suppress annoying "registration != duplicate" warning for root oids
 
     build:
