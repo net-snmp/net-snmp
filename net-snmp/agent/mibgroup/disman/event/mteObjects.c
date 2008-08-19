@@ -286,8 +286,11 @@ mteObjects_vblist( netsnmp_variable_list *vblist,
     oid    name[MAX_OID_LEN];
     size_t name_len;
 
-    if (!oname || !*oname)
+    if (!oname || !*oname) {
+        DEBUGMSGTL(("disman:event:objects", "No objects to add (%s)\n",
+                                         owner));
         return 1;   /* Empty object name means nothing to add */
+    }
 
     DEBUGMSGTL(("disman:event:objects", "Objects add (%s, %s)\n",
                                          owner, oname ));
