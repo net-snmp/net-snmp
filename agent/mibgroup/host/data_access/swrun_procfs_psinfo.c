@@ -23,8 +23,14 @@
 #include <fcntl.h>
 #endif
 
+#define HAVE_SYS_PROCFS_H    /* XXX - Needs a configure check! */
 #ifdef HAVE_SYS_PROCFS_H
+#define _KERNEL              /* For psinfo_t */
 #include <sys/procfs.h>
+#undef _KERNEL
+#endif
+#ifdef HAVE_SYS_PROC_H
+#include <sys/proc.h>
 #endif
 
 #include <net-snmp/net-snmp-includes.h>
@@ -51,7 +57,7 @@ netsnmp_arch_swrun_container_load( netsnmp_container *container, u_int flags)
     struct dirent       *procentry_p;
     psinfo_t             psinfo;
     int                  pid, rc, fd;
-    char                *cp1, *cp2;
+    char                *cp, buf[512];
     netsnmp_swrun_entry *entry;
 
     procdir = opendir("/proc");
@@ -78,7 +84,7 @@ netsnmp_arch_swrun_container_load( netsnmp_container *container, u_int flags)
          *   from the various /proc{PID}/ interface files
          */
 
-        snprintf( buf, BUF_SIZ, "/proc/%d/psinfo", pid );
+        snprintf( buf, sizeof(buf), "/proc/%d/psinfo", pid );
         fd = open( buf, O_RDONLY );
         read( fd, &psinfo, sizeof(psinfo));
         close(fd);
@@ -91,17 +97,17 @@ netsnmp_arch_swrun_container_load( netsnmp_container *container, u_int flags)
          *     argv[0]   is hrSWRunPath
          *     argv[1..] is hrSWRunParameters
          */
-        for ( cp1 = psinfo.pr_psargs; ' ' == *cp; cp++ )
+        for ( cp = psinfo.pr_psargs; ' ' == *cp; cp++ )
             ;
-        *cp1 = '\0';    /* End of argv[0] */
+        *cp = '\0';    /* End of argv[0] */
         entry->hrSWRunPath_len = snprintf(entry->hrSWRunPath,
                                    sizeof(entry->hrSWRunPath)-1,
                                           "%s", psinfo.pr_psargs);
 
         entry->hrSWRunParameters_len = snprintf(entry->hrSWRunParameters,
                                          sizeof(entry->hrSWRunParameters)-1,
-                                          "%s", cp1+1);
-        *cp1 = ' ';     /* Restore pr_psargs value */
+                                          "%s", cp+1);
+        *cp = ' ';     /* Restore pr_psargs value */
 
         /*
          * check for system processes
