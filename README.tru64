@@ -36,11 +36,15 @@ on Tru64 Unix 5.1:
 There's no support for the IPv6 MIBs, though.
 
 
-4. Testing
-----------
+4. Known problems
+-----------------
 
-"make test" reports a number of problems on Tru64 Unix. It is yet to be checked
-whether these are problems in the test scripts or the toolkit.
+"make test" is known to report the following failure:
+
+  59: testing full snmpwalk (SNMPv2c) against agent (may take time)... FAIL
+
+so it's obvious that there are still problems with some MIB modules on Tru64.
+If you have ideas how to fix them, please let us know!
 
 
 5. Feedback
