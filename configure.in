@@ -735,6 +735,7 @@ AC_ARG_WITH(out_mib_modules,
       misc/ipfwacc         accounting rules IP firewall information
       ipfwchains/ipfwchains  firewall chains under ipfw
                              (See agent/mibgroup/ipfwchains/README)
+      sctp-mib             support for the SCTP-MIB
 
     Solaris
       ucd-snmp/lmSensors   hardware monitoring (LM-SENSORS-MIB)
