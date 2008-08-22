@@ -1142,7 +1142,11 @@ var_hrswrun(struct variable * vp,
         return (u_char *) & long_return;
     case HRSWRUNPERF_MEM:
 #ifdef HAVE_SYS_PSTAT_H
+# ifdef PGSHIFT
         long_return = (proc_buf.pst_rssize << PGSHIFT) / 1024;
+# else
+        long_return = proc_buf.pst_rssize * getpagesize() / 1024;
+# endif
 #elif defined(dynix)
         long_return = (lowpsinfo.pr_rssize * MMU_PAGESIZE) / 1024;
 #elif defined(solaris2)
