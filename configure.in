@@ -3943,11 +3943,7 @@ AC_INCLUDES_DEFAULT()
 #include <sys/param.h>
 #endif
 #ifdef HAVE_SYS_SOCKET_H
-#define KERNEL
-#define _KERNEL
 #include <sys/socket.h>
-#undef KERNEL
-#undef _KERNEL
 #endif
 ]])
 
@@ -3965,6 +3961,48 @@ AC_INCLUDES_DEFAULT()
 #endif
 ]])
 
+AC_CACHE_CHECK([if _KERNEL needs to be defined for if_mtu],
+        [ac_cv_IFNET_NEEDS_KERNEL],
+[ac_cv_IFNET_NEEDS_KERNEL=unknown
+AC_COMPILE_IFELSE(AC_LANG_PROGRAM([
+#include <sys/types.h>
+#ifdef HAVE_SYS_PARAM_H
+#include <sys/param.h>
+#endif
+#ifdef HAVE_SYS_SOCKET_H
+#include <sys/socket.h>
+#endif
+#ifdef HAVE_NET_IF_H
+#include <net/if.h>
+#endif
+#ifdef HAVE_NET_IF_VAR_H
+#include <net/if_var.h>
+#endif], [[struct ifnet test; test.if_mtu = 0;]]),
+        [ac_cv_IFNET_NEEDS_KERNEL=no])
+if test "$ac_cv_IFNET_NEEDS_KERNEL" = unknown ; then
+AC_COMPILE_IFELSE(AC_LANG_PROGRAM([
+#define _KERNEL 1
+#include <sys/types.h>
+#ifdef HAVE_SYS_PARAM_H
+#include <sys/param.h>
+#endif
+#ifdef HAVE_SYS_SOCKET_H
+#include <sys/socket.h>
+#endif
+#ifdef HAVE_NET_IF_H
+#include <net/if.h>
+#endif
+#ifdef HAVE_NET_IF_VAR_H
+#include <net/if_var.h>
+#endif], [[struct ifnet test; test.if_mtu = 0;]]),
+        [ac_cv_IFNET_NEEDS_KERNEL=yes])
+fi])
+
+if test "x$ac_cv_IFNET_NEEDS_KERNEL" = "xyes"; then
+  AC_DEFINE(NETSNMP_IFNET_NEEDS_KERNEL, 1,
+        [ifnet needs to have _KERNEL defined])
+fi
+
 # Check struct rtentry for various things.
 AC_CHECK_MEMBERS([struct rtentry.rt_dst, struct rtentry.rt_unit,
                   struct rtentry.rt_refcnt, struct rtentry.rt_hash,
@@ -3974,8 +4012,10 @@ AC_CHECK_MEMBERS([struct rtentry.rt_dst, struct rtentry.rt_unit,
 #include <sys/param.h>
 #endif
 #ifdef HAVE_SYS_SOCKET_H
+#ifdef NETSNMP_IFNET_NEEDS_KERNEL
 #define KERNEL
 #define _KERNEL
+#endif
 #include <sys/socket.h>
 #undef KERNEL
 #undef _KERNEL
@@ -3993,8 +4033,10 @@ AC_TRY_COMPILE([
 #include <sys/param.h>
 #endif
 #include <sys/types.h>
+#ifdef NETSNMP_IFNET_NEEDS_KERNEL
 #define KERNEL
 #define _KERNEL
+#endif
 #include <sys/socket.h>
 #undef KERNEL
 #undef _KERNEL
@@ -4017,8 +4059,10 @@ AC_TRY_COMPILE([
 #include <sys/param.h>
 #endif
 #include <sys/types.h>
+#ifdef NETSNMP_IFNET_NEEDS_KERNEL
 #define KERNEL
 #define _KERNEL
+#endif
 #include <sys/socket.h>
 #undef KERNEL
 #undef _KERNEL
@@ -4083,49 +4127,6 @@ AC_INCLUDES_DEFAULT()
 #endif
 ]])
 
-# irix checks
-
-AC_CACHE_CHECK([if _KERNEL needs to be defined for if_mtu],
-        [ac_cv_IFNET_NEEDS_KERNEL],
-[ac_cv_IFNET_NEEDS_KERNEL=unknown
-AC_COMPILE_IFELSE(AC_LANG_PROGRAM([
-#include <sys/types.h>
-#ifdef HAVE_SYS_PARAM_H
-#include <sys/param.h>
-#endif
-#ifdef HAVE_SYS_SOCKET_H
-#include <sys/socket.h>
-#endif
-#ifdef HAVE_NET_IF_H
-#include <net/if.h>
-#endif
-#ifdef HAVE_NET_IF_VAR_H
-#include <net/if_var.h>
-#endif], [[struct ifnet test; test.if_mtu = 0;]]),
-        [ac_cv_IFNET_NEEDS_KERNEL=no])
-if test "$ac_cv_IFNET_NEEDS_KERNEL" = unknown ; then
-AC_COMPILE_IFELSE(AC_LANG_PROGRAM([
-#define _KERNEL 1
-#include <sys/types.h>
-#ifdef HAVE_SYS_PARAM_H
-#include <sys/param.h>
-#endif
-#ifdef HAVE_SYS_SOCKET_H
-#include <sys/socket.h>
-#endif
-#ifdef HAVE_NET_IF_H
-#include <net/if.h>
-#endif
-#ifdef HAVE_NET_IF_VAR_H
-#include <net/if_var.h>
-#endif], [[struct ifnet test; test.if_mtu = 0;]]),
-        [ac_cv_IFNET_NEEDS_KERNEL=yes])
-fi])
-
-if test "x$ac_cv_IFNET_NEEDS_KERNEL" = "xyes"; then
-  AC_DEFINE(NETSNMP_IFNET_NEEDS_KERNEL, 1,
-        [ifnet needs to have _KERNEL defined])
-fi
 
 AC_CHECK_MEMBERS([struct ifaddr.ifa_next],,,[
 [#ifdef NETSNMP_IFNET_NEEDS_KERNEL
