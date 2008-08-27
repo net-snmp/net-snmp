@@ -45,6 +45,16 @@ void init_cpu_linux( void ) {
             strcat( cpu->descr, "An S/390 CPU" );
 #endif
         }
+#if defined(__s390__) || defined(__s390x__)
+        /* s390 may have different format of CPU_FILE */
+        else { 
+            if (sscanf( buf, "processor %d:", &i ) == 1)  {
+                cpu = netsnmp_cpu_get_byIdx( i, 1 );
+                sprintf( cpu->name, "cpu%d", i );
+                strcat( cpu->descr, "An S/390 CPU" );
+            }
+        }
+#endif
 
 #ifdef DESCR2_FIELD
         if (!strncmp( buf, DESCR_FIELD, strlen(DESCR_FIELD))) {
