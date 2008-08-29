@@ -46,6 +46,8 @@ while (<>) {
             $z = $_;
             $z =~ s/[ \t]*$prefix/ /;
             $stuff .= $z;
+        } else {
+            $stuff .= " ".$_;
         }
         if ( /:/ ) {
             #
