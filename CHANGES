@@ -86,11 +86,14 @@ listing of all changes made to the code.
       - [BUG 1872266]: PERLCC check fails for CC with options
       - [BUG 1995172]: fix --without-elf configure usage
       - [BUG 2014526]: Win32: snmpv3-security-includes.h not installed
+      - [BUG 2023803]: Compilation problems on HP-UX 11.31
       - [PATCH 1681035]: improve net-snmp-config /bin/sh compatibility
       - [PATCH 1899762]: Tweak embedded_perl configure checks.
       - add --with-temp-file-pattern configure option
       - Add support for winExtDLL to build.bat (win32)
       - Disable agent tests if built without necessary mib modules
+      - Limit the use of _KERNEL definitions in configure tests to match
+        the use of _KERNEL in our codebase
       - Update to libtool 1.5.26
 
     mib2c:
