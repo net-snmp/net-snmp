@@ -1,56 +1,93 @@
+#########################################
+##
+# Checks for types
+##
+#########################################
+
+##
+#   Standard checks:
+##
+
 # Checks for typedefs, structures, and compiler characteristics.
 AC_TYPE_OFF_T
 AC_TYPE_PID_T
 AC_HEADER_TIME
 
-# this should use AC_CHECK_TYPE, but it's broken at least in 2.13-14
-# so we do it by hand.
+
+##
+#   More complex checks:
+##
+
+#   Check for 'socklen_t'                           (HP-UX)
+#       (should really use AC_CHECK_TYPE, but
+#         this was broken at least in 2.13-14)
+#
+#       XXX - is it safe to revert to AC_CHECK_TYPE now?
+#
 AC_MSG_CHECKING([for socklen_t])
 AC_CACHE_VAL(ac_cv_type_$1,
-[AC_EGREP_CPP([socklen_t@<:@^a-zA-Z_0-9@:>@],
-[#include <sys/types.h>
+    [AC_EGREP_CPP([socklen_t@<:@^a-zA-Z_0-9@:>@],
+        [
+#include <sys/types.h>
 #if STDC_HEADERS
 #include <stdlib.h>
 #include <stddef.h>
 #endif
 #ifdef HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
-#endif], [ac_cv_type_socklen_t=yes], [ac_cv_type_socklen_t=no])])
+#endif
+        ],
+        [ac_cv_type_socklen_t=yes],
+        [ac_cv_type_socklen_t=no])])
 
 AC_MSG_RESULT([$ac_cv_type_socklen_t])
 if test $ac_cv_type_socklen_t = yes; then
-  AC_DEFINE(HAVE_SOCKLEN_T)
+    AC_DEFINE(HAVE_SOCKLEN_T)
 fi
 
-# AIX keeps in_addr_t in /usr/include/netinet/in.h
+
+#   Check for 'in_addr_t'
+#       May be in <netinet/in.h>                        (AIX)
+#
 AC_MSG_CHECKING([for in_addr_t])
 AC_CACHE_VAL(ac_cv_type_$1,
-[AC_EGREP_CPP([in_addr_t@<:@^a-zA-Z_0-9@:>@],
-[#include <sys/types.h>
+    [AC_EGREP_CPP([in_addr_t@<:@^a-zA-Z_0-9@:>@],
+        [
+#include <sys/types.h>
 #if STDC_HEADERS
 #include <stdlib.h>
 #include <stddef.h>
 #endif
 #ifdef HAVE_NETINET_IN_H
 #include <netinet/in.h>
-#endif], [ac_cv_type_in_addr_t=yes], [ac_cv_type_in_addr_t=no])])
+#endif
+        ],
+        [ac_cv_type_in_addr_t=yes],
+        [ac_cv_type_in_addr_t=no])])
 
 AC_MSG_RESULT([$ac_cv_type_in_addr_t])
 if test $ac_cv_type_in_addr_t = yes; then
-  AC_DEFINE(HAVE_IN_ADDR_T)
+    AC_DEFINE(HAVE_IN_ADDR_T)
 fi
 
-# Older versions of MinGW do not define ssize_t in sys/types
+
+#   Check for 'ssize_t'
+#       Not necessarily in <sys/types.h>                (older MinGW)
+#
 AC_MSG_CHECKING([for ssize_t])
 AC_CACHE_VAL(ac_cv_type_$1,
-[AC_EGREP_CPP([ssize_t@<:@^a-zA-Z_0-9@:>@],
-[#include <sys/types.h>
+    [AC_EGREP_CPP([ssize_t@<:@^a-zA-Z_0-9@:>@],
+        [
+#include <sys/types.h>
 #if STDC_HEADERS
 #include <stdlib.h>
 #include <stddef.h>
-#endif], [ac_cv_type_ssize_t=yes], [ac_cv_type_ssize_t=no])])
+#endif
+        ],
+        [ac_cv_type_ssize_t=yes],
+        [ac_cv_type_ssize_t=no])])
 
 AC_MSG_RESULT([$ac_cv_type_ssize_t])
 if test $ac_cv_type_ssize_t = yes; then
-  AC_DEFINE(HAVE_SSIZE_T, 1, [Define if type ssize_t is available])
+    AC_DEFINE(HAVE_SSIZE_T, 1, [Define if type ssize_t is available])
 fi
