@@ -26,6 +26,19 @@ AC_DEFINE_UNQUOTED(NETSNMP_CONFIGURE_OPTIONS,"$ac_configure_args")
 CONFIGURE_OPTIONS="\"$ac_configure_args"\"
 AC_SUBST(CONFIGURE_OPTIONS)
 
+##
+## Recommended structure:
+##
+#     information on the package
+#     checks for programs
+#     checks for libraries
+#     checks for header files
+#     checks for types
+#     checks for structures
+#     checks for compiler characteristics
+#     checks for library functions
+#     checks for system services
+
 m4_include([configure.d/config_project_with_enable])
 m4_include([configure.d/config_os_progs])
 m4_include([configure.d/config_project_paths])
@@ -42,6 +55,7 @@ m4_include([configure.d/config_os_misc3])
 m4_include([configure.d/config_os_functions])
 m4_include([configure.d/config_os_struct_members])
 m4_include([configure.d/config_os_misc4])
+
 #
 # define the agent libraries variables
 #
@@ -53,6 +67,7 @@ AC_SUBST(OTHERAGENTLIBLOBJS)
 m4_include([configure.d/config_project_manual])
 
 AC_SUBST(DLLIBS)
+
 AC_CONFIG_FILES([Makefile:Makefile.top:Makefile.in:Makefile.rules])
 AC_CONFIG_FILES([snmplib/Makefile:Makefile.top:snmplib/Makefile.in:Makefile.rules:snmplib/Makefile.depend])
 AC_CONFIG_FILES([apps/Makefile:Makefile.top:apps/Makefile.in:Makefile.rules:apps/Makefile.depend])
