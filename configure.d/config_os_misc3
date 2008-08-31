@@ -1,24 +1,37 @@
-# Check ps args
-AC_CACHE_CHECK([for correct flags to ps], ac_cv_ps_flags,
-[if test "`($PSPROG -e 2>&1) | $EGREP ' (ps) *$' | awk '{print $NF}'`" = "ps" ; then
-  ac_cv_ps_flags="-e"
+#########################################
+##
+# Miscellaneous checks
+##
+#########################################
+
+##
+#   Operating-System characteristics
+##
+
+#       Check ps args
+#
+AC_CACHE_CHECK([for correct flags to ps],
+     ac_cv_ps_flags,
+     [
+if test "`($PSPROG -e 2>&1) | $EGREP ' (ps) *$' | awk '{print $NF}'`" = "ps" ; then
+    ac_cv_ps_flags="-e"
 elif test "`($PSPROG -el 2>&1) | $EGREP ' (ps) *$' | awk '{print $NF}'`" = "ps" ; then
-  ac_cv_ps_flags="-el"
+    ac_cv_ps_flags="-el"
 elif test "`($PSPROG acx 2>&1) | $EGREP ' (ps) *$' | awk '{print $NF}'`" = "ps" ; then
-  ac_cv_ps_flags="acx"
+    ac_cv_ps_flags="acx"
 elif test "`($PSPROG -acx 2>&1) | $EGREP ' (ps) *$' | awk '{print $NF}'`" = "ps" ; then
-  ac_cv_ps_flags="-acx"
+    ac_cv_ps_flags="-acx"
 elif test "`($PSPROG -o pid,tt,state,time,ucomm 2>&1) | $EGREP ' ps *$' | awk '{print $NF}'`" = "ps" ; then
-  ac_cv_ps_flags="-o pid,tt,state,time,ucomm"
+    ac_cv_ps_flags="-o pid,tt,state,time,ucomm"
 elif test "`($PSPROG ax 2>&1) | $EGREP ' (ps) *$' | awk '{print $NF}'`" = "ps" ; then
-  ac_cv_ps_flags="ax"
+    ac_cv_ps_flags="ax"
 elif test "x$PARTIALTARGETOS" = "xcygwin"; then
-  ac_cv_ps_flags="-e"
+    ac_cv_ps_flags="-e"
 elif test "x$PARTIALTARGETOS" = "xmingw32" -o "x$PARTIALTARGETOS" = "xmingw32msvc"; then 
-  ac_cv_ps_flags="-e"
+    ac_cv_ps_flags="-e"
 else
-  AC_MSG_WARN([Unable to determine valid ps flags...  defaulting...])
-  ac_cv_ps_flags="-acx"
+    AC_MSG_WARN([Unable to determine valid ps flags...  defaulting...])
+    ac_cv_ps_flags="-acx"
 fi
 ])
 
@@ -26,16 +39,22 @@ PSCMD="$PSPROG $ac_cv_ps_flags"
 AC_SUBST(PSCMD)
 AC_DEFINE_UNQUOTED(PSCMD, "$PSPROG $ac_cv_ps_flags")
 
-# Checks for byte order
+
+##
+#   Compilation characteristics
+##
+
+#       Byte order
+#
 if test $cross_compiling = yes; then
-  if test $with_endianness = "big"; then
-    AC_DEFINE(WORDS_BIGENDIAN)
-  elif test -z $with_endianness; then
-    AC_MSG_ERROR([You are cross-compiling, but you have not specified the target's endianness])
-  fi
+    if test $with_endianness = "big"; then
+        AC_DEFINE(WORDS_BIGENDIAN)
+    elif test -z $with_endianness; then
+        AC_MSG_ERROR([You are cross-compiling, but you have not specified the target's endianness])
+    fi
 else
-  if test $with_endianness; then
-    AC_MSG_ERROR([Endianness has been specified, but you are not cross-compiling.])
-  fi
-  AC_C_BIGENDIAN
+    if test $with_endianness; then
+        AC_MSG_ERROR([Endianness has been specified, but you are not cross-compiling.])
+    fi
+    AC_C_BIGENDIAN
 fi

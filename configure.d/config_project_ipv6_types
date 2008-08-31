@@ -1,8 +1,19 @@
+#########################################
+##
+# Checks for types
+##
+#########################################
+
+##
+#   Standard checks:
+##
+
 AC_CHECK_SIZEOF(short)
 AC_CHECK_SIZEOF(int)
 AC_CHECK_SIZEOF(long)
 AC_CHECK_SIZEOF(long long)
 AC_CHECK_SIZEOF(intmax_t)
+
 AC_TYPE_INT8_T
 AC_TYPE_INT16_T
 AC_TYPE_INT32_T
@@ -15,14 +26,33 @@ AC_TYPE_UINT64_T
 AC_TYPE_UINTMAX_T
 AC_TYPE_INTPTR_T
 AC_TYPE_UINTPTR_T
+
+##
+#   Other type checks:
+##
+
 AC_CHECK_TYPES([off64_t])
 AC_CHECK_TYPES([nfds_t],,,[#include <sys/poll.h>])
 
-# solaris specific types
+#   Solaris specific checks
+#       (taken from Perl's configure script)
+#
 AC_CHECK_TYPES([Counter64],,,[#include <inet/mib2.h>])
 AC_CHECK_TYPES([mib2_ipIfStatsEntry_t],,,[#include <inet/mib2.h>])
 
-# guess IPv6 stack type.
+#   N.B:  The above checks could safely be moved to
+#         the later 'config_types' sub-script
+#
+
+
+##
+#   Determine the IPv6 stack type
+##
+
+#       These checks also set the LIBS/CFLAGS variables,
+#       which may be needed for subsequent function tests
+#
+
 if test "x$enable_ipv6" = "xyes"; then
 	v6type=unknown
 	v6lib=none

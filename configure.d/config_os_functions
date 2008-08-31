@@ -1,66 +1,68 @@
+#########################################
+##
 # Checks for library functions.
-AC_FUNC_ALLOCA
+##
+#########################################
+
+##
+#   Standard checks:
+##
+AC_FUNC_ALLOCA          #  alloca()
 AC_PROG_GCC_TRADITIONAL
-AC_FUNC_MEMCMP
+AC_FUNC_MEMCMP          #  memcmp()   -  obs
 AC_TYPE_SIGNAL
 AC_FUNC_GETMNTENT
-AC_CHECK_FUNCS(setmntent hasmntopt gethostname uname gettimeofday select poll socket strtol strtoul strlcpy)
-AC_CHECK_FUNCS(strchr strtok_r strdup memcpy memmove index bcopy strcasestr regcomp)
-AC_CHECK_FUNCS(signal setsid sigset sigblock sighold strerror setenv vsnprintf snprintf)
-AC_CHECK_FUNCS(sigaction)
-AC_CHECK_FUNCS(random lrand48 rand)
-AC_CHECK_FUNCS(execv system fork getpid strncasecmp sigalrm)
-AC_CHECK_FUNCS(lseek64 pread64)
+
+##
+#   Stand-alone function checks:
+##
+AC_CHECK_FUNCS([bcopy           execv         fork                           \
+                gai_strerror    getaddrinfo   getdtablesize                  \
+                getfsstat       getgrnam      gethostname                    \
+                getipnodebyname getloadavg    getpagesize                    \
+                getpid          getpwnam      gettimeofday   getvfsstat      \
+                hasmntopt                                                    \
+                if_nameindex    if_nametoindex    if_freenameindex           \
+                index           initgroups                                   \
+                lrand48         lseek64                                      \
+                memcpy          memmove       mkstemp        mktime          \
+                poll            pread64                                      \
+                rand            random        regcomp                        \
+                select          setenv        setgid                         \
+                setgroups       setitimer     setlocale                      \
+                setmntent       setsid        setuid                         \
+                sigaction       sigalrm       sigblock                       \
+                sighold         signal        sigset                         \
+                snprintf        socket                                       \
+                statfs          statvfs       stime                          \
+                strcasestr      strchr        strdup                         \
+                strerror        strlcpy       strncasecmp                    \
+                strtok_r        strtol        strtoul                        \
+                sysconf         system                                       \
+                tcgetattr       times                                        \
+                uname           usleep                                       \
+                vsnprintf])
+
+##
+#   More complex function checks:
+##
+
+#       rpmGetPath check needs clean LIBS environment   (Linux)
+#
 if test "x$with_rpm" != "xno" && \
         echo " $module_list " | $GREP " host/hr_swinst " > /dev/null; then
-  OLDLIBS=$LIBS
-  LIBS=$LMIBLIBS
-  AC_CHECK_FUNCS(rpmGetPath)
-  LIBS=$OLDLIBS
+    OLDLIBS=$LIBS
+    LIBS=$LMIBLIBS
+    AC_CHECK_FUNCS(rpmGetPath)
+    LIBS=$OLDLIBS
 fi
 
-AC_CHECK_FUNCS(getloadavg)
-AC_CHECK_FUNCS(getaddrinfo getipnodebyname gai_strerror)
-# BSDi2 functions differ
-AC_CHECK_FUNCS(statvfs statfs)
-AC_CHECK_FUNCS(getdtablesize)
-# freebsd2 checks
-AC_CHECK_FUNCS(getfsstat getvfsstat)
-AC_CHECK_FUNCS(usleep)
-AC_CHECK_FUNCS(setlocale)
-AC_CHECK_FUNCS(tcgetattr)
-AC_CHECK_FUNCS(if_nameindex if_freenameindex)
-# solaris checks
-AC_CHECK_FUNCS(getpagesize)
-AC_CHECK_FUNCS(mkstemp)
-AC_CHECK_FUNCS(getpwnam getgrnam setgid setuid setgroups initgroups)
-# High resolution alarm support
-AC_CHECK_FUNCS(setitimer)
-# functions to support the clock.
-AC_CHECK_FUNCS(mktime stime times sysconf)
-# missing from hp-ux
-AC_CHECK_FUNCS(if_nametoindex)
-
-AC_CACHE_CHECK([for SIOCGIFADDR in sys/ioctl.h],
-               netsnmp_cv_sys_ioctl_h_has_SIOCGIFADDR,
-               AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[
-#ifdef HAVE_SYS_IOCTL_H
-#include <sys/ioctl.h>
-#endif
-#ifndef SIOCGIFADDR
-No SIOCGIFADDR found here.
-#endif
-]])],
-               [netsnmp_cv_sys_ioctl_h_has_SIOCGIFADDR=yes],
-               [netsnmp_cv_sys_ioctl_h_has_SIOCGIFADDR=no]))
-if test $netsnmp_cv_sys_ioctl_h_has_SIOCGIFADDR = yes; then
-  AC_DEFINE(SYS_IOCTL_H_HAS_SIOCGIFADDR)
-fi
-
-# ultrix
+#       statfs( char *, struct fs_data* )               (Ultrix)
+#
 AC_MSG_CHECKING([[for two-argument statfs with struct fs_data (Ultrix)]])
-AC_CACHE_VAL(fu_cv_sys_stat_fs_data,
-[AC_TRY_RUN([
+AC_CACHE_VAL(
+    fu_cv_sys_stat_fs_data,
+    [AC_TRY_RUN([
 #ifdef HAVE_SYS_PARAM_H
 #include <sys/param.h>
 #endif
@@ -78,49 +80,57 @@ struct fs_data fsd;
    0 for not mounted, -1 for failure.  */
 exit (statfs (".", &fsd) != 1);
 }],
-fu_cv_sys_stat_fs_data=yes,
-fu_cv_sys_stat_fs_data=no,
-fu_cv_sys_stat_fs_data=no)])
+    fu_cv_sys_stat_fs_data=yes,
+    fu_cv_sys_stat_fs_data=no,
+    fu_cv_sys_stat_fs_data=no)])
 AC_MSG_RESULT($fu_cv_sys_stat_fs_data)
 if test $fu_cv_sys_stat_fs_data = yes; then
-  AC_DEFINE(STAT_STATFS_FS_DATA)
+    AC_DEFINE(STAT_STATFS_FS_DATA)
 fi
 
+##
+#   Other function-related checks:
+##
+
+#       How to get the name of the current function
+#
 AC_CACHE_CHECK([how to get the name of the current function],
                [netsnmp_cv__func__name],[
-netsnmp_cv__func__name=no
-AC_COMPILE_IFELSE(
+    netsnmp_cv__func__name=no
+    AC_COMPILE_IFELSE(
         AC_LANG_PROGRAM(
                 [[extern inline void t1() { const char* cp = __func__; }]],
                 [[const char* cp = __func__;]]),
         [netsnmp_cv__func__name=__func__])
-if test "$netsnmp_cv__func__name" = no ; then
-AC_COMPILE_IFELSE(
+    if test "$netsnmp_cv__func__name" = no ; then
+      AC_COMPILE_IFELSE(
         AC_LANG_PROGRAM(,[[const char* cp = __FUNCTION__;]]),
         [netsnmp_cv__func__name=__FUNCTION__])
-fi])
+    fi])
 if test "$netsnmp_cv__func__name" != no; then
     AC_DEFINE_UNQUOTED([NETSNMP_FUNCTION],[$netsnmp_cv__func__name],
         [Should evaluate to the name of the current function if defined])
 fi
 
-#--------------------------------------------------------------
-# on SCO Unixware 7.1.4 (SCO compiler), "static inline" functions
-# are not supported, so this disables the whole inline thing if it
-# doesn't work properly. Should have no effect on other platforms.
+
+#       Whether static inline functions are broken      (SCO Unixware)
+#
 AC_CACHE_CHECK([[whether static inline functions are broken (Unixware)]],
-    [netsnmp_cv_c_broken_inline],
-AC_COMPILE_IFELSE([[
+                [netsnmp_cv_c_broken_inline],
+    AC_COMPILE_IFELSE([[
 static inline int nested_inline_function(void) {
   return 0;
 }
 inline int main_inline_function( void ) {
   return nested_inline_function();
 }
-]], netsnmp_cv_broken_inline=no, netsnmp_cv_broken_inline=yes))
+    ]],
+    netsnmp_cv_broken_inline=no,
+    netsnmp_cv_broken_inline=yes))
 
-# But, sadly, the usage of inline in NET_SNMP disagrees seriously with at least
-# solaris2, so disable it for now.
+
+#       Yes -  static inline functions are broken       (Solaris 2.x)
+#
 case "$target_os" in
     solaris*)
         netsnmp_cv_broken_inline=yes
@@ -133,3 +143,26 @@ if test "$netsnmp_cv_broken_inline" = yes ; then
   AC_DEFINE(NETSNMP_BROKEN_INLINE, 1,
         [Define if static inline functions are unsupported])
 fi
+
+
+##
+#   Mis-placed (non-function) checks:
+##
+
+AC_CACHE_CHECK([for SIOCGIFADDR in sys/ioctl.h],
+               netsnmp_cv_sys_ioctl_h_has_SIOCGIFADDR,
+    AC_COMPILE_IFELSE(
+        [AC_LANG_PROGRAM([[
+#ifdef HAVE_SYS_IOCTL_H
+#include <sys/ioctl.h>
+#endif
+#ifndef SIOCGIFADDR
+No SIOCGIFADDR found here.
+#endif
+        ]])],
+    [netsnmp_cv_sys_ioctl_h_has_SIOCGIFADDR=yes],
+    [netsnmp_cv_sys_ioctl_h_has_SIOCGIFADDR=no]))
+if test $netsnmp_cv_sys_ioctl_h_has_SIOCGIFADDR = yes; then
+  AC_DEFINE(SYS_IOCTL_H_HAS_SIOCGIFADDR)
+fi
+
