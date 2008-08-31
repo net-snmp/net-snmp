@@ -1,0 +1,336 @@
+#
+# Maybe add library extensions for thread mutex locking.
+#
+
+if test "x$with_res_locks" = "xyes"; then
+  AC_DEFINE(NETSNMP_REENTRANT)
+
+    case $target_os in
+
+    aix*)
+	CC_RUNTIME_ARG="$CC_RUNTIME_ARG -lpthreads"
+	;;
+
+    *)
+	;;
+
+    esac
+fi
+
+#
+# Add platform-specific source files.
+#
+AC_MSG_CHECKING([for platform-specific source])
+other_src_list=""
+other_objs_list=""
+other_lobjs_list=""
+other_agentobjs=""
+other_lagentobjs=""
+other_trapd_objects=""
+
+# Win32 service code
+if test "x$PARTIALTARGETOS" = "xmingw32" -o "x$PARTIALTARGETOS" = "xmingw32msvc"; then
+  other_src_list="$other_src_list winservice.c winservicerc.rc"
+  other_objs_list="$other_objs_list winservice.o winservicerc.o"
+  other_lobjs_list="$other_lobjs_list winservice.lo winservicerc.lo"
+  other_agentobjs="../snmplib/winservicerc.o"
+  other_lagentobjs="../snmplib/winservicerc.lo"
+  other_trapd_objects="../snmplib/winservicerc.o" 
+fi
+  
+# Win32 pipes
+if test "x$PARTIALTARGETOS" = "xmingw32" -o "x$PARTIALTARGETOS" = "xmingw32msvc" -o "x$PARTIALTARGETOS" = "xcygwin"; then
+  other_src_list="$other_src_list winpipe.c"
+  other_objs_list="$other_objs_list winpipe.o"
+  other_lobjs_list="$other_lobjs_list winpipe.lo"
+fi
+
+AC_SUBST(other_src_list)
+AC_SUBST(other_objs_list)
+AC_SUBST(other_lobjs_list)
+AC_SUBST(other_agentobjs)
+AC_SUBST(other_lagentobjs)
+AC_SUBST(other_trapd_objects)
+
+AC_MSG_RESULT([$other_src_list $other_objs_list $other_lobjs_list])
+AC_MSG_RESULT([$other_agentobjs $other_lagentobjs $other_trapd_objects])
+  
+#
+# Do transport module processing.
+#
+AC_MSG_CHECKING([for and configuring transport modules to use])
+transport_src_list=""
+transport_hdr_list=""
+transport_def_list=""
+transport_result_list=""
+transport_add_list=""
+transport_callback_disabled=""
+new_with_transport_list=`echo $with_transports | $SED 's/,/ /g;'`
+new_with_out_transport_list=`echo $with_out_transports | $SED 's/,/ /g;'`
+
+#
+# Add the default transports to the list
+#
+if test "x$PARTIALTARGETOS" = "xcygwin"; then
+  transport_default_list="UDP TCP Alias Callback"
+elif test "x$PARTIALTARGETOS" = "xmingw32" -o "x$PARTIALTARGETOS" = "xmingw32msvc"; then 
+  transport_default_list="UDP TCP Alias Callback"
+else
+  transport_default_list="UDP TCP Alias Unix Callback"
+fi
+if test "x$enable_ipv6" = "xyes"; then
+  transport_default_list="UDPIPv6 TCPIPv6 $transport_default_list"
+fi
+for i in $transport_default_list; do
+  if echo " $new_with_transport_list " | $GREP " $i " >/dev/null; then
+    :
+  else
+    transport_add_list="$i $transport_add_list"
+  fi
+done
+new_transport_list="$transport_add_list $new_with_transport_list"
+
+for i in $new_transport_list; do
+  if echo " $new_with_out_transport_list " | $GREP " $i " >/dev/null; then
+    if test "x$i" = "xUDP"; then
+      echo
+      AC_MSG_ERROR(It is not possible to compile without UDP/IP support.)
+    elif test "x$i" = "xCallback"; then
+      echo
+      transport_callback_disabled="yes"
+    fi
+  else
+    if test "x$i" = "xAAL5PVC"; then
+      if test "x$PARTIALTARGETOS" != "xlinux"; then
+        echo
+        AC_MSG_ERROR(AAL5 PVC support unavailable for this platform (Linux only))
+      fi
+    fi
+    if test "x$i" = "xIPX"; then
+      if test "x$PARTIALTARGETOS" != "xlinux"; then
+        echo
+        AC_MSG_ERROR(IPX support unavailable for this platform (Linux only))
+      fi
+    fi
+    if test "x$i" = "xUnix"; then
+      if test "x$PARTIALTARGETOS" = "xcygwin"; then
+        echo
+        AC_MSG_ERROR(Unix domain protocol support unavailable for this platform)
+      elif test "x$PARTIALTARGETOS" = "xmingw32" -o "x$PARTIALTARGETOS" = "xmingw32msvc"; then
+        echo
+        AC_MSG_ERROR(Unix domain protocol support unavailable for this platform)
+      fi
+    fi
+    if test ! "x$enable_ipv6" = "xyes"; then
+        if test "x$i" = "xUDPIPv6" -o "x$i" = "xTCPIPv6"; then
+            echo
+            AC_MSG_ERROR(IPv6 transports not available if IPv6 support is not enabled)
+        fi
+    fi
+    transport_src="snmp"$i"Domain.c"
+    transport_hdr="snmp"$i"Domain.h"
+    rel_transport_src="snmplib/"$transport_src
+    rel_transport_hdr="include/net-snmp/library/"$transport_hdr
+    if test -f "$srcdir/$rel_transport_src"; then
+      transport_result_list="$transport_result_list $i"
+      transport_src_list="$transport_src $transport_src_list"
+      if test -f "$srcdir/$rel_transport_hdr"; then
+        transport_hdr_list="$transport_hdr $transport_hdr_list"
+      fi
+      transport_def=`echo $i | $SED 'y/abcdefghijklmnopqrstuvwxyz/ABCDEFGHIJKLMNOPQRSTUVWXYZ/'`
+      transport_def_list="NETSNMP_TRANSPORT_"$transport_def"_DOMAIN $transport_def_list"
+    else
+      echo
+      AC_MSG_ERROR(Cannot find file $srcdir/$rel_transport_src to support SNMP transport domain $i.)
+    fi
+  fi
+done
+transport_obj_list=`echo " $transport_src_list " | $SED 's/\.c/\.o/g'` 	 
+transport_lobj_list=`echo " $transport_src_list " | $SED 's/\.c/\.lo/g'`
+
+## win32 platforms require inet_ntop etc.
+if test "x$PARTIALTARGETOS" = "xmingw32" -o "x$PARTIALTARGETOS" = "xmingw32msvc" -o "x$PARTIALTARGETOS" = "xcygwin"; then
+  if echo "$transport_def_list" | $GREP "IPV6" >/dev/null; then
+    transport_obj_list="$transport_obj_list inet_ntop.o inet_pton.o"
+    transport_lobj_list="$transport_lobj_list inet_ntop.lo inet_pton.lo"
+  fi
+fi
+
+AC_SUBST(transport_hdr_list)
+AC_SUBST(transport_src_list)
+AC_SUBST(transport_obj_list)
+AC_SUBST(transport_lobj_list)
+for i in $transport_def_list; do
+  AC_DEFINE_UNQUOTED($i)
+done
+AC_MSG_RESULT($transport_result_list.)
+AC_MSG_CACHE_ADD(Network transport support: $transport_result_list)
+
+#
+# Security modules to use
+# 
+
+AC_MSG_CHECKING([for security modules to use])
+security_def_list="usm"
+security_src_list=""
+security_obj_list="" 	 
+security_lobj_list=""
+security_init_file="snmplib/snmpsm_init.h"
+security_incl_file="include/net-snmp/library/snmpv3-security-includes.h"
+new_with_security=`echo $with_security_modules | $SED 's/,/ /g;'`
+new_with_out_security=`echo $with_out_security_modules | $SED 's/,/ /g;'`
+
+if test ! -d include; then
+  mkdir include
+fi
+if test ! -d include/net-snmp; then
+  mkdir include/net-snmp
+fi
+if test ! -d include/net-snmp/agent; then
+  mkdir include/net-snmp/agent
+fi
+if test ! -d include/net-snmp/library; then
+  mkdir include/net-snmp/library
+fi
+if test ! -d include/ucd-snmp; then
+  mkdir include/ucd-snmp
+fi
+
+if test ! -d snmplib; then
+  mkdir snmplib
+fi
+echo "/* This file is automatically generated by configure.  Do not modify by hand. */" > $security_init_file
+echo "/* This file is automatically generated by configure.  Do not modify by hand. */" > $security_incl_file
+
+for i in $security_def_list; do
+  if echo " $new_with_out_security " | $GREP " $i " > /dev/null; then
+    if test "x$i" = "xusm"; then
+	echo
+        AC_MSG_ERROR(The USM security module is mandatory)
+    fi
+  else
+    new_with_security="$new_with_security $i"
+  fi
+done
+
+for i in $new_with_security; do
+  cfile="snmp"$i".c"
+  hfile="snmp"$i".h"
+
+  # make sure support exists for it
+  if test -f $srcdir"/snmplib/"$cfile -a -f $srcdir"/include/net-snmp/library/"$hfile; then
+    :
+  else
+    echo
+    AC_MSG_ERROR(No such security module: $i / $cfile / $hfile)
+  fi
+
+  # define a bunch of stuff to enable it
+  security_src_list="$security_src_list $cfile"
+  security_hdr_list="$security_hdr_list $hfile"
+  security_obj_list="$security_obj_list snmp"$i".o" 	 
+  security_lobj_list="$security_lobj_list snmp"$i".lo"
+  def_name="NETSNMP_SECMOD_"`echo $i | tr 'abcdefghijklmnopqrstuvwxyz' 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'`
+  echo "init_"$i"();" >> $security_init_file
+  echo "#include <net-snmp/library/$hfile>" >> $security_incl_file
+  AC_DEFINE_UNQUOTED($def_name)
+done
+
+AC_SUBST(security_src_list)
+AC_SUBST(security_hdr_list)
+AC_SUBST(security_obj_list) 	 
+AC_SUBST(security_lobj_list)
+AC_MSG_RESULT($new_with_security)
+AC_MSG_CACHE_ADD(SNMPv3 Security Modules:    $new_with_security)
+
+#
+# Handle the special case of KSM to see which crypto API we support
+#
+
+ac_cv_NETSNMP_USE_KERBEROS_MIT=no
+rebuilt_new_with_security=
+already_checked_krb5=no
+
+for sec in $new_with_security
+do
+  if test "x$sec" = "xksm" -a "xyes" = "x$already_checked_krb5"; then
+    continue
+  fi
+  already_checked_krb5=yes
+
+  if test x$sec != xksm; then
+    rebuilt_new_with_security="$rebuilt_new_with_security $sec"
+  else
+    if test no = $trykrb5; then
+      AC_MSG_NOTICE([configured not to use krb5. disabling ksm])
+      continue
+    fi
+
+    AC_PATH_PROG([krb5_config],krb5-config,[no],$krb5path/bin:$PATH)
+
+    if test no != $krb5_config; then
+      CPPFLAGS="$CPPFLAGS `$krb5_config --cflags`"
+      LIBS="$LIBS `$krb5_config --libs`"
+    elif test $krb5path != no; then
+      AC_ADD_SEARCH_PATH($krb5path)
+    else
+      AC_ADD_SEARCH_PATH(/usr/kerberos)
+    fi
+
+    AC_MSG_CHECKING([for krb5])
+    AC_CACHE_VAL(ac_cv_have_krb5,
+      AC_CHECK_LIB(krb5, krb5_init_context,
+	ac_cv_have_krb5=yes, ac_cv_have_krb5=no
+      )
+    )
+
+    if test $ac_cv_have_krb5 = no; then
+      if test "x$askedkrb5" = "xyes"; then
+	AC_MSG_ERROR(Asked to use krb5 but I couldn't find it.)
+      fi
+      AC_MSG_RESULT(no. disabling ksm)
+      continue
+    fi
+      
+    AC_MSG_RESULT(yes)
+    rebuilt_new_with_security="$rebuilt_new_with_security ksm"
+
+    AC_MSG_CHECKING([[for heimdal]])
+    AC_CACHE_VAL(ac_cv_heimdal,
+    [AC_TRY_COMPILE(
+      [#include <krb5.h>],
+      [const char *v = heimdal_version;],
+      ac_cv_heimdal=yes,
+      ac_cv_heimdal=no
+    )])
+    AC_MSG_RESULT($ac_cv_heimdal)
+    if test $ac_cv_heimdal = yes; then
+      AC_DEFINE(NETSNMP_USE_KERBEROS_HEIMDAL)
+      if test no = $krb5_config; then
+	LIBS="$LIBS -lkrb5 -lasn1 -lcom_err -lroken"
+      fi
+    elif test no = $krb5_config; then
+	LIBS="$LIBS -lkrb5 -lcom_err"
+    fi
+
+    AC_MSG_CHECKING([to see which crypto API we need to use])
+    AC_CHECK_FUNC(krb5_c_encrypt,[
+    AC_CACHE_VAL(ac_cv_NETSNMP_USE_KERBEROS_MIT,
+      AC_CHECK_LIB(k5crypto, krb5_init_context,
+	ac_cv_NETSNMP_USE_KERBEROS_MIT=yes, ac_cv_MIT_NEW_CRYPTo=no
+      )
+    )
+
+    if test yes = $ac_cv_NETSNMP_USE_KERBEROS_MIT; then
+      AC_MSG_RESULT(new MIT crypto API)
+      AC_DEFINE(NETSNMP_USE_KERBEROS_MIT)
+      if test no = $krb5_config; then
+	LIBS="$LIBS -lk5crypto"
+      fi
+    else
+      AC_MSG_RESULT(old MIT crypto API)])
+    fi
+  fi
+done
+
+new_with_security=$rebuilt_new_with_security
