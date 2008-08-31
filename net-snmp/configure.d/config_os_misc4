@@ -1,0 +1,115 @@
+# attempt to figure out if sysctl is usable
+
+if test $cross_compiling = yes; then
+  AC_MSG_WARN([Can't check sysctl, manually define NETSNMP_CAN_USE_SYSCTL if platform support available])
+else
+  AC_CACHE_CHECK(if sysctl can read kernel information,ac_cv_NETSNMP_CAN_USE_SYSCTL,
+  [AC_TRY_RUN([
+#if TIME_WITH_SYS_TIME
+# include <sys/time.h>
+# include <time.h>
+#else
+# if HAVE_SYS_TIME_H
+#  include <sys/time.h>
+# else
+#  include <time.h>
+# endif
+#endif
+#if HAVE_SYS_PARAM_H
+# include <sys/param.h>
+#endif
+#include <sys/types.h>
+#if HAVE_SYS_SYSCTL_H
+# include <sys/sysctl.h>
+#endif
+
+main() {
+  int                 mib[2];
+  size_t              len;
+  struct timeval boottime;
+  
+  mib[0] = CTL_KERN;
+  mib[1] = KERN_BOOTTIME;
+  
+  len = sizeof(boottime);
+  sysctl(mib, 2, &boottime, &len, NULL, NULL);
+  if (boottime.tv_sec != 0)
+    exit(0);
+  else
+    exit(1);
+}
+  ], ac_cv_NETSNMP_CAN_USE_SYSCTL=yes, ac_cv_NETSNMP_CAN_USE_SYSCTL=no, ac_cv_NETSNMP_CAN_USE_SYSCTL=no)])
+fi
+
+if test "x$ac_cv_NETSNMP_CAN_USE_SYSCTL" = "xyes"; then
+  AC_DEFINE(NETSNMP_CAN_USE_SYSCTL)
+fi
+
+#
+# In FreeBSD 4.x, the TCP timer constants aren't.  They are defined
+# in terms of `hz', the kernel clock tick.  In this case,
+# we need to have a local variable `hz' in scope and set to a useful
+# value whenever we use one of these constants.
+#
+AC_CACHE_CHECK(whether TCP timers depend on \`hz',ac_cv_TCPTV_NEEDS_HZ,
+[AC_EGREP_CPP(hz,
+[#include <netinet/tcp_timer.h>
+TCPTV_SRTTDFLT
+], ac_cv_TCPTV_NEEDS_HZ=yes, ac_cv_TCPTV_NEEDS_HZ=no)])
+
+if test "x$ac_cv_TCPTV_NEEDS_HZ" = "xyes"; then
+  AC_DEFINE(TCPTV_NEEDS_HZ)
+fi
+
+#
+# Solaris: ip route cache
+#
+case $target_os in
+  solaris*)
+    # at least Solaris 2.6/7 needs inet/common.h (mblk_t) to compile inet/ip.h
+    AC_CHECK_HEADERS(inet/common.h)
+    AC_CHECK_HEADERS(inet/ip.h,ac_inet_ip_h=yes,ac_inet_ip_h=no,
+AC_INCLUDES_DEFAULT([])
+[
+#if HAVE_SYS_STREAM_H
+#include <sys/stream.h>
+#endif
+#if HAVE_INET_COMMON_H
+#include <inet/common.h>
+#endif
+])
+    if test $ac_inet_ip_h = yes ; then
+      AC_CACHE_CHECK(for mib2_ipRouteEntry_t in inet/mib2.h,ac_cv_mib2_ipRouteEntry_t,[
+AC_TRY_COMPILE([
+#if HAVE_INET_MIB2_H
+#include <inet/mib2.h>
+#endif],[
+  mib2_ipRouteEntry_t testit;
+  if(sizeof(testit))
+    return(0);
+],ac_cv_mib2_ipRouteEntry_t=yes,ac_cv_mib2_ipRouteEntry_t=no)])
+
+      if test "x$ac_cv_mib2_ipRouteEntry_t" = "xyes" ; then
+        AC_CACHE_CHECK(whether IRE_CACHE is defined in inet/ip.h ,ac_cv_ire_cache,[
+AC_TRY_COMPILE([
+#if HAVE_INET_IP_H
+#include <inet/ip.h>
+#endif],[
+  int testit=IRE_CACHE;
+  if(testit)
+    return(0);
+],ac_cv_ire_cache=yes,ac_cv_ire_cache=no)])
+      else
+        ac_cv_ire_cache=no
+      fi
+
+      if test "x$ac_cv_ire_cache" = "xyes" ; then
+        AC_DEFINE(HAVE_DEFINED_IRE_CACHE,[],[define to 1 if you have IRE_CACHE defined in <inet/ip.h> header file.])
+      else
+        AC_MSG_WARN([It seems that you have inet/ip.h, but IRE_CACHE is not defined. \
+That means that your query to ipRoute MIB could generate over 20k results! And this \
+can be very slow.])
+      fi
+    fi
+    ;;
+esac

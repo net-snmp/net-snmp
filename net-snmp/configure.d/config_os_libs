@@ -1,0 +1,254 @@
+# forced efence turned off.
+# if test "x$developer" = "xyes" -a "x$use_efence" != "xno"; then
+#    use_efence="yes"
+# fi
+
+if test "x$use_efence" = "xyes"; then
+    AC_CHECK_LIB(efence, EF_Exit)
+fi
+
+# Checks for libraries.
+# AC_CHECK_LIB(des, main)
+# AC_CHECK_LIB(m, asin)
+
+AC_ARG_WITH(elf,
+	[AS_HELP_STRING(--without-elf,[use elf libraries])],,
+	[AC_ARG_ENABLE(elf,,
+		[AC_MSG_ERROR([ Invalid option. Use --with-elf/--without-elf instead ])])])
+
+if test "x$with_elf" != "xno"; then
+# nlist is needed for uptime on some sytems in the generic library
+# add hosts which don't use nlist to the blank first line
+case $target_os in
+	linux*) ;;
+	irix*) # Check for nlist in mld (irix)
+		AC_CHECK_LIB(elf, nlist)
+		AC_CHECK_LIB(elf, nlist64)
+		AC_CHECK_LIB(mld, nlist)
+		;;
+	*) # default
+		AC_CHECK_LIB(elf, nlist)
+		;;
+esac
+fi
+ 
+# Solaris needs -lsocket for, among other things, socket(2)
+AC_SEARCH_LIBS(socket, socket,,AC_MSG_ERROR([socket(2) not found.]))
+# gethostbyname(3) is in -lnsl on Solaris and in -lsocket on some other OSes
+AC_SEARCH_LIBS(gethostbyname, [nsl socket])
+AC_CHECK_FUNCS(gethostbyname)
+
+# Solaris kstat
+NETSNMP_SEARCH_LIBS(kstat_lookup, kstat,
+        AC_DEFINE(HAVE_LIBKSTAT, 1,
+        	[Define to 1 if you have the `kstat' library (-lkstat).]),,,
+        LNETSNMPLIBS)
+
+# Check for libraries that the agent needs
+# saving old libraries
+NONAGENTLIBS=$LIBS
+
+# Check for security related functions
+if test "x$tryopenssl" != "xno"; then
+    if test "x$askedopenssl" != "xyes" -a "x$askedpkcs" = "xyes"; then
+      AC_CHECK_LIB(pkcs11, C_Initialize, AC_DEFINE(HAVE_LIBPKCS11, 1, [Define to 1 if you have the `pkcs11' library (-lpkcs11).])
+              LIBPKCS11="-lpkcs11")
+    else 
+      if test "x$tryrsaref" != "xno"; then
+         AC_CHECK_LIB(rsaref, RSAPrivateDecrypt)
+         AC_CHECK_LIB(RSAglue, RSA_PKCS1_RSAref)
+      fi
+
+      AC_CHECK_LIB(crypto, EVP_md5, AC_DEFINE(HAVE_LIBCRYPTO, 1, [Define to 1 if you have the `crypto' library (-lcrypto).])
+              LIBCRYPTO="-lcrypto")
+      AC_CHECK_LIB(crypto, AES_cfb128_encrypt, 
+              AC_DEFINE(HAVE_AES_CFB128_ENCRYPT, 1, [Define to 1 if you have the `AES_cfb128_encrypt' function.]))
+    fi
+elif test "x$askedpkcs" = "xyes"; then
+    AC_CHECK_LIB(pkcs11, C_Initialize, AC_DEFINE(HAVE_LIBPKCS11)
+            LIBPKCS11="-lpkcs11")
+fi
+
+LIBS=$NONAGENTLIBS
+
+# check for tcp wrapper support
+_cppflags="${CPPFLAGS}"
+_ldflags="${LDFLAGS}"
+
+AC_ARG_WITH(libwrap,
+[  --with-libwrap[=LIBPATH]  Compile in libwrap (tcp_wrappers) support.],[
+  if test "$with_libwrap" != "no"; then
+    if test "$with_libwrap" != "yes"; then
+      CPPFLAGS="${CPPFLAGS} -I$with_libwrap/include"
+      LDFLAGS="${LDFLAGS} -L$with_libwrap/lib"
+    fi
+
+    _libs=${LIBS}
+    AC_CHECK_HEADER(tcpd.h, ,
+	    AC_MSG_ERROR([Asked to use libwrap but I couldn't find tcpd.h.]))
+
+    LIBS="$LIBS -lwrap"
+	AC_MSG_CHECKING([for TCP wrappers library -lwrap])
+	# XXX: should check for hosts_ctl
+	AC_TRY_LINK([#include <sys/types.h>
+		     #include <tcpd.h>
+		     int allow_severity = 0;
+		     int deny_severity  = 0;
+		    ],[hosts_access((void *)0)],[
+
+	    AC_MSG_RESULT([yes])
+	    AC_DEFINE(NETSNMP_USE_LIBWRAP)
+	    test "$with_libwrap" != no -a "$with_libwrap" != yes && _wraplibs="-L$with_libwrap/lib"
+	    _wraplibs="$_wraplibs -lwrap"],
+        [
+	    AC_MSG_RESULT([no])
+	    # Linux RedHat 6.1 won't link libwrap without libnsl
+	    AC_CHECK_FUNC(yp_get_default_domain, ,
+		AC_CHECK_LIB(nsl, yp_get_default_domain))
+	    AC_MSG_CHECKING([for TCP wrappers library -lwrap linked with -lnsl])
+	    AC_TRY_LINK([#include <sys/types.h>
+		         #include <tcpd.h>
+		         int allow_severity = 0;
+	                 int deny_severity  = 0;
+	 		],[hosts_access((void *)0)],
+
+			AC_MSG_RESULT(yes)
+			AC_DEFINE(NETSNMP_USE_LIBWRAP)
+			test "$with_libwrap" != no -a "$with_libwrap" != yes && _wraplibs="-L$with_libwrap/lib"
+			_wraplibs="$_wraplibs -lwrap -lnsl",
+
+			AC_MSG_RESULT(no)
+			AC_MSG_ERROR(Asked to use libwrap but I couldn't find it.))])
+    LAGENTLIBS="$_wraplibs"
+    CPPFLAGS=${_cppflags}
+    LDFLAGS=${_ldflags}
+    LIBS=${_libs}
+  fi
+])
+
+AC_CHECK_HEADERS(rpm/rpmlib.h rpm/header.h)
+
+AC_CHECK_HEADER(rpm/rpmlib.h,rpmlib_h=yes,rpmlib_h=no)
+AC_CHECK_HEADER(rpm/header.h,rpmheader_h=yes,rpmheader_h=no)
+
+if test "x$rpmheader_h" = "xno" -o "x$rpmlib_h" = "xno" ; then
+  if test "x$with_rpm" = "xyes" ; then
+    AC_MSG_ERROR([Could not find either the RPM header files needed and was specifically asked to use RPM support])
+  else
+    with_rpm=no
+  fi
+fi
+
+#
+# rpm libraries only needed for the host resources mib software
+# installed tables (on linux in particular)
+#
+if test "x$with_rpm" != "xno" && \
+        echo " $module_list " | $GREP " host/hr_swinst " > /dev/null; then
+  # ARG.  RPM is a real pain.
+  # FWIW librpm.la, librpmio.la, and libpopt.la have correct dependencies.
+  _rpmlibs=""
+
+  # zlib is required for newer versions of rpm
+  _cppflags="${CPPFLAGS}"
+  _ldflags="${LDFLAGS}"
+
+  AC_ARG_WITH(zlib,
+  [  --with-zlib[=DIR]         use libz in DIR],[
+    if test -d "$withval"; then
+      CPPFLAGS="${CPPFLAGS} -I$withval/include"
+      LDFLAGS="${LDFLAGS} -L$withval/lib"
+    fi
+  ])
+
+  # dunno if this is needed for rpm-4.0.x, earlier probably needs.
+  AC_CHECK_HEADER(zlib.h,
+      NETSNMP_SEARCH_LIBS(gzread, z,,
+          CPPFLAGS=${_cppflags} LDFLAGS=${_ldflags}, $LMIBLIBS, _rpmlibs),
+      CPPFLAGS=${_cppflags} LDFLAGS=${_ldflags})
+
+  # two variants of bzip2 need checking.
+  AC_ARG_WITH(bzip2,
+  [  --with-bzip2[=DIR]        use libbz2 in DIR],[
+    if test -d "$withval"; then
+      CPPFLAGS="${CPPFLAGS} -I$withval/include"
+      LDFLAGS="${LDFLAGS} -L$withval/lib"
+    fi
+    if test "x$with_bzip2" != "xno"; then
+      NETSNMP_SEARCH_LIBS(bzread, bz2,,, $LMIBLIBS, _rpmlibs)
+      NETSNMP_SEARCH_LIBS(BZ2_bzread, bz2,,, $LMIBLIBS, _rpmlibs)
+    fi
+  ])
+
+
+  # two variants of db1 need checking.
+  NETSNMP_SEARCH_LIBS(dbopen, [db1 db],,, $LMIBLIBS, _rpmlibs)
+
+  # two variants of db3 need checking.
+  NETSNMP_SEARCH_LIBS(db_create, [db-3.1 db-3.0],,, $LMIBLIBS, _rpmlibs)
+  
+  # rpm-3.0.5 and later needs popt.
+  NETSNMP_SEARCH_LIBS(poptParseArgvString, popt,,, $LMIBLIBS, _rpmlibs)
+  
+  # rpm-4.0.x needs rpmio.
+  NETSNMP_SEARCH_LIBS(Fopen, rpmio,,, $LMIBLIBS, _rpmlibs)
+  
+  # rpm-4.0.3 librpmdb actually contains what we need.
+  NETSNMP_SEARCH_LIBS(rpmdbOpen, rpmdb,,, $LMIBLIBS, _rpmlibs)
+  # now check for rpm using the appropriate libraries.
+  NETSNMP_SEARCH_LIBS(rpmGetFilesystemList, rpm, [
+    AC_DEFINE(HAVE_LIBRPM)
+    LMIBLIBS="$_rpmlibs $LMIBLIBS"
+    CFLAGS="$CFLAGS -I/usr/include/rpm"
+  ],, $LMIBLIBS, _rpmlibs)
+fi
+  
+# libkvm
+NETSNMP_SEARCH_LIBS(kvm_read, kvm,,,, LAGENTLIBS)
+NETSNMP_SEARCH_LIBS(kvm_openfiles, kvm,,,, LAGENTLIBS)
+NETSNMP_SEARCH_LIBS(kvm_getprocs, kvm,,,, LAGENTLIBS)
+NETSNMP_SEARCH_LIBS(kvm_getswapinfo, kvm,,,, LAGENTLIBS)
+netsnmp_save_LIBS="$LIBS"
+LIBS="$LAGENTLIBS $LIBS"
+AC_CHECK_FUNCS([kvm_openfiles kvm_getprocs kvm_getswapinfo])
+LIBS="$netsnmp_save_LIBS"
+
+# DYNAMIC MODULE SUPPORT
+NETSNMP_SEARCH_LIBS(dlopen, dl,,,,LMIBLIBS)
+netsnmp_save_LIBS="$LIBS"
+LIBS="$LMIBLIBS $LIBS"
+AC_CHECK_FUNCS([dlopen])
+LIBS="$netsnmp_save_LIBS"
+
+# nlist
+AC_CHECK_FUNCS(nlist nlist64 knlist)
+
+# whether we need -ldevstat for diskio MIB
+echo " $module_list " | $GREP " ucd-snmp/diskio " >/dev/null
+if test $? -eq 0 ; then
+	NETSNMP_SEARCH_LIBS(getdevs, devstat,
+                AC_DEFINE(HAVE_GETDEVS, 1,
+                        [define if you have getdevs()]),,,LMIBLIBS)
+	NETSNMP_SEARCH_LIBS(devstat_getdevs, devstat,
+                AC_DEFINE(HAVE_DEVSTAT_GETDEVS, 1,
+                        [define if you have devstat_getdevs()]),,,LMIBLIBS)
+fi
+
+# LM-SENSORS-MIB support
+echo " $module_list " | $GREP -i "ucd-snmp/lmsensor" > /dev/null
+if test $? -eq 0 ; then
+        AC_MSG_CHECKING([for sensors support])
+        case $target_os in
+          solaris*)
+            AC_CHECK_HEADER(picl.h, LMIBLIBS="${LMIBLIBS} -lpicl",)
+            AC_CHECK_HEADERS(picl.h)
+            ;;
+        *)
+            AC_CHECK_HEADER(sensors/sensors.h,,
+                [AC_MSG_ERROR([asked to use lm_sensors but I couldn't find sensors/sensors.h])])
+            NETSNMP_SEARCH_LIBS(sensors_get_detected_chips, sensors,,
+                [AC_MSG_ERROR([asked to use lm_sensors but I couldn't find -lsensors])],,
+                LMIBLIBS)
+            ;;
+        esac
+fi
