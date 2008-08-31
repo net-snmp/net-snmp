@@ -1,0 +1,66 @@
+# Prefixes must begin with "/" or [A-Z] followed by colon.
+
+if test "x$prefix" = "xNONE"; then
+  prefix=/usr/local
+fi
+
+fch=`echo $prefix | $SED 's/\(.\).*/\1/'`
+if test "x$fch" != "x/" ; then
+   sch=`echo $prefix | $SED 's/.\(.\).*/\1/'`
+   if test "x$sch" != "x:" ; then
+      prefix=`pwd`/$prefix
+      echo "adjusting prefix to $prefix"
+   fi
+fi
+
+if test "x$exec_prefix" = "xNONE"; then
+  exec_prefix=$prefix
+fi
+
+fch=`echo $exec_prefix | $SED 's/\(.\).*/\1/'`
+if test "x$fch" != "x/" ; then
+   sch=`echo $exec_prefix | $SED 's/.\(.\).*/\1/'`
+   if test "x$sch" != "x:" ; then
+      exec_prefix=`pwd`/$exec_prefix
+      echo "adjusting exec_prefix to $exec_prefix"
+   fi
+fi
+
+# Set SNMPLIBPATH & SNMPSHAREPATH
+
+SNMPLIBPATH=""
+tmpset="$libdir/snmp"
+while test "x$tmpset" != "x$SNMPLIBPATH"; do
+  SNMPLIBPATH="$tmpset"
+  eval tmpset="$tmpset"
+done
+AC_DEFINE_UNQUOTED(SNMPLIBPATH,"$SNMPLIBPATH")
+AC_SUBST(SNMPLIBPATH)
+AC_DEFINE_UNQUOTED(SNMPDLMODPATH,"$SNMPLIBPATH/dlmod")
+
+SNMPSHAREPATH=""
+tmpset="$datadir/snmp"
+while test "x$tmpset" != "x$SNMPSHAREPATH"; do
+  SNMPSHAREPATH="$tmpset"
+  eval tmpset="$tmpset"
+done
+AC_DEFINE_UNQUOTED(SNMPSHAREPATH,"$SNMPSHAREPATH")
+AC_SUBST(SNMPSHAREPATH)
+
+if test "x$NETSNMP_DEFAULT_MIBDIRS" = "x"; then
+  NETSNMP_DEFAULT_MIBDIRS="\$HOME/.snmp/mibs:$SNMPSHAREPATH/mibs"
+  if test "x$PARTIALTARGETOS" = "xmingw32" -o "x$PARTIALTARGETOS" = "xmingw32msvc" -o "x$PARTIALTARGETOS" = "xcygwin"; then
+    NETSNMP_DEFAULT_MIBDIRS=`echo "$NETSNMP_DEFAULT_MIBDIRS" | $SED 's/:/;/g'`
+  fi
+  AC_DEFINE_UNQUOTED(NETSNMP_DEFAULT_MIBDIRS,"$NETSNMP_DEFAULT_MIBDIRS")
+fi
+AC_SUBST(NETSNMP_DEFAULT_MIBDIRS)
+
+SNMPCONFPATH=""
+tmpset="$sysconfdir/snmp"
+while test "x$tmpset" != "x$SNMPCONFPATH"; do
+  SNMPCONFPATH="$tmpset"
+  eval tmpset="$tmpset"
+done
+AC_DEFINE_UNQUOTED(SNMPCONFPATH,"$SNMPCONFPATH")
+AC_SUBST(SNMPCONFPATH)
