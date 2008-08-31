@@ -1,4 +1,15 @@
-# Printing
+#########################################
+##
+# Miscellaneous checks
+##
+#########################################
+
+##
+#   Operating-System characteristics
+##
+
+#       Printing
+#
 AC_PATH_PROG([LPSTAT_PATH],lpstat)
 if test x$LPSTAT_PATH != x; then
     AC_DEFINE_UNQUOTED(LPSTAT_PATH,"$LPSTAT_PATH")
@@ -9,12 +20,20 @@ if test -r /etc/printcap; then
     AC_DEFINE(HAVE_PRINTCAP)
 fi
 
+
+##
+#   Package characteristics
+#       Authentication/Encryption support
+##
+
+#       Check for PKCS11
+#
 AC_MSG_CHECKING([for authentication support])
 useopenssl=no
 usepkcs=no
 if test "x$ac_cv_lib_pkcs11_C_Initialize" != "xyes" -o "x$ac_cv_header_security_cryptoki_h" != "xyes"; then
     if test "x$askedpkcs" = "xyes"; then
-       AC_MSG_ERROR(Asked to use PKCS11 but I couldn't find it.)
+        AC_MSG_ERROR(Asked to use PKCS11 but I couldn't find it.)
     fi
 else
     if test "x$askedpkcs" = "xyes"; then
@@ -22,6 +41,8 @@ else
     fi
 fi
 
+#       Check for OpenSSL
+#
 if test "x$ac_cv_lib_crypto_EVP_md5" != "xyes" -o "x$ac_cv_header_openssl_hmac_h" != "xyes" -o "x$ac_cv_header_openssl_hmac_h" != "xyes"; then
     if test "x$askedopenssl" = "xyes"; then
         AC_MSG_ERROR(Asked to use OpenSSL but I couldn't find it.)
@@ -36,6 +57,8 @@ else
     fi
 fi
 
+#       Available authentication/encryption modes
+#
 if test "x$useopenssl" != "xno" ; then
     authmodes="MD5 SHA1"
     if test "x$enable_privacy" != "xno" ; then
