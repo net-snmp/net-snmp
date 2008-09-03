@@ -1,60 +1,140 @@
-AC_CHECK_MEMBERS([struct dirent.d_type],,,[
-AC_INCLUDES_DEFAULT()
-[#if HAVE_DIRENT_H
-#include <dirent.h>
-#endif
-]])
+#########################################
+##
+# Checks for data structures & members
+##
+#########################################
 
-AC_CHECK_MEMBERS([struct mbstat.m_clusters, struct mbstat.m_clfree,
-                  struct mbstat.m_mbufs],,,[
-AC_INCLUDES_DEFAULT()
-[#if HAVE_SYS_MBUF_H
-#include <sys/mbuf.h>
-#endif
-]])
+##
+#   Simple checks:
+##
 
-
-AC_CHECK_MEMBERS([struct sigaction.sa_sigaction],,,[
-AC_INCLUDES_DEFAULT()
-[#ifdef HAVE_SYS_PARAM_H
-#include <sys/param.h>
-#endif
-#ifdef HAVE_SYS_SIGNAL_H
-#include <sys/signal.h>
-#endif
-]])
-
-AC_CHECK_MEMBERS([struct tm.tm_gmtoff],,,[
-AC_INCLUDES_DEFAULT()
-[#if TIME_WITH_SYS_TIME
-# include <sys/time.h>
-# include <time.h>
-#else
-# if HAVE_SYS_TIME_H
-#  include <sys/time.h>
-# else
-#  include <time.h>
-# endif
-#endif
-]])
-
-AC_CHECK_MEMBERS([struct sockaddr.sa_len,
-                  struct sockaddr.sa_union.sa_generic.sa_family2,
-                  struct sockaddr_storage.ss_family,
-                  struct sockaddr_storage.__ss_family],,,[
-AC_INCLUDES_DEFAULT()
-[#ifdef HAVE_SYS_PARAM_H
+#       struct arphd
+#
+AC_CHECK_MEMBERS([struct arphd.at_next],,,[
+    AC_INCLUDES_DEFAULT()
+    [
+#ifdef HAVE_SYS_PARAM_H
 #include <sys/param.h>
 #endif
 #ifdef HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
 #endif
-]])
+#ifdef HAVE_SYS_TIME_H
+#include <sys/time.h>
+#endif
+#include <net/if.h>
+#if HAVE_NETINET_IN_H
+#include <netinet/in.h>
+#endif
+#if HAVE_NETINET_IF_ETHER_H
+#include <netinet/if_ether.h>
+#endif
+    ]])
 
-# Check sin6_scope_id member specified in RFC2553 additionally
+#       struct des_ks_struct
+#         ('weak_key' indicates older version of OpenSSL)
+#
+if test "x$ac_cv_header_openssl_des_h" = "xyes" ; then
+    AC_CHECK_MEMBERS([struct des_ks_struct.weak_key],,,[[
+#ifdef HAVE_OPENSSL_DES_H
+#include <openssl/des.h>
+#endif
+    ]])
+fi
+
+#       struct dirent
+#         (see also AC_STRUCT_DIRENT_D_TYPE)
+#
+AC_CHECK_MEMBERS([struct dirent.d_type],,,[
+    AC_INCLUDES_DEFAULT()
+    [
+#if HAVE_DIRENT_H
+#include <dirent.h>
+#endif
+    ]])
+
+#       struct ipstat
+#
+AC_CHECK_MEMBERS([struct ipstat.ips_cantforward,
+                  struct ipstat.ips_cantfrag,
+                  struct ipstat.ips_delivered,
+                  struct ipstat.ips_fragdropped,
+                  struct ipstat.ips_fragtimeout,
+                  struct ipstat.ips_fragmented,
+                  struct ipstat.ips_localout,
+                  struct ipstat.ips_noproto,
+                  struct ipstat.ips_noroute,
+                  struct ipstat.ips_odropped,
+                  struct ipstat.ips_ofragments,
+                  struct ipstat.ips_reassembled],,,[
+    AC_INCLUDES_DEFAULT()
+    [
+#if HAVE_NETINET_IN_H
+#include <netinet/in.h>
+#endif
+#if HAVE_NETINET_IP_VAR_H
+#include <netinet/ip_var.h>
+#endif
+    ]])
+
+#       struct mbstat
+#
+AC_CHECK_MEMBERS([struct mbstat.m_clusters,
+                  struct mbstat.m_clfree,
+                  struct mbstat.m_mbufs],,,[
+    AC_INCLUDES_DEFAULT()
+    [
+#if HAVE_SYS_MBUF_H
+#include <sys/mbuf.h>
+#endif
+    ]])
+
+#       struct nlist
+#
+AC_CHECK_MEMBERS([struct nlist.n_value,
+                  struct nlist64.n_value],,,[
+    AC_INCLUDES_DEFAULT()
+    [
+#if HAVE_NLIST_H
+#include <nlist.h>
+#endif
+    ]])
+
+#       struct sigaction
+#
+AC_CHECK_MEMBERS([struct sigaction.sa_sigaction],,,[
+    AC_INCLUDES_DEFAULT()
+    [
+#ifdef HAVE_SYS_PARAM_H
+#include <sys/param.h>
+#endif
+#ifdef HAVE_SYS_SIGNAL_H
+#include <sys/signal.h>
+#endif
+    ]])
+
+#       struct sockaddr
+#
+AC_CHECK_MEMBERS([struct sockaddr.sa_len,
+                  struct sockaddr.sa_union.sa_generic.sa_family2,
+                  struct sockaddr_storage.ss_family,
+                  struct sockaddr_storage.__ss_family],,,[
+    AC_INCLUDES_DEFAULT()
+    [
+#ifdef HAVE_SYS_PARAM_H
+#include <sys/param.h>
+#endif
+#ifdef HAVE_SYS_SOCKET_H
+#include <sys/socket.h>
+#endif
+    ]])
+
+#       struct sockaddr_in6     (see RFC 2553)
+#
 AC_CHECK_MEMBERS([struct sockaddr_in6.sin6_scope_id],,,[
-AC_INCLUDES_DEFAULT()
-[#ifdef HAVE_SYS_PARAM_H
+    AC_INCLUDES_DEFAULT()
+    [
+#ifdef HAVE_SYS_PARAM_H
 #include <sys/param.h>
 #endif
 #ifdef HAVE_SYS_SOCKET_H
@@ -63,158 +143,61 @@ AC_INCLUDES_DEFAULT()
 #ifdef HAVE_NETINET_IN_H
 #include <netinet/in.h>
 #endif
-]])
+    ]])
 
-AC_CACHE_CHECK([if _KERNEL needs to be defined for if_mtu],
-        [ac_cv_IFNET_NEEDS_KERNEL],
-[ac_cv_IFNET_NEEDS_KERNEL=unknown
-AC_COMPILE_IFELSE(AC_LANG_PROGRAM([
-#include <sys/types.h>
+#       struct statfs
+#
+AC_CHECK_MEMBERS([struct statfs.f_favail,
+                  struct statfs.f_ffree,
+                  struct statfs.f_files,
+                  struct statfs.f_frsize],,,[
+    AC_INCLUDES_DEFAULT()
+    [
+#if HAVE_SYS_STATFS_H
+#include <sys/statfs.h>
+#endif
 #ifdef HAVE_SYS_PARAM_H
 #include <sys/param.h>
 #endif
-#ifdef HAVE_SYS_SOCKET_H
-#include <sys/socket.h>
+#ifdef HAVE_SYS_MOUNT_H
+#include <sys/mount.h>
+#endif 
+    ]])
+
+#       struct statvfs
+#
+AC_CHECK_MEMBERS([struct statvfs.f_files,
+                  struct statvfs.f_frsize,
+                  struct statvfs.mnt_dir],,,[
+    AC_INCLUDES_DEFAULT()
+    [
+#if HAVE_SYS_STATFS_H
+#include <sys/statfs.h>
 #endif
-#ifdef HAVE_NET_IF_H
-#include <net/if.h>
+#if HAVE_SYS_STATVFS_H
+#include <sys/statvfs.h>
 #endif
-#ifdef HAVE_NET_IF_VAR_H
-#include <net/if_var.h>
-#endif], [[struct ifnet test; test.if_mtu = 0;]]),
-        [ac_cv_IFNET_NEEDS_KERNEL=no])
-if test "$ac_cv_IFNET_NEEDS_KERNEL" = unknown ; then
-AC_COMPILE_IFELSE(AC_LANG_PROGRAM([
-#define _KERNEL 1
-#include <sys/types.h>
+    ]])
+
+#       struct swdevt
+#
+AC_CHECK_MEMBERS([struct swdevt.sw_nblksenabled],,,[
+    AC_INCLUDES_DEFAULT()
+    [
 #ifdef HAVE_SYS_PARAM_H
 #include <sys/param.h>
 #endif
-#ifdef HAVE_SYS_SOCKET_H
-#include <sys/socket.h>
+#if HAVE_SYS_CONF_H
+#include <sys/conf.h>
 #endif
-#ifdef HAVE_NET_IF_H
-#include <net/if.h>
-#endif
-#ifdef HAVE_NET_IF_VAR_H
-#include <net/if_var.h>
-#endif], [[struct ifnet test; test.if_mtu = 0;]]),
-        [ac_cv_IFNET_NEEDS_KERNEL=yes])
-fi])
+    ]])
 
-if test "x$ac_cv_IFNET_NEEDS_KERNEL" = "xyes"; then
-  AC_DEFINE(NETSNMP_IFNET_NEEDS_KERNEL, 1,
-        [ifnet needs to have _KERNEL defined])
-fi
-
-# Check struct rtentry for various things.
-AC_CHECK_MEMBERS([struct rtentry.rt_dst, struct rtentry.rt_unit,
-                  struct rtentry.rt_refcnt, struct rtentry.rt_hash,
-                  struct rtentry.rt_use, struct rtentry.rt_next],,,
-[#include<sys/types.h>
-#ifdef HAVE_SYS_PARAM_H
-#include <sys/param.h>
-#endif
-#ifdef HAVE_SYS_SOCKET_H
-#ifdef NETSNMP_IFNET_NEEDS_KERNEL
-#define KERNEL
-#define _KERNEL
-#endif
-#include <sys/socket.h>
-#undef KERNEL
-#undef _KERNEL
-#endif
-#ifdef HAVE_NET_ROUTE_H
-#include <net/route.h>
-#endif])
-
-# checking for 4.3 vs 4.4 rtentry.
-AC_CACHE_CHECK([type of rtentry structure], [ac_cv_RTENTRY_TYPE],
-[
-# 4.4 compat
-AC_TRY_COMPILE([
-#ifdef HAVE_SYS_PARAM_H
-#include <sys/param.h>
-#endif
-#include <sys/types.h>
-#ifdef NETSNMP_IFNET_NEEDS_KERNEL
-#define KERNEL
-#define _KERNEL
-#endif
-#include <sys/socket.h>
-#undef KERNEL
-#undef _KERNEL
-#include <net/route.h>
-],[
-
-#ifndef HAVE_STRUCT_RTENTRY_RT_DST
-#define rt_dst rt_nodes->rn_key
-#endif
-
-  struct rtentry rt; 
-  rt.rt_nodes[0].rn_flags = 1;
-  rt.rt_dst;
-  ], ac_cv_RTENTRY_TYPE="BSD-4.4")
-
-# 4.3 compat
-if test "x$ac_cv_RTENTRY_TYPE" = "x"; then
-AC_TRY_COMPILE([
-#ifdef HAVE_SYS_PARAM_H
-#include <sys/param.h>
-#endif
-#include <sys/types.h>
-#ifdef NETSNMP_IFNET_NEEDS_KERNEL
-#define KERNEL
-#define _KERNEL
-#endif
-#include <sys/socket.h>
-#undef KERNEL
-#undef _KERNEL
-#include <net/route.h>
-],[
-struct rtentry rt; 
-rt.rt_hash;
-], ac_cv_RTENTRY_TYPE="BSD-4.3")
-fi
-
-# else ack.
-if test "x$ac_cv_RTENTRY_TYPE" = "x"; then
-  ac_cv_RTENTRY_TYPE="unknown"
-fi
-
-])
-
-if test "x$ac_cv_RTENTRY_TYPE" = "xBSD-4.4"; then
-  AC_DEFINE(RTENTRY_4_4, 1, [Use BSD 4.4 routing table entries?])
-fi
-
-# checking for alpha's ortentry vs rtentry
-if test "x$ac_cv_RTENTRY_TYPE" = "xunknown"; then
-AC_CACHE_CHECK(for struct rtentry, ac_cv_struct_rtentry,
-[AC_EGREP_CPP(ortentry, [#define KERNEL
-#include <net/route.h>
-],  ac_cv_struct_rtentry=ortentry,  ac_cv_struct_rtentry=rtentry )
-if test "x$ac_cv_struct_rtentry" = "xrtentry" ; then
-  ac_cv_struct_rtentry="rtentry"
-else
-  ac_cv_struct_rtentry="ortentry"
-fi
-])
-else
-  RTENTRY_TYPE="rtentry"
-  ac_cv_struct_rtentry="rtentry"
-fi
-
-if test "x$ac_cv_struct_rtentry" = "x"; then
-  ac_cv_struct_rtentry=rtentry
-fi
-AC_DEFINE_UNQUOTED(RTENTRY,struct ${ac_cv_struct_rtentry},
-        [define rtentry to ortentry on SYSV machines (alphas)])
-
-# Check tcpstat for tcpstat.tcp_rcvmemdrop
+#       struct tcpstat
+#
 AC_CHECK_MEMBERS([struct tcpstat.tcp_rcvmemdrop],,,[
-AC_INCLUDES_DEFAULT()
-[#ifdef HAVE_SYS_PARAM_H
+    AC_INCLUDES_DEFAULT()
+    [
+#ifdef HAVE_SYS_PARAM_H
 #include <sys/param.h>
 #endif
 #ifdef HAVE_SYS_TIMEOUT_H
@@ -229,15 +212,113 @@ AC_INCLUDES_DEFAULT()
 #ifdef HAVE_NETINET_TCP_VAR_H
 #include <netinet/tcp_var.h>
 #endif
-]])
+    ]])
+
+#       struct tm
+#
+AC_CHECK_MEMBERS([struct tm.tm_gmtoff],,,[
+    AC_INCLUDES_DEFAULT()
+    [
+#if TIME_WITH_SYS_TIME
+# include <sys/time.h>
+# include <time.h>
+#else
+# if HAVE_SYS_TIME_H
+#  include <sys/time.h>
+# else
+#  include <time.h>
+# endif
+#endif
+    ]])
+
+#       struct udpstat
+#
+AC_CHECK_MEMBERS([struct udpstat.udps_discard,
+                  struct udpstat.udps_fullsock,
+                  struct udpstat.udps_noport,
+                  struct udpstat.udps_noportbcast],,,[
+    AC_INCLUDES_DEFAULT()
+    [
+#if HAVE_NETINET_IN_H
+#include <netinet/in.h>
+#endif
+#if HAVE_NETINET_IP_VAR_H
+#include <netinet/ip_var.h>
+#endif
+#if HAVE_NETINET_UDP_H
+#include <netinet/udp.h>
+#endif
+#if HAVE_NETINET_UDP_VAR_H
+#include <netinet/udp_var.h>
+#endif
+    ]])
 
 
-AC_CHECK_MEMBERS([struct ifaddr.ifa_next],,,[
-[#ifdef NETSNMP_IFNET_NEEDS_KERNEL
+
+##
+#   ifnet-related checks:
+##
+
+#       Does "struct ifnet" need _KERNEL defined?       (Irix)
+#
+AC_CACHE_CHECK([if _KERNEL needs to be defined for if_mtu],
+        [ac_cv_IFNET_NEEDS_KERNEL],
+        [ac_cv_IFNET_NEEDS_KERNEL=unknown
+         AC_COMPILE_IFELSE(
+             AC_LANG_PROGRAM([
+#include <sys/types.h>
+#ifdef HAVE_SYS_PARAM_H
+#include <sys/param.h>
+#endif
+#ifdef HAVE_SYS_SOCKET_H
+#include <sys/socket.h>
+#endif
+#ifdef HAVE_NET_IF_H
+#include <net/if.h>
+#endif
+#ifdef HAVE_NET_IF_VAR_H
+#include <net/if_var.h>
+#endif
+             ], [[struct ifnet test; test.if_mtu = 0;]]),
+             [ac_cv_IFNET_NEEDS_KERNEL=no])
+         if test "$ac_cv_IFNET_NEEDS_KERNEL" = unknown ; then
+         AC_COMPILE_IFELSE(
+             AC_LANG_PROGRAM([
 #define _KERNEL 1
-#endif]
-AC_INCLUDES_DEFAULT()
-[#ifdef HAVE_SYS_PARAM_H
+#include <sys/types.h>
+#ifdef HAVE_SYS_PARAM_H
+#include <sys/param.h>
+#endif
+#ifdef HAVE_SYS_SOCKET_H
+#include <sys/socket.h>
+#endif
+#ifdef HAVE_NET_IF_H
+#include <net/if.h>
+#endif
+#ifdef HAVE_NET_IF_VAR_H
+#include <net/if_var.h>
+#endif
+             ], [[struct ifnet test; test.if_mtu = 0;]]),
+             [ac_cv_IFNET_NEEDS_KERNEL=yes])
+         fi])
+
+if test "x$ac_cv_IFNET_NEEDS_KERNEL" = "xyes"; then
+    AC_DEFINE(NETSNMP_IFNET_NEEDS_KERNEL, 1,
+        [ifnet needs to have _KERNEL defined])
+fi
+
+
+#       struct ifaddr
+#
+AC_CHECK_MEMBERS([struct ifaddr.ifa_next],,,[
+    [
+#ifdef NETSNMP_IFNET_NEEDS_KERNEL
+#define _KERNEL 1
+#endif
+    ]
+    AC_INCLUDES_DEFAULT()
+    [
+#ifdef HAVE_SYS_PARAM_H
 #include <sys/param.h>
 #endif
 #ifdef HAVE_SYS_SOCKET_H
@@ -251,20 +332,27 @@ AC_INCLUDES_DEFAULT()
 #endif
 #ifdef HAVE_NET_IF_VAR_H
 #include <net/if_var.h>
-#endif]])
+#endif
+    ]])
 
-# Check ifnet entries using macro defined in aclocal.m4.
+#       struct ifnet
+#         (Broken on FreeBSD - #define'd in <net/if.h>)
 #
-# XXX  Broken on FreeBSD where these are #define'd in <net/if.h>
-#
-AC_CHECK_MEMBERS([struct ifnet.if_mtu, struct ifnet.if_baudrate,
-                  struct ifnet.if_baudrate.ifs_value, struct ifnet.if_speed,
-                  struct ifnet.if_type, struct ifnet.if_imcasts,
-                  struct ifnet.if_iqdrops, struct ifnet.if_noproto,
-                  struct ifnet.if_omcasts, struct ifnet.if_xname,
-                  struct ifnet.if_lastchange.tv_sec, struct ifnet.if_obytes,
-                  struct ifnet.if_ibytes, struct ifnet.if_addrlist,
-                  struct ifnet.if_addrhead.tqh_first],,,[[
+AC_CHECK_MEMBERS([struct ifnet.if_addrlist,
+                  struct ifnet.if_addrhead.tqh_first,
+                  struct ifnet.if_baudrate,
+                  struct ifnet.if_baudrate.ifs_value,
+                  struct ifnet.if_ibytes,
+                  struct ifnet.if_imcasts,
+                  struct ifnet.if_iqdrops,
+                  struct ifnet.if_lastchange.tv_sec,
+                  struct ifnet.if_mtu,
+                  struct ifnet.if_noproto,
+                  struct ifnet.if_obytes,
+                  struct ifnet.if_omcasts,
+                  struct ifnet.if_speed,
+                  struct ifnet.if_type,
+                  struct ifnet.if_xname],,,[[
 #ifdef NETSNMP_IFNET_NEEDS_KERNEL
 #define _KERNEL 1
 #endif
@@ -317,110 +405,135 @@ struct ifnet {
 /* end statistics */
 	struct	ifnet *if_next;
 };
-#endif]])
+#endif
+    ]])
 
-AC_CHECK_MEMBERS([struct udpstat.udps_discard, struct udpstat.udps_noport,
-                  struct udpstat.udps_noportbcast,
-                  struct udpstat.udps_fullsock],,,[
-AC_INCLUDES_DEFAULT()
-[#if HAVE_NETINET_IN_H
-#include <netinet/in.h>
-#endif
-#if HAVE_NETINET_IP_VAR_H
-#include <netinet/ip_var.h>
-#endif
-#if HAVE_NETINET_UDP_H
-#include <netinet/udp.h>
-#endif
-#if HAVE_NETINET_UDP_VAR_H
-#include <netinet/udp_var.h>
-#endif
-]])
 
-AC_CHECK_MEMBERS([struct arphd.at_next],,,[
-AC_INCLUDES_DEFAULT()
-[#ifdef HAVE_SYS_PARAM_H
-#include <sys/param.h>
-#endif
-#ifdef HAVE_SYS_SOCKET_H
-#include <sys/socket.h>
-#endif
-#ifdef HAVE_SYS_TIME_H
-#include <sys/time.h>
-#endif
-#include <net/if.h>
-#if HAVE_NETINET_IN_H
-#include <netinet/in.h>
-#endif
-#if HAVE_NETINET_IF_ETHER_H
-#include <netinet/if_ether.h>
-#endif
-]])
+##
+#   rtentry structure checks:
+##
 
-AC_CHECK_MEMBERS([struct swdevt.sw_nblksenabled],,,[
-AC_INCLUDES_DEFAULT()
-[#ifdef HAVE_SYS_PARAM_H
-#include <sys/param.h>
-#endif
-#if HAVE_SYS_CONF_H
-#include <sys/conf.h>
-#endif
-]])
-
-AC_CHECK_MEMBERS([struct statvfs.mnt_dir, struct statvfs.f_frsize,
-                  struct statvfs.f_files],,,[
-AC_INCLUDES_DEFAULT()
-[#if HAVE_SYS_STATFS_H
-#include <sys/statfs.h>
-#endif
-#if HAVE_SYS_STATVFS_H
-#include <sys/statvfs.h>
-#endif
-]])
-
-AC_CHECK_MEMBERS([struct statfs.f_frsize, struct statfs.f_files,
-                  struct statfs.f_ffree, struct statfs.f_favail],,,[
-AC_INCLUDES_DEFAULT()
-[#if HAVE_SYS_STATFS_H
-#include <sys/statfs.h>
-#endif
+# Check struct rtentry for common fields
+#
+AC_CHECK_MEMBERS([struct rtentry.rt_dst,
+                  struct rtentry.rt_hash,
+                  struct rtentry.rt_next,
+                  struct rtentry.rt_refcnt,
+                  struct rtentry.rt_unit,
+                  struct rtentry.rt_use],,,
+    [
+#include<sys/types.h>
 #ifdef HAVE_SYS_PARAM_H
 #include <sys/param.h>
 #endif
-#ifdef HAVE_SYS_MOUNT_H
-#include <sys/mount.h>
-#endif]])
+#ifdef HAVE_SYS_SOCKET_H
+#ifdef NETSNMP_IFNET_NEEDS_KERNEL
+#define KERNEL
+#define _KERNEL
+#endif
+#include <sys/socket.h>
+#undef KERNEL
+#undef _KERNEL
+#endif
+#ifdef HAVE_NET_ROUTE_H
+#include <net/route.h>
+#endif
+    ])
 
-AC_CHECK_MEMBERS([struct nlist.n_value, struct nlist64.n_value],,,[
-AC_INCLUDES_DEFAULT()
-[#if HAVE_NLIST_H
-#include <nlist.h>
-#endif
-]])
 
-# check struct ipstat for various things
-AC_CHECK_MEMBERS([
-        struct ipstat.ips_cantforward, struct ipstat.ips_cantfrag,
-        struct ipstat.ips_delivered, struct ipstat.ips_fragdropped,
-        struct ipstat.ips_fragtimeout, struct ipstat.ips_fragmented,
-        struct ipstat.ips_localout, struct ipstat.ips_noproto,
-        struct ipstat.ips_noroute, struct ipstat.ips_odropped,
-        struct ipstat.ips_ofragments, struct ipstat.ips_reassembled],,,[
-AC_INCLUDES_DEFAULT()
-[#if HAVE_NETINET_IN_H
-#include <netinet/in.h>
+# Check for BSD 4.3 vs 4.4 struct rtentry
+#
+AC_CACHE_CHECK([type of rtentry structure],
+    [ac_cv_RTENTRY_TYPE],
+    [
+        # BSD 4.4 compatible structure
+        #    ('rt_nodes' array)
+        #
+        AC_TRY_COMPILE([
+#ifdef HAVE_SYS_PARAM_H
+#include <sys/param.h>
 #endif
-#if HAVE_NETINET_IP_VAR_H
-#include <netinet/ip_var.h>
+#include <sys/types.h>
+#ifdef NETSNMP_IFNET_NEEDS_KERNEL
+#define KERNEL
+#define _KERNEL
 #endif
-]])
+#include <sys/socket.h>
+#undef KERNEL
+#undef _KERNEL
+#include <net/route.h>
+        ],[
 
-# check for the des_ks_struct.weak_key attribute, which indicates the 
-# older openssl version is being used.
-if test "x$ac_cv_header_openssl_des_h" = "xyes" ; then
-AC_CHECK_MEMBERS([struct des_ks_struct.weak_key],,,[[
-#ifdef HAVE_OPENSSL_DES_H
-#include <openssl/des.h>
+#ifndef HAVE_STRUCT_RTENTRY_RT_DST
+#define rt_dst rt_nodes->rn_key
 #endif
-]])
+
+  struct rtentry rt; 
+  rt.rt_nodes[0].rn_flags = 1;
+  rt.rt_dst;
+        ], ac_cv_RTENTRY_TYPE="BSD-4.4")
+
+        if test "x$ac_cv_RTENTRY_TYPE" = "x"; then
+        # BSD 4.3 compatible structure
+        #    ('rt_hash')
+        #
+        AC_TRY_COMPILE([
+#ifdef HAVE_SYS_PARAM_H
+#include <sys/param.h>
+#endif
+#include <sys/types.h>
+#ifdef NETSNMP_IFNET_NEEDS_KERNEL
+#define KERNEL
+#define _KERNEL
+#endif
+#include <sys/socket.h>
+#undef KERNEL
+#undef _KERNEL
+#include <net/route.h>
+        ],[
+
+struct rtentry rt; 
+rt.rt_hash;
+        ], ac_cv_RTENTRY_TYPE="BSD-4.3")
+        fi
+
+        if test "x$ac_cv_RTENTRY_TYPE" = "x"; then
+        # Neither BSD 4.3 nor 4.4 compatible structure
+        #
+            ac_cv_RTENTRY_TYPE="unknown"
+        fi
+    ])
+
+if test "x$ac_cv_RTENTRY_TYPE" = "xBSD-4.4"; then
+    AC_DEFINE(RTENTRY_4_4, 1, [Use BSD 4.4 routing table entries?])
 fi
+
+#    Check for ortentry                                 (Alpha)
+#
+if test "x$ac_cv_RTENTRY_TYPE" = "xunknown"; then
+    AC_CACHE_CHECK([for struct rtentry],
+        [ac_cv_struct_rtentry],
+        [AC_EGREP_CPP(ortentry,
+            [
+#define KERNEL
+#include <net/route.h>
+            ],
+            [ac_cv_struct_rtentry=ortentry],
+            [ac_cv_struct_rtentry=rtentry ])
+        if test "x$ac_cv_struct_rtentry" = "xrtentry" ; then
+             ac_cv_struct_rtentry="rtentry"
+        else
+             ac_cv_struct_rtentry="ortentry"
+        fi
+    ])
+else
+    RTENTRY_TYPE="rtentry"
+    ac_cv_struct_rtentry="rtentry"
+fi
+
+if test "x$ac_cv_struct_rtentry" = "x"; then
+    ac_cv_struct_rtentry=rtentry
+fi
+AC_DEFINE_UNQUOTED(RTENTRY,struct ${ac_cv_struct_rtentry},
+        [define rtentry to ortentry on SYSV machines (alphas)])
+
