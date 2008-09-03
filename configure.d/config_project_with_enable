@@ -555,10 +555,10 @@ fi
 
 AC_ARG_WITH(transports,
 [  --with-transports="t1 t2 ..."   Compile in the given SNMP transport
-                                    modules (space separated list).])
+                                    modules (space or comma separated list).])
 AC_ARG_WITH(out_transports,
 [  --with-out-transports="t1 ..."  Exclude listed SNMP transports
-                                    (space separated list).
+                                    (space or comma separated list).
 
   Available SNMP transport modules are:
 
@@ -567,11 +567,11 @@ AC_ARG_WITH(out_transports,
     UDPIPv6     support for SNMP over UDP/IPv6.
                 This transport is available for Linux, Solaris and
                 FreeBSD at least.
-                It is never compiled in by default.
+                This transport is compiled in by default if IPv6 support is enabled.
     TCPIPv6     support for SNMP over UDP/IPv6.
                 This transport is available for Linux, Solaris and
                 FreeBSD at least.
-                It is never compiled in by default.
+                This transport is compiled in by default if IPv6 support is enabled.
     TCP         support for SNMP over TCP/IP.
                 This transport is compiled in by default, but may be omitted.
     Unix        support for SNMP over Unix domain protocols.
