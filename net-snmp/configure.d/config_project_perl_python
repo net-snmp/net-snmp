@@ -1,135 +1,164 @@
-######################################################################
-# PERL SUPPORT
-######################################################################
+#########################################
+##
+#   Perl & Python support
+##
+#########################################
 
+##
+#   Check whether Net-SNMP configuration will support Perl
+##
+
+#   Inputs:
+#       install_perl:   whether or not to install the Perl modules
+#                           yes/no/try   (i.e. 'maybe' - the default)
+#       embed_perl:     whether or not to embed Perl support within the agent
+#                           yes/no/try   (i.e. 'maybe' - the default)
 #
-# test to see if we can attempt to build embedded Perl so far
+#       ac_cv_path_PERLPROG:    Path to perl binary
+
+
+#       Embedded Perl requires Perl modules, and the perl binary
 #
 if test "x$embed_perl" = "xtry" ; then
-  if test "x$install_perl" = "xno" ; then
-    install_perl="try"
-  fi
-  if test "x$ac_cv_path_PERLPROG" = "x" -o "x$ac_cv_path_PERLPROG" = "xno" ; then
-    install_perl="no"
-    embed_perl="no"
-  fi
+    if test "x$install_perl" = "xno" ; then
+        install_perl="try"
+    fi
+    if test "x$ac_cv_path_PERLPROG" = "x" -o "x$ac_cv_path_PERLPROG" = "xno" ; then
+        install_perl="no"
+        embed_perl="no"
+    fi
 fi
 
-
+#       Perl modules require the perl binary
 #
-# Embedded Perl specific stuff
-#
-
-# test perl prog
 if test "x$install_perl" != "xno" ; then
     myperl=$ac_cv_path_PERLPROG
     if test $myperl = "no" ; then
-      if test "x$install_perl" = "xtry" ; then
-        install_perl="no"
-      else
-        AC_MSG_ERROR(--enable-embedded-perl requested but no perl executable found)
-      fi
+        if test "x$install_perl" = "xtry" ; then
+            install_perl="no"
+        else
+            AC_MSG_ERROR(--enable-embedded-perl requested but no perl executable found)
+        fi
     fi
 fi
 
-# test for shared libraries support
+#       Perl modules require shared libraries
+#
 if test "x$install_perl" != "xno" ; then
-    # embedded Perl requires shared libraries
     if test "x$enable_shared" != "xyes"; then
-      if test "x$install_perl" = "xtry" ; then
-        install_perl="no"
-      else
-        AC_MSG_ERROR(Perl support requires --enable-shared)
-      fi
+        if test "x$install_perl" = "xtry" ; then
+            install_perl="no"
+        else
+            AC_MSG_ERROR(Perl support requires --enable-shared)
+        fi
     fi
 fi
 
+#       Perl modules can only be installed from within the source tree
+#
 if test "x$install_perl" != "xno" ; then
-  AC_MSG_CHECKING([if we are in the source tree so we can install Perl modules])
-  if test "x$srcdir" = "x." -o -d perl/agent/default_store ; then
-    AC_MSG_RESULT([Yes])
-  else
-    if test "x$install_perl" = "xtry" ; then
-      install_perl="no"
-      AC_MSG_RESULT([No])
+    AC_MSG_CHECKING([if we are in the source tree so we can install Perl modules])
+    if test "x$srcdir" = "x." -o -d perl/agent/default_store ; then
+        AC_MSG_RESULT([Yes])
     else
-      AC_MSG_ERROR([Perl modules can not be built outside the source directory])
+        if test "x$install_perl" = "xtry" ; then
+            install_perl="no"
+            AC_MSG_RESULT([No])
+        else
+            AC_MSG_ERROR([Perl modules can not be built outside the source directory])
+        fi
     fi
-  fi
 fi      
 
-# check the Perl compiler name
+
+#   The rest of the Perl-related checks aren't relevant
+#       if we're not using the Perl modules
+#
 if test "x$install_perl" != "xno" ; then
-    #
-    # Perl cc checks
+
+
+##
+#   Check compiler compatability
+##
+
+    #       What compiler was used to build the perl binary?
     #
     if test "xenable_perl_cc_checks" != "xno" ; then
-      AC_MSG_CHECKING([for Perl cc])
-      changequote(, )
-      PERLCC=`$myperl -V:cc | $myperl -n -e 'print if (s/^\s*cc=.([-=\w\s\/]+).;\s*/$1/);'`
-      changequote([, ])
-      if test "x$PERLCC" != "x" ; then
-        AC_MSG_RESULT([$PERLCC])
-      else
-        if test "x$install_perl" = "xtry" ; then
-          install_perl="no"
+        AC_MSG_CHECKING([for Perl cc])
+        changequote(, )
+        PERLCC=`$myperl -V:cc | $myperl -n -e 'print if (s/^\s*cc=.([-=\w\s\/]+).;\s*/$1/);'`
+        changequote([, ])
+        if test "x$PERLCC" != "x" ; then
+            AC_MSG_RESULT([$PERLCC])
         else
-          AC_MSG_ERROR([Could not determine the compiler that was used to build $myperl. Either set the environment variable PERLPROG to a different perl binary or use --without-perl-modules to build without Perl.])
+            if test "x$install_perl" = "xtry" ; then
+                install_perl="no"
+            else
+                AC_MSG_ERROR([Could not determine the compiler that was used to build $myperl. Either set the environment variable PERLPROG to a different perl binary or use --without-perl-modules to build without Perl.])
+            fi
         fi
-      fi
-fi
+    fi
 
-# check the Perl compiler compatibility
-if test "x$install_perl" != "xno" ; then
-      AC_MSG_CHECKING([whether $PERLCC is a GNU C compiler])
-      OLDCC=$CC
-      CC="$PERLCC"
-      AC_COMPILE_IFELSE([AC_LANG_PROGRAM([], [[
+    #       Was GCC used to build the perl binary?
+    #
+    if test "x$install_perl" != "xno" ; then
+        AC_MSG_CHECKING([whether $PERLCC is a GNU C compiler])
+        OLDCC=$CC
+        CC="$PERLCC"
+        AC_COMPILE_IFELSE([
+            AC_LANG_PROGRAM([], [[
 #ifndef __GNUC__
   choke me
 #endif
-      ]])], [perlcc_is_gnu=yes], [perlcc_is_gnu=no])
-      AC_MSG_RESULT([$perlcc_is_gnu])
-      CC=$OLDCC
-      if test "x$GCC" = "xyes" -a "x$perlcc_is_gnu" = "xno" ; then
-      	if test "x$install_perl" = "xtry" ; then
-      	  install_perl="no"
-      	else
-      	  AC_MSG_ERROR([This build is using a GNU C compiler ($CC) while Perl has been compiled with a non-GNU (or non-working) compiler ($PERLCC). This likely won't work for building with Perl support. Either specify a different compiler (--with-cc=PATH), disable this check (--disable-perl-cc-checks) or build without Perl (--without-perl-modules).])
-      	fi
-      fi
-fi
+            ]])], [perlcc_is_gnu=yes], [perlcc_is_gnu=no])
+        AC_MSG_RESULT([$perlcc_is_gnu])
+        CC=$OLDCC
 
-# check if they're both gnu
-if test "x$install_perl" != "xno" ; then
-      if test "x$GCC" != "xyes" -a "x$perlcc_is_gnu" = "xyes" ; then
-      	if test "x$install_perl" = "xtry" ; then
-      	  install_perl="no"
-      	else
-          AC_MSG_ERROR([This build is using a non-GNU C compiler ($CC) while Perl has been compiled with a GNU compiler ($PERLCC). This likely won't work for building with Perl support. Either specify a different compiler (--with-cc=PATH), disable this check (--disable-perl-cc-checks) or build without Perl (--without-perl-modules).])
-      	fi
-      fi
-fi
+        #       Check compatability:  Gnu Net-SNMP vs Non-Gnu perl
+        #
+        if test "x$GCC" = "xyes" -a "x$perlcc_is_gnu" = "xno" ; then
+            if test "x$install_perl" = "xtry" ; then
+      	        install_perl="no"
+      	    else
+      	        AC_MSG_ERROR([This build is using a GNU C compiler ($CC) while Perl has been compiled with a non-GNU (or non-working) compiler ($PERLCC). This likely won't work for building with Perl support. Either specify a different compiler (--with-cc=PATH), disable this check (--disable-perl-cc-checks) or build without Perl (--without-perl-modules).])
+      	    fi
+        fi
+    fi
 
-# we have enough support for installing the modules at least.
-if test "x$install_perl" = "xtry" ; then
-  install_perl="yes"
-else
-  if test "x$install_perl" = "xno" ; then
-    install_perl="no"
-    embed_perl="no"
-  fi
-fi
+    #       Check compatability:  Non-Gnu Net-SNMP vs Gnu perl
+    #
+    if test "x$install_perl" != "xno" ; then
+        if test "x$GCC" != "xyes" -a "x$perlcc_is_gnu" = "xyes" ; then
+      	    if test "x$install_perl" = "xtry" ; then
+      	        install_perl="no"
+      	    else
+                AC_MSG_ERROR([This build is using a non-GNU C compiler ($CC) while Perl has been compiled with a GNU compiler ($PERLCC). This likely won't work for building with Perl support. Either specify a different compiler (--with-cc=PATH), disable this check (--disable-perl-cc-checks) or build without Perl (--without-perl-modules).])
+      	    fi
+        fi
+    fi
 
-####################
-# on to embedding...
+    #       Are we clear to proceed?
+    #
+    if test "x$install_perl" = "xtry" ; then
+        install_perl="yes"
+    else
+        if test "x$install_perl" = "xno" ; then
+            install_perl="no"
+            embed_perl="no"
+        fi
+    fi
 
-# check the compiler flags for illegal tokens
+
+##
+#   Determine compilation environment needed for embedded Perl
+##
+
+#       System-specific requirements
+#
 case $target_os in
     solaris*)
       if test "x$embed_perl" != "xno" ; then
-          #
-          # Perl cc checks
+          #   Check for LARGEFILE support               (Solaris)
           #
           AC_MSG_CHECKING([for problematic Perl cc flags on Suns])
           if $myperl -V:ccflags | $GREP LARGEFILE > /dev/null ; then
@@ -148,8 +177,8 @@ case $target_os in
     ;;
 esac
 
-
-# check the cflags
+#       Compiler flags
+#
 if test "x$embed_perl" != "xno" ; then
     AC_MSG_CHECKING([for Perl CFLAGS])
     perlcflags=`$myperl -MExtUtils::Embed -e ccopts`
@@ -165,7 +194,8 @@ if test "x$embed_perl" != "xno" ; then
     fi
 fi
 
-# check the ldflags
+#       Linker flags
+#
 if test "x$embed_perl" != "xno" ; then
     AC_MSG_CHECKING([for Perl LDFLAGS])
     netsnmp_perlldopts=`$myperl -MExtUtils::Embed -e ldopts`
@@ -179,9 +209,12 @@ if test "x$embed_perl" != "xno" ; then
       fi
     fi
     if test "x$enable_as_needed" != "xno" ; then
-      # link *libraries* with libperl
+      #   Just-in-time linking will embed the Perl library within
+      #       the Net-SNMP library (rather than the agent application)
+      #
       PERLLDOPTS_FOR_LIBS="$netsnmp_perlldopts"
-      # Perl ccdlflags (RPATH to libperl, hopefully)
+      #   Perl ccdlflags (RPATH to libperl, hopefully)
+      #
       AC_MSG_CHECKING([for Perl CCDLFLAGS])
       changequote(, )
       netsnmp_perlccdlflags=`$myperl -V:ccdlflags | $myperl -n -e 'print $1 '"if (/^\s*ccdlflags='([^']+)';/);"`
@@ -189,27 +222,31 @@ if test "x$embed_perl" != "xno" ; then
       AC_MSG_RESULT([$netsnmp_perlccdlflags])
       PERLLDOPTS_FOR_APPS="$netsnmp_perlccdlflags"
     else
+      #   Otherwise embed the Perl library within the application
+      #
+      PERLLDOPTS_FOR_LIBS="$netsnmp_perlldopts"
       # link *applications* against libperl
       PERLLDOPTS_FOR_APPS="$netsnmp_perlldopts"
     fi
 fi
 
-# check needed functions
+#       'Perl_eval_pv' function (and equivalents)
+#
 if test "x$embed_perl" != "xno" ; then
+    #   Three possible versions of this routine:
+    #       eval_pv                                     (to 5.003_97d)
+    #       perl_eval_pv                                (5.004/5.005)
+    #       Perl_eval_pv                                (from 5.6ff)
+    #
     OLDLIBS="$LIBS"
     LIBS="$LIBS $netsnmp_perlldopts"
-
-    # newer perl vs older perl call functions
     AC_CHECK_FUNCS(eval_pv)
-
-    # sigh: this has a CAPITAL P in Perl, which ends up being the same
-    # autoconf define as the lower case so we have to treat them *BOTH*
-    # specially.  Wonderful.
     AC_CHECK_FUNC(perl_eval_pv, AC_DEFINE(HAVE_PERL_EVAL_PV_LC))
     AC_CHECK_FUNC(Perl_eval_pv, AC_DEFINE(HAVE_PERL_EVAL_PV_UC))
-
     LIBS="$OLDLIBS"
-
+    #
+    #   Note that autoconf flattens case when defining tokens,
+    #   so we need to explicitly distinguish between the latter two.
 
     if test "x$ac_cv_func_perl_eval_pv" != "xyes" -a "x$ac_cv_func_Perl_eval_pv" != "xyes" -a "x$ac_cv_func_eval_pv" != "xyes" ; then
       if test "x$embed_perl" = "xtry" ; then
@@ -218,13 +255,14 @@ if test "x$embed_perl" != "xno" ; then
         AC_MSG_ERROR([Could not find the eval_pv, perl_eval_pv or Perl_eval_pv functions needed for embedded Perl support. Either set the environment variable PERLPROG to a different perl binary or use --disable-embedded-perl to turn off embedded Perl functionality altogether.])
       fi
     else
+      #   Activate Embedded Perl
+      #
       AC_DEFINE(NETSNMP_EMBEDDED_PERL)
       OTHERAGENTLIBOBJS="snmp_perl.o"
       OTHERAGENTLIBLOBJS="snmp_perl.lo"
 
       EMBEDPERLINSTALL="embedperlinstall"
       EMBEDPERLUNINSTALL="embedperluninstall"
-      # yay, we got here!
       embed_perl="yes"
     fi
 else
@@ -233,12 +271,19 @@ else
       embed_perl="no"
     fi
 fi
+
+
+##
+#   Report and configure results
+##
+
 AC_SUBST(EMBEDPERLINSTALL)
 AC_SUBST(EMBEDPERLUNINSTALL)
 AC_SUBST(PERLLDOPTS_FOR_LIBS)
 AC_SUBST(PERLLDOPTS_FOR_APPS)
 
-# embedded Perl results
+#       Results of Embedded Perl checks
+#
 AC_MSG_CHECKING([for potential embedded Perl support])
 if test "x$embed_perl" != "xyes" ; then
   AC_MSG_CACHE_ADD(Embedded Perl support:      disabled)
@@ -248,7 +293,8 @@ else
   AC_MSG_RESULT([enabled])
 fi
 
-# install Perl module results
+#       Results of Perl Module checks
+#
 PERLTARGS=""
 PERLINSTALLTARGS=""
 PERLUNINSTALLTARGS=""
@@ -274,14 +320,17 @@ AC_SUBST(PERLUNINSTALLTARGS)
 AC_SUBST(PERLARGS)
 
 
-
-# reset libs
+#       Reset LIBS to pre-libwrap value   (???)
+#
 AGENTLIBS=$LIBS
 LIBS=$NONAGENTLIBS
 
 
 
-# python support
+##
+#   Python checks
+##
+
 PYTHONTARGS=""
 PYTHONINSTALLTARGS=""
 PYTHONUNINSTALLTARGS=""
