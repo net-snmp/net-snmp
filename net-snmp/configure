@@ -1677,9 +1677,9 @@ Miscellaneous:
                                     (Default: 3)
                                     Legal values: 1, 2 (for SNMPv2c) or 3.
   --with-transports="t1 t2 ..."   Compile in the given SNMP transport
-                                    modules (space separated list).
+                                    modules (space or comma separated list).
   --with-out-transports="t1 ..."  Exclude listed SNMP transports
-                                    (space separated list).
+                                    (space or comma separated list).
 
   Available SNMP transport modules are:
 
@@ -1688,11 +1688,11 @@ Miscellaneous:
     UDPIPv6     support for SNMP over UDP/IPv6.
                 This transport is available for Linux, Solaris and
                 FreeBSD at least.
-                It is never compiled in by default.
+                This transport is compiled in by default if IPv6 support is enabled.
     TCPIPv6     support for SNMP over UDP/IPv6.
                 This transport is available for Linux, Solaris and
                 FreeBSD at least.
-                It is never compiled in by default.
+                This transport is compiled in by default if IPv6 support is enabled.
     TCP         support for SNMP over TCP/IP.
                 This transport is compiled in by default, but may be omitted.
     Unix        support for SNMP over Unix domain protocols.
@@ -26914,16 +26914,13 @@ transport_hdr_list=""
 transport_def_list=""
 transport_result_list=""
 transport_add_list=""
-transport_callback_disabled=""
 new_with_transport_list=`echo $with_transports | $SED 's/,/ /g;'`
 new_with_out_transport_list=`echo $with_out_transports | $SED 's/,/ /g;'`
 
 #
 # Add the default transports to the list
 #
-if test "x$PARTIALTARGETOS" = "xcygwin"; then
-  transport_default_list="UDP TCP Alias Callback"
-elif test "x$PARTIALTARGETOS" = "xmingw32" -o "x$PARTIALTARGETOS" = "xmingw32msvc"; then
+if test "x$PARTIALTARGETOS" = "xcygwin" -o "x$PARTIALTARGETOS" = "xmingw32" -o "x$PARTIALTARGETOS" = "xmingw32msvc"; then
   transport_default_list="UDP TCP Alias Callback"
 else
   transport_default_list="UDP TCP Alias Unix Callback"
@@ -26947,10 +26944,8 @@ for i in $new_transport_list; do
       { { echo "$as_me:$LINENO: error: It is not possible to compile without UDP/IP support." >&5
 echo "$as_me: error: It is not possible to compile without UDP/IP support." >&2;}
    { (exit 1); exit 1; }; }
-    elif test "x$i" = "xCallback"; then
-      echo
-      transport_callback_disabled="yes"
     fi
+    continue
   else
     if test "x$i" = "xAAL5PVC"; then
       if test "x$PARTIALTARGETOS" != "xlinux"; then
