@@ -338,7 +338,7 @@ int flag;
               }
            }
            if (!len) {
-              snprintf(buf,"%ld", buf_len, *var->val.integer);
+              snprintf(buf, buf_len, "%ld", *var->val.integer);
               len = STRLEN(buf);
            }
            break;
