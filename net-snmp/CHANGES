@@ -122,7 +122,8 @@ listing of all changes made to the code.
 
     python:
       - [BUG 1826174]: Check for buffer overflow when printing values
-      - [PATCH 1862177]: made code more windows/cygwin compiler friendl
+      - [BUG 1868278]: Python segfault (introduced by r16962)
+      - [PATCH 1862177]: made code more windows/cygwin compiler friendly
       - [PATCH 1877840]: fix MIB label and indexing due to broken regexp
 
     AIX:
