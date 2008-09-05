@@ -201,7 +201,7 @@ System("release:update","svn -u status");
 print STDERR "**************************************** FINISHED ********************\n";
 print STDERR "\nDouble check the SVN status output above for any outstanding changes\n\n";
 print STDERR "Run the following command to upload the relase to SF:\n";
-print STDERR "  ncftpput upload.sf.net incoming $pkg1 $pkg2 $sig1 $sig2\n";
+print STDERR "  rsync -v  $pkg1 $pkg2 $sig1 $sig2 frs.sourceforge.net:uploads/\n";
 print STDERR "See RELEASE-INSTRUCTIONS for any additional steps\n";
 
 
