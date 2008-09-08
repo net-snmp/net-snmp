@@ -121,7 +121,7 @@ netsnmp_dateandtime_set_buf_from_vars(u_char *buf, size_t *bufsize,
 }
 
 u_char         *
-date_n_time(time_t * when, size_t * length)
+date_n_time(const time_t * when, size_t * length)
 {
     struct tm      *tm_p;
     static u_char   string[11];
@@ -202,7 +202,7 @@ date_n_time(time_t * when, size_t * length)
 
 
 time_t
-ctime_to_timet(char *str)
+ctime_to_timet(const char *str)
 {
     struct tm       tm;
 
