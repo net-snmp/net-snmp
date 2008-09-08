@@ -1535,7 +1535,7 @@ snmp_sess_add_ex(netsnmp_session * in_session,
 
     if (slp->session->version == SNMP_VERSION_3) {
         DEBUGMSGTL(("snmp_sess_add",
-                    "adding v3 session -- engineID probe now\n"));
+                    "adding v3 session -- maybe engineID probe now\n"));
         if (!snmpv3_engineID_probe(slp, in_session)) {
             DEBUGMSGTL(("snmp_sess_add", "engine ID probe failed\n"));
             snmp_sess_close(slp);
@@ -2034,10 +2034,16 @@ snmpv3_verify_msg(netsnmp_request_list *rp, netsnmp_pdu *pdu)
     if (rpdu->contextNameLen != pdu->contextNameLen ||
         memcmp(rpdu->contextName, pdu->contextName, pdu->contextNameLen))
         return 0;
-    if (rpdu->securityEngineIDLen != pdu->securityEngineIDLen ||
+
+    /* tunneled transports don't have a securityEngineID...  that's
+       USM specific (and maybe other future ones) */
+    if (pdu->securityModel == SNMP_SEC_MODEL_USM &&
+        (rpdu->securityEngineIDLen != pdu->securityEngineIDLen ||
         memcmp(rpdu->securityEngineID, pdu->securityEngineID,
-               pdu->securityEngineIDLen))
+               pdu->securityEngineIDLen)))
         return 0;
+
+    /* the securityName must match though regardless of secmodel */
     if (rpdu->securityNameLen != pdu->securityNameLen ||
         memcmp(rpdu->securityName, pdu->securityName,
                pdu->securityNameLen))
@@ -2143,7 +2149,11 @@ snmpv3_build(u_char ** pkt, size_t * pkt_len, size_t * offset,
     if (pdu->securityModel == SNMP_DEFAULT_SECMODEL) {
         pdu->securityModel = session->securityModel;
         if (pdu->securityModel == SNMP_DEFAULT_SECMODEL) {
-            pdu->securityModel = SNMP_SEC_MODEL_USM;
+            pdu->securityModel = se_find_value_in_slist("snmp_secmods", netsnmp_ds_get_string(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_SECMODEL));
+            
+            if (pdu->securityModel <= 0) {
+                pdu->securityModel = SNMP_SEC_MODEL_USM;
+            }
         }
     }
     if (pdu->securityNameLen == 0 && pdu->securityName == NULL) {
@@ -5109,6 +5119,13 @@ _sess_process_packet(void *sessp, netsnmp_session * sp,
   } else {
     pdu = snmp_create_sess_pdu(transport, opaque, olength);
   }
+
+  /* if the transport was a magic tunnel, mark the PDU as having come
+     through one. */
+  if (transport->flags & NETSNMP_TRANSPORT_FLAG_TUNNELED) {
+      pdu->flags |= UCD_MSG_FLAG_TUNNELED;
+  }
+
   if (pdu == NULL) {
     snmp_log(LOG_ERR, "pdu failed to be created\n");
     if (opaque != NULL) {
