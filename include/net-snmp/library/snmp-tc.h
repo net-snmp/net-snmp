@@ -18,8 +18,8 @@ extern          "C" {
                                           u_char utc_offset_hours,
                                           u_char utc_offset_minutes);
 
-    u_char         *date_n_time(time_t *, size_t *);
-    time_t          ctime_to_timet(char *);
+    u_char         *date_n_time(const time_t *, size_t *);
+    time_t          ctime_to_timet(const char *);
 
     /*
      * TrueValue 
