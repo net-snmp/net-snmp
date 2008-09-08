@@ -217,8 +217,12 @@ localsm_process_in_msg(struct snmp_secmod_incoming_params *parms)
        hole to assume otherwise) */
     DEBUGMSGTL(("localsm","checking how we got here\n"));
     if (!(parms->pdu->flags & UCD_MSG_FLAG_TUNNELED)) {
-        DEBUGMSGTL(("localsm","  not tunneled\n"));
-        return SNMPERR_USM_AUTHENTICATIONFAILURE;
+        DEBUGMSGTL(("localsm","  pdu not tunneled\n"));
+        if (!(parms->sess->flags & NETSNMP_TRANSPORT_FLAG_TUNNELED)) {
+            DEBUGMSGTL(("localsm","  session not tunneled\n"));
+            return SNMPERR_USM_AUTHENTICATIONFAILURE;
+        }
+        DEBUGMSGTL(("localsm","  but session is tunneled\n"));
     } else {
         DEBUGMSGTL(("localsm","  tunneled\n"));
     }
