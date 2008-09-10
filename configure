@@ -38451,14 +38451,10 @@ fi
 ##
 
 #   Check for 'socklen_t'                           (HP-UX)
-#       (should really use AC_CHECK_TYPE, but
-#         this was broken at least in 2.13-14)
-#
-#       XXX - is it safe to revert to AC_CHECK_TYPE now?
 #
 { echo "$as_me:$LINENO: checking for socklen_t" >&5
 echo $ECHO_N "checking for socklen_t... $ECHO_C" >&6; }
-if { as_var=ac_cv_type_$1; eval "test \"\${$as_var+set}\" = set"; }; then
+if test "${ac_cv_type_socklen_t+set}" = set; then
   echo $ECHO_N "(cached) $ECHO_C" >&6
 else
   cat >conftest.$ac_ext <<_ACEOF
@@ -38477,26 +38473,56 @@ cat >>conftest.$ac_ext <<_ACEOF
 #include <sys/socket.h>
 #endif
 
+typedef socklen_t ac__type_new_;
+int
+main ()
+{
+if ((ac__type_new_ *) 0)
+  return 0;
+if (sizeof (ac__type_new_))
+  return 0;
+  ;
+  return 0;
+}
 _ACEOF
-if (eval "$ac_cpp conftest.$ac_ext") 2>&5 |
-  $EGREP "socklen_t[^a-zA-Z_0-9]" >/dev/null 2>&1; then
+rm -f conftest.$ac_objext
+if { (ac_try="$ac_compile"
+case "(($ac_try" in
+  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
+  *) ac_try_echo=$ac_try;;
+esac
+eval "echo \"\$as_me:$LINENO: $ac_try_echo\"") >&5
+  (eval "$ac_compile") 2>conftest.er1
+  ac_status=$?
+  grep -v '^ *+' conftest.er1 >conftest.err
+  rm -f conftest.er1
+  cat conftest.err >&5
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } && {
+	 test -z "$ac_c_werror_flag" ||
+	 test ! -s conftest.err
+       } && test -s conftest.$ac_objext; then
   ac_cv_type_socklen_t=yes
 else
-  ac_cv_type_socklen_t=no
+  echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
+
+	ac_cv_type_socklen_t=no
 fi
-rm -f conftest*
 
+rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
 fi
-
-
 { echo "$as_me:$LINENO: result: $ac_cv_type_socklen_t" >&5
 echo "${ECHO_T}$ac_cv_type_socklen_t" >&6; }
 if test $ac_cv_type_socklen_t = yes; then
-    cat >>confdefs.h <<\_ACEOF
+
+cat >>confdefs.h <<_ACEOF
 #define HAVE_SOCKLEN_T 1
 _ACEOF
 
+
 fi
+
 
 
 #   Check for 'in_addr_t'
@@ -38504,7 +38530,7 @@ fi
 #
 { echo "$as_me:$LINENO: checking for in_addr_t" >&5
 echo $ECHO_N "checking for in_addr_t... $ECHO_C" >&6; }
-if { as_var=ac_cv_type_$1; eval "test \"\${$as_var+set}\" = set"; }; then
+if test "${ac_cv_type_in_addr_t+set}" = set; then
   echo $ECHO_N "(cached) $ECHO_C" >&6
 else
   cat >conftest.$ac_ext <<_ACEOF
@@ -38523,26 +38549,56 @@ cat >>conftest.$ac_ext <<_ACEOF
 #include <netinet/in.h>
 #endif
 
+typedef in_addr_t ac__type_new_;
+int
+main ()
+{
+if ((ac__type_new_ *) 0)
+  return 0;
+if (sizeof (ac__type_new_))
+  return 0;
+  ;
+  return 0;
+}
 _ACEOF
-if (eval "$ac_cpp conftest.$ac_ext") 2>&5 |
-  $EGREP "in_addr_t[^a-zA-Z_0-9]" >/dev/null 2>&1; then
+rm -f conftest.$ac_objext
+if { (ac_try="$ac_compile"
+case "(($ac_try" in
+  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
+  *) ac_try_echo=$ac_try;;
+esac
+eval "echo \"\$as_me:$LINENO: $ac_try_echo\"") >&5
+  (eval "$ac_compile") 2>conftest.er1
+  ac_status=$?
+  grep -v '^ *+' conftest.er1 >conftest.err
+  rm -f conftest.er1
+  cat conftest.err >&5
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } && {
+	 test -z "$ac_c_werror_flag" ||
+	 test ! -s conftest.err
+       } && test -s conftest.$ac_objext; then
   ac_cv_type_in_addr_t=yes
 else
-  ac_cv_type_in_addr_t=no
+  echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
+
+	ac_cv_type_in_addr_t=no
 fi
-rm -f conftest*
 
+rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
 fi
-
-
 { echo "$as_me:$LINENO: result: $ac_cv_type_in_addr_t" >&5
 echo "${ECHO_T}$ac_cv_type_in_addr_t" >&6; }
 if test $ac_cv_type_in_addr_t = yes; then
-    cat >>confdefs.h <<\_ACEOF
+
+cat >>confdefs.h <<_ACEOF
 #define HAVE_IN_ADDR_T 1
 _ACEOF
 
+
 fi
+
 
 
 #   Check for 'ssize_t'
@@ -38550,7 +38606,7 @@ fi
 #
 { echo "$as_me:$LINENO: checking for ssize_t" >&5
 echo $ECHO_N "checking for ssize_t... $ECHO_C" >&6; }
-if { as_var=ac_cv_type_$1; eval "test \"\${$as_var+set}\" = set"; }; then
+if test "${ac_cv_type_ssize_t+set}" = set; then
   echo $ECHO_N "(cached) $ECHO_C" >&6
 else
   cat >conftest.$ac_ext <<_ACEOF
@@ -38566,27 +38622,56 @@ cat >>conftest.$ac_ext <<_ACEOF
 #include <stddef.h>
 #endif
 
+typedef ssize_t ac__type_new_;
+int
+main ()
+{
+if ((ac__type_new_ *) 0)
+  return 0;
+if (sizeof (ac__type_new_))
+  return 0;
+  ;
+  return 0;
+}
 _ACEOF
-if (eval "$ac_cpp conftest.$ac_ext") 2>&5 |
-  $EGREP "ssize_t[^a-zA-Z_0-9]" >/dev/null 2>&1; then
+rm -f conftest.$ac_objext
+if { (ac_try="$ac_compile"
+case "(($ac_try" in
+  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
+  *) ac_try_echo=$ac_try;;
+esac
+eval "echo \"\$as_me:$LINENO: $ac_try_echo\"") >&5
+  (eval "$ac_compile") 2>conftest.er1
+  ac_status=$?
+  grep -v '^ *+' conftest.er1 >conftest.err
+  rm -f conftest.er1
+  cat conftest.err >&5
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } && {
+	 test -z "$ac_c_werror_flag" ||
+	 test ! -s conftest.err
+       } && test -s conftest.$ac_objext; then
   ac_cv_type_ssize_t=yes
 else
-  ac_cv_type_ssize_t=no
+  echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
+
+	ac_cv_type_ssize_t=no
 fi
-rm -f conftest*
 
+rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
 fi
-
-
 { echo "$as_me:$LINENO: result: $ac_cv_type_ssize_t" >&5
 echo "${ECHO_T}$ac_cv_type_ssize_t" >&6; }
 if test $ac_cv_type_ssize_t = yes; then
 
-cat >>confdefs.h <<\_ACEOF
+cat >>confdefs.h <<_ACEOF
 #define HAVE_SSIZE_T 1
 _ACEOF
 
+
 fi
+
 
 #########################################
 ##
