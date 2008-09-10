@@ -1,4 +1,4 @@
-/* include/net-snmp/net-snmp-config.h.in.  Generated from configure.in by autoheader.  */
+/* include/net-snmp/net-snmp-config.h.in.  Generated from configure.ac by autoheader.  */
 /* 
  * net-snmp configuration header file
  */
@@ -24,11 +24,6 @@
  */
 #ifndef NETSNMP_NO_AUTOCONF_DEFINITIONS
 
-/* got socklen_t? */
-#undef HAVE_SOCKLEN_T
-
-/* got in_addr_t? */
-#undef HAVE_IN_ADDR_T
 
 /* define if you have libdb or librpm, respectively */
 #undef HAVE_LIBDB
@@ -261,6 +256,9 @@
 
 /* Define to 1 if you have the <inttypes.h> header file. */
 #undef HAVE_INTTYPES_H
+
+/* Define to 1 if the system has the type `in_addr_t'. */
+#undef HAVE_IN_ADDR_T
 
 /* Define to 1 if you have the <ioctls.h> header file. */
 #undef HAVE_IOCTLS_H
@@ -637,7 +635,10 @@
 /* Define to 1 if you have the `socket' function. */
 #undef HAVE_SOCKET
 
-/* Define if type ssize_t is available */
+/* Define to 1 if the system has the type `socklen_t'. */
+#undef HAVE_SOCKLEN_T
+
+/* Define to 1 if the system has the type `ssize_t'. */
 #undef HAVE_SSIZE_T
 
 /* Define to 1 if you have the `statfs' function. */
