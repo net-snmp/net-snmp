@@ -23,11 +23,6 @@
  */
 #ifndef NETSNMP_NO_AUTOCONF_DEFINITIONS
 
-/* got socklen_t? */
-#undef HAVE_SOCKLEN_T
-
-/* got in_addr_t? */
-#undef HAVE_IN_ADDR_T
 
 /* define if you have libdb or librpm, respectively */
 #undef HAVE_LIBDB
