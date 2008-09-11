@@ -152,6 +152,104 @@ ifTable_container_init(netsnmp_container **container_ptr_ptr,
          NETSNMP_CACHE_AUTO_RELOAD | NETSNMP_CACHE_DONT_INVALIDATE_ON_SET);
 }                               /* ifTable_container_init */
 
+void
+send_linkUpDownNotifications(oid *notification_oid, size_t notification_oid_len, int if_index, int if_admin_status, int if_oper_status)
+{
+    /*
+     * In the notification, we have to assign our notification OID to
+     * the snmpTrapOID.0 object. Here is it's definition. 
+     */
+    oid             objid_snmptrap[] = { 1, 3, 6, 1, 6, 3, 1, 1, 4, 1, 0 };
+    size_t          objid_snmptrap_len = OID_LENGTH(objid_snmptrap);
+
+    /*
+     * define the OIDs for the varbinds we're going to include
+     *  with the notification -
+     * IF-MIB::ifIndex,
+     * IF-MIB::ifAdminStatus, and
+     * IF-MIB::ifOperStatus
+     */
+    oid      if_index_oid[]   = { 1, 3, 6, 1, 2, 1, 2, 2, 1, 1, 0 };
+    size_t   if_index_oid_len = OID_LENGTH(if_index_oid);
+    oid      if_admin_status_oid[]   = { 1, 3, 6, 1, 2, 1, 2, 2, 1, 7, 0 };
+    size_t   if_admin_status_oid_len = OID_LENGTH(if_admin_status_oid);
+    oid      if_oper_status_oid[]   = { 1, 3, 6, 1, 2, 1, 2, 2, 1, 8, 0 };
+    size_t   if_oper_status_oid_len = OID_LENGTH(if_oper_status_oid);
+
+    /*
+     * here is where we store the variables to be sent in the trap 
+     */
+    netsnmp_variable_list *notification_vars = NULL;
+
+    DEBUGMSGTL(("rsys:linkUpDownNotifications", "defining the trap\n"));
+
+    /*
+     * update the instance for each variable to be sent in the trap
+     */
+    if_index_oid[10] = if_index;
+    if_admin_status_oid[10] = if_index;
+    if_oper_status_oid[10] = if_index;
+
+    /*
+     * add in the trap definition object 
+     */
+    snmp_varlist_add_variable(&notification_vars,
+                              /*
+                               * the snmpTrapOID.0 variable 
+                               */
+                              objid_snmptrap, objid_snmptrap_len,
+                              /*
+                               * value type is an OID 
+                               */
+                              ASN_OBJECT_ID,
+                              /*
+                               * value contents is our notification OID 
+                               */
+                              (u_char *) notification_oid,
+                              /*
+                               * size in bytes = oid length * sizeof(oid) 
+                               */
+                              notification_oid_len * sizeof(oid));
+
+    /*
+     * add in the additional objects defined as part of the trap
+     */
+    snmp_varlist_add_variable(&notification_vars,
+                               if_index_oid, if_index_oid_len,
+                               ASN_INTEGER,
+                              (u_char *)&if_index,
+                                  sizeof(if_index));
+
+    /*
+     * if we want to insert additional objects, we do it here 
+     */
+    snmp_varlist_add_variable(&notification_vars,
+                               if_admin_status_oid, if_admin_status_oid_len,
+                               ASN_INTEGER,
+                              (u_char *)&if_admin_status,
+                                  sizeof(if_admin_status));
+
+    snmp_varlist_add_variable(&notification_vars,
+                               if_oper_status_oid, if_oper_status_oid_len,
+                               ASN_INTEGER,
+                              (u_char *)&if_oper_status,
+                                  sizeof(if_oper_status));
+
+    /*
+     * send the trap out.  This will send it to all registered
+     * receivers (see the "SETTING UP TRAP AND/OR INFORM DESTINATIONS"
+     * section of the snmpd.conf manual page. 
+     */
+    DEBUGMSGTL(("rsys:linkUpDownNotifications", "sending the trap\n"));
+    send_v2trap(notification_vars);
+
+    /*
+     * free the created notification variable list 
+     */
+    DEBUGMSGTL(("rsys:linkUpDownNotifications", "cleaning up\n"));
+    snmp_free_varbind(notification_vars);
+}
+
 /**
  * check entry for update
  *
@@ -253,8 +351,25 @@ _check_interface_entry_for_updates(ifTable_rowreq_ctx * rowreq_ctx,
     /*
      * if ifOperStatus changed, update ifLastChange
      */
-    if (oper_changed)
+    if (oper_changed) {
         rowreq_ctx->data.ifLastChange = netsnmp_get_agent_uptime();
+        if (rowreq_ctx->data.ifLinkUpDownTrapEnable == 1) {
+            if (rowreq_ctx->data.ifOperStatus == IFOPERSTATUS_UP) {
+                oid notification_oid[] = { 1, 3, 6, 1, 6, 3, 1, 1, 5, 4 };
+                send_linkUpDownNotifications(notification_oid, OID_LENGTH(notification_oid),
+                                             rowreq_ctx->tbl_idx.ifIndex,
+                                             rowreq_ctx->data.ifAdminStatus,
+                                             rowreq_ctx->data.ifOperStatus);
+            } else if (rowreq_ctx->data.ifOperStatus == IFOPERSTATUS_DOWN) {
+                oid notification_oid[] = { 1, 3, 6, 1, 6, 3, 1, 1, 5, 3 };
+                send_linkUpDownNotifications(notification_oid, OID_LENGTH(notification_oid),
+                                             rowreq_ctx->tbl_idx.ifIndex,
+                                             rowreq_ctx->data.ifAdminStatus,
+                                             rowreq_ctx->data.ifOperStatus);
+            }
+        }
+    }
+
     else
         rowreq_ctx->data.ifLastChange = lastchanged;
 }
