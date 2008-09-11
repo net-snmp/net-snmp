@@ -873,15 +873,25 @@ netsnmp_sockaddr_in2(struct sockaddr_in *addr,
             DEBUGMSGTL(("netsnmp_sockaddr_in",
                         "check destination %s\n", host));
 
-            ret = netsnmp_gethostbyname_v4(peername, & addr->sin_addr.s_addr);
-            if (ret < 0) {
+
+            if (strcmp(peername, "255.255.255.255") == 0 ) {
+                /*
+                 * The explicit broadcast address hack
+                 */
+                DEBUGMSGTL(("netsnmp_sockaddr_in", "Explicit UDP broadcast\n"));
+                addr->sin_addr.s_addr = INADDR_NONE;
+            } else {
+                ret =
+                    netsnmp_gethostbyname_v4(peername, &addr->sin_addr.s_addr);
+                if (ret < 0) {
+                    DEBUGMSGTL(("netsnmp_sockaddr_in",
+                                "couldn't resolve hostname\n"));
+                    free(peername);
+                    return 0;
+                }
                 DEBUGMSGTL(("netsnmp_sockaddr_in",
-                            "couldn't resolve hostname\n"));
-                free(peername);
-                return 0;
+                            "hostname (resolved okay)\n"));
             }
-            DEBUGMSGTL(("netsnmp_sockaddr_in",
-                        "hostname (resolved okay)\n"));
         }
 	free(peername);
     }
