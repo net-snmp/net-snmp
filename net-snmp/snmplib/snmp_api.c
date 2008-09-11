@@ -1399,6 +1399,25 @@ _sess_open(netsnmp_session * in_session)
             netsnmp_ds_set_string(NETSNMP_DS_LIBRARY_ID,
                                   NETSNMP_DS_LIB_CLIENT_ADDR, clientaddr_save);
     }
+
+#if defined(SO_BROADCAST) && defined(SOL_SOCKET)
+    if ( transport != 0 && (in_session->flags & SNMP_FLAGS_UDP_BROADCAST) ) {
+        int   b = 1;
+        int   rc;
+
+        rc = setsockopt(transport->sock, SOL_SOCKET, SO_BROADCAST,
+                        (char *)&b, sizeof(b));
+
+        if ( rc != 0 ) {
+            in_session->s_snmp_errno = SNMPERR_BAD_ADDRESS; /* good as any? */
+            in_session->s_errno = errno;
+
+            DEBUGMSGTL(("_sess_open", "couldn't enable UDP_BROADCAST\n"));
+            return NULL;
+        }
+    }
+#endif
+
     if (transport == NULL) {
         DEBUGMSGTL(("_sess_open", "couldn't interpret peername\n"));
         in_session->s_snmp_errno = SNMPERR_BAD_ADDRESS;
