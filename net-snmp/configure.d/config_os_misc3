@@ -37,7 +37,9 @@ fi
 
 PSCMD="$PSPROG $ac_cv_ps_flags"
 AC_SUBST(PSCMD)
-AC_DEFINE_UNQUOTED(PSCMD, "$PSPROG $ac_cv_ps_flags")
+AC_DEFINE_UNQUOTED(PSCMD, "$PSPROG $ac_cv_ps_flags",
+  [Command to generate ps output, the final column must be the process
+   name withOUT arguments])
 
 
 ##

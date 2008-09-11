@@ -50,13 +50,6 @@
 /* location of swap device (ok if not found) */
 #undef DMEM_LOC
 
-/* Command to generate ps output, the final column must be the process
-   name withOUT arguments */
-#define PSCMD "/bin/ps"
-
-/* Where is the uname command */
-#define UNAMEPROG "/bin/uname"
-
 /* define if you are using linux and /proc/net/dev has the compressed
    field, which exists in linux kernels 2.2 and greater. */
 #undef PROC_NET_DEV_HAS_COMPRESSED
