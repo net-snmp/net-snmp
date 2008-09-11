@@ -49,7 +49,7 @@ AC_PATH_PROG([PSPROG],    ps)
 AC_PATH_PROG([PYTHONPROG],python)
 
 AC_PATH_PROG([UNAMEPROG], uname)
-AC_DEFINE_UNQUOTED(UNAMEPROG,"$UNAMEPROG")
+AC_DEFINE_UNQUOTED(UNAMEPROG,"$UNAMEPROG", [Where is the uname command])
 
 if test "x$ac_cv_prog_AUTOCONF" = "x"; then
 	AUTOCONF=":"
