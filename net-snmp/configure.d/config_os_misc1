@@ -104,5 +104,6 @@ AC_CACHE_CHECK(for location of swap device,ac_cv_DMEM_LOC,
     fi
 ])
 if test "x$ac_cv_DMEM_LOC" != "xnone"; then
-    AC_DEFINE_UNQUOTED(DMEM_LOC,"$ac_cv_DMEM_LOC")
+  AC_DEFINE_UNQUOTED(DMEM_LOC,"$ac_cv_DMEM_LOC",
+    [location of swap device (ok if not found)])
 fi
