@@ -85,7 +85,9 @@ exit (statfs (".", &fsd) != 1);
     fu_cv_sys_stat_fs_data=no)])
 AC_MSG_RESULT($fu_cv_sys_stat_fs_data)
 if test $fu_cv_sys_stat_fs_data = yes; then
-    AC_DEFINE(STAT_STATFS_FS_DATA)
+    AC_DEFINE(STAT_STATFS_FS_DATA, 1,
+        [Define if statfs takes 2 args and the second argument has
+         type struct fs_data. @<:@Ultrix@:>@])
 fi
 
 ##
@@ -163,6 +165,7 @@ No SIOCGIFADDR found here.
     [netsnmp_cv_sys_ioctl_h_has_SIOCGIFADDR=yes],
     [netsnmp_cv_sys_ioctl_h_has_SIOCGIFADDR=no]))
 if test $netsnmp_cv_sys_ioctl_h_has_SIOCGIFADDR = yes; then
-  AC_DEFINE(SYS_IOCTL_H_HAS_SIOCGIFADDR)
+  AC_DEFINE(SYS_IOCTL_H_HAS_SIOCGIFADDR, 1,
+   [define if SIOCGIFADDR exists in sys/ioctl.h])
 fi
 

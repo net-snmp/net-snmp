@@ -34,39 +34,11 @@
 /* define if you have the Perl_eval_pv() function */
 #undef HAVE_PERL_EVAL_PV_UC
 
-/* printing system */
-#undef HAVE_LPSTAT
-#undef LPSTAT_PATH
-#undef HAVE_PRINTCAP
-/* Use dmalloc to do malloc debugging? */
-#undef HAVE_DMALLOC_H
-
 /* location of UNIX kernel */
 #define KERNEL_LOC "/vmunix"
 
 /* location of mount table list */
 #define ETC_MNTTAB "/etc/mnttab"
-
-/* location of swap device (ok if not found) */
-#undef DMEM_LOC
-
-/* define if you are using linux and /proc/net/dev has the compressed
-   field, which exists in linux kernels 2.2 and greater. */
-#undef PROC_NET_DEV_HAS_COMPRESSED
-
-/* sysctl works to get boottime, etc... */
-#undef NETSNMP_CAN_USE_SYSCTL
-
-/* define if SIOCGIFADDR exists in sys/ioctl.h */
-#undef SYS_IOCTL_H_HAS_SIOCGIFADDR
-
-/* Define if statfs takes 2 args and the second argument has
-   type struct fs_data. [Ultrix] */
-#undef STAT_STATFS_FS_DATA
-
-/* Define if the TCP timer constants in <netinet/tcp_timer.h>
-   depend on the integer variable `hz'.  [FreeBSD 4.x] */
-#undef TCPTV_NEEDS_HZ
 
 /* Not-to-be-compiled macros for use by configure only */
 #define config_require(x)
@@ -190,23 +162,9 @@
 /* default list of mibs to load */
 #define NETSNMP_DEFAULT_MIBS "IP-MIB:IF-MIB:TCP-MIB:UDP-MIB:SNMPv2-MIB:RFC1213-MIB"
 
-/* default location to look for mibs to load using the above tokens
-   and/or those in the MIBS envrionment variable*/
-#undef NETSNMP_DEFAULT_MIBDIRS
-
-/* default mib files to load, specified by path. */
-#undef NETSNMP_DEFAULT_MIBFILES
-
 /* should we compile to use special opaque types: float, double,
    counter64, i64, ui64, union? */
 #undef NETSNMP_WITH_OPAQUE_SPECIAL_TYPES
-
-/* define if you want to compile support for both authentication and
-   privacy support. */
-#undef NETSNMP_ENABLE_SCAPI_AUTHPRIV
-
-/* define if you are using the MD5 code ...*/
-#undef NETSNMP_USE_INTERNAL_MD5
 
 /* define if you are using the codeS11 library ...*/
 #undef NETSNMP_USE_PKCS11
@@ -272,19 +230,6 @@
 
 /* Use libwrap to handle allow/deny hosts? */
 #undef NETSNMP_USE_LIBWRAP
-
-/* testing code sections. */
-#undef NETSNMP_ENABLE_TESTING_CODE 
-
-/* If you don't have root access don't exit upon kmem errors */
-#undef NETSNMP_NO_ROOT_ACCESS
-
-/* If we don't want to use kmem. */
-#undef NETSNMP_NO_KMEM_USAGE
-
-/* If you don't want the agent to report on variables it doesn't have data for */
-#undef NETSNMP_NO_DUMMY_VALUES
-
 
 /* Mib-2 tree Info */
 /* These are the system information variables. */

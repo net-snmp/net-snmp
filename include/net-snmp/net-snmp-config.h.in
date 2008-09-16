@@ -35,39 +35,11 @@
 /* define if you have the Perl_eval_pv() function */
 #undef HAVE_PERL_EVAL_PV_UC
 
-/* printing system */
-#undef HAVE_LPSTAT
-#undef LPSTAT_PATH
-#undef HAVE_PRINTCAP
-/* Use dmalloc to do malloc debugging? */
-#undef HAVE_DMALLOC_H
-
 /* location of UNIX kernel */
 #define KERNEL_LOC "/vmunix"
 
 /* location of mount table list */
 #define ETC_MNTTAB "/etc/mnttab"
-
-/* location of swap device (ok if not found) */
-#undef DMEM_LOC
-
-/* define if you are using linux and /proc/net/dev has the compressed
-   field, which exists in linux kernels 2.2 and greater. */
-#undef PROC_NET_DEV_HAS_COMPRESSED
-
-/* sysctl works to get boottime, etc... */
-#undef NETSNMP_CAN_USE_SYSCTL
-
-/* define if SIOCGIFADDR exists in sys/ioctl.h */
-#undef SYS_IOCTL_H_HAS_SIOCGIFADDR
-
-/* Define if statfs takes 2 args and the second argument has
-   type struct fs_data. [Ultrix] */
-#undef STAT_STATFS_FS_DATA
-
-/* Define if the TCP timer constants in <netinet/tcp_timer.h>
-   depend on the integer variable `hz'.  [FreeBSD 4.x] */
-#undef TCPTV_NEEDS_HZ
 
 /* Not-to-be-compiled macros for use by configure only */
 #define config_require(x)
@@ -97,6 +69,9 @@
 
 /* Define to 1 if using `alloca.c'. */
 #undef C_ALLOCA
+
+/* location of swap device (ok if not found) */
+#undef DMEM_LOC
 
 /* Define to 1 if you have the `AES_cfb128_encrypt' function. */
 #undef HAVE_AES_CFB128_ENCRYPT
@@ -141,6 +116,9 @@
 
 /* Define to 1 if you have the `dlopen' function. */
 #undef HAVE_DLOPEN
+
+/* Define to 1 if you have the <dmalloc.h> header file. */
+#undef HAVE_DMALLOC_H
 
 /* Define to 1 if you have the <err.h> header file. */
 #undef HAVE_ERR_H
@@ -280,9 +258,6 @@
 /* Define to 1 if you have the `crypto' library (-lcrypto). */
 #undef HAVE_LIBCRYPTO
 
-/* Define to 1 if you have the `efence' library (-lefence). */
-#undef HAVE_LIBEFENCE
-
 /* Define to 1 if you have the `elf' library (-lelf). */
 #undef HAVE_LIBELF
 
@@ -333,6 +308,9 @@
 
 /* Define to 1 if the system has the type `long long int'. */
 #undef HAVE_LONG_LONG_INT
+
+/* Set if the lpstat command is available */
+#undef HAVE_LPSTAT
 
 /* Define to 1 if you have the `lrand48' function. */
 #undef HAVE_LRAND48
@@ -537,6 +515,9 @@
 
 /* Define to 1 if you have the `pread64' function. */
 #undef HAVE_PREAD64
+
+/* Set if /etc/printcap exists */
+#undef HAVE_PRINTCAP
 
 /* Define to 1 if you have the <pthread.h> header file. */
 #undef HAVE_PTHREAD_H
@@ -1132,11 +1113,24 @@
 /* Define to 1 if you have the <xti.h> header file. */
 #undef HAVE_XTI_H
 
+/* Path to the lpstat command */
+#undef LPSTAT_PATH
+
 /* Unix domain socket for AgentX master-subagent communication */
 #undef NETSNMP_AGENTX_SOCKET
 
 /* Define if static inline functions are unsupported */
 #undef NETSNMP_BROKEN_INLINE
+
+/* sysctl works to get boottime, etc... */
+#undef NETSNMP_CAN_USE_SYSCTL
+
+/* default location to look for mibs to load using the above tokens and/or
+   those in the MIBS envrionment variable */
+#undef NETSNMP_DEFAULT_MIBDIRS
+
+/* default mib files to load, specified by path. */
+#undef NETSNMP_DEFAULT_MIBFILES
 
 /* Define if DES encryption should not be supported */
 #undef NETSNMP_DISABLE_DES
@@ -1156,6 +1150,13 @@
 /* Define if SNMPv2c code should not be included */
 #undef NETSNMP_DISABLE_SNMPV2C
 
+/* define if you want to compile support for both authentication and privacy
+   support. */
+#undef NETSNMP_ENABLE_SCAPI_AUTHPRIV
+
+/* testing code sections. */
+#undef NETSNMP_ENABLE_TESTING_CODE
+
 /* Should evaluate to the name of the current function if defined */
 #undef NETSNMP_FUNCTION
 
@@ -1165,8 +1166,21 @@
 /* Define to suppress inclusion of deprecated functions */
 #undef NETSNMP_NO_DEPRECATED_FUNCTIONS
 
+/* If you don't want the agent to report on variables it doesn't have data for
+   */
+#undef NETSNMP_NO_DUMMY_VALUES
+
+/* If we don't want to use kmem. */
+#undef NETSNMP_NO_KMEM_USAGE
+
+/* If you don't have root access don't exit upon kmem errors */
+#undef NETSNMP_NO_ROOT_ACCESS
+
 /* Pattern of temporary files */
 #undef NETSNMP_TEMP_FILE_PATTERN
+
+/* define if you are using the MD5 code ... */
+#undef NETSNMP_USE_INTERNAL_MD5
 
 /* Define to the address where bug reports for this package should be sent. */
 #ifndef PACKAGE_BUGREPORT
@@ -1229,8 +1243,19 @@
 	STACK_DIRECTION = 0 => direction of growth unknown */
 #undef STACK_DIRECTION
 
+/* Define if statfs takes 2 args and the second argument has type struct
+   fs_data. [Ultrix] */
+#undef STAT_STATFS_FS_DATA
+
 /* Define to 1 if you have the ANSI C header files. */
 #undef STDC_HEADERS
+
+/* define if SIOCGIFADDR exists in sys/ioctl.h */
+#undef SYS_IOCTL_H_HAS_SIOCGIFADDR
+
+/* Define if the TCP timer constants in <netinet/tcp_timer.h> depend on the
+   integer variable `hz'. [FreeBSD 4.x] */
+#undef TCPTV_NEEDS_HZ
 
 /* Define to 1 if you can safely include both <sys/time.h> and <time.h>. */
 #undef TIME_WITH_SYS_TIME
@@ -1426,23 +1451,9 @@
 /* default list of mibs to load */
 #define NETSNMP_DEFAULT_MIBS "IP-MIB:IF-MIB:TCP-MIB:UDP-MIB:SNMPv2-MIB:RFC1213-MIB"
 
-/* default location to look for mibs to load using the above tokens
-   and/or those in the MIBS envrionment variable*/
-#undef NETSNMP_DEFAULT_MIBDIRS
-
-/* default mib files to load, specified by path. */
-#undef NETSNMP_DEFAULT_MIBFILES
-
 /* should we compile to use special opaque types: float, double,
    counter64, i64, ui64, union? */
 #undef NETSNMP_WITH_OPAQUE_SPECIAL_TYPES
-
-/* define if you want to compile support for both authentication and
-   privacy support. */
-#undef NETSNMP_ENABLE_SCAPI_AUTHPRIV
-
-/* define if you are using the MD5 code ...*/
-#undef NETSNMP_USE_INTERNAL_MD5
 
 /* define if you are using the codeS11 library ...*/
 #undef NETSNMP_USE_PKCS11
@@ -1508,19 +1519,6 @@
 
 /* Use libwrap to handle allow/deny hosts? */
 #undef NETSNMP_USE_LIBWRAP
-
-/* testing code sections. */
-#undef NETSNMP_ENABLE_TESTING_CODE 
-
-/* If you don't have root access don't exit upon kmem errors */
-#undef NETSNMP_NO_ROOT_ACCESS
-
-/* If we don't want to use kmem. */
-#undef NETSNMP_NO_KMEM_USAGE
-
-/* If you don't want the agent to report on variables it doesn't have data for */
-#undef NETSNMP_NO_DUMMY_VALUES
-
 
 /* Mib-2 tree Info */
 /* These are the system information variables. */

@@ -12,12 +12,13 @@
 #
 AC_PATH_PROG([LPSTAT_PATH],lpstat)
 if test x$LPSTAT_PATH != x; then
-    AC_DEFINE_UNQUOTED(LPSTAT_PATH,"$LPSTAT_PATH")
-    AC_DEFINE(HAVE_LPSTAT)
+    AC_DEFINE_UNQUOTED(LPSTAT_PATH, "$LPSTAT_PATH",
+	[Path to the lpstat command])
+    AC_DEFINE(HAVE_LPSTAT, 1, [Set if the lpstat command is available])
 fi
 AC_CHECK_FUNCS(cgetnext)
 if test -r /etc/printcap; then
-    AC_DEFINE(HAVE_PRINTCAP)
+    AC_DEFINE(HAVE_PRINTCAP, 1, [Set if /etc/printcap exists])
 fi
 
 

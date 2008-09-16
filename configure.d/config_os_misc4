@@ -56,7 +56,7 @@ main() {
 fi
 
 if test "x$ac_cv_NETSNMP_CAN_USE_SYSCTL" = "xyes"; then
-  AC_DEFINE(NETSNMP_CAN_USE_SYSCTL)
+  AC_DEFINE(NETSNMP_CAN_USE_SYSCTL, 1, [sysctl works to get boottime, etc...])
 fi
 
 
@@ -78,7 +78,9 @@ TCPTV_SRTTDFLT
         ac_cv_TCPTV_NEEDS_HZ=no)])
 
 if test "x$ac_cv_TCPTV_NEEDS_HZ" = "xyes"; then
-    AC_DEFINE(TCPTV_NEEDS_HZ)
+    AC_DEFINE(TCPTV_NEEDS_HZ, 1,
+        [Define if the TCP timer constants in <netinet/tcp_timer.h>
+         depend on the integer variable `hz'.  @<:@FreeBSD 4.x@:>@])
 fi
 
 
