@@ -11,12 +11,21 @@
 # AC_CHECK_LIB(des, main)
 # AC_CHECK_LIB(m,   asin)
 
+#   dmalloc
+#
+if test "${with_dmalloc+set}" = set; then
+   if test "$with_dmalloc" = yes -a -d $with_dmalloc ; then
+       AC_ADD_SEARCH_PATH($with_dmalloc)
+   fi
+   AC_CHECK_HEADERS([dmalloc.h])
+   AC_SEARCH_LIBS([dmalloc_message], [dmalloc])
+fi
 
 #   EFence
 #       (This used to be on by default for developer checkout)
 #
 if test "x$use_efence" = "xyes"; then
-    AC_CHECK_LIB(efence, EF_Exit)
+    AC_SEARCH_LIBS([EF_Exit], [efence])
 fi
 
 
