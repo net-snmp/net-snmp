@@ -24,22 +24,6 @@
 #ifndef NETSNMP_NO_AUTOCONF_DEFINITIONS
 
 
-/* define if you have libdb or librpm, respectively */
-#undef HAVE_LIBDB
-#undef HAVE_LIBRPM
-
-/* define if you have the perl_eval_pv() function */
-#undef HAVE_PERL_EVAL_PV_LC
-
-/* define if you have the Perl_eval_pv() function */
-#undef HAVE_PERL_EVAL_PV_UC
-
-/* location of UNIX kernel */
-#define KERNEL_LOC "/vmunix"
-
-/* location of mount table list */
-#define ETC_MNTTAB "/etc/mnttab"
-
 /* Not-to-be-compiled macros for use by configure only */
 #define config_require(x)
 #define config_version_require(x)
@@ -161,13 +145,6 @@
 
 /* default list of mibs to load */
 #define NETSNMP_DEFAULT_MIBS "IP-MIB:IF-MIB:TCP-MIB:UDP-MIB:SNMPv2-MIB:RFC1213-MIB"
-
-/* should we compile to use special opaque types: float, double,
-   counter64, i64, ui64, union? */
-#undef NETSNMP_WITH_OPAQUE_SPECIAL_TYPES
-
-/* define if you are using the codeS11 library ...*/
-#undef NETSNMP_USE_PKCS11
 
 /* debugging stuff */
 /* if defined, we optimize the code to exclude all debugging calls. */
@@ -424,9 +401,6 @@
 /* internal define */
 #define NETSNMP_LASTFIELD -1
 
-/* configure options specified */
-#define NETSNMP_CONFIGURE_OPTIONS ""
-
 /*  Pluggable transports.  */
 
 /*  This is defined if support for the UDP/IP transport domain is
@@ -481,17 +455,8 @@
 /* define this if the local security module is available */
 #undef NETSNMP_SECMOD_LOCALSM
 
-/* define if you want to build with reentrant/threaded code (incomplete)*/
-#undef NETSNMP_REENTRANT
-
 /* define if configured as a "mini-agent" */
 #undef NETSNMP_MINI_AGENT
-
-/* define if you are embedding perl in the main agent */
-#undef NETSNMP_EMBEDDED_PERL
-
-/* define if you want to build MFD module rewrites*/
-#undef NETSNMP_ENABLE_MFD_REWRITES
 
 /* this is the location of the net-snmp mib tree.  It shouldn't be
    changed, as the places it is used are expected to be constant
@@ -559,24 +524,6 @@
 #ifndef NETSNMP_IMPORT
 #  define NETSNMP_IMPORT extern
 #endif
-
-/* define if you want to enable IPv6 support */
-#undef NETSNMP_ENABLE_IPV6
-
-/* define if you want to restrict SMUX connections to localhost by default */
-#undef NETSNMP_ENABLE_LOCAL_SMUX
-
-/* define if agentx transport is to use domain sockets only */
-#undef NETSNMP_AGENTX_DOM_SOCK_ONLY
-
-/* define if you do not want snmptrapd to register as an AgentX subagent */
-#undef NETSNMP_SNMPTRAPD_DISABLE_AGENTX
-
-/* define this if we're using the new MIT crypto API */
-#undef NETSNMP_USE_KERBEROS_MIT
-
-/* define this if you're using Heimdal Kerberos */
-#undef NETSNMP_USE_KERBEROS_HEIMDAL
 
 /* comment the next line if you are compiling with libsnmp.h 
    and are not using the UC-Davis SNMP library. */

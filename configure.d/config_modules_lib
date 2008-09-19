@@ -3,7 +3,9 @@
 #
 
 if test "x$with_res_locks" = "xyes"; then
-  AC_DEFINE(NETSNMP_REENTRANT)
+  AC_DEFINE(NETSNMP_REENTRANT, 1,
+    [Define to 1 if you want to build with reentrant/threaded
+     code (incomplete).])
 
     case $target_os in
 
@@ -300,7 +302,8 @@ do
     )])
     AC_MSG_RESULT($ac_cv_heimdal)
     if test $ac_cv_heimdal = yes; then
-      AC_DEFINE(NETSNMP_USE_KERBEROS_HEIMDAL)
+      AC_DEFINE(NETSNMP_USE_KERBEROS_HEIMDAL, 1,
+        [Define this if you're using Heimdal Kerberos])
       if test no = $krb5_config; then
 	LIBS="$LIBS -lkrb5 -lasn1 -lcom_err -lroken"
       fi
@@ -318,7 +321,8 @@ do
 
     if test yes = $ac_cv_NETSNMP_USE_KERBEROS_MIT; then
       AC_MSG_RESULT(new MIT crypto API)
-      AC_DEFINE(NETSNMP_USE_KERBEROS_MIT)
+      AC_DEFINE(NETSNMP_USE_KERBEROS_MIT, 1,
+        [Define this if we're using the new MIT crypto API])
       if test no = $krb5_config; then
 	LIBS="$LIBS -lk5crypto"
       fi
