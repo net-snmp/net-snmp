@@ -1,3 +1,142 @@
+* 5.4.2 *
+
+    snmplib:
+      - [BUG 1793545]: Take the name from the sockaddr_un
+      - [BUG 1795840]: Signed 32-bit truncation logged as debug message
+      - [BUG 1801835]: Support multiple default transports for an app.
+      - [BUG 1866655]: Handle parsing invalid OID subidentifiers
+      - [BUG 1958041]: Ensure IDs are not truncated.
+      - [BUG 2027834]: Extend string print buffer by the minimum necessary
+      - [BUG Coverity #183]: fix memory leak if IP_PKTINFO fails
+      - [PATCH 1768285]: Count MIB files correctly in add_mibdir()
+      - [PATCH 1775124]: Fix clientaddr functionality
+      - [PATCH 1806336]: fix -LS option parsing
+      - [PATCH 1807489]: fix ignoring of display hints.
+      - [PATCH 1811469]: read_config_files_in_path() reads past malloc'd buffer
+      - [PATCH 1875022]: improve callback locking mechanisms
+      - [PATCH 1895927]: change obsolete recv/send to recvfrom/sendto
+      - [PATCH 1898204], [BUF 1898198]: fix segfault when parsing broken mibs.
+      - [PATCH 1921861]: Avoid endless loop after truncating 64bit int
+      - [PATCH 2003450]: Fix a couple of 64-bit problems
+      - Change CONTAINER_INSERT to not do partial inserts in containers
+	with multiple indices when one insert fails.
+      - Do not leak memory whenever an udp address is formatted.
+      - Do not try to look up empty strings as hostnames for IPv6
+      - Fix registering of multiple premib config handlers
+      - Fix potential buffer overflow in sprintf for UDP/IPv6
+
+    snmpd:
+      - [BUG 1557372]: Realign hrFSStorageIndex with hrStorageTable
+      - [BUG 1748206]: Protect against failures to open /etc/mtab (or equiv)
+      - [BUG 1758212]: Handling missing variable types (IpAddress,Counter,Opaque)
+      - [BUG 1771221]: Retain ifLastChange information on data reload.
+      - [BUG 1792890]: include CIFS mounts when skipping remote filesystems
+      - [BUG 1822360]: Fix spinlock helper error handling.
+      - [BUG 1851047]: Don't over-process failed watcher requests
+      - [BUG 1912647]: Fix memory leak following failed request
+      - [BUG 1931391]: Fix reporting of Memory buffers and cached memory
+      - [BUG 2003144]: Increase size of AgentX packet
+      - [BUG 2006786]: Interface name can have more than 8 characters
+      - [BUG 2018031]: Don't probe engineID in internal monitor sessions
+      - [BUG 2023803]: Remove irrelevant configure dependency (HP-UX 11)
+      - [PATCH 1716548]: Fix help output for -D
+      - [PATCH 1744157]: Report duplicate "extend/exec" identifiers.
+      - [PATCH 1746831]: fix process checking race condition
+      - [PATCH 1752934]: Fix off-by-one qsort error in table utilities.
+      - [PATCH 1753437]: Fix error index on failing SET requests
+      - [PATCH 1753449]: Fix AgentX error propagation
+      - [PATCH 1753463]: Fix AgentX subagent ping alarm handling
+      - [PATCH 1758208]: Fix memory leak
+      - [PATCH 1774612]: More resilient process status handling
+      - [PATCH 1783733]: Include version info in hrSWInst table (solaris)
+      - [PATCH 1784747]: Fix ip adresses on 64 bit systems
+      - [PATCH 1823800]: release and reload all trap destinations on SIGHUP
+      - [PATCH 1826088]: Use the right interface to read the netmask
+      - [PATCH 1826102]: support longer interface names on linux
+      - [PATCH 1828839]: handle of disk mount paths with embedded spaces
+      - [PATCH 1849903]: do not spam log with asserts when XEN is used
+      - [PATCH 1866823]: truncate 32 bit counter values on 64 bit machines
+      - [PATCH 1879261]: Add inactive memory to cached report (freebsd)
+      - [PATCH 1893468]: fixed registration of OIDs with ranges
+      - [PATCH 1896118]: fix ifTable 32bit counters on linux
+      - [PATCH 1909813]: fix table_iterator hint for SORTED tables
+      - [PATCH 1944581]: Don't core dump on long string index values.
+      - [PATCH 1951996]: Fix for CPU stats on FreeBSD
+      - [PATCH 1967194]: Recognise NFS4 mounts
+      - [PATCH 2014204]: Support -g {groupname}
+      - [PATCH 2022936]: Fix AgentX Counter64 decoding on 64-bit architectures
+      - [PATCH 2023633]: add SCTP-MIB implementation (Linux only)
+      - Enforce the lower limit on scalar_groups
+      - suppress annoying "registration != duplicate" warning for root oids
+      - Handle device names with embedded spaces in UCD-SNMP-MIB (dskDevice)
+
+    snmptrapd:
+      - [BUG 1955227]: Memory leak for embedded Perl on x86_64
+      - [PATCH 1746992]: Improve snmptrapd access-control error messages.
+      - [PATCH 1767725]: Close all non standard file handles
+
+    build:
+      - [BUG 1802833]: Ensure snmptrapd builds with --disable-snmpv1/2c
+      - [BUG 1823381]: Valid MIB directory search path on Windows
+      - [BUG 1872266]: PERLCC check fails for CC with options
+      - [BUG 1995172]: fix --without-elf configure usage
+      - [BUG 2014526]: Win32: snmpv3-security-includes.h not installed
+      - [BUG 2023803]: Compilation problems on HP-UX 11.31
+      - [PATCH 1681035]: improve net-snmp-config /bin/sh compatibility
+      - [PATCH 1899762]: Tweak embedded_perl configure checks.
+      - add --with-temp-file-pattern configure option
+      - Add support for winExtDLL to build.bat (win32)
+      - Disable agent tests if built without necessary mib modules
+      - Limit the use of _KERNEL definitions in configure tests to match
+        the use of _KERNEL in our codebase
+      - Update to libtool 1.5.26
+
+    mib2c:
+      - [BUG 1874059,1737068]: Handle MIB objects with embedded hyphens
+      - [PATCH 1914398]: install mib2c.perl.conf
+
+    documentation:
+      - [BUG 2027129]: fix typo in snmpcmd.1
+
+    misc:
+      - Avoid calling debug macros with too few/many arguments.
+      - enhance snmpnetstat test to check tcpTable in TCP mode
+
+    perl:
+      - [BUG 1606062]: perl bulkwalk (async) coredump
+      - [BUG 1747733]: More robust handling of undefined values.
+      - [BUG 1826174]: Check for buffer overflow when printing values.
+      - [BUG 1834539]: Consistent handling of OID parsing.
+      - [PATCH 1811463]: perl async callback coredump
+      - [PATCH 1914393]: registerAgent can now be run multiple times
+      - [PATCH 1914643]: fix issues with embedded perl
+      - [PATCH 1914645]: better end of mib support
+      - [PATCH 1920390]: fix registration of tables with .0 as IIDs
+      - [PATCH 2021444]: Support SNMPv2c in gettable
+      - fixed an extra brace in the docs pointed out by Jason Martin
+
+    python:
+      - [BUG 1826174]: Check for buffer overflow when printing values
+      - [BUG 1868278]: Python segfault (introduced by r16962)
+      - [PATCH 1862177]: made code more windows/cygwin compiler friendly
+      - [PATCH 1877840]: fix MIB label and indexing due to broken regexp
+
+    AIX:
+      - Add support for AIX 6.x.
+
+    Linux:
+      - [PATCH 1969627]: Handle empty /etc/sysconfig/network file
+      - Improved RPM spec files, for better consistency with
+        vendor-provided packages
+
+    Solaris:
+      - [BUG 1810814]: tcpTable missing entries and wrong ports
+      - [PATCH 1824196]: {ifOperStatus,ipAdEntIfIndex} reported incorrectly
+      - [PATCH 1834699]: Fix 1833294: DLPI problems on Solaris 2.6
+      - #define NEW_MIB_COMPLIANT to support Solaris 10U4+
+
+* 5.4.1 *
+
     snmplib:
       - Change snmp_sess_add_ex to consistently close and
       - Deallocate the confmibs and confmibdirs
@@ -97,6 +236,7 @@
       - upport for forwarding traps by OID subtree.
 
     apps:
+      - [BUG 1964136]: Drop NULL type from snmpset usage
       - [PATCH 1529523]: Close SNMP session on failure.
 
     build:

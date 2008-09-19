@@ -1,20 +1,5 @@
-Various copyrights apply to this package, listed in various separate parts
-below.  Please make sure that you read all the parts.  Up until 2001,
-the project was based at UC Davis, and the first part covers all code
-written during this time.  From 2001 onwards, the project has been
-based at SourceForge, and Networks Associates Technology, Inc hold the
-copyright on behalf of the wider Net-SNMP community, covering all
-derivative work done since then.  An additional copyright section has
-been added as Part 3 below also under a BSD license for the work
-contributed by Cambridge Broadband Ltd. to the project since 2001.
-An additional copyright section has been added as Part 4 below also
-under a BSD license for the work contributed by Sun Microsystems, Inc.
-to the project since 2003.
-
-Code has been contributed to this project by many people over
-the years it has been in development, and a full list of contributors
-can be found in the README file under the THANKS section.
-
+Various copyrights apply to this package, listed in various separate
+parts below.  Please make sure that you read all the parts.
 
 ---- Part 1: CMU/UCD copyright notice: (BSD like) -----
 
@@ -150,7 +135,7 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ---- Part 5: Sparta, Inc copyright notice (BSD) -----
 
-Copyright (c) 2003-2006, Sparta, Inc
+Copyright (c) 2003-2008, Sparta, Inc
 All rights reserved.
  
 Redistribution and use in source and binary forms, with or without

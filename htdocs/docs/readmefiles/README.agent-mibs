@@ -406,6 +406,19 @@ TUNNEL-MIB
  tunnelConfigTable            L         4.2     O tunnel/tunnel.c
  tunnelInetConfigTable        ---
 
+------------------------------------------------------------------------------
+SCTP-MIB
+ sctpStats                    L         5.4.2   S sctp-mib/sctpScalars*
+ sctpParameters               L         5.4.2   S sctp-mib/sctpScalars*
+ sctpAssocTable               L         5.4.2   C sctp-mib/=
+ sctpAssocLocalAddrTable      L         5.4.2   C sctp-mib/=
+ sctpAssocRemAddrTable        L         5.4.2   C sctp-mib/=
+ sctpLookupLocalPortTable     L         5.4.2   C sctp-mib/=
+ sctpLookupRemPortTable       L         5.4.2   C sctp-mib/=
+ sctpLookupRemHostNameTable   L         5.4.2   C sctp-mib/=
+ sctpLookupRemPrimIPAddrTable L         5.4.2   C sctp-mib/=
+ sctpLookupRemIPAddrTable     L         5.4.2   C sctp-mib/=
+
 ==============================================================================
 
 Misc notes

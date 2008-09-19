@@ -1,4 +1,4 @@
-	       README file for net-snmp Version: 5.4.1
+	       README file for net-snmp Version: 5.4.2
 
 DISCLAIMER
 
@@ -71,8 +71,6 @@ AVAILABILITY
     - http://sourceforge.net/projects/net-snmp
   Mirrors:
     - US:        ftp://ftp.freesnmp.com/mirrors/net-snmp/
-    - Bulgaria:  http://rtfm.uni-svishtov.bg/net-snmp/
-    - Germany:   ftp://ftp.mpg.goe.ni.schule.de/pub/internet/net-snmp/
 
   The old ucd-snmp.ucdavis.edu web site and ftp server is now
   offline and should not be accessed any longer.

@@ -3,6 +3,23 @@ Please see the CHANGES file for a more detailed list of specific bugs/patches
 that have been fixed/applied, and the ChangeLog file for a comprehensive
 listing of all changes made to the code.
 
+*5.4.2*
+
+    snmplib:
+      - [PATCH 1921861]: Avoid endless loop after truncating 64bit int
+      - Better handling of CONTAINER_INSERT failures with multiple indices
+
+    snmpd:
+      - [PATCH 2023633]: add SCTP-MIB implementation (Linux only)
+      - suppress annoying &quot;registration != duplicate&quot; warning for root oids
+
+    build:
+      - [BUG 2023803]: Compilation problems on HP-UX 11.31
+      - Update to libtool 1.5.26
+
+    AIX:
+      - Add support for AIX 6.x.
+
 
 *5.4.1*
 
