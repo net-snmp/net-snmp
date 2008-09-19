@@ -1212,6 +1212,9 @@
 /* Define this if we're using the new MIT crypto API */
 #undef NETSNMP_USE_KERBEROS_MIT
 
+/* Define if you are using the codeS11 library ... */
+#undef NETSNMP_USE_PKCS11
+
 /* Should we compile to use special opaque types: float, double, counter64,
    i64, ui64, union? */
 #undef NETSNMP_WITH_OPAQUE_SPECIAL_TYPES
