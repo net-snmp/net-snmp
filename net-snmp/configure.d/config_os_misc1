@@ -53,7 +53,7 @@ AC_CACHE_CHECK([for location of system kernel],
         ac_cv_KERNEL_LOC="/vmunix"
     fi
 ])
-AC_DEFINE_UNQUOTED(KERNEL_LOC,"$ac_cv_KERNEL_LOC")
+AC_DEFINE_UNQUOTED(KERNEL_LOC,"$ac_cv_KERNEL_LOC", [location of UNIX kernel])
 
 
 #       Mount table Location
@@ -75,7 +75,8 @@ AC_CACHE_CHECK([for mount table location],
         done
     fi
 ])
-AC_DEFINE_UNQUOTED(ETC_MNTTAB,"$ac_cv_ETC_MNTTAB")
+AC_DEFINE_UNQUOTED(ETC_MNTTAB,"$ac_cv_ETC_MNTTAB",
+    [location of mount table list])
 
 
 #       Swap device Location

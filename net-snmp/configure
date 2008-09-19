@@ -2311,6 +2311,7 @@ ac_config_headers="$ac_config_headers include/net-snmp/net-snmp-config.h"
 #
 # save the configure arguments
 #
+
 cat >>confdefs.h <<_ACEOF
 #define NETSNMP_CONFIGURE_OPTIONS "$ac_configure_args"
 _ACEOF
@@ -3064,7 +3065,8 @@ fi
 # Check whether --enable-ipv6 was given.
 if test "${enable_ipv6+set}" = set; then
   enableval=$enable_ipv6; if test "x$enable_ipv6" = "xyes"; then
-      cat >>confdefs.h <<\_ACEOF
+
+cat >>confdefs.h <<\_ACEOF
 #define NETSNMP_ENABLE_IPV6 1
 _ACEOF
 
@@ -3547,7 +3549,8 @@ fi
 # Check whether --enable-local-smux was given.
 if test "${enable_local_smux+set}" = set; then
   enableval=$enable_local_smux; if test "x$enable_local_smux" = "xyes"; then
-      cat >>confdefs.h <<\_ACEOF
+
+cat >>confdefs.h <<\_ACEOF
 #define NETSNMP_ENABLE_LOCAL_SMUX 1
 _ACEOF
 
@@ -3565,7 +3568,8 @@ fi
 
 # Check whether --enable-agentx-dom-sock-only was given.
 if test "${enable_agentx_dom_sock_only+set}" = set; then
-  enableval=$enable_agentx_dom_sock_only; cat >>confdefs.h <<\_ACEOF
+  enableval=$enable_agentx_dom_sock_only;
+cat >>confdefs.h <<\_ACEOF
 #define NETSNMP_AGENTX_DOM_SOCK_ONLY 1
 _ACEOF
 
@@ -3586,7 +3590,8 @@ if test "${enable_snmptrapd_subagent+set}" = set; then
 fi
 
 if test "x$enable_snmptrapd_subagent" = "xno"; then
-  cat >>confdefs.h <<\_ACEOF
+
+cat >>confdefs.h <<\_ACEOF
 #define NETSNMP_SNMPTRAPD_DISABLE_AGENTX 1
 _ACEOF
 
@@ -3613,22 +3618,18 @@ echo "$as_me: error:  Please provide a full path " >&2;}
   { echo "$as_me:$LINENO: result: using AgentX socket $withval" >&5
 echo "${ECHO_T}using AgentX socket $withval" >&6; }
 
-cat >>confdefs.h <<_ACEOF
-#define NETSNMP_AGENTX_SOCKET "$withval"
-_ACEOF
-
-
 else
 
+  withval=$default_agentx_socket
   { echo "$as_me:$LINENO: result: using default AgentX socket $default_agentx_socket" >&5
 echo "${ECHO_T}using default AgentX socket $default_agentx_socket" >&6; }
 
-cat >>confdefs.h <<_ACEOF
-#define NETSNMP_AGENTX_SOCKET "$default_agentx_socket"
-_ACEOF
-
-
 fi
+
+
+cat >>confdefs.h <<_ACEOF
+#define NETSNMP_AGENTX_SOCKET "$withval"
+_ACEOF
 
 # Check whether --enable-agentx-socket was given.
 if test "${enable_agentx_socket+set}" = set; then
@@ -3683,7 +3684,8 @@ if test "${enable_mfd_rewrites+set}" = set; then
 fi
 
 if test "x$enable_mfd_rewrites" = "xyes"; then
-   cat >>confdefs.h <<\_ACEOF
+
+cat >>confdefs.h <<\_ACEOF
 #define NETSNMP_ENABLE_MFD_REWRITES 1
 _ACEOF
 
@@ -4138,7 +4140,8 @@ fi
 
 # Only define if specifically chosen as --without (i.e., default to true).
 if test "x$with_opaque_special_types" != "xno"; then
-  cat >>confdefs.h <<\_ACEOF
+
+cat >>confdefs.h <<\_ACEOF
 #define NETSNMP_WITH_OPAQUE_SPECIAL_TYPES 1
 _ACEOF
 
@@ -7015,7 +7018,7 @@ ia64-*-hpux*)
   ;;
 *-*-irix6*)
   # Find out which ABI we are using.
-  echo '#line 7018 "configure"' > conftest.$ac_ext
+  echo '#line 7021 "configure"' > conftest.$ac_ext
   if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
   (eval $ac_compile) 2>&5
   ac_status=$?
@@ -10023,11 +10026,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:10026: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:10029: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:10030: \$? = $ac_status" >&5
+   echo "$as_me:10033: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -10313,11 +10316,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:10316: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:10319: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:10320: \$? = $ac_status" >&5
+   echo "$as_me:10323: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -10417,11 +10420,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:10420: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:10423: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:10424: \$? = $ac_status" >&5
+   echo "$as_me:10427: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -12781,7 +12784,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<EOF
-#line 12784 "configure"
+#line 12787 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -12881,7 +12884,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<EOF
-#line 12884 "configure"
+#line 12887 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -15282,11 +15285,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:15285: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:15288: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:15289: \$? = $ac_status" >&5
+   echo "$as_me:15292: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -15386,11 +15389,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:15389: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:15392: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:15393: \$? = $ac_status" >&5
+   echo "$as_me:15396: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -16969,11 +16972,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:16972: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:16975: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:16976: \$? = $ac_status" >&5
+   echo "$as_me:16979: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -17073,11 +17076,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:17076: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:17079: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:17080: \$? = $ac_status" >&5
+   echo "$as_me:17083: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -19280,11 +19283,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:19283: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:19286: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:19287: \$? = $ac_status" >&5
+   echo "$as_me:19290: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -19570,11 +19573,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:19573: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:19576: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:19577: \$? = $ac_status" >&5
+   echo "$as_me:19580: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -19674,11 +19677,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:19677: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:19680: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:19681: \$? = $ac_status" >&5
+   echo "$as_me:19684: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -26830,7 +26833,8 @@ fi
 #
 
 if test "x$with_res_locks" = "xyes"; then
-  cat >>confdefs.h <<\_ACEOF
+
+cat >>confdefs.h <<\_ACEOF
 #define NETSNMP_REENTRANT 1
 _ACEOF
 
@@ -27345,7 +27349,8 @@ fi
     { echo "$as_me:$LINENO: result: $ac_cv_heimdal" >&5
 echo "${ECHO_T}$ac_cv_heimdal" >&6; }
     if test $ac_cv_heimdal = yes; then
-      cat >>confdefs.h <<\_ACEOF
+
+cat >>confdefs.h <<\_ACEOF
 #define NETSNMP_USE_KERBEROS_HEIMDAL 1
 _ACEOF
 
@@ -27519,7 +27524,8 @@ fi
     if test yes = $ac_cv_NETSNMP_USE_KERBEROS_MIT; then
       { echo "$as_me:$LINENO: result: new MIT crypto API" >&5
 echo "${ECHO_T}new MIT crypto API" >&6; }
-      cat >>confdefs.h <<\_ACEOF
+
+cat >>confdefs.h <<\_ACEOF
 #define NETSNMP_USE_KERBEROS_MIT 1
 _ACEOF
 
@@ -28557,6 +28563,7 @@ echo "$as_me: WARNING: Can't find system kernel...  Setting to /vmunix" >&2;}
 fi
 { echo "$as_me:$LINENO: result: $ac_cv_KERNEL_LOC" >&5
 echo "${ECHO_T}$ac_cv_KERNEL_LOC" >&6; }
+
 cat >>confdefs.h <<_ACEOF
 #define KERNEL_LOC "$ac_cv_KERNEL_LOC"
 _ACEOF
@@ -28590,6 +28597,7 @@ fi
 fi
 { echo "$as_me:$LINENO: result: $ac_cv_ETC_MNTTAB" >&5
 echo "${ECHO_T}$ac_cv_ETC_MNTTAB" >&6; }
+
 cat >>confdefs.h <<_ACEOF
 #define ETC_MNTTAB "$ac_cv_ETC_MNTTAB"
 _ACEOF
@@ -34032,7 +34040,8 @@ echo "${ECHO_T}$netsnmp_cv_func_rpmGetFilesystemList__rpmlibs" >&6; }
        _rpmlibs="${netsnmp_result} ${netsnmp_target_val}"
     fi
 
-    cat >>confdefs.h <<\_ACEOF
+
+cat >>confdefs.h <<\_ACEOF
 #define HAVE_LIBRPM 1
 _ACEOF
 
@@ -34737,7 +34746,8 @@ fi
 { echo "$as_me:$LINENO: result: $ac_cv_func_perl_eval_pv" >&5
 echo "${ECHO_T}$ac_cv_func_perl_eval_pv" >&6; }
 if test $ac_cv_func_perl_eval_pv = yes; then
-  cat >>confdefs.h <<\_ACEOF
+
+cat >>confdefs.h <<\_ACEOF
 #define HAVE_PERL_EVAL_PV_LC 1
 _ACEOF
 
@@ -34825,7 +34835,8 @@ fi
 { echo "$as_me:$LINENO: result: $ac_cv_func_Perl_eval_pv" >&5
 echo "${ECHO_T}$ac_cv_func_Perl_eval_pv" >&6; }
 if test $ac_cv_func_Perl_eval_pv = yes; then
-  cat >>confdefs.h <<\_ACEOF
+
+cat >>confdefs.h <<\_ACEOF
 #define HAVE_PERL_EVAL_PV_UC 1
 _ACEOF
 
@@ -34847,7 +34858,8 @@ echo "$as_me: error: Could not find the eval_pv, perl_eval_pv or Perl_eval_pv fu
     else
       #   Activate Embedded Perl
       #
-      cat >>confdefs.h <<\_ACEOF
+
+cat >>confdefs.h <<\_ACEOF
 #define NETSNMP_EMBEDDED_PERL 1
 _ACEOF
 

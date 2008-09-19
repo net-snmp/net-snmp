@@ -22,7 +22,8 @@ AC_MSG_CACHE_INIT()
 #
 # save the configure arguments
 #
-AC_DEFINE_UNQUOTED(NETSNMP_CONFIGURE_OPTIONS,"$ac_configure_args")
+AC_DEFINE_UNQUOTED(NETSNMP_CONFIGURE_OPTIONS,"$ac_configure_args",
+  [configure options specified])
 CONFIGURE_OPTIONS="\"$ac_configure_args"\"
 AC_SUBST(CONFIGURE_OPTIONS)
 

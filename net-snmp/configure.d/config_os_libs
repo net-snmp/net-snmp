@@ -297,7 +297,8 @@ if test "x$with_rpm" != "xno" && \
   NETSNMP_SEARCH_LIBS(rpmdbOpen, rpmdb,,, $LMIBLIBS, _rpmlibs)
   # now check for rpm using the appropriate libraries.
   NETSNMP_SEARCH_LIBS(rpmGetFilesystemList, rpm, [
-    AC_DEFINE(HAVE_LIBRPM)
+    AC_DEFINE(HAVE_LIBRPM, 1,
+      [Define to 1 if you have the `rpm' library (-lrpm).])
     LMIBLIBS="$_rpmlibs $LMIBLIBS"
     CFLAGS="$CFLAGS -I/usr/include/rpm"
   ],, $LMIBLIBS, _rpmlibs)
