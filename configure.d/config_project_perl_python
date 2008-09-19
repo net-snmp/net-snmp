@@ -241,8 +241,12 @@ if test "x$embed_perl" != "xno" ; then
     OLDLIBS="$LIBS"
     LIBS="$LIBS $netsnmp_perlldopts"
     AC_CHECK_FUNCS(eval_pv)
-    AC_CHECK_FUNC(perl_eval_pv, AC_DEFINE(HAVE_PERL_EVAL_PV_LC))
-    AC_CHECK_FUNC(Perl_eval_pv, AC_DEFINE(HAVE_PERL_EVAL_PV_UC))
+    AC_CHECK_FUNC(perl_eval_pv,
+      AC_DEFINE(HAVE_PERL_EVAL_PV_LC, 1,
+        [Define to 1 if you have `the perl_eval_pv' function.]))
+    AC_CHECK_FUNC(Perl_eval_pv,
+      AC_DEFINE(HAVE_PERL_EVAL_PV_UC, 1,
+        [Define to 1 if you have the `Perl_eval_pv' function.]))
     LIBS="$OLDLIBS"
     #
     #   Note that autoconf flattens case when defining tokens,
@@ -257,7 +261,8 @@ if test "x$embed_perl" != "xno" ; then
     else
       #   Activate Embedded Perl
       #
-      AC_DEFINE(NETSNMP_EMBEDDED_PERL)
+      AC_DEFINE(NETSNMP_EMBEDDED_PERL, 1,
+        [Define if you are embedding perl in the main agent.])
       OTHERAGENTLIBOBJS="snmp_perl.o"
       OTHERAGENTLIBLOBJS="snmp_perl.lo"
 
