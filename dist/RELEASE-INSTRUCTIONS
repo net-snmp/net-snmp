@@ -191,11 +191,10 @@ Note:  This is the last stage that is handled by the "makerelease" script
 
      Update the following files with any changes:
 
-         htdocs/readmefiles/NEWS
-         htdocs/readmefiles/CHANGES
-         htdocs/readmefiles/ChangeLog
-         htdocs/readmefiles/README*
-         htdocs/readmefiles/COPYING
+         htdocs/docs/readmefiles/NEWS
+         htdocs/docs/readmefiles/CHANGES
+         htdocs/docs/readmefiles/README*
+         htdocs/COPYING
 
      [Make sure you have permissions set up properly on the web
       server so that files created become group-writable!!!]
