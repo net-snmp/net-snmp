@@ -81,7 +81,8 @@ elif test "x$usepkcs" != "xno" ; then
     else
         encrmodes="[disabled]"
     fi
-    AC_DEFINE(NETSNMP_USE_PKCS11)
+    AC_DEFINE(NETSNMP_USE_PKCS11, 1,
+      [Define if you are using the codeS11 library ...])
     LNETSNMPLIBS="$LNETSNMPLIBS $LIBPKCS11"
     AC_MSG_RESULT(PKCS11 Support)
 elif test "x$enable_md5" != "xno"; then
