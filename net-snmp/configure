@@ -38989,24 +38989,12 @@ _ACEOF
 
 #       Byte order
 #
-if test $cross_compiling = yes; then
-    if test $with_endianness = "big"; then
-        cat >>confdefs.h <<\_ACEOF
-#define WORDS_BIGENDIAN 1
-_ACEOF
-
-    elif test -z $with_endianness; then
-        { { echo "$as_me:$LINENO: error: You are cross-compiling, but you have not specified the target's endianness" >&5
-echo "$as_me: error: You are cross-compiling, but you have not specified the target's endianness" >&2;}
-   { (exit 1); exit 1; }; }
-    fi
-else
-    if test $with_endianness; then
-        { { echo "$as_me:$LINENO: error: Endianness has been specified, but you are not cross-compiling." >&5
-echo "$as_me: error: Endianness has been specified, but you are not cross-compiling." >&2;}
-   { (exit 1); exit 1; }; }
-    fi
-    { echo "$as_me:$LINENO: checking whether byte ordering is bigendian" >&5
+if test "$with_endianness" = "big"; then
+    ac_cv_c_bigendian=yes
+elif test "$with_endianness" = "little" ; then
+    ac_cv_c_bigendian=no
+fi
+{ echo "$as_me:$LINENO: checking whether byte ordering is bigendian" >&5
 echo $ECHO_N "checking whether byte ordering is bigendian... $ECHO_C" >&6; }
 if test "${ac_cv_c_bigendian+set}" = set; then
   echo $ECHO_N "(cached) $ECHO_C" >&6
@@ -39235,14 +39223,11 @@ _ACEOF
   no)
      ;;
   *)
-    { { echo "$as_me:$LINENO: error: unknown endianness
-presetting ac_cv_c_bigendian=no (or yes) will help" >&5
-echo "$as_me: error: unknown endianness
-presetting ac_cv_c_bigendian=no (or yes) will help" >&2;}
+    { { echo "$as_me:$LINENO: error: Failed to figure out host endianness, please use --with-endianness to specify it." >&5
+echo "$as_me: error: Failed to figure out host endianness, please use --with-endianness to specify it." >&2;}
    { (exit 1); exit 1; }; } ;;
 esac
 
-fi
 
 #########################################
 ##
