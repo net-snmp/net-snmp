@@ -48,15 +48,10 @@ AC_DEFINE_UNQUOTED(PSCMD, "$PSPROG $ac_cv_ps_flags",
 
 #       Byte order
 #
-if test $cross_compiling = yes; then
-    if test $with_endianness = "big"; then
-        AC_DEFINE(WORDS_BIGENDIAN)
-    elif test -z $with_endianness; then
-        AC_MSG_ERROR([You are cross-compiling, but you have not specified the target's endianness])
-    fi
-else
-    if test $with_endianness; then
-        AC_MSG_ERROR([Endianness has been specified, but you are not cross-compiling.])
-    fi
-    AC_C_BIGENDIAN
+if test "$with_endianness" = "big"; then
+    ac_cv_c_bigendian=yes
+elif test "$with_endianness" = "little" ; then
+    ac_cv_c_bigendian=no
 fi
+AC_C_BIGENDIAN(,,
+    [AC_MSG_ERROR([Failed to figure out host endianness, please use --with-endianness to specify it.])])
