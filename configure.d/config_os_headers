@@ -7,59 +7,99 @@
 ##
 #   Standard checks:
 ##
+#  Core:
 AC_HEADER_STDC          #  <stdlib.h>, <stdarg.h>,   <string.h>  & <float.h>
 AC_HEADER_DIRENT        #  <dirent.h>, <sys/ndir.h>, <sys/dir.h> & <ndir.h>
+#  Apps:
 AC_HEADER_SYS_WAIT      #  <sys/wait.h>
 
 ##
 #   Stand-alone headers:
 ##
-AC_CHECK_HEADERS([dlfcn.h    err.h      fcntl.h    fstab.h      \
-                  getopt.h   grp.h      io.h                    \
-                  ioctls.h   kstat.h    kvm.h      limits.h     \
-                  locale.h   mntent.h   mtab.h                  \
-                  nlist.h    pkglocs.h  pthread.h  pwd.h        \
-                  regex.h    search.h   sgtty.h    stdarg.h     \
-                  string.h   syslog.h                           \
-                  unistd.h   utmpx.h    utsname.h  xti.h])
+#  Core:
+AC_CHECK_HEADERS([getopt.h   pthread.h  regex.h                 \
+                  stdarg.h   string.h   syslog.h   unistd.h     \
+                  sys/param.h        \
+                  sys/select.h       \
+                  sys/socket.h       \
+                  sys/time.h         \
+                  sys/un.h           \
+                ])
 
-AC_CHECK_HEADERS([sys/cdefs.h   sys/diskio.h   sys/dkio.h     sys/dmap.h       \
+#  Library:
+AC_CHECK_HEADERS([fcntl.h    io.h       kstat.h                 \
+                  limits.h   locale.h   nlist.h                 \
+                  sys/file.h       sys/ioctl.h         \
+                  sys/sockio.h     sys/stat.h          \
+                  sys/systemcfg.h  sys/systeminfo.h    \
+                  sys/times.h      sys/uio.h           \
+                  sys/utsname.h      \
+                  netipx/ipx.h       \
+                ])
+
+#  Agent:
+AC_CHECK_HEADERS([dlfcn.h    err.h      fcntl.h    fstab.h      \
+                             grp.h      io.h                    \
+                  ioctls.h   kstat.h    kvm.h      limits.h     \
+                             mntent.h   mtab.h                  \
+                  nlist.h    pkglocs.h             pwd.h        \
+                             utmpx.h    utsname.h               \
+                ])
+AC_CHECK_HEADERS([sys/diskio.h   sys/dkio.h            \
                   sys/file.h    sys/filio.h    sys/fixpoint.h sys/fs.h         \
                   sys/ioctl.h   sys/loadavg.h  sys/mntent.h   sys/mnttab.h     \
-                  sys/param.h   sys/poll.h     sys/pool.h     sys/protosw.h    \
-                  sys/pstat.h   sys/select.h   sys/sema.h     sys/socket.h     \
+                  sys/pool.h    sys/protosw.h  sys/pstat.h                     \
                   sys/sockio.h  sys/stat.h     sys/statfs.h   sys/statvfs.h    \
-                  sys/stream.h  sys/sysget.h   sys/sysmp.h    sys/systemcfg.h  \
-                  sys/systeminfo.h             sys/tcpipstats.h                \
-                  sys/time.h    sys/timeout.h  sys/times.h    sys/uio.h        \
-                  sys/un.h      sys/utsname.h  sys/vfs.h      sys/vm.h         \
-                  sys/vmmac.h   sys/vmmeter.h  sys/vmparam.h  sys/vmsystm.h])
-
+                  sys/stream.h  sys/sysget.h   sys/sysmp.h                     \
+                  sys/tcpipstats.h  sys/utsname.h  sys/vfs.h  sys/vm.h         \
+                  sys/vmmac.h   sys/vmmeter.h  sys/vmparam.h  sys/vmsystm.h    \
+                ])
 AC_CHECK_HEADERS([asm/page.h asm/types.h               \
                   inet/mib2.h                          \
                   linux/hdreg.h linux/tasks.h          \
-                  machine/param.h machine/pte.h        \
-                  netinet/tcp_fsm.h netipx/ipx.h       \
-                  pci/pci.h                            \
+                  machine/param.h                      \
+                  netinet/tcp_fsm.h                    \
                   ufs/fs.h                             \
                   uvm/uvm_extern.h uvm/uvm_param.h     \
-                  vm/vm.h vm/vm_extern.h vm/vm_param.h])
+                  vm/vm.h vm/vm_extern.h vm/vm_param.h \
+                ])
+
+#  Apps:
+AC_CHECK_HEADERS([fcntl.h    grp.h      pwd.h      \
+                  sys/cdefs.h   sys/ioctl.h        \
+                  sys/socket.h  sys/sockio.h       \
+                  sys/time.h                       \
+                ])
+
+#  Not-Used:
+AC_CHECK_HEADERS([search.h   sgtty.h    xti.h      \
+                  sys/dmap.h sys/poll.h            \ 
+                  sys/timeout.h                    \ 
+                  machine/pte.h                    \ 
+                  pci/pci.h                        \
+                ])
+
 
 # OpenSSL
-AC_CHECK_HEADERS([openssl/aes.h  openssl/des.h openssl/dh.h        \
-                  openssl/hmac.h openssl/evp.h security/cryptoki.h])
+AC_CHECK_HEADERS([openssl/aes.h ])     #  (Core)
+AC_CHECK_HEADERS([openssl/dh.h  ])     #  (Apps)
+#  Not-Used:
+AC_CHECK_HEADERS([openssl/des.h  openssl/hmac.h \
+                  openssl/evp.h  security/cryptoki.h])
 
-# RPM subdirectory path (sigh)
+# RPM subdirectory path                   (Agent)
 if test "x$with_rpm" != "xno" && \
         echo " $module_list " | $GREP " host/hr_swinst " > /dev/null; then
   AC_CHECK_HEADERS(rpm/rpmdb.h)
 fi
+
 
 ##
 #   Pre-requisite on other headers:
 ##
 
 #       requiring <sys/param.h>  (MAXPATHLEN)           (OpenBSD 3.4)
+#  Agent:
 #
 AC_CHECK_HEADERS(sys/swap.h,,,
     AC_INCLUDES_DEFAULT([])
@@ -71,7 +111,30 @@ AC_CHECK_HEADERS(sys/swap.h,,,
 
 #       requiring <sys/param.h>                         (FreeBSD)
 #
-AC_CHECK_HEADERS([malloc.h        osreldate.h   stdlib.h        \
+#  Core:      (? Tested above? )
+AC_CHECK_HEADERS([stdlib.h  ],,,
+    [[
+#if HAVE_SYS_TYPES_H
+#include <sys/types.h>
+#endif
+#if HAVE_SYS_PARAM_H
+#include <sys/param.h>
+#endif
+    ]])
+#
+#  Library:
+AC_CHECK_HEADERS([malloc.h        net/if_dl.h   sys/sysctl.h    ],,,
+    [[
+#if HAVE_SYS_TYPES_H
+#include <sys/types.h>
+#endif
+#if HAVE_SYS_PARAM_H
+#include <sys/param.h>
+#endif
+    ]])
+#
+#  Agent:
+AC_CHECK_HEADERS([malloc.h        osreldate.h                   \
                   machine/types.h net/if_dl.h   net/if_types.h  \
                   sys/dkstat.h    sys/conf.h    sys/mbuf.h      \
                   sys/mount.h     sys/proc.h    sys/queue.h     \
@@ -86,7 +149,9 @@ AC_CHECK_HEADERS([malloc.h        osreldate.h   stdlib.h        \
     ]])
 
 #       requiring <sys/sema.h>                          (IRIX 6.5)
+#  Agent:
 #
+AC_CHECK_HEADERS([sys/sema.h])
 AC_CHECK_HEADERS(sys/hashing.h,,,
     AC_INCLUDES_DEFAULT([])
     [
@@ -96,6 +161,7 @@ AC_CHECK_HEADERS(sys/hashing.h,,,
     ])
 
 #       requiring <sys/socket.h>                        (Solaris 9)
+#  Agent:
 #
 AC_CHECK_HEADERS(sys/socketvar.h,,,
     AC_INCLUDES_DEFAULT([])
@@ -106,6 +172,7 @@ AC_CHECK_HEADERS(sys/socketvar.h,,,
     ])
 
 #       requiring _KMEMUSER and <sys/types.h>           (BSDi3/IRIX)
+#  Agent:
 #
 AC_CHECK_HEADERS(sys/vnode.h,,,
     [
@@ -116,6 +183,7 @@ AC_CHECK_HEADERS(sys/vnode.h,,,
     ])
 
 #       requiring <machine/types.h>                     (NetBSD)
+#  Agent:
 #
 AC_CHECK_HEADERS(sys/disklabel.h,,,
     [[
@@ -131,6 +199,7 @@ AC_CHECK_HEADERS(sys/disklabel.h,,,
     ]])
 
 #       UFS headers
+#  Agent:
 #
 AC_CHECK_HEADERS([ufs/ufs/dinode.h ufs/ufs/quota.h ufs/ufs/inode.h ufs/ffs/fs.h],,,
     [[
@@ -146,6 +215,7 @@ AC_CHECK_HEADERS([ufs/ufs/dinode.h ufs/ufs/quota.h ufs/ufs/inode.h ufs/ffs/fs.h]
     ]])
 
 #       requiring <vm/vm.h>                             (BSDi2)
+#  Agent:
 #
 AC_CHECK_HEADERS(vm/swap_pager.h,,,
     [[
@@ -155,6 +225,7 @@ AC_CHECK_HEADERS(vm/swap_pager.h,,,
     ]])
 
 #       netlink/rtnetlink                               (Linux)
+#  Agent:
 #
 AC_CHECK_HEADERS([linux/netlink.h  linux/rtnetlink.h],,,
     [[
@@ -171,15 +242,63 @@ AC_CHECK_HEADERS([linux/netlink.h  linux/rtnetlink.h],,,
 
 
 #       Network headers
+#  Core or Library/Agent/Apps:
 #
-AC_CHECK_HEADERS([arpa/inet.h        netinet/in_systm.h   netinet/in.h       \
-                  netinet/ip.h       net/if.h             netinet/ip_var.h   \
-                  netinet/tcp.h      netinet/udp.h        netinet/tcpip.h    \
-                  netinet/in_var.h   netinet/ip.h         netinet/ip_icmp.h  \
-                  net/if_arp.h       net/if_mib.h         net/if_var.h       \
-                  netinet/if_ether.h netinet/tcp_timer.h                     \
-                  netinet/tcp_var.h  netinet/udp_var.h    netinet/icmp_var.h \
-                  netdb.h            net/route.h],,,
+AC_CHECK_HEADERS([arpa/inet.h        net/if.h             \
+                  netinet/in.h       netdb.h              ],,,
+    [[
+#if HAVE_SYS_TYPES_H
+#include <sys/types.h>
+#endif
+#if HAVE_SYS_TIMEOUT_H
+#include <sys/timeout.h>
+#endif
+#if HAVE_SYS_SOCKET_H
+#include <sys/socket.h>
+#endif
+#if HAVE_SYS_SOCKETVAR_H
+#include <sys/socketvar.h>
+#endif
+#if HAVE_ARPA_INET_H
+#include <arpa/inet.h>
+#endif
+#if HAVE_NETINET_IN_SYSTM_H
+#include <netinet/in_systm.h>
+#endif
+#if HAVE_NETINET_IN_H
+#include <netinet/in.h>
+#endif
+#if HAVE_NETINET_IP_H
+#include <netinet/ip.h>
+#endif
+#if HAVE_NET_IF_H
+#include <net/if.h>
+#endif
+#if HAVE_NETINET_IP_VAR_H
+#include <netinet/ip_var.h>
+#endif
+#if HAVE_NETINET_IP_ICMP_H
+#include <netinet/ip_icmp.h>
+#endif
+#if HAVE_NETINET_TCP_H
+#include <netinet/tcp.h>
+#endif
+#if HAVE_NETINET_UDP_H
+#include <netinet/udp.h>
+#endif
+#if HAVE_NETINET_TCP_TIMER_H
+#include <netinet/tcp_timer.h>
+#endif
+    ]])
+#
+#  Agent:
+AC_CHECK_HEADERS([net/if_arp.h       net/if_mib.h         net/if_var.h       \
+                  netinet/icmp_var.h netinet/if_ether.h                      \
+                  netinet/in_systm.h netinet/in_var.h                        \
+                  netinet/ip.h       netinet/ip_icmp.h    netinet/ip_var.h   \
+                  netinet/tcp.h      netinet/tcp_timer.h  netinet/tcp_var.h  \
+                  netinet/tcpip.h    netinet/udp.h        netinet/udp_var.h  \
+                  net/route.h        ],,,
     [[
 #if HAVE_SYS_TYPES_H
 #include <sys/types.h>
@@ -226,11 +345,14 @@ AC_CHECK_HEADERS([arpa/inet.h        netinet/in_systm.h   netinet/in.h       \
     ]])
 
 #       KAME (IPv6) headers
+#  Agent:
 #
 # KAME
-AC_CHECK_HEADERS([netinet/ip6.h       netinet6/in6_var.h    netinet6/in6_pcb.h    \
-                  netinet6/ip6_var.h  netinet6/tcp6.h       netinet6/tcp6_fsm.h   \
-                  netinet6/nd6.h      netinet6/tcp6_timer.h netinet6/tcp6_var.h],,,
+AC_CHECK_HEADERS([netinet/ip6.h                               \
+                  netinet6/in6_var.h    netinet6/in6_pcb.h    \
+                  netinet6/ip6_var.h    netinet6/nd6.h        \
+                  netinet6/tcp6.h       netinet6/tcp6_fsm.h   \
+                  netinet6/tcp6_timer.h netinet6/tcp6_var.h],,,
     [[
 #if HAVE_SYS_TYPES_H
 #include <sys/types.h>
@@ -247,6 +369,7 @@ AC_CHECK_HEADERS([netinet/ip6.h       netinet6/in6_var.h    netinet6/in6_pcb.h  
     ]])
 
 #       requiring <netinet/in.h>                        (OpenBSD 2.6)
+#  Agent:
 #
 AC_CHECK_HEADERS(netinet/in_pcb.h,,,
     [[
@@ -282,6 +405,7 @@ AC_CHECK_HEADERS(netinet/in_pcb.h,,,
 
 #       Special hack to get around various problems on older Linux kernels
 #       (major ugh!)
+#  Agent:
 #
 AC_CHECK_HEADERS([linux/ethtool.h],,,
 [[
@@ -297,6 +421,7 @@ typedef __u8 u8;           /* ditto */
 ##
 
 #       for HostRes                                     (Solaris 2.x)
+#  Agent:
 #
 AC_CHECK_HEADERS(pkginfo.h,
     NETSNMP_SEARCH_LIBS(pkginfo, adm,
@@ -305,6 +430,7 @@ AC_CHECK_HEADERS(pkginfo.h,
 case $target_os in
     aix*)
         #       for CPU/memory statistics               (AIX)
+        #  Agent:
         #
         AC_CHECK_HEADERS(libperfstat.h,
             NETSNMP_SEARCH_LIBS(perfstat_cpu_total, perfstat,
@@ -327,6 +453,7 @@ case $target_os in
 esac
 
 #       for MIB-2 info                                  (Win32)
+#  Core:
 #
 AC_CHECK_HEADERS(winsock.h,[
         AGENTLIBS="${AGENTLIBS} -liphlpapi"
