@@ -126,7 +126,7 @@ parse_assoc_remote_addresses(sctpAssocTable_entry * entry)
 static int
 parse_assoc_line(char *line, sctpTables_containers * containers)
 {
-    long            inode;
+    unsigned long long inode;
     char           *token;
     int             ret;
     sctpAssocTable_entry *entry;
@@ -169,7 +169,7 @@ parse_assoc_line(char *line, sctpTables_containers * containers)
         ret = SNMP_ERR_GENERR;
         goto error;
     }
-    inode = strtol(token, NULL, 10);
+    inode = strtoull(token, NULL, 10);
     entry->sctpAssocPrimProcess = get_pid_from_inode(inode);
 
     token = strtok(NULL, " ");  /* LPORT */
