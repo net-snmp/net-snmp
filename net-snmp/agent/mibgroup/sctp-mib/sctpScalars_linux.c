@@ -52,7 +52,7 @@ netsnmp_access_sctp_stats_arch_load(netsnmp_sctp_stats * sctp_stats)
 {
     FILE           *f;
     char            line[100];
-    u_long          value;
+    unsigned long long value;
     char           *delimiter;
     int             ret = 0;
 
@@ -74,7 +74,7 @@ netsnmp_access_sctp_stats_arch_load(netsnmp_sctp_stats * sctp_stats)
             return -1;
         }
         errno = 0;
-        value = strtoul(delimiter + 1, NULL, 10);
+        value = strtoull(delimiter + 1, NULL, 10);
         if (errno != 0) {
             DEBUGMSGTL(("sctp:scalars:stats:arch_load",
                         "Malformed value!'\n"));
