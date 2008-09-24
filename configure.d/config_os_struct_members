@@ -9,6 +9,7 @@
 ##
 
 #       struct arphd
+#   Agent:
 #
 AC_CHECK_MEMBERS([struct arphd.at_next],,,[
     AC_INCLUDES_DEFAULT()
@@ -33,6 +34,7 @@ AC_CHECK_MEMBERS([struct arphd.at_next],,,[
 
 #       struct des_ks_struct
 #         ('weak_key' indicates older version of OpenSSL)
+#   Library:
 #
 if test "x$ac_cv_header_openssl_des_h" = "xyes" ; then
     AC_CHECK_MEMBERS([struct des_ks_struct.weak_key],,,[[
@@ -44,6 +46,7 @@ fi
 
 #       struct dirent
 #         (see also AC_STRUCT_DIRENT_D_TYPE)
+#   Library:
 #
 AC_CHECK_MEMBERS([struct dirent.d_type],,,[
     AC_INCLUDES_DEFAULT()
@@ -54,12 +57,11 @@ AC_CHECK_MEMBERS([struct dirent.d_type],,,[
     ]])
 
 #       struct ipstat
+#   Agent:
 #
-AC_CHECK_MEMBERS([struct ipstat.ips_cantforward,
-                  struct ipstat.ips_cantfrag,
+AC_CHECK_MEMBERS([struct ipstat.ips_cantfrag,
                   struct ipstat.ips_delivered,
                   struct ipstat.ips_fragdropped,
-                  struct ipstat.ips_fragtimeout,
                   struct ipstat.ips_fragmented,
                   struct ipstat.ips_localout,
                   struct ipstat.ips_noproto,
@@ -76,8 +78,22 @@ AC_CHECK_MEMBERS([struct ipstat.ips_cantforward,
 #include <netinet/ip_var.h>
 #endif
     ]])
+#
+#   Not-Used:
+AC_CHECK_MEMBERS([struct ipstat.ips_cantforward,
+                  struct ipstat.ips_fragtimeout],,,[
+    AC_INCLUDES_DEFAULT()
+    [
+#if HAVE_NETINET_IN_H
+#include <netinet/in.h>
+#endif
+#if HAVE_NETINET_IP_VAR_H
+#include <netinet/ip_var.h>
+#endif
+    ]])
 
 #       struct mbstat
+#   Not-Used:
 #
 AC_CHECK_MEMBERS([struct mbstat.m_clusters,
                   struct mbstat.m_clfree,
@@ -101,6 +117,7 @@ AC_CHECK_MEMBERS([struct nlist.n_value,
     ]])
 
 #       struct sigaction
+#   Agent:
 #
 AC_CHECK_MEMBERS([struct sigaction.sa_sigaction],,,[
     AC_INCLUDES_DEFAULT()
@@ -114,6 +131,7 @@ AC_CHECK_MEMBERS([struct sigaction.sa_sigaction],,,[
     ]])
 
 #       struct sockaddr
+#   Library:
 #
 AC_CHECK_MEMBERS([struct sockaddr.sa_len,
                   struct sockaddr.sa_union.sa_generic.sa_family2,
@@ -130,6 +148,7 @@ AC_CHECK_MEMBERS([struct sockaddr.sa_len,
     ]])
 
 #       struct sockaddr_in6     (see RFC 2553)
+#   Library:
 #
 AC_CHECK_MEMBERS([struct sockaddr_in6.sin6_scope_id],,,[
     AC_INCLUDES_DEFAULT()
@@ -146,6 +165,7 @@ AC_CHECK_MEMBERS([struct sockaddr_in6.sin6_scope_id],,,[
     ]])
 
 #       struct statfs
+#   Agent:
 #
 AC_CHECK_MEMBERS([struct statfs.f_favail,
                   struct statfs.f_ffree,
@@ -165,6 +185,7 @@ AC_CHECK_MEMBERS([struct statfs.f_favail,
     ]])
 
 #       struct statvfs
+#   Agent:
 #
 AC_CHECK_MEMBERS([struct statvfs.f_files,
                   struct statvfs.f_frsize,
@@ -180,6 +201,7 @@ AC_CHECK_MEMBERS([struct statvfs.f_files,
     ]])
 
 #       struct swdevt
+#   Not-Used:
 #
 AC_CHECK_MEMBERS([struct swdevt.sw_nblksenabled],,,[
     AC_INCLUDES_DEFAULT()
@@ -193,6 +215,7 @@ AC_CHECK_MEMBERS([struct swdevt.sw_nblksenabled],,,[
     ]])
 
 #       struct tcpstat
+#   Agent:
 #
 AC_CHECK_MEMBERS([struct tcpstat.tcp_rcvmemdrop],,,[
     AC_INCLUDES_DEFAULT()
@@ -215,6 +238,7 @@ AC_CHECK_MEMBERS([struct tcpstat.tcp_rcvmemdrop],,,[
     ]])
 
 #       struct tm
+#   Library:
 #
 AC_CHECK_MEMBERS([struct tm.tm_gmtoff],,,[
     AC_INCLUDES_DEFAULT()
@@ -232,11 +256,13 @@ AC_CHECK_MEMBERS([struct tm.tm_gmtoff],,,[
     ]])
 
 #       struct udpstat
+#   Agent:
 #
 AC_CHECK_MEMBERS([struct udpstat.udps_discard,
                   struct udpstat.udps_fullsock,
                   struct udpstat.udps_noport,
-                  struct udpstat.udps_noportbcast],,,[
+                  struct udpstat.udps_noportbcast,
+                  struct udpstat.udps_opackets],,,[
     AC_INCLUDES_DEFAULT()
     [
 #if HAVE_NETINET_IN_H
@@ -309,6 +335,7 @@ fi
 
 
 #       struct ifaddr
+#   Not-Used:
 #
 AC_CHECK_MEMBERS([struct ifaddr.ifa_next],,,[
     [
@@ -337,6 +364,7 @@ AC_CHECK_MEMBERS([struct ifaddr.ifa_next],,,[
 
 #       struct ifnet
 #         (Broken on FreeBSD - #define'd in <net/if.h>)
+#   Agent:   (?or Not-Used?)
 #
 AC_CHECK_MEMBERS([struct ifnet.if_addrlist,
                   struct ifnet.if_addrhead.tqh_first,
@@ -414,6 +442,7 @@ struct ifnet {
 ##
 
 # Check struct rtentry for common fields
+#   Agent:
 #
 AC_CHECK_MEMBERS([struct rtentry.rt_dst,
                   struct rtentry.rt_hash,

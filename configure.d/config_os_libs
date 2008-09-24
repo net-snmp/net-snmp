@@ -4,6 +4,12 @@
 ##
 #########################################
 
+#   HAVE_LIB Definitions used in the Net-SNMP code base:
+#
+#       HAVE_LIBCRYPTO:	apps
+#       HAVE_LIBRPM:	agent
+#
+
 ##
 #   Simple checks:
 ##
@@ -99,6 +105,8 @@ LIBS="$netsnmp_save_LIBS"
 #   libdevstat
 #        (for diskIO MIB)
 #
+#   Not-Used: HAVE_GETDEVS/HAVE_DEVSTAT_GETDEVS
+#
 echo " $module_list " | $GREP " ucd-snmp/diskio " >/dev/null
 if test $? -eq 0 ; then
 	NETSNMP_SEARCH_LIBS(getdevs, devstat,
@@ -116,11 +124,15 @@ echo " $module_list " | $GREP -i "ucd-snmp/lmsensor" > /dev/null
 if test $? -eq 0 ; then
         AC_MSG_CHECKING([for sensors support])
         case $target_os in
-          solaris*)
+        solaris*)
+            #  Agent:  HAVE_PICL_H
+            #
             AC_CHECK_HEADER(picl.h, LMIBLIBS="${LMIBLIBS} -lpicl",)
             AC_CHECK_HEADERS(picl.h)
             ;;
         *)
+            #  Not-Used:  HAVE_SENSORS_SENSORS_H
+            #
             AC_CHECK_HEADER(sensors/sensors.h,,
                 [AC_MSG_ERROR([asked to use lm_sensors but I couldn't find sensors/sensors.h])])
             NETSNMP_SEARCH_LIBS(sensors_get_detected_chips, sensors,,
@@ -225,6 +237,7 @@ AC_ARG_WITH(libwrap,
 
 ##
 #   RPM checks
+#
 ##
 AC_CHECK_HEADERS(rpm/rpmlib.h rpm/header.h)
 
@@ -308,9 +321,6 @@ fi
 ##
 #   Non-library checks
 ##
-
-# nlist
-AC_CHECK_FUNCS(nlist nlist64 knlist)
 
 # nlist
 AC_CHECK_FUNCS(nlist nlist64 knlist)

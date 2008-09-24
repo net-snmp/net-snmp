@@ -16,35 +16,60 @@ AC_FUNC_GETMNTENT
 ##
 #   Stand-alone function checks:
 ##
-AC_CHECK_FUNCS([bcopy           execv         fork                           \
-                gai_strerror    getaddrinfo   getdtablesize                  \
-                getfsstat       getgrnam      gethostname                    \
-                getipnodebyname getloadavg    getpagesize                    \
-                getpid          getpwnam      gettimeofday   getvfsstat      \
-                hasmntopt                                                    \
-                if_nameindex    if_nametoindex    if_freenameindex           \
-                index           initgroups                                   \
-                lrand48         lseek64                                      \
-                memcpy          memmove       mkstemp        mktime          \
-                poll            pread64                                      \
-                rand            random        regcomp                        \
-                select          setenv        setgid                         \
-                setgroups       setitimer     setlocale                      \
-                setmntent       setsid        setuid                         \
-                sigaction       sigalrm       sigblock                       \
-                sighold         signal        sigset                         \
-                snprintf        socket                                       \
-                statfs          statvfs       stime                          \
-                strcasestr      strchr        strdup                         \
-                strerror        strlcpy       strncasecmp                    \
-                strtok_r        strtol        strtoul                        \
-                sysconf         system                                       \
-                tcgetattr       times                                        \
-                uname           usleep                                       \
-                vsnprintf])
+#  Core:
+AC_CHECK_FUNCS([bcopy           index                   \
+                memcpy          memmove                 \
+                lrand48         rand          random    \
+                strchr          signal        sigset    \
+              ])
+
+#  Library:
+AC_CHECK_FUNCS([fork            gai_strerror                   \
+                getaddrinfo     gethostname   gethostbyname    \
+                getipnodebyname               gettimeofday     \
+                if_nametoindex  mkstemp       regcomp          \
+                setenv          setitimer     setlocale        \
+                setsid          snprintf                       \
+                strcasestr                    strdup           \
+                strerror        strlcpy       strncasecmp      \
+                strtok_r        strtol        strtoul          \
+                sysconf         times         vsnprintf        \
+              ])
+
+#  Agent:
+AC_CHECK_FUNCS([execv           gai_strerror                   \
+                getfsstat       getgrnam      gethostname      \
+                                getloadavg                     \
+                getpid          getpwnam      getvfsstat       \
+                hasmntopt       initgroups                     \
+                if_nameindex    if_nametoindex                 \
+                mkstemp         mktime                         \
+                poll            regcomp                        \
+                setgid          setgroups                      \
+                setmntent       setuid                         \
+                sigaction       sigblock      sighold          \
+                statfs          statvfs       stime            \
+                strncasecmp     system                         \
+                uname           usleep                         \
+              ])
+
+#  Apps:
+AC_CHECK_FUNCS([getdtablesize                                  \
+                getgrnam        getpid        getpwnam         \
+                setgid          setgroups     setuid           \
+                tcgetattr                                      \
+              ])
+
+#  Not-Used:
+AC_CHECK_FUNCS([if_freenameindex              getpagesize      \
+                lseek64         pread64                        \
+                select          sigalrm       socket           \
+              ])
+
 
 ##
 #   More complex function checks:
+#           (Agent)
 ##
 
 #       rpmGetPath check needs clean LIBS environment   (Linux)
@@ -90,8 +115,10 @@ if test $fu_cv_sys_stat_fs_data = yes; then
          type struct fs_data. @<:@Ultrix@:>@])
 fi
 
+
 ##
 #   Other function-related checks:
+#           (general build)
 ##
 
 #       How to get the name of the current function
