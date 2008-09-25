@@ -1,4 +1,4 @@
 # Redirect for transition from old site, and also to make life easier so people don't have to remember long URLS
 # For Redirect line, escape all &s
-RedirectMatch .* /support/mailinglists.html
+RedirectMatch .* http://www.net-snmp.org/support/mailinglists.html
 
