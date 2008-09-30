@@ -1153,7 +1153,7 @@ init_master_agent(void)
 {
     netsnmp_transport *transport;
     char           *cptr;
-    char            buf[SPRINT_MAX_LEN];
+    char           *buf = NULL;
     char           *st;
 
     /* default to a default cache size */
@@ -1185,13 +1185,17 @@ init_master_agent(void)
 				 NETSNMP_DS_AGENT_PORTS);
 
     if (cptr) {
-        snprintf(buf, sizeof(buf), "%s", cptr);
-        buf[ sizeof(buf)-1 ] = 0;
+        buf = strdup(cptr);
+        if (!buf) {
+            snmp_log(LOG_ERR,
+                     "Error processing transport \"%s\"\n", cptr);
+            return 1;
+        }
     } else {
         /*
          * No, so just specify the default port.  
          */
-        buf[0] = 0;
+        buf = "";
     }
 
     DEBUGMSGTL(("snmp_agent", "final port spec: \"%s\"\n", buf));
