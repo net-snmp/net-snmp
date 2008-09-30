@@ -90,6 +90,8 @@ typedef void    (SecmodHandleReport) (void *sessp,
                                       netsnmp_session *,
                                       int result,
                                       netsnmp_pdu *origpdu);
+typedef int     (SecmodDiscoveryMethod) (void *slp,
+                                         netsnmp_session *session);
 
 /*
  * definition of a security module
@@ -125,6 +127,11 @@ struct snmp_secmod_def {
     * error and report handling
     */
    SecmodHandleReport *handle_report;
+
+   /*
+    * default engineID discovery mechanism
+    */
+   SecmodDiscoveryMethod *probe_engineid;
 };
 
 
