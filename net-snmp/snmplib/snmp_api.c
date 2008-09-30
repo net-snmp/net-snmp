@@ -749,6 +749,11 @@ register_default_handlers(void)
 		      NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_DISABLE_PERSISTENT_LOAD);
     netsnmp_ds_register_config(ASN_BOOLEAN, "snmp", "noPersistentSave",
 		      NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_DISABLE_PERSISTENT_SAVE);
+    netsnmp_ds_register_config(ASN_BOOLEAN, "snmp",
+                               "noContextEngineIDDiscovery",
+                               NETSNMP_DS_LIBRARY_ID,
+                               NETSNMP_DS_LIB_NO_DISCOVERY);
+
     netsnmp_register_service_handlers();
 }
 
@@ -1234,6 +1239,92 @@ snmp_sess_copy(netsnmp_session * pss)
     return psl;
 }
 
+/**
+ * probe for engineID using RFC 5343 probing mechanisms
+ *
+ * Designed to be a callback for within a security model's probe_engineid hook.
+ * Since it's likely multiple security models won't have engineIDs to
+ * probe for then this function is a callback likely to be used by
+ * multiple future security models.  E.G. both SSH and DTLS.
+ */
+int
+snmpv3_probe_contextEngineID_rfc5343(void *slp, netsnmp_session *session) {
+    netsnmp_pdu    *pdu = NULL, *response = NULL;
+    static oid      snmpEngineIDoid[]   = { 1,3,6,1,6,3,10,2,1,1,0};
+    static size_t   snmpEngineIDoid_len = 11;
+
+    static char     probeEngineID[] = { 0x80, 0, 0, 0, 6 };
+    static size_t   probeEngineID_len = sizeof(probeEngineID);
+    
+    int status;
+
+    pdu = snmp_pdu_create(SNMP_MSG_GET);
+    if (!pdu)
+        return SNMP_ERR_GENERR;
+    pdu->version = SNMP_VERSION_3;
+    pdu->securityName = strdup(session->securityName);
+    pdu->securityNameLen = strlen(pdu->securityName);
+    pdu->securityLevel = SNMP_SEC_LEVEL_NOAUTH;
+    pdu->securityModel = session->securityModel;
+    if (memdup(&pdu->contextEngineID, probeEngineID, probeEngineID_len) !=
+        SNMPERR_SUCCESS) {
+        snmp_log(LOG_ERR, "failed to clone memory for rfc5343 probe\n");
+        return SNMP_ERR_GENERR;
+    }
+    pdu->contextEngineIDLen = probeEngineID_len;
+    
+    snmp_add_null_var(pdu, snmpEngineIDoid, snmpEngineIDoid_len);
+
+    DEBUGMSGTL(("snmp_api", "probing for engineID using rfc5343 methods...\n"));
+    session->flags |= SNMP_FLAGS_DONT_PROBE; /* prevent recursion */
+    status = snmp_sess_synch_response(slp, pdu, &response);
+
+    if ((response == NULL) && (status == STAT_SUCCESS)) {
+        snmp_log(LOG_ERR, "failed rfc5343 contextEngineID probing\n");
+        return SNMP_ERR_GENERR;
+    }
+
+    /* check that the response makes sense */
+    if (NULL != response->variables &&
+        NULL != response->variables->name &&
+        snmp_oid_compare(response->variables->name,
+                         response->variables->name_length,
+                         snmpEngineIDoid, snmpEngineIDoid_len) == 0 &&
+        ASN_OCTET_STR == response->variables->type  &&
+        NULL != response->variables->val.string &&
+        response->variables->val_len > 0) {
+        if (memdup(&session->contextEngineID,
+                   response->variables->val.string,
+                   response->variables->val_len) != SNMPERR_SUCCESS) {
+            snmp_log(LOG_ERR, "failed rfc5343 contextEngineID probing: memory allocation failed\n");
+            return SNMP_ERR_GENERR;
+        }
+        
+        /* technically there likely isn't a securityEngineID but just
+           in case anyone goes looking we might as well have one */
+        if (memdup(&session->securityEngineID,
+                   response->variables->val.string,
+                   response->variables->val_len) != SNMPERR_SUCCESS) {
+            snmp_log(LOG_ERR, "failed rfc5343 securityEngineID probing: memory allocation failed\n");
+            return SNMP_ERR_GENERR;
+        }
+        
+        session->securityEngineIDLen = session->contextEngineIDLen =
+            response->variables->val_len;
+        
+        if (snmp_get_do_debugging()) {
+            int i;
+            DEBUGMSGTL(("snmp_sess_open",
+                        "  probe found engineID:  "));
+            for (i = 0; i < session->securityEngineIDLen; i++)
+                DEBUGMSG(("snmp_sess_open", "%02x",
+                          session->securityEngineID[i]));
+            DEBUGMSG(("snmp_sess_open", "\n"));
+        }
+    }
+    return SNMPERR_SUCCESS;
+}
+
 
 /**
  * probe for peer engineID
@@ -1275,7 +1366,16 @@ snmpv3_engineID_probe(struct session_list *slp,
         return 1;
 
     if (session->version == SNMP_VERSION_3) {
-        if (session->securityEngineIDLen == 0) {
+        struct snmp_secmod_def *sptr = find_sec_mod(session->securityModel);
+
+        if (NULL != sptr && NULL != sptr->probe_engineid) {
+            DEBUGMSGTL(("snmp_api", "probing for engineID using security model callback...\n"));
+            /* security model specific mechanism of determining engineID */
+            int status = (*sptr->probe_engineid) (slp, session);
+            if (status)
+                return 0;
+            return 1; /* success! */
+        } else if (session->securityEngineIDLen == 0) {
             if (snmpv3_build_probe_pdu(&pdu) != 0) {
                 DEBUGMSGTL(("snmp_api", "unable to create probe PDU\n"));
                 return 0;
@@ -4073,6 +4173,14 @@ _snmp_parse(void *sessp,
 #endif
     int             result = -1;
 
+    static oid      snmpEngineIDoid[]   = { 1,3,6,1,6,3,10,2,1,1,0};
+    static size_t   snmpEngineIDoid_len = 11;
+
+    static char     ourEngineID[SNMP_SEC_PARAM_BUF_SIZE];
+    static size_t   ourEngineID_len = sizeof(ourEngineID);
+
+    netsnmp_pdu    *pdu2 = NULL;
+
     session->s_snmp_errno = 0;
     session->s_errno = 0;
 
@@ -4196,6 +4304,120 @@ _snmp_parse(void *sessp,
                 }
             }
         }
+
+        /* Implement RFC5343 here for two reasons:
+           1) From a security perspective it handles this otherwise
+              always approved request earlier.  It bypasses the need
+              for authorization to the snmpEngineID scalar, which is
+              what is what RFC3415 appendix A species as ok.  Note
+              that we haven't bypassed authentication since if there
+              was an authentication eror it would have been handled
+              above in the if(result) part at the lastet.
+           2) From an application point of view if we let this request
+              get all the way to the application, it'd require that
+              all application types supporting discovery also fire up
+              a minimal agent in order to handle just this request
+              which seems like overkill.  Though there is no other
+              application types that currently need discovery (NRs
+              accept notifications from contextEngineIDs that derive
+              from the NO not the NR).  Also a lame excuse for doing
+              it here.
+           3) Less important technically, but the net-snmp agent
+              doesn't currently handle registrations of different
+              engineIDs either and it would have been a lot more work
+              to implement there since we'd need to support that
+              first. :-/ Supporting multiple context engineIDs should
+              be done anyway, so it's not a valid excuse here.
+           4) There is a lot less to do if we trump the agent at this
+              point; IE, the agent does a lot more unnecessary
+              processing when the only thing that should ever be in
+              this context by definition is the single scalar.
+        */
+
+        /* special RFC5343 engineID discovery engineID check */
+        if (!ds_get_boolean(NETSNMP_DS_LIBRARY_ID,
+                            NETSNMP_DS_LIB_NO_DISCOVERY) &&
+            SNMP_MSG_RESPONSE       != pdu->command &&
+            NULL                    != pdu->contextEngineID &&
+            pdu->contextEngineIDLen == 5 &&
+            pdu->contextEngineID[0] == 0x80 &&
+            pdu->contextEngineID[1] == 0x00 &&
+            pdu->contextEngineID[2] == 0x00 &&
+            pdu->contextEngineID[3] == 0x00 &&
+            pdu->contextEngineID[4] == 0x06) {
+
+            /* define a result so it doesn't get past us at this point
+               and gets dropped by future parts of the stack */
+            result = SNMPERR_JUST_A_CONTEXT_PROBE;
+
+            DEBUGMSGTL(("snmpv3_contextid", "starting context ID discovery\n"));
+            /* ensure exactly one variable */
+            if (NULL != pdu->variables &&
+                NULL == pdu->variables->next_variable &&
+
+                /* if it's a GET, match it exactly */
+                ((SNMP_MSG_GET == pdu->command &&
+                  snmp_oid_compare(snmpEngineIDoid,
+                                   snmpEngineIDoid_len,
+                                   pdu->variables->name,
+                                   pdu->variables->name_length) == 0)
+                 /* if it's a GETNEXT ensure it's less than the engineID oid */
+                 ||
+                 (SNMP_MSG_GETNEXT == pdu->command &&
+                  snmp_oid_compare(snmpEngineIDoid,
+                                   snmpEngineIDoid_len,
+                                   pdu->variables->name,
+                                   pdu->variables->name_length) > 0)
+                    )) {
+
+                DEBUGMSGTL(("snmpv3_contextid",
+                            "  One correct variable found\n"));
+
+                /* Note: we're explictly not handling a GETBULK.  Deal. */
+
+                /* set up the response */
+                pdu2 = snmp_clone_pdu(pdu);
+
+                /* free the current varbind */
+                snmp_free_varbind(pdu2->variables);
+
+                /* set the variables */
+                pdu2->variables = NULL;
+                pdu2->command = SNMP_MSG_RESPONSE;
+                pdu2->errstat = 0;
+                pdu2->errindex = 0;
+
+                ourEngineID_len =
+                    snmpv3_get_engineID(ourEngineID, ourEngineID_len);
+                if (0 != ourEngineID_len) {
+
+                    DEBUGMSGTL(("snmpv3_contextid",
+                                "  responding with our engineID\n"));
+
+                    snmp_pdu_add_variable(pdu2,
+                                          snmpEngineIDoid, snmpEngineIDoid_len,
+                                          ASN_OCTET_STR,
+                                          ourEngineID, ourEngineID_len);
+                    
+                    /* send the response */
+                    if (0 == snmp_sess_send(sessp, pdu2)) {
+
+                        DEBUGMSGTL(("snmpv3_contextid",
+                                    "  sent it off!\n"));
+
+                        snmp_free_pdu(pdu2);
+                        
+                        snmp_log(LOG_ERR, "sending a response to the context engineID probe failed\n");
+                    }
+                } else {
+                    snmp_log(LOG_ERR, "failed to get our own engineID!\n");
+                }
+            } else {
+                snmp_log(LOG_WARNING,
+                         "received an odd context engineID probe\n");
+            }
+        }
+
         break;
     case SNMPERR_BAD_VERSION:
         ERROR_MSG("error parsing snmp message version");
