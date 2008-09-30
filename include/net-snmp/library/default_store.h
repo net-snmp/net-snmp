@@ -87,6 +87,7 @@ extern          "C" {
 #define NETSNMP_DS_LIB_DISABLE_PERSISTENT_LOAD  35 /* don't load persistent file */
 #define NETSNMP_DS_LIB_DISABLE_PERSISTENT_SAVE  36 /* don't save persistent file */
 #define NETSNMP_DS_LIB_APPEND_LOGFILES     37 /* append, don't overwrite, log files */
+#define NETSNMP_DS_LIB_NO_DISCOVERY        38 /* don't support RFC5343 contextEngineID discovery */
 
     /*
      * library integers 
