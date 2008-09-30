@@ -187,3 +187,11 @@ mib_modules.lo: mibgroup/mib_module_inits.h
 #
 # dependency for snmplib object. it's here because the headers listed
 # are relative to the agent directory.
+
+$(HELPERLIB): subdirs
+# the above is needed when building with '-j' argument - everything what needs 
+# helper lib must wait until 'subdirs' target is finished
+
+subdirs: agentlib
+# wait for agentlib before building 'subdirs' target
+
