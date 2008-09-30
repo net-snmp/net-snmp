@@ -1292,7 +1292,7 @@ main(int argc, char *argv[])
                  tm->tm_year + 1900, tm->tm_mon + 1, tm->tm_mday, tm->tm_hour,
                  tm->tm_min, tm->tm_sec, netsnmp_get_version());
     }
-    snmp_log(LOG_INFO, "Stopping snmptrapd");
+    snmp_log(LOG_INFO, "Stopping snmptrapd\n");
     
     snmptrapd_close_sessions(sess_list);
     snmp_shutdown("snmptrapd");
