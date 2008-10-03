@@ -2316,7 +2316,7 @@ cat >>confdefs.h <<_ACEOF
 #define NETSNMP_CONFIGURE_OPTIONS "$ac_configure_args"
 _ACEOF
 
-CONFIGURE_OPTIONS="\"$ac_configure_args"\"
+CONFIGURE_OPTIONS="\"$ac_configure_args\""
 
 
 ##
