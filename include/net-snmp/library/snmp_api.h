@@ -57,7 +57,9 @@ ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS
 SOFTWARE.
 ******************************************************************/
 
+#ifdef HAVE_SYS_POLL_H
 #include <sys/poll.h>
+#endif
 
 /** @typedef struct variable_list netsnmp_variable_list
     * Typedefs the variable_list struct into netsnmp_variable_list */
