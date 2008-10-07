@@ -2,4 +2,4 @@
 # This is rpmbuild helper script used to filter out perl(Tk) and 
 # perl(Term::ReadKey) dependencies.
 
-/usr/lib/rpm/find-requires | grep -v "perl(Tk)\|perl(Term::ReadKey)
+/usr/lib/rpm/find-requires | grep -v "perl(Tk)\|perl(Term::ReadKey)"
