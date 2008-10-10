@@ -5,44 +5,6 @@
 #########################################
 
 ##
-#   Operating-System characteristics
-##
-
-#       Check ps args
-#
-AC_CACHE_CHECK([for correct flags to ps],
-     ac_cv_ps_flags,
-     [
-if test "`($PSPROG -e 2>&1) | $EGREP ' (ps) *$' | awk '{print $NF}'`" = "ps" ; then
-    ac_cv_ps_flags="-e"
-elif test "`($PSPROG -el 2>&1) | $EGREP ' (ps) *$' | awk '{print $NF}'`" = "ps" ; then
-    ac_cv_ps_flags="-el"
-elif test "`($PSPROG acx 2>&1) | $EGREP ' (ps) *$' | awk '{print $NF}'`" = "ps" ; then
-    ac_cv_ps_flags="acx"
-elif test "`($PSPROG -acx 2>&1) | $EGREP ' (ps) *$' | awk '{print $NF}'`" = "ps" ; then
-    ac_cv_ps_flags="-acx"
-elif test "`($PSPROG -o pid,tt,state,time,ucomm 2>&1) | $EGREP ' ps *$' | awk '{print $NF}'`" = "ps" ; then
-    ac_cv_ps_flags="-o pid,tt,state,time,ucomm"
-elif test "`($PSPROG ax 2>&1) | $EGREP ' (ps) *$' | awk '{print $NF}'`" = "ps" ; then
-    ac_cv_ps_flags="ax"
-elif test "x$PARTIALTARGETOS" = "xcygwin"; then
-    ac_cv_ps_flags="-e"
-elif test "x$PARTIALTARGETOS" = "xmingw32" -o "x$PARTIALTARGETOS" = "xmingw32msvc"; then 
-    ac_cv_ps_flags="-e"
-else
-    AC_MSG_WARN([Unable to determine valid ps flags...  defaulting...])
-    ac_cv_ps_flags="-acx"
-fi
-])
-
-PSCMD="$PSPROG $ac_cv_ps_flags"
-AC_SUBST(PSCMD)
-AC_DEFINE_UNQUOTED(PSCMD, "$PSPROG $ac_cv_ps_flags",
-  [Command to generate ps output, the final column must be the process
-   name withOUT arguments])
-
-
-##
 #   Compilation characteristics
 ##
 

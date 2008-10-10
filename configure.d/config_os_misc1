@@ -9,6 +9,7 @@
 ##
 
 #       Dynamic modules require Position-Independent Code
+#	    LIB_CFLAGS/DLLIBS: used in agent Makefile only
 #
 AC_MSG_CHECKING([whether we have to build PIC code])
 echo " $module_list " | $GREP " ucd-snmp/dlmod " >/dev/null
@@ -20,91 +21,3 @@ else
     AC_MSG_RESULT(no)
 fi
 
-
-##
-#   Operating-System characteristics
-##
-
-#       Kernel Location
-#
-AC_CACHE_CHECK([for location of system kernel],
-    ac_cv_KERNEL_LOC,
-   [ac_cv_KERNEL_LOC="unknown"
-    #
-    #   First determine if test expects a -f or a -c (character device (SYSV))
-    #
-    if test -c /dev/null; then
-        CFLAG="-c"
-    elif test -f /dev/null; then
-        CFLAG="-f"
-    else
-        # fall back
-        CFLAG="-f"
-    fi
-    for i in /vmunix /hp-ux /stand/vmunix /dev/ksyms /kernel/unix /kernel/genunix /netbsd /unix /kernel /bsd /mach_kernel /boot/kernel/kernel
-    do
-        if test -f $i -o $CFLAG $i; then
-            ac_cv_KERNEL_LOC="$i"
-            break;
-        fi
-    done
-    if test $i = "unknown"; then
-        AC_MSG_WARN([Can't find system kernel...  Setting to /vmunix])
-        ac_cv_KERNEL_LOC="/vmunix"
-    fi
-])
-AC_DEFINE_UNQUOTED(KERNEL_LOC,"$ac_cv_KERNEL_LOC", [location of UNIX kernel])
-
-
-#       Mount table Location
-#
-AC_CACHE_CHECK([for mount table location],
-    ac_cv_ETC_MNTTAB,
-   [ac_cv_ETC_MNTTAB="unknown"
-    AC_ARG_WITH(mnttab,
-        [  --with-mnttab=\"/etc/mnttab\"  Mount table location.
-                                 The default is to autodetect this.],
-	[ac_cv_ETC_MNTTAB="$with_mnttab"])
-    if test "$ac_cv_ETC_MNTTAB" = "unknown"; then
-        for i in /etc/mnttab /etc/mtab /etc/filesystems
-        do
-            if test -f $i; then
-                ac_cv_ETC_MNTTAB="$i"
-                break;
-            fi
-        done
-    fi
-])
-AC_DEFINE_UNQUOTED(ETC_MNTTAB,"$ac_cv_ETC_MNTTAB",
-    [location of mount table list])
-
-
-#       Swap device Location
-#           (/dev/dmem or /dev/drum)
-#
-AC_CACHE_CHECK(for location of swap device,ac_cv_DMEM_LOC,
-    [
-    #
-    #   First determine if test expects a -f or a -c (character device (SYSV))
-    #
-    if test -f /dev/kmem; then
-        CTEST="test -f"
-    elif test -c /dev/kmem; then
-        CTEST="test -c"
-    else
-        # fall back
-        CTEST="test -f"
-    fi
-
-    if $CTEST /dev/dmem; then
-        ac_cv_DMEM_LOC="/dev/dmem"
-    elif $CTEST /dev/drum; then
-        ac_cv_DMEM_LOC="/dev/drum"
-    else
-        ac_cv_DMEM_LOC="none"
-    fi
-])
-if test "x$ac_cv_DMEM_LOC" != "xnone"; then
-  AC_DEFINE_UNQUOTED(DMEM_LOC,"$ac_cv_DMEM_LOC",
-    [location of swap device (ok if not found)])
-fi

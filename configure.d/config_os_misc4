@@ -1,14 +1,153 @@
 #########################################
 ##
-# Miscellaneous checks
+# Miscellaneous Operating-System characteristics
 ##
 #########################################
+
+
+#	Determine how to test for character devices
+#	[We assume that /dev/null does actually exist!]
+#
+if test -c /dev/null; then
+    CDEV_TEST_FLAG="-c"
+elif test -f /dev/null; then
+    CDEV_TEST_FLAG="-f"
+else
+    AC_MSG_WARN([Can't reliably detect character devices])
+    # Is it actually sensible to fall back on "test -f" ?
+    CDEV_TEST_FLAG="-f"
+fi
+
+#       Kernel Location
+#	    used in library/agent
+#
+AC_CACHE_CHECK([for location of system kernel],
+    ac_cv_KERNEL_LOC,
+   [ac_cv_KERNEL_LOC="unknown"
+    for i in /vmunix /hp-ux /stand/vmunix /dev/ksyms /kernel/unix /kernel/genunix /netbsd /unix /kernel /bsd /mach_kernel /boot/kernel/kernel
+    do
+        if test $CDEV_TEST_FLAG $i; then
+            ac_cv_KERNEL_LOC="$i"
+            break;
+        fi
+    done
+    #
+    # In principle, this test is meant to provide a default path to the kernel
+    # In practice, the test is broken and the kernel path is set to "unknown"
+    #
+    # Note that on certain systems (e.g. some Linux distributions),
+    #    it is impossible to predict the name of the kernel,
+    #    particularly if it includes the kernel version, architecture, etc
+    #
+    # Since this default will never actually be used, then don't try to set it
+    #
+    if test $i = "unknown"; then
+        AC_MSG_WARN([Can't find system kernel... hopefully this won't be needed!])
+    fi
+])
+AC_DEFINE_UNQUOTED(KERNEL_LOC,"$ac_cv_KERNEL_LOC", [location of UNIX kernel])
+
+
+#       Swap device Location
+#           (/dev/dmem or /dev/drum)
+#	    used in agent only
+#
+AC_CACHE_CHECK([for location of swap device],
+    ac_cv_DMEM_LOC,
+   [if test $CDEV_TEST_FLAG /dev/dmem; then
+        ac_cv_DMEM_LOC="/dev/dmem"
+    elif test $CDEV_TEST_FLAG /dev/drum; then
+        ac_cv_DMEM_LOC="/dev/drum"
+    else
+        ac_cv_DMEM_LOC="none"
+    fi
+])
+#
+#  Note that it's OK if this device is not found
+#
+if test "x$ac_cv_DMEM_LOC" != "xnone"; then
+    AC_DEFINE_UNQUOTED(DMEM_LOC,"$ac_cv_DMEM_LOC", [location of swap device])
+fi
+
+
+#       Mount table Location
+#	    used in agent only
+#
+AC_CACHE_CHECK([for mount table location],
+    ac_cv_ETC_MNTTAB,
+   [ac_cv_ETC_MNTTAB="unknown"
+    AC_ARG_WITH(mnttab,
+        [  --with-mnttab=\"/etc/mnttab\"  Mount table location.
+                                 The default is to autodetect this.],
+	[ac_cv_ETC_MNTTAB="$with_mnttab"])
+    if test "$ac_cv_ETC_MNTTAB" = "unknown"; then
+        for i in /etc/mnttab /etc/mtab /etc/filesystems
+        do
+            if test -f $i; then
+                ac_cv_ETC_MNTTAB="$i"
+                break;
+            fi
+        done
+    fi
+])
+AC_DEFINE_UNQUOTED(ETC_MNTTAB,"$ac_cv_ETC_MNTTAB", [location of mount table list])
+
+
+#       Printing
+#	    used in agent only
+#
+AC_PATH_PROG([LPSTAT_PATH],lpstat)
+if test x$LPSTAT_PATH != x; then
+    AC_DEFINE_UNQUOTED(LPSTAT_PATH, "$LPSTAT_PATH",
+	[Path to the lpstat command])
+    AC_DEFINE(HAVE_LPSTAT, 1, [Set if the lpstat command is available])
+fi
+if test -r /etc/printcap; then
+    AC_DEFINE(HAVE_PRINTCAP, 1, [Set if /etc/printcap exists])
+fi
+
+
+#       Check ps args
+#	    used in agent only
+#
+AC_CACHE_CHECK([for correct flags to ps],
+     ac_cv_ps_flags,
+     [
+if test "`($PSPROG -e 2>&1) | $EGREP ' (ps) *$' | awk '{print $NF}'`" = "ps" ; then
+    ac_cv_ps_flags="-e"
+elif test "`($PSPROG -el 2>&1) | $EGREP ' (ps) *$' | awk '{print $NF}'`" = "ps" ; then
+    ac_cv_ps_flags="-el"
+elif test "`($PSPROG acx 2>&1) | $EGREP ' (ps) *$' | awk '{print $NF}'`" = "ps" ; then
+    ac_cv_ps_flags="acx"
+elif test "`($PSPROG -acx 2>&1) | $EGREP ' (ps) *$' | awk '{print $NF}'`" = "ps" ; then
+    ac_cv_ps_flags="-acx"
+elif test "`($PSPROG -o pid,tt,state,time,ucomm 2>&1) | $EGREP ' ps *$' | awk '{print $NF}'`" = "ps" ; then
+    ac_cv_ps_flags="-o pid,tt,state,time,ucomm"
+elif test "`($PSPROG ax 2>&1) | $EGREP ' (ps) *$' | awk '{print $NF}'`" = "ps" ; then
+    ac_cv_ps_flags="ax"
+elif test "x$PARTIALTARGETOS" = "xcygwin"; then
+    ac_cv_ps_flags="-e"
+elif test "x$PARTIALTARGETOS" = "xmingw32" -o "x$PARTIALTARGETOS" = "xmingw32msvc"; then 
+    ac_cv_ps_flags="-e"
+else
+    AC_MSG_WARN([Unable to determine valid ps flags...  defaulting...])
+    ac_cv_ps_flags="-acx"
+fi
+])
+
+PSCMD="$PSPROG $ac_cv_ps_flags"
+AC_SUBST(PSCMD)
+AC_DEFINE_UNQUOTED(PSCMD, "$PSPROG $ac_cv_ps_flags",
+  [Command to generate ps output, the final column must be the process
+   name withOUT arguments])
+
 
 ##
 #   System/Compilation-related
 ##
 
 #       Check whether sysctl() is usable
+#	    used in library/agent
 #
 if test $cross_compiling = yes; then
     AC_MSG_WARN([Can't check sysctl, manually define NETSNMP_CAN_USE_SYSCTL if platform support available])
@@ -67,6 +206,8 @@ fi
 #       variable 'hz' defined and with a suitable value,
 #       whenever we want to  use one one of these 'constants'.
 #
+# 	    used in agent only
+#
 AC_CACHE_CHECK([whether TCP timers depend on \`hz'],
     ac_cv_TCPTV_NEEDS_HZ,
    [AC_EGREP_CPP(hz,
@@ -85,6 +226,7 @@ fi
 
 
 #   Check whether IP Route table is cached              (Solaris)
+#	    used in agent only
 #
 case $target_os in
   solaris*)
