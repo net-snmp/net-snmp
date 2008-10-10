@@ -37,7 +37,7 @@ AC_CHECK_FUNCS([fork            gai_strerror                   \
               ])
 
 #  Agent:
-AC_CHECK_FUNCS([execv           gai_strerror                   \
+AC_CHECK_FUNCS([cgetnext        execv         gai_strerror     \
                 getfsstat       getgrnam      gethostname      \
                                 getloadavg                     \
                 getpid          getpwnam      getvfsstat       \
