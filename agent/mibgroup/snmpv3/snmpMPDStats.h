@@ -12,6 +12,7 @@
  */
 
 config_require(util_funcs/header_generic)
+config_exclude(snmpv3/snmpMPDStats_5_5)
 config_add_mib(SNMP-MPD-MIB)
 
     /*
