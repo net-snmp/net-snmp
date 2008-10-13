@@ -464,7 +464,7 @@ setPassPersist(int action,
                 buf[ sizeof(buf)-1 ] = 0;
                 break;
             case ASN_OBJECT_ID:
-                sprint_mib_oid(buf2, (oid *) var_val, var_val_len);
+                sprint_mib_oid(buf2, (oid *) var_val, var_val_len/sizeof(oid));
                 snprintf(buf, sizeof(buf), "objectid \"%s\"\n", buf2);
                 buf[ sizeof(buf)-1 ] = 0;
                 break;
