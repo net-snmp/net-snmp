@@ -211,7 +211,7 @@ int CONTAINER_INSERT_HELPER(netsnmp_container* x, const void* k)
     if(x) {
         int rc = x->insert(x,k);
         if(rc)
-            snmp_log(LOG_ERR,"error on subcontainer insert (%d)\n", rc);
+            snmp_log(LOG_DEBUG,"error on subcontainer insert (%d)\n", rc);
         else {
             rc = CONTAINER_INSERT_HELPER(x->next, k);
             if(rc)
