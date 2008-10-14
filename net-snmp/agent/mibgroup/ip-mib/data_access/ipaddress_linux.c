@@ -325,7 +325,11 @@ _load_v6(netsnmp_container *container, int idx_offset)
         /*
          * add entry to container
          */
-        CONTAINER_INSERT(container, entry);
+        if (CONTAINER_INSERT(container, entry) < 0) {
+            DEBUGMSGTL(("access:ipaddress:container","error with ipaddress_entry: insert into container failed.\n"));
+            netsnmp_access_ipaddress_entry_free(entry);
+            continue;
+        }
     }
 
     fclose(in);
