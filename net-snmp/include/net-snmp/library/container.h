@@ -358,7 +358,7 @@ extern "C" {
         if(x) {
             int rc = x->insert(x,k);
             if(rc)
-                snmp_log(LOG_ERR,"error on subcontainer '%s' insert (%d)\n",
+                snmp_log(LOG_DEBUG,"error on subcontainer '%s' insert (%d)\n",
                          x->container_name ? x->container_name : "", rc);
             else {
                 rc = CONTAINER_INSERT_HELPER(x->next, k);
