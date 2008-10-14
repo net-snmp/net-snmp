@@ -65,6 +65,12 @@
 #define INADDR_NONE	-1
 #endif
 
+#ifdef  MSG_DONTWAIT
+#define NETSNMP_DONTWAIT MSG_DONTWAIT
+#else
+#define NETSNMP_DONTWAIT 0
+#endif
+
 static netsnmp_tdomain udpDomain;
 
 typedef struct netsnmp_udp_addr_pair_s {
@@ -137,7 +143,7 @@ static int netsnmp_udp_recvfrom(int s, char *buf, int len, struct sockaddr *from
     msg.msg_control = &cmsg;
     msg.msg_controllen = sizeof(cmsg);
 
-    r = recvmsg(s, &msg, 0);
+    r = recvmsg(s, &msg, NETSNMP_DONTWAIT);
 
     if (r == -1) {
         return -1;
@@ -215,7 +221,7 @@ netsnmp_udp_recv(netsnmp_transport *t, void *buf, int size,
 #if defined(linux) && defined(IP_PKTINFO)
             rc = netsnmp_udp_recvfrom(t->sock, buf, size, from, &fromlen, &(addr_pair->local_addr));
 #else
-            rc = recvfrom(t->sock, buf, size, 0, from, &fromlen);
+            rc = recvfrom(t->sock, buf, size, NETSNMP_DONTWAIT, from, &fromlen);
 #endif /* linux && IP_PKTINFO */
 	    if (rc < 0 && errno != EINTR) {
 		break;
