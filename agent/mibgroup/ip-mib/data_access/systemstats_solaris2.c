@@ -31,6 +31,9 @@ netsnmp_access_systemstats_container_arch_load(netsnmp_container* container,
     if (container == NULL)
         return (-1);
 
+    if (load_flags & NETSNMP_ACCESS_SYSTEMSTATS_LOAD_IFTABLE)
+	return 0; /* we do not support ipIfStatsTable yet */
+
     if ((rc = _systemstats(MIB_IP_TRAFFIC_STATS, container, load_flags)) < 0)
         return (rc);
 #if defined(NETSNMP_ENABLE_IPV6)
@@ -123,8 +126,10 @@ _add_ipstats(mib2_ipIfStatsEntry_t *o1, mib2_ipIfStatsEntry_t *o2)
 static int 
 _insert_entry(netsnmp_container *container, mib2_ipIfStatsEntry_t *ipe)
 {
+    int i;
+    
     netsnmp_systemstats_entry *ep =
-        netsnmp_access_systemstats_entry_create(ipe->ipIfStatsIPVersion); 
+        netsnmp_access_systemstats_entry_create(ipe->ipIfStatsIPVersion, 0); 
 
     DEBUGMSGTL(("access:systemstats:arch", "insert entry for v%d\n",
                 ipe->ipIfStatsIPVersion)); 
@@ -159,15 +164,20 @@ _insert_entry(netsnmp_container *container, mib2_ipIfStatsEntry_t *ipe)
         ipe->ipIfStatsHCOutRequests & 0xffffffff;
     ep->stats.HCOutRequests.high = 
         ipe->ipIfStatsHCOutRequests >> 32; 
-    ep->stats.OutNoRoutes = ipe->ipIfStatsOutNoRoutes; 
+    ep->stats.HCOutNoRoutes.low = ipe->ipIfStatsOutNoRoutes & 0xffffffff; 
+    ep->stats.HCOutNoRoutes.high = 0;
     ep->stats.HCOutForwDatagrams.low = 
         ipe->ipIfStatsHCOutForwDatagrams & 0xffffffff;
     ep->stats.HCOutForwDatagrams.high = 
         ipe->ipIfStatsHCOutForwDatagrams >> 32;
-    ep->stats.OutDiscards = ipe->ipIfStatsOutDiscards; 
-    ep->stats.OutFragOKs = ipe->ipIfStatsOutFragOKs; 
-    ep->stats.OutFragFails = ipe->ipIfStatsOutFragFails; 
-    ep->stats.OutFragCreates = ipe->ipIfStatsOutFragCreates; 
+    ep->stats.HCOutDiscards.low = ipe->ipIfStatsOutDiscards & 0xffffffff;
+    ep->stats.HCOutDiscards.high = 0; 
+    ep->stats.HCOutFragOKs.low = ipe->ipIfStatsOutFragOKs & 0xffffffff;
+    ep->stats.HCOutFragOKs.high = 0;
+    ep->stats.HCOutFragFails.low = ipe->ipIfStatsOutFragFails & 0xffffffff; 
+    ep->stats.HCOutFragFails.high = 0;
+    ep->stats.HCOutFragCreates.low = ipe->ipIfStatsOutFragCreates & 0xffffffff;
+    ep->stats.HCOutFragCreates.high = 0;
     ep->stats.HCOutTransmits.low = 
         ipe->ipIfStatsHCOutTransmits & 0xffffffff;
     ep->stats.HCOutTransmits.high = ipe->ipIfStatsHCOutTransmits >> 32;
@@ -190,6 +200,9 @@ _insert_entry(netsnmp_container *container, mib2_ipIfStatsEntry_t *ipe)
         ipe->ipIfStatsHCOutBcastPkts & 0xffffffff;
     ep->stats.HCOutBcastPkts.high = ipe->ipIfStatsHCOutBcastPkts >> 32;
 
+    for (i=0; i<=IPSYSTEMSTATSTABLE_LAST; i++)
+        ep->stats.columnAvail[i] = 1;
+    
     if (CONTAINER_INSERT(container, ep) < 0) {
         DEBUGMSGT(("access:systemstats:arch", "unable to insert entry")); 
         netsnmp_access_systemstats_entry_free(ep); 
