@@ -22,7 +22,11 @@ extern          "C" {
 typedef struct netsnmp_systemstats_s {
 
    netsnmp_index oid_index;   /* MUST BE FIRST!! for container use */
-   oid           ns_ip_version;
+   /* 
+    * Index of the table
+    * First entry = ip version
+    * Second entry = interface index (0 for ipSystemStatsTable */
+   oid           index[2];           
 
    int       flags; /* for net-snmp use */
 
@@ -49,13 +53,15 @@ netsnmp_container * netsnmp_access_systemstats_container_init(u_int init_flags);
 #define NETSNMP_ACCESS_SYSTEMSTATS_INIT_NOFLAGS               0x0000
 #define NETSNMP_ACCESS_SYSTEMSTATS_INIT_ADDL_IDX_BY_ADDR      0x0001
 
-/*
- * load and free
+/**
+ * Load container. If the NETSNMP_ACCESS_SYSTEMSTATS_LOAD_IFTABLE is set
+ * the ipIfSystemStats table is loaded, else ipSystemStatsTable is loaded.
  */
 netsnmp_container*
 netsnmp_access_systemstats_container_load(netsnmp_container* container,
                                     u_int load_flags);
 #define NETSNMP_ACCESS_SYSTEMSTATS_LOAD_NOFLAGS               0x0000
+#define NETSNMP_ACCESS_SYSTEMSTATS_LOAD_IFTABLE               0x0001 
 
 void netsnmp_access_systemstats_container_free(netsnmp_container *container,
                                          u_int free_flags);
@@ -68,7 +74,7 @@ void netsnmp_access_systemstats_container_free(netsnmp_container *container,
  * create/free an entry
  */
 netsnmp_systemstats_entry *
-netsnmp_access_systemstats_entry_create(int version);
+netsnmp_access_systemstats_entry_create(int version, int if_index);
 
 void netsnmp_access_systemstats_entry_free(netsnmp_systemstats_entry * entry);
 

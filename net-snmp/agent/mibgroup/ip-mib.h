@@ -8,5 +8,6 @@ config_require(ip-mib/ipSystemStatsTable);
 config_require(ip-mib/ip_scalars);
 #ifdef linux
 config_require(ip-mib/ipv6ScopeZoneIndexTable);
+config_require(ip-mib/ipIfStatsTable);
 #endif
 config_add_mib(IP-MIB)

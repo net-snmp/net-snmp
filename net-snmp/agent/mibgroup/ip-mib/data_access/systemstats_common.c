@@ -1,5 +1,5 @@
 /*
- *  Systemstats MIB architecture support
+ *  ipSystemStatsTable and ipIfStatsTable MIB architecture support
  *
  * $Id$
  */
@@ -163,7 +163,7 @@ netsnmp_access_systemstats_entry_get_by_index(netsnmp_container *container, oid 
 /**
  */
 netsnmp_systemstats_entry *
-netsnmp_access_systemstats_entry_create(int version)
+netsnmp_access_systemstats_entry_create(int version, int if_index)
 {
     netsnmp_systemstats_entry *entry =
         SNMP_MALLOC_TYPEDEF(netsnmp_systemstats_entry);
@@ -173,10 +173,10 @@ netsnmp_access_systemstats_entry_create(int version)
     if(NULL == entry)
         return NULL;
 
-    entry->ns_ip_version = version;
-
-    entry->oid_index.len = 1;
-    entry->oid_index.oids = (oid *) & entry->ns_ip_version;
+    entry->oid_index.len = 2;
+    entry->oid_index.oids = entry->index;
+    entry->index[0] = version;
+    entry->index[1] = if_index;
 
     return entry;
 }
@@ -217,6 +217,64 @@ _entry_release(netsnmp_systemstats_entry * entry, void *context)
     netsnmp_access_systemstats_entry_free(entry);
 }
 
+/*
+ * Calculates the entries, which are not provided by OS, but can be 
+ * computed from the others.
+ */
+static void
+_calculate_entries(netsnmp_systemstats_entry * entry)
+{
+    U64 calc_val;
+    
+    /*
+     * HCInForwDatagrams = HCInNoRoutes + HCOutForwDatagrams
+     */
+    if (!entry->stats.columnAvail[IPSYSTEMSTATSTABLE_HCINFORWDATAGRAMS]
+        && entry->stats.columnAvail[IPSYSTEMSTATSTABLE_HCOUTFORWDATAGRAMS]
+        && entry->stats.columnAvail[IPSYSTEMSTATSTABLE_HCINNOROUTES]) {
+        
+        entry->stats.HCInForwDatagrams = entry->stats.HCInNoRoutes;
+        u64Incr(&entry->stats.HCInForwDatagrams, &entry->stats.HCOutForwDatagrams);
+        entry->stats.columnAvail[IPSYSTEMSTATSTABLE_HCINFORWDATAGRAMS] = 1;
+    }
+
+    /*
+     * HCOutFragReqds = HCOutFragOKs + HCOutFragFails
+     */
+    if (!entry->stats.columnAvail[IPSYSTEMSTATSTABLE_HCOUTFRAGREQDS]
+        && entry->stats.columnAvail[IPSYSTEMSTATSTABLE_HCOUTFRAGOKS]
+           && entry->stats.columnAvail[IPSYSTEMSTATSTABLE_HCOUTFRAGFAILS]) {
+        
+        entry->stats.HCOutFragReqds = entry->stats.HCOutFragOKs;
+        u64Incr(&entry->stats.HCOutFragReqds, &entry->stats.HCOutFragFails);
+        entry->stats.columnAvail[IPSYSTEMSTATSTABLE_HCOUTFRAGREQDS] = 1;
+    }
+    
+    /*
+     * HCOutTransmits = HCOutRequests  + HCOutForwDatagrams + HCOutFragCreates  
+     *                  - HCOutFragReqds - HCOutNoRoutes  - HCOutDiscards
+     */
+    if (!entry->stats.columnAvail[IPSYSTEMSTATSTABLE_HCOUTTRANSMITS]
+        && entry->stats.columnAvail[IPSYSTEMSTATSTABLE_HCOUTREQUESTS]
+        && entry->stats.columnAvail[IPSYSTEMSTATSTABLE_HCOUTFORWDATAGRAMS]
+           && entry->stats.columnAvail[IPSYSTEMSTATSTABLE_HCOUTFRAGREQDS]
+           && entry->stats.columnAvail[IPSYSTEMSTATSTABLE_HCOUTNOROUTES]
+           && entry->stats.columnAvail[IPSYSTEMSTATSTABLE_HCOUTFRAGCREATES]
+        && entry->stats.columnAvail[IPSYSTEMSTATSTABLE_HCOUTDISCARDS]) {
+
+        U64 tmp, tmp2, tmp3;
+        tmp = entry->stats.HCOutRequests;
+        u64Incr(&tmp, &entry->stats.HCOutForwDatagrams);
+        u64Incr(&tmp, &entry->stats.HCOutFragCreates);
+        
+        u64Subtract(&tmp, &entry->stats.HCOutFragReqds, &tmp2);
+        u64Subtract(&tmp2, &entry->stats.HCOutNoRoutes, &tmp3);
+        u64Subtract(&tmp3, &entry->stats.HCOutDiscards, &entry->stats.HCOutTransmits);
+                
+        entry->stats.columnAvail[IPSYSTEMSTATSTABLE_HCOUTTRANSMITS] = 1;
+    }
+}
+
 /**
  * update entry stats (checking for counter wrap)
  *
@@ -233,7 +291,8 @@ netsnmp_access_systemstats_entry_update_stats(netsnmp_systemstats_entry * prev_v
      * sanity checks
      */
     if ((NULL == prev_vals) || (NULL == new_vals) ||
-        (prev_vals->ns_ip_version != new_vals->ns_ip_version))
+        (prev_vals->index[0] != new_vals->index[0])
+        || (prev_vals->index[1] != new_vals->index[1]))
         return -1;
 
     /*
@@ -241,6 +300,7 @@ netsnmp_access_systemstats_entry_update_stats(netsnmp_systemstats_entry * prev_v
      */
     if (0 == need_wrap_check) {
         memcpy(&prev_vals->stats, &new_vals->stats, sizeof(new_vals->stats));
+        _calculate_entries(prev_vals);
         return 0;
     }
 
@@ -257,8 +317,8 @@ netsnmp_access_systemstats_entry_update_stats(netsnmp_systemstats_entry * prev_v
         /*
          * update straight 32 bit counters
          */
+        memcpy(&prev_vals->stats.columnAvail[0], &new_vals->stats.columnAvail[0], sizeof(new_vals->stats.columnAvail));
         prev_vals->stats.InHdrErrors = new_vals->stats.InHdrErrors;
-        prev_vals->stats.InNoRoutes = new_vals->stats.InNoRoutes;
         prev_vals->stats.InAddrErrors = new_vals->stats.InAddrErrors;
         prev_vals->stats.InUnknownProtos = new_vals->stats.InUnknownProtos;
         prev_vals->stats.InTruncatedPkts = new_vals->stats.InTruncatedPkts;
@@ -266,16 +326,38 @@ netsnmp_access_systemstats_entry_update_stats(netsnmp_systemstats_entry * prev_v
         prev_vals->stats.ReasmOKs = new_vals->stats.ReasmOKs;
         prev_vals->stats.ReasmFails = new_vals->stats.ReasmFails;
         prev_vals->stats.InDiscards = new_vals->stats.InDiscards;
-        prev_vals->stats.OutNoRoutes = new_vals->stats.OutNoRoutes;
-        prev_vals->stats.OutDiscards = new_vals->stats.OutDiscards;
-        prev_vals->stats.OutFragReqds = new_vals->stats.OutFragReqds;
-        prev_vals->stats.OutFragOKs = new_vals->stats.OutFragOKs;
-        prev_vals->stats.OutFragFails = new_vals->stats.OutFragFails;
-        prev_vals->stats.OutFragCreates = new_vals->stats.OutFragCreates;
 
         /*
          * update 64bit counters
          */
+        netsnmp_c64_check32_and_update(&prev_vals->stats.HCInNoRoutes,
+                                       &new_vals->stats.HCInNoRoutes,
+                                       &prev_vals->old_stats->HCInNoRoutes,
+                                       &need_wrap_check);
+        netsnmp_c64_check32_and_update(&prev_vals->stats.HCOutNoRoutes,
+                                       &new_vals->stats.HCOutNoRoutes,
+                                       &prev_vals->old_stats->HCOutNoRoutes,
+                                       &need_wrap_check);
+        netsnmp_c64_check32_and_update(&prev_vals->stats.HCOutDiscards,
+                                       &new_vals->stats.HCOutDiscards,
+                                       &prev_vals->old_stats->HCOutDiscards,
+                                       &need_wrap_check);
+        netsnmp_c64_check32_and_update(&prev_vals->stats.HCOutFragReqds,
+                                       &new_vals->stats.HCOutFragReqds,
+                                       &prev_vals->old_stats->HCOutFragReqds,
+                                       &need_wrap_check);
+        netsnmp_c64_check32_and_update(&prev_vals->stats.HCOutFragOKs,
+                                       &new_vals->stats.HCOutFragOKs,
+                                       &prev_vals->old_stats->HCOutFragOKs,
+                                       &need_wrap_check);
+        netsnmp_c64_check32_and_update(&prev_vals->stats.HCOutFragFails,
+                                       &new_vals->stats.HCOutFragFails,
+                                       &prev_vals->old_stats->HCOutFragFails,
+                                       &need_wrap_check);
+        netsnmp_c64_check32_and_update(&prev_vals->stats.HCOutFragCreates,
+                                       &new_vals->stats.HCOutFragCreates,
+                                       &prev_vals->old_stats->HCOutFragCreates,
+                                       &need_wrap_check);
         netsnmp_c64_check32_and_update(&prev_vals->stats.HCInReceives,
                                        &new_vals->stats.HCInReceives,
                                        &prev_vals->old_stats->HCInReceives,
@@ -333,7 +415,7 @@ netsnmp_access_systemstats_entry_update_stats(netsnmp_systemstats_entry * prev_v
                                        &prev_vals->old_stats->HCOutBcastPkts,
                                        &need_wrap_check);
     }
-    
+
     /*
      * if we've decided we no longer need to check wraps, free old stats
      */
@@ -346,7 +428,9 @@ netsnmp_access_systemstats_entry_update_stats(netsnmp_systemstats_entry * prev_v
      * careful - old_stats is a pointer to stats...
      */
     memcpy(prev_vals->old_stats, &new_vals->stats, sizeof(new_vals->stats));
-    
+
+    _calculate_entries(prev_vals);
+
     return 0;
 }
 
@@ -367,7 +451,8 @@ netsnmp_access_systemstats_entry_update(netsnmp_systemstats_entry * lhs,
     DEBUGMSGTL(("access:systemstats", "copy\n"));
     
     if ((NULL == lhs) || (NULL == rhs) ||
-        (lhs->ns_ip_version != rhs->ns_ip_version))
+        (lhs->index[0] != rhs->index[0])
+        || (lhs->index[1] != rhs->index[1]))
         return -1;
 
     /*
