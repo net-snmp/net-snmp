@@ -1371,7 +1371,7 @@ snmpv3_engineID_probe(struct session_list *slp,
         if (NULL != sptr && NULL != sptr->probe_engineid) {
             DEBUGMSGTL(("snmp_api", "probing for engineID using security model callback...\n"));
             /* security model specific mechanism of determining engineID */
-            int status = (*sptr->probe_engineid) (slp, session);
+            status = (*sptr->probe_engineid) (slp, session);
             if (status)
                 return 0;
             return 1; /* success! */
