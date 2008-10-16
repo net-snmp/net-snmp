@@ -49,10 +49,10 @@ typedef __u8 u8;           /* ditto */
 #define SIOCGMIIREG 0x8948
 #endif
 
-unsigned int
+unsigned long long
 netsnmp_linux_interface_get_if_speed(int fd, const char *name);
 #ifdef HAVE_LINUX_ETHTOOL_H
-unsigned int
+unsigned long long
 netsnmp_linux_interface_get_if_speed_mii(int fd, const char *name);
 #endif
 
@@ -635,9 +635,14 @@ netsnmp_arch_interface_container_load(netsnmp_container* container,
                 entry->type = IANAIFTYPE_OTHER;
         }
 
-        if (IANAIFTYPE_ETHERNETCSMACD == entry->type)
-            entry->speed =
-                netsnmp_linux_interface_get_if_speed(fd, entry->name);
+        if (IANAIFTYPE_ETHERNETCSMACD == entry->type) {
+            unsigned long long speed = netsnmp_linux_interface_get_if_speed(fd, entry->name);
+            if (speed > 0xffffffffL) {
+                entry->speed = 0xffffffff;
+            } else
+                entry->speed = speed;
+            entry->speed_high = speed / 1000000LL;
+        }
 #ifdef APPLIED_PATCH_836390   /* xxx-rks ifspeed fixes */
         else if (IANAIFTYPE_PROPVIRTUAL == entry->type)
             entry->speed = _get_bonded_if_speed(entry);
@@ -676,8 +681,6 @@ netsnmp_arch_interface_container_load(netsnmp_container* container,
         entry->reasm_max = 65535;
 
         netsnmp_access_interface_entry_overrides(entry);
-
-        entry->speed_high = entry->speed / 1000000;
 
         if (! (load_flags & NETSNMP_ACCESS_INTERFACE_LOAD_NO_STATS))
             _parse_stats(entry, stats, scan_expected);
@@ -724,7 +727,7 @@ netsnmp_arch_set_admin_status(netsnmp_interface_entry * entry,
 /**
  * Determines network interface speed from ETHTOOL_GSET
  */
-unsigned int
+unsigned long long
 netsnmp_linux_interface_get_if_speed(int fd, const char *name)
 {
     struct ifreq ifr;
@@ -743,7 +746,8 @@ netsnmp_linux_interface_get_if_speed(int fd, const char *name)
     }
     
     if (edata.speed != SPEED_10 && edata.speed != SPEED_100 &&
-        edata.speed != SPEED_1000) {
+        edata.speed != SPEED_1000 && edata.speed != SPEED_10000 &&
+        edata.speed != SPEED_2500) {
         DEBUGMSGTL(("mibII/interfaces", "fallback to mii for %s\n",
                     ifr.ifr_name));
         /* try MII */
@@ -753,21 +757,21 @@ netsnmp_linux_interface_get_if_speed(int fd, const char *name)
     /* return in bps */
     DEBUGMSGTL(("mibII/interfaces", "ETHTOOL_GSET on %s speed = %d\n",
                 ifr.ifr_name, edata.speed));
-    return edata.speed*1000*1000;
+    return edata.speed*1000LL*1000LL;
 }
 #endif
  
 /**
  * Determines network interface speed from MII
  */
-unsigned int
+unsigned long long
 #ifdef HAVE_LINUX_ETHTOOL_H
 netsnmp_linux_interface_get_if_speed_mii(int fd, const char *name)
 #else
 netsnmp_linux_interface_get_if_speed(int fd, const char *name)
 #endif
 {
-    unsigned int retspeed = 10000000;
+    unsigned long long retspeed = 10000000;
     struct ifreq ifr;
 
     /* the code is based on mii-diag utility by Donald Becker
@@ -778,7 +782,7 @@ netsnmp_linux_interface_get_if_speed(int fd, const char *name)
     int mii_reg, i;
     ushort mii_val[32];
     ushort bmcr, bmsr, nway_advert, lkpar;
-    const unsigned int media_speeds[] = {10000000, 10000000, 100000000, 100000000, 10000000, 0};	
+    const unsigned long long media_speeds[] = {10000000, 10000000, 100000000, 100000000, 10000000, 0};
     /* It corresponds to "10baseT", "10baseT-FD", "100baseTx", "100baseTx-FD", "100baseT4", "Flow-control", 0, */
 
     strncpy(ifr.ifr_name, name, sizeof(ifr.ifr_name));
