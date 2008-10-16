@@ -665,6 +665,7 @@ netsnmp_access_interface_entry_guess_speed(netsnmp_interface_entry *entry)
         entry->speed = 4000000;
     else
         entry->speed = 0;
+    entry->speed_high = entry->speed / 1000000LL;
 }
 
 netsnmp_conf_if_list *
@@ -702,7 +703,12 @@ netsnmp_access_interface_entry_overrides(netsnmp_interface_entry *entry)
         netsnmp_access_interface_entry_overrides_get(entry->name);
     if (if_ptr) {
         entry->type = if_ptr->type;
-        entry->speed = if_ptr->speed;
+        if (if_ptr->speed > 0xffffffff) {
+            entry->speed = 0xffffffff;
+        } else {
+            entry->speed = if_ptr->speed;
+        }
+        entry->speed_high = if_ptr->speed / 1000000LL;
     }
 }
 
@@ -747,7 +753,7 @@ _parse_interface_config(const char *token, char *cptr)
         config_perror("Out of memory");
         return;
     }
-    if_new->speed = strtoul(speed, &ecp, 0);
+    if_new->speed = strtoull(speed, &ecp, 0);
     if (*ecp) {
         config_perror("Bad SPEED value");
         free(if_new);
