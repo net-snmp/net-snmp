@@ -122,7 +122,7 @@ SOFTWARE.
     char *          netsnmp_mibindex_lookup( const char * );
     FILE *          netsnmp_mibindex_new( const char * );
     void            netsnmp_init_mib(void);
-#ifndef NETSNMP_CLEAN_NAMESPACE
+#ifndef NETSNMP_NO_LEGACY_DEFINITIONS
     void            init_mib(void);
 #endif
     void            shutdown_mib(void);

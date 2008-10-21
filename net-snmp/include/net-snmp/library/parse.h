@@ -210,13 +210,13 @@ SOFTWARE.
 #define	ANON_LEN  strlen(ANON)
 
     struct tree    *netsnmp_read_module(const char *);
-#ifndef NETSNMP_CLEAN_NAMESPACE
+#ifndef NETSNMP_NO_LEGACY_DEFINITIONS
     struct tree    *read_module(const char *);
 #endif
     struct tree    *read_mib(const char *);
     struct tree    *read_all_mibs(void);
     int             netsnmp_unload_module(const char *name);
-#ifndef NETSNMP_CLEAN_NAMESPACE
+#ifndef NETSNMP_NO_LEGACY_DEFINITIONS
     int             unload_module(const char *name);
     void            init_mib_internals(void);
 #endif

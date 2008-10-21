@@ -2721,7 +2721,7 @@ netsnmp_init_mib(void)
     }
 }
 
-#ifndef NETSNMP_CLEAN_NAMESPACE
+#ifndef NETSNMP_NO_LEGACY_DEFINITIONS
 void
 init_mib(void)
 {
