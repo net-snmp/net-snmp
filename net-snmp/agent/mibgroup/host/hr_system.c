@@ -124,23 +124,37 @@ extern int      count_processes(void);
 
 #if defined(solaris2)
 struct variable2 hrsystem_variables[] = {
-    {HRSYS_UPTIME, ASN_TIMETICKS, RONLY, var_hrsys, 1, {1}},
-    {HRSYS_DATE, ASN_OCTET_STR, RWRITE, var_hrsys, 1, {2}},
-    {HRSYS_LOAD_DEV, ASN_INTEGER, RONLY, var_hrsys, 1, {3}},
-    {HRSYS_LOAD_PARAM, ASN_OCTET_STR, RWRITE, var_hrsys, 1, {4}},
-    {HRSYS_USERS, ASN_GAUGE, RONLY, var_hrsys, 1, {5}},
-    {HRSYS_PROCS, ASN_GAUGE, RONLY, var_hrsys, 1, {6}},
-    {HRSYS_MAXPROCS, ASN_INTEGER, RONLY, var_hrsys, 1, {7}}
+    {HRSYS_UPTIME, ASN_TIMETICKS, NETSNMP_OLDAPI_RONLY,
+     var_hrsys, 1, {1}},
+    {HRSYS_DATE, ASN_OCTET_STR, NETSNMP_OLDAPI_RWRITE,
+     var_hrsys, 1, {2}},
+    {HRSYS_LOAD_DEV, ASN_INTEGER, NETSNMP_OLDAPI_RONLY,
+     var_hrsys, 1, {3}},
+    {HRSYS_LOAD_PARAM, ASN_OCTET_STR, NETSNMP_OLDAPI_RWRITE,
+     var_hrsys, 1, {4}},
+    {HRSYS_USERS, ASN_GAUGE, NETSNMP_OLDAPI_RONLY,
+     var_hrsys, 1, {5}},
+    {HRSYS_PROCS, ASN_GAUGE, NETSNMP_OLDAPI_RONLY,
+     var_hrsys, 1, {6}},
+    {HRSYS_MAXPROCS, ASN_INTEGER, NETSNMP_OLDAPI_RONLY,
+     var_hrsys, 1, {7}}
 };
 #else
 struct variable2 hrsystem_variables[] = {
-    {HRSYS_UPTIME, ASN_TIMETICKS, RONLY, var_hrsys, 1, {1}},
-    {HRSYS_DATE, ASN_OCTET_STR, RONLY, var_hrsys, 1, {2}},
-    {HRSYS_LOAD_DEV, ASN_INTEGER, RONLY, var_hrsys, 1, {3}},
-    {HRSYS_LOAD_PARAM, ASN_OCTET_STR, RONLY, var_hrsys, 1, {4}},
-    {HRSYS_USERS, ASN_GAUGE, RONLY, var_hrsys, 1, {5}},
-    {HRSYS_PROCS, ASN_GAUGE, RONLY, var_hrsys, 1, {6}},
-    {HRSYS_MAXPROCS, ASN_INTEGER, RONLY, var_hrsys, 1, {7}}
+    {HRSYS_UPTIME, ASN_TIMETICKS, NETSNMP_OLDAPI_RONLY,
+     var_hrsys, 1, {1}},
+    {HRSYS_DATE, ASN_OCTET_STR, NETSNMP_OLDAPI_RONLY,
+     var_hrsys, 1, {2}},
+    {HRSYS_LOAD_DEV, ASN_INTEGER, NETSNMP_OLDAPI_RONLY,
+     var_hrsys, 1, {3}},
+    {HRSYS_LOAD_PARAM, ASN_OCTET_STR, NETSNMP_OLDAPI_RONLY,
+     var_hrsys, 1, {4}},
+    {HRSYS_USERS, ASN_GAUGE, NETSNMP_OLDAPI_RONLY,
+     var_hrsys, 1, {5}},
+    {HRSYS_PROCS, ASN_GAUGE, NETSNMP_OLDAPI_RONLY,
+     var_hrsys, 1, {6}},
+    {HRSYS_MAXPROCS, ASN_INTEGER, NETSNMP_OLDAPI_RONLY,
+     var_hrsys, 1, {7}}
 };
 #endif
 oid             hrsystem_variables_oid[] = { 1, 3, 6, 1, 2, 1, 25, 1 };

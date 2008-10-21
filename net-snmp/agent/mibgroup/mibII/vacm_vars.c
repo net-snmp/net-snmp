@@ -78,26 +78,40 @@ init_vacm_vars(void)
 #define PRIVRW	(NETSNMP_SNMPV2ANY | 0x5000)
 
     struct variable1 vacm_sec2group[] = {
-        {SECURITYGROUP, ASN_OCTET_STR, RWRITE, var_vacm_sec2group, 1, {3}},
-        {SECURITYSTORAGE, ASN_INTEGER, RWRITE, var_vacm_sec2group, 1, {4}},
-        {SECURITYSTATUS, ASN_INTEGER, RWRITE, var_vacm_sec2group, 1, {5}},
+        {SECURITYGROUP, ASN_OCTET_STR, NETSNMP_OLDAPI_RWRITE,
+         var_vacm_sec2group, 1, {3}},
+        {SECURITYSTORAGE, ASN_INTEGER, NETSNMP_OLDAPI_RWRITE,
+         var_vacm_sec2group, 1, {4}},
+        {SECURITYSTATUS, ASN_INTEGER, NETSNMP_OLDAPI_RWRITE,
+         var_vacm_sec2group, 1, {5}},
     };
 
     struct variable1 vacm_access[] = {
-        {ACCESSMATCH, ASN_INTEGER, RWRITE, var_vacm_access, 1, {4}},
-        {ACCESSREAD, ASN_OCTET_STR, RWRITE, var_vacm_access, 1, {5}},
-        {ACCESSWRITE, ASN_OCTET_STR, RWRITE, var_vacm_access, 1, {6}},
-        {ACCESSNOTIFY, ASN_OCTET_STR, RWRITE, var_vacm_access, 1, {7}},
-        {ACCESSSTORAGE, ASN_INTEGER, RWRITE, var_vacm_access, 1, {8}},
-        {ACCESSSTATUS, ASN_INTEGER, RWRITE, var_vacm_access, 1, {9}},
+        {ACCESSMATCH, ASN_INTEGER, NETSNMP_OLDAPI_RWRITE,
+         var_vacm_access, 1, {4}},
+        {ACCESSREAD, ASN_OCTET_STR, NETSNMP_OLDAPI_RWRITE,
+         var_vacm_access, 1, {5}},
+        {ACCESSWRITE, ASN_OCTET_STR, NETSNMP_OLDAPI_RWRITE,
+         var_vacm_access, 1, {6}},
+        {ACCESSNOTIFY, ASN_OCTET_STR, NETSNMP_OLDAPI_RWRITE,
+         var_vacm_access, 1, {7}},
+        {ACCESSSTORAGE, ASN_INTEGER, NETSNMP_OLDAPI_RWRITE,
+         var_vacm_access, 1, {8}},
+        {ACCESSSTATUS, ASN_INTEGER, NETSNMP_OLDAPI_RWRITE,
+         var_vacm_access, 1, {9}},
     };
 
     struct variable3 vacm_view[] = {
-        {VACMVIEWSPINLOCK, ASN_INTEGER, RWRITE, var_vacm_view, 1, {1}},
-        {VIEWMASK, ASN_OCTET_STR, RWRITE, var_vacm_view, 3, {2, 1, 3}},
-        {VIEWTYPE, ASN_INTEGER, RWRITE, var_vacm_view, 3, {2, 1, 4}},
-        {VIEWSTORAGE, ASN_INTEGER, RWRITE, var_vacm_view, 3, {2, 1, 5}},
-        {VIEWSTATUS, ASN_INTEGER, RWRITE, var_vacm_view, 3, {2, 1, 6}},
+        {VACMVIEWSPINLOCK, ASN_INTEGER, NETSNMP_OLDAPI_RWRITE,
+         var_vacm_view, 1, {1}},
+        {VIEWMASK, ASN_OCTET_STR, NETSNMP_OLDAPI_RWRITE,
+         var_vacm_view, 3, {2, 1, 3}},
+        {VIEWTYPE, ASN_INTEGER, NETSNMP_OLDAPI_RWRITE,
+         var_vacm_view, 3, {2, 1, 4}},
+        {VIEWSTORAGE, ASN_INTEGER, NETSNMP_OLDAPI_RWRITE,
+         var_vacm_view, 3, {2, 1, 5}},
+        {VIEWSTATUS, ASN_INTEGER, NETSNMP_OLDAPI_RWRITE,
+         var_vacm_view, 3, {2, 1, 6}},
     };
 
     /*

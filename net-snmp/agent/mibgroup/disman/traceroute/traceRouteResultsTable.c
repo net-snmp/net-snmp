@@ -48,14 +48,22 @@ oid             traceRouteResultsTable_variables_oid[] =
     { 1, 3, 6, 1, 2, 1, 81, 1, 3 };
 
 struct variable2 traceRouteResultsTable_variables[] = {
-    {COLUMN_TRACEROUTERESULTSOPERSTATUS,     ASN_INTEGER, RONLY, var_traceRouteResultsTable, 2, {1, 1}},
-    {COLUMN_TRACEROUTERESULTSCURHOPCOUNT,      ASN_GAUGE, RONLY, var_traceRouteResultsTable, 2, {1, 2}},
-    {COLUMN_TRACEROUTERESULTSCURPROBECOUNT,    ASN_GAUGE, RONLY, var_traceRouteResultsTable, 2, {1, 3}},
-    {COLUMN_TRACEROUTERESULTSIPTGTADDRTYPE,  ASN_INTEGER, RONLY, var_traceRouteResultsTable, 2, {1, 4}},
-    {COLUMN_TRACEROUTERESULTSIPTGTADDR,    ASN_OCTET_STR, RONLY, var_traceRouteResultsTable, 2, {1, 5}},
-    {COLUMN_TRACEROUTERESULTSTESTATTEMPTS,  ASN_UNSIGNED, RONLY, var_traceRouteResultsTable, 2, {1, 6}},
-    {COLUMN_TRACEROUTERESULTSTESTSUCCESSES, ASN_UNSIGNED, RONLY, var_traceRouteResultsTable, 2, {1, 7}},
-    {COLUMN_TRACEROUTERESULTSLASTGOODPATH, ASN_OCTET_STR, RONLY, var_traceRouteResultsTable, 2, {1, 8}}
+    {COLUMN_TRACEROUTERESULTSOPERSTATUS,     ASN_INTEGER, NETSNMP_OLDAPI_RONLY,
+     var_traceRouteResultsTable, 2, {1, 1}},
+    {COLUMN_TRACEROUTERESULTSCURHOPCOUNT,      ASN_GAUGE, NETSNMP_OLDAPI_RONLY,
+     var_traceRouteResultsTable, 2, {1, 2}},
+    {COLUMN_TRACEROUTERESULTSCURPROBECOUNT,    ASN_GAUGE, NETSNMP_OLDAPI_RONLY,
+     var_traceRouteResultsTable, 2, {1, 3}},
+    {COLUMN_TRACEROUTERESULTSIPTGTADDRTYPE,  ASN_INTEGER, NETSNMP_OLDAPI_RONLY,
+     var_traceRouteResultsTable, 2, {1, 4}},
+    {COLUMN_TRACEROUTERESULTSIPTGTADDR,    ASN_OCTET_STR, NETSNMP_OLDAPI_RONLY,
+     var_traceRouteResultsTable, 2, {1, 5}},
+    {COLUMN_TRACEROUTERESULTSTESTATTEMPTS,  ASN_UNSIGNED, NETSNMP_OLDAPI_RONLY,
+     var_traceRouteResultsTable, 2, {1, 6}},
+    {COLUMN_TRACEROUTERESULTSTESTSUCCESSES, ASN_UNSIGNED, NETSNMP_OLDAPI_RONLY,
+     var_traceRouteResultsTable, 2, {1, 7}},
+    {COLUMN_TRACEROUTERESULTSLASTGOODPATH, ASN_OCTET_STR, NETSNMP_OLDAPI_RONLY,
+     var_traceRouteResultsTable, 2, {1, 8}}
 };
 
 

@@ -72,11 +72,14 @@ ucdDemo_parse_userpass(const char *word, char *line)
  */
 
 struct variable2 ucdDemoPublic_variables[] = {
-    {UCDDEMORESETKEYS, ASN_INTEGER, RWRITE, var_ucdDemoPublic, 1, {1}},
-    {UCDDEMOPUBLICSTRING, ASN_OCTET_STR, RWRITE, var_ucdDemoPublic, 1,
-     {2}},
-    {UCDDEMOUSERLIST, ASN_OCTET_STR, RWRITE, var_ucdDemoPublic, 1, {3}},
-    {UCDDEMOPASSPHRASE, ASN_OCTET_STR, RWRITE, var_ucdDemoPublic, 1, {4}},
+    {UCDDEMORESETKEYS, ASN_INTEGER, NETSNMP_OLDAPI_RWRITE,
+     var_ucdDemoPublic, 1, {1}},
+    {UCDDEMOPUBLICSTRING, ASN_OCTET_STR, NETSNMP_OLDAPI_RWRITE,
+     var_ucdDemoPublic, 1, {2}},
+    {UCDDEMOUSERLIST, ASN_OCTET_STR, NETSNMP_OLDAPI_RWRITE,
+     var_ucdDemoPublic, 1, {3}},
+    {UCDDEMOPASSPHRASE, ASN_OCTET_STR, NETSNMP_OLDAPI_RWRITE,
+     var_ucdDemoPublic, 1, {4}},
 
 };
 

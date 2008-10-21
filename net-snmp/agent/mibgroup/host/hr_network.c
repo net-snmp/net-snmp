@@ -51,7 +51,8 @@ int             header_hrnet(struct variable *, oid *, size_t *, int,
 #define	HRNET_IFINDEX		1
 
 struct variable4 hrnet_variables[] = {
-    {HRNET_IFINDEX, ASN_INTEGER, RONLY, var_hrnet, 2, {1, 1}}
+    {HRNET_IFINDEX, ASN_INTEGER, NETSNMP_OLDAPI_RONLY,
+     var_hrnet, 2, {1, 1}}
 };
 oid             hrnet_variables_oid[] = { 1, 3, 6, 1, 2, 1, 25, 3, 4 };
 

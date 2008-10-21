@@ -42,8 +42,10 @@ oid             lookupResultsTable_variables_oid[] =
     { 1, 3, 6, 1, 2, 1, 82, 1, 4 };
 
 struct variable2 lookupResultsTable_variables[] = {
-    {COLUMN_LOOKUPRESULTSADDRESSTYPE, ASN_INTEGER, RONLY, var_lookupResultsTable, 2, {1, 2}},
-    {COLUMN_LOOKUPRESULTSADDRESS,   ASN_OCTET_STR, RONLY, var_lookupResultsTable, 2, {1, 3}}
+    {COLUMN_LOOKUPRESULTSADDRESSTYPE, ASN_INTEGER, NETSNMP_OLDAPI_RONLY,
+     var_lookupResultsTable, 2, {1, 2}},
+    {COLUMN_LOOKUPRESULTSADDRESS,   ASN_OCTET_STR, NETSNMP_OLDAPI_RONLY,
+     var_lookupResultsTable, 2, {1, 3}}
 };
 
 /*

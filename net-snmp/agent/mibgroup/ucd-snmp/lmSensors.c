@@ -131,41 +131,41 @@ struct variable4 lmSensors_variables[] = {
      * magic number        , variable type , ro/rw , callback fn  , L, oidsuffix 
      */
 #define   LMTEMPSENSORSINDEX    3
-    {LMTEMPSENSORSINDEX, ASN_INTEGER, RONLY, var_lmSensorsTable, 3,
-     {2, 1, 1}},
+    {LMTEMPSENSORSINDEX, ASN_INTEGER, NETSNMP_OLDAPI_RONLY,
+     var_lmSensorsTable, 3, {2, 1, 1}},
 #define   LMTEMPSENSORSDEVICE   4
-    {LMTEMPSENSORSDEVICE, ASN_OCTET_STR, RONLY, var_lmSensorsTable, 3,
-     {2, 1, 2}},
+    {LMTEMPSENSORSDEVICE, ASN_OCTET_STR, NETSNMP_OLDAPI_RONLY,
+     var_lmSensorsTable, 3, {2, 1, 2}},
 #define   LMTEMPSENSORSVALUE    5
-    {LMTEMPSENSORSVALUE, ASN_GAUGE, RONLY, var_lmSensorsTable, 3,
-     {2, 1, 3}},
+    {LMTEMPSENSORSVALUE, ASN_GAUGE, NETSNMP_OLDAPI_RONLY,
+     var_lmSensorsTable, 3, {2, 1, 3}},
 #define   LMFANSENSORSINDEX     8
-    {LMFANSENSORSINDEX, ASN_INTEGER, RONLY, var_lmSensorsTable, 3,
-     {3, 1, 1}},
+    {LMFANSENSORSINDEX, ASN_INTEGER, NETSNMP_OLDAPI_RONLY,
+     var_lmSensorsTable, 3, {3, 1, 1}},
 #define   LMFANSENSORSDEVICE    9
-    {LMFANSENSORSDEVICE, ASN_OCTET_STR, RONLY, var_lmSensorsTable, 3,
-     {3, 1, 2}},
+    {LMFANSENSORSDEVICE, ASN_OCTET_STR, NETSNMP_OLDAPI_RONLY,
+     var_lmSensorsTable, 3, {3, 1, 2}},
 #define   LMFANSENSORSVALUE     10
-    {LMFANSENSORSVALUE, ASN_GAUGE, RONLY, var_lmSensorsTable, 3,
-     {3, 1, 3}},
+    {LMFANSENSORSVALUE, ASN_GAUGE, NETSNMP_OLDAPI_RONLY,
+     var_lmSensorsTable, 3, {3, 1, 3}},
 #define   LMVOLTSENSORSINDEX    13
-    {LMVOLTSENSORSINDEX, ASN_INTEGER, RONLY, var_lmSensorsTable, 3,
-     {4, 1, 1}},
+    {LMVOLTSENSORSINDEX, ASN_INTEGER, NETSNMP_OLDAPI_RONLY,
+     var_lmSensorsTable, 3, {4, 1, 1}},
 #define   LMVOLTSENSORSDEVICE   14
-    {LMVOLTSENSORSDEVICE, ASN_OCTET_STR, RONLY, var_lmSensorsTable, 3,
-     {4, 1, 2}},
+    {LMVOLTSENSORSDEVICE, ASN_OCTET_STR, NETSNMP_OLDAPI_RONLY,
+     var_lmSensorsTable, 3, {4, 1, 2}},
 #define   LMVOLTSENSORSVALUE    15
-    {LMVOLTSENSORSVALUE, ASN_GAUGE, RONLY, var_lmSensorsTable, 3,
-     {4, 1, 3}},
+    {LMVOLTSENSORSVALUE, ASN_GAUGE, NETSNMP_OLDAPI_RONLY,
+     var_lmSensorsTable, 3, {4, 1, 3}},
 #define   LMMISCSENSORSINDEX    18
-    {LMMISCSENSORSINDEX, ASN_INTEGER, RONLY, var_lmSensorsTable, 3,
-     {5, 1, 1}},
+    {LMMISCSENSORSINDEX, ASN_INTEGER, NETSNMP_OLDAPI_RONLY,
+     var_lmSensorsTable, 3, {5, 1, 1}},
 #define   LMMISCSENSORSDEVICE   19
-    {LMMISCSENSORSDEVICE, ASN_OCTET_STR, RONLY, var_lmSensorsTable, 3,
-     {5, 1, 2}},
+    {LMMISCSENSORSDEVICE, ASN_OCTET_STR, NETSNMP_OLDAPI_RONLY,
+     var_lmSensorsTable, 3, {5, 1, 2}},
 #define   LMMISCSENSORSVALUE    20
-    {LMMISCSENSORSVALUE, ASN_GAUGE, RONLY, var_lmSensorsTable, 3,
-     {5, 1, 3}},
+    {LMMISCSENSORSVALUE, ASN_GAUGE, NETSNMP_OLDAPI_RONLY,
+     var_lmSensorsTable, 3, {5, 1, 3}},
 };
 
 typedef struct {

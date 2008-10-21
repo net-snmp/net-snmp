@@ -156,13 +156,20 @@ static void     Release_HRSW_token(void);
 #define	HRSWINST_DATE		7
 
 struct variable4 hrswinst_variables[] = {
-    {HRSWINST_CHANGE, ASN_TIMETICKS, RONLY, var_hrswinst, 1, {1}},
-    {HRSWINST_UPDATE, ASN_TIMETICKS, RONLY, var_hrswinst, 1, {2}},
-    {HRSWINST_INDEX, ASN_INTEGER, RONLY, var_hrswinst, 3, {3, 1, 1}},
-    {HRSWINST_NAME, ASN_OCTET_STR, RONLY, var_hrswinst, 3, {3, 1, 2}},
-    {HRSWINST_ID, ASN_OBJECT_ID, RONLY, var_hrswinst, 3, {3, 1, 3}},
-    {HRSWINST_TYPE, ASN_INTEGER, RONLY, var_hrswinst, 3, {3, 1, 4}},
-    {HRSWINST_DATE, ASN_OCTET_STR, RONLY, var_hrswinst, 3, {3, 1, 5}}
+    {HRSWINST_CHANGE, ASN_TIMETICKS, NETSNMP_OLDAPI_RONLY,
+     var_hrswinst, 1, {1}},
+    {HRSWINST_UPDATE, ASN_TIMETICKS, NETSNMP_OLDAPI_RONLY,
+     var_hrswinst, 1, {2}},
+    {HRSWINST_INDEX, ASN_INTEGER, NETSNMP_OLDAPI_RONLY,
+     var_hrswinst, 3, {3, 1, 1}},
+    {HRSWINST_NAME, ASN_OCTET_STR, NETSNMP_OLDAPI_RONLY,
+     var_hrswinst, 3, {3, 1, 2}},
+    {HRSWINST_ID, ASN_OBJECT_ID, NETSNMP_OLDAPI_RONLY,
+     var_hrswinst, 3, {3, 1, 3}},
+    {HRSWINST_TYPE, ASN_INTEGER, NETSNMP_OLDAPI_RONLY,
+     var_hrswinst, 3, {3, 1, 4}},
+    {HRSWINST_DATE, ASN_OCTET_STR, NETSNMP_OLDAPI_RONLY,
+     var_hrswinst, 3, {3, 1, 5}}
 };
 oid             hrswinst_variables_oid[] = { 1, 3, 6, 1, 2, 1, 25, 6 };
 

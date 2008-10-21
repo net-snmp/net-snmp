@@ -146,9 +146,12 @@ static int      ARP_Scan_Next(u_long *, char *, u_long *);
  * information at 
  */
 struct variable1 at_variables[] = {
-    {ATIFINDEX, ASN_INTEGER, RONLY, var_atEntry, 1, {1}},
-    {ATPHYSADDRESS, ASN_OCTET_STR, RONLY, var_atEntry, 1, {2}},
-    {ATNETADDRESS, ASN_IPADDRESS, RONLY, var_atEntry, 1, {3}}
+    {ATIFINDEX, ASN_INTEGER, NETSNMP_OLDAPI_RONLY,
+     var_atEntry, 1, {1}},
+    {ATPHYSADDRESS, ASN_OCTET_STR, NETSNMP_OLDAPI_RONLY,
+     var_atEntry, 1, {2}},
+    {ATNETADDRESS, ASN_IPADDRESS, NETSNMP_OLDAPI_RONLY,
+     var_atEntry, 1, {3}}
 };
 
 /*

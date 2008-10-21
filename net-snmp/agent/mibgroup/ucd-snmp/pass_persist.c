@@ -72,8 +72,8 @@ struct variable2 extensible_persist_passthru_variables[] = {
     /*
      * bogus entry.  Only some of it is actually used. 
      */
-    {MIBINDEX, ASN_INTEGER, RWRITE, var_extensible_pass_persist, 0,
-     {MIBINDEX}},
+    {MIBINDEX, ASN_INTEGER, NETSNMP_OLDAPI_RWRITE,
+     var_extensible_pass_persist, 0, {MIBINDEX}},
 };
 
 void

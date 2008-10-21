@@ -133,20 +133,20 @@ extern struct variable2 extensible_passthru_variables[];
  * the relocatable extensible commands variables 
  */
 struct variable2 extensible_relocatable_variables[] = {
-    {MIBINDEX, ASN_INTEGER, RONLY, var_extensible_relocatable, 1,
-     {MIBINDEX}},
-    {ERRORNAME, ASN_OCTET_STR, RONLY, var_extensible_relocatable, 1,
-     {ERRORNAME}},
-    {SHELLCOMMAND, ASN_OCTET_STR, RONLY, var_extensible_relocatable, 1,
-     {SHELLCOMMAND}},
-    {ERRORFLAG, ASN_INTEGER, RONLY, var_extensible_relocatable, 1,
-     {ERRORFLAG}},
-    {ERRORMSG, ASN_OCTET_STR, RONLY, var_extensible_relocatable, 1,
-     {ERRORMSG}},
-    {ERRORFIX, ASN_INTEGER, RWRITE, var_extensible_relocatable, 1,
-     {ERRORFIX}},
-    {ERRORFIXCMD, ASN_OCTET_STR, RONLY, var_extensible_relocatable, 1,
-     {ERRORFIXCMD}}
+    {MIBINDEX, ASN_INTEGER, NETSNMP_OLDAPI_RONLY,
+     var_extensible_relocatable, 1, {MIBINDEX}},
+    {ERRORNAME, ASN_OCTET_STR, NETSNMP_OLDAPI_RONLY,
+     var_extensible_relocatable, 1, {ERRORNAME}},
+    {SHELLCOMMAND, ASN_OCTET_STR, NETSNMP_OLDAPI_RONLY,
+     var_extensible_relocatable, 1, {SHELLCOMMAND}},
+    {ERRORFLAG, ASN_INTEGER, NETSNMP_OLDAPI_RONLY,
+     var_extensible_relocatable, 1, {ERRORFLAG}},
+    {ERRORMSG, ASN_OCTET_STR, NETSNMP_OLDAPI_RONLY,
+     var_extensible_relocatable, 1, {ERRORMSG}},
+    {ERRORFIX, ASN_INTEGER, NETSNMP_OLDAPI_RWRITE,
+     var_extensible_relocatable, 1, {ERRORFIX}},
+    {ERRORFIXCMD, ASN_OCTET_STR, NETSNMP_OLDAPI_RONLY,
+     var_extensible_relocatable, 1, {ERRORFIXCMD}}
 };
 
 
@@ -155,20 +155,20 @@ init_extensible(void)
 {
 
     struct variable2 extensible_extensible_variables[] = {
-        {MIBINDEX, ASN_INTEGER, RONLY, var_extensible_shell, 1,
-         {MIBINDEX}},
-        {ERRORNAME, ASN_OCTET_STR, RONLY, var_extensible_shell, 1,
-         {ERRORNAME}},
-        {SHELLCOMMAND, ASN_OCTET_STR, RONLY, var_extensible_shell, 1,
-         {SHELLCOMMAND}},
-        {ERRORFLAG, ASN_INTEGER, RONLY, var_extensible_shell, 1,
-         {ERRORFLAG}},
-        {ERRORMSG, ASN_OCTET_STR, RONLY, var_extensible_shell, 1,
-         {ERRORMSG}},
-        {ERRORFIX, ASN_INTEGER, RWRITE, var_extensible_shell, 1,
-         {ERRORFIX}},
-        {ERRORFIXCMD, ASN_OCTET_STR, RONLY, var_extensible_shell, 1,
-         {ERRORFIXCMD}}
+        {MIBINDEX, ASN_INTEGER, NETSNMP_OLDAPI_RONLY,
+         var_extensible_shell, 1, {MIBINDEX}},
+        {ERRORNAME, ASN_OCTET_STR, NETSNMP_OLDAPI_RONLY,
+         var_extensible_shell, 1, {ERRORNAME}},
+        {SHELLCOMMAND, ASN_OCTET_STR, NETSNMP_OLDAPI_RONLY,
+         var_extensible_shell, 1, {SHELLCOMMAND}},
+        {ERRORFLAG, ASN_INTEGER, NETSNMP_OLDAPI_RONLY,
+         var_extensible_shell, 1, {ERRORFLAG}},
+        {ERRORMSG, ASN_OCTET_STR, NETSNMP_OLDAPI_RONLY,
+         var_extensible_shell, 1, {ERRORMSG}},
+        {ERRORFIX, ASN_INTEGER, NETSNMP_OLDAPI_RWRITE,
+         var_extensible_shell, 1, {ERRORFIX}},
+        {ERRORFIXCMD, ASN_OCTET_STR, NETSNMP_OLDAPI_RONLY,
+         var_extensible_shell, 1, {ERRORFIXCMD}}
     };
 
     /*

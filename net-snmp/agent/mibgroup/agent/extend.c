@@ -48,13 +48,20 @@ WriteMethod fixExec2Error;
 FindVarMethod var_extensible_old;
 oid  old_extensible_variables_oid[] = { NETSNMP_UCDAVIS_MIB, NETSNMP_SHELLMIBNUM, 1 };
 struct variable2 old_extensible_variables[] = {
-    {MIBINDEX,     ASN_INTEGER,   RONLY, var_extensible_old, 1, {MIBINDEX}},
-    {ERRORNAME,    ASN_OCTET_STR, RONLY, var_extensible_old, 1, {ERRORNAME}},
-    {SHELLCOMMAND, ASN_OCTET_STR, RONLY, var_extensible_old, 1, {SHELLCOMMAND}},
-    {ERRORFLAG,    ASN_INTEGER,   RONLY, var_extensible_old, 1, {ERRORFLAG}},
-    {ERRORMSG,     ASN_OCTET_STR, RONLY, var_extensible_old, 1, {ERRORMSG}},
-    {ERRORFIX,     ASN_INTEGER,  RWRITE, var_extensible_old, 1, {ERRORFIX}},
-    {ERRORFIXCMD,  ASN_OCTET_STR, RONLY, var_extensible_old, 1, {ERRORFIXCMD}}
+    {MIBINDEX,     ASN_INTEGER,   NETSNMP_OLDAPI_RONLY,
+     var_extensible_old, 1, {MIBINDEX}},
+    {ERRORNAME,    ASN_OCTET_STR, NETSNMP_OLDAPI_RONLY,
+     var_extensible_old, 1, {ERRORNAME}},
+    {SHELLCOMMAND, ASN_OCTET_STR, NETSNMP_OLDAPI_RONLY,
+     var_extensible_old, 1, {SHELLCOMMAND}},
+    {ERRORFLAG,    ASN_INTEGER,   NETSNMP_OLDAPI_RONLY,
+     var_extensible_old, 1, {ERRORFLAG}},
+    {ERRORMSG,     ASN_OCTET_STR, NETSNMP_OLDAPI_RONLY,
+     var_extensible_old, 1, {ERRORMSG}},
+    {ERRORFIX,     ASN_INTEGER,  NETSNMP_OLDAPI_RWRITE,
+     var_extensible_old, 1, {ERRORFIX}},
+    {ERRORFIXCMD,  ASN_OCTET_STR, NETSNMP_OLDAPI_RONLY,
+     var_extensible_old, 1, {ERRORFIXCMD}}
 };
 #endif
 

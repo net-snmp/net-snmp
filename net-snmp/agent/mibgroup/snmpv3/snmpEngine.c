@@ -16,15 +16,21 @@
 #include "snmpEngine.h"
 
 struct variable2 snmpEngine_variables[] = {
-    {SNMPENGINEID, ASN_OCTET_STR, RONLY, var_snmpEngine, 1, {1}},
+    {SNMPENGINEID, ASN_OCTET_STR, NETSNMP_OLDAPI_RONLY,
+     var_snmpEngine, 1, {1}},
 #ifdef NETSNMP_ENABLE_TESTING_CODE
-    {SNMPENGINEBOOTS, ASN_INTEGER, RWRITE, var_snmpEngine, 1, {2}},
-    {SNMPENGINETIME, ASN_INTEGER, RWRITE, var_snmpEngine, 1, {3}},
+    {SNMPENGINEBOOTS, ASN_INTEGER, NETSNMP_OLDAPI_RWRITE,
+     var_snmpEngine, 1, {2}},
+    {SNMPENGINETIME, ASN_INTEGER, NETSNMP_OLDAPI_RWRITE,
+     var_snmpEngine, 1, {3}},
 #else                           /* !NETSNMP_ENABLE_TESTING_CODE */
-    {SNMPENGINEBOOTS, ASN_INTEGER, RONLY, var_snmpEngine, 1, {2}},
-    {SNMPENGINETIME, ASN_INTEGER, RONLY, var_snmpEngine, 1, {3}},
+    {SNMPENGINEBOOTS, ASN_INTEGER, NETSNMP_OLDAPI_RONLY,
+     var_snmpEngine, 1, {2}},
+    {SNMPENGINETIME, ASN_INTEGER, NETSNMP_OLDAPI_RONLY,
+     var_snmpEngine, 1, {3}},
 #endif                          /* NETSNMP_ENABLE_TESTING_CODE */
-    {SNMPENGINEMAXMESSAGESIZE, ASN_INTEGER, RONLY, var_snmpEngine, 1, {4}},
+    {SNMPENGINEMAXMESSAGESIZE, ASN_INTEGER, NETSNMP_OLDAPI_RONLY,
+     var_snmpEngine, 1, {4}},
 };
 
 /*
