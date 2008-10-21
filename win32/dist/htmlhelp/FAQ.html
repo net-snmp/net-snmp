@@ -3234,14 +3234,14 @@ How can I support a large table, with more than 256 column objects?
   magic numbers quite safely:
 
     struct variable1 [] = {
-       {MAGIC1,   ASN_INTEGER, RWRITE, var_myfirst,  1, {  1}},
-       {MAGIC2,   ASN_INTEGER, RWRITE, var_myfirst,  1, {  2}},
+       {MAGIC1,   ASN_INTEGER, NETSNMP_OLDAPI_RWRITE, var_myfirst,  1, {  1}},
+       {MAGIC2,   ASN_INTEGER, NETSNMP_OLDAPI_RWRITE, var_myfirst,  1, {  2}},
     		:
-       {MAGIC255, ASN_INTEGER, RWRITE, var_myfirst,  1, {255}},
-       {MAGIC1,   ASN_INTEGER, RWRITE, var_mysecond, 1, {256}},
-       {MAGIC2,   ASN_INTEGER, RWRITE, var_mysecond, 1, {257}},
+       {MAGIC255, ASN_INTEGER, NETSNMP_OLDAPI_RWRITE, var_myfirst,  1, {255}},
+       {MAGIC1,   ASN_INTEGER, NETSNMP_OLDAPI_RWRITE, var_mysecond, 1, {256}},
+       {MAGIC2,   ASN_INTEGER, NETSNMP_OLDAPI_RWRITE, var_mysecond, 1, {257}},
     		:
-       {MAGIC255, ASN_INTEGER, RWRITE, var_mysecond, 1, {510}}
+       {MAGIC255, ASN_INTEGER, NETSNMP_OLDAPI_RWRITE, var_mysecond, 1, {510}}
     };
 
   All that matters is that a given magic number isn't re-used within

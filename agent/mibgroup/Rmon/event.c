@@ -787,23 +787,34 @@ struct variable2 eventTable_variables[] = {
     /*
      * magic number        , variable type, ro/rw , callback fn  ,           L, oidsuffix 
      */
-    {EVENTINDEX, ASN_INTEGER, RONLY, var_eventTable, 2, {1, 1}},
-    {EVENTDESCRIPTION, ASN_OCTET_STR, RWRITE, var_eventTable, 2, {1, 2}},
-    {EVENTTYPE, ASN_INTEGER, RWRITE, var_eventTable, 2, {1, 3}},
-    {EVENTCOMMUNITY, ASN_OCTET_STR, RWRITE, var_eventTable, 2, {1, 4}},
-    {EVENTLASTTIMESENT, ASN_TIMETICKS, RONLY, var_eventTable, 2, {1, 5}},
-    {EVENTOWNER, ASN_OCTET_STR, RWRITE, var_eventTable, 2, {1, 6}},
-    {EVENTSTATUS, ASN_INTEGER, RWRITE, var_eventTable, 2, {1, 7}}
+    {EVENTINDEX, ASN_INTEGER, NETSNMP_OLDAPI_RONLY,
+     var_eventTable, 2, {1, 1}},
+    {EVENTDESCRIPTION, ASN_OCTET_STR, NETSNMP_OLDAPI_RWRITE,
+     var_eventTable, 2, {1, 2}},
+    {EVENTTYPE, ASN_INTEGER, NETSNMP_OLDAPI_RWRITE,
+     var_eventTable, 2, {1, 3}},
+    {EVENTCOMMUNITY, ASN_OCTET_STR, NETSNMP_OLDAPI_RWRITE,
+     var_eventTable, 2, {1, 4}},
+    {EVENTLASTTIMESENT, ASN_TIMETICKS, NETSNMP_OLDAPI_RONLY,
+     var_eventTable, 2, {1, 5}},
+    {EVENTOWNER, ASN_OCTET_STR, NETSNMP_OLDAPI_RWRITE,
+     var_eventTable, 2, {1, 6}},
+    {EVENTSTATUS, ASN_INTEGER, NETSNMP_OLDAPI_RWRITE,
+     var_eventTable, 2, {1, 7}}
 };
 
 struct variable2 logTable_variables[] = {
     /*
      * magic number        , variable type, ro/rw , callback fn  ,           L, oidsuffix 
      */
-    {LOGEVENTINDEX, ASN_INTEGER, RONLY, var_logTable, 2, {1, 1}},
-    {LOGINDEX, ASN_INTEGER, RONLY, var_logTable, 2, {1, 2}},
-    {LOGTIME, ASN_TIMETICKS, RONLY, var_logTable, 2, {1, 3}},
-    {LOGDESCRIPTION, ASN_OCTET_STR, RONLY, var_logTable, 2, {1, 4}}
+    {LOGEVENTINDEX, ASN_INTEGER, NETSNMP_OLDAPI_RONLY,
+     var_logTable, 2, {1, 1}},
+    {LOGINDEX, ASN_INTEGER, NETSNMP_OLDAPI_RONLY,
+     var_logTable, 2, {1, 2}},
+    {LOGTIME, ASN_TIMETICKS, NETSNMP_OLDAPI_RONLY,
+     var_logTable, 2, {1, 3}},
+    {LOGDESCRIPTION, ASN_OCTET_STR, NETSNMP_OLDAPI_RONLY,
+     var_logTable, 2, {1, 4}}
 
 };
 

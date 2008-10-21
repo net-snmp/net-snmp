@@ -137,23 +137,30 @@ struct variable4 tunnel_variables[] = {
      * magic number        , variable type , ro/rw , callback fn  , L, oidsuffix 
      */
 #define   LOCALADDRESS          1
-    {LOCALADDRESS, ASN_IPADDRESS, RWRITE, var_tunnelIfEntry, 3, {1, 1, 1}},
+    {LOCALADDRESS, ASN_IPADDRESS, NETSNMP_OLDAPI_RWRITE,
+     var_tunnelIfEntry, 3, {1, 1, 1}},
 #define   REMOTEADDRESS         2
-    {REMOTEADDRESS, ASN_IPADDRESS, RWRITE, var_tunnelIfEntry, 3,
-     {1, 1, 2}},
+    {REMOTEADDRESS, ASN_IPADDRESS, NETSNMP_OLDAPI_RWRITE,
+     var_tunnelIfEntry, 3, {1, 1, 2}},
 #define   ENCAPSMETHOD          3
-    {ENCAPSMETHOD, ASN_INTEGER, RONLY, var_tunnelIfEntry, 3, {1, 1, 3}},
+    {ENCAPSMETHOD, ASN_INTEGER, NETSNMP_OLDAPI_RONLY,
+     var_tunnelIfEntry, 3, {1, 1, 3}},
 #define   HOPLIMIT              4
-    {HOPLIMIT, ASN_INTEGER, RWRITE, var_tunnelIfEntry, 3, {1, 1, 4}},
+    {HOPLIMIT, ASN_INTEGER, NETSNMP_OLDAPI_RWRITE,
+     var_tunnelIfEntry, 3, {1, 1, 4}},
 #define   SECURITY              5
-    {SECURITY, ASN_INTEGER, RONLY, var_tunnelIfEntry, 3, {1, 1, 5}},
+    {SECURITY, ASN_INTEGER, NETSNMP_OLDAPI_RONLY,
+     var_tunnelIfEntry, 3, {1, 1, 5}},
 #define   TOS                   6
-    {TOS, ASN_INTEGER, RWRITE, var_tunnelIfEntry, 3, {1, 1, 6}},
+    {TOS, ASN_INTEGER, NETSNMP_OLDAPI_RWRITE,
+     var_tunnelIfEntry, 3, {1, 1, 6}},
 
 #define   IFINDEX               7
-    {IFINDEX, ASN_INTEGER, RONLY, var_tunnelConfigEntry, 3, {2, 1, 5}},
+    {IFINDEX, ASN_INTEGER, NETSNMP_OLDAPI_RONLY,
+     var_tunnelConfigEntry, 3, {2, 1, 5}},
 #define   ROWSTATUS             8
-    {ROWSTATUS, ASN_INTEGER, RWRITE, var_tunnelConfigEntry, 3, {2, 1, 6}},
+    {ROWSTATUS, ASN_INTEGER, NETSNMP_OLDAPI_RWRITE,
+     var_tunnelConfigEntry, 3, {2, 1, 6}},
 };
 
 
@@ -209,8 +216,8 @@ getType(int index)
     oid             name[MAX_OID_LEN] = { 1, 3, 6, 1, 2, 1, 2, 2, 1, 3 };
     size_t          length = 10;
     struct variable ifType_variable =
-        { 3, ASN_INTEGER, RONLY, var_ifEntry, 10,
-        {1, 3, 6, 1, 2, 1, 2, 2, 1, 3}
+        { 3, ASN_INTEGER, NETSNMP_OLDAPI_RONLY,
+          var_ifEntry, 10, {1, 3, 6, 1, 2, 1, 2, 2, 1, 3}
     };
     unsigned char  *p;
     size_t          var_len;
@@ -248,8 +255,8 @@ getName(int index)
     oid             name[MAX_OID_LEN] = { 1, 3, 6, 1, 2, 1, 2, 2, 1, 2 };
     size_t          length = 10;
     struct variable ifName_variable =
-        { 2, ASN_INTEGER, RONLY, var_ifEntry, 10,
-        {1, 3, 6, 1, 2, 1, 2, 2, 1, 2}
+        { 2, ASN_INTEGER, NETSNMP_OLDAPI_RONLY,
+          var_ifEntry, 10, {1, 3, 6, 1, 2, 1, 2, 2, 1, 2}
     };
     unsigned char  *p;
     size_t          var_len;

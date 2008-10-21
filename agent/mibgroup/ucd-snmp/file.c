@@ -52,12 +52,18 @@ void
 init_file(void)
 {
     struct variable2 file_table[] = {
-        {FILE_INDEX, ASN_INTEGER, RONLY, var_file_table, 1, {1}},
-        {FILE_NAME, ASN_OCTET_STR, RONLY, var_file_table, 1, {2}},
-        {FILE_SIZE, ASN_INTEGER, RONLY, var_file_table, 1, {3}},
-        {FILE_MAX, ASN_INTEGER, RONLY, var_file_table, 1, {4}},
-        {FILE_ERROR, ASN_INTEGER, RONLY, var_file_table, 1, {100}},
-        {FILE_MSG, ASN_OCTET_STR, RONLY, var_file_table, 1, {101}}
+        {FILE_INDEX, ASN_INTEGER, NETSNMP_OLDAPI_RONLY,
+         var_file_table, 1, {1}},
+        {FILE_NAME, ASN_OCTET_STR, NETSNMP_OLDAPI_RONLY,
+         var_file_table, 1, {2}},
+        {FILE_SIZE, ASN_INTEGER, NETSNMP_OLDAPI_RONLY,
+         var_file_table, 1, {3}},
+        {FILE_MAX, ASN_INTEGER, NETSNMP_OLDAPI_RONLY,
+         var_file_table, 1, {4}},
+        {FILE_ERROR, ASN_INTEGER, NETSNMP_OLDAPI_RONLY,
+         var_file_table, 1, {100}},
+        {FILE_MSG, ASN_OCTET_STR, NETSNMP_OLDAPI_RONLY,
+         var_file_table, 1, {101}}
     };
 
     /*

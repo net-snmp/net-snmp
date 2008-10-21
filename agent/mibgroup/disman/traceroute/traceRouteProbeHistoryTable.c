@@ -39,12 +39,18 @@ oid             traceRouteProbeHistoryTable_variables_oid[] =
     { 1, 3, 6, 1, 2, 1, 81, 1, 4 };
 
 struct variable2 traceRouteProbeHistoryTable_variables[] = {
-    {COLUMN_TRACEROUTEPROBEHISTORYHADDRTYPE, ASN_INTEGER, RONLY, var_traceRouteProbeHistoryTable, 2, {1, 4}},
-    {COLUMN_TRACEROUTEPROBEHISTORYHADDR,   ASN_OCTET_STR, RONLY, var_traceRouteProbeHistoryTable, 2, {1, 5}},
-    {COLUMN_TRACEROUTEPROBEHISTORYRESPONSE, ASN_UNSIGNED, RONLY, var_traceRouteProbeHistoryTable, 2, {1, 6}},
-    {COLUMN_TRACEROUTEPROBEHISTORYSTATUS,    ASN_INTEGER, RONLY, var_traceRouteProbeHistoryTable, 2, {1, 7}},
-    {COLUMN_TRACEROUTEPROBEHISTORYLASTRC,    ASN_INTEGER, RONLY, var_traceRouteProbeHistoryTable, 2, {1, 8}},
-    {COLUMN_TRACEROUTEPROBEHISTORYTIME,    ASN_OCTET_STR, RONLY, var_traceRouteProbeHistoryTable, 2, {1, 9}}
+    {COLUMN_TRACEROUTEPROBEHISTORYHADDRTYPE, ASN_INTEGER, NETSNMP_OLDAPI_RONLY,
+     var_traceRouteProbeHistoryTable, 2, {1, 4}},
+    {COLUMN_TRACEROUTEPROBEHISTORYHADDR,   ASN_OCTET_STR, NETSNMP_OLDAPI_RONLY,
+     var_traceRouteProbeHistoryTable, 2, {1, 5}},
+    {COLUMN_TRACEROUTEPROBEHISTORYRESPONSE, ASN_UNSIGNED, NETSNMP_OLDAPI_RONLY,
+     var_traceRouteProbeHistoryTable, 2, {1, 6}},
+    {COLUMN_TRACEROUTEPROBEHISTORYSTATUS,    ASN_INTEGER, NETSNMP_OLDAPI_RONLY,
+     var_traceRouteProbeHistoryTable, 2, {1, 7}},
+    {COLUMN_TRACEROUTEPROBEHISTORYLASTRC,    ASN_INTEGER, NETSNMP_OLDAPI_RONLY,
+     var_traceRouteProbeHistoryTable, 2, {1, 8}},
+    {COLUMN_TRACEROUTEPROBEHISTORYTIME,    ASN_OCTET_STR, NETSNMP_OLDAPI_RONLY,
+     var_traceRouteProbeHistoryTable, 2, {1, 9}}
 };
 
 

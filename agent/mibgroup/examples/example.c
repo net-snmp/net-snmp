@@ -81,7 +81,7 @@ void            example_free_config_examplestr(void);
      *      2: ASN_OCTET_STR:
      *          The type of the object.
      *          Valid types are listed in <snmp_impl.h>
-     *      3: RONLY (or RWRITE):
+     *      3: NETSNMP_OLDAPI_RONLY (or NETSNMP_OLDAPI_RWRITE):
      *          Whether this object can be SET or not.
      *      4: var_example:
      *          The callback routine, used when the object is queried.
@@ -97,15 +97,24 @@ void            example_free_config_examplestr(void);
      *            to obtain the full OID of each entry.
      */
 struct variable2 example_variables[] = {
-    {EXAMPLESTRING, ASN_OCTET_STR, RONLY, var_example, 1, {1}},
-    {EXAMPLEINTEGER, ASN_INTEGER, RWRITE, var_example, 2, {2, 1}},
-    {EXAMPLEOBJECTID, ASN_OBJECT_ID, RONLY, var_example, 2, {2, 2}},
-    {EXAMPLETIMETICKS, ASN_TIMETICKS, RONLY, var_example, 1, {3}},
-    {EXAMPLEIPADDRESS, ASN_IPADDRESS, RONLY, var_example, 1, {4}},
-    {EXAMPLECOUNTER, ASN_COUNTER, RONLY, var_example, 1, {5}},
-    {EXAMPLEGAUGE, ASN_GAUGE, RONLY, var_example, 1, {6}},
-    {EXAMPLETRIGGERTRAP, ASN_INTEGER, RWRITE, var_example, 1, {7}},
-    {EXAMPLETRIGGERTRAP2, ASN_INTEGER, RWRITE, var_example, 1, {8}}
+    {EXAMPLESTRING, ASN_OCTET_STR, NETSNMP_OLDAPI_RONLY,
+     var_example, 1, {1}},
+    {EXAMPLEINTEGER, ASN_INTEGER, NETSNMP_OLDAPI_RWRITE,
+     var_example, 2, {2, 1}},
+    {EXAMPLEOBJECTID, ASN_OBJECT_ID, NETSNMP_OLDAPI_RONLY,
+     var_example, 2, {2, 2}},
+    {EXAMPLETIMETICKS, ASN_TIMETICKS, NETSNMP_OLDAPI_RONLY,
+     var_example, 1, {3}},
+    {EXAMPLEIPADDRESS, ASN_IPADDRESS, NETSNMP_OLDAPI_RONLY,
+     var_example, 1, {4}},
+    {EXAMPLECOUNTER, ASN_COUNTER, NETSNMP_OLDAPI_RONLY,
+     var_example, 1, {5}},
+    {EXAMPLEGAUGE, ASN_GAUGE, NETSNMP_OLDAPI_RONLY,
+     var_example, 1, {6}},
+    {EXAMPLETRIGGERTRAP, ASN_INTEGER, NETSNMP_OLDAPI_RWRITE,
+     var_example, 1, {7}},
+    {EXAMPLETRIGGERTRAP2, ASN_INTEGER, NETSNMP_OLDAPI_RWRITE,
+     var_example, 1, {8}}
 };
 
     /*

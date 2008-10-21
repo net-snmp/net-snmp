@@ -65,19 +65,26 @@ struct variable2 expExpressionTable_variables[] = {
      * magic number        , variable type , ro/rw , callback fn  , L, oidsuffix 
      */
 #define	EXPEXPRESSION  3
-    {EXPEXPRESSION,          ASN_OCTET_STR, RWRITE, var_expExpressionTable, 2, {1, 3}},
+    {EXPEXPRESSION,          ASN_OCTET_STR, NETSNMP_OLDAPI_RWRITE,
+     var_expExpressionTable, 2, {1, 3}},
 #define	EXPEXPRESSIONVALUETYPE 4
-    {EXPEXPRESSIONVALUETYPE, ASN_INTEGER,   RWRITE, var_expExpressionTable, 2, {1, 4}},
+    {EXPEXPRESSIONVALUETYPE, ASN_INTEGER,   NETSNMP_OLDAPI_RWRITE,
+     var_expExpressionTable, 2, {1, 4}},
 #define	EXPEXPRESSIONCOMMENT 5
-    {EXPEXPRESSIONCOMMENT,   ASN_OCTET_STR, RWRITE, var_expExpressionTable, 2, {1, 5}},
+    {EXPEXPRESSIONCOMMENT,   ASN_OCTET_STR, NETSNMP_OLDAPI_RWRITE,
+     var_expExpressionTable, 2, {1, 5}},
 #define	EXPEXPRESSIONDELTALNTERVAL 6
-    {EXPEXPRESSIONDELTALNTERVAL, ASN_INTEGER, RWRITE, var_expExpressionTable, 2, {1, 6}},
+    {EXPEXPRESSIONDELTALNTERVAL, ASN_INTEGER, NETSNMP_OLDAPI_RWRITE,
+     var_expExpressionTable, 2, {1, 6}},
 #define	EXPEXPRESSIONPREFIX 7
-    {EXPEXPRESSIONPREFIX,    ASN_OBJECT_ID, RONLY,  var_expExpressionTable, 2, {1, 7}},
+    {EXPEXPRESSIONPREFIX,    ASN_OBJECT_ID, NETSNMP_OLDAPI_RONLY,
+     var_expExpressionTable, 2, {1, 7}},
 #define	EXPEXPRESSIONERRORS 8
-    {EXPEXPRESSIONERRORS,    ASN_UNSIGNED,  RONLY,  var_expExpressionTable, 2, {1, 8}},
+    {EXPEXPRESSIONERRORS,    ASN_UNSIGNED,  NETSNMP_OLDAPI_RONLY,
+     var_expExpressionTable, 2, {1, 8}},
 #define	EXPEXPRESSIONENTRYSTATUS  9
-    {EXPEXPRESSIONENTRYSTATUS, ASN_INTEGER, RWRITE, var_expExpressionTable, 2, {1, 9}}
+    {EXPEXPRESSIONENTRYSTATUS, ASN_INTEGER, NETSNMP_OLDAPI_RWRITE,
+     var_expExpressionTable, 2, {1, 9}}
 };
 
 /*

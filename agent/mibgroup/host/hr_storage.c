@@ -264,14 +264,22 @@ void            sol_get_swapinfo(int *, int *);
 #define	HRSTORE_FAILS		8
 
 struct variable4 hrstore_variables[] = {
-    {HRSTORE_MEMSIZE, ASN_INTEGER, RONLY, var_hrstore, 1, {2}},
-    {HRSTORE_INDEX, ASN_INTEGER, RONLY, var_hrstore, 3, {3, 1, 1}},
-    {HRSTORE_TYPE, ASN_OBJECT_ID, RONLY, var_hrstore, 3, {3, 1, 2}},
-    {HRSTORE_DESCR, ASN_OCTET_STR, RONLY, var_hrstore, 3, {3, 1, 3}},
-    {HRSTORE_UNITS, ASN_INTEGER, RONLY, var_hrstore, 3, {3, 1, 4}},
-    {HRSTORE_SIZE, ASN_INTEGER, RONLY, var_hrstore, 3, {3, 1, 5}},
-    {HRSTORE_USED, ASN_INTEGER, RONLY, var_hrstore, 3, {3, 1, 6}},
-    {HRSTORE_FAILS, ASN_COUNTER, RONLY, var_hrstore, 3, {3, 1, 7}}
+    {HRSTORE_MEMSIZE, ASN_INTEGER, NETSNMP_OLDAPI_RONLY,
+     var_hrstore, 1, {2}},
+    {HRSTORE_INDEX, ASN_INTEGER, NETSNMP_OLDAPI_RONLY,
+     var_hrstore, 3, {3, 1, 1}},
+    {HRSTORE_TYPE, ASN_OBJECT_ID, NETSNMP_OLDAPI_RONLY,
+     var_hrstore, 3, {3, 1, 2}},
+    {HRSTORE_DESCR, ASN_OCTET_STR, NETSNMP_OLDAPI_RONLY,
+     var_hrstore, 3, {3, 1, 3}},
+    {HRSTORE_UNITS, ASN_INTEGER, NETSNMP_OLDAPI_RONLY,
+     var_hrstore, 3, {3, 1, 4}},
+    {HRSTORE_SIZE, ASN_INTEGER, NETSNMP_OLDAPI_RONLY,
+     var_hrstore, 3, {3, 1, 5}},
+    {HRSTORE_USED, ASN_INTEGER, NETSNMP_OLDAPI_RONLY,
+     var_hrstore, 3, {3, 1, 6}},
+    {HRSTORE_FAILS, ASN_COUNTER, NETSNMP_OLDAPI_RONLY,
+     var_hrstore, 3, {3, 1, 7}}
 };
 oid             hrstore_variables_oid[] = { 1, 3, 6, 1, 2, 1, 25, 2 };
 

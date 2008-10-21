@@ -72,11 +72,16 @@ int             header_hrpartition(struct variable *, oid *, size_t *, int,
 #define	HRPART_FSIDX		5
 
 struct variable4 hrpartition_variables[] = {
-    {HRPART_INDEX, ASN_INTEGER, RONLY, var_hrpartition, 2, {1, 1}},
-    {HRPART_LABEL, ASN_OCTET_STR, RONLY, var_hrpartition, 2, {1, 2}},
-    {HRPART_ID, ASN_OCTET_STR, RONLY, var_hrpartition, 2, {1, 3}},
-    {HRPART_SIZE, ASN_INTEGER, RONLY, var_hrpartition, 2, {1, 4}},
-    {HRPART_FSIDX, ASN_INTEGER, RONLY, var_hrpartition, 2, {1, 5}}
+    {HRPART_INDEX, ASN_INTEGER, NETSNMP_OLDAPI_RONLY,
+     var_hrpartition, 2, {1, 1}},
+    {HRPART_LABEL, ASN_OCTET_STR, NETSNMP_OLDAPI_RONLY,
+     var_hrpartition, 2, {1, 2}},
+    {HRPART_ID, ASN_OCTET_STR, NETSNMP_OLDAPI_RONLY,
+     var_hrpartition, 2, {1, 3}},
+    {HRPART_SIZE, ASN_INTEGER, NETSNMP_OLDAPI_RONLY,
+     var_hrpartition, 2, {1, 4}},
+    {HRPART_FSIDX, ASN_INTEGER, NETSNMP_OLDAPI_RONLY,
+     var_hrpartition, 2, {1, 5}}
 };
 oid             hrpartition_variables_oid[] =
     { 1, 3, 6, 1, 2, 1, 25, 3, 7 };

@@ -76,21 +76,29 @@ struct variable2 expValueTable_variables[] = {
      * magic number        , variable type , ro/rw , callback fn  , L, oidsuffix 
      */
 #define	EXPVALUECOUNTER32VAL 2
-    {EXPVALUECOUNTER32VAL,  ASN_COUNTER,  RONLY, var_expValueTable, 2, {1, 2}},
+    {EXPVALUECOUNTER32VAL,  ASN_COUNTER,  NETSNMP_OLDAPI_RONLY,
+     var_expValueTable, 2, {1, 2}},
 #define	EXPVALUEUNSIGNED32VAL 3
-    {EXPVALUEUNSIGNED32VAL, ASN_UNSIGNED, RONLY, var_expValueTable, 2, {1, 3}},
+    {EXPVALUEUNSIGNED32VAL, ASN_UNSIGNED, NETSNMP_OLDAPI_RONLY,
+     var_expValueTable, 2, {1, 3}},
 #define	EXPVALUETIMETICKSVAL 4
-    {EXPVALUETIMETICKSVAL,  ASN_UNSIGNED, RONLY, var_expValueTable, 2, {1, 4}},
+    {EXPVALUETIMETICKSVAL,  ASN_UNSIGNED, NETSNMP_OLDAPI_RONLY,
+     var_expValueTable, 2, {1, 4}},
 #define	EXPVALUEINTEGER32VAL 5
-    {EXPVALUEINTEGER32VAL,  ASN_INTEGER,  RONLY, var_expValueTable, 2, {1, 5}},
+    {EXPVALUEINTEGER32VAL,  ASN_INTEGER,  NETSNMP_OLDAPI_RONLY,
+     var_expValueTable, 2, {1, 5}},
 #define	EXPVALUEIPADDRESSVAL 6
-    {EXPVALUEIPADDRESSVAL, ASN_IPADDRESS, RONLY, var_expValueTable, 2, {1, 6}},
+    {EXPVALUEIPADDRESSVAL, ASN_IPADDRESS, NETSNMP_OLDAPI_RONLY,
+     var_expValueTable, 2, {1, 6}},
 #define	EXPVALUEOCTETSTRINGVAL 7
-    {EXPVALUEOCTETSTRINGVAL, ASN_OCTET_STR, RONLY, var_expValueTable, 2, {1, 7}},
+    {EXPVALUEOCTETSTRINGVAL, ASN_OCTET_STR, NETSNMP_OLDAPI_RONLY,
+     var_expValueTable, 2, {1, 7}},
 #define	EXPVALUEOIDVAL  8
-    {EXPVALUEOIDVAL,       ASN_OBJECT_ID, RONLY, var_expValueTable, 2, {1, 8}},
+    {EXPVALUEOIDVAL,       ASN_OBJECT_ID, NETSNMP_OLDAPI_RONLY,
+     var_expValueTable, 2, {1, 8}},
 #define	EXPVALUECOUNTER64VAL  9
-    {EXPVALUECOUNTER64VAL, ASN_INTEGER,   RONLY, var_expValueTable, 2, {1, 9}}
+    {EXPVALUECOUNTER64VAL, ASN_INTEGER,   NETSNMP_OLDAPI_RONLY,
+     var_expValueTable, 2, {1, 9}}
 };
 
 

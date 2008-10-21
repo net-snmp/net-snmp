@@ -50,10 +50,14 @@ oid             pingProbeHistoryTable_variables_oid[] =
     { 1, 3, 6, 1, 2, 1, 80, 1, 4 };
 
 struct variable2 pingProbeHistoryTable_variables[] = {
-    {COLUMN_PINGPROBEHISTORYRESPONSE, ASN_UNSIGNED, RONLY, var_pingProbeHistoryTable, 2, {1, 2}},
-    {COLUMN_PINGPROBEHISTORYSTATUS,    ASN_INTEGER, RONLY, var_pingProbeHistoryTable, 2, {1, 3}},
-    {COLUMN_PINGPROBEHISTORYLASTRC,    ASN_INTEGER, RONLY, var_pingProbeHistoryTable, 2, {1, 4}},
-    {COLUMN_PINGPROBEHISTORYTIME,    ASN_OCTET_STR, RONLY, var_pingProbeHistoryTable, 2, {1, 5}}
+    {COLUMN_PINGPROBEHISTORYRESPONSE, ASN_UNSIGNED, NETSNMP_OLDAPI_RONLY,
+     var_pingProbeHistoryTable, 2, {1, 2}},
+    {COLUMN_PINGPROBEHISTORYSTATUS,    ASN_INTEGER, NETSNMP_OLDAPI_RONLY,
+     var_pingProbeHistoryTable, 2, {1, 3}},
+    {COLUMN_PINGPROBEHISTORYLASTRC,    ASN_INTEGER, NETSNMP_OLDAPI_RONLY,
+     var_pingProbeHistoryTable, 2, {1, 4}},
+    {COLUMN_PINGPROBEHISTORYTIME,    ASN_OCTET_STR, NETSNMP_OLDAPI_RONLY,
+     var_pingProbeHistoryTable, 2, {1, 5}}
 };
 
 

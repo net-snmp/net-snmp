@@ -79,21 +79,24 @@ init_proc(void)
      * information at 
      */
     struct variable2 extensible_proc_variables[] = {
-        {MIBINDEX, ASN_INTEGER, RONLY, var_extensible_proc, 1, {MIBINDEX}},
-        {ERRORNAME, ASN_OCTET_STR, RONLY, var_extensible_proc, 1,
-         {ERRORNAME}},
-        {PROCMIN, ASN_INTEGER, RONLY, var_extensible_proc, 1, {PROCMIN}},
-        {PROCMAX, ASN_INTEGER, RONLY, var_extensible_proc, 1, {PROCMAX}},
-        {PROCCOUNT, ASN_INTEGER, RONLY, var_extensible_proc, 1,
-         {PROCCOUNT}},
-        {ERRORFLAG, ASN_INTEGER, RONLY, var_extensible_proc, 1,
-         {ERRORFLAG}},
-        {ERRORMSG, ASN_OCTET_STR, RONLY, var_extensible_proc, 1,
-         {ERRORMSG}},
-        {ERRORFIX, ASN_INTEGER, RWRITE, var_extensible_proc, 1,
-         {ERRORFIX}},
-        {ERRORFIXCMD, ASN_OCTET_STR, RONLY, var_extensible_proc, 1,
-         {ERRORFIXCMD}}
+        {MIBINDEX, ASN_INTEGER, NETSNMP_OLDAPI_RONLY,
+         var_extensible_proc, 1, {MIBINDEX}},
+        {ERRORNAME, ASN_OCTET_STR, NETSNMP_OLDAPI_RONLY,
+         var_extensible_proc, 1, {ERRORNAME}},
+        {PROCMIN, ASN_INTEGER, NETSNMP_OLDAPI_RONLY,
+         var_extensible_proc, 1, {PROCMIN}},
+        {PROCMAX, ASN_INTEGER, NETSNMP_OLDAPI_RONLY,
+         var_extensible_proc, 1, {PROCMAX}},
+        {PROCCOUNT, ASN_INTEGER, NETSNMP_OLDAPI_RONLY,
+         var_extensible_proc, 1, {PROCCOUNT}},
+        {ERRORFLAG, ASN_INTEGER, NETSNMP_OLDAPI_RONLY,
+         var_extensible_proc, 1, {ERRORFLAG}},
+        {ERRORMSG, ASN_OCTET_STR, NETSNMP_OLDAPI_RONLY,
+         var_extensible_proc, 1, {ERRORMSG}},
+        {ERRORFIX, ASN_INTEGER, NETSNMP_OLDAPI_RWRITE,
+         var_extensible_proc, 1, {ERRORFIX}},
+        {ERRORFIXCMD, ASN_OCTET_STR, NETSNMP_OLDAPI_RONLY,
+         var_extensible_proc, 1, {ERRORFIXCMD}}
     };
 
     /*
