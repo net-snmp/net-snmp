@@ -51,28 +51,37 @@ void
 init_logmatch(void)
 {
     struct variable2 logmatch_info[] = {
-        {LOGMATCH_INFO, ASN_INTEGER, RONLY, var_logmatch_table, 0}
+        {LOGMATCH_INFO, ASN_INTEGER, NETSNMP_OLDAPI_RONLY,
+         var_logmatch_table, 0}
     };
 
     struct variable2 logmatch_table[] = {
-        {LOGMATCH_INDEX, ASN_INTEGER, RONLY, var_logmatch_table, 1, {1}},
-        {LOGMATCH_NAME, ASN_OCTET_STR, RONLY, var_logmatch_table, 1, {2}},
-        {LOGMATCH_FILENAME, ASN_OCTET_STR, RONLY, var_logmatch_table, 1,
-         {3}},
-        {LOGMATCH_REGEX, ASN_OCTET_STR, RONLY, var_logmatch_table, 1, {4}},
-        {LOGMATCH_GLOBALCTR, ASN_COUNTER, RONLY, var_logmatch_table, 1,
-         {5}},
-        {LOGMATCH_GLOBALCNT, ASN_INTEGER, RONLY, var_logmatch_table, 1,
-         {6}},
-        {LOGMATCH_CURRENTCTR, ASN_COUNTER, RONLY, var_logmatch_table, 1,
-         {7}},
-        {LOGMATCH_CURRENTCNT, ASN_INTEGER, RONLY, var_logmatch_table, 1,
-         {8}},
-        {LOGMATCH_COUNTER, ASN_COUNTER, RONLY, var_logmatch_table, 1, {9}},
-        {LOGMATCH_COUNT, ASN_INTEGER, RONLY, var_logmatch_table, 1, {10}},
-        {LOGMATCH_FREQ, ASN_INTEGER, RONLY, var_logmatch_table, 1, {11}},
-        {LOGMATCH_ERROR, ASN_INTEGER, RONLY, var_logmatch_table, 1, {100}},
-        {LOGMATCH_MSG, ASN_OCTET_STR, RONLY, var_logmatch_table, 1, {101}}
+        {LOGMATCH_INDEX, ASN_INTEGER, NETSNMP_OLDAPI_RONLY,
+         var_logmatch_table, 1, {1}},
+        {LOGMATCH_NAME, ASN_OCTET_STR, NETSNMP_OLDAPI_RONLY,
+         var_logmatch_table, 1, {2}},
+        {LOGMATCH_FILENAME, ASN_OCTET_STR, NETSNMP_OLDAPI_RONLY,
+         var_logmatch_table, 1, {3}},
+        {LOGMATCH_REGEX, ASN_OCTET_STR, NETSNMP_OLDAPI_RONLY,
+         var_logmatch_table, 1, {4}},
+        {LOGMATCH_GLOBALCTR, ASN_COUNTER, NETSNMP_OLDAPI_RONLY,
+         var_logmatch_table, 1, {5}},
+        {LOGMATCH_GLOBALCNT, ASN_INTEGER, NETSNMP_OLDAPI_RONLY,
+         var_logmatch_table, 1, {6}},
+        {LOGMATCH_CURRENTCTR, ASN_COUNTER, NETSNMP_OLDAPI_RONLY,
+         var_logmatch_table, 1, {7}},
+        {LOGMATCH_CURRENTCNT, ASN_INTEGER, NETSNMP_OLDAPI_RONLY,
+         var_logmatch_table, 1, {8}},
+        {LOGMATCH_COUNTER, ASN_COUNTER, NETSNMP_OLDAPI_RONLY,
+         var_logmatch_table, 1, {9}},
+        {LOGMATCH_COUNT, ASN_INTEGER, NETSNMP_OLDAPI_RONLY,
+         var_logmatch_table, 1, {10}},
+        {LOGMATCH_FREQ, ASN_INTEGER, NETSNMP_OLDAPI_RONLY,
+         var_logmatch_table, 1, {11}},
+        {LOGMATCH_ERROR, ASN_INTEGER, NETSNMP_OLDAPI_RONLY,
+         var_logmatch_table, 1, {100}},
+        {LOGMATCH_MSG, ASN_OCTET_STR, NETSNMP_OLDAPI_RONLY,
+         var_logmatch_table, 1, {101}}
     };
 
     /*

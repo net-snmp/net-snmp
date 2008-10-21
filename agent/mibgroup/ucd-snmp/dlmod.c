@@ -45,11 +45,16 @@ static void     dlmod_free_config(void);
  * information for the dlmod mib
  */
 static struct variable4 dlmod_variables[] = {
-    {DLMODNEXTINDEX, ASN_INTEGER, RONLY, var_dlmod, 1, {1}},
-    {DLMODNAME, ASN_OCTET_STR, RWRITE, var_dlmodEntry, 3, {2, 1, 2}},
-    {DLMODPATH, ASN_OCTET_STR, RWRITE, var_dlmodEntry, 3, {2, 1, 3}},
-    {DLMODERROR, ASN_OCTET_STR, RONLY, var_dlmodEntry, 3, {2, 1, 4}},
-    {DLMODSTATUS, ASN_INTEGER, RWRITE, var_dlmodEntry, 3, {2, 1, 5}},
+    {DLMODNEXTINDEX, ASN_INTEGER, NETSNMP_OLDAPI_RONLY,
+     var_dlmod, 1, {1}},
+    {DLMODNAME, ASN_OCTET_STR, NETSNMP_OLDAPI_RWRITE,
+     var_dlmodEntry, 3, {2, 1, 2}},
+    {DLMODPATH, ASN_OCTET_STR, NETSNMP_OLDAPI_RWRITE,
+     var_dlmodEntry, 3, {2, 1, 3}},
+    {DLMODERROR, ASN_OCTET_STR, NETSNMP_OLDAPI_RONLY,
+     var_dlmodEntry, 3, {2, 1, 4}},
+    {DLMODSTATUS, ASN_INTEGER, NETSNMP_OLDAPI_RWRITE,
+     var_dlmodEntry, 3, {2, 1, 5}},
 };
 
 static oid      dlmod_variables_oid[] = { 1, 3, 6, 1, 4, 1, 2021, 13, 14 };

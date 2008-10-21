@@ -64,43 +64,69 @@ extern void     init_routes(void);
  * information at 
  */
 struct variable1 ipaddr_variables[] = {
-    {IPADADDR,      ASN_IPADDRESS, RONLY, var_ipAddrEntry, 1, {1}},
-    {IPADIFINDEX,   ASN_INTEGER,   RONLY, var_ipAddrEntry, 1, {2}},
+    {IPADADDR,      ASN_IPADDRESS, NETSNMP_OLDAPI_RONLY,
+     var_ipAddrEntry, 1, {1}},
+    {IPADIFINDEX,   ASN_INTEGER,   NETSNMP_OLDAPI_RONLY,
+     var_ipAddrEntry, 1, {2}},
 #ifndef sunV3
-    {IPADNETMASK,   ASN_IPADDRESS, RONLY, var_ipAddrEntry, 1, {3}},
+    {IPADNETMASK,   ASN_IPADDRESS, NETSNMP_OLDAPI_RONLY,
+     var_ipAddrEntry, 1, {3}},
 #endif
-    {IPADBCASTADDR, ASN_INTEGER,   RONLY, var_ipAddrEntry, 1, {4}},
-    {IPADREASMMAX,  ASN_INTEGER,   RONLY, var_ipAddrEntry, 1, {5}}
+    {IPADBCASTADDR, ASN_INTEGER,   NETSNMP_OLDAPI_RONLY,
+     var_ipAddrEntry, 1, {4}},
+    {IPADREASMMAX,  ASN_INTEGER,   NETSNMP_OLDAPI_RONLY,
+     var_ipAddrEntry, 1, {5}}
 };
 
 struct variable1 iproute_variables[] = {
-    {IPROUTEDEST,    ASN_IPADDRESS, RWRITE, var_ipRouteEntry, 1, {1}},
-    {IPROUTEIFINDEX, ASN_INTEGER,   RWRITE, var_ipRouteEntry, 1, {2}},
-    {IPROUTEMETRIC1, ASN_INTEGER,   RWRITE, var_ipRouteEntry, 1, {3}},
-    {IPROUTEMETRIC2, ASN_INTEGER,   RWRITE, var_ipRouteEntry, 1, {4}},
-    {IPROUTEMETRIC3, ASN_INTEGER,   RWRITE, var_ipRouteEntry, 1, {5}},
-    {IPROUTEMETRIC4, ASN_INTEGER,   RWRITE, var_ipRouteEntry, 1, {6}},
-    {IPROUTENEXTHOP, ASN_IPADDRESS, RWRITE, var_ipRouteEntry, 1, {7}},
-    {IPROUTETYPE,    ASN_INTEGER,   RWRITE, var_ipRouteEntry, 1, {8}},
-    {IPROUTEPROTO,   ASN_INTEGER,   RONLY,  var_ipRouteEntry, 1, {9}},
-    {IPROUTEAGE,     ASN_INTEGER,   RWRITE, var_ipRouteEntry, 1, {10}},
-    {IPROUTEMASK,    ASN_IPADDRESS, RWRITE, var_ipRouteEntry, 1, {11}},
-    {IPROUTEMETRIC5, ASN_INTEGER,   RWRITE, var_ipRouteEntry, 1, {12}},
-    {IPROUTEINFO,    ASN_OBJECT_ID, RONLY,  var_ipRouteEntry, 1, {13}}
+    {IPROUTEDEST,    ASN_IPADDRESS, NETSNMP_OLDAPI_RWRITE,
+     var_ipRouteEntry, 1, {1}},
+    {IPROUTEIFINDEX, ASN_INTEGER,   NETSNMP_OLDAPI_RWRITE,
+     var_ipRouteEntry, 1, {2}},
+    {IPROUTEMETRIC1, ASN_INTEGER,   NETSNMP_OLDAPI_RWRITE,
+     var_ipRouteEntry, 1, {3}},
+    {IPROUTEMETRIC2, ASN_INTEGER,   NETSNMP_OLDAPI_RWRITE,
+     var_ipRouteEntry, 1, {4}},
+    {IPROUTEMETRIC3, ASN_INTEGER,   NETSNMP_OLDAPI_RWRITE,
+     var_ipRouteEntry, 1, {5}},
+    {IPROUTEMETRIC4, ASN_INTEGER,   NETSNMP_OLDAPI_RWRITE,
+     var_ipRouteEntry, 1, {6}},
+    {IPROUTENEXTHOP, ASN_IPADDRESS, NETSNMP_OLDAPI_RWRITE,
+     var_ipRouteEntry, 1, {7}},
+    {IPROUTETYPE,    ASN_INTEGER,   NETSNMP_OLDAPI_RWRITE,
+     var_ipRouteEntry, 1, {8}},
+    {IPROUTEPROTO,   ASN_INTEGER,   NETSNMP_OLDAPI_RONLY,
+     var_ipRouteEntry, 1, {9}},
+    {IPROUTEAGE,     ASN_INTEGER,   NETSNMP_OLDAPI_RWRITE,
+     var_ipRouteEntry, 1, {10}},
+    {IPROUTEMASK,    ASN_IPADDRESS, NETSNMP_OLDAPI_RWRITE,
+     var_ipRouteEntry, 1, {11}},
+    {IPROUTEMETRIC5, ASN_INTEGER,   NETSNMP_OLDAPI_RWRITE,
+     var_ipRouteEntry, 1, {12}},
+    {IPROUTEINFO,    ASN_OBJECT_ID, NETSNMP_OLDAPI_RONLY,
+     var_ipRouteEntry, 1, {13}}
 };
 
 struct variable1 ipmedia_variables[] = {
 #ifdef USING_MIBII_AT_MODULE
 #if defined (WIN32) || defined (cygwin)
-    {IPMEDIAIFINDEX,     ASN_INTEGER,   RWRITE, var_atEntry, 1, {1}},
-    {IPMEDIAPHYSADDRESS, ASN_OCTET_STR, RWRITE, var_atEntry, 1, {2}},
-    {IPMEDIANETADDRESS,  ASN_IPADDRESS, RWRITE, var_atEntry, 1, {3}},
-    {IPMEDIATYPE,        ASN_INTEGER,   RWRITE, var_atEntry, 1, {4}}
+    {IPMEDIAIFINDEX,     ASN_INTEGER,   NETSNMP_OLDAPI_RWRITE,
+     var_atEntry, 1, {1}},
+    {IPMEDIAPHYSADDRESS, ASN_OCTET_STR, NETSNMP_OLDAPI_RWRITE,
+     var_atEntry, 1, {2}},
+    {IPMEDIANETADDRESS,  ASN_IPADDRESS, NETSNMP_OLDAPI_RWRITE,
+     var_atEntry, 1, {3}},
+    {IPMEDIATYPE,        ASN_INTEGER,   NETSNMP_OLDAPI_RWRITE,
+     var_atEntry, 1, {4}}
 #else
-    {IPMEDIAIFINDEX,     ASN_INTEGER,   RONLY, var_atEntry, 1, {1}},
-    {IPMEDIAPHYSADDRESS, ASN_OCTET_STR, RONLY, var_atEntry, 1, {2}},
-    {IPMEDIANETADDRESS,  ASN_IPADDRESS, RONLY, var_atEntry, 1, {3}},
-    {IPMEDIATYPE,        ASN_INTEGER,   RONLY, var_atEntry, 1, {4}}
+    {IPMEDIAIFINDEX,     ASN_INTEGER,   NETSNMP_OLDAPI_RONLY,
+     var_atEntry, 1, {1}},
+    {IPMEDIAPHYSADDRESS, ASN_OCTET_STR, NETSNMP_OLDAPI_RONLY,
+     var_atEntry, 1, {2}},
+    {IPMEDIANETADDRESS,  ASN_IPADDRESS, NETSNMP_OLDAPI_RONLY,
+     var_atEntry, 1, {3}},
+    {IPMEDIATYPE,        ASN_INTEGER,   NETSNMP_OLDAPI_RONLY,
+     var_atEntry, 1, {4}}
 #endif
 #endif
 };

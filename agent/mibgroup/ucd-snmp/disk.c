@@ -175,23 +175,30 @@ int             maxdisks = 0;
 struct diskpart *disks;
 
 struct variable2 extensible_disk_variables[] = {
-  {MIBINDEX, ASN_INTEGER, RONLY, var_extensible_disk, 1, {MIBINDEX}},
-  {ERRORNAME, ASN_OCTET_STR, RONLY, var_extensible_disk, 1, {ERRORNAME}},
-  {DISKDEVICE, ASN_OCTET_STR, RONLY, var_extensible_disk, 1,
-   {DISKDEVICE}},
-  {DISKMINIMUM, ASN_INTEGER, RONLY, var_extensible_disk, 1,
-   {DISKMINIMUM}},
-  {DISKMINPERCENT, ASN_INTEGER, RONLY, var_extensible_disk, 1,
-   {DISKMINPERCENT}},
-  {DISKTOTAL, ASN_INTEGER, RONLY, var_extensible_disk, 1, {DISKTOTAL}},
-  {DISKAVAIL, ASN_INTEGER, RONLY, var_extensible_disk, 1, {DISKAVAIL}},
-  {DISKUSED, ASN_INTEGER, RONLY, var_extensible_disk, 1, {DISKUSED}},
-  {DISKPERCENT, ASN_INTEGER, RONLY, var_extensible_disk, 1,
-   {DISKPERCENT}},
-  {DISKPERCENTNODE, ASN_INTEGER, RONLY, var_extensible_disk, 1,
-   {DISKPERCENTNODE}},
-  {ERRORFLAG, ASN_INTEGER, RONLY, var_extensible_disk, 1, {ERRORFLAG}},
-  {ERRORMSG, ASN_OCTET_STR, RONLY, var_extensible_disk, 1, {ERRORMSG}}
+  {MIBINDEX, ASN_INTEGER, NETSNMP_OLDAPI_RONLY,
+   var_extensible_disk, 1, {MIBINDEX}},
+  {ERRORNAME, ASN_OCTET_STR, NETSNMP_OLDAPI_RONLY,
+   var_extensible_disk, 1, {ERRORNAME}},
+  {DISKDEVICE, ASN_OCTET_STR, NETSNMP_OLDAPI_RONLY,
+   var_extensible_disk, 1, {DISKDEVICE}},
+  {DISKMINIMUM, ASN_INTEGER, NETSNMP_OLDAPI_RONLY,
+   var_extensible_disk, 1, {DISKMINIMUM}},
+  {DISKMINPERCENT, ASN_INTEGER, NETSNMP_OLDAPI_RONLY,
+   var_extensible_disk, 1, {DISKMINPERCENT}},
+  {DISKTOTAL, ASN_INTEGER, NETSNMP_OLDAPI_RONLY,
+   var_extensible_disk, 1, {DISKTOTAL}},
+  {DISKAVAIL, ASN_INTEGER, NETSNMP_OLDAPI_RONLY,
+   var_extensible_disk, 1, {DISKAVAIL}},
+  {DISKUSED, ASN_INTEGER, NETSNMP_OLDAPI_RONLY,
+   var_extensible_disk, 1, {DISKUSED}},
+  {DISKPERCENT, ASN_INTEGER, NETSNMP_OLDAPI_RONLY,
+   var_extensible_disk, 1, {DISKPERCENT}},
+  {DISKPERCENTNODE, ASN_INTEGER, NETSNMP_OLDAPI_RONLY,
+   var_extensible_disk, 1, {DISKPERCENTNODE}},
+  {ERRORFLAG, ASN_INTEGER, NETSNMP_OLDAPI_RONLY,
+   var_extensible_disk, 1, {ERRORFLAG}},
+  {ERRORMSG, ASN_OCTET_STR, NETSNMP_OLDAPI_RONLY,
+   var_extensible_disk, 1, {ERRORMSG}}
 };
 
 /*

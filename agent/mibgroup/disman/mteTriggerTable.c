@@ -83,43 +83,44 @@ struct variable2 mteTriggerTable_variables[] = {
      * magic number        , variable type , ro/rw , callback fn  , L, oidsuffix 
      */
 #define   MTETRIGGERCOMMENT     5
-    {MTETRIGGERCOMMENT, ASN_OCTET_STR, RWRITE, var_mteTriggerTable, 2,
-     {1, 3}},
+    {MTETRIGGERCOMMENT, ASN_OCTET_STR, NETSNMP_OLDAPI_RWRITE,
+     var_mteTriggerTable, 2, {1, 3}},
 #define   MTETRIGGERTEST        6
-    {MTETRIGGERTEST, ASN_OCTET_STR, RWRITE, var_mteTriggerTable, 2, {1, 4}},
+    {MTETRIGGERTEST, ASN_OCTET_STR, NETSNMP_OLDAPI_RWRITE,
+     var_mteTriggerTable, 2, {1, 4}},
 #define   MTETRIGGERSAMPLETYPE  7
-    {MTETRIGGERSAMPLETYPE, ASN_INTEGER, RWRITE, var_mteTriggerTable, 2,
-     {1, 5}},
+    {MTETRIGGERSAMPLETYPE, ASN_INTEGER, NETSNMP_OLDAPI_RWRITE,
+     var_mteTriggerTable, 2, {1, 5}},
 #define   MTETRIGGERVALUEID     8
-    {MTETRIGGERVALUEID, ASN_OBJECT_ID, RWRITE, var_mteTriggerTable, 2,
-     {1, 6}},
+    {MTETRIGGERVALUEID, ASN_OBJECT_ID, NETSNMP_OLDAPI_RWRITE,
+     var_mteTriggerTable, 2, {1, 6}},
 #define   MTETRIGGERVALUEIDWILDCARD  9
-    {MTETRIGGERVALUEIDWILDCARD, ASN_INTEGER, RWRITE, var_mteTriggerTable,
-     2, {1, 7}},
+    {MTETRIGGERVALUEIDWILDCARD, ASN_INTEGER, NETSNMP_OLDAPI_RWRITE,
+     var_mteTriggerTable, 2, {1, 7}},
 #define   MTETRIGGERTARGETTAG   10
-    {MTETRIGGERTARGETTAG, ASN_OCTET_STR, RWRITE, var_mteTriggerTable, 2,
-     {1, 8}},
+    {MTETRIGGERTARGETTAG, ASN_OCTET_STR, NETSNMP_OLDAPI_RWRITE,
+     var_mteTriggerTable, 2, {1, 8}},
 #define   MTETRIGGERCONTEXTNAME  11
-    {MTETRIGGERCONTEXTNAME, ASN_OCTET_STR, RWRITE, var_mteTriggerTable, 2,
-     {1, 9}},
+    {MTETRIGGERCONTEXTNAME, ASN_OCTET_STR, NETSNMP_OLDAPI_RWRITE,
+     var_mteTriggerTable, 2, {1, 9}},
 #define   MTETRIGGERCONTEXTNAMEWILDCARD  12
-    {MTETRIGGERCONTEXTNAMEWILDCARD, ASN_INTEGER, RWRITE,
+    {MTETRIGGERCONTEXTNAMEWILDCARD, ASN_INTEGER, NETSNMP_OLDAPI_RWRITE,
      var_mteTriggerTable, 2, {1, 10}},
 #define   MTETRIGGERFREQUENCY   13
-    {MTETRIGGERFREQUENCY, ASN_UNSIGNED, RWRITE, var_mteTriggerTable, 2,
-     {1, 11}},
+    {MTETRIGGERFREQUENCY, ASN_UNSIGNED, NETSNMP_OLDAPI_RWRITE,
+     var_mteTriggerTable, 2, {1, 11}},
 #define   MTETRIGGEROBJECTSOWNER  14
-    {MTETRIGGEROBJECTSOWNER, ASN_OCTET_STR, RWRITE, var_mteTriggerTable, 2,
-     {1, 12}},
+    {MTETRIGGEROBJECTSOWNER, ASN_OCTET_STR, NETSNMP_OLDAPI_RWRITE,
+     var_mteTriggerTable, 2, {1, 12}},
 #define   MTETRIGGEROBJECTS     15
-    {MTETRIGGEROBJECTS, ASN_OCTET_STR, RWRITE, var_mteTriggerTable, 2,
-     {1, 13}},
+    {MTETRIGGEROBJECTS, ASN_OCTET_STR, NETSNMP_OLDAPI_RWRITE,
+     var_mteTriggerTable, 2, {1, 13}},
 #define   MTETRIGGERENABLED     16
-    {MTETRIGGERENABLED, ASN_INTEGER, RWRITE, var_mteTriggerTable, 2,
-     {1, 14}},
+    {MTETRIGGERENABLED, ASN_INTEGER, NETSNMP_OLDAPI_RWRITE,
+     var_mteTriggerTable, 2, {1, 14}},
 #define   MTETRIGGERENTRYSTATUS  17
-    {MTETRIGGERENTRYSTATUS, ASN_INTEGER, RWRITE, var_mteTriggerTable, 2,
-     {1, 15}},
+    {MTETRIGGERENTRYSTATUS, ASN_INTEGER, NETSNMP_OLDAPI_RWRITE,
+     var_mteTriggerTable, 2, {1, 15}},
 
 };
 /*

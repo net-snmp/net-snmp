@@ -418,14 +418,16 @@ A single entry consists of six fields:
 
    * a magic number (the #defined integer constant described above)
    * a type indicator (from the values listed in <snmplib/snmp_impl.h>)
-   * an access indicator (essentially RWRITE or RONLY)
+   * an access indicator (essentially NETSNMP_OLDAPI_RWRITE or
+     NETSNMP_OLDAPI_RONLY)
    * the name of the routine used to handle this entry
    * the length of the OID suffix used, and
    * an array of integers specifying this suffix (more on this in a moment)
 
 Thus a typical variable entry would look like:
 
-        { EXAMPLESTRING, ASN_OCTET_STR, RONLY, var_example, 1, {1}}
+        { EXAMPLESTRING, ASN_OCTET_STR, NETSNMP_OLDAPI_RONLY,
+          var_example, 1, {1}}
 
 If the magic numbers have not been defined in the header file, then they
 should be defined here, usually comming immediately before the corresponding

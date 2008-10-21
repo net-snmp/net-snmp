@@ -158,14 +158,14 @@ init_errormib(void)
      * information at 
      */
     struct variable2 extensible_error_variables[] = {
-        {MIBINDEX, ASN_INTEGER, RONLY, var_extensible_errors, 1,
-         {MIBINDEX}},
-        {ERRORNAME, ASN_OCTET_STR, RONLY, var_extensible_errors, 1,
-         {ERRORNAME}},
-        {ERRORFLAG, ASN_INTEGER, RONLY, var_extensible_errors, 1,
-         {ERRORFLAG}},
-        {ERRORMSG, ASN_OCTET_STR, RONLY, var_extensible_errors, 1,
-         {ERRORMSG}}
+        {MIBINDEX, ASN_INTEGER, NETSNMP_OLDAPI_RONLY,
+         var_extensible_errors, 1, {MIBINDEX}},
+        {ERRORNAME, ASN_OCTET_STR, NETSNMP_OLDAPI_RONLY,
+         var_extensible_errors, 1, {ERRORNAME}},
+        {ERRORFLAG, ASN_INTEGER, NETSNMP_OLDAPI_RONLY,
+         var_extensible_errors, 1, {ERRORFLAG}},
+        {ERRORMSG, ASN_OCTET_STR, NETSNMP_OLDAPI_RONLY,
+         var_extensible_errors, 1, {ERRORMSG}}
     };
 
     /*

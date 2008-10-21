@@ -48,8 +48,10 @@ FILE           *run_lpstat(int *);
 #define	HRPRINT_ERROR		2
 
 struct variable4 hrprint_variables[] = {
-    {HRPRINT_STATUS, ASN_INTEGER, RONLY, var_hrprint, 2, {1, 1}},
-    {HRPRINT_ERROR, ASN_OCTET_STR, RONLY, var_hrprint, 2, {1, 2}}
+    {HRPRINT_STATUS, ASN_INTEGER, NETSNMP_OLDAPI_RONLY,
+     var_hrprint, 2, {1, 1}},
+    {HRPRINT_ERROR, ASN_OCTET_STR, NETSNMP_OLDAPI_RONLY,
+     var_hrprint, 2, {1, 2}}
 };
 oid             hrprint_variables_oid[] = { 1, 3, 6, 1, 2, 1, 25, 3, 5 };
 

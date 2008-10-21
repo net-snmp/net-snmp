@@ -55,12 +55,18 @@ struct variable2 lookupCtlTable_variables[] = {
     /*
      * magic number        , variable type , ro/rw , callback fn  , L, oidsuffix 
      */
-    {COLUMN_LOOKUPCTLTARGETADDRESSTYPE, ASN_INTEGER, RWRITE, var_lookupCtlTable, 2, {1, 3}},
-    {COLUMN_LOOKUPCTLTARGETADDRESS,   ASN_OCTET_STR, RWRITE, var_lookupCtlTable, 2, {1, 4}},
-    {COLUMN_LOOKUPCTLOPERSTATUS, ASN_INTEGER, RONLY, var_lookupCtlTable, 2, {1, 5}},
-    {COLUMN_LOOKUPCTLTIME,      ASN_UNSIGNED, RONLY, var_lookupCtlTable, 2, {1, 6}},
-    {COLUMN_LOOKUPCTLRC,         ASN_INTEGER, RONLY, var_lookupCtlTable, 2, {1, 7}},
-    {COLUMN_LOOKUPCTLROWSTATUS, ASN_INTEGER, RWRITE, var_lookupCtlTable, 2, {1, 8}}
+    {COLUMN_LOOKUPCTLTARGETADDRESSTYPE, ASN_INTEGER, NETSNMP_OLDAPI_RWRITE,
+     var_lookupCtlTable, 2, {1, 3}},
+    {COLUMN_LOOKUPCTLTARGETADDRESS,   ASN_OCTET_STR, NETSNMP_OLDAPI_RWRITE,
+     var_lookupCtlTable, 2, {1, 4}},
+    {COLUMN_LOOKUPCTLOPERSTATUS, ASN_INTEGER, NETSNMP_OLDAPI_RONLY,
+     var_lookupCtlTable, 2, {1, 5}},
+    {COLUMN_LOOKUPCTLTIME,      ASN_UNSIGNED, NETSNMP_OLDAPI_RONLY,
+     var_lookupCtlTable, 2, {1, 6}},
+    {COLUMN_LOOKUPCTLRC,         ASN_INTEGER, NETSNMP_OLDAPI_RONLY,
+     var_lookupCtlTable, 2, {1, 7}},
+    {COLUMN_LOOKUPCTLROWSTATUS, ASN_INTEGER, NETSNMP_OLDAPI_RWRITE,
+     var_lookupCtlTable, 2, {1, 8}}
 };
 
 

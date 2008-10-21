@@ -17,10 +17,12 @@
 
 
 struct variable2 snmpMPDStats_variables[] = {
-    {SNMPUNKNOWNSECURITYMODELS, ASN_COUNTER, RONLY, var_snmpMPDStats, 1,
-     {1}},
-    {SNMPINVALIDMSGS, ASN_COUNTER, RONLY, var_snmpMPDStats, 1, {2}},
-    {SNMPUNKNOWNPDUHANDLERS, ASN_COUNTER, RONLY, var_snmpMPDStats, 1, {3}},
+    {SNMPUNKNOWNSECURITYMODELS, ASN_COUNTER, NETSNMP_OLDAPI_RONLY,
+     var_snmpMPDStats, 1, {1}},
+    {SNMPINVALIDMSGS, ASN_COUNTER, NETSNMP_OLDAPI_RONLY,
+     var_snmpMPDStats, 1, {2}},
+    {SNMPUNKNOWNPDUHANDLERS, ASN_COUNTER, NETSNMP_OLDAPI_RONLY,
+     var_snmpMPDStats, 1, {3}},
 };
 
 /*

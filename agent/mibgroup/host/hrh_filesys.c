@@ -98,15 +98,24 @@ int             header_hrhfilesys(struct variable *, oid *, size_t *, int,
 #define HRFSYS_PARTDUMP		9
 
 struct variable4 hrfsys_variables[] = {
-    {HRFSYS_INDEX,    ASN_INTEGER,   RONLY, var_hrhfilesys, 2, {1, 1}},
-    {HRFSYS_MOUNT,    ASN_OCTET_STR, RONLY, var_hrhfilesys, 2, {1, 2}},
-    {HRFSYS_RMOUNT,   ASN_OCTET_STR, RONLY, var_hrhfilesys, 2, {1, 3}},
-    {HRFSYS_TYPE,     ASN_OBJECT_ID, RONLY, var_hrhfilesys, 2, {1, 4}},
-    {HRFSYS_ACCESS,   ASN_INTEGER,   RONLY, var_hrhfilesys, 2, {1, 5}},
-    {HRFSYS_BOOT,     ASN_INTEGER,   RONLY, var_hrhfilesys, 2, {1, 6}},
-    {HRFSYS_STOREIDX, ASN_INTEGER,   RONLY, var_hrhfilesys, 2, {1, 7}},
-    {HRFSYS_FULLDUMP, ASN_OCTET_STR, RONLY, var_hrhfilesys, 2, {1, 8}},
-    {HRFSYS_PARTDUMP, ASN_OCTET_STR, RONLY, var_hrhfilesys, 2, {1, 9}},
+    {HRFSYS_INDEX,    ASN_INTEGER,   NETSNMP_OLDAPI_RONLY,
+     var_hrhfilesys, 2, {1, 1}},
+    {HRFSYS_MOUNT,    ASN_OCTET_STR, NETSNMP_OLDAPI_RONLY,
+     var_hrhfilesys, 2, {1, 2}},
+    {HRFSYS_RMOUNT,   ASN_OCTET_STR, NETSNMP_OLDAPI_RONLY,
+     var_hrhfilesys, 2, {1, 3}},
+    {HRFSYS_TYPE,     ASN_OBJECT_ID, NETSNMP_OLDAPI_RONLY,
+     var_hrhfilesys, 2, {1, 4}},
+    {HRFSYS_ACCESS,   ASN_INTEGER,   NETSNMP_OLDAPI_RONLY,
+     var_hrhfilesys, 2, {1, 5}},
+    {HRFSYS_BOOT,     ASN_INTEGER,   NETSNMP_OLDAPI_RONLY,
+     var_hrhfilesys, 2, {1, 6}},
+    {HRFSYS_STOREIDX, ASN_INTEGER,   NETSNMP_OLDAPI_RONLY,
+     var_hrhfilesys, 2, {1, 7}},
+    {HRFSYS_FULLDUMP, ASN_OCTET_STR, NETSNMP_OLDAPI_RONLY,
+     var_hrhfilesys, 2, {1, 8}},
+    {HRFSYS_PARTDUMP, ASN_OCTET_STR, NETSNMP_OLDAPI_RONLY,
+     var_hrhfilesys, 2, {1, 9}},
 };
 oid             hrfsys_variables_oid[] = { 1, 3, 6, 1, 2, 1, 25, 3, 8 };
 

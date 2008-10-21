@@ -69,15 +69,17 @@ struct variable2 snmpNotifyTable_variables[] = {
      * magic number        , variable type , ro/rw , callback fn  , L, oidsuffix 
      */
 #define   SNMPNOTIFYTAG         4
-    {SNMPNOTIFYTAG, ASN_OCTET_STR, RWRITE, var_snmpNotifyTable, 2, {1, 2}},
+    {SNMPNOTIFYTAG, ASN_OCTET_STR, NETSNMP_OLDAPI_RWRITE,
+     var_snmpNotifyTable, 2, {1, 2}},
 #define   SNMPNOTIFYTYPE        5
-    {SNMPNOTIFYTYPE, ASN_INTEGER, RWRITE, var_snmpNotifyTable, 2, {1, 3}},
+    {SNMPNOTIFYTYPE, ASN_INTEGER, NETSNMP_OLDAPI_RWRITE,
+     var_snmpNotifyTable, 2, {1, 3}},
 #define   SNMPNOTIFYSTORAGETYPE  6
-    {SNMPNOTIFYSTORAGETYPE, ASN_INTEGER, RWRITE, var_snmpNotifyTable, 2,
-     {1, 4}},
+    {SNMPNOTIFYSTORAGETYPE, ASN_INTEGER, NETSNMP_OLDAPI_RWRITE,
+     var_snmpNotifyTable, 2, {1, 4}},
 #define   SNMPNOTIFYROWSTATUS   7
-    {SNMPNOTIFYROWSTATUS, ASN_INTEGER, RWRITE, var_snmpNotifyTable, 2,
-     {1, 5}},
+    {SNMPNOTIFYROWSTATUS, ASN_INTEGER, NETSNMP_OLDAPI_RWRITE,
+     var_snmpNotifyTable, 2, {1, 5}},
 
 };
 /*
