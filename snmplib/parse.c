@@ -723,7 +723,7 @@ netsnmp_init_mib_internals(void)
      */
 }
 
-#ifndef NETSNMP_CLEAN_NAMESPACE
+#ifndef NETSNMP_NO_LEGACY_DEFINITIONS
 void
 init_mib_internals(void)
 {
@@ -3906,7 +3906,7 @@ adopt_orphans(void)
         }
 }
 
-#ifndef NETSNMP_CLEAN_NAMESPACE
+#ifndef NETSNMP_NO_LEGACY_DEFINITIONS
 struct tree    *
 read_module(const char *name)
 {
@@ -4007,7 +4007,7 @@ unload_module_by_ID(int modID, struct tree *tree_top)
     }
 }
 
-#ifndef NETSNMP_CLEAN_NAMESPACE
+#ifndef NETSNMP_NO_LEGACY_DEFINITIONS
 int
 unload_module(const char *name)
 {
