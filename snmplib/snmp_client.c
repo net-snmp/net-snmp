@@ -1051,7 +1051,7 @@ snmp_synch_response_cb(netsnmp_session * ss,
 
         if ( ss->flags & SNMP_FLAGS_RESP_CALLBACK ) {
             void (*cb)(void);
-            cb = ss->myvoid;
+            cb = (void (*)(void))(ss->myvoid);
             cb();        /* Used to invoke 'netsnmp_check_outstanding_agent_requests();'
                             on internal AgentX queries.  */
         }

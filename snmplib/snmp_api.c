@@ -4335,8 +4335,8 @@ _snmp_parse(void *sessp,
         */
 
         /* special RFC5343 engineID discovery engineID check */
-        if (!ds_get_boolean(NETSNMP_DS_LIBRARY_ID,
-                            NETSNMP_DS_LIB_NO_DISCOVERY) &&
+        if (!netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID,
+                                    NETSNMP_DS_LIB_NO_DISCOVERY) &&
             SNMP_MSG_RESPONSE       != pdu->command &&
             NULL                    != pdu->contextEngineID &&
             pdu->contextEngineIDLen == 5 &&
@@ -4388,7 +4388,7 @@ _snmp_parse(void *sessp,
                 pdu2->errindex = 0;
 
                 ourEngineID_len =
-                    snmpv3_get_engineID(ourEngineID, ourEngineID_len);
+                    snmpv3_get_engineID((u_char*)ourEngineID, ourEngineID_len);
                 if (0 != ourEngineID_len) {
 
                     DEBUGMSGTL(("snmpv3_contextid",
