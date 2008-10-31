@@ -68,7 +68,7 @@ CC	        = @CC@
 #
 LIBCURRENT  = 9
 LIBAGE      = 0
-LIBREVISION = 3
+LIBREVISION = 4
 
 LIB_LD_CMD      = $(LIBTOOL) --mode=link $(CC) $(CFLAGS) -rpath $(libdir) -version-info $(LIBCURRENT):$(LIBREVISION):$(LIBAGE) -o
 LIB_EXTENSION   = la
