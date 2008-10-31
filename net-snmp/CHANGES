@@ -3,6 +3,11 @@ that have been applied in released versions.  Please see the NEWS file for
 a summary of the major changes, and the ChangeLog file for a comprehensive
 listing of all changes made to the code.
 
+*5.2.5.1*
+    snmpd:
+      - SECURITY ISSUE: A bug in the getbulk handling code could let
+        anyone with even minimal access crash the agent.
+
 *5.2.5*
     snmplib:
       - Change CONTAINER_INSERT to not do partial inserts
