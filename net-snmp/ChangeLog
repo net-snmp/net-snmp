@@ -1,5 +1,16 @@
 -------------------------------------------------------------------------------
 
+Changes: V5.4.1 -> V5.4.2.1
+
+2008-10-31 15:16  hardaker
+
+   * agent/snmp_agent.c:
+
+   NEWS: snmpd: Applying patch from Magnus Fromreide to fix the
+   getbulk issue reported by Oscar Mira-Sanchez
+
+-------------------------------------------------------------------------------
+
 Changes: V5.4.1 -> V5.4.2
 
 2008-09-05 07:51  dts12
