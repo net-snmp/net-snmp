@@ -2234,7 +2234,6 @@ netsnmp_create_subtree_cache(netsnmp_agent_session *asp)
             r = 0;
             asp->bulkcache = NULL;
         } else {
-            int numresponses;
             int           maxbulk =
                 netsnmp_ds_get_int(NETSNMP_DS_APPLICATION_ID,
                                    NETSNMP_DS_AGENT_MAX_GETBULKREPEATS);
@@ -2245,28 +2244,31 @@ netsnmp_create_subtree_cache(netsnmp_agent_session *asp)
             if (maxresponses == 0)
                 maxresponses = 100;   /* more than reasonable default */
 
-            if (maxbulk == 0)
-                maxbulk = -1;
+            /* ensure that the total number of responses fits in a mallocable
+             * result vector
+             */
+            if (maxresponses < 0 ||
+                maxresponses > INT_MAX / sizeof(struct varbind_list *))
+                maxresponses = INT_MAX / sizeof(struct varbind_list *);
+
+            /* ensure that the maximum number of repetitions will fit in the
+             * result vector
+             */
+            if (maxbulk <= 0 || maxbulk > maxresponses / r)
+                maxbulk = maxresponses / r;
 
             /* limit getbulk number of repeats to a configured size */
-            if (asp->pdu->errindex > maxbulk && maxbulk != -1) {
+            if (asp->pdu->errindex > maxbulk) {
                 asp->pdu->errindex = maxbulk;
-            }
-
-            numresponses = asp->pdu->errindex * r;
-
-            /* limit getbulk number of getbulk responses to a configured size */
-            if (maxresponses != -1 && numresponses > maxresponses) {
-                /* attempt to truncate this */
-                asp->pdu->errindex = maxresponses/r;
-                numresponses = asp->pdu->errindex * r;
-                DEBUGMSGTL(("snmp_agent", "truncating number of getbulk repeats to %d\n", asp->pdu->errindex));
+                DEBUGMSGTL(("snmp_agent",
+                            "truncating number of getbulk repeats to %d\n",
+                            asp->pdu->errindex));
             }
 
             asp->bulkcache =
-                (netsnmp_variable_list **) malloc(numresponses *
-                                                  sizeof(struct
-                                                         varbind_list *));
+                (netsnmp_variable_list **) malloc(
+                    asp->pdu->errindex * r * sizeof(struct varbind_list *));
+
             if (!asp->bulkcache) {
                 DEBUGMSGTL(("snmp_agent", "Bulkcache malloc failed\n"));
                 return SNMP_ERR_GENERR;
