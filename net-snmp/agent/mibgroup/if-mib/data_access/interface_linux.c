@@ -745,9 +745,14 @@ netsnmp_linux_interface_get_if_speed(int fd, const char *name)
         return netsnmp_linux_interface_get_if_speed_mii(fd,name);
     }
     
-    if (edata.speed != SPEED_10 && edata.speed != SPEED_100 &&
-        edata.speed != SPEED_1000 && edata.speed != SPEED_10000 &&
-        edata.speed != SPEED_2500) {
+    if (edata.speed != SPEED_10 && edata.speed != SPEED_100
+#ifdef SPEED_10000
+        && edata.speed != SPEED_10000
+#endif
+#ifdef SPEED_2500
+        && edata.speed != SPEED_2500
+#endif
+        && edata.speed != SPEED_1000 ) {
         DEBUGMSGTL(("mibII/interfaces", "fallback to mii for %s\n",
                     ifr.ifr_name));
         /* try MII */
