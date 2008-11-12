@@ -58,7 +58,7 @@ maybe_source_perl_startup(void)
     return;
 
   bail_out:
-    snmp_log(LOG_ERR, "embedded perl support failed to initalize\n");
+    snmp_log(LOG_ERR, "embedded perl support failed to initialize\n");
     netsnmp_ds_set_boolean(NETSNMP_DS_APPLICATION_ID, 
 			   NETSNMP_DS_AGENT_DISABLE_PERL, 1);
     return;
