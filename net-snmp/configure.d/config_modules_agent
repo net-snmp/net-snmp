@@ -55,7 +55,7 @@ fi
 test_modules="$new_module_list"
 new_module_list=""
 
-# remove modules that were explicity excluded
+# remove modules that were explicitly excluded
 for i in $test_modules
  do
   if echo " $new_with_out_mib_modules " | $GREP " $i " > /dev/null; then
