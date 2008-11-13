@@ -239,7 +239,7 @@ while test "x$new_module_list" != "x"; do
     done
 
     #---------------------
-    # make sure module wasn't explicity excluded, or already added
+    # make sure module wasn't explicitly excluded, or already added
     #
     if test "x$dblfix" != "x" ; then
       AC_MSG_MODULE_DBG("$i was duplicated -- putting into main")
