@@ -1726,7 +1726,7 @@ test_modules="$default_module_list $new_with_mib_modules"
 new_module_list=""
 module_list_h=""
 
-# remove modules that were explicity excluded
+# remove modules that were explicitly excluded
 for i in $test_modules
  do
   if echo " $new_with_out_mib_modules " | grep " $i " > /dev/null; then
@@ -1775,7 +1775,7 @@ while test "x$new_module_list" != "x"; do
       echo "testing $i"
     fi
     #---------------------
-    # make sure module wasn't explicity excluded, or already added
+    # make sure module wasn't explicitly excluded, or already added
     #
     if echo " $new_with_out_mib_modules " | grep " $i " > /dev/null; then
       if test $module_debug -eq 1; then
