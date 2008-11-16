@@ -2092,7 +2092,7 @@ Network Buffers:
   --with-libwrap=LIBPATH  Compile in libwrap (tcp_wrappers) support.
   --with-zlib=DIR         use libz in DIR
   --with-bzip2=DIR        use libbz2 in DIR
-  --with-mnttab=\"/etc/mnttab\"  Mount table location.
+  --with-mnttab="/etc/mnttab"  Mount table location.
                                  The default is to autodetect this.
 
 Some influential environment variables:
@@ -36299,14 +36299,7 @@ fi
 
 
 
-for ac_header in getopt.h   pthread.h  regex.h                 \
-                  stdarg.h   string.h   syslog.h   unistd.h     \
-                  sys/param.h        \
-                  sys/select.h       \
-                  sys/socket.h       \
-                  sys/time.h         \
-                  sys/un.h           \
-
+for ac_header in getopt.h   pthread.h  regex.h                                   stdarg.h   string.h   syslog.h   unistd.h                       sys/param.h                          sys/select.h                         sys/socket.h                         sys/time.h                           sys/un.h
 do
 as_ac_Header=`$as_echo "ac_cv_header_$ac_header" | $as_tr_sh`
 if { as_var=$as_ac_Header; eval "test \"\${$as_var+set}\" = set"; }; then
@@ -36474,15 +36467,7 @@ done
 
 
 
-for ac_header in fcntl.h    io.h       kstat.h                 \
-                  limits.h   locale.h   nlist.h                 \
-                  sys/file.h       sys/ioctl.h         \
-                  sys/sockio.h     sys/stat.h          \
-                  sys/systemcfg.h  sys/systeminfo.h    \
-                  sys/times.h      sys/uio.h           \
-                  sys/utsname.h      \
-                  netipx/ipx.h       \
-
+for ac_header in fcntl.h    io.h       kstat.h                                   limits.h   locale.h   nlist.h                                   sys/file.h       sys/ioctl.h                           sys/sockio.h     sys/stat.h                            sys/systemcfg.h  sys/systeminfo.h                      sys/times.h      sys/uio.h                             sys/utsname.h                        netipx/ipx.h
 do
 as_ac_Header=`$as_echo "ac_cv_header_$ac_header" | $as_tr_sh`
 if { as_var=$as_ac_Header; eval "test \"\${$as_var+set}\" = set"; }; then
@@ -36651,13 +36636,7 @@ done
 
 
 
-for ac_header in dlfcn.h    err.h      fcntl.h    fstab.h      \
-                             grp.h      io.h                    \
-                  ioctls.h   kstat.h    kvm.h      limits.h     \
-                             mntent.h   mtab.h                  \
-                  nlist.h    pkglocs.h             pwd.h        \
-                             utmpx.h    utsname.h               \
-
+for ac_header in dlfcn.h    err.h      fcntl.h    fstab.h                                   grp.h      io.h                                      ioctls.h   kstat.h    kvm.h      limits.h                                  mntent.h   mtab.h                                    nlist.h    pkglocs.h             pwd.h                                     utmpx.h    utsname.h
 do
 as_ac_Header=`$as_echo "ac_cv_header_$ac_header" | $as_tr_sh`
 if { as_var=$as_ac_Header; eval "test \"\${$as_var+set}\" = set"; }; then
@@ -36835,15 +36814,8 @@ done
 
 
 
-for ac_header in sys/diskio.h   sys/dkio.h            \
-                  sys/file.h    sys/filio.h    sys/fixpoint.h sys/fs.h         \
-                  sys/ioctl.h   sys/loadavg.h  sys/mntent.h   sys/mnttab.h     \
-                  sys/pool.h    sys/protosw.h  sys/pstat.h                     \
-                  sys/sockio.h  sys/stat.h     sys/statfs.h   sys/statvfs.h    \
-                  sys/stream.h  sys/sysget.h   sys/sysmp.h                     \
-                  sys/tcpipstats.h  sys/utsname.h  sys/vfs.h  sys/vm.h         \
-                  sys/vmmac.h   sys/vmmeter.h  sys/vmparam.h  sys/vmsystm.h    \
 
+for ac_header in sys/diskio.h  sys/dkio.h                                                   sys/file.h    sys/filio.h   sys/fixpoint.h                                 sys/fs.h      sys/ioctl.h   sys/loadavg.h  sys/mntent.h                    sys/mnttab.h  sys/pool.h    sys/protosw.h  sys/pstat.h                     sys/sockio.h  sys/stat.h    sys/statfs.h   sys/statvfs.h                   sys/stream.h  sys/sysget.h  sys/sysmp.h                                    sys/tcpipstats.h            sys/utsname.h  sys/vfs.h                       sys/vm.h      sys/vmmac.h   sys/vmmeter.h  sys/vmparam.h                   sys/vmsystm.h
 do
 as_ac_Header=`$as_echo "ac_cv_header_$ac_header" | $as_tr_sh`
 if { as_var=$as_ac_Header; eval "test \"\${$as_var+set}\" = set"; }; then
@@ -37006,15 +36978,8 @@ done
 
 
 
-for ac_header in asm/page.h asm/types.h               \
-                  inet/mib2.h                          \
-                  linux/hdreg.h linux/tasks.h          \
-                  machine/param.h                      \
-                  netinet/tcp_fsm.h                    \
-                  ufs/fs.h                             \
-                  uvm/uvm_extern.h uvm/uvm_param.h     \
-                  vm/vm.h vm/vm_extern.h vm/vm_param.h \
 
+for ac_header in asm/page.h asm/types.h                                 inet/mib2.h                                            linux/hdreg.h linux/tasks.h                            machine/param.h                                        netinet/tcp_fsm.h                                      ufs/fs.h                                               uvm/uvm_extern.h uvm/uvm_param.h                       vm/vm.h vm/vm_extern.h vm/vm_param.h
 do
 as_ac_Header=`$as_echo "ac_cv_header_$ac_header" | $as_tr_sh`
 if { as_var=$as_ac_Header; eval "test \"\${$as_var+set}\" = set"; }; then
@@ -37174,11 +37139,7 @@ done
 
 
 
-for ac_header in fcntl.h    grp.h      pwd.h      \
-                  sys/cdefs.h   sys/ioctl.h        \
-                  sys/socket.h  sys/sockio.h       \
-                  sys/time.h                       \
-
+for ac_header in fcntl.h    grp.h      pwd.h                        sys/cdefs.h   sys/ioctl.h                          sys/socket.h  sys/sockio.h                         sys/time.h
 do
 as_ac_Header=`$as_echo "ac_cv_header_$ac_header" | $as_tr_sh`
 if { as_var=$as_ac_Header; eval "test \"\${$as_var+set}\" = set"; }; then
@@ -37338,15 +37299,7 @@ done
 
 
 
-
-
-
-for ac_header in search.h   sgtty.h    xti.h      \
-                  sys/dmap.h sys/poll.h            \
-                  sys/timeout.h                    \
-                  machine/pte.h                    \
-                  pci/pci.h                        \
-
+for ac_header in search.h   sgtty.h    xti.h                        sys/dmap.h sys/poll.h                              sys/timeout.h                                      machine/pte.h                                      pci/pci.h
 do
 as_ac_Header=`$as_echo "ac_cv_header_$ac_header" | $as_tr_sh`
 if { as_var=$as_ac_Header; eval "test \"\${$as_var+set}\" = set"; }; then
@@ -37806,8 +37759,7 @@ done
 
 
 
-for ac_header in openssl/des.h  openssl/hmac.h \
-                  openssl/evp.h  security/cryptoki.h
+for ac_header in openssl/des.h  openssl/hmac.h                   openssl/evp.h  security/cryptoki.h
 do
 as_ac_Header=`$as_echo "ac_cv_header_$ac_header" | $as_tr_sh`
 if { as_var=$as_ac_Header; eval "test \"\${$as_var+set}\" = set"; }; then
@@ -38350,11 +38302,7 @@ done
 
 
 
-for ac_header in malloc.h        osreldate.h                   \
-                  machine/types.h net/if_dl.h   net/if_types.h  \
-                  sys/dkstat.h    sys/conf.h    sys/mbuf.h      \
-                  sys/mount.h     sys/proc.h    sys/queue.h     \
-                  sys/sysctl.h    sys/user.h
+for ac_header in malloc.h        osreldate.h                                     machine/types.h net/if_dl.h   net/if_types.h                    sys/dkstat.h    sys/conf.h    sys/mbuf.h                        sys/mount.h     sys/proc.h    sys/queue.h                       sys/sysctl.h    sys/user.h
 do
 as_ac_Header=`$as_echo "ac_cv_header_$ac_header" | $as_tr_sh`
 { $as_echo "$as_me:$LINENO: checking for $ac_header" >&5
@@ -39097,8 +39045,7 @@ done
 
 
 
-for ac_header in arpa/inet.h        net/if.h             \
-                  netinet/in.h       netdb.h
+for ac_header in arpa/inet.h        net/if.h                               netinet/in.h       netdb.h
 do
 as_ac_Header=`$as_echo "ac_cv_header_$ac_header" | $as_tr_sh`
 { $as_echo "$as_me:$LINENO: checking for $ac_header" >&5
@@ -39221,13 +39168,7 @@ done
 
 
 
-for ac_header in net/if_arp.h       net/if_mib.h         net/if_var.h       \
-                  netinet/icmp_var.h netinet/if_ether.h                      \
-                  netinet/in_systm.h netinet/in_var.h                        \
-                  netinet/ip.h       netinet/ip_icmp.h    netinet/ip_var.h   \
-                  netinet/tcp.h      netinet/tcp_timer.h  netinet/tcp_var.h  \
-                  netinet/tcpip.h    netinet/udp.h        netinet/udp_var.h  \
-                  net/route.h
+for ac_header in net/if_arp.h       net/if_mib.h         net/if_var.h                       netinet/icmp_var.h netinet/if_ether.h                                      netinet/in_systm.h netinet/in_var.h                                        netinet/ip.h       netinet/ip_icmp.h    netinet/ip_var.h                   netinet/tcp.h      netinet/tcp_timer.h  netinet/tcp_var.h                  netinet/tcpip.h    netinet/udp.h        netinet/udp_var.h                  net/route.h
 do
 as_ac_Header=`$as_echo "ac_cv_header_$ac_header" | $as_tr_sh`
 { $as_echo "$as_me:$LINENO: checking for $ac_header" >&5
@@ -39345,11 +39286,7 @@ done
 
 
 
-for ac_header in netinet/ip6.h                               \
-                  netinet6/in6_var.h    netinet6/in6_pcb.h    \
-                  netinet6/ip6_var.h    netinet6/nd6.h        \
-                  netinet6/tcp6.h       netinet6/tcp6_fsm.h   \
-                  netinet6/tcp6_timer.h netinet6/tcp6_var.h
+for ac_header in netinet/ip6.h                                                 netinet6/in6_var.h    netinet6/in6_pcb.h                      netinet6/ip6_var.h    netinet6/nd6.h                          netinet6/tcp6.h       netinet6/tcp6_fsm.h                     netinet6/tcp6_timer.h netinet6/tcp6_var.h
 do
 as_ac_Header=`$as_echo "ac_cv_header_$ac_header" | $as_tr_sh`
 { $as_echo "$as_me:$LINENO: checking for $ac_header" >&5
@@ -42404,11 +42341,7 @@ fi
 
 
 
-for ac_func in bcopy           index                   \
-                memcpy          memmove                 \
-                lrand48         rand          random    \
-                strchr          signal        sigset    \
-
+for ac_func in bcopy           index                                   memcpy          memmove                                 lrand48         rand          random                    strchr          signal        sigset
 do
 as_ac_var=`$as_echo "ac_cv_func_$ac_func" | $as_tr_sh`
 { $as_echo "$as_me:$LINENO: checking for $ac_func" >&5
@@ -42536,17 +42469,7 @@ done
 
 
 
-for ac_func in fork            gai_strerror                   \
-                getaddrinfo     gethostname   gethostbyname    \
-                getipnodebyname               gettimeofday     \
-                if_nametoindex  mkstemp       regcomp          \
-                setenv          setitimer     setlocale        \
-                setsid          snprintf                       \
-                strcasestr                    strdup           \
-                strerror        strlcpy       strncasecmp      \
-                strtok_r        strtol        strtoul          \
-                sysconf         times         vsnprintf        \
-
+for ac_func in fork            gai_strerror                                   getaddrinfo     gethostname   gethostbyname                    getipnodebyname               gettimeofday                     if_nametoindex  mkstemp       regcomp                          setenv          setitimer     setlocale                        setsid          snprintf                                       strcasestr                    strdup                           strerror        strlcpy       strncasecmp                      strtok_r        strtol        strtoul                          sysconf         times         vsnprintf
 do
 as_ac_var=`$as_echo "ac_cv_func_$ac_func" | $as_tr_sh`
 { $as_echo "$as_me:$LINENO: checking for $ac_func" >&5
@@ -42680,21 +42603,7 @@ done
 
 
 
-for ac_func in cgetnext        execv         gai_strerror     \
-                getfsstat       getgrnam      gethostname      \
-                                getloadavg                     \
-                getpid          getpwnam      getvfsstat       \
-                hasmntopt       initgroups                     \
-                if_nameindex    if_nametoindex                 \
-                mkstemp         mktime                         \
-                poll            regcomp                        \
-                setgid          setgroups                      \
-                setmntent       setuid                         \
-                sigaction       sigblock      sighold          \
-                statfs          statvfs       stime            \
-                strncasecmp     system                         \
-                uname           usleep                         \
-
+for ac_func in cgetnext        execv         gai_strerror                     getfsstat       getgrnam      gethostname                                      getloadavg                                     getpid          getpwnam      getvfsstat                       hasmntopt       initgroups                                     if_nameindex    if_nametoindex                                 mkstemp         mktime                                         poll            regcomp                                        setgid          setgroups                                      setmntent       setuid                                         sigaction       sigblock      sighold                          statfs          statvfs       stime                            strncasecmp     system                                         uname           usleep
 do
 as_ac_var=`$as_echo "ac_cv_func_$ac_func" | $as_tr_sh`
 { $as_echo "$as_me:$LINENO: checking for $ac_func" >&5
@@ -42804,11 +42713,7 @@ done
 
 
 
-for ac_func in getdtablesize                                  \
-                getgrnam        getpid        getpwnam         \
-                setgid          setgroups     setuid           \
-                tcgetattr                                      \
-
+for ac_func in getdtablesize                                                  getgrnam        getpid        getpwnam                         setgid          setgroups     setuid                           tcgetattr
 do
 as_ac_var=`$as_echo "ac_cv_func_$ac_func" | $as_tr_sh`
 { $as_echo "$as_me:$LINENO: checking for $ac_func" >&5
@@ -42917,10 +42822,7 @@ done
 
 
 
-for ac_func in if_freenameindex              getpagesize      \
-                lseek64         pread64                        \
-                select          sigalrm       socket           \
-
+for ac_func in if_freenameindex              getpagesize                      lseek64         pread64                                        select          sigalrm       socket
 do
 as_ac_var=`$as_echo "ac_cv_func_$ac_func" | $as_tr_sh`
 { $as_echo "$as_me:$LINENO: checking for $ac_func" >&5

@@ -77,7 +77,7 @@ AC_CACHE_CHECK([for mount table location],
     ac_cv_ETC_MNTTAB,
    [ac_cv_ETC_MNTTAB="unknown"
     AC_ARG_WITH(mnttab,
-        [  --with-mnttab=\"/etc/mnttab\"  Mount table location.
+        [  --with-mnttab="/etc/mnttab"  Mount table location.
                                  The default is to autodetect this.],
 	[ac_cv_ETC_MNTTAB="$with_mnttab"])
     if test "$ac_cv_ETC_MNTTAB" = "unknown"; then
