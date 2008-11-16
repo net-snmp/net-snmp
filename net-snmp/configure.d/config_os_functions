@@ -122,9 +122,7 @@ AC_CACHE_CHECK([how to get the name of the current function],
                [netsnmp_cv__func__name],[
     netsnmp_cv__func__name=no
     AC_COMPILE_IFELSE(
-        AC_LANG_PROGRAM(
-                [[extern inline void t1() { const char* cp = __func__; }]],
-                [[const char* cp = __func__;]]),
+        AC_LANG_PROGRAM(,[[const char* cp = __func__;]]),
         [netsnmp_cv__func__name=__func__])
     if test "$netsnmp_cv__func__name" = no ; then
       AC_COMPILE_IFELSE(
