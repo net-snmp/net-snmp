@@ -17,75 +17,71 @@ AC_HEADER_SYS_WAIT      #  <sys/wait.h>
 #   Stand-alone headers:
 ##
 #  Core:
-AC_CHECK_HEADERS([getopt.h   pthread.h  regex.h                 \
-                  stdarg.h   string.h   syslog.h   unistd.h     \
-                  sys/param.h        \
-                  sys/select.h       \
-                  sys/socket.h       \
-                  sys/time.h         \
-                  sys/un.h           \
-                ])
+AC_CHECK_HEADERS([getopt.h   pthread.h  regex.h                 ] dnl
+                 [stdarg.h   string.h   syslog.h   unistd.h     ] dnl
+                 [sys/param.h        ] dnl
+                 [sys/select.h       ] dnl
+                 [sys/socket.h       ] dnl
+                 [sys/time.h         ] dnl
+                 [sys/un.h           ])
 
 #  Library:
-AC_CHECK_HEADERS([fcntl.h    io.h       kstat.h                 \
-                  limits.h   locale.h   nlist.h                 \
-                  sys/file.h       sys/ioctl.h         \
-                  sys/sockio.h     sys/stat.h          \
-                  sys/systemcfg.h  sys/systeminfo.h    \
-                  sys/times.h      sys/uio.h           \
-                  sys/utsname.h      \
-                  netipx/ipx.h       \
-                ])
+AC_CHECK_HEADERS([fcntl.h    io.h       kstat.h                 ] dnl
+                 [limits.h   locale.h   nlist.h                 ] dnl
+                 [sys/file.h       sys/ioctl.h         ] dnl
+                 [sys/sockio.h     sys/stat.h          ] dnl
+                 [sys/systemcfg.h  sys/systeminfo.h    ] dnl
+                 [sys/times.h      sys/uio.h           ] dnl
+                 [sys/utsname.h      ] dnl
+                 [netipx/ipx.h       ])
 
 #  Agent:
-AC_CHECK_HEADERS([dlfcn.h    err.h      fcntl.h    fstab.h      \
-                             grp.h      io.h                    \
-                  ioctls.h   kstat.h    kvm.h      limits.h     \
-                             mntent.h   mtab.h                  \
-                  nlist.h    pkglocs.h             pwd.h        \
-                             utmpx.h    utsname.h               \
-                ])
-AC_CHECK_HEADERS([sys/diskio.h   sys/dkio.h            \
-                  sys/file.h    sys/filio.h    sys/fixpoint.h sys/fs.h         \
-                  sys/ioctl.h   sys/loadavg.h  sys/mntent.h   sys/mnttab.h     \
-                  sys/pool.h    sys/protosw.h  sys/pstat.h                     \
-                  sys/sockio.h  sys/stat.h     sys/statfs.h   sys/statvfs.h    \
-                  sys/stream.h  sys/sysget.h   sys/sysmp.h                     \
-                  sys/tcpipstats.h  sys/utsname.h  sys/vfs.h  sys/vm.h         \
-                  sys/vmmac.h   sys/vmmeter.h  sys/vmparam.h  sys/vmsystm.h    \
-                ])
-AC_CHECK_HEADERS([asm/page.h asm/types.h               \
-                  inet/mib2.h                          \
-                  linux/hdreg.h linux/tasks.h          \
-                  machine/param.h                      \
-                  netinet/tcp_fsm.h                    \
-                  ufs/fs.h                             \
-                  uvm/uvm_extern.h uvm/uvm_param.h     \
-                  vm/vm.h vm/vm_extern.h vm/vm_param.h \
-                ])
+AC_CHECK_HEADERS([dlfcn.h    err.h      fcntl.h    fstab.h      ] dnl
+                 [           grp.h      io.h                    ] dnl
+                 [ioctls.h   kstat.h    kvm.h      limits.h     ] dnl
+                 [           mntent.h   mtab.h                  ] dnl
+                 [nlist.h    pkglocs.h             pwd.h        ] dnl
+                 [           utmpx.h    utsname.h               ])
+
+AC_CHECK_HEADERS([sys/diskio.h  sys/dkio.h                                 ] dnl
+                 [sys/file.h    sys/filio.h   sys/fixpoint.h               ] dnl
+                 [sys/fs.h      sys/ioctl.h   sys/loadavg.h  sys/mntent.h  ] dnl
+                 [sys/mnttab.h  sys/pool.h    sys/protosw.h  sys/pstat.h   ] dnl
+                 [sys/sockio.h  sys/stat.h    sys/statfs.h   sys/statvfs.h ] dnl
+                 [sys/stream.h  sys/sysget.h  sys/sysmp.h                  ] dnl
+                 [sys/tcpipstats.h            sys/utsname.h  sys/vfs.h     ] dnl
+                 [sys/vm.h      sys/vmmac.h   sys/vmmeter.h  sys/vmparam.h ] dnl
+                 [sys/vmsystm.h                                            ])
+
+AC_CHECK_HEADERS([asm/page.h asm/types.h               ] dnl
+                 [inet/mib2.h                          ] dnl
+                 [linux/hdreg.h linux/tasks.h          ] dnl
+                 [machine/param.h                      ] dnl
+                 [netinet/tcp_fsm.h                    ] dnl
+                 [ufs/fs.h                             ] dnl
+                 [uvm/uvm_extern.h uvm/uvm_param.h     ] dnl
+                 [vm/vm.h vm/vm_extern.h vm/vm_param.h ])
 
 #  Apps:
-AC_CHECK_HEADERS([fcntl.h    grp.h      pwd.h      \
-                  sys/cdefs.h   sys/ioctl.h        \
-                  sys/socket.h  sys/sockio.h       \
-                  sys/time.h                       \
-                ])
+AC_CHECK_HEADERS([fcntl.h    grp.h      pwd.h      ] dnl
+                 [sys/cdefs.h   sys/ioctl.h        ] dnl
+                 [sys/socket.h  sys/sockio.h       ] dnl
+                 [sys/time.h                       ])
 
 #  Not-Used:
-AC_CHECK_HEADERS([search.h   sgtty.h    xti.h      \
-                  sys/dmap.h sys/poll.h            \ 
-                  sys/timeout.h                    \ 
-                  machine/pte.h                    \ 
-                  pci/pci.h                        \
-                ])
+AC_CHECK_HEADERS([search.h   sgtty.h    xti.h      ] dnl
+                 [sys/dmap.h sys/poll.h            ] dnl
+                 [sys/timeout.h                    ] dnl
+                 [machine/pte.h                    ] dnl
+                 [pci/pci.h                        ])
 
 
 # OpenSSL
 AC_CHECK_HEADERS([openssl/aes.h ])     #  (Core)
 AC_CHECK_HEADERS([openssl/dh.h  ])     #  (Apps)
 #  Not-Used:
-AC_CHECK_HEADERS([openssl/des.h  openssl/hmac.h \
-                  openssl/evp.h  security/cryptoki.h])
+AC_CHECK_HEADERS([openssl/des.h  openssl/hmac.h ] dnl
+                 [openssl/evp.h  security/cryptoki.h])
 
 # RPM subdirectory path                   (Agent)
 if test "x$with_rpm" != "xno" && \
@@ -134,11 +130,11 @@ AC_CHECK_HEADERS([malloc.h        net/if_dl.h   sys/sysctl.h    ],,,
     ]])
 #
 #  Agent:
-AC_CHECK_HEADERS([malloc.h        osreldate.h                   \
-                  machine/types.h net/if_dl.h   net/if_types.h  \
-                  sys/dkstat.h    sys/conf.h    sys/mbuf.h      \
-                  sys/mount.h     sys/proc.h    sys/queue.h     \
-                  sys/sysctl.h    sys/user.h],,,
+AC_CHECK_HEADERS([malloc.h        osreldate.h                   ] dnl
+                 [machine/types.h net/if_dl.h   net/if_types.h  ] dnl
+                 [sys/dkstat.h    sys/conf.h    sys/mbuf.h      ] dnl
+                 [sys/mount.h     sys/proc.h    sys/queue.h     ] dnl
+                 [sys/sysctl.h    sys/user.h                    ],,,
     [[
 #if HAVE_SYS_TYPES_H
 #include <sys/types.h>
@@ -244,8 +240,8 @@ AC_CHECK_HEADERS([linux/netlink.h  linux/rtnetlink.h],,,
 #       Network headers
 #  Core or Library/Agent/Apps:
 #
-AC_CHECK_HEADERS([arpa/inet.h        net/if.h             \
-                  netinet/in.h       netdb.h              ],,,
+AC_CHECK_HEADERS([arpa/inet.h        net/if.h             ] dnl
+                 [netinet/in.h       netdb.h              ],,,
     [[
 #if HAVE_SYS_TYPES_H
 #include <sys/types.h>
@@ -292,13 +288,13 @@ AC_CHECK_HEADERS([arpa/inet.h        net/if.h             \
     ]])
 #
 #  Agent:
-AC_CHECK_HEADERS([net/if_arp.h       net/if_mib.h         net/if_var.h       \
-                  netinet/icmp_var.h netinet/if_ether.h                      \
-                  netinet/in_systm.h netinet/in_var.h                        \
-                  netinet/ip.h       netinet/ip_icmp.h    netinet/ip_var.h   \
-                  netinet/tcp.h      netinet/tcp_timer.h  netinet/tcp_var.h  \
-                  netinet/tcpip.h    netinet/udp.h        netinet/udp_var.h  \
-                  net/route.h        ],,,
+AC_CHECK_HEADERS([net/if_arp.h       net/if_mib.h         net/if_var.h     ] dnl
+                 [netinet/icmp_var.h netinet/if_ether.h                    ] dnl
+                 [netinet/in_systm.h netinet/in_var.h                      ] dnl
+                 [netinet/ip.h       netinet/ip_icmp.h    netinet/ip_var.h ] dnl
+                 [netinet/tcp.h      netinet/tcp_timer.h  netinet/tcp_var.h] dnl
+                 [netinet/tcpip.h    netinet/udp.h        netinet/udp_var.h] dnl
+                 [net/route.h        ],,,
     [[
 #if HAVE_SYS_TYPES_H
 #include <sys/types.h>
@@ -348,11 +344,11 @@ AC_CHECK_HEADERS([net/if_arp.h       net/if_mib.h         net/if_var.h       \
 #  Agent:
 #
 # KAME
-AC_CHECK_HEADERS([netinet/ip6.h                               \
-                  netinet6/in6_var.h    netinet6/in6_pcb.h    \
-                  netinet6/ip6_var.h    netinet6/nd6.h        \
-                  netinet6/tcp6.h       netinet6/tcp6_fsm.h   \
-                  netinet6/tcp6_timer.h netinet6/tcp6_var.h],,,
+AC_CHECK_HEADERS([netinet/ip6.h                               ] dnl
+                 [netinet6/in6_var.h    netinet6/in6_pcb.h    ] dnl
+                 [netinet6/ip6_var.h    netinet6/nd6.h        ] dnl
+                 [netinet6/tcp6.h       netinet6/tcp6_fsm.h   ] dnl
+                 [netinet6/tcp6_timer.h netinet6/tcp6_var.h],,,
     [[
 #if HAVE_SYS_TYPES_H
 #include <sys/types.h>
