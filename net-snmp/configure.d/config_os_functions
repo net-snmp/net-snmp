@@ -17,54 +17,49 @@ AC_FUNC_GETMNTENT
 #   Stand-alone function checks:
 ##
 #  Core:
-AC_CHECK_FUNCS([bcopy           index                   \
-                memcpy          memmove                 \
-                lrand48         rand          random    \
-                strchr          signal        sigset    \
-              ])
+AC_CHECK_FUNCS([bcopy           index                   ] dnl
+               [memcpy          memmove                 ] dnl
+               [lrand48         rand          random    ] dnl
+               [strchr          signal        sigset    ] )
 
 #  Library:
-AC_CHECK_FUNCS([fork            gai_strerror                   \
-                getaddrinfo     gethostname   gethostbyname    \
-                getipnodebyname               gettimeofday     \
-                if_nametoindex  mkstemp       regcomp          \
-                setenv          setitimer     setlocale        \
-                setsid          snprintf                       \
-                strcasestr                    strdup           \
-                strerror        strlcpy       strncasecmp      \
-                strtok_r        strtol        strtoul          \
-                sysconf         times         vsnprintf        \
-              ])
+AC_CHECK_FUNCS([fork            gai_strerror                   ] dnl
+               [getaddrinfo     gethostname   gethostbyname    ] dnl
+               [getipnodebyname               gettimeofday     ] dnl
+               [if_nametoindex  mkstemp       regcomp          ] dnl
+               [setenv          setitimer     setlocale        ] dnl
+               [setsid          snprintf                       ] dnl
+               [strcasestr                    strdup           ] dnl
+               [strerror        strlcpy       strncasecmp      ] dnl
+               [strtok_r        strtol        strtoul          ] dnl
+               [sysconf         times         vsnprintf        ] )
 
 #  Agent:
-AC_CHECK_FUNCS([cgetnext        execv         gai_strerror     \
-                getfsstat       getgrnam      gethostname      \
-                                getloadavg                     \
-                getpid          getpwnam      getvfsstat       \
-                hasmntopt       initgroups                     \
-                if_nameindex    if_nametoindex                 \
-                mkstemp         mktime                         \
-                poll            regcomp                        \
-                setgid          setgroups                      \
-                setmntent       setuid                         \
-                sigaction       sigblock      sighold          \
-                statfs          statvfs       stime            \
-                strncasecmp     system                         \
-                uname           usleep                         \
-              ])
+AC_CHECK_FUNCS([cgetnext        execv         gai_strerror     ] dnl
+               [getfsstat       getgrnam      gethostname      ] dnl
+               [                getloadavg                     ] dnl
+               [getpid          getpwnam      getvfsstat       ] dnl
+               [hasmntopt       initgroups                     ] dnl
+               [if_nameindex    if_nametoindex                 ] dnl
+               [mkstemp         mktime                         ] dnl
+               [poll            regcomp                        ] dnl
+               [setgid          setgroups                      ] dnl
+               [setmntent       setuid                         ] dnl
+               [sigaction       sigblock      sighold          ] dnl
+               [statfs          statvfs       stime            ] dnl
+               [strncasecmp     system                         ] dnl
+               [uname           usleep                         ] )
 
 #  Apps:
-AC_CHECK_FUNCS([getdtablesize                                  \
-                getgrnam        getpid        getpwnam         \
-                setgid          setgroups     setuid           \
-                tcgetattr                                      \
-              ])
+AC_CHECK_FUNCS([getdtablesize                                  ] dnl
+               [getgrnam        getpid        getpwnam         ] dnl
+               [setgid          setgroups     setuid           ] dnl
+               [tcgetattr                                      ] )
 
 #  Not-Used:
-AC_CHECK_FUNCS([if_freenameindex              getpagesize      \
-                lseek64         pread64                        \
-                select          sigalrm       socket           \
-              ])
+AC_CHECK_FUNCS([if_freenameindex              getpagesize      ] dnl
+               [lseek64         pread64                        ] dnl
+               [select          sigalrm       socket           ] )
 
 
 ##
