@@ -422,9 +422,10 @@ convert_v2pdu_to_v1( netsnmp_pdu* template_v2pdu )
                              snmptrapenterprise_oid,
                              snmptrapenterprise_oid_len);
         if (var) {
-            memdup((u_char**)&template_v1pdu->enterprise,
-                   (const u_char*)var->val.objid, var->val_len);
             template_v1pdu->enterprise_length = var->val_len/sizeof(oid);
+            template_v1pdu->enterprise =
+                snmp_duplicate_objid(var->val.objid,
+                                     template_v1pdu->enterprise_length);
         } else {
             template_v1pdu->enterprise        = NULL;
             template_v1pdu->enterprise_length = 0;		/* XXX ??? */
@@ -447,8 +448,8 @@ convert_v2pdu_to_v1( netsnmp_pdu* template_v2pdu )
         if (vblist->val.objid[len-1] == 0)
             len--;
         SNMP_FREE(template_v1pdu->enterprise);
-        memdup((u_char**)&template_v1pdu->enterprise,
-               (u_char *)vblist->val.objid, len*sizeof(oid));
+        template_v1pdu->enterprise =
+            snmp_duplicate_objid(vblist->val.objid, len);
         template_v1pdu->enterprise_length = len;
     }
     var = find_varbind_in_list( vblist, agentaddr_oid,
