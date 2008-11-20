@@ -110,9 +110,8 @@ netsnmp_tdata_clone_row(netsnmp_tdata_row *row)
     }
 
     if (row->oid_index.oids) {
-        memdup((u_char **) & newrow->oid_index.oids,
-               (u_char *) row->oid_index.oids,
-               row->oid_index.len * sizeof(oid));
+        newrow->oid_index.oids =
+            snmp_duplicate_objid(row->oid_index.oids, row->oid_index.len);
         if (!newrow->oid_index.oids) {
             if (newrow->indexes)
                 snmp_free_varbind(newrow->indexes);
@@ -141,9 +140,8 @@ netsnmp_tdata_copy_row(netsnmp_tdata_row *dst_row, netsnmp_tdata_row *src_row)
     }
 
     if (src_row->oid_index.oids) {
-        memdup((u_char **) &dst_row->oid_index.oids,
-               (u_char  *)  src_row->oid_index.oids,
-               src_row->oid_index.len * sizeof(oid));
+        dst_row->oid_index.oids = snmp_duplicate_objid(src_row->oid_index.oids,
+                                                       src_row->oid_index.len);
         if (!dst_row->oid_index.oids)
             return -1;
     }
