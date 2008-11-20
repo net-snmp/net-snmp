@@ -1202,7 +1202,7 @@ main(int argc, char *argv[])
                  */
                 snmptrapd_close_sessions(sess_list);
                 netsnmp_transport_free(transport);
-                snmp_log(LOG_ERR, "couldn't open snmp - %m");
+                snmp_log(LOG_ERR, "couldn't open snmp - %s", strerror(errno));
                 SOCK_CLEANUP;
                 exit(1);
             } else {
