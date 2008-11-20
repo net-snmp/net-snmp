@@ -179,8 +179,7 @@ netsnmp_handler_registration_create(const char *name,
     the_reg->priority = DEFAULT_MIB_PRIORITY;
     if (name)
         the_reg->handlerName = strdup(name);
-    memdup((u_char **) & the_reg->rootoid, (const u_char *) reg_oid,
-           reg_oid_len * sizeof(oid));
+    the_reg->rootoid = snmp_duplicate_objid(reg_oid, reg_oid_len);
     the_reg->rootoid_len = reg_oid_len;
     return the_reg;
 }
@@ -669,9 +668,8 @@ netsnmp_handler_registration_dup(netsnmp_handler_registration *reginfo)
         }
 
         if (reginfo->rootoid != NULL) {
-            memdup((u_char **) & (r->rootoid),
-                   (const u_char *) reginfo->rootoid,
-                   reginfo->rootoid_len * sizeof(oid));
+            r->rootoid =
+                snmp_duplicate_objid(reginfo->rootoid, reginfo->rootoid_len);
             if (r->rootoid == NULL) {
                 netsnmp_handler_registration_free(r);
                 return NULL;

@@ -136,8 +136,7 @@ netsnmp_table_row_register(netsnmp_handler_registration *reginfo,
                       MAX_OID_LEN-row_oid_len, &len, NULL, 0, index);
     row_oid_len += len;
     free(reginfo->rootoid);
-    memdup((u_char **) & reginfo->rootoid, (const u_char *) row_oid,
-           row_oid_len * sizeof(oid));
+    reginfo->rootoid = snmp_duplicate_objid(row_oid, row_oid_len);
     reginfo->rootoid_len = row_oid_len;
 
      

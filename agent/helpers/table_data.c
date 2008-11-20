@@ -86,9 +86,8 @@ netsnmp_table_data_clone_row(netsnmp_table_row *row)
     }
 
     if (row->index_oid) {
-        memdup((u_char **) & newrow->index_oid,
-               (u_char *) row->index_oid,
-               row->index_oid_len * sizeof(oid));
+        newrow->index_oid =
+            snmp_duplicate_objid(row->index_oid, row->index_oid_len);
         if (!newrow->index_oid)
             return NULL;
     }
@@ -338,9 +337,8 @@ netsnmp_table_data_copy_row( netsnmp_table_row  *old_row,
     if (old_row->indexes)
         new_row->indexes = snmp_clone_varbind(old_row->indexes);
     if (old_row->index_oid)
-        memdup((u_char **) & new_row->index_oid,
-               (u_char *)    old_row->index_oid,
-               old_row->index_oid_len * sizeof(oid));
+        new_row->index_oid =
+            snmp_duplicate_objid(old_row->index_oid, old_row->index_oid_len);
     /* XXX - Doesn't copy table-specific row structure */
     return 0;
 }
