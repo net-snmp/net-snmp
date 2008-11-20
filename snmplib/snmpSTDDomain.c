@@ -212,7 +212,7 @@ netsnmp_std_transport(const char *instring, size_t instring_len,
 
             data = SNMP_MALLOC_TYPEDEF(netsnmp_std_data);
             if (!data) {
-                snmp_log(LOG_ERR, "snmpSTDDomain: memdup failed");
+                snmp_log(LOG_ERR, "snmpSTDDomain: malloc failed");
                 netsnmp_transport_free(t);
                 return NULL;
             }
