@@ -7573,13 +7573,14 @@ snmp_sess_transport_set(void *sp, netsnmp_transport *t)
 oid            *
 snmp_duplicate_objid(const oid * objToCopy, size_t objToCopyLen)
 {
-    oid            *returnOid = NULL;
+    oid            *returnOid;
     if (objToCopy != NULL && objToCopyLen != 0) {
         returnOid = (oid *) malloc(objToCopyLen * sizeof(oid));
         if (returnOid) {
-            memmove(returnOid, objToCopy, objToCopyLen * sizeof(oid));
+            memcpy(returnOid, objToCopy, objToCopyLen * sizeof(oid));
         }
-    }
+    } else
+        returnOid = NULL;
     return returnOid;
 }
 
