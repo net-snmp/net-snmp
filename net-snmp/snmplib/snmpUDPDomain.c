@@ -118,7 +118,7 @@ netsnmp_udp_fmtaddr(netsnmp_transport *t, void *data, int len)
             return (host ? strdup(host->h_name) : NULL); 
         } else {
             sprintf(tmp, "UDP: [%s]->", inet_ntoa(addr_pair->local_addr));
-            sprintf(tmp + strlen(tmp), "[%s]:%hd",
+            sprintf(tmp + strlen(tmp), "[%s]:%hu",
                     inet_ntoa(to->sin_addr), ntohs(to->sin_port));
         }
         return strdup(tmp);
