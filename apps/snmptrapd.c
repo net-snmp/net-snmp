@@ -1084,55 +1084,6 @@ main(int argc, char *argv[])
 #endif        
     }
 
-#ifndef WIN32
-    /*
-     * fork the process to the background if we are not printing to stderr 
-     */
-    if (dofork && netsnmp_running) {
-        int             fd;
-
-        switch (fork()) {
-        case -1:
-            fprintf(stderr, "bad fork - %s\n", strerror(errno));
-            _exit(1);
-
-        case 0:
-            /*
-             * become process group leader 
-             */
-            if (setsid() == -1) {
-                fprintf(stderr, "bad setsid - %s\n", strerror(errno));
-                _exit(1);
-            }
-
-            /*
-             * if we are forked, we don't want to print out to stdout or stderr 
-             */
-            fd = open("/dev/null", O_RDWR);
-            dup2(fd, STDIN_FILENO);
-            dup2(fd, STDOUT_FILENO);
-            dup2(fd, STDERR_FILENO);
-            close(fd);
-            break;
-
-        default:
-            _exit(0);
-        }
-    }
-#endif                          /* WIN32 */
-#if HAVE_GETPID
-    if (pid_file != NULL) {
-        if ((PID = fopen(pid_file, "w")) == NULL) {
-            snmp_log_perror("fopen");
-            exit(1);
-        }
-        fprintf(PID, "%d\n", (int) getpid());
-        fclose(PID);
-        free_config_pidFile();
-    }
-#endif
-
-    snmp_log(LOG_INFO, "NET-SNMP version %s\n", netsnmp_get_version());
     SOCK_STARTUP;
 
     if (listen_ports)
@@ -1183,6 +1134,56 @@ main(int argc, char *argv[])
             cp = NULL;
         }
     }
+
+#ifndef WIN32
+    /*
+     * fork the process to the background if we are not printing to stderr 
+     */
+    if (dofork && netsnmp_running) {
+        int             fd;
+
+        switch (fork()) {
+        case -1:
+            fprintf(stderr, "bad fork - %s\n", strerror(errno));
+            _exit(1);
+
+        case 0:
+            /*
+             * become process group leader 
+             */
+            if (setsid() == -1) {
+                fprintf(stderr, "bad setsid - %s\n", strerror(errno));
+                _exit(1);
+            }
+
+            /*
+             * if we are forked, we don't want to print out to stdout or stderr 
+             */
+            fd = open("/dev/null", O_RDWR);
+            dup2(fd, STDIN_FILENO);
+            dup2(fd, STDOUT_FILENO);
+            dup2(fd, STDERR_FILENO);
+            close(fd);
+            break;
+
+        default:
+            _exit(0);
+        }
+    }
+#endif                          /* WIN32 */
+#if HAVE_GETPID
+    if (pid_file != NULL) {
+        if ((PID = fopen(pid_file, "w")) == NULL) {
+            snmp_log_perror("fopen");
+            exit(1);
+        }
+        fprintf(PID, "%d\n", (int) getpid());
+        fclose(PID);
+        free_config_pidFile();
+    }
+#endif
+
+    snmp_log(LOG_INFO, "NET-SNMP version %s\n", netsnmp_get_version());
 
     /*
      * ignore early sighup during startup

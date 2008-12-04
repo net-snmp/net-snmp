@@ -903,19 +903,6 @@ main(int argc, char *argv[])
 #ifdef BUFSIZ
     setvbuf(stdout, NULL, _IOLBF, BUFSIZ);
 #endif
-    /*
-     * Initialize the world.  Detach from the shell.  Create initial user.  
-     */
-    if(!dont_fork) {
-        int quit = ! netsnmp_ds_get_boolean(NETSNMP_DS_APPLICATION_ID,
-                                            NETSNMP_DS_AGENT_QUIT_IMMEDIATELY);
-        ret = netsnmp_daemonize(quit, snmp_stderrlog_status());
-        /*
-         * xxx-rks: do we care if fork fails? I think we should...
-         */
-        if(ret != 0)
-            Exit(1);                /*  Exit logs exit val for us  */
-    }
 
     SOCK_STARTUP;
     init_agent(app_name);        /* do what we need to do first. */
@@ -931,6 +918,20 @@ main(int argc, char *argv[])
          * Some error opening one of the specified agent transports.  
          */
         Exit(1);                /*  Exit logs exit val for us  */
+    }
+
+    /*
+     * Initialize the world.  Detach from the shell.  Create initial user.  
+     */
+    if(!dont_fork) {
+        int quit = ! netsnmp_ds_get_boolean(NETSNMP_DS_APPLICATION_ID,
+                                            NETSNMP_DS_AGENT_QUIT_IMMEDIATELY);
+        ret = netsnmp_daemonize(quit, snmp_stderrlog_status());
+        /*
+         * xxx-rks: do we care if fork fails? I think we should...
+         */
+        if(ret != 0)
+            Exit(1);                /*  Exit logs exit val for us  */
     }
 
 #if HAVE_GETPID
