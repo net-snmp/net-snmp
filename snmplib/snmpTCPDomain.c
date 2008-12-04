@@ -79,7 +79,7 @@ netsnmp_tcp_fmtaddr(netsnmp_transport *t, void *data, int len)
             return strdup("TCP: unknown");
         }
 
-        sprintf(tmp, "TCP: [%s]:%hd",
+        sprintf(tmp, "TCP: [%s]:%hu",
                 inet_ntoa(to->sin_addr), ntohs(to->sin_port));
         return strdup(tmp);
     }
