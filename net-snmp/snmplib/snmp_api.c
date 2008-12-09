@@ -1279,7 +1279,7 @@ snmpv3_probe_contextEngineID_rfc5343(void *slp, netsnmp_session *session) {
     session->flags |= SNMP_FLAGS_DONT_PROBE; /* prevent recursion */
     status = snmp_sess_synch_response(slp, pdu, &response);
 
-    if ((response == NULL) && (status == STAT_SUCCESS)) {
+    if ((response == NULL) || (status != STAT_SUCCESS)) {
         snmp_log(LOG_ERR, "failed rfc5343 contextEngineID probing\n");
         return SNMP_ERR_GENERR;
     }
