@@ -6,9 +6,6 @@ listing of all changes made to the code.
 
 *5.5.dev*      (SVN snapshot)
 
-    administrative:
-      - Code repository moved to SVN from CVS on SourceForge.net
-
     applications:
       - Added the ability to "alias" transports to a more simple name
          (see the "alias" keyword in the snmp.conf manual page)
