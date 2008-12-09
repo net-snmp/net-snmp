@@ -19,6 +19,8 @@ extern          "C" {
 #define		NETSNMP_TRANSPORT_FLAG_STREAM	0x01
 #define		NETSNMP_TRANSPORT_FLAG_LISTEN	0x02
 #define		NETSNMP_TRANSPORT_FLAG_TUNNELED	0x04
+#define         NETSNMP_TRANSPORT_FLAG_TMSTATE  0x08  /* indicates opaque is a
+                                                         TSM tmStateReference */
 #define		NETSNMP_TRANSPORT_FLAG_HOSTNAME	0x80  /* for fmtaddr hook */
 
 /*  The standard SNMP domains.  */
@@ -33,6 +35,27 @@ NETSNMP_IMPORT size_t   netsnmpCLNSDomain_len;
 NETSNMP_IMPORT size_t   netsnmpCONSDomain_len;
 NETSNMP_IMPORT size_t   netsnmpDDPDomain_len;
 NETSNMP_IMPORT size_t   netsnmpIPXDomain_len;
+
+/* Structure which stores transport security model specific parameters */
+/* isms-secshell-11 section 4.1 */
+
+/* contents documented in draft-ietf-isms-transport-security-model
+   Section 3.2 */
+/* note: VACM only allows <= 32 so this is overkill till another ACM comes */
+#define NETSNMP_TM_MAX_SECNAME 256
+
+typedef struct netsnmp_tmStateReference_s {
+   oid    transportDomain[MAX_OID_LEN];
+   size_t transportDomainLen;
+   char   securityName[NETSNMP_TM_MAX_SECNAME];
+   size_t securityNameLen;
+   int    requestedSecurityLevel;
+   int    transportSecurityLevel;
+   char   sameSecurity;
+   int    sessionID;
+
+   void *otherTransportOpaque;
+} netsnmp_tmStateReference;
 
 /*  Structure which defines the transport-independent API.  */
 
@@ -68,6 +91,9 @@ typedef struct netsnmp_transport_s {
     /*  Maximum size of PDU that can be sent/received by this transport.  */
 
     size_t          msgMaxSize;
+
+    /* TM state reference per ISMS WG solution */
+    netsnmp_tmStateReference *tmStateRef;
 
     /*  Callbacks.  Arguments are:
      *		
