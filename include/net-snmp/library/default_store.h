@@ -144,9 +144,6 @@ extern          "C" {
 #define NETSNMP_DS_LIB_APPTYPES          20
 #define NETSNMP_DS_LIB_KSM_KEYTAB        21
 #define NETSNMP_DS_LIB_KSM_SERVICE_NAME  22
-#define NETSNMP_DS_LIB_SSH_USER_NAME     23
-#define NETSNMP_DS_LIB_SSH_PUBLIC_KEY    24
-#define NETSNMP_DS_LIB_SSH_PRIVATE_KEY   25
 
     /*
      * end storage definitions 
