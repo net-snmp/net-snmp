@@ -15,6 +15,7 @@ listing of all changes made to the code.
       - The -t (timeout) switch will accept floating point numbers (eg: .1)
 
     snmplib:
+      - Support for the TSM security model for use with tunneling
       - [PATCH 1592706]: Fix memory leak when cloning varbinds.
 
     snmpd:
