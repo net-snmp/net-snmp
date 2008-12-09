@@ -88,6 +88,7 @@ extern          "C" {
 #define NETSNMP_DS_LIB_DISABLE_PERSISTENT_SAVE  36 /* don't save persistent file */
 #define NETSNMP_DS_LIB_APPEND_LOGFILES     37 /* append, don't overwrite, log files */
 #define NETSNMP_DS_LIB_NO_DISCOVERY        38 /* don't support RFC5343 contextEngineID discovery */
+#define NETSNMP_DS_LIB_TSM_USE_PREFIX      39 /* TSM's simple security name mapping */
 
     /*
      * library integers 
@@ -143,6 +144,9 @@ extern          "C" {
 #define NETSNMP_DS_LIB_APPTYPES          20
 #define NETSNMP_DS_LIB_KSM_KEYTAB        21
 #define NETSNMP_DS_LIB_KSM_SERVICE_NAME  22
+#define NETSNMP_DS_LIB_SSH_USER_NAME     23
+#define NETSNMP_DS_LIB_SSH_PUBLIC_KEY    24
+#define NETSNMP_DS_LIB_SSH_PRIVATE_KEY   25
 
     /*
      * end storage definitions 
