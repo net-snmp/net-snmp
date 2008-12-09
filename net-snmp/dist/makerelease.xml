@@ -6,7 +6,7 @@
   - configure options should be prompted into a variable and used
   -->
   <steps>
-    <step type="section" title="Setup Steps">
+    <step type="section" title="Setup Steps" mandatory="1">
       <text>
 	This set of steps will do some preliminary "safety" checks to
 	ensure the local environment is ok and setup some important
@@ -33,7 +33,8 @@
 	    should be labeled ".rcN" like 5.4.1.rc1.
 	  </text>
 	</step>
-	<step type="perl" title="Defining a second internal version string">
+	<step type="perl" title="Defining a second internal version string"
+	  mandatory="1">
 	  <perl>
 	    <code>
 	      # version number with dashes instead of dots
@@ -550,6 +551,7 @@
 	Advertise: NEWS upload to sf, publish on -announce, freshmeat,
 	and the GNU FSF directory
 	(http://directory.fsf.org/project/net-snmp/)...
+        (send mail to bug-directory@gnu.org)
       </text>
     </step>
   </steps>
