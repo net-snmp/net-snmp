@@ -43,6 +43,7 @@
 #ifdef HAVE_LIBRPM
 #include <rpm/rpmlib.h>
 #include <rpm/header.h>
+#include <rpm/rpmfileutil.h>
 #include <fcntl.h>
 
 #ifdef HAVE_RPMGETPATH
@@ -484,7 +485,7 @@ var_hrswinst(struct variable * vp,
     case HRSWINST_DATE:
         {
 #ifdef HAVE_LIBRPM
-            int_32         *rpm_data;
+            int32_t         *rpm_data;
             if ( headerGetEntry(swi->swi_h, RPMTAG_INSTALLTIME, NULL, (void **) &rpm_data, NULL) ) {
                 time_t          installTime = *rpm_data;
                 ret = date_n_time(&installTime, var_len);
