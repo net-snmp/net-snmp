@@ -63,9 +63,9 @@ struct s_node {
     unsigned        data;
     struct s_node  *next;
 };
-typedef struct s_node link;
-link           *operater = NULL;
-link           *operand = NULL;
+typedef struct s_node nodelink;
+nodelink           *operater = NULL;
+nodelink           *operand = NULL;
 
 /*
  * variable2 expObjectTable_variables:
@@ -739,10 +739,10 @@ var_expValueTable(struct variable *vp,
 
 
 void
-push(link ** stack, unsigned long value)
+push(nodelink ** stack, unsigned long value)
 {
-    link           *newnode;
-    newnode = (link *) malloc(sizeof(link));
+    nodelink           *newnode;
+    newnode = (nodelink *) malloc(sizeof(nodelink));
     if (!newnode) {
         printf("\nMemory allocation failure!");
         return;
@@ -753,10 +753,10 @@ push(link ** stack, unsigned long value)
 }
 
 unsigned long
-pop(link ** stack)
+pop(nodelink ** stack)
 {
     unsigned long   value;
-    link           *top;
+    nodelink           *top;
     top = *stack;
     *stack = (*stack)->next;
     value = top->data;
