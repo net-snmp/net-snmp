@@ -92,7 +92,7 @@ netsnmp_sockaddr_in2(struct sockaddr_in *addr,
  * address if data is NULL.  
  */
 
-static char *
+char *
 netsnmp_udp_fmtaddr(netsnmp_transport *t, void *data, int len)
 {
     netsnmp_udp_addr_pair *addr_pair = NULL;
@@ -131,7 +131,7 @@ netsnmp_udp_fmtaddr(netsnmp_transport *t, void *data, int len)
 
 # define netsnmp_dstaddr(x) (&(((struct in_pktinfo *)(CMSG_DATA(x)))->ipi_addr))
 
-static int netsnmp_udp_recvfrom(int s, void *buf, int len, struct sockaddr *from, socklen_t *fromlen, struct in_addr *dstip)
+int netsnmp_udp_recvfrom(int s, void *buf, int len, struct sockaddr *from, socklen_t *fromlen, struct in_addr *dstip)
 {
     int r;
     struct iovec iov[1];
@@ -167,7 +167,7 @@ static int netsnmp_udp_recvfrom(int s, void *buf, int len, struct sockaddr *from
     return r;
 }
 
-static int netsnmp_udp_sendto(int fd, struct in_addr *srcip, struct sockaddr *remote,
+int netsnmp_udp_sendto(int fd, struct in_addr *srcip, struct sockaddr *remote,
 			void *data, int len)
 {
     struct iovec iov = { data, len };
