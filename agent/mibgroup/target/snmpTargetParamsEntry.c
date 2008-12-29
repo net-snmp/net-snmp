@@ -541,13 +541,11 @@ snmpd_parse_config_targetParams(const char *token, char *char_ptr)
         snmpTargetParamTable_dispose(newEntry);
         return;
     }
-    snprintf(buff, sizeof(buff),
-            "snmp_parse_config_targetParams, read: %s %d %d %s %d %d %d\n",
-            newEntry->paramName, newEntry->mpModel, newEntry->secModel,
-            newEntry->secName, newEntry->secLevel, newEntry->storageType,
-            newEntry->rowStatus);
-    buff[ sizeof(buff)-1 ] = 0;
-    DEBUGMSGTL(("snmpTargetParamsEntry", buff));
+    DEBUGMSGTL(("snmpTargetParamsEntry",
+                "snmp_parse_config_targetParams, read: %s %d %d %s %d %d %d\n",
+                newEntry->paramName, newEntry->mpModel, newEntry->secModel,
+                newEntry->secName, newEntry->secLevel, newEntry->storageType,
+                newEntry->rowStatus));
 
     update_timestamp(newEntry);
     snmpTargetParamTable_addToList(newEntry, &aPTable);
