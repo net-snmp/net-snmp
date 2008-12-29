@@ -2000,7 +2000,7 @@ asn_build_unsigned_int64(u_char * data,
     DEBUGIF("dumpv_send") {
         char            i64buf[I64CHARSZ + 1];
         printU64(i64buf, cp);
-        DEBUGMSG(("dumpv_send", i64buf));
+        DEBUGMSG(("dumpv_send", "%s", i64buf));
     }
     return data;
 }
@@ -2210,7 +2210,7 @@ asn_build_signed_int64(u_char * data,
     DEBUGIF("dumpv_send") {
         char            i64buf[I64CHARSZ + 1];
         printU64(i64buf, cp);
-        DEBUGMSG(("dumpv_send", i64buf));
+        DEBUGMSG(("dumpv_send", "%s", i64buf));
     }
     return data;
 }

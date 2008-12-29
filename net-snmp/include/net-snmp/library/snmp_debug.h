@@ -168,8 +168,7 @@ extern          "C" {
 
 #define __DBGDUMPSECTION(token,x) \
         __DBGPRINTINDENT("dumph_" token); \
-        debugmsg("dumph_" token,x); \
-        debugmsg("dumph_" token,"\n"); \
+        debugmsg("dumph_" token,"%s\n",x);\
         __DBGINDENTMORE()
 
 #define __DBGDUMPSETUP(token,buf,len) \

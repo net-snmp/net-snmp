@@ -336,13 +336,13 @@ var_hrfilesys(struct variable *vp,
         long_return = fsys_idx;
         return (u_char *) & long_return;
     case HRFSYS_MOUNT:
-        snprintf(string, sizeof(string), HRFS_entry->HRFS_mount);
+        snprintf(string, sizeof(string), "%s", HRFS_entry->HRFS_mount);
         string[ sizeof(string)-1 ] = 0;
         *var_len = strlen(string);
         return (u_char *) string;
     case HRFSYS_RMOUNT:
         if (Check_HR_FileSys_NFS()) {
-            snprintf(string, sizeof(string), HRFS_entry->HRFS_name);
+            snprintf(string, sizeof(string), "%s", HRFS_entry->HRFS_name);
             string[ sizeof(string)-1 ] = 0;
         } else
             string[0] = '\0';
