@@ -325,7 +325,7 @@ var_example(struct variable *vp,
      */
     switch (vp->magic) {
     case EXAMPLESTRING:
-        sprintf(string, example_str);
+        strcpy(string, example_str);
         /*
          * Note that the assumption that the answer will be an
          *  integer does not hold true in this case, so the length

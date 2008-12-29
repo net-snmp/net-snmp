@@ -535,15 +535,15 @@ int
 snmpTargetAddr_addStorageType(struct targetAddrTable_struct *entry,
                               char *cptr)
 {
-    char            buff[1024];
-
     if (cptr == NULL) {
         DEBUGMSGTL(("snmpTargetAddrEntry",
-                    "ERROR snmpTargetAddrEntry: no storage type in config string\n"));
+                    "ERROR snmpTargetAddrEntry: no storage type in config "
+                    "string\n"));
         return (0);
     } else if (!(isdigit(*cptr))) {
         DEBUGMSGTL(("snmpTargetAddrEntry",
-                    "ERROR snmpTargetAddrEntry: storage type is not a digit in config string\n"));
+                    "ERROR snmpTargetAddrEntry: storage type is not a digit "
+                    "in config string\n"));
         return (0);
     }
     /*
@@ -555,14 +555,13 @@ snmpTargetAddr_addStorageType(struct targetAddrTable_struct *entry,
              (entry->storageType != SNMP_STORAGE_NONVOLATILE) &&
              (entry->storageType != SNMP_STORAGE_PERMANENT) &&
              (entry->storageType != SNMP_STORAGE_READONLY)) {
-        snprintf(buff, sizeof(buff),
-                "ERROR snmpTargetAddrEntry: storage type not a valid value of other(%d), volatile(%d), nonvolatile(%d), permanent(%d), or readonly(%d) in config string.\n",
-                SNMP_STORAGE_OTHER, SNMP_STORAGE_VOLATILE,
-                SNMP_STORAGE_NONVOLATILE, SNMP_STORAGE_PERMANENT,
-                SNMP_STORAGE_READONLY);
-        buff[ sizeof(buff)-1 ] = 0;
-        DEBUGMSGTL(("snmpTargetAddrEntry", buff));
-
+	DEBUGMSGTL(("snmpTargetAddrEntry",
+                    "ERROR snmpTargetAddrEntry: storage type not a valid "
+                    "value of other(%d), volatile(%d), nonvolatile(%d), "
+                    "permanent(%d), or readonly(%d) in config string.\n",
+                    SNMP_STORAGE_OTHER, SNMP_STORAGE_VOLATILE,
+                    SNMP_STORAGE_NONVOLATILE, SNMP_STORAGE_PERMANENT,
+                    SNMP_STORAGE_READONLY));
         return (0);
     }
     return (1);
@@ -573,15 +572,15 @@ int
 snmpTargetAddr_addRowStatus(struct targetAddrTable_struct *entry,
                             char *cptr)
 {
-    char            buff[1024];
-
     if (cptr == NULL) {
         DEBUGMSGTL(("snmpTargetAddrEntry",
-                    "ERROR snmpTargetAddrEntry: no Row Status in config string\n"));
+                    "ERROR snmpTargetAddrEntry: no Row Status in config "
+                    "string\n"));
         return (0);
     } else if (!(isdigit(*cptr))) {
         DEBUGMSGTL(("snmpTargetAddrEntry",
-                    "ERROR snmpTargetAddrEntry: Row Status is not a digit in config string\n"));
+                    "ERROR snmpTargetAddrEntry: Row Status is not a digit in "
+                    "config string\n"));
         return (0);
     }
     /*
@@ -591,12 +590,11 @@ snmpTargetAddr_addRowStatus(struct targetAddrTable_struct *entry,
               != SNMP_ROW_ACTIVE) &&
              (entry->rowStatus != SNMP_ROW_NOTINSERVICE) &&
              (entry->rowStatus != SNMP_ROW_NOTREADY)) {
-        snprintf(buff, sizeof(buff),
-                "ERROR snmpTargetAddrEntry: Row Status is not a valid value of active(%d), notinservice(%d), or notready(%d) in config string.\n",
-                SNMP_ROW_ACTIVE, SNMP_ROW_NOTINSERVICE, SNMP_ROW_NOTREADY);
-        buff[ sizeof(buff)-1 ] = 0;
-        DEBUGMSGTL(("snmpTargetAddrEntry", buff));
-
+        DEBUGMSGTL(("snmpTargetAddrEntry",
+                    "ERROR snmpTargetAddrEntry: Row Status is not a valid "
+                    "value of active(%d), notinservice(%d), or notready(%d) "
+                    "in config string.\n",
+                    SNMP_ROW_ACTIVE, SNMP_ROW_NOTINSERVICE, SNMP_ROW_NOTREADY));
         return (0);
     }
     return (1);
@@ -676,7 +674,7 @@ snmpd_parse_config_targetAddr(const char *token, char *char_ptr)
             newEntry->tagList, newEntry->params, newEntry->storageType,
             newEntry->rowStatus);
     buff[ sizeof(buff)-1 ] = 0;
-    DEBUGMSGTL(("snmpTargetAddrEntry", buff));
+    DEBUGMSGTL(("snmpTargetAddrEntry", "%s", buff));
 
     snmpTargetAddrTable_addToList(newEntry, &aAddrTable);
 }                               /* snmpd_parse_config_target */
