@@ -894,8 +894,7 @@ __add_var_val_str(pdu, name, name_length, val, len, type)
     }
 
     vars->next_variable = NULL;
-    vars->name = (oid *)malloc(name_length * sizeof(oid));
-    memcpy((char *)vars->name, (char *)name, name_length * sizeof(oid));
+    vars->name = snmp_duplicate_objid(name, name_length);
     vars->name_length = name_length;
     switch (type) {
       case TYPE_INTEGER:
@@ -977,9 +976,8 @@ OCT:
             vars->val.objid = NULL;
 	    ret = FAILURE;
         } else {
+            vars->val.objid = snmp_duplicate_objid(oidbuf, vars->val_len);
             vars->val_len *= sizeof(oid);
-            vars->val.objid = (oid *)malloc(vars->val_len);
-            memcpy((char *)vars->val.objid, (char *)oidbuf, vars->val_len);
         }
         break;
 
