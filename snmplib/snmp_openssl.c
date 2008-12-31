@@ -12,6 +12,8 @@
 
 #include <net-snmp/library/snmp_openssl.h>
 
+#ifdef NETSNMP_USE_OPENSSL
+
 #include <openssl/evp.h>
 #include <openssl/ssl.h>
 
@@ -32,3 +34,5 @@ void netsnmp_init_openssl(void) {
     ERR_load_BIO_strings();
     OpenSSL_add_all_algorithms();
 }
+
+#endif /* NETSNMP_USE_OPENSSL */
