@@ -5089,6 +5089,8 @@ _sess_async_send(void *sessp,
      * Send the message.  
      */
 
+    DEBUGMSGTL(("sess_process_packet", "sending message id#%d reqid#%d\n",
+                pdu->msgid, pdu->reqid));
     result = transport->f_send(transport, packet, length,
                                &(pdu->transport_data),
                                &(pdu->transport_data_length));
@@ -5381,6 +5383,9 @@ _sess_process_packet(void *sessp, netsnmp_session * sp,
     ret = snmp_parse(sessp, sp, pdu, packetptr, length);
   }
 
+  DEBUGMSGTL(("sess_process_packet", "received message id#%d reqid#%d rp_reqid#%d rp_msgid#%d\n",
+              pdu->msgid, pdu->reqid));
+
   if (ret != SNMP_ERR_NOERROR) {
     DEBUGMSGTL(("sess_process_packet", "parse fail\n"));
   }
@@ -5448,7 +5453,9 @@ _sess_process_packet(void *sessp, netsnmp_session * sp,
 	 * msgId must match for v3 messages.  
 	 */
 	if (rp->message_id != pdu->msgid) {
-	  continue;
+            DEBUGMSGTL(("sess_process_packet", "unmatched msg id: %d != %d\n",
+                        rp->message_id, pdu->msgid));
+	    continue;
 	}
 
 	/*
@@ -6499,6 +6506,8 @@ snmp_resend_request(struct session_list *slp, netsnmp_request_list *rp,
         xdump(packet, length, "");
     }
 
+    DEBUGMSGTL(("sess_process_packet", "resending message id#%d reqid#%d rp_reqid#%d rp_msgid#%d\n",
+                rp->pdu->msgid, rp->pdu->reqid, rp->request_id, rp->message_id));
     result = transport->f_send(transport, packet, length,
                                &(rp->pdu->transport_data),
                                &(rp->pdu->transport_data_length));
