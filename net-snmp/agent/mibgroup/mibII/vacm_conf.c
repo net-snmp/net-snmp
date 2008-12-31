@@ -155,24 +155,24 @@ init_vacm_conf(void)
 void
 vacm_parse_group(const char *token, char *param)
 {
-    char           *group, *model, *security;
+    char            group[VACMSTRINGLEN], model[VACMSTRINGLEN], security[VACMSTRINGLEN];
     int             imodel;
     struct vacm_groupEntry *gp = NULL;
     char           *st;
 
-    group = strtok_r(param, " \t\n", &st);
-    model = strtok_r(NULL, " \t\n", &st);
-    security = strtok_r(NULL, " \t\n", &st);
+    st = copy_nword(param, group, sizeof(group)-1);
+    st = copy_nword(st, model, sizeof(model)-1);
+    st = copy_nword(st, security, sizeof(security)-1);
 
-    if (group == NULL || *group == 0) {
+    if (group[0] == 0) {
         config_perror("missing GROUP parameter");
         return;
     }
-    if (model == NULL || *model == 0) {
+    if (model[0] == 0) {
         config_perror("missing MODEL parameter");
         return;
     }
-    if (security == NULL || *security == 0) {
+    if (security[0] == 0) {
         config_perror("missing SECURITY parameter");
         return;
     }
@@ -995,7 +995,7 @@ vacm_create_simple(const char *token, char *confline,
                 if (!isalnum(*tmp))
                     *tmp = '_';
             snprintf(line, sizeof(line),
-                     "%s %s %s", grpname, model, secname);
+                     "%s %s \"%s\"", grpname, model, secname);
             line[ sizeof(line)-1 ] = 0;
             DEBUGMSGTL((token, "passing: %s %s\n", "group", line));
             vacm_parse_group("group", line);
