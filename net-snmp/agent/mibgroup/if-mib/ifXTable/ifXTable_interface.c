@@ -1773,7 +1773,7 @@ static char    *_ifXTable_container_col_save(ifXTable_rowreq_ctx *
                                              rowreq_ctx, u_int col,
                                              char *buf);
 
-static char     row_token[] = "ifXTable";
+static const char row_token[] = "ifXTable";
 
 /************************************************************
  * *_init_persistence should be called from the main table
