@@ -252,8 +252,8 @@ int ${context}_row_ref_increment(${context}_rowreq_ctx *rowreq_ctx);
 int ${context}_row_ref_decrement(${context}_rowreq_ctx *rowreq_ctx);
 
 @   end@
-extern oid ${context}_oid[];
-extern int ${context}_oid_size;
+extern const oid ${context}_oid[];
+extern const int ${context}_oid_size;
 
 @end@ # for each
 
@@ -309,8 +309,8 @@ extern int ${context}_oid_size;
 
 @foreach $table table@
 @    include m2c_setup_table.m2i@
-oid ${context}_oid[] = { $context.uc_OID };
-int ${context}_oid_size = OID_LENGTH(${context}_oid);
+const oid ${context}_oid[] = { $context.uc_OID };
+const int ${context}_oid_size = OID_LENGTH(${context}_oid);
 
 @    if "x$m2c_context_reg" ne "x"@
     ${context}_registration  ${context}_user_context;

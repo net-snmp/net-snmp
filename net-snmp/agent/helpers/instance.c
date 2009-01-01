@@ -109,7 +109,7 @@ static
 netsnmp_handler_registration *
 get_reg(const char *name,
         const char *ourname,
-        oid * reg_oid, size_t reg_oid_len,
+        const oid * reg_oid, size_t reg_oid_len,
         void *it,
         int modes,
         Netsnmp_Node_Handler * scalarh, Netsnmp_Node_Handler * subhandler,
@@ -142,7 +142,7 @@ get_reg(const char *name,
 
 int
 netsnmp_register_read_only_ulong_instance(const char *name,
-                                          oid * reg_oid,
+                                          const oid * reg_oid,
                                           size_t reg_oid_len, u_long * it,
                                           Netsnmp_Node_Handler *
                                           subhandler)
@@ -157,7 +157,7 @@ netsnmp_register_read_only_ulong_instance(const char *name,
 
 int
 netsnmp_register_ulong_instance(const char *name,
-                                oid * reg_oid, size_t reg_oid_len,
+                                const oid * reg_oid, size_t reg_oid_len,
                                 u_long * it,
                                 Netsnmp_Node_Handler * subhandler)
 {
@@ -171,7 +171,7 @@ netsnmp_register_ulong_instance(const char *name,
 
 int
 netsnmp_register_read_only_counter32_instance(const char *name,
-                                              oid * reg_oid,
+                                              const oid * reg_oid,
                                               size_t reg_oid_len,
                                               u_long * it,
                                               Netsnmp_Node_Handler *
@@ -187,7 +187,8 @@ netsnmp_register_read_only_counter32_instance(const char *name,
 
 int
 netsnmp_register_read_only_long_instance(const char *name,
-                                         oid * reg_oid, size_t reg_oid_len,
+                                         const oid * reg_oid,
+                                         size_t reg_oid_len,
                                          long *it,
                                          Netsnmp_Node_Handler * subhandler)
 {
@@ -200,7 +201,7 @@ netsnmp_register_read_only_long_instance(const char *name,
 
 int
 netsnmp_register_long_instance(const char *name,
-                               oid * reg_oid, size_t reg_oid_len,
+                               const oid * reg_oid, size_t reg_oid_len,
                                long *it, Netsnmp_Node_Handler * subhandler)
 {
     return netsnmp_register_watched_instance(
@@ -213,7 +214,8 @@ netsnmp_register_long_instance(const char *name,
 
 int
 netsnmp_register_read_only_uint_instance(const char *name,
-                                         oid * reg_oid, size_t reg_oid_len,
+                                         const oid * reg_oid,
+                                         size_t reg_oid_len,
                                          unsigned int *it,
                                          Netsnmp_Node_Handler * subhandler)
 {
@@ -227,7 +229,7 @@ netsnmp_register_read_only_uint_instance(const char *name,
 
 int
 netsnmp_register_uint_instance(const char *name,
-                               oid * reg_oid, size_t reg_oid_len,
+                               const oid * reg_oid, size_t reg_oid_len,
                                unsigned int *it, Netsnmp_Node_Handler * subhandler)
 {
     return netsnmp_register_watched_instance(
@@ -240,7 +242,7 @@ netsnmp_register_uint_instance(const char *name,
 
 int
 netsnmp_register_read_only_int_instance(const char *name,
-                                oid * reg_oid, size_t reg_oid_len,
+                                const oid * reg_oid, size_t reg_oid_len,
                                 int *it, Netsnmp_Node_Handler * subhandler)
 {
     return netsnmp_register_watched_instance(
@@ -255,7 +257,7 @@ netsnmp_register_read_only_int_instance(const char *name,
    */
 int
 register_read_only_int_instance(const char *name,
-                                oid * reg_oid, size_t reg_oid_len,
+                                const oid * reg_oid, size_t reg_oid_len,
                                 int *it, Netsnmp_Node_Handler * subhandler)
 {
   return netsnmp_register_read_only_int_instance(name,
@@ -269,7 +271,7 @@ register_read_only_int_instance(const char *name,
 
 int
 netsnmp_register_read_only_ulong_instance_context(const char *name,
-                                                  oid * reg_oid,
+                                                  const oid * reg_oid,
                                                   size_t reg_oid_len,
                                                   u_long * it,
                                                   Netsnmp_Node_Handler *
@@ -288,7 +290,7 @@ netsnmp_register_read_only_ulong_instance_context(const char *name,
 
 int
 netsnmp_register_ulong_instance_context(const char *name,
-                                        oid * reg_oid, size_t reg_oid_len,
+                                        const oid * reg_oid, size_t reg_oid_len,
                                         u_long * it,
                                         Netsnmp_Node_Handler * subhandler,
                                         const char *contextName)
@@ -305,7 +307,7 @@ netsnmp_register_ulong_instance_context(const char *name,
 
 int
 netsnmp_register_read_only_counter32_instance_context(const char *name,
-                                                      oid * reg_oid,
+                                                      const oid * reg_oid,
                                                       size_t reg_oid_len,
                                                       u_long * it,
                                                       Netsnmp_Node_Handler *
@@ -324,7 +326,7 @@ netsnmp_register_read_only_counter32_instance_context(const char *name,
 
 int
 netsnmp_register_read_only_long_instance_context(const char *name,
-                                                 oid * reg_oid,
+                                                 const oid * reg_oid,
                                                  size_t reg_oid_len,
                                                  long *it,
                                                  Netsnmp_Node_Handler
@@ -343,7 +345,7 @@ netsnmp_register_read_only_long_instance_context(const char *name,
 
 int
 netsnmp_register_long_instance_context(const char *name,
-                                       oid * reg_oid, size_t reg_oid_len,
+                                       const oid * reg_oid, size_t reg_oid_len,
                                        long *it,
                                        Netsnmp_Node_Handler * subhandler,
                                        const char *contextName)
@@ -360,7 +362,7 @@ netsnmp_register_long_instance_context(const char *name,
 
 int
 netsnmp_register_int_instance_context(const char *name,
-                                      oid * reg_oid,
+                                      const oid * reg_oid,
                                       size_t reg_oid_len,
                                       int *it,
                                       Netsnmp_Node_Handler * subhandler,
@@ -378,7 +380,7 @@ netsnmp_register_int_instance_context(const char *name,
 
 int
 netsnmp_register_read_only_int_instance_context(const char *name,
-                                                oid * reg_oid,
+                                                const oid * reg_oid,
                                                 size_t reg_oid_len,
                                                 int *it,
                                                 Netsnmp_Node_Handler * subhandler,
@@ -399,7 +401,7 @@ netsnmp_register_read_only_int_instance_context(const char *name,
  */
 int
 register_read_only_int_instance_context(const char *name,
-                                        oid * reg_oid, size_t reg_oid_len,
+                                        const oid * reg_oid, size_t reg_oid_len,
                                         int *it,
                                         Netsnmp_Node_Handler * subhandler,
                                         const char *contextName)
@@ -412,7 +414,7 @@ register_read_only_int_instance_context(const char *name,
 
 int
 netsnmp_register_num_file_instance(const char *name,
-                                   oid * reg_oid, size_t reg_oid_len,
+                                   const oid * reg_oid, size_t reg_oid_len,
                                    char *file_name, int asn_type, int mode,
                                    Netsnmp_Node_Handler * subhandler,
                                    const char *contextName)
@@ -470,7 +472,7 @@ netsnmp_register_num_file_instance(const char *name,
  */
 int
 netsnmp_register_int_instance(const char *name,
-                              oid * reg_oid, size_t reg_oid_len,
+                              const oid * reg_oid, size_t reg_oid_len,
                               int *it, Netsnmp_Node_Handler * subhandler)
 {
     return netsnmp_register_watched_instance(
