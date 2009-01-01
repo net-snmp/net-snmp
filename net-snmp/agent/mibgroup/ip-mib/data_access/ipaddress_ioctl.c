@@ -418,10 +418,13 @@ _next_alias(const char *if_name)
         for(k=0;k<j;++k)
             if (alias_list[k] == i)
                 break;
-        if (k == j)
+        if (k == j) {
+            free(alias_list);
             return i;
+        }
     }
 
+    free(alias_list);
     return interfaces + 1;
 }
 
