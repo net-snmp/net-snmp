@@ -206,12 +206,13 @@ typedef int (Netsnmp_Node_Handler) (netsnmp_mib_handler *handler,
     netsnmp_handler_registration *
     netsnmp_handler_registration_create(const char *name,
                                         netsnmp_mib_handler *handler,
-                                        oid * reg_oid, size_t reg_oid_len,
+                                        const oid * reg_oid, size_t reg_oid_len,
                                         int modes);
     netsnmp_handler_registration *
     netsnmp_create_handler_registration(const char *name, Netsnmp_Node_Handler*
-                                        handler_access_method, oid *reg_oid,
-                                        size_t reg_oid_len, int modes);
+                                        handler_access_method,
+                                        const oid *reg_oid, size_t reg_oid_len,
+                                        int modes);
 
     netsnmp_delegated_cache
         *netsnmp_create_delegated_cache(netsnmp_mib_handler *,

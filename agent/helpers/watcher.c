@@ -417,7 +417,7 @@ netsnmp_watched_spinlock_handler(netsnmp_mib_handler *handler,
 
 int
 netsnmp_register_ulong_scalar(const char *name,
-                              oid * reg_oid, size_t reg_oid_len,
+                              const oid * reg_oid, size_t reg_oid_len,
                               u_long * it,
                               Netsnmp_Node_Handler * subhandler)
 {
@@ -433,7 +433,7 @@ netsnmp_register_ulong_scalar(const char *name,
 
 int
 netsnmp_register_read_only_ulong_scalar(const char *name,
-                              oid * reg_oid, size_t reg_oid_len,
+                              const oid * reg_oid, size_t reg_oid_len,
                               u_long * it,
                               Netsnmp_Node_Handler * subhandler)
 {
@@ -449,7 +449,7 @@ netsnmp_register_read_only_ulong_scalar(const char *name,
 
 int
 netsnmp_register_long_scalar(const char *name,
-                              oid * reg_oid, size_t reg_oid_len,
+                              const oid * reg_oid, size_t reg_oid_len,
                               long * it,
                               Netsnmp_Node_Handler * subhandler)
 {
@@ -465,7 +465,7 @@ netsnmp_register_long_scalar(const char *name,
 
 int
 netsnmp_register_read_only_long_scalar(const char *name,
-                              oid * reg_oid, size_t reg_oid_len,
+                              const oid * reg_oid, size_t reg_oid_len,
                               long * it,
                               Netsnmp_Node_Handler * subhandler)
 {
@@ -482,7 +482,7 @@ netsnmp_register_read_only_long_scalar(const char *name,
 
 int
 netsnmp_register_int_scalar(const char *name,
-                              oid * reg_oid, size_t reg_oid_len,
+                              const oid * reg_oid, size_t reg_oid_len,
                               int * it,
                               Netsnmp_Node_Handler * subhandler)
 {
@@ -498,7 +498,7 @@ netsnmp_register_int_scalar(const char *name,
 
 int
 netsnmp_register_read_only_int_scalar(const char *name,
-                              oid * reg_oid, size_t reg_oid_len,
+                              const oid * reg_oid, size_t reg_oid_len,
                               int * it,
                               Netsnmp_Node_Handler * subhandler)
 {
@@ -515,7 +515,7 @@ netsnmp_register_read_only_int_scalar(const char *name,
 
 int
 netsnmp_register_read_only_counter32_scalar(const char *name,
-                              oid * reg_oid, size_t reg_oid_len,
+                              const oid * reg_oid, size_t reg_oid_len,
                               u_long * it,
                               Netsnmp_Node_Handler * subhandler)
 {

@@ -127,7 +127,7 @@ netsnmp_cache_get_head(void)
 /** find existing cache
  */
 netsnmp_cache *
-netsnmp_cache_find_by_oid(oid * rootoid, int rootoid_len)
+netsnmp_cache_find_by_oid(const oid * rootoid, int rootoid_len)
 {
     netsnmp_cache  *cache;
 
@@ -145,7 +145,7 @@ netsnmp_cache_find_by_oid(oid * rootoid, int rootoid_len)
 netsnmp_cache *
 netsnmp_cache_create(int timeout, NetsnmpCacheLoad * load_hook,
                      NetsnmpCacheFree * free_hook,
-                     oid * rootoid, int rootoid_len)
+                     const oid * rootoid, int rootoid_len)
 {
     netsnmp_cache  *cache = NULL;
 
@@ -310,7 +310,7 @@ netsnmp_cache_handler_get(netsnmp_cache* cache)
 netsnmp_mib_handler *
 netsnmp_get_cache_handler(int timeout, NetsnmpCacheLoad * load_hook,
                           NetsnmpCacheFree * free_hook,
-                          oid * rootoid, int rootoid_len)
+                          const oid * rootoid, int rootoid_len)
 {
     netsnmp_mib_handler *ret = NULL;
     netsnmp_cache  *cache = NULL;
