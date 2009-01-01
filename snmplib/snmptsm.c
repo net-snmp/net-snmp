@@ -15,7 +15,6 @@
 
 static int      tsm_session_init(netsnmp_session *);
 static void     tsm_free_state_ref(void *);
-static int      tsm_free_pdu(netsnmp_pdu *);
 static int      tsm_clone_pdu(netsnmp_pdu *, netsnmp_pdu *);
 
 u_int next_sess_id = 1;
@@ -84,18 +83,6 @@ tsm_free_state_ref(void *ptr)
     SNMP_FREE(tsmRef->tmStateRef);
     SNMP_FREE(tsmRef);
     return;
-}
-
-/** This is called when the PDU is freed. */
-static int
-tsm_free_pdu(netsnmp_pdu *pdu)
-{
-    netsnmp_tsmSecurityReference *tsmRef;
-
-    tsmRef = (netsnmp_tsmSecurityReference *) pdu->securityStateRef;
-    // SNMP_FREE(tsmRef->tmStateRef);
-    // SNMP_FREE(pdu->securityStateRef);
-    return SNMPERR_SUCCESS;
 }
 
 /** This is called when a PDU is cloned (to increase reference counts) */
@@ -324,8 +311,6 @@ tsm_process_in_msg(struct snmp_secmod_incoming_params *parms)
     u_char          ourEngineID[SNMP_MAX_ENG_SIZE];
     static size_t   ourEngineID_len = sizeof(ourEngineID);
     
-    // sleep(5);
-
     /* Section 5.2, step 1 */
     ourEngineID_len =
         snmpv3_get_engineID((u_char*)ourEngineID, ourEngineID_len);
