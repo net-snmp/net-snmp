@@ -39,7 +39,6 @@ init_tsm(void)
     def->decode = tsm_process_in_msg;
     def->session_open = tsm_session_init;
     def->pdu_free_state_ref = tsm_free_state_ref;
-    def->pdu_free = tsm_free_pdu;
     def->pdu_clone = tsm_clone_pdu;
     def->probe_engineid = snmpv3_probe_contextEngineID_rfc5343;
 
@@ -79,13 +78,23 @@ tsm_session_init(netsnmp_session * sess)
 static void
 tsm_free_state_ref(void *ptr)
 {
-//    SNMP_FREE(ptr);
+    netsnmp_tsmSecurityReference *tsmRef;
+
+    tsmRef = (netsnmp_tsmSecurityReference *) ptr;
+    SNMP_FREE(tsmRef->tmStateRef);
+    SNMP_FREE(tsmRef);
+    return;
 }
 
 /** This is called when the PDU is freed. */
 static int
 tsm_free_pdu(netsnmp_pdu *pdu)
 {
+    netsnmp_tsmSecurityReference *tsmRef;
+
+    tsmRef = (netsnmp_tsmSecurityReference *) pdu->securityStateRef;
+    // SNMP_FREE(tsmRef->tmStateRef);
+    // SNMP_FREE(pdu->securityStateRef);
     return SNMPERR_SUCCESS;
 }
 
@@ -99,6 +108,7 @@ tsm_clone_pdu(netsnmp_pdu *pdu, netsnmp_pdu *pdu2)
     if (!oldref)
         return SNMPERR_SUCCESS;
 
+#ifdef TRY_WITHOUT
     newref = SNMP_MALLOC_TYPEDEF(netsnmp_tsmSecurityReference);
     if (!newref)
         return SNMPERR_GENERR;
@@ -114,7 +124,7 @@ tsm_clone_pdu(netsnmp_pdu *pdu, netsnmp_pdu *pdu2)
         return SNMPERR_GENERR;
     if (!newref->tmStateRef)
         return SNMPERR_GENERR;
-
+#endif
     return SNMPERR_SUCCESS;
 }
 
@@ -311,22 +321,17 @@ tsm_process_in_msg(struct snmp_secmod_incoming_params *parms)
     u_char *data_ptr;
     netsnmp_tmStateReference *tmStateRef;
     netsnmp_tsmSecurityReference *tsmSecRef;
-    u_char          ourEngineID[SNMP_SEC_PARAM_BUF_SIZE];
+    u_char          ourEngineID[SNMP_MAX_ENG_SIZE];
     static size_t   ourEngineID_len = sizeof(ourEngineID);
     
     // sleep(5);
 
     /* Section 5.2, step 1 */
-    parms->secEngineID = NULL;
-    *parms->secEngineIDLen =
+    ourEngineID_len =
         snmpv3_get_engineID((u_char*)ourEngineID, ourEngineID_len);
-    if (*parms->secEngineIDLen == 0)
+    if (ourEngineID_len == 0 || ourEngineID_len > *parms->secEngineIDLen)
         return SNMPERR_GENERR;
-    if (snmp_clone_mem((void **) &parms->secEngineID, ourEngineID,
-                       *parms->secEngineIDLen))
-        return SNMPERR_GENERR;
-    if (NULL == parms->secEngineID)
-        return SNMPERR_GENERR;
+    memcpy(parms->secEngineID, ourEngineID, *parms->secEngineIDLen);
 
     /* Section 5.2, step 2 */
     if (!parms->pdu->transport_data ||
@@ -382,9 +387,14 @@ tsm_process_in_msg(struct snmp_secmod_incoming_params *parms)
 
     /* Section 5.2 Step 5 */
 
-    tsmSecRef = SNMP_MALLOC_TYPEDEF(netsnmp_tsmSecurityReference);
+    if (NULL == *parms->secStateRef)
+        tsmSecRef = SNMP_MALLOC_TYPEDEF(netsnmp_tsmSecurityReference);
+    else
+        tsmSecRef = *parms->secStateRef;
+
     if (!tsmSecRef)
         return SNMPERR_GENERR;
+
     *parms->secStateRef = tsmSecRef;
     tsmSecRef->tmStateRef = tmStateRef;
 
