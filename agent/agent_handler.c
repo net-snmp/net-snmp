@@ -190,10 +190,16 @@ netsnmp_create_handler_registration(const char *name,
                                     handler_access_method, oid * reg_oid,
                                     size_t reg_oid_len, int modes)
 {
-    return
-        netsnmp_handler_registration_create(name,
-                                            netsnmp_create_handler(name, handler_access_method),
-                                            reg_oid, reg_oid_len, modes);
+    netsnmp_handler_registration *rv = NULL;
+    netsnmp_mib_handler *handler =
+        netsnmp_create_handler(name, handler_access_method);
+    if (handler) {
+        rv = netsnmp_handler_registration_create(
+            name, handler, reg_oid, reg_oid_len, modes);
+        if (!rv)
+            netsnmp_handler_free(handler);
+    }
+    return rv;
 }
 
 /** register a handler, as defined by the netsnmp_handler_registration pointer. */
