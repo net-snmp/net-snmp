@@ -40,7 +40,6 @@
 
 oid             ifXTable_oid[] = { IFXTABLE_OID };
 int             ifXTable_oid_size = OID_LENGTH(ifXTable_oid);
-const char     *row_token = "ifXTable";
 
 ifXTable_registration ifXTable_user_context;
 
