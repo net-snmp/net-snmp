@@ -169,6 +169,10 @@ if test "x$tryopenssl" != "xno"; then
         AC_CHECK_LIB(crypto, AES_cfb128_encrypt, 
             AC_DEFINE(HAVE_AES_CFB128_ENCRYPT, 1,
                 [Define to 1 if you have the `AES_cfb128_encrypt' function.]))
+	AC_CHECK_LIB(ssl, OpenSSL_add_all_algorithms,
+            AC_DEFINE(HAVE_LIBSSL, 1,
+                [Define to 1 if you have the `ssl' library (-lssl).])
+            LIBCRYPTO="$LIBCRYPTO -lssl")
     fi
 elif test "x$askedpkcs" = "xyes"; then
     AC_CHECK_LIB(pkcs11, C_Initialize,
