@@ -278,6 +278,9 @@
 /* Define to 1 if you have the `rsaref' library (-lrsaref). */
 #undef HAVE_LIBRSAREF
 
+/* Define to 1 if you have the `ssl' library (-lssl). */
+#undef HAVE_LIBSSL
+
 /* Define to 1 if you have the <limits.h> header file. */
 #undef HAVE_LIMITS_H
 
@@ -1120,6 +1123,10 @@
 
 /* Path to the lpstat command */
 #undef LPSTAT_PATH
+
+/* Define to the sub-directory in which libtool stores uninstalled libraries.
+   */
+#undef LT_OBJDIR
 
 /* define if agentx transport is to use domain sockets only */
 #undef NETSNMP_AGENTX_DOM_SOCK_ONLY

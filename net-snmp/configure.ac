@@ -15,6 +15,7 @@ AC_PREREQ([2.63])
 AC_CONFIG_SRCDIR([agent/mibgroup/ucd-snmp/extensible.c])
 AC_REVISION([$Revision$])
 
+AC_CONFIG_MACRO_DIR([m4])
 AC_CONFIG_HEADER(include/net-snmp/net-snmp-config.h)
 
 AC_MSG_CACHE_INIT()
