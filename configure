@@ -45248,7 +45248,6 @@ tmpinput="3"
 eval NETSNMP_DEFAULT_SNMP_VERSION=\"$tmpinput\"
 fi
 
-
 eval ac_cv_user_prompt_NETSNMP_DEFAULT_SNMP_VERSION=\$NETSNMP_DEFAULT_SNMP_VERSION
 echo $ECHO_N "setting $MSG_CHECK to...  $ECHO_C" >&6
 
@@ -45323,7 +45322,6 @@ tmpinput="$ME@$LOC"
 eval NETSNMP_SYS_CONTACT=\"$tmpinput\"
 fi
 
-
 eval ac_cv_user_prompt_NETSNMP_SYS_CONTACT=\$NETSNMP_SYS_CONTACT
 echo $ECHO_N "setting $MSG_CHECK to...  $ECHO_C" >&6
 
@@ -45385,7 +45383,6 @@ else
 tmpinput="Unknown"
 eval NETSNMP_SYS_LOC=\"$tmpinput\"
 fi
-
 
 eval ac_cv_user_prompt_NETSNMP_SYS_LOC=\$NETSNMP_SYS_LOC
 echo $ECHO_N "setting $MSG_CHECK to...  $ECHO_C" >&6
@@ -45456,7 +45453,6 @@ else
 tmpinput="$defaultlog"
 eval NETSNMP_LOGFILE=\"$tmpinput\"
 fi
-
 
 eval ac_cv_user_prompt_NETSNMP_LOGFILE=\$NETSNMP_LOGFILE
 echo $ECHO_N "setting $MSG_CHECK to...  $ECHO_C" >&6
@@ -45538,7 +45534,6 @@ tmpinput="$defaultstore"
 eval NETSNMP_PERSISTENT_DIRECTORY=\"$tmpinput\"
 fi
 
-
 eval ac_cv_user_prompt_NETSNMP_PERSISTENT_DIRECTORY=\$NETSNMP_PERSISTENT_DIRECTORY
 echo $ECHO_N "setting $MSG_CHECK to...  $ECHO_C" >&6
 
@@ -45596,7 +45591,6 @@ else
 tmpinput=""yes""
 eval ac_cv_user_prompt_COPY_PERSISTENT_FILES=\"$tmpinput\"
 fi
-
 
 
 fi
