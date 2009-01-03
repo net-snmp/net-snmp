@@ -7,8 +7,6 @@ dnl @version 1.15
 dnl @author Wes Hardaker <hardaker@users.sourceforge.net>
 dnl
 AC_DEFUN([AC_PROMPT_USER_NO_DEFINE],
-dnl changequote(<<, >>) dnl
-dnl <<
 [
 if test "x$defaults" = "xno"; then
 echo $ECHO_N "$2 ($3): $ECHO_C"
@@ -21,10 +19,7 @@ else
 tmpinput="$3"
 eval $1=\"$tmpinput\"
 fi
-]
-dnl >>
-dnl changequote([, ])
-) dnl done AC_PROMPT_USER
+]) dnl done AC_PROMPT_USER
 
 dnl @synopsis AC_PROMPT_USER(VARIABLENAME,QUESTION,[DEFAULT],QUOTED)
 dnl
@@ -41,10 +36,10 @@ AC_DEFUN([AC_PROMPT_USER],
 [
 MSG_CHECK=`echo "$2" | tail -1`
 AC_CACHE_CHECK($MSG_CHECK, ac_cv_user_prompt_$1,
-[echo "" >&AC_FD_MSG
+[echo "" >&AS_MESSAGE_FD
 AC_PROMPT_USER_NO_DEFINE($1,[$2],$3)
 eval ac_cv_user_prompt_$1=\$$1
-echo $ECHO_N "setting $MSG_CHECK to...  $ECHO_C" >&AC_FD_MSG
+echo $ECHO_N "setting $MSG_CHECK to...  $ECHO_C" >&AS_MESSAGE_FD
 ])
 if test "$ac_cv_user_prompt_$1" != "none"; then
   if test "x$4" = "xquoted" -o "x$4" = "xQUOTED"; then
