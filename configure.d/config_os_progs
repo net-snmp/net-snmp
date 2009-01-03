@@ -81,8 +81,8 @@ AC_C_INLINE
 
 #       libtool stuff for shared/static libraries.
 #
-AC_LIBTOOL_WIN32_DLL
-AC_PROG_LIBTOOL
+LT_PREREQ([2.2.4])
+LT_INIT([win32-dll])
 AC_SUBST(LIBTOOL_DEPS)
 
 
