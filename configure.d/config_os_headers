@@ -289,9 +289,9 @@ AC_CHECK_HEADERS([arpa/inet.h        net/if.h             ] dnl
 #
 #  Agent:
 AC_CHECK_HEADERS([net/if_arp.h       net/if_mib.h         net/if_var.h     ] dnl
-                 [netinet/icmp_var.h netinet/if_ether.h                    ] dnl
-                 [netinet/in_systm.h netinet/in_var.h                      ] dnl
-                 [netinet/ip.h       netinet/ip_icmp.h    netinet/ip_var.h ] dnl
+                 [netinet/if_ether.h netinet/in_systm.h   netinet/in_var.h ] dnl
+                 [netinet/ip.h       netinet/ip_icmp.h                     ] dnl
+                 [netinet/icmp_var.h netinet/ip_var.h                      ] dnl
                  [netinet/tcp.h      netinet/tcp_timer.h  netinet/tcp_var.h] dnl
                  [netinet/tcpip.h    netinet/udp.h        netinet/udp_var.h] dnl
                  [net/route.h        ],,,

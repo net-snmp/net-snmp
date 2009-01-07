@@ -30367,7 +30367,7 @@ done
 
 
 
-for ac_header in net/if_arp.h       net/if_mib.h         net/if_var.h                       netinet/icmp_var.h netinet/if_ether.h                                      netinet/in_systm.h netinet/in_var.h                                        netinet/ip.h       netinet/ip_icmp.h    netinet/ip_var.h                   netinet/tcp.h      netinet/tcp_timer.h  netinet/tcp_var.h                  netinet/tcpip.h    netinet/udp.h        netinet/udp_var.h                  net/route.h
+for ac_header in net/if_arp.h       net/if_mib.h         net/if_var.h                       netinet/if_ether.h netinet/in_systm.h   netinet/in_var.h                   netinet/ip.h       netinet/ip_icmp.h                                       netinet/icmp_var.h netinet/ip_var.h                                        netinet/tcp.h      netinet/tcp_timer.h  netinet/tcp_var.h                  netinet/tcpip.h    netinet/udp.h        netinet/udp_var.h                  net/route.h
 do
 as_ac_Header=`$as_echo "ac_cv_header_$ac_header" | $as_tr_sh`
 { $as_echo "$as_me:$LINENO: checking for $ac_header" >&5
