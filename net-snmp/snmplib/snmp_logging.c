@@ -374,6 +374,13 @@ snmp_log_options(char *optarg, int argc, char *const *argv)
         priority = decode_priority( optarg, &pri_max );
         if (priority == -1 || !argv)  return -1;
         optarg++;
+        if (!optarg[0]) {
+            /* The command line argument with priority does not contain log
+             * facility. The facility must be in next argument then. */
+            optind++;
+            if (optind < argc)
+                optarg = argv[optind];
+        }
         /* Fallthrough */
     case 's':
         if (inc_optind)
