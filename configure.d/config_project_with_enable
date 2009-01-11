@@ -419,6 +419,12 @@ AC_ARG_WITH(opaque-special-types,
                                   (in a legal way)])
 AC_ARG_ENABLE(opaque-special-types,,
 	AC_MSG_ERROR([ Invalid option. Use --with-opaque-special-types/--without-opaque-special-types instead ]) )
+# Only define if specifically chosen as --without (i.e., default to true).
+if test "x$with_opaque_special_types" != "xno"; then
+  AC_DEFINE(NETSNMP_WITH_OPAQUE_SPECIAL_TYPES, 1,
+    [Should we compile to use special opaque types: float, double, counter64,
+     i64, ui64, union?])
+fi
 
 AC_ARG_ENABLE(ipv6,
 [  --enable-ipv6                   Generate IPv6 ready version.],
@@ -613,6 +619,9 @@ AC_ARG_ENABLE(debugging,
     AC_DEFINE(NETSNMP_ALWAYS_DEBUG))
 AC_ARG_WITH(debugging,,
 	AC_MSG_ERROR([ Invalid option. Use --enable-debugging/--disable-debugging instead ]) )
+if test "x$enable_debugging" = "xno"; then
+    AC_DEFINE(NETSNMP_NO_DEBUGGING)
+fi
 
 AC_ARG_ENABLE(developer,
 [  --enable-developer              Turns on super-duper-extra-compile-warnings
@@ -620,10 +629,6 @@ AC_ARG_ENABLE(developer,
     developer=yes)
 AC_ARG_WITH(developer,,
 	AC_MSG_ERROR([ Invalid option. Use --enable-developer/--disable-developer instead ]) )
-
-if test "x$enable_debugging" = "xno"; then
-    AC_DEFINE(NETSNMP_NO_DEBUGGING)
-fi
 
 AC_ARG_ENABLE(testing-code,
 [  --enable-testing-code           Enables some code sections that should 
@@ -667,12 +672,21 @@ Configuring the agent:
                                   mib-II tree may not be correct, however.])
 AC_ARG_ENABLE(root-access,,
 	AC_MSG_ERROR([ Invalid option. Use --with-root-access/--without-root-access instead ]) )
+# Only define if specifically chosen as --without (i.e., default to true).
+if test "x$with_root_access" = "xno"; then
+  AC_DEFINE(NETSNMP_NO_ROOT_ACCESS, 1,
+    [If you don't have root access don't exit upon kmem errors])
+fi
 
 AC_ARG_WITH(kmem-usage,
 [  --without-kmem-usage            Do not include any code related to the use
                                   of kmem.])
 AC_ARG_ENABLE(kmem-usage,,
 	AC_MSG_ERROR([ Invalid option. Use --with-kmem-usage/--without-kmem-usage instead ]) )
+# Only define if specifically chosen as --without (i.e., default to true).
+if test "x$with_kmem_usage" = "xno"; then
+  AC_DEFINE(NETSNMP_NO_KMEM_USAGE, 1, [If we don't want to use kmem.])
+fi
 
 AC_ARG_WITH(dummy-values,
 [  --with-dummy-values             Provide 'placeholder' dummy values where
@@ -682,6 +696,12 @@ AC_ARG_WITH(dummy-values,
                                   operated for versions < 4.0.])
 AC_ARG_ENABLE(dummy-values,,
 	AC_MSG_ERROR([ Invalid option. Use --with-dummy-values/--without-dummy-values instead ]) )
+# Define unless specifically suppressed (i.e., option defaults to false).
+if test "x$with_dummy_values" != "xyes"; then
+  AC_DEFINE(NETSNMP_NO_DUMMY_VALUES, 1,
+    [If you don't want the agent to report on variables it doesn't have
+     data for])
+fi
 
 AC_ARG_ENABLE(set-support,
 [  --disable-set-support           Do not allow SNMP set requests.])
@@ -1092,33 +1112,3 @@ AC_ARG_WITH(bzip2,
 AC_ARG_WITH(mnttab,
  [  --with-mnttab="/etc/mnttab"  Mount table location.
                                  The default is to autodetect this.])
-
-##
-#   Project: set defaults
-##
-
-# Only define if specifically chosen as --without (i.e., default to true). 
-if test "x$with_root_access" = "xno"; then
-  AC_DEFINE(NETSNMP_NO_ROOT_ACCESS, 1,
-    [If you don't have root access don't exit upon kmem errors])
-fi
-
-# Only define if specifically chosen as --without (i.e., default to true).
-if test "x$with_kmem_usage" = "xno"; then
-  AC_DEFINE(NETSNMP_NO_KMEM_USAGE, 1, [If we don't want to use kmem.])
-fi
-
-# Define unless specifically suppressed (i.e., option defaults to false). 
-if test "x$with_dummy_values" != "xyes"; then
-  AC_DEFINE(NETSNMP_NO_DUMMY_VALUES, 1,
-    [If you don't want the agent to report on variables it doesn't have
-     data for])
-fi
-
-# Only define if specifically chosen as --without (i.e., default to true). 
-if test "x$with_opaque_special_types" != "xno"; then
-  AC_DEFINE(NETSNMP_WITH_OPAQUE_SPECIAL_TYPES, 1,
-    [Should we compile to use special opaque types: float, double, counter64,
-     i64, ui64, union?])
-fi
-
