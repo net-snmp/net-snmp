@@ -3283,6 +3283,14 @@ $as_echo "$as_me: error:  Invalid option. Use --with-opaque-special-types/--with
    { (exit 1); exit 1; }; }
 fi
 
+# Only define if specifically chosen as --without (i.e., default to true).
+if test "x$with_opaque_special_types" != "xno"; then
+
+cat >>confdefs.h <<\_ACEOF
+#define NETSNMP_WITH_OPAQUE_SPECIAL_TYPES 1
+_ACEOF
+
+fi
 
 # Check whether --enable-ipv6 was given.
 if test "${enable_ipv6+set}" = set; then
@@ -3586,6 +3594,12 @@ $as_echo "$as_me: error:  Invalid option. Use --enable-debugging/--disable-debug
    { (exit 1); exit 1; }; }
 fi
 
+if test "x$enable_debugging" = "xno"; then
+    cat >>confdefs.h <<\_ACEOF
+#define NETSNMP_NO_DEBUGGING 1
+_ACEOF
+
+fi
 
 # Check whether --enable-developer was given.
 if test "${enable_developer+set}" = set; then
@@ -3600,13 +3614,6 @@ $as_echo "$as_me: error:  Invalid option. Use --enable-developer/--disable-devel
    { (exit 1); exit 1; }; }
 fi
 
-
-if test "x$enable_debugging" = "xno"; then
-    cat >>confdefs.h <<\_ACEOF
-#define NETSNMP_NO_DEBUGGING 1
-_ACEOF
-
-fi
 
 # Check whether --enable-testing-code was given.
 if test "${enable_testing_code+set}" = set; then
@@ -3682,6 +3689,14 @@ $as_echo "$as_me: error:  Invalid option. Use --with-root-access/--without-root-
    { (exit 1); exit 1; }; }
 fi
 
+# Only define if specifically chosen as --without (i.e., default to true).
+if test "x$with_root_access" = "xno"; then
+
+cat >>confdefs.h <<\_ACEOF
+#define NETSNMP_NO_ROOT_ACCESS 1
+_ACEOF
+
+fi
 
 
 # Check whether --with-kmem-usage was given.
@@ -3696,6 +3711,14 @@ $as_echo "$as_me: error:  Invalid option. Use --with-kmem-usage/--without-kmem-u
    { (exit 1); exit 1; }; }
 fi
 
+# Only define if specifically chosen as --without (i.e., default to true).
+if test "x$with_kmem_usage" = "xno"; then
+
+cat >>confdefs.h <<\_ACEOF
+#define NETSNMP_NO_KMEM_USAGE 1
+_ACEOF
+
+fi
 
 
 # Check whether --with-dummy-values was given.
@@ -3710,6 +3733,14 @@ $as_echo "$as_me: error:  Invalid option. Use --with-dummy-values/--without-dumm
    { (exit 1); exit 1; }; }
 fi
 
+# Define unless specifically suppressed (i.e., option defaults to false).
+if test "x$with_dummy_values" != "xyes"; then
+
+cat >>confdefs.h <<\_ACEOF
+#define NETSNMP_NO_DUMMY_VALUES 1
+_ACEOF
+
+fi
 
 # Check whether --enable-set-support was given.
 if test "${enable_set_support+set}" = set; then
@@ -4390,47 +4421,6 @@ fi
 # Check whether --with-mnttab was given.
 if test "${with_mnttab+set}" = set; then
   withval=$with_mnttab;
-fi
-
-
-##
-#   Project: set defaults
-##
-
-# Only define if specifically chosen as --without (i.e., default to true).
-if test "x$with_root_access" = "xno"; then
-
-cat >>confdefs.h <<\_ACEOF
-#define NETSNMP_NO_ROOT_ACCESS 1
-_ACEOF
-
-fi
-
-# Only define if specifically chosen as --without (i.e., default to true).
-if test "x$with_kmem_usage" = "xno"; then
-
-cat >>confdefs.h <<\_ACEOF
-#define NETSNMP_NO_KMEM_USAGE 1
-_ACEOF
-
-fi
-
-# Define unless specifically suppressed (i.e., option defaults to false).
-if test "x$with_dummy_values" != "xyes"; then
-
-cat >>confdefs.h <<\_ACEOF
-#define NETSNMP_NO_DUMMY_VALUES 1
-_ACEOF
-
-fi
-
-# Only define if specifically chosen as --without (i.e., default to true).
-if test "x$with_opaque_special_types" != "xno"; then
-
-cat >>confdefs.h <<\_ACEOF
-#define NETSNMP_WITH_OPAQUE_SPECIAL_TYPES 1
-_ACEOF
-
 fi
 
 
@@ -7674,13 +7664,13 @@ if test "${lt_cv_nm_interface+set}" = set; then
 else
   lt_cv_nm_interface="BSD nm"
   echo "int some_variable = 0;" > conftest.$ac_ext
-  (eval echo "\"\$as_me:7677: $ac_compile\"" >&5)
+  (eval echo "\"\$as_me:7667: $ac_compile\"" >&5)
   (eval "$ac_compile" 2>conftest.err)
   cat conftest.err >&5
-  (eval echo "\"\$as_me:7680: $NM \\\"conftest.$ac_objext\\\"\"" >&5)
+  (eval echo "\"\$as_me:7670: $NM \\\"conftest.$ac_objext\\\"\"" >&5)
   (eval "$NM \"conftest.$ac_objext\"" 2>conftest.err > conftest.out)
   cat conftest.err >&5
-  (eval echo "\"\$as_me:7683: output\"" >&5)
+  (eval echo "\"\$as_me:7673: output\"" >&5)
   cat conftest.out >&5
   if $GREP 'External.*some_variable' conftest.out > /dev/null; then
     lt_cv_nm_interface="MS dumpbin"
@@ -8767,7 +8757,7 @@ ia64-*-hpux*)
   ;;
 *-*-irix6*)
   # Find out which ABI we are using.
-  echo '#line 8770 "configure"' > conftest.$ac_ext
+  echo '#line 8760 "configure"' > conftest.$ac_ext
   if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
   (eval $ac_compile) 2>&5
   ac_status=$?
@@ -10434,11 +10424,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:10437: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:10427: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:10441: \$? = $ac_status" >&5
+   echo "$as_me:10431: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -10758,11 +10748,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:10761: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:10751: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:10765: \$? = $ac_status" >&5
+   echo "$as_me:10755: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -10863,11 +10853,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:10866: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:10856: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:10870: \$? = $ac_status" >&5
+   echo "$as_me:10860: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -10918,11 +10908,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:10921: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:10911: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:10925: \$? = $ac_status" >&5
+   echo "$as_me:10915: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -13710,7 +13700,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 13713 "configure"
+#line 13703 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -13810,7 +13800,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 13813 "configure"
+#line 13803 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
