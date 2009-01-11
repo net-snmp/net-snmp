@@ -417,16 +417,16 @@ NETSNMP_ARG_WITH(copy_persistent_files,
 
 default_temp_file_pattern="/tmp/snmpdXXXXXX"
 NETSNMP_ARG_WITH(temp-file-pattern,
-[  --with-temp-file-pattern=PATTERN  Pattern of temporary files (Default: /tmp/snmpdXXXXXX)],[
-  if test "$withval" = yes; then
-    AC_MSG_ERROR([ Please provide a pattern ]);
-  fi
-  AC_MSG_RESULT(using temporary file pattern $withval)
-  AC_DEFINE_UNQUOTED(NETSNMP_TEMP_FILE_PATTERN,"$withval",[Pattern of temporary files])
-],[
-  AC_MSG_RESULT(using default temporary file pattern $default_temp_file_pattern)
-  AC_DEFINE_UNQUOTED(NETSNMP_TEMP_FILE_PATTERN,"$default_temp_file_pattern",[Pattern of temporary files])
-])
+[  --with-temp-file-pattern=PATTERN  Pattern of temporary files (Default: /tmp/snmpdXXXXXX)],
+  [if test `expr "X$withval" : ".*XXXXXX$"` -ne 0 ; then
+     AC_MSG_RESULT(using temporary file pattern $withval)
+   else
+     AC_MSG_ERROR([temporary file pattens must end with 6 X's])
+   fi],
+  [withval="$default_temp_file_pattern"
+   AC_MSG_RESULT(using default temporary file pattern $withval)])
+AC_DEFINE_UNQUOTED(NETSNMP_TEMP_FILE_PATTERN,"$withval",
+  [Pattern of temporary files])
 
 
 ##
