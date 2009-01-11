@@ -38,11 +38,6 @@ fi
 #   ELF libraries
 #       Typically used for 'nlist'  (needed for uptime)
 #
-AC_ARG_WITH(elf,
-	[AS_HELP_STRING(--without-elf,[use elf libraries])],,
-	[AC_ARG_ENABLE(elf,,
-		[AC_MSG_ERROR([ Invalid option. Use --with-elf/--without-elf instead ])])])
-
 if test "x$with_elf" != "xno"; then
 case $target_os in
 	linux*) # add hosts which don't use nlist here
@@ -186,57 +181,51 @@ LIBS=$NONAGENTLIBS	 # restore old libraries
 #
 _cppflags="${CPPFLAGS}"
 _ldflags="${LDFLAGS}"
-
-AC_ARG_WITH(libwrap,
-[  --with-libwrap[=LIBPATH]  Compile in libwrap (tcp_wrappers) support.],[
-  if test "$with_libwrap" != "no"; then
-    if test "$with_libwrap" != "yes"; then
-      CPPFLAGS="${CPPFLAGS} -I$with_libwrap/include"
-      LDFLAGS="${LDFLAGS} -L$with_libwrap/lib"
-    fi
-
-    _libs=${LIBS}
-    AC_CHECK_HEADER(tcpd.h, ,
-	    AC_MSG_ERROR([Asked to use libwrap but I couldn't find tcpd.h.]))
-
-    LIBS="$LIBS -lwrap"
-	AC_MSG_CHECKING([for TCP wrappers library -lwrap])
-	# XXX: should check for hosts_ctl
-	AC_TRY_LINK([#include <sys/types.h>
-		     #include <tcpd.h>
-		     int allow_severity = 0;
-		     int deny_severity  = 0;
-		    ],[hosts_access((void *)0)],[
-
-	    AC_MSG_RESULT([yes])
-	    AC_DEFINE(NETSNMP_USE_LIBWRAP)
-	    test "$with_libwrap" != no -a "$with_libwrap" != yes && _wraplibs="-L$with_libwrap/lib"
-	    _wraplibs="$_wraplibs -lwrap"],
-        [
-	    AC_MSG_RESULT([no])
-	    # Linux RedHat 6.1 won't link libwrap without libnsl
-	    AC_CHECK_FUNC(yp_get_default_domain, ,
-		AC_CHECK_LIB(nsl, yp_get_default_domain))
-	    AC_MSG_CHECKING([for TCP wrappers library -lwrap linked with -lnsl])
-	    AC_TRY_LINK([#include <sys/types.h>
-		         #include <tcpd.h>
-		         int allow_severity = 0;
-	                 int deny_severity  = 0;
-	 		],[hosts_access((void *)0)],
-
-			AC_MSG_RESULT(yes)
-			AC_DEFINE(NETSNMP_USE_LIBWRAP)
-			test "$with_libwrap" != no -a "$with_libwrap" != yes && _wraplibs="-L$with_libwrap/lib"
-			_wraplibs="$_wraplibs -lwrap -lnsl",
-
-			AC_MSG_RESULT(no)
-			AC_MSG_ERROR(Asked to use libwrap but I couldn't find it.))])
-    LAGENTLIBS="$_wraplibs"
-    CPPFLAGS=${_cppflags}
-    LDFLAGS=${_ldflags}
-    LIBS=${_libs}
+if test "$with_libwrap" != "no"; then
+  if test "$with_libwrap" != "yes"; then
+    CPPFLAGS="${CPPFLAGS} -I$with_libwrap/include"
+    LDFLAGS="${LDFLAGS} -L$with_libwrap/lib"
   fi
-])
+
+  _libs=${LIBS}
+  AC_CHECK_HEADER(tcpd.h, ,
+    AC_MSG_ERROR([Asked to use libwrap but I couldn't find tcpd.h.]))
+
+  LIBS="$LIBS -lwrap"
+  AC_MSG_CHECKING([for TCP wrappers library -lwrap])
+  # XXX: should check for hosts_ctl
+  AC_TRY_LINK(
+    [#include <sys/types.h>
+     #include <tcpd.h>
+     int allow_severity = 0;
+     int deny_severity  = 0;],
+    [hosts_access((void *)0)],
+    [AC_MSG_RESULT([yes])
+     AC_DEFINE(NETSNMP_USE_LIBWRAP)
+     test "$with_libwrap" != no -a "$with_libwrap" != yes && _wraplibs="-L$with_libwrap/lib"
+     _wraplibs="$_wraplibs -lwrap"],
+    [AC_MSG_RESULT([no])
+     # Linux RedHat 6.1 won't link libwrap without libnsl
+     AC_CHECK_FUNC(yp_get_default_domain, ,
+       AC_CHECK_LIB(nsl, yp_get_default_domain))
+     AC_MSG_CHECKING([for TCP wrappers library -lwrap linked with -lnsl])
+     AC_TRY_LINK(
+       [#include <sys/types.h>
+	#include <tcpd.h>
+	int allow_severity = 0;
+	int deny_severity  = 0;],
+       [hosts_access((void *)0)],
+       [AC_MSG_RESULT(yes)
+	AC_DEFINE(NETSNMP_USE_LIBWRAP)
+	test "$with_libwrap" != no -a "$with_libwrap" != yes && _wraplibs="-L$with_libwrap/lib"
+	_wraplibs="$_wraplibs -lwrap -lnsl"],
+       [AC_MSG_RESULT(no)
+	AC_MSG_ERROR(Asked to use libwrap but I couldn't find it.)])])
+  LAGENTLIBS="$_wraplibs"
+  CPPFLAGS=${_cppflags}
+  LDFLAGS=${_ldflags}
+  LIBS=${_libs}
+fi
 
 
 ##
@@ -270,13 +259,11 @@ if test "x$with_rpm" != "xno" && \
   _cppflags="${CPPFLAGS}"
   _ldflags="${LDFLAGS}"
 
-  AC_ARG_WITH(zlib,
-  [  --with-zlib[=DIR]         use libz in DIR],[
-    if test -d "$withval"; then
-      CPPFLAGS="${CPPFLAGS} -I$withval/include"
-      LDFLAGS="${LDFLAGS} -L$withval/lib"
-    fi
-  ])
+  # check for zlib
+  if test "x${with_zlib}" != "xno" -a -d "${with_zlib}"; then
+    CPPFLAGS="${CPPFLAGS} -I${with_zlib}/include"
+    LDFLAGS="${LDFLAGS} -L${with_zlib}/lib"
+  fi
 
   # dunno if this is needed for rpm-4.0.x, earlier probably needs.
   AC_CHECK_HEADER(zlib.h,
@@ -285,18 +272,14 @@ if test "x$with_rpm" != "xno" && \
       CPPFLAGS=${_cppflags} LDFLAGS=${_ldflags})
 
   # two variants of bzip2 need checking.
-  AC_ARG_WITH(bzip2,
-  [  --with-bzip2[=DIR]        use libbz2 in DIR],[
-    if test -d "$withval"; then
-      CPPFLAGS="${CPPFLAGS} -I$withval/include"
-      LDFLAGS="${LDFLAGS} -L$withval/lib"
+  if test "x${with_bzip2}" != "xno"; then
+    if test -d "${with_bzip2}"; then
+      CPPFLAGS="${CPPFLAGS} -I${with_bzip2}/include"
+      LDFLAGS="${LDFLAGS} -L${with_bzip2}/lib"
     fi
-    if test "x$with_bzip2" != "xno"; then
-      NETSNMP_SEARCH_LIBS(bzread, bz2,,, $LMIBLIBS, _rpmlibs)
-      NETSNMP_SEARCH_LIBS(BZ2_bzread, bz2,,, $LMIBLIBS, _rpmlibs)
-    fi
-  ])
-
+    NETSNMP_SEARCH_LIBS(bzread, bz2,,, $LMIBLIBS, _rpmlibs)
+    NETSNMP_SEARCH_LIBS(BZ2_bzread, bz2,,, $LMIBLIBS, _rpmlibs)
+  fi
 
   # two variants of db1 need checking.
   NETSNMP_SEARCH_LIBS(dbopen, [db1 db],,, $LMIBLIBS, _rpmlibs)
