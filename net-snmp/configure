@@ -3394,30 +3394,18 @@ default_temp_file_pattern="/tmp/snmpdXXXXXX"
 
 # Check whether --with-temp-file-pattern was given.
 if test "${with_temp_file_pattern+set}" = set; then
-  withval=$with_temp_file_pattern;
-  if test "$withval" = yes; then
-    { { $as_echo "$as_me:$LINENO: error:  Please provide a pattern " >&5
-$as_echo "$as_me: error:  Please provide a pattern " >&2;}
-   { (exit 1); exit 1; }; };
-  fi
-  { $as_echo "$as_me:$LINENO: result: using temporary file pattern $withval" >&5
+  withval=$with_temp_file_pattern; if test `expr "X$withval" : ".*XXXXXX$"` -ne 0 ; then
+     { $as_echo "$as_me:$LINENO: result: using temporary file pattern $withval" >&5
 $as_echo "using temporary file pattern $withval" >&6; }
-
-cat >>confdefs.h <<_ACEOF
-#define NETSNMP_TEMP_FILE_PATTERN "$withval"
-_ACEOF
-
-
+   else
+     { { $as_echo "$as_me:$LINENO: error: temporary file pattens must end with 6 X's" >&5
+$as_echo "$as_me: error: temporary file pattens must end with 6 X's" >&2;}
+   { (exit 1); exit 1; }; }
+   fi
 else
-
-  { $as_echo "$as_me:$LINENO: result: using default temporary file pattern $default_temp_file_pattern" >&5
-$as_echo "using default temporary file pattern $default_temp_file_pattern" >&6; }
-
-cat >>confdefs.h <<_ACEOF
-#define NETSNMP_TEMP_FILE_PATTERN "$default_temp_file_pattern"
-_ACEOF
-
-
+  withval="$default_temp_file_pattern"
+   { $as_echo "$as_me:$LINENO: result: using default temporary file pattern $withval" >&5
+$as_echo "using default temporary file pattern $withval" >&6; }
 fi
 
    # Check whether --enable-temp-file-pattern was given.
@@ -3426,6 +3414,11 @@ if test "${enable_temp_file_pattern+set}" = set; then
 $as_echo "$as_me: error: Invalid option. Use --with-temp-file-pattern/--without-temp-file-pattern instead" >&2;}
    { (exit 1); exit 1; }; }
 fi
+
+
+cat >>confdefs.h <<_ACEOF
+#define NETSNMP_TEMP_FILE_PATTERN "$withval"
+_ACEOF
 
 
 
@@ -7667,13 +7660,13 @@ if test "${lt_cv_nm_interface+set}" = set; then
 else
   lt_cv_nm_interface="BSD nm"
   echo "int some_variable = 0;" > conftest.$ac_ext
-  (eval echo "\"\$as_me:7670: $ac_compile\"" >&5)
+  (eval echo "\"\$as_me:7663: $ac_compile\"" >&5)
   (eval "$ac_compile" 2>conftest.err)
   cat conftest.err >&5
-  (eval echo "\"\$as_me:7673: $NM \\\"conftest.$ac_objext\\\"\"" >&5)
+  (eval echo "\"\$as_me:7666: $NM \\\"conftest.$ac_objext\\\"\"" >&5)
   (eval "$NM \"conftest.$ac_objext\"" 2>conftest.err > conftest.out)
   cat conftest.err >&5
-  (eval echo "\"\$as_me:7676: output\"" >&5)
+  (eval echo "\"\$as_me:7669: output\"" >&5)
   cat conftest.out >&5
   if $GREP 'External.*some_variable' conftest.out > /dev/null; then
     lt_cv_nm_interface="MS dumpbin"
@@ -8760,7 +8753,7 @@ ia64-*-hpux*)
   ;;
 *-*-irix6*)
   # Find out which ABI we are using.
-  echo '#line 8763 "configure"' > conftest.$ac_ext
+  echo '#line 8756 "configure"' > conftest.$ac_ext
   if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
   (eval $ac_compile) 2>&5
   ac_status=$?
@@ -10427,11 +10420,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:10430: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:10423: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:10434: \$? = $ac_status" >&5
+   echo "$as_me:10427: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -10751,11 +10744,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:10754: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:10747: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:10758: \$? = $ac_status" >&5
+   echo "$as_me:10751: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -10856,11 +10849,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:10859: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:10852: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:10863: \$? = $ac_status" >&5
+   echo "$as_me:10856: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -10911,11 +10904,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:10914: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:10907: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:10918: \$? = $ac_status" >&5
+   echo "$as_me:10911: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -13703,7 +13696,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 13706 "configure"
+#line 13699 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -13803,7 +13796,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 13806 "configure"
+#line 13799 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
