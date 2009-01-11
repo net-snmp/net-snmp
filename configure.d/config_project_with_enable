@@ -395,19 +395,19 @@ NETSNMP_ARG_WITH(persistent-directory,
 [  --with-persistent-directory="directory"
                                   Default directory for persistent data storage.],ac_cv_user_prompt_NETSNMP_PERSISTENT_DIRECTORY="$with_persistent_directory")
 
-default_persistent_mask=077
 NETSNMP_ARG_WITH(persistent-mask,
 [  --with-persistent-mask="mask"  Default mask for persistent data storage.
-                                  (Default: 077)],[
-  if test "$withval" = yes; then
-    AC_MSG_ERROR([ Please provide a mask value ]);
-  fi
-  AC_MSG_RESULT(using default persistent mask $withval)
-  AC_DEFINE_UNQUOTED(NETSNMP_PERSISTENT_MASK,$withval)
-],[
-  AC_MSG_RESULT(using default persistent mask $default_persistent_mask)
-  AC_DEFINE_UNQUOTED(NETSNMP_PERSISTENT_MASK,$default_persistent_mask)
-])
+                                  (Default: 077)],
+  [if test [`expr "X$withval" : 'X[0-7]*$'`] -eq 4 ; then
+     AC_MSG_RESULT([using persistent mask $withval])
+     withval="0$withval"
+   else
+     AC_MSG_ERROR([Please provide a three digit octal persistent mask value])
+   fi],
+  [withval=077
+   AC_MSG_RESULT([using default persistent mask $withval])])
+AC_DEFINE_UNQUOTED(NETSNMP_PERSISTENT_MASK,$withval,
+   [umask permissions to set up persistent files with])
 
 NETSNMP_ARG_WITH(copy_persistent_files,
 [  --with-copy-persistent-files="no" Don't copy persistent files
