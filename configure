@@ -1009,6 +1009,7 @@ enable_mibs
 enable_mib_config_checking
 with_mib_config_checking
 enable_mib_config_debug
+with_mib_config_debug
 enable_new_features
 enable_old_features
 with_features_of
@@ -1101,8 +1102,8 @@ with_mib_module
 with_module
 with_modules
 with_out_mib_module
-with_out_modules
 with_out_module
+with_out_modules
 with_enterprise_oid
 enable_enterprise_oid
 with_enterprise_sysoid
@@ -1110,10 +1111,10 @@ enable_enterprise_sysoid
 with_enterprise_notification_oid
 enable_enterprise_notification_oid
 with_perl_modules
-enable_embedded_perl
-enable_perl_cc_checks
 enable_perl_modules
+enable_embedded_perl
 with_embedded_perl
+enable_perl_cc_checks
 with_perl_cc_checks
 with_python_modules
 with_server_send_buf
@@ -1132,6 +1133,7 @@ with_zlib
 enable_zlib
 with_bzip2
 with_mnttab
+enable_mnttab
 enable_shared
 enable_static
 with_pic
@@ -2076,8 +2078,9 @@ Network Buffers:
   --with-libwrap=LIBPATH  Compile in libwrap (tcp_wrappers) support.
   --with-zlib=DIR         use libz in DIR
   --with-bzip2=DIR        use libbz2 in DIR
-  --with-mnttab="/etc/mnttab"  Mount table location.
-                                 The default is to autodetect this.
+  --with-mnttab="/etc/mnttab"
+                          Mount table location. The default is to autodetect
+                          this.
   --with-pic              try to use only PIC/non-PIC objects [default=use
                           both]
   --with-gnu-ld           assume the C compiler uses GNU ld [default=no]
@@ -2664,10 +2667,10 @@ if test "${with_dmalloc+set}" = set; then
   withval=$with_dmalloc;
 fi
 
-# Check whether --enable-dmalloc was given.
+   # Check whether --enable-dmalloc was given.
 if test "${enable_dmalloc+set}" = set; then
-  enableval=$enable_dmalloc; { { $as_echo "$as_me:$LINENO: error:  Invalid option. Use --with-dmalloc/--without-dmalloc instead " >&5
-$as_echo "$as_me: error:  Invalid option. Use --with-dmalloc/--without-dmalloc instead " >&2;}
+  enableval=$enable_dmalloc; { { $as_echo "$as_me:$LINENO: error: Invalid option. Use --with-dmalloc/--without-dmalloc instead" >&5
+$as_echo "$as_me: error: Invalid option. Use --with-dmalloc/--without-dmalloc instead" >&2;}
    { (exit 1); exit 1; }; }
 fi
 
@@ -2678,10 +2681,10 @@ if test "${with_efence+set}" = set; then
   withval=$with_efence; use_efence="$withval"
 fi
 
-# Check whether --enable-efence was given.
+   # Check whether --enable-efence was given.
 if test "${enable_efence+set}" = set; then
-  enableval=$enable_efence; { { $as_echo "$as_me:$LINENO: error:  Invalid option. Use --with-efence/--without-efence instead " >&5
-$as_echo "$as_me: error:  Invalid option. Use --with-efence/--without-efence instead " >&2;}
+  enableval=$enable_efence; { { $as_echo "$as_me:$LINENO: error: Invalid option. Use --with-efence/--without-efence instead" >&5
+$as_echo "$as_me: error: Invalid option. Use --with-efence/--without-efence instead" >&2;}
    { (exit 1); exit 1; }; }
 fi
 
@@ -2709,10 +2712,10 @@ if test "${with_rsaref+set}" = set; then
     fi
 fi
 
-# Check whether --enable-rsaref was given.
+   # Check whether --enable-rsaref was given.
 if test "${enable_rsaref+set}" = set; then
-  enableval=$enable_rsaref; { { $as_echo "$as_me:$LINENO: error:  Invalid option. Use --with-rsaref/--without-rsaref instead " >&5
-$as_echo "$as_me: error:  Invalid option. Use --with-rsaref/--without-rsaref instead " >&2;}
+  enableval=$enable_rsaref; { { $as_echo "$as_me:$LINENO: error: Invalid option. Use --with-rsaref/--without-rsaref instead" >&5
+$as_echo "$as_me: error: Invalid option. Use --with-rsaref/--without-rsaref instead" >&2;}
    { (exit 1); exit 1; }; }
 fi
 
@@ -2743,6 +2746,13 @@ if test "${with_openssl+set}" = set; then
     fi
 fi
 
+   # Check whether --enable-openssl was given.
+if test "${enable_openssl+set}" = set; then
+  enableval=$enable_openssl; { { $as_echo "$as_me:$LINENO: error: Invalid option. Use --with-openssl/--without-openssl instead" >&5
+$as_echo "$as_me: error: Invalid option. Use --with-openssl/--without-openssl instead" >&2;}
+   { (exit 1); exit 1; }; }
+fi
+
 if test "x$tryopenssl" = "xdefaultyes"; then
 
   if test "x/usr/local/ssl" != x -a -d /usr/local/ssl; then
@@ -2756,25 +2766,18 @@ if test "x$tryopenssl" = "xdefaultyes"; then
 
       tryopenssl=yes
 fi
-# Check whether --enable-openssl was given.
-if test "${enable_openssl+set}" = set; then
-  enableval=$enable_openssl; { { $as_echo "$as_me:$LINENO: error:  Invalid option. Use --with-openssl/--without-openssl instead " >&5
-$as_echo "$as_me: error:  Invalid option. Use --with-openssl/--without-openssl instead " >&2;}
-   { (exit 1); exit 1; }; }
-fi
-
 
 # Check whether --with-ssl was given.
 if test "${with_ssl+set}" = set; then
-  withval=$with_ssl; { { $as_echo "$as_me:$LINENO: error:  Invalid option. Use --with-openssl/--without-openssl instead " >&5
-$as_echo "$as_me: error:  Invalid option. Use --with-openssl/--without-openssl instead " >&2;}
+  withval=$with_ssl; { { $as_echo "$as_me:$LINENO: error: Invalid option. Use --with-openssl/--without-openssl instead" >&5
+$as_echo "$as_me: error: Invalid option. Use --with-openssl/--without-openssl instead" >&2;}
    { (exit 1); exit 1; }; }
 fi
 
 # Check whether --enable-ssl was given.
 if test "${enable_ssl+set}" = set; then
-  enableval=$enable_ssl; { { $as_echo "$as_me:$LINENO: error:  Invalid option. Use --with-openssl/--without-openssl instead " >&5
-$as_echo "$as_me: error:  Invalid option. Use --with-openssl/--without-openssl instead " >&2;}
+  enableval=$enable_ssl; { { $as_echo "$as_me:$LINENO: error: Invalid option. Use --with-openssl/--without-openssl instead" >&5
+$as_echo "$as_me: error: Invalid option. Use --with-openssl/--without-openssl instead" >&2;}
    { (exit 1); exit 1; }; }
 fi
 
@@ -2802,10 +2805,10 @@ if test "${with_pkcs+set}" = set; then
     fi
 fi
 
-# Check whether --enable-pkcs was given.
+   # Check whether --enable-pkcs was given.
 if test "${enable_pkcs+set}" = set; then
-  enableval=$enable_pkcs; { { $as_echo "$as_me:$LINENO: error:  Invalid option. Use --with-pkcs/--without-pkcs instead " >&5
-$as_echo "$as_me: error:  Invalid option. Use --with-pkcs/--without-pkcs instead " >&2;}
+  enableval=$enable_pkcs; { { $as_echo "$as_me:$LINENO: error: Invalid option. Use --with-pkcs/--without-pkcs instead" >&5
+$as_echo "$as_me: error: Invalid option. Use --with-pkcs/--without-pkcs instead" >&2;}
    { (exit 1); exit 1; }; }
 fi
 
@@ -2829,17 +2832,17 @@ if test "${with_krb5+set}" = set; then
     fi
 fi
 
+   # Check whether --enable-krb5 was given.
+if test "${enable_krb5+set}" = set; then
+  enableval=$enable_krb5; { { $as_echo "$as_me:$LINENO: error: Invalid option. Use --with-krb5/--without-krb5 instead" >&5
+$as_echo "$as_me: error: Invalid option. Use --with-krb5/--without-krb5 instead" >&2;}
+   { (exit 1); exit 1; }; }
+fi
+
 if test "x$trykrb5" = "xdefaultyes"; then
       trykrb5=yes
       krb5path=/usr/kerberos
 fi
-# Check whether --enable-krb5 was given.
-if test "${enable_krb5+set}" = set; then
-  enableval=$enable_krb5; { { $as_echo "$as_me:$LINENO: error:  Invalid option. Use --with-krb5/--without-krb5 instead " >&5
-$as_echo "$as_me: error:  Invalid option. Use --with-krb5/--without-krb5 instead " >&2;}
-   { (exit 1); exit 1; }; }
-fi
-
 
 
 # Check whether --with-rpm was given.
@@ -2847,10 +2850,10 @@ if test "${with_rpm+set}" = set; then
   withval=$with_rpm;
 fi
 
-# Check whether --enable-rpm was given.
+   # Check whether --enable-rpm was given.
 if test "${enable_rpm+set}" = set; then
-  enableval=$enable_rpm; { { $as_echo "$as_me:$LINENO: error:  Invalid option. Use --with-rpm/--without-rpm instead " >&5
-$as_echo "$as_me: error:  Invalid option. Use --with-rpm/--without-rpm instead " >&2;}
+  enableval=$enable_rpm; { { $as_echo "$as_me:$LINENO: error: Invalid option. Use --with-rpm/--without-rpm instead" >&5
+$as_echo "$as_me: error: Invalid option. Use --with-rpm/--without-rpm instead" >&2;}
    { (exit 1); exit 1; }; }
 fi
 
@@ -2889,6 +2892,14 @@ if test "${enable_agent+set}" = set; then
   enableval=$enable_agent;
 fi
 
+
+# Check whether --with-agent was given.
+if test "${with_agent+set}" = set; then
+  withval=$with_agent; { { $as_echo "$as_me:$LINENO: error: Invalid option. Use --enable-agent/--disable-agent instead" >&5
+$as_echo "$as_me: error: Invalid option. Use --enable-agent/--disable-agent instead" >&2;}
+   { (exit 1); exit 1; }; }
+fi
+
 if test "x$enable_agent" != "xno"; then
    SNMPD='snmpd$(EXEEXT)'
    MAINSUBS="$MAINSUBS agent"
@@ -2908,14 +2919,6 @@ fi
 
 
 
-# Check whether --with-agent was given.
-if test "${with_agent+set}" = set; then
-  withval=$with_agent; { { $as_echo "$as_me:$LINENO: error:  Invalid option. Use --enable-agent/--disable-agent instead " >&5
-$as_echo "$as_me: error:  Invalid option. Use --enable-agent/--disable-agent instead " >&2;}
-   { (exit 1); exit 1; }; }
-fi
-
-
 #       Applications
 #
 # Check whether --enable-applications was given.
@@ -2923,17 +2926,17 @@ if test "${enable_applications+set}" = set; then
   enableval=$enable_applications;
 fi
 
-if test "x$enable_applications" != "xno"; then
-   MAINSUBS="$MAINSUBS apps"
-fi
 
 # Check whether --with-applications was given.
 if test "${with_applications+set}" = set; then
-  withval=$with_applications; { { $as_echo "$as_me:$LINENO: error:  Invalid option. Use --enable-applications/--disable-applications instead " >&5
-$as_echo "$as_me: error:  Invalid option. Use --enable-applications/--disable-applications instead " >&2;}
+  withval=$with_applications; { { $as_echo "$as_me:$LINENO: error: Invalid option. Use --enable-applications/--disable-applications instead" >&5
+$as_echo "$as_me: error: Invalid option. Use --enable-applications/--disable-applications instead" >&2;}
    { (exit 1); exit 1; }; }
 fi
 
+if test "x$enable_applications" != "xno"; then
+   MAINSUBS="$MAINSUBS apps"
+fi
 
 #       Manual pages
 #
@@ -2942,17 +2945,17 @@ if test "${enable_manuals+set}" = set; then
   enableval=$enable_manuals;
 fi
 
-if test "x$enable_manuals" != "xno"; then
-   MAINSUBS="$MAINSUBS man"
-fi
 
 # Check whether --with-manuals was given.
 if test "${with_manuals+set}" = set; then
-  withval=$with_manuals; { { $as_echo "$as_me:$LINENO: error:  Invalid option. Use --enable-manuals/--disable-manuals instead " >&5
-$as_echo "$as_me: error:  Invalid option. Use --enable-manuals/--disable-manuals instead " >&2;}
+  withval=$with_manuals; { { $as_echo "$as_me:$LINENO: error: Invalid option. Use --enable-manuals/--disable-manuals instead" >&5
+$as_echo "$as_me: error: Invalid option. Use --enable-manuals/--disable-manuals instead" >&2;}
    { (exit 1); exit 1; }; }
 fi
 
+if test "x$enable_manuals" != "xno"; then
+   MAINSUBS="$MAINSUBS man"
+fi
 
 #       Supporting scripts
 #
@@ -2961,17 +2964,17 @@ if test "${enable_scripts+set}" = set; then
   enableval=$enable_scripts;
 fi
 
-if test "x$enable_scripts" != "xno"; then
-   MAINSUBS="$MAINSUBS local"
-fi
 
 # Check whether --with-scripts was given.
 if test "${with_scripts+set}" = set; then
-  withval=$with_scripts; { { $as_echo "$as_me:$LINENO: error:  Invalid option. Use --enable-scripts/--disable-scripts instead " >&5
-$as_echo "$as_me: error:  Invalid option. Use --enable-scripts/--disable-scripts instead " >&2;}
+  withval=$with_scripts; { { $as_echo "$as_me:$LINENO: error: Invalid option. Use --enable-scripts/--disable-scripts instead" >&5
+$as_echo "$as_me: error: Invalid option. Use --enable-scripts/--disable-scripts instead" >&2;}
    { (exit 1); exit 1; }; }
 fi
 
+if test "x$enable_scripts" != "xno"; then
+   MAINSUBS="$MAINSUBS local"
+fi
 
 #       MIB files
 #
@@ -3004,8 +3007,8 @@ fi
 
 # Check whether --with-mib-config-checking was given.
 if test "${with_mib_config_checking+set}" = set; then
-  withval=$with_mib_config_checking; { { $as_echo "$as_me:$LINENO: error:  Invalid option. Use --enable-mib-config-checking/--disable-mib-config-checking instead " >&5
-$as_echo "$as_me: error:  Invalid option. Use --enable-mib-config-checking/--disable-mib-config-checking instead " >&2;}
+  withval=$with_mib_config_checking; { { $as_echo "$as_me:$LINENO: error: Invalid option. Use --enable-mib-config-checking/--disable-mib-config-checking instead" >&5
+$as_echo "$as_me: error: Invalid option. Use --enable-mib-config-checking/--disable-mib-config-checking instead" >&2;}
    { (exit 1); exit 1; }; }
 fi
 
@@ -3018,10 +3021,10 @@ else
 fi
 
 
-# Check whether --with-mib-config-checking was given.
-if test "${with_mib_config_checking+set}" = set; then
-  withval=$with_mib_config_checking; { { $as_echo "$as_me:$LINENO: error:  Invalid option. Use --enable-mib-config-checking/--disable-mib-config-checking instead " >&5
-$as_echo "$as_me: error:  Invalid option. Use --enable-mib-config-checking/--disable-mib-config-checking instead " >&2;}
+# Check whether --with-mib-config-debug was given.
+if test "${with_mib_config_debug+set}" = set; then
+  withval=$with_mib_config_debug; { { $as_echo "$as_me:$LINENO: error: Invalid option. Use --enable-mib-config-debug/--disable-mib-config-debug instead" >&5
+$as_echo "$as_me: error: Invalid option. Use --enable-mib-config-debug/--disable-mib-config-debug instead" >&2;}
    { (exit 1); exit 1; }; }
 fi
 
@@ -3061,10 +3064,10 @@ else
   defaults="no"
 fi
 
-# Check whether --enable-defaults was given.
+   # Check whether --enable-defaults was given.
 if test "${enable_defaults+set}" = set; then
-  enableval=$enable_defaults; { { $as_echo "$as_me:$LINENO: error:  Invalid option. Use --with-defaults/--without-defaults instead " >&5
-$as_echo "$as_me: error:  Invalid option. Use --with-defaults/--without-defaults instead " >&2;}
+  enableval=$enable_defaults; { { $as_echo "$as_me:$LINENO: error: Invalid option. Use --with-defaults/--without-defaults instead" >&5
+$as_echo "$as_me: error: Invalid option. Use --with-defaults/--without-defaults instead" >&2;}
    { (exit 1); exit 1; }; }
 fi
 
@@ -3080,8 +3083,8 @@ fi
 
 # Check whether --with-ucd-snmp-compatibility was given.
 if test "${with_ucd_snmp_compatibility+set}" = set; then
-  withval=$with_ucd_snmp_compatibility; { { $as_echo "$as_me:$LINENO: error:  Invalid option. Use --enable-ucd-snmp-compatibility/--disable-ucd-snmp-compatibility instead " >&5
-$as_echo "$as_me: error:  Invalid option. Use --enable-ucd-snmp-compatibility/--disable-ucd-snmp-compatibility instead " >&2;}
+  withval=$with_ucd_snmp_compatibility; { { $as_echo "$as_me:$LINENO: error: Invalid option. Use --enable-ucd-snmp-compatibility/--disable-ucd-snmp-compatibility instead" >&5
+$as_echo "$as_me: error: Invalid option. Use --enable-ucd-snmp-compatibility/--disable-ucd-snmp-compatibility instead" >&2;}
    { (exit 1); exit 1; }; }
 fi
 
@@ -3108,6 +3111,14 @@ if test "${enable_mib_loading+set}" = set; then
   enableval=$enable_mib_loading;
 fi
 
+
+# Check whether --with-mib-loading was given.
+if test "${with_mib_loading+set}" = set; then
+  withval=$with_mib_loading; { { $as_echo "$as_me:$LINENO: error: Invalid option. Use --enable-mib-loading/--disable-mib-loading instead" >&5
+$as_echo "$as_me: error: Invalid option. Use --enable-mib-loading/--disable-mib-loading instead" >&2;}
+   { (exit 1); exit 1; }; }
+fi
+
 if test "x$enable_mib_loading" = "xno"; then
 
 cat >>confdefs.h <<\_ACEOF
@@ -3115,14 +3126,6 @@ cat >>confdefs.h <<\_ACEOF
 _ACEOF
 
 fi
-
-# Check whether --with-mib-loading was given.
-if test "${with_mib_loading+set}" = set; then
-  withval=$with_mib_loading; { { $as_echo "$as_me:$LINENO: error:  Invalid option. Use --enable-mib-loading/--disable-mib-loading instead " >&5
-$as_echo "$as_me: error:  Invalid option. Use --enable-mib-loading/--disable-mib-loading instead " >&2;}
-   { (exit 1); exit 1; }; }
-fi
-
 
 
 # Check whether --with-mibdirs was given.
@@ -3135,11 +3138,10 @@ _ACEOF
 
 fi
 
-
-# Check whether --enable-mibdirs was given.
+   # Check whether --enable-mibdirs was given.
 if test "${enable_mibdirs+set}" = set; then
-  enableval=$enable_mibdirs; { { $as_echo "$as_me:$LINENO: error:  Invalid option. Use --with-mibdirs/--without-mibdirs instead " >&5
-$as_echo "$as_me: error:  Invalid option. Use --with-mibdirs/--without-mibdirs instead " >&2;}
+  enableval=$enable_mibdirs; { { $as_echo "$as_me:$LINENO: error: Invalid option. Use --with-mibdirs/--without-mibdirs instead" >&5
+$as_echo "$as_me: error: Invalid option. Use --with-mibdirs/--without-mibdirs instead" >&2;}
    { (exit 1); exit 1; }; }
 fi
 
@@ -3162,10 +3164,10 @@ _ACEOF
 
 fi
 
-# Check whether --enable-mibfiles was given.
+   # Check whether --enable-mibfiles was given.
 if test "${enable_mibfiles+set}" = set; then
-  enableval=$enable_mibfiles; { { $as_echo "$as_me:$LINENO: error:  Invalid option. Use --with-mibfiles/--without-mibfiles instead " >&5
-$as_echo "$as_me: error:  Invalid option. Use --with-mibfiles/--without-mibfiles instead " >&2;}
+  enableval=$enable_mibfiles; { { $as_echo "$as_me:$LINENO: error: Invalid option. Use --with-mibfiles/--without-mibfiles instead" >&5
+$as_echo "$as_me: error: Invalid option. Use --with-mibfiles/--without-mibfiles instead" >&2;}
    { (exit 1); exit 1; }; }
 fi
 
@@ -3180,6 +3182,14 @@ if test "${enable_des+set}" = set; then
   enableval=$enable_des;
 fi
 
+
+# Check whether --with-des was given.
+if test "${with_des+set}" = set; then
+  withval=$with_des; { { $as_echo "$as_me:$LINENO: error: Invalid option. Use --enable-des/--disable-des instead" >&5
+$as_echo "$as_me: error: Invalid option. Use --enable-des/--disable-des instead" >&2;}
+   { (exit 1); exit 1; }; }
+fi
+
 if test "x$enable_des" = "xno"; then
 
 cat >>confdefs.h <<\_ACEOF
@@ -3188,17 +3198,17 @@ _ACEOF
 
 fi
 
-# Check whether --with-des was given.
-if test "${with_des+set}" = set; then
-  withval=$with_des; { { $as_echo "$as_me:$LINENO: error:  Invalid option. Use --enable-des/--disable-des instead " >&5
-$as_echo "$as_me: error:  Invalid option. Use --enable-des/--disable-des instead " >&2;}
-   { (exit 1); exit 1; }; }
-fi
-
-
 # Check whether --enable-privacy was given.
 if test "${enable_privacy+set}" = set; then
   enableval=$enable_privacy;
+fi
+
+
+# Check whether --with-privacy was given.
+if test "${with_privacy+set}" = set; then
+  withval=$with_privacy; { { $as_echo "$as_me:$LINENO: error: Invalid option. Use --enable-privacy/--disable-privacy instead" >&5
+$as_echo "$as_me: error: Invalid option. Use --enable-privacy/--disable-privacy instead" >&2;}
+   { (exit 1); exit 1; }; }
 fi
 
 if test "x$enable_privacy" != "xno"; then
@@ -3209,17 +3219,17 @@ _ACEOF
 
 fi
 
-# Check whether --with-privacy was given.
-if test "${with_privacy+set}" = set; then
-  withval=$with_privacy; { { $as_echo "$as_me:$LINENO: error:  Invalid option. Use --enable-privacy/--disable-privacy instead " >&5
-$as_echo "$as_me: error:  Invalid option. Use --enable-privacy/--disable-privacy instead " >&2;}
-   { (exit 1); exit 1; }; }
-fi
-
-
 # Check whether --enable-md5 was given.
 if test "${enable_md5+set}" = set; then
   enableval=$enable_md5;
+fi
+
+
+# Check whether --with-md5 was given.
+if test "${with_md5+set}" = set; then
+  withval=$with_md5; { { $as_echo "$as_me:$LINENO: error: Invalid option. Use --enable-md5/--disable-md5 instead" >&5
+$as_echo "$as_me: error: Invalid option. Use --enable-md5/--disable-md5 instead" >&2;}
+   { (exit 1); exit 1; }; }
 fi
 
 if test "x$enable_md5" = "xno"; then
@@ -3230,17 +3240,17 @@ _ACEOF
 
 fi
 
-# Check whether --with-md5 was given.
-if test "${with_md5+set}" = set; then
-  withval=$with_md5; { { $as_echo "$as_me:$LINENO: error:  Invalid option. Use --enable-md5/--disable-md5 instead " >&5
-$as_echo "$as_me: error:  Invalid option. Use --enable-md5/--disable-md5 instead " >&2;}
-   { (exit 1); exit 1; }; }
-fi
-
-
 # Check whether --enable-internal-md5 was given.
 if test "${enable_internal_md5+set}" = set; then
   enableval=$enable_internal_md5;
+fi
+
+
+# Check whether --with-internal-md5 was given.
+if test "${with_internal_md5+set}" = set; then
+  withval=$with_internal_md5; { { $as_echo "$as_me:$LINENO: error: Invalid option. Use --enable-internal-md5/--disable-internal-md5 instead" >&5
+$as_echo "$as_me: error: Invalid option. Use --enable-internal-md5/--disable-internal-md5 instead" >&2;}
+   { (exit 1); exit 1; }; }
 fi
 
 if test "x$enable_internal_md5" = "xyes"; then
@@ -3257,14 +3267,6 @@ _ACEOF
   fi
 fi
 
-# Check whether --with-internal-md5 was given.
-if test "${with_internal_md5+set}" = set; then
-  withval=$with_internal_md5; { { $as_echo "$as_me:$LINENO: error:  Invalid option. Use --enable-internal-md5/--disable-internal-md5 instead " >&5
-$as_echo "$as_me: error:  Invalid option. Use --enable-internal-md5/--disable-internal-md5 instead " >&2;}
-   { (exit 1); exit 1; }; }
-fi
-
-
 
 ##
 #   Project: Library: Misc configuration
@@ -3276,10 +3278,10 @@ if test "${with_opaque_special_types+set}" = set; then
   withval=$with_opaque_special_types;
 fi
 
-# Check whether --enable-opaque-special-types was given.
+   # Check whether --enable-opaque-special-types was given.
 if test "${enable_opaque_special_types+set}" = set; then
-  enableval=$enable_opaque_special_types; { { $as_echo "$as_me:$LINENO: error:  Invalid option. Use --with-opaque-special-types/--without-opaque-special-types instead " >&5
-$as_echo "$as_me: error:  Invalid option. Use --with-opaque-special-types/--without-opaque-special-types instead " >&2;}
+  enableval=$enable_opaque_special_types; { { $as_echo "$as_me:$LINENO: error: Invalid option. Use --with-opaque-special-types/--without-opaque-special-types instead" >&5
+$as_echo "$as_me: error: Invalid option. Use --with-opaque-special-types/--without-opaque-special-types instead" >&2;}
    { (exit 1); exit 1; }; }
 fi
 
@@ -3306,8 +3308,8 @@ fi
 
 # Check whether --with-ipv6 was given.
 if test "${with_ipv6+set}" = set; then
-  withval=$with_ipv6; { { $as_echo "$as_me:$LINENO: error:  Invalid option. Use --enable-ipv6/--disable-ipv6 instead " >&5
-$as_echo "$as_me: error:  Invalid option. Use --enable-ipv6/--disable-ipv6 instead " >&2;}
+  withval=$with_ipv6; { { $as_echo "$as_me:$LINENO: error: Invalid option. Use --enable-ipv6/--disable-ipv6 instead" >&5
+$as_echo "$as_me: error: Invalid option. Use --enable-ipv6/--disable-ipv6 instead" >&2;}
    { (exit 1); exit 1; }; }
 fi
 
@@ -3318,10 +3320,10 @@ if test "${with_logfile+set}" = set; then
   withval=$with_logfile; ac_cv_user_prompt_NETSNMP_LOGFILE="$with_logfile"
 fi
 
-# Check whether --enable-logfile was given.
+   # Check whether --enable-logfile was given.
 if test "${enable_logfile+set}" = set; then
-  enableval=$enable_logfile; { { $as_echo "$as_me:$LINENO: error:  Invalid option. Use --with-logfile/--without-logfile instead " >&5
-$as_echo "$as_me: error:  Invalid option. Use --with-logfile/--without-logfile instead " >&2;}
+  enableval=$enable_logfile; { { $as_echo "$as_me:$LINENO: error: Invalid option. Use --with-logfile/--without-logfile instead" >&5
+$as_echo "$as_me: error: Invalid option. Use --with-logfile/--without-logfile instead" >&2;}
    { (exit 1); exit 1; }; }
 fi
 
@@ -3335,10 +3337,10 @@ if test "${with_persistent_directory+set}" = set; then
   withval=$with_persistent_directory; ac_cv_user_prompt_NETSNMP_PERSISTENT_DIRECTORY="$with_persistent_directory"
 fi
 
-# Check whether --enable-persistent-directory was given.
+   # Check whether --enable-persistent-directory was given.
 if test "${enable_persistent_directory+set}" = set; then
-  enableval=$enable_persistent_directory; { { $as_echo "$as_me:$LINENO: error:  Invalid option. Use --with-persistent-directory/--without-persistent-directory instead " >&5
-$as_echo "$as_me: error:  Invalid option. Use --with-persistent-directory/--without-persistent-directory instead " >&2;}
+  enableval=$enable_persistent_directory; { { $as_echo "$as_me:$LINENO: error: Invalid option. Use --with-persistent-directory/--without-persistent-directory instead" >&5
+$as_echo "$as_me: error: Invalid option. Use --with-persistent-directory/--without-persistent-directory instead" >&2;}
    { (exit 1); exit 1; }; }
 fi
 
@@ -3371,10 +3373,10 @@ _ACEOF
 
 fi
 
-# Check whether --enable-persistent-mask was given.
+   # Check whether --enable-persistent-mask was given.
 if test "${enable_persistent_mask+set}" = set; then
-  enableval=$enable_persistent_mask; { { $as_echo "$as_me:$LINENO: error:  Invalid option. Use --with-persistent-mask instead " >&5
-$as_echo "$as_me: error:  Invalid option. Use --with-persistent-mask instead " >&2;}
+  enableval=$enable_persistent_mask; { { $as_echo "$as_me:$LINENO: error: Invalid option. Use --with-persistent-mask/--without-persistent-mask instead" >&5
+$as_echo "$as_me: error: Invalid option. Use --with-persistent-mask/--without-persistent-mask instead" >&2;}
    { (exit 1); exit 1; }; }
 fi
 
@@ -3385,10 +3387,10 @@ if test "${with_copy_persistent_files+set}" = set; then
   withval=$with_copy_persistent_files; ac_cv_user_prompt_COPY_PERSISTENT_FILES="$with_copy_persistent_files"
 fi
 
-# Check whether --enable-copy_persistent_files was given.
+   # Check whether --enable-copy_persistent_files was given.
 if test "${enable_copy_persistent_files+set}" = set; then
-  enableval=$enable_copy_persistent_files; { { $as_echo "$as_me:$LINENO: error:  Invalid option. Use --with-copy_persistent_files/--without-copy_persistent_files instead " >&5
-$as_echo "$as_me: error:  Invalid option. Use --with-copy_persistent_files/--without-copy_persistent_files instead " >&2;}
+  enableval=$enable_copy_persistent_files; { { $as_echo "$as_me:$LINENO: error: Invalid option. Use --with-copy_persistent_files/--without-copy_persistent_files instead" >&5
+$as_echo "$as_me: error: Invalid option. Use --with-copy_persistent_files/--without-copy_persistent_files instead" >&2;}
    { (exit 1); exit 1; }; }
 fi
 
@@ -3423,10 +3425,10 @@ _ACEOF
 
 fi
 
-# Check whether --enable-temp-file-pattern was given.
+   # Check whether --enable-temp-file-pattern was given.
 if test "${enable_temp_file_pattern+set}" = set; then
-  enableval=$enable_temp_file_pattern; { { $as_echo "$as_me:$LINENO: error:  Invalid option. Use --with-temp-file-pattern instead " >&5
-$as_echo "$as_me: error:  Invalid option. Use --with-temp-file-pattern instead " >&2;}
+  enableval=$enable_temp_file_pattern; { { $as_echo "$as_me:$LINENO: error: Invalid option. Use --with-temp-file-pattern/--without-temp-file-pattern instead" >&5
+$as_echo "$as_me: error: Invalid option. Use --with-temp-file-pattern/--without-temp-file-pattern instead" >&2;}
    { (exit 1); exit 1; }; }
 fi
 
@@ -3442,6 +3444,14 @@ if test "${enable_snmpv1+set}" = set; then
   enableval=$enable_snmpv1;
 fi
 
+
+# Check whether --with-snmpv1 was given.
+if test "${with_snmpv1+set}" = set; then
+  withval=$with_snmpv1; { { $as_echo "$as_me:$LINENO: error: Invalid option. Use --enable-snmpv1/--disable-snmpv1 instead" >&5
+$as_echo "$as_me: error: Invalid option. Use --enable-snmpv1/--disable-snmpv1 instead" >&2;}
+   { (exit 1); exit 1; }; }
+fi
+
 if test "x$enable_snmpv1" = "xno"; then
 
 cat >>confdefs.h <<\_ACEOF
@@ -3452,17 +3462,17 @@ else
   SNMP_VERSIONS="$SNMP_VERSIONS 1"
 fi
 
-# Check whether --with-snmpv1 was given.
-if test "${with_snmpv1+set}" = set; then
-  withval=$with_snmpv1; { { $as_echo "$as_me:$LINENO: error:  Invalid option. Use --enable-snmpv1/--disable-snmpv1 instead " >&5
-$as_echo "$as_me: error:  Invalid option. Use --enable-snmpv1/--disable-snmpv1 instead " >&2;}
-   { (exit 1); exit 1; }; }
-fi
-
-
 # Check whether --enable-snmpv2c was given.
 if test "${enable_snmpv2c+set}" = set; then
   enableval=$enable_snmpv2c;
+fi
+
+
+# Check whether --with-snmpv2c was given.
+if test "${with_snmpv2c+set}" = set; then
+  withval=$with_snmpv2c; { { $as_echo "$as_me:$LINENO: error: Invalid option. Use --enable-snmpv2c/--disable-snmpv2c instead" >&5
+$as_echo "$as_me: error: Invalid option. Use --enable-snmpv2c/--disable-snmpv2c instead" >&2;}
+   { (exit 1); exit 1; }; }
 fi
 
 if test "x$enable_snmpv2c" = "xno"; then
@@ -3474,14 +3484,6 @@ _ACEOF
 else
   SNMP_VERSIONS="$SNMP_VERSIONS 2c"
 fi
-
-# Check whether --with-snmpv2c was given.
-if test "${with_snmpv2c+set}" = set; then
-  withval=$with_snmpv2c; { { $as_echo "$as_me:$LINENO: error:  Invalid option. Use --enable-snmpv2c/--disable-snmpv2c instead " >&5
-$as_echo "$as_me: error:  Invalid option. Use --enable-snmpv2c/--disable-snmpv2c instead " >&2;}
-   { (exit 1); exit 1; }; }
-fi
-
 
 SNMP_VERSIONS="$SNMP_VERSIONS 3"
 
@@ -3496,10 +3498,10 @@ if test "${with_default_snmp_version+set}" = set; then
   withval=$with_default_snmp_version; ac_cv_user_prompt_NETSNMP_DEFAULT_SNMP_VERSION="$with_default_snmp_version"
 fi
 
-# Check whether --enable-default-snmp-version was given.
+   # Check whether --enable-default-snmp-version was given.
 if test "${enable_default_snmp_version+set}" = set; then
-  enableval=$enable_default_snmp_version; { { $as_echo "$as_me:$LINENO: error:  Invalid option. Use --with-default-snmp-version/--without-default-snmp-version instead " >&5
-$as_echo "$as_me: error:  Invalid option. Use --with-default-snmp-version/--without-default-snmp-version instead " >&2;}
+  enableval=$enable_default_snmp_version; { { $as_echo "$as_me:$LINENO: error: Invalid option. Use --with-default-snmp-version/--without-default-snmp-version instead" >&5
+$as_echo "$as_me: error: Invalid option. Use --with-default-snmp-version/--without-default-snmp-version instead" >&2;}
    { (exit 1); exit 1; }; }
 fi
 
@@ -3540,16 +3542,16 @@ fi
 
 # Check whether --with-transport was given.
 if test "${with_transport+set}" = set; then
-  withval=$with_transport; { { $as_echo "$as_me:$LINENO: error:  Invalid option. Use --with-transports/--without-transports instead " >&5
-$as_echo "$as_me: error:  Invalid option. Use --with-transports/--without-transports instead " >&2;}
+  withval=$with_transport; { { $as_echo "$as_me:$LINENO: error: Invalid option. Use --with-transports/--without-transports instead" >&5
+$as_echo "$as_me: error: Invalid option. Use --with-transports/--without-transports instead" >&2;}
    { (exit 1); exit 1; }; }
 fi
 
 
 # Check whether --with-out-transport was given.
 if test "${with_out_transport+set}" = set; then
-  withval=$with_out_transport; { { $as_echo "$as_me:$LINENO: error:  Invalid option. Use --with-out-transports/--without-out-transports instead " >&5
-$as_echo "$as_me: error:  Invalid option. Use --with-out-transports/--without-out-transports instead " >&2;}
+  withval=$with_out_transport; { { $as_echo "$as_me:$LINENO: error: Invalid option. Use --with-out-transports/--without-out-transports instead" >&5
+$as_echo "$as_me: error: Invalid option. Use --with-out-transports/--without-out-transports instead" >&2;}
    { (exit 1); exit 1; }; }
 fi
 
@@ -3565,10 +3567,10 @@ if test "${with_security_modules+set}" = set; then
   withval=$with_security_modules;
 fi
 
-# Check whether --enable-security-modules was given.
+   # Check whether --enable-security-modules was given.
 if test "${enable_security_modules+set}" = set; then
-  enableval=$enable_security_modules; { { $as_echo "$as_me:$LINENO: error:  Invalid option. Use --with-security-modules/--without-security-modules instead " >&5
-$as_echo "$as_me: error:  Invalid option. Use --with-security-modules/--without-security-modules instead " >&2;}
+  enableval=$enable_security_modules; { { $as_echo "$as_me:$LINENO: error: Invalid option. Use --with-security-modules/--without-security-modules instead" >&5
+$as_echo "$as_me: error: Invalid option. Use --with-security-modules/--without-security-modules instead" >&2;}
    { (exit 1); exit 1; }; }
 fi
 
@@ -3589,8 +3591,8 @@ fi
 
 # Check whether --with-debugging was given.
 if test "${with_debugging+set}" = set; then
-  withval=$with_debugging; { { $as_echo "$as_me:$LINENO: error:  Invalid option. Use --enable-debugging/--disable-debugging instead " >&5
-$as_echo "$as_me: error:  Invalid option. Use --enable-debugging/--disable-debugging instead " >&2;}
+  withval=$with_debugging; { { $as_echo "$as_me:$LINENO: error: Invalid option. Use --enable-debugging/--disable-debugging instead" >&5
+$as_echo "$as_me: error: Invalid option. Use --enable-debugging/--disable-debugging instead" >&2;}
    { (exit 1); exit 1; }; }
 fi
 
@@ -3609,8 +3611,8 @@ fi
 
 # Check whether --with-developer was given.
 if test "${with_developer+set}" = set; then
-  withval=$with_developer; { { $as_echo "$as_me:$LINENO: error:  Invalid option. Use --enable-developer/--disable-developer instead " >&5
-$as_echo "$as_me: error:  Invalid option. Use --enable-developer/--disable-developer instead " >&2;}
+  withval=$with_developer; { { $as_echo "$as_me:$LINENO: error: Invalid option. Use --enable-developer/--disable-developer instead" >&5
+$as_echo "$as_me: error: Invalid option. Use --enable-developer/--disable-developer instead" >&2;}
    { (exit 1); exit 1; }; }
 fi
 
@@ -3627,8 +3629,8 @@ fi
 
 # Check whether --with-testing-code was given.
 if test "${with_testing_code+set}" = set; then
-  withval=$with_testing_code; { { $as_echo "$as_me:$LINENO: error:  Invalid option. Use --enable-testing-code/--disable-testing-code instead " >&5
-$as_echo "$as_me: error:  Invalid option. Use --enable-testing-code/--disable-testing-code instead " >&2;}
+  withval=$with_testing_code; { { $as_echo "$as_me:$LINENO: error: Invalid option. Use --enable-testing-code/--disable-testing-code instead" >&5
+$as_echo "$as_me: error: Invalid option. Use --enable-testing-code/--disable-testing-code instead" >&2;}
    { (exit 1); exit 1; }; }
 fi
 
@@ -3643,8 +3645,8 @@ fi
 
 # Check whether --with-reentrant was given.
 if test "${with_reentrant+set}" = set; then
-  withval=$with_reentrant; { { $as_echo "$as_me:$LINENO: error:  Invalid option. Use --enable-reentrant/--disable-reentrant instead " >&5
-$as_echo "$as_me: error:  Invalid option. Use --enable-reentrant/--disable-reentrant instead " >&2;}
+  withval=$with_reentrant; { { $as_echo "$as_me:$LINENO: error: Invalid option. Use --enable-reentrant/--disable-reentrant instead" >&5
+$as_echo "$as_me: error: Invalid option. Use --enable-reentrant/--disable-reentrant instead" >&2;}
    { (exit 1); exit 1; }; }
 fi
 
@@ -3657,8 +3659,8 @@ fi
 
 # Check whether --with-deprecated was given.
 if test "${with_deprecated+set}" = set; then
-  withval=$with_deprecated; { { $as_echo "$as_me:$LINENO: error:  Invalid option. Use --enable-deprecated/--disable-deprecated instead " >&5
-$as_echo "$as_me: error:  Invalid option. Use --enable-deprecated/--disable-deprecated instead " >&2;}
+  withval=$with_deprecated; { { $as_echo "$as_me:$LINENO: error: Invalid option. Use --enable-deprecated/--disable-deprecated instead" >&5
+$as_echo "$as_me: error: Invalid option. Use --enable-deprecated/--disable-deprecated instead" >&2;}
    { (exit 1); exit 1; }; }
 fi
 
@@ -3682,10 +3684,10 @@ if test "${with_root_access+set}" = set; then
   withval=$with_root_access;
 fi
 
-# Check whether --enable-root-access was given.
+   # Check whether --enable-root-access was given.
 if test "${enable_root_access+set}" = set; then
-  enableval=$enable_root_access; { { $as_echo "$as_me:$LINENO: error:  Invalid option. Use --with-root-access/--without-root-access instead " >&5
-$as_echo "$as_me: error:  Invalid option. Use --with-root-access/--without-root-access instead " >&2;}
+  enableval=$enable_root_access; { { $as_echo "$as_me:$LINENO: error: Invalid option. Use --with-root-access/--without-root-access instead" >&5
+$as_echo "$as_me: error: Invalid option. Use --with-root-access/--without-root-access instead" >&2;}
    { (exit 1); exit 1; }; }
 fi
 
@@ -3704,10 +3706,10 @@ if test "${with_kmem_usage+set}" = set; then
   withval=$with_kmem_usage;
 fi
 
-# Check whether --enable-kmem-usage was given.
+   # Check whether --enable-kmem-usage was given.
 if test "${enable_kmem_usage+set}" = set; then
-  enableval=$enable_kmem_usage; { { $as_echo "$as_me:$LINENO: error:  Invalid option. Use --with-kmem-usage/--without-kmem-usage instead " >&5
-$as_echo "$as_me: error:  Invalid option. Use --with-kmem-usage/--without-kmem-usage instead " >&2;}
+  enableval=$enable_kmem_usage; { { $as_echo "$as_me:$LINENO: error: Invalid option. Use --with-kmem-usage/--without-kmem-usage instead" >&5
+$as_echo "$as_me: error: Invalid option. Use --with-kmem-usage/--without-kmem-usage instead" >&2;}
    { (exit 1); exit 1; }; }
 fi
 
@@ -3726,10 +3728,10 @@ if test "${with_dummy_values+set}" = set; then
   withval=$with_dummy_values;
 fi
 
-# Check whether --enable-dummy-values was given.
+   # Check whether --enable-dummy-values was given.
 if test "${enable_dummy_values+set}" = set; then
-  enableval=$enable_dummy_values; { { $as_echo "$as_me:$LINENO: error:  Invalid option. Use --with-dummy-values/--without-dummy-values instead " >&5
-$as_echo "$as_me: error:  Invalid option. Use --with-dummy-values/--without-dummy-values instead " >&2;}
+  enableval=$enable_dummy_values; { { $as_echo "$as_me:$LINENO: error: Invalid option. Use --with-dummy-values/--without-dummy-values instead" >&5
+$as_echo "$as_me: error: Invalid option. Use --with-dummy-values/--without-dummy-values instead" >&2;}
    { (exit 1); exit 1; }; }
 fi
 
@@ -3747,6 +3749,14 @@ if test "${enable_set_support+set}" = set; then
   enableval=$enable_set_support;
 fi
 
+
+# Check whether --with-set-support was given.
+if test "${with_set_support+set}" = set; then
+  withval=$with_set_support; { { $as_echo "$as_me:$LINENO: error: Invalid option. Use --enable-set-support/--disable-set-support instead" >&5
+$as_echo "$as_me: error: Invalid option. Use --enable-set-support/--disable-set-support instead" >&2;}
+   { (exit 1); exit 1; }; }
+fi
+
 if test "x$enable_set_support" = "xno"; then
 
 cat >>confdefs.h <<\_ACEOF
@@ -3755,14 +3765,6 @@ _ACEOF
 
 fi
 
-# Check whether --with-set-support was given.
-if test "${with_set_support+set}" = set; then
-  withval=$with_set_support; { { $as_echo "$as_me:$LINENO: error:  Invalid option. Use --enable-set-support/--disable-set-support instead " >&5
-$as_echo "$as_me: error:  Invalid option. Use --enable-set-support/--disable-set-support instead " >&2;}
-   { (exit 1); exit 1; }; }
-fi
-
-
 
 
 # Check whether --with-sys_contact was given.
@@ -3770,10 +3772,10 @@ if test "${with_sys_contact+set}" = set; then
   withval=$with_sys_contact; ac_cv_user_prompt_NETSNMP_SYS_CONTACT="$with_sys_contact"
 fi
 
-# Check whether --enable-sys_contact was given.
+   # Check whether --enable-sys_contact was given.
 if test "${enable_sys_contact+set}" = set; then
-  enableval=$enable_sys_contact; { { $as_echo "$as_me:$LINENO: error:  Invalid option. Use --with-sys-contact/--without-sys-contact instead " >&5
-$as_echo "$as_me: error:  Invalid option. Use --with-sys-contact/--without-sys-contact instead " >&2;}
+  enableval=$enable_sys_contact; { { $as_echo "$as_me:$LINENO: error: Invalid option. Use --with-sys_contact/--without-sys_contact instead" >&5
+$as_echo "$as_me: error: Invalid option. Use --with-sys_contact/--without-sys_contact instead" >&2;}
    { (exit 1); exit 1; }; }
 fi
 
@@ -3784,10 +3786,10 @@ if test "${with_sys_location+set}" = set; then
   withval=$with_sys_location; ac_cv_user_prompt_NETSNMP_SYS_LOC="$with_sys_location"
 fi
 
-# Check whether --enable-sys_location was given.
+   # Check whether --enable-sys_location was given.
 if test "${enable_sys_location+set}" = set; then
-  enableval=$enable_sys_location; { { $as_echo "$as_me:$LINENO: error:  Invalid option. Use --with-sys-location/--without-sys-location instead " >&5
-$as_echo "$as_me: error:  Invalid option. Use --with-sys-location/--without-sys-location instead " >&2;}
+  enableval=$enable_sys_location; { { $as_echo "$as_me:$LINENO: error: Invalid option. Use --with-sys_location/--without-sys_location instead" >&5
+$as_echo "$as_me: error: Invalid option. Use --with-sys_location/--without-sys_location instead" >&2;}
    { (exit 1); exit 1; }; }
 fi
 
@@ -3812,8 +3814,8 @@ fi
 
 # Check whether --with-local-smux was given.
 if test "${with_local_smux+set}" = set; then
-  withval=$with_local_smux; { { $as_echo "$as_me:$LINENO: error:  Invalid option. Use --enable-local-smux/--disable-local-smux instead " >&5
-$as_echo "$as_me: error:  Invalid option. Use --enable-local-smux/--disable-local-smux instead " >&2;}
+  withval=$with_local_smux; { { $as_echo "$as_me:$LINENO: error: Invalid option. Use --enable-local-smux/--disable-local-smux instead" >&5
+$as_echo "$as_me: error: Invalid option. Use --enable-local-smux/--disable-local-smux instead" >&2;}
    { (exit 1); exit 1; }; }
 fi
 
@@ -3830,8 +3832,8 @@ fi
 
 # Check whether --with-agentx-dom-sock-only was given.
 if test "${with_agentx_dom_sock_only+set}" = set; then
-  withval=$with_agentx_dom_sock_only; { { $as_echo "$as_me:$LINENO: error:  Invalid option. Use --enable-agentx-dom-sock-only/--disable-agentx-dom-sock-only instead " >&5
-$as_echo "$as_me: error:  Invalid option. Use --enable-agentx-dom-sock-only/--disable-agentx-dom-sock-only instead " >&2;}
+  withval=$with_agentx_dom_sock_only; { { $as_echo "$as_me:$LINENO: error: Invalid option. Use --enable-agentx-dom-sock-only/--disable-agentx-dom-sock-only instead" >&5
+$as_echo "$as_me: error: Invalid option. Use --enable-agentx-dom-sock-only/--disable-agentx-dom-sock-only instead" >&2;}
    { (exit 1); exit 1; }; }
 fi
 
@@ -3841,6 +3843,14 @@ if test "${enable_snmptrapd_subagent+set}" = set; then
   enableval=$enable_snmptrapd_subagent;
 fi
 
+
+# Check whether --with-snmptrapd-subagent was given.
+if test "${with_snmptrapd_subagent+set}" = set; then
+  withval=$with_snmptrapd_subagent; { { $as_echo "$as_me:$LINENO: error: Invalid option. Use --enable-snmptrapd-subagent/--disable-snmptrapd-subagent instead" >&5
+$as_echo "$as_me: error: Invalid option. Use --enable-snmptrapd-subagent/--disable-snmptrapd-subagent instead" >&2;}
+   { (exit 1); exit 1; }; }
+fi
+
 if test "x$enable_snmptrapd_subagent" = "xno"; then
 
 cat >>confdefs.h <<\_ACEOF
@@ -3848,14 +3858,6 @@ cat >>confdefs.h <<\_ACEOF
 _ACEOF
 
 fi
-
-# Check whether --with-snmptrapd-subagent was given.
-if test "${with_snmptrapd_subagent+set}" = set; then
-  withval=$with_snmptrapd_subagent; { { $as_echo "$as_me:$LINENO: error:  Invalid option. Use --enable-snmptrapd-subagent/--disable-snmptrapd-subagent instead " >&5
-$as_echo "$as_me: error:  Invalid option. Use --enable-snmptrapd-subagent/--disable-snmptrapd-subagent instead " >&2;}
-   { (exit 1); exit 1; }; }
-fi
-
 
 default_agentx_socket="/var/agentx/master"
 
@@ -3878,17 +3880,17 @@ $as_echo "using default AgentX socket $default_agentx_socket" >&6; }
 
 fi
 
+   # Check whether --enable-agentx-socket was given.
+if test "${enable_agentx_socket+set}" = set; then
+  enableval=$enable_agentx_socket; { { $as_echo "$as_me:$LINENO: error: Invalid option. Use --with-agentx-socket/--without-agentx-socket instead" >&5
+$as_echo "$as_me: error: Invalid option. Use --with-agentx-socket/--without-agentx-socket instead" >&2;}
+   { (exit 1); exit 1; }; }
+fi
+
 
 cat >>confdefs.h <<_ACEOF
 #define NETSNMP_AGENTX_SOCKET "$withval"
 _ACEOF
-
-# Check whether --enable-agentx-socket was given.
-if test "${enable_agentx_socket+set}" = set; then
-  enableval=$enable_agentx_socket; { { $as_echo "$as_me:$LINENO: error:  Invalid option. Use --with-agentx-socket instead " >&5
-$as_echo "$as_me: error:  Invalid option. Use --with-agentx-socket instead " >&2;}
-   { (exit 1); exit 1; }; }
-fi
 
 
 
@@ -3901,31 +3903,31 @@ if test "${enable_mini_agent+set}" = set; then
   enableval=$enable_mini_agent;
 fi
 
+
+# Check whether --with-mini_agent was given.
+if test "${with_mini_agent+set}" = set; then
+  withval=$with_mini_agent; { { $as_echo "$as_me:$LINENO: error: Invalid option. Use --enable-mini_agent/--disable-mini_agent instead" >&5
+$as_echo "$as_me: error: Invalid option. Use --enable-mini_agent/--disable-mini_agent instead" >&2;}
+   { (exit 1); exit 1; }; }
+fi
+
 if test "x$enable_mini_agent" = "xyes"; then
     mini_agent="yes"
 else
     mini_agent="no"
 fi
 
-# Check whether --with-mini_agent was given.
-if test "${with_mini_agent+set}" = set; then
-  withval=$with_mini_agent; { { $as_echo "$as_me:$LINENO: error:  Invalid option. Use --enable-mini-agent/--disable-mini-agent instead " >&5
-$as_echo "$as_me: error:  Invalid option. Use --enable-mini-agent/--disable-mini-agent instead " >&2;}
-   { (exit 1); exit 1; }; }
-fi
-
-
 # Check whether --with-miniagent was given.
 if test "${with_miniagent+set}" = set; then
-  withval=$with_miniagent; { { $as_echo "$as_me:$LINENO: error:  Invalid option. Use --enable-mini-agent/--disable-mini-agent instead " >&5
-$as_echo "$as_me: error:  Invalid option. Use --enable-mini-agent/--disable-mini-agent instead " >&2;}
+  withval=$with_miniagent; { { $as_echo "$as_me:$LINENO: error: Invalid option. Use --enable-mini-agent/--disable-mini-agent instead" >&5
+$as_echo "$as_me: error: Invalid option. Use --enable-mini-agent/--disable-mini-agent instead" >&2;}
    { (exit 1); exit 1; }; }
 fi
 
 # Check whether --enable-miniagent was given.
 if test "${enable_miniagent+set}" = set; then
-  enableval=$enable_miniagent; { { $as_echo "$as_me:$LINENO: error:  Invalid option. Use --enable-mini-agent/--disable-mini-agent instead " >&5
-$as_echo "$as_me: error:  Invalid option. Use --enable-mini-agent/--disable-mini-agent instead " >&2;}
+  enableval=$enable_miniagent; { { $as_echo "$as_me:$LINENO: error: Invalid option. Use --enable-mini-agent/--disable-mini-agent instead" >&5
+$as_echo "$as_me: error: Invalid option. Use --enable-mini-agent/--disable-mini-agent instead" >&2;}
    { (exit 1); exit 1; }; }
 fi
 
@@ -3933,6 +3935,14 @@ fi
 # Check whether --enable-mfd-rewrites was given.
 if test "${enable_mfd_rewrites+set}" = set; then
   enableval=$enable_mfd_rewrites;
+fi
+
+
+# Check whether --with-mfd-rewrites was given.
+if test "${with_mfd_rewrites+set}" = set; then
+  withval=$with_mfd_rewrites; { { $as_echo "$as_me:$LINENO: error: Invalid option. Use --enable-mfd-rewrites/--disable-mfd-rewrites instead" >&5
+$as_echo "$as_me: error: Invalid option. Use --enable-mfd-rewrites/--disable-mfd-rewrites instead" >&2;}
+   { (exit 1); exit 1; }; }
 fi
 
 if test "x$enable_mfd_rewrites" = "xyes"; then
@@ -3943,14 +3953,6 @@ _ACEOF
 
 fi
 
-# Check whether --with-mfd-rewrites was given.
-if test "${with_mfd_rewrites+set}" = set; then
-  withval=$with_mfd_rewrites; { { $as_echo "$as_me:$LINENO: error:  Invalid option. Use --enable-mfd-rewrites/--disable-mfd-rewrites instead " >&5
-$as_echo "$as_me: error:  Invalid option. Use --enable-mfd-rewrites/--disable-mfd-rewrites instead " >&2;}
-   { (exit 1); exit 1; }; }
-fi
-
-
 
 
 # Check whether --with-mib_modules was given.
@@ -3958,10 +3960,10 @@ if test "${with_mib_modules+set}" = set; then
   withval=$with_mib_modules;
 fi
 
-# Check whether --enable-mib_modules was given.
+   # Check whether --enable-mib_modules was given.
 if test "${enable_mib_modules+set}" = set; then
-  enableval=$enable_mib_modules; { { $as_echo "$as_me:$LINENO: error:  Invalid option. Use --with-mib-modules/--without-mib-modules instead " >&5
-$as_echo "$as_me: error:  Invalid option. Use --with-mib-modules/--without-mib-modules instead " >&2;}
+  enableval=$enable_mib_modules; { { $as_echo "$as_me:$LINENO: error: Invalid option. Use --with-mib_modules/--without-mib_modules instead" >&5
+$as_echo "$as_me: error: Invalid option. Use --with-mib_modules/--without-mib_modules instead" >&2;}
    { (exit 1); exit 1; }; }
 fi
 
@@ -3972,12 +3974,14 @@ if test "${with_out_mib_modules+set}" = set; then
   withval=$with_out_mib_modules;
 fi
 
-# Check whether --enable-out_mib_modules was given.
+   # Check whether --enable-out_mib_modules was given.
 if test "${enable_out_mib_modules+set}" = set; then
-  enableval=$enable_out_mib_modules; { { $as_echo "$as_me:$LINENO: error:  Invalid option. Use --with-out-mib-modules/--without-out-mib-modules instead " >&5
-$as_echo "$as_me: error:  Invalid option. Use --with-out-mib-modules/--without-out-mib-modules instead " >&2;}
+  enableval=$enable_out_mib_modules; { { $as_echo "$as_me:$LINENO: error: Invalid option. Use --with-out_mib_modules/--without-out_mib_modules instead" >&5
+$as_echo "$as_me: error: Invalid option. Use --with-out_mib_modules/--without-out_mib_modules instead" >&2;}
    { (exit 1); exit 1; }; }
 fi
+
+
 
 #
 # Catch common mistakes in configure options
@@ -3985,24 +3989,24 @@ fi
 
 # Check whether --with-mib-module was given.
 if test "${with_mib_module+set}" = set; then
-  withval=$with_mib_module; { { $as_echo "$as_me:$LINENO: error:  Invalid option1. Use --with-mib-modules instead " >&5
-$as_echo "$as_me: error:  Invalid option1. Use --with-mib-modules instead " >&2;}
+  withval=$with_mib_module; { { $as_echo "$as_me:$LINENO: error: Invalid option. Use --with-mib-modules/--without-mib-modules instead" >&5
+$as_echo "$as_me: error: Invalid option. Use --with-mib-modules/--without-mib-modules instead" >&2;}
    { (exit 1); exit 1; }; }
 fi
 
 
 # Check whether --with-module was given.
 if test "${with_module+set}" = set; then
-  withval=$with_module; { { $as_echo "$as_me:$LINENO: error:  Invalid option3. Use --with-mib-modules instead " >&5
-$as_echo "$as_me: error:  Invalid option3. Use --with-mib-modules instead " >&2;}
+  withval=$with_module; { { $as_echo "$as_me:$LINENO: error: Invalid option. Use --with-mib-modules/--without-mib-modules instead" >&5
+$as_echo "$as_me: error: Invalid option. Use --with-mib-modules/--without-mib-modules instead" >&2;}
    { (exit 1); exit 1; }; }
 fi
 
 
 # Check whether --with-modules was given.
 if test "${with_modules+set}" = set; then
-  withval=$with_modules; { { $as_echo "$as_me:$LINENO: error:  Invalid option4. Use --with-mib-modules instead " >&5
-$as_echo "$as_me: error:  Invalid option4. Use --with-mib-modules instead " >&2;}
+  withval=$with_modules; { { $as_echo "$as_me:$LINENO: error: Invalid option. Use --with-mib-modules/--without-mib-modules instead" >&5
+$as_echo "$as_me: error: Invalid option. Use --with-mib-modules/--without-mib-modules instead" >&2;}
    { (exit 1); exit 1; }; }
 fi
 
@@ -4010,24 +4014,24 @@ fi
 
 # Check whether --with-out-mib-module was given.
 if test "${with_out_mib_module+set}" = set; then
-  withval=$with_out_mib_module; { { $as_echo "$as_me:$LINENO: error:  Invalid option5. Use --with-out-mib-modules instead " >&5
-$as_echo "$as_me: error:  Invalid option5. Use --with-out-mib-modules instead " >&2;}
-   { (exit 1); exit 1; }; }
-fi
-
-
-# Check whether --with-out-modules was given.
-if test "${with_out_modules+set}" = set; then
-  withval=$with_out_modules; { { $as_echo "$as_me:$LINENO: error:  Invalid option7. Use --with-out-mib-modules instead " >&5
-$as_echo "$as_me: error:  Invalid option7. Use --with-out-mib-modules instead " >&2;}
+  withval=$with_out_mib_module; { { $as_echo "$as_me:$LINENO: error: Invalid option. Use --with-out-mib-modules/--without-out-mib-modules instead" >&5
+$as_echo "$as_me: error: Invalid option. Use --with-out-mib-modules/--without-out-mib-modules instead" >&2;}
    { (exit 1); exit 1; }; }
 fi
 
 
 # Check whether --with-out-module was given.
 if test "${with_out_module+set}" = set; then
-  withval=$with_out_module; { { $as_echo "$as_me:$LINENO: error:  Invalid option8. Use --with-out-mib-modules instead " >&5
-$as_echo "$as_me: error:  Invalid option8. Use --with-out-mib-modules instead " >&2;}
+  withval=$with_out_module; { { $as_echo "$as_me:$LINENO: error: Invalid option. Use --with-out-mib-modules/--without-out-mib-modules instead" >&5
+$as_echo "$as_me: error: Invalid option. Use --with-out-mib-modules/--without-out-mib-modules instead" >&2;}
+   { (exit 1); exit 1; }; }
+fi
+
+
+# Check whether --with-out-modules was given.
+if test "${with_out_modules+set}" = set; then
+  withval=$with_out_modules; { { $as_echo "$as_me:$LINENO: error: Invalid option. Use --with-out-mib-modules/--without-out-mib-modules instead" >&5
+$as_echo "$as_me: error: Invalid option. Use --with-out-mib-modules/--without-out-mib-modules instead" >&2;}
    { (exit 1); exit 1; }; }
 fi
 
@@ -4070,10 +4074,10 @@ $as_echo "using default \"enterprise.net-snmp\"" >&6; }
 
 fi
 
-# Check whether --enable-enterprise-oid was given.
+   # Check whether --enable-enterprise-oid was given.
 if test "${enable_enterprise_oid+set}" = set; then
-  enableval=$enable_enterprise_oid; { { $as_echo "$as_me:$LINENO: error:  Invalid option. Use --with-enterprise-oid/--without-enterprise-oid instead " >&5
-$as_echo "$as_me: error:  Invalid option. Use --with-enterprise-oid/--without-enterprise-oid instead " >&2;}
+  enableval=$enable_enterprise_oid; { { $as_echo "$as_me:$LINENO: error: Invalid option. Use --with-enterprise-oid/--without-enterprise-oid instead" >&5
+$as_echo "$as_me: error: Invalid option. Use --with-enterprise-oid/--without-enterprise-oid instead" >&2;}
    { (exit 1); exit 1; }; }
 fi
 
@@ -4112,10 +4116,10 @@ $as_echo "using default enterprise sysOID \"NET-SNMP-MIB::netSnmpAgentOIDs...\""
 
 fi
 
-# Check whether --enable-enterprise-sysoid was given.
+   # Check whether --enable-enterprise-sysoid was given.
 if test "${enable_enterprise_sysoid+set}" = set; then
-  enableval=$enable_enterprise_sysoid; { { $as_echo "$as_me:$LINENO: error:  Invalid option. Use --with-enterprise-sysoid/--without-enterprise-sysoid instead " >&5
-$as_echo "$as_me: error:  Invalid option. Use --with-enterprise-sysoid/--without-enterprise-sysoid instead " >&2;}
+  enableval=$enable_enterprise_sysoid; { { $as_echo "$as_me:$LINENO: error: Invalid option. Use --with-enterprise-sysoid/--without-enterprise-sysoid instead" >&5
+$as_echo "$as_me: error: Invalid option. Use --with-enterprise-sysoid/--without-enterprise-sysoid instead" >&2;}
    { (exit 1); exit 1; }; }
 fi
 
@@ -4154,10 +4158,10 @@ $as_echo "using default notifications \"NET-SNMP-MIB::netSnmpNotifications\"" >&
 
 fi
 
-# Check whether --enable-enterprise-notification-oid was given.
+   # Check whether --enable-enterprise-notification-oid was given.
 if test "${enable_enterprise_notification_oid+set}" = set; then
-  enableval=$enable_enterprise_notification_oid; { { $as_echo "$as_me:$LINENO: error:  Invalid option. Use --with-enterprise-notification-oid/--without-enterprise-notification-oid instead " >&5
-$as_echo "$as_me: error:  Invalid option. Use --with-enterprise-notification-oid/--without-enterprise-notification-oid instead " >&2;}
+  enableval=$enable_enterprise_notification_oid; { { $as_echo "$as_me:$LINENO: error: Invalid option. Use --with-enterprise-notification-oid/--without-enterprise-notification-oid instead" >&5
+$as_echo "$as_me: error: Invalid option. Use --with-enterprise-notification-oid/--without-enterprise-notification-oid instead" >&2;}
    { (exit 1); exit 1; }; }
 fi
 
@@ -4184,6 +4188,13 @@ else
   install_perl="try"
 fi
 
+   # Check whether --enable-perl-modules was given.
+if test "${enable_perl_modules+set}" = set; then
+  enableval=$enable_perl_modules; { { $as_echo "$as_me:$LINENO: error: Invalid option. Use --with-perl-modules/--without-perl-modules instead" >&5
+$as_echo "$as_me: error: Invalid option. Use --with-perl-modules/--without-perl-modules instead" >&2;}
+   { (exit 1); exit 1; }; }
+fi
+
 
 # Check whether --enable-embedded-perl was given.
 if test "${enable_embedded_perl+set}" = set; then
@@ -4193,36 +4204,26 @@ else
 fi
 
 
+# Check whether --with-embedded-perl was given.
+if test "${with_embedded_perl+set}" = set; then
+  withval=$with_embedded_perl; { { $as_echo "$as_me:$LINENO: error: Invalid option. Use --enable-embedded-perl/--disable-embedded-perl instead" >&5
+$as_echo "$as_me: error: Invalid option. Use --enable-embedded-perl/--disable-embedded-perl instead" >&2;}
+   { (exit 1); exit 1; }; }
+fi
+
+
 # Check whether --enable-perl-cc-checks was given.
 if test "${enable_perl_cc_checks+set}" = set; then
   enableval=$enable_perl_cc_checks;
 fi
 
 
-# Common perl mistakes
-# Check whether --enable-perl-modules was given.
-if test "${enable_perl_modules+set}" = set; then
-  enableval=$enable_perl_modules; { { $as_echo "$as_me:$LINENO: error:  Invalid option. Use --with-perl-modules/--without-perl-modules instead " >&5
-$as_echo "$as_me: error:  Invalid option. Use --with-perl-modules/--without-perl-modules instead " >&2;}
-   { (exit 1); exit 1; }; }
-fi
-
-
-# Check whether --with-embedded-perl was given.
-if test "${with_embedded_perl+set}" = set; then
-  withval=$with_embedded_perl; { { $as_echo "$as_me:$LINENO: error:  Invalid option. Use --enable-embedded-perl/--disable-embedded-perl instead " >&5
-$as_echo "$as_me: error:  Invalid option. Use --enable-embedded-perl/--disable-embedded-perl instead " >&2;}
-   { (exit 1); exit 1; }; }
-fi
-
-
 # Check whether --with-perl-cc-checks was given.
 if test "${with_perl_cc_checks+set}" = set; then
-  withval=$with_perl_cc_checks; { { $as_echo "$as_me:$LINENO: error:  Invalid option. Use --enable-perl-cc-checks/--disable-perl-cc-checks instead " >&5
-$as_echo "$as_me: error:  Invalid option. Use --enable-perl-cc-checks/--disable-perl-cc-checks instead " >&2;}
+  withval=$with_perl_cc_checks; { { $as_echo "$as_me:$LINENO: error: Invalid option. Use --enable-perl-cc-checks/--disable-perl-cc-checks instead" >&5
+$as_echo "$as_me: error: Invalid option. Use --enable-perl-cc-checks/--disable-perl-cc-checks instead" >&2;}
    { (exit 1); exit 1; }; }
 fi
-
 
 
 
@@ -4272,10 +4273,10 @@ else
 $as_echo "using OS default send buffer size for server sockets" >&6; }
 fi
 
-# Check whether --enable-server-send-buf was given.
+   # Check whether --enable-server-send-buf was given.
 if test "${enable_server_send_buf+set}" = set; then
-  enableval=$enable_server_send_buf; { { $as_echo "$as_me:$LINENO: error:  Invalid option. Use --with-server-send-buf/--without-server-send-buf instead " >&5
-$as_echo "$as_me: error:  Invalid option. Use --with-server-send-buf/--without-server-send-buf instead " >&2;}
+  enableval=$enable_server_send_buf; { { $as_echo "$as_me:$LINENO: error: Invalid option. Use --with-server-send-buf/--without-server-send-buf instead" >&5
+$as_echo "$as_me: error: Invalid option. Use --with-server-send-buf/--without-server-send-buf instead" >&2;}
    { (exit 1); exit 1; }; }
 fi
 
@@ -4298,10 +4299,10 @@ else
 $as_echo "using OS default recv buffer size for server sockets" >&6; }
 fi
 
-# Check whether --enable-server-recv-buf was given.
+   # Check whether --enable-server-recv-buf was given.
 if test "${enable_server_recv_buf+set}" = set; then
-  enableval=$enable_server_recv_buf; { { $as_echo "$as_me:$LINENO: error:  Invalid option. Use --with-server-recv-buf/--without-server-recv-buf instead " >&5
-$as_echo "$as_me: error:  Invalid option. Use --with-server-recv-buf/--without-server-recv-buf instead " >&2;}
+  enableval=$enable_server_recv_buf; { { $as_echo "$as_me:$LINENO: error: Invalid option. Use --with-server-recv-buf/--without-server-recv-buf instead" >&5
+$as_echo "$as_me: error: Invalid option. Use --with-server-recv-buf/--without-server-recv-buf instead" >&2;}
    { (exit 1); exit 1; }; }
 fi
 
@@ -4324,10 +4325,10 @@ else
 $as_echo "using OS default send buffer size for client sockets" >&6; }
 fi
 
-# Check whether --enable-client-send-buf was given.
+   # Check whether --enable-client-send-buf was given.
 if test "${enable_client_send_buf+set}" = set; then
-  enableval=$enable_client_send_buf; { { $as_echo "$as_me:$LINENO: error:  Invalid option. Use --with-client-send-buf/--without-client-send-buf instead " >&5
-$as_echo "$as_me: error:  Invalid option. Use --with-client-send-buf/--without-client-send-buf instead " >&2;}
+  enableval=$enable_client_send_buf; { { $as_echo "$as_me:$LINENO: error: Invalid option. Use --with-client-send-buf/--without-client-send-buf instead" >&5
+$as_echo "$as_me: error: Invalid option. Use --with-client-send-buf/--without-client-send-buf instead" >&2;}
    { (exit 1); exit 1; }; }
 fi
 
@@ -4350,10 +4351,10 @@ else
 $as_echo "using OS default recv buffer size for client sockets" >&6; }
 fi
 
-# Check whether --enable-client-recv-buf was given.
+   # Check whether --enable-client-recv-buf was given.
 if test "${enable_client_recv_buf+set}" = set; then
-  enableval=$enable_client_recv_buf; { { $as_echo "$as_me:$LINENO: error:  Invalid option. Use --with-client-recv-buf/--without-client-recv-buf instead " >&5
-$as_echo "$as_me: error:  Invalid option. Use --with-client-recv-buf/--without-client-recv-buf instead " >&2;}
+  enableval=$enable_client_recv_buf; { { $as_echo "$as_me:$LINENO: error: Invalid option. Use --with-client-recv-buf/--without-client-recv-buf instead" >&5
+$as_echo "$as_me: error: Invalid option. Use --with-client-recv-buf/--without-client-recv-buf instead" >&2;}
    { (exit 1); exit 1; }; }
 fi
 
@@ -4368,10 +4369,10 @@ if test "${with_elf+set}" = set; then
   withval=$with_elf;
 fi
 
-# Check whether --enable-elf was given.
+   # Check whether --enable-elf was given.
 if test "${enable_elf+set}" = set; then
-  enableval=$enable_elf; { { $as_echo "$as_me:$LINENO: error:  Invalid option. Use --with-elf/--without-elf instead " >&5
-$as_echo "$as_me: error:  Invalid option. Use --with-elf/--without-elf instead " >&2;}
+  enableval=$enable_elf; { { $as_echo "$as_me:$LINENO: error: Invalid option. Use --with-elf/--without-elf instead" >&5
+$as_echo "$as_me: error: Invalid option. Use --with-elf/--without-elf instead" >&2;}
    { (exit 1); exit 1; }; }
 fi
 
@@ -4384,10 +4385,10 @@ else
   with_libwrap="no"
 fi
 
-# Check whether --enable-libwrap was given.
+   # Check whether --enable-libwrap was given.
 if test "${enable_libwrap+set}" = set; then
-  enableval=$enable_libwrap; { { $as_echo "$as_me:$LINENO: error:  Invalid option. Use --with-libwrap/--without-libwrap instead " >&5
-$as_echo "$as_me: error:  Invalid option. Use --with-libwrap/--without-libwrap instead " >&2;}
+  enableval=$enable_libwrap; { { $as_echo "$as_me:$LINENO: error: Invalid option. Use --with-libwrap/--without-libwrap instead" >&5
+$as_echo "$as_me: error: Invalid option. Use --with-libwrap/--without-libwrap instead" >&2;}
    { (exit 1); exit 1; }; }
 fi
 
@@ -4400,10 +4401,10 @@ else
   with_zlib="no"
 fi
 
-# Check whether --enable-zlib was given.
+   # Check whether --enable-zlib was given.
 if test "${enable_zlib+set}" = set; then
-  enableval=$enable_zlib; { { $as_echo "$as_me:$LINENO: error:  Invalid option. Use --with-zlib/--without-zlib instead " >&5
-$as_echo "$as_me: error:  Invalid option. Use --with-zlib/--without-zlib instead " >&2;}
+  enableval=$enable_zlib; { { $as_echo "$as_me:$LINENO: error: Invalid option. Use --with-zlib/--without-zlib instead" >&5
+$as_echo "$as_me: error: Invalid option. Use --with-zlib/--without-zlib instead" >&2;}
    { (exit 1); exit 1; }; }
 fi
 
@@ -4421,6 +4422,13 @@ fi
 # Check whether --with-mnttab was given.
 if test "${with_mnttab+set}" = set; then
   withval=$with_mnttab;
+fi
+
+   # Check whether --enable-mnttab was given.
+if test "${enable_mnttab+set}" = set; then
+  enableval=$enable_mnttab; { { $as_echo "$as_me:$LINENO: error: Invalid option. Use --with-mnttab/--without-mnttab instead" >&5
+$as_echo "$as_me: error: Invalid option. Use --with-mnttab/--without-mnttab instead" >&2;}
+   { (exit 1); exit 1; }; }
 fi
 
 
@@ -7664,13 +7672,13 @@ if test "${lt_cv_nm_interface+set}" = set; then
 else
   lt_cv_nm_interface="BSD nm"
   echo "int some_variable = 0;" > conftest.$ac_ext
-  (eval echo "\"\$as_me:7667: $ac_compile\"" >&5)
+  (eval echo "\"\$as_me:7675: $ac_compile\"" >&5)
   (eval "$ac_compile" 2>conftest.err)
   cat conftest.err >&5
-  (eval echo "\"\$as_me:7670: $NM \\\"conftest.$ac_objext\\\"\"" >&5)
+  (eval echo "\"\$as_me:7678: $NM \\\"conftest.$ac_objext\\\"\"" >&5)
   (eval "$NM \"conftest.$ac_objext\"" 2>conftest.err > conftest.out)
   cat conftest.err >&5
-  (eval echo "\"\$as_me:7673: output\"" >&5)
+  (eval echo "\"\$as_me:7681: output\"" >&5)
   cat conftest.out >&5
   if $GREP 'External.*some_variable' conftest.out > /dev/null; then
     lt_cv_nm_interface="MS dumpbin"
@@ -8757,7 +8765,7 @@ ia64-*-hpux*)
   ;;
 *-*-irix6*)
   # Find out which ABI we are using.
-  echo '#line 8760 "configure"' > conftest.$ac_ext
+  echo '#line 8768 "configure"' > conftest.$ac_ext
   if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
   (eval $ac_compile) 2>&5
   ac_status=$?
@@ -10424,11 +10432,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:10427: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:10435: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:10431: \$? = $ac_status" >&5
+   echo "$as_me:10439: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -10748,11 +10756,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:10751: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:10759: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:10755: \$? = $ac_status" >&5
+   echo "$as_me:10763: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -10853,11 +10861,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:10856: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:10864: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:10860: \$? = $ac_status" >&5
+   echo "$as_me:10868: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -10908,11 +10916,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:10911: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:10919: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:10915: \$? = $ac_status" >&5
+   echo "$as_me:10923: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -13700,7 +13708,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 13703 "configure"
+#line 13711 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -13800,7 +13808,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 13803 "configure"
+#line 13811 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
