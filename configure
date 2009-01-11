@@ -980,8 +980,6 @@ with_ldflags
 enable_as_needed
 with_libs
 enable_silent_libtool
-enable_libwrap
-enable_zlib
 with_dmalloc
 enable_dmalloc
 with_efence
@@ -1126,18 +1124,20 @@ with_client_send_buf
 enable_client_send_buf
 with_client_recv_buf
 enable_client_recv_buf
+with_elf
+enable_elf
+with_libwrap
+enable_libwrap
+with_zlib
+enable_zlib
+with_bzip2
+with_mnttab
 enable_shared
 enable_static
 with_pic
 enable_fast_install
 with_gnu_ld
 enable_libtool_lock
-with_elf
-enable_elf
-with_libwrap
-with_zlib
-with_bzip2
-with_mnttab
 '
       ac_precious_vars='build_alias
 host_alias
@@ -2072,15 +2072,15 @@ Network Buffers:
   --with-client-send-buf=ARG    Similar as previous options, but for the
                                   receive buffer of client sockets
   --with-client-recv-buf=ARG    Similar as previous options, but for the send buffer
-  --with-pic              try to use only PIC/non-PIC objects [default=use
-                          both]
-  --with-gnu-ld           assume the C compiler uses GNU ld [default=no]
   --without-elf           use elf libraries
   --with-libwrap=LIBPATH  Compile in libwrap (tcp_wrappers) support.
   --with-zlib=DIR         use libz in DIR
   --with-bzip2=DIR        use libbz2 in DIR
   --with-mnttab="/etc/mnttab"  Mount table location.
                                  The default is to autodetect this.
+  --with-pic              try to use only PIC/non-PIC objects [default=use
+                          both]
+  --with-gnu-ld           assume the C compiler uses GNU ld [default=no]
 
 Some influential environment variables:
   CC          C compiler command
@@ -2651,29 +2651,6 @@ if test "${enable_silent_libtool+set}" = set; then
   enableval=$enable_silent_libtool; LIBTOOLFLAGS=--silent
 fi
 
-
-
-
-##
-#   System: library settings  (advance)
-##
-
-#       These library-arguments are run *after* module processing.
-#       But catch common errors here, so they are reported promptly.
-#
-# Check whether --enable-libwrap was given.
-if test "${enable_libwrap+set}" = set; then
-  enableval=$enable_libwrap; { { $as_echo "$as_me:$LINENO: error:  Invalid option. Use --with-libwrap/--without-libwrap instead " >&5
-$as_echo "$as_me: error:  Invalid option. Use --with-libwrap/--without-libwrap instead " >&2;}
-   { (exit 1); exit 1; }; }
-fi
-
-  # Check whether --enable-zlib was given.
-if test "${enable_zlib+set}" = set; then
-  enableval=$enable_zlib; { { $as_echo "$as_me:$LINENO: error:  Invalid option. Use --with-zlib/--without-zlib instead " >&5
-$as_echo "$as_me: error:  Invalid option. Use --with-zlib/--without-zlib instead " >&2;}
-   { (exit 1); exit 1; }; }
-fi
 
 
 
@@ -4350,6 +4327,71 @@ $as_echo "$as_me: error:  Invalid option. Use --with-client-recv-buf/--without-c
    { (exit 1); exit 1; }; }
 fi
 
+
+##
+#   System: library settings  (more)
+##
+
+
+# Check whether --with-elf was given.
+if test "${with_elf+set}" = set; then
+  withval=$with_elf;
+fi
+
+# Check whether --enable-elf was given.
+if test "${enable_elf+set}" = set; then
+  enableval=$enable_elf; { { $as_echo "$as_me:$LINENO: error:  Invalid option. Use --with-elf/--without-elf instead " >&5
+$as_echo "$as_me: error:  Invalid option. Use --with-elf/--without-elf instead " >&2;}
+   { (exit 1); exit 1; }; }
+fi
+
+
+
+# Check whether --with-libwrap was given.
+if test "${with_libwrap+set}" = set; then
+  withval=$with_libwrap;
+else
+  with_libwrap="no"
+fi
+
+# Check whether --enable-libwrap was given.
+if test "${enable_libwrap+set}" = set; then
+  enableval=$enable_libwrap; { { $as_echo "$as_me:$LINENO: error:  Invalid option. Use --with-libwrap/--without-libwrap instead " >&5
+$as_echo "$as_me: error:  Invalid option. Use --with-libwrap/--without-libwrap instead " >&2;}
+   { (exit 1); exit 1; }; }
+fi
+
+
+
+# Check whether --with-zlib was given.
+if test "${with_zlib+set}" = set; then
+  withval=$with_zlib;
+else
+  with_zlib="no"
+fi
+
+# Check whether --enable-zlib was given.
+if test "${enable_zlib+set}" = set; then
+  enableval=$enable_zlib; { { $as_echo "$as_me:$LINENO: error:  Invalid option. Use --with-zlib/--without-zlib instead " >&5
+$as_echo "$as_me: error:  Invalid option. Use --with-zlib/--without-zlib instead " >&2;}
+   { (exit 1); exit 1; }; }
+fi
+
+
+
+# Check whether --with-bzip2 was given.
+if test "${with_bzip2+set}" = set; then
+  withval=$with_bzip2;
+else
+  with_bzip2="no"
+fi
+
+
+
+# Check whether --with-mnttab was given.
+if test "${with_mnttab+set}" = set; then
+  withval=$with_mnttab;
+fi
 
 
 ##
@@ -7633,13 +7675,13 @@ if test "${lt_cv_nm_interface+set}" = set; then
 else
   lt_cv_nm_interface="BSD nm"
   echo "int some_variable = 0;" > conftest.$ac_ext
-  (eval echo "\"\$as_me:7636: $ac_compile\"" >&5)
+  (eval echo "\"\$as_me:7678: $ac_compile\"" >&5)
   (eval "$ac_compile" 2>conftest.err)
   cat conftest.err >&5
-  (eval echo "\"\$as_me:7639: $NM \\\"conftest.$ac_objext\\\"\"" >&5)
+  (eval echo "\"\$as_me:7681: $NM \\\"conftest.$ac_objext\\\"\"" >&5)
   (eval "$NM \"conftest.$ac_objext\"" 2>conftest.err > conftest.out)
   cat conftest.err >&5
-  (eval echo "\"\$as_me:7642: output\"" >&5)
+  (eval echo "\"\$as_me:7684: output\"" >&5)
   cat conftest.out >&5
   if $GREP 'External.*some_variable' conftest.out > /dev/null; then
     lt_cv_nm_interface="MS dumpbin"
@@ -8726,7 +8768,7 @@ ia64-*-hpux*)
   ;;
 *-*-irix6*)
   # Find out which ABI we are using.
-  echo '#line 8729 "configure"' > conftest.$ac_ext
+  echo '#line 8771 "configure"' > conftest.$ac_ext
   if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
   (eval $ac_compile) 2>&5
   ac_status=$?
@@ -10393,11 +10435,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:10396: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:10438: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:10400: \$? = $ac_status" >&5
+   echo "$as_me:10442: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -10717,11 +10759,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:10720: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:10762: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:10724: \$? = $ac_status" >&5
+   echo "$as_me:10766: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -10822,11 +10864,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:10825: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:10867: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:10829: \$? = $ac_status" >&5
+   echo "$as_me:10871: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -10877,11 +10919,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:10880: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:10922: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:10884: \$? = $ac_status" >&5
+   echo "$as_me:10926: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -13669,7 +13711,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 13672 "configure"
+#line 13714 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -13769,7 +13811,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 13772 "configure"
+#line 13814 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -20710,21 +20752,6 @@ fi
 #   ELF libraries
 #       Typically used for 'nlist'  (needed for uptime)
 #
-
-# Check whether --with-elf was given.
-if test "${with_elf+set}" = set; then
-  withval=$with_elf;
-else
-  # Check whether --enable-elf was given.
-if test "${enable_elf+set}" = set; then
-  enableval=$enable_elf; { { $as_echo "$as_me:$LINENO: error:  Invalid option. Use --with-elf/--without-elf instead " >&5
-$as_echo "$as_me: error:  Invalid option. Use --with-elf/--without-elf instead " >&2;}
-   { (exit 1); exit 1; }; }
-fi
-
-fi
-
-
 if test "x$with_elf" != "xno"; then
 case $target_os in
 	linux*) # add hosts which don't use nlist here
@@ -23778,19 +23805,14 @@ LIBS=$NONAGENTLIBS	 # restore old libraries
 #
 _cppflags="${CPPFLAGS}"
 _ldflags="${LDFLAGS}"
+if test "$with_libwrap" != "no"; then
+  if test "$with_libwrap" != "yes"; then
+    CPPFLAGS="${CPPFLAGS} -I$with_libwrap/include"
+    LDFLAGS="${LDFLAGS} -L$with_libwrap/lib"
+  fi
 
-
-# Check whether --with-libwrap was given.
-if test "${with_libwrap+set}" = set; then
-  withval=$with_libwrap;
-  if test "$with_libwrap" != "no"; then
-    if test "$with_libwrap" != "yes"; then
-      CPPFLAGS="${CPPFLAGS} -I$with_libwrap/include"
-      LDFLAGS="${LDFLAGS} -L$with_libwrap/lib"
-    fi
-
-    _libs=${LIBS}
-    if test "${ac_cv_header_tcpd_h+set}" = set; then
+  _libs=${LIBS}
+  if test "${ac_cv_header_tcpd_h+set}" = set; then
   { $as_echo "$as_me:$LINENO: checking for tcpd.h" >&5
 $as_echo_n "checking for tcpd.h... " >&6; }
 if test "${ac_cv_header_tcpd_h+set}" = set; then
@@ -23932,21 +23954,20 @@ fi
 
 
 
-    LIBS="$LIBS -lwrap"
-	{ $as_echo "$as_me:$LINENO: checking for TCP wrappers library -lwrap" >&5
+  LIBS="$LIBS -lwrap"
+  { $as_echo "$as_me:$LINENO: checking for TCP wrappers library -lwrap" >&5
 $as_echo_n "checking for TCP wrappers library -lwrap... " >&6; }
-	# XXX: should check for hosts_ctl
-	cat >conftest.$ac_ext <<_ACEOF
+  # XXX: should check for hosts_ctl
+  cat >conftest.$ac_ext <<_ACEOF
 /* confdefs.h.  */
 _ACEOF
 cat confdefs.h >>conftest.$ac_ext
 cat >>conftest.$ac_ext <<_ACEOF
 /* end confdefs.h.  */
 #include <sys/types.h>
-		     #include <tcpd.h>
-		     int allow_severity = 0;
-		     int deny_severity  = 0;
-
+     #include <tcpd.h>
+     int allow_severity = 0;
+     int deny_severity  = 0;
 int
 main ()
 {
@@ -23976,25 +23997,22 @@ $as_echo "$ac_try_echo") >&5
 	 test "$cross_compiling" = yes ||
 	 $as_test_x conftest$ac_exeext
        }; then
-
-
-	    { $as_echo "$as_me:$LINENO: result: yes" >&5
+  { $as_echo "$as_me:$LINENO: result: yes" >&5
 $as_echo "yes" >&6; }
-	    cat >>confdefs.h <<\_ACEOF
+     cat >>confdefs.h <<\_ACEOF
 #define NETSNMP_USE_LIBWRAP 1
 _ACEOF
 
-	    test "$with_libwrap" != no -a "$with_libwrap" != yes && _wraplibs="-L$with_libwrap/lib"
-	    _wraplibs="$_wraplibs -lwrap"
+     test "$with_libwrap" != no -a "$with_libwrap" != yes && _wraplibs="-L$with_libwrap/lib"
+     _wraplibs="$_wraplibs -lwrap"
 else
   $as_echo "$as_me: failed program was:" >&5
 sed 's/^/| /' conftest.$ac_ext >&5
 
-
-	    { $as_echo "$as_me:$LINENO: result: no" >&5
+	{ $as_echo "$as_me:$LINENO: result: no" >&5
 $as_echo "no" >&6; }
-	    # Linux RedHat 6.1 won't link libwrap without libnsl
-	    { $as_echo "$as_me:$LINENO: checking for yp_get_default_domain" >&5
+     # Linux RedHat 6.1 won't link libwrap without libnsl
+     { $as_echo "$as_me:$LINENO: checking for yp_get_default_domain" >&5
 $as_echo_n "checking for yp_get_default_domain... " >&6; }
 if test "${ac_cv_func_yp_get_default_domain+set}" = set; then
   $as_echo_n "(cached) " >&6
@@ -24159,19 +24177,18 @@ fi
 
 fi
 
-	    { $as_echo "$as_me:$LINENO: checking for TCP wrappers library -lwrap linked with -lnsl" >&5
+     { $as_echo "$as_me:$LINENO: checking for TCP wrappers library -lwrap linked with -lnsl" >&5
 $as_echo_n "checking for TCP wrappers library -lwrap linked with -lnsl... " >&6; }
-	    cat >conftest.$ac_ext <<_ACEOF
+     cat >conftest.$ac_ext <<_ACEOF
 /* confdefs.h.  */
 _ACEOF
 cat confdefs.h >>conftest.$ac_ext
 cat >>conftest.$ac_ext <<_ACEOF
 /* end confdefs.h.  */
 #include <sys/types.h>
-		         #include <tcpd.h>
-		         int allow_severity = 0;
-	                 int deny_severity  = 0;
-
+	#include <tcpd.h>
+	int allow_severity = 0;
+	int deny_severity  = 0;
 int
 main ()
 {
@@ -24203,19 +24220,19 @@ $as_echo "$ac_try_echo") >&5
        }; then
   { $as_echo "$as_me:$LINENO: result: yes" >&5
 $as_echo "yes" >&6; }
-			cat >>confdefs.h <<\_ACEOF
+	cat >>confdefs.h <<\_ACEOF
 #define NETSNMP_USE_LIBWRAP 1
 _ACEOF
 
-			test "$with_libwrap" != no -a "$with_libwrap" != yes && _wraplibs="-L$with_libwrap/lib"
-			_wraplibs="$_wraplibs -lwrap -lnsl"
+	test "$with_libwrap" != no -a "$with_libwrap" != yes && _wraplibs="-L$with_libwrap/lib"
+	_wraplibs="$_wraplibs -lwrap -lnsl"
 else
   $as_echo "$as_me: failed program was:" >&5
 sed 's/^/| /' conftest.$ac_ext >&5
 
 	{ $as_echo "$as_me:$LINENO: result: no" >&5
 $as_echo "no" >&6; }
-			{ { $as_echo "$as_me:$LINENO: error: Asked to use libwrap but I couldn't find it." >&5
+	{ { $as_echo "$as_me:$LINENO: error: Asked to use libwrap but I couldn't find it." >&5
 $as_echo "$as_me: error: Asked to use libwrap but I couldn't find it." >&2;}
    { (exit 1); exit 1; }; }
 fi
@@ -24228,14 +24245,11 @@ fi
 rm -rf conftest.dSYM
 rm -f core conftest.err conftest.$ac_objext conftest_ipa8_conftest.oo \
       conftest$ac_exeext conftest.$ac_ext
-    LAGENTLIBS="$_wraplibs"
-    CPPFLAGS=${_cppflags}
-    LDFLAGS=${_ldflags}
-    LIBS=${_libs}
-  fi
-
+  LAGENTLIBS="$_wraplibs"
+  CPPFLAGS=${_cppflags}
+  LDFLAGS=${_ldflags}
+  LIBS=${_libs}
 fi
-
 
 
 ##
@@ -24698,17 +24712,11 @@ if test "x$with_rpm" != "xno" && \
   _cppflags="${CPPFLAGS}"
   _ldflags="${LDFLAGS}"
 
-
-# Check whether --with-zlib was given.
-if test "${with_zlib+set}" = set; then
-  withval=$with_zlib;
-    if test -d "$withval"; then
-      CPPFLAGS="${CPPFLAGS} -I$withval/include"
-      LDFLAGS="${LDFLAGS} -L$withval/lib"
-    fi
-
-fi
-
+  # check for zlib
+  if test "x${with_zlib}" != "xno" -a -d "${with_zlib}"; then
+    CPPFLAGS="${CPPFLAGS} -I${with_zlib}/include"
+    LDFLAGS="${LDFLAGS} -L${with_zlib}/lib"
+  fi
 
   # dunno if this is needed for rpm-4.0.x, earlier probably needs.
   if test "${ac_cv_header_zlib_h+set}" = set; then
@@ -24987,15 +24995,11 @@ fi
 
 
   # two variants of bzip2 need checking.
-
-# Check whether --with-bzip2 was given.
-if test "${with_bzip2+set}" = set; then
-  withval=$with_bzip2;
-    if test -d "$withval"; then
-      CPPFLAGS="${CPPFLAGS} -I$withval/include"
-      LDFLAGS="${LDFLAGS} -L$withval/lib"
+  if test "x${with_bzip2}" != "xno"; then
+    if test -d "${with_bzip2}"; then
+      CPPFLAGS="${CPPFLAGS} -I${with_bzip2}/include"
+      LDFLAGS="${LDFLAGS} -L${with_bzip2}/lib"
     fi
-    if test "x$with_bzip2" != "xno"; then
 
  { $as_echo "$as_me:$LINENO: checking for library containing bzread" >&5
 $as_echo_n "checking for library containing bzread... " >&6; }
@@ -25266,11 +25270,7 @@ $as_echo "$netsnmp_cv_func_BZ2_bzread__rpmlibs" >&6; }
 
  fi
 
-    fi
-
-fi
-
-
+  fi
 
   # two variants of db1 need checking.
 
@@ -44453,13 +44453,7 @@ $as_echo_n "checking for mount table location... " >&6; }
 if test "${ac_cv_ETC_MNTTAB+set}" = set; then
   $as_echo_n "(cached) " >&6
 else
-  ac_cv_ETC_MNTTAB="unknown"
-
-# Check whether --with-mnttab was given.
-if test "${with_mnttab+set}" = set; then
-  withval=$with_mnttab; ac_cv_ETC_MNTTAB="$with_mnttab"
-fi
-
+  ac_cv_ETC_MNTTAB="${with_mnttab:-unknown}"
     if test "$ac_cv_ETC_MNTTAB" = "unknown"; then
         for i in /etc/mnttab /etc/mtab /etc/filesystems
         do
