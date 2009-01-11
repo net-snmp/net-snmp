@@ -1206,6 +1206,9 @@
 /* If you don't have root access don't exit upon kmem errors */
 #undef NETSNMP_NO_ROOT_ACCESS
 
+/* umask permissions to set up persistent files with */
+#undef NETSNMP_PERSISTENT_MASK
+
 /* Define to 1 if you want to build with reentrant/threaded code (incomplete).
    */
 #undef NETSNMP_REENTRANT
@@ -1548,9 +1551,6 @@
    persisant information to this directory in the form of configuration
    lines: PERSISTENT_DIRECTORY/NAME.persistent.conf */
 #define NETSNMP_PERSISTENT_DIRECTORY "/var/snmp"
-
-/* PERSISTENT_MASK: the umask permissions to set up persistent files with */
-#define NETSNMP_PERSISTENT_MASK 077
 
 /* AGENT_DIRECTORY_MODE: the mode the agents should use to create
    directories with. Since the data stored here is probably sensitive, it
