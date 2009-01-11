@@ -161,9 +161,6 @@
    lines: PERSISTENT_DIRECTORY/NAME.persistent.conf */
 #define NETSNMP_PERSISTENT_DIRECTORY "/var/snmp"
 
-/* PERSISTENT_MASK: the umask permissions to set up persistent files with */
-#define NETSNMP_PERSISTENT_MASK 077
-
 /* AGENT_DIRECTORY_MODE: the mode the agents should use to create
    directories with. Since the data stored here is probably sensitive, it
    probably should be read-only by root/administrator. */
