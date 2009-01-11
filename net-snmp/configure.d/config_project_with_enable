@@ -524,14 +524,13 @@ AC_ARG_ENABLE(default-snmp-version,,
 
 # we test this now and later as well.  we test it now so configure can die
 # early on with an error rather than waiting till the end of the script.
-if test "x$ac_cv_user_prompt_NETSNMP_DEFAULT_SNMP_VERSION" != "x"; then
-  if test "$ac_cv_user_prompt_NETSNMP_DEFAULT_SNMP_VERSION" = "2c"; then
-    ac_cv_user_prompt_NETSNMP_DEFAULT_SNMP_VERSION="2"
-  fi
-  if test "$ac_cv_user_prompt_NETSNMP_DEFAULT_SNMP_VERSION" != "1" -a "$ac_cv_user_prompt_NETSNMP_DEFAULT_SNMP_VERSION" != "2" -a "$ac_cv_user_prompt_NETSNMP_DEFAULT_SNMP_VERSION" != "3"; then
-    AC_MSG_ERROR(Illegal version number passed to --with-default-snmp-version)
-  fi
-fi
+case "${ac_cv_user_prompt_NETSNMP_DEFAULT_SNMP_VERSION-3}" in
+  [[123]]) ;;
+  2c) ac_cv_user_prompt_NETSNMP_DEFAULT_SNMP_VERSION=2 ;;
+  *)
+    AC_MSG_ERROR([Illegal version number.  Only 1, 2 (for SNMPv2c) and 3 are supported.])
+    ;;
+esac
 
 
 ##
