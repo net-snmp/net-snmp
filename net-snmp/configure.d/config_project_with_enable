@@ -293,7 +293,7 @@ AC_ARG_ENABLE([old-features],
                 [Compile in old MIB modules and other deprecated features
                  which were replaced in the default build of this release.])])
 
-AC_ARG_ENABLE([features-of],
+AC_ARG_WITH([features-of],
         [AS_HELP_STRING([--with-features-of=version],
                 [Compile in MIB modules and other features as if this was
                  release "version" (default is ]AC_PACKAGE_VERSION[).])],,
