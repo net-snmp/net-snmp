@@ -1328,6 +1328,14 @@ asn_parse_objid(u_char * data,
             length--;
         } while ((*(u_char *) bufp++ & ASN_BIT8) && (length > 0));        /* last byte has high bit clear */
 
+	if (length == 0) {
+            u_char *last_byte = bufp - 1;
+            if (*last_byte & ASN_BIT8) {
+                /* last byte has high bit set -> wrong BER encoded OID */
+                ERROR_MSG("subidentifier syntax error");
+                return NULL;
+            }
+        }
 #if defined(EIGHTBIT_SUBIDS) || (SIZEOF_LONG != 4)
         if (subidentifier > (u_long) MAX_SUBID) {
             ERROR_MSG("subidentifier too large");
