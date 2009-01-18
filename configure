@@ -1791,7 +1791,7 @@ Optional Features:
                                   configure to abort (default is to issue a
                                   warning and continue.)
   --enable-mib-config-debug       Turns on verbose output during mib module
-                                  configure processing.)
+                                  configure processing.
   --enable-new-features   Compile in new MIB modules and other experimental
                           features which are due to be included in future
                           releases.
@@ -2999,7 +2999,13 @@ $as_echo "$MAINSUBS" >&6; }
 #
 # Check whether --enable-mib-config-checking was given.
 if test "${enable_mib_config_checking+set}" = set; then
-  enableval=$enable_mib_config_checking; with_mib_cfg_checks="yes"
+  enableval=$enable_mib_config_checking; if test "$enableval" = yes -o "$enableval" = no ; then
+     with_mib_cfg_checks="$enableval"
+   else
+     { { $as_echo "$as_me:$LINENO: error: Please use --enable/--disable-mib-config-checking" >&5
+$as_echo "$as_me: error: Please use --enable/--disable-mib-config-checking" >&2;}
+   { (exit 1); exit 1; }; }
+   fi
 else
   with_mib_cfg_checks="no"
 fi
@@ -3015,7 +3021,13 @@ fi
 
 # Check whether --enable-mib-config-debug was given.
 if test "${enable_mib_config_debug+set}" = set; then
-  enableval=$enable_mib_config_debug; with_mib_cfg_debug="yes"
+  enableval=$enable_mib_config_debug; if test "$enableval" = yes -o "$enableval" = no ; then
+     with_mib_cfg_debug="$enableval"
+   else
+     { { $as_echo "$as_me:$LINENO: error: Please use --enable/--disable-mib-config-debug" >&5
+$as_echo "$as_me: error: Please use --enable/--disable-mib-config-debug" >&2;}
+   { (exit 1); exit 1; }; }
+   fi
 else
   with_mib_cfg_debug="no"
 fi
@@ -3059,7 +3071,13 @@ fi
 
 # Check whether --with-defaults was given.
 if test "${with_defaults+set}" = set; then
-  withval=$with_defaults; defaults="yes"
+  withval=$with_defaults; if test "$withval" = yes -o "$withval" = no ; then
+     defaults="$withval"
+   else
+     { { $as_echo "$as_me:$LINENO: error: Please use --with/--without-defaults" >&5
+$as_echo "$as_me: error: Please use --with/--without-defaults" >&2;}
+   { (exit 1); exit 1; }; }
+   fi
 else
   defaults="no"
 fi
@@ -3593,7 +3611,13 @@ fi
 
 # Check whether --enable-developer was given.
 if test "${enable_developer+set}" = set; then
-  enableval=$enable_developer; developer=yes
+  enableval=$enable_developer; if test "$enableval" = yes ; then
+     developer="yes"
+   elif test "$enableval" != no ; then
+     { { $as_echo "$as_me:$LINENO: error: Please use --enable/--disable-developer" >&5
+$as_echo "$as_me: error: Please use --enable/--disable-developer" >&2;}
+   { (exit 1); exit 1; }; }
+   fi
 fi
 
 
@@ -3607,11 +3631,17 @@ fi
 
 # Check whether --enable-testing-code was given.
 if test "${enable_testing_code+set}" = set; then
-  enableval=$enable_testing_code;
+  enableval=$enable_testing_code; if test "$enableval" = yes ; then
+
 cat >>confdefs.h <<\_ACEOF
 #define NETSNMP_ENABLE_TESTING_CODE 1
 _ACEOF
 
+   elif test "$enableval" != no ; then
+     { { $as_echo "$as_me:$LINENO: error: Please use --enable/--disable-testing-code" >&5
+$as_echo "$as_me: error: Please use --enable/--disable-testing-code" >&2;}
+   { (exit 1); exit 1; }; }
+   fi
 fi
 
 
@@ -3625,7 +3655,13 @@ fi
 
 # Check whether --enable-reentrant was given.
 if test "${enable_reentrant+set}" = set; then
-  enableval=$enable_reentrant; with_res_locks="yes"
+  enableval=$enable_reentrant; if test "$enableval" = yes -o "$enableval" = no ; then
+     with_res_locks="$enableval"
+   else
+     { { $as_echo "$as_me:$LINENO: error: Please use --enable/--disable-reentrant" >&5
+$as_echo "$as_me: error: Please use --enable/--disable-reentrant" >&2;}
+   { (exit 1); exit 1; }; }
+   fi
 else
   with_res_locks="no"
 fi
@@ -7660,13 +7696,13 @@ if test "${lt_cv_nm_interface+set}" = set; then
 else
   lt_cv_nm_interface="BSD nm"
   echo "int some_variable = 0;" > conftest.$ac_ext
-  (eval echo "\"\$as_me:7663: $ac_compile\"" >&5)
+  (eval echo "\"\$as_me:7699: $ac_compile\"" >&5)
   (eval "$ac_compile" 2>conftest.err)
   cat conftest.err >&5
-  (eval echo "\"\$as_me:7666: $NM \\\"conftest.$ac_objext\\\"\"" >&5)
+  (eval echo "\"\$as_me:7702: $NM \\\"conftest.$ac_objext\\\"\"" >&5)
   (eval "$NM \"conftest.$ac_objext\"" 2>conftest.err > conftest.out)
   cat conftest.err >&5
-  (eval echo "\"\$as_me:7669: output\"" >&5)
+  (eval echo "\"\$as_me:7705: output\"" >&5)
   cat conftest.out >&5
   if $GREP 'External.*some_variable' conftest.out > /dev/null; then
     lt_cv_nm_interface="MS dumpbin"
@@ -8753,7 +8789,7 @@ ia64-*-hpux*)
   ;;
 *-*-irix6*)
   # Find out which ABI we are using.
-  echo '#line 8756 "configure"' > conftest.$ac_ext
+  echo '#line 8792 "configure"' > conftest.$ac_ext
   if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
   (eval $ac_compile) 2>&5
   ac_status=$?
@@ -10420,11 +10456,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:10423: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:10459: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:10427: \$? = $ac_status" >&5
+   echo "$as_me:10463: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -10744,11 +10780,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:10747: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:10783: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:10751: \$? = $ac_status" >&5
+   echo "$as_me:10787: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -10849,11 +10885,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:10852: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:10888: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:10856: \$? = $ac_status" >&5
+   echo "$as_me:10892: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -10904,11 +10940,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:10907: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:10943: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:10911: \$? = $ac_status" >&5
+   echo "$as_me:10947: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -13696,7 +13732,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 13699 "configure"
+#line 13735 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -13796,7 +13832,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 13799 "configure"
+#line 13835 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
