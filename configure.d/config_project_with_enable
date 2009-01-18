@@ -232,12 +232,22 @@ NETSNMP_ARG_ENABLE(mib-config-checking,
                                   of mib modules. Any conflicts will cause
                                   configure to abort (default is to issue a
                                   warning and continue.)],
-    with_mib_cfg_checks="yes",with_mib_cfg_checks="no")
+  [if test "$enableval" = yes -o "$enableval" = no ; then
+     with_mib_cfg_checks="$enableval"
+   else
+     AC_MSG_ERROR([Please use --enable/--disable-mib-config-checking])
+   fi],
+  [with_mib_cfg_checks="no"])
 
 NETSNMP_ARG_ENABLE(mib-config-debug,
 [  --enable-mib-config-debug       Turns on verbose output during mib module
-                                  configure processing.)],
-    with_mib_cfg_debug="yes",with_mib_cfg_debug="no")
+                                  configure processing.],
+  [if test "$enableval" = yes -o "$enableval" = no ; then
+     with_mib_cfg_debug="$enableval"
+   else
+     AC_MSG_ERROR([Please use --enable/--disable-mib-config-debug])
+   fi],
+  [with_mib_cfg_debug="no"])
 
 
 #       Version-specific features
@@ -265,7 +275,12 @@ NETSNMP_ARG_WITH(defaults,
 [
 Miscellaneous:
   --with-defaults         Use defaults for prompted values.],
-    defaults="yes",defaults="no")
+  [if test "$withval" = yes -o "$withval" = no ; then
+     defaults="$withval"
+   else
+     AC_MSG_ERROR([Please use --with/--without-defaults])
+   fi],
+  [defaults="no"])
 
 
 #       UCD compatability
@@ -555,14 +570,22 @@ fi
 NETSNMP_ARG_ENABLE(developer,
 [  --enable-developer              Turns on super-duper-extra-compile-warnings
                                   when using gcc.],
-    developer=yes)
+  [if test "$enableval" = yes ; then
+     developer="yes"
+   elif test "$enableval" != no ; then
+     AC_MSG_ERROR([Please use --enable/--disable-developer])
+   fi])
 
 NETSNMP_ARG_ENABLE(testing-code,
 [  --enable-testing-code           Enables some code sections that should 
                                   only be used for testing of certain
                                   SNMP functionalities.  This should *not* 
                                   be turned on for production use.  Ever.],
-    AC_DEFINE(NETSNMP_ENABLE_TESTING_CODE, 1, [testing code sections.]))
+  [if test "$enableval" = yes ; then
+     AC_DEFINE(NETSNMP_ENABLE_TESTING_CODE, 1, [testing code sections.])
+   elif test "$enableval" != no ; then
+     AC_MSG_ERROR([Please use --enable/--disable-testing-code])
+   fi])
 
 NETSNMP_ARG_ENABLE(reentrant,
 [  --enable-reentrant              Enables locking functions that protect
@@ -570,7 +593,12 @@ NETSNMP_ARG_ENABLE(reentrant,
                                   environments.  This does not guarantee
                                   thread-safe operation.
                                   Currently an experimental setting.],
-    with_res_locks="yes",with_res_locks="no")
+  [if test "$enableval" = yes -o "$enableval" = no ; then
+     with_res_locks="$enableval"
+   else
+     AC_MSG_ERROR([Please use --enable/--disable-reentrant])
+   fi],
+  [with_res_locks="no"])
 
 NETSNMP_ARG_ENABLE(deprecated,
 [  --disable-deprecated            Don't compile in deprecated functions.])
