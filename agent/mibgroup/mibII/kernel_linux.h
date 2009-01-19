@@ -114,6 +114,20 @@ struct icmp6_mib {
     unsigned long icmp6OutGroupMembReductions;
 };
 
+struct icmp_msg_mib {
+    unsigned long InType;
+    unsigned long OutType;
+};
+
+/* Lets use wrapper structures for future expansion */
+struct icmp4_msg_mib {
+    struct icmp_msg_mib vals[255];
+};
+
+struct icmp6_msg_mib {
+    struct icmp_msg_mib vals[255];
+};
+
 struct udp_mib {
     unsigned long   udpInDatagrams;
     unsigned long   udpNoPorts;
@@ -155,5 +169,11 @@ int             linux_read_icmp6_stat(struct icmp6_mib *);
 int             linux_read_udp_stat(struct udp_mib *);
 int             linux_read_udp6_stat(struct udp6_mib *);
 int             linux_read_tcp_stat(struct tcp_mib *);
+int             linux_read_icmp_msg_stat(struct icmp_mib *,
+                                         struct icmp4_msg_mib *,
+                                         int *flag);
+int             linux_read_icmp6_msg_stat(struct icmp6_mib *,
+                                          struct icmp6_msg_mib *,
+                                          int *support);
 
 #endif                          /* _MIBGROUP_KERNEL_LINUX_H */

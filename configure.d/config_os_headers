@@ -294,7 +294,7 @@ AC_CHECK_HEADERS([net/if_arp.h       net/if_mib.h         net/if_var.h     ] dnl
                  [netinet/icmp_var.h netinet/ip_var.h                      ] dnl
                  [netinet/tcp.h      netinet/tcp_timer.h  netinet/tcp_var.h] dnl
                  [netinet/tcpip.h    netinet/udp.h        netinet/udp_var.h] dnl
-                 [net/route.h        ],,,
+                 [net/route.h        netinet/icmp6.h                       ],,,
     [[
 #if HAVE_SYS_TYPES_H
 #include <sys/types.h>
@@ -337,6 +337,9 @@ AC_CHECK_HEADERS([net/if_arp.h       net/if_mib.h         net/if_var.h     ] dnl
 #endif
 #if HAVE_NETINET_TCP_TIMER_H
 #include <netinet/tcp_timer.h>
+#endif
+#if HAVE_NETINET_ICMP6_H
+#include <netinet/icmp6.h>
 #endif
     ]])
 
