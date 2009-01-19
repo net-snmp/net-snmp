@@ -472,6 +472,9 @@
 /* Define to 1 if you have the <netinet/ip_icmp.h> header file. */
 /* #undef HAVE_NETINET_IP_ICMP_H */
 
+/* Define to 1 if you have the <netinet/icmp6.h> header file. */
+/* #undef HAVE_NETINET_ICMP6_H */
+
 /* Define to 1 if you have the <netinet/ip_var.h> header file. */
 /* #undef HAVE_NETINET_IP_VAR_H */
 
