@@ -351,8 +351,8 @@ icmp_msg_stats_load(netsnmp_cache *cache, void *vmagic)
             icmp_msg_stats_table[ICMP_MSG_STATS_IPV4_COUNT + j].ipVer = 2;
             icmp_msg_stats_table[ICMP_MSG_STATS_IPV4_COUNT + j].flags = ICMP_MSG_STATS_HAS_IN | ICMP_MSG_STATS_HAS_OUT;
         }
-#endif /* NETSNMP_ENABLE_IPV6 */
     }
+#endif /* NETSNMP_ENABLE_IPV6 */
     return 0;
 }
 
