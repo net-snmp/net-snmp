@@ -13,6 +13,7 @@ config_arch_require(linux, mibII/kernel_linux)
 extern void     init_icmp(void);
 extern Netsnmp_Node_Handler icmp_handler;
 extern Netsnmp_Node_Handler icmp_stats_table_handler;
+extern Netsnmp_Node_Handler icmp_msg_stats_table_handler;
 extern NetsnmpCacheLoad icmp_load;
 extern NetsnmpCacheFree icmp_free;
 
@@ -49,4 +50,11 @@ extern NetsnmpCacheFree icmp_free;
 #define ICMP_STAT_INERR       3 
 #define ICMP_STAT_OUTMSG      4 
 #define ICMP_STAT_OUTERR      5 
+
+#define ICMPMSGSTATSTABLE     30
+#define ICMP_MSG_STAT_IPVER    1
+#define ICMP_MSG_STAT_TYPE     2
+#define ICMP_MSG_STAT_IN_PKTS  3
+#define ICMP_MSG_STAT_OUT_PKTS 4
+
 #endif                          /* _MIBGROUP_ICMP_H */
