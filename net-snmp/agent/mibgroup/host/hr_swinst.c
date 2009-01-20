@@ -43,8 +43,11 @@
 #ifdef HAVE_LIBRPM
 #include <rpm/rpmlib.h>
 #include <rpm/header.h>
-#include <rpm/rpmfileutil.h>
 #include <fcntl.h>
+
+#ifdef HAVE_RPM_RPMFILEUTIL_H
+#include <rpm/rpmfileutil.h>
+#endif
 
 #ifdef HAVE_RPMGETPATH
 #include <rpm/rpmmacro.h>
