@@ -29135,7 +29135,8 @@ done
 if test "x$with_rpm" != "xno" && \
         echo " $module_list " | $GREP " host/hr_swinst " > /dev/null; then
 
-for ac_header in rpm/rpmdb.h
+
+for ac_header in rpm/rpmdb.h   rpm/rpmfileutil.h
 do
 as_ac_Header=`$as_echo "ac_cv_header_$ac_header" | $as_tr_sh`
 if { as_var=$as_ac_Header; eval "test \"\${$as_var+set}\" = set"; }; then

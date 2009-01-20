@@ -86,7 +86,7 @@ AC_CHECK_HEADERS([openssl/des.h  openssl/hmac.h ] dnl
 # RPM subdirectory path                   (Agent)
 if test "x$with_rpm" != "xno" && \
         echo " $module_list " | $GREP " host/hr_swinst " > /dev/null; then
-  AC_CHECK_HEADERS(rpm/rpmdb.h)
+  AC_CHECK_HEADERS(rpm/rpmdb.h   rpm/rpmfileutil.h)
 fi
 
 
