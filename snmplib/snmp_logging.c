@@ -166,15 +166,21 @@ init_snmp_logging(void)
 #define LOG_USER	0
 #endif
 
+/*
+ * Decodes log priority.
+ * @param optarg - IN - priority to decode, "0" or "0-7"
+ *                 OUT - points to last character after the decoded priority
+ * @param pri_max - OUT - maximum priority (i.e. 0x7 from "0-7")
+ */
 int
-decode_priority( char *optarg, int *pri_max )
+decode_priority( char **optarg, int *pri_max )
 {
     int pri_low = LOG_DEBUG;
 
-    if (optarg == NULL)
+    if (*optarg == NULL)
         return -1;
 
-    switch (*optarg) {
+    switch (**optarg) {
         case '0': 
         case '!': 
             pri_low = LOG_EMERG;
@@ -218,9 +224,11 @@ decode_priority( char *optarg, int *pri_max )
             fprintf(stderr, "invalid priority: %c\n",*optarg);
             return -1;
     }
+    *optarg = *optarg+1;
 
-    if (pri_max && *(optarg+1)=='-') {
-        *pri_max = decode_priority( optarg+2, NULL );
+    if (pri_max && **optarg=='-') {
+        *optarg = *optarg + 1; /* skip '-' */
+        *pri_max = decode_priority( optarg, NULL );
         if (*pri_max == -1) return -1;
     }
     return pri_low;
@@ -317,7 +325,7 @@ snmp_log_options(char *optarg, int argc, char *const *argv)
      * Log to Standard Error
      */
     case 'E':
-        priority = decode_priority( optarg, &pri_max );
+        priority = decode_priority( &optarg, &pri_max );
         if (priority == -1)  return -1;
         if (inc_optind)
             optind++;
@@ -334,7 +342,7 @@ snmp_log_options(char *optarg, int argc, char *const *argv)
      * Log to Standard Output
      */
     case 'O':
-        priority = decode_priority( optarg, &pri_max );
+        priority = decode_priority( &optarg, &pri_max );
         if (priority == -1)  return -1;
         if (inc_optind)
             optind++;
@@ -352,7 +360,7 @@ snmp_log_options(char *optarg, int argc, char *const *argv)
      * Log to a named file
      */
     case 'F':
-        priority = decode_priority( optarg, &pri_max );
+        priority = decode_priority( &optarg, &pri_max );
         if (priority == -1 || !argv)  return -1;
         optarg = argv[++optind];
         /* Fallthrough */
@@ -377,9 +385,8 @@ snmp_log_options(char *optarg, int argc, char *const *argv)
      * Log to syslog
      */
     case 'S':
-        priority = decode_priority( optarg, &pri_max );
+        priority = decode_priority( &optarg, &pri_max );
         if (priority == -1 || !argv)  return -1;
-        optarg++;
         if (!optarg[0]) {
             /* The command line argument with priority does not contain log
              * facility. The facility must be in next argument then. */
