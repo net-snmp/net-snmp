@@ -6602,6 +6602,7 @@ snmp_varlist_add_variable(netsnmp_variable_list ** varlist,
  * may set these error types :
  * SNMPERR_RANGE - type, value, or length not found or out of range
  * SNMPERR_VALUE - value is not correct
+ * SNMPERR_VAR_TYPE - type is not correct
  * SNMPERR_BAD_NAME - name is not found
  *
  * returns 0 if success, error if failure.
@@ -6709,7 +6710,7 @@ snmp_add_var(netsnmp_pdu *pdu,
             }
             if (!ep) {
 #endif /* DISABLE_MIB_LOADING */
-                result = SNMPERR_BAD_NAME;
+                result = SNMPERR_RANGE;   /* ?? or SNMPERR_VALUE; */
                 snmp_set_detail(value);
                 break;
 #ifndef DISABLE_MIB_LOADING
@@ -6935,7 +6936,7 @@ snmp_add_var(netsnmp_pdu *pdu,
                     ltmp = ep->value;
                 } else {
 #endif /* DISABLE_MIB_LOADING */
-                    result = SNMPERR_BAD_NAME;
+                    result = SNMPERR_RANGE;   /* ?? or SNMPERR_VALUE; */
                     snmp_set_detail(cp);
                     SNMP_FREE(buf);
 		    SNMP_FREE(vp);
