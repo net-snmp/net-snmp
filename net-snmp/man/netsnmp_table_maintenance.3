@@ -1,4 +1,4 @@
-.TH "table_maintenance" 3 "11 Sep 2007" "Version 5.3.2.pre1" "net-snmp" \" -*- nroff -*-
+.TH "table_maintenance" 3 "3 Feb 2009" "Version 5.3.2" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -52,7 +52,7 @@ table_maintenance \- Routines for maintaining the contents of a table.
 .SH "Detailed Description"
 .PP 
 Routines for maintaining the contents of a table. 
-.PP
+
 This would typically be part of implementing an SNMP MIB, but could potentially also be used for a standalone table.
 .PP
 This section of the generic API is primarily relevant to table helpers where the representation of the table is constructed and maintained within the helper itself. 'External' tables will typically look after such aspects directly, although this section of the abstract API framework could also help direct the design of such table-specific implementations. 
@@ -124,3 +124,6 @@ Replace one row with another in the table.
 This will typically (but not necessarily) involve two rows sharing the same index information (e.g. to implement update/restore-style SET behaviour). 
 .PP
 Definition at line 113 of file table_generic.c.
+.SH "Author"
+.PP 
+Generated automatically by Doxygen for net-snmp from the source code.

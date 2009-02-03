@@ -1,4 +1,4 @@
-.TH "serialize" 3 "11 Sep 2007" "Version 5.3.2.pre1" "net-snmp" \" -*- nroff -*-
+.TH "serialize" 3 "3 Feb 2009" "Version 5.3.2" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -28,7 +28,7 @@ serialize \- Calls sub handlers one request at a time.
 .SH "Detailed Description"
 .PP 
 Calls sub handlers one request at a time. 
-.PP
+
 This functionally passes in one request at a time into lower handlers rather than a whole bunch of requests at once. This is useful for handlers that don't want to iterate through the request lists themselves. Generally, this is probably less efficient so use with caution. The serialize handler might be useable to dynamically fix handlers with broken looping code, however. 
 .SH "Function Documentation"
 .PP 
@@ -37,8 +37,6 @@ This functionally passes in one request at a time into lower handlers rather tha
 returns a serialize handler that can be injected into a given handler chain. 
 .PP
 Definition at line 31 of file serialize.c.
-.PP
-Referenced by netsnmp_init_serialize(), and netsnmp_register_serialize().
 .SS "void netsnmp_init_serialize (void)"
 .PP
 initializes the serialize helper which then registers a serialize handler as a run-time injectable handler for configuration file use. 
@@ -51,14 +49,11 @@ functionally the same as calling \fBnetsnmp_register_handler()\fP but also injec
 
 .PP
 Definition at line 40 of file serialize.c.
-.PP
-Referenced by netsnmp_register_instance(), netsnmp_register_read_only_instance(), netsnmp_register_read_only_scalar(), netsnmp_register_scalar(), and netsnmp_register_scalar_group().
 .SS "int netsnmp_serialize_helper_handler (\fBnetsnmp_mib_handler\fP * handler, \fBnetsnmp_handler_registration\fP * reginfo, \fBnetsnmp_agent_request_info\fP * reqinfo, \fBnetsnmp_request_info\fP * requests)"
 .PP
 Implements the serial handler. 
 .PP
 Definition at line 48 of file serialize.c.
-.PP
-References netsnmp_call_next_handler(), netsnmp_request_info::next, and NULL.
-.PP
-Referenced by netsnmp_get_serialize_handler().
+.SH "Author"
+.PP 
+Generated automatically by Doxygen for net-snmp from the source code.

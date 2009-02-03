@@ -1,4 +1,4 @@
-.TH "netsnmp_mib_handler_s" 3 "11 Sep 2007" "Version 5.3.2.pre1" "net-snmp" \" -*- nroff -*-
+.TH "netsnmp_mib_handler_s" 3 "3 Feb 2009" "Version 5.3.2" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -10,9 +10,58 @@ netsnmp_mib_handler_s \- the mib handler structure to be registered
 .PP
 \fC#include <agent_handler.h>\fP
 .PP
+.SS "Data Fields"
+
+.in +1c
+.ti -1c
+.RI "char * \fBhandler_name\fP"
+.br
+.ti -1c
+.RI "void * \fBmyvoid\fP"
+.br
+.RI "\fIfor handler's internal use \fP"
+.ti -1c
+.RI "int \fBflags\fP"
+.br
+.RI "\fIfor agent_handler's internal use \fP"
+.ti -1c
+.RI "int(* \fBaccess_method\fP )(struct \fBnetsnmp_mib_handler_s\fP *, struct \fBnetsnmp_handler_registration_s\fP *, struct \fBnetsnmp_agent_request_info_s\fP *, struct \fBnetsnmp_request_info_s\fP *)"
+.br
+.RI "\fIif you add more members, you probably also want to update \fP"
+.ti -1c
+.RI "struct \fBnetsnmp_mib_handler_s\fP * \fBnext\fP"
+.br
+.ti -1c
+.RI "struct \fBnetsnmp_mib_handler_s\fP * \fBprev\fP"
+.br
+.in -1c
 .SH "Detailed Description"
 .PP 
 the mib handler structure to be registered 
+.PP
+\fBExamples: \fP
+.in +1c
+.PP
+\fBdelayed_instance.c\fP.
+.PP
+Definition at line 47 of file agent_handler.h.
+.SH "Field Documentation"
+.PP 
+.SS "int(* \fBnetsnmp_mib_handler_s::access_method\fP)(struct \fBnetsnmp_mib_handler_s\fP *, struct \fBnetsnmp_handler_registration_s\fP *, struct \fBnetsnmp_agent_request_info_s\fP *, struct \fBnetsnmp_request_info_s\fP *)"
+.PP
+if you add more members, you probably also want to update 
+.PP
+_clone_handler in \fBagent_handler.c\fP. 
+.SS "int \fBnetsnmp_mib_handler_s::flags\fP"
+.PP
+for agent_handler's internal use 
+.PP
+Definition at line 52 of file agent_handler.h.
+.SS "void* \fBnetsnmp_mib_handler_s::myvoid\fP"
+.PP
+for handler's internal use 
+.PP
+Definition at line 50 of file agent_handler.h.
 
 .SH "Author"
 .PP 
