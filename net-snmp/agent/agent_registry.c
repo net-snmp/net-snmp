@@ -864,6 +864,9 @@ netsnmp_register_mib(const char *moduleName,
         reg_parms.timeout = timeout;
         reg_parms.flags = (u_char) flags;
         reg_parms.contextName = context;
+        reg_parms.session = ss;
+        reg_parms.reginfo = reginfo;
+        reg_parms.contextName = context;
         snmp_call_callbacks(SNMP_CALLBACK_APPLICATION,
                             SNMPD_CALLBACK_REGISTER_OID, &reg_parms);
     }
@@ -897,6 +900,9 @@ register_mib_reattach_node(netsnmp_subtree *s)
         reg_parms.range_ubound = s->range_ubound;
         reg_parms.timeout = s->timeout;
         reg_parms.flags = s->flags;
+        reg_parms.session = s->session;
+        reg_parms.reginfo = s->reginfo;
+        /* XXX: missing in subtree: reg_parms.contextName = s->context; */
         if ((NULL != s->reginfo) && (NULL != s->reginfo->contextName))
             reg_parms.contextName = s->reginfo->contextName;
         snmp_call_callbacks(SNMP_CALLBACK_APPLICATION,
