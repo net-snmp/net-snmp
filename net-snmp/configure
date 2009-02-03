@@ -23675,7 +23675,7 @@ if test "${ac_cv_lib_ssl_SSL_library_init+set}" = set; then
   $as_echo_n "(cached) " >&6
 else
   ac_check_lib_save_LIBS=$LIBS
-LIBS="-lssl  $LIBS"
+LIBS="-lssl -lcrypto $LIBS"
 cat >conftest.$ac_ext <<_ACEOF
 /* confdefs.h.  */
 _ACEOF
@@ -23740,7 +23740,7 @@ cat >>confdefs.h <<\_ACEOF
 #define HAVE_LIBSSL 1
 _ACEOF
 
-            LIBCRYPTO="$LIBCRYPTO -lssl"
+            LIBCRYPTO=" -lssl $LIBCRYPTO"
 fi
 
     fi
