@@ -1,4 +1,4 @@
-.TH "baby_steps" 3 "11 Sep 2007" "Version 5.3.2.pre1" "net-snmp" \" -*- nroff -*-
+.TH "baby_steps" 3 "3 Feb 2009" "Version 5.3.2" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -27,7 +27,6 @@ baby_steps \- Calls your handler in baby_steps for set processing.
 .SH "Detailed Description"
 .PP 
 Calls your handler in baby_steps for set processing. 
-.PP
 .SH "Function Documentation"
 .PP 
 .SS "\fBnetsnmp_mib_handler\fP* netsnmp_baby_steps_handler_get (u_long modes)"
@@ -35,12 +34,11 @@ Calls your handler in baby_steps for set processing.
 returns a baby_steps handler that can be injected into a given handler chain. 
 .PP
 Definition at line 58 of file baby_steps.c.
-.PP
-Referenced by netsnmp_baby_steps_handler_init().
 .SS "void netsnmp_baby_steps_handler_init (void)"
 .PP
 initializes the baby_steps helper which then registers a baby_steps handler as a run-time injectable handler for configuration file use. 
 .PP
 Definition at line 319 of file baby_steps.c.
-.PP
-References netsnmp_baby_steps_handler_get(), and netsnmp_register_handler_by_name().
+.SH "Author"
+.PP 
+Generated automatically by Doxygen for net-snmp from the source code.

@@ -1,4 +1,4 @@
-.TH "read_only" 3 "11 Sep 2007" "Version 5.3.2.pre1" "net-snmp" \" -*- nroff -*-
+.TH "read_only" 3 "3 Feb 2009" "Version 5.3.2" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -23,7 +23,7 @@ read_only \- Make your handler read_only automatically The only purpose of this 
 .SH "Detailed Description"
 .PP 
 Make your handler read_only automatically The only purpose of this handler is to return an appropriate error for any requests passed to it in a SET mode. 
-.PP
+
 Inserting it into your handler chain will ensure you're never asked to perform a SET request so you can ignore those error conditions. 
 .SH "Function Documentation"
 .PP 
@@ -32,10 +32,11 @@ Inserting it into your handler chain will ensure you're never asked to perform a
 returns a read_only handler that can be injected into a given handler chain. 
 .PP
 Definition at line 29 of file read_only.c.
-.PP
-Referenced by netsnmp_init_read_only_helper(), netsnmp_register_read_only_instance(), netsnmp_register_read_only_scalar(), and netsnmp_register_read_only_table_data().
 .SS "void netsnmp_init_read_only_helper (void)"
 .PP
 initializes the read_only helper which then registers a read_only handler as a run-time injectable handler for configuration file use. 
 .PP
 Definition at line 81 of file read_only.c.
+.SH "Author"
+.PP 
+Generated automatically by Doxygen for net-snmp from the source code.

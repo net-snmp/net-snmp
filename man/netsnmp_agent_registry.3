@@ -1,4 +1,4 @@
-.TH "Maintain a registry of MIB subtrees, together with related information regarding mibmodule, sessions, etc" 3 "11 Sep 2007" "Version 5.3.2.pre1" "net-snmp" \" -*- nroff -*-
+.TH "Maintain a registry of MIB subtrees, together with related information regarding mibmodule, sessions, etc" 3 "3 Feb 2009" "Version 5.3.2" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -7,10 +7,10 @@ Maintain a registry of MIB subtrees, together with related information regarding
 
 .in +1c
 .ti -1c
-.RI "struct \fBlookup_cache\fP"
+.RI "struct \fBlookup_cache_s\fP"
 .br
 .ti -1c
-.RI "struct \fBlookup_cache_context\fP"
+.RI "struct \fBlookup_cache_context_s\fP"
 .br
 .in -1c
 .SS "Defines"
@@ -24,6 +24,16 @@ Maintain a registry of MIB subtrees, together with related information regarding
 .br
 .ti -1c
 .RI "#define \fBSUBTREE_MAX_CACHE_SIZE\fP   32"
+.br
+.in -1c
+.SS "Typedefs"
+
+.in +1c
+.ti -1c
+.RI "typedef struct lookup_cache_s \fBlookup_cache\fP"
+.br
+.ti -1c
+.RI "typedef struct lookup_cache_context_s \fBlookup_cache_context\fP"
 .br
 .in -1c
 .SS "Functions"
@@ -41,43 +51,43 @@ Maintain a registry of MIB subtrees, together with related information regarding
 .br
 .RI "\fIretrieves the current value of the lookup cache size \fP"
 .ti -1c
-.RI "void \fBnetsnmp_subtree_free\fP (\fBnetsnmp_subtree\fP *a)"
+.RI "void \fBnetsnmp_subtree_free\fP (netsnmp_subtree *a)"
 .br
 .ti -1c
-.RI "\fBnetsnmp_subtree\fP * \fBnetsnmp_subtree_deepcopy\fP (\fBnetsnmp_subtree\fP *a)"
+.RI "netsnmp_subtree * \fBnetsnmp_subtree_deepcopy\fP (netsnmp_subtree *a)"
 .br
 .ti -1c
-.RI "\fBsubtree_context_cache\fP * \fBget_top_context_cache\fP (void)"
+.RI "subtree_context_cache * \fBget_top_context_cache\fP (void)"
 .br
 .ti -1c
-.RI "\fBnetsnmp_subtree\fP * \fBnetsnmp_subtree_find_first\fP (const char *context_name)"
+.RI "netsnmp_subtree * \fBnetsnmp_subtree_find_first\fP (const char *context_name)"
 .br
 .ti -1c
-.RI "\fBnetsnmp_subtree\fP * \fBadd_subtree\fP (\fBnetsnmp_subtree\fP *new_tree, const char *context_name)"
+.RI "netsnmp_subtree * \fBadd_subtree\fP (netsnmp_subtree *new_tree, const char *context_name)"
 .br
 .ti -1c
-.RI "\fBnetsnmp_subtree\fP * \fBnetsnmp_subtree_replace_first\fP (\fBnetsnmp_subtree\fP *new_tree, const char *context_name)"
+.RI "netsnmp_subtree * \fBnetsnmp_subtree_replace_first\fP (netsnmp_subtree *new_tree, const char *context_name)"
 .br
 .ti -1c
-.RI "NETSNMP_INLINE void \fBnetsnmp_subtree_change_next\fP (\fBnetsnmp_subtree\fP *ptr, \fBnetsnmp_subtree\fP *thenext)"
+.RI "NETSNMP_INLINE void \fBnetsnmp_subtree_change_next\fP (netsnmp_subtree *ptr, netsnmp_subtree *thenext)"
 .br
 .ti -1c
-.RI "NETSNMP_INLINE void \fBnetsnmp_subtree_change_prev\fP (\fBnetsnmp_subtree\fP *ptr, \fBnetsnmp_subtree\fP *theprev)"
+.RI "NETSNMP_INLINE void \fBnetsnmp_subtree_change_prev\fP (netsnmp_subtree *ptr, netsnmp_subtree *theprev)"
 .br
 .ti -1c
-.RI "int \fBnetsnmp_subtree_compare\fP (const \fBnetsnmp_subtree\fP *ap, const \fBnetsnmp_subtree\fP *bp)"
+.RI "int \fBnetsnmp_subtree_compare\fP (const netsnmp_subtree *ap, const netsnmp_subtree *bp)"
 .br
 .ti -1c
-.RI "void \fBnetsnmp_subtree_join\fP (\fBnetsnmp_subtree\fP *root)"
+.RI "void \fBnetsnmp_subtree_join\fP (netsnmp_subtree *root)"
 .br
 .ti -1c
-.RI "\fBnetsnmp_subtree\fP * \fBnetsnmp_subtree_split\fP (\fBnetsnmp_subtree\fP *current, oid name[], int name_len)"
+.RI "netsnmp_subtree * \fBnetsnmp_subtree_split\fP (netsnmp_subtree *current, oid name[], int name_len)"
 .br
 .ti -1c
-.RI "int \fBnetsnmp_subtree_load\fP (\fBnetsnmp_subtree\fP *new_sub, const char *context_name)"
+.RI "int \fBnetsnmp_subtree_load\fP (netsnmp_subtree *new_sub, const char *context_name)"
 .br
 .ti -1c
-.RI "int \fBnetsnmp_register_mib\fP (const char *moduleName, struct \fBvariable\fP *var, size_t varsize, size_t numvars, oid *mibloc, size_t mibloclen, int priority, int range_subid, oid range_ubound, \fBnetsnmp_session\fP *ss, const char *context, int timeout, int flags, \fBnetsnmp_handler_registration\fP *reginfo, int perform_callback)"
+.RI "int \fBnetsnmp_register_mib\fP (const char *moduleName, struct variable *var, size_t varsize, size_t numvars, oid *mibloc, size_t mibloclen, int priority, int range_subid, oid range_ubound, \fBnetsnmp_session\fP *ss, const char *context, int timeout, int flags, \fBnetsnmp_handler_registration\fP *reginfo, int perform_callback)"
 .br
 .ti -1c
 .RI "void \fBregister_mib_reattach\fP (void)"
@@ -86,19 +96,19 @@ Maintain a registry of MIB subtrees, together with related information regarding
 .RI "void \fBregister_mib_detach\fP (void)"
 .br
 .ti -1c
-.RI "int \fBregister_mib_context\fP (const char *moduleName, struct \fBvariable\fP *var, size_t varsize, size_t numvars, oid *mibloc, size_t mibloclen, int priority, int range_subid, oid range_ubound, \fBnetsnmp_session\fP *ss, const char *context, int timeout, int flags)"
+.RI "int \fBregister_mib_context\fP (const char *moduleName, struct variable *var, size_t varsize, size_t numvars, oid *mibloc, size_t mibloclen, int priority, int range_subid, oid range_ubound, \fBnetsnmp_session\fP *ss, const char *context, int timeout, int flags)"
 .br
 .ti -1c
-.RI "int \fBregister_mib_range\fP (const char *moduleName, struct \fBvariable\fP *var, size_t varsize, size_t numvars, oid *mibloc, size_t mibloclen, int priority, int range_subid, oid range_ubound, \fBnetsnmp_session\fP *ss)"
+.RI "int \fBregister_mib_range\fP (const char *moduleName, struct variable *var, size_t varsize, size_t numvars, oid *mibloc, size_t mibloclen, int priority, int range_subid, oid range_ubound, \fBnetsnmp_session\fP *ss)"
 .br
 .ti -1c
-.RI "int \fBregister_mib_priority\fP (const char *moduleName, struct \fBvariable\fP *var, size_t varsize, size_t numvars, oid *mibloc, size_t mibloclen, int priority)"
+.RI "int \fBregister_mib_priority\fP (const char *moduleName, struct variable *var, size_t varsize, size_t numvars, oid *mibloc, size_t mibloclen, int priority)"
 .br
 .ti -1c
-.RI "int \fBregister_mib\fP (const char *moduleName, struct \fBvariable\fP *var, size_t varsize, size_t numvars, oid *mibloc, size_t mibloclen)"
+.RI "int \fBregister_mib\fP (const char *moduleName, struct variable *var, size_t varsize, size_t numvars, oid *mibloc, size_t mibloclen)"
 .br
 .ti -1c
-.RI "void \fBnetsnmp_subtree_unload\fP (\fBnetsnmp_subtree\fP *sub, \fBnetsnmp_subtree\fP *prev, const char *context)"
+.RI "void \fBnetsnmp_subtree_unload\fP (netsnmp_subtree *sub, netsnmp_subtree *prev, const char *context)"
 .br
 .ti -1c
 .RI "int \fBunregister_mib_context\fP (oid *name, size_t len, int priority, int range_subid, oid range_ubound, const char *context)"
@@ -130,25 +140,25 @@ Maintain a registry of MIB subtrees, together with related information regarding
 .br
 .RI "\fIchecks to see if everything within a given subtree is either: in view, not in view, or possibly both. \fP"
 .ti -1c
-.RI "NETSNMP_STATIC_INLINE \fBlookup_cache_context\fP * \fBget_context_lookup_cache\fP (const char *context)"
+.RI "NETSNMP_STATIC_INLINE lookup_cache_context * \fBget_context_lookup_cache\fP (const char *context)"
 .br
 .ti -1c
-.RI "NETSNMP_STATIC_INLINE void \fBlookup_cache_add\fP (const char *context, \fBnetsnmp_subtree\fP *next, \fBnetsnmp_subtree\fP *previous)"
+.RI "NETSNMP_STATIC_INLINE void \fBlookup_cache_add\fP (const char *context, netsnmp_subtree *next, netsnmp_subtree *previous)"
 .br
 .ti -1c
-.RI "NETSNMP_STATIC_INLINE void \fBlookup_cache_replace\fP (\fBlookup_cache\fP *ptr, \fBnetsnmp_subtree\fP *next, \fBnetsnmp_subtree\fP *previous)"
+.RI "NETSNMP_STATIC_INLINE void \fBlookup_cache_replace\fP (lookup_cache *ptr, netsnmp_subtree *next, netsnmp_subtree *previous)"
 .br
 .ti -1c
-.RI "NETSNMP_STATIC_INLINE \fBlookup_cache\fP * \fBlookup_cache_find\fP (const char *context, oid *name, size_t name_len, int *retcmp)"
+.RI "NETSNMP_STATIC_INLINE lookup_cache * \fBlookup_cache_find\fP (const char *context, oid *name, size_t name_len, int *retcmp)"
 .br
 .ti -1c
-.RI "\fBnetsnmp_subtree\fP * \fBnetsnmp_subtree_find_prev\fP (oid *name, size_t len, \fBnetsnmp_subtree\fP *subtree, const char *context_name)"
+.RI "netsnmp_subtree * \fBnetsnmp_subtree_find_prev\fP (oid *name, size_t len, netsnmp_subtree *subtree, const char *context_name)"
 .br
 .ti -1c
-.RI "\fBnetsnmp_subtree\fP * \fBnetsnmp_subtree_find_next\fP (oid *name, size_t len, \fBnetsnmp_subtree\fP *subtree, const char *context_name)"
+.RI "netsnmp_subtree * \fBnetsnmp_subtree_find_next\fP (oid *name, size_t len, netsnmp_subtree *subtree, const char *context_name)"
 .br
 .ti -1c
-.RI "\fBnetsnmp_subtree\fP * \fBnetsnmp_subtree_find\fP (oid *name, size_t len, \fBnetsnmp_subtree\fP *subtree, const char *context_name)"
+.RI "netsnmp_subtree * \fBnetsnmp_subtree_find\fP (oid *name, size_t len, netsnmp_subtree *subtree, const char *context_name)"
 .br
 .ti -1c
 .RI "\fBnetsnmp_session\fP * \fBget_session_for_oid\fP (oid *name, size_t len, const char *context_name)"
@@ -163,7 +173,7 @@ Maintain a registry of MIB subtrees, together with related information regarding
 .RI "void \fBshutdown_tree\fP (void)"
 .br
 .ti -1c
-.RI "void \fBclear_subtree\fP (\fBnetsnmp_subtree\fP *sub)"
+.RI "void \fBclear_subtree\fP (netsnmp_subtree *sub)"
 .br
 .ti -1c
 .RI "void \fBclear_lookup_cache\fP (void)"
@@ -191,7 +201,7 @@ Maintain a registry of MIB subtrees, together with related information regarding
 
 .in +1c
 .ti -1c
-.RI "\fBsubtree_context_cache\fP * \fBcontext_subtrees\fP = NULL"
+.RI "subtree_context_cache * \fBcontext_subtrees\fP = NULL"
 .br
 .ti -1c
 .RI "int \fBlookup_cache_size\fP = 0"
@@ -218,9 +228,7 @@ If the entire subtree is not-in-view we can use this information to skip calling
 .PP
 
 .PP
-Definition at line 1298 of file agent_registry.c.
-.PP
-Referenced by netsnmp_add_varbind_to_cache().
+Definition at line 1323 of file agent_registry.c.
 .SS "int netsnmp_get_lookup_cache_size (void)"
 .PP
 retrieves the current value of the lookup cache size 
@@ -232,9 +240,7 @@ the current lookup cache size
 .PP
 
 .PP
-Definition at line 1371 of file agent_registry.c.
-.PP
-Referenced by netsnmp_register_mib(), and unregister_mib_context().
+Definition at line 1396 of file agent_registry.c.
 .SS "void netsnmp_set_lookup_cache_size (int newsize)"
 .PP
 set the lookup cache size for optimized agent registration performance. 
@@ -246,16 +252,12 @@ set the lookup cache size for optimized agent registration performance.
 .PP
 
 .PP
-Definition at line 1358 of file agent_registry.c.
-.PP
-References SUBTREE_DEFAULT_CACHE_SIZE, and SUBTREE_MAX_CACHE_SIZE.
-.PP
-Referenced by init_master_agent(), netsnmp_register_mib(), and unregister_mib_context().
+Definition at line 1383 of file agent_registry.c.
 .SS "int unregister_mib_context (oid * name, size_t len, int priority, int range_subid, oid range_ubound, const char * context)"
 .PP
 Unregisters an OID that has an associated context name value. 
 .PP
-Typically used when a \fBmodule\fP has multiple contexts defined. The parameters priority, range_subid, and range_ubound should be used in conjunction with agentx, see RFC 2741, otherwise these values should always be 0.
+Typically used when a module has multiple contexts defined. The parameters priority, range_subid, and range_ubound should be used in conjunction with agentx, see RFC 2741, otherwise these values should always be 0.
 .PP
 \fBParameters:\fP
 .RS 4
@@ -278,6 +280,7 @@ Typically used when a \fBmodule\fP has multiple contexts defined. The parameters
 .PP
 
 .PP
-Definition at line 964 of file agent_registry.c.
-.PP
-Referenced by netsnmp_register_mib(), netsnmp_unregister_handler(), remove_tree_entry(), and unregister_mib_range().
+Definition at line 969 of file agent_registry.c.
+.SH "Author"
+.PP 
+Generated automatically by Doxygen for net-snmp from the source code.

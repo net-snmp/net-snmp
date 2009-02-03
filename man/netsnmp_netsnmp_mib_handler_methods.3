@@ -1,4 +1,4 @@
-.TH "netsnmp_mib_handler_methods" 3 "11 Sep 2007" "Version 5.3.2.pre1" "net-snmp" \" -*- nroff -*-
+.TH "netsnmp_mib_handler_methods" 3 "3 Feb 2009" "Version 5.3.2" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -10,61 +10,9 @@ netsnmp_mib_handler_methods \- Defines the subhandlers to be called by the multi
 .PP
 \fC#include <multiplexer.h>\fP
 .PP
-.SS "Data Fields"
-
-.in +1c
-.ti -1c
-.RI "\fBnetsnmp_mib_handler\fP * \fBget_handler\fP"
-.br
-.RI "\fIcalled when a GET request is received \fP"
-.ti -1c
-.RI "\fBnetsnmp_mib_handler\fP * \fBgetnext_handler\fP"
-.br
-.RI "\fIcalled when a GETNEXT request is received \fP"
-.ti -1c
-.RI "\fBnetsnmp_mib_handler\fP * \fBgetbulk_handler\fP"
-.br
-.RI "\fIcalled when a GETBULK request is received \fP"
-.ti -1c
-.RI "\fBnetsnmp_mib_handler\fP * \fBset_handler\fP"
-.br
-.RI "\fIcalled when a SET request is received \fP"
-.in -1c
 .SH "Detailed Description"
 .PP 
 Defines the subhandlers to be called by the multiplexer helper. 
-.PP
-Definition at line 18 of file multiplexer.h.
-.SH "Field Documentation"
-.PP 
-.SS "\fBnetsnmp_mib_handler\fP* \fBnetsnmp_mib_handler_methods::get_handler\fP"
-.PP
-called when a GET request is received 
-.PP
-Definition at line 20 of file multiplexer.h.
-.PP
-Referenced by netsnmp_multiplexer_helper_handler().
-.SS "\fBnetsnmp_mib_handler\fP* \fBnetsnmp_mib_handler_methods::getnext_handler\fP"
-.PP
-called when a GETNEXT request is received 
-.PP
-Definition at line 22 of file multiplexer.h.
-.PP
-Referenced by netsnmp_multiplexer_helper_handler().
-.SS "\fBnetsnmp_mib_handler\fP* \fBnetsnmp_mib_handler_methods::getbulk_handler\fP"
-.PP
-called when a GETBULK request is received 
-.PP
-Definition at line 24 of file multiplexer.h.
-.PP
-Referenced by netsnmp_multiplexer_helper_handler().
-.SS "\fBnetsnmp_mib_handler\fP* \fBnetsnmp_mib_handler_methods::set_handler\fP"
-.PP
-called when a SET request is received 
-.PP
-Definition at line 26 of file multiplexer.h.
-.PP
-Referenced by netsnmp_multiplexer_helper_handler().
 
 .SH "Author"
 .PP 

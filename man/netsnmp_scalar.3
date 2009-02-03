@@ -1,4 +1,4 @@
-.TH "scalar" 3 "11 Sep 2007" "Version 5.3.2.pre1" "net-snmp" \" -*- nroff -*-
+.TH "scalar" 3 "3 Feb 2009" "Version 5.3.2" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -27,7 +27,6 @@ scalar \- Process scalars easily.
 .SH "Detailed Description"
 .PP 
 Process scalars easily. 
-.PP
 .SH "Function Documentation"
 .PP 
 .SS "\fBnetsnmp_mib_handler\fP* netsnmp_get_scalar_handler (void)"
@@ -36,7 +35,7 @@ Creates a scalar handler calling netsnmp_create_handler with a handler name defa
 .PP
 \fBReturns:\fP
 .RS 4
-Returns a pointer to a \fBnetsnmp_mib_handler\fP struct which contains the handler's name and the access method
+Returns a pointer to a netsnmp_mib_handler struct which contains the handler's name and the access method
 .RE
 .PP
 \fBSee also:\fP
@@ -49,8 +48,6 @@ Returns a pointer to a \fBnetsnmp_mib_handler\fP struct which contains the handl
 
 .PP
 Definition at line 46 of file scalar.c.
-.PP
-Referenced by netsnmp_register_read_only_scalar(), netsnmp_register_scalar(), and netsnmp_register_scalar_group().
 .SS "int netsnmp_register_read_only_scalar (\fBnetsnmp_handler_registration\fP * reginfo)"
 .PP
 This function registers a read only scalar helper handler. 
@@ -105,5 +102,6 @@ MIB_REGISTERED_OK is returned if the registration was a success. Failures are MI
 
 .PP
 Definition at line 74 of file scalar.c.
-.PP
-Referenced by netsnmp_register_watched_scalar(), and netsnmp_watched_timestamp_register().
+.SH "Author"
+.PP 
+Generated automatically by Doxygen for net-snmp from the source code.

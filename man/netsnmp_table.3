@@ -1,4 +1,4 @@
-.TH "table" 3 "11 Sep 2007" "Version 5.3.2.pre1" "net-snmp" \" -*- nroff -*-
+.TH "table" 3 "3 Feb 2009" "Version 5.3.2" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -18,7 +18,7 @@ table \- Helps you implement a table.
 .ti -1c
 .RI "\fBtable_container\fP"
 .br
-.RI "\fIHelps you implement a table when data can be found via a \fBnetsnmp_container\fP. \fP"
+.RI "\fIHelps you implement a table when data can be found via a netsnmp_container. \fP"
 .PP
 .in +1c
 
@@ -63,11 +63,11 @@ table \- Helps you implement a table.
 .ti -1c
 .RI "\fBnetsnmp_mib_handler\fP * \fBnetsnmp_get_table_handler\fP (\fBnetsnmp_table_registration_info\fP *tabreq)"
 .br
-.RI "\fIGiven a \fBnetsnmp_table_registration_info\fP object, creates a table handler. \fP"
+.RI "\fIGiven a netsnmp_table_registration_info object, creates a table handler. \fP"
 .ti -1c
 .RI "int \fBnetsnmp_register_table\fP (\fBnetsnmp_handler_registration\fP *reginfo, \fBnetsnmp_table_registration_info\fP *tabreq)"
 .br
-.RI "\fIcreates a table handler given the \fBnetsnmp_table_registration_info\fP object, inserts it into the request chain and then calls \fBnetsnmp_register_handler()\fP to register the table into the agent. \fP"
+.RI "\fIcreates a table handler given the netsnmp_table_registration_info object, inserts it into the request chain and then calls \fBnetsnmp_register_handler()\fP to register the table into the agent. \fP"
 .ti -1c
 .RI "NETSNMP_INLINE \fBnetsnmp_table_request_info\fP * \fBnetsnmp_extract_table_info\fP (\fBnetsnmp_request_info\fP *request)"
 .br
@@ -75,7 +75,7 @@ table \- Helps you implement a table.
 .ti -1c
 .RI "\fBnetsnmp_table_registration_info\fP * \fBnetsnmp_find_table_registration_info\fP (\fBnetsnmp_handler_registration\fP *reginfo)"
 .br
-.RI "\fIextracts the registered \fBnetsnmp_table_registration_info\fP object from a \fBnetsnmp_handler_registration\fP object \fP"
+.RI "\fIextracts the registered netsnmp_table_registration_info object from a netsnmp_handler_registration object \fP"
 .ti -1c
 .RI "int \fBtable_helper_handler\fP (\fBnetsnmp_mib_handler\fP *handler, \fBnetsnmp_handler_registration\fP *reginfo, \fBnetsnmp_agent_request_info\fP *reqinfo, \fBnetsnmp_request_info\fP *requests)"
 .br
@@ -87,7 +87,7 @@ table \- Helps you implement a table.
 .ti -1c
 .RI "int \fBnetsnmp_sparse_table_register\fP (\fBnetsnmp_handler_registration\fP *reginfo, \fBnetsnmp_table_registration_info\fP *tabreq)"
 .br
-.RI "\fIcreates a table handler given the \fBnetsnmp_table_registration_info\fP object, inserts it into the request chain and then calls \fBnetsnmp_register_handler()\fP to register the table into the agent. \fP"
+.RI "\fIcreates a table handler given the netsnmp_table_registration_info object, inserts it into the request chain and then calls \fBnetsnmp_register_handler()\fP to register the table into the agent. \fP"
 .ti -1c
 .RI "int \fBnetsnmp_table_build_result\fP (\fBnetsnmp_handler_registration\fP *reginfo, \fBnetsnmp_request_info\fP *reqinfo, \fBnetsnmp_table_request_info\fP *table_info, u_char type, u_char *result, size_t result_len)"
 .br
@@ -116,7 +116,7 @@ table \- Helps you implement a table.
 .SH "Detailed Description"
 .PP 
 Helps you implement a table. 
-.PP
+
 This handler helps you implement a table by doing some of the processing for you.
 .PP
 This handler truly shows the power of the new handler mechanism. By creating a table handler and injecting it into your calling chain, or by using the \fBnetsnmp_register_table()\fP function to register your table, you get access to some pre-parsed information. Specifically, the table handler pulls out the column number and indexes from the request oid so that you don't have to do the complex work to do that parsing within your own code.
@@ -131,13 +131,11 @@ checks the original request against the current data being passed in if its grea
 returns 1 if outvar was replaced with the oid from newvar (success). returns 0 if not. 
 .PP
 Definition at line 884 of file table.c.
-.PP
-Referenced by netsnmp_table_iterator_helper_handler().
 .SS "NETSNMP_INLINE \fBnetsnmp_table_request_info\fP* netsnmp_extract_table_info (\fBnetsnmp_request_info\fP * request)"
 .PP
 Extracts the processed table information from a given request. 
 .PP
-Call this from subhandlers on a request to extract the processed \fBnetsnmp_request_info\fP information. The resulting information includes the index values and the column number.
+Call this from subhandlers on a request to extract the processed netsnmp_request_info information. The resulting information includes the index values and the column number.
 .PP
 \fBParameters:\fP
 .RS 4
@@ -146,24 +144,20 @@ Call this from subhandlers on a request to extract the processed \fBnetsnmp_requ
 .PP
 \fBReturns:\fP
 .RS 4
-populated \fBnetsnmp_table_request_info\fP structure 
+populated netsnmp_table_request_info structure 
 .RE
 .PP
 
 .PP
 Definition at line 125 of file table.c.
-.PP
-Referenced by _netsnmp_tdata_helper_handler(), netsnmp_container_table_row_insert(), netsnmp_insert_iterator_context(), netsnmp_insert_table_row(), netsnmp_table_data_helper_handler(), netsnmp_table_data_set_helper_handler(), netsnmp_table_iterator_helper_handler(), and table_helper_handler().
 .SS "\fBnetsnmp_table_registration_info\fP* netsnmp_find_table_registration_info (\fBnetsnmp_handler_registration\fP * reginfo)"
 .PP
-extracts the registered \fBnetsnmp_table_registration_info\fP object from a \fBnetsnmp_handler_registration\fP object 
+extracts the registered netsnmp_table_registration_info object from a netsnmp_handler_registration object 
 .PP
 Definition at line 134 of file table.c.
-.PP
-Referenced by netsnmp_table_data_helper_handler(), and netsnmp_table_iterator_helper_handler().
 .SS "\fBnetsnmp_mib_handler\fP* netsnmp_get_table_handler (\fBnetsnmp_table_registration_info\fP * tabreq)"
 .PP
-Given a \fBnetsnmp_table_registration_info\fP object, creates a table handler. 
+Given a netsnmp_table_registration_info object, creates a table handler. 
 .PP
 You can use this table handler by injecting it into a calling chain. When the handler gets called, it'll do processing and store it's information into the request->parent_data structure.
 .PP
@@ -171,26 +165,22 @@ The table helper handler pulls out the column number and indexes from the reques
 .PP
 \fBParameters:\fP
 .RS 4
-\fItabreq\fP is a pointer to a \fBnetsnmp_table_registration_info\fP struct. The table handler needs to know up front how your table is structured. A netsnmp_table_registeration_info structure that is passed to the table handler should contain the asn index types for the table as well as the minimum and maximum column that should be used.
+\fItabreq\fP is a pointer to a netsnmp_table_registration_info struct. The table handler needs to know up front how your table is structured. A netsnmp_table_registeration_info structure that is passed to the table handler should contain the asn index types for the table as well as the minimum and maximum column that should be used.
 .RE
 .PP
 \fBReturns:\fP
 .RS 4
-Returns a pointer to a \fBnetsnmp_mib_handler\fP struct which contains the handler's name and the access method 
+Returns a pointer to a netsnmp_mib_handler struct which contains the handler's name and the access method 
 .RE
 .PP
 
 .PP
 Definition at line 85 of file table.c.
-.PP
-Referenced by netsnmp_register_table(), and netsnmp_sparse_table_register().
 .SS "int netsnmp_register_table (\fBnetsnmp_handler_registration\fP * reginfo, \fBnetsnmp_table_registration_info\fP * tabreq)"
 .PP
-creates a table handler given the \fBnetsnmp_table_registration_info\fP object, inserts it into the request chain and then calls \fBnetsnmp_register_handler()\fP to register the table into the agent. 
+creates a table handler given the netsnmp_table_registration_info object, inserts it into the request chain and then calls \fBnetsnmp_register_handler()\fP to register the table into the agent. 
 .PP
 Definition at line 108 of file table.c.
-.PP
-Referenced by netsnmp_container_table_register(), netsnmp_register_table_data(), netsnmp_register_table_iterator(), and netsnmp_table_container_register().
 .SS "\fBnetsnmp_mib_handler\fP* netsnmp_sparse_table_handler_get (void)"
 .PP
 create sparse table handler 
@@ -198,7 +188,7 @@ create sparse table handler
 Definition at line 722 of file table.c.
 .SS "int netsnmp_sparse_table_register (\fBnetsnmp_handler_registration\fP * reginfo, \fBnetsnmp_table_registration_info\fP * tabreq)"
 .PP
-creates a table handler given the \fBnetsnmp_table_registration_info\fP object, inserts it into the request chain and then calls \fBnetsnmp_register_handler()\fP to register the table into the agent. 
+creates a table handler given the netsnmp_table_registration_info object, inserts it into the request chain and then calls \fBnetsnmp_register_handler()\fP to register the table into the agent. 
 .PP
 Definition at line 733 of file table.c.
 .SS "int netsnmp_table_build_oid (\fBnetsnmp_handler_registration\fP * reginfo, \fBnetsnmp_request_info\fP * reqinfo, \fBnetsnmp_table_request_info\fP * table_info)"
@@ -212,8 +202,6 @@ Index values are extracted from the table_info varbinds.
 .column 
 .PP
 Definition at line 784 of file table.c.
-.PP
-Referenced by netsnmp_table_build_result().
 .SS "int netsnmp_table_build_oid_from_index (\fBnetsnmp_handler_registration\fP * reginfo, \fBnetsnmp_request_info\fP * reqinfo, \fBnetsnmp_table_request_info\fP * table_info)"
 .PP
 given a registration info object, a request object and the table info object it builds the request->requestvb->name oid from the index values and column information found in the table_info object. 
@@ -255,7 +243,6 @@ got one ok
 for loop 
 .PP
 Definition at line 142 of file table.c.
-.PP
-References netsnmp_table_request_info::colnum, netsnmp_mib_handler::handler_name, netsnmp_table_request_info::index_oid, netsnmp_table_request_info::index_oid_len, netsnmp_table_request_info::indexes, netsnmp_table_registration_info::indexes, netsnmp_table_registration_info::max_column, netsnmp_table_registration_info::min_column, netsnmp_agent_request_info::mode, netsnmp_mib_handler::myvoid, variable_list::name, variable_list::name_length, variable_list::name_loc, netsnmp_agent_get_list_data(), netsnmp_call_next_handler(), netsnmp_create_data_list(), netsnmp_extract_table_info(), netsnmp_free_agent_data_sets(), netsnmp_request_add_list_data(), netsnmp_set_request_error(), netsnmp_request_info::next, netsnmp_mib_handler::next, variable_list::next_variable, NULL, netsnmp_table_registration_info::number_indexes, netsnmp_table_request_info::number_indexes, parse_one_oid_index(), netsnmp_request_info::processed, netsnmp_table_request_info::reg_info, netsnmp_request_info::requestvb, netsnmp_handler_registration::rootoid, netsnmp_handler_registration::rootoid_len, snmp_clone_varbind(), SNMP_FREE, snmp_log(), SNMP_MALLOC_TYPEDEF, snmp_oid_compare(), snmp_set_var_objid(), sprint_realloc_by_type(), netsnmp_request_info::status, variable_list::type, and netsnmp_table_registration_info::valid_columns.
-.PP
-Referenced by netsnmp_get_table_handler().
+.SH "Author"
+.PP 
+Generated automatically by Doxygen for net-snmp from the source code.

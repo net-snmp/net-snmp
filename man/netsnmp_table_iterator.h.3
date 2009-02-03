@@ -1,4 +1,4 @@
-.TH "table_iterator.h" 3 "11 Sep 2007" "Version 5.3.2.pre1" "net-snmp" \" -*- nroff -*-
+.TH "table_iterator.h" 3 "3 Feb 2009" "Version 5.3.2" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -10,8 +10,9 @@ table_iterator.h \-
 
 .in +1c
 .ti -1c
-.RI "struct \fBnetsnmp_iterator_info\fP"
+.RI "struct \fBnetsnmp_iterator_info_s\fP"
 .br
+.RI "\fIHolds iterator information containing functions which should be called by the iterator_handler to loop over your data set and sort it in a SNMP specific manner. \fP"
 .in -1c
 .SS "Defines"
 
@@ -41,6 +42,10 @@ table_iterator.h \-
 .ti -1c
 .RI "typedef void( \fBNetsnmp_Free_Data_Context\fP )(void *, struct \fBnetsnmp_iterator_info_s\fP *)"
 .br
+.ti -1c
+.RI "typedef struct \fBnetsnmp_iterator_info_s\fP \fBnetsnmp_iterator_info\fP"
+.br
+.RI "\fITypedefs the \fBnetsnmp_iterator_info_s\fP struct into netsnmp_iterator_info. \fP"
 .in -1c
 .SS "Functions"
 
@@ -48,7 +53,7 @@ table_iterator.h \-
 .ti -1c
 .RI "\fBnetsnmp_mib_handler\fP * \fBnetsnmp_get_table_iterator_handler\fP (\fBnetsnmp_iterator_info\fP *iinfo)"
 .br
-.RI "\fIreturns a \fBnetsnmp_mib_handler\fP object for the table_iterator helper \fP"
+.RI "\fIreturns a netsnmp_mib_handler object for the table_iterator helper \fP"
 .ti -1c
 .RI "int \fBnetsnmp_register_table_iterator\fP (\fBnetsnmp_handler_registration\fP *reginfo, \fBnetsnmp_iterator_info\fP *iinfo)"
 .br
@@ -93,7 +98,7 @@ table_iterator.h \-
 
 .in +1c
 .ti -1c
-.RI "\fBNetsnmp_Node_Handler\fP \fBnetsnmp_table_iterator_helper_handler\fP"
+.RI "Netsnmp_Node_Handler \fBnetsnmp_table_iterator_helper_handler\fP"
 .br
 .in -1c
 .SH "Detailed Description"
