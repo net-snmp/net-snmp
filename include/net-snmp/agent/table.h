@@ -163,13 +163,9 @@ extern          "C" {
 
 #define netsnmp_table_helper_add_index(tinfo, type) snmp_varlist_add_variable(&tinfo->indexes, NULL, 0, (u_char)type, NULL, 0);
 
-#if HAVE_STDARG_H
     void           
         netsnmp_table_helper_add_indexes(netsnmp_table_registration_info
                                          *tinfo, ...);
-#else
-    void            netsnmp_table_helper_add_indexes(va_alist);
-#endif
 
     int netsnmp_check_getnext_reply(netsnmp_request_info *request,
                                     oid * prefix, size_t prefix_len,

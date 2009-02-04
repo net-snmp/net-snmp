@@ -643,9 +643,6 @@
 /* Define to 1 if you have the `statvfs' function. */
 /* #undef HAVE_STATVFS */
 
-/* Define to 1 if you have the <stdarg.h> header file. */
-#define HAVE_STDARG_H 1
-
 /* Define to 1 if you have the <stdint.h> header file. */
 /* #undef HAVE_STDINT_H */
 

@@ -63,25 +63,11 @@
 #include <ctype.h>
 #include <sys/types.h>
 
-#if HAVE_STDARG_H
 # include <stdarg.h>
-# define HAVE_STDARGS           /* let's hope that works everywhere (mj) */
 # define VA_LOCAL_DECL   va_list ap
 # define VA_START(f)     va_start(ap, f)
 # define VA_SHIFT(v,t)  ;       /* no-op for ANSI */
 # define VA_END          va_end(ap)
-#elif HAVE_VARARGS_H
-#  include <varargs.h>
-#  undef HAVE_STDARGS
-#  define VA_LOCAL_DECL   va_list ap
-#  define VA_START(f)     va_start(ap)  /* f is ignored! */
-#  define VA_SHIFT(v,t) v = va_arg(ap,t)
-#  define VA_END        va_end(ap)
-#else
-/*
- * XX ** NO VARARGS ** XX
- */
-#endif
 
 #ifdef HAVE_LONG_DOUBLE
 #define LDOUBLE long double
@@ -725,20 +711,9 @@ vsnprintf(char *str, size_t count, const char *fmt, va_list args)
 /*
  * VARARGS3 
  */
-#ifdef HAVE_STDARGS
 int
 snprintf(char *str, size_t count, const char *fmt, ...)
-#else
-int
-snprintf(va_alist)
-     va_dcl
-#endif
 {
-#ifndef HAVE_STDARGS
-    char           *str;
-    size_t          count;
-    char           *fmt;
-#endif
     VA_LOCAL_DECL;
 
     VA_START(fmt);

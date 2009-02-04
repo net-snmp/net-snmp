@@ -51,8 +51,7 @@ extern          "C" {
     void            read_premib_configs(void);
     void            read_config_files(int);
     void            free_config(void);
-#if HAVE_STDARG_H
-# if !defined(__GNUC__) || __GNUC__ < 2 || (__GNUC__ == 2&& __GNUC_MINOR__ < 8)
+#if !defined(__GNUC__) || __GNUC__ < 2 || (__GNUC__ == 2&& __GNUC_MINOR__ < 8)
     void            netsnmp_config_error(const char *, ...);
     void            netsnmp_config_warn(const char *, ...);
 #else
@@ -60,10 +59,6 @@ extern          "C" {
 	__attribute__((__format__(__printf__, 1, 2)));
     void            netsnmp_config_warn(const char *, ...)
 	__attribute__((__format__(__printf__, 1, 2)));
-# endif
-#else
-    void            netsnmp_config_error();
-    void            netsnmp_config_warn();
 #endif
     void            config_perror(const char *);
     void            config_pwarn(const char *);
