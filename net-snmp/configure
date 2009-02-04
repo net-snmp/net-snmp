@@ -27519,8 +27519,7 @@ fi
 
 
 
-
-for ac_header in getopt.h   pthread.h  regex.h                                   stdarg.h   string.h   syslog.h   unistd.h                       sys/param.h                          sys/select.h                         sys/socket.h                         sys/time.h                           sys/un.h
+for ac_header in getopt.h   pthread.h  regex.h                        string.h   syslog.h   unistd.h                       sys/param.h                          sys/select.h                         sys/socket.h                         sys/time.h                           sys/un.h
 do
 as_ac_Header=`$as_echo "ac_cv_header_$ac_header" | $as_tr_sh`
 if { as_var=$as_ac_Header; eval "test \"\${$as_var+set}\" = set"; }; then

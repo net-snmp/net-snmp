@@ -13,11 +13,7 @@
 #if HAVE_NETINET_IN_H
 #include <netinet/in.h>
 #endif
-#if HAVE_STDARG_H
 #include <stdarg.h>
-#else
-#include <varargs.h>
-#endif
 #if HAVE_WINSOCK_H
 #include <winsock.h>
 #endif
@@ -253,30 +249,15 @@ debug_is_token_registered(const char *token)
 }
 
 void
-#if HAVE_STDARG_H
 debugmsg(const char *token, const char *format, ...)
-#else
-debugmsg(va_alist)
-     va_dcl
-#endif
 {
-    va_list         debugargs;
-
-#if HAVE_STDARG_H
-    va_start(debugargs, format);
-#else
-    const char     *format;
-    const char     *token;
-
-    va_start(debugargs);
-    token = va_arg(debugargs, const char *);
-    format = va_arg(debugargs, const char *);   /* ??? */
-#endif
-
     if (debug_is_token_registered(token) == SNMPERR_SUCCESS) {
-        snmp_vlog(LOG_DEBUG, format, debugargs);
+	va_list         debugargs;
+
+	va_start(debugargs, format);
+	snmp_vlog(LOG_DEBUG, format, debugargs);
+	va_end(debugargs);
     }
-    va_end(debugargs);
 }
 
 void
@@ -451,53 +432,23 @@ debugmsg_hextli(const char *token, u_char * thedata, size_t len)
 }
 
 void
-#if HAVE_STDARG_H
 debugmsgtoken(const char *token, const char *format, ...)
-#else
-debugmsgtoken(va_alist)
-     va_dcl
-#endif
 {
     va_list         debugargs;
 
-#if HAVE_STDARG_H
     va_start(debugargs, format);
-#else
-    const char     *token;
-
-    va_start(debugargs);
-    token = va_arg(debugargs, const char *);
-#endif
-
     debugmsg(token, "%s: ", token);
-
     va_end(debugargs);
 }
 
 void
-#if HAVE_STDARG_H
 debug_combo_nc(const char *token, const char *format, ...)
-#else
-debug_combo_nc(va_alist)
-     va_dcl
-#endif
 {
     va_list         debugargs;
 
-#if HAVE_STDARG_H
     va_start(debugargs, format);
-#else
-    const char     *format;
-    const char     *token;
-
-    va_start(debugargs);
-    token = va_arg(debugargs, const char *);
-    format = va_arg(debugargs, const char *);   /* ??? */
-#endif
-
     snmp_log(LOG_DEBUG, "%s: ", token);
     snmp_vlog(LOG_DEBUG, format, debugargs);
-
     va_end(debugargs);
 }
 

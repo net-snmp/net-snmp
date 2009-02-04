@@ -380,6 +380,9 @@
 /* Define to 1 if you have the <netinet6/tcp6_var.h> header file. */
 #undef HAVE_NETINET6_TCP6_VAR_H
 
+/* Define to 1 if you have the <netinet/icmp6.h> header file. */
+#undef HAVE_NETINET_ICMP6_H
+
 /* Define to 1 if you have the <netinet/icmp_var.h> header file. */
 #undef HAVE_NETINET_ICMP_VAR_H
 
@@ -406,9 +409,6 @@
 
 /* Define to 1 if you have the <netinet/ip_icmp.h> header file. */
 #undef HAVE_NETINET_IP_ICMP_H
-
-/* Define to 1 if you have the <netinet/icmp6.h> header file. */
-#undef HAVE_NETINET_ICMP6_H
 
 /* Define to 1 if you have the <netinet/ip_var.h> header file. */
 #undef HAVE_NETINET_IP_VAR_H
@@ -551,6 +551,9 @@
 /* Define to 1 if you have the <rpm/rpmdb.h> header file. */
 #undef HAVE_RPM_RPMDB_H
 
+/* Define to 1 if you have the <rpm/rpmfileutil.h> header file. */
+#undef HAVE_RPM_RPMFILEUTIL_H
+
 /* Define to 1 if you have the <rpm/rpmlib.h> header file. */
 #undef HAVE_RPM_RPMLIB_H
 
@@ -625,9 +628,6 @@
 
 /* Define to 1 if you have the `statvfs' function. */
 #undef HAVE_STATVFS
-
-/* Define to 1 if you have the <stdarg.h> header file. */
-#undef HAVE_STDARG_H
 
 /* Define to 1 if you have the <stdint.h> header file. */
 #undef HAVE_STDINT_H

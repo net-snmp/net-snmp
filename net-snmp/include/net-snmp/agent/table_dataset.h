@@ -112,12 +112,8 @@ extern          "C" {
                                           unsigned int, int, int,
                                           void  *default_value,
                                           size_t default_value_len);
-#if HAVE_STDARG_H
     void netsnmp_table_set_multi_add_default_row(netsnmp_table_data_set *,
                                                 ...);
-#else
-    void netsnmp_table_set_multi_add_default_row(va_alist);
-#endif
 
 
 /* ============================
@@ -176,11 +172,7 @@ extern          "C" {
 
     void netsnmp_table_dataset_add_index(netsnmp_table_data_set
                                                     *table, u_char type);
-#if HAVE_STDARG_H
     void netsnmp_table_set_add_indexes(netsnmp_table_data_set *tset, ...);
-#else
-    void netsnmp_table_helper_add_indexes(va_alist);
-#endif
 
 #ifdef __cplusplus
 }

@@ -313,13 +313,7 @@ netsnmp_table_set_add_default_row(netsnmp_table_data_set *table_set,
  *  repeatedly for you.
  */
 void
-#if HAVE_STDARG_H
 netsnmp_table_set_multi_add_default_row(netsnmp_table_data_set *tset, ...)
-#else
-netsnmp_table_set_multi_add_default_row(va_dcl
-    )
-     va_dcl
-#endif
 {
     va_list         debugargs;
     unsigned int    column;
@@ -327,14 +321,7 @@ netsnmp_table_set_multi_add_default_row(va_dcl
     void           *data;
     size_t          data_len;
 
-#if HAVE_STDARG_H
     va_start(debugargs, tset);
-#else
-    netsnmp_table_data_set *tset;
-
-    va_start(debugargs);
-    tset = va_arg(debugargs, netsnmp_table_data_set *);
-#endif
 
     while ((column = va_arg(debugargs, unsigned int)) != 0) {
         type = va_arg(debugargs, int);
@@ -1297,25 +1284,13 @@ netsnmp_table_dataset_add_index(netsnmp_table_data_set *table, u_char type)
 /** adds multiple indexes to a table_dataset helper object.
  *  To end the list, use a 0 after the list of ASN index types. */
 void
-#if HAVE_STDARG_H
 netsnmp_table_set_add_indexes(netsnmp_table_data_set *tset,
                               ...)
-#else
-netsnmp_table_set_add_indexes(va_alist)
-     va_dcl
-#endif
 {
     va_list         debugargs;
     int             type;
 
-#if HAVE_STDARG_H
     va_start(debugargs, tset);
-#else
-    netsnmp_table_data_set *tset;
-
-    va_start(debugargs);
-    tset = va_arg(debugargs, netsnmp_table_data_set *);
-#endif
 
     if (tset)
         while ((type = va_arg(debugargs, int)) != 0)

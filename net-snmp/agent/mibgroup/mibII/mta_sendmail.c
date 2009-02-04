@@ -101,13 +101,8 @@
 # endif
 #endif
 
-#if HAVE_STDARG_H
-#include <stdarg.h>
-#else
-#include <varargs.h>
-#endif
-
 #include <errno.h>
+#include <stdarg.h>
 
  /**/
 /** "macros and variables for registering the OID tree" */
@@ -348,37 +343,15 @@ static long     dir_cache_time = 10;    /* time (in seconds) to wait before scan
  *    ...:         additional parameters to insert into the error message string
  *
  */
-#if HAVE_STDARG_H
-    static void
+static void
 print_error(int priority, BOOL config, BOOL config_only,
             const char *function, const char *format, ...)
-#else
-    static void
-print_error(va_alist)
-     va_dcl
-#endif
 {
     va_list         ap;
     char            buffer[2 * FILENAMELEN + 200];      /* I know, that's not perfectly safe, but since I don't use more
                                                          * than two filenames in one error message, that should be enough */
 
-#if HAVE_STDARG_H
     va_start(ap, format);
-#else
-    int             priority;
-    BOOL            config;
-    BOOL            config_only;
-    const char     *function;
-    const char     *format;
-
-    va_start(ap);
-    priority = va_arg(ap, int);
-    config = va_arg(ap, BOOL);
-    config_only = va_arg(ap, BOOL);
-    function = va_arg(ap, char *);
-    format = va_arg(ap, char *);
-#endif
-
     vsnprintf(buffer, sizeof(buffer), format, ap);
 
     if (config) {

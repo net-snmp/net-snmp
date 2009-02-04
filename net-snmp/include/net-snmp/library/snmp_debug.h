@@ -19,14 +19,13 @@ extern          "C" {
      * These functions should not be used, if at all possible.  Instead, use
      * the macros below. 
      */
-#if HAVE_STDARG_H
-# if !defined(__GNUC__) || __GNUC__ < 2 || (__GNUC__ == 2 && __GNUC_MINOR__ < 8)
+#if !defined(__GNUC__) || __GNUC__ < 2 || (__GNUC__ == 2 && __GNUC_MINOR__ < 8)
     void            debugmsg(const char *token, const char *format, ...);
     void            debugmsgtoken(const char *token, const char *format,
                                   ...);
     void            debug_combo_nc(const char *token, const char *format,
                                    ...);
-# else
+#else
     void            debugmsg(const char *token, const char *format, ...)
                         __attribute__ ((__format__ (__printf__, 2, 3)));
     void            debugmsgtoken(const char *token, const char *format,
@@ -35,11 +34,6 @@ extern          "C" {
     void            debug_combo_nc(const char *token, const char *format,
                                    ...)
                         __attribute__ ((__format__ (__printf__, 2, 3)));
-# endif
-#else
-    void            debugmsg(va_alist);
-    void            debugmsgtoken(va_alist);
-    void            debug_combo_nc(va_alist);
 #endif
     void            debugmsg_oid(const char *token, const oid * theoid,
                                  size_t len);

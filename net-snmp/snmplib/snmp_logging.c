@@ -59,11 +59,7 @@
 #include <netinet/in.h>
 #endif
 
-#if HAVE_STDARG_H
 #include <stdarg.h>
-#else
-#include <varargs.h>
-#endif
 
 #if HAVE_DMALLOC_H
 #include <dmalloc.h>
@@ -1265,25 +1261,11 @@ snmp_vlog(int priority, const char *format, va_list ap)
  * @see snmp_vlog
  */
 int
-#if HAVE_STDARG_H
 snmp_log(int priority, const char *format, ...)
-#else
-snmp_log(va_alist)
-     va_dcl
-#endif
 {
     va_list         ap;
     int             ret;
-#if HAVE_STDARG_H
     va_start(ap, format);
-#else
-    int             priority;
-    const char     *format;
-    va_start(ap);
-
-    priority = va_arg(ap, int);
-    format = va_arg(ap, const char *);
-#endif
     ret = snmp_vlog(priority, format, ap);
     va_end(ap);
     return (ret);
