@@ -259,7 +259,6 @@ static void
 disk_parse_config(const char *token, char *cptr)
 {
 #if HAVE_FSTAB_H || HAVE_GETMNTENT || HAVE_STATFS
-  char            tmpbuf[1024];
   char            path[STRMAX];
   int             minpercent;
   int             minspace;
@@ -270,9 +269,7 @@ disk_parse_config(const char *token, char *cptr)
           disks = malloc(maxdisks * sizeof(struct diskpart));
           if (!disks) {
               config_perror("malloc failed for new disk allocation.");
-              sprintf(tmpbuf, "\tignoring:  %s", cptr);
-              tmpbuf[ sizeof(tmpbuf)-1 ] = 0;
-              config_perror(tmpbuf);
+	      netsnmp_config_error("\tignoring:  %s", cptr);
               return;
           }
           memset(disks, 0, maxdisks * sizeof(struct diskpart));
@@ -281,9 +278,7 @@ disk_parse_config(const char *token, char *cptr)
           disks = realloc(disks, maxdisks * sizeof(struct diskpart));
           if (!disks) {
               config_perror("malloc failed for new disk allocation.");
-              sprintf(tmpbuf, "\tignoring:  %s", cptr);
-              tmpbuf[ sizeof(tmpbuf)-1 ] = 0;
-              config_perror(tmpbuf);
+	      netsnmp_config_error("\tignoring:  %s", cptr);
               return;
           }
           memset(disks + maxdisks/2, 0, maxdisks/2 * sizeof(struct diskpart));
@@ -326,7 +321,6 @@ static void
 disk_parse_config_all(const char *token, char *cptr)
 {
 #if HAVE_FSTAB_H || HAVE_GETMNTENT || HAVE_STATFS
-  char            tmpbuf[1024];
   int             minpercent = DISKMINPERCENT;
     
   if (numdisks == maxdisks) {
@@ -335,8 +329,7 @@ disk_parse_config_all(const char *token, char *cptr)
           disks = malloc(maxdisks * sizeof(struct diskpart));
           if (!disks) {
               config_perror("malloc failed for new disk allocation.");
-              sprintf(tmpbuf, "\tignoring:  %s", cptr);
-              config_perror(tmpbuf);
+	      netsnmp_config_error("\tignoring:  %s", cptr);
               return;
           }
           memset(disks, 0, maxdisks * sizeof(struct diskpart));
@@ -345,8 +338,7 @@ disk_parse_config_all(const char *token, char *cptr)
           disks = realloc(disks, maxdisks * sizeof(struct diskpart));
           if (!disks) {
               config_perror("malloc failed for new disk allocation.");
-              sprintf(tmpbuf, "\tignoring:  %s", cptr);
-              config_perror(tmpbuf);
+	      netsnmp_config_error("\tignoring:  %s", cptr);
               return;
           }
           memset(disks + maxdisks/2, 0, maxdisks/2 * sizeof(struct diskpart));
@@ -368,8 +360,7 @@ disk_parse_config_all(const char *token, char *cptr)
    */
   if(allDisksIncluded) {
       config_perror("includeAllDisks already specified.");
-      sprintf(tmpbuf, "\tignoring: includeAllDisks %s", cptr);
-      config_perror(tmpbuf);
+      netsnmp_config_error("\tignoring: includeAllDisks %s", cptr);
   }
   else {
       allDisksIncluded = 1;
@@ -393,10 +384,7 @@ add_device(char *path, char *device, int minspace, int minpercent, int override)
           maxdisks = 50;
           disks = malloc(maxdisks * sizeof(struct diskpart));
           if (!disks) {
-              char tmpbuf[1024];
-              snprintf(tmpbuf, sizeof(tmpbuf), "\tignoring:  %s", device);
-              tmpbuf[ sizeof(tmpbuf)-1 ] = 0;
-              config_perror(tmpbuf);
+	      netsnmp_config_error("\tignoring:  %s", device);
               return;
           }
           memset(disks, 0, maxdisks * sizeof(struct diskpart));
@@ -404,11 +392,8 @@ add_device(char *path, char *device, int minspace, int minpercent, int override)
           maxdisks *= 2;
           disks = realloc(disks, maxdisks * sizeof(struct diskpart));
           if (!disks) {
-              char tmpbuf[1024];
               config_perror("malloc failed for new disk allocation.");
-              snprintf(tmpbuf, sizeof(tmpbuf), "\tignoring:  %s", device);
-              tmpbuf[ sizeof(tmpbuf)-1 ] = 0;
-              config_perror(tmpbuf);
+	      netsnmp_config_error("\tignoring:  %s", device);
               return;
           }
           memset(disks + maxdisks/2, 0, maxdisks/2 * sizeof(struct diskpart));
@@ -478,7 +463,7 @@ find_and_add_allDisks(int minpercent)
 #endif
 
   int dummy = 0;
-  char            tmpbuf[1024];
+
   /* 
    * find the device for the path and copy the device into the
    * string declared above and at the end of the routine return it
@@ -489,8 +474,7 @@ find_and_add_allDisks(int minpercent)
 #if HAVE_SETMNTENT
   mntfp = setmntent(ETC_MNTTAB, "r");
   if (!mntfp) {
-      snprintf( tmpbuf, sizeof(tmpbuf), "Can't open %s (setmntent)\n", ETC_MNTTAB );
-      config_perror(tmpbuf);
+      netsnmp_config_error("Can't open %s (setmntent)\n", ETC_MNTTAB);
       return;
   }
   while (mntfp && NULL != (mntent = getmntent(mntfp))) {
@@ -507,8 +491,7 @@ find_and_add_allDisks(int minpercent)
 #else                           /* getmentent but not setmntent */
   mntfp = fopen(ETC_MNTTAB, "r");
   if (!mntfp) {
-      snprintf( tmpbuf, sizeof(tmpbuf), "Can't open %s (fopen)\n", ETC_MNTTAB );
-      config_perror(tmpbuf);
+      netsnmp_config_error("Can't open %s (fopen)\n", ETC_MNTTAB);
       return;
   }
   while ((i = getmntent(mntfp, &mnttab)) == 0) {
@@ -547,11 +530,8 @@ find_and_add_allDisks(int minpercent)
     if (numdisks == maxdisks) {
       return;
     }
-    snprintf(tmpbuf, sizeof(tmpbuf),
-             "Couldn't find device for disk %s",
-             disks[numdisks].path);
-    tmpbuf[ sizeof(tmpbuf)-1 ] = 0;
-    config_pwarn(tmpbuf);
+    netsnmp_config_warn("Couldn't find device for disk %s",
+			disks[numdisks].path);
     disks[numdisks].minimumspace = -1;
     disks[numdisks].minpercent = -1;
     disks[numdisks].path[0] = 0;
@@ -578,7 +558,6 @@ find_device(char *path)
 #elif HAVE_STATFS
   struct statfs   statf;
 #endif
-  char            tmpbuf[1024];
   static char     device[STRMAX];
 #if defined(HAVE_GETMNTENT) && !defined(HAVE_SETMNTENT)
   int             i;
@@ -596,8 +575,7 @@ find_device(char *path)
 #if HAVE_SETMNTENT
   mntfp = setmntent(ETC_MNTTAB, "r");
   if (!mntfp) {
-      snprintf( tmpbuf, sizeof(tmpbuf), "Can't open %s (setmntent)\n", ETC_MNTTAB );
-      config_perror(tmpbuf);
+      netsnmp_config_error("Can't open %s (setmntent)\n", ETC_MNTTAB);
       return NULL;
   }
   while (mntfp && NULL != (mntent = getmntent(mntfp)))
@@ -616,8 +594,7 @@ find_device(char *path)
 #else                           /* getmentent but not setmntent */
   mntfp = fopen(ETC_MNTTAB, "r");
   if (!mntfp) {
-      snprintf( tmpbuf, sizeof(tmpbuf), "Can't open %s (fopen)\n", ETC_MNTTAB );
-      config_perror(tmpbuf);
+      netsnmp_config_error("Can't open %s (fopen)\n", ETC_MNTTAB);
       return NULL;
   }
   while ((i = getmntent(mntfp, &mnttab)) == 0)
@@ -656,9 +633,7 @@ find_device(char *path)
   }
 #endif
   else {
-    sprintf(tmpbuf, "Couldn't find device for disk %s",
-	    path);
-    config_pwarn(tmpbuf);
+    netsnmp_config_warn("Couldn't find device for disk %s", path);
   }
 #else
   config_perror("'disk' checks not supported on this architecture.");

@@ -369,8 +369,7 @@ static int      monitor_call_count = 0;
 void
 parse_simple_monitor(const char *token, char *line)
 {
-    char            buf[SPRINT_MAX_LEN], *cp, ebuf[SPRINT_MAX_LEN],
-                    eventname[64];
+    char            buf[SPRINT_MAX_LEN], *cp, eventname[64];
     oid             obuf[MAX_OID_LEN];
     size_t          obufLen;
     struct mteTriggerTable_data *StorageNew;
@@ -457,8 +456,7 @@ parse_simple_monitor(const char *token, char *line)
             cp = copy_nword(cp, buf, sizeof(buf));
             obufLen = MAX_OID_LEN;
             if (!snmp_parse_oid(buf, obuf, &obufLen)) {
-                sprintf(ebuf, "unable to parse oid: %s", buf);
-                config_perror(ebuf);
+		netsnmp_config_error("unable to parse oid: %s", buf);
                 /*
                  * XXX: free StorageNew 
                  */
@@ -519,8 +517,7 @@ parse_simple_monitor(const char *token, char *line)
     cp = copy_nword(cp, buf, sizeof(buf));
     obufLen = MAX_OID_LEN;
     if (!snmp_parse_oid(buf, obuf, &obufLen)) {
-        sprintf(ebuf, "unable to parse oid: %s", buf);
-        config_perror(ebuf);
+	netsnmp_config_error("unable to parse oid: %s", buf);
         /*
          * XXX: free StorageNew 
          */
