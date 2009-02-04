@@ -637,9 +637,7 @@ Init_HR_FileSys(void)
         fclose(fp);
     fp = fopen(ETC_MNTTAB, "r");
     if (!fp) {
-      char tmpbuf[STRINGMAX];
-      snprintf( tmpbuf, sizeof(tmpbuf), "Can't open %s\n", ETC_MNTTAB );
-      config_perror(tmpbuf);
+      netsnmp_config_error("Can't open %s\n", ETC_MNTTAB);
     }
 #endif
 }

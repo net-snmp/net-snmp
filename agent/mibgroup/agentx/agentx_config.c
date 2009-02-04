@@ -47,7 +47,6 @@ void
 agentx_parse_master(const char *token, char *cptr)
 {
     int             i = -1;
-    char            buf[BUFSIZ];
 
     if (!strcmp(cptr, "agentx") ||
         !strcmp(cptr, "all") ||
@@ -60,8 +59,7 @@ agentx_parse_master(const char *token, char *cptr)
         i = atoi(cptr);
 
     if (i < 0 || i > 1) {
-        sprintf(buf, "master '%s' unrecognised", cptr);
-        config_perror(buf);
+	netsnmp_config_error("master '%s' unrecognised", cptr);
     } else
         netsnmp_ds_set_boolean(NETSNMP_DS_APPLICATION_ID, NETSNMP_DS_AGENT_AGENTX_MASTER, i);
 }

@@ -216,16 +216,13 @@ parse_secLevel_conf(const char *word, char *cptr) {
 void
 snmpv3_secLevel_conf(const char *word, char *cptr)
 {
-    char            buf[1024];
     int             secLevel;
 
     if ((secLevel = parse_secLevel_conf( word, cptr )) >= 0 ) {
         netsnmp_ds_set_int(NETSNMP_DS_LIBRARY_ID, 
 			   NETSNMP_DS_LIB_SECLEVEL, secLevel);
     } else {
-        snprintf(buf, sizeof(buf), "Unknown security level: %s", cptr);
-        buf[ sizeof(buf)-1 ] = 0;
-        config_perror(buf);
+	netsnmp_config_error("Unknown security level: %s", cptr);
     }
     DEBUGMSGTL(("snmpv3", "default secLevel set to: %s = %d\n", cptr,
                 netsnmp_ds_get_int(NETSNMP_DS_LIBRARY_ID, 
@@ -1215,14 +1212,11 @@ oldengineID_conf(const char *word, char *cptr)
 void
 exactEngineID_conf(const char *word, char *cptr)
 {
-    char buf[ 1024 ];
-
     read_config_read_octet_string(cptr, &engineID, &engineIDLength);
     if (engineIDLength > MAX_ENGINEID_LENGTH) {
-        snprintf(buf, sizeof(buf),
-                 "exactEngineID '%s' too long; truncating to %d bytes",
-                 cptr, MAX_ENGINEID_LENGTH);
-        config_perror(buf);
+	netsnmp_config_error(
+	    "exactEngineID '%s' too long; truncating to %d bytes",
+	    cptr, MAX_ENGINEID_LENGTH);
         engineID[MAX_ENGINEID_LENGTH - 1] = '\0';
         engineIDLength = MAX_ENGINEID_LENGTH;
     }

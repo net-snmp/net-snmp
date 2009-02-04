@@ -1063,9 +1063,7 @@ mta_sendmail_parse_config(const char *token, char *line)
         open_sendmailst(TRUE);
 
         if (sendmailst_fh == -1) {
-            char            str[FILENAMELEN + 50];
-            sprintf(str, "couldn't open file \"%s\"", sendmailst_fn);
-            config_perror(str);
+	    netsnmp_config_error("couldn't open file \"%s\"", sendmailst_fn);
             return;
         }
 

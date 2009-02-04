@@ -7,24 +7,19 @@
 void
 netsnmp_parse_iquerySecLevel(const char *token, char *line)
 {
-    char buf[1024];
     int secLevel;
 
     if ((secLevel = parse_secLevel_conf( token, line )) >= 0 ) {
         netsnmp_ds_set_int(NETSNMP_DS_APPLICATION_ID,
                            NETSNMP_DS_AGENT_INTERNAL_SECLEVEL, secLevel);
     } else {
-        snprintf(buf, sizeof(buf), "Unknown security level: %s", line);
-        buf[ sizeof(buf)-1 ] = 0;
-        config_perror(buf);
+	netsnmp_config_error("Unknown security level: %s", line);
     }
 }
 
 void
 netsnmp_parse_iqueryVersion(const char *token, char *line)
 {
-    char buf[1024];
-
 #ifndef NETSNMP_DISABLE_SNMPV1
     if (!strcmp( line, "1" ))
         netsnmp_ds_set_int(NETSNMP_DS_APPLICATION_ID,
@@ -41,9 +36,7 @@ netsnmp_parse_iqueryVersion(const char *token, char *line)
         netsnmp_ds_set_int(NETSNMP_DS_APPLICATION_ID,
                            NETSNMP_DS_AGENT_INTERNAL_VERSION, SNMP_VERSION_3);
     else {
-        snprintf(buf, sizeof(buf), "Unknown version: %s", line);
-        buf[ sizeof(buf)-1 ] = 0;
-        config_perror(buf);
+	netsnmp_config_error("Unknown version: %s", line);
     }
 }
 
