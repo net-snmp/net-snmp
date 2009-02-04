@@ -1125,30 +1125,16 @@ netsnmp_closest_column(unsigned int current,
  *
  */
 void
-#if HAVE_STDARG_H
 netsnmp_table_helper_add_indexes(netsnmp_table_registration_info *tinfo,
                                  ...)
-#else
-netsnmp_table_helper_add_indexes(va_alist)
-     va_dcl
-#endif
 {
     va_list         debugargs;
     int             type;
 
-#if HAVE_STDARG_H
     va_start(debugargs, tinfo);
-#else
-    netsnmp_table_registration_info *tinfo;
-
-    va_start(debugargs);
-    tinfo = va_arg(debugargs, netsnmp_table_registration_info *);
-#endif
-
     while ((type = va_arg(debugargs, int)) != 0) {
         netsnmp_table_helper_add_index(tinfo, type);
     }
-
     va_end(debugargs);
 }
 

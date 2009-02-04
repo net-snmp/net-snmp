@@ -8,11 +8,7 @@ extern          "C" {
 #if HAVE_SYSLOG_H
 #include <syslog.h>
 #endif
-#if HAVE_STDARG_H
 #include <stdarg.h>
-#else
-#include <varargs.h>
-#endif
 
 #ifndef LOG_ERR
 #define LOG_EMERG       0       /* system is unusable */
@@ -52,15 +48,11 @@ extern          "C" {
 
     int             snmp_stderrlog_status(void);
 
-#if HAVE_STDARG_H
-# if !defined(__GNUC__) || __GNUC__ < 2 || (__GNUC__ == 2 && __GNUC_MINOR__ < 8)
+#if !defined(__GNUC__) || __GNUC__ < 2 || (__GNUC__ == 2 && __GNUC_MINOR__ < 8)
     int             snmp_log(int priority, const char *format, ...);
-# else
+#else
     int             snmp_log(int priority, const char *format, ...)
                     	__attribute__ ((__format__ (__printf__, 2, 3)));
-# endif
-#else
-    int             snmp_log(va_alist);
 #endif
     int             snmp_vlog(int priority, const char *format,
                               va_list ap);
