@@ -86,15 +86,9 @@ static void     windowsOSVersionString(char [], size_t);
 static void
 system_parse_config_sysdescr(const char *token, char *cptr)
 {
-    char            tmpbuf[1024];
-
     if (strlen(cptr) >= sizeof(version_descr)) {
-        snprintf(tmpbuf,
-                 sizeof(tmpbuf),
-                 "sysdescr token too long (must be < %lu):\n\t%s",
-                 (unsigned long)sizeof(version_descr),
-                 cptr);
-        config_perror(tmpbuf);
+	netsnmp_config_error("sysdescr token too long (must be < %lu):\n\t%s",
+			     (unsigned long)sizeof(version_descr), cptr);
     } else if (strcmp(cptr, "\"\"") == 0) {
         version_descr[0] = '\0';
     } else {
@@ -107,13 +101,9 @@ system_parse_config_string(const char *token, char *cptr,
                            const char *name, char* value, size_t size,
                            int* guard)
 {
-    char            tmpbuf[1024];
-
     if (strlen(cptr) >= size) {
-        snprintf(tmpbuf, 1024,
-                 "%s token too long (must be < %lu):\n\t%s",
-                 token, size, cptr);
-        config_perror(tmpbuf);
+	netsnmp_config_error("%s token too long (must be < %lu):\n\t%s",
+			     token, size, cptr);
     }
 
     if (*token == 'p' && strcasecmp(token + 1, name) == 0) {
@@ -181,15 +171,10 @@ system_parse_config_sysServices(const char *token, char *cptr)
 static void
 system_parse_config_sysObjectID(const char *token, char *cptr)
 {
-    char tmpbuf[1024];
-
     sysObjectIDLength = MAX_OID_LEN;
     if (!read_objid(cptr, sysObjectID, &sysObjectIDLength)) {
-        snprintf(tmpbuf,
-                 sizeof(tmpbuf),
-                 "sysobjectid token not a parsable OID:\n\t%s",
-                 cptr);
-        config_perror(tmpbuf);
+	netsnmp_config_error("sysobjectid token not a parsable OID:\n\t%s",
+			     cptr);
         memcpy(sysObjectID, version_sysoid, version_sysoid_len * sizeof(oid));
         sysObjectIDLength = version_sysoid_len;
     }

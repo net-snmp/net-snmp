@@ -116,11 +116,8 @@ snmptrapd_parse_traphandle(const char *token, char *line)
             }
         }
         if (!read_objid(buf, obuf, &olen)) {
-            char            buf1[STRINGMAX];
-            snprintf(buf1,  sizeof(buf1),
-                    "Bad trap OID in traphandle directive: %s", buf);
-            buf1[ sizeof(buf1)-1 ] = 0;
-            config_perror(buf1);
+	    netsnmp_config_error("Bad trap OID in traphandle directive: %s",
+				 buf);
             return;
         }
         DEBUGMSGOID(("read_config:traphandle", obuf, olen));
@@ -181,11 +178,7 @@ parse_forward(const char *token, char *line)
         }
 
         if (!read_objid(buf, obuf, &olen)) {
-            char            buf1[STRINGMAX];
-            snprintf(buf1,  sizeof(buf1),
-                    "Bad trap OID in forward directive: %s", buf);
-            buf1[ sizeof(buf1)-1 ] = 0;
-            config_perror(buf1);
+	    netsnmp_config_error("Bad trap OID in forward directive: %s", buf);
             return;
         }
         DEBUGMSGOID(("read_config:forward", obuf, olen));
