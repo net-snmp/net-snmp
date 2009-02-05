@@ -33561,12 +33561,7 @@ fi
 
 
 
-
-
-
-
-
-for ac_func in bcopy           index                                   memcpy          memmove                                 lrand48         rand          random                    strchr          signal        sigset
+for ac_func in lrand48         rand          random                    signal          sigset
 do
 as_ac_var=`$as_echo "ac_cv_func_$ac_func" | $as_tr_sh`
 { $as_echo "$as_me:$LINENO: checking for $ac_func" >&5

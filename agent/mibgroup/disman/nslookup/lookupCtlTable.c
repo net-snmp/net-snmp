@@ -623,7 +623,7 @@ run_lookup(struct lookupTable_data *item)
                         address));
         } else {
             while (*lookup->h_addr_list) {
-                bcopy(*lookup->h_addr_list++, (char *) &a, sizeof(a));
+                memcpy(&a, *lookup->h_addr_list++, sizeof(a));
 
                 temp = SNMP_MALLOC_STRUCT(lookupResultsTable_data);
                 if (temp == NULL) {
@@ -1012,7 +1012,7 @@ lookupResultsTable_del(struct lookupTable_data *thedata)
 
     snmp_varlist_add_variable(&vars, NULL, 0, ASN_OCTET_STR, (char *) thedata->lookupCtlOwnerIndex, thedata->lookupCtlOwnerIndexLen);   /* lookupCtlOwnerIndex */
     snmp_varlist_add_variable(&vars, NULL, 0, ASN_OCTET_STR, (char *) thedata->lookupCtlOperationName, thedata->lookupCtlOperationNameLen);     /* lookupCtlOperationName */
-    bzero(newoid, MAX_OID_LEN * sizeof(oid));
+    memset(newoid, '\0', MAX_OID_LEN * sizeof(oid));
     header_complex_generate_oid(newoid, &newoid_len, NULL, 0, vars);
 
 

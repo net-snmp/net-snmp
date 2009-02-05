@@ -57,7 +57,7 @@ _systemstats(mibgroup_e mib, netsnmp_container *container, u_int load_flags)
     req_e req = GET_FIRST;
     int ipversion = (mib == MIB_IP6) ? MIB2_INETADDRESSTYPE_ipv6 :
                                        MIB2_INETADDRESSTYPE_ipv4;
-    bzero((void *)&iptot, sizeof(iptot));
+    memset(&iptot, '\0', sizeof(iptot));
 
     while (getMibstat(mib, &ipe, sizeof(ipe), req, 
                       &Get_everything, NULL) == 0) { 

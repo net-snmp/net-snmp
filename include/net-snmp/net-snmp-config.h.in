@@ -82,9 +82,6 @@
 /* Define to 1 if you have the <asm/types.h> header file. */
 #undef HAVE_ASM_TYPES_H
 
-/* Define to 1 if you have the `bcopy' function. */
-#undef HAVE_BCOPY
-
 /* Define to 1 if you have the `cgetnext' function. */
 #undef HAVE_CGETNEXT
 
@@ -193,9 +190,6 @@
 
 /* Define to 1 if you have the `if_nametoindex' function. */
 #undef HAVE_IF_NAMETOINDEX
-
-/* Define to 1 if you have the `index' function. */
-#undef HAVE_INDEX
 
 /* Define to 1 if you have the <inet/common.h> header file. */
 #undef HAVE_INET_COMMON_H
@@ -325,12 +319,6 @@
 
 /* Define to 1 if you have the <malloc.h> header file. */
 #undef HAVE_MALLOC_H
-
-/* Define to 1 if you have the `memcpy' function. */
-#undef HAVE_MEMCPY
-
-/* Define to 1 if you have the `memmove' function. */
-#undef HAVE_MEMMOVE
 
 /* Define to 1 if you have the <memory.h> header file. */
 #undef HAVE_MEMORY_H
@@ -640,9 +628,6 @@
 
 /* Define to 1 if you have the `strcasestr' function. */
 #undef HAVE_STRCASESTR
-
-/* Define to 1 if you have the `strchr' function. */
-#undef HAVE_STRCHR
 
 /* Define to 1 if you have the `strdup' function. */
 #undef HAVE_STRDUP
@@ -1442,47 +1427,6 @@
 #undef uintptr_t
 
 /* end of definitions added by configure on-the-fly */
-
-#ifndef HAVE_STRCHR
-#ifdef HAVE_INDEX
-# define strchr index
-# define strrchr rindex
-#endif
-#endif
-
-#ifndef HAVE_INDEX
-#ifdef HAVE_STRCHR
-#ifdef mingw32
-# define index(a,b) strchr(a,b)
-# define rindex(a,b) strrchr(a,b)
-#else
-# define index strchr
-# define rindex strrchr
-#endif
-#endif
-#endif
-
-#ifndef HAVE_MEMCPY
-#ifdef HAVE_BCOPY
-# define memcpy(d, s, n) bcopy ((s), (d), (n))
-# define memmove(d, s, n) bcopy ((s), (d), (n))
-# define memcmp bcmp
-#endif
-#endif
-
-#ifndef HAVE_MEMMOVE
-#ifdef HAVE_MEMCPY
-# define memmove memcpy
-#endif
-#endif
-
-#ifndef HAVE_BCOPY
-#ifdef HAVE_MEMCPY
-# define bcopy(s, d, n) memcpy ((d), (s), (n))
-# define bzero(p,n) memset((p),(0),(n))
-# define bcmp memcmp
-#endif
-#endif
 
 /* If you have openssl 0.9.7 or above, you likely have AES support. */
 #undef NETSNMP_USE_OPENSSL

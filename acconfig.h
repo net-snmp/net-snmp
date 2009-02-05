@@ -49,47 +49,6 @@
 
 /* end of definitions added by configure on-the-fly */
 
-#ifndef HAVE_STRCHR
-#ifdef HAVE_INDEX
-# define strchr index
-# define strrchr rindex
-#endif
-#endif
-
-#ifndef HAVE_INDEX
-#ifdef HAVE_STRCHR
-#ifdef mingw32
-# define index(a,b) strchr(a,b)
-# define rindex(a,b) strrchr(a,b)
-#else
-# define index strchr
-# define rindex strrchr
-#endif
-#endif
-#endif
-
-#ifndef HAVE_MEMCPY
-#ifdef HAVE_BCOPY
-# define memcpy(d, s, n) bcopy ((s), (d), (n))
-# define memmove(d, s, n) bcopy ((s), (d), (n))
-# define memcmp bcmp
-#endif
-#endif
-
-#ifndef HAVE_MEMMOVE
-#ifdef HAVE_MEMCPY
-# define memmove memcpy
-#endif
-#endif
-
-#ifndef HAVE_BCOPY
-#ifdef HAVE_MEMCPY
-# define bcopy(s, d, n) memcpy ((d), (s), (n))
-# define bzero(p,n) memset((p),(0),(n))
-# define bcmp memcmp
-#endif
-#endif
-
 /* If you have openssl 0.9.7 or above, you likely have AES support. */
 #undef NETSNMP_USE_OPENSSL
 #if defined(NETSNMP_USE_OPENSSL) && defined(HAVE_OPENSSL_AES_H) && defined(HAVE_AES_CFB128_ENCRYPT)
