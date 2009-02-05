@@ -7,12 +7,6 @@
 /*
  * using CCS "cc", "configure" does not find this item 
  */
-#define HAVE_MEMCPY 1
-/*
- * so, undo the damage done earlier in config.h 
- */
-#undef memcpy
-#undef memmove
 #define HAVE_GETHOSTBYNAME 1
 
 /*

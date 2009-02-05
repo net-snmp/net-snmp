@@ -222,9 +222,9 @@ _load_v6(netsnmp_container *container, int idx_offset)
         entry = netsnmp_access_ipaddress_entry_create();
         if (entry == NULL)
             return (-1);    
-        if (bcmp((const void *)&ip6ae.ipv6AddrAddress,
-                 (const void *)&in6addr_any,
-                 sizeof (ip6ae.ipv6AddrAddress)) == 0)
+        if (memcmp((const void *)&ip6ae.ipv6AddrAddress,
+                   (const void *)&in6addr_any,
+                   sizeof (ip6ae.ipv6AddrAddress)) == 0)
             continue;
 
         ip6ae.ipv6AddrIfIndex.o_bytes[ip6ae.ipv6AddrIfIndex.o_length] = '\0';

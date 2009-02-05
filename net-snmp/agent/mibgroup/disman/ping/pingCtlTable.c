@@ -1020,7 +1020,7 @@ host_serv(const char *host, const char *serv, int family, int socktype)
     int             n;
     struct addrinfo hints, *res;
 
-    bzero(&hints, sizeof(struct addrinfo));
+    memset(&hints, '\0', sizeof(struct addrinfo));
     hints.ai_flags = AI_CANONNAME;      /* always return canonical name */
     hints.ai_family = family;   /* AF_UNSPEC, AF_INET, AF_INET6, etc. */
     hints.ai_socktype = socktype;       /* 0, SOCK_STREAM, SOCK_DGRAM, etc. */
@@ -1048,7 +1048,7 @@ Host_serv(const char *host, const char *serv, int family, int socktype)
     int             n;
     struct addrinfo hints, *res;
 
-    bzero(&hints, sizeof(struct addrinfo));
+    memset(&hints, '\0', sizeof(struct addrinfo));
     hints.ai_flags = AI_CANONNAME;      /* always return canonical name */
     hints.ai_family = family;   /* 0, AF_INET, AF_INET6, etc. */
     hints.ai_socktype = socktype;       /* 0, SOCK_STREAM, SOCK_DGRAM, etc. */
@@ -1125,7 +1125,7 @@ send_ping_trap(struct pingCtlTable_data *item,
     /*
      * pingCtlTargetAddress 
      */
-    bzero(newoid, MAX_OID_LEN * sizeof(oid));
+    memset(newoid, '\0', MAX_OID_LEN * sizeof(oid));
     header_complex_generate_oid(newoid, &newoid_len, pingCtlTargetAddress,
                                 sizeof(pingCtlTargetAddress) / sizeof(oid),
                                 vars);
@@ -1139,7 +1139,7 @@ send_ping_trap(struct pingCtlTable_data *item,
     /*
      * pingResultsMinRtt
      */
-    bzero(newoid, newoid_len);
+    memset(newoid, '\0', newoid_len);
     header_complex_generate_oid(newoid, &newoid_len, pingResultsMinRtt,
                                 sizeof(pingResultsMinRtt) / sizeof(oid),
                                 vars);
@@ -1152,7 +1152,7 @@ send_ping_trap(struct pingCtlTable_data *item,
     /*
      * pingResultsMaxRtt 
      */
-    bzero(newoid, newoid_len);
+    memset(newoid, '\0', newoid_len);
     header_complex_generate_oid(newoid, &newoid_len, pingResultsMaxRtt,
                                 sizeof(pingResultsMaxRtt) / sizeof(oid),
                                 vars);
@@ -1166,7 +1166,7 @@ send_ping_trap(struct pingCtlTable_data *item,
     /*
      * pingResultsAverageRtt 
      */
-    bzero(newoid, newoid_len);
+    memset(newoid, '\0', newoid_len);
     header_complex_generate_oid(newoid, &newoid_len, pingResultsAverageRtt,
                                 sizeof(pingResultsAverageRtt) /
                                 sizeof(oid), vars);
@@ -1181,7 +1181,7 @@ send_ping_trap(struct pingCtlTable_data *item,
     /*
      * pingResultsProbeResponses 
      */
-    bzero(newoid, newoid_len);
+    memset(newoid, '\0', newoid_len);
     header_complex_generate_oid(newoid, &newoid_len,
                                 pingResultsProbeResponses,
                                 sizeof(pingResultsProbeResponses) /
@@ -1197,7 +1197,7 @@ send_ping_trap(struct pingCtlTable_data *item,
     /*
      * pingResultsSendProbes 
      */
-    bzero(newoid, newoid_len);
+    memset(newoid, '\0', newoid_len);
     header_complex_generate_oid(newoid, &newoid_len, pingResultsSendProbes,
                                 sizeof(pingResultsSendProbes) /
                                 sizeof(oid), vars);
