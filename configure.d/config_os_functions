@@ -17,10 +17,8 @@ AC_FUNC_GETMNTENT
 #   Stand-alone function checks:
 ##
 #  Core:
-AC_CHECK_FUNCS([bcopy           index                   ] dnl
-               [memcpy          memmove                 ] dnl
-               [lrand48         rand          random    ] dnl
-               [strchr          signal        sigset    ] )
+AC_CHECK_FUNCS([lrand48         rand          random    ] dnl
+               [signal          sigset                  ] )
 
 #  Library:
 AC_CHECK_FUNCS([fork            gai_strerror                   ] dnl

@@ -505,7 +505,7 @@ void devla_getstats(unsigned int regno, void *dummy) {
         if (ndevs == 0) {
                 ndevs = lastat->dinfo->numdevs;
                 devloads = (struct dev_la *) malloc(ndevs * sizeof(struct dev_la));
-                bzero(devloads, ndevs * sizeof(struct dev_la));
+                memset(devloads, '\0', ndevs * sizeof(struct dev_la));
                 for (i=0; i < ndevs; i++) {
                         devloads[i].la1 = devloads[i].la5 = devloads[i].la15 = 0;
                         memcpy(&devloads[i].prev, &lastat->dinfo->devices[i].busy_time, sizeof(devloads[i].prev));

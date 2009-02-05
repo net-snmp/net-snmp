@@ -145,7 +145,8 @@ init_trResultsTable(struct traceRouteCtlTable_data *item)
         exit(1);
     }
 
-    bzero(host, sizeof(char) * (item->traceRouteCtlTargetAddressLen + 1));
+    memset(host, '\0',
+	   sizeof(char) * (item->traceRouteCtlTargetAddressLen + 1));
     strcpy(host, item->traceRouteCtlTargetAddress);
     host[item->traceRouteCtlTargetAddressLen] = '\0';
 
@@ -238,7 +239,7 @@ init_trResultsTable(struct traceRouteCtlTable_data *item)
         struct hostent *hp = NULL;
         /* struct hostenv hp; */
         char            pa[64];
-        bzero(pa, 64);
+        memset(pa, '\0', 64);
 
         to->sin6_family = AF_INET6;
         to->sin6_port = htons(33434);
@@ -253,7 +254,7 @@ init_trResultsTable(struct traceRouteCtlTable_data *item)
                             strerror(errno)));
                 exit(1);
             }
-            bzero(StorageTmp->traceRouteResultsIpTgtAddr,
+            memset(StorageTmp->traceRouteResultsIpTgtAddr, '\0',
                   sizeof(char) * (strlen(host) + 1));
             memcpy(StorageTmp->traceRouteResultsIpTgtAddr, host,
                    strlen(host) + 1);
@@ -274,7 +275,7 @@ init_trResultsTable(struct traceRouteCtlTable_data *item)
                                 strerror(errno)));
                     exit(1);
                 }
-                bzero(StorageTmp->traceRouteResultsIpTgtAddr,
+                memset(StorageTmp->traceRouteResultsIpTgtAddr, '\0',
                       sizeof(char) * (strlen(host) + 1));
                 memcpy(StorageTmp->traceRouteResultsIpTgtAddr, hostname,
                        strlen(hostname) + 1);
@@ -720,7 +721,7 @@ traceRouteProbeHistoryTable_delLast(struct traceRouteCtlTable_data
     snmp_varlist_add_variable(&vars, NULL, 0, ASN_OCTET_STR, (char *) thedata->traceRouteCtlOwnerIndex, thedata->traceRouteCtlOwnerIndexLen);   /* traceRouteCtlOwnerIndex */
     snmp_varlist_add_variable(&vars, NULL, 0, ASN_OCTET_STR, (char *) thedata->traceRouteCtlTestName, thedata->traceRouteCtlTestNameLen);       /* traceRouteCtlOperationName */
 
-    bzero(newoid, sizeof(oid) * MAX_OID_LEN);
+    memset(newoid, '\0', sizeof(oid) * MAX_OID_LEN);
     header_complex_generate_oid(newoid, &newoid_len, NULL, 0, vars);
 
     for (hcilast = hciptr2 = traceRouteProbeHistoryTableStorage;
@@ -1359,7 +1360,7 @@ traceRouteResultsTable_del(struct traceRouteCtlTable_data *thedata)
     snmp_varlist_add_variable(&vars, NULL, 0, ASN_OCTET_STR, (char *) thedata->traceRouteCtlOwnerIndex, thedata->traceRouteCtlOwnerIndexLen);   /* traceRouteCtlOwnerIndex */
     snmp_varlist_add_variable(&vars, NULL, 0, ASN_OCTET_STR, (char *) thedata->traceRouteCtlTestName, thedata->traceRouteCtlTestNameLen);       /* traceRouteCtlTestName */
 
-    bzero(newoid, sizeof(oid) * MAX_OID_LEN);
+    memset(newoid, '\0', sizeof(oid) * MAX_OID_LEN);
     header_complex_generate_oid(newoid, &newoid_len, NULL, 0, vars);
 
     for (hciptr2 = traceRouteResultsTableStorage; hciptr2 != NULL;
@@ -1393,7 +1394,7 @@ traceRouteProbeHistoryTable_del(struct traceRouteCtlTable_data *thedata)
     snmp_varlist_add_variable(&vars, NULL, 0, ASN_OCTET_STR, (char *) thedata->traceRouteCtlOwnerIndex, thedata->traceRouteCtlOwnerIndexLen);   /* traceRouteCtlOwnerIndex */
     snmp_varlist_add_variable(&vars, NULL, 0, ASN_OCTET_STR, (char *) thedata->traceRouteCtlTestName, thedata->traceRouteCtlTestNameLen);       /* traceRouteCtlOperationName */
 
-    bzero(newoid, sizeof(oid) * MAX_OID_LEN);
+    memset(newoid, '\0', sizeof(oid) * MAX_OID_LEN);
 
     header_complex_generate_oid(newoid, &newoid_len, NULL, 0, vars);
 
@@ -1430,7 +1431,7 @@ traceRouteHopsTable_del(struct traceRouteCtlTable_data *thedata)
     snmp_varlist_add_variable(&vars, NULL, 0, ASN_OCTET_STR, (char *) thedata->traceRouteCtlOwnerIndex, thedata->traceRouteCtlOwnerIndexLen);   /* traceRouteCtlOwnerIndex */
     snmp_varlist_add_variable(&vars, NULL, 0, ASN_OCTET_STR, (char *) thedata->traceRouteCtlTestName, thedata->traceRouteCtlTestNameLen);       /* traceRouteCtlTestName */
 
-    bzero(newoid, sizeof(oid) * MAX_OID_LEN);
+    memset(newoid, '\0', sizeof(oid) * MAX_OID_LEN);
 
     header_complex_generate_oid(newoid, &newoid_len, NULL, 0, vars);
 
@@ -1492,7 +1493,7 @@ send_traceRoute_trap(struct traceRouteCtlTable_data *item,
     /*
      * traceRouteCtlTargetAddress 
      */
-    bzero(newoid, MAX_OID_LEN * sizeof(oid));
+    memset(newoid, '\0', MAX_OID_LEN * sizeof(oid));
     header_complex_generate_oid(newoid, &newoid_len,
                                 traceRouteCtlTargetAddress,
                                 sizeof(traceRouteCtlTargetAddress) /
@@ -1506,7 +1507,7 @@ send_traceRoute_trap(struct traceRouteCtlTable_data *item,
 
     for (hciptr = traceRouteHopsTableStorage; hciptr != NULL;
          hciptr = hciptr->next) {
-        bzero(indexoid, MAX_OID_LEN * sizeof(oid));
+	memset(indexoid, '\0', MAX_OID_LEN * sizeof(oid));
         header_complex_generate_oid(indexoid, &indexoid_len, NULL, 0,
                                     vars);
         if (snmp_oid_compare
@@ -1515,13 +1516,13 @@ send_traceRoute_trap(struct traceRouteCtlTable_data *item,
                 (struct traceRouteHopsTable_data *)
                 header_complex_get_from_oid(traceRouteHopsTableStorage,
                                             hciptr->name, hciptr->namelen);
-            bzero(tempoid, MAX_OID_LEN * sizeof(oid));
+            memset(tempoid, '\0', MAX_OID_LEN * sizeof(oid));
             header_complex_generate_oid(tempoid, &tempoid_len,
                                         traceRouteHopsIpTgAddress,
                                         sizeof(traceRouteHopsIpTgAddress) /
                                         sizeof(oid), vars);
             snmp_varlist_add_variable(&var_hops, NULL, 0, ASN_UNSIGNED, (char *) &StorageHops->traceRouteHopsHopIndex, sizeof(StorageHops->traceRouteHopsHopIndex));    /* traceRouteCtlTestName */
-            bzero(newoid, MAX_OID_LEN * sizeof(oid));
+            memset(newoid, '\0', MAX_OID_LEN * sizeof(oid));
             header_complex_generate_oid(newoid, &newoid_len, tempoid,
                                         tempoid_len, var_hops);
             snmp_varlist_add_variable(&var_list, newoid, newoid_len,
@@ -5041,7 +5042,7 @@ run_traceRoute(unsigned int clientreg, void *clientarg)
 
         setlinebuf(stdout);
 
-        (void) bzero((char *) &whereto, sizeof(struct sockaddr_in6));
+        memset(&whereto, '\0', sizeof(struct sockaddr_in6));
 
         to->sin6_family = AF_INET6;
         to->sin6_port = htons(port);
@@ -5140,7 +5141,7 @@ run_traceRoute(unsigned int clientreg, void *clientarg)
             saddr.sin6_port = 0;
             close(probe_fd);
         } else {
-            (void) bzero((char *) &saddr, sizeof(struct sockaddr_in6));
+            memset(&saddr, '\0', sizeof(struct sockaddr_in6));
             saddr.sin6_family = AF_INET6;
             if (inet_pton(AF_INET6, source, &saddr.sin6_addr) < 0) {
                 Printf("traceroute: unknown addr %s\n", source);
