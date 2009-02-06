@@ -1439,7 +1439,7 @@ config_vlog(int level, const char *levelmsg, const char *str, va_list args)
     int len = snprintf(tmpbuf, sizeof(tmpbuf), "%s: line %d: %s: %s\n",
 		       curfilename, linecount, levelmsg, str);
     if (len >= sizeof(tmpbuf)) {
-	buf = malloc(len + 1);
+	buf = (char*)malloc(len + 1);
 	sprintf(buf, "%s: line %d: %s: %s\n",
 		curfilename, linecount, levelmsg, str);
     }
