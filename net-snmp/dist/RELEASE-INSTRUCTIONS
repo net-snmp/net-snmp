@@ -1,22 +1,19 @@
-This is a summary of the steps required to make a new release.
-Do not attempt to run these manually - instead use the 'makerelease'
-script, which will automate as much of this process as possible.
+This is a summary of the steps required to make a new release.  Do not
+attempt to run these manually - instead use the 'makerelease'
+application and makerelease.xml file.  Get 'makerelease' from the
+makerelease SVN repository:
 
-Invoke this script as:
+  svn co https://makerelease.svn.sourceforge.net/svnroot/makerelease/trunk/makerelease
+  cd makerelease
+  perl Makefile.PL
+  make
+  sudo make install
 
-        makerelease 5.x.y
+Then to run it from a directory to release:
 
-For pre-releases and release candidates, append the relevant suffix:
+  makerelease -c NETSNMPTRUNK/dist/makerelease.xml
 
-	makerelease 5.x.y.preN
-or	makerelease 5.x.y.rcN
-
-Any mention of "5.x.y" or "5-x-y" in these intructions should have the
-appropriate suffix appended, in the obvious manner.
-
-Certain stages need to be handled manually - there are further
-details about these particular steps later on in this file.
-
+It will prompt you for all needed information and tasks to be done.
 
 IMPORTANT NOTE:
     Don't *ever* release a second tar ball under the same name as the
@@ -24,6 +21,624 @@ IMPORTANT NOTE:
     instead, since you don't have to figure out from the bug reports
     that a user really grabbed the first snapshot instead of the
     second when they complain about version "XXX" not working.
+
+====== makerelease -n output showing makerelease documented steps ======
+
+STEP: 1: Setup Steps
+
+  This set of steps will do some preliminary "safety" checks to ensure the
+  local environment is ok and setup some important information.
+
+  ===== Entering Step: 1 =====
+
+STEP: 1.1: Setup Checck
+
+  This should show the last version number published in this branch by
+  looking at the time line in the README file:
+
+  Commands to execute:
+
+    head -1 README
+
+STEP: 1.2: Pick a Version Number
+
+  Please enter the version number to publish.  Net-SNMP convention dictates
+  that this be a version number like 5.4 or 5.4.1.  Pre-releases that occur
+  before a branch freezes should be appended with ".preN" like 5.4.1.pre2. 
+  Release-candidates should be labeled ".rcN" like 5.4.1.rc1.
+
+  Decide on a value for parameter 'VERSION'
+
+    parameter: VERSION
+
+    prompt:    Enter the new version number:
+
+STEP: 1.3: Defining a second internal version string
+
+  Internal perl code will be executed
+
+STEP: 1.4: Release Parameter Information
+
+  Here is the configured information we'll be using:
+
+  VERSION:		   {VERSION}
+
+  VERSION with dashes:	   {VERSIONDASHES}
+
+  Floating point VERSION:  {VERSIONFLOAT}
+
+  SVN Branch URL:	   {BRANCHPATH}
+
+STEP: 1.5: update
+
+  We need to make sure your code is up to date and matches the latest
+  sources in this branch.
+
+  Commands to execute:
+
+    svn update
+
+STEP: 1.6: Check for changes
+
+  This steps looks for outstanding files that have been modified.  There
+  should be no outstanding modifications!  If this step finds outstanding
+  modified files you need to check them in or revert them before
+  continuing!
+
+  Commands to execute:
+
+    svn -u status | egrep '^[^\?]'
+
+  (Leaving Step: 1)
+
+STEP: 2: Source Code Setup
+
+  This set of steps will modify various places within the source code tree
+  to bring it up to date with the new version number about to be published.
+
+  ===== Entering Step: 2 =====
+
+STEP: 2.1: Libtool / Library versioning setup
+
+  These steps will modify the various files in the source tree that contain
+  the version number, show you the changes that will be made and then check
+  in the resulting changes if you approve of them.
+
+  ===== Entering Step: 2.1 =====
+
+STEP: 2.1.1: version:libtoolmanualedit
+
+  You (may) need to edit Makefile.top to update the library version
+  numbering (usually just for the first pre-release of a given version). 
+  See the comments in RELEASE-INSTRUCTIONS about LIBCURRENT, LIBAGE and
+  LIBREVISION.
+
+  This script will commit the file for you after you're done.
+
+STEP: 2.1.2: version:commit
+
+  We'll now commit the Makefile.top file if you've modified it.
+
+  Commands to execute:
+
+    svn commit -m "version update" Makefile.top
+
+  (Leaving Step: 2.1)
+
+STEP: 2.2: Change The Version Number
+
+  These steps will modify the various files in the source tree that contain
+  the version number, show you the changes that will be made and then check
+  in the resulting changes if you approve of them.
+
+  ===== Entering Step: 2.2 =====
+
+STEP: 2.2.1: Modify the source files
+
+  We will now modify files through the code to replace the version number
+  with the newer one.
+
+  Modifying files:
+
+    replacing: 'VERSION = '(.*)'' with: 'VERSION = \'{VERSIONFLOAT}\''
+
+
+    files:  glob=ARRAY(0x8dc9064)
+
+      perl/SNMP/SNMP.pm
+
+      perl/agent/agent.pm
+
+      perl/agent/Support/Support.pm
+
+      perl/agent/default_store/default_store.pm
+
+      perl/default_store/default_store.pm
+
+      perl/OID/OID.pm
+
+      perl/ASN/ASN.pm
+
+      perl/AnyData_SNMP/Storage.pm
+
+      perl/AnyData_SNMP/Format.pm
+
+      perl/TrapReceiver/TrapReceiver.pm
+
+
+
+  Modifying files:
+
+    replacing: 'NetSnmpVersionInfo = "[\d\.]+"' with: 'NetSnmpVersionInfo =
+  "{VERSION}"'
+
+
+    files:  glob=ARRAY(0x8dc8fd4)
+
+      snmplib/snmp_version.c
+
+
+
+  Modifying files:
+
+    replacing: 'Version: [\.0-9a-zA-Z]+' with: 'Version: {VERSION}'
+
+
+    files:  glob=ARRAY(0x8dc8f44)
+
+      README
+
+      FAQ
+
+      dist/net-snmp.spec
+
+
+
+  Modifying files:
+
+    replacing: 'VERSION = [\.0-9a-zA-Z]+' with: 'VERSION = {VERSION}'
+
+
+    files:  glob=ARRAY(0x8dc8ed4)
+
+      dist/Makefile
+
+
+
+  Modifying files:
+
+    replacing: 'AC_INIT\(\[Net-SNMP\], \[([^\]]+)\]' with:
+  'AC_INIT([Net-SNMP], [{VERSION}]'
+
+
+    files:  glob=ARRAY(0x8dc8e64)
+
+      configure.in
+
+
+
+  Modifying files:
+
+    replacing: 'NetSnmpVersionInfo = "[^"]+"' with: 'NetSnmpVersionInfo =
+  "{VERSION}"'
+
+
+    files:  glob=ARRAY(0x8dc8df4)
+
+      snmplib/snmp_version.c
+
+
+
+STEP: 2.2.2: Running autoconf to rebuild configure
+
+  We modified configure.in, so we now need to run autoconf to rebuild
+  configure.
+
+  XXX: in the future we should verify the correct autoconf version number
+
+  Commands to execute:
+
+    autoconf
+
+STEP: 2.2.3: Running svn diff to check changes
+
+  Check the following changes for proper version number differences before
+  we commit the chances.
+
+  Commands to execute:
+
+    svn diff
+
+STEP: 2.2.4: Running svn commit to commit the changes
+
+  Check the changes in the above diff and then we'll commit the results
+  here if they look ok.
+
+  Commands to execute:
+
+    svn commit -m "Version number update"
+
+  (Leaving Step: 2.2)
+
+STEP: 2.3: docs:make
+
+  This step will create manual pages from doxygen instrumented code files.
+
+  Commands to execute:
+
+    make docs
+
+    make mancp
+
+STEP: 2.4: docs:update
+
+  This will run svn status to figure out what files have changed since the
+  previous man page generation steps were done.  After this step, we'll
+  commit all the modified files.
+
+  You may find additional files (marked with a ?) that should be added to
+  the svn repository and you'll need to do this by hand before going on to
+  the next step.
+
+  Note: based on a recent net-snmp-admin discussion, we're no longer going
+  to be adding the bazillions of man pages that doxygen generates by
+  default.  Only important ones should be added.
+
+  Commands to execute:
+
+    svn -u status man
+
+STEP: 2.5: docs:manualaddnewman
+
+  Update man/Makefile.in with details of any new man pages, and run 'svn
+  add' on them.
+
+  I'll commit these changes for you after you're done.
+
+STEP: 2.6: docs:commit
+
+  Commands to execute:
+
+    svn commit -m "documentation update" man
+
+  (Leaving Step: 2)
+
+STEP: 3: Testing Steps
+
+  These steps will help you test the source code to ensure it passes some
+  simple "it works" tests.
+
+  ===== Entering Step: 3 =====
+
+STEP: 3.1: build:distclean
+
+  First we need to clean the existing build tree and start from scratch.
+
+  Commands to execute:
+
+    make distclean
+
+STEP: 3.2: build:configure
+
+  We need to run configure to set up the build tree.
+
+  Commands to execute:
+
+    ./configure --cache=config.cache --with-defaults
+  --with-mib-modules='host examples examples/example testhandler smux Rmon
+  disman/event-mib' --with-transports=IPX --enable-ipv6
+  --enable-embedded-perl --enable-shared
+
+STEP: 3.3: build:make
+
+  Then we need to build the code
+
+  Commands to execute:
+
+    make
+
+STEP: 3.4: build:test
+
+  Now we run "make test" which should produce a perfect set up test
+  results.  If not, this needs to be fixed or at least understood and
+  accepted as is for some other reason.
+
+  Commands to execute:
+
+    make test TESTOPTS=-n
+
+STEP: 3.5: code:checkcomments
+
+  This command looks for source code oddities and policy violations.
+
+  Commands to execute:
+
+    make checks
+
+  (Leaving Step: 3)
+
+STEP: 4: Release File Steps
+
+  Certain files in the distribution and built on a per-release basis. 
+  These steps will help set up these files.
+
+  ===== Entering Step: 4 =====
+
+STEP: 4.1: code:makedepend
+
+  This step creates Makefile dependencies using the "distdepend" rule in
+  the top level Makefile.
+
+  Commands to execute:
+
+    make distdepend
+
+STEP: 4.2: code:commitdepend
+
+  This step commits the dependency changes done in the previous step.
+
+  Commands to execute:
+
+    svn commit -m "make depend" `find . -name Makefile.depend`
+
+STEP: 4.3: changelog:svn2cl
+
+  We need to extract the portions of the change logs committed to the
+  repository.
+
+  Commands to execute:
+
+    svn2cl -f ChangeLog.add --break-before-msg --stop-on-copy
+
+    perl dist/changelogfix  < ChangeLog.add > ChangeLog.reallyadd
+
+STEP: 4.4: changelog:manualedit
+
+  You need to manually insert the *relevent* portions of
+  'ChangeLog.reallyadd' into the ChangeLog file. I'll commit these changes
+  for you after you finish cutting out the proper changes.
+
+STEP: 4.5: changelog:commit
+
+  Commands to execute:
+
+    svn commit -m "version update" ChangeLog
+
+STEP: 4.6: docs:newnews
+
+  Commands to execute:
+
+    perl dist/extractnews -s ----- -e ----- ChangeLog
+
+STEP: 4.7: docs:newnews
+
+  Commands to execute:
+
+    perl dist/extractnews -c CHANGES.new2 -n NEWS.new2 ChangeLog.reallyadd
+
+STEP: 4.8: docs:README
+
+  You need to manually insert the relevent portions of 'CHANGES.new' and
+  'NEWS.new' into the CHANGES and NEWS file. (There are alternative
+  versions in 'CHANGES.new2' and 'NEWS.new2') You may wish to update the
+  README file as well. I'll commit these changes for you afterwards
+
+STEP: 4.9: docs:commit
+
+  Commands to execute:
+
+    svn commit -m "version update" README NEWS CHANGES
+
+STEP: 4.10: release:update
+
+  One more svn update and status to make sure nothing odd exists in your
+  source tree.	Please check the results!
+
+  Commands to execute:
+
+    svn -u status
+
+  (Leaving Step: 4)
+
+STEP: 5: Make the Release
+
+  This is it!  After this point it's much harder to turn back.	If
+  everything is ok until this point and you're ready to actually stamp the
+  release in SVN and make release files, these steps will do that for you.
+
+  ===== Entering Step: 5 =====
+
+STEP: 5.1: release:tag
+
+  This will actually svn copy the current checked out branch to the new tag
+  name.  Specifically:
+
+  svn copy {BRANCHPATH} .../tags/Ext-{VERSIONDASHES}
+
+  Commands to execute:
+
+    svn copy -m "{VERSION} release" {BRANCHPATH}
+  https://net-snmp.svn.sourceforge.net/svnroot/net-snmp/tags/Ext-{VERSIONDA
+  SHES}
+
+STEP: 5.2: release:makedist
+
+  Commands to execute:
+
+    svn export
+  https://net-snmp.svn.sourceforge.net/svnroot/net-snmp/tags/Ext-{VERSIONDA
+  SHES}/net-snmp net-snmp-{VERSION}
+
+STEP: 5.3: release:removefiles
+
+  Commands to execute:
+
+    net-snmp-{VERSION}/remove-files net-snmp-{VERSION}
+
+STEP: 5.4: release:makedist
+
+  Commands to execute:
+
+    star artype=ustar -c -z -f net-snmp-{VERSION}.tar.gz 
+  net-snmp-{VERSION}
+
+STEP: 5.5: release:makezipclean
+
+  Commands to execute:
+
+    rm -f net-snmp-{VERSION}.zip
+
+STEP: 5.6: release:makezip
+
+  Commands to execute:
+
+    zip -r net-snmp-{VERSION}.zip  net-snmp-{VERSION}
+
+STEP: 5.7: release:searching-gpg-keys
+
+  Commands to execute:
+
+    gpg --list-secret-keys net-snmp-admin
+
+STEP: 5.8: release:gpg
+
+  Commands to execute:
+
+    gpg -u 317F8F64 -a --detach-sign net-snmp-{VERSION}.tar.gz
+
+STEP: 5.9: release:gpg
+
+  Commands to execute:
+
+    gpg -u 317F8F64 -a --detach-sign net-snmp-{VERSION}.zip
+
+STEP: 5.10: Release File Test
+
+  We'll also re-build the source and retest a few things to ensure the
+  packaged file can actually be built.
+
+  ===== Entering Step: 5.10 =====
+
+STEP: 5.10.1: posttest:untar
+
+  Commands to execute:
+
+    rm -rf net-snmp-{VERSION}
+
+STEP: 5.10.2: posttest:untar
+
+  Commands to execute:
+
+    tar xzf net-snmp-{VERSION}.tar.gz
+
+STEP: 5.10.3: posttest:configure
+
+  Commands to execute:
+
+    cd net-snmp-{VERSION} && ./configure --cache=config.cache
+  --with-defaults --with-mib-modules='host examples examples/example	
+  testhandler smux Rmon disman/event-mib' --with-transports=IPX
+  --enable-ipv6 --enable-embedded-perl --enable-shared
+
+STEP: 5.10.4: posttest:make
+
+  Commands to execute:
+
+    cd net-snmp-{VERSION} && make
+
+STEP: 5.10.5: posttest:test
+
+  Commands to execute:
+
+    cd net-snmp-{VERSION} && make test
+
+  (Leaving Step: 5.10)
+
+  (Leaving Step: 5)
+
+STEP: 6: Release the results
+
+  Now we'll publish the results to the SF server
+
+  ===== Entering Step: 6 =====
+
+STEP: 6.1: rsync the new files
+
+  This will copy the results to the SF uploads directory in your account on
+  frs.sourceforge.net
+
+  Commands to execute:
+
+    rsync -v net-snmp-{VERSION}.tar.gz net-snmp-{VERSION}.tar.gz.asc
+  net-snmp-{VERSION}.zip net-snmp-{VERSION}.zip.asc
+  frs.sourceforge.net:uploads/
+
+STEP: 6.2: Update the SF release web page
+
+  Commands to execute:
+
+    firefox
+  'http://sourceforge.net/project/admin/editpackages.php?group_id=12694'
+
+  (Leaving Step: 6)
+
+STEP: 7: 
+
+  Binaries: build rpms, .tar.gzs, etc.
+
+STEP: 8: Advertise it!
+
+  ===== Entering Step: 8 =====
+
+STEP: 8.1: 
+
+  Add a note to the source forge news system:
+
+  http://sourceforge.net/news/submit.php?group_id=12694
+
+  Commands to execute:
+
+    firefox 'http://sourceforge.net/news/submit.php?group_id=12694'
+
+STEP: 8.2: 
+
+  Send an announcement message to one of the following mailing lists based
+  on it's type:
+
+  pre:	  net-snmp-coders@lists.sourceforge.net
+
+  rc:	  net-snmp-users@lists.sourceforge.net
+
+  final:  net-snmp-announce@lists.sourceforge.net
+
+STEP: 8.3: 
+
+  Update the topic on the #Net-SNMP channel if this is a trunk based
+  release.
+
+STEP: 8.4: 
+
+  Update the freshmeat listing (Wes needs to do this):
+
+  http://freshmeat.net/projects/net-snmp/
+
+  Commands to execute:
+
+    firefox http://freshmeat.net/projects/net-snmp/
+
+  (Leaving Step: 8)
+
+STEP: 9: 
+
+  Advertise: NEWS upload to sf, publish on -announce, freshmeat, and the
+  GNU FSF directory (http://directory.fsf.org/project/net-snmp/)... (send
+  mail to bug-directory@gnu.org)
+
+
+
+
+
+====== BEGIN OBSOLETE (pre-makerelease) DOCUMENTATION ======
 
 ***************************************************************************
 TESTING:
