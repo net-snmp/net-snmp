@@ -16,6 +16,7 @@
 static int      tsm_session_init(netsnmp_session *);
 static void     tsm_free_state_ref(void *);
 static int      tsm_clone_pdu(netsnmp_pdu *, netsnmp_pdu *);
+static void     tsm_free_pdu(netsnmp_pdu *pdu);
 
 u_int next_sess_id = 1;
 
@@ -39,6 +40,7 @@ init_tsm(void)
     def->session_open = tsm_session_init;
     def->pdu_free_state_ref = tsm_free_state_ref;
     def->pdu_clone = tsm_clone_pdu;
+    def->pdu_free = tsm_free_pdu;
     def->probe_engineid = snmpv3_probe_contextEngineID_rfc5343;
 
     DEBUGMSGTL(("tsm","registering ourselves\n"));
@@ -79,10 +81,24 @@ tsm_free_state_ref(void *ptr)
 {
     netsnmp_tsmSecurityReference *tsmRef;
 
+    if (NULL == ptr)
+        return;
+
     tsmRef = (netsnmp_tsmSecurityReference *) ptr;
-    SNMP_FREE(tsmRef->tmStateRef);
-    SNMP_FREE(tsmRef);
-    return;
+    /* the tmStateRef is always taken care of by the normal PDU, since this
+       is just a reference to that one */
+    /* DON'T DO: SNMP_FREE(tsmRef->tmStateRef); */
+    // SNMP_FREE(tsmRef); 
+}
+
+static void
+tsm_free_pdu(netsnmp_pdu *pdu)
+{
+    /* free the security reference */
+    if (pdu->securityStateRef) {
+        tsm_free_state_ref(pdu->securityStateRef);
+        pdu->securityStateRef = NULL;
+    }
 }
 
 /** This is called when a PDU is cloned (to increase reference counts) */
@@ -95,23 +111,22 @@ tsm_clone_pdu(netsnmp_pdu *pdu, netsnmp_pdu *pdu2)
     if (!oldref)
         return SNMPERR_SUCCESS;
 
-#ifdef TRY_WITHOUT
     newref = SNMP_MALLOC_TYPEDEF(netsnmp_tsmSecurityReference);
+    fprintf(stderr, "cloned as pdu=%p, ref=%p (oldref=%p)\n",
+            pdu2, newref, pdu2->securityStateRef);
     if (!newref)
         return SNMPERR_GENERR;
     
-    /* clone the state reference from one pdu to the next */
-    pdu2->securityStateRef = newref;
-    newref->securityLevel = oldref->securityLevel;
+    memcpy(newref, oldref, sizeof(*oldref));
 
-    newref->tmStateRef = NULL;
-    if (snmp_clone_mem((void **) &newref->tmStateRef,
-                       oldref->tmStateRef,
-                       sizeof(netsnmp_tmStateReference)))
-        return SNMPERR_GENERR;
-    if (!newref->tmStateRef)
-        return SNMPERR_GENERR;
-#endif
+    pdu2->securityStateRef = newref;
+
+    /* the tm state reference is just a link to the one in the pdu,
+       which was already copied by snmp_clone_pdu before handing it to
+       us. */
+
+    memdup(&newref->tmStateRef, oldref->tmStateRef,
+           sizeof(*oldref->tmStateRef));
     return SNMPERR_SUCCESS;
 }
 
@@ -161,7 +176,14 @@ tsm_rgenerate_out_msg(struct snmp_secmod_outgoing_params *parms)
     
     if (tsmSecRef) {
         /* section 4.2, step 1 */
-        tmStateRef = tsmSecRef->tmStateRef;
+        if (tsmSecRef->tmStateRef)
+            tmStateRef = tsmSecRef->tmStateRef;
+        else
+            tmStateRef = SNMP_MALLOC_TYPEDEF(netsnmp_tmStateReference);
+        if (NULL == tmStateRef) {
+            snmp_log(LOG_ERR, "failed to allocate a tmStateReference\n");
+            return SNMPERR_GENERR;
+        }
         tmStateRef->sameSecurity = NETSNMP_TM_USE_SAME_SECURITY;
         tmStateRef->requestedSecurityLevel = tsmSecRef->securityLevel;
 
@@ -276,7 +298,10 @@ tsm_rgenerate_out_msg(struct snmp_secmod_outgoing_params *parms)
     }
 
     /* put the transport state reference into the PDU for the transport */
-    parms->pdu->transport_data = tmStateRef;
+    if (SNMPERR_SUCCESS !=
+        memdup(&parms->pdu->transport_data, tmStateRef, sizeof(*tmStateRef))) {
+        snmp_log(LOG_ERR, "tsm: malloc failure\n");
+    }
     parms->pdu->transport_data_length = sizeof(*tmStateRef);
 
     DEBUGMSGTL(("tsm", "TSM processing completed.\n"));
@@ -372,10 +397,11 @@ tsm_process_in_msg(struct snmp_secmod_incoming_params *parms)
 
     /* Section 5.2 Step 5 */
 
-    if (NULL == *parms->secStateRef)
+    if (NULL == *parms->secStateRef) {
         tsmSecRef = SNMP_MALLOC_TYPEDEF(netsnmp_tsmSecurityReference);
-    else
+    } else {
         tsmSecRef = *parms->secStateRef;
+    }
 
     if (!tsmSecRef)
         return SNMPERR_GENERR;

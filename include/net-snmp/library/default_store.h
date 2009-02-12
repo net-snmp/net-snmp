@@ -29,7 +29,7 @@ extern          "C" {
 #endif
 
 #define NETSNMP_DS_MAX_IDS 3
-#define NETSNMP_DS_MAX_SUBIDS 40        /* needs to be a multiple of 8 */
+#define NETSNMP_DS_MAX_SUBIDS 48        /* needs to be a multiple of 8 */
 
     /*
      * begin storage definitions 
@@ -89,6 +89,7 @@ extern          "C" {
 #define NETSNMP_DS_LIB_APPEND_LOGFILES     37 /* append, don't overwrite, log files */
 #define NETSNMP_DS_LIB_NO_DISCOVERY        38 /* don't support RFC5343 contextEngineID discovery */
 #define NETSNMP_DS_LIB_TSM_USE_PREFIX      39 /* TSM's simple security name mapping */
+#define NETSNMP_DS_LIB_ALLOW_SELF_SIGNED   40 /* Certs for DTLS */
 
     /*
      * library integers 
@@ -144,6 +145,14 @@ extern          "C" {
 #define NETSNMP_DS_LIB_APPTYPES          20
 #define NETSNMP_DS_LIB_KSM_KEYTAB        21
 #define NETSNMP_DS_LIB_KSM_SERVICE_NAME  22
+/* for the client */
+#define NETSNMP_DS_LIB_X509_CLIENT_PUB   23
+#define NETSNMP_DS_LIB_X509_CLIENT_PRIV  24
+#define NETSNMP_DS_LIB_X509_SERVER_CERTS 25
+/* for the server */
+#define NETSNMP_DS_LIB_X509_SERVER_PUB   26
+#define NETSNMP_DS_LIB_X509_SERVER_PRIV  27
+#define NETSNMP_DS_LIB_X509_CLIENT_CERTS 28
 
     /*
      * end storage definitions 
