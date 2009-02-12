@@ -403,6 +403,10 @@
     available.   */
 #undef NETSNMP_TRANSPORT_SSH_DOMAIN
 
+/*  This is defined if support for the SSH transport domain is
+    available.   */
+#undef NETSNMP_TRANSPORT_DTLSUDP_DOMAIN
+
 /*  This is defined if support for stdin/out transport domain is available.   */
 #undef NETSNMP_TRANSPORT_STD_DOMAIN
 

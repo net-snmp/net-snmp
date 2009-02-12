@@ -30,6 +30,9 @@
 #ifdef NETSNMP_TRANSPORT_TCP_DOMAIN
 #include <net-snmp/library/snmpTCPDomain.h>
 #endif
+#ifdef NETSNMP_TRANSPORT_DTLSUDP_DOMAIN
+#include <net-snmp/library/snmpDTLSUDPDomain.h>
+#endif
 #ifdef NETSNMP_TRANSPORT_ALIAS_DOMAIN
 #include <net-snmp/library/snmpAliasDomain.h>
 #endif
@@ -225,6 +228,9 @@ netsnmp_tdomain_init(void)
 #endif
 #ifdef NETSNMP_TRANSPORT_TCPIPV6_DOMAIN
     netsnmp_tcp6_ctor();
+#endif
+#ifdef NETSNMP_TRANSPORT_DTLSUDP_DOMAIN
+    netsnmp_dtlsudp_ctor();
 #endif
     netsnmp_tdomain_dump();
 }

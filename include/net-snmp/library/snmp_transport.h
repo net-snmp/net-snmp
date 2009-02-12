@@ -44,6 +44,11 @@ NETSNMP_IMPORT size_t   netsnmpIPXDomain_len;
 /* note: VACM only allows <= 32 so this is overkill till another ACM comes */
 #define NETSNMP_TM_MAX_SECNAME 256
 
+typedef struct netsnmp_addr_pair_s {
+   struct sockaddr_in remote_addr;
+   struct in_addr local_addr;
+} netsnmp_addr_pair;
+
 typedef struct netsnmp_tmStateReference_s {
    oid    transportDomain[MAX_OID_LEN];
    size_t transportDomainLen;
@@ -53,8 +58,11 @@ typedef struct netsnmp_tmStateReference_s {
    int    transportSecurityLevel;
    char   sameSecurity;
    int    sessionID;
+   
+   char   have_addresses;
+   netsnmp_addr_pair addresses;
 
-   void *otherTransportOpaque;
+   void *otherTransportOpaque; /* XXX: May have mem leak issues */
 } netsnmp_tmStateReference;
 
 /*  Structure which defines the transport-independent API.  */
