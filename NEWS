@@ -8,24 +8,11 @@ listing of all changes made to the code.
     snmplib:
       - Change CONTAINER_INSERT to not do partial inserts
       - Corrected registering of
-      - [PATCH 1553447]: responses will get sent from the original
-	   dest IP address when possible.
-      - [PATCH 1592706]: Fix memory leak when cloning varbinds.
-      - fix potential buffer overflow in sprintf for
 
     snmpd:
       - Applying patch from Magnus Fromreide to fix the
-      - [BUG 1527930]: fix smux authentication
-      - [BUG 1558823]: fix ipAddressTable memory leak
-      - [BUG 1712988]: default and configurable maximum
-      - [PATCH 1520292]: hr_storage.c fix for Darwin / OS X
-      - [PATCH 1561277]: use net.ipv6.neigh.lo.base_reachable_time_ms
-	   instead of deprecated base_reachable_time
-      - [PATCH 1666737]: include ipv6 counts in
       - [PATCH 1893468]: fixed registration of
       - [PATCH 1909813]: fix table_iterator hint to get_first
-      - patch: 1700157: from afrika: fixes ordering of exec
-      - suppress annoying "registration != duplicate"
 
     snmptrapd:
       - [BUG 1955227]: Memory leak for embedded Perl on
@@ -36,15 +23,8 @@ listing of all changes made to the code.
       - add --with-temp-file-pattern configure option
 
     perl:
-      - Fixed the perl bulkwalk function
       - gettable() was fairly broken in the 5.3.1 release.
       - OID and SNMP handling was fully broken on various 64bit platforms
-      - NMP.pm fixes for 64-bit platforms
-      - patch: 1725049: fix bulkwalk in cases of non-repeater
-
-    Linux:
-      - [BUG 1596638]: fix memory leak in pCidrRouteTable, inetCidrRouteTable
-
 
 
 *5.3.2*      
