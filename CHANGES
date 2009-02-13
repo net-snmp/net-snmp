@@ -6,10 +6,6 @@ listing of all changes made to the code.
 *5.3.3.pre1*
 
     snmplib:
-      - Change CONTAINER_INSERT to not do partial inserts with
-          multi-indexed containers when one insert fails
-      - Corrected registering of multiple premib config handlers
-      - Do not leak memory whenever an udp address is
       - [BUG 1397891]: Re-fix unsigned comparisons
       - [BUG 1399370]: Remove broken assertion
       - [BUG 1399370]: Report a failure to build the
@@ -36,13 +32,19 @@ listing of all changes made to the code.
       - [PATCH 1640114]: Don't store trailing null
       - [PATCH 1641895]: Extend short view masks (as per
       - [PATCH 1641972]: add missing const
+      - [PATCH 1807489]: fix ignoring of display hints.
+      - [PATCH 1875022]: improve callback
+      - [PATCH 1898204]: Wescott: fix bug
+      - [PATCH 1921861]: Avoid endless loop after
       - [PATCH 2003450]: Fix a couple of 64-bit
       - [PATCH 2043018]: fix recvfrom hangs
+      - Change CONTAINER_INSERT to not do partial inserts with
+          multi-indexed containers when one insert fails
+      - Corrected registering of multiple premib config handlers
+      - Do not leak memory whenever an udp address is
 
     snmpd:
-      - Fix handling of GETBULK requests
-      - Correct the dependency information for
-      - Enforce the lower limit on scalar_groups
+      - [BUG 711465]: Fix BulkGet handling of override
       - [BUG 1397895]: include missing interface
       - [BUG 1397906]: Fix signedness of return values.
       - [BUG 1416276]: Handle dependency on MIB parsing
@@ -59,6 +61,7 @@ listing of all changes made to the code.
       - [BUG 1546817]: Fix snmpEnterprise varbind when
       - [BUG 1558823]: fix ipAddressTable memory leak
       - [BUG 1559358]: check scanf results
+      - [BUG 1600432]: Handle signals
       - [BUG 1633595]: Fix AgentX handling of Counter64
       - [BUG 1693039]: be silent when insert fails.
       - [BUG 1748206]: Protect against failures to open
@@ -70,20 +73,19 @@ listing of all changes made to the code.
       - [BUG 2003144]: Increase size of AgentX packet
       - [BUG 2018031]: Don't probe engineID in internal
       - [BUG 2023803]: Ensure compilation is not dependent
-      - [BUG 711465]: Fix BulkGet handling of override
       - [PATCH 1047706]: make end-of-mib-view RFC
       - [PATCH 1482169]: Attempt to use the most
       - [PATCH 1520286]: Prevent potential crash in
       - [PATCH 1520292]: hr_storage.c fix for Darwin / OS X
       - [PATCH 1524755]: to better support
       - [PATCH 1554827]: fix handling of
-      - [PATCH 1557514 ]: Do not attempt to
+      - [PATCH 1557514]: Do not attempt to
       - [PATCH 1561277]: use base_reachable_time_ms for Linux I/F info
       - [PATCH 1562688]: fix ping/reattach agentx code
       - [PATCH 1565703]: patch to fix rapid
       - [PATCH 1570650]: make delete
       - [PATCH 1575984]: block SIGHUP during
-      - [PATCH 1601188, ]: BUG: 1600432: Handle signals
+      - [PATCH 1601188]: Handle signals
       - [PATCH 1637287]: Handle multiple target tags
       - [PATCH 1639282]: Save persistent
       - [PATCH 1639360]: Fix snmpNotifyFilterProfileTable
@@ -106,13 +108,13 @@ listing of all changes made to the code.
       - [PATCH 2014204]: Support -g {groupname}
       - [PATCH 2022936]: Fix AgentX Counter64 decoding on
       - [PATCH 2082726]: correctly report NIC speeds
+      - Correct the dependency information for
+      - Enforce the lower limit on scalar_groups
+      - Fix handling of GETBULK requests
       - fix memory leak when multiple interfaces have the
 
     snmpd, apps:
       - Parser of -LS command line argument now
-
-    snmpdf:
-      - [BUG 1515507]: Handle failed requests better
 
     snmptrapd:
       - [BUG 1638225]: Fix interpretation of transport
@@ -120,11 +122,11 @@ listing of all changes made to the code.
       - [PATCH 1598968]: fix bug
 
     apps:
+      - [BUG 1515507]: Handle failed snmpdf requests better
       - [BUG 1964136]: Drop NULL type from snmpset usage
       - [PATCH 1529523]: Close SNMP session on failure.
 
     build:
-      - Limit the use of _KERNEL definitions in configure
       - [BUG 1096166]: Handle --without-logfile correctly.
       - [BUG 1564233]: Have configure test for rpm headers
       - [BUG 1585156]: Fix --without-perl-modules
@@ -134,12 +136,11 @@ listing of all changes made to the code.
       - [BUG 2023803]: Compilation problems on HP-UX 11.31
       - [PATCH 1681035]: improve
       - [PATCH 1899762]: Tweak embedded_perl configure
+      - Disable tests if the agent is built without
+      - Limit the use of _KERNEL definitions in configure
+      - add --with-temp-file-pattern configure option
       - add configure check for hasmntopt to fix the
       - yet another fix to address build issues with
-
-    building:
-      - Disable tests if the agent is built without
-      - add --with-temp-file-pattern configure option
 
     documentation:
       - [BUG 1247164]: Document use of OID macros
@@ -151,14 +152,6 @@ listing of all changes made to the code.
     install:
       - [PATCH 1969627]: Handle empty
 
-    library:
-      - [PATCH 1921861]: Avoid endless loop after
-
-    libsnmp:
-      - [PATCH 1807489]: fix ignoring of display hints.
-      - [PATCH 1875022]: improve callback
-      - [PATCH 1898204]: Wescott: fix bug
-
     mib2c:
       - [BUG 1422708]: Include missing flags parameter.
       - [BUG 1429472]: Protect against missing instances
@@ -169,15 +162,18 @@ listing of all changes made to the code.
       - [PATCH 1668171]: skip unknown cols in min/max
 
     misc:
+      - [BUG 1585250]: don't use deprecated options in
+      - [BUG 1851047]: Do not try to do more handling of a value
+      - [BUG 2217367]: Backported 1616912 from revision 15683 to
       - "make test" fixes for non-UDP transports
       - Avoid calling debug macros with too few arguments.
+      - Do not use %m in printf-formatted strings since %m in
+      - Fix two bugs with smux password support.
+      - Handle device names with embedded spaces in
       - RPM spec file fixes for 64-bit platforms
-      - [BUG 1585250]: don't use deprecated options in
       - avoid calling debug macros with too many
 
     perl:
-      - Fixed the perl bulkwalk function
-      - SNMP.pm fixes for 64-bit platforms
       - [BUG 1450669]: PATCH: 1627949: from martin987: a
       - [BUG 1747733]: More robust handling of undefined
       - [BUG 1826174]: Check for buffer overflow when
@@ -186,17 +182,12 @@ listing of all changes made to the code.
       - [PATCH 1914643]: fix issues with
       - [PATCH 2021444]: Support SNMPv2c in gettable
       - [PATCH 2022948]: Fix for Counter64 in perl subagent
+      - Fixed the perl bulkwalk function
+      - SNMP.pm fixes for 64-bit platforms
       - fixed an extra brace in the docs pointed out by
       - make perltest fixes for HP-UX
       - make perltest fixes for IRIX
       - make perltest fixes for Solaris 2.6 and earlier
-
-    unspecified:
-      - Do not use %m in printf-formatted strings since %m in
-      - Fix two bugs with smux password support.
-      - Handle device names with embedded spaces in
-      - [BUG 1851047]: Do not try to do more handling of a value
-      - [BUG 2217367]: Backported 1616912 from revision 15683 to
 
     FreeBSD:
       - fix configure warning for sys/conf.h
@@ -217,26 +208,30 @@ listing of all changes made to the code.
 *5.3.2*     
 
     snmplib:
-      - [BUG ]: Coverity #183: fix memory leak if
-      - [PATCH 1806336]: fix -LS option parsing
-      - [PATCH 1811469]: read_config_files_in_path()
-      - Deallocate the confmibs and confmibdirs
-      - FEATURES: 1041888: Check directory paths for
-      - FEATURES: 851887: Report range information for
+      - [BUG Coverity #183]: fix memory leak if
+      - [FEATURES 454028]: Detect and handle empty MIB
+      - [FEATURES 851887]: Report range information for
+      - [FEATURES 1041888]: Check directory paths for
+      - [PATCH 1642071]: Don't fiddle with the storage
+      - [PATCH 1645698]: fix 64-bit signed integer
       - [PATCH 1653670]: Consistent SNMPv3 behaviour
+      - [PATCH 1665543]: Handle VACM checks correctly.
       - [PATCH 1681030]: Better handling of empty
       - [PATCH 1687316]: Don't drop const from casts.
       - [PATCH 1687325]: Fix problem with operator
       - [PATCH 1768285]: Count MIB files correctly in
       - [PATCH 1775124]: Fix clientaddr functionality
+      - [PATCH 1806336]: fix -LS option parsing
+      - [PATCH 1811469]: read_config_files_in_path()
+      - Deallocate the confmibs and confmibdirs
       - fix forwarding encoding
       - fix potential buffer overflow in sprintf for TCP/IPv6
-      - patch: 1645698: fix 64-bit signed integer
+      - Patch from "Mitsuru Chinen": cleans up the
 
 
     snmpd:
-      - [PATCH 1746831]: fix process
-      - Revert faulty change to dependency information
+      - [BUG 902610]: Don't discard pending data following
+      - [BUG 902801]: Fix ordering of SMUX-registered
       - [BUG 1046327]: Reset "includeAllDisks" flag when
       - [BUG 1073782]: Restore PerfStat values for FreeBSD
       - [BUG 1102058]: Skip non-mounted disks (e.g. swap
@@ -248,8 +243,9 @@ listing of all changes made to the code.
       - [BUG 1712988]: default/configurable maximum GETBULK varbinds
       - [BUG 1745113]: Handle single-line (and zero-line)
       - [BUG 1760633]: fix typo in debug message
-      - [BUG 902610]: Don't discard pending data following
-      - [BUG 902801]: Fix ordering of SMUX-registered
+      - [PATCH 1225440]: Apply intent of patch: to delay
+      - [PATCH 1595568]: from cyril_margaria: fix
+      - [PATCH 1617255]: fix length of the history array
       - [PATCH 1639726]: Report physical memory
       - [PATCH 1641865]: Don't double check snmpTrapOID
       - [PATCH 1642255]: Handle saving long
@@ -269,19 +265,18 @@ listing of all changes made to the code.
       - [PATCH 1700730]: Remove unused extern declaration.
       - [PATCH 1700732]: Fix debug output statements.
       - [PATCH 1700737]: Tidy up setSerialNo
+      - [PATCH 1710632]: from mavarley: fix memory leak on
+      - [PATCH 1719254]: from "Christan Jung": update
       - [PATCH 1729629]: Fix memory leak in disman
       - [PATCH 1744157]: Report duplicate "extend/exec"
+      - [PATCH 1746831]: fix process
       - [PATCH 1752934]: Fix off-by-one qsort error in
       - [PATCH 1753437]: Fix error index on failing SET
       - [PATCH 1753449]: Fix AgentX error propagation
       - [PATCH 1753463]: Fix AgentX subagent ping alarm
       - [PATCH 1758208]: Fix memory leak
       - [PATCH 1774612]: More resilient process status
-      - patch: 1225440: Apply intent of patch: to delay
-      - patch: 1595568: from cyril_margaria: fix
-      - patch: 1617255: fix length of the history array
-      - patch: 1710632: from mavarley: fix memory leak on
-      - patch: 1719254: from "Christan Jung": update
+      - Revert faulty change to dependency information
       - suppress "registration != duplicate" warnings for root OIDs
 
    snmptrapd:
@@ -290,25 +285,15 @@ listing of all changes made to the code.
       - patch: 1225440: Apply intent of patch: to
 
     build:
+      - [BUG 1567324]: Clarify prompting for
       - [PATCH 1728226]: make sure
       - [PATCH 1728230]: add
       - [PATCH 1728244]: Add
       - [PATCH 1728247]: Add type
-      - add "BuildRequires: perl-ExtUtils-Embed" to the
-      - use libtool clean for removing files to ensure we
-
-    building:
       - Check for support of static inline functions
       - Disable inlining on solaris as there are some
-
-    configure:
-      - [BUG 1567324]: Clarify prompting for
-
-    library:
-      - FEATURES: 454028: Detect and handle empty MIB
-      - Patch from "Mitsuru Chinen": cleans up the
-      - [PATCH 1642071]: Don't fiddle with the storage
-      - [PATCH 1665543]: Handle VACM checks correctly.
+      - add "BuildRequires: perl-ExtUtils-Embed" to the
+      - use libtool clean for removing files to ensure we
 
     mib2c:
       - [BUG 833673]: More focused size checks.
