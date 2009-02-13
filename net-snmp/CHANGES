@@ -6,8 +6,9 @@ listing of all changes made to the code.
 *5.3.3.pre1*
 
     snmplib:
-      - Change CONTAINER_INSERT to not do partial inserts
-      - Corrected registering of
+      - Change CONTAINER_INSERT to not do partial inserts with
+          multi-indexed containers when one insert fails
+      - Corrected registering of multiple premib config handlers
       - Do not leak memory whenever an udp address is
       - [BUG 1397891]: Re-fix unsigned comparisons
       - [BUG 1399370]: Remove broken assertion
@@ -25,11 +26,12 @@ listing of all changes made to the code.
       - [BUG 2027834]: Extend string print buffer by the
       - [PATCH 1510032]: Accept -Z 0 values for
       - [PATCH 1548670]: Fix range checks for unsigned
-      - [PATCH 1553447]: responses will get sent from the
+      - [PATCH 1553447]: responses will get sent from the original
+           dest IP address when possible
       - [PATCH 1562168]: check for a sock fd less than
       - [PATCH 1565293]: UDPIPv6 transport
       - [PATCH 1570650]: create a
-      - [PATCH 1592706]: Fix memory leak when cloning
+      - [PATCH 1592706]: Fix memory leak when cloning varbinds
       - [PATCH 1634620]: Fix leaks from
       - [PATCH 1640114]: Don't store trailing null
       - [PATCH 1641895]: Extend short view masks (as per
@@ -38,7 +40,7 @@ listing of all changes made to the code.
       - [PATCH 2043018]: fix recvfrom hangs
 
     snmpd:
-      - Applying patch from Magnus Fromreide to fix the
+      - Fix handling of GETBULK requests
       - Correct the dependency information for
       - Enforce the lower limit on scalar_groups
       - [BUG 1397895]: include missing interface
@@ -76,7 +78,7 @@ listing of all changes made to the code.
       - [PATCH 1524755]: to better support
       - [PATCH 1554827]: fix handling of
       - [PATCH 1557514 ]: Do not attempt to
-      - [PATCH 1561277]: use
+      - [PATCH 1561277]: use base_reachable_time_ms for Linux I/F info
       - [PATCH 1562688]: fix ping/reattach agentx code
       - [PATCH 1565703]: patch to fix rapid
       - [PATCH 1570650]: make delete
@@ -95,9 +97,9 @@ listing of all changes made to the code.
       - [PATCH 1849903]: do not spam log
       - [PATCH 1866823]: truncate 32 bit
       - [PATCH 1879261]: Add in inactive
-      - [PATCH 1893468]: fixed registration of
+      - [PATCH 1893468]: fixed registration of OIDs with ranges
       - [PATCH 1896118]: patch from jsafranek: fix ifTable
-      - [PATCH 1909813]: fix table_iterator hint to get_first
+      - [PATCH 1909813]: fix table_iterator hint for SORTED get_first
       - [PATCH 1944581]: Protect against core dumps with
       - [PATCH 1967194]: Recognise NFS4 mounts
       - [PATCH 1977439]: Fix pass/_persist bug with SET
@@ -114,7 +116,7 @@ listing of all changes made to the code.
 
     snmptrapd:
       - [BUG 1638225]: Fix interpretation of transport
-      - [BUG 1955227]: Memory leak for embedded Perl on
+      - [BUG 1955227]: Memory leak for embedded Perl on x86_64
       - [PATCH 1598968]: fix bug
 
     apps:
@@ -200,7 +202,7 @@ listing of all changes made to the code.
       - fix configure warning for sys/conf.h
 
     Linux:
-      - [BUG 1596638]: fix memory leak in pCidrRouteTable,
+      - [BUG 1596638]: fix memory leak in {ip,inet}CidrRouteTable
       - [BUG 1666005]: Fail to walk ipv6InterfaceTable on
       - fix ethtool configure check for recent systems
 
@@ -228,7 +230,7 @@ listing of all changes made to the code.
       - [PATCH 1768285]: Count MIB files correctly in
       - [PATCH 1775124]: Fix clientaddr functionality
       - fix forwarding encoding
-      - fix potential buffer overflow in sprintf for
+      - fix potential buffer overflow in sprintf for TCP/IPv6
       - patch: 1645698: fix 64-bit signed integer
 
 
@@ -243,7 +245,7 @@ listing of all changes made to the code.
       - [BUG 1677063]: Check for failed malloc calls.
       - [BUG 1685067]: More precise handling of
       - [BUG 1685081]: Check for valid OID on Free/Undo
-      - [BUG 1712988]: default and configurable maximum
+      - [BUG 1712988]: default/configurable maximum GETBULK varbinds
       - [BUG 1745113]: Handle single-line (and zero-line)
       - [BUG 1760633]: fix typo in debug message
       - [BUG 902610]: Don't discard pending data following
@@ -256,13 +258,14 @@ listing of all changes made to the code.
       - [PATCH 1659623]: Handle SMUX peers with an empty
       - [PATCH 1665549]: Handle creating VACM entries
       - [PATCH 1665985]: Implement ipReasmTimeout
-      - [PATCH 1666737]: include ipv6 counts in
+      - [PATCH 1666737]: include ipv6 counts in UDP stats
       - [PATCH 1668193]: Fix check for v6 ReasmMaxSize
       - [PATCH 1668952]: Ignore zombie processes.
       - [PATCH 1676478]: fix udpEndpointRemoteAddress
       - [PATCH 1687336]: Start using the enhanced
       - [PATCH 1692768]: Fix copying of non-octet-aligned
       - [PATCH 1698184]: Register non-default context
+      - [PATCH 1700157]: fixes ordering of exec tokens in the mib tree
       - [PATCH 1700730]: Remove unused extern declaration.
       - [PATCH 1700732]: Fix debug output statements.
       - [PATCH 1700737]: Tidy up setSerialNo
@@ -277,10 +280,9 @@ listing of all changes made to the code.
       - patch: 1225440: Apply intent of patch: to delay
       - patch: 1595568: from cyril_margaria: fix
       - patch: 1617255: fix length of the history array
-      - patch: 1700157: from afrika: fixes ordering of exec
       - patch: 1710632: from mavarley: fix memory leak on
       - patch: 1719254: from "Christan Jung": update
-      - suppress annoying "registration != duplicate"
+      - suppress "registration != duplicate" warnings for root OIDs
 
    snmptrapd:
       - [PATCH 1746992]: Improve snmptrapd
@@ -317,11 +319,11 @@ listing of all changes made to the code.
 
     perl:
       - [BUG 1606062]: perl bulkwalk (async) coredump
+      - [PATCH 1725049]: fix bulkwalk in cases of non-repeater usage
       - [PATCH 1811463]: perl async callback coredump
       - fix SNMP SET for IP addresses on 64-bit
       - fix prerequisites for NetSNMP::TrapReceiver
       - install embedded perl init files for
-      - patch: 1725049: fix bulkwalk in cases of non-repeater
 
     test:
       - enhance snmpnetstat test to check tcpTable in TCP

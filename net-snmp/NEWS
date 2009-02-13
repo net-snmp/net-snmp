@@ -6,16 +6,17 @@ listing of all changes made to the code.
 *5.3.3.pre1*
 
     snmplib:
-      - Change CONTAINER_INSERT to not do partial inserts
-      - Corrected registering of
+      - Change CONTAINER_INSERT to not do partial inserts with
+          multi-indexed containers when one insert fails
+      - Corrected registering of multiple premib config handlers
 
     snmpd:
-      - Applying patch from Magnus Fromreide to fix the
-      - [PATCH 1893468]: fixed registration of
-      - [PATCH 1909813]: fix table_iterator hint to get_first
+      - [PATCH 1893468]: fixed registration of OIDs with ranges
+      - [PATCH 1909813]: fix table_iterator hint to SORTED get_first
+      - Fix handling of GETBULK requests
 
     snmptrapd:
-      - [BUG 1955227]: Memory leak for embedded Perl on
+      - [BUG 1955227]: Memory leak for embedded Perl on x86_64
       - disabling AgentX broke snmptrapd auth
 
     build:
@@ -30,27 +31,28 @@ listing of all changes made to the code.
 *5.3.2*      
 
     snmplib:
-      - [PATCH 1553447]: responses will get sent from the
-      - [PATCH 1592706]: Fix memory leak when cloning
-      - fix potential buffer overflow in sprintf for
+      - [PATCH 1553447]: responses will get sent from the original
+          dest IP address when possible
+      - [PATCH 1592706]: Fix memory leak when cloning varbinds
+      - fix potential buffer overflow in sprintf for TCP/IPv6
 
     snmpd:
       - [BUG 1527930]: fix smux authentication
       - [BUG 1558823]: fix ipAddressTable memory leak
-      - [BUG 1712988]: default and configurable maximum
+      - [BUG 1712988]: default/configurable maximum GETBULK varbinds
       - [PATCH 1520292]: hr_storage.c fix for Darwin / OS X
-      - [PATCH 1561277]: use
-      - [PATCH 1666737]: include ipv6 counts in
-      - patch: 1700157: from afrika: fixes ordering of exec
-      - suppress annoying "registration != duplicate"
+      - [PATCH 1561277]: use base_reachable_time_ms for Linux I/F info
+      - [PATCH 1666737]: include ipv6 counts in UDP stats
+      - [PATCH 1700157]: fixes ordering of exec tokens in the mib tree
+      - suppress "registration != duplicate" warnings for root OIDs
 
     perl:
+      - [PATCH 1725049]: fix bulkwalk in cases of non-repeater usage
       - Fixed the perl bulkwalk function
-      - NMP.pm fixes for 64-bit platforms
-      - patch: 1725049: fix bulkwalk in cases of non-repeater
+      - SNMP.pm fixes for 64-bit platforms
 
     Linux:
-      - [BUG 1596638]: fix memory leak in pCidrRouteTable,
+      - [BUG 1596638]: fix memory leak in {ip,inet}CidrRouteTable
 
 
 *5.3.1*
