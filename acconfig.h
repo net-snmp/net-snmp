@@ -403,7 +403,7 @@
     available.   */
 #undef NETSNMP_TRANSPORT_SSH_DOMAIN
 
-/*  This is defined if support for the SSH transport domain is
+/*  This is defined if support for the DTLS/UDP transport domain is
     available.   */
 #undef NETSNMP_TRANSPORT_DTLSUDP_DOMAIN
 
