@@ -397,7 +397,7 @@ handler_wrapper(netsnmp_mib_handler          *handler,
         sv_setiv(arg, (IV) handler);
         XPUSHs(sv_2mortal(rarg));
         rarg = newSViv(0);
-        arg = newSVrv(rarg, "NetSNMP::agent::reginfo");
+        arg = newSVrv(rarg, "NetSNMP::agent::netsnmp_handler_registrationPtr");
         sv_setiv(arg, (IV) reginfo);
         XPUSHs(sv_2mortal(rarg));
         rarg = newSViv(0);
@@ -520,7 +520,7 @@ nsahr_new(name, regoid, perlcallback)
     OUTPUT:
         RETVAL
 
-MODULE = NetSNMP::agent  PACKAGE = netsnmp_handler_registrationPtr  PREFIX = nsahr_
+MODULE = NetSNMP::agent  PACKAGE = NetSNMP::agent::netsnmp_handler_registrationPtr  PREFIX = nsahr_
 
 void
 nsahr_DESTROY(reginfo)
