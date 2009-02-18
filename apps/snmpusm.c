@@ -299,7 +299,7 @@ optProc(int argc, char *const *argv, int opt)
                 break;
 
 	    case 'E': {
-	        size_t ebuf_len = 32; /* XXX: MAX_ENGINEID_LENGTH */
+	        size_t ebuf_len = MAX_ENGINEID_LENGTH;
                 u_char *ebuf;
                 if (optind < argc) {
                     if (argv[optind]) {
