@@ -152,12 +152,6 @@ initialize_table_sctpAssocTable(void)
     if (handler)
         netsnmp_handler_free(handler);
 
-    if (cache)
-        netsnmp_cache_free(cache);
-
-    if (table_info)
-        netsnmp_table_registration_info_free(table_info);
-
     if (container)
         CONTAINER_FREE(container);
 
