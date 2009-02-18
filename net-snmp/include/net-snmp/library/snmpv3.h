@@ -9,7 +9,7 @@
 extern          "C" {
 #endif
 
-#define MAX_ENGINEID_LENGTH 128
+#define MAX_ENGINEID_LENGTH 32 /* per SNMP-FRAMEWORK-MIB SnmpEngineID TC */
 
 #define ENGINEID_TYPE_IPV4    1
 #define ENGINEID_TYPE_IPV6    2
