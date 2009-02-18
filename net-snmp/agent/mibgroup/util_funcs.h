@@ -34,6 +34,10 @@ void            string_append_int(char *, int);
 void            wait_on_exec(struct extensible *);
 const char     *make_tempfile(void);
 
+#ifdef linux
+unsigned int    get_pid_from_inode(unsigned long long);
+#endif
+
 #define     satosin(x)      ((struct sockaddr_in *) &(x))
 #define     SOCKADDR(x)     (satosin(x)->sin_addr.s_addr)
 #ifndef MIB_STATS_CACHE_TIMEOUT
