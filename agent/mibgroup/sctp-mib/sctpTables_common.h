@@ -1,10 +1,6 @@
 #ifndef SCTP_TABLES_COMMON_H
 #define SCTP_TABLES_COMMON_H
 
-#include <net-snmp/net-snmp-config.h>
-#include <net-snmp/net-snmp-includes.h>
-#include <net-snmp/agent/net-snmp-agent-includes.h>
-
 #define SCTP_IPADDRESS_SIZE 16
 #define SCTP_HOSTNAME_SIZE 255
 
