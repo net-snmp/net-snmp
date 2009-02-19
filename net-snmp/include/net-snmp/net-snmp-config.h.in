@@ -338,6 +338,9 @@
 /* Define to 1 if you have the <mtab.h> header file. */
 #undef HAVE_MTAB_H
 
+/* Define to 1 if you have the <mysql/mysql.h> header file. */
+#undef HAVE_MYSQL_MYSQL_H
+
 /* Define to 1 if you have the <ndir.h> header file, and it defines `DIR'. */
 #undef HAVE_NDIR_H
 
@@ -1181,6 +1184,9 @@
 /* ifnet needs to have _KERNEL defined */
 #undef NETSNMP_IFNET_NEEDS_KERNEL
 
+/* Define if snmptrapd should support MySQL trap logging */
+#undef NETSNMP_MYSQL_TRAPS
+
 /* Define to suppress inclusion of deprecated functions */
 #undef NETSNMP_NO_DEPRECATED_FUNCTIONS
 
@@ -1215,6 +1221,9 @@
 
 /* Define this if we're using the new MIT crypto API */
 #undef NETSNMP_USE_KERBEROS_MIT
+
+/* define if you are using the mysql code for snmptrapd ... */
+#undef NETSNMP_USE_MYSQL
 
 /* Define if you are using the codeS11 library ... */
 #undef NETSNMP_USE_PKCS11

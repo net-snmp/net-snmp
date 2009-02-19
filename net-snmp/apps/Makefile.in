@@ -50,6 +50,8 @@ HELPERLIB       = ../agent/helpers/libnetsnmphelpers.$(LIB_EXTENSION)$(LIB_VERSI
 AGENTLIB        = ../agent/libnetsnmpagent.$(LIB_EXTENSION)$(LIB_VERSION)
 MIBLIB          = ../agent/libnetsnmpmibs.$(LIB_EXTENSION)$(LIB_VERSION)
 USEAGENTLIBS	= $(MIBLIB) $(AGENTLIB) $(HELPERLIB) $(USELIBS)
+MYSQL_LIBS	= @MYSQL_LIBS@
+MYSQL_INCLUDES	= @MYSQL_INCLUDES@
 
 #
 # link path in src dir
@@ -60,22 +62,23 @@ PERLLDOPTS_FOR_LIBS = @PERLLDOPTS_FOR_LIBS@
 
 #
 # hack for compiling trapd when agent is disabled
-TRAPDWITHAGENT  = $(USETRAPLIBS) @AGENTLIBS@
-TRAPDWITHOUTAGENT = $(LIBS)
+TRAPDWITHAGENT  = $(USETRAPLIBS) $(MYSQL_LIBS) @AGENTLIBS@
+TRAPDWITHOUTAGENT = $(LIBS) $(MYSQL_LIBS)
 
 # these will be set by configure to one of the above 2 lines
 TRAPLIBS	= @TRAPLIBS@ $(PERLLDOPTS_FOR_APPS)
 USETRAPLIBS	= @USETRAPLIBS@
 
 CPPFLAGS	= $(TOP_INCLUDES) -I. $(AGENT_INCLUDES) $(HELPER_INCLUDES) \
-		  $(MIBGROUP_INCLUDES)  $(SNMPLIB_INCLUDES) @CPPFLAGS@
+		  $(MIBGROUP_INCLUDES)  \
+		  $(SNMPLIB_INCLUDES) $(MYSQL_INCLUDES) @CPPFLAGS@
 
 OSUFFIX		= lo
 TRAPD_OBJECTS   = snmptrapd.$(OSUFFIX) @other_trapd_objects@
 LIBTRAPD_OBJS   = snmptrapd_handlers.o  snmptrapd_log.o \
-		  snmptrapd_auth.o
+		  snmptrapd_auth.o snmptrapd_sql.o
 LLIBTRAPD_OBJS  = snmptrapd_handlers.lo snmptrapd_log.lo \
-		  snmptrapd_auth.lo
+		  snmptrapd_auth.lo snmptrapd_sql.lo
 OBJS  = *.o
 LOBJS = *.lo
 
