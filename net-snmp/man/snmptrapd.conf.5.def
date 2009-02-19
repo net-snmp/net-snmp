@@ -156,6 +156,18 @@ specifies various characteristics of how OIDs and other values
 should be displayed.
 See the section OUTPUT OPTIONS in the
 \fIsnmpcmd(1)\fR manual page for details.
+.SH MySQL Logging
+There are two configuration variables that work together to control
+when queued traps are logged to the MySQL database. A non-zero
+value must be specified for sqlSaveInterval to enable MySQL logging.
+.RE
+.IP "sqlMaxQueue max"
+specifies the maximum number of traps to queue before a forced flush
+to the MySQL database.
+.RE
+.IP "sqlSaveInterval seconds"
+specified the number of seconds between periodic queue flushes.
+A value of 0 for will disable MySQL logging.
 .SH NOTIFICATION PROCESSING
 As well as logging incoming notifications, they can also
 be forwarded on to another notification receiver, or passed
