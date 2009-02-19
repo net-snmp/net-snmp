@@ -412,7 +412,8 @@ extern "C" {
             rc2 = x->remove(x,k);
             /** ignore remove errors if there is a filter in place */
             if ((rc2) && (NULL == x->insert_filter)) {
-                snmp_log(LOG_ERR,"error on subcontainer remove (%d)\n", rc2);
+                snmp_log(LOG_ERR,"error on subcontainer '%s' remove (%d)\n",
+                         x->container_name ? x->container_name : "", rc2);
                 rc = rc2;
             }
             x = x->prev;
@@ -435,12 +436,15 @@ extern "C" {
             x = x->next;
         while(x) {
             netsnmp_container *tmp;
+            const char *name;
             tmp = x->prev;
+            name = x->container_name;
             if (NULL != x->container_name)
                 SNMP_FREE(x->container_name);
             rc2 = x->cfree(x);
             if (rc2) {
-                snmp_log(LOG_ERR,"error on subcontainer cfree (%d)\n", rc2);
+                snmp_log(LOG_ERR,"error on subcontainer '%s' cfree (%d)\n",
+                         name ? name : "", rc2);
                 rc = rc2;
             }
             x = tmp;
