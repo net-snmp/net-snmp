@@ -1002,3 +1002,17 @@ NETSNMP_ARG_WITH(
  AS_HELP_STRING(
    [--with-mnttab="/etc/mnttab"],
    [Mount table location. The default is to autodetect this.]))
+
+##
+#   Project: mysql
+##
+
+AC_ARG_WITH(mysql,
+  [  --with-mysql            Include support for MySQL.])
+AC_ARG_ENABLE([mysql],,NETSNMP_INVALID_WITH([openssl]))
+if test "x$with_mysql" = "xyes"; then
+  AC_DEFINE(NETSNMP_USE_MYSQL, 1,
+    [define if you are using the mysql code for snmptrapd ...])
+fi
+
+

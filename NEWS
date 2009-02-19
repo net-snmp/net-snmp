@@ -19,6 +19,9 @@ listing of all changes made to the code.
       - [PATCH 1585146]: Extend range of available error codes
       - patch from Wojtek Jawor to handle row deletion issues in dataset tables
 
+    snmptrapd:
+      - add trap handler for logging traps to a mysql database
+
     unspecified:
       - [BUG 1558823]: fix ipAddressTable memory leak
       - [BUG 1596638]: memory leak in ipCidrRouteTable, inetCidrRouteTable
