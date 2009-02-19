@@ -152,6 +152,11 @@ int             dofork = 1;
 
 extern int      netsnmp_running;
 
+#ifdef NETSNMP_USE_MYSQL
+extern int      netsnmp_mysql_init(void);
+extern void     snmptrapd_register_sql_configs( void );
+#endif
+
 /*
  * These definitions handle 4.2 systems without additional syslog facilities.
  */
@@ -595,6 +600,7 @@ main(int argc, char *argv[])
     extern void init_perl(void);
 #endif
 
+
 #ifndef WIN32
     /*
      * close all non-standard file descriptors we may have
@@ -623,6 +629,9 @@ main(int argc, char *argv[])
      * register our configuration handlers now so -H properly displays them 
      */
     snmptrapd_register_configs( );
+#ifdef NETSNMP_USE_MYSQL
+    snmptrapd_register_sql_configs( );
+#endif
     init_usm_conf( "snmptrapd" );
     register_config_handler("snmptrapd", "snmpTrapdAddr",
                             parse_trapd_address, free_trapd_address, "string");
@@ -1134,6 +1143,14 @@ main(int argc, char *argv[])
             cp = NULL;
         }
     }
+    SNMP_FREE(listen_ports); /* done with them */
+
+#ifdef NETSNMP_USE_MYSQL
+    if( netsnmp_mysql_init() ) {
+        fprintf(stderr, "MySQL initialization failed\n");
+        exit(1);
+    }
+#endif
 
 #ifndef WIN32
     /*
