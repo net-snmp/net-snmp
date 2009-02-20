@@ -1,3 +1,4 @@
+# -*- autoconf -*-
 #
 # Maybe add library extensions for thread mutex locking.
 #
