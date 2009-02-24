@@ -1184,9 +1184,6 @@
 /* ifnet needs to have _KERNEL defined */
 #undef NETSNMP_IFNET_NEEDS_KERNEL
 
-/* Define if snmptrapd should support MySQL trap logging */
-#undef NETSNMP_MYSQL_TRAPS
-
 /* Define to suppress inclusion of deprecated functions */
 #undef NETSNMP_NO_DEPRECATED_FUNCTIONS
 
