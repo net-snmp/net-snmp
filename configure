@@ -4473,10 +4473,10 @@ if test "${with_mysql+set}" = set; then
   withval=$with_mysql;
 fi
 
-# Check whether --enable-mysql was given.
+   # Check whether --enable-mysql was given.
 if test "${enable_mysql+set}" = set; then
-  enableval=$enable_mysql; { { $as_echo "$as_me:$LINENO: error: Invalid option. Use --with-openssl/--without-openssl instead" >&5
-$as_echo "$as_me: error: Invalid option. Use --with-openssl/--without-openssl instead" >&2;}
+  enableval=$enable_mysql; { { $as_echo "$as_me:$LINENO: error: Invalid option. Use --with-mysql/--without-mysql instead" >&5
+$as_echo "$as_me: error: Invalid option. Use --with-mysql/--without-mysql instead" >&2;}
    { (exit 1); exit 1; }; }
 fi
 
