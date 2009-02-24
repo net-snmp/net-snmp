@@ -221,7 +221,7 @@ decode_priority( char **optarg, int *pri_max )
             pri_low = LOG_DEBUG;
             break;
         default: 
-            fprintf(stderr, "invalid priority: %c\n",*optarg);
+            fprintf(stderr, "invalid priority: %c\n",**optarg);
             return -1;
     }
     *optarg = *optarg+1;
@@ -417,7 +417,7 @@ snmp_log_options(char *optarg, int argc, char *const *argv)
      * Don't log 
      */
     case 'N':
-        priority = decode_priority( optarg, &pri_max );
+        priority = decode_priority( &optarg, &pri_max );
         if (priority == -1)  return -1;
         if (inc_optind)
             optind++;
