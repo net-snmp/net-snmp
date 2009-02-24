@@ -1008,9 +1008,8 @@ NETSNMP_ARG_WITH(
 #   Project: mysql
 ##
 
-AC_ARG_WITH(mysql,
+NETSNMP_ARG_WITH(mysql,
   [  --with-mysql            Include support for MySQL.])
-AC_ARG_ENABLE([mysql],,NETSNMP_INVALID_WITH([openssl]))
 if test "x$with_mysql" = "xyes"; then
   AC_DEFINE(NETSNMP_USE_MYSQL, 1,
     [define if you are using the mysql code for snmptrapd ...])
