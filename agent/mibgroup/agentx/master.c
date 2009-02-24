@@ -60,13 +60,6 @@ real_init_master(void)
     char *agentx_sockets;
     char *cp1;
 
-#ifdef NETSNMP_TRANSPORT_UNIX_DOMAIN
-    int agentx_dir_perm;
-    int agentx_sock_perm;
-    int agentx_sock_user;
-    int agentx_sock_group;
-#endif
-
     if (netsnmp_ds_get_boolean(NETSNMP_DS_APPLICATION_ID, NETSNMP_DS_AGENT_ROLE) != MASTER_AGENT)
         return;
 
@@ -98,6 +91,18 @@ real_init_master(void)
                                       NETSNMP_DS_AGENT_AGENTX_TIMEOUT);
     sess.retries = netsnmp_ds_get_int(NETSNMP_DS_APPLICATION_ID,
                                       NETSNMP_DS_AGENT_AGENTX_RETRIES);
+
+#ifdef NETSNMP_TRANSPORT_UNIX_DOMAIN
+    {
+	int agentx_dir_perm =
+	    netsnmp_ds_get_int(NETSNMP_DS_APPLICATION_ID,
+			       NETSNMP_DS_AGENT_X_DIR_PERM);
+	if (agentx_dir_perm == 0)
+	    agentx_dir_perm = NETSNMP_AGENT_DIRECTORY_MODE;
+	netsnmp_unix_create_path_with_mode(agentx_dir_perm);
+    }
+#endif
+
     cp1 = agentx_sockets;
     while (cp1) {
         netsnmp_transport *t;
@@ -111,44 +116,15 @@ real_init_master(void)
         if (cp1 != NULL) {
             *cp1++ = '\0';
 	}
-    
-        if (sess.peername[0] == '/') {
-#ifdef NETSNMP_TRANSPORT_UNIX_DOMAIN
-            /*
-             *  If this is a Unix pathname,
-             *  try and create the directory first.
-             */
-            agentx_dir_perm = netsnmp_ds_get_int(NETSNMP_DS_APPLICATION_ID, 
-                                                 NETSNMP_DS_AGENT_X_DIR_PERM);
-            if (agentx_dir_perm == 0)
-                agentx_dir_perm = NETSNMP_AGENT_DIRECTORY_MODE;
-            if (mkdirhier(sess.peername, (mode_t)agentx_dir_perm, 1)) {
-                snmp_log(LOG_ERR,
-                         "Failed to create the directory for the agentX socket: %s\n",
-                         sess.peername);
-            }
-#else
-            netsnmp_sess_log_error(LOG_WARNING,
-                                   "unix domain support not available\n",
-                                   &sess);
-#endif
-        }
-    
+
         /*
-         *  Otherwise, let 'snmp_open' interpret the string.
+         *  Let 'snmp_open' interpret the descriptor.
          */
         sess.local_port = AGENTX_PORT;      /* Indicate server & set default port */
         sess.remote_port = 0;
         sess.callback = handle_master_agentx_packet;
         errno = 0;
         t = netsnmp_transport_open_server("agentx", sess.peername);
-        if (t == NULL && errno == EADDRINUSE) {
-            /*
-             * Could be a left-over socket (now deleted)
-             * Try again
-             */
-            t = netsnmp_transport_open_server("agentx", sess.peername);
-        }
         if (t == NULL) {
             /*
              * diagnose snmp_open errors with the input netsnmp_session
@@ -171,22 +147,23 @@ real_init_master(void)
         } else {
 #ifdef NETSNMP_TRANSPORT_UNIX_DOMAIN
             if (t->domain == netsnmp_UnixDomain && t->local != NULL) {
-                char name[sizeof(struct sockaddr_un) + 1];
-                memcpy(name, t->local, t->local_length);
-                name[t->local_length] = '\0';
                 /*
                  * Apply any settings to the ownership/permissions of the
                  * AgentX socket
                  */
-                agentx_sock_perm =
+                int agentx_sock_perm =
                     netsnmp_ds_get_int(NETSNMP_DS_APPLICATION_ID,
                                        NETSNMP_DS_AGENT_X_SOCK_PERM);
-                agentx_sock_user =
+                int agentx_sock_user =
                     netsnmp_ds_get_int(NETSNMP_DS_APPLICATION_ID,
                                        NETSNMP_DS_AGENT_X_SOCK_USER);
-                agentx_sock_group =
+                int agentx_sock_group =
                     netsnmp_ds_get_int(NETSNMP_DS_APPLICATION_ID,
                                        NETSNMP_DS_AGENT_X_SOCK_GROUP);
+
+                char name[sizeof(struct sockaddr_un) + 1];
+                memcpy(name, t->local, t->local_length);
+                name[t->local_length] = '\0';
 
                 if (agentx_sock_perm != 0)
                     chmod(name, agentx_sock_perm);
@@ -212,6 +189,10 @@ real_init_master(void)
             netsnmp_transport_free(t);
         }
     }
+
+#ifdef NETSNMP_TRANSPORT_UNIX_DOMAIN
+    netsnmp_unix_dont_create_path();
+#endif
 
     SNMP_FREE(agentx_sockets);
     DEBUGMSGTL(("agentx/master", "initializing...   DONE\n"));

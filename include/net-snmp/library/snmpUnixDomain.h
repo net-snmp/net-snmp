@@ -41,9 +41,20 @@ int netsnmp_unix_getSecName(void *opaque, int olength,
 
 void            netsnmp_unix_ctor(void);
 
+/*
+ * Support functions
+ */
+void            netsnmp_unix_create_path_with_mode(int mode);
+void            netsnmp_unix_dont_create_path(void);
+
 #ifdef __cplusplus
 }
 #endif
+#else
+
+#define netsnmp_unix_create_path_with_mode(x)
+#define netsnmp_unix_dont_create_path()
+
 #endif                          /*NETSNMP_TRANSPORT_UNIX_DOMAIN */
 
 #endif/*_SNMPUNIXDOMAIN_H*/

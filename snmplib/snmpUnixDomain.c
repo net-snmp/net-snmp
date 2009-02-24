@@ -252,7 +252,25 @@ netsnmp_unix_accept(netsnmp_transport *t)
     }
 }
 
+static int create_path = 0;
+static mode_t create_mode;
 
+/** If trying to create unix sockets in nonexisting directories then
+ *  try to create the directory with mask mode.
+ */
+void netsnmp_unix_create_path_with_mode(int mode)
+{
+    create_path = 1;
+    create_mode = mode;
+}
+
+/** If trying to create unix sockets in nonexisting directories then
+ *  fail.
+ */
+void netsnmp_unix_dont_create_path(void)
+{
+    create_path = 0;
+}
 
 /*
  * Open a Unix-domain transport for SNMP.  Local is TRUE if addr is the local
@@ -308,7 +326,7 @@ netsnmp_unix_transport(struct sockaddr_un *addr, int local)
     t->flags = NETSNMP_TRANSPORT_FLAG_STREAM;
 
     if (local) {
-      t->local = (u_char *)malloc(strlen(addr->sun_path));
+        t->local = (u_char *)malloc(strlen(addr->sun_path));
         if (t->local == NULL) {
             netsnmp_transport_free(t);
             return NULL;
@@ -325,6 +343,16 @@ netsnmp_unix_transport(struct sockaddr_un *addr, int local)
 
         unlink(addr->sun_path);
         rc = bind(t->sock, (struct sockaddr *) addr, SUN_LEN(addr));
+
+        if (rc != 0 && errno == ENOENT && create_path) {
+            rc = mkdirhier(addr->sun_path, create_mode, 1);
+            if (rc != 0) {
+                netsnmp_unix_close(t);
+                netsnmp_transport_free(t);
+                return NULL;
+            }
+            rc = bind(t->sock, (struct sockaddr *) addr, SUN_LEN(addr));
+        }
         if (rc != 0) {
             DEBUGMSGTL(("netsnmp_unix_transport",
                         "couldn't bind \"%s\", errno %d (%s)\n",
@@ -358,7 +386,7 @@ netsnmp_unix_transport(struct sockaddr_un *addr, int local)
         }
 
     } else {
-      t->remote = (u_char *)malloc(strlen(addr->sun_path));
+        t->remote = (u_char *)malloc(strlen(addr->sun_path));
         if (t->remote == NULL) {
             netsnmp_transport_free(t);
             return NULL;
@@ -385,8 +413,8 @@ netsnmp_unix_transport(struct sockaddr_un *addr, int local)
         sup->server.sun_family = AF_UNIX;
         strcpy(sup->server.sun_path, addr->sun_path);
         sup->local = 0;
-       netsnmp_sock_buffer_set(t->sock, SO_SNDBUF, local, 0);
-       netsnmp_sock_buffer_set(t->sock, SO_RCVBUF, local, 0);
+        netsnmp_sock_buffer_set(t->sock, SO_SNDBUF, local, 0);
+        netsnmp_sock_buffer_set(t->sock, SO_RCVBUF, local, 0);
     }
 
     /*
