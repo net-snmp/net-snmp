@@ -34,6 +34,7 @@
 #include <net-snmp/library/snmp_transport.h>
 #include <net-snmp/library/snmpUDPDomain.h>
 #include <net-snmp/library/snmpUnixDomain.h>
+#include <net-snmp/library/system.h> /* mkdirhier */
 
 
 #ifndef NETSNMP_STREAM_QUEUE_LEN
