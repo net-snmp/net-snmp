@@ -40,6 +40,9 @@ static char *rcsid = "$OpenBSD: if.c,v 1.42 2005/03/13 16:05:50 mpf Exp $";
 #endif /* not lint */
 #endif
 
+#define _XOPEN_SOURCE 1
+#define _XOPEN_SOURCE_EXTENDED 1
+
 #include <net-snmp/net-snmp-config.h>
 #include <net-snmp/net-snmp-includes.h>
 
@@ -49,8 +52,6 @@ static char *rcsid = "$OpenBSD: if.c,v 1.42 2005/03/13 16:05:50 mpf Exp $";
 #if HAVE_NET_IF_H
 #include <net/if.h>
 #endif
-#define __USE_XOPEN
-#define __USE_XOPEN_EXTENDED
 #include <signal.h>
 
 #include "main.h"
