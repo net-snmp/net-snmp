@@ -788,7 +788,7 @@ var_diskio(struct variable * vp,
       return (u_char *) & long_ret;
 
     default:
-	snmp_log(LOG_ERR, "diskio.c: don't know how to handle %d request\n", vp->magic);
+	DEBUGMSGTL(("diskio", "don't know how to handle %d request\n", vp->magic));
   }
   return NULL;
 }
