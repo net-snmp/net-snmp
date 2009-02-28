@@ -184,6 +184,7 @@ while test "x$new_module_list" != "x"; do
     #     - mib_module   => libnetsnmpmibs   (default)
     #     - agent_module => libnetsnmpagent
     #
+    AH_TOP([#define config_belongs_in(x)])
     module_type=mib_module
     if test -f $srcdir/$mibdir/$i.h; then
       changequote(, )
@@ -267,6 +268,7 @@ while test "x$new_module_list" != "x"; do
       	#
         # check if $i has any conflicts
         #
+        AH_TOP([#define config_exclude(x)])
 	new_list_excl=`$MODULECPP module_tmp_header.h | $GREP config_exclude | $SED 's/.*config_exclude(\(.*\)).*/\1/'`
 	if test "x$new_list_excl" != "x"; then
           AC_MSG_MODULE_DBG("$i excludes $new_list_excl")
@@ -294,6 +296,7 @@ while test "x$new_module_list" != "x"; do
         #
         # check if $i has any architecture specific requirements
         #
+        AH_TOP([#define config_arch_require(x,y)])
         changequote(, )
         new_list_arch=`$MODULECPP module_tmp_header.h | $GREP config_arch_require | $SED 's/.*config_arch_require( *\([^ ]*\) *, *\([^ ]*\) *).*/\1-xarchx-\2/'`
         changequote([, ])
@@ -314,6 +317,7 @@ while test "x$new_module_list" != "x"; do
       	# macro: config_version_require((base, version, version-modules, ...))
       	#  - lists alternative modules used from different versions.
         #
+        AH_TOP([#define config_version_require(x)])
         [new_list_alt3=`$MODULECPP module_tmp_header.h | \
             $GREP config_version_require | \
             $SED -e 's/  */ /g' \
@@ -356,6 +360,7 @@ while test "x$new_module_list" != "x"; do
         #
         # check if $i has any other required modules
         #
+        AH_TOP([#define config_require(x)])
 	new_list="$new_list `$MODULECPP module_tmp_header.h | $GREP config_require | $SED 's/.*config_require(\(.*\)).*/\1/'`"
         AC_MSG_MODULE_DBG(" $i will test: $new_list")
 	if test "x$new_list" != "x"; then
@@ -391,6 +396,7 @@ while test "x$new_module_list" != "x"; do
         #
         # check if $i has any mibs to add
         #
+        AH_TOP([#define config_add_mib(x)])
 	new_mibs=`$MODULECPP module_tmp_header.h | $GREP config_add_mib | $SED 's/.*config_add_mib(\(.*\)).*/\1/'`
 	if test "x$new_mibs" != "x"; then
 	    for j in $new_mibs
@@ -436,6 +442,7 @@ while test "x$new_module_list" != "x"; do
         # check for config_parse_dot_conf
         #  (generally not used any longer; old auto-load a .conf token)
         #
+        AH_TOP([#define config_parse_dot_conf(w,x,y,z)])
         changequote(, )
         $MODULECPP module_tmp_header.h | $GREP config_parse_dot_conf | $SED 's@.*config_parse_dot_conf(\([^)]*\), *\([^),]*\), *\([^),]*\), *\([^),]*\)).*@register_config_handler("snmpd",\1, \2, \3, \4);@' >> $mibdir/mib_module_dot_conf.h
 	changequote([, ])
@@ -446,6 +453,7 @@ while test "x$new_module_list" != "x"; do
         #
         # check if $i has any errors, or warnings
         #
+        AH_TOP([#define config_error(x)])
 	error=`$MODULECPP module_tmp_header.h | $GREP config_error | $SED 's/.*config_error(\(.*\)).*/\1/'`
 	if test "x$error" != "x"; then
           echo
@@ -457,6 +465,7 @@ while test "x$new_module_list" != "x"; do
       	# macro: config_warning(warning text)
       	#  - used to signal a configuration "warning" to be printed to the user
         #
+        AH_TOP([#define config_warning(x)])
 	warning=`$MODULECPP module_tmp_header.h | $GREP config_warning | $SED 's/.*config_warning(\(.*\)).*/\1/'`
 	if test "x$warning" != "x"; then
           all_warnings="$all_warnings $warning
