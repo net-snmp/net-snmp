@@ -19688,6 +19688,8 @@ _ACEOF
     #     - mib_module   => libnetsnmpmibs   (default)
     #     - agent_module => libnetsnmpagent
     #
+
+
     module_type=mib_module
     if test -f $srcdir/$mibdir/$i.h; then
 
@@ -19791,6 +19793,8 @@ _ACEOF
       	#
         # check if $i has any conflicts
         #
+
+
 	new_list_excl=`$MODULECPP module_tmp_header.h | $GREP config_exclude | $SED 's/.*config_exclude(\(.*\)).*/\1/'`
 	if test "x$new_list_excl" != "x"; then
 
@@ -19837,6 +19841,8 @@ EOF
         # check if $i has any architecture specific requirements
         #
 
+
+
         new_list_arch=`$MODULECPP module_tmp_header.h | $GREP config_arch_require | $SED 's/.*config_arch_require( *\([^ ]*\) *, *\([^ ]*\) *).*/\1-xarchx-\2/'`
 
 	if test "x$new_list_arch" != "x"; then
@@ -19866,6 +19872,8 @@ EOF
       	# macro: config_version_require((base, version, version-modules, ...))
       	#  - lists alternative modules used from different versions.
         #
+
+
         new_list_alt3=`$MODULECPP module_tmp_header.h | \
             $GREP config_version_require | \
             $SED -e 's/  */ /g' \
@@ -19913,6 +19921,8 @@ EOF
         #
         # check if $i has any other required modules
         #
+
+
 	new_list="$new_list `$MODULECPP module_tmp_header.h | $GREP config_require | $SED 's/.*config_require(\(.*\)).*/\1/'`"
 
   if test $module_debug = 1; then
@@ -19974,6 +19984,8 @@ EOF
         #
         # check if $i has any mibs to add
         #
+
+
 	new_mibs=`$MODULECPP module_tmp_header.h | $GREP config_add_mib | $SED 's/.*config_add_mib(\(.*\)).*/\1/'`
 	if test "x$new_mibs" != "x"; then
 	    for j in $new_mibs
@@ -20027,6 +20039,8 @@ $as_echo "$as_me: WARNING: mib module \"$i\" uses the \"config_load_mib\" direct
         #  (generally not used any longer; old auto-load a .conf token)
         #
 
+
+
         $MODULECPP module_tmp_header.h | $GREP config_parse_dot_conf | $SED 's@.*config_parse_dot_conf(\([^)]*\), *\([^),]*\), *\([^),]*\), *\([^),]*\)).*@register_config_handler("snmpd",\1, \2, \3, \4);@' >> $mibdir/mib_module_dot_conf.h
 
 
@@ -20036,6 +20050,8 @@ $as_echo "$as_me: WARNING: mib module \"$i\" uses the \"config_load_mib\" direct
         #
         # check if $i has any errors, or warnings
         #
+
+
 	error=`$MODULECPP module_tmp_header.h | $GREP config_error | $SED 's/.*config_error(\(.*\)).*/\1/'`
 	if test "x$error" != "x"; then
           echo
@@ -20049,6 +20065,8 @@ $as_echo "$as_me: error: $i: *** $error ***" >&2;}
       	# macro: config_warning(warning text)
       	#  - used to signal a configuration "warning" to be printed to the user
         #
+
+
 	warning=`$MODULECPP module_tmp_header.h | $GREP config_warning | $SED 's/.*config_warning(\(.*\)).*/\1/'`
 	if test "x$warning" != "x"; then
           all_warnings="$all_warnings $warning
