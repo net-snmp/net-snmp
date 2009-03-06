@@ -2797,25 +2797,25 @@ fi
 
 # OpenBSD 2.6 needs netinet/in.h before netinet/in_pcb.h
 AC_MSG_CHECKING([[for netinet/in_pcb.h]])
-AC_CACHE_VAL(cv_have_netinet_in_pcb_h,
+AC_CACHE_VAL(ac_cv_have_netinet_in_pcb_h,
 [ AC_TRY_CPP( [
 #include <netinet/in.h>
 #include <netinet/in_pcb.h>
-], cv_have_netinet_in_pcb_h=yes, cv_have_netinet_in_pcb_h=no)])
-AC_MSG_RESULT($cv_have_netinet_in_pcb_h)
-if test $cv_have_netinet_in_pcb_h = yes; then
+], ac_cv_have_netinet_in_pcb_h=yes, ac_cv_have_netinet_in_pcb_h=no)])
+AC_MSG_RESULT($ac_cv_have_netinet_in_pcb_h)
+if test $ac_cv_have_netinet_in_pcb_h = yes; then
   AC_DEFINE(HAVE_NETINET_IN_PCB_H)
 fi
 
 # NetBSD needs machine/types.h before sys/disklabel.h
 AC_MSG_CHECKING([[for sys/disklabel.h]])
-AC_CACHE_VAL(cv_have_sys_disklabel_h,
+AC_CACHE_VAL(ac_cv_have_sys_disklabel_h,
 [ AC_TRY_CPP( [
 #include <machine/types.h>
 #include <sys/disklabel.h>
-], cv_have_sys_disklabel_h=yes, cv_have_sys_disklabel_h=no)])
-AC_MSG_RESULT($cv_have_sys_disklabel_h)
-if test $cv_have_sys_disklabel_h = yes; then
+], ac_cv_have_sys_disklabel_h=yes, ac_cv_have_sys_disklabel_h=no)])
+AC_MSG_RESULT($ac_cv_have_sys_disklabel_h)
+if test $ac_cv_have_sys_disklabel_h = yes; then
   AC_DEFINE(HAVE_SYS_DISKLABEL_H)
 fi
 
