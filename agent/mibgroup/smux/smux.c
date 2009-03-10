@@ -165,9 +165,6 @@ smux_parse_peer_auth(const char *token, char *cptr)
     if (!rv)
         config_perror("Error parsing smux oid");
 
-    password_cptr = strchr(cptr, ' ');
-    cptr_len = strlen(cptr);
-
     if (password_cptr != NULL) {    /* Do we have a password or not? */
             DEBUGMSGTL(("smux_conf", "password is: %s\n",
                         ( password_cptr ? password_cptr : "(null)")));
