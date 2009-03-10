@@ -29,6 +29,14 @@ handle_ipv6IpForwarding(netsnmp_mib_handler *handler,
                         netsnmp_agent_request_info *reqinfo,
                         netsnmp_request_info *requests);
 
+int ipAddressSpinLockValue;
+
+int
+handle_ipAddressSpinLock(netsnmp_mib_handler *handler,
+                         netsnmp_handler_registration *reginfo,
+                         netsnmp_agent_request_info *reqinfo,
+                         netsnmp_request_info *requests);
+
 /** Initializes the ip module */
 void
 init_ip_scalars(void)
@@ -39,6 +47,7 @@ init_ip_scalars(void)
     static oid      ipv6IpForwarding_oid[] = { 1, 3, 6, 1, 2, 1, 4, 25 };
     static oid      ipv6IpDefaultHopLimit_oid[] =
         { 1, 3, 6, 1, 2, 1, 4, 26, 0 };
+    static oid      ipAddressSpinLock_oid[] = { 1, 3, 6, 1, 2, 1, 4, 33 };
 
     DEBUGMSGTL(("ip_scalar", "Initializing\n"));
 
@@ -59,6 +68,15 @@ init_ip_scalars(void)
                              ipv6IpForwarding_oid,
                              OID_LENGTH(ipv6IpForwarding_oid),
                              HANDLER_CAN_RWRITE));
+
+    netsnmp_register_scalar(netsnmp_create_handler_registration
+                            ("ipAddressSpinLock", handle_ipAddressSpinLock,
+                             ipAddressSpinLock_oid,
+                             OID_LENGTH(ipAddressSpinLock_oid),
+                             HANDLER_CAN_RWRITE));
+
+    /* Initialize spin lock with random value */
+    ipAddressSpinLockValue = (int) random();
 
     netsnmp_register_num_file_instance
         ("ipv6IpDefaultHopLimit",
@@ -272,6 +290,73 @@ handle_ipv6IpForwarding(netsnmp_mib_handler *handler,
         snmp_log(LOG_ERR, "unknown mode (%d) in handle_ipv6IpForwarding\n",
                  reqinfo->mode);
         return SNMP_ERR_GENERR;
+    }
+
+    return SNMP_ERR_NOERROR;
+}
+
+int
+handle_ipAddressSpinLock(netsnmp_mib_handler *handler,
+                          netsnmp_handler_registration *reginfo,
+                          netsnmp_agent_request_info   *reqinfo,
+                          netsnmp_request_info         *requests)
+{
+    u_long   value;
+
+    /* We are never called for a GETNEXT if it's registered as a
+       "instance", as it's "magically" handled for us.  */
+
+    /* a instance handler also only hands us one request at a time, so
+       we don't need to loop over a list of requests; we'll only get one. */
+
+    switch(reqinfo->mode) {
+
+        case MODE_GET:
+            snmp_set_var_typed_value(requests->requestvb, ASN_INTEGER,
+                                     (u_char *)&ipAddressSpinLockValue, 
+                                     sizeof(ipAddressSpinLockValue));
+            break;
+
+        /*
+         * SET REQUEST
+         *
+         * multiple states in the transaction.  See:
+         * http://www.net-snmp.org/tutorial-5/toolkit/mib_module/set-actions.jpg
+         */
+        case MODE_SET_RESERVE1:
+        case MODE_SET_RESERVE2:
+            /* just check the value */
+            value =  *(requests->requestvb->val.integer);
+            if (value != ipAddressSpinLockValue)
+                netsnmp_set_request_error(reqinfo, requests, SNMP_ERR_INCONSISTENTVALUE);
+            break;
+
+        case MODE_SET_FREE:
+            break;
+
+        case MODE_SET_ACTION:
+            /* perform the final spinlock check and increase its value */
+            value =  *(requests->requestvb->val.integer);
+            if (value != ipAddressSpinLockValue) {
+                netsnmp_set_request_error(reqinfo, requests, SNMP_ERR_INCONSISTENTVALUE);
+            } else {
+                ipAddressSpinLockValue++;
+                /* and check it for overflow */
+                if (ipAddressSpinLockValue > 2147483647 || ipAddressSpinLockValue < 0)
+                    ipAddressSpinLockValue = 0;
+            }
+            break;
+
+        case MODE_SET_COMMIT:
+            break;
+
+        case MODE_SET_UNDO:
+             break;
+
+        default:
+            /* we should never get here, so this is a really bad error */
+            snmp_log(LOG_ERR, "unknown mode (%d) in handle_ipAddressSpinLock\n", reqinfo->mode );
+            return SNMP_ERR_GENERR;
     }
 
     return SNMP_ERR_NOERROR;
