@@ -159,7 +159,7 @@ IP-MIB
  ipIfStatsTable               L--       5.5     M ip-mib/=/*
 
  ipAddrTable (D)              U $2      4.2     O mibII/ipAddr.c
- ipAddressSpinLock.0          ---
+ ipAddressSpinLock.0          A         5.5     O mibII/ipAddr.c
  ipAddressTable               L         5.2     M ip-mib/=/*
  ipAddressTable                S        5.5     M ip-mib/=/*
  ipAddressPrefixTable         L         5.3     M ip-mib/=/*
