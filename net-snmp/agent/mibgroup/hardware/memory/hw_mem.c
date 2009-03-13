@@ -9,7 +9,9 @@ netsnmp_memory_info *_mem_head  = NULL;
 netsnmp_cache       *_mem_cache = NULL;
 
 void init_hw_mem( void ) {
-    _mem_cache = netsnmp_cache_create( 5, netsnmp_mem_arch_load, NULL, NULL, 0);
+    oid nsMemory[] = { 1, 3, 6, 1, 4, 1, 8072, 1, 31 };
+    _mem_cache = netsnmp_cache_create( 5, netsnmp_mem_arch_load, NULL,
+                                          nsMemory, OID_LENGTH(nsMemory));
 }
 
 
