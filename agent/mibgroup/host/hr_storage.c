@@ -249,6 +249,7 @@ int             header_hrstore(struct variable *, oid *, size_t *, int,
                                size_t *, WriteMethod **);
 void*           header_hrstoreEntry(struct variable *, oid *, size_t *,
                                     int, size_t *, WriteMethod **);
+Netsnmp_Node_Handler handle_memsize;
 
 #ifdef solaris2
 void            sol_get_swapinfo(int *, int *);
@@ -263,25 +264,25 @@ void            sol_get_swapinfo(int *, int *);
 #define	HRSTORE_USED		7
 #define	HRSTORE_FAILS		8
 
-struct variable4 hrstore_variables[] = {
-    {HRSTORE_MEMSIZE, ASN_INTEGER, NETSNMP_OLDAPI_RONLY,
-     var_hrstore, 1, {2}},
+struct variable2 hrstore_variables[] = {
     {HRSTORE_INDEX, ASN_INTEGER, NETSNMP_OLDAPI_RONLY,
-     var_hrstore, 3, {3, 1, 1}},
+     var_hrstore, 1, {1}},
     {HRSTORE_TYPE, ASN_OBJECT_ID, NETSNMP_OLDAPI_RONLY,
-     var_hrstore, 3, {3, 1, 2}},
+     var_hrstore, 1, {2}},
     {HRSTORE_DESCR, ASN_OCTET_STR, NETSNMP_OLDAPI_RONLY,
-     var_hrstore, 3, {3, 1, 3}},
+     var_hrstore, 1, {3}},
     {HRSTORE_UNITS, ASN_INTEGER, NETSNMP_OLDAPI_RONLY,
-     var_hrstore, 3, {3, 1, 4}},
+     var_hrstore, 1, {4}},
     {HRSTORE_SIZE, ASN_INTEGER, NETSNMP_OLDAPI_RONLY,
-     var_hrstore, 3, {3, 1, 5}},
+     var_hrstore, 1, {5}},
     {HRSTORE_USED, ASN_INTEGER, NETSNMP_OLDAPI_RONLY,
-     var_hrstore, 3, {3, 1, 6}},
+     var_hrstore, 1, {6}},
     {HRSTORE_FAILS, ASN_COUNTER, NETSNMP_OLDAPI_RONLY,
-     var_hrstore, 3, {3, 1, 7}}
+     var_hrstore, 1, {7}}
 };
 oid             hrstore_variables_oid[] = { 1, 3, 6, 1, 2, 1, 25, 2 };
+oid             hrMemorySize_oid[]   = { 1, 3, 6, 1, 2, 1, 25, 2, 2 };
+oid             hrStorageTable_oid[] = { 1, 3, 6, 1, 2, 1, 25, 2, 3, 1 };
 
 
 void
@@ -289,8 +290,12 @@ init_hr_storage(void)
 {
     char *appname;
 
-    REGISTER_MIB("host/hr_storage", hrstore_variables, variable4,
-                 hrstore_variables_oid);
+    netsnmp_register_scalar(
+        netsnmp_create_handler_registration("host/hrMemorySize", handle_memsize,
+                           hrMemorySize_oid, OID_LENGTH(hrMemorySize_oid),
+                                             HANDLER_CAN_RONLY));
+    REGISTER_MIB("host/hr_storage", hrstore_variables, variable2,
+                 hrStorageTable_oid);
 
     appname = netsnmp_ds_get_string(NETSNMP_DS_LIBRARY_ID,
                                     NETSNMP_DS_LIB_APPTYPE);
@@ -325,7 +330,7 @@ parse_storage_config(const char *token, char *cptr)
 }
 
 /*
- * header_hrstore(...
+ * header_hrstoreEntry(...
  * Arguments:
  * vp     IN      - pointer to variable entry that points here
  * name    IN/OUT  - IN/name requested, OUT/name found
@@ -335,34 +340,6 @@ parse_storage_config(const char *token, char *cptr)
  * write_method
  * 
  */
-
-int
-header_hrstore(struct variable *vp,
-               oid * name,
-               size_t * length,
-               int exact, size_t * var_len, WriteMethod ** write_method)
-{
-#define HRSTORE_NAME_LENGTH	9
-    oid             newname[MAX_OID_LEN];
-    int             result;
-
-    DEBUGMSGTL(("host/hr_storage", "var_hrstore: "));
-    DEBUGMSGOID(("host/hr_storage", name, *length));
-    DEBUGMSG(("host/hr_storage", " %d\n", exact));
-
-    memcpy((char *) newname, (char *) vp->name, vp->namelen * sizeof(oid));
-    newname[HRSTORE_NAME_LENGTH] = 0;
-    result = snmp_oid_compare(name, *length, newname, vp->namelen + 1);
-    if ((exact && (result != 0)) || (!exact && (result >= 0)))
-        return (MATCH_FAILED);
-    memcpy((char *) name, (char *) newname,
-           (vp->namelen + 1) * sizeof(oid));
-    *length = vp->namelen + 1;
-
-    *write_method = (WriteMethod*)0;
-    *var_len = sizeof(long);    /* default to 'long' results */
-    return (MATCH_SUCCEEDED);
-}
 
 void *
 header_hrstoreEntry(struct variable *vp,
@@ -497,6 +474,50 @@ int             storage_type_len =
 	 *
 	 *********************/
 
+int
+handle_memsize(netsnmp_mib_handler *handler,
+                netsnmp_handler_registration *reginfo,
+                netsnmp_agent_request_info *reqinfo,
+                netsnmp_request_info *requests)
+{
+    netsnmp_memory_info *mem_info;
+    int val;
+    char buf[1024];
+
+    /*
+     * We just need to handle valid GET requests, as invalid instances
+     *   are rejected automatically, and (valid) GETNEXT requests are
+     *   converted into the appropriate GET request.
+     *
+     * We also only ever receive one request at a time.
+     */
+    switch (reqinfo->mode) {
+    case MODE_GET:
+        netsnmp_memory_load();
+        mem_info = netsnmp_memory_get_byIdx( NETSNMP_MEM_TYPE_PHYSMEM, 0 );
+        if ( !mem_info || mem_info->size == -1 || mem_info->units == -1 )
+            netsnmp_set_request_error( reqinfo, requests, SNMP_NOSUCHOBJECT );
+	else {
+            val  =  mem_info->size;     /* memtotal */
+            val *= (mem_info->units/1024);
+            snmp_set_var_typed_value(requests->requestvb, ASN_INTEGER,
+                                     (u_char *)&val, sizeof(val));
+        }
+        return SNMP_ERR_NOERROR;
+
+    default:
+        /*
+         * we should never get here, so this is a really bad error 
+         */
+        snmp_log(LOG_ERR, "unknown mode (%d) in handle_memsize\n",
+                 reqinfo->mode);
+        return SNMP_ERR_GENERR;
+    }
+
+    return SNMP_ERR_NOERROR;
+}
+
+
 u_char         *
 var_hrstore(struct variable *vp,
             oid * name,
@@ -508,12 +529,6 @@ var_hrstore(struct variable *vp,
     struct HRFS_statfs stat_buf;
     void                *ptr;
     netsnmp_memory_info *mem = NULL;
-
-    if (vp->magic == HRSTORE_MEMSIZE) {
-        if (header_hrstore(vp, name, length, exact, var_len, write_method)
-            == MATCH_FAILED)
-            return NULL;
-    } else {
 
 really_try_next:
 	ptr = header_hrstoreEntry(vp, name, length, exact, var_len,
@@ -535,19 +550,10 @@ really_try_next:
 	} else {
 	    mem = (netsnmp_memory_info*)ptr;
         }
-    }
 
 
 
     switch (vp->magic) {
-    case HRSTORE_MEMSIZE:
-        netsnmp_memory_load();
-        mem = netsnmp_memory_get_byIdx( NETSNMP_MEM_TYPE_PHYSMEM, 0 );
-        if ( !mem || mem->size == -1 || mem->units == -1 )
-	    return NULL;
-	long_return = mem->size * (mem->units / 1024);
-        return (u_char *) & long_return;
-
     case HRSTORE_INDEX:
         long_return = store_idx;
         return (u_char *) & long_return;
