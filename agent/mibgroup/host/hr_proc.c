@@ -177,7 +177,8 @@ var_hrproc(struct variable * vp,
         return (u_char *) nullOid;
     case HRPROC_LOAD:
         cpu = netsnmp_cpu_get_byIdx( proc_idx & HRDEV_TYPE_MASK, 0 );
-        if ( !cpu || !cpu->history || !cpu->history[0].total_hist )
+        if ( !cpu || !cpu->history || !cpu->history[0].total_hist ||
+           ( cpu->history[0].total_hist == cpu->total_ticks ))
             return NULL;
 
         long_return  = (cpu->idle_ticks  - cpu->history[0].idle_hist)*100;
