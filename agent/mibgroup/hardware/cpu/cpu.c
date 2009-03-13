@@ -15,6 +15,7 @@ static netsnmp_cpu_info *_cpu_tail  = NULL;
 static netsnmp_cache    *_cpu_cache = NULL;
 
 void init_cpu( void ) {
+    oid nsCPU[] = { 1, 3, 6, 1, 4, 1, 8072, 1, 33 };
     /*
      * If we're sampling the CPU statistics automatically,
      *   then arrange for this to be triggered regularly,
@@ -35,8 +36,8 @@ void init_cpu( void ) {
         if ( _cpu_head )
             _cpu_update_stats( 0, NULL );
     } else
-        _cpu_cache = netsnmp_cache_create( 5, netsnmp_cpu_arch_load,
-                                           NULL, NULL, 0 );
+        _cpu_cache = netsnmp_cache_create( 5, netsnmp_cpu_arch_load, NULL,
+                                              nsCPU, OID_LENGTH(nsCPU));
 }
 
 void shutdown_cpu( void ) {
