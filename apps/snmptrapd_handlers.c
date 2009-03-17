@@ -411,7 +411,7 @@ netsnmp_add_default_traphandler( Netsnmp_Trap_Handler handler) {
  * Register a new trap-specific traphandler
  */
 netsnmp_trapd_handler *
-netsnmp_add_traphandler(Netsnmp_Trap_Handler handler,
+netsnmp_add_traphandler(Netsnmp_Trap_Handler* handler,
                         oid *trapOid, int trapOidLen ) {
     netsnmp_trapd_handler *traph, *traph2;
 
