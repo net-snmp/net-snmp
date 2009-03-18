@@ -735,6 +735,7 @@ netsnmp_linux_interface_get_if_speed(int fd, const char *name)
 
     memset(&ifr, 0, sizeof(ifr));
     edata.cmd = ETHTOOL_GSET;
+    edata.speed = 0;
     
     strncpy(ifr.ifr_name, name, sizeof(ifr.ifr_name)-1);
     ifr.ifr_data = (char *) &edata;
