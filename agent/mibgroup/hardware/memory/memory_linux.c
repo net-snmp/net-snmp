@@ -37,14 +37,14 @@ int netsnmp_mem_arch_load( netsnmp_cache *cache, void *magic ) {
     }
     if (bsize == 0) {
         bsize = MEMINFO_INIT_SIZE;
-        buff = malloc(bsize);
+        buff = malloc(bsize+1);
         if (NULL == buff) {
             snmp_log(LOG_ERR, "malloc failed\n");
             return -1;
         }
     }
     while ((bytes_read = read(statfd, buff, bsize)) == bsize) {
-        b = realloc(buff, bsize + MEMINFO_STEP_SIZE);
+        b = realloc(buff, bsize + MEMINFO_STEP_SIZE + 1);
         if (NULL == b) {
             snmp_log(LOG_ERR, "malloc failed\n");
             return -1;
@@ -62,6 +62,9 @@ int netsnmp_mem_arch_load( netsnmp_cache *cache, void *magic ) {
     close(statfd);
     if (bytes_read <= 0) {
         snmp_log_perror(MEMINFO_FILE);
+    }
+    else {
+        buff[bytes_read] = '\0';
     }
 
         /*
