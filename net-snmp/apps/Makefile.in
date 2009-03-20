@@ -17,6 +17,8 @@ top_builddir=..
 # Things to install
 #
 
+SSHINSTALLBINPROGS = @SSHINSTALLBINPROGS@
+
 INSTALLBINPROGS	= snmpget$(EXEEXT) 			\
 		snmpgetnext$(EXEEXT) 			\
 		snmpset$(EXEEXT) 			\
@@ -32,7 +34,8 @@ INSTALLBINPROGS	= snmpget$(EXEEXT) 			\
 		snmptest$(EXEEXT)			\
 		encode_keychange$(EXEEXT) 		\
 		snmpdf$(EXEEXT) 			\
-		snmpvacm$(EXEEXT)
+		snmpvacm$(EXEEXT)                       \
+                $(SSHINSTALLBINPROGS)
 
 INSTALLSBINPROGS = snmptrapd$(EXEEXT)
 
@@ -163,6 +166,10 @@ snmptrapdperlinstall: installdirs
 snmptrapdperluninstall: installdirs
 	  @rm -f $(INSTALL_PREFIX)$(snmplibdir)/snmp_perl_trapd.pl
 	  @echo "removed snmp_perl_trapd.pl from $(INSTALL_PREFIX)$(snmplibdir)"
+
+sshtosnmp: sshtosnmp.$(OSUFFIX)
+	$(LINK) ${CFLAGS} -o $@ sshtosnmp.$(OSUFFIX)
+
 
 installdirs:
 	@$(SHELL) $(srcdir)/../mkinstalldirs $(INSTALL_PREFIX)$(snmplibdir)
