@@ -387,6 +387,21 @@ perform the query using UDP/IPv6 datagrams to port 161 at address
 connect to port 1611 on the local host
 .IR "" ( ::1 
 in IPv6 parlance) using TCP/IPv6 and perform query over that connection.
+.TP 24
+.IR "dtlsudp:hostname:9161"
+Connects using SNMP over DTLS/UDP as documented by the ISMS working group
+(RFCs not yet published as of this date).  This will require that the
+TSM security model is in use (--defSecurityModel=tsm) and that the
+.IR defX509ServerCerts,
+.IR defX509ClientPriv,
+and
+.IR defX509ClientPub
+configuration tokens have been set.
+.TP 24
+.IR "ssh:hostname:22"
+Connects using SNMP over SSH as documented by the ISMS working group
+(RFCs not yet published as of this date).  This will require that the
+TSM security model is in use (--defSecurityModel=tsm).
 .PP
 Note that not all the transport domains listed above will always be
 available; for instance, hosts with no IPv6 support will not be able
@@ -394,7 +409,6 @@ to use udp6 transport addresses, and attempts to do so will result in
 the error "Unknown host".  Likewise, since AAL5 PVC support is only
 currently available on Linux, it will fail with the same error on
 other platforms.
-
 .SH "MIB PARSING OPTIONS"
 The Net-SNMP MIB parser mostly adheres to the Structure of Management
 Information (SMI).  As that specification has changed through time, and
