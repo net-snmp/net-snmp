@@ -1948,6 +1948,8 @@ Miscellaneous:
     IPX         support for SNMP over IPX per RFC 1420.
                 This transport is presently only available for Linux,
                 is never compiled in by default and may be omitted.
+    SSH         (alpha) support for tunneling SNMP over SSH
+    DTLSUDP     (alpha) support for tunneling SNMP over DTLS/UDP
 
   --with-security-modules="s1 s2 ..."   Compile in the given SNMP security
                                     module services (space separated list).
@@ -1957,6 +1959,8 @@ Miscellaneous:
         usm                support for user based SNMP security
                            (required and always compiled in)
         ksm                support for kerberos based SNMP security
+        tsm                support for the Transport-based security
+                           (for use with the SSH and DTLSUDP transports)
 
 
 Configuring the agent:
@@ -7732,13 +7736,13 @@ if test "${lt_cv_nm_interface+set}" = set; then
 else
   lt_cv_nm_interface="BSD nm"
   echo "int some_variable = 0;" > conftest.$ac_ext
-  (eval echo "\"\$as_me:7735: $ac_compile\"" >&5)
+  (eval echo "\"\$as_me:7739: $ac_compile\"" >&5)
   (eval "$ac_compile" 2>conftest.err)
   cat conftest.err >&5
-  (eval echo "\"\$as_me:7738: $NM \\\"conftest.$ac_objext\\\"\"" >&5)
+  (eval echo "\"\$as_me:7742: $NM \\\"conftest.$ac_objext\\\"\"" >&5)
   (eval "$NM \"conftest.$ac_objext\"" 2>conftest.err > conftest.out)
   cat conftest.err >&5
-  (eval echo "\"\$as_me:7741: output\"" >&5)
+  (eval echo "\"\$as_me:7745: output\"" >&5)
   cat conftest.out >&5
   if $GREP 'External.*some_variable' conftest.out > /dev/null; then
     lt_cv_nm_interface="MS dumpbin"
@@ -8825,7 +8829,7 @@ ia64-*-hpux*)
   ;;
 *-*-irix6*)
   # Find out which ABI we are using.
-  echo '#line 8828 "configure"' > conftest.$ac_ext
+  echo '#line 8832 "configure"' > conftest.$ac_ext
   if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
   (eval $ac_compile) 2>&5
   ac_status=$?
@@ -10492,11 +10496,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:10495: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:10499: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:10499: \$? = $ac_status" >&5
+   echo "$as_me:10503: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -10816,11 +10820,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:10819: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:10823: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:10823: \$? = $ac_status" >&5
+   echo "$as_me:10827: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -10921,11 +10925,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:10924: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:10928: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:10928: \$? = $ac_status" >&5
+   echo "$as_me:10932: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -10976,11 +10980,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:10979: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:10983: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:10983: \$? = $ac_status" >&5
+   echo "$as_me:10987: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -13768,7 +13772,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 13771 "configure"
+#line 13775 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -13868,7 +13872,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 13871 "configure"
+#line 13875 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
