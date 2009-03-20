@@ -16,12 +16,13 @@ extern          "C" {
 
 /*  Some transport-type flags.  */
 
-#define		NETSNMP_TRANSPORT_FLAG_STREAM	0x01
-#define		NETSNMP_TRANSPORT_FLAG_LISTEN	0x02
-#define		NETSNMP_TRANSPORT_FLAG_TUNNELED	0x04
-#define         NETSNMP_TRANSPORT_FLAG_TMSTATE  0x08  /* indicates opaque is a
-                                                         TSM tmStateReference */
-#define		NETSNMP_TRANSPORT_FLAG_HOSTNAME	0x80  /* for fmtaddr hook */
+#define		NETSNMP_TRANSPORT_FLAG_STREAM	 0x01
+#define		NETSNMP_TRANSPORT_FLAG_LISTEN	 0x02
+#define		NETSNMP_TRANSPORT_FLAG_TUNNELED	 0x04
+#define         NETSNMP_TRANSPORT_FLAG_TMSTATE   0x08  /* indicates opaque is a
+                                                          TSM tmStateReference */
+#define		NETSNMP_TRANSPORT_FLAG_EMPTY_PKT 0x10
+#define		NETSNMP_TRANSPORT_FLAG_HOSTNAME	 0x80  /* for fmtaddr hook */
 
 /*  The standard SNMP domains.  */
 
