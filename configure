@@ -818,6 +818,7 @@ EMBEDPERLINSTALL
 MYSQL_INCLUDES
 MYSQL_LIBS
 MYSQLCONFIG
+SSHINSTALLBINPROGS
 NETSNMP_DEFAULT_MIBS
 ENV_SEPARATOR
 dllcleans
@@ -7731,13 +7732,13 @@ if test "${lt_cv_nm_interface+set}" = set; then
 else
   lt_cv_nm_interface="BSD nm"
   echo "int some_variable = 0;" > conftest.$ac_ext
-  (eval echo "\"\$as_me:7734: $ac_compile\"" >&5)
+  (eval echo "\"\$as_me:7735: $ac_compile\"" >&5)
   (eval "$ac_compile" 2>conftest.err)
   cat conftest.err >&5
-  (eval echo "\"\$as_me:7737: $NM \\\"conftest.$ac_objext\\\"\"" >&5)
+  (eval echo "\"\$as_me:7738: $NM \\\"conftest.$ac_objext\\\"\"" >&5)
   (eval "$NM \"conftest.$ac_objext\"" 2>conftest.err > conftest.out)
   cat conftest.err >&5
-  (eval echo "\"\$as_me:7740: output\"" >&5)
+  (eval echo "\"\$as_me:7741: output\"" >&5)
   cat conftest.out >&5
   if $GREP 'External.*some_variable' conftest.out > /dev/null; then
     lt_cv_nm_interface="MS dumpbin"
@@ -8824,7 +8825,7 @@ ia64-*-hpux*)
   ;;
 *-*-irix6*)
   # Find out which ABI we are using.
-  echo '#line 8827 "configure"' > conftest.$ac_ext
+  echo '#line 8828 "configure"' > conftest.$ac_ext
   if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
   (eval $ac_compile) 2>&5
   ac_status=$?
@@ -10491,11 +10492,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:10494: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:10495: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:10498: \$? = $ac_status" >&5
+   echo "$as_me:10499: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -10815,11 +10816,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:10818: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:10819: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:10822: \$? = $ac_status" >&5
+   echo "$as_me:10823: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -10920,11 +10921,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:10923: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:10924: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:10927: \$? = $ac_status" >&5
+   echo "$as_me:10928: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -10975,11 +10976,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:10978: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:10979: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:10982: \$? = $ac_status" >&5
+   echo "$as_me:10983: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -13767,7 +13768,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 13770 "configure"
+#line 13771 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -13867,7 +13868,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 13870 "configure"
+#line 13871 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -23351,6 +23352,7 @@ fi
 #   Security related functions
 #
 NONAGENTLIBS=$LIBS	 # save old libraries
+SSHINSTALLBINPROGS=""
 if test "x$tryopenssl" != "xno"; then
     if test "x$askedopenssl" != "xyes" -a "x$askedpkcs" = "xyes"; then
         { $as_echo "$as_me:$LINENO: checking for C_Initialize in -lpkcs11" >&5
@@ -23728,7 +23730,8 @@ _ACEOF
 
 fi
 
-	{ $as_echo "$as_me:$LINENO: checking for SSL_library_init in -lssl" >&5
+        if echo " $transport_result_list " | $GREP " DTLS" > /dev/null; then
+	    { $as_echo "$as_me:$LINENO: checking for SSL_library_init in -lssl" >&5
 $as_echo_n "checking for SSL_library_init in -lssl... " >&6; }
 if test "${ac_cv_lib_ssl_SSL_library_init+set}" = set; then
   $as_echo_n "(cached) " >&6
@@ -23799,9 +23802,95 @@ cat >>confdefs.h <<\_ACEOF
 #define HAVE_LIBSSL 1
 _ACEOF
 
-            LIBCRYPTO=" -lssl $LIBCRYPTO"
+                LIBCRYPTO=" -lssl $LIBCRYPTO"
+else
+  { { $as_echo "$as_me:$LINENO: error: The DTLS based transports require the libssl library from OpenSSL to be available" >&5
+$as_echo "$as_me: error: The DTLS based transports require the libssl library from OpenSSL to be available" >&2;}
+   { (exit 1); exit 1; }; }
 fi
 
+        fi
+        if echo " $transport_result_list " | $GREP " SSH " > /dev/null; then
+	    { $as_echo "$as_me:$LINENO: checking for libssh2_session_startup in -lssh2" >&5
+$as_echo_n "checking for libssh2_session_startup in -lssh2... " >&6; }
+if test "${ac_cv_lib_ssh2_libssh2_session_startup+set}" = set; then
+  $as_echo_n "(cached) " >&6
+else
+  ac_check_lib_save_LIBS=$LIBS
+LIBS="-lssh2  $LIBS"
+cat >conftest.$ac_ext <<_ACEOF
+/* confdefs.h.  */
+_ACEOF
+cat confdefs.h >>conftest.$ac_ext
+cat >>conftest.$ac_ext <<_ACEOF
+/* end confdefs.h.  */
+
+/* Override any GCC internal prototype to avoid an error.
+   Use char because int might match the return type of a GCC
+   builtin and then its argument prototype would still apply.  */
+#ifdef __cplusplus
+extern "C"
+#endif
+char libssh2_session_startup ();
+int
+main ()
+{
+return libssh2_session_startup ();
+  ;
+  return 0;
+}
+_ACEOF
+rm -f conftest.$ac_objext conftest$ac_exeext
+if { (ac_try="$ac_link"
+case "(($ac_try" in
+  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
+  *) ac_try_echo=$ac_try;;
+esac
+eval ac_try_echo="\"\$as_me:$LINENO: $ac_try_echo\""
+$as_echo "$ac_try_echo") >&5
+  (eval "$ac_link") 2>conftest.er1
+  ac_status=$?
+  grep -v '^ *+' conftest.er1 >conftest.err
+  rm -f conftest.er1
+  cat conftest.err >&5
+  $as_echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } && {
+	 test -z "$ac_c_werror_flag" ||
+	 test ! -s conftest.err
+       } && test -s conftest$ac_exeext && {
+	 test "$cross_compiling" = yes ||
+	 $as_test_x conftest$ac_exeext
+       }; then
+  ac_cv_lib_ssh2_libssh2_session_startup=yes
+else
+  $as_echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
+
+	ac_cv_lib_ssh2_libssh2_session_startup=no
+fi
+
+rm -rf conftest.dSYM
+rm -f core conftest.err conftest.$ac_objext conftest_ipa8_conftest.oo \
+      conftest$ac_exeext conftest.$ac_ext
+LIBS=$ac_check_lib_save_LIBS
+fi
+{ $as_echo "$as_me:$LINENO: result: $ac_cv_lib_ssh2_libssh2_session_startup" >&5
+$as_echo "$ac_cv_lib_ssh2_libssh2_session_startup" >&6; }
+if test "x$ac_cv_lib_ssh2_libssh2_session_startup" = x""yes; then
+
+cat >>confdefs.h <<\_ACEOF
+#define HAVE_LIBSSH2 1
+_ACEOF
+
+                LIBCRYPTO=" -lssh2 $LIBCRYPTO"
+else
+  { { $as_echo "$as_me:$LINENO: error: The SSH transport requires the libssh2 library to be available" >&5
+$as_echo "$as_me: error: The SSH transport requires the libssh2 library to be available" >&2;}
+   { (exit 1); exit 1; }; }
+fi
+
+            SSHINSTALLBINPROGS=sshtosnmp
+        fi
     fi
 elif test "x$askedpkcs" = "xyes"; then
     { $as_echo "$as_me:$LINENO: checking for C_Initialize in -lpkcs11" >&5
@@ -23879,6 +23968,7 @@ fi
 
 fi
 LIBS=$NONAGENTLIBS	 # restore old libraries
+
 
 
 #   TCP wrapper support

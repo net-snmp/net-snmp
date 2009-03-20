@@ -146,6 +146,7 @@ fi
 #   Security related functions
 #
 NONAGENTLIBS=$LIBS	 # save old libraries
+SSHINSTALLBINPROGS=""
 if test "x$tryopenssl" != "xno"; then
     if test "x$askedopenssl" != "xyes" -a "x$askedpkcs" = "xyes"; then
         AC_CHECK_LIB(pkcs11, C_Initialize,
@@ -165,10 +166,21 @@ if test "x$tryopenssl" != "xno"; then
         AC_CHECK_LIB(crypto, AES_cfb128_encrypt, 
             AC_DEFINE(HAVE_AES_CFB128_ENCRYPT, 1,
                 [Define to 1 if you have the `AES_cfb128_encrypt' function.]))
-	AC_CHECK_LIB(ssl, SSL_library_init,
-            AC_DEFINE(HAVE_LIBSSL, 1,
-                [Define to 1 if you have the `ssl' library (-lssl).])
-            LIBCRYPTO=" -lssl $LIBCRYPTO", ,-lcrypto)
+        if echo " $transport_result_list " | $GREP " DTLS" > /dev/null; then
+	    AC_CHECK_LIB(ssl, SSL_library_init,
+                AC_DEFINE(HAVE_LIBSSL, 1,
+                    [Define to 1 if you have the `ssl' library (-lssl).])
+                LIBCRYPTO=" -lssl $LIBCRYPTO",	
+		AC_MSG_ERROR([The DTLS based transports require the libssl library from OpenSSL to be available])	,-lcrypto)
+        fi
+        if echo " $transport_result_list " | $GREP " SSH " > /dev/null; then
+	    AC_CHECK_LIB(ssh2, libssh2_session_startup,
+                AC_DEFINE(HAVE_LIBSSH2, 1,
+                    [Define to 1 if you have the `ssh2' library (-lssh2).])
+                LIBCRYPTO=" -lssh2 $LIBCRYPTO",
+                AC_MSG_ERROR([The SSH transport requires the libssh2 library to be available]),)
+            SSHINSTALLBINPROGS=sshtosnmp
+        fi
     fi
 elif test "x$askedpkcs" = "xyes"; then
     AC_CHECK_LIB(pkcs11, C_Initialize,
@@ -176,6 +188,7 @@ elif test "x$askedpkcs" = "xyes"; then
         LIBPKCS11="-lpkcs11")
 fi
 LIBS=$NONAGENTLIBS	 # restore old libraries
+AC_SUBST(SSHINSTALLBINPROGS)
 
 
 #   TCP wrapper support
