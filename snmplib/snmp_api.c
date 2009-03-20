@@ -5854,6 +5854,17 @@ _sess_read(void *sessp, fd_set * fdset, struct pollfd fds[], nfds_t nfds)
         return -1;
     }
 
+    if (0 == length && transport->flags & NETSNMP_TRANSPORT_FLAG_EMPTY_PKT) {
+        /* this allows for a transport that needs to return from
+         * packet processing that doesn't necessarily have any
+         * consumable data in it. */
+
+        /* reset the flag since it's a per-message flag */
+        transport->flags &= (~NETSNMP_TRANSPORT_FLAG_EMPTY_PKT);
+
+        return 0;
+    }
+
     /*
      * Remote end closed connection.  
      */
