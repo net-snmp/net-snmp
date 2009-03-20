@@ -737,7 +737,7 @@ netsnmp_dtlsudp_send(netsnmp_transport *t, void *buf, int size,
                                            WE_ARE_CLIENT)))
         return -1;
 
-    if (!cachep->securityName && tmStateRef->securityNameLen > 0)
+    if (!cachep->securityName && tmStateRef && tmStateRef->securityNameLen > 0)
         cachep->securityName = strdup(tmStateRef->securityName);
         
         
