@@ -329,7 +329,7 @@ int
 tsm_process_in_msg(struct snmp_secmod_incoming_params *parms)
 {
     u_char type_value;
-    size_t octet_string_length;
+    size_t remaining;
     u_char *data_ptr;
     netsnmp_tmStateReference *tmStateRef;
     netsnmp_tsmSecurityReference *tsmSecRef;
@@ -431,7 +431,8 @@ tsm_process_in_msg(struct snmp_secmod_incoming_params *parms)
     /*
      * Eat the first octet header.
      */
-    if ((data_ptr = asn_parse_sequence(parms->secParams, &octet_string_length,
+    remaining = parms->wholeMsgLen - (parms->secParams - parms->wholeMsg);
+    if ((data_ptr = asn_parse_sequence(parms->secParams, &remaining,
                                         &type_value,
                                         (ASN_UNIVERSAL | ASN_PRIMITIVE |
                                          ASN_OCTET_STR),
@@ -447,12 +448,6 @@ tsm_process_in_msg(struct snmp_secmod_incoming_params *parms)
 
     /* Section 5.2, Step 7 */
     *parms->maxSizeResponse = parms->maxMsgSize; /* XXX */
-
-    /* for those not being liberal in what you receive: */
-#ifdef NETSNMP_VERY_STRICT
-    if (octet_string_length != 0)
-        return -1;
-#endif /* NETSNMP_VERY_STRICT */
 
     tsmSecRef->securityLevel = parms->secLevel;
 
