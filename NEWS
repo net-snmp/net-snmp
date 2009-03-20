@@ -22,6 +22,10 @@ listing of all changes made to the code.
     snmptrapd:
       - add trap handler for logging traps to a mysql database
 
+    snmpv3:
+      - Preliminary (alpha) support for SNMP over SSH and DTLS/UDP.
+      - Preliminary (alpha) support for the TSM security model
+
     unspecified:
       - [BUG 1558823]: fix ipAddressTable memory leak
       - [BUG 1596638]: memory leak in ipCidrRouteTable, inetCidrRouteTable
