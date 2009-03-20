@@ -194,6 +194,12 @@ IPv6-address[:port]
 hostname[:port]
 .I or
 IPv6-address[:port]
+.TP 28
+.IR "" "ssh"
+hostname:port
+.TP 28
+.IR "" "dtlsudp"
+hostname:port
 .RE
 .PP
 Note that <transport-specifier> strings are case-insensitive so that,
@@ -226,6 +232,19 @@ listen on the AAL5 permanent virtual circuit with VPI=0 and VCI=161
 .TP 24
 .IR "udp6:10161"
 listen on port 10161 on all IPv6 interfaces.
+.TP 24
+.IR "ssh:127.0.0.1:22"
+Allows connections from the snmp subsystem on the ssh server on port
+22.  The details of using SNMP over SSH are defined below.
+.TP 24
+.IR "dtlsudp:127.0.0.1:9161"
+Listen for connections over DTLS on UDP port 9161.  The snmp.conf file
+must have the
+.IR defX509ServerPub,
+.IR defX509ServerPriv,
+and
+.IR defX509ClientCerts
+configuration tokens defined.
 .PP
 Note that not all the transport domains listed above will always be
 available; for instance, hosts with no IPv6 support will not be able
@@ -233,6 +252,61 @@ to use udp6 transport addresses, and attempts to do so will result in
 the error "Error opening specified endpoint".  Likewise, since AAL5
 PVC support is only currently available on Linux, it will fail with
 the same error on other platforms.
+.SH Transport Specific Notes
+.RS 0
+.TP 8
+ssh
+The SSH transport is actually just a unix named pipe that can be
+connected to via a ssh subsystem configured in the main ssh server.
+The pipe location (currently not configurable) is
+.I /var/net-snmp/sshtosnmp.  It is important that only security
+approved users can connect to this pipe as raw SNMP commands can be
+passed to it without other authentication.
+.IP
+The sshtosnmp command knows how to connect to this pipe and talk to
+it.  It should be configured in the
+.IR "OpenSSH sshd"
+configuration file (which is normally
+.IR "/etc/ssh/sshd_config"
+using the following configuration line:
+.TP 8
+.IP
+Subsystem snmp /usr/bin/sshtosnmp
+.IP
+The
+.I sshtosnmp
+command will need read/write access to the 
+.I /var/net-snmp/sshtosnmp
+pipe either through direct permissions by the resulting user that logs
+in through ssh and runs the program.  But it is important to note that
+this results in permissions that is granted to the root-like
+privileges the snmpd process runs under.  Thus is recommended that the
+user that has write access to the 
+.I /var/net-snmp/sshtosnmp
+file
+.B NOT
+be granted shell access and that account separation is used to prevent
+malicious local use.  IE, accounts should only be for shell-use or
+SNMP use but not both.
+.TP 8
+dtlsudp
+The DTLS protocol, which is based off of TLS, requires both client and
+server certificates to establish the connection and authenticate both
+sides.  In order to do this, the client will need to configure the
+snmp.conf file
+with the
+.IR defX509ServerCerts,
+.IR defX509ClientPriv,
+and
+.IR defX509ClientPub
+configuration tokens.  The server will need to configure the snmp.conf
+file with the
+.IR defX509ServerPub,
+.IR defX509ServerPriv,
+and
+.IR defX509ClientCerts
+configuration tokens defined.
+.RE
 .SH CONFIGURATION FILES
 .PP
 .B snmpd
