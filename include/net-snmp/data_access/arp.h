@@ -83,6 +83,7 @@ typedef struct netsnmp_arp_s {
    u_char    arp_type;           /* inetNetToMediaType 1-5 */
    u_char    arp_state;          /* inetNetToMediaState 1-7 */
 
+   u_long    arp_last_updated;   /* timeticks of last update */
 } netsnmp_arp_entry;
 
 
@@ -118,6 +119,9 @@ netsnmp_arp_entry *
 netsnmp_access_arp_entry_create(void);
 
 void netsnmp_access_arp_entry_free(netsnmp_arp_entry * entry);
+
+void netsnmp_access_arp_entry_update(netsnmp_arp_entry *entry,
+        netsnmp_arp_entry *new_data);
 
 /*
  * find entry in container
