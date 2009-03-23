@@ -533,11 +533,7 @@ inetNetToMediaLastUpdated_get(inetNetToMediaTable_rowreq_ctx * rowreq_ctx,
      * TODO:231:o: |-> Extract the current value of the inetNetToMediaLastUpdated data.
      * copy (* inetNetToMediaLastUpdated_val_ptr ) from rowreq_ctx->data
      */
-    /*
-     * xxx-rks: get this value?
-     */
-    return MFD_SKIP;
-
+    *inetNetToMediaLastUpdated_val_ptr = rowreq_ctx->data->arp_last_updated;
     return MFD_SUCCESS;
 }                               /* inetNetToMediaLastUpdated_get */
 

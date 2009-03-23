@@ -129,17 +129,34 @@ inetNetToMediaTable_container_init(netsnmp_container **container_ptr_ptr,
      * cache->enabled to 0.
      */
     cache->timeout = INETNETTOMEDIATABLE_CACHE_TIMEOUT; /* seconds */
+
+    /* We want to manually delete entries in the cache to keep LastUpdated
+     * timestamp. */
+    cache->flags |= NETSNMP_CACHE_DONT_FREE_BEFORE_LOAD
+                    | NETSNMP_CACHE_AUTO_RELOAD;
 }                               /* inetNetToMediaTable_container_init */
 
 /**
- * check entry for update
- *
+ * Put all entries with valid !=1 to the list to delete.
  */
 static void
-_snarf_arp_entry(netsnmp_arp_entry *arp_entry,
+_collect_invalid_arp_ctx(inetNetToMediaTable_rowreq_ctx *ctx,
+        netsnmp_container *to_delete)
+{
+    if (ctx->valid)
+            ctx->valid = 0;
+    else
+        CONTAINER_INSERT(to_delete, ctx);
+}
+
+/**
+ * check entry for update
+ */
+static void
+_add_or_update_arp_entry(netsnmp_arp_entry *arp_entry,
                  netsnmp_container *container)
 {
-    inetNetToMediaTable_rowreq_ctx *rowreq_ctx;
+    inetNetToMediaTable_rowreq_ctx *rowreq_ctx, *old;
     int             inetAddressType;
 
     DEBUGTRACE;
@@ -166,8 +183,8 @@ _snarf_arp_entry(netsnmp_arp_entry *arp_entry,
     }
 
     /*
-     * allocate an row context and set the index(es), then add it to
-     * the container
+     * allocate an row context and set the index(es), then try to find it in
+     * the cache.
      */
     rowreq_ctx = inetNetToMediaTable_allocate_rowreq_ctx(arp_entry, NULL);
     if ((NULL != rowreq_ctx) &&
@@ -175,8 +192,23 @@ _snarf_arp_entry(netsnmp_arp_entry *arp_entry,
          (rowreq_ctx, rowreq_ctx->data->if_index, inetAddressType,
           rowreq_ctx->data->arp_ipaddress,
           rowreq_ctx->data->arp_ipaddress_len))) {
-        rowreq_ctx->inetNetToMediaRowStatus = ROWSTATUS_ACTIVE;
-        CONTAINER_INSERT(container, rowreq_ctx);
+
+        /* try to find old entry */
+        old = CONTAINER_FIND(container, rowreq_ctx);
+        if (old != NULL) {
+            /* the entry is already there, update it */
+            netsnmp_access_arp_entry_update(old->data, arp_entry);
+            old->valid = 1; /* do not delete it in following sweep */
+            /* delete the auxiliary context we used to find the entry
+             * (this deletes also arp_entry) */
+            inetNetToMediaTable_release_rowreq_ctx(rowreq_ctx);
+        } else {
+            /* create new entry and add it to the cache*/
+            rowreq_ctx->inetNetToMediaRowStatus = ROWSTATUS_ACTIVE;
+            rowreq_ctx->data->arp_last_updated = netsnmp_get_agent_uptime();
+            rowreq_ctx->valid = 1; /* do not delete it in following sweep */
+            CONTAINER_INSERT(container, rowreq_ctx);
+        }
     } else {
         if (rowreq_ctx) {
             snmp_log(LOG_ERR, "error setting index while loading "
@@ -253,6 +285,7 @@ int
 inetNetToMediaTable_container_load(netsnmp_container *container)
 {
     netsnmp_container *arp_container;
+    netsnmp_container *to_delete = netsnmp_container_find("lifo");
 
     DEBUGMSGTL(("verbose:inetNetToMediaTable:inetNetToMediaTable_cache_load", "called\n"));
 
@@ -272,8 +305,22 @@ inetNetToMediaTable_container_load(netsnmp_container *container)
      * we just got a fresh copy of data. snarf data
      */
     CONTAINER_FOR_EACH(arp_container,
-                       (netsnmp_container_obj_func *) _snarf_arp_entry,
+                       (netsnmp_container_obj_func *) _add_or_update_arp_entry,
                        container);
+
+    /*
+     * Delete all cached entries, which were not provided by
+     * netsnmp_access_arp_container_load
+     */
+    CONTAINER_FOR_EACH(container,
+                       (netsnmp_container_obj_func *) _collect_invalid_arp_ctx,
+                       to_delete);
+    while (CONTAINER_SIZE(to_delete)) {
+        inetNetToMediaTable_rowreq_ctx *ctx = CONTAINER_FIRST(to_delete);
+        CONTAINER_REMOVE(container, ctx);
+        inetNetToMediaTable_release_rowreq_ctx(ctx);
+        CONTAINER_REMOVE(to_delete, NULL);
+        }
 
     /*
      * free the container. we've either claimed each entry, or released it,
