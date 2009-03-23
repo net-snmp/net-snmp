@@ -155,6 +155,9 @@ config_require(ip-mib/inetNetToMediaTable/inetNetToMediaTable_data_access)
         int             inetNetToMediaRowStatus,
             inetNetToMediaRowStatus_undo;
 
+        /* flag, if the row was present in last read from operating system */
+        int valid;
+
         /*
          * storage for future expansion
          */
