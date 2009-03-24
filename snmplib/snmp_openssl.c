@@ -12,7 +12,7 @@
 
 #include <net-snmp/library/snmp_openssl.h>
 
-#ifdef NETSNMP_USE_OPENSSL
+#if defined(NETSNMP_USE_OPENSSL) && defined(HAVE_LIBSSL)
 
 #include <openssl/evp.h>
 #include <openssl/ssl.h>
@@ -35,4 +35,4 @@ void netsnmp_init_openssl(void) {
     OpenSSL_add_all_algorithms();
 }
 
-#endif /* NETSNMP_USE_OPENSSL */
+#endif /* NETSNMP_USE_OPENSSL && HAVE_LIBSSL */
