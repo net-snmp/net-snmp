@@ -37,6 +37,14 @@
 #define ICMP_STATS_CACHE_TIMEOUT	MIB_STATS_CACHE_TIMEOUT
 #endif
 
+/* redefine ICMP6 message types from glibc < 2.4 to newer names */
+#ifdef ICMP6_MEMBERSHIP_QUERY
+#define MLD_LISTENER_QUERY ICMP6_MEMBERSHIP_QUERY
+#define MLD_LISTENER_REPORT ICMP6_MEMBERSHIP_REPORT
+#define MLD_LISTENER_REDUCTION ICMP6_MEMBERSHIP_REDUCTION
+#endif /* ICMP6_MEMBERSHIP_QUERY */
+
+
 #if defined(HAVE_LIBPERFSTAT_H) && (defined(aix4) || defined(aix5) || defined(aix6)) && !defined(FIRST_PROTOCOL)
 #include <libperfstat.h>
 #ifdef FIRST_PROTOCOL
@@ -307,6 +315,7 @@ icmp_msg_stats_load(netsnmp_cache *cache, void *vmagic)
         icmp_msg_stats_table[i].icmpMsgStatsOutPkts = v6icmp.icmp6OutEchoReplies;
         i++;
 
+#ifdef MLD_LISTENER_QUERY
         icmp_msg_stats_table[i].icmpMsgStatsType = MLD_LISTENER_QUERY;
         icmp_msg_stats_table[i].icmpMsgStatsInPkts = v6icmp.icmp6InGroupMembQueries;
         icmp_msg_stats_table[i].icmpMsgStatsOutPkts = 0;
@@ -321,6 +330,7 @@ icmp_msg_stats_load(netsnmp_cache *cache, void *vmagic)
         icmp_msg_stats_table[i].icmpMsgStatsInPkts = v6icmp.icmp6InGroupMembReductions;
         icmp_msg_stats_table[i].icmpMsgStatsOutPkts = v6icmp.icmp6OutGroupMembReductions;
         i++;
+#endif
 
         icmp_msg_stats_table[i].icmpMsgStatsType = ND_ROUTER_SOLICIT;
         icmp_msg_stats_table[i].icmpMsgStatsInPkts = v6icmp.icmp6InRouterSolicits;
