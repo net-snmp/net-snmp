@@ -154,6 +154,9 @@ SOFTWARE.
                                         const char *ospmrelprefix);
     int             netsnmp_os_kernel_width(void);
 
+    int             netsnmp_str_to_uid(const char *useroruid);
+    int             netsnmp_str_to_gid(const char *grouporgid);
+
 #ifdef __cplusplus
 }
 #endif

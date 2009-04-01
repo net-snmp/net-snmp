@@ -152,6 +152,13 @@ SOFTWARE.
 #include <crt_externs.h>        /* for _NSGetArgv() */
 #endif
 
+#if HAVE_PWD_H
+#include <pwd.h>
+#endif
+#if HAVE_GRP_H
+#include <grp.h>
+#endif
+
 #include <net-snmp/types.h>
 #include <net-snmp/output_api.h>
 #include <net-snmp/utilities.h>
@@ -1318,3 +1325,45 @@ netsnmp_os_kernel_width(void)
 #endif
 }
 
+int netsnmp_str_to_uid(const char *useroruid) {
+    int uid;
+#if HAVE_GETPWNAM && HAVE_PWD_H
+    struct passwd *pwd;
+#endif
+
+    uid = atoi(useroruid);
+
+    if ( uid == 0 ) {
+#if HAVE_GETPWNAM && HAVE_PWD_H
+        pwd = getpwnam( useroruid );
+        if (pwd)
+            uid = pwd->pw_uid;
+        else
+#endif
+            snmp_log(LOG_WARNING, "Can't identify user (%s).\n", useroruid);
+    }
+    return uid;
+    
+}
+
+int netsnmp_str_to_gid(const char *grouporgid) {
+    int gid;
+#if HAVE_GETGRNAM && HAVE_GRP_H
+    struct group  *grp;
+#endif
+
+    gid = atoi(grouporgid);
+
+    if ( gid == 0 ) {
+#if HAVE_GETGRNAM && HAVE_GRP_H
+        grp = getgrnam( grouporgid );
+        if (grp)
+            gid = grp->gr_gid;
+        else
+#endif
+            snmp_log(LOG_WARNING, "Can't identify group (%s).\n",
+                     grouporgid);
+    }
+
+    return gid;
+}
