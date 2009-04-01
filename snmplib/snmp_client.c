@@ -285,7 +285,7 @@ snmp_clone_var(netsnmp_variable_list * var, netsnmp_variable_list * newvar)
  * Returns 0 if successful, 1 if memory allocation fails.
  */
 int
-snmp_clone_mem(void **dstPtr, void *srcPtr, unsigned len)
+snmp_clone_mem(void **dstPtr, const void *srcPtr, unsigned len)
 {
     *dstPtr = NULL;
     if (srcPtr) {
