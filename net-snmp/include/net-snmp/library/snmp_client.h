@@ -90,7 +90,7 @@ extern          "C" {
     int             snmp_synch_response_cb(netsnmp_session *,
                                            netsnmp_pdu *, netsnmp_pdu **,
                                            snmp_callback);
-    int             snmp_clone_mem(void **, void *, unsigned);
+    int             snmp_clone_mem(void **, const void *, unsigned);
 
     /*
      * single session API - see snmp_api.h for full details 
