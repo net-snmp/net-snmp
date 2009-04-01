@@ -193,7 +193,8 @@
 		  find="AC_INIT\(\[Net-SNMP\], \[([^\]]+)\]"
 		  replace="AC_INIT([Net-SNMP], [{VERSION}]">
 		  <files>
-		    <file>configure.in</file>
+		    <file>configure.in*</file>
+		    <file>configure.ac*</file>
 		  </files>
 		</modify>
 		<modify
@@ -213,6 +214,7 @@
 		XXX: in the future we should verify the correct autoconf
 		version number</text>
 	      <commands>
+		<command>rm -f configure</command>
 		<command>autoconf</command>
 	      </commands>
 	    </step>
