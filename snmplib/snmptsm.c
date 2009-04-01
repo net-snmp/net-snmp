@@ -88,7 +88,7 @@ tsm_free_state_ref(void *ptr)
     /* the tmStateRef is always taken care of by the normal PDU, since this
        is just a reference to that one */
     /* DON'T DO: SNMP_FREE(tsmRef->tmStateRef); */
-    // SNMP_FREE(tsmRef); 
+    /* SNMP_FREE(tsmRef);  ? */
 }
 
 static void
