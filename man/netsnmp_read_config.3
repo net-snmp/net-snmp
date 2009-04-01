@@ -1,4 +1,4 @@
-.TH "parsing various configuration files at run time" 3 "8 Dec 2006" "Version 5.5.dev" "net-snmp" \" -*- nroff -*-
+.TH "parsing various configuration files at run time" 3 "1 Apr 2009" "Version 5.5.pre1" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -16,17 +16,17 @@ parsing various configuration files at run time \- The read_config related funct
 
 .in +1c
 .ti -1c
-.RI "\fBconfig_line\fP * \fBregister_prenetsnmp_mib_handler\fP (const char *type, const char *token, void(*parser)(const char *, char *), void(*releaser)(void), const char *help)"
+.RI "struct config_line * \fBregister_prenetsnmp_mib_handler\fP (const char *type, const char *token, void(*parser)(const char *, char *), void(*releaser)(void), const char *help)"
 .br
 .ti -1c
-.RI "\fBconfig_line\fP * \fBregister_app_prenetsnmp_mib_handler\fP (const char *token, void(*parser)(const char *, char *), void(*releaser)(void), const char *help)"
+.RI "struct config_line * \fBregister_app_prenetsnmp_mib_handler\fP (const char *token, void(*parser)(const char *, char *), void(*releaser)(void), const char *help)"
 .br
 .ti -1c
-.RI "\fBconfig_line\fP * \fBregister_config_handler\fP (const char *type_param, const char *token, void(*parser)(const char *, char *), void(*releaser)(void), const char *help)"
+.RI "struct config_line * \fBregister_config_handler\fP (const char *type, const char *token, void(*parser)(const char *, char *), void(*releaser)(void), const char *help)"
 .br
 .RI "\fIregister_config_handler registers handlers for certain tokens specified in certain types of files. \fP"
 .ti -1c
-.RI "\fBconfig_line\fP * \fBregister_app_config_handler\fP (const char *token, void(*parser)(const char *, char *), void(*releaser)(void), const char *help)"
+.RI "struct config_line * \fBregister_app_config_handler\fP (const char *token, void(*parser)(const char *, char *), void(*releaser)(void), const char *help)"
 .br
 .ti -1c
 .RI "void \fBunregister_config_handler\fP (const char *type_param, const char *token)"
@@ -36,10 +36,10 @@ parsing various configuration files at run time \- The read_config related funct
 .RI "void \fBunregister_app_config_handler\fP (const char *token)"
 .br
 .ti -1c
-.RI "void \fBunregister_all_config_handlers\fP ()"
+.RI "void \fBunregister_all_config_handlers\fP (void)"
 .br
 .ti -1c
-.RI "\fBconfig_line\fP * \fBread_config_get_handlers\fP (const char *type)"
+.RI "struct config_line * \fBread_config_get_handlers\fP (const char *type)"
 .br
 .ti -1c
 .RI "void \fBread_config_with_type_when\fP (const char *filename, const char *type, int when)"
@@ -48,10 +48,10 @@ parsing various configuration files at run time \- The read_config related funct
 .RI "void \fBread_config_with_type\fP (const char *filename, const char *type)"
 .br
 .ti -1c
-.RI "\fBconfig_line\fP * \fBread_config_find_handler\fP (struct \fBconfig_line\fP *line_handlers, const char *token)"
+.RI "struct config_line * \fBread_config_find_handler\fP (struct config_line *line_handlers, const char *token)"
 .br
 .ti -1c
-.RI "int \fBrun_config_handler\fP (struct \fBconfig_line\fP *lptr, const char *token, char *cptr, int when)"
+.RI "int \fBrun_config_handler\fP (struct config_line *lptr, const char *token, char *cptr, int when)"
 .br
 .ti -1c
 .RI "int \fBsnmp_config_when\fP (char *line, int when)"
@@ -60,13 +60,13 @@ parsing various configuration files at run time \- The read_config related funct
 .RI "int \fBnetsnmp_config\fP (char *line)"
 .br
 .ti -1c
-.RI "void \fBnetsnmp_config_remember_in_list\fP (char *line, struct \fBread_config_memory\fP **mem)"
+.RI "void \fBnetsnmp_config_remember_in_list\fP (char *line, struct read_config_memory **mem)"
 .br
 .ti -1c
-.RI "void \fBnetsnmp_config_remember_free_list\fP (struct \fBread_config_memory\fP **mem)"
+.RI "void \fBnetsnmp_config_remember_free_list\fP (struct read_config_memory **mem)"
 .br
 .ti -1c
-.RI "void \fBnetsnmp_config_process_memory_list\fP (struct \fBread_config_memory\fP **memp, int when, int clear)"
+.RI "void \fBnetsnmp_config_process_memory_list\fP (struct read_config_memory **memp, int when, int clear)"
 .br
 .ti -1c
 .RI "void \fBnetsnmp_config_remember\fP (char *line)"
@@ -78,7 +78,7 @@ parsing various configuration files at run time \- The read_config related funct
 .RI "void \fBnetsnmp_config_process_memories_when\fP (int when, int clear)"
 .br
 .ti -1c
-.RI "void \fBread_config\fP (const char *filename, struct \fBconfig_line\fP *line_handler, int when)"
+.RI "void \fBread_config\fP (const char *filename, struct config_line *line_handler, int when)"
 .br
 .ti -1c
 .RI "void \fBfree_config\fP (void)"
@@ -96,19 +96,19 @@ parsing various configuration files at run time \- The read_config related funct
 .RI "void \fBset_configuration_directory\fP (const char *dir)"
 .br
 .ti -1c
-.RI "const char * \fBget_configuration_directory\fP ()"
+.RI "const char * \fBget_configuration_directory\fP (void)"
 .br
 .ti -1c
 .RI "void \fBset_persistent_directory\fP (const char *dir)"
 .br
 .ti -1c
-.RI "const char * \fBget_persistent_directory\fP ()"
+.RI "const char * \fBget_persistent_directory\fP (void)"
 .br
 .ti -1c
 .RI "void \fBset_temp_file_pattern\fP (const char *pattern)"
 .br
 .ti -1c
-.RI "const char * \fBget_temp_file_pattern\fP ()"
+.RI "const char * \fBget_temp_file_pattern\fP (void)"
 .br
 .ti -1c
 .RI "void \fBread_config_files\fP (int when)"
@@ -128,6 +128,12 @@ parsing various configuration files at run time \- The read_config related funct
 .br
 .ti -1c
 .RI "void \fBsnmp_clean_persistent\fP (const char *type)"
+.br
+.ti -1c
+.RI "void \fBnetsnmp_config_error\fP (const char *str,...)"
+.br
+.ti -1c
+.RI "void \fBnetsnmp_config_warn\fP (const char *str,...)"
 .br
 .ti -1c
 .RI "void \fBconfig_perror\fP (const char *str)"
@@ -181,7 +187,7 @@ parsing various configuration files at run time \- The read_config related funct
 
 .in +1c
 .ti -1c
-.RI "\fBconfig_files\fP * \fBconfig_files\fP = NULL"
+.RI "struct config_files * \fBconfig_files\fP = NULL"
 .br
 .ti -1c
 .RI "int \fBlinecount\fP"
@@ -193,7 +199,7 @@ parsing various configuration files at run time \- The read_config related funct
 .SH "Detailed Description"
 .PP 
 The read_config related functions are a fairly extensible system of parsing various configuration files at the run time. 
-.PP
+
 The idea is that the calling application is able to register handlers for certain tokens specified in certain types of files. The read_configs function can then be called to look for all the files that it has registrations for, find the first word on each line, and pass the remainder to the appropriately registered handler.
 .PP
 For persistent configuration storage you will need to use the read_config_read_data, read_config_store, and read_config_store_data APIs in conjunction with first registering a callback so when the agent shutsdown for whatever reason data is written to your configuration files. The following explains in more detail the sequence to make this happen.
@@ -253,11 +259,7 @@ the next token in the configuration line. NULL if none left or if an unknown typ
 .PP
 
 .PP
-Definition at line 1793 of file read_config.c.
-.PP
-References NULL, read_config_read_objid(), read_config_read_octet_string(), and skip_token().
-.PP
-Referenced by netsnmp_read_data_callback().
+Definition at line 1851 of file read_config.c.
 .SS "void read_config_store (const char * type, const char * line)"
 .PP
 read_config_store intended for use by applications to store permenant configuration information generated by sets or persistent counters. 
@@ -278,11 +280,7 @@ void
 .PP
 
 .PP
-Definition at line 1229 of file read_config.c.
-.PP
-References get_persistent_directory(), netsnmp_ds_get_boolean(), netsnmp_getenv(), NULL, and snmp_log().
-.PP
-Referenced by netsnmp_oid_stash_store(), netsnmp_save_all_data(), and read_app_config_store().
+Definition at line 1254 of file read_config.c.
 .SS "char* read_config_store_data (int type, char * storeto, void * dataptr, size_t * len)"
 .PP
 read_config_store_data stores data of a given type to a configuration line into the storeto buffer. 
@@ -321,10 +319,8 @@ character pointer to the end of the line. NULL if an unknown type.
 .PP
 
 .PP
-Definition at line 1952 of file read_config.c.
-.PP
-References read_config_store_data_prefix().
-.SS "struct \fBconfig_line\fP* register_config_handler (const char * type_param, const char * token, void(*)(const char *, char *) parser, void(*)(void) releaser, const char * help)"
+Definition at line 2005 of file read_config.c.
+.SS "struct config_line* register_config_handler (const char * type, const char * token, void(*)(const char *, char *) parser, void(*)(void) releaser, const char * help)\fC [read]\fP"
 .PP
 register_config_handler registers handlers for certain tokens specified in certain types of files. 
 .PP
@@ -332,7 +328,7 @@ Allows a module writer use/register multiple configuration files based off of th
 .PP
 \fBParameters:\fP
 .RS 4
-\fItype_param\fP the configuration file used, e.g., if snmp.conf is the file where the token is located use 'snmp' here. If NULL the configuration file used will be snmpd.conf.
+\fItype\fP the configuration file used, e.g., if snmp.conf is the file where the token is located use 'snmp' here. Multiple colon separated tokens might be used. If NULL or '' then the configuration file used will be <application>.conf.
 .br
 \fItoken\fP the token being parsed from the file. Must be non-NULL.
 .br
@@ -350,11 +346,7 @@ Pointer to a new config line entry or NULL on error.
 .PP
 
 .PP
-Definition at line 196 of file read_config.c.
-.PP
-References config_files, netsnmp_ds_get_string(), NULL, and register_config_handler().
-.PP
-Referenced by netsnmp_ds_register_config(), netsnmp_register_save_list(), register_app_config_handler(), register_config_handler(), register_mib_handlers(), and register_prenetsnmp_mib_handler().
+Definition at line 284 of file read_config.c.
 .SS "void unregister_config_handler (const char * type_param, const char * token)"
 .PP
 uregister_config_handler un-registers handlers given a specific type_param and token. 
@@ -373,8 +365,7 @@ void
 .PP
 
 .PP
-Definition at line 301 of file read_config.c.
-.PP
-References config_files, netsnmp_ds_get_string(), config_line::next, NULL, SNMP_FREE, and unregister_config_handler().
-.PP
-Referenced by netsnmp_ds_shutdown(), unregister_all_config_handlers(), unregister_app_config_handler(), and unregister_config_handler().
+Definition at line 315 of file read_config.c.
+.SH "Author"
+.PP 
+Generated automatically by Doxygen for net-snmp from the source code.

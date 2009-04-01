@@ -1,4 +1,4 @@
-.TH "scalar" 3 "8 Dec 2006" "Version 5.5.dev" "net-snmp" \" -*- nroff -*-
+.TH "scalar" 3 "1 Apr 2009" "Version 5.5.pre1" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -27,7 +27,6 @@ scalar \- Process scalars easily.
 .SH "Detailed Description"
 .PP 
 Process scalars easily. 
-.PP
 .SH "Function Documentation"
 .PP 
 .SS "\fBnetsnmp_mib_handler\fP* netsnmp_get_scalar_handler (void)"
@@ -48,11 +47,7 @@ Returns a pointer to a netsnmp_mib_handler struct which contains the handler's n
 .PP
 
 .PP
-Definition at line 46 of file scalar.c.
-.PP
-References netsnmp_create_handler(), and netsnmp_scalar_helper_handler().
-.PP
-Referenced by netsnmp_register_read_only_scalar(), netsnmp_register_scalar(), and netsnmp_register_scalar_group().
+Definition at line 47 of file scalar.c.
 .SS "int netsnmp_register_read_only_scalar (\fBnetsnmp_handler_registration\fP * reginfo)"
 .PP
 This function registers a read only scalar helper handler. 
@@ -78,9 +73,7 @@ MIB_REGISTERED_OK is returned if the registration was a success. Failures are MI
 .PP
 
 .PP
-Definition at line 109 of file scalar.c.
-.PP
-References netsnmp_get_instance_handler(), netsnmp_get_read_only_handler(), netsnmp_get_scalar_handler(), netsnmp_inject_handler(), netsnmp_register_serialize(), netsnmp_handler_registration_s::rootoid, and netsnmp_handler_registration_s::rootoid_len.
+Definition at line 110 of file scalar.c.
 .SS "int netsnmp_register_scalar (\fBnetsnmp_handler_registration\fP * reginfo)"
 .PP
 This function registers a scalar helper handler. 
@@ -108,8 +101,7 @@ MIB_REGISTERED_OK is returned if the registration was a success. Failures are MI
 .PP
 
 .PP
-Definition at line 74 of file scalar.c.
-.PP
-References netsnmp_get_instance_handler(), netsnmp_get_scalar_handler(), netsnmp_inject_handler(), netsnmp_register_serialize(), netsnmp_handler_registration_s::rootoid, and netsnmp_handler_registration_s::rootoid_len.
-.PP
-Referenced by netsnmp_register_watched_scalar(), and netsnmp_watched_timestamp_register().
+Definition at line 75 of file scalar.c.
+.SH "Author"
+.PP 
+Generated automatically by Doxygen for net-snmp from the source code.

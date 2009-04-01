@@ -1,4 +1,4 @@
-.TH "netsnmp_data_list_s" 3 "8 Dec 2006" "Version 5.5.dev" "net-snmp" \" -*- nroff -*-
+.TH "netsnmp_data_list_s" 3 "1 Apr 2009" "Version 5.5.pre1" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -14,7 +14,7 @@ netsnmp_data_list_s \- used to iterate through lists of data
 
 .in +1c
 .ti -1c
-.RI "\fBnetsnmp_data_list_s\fP * \fBnext\fP"
+.RI "struct \fBnetsnmp_data_list_s\fP * \fBnext\fP"
 .br
 .ti -1c
 .RI "char * \fBname\fP"
@@ -39,16 +39,14 @@ Definition at line 41 of file data_list.h.
 .PP
 The pointer to the data passed on. 
 .PP
-Definition at line 45 of file data_list.h.
+
 .PP
-Referenced by netsnmp_create_data_list(), netsnmp_free_list_data(), and netsnmp_save_all_data().
+Definition at line 45 of file data_list.h.
 .SS "Netsnmp_Free_List_Data* \fBnetsnmp_data_list_s::free_func\fP"
 .PP
 must know how to free netsnmp_data_list->data 
 .PP
 Definition at line 47 of file data_list.h.
-.PP
-Referenced by netsnmp_create_data_list(), and netsnmp_free_list_data().
 
 .SH "Author"
 .PP 

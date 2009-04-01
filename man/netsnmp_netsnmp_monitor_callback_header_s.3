@@ -1,0 +1,84 @@
+.TH "netsnmp_monitor_callback_header_s" 3 "1 Apr 2009" "Version 5.5.pre1" "net-snmp" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+netsnmp_monitor_callback_header_s \- callback header  
+
+.PP
+.SH SYNOPSIS
+.br
+.PP
+\fC#include <object_monitor.h>\fP
+.PP
+.SS "Data Fields"
+
+.in +1c
+.ti -1c
+.RI "unsigned int \fBevent\fP"
+.br
+.RI "\fIcallback type \fP"
+.ti -1c
+.RI "netsnmp_index \fBmonitored_object\fP"
+.br
+.RI "\fIregistered oid \fP"
+.ti -1c
+.RI "int \fBpriority\fP"
+.br
+.RI "\fIpriority \fP"
+.ti -1c
+.RI "void * \fBwatcher_data\fP"
+.br
+.RI "\fIpointer given by watcher at registration \fP"
+.ti -1c
+.RI "void * \fBobject_info\fP"
+.br
+.RI "\fIpointer passed from the monitored object \fP"
+.ti -1c
+.RI "struct \fBnetsnmp_monitor_callback_header_s\fP * \fBprivate\fP"
+.br
+.RI "\fIDO NOT USE, INTERNAL USE ONLY. \fP"
+.ti -1c
+.RI "int \fBrefs\fP"
+.br
+.in -1c
+.SH "Detailed Description"
+.PP 
+callback header 
+.PP
+Definition at line 64 of file object_monitor.h.
+.SH "Field Documentation"
+.PP 
+.SS "unsigned int \fBnetsnmp_monitor_callback_header_s::event\fP"
+.PP
+callback type 
+.PP
+Definition at line 67 of file object_monitor.h.
+.SS "netsnmp_index \fBnetsnmp_monitor_callback_header_s::monitored_object\fP"
+.PP
+registered oid 
+.PP
+Definition at line 70 of file object_monitor.h.
+.SS "void* \fBnetsnmp_monitor_callback_header_s::object_info\fP"
+.PP
+pointer passed from the monitored object 
+.PP
+Definition at line 79 of file object_monitor.h.
+.SS "int \fBnetsnmp_monitor_callback_header_s::priority\fP"
+.PP
+priority 
+.PP
+Definition at line 73 of file object_monitor.h.
+.SS "struct \fBnetsnmp_monitor_callback_header_s\fP* \fBnetsnmp_monitor_callback_header_s::private\fP\fC [read]\fP"
+.PP
+DO NOT USE, INTERNAL USE ONLY. 
+.PP
+Definition at line 82 of file object_monitor.h.
+.SS "void* \fBnetsnmp_monitor_callback_header_s::watcher_data\fP"
+.PP
+pointer given by watcher at registration 
+.PP
+Definition at line 76 of file object_monitor.h.
+
+.SH "Author"
+.PP 
+Generated automatically by Doxygen for net-snmp from the source code.
