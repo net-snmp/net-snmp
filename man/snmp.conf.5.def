@@ -200,6 +200,17 @@ needs to be appropriate for the authentication or encryption type
 being used (auth keys: MD5=16 bytes, SHA1=20 bytes;
 priv keys: DES=16 bytes (8
 bytes of which is used as an IV and not a key), and AES=16 bytes).
+.IP "sshtosnmpsocketperms PATH"
+Sets the path of the sshtosnmp socket created by an application
+(e.g. snmpd) listening for incoming ssh connections through the
+sshtosnmp unix socket.
+.IP "sshtosnmpsocketperms MODE [OWNER [GROUP]]"
+Sets the mode, owner and group of the sshtosnmp socket created by
+an application (e.g. snmpd) listening for incoming ssh connections
+through the sshtosnmp unix socket.  The socket needs to be read/write
+privileged for SSH users that are allowed to connect to the SNMP
+service (VACM access still needs to be granted as well, most likely
+through the TSM security model).
 .\"
 .\" XXX - are these lengths still correct ?
 .\"
