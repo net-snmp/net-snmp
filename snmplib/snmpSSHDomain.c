@@ -55,16 +55,21 @@
 #include <net-snmp/types.h>
 #include <net-snmp/output_api.h>
 #include <net-snmp/library/tools.h>
-#include <net-snmp/library/tools.h>
+#include <net-snmp/library/system.h>
+#include <net-snmp/library/default_store.h>
 
 #include <net-snmp/library/snmp_transport.h>
 #include <net-snmp/library/snmpUDPDomain.h>
 #include <net-snmp/library/snmpTCPDomain.h>
 #include <net-snmp/library/snmpSSHDomain.h>
+#include <net-snmp/library/read_config.h>
 
 #define MAX_NAME_LENGTH 127
 
-#define DEFAULT_SOCK_PATH "/var/net-snmp/sshdomainsocket"
+#define NETSNMP_SSHTOSNMP_VERSION1      1
+#define NETSNMP_MAX_SSHTOSNMP_VERSION   1
+
+#define DEFAULT_SOCK_NAME "sshdomainsocket"
 
 typedef struct netsnmp_ssh_addr_pair_s {
     struct sockaddr_in remote_addr;
@@ -185,67 +190,95 @@ netsnmp_ssh_recv(netsnmp_transport *t, void *buf, int size,
                 return -1;
             };
 
-            while (rc < 0) {
-                rc = recvfrom(t->sock, buf, size, 0, NULL, NULL);
-                if (rc < 0 && errno != EINTR) {
-                    DEBUGMSGTL(("ssh", "recv fd %d err %d (\"%s\")\n",
-                                t->sock, errno, strerror(errno)));
-                    return rc;
-                }
-                *opaque = (void*)to;
-                *olength = sizeof(struct sockaddr_un);
-            }
-            DEBUGMSGTL(("ssh", "recv fd %d got %d bytes\n",
-                        t->sock, rc));
-
             if (addr_pair->username[0] == '\0') {
-                u_short name_len = 0;
+                /* we don't have a username yet, so this is the first message */
+                struct ucred *remoteuser;
+                struct msghdr msg;
+                struct iovec iov[1];
+                char cmsg[CMSG_SPACE(sizeof(remoteuser))+4096];
+                struct cmsghdr *cmsgptr;
                 u_char *charbuf  = buf;
 
-                if (rc < 3) {
-                    /* unsupported connection version */
-                    snmp_log(LOG_ERR, "unsported sshtosnmp starting size\n");
-                    return -1;
-                }
+                iov[0].iov_base = buf;
+                iov[0].iov_len = size;
+
+                memset(&msg, 0, sizeof msg);
+                msg.msg_iov = iov;
+                msg.msg_iovlen = 1;
+                msg.msg_control = &cmsg;
+                msg.msg_controllen = sizeof(cmsg);
                 
+                rc = recvmsg(t->sock, &msg, MSG_DONTWAIT); /* use DONTWAIT? */
+                if (rc <= 0) {
+                    return rc;
+                }
+
                 /* we haven't received the starting info */
-                if ((u_char) charbuf[0] != 1) {
+                if ((u_char) charbuf[0] > NETSNMP_SSHTOSNMP_VERSION1) {
                     /* unsupported connection version */
-                    snmp_log(LOG_ERR, "received unsported sshtosnmp version\n");
+                    snmp_log(LOG_ERR, "received unsupported sshtosnmp version: %d\n", charbuf[0]);
                     return -1;
                 }
 
-                name_len = (((u_char) charbuf[1]) * 0xff) + ((u_char) charbuf[2]);
+                DEBUGMSGTL(("ssh", "received first msg over SSH; internal SSH protocol version %d\n", charbuf[0]));
 
-                if (name_len > MAX_NAME_LENGTH) {
-                    /* unsupported connection version */
-                    snmp_log(LOG_ERR, "received sshtosnmp username length which is too long\n");
+                for (cmsgptr = CMSG_FIRSTHDR(&msg); cmsgptr != NULL; cmsgptr = CMSG_NXTHDR(&msg, cmsgptr)) {
+                    if (cmsgptr->cmsg_level == SOL_SOCKET && cmsgptr->cmsg_type == SCM_CREDENTIALS) {
+                        /* received credential info */
+                        struct passwd *user_pw;
+
+                        remoteuser = (struct ucred *) CMSG_DATA(cmsgptr);
+
+                        if ((user_pw = getpwuid(remoteuser->uid)) == NULL) {
+                            snmp_log(LOG_ERR, "No user found for uid %d\n",
+                                remoteuser->uid);
+                            return -1;
+                        }
+                        if (strlen(user_pw->pw_name) >
+                            sizeof(addr_pair->username)-1) {
+                            snmp_log(LOG_ERR,
+                                     "User name '%s' too long for snmp\n",
+                                     user_pw->pw_name);
+                            return -1;
+                        }
+                        strncpy(addr_pair->username, user_pw->pw_name,
+                                sizeof(addr_pair->username));
+                        addr_pair->username[sizeof(addr_pair->username)-1] = '\0';
+                    }
+                    DEBUGMSGTL(("ssh", "Setting user name to %s\n",
+                                addr_pair->username));
+                }
+
+                if (addr_pair->username[0] == '\0') {
+                    snmp_log(LOG_ERR,
+                             "failed to extract username from sshd connected unix socket\n");
                     return -1;
                 }
 
-                if (rc < 3+name_len) {
-                    /* unsupported connection version */
-                    snmp_log(LOG_ERR, "unsported sshtosnmp starting size (name field not big enough)\n");
-                    return -1;
-                }                    
-
-                memcpy(addr_pair->username, &charbuf[3], name_len);
-                addr_pair->username[name_len] = '\0';
-                DEBUGMSGTL(("ssh", "Setting user name to %d -> %s\n",
-                            name_len, addr_pair->username));
-                if (rc == 3+name_len) {
+                if (rc == 1) {
                     /* the only packet we received was the starting one */
-                    /* XXX: no good signaling mechanism here */
                     t->flags |= NETSNMP_TRANSPORT_FLAG_EMPTY_PKT;
                     return 0;
                 }
 
-                rc -= 3+name_len;
-                memmove(charbuf, &charbuf[3+name_len], rc);
+                rc -= 1;
+                memmove(charbuf, &charbuf[1], rc);
+            } else {
+                while (rc < 0) {
+                    rc = recvfrom(t->sock, buf, size, 0, NULL, NULL);
+                    if (rc < 0 && errno != EINTR) {
+                        DEBUGMSGTL(("ssh", "recv fd %d err %d (\"%s\")\n",
+                                    t->sock, errno, strerror(errno)));
+                        return rc;
+                    }
+                    *opaque = (void*)to;
+                    *olength = sizeof(struct sockaddr_un);
+                }
             }
+            DEBUGMSGTL(("ssh", "recv fd %d got %d bytes\n",
+                        t->sock, rc));
         }
         
-
 #else /* we're called directly by sshd and use stdin/out */
 
         struct passwd *user_pw;
@@ -497,6 +530,13 @@ netsnmp_ssh_accept(netsnmp_transport *t)
 
         newsock = accept(t->sock, farend, &farendlen);
 
+        /* set the SO_PASSCRED option so we can receive the remote uid */
+        {
+            int one = 1;
+            setsockopt(newsock, SOL_SOCKET, SO_PASSCRED, (void *) &one,
+                       sizeof(one));
+        }
+
         if (newsock < 0) {
             DEBUGMSGTL(("ssh","accept failed rc %d errno %d \"%s\"\n",
                         newsock, errno, strerror(errno)));
@@ -546,7 +586,10 @@ netsnmp_ssh_transport(struct sockaddr_in *addr, int local)
     const char *fingerprint;
     char *userauthlist;
     struct sockaddr_un *unaddr;
-
+    const char *sockpath =
+        netsnmp_ds_get_string(NETSNMP_DS_LIBRARY_ID,
+                              NETSNMP_DS_LIB_SSHTOSNMP_SOCKET);
+    char tmpsockpath[MAXPATHLEN];
 
     if (addr == NULL || addr->sin_family != AF_INET) {
         return NULL;
@@ -585,13 +628,26 @@ netsnmp_ssh_transport(struct sockaddr_in *addr, int local)
         /* open a unix domain socket */
         /* XXX: get data from the transport def for it's location */
         unaddr->sun_family = AF_UNIX;
-        strcpy(unaddr->sun_path, DEFAULT_SOCK_PATH);
-        strcpy(addr_pair->socket_path, DEFAULT_SOCK_PATH);
+        if (NULL == sockpath) {
+            sprintf(tmpsockpath, "%s/%s", get_persistent_directory(),
+                    DEFAULT_SOCK_NAME);
+            sockpath = tmpsockpath;
+        }
+
+        strcpy(unaddr->sun_path, sockpath);
+        strcpy(addr_pair->socket_path, sockpath);
 
         t->sock = socket(PF_UNIX, SOCK_STREAM, 0);
         if (t->sock < 0) {
             netsnmp_transport_free(t);
             return NULL;
+        }
+
+        /* set the SO_PASSCRED option so we can receive the remote uid */
+        {
+            int one = 1;
+            setsockopt(t->sock, SOL_SOCKET, SO_PASSCRED, (void *) &one,
+                       sizeof(one));
         }
 
         unlink(unaddr->sun_path);
@@ -605,6 +661,48 @@ netsnmp_ssh_transport(struct sockaddr_in *addr, int local)
             return NULL;
         }
 
+
+        /* set the socket permissions */
+        {
+            /*
+             * Apply any settings to the ownership/permissions of the
+             * Sshdomain socket
+             */
+            int sshdomain_sock_perm =
+                netsnmp_ds_get_int(NETSNMP_DS_LIBRARY_ID,
+                                   NETSNMP_DS_SSHDOMAIN_SOCK_PERM);
+            int sshdomain_sock_user =
+                netsnmp_ds_get_int(NETSNMP_DS_LIBRARY_ID,
+                                   NETSNMP_DS_SSHDOMAIN_SOCK_USER);
+            int sshdomain_sock_group =
+                netsnmp_ds_get_int(NETSNMP_DS_LIBRARY_ID,
+                                   NETSNMP_DS_SSHDOMAIN_SOCK_GROUP);
+
+            DEBUGMSGTL(("ssh", "here: %s, %d, %d, %d\n",
+                        unaddr->sun_path,
+                        sshdomain_sock_perm, sshdomain_sock_user,
+                        sshdomain_sock_group));
+            if (sshdomain_sock_perm != 0) {
+                DEBUGMSGTL(("ssh", "Setting socket perms to %d\n",
+                            sshdomain_sock_perm));
+                chmod(unaddr->sun_path, sshdomain_sock_perm);
+            }
+
+            if (sshdomain_sock_user || sshdomain_sock_group) {
+                /*
+                 * If either of user or group haven't been set,
+                 *  then leave them unchanged.
+                 */
+                if (sshdomain_sock_user == 0 )
+                    sshdomain_sock_user = -1;
+                if (sshdomain_sock_group == 0 )
+                    sshdomain_sock_group = -1;
+                DEBUGMSGTL(("ssh", "Setting socket user/group to %d/%d\n",
+                            sshdomain_sock_user, sshdomain_sock_group));
+                chown(unaddr->sun_path,
+                      sshdomain_sock_user, sshdomain_sock_group);
+            }
+        }
 
         rc = listen(t->sock, NETSNMP_STREAM_QUEUE_LEN);
         if (rc != 0) {
@@ -799,10 +897,54 @@ netsnmp_ssh_create_ostring(const u_char * o, size_t o_len, int local)
     return NULL;
 }
 
+void
+sshdomain_parse_socket(const char *token, char *cptr)
+{
+    char *socket_perm, *socket_user, *socket_group;
+    int uid = -1;
+    int gid = -1;
+    int s_perm = -1;
+    char *st;
 
+    DEBUGMSGTL(("ssh/config", "parsing socket info: %s\n", cptr));
+    socket_perm = strtok_r(cptr, " \t", &st);
+    socket_user = strtok_r(NULL, " \t", &st);
+    socket_group = strtok_r(NULL, " \t", &st);
+
+    if (socket_perm) {
+        s_perm = strtol(socket_perm, NULL, 8);
+        netsnmp_ds_set_int(NETSNMP_DS_LIBRARY_ID,
+                           NETSNMP_DS_SSHDOMAIN_SOCK_PERM, s_perm);
+        DEBUGMSGTL(("ssh/config", "socket permissions: %o (%d)\n",
+                    s_perm, s_perm));
+    }
+    /*
+     * Try to handle numeric UIDs or user names for the socket owner
+     */
+    if (socket_user) {
+        uid = netsnmp_str_to_uid(socket_user);
+        if ( uid != 0 )
+            netsnmp_ds_set_int(NETSNMP_DS_LIBRARY_ID,
+                               NETSNMP_DS_SSHDOMAIN_SOCK_USER, uid);
+        DEBUGMSGTL(("ssh/config", "socket owner: %s (%d)\n",
+                    socket_user, uid));
+    }
+
+    /*
+     * and similarly for the socket group ownership
+     */
+    if (socket_group) {
+        gid = netsnmp_str_to_gid(socket_group);
+        if ( gid != 0 )
+            netsnmp_ds_set_int(NETSNMP_DS_LIBRARY_ID,
+                               NETSNMP_DS_SSHDOMAIN_SOCK_GROUP, gid);
+        DEBUGMSGTL(("ssh/config", "socket group: %s (%d)\n",
+                    socket_group, gid));
+    }
+}
 
 void
-netsnmp_ssh_ctor(void)
+netsnmp_ssh_ctor(void)    
 {
     sshDomain.name = netsnmp_snmpSSHDomain;
     sshDomain.name_length = sizeof(netsnmp_snmpSSHDomain) / sizeof(oid);
@@ -812,6 +954,16 @@ netsnmp_ssh_ctor(void)
     sshDomain.f_create_from_tstring_new = netsnmp_ssh_create_tstring;
     sshDomain.f_create_from_ostring = netsnmp_ssh_create_ostring;
 
+    register_config_handler("snmp", "sshtosnmpsocketperms",
+                            &sshdomain_parse_socket, NULL,
+                            "socketperms [username [groupname]]");
+
+    netsnmp_ds_register_config(ASN_OCTET_STR, "snmp", "sshtosnmpsocket",
+                               NETSNMP_DS_LIBRARY_ID,
+                               NETSNMP_DS_LIB_SSHTOSNMP_SOCKET);
+
     DEBUGMSGTL(("ssh", "registering the ssh domain\n"));
     netsnmp_tdomain_register(&sshDomain);
 }
+
+

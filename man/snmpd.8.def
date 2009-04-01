@@ -256,14 +256,18 @@ the same error on other platforms.
 .RS 0
 .TP 8
 ssh
-The SSH transport is actually just a unix named pipe that can be
-connected to via a ssh subsystem configured in the main ssh server.
-The pipe location (currently not configurable) is
-.I /var/net-snmp/sshtosnmp.  It is important that only security
-approved users can connect to this pipe as raw SNMP commands can be
-passed to it without other authentication.
+The SSH transport, on the server side, is actually just a unix
+named pipe that can be connected to via a ssh subsystem configured in
+the main ssh server.  The pipe location (configurable with the
+sshtosnmpsocket token in snmp.conf) is
+.I /var/net-snmp/sshtosnmp.
+Packets should be submitted to it via the sshtosnmp application, which
+also sends the user ID as well when starting the connection.  The TSM
+security model should be used when packets should process it.
 .IP
-The sshtosnmp command knows how to connect to this pipe and talk to
+The
+.I sshtosnmp
+command knows how to connect to this pipe and talk to
 it.  It should be configured in the
 .IR "OpenSSH sshd"
 configuration file (which is normally
@@ -277,17 +281,26 @@ The
 .I sshtosnmp
 command will need read/write access to the 
 .I /var/net-snmp/sshtosnmp
-pipe either through direct permissions by the resulting user that logs
-in through ssh and runs the program.  But it is important to note that
-this results in permissions that is granted to the root-like
-privileges the snmpd process runs under.  Thus is recommended that the
-user that has write access to the 
-.I /var/net-snmp/sshtosnmp
-file
-.B NOT
-be granted shell access and that account separation is used to prevent
-malicious local use.  IE, accounts should only be for shell-use or
-SNMP use but not both.
+pipe.  Although it should be fairly safe to grant access to the
+average user since it still requires modifications to the ACM settings
+before the user can perform operations, paranoid administrators may
+want to make the /var/net-snmp directory accessible only by users in a
+particular group.  Use the
+.I sshtosnmpsocketperms
+snmp.conf configure option to set the permissions, owner and group of
+the created socket.
+.IP
+Access control can be granted to the user "foo" using the following
+style of simple snmpd.conf settings:
+.TP 8
+.IP
+rouser -s tsm foo authpriv
+.IP
+Note that "authpriv" is acceptable assuming as SSH protects everything
+that way (assuming you have a non-insane setup).
+snmpd has no notion of how SSH has actually protected a packet and
+thus the snmp agent assumes all packets passed through the SSH
+transport have been protected at the authpriv level.
 .TP 8
 dtlsudp
 The DTLS protocol, which is based off of TLS, requires both client and
@@ -306,6 +319,9 @@ file with the
 and
 .IR defX509ClientCerts
 configuration tokens defined.
+.IP
+Access control setup is similar to the ssh transport as the TSM
+security model should be used to protect the packet.
 .RE
 .SH CONFIGURATION FILES
 .PP
