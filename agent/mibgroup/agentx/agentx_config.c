@@ -14,13 +14,6 @@
 #include <strings.h>
 #endif
 
-#if HAVE_PWD_H
-#include <pwd.h>
-#endif
-#if HAVE_GRP_H
-#include <grp.h>
-#endif
-
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 #include "snmpd.h"
@@ -73,12 +66,6 @@ agentx_parse_agentx_perms(const char *token, char *cptr)
     int s_perm = -1;
     int d_perm = -1;
     char *st;
-#if HAVE_GETPWNAM && HAVE_PWD_H
-    struct passwd *pwd;
-#endif
-#if HAVE_GETGRNAM && HAVE_GRP_H
-    struct group  *grp;
-#endif
 
     DEBUGMSGTL(("agentx/config", "port permissions: %s\n", cptr));
     socket_perm = strtok_r(cptr, " \t", &st);
@@ -105,16 +92,7 @@ agentx_parse_agentx_perms(const char *token, char *cptr)
      * Try to handle numeric UIDs or user names for the socket owner
      */
     if (socket_user) {
-        uid = atoi(socket_user);
-        if ( uid == 0 ) {
-#if HAVE_GETPWNAM && HAVE_PWD_H
-            pwd = getpwnam( socket_user );
-            if (pwd)
-                uid = pwd->pw_uid;
-            else
-#endif
-                snmp_log(LOG_WARNING, "Can't identify AgentX socket user (%s).\n", socket_user);
-        }
+        uid = netsnmp_str_to_uid(socket_user);
         if ( uid != 0 )
             netsnmp_ds_set_int(NETSNMP_DS_APPLICATION_ID,
                                NETSNMP_DS_AGENT_X_SOCK_USER, uid);
@@ -126,16 +104,7 @@ agentx_parse_agentx_perms(const char *token, char *cptr)
      * and similarly for the socket group ownership
      */
     if (socket_group) {
-        gid = atoi(socket_group);
-        if ( gid == 0 ) {
-#if HAVE_GETGRNAM && HAVE_GRP_H
-            grp = getgrnam( socket_group );
-            if (grp)
-                gid = grp->gr_gid;
-            else
-#endif
-                snmp_log(LOG_WARNING, "Can't identify AgentX socket group (%s).\n", socket_group);
-        }
+        gid = netsnmp_str_to_gid(socket_group);
         if ( gid != 0 )
             netsnmp_ds_set_int(NETSNMP_DS_APPLICATION_ID,
                                NETSNMP_DS_AGENT_X_SOCK_GROUP, gid);
