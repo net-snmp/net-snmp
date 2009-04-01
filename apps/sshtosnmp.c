@@ -25,6 +25,7 @@
 #include <unistd.h>
 #include <stdlib.h>
 #include <errno.h>
+#include <stdio.h>
 
 #ifndef MAXPATHLEN
 #warn no system max path length detected
@@ -33,7 +34,7 @@
 
 #define DEFAULT_SOCK_PATH "/var/net-snmp/sshdomainsocket"
 
-#define SSHTOSNMP_VERSION_NUMBER 1
+#define NETSNMP_SSHTOSNMP_VERSION_NUMBER 1
 
 
 
@@ -41,11 +42,10 @@
  * Extra debugging output for, um, debugging.
  */
 
-#define DEBUGGING 0
+#undef DEBUGGING
 
 #ifdef DEBUGGING
 #define DEBUG(x) deb(x)
-#include <stdio.h>
 FILE *debf = NULL;
 void
 deb(const char *string) {
@@ -67,12 +67,13 @@ main(int argc, char **argv) {
     int sock;
     struct sockaddr_un addr;
     u_char buf[4096];
+    size_t buf_len = sizeof(buf);
     u_short name_len;
     int rc = 0, pktsize = 0;
 
     fd_set read_set;
 
-    DEBUG("starting up");
+    DEBUG("----------\nstarting up");
 
     /* Open a connection to the UNIX domain socket or fail */
 
@@ -88,6 +89,16 @@ main(int argc, char **argv) {
     if (sock <= 0) {
         exit(1);
     }
+
+    /* set the SO_PASSCRED option so we can pass uid */
+    /* XXX: according to the unix(1) manual this shouldn't be needed
+       on the sending side? */
+    {
+        int one = 1;
+        setsockopt(sock, SOL_SOCKET, SO_PASSCRED, (void *) &one,
+                   sizeof(one));
+    }
+
     if (connect(sock, (struct sockaddr *) &addr,
                 sizeof(struct sockaddr_un)) != 0) {
         DEBUG("FAIL CONNECT");
@@ -98,28 +109,57 @@ main(int argc, char **argv) {
 
     /*
      * we are running as the user that ssh authenticated us as, and this
-     * is the name that the agent needs for processing as a SNMPv3
+     * is the name/uid that the agent needs for processing as a SNMPv3
      * security name.  So this is the only thing needed to pass to the
      * agent.
      */
 
+    /* version 1 of our internal ssh to snmp wrapper is just a single
+       byte version number and indicates we're also passing unix
+       socket credentials containing our user id */
+
     /* In case of future changes, we'll pass a version number first */
 
-    buf[0] = SSHTOSNMP_VERSION_NUMBER;
+    buf[0] = NETSNMP_SSHTOSNMP_VERSION_NUMBER;
+    buf_len = 1;
+    
+    /* send the prelim message and the credentials together using sendmsg() */
+    {
+        struct msghdr m;
+        struct {
+           struct cmsghdr cm;
+           struct ucred ouruser;
+        } cmsg;
+        struct iovec iov = { buf, buf_len };
 
-    /* now send the user name, prefixed by a 16-bit length */
+        /* do what all ANSI compilers should  */
+        memset(&cmsg, 0, sizeof(cmsg));
+        memset(&m, 0, sizeof(m));
 
-    name_len = strlen(getenv("USER"));
-    if (name_len > sizeof(buf)-2) {
-        exit(1);
+        /* set up the basic message */
+        cmsg.cm.cmsg_len = sizeof(struct cmsghdr) + sizeof(struct ucred);
+        cmsg.cm.cmsg_level = SOL_SOCKET;
+        cmsg.cm.cmsg_type = SCM_CREDENTIALS;
+
+        cmsg.ouruser.uid = getuid();
+        cmsg.ouruser.gid = getgid();
+        cmsg.ouruser.pid = getpid();
+
+        m.msg_iov               = &iov;
+        m.msg_iovlen            = 1;
+        m.msg_control           = &cmsg;
+        m.msg_controllen        = sizeof(cmsg);
+        m.msg_flags             = 0;
+        
+        DEBUG("sending to sock");
+        rc = sendmsg(sock, &m, MSG_NOSIGNAL|MSG_DONTWAIT);
+        if (rc < 0) {
+            fprintf(stderr, "failed to send startup message\n");
+            DEBUG("failed to send startup message\n");
+            exit(1);
+        }
     }
-    buf[1] = (name_len & 0xff00) >> 8;
-    buf[2] = (name_len & 0xff);
 
-    /* XXX: should do this via getpwuid(getuid()) */
-    memcpy(&buf[3], getenv("USER"), name_len);
-
-    sendto(sock, buf, name_len+3, 0, NULL, 0);
     DEBUG("sent name");
     
     /* now we just send and receive from both the socket and stdin/stdout */
