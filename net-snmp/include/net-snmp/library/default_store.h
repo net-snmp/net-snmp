@@ -94,19 +94,23 @@ extern          "C" {
     /*
      * library integers 
      */
-#define NETSNMP_DS_LIB_MIB_WARNINGS  0
-#define NETSNMP_DS_LIB_SECLEVEL      1
-#define NETSNMP_DS_LIB_SNMPVERSION   2
-#define NETSNMP_DS_LIB_DEFAULT_PORT  3
-#define NETSNMP_DS_LIB_OID_OUTPUT_FORMAT  4
-#define NETSNMP_DS_LIB_PRINT_SUFFIX_ONLY  NETSNMP_DS_LIB_OID_OUTPUT_FORMAT
+#define NETSNMP_DS_LIB_MIB_WARNINGS         0
+#define NETSNMP_DS_LIB_SECLEVEL             1
+#define NETSNMP_DS_LIB_SNMPVERSION          2
+#define NETSNMP_DS_LIB_DEFAULT_PORT         3
+#define NETSNMP_DS_LIB_OID_OUTPUT_FORMAT    4
+#define NETSNMP_DS_LIB_PRINT_SUFFIX_ONLY    NETSNMP_DS_LIB_OID_OUTPUT_FORMAT
 #define NETSNMP_DS_LIB_STRING_OUTPUT_FORMAT 5
-#define NETSNMP_DS_LIB_HEX_OUTPUT_LENGTH 6
-#define NETSNMP_DS_LIB_SERVERSENDBUF   7 /* send buffer (server) */
-#define NETSNMP_DS_LIB_SERVERRECVBUF   8 /* receive buffer (server) */
-#define NETSNMP_DS_LIB_CLIENTSENDBUF   9 /* send buffer (client) */
-#define NETSNMP_DS_LIB_CLIENTRECVBUF  10 /* receive buffer (client) */
-
+#define NETSNMP_DS_LIB_HEX_OUTPUT_LENGTH    6
+#define NETSNMP_DS_LIB_SERVERSENDBUF        7 /* send buffer (server) */
+#define NETSNMP_DS_LIB_SERVERRECVBUF        8 /* receive buffer (server) */
+#define NETSNMP_DS_LIB_CLIENTSENDBUF        9 /* send buffer (client) */
+#define NETSNMP_DS_LIB_CLIENTRECVBUF       10 /* receive buffer (client) */
+#define NETSNMP_DS_SSHDOMAIN_SOCK_PERM     11
+#define NETSNMP_DS_SSHDOMAIN_DIR_PERM      12
+#define NETSNMP_DS_SSHDOMAIN_SOCK_USER     12
+#define NETSNMP_DS_SSHDOMAIN_SOCK_GROUP    13
+    
     /*
      * special meanings for the default SNMP version slot (NETSNMP_DS_LIB_SNMPVERSION) 
      */
@@ -153,6 +157,7 @@ extern          "C" {
 #define NETSNMP_DS_LIB_X509_SERVER_PUB   26
 #define NETSNMP_DS_LIB_X509_SERVER_PRIV  27
 #define NETSNMP_DS_LIB_X509_CLIENT_CERTS 28
+#define NETSNMP_DS_LIB_SSHTOSNMP_SOCKET  29
 
     /*
      * end storage definitions 
