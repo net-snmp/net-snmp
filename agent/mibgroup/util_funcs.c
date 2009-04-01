@@ -296,7 +296,7 @@ get_exec_output(struct extensible *ex)
             /*
              * XXX  Use SNMP_FILEMODE_CLOSED instead of 644? 
              */
-        if ((cfd = open(cachefile, O_WRONLY | O_TRUNC | O_CREAT, 0644)) < 0) {
+        if ((cfd = open(cachefile, O_WRONLY | O_TRUNC | O_CREAT, 0600)) < 0) {
                 snmp_log(LOG_ERR,"can not create cache file\n");
                 setPerrorstatus(cachefile);
                 cachetime = 0;
