@@ -1,0 +1,40 @@
+.TH "table_row" 3 "1 Apr 2009" "Version 5.5.pre1" "net-snmp" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+table_row \- Helps you implement a table shared across two or more subagents, or otherwise split into individual row slices.  
+
+.PP
+.SS "Functions"
+
+.in +1c
+.ti -1c
+.RI "\fBnetsnmp_mib_handler\fP * \fBnetsnmp_table_row_handler_get\fP (void *row)"
+.br
+.RI "\fIreturns a netsnmp_mib_handler object for the table_container helper \fP"
+.ti -1c
+.RI "int \fBnetsnmp_table_row_register\fP (\fBnetsnmp_handler_registration\fP *reginfo, \fBnetsnmp_table_registration_info\fP *tabreg, void *row, \fBnetsnmp_variable_list\fP *index)"
+.br
+.ti -1c
+.RI "void * \fBnetsnmp_table_row_extract\fP (\fBnetsnmp_request_info\fP *request)"
+.br
+.RI "\fIreturn the row data structure supplied to the table_row helper \fP"
+.in -1c
+.SH "Detailed Description"
+.PP 
+Helps you implement a table shared across two or more subagents, or otherwise split into individual row slices. 
+.SH "Function Documentation"
+.PP 
+.SS "void* netsnmp_table_row_extract (\fBnetsnmp_request_info\fP * request)"
+.PP
+return the row data structure supplied to the table_row helper 
+.PP
+Definition at line 158 of file table_row.c.
+.SS "\fBnetsnmp_mib_handler\fP* netsnmp_table_row_handler_get (void * row)"
+.PP
+returns a netsnmp_mib_handler object for the table_container helper 
+.PP
+Definition at line 75 of file table_row.c.
+.SH "Author"
+.PP 
+Generated automatically by Doxygen for net-snmp from the source code.

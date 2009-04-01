@@ -1,0 +1,240 @@
+.TH "agent_handler.h" 3 "1 Apr 2009" "Version 5.5.pre1" "net-snmp" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+agent_handler.h \- 
+.SH SYNOPSIS
+.br
+.PP
+.SS "Data Structures"
+
+.in +1c
+.ti -1c
+.RI "struct \fBnetsnmp_mib_handler_s\fP"
+.br
+.RI "\fIthe mib handler structure to be registered \fP"
+.ti -1c
+.RI "struct \fBnetsnmp_handler_registration_s\fP"
+.br
+.RI "\fIRoot registration info. \fP"
+.ti -1c
+.RI "struct \fBnetsnmp_handler_args_s\fP"
+.br
+.ti -1c
+.RI "struct \fBnetsnmp_delegated_cache_s\fP"
+.br
+.in -1c
+.SS "Defines"
+
+.in +1c
+.ti -1c
+.RI "#define \fBMIB_HANDLER_AUTO_NEXT\fP   0x00000001"
+.br
+.ti -1c
+.RI "#define \fBMIB_HANDLER_AUTO_NEXT_OVERRIDE_ONCE\fP   0x00000002"
+.br
+.ti -1c
+.RI "#define \fBMIB_HANDLER_INSTANCE\fP   0x00000004"
+.br
+.ti -1c
+.RI "#define \fBMIB_HANDLER_CUSTOM4\fP   0x10000000"
+.br
+.ti -1c
+.RI "#define \fBMIB_HANDLER_CUSTOM3\fP   0x20000000"
+.br
+.ti -1c
+.RI "#define \fBMIB_HANDLER_CUSTOM2\fP   0x40000000"
+.br
+.ti -1c
+.RI "#define \fBMIB_HANDLER_CUSTOM1\fP   0x80000000"
+.br
+.ti -1c
+.RI "#define \fBHANDLER_CAN_GETANDGETNEXT\fP   0x01"
+.br
+.ti -1c
+.RI "#define \fBHANDLER_CAN_SET\fP   0x02"
+.br
+.ti -1c
+.RI "#define \fBHANDLER_CAN_GETBULK\fP   0x04"
+.br
+.ti -1c
+.RI "#define \fBHANDLER_CAN_NOT_CREATE\fP   0x08"
+.br
+.ti -1c
+.RI "#define \fBHANDLER_CAN_BABY_STEP\fP   0x10"
+.br
+.ti -1c
+.RI "#define \fBHANDLER_CAN_STASH\fP   0x20"
+.br
+.ti -1c
+.RI "#define \fBHANDLER_CAN_RONLY\fP   (HANDLER_CAN_GETANDGETNEXT)"
+.br
+.ti -1c
+.RI "#define \fBHANDLER_CAN_RWRITE\fP   (HANDLER_CAN_GETANDGETNEXT | HANDLER_CAN_SET)"
+.br
+.ti -1c
+.RI "#define \fBHANDLER_CAN_SET_ONLY\fP   (HANDLER_CAN_SET | HANDLER_CAN_NOT_CREATE)"
+.br
+.ti -1c
+.RI "#define \fBHANDLER_CAN_DEFAULT\fP   (HANDLER_CAN_RONLY | HANDLER_CAN_NOT_CREATE)"
+.br
+.ti -1c
+.RI "#define \fBREQUEST_IS_DELEGATED\fP   1"
+.br
+.ti -1c
+.RI "#define \fBREQUEST_IS_NOT_DELEGATED\fP   0"
+.br
+.in -1c
+.SS "Typedefs"
+
+.in +1c
+.ti -1c
+.RI "typedef struct \fBnetsnmp_mib_handler_s\fP \fBnetsnmp_mib_handler\fP"
+.br
+.RI "\fITypedefs the \fBnetsnmp_mib_handler_s\fP struct into netsnmp_mib_handler. \fP"
+.ti -1c
+.RI "typedef struct \fBnetsnmp_handler_registration_s\fP \fBnetsnmp_handler_registration\fP"
+.br
+.RI "\fITypedefs the \fBnetsnmp_handler_registration_s\fP struct into netsnmp_handler_registration. \fP"
+.ti -1c
+.RI "typedef int( \fBNetsnmp_Node_Handler\fP )(\fBnetsnmp_mib_handler\fP *handler, \fBnetsnmp_handler_registration\fP *reginfo, \fBnetsnmp_agent_request_info\fP *reqinfo, \fBnetsnmp_request_info\fP *requests)"
+.br
+.ti -1c
+.RI "typedef struct netsnmp_handler_args_s \fBnetsnmp_handler_args\fP"
+.br
+.ti -1c
+.RI "typedef struct netsnmp_delegated_cache_s \fBnetsnmp_delegated_cache\fP"
+.br
+.in -1c
+.SS "Functions"
+
+.in +1c
+.ti -1c
+.RI "void \fBnetsnmp_init_handler_conf\fP (void)"
+.br
+.ti -1c
+.RI "int \fBnetsnmp_register_handler\fP (\fBnetsnmp_handler_registration\fP *reginfo)"
+.br
+.RI "\fIregister a handler, as defined by the netsnmp_handler_registration pointer. \fP"
+.ti -1c
+.RI "int \fBnetsnmp_unregister_handler\fP (\fBnetsnmp_handler_registration\fP *reginfo)"
+.br
+.RI "\fIunregister a handler, as defined by the netsnmp_handler_registration pointer. \fP"
+.ti -1c
+.RI "int \fBnetsnmp_register_handler_nocallback\fP (\fBnetsnmp_handler_registration\fP *reginfo)"
+.br
+.RI "\fIregister a handler, as defined by the netsnmp_handler_registration pointer. \fP"
+.ti -1c
+.RI "int \fBnetsnmp_inject_handler\fP (\fBnetsnmp_handler_registration\fP *reginfo, \fBnetsnmp_mib_handler\fP *handler)"
+.br
+.RI "\fIinject a new handler into the calling chain of the handlers definedy by the netsnmp_handler_registration pointer. \fP"
+.ti -1c
+.RI "int \fBnetsnmp_inject_handler_before\fP (\fBnetsnmp_handler_registration\fP *reginfo, \fBnetsnmp_mib_handler\fP *handler, const char *before_what)"
+.br
+.RI "\fIinject a new handler into the calling chain of the handlers definedy by the netsnmp_handler_registration pointer. \fP"
+.ti -1c
+.RI "\fBnetsnmp_mib_handler\fP * \fBnetsnmp_find_handler_by_name\fP (\fBnetsnmp_handler_registration\fP *reginfo, const char *name)"
+.br
+.RI "\fIReturns a handler from a chain based on the name. \fP"
+.ti -1c
+.RI "void * \fBnetsnmp_find_handler_data_by_name\fP (\fBnetsnmp_handler_registration\fP *reginfo, const char *name)"
+.br
+.RI "\fIReturns a handler's void * pointer from a chain based on the name. \fP"
+.ti -1c
+.RI "int \fBnetsnmp_call_handlers\fP (\fBnetsnmp_handler_registration\fP *reginfo, \fBnetsnmp_agent_request_info\fP *reqinfo, \fBnetsnmp_request_info\fP *requests)"
+.br
+.ti -1c
+.RI "NETSNMP_INLINE int \fBnetsnmp_call_handler\fP (\fBnetsnmp_mib_handler\fP *next_handler, \fBnetsnmp_handler_registration\fP *reginfo, \fBnetsnmp_agent_request_info\fP *reqinfo, \fBnetsnmp_request_info\fP *requests)"
+.br
+.RI "\fIcalls a handler with with appropriate NULL checking of arguments, etc. \fP"
+.ti -1c
+.RI "NETSNMP_INLINE int \fBnetsnmp_call_next_handler\fP (\fBnetsnmp_mib_handler\fP *current, \fBnetsnmp_handler_registration\fP *reginfo, \fBnetsnmp_agent_request_info\fP *reqinfo, \fBnetsnmp_request_info\fP *requests)"
+.br
+.RI "\fIcalls the next handler in the chain after the current one with with appropriate NULL checking, etc. \fP"
+.ti -1c
+.RI "NETSNMP_INLINE int \fBnetsnmp_call_next_handler_one_request\fP (\fBnetsnmp_mib_handler\fP *current, \fBnetsnmp_handler_registration\fP *reginfo, \fBnetsnmp_agent_request_info\fP *reqinfo, \fBnetsnmp_request_info\fP *requests)"
+.br
+.RI "\fIcalls the next handler in the chain after the current one with with appropriate NULL checking, etc. \fP"
+.ti -1c
+.RI "\fBnetsnmp_mib_handler\fP * \fBnetsnmp_create_handler\fP (const char *name, Netsnmp_Node_Handler *handler_access_method)"
+.br
+.RI "\fIcreates a netsnmp_mib_handler structure given a name and a access method. \fP"
+.ti -1c
+.RI "\fBnetsnmp_handler_registration\fP * \fBnetsnmp_handler_registration_create\fP (const char *name, \fBnetsnmp_mib_handler\fP *handler, const oid *reg_oid, size_t reg_oid_len, int modes)"
+.br
+.RI "\fIcreates a handler registration structure given a name, a access_method function, a registration location oid and the modes the handler supports. \fP"
+.ti -1c
+.RI "\fBnetsnmp_handler_registration\fP * \fBnetsnmp_create_handler_registration\fP (const char *name, Netsnmp_Node_Handler *handler_access_method, const oid *reg_oid, size_t reg_oid_len, int modes)"
+.br
+.ti -1c
+.RI "NETSNMP_INLINE netsnmp_delegated_cache * \fBnetsnmp_create_delegated_cache\fP (\fBnetsnmp_mib_handler\fP *handler, \fBnetsnmp_handler_registration\fP *reginfo, \fBnetsnmp_agent_request_info\fP *reqinfo, \fBnetsnmp_request_info\fP *requests, void *localinfo)"
+.br
+.RI "\fIcreates a cache of information which can be saved for future reference. \fP"
+.ti -1c
+.RI "NETSNMP_INLINE void \fBnetsnmp_free_delegated_cache\fP (netsnmp_delegated_cache *dcache)"
+.br
+.RI "\fIfrees a cache once you're finished using it \fP"
+.ti -1c
+.RI "NETSNMP_INLINE netsnmp_delegated_cache * \fBnetsnmp_handler_check_cache\fP (netsnmp_delegated_cache *dcache)"
+.br
+.RI "\fIcheck's a given cache and returns it if it is still valid (ie, the agent still considers it to be an outstanding request. \fP"
+.ti -1c
+.RI "void \fBnetsnmp_register_handler_by_name\fP (const char *name, \fBnetsnmp_mib_handler\fP *handler)"
+.br
+.RI "\fIregisters a given handler by name so that it can be found easily later. \fP"
+.ti -1c
+.RI "void \fBnetsnmp_clear_handler_list\fP (void)"
+.br
+.RI "\fIclears the entire handler-registration list \fP"
+.ti -1c
+.RI "NETSNMP_INLINE void \fBnetsnmp_request_add_list_data\fP (\fBnetsnmp_request_info\fP *request, \fBnetsnmp_data_list\fP *node)"
+.br
+.RI "\fIadd data to a request that can be extracted later by submodules \fP"
+.ti -1c
+.RI "NETSNMP_INLINE int \fBnetsnmp_request_remove_list_data\fP (\fBnetsnmp_request_info\fP *request, const char *name)"
+.br
+.RI "\fIremove data from a request \fP"
+.ti -1c
+.RI "void * \fBnetsnmp_request_get_list_data\fP (\fBnetsnmp_request_info\fP *request, const char *name)"
+.br
+.RI "\fIextract data from a request that was added previously by a parent module \fP"
+.ti -1c
+.RI "NETSNMP_INLINE void \fBnetsnmp_free_request_data_set\fP (\fBnetsnmp_request_info\fP *request)"
+.br
+.RI "\fIFree the extra data stored in a request. \fP"
+.ti -1c
+.RI "NETSNMP_INLINE void \fBnetsnmp_free_request_data_sets\fP (\fBnetsnmp_request_info\fP *request)"
+.br
+.RI "\fIFree the extra data stored in a bunch of requests (all data in the chain). \fP"
+.ti -1c
+.RI "void \fBnetsnmp_handler_free\fP (\fBnetsnmp_mib_handler\fP *handler)"
+.br
+.RI "\fIfree's the resourceses associated with a given handler \fP"
+.ti -1c
+.RI "\fBnetsnmp_mib_handler\fP * \fBnetsnmp_handler_dup\fP (\fBnetsnmp_mib_handler\fP *handler)"
+.br
+.RI "\fIdulpicates a handler and all subsequent handlers see also _clone_handler \fP"
+.ti -1c
+.RI "\fBnetsnmp_handler_registration\fP * \fBnetsnmp_handler_registration_dup\fP (\fBnetsnmp_handler_registration\fP *reginfo)"
+.br
+.RI "\fIduplicates the handler registration object \fP"
+.ti -1c
+.RI "void \fBnetsnmp_handler_registration_free\fP (\fBnetsnmp_handler_registration\fP *reginfo)"
+.br
+.RI "\fIfree the resources associated with a handler registration object \fP"
+.ti -1c
+.RI "void \fBnetsnmp_handler_mark_requests_as_delegated\fP (\fBnetsnmp_request_info\fP *requests, int isdelegated)"
+.br
+.RI "\fImarks a list of requests as delegated (or not if isdelegaded = 0) \fP"
+.ti -1c
+.RI "void * \fBnetsnmp_handler_get_parent_data\fP (\fBnetsnmp_request_info\fP *, const char *)"
+.br
+.in -1c
+.SH "Detailed Description"
+.PP 
+
+.PP
+Definition in file \fBagent_handler.h\fP.
+.SH "Author"
+.PP 
+Generated automatically by Doxygen for net-snmp from the source code.

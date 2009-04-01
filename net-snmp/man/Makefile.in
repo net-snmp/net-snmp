@@ -47,7 +47,15 @@ MAN3  = snmp_close.3 snmp_free_pdu.3 snmp_open.3 snmp_read.3 \
 	netsnmp_container.3 netsnmp_iterator_info_s.3 netsnmp_leaf.3   \
 	netsnmp_row_merge.3		       \
 	netsnmp_scalar_group_group.3 netsnmp_stash_cache.3	       \
-	netsnmp_utilities.3
+	netsnmp_utilities.3 \
+	netsnmp_container_iterator.h.3 \
+	netsnmp_container_iterator.3 \
+	netsnmp_netsnmp_monitor_callback_header_s.3 \
+	netsnmp_table_row.3 \
+	netsnmp_agent_handler.h.3 \
+	netsnmp_access_multiplexer.3 \
+	netsnmp_null_container.3 \
+	netsnmp_tools.h.3
 
 MAN3G = default_store.3 mib_api.3 read_config.3 snmp_agent_api.3 snmp_alarm.3 \
 	snmp_api.3 snmp_sess_api.3 snmp_trap_api.3

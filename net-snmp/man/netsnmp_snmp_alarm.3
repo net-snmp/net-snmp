@@ -1,4 +1,4 @@
-.TH "generic library based alarm timers for various parts of an application" 3 "8 Dec 2006" "Version 5.5.dev" "net-snmp" \" -*- nroff -*-
+.TH "generic library based alarm timers for various parts of an application" 3 "1 Apr 2009" "Version 5.5.pre1" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -13,7 +13,7 @@ generic library based alarm timers for various parts of an application \-
 .RI "void \fBinit_snmp_alarm\fP (void)"
 .br
 .ti -1c
-.RI "void \fBsa_update_entry\fP (struct \fBsnmp_alarm\fP *a)"
+.RI "void \fBsa_update_entry\fP (struct snmp_alarm *a)"
 .br
 .ti -1c
 .RI "void \fBsnmp_alarm_unregister\fP (unsigned int clientreg)"
@@ -24,10 +24,10 @@ generic library based alarm timers for various parts of an application \-
 .br
 .RI "\fIThis function unregisters all alarms currently stored. \fP"
 .ti -1c
-.RI "\fBsnmp_alarm\fP * \fBsa_find_next\fP (void)"
+.RI "struct snmp_alarm * \fBsa_find_next\fP (void)"
 .br
 .ti -1c
-.RI "\fBsnmp_alarm\fP * \fBsa_find_specific\fP (unsigned int clientreg)"
+.RI "struct snmp_alarm * \fBsa_find_specific\fP (unsigned int clientreg)"
 .br
 .ti -1c
 .RI "void \fBrun_alarms\fP (void)"
@@ -69,7 +69,7 @@ This function registers function callbacks to occur at a speciifc time in the fu
 .PP
 \fBReturns:\fP
 .RS 4
-Returns a unique unsigned integer(which is also passed as the first argument of each callback), which can then be used to remove the callback from the list at a later point in the future using the \fBsnmp_alarm_unregister()\fP function. If memory could not be allocated for the \fBsnmp_alarm\fP struct 0 is returned.
+Returns a unique unsigned integer(which is also passed as the first argument of each callback), which can then be used to remove the callback from the list at a later point in the future using the \fBsnmp_alarm_unregister()\fP function. If memory could not be allocated for the snmp_alarm struct 0 is returned.
 .RE
 .PP
 \fBSee also:\fP
@@ -88,10 +88,6 @@ Returns a unique unsigned integer(which is also passed as the first argument of 
 \fBdelayed_instance.c\fP, and \fBnotification.c\fP.
 .PP
 Definition at line 404 of file snmp_alarm.c.
-.PP
-References NULL, sa_update_entry(), set_an_alarm(), and SNMP_MALLOC_STRUCT.
-.PP
-Referenced by netsnmp_cache_timer_start().
 .SS "unsigned int snmp_alarm_register_hr (struct timeval t, unsigned int flags, SNMPAlarmCallback * cb, void * cd)"
 .PP
 This function offers finer granularity as to when the callback function is called by making use of t->tv_usec value forming the 'when' aspect of \fBsnmp_alarm_register()\fP. 
@@ -109,7 +105,7 @@ This function offers finer granularity as to when the callback function is calle
 .PP
 \fBReturns:\fP
 .RS 4
-Returns a unique unsigned integer(which is also passed as the first argument of each callback), which can then be used to remove the callback from the list at a later point in the future using the \fBsnmp_alarm_unregister()\fP function. If memory could not be allocated for the \fBsnmp_alarm\fP struct 0 is returned.
+Returns a unique unsigned integer(which is also passed as the first argument of each callback), which can then be used to remove the callback from the list at a later point in the future using the \fBsnmp_alarm_unregister()\fP function. If memory could not be allocated for the snmp_alarm struct 0 is returned.
 .RE
 .PP
 \fBSee also:\fP
@@ -124,8 +120,6 @@ Returns a unique unsigned integer(which is also passed as the first argument of 
 
 .PP
 Definition at line 481 of file snmp_alarm.c.
-.PP
-References NULL, sa_update_entry(), set_an_alarm(), and SNMP_MALLOC_STRUCT.
 .SS "void snmp_alarm_unregister (unsigned int clientreg)"
 .PP
 This function removes the callback function from a list of registered alarms, unregistering the alarm. 
@@ -152,10 +146,6 @@ void
 
 .PP
 Definition at line 151 of file snmp_alarm.c.
-.PP
-References clientreg, next, and NULL.
-.PP
-Referenced by netsnmp_cache_timer_stop(), and sa_update_entry().
 .SS "void snmp_alarm_unregister_all (void)"
 .PP
 This function unregisters all alarms currently stored. 
@@ -177,7 +167,6 @@ void
 
 .PP
 Definition at line 184 of file snmp_alarm.c.
-.PP
-References next, and NULL.
-.PP
-Referenced by snmp_shutdown().
+.SH "Author"
+.PP 
+Generated automatically by Doxygen for net-snmp from the source code.

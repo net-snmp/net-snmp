@@ -1,4 +1,4 @@
-.TH "mib_maintenance" 3 "8 Dec 2006" "Version 5.5.dev" "net-snmp" \" -*- nroff -*-
+.TH "mib_maintenance" 3 "1 Apr 2009" "Version 5.5.pre1" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -40,7 +40,6 @@ mib_maintenance \- Routines for maintaining a MIB table.
 .SH "Detailed Description"
 .PP 
 Routines for maintaining a MIB table. 
-.PP
 .SH "Function Documentation"
 .PP 
 .SS "void netsnmp_generic_extract_row (\fBnetsnmp_request_info\fP * request)"
@@ -88,3 +87,6 @@ Unregister a MIB table from the SNMP agent.
 This should also release the internal representation of the table. ?? Is a table-specific version of this needed, or would 'netsnmp_unregister_handler' + 'netsnmp_generic_free_handler' do? 
 .PP
 Definition at line 183 of file table_generic.c.
+.SH "Author"
+.PP 
+Generated automatically by Doxygen for net-snmp from the source code.
