@@ -275,7 +275,7 @@ configuration file (which is normally
 using the following configuration line:
 .TP 8
 .IP
-Subsystem snmp /usr/bin/sshtosnmp
+Subsystem snmp /usr/local/bin/sshtosnmp
 .IP
 The
 .I sshtosnmp
