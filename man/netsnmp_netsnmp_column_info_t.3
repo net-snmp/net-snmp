@@ -1,4 +1,4 @@
-.TH "netsnmp_column_info_t" 3 "8 Dec 2006" "Version 5.5.dev" "net-snmp" \" -*- nroff -*-
+.TH "netsnmp_column_info_t" 3 "1 Apr 2009" "Version 5.5.pre1" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -33,7 +33,7 @@ netsnmp_column_info_t \- column info struct.
 .RI "} \fBdetails\fP"
 .br
 .ti -1c
-.RI "\fBnetsnmp_column_info_t\fP * \fBnext\fP"
+.RI "struct \fBnetsnmp_column_info_t\fP * \fBnext\fP"
 .br
 .in -1c
 .SH "Detailed Description"
@@ -42,14 +42,14 @@ column info struct.
 
 OVERLAPPING RANGES ARE NOT SUPPORTED. 
 .PP
-Definition at line 52 of file table.h.
+Definition at line 58 of file table.h.
 .SH "Field Documentation"
 .PP 
 .SS "char \fBnetsnmp_column_info_t::list_count\fP"
 .PP
 only useful if isRange == 0 
 .PP
-Definition at line 55 of file table.h.
+Definition at line 61 of file table.h.
 
 .SH "Author"
 .PP 

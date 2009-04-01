@@ -1,4 +1,4 @@
-.TH "stash_to_next" 3 "8 Dec 2006" "Version 5.5.dev" "net-snmp" \" -*- nroff -*-
+.TH "stash_to_next" 3 "1 Apr 2009" "Version 5.5.pre1" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -19,7 +19,7 @@ stash_to_next \- Convert GET_STASH requests into GETNEXT requests for the handle
 .SH "Detailed Description"
 .PP 
 Convert GET_STASH requests into GETNEXT requests for the handler. 
-.PP
+
 The purpose of this handler is to convert a GET_STASH auto-cache request to a series of GETNEXT requests. It can be inserted into a handler chain where the lower-level handlers don't process such requests themselves. 
 .SH "Function Documentation"
 .PP 
@@ -27,8 +27,7 @@ The purpose of this handler is to convert a GET_STASH auto-cache request to a se
 .PP
 returns a stash_to_next handler that can be injected into a given handler chain. 
 .PP
-Definition at line 28 of file stash_to_next.c.
-.PP
-References netsnmp_mib_handler_s::flags, MIB_HANDLER_AUTO_NEXT, netsnmp_create_handler(), netsnmp_stash_to_next_helper(), and NULL.
-.PP
-Referenced by netsnmp_get_stash_cache_handler(), and netsnmp_get_timed_stash_cache_handler().
+Definition at line 23 of file stash_to_next.c.
+.SH "Author"
+.PP 
+Generated automatically by Doxygen for net-snmp from the source code.

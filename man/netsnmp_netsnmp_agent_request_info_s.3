@@ -1,4 +1,4 @@
-.TH "netsnmp_agent_request_info_s" 3 "8 Dec 2006" "Version 5.5.dev" "net-snmp" \" -*- nroff -*-
+.TH "netsnmp_agent_request_info_s" 3 "1 Apr 2009" "Version 5.5.pre1" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -17,7 +17,7 @@ netsnmp_agent_request_info_s \- The agent transaction request structure.
 .RI "int \fBmode\fP"
 .br
 .ti -1c
-.RI "\fBnetsnmp_agent_session_s\fP * \fBasp\fP"
+.RI "struct netsnmp_agent_session_s * \fBasp\fP"
 .br
 .RI "\fIpdu contains authinfo, eg \fP"
 .ti -1c
@@ -36,13 +36,11 @@ The agent transaction request structure.
 Definition at line 158 of file snmp_agent.h.
 .SH "Field Documentation"
 .PP 
-.SS "struct \fBnetsnmp_agent_session_s\fP* \fBnetsnmp_agent_request_info_s::asp\fP"
+.SS "struct netsnmp_agent_session_s* \fBnetsnmp_agent_request_info_s::asp\fP\fC [read]\fP"
 .PP
 pdu contains authinfo, eg 
 .PP
 Definition at line 162 of file snmp_agent.h.
-.PP
-Referenced by handle_var_requests(), and netsnmp_create_delegated_cache().
 
 .SH "Author"
 .PP 

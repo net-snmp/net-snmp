@@ -1,4 +1,4 @@
-.TH "watcher" 3 "8 Dec 2006" "Version 5.5.dev" "net-snmp" \" -*- nroff -*-
+.TH "watcher" 3 "1 Apr 2009" "Version 5.5.pre1" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -12,13 +12,16 @@ watcher \- Watch a specified variable and process it as an instance or scalar ob
 .RI "\fBnetsnmp_mib_handler\fP * \fBnetsnmp_get_watcher_handler\fP (void)"
 .br
 .ti -1c
-.RI "\fBnetsnmp_watcher_info\fP * \fBnetsnmp_create_watcher_info\fP (void *data, size_t size, u_char type, int flags)"
+.RI "netsnmp_watcher_info * \fBnetsnmp_create_watcher_info6\fP (void *data, size_t size, u_char type, int flags, size_t max_size, size_t *size_p)"
 .br
 .ti -1c
-.RI "int \fBnetsnmp_register_watched_instance\fP (\fBnetsnmp_handler_registration\fP *reginfo, \fBnetsnmp_watcher_info\fP *watchinfo)"
+.RI "netsnmp_watcher_info * \fBnetsnmp_create_watcher_info\fP (void *data, size_t size, u_char type, int flags)"
 .br
 .ti -1c
-.RI "int \fBnetsnmp_register_watched_scalar\fP (\fBnetsnmp_handler_registration\fP *reginfo, \fBnetsnmp_watcher_info\fP *watchinfo)"
+.RI "int \fBnetsnmp_register_watched_instance\fP (\fBnetsnmp_handler_registration\fP *reginfo, netsnmp_watcher_info *watchinfo)"
+.br
+.ti -1c
+.RI "int \fBnetsnmp_register_watched_scalar\fP (\fBnetsnmp_handler_registration\fP *reginfo, netsnmp_watcher_info *watchinfo)"
 .br
 .ti -1c
 .RI "int \fBnetsnmp_watcher_helper_handler\fP (\fBnetsnmp_mib_handler\fP *handler, \fBnetsnmp_handler_registration\fP *reginfo, \fBnetsnmp_agent_request_info\fP *reqinfo, \fBnetsnmp_request_info\fP *requests)"
@@ -27,10 +30,10 @@ watcher \- Watch a specified variable and process it as an instance or scalar ob
 .RI "\fBnetsnmp_mib_handler\fP * \fBnetsnmp_get_watched_timestamp_handler\fP (void)"
 .br
 .ti -1c
-.RI "int \fBnetsnmp_watched_timestamp_register\fP (\fBnetsnmp_mib_handler\fP *whandler, \fBnetsnmp_handler_registration\fP *reginfo, \fBmarker_t\fP timestamp)"
+.RI "int \fBnetsnmp_watched_timestamp_register\fP (\fBnetsnmp_mib_handler\fP *whandler, \fBnetsnmp_handler_registration\fP *reginfo, marker_t timestamp)"
 .br
 .ti -1c
-.RI "int \fBnetsnmp_register_watched_timestamp\fP (\fBnetsnmp_handler_registration\fP *reginfo, \fBmarker_t\fP timestamp)"
+.RI "int \fBnetsnmp_register_watched_timestamp\fP (\fBnetsnmp_handler_registration\fP *reginfo, marker_t timestamp)"
 .br
 .ti -1c
 .RI "int \fBnetsnmp_watched_timestamp_handler\fP (\fBnetsnmp_mib_handler\fP *handler, \fBnetsnmp_handler_registration\fP *reginfo, \fBnetsnmp_agent_request_info\fP *reqinfo, \fBnetsnmp_request_info\fP *requests)"
@@ -45,29 +48,74 @@ watcher \- Watch a specified variable and process it as an instance or scalar ob
 .RI "int \fBnetsnmp_watched_spinlock_handler\fP (\fBnetsnmp_mib_handler\fP *handler, \fBnetsnmp_handler_registration\fP *reginfo, \fBnetsnmp_agent_request_info\fP *reqinfo, \fBnetsnmp_request_info\fP *requests)"
 .br
 .ti -1c
-.RI "int \fBnetsnmp_register_ulong_scalar\fP (const char *name, oid *reg_oid, size_t reg_oid_len, u_long *it, \fBNetsnmp_Node_Handler\fP *subhandler)"
+.RI "int \fBnetsnmp_register_ulong_scalar\fP (const char *name, const oid *reg_oid, size_t reg_oid_len, u_long *it, Netsnmp_Node_Handler *subhandler)"
 .br
 .ti -1c
-.RI "int \fBnetsnmp_register_read_only_ulong_scalar\fP (const char *name, oid *reg_oid, size_t reg_oid_len, u_long *it, \fBNetsnmp_Node_Handler\fP *subhandler)"
+.RI "int \fBnetsnmp_register_read_only_ulong_scalar\fP (const char *name, const oid *reg_oid, size_t reg_oid_len, u_long *it, Netsnmp_Node_Handler *subhandler)"
 .br
 .ti -1c
-.RI "int \fBnetsnmp_register_long_scalar\fP (const char *name, oid *reg_oid, size_t reg_oid_len, long *it, \fBNetsnmp_Node_Handler\fP *subhandler)"
+.RI "int \fBnetsnmp_register_long_scalar\fP (const char *name, const oid *reg_oid, size_t reg_oid_len, long *it, Netsnmp_Node_Handler *subhandler)"
 .br
 .ti -1c
-.RI "int \fBnetsnmp_register_read_only_long_scalar\fP (const char *name, oid *reg_oid, size_t reg_oid_len, long *it, \fBNetsnmp_Node_Handler\fP *subhandler)"
+.RI "int \fBnetsnmp_register_read_only_long_scalar\fP (const char *name, const oid *reg_oid, size_t reg_oid_len, long *it, Netsnmp_Node_Handler *subhandler)"
 .br
 .ti -1c
-.RI "int \fBnetsnmp_register_int_scalar\fP (const char *name, oid *reg_oid, size_t reg_oid_len, int *it, \fBNetsnmp_Node_Handler\fP *subhandler)"
+.RI "int \fBnetsnmp_register_int_scalar\fP (const char *name, const oid *reg_oid, size_t reg_oid_len, int *it, Netsnmp_Node_Handler *subhandler)"
 .br
 .ti -1c
-.RI "int \fBnetsnmp_register_read_only_int_scalar\fP (const char *name, oid *reg_oid, size_t reg_oid_len, int *it, \fBNetsnmp_Node_Handler\fP *subhandler)"
+.RI "int \fBnetsnmp_register_read_only_int_scalar\fP (const char *name, const oid *reg_oid, size_t reg_oid_len, int *it, Netsnmp_Node_Handler *subhandler)"
 .br
 .ti -1c
-.RI "int \fBnetsnmp_register_read_only_counter32_scalar\fP (const char *name, oid *reg_oid, size_t reg_oid_len, u_long *it, \fBNetsnmp_Node_Handler\fP *subhandler)"
+.RI "int \fBnetsnmp_register_read_only_counter32_scalar\fP (const char *name, const oid *reg_oid, size_t reg_oid_len, u_long *it, Netsnmp_Node_Handler *subhandler)"
 .br
 .in -1c
 .SH "Detailed Description"
 .PP 
 Watch a specified variable and process it as an instance or scalar object. 
+.SH "Define Documentation"
+.PP 
+.SS "#define WATCHER_FIXED_SIZE"
+.PP
+The size of the watched object is constant. 
+.PP
+Definition at line 26 of file watcher.h.
+.SS "#define WATCHER_MAX_SIZE"
+.PP
+The maximum size of the watched object is stored in max_size. 
+.PP
+If WATCHER_SIZE_STRLEN is set then it is supposed that max_size + 1 bytes could be stored in the buffer. 
+.PP
+\fBExamples: \fP
+.in +1c
+\fBwatched.c\fP.
+.PP
+Definition at line 32 of file watcher.h.
+.SS "#define WATCHER_SIZE_IS_PTR"
+.PP
+If set then the variable data_size_p points to is supposed to hold the current size of the watched object and will be updated on writes. 
+.PP
+\fBSince:\fP
+.RS 4
+Net-SNMP 5.5 
+.RE
 .PP
 
+.PP
+Definition at line 38 of file watcher.h.
+.SS "#define WATCHER_SIZE_STRLEN"
+.PP
+If set then data is suppposed to be a zero-terminated character array and both data_size and data_size_p are ignored. 
+.PP
+Additionally \\0 is a forbidden character in the data set.
+.PP
+\fBSince:\fP
+.RS 4
+Net-SNMP 5.5 
+.RE
+.PP
+
+.PP
+Definition at line 45 of file watcher.h.
+.SH "Author"
+.PP 
+Generated automatically by Doxygen for net-snmp from the source code.

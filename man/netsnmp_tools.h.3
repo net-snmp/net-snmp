@@ -1,0 +1,234 @@
+.TH "tools.h" 3 "1 Apr 2009" "Version 5.5.pre1" "net-snmp" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+tools.h \- 
+.SH SYNOPSIS
+.br
+.PP
+.SS "Defines"
+
+.in +1c
+.ti -1c
+.RI "#define \fBSNMP_MAXPATH\fP   1024"
+.br
+.ti -1c
+.RI "#define \fBSNMP_MAXBUF\fP   (1024 * 4)"
+.br
+.ti -1c
+.RI "#define \fBSNMP_MAXBUF_MEDIUM\fP   1024"
+.br
+.ti -1c
+.RI "#define \fBSNMP_MAXBUF_SMALL\fP   512"
+.br
+.ti -1c
+.RI "#define \fBSNMP_MAXBUF_MESSAGE\fP   1500"
+.br
+.ti -1c
+.RI "#define \fBSNMP_MAXOID\fP   64"
+.br
+.ti -1c
+.RI "#define \fBSNMP_MAX_CMDLINE_OIDS\fP   128"
+.br
+.ti -1c
+.RI "#define \fBSNMP_FILEMODE_CLOSED\fP   0600"
+.br
+.ti -1c
+.RI "#define \fBSNMP_FILEMODE_OPEN\fP   0644"
+.br
+.ti -1c
+.RI "#define \fBBYTESIZE\fP(bitsize)   ((bitsize + 7) >> 3)"
+.br
+.ti -1c
+.RI "#define \fBROUNDUP8\fP(x)   ( ( (x+7) >> 3 ) * 8 )"
+.br
+.ti -1c
+.RI "#define \fBSNMP_STRORNULL\fP(x)   ( x ? x : '(null)')"
+.br
+.ti -1c
+.RI "#define \fBSNMP_FREE\fP(s)   do { if (s) { free((void *)s); s=NULL; } } while(0)"
+.br
+.RI "\fIFrees a pointer only if it is !NULL and sets its value to NULL. \fP"
+.ti -1c
+.RI "#define \fBSNMP_SWIPE_MEM\fP(n, s)   do { if (n) free((void *)n); n = s; s=NULL; } while(0)"
+.br
+.RI "\fIFrees pointer n only if it is !NULL, sets n to s and sets s to NULL. \fP"
+.ti -1c
+.RI "#define \fBSNMP_MALLOC_STRUCT\fP(s)   (struct s *) calloc(1, sizeof(struct s))"
+.br
+.RI "\fIMallocs memory of sizeof(struct s), zeros it and returns a pointer to it. \fP"
+.ti -1c
+.RI "#define \fBSNMP_MALLOC_TYPEDEF\fP(td)   (td *) calloc(1, sizeof(td))"
+.br
+.RI "\fIMallocs memory of sizeof(t), zeros it and returns a pointer to it. \fP"
+.ti -1c
+.RI "#define \fBSNMP_ZERO\fP(s, l)   do { if (s) memset(s, 0, l); } while(0)"
+.br
+.RI "\fIZeros l bytes of memory starting at s. \fP"
+.ti -1c
+.RI "#define \fBTOUPPER\fP(c)   (c >= 'a' && c <= 'z' ? c - ('a' - 'A') : c)"
+.br
+.ti -1c
+.RI "#define \fBTOLOWER\fP(c)   (c >= 'A' && c <= 'Z' ? c + ('a' - 'A') : c)"
+.br
+.ti -1c
+.RI "#define \fBHEX2VAL\fP(s)   ((isalpha(s) ? (TOLOWER(s)-'a'+10) : (TOLOWER(s)-'0')) & 0xf)"
+.br
+.ti -1c
+.RI "#define \fBVAL2HEX\fP(s)   ( (s) + (((s) >= 10) ? ('a'-10) : '0') )"
+.br
+.ti -1c
+.RI "#define \fBSNMP_MAX\fP(a, b)   ((a) > (b) ? (a) : (b))"
+.br
+.RI "\fIComputers the maximum of a and b. \fP"
+.ti -1c
+.RI "#define \fBSNMP_MIN\fP(a, b)   ((a) > (b) ? (b) : (a))"
+.br
+.RI "\fIComputers the minimum of a and b. \fP"
+.ti -1c
+.RI "#define \fBSNMP_MACRO_VAL_TO_STR\fP(s)   SNMP_MACRO_VAL_TO_STR_PRIV(s)"
+.br
+.RI "\fIExpands to string with value of the s. \fP"
+.ti -1c
+.RI "#define \fBSNMP_MACRO_VAL_TO_STR_PRIV\fP(s)   #s"
+.br
+.ti -1c
+.RI "#define \fBFALSE\fP   0"
+.br
+.ti -1c
+.RI "#define \fBTRUE\fP   1"
+.br
+.ti -1c
+.RI "#define \fBQUITFUN\fP(e, l)"
+.br
+.ti -1c
+.RI "#define \fBDIFFTIMEVAL\fP(now, then, diff)"
+.br
+.ti -1c
+.RI "#define \fBUSM_LENGTH_OID_TRANSFORM\fP   10"
+.br
+.ti -1c
+.RI "#define \fBISTRANSFORM\fP(ttype, toid)"
+.br
+.ti -1c
+.RI "#define \fBENGINETIME_MAX\fP   2147483647"
+.br
+.ti -1c
+.RI "#define \fBENGINEBOOT_MAX\fP   2147483647"
+.br
+.ti -1c
+.RI "#define \fBsnmp_cstrcat\fP(b, l, o, a, s)   snmp_strcat(b,l,o,a,(const u_char *)s)"
+.br
+.in -1c
+.SS "Typedefs"
+
+.in +1c
+.ti -1c
+.RI "typedef void * \fBmarker_t\fP"
+.br
+.in -1c
+.SS "Functions"
+
+.in +1c
+.ti -1c
+.RI "int \fBsnmp_realloc\fP (u_char **buf, size_t *buf_len)"
+.br
+.RI "\fIThis function increase the size of the buffer pointed at by *buf, which is initially of size *buf_len. \fP"
+.ti -1c
+.RI "void \fBfree_zero\fP (void *buf, size_t size)"
+.br
+.RI "\fIzeros memory before freeing it. \fP"
+.ti -1c
+.RI "u_char * \fBmalloc_random\fP (size_t *size)"
+.br
+.RI "\fIReturns pointer to allocaed & set buffer on success, size contains number of random bytes filled. \fP"
+.ti -1c
+.RI "u_char * \fBmalloc_zero\fP (size_t size)"
+.br
+.ti -1c
+.RI "int \fBmemdup\fP (u_char **to, const void *from, size_t size)"
+.br
+.RI "\fIDuplicates a memory block. \fP"
+.ti -1c
+.RI "u_int \fBbinary_to_hex\fP (const u_char *input, size_t len, char **output)"
+.br
+.RI "\fIconverts binary to hexidecimal \fP"
+.ti -1c
+.RI "int \fBnetsnmp_hex_to_binary\fP (u_char **buf, size_t *buf_len, size_t *offset, int allow_realloc, const char *hex, const char *delim)"
+.br
+.RI "\fIconvert an ASCII hex string (with specified delimiters) to binary \fP"
+.ti -1c
+.RI "int \fBsnmp_hex_to_binary\fP (u_char **buf, size_t *buf_len, size_t *offset, int allow_realloc, const char *hex)"
+.br
+.RI "\fIconvert an ASCII hex string to binary \fP"
+.ti -1c
+.RI "int \fBhex_to_binary2\fP (const u_char *input, size_t len, char **output)"
+.br
+.RI "\fIhex_to_binary2 \fP"
+.ti -1c
+.RI "int \fBsnmp_decimal_to_binary\fP (u_char **buf, size_t *buf_len, size_t *out_len, int allow_realloc, const char *decimal)"
+.br
+.ti -1c
+.RI "int \fBsnmp_strcat\fP (u_char **buf, size_t *buf_len, size_t *out_len, int allow_realloc, const u_char *s)"
+.br
+.ti -1c
+.RI "char * \fBnetsnmp_strdup_and_null\fP (const u_char *from, size_t from_len)"
+.br
+.RI "\fIcopies a (possible) unterminated string of a given length into a new buffer and null terminates it as well (new buffer MAY be one byte longer to account for this \fP"
+.ti -1c
+.RI "void \fBdump_chunk\fP (const char *debugtoken, const char *title, const u_char *buf, int size)"
+.br
+.ti -1c
+.RI "char * \fBdump_snmpEngineID\fP (const u_char *buf, size_t *buflen)"
+.br
+.ti -1c
+.RI "marker_t \fBatime_newMarker\fP (void)"
+.br
+.RI "\fIcreate a new time marker. \fP"
+.ti -1c
+.RI "void \fBatime_setMarker\fP (marker_t pm)"
+.br
+.RI "\fIset a time marker. \fP"
+.ti -1c
+.RI "long \fBatime_diff\fP (marker_t first, marker_t second)"
+.br
+.RI "\fIReturns the difference (in msec) between the two markers. \fP"
+.ti -1c
+.RI "u_long \fBuatime_diff\fP (marker_t first, marker_t second)"
+.br
+.RI "\fIReturns the difference (in u_long msec) between the two markers. \fP"
+.ti -1c
+.RI "u_long \fBuatime_hdiff\fP (marker_t first, marker_t second)"
+.br
+.RI "\fIReturns the difference (in u_long 1/100th secs) between the two markers (functionally this is what sysUpTime needs). \fP"
+.ti -1c
+.RI "int \fBatime_ready\fP (marker_t pm, int deltaT)"
+.br
+.RI "\fITest: Has (marked time plus delta) exceeded current time (in msec) ? Returns 0 if test fails or cannot be tested (no marker). \fP"
+.ti -1c
+.RI "int \fBuatime_ready\fP (marker_t pm, unsigned int deltaT)"
+.br
+.RI "\fITest: Has (marked time plus delta) exceeded current time (in msec) ? Returns 0 if test fails or cannot be tested (no marker). \fP"
+.ti -1c
+.RI "int \fBmarker_tticks\fP (marker_t pm)"
+.br
+.RI "\fIReturn the number of timeTicks since the given marker. \fP"
+.ti -1c
+.RI "int \fBtimeval_tticks\fP (struct timeval *tv)"
+.br
+.ti -1c
+.RI "char * \fBnetsnmp_getenv\fP (const char *name)"
+.br
+.RI "\fINon Windows: Returns a pointer to the desired environment variable or NULL if the environment variable does not exist. \fP"
+.ti -1c
+.RI "int \fBnetsnmp_addrstr_hton\fP (char *ptr, size_t len)"
+.br
+.in -1c
+.SH "Detailed Description"
+.PP 
+
+.PP
+Definition in file \fBtools.h\fP.
+.SH "Author"
+.PP 
+Generated automatically by Doxygen for net-snmp from the source code.

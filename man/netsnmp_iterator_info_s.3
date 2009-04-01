@@ -1,4 +1,4 @@
-.TH "iterator_info_s" 3 "8 Dec 2006" "Version 5.5.dev" "net-snmp" \" -*- nroff -*-
+.TH "iterator_info_s" 3 "1 Apr 2009" "Version 5.5.pre1" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -12,40 +12,40 @@ iterator_info_s \- Holds iterator information containing functions which should 
 
 .in +1c
 .ti -1c
-.RI "\fBnetsnmp_container\fP \fBc\fP"
+.RI "netsnmp_container \fBc\fP"
 .br
 .ti -1c
-.RI "\fBNetsnmp_Iterator_Loop_Key\fP * \fBget_first\fP"
+.RI "Netsnmp_Iterator_Loop_Key * \fBget_first\fP"
 .br
 .ti -1c
-.RI "\fBNetsnmp_Iterator_Loop_Key\fP * \fBget_next\fP"
+.RI "Netsnmp_Iterator_Loop_Key * \fBget_next\fP"
 .br
 .ti -1c
-.RI "\fBNetsnmp_Iterator_Loop_Data\fP * \fBget_data\fP"
+.RI "Netsnmp_Iterator_Loop_Data * \fBget_data\fP"
 .br
 .ti -1c
-.RI "\fBNetsnmp_Iterator_Data\fP * \fBfree_user_ctx\fP"
+.RI "Netsnmp_Iterator_Data * \fBfree_user_ctx\fP"
 .br
 .ti -1c
-.RI "\fBNetsnmp_Iterator_Ctx\fP * \fBinit_loop_ctx\fP"
+.RI "Netsnmp_Iterator_Ctx * \fBinit_loop_ctx\fP"
 .br
 .ti -1c
-.RI "\fBNetsnmp_Iterator_Ctx\fP * \fBcleanup_loop_ctx\fP"
+.RI "Netsnmp_Iterator_Ctx * \fBcleanup_loop_ctx\fP"
 .br
 .ti -1c
-.RI "\fBNetsnmp_Iterator_Ctx_Dup\fP * \fBsave_pos\fP"
+.RI "Netsnmp_Iterator_Ctx_Dup * \fBsave_pos\fP"
 .br
 .ti -1c
-.RI "\fBNetsnmp_Iterator_Data\fP * \fBrelease_data\fP"
+.RI "Netsnmp_Iterator_Data * \fBrelease_data\fP"
 .br
 .ti -1c
-.RI "\fBNetsnmp_Iterator_Data\fP * \fBinsert_data\fP"
+.RI "Netsnmp_Iterator_Data * \fBinsert_data\fP"
 .br
 .ti -1c
-.RI "\fBNetsnmp_Iterator_Data\fP * \fBremove_data\fP"
+.RI "Netsnmp_Iterator_Data * \fBremove_data\fP"
 .br
 .ti -1c
-.RI "\fBNetsnmp_Iterator_Op\fP * \fBget_size\fP"
+.RI "Netsnmp_Iterator_Op * \fBget_size\fP"
 .br
 .ti -1c
 .RI "int \fBsorted\fP"
@@ -61,16 +61,14 @@ Holds iterator information containing functions which should be called by the it
 
 The iterator_info typedef can be used instead of directly calling this struct if you would prefer. 
 .PP
-Definition at line 43 of file container_iterator.c.
+Definition at line 39 of file container_iterator.c.
 .SH "Field Documentation"
 .PP 
 .SS "void* \fBiterator_info_s::user_ctx\fP"
 .PP
 This can be used by client handlers to store any information they need. 
 .PP
-Definition at line 73 of file container_iterator.c.
-.PP
-Referenced by netsnmp_container_iterator_get().
+Definition at line 69 of file container_iterator.c.
 
 .SH "Author"
 .PP 
