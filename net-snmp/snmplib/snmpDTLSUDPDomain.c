@@ -160,7 +160,7 @@ static netsnmp_tdomain dtlsudpDomain;
 typedef struct bio_cache_s {
    BIO *bio;
    BIO *write_bio;
-   struct sockaddr_in sockaddr; // eventually
+   struct sockaddr_in sockaddr;
    uint32_t ipv4addr;
    u_short portnum;
    SSL *con;
@@ -346,9 +346,6 @@ static const char * _x509_get_error(int x509failvalue, const char *location) {
     }
 
     return reason;
-
-    //    snmp_log(LOG_ERR, "DTLS X509 error: %s: %d (%s)\n",
-    //           location, x509failvalue, reason);
 }
 
 int verify_callback(int ok, X509_STORE_CTX *ctx) {
@@ -446,7 +443,6 @@ static bio_cache *
 start_new_cached_connection(int sock, struct sockaddr_in *remote_addr,
                             int we_are_client) {
     bio_cache *cachep = NULL;
-    // X509_STORE *store = NULL;
 
     if (!sock)
         DIEHERE("no socket passed in to start_new_cached_connection\n");
@@ -474,8 +470,8 @@ start_new_cached_connection(int sock, struct sockaddr_in *remote_addr,
 
         /* create a bio */
 
-        cachep->bio = BIO_new(BIO_s_mem()); // The one openssl reads from
-        cachep->write_bio = BIO_new(BIO_s_mem()); // The one openssl writes to
+        cachep->bio = BIO_new(BIO_s_mem()); /* The one openssl reads from */
+        cachep->write_bio = BIO_new(BIO_s_mem()); /* openssl writes to */
 
         BIO_set_mem_eof_return(cachep->bio, -1);
         BIO_set_mem_eof_return(cachep->write_bio, -1);
@@ -486,8 +482,8 @@ start_new_cached_connection(int sock, struct sockaddr_in *remote_addr,
     } else {
         /* we're the server */
 
-        cachep->bio = BIO_new(BIO_s_mem()); // The one openssl reads from
-        cachep->write_bio = BIO_new(BIO_s_mem()); // The one openssl writes to
+        cachep->bio = BIO_new(BIO_s_mem()); /* The one openssl reads from */
+        cachep->write_bio = BIO_new(BIO_s_mem()); /* openssl writes to */
 
         BIO_set_mem_eof_return(cachep->bio, -1);
         BIO_set_mem_eof_return(cachep->write_bio, -1);
@@ -757,7 +753,7 @@ netsnmp_dtlsudp_send(netsnmp_transport *t, void *buf, int size,
        the packet to go out) and send it out the udp port manually */
     rc = BIO_read(cachep->write_bio, outbuf, sizeof(outbuf));
     if (rc <= 0) {
-        // in theory an ok thing
+        /* in theory an ok thing */
         return 0;
     }
 #if defined(FIXME) && defined(linux) && defined(IP_PKTINFO)
@@ -1012,7 +1008,6 @@ dtlsudp_bootstrap(int majorid, int minorid, void *serverarg, void *clientarg) {
                        SSL_VERIFY_FAIL_IF_NO_PEER_CERT|
                        SSL_VERIFY_CLIENT_ONCE,
                        &verify_callback);
-    //SSL_CTX_set_verify(ctx,SSL_VERIFY_NONE, NULL);
 
     keybio = BIO_new(BIO_s_file());
     if (!keybio)
@@ -1029,7 +1024,7 @@ dtlsudp_bootstrap(int majorid, int minorid, void *serverarg, void *clientarg) {
     if (!cert)
         LOGANDDIE("failed to load public key");
 
-    // XXX: mem leak on previous keybio?
+    /* XXX: mem leak on previous keybio? */
 
     certfile = netsnmp_ds_get_string(NETSNMP_DS_LIBRARY_ID,
                                      NETSNMP_DS_LIB_X509_CLIENT_PRIV);
@@ -1073,14 +1068,6 @@ dtlsudp_bootstrap(int majorid, int minorid, void *serverarg, void *clientarg) {
         LOGANDDIE ("failed to set default verify path");
     }
 
-    /* XXX: hmmm.... ln 723 */
-    // store = SSL_CTX_get_cert_store(client_ctx);
-    // potential flags: X509_V_FLAG_CRL_CHECK|X509_V_FLAG_CRL_CHECK_ALL
-    // X509_STORE_set_flags(store, vflags);
-
-    /* XXX: con context? line 734 */
-
-
     /***********************************************************************
      * Set up the server context
      */
@@ -1106,7 +1093,6 @@ dtlsudp_bootstrap(int majorid, int minorid, void *serverarg, void *clientarg) {
     }
 
     SSL_CTX_set_read_ahead(server_ctx, 1);
-    // SSL_CTX_set_quiet_shutdown(ctx,1);
 
 
     certfile = netsnmp_ds_get_string(NETSNMP_DS_LIBRARY_ID,
