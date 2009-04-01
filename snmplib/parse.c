@@ -4260,7 +4260,7 @@ parse(FILE * fp, struct node *root)
 #ifdef TEST
             if (netsnmp_ds_get_int(NETSNMP_DS_LIBRARY_ID, 
 				   NETSNMP_DS_LIB_MIB_WARNINGS)) {
-                // xmalloc_stats(stderr);
+                /* xmalloc_stats(stderr); */
 	    }
 #endif
             continue;
