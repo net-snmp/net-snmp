@@ -1149,15 +1149,6 @@ init_master_agent(void)
                     "init_master_agent; not master agent\n"));
         return 0;               /*  No error if ! MASTER_AGENT  */
     }
-#ifdef USING_AGENTX_MASTER_MODULE
-    if (netsnmp_ds_get_boolean(NETSNMP_DS_APPLICATION_ID, 
-			       NETSNMP_DS_AGENT_AGENTX_MASTER) == 1)
-        real_init_master();
-#endif
-#ifdef USING_SMUX_MODULE
-    if(should_init("smux"))
-    real_init_smux();
-#endif
 
     /*
      * Have specific agent ports been specified?  
@@ -1205,7 +1196,7 @@ init_master_agent(void)
         if (strncasecmp(cptr, "none", 4) == 0) {
             DEBUGMSGTL(("snmp_agent",
                         "init_master_agent; pseudo-transport \"none\" requested\n"));
-            return 0;
+            break;
         }
         transport = netsnmp_tdomain_transport(cptr, 1, "udp");
 
@@ -1231,6 +1222,16 @@ init_master_agent(void)
          */
         cptr = strtok_r(NULL, ",", &st);
     }
+
+#ifdef USING_AGENTX_MASTER_MODULE
+    if (netsnmp_ds_get_boolean(NETSNMP_DS_APPLICATION_ID, 
+			       NETSNMP_DS_AGENT_AGENTX_MASTER) == 1)
+        real_init_master();
+#endif
+#ifdef USING_SMUX_MODULE
+    if(should_init("smux"))
+    real_init_smux();
+#endif
 
     return 0;
 }
