@@ -10,7 +10,7 @@
 #include "memory.h"
 
 #define DEFAULTMINIMUMSWAP 16000        /* kilobytes */
-int minimum_swap;
+static int minimum_swap;
 
 /** Initializes the memory module */
 void
