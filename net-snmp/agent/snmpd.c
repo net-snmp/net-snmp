@@ -176,7 +176,7 @@ typedef long    fd_mask;
 #define TIMETICK         500000L
 
 int             snmp_dump_packet;
-int             reconfig = 0;
+static int      reconfig = 0;
 int             Facility = LOG_DAEMON;
 
 #ifdef WIN32SERVICE
