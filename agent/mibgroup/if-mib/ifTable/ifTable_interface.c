@@ -363,7 +363,7 @@ _ifTable_initialize_interface(ifTable_registration * reg_ptr, u_long flags)
      * register ifTableLastChanged
      */
     {
-        oid             iftlc_oid[] = { IFTABLE_LAST_CHANGE };
+        const oid       iftlc_oid[] = { IFTABLE_LAST_CHANGE };
         netsnmp_register_watched_scalar(netsnmp_create_handler_registration
                                         ("ifTableLastChanged", NULL,
                                          iftlc_oid, OID_LENGTH(iftlc_oid),
