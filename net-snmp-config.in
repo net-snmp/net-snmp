@@ -309,7 +309,7 @@ EOF
 
       cat >> $tmpfile <<EOF
 const char *app_name = "$outname";
-int reconfig = 0;
+static int reconfig = 0;
 
 extern int netsnmp_running;
 

@@ -139,7 +139,7 @@ typedef long    fd_mask;
 char           *logfile = NULL;
 extern int      SyslogTrap;
 extern int      dropauth;
-int             reconfig = 0;
+static int      reconfig = 0;
 char            ddefault_port[] = "udp:162";	/* Default default port */
 char           *default_port = ddefault_port;
 #if HAVE_GETPID
