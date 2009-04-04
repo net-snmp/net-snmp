@@ -147,8 +147,7 @@ initialize_table_ifTable(void)
      * register scalar for ifNumber
      */
     {
-        oid             reg_oid[] =
-            { IFTABLE_NUMBER };
+        const oid       reg_oid[] = { IFTABLE_NUMBER };
         netsnmp_handler_registration *myreg;
 
         myreg =
