@@ -11,30 +11,31 @@
 
 #include "agent/nsDebug.h"
 
-/*
- * OIDs for the debugging control scalar objects
- *
- * Note that these we're registering the full object rather
- *  than the (sole) valid instance in each case, in order
- *  to handle requests for invalid instances properly.
- */
-oid nsDebugEnabled_oid[]    = { 1, 3, 6, 1, 4, 1, 8072, 1, 7, 1, 1};
-oid nsDebugOutputAll_oid[]  = { 1, 3, 6, 1, 4, 1, 8072, 1, 7, 1, 2};
-oid nsDebugDumpPdu_oid[]    = { 1, 3, 6, 1, 4, 1, 8072, 1, 7, 1, 3};
-
-/*
- * ... and for the token table.
- */
-
-#define  DBGTOKEN_PREFIX	2
-#define  DBGTOKEN_ENABLED	3
-#define  DBGTOKEN_STATUS	4
-oid nsDebugTokenTable_oid[] = { 1, 3, 6, 1, 4, 1, 8072, 1, 7, 1, 4};
-
+#define nsConfigDebug 1, 3, 6, 1, 4, 1, 8072, 1, 7, 1
 
 void
 init_nsDebug(void)
 {
+    /*
+     * OIDs for the debugging control scalar objects
+     *
+     * Note that these we're registering the full object rather
+     *  than the (sole) valid instance in each case, in order
+     *  to handle requests for invalid instances properly.
+     */
+    const oid nsDebugEnabled_oid[]    = { nsConfigDebug, 1};
+    const oid nsDebugOutputAll_oid[]  = { nsConfigDebug, 2};
+    const oid nsDebugDumpPdu_oid[]    = { nsConfigDebug, 3};
+
+    /*
+     * ... and for the token table.
+     */
+
+#define  DBGTOKEN_PREFIX	2
+#define  DBGTOKEN_ENABLED	3
+#define  DBGTOKEN_STATUS	4
+    const oid nsDebugTokenTable_oid[] = { nsConfigDebug, 4};
+
     netsnmp_table_registration_info *table_info;
     netsnmp_iterator_info           *iinfo;
 

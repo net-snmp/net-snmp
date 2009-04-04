@@ -301,8 +301,8 @@ config_require(tcp-mib/tcpConnectionTable/tcpConnectionTable_data_access)
         * tcpConnectionTable_row_find_by_mib_index
         (tcpConnectionTable_mib_index * mib_idx);
 
-    extern oid      tcpConnectionTable_oid[];
-    extern int      tcpConnectionTable_oid_size;
+    extern const oid      tcpConnectionTable_oid[];
+    extern const int      tcpConnectionTable_oid_size;
 
 
 #include "tcpConnectionTable_interface.h"

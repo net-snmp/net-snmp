@@ -26,8 +26,8 @@
 
 #include "ipDefaultRouterTable_interface.h"
 
-oid             ipDefaultRouterTable_oid[] = { IPDEFAULTROUTERTABLE_OID };
-int             ipDefaultRouterTable_oid_size =
+const oid       ipDefaultRouterTable_oid[] = { IPDEFAULTROUTERTABLE_OID };
+const int       ipDefaultRouterTable_oid_size =
 OID_LENGTH(ipDefaultRouterTable_oid);
 
 ipDefaultRouterTable_registration ipDefaultRouterTable_user_context;

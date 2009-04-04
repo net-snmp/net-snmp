@@ -28,8 +28,8 @@
 
 #include "ipAddressTable_interface.h"
 
-oid             ipAddressTable_oid[] = { IPADDRESSTABLE_OID };
-int             ipAddressTable_oid_size = OID_LENGTH(ipAddressTable_oid);
+const oid       ipAddressTable_oid[] = { IPADDRESSTABLE_OID };
+const int       ipAddressTable_oid_size = OID_LENGTH(ipAddressTable_oid);
 
 ipAddressTable_registration ipAddressTable_user_context;
 

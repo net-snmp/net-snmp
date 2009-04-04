@@ -15,10 +15,7 @@
 void
 initialize_table_nsTransactionTable(void)
 {
-    static oid      nsTransactionTable_oid[] =
-        { 1, 3, 6, 1, 4, 1, 8072, 1, 8, 1 };
-    size_t          nsTransactionTable_oid_len =
-        OID_LENGTH(nsTransactionTable_oid);
+    const oid nsTransactionTable_oid[] = { 1, 3, 6, 1, 4, 1, 8072, 1, 8, 1 };
     netsnmp_table_registration_info *table_info;
     netsnmp_handler_registration *my_handler;
     netsnmp_iterator_info *iinfo;
@@ -33,11 +30,10 @@ initialize_table_nsTransactionTable(void)
      * if your table is read only, it's easiest to change the
      * HANDLER_CAN_RWRITE definition below to HANDLER_CAN_RONLY 
      */
-    my_handler = netsnmp_create_handler_registration("nsTransactionTable",
-                                                     nsTransactionTable_handler,
-                                                     nsTransactionTable_oid,
-                                                     nsTransactionTable_oid_len,
-                                                     HANDLER_CAN_RONLY);
+    my_handler = netsnmp_create_handler_registration(
+        "nsTransactionTable", nsTransactionTable_handler,
+        nsTransactionTable_oid, OID_LENGTH(nsTransactionTable_oid),
+        HANDLER_CAN_RONLY);
 
     if (!my_handler || !table_info || !iinfo) {
         if (my_handler)

@@ -17,17 +17,15 @@ init_register_nsVacm_context(const char *context)
      * Initialize the nsVacmAccessTable table by defining its
      *   contents and how it's structured
      */
-    static oid nsVacmAccessTable_oid[]   = { 1,3,6,1,4,1,8072,1,9,1 };
-    size_t     nsVacmAccessTable_oid_len = OID_LENGTH(nsVacmAccessTable_oid);
+    const oid nsVacmAccessTable_oid[]   = { 1,3,6,1,4,1,8072,1,9,1 };
     netsnmp_handler_registration    *reg;
     netsnmp_iterator_info           *iinfo;
     netsnmp_table_registration_info *table_info;
 
-    reg = netsnmp_create_handler_registration("nsVacmAccessTable",
-                                            nsVacmAccessTable_handler,
-                                            nsVacmAccessTable_oid,
-                                            nsVacmAccessTable_oid_len,
-                                            HANDLER_CAN_RWRITE);
+    reg = netsnmp_create_handler_registration(
+        "nsVacmAccessTable", nsVacmAccessTable_handler,
+        nsVacmAccessTable_oid, OID_LENGTH(nsVacmAccessTable_oid),
+        HANDLER_CAN_RWRITE);
 
     table_info = SNMP_MALLOC_TYPEDEF(netsnmp_table_registration_info);
     netsnmp_table_helper_add_indexes(table_info,

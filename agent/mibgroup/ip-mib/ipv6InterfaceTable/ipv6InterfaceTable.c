@@ -26,8 +26,8 @@
 
 #include "ipv6InterfaceTable_interface.h"
 
-oid             ipv6InterfaceTable_oid[] = { IPV6INTERFACETABLE_OID };
-int             ipv6InterfaceTable_oid_size =
+const oid       ipv6InterfaceTable_oid[] = { IPV6INTERFACETABLE_OID };
+const int       ipv6InterfaceTable_oid_size =
 OID_LENGTH(ipv6InterfaceTable_oid);
 
 ipv6InterfaceTable_registration ipv6InterfaceTable_user_context;

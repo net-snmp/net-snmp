@@ -37,8 +37,8 @@
 #   include "if-mib/ifXTable/ifXTable.h"
 #endif
 
-oid             ifTable_oid[] = { IFTABLE_OID };
-int             ifTable_oid_size = OID_LENGTH(ifTable_oid);
+const oid       ifTable_oid[] = { IFTABLE_OID };
+const int       ifTable_oid_size = OID_LENGTH(ifTable_oid);
 
 ifTable_registration ifTable_user_context;
 

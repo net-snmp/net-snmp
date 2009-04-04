@@ -20,14 +20,13 @@
 #define  NSLOGGING_MAXLEVEL	4
 #define  NSLOGGING_STATUS	5
 
-oid nsLoggingTable_oid[]      = { 1, 3, 6, 1, 4, 1, 8072, 1, 7, 2, 1};
-
-
 void
 init_nsLogging(void)
 {
     netsnmp_table_registration_info *table_info;
     netsnmp_iterator_info           *iinfo;
+
+    const oid nsLoggingTable_oid[] = { 1, 3, 6, 1, 4, 1, 8072, 1, 7, 2, 1};
 
     /*
      * Register the table.

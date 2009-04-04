@@ -175,8 +175,8 @@ config_require(ip-mib/ipIfStatsTable/ipIfStatsTable_data_get)
         *ipIfStatsTable_row_find_by_mib_index(ipIfStatsTable_mib_index *
                                               mib_idx);
 
-    extern oid      ipIfStatsTable_oid[];
-    extern int      ipIfStatsTable_oid_size;
+    extern const oid      ipIfStatsTable_oid[];
+    extern const int      ipIfStatsTable_oid_size;
 
 
 #include "ipIfStatsTable_interface.h"

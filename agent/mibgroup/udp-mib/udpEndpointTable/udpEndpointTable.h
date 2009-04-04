@@ -205,8 +205,8 @@ config_require(udp-mib/udpEndpointTable/udpEndpointTable_data_access)
         * udpEndpointTable_row_find_by_mib_index(udpEndpointTable_mib_index
                                                  * mib_idx);
 
-    extern oid      udpEndpointTable_oid[];
-    extern int      udpEndpointTable_oid_size;
+    extern const oid      udpEndpointTable_oid[];
+    extern const int      udpEndpointTable_oid_size;
 
 
 #include "udpEndpointTable_interface.h"

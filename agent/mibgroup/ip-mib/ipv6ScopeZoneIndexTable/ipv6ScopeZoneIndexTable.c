@@ -26,9 +26,9 @@
 
 #include "ipv6ScopeZoneIndexTable_interface.h"
 
-oid             ipv6ScopeZoneIndexTable_oid[] =
+const oid       ipv6ScopeZoneIndexTable_oid[] =
     { IPV6SCOPEZONEINDEXTABLE_OID };
-int             ipv6ScopeZoneIndexTable_oid_size =
+const int       ipv6ScopeZoneIndexTable_oid_size =
 OID_LENGTH(ipv6ScopeZoneIndexTable_oid);
 
 ipv6ScopeZoneIndexTable_registration ipv6ScopeZoneIndexTable_user_context;
