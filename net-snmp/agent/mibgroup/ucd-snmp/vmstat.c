@@ -13,7 +13,7 @@ FindVarMethod var_extensible_vmstat;
 void
 init_vmstat(void)
 {
-    static oid  vmstat_oid[] = { NETSNMP_UCDAVIS_MIB, 11 };
+    const oid  vmstat_oid[] = { NETSNMP_UCDAVIS_MIB, 11 };
 
     DEBUGMSGTL(("vmstat", "Initializing\n"));
     netsnmp_register_scalar_group(

@@ -6,7 +6,7 @@
 
 netsnmp_container *sensorContainer = NULL;
 
-void initialize_lmSensorsTable(const char *tableName, oid *tableOID,
+void initialize_lmSensorsTable(const char *tableName, const oid *tableOID,
                                netsnmp_container_op *filter, int mult );
 
 int _sensor_filter_temp( netsnmp_container *c, const void *v );
@@ -14,12 +14,12 @@ int _sensor_filter_fan(  netsnmp_container *c, const void *v );
 int _sensor_filter_volt( netsnmp_container *c, const void *v );
 int _sensor_filter_misc( netsnmp_container *c, const void *v );
 
-static oid lmTempSensorsTable_oid[]   = {1,3,6,1,4,1,2021,13,16,2};
-static oid lmFanSensorsTable_oid[]    = {1,3,6,1,4,1,2021,13,16,3};
-static oid lmVoltSensorsTable_oid[]   = {1,3,6,1,4,1,2021,13,16,4};
-static oid lmMiscSensorsTable_oid[]   = {1,3,6,1,4,1,2021,13,16,5};
+static const oid lmTempSensorsTable_oid[]   = {1,3,6,1,4,1,2021,13,16,2};
+static const oid lmFanSensorsTable_oid[]    = {1,3,6,1,4,1,2021,13,16,3};
+static const oid lmVoltSensorsTable_oid[]   = {1,3,6,1,4,1,2021,13,16,4};
+static const oid lmMiscSensorsTable_oid[]   = {1,3,6,1,4,1,2021,13,16,5};
             /* All the tables have the same length root OID */
-size_t     lmSensorsTables_oid_len = OID_LENGTH(lmMiscSensorsTable_oid);
+const size_t lmSensorsTables_oid_len = OID_LENGTH(lmMiscSensorsTable_oid);
 
 
 /* Initialise the LM Sensors MIB module */
@@ -47,7 +47,7 @@ init_lmsensorsMib(void)
  * Common initialisation code, used for setting up all four tables
  */
 void
-initialize_lmSensorsTable(const char *tableName, oid *tableOID,
+initialize_lmSensorsTable(const char *tableName, const oid *tableOID,
                           netsnmp_container_op *filter, int mult )
 {
     netsnmp_handler_registration    *reg;
