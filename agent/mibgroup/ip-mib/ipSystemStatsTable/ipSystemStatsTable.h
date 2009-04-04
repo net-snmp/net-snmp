@@ -234,8 +234,8 @@ config_require(ip-mib/ipSystemStatsTable/ipSystemStatsTable_data_access)
         * ipSystemStatsTable_row_find_by_mib_index
         (ipSystemStatsTable_mib_index * mib_idx);
 
-    extern oid      ipSystemStatsTable_oid[];
-    extern int      ipSystemStatsTable_oid_size;
+    extern const oid      ipSystemStatsTable_oid[];
+    extern const int      ipSystemStatsTable_oid_size;
 
 
 #include "ipSystemStatsTable_interface.h"

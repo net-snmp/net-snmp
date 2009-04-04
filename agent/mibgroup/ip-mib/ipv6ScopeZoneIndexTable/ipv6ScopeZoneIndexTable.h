@@ -168,8 +168,8 @@ config_require(ip-mib/ipv6ScopeZoneIndexTable/ipv6ScopeZoneIndexTable_data_acces
     void
        ipv6ScopeZoneIndexTable_release_data(ipv6ScopeZoneIndexTable_data * data);
 
-    extern oid      ipv6ScopeZoneIndexTable_oid[];
-    extern int      ipv6ScopeZoneIndexTable_oid_size;
+    extern const oid      ipv6ScopeZoneIndexTable_oid[];
+    extern const int      ipv6ScopeZoneIndexTable_oid_size;
 
 
 #include "ipv6ScopeZoneIndexTable_interface.h"

@@ -38,8 +38,8 @@
  */
 #undef NETSNMP_ENABLE_PROMISCUOUSMODE_SET
 
-oid             ifXTable_oid[] = { IFXTABLE_OID };
-int             ifXTable_oid_size = OID_LENGTH(ifXTable_oid);
+const oid       ifXTable_oid[] = { IFXTABLE_OID };
+const int       ifXTable_oid_size = OID_LENGTH(ifXTable_oid);
 
 ifXTable_registration ifXTable_user_context;
 

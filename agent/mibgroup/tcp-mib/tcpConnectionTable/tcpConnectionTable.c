@@ -26,8 +26,8 @@
 
 #include "tcpConnectionTable_interface.h"
 
-oid             tcpConnectionTable_oid[] = { TCPCONNECTIONTABLE_OID };
-int             tcpConnectionTable_oid_size =
+const oid       tcpConnectionTable_oid[] = { TCPCONNECTIONTABLE_OID };
+const int       tcpConnectionTable_oid_size =
 OID_LENGTH(tcpConnectionTable_oid);
 
 tcpConnectionTable_registration tcpConnectionTable_user_context;

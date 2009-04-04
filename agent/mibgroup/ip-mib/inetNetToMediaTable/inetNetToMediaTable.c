@@ -26,8 +26,8 @@
 
 #include "inetNetToMediaTable_interface.h"
 
-oid             inetNetToMediaTable_oid[] = { INETNETTOMEDIATABLE_OID };
-int             inetNetToMediaTable_oid_size =
+const oid       inetNetToMediaTable_oid[] = { INETNETTOMEDIATABLE_OID };
+const int       inetNetToMediaTable_oid_size =
 OID_LENGTH(inetNetToMediaTable_oid);
 
 inetNetToMediaTable_registration inetNetToMediaTable_user_context;

@@ -6,7 +6,7 @@
 #include "snmp_mib.h"
 #include "updates.h"
 
-static oid snmp_oid[] = { 1, 3, 6, 1, 2, 1, 11 };
+static const oid snmp_oid[] = { 1, 3, 6, 1, 2, 1, 11 };
 
 extern int snmp_enableauthentraps;
 extern int snmp_enableauthentrapsset;
@@ -99,7 +99,7 @@ init_snmp_mib(void)
 	"mibII/snmp", handle_snmp, snmp_oid, OID_LENGTH(snmp_oid),
 	HANDLER_CAN_RONLY), 1, 32);
     {
-        oid snmpEnableAuthenTraps_oid[] = { 1, 3, 6, 1, 2, 1, 11, 30, 0 };
+        const oid snmpEnableAuthenTraps_oid[] = { 1, 3, 6, 1, 2, 1, 11, 30, 0 };
         netsnmp_handler_registration *reg =
             netsnmp_create_update_handler_registration(
                 "mibII/snmpEnableAuthenTraps",

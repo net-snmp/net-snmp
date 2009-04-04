@@ -182,8 +182,8 @@ config_require(tcp-mib/tcpListenerTable/tcpListenerTable_data_access)
         * tcpListenerTable_row_find_by_mib_index(tcpListenerTable_mib_index
                                                  * mib_idx);
 
-    extern oid      tcpListenerTable_oid[];
-    extern int      tcpListenerTable_oid_size;
+    extern const oid      tcpListenerTable_oid[];
+    extern const int      tcpListenerTable_oid_size;
 
 
 #include "tcpListenerTable_interface.h"

@@ -94,8 +94,8 @@ config_require(if-mib/ifXTable/ifXTable_data_access)
     ifXTable_rowreq_ctx *ifXTable_row_find_by_mib_index(ifXTable_mib_index
                                                         * mib_idx);
 
-    extern oid      ifXTable_oid[];
-    extern int      ifXTable_oid_size;
+    extern const oid      ifXTable_oid[];
+    extern const int      ifXTable_oid_size;
 
 
 #include "ifXTable_interface.h"

@@ -217,8 +217,8 @@ config_require(ip-forward-mib/inetCidrRouteTable/inetCidrRouteTable_data_access)
         * inetCidrRouteTable_row_find_by_mib_index
         (inetCidrRouteTable_mib_index * mib_idx);
 
-    extern oid      inetCidrRouteTable_oid[];
-    extern int      inetCidrRouteTable_oid_size;
+    extern const oid      inetCidrRouteTable_oid[];
+    extern const int      inetCidrRouteTable_oid_size;
 
 
 #include "inetCidrRouteTable_interface.h"

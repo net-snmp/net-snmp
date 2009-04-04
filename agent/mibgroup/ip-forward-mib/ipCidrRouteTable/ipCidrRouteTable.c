@@ -26,8 +26,8 @@
 
 #include "ipCidrRouteTable_interface.h"
 
-oid             ipCidrRouteTable_oid[] = { IPCIDRROUTETABLE_OID };
-int             ipCidrRouteTable_oid_size =
+const oid       ipCidrRouteTable_oid[] = { IPCIDRROUTETABLE_OID };
+const int       ipCidrRouteTable_oid_size =
 OID_LENGTH(ipCidrRouteTable_oid);
 
 ipCidrRouteTable_registration ipCidrRouteTable_user_context;

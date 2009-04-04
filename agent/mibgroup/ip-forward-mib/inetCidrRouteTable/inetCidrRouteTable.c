@@ -26,8 +26,8 @@
 
 #include "inetCidrRouteTable_interface.h"
 
-oid             inetCidrRouteTable_oid[] = { INETCIDRROUTETABLE_OID };
-int             inetCidrRouteTable_oid_size =
+const oid       inetCidrRouteTable_oid[] = { INETCIDRROUTETABLE_OID };
+const int       inetCidrRouteTable_oid_size =
 OID_LENGTH(inetCidrRouteTable_oid);
 
 inetCidrRouteTable_registration inetCidrRouteTable_user_context;

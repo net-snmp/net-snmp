@@ -26,8 +26,8 @@
 
 #include "usmDHUserKeyTable_interface.h"
 
-oid             usmDHUserKeyTable_oid[] = { USMDHUSERKEYTABLE_OID };
-int             usmDHUserKeyTable_oid_size =
+const oid       usmDHUserKeyTable_oid[] = { USMDHUSERKEYTABLE_OID };
+const int       usmDHUserKeyTable_oid_size =
 OID_LENGTH(usmDHUserKeyTable_oid);
 
 usmDHUserKeyTable_registration usmDHUserKeyTable_user_context;

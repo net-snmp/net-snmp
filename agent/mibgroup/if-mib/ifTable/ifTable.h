@@ -361,8 +361,8 @@ config_exclude(mibII/interfaces)
     ifTable_rowreq_ctx *ifTable_row_find_by_mib_index(ifTable_mib_index *
                                                       mib_idx);
 
-    extern oid      ifTable_oid[];
-    extern int      ifTable_oid_size;
+    extern const oid ifTable_oid[];
+    extern const int ifTable_oid_size;
 
 
 #include "ifTable_interface.h"

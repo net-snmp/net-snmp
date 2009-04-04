@@ -199,8 +199,8 @@ config_require(snmp-usm-dh-objects-mib/usmDHUserKeyTable/usmDHUserKeyTable_data_
         *usmDHUserKeyTable_row_find_by_mib_index
         (usmDHUserKeyTable_mib_index * mib_idx);
 
-    extern oid      usmDHUserKeyTable_oid[];
-    extern int      usmDHUserKeyTable_oid_size;
+    extern const oid      usmDHUserKeyTable_oid[];
+    extern const int      usmDHUserKeyTable_oid_size;
 
 
 #include "usmDHUserKeyTable_interface.h"
