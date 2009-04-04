@@ -197,8 +197,8 @@ config_require(ip-mib/ipAddressTable/ipAddressTable_data_access)
         * ipAddressTable_row_find_by_mib_index(ipAddressTable_mib_index *
                                                mib_idx);
 
-    extern oid      ipAddressTable_oid[];
-    extern int      ipAddressTable_oid_size;
+    extern const oid      ipAddressTable_oid[];
+    extern const int      ipAddressTable_oid_size;
 
 
 #include "ipAddressTable_interface.h"

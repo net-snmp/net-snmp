@@ -194,8 +194,8 @@ config_require(ip-forward-mib/ipCidrRouteTable/ipCidrRouteTable_data_access)
         * ipCidrRouteTable_row_find_by_mib_index(ipCidrRouteTable_mib_index
                                                  * mib_idx);
 
-    extern oid      ipCidrRouteTable_oid[];
-    extern int      ipCidrRouteTable_oid_size;
+    extern const oid      ipCidrRouteTable_oid[];
+    extern const int      ipCidrRouteTable_oid_size;
 
 
 #include "ipCidrRouteTable_interface.h"

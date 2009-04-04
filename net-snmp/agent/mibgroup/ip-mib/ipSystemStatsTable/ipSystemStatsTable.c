@@ -26,8 +26,8 @@
 
 #include "ipSystemStatsTable_interface.h"
 
-oid             ipSystemStatsTable_oid[] = { IPSYSTEMSTATSTABLE_OID };
-int             ipSystemStatsTable_oid_size =
+const oid       ipSystemStatsTable_oid[] = { IPSYSTEMSTATSTABLE_OID };
+const int       ipSystemStatsTable_oid_size =
 OID_LENGTH(ipSystemStatsTable_oid);
 
 ipSystemStatsTable_registration ipSystemStatsTable_user_context;

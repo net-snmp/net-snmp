@@ -26,8 +26,8 @@
 
 #include "ipIfStatsTable_interface.h"
 
-oid             ipIfStatsTable_oid[] = { IPIFSTATSTABLE_OID };
-int             ipIfStatsTable_oid_size = OID_LENGTH(ipIfStatsTable_oid);
+const oid       ipIfStatsTable_oid[] = { IPIFSTATSTABLE_OID };
+const int       ipIfStatsTable_oid_size = OID_LENGTH(ipIfStatsTable_oid);
 
 ipIfStatsTable_registration ipIfStatsTable_user_context;
 

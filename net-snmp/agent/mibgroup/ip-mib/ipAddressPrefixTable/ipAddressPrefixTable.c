@@ -26,8 +26,8 @@
 
 #include "ipAddressPrefixTable_interface.h"
 
-oid             ipAddressPrefixTable_oid[] = { IPADDRESSPREFIXTABLE_OID };
-int             ipAddressPrefixTable_oid_size =
+const oid       ipAddressPrefixTable_oid[] = { IPADDRESSPREFIXTABLE_OID };
+const int       ipAddressPrefixTable_oid_size =
 OID_LENGTH(ipAddressPrefixTable_oid);
 
 ipAddressPrefixTable_registration ipAddressPrefixTable_user_context;

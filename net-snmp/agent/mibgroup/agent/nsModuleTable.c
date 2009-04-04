@@ -18,8 +18,7 @@ nsModuleTable_free(void *context, netsnmp_iterator_info *dont_care)
 void
 initialize_table_nsModuleTable(void)
 {
-    static oid      nsModuleTable_oid[] =
-        { 1, 3, 6, 1, 4, 1, 8072, 1, 2, 1 };
+    const oid nsModuleTable_oid[] = { 1, 3, 6, 1, 4, 1, 8072, 1, 2, 1 };
     netsnmp_table_registration_info *table_info;
     netsnmp_handler_registration *my_handler;
     netsnmp_iterator_info *iinfo;

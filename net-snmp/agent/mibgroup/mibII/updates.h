@@ -10,7 +10,7 @@
 
 extern netsnmp_handler_registration*
 netsnmp_create_update_handler_registration(const char* name,
-                                           oid* id, size_t idlen, int mode,
-                                           int* set);
+                                           const oid* id, size_t idlen,
+                                           int mode, int* set);
 
 #endif

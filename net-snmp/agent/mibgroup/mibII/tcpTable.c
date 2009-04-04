@@ -128,11 +128,11 @@ int                      tcp_estab = 0;
 #define TCP_PORT_TO_HOST_ORDER(x) ntohs(x)
 #endif
 
-oid             tcpTable_oid[] = { SNMP_OID_MIB2, 6, 13 };
-
 void
 init_tcpTable(void)
 {
+    const oid tcpTable_oid[] = { SNMP_OID_MIB2, 6, 13 };
+
     netsnmp_table_registration_info *table_info;
     netsnmp_iterator_info           *iinfo;
     netsnmp_handler_registration    *reginfo;

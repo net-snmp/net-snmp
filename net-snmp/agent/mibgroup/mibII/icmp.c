@@ -72,9 +72,9 @@ perfstat_id_t ps_name;
  * Define the OID pointer to the top of the mib tree that we're
  * registering underneath 
  */
-oid             icmp_oid[] = { SNMP_OID_MIB2, 5 };
-oid             icmp_stats_tbl_oid[] = { SNMP_OID_MIB2, 5, 29 };
-oid             icmp_msg_stats_tbl_oid[] = { SNMP_OID_MIB2, 5, 30 };
+static const oid icmp_oid[] = { SNMP_OID_MIB2, 5 };
+static const oid icmp_stats_tbl_oid[] = { SNMP_OID_MIB2, 5, 29 };
+static const oid icmp_msg_stats_tbl_oid[] = { SNMP_OID_MIB2, 5, 30 };
 #ifdef USING_MIBII_IP_MODULE
 extern oid      ip_module_oid[];
 extern int      ip_module_oid_len;

@@ -202,8 +202,8 @@ static netsnmp_table_registration_info *sysORTable_table_info;
 void
 init_sysORTable(void)
 {
-    oid sysORLastChange_oid[] = { 1, 3, 6, 1, 2, 1, 1, 8 };
-    oid sysORTable_oid[] = { 1, 3, 6, 1, 2, 1, 1, 9 };
+    const oid sysORLastChange_oid[] = { 1, 3, 6, 1, 2, 1, 1, 8 };
+    const oid sysORTable_oid[] = { 1, 3, 6, 1, 2, 1, 1, 9 };
 
     sysORTable_table_info =
         SNMP_MALLOC_TYPEDEF(netsnmp_table_registration_info);

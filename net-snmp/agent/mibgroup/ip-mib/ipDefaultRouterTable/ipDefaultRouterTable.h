@@ -187,8 +187,8 @@ config_require(ip-mib/ipDefaultRouterTable/ipDefaultRouterTable_data_get)
         *ipDefaultRouterTable_row_find_by_mib_index
         (ipDefaultRouterTable_mib_index * mib_idx);
 
-    extern oid      ipDefaultRouterTable_oid[];
-    extern int      ipDefaultRouterTable_oid_size;
+    extern const oid      ipDefaultRouterTable_oid[];
+    extern const int      ipDefaultRouterTable_oid_size;
 
 
 #include "ipDefaultRouterTable_interface.h"
