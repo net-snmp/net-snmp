@@ -114,19 +114,15 @@ netSnmpHostsTable_handler(netsnmp_mib_handler *handler,
 
     netsnmp_request_info *request;
     netsnmp_table_request_info *table_info;
-    netsnmp_variable_list *var;
     struct commitInfo *ci = NULL;
 
     void           *data_context = NULL;
 
-    oid            *suffix;
-    size_t          suffix_len;
-
     for (request = requests; request; request = request->next) {
         /* column and row index encoded portion */
-        var = request->requestvb;
-        suffix     = var->name + reginfo->rootoid_len + 1;
-        suffix_len = var->name_length - (reginfo->rootoid_len + 1);
+        netsnmp_variable_list *var = request->requestvb;
+        const oid * const suffix = var->name + reginfo->rootoid_len + 1;
+        const size_t suffix_len = var->name_length - (reginfo->rootoid_len + 1);
 
         if (request->processed != 0)
             continue;
