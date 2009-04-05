@@ -450,8 +450,6 @@ netsnmp_table_data_set_helper_handler(netsnmp_mib_handler *handler,
     netsnmp_table_row *row, *newrow = NULL;
     netsnmp_table_request_info *table_info;
     netsnmp_request_info *request;
-    oid            *suffix;
-    size_t          suffix_len;
     netsnmp_oid_stash_node **stashp = NULL;
 
     if (!handler)
@@ -461,6 +459,11 @@ netsnmp_table_data_set_helper_handler(netsnmp_mib_handler *handler,
     for (request = requests; request; request = request->next) {
         netsnmp_table_data_set *datatable =
             (netsnmp_table_data_set *) handler->myvoid;
+        const oid * const suffix =
+            requests->requestvb->name + reginfo->rootoid_len + 2;
+        const size_t suffix_len =
+            requests->requestvb->name_length - (reginfo->rootoid_len + 2);
+
         if (request->processed)
             continue;
 
@@ -469,9 +472,6 @@ netsnmp_table_data_set_helper_handler(netsnmp_mib_handler *handler,
          */
         row = netsnmp_extract_table_row(request);
         table_info = netsnmp_extract_table_info(request);
-        suffix = requests->requestvb->name + reginfo->rootoid_len + 2;
-        suffix_len = requests->requestvb->name_length -
-            (reginfo->rootoid_len + 2);
 
         if (MODE_IS_SET(reqinfo->mode)) {
 
