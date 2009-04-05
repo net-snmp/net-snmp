@@ -260,12 +260,10 @@ ipCidrRouteTable_handler(netsnmp_mib_handler *handler,
 
     void           *data_context;
 
-    oid            *suffix;
-    size_t          suffix_len;
-
     /** column and row index encoded portion */
-    suffix = requests->requestvb->name + reginfo->rootoid_len + 1;
-    suffix_len = requests->requestvb->name_length -
+    const oid * const suffix =
+        requests->requestvb->name + reginfo->rootoid_len + 1;
+    const size_t suffix_len = requests->requestvb->name_length -
         (reginfo->rootoid_len + 1);
 
     for (request = requests; request; request = request->next) {
