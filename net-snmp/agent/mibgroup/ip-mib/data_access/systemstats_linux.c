@@ -560,7 +560,7 @@ _systemstats_v6_load_ifstats(netsnmp_container* container, u_int load_flags)
     char           dev_filename[DEV_FILENAME_LEN];
     FILE           *devin;
     char           line[1024];
-    char           *stats, *start = line;
+    char           *start = line;
     int            rc;
     char           *scan_str;
     uintmax_t       scan_val;

@@ -224,8 +224,6 @@ _entry_release(netsnmp_systemstats_entry * entry, void *context)
 static void
 _calculate_entries(netsnmp_systemstats_entry * entry)
 {
-    U64 calc_val;
-    
     /*
      * HCInForwDatagrams = HCInNoRoutes + HCOutForwDatagrams
      */
