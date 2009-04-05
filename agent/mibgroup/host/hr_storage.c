@@ -482,7 +482,6 @@ handle_memsize(netsnmp_mib_handler *handler,
 {
     netsnmp_memory_info *mem_info;
     int val;
-    char buf[1024];
 
     /*
      * We just need to handle valid GET requests, as invalid instances

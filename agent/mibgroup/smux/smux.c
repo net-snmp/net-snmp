@@ -924,10 +924,7 @@ static int
 smux_auth_peer(oid * name, size_t namelen, char *passwd, int fd)
 {
     int             i;
-    oid             oid_name[MAX_OID_LEN];
     char            oid_print[SMUXMAXSTRLEN];
-    size_t          oid_name_len, string_len;
-
 
     if (snmp_get_do_debugging()) {
         snprint_objid(oid_print, sizeof(oid_print), name, namelen);
