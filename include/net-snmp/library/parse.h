@@ -70,33 +70,6 @@ SOFTWARE.
     };
 
     /*
-     * A linked list of nodes.
-     */
-    struct node {
-        struct node    *next;
-        char           *label;  /* This node's (unique) textual name */
-        u_long          subid;  /* This node's integer subidentifier */
-        int             modid;  /* The module containing this node */
-        char           *parent; /* The parent's textual name */
-        int             tc_index;       /* index into tclist (-1 if NA) */
-        int             type;   /* The type of object this represents */
-        int             access;
-        int             status;
-        struct enum_list *enums;        /* (optional) list of enumerated integers */
-        struct range_list *ranges;
-        struct index_list *indexes;
-        char           *augments;
-        struct varbind_list *varbinds;
-        char           *hint;
-        char           *units;
-        char           *description;    /* description (a quoted string) */
-        char           *reference;    /* references (a quoted string) */
-        char           *defaultValue;
-	char           *filename;
-        int             lineno;
-    };
-
-    /*
      * A tree in the format of the tree structure of the MIB.
      */
     struct tree {
