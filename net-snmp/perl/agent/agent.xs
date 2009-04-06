@@ -489,7 +489,7 @@ na_errlog(me,value)
     CODE:
     {
         stringptr = SvPV(value, stringlen);
-        snmp_log(LOG_ERR, stringptr );
+        snmp_log(LOG_ERR, "%s", stringptr );
     }
 
 
