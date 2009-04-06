@@ -742,8 +742,7 @@ var_hrswrun(struct variable * vp,
             sprintf(string, "/proc/%d/status", pid);
             if ((fp = fopen(string, "r")) == NULL)
                 return NULL;
-            fgets(buf, sizeof(buf), fp);        /* Name: process name */
-            if ( cp == NULL ) {
+            if (!fgets(buf, sizeof(buf), fp)) {
                 fclose(fp);
                 return NULL;    /* the process probably died */
             }
