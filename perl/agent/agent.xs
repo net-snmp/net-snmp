@@ -13,6 +13,8 @@
 #define sv_undef PL_sv_undef
 #endif
 
+typedef netsnmp_handler_registration *NetSNMP__agent__netsnmp_handler_registration;
+
 typedef struct handler_cb_data_s {
    SV *perl_cb;
 } handler_cb_data;
@@ -494,7 +496,7 @@ na_errlog(me,value)
 
 MODULE = NetSNMP::agent  PACKAGE = NetSNMP::agent::netsnmp_handler_registration  PREFIX = nsahr_
 
-netsnmp_handler_registration *
+NetSNMP::agent::netsnmp_handler_registration
 nsahr_new(name, regoid, perlcallback)
         char *name;
 	char *regoid;
@@ -524,8 +526,6 @@ nsahr_new(name, regoid, perlcallback)
     OUTPUT:
         RETVAL
 
-MODULE = NetSNMP::agent  PACKAGE = NetSNMP::agent::netsnmp_handler_registrationPtr  PREFIX = nsahr_
-
 void
 nsahr_DESTROY(reginfo)
 	netsnmp_handler_registration *reginfo
@@ -548,6 +548,9 @@ nsahr_register(me)
             }
     OUTPUT:
 	RETVAL
+
+
+MODULE = NetSNMP::agent PACKAGE = NetSNMP::agent::netsnmp_handler_registrationPtr PREFIX = nsahr_
 
 void
 nsahr_getRootOID(me)
