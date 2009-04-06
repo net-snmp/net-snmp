@@ -112,6 +112,33 @@ SOFTWARE.
 #include <net-snmp/library/snmp_api.h>
 
 /*
+ * A linked list of nodes.
+ */
+struct node {
+    struct node    *next;
+    char           *label;  /* This node's (unique) textual name */
+    u_long          subid;  /* This node's integer subidentifier */
+    int             modid;  /* The module containing this node */
+    char           *parent; /* The parent's textual name */
+    int             tc_index; /* index into tclist (-1 if NA) */
+    int             type;   /* The type of object this represents */
+    int             access;
+    int             status;
+    struct enum_list *enums; /* (optional) list of enumerated integers */
+    struct range_list *ranges;
+    struct index_list *indexes;
+    char           *augments;
+    struct varbind_list *varbinds;
+    char           *hint;
+    char           *units;
+    char           *description; /* description (a quoted string) */
+    char           *reference; /* references (a quoted string) */
+    char           *defaultValue;
+    char           *filename;
+    int             lineno;
+};
+
+/*
  * This is one element of an object identifier with either an integer
  * subidentifier, or a textual string label, or both.
  * The subid is -1 if not present, and label is NULL if not present.
@@ -520,8 +547,8 @@ static struct node *nbuckets[NHASHSIZE];
 static struct tree *tbuckets[NHASHSIZE];
 static struct module *module_head = NULL;
 
-struct node    *orphan_nodes = NULL;
-struct tree    *tree_head = NULL;
+static struct node *orphan_nodes = NULL;
+struct tree        *tree_head = NULL;
 
 #define	NUMBER_OF_ROOT_NODES	3
 static struct module_import root_imports[NUMBER_OF_ROOT_NODES];
