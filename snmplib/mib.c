@@ -3836,6 +3836,7 @@ dump_realloc_oid_to_inetaddress(const int addr_type, const oid * objid, size_t o
     if (buf) {
         int             i, len;
         char            intbuf[64], * p;
+        unsigned char  *zc;
         unsigned long   zone;
 
         memset(intbuf, 0, 64);
@@ -3853,7 +3854,9 @@ dump_realloc_oid_to_inetaddress(const int addr_type, const oid * objid, size_t o
                 len = sprintf(p, "%lu.%lu.%lu.%lu", objid[0], objid[1], objid[2], objid[3]);
                 p += len;
                 if (addr_type == IPV4Z) {
-                    zone = ntohl((long)objid[4]);
+                    zc = (unsigned char*)&zone;
+                    zc[0] = objid[4]; zc[1] = objid[5]; zc[2] = objid[6]; zc[3] = objid[7];
+                    zone = ntohl(zone);
                     len = sprintf(p, "%%%lu", zone);
                     p += len;
                 }
@@ -3874,7 +3877,9 @@ dump_realloc_oid_to_inetaddress(const int addr_type, const oid * objid, size_t o
                 p-- ; /* do not include the last ':' */
 
                 if (addr_type == IPV6Z) {
-                    zone = ntohl((long)objid[16]);
+                    zc = (unsigned char*)&zone;
+                    zc[0] = objid[16]; zc[1] = objid[17]; zc[2] = objid[18]; zc[3] = objid[19];
+                    zone = ntohl(zone);
                     len = sprintf(p, "%%%lu", zone);
                     p += len;
                 }
