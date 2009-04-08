@@ -16,7 +16,7 @@
  * define __STRING for systems (*cough* sun *cough*) that don't have it
  */
 #ifndef __STRING
-#  ifdef __STDC__
+#  if defined(__STDC__) || defined(_MSC_VER)
 #    define __STRING(x) #x
 #  else
 #    define __STRING(x) "x"
