@@ -1059,8 +1059,9 @@ nari_next(me)
 
 MODULE = NetSNMP::agent  PACKAGE = NetSNMP::agent::netsnmp_agent_request_info PREFIX = narqi_
 
+/* XXX: transport-specific: UDP/IPv4 only */
 SV *
-narqi_getRequestorIp(me)
+narqi_getSourceIp(me)
         SV *me;
     PREINIT:
         netsnmp_agent_request_info *reqinfo;
@@ -1078,8 +1079,9 @@ narqi_getRequestorIp(me)
     OUTPUT:
         RETVAL
 
+/* XXX: transport-specific: UDP/IPv4 only */
 SV *
-narqi_getTargetIp(me)
+narqi_getDestIp(me)
         SV *me;
     PREINIT:
         netsnmp_agent_request_info *reqinfo;
