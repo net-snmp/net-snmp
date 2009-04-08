@@ -14,6 +14,9 @@ config_require(sctp-mib/sctpLookupRemIPAddrTable)
 config_require(sctp-mib/sctpAssocTable)
 #if defined( linux )
 config_require(sctp-mib/sctpTables_linux)
+
+#elif defined( freebsd7 ) || defined( freebsd8 )
+config_require(sctp-mib/sctpTables_freebsd)
 #else
 /*
 * couldn't determine the correct file!
