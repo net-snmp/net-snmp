@@ -87,11 +87,11 @@ my @names = (qw(NETSNMPTRAPD_AUTH_HANDLER NETSNMPTRAPD_HANDLER_BREAK
 	       NETSNMPTRAPD_HANDLER_OK NETSNMPTRAPD_POST_HANDLER
 	       NETSNMPTRAPD_PRE_HANDLER));
 
-print constant_types(); # macro defs
+print constant_types(), "\n"; # macro defs
 foreach (C_constant ("NetSNMP::TrapReceiver", 'constant', 'IV', $types, undef, 3, @names) ) {
     print $_, "\n"; # C constant subs
 }
-print "#### XS Section:\n";
+print "\n#### XS Section:\n";
 print XS_constant ("NetSNMP::TrapReceiver", $types);
 __END__
    */
