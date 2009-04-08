@@ -1100,10 +1100,10 @@ py_netsnmp_attr_string(PyObject *obj, char * attr_name)
   return val;
 }
 
-static long
+static long long
 py_netsnmp_attr_long(PyObject *obj, char * attr_name)
 {
-  long val = -1;
+  long long val = -1;
 
   if (obj && attr_name  && PyObject_HasAttrString(obj, attr_name)) {
     PyObject *attr = PyObject_GetAttrString(obj, attr_name);
@@ -1199,7 +1199,7 @@ netsnmp_create_session(PyObject *self, PyObject *args)
       printf("error:snmp_new_session: Couldn't open SNMP session");
   }
  end:
-  return Py_BuildValue("i", (int)ss);
+  return Py_BuildValue("L", (long long)ss);
 }
 
 static PyObject *
