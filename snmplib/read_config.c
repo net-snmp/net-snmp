@@ -1488,7 +1488,7 @@ skip_white(char *ptr)
 {
     if (ptr == NULL)
         return (NULL);
-    while (*ptr != 0 && isspace(*ptr))
+    while (*ptr != 0 && isspace((unsigned char)*ptr))
         ptr++;
     if (*ptr == 0 || *ptr == '#')
         return (NULL);
@@ -1500,7 +1500,7 @@ skip_not_white(char *ptr)
 {
     if (ptr == NULL)
         return (NULL);
-    while (*ptr != 0 && !isspace(*ptr))
+    while (*ptr != 0 && !isspace((unsigned char)*ptr))
         ptr++;
     if (*ptr == 0 || *ptr == '#')
         return (NULL);
