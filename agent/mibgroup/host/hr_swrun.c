@@ -84,6 +84,11 @@
 #include <net-snmp/agent/auto_nlist.h>
 #include "kernel.h"
 #ifdef solaris2
+#if _SLASH_PROC_METHOD_ && defined _ILP32
+#include <net-snmp/agent/cache_handler.h>
+#include <net-snmp/agent/hardware/memory.h>
+#endif
+
 #include "kernel_sunos5.h"
 #endif
 #if defined(aix4) || defined(aix5) || defined(aix6)
@@ -1160,7 +1165,32 @@ var_hrswrun(struct variable * vp,
         long_return = (lowpsinfo.pr_rssize * MMU_PAGESIZE) / 1024;
 #elif defined(solaris2)
 #if _SLASH_PROC_METHOD_
+#ifdef _ILP32
+        if(NULL != proc_buf && 0 == proc_buf->pr_rssize)
+        { /* Odds on that we are looking with a 32 bit app at a 64 bit psinfo.*/
+            netsnmp_memory_load();
+            netsnmp_memory_info *mem;
+            mem = netsnmp_memory_get_byIdx( NETSNMP_MEM_TYPE_PHYSMEM, 0 );
+            if (!mem) 
+            {
+                snmp_log(LOG_INFO, "netsnmp_memory_get_byIdx returned NULL pointer\n");
+                long_return = 0;/* Tried my best, giving up.*/
+            } 
+            else 
+            {/* 0x8000 is the maximum range of pr_pctmem. devision of 1024 is to go from B to kB*/
+                uint32_t pct_unit = (mem->size/0x8000) * (mem->units/1024);
+                long_return = proc_buf ? proc_buf->pr_pctmem * pct_unit : 0;
+            }
+        }
+        else
+        {    
+            long_return = proc_buf ? proc_buf->pr_rssize : 0;
+        
+        }
+#else /*_LP64*/
         long_return = proc_buf ? proc_buf->pr_rssize : 0;
+#endif /*_LP64*/
+
 #else
         long_return = proc_buf->p_swrss;
 #endif
