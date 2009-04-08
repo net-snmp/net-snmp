@@ -585,7 +585,8 @@ snmp_split_pdu(netsnmp_pdu *pdu, int skip_count, int copy_count)
  * The command is set to the input command and the reqid, errstat, and
  * errindex are set to default values.
  * If the error status didn't indicate an error, the error index didn't
- * indicate a variable, the pdu wasn't a get response message, or there
+ * indicate a variable, the pdu wasn't a get response message, the
+ * marked variable was not present in the initial request, or there
  * would be no remaining variables, this function will return 0.
  * If everything was successful, a pointer to the fixed cloned pdu will
  * be returned.
@@ -598,6 +599,7 @@ snmp_fix_pdu(netsnmp_pdu *pdu, int command)
     if ((pdu->command != SNMP_MSG_RESPONSE)
         || (pdu->errstat == SNMP_ERR_NOERROR)
         || (NULL == pdu->variables)
+        || (pdu->errindex > snmp_varbind_len(pdu))
         || (pdu->errindex <= 0)) {
         return NULL;            /* pre-condition tests fail */
     }
