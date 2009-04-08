@@ -791,8 +791,8 @@ snmp_enable_calllog(void)	/* XXX - or take a callback routine ??? */
     netsnmp_log_handler *logh;
     int                  found = 0;
 
-    for (logh = logh_head; logh; logh = logh->next) {
-        if (logh->type == NETSNMP_LOGHANDLER_CALLBACK)
+    for (logh = logh_head; logh; logh = logh->next)
+        if (logh->type == NETSNMP_LOGHANDLER_CALLBACK) {
             logh->enabled = 1;
             found         = 1;
 	}
