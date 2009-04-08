@@ -1156,8 +1156,8 @@ netsnmp_udp6_parse_security(const char *token, char *param)
                      0, NI_NUMERICHOST)) {
                     config_perror("getnameinfo failed");
                 }
-                memmove(ai->ai_addr, &net, sizeof(struct sockaddr_in6));
-                inet_make_mask_addr(AF_INET6, &mask.sin6_addr, 127);
+                memmove(&net, ai->ai_addr, sizeof(struct sockaddr_in6));
+                inet_make_mask_addr(PF_INET6, &mask.sin6_addr, 128);
 
                 e = (com2Sec6Entry *) malloc(sizeof(com2Sec6Entry));
                 if (e == NULL) {
@@ -1275,7 +1275,7 @@ netsnmp_udp6_getSecName(void *opaque, int olength,
 
     for (c = com2Sec6List; c != NULL; c = c->next) {
         DEBUGMSGTL(("netsnmp_udp6_getSecName",
-                    "compare <\"%s\", 0x%032/0x%032x>", c->community,
+                    "compare <\"%s\", 0x%032x/0x%032x>", c->community,
                     c->network, c->mask));
 
         if ((community_len == (int)strlen(c->community)) &&
