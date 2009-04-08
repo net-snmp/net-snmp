@@ -28,6 +28,7 @@ def _parse_session_args(kargs):
         'Context':'',
         'Engineboots':0,
         'Enginetime':0,
+        'UseNumeric':0,
         }
     keys = kargs.keys()
     for key in keys:
@@ -234,8 +235,6 @@ def snmpwalk(*args, **kargs):
                 var_list.append(arg)
             else:
                 var_list.append(Varbind(arg))
-    for var in var_list:
-        print "  ",var.tag, var.iid, "=", var.val, '(',var.type,')'
     res = sess.walk(var_list)
     return res
     
