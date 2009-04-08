@@ -15,6 +15,12 @@
 
 typedef netsnmp_handler_registration *NetSNMP__agent__netsnmp_handler_registration;
 
+/* Copied from snmpUDPDomain.c */
+typedef struct netsnmp_udp_addr_pair_s {
+	struct sockaddr_in remote_addr;
+	struct in_addr local_addr;
+} netsnmp_udp_addr_pair;
+
 typedef struct handler_cb_data_s {
    SV *perl_cb;
 } handler_cb_data;
@@ -1052,6 +1058,44 @@ nari_next(me)
         RETVAL
 
 MODULE = NetSNMP::agent  PACKAGE = NetSNMP::agent::netsnmp_agent_request_info PREFIX = narqi_
+
+SV *
+narqi_getRequestorIp(me)
+        SV *me;
+    PREINIT:
+        netsnmp_agent_request_info *reqinfo;
+	struct netsnmp_udp_addr_pair_s *addr_pair;
+	struct sockaddr_in *from;
+        SV *rarg;
+
+    CODE:
+        reqinfo = (netsnmp_agent_request_info *) SvIV(SvRV(me));
+
+	addr_pair = (struct netsnmp_udp_addr_pair_s *) (reqinfo->asp->pdu->transport_data);
+	from = (struct sockaddr_in *) &(addr_pair->remote_addr);
+        rarg = newSVpv((unsigned char *)(&from->sin_addr.s_addr), sizeof(from->sin_addr.s_addr));
+        RETVAL = rarg;
+    OUTPUT:
+        RETVAL
+
+SV *
+narqi_getTargetIp(me)
+        SV *me;
+    PREINIT:
+        netsnmp_agent_request_info *reqinfo;
+	struct netsnmp_udp_addr_pair_s *addr_pair;
+	struct in_addr *to;
+        SV *rarg;
+
+    CODE:
+        reqinfo = (netsnmp_agent_request_info *) SvIV(SvRV(me));
+
+	addr_pair = (struct netsnmp_udp_addr_pair_s *) (reqinfo->asp->pdu->transport_data);
+	to = (struct in_addr *) &(addr_pair->local_addr);
+        rarg = newSVpv((unsigned char *)(&to->s_addr), sizeof(to->s_addr));
+        RETVAL = rarg;
+    OUTPUT:
+        RETVAL
 
 int
 narqi_getMode(me)
