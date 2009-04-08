@@ -1059,7 +1059,7 @@ nari_next(me)
 
 MODULE = NetSNMP::agent  PACKAGE = NetSNMP::agent::netsnmp_agent_request_info PREFIX = narqi_
 
-/* XXX: transport-specific: UDP/IPv4 only */
+
 SV *
 narqi_getSourceIp(me)
         SV *me;
@@ -1072,6 +1072,7 @@ narqi_getSourceIp(me)
     CODE:
         reqinfo = (netsnmp_agent_request_info *) SvIV(SvRV(me));
 
+        /* XXX: transport-specific: UDP/IPv4 only! */
 	addr_pair = (struct netsnmp_udp_addr_pair_s *) (reqinfo->asp->pdu->transport_data);
 	from = (struct sockaddr_in *) &(addr_pair->remote_addr);
         rarg = newSVpv((unsigned char *)(&from->sin_addr.s_addr), sizeof(from->sin_addr.s_addr));
@@ -1079,7 +1080,7 @@ narqi_getSourceIp(me)
     OUTPUT:
         RETVAL
 
-/* XXX: transport-specific: UDP/IPv4 only */
+
 SV *
 narqi_getDestIp(me)
         SV *me;
@@ -1092,6 +1093,7 @@ narqi_getDestIp(me)
     CODE:
         reqinfo = (netsnmp_agent_request_info *) SvIV(SvRV(me));
 
+        /* XXX: transport-specific: UDP/IPv4 only! */
 	addr_pair = (struct netsnmp_udp_addr_pair_s *) (reqinfo->asp->pdu->transport_data);
 	to = (struct in_addr *) &(addr_pair->local_addr);
         rarg = newSVpv((unsigned char *)(&to->s_addr), sizeof(to->s_addr));
