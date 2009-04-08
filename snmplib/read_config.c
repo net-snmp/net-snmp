@@ -1426,7 +1426,7 @@ skip_not_white(char *ptr)
 {
     if (ptr == NULL)
         return (NULL);
-    while (*ptr != 0 && !isspace(*ptr))
+    while (*ptr != 0 && !isspace((unsigned char)*ptr))
         ptr++;
     if (*ptr == 0 || *ptr == '#')
         return (NULL);
@@ -1487,7 +1487,7 @@ copy_nword(char *from, char *to, int len)
         } else
             from++;
     } else {
-        while (*from != 0 && !isspace(*from)) {
+        while (*from != 0 && !isspace((unsigned char)*from)) {
             if ((*from == '\\') && (*(from + 1) != 0)) {
                 if (len > 0) {  /* don't copy beyond len bytes */
                     *to++ = *(from + 1);

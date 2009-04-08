@@ -385,7 +385,7 @@ netsnmp_sockaddr_in6(struct sockaddr_in6 *addr,
             return 0;
         }
 
-        for (cp = peername; *cp && isdigit((int) *cp); cp++);
+        for (cp = peername; *cp && isdigit((unsigned char) *cp); cp++);
         if (!*cp && atoi(peername) != 0) {
             /*
              * Okay, it looks like JUST a port number.  
