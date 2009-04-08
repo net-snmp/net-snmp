@@ -2197,7 +2197,7 @@ netsnmp_create_subtree_cache(netsnmp_agent_session *asp)
 
             asp->bulkcache =
                 (netsnmp_variable_list **) malloc(
-                    asp->pdu->errindex * r * sizeof(struct varbind_list *));
+                    (n + asp->pdu->errindex * r) * sizeof(struct varbind_list *));
 
             if (!asp->bulkcache) {
                 DEBUGMSGTL(("snmp_agent", "Bulkcache malloc failed\n"));
