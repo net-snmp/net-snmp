@@ -487,6 +487,20 @@ functional "enough" at this point in time.
 
 	$request->setRepeat(5);
 
+    getRequestorIp ()
+
+	Gets the IPv4 address of the device making the request to the handler.
+
+	use Socket;
+	print "Requestor: ", inet_ntoa($request->getRequestorIp()), "\n";
+
+    getTargetIp ()
+
+	Gets the IPv4 address that the request was sent to.
+
+	use Socket;
+	print "Target: ", inet_ntoa($request->getTargetIp()), "\n";
+
 =head1 MODES
 
 	MODE_GET
