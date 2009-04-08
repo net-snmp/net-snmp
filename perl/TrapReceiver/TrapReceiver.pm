@@ -135,6 +135,34 @@ containing three values: a NetSNMP::OID object, the value that came
 associated with it, and the value's numeric type (see NetSNMP::ASN for
 further details on SNMP typing information).
 
+Registered functions should return one of the following values:
+
+=over 2
+
+=item NETSNMPTRAPD_HANDLER_OK
+
+Handling the trap succeeded, but lets the snmptrapd demon check for
+further appropriate handlers.
+
+=item NETSNMPTRAPD_HANDLER_FAIL
+
+Handling the trap failed, but lets the snmptrapd demon check for
+further appropriate handlers.
+
+=item NETSNMPTRAPD_HANDLER_BREAK
+
+Stops evaluating the list of handlers for this specific trap, but lets
+the snmptrapd demon apply global handlers.
+
+=item NETSNMPTRAPD_HANDLER_FINISH
+
+Stops searching for further appropriate handlers.
+
+=back
+
+If a handler function does not return anything appropriate or even
+nothing at all, a return value of NETSNMPTRAPD_HANDLER_OK is assumed.
+
 Subroutines are registered using the NetSNMP::TrapReceiver::register
 function, which takes two arguments.  The first is a string describing
 the notification you want to register for (such as "linkUp" or
@@ -143,6 +171,7 @@ be used in place of an OID: "default" and "all".  The "default"
 keyword indicates you want your handler to be called in the case where
 no other handlers are called.  The "all" keyword indicates that the
 handler should ALWAYS be called for every notification.
+
 
 =head1 EXAMPLE
 
