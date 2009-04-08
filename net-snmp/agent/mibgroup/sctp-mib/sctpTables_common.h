@@ -1,6 +1,10 @@
 #ifndef SCTP_TABLES_COMMON_H
 #define SCTP_TABLES_COMMON_H
 
+#if defined(freebsd8) || defined(freebsd7)
+#define netsnmp_table_registration_info_free SNMP_FREE
+#endif
+
 #define SCTP_IPADDRESS_SIZE 16
 #define SCTP_HOSTNAME_SIZE 255
 
