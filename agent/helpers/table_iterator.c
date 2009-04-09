@@ -389,7 +389,7 @@ netsnmp_table_iterator_helper_handler(netsnmp_mib_handler *handler,
     netsnmp_table_request_info *table_info = NULL;
     oid             coloid[MAX_OID_LEN];
     size_t          coloid_len;
-    int             ret;
+    int             ret = SNMP_ERR_NOERROR;
     static oid      myname[MAX_OID_LEN];
     size_t          myname_len;
     int             oldmode = 0;
@@ -869,7 +869,7 @@ netsnmp_table_iterator_helper_handler(netsnmp_mib_handler *handler,
     if (free_this_index_search)
         snmp_free_varbind(free_this_index_search);
 
-    return SNMP_ERR_NOERROR;
+    return ret;
 }
 
 /* ==================================
