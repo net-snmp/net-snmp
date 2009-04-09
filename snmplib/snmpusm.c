@@ -3028,9 +3028,6 @@ usm_get_user_from_list(u_char * engineID, size_t engineIDLen,
  * to facilitate getNext calls on a usmUser table which is indexed by
  * these values.
  * 
- * Note: userList must not be NULL (obviously), as thats a rather trivial
- * addition and is left to the API user.
- * 
  * returns the head of the list (which could change due to this add).
  */
 
