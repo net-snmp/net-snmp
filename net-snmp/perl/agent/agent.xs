@@ -1075,7 +1075,7 @@ narqi_getSourceIp(me)
         /* XXX: transport-specific: UDP/IPv4 only! */
 	addr_pair = (struct netsnmp_udp_addr_pair_s *) (reqinfo->asp->pdu->transport_data);
 	from = (struct sockaddr_in *) &(addr_pair->remote_addr);
-        rarg = newSVpv((unsigned char *)(&from->sin_addr.s_addr), sizeof(from->sin_addr.s_addr));
+        rarg = newSVpv((const char *)(&from->sin_addr.s_addr), sizeof(from->sin_addr.s_addr));
         RETVAL = rarg;
     OUTPUT:
         RETVAL
@@ -1096,7 +1096,7 @@ narqi_getDestIp(me)
         /* XXX: transport-specific: UDP/IPv4 only! */
 	addr_pair = (struct netsnmp_udp_addr_pair_s *) (reqinfo->asp->pdu->transport_data);
 	to = (struct in_addr *) &(addr_pair->local_addr);
-        rarg = newSVpv((unsigned char *)(&to->s_addr), sizeof(to->s_addr));
+        rarg = newSVpv((const char *)(&to->s_addr), sizeof(to->s_addr));
         RETVAL = rarg;
     OUTPUT:
         RETVAL
