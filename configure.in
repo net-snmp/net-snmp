@@ -823,6 +823,10 @@ AC_ARG_ENABLE(perl-modules,,
 	AC_MSG_ERROR([ Invalid option. Use --with-perl-modules/--without-perl-modules instead ]) )
 AC_ARG_WITH(embedded-perl,,
 	AC_MSG_ERROR([ Invalid option. Use --enable-embedded-perl=(yes|no) instead ]) )
+AC_ARG_WITH(embeded-perl,,
+	AC_MSG_ERROR([ Invalid option. Use --enable-embedded-perl=(yes|no) instead ]) )
+AC_ARG_ENABLE(embeded-perl,,
+	AC_MSG_ERROR([ Invalid option. Use --enable-embedded-perl=(yes|no) instead ]) )
 
 AC_ARG_WITH(server-send-buf,
 [
@@ -2549,6 +2553,9 @@ if test "x$embed_perl" = "xyes"; then
 
     AC_MSG_CHECKING([for perl CFLAGS])
     perlcflags=`$myperl -MExtUtils::Embed -e ccopts`
+    if test $? -ne 0; then
+      AC_MSG_ERROR(--enable-embedded-perl requested but no perl ccopts found)
+    fi
     AC_MSG_RESULT($perlcflags)
     CPPFLAGS="$CPPFLAGS $perlcflags"
 
