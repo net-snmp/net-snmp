@@ -1335,6 +1335,7 @@ my %node_elements =
      parent => 0,   # parent node
      children => 0, # array reference of children nodes
      indexes => 0,  # returns array of column labels
+     implied => 0,  # boolean: is the last index IMPLIED
      varbinds => 0, # returns array of trap/notification varbinds
      nextNode => 0, # next lexico node (BUG! does not return in lexico order)
      type => 0,     # returns simple type (see getType for values)
@@ -2276,6 +2277,14 @@ be set prior to MIB initialization/parsing)
 =item reference
 
 returns the REFERENCE clause
+
+=item indexes
+
+returns the objects in the INDEX clause
+
+=item implied
+
+returns true if the last object in the INDEX is IMPLIED
 
 =back
 
