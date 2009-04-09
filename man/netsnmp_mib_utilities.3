@@ -1,4 +1,4 @@
-.TH "mib parsing and datatype manipulation routines." 3 "6 Mar 2009" "Version 5.3.2" "net-snmp" \" -*- nroff -*-
+.TH "mib parsing and datatype manipulation routines." 3 "9 Apr 2009" "Version 5.3.2" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -458,7 +458,7 @@ Prints on oid description into a file descriptor.
 .PP
 
 .PP
-Definition at line 4448 of file mib.c.
+Definition at line 4453 of file mib.c.
 .SS "void fprint_objid (FILE * f, const oid * objid, size_t objidlen)"
 .PP
 Prints an oid to a file descriptor. 
@@ -514,7 +514,7 @@ comments on find_best_tree_node for usage after first time.
 .PP
 
 .PP
-Definition at line 5468 of file mib.c.
+Definition at line 5473 of file mib.c.
 .SS "void init_mib (void)"
 .PP
 Initialises the mib reader. 
@@ -562,7 +562,7 @@ in example 5 . 1 . 2 . 3 . 4 . 5 = 12345
 .PP
 length 
 .PP
-Definition at line 6255 of file mib.c.
+Definition at line 6260 of file mib.c.
 .SS "int netsnmp_oid2str (char * S, int L, oid * O)"
 .PP
 Converts an OID to its string form. 
@@ -585,7 +585,7 @@ in example 5 . 'h' . 'e' . 'l' . 'l' . 'o' = 'hello\\0' (null terminated)
 .PP
 
 .PP
-Definition at line 6283 of file mib.c.
+Definition at line 6288 of file mib.c.
 .SS "void netsnmp_set_mib_directory (const char * dir)"
 .PP
 
@@ -619,7 +619,7 @@ in example 'hello' = 5 . 'h' . 'e' . 'l' . 'l' . 'o'
 .PP
 
 .PP
-Definition at line 6220 of file mib.c.
+Definition at line 6225 of file mib.c.
 .SS "void print_description (oid * objid, size_t objidlen, int width)"
 .PP
 Prints on oid description on stdout. 
@@ -631,7 +631,7 @@ Prints on oid description on stdout.
 .PP
 
 .PP
-Definition at line 4432 of file mib.c.
+Definition at line 4437 of file mib.c.
 .SS "void print_mib (FILE * fp)"
 .PP
 Prints the MIBs to the file fp. 
@@ -750,7 +750,7 @@ The root oid pointer if successful, or NULL otherwise.
 .PP
 
 .PP
-Definition at line 5826 of file mib.c.
+Definition at line 5831 of file mib.c.
 .SS "int sprint_realloc_asciistring (u_char ** buf, size_t * buf_len, size_t * out_len, int allow_realloc, const u_char * cp, size_t len)"
 .PP
 Prints an ascii string into a buffer. 
@@ -1339,7 +1339,7 @@ uptimeString
 .PP
 
 .PP
-Definition at line 5791 of file mib.c.
+Definition at line 5796 of file mib.c.
 .SH "Variable Documentation"
 .PP 
 .SS "PrefixList mib_prefixes[]"
