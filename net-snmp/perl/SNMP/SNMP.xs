@@ -5103,9 +5103,7 @@ snmp_mib_node_FETCH(tp_ref, key)
 	          /* we must be looking at description */
                  sv_setpv(ret,tp->description);
                  break;
-              case 'i': /* indexes */
-                 if (strncmp("indexes", key, strlen(key))) break;
-                 index_av = newAV();
+              case 'i': /* indexes, implied */
                  if (tp->augments) {
  	             clear_tree_flags(get_tree_head()); 
                      tptmp = find_best_tree_node(tp->augments, get_tree_head(), NULL);
@@ -5115,6 +5113,19 @@ snmp_mib_node_FETCH(tp_ref, key)
                  } else {
                      tptmp = tp;
                  }
+                 if (strcmp("implied", key) == 0) {
+                     /* only the last index can be implied */
+                     int isimplied = 0;
+                     if (tptmp && tptmp->indexes) {
+                         for(ip=tptmp->indexes; ip->next; ip = ip->next) {
+                         }
+                         isimplied = ip->isimplied;
+                     }
+                     sv_setiv(ret, isimplied);
+                     break;
+                 }
+                 if (strncmp("indexes", key, strlen(key))) break;
+                 index_av = newAV();
                  if (tptmp)
                      for(ip=tptmp->indexes; ip != NULL; ip = ip->next) {
                          av_push(index_av,newSVpv((ip->ilabel),strlen(ip->ilabel)));
