@@ -1805,7 +1805,7 @@ netsnmp_walk(PyObject *self, PyObject *args)
   PyObject *varlist_iter;
   PyObject *varbind;
   PyObject *val_tuple = NULL;
-  PyObject *varbinds;
+  PyObject *varbinds  = NULL;
   int varlist_len = 0;
   int varlist_ind;
   netsnmp_session *ss;
@@ -2030,7 +2030,6 @@ netsnmp_walk(PyObject *self, PyObject *args)
 			  (len ? Py_BuildValue("s#", str_buf, len) :
 			   Py_BuildValue("")));
             
-    	  Py_DECREF(varbind);
 
           } else {
 	    /* Return None for this variable. */
@@ -2038,6 +2037,7 @@ netsnmp_walk(PyObject *self, PyObject *args)
 	    PyTuple_SetItem(val_tuple, result_count++, Py_BuildValue(""));
 	    printf("netsnmp_walk: bad varbind (%d)\n", varlist_ind);
           }	
+          Py_XDECREF(varbind);
         }
         /* reuse the response as the next pdu to send */
         pdu = snmp_pdu_create(SNMP_MSG_GETNEXT);
@@ -2063,6 +2063,7 @@ netsnmp_walk(PyObject *self, PyObject *args)
   }
 
  done:
+  Py_XDECREF(varbinds);
   SAFE_FREE(oid_arr);
   return (val_tuple ? val_tuple : Py_BuildValue(""));
 }
