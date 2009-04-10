@@ -77,7 +77,7 @@ extern "C"
   /*
    * To unregister service 
    */
-  int UnregisterService (LPCSTR lpszServiceName, int quiet);
+  int UnregisterService (LPCTSTR lpszServiceName, int quiet);
 
   /*
    * To parse command line for startup option 
@@ -155,7 +155,7 @@ extern "C"
   /*
    * TheadFunction - To spawan as thread - Invokes registered service function 
    */
-  DWORD WINAPI ThreadFunction (LPVOID lpParam);
+  unsigned WINAPI ThreadFunction (LPVOID lpParam);
 
   /*
    * Service STOP function registration with this framewrok
