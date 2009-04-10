@@ -148,9 +148,11 @@ init_diskio(void)
         {DISKIO_NWRITTEN, ASN_COUNTER, RONLY, var_diskio, 1, {4}},
         {DISKIO_READS, ASN_COUNTER, RONLY, var_diskio, 1, {5}},
         {DISKIO_WRITES, ASN_COUNTER, RONLY, var_diskio, 1, {6}},
+#if defined(freebsd4) || defined(freebsd5)
         {DISKIO_LA1, ASN_INTEGER, RONLY, var_diskio, 1, {9}},
         {DISKIO_LA5, ASN_INTEGER, RONLY, var_diskio, 1, {10}},
         {DISKIO_LA15, ASN_INTEGER, RONLY, var_diskio, 1, {11}},
+#endif
         {DISKIO_NREADX, ASN_COUNTER64, RONLY, var_diskio, 1, {12}},
         {DISKIO_NWRITTENX, ASN_COUNTER64, RONLY, var_diskio, 1, {13}},
     };
@@ -833,7 +835,7 @@ var_diskio(struct variable * vp,
       c64_ret.high = head.indices[indx].wsect >> (32 - 9);
       return (u_char *) & c64_ret;
     default:
-	DEBUGMSGTL(("diskio", "don't know how to handle %d request\n", vp->magic));
+	snmp_log(LOG_ERR, "don't know how to handle %d request\n", vp->magic);
   }
   return NULL;
 }
