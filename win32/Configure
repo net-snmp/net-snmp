@@ -258,8 +258,10 @@ foreach my $progName (@programs) {
     s/^OUTDIR=/OUTDIR=.\\$outdir/;
     s/^INTDIR=/INTDIR=.\\$intdir/;
     s/^SSL=.*/SSL=$openssl/;
-    s/#(.*?)\s+# uncomment for winExtDLL.*/$1/;
-    s/^LIB32_FLAGS=(.*)/LIB32_FLAGS=MgmtAPI.lib snmpapi.lib $1/;
+    if ($b_winextdll == 1) {
+      s/#(.*?)\s+# uncomment for winExtDLL.*/$1/;
+      s/^LIB32_FLAGS=(.*)/LIB32_FLAGS=MgmtAPI.lib snmpapi.lib $1/;
+    }
     print MAKE_OUT $_ . "\n";
   }
 }

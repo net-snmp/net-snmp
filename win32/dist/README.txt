@@ -88,12 +88,14 @@ INSTALLATION
   Net-SNMP, see 'Overview' document in the Configuration section of the Net-SNMP help file.
 
   For information on running snmpd.exe and snmptrapd.exe as a Windows service, see 
-  'How to Register the Net-SNMP Agent and Trap Daemon as Windows services' in README.win32.
+  'How to Register the Net-SNMP Agent and Trap Daemon as Windows services' in README.win32
+  which can be found in the Net-SNMP Help file in the Start menu.
 
 
 CO-EXISTENCE WITH MICROSOFT SNMP SERVICES
 
-Please see the section 'Co-existence with Microsoft SNMP services' in README.win32
+Please see the section 'Co-existence with Microsoft SNMP services' in README.win32 which 
+can be found in the Net-SNMP Help file in the Start menu.
 
 
 INSTALLATION - PERL MODULE
