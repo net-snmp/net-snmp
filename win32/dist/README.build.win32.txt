@@ -126,7 +126,7 @@ Part 2 - Compiling winExtDLL
     8. Debug mode:           		disabled
 
     9. IPv6 transports:      		disabled
-    10. winExtDLL agent (requires SDK): disabled        ***
+    10. winExtDLL agent (requires SDK): enabled         ***
 
     11. Link type:                      dynamic		***
 
