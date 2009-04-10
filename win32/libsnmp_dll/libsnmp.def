@@ -381,6 +381,7 @@ EXPORTS
 	netsnmp_ds_get_void
 	netsnmp_ds_set_void
 	netsnmp_ds_shutdown
+	netsnmp_sprint_realloc_objid
 	netsnmp_sprint_realloc_objid_tree
 	module_name
 	Mib                     DATA
