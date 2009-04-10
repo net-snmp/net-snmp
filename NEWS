@@ -3,12 +3,16 @@ Please see the CHANGES file for a more detailed list of specific bugs/patches
 that have been fixed/applied, and the ChangeLog file for a comprehensive
 listing of all changes made to the code.
 
-*5.3.3.pre1*
+*5.3.3.rc1*
 
     snmplib:
       - Change CONTAINER_INSERT to not do partial inserts with
           multi-indexed containers when one insert fails
-      - Corrected registering of multiple premib config handlers
+      - Corrected registering of multiple premib config handlers so
+        that all of them get registered as premib handlers as opposed
+        to the earlier behaviour where they always got registered as
+        normal config items.
+      - fix potential buffer overflow in sprintf for TCP/IPv6
 
     snmpd:
       - [PATCH 1893468]: fixed registration of OIDs with ranges
