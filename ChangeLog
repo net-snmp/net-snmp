@@ -1,5 +1,324 @@
 -------------------------------------------------------------
 
+Changes: V5.3.3.pre1 -> V5.3.3.rc1
+
+2009-04-09 14:57  rstory
+
+   * configure.in:
+
+   CHANGES: perl: BUG: check for rc when using ExtUtils::Embed
+
+2009-04-09 12:28  dts12
+
+   * agent/helpers/table_iterator.c:
+
+   CHANGES: snmpd: PATCH: 1550730: Report errors from iterator-based
+   handlers.
+   Based on a patch provided by Wayne Glantz
+
+2009-04-09 11:41  dts12
+
+   * agent/mibgroup/snmpv3/usmUser.c:
+
+   CHANGES: snmpd: PATCH: 2124288: Fix setting of
+   usmUserPrivProtocol at creation.
+   Logic bug, reported by Ramesh Kotabagi
+
+2009-04-09 09:12  dts12
+
+   * snmplib/snmpusm.c:
+
+   CHANGES: snmplib: PATCH: 2258229: Remove misleading comment
+   Patch provided by Dan Anderson
+
+2009-04-09 08:54  dts12
+
+   * local/mib2c.iterate_access.conf:
+
+   CHANGES: mib2c: PATCH: 2316127: Fix bug in iterate_access
+   generated code.
+
+2009-04-08 16:00  dts12
+
+   * agent/snmp_agent.c:
+
+   CHANGES: snmpd: PATCH: 2384779: Fix handling of GetBulk with
+   N>0,M==0
+   Patch provided by Angus Salkeld
+
+2009-04-08 15:48  dts12
+
+   * snmplib/mib.c:
+
+   CHANGES: snmplib: PATCH: 2479700: Fix zoned IP address used as
+   table indices
+   Patch provided by Brian Retford.
+
+2009-04-08 15:33  dts12
+
+   * snmplib/snmp_logging.c:
+
+   CHANGES: snmplib: PATCH: 2492377: Fix typo/bug in
+   snmp_enable_callback()
+   Reported by joyceanmachine
+
+2009-04-08 15:16  dts12
+
+   * snmplib/snmp_client.c:
+
+   CHANGES: snmplib: PATCH: 2538169: Prevent infinite retries for an
+   invalid error-index.
+   Patch provided by Doug Manley
+
+2009-04-08 14:30  dts12
+
+   * snmplib/read_config.c, snmplib/snmpUDPIPv6Domain.c:
+
+   CHANGES: snmplib: PATCH: 2713841: Fix runtime errors triggered by
+   high-ASCII chars
+   Patch provided by Bart Van Assche
+
+2009-04-08 14:16  dts12
+
+   * snmplib/snmpUDPIPv6Domain.c:
+
+   CHANGES: snmplib: PATCH: 2689362: Fix handling of IPv6 hostnames.
+   Patch provided by Nestor Melo.
+
+2009-04-06 18:22  dts12
+
+   * agent/mibgroup/host/hr_swrun.c:
+
+   Proper check for empty process status file.
+   (Avoids truncated walk of hrSWRunPath on SuSE systems)
+   Reported by Kamil Kisiel.
+
+2009-04-06 12:05  tanders
+
+   * perl/agent/agent.xs, perl/agent/typemap:
+
+   CHANGES: perl: BUG 1554817: from xanco: revised fix for the class
+   assigment so
+   getRootOID works properly. Now passes "make test" and "make
+   perltest".
+
+2009-04-02 21:24  hardaker
+
+   * agent/snmp_agent.c:
+
+   CHANGES: BUG 112694: Patch from Bill Fenner: don't open (and
+   clobber) an agentx socket if the other transports fail to open
+
+2009-03-31 15:12  dts12
+
+   * local/mib2c.table_data.conf:
+
+   Balance parentheses in cache-based registration code.
+
+2009-03-31 15:07  dts12
+
+   * local/mib2c.table_data.conf:
+
+   But they're not C comments at all, Dave.
+   They are mib2c template comments,
+   and should be omitted from the generated code.
+   <sigh>
+
+2009-03-31 15:00  dts12
+
+   * local/mib2c.table_data.conf:
+
+   C comments use /* ... */, not #
+
+2009-03-18 10:52  dts12
+
+   * agent/mibgroup/hardware/cpu/cpu_linux.c:
+
+   cpu_linux: avoid reading past end of buffer
+   Patch provided by Stephen Hemminger
+
+2009-03-18 10:43  dts12
+
+   *  agent/mibgroup/hardware/cpu/cpu_linux.c,   
+      agent/mibgroup/hardware/memory/memory_linux.c:
+
+   linux: increase size of initial proc i/o buffer
+   Patch provided by Stephen Hemmings
+
+2009-03-18 10:31  dts12
+
+   * agent/mibgroup/hardware/memory/memory_linux.c:
+
+   memory_linux: avoid reading past end of buffer.
+   Patch provided by Stephen Hemminger
+
+2009-03-18 10:25  dts12
+
+   * agent/mibgroup/if-mib/data_access/interface_linux.c:
+
+   Fix valgrind warning.
+   Patch provided by Stephen Hemminger
+
+2009-03-06 17:51  rstory
+
+   *  man/netsnmp_agent.3, man/netsnmp_agent_registry.3,   
+      man/netsnmp_agent_trap.3, man/netsnmp_asn1_packet_parse.3,   
+      man/netsnmp_baby_steps.3, man/netsnmp_bulk_to_next.3,   
+      man/netsnmp_cache_handler.3, man/netsnmp_callback.3,   
+      man/netsnmp_container.3, man/netsnmp_data_list.3,   
+      man/netsnmp_debug.3, man/netsnmp_default_store.3,   
+      man/netsnmp_handler.3, man/netsnmp_instance.3,   
+      man/netsnmp_iterator_info_s.3, man/netsnmp_leaf.3,   
+      man/netsnmp_library.3, man/netsnmp_mib_maintenance.3,   
+      man/netsnmp_mib_utilities.3, man/netsnmp_mode_end_call.3,   
+      man/netsnmp_multiplexer.3,   
+      man/netsnmp_netsnmp_agent_request_info_s.3,   
+      man/netsnmp_netsnmp_column_info_t.3,   
+      man/netsnmp_netsnmp_data_list_s.3,   
+      man/netsnmp_netsnmp_handler_registration_s.3,   
+      man/netsnmp_netsnmp_iterator_info_s.3,   
+      man/netsnmp_netsnmp_mib_handler_access_methods.3,   
+      man/netsnmp_netsnmp_mib_handler_methods.3,   
+      man/netsnmp_netsnmp_mib_handler_s.3,   
+      man/netsnmp_netsnmp_request_info_s.3,   
+      man/netsnmp_netsnmp_table_registration_info_s.3,   
+      man/netsnmp_netsnmp_table_request_info_s.3,   
+      man/netsnmp_oid_stash.3, man/netsnmp_old_api.3,   
+      man/netsnmp_read_config.3, man/netsnmp_read_only.3,   
+      man/netsnmp_row_merge.3, man/netsnmp_scalar.3,   
+      man/netsnmp_scalar_group_group.3, man/netsnmp_serialize.3,   
+      man/netsnmp_snmp_agent.3, man/netsnmp_snmp_alarm.3,   
+      man/netsnmp_snmp_client.3, man/netsnmp_snmp_logging.3,   
+      man/netsnmp_snmp_pdu.3, man/netsnmp_snmp_session.3,   
+      man/netsnmp_stash_cache.3, man/netsnmp_stash_to_next.3,   
+      man/netsnmp_table.3, man/netsnmp_table_array.3,   
+      man/netsnmp_table_container.3, man/netsnmp_table_data.3,   
+      man/netsnmp_table_dataset.3, man/netsnmp_table_generic.3,   
+      man/netsnmp_table_indexes.3, man/netsnmp_table_iterator.3,   
+      man/netsnmp_table_iterator.h.3, man/netsnmp_table_maintenance.3,  
+       man/netsnmp_table_rows.3, man/netsnmp_tdata.3,   
+      man/netsnmp_util.3, man/netsnmp_utilities.3,   
+      man/netsnmp_variable_list.3, man/netsnmp_watcher.3:
+
+   documentation update
+
+2009-03-06 16:53  rstory
+
+   *  FAQ, README, configure, configure.in, dist/net-snmp.spec,   
+      snmplib/snmp_version.c:
+
+   Version number update
+
+2009-03-06 16:53  rstory
+
+   * configure.in:
+
+   fix names for proper caching (s/cv/ac_cv)
+
+2009-02-27 13:20  jsafranek
+
+   * agent/mibgroup/ucd-snmp/diskio.c:
+
+   Get rid of annoying 'diskio.c: don't know how to handle 9
+   request' in log.
+   It's being written to log everytime someone queries
+   UCD-SNMP-DISKIO MIB.
+
+2009-02-24 07:26  magfr
+
+   * snmplib/snmp_logging.c:
+
+   CHANGES: Make -LN stop dumping core. Make bad debug levels report
+   the offending symbol.
+
+2009-02-16 21:24  hardaker
+
+   * perl/agent/agent.xs:
+
+   CHANGES: perl: BUG 1554817: Patch from xanco: fix the class
+   assigment so getRootOID works properly.
+
+2009-02-13 09:57  dts12
+
+   * CHANGES:
+
+   Consolidate ordering and categories
+
+2009-02-13 09:45  dts12
+
+   * CHANGES, NEWS:
+
+   Fix truncated NEWS items
+
+2009-02-13 09:30  dts12
+
+   * CHANGES, NEWS:
+
+   Remove duplicate 5.3.2 entries from 5.3.3.pre1 section.
+
+2009-02-05 01:30  rstory
+
+   * CHANGES, NEWS:
+
+   version update
+
+2009-02-05 00:58  rstory
+
+   * ChangeLog:
+
+   version update
+
+2009-02-05 00:34  rstory
+
+   *  man/netsnmp_agent.3, man/netsnmp_agent_registry.3,   
+      man/netsnmp_agent_trap.3, man/netsnmp_asn1_packet_parse.3,   
+      man/netsnmp_baby_steps.3, man/netsnmp_bulk_to_next.3,   
+      man/netsnmp_cache_handler.3, man/netsnmp_callback.3,   
+      man/netsnmp_container.3, man/netsnmp_data_list.3,   
+      man/netsnmp_debug.3, man/netsnmp_default_store.3,   
+      man/netsnmp_handler.3, man/netsnmp_instance.3,   
+      man/netsnmp_iterator_info_s.3, man/netsnmp_leaf.3,   
+      man/netsnmp_library.3, man/netsnmp_mib_maintenance.3,   
+      man/netsnmp_mib_utilities.3, man/netsnmp_mode_end_call.3,   
+      man/netsnmp_multiplexer.3,   
+      man/netsnmp_netsnmp_agent_request_info_s.3,   
+      man/netsnmp_netsnmp_column_info_t.3,   
+      man/netsnmp_netsnmp_data_list_s.3,   
+      man/netsnmp_netsnmp_handler_registration_s.3,   
+      man/netsnmp_netsnmp_iterator_info_s.3,   
+      man/netsnmp_netsnmp_mib_handler_access_methods.3,   
+      man/netsnmp_netsnmp_mib_handler_methods.3,   
+      man/netsnmp_netsnmp_mib_handler_s.3,   
+      man/netsnmp_netsnmp_request_info_s.3,   
+      man/netsnmp_netsnmp_table_registration_info_s.3,   
+      man/netsnmp_netsnmp_table_request_info_s.3,   
+      man/netsnmp_oid_stash.3, man/netsnmp_old_api.3,   
+      man/netsnmp_read_config.3, man/netsnmp_read_only.3,   
+      man/netsnmp_row_merge.3, man/netsnmp_scalar.3,   
+      man/netsnmp_scalar_group_group.3, man/netsnmp_serialize.3,   
+      man/netsnmp_snmp_agent.3, man/netsnmp_snmp_alarm.3,   
+      man/netsnmp_snmp_client.3, man/netsnmp_snmp_logging.3,   
+      man/netsnmp_snmp_pdu.3, man/netsnmp_snmp_session.3,   
+      man/netsnmp_stash_cache.3, man/netsnmp_stash_to_next.3,   
+      man/netsnmp_table.3, man/netsnmp_table_array.3,   
+      man/netsnmp_table_container.3, man/netsnmp_table_data.3,   
+      man/netsnmp_table_dataset.3, man/netsnmp_table_generic.3,   
+      man/netsnmp_table_indexes.3, man/netsnmp_table_iterator.3,   
+      man/netsnmp_table_iterator.h.3, man/netsnmp_table_maintenance.3,  
+       man/netsnmp_table_rows.3, man/netsnmp_tdata.3,   
+      man/netsnmp_util.3, man/netsnmp_utilities.3,   
+      man/netsnmp_variable_list.3, man/netsnmp_watcher.3:
+
+   documentation update
+
+2009-02-05 00:33  rstory
+
+   * configure:
+
+   Version number update
+
+-------------------------------------------------------------
+
 Changes: V5.3.2 -> V5.3.3.pre1
 
 2009-02-03 21:08  rstory
