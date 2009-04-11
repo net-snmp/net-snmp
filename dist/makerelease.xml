@@ -350,6 +350,11 @@
 	  <text>
 	    You need to manually insert the *relevent* portions of
 	    'ChangeLog.reallyadd' into the ChangeLog file.
+
+            I also suggest truncating ChangeLog.reallyadd to only contain
+            the *relevent* portions for this release, as this will make
+            CHANGES.new2 and NEWS.new2 more accurate later on.
+
 	    I'll commit these changes for you after you finish cutting
 	    out the proper changes.
 	  </text>
