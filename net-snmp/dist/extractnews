@@ -23,6 +23,11 @@ LocalGetOptions(\%opts,
 		['GUI:otherargs_text','Input files to parse'],
 	       );
 
+my $maybecontinue = 0;
+my $lasttext = 0;
+my $lastfile;
+my $lastcomponent;
+
 foreach my $argv (@ARGV) {
     open(I, $argv);
     if ($opts{'s'}) {
@@ -62,17 +67,35 @@ foreach my $argv (@ARGV) {
 	($file, $patbug, $nums, $text) = 
 	  /(NEWS|CHANGES):\s*\[*(BUG|PATCH)*(?:ES|S|):*\s*([\d,\s*]*)\]*:*\s*-*\s*(.*)/ if (!$file);
 	
-	next if (!$file);
-	
+	if (!$file && $maybecontinue) {
+	    if (/^\s*(.+)$/) {
+		$text = $1;
+		$file = $lastfile;
+		$component = $lastcomponent;
+
+		# we're going to re-add these
+		pop @{$output{$opts{'c'}}{$component}};
+		pop @{$output{$opts{'n'}}{$component}} if ($file eq 'NEWS');
+	    } else {
+		$maybecontinue = 0;
+		$lasttext = "";
+		next;
+	    }
+	} elsif (!$file) {
+	    next;
+	}
+		
 	next if (exists($stash{$text}));
 	$stash{$text} = 1;
 	
 	$component = "unspecified" if (!$component);
 	if ($patbug) {
-	    $text = wrap("      - ","        ","[$patbug $nums]: $text") . "\n";
+	    $lasttext .= " [$patbug $nums]: $text";
 	} else {
-	    $text = wrap("      - ","        ","$text") . "\n";
+	    $lasttext .= " $text";
 	}
+	$lasttext =~ s/^ //;
+	$text = wrap("      - ","        ","$lasttext") . "\n";
 	
 	#
 	#  Assist with displaying categories in a sensible order
@@ -87,6 +110,9 @@ foreach my $argv (@ARGV) {
 	$component =~ s/^([A-Z])/zz\1/;
 	push @{$output{$opts{'c'}}{$component}}, $text;
 	push @{$output{$opts{'n'}}{$component}}, $text if ($file eq 'NEWS');
+	$lastfile = $file;
+	$lastcomponent = $component;
+	$maybecontinue = 1;
     }
 }
 
