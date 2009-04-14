@@ -4524,6 +4524,7 @@ get_token(FILE * fp, char *token, int maxtlen)
     register int    hash = 0;
     register struct tok *tp;
     int             too_long = 0;
+    enum { bdigits, xdigits, other } seenSymbols;
 
     /*
      * skip all white space 
@@ -4542,39 +4543,60 @@ get_token(FILE * fp, char *token, int maxtlen)
     case '"':
         return parseQuoteString(fp, token, maxtlen);
     case '\'':                 /* binary or hex constant */
-        while ((ch = getc(fp)) != EOF && ch != '\''
-               && cp - token < maxtlen - 2)
-            *cp++ = ch;
+        seenSymbols = bdigits;
+        while ((ch = getc(fp)) != EOF && ch != '\'') {
+            switch (seenSymbols) {
+            case bdigits:
+                if (ch == '0' || ch == '1')
+                    break;
+                seenSymbols = xdigits;
+            case xdigits:
+                if (isxdigit(ch))
+                    break;
+                seenSymbols = other;
+            case other:
+                break;
+            }
+            if (cp - token < maxtlen - 2)
+                *cp++ = ch;
+        }
         if (ch == '\'') {
             unsigned long   val = 0;
-            *cp++ = '\'';
-            *cp++ = ch = getc(fp);
-            *cp = 0;
-            cp = token + 1;
+            char           *run = token + 1;
+            ch = getc(fp);
             switch (ch) {
             case EOF:
                 return ENDOFFILE;
             case 'b':
             case 'B':
-                while ((ch = *cp++) != '\'')
-                    if (ch != '0' && ch != '1')
-                        return LABEL;
-                    else
-                        val = val * 2 + ch - '0';
+                if (seenSymbols > bdigits) {
+                    *cp++ = '\'';
+                    *cp = 0;
+                    return LABEL;
+                }
+                while (run != cp)
+                    val = val * 2 + *run++ - '0';
                 break;
             case 'h':
             case 'H':
-                while ((ch = *cp++) != '\'')
+                if (seenSymbols > xdigits) {
+                    *cp++ = '\'';
+                    *cp = 0;
+                    return LABEL;
+                }
+                while (run != cp) {
+                    ch = *run++;
                     if ('0' <= ch && ch <= '9')
                         val = val * 16 + ch - '0';
                     else if ('a' <= ch && ch <= 'f')
                         val = val * 16 + ch - 'a' + 10;
                     else if ('A' <= ch && ch <= 'F')
                         val = val * 16 + ch - 'A' + 10;
-                    else
-                        return LABEL;
+                }
                 break;
             default:
+                *cp++ = '\'';
+                *cp = 0;
                 return LABEL;
             }
             sprintf(token, "%ld", val);
