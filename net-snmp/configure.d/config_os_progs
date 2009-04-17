@@ -82,7 +82,7 @@ AC_C_INLINE
 
 #       libtool stuff for shared/static libraries.
 #
-LT_PREREQ([2.2.4])
+LT_PREREQ([2.2.6])
 LT_INIT([win32-dll])
 AC_SUBST(LIBTOOL_DEPS)
 
