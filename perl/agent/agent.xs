@@ -782,7 +782,7 @@ nari_setValue(me, type, value)
         netsnmp_request_info *request;
         u_long utmp;
         long ltmp;
-        unsigned long long ulltmp;
+        uint64_t ulltmp;
         struct counter64 c64;
 	oid myoid[MAX_OID_LEN];
 	size_t myoid_len;
@@ -877,8 +877,13 @@ nari_setValue(me, type, value)
 	      if ((SvTYPE(value) == SVt_IV) || (SvTYPE(value) == SVt_PVMG)) {
 		  /* Good - got a real one (or a blessed scalar which we have to hope will turn out OK) */
 		  ulltmp = SvIV(value);
+#ifndef WIN32
 		  c64.high = (ulltmp & 0xffffffff00000000ULL) >> 32;
 		  c64.low  = (ulltmp & 0xffffffffULL);
+#else
+		  c64.high = (ulltmp & 0xffffffff00000000ui64) >> 32;
+		  c64.low  = (ulltmp & 0xffffffffui64);
+#endif
                   snmp_set_var_typed_value(request->requestvb, (u_char)type,
                                        (u_char *) &c64, sizeof(struct counter64));
 		  RETVAL = 1;
@@ -893,9 +898,13 @@ nari_setValue(me, type, value)
 			RETVAL = 0;
 			break;
 		  }
-
+#ifndef WIN32
 		  c64.high = (ulltmp & 0xffffffff00000000ULL) >> 32;
 		  c64.low  = (ulltmp & 0xffffffffULL);
+#else
+		  c64.high = (ulltmp & 0xffffffff00000000ui64) >> 32;
+		  c64.low  = (ulltmp & 0xffffffffui64);
+#endif
                   snmp_set_var_typed_value(request->requestvb, (u_char)type,
                                        (u_char *) &c64, sizeof(struct counter64));
 		  RETVAL = 1;

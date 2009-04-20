@@ -7,6 +7,7 @@
 use Getopt::Long;
 use strict;
 
+my $version = "unknown";
 my $config;
 my $sdk = 0;
 my $linktype;
@@ -82,6 +83,26 @@ if ($b_winextdll == 1) {
 }
 
 print "\n\n";
+
+###############################################
+#
+# Determine version from unix configure script
+#
+###############################################
+  
+my $unix_configure_in = "../configure";
+
+open (UNIX_CONFIGURE_IN, "<$unix_configure_in") || die "Can't Open $unix_configure_in\n";
+
+while (<UNIX_CONFIGURE_IN>)
+{
+  chomp;
+  /PACKAGE_VERSION='(.*)'/;
+  if ($1 ne "") {
+    $version = $1;
+    last;
+  }
+}
 
 ###############################################
 #
@@ -357,7 +378,7 @@ while (<MAKE_IN>)
   while (<FILE_IN>)
   {
     chomp;
-
+    s/^#define PACKAGE_VERSION.*/#define PACKAGE_VERSION \"$version\"/;
     if ($prefix ne "") {
       s/^#define INSTALL_BASE.*/#define INSTALL_BASE \"$prefix\"/;
     }
@@ -416,6 +437,11 @@ print qq/
 
 /;
 
+if ($version eq "unknown") {
+  $version = "unknown - Could not determine version from ../configure!";
+}
+
+print "  Version:                    $version\n";
 print "  Config type:                $config\n";
 print "  SDK:                        " . ($sdk == 1 ? "enabled" : "disabled") . "\n";
 print "  Link type:                  $linktype\n";

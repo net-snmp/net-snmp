@@ -4,6 +4,12 @@
 #ifndef NET_SNMP_CONFIG_H
 #define NET_SNMP_CONFIG_H
 
+/* Automatically set by Windows perl Configure script.
+ * When compiling with the MSVC workspace, this must be set manually.
+ * See the PACKAGE_VERSION variable in Unix /configure script
+*/
+#define PACKAGE_VERSION "unknown"
+
 /* Define HAVE_WIN32_PLATFORM_SDK if you have:
  * Microsoft Visual Studio MSVC 6.0 and the Platform SDK (PSDK)
  * Microsoft Visual Studio.Net 2002
@@ -1453,6 +1459,7 @@
 
 /* Not-to-be-compiled macros for use by configure only */
 #define config_require(x)
+#define config_version_require(x)
 #define config_warning(x)
 #define config_exclude(x)
 #define config_arch_require(x,y)
@@ -1531,6 +1538,19 @@ typedef __int64 int64_t;
 typedef unsigned __int64 uintmax_t;
 typedef __int64 intmax_t;
 typedef unsigned short   uint16_t;
+
+
+/* (u)intptr_t should only be needed for MSVC 6 32-bit. */
+/* SDK has it for 64-bit and newer MSVC should also have it in stddef.h. */
+#ifndef _INTPTR_T_DEFINED
+typedef int            intptr_t;
+#define _INTPTR_T_DEFINED
+#endif
+
+#ifndef _UINTPTR_T_DEFINED
+typedef unsigned int   uintptr_t;
+#define _UINTPTR_T_DEFINED
+#endif
 
 /* Define if you have the closesocket function.  */
 #define HAVE_CLOSESOCKET 1

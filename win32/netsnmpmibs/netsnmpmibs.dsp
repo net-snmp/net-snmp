@@ -101,6 +101,10 @@ SOURCE=..\..\agent\mibgroup\mibII\system_mib.c
 # End Source File
 # Begin Source File
 
+SOURCE=..\..\agent\mibgroup\mibII\updates.c
+# End Source File
+# Begin Source File
+
 SOURCE=..\..\agent\mibgroup\mibII\vacm_context.c
 # End Source File
 # Begin Source File
@@ -338,6 +342,14 @@ SOURCE=..\..\agent\mibgroup\utilities\execute.c
 # Begin Source File
 
 SOURCE=..\..\agent\mibgroup\utilities\iquery.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\agent\mibgroup\util_funcs\header_generic.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\agent\mibgroup\util_funcs\header_simple_table.c
 # End Source File
 # Begin Source File
 
