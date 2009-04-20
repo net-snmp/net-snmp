@@ -5634,12 +5634,9 @@ snmp_read(fd_set * fdset)
  * returns 0 if success, -1 if fail 
  * MTR: can't lock here and at snmp_read 
  * Beware recursive send maybe inside snmp_read callback function. 
- * 
- * Extended interface for compatibility with poll() interface.
- * Assumes fdset is zero when this interface is used.
  */
 int
-_sess_read(void *sessp, fd_set * fdset, struct pollfd fds[], nfds_t nfds)
+_sess_read(void *sessp, fd_set * fdset)
 {
     struct session_list *slp = (struct session_list *) sessp;
     netsnmp_session *sp = slp ? slp->session : NULL;
@@ -5661,59 +5658,11 @@ _sess_read(void *sessp, fd_set * fdset, struct pollfd fds[], nfds_t nfds)
         return 0; 
     }
 
-    if ((fdset && fds) || (!fdset && !fds)) {
-        DEBUGMSGTL(("sess_read", 
-                    "either fdset or fds should be used, not both.\n"));
-        return 0;
-    }
-
-
-    /* 
-     * Check if there is something to read for this session on fdset. 
-     */
-    if (fdset && !(FD_ISSET(transport->sock, fdset))) {
+    if (!fdset || !(FD_ISSET(transport->sock, fdset))) {
         DEBUGMSGTL(("sess_read", "not reading %d (fdset %p set %d)\n",
                     transport->sock, fdset,
-                    FD_ISSET(transport->sock, fdset)));
+                    fdset ? FD_ISSET(transport->sock, fdset) : -9));
         return 0;
-    }
-
-    /* 
-     * Check if there is something to read for this session on fds. 
-     * If there is nothing to read, return 0 and send out debug message.
-     */
-    if (fds) {
-        int somethingtoread = 0;
-        nfds_t i;
-        /* 
-         * Set revents bitmask for incoming messages.
-         * The first two should be available on every system that has poll()
-         */
-        short bitmask = 0;
-        bitmask |= POLLIN | POLLPRI;
-#ifdef POLLRDNORM
-        bitmask |= POLLRDNORM;
-#endif
-#ifdef POLLRDBAND
-        bitmask |= POLLRDBAND;
-#endif
-        /*
-         * FIXME?: this linear search in the list of fds leads to quadratic
-         * behaviour in the number of sessions (this is only relevant when
-         * dealing with really large numbers of sessions). Possible solution
-         * is the application of a hash table to look up the file descriptors.
-         */
-        for (i = 0; i < nfds && !somethingtoread; i++) {
-            if (fds[i].fd == transport->sock &&
-                    fds[i].revents & bitmask) {
-                somethingtoread = 1;
-            }
-        }
-        if (!somethingtoread) {
-            DEBUGMSGTL(("sess_read", "not reading %d\n",
-                        transport->sock));
-            return 0;
-        }
     }
 
     sp->s_snmp_errno = 0;
@@ -6057,6 +6006,8 @@ _sess_read(void *sessp, fd_set * fdset, struct pollfd fds[], nfds_t nfds)
     }
 }
 
+
+
 /*
  * returns 0 if success, -1 if fail 
  */
@@ -6067,47 +6018,7 @@ snmp_sess_read(void *sessp, fd_set * fdset)
     netsnmp_session *pss;
     int             rc;
 
-    rc = _sess_read(sessp, fdset, NULL, 0);
-    psl = (struct session_list *) sessp;
-    pss = psl->session;
-    if (rc && pss->s_snmp_errno) {
-        SET_SNMP_ERROR(pss->s_snmp_errno);
-    }
-    return rc;
-}
-
-/*
- * Extension of snmp_read with the poll() interface, i.e.
- * allow for an unlimited number of filehandles to be passed.
- * Checks to see if any of the fd's set in the fdset belong to
- * snmp. Each socket with it's fd set has a packet read from it
- * and snmp_parse is called on the packet received.  The resulting pdu
- * is passed to the callback routine for that session.  If the callback
- * routine returns successfully, the pdu and it's request are deleted.
- */
-void
-snmp_read_extd(struct pollfd fds[], nfds_t nfds)
-{
-    struct session_list *slp;
-    snmp_res_lock(MT_LIBRARY_ID, MT_LIB_SESSION);
-    for (slp = Sessions; slp; slp = slp->next) {
-        snmp_sess_read_extd((void *) slp, fds, nfds);
-    }
-    snmp_res_unlock(MT_LIBRARY_ID, MT_LIB_SESSION);
-}
-
-
-/*
- * returns 0 if success, -1 if fail 
- */
-int
-snmp_sess_read_extd(void *sessp, struct pollfd fds[], nfds_t nfds)
-{
-    struct session_list *psl;
-    netsnmp_session *pss;
-    int             rc;
-
-    rc = _sess_read(sessp, NULL, fds, nfds);
+    rc = _sess_read(sessp, fdset);
     psl = (struct session_list *) sessp;
     pss = psl->session;
     if (rc && pss->s_snmp_errno) {
@@ -6155,17 +6066,12 @@ snmp_select_info(int *numfds,
 }
 
 /*
- * Implements snmp_sess_select_info and snmp_sess_poll_info
- * (two interfaces for the same functionality, just the poll interface
- * allows for more file handles).
- * If fd_set is used (old interface), afterwards numfds contains the max
- * filedescriptor + 1 (needed for select), otherwise nfds contains the
- * number of elements in the fds list (and numfds is zero).
- * If the poll() interface is used, the array is resized when necessary.
+ * Same as snmp_select_info, but works just one session. 
  */
-static int
-_sess_selpol_info(void *sessp, struct timeval *timeout, int *block,
-                  int *numfds, fd_set *fdset, struct pollfdarr *fdarr)
+int
+snmp_sess_select_info(void *sessp,
+                      int *numfds,
+                      fd_set * fdset, struct timeval *timeout, int *block)
 {
     struct session_list *slptest = (struct session_list *) sessp;
     struct session_list *slp, *next = NULL;
@@ -6218,47 +6124,11 @@ _sess_selpol_info(void *sessp, struct timeval *timeout, int *block,
         }
 
         DEBUGMSG(("sess_select", "%d ", slp->transport->sock));
+        if ((slp->transport->sock + 1) > *numfds) {
+            *numfds = (slp->transport->sock + 1);
+        }
 
-        if (fdset) { /* Use fdset from the select() interface */
-            if ((slp->transport->sock + 1) > *numfds) {
-                *numfds = (slp->transport->sock + 1);
-            }
-            FD_SET(slp->transport->sock, fdset);
-        } else { /* Use fdarr for the poll() interface. */
-            /* Append fd at the end of the array, and increase number of fds */
-            int fdindex = fdarr->nfds++;
-            int fdas = fdarr->arrsize;
-            if (fdindex >= fdas) { 
-                /* increase array size *2 if it's not big enough */
-                int newfdas = (fdas > 0) ? fdas * 2 : 1;
-                struct pollfd *prev = fdarr->fds;
-                fdarr->fds = (struct pollfd*)realloc(fdarr->fds,
-                                              newfdas * sizeof(struct pollfd));
-                if (fdarr->fds == NULL) {
-                    /* realloc failed, revert to old list and abort */
-                    fdarr->fds = prev;
-                    DEBUGMSG(("_sess_select_info",
-                              "realloc failed, aborting.\n"));
-                    break;
-                }
-                /*
-                 * set the new memory to zero
-                 */
-                memset(&((fdarr->fds)[fdas]), 0,
-                        (newfdas - fdas) * sizeof(struct pollfd));
-                fdarr->arrsize = newfdas;
-            }
-            (fdarr->fds)[fdindex].fd = slp->transport->sock;
-            (fdarr->fds)[fdindex].events = 0;
-            (fdarr->fds)[fdindex].events |= POLLIN | POLLPRI;
-#ifdef POLLRDNORM
-            (fdarr->fds)[fdindex].events |= POLLRDNORM;
-#endif
-#ifdef POLLRDBAND
-            (fdarr->fds)[fdindex].events |= POLLRDBAND;
-#endif
-            (fdarr->fds)[fdindex].revents = 0;
-        } 
+        FD_SET(slp->transport->sock, fdset);
         if (slp->internal != NULL && slp->internal->requests) {
             /*
              * Found another session with outstanding requests.  
@@ -6359,51 +6229,6 @@ _sess_selpol_info(void *sessp, struct timeval *timeout, int *block,
     }
     return active;
 }
-
-int
-snmp_poll_info(struct pollfdarr *fdarr, int *timeout, int *block)
-/*
- * same as snmp_select_info but with poll() interface.
- * Appends filedescriptors for snmp at the end of fdarr
- * increasing the size of the array when necessary.
- */
-{
-    int numfds = 0;
-    struct timeval stimeout;
-    int numsessions = _sess_selpol_info(NULL, &stimeout, block,
-            &numfds, NULL, fdarr);
-    if (numfds) { /* something went wrong, only nfds should be set. */
-        DEBUGMSGTL(("snmp_select_info_extd", 
-                    "error in call of _sess_select_info\n"));
-    }
-    if (!block) {
-        int rettimeout = stimeout.tv_sec * 1000 + stimeout.tv_usec / 1000;
-        if ((rettimeout > 0) &&
-            (rettimeout < *timeout)) {
-            *timeout = rettimeout;
-        }
-    }
-
-    return numsessions;
-}
-
-/*
- * Same as snmp_select_info, but works just one session. 
- */
-int
-snmp_sess_select_info(void *sessp,
-                      int *numfds,
-                      fd_set * fdset, struct timeval *timeout, int *block)
-{
-    nfds_t nfds = 0;
-    int numsessions = _sess_selpol_info(sessp, timeout, block, numfds, fdset, NULL);
-    if (nfds) {
-    DEBUGMSGTL(("snmp_sess_select_info", 
-      "error in call of _sess_select_info\n"));
-    }
-    return numsessions;
-}
-
 
 /*
  * snmp_timeout should be called whenever the timeout from snmp_select_info
