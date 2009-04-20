@@ -57,10 +57,6 @@ ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS
 SOFTWARE.
 ******************************************************************/
 
-#ifdef HAVE_SYS_POLL_H
-#include <sys/poll.h>
-#endif
-
 /** @typedef struct variable_list netsnmp_variable_list
     * Typedefs the variable_list struct into netsnmp_variable_list */
 struct variable_list;
@@ -624,13 +620,7 @@ struct variable_list {
      */
     void            snmp_read(fd_set *);
 
-    /*
-     * Same as snmp_read, but with the poll() interface, to allow for large
-     * file handles. I.e. checks to see if any of the fd's in fds belongs to
-     * snmp. nfds is the number of filedescriptors in fds (<= size of the
-     * array).
-     */
-    void            snmp_read_extd(struct pollfd *fds, nfds_t nfds);
+
 
     /*
      * void
@@ -675,20 +665,8 @@ struct variable_list {
      */
     int             snmp_select_info(int *, fd_set *, struct timeval *,
                                      int *);
-struct pollfdarr {
-   /** Number of file descriptors in fds */
-   nfds_t nfds; 
-   /** Array of file descriptors */
-   struct pollfd *fds; 
-   /** Array size (which may be bigger than the number of file descriptors
-    ** in it). */
-   int arrsize;
-};
-    /*
-     * Same as snmp_select_info but using the poll() interface, to allow
-     * for large file handles.
-     */
-    int             snmp_poll_info(struct pollfdarr *, int *, int *);
+
+
 
     /*
      * void snmp_timeout();
@@ -1009,7 +987,6 @@ struct pollfdarr {
     int             snmp_sess_select_info(void *, int *, fd_set *,
                                           struct timeval *, int *);
     int             snmp_sess_read(void *, fd_set *);
-    int             snmp_sess_read_extd(void *sessp, struct pollfd fds[], nfds_t nfds);
     void            snmp_sess_timeout(void *);
     int             snmp_sess_close(void *);
 
