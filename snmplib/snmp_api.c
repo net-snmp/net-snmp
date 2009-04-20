@@ -5657,6 +5657,13 @@ _sess_read(void *sessp, fd_set * fdset)
         snmp_log (LOG_INFO, "transport->sock got negative fd value %d\n", transport->sock);
         return 0; 
     }
+#ifdef FD_SETSIZE
+    /* fd_sets can only handle so many sockets */
+    if (transport->sock >= FD_SETSIZE) {
+        snmp_log (LOG_INFO, "transport->sock got too large fd value %d\n", transport->sock);
+        return 0; 
+    }
+#endif
 
     if (!fdset || !(FD_ISSET(transport->sock, fdset))) {
         DEBUGMSGTL(("sess_read", "not reading %d (fdset %p set %d)\n",
@@ -6124,6 +6131,17 @@ snmp_sess_select_info(void *sessp,
         }
 
         DEBUGMSG(("sess_select", "%d ", slp->transport->sock));
+
+#ifdef FD_SETSIZE
+        if (slp->transport->sock >= FD_SETSIZE) {
+            /*
+             *  fd_sets can only handle so many sockets
+             */
+            DEBUGMSGTL(("sess_select", "Transport socket too big - skipping"));
+            continue;
+        }
+#endif
+
         if ((slp->transport->sock + 1) > *numfds) {
             *numfds = (slp->transport->sock + 1);
         }
