@@ -26,11 +26,13 @@ typedef struct prefix_info
    unsigned long ipAddressPrefixAutonomousFlag;
    char in6p[40];
 }prefix_cbx;
+#ifndef WIN32
 typedef struct 
 {
  prefix_cbx **list_head;
  pthread_mutex_t *lockinfo;  
 }netsnmp_prefix_listen_info;
+#endif
 void            Exit(int);
 int             shell_command(struct extensible *);
 int             exec_command(struct extensible *);
@@ -56,6 +58,7 @@ unsigned int    get_pid_from_inode(unsigned long long);
 prefix_cbx *net_snmp_create_prefix_info(unsigned long OnLinkFlag,
                                         unsigned long AutonomousFlag,
                                         char *in6ptr);
+#ifndef WIN32
 int net_snmp_find_prefix_info(prefix_cbx **head,
                               char *address,
                               prefix_cbx *node_to_find,
@@ -70,6 +73,7 @@ int net_snmp_search_update_prefix_info(prefix_cbx **head,
 int net_snmp_delete_prefix_info(prefix_cbx **head,
                                 char *address,
                                 pthread_mutex_t *lockid);
+#endif
 #define NIP6(addr) \
         ntohs((addr).s6_addr16[0]), \
         ntohs((addr).s6_addr16[1]), \

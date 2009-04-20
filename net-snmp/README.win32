@@ -740,12 +740,16 @@ workspace if you don't have or don't need these features.  Note:  Other
 features may be disabled if the Platform SDK is not used.  See the section
 'Installing Platform SDK' for more information.
 
-1. If SNMPv3 encryption capabilities or SHA authentication is required,
+1. Update the version stamp in win32\net-snmp\net-snmp-config.h.  The current
+   version can be found in the Unix configure script (top level folder) by 
+   looking for the PACKAGE_VERSION variable.
+
+2. If SNMPv3 encryption capabilities or SHA authentication is required,
    install the OpenSSL DLL and library file as described in the section 
    'Microsoft Visual C++ - Building with OpenSSL" and then continue with 
    step 2.
 
-2. The default installation path is c:\usr.  This folder will contain all
+3. The default installation path is c:\usr.  This folder will contain all
    the binaries, MIB files, configuration files etc.  To change the location,
    the win32\net-snmp\net-snmp-config.h file needs to be modified by changing
    the INSTALL_BASE variable. 
@@ -757,7 +761,7 @@ features may be disabled if the Platform SDK is not used.  See the section
 
      For example: #define INSTALL_BASE "c:/usr".  
 
-3. If you are using win32sdk, the Platform SDK must be enabled.  Edit the 
+4. If you are using win32sdk, the Platform SDK must be enabled.  Edit the 
    the win32\net-snmp\net-snmp-config.h file and *change*:
 
         /* #undef HAVE_WIN32_PLATFORM_SDK */
@@ -766,7 +770,7 @@ features may be disabled if the Platform SDK is not used.  See the section
 
         #define HAVE_WIN32_PLATFORM_SDK 1
 
-4. Build the applications
+5. Build the applications
 
    Static build (does not use NetSNMP.DLL)
    =======================================
@@ -847,7 +851,7 @@ features may be disabled if the Platform SDK is not used.  See the section
       save to a text file if there is some information to share.
    h. Click "File->Close Solution".
   
-5.  If the Perl modules are required, continue with the next section:
+6.  If the Perl modules are required, continue with the next section:
     'Microsoft Visual C++ - Building the Perl SNMP modules'.
 
     Otherwise, continue with the section: 
@@ -860,15 +864,19 @@ features may be disabled if the Platform SDK is not used.  See the section
 *
 ***************************************************************************
 
-1.  Optional: Make a backup of the existing net-snmp-config.h which contains 
+1.  Update the version stamp in win32\net-snmp\net-snmp-config.h.  The current
+    version can be found in the Unix configure script (top level folder) by 
+    looking for the PACKAGE_VERSION variable.
+
+2.  Optional: Make a backup of the existing net-snmp-config.h which contains 
     settings for a static build of Net-SNMP:
 
     Copy win32\net-snmp\net-snmp-config.h to 
     win32\net-snmp\static-config.h.
 
-2.  Open win32\net-snmp\net-snmp-config.h using a text editor.
+3.  Open win32\net-snmp\net-snmp-config.h using a text editor.
 
-3.  *Change* the following line which is located near the top of the file:
+4.  *Change* the following line which is located near the top of the file:
 
         /* #undef NETSNMP_USE_DLL */
 
@@ -876,13 +884,13 @@ features may be disabled if the Platform SDK is not used.  See the section
 
         #define NETSNMP_USE_DLL 1
 
-4.  Optional: Make a backup of the new net-snmp-config.h which contains 
+5.  Optional: Make a backup of the new net-snmp-config.h which contains 
     settings for a DLL build of Net-SNMP:
 
     Copy win32\net-snmp\net-snmp-config.h to 
     win32\net-snmp\dll-config.h.
 
-5. Build the DLL
+6. Build the DLL
 
    MS VC++ 6.0:
    ------------

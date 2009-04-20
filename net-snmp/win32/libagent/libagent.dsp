@@ -101,6 +101,10 @@ SOURCE=..\..\agent\agent_registry.c
 # End Source File
 # Begin Source File
 
+SOURCE=..\..\agent\agent_sysORTable.c
+# End Source File
+# Begin Source File
+
 SOURCE=..\..\agent\agent_trap.c
 # End Source File
 # Begin Source File
@@ -130,6 +134,10 @@ SOURCE="..\..\include\net-snmp\agent\agent_read_config.h"
 # Begin Source File
 
 SOURCE="..\..\include\net-snmp\agent\agent_registry.h"
+# End Source File
+# Begin Source File
+
+SOURCE="..\..\include\net-snmp\agent\agent_sysORTable.h"
 # End Source File
 # Begin Source File
 
