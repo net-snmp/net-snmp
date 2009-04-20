@@ -303,6 +303,7 @@ EXPORTS
 	snmp_realloc
       netsnmp_config
       netsnmp_config_remember
+      netsnmp_config_error
       snmp_hex_to_binary
       snmpv3_options
       netsnmp_get_version
@@ -447,6 +448,12 @@ EXPORTS
         netsnmp_query_walk
         netsnmp_query_getnext
         netsnmp_query_get
+        netsnmp_gethostbyname_v4
+        netsnmp_str_to_gid
+        netsnmp_mktemp
+        netsnmp_str_to_uid
+        netsnmp_check_vb_truthvalue
+        snmp_set_var_typed_integer
 ;IPv6        netsnmp_udp6_parse_security
 ;IPv6        netsnmp_udp6_getSecName
 ;IPv6        netsnmp_TCPIPv6Domain

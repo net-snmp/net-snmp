@@ -19,6 +19,7 @@ CLEAN :
 	-@erase "$(INTDIR)\agent_index.obj"
 	-@erase "$(INTDIR)\agent_read_config.obj"
 	-@erase "$(INTDIR)\agent_registry.obj"
+	-@erase "$(INTDIR)\agent_sysORTable.obj"
 	-@erase "$(INTDIR)\agent_trap.obj"
 	-@erase "$(INTDIR)\snmp_agent.obj"
 	-@erase "$(INTDIR)\snmp_vars.obj"
@@ -77,6 +78,7 @@ LIB32_OBJS= \
 	"$(INTDIR)\agent_index.obj" \
 	"$(INTDIR)\agent_read_config.obj" \
 	"$(INTDIR)\agent_registry.obj" \
+	"$(INTDIR)\agent_sysORTable.obj" \
 	"$(INTDIR)\agent_trap.obj" \
 	"$(INTDIR)\snmp_agent.obj" \
 	"$(INTDIR)\snmp_vars.obj"
@@ -96,6 +98,7 @@ CLEAN :
 	-@erase "$(INTDIR)\agent_index.obj"
 	-@erase "$(INTDIR)\agent_read_config.obj"
 	-@erase "$(INTDIR)\agent_registry.obj"
+	-@erase "$(INTDIR)\agent_sysORTable.obj"
 	-@erase "$(INTDIR)\agent_trap.obj"
 	-@erase "$(INTDIR)\snmp_agent.obj"
 	-@erase "$(INTDIR)\snmp_vars.obj"
@@ -155,6 +158,7 @@ LIB32_OBJS= \
 	"$(INTDIR)\agent_index.obj" \
 	"$(INTDIR)\agent_read_config.obj" \
 	"$(INTDIR)\agent_registry.obj" \
+	"$(INTDIR)\agent_sysORTable.obj" \
 	"$(INTDIR)\agent_trap.obj" \
 	"$(INTDIR)\snmp_agent.obj" \
 	"$(INTDIR)\snmp_vars.obj"
@@ -200,6 +204,10 @@ SOURCE=..\..\agent\agent_registry.c
 "$(INTDIR)\agent_registry.obj" : $(SOURCE) "$(INTDIR)"
 	$(CPP) $(CPP_PROJ) $(SOURCE)
 
+SOURCE=..\..\agent\agent_sysORTable.c
+
+"$(INTDIR)\agent_sysORTable.obj" : $(SOURCE) "$(INTDIR)"
+	$(CPP) $(CPP_PROJ) $(SOURCE)
 
 SOURCE=..\..\agent\agent_trap.c
 

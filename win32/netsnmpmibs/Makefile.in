@@ -22,6 +22,9 @@ CLEAN :
 	-@erase "$(INTDIR)\example.obj"
 	-@erase "$(INTDIR)\execute.obj"
 	-@erase "$(INTDIR)\iquery.obj"
+	-@erase "$(INTDIR)\override.obj"
+	-@erase "$(INTDIR)\header_generic.obj"
+	-@erase "$(INTDIR)\header_simple_table.obj"
 	-@erase "$(INTDIR)\extensible.obj"
 	-@erase "$(INTDIR)\file.obj"
 	-@erase "$(INTDIR)\header_complex.obj"
@@ -64,6 +67,7 @@ CLEAN :
 	-@erase "$(INTDIR)\subagent.obj"
 	-@erase "$(INTDIR)\sysORTable.obj"
 	-@erase "$(INTDIR)\system_mib.obj"
+	-@erase "$(INTDIR)\updates.obj"
 	-@erase "$(INTDIR)\target.obj"
 	-@erase "$(INTDIR)\target_counters.obj"
 	-@erase "$(INTDIR)\ucdDemoPublic.obj"
@@ -130,6 +134,7 @@ LIB32_OBJS= \
 	"$(INTDIR)\snmp_mib.obj" \
 	"$(INTDIR)\sysORTable.obj" \
 	"$(INTDIR)\system_mib.obj" \
+	"$(INTDIR)\updates.obj" \
 	"$(INTDIR)\vacm_context.obj" \
 	"$(INTDIR)\vacm_conf.obj" \
 	"$(INTDIR)\vacm_vars.obj" \
@@ -181,6 +186,9 @@ LIB32_OBJS= \
 	"$(INTDIR)\nsTransactionTable.obj" \
 	"$(INTDIR)\execute.obj" \
 	"$(INTDIR)\iquery.obj" \
+	"$(INTDIR)\override.obj" \
+	"$(INTDIR)\header_generic.obj" \
+	"$(INTDIR)\header_simple_table.obj" \
 	"$(INTDIR)\header_complex.obj" \
 	"$(INTDIR)\mib_modules.obj" \
 	"$(INTDIR)\override.obj" \
@@ -205,6 +213,9 @@ CLEAN :
 	-@erase "$(INTDIR)\example.obj"
 	-@erase "$(INTDIR)\execute.obj"
 	-@erase "$(INTDIR)\iquery.obj"
+	-@erase "$(INTDIR)\override.obj"
+	-@erase "$(INTDIR)\header_generic.obj"
+	-@erase "$(INTDIR)\header_simple_table.obj"
 	-@erase "$(INTDIR)\extensible.obj"
 	-@erase "$(INTDIR)\file.obj"
 	-@erase "$(INTDIR)\header_complex.obj"
@@ -247,6 +258,7 @@ CLEAN :
 	-@erase "$(INTDIR)\subagent.obj"
 	-@erase "$(INTDIR)\sysORTable.obj"
 	-@erase "$(INTDIR)\system_mib.obj"
+	-@erase "$(INTDIR)\updates.obj"
 	-@erase "$(INTDIR)\target.obj"
 	-@erase "$(INTDIR)\target_counters.obj"
 	-@erase "$(INTDIR)\ucdDemoPublic.obj"
@@ -314,6 +326,7 @@ LIB32_OBJS= \
 	"$(INTDIR)\snmp_mib.obj" \
 	"$(INTDIR)\sysORTable.obj" \
 	"$(INTDIR)\system_mib.obj" \
+	"$(INTDIR)\updates.obj" \
 	"$(INTDIR)\vacm_context.obj" \
 	"$(INTDIR)\vacm_conf.obj" \
 	"$(INTDIR)\vacm_vars.obj" \
@@ -365,6 +378,9 @@ LIB32_OBJS= \
 	"$(INTDIR)\nsTransactionTable.obj" \
 	"$(INTDIR)\execute.obj" \
 	"$(INTDIR)\iquery.obj" \
+	"$(INTDIR)\override.obj" \
+	"$(INTDIR)\header_generic.obj" \
+	"$(INTDIR)\header_simple_table.obj" \
 	"$(INTDIR)\header_complex.obj" \
 	"$(INTDIR)\mib_modules.obj" \
 	"$(INTDIR)\override.obj" \
@@ -410,6 +426,12 @@ SOURCE=..\..\agent\mibgroup\mibII\sysORTable.c
 SOURCE=..\..\agent\mibgroup\mibII\system_mib.c
 
 "$(INTDIR)\system_mib.obj" : $(SOURCE) "$(INTDIR)"
+	$(CPP) $(CPP_PROJ) $(SOURCE)
+
+
+SOURCE=..\..\agent\mibgroup\mibII\updates.c
+
+"$(INTDIR)\updates.obj" : $(SOURCE) "$(INTDIR)"
 	$(CPP) $(CPP_PROJ) $(SOURCE)
 
 
@@ -717,6 +739,25 @@ SOURCE=..\..\agent\mibgroup\utilities\iquery.c
 
 "$(INTDIR)\iquery.obj" : $(SOURCE) "$(INTDIR)"
 	$(CPP) $(CPP_PROJ) $(SOURCE)
+
+
+SOURCE=..\..\agent\mibgroup\utilities\override.c
+
+"$(INTDIR)\override.obj" : $(SOURCE) "$(INTDIR)"
+	$(CPP) $(CPP_PROJ) $(SOURCE)
+
+
+SOURCE=..\..\agent\mibgroup\util_funcs\header_generic.c
+
+"$(INTDIR)\header_generic.obj" : $(SOURCE) "$(INTDIR)"
+	$(CPP) $(CPP_PROJ) $(SOURCE)
+
+
+SOURCE=..\..\agent\mibgroup\util_funcs\header_simple_table.c
+
+"$(INTDIR)\header_simple_table.obj" : $(SOURCE) "$(INTDIR)"
+	$(CPP) $(CPP_PROJ) $(SOURCE)
+
 
 SOURCE=..\..\agent\mibgroup\header_complex.c
 

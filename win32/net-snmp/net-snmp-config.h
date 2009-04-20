@@ -4,6 +4,12 @@
 #ifndef NET_SNMP_CONFIG_H
 #define NET_SNMP_CONFIG_H
 
+/* Automatically set by Windows perl Configure script.
+ * When compiling with the MSVC workspace, this must be set manually.
+ * See the PACKAGE_VERSION variable in Unix /configure script
+*/
+#define PACKAGE_VERSION "unknown"
+
 /* Define HAVE_WIN32_PLATFORM_SDK if you have:
  * Microsoft Visual Studio MSVC 6.0 and the Platform SDK (PSDK)
  * Microsoft Visual Studio.Net 2002
@@ -991,69 +997,69 @@
 /* #undef RTENTRY_4_4 */
 
 /* Does struct sigaction have a sa_sigaction field? */
-/* #undef HAVE_STRUCT_SIGACTION_SA_SIGACTION */
+/* #undef STRUCT_SIGACTION_HAS_SA_SIGACTION */
 
 /* Does struct sockaddr have a sa_len field? */
-/* #undef HAVE_STRUCT_SOCKADDR_SA_LEN */
+/* #undef STRUCT_SOCKADDR_HAS_SA_LEN */
 
 /* Does struct sockaddr have a sa_family2 field? */
-/* #undef HAVE_STRUCT_SOCKADDR_SA_UNION_SA_GENERIC_SA_FAMILY2 */
+/* #undef STRUCT_SOCKADDR_HAS_SA_UNION_SA_GENERIC_SA_FAMILY2 */
 
 /* Does struct in6_addr have a s6_un.sa6_ladd field? */
-/* #undef HAVE_STRUCT_IN6_ADDR_S6_UN_SA6_LADDR */
+/* #undef STRUCT_IN6_ADDR_HAS_S6_UN_SA6_LADDR */
 
 /* rtentry structure tests */
 /* #undef RTENTRY_RT_NEXT */
-/* #undef HAVE_STRUCT_RTENTRY_RT_DST */
-/* #undef HAVE_STRUCT_RTENTRY_RT_UNIT */
-/* #undef HAVE_STRUCT_RTENTRY_RT_USE */
-/* #undef HAVE_STRUCT_RTENTRY_RT_REFCNT */
-/* #undef HAVE_STRUCT_RTENTRY_RT_HASH */
+/* #undef STRUCT_RTENTRY_HAS_RT_DST */
+/* #undef STRUCT_RTENTRY_HAS_RT_UNIT */
+/* #undef STRUCT_RTENTRY_HAS_RT_USE */
+/* #undef STRUCT_RTENTRY_HAS_RT_REFCNT */
+/* #undef STRUCT_RTENTRY_HAS_RT_HASH */
 
 /* ifnet structure tests */
-/* #undef HAVE_STRUCT_IFNET_IF_BAUDRATE */
-/* #undef HAVE_STRUCT_IFNET_IF_BAUDRATE_IFS_VALUE */
-/* #undef HAVE_STRUCT_IFNET_IF_SPEED */
-/* #undef HAVE_STRUCT_IFNET_IF_TYPE */
-/* #undef HAVE_STRUCT_IFNET_IF_IMCASTS */
-/* #undef HAVE_STRUCT_IFNET_IF_IQDROPS */
-/* #undef HAVE_STRUCT_IFNET_IF_LASTCHANGE_TV_SEC */
-/* #undef HAVE_STRUCT_IFNET_IF_NOPROTO */
-/* #undef HAVE_STRUCT_IFNET_IF_OMCASTS */
-/* #undef HAVE_STRUCT_IFNET_IF_XNAME */
-/* #undef HAVE_STRUCT_IFNET_IF_OBYTES */
-/* #undef HAVE_STRUCT_IFNET_IF_IBYTES */
-/* #undef HAVE_STRUCT_IFNET_IF_ADDRLIST */
+/* #undef STRUCT_IFNET_HAS_IF_BAUDRATE */
+/* #undef STRUCT_IFNET_HAS_IF_BAUDRATE_IFS_VALUE */
+/* #undef STRUCT_IFNET_HAS_IF_SPEED */
+/* #undef STRUCT_IFNET_HAS_IF_TYPE */
+/* #undef STRUCT_IFNET_HAS_IF_IMCASTS */
+/* #undef STRUCT_IFNET_HAS_IF_IQDROPS */
+/* #undef STRUCT_IFNET_HAS_IF_LASTCHANGE_TV_SEC */
+/* #undef STRUCT_IFNET_HAS_IF_NOPROTO */
+/* #undef STRUCT_IFNET_HAS_IF_OMCASTS */
+/* #undef STRUCT_IFNET_HAS_IF_XNAME */
+/* #undef STRUCT_IFNET_HAS_IF_OBYTES */
+/* #undef STRUCT_IFNET_HAS_IF_IBYTES */
+/* #undef STRUCT_IFNET_HAS_IF_ADDRLIST */
 
 /* tcpstat.tcps_rcvmemdrop */
-/* #undef HAVE_STRUCT_TCPSTAT_TCPS_RCVMEMDROP */
+/* #undef STRUCT_TCPSTAT_HAS_TCPS_RCVMEMDROP */
 
 /* udpstat.udps_discard */
-/* #undef HAVE_STRUCT_UDPSTAT_UDPS_DISCARD */
+/* #undef STRUCT_UDPSTAT_HAS_UDPS_DISCARD */
 
 /* udpstat.udps_discard */
-/* #undef HAVE_STRUCT_UDPSTAT_UDPS_NOPORT */
+/* #undef STRUCT_UDPSTAT_HAS_UDPS_NOPORT */
 
 /* udpstat.udps_discard */
-/* #undef HAVE_STRUCT_UDPSTAT_UDPS_NOPORTBCAST */
+/* #undef STRUCT_UDPSTAT_HAS_UDPS_NOPORTBCAST */
 
 /* udpstat.udps_discard */
-/* #undef HAVE_STRUCT_UDPSTAT_UDPS_FULLSOCK */
+/* #undef STRUCT_UDPSTAT_HAS_UDPS_FULLSOCK */
 
 /* arphd.at_next */
-/* #undef HAVE_STRUCT_ARPHD_AT_NEXT */
+/* #undef STRUCT_ARPHD_HAS_AT_NEXT */
 
 /* ifaddr.ifa_next */
-/* #undef HAVE_STRUCT_IFADDR_IFA_NEXT */
+/* #undef STRUCT_IFADDR_HAS_IFA_NEXT */
 
 /* ifnet.if_mtu */
-/* #undef HAVE_STRUCT_IFNET_IF_MTU */
+/* #undef STRUCT_IFNET_HAS_IF_MTU */
 
 /* swdevt.sw_nblksenabled */
-/* #undef HAVE_STRUCT_SWDEVT_SW_NBLKSENABLED */
+/* #undef STRUCT_SWDEVT_HAS_SW_NBLKSENABLED */
 
 /* nlist.n_value */
-/* #undef HAVE_STRUCT_NLIST_N_VALUE */
+/* #undef STRUCT_NLIST_HAS_N_VALUE */
 
 /* ipstat structure tests */
 /* #undef HAVE_STRUCT_IPSTAT_IPS_CANTFORWARD */
@@ -1069,18 +1075,18 @@
 /* #undef HAVE_STRUCT_IPSTAT_IPS_REASSEMBLED */
 
 /* vfsstat.f_frsize */
-/* #undef HAVE_STRUCT_STATVFS_F_FRSIZE */
+/* #undef STRUCT_STATVFS_HAS_F_FRSIZE */
 
 /* vfsstat.f_files */
-/* #undef HAVE_STRUCT_STATVFS_F_FILES */
+/* #undef STRUCT_STATVFS_HAS_F_FILES */
 
 /* statfs inode structure tests*/
-/* #undef HAVE_STRUCT_STATFS_F_FILES */
-/* #undef HAVE_STRUCT_STATFS_F_FFREE */
-/* #undef HAVE_STRUCT_STATFS_F_FAVAIL */
+/* #undef STRUCT_STATFS_HAS_F_FILES */
+/* #undef STRUCT_STATFS_HAS_F_FFREE */
+/* #undef STRUCT_STATFS_HAS_F_FAVAIL */
 
 /* des_ks_struct.weak_key */
-/* #undef HAVE_STRUCT_DES_KS_STRUCT_WEAK_KEY */
+/* #undef STRUCT_DES_KS_STRUCT_HAS_WEAK_KEY */
 
 /* ifnet needs to have _KERNEL defined */
 /* #undef IFNET_NEEDS_KERNEL */
@@ -1453,6 +1459,7 @@
 
 /* Not-to-be-compiled macros for use by configure only */
 #define config_require(x)
+#define config_version_require(x)
 #define config_warning(x)
 #define config_exclude(x)
 #define config_arch_require(x,y)
@@ -1532,6 +1539,19 @@ typedef unsigned __int64 uintmax_t;
 typedef __int64 intmax_t;
 typedef unsigned short   uint16_t;
 
+
+/* (u)intptr_t should only be needed for MSVC 6 32-bit. */
+/* SDK has it for 64-bit and newer MSVC should also have it in stddef.h. */
+#ifndef _INTPTR_T_DEFINED
+typedef int            intptr_t;
+#define _INTPTR_T_DEFINED
+#endif
+
+#ifndef _UINTPTR_T_DEFINED
+typedef unsigned int   uintptr_t;
+#define _UINTPTR_T_DEFINED
+#endif
+
 /* Define if you have the closesocket function.  */
 #define HAVE_CLOSESOCKET 1
 
@@ -1593,7 +1613,7 @@ typedef unsigned short   uint16_t;
 #  define NETSNMP_IMPORT extern
 #endif
 
-#if defined(HAVE_NLIST) && defined(HAVE_STRUCT_NLIST_N_VALUE) && !defined(DONT_USE_NLIST) && !defined(NETSNMP_NO_KMEM_USAGE)
+#if defined(HAVE_NLIST) && defined(STRUCT_NLIST_HAS_N_VALUE) && !defined(DONT_USE_NLIST) && !defined(NETSNMP_NO_KMEM_USAGE)
 #define NETSNMP_CAN_USE_NLIST
 #endif
 
