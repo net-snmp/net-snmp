@@ -7,6 +7,19 @@
 
 #include <net-snmp/types.h>
 
+#ifdef __cplusplus
+extern          "C" {
+#endif
+
+netsnmp_pdu    *snmp_pdu_create(int type);
+netsnmp_pdu    *snmp_clone_pdu(netsnmp_pdu *pdu);
+netsnmp_pdu    *snmp_fix_pdu(  netsnmp_pdu *pdu, int idx);
+void            snmp_free_pdu( netsnmp_pdu *pdu);
+
+#ifdef __cplusplus
+}
+#endif
+
     /*
      *  For the initial release, this will just refer to the
      *  relevant UCD header files.
