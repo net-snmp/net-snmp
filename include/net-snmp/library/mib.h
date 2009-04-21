@@ -34,6 +34,8 @@ SOFTWARE.
 
 #include <stdio.h>              /* for FILE */
 
+#include <net-snmp/mib_api.h>
+
 #define MIB 1, 3, 6, 1, 2, 1
 
 #define MIB_IFTYPE_OTHER		    1
@@ -111,9 +113,7 @@ SOFTWARE.
     struct variable_list;
     struct enum_list;
 
-    void            print_mib(FILE * fp);
     void            print_ascii_dump(FILE *);
-    int             read_objid(const char *, oid *, size_t *);
     void            register_mib_handlers(void);
     void            netsnmp_set_mib_directory(const char *dir);
     char            *netsnmp_get_mib_directory(void);
@@ -121,21 +121,11 @@ SOFTWARE.
     void            netsnmp_mibindex_load( void );
     char *          netsnmp_mibindex_lookup( const char * );
     FILE *          netsnmp_mibindex_new( const char * );
-    void            netsnmp_init_mib(void);
-#ifndef NETSNMP_NO_LEGACY_DEFINITIONS
-    void            init_mib(void);
-#endif
-    void            shutdown_mib(void);
-    void            print_description(oid *, size_t, int);
-    void            fprint_description(FILE *, oid *, size_t, int);
-    int             snprint_description(char *, size_t, oid *, size_t, int);
-    int             sprint_realloc_description(u_char **, size_t *, size_t *,
-                                               int, oid *, size_t, int);
-    int             get_module_node(const char *, const char *, oid *,
-                                    size_t *);
+    int             sprint_realloc_description(u_char ** buf, size_t * buf_len,
+                                size_t * out_len, int allow_realloc,
+                                oid * objid, size_t objidlen, int width);
     int             get_wild_node(const char *, oid *, size_t *);
     int             get_node(const char *, oid *, size_t *);
-    oid            *snmp_parse_oid(const char *, oid *, size_t *);
     struct tree    *get_tree(const oid *, size_t, struct tree *);
     struct tree    *get_tree_head(void);
     void            set_function(struct tree *);
@@ -154,26 +144,10 @@ SOFTWARE.
                               netsnmp_variable_list * indexes);
     int             build_oid_segment(netsnmp_variable_list * var);
 
-
-    void            print_variable(const oid * objid, size_t objidlen,
+    int             sprint_realloc_variable(u_char ** buf, size_t * buf_len,
+                                   size_t * out_len, int allow_realloc,
+                                   const oid * objid, size_t objidlen,
                                    const netsnmp_variable_list * variable);
-
-    void            fprint_variable(FILE * fp,
-                                    const oid * objid, size_t objidlen,
-                                    const netsnmp_variable_list * variable);
-
-    int             snprint_variable(char *buf, size_t buf_len,
-                                     const oid * objid, size_t objidlen,
-                                     const netsnmp_variable_list * variable);
-
-    int             sprint_realloc_variable(u_char ** buf,
-                                            size_t * buf_len,
-                                            size_t * out_len,
-                                            int allow_realloc,
-                                            const oid * objid,
-                                            size_t objidlen,
-                                            const netsnmp_variable_list *
-                                            variable);
 
 #ifndef NETSNMP_DISABLE_MIB_LOADING
     struct tree    *
@@ -197,39 +171,14 @@ SOFTWARE.
                                                  const oid * objid,
                                                  size_t objidlen);
 
-    void            print_value(const oid * objid, size_t objidlen,
-                                const netsnmp_variable_list * variable);
-
-    void            fprint_value(FILE * fp,
+    int             sprint_realloc_value(u_char ** buf, size_t * buf_len,
+                                 size_t * out_len, int allow_realloc,
                                  const oid * objid, size_t objidlen,
                                  const netsnmp_variable_list * variable);
 
-    int             snprint_value(char *buf, size_t buf_len,
-                                  const oid * objid, size_t objidlen,
-                                  const netsnmp_variable_list * variable);
-
-    int             sprint_realloc_value(u_char ** buf, size_t * buf_len,
-                                         size_t * out_len,
-                                         int allow_realloc,
-                                         const oid * objid,
-                                         size_t objidlen,
-                                         const netsnmp_variable_list * variable);
-
-
-    void            print_objid(const oid * objid, size_t objidlen);
-
-    void            fprint_objid(FILE * fp,
-                                 const oid * objid, size_t objidlen);
-
-    int             snprint_objid(char *buf, size_t buf_len,
-                                  const oid * objid, size_t objidlen);
-
     int             sprint_realloc_objid(u_char ** buf, size_t * buf_len,
-                                         size_t * out_len,
-                                         int allow_realloc,
-                                         const oid * objid,
-                                         size_t objidlen);
-
+                                 size_t * out_len, int allow_realloc,
+                                 const oid * objid, size_t objidlen);
 
     int             sprint_realloc_by_type(u_char ** buf, size_t * buf_len,
                                            size_t * out_len,

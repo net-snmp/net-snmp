@@ -15,7 +15,7 @@ extern          "C" {
 #define PREMIB_CONFIG 1
 #define EITHER_CONFIG 2
 
-
+#include <net-snmp/config_api.h>
 
     /*
      * Defines a set of file types and the parse and free functions
@@ -47,8 +47,6 @@ extern          "C" {
     void            netsnmp_config_remember(char *);    /* process later, during snmp_init() */
     void            netsnmp_config_process_memories(void);      /* run all memories through parser */
     void            read_config(const char *, struct config_line *, int);
-    void            read_configs(void);
-    void            read_premib_configs(void);
     void            read_config_files(int);
     void            free_config(void);
 #if !defined(__GNUC__) || __GNUC__ < 2 || (__GNUC__ == 2&& __GNUC_MINOR__ < 8)
@@ -60,8 +58,6 @@ extern          "C" {
     void            netsnmp_config_warn(const char *, ...)
 	__attribute__((__format__(__printf__, 1, 2)));
 #endif
-    void            config_perror(const char *);
-    void            config_pwarn(const char *);
 
     char           *skip_white(char *);
     char           *skip_not_white(char *);
@@ -69,38 +65,6 @@ extern          "C" {
     char           *copy_nword(char *, char *, int);
     char           *copy_word(char *, char *);  /* do not use */
     void            read_config_with_type(const char *, const char *);
-    struct config_line *register_config_handler(const char *, const char *,
-                                                void (*parser) (const char
-                                                                *, char *),
-                                                void (*releaser) (void),
-                                                const char *);
-    struct config_line *register_app_config_handler(const char *,
-                                                    void (*parser) (const
-                                                                    char *,
-                                                                    char
-                                                                    *),
-                                                    void (*releaser)
-                                                    (void), const char *);
-    struct config_line *register_prenetsnmp_mib_handler(const char *,
-                                                        const char *,
-                                                        void (*parser)
-                                                        (const char *,
-                                                         char *),
-                                                        void (*releaser)
-                                                        (void),
-                                                        const char *);
-    struct config_line *register_app_prenetsnmp_mib_handler(const char *,
-                                                            void (*parser)
-                                                            (const char *,
-                                                             char *),
-                                                            void
-                                                            (*releaser)
-                                                            (void),
-                                                            const char *);
-    void            unregister_config_handler(const char *, const char *);
-    void            unregister_app_config_handler(const char *);
-    void            unregister_all_config_handlers(void);
-    void            read_config_print_usage(const char *lead);
     char           *read_config_save_octet_string(char *saveto,
                                                   u_char * str,
                                                   size_t len);
