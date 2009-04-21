@@ -73,7 +73,7 @@ READ_CONFIG_ALIASES = config_perror.3 config_pwarn.3			\
 	register_app_config_handler.3 register_app_premib_handler.3	\
 	register_config_handler.3 register_mib_handlers.3 		\
 	register_premib_handler.3 					\
-	unregister_app_config_handler.3 unregister_config_handler.3
+	unregister_app_config_handler.3 unregister_config_handler.3 read_config.3
 SNMP_ALARM_ALIASES = snmp_alarm_register.3 snmp_alarm_register_hr.3 	\
 	snmp_alarm_unregister.3
 SNMP_SET_SAVE_DESCRIPTIONS_ALIASES = fprint_description.3 fprint_objid.3 \
@@ -101,8 +101,8 @@ manaliases: Makefile
 		echo ".so man3/default_store.3" > $$i ; 		\
 	done
 	@for i in $(READ_CONFIG_ALIASES) ; do				\
-		echo "making man page alias $$i -> read_config APIs" ;	\
-		echo ".so man3/read_config.3" > $$i ; 			\
+		echo "making man page alias $$i -> config_api APIs" ;	\
+		echo ".so man3/config_api.3" > $$i ; 			\
 	done
 	@for i in $(SNMP_ALARM_ALIASES) ; do				\
 		echo "making man page alias $$i -> snmp_alarm APIs" ;	\
@@ -116,6 +116,7 @@ manaliases: Makefile
 		echo "making man page alias $$i -> snmp_trap APIs" ;	\
 		echo ".so man3/snmp_trap_api.3" > $$i ;			\
 	done
+        echo ".so man3/session_api.3" > snmp_api.3
 
 snmpbulkget.1: $(srcdir)/snmpbulkget.1.def ../sedscript
 	$(SED) -f ../sedscript < $(srcdir)/snmpbulkget.1.def > snmpbulkget.1
