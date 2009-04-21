@@ -116,7 +116,7 @@ manaliases: Makefile
 		echo "making man page alias $$i -> snmp_trap APIs" ;	\
 		echo ".so man3/snmp_trap_api.3" > $$i ;			\
 	done
-        echo ".so man3/session_api.3" > snmp_api.3
+	echo ".so man3/session_api.3" > snmp_api.3
 
 snmpbulkget.1: $(srcdir)/snmpbulkget.1.def ../sedscript
 	$(SED) -f ../sedscript < $(srcdir)/snmpbulkget.1.def > snmpbulkget.1
@@ -199,20 +199,26 @@ tkmib.1: $(srcdir)/tkmib.1.def ../sedscript
 traptoemail.1: $(srcdir)/traptoemail.1.def ../sedscript
 	$(SED) -f ../sedscript < $(srcdir)/traptoemail.1.def > traptoemail.1
 
+varbind_api.3: $(srcdir)/varbind_api.3.def ../sedscript
+	$(SED) -f ../sedscript < $(srcdir)/varbind_api.3.def > varbind_api.3
+
+pdu_api.3: $(srcdir)/pdu_api.3.def ../sedscript
+	$(SED) -f ../sedscript < $(srcdir)/pdu_api.3.def > pdu_api.3
+
+session_api.3: $(srcdir)/session_api.3.def ../sedscript
+	$(SED) -f ../sedscript < $(srcdir)/session_api.3.def > session_api.3
+
 mib_api.3: $(srcdir)/mib_api.3.def ../sedscript
 	$(SED) -f ../sedscript < $(srcdir)/mib_api.3.def > mib_api.3
 
-read_config.3: $(srcdir)/read_config.3.def ../sedscript
-	$(SED) -f ../sedscript < $(srcdir)/read_config.3.def > read_config.3
+config_api.3: $(srcdir)/config_api.3.def ../sedscript
+	$(SED) -f ../sedscript < $(srcdir)/config_api.3.def > config_api.3
 
 snmp_agent_api.3: $(srcdir)/snmp_agent_api.3.def ../sedscript
 	$(SED) -f ../sedscript < $(srcdir)/snmp_agent_api.3.def > snmp_agent_api.3
 
 snmp_alarm.3: $(srcdir)/snmp_alarm.3.def ../sedscript
 	$(SED) -f ../sedscript < $(srcdir)/snmp_alarm.3.def > snmp_alarm.3
-
-snmp_api.3: $(srcdir)/snmp_api.3.def ../sedscript
-	$(SED) -f ../sedscript < $(srcdir)/snmp_api.3.def > snmp_api.3
 
 snmp_sess_api.3: $(srcdir)/snmp_sess_api.3.def ../sedscript
 	$(SED) -f ../sedscript < $(srcdir)/snmp_sess_api.3.def > snmp_sess_api.3
