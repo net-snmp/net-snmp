@@ -57,8 +57,8 @@ MAN3  = snmp_close.3 snmp_free_pdu.3 snmp_open.3 snmp_read.3 \
 	netsnmp_null_container.3 \
 	netsnmp_tools.h.3
 
-MAN3G = default_store.3 mib_api.3 read_config.3 snmp_agent_api.3 snmp_alarm.3 \
-	snmp_api.3 snmp_sess_api.3 snmp_trap_api.3
+MAN3G = default_store.3 mib_api.3 config_api.3 snmp_agent_api.3 snmp_alarm.3 \
+	session_api.3 snmp_sess_api.3 snmp_trap_api.3 varbind_api.3 pdu_api.3 
 MAN5G = snmpd.conf.5 snmptrapd.conf.5 snmp.conf.5 snmp_config.5 variables.5 \
         mib2c.conf.5 snmpd.examples.5 snmpd.internal.5
 MAN8G = snmptrapd.8 snmpd.8

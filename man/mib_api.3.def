@@ -5,92 +5,87 @@ init_mib, add_mibdir, init_mib_internals,
 add_module_replacement,
 read_module, read_mib, read_all_mibs,
 read_objid, read_module_node, get_module_node,
-snmp_set_mib_warnings, snmp_set_save_descriptions,
+snmp_set_mib_errors, snmp_set_mib_warnings, snmp_set_save_descriptions,
 shutdown_mib,
 print_mib,
-print_variable, fprint_variable, snprint_variable, sprint_realloc_variable,
-print_value, fprint_value, snprint_value, sprint_realloc_value,
-print_objid, fprint_objid, snprint_objid, sprint_realloc_objid,
-print_description, fprint_description - mib_api functions
+print_objid, fprint_objid, snprint_objid,
+print_description, fprint_description, snprint_description - mib_api functions
 .SH SYNOPSIS
 .B #include <net-snmp/mib_api.h>
 .PP
 .B "void init_mib(void);
-.br
+.PP
 .BI "int add_mibdir(const char *" "dirname" );
 .br
-.BI "int add_module_replacement(const char *" "old_module" ", const char *" "new_module" ", const char *" "tag" ", int " "len" );
-.br
 .B "void init_mib_internals(void);
-.br
+.PP
+.B "void shutdown_mib(void);
+.SS Reading and Parsing MIBs
+.PP
 .BI "struct tree *read_module(const char *" "name" );
 .br
 .BI "struct tree *read_mib(const char *" "filename" );
 .br
 .B "struct tree *read_all_mibs(void);
 .PP
-.B "void shutdown_mib(void);
-.PP
-.BI "void print_mib(FILE *" "fp" );
-.PP
-.BI "int read_objid(const char *" "input" ", oid *" "output" ", size_t *" "out_len" );
+.BI "int add_module_replacement(const char *" "old_module" ","
 .br
-.BI "int get_module_node(const char *" "name" ", const char *" "module" ", oid *" "objid" ", size_t *" "objidlen" );
-.PP
-.BI "void print_variable(const oid *" "objid" ", size_t " "objidlen" ", const netsnmp_variable_list *" "variable" );
+.BI "                           const char *" "new_module" ","
 .br
-.BI "void fprint_variable(FILE *" fp ", const oid *" objid ", size_t " objidlen ", const netsnmp_variable_list *" variable );
-.br
-.BI "int snprint_variable(char *" "buf" ", size_t " "len" ", const oid *" "objid" ", size_t " "objidlen" ", const netsnmp_variable_list *" "variable" );
-.br
-.BI "int sprint_realloc_variable(u_char **" buf ", size_t *" buf_len ", size_t *" out_len ", int " allow_realloc ", const oid *" objid ", size_t " objidlen ", const netsnmp_variable_list *" variable );
-.PP
-.BI "void print_value(oid *objid, size_t objidlen, const netsnmp_variable_list *variable)
-.br
-.BI "void fprint_value(FILE *" fp ", const oid *" objid ", size_t " objidlen ", const netsnmp_variable_list *" variable );
-.br
-.BI "int snprint_value(char *" buf ", size_t " "len" ", const oid *" objid ", size_t " objidlen ", const netsnmp_variable_list *" variable );
-.br
-.BI "int sprint_realloc_value(u_char **" buf ", size_t *" buf_len ", size_t *" out_len ", int " allow_realloc ", const oid *" objid ", size_t " objidlen ", const netsnmp_variable_list *" variable );
-.PP
-.BI "void print_objid(const oid *" objid ", size_t " objidlen );
-.br
-.BI "void fprint_objid(FILE *" fp ", const oid *" objid ", size_t " objidlen );
-.br
-.BI "int snprint_objid(char *" buf ", size_t " "len" ", const oid *" objid ", size_t " objidlen );
-.br
-.BI "int sprint_realloc_objid(u_char **" buf ", size_t *" buf_len ", size_t *" out_len ", int "allow_realloc ", const oid *" objid ", size_t " objidlen );
-.PP
-.BI "void print_description(oid *" objid ", size_t " objidlen ", int " width );
-.br
-.BI "void fprint_description(FILE *" fp ", const oid *" objid ", size_t " objidlen ", int " width );
+.BI "                           const char *" "tag" ", int " "len" );
 .PP
 .BI "void snmp_set_mib_warnings(int " level );
 .br
+.BI "void snmp_set_mib_errors(  int " level );
+.br
 .BI "void snmp_set_save_descriptions(int " save ");"
+.SS Searching the MIB Tree
+.PP
+.BI "oid *snmp_parse_oid(const char *" "input" ","
+.br
+.BI "                oid *" "objid" ", size_t *" "objidlen" );
+.br
+.BI "int  read_objid(const char *" "input" ","
+.br
+.BI "                oid *" "objid" ", size_t *" "objidlen" );
+.br
+.BI "int  get_module_node(const char *" "name" ", const char *" "module" ","
+.br
+.BI "                oid *" "objid" ", size_t *" "objidlen" );
+.SS Output
+.PP
+.BI "void  print_mib(FILE *" "fp" );
+.PP
+.BI "void  print_objid(const oid *" objid ", size_t " objidlen );
+.br
+.BI "void fprint_objid(FILE *" fp ","
+.br
+.BI "                  const oid *" objid ", size_t " objidlen ");"
+.br
+.BI "int snprint_objid(char *" buf ", size_t " "len" ","
+.br
+.BI "                  const oid *" objid ", size_t " objidlen ");"
+.PP
+.BI "void  print_description(const oid *" objid ", size_t " objidlen ", int " width );
+.br
+.BI "void fprint_description(FILE *" fp ","
+.br
+.BI "                        const oid *" objid ", size_t " objidlen ", int " width );
+.br
+.BI "int snprint_description(char *" buf ", size_t " "len" ","
+.br
+.BI "                        const oid *" objid ", size_t " objidlen ", int " width );
+.br
 .PP
 .SH DESCRIPTION
-The functions dealing with MIB modules fall into four groups.  Those
-dealing with initialisation and shutdown, those that read in and
-parse MIB files, those that search the MIB tree, and various output
-routines.
+The functions dealing with MIB modules fall into four groups - those
+dealing with initialisation and shutdown, with reading in and parsing
+MIB files, with searching the MIB tree, and output routines.
 .SS Initialisation and Shutdown
-.B init_mib
-is a convenience function that handles all calls to
-.BR add_mibdir ", " read_module " and " read_mib
-for standard applications.  It should be called before any other
-routine that manipulates or accesses the MIB tree.  This routine sets
-up various internal structures, as well as reading in the default MIB
-modules, as detailed below.
 .PP
 .B add_mibdir
 is used to define the range of directory locations which are searched
-for files containing MIB modules (one module per file).  By default,
-this will be set to the directory
-.I DATADIR/mibs
-but this can be overridden by setting the environment variable
-.I MIBDIRS
-to a (colon-separated) list of directories to search.
+for files containing MIB modules.
 Note that this does not actually load the MIB modules located
 in that directory, but is an initialisation step to make them available.
 This function returns a count of files found in the directory, or a -1
@@ -100,11 +95,16 @@ if there is an error.
 sets up the internal structures, preparatory to reading in MIB
 modules.  It should be called after all calls to
 .BR add_mibdir ,
-and before and calls to
+and before any calls to
 .BR read_module .
-This is called automatically if
+.PP
 .B init_mib
-is used.
+is a convenience function that handles all calls to
+.BR add_mibdir ", " read_module " and " read_mib
+for standard applications.  It should be called before any other
+routine that manipulates or accesses the MIB tree.  This routine sets
+up various internal structures, as well as reading in the default MIB
+modules, as detailed below.
 .PP
 .B shutdown_mib
 will clear the information that was gathered by 
@@ -173,6 +173,15 @@ The environment variable
 .I MIBFILES
 can be set to a (colon-separated) list of files containing MIBs to load.
 .PP
+In general the parser is silent about what strangenesses it sees in
+the MIB files. To get warnings reported, call
+.B snmp_set_mib_warnings
+with a
+.I level
+of 1 (or 2 for even more warnings).
+.br
+.SS Searching the MIB Tree
+.PP
 .B read_objid
 takes a string containing a textual version of an object identifier
 (in either numeric or descriptor form), and transforms this into the
@@ -189,7 +198,10 @@ If multiple object identifiers are being processed, then this
 length should be reset before each call.
 This function returns a value of 1 if it succeeds in parsing the string
 and 0 otherwise.
-.SS Searching the MIB Tree
+.PP
+.B snmp_parse_oid
+is similar, but returns a pointer to the parsed OID buffer.
+.PP
 .B get_module_node
 takes a descriptor and the name of a module, and returns the corresponding
 oid list, in the same way as
@@ -206,19 +218,19 @@ dependent.
 will print out a representation of the currently active MIB tree to
 the specified FILE pointer.
 .PP
-.B print_variable
+.B print_objid
 will take an object identifier (as returned by
 .B read_objid
 or
-.BR get_module_node )
-and an instance of such a variable, and prints to the standard output
-the textual form of the object identifier together with the value
-of the variable.
-.B fprint_variable
+.BR get_module_node ),
+and prints to the standard output
+the textual form of this OID.
+.PP
+.B fprint_objid
 does the same, but prints to the FILE pointer specified by the initial
 parameter.
-.br
-.B snprint_variable
+.PP
+.B snprint_objid
 prints the same information into the buffer pointed to by
 .I buf
 which is of length
@@ -227,86 +239,23 @@ and returns either the number of characters printed, or -1 if the
 buffer was not large enough.  In the latter case,
 .I buf
 will typically contained a truncated version of the information (but
-this behaviour is not guaranteed).  This function replaces the
-obsolete function
-.BR sprint_variable .
+this behaviour is not guaranteed).
+.PP
+.BR print_description ,
+.BR fprint_description ,
+and
+.B snprint_description
+take a similar object identifier
+and print out the associated DESCRIPTION clause.
 .br
-.B sprint_realloc_variable
-is the low-level function used to implement all these functions.  It
-prints to a specified offset in a string buffer.  The
-.I buf
-parameter points to a pointer to that buffer;
-.I buf_len
-points to a variable holding the current size of that buffer, and
-.I out_len
-points to a variable holding the offset to which to print.
-.I out_len
-will be updated to hold the offset of the character following the last
-one added to the buffer.  If
-.I allow_realloc
-is 1, the buffer will be dynamically expanded, as necessary, to hold
-the output; the variables pointed to by
-.I buf
-and
-.I buf_len
-will be updated.  If
-.I allow_realloc
-is 0, the buffer will not be dynamically expanded.
-.B sprint_realloc_variable
-returns 0 if
-.I allow_realloc
-is 1 and an attempt to allocate memory to expand the buffer fails, or
-if
-.I allow_realloc
-is 0 and the output wouldn't fit in the buffer.  Otherwise it returns
-1.  When using this function you should be careful to call
-.BR free (3)
-on
-.I *buf
-when you have finished with it.
-.PP
-.BR print_value ,
-.BR fprint_value ,
-.BR snprint_value
-and
-.B sprint_realloc_value
-do the same as the equivalent
-.B print_variable
-routines, but only displaying the value of the variable, without the
-corresponding object identifier.
-.PP
-.BR print_objid ,
-.BR fprint_objid ,
-.BR snprint_objid ,
-and
-.B sprint_realloc_objid
-take an object identifier (without an accompanying variable instance)
-and print out the textual representation.
-.PP
-.B print_description
-and
-.B fprint_description
-take an object identifier (as for
-.B print_objid
-above) and print out the associated DESCRIPTION clause. The 
+The 
 .I width
 argument gives the number of subidentifiers of an OID, e.g., .1.3.6
 is composed of 3 subidentifiers.
 .PP
-Note that there are no corresponding routines
-.B snprint_description
-or
-.BR sprint_realloc_description .
 By default the parser does not save descriptions since they may be
 huge.  In order to be able to print them, you must call
 .BR snmp_set_save_descriptions(1) .
-.PP
-In general the parser is silent about what strangenesses it sees in
-the MIB files. To get warnings reported, call
-.B snmp_set_mib_warnings
-with a
-.I level
-of 1 (or 2 for even more warnings).
 .SH "ENVIRONMENT VARIABLES"
 .TP 10
 MIBDIRS
@@ -321,4 +270,5 @@ MIBS
 A colon separated list of MIB modules to load.
 Default: IP-MIB:IF-MIB:TCP-MIB:UDP-MIB:SNMPv2-MIB:RFC1213-MIB:UCD-SNMP-MIB.
 .SH "SEE ALSO"
-.BR snmp_api "(3)"
+.BR snmp_api "(3),"
+.BR output_api "(3)"
