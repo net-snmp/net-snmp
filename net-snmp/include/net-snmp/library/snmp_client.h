@@ -26,6 +26,11 @@ SOFTWARE.
 #ifndef SNMP_CLIENT_H
 #define SNMP_CLIENT_H
 
+#include <net-snmp/types.h>
+#include <net-snmp/varbind_api.h>
+#include <net-snmp/pdu_api.h>
+#include <net-snmp/session_api.h>
+
 #ifdef __cplusplus
 extern          "C" {
 #endif
@@ -48,17 +53,6 @@ extern          "C" {
         netsnmp_pdu    *pdu;
     };
 
-    int             snmp_set_var_value(netsnmp_variable_list *,
-                                       const void *, size_t);
-    int             snmp_set_var_objid(netsnmp_variable_list * vp,
-                                       const oid * objid,
-                                       size_t name_length);
-    int             snmp_set_var_typed_value(netsnmp_variable_list *
-                                             newvar, u_char type,
-                                             const void * val_str,
-                                             size_t val_len);
-    int             snmp_set_var_typed_integer(netsnmp_variable_list * newvar,
-                                               u_char type, long val);
     void            snmp_replace_var_types(netsnmp_variable_list * vbl,
                                            u_char old_type,
                                            u_char new_type);
@@ -73,30 +67,18 @@ extern          "C" {
     netsnmp_variable_list *find_varbind_in_list(netsnmp_variable_list *vblist,
                                                 oid *name, size_t len);
 
-    netsnmp_variable_list *snmp_add_null_var(netsnmp_pdu *, const oid *, size_t);
-    netsnmp_pdu    *snmp_pdu_create(int);
-    netsnmp_pdu    *snmp_fix_pdu(netsnmp_pdu *, int);
-    netsnmp_pdu    *snmp_clone_pdu(netsnmp_pdu *);
     netsnmp_pdu    *snmp_split_pdu(netsnmp_pdu *, int skipCount,
                                    int copyCount);
 
     unsigned long   snmp_varbind_len(netsnmp_pdu *pdu);
     int             snmp_clone_var(netsnmp_variable_list *,
                                    netsnmp_variable_list *);
-    netsnmp_variable_list *snmp_clone_varbind(netsnmp_variable_list *);
     const char     *snmp_errstring(int);
-    int             snmp_synch_response(netsnmp_session *, netsnmp_pdu *,
-                                        netsnmp_pdu **);
     int             snmp_synch_response_cb(netsnmp_session *,
                                            netsnmp_pdu *, netsnmp_pdu **,
                                            snmp_callback);
     int             snmp_clone_mem(void **, const void *, unsigned);
 
-    /*
-     * single session API - see snmp_api.h for full details 
-     */
-    int             snmp_sess_synch_response(void *, netsnmp_pdu *,
-                                             netsnmp_pdu **);
 
 void              netsnmp_query_set_default_session(netsnmp_session *);
 netsnmp_session * netsnmp_query_get_default_session( void );
