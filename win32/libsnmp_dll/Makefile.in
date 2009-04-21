@@ -76,6 +76,7 @@ CLEAN :
 	-@erase "$(INTDIR)\vc??.idb"
 	-@erase "$(INTDIR)\winpipe.obj"
 	-@erase "$(INTDIR)\fd_event_manager.obj"
+	-@erase "$(INTDIR)\large_fd_set.obj"
 	-@erase "$(INTDIR)\$(PROGNAME).pch"
 	-@erase "..\lib\$(OUTDIR)\netsnmp.exp"
 	-@erase "..\lib\$(OUTDIR)\netsnmp.lib"
@@ -185,7 +186,8 @@ LINK32_OBJS= \
 	"$(INTDIR)\ucd_compat.obj" \
 	"$(INTDIR)\vacm.obj" \
 	"$(INTDIR)\winpipe.obj" \
-	"$(INTDIR)\fd_event_manager.obj"
+	"$(INTDIR)\fd_event_manager.obj" \
+	"$(INTDIR)\large_fd_set.obj"
 
 "..\bin\$(OUTDIR)\netsnmp.dll" : "..\bin\$(OUTDIR)" "..\lib\$(OUTDIR)" $(DEF_FILE) $(LINK32_OBJS)
     $(LINK32) @<<
@@ -253,6 +255,7 @@ CLEAN :
 	-@erase "$(INTDIR)\vc??.pdb"
 	-@erase "$(INTDIR)\winpipe.obj"
 	-@erase "$(INTDIR)\fd_event_manager.obj"
+	-@erase "$(INTDIR)\large_fd_set.obj"
 	-@erase "$(INTDIR)\$(PROGNAME).pch"
 	-@erase "..\lib\$(OUTDIR)\netsnmp.exp"
 	-@erase "..\lib\$(OUTDIR)\netsnmp.lib"
@@ -363,7 +366,8 @@ LINK32_OBJS= \
 	"$(INTDIR)\ucd_compat.obj" \
 	"$(INTDIR)\vacm.obj" \
 	"$(INTDIR)\winpipe.obj" \
-	"$(INTDIR)\fd_event_manager.obj"
+	"$(INTDIR)\fd_event_manager.obj" \
+	"$(INTDIR)\large_fd_set.obj"
 
 "..\bin\$(OUTDIR)\netsnmp.dll" : "..\bin\$(OUTDIR)" "..\lib\$(OUTDIR)" $(DEF_FILE) $(LINK32_OBJS)
     $(LINK32) @<<
@@ -694,9 +698,16 @@ SOURCE=..\..\snmplib\winpipe.c
 "$(INTDIR)\winpipe.obj" : $(SOURCE) "$(INTDIR)"
 	$(CPP) $(CPP_PROJ) $(SOURCE)
 
+
 SOURCE=..\..\snmplib\fd_event_manager.c
 
 "$(INTDIR)\fd_event_manager.obj" : $(SOURCE) "$(INTDIR)"
+	$(CPP) $(CPP_PROJ) $(SOURCE)
+
+
+SOURCE=..\..\snmplib\large_fd_set.c
+
+"$(INTDIR)\large_fd_set.obj" : $(SOURCE) "$(INTDIR)"
 	$(CPP) $(CPP_PROJ) $(SOURCE)
 
 

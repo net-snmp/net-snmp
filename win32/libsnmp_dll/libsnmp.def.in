@@ -454,6 +454,15 @@ EXPORTS
         netsnmp_str_to_uid
         netsnmp_check_vb_truthvalue
         snmp_set_var_typed_integer
+        netsnmp_large_fd_set_cleanup
+        netsnmp_large_fd_set_init
+        netsnmp_large_fd_is_set
+        netsnmp_large_fd_setfd
+        netsnmp_large_fd_clr
+        snmp_read2
+        netsnmp_dispatch_external_events2
+        netsnmp_external_event_info2
+        snmp_select_info2
 ;IPv6        netsnmp_udp6_parse_security
 ;IPv6        netsnmp_udp6_getSecName
 ;IPv6        netsnmp_TCPIPv6Domain
