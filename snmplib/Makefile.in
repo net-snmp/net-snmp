@@ -68,6 +68,7 @@ INCLUDESUBDIRHEADERS=README \
 	snmp.h \
 	snmp_alarm.h \
 	snmp_api.h \
+	large_fd_set.h \
 	snmp_assert.h \
 	snmp_client.h \
 	snmp_debug.h \
@@ -112,6 +113,7 @@ INSTALLUCDHEADERS= asn1.h \
 	scapi.h		\
 	snmp_alarm.h	\
 	snmp_api.h	\
+	large_fd_set.h	\
 	snmp_client.h	\
 	snmp_debug.h	\
 	snmp.h		\
@@ -135,6 +137,7 @@ INSTALLUCDLIBS=libsnmp.$(LIB_EXTENSION)$(LIB_VERSION)
 # Things to build
 #
 CSRCS=	snmp_client.c mib.c parse.c snmp_api.c snmp.c 		\
+	large_fd_set.c						\
 	snmp_auth.c asn1.c md5.c snmp_parse_args.c		\
 	system.c vacm.c int64.c read_config.c pkcs.c		\
 	snmp_debug.c tools.c  snmp_logging.c text_utils.c	\
@@ -150,6 +153,7 @@ CSRCS=	snmp_client.c mib.c parse.c snmp_api.c snmp.c 		\
 	cmu_compat.c ucd_compat.c snmp_openssl.c @other_src_list@
 
 OBJS=	snmp_client.o mib.o parse.o snmp_api.o snmp.o 		\
+	large_fd_set.o						\
 	snmp_auth.o asn1.o md5.o snmp_parse_args.o		\
 	system.o vacm.o int64.o read_config.o pkcs.o 		\
 	snmp_debug.o tools.o  snmp_logging.o text_utils.o	\
@@ -165,6 +169,7 @@ OBJS=	snmp_client.o mib.o parse.o snmp_api.o snmp.o 		\
 	cmu_compat.o ucd_compat.o snmp_openssl.o @other_objs_list@
 
 LOBJS=	snmp_client.lo mib.lo parse.lo snmp_api.lo snmp.lo 	\
+	large_fd_set.lo						\
 	snmp_auth.lo asn1.lo md5.lo snmp_parse_args.lo		\
 	system.lo vacm.lo int64.lo read_config.lo pkcs.lo	\
 	snmp_debug.lo tools.lo  snmp_logging.lo	 text_utils.lo	\
