@@ -22,7 +22,7 @@
 .TH SNMP_API 3 "21 Oct 1999" VVERSIONINFO "Net-SNMP"
 .UC 5
 .SH NAME
-snmp_sess_init, snmp_open, snmp_send, snmp_free_pdu, snmp_select_info, snmp_read, snmp_timeout, snmp_close, snmp_perror, snmp_sess_perror, snmp_error, snmp_api_errstring \- send and receive SNMP messages
+snmp_sess_init, snmp_open, snmp_send, snmp_select_info, snmp_read, snmp_timeout, snmp_close, snmp_perror, snmp_sess_perror, snmp_error, snmp_api_errstring \- send and receive SNMP messages
 .SH SYNOPSIS
 #include <net-snmp/session_api.h>
 .PP
@@ -48,9 +48,6 @@ void snmp_read ( fd_set *fdset );
 void snmp_timeout ( void );
 .PP
 int snmp_close ( struct snmp_session *session );
-.PP
-void snmp_free_pdu (
-struct snmp_pdu *pdu );
 .PP
 void snmp_error (
 struct snmp_session *session,
@@ -87,9 +84,7 @@ object, which the application must use to reference the
 active SNMP session.
 .PP
 .I Snmp_send
-and
-.I snmp_free_pdu
-each take as input a pointer to a
+takes as input a pointer to a
 .I struct snmp_pdu
 object.
 This structure contains information that describes a transaction
