@@ -7,6 +7,9 @@
 #include <net-snmp/library/snmp_api.h>
 #include <net-snmp/library/fd_event_manager.h>
 #include <net-snmp/library/snmp_logging.h>
+#include <net-snmp/library/large_fd_set.h>
+
+
 int     external_readfd[NUM_EXTERNAL_FDS],   external_readfdlen   = 0;
 int     external_writefd[NUM_EXTERNAL_FDS],  external_writefdlen  = 0;
 int     external_exceptfd[NUM_EXTERNAL_FDS], external_exceptfdlen = 0;
@@ -180,6 +183,32 @@ void netsnmp_external_event_info(int *numfds, fd_set *readfds, fd_set *writefds,
   }
 }
 
+void netsnmp_external_event_info2(int *numfds,
+                                  netsnmp_large_fd_set *readfds,
+                                  netsnmp_large_fd_set *writefds,
+                                  netsnmp_large_fd_set *exceptfds)
+{
+  int i;
+
+  external_fd_unregistered = 0;
+
+  for (i = 0; i < external_readfdlen; i++) {
+    NETSNMP_LARGE_FD_SET(external_readfd[i], readfds);
+    if (external_readfd[i] >= *numfds)
+      *numfds = external_readfd[i] + 1;
+  }
+  for (i = 0; i < external_writefdlen; i++) {
+    NETSNMP_LARGE_FD_SET(external_writefd[i], writefds);
+    if (external_writefd[i] >= *numfds)
+      *numfds = external_writefd[i] + 1;
+  }
+  for (i = 0; i < external_exceptfdlen; i++) {
+    NETSNMP_LARGE_FD_SET(external_exceptfd[i], exceptfds);
+    if (external_exceptfd[i] >= *numfds)
+      *numfds = external_exceptfd[i] + 1;
+  }
+}
+
 /* 
  * NET-SNMP Dispatch External Events 
  */
@@ -216,6 +245,47 @@ void netsnmp_dispatch_external_events(int *count, fd_set *readfds, fd_set *write
           external_exceptfdfunc[i] (external_exceptfd[i],
                                     external_exceptfd_data[i]);
           FD_CLR(external_exceptfd[i], exceptfds);
+          (*count)--;
+      }
+  }
+}
+
+void netsnmp_dispatch_external_events2(int *count,
+                                       netsnmp_large_fd_set *readfds,
+                                       netsnmp_large_fd_set *writefds,
+                                       netsnmp_large_fd_set *exceptfds)
+{
+  int i;
+  for (i = 0;
+       *count && (i < external_readfdlen) && !external_fd_unregistered; i++) {
+      if (NETSNMP_LARGE_FD_ISSET(external_readfd[i], readfds)) {
+          DEBUGMSGTL(("fd_event_manager:netsnmp_dispatch_external_events", 
+                     "readfd[%d] = %d\n", i, external_readfd[i]));
+          external_readfdfunc[i] (external_readfd[i],
+                                  external_readfd_data[i]);
+          NETSNMP_LARGE_FD_CLR(external_readfd[i], readfds);
+          (*count)--;
+      }
+  }
+  for (i = 0;
+       *count && (i < external_writefdlen) && !external_fd_unregistered; i++) {
+      if (NETSNMP_LARGE_FD_ISSET(external_writefd[i], writefds)) {
+          DEBUGMSGTL(("fd_event_manager:netsnmp_dispatch_external_events", 
+                     "writefd[%d] = %d\n", i, external_writefd[i]));
+          external_writefdfunc[i] (external_writefd[i],
+                                   external_writefd_data[i]);
+          NETSNMP_LARGE_FD_CLR(external_writefd[i], writefds);
+          (*count)--;
+      }
+  }
+  for (i = 0;
+       *count && (i < external_exceptfdlen) && !external_fd_unregistered; i++) {
+      if (NETSNMP_LARGE_FD_ISSET(external_exceptfd[i], exceptfds)) {
+          DEBUGMSGTL(("fd_event_manager:netsnmp_dispatch_external_events", 
+                     "exceptfd[%d] = %d\n", i, external_exceptfd[i]));
+          external_exceptfdfunc[i] (external_exceptfd[i],
+                                    external_exceptfd_data[i]);
+          NETSNMP_LARGE_FD_CLR(external_exceptfd[i], exceptfds);
           (*count)--;
       }
   }
