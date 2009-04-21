@@ -87,6 +87,8 @@ extern          "C" {
      */
     void            snmp_read(fd_set *);
 
+    void            snmp_read2(netsnmp_large_fd_set *);
+
 
     int             snmp_synch_response(netsnmp_session *, netsnmp_pdu *,
                                         netsnmp_pdu **);
@@ -121,6 +123,8 @@ extern          "C" {
     int             snmp_select_info(int *, fd_set *, struct timeval *,
                                      int *);
 
+    int             snmp_select_info2(int *, netsnmp_large_fd_set *,
+                                      struct timeval *, int *);
 
 
     /*
@@ -196,7 +200,12 @@ extern          "C" {
                                          netsnmp_callback, void *);
     int             snmp_sess_select_info(void *, int *, fd_set *,
                                           struct timeval *, int *);
+    int             snmp_sess_select_info2(void *, int *,
+					   netsnmp_large_fd_set *,
+                                           struct timeval *, int *);
     int             snmp_sess_read(void *, fd_set *);
+    int             snmp_sess_read2(void *,
+                                    netsnmp_large_fd_set *);
     void            snmp_sess_timeout(void *);
     int             snmp_sess_close(void *);
 

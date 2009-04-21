@@ -127,6 +127,7 @@ SOFTWARE.
 #include <net-snmp/library/callback.h>
 #include <net-snmp/library/container.h>
 #include <net-snmp/library/snmp_secmod.h>
+#include <net-snmp/library/large_fd_set.h>
 #ifdef NETSNMP_SECMOD_USM
 #include <net-snmp/library/snmpusm.h>
 #endif
@@ -5621,10 +5622,21 @@ _sess_process_packet(void *sessp, netsnmp_session * sp,
 void
 snmp_read(fd_set * fdset)
 {
+    netsnmp_large_fd_set lfdset;
+
+    netsnmp_large_fd_set_init(&lfdset, FD_SETSIZE);
+    *lfdset.lfs_setptr = *fdset;
+    snmp_read2(&lfdset);
+    netsnmp_large_fd_set_cleanup(&lfdset);
+}
+
+void
+snmp_read2(netsnmp_large_fd_set * fdset)
+{
     struct session_list *slp;
     snmp_res_lock(MT_LIBRARY_ID, MT_LIB_SESSION);
     for (slp = Sessions; slp; slp = slp->next) {
-        snmp_sess_read((void *) slp, fdset);
+        snmp_sess_read2((void *) slp, fdset);
     }
     snmp_res_unlock(MT_LIBRARY_ID, MT_LIB_SESSION);
 }
@@ -5636,7 +5648,7 @@ snmp_read(fd_set * fdset)
  * Beware recursive send maybe inside snmp_read callback function. 
  */
 int
-_sess_read(void *sessp, fd_set * fdset)
+_sess_read(void *sessp, netsnmp_large_fd_set * fdset)
 {
     struct session_list *slp = (struct session_list *) sessp;
     netsnmp_session *sp = slp ? slp->session : NULL;
@@ -5657,18 +5669,16 @@ _sess_read(void *sessp, fd_set * fdset)
         snmp_log (LOG_INFO, "transport->sock got negative fd value %d\n", transport->sock);
         return 0; 
     }
-#ifdef FD_SETSIZE
-    /* fd_sets can only handle so many sockets */
-    if (transport->sock >= FD_SETSIZE) {
+    if (transport->sock >= fdset->lfs_setsize) { 
         snmp_log (LOG_INFO, "transport->sock got too large fd value %d\n", transport->sock);
         return 0; 
     }
-#endif
 
-    if (!fdset || !(FD_ISSET(transport->sock, fdset))) {
+    if (!fdset || !(NETSNMP_LARGE_FD_ISSET(transport->sock, fdset))) {
         DEBUGMSGTL(("sess_read", "not reading %d (fdset %p set %d)\n",
                     transport->sock, fdset,
-                    fdset ? FD_ISSET(transport->sock, fdset) : -9));
+                    fdset ? NETSNMP_LARGE_FD_ISSET(transport->sock, fdset)
+		    : -9));
         return 0;
     }
 
@@ -6021,6 +6031,19 @@ _sess_read(void *sessp, fd_set * fdset)
 int
 snmp_sess_read(void *sessp, fd_set * fdset)
 {
+  int rc;
+  netsnmp_large_fd_set lfdset;
+  
+  netsnmp_large_fd_set_init(&lfdset, FD_SETSIZE);
+  *lfdset.lfs_setptr = *fdset;
+  rc = snmp_sess_read2(sessp, &lfdset);
+  netsnmp_large_fd_set_cleanup(&lfdset);
+  return rc;
+}
+
+int
+snmp_sess_read2(void *sessp, netsnmp_large_fd_set * fdset)
+{
     struct session_list *psl;
     netsnmp_session *pss;
     int             rc;
@@ -6072,6 +6095,21 @@ snmp_select_info(int *numfds,
                                  block);
 }
 
+int
+snmp_select_info2(int *numfds,
+                  netsnmp_large_fd_set * fdset,
+		  struct timeval *timeout, int *block)
+    /*
+     * input:  set to 1 if input timeout value is undefined  
+     * set to 0 if input timeout value is defined    
+     * output: set to 1 if output timeout value is undefined 
+     * set to 0 if output rimeout vlaue id defined   
+     */
+{
+    return snmp_sess_select_info2((void *) 0, numfds, fdset, timeout,
+                                  block);
+}
+
 /*
  * Same as snmp_select_info, but works just one session. 
  */
@@ -6079,6 +6117,23 @@ int
 snmp_sess_select_info(void *sessp,
                       int *numfds,
                       fd_set * fdset, struct timeval *timeout, int *block)
+{
+  int rc;
+  netsnmp_large_fd_set lfdset;
+
+  netsnmp_large_fd_set_init(&lfdset, FD_SETSIZE);
+  *lfdset.lfs_setptr = *fdset;
+  rc = snmp_sess_select_info2(sessp, numfds, &lfdset, timeout, block);
+  *fdset = *lfdset.lfs_setptr;
+  netsnmp_large_fd_set_cleanup(&lfdset);
+  return rc;
+}
+
+int
+snmp_sess_select_info2(void *sessp,
+                       int *numfds,
+                       netsnmp_large_fd_set * fdset,
+		       struct timeval *timeout, int *block)
 {
     struct session_list *slptest = (struct session_list *) sessp;
     struct session_list *slp, *next = NULL;
@@ -6131,22 +6186,16 @@ snmp_sess_select_info(void *sessp,
         }
 
         DEBUGMSG(("sess_select", "%d ", slp->transport->sock));
-
-#ifdef FD_SETSIZE
-        if (slp->transport->sock >= FD_SETSIZE) {
-            /*
-             *  fd_sets can only handle so many sockets
-             */
-            DEBUGMSGTL(("sess_select", "Transport socket too big - skipping"));
-            continue;
+        if (slp->transport->sock >= fdset->lfs_setsize) { 
+            DEBUGMSGTL(("sess_select", "too big - skipping"));
+            continue; 
         }
-#endif
 
         if ((slp->transport->sock + 1) > *numfds) {
             *numfds = (slp->transport->sock + 1);
         }
 
-        FD_SET(slp->transport->sock, fdset);
+        NETSNMP_LARGE_FD_SET(slp->transport->sock, fdset);
         if (slp->internal != NULL && slp->internal->requests) {
             /*
              * Found another session with outstanding requests.  
