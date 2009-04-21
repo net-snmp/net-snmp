@@ -382,21 +382,6 @@ struct snmp_session {
 };
 
 
-/**
- * Structure for holding a set of file descriptors, similar to fd_set.
- *
- * Notes:
- * - On Unix systems, lfs_setsize is one more than the largest file
- *   descriptor that lfs_set can contain. On Windows systems,
- *   lfs_setsize is the maximum number of file descriptors that lfs_set
- *   can contain.
- * - The memory allocated for lfs_set may be larger than an fd_set.
- */
-typedef struct netsnmp_fd_set_s {
-  unsigned lfs_setsize;
-  fd_set   lfs_set;
-} netsnmp_fd_set;
-
 #include <net-snmp/definitions.h>
 #include <net-snmp/library/snmp_api.h>
 
