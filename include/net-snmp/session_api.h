@@ -86,7 +86,6 @@ extern          "C" {
      * routine returns successfully, the pdu and it's request are deleted.
      */
     void            snmp_read(fd_set *);
-    void         netsnmp_read(netsnmp_fd_set *);
 
 
     int             snmp_synch_response(netsnmp_session *, netsnmp_pdu *,
@@ -197,10 +196,7 @@ extern          "C" {
                                          netsnmp_callback, void *);
     int             snmp_sess_select_info(void *, int *, fd_set *,
                                           struct timeval *, int *);
-    int          netsnmp_sess_select_info(void *, int *, netsnmp_fd_set *,
-                                          struct timeval *, int *);
     int             snmp_sess_read(void *, fd_set *);
-    int          netsnmp_sess_read(void *, netsnmp_fd_set *);
     void            snmp_sess_timeout(void *);
     int             snmp_sess_close(void *);
 
