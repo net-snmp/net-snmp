@@ -869,6 +869,7 @@ nari_setValue(me, type, value)
 		snmp_log(LOG_ERR, "Non-unsigned-integer value passed to setValue with ASN_UNSIGNED/ASN_COUNTER/ASN_TIMETICKS: type was %d\n",
 			SvTYPE(value));
 		RETVAL = 0;
+          case ASN_OPAQUE:
 		break;
 	      }
 
