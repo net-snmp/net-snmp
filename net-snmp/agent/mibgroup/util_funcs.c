@@ -1045,23 +1045,8 @@ Retrieve_Table_Data(mib_table_t t, int *max_idx)
 
 #ifdef linux
 # define PROC_PATH          "/proc"
-# define FILE_DISP          "fd/"
 # define SOCKET_TYPE_1      "socket:["
 # define SOCKET_TYPE_2      "[0000]:"
-
-unsigned long long
-extract_inode(char *format)
-{
-    unsigned long long ret = 0;
-
-    if (!strncmp(format, SOCKET_TYPE_1, 8)) {
-        ret = strtoull(format + 8, NULL, 0);
-    } else if (!strncmp(format, SOCKET_TYPE_2, 7)) {
-        ret = strtoull(format + 7, NULL, 0);
-    }
-
-    return ret;
-}
 
 unsigned int
 get_pid_from_inode(unsigned long long inode)
@@ -1091,7 +1076,7 @@ get_pid_from_inode(unsigned long long inode)
 
         memset(path_name, '\0', PATH_MAX + 1);
         filelen = snprintf(path_name, PATH_MAX,
-                           PROC_PATH "/%s/" FILE_DISP, procinfo->d_name);
+                           PROC_PATH "/%s/fd/", procinfo->d_name);
         if (filelen <= 0 || PATH_MAX < filelen)
             continue;
 
@@ -1112,7 +1097,12 @@ get_pid_from_inode(unsigned long long inode)
                 continue;
             socket_lnk[readlen] = '\0';
 
-            temp_inode = extract_inode(socket_lnk);
+            if (!strncmp(socket_lnk, SOCKET_TYPE_1, 8)) {
+                temp_inode = strtoull(socket_lnk + 8, NULL, 0);
+            } else if (!strncmp(socket_lnk, SOCKET_TYPE_2, 7)) {
+                temp_inode = strtoull(socket_lnk + 7, NULL, 0);
+            } else
+		temp_inode = 0;
             if (inode == temp_inode) {
                 iflag = 1;
                 break;
