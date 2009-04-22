@@ -244,7 +244,7 @@ IF-INVERTED-STACK-MIB
 ------------------------------------------------------------------------------
 RMON-MIB
  etherStatsTable              U         5.0     O Rmon/statistics.c
- .etherStatsJabbers           L         5.5     M rmon-mib/=/*
+ .etherStatsJabbers           L3        5.5     M rmon-mib/=/*
  etherHistoryControlTable     U         5.0     O Rmon/history.c
  etherHistoryTable            U         5.0     O Rmon/history.c
  alarmTable                   U         3.2     O Rmon/alarm.c
@@ -434,6 +434,7 @@ Misc notes
 ----------
  1: available for systems using KAME ipv6
  2: with platform SDK. See README.win32
+ 3: works only with Intel and Broadcom network cards and must run as root only
 
 Other feature info
 ------------------
