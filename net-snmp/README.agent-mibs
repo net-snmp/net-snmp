@@ -244,6 +244,7 @@ IF-INVERTED-STACK-MIB
 ------------------------------------------------------------------------------
 RMON-MIB
  etherStatsTable              U         5.0     O Rmon/statistics.c
+ .etherStatsJabbers           L         5.5     M rmon-mib/=/*
  etherHistoryControlTable     U         5.0     O Rmon/history.c
  etherHistoryTable            U         5.0     O Rmon/history.c
  alarmTable                   U         3.2     O Rmon/alarm.c
