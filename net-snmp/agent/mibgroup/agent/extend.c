@@ -1242,7 +1242,7 @@ _extend_find_entry( netsnmp_request_info       *request,
             snmp_set_var_value( table_info->indexes,
                                 eptr->token, strlen(eptr->token));
             snmp_set_var_value( table_info->indexes->next_variable,
-                                &line_idx, sizeof(line_idx));
+                                (const u_char*)&line_idx, sizeof(line_idx));
         }
         return eptr;  /* Finally, signal success */
     }

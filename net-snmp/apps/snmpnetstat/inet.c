@@ -158,14 +158,14 @@ tcpprotopr(const char *name)
         cp[2] = vp->name[ 12 ] & 0xff;
         cp[3] = vp->name[ 13 ] & 0xff;
         localAddr.s_addr = tmpAddr.addr.s_addr;
-        localPort        = ntohs(vp->name[ 14 ]);
+        localPort        = ntohs((u_short)(vp->name[ 14 ]));
         cp = tmpAddr.data;
         cp[0] = vp->name[ 15 ] & 0xff;
         cp[1] = vp->name[ 16 ] & 0xff;
         cp[2] = vp->name[ 17 ] & 0xff;
         cp[3] = vp->name[ 18 ] & 0xff;
         remoteAddr.s_addr = tmpAddr.addr.s_addr;
-        remotePort        = ntohs(vp->name[ 19 ]);
+        remotePort        = ntohs((u_short)(vp->name[ 19 ]));
 
         printf("%-5.5s", name);
         inetprint(&localAddr,  localPort,  name, 1);
@@ -223,7 +223,7 @@ udpprotopr(const char *name)
         cp[2] = vp->name[ 12 ] & 0xff;
         cp[3] = vp->name[ 13 ] & 0xff;
         localAddr.s_addr = tmpAddr.addr.s_addr;
-        localPort        = ntohs( vp->name[ 14 ]);
+        localPort        = ntohs( (u_short)(vp->name[ 14 ]));
         inetprint(&localAddr, localPort, name, 1);
         putchar('\n');
     }
