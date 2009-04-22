@@ -5669,10 +5669,6 @@ _sess_read(void *sessp, netsnmp_large_fd_set * fdset)
         snmp_log (LOG_INFO, "transport->sock got negative fd value %d\n", transport->sock);
         return 0; 
     }
-    if (transport->sock >= fdset->lfs_setsize) { 
-        snmp_log (LOG_INFO, "transport->sock got too large fd value %d\n", transport->sock);
-        return 0; 
-    }
 
     if (!fdset || !(NETSNMP_LARGE_FD_ISSET(transport->sock, fdset))) {
         DEBUGMSGTL(("sess_read", "not reading %d (fdset %p set %d)\n",
@@ -6186,11 +6182,6 @@ snmp_sess_select_info2(void *sessp,
         }
 
         DEBUGMSG(("sess_select", "%d ", slp->transport->sock));
-        if (slp->transport->sock >= fdset->lfs_setsize) { 
-            DEBUGMSGTL(("sess_select", "too big - skipping"));
-            continue; 
-        }
-
         if ((slp->transport->sock + 1) > *numfds) {
             *numfds = (slp->transport->sock + 1);
         }
