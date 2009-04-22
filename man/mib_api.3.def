@@ -227,12 +227,10 @@ this behaviour is not guaranteed).
 and
 .B snprint_description
 take a similar object identifier
-and print out the associated DESCRIPTION clause.
-.br
-The 
+and print out a version of the MIB definition for that object,
+together with the full OID. The
 .I width
-argument gives the number of subidentifiers of an OID, e.g., .1.3.6
-is composed of 3 subidentifiers.
+argument controls how the OID is layed out.
 .PP
 By default the parser does not save descriptions since they may be
 huge.  In order to be able to print them, it is necessary to invoke
