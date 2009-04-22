@@ -283,20 +283,18 @@ and
 take an object identifier (without an accompanying variable instance)
 and print out the textual representation.
 .PP
-.B print_description
+.BI print_description ,
+.BI fprint_description ,
+.BI snprint_description ,
 and
-.B fprint_description
+.B sprint_realloc_description
 take an object identifier (as for
 .B print_objid
-above) and print out the associated DESCRIPTION clause. The 
+above) and print out a version of the MIB definition for that object,
+together with the full OID. The
 .I width
-argument gives the number of subidentifiers of an OID, e.g., .1.3.6
-is composed of 3 subidentifiers.
+argument controls how the OID is layed out.
 .PP
-Note that there are no corresponding routines
-.B snprint_description
-or
-.BR sprint_realloc_description .
 By default the parser does not save descriptions since they may be
 huge.  In order to be able to print them, you must call
 .BR snmp_set_save_descriptions(1) .
