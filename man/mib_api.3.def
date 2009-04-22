@@ -2,11 +2,11 @@
 .UC 5
 .SH NAME
 init_mib, add_mibdir, init_mib_internals,
-add_module_replacement,
-read_module, read_mib, read_all_mibs,
-read_objid, read_module_node, get_module_node,
-snmp_set_mib_errors, snmp_set_mib_warnings, snmp_set_save_descriptions,
 shutdown_mib,
+netsnmp_read_module, read_mib, read_all_mibs,
+add_module_replacement,
+read_objid, snmp_parse_oid, get_module_node,
+snmp_set_mib_errors, snmp_set_mib_warnings, snmp_set_save_descriptions,
 print_mib,
 print_objid, fprint_objid, snprint_objid,
 print_description, fprint_description, snprint_description - mib_api functions
@@ -22,7 +22,7 @@ print_description, fprint_description, snprint_description - mib_api functions
 .B "void shutdown_mib(void);
 .SS Reading and Parsing MIBs
 .PP
-.BI "struct tree *read_module(const char *" "name" );
+.BI "struct tree *netsnmp_read_module(const char *" "name" );
 .br
 .BI "struct tree *read_mib(const char *" "filename" );
 .br
@@ -41,11 +41,11 @@ print_description, fprint_description, snprint_description - mib_api functions
 .BI "void snmp_set_save_descriptions(int " save ");"
 .SS Searching the MIB Tree
 .PP
-.BI "oid *snmp_parse_oid(const char *" "input" ","
+.BI "int  read_objid(const char *" "input" ","
 .br
 .BI "                oid *" "objid" ", size_t *" "objidlen" );
 .br
-.BI "int  read_objid(const char *" "input" ","
+.BI "oid *snmp_parse_oid(const char *" "input" ","
 .br
 .BI "                oid *" "objid" ", size_t *" "objidlen" );
 .br
@@ -84,38 +84,67 @@ MIB files, with searching the MIB tree, and output routines.
 .SS Initialisation and Shutdown
 .PP
 .B add_mibdir
-is used to define the range of directory locations which are searched
-for files containing MIB modules.
+is used to add the specified directory to the path of locations which are
+searched for files containing MIB modules.
 Note that this does not actually load the MIB modules located
-in that directory, but is an initialisation step to make them available.
+in that directory, but is simply an initialisation step to make
+them available to
+.BR netsnmp_read_module .
 This function returns a count of files found in the directory, or a -1
 if there is an error.  
 .PP
 .B init_mib_internals
 sets up the internal structures, preparatory to reading in MIB
-modules.  It should be called after all calls to
+modules.  It should be called \fIafter\fP all calls to
 .BR add_mibdir ,
 and before any calls to
-.BR read_module .
+.BR netsnmp_read_module .
 .PP
 .B init_mib
-is a convenience function that handles all calls to
-.BR add_mibdir ", " read_module " and " read_mib
-for standard applications.  It should be called before any other
-routine that manipulates or accesses the MIB tree.  This routine sets
-up various internal structures, as well as reading in the default MIB
-modules, as detailed below.
+is a convenience function that configures the MIB directory search path (using
+.B add_mibdir
+), set up the internal MIB framework (using
+.B init_mib_internals
+), and then loads the appropriate MIB modules (using
+.BR netsnmp_read_module " and " read_mib ")."
+See the ENVIRONMENTAL VARIABLES section for details.
+.br
+It should be called before any other
+routine that manipulates or accesses the MIB tree.
 .PP
 .B shutdown_mib
 will clear the information that was gathered by 
-.BR read_module ", " add_mibdir " and " add_module_replacement .
+.BR netsnmp_read_module ", " add_mibdir " and " add_module_replacement .
 It is strongly recommended that one does not invoke
 .BR shutdown_mib
 while there are SNMP sessions being actively managed.
 .SS Reading and Parsing MIBs
+.PP
+.B netsnmp_read_module
+takes the name of a MIB module (which need not be the same as the
+name of the file that contains the module), locates this within the
+configured list of MIB directories, and loads the definitions from
+the module into the active MIB tree.
+It also loads any MIB modules listed in the IMPORTS clause of this module.
+.PP
+.B read_mib
+is similar, but takes the name of the file containing the MIB module.
+Note that this file need not be located within the MIB directory
+search list (although any modules listed in the IMPORTS clause do).
+.PP
+.B read_all_mibs
+will read in all the MIB modules found on the MIB directory search list.
+.PP
+In general the parser is silent about what strangenesses it sees in
+the MIB files. To get warnings reported, call
+.B snmp_set_mib_warnings
+with a
+.I level
+of 1 (or 2 for even more warnings).
+.PP
 .B add_module_replacement
 can be used to allow new MIB modules to obsolete older ones, without
-needing to amend the imports clauses of other modules.  It takes the
+needing to amend the IMPORTS clauses of other modules.  It takes the
 names of the old and new modules, together with an indication of which
 portions of the old module are affected.
 .RS
@@ -130,56 +159,10 @@ name + non-0 + for any identifier with this prefix
 .TE
 .RE
 It can also be used to handle errors in the module identifiers used
-in MIB import clauses (such as referring to
+in MIB IMPORTS clauses (such as referring to
 .I RFC1213
 instead of
 .IR RFC1213-MIB ).
-.PP
-.B read_module
-locates and parses the module specified, together with any modules
-that it imports from, and adds the contents of these modules to the
-active MIB tree.  Note that
-.B add_mibdir
-must first be called to add the directory containing the file with the
-module definition, if this is not in the standard path.
-.br
-By default, the following MIB modules will be loaded:  IP-MIB, IF-MIB,
-TCP-MIB, UDP-MIB, SNMPv2-MIB, RFC1213-MIB, UCD-SNMP-MIB.
-This can be overridden by setting the environment variable
-.I MIBS
-to a (colon-separated) list of modules to load.
-If this variable starts with a plus character, then the specified modules
-are added to the default list.  Otherwise only those modules listed are
-loaded (together with any others they import from).
-If
-.I MIBS
-is set to
-.IR ALL ,
-.B read_all_mibs
-is called to load all the MIB files found in all the specified
-.IR MIBDIRS .
-.PP
-.B read_mib
-parses the file specified, together with any modules that it imports
-from, and adds the contents to the active MIB tree.  Such a file can
-contain more then one module, though care must be taken that any
-imports occur earlier in the file, if they are not to be read from the
-installed modules.  Note that the file specified does not need to be
-in any of the directories initialised by
-.B add_mibdir
-(or the default setup), though any imported modules do.
-.br
-The environment variable
-.I MIBFILES
-can be set to a (colon-separated) list of files containing MIBs to load.
-.PP
-In general the parser is silent about what strangenesses it sees in
-the MIB files. To get warnings reported, call
-.B snmp_set_mib_warnings
-with a
-.I level
-of 1 (or 2 for even more warnings).
-.br
 .SS Searching the MIB Tree
 .PP
 .B read_objid
@@ -200,7 +183,7 @@ This function returns a value of 1 if it succeeds in parsing the string
 and 0 otherwise.
 .PP
 .B snmp_parse_oid
-is similar, but returns a pointer to the parsed OID buffer.
+is similar, but returns a pointer to the parsed OID buffer (or NULL).
 .PP
 .B get_module_node
 takes a descriptor and the name of a module, and returns the corresponding
@@ -213,6 +196,7 @@ assume that the descriptor given is unique within the tree, and will
 return the matching entry.  If this assumption is invalid, then the
 behaviour as to which variable is returned is implementation
 dependent.
+.br
 .SS Output
 .B print_mib
 will print out a representation of the currently active MIB tree to
@@ -220,11 +204,8 @@ the specified FILE pointer.
 .PP
 .B print_objid
 will take an object identifier (as returned by
-.B read_objid
-or
-.BR get_module_node ),
-and prints to the standard output
-the textual form of this OID.
+.BR read_objid ", " snmp_parse_oid " or " get_module_node "),"
+and prints the textual form of this OID to the standard output.
 .PP
 .B fprint_objid
 does the same, but prints to the FILE pointer specified by the initial
@@ -234,11 +215,11 @@ parameter.
 prints the same information into the buffer pointed to by
 .I buf
 which is of length
-.IR len 
-and returns either the number of characters printed, or -1 if the
+.IR len .
+It returns the number of characters printed, or -1 if the
 buffer was not large enough.  In the latter case,
 .I buf
-will typically contained a truncated version of the information (but
+will typically contain a truncated version of the information (but
 this behaviour is not guaranteed).
 .PP
 .BR print_description ,
@@ -254,21 +235,60 @@ argument gives the number of subidentifiers of an OID, e.g., .1.3.6
 is composed of 3 subidentifiers.
 .PP
 By default the parser does not save descriptions since they may be
-huge.  In order to be able to print them, you must call
-.BR snmp_set_save_descriptions(1) .
+huge.  In order to be able to print them, it is necessary to invoke
+.BI snmp_set_save_descriptions(1) before
+calling
+.B init_mib
+(or similar).
 .SH "ENVIRONMENT VARIABLES"
+.PP
+The main use of environmental variables with respect to these API calls
+is to configure which MIB modules should be loaded, and where they are
+located.
 .TP 10
 MIBDIRS
 A colon separated list of directories to search for MIB modules.
+.br
 Default: DATADIR/snmp/mibs
-.TP 10
-MIBFILES
-A colon separated list of files to load.
-Default: (none)
+.br
+Used by
+.BR init_mib ", " netsnmp_read_module ", " read_all_mibs
+and (implicitly) by
+.BR read_mib .
 .TP 10
 MIBS
 A colon separated list of MIB modules to load.
-Default: IP-MIB:IF-MIB:TCP-MIB:UDP-MIB:SNMPv2-MIB:RFC1213-MIB:UCD-SNMP-MIB.
+.br
+The default list of modules will depend on how the Net-SNMP software
+was originally compiled, but is typically:
+IP-MIB:IF-MIB:TCP-MIB:UDP-MIB:SNMPv2-MIB:RFC1213-MIB:UCD-SNMP-MIB:HOST-RESOURCES-MIB
+.IP
+If the value of the
+.B MIBS
+environmental variable starts with a '+' character,
+then these MIB modules will be added to the default list.
+Otherwise these modules (plus any that they IMPORT from) will be loaded
+.I instead
+of the default list.
+.IP
+If the 
+.B MIBS
+environmental variable has the value
+.BR ALL " then " read_all_mibs
+will be called to load the full collection of all available MIB modules.
+.IP
+Used by
+.B init_mib
+only.
+.TP 10
+MIBFILES
+A colon separated list of files to load.
+.br
+Default: (none)
+.br
+Used by
+.B init_mib
+only.
 .SH "SEE ALSO"
 .BR snmp_api "(3),"
 .BR output_api "(3)"
