@@ -68,6 +68,9 @@ static char *rcsid = "$OpenBSD: route.c,v 1.66 2004/11/17 01:47:20 itojun Exp $"
 
 #include "main.h"
 #include "netstat.h"
+#if HAVE_WINSOCK_H
+#include "winstub.h"
+#endif
 
 #define SET_MASK 0x01
 #define SET_GWAY 0x02

@@ -46,9 +46,9 @@ extern char *print_format2;
 #define NETSNMPTRAPD_HANDLER_FINISH  4	/* No further processing */
 
 void snmptrapd_register_configs( void );
-netsnmp_trapd_handler *netsnmp_add_global_traphandler(int list, Netsnmp_Trap_Handler handler);
-netsnmp_trapd_handler *netsnmp_add_default_traphandler(Netsnmp_Trap_Handler handler);
-netsnmp_trapd_handler *netsnmp_add_traphandler(Netsnmp_Trap_Handler handler,
+netsnmp_trapd_handler *netsnmp_add_global_traphandler(int list, Netsnmp_Trap_Handler* handler);
+netsnmp_trapd_handler *netsnmp_add_default_traphandler(Netsnmp_Trap_Handler* handler);
+netsnmp_trapd_handler *netsnmp_add_traphandler(Netsnmp_Trap_Handler* handler,
                         oid *trapOid, int trapOidLen);
 netsnmp_trapd_handler *netsnmp_get_traphandler(oid *trapOid, int trapOidLen);
 
