@@ -1009,7 +1009,9 @@ int *err_ind;
    *response = NULL;
 retry:
 
-   status = snmp_synch_response(ss, pdu, response);
+   Py_BEGIN_ALLOW_THREADS
+   status = snmp_sess_synch_response(ss, pdu, response);
+   Py_END_ALLOW_THREADS
 
    if ((*response == NULL) && (status == STAT_SUCCESS)) status = STAT_ERROR;
 
@@ -1164,6 +1166,8 @@ netsnmp_create_session(PyObject *self, PyObject *args)
 
   __libraries_init("python");
 
+  snmp_sess_init(&session);
+
   session.version = -1;
 #ifndef DISABLE_SNMPV1
   if (version == 1) {
@@ -1192,7 +1196,7 @@ netsnmp_create_session(PyObject *self, PyObject *args)
   session.timeout = timeout; /* 1000000L */
   session.authenticator = NULL;
 
-  ss = snmp_open(&session);
+  ss = snmp_sess_open(&session);
 
   if (ss == NULL) {
     if (verbose) 
@@ -1359,7 +1363,7 @@ netsnmp_delete_session(PyObject *self, PyObject *args)
 
   ss = (SnmpSession *)py_netsnmp_attr_long(session, "sess_ptr");
 
-  snmp_close(ss);
+  snmp_sess_close(ss);
   return (Py_BuildValue(""));
 }
 
