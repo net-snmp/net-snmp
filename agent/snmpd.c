@@ -1160,7 +1160,7 @@ receive(void)
 
 #ifdef	USING_SMUX_MODULE
         if (smux_listen_sd >= 0) {
-            NETSNMP_LARGE_FD_SET(smux_listen_sd, readfds);
+            NETSNMP_LARGE_FD_SET(smux_listen_sd, &readfds);
             numfds =
                 smux_listen_sd >= numfds ? smux_listen_sd + 1 : numfds;
 
@@ -1168,7 +1168,7 @@ receive(void)
                 sd = smux_snmp_select_list_get_SD_from_List(i);
                 if (sd != 0)
                 {
-                   NETSNMP_LARGE_FD_SET(sd, readfds);
+                   NETSNMP_LARGE_FD_SET(sd, &readfds);
                    numfds = sd >= numfds ? sd + 1 : numfds;
                 }
             }
@@ -1194,7 +1194,7 @@ receive(void)
             if (smux_listen_sd >= 0) {
                 for (i = 0; i < smux_snmp_select_list_get_length(); i++) {
                     sd = smux_snmp_select_list_get_SD_from_List(i);
-                    if (NETSNMP_LARGE_FD_ISSET(sd, readfds)) {
+                    if (NETSNMP_LARGE_FD_ISSET(sd, &readfds)) {
                         if (smux_process(sd) < 0) {
                             smux_snmp_select_list_del(sd);
                         }
@@ -1203,7 +1203,7 @@ receive(void)
                 /*
                  * new connection 
                  */
-                if (NETSNMP_LARGE_FD_ISSET(smux_listen_sd, readfds)) {
+                if (NETSNMP_LARGE_FD_ISSET(smux_listen_sd, &readfds)) {
                     if ((sd = smux_accept(smux_listen_sd)) >= 0) {
                         smux_snmp_select_list_add(sd);
                     }
