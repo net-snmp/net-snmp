@@ -1,6 +1,7 @@
 package NetSNMP::agent::default_store;
 
 use strict;
+use warnings;
 use Carp;
 
 require Exporter;

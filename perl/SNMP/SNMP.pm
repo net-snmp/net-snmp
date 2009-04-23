@@ -9,6 +9,9 @@
 package SNMP;
 $VERSION = '5.0402';   # current release version number
 
+use strict;
+use warnings;
+
 require Exporter;
 require DynaLoader;
 require AutoLoader;
@@ -46,11 +49,12 @@ use NetSNMP::default_store (':all');
 );
 
 sub AUTOLOAD {
+    no strict;
     # This AUTOLOAD is used to 'autoload' constants from the constant()
     # XS function.  If a constant is not found then control is passed
     # to the AUTOLOAD in AutoLoader.
     my($val,$pack,$file,$line);
-    local($constname);
+    my $constname;
     ($constname = $AUTOLOAD) =~ s/.*:://;
     # croak "&$module::constant not defined" if $constname eq 'constant';
     $val = constant($constname, @_ ? $_[0] : 0);
@@ -74,15 +78,22 @@ bootstrap SNMP;
 # Preloaded methods go here.
 
 # Package variables
-tie $SNMP::debugging, SNMP::DEBUGGING;
-tie $SNMP::debug_internals, SNMP::DEBUG_INTERNALS;
-tie $SNMP::dump_packet, SNMP::DUMP_PACKET;
-tie %SNMP::MIB, SNMP::MIB;
-tie $SNMP::save_descriptions, SNMP::MIB::SAVE_DESCR;
-tie $SNMP::replace_newer, SNMP::MIB::REPLACE_NEWER;
-tie $SNMP::mib_options, SNMP::MIB::MIB_OPTIONS;
+tie $SNMP::debugging,         'SNMP::DEBUGGING';
+tie $SNMP::debug_internals,   'SNMP::DEBUG_INTERNALS';
+tie $SNMP::dump_packet,       'SNMP::DUMP_PACKET';
+tie %SNMP::MIB,               'SNMP::MIB';
+tie $SNMP::save_descriptions, 'SNMP::MIB::SAVE_DESCR';
+tie $SNMP::replace_newer,     'SNMP::MIB::REPLACE_NEWER';
+tie $SNMP::mib_options,       'SNMP::MIB::MIB_OPTIONS';
 
 %SNMP::V3_SEC_LEVEL_MAP = (noAuthNoPriv => 1, authNoPriv => 2, authPriv =>3);
+
+use vars qw(
+  $auto_init_mib $use_long_names $use_sprint_value $use_enums
+  $use_numeric %MIB $verbose $debugging $dump_packet $save_descriptions
+  $best_guess $non_increasing $replace_newer %session_params
+  $debug_internals $mib_options
+);
 
 $auto_init_mib = 1; # enable automatic MIB loading at session creation time
 $use_long_names = 0; # non-zero to prefer longer mib textual identifiers rather
@@ -641,8 +652,6 @@ sub get {
 }
 
 
-use strict;
-
 my $have_netsnmp_oid = eval { require NetSNMP::OID; };
 sub gettable {
 
@@ -912,7 +921,6 @@ sub _gettable_end_routine {
 	}
     }
 }
-no strict;
 
 
 sub fget {
@@ -935,8 +943,8 @@ sub fget {
 
    SNMP::_get($this, $this->{RetryNoSuch}, $varbind_list_ref, $cb);
 
-   foreach $varbind (@$varbind_list_ref) {
-     $sub = $this->{VarFormats}{$varbind->[$SNMP::Varbind::tag_f]} ||
+   foreach my $varbind (@$varbind_list_ref) {
+     my $sub = $this->{VarFormats}{$varbind->[$SNMP::Varbind::tag_f]} ||
 	 $this->{TypeFormats}{$varbind->[$SNMP::Varbind::type_f]};
      &$sub($varbind) if defined $sub;
      push(@res, $varbind->[$SNMP::Varbind::val_f]);
@@ -988,8 +996,8 @@ sub fgetnext {
 
    SNMP::_getnext($this, $varbind_list_ref, $cb);
 
-   foreach $varbind (@$varbind_list_ref) {
-     $sub = $this->{VarFormats}{$varbind->[$SNMP::Varbind::tag_f]} ||
+   foreach my $varbind (@$varbind_list_ref) {
+     my $sub = $this->{VarFormats}{$varbind->[$SNMP::Varbind::tag_f]} ||
 	 $this->{TypeFormats}{$varbind->[$SNMP::Varbind::type_f]};
      &$sub($varbind) if defined $sub;
      push(@res, $varbind->[$SNMP::Varbind::val_f]);
@@ -1068,7 +1076,7 @@ sub bulkwalk {
    return defined($cb) ? $res[0] : \@res;
 }
 
-%trap_type = (coldStart => 0, warmStart => 1, linkDown => 2, linkUp => 3,
+my %trap_type = (coldStart => 0, warmStart => 1, linkDown => 2, linkUp => 3,
 	      authFailure => 4, egpNeighborLoss => 5, specific => 6 );
 sub trap {
 # (v1) enterprise, agent, generic, specific, uptime, <vars>
@@ -1160,7 +1168,7 @@ sub inform {
 }
 
 package SNMP::TrapSession;
-@ISA = ('SNMP::Session');
+@SNMP::TrapSession::ISA = ('SNMP::Session');
 
 sub new {
    my $type = shift;
@@ -1175,11 +1183,11 @@ sub new {
 
 package SNMP::Varbind;
 
-$tag_f = 0;
-$iid_f = 1;
-$val_f = 2;
-$type_f = 3;
-$time_f = 4;
+my $tag_f = 0;
+my $iid_f = 1;
+my $val_f = 2;
+my $type_f = 3;
+my $time_f = 4;
 
 sub new {
    my $type = shift;
@@ -1301,7 +1309,7 @@ sub FETCH {
     my $key = shift;
 
     if (!defined $this->{$key}) {
-	tie(%{$this->{$key}}, SNMP::MIB::NODE, $key) or return undef;
+	tie(%{$this->{$key}}, 'SNMP::MIB::NODE', $key) or return undef;
     }
     $this->{$key};
 }

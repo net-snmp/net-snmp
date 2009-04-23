@@ -1,6 +1,7 @@
 package NetSNMP::ASN;
 
 use strict;
+use warnings;
 use Carp;
 
 require Exporter;

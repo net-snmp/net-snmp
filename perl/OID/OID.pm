@@ -1,6 +1,7 @@
 package NetSNMP::OID;
 
 use strict;
+use warnings;
 use Carp;
 
 require Exporter;
@@ -140,6 +141,8 @@ sub to_array($) {
     my $self = shift;
     return $self->{oidptr}->to_array();
 }
+
+sub DESTROY {}
 
 sub AUTOLOAD {
     # This AUTOLOAD is used to 'autoload' constants from the constant()

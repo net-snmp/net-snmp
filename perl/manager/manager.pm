@@ -1,6 +1,7 @@
 package NetSNMP::manager;
 
 use strict ();
+use warnings;
 use Apache::Constants qw(:common);
 use CGI qw(:standard delete_all);
 use SNMP ();
