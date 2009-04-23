@@ -69,6 +69,10 @@ listing of all changes made to the code.
       - Enable automatic reregistering of sysORTable entries from AgentX
 	subagents. Add the sysORTable interface to the include directory.
 	Rewrite the sysORTable module to use the table_container handler.
+      - [PATCH 1901764]: for supporting logwatch files that are date based
+      - [PATCH 2053273]: to imlpement the etherlike mib (at least on linux)
+      - [PATCH 2103492]: implement RMON-MIB::etherStatsJabbers Patch from
+	Narendra K., Sandeep K. Shandilya and Shyam Iyer
       - [BUG 1558823]: fix ipAddressTable memory leak
       - [BUG 1712988]: default and configurable maximum number of varbinds
 	returnable to a GETBULK request
@@ -119,6 +123,9 @@ listing of all changes made to the code.
 	END block
       - [BUG 1955227]: Memory leak for embedded Perl on x86_64
 
+    snmpnetstat:
+      - [PATCH 2564538]: to support GETBULK in v2c+ snmp versions
+
     snmpusm:
       - [PATCH 1591355]: Allow cloning to engineIDs that are different from
 	the agent's engineID
@@ -153,6 +160,8 @@ listing of all changes made to the code.
       - add --with-temp-file-pattern configure option
 
     perl:
+      - [PATCH 1956193]: beta threadable perl module code for
+	SNMPv1/SNMPv2c usage.
       - [BUG 1619827]: link libnetsnmpagent/libnetsnmptrapd (rather than
 	snmpd/snmptrapd) against libperl.
       - [BUG 1619827]: link net-snmp libraries and binaries against the
@@ -182,6 +191,8 @@ listing of all changes made to the code.
 	Part 2 (Solaris-specific new files)
 
     Win32:
+      - [PATCH 2686248]: Applied patch by Bart Van Assche which fixes
+	several winExtDLL bugs.
       - patch: 1706344: from naylor: fix compilation with cygwin
       - Fix AES support
 
