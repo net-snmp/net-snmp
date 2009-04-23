@@ -663,7 +663,11 @@ inet_make_mask_addr(int pf, void *dst, int masklength)
             mask |= maskbit;
             maskbit >>= 1;
         }
-        (*(u_char *) (&((struct in6_addr *) dst)->s6_addr[j])) = mask;
+
+	if (j < sizeof (((struct in6_addr *) dst)->s6_addr)){
+	    (*(u_char *) (&((struct in6_addr *) dst)->s6_addr[j])) = mask;
+	}
+
         break;
     default:
         return -1;              /* unsupported protocol family */
@@ -1039,39 +1043,39 @@ netsnmp_udp6_parse_security(const char *token, char *param)
      * Deal with the network part first.  
      */
     if ((strcmp(source, "default") == 0) || (strcmp(source, "::") == 0)) {
-        strnetwork = strdup("0::0");
-        strmask = strdup("0::0");
-
-        inet_pton(AF_INET6, strnetwork, &net.sin6_addr);
-        inet_pton(AF_INET6, strmask, &mask.sin6_addr);
-
-        e = (com2Sec6Entry *) malloc(sizeof(com2Sec6Entry));
-        if (e == NULL) {
-            config_perror("memory error");
-            return;
-        }
-        /*
-         * Everything is okay.  Copy the parameters to the structure allocated
-         * above and add it to END of the list.  
-         */
-        if (strmask != NULL && strnetwork != NULL) {
-            DEBUGMSGTL(("netsnmp_udp6_parse_security",
-                        "<\"%s\", %s/%s> => \"%s\"\n", community,
-                        strnetwork, strmask, secName));
-            free(strmask);
-            free(strnetwork);
-        } else {
-            DEBUGMSGTL(("netsnmp_udp6_parse_security",
-                        "Couldn't allocate enough memory\n"));
-        }
-        memmove_com2Sec6Entry(e, secName, community, net, mask, contextName);
-        if (com2Sec6ListLast != NULL) {
-            com2Sec6ListLast->next = e;
-            com2Sec6ListLast = e;
-        } else {
-            com2Sec6ListLast = com2Sec6List = e;
-        }
-
+        if ((strnetwork = strdup("0::0")) != NULL)
+	{
+	    if ((strmask = strdup("0::0")) != NULL)
+	    {
+	
+		inet_pton(AF_INET6, strnetwork, &net.sin6_addr);
+		inet_pton(AF_INET6, strmask, &mask.sin6_addr);
+		
+		e = (com2Sec6Entry *) malloc(sizeof(com2Sec6Entry));
+		if (e != NULL) {
+		    memmove_com2Sec6Entry(e, secName, community, net, mask, contextName);
+		    if (com2Sec6ListLast != NULL) {
+			com2Sec6ListLast->next = e;
+			com2Sec6ListLast = e;
+		    } else {
+			com2Sec6ListLast = com2Sec6List = e;
+		    }
+		}
+		else {
+		    config_perror ("memory error");
+		}
+		free (strmask);
+	    }
+	    else {
+		DEBUGMSGTL(("netsnmp_udp6_parse_security",
+			    "Couldn't allocate enough memory\n"));
+	    }
+	    free (strnetwork);
+	}
+	else {
+	    DEBUGMSGTL(("netsnmp_udp6_parse_security",
+			"Couldn't allocate enough memory\n"));
+	}
     } else {
         /*
          * Try interpreting as IPv6 address.  

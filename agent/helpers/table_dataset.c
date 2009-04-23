@@ -563,7 +563,7 @@ netsnmp_table_data_set_helper_handler(netsnmp_mib_handler *handler,
             data = (netsnmp_table_data_set_storage *) row->data;
 
         if (!row || !table_info || !data) {
-            if (!MODE_IS_SET(reqinfo->mode)) {
+            if (!MODE_IS_SET(reqinfo->mode) || !table_info) {
                 netsnmp_set_request_error(reqinfo, request,
                                           SNMP_NOSUCHINSTANCE);
                 continue;
@@ -975,6 +975,7 @@ netsnmp_config_parse_table_set(const char *token, char *line)
         if (!snmp_parse_oid(tp->augments, name, &name_length)) {
             config_pwarn("I can't parse the augment tabel name");
             snmp_log(LOG_WARNING, "  can't parse %s\n", tp->augments);
+            SNMP_FREE (table_set);
             return;
         }
         if(NULL == (tp2 = get_tree(name, name_length, get_tree_head()))) {
@@ -982,6 +983,7 @@ netsnmp_config_parse_table_set(const char *token, char *line)
                          "I can't find mib information about augment table");
             snmp_log(LOG_WARNING, "  table %s not found in tree\n",
                      tp->augments);
+            SNMP_FREE (table_set);
             return;
         }
         _table_set_add_indexes(table_set, tp2);
@@ -998,6 +1000,7 @@ netsnmp_config_parse_table_set(const char *token, char *line)
         type = mib_to_asn_type(tp->type);
         if (type == (u_char) - 1) {
             config_pwarn("unknown column type");
+	    SNMP_FREE (table_set);
             return;             /* xxx mem leak */
         }
 
@@ -1073,6 +1076,7 @@ netsnmp_config_parse_add_row(const char *token, char *line)
          vb = vb->next_variable) {
         if (!line) {
             config_pwarn("missing an index value");
+            SNMP_FREE (row);
             return;
         }
 
@@ -1092,6 +1096,7 @@ netsnmp_config_parse_add_row(const char *token, char *line)
                          "All columns must be specified.");
             snmp_log(LOG_WARNING,"  can't find value for column %d\n",
                      dr->column - 1);
+            SNMP_FREE (row);
             return;
         }
 
