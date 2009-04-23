@@ -524,6 +524,7 @@ really_try_next:
 
         store_idx = name[ HRSTORE_ENTRY_NAME_LENGTH ];
         if (HRFS_entry &&
+	    store_idx > NETSNMP_MEM_TYPE_MAX &&
             netsnmp_ds_get_boolean(NETSNMP_DS_APPLICATION_ID,
                                    NETSNMP_DS_AGENT_SKIPNFSINHOSTRESOURCES) &&
             Check_HR_FileSys_NFS())
