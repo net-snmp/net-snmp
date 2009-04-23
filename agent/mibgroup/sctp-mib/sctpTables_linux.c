@@ -7,7 +7,7 @@
 #include "sctpAssocRemAddrTable.h"
 #include "sctpTables_common.h"
 
-#include <util_funcs.h>
+#include "mibgroup/util_funcs/get_pid_from_inode.h"
 
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -174,7 +174,7 @@ parse_assoc_line(char *line, sctpTables_containers * containers)
         goto error;
     }
     inode = strtoull(token, NULL, 10);
-    entry->sctpAssocPrimProcess = get_pid_from_inode(inode);
+    entry->sctpAssocPrimProcess = netsnmp_get_pid_from_inode(inode);
 
     token = strtok(NULL, " ");  /* LPORT */
     if (token == NULL) {
