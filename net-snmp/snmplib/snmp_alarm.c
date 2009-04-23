@@ -201,7 +201,7 @@ sa_find_next(void)
     gettimeofday(&t_now, NULL);
 
     for (a = thealarms; a != NULL; a = a->next) {
-        // check for time delta skew
+        /* check for time delta skew */
         if ((a->t_next.tv_sec - t_now.tv_sec) > a->t.tv_sec)
         {
             DEBUGMSGTL(("time_skew", "Time delta too big (%d seconds), should be %d seconds - fixing\n", (a->t_next.tv_sec - t_now.tv_sec), a->t.tv_sec));
