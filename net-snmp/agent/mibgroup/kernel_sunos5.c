@@ -865,7 +865,16 @@ getmib(int groupname, int subgroupname, void *statbuf, size_t size,
     req = (struct opthdr *)(tor + 1);
     req->level = groupname;
     req->name = subgroupname;
+    /*
+     * non-zero len field is used to request extended MIB statistics
+     * on Solaris 10 Update 4 and later. The LEGACY_MIB_SIZE macro is only
+     * available for S10U4+, so we use that to see what action to take.
+     */
+#ifdef LEGACY_MIB_SIZE
+    req->len = 1;	/* ask for extended MIBs */
+#else
     req->len = 0;
+#endif
     strbuf.len = tor->OPT_length + tor->OPT_offset;
     flags = 0;
     if ((rc = putmsg(sd, &strbuf, NULL, flags))) {
