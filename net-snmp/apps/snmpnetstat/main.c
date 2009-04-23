@@ -75,9 +75,11 @@ int	sflag;		/* show protocol statistics */
 int	tflag;		/* show i/f watchdog timers */
 int	vflag;		/* be verbose */
 
+
 int	interval;	/* repeat interval for i/f stats */
 char	*intrface;	/* desired i/f for stats, or NULL for all i/fs */
 int	af;		/* address family */
+int     max_getbulk = 32;  /* specifies the max-repeaters value to use with GETBULK requests */
 
 char    *progname = NULL;
 
@@ -233,6 +235,24 @@ optProc( int argc, char *const *argv, int opt )
 		case 'r':
 			rflag = 1;
 			break;
+		case 'R':
+                        if (optind < argc) {
+                            if (argv[optind]) {
+                                max_getbulk = atoi(argv[optind]);
+                                if (max_getbulk == 0) {
+                                    usage();
+                                    fprintf(stderr, "Bad -CR option: %s\n", 
+                                            argv[optind]);
+                                    exit(1);
+                                }
+                            }
+                        } else {
+                            usage();
+                            fprintf(stderr, "Bad -CR option: no argument given\n");
+                            exit(1);
+                        }
+                        optind++;
+                        break;
 		case 'S':	     /* FreeBSD:
 					NetBSD:  Semi-numeric display
 					OpenBSD: Show route source selector */

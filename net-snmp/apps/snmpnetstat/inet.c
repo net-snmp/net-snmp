@@ -106,20 +106,65 @@ const char     *tcpstates[] = {
 };
 #define TCP_NSTATES 11
 
-void
-tcpprotopr(const char *name)
+static void
+tcpprotoprint_line(const char *name, netsnmp_variable_list *vp, int *first)
 {
-    netsnmp_variable_list *var, *vp;
-    oid    tcpConnState_oid[] = { 1,3,6,1,2,1,6,13,1,1 };
-    size_t tcpConnState_len   = OID_LENGTH( tcpConnState_oid );
     int    state, width;
+    char  *cp;
     union {
         struct in_addr addr;
         char      data[4];
     } tmpAddr;
     oid    localPort, remotePort;
     struct in_addr localAddr, remoteAddr;
-    char  *cp;
+
+	state = *vp->val.integer;
+	if (!aflag && state == MIB_TCPCONNSTATE_LISTEN) {
+		return;
+	}
+
+	if (*first) {
+		printf("Active Internet (%s) Connections", name);
+		if (aflag)
+			printf(" (including servers)");
+		putchar('\n');
+		width = Aflag ? 18 : 22;
+		printf("%-5.5s %*.*s %*.*s %s\n",
+			   "Proto", -width, width, "Local Address",
+						-width, width, "Remote Address", "(state)");
+		*first = 0;
+	}
+	
+	/* Extract the local/remote information from the index values */
+	cp = tmpAddr.data;
+	cp[0] = vp->name[ 10 ] & 0xff;
+	cp[1] = vp->name[ 11 ] & 0xff;
+	cp[2] = vp->name[ 12 ] & 0xff;
+	cp[3] = vp->name[ 13 ] & 0xff;
+	localAddr.s_addr = tmpAddr.addr.s_addr;
+	localPort        = ntohs(vp->name[ 14 ]);
+	cp = tmpAddr.data;
+	cp[0] = vp->name[ 15 ] & 0xff;
+	cp[1] = vp->name[ 16 ] & 0xff;
+	cp[2] = vp->name[ 17 ] & 0xff;
+	cp[3] = vp->name[ 18 ] & 0xff;
+	remoteAddr.s_addr = tmpAddr.addr.s_addr;
+	remotePort        = ntohs(vp->name[ 19 ]);
+
+	printf("%-5.5s", name);
+	inetprint(&localAddr,  localPort,  name, 1);
+	inetprint(&remoteAddr, remotePort, name, 0);
+	if (state < 1 || state > TCP_NSTATES) {
+		printf("%d\n", state );
+	} else {
+		printf("%s\n", tcpstates[state]);
+	}
+}
+
+static void
+tcpprotopr_get(const char *name, oid *root, size_t root_len)
+{
+    netsnmp_variable_list *var, *vp;
     int    first = 1;
 
     /*
@@ -127,7 +172,7 @@ tcpprotopr(const char *name)
      *   the necessary information.
      */
     var = NULL;
-    snmp_varlist_add_variable( &var, tcpConnState_oid, tcpConnState_len,
+    snmp_varlist_add_variable( &var, root, root_len,
                                    ASN_NULL, NULL,  0);
     if (!var)
         return;
@@ -135,45 +180,7 @@ tcpprotopr(const char *name)
         return;
 
     for (vp = var; vp ; vp=vp->next_variable) {
-        state = *vp->val.integer;
-        if (!aflag && state == MIB_TCPCONNSTATE_LISTEN)
-            continue;
-
-        if (first) {
-            printf("Active Internet (%s) Connections", name);
-            if (aflag)
-                printf(" (including servers)");
-            putchar('\n');
-            width = Aflag ? 18 : 22;
-            printf("%-5.5s %*.*s %*.*s %s\n",
-                   "Proto", -width, width, "Local Address",
-                            -width, width, "Remote Address", "(state)");
-            first=0;
-        }
-        
-        /* Extract the local/remote information from the index values */
-        cp = tmpAddr.data;
-        cp[0] = vp->name[ 10 ] & 0xff;
-        cp[1] = vp->name[ 11 ] & 0xff;
-        cp[2] = vp->name[ 12 ] & 0xff;
-        cp[3] = vp->name[ 13 ] & 0xff;
-        localAddr.s_addr = tmpAddr.addr.s_addr;
-        localPort        = ntohs((u_short)(vp->name[ 14 ]));
-        cp = tmpAddr.data;
-        cp[0] = vp->name[ 15 ] & 0xff;
-        cp[1] = vp->name[ 16 ] & 0xff;
-        cp[2] = vp->name[ 17 ] & 0xff;
-        cp[3] = vp->name[ 18 ] & 0xff;
-        remoteAddr.s_addr = tmpAddr.addr.s_addr;
-        remotePort        = ntohs((u_short)(vp->name[ 19 ]));
-
-        printf("%-5.5s", name);
-        inetprint(&localAddr,  localPort,  name, 1);
-        inetprint(&remoteAddr, remotePort, name, 0);
-        if ( state < 1 || state > TCP_NSTATES )
-            printf("%d\n", state );
-        else
-            printf("%s\n", tcpstates[ state ]);
+        tcpprotoprint_line(name, vp, &first);
     }
     snmp_free_varbind( var );
 }
@@ -228,6 +235,110 @@ udpprotopr(const char *name)
         putchar('\n');
     }
     snmp_free_varbind( var );
+}
+
+void
+tcpprotopr_bulkget(const char *name, oid *root, size_t root_len)
+{
+    netsnmp_variable_list *vp;
+	netsnmp_pdu    *pdu, *response;
+    oid             tcpConnState_oid[MAX_OID_LEN];
+	size_t          tcpConnState_len;
+    int    first = 1;
+    int    running = 1;
+    int    status;
+
+	/*
+     * setup initial object name
+     */
+	memmove(tcpConnState_oid, root, sizeof(root) * root_len);
+	tcpConnState_len = root_len;
+
+    /*
+     * Walking the tcpConnState column will provide all
+     *   the necessary information.
+     */
+	while (running) {
+        /*
+         * create PDU for GETBULK request and add object name to request
+         */
+        pdu = snmp_pdu_create(SNMP_MSG_GETBULK);
+        pdu->non_repeaters = 0;
+        pdu->max_repetitions = max_getbulk;    /* fill the packet */
+        snmp_add_null_var(pdu, tcpConnState_oid, tcpConnState_len);
+
+        /*
+         * do the request
+         */
+        status = snmp_synch_response(ss, pdu, &response);
+        if (status == STAT_SUCCESS) {
+            if (response->errstat == SNMP_ERR_NOERROR) {
+				for (vp = response->variables; vp ; vp=vp->next_variable) {
+                    if ((vp->name_length < root_len) ||
+							(memcmp(root, vp->name, sizeof(oid) * root_len) != 0)) {
+                        /*
+                         * not part of this subtree
+                         */
+                        running = 0;
+                        continue;
+                    }
+
+					tcpprotoprint_line(name, vp, &first);
+
+                    if ((vp->type != SNMP_ENDOFMIBVIEW) &&
+                        (vp->type != SNMP_NOSUCHOBJECT) &&
+                        (vp->type != SNMP_NOSUCHINSTANCE)) {
+                        /*
+                         * Check if last variable, and if so, save for next request.
+                         */
+                        if (vp->next_variable == NULL) {
+                            memmove(tcpConnState_oid, vp->name,
+                                    vp->name_length * sizeof(oid));
+                            tcpConnState_len = vp->name_length;
+                        }
+                    } else {
+                        /*
+                         * an exception value, so stop
+                         */
+                        running = 0;
+                    }
+				}
+            } else {
+                /*
+                 * error in response, print it
+                 */
+                running = 0;
+            }
+        } else if (status == STAT_TIMEOUT) {
+            running = 0;
+        } else {                /* status == STAT_ERROR */
+            running = 0;
+        }
+
+        if (response) {
+            snmp_free_pdu(response);
+		}
+	}
+}
+
+void
+tcpprotopr(const char *name)
+{
+    oid    tcpConnState_oid[] = { 1,3,6,1,2,1,6,13,1,1 };
+    size_t tcpConnState_len   = OID_LENGTH( tcpConnState_oid );
+	int    use_getbulk = 1;
+
+#ifndef NETSNMP_DISABLE_SNMPV1
+    if (ss->version == SNMP_VERSION_1) {
+        use_getbulk = 0;
+	}
+#endif
+
+	if (use_getbulk) {
+		tcpprotopr_bulkget(name, tcpConnState_oid, tcpConnState_len);
+	} else {
+		tcpprotopr_get(name, tcpConnState_oid, tcpConnState_len);
+	}
 }
 
 

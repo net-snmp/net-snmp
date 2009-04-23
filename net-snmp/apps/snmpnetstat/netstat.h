@@ -62,6 +62,7 @@ extern int	interval;	/* repeat interval for i/f stats */
 extern char	*intrface;	/* desired i/f for stats, or NULL for all i/fs */
 
 extern int	af;		/* address family */
+extern int  max_getbulk;  /* specifies the max-repeaters value to use with GETBULK requests */
 
 extern	char *__progname; /* program name, from crt0.o */
 
