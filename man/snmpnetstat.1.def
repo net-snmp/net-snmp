@@ -92,6 +92,12 @@ will continuously display the information regarding packet
 traffic on the configured network interfaces.
 The fourth form displays statistics about the named protocol.
 .PP
+.B snmpnetstat
+will issue GETBULK requests to query for information
+if at least protocol version
+.I v2
+is used.
+.PP
 AGENT identifies a target SNMP agent, which is
 instrumented to monitor the given objects.
 At its simplest, the AGENT specification will
@@ -163,6 +169,11 @@ When
 .B \-Cs
 is also present, show per-protocol routing statistics instead of 
 the routing tables.
+.PP
+.BI \-CR " repeaters"
+For GETBULK requests,
+.I repeaters
+specifies the max-repeaters value to use.
 .PP
 When  snmpnetstat is invoked with an interval argument, it
 displays a running count of statistics related to  network
