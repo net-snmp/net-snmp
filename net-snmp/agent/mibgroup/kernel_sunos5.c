@@ -81,7 +81,7 @@ kstat_ctl_t    *kstat_fd = 0;
 static
 mibcache        Mibcache[MIBCACHE_SIZE+1] = {
     {MIB_SYSTEM, 0, (void *) -1, 0, 0, 0, 0},
-    {MIB_INTERFACES, 10 * sizeof(mib2_ifEntry_t), (void *) -1, 0, 30, 0,
+    {MIB_INTERFACES, 50 * sizeof(mib2_ifEntry_t), (void *) -1, 0, 30, 0,
      0},
     {MIB_AT, 0, (void *) -1, 0, 0, 0, 0},
     {MIB_IP, sizeof(mib2_ip_t), (void *) -1, 0, 60, 0, 0},
