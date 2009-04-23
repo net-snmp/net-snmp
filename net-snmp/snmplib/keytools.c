@@ -398,6 +398,9 @@ encode_keychange(const oid * hashtype, u_int hashtype_len,
     /*
      * Sanity check.
      */
+    if (!kcstring || !kcstring_len)
+	return SNMPERR_GENERR;
+
     if (!hashtype || !oldkey || !newkey || !kcstring || !kcstring_len
         || (oldkey_len <= 0) || (newkey_len <= 0) || (*kcstring_len <= 0)
         || (hashtype_len != USM_LENGTH_OID_TRANSFORM)) {
