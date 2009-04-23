@@ -15097,7 +15097,7 @@ if test "${ac_cv_ETC_MNTTAB+set}" = set; then
   echo $ECHO_N "(cached) $ECHO_C" >&6
 else
   ac_cv_ETC_MNTTAB="unknown"
-for i in /etc/mnttab /etc/mtab /etc/filesystems
+for i in /etc/mnttab /etc/mtab /etc/filesystems /dev/mnttab
   do
   if test -f $i; then
     ac_cv_ETC_MNTTAB="$i"
