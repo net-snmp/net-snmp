@@ -2084,10 +2084,9 @@ _bulkwalk_recv_pdu(walk_context *context, netsnmp_pdu *pdu)
       ** easy enough to do, and will avoid confusion for the caller from mis-
       ** behaving agents (badly misbehaving... ;^).
       */
-      if ((context->pkts_exch > 1) && (pix < context->repeaters)) {
+      if (context->pkts_exch > 1) {
 	 if (__oid_cmp(vars->name, vars->name_length,
-				   context->reqbase[pix].last_oid,
-				   context->reqbase[pix].last_len) <= 0)
+                       expect->last_oid, expect->last_len) <= 0)
 	 {
 	    DBPRT(2, (DBOUT "Ignoring repeat oid: %s\n",
 			__snprint_oid(vars->name,vars->name_length)));
@@ -2104,12 +2103,10 @@ _bulkwalk_recv_pdu(walk_context *context, netsnmp_pdu *pdu)
       ** variables in a completed request.  In order to maintain the correct
       ** ordering of which variables we expect to see in this packet, we must
       ** not set the ignore flags immediately.  It is done in bulkwalk_done().
-      ** XXX Can we use 'expect' instead of 'context->req_oids[pix]'?
       */
       if (context->oid_saved < context->non_reps) {
 	DBPRT(2, (DBOUT "   expected var %s (nonrepeater %d/%d)\n",
-		  __snprint_oid(context->req_oids[pix].req_oid,
-			 context->req_oids[pix].req_len),
+		  __snprint_oid(expect->req_oid, expect->req_len),
 		  pix, context->non_reps));
 	DBPRT(2, (DBOUT "   received var %s\n",
 		  __snprint_oid(vars->name, vars->name_length)));
