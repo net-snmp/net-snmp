@@ -29,6 +29,7 @@ use vars qw(@ISA @EXPORT @EXPORT_OK $VERSION);
 $VERSION = '5.05';
 
 use strict;
+use warnings;
 
 BEGIN {
     print STDERR "Module SnmpAgent.pm loaded ok\n";
