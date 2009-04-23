@@ -478,7 +478,7 @@ get_user_passphrases(void)
     char            path[SNMP_MAXBUF], buf[SNMP_MAXBUF], *s = NULL;
 
     struct stat     statbuf;
-    FILE           *fp;
+    FILE           *fp = NULL;
 
 
 
@@ -624,6 +624,9 @@ get_user_passphrases(void)
         SNMP_FREE(nbuf);
     }
 
+    if (fp)
+        fclose (fp);
+        
     return rval;
 
 }                               /* end get_user_passphrases() */
