@@ -1,4 +1,4 @@
-.TH "parsing various configuration files at run time" 3 "1 Apr 2009" "Version 5.5.pre1" "net-snmp" \" -*- nroff -*-
+.TH "parsing various configuration files at run time" 3 "23 Apr 2009" "Version 5.5.pre2" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -323,6 +323,8 @@ Definition at line 2005 of file read_config.c.
 .SS "struct config_line* register_config_handler (const char * type, const char * token, void(*)(const char *, char *) parser, void(*)(void) releaser, const char * help)\fC [read]\fP"
 .PP
 register_config_handler registers handlers for certain tokens specified in certain types of files. 
+.PP
+Library API routines concerned with configuration and control of the behaviour of the library, agent and other applications.
 .PP
 Allows a module writer use/register multiple configuration files based off of the type parameter. A module writer may want to set up multiple configuration files to separate out related tasks/variables or just for management of where to put tokens as the module or modules get more complex in regard to handling token registrations.
 .PP

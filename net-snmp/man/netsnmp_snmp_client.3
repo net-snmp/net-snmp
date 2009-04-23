@@ -1,4 +1,4 @@
-.TH "various PDU processing routines" 3 "1 Apr 2009" "Version 5.5.pre1" "net-snmp" \" -*- nroff -*-
+.TH "various PDU processing routines" 3 "23 Apr 2009" "Version 5.5.pre2" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -38,6 +38,7 @@ various PDU processing routines \-
 .ti -1c
 .RI "\fBnetsnmp_pdu\fP * \fBsnmp_pdu_create\fP (int command)"
 .br
+.RI "\fILibrary API routines concerned with SNMP PDUs. \fP"
 .ti -1c
 .RI "\fBnetsnmp_variable_list\fP * \fBsnmp_add_null_var\fP (\fBnetsnmp_pdu\fP *pdu, const oid *name, size_t name_length)"
 .br
@@ -129,6 +130,11 @@ various PDU processing routines \-
 .in -1c
 .SH "Function Documentation"
 .PP 
+.SS "\fBnetsnmp_pdu\fP* snmp_pdu_create (int command)"
+.PP
+Library API routines concerned with SNMP PDUs. 
+.PP
+Definition at line 128 of file snmp_client.c.
 .SS "int snmp_set_var_typed_value (\fBnetsnmp_variable_list\fP * newvar, u_char type, const void * val_str, size_t val_len)"
 .PP
 snmp_set_var_typed_value is used to set data into the netsnmp_variable_list structure. 
@@ -157,14 +163,14 @@ returns 0 on success and 1 on a malloc error
 .in +1c
 \fBdelayed_instance.c\fP.
 .PP
-Definition at line 691 of file snmp_client.c.
+Definition at line 693 of file snmp_client.c.
 .SS "int snmp_set_var_value (\fBnetsnmp_variable_list\fP * vars, const void * value, size_t len)"
 .PP
 
 .PP
 FALL THROUGH 
 .PP
-Definition at line 756 of file snmp_client.c.
+Definition at line 758 of file snmp_client.c.
 .SH "Author"
 .PP 
 Generated automatically by Doxygen for net-snmp from the source code.
