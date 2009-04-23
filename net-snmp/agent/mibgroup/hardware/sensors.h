@@ -10,4 +10,4 @@ config_require(hardware/sensors/kstat_sensors)
 config_require(hardware/sensors/lmsensors_v2)
 #endif
 
-//config_require(hardware/sensors/dummy_sensors)
+/* config_require(hardware/sensors/dummy_sensors) */
