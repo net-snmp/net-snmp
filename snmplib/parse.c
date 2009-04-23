@@ -2978,6 +2978,9 @@ eat_syntax(FILE * fp, char *token, int maxtoken)
     struct node    *np = alloc_node(current_module);
     char            nexttoken[MAXTOKEN];
 
+    if (!np)
+	return 0;
+
     type = get_token(fp, token, maxtoken);
     nexttype = get_token(fp, nexttoken, MAXTOKEN);
     switch (type) {

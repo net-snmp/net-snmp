@@ -879,6 +879,7 @@ usm_parse_create_usmUser(const char *token, char *line)
                                newuser->authProtocolLen);
     if (ret2 <= 0) {
         config_perror("Could not get proper authentication protocol key length");
+	usm_free_user(newuser);
         return;
     }
     newuser->authKey = (u_char *) malloc(ret2);
