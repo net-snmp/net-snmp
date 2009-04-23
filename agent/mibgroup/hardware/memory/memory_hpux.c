@@ -117,13 +117,13 @@ get_swapinfo(long *total, long *free, long *size)
                 sprintf(buf, "swap #%d %s", i, pss.pss_mntpt);
                 mem->descr = strdup( buf );
             }
-            mem->units = pss.pss_swapchunk;
-            mem->size  = pss.pss_nblksenabled;    /* Or pss_nblks      ? */
-            mem->free  = pss.pss_nfpgs;           /* Or pss_nblksavail ? */
+            mem->units = 1024;
+            mem->size  = (pss.pss_nblksavail * (DEV_BSIZE/512)) / 2;    /* Or pss_nblks      ? */
+            mem->free  = 4*pss.pss_nfpgs;           /* Or pss_nblksavail ? */
             mem->other = -1;
-            *total += mem->size;
-            *free  += mem->other;
-            *size   = pss.pss_swapchunk;  /* Hopefully consistent! */
+            *total +=mem->size;
+            *free  +=mem->free;
+            *size   = mem->units;  /* Hopefully consistent! */
             i++;
         } else
             return;
