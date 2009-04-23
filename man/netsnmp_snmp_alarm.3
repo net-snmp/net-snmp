@@ -1,4 +1,4 @@
-.TH "generic library based alarm timers for various parts of an application" 3 "1 Apr 2009" "Version 5.5.pre1" "net-snmp" \" -*- nroff -*-
+.TH "generic library based alarm timers for various parts of an application" 3 "23 Apr 2009" "Version 5.5.pre2" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -44,7 +44,7 @@ generic library based alarm timers for various parts of an application \-
 .ti -1c
 .RI "unsigned int \fBsnmp_alarm_register\fP (unsigned int when, unsigned int flags, SNMPAlarmCallback *thecallback, void *clientarg)"
 .br
-.RI "\fIThis function registers function callbacks to occur at a speciifc time in the future. \fP"
+.RI "\fIThis function registers function callbacks to occur at a specific time in the future. \fP"
 .ti -1c
 .RI "unsigned int \fBsnmp_alarm_register_hr\fP (struct timeval t, unsigned int flags, SNMPAlarmCallback *cb, void *cd)"
 .br
@@ -54,7 +54,7 @@ generic library based alarm timers for various parts of an application \-
 .PP 
 .SS "unsigned int snmp_alarm_register (unsigned int when, unsigned int flags, SNMPAlarmCallback * thecallback, void * clientarg)"
 .PP
-This function registers function callbacks to occur at a speciifc time in the future. 
+This function registers function callbacks to occur at a specific time in the future. 
 .PP
 \fBParameters:\fP
 .RS 4
@@ -87,7 +87,7 @@ Returns a unique unsigned integer(which is also passed as the first argument of 
 .in +1c
 \fBdelayed_instance.c\fP, and \fBnotification.c\fP.
 .PP
-Definition at line 404 of file snmp_alarm.c.
+Definition at line 414 of file snmp_alarm.c.
 .SS "unsigned int snmp_alarm_register_hr (struct timeval t, unsigned int flags, SNMPAlarmCallback * cb, void * cd)"
 .PP
 This function offers finer granularity as to when the callback function is called by making use of t->tv_usec value forming the 'when' aspect of \fBsnmp_alarm_register()\fP. 
@@ -119,7 +119,7 @@ Returns a unique unsigned integer(which is also passed as the first argument of 
 .PP
 
 .PP
-Definition at line 481 of file snmp_alarm.c.
+Definition at line 491 of file snmp_alarm.c.
 .SS "void snmp_alarm_unregister (unsigned int clientreg)"
 .PP
 This function removes the callback function from a list of registered alarms, unregistering the alarm. 

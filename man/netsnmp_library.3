@@ -1,4 +1,4 @@
-.TH "The Net-SNMP library" 3 "1 Apr 2009" "Version 5.5.pre1" "net-snmp" \" -*- nroff -*-
+.TH "The Net-SNMP library" 3 "23 Apr 2009" "Version 5.5.pre2" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -216,6 +216,7 @@ The Net-SNMP library \-
 .ti -1c
 .RI "void \fBsnmp_sess_init\fP (\fBnetsnmp_session\fP *session)"
 .br
+.RI "\fILibrary API routines concerned with specifying and using SNMP 'sessions' including sending and receiving requests. \fP"
 .ti -1c
 .RI "void \fBinit_snmp\fP (const char *type)"
 .br
@@ -320,25 +321,28 @@ The Net-SNMP library \-
 .RI "void \fBsnmp_read\fP (fd_set *fdset)"
 .br
 .ti -1c
-.RI "int \fB_sess_read\fP (void *sessp, fd_set *fdset, struct pollfd fds[], nfds_t nfds)"
+.RI "void \fBsnmp_read2\fP (\fBnetsnmp_large_fd_set\fP *fdset)"
+.br
+.ti -1c
+.RI "int \fB_sess_read\fP (void *sessp, \fBnetsnmp_large_fd_set\fP *fdset)"
 .br
 .ti -1c
 .RI "int \fBsnmp_sess_read\fP (void *sessp, fd_set *fdset)"
 .br
 .ti -1c
-.RI "void \fBsnmp_read_extd\fP (struct pollfd fds[], nfds_t nfds)"
-.br
-.ti -1c
-.RI "int \fBsnmp_sess_read_extd\fP (void *sessp, struct pollfd fds[], nfds_t nfds)"
+.RI "int \fBsnmp_sess_read2\fP (void *sessp, \fBnetsnmp_large_fd_set\fP *fdset)"
 .br
 .ti -1c
 .RI "int \fBsnmp_select_info\fP (int *numfds, fd_set *fdset, struct timeval *timeout, int *block)"
 .br
 .ti -1c
-.RI "int \fBsnmp_poll_info\fP (struct pollfdarr *fdarr, int *timeout, int *block)"
+.RI "int \fBsnmp_select_info2\fP (int *numfds, \fBnetsnmp_large_fd_set\fP *fdset, struct timeval *timeout, int *block)"
 .br
 .ti -1c
 .RI "int \fBsnmp_sess_select_info\fP (void *sessp, int *numfds, fd_set *fdset, struct timeval *timeout, int *block)"
+.br
+.ti -1c
+.RI "int \fBsnmp_sess_select_info2\fP (void *sessp, int *numfds, \fBnetsnmp_large_fd_set\fP *fdset, struct timeval *timeout, int *block)"
 .br
 .ti -1c
 .RI "void \fBsnmp_timeout\fP (void)"
@@ -379,6 +383,7 @@ The Net-SNMP library \-
 .ti -1c
 .RI "\fBnetsnmp_variable_list\fP * \fBsnmp_pdu_add_variable\fP (\fBnetsnmp_pdu\fP *pdu, const oid *name, size_t name_length, u_char type, const void *value, size_t len)"
 .br
+.RI "\fILibrary API routines concerned with variable bindings and values. \fP"
 .ti -1c
 .RI "\fBnetsnmp_variable_list\fP * \fBsnmp_varlist_add_variable\fP (\fBnetsnmp_variable_list\fP **varlist, const oid *name, size_t name_length, u_char type, const void *value, size_t len)"
 .br
@@ -464,10 +469,10 @@ The Net-SNMP library \-
         (tvp)->tv_usec cmp (uvp)->tv_usec))
 .fi
 .PP
-Definition at line 148 of file snmp_api.c.
+Definition at line 149 of file snmp_api.c.
 .SH "Function Documentation"
 .PP 
-.SS "int _sess_read (void * sessp, fd_set * fdset, struct pollfd fds[], nfds_t nfds)"
+.SS "int _sess_read (void * sessp, \fBnetsnmp_large_fd_set\fP * fdset)"
 .PP
 
 .PP
@@ -475,7 +480,7 @@ XXX-rks: why no SNMP_FREE(isp->packet); ??
 .PP
 XXX-rks: why no SNMP_FREE(isp->packet); ?? 
 .PP
-Definition at line 5642 of file snmp_api.c.
+Definition at line 5651 of file snmp_api.c.
 .SS "int init_agent (const char * app)"
 .PP
 Initialize the agent. 
@@ -521,7 +526,7 @@ void
 .PP
 
 .PP
-Definition at line 771 of file snmp_api.c.
+Definition at line 772 of file snmp_api.c.
 .SS "int netsnmp_oid_compare_ll (const oid * in_name1, size_t len1, const oid * in_name2, size_t len2, size_t * offpt)"
 .PP
 lexicographical compare two object identifiers and return the point where they differ 
@@ -535,7 +540,7 @@ Caution: this method is called often by command responder applications (ie, agen
 .PP
 
 .PP
-Definition at line 6765 of file snmp_api.c.
+Definition at line 6652 of file snmp_api.c.
 .SS "int netsnmp_oid_equals (const oid * in_name1, size_t len1, const oid * in_name2, size_t len2)"
 .PP
 Compares 2 OIDs to determine if they are exactly equal. 
@@ -560,7 +565,7 @@ This should be faster than doing a snmp_oid_compare for different length OIDs, s
 .PP
 
 .PP
-Definition at line 6846 of file snmp_api.c.
+Definition at line 6733 of file snmp_api.c.
 .SS "int netsnmp_oid_find_prefix (const oid * in_name1, size_t len1, const oid * in_name2, size_t len2)"
 .PP
 Given two OIDs, determine the common prefix to them both. 
@@ -583,7 +588,7 @@ length of largest common index of commonality. 1 = first, 0 if none * or -1 on e
 .PP
 
 .PP
-Definition at line 6902 of file snmp_api.c.
+Definition at line 6789 of file snmp_api.c.
 .SS "int netsnmp_oid_is_subtree (const oid * in_name1, size_t len1, const oid * in_name2, size_t len2)"
 .PP
 Identical to netsnmp_oid_equals, except only the length up to len1 is compared. 
@@ -608,7 +613,7 @@ Functionally, this determines if in_name2 is equal or a subtree of in_name1
 .PP
 
 .PP
-Definition at line 6882 of file snmp_api.c.
+Definition at line 6769 of file snmp_api.c.
 .SS "int snmp_oid_compare (const oid * in_name1, size_t len1, const oid * in_name2, size_t len2)"
 .PP
 lexicographical compare two object identifiers. 
@@ -622,7 +627,7 @@ Caution: this method is called often by command responder applications (ie, agen
 .PP
 
 .PP
-Definition at line 6716 of file snmp_api.c.
+Definition at line 6603 of file snmp_api.c.
 .SS "int snmp_oidtree_compare (const oid * in_name1, size_t len1, const oid * in_name2, size_t len2)"
 .PP
 Compares 2 OIDs to determine if they are equal up until the shortest length. 
@@ -645,7 +650,17 @@ Compares 2 OIDs to determine if they are equal up until the shortest length.
 .PP
 
 .PP
-Definition at line 6818 of file snmp_api.c.
+Definition at line 6705 of file snmp_api.c.
+.SS "\fBnetsnmp_variable_list\fP* snmp_pdu_add_variable (\fBnetsnmp_pdu\fP * pdu, const oid * name, size_t name_length, u_char type, const void * value, size_t len)"
+.PP
+Library API routines concerned with variable bindings and values. 
+.PP
+Definition at line 6857 of file snmp_api.c.
+.SS "void snmp_sess_init (\fBnetsnmp_session\fP * session)"
+.PP
+Library API routines concerned with specifying and using SNMP 'sessions' including sending and receiving requests. 
+.PP
+Definition at line 695 of file snmp_api.c.
 .SS "void snmp_shutdown (const char * type)"
 .PP
 Shuts down the application, saving any needed persistent storage, and appropriate clean up. 
@@ -662,7 +677,7 @@ void
 .PP
 
 .PP
-Definition at line 839 of file snmp_api.c.
+Definition at line 840 of file snmp_api.c.
 .SS "int snmpv3_engineID_probe (struct session_list * slp, \fBnetsnmp_session\fP * in_session)"
 .PP
 probe for peer engineID 
@@ -694,14 +709,14 @@ the first session in slp should the internal allocated copy of in_session
 .PP
 
 .PP
-Definition at line 1345 of file snmp_api.c.
+Definition at line 1346 of file snmp_api.c.
 .SS "int snmpv3_probe_contextEngineID_rfc5343 (void * slp, \fBnetsnmp_session\fP * session)"
 .PP
 probe for engineID using RFC 5343 probing mechanisms 
 .PP
 Designed to be a callback for within a security model's probe_engineid hook. Since it's likely multiple security models won't have engineIDs to probe for then this function is a callback likely to be used by multiple future security models. E.G. both SSH and DTLS. 
 .PP
-Definition at line 1251 of file snmp_api.c.
+Definition at line 1252 of file snmp_api.c.
 .SH "Author"
 .PP 
 Generated automatically by Doxygen for net-snmp from the source code.
