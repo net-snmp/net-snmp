@@ -46,6 +46,8 @@ use NetSNMP::default_store (':all');
         snmp_getnext
         snmp_set
         snmp_trap
+	SNMP_API_TRADITIONAL
+	SNMP_API_SINGLE
 );
 
 sub AUTOLOAD {
@@ -328,12 +330,24 @@ sub snmp_trap {
     $sess->trap(@_);
 }
 
+#--------------------------------------------------------------------- 
+# Preserves the ability to call MainLoop() with no args so we don't 
+# break old code
+#
+# Alternately, MainLoop() could be called as an object method, 
+# ( $sess->MainLoop() ) , so that $self winds up in @_.  Then it would 
+# be more like :
+# my $self = shift;
+# .... 
+# SNMP::_main_loop(......, $self->{SessPtr});
+#--------------------------------------------------------------------- 
 sub MainLoop {
+    my $ss = shift if(&SNMP::_api_mode() == SNMP::SNMP_API_SINGLE());
     my $time = shift;
     my $callback = shift;
     my $time_sec = ($time ? int $time : 0);
     my $time_usec = ($time ? int(($time-$time_sec)*1000000) : 0);
-    SNMP::_main_loop($time_sec,$time_usec,$callback);
+    SNMP::_main_loop($time_sec,$time_usec,$callback,(defined($ss) ? $ss->{SessPtr} : ()));
 }
 
 sub finish {
