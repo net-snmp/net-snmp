@@ -8,6 +8,7 @@ package AnyData::Storage::SNMP;
 
 $AnyData::Storage::VERSION = '5.05';
 use strict;
+use warnings;
 
 use vars qw(@basecols);
 
