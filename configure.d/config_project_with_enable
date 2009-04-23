@@ -777,6 +777,7 @@ NETSNMP_ARG_WITH(out_mib_modules,
       ipfwchains/ipfwchains  firewall chains under ipfw
                              (See agent/mibgroup/ipfwchains/README)
       sctp-mib             support for the SCTP-MIB
+      etherlike-mib        support for the EtherLike-MIB
 
     Solaris
       ucd-snmp/lmSensors   hardware monitoring (LM-SENSORS-MIB)
