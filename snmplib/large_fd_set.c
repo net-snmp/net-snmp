@@ -7,6 +7,8 @@
 
 #include <net-snmp/net-snmp-config.h>
 
+#include <stdio.h>
+
 #ifdef HAVE_STDLIB_H
 #include <stdlib.h>
 #endif
@@ -15,6 +17,7 @@
 #include <winsock.h>
 #endif
 
+#include <net-snmp/library/snmp_assert.h>
 #include <net-snmp/library/large_fd_set.h>
 
 
@@ -24,6 +27,8 @@ void
 netsnmp_large_fd_setfd(SOCKET fd, netsnmp_large_fd_set * fdset)
 {
     unsigned        i;
+
+    netsnmp_assert(fd != INVALID_SOCKET);
 
     if (fdset->lfs_set.fd_count == fdset->lfs_setsize)
         netsnmp_large_fd_set_resize(fdset, 2 * (fdset->lfs_setsize + 1));
@@ -45,6 +50,8 @@ netsnmp_large_fd_clr(SOCKET fd, netsnmp_large_fd_set * fdset)
 {
     unsigned        i;
 
+    netsnmp_assert(fd != INVALID_SOCKET);
+
     for (i = 0; i < fdset->lfs_set.fd_count; i++) {
         if (fdset->lfs_set.fd_array[i] == (fd)) {
             while (i < fdset->lfs_set.fd_count - 1) {
@@ -63,6 +70,8 @@ netsnmp_large_fd_is_set(SOCKET fd, netsnmp_large_fd_set * fdset)
 {
     unsigned int    i;
 
+    netsnmp_assert(fd != INVALID_SOCKET);
+
     for (i = 0; i < fdset->lfs_set.fd_count; i++) {
         if (fdset->lfs_set.fd_array[i] == fd)
             return 1;
@@ -75,6 +84,8 @@ netsnmp_large_fd_is_set(SOCKET fd, netsnmp_large_fd_set * fdset)
 void
 netsnmp_large_fd_setfd(int fd, netsnmp_large_fd_set * fdset)
 {
+    netsnmp_assert(fd >= 0);
+
     if (fd >= fdset->lfs_setsize)
         netsnmp_large_fd_set_resize(fdset, 2 * (fdset->lfs_setsize + 1));
 
@@ -84,6 +95,8 @@ netsnmp_large_fd_setfd(int fd, netsnmp_large_fd_set * fdset)
 void
 netsnmp_large_fd_clr(int fd, netsnmp_large_fd_set * fdset)
 {
+    netsnmp_assert(fd >= 0);
+
     if (fd < fdset->lfs_setsize)
         FD_CLR(fd, fdset->lfs_setptr);
 }
@@ -91,6 +104,8 @@ netsnmp_large_fd_clr(int fd, netsnmp_large_fd_set * fdset)
 int
 netsnmp_large_fd_is_set(int fd, netsnmp_large_fd_set * fdset)
 {
+    netsnmp_assert(fd >= 0);
+
     return fd < fdset->lfs_setsize && FD_ISSET(fd, fdset->lfs_setptr);
 }
 
@@ -113,20 +128,31 @@ netsnmp_large_fd_set_resize(netsnmp_large_fd_set * fdset, int setsize)
         fd_set_bytes = NETSNMP_FD_SET_BYTES(setsize);
         if (fdset->lfs_setsize > FD_SETSIZE)
             fdset->lfs_setptr = realloc(fdset->lfs_setptr, fd_set_bytes);
-        else
-        {
+        else {
             fdset->lfs_setptr = malloc(fd_set_bytes);
             *fdset->lfs_setptr = fdset->lfs_set;
         }
-    }
-    else {
-        if (fdset->lfs_setsize > FD_SETSIZE)
-        {
+    } else {
+        if (fdset->lfs_setsize > FD_SETSIZE) {
             fdset->lfs_set = *fdset->lfs_setptr;
             free(fdset->lfs_setptr);
         }
         fdset->lfs_setptr = &fdset->lfs_set;
     }
+
+#if ! (! defined(cygwin) && defined(HAVE_WINSOCK_H))
+    {
+        int             i;
+
+	/*
+	 * Unix: clear the file descriptors defined in the resized *fdset
+	 * but that were not defined in the original *fdset.
+	 */
+	for (i = fdset->lfs_setsize + 1; i < setsize; i++)
+	    FD_CLR(i, fdset->lfs_setptr);
+    }
+#endif
+
     fdset->lfs_setsize = setsize;
 }
 
@@ -136,4 +162,37 @@ netsnmp_large_fd_set_cleanup(netsnmp_large_fd_set * fdset)
     netsnmp_large_fd_set_resize(fdset, 0);
     fdset->lfs_setsize = 0;
     fdset->lfs_setptr  = 0;
+}
+
+void
+netsnmp_copy_fd_set_to_large_fd_set(netsnmp_large_fd_set * dst,
+                                    const fd_set * src)
+{
+    netsnmp_large_fd_set_resize(dst, FD_SETSIZE);
+    *dst->lfs_setptr = *src;
+}
+
+int
+netsnmp_copy_large_fd_set_to_fd_set(fd_set * dst,
+                                    const netsnmp_large_fd_set * src)
+{
+    /* Report failure if *src is larger than FD_SETSIZE. */
+    if (src->lfs_setsize > FD_SETSIZE) {
+        FD_ZERO(dst);
+        return -1;
+    }
+
+    *dst = *src->lfs_setptr;
+
+#if ! (! defined(cygwin) && defined(HAVE_WINSOCK_H))
+    {
+        int             i;
+
+	/* Unix: clear any file descriptors defined in *dst but not in *src. */
+	for (i = src->lfs_setsize; i < FD_SETSIZE; ++i)
+	  FD_CLR(i, dst);
+    }
+#endif
+
+    return 0;
 }

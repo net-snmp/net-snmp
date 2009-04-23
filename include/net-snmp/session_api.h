@@ -87,6 +87,11 @@ extern          "C" {
      */
     void            snmp_read(fd_set *);
 
+    /*
+     * snmp_read2() is similar to snmp_read(), but accepts a pointer to a
+     * large file descriptor set instead of a pointer to a regular file
+     * descriptor set.
+     */
     void            snmp_read2(netsnmp_large_fd_set *);
 
 
@@ -123,6 +128,11 @@ extern          "C" {
     int             snmp_select_info(int *, fd_set *, struct timeval *,
                                      int *);
 
+    /*
+     * snmp_select_info2() is similar to snmp_select_info(), but accepts a
+     * pointer to a large file descriptor set instead of a pointer to a
+     * regular file descriptor set.
+     */
     int             snmp_select_info2(int *, netsnmp_large_fd_set *,
                                       struct timeval *, int *);
 
@@ -203,7 +213,14 @@ extern          "C" {
     int             snmp_sess_select_info2(void *, int *,
 					   netsnmp_large_fd_set *,
                                            struct timeval *, int *);
+    /*
+     * Returns 0 if success, -1 if fail.
+     */
     int             snmp_sess_read(void *, fd_set *);
+    /*
+     * Similar to snmp_sess_read(), but accepts a pointer to a large file
+     * descriptor set instead of a pointer to a file descriptor set.
+     */
     int             snmp_sess_read2(void *,
                                     netsnmp_large_fd_set *);
     void            snmp_sess_timeout(void *);

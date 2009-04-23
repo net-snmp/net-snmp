@@ -162,25 +162,32 @@ unregister_exceptfd(int fd)
  */
 void netsnmp_external_event_info(int *numfds, fd_set *readfds, fd_set *writefds, fd_set *exceptfds)
 {
-  int i;
+  netsnmp_large_fd_set lreadfds;
+  netsnmp_large_fd_set lwritefds;
+  netsnmp_large_fd_set lexceptfds;
 
-  external_fd_unregistered = 0;
+  netsnmp_large_fd_set_init(&lreadfds, FD_SETSIZE);
+  netsnmp_large_fd_set_init(&lwritefds, FD_SETSIZE);
+  netsnmp_large_fd_set_init(&lexceptfds, FD_SETSIZE);
 
-  for (i = 0; i < external_readfdlen; i++) {
-    FD_SET(external_readfd[i], readfds);
-    if (external_readfd[i] >= *numfds)
-      *numfds = external_readfd[i] + 1;
+  netsnmp_copy_fd_set_to_large_fd_set(&lreadfds, readfds);
+  netsnmp_copy_fd_set_to_large_fd_set(&lwritefds, writefds);
+  netsnmp_copy_fd_set_to_large_fd_set(&lexceptfds, exceptfds);
+
+  netsnmp_external_event_info2(numfds, &lreadfds, &lwritefds, &lexceptfds);
+
+  if (netsnmp_copy_large_fd_set_to_fd_set(readfds, &lreadfds) < 0
+      || netsnmp_copy_large_fd_set_to_fd_set(writefds, &lwritefds) < 0
+      || netsnmp_copy_large_fd_set_to_fd_set(exceptfds, &lexceptfds) < 0)
+  {
+    snmp_log(LOG_ERR,
+	     "Use netsnmp_external_event_info2() for processing"
+	     " large file descriptors");
   }
-  for (i = 0; i < external_writefdlen; i++) {
-    FD_SET(external_writefd[i], writefds);
-    if (external_writefd[i] >= *numfds)
-      *numfds = external_writefd[i] + 1;
-  }
-  for (i = 0; i < external_exceptfdlen; i++) {
-    FD_SET(external_exceptfd[i], exceptfds);
-    if (external_exceptfd[i] >= *numfds)
-      *numfds = external_exceptfd[i] + 1;
-  }
+
+  netsnmp_large_fd_set_cleanup(&lreadfds);
+  netsnmp_large_fd_set_cleanup(&lwritefds);
+  netsnmp_large_fd_set_cleanup(&lexceptfds);
 }
 
 void netsnmp_external_event_info2(int *numfds,
@@ -214,40 +221,32 @@ void netsnmp_external_event_info2(int *numfds,
  */
 void netsnmp_dispatch_external_events(int *count, fd_set *readfds, fd_set *writefds, fd_set *exceptfds)
 {
-  int i;
-  for (i = 0;
-       *count && (i < external_readfdlen) && !external_fd_unregistered; i++) {
-      if (FD_ISSET(external_readfd[i], readfds)) {
-          DEBUGMSGTL(("fd_event_manager:netsnmp_dispatch_external_events", 
-                     "readfd[%d] = %d\n", i, external_readfd[i]));
-          external_readfdfunc[i] (external_readfd[i],
-                                  external_readfd_data[i]);
-          FD_CLR(external_readfd[i], readfds);
-          (*count)--;
-      }
+  netsnmp_large_fd_set lreadfds;
+  netsnmp_large_fd_set lwritefds;
+  netsnmp_large_fd_set lexceptfds;
+
+  netsnmp_large_fd_set_init(&lreadfds, FD_SETSIZE);
+  netsnmp_large_fd_set_init(&lwritefds, FD_SETSIZE);
+  netsnmp_large_fd_set_init(&lexceptfds, FD_SETSIZE);
+
+  netsnmp_copy_fd_set_to_large_fd_set(&lreadfds, readfds);
+  netsnmp_copy_fd_set_to_large_fd_set(&lwritefds, writefds);
+  netsnmp_copy_fd_set_to_large_fd_set(&lexceptfds, exceptfds);
+
+  netsnmp_dispatch_external_events2(count, &lreadfds, &lwritefds, &lexceptfds);
+
+  if (netsnmp_copy_large_fd_set_to_fd_set(readfds, &lreadfds) < 0
+      || netsnmp_copy_large_fd_set_to_fd_set(writefds,  &lwritefds) < 0
+      || netsnmp_copy_large_fd_set_to_fd_set(exceptfds, &lexceptfds) < 0)
+  {
+    snmp_log(LOG_ERR,
+	     "Use netsnmp_dispatch_external_events2() for processing"
+	     " large file descriptors");
   }
-  for (i = 0;
-       *count && (i < external_writefdlen) && !external_fd_unregistered; i++) {
-      if (FD_ISSET(external_writefd[i], writefds)) {
-          DEBUGMSGTL(("fd_event_manager:netsnmp_dispatch_external_events", 
-                     "writefd[%d] = %d\n", i, external_writefd[i]));
-          external_writefdfunc[i] (external_writefd[i],
-                                   external_writefd_data[i]);
-          FD_CLR(external_writefd[i], writefds);
-          (*count)--;
-      }
-  }
-  for (i = 0;
-       *count && (i < external_exceptfdlen) && !external_fd_unregistered; i++) {
-      if (FD_ISSET(external_exceptfd[i], exceptfds)) {
-          DEBUGMSGTL(("fd_event_manager:netsnmp_dispatch_external_events", 
-                     "exceptfd[%d] = %d\n", i, external_exceptfd[i]));
-          external_exceptfdfunc[i] (external_exceptfd[i],
-                                    external_exceptfd_data[i]);
-          FD_CLR(external_exceptfd[i], exceptfds);
-          (*count)--;
-      }
-  }
+
+  netsnmp_large_fd_set_cleanup(&lreadfds);
+  netsnmp_large_fd_set_cleanup(&lwritefds);
+  netsnmp_large_fd_set_cleanup(&lexceptfds);
 }
 
 void netsnmp_dispatch_external_events2(int *count,
