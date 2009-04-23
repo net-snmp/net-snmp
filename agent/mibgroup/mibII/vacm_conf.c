@@ -1236,6 +1236,14 @@ int
 vacm_check_view(netsnmp_pdu *pdu, oid * name, size_t namelen,
                 int check_subtree, int viewtype)
 {
+    return vacm_check_view_contents(pdu, name, namelen, check_subtree, viewtype,
+                                    VACM_CHECK_VIEW_CONTENTS_NO_FLAGS);
+}
+
+int
+vacm_check_view_contents(netsnmp_pdu *pdu, oid * name, size_t namelen,
+                         int check_subtree, int viewtype, int flags)
+{
     struct vacm_accessEntry *ap;
     struct vacm_groupEntry *gp;
     struct vacm_viewEntry *vp;
@@ -1395,7 +1403,8 @@ vacm_check_view(netsnmp_pdu *pdu, oid * name, size_t namelen,
         contextNameIndex[0] = '\0';
 
     contextNameIndex[pdu->contextNameLen] = '\0';
-    if (!netsnmp_subtree_find_first(contextNameIndex)) {
+    if (!(flags & VACM_CHECK_VIEW_CONTENTS_DNE_CONTEXT_OK) &&
+        !netsnmp_subtree_find_first(contextNameIndex)) {
         /*
          * rfc 3415 section 3.2, step 1
          * no such context here; return no such context error 
