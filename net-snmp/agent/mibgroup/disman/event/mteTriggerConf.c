@@ -1472,9 +1472,18 @@ int
 clear_mteTTable(int majorID, int minorID, void *serverarg, void *clientarg)
 {
     netsnmp_tdata_row *row;
-
+   
     while (( row = netsnmp_tdata_row_first( trigger_table_data ))) {
-        netsnmp_tdata_remove_and_delete_row( trigger_table_data, row );
+        struct mteTrigger *entry = (struct mteTrigger *)
+            netsnmp_tdata_remove_and_delete_row(trigger_table_data, row);
+        if (entry) {
+            /* Remove from the callbacks list and disable triggers */
+            snmp_unregister_callback( SNMP_CALLBACK_LIBRARY,
+                                      SNMP_CALLBACK_POST_READ_CONFIG,
+                                      _mteTrigger_callback_enable, entry, 0 ); 
+            mteTrigger_disable( entry );
+            SNMP_FREE(entry);
+        }
     }
     return SNMPERR_SUCCESS;
 }
