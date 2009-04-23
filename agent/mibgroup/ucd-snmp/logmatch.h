@@ -12,6 +12,7 @@ config_require(util_funcs/header_simple_table)
 #include <regex.h>
 
 struct logmatchstat {
+    char            filenamePattern[256];
     char            filename[256];
     char            regEx[256];
     char            name[256];
