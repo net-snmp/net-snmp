@@ -5625,7 +5625,7 @@ snmp_read(fd_set * fdset)
     netsnmp_large_fd_set lfdset;
 
     netsnmp_large_fd_set_init(&lfdset, FD_SETSIZE);
-    *lfdset.lfs_setptr = *fdset;
+    netsnmp_copy_fd_set_to_large_fd_set(&lfdset, fdset);
     snmp_read2(&lfdset);
     netsnmp_large_fd_set_cleanup(&lfdset);
 }
@@ -6031,7 +6031,7 @@ snmp_sess_read(void *sessp, fd_set * fdset)
   netsnmp_large_fd_set lfdset;
   
   netsnmp_large_fd_set_init(&lfdset, FD_SETSIZE);
-  *lfdset.lfs_setptr = *fdset;
+  netsnmp_copy_fd_set_to_large_fd_set(&lfdset, fdset);
   rc = snmp_sess_read2(sessp, &lfdset);
   netsnmp_large_fd_set_cleanup(&lfdset);
   return rc;
@@ -6118,9 +6118,13 @@ snmp_sess_select_info(void *sessp,
   netsnmp_large_fd_set lfdset;
 
   netsnmp_large_fd_set_init(&lfdset, FD_SETSIZE);
-  *lfdset.lfs_setptr = *fdset;
+  netsnmp_copy_fd_set_to_large_fd_set(&lfdset, fdset);
   rc = snmp_sess_select_info2(sessp, numfds, &lfdset, timeout, block);
-  *fdset = *lfdset.lfs_setptr;
+  if (netsnmp_copy_large_fd_set_to_fd_set(fdset, &lfdset) < 0) {
+      snmp_log(LOG_ERR,
+	     "Use snmp_sess_select_info2() for processing"
+	     " large file descriptors");
+  }
   netsnmp_large_fd_set_cleanup(&lfdset);
   return rc;
 }

@@ -388,6 +388,12 @@ struct snmp_session {
  * This structure however can hold so-called large file descriptors
  * (>= FD_SETSIZE or 1024) on Unix systems or more than FD_SETSIZE (64)
  * sockets on Windows systems.
+ *
+ * It is safe to allocate this structure on the stack.
+ *
+ * This structure must be initialized by calling netsnmp_large_fd_set_init()
+ * and must be cleaned up via netsnmp_large_fd_set_cleanup(). If this last
+ * function is not called this may result in a memory leak.
  */
 typedef struct netsnmp_large_fd_set_s {
     /** Maximum set size. */
