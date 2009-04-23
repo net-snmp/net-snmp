@@ -43,6 +43,7 @@ sctpAssocTable_delete_invalid(netsnmp_container *assocTable)
         sctpAssocTable_entry_free(entry);
         CONTAINER_REMOVE(to_delete, NULL);
     }
+    CONTAINER_FREE(to_delete);
 }
 
 static void
@@ -76,6 +77,7 @@ sctpAssocRemAddrTable_delete_invalid(netsnmp_container *remAddrTable)
         sctpAssocRemAddrTable_entry_free(entry);
         CONTAINER_REMOVE(to_delete, NULL);
     }
+    CONTAINER_FREE(to_delete);
 }
 
 static void
@@ -109,6 +111,7 @@ sctpAssocLocalAddrTable_delete_invalid(netsnmp_container *localAddrTable)
         sctpAssocLocalAddrTable_entry_free(entry);
         CONTAINER_REMOVE(to_delete, NULL);
     }
+    CONTAINER_FREE(to_delete);
 }
 
 
