@@ -1,6 +1,7 @@
 package NetSNMP::agent;
 
 use strict;
+use warnings;
 use Carp;
 
 require Exporter;
