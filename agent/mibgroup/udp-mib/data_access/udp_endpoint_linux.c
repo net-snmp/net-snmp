@@ -14,7 +14,7 @@
 #include <net-snmp/data_access/udp_endpoint.h>
 
 #include "udp-mib/udpEndpointTable/udpEndpointTable_constants.h"
-#include "mibgroup/util_funcs.h"
+#include "mibgroup/util_funcs/get_pid_from_inode.h"
 #include "udp_endpoint_private.h"
 
 #include <fcntl.h>
@@ -225,7 +225,7 @@ _process_line_udp_ep(netsnmp_line_info *line_info, void *mem,
     /*
      * get the pid also
      */
-    ep->pid = get_pid_from_inode(inode);
+    ep->pid = netsnmp_get_pid_from_inode(inode);
 
     ep->index = (u_int)(lpi->user_context);
     lpi->user_context = (void*)((u_int)(lpi->user_context) + 1);

@@ -20,6 +20,7 @@
 config_require(udp-mib/data_access/udp_endpoint_common)
 #if defined( linux )
 config_require(udp-mib/data_access/udp_endpoint_linux)
+config_require(util_funcs/get_pid_from_inode)
 #elif defined( solaris2 )
 config_require(udp-mib/data_access/udp_endpoint_solaris2)
 #else
