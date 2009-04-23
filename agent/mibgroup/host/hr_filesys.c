@@ -637,7 +637,7 @@ Init_HR_FileSys(void)
         fclose(fp);
     fp = fopen(ETC_MNTTAB, "r");
     if (!fp) {
-      netsnmp_config_error("Can't open %s\n", ETC_MNTTAB);
+      netsnmp_config_error("Can't open mnttab %s\n", ETC_MNTTAB);
     }
 #endif
 }
