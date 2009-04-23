@@ -632,7 +632,11 @@ really_try_next:
         if (store_idx > HRS_TYPE_FIXED_MAX)
             if (storageUseNFS && Check_HR_FileSys_NFS())
                 storage_type_id[storage_type_len - 1] = 10;     /* Network Disk */
-#if HAVE_HASMNTOPT
+#if HAVE_HASMNTOPT && !(defined(aix4) || defined(aix5) || defined(aix6))
+            /* 
+             * hasmntopt takes "const struct mntent*", but HRFS_entry has been
+             * defined differently for AIX, so skip this for AIX
+             */
             else if (hasmntopt(HRFS_entry, "loop") != NULL)
                 storage_type_id[storage_type_len - 1] = 5;      /* Removable Disk */
 #endif
