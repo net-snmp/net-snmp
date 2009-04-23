@@ -531,8 +531,11 @@ _ba_get_subset(netsnmp_container *container, void *data)
     
     va = SNMP_MALLOC_TYPEDEF(netsnmp_void_array);
     if (NULL==va)
+    {
+        free (rtn);
         return NULL;
-
+    }
+    
     va->size = len;
     va->array = rtn;
 

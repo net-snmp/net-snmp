@@ -80,16 +80,20 @@ netsnmp_table_data_clone_row(netsnmp_table_row *row)
 
     if (row->indexes) {
         newrow->indexes = snmp_clone_varbind(newrow->indexes);
-        if (!newrow->indexes)
+        if (!newrow->indexes) {
+            free (newrow);
             return NULL;
+        }
     }
 
     if (row->index_oid) {
         memdup((u_char **) & newrow->index_oid,
                (u_char *) row->index_oid,
                row->index_oid_len * sizeof(oid));
-        if (!newrow->index_oid)
+        if (!newrow->index_oid) {
+            free (newrow);
             return NULL;
+        }
     }
 
     return newrow;
