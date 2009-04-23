@@ -122,6 +122,24 @@ listing of all changes made to the code.
       - library layering improvements: introduce netsnmp_mktemp to prevent
 	libnetsnmpagent from depending on libnetsnmpmibs
       - patch: 1645698: fix 64-bit signed integer encoding
+      - [BUG 1976772]: Changed the mib parser to handle long binary and hex
+	strings.
+      - [PATCH 2258229]: Remove misleading comment Patch provided by Dan
+	Anderson
+      - [PATCH 2479700]: Fix zoned IP address used as table indices Patch
+	provided by Brian Retford.
+      - [PATCH 2492377]: Fix typo/bug in snmp_enable_callback() Reported by
+	joyceanmachine
+      - [PATCH 2505488]: to fix alarms not being triggered at the right
+	times due to large clock skews.
+      - [PATCH 2538169]: Prevent infinite retries for an invalid
+	error-index. Patch provided by Doug Manley
+      - [PATCH 2689362]: Fix handling of IPv6 hostnames. Patch provided by
+	Nestor Melo.
+      - [PATCH 2713841]: Fix runtime errors triggered by high-ASCII chars
+	Patch provided by Bart Van Assche
+      - [PATCH 2772787]: Cleaner approach to handling large fd_sets. Based
+	on patch supplied by Bart Van Assche.
 
     snmplib, snmpd:
       - [BUG 2001124]: Allow embedded NUL characters in usmUserPublic
@@ -369,6 +387,34 @@ listing of all changes made to the code.
 	from kernel extraction for better portability.
       - suppress annoying "registration != duplicate" warning for root oids
 	(otherwise, you'll get this message on almost every startup)
+      - [PATCH 1550730]: Report errors from iterator-based handlers. Based
+	on a patch provided by Wayne Glantz
+      - [PATCH 1901764]: for supporting logwatch files that are date based
+      - [PATCH 2053273]: to imlpement the etherlike mib (at least on linux)
+      - [PATCH 2103492]: implement RMON-MIB::etherStatsJabbers Patch from
+	Narendra K., Sandeep K. Shandilya and Shyam Iyer
+      - [PATCH 2124288]: Fix setting of usmUserPrivProtocol at creation.
+	Logic bug, reported by Ramesh Kotabagi
+      - [PATCH 2162652]: patch to fix simple hrfs checks when NFS is in
+	use.
+      - [PATCH 2384779]: Fix handling of GetBulk with N>0,M==0 Patch
+	provided by Angus Salkeld
+      - [PATCH 2406378]: Fix hrSWRunPerfMem on 64-bit Solaris systems Patch
+	provided by NTwoO
+      - [PATCH 2431353 ]: to make some C++ compilers happier
+      - [PATCH 2435681]: Enable if-mib rewrite (with sysctl backend) on
+	NetBSD
+      - [PATCH 2435793]: Support 64-bit IF-MIB counters on sysctl (*BSD)
+	systems. Patch provided by Jan Andres
+      - [PATCH 2507249]: sctp-mib support for FreeBSD.
+      - [PATCH 2686280]: Report duplicate registrations as an error (rather
+	than a failed assertion). Fix provided by Bart Van Assche   Qn:
+	Does this even qualify as an error? Wouldn't a warning be
+	sufficient?
+      - patch from Tushar Gohad to clean up notification registerations
+	during disman event mib cleanup processing.
+      - [BUG 112694]: Patch from Bill Fenner: don't open (and clobber) an
+	agentx socket if the other transports fail to open
 
     snmpd, apps:
       - Parser of -LS command line argument now accepts both '-LS <level>
@@ -393,6 +439,9 @@ listing of all changes made to the code.
       - Use NULL instead of 0 for NULL pointers. Use casted 0's instead of
 	0 for NULL function pointers.
 
+    snmpnetstat:
+      - [PATCH 2564538]: to support GETBULK in v2c+ snmp versions
+
     snmptrapd:
       - FEATURE: 1159947: Allow control of traphandle data format
       - FEATURE: 741375: Extend -F flag to cover syslog/execute format
@@ -414,6 +463,8 @@ listing of all changes made to the code.
       - upport for forwarding traps by OID subtree. (Consistent with
 	subtree-based script processing).
       - upport per-trap format specifications
+      - [PATCH 2726302]: Pass results of Perl trap handlers to trap daemon
+	Patch provided by Michael Schmitz
 
     snmpusm:
       - [PATCH 1591355]: Allow cloning to engineIDs that are different from
@@ -502,6 +553,10 @@ listing of all changes made to the code.
 	when linking snmptrapd
       - yet another fix to address build issues with ethtool (on RH9).
 	Patch provided by Magnus Fromreide.
+      - Upgrade libtool version to 2.2.6 in order to work around a buglet
+	that made autoreconf -vif erase config.sub and config.guess.
+      - [PATCH 2184039]: misc fixes for freeing memory during error
+	conditions.
 
     building:
       - Add a variation of AC_SEARCH_LIBS where the result variable is
@@ -595,6 +650,12 @@ listing of all changes made to the code.
       - [PATCH 1898204]: Wescott: fix bug 1898198 in parse.c to avoid a
 	segfault when parsing broken mibs.
 
+    hpux:
+      - [PATCH 2088726]: to fix an issue with hpux reporting memory in
+	negative values.
+      - 0 UX: BUG: 2779472: Filesystems missing in hrStorage table on HP-UX
+	11.31
+
     mib2c:
       - [BUG 1429472]: Protect against missing instances (and invalid
 	objects)
@@ -605,6 +666,9 @@ listing of all changes made to the code.
       - [PATCH 1668171]: skip unknown cols in min/max range for tables,
 	instead of error
       - [PATCH 1914398]: install mib2c.perl.conf
+      - [PATCH 2136437]: make FLAG defines more 64bit friendly when huge
+	tables are encountered
+      - [PATCH 2316127]: Fix bug in iterate_access generated code.
 
     misc:
       - Add config rereading support to the subagent generated by
@@ -653,9 +717,23 @@ listing of all changes made to the code.
       - install embedded perl init files for snmpd/snmptrapd with mode 644
 	instead of 755
       - patch: 1725049: fix bulkwalk in cases of non-repeater usage.
+      - [BUG 1554817]: revised fix for the class assigment so getRootOID
+	works properly. Now passes "make test" and "make perltest".
+      - [PATCH 1956193]: beta threadable perl module code for
+	SNMPv1/SNMPv2c usage.
+      - [PATCH 2182079]: apply patch from int32 to fix a number of perl
+	warnings and fix the modules so that use strict is possible
+      - [PATCH 2272347]: Implement "implied" in MIB hash Patch provided by
+	Bill Fenner
+      - [PATCH 2361712]: to fix getbulk optimization during walks where end
+	conditionns are met on middle OIDs first.
+      - [PATCH 2709705]: Retrieve src/target IP address in Perl-based
+	agents Patch provided by fhew
+      - [PATCH 276371]: to allow perl to use OPAQUEs
 
     ports:
       - patch: 1706344: from naylor: fix compilation with cygwin
+      - [PATCH 2688342]: to fix various compiler warning
 
     python:
       - [BUG 1826174]: Check for buffer overflow when printing values.
@@ -667,6 +745,15 @@ listing of all changes made to the code.
       - [PATCH 1862177]: made code more windows/cygwin compiler friendl
       - [PATCH 1877840]: fix MIB label and indexing due to slightly broken
 	regexp
+      - [PATCH 2074817]: to fix regexp engine CPU performance issues
+      - [PATCH 2260828]: Fix python snmpwalk memory leak Patch provided by
+	Gabriele Messineo
+      - [PATCH 2580979]: Fix python session pointers on 64-bit systems.
+	Patch provided by John Khvatov.
+      - [PATCH 2667415]: Support "UseNumeric" option. Remove debugging
+	output in "snmpwalk" command. Patch provided by Diego Billi
+      - [PATCH 2775800]: Romanek to allow python threading to continue when
+	a request is sent
 
     test:
       - enhance snmpnetstat test to check tcpTable in TCP mode
@@ -796,14 +883,21 @@ listing of all changes made to the code.
       - [PATCH 1824196]: {ifOperStatus,ipAdEntIfIndex} reported incorrectly
 	Patch supplied by Anders Persson. Fixes Bugs 1822275 and 1819189.
       - [PATCH 1834699]: Fix 1833294: DLPI problems on Solaris 2.6
+      - [PATCH 2012404]: deal with more than 10 interfaces. New hardcoded
+	limit is 50. A better scaling patch would be appreciated :-)
+      - [PATCH 2751588]: Inconsistent data (e.g. UDP/TCP MIB scalar values
+	of zero) can be reported on Solaris 10U4+ Patch provided by Anders
+	Persson
 
     Win32:
       - [BUG 1662987]: compile error on Cygwin
       - [PATCH 1622080]: A: pass Win32 handles remain open.
       - fix AES support
       - fix win32/Configure --with-ipv6
-
-
+      - [PATCH 2686248]: Applied patch by Bart Van Assche which fixes
+	several winExtDLL bugs.
+      - [PATCH 2691876]: Applied patch by rdiez to allow compiling the
+	services using unicode.
 
 *5.4*
 
