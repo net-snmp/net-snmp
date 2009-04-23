@@ -45116,7 +45116,7 @@ if test "${ac_cv_ETC_MNTTAB+set}" = set; then
 else
   ac_cv_ETC_MNTTAB="${with_mnttab:-unknown}"
     if test "$ac_cv_ETC_MNTTAB" = "unknown"; then
-        for i in /etc/mnttab /etc/mtab /etc/filesystems
+        for i in /etc/mnttab /etc/mtab /etc/filesystems /dev/mnttab
         do
             if test -f $i; then
                 ac_cv_ETC_MNTTAB="$i"
