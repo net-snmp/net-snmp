@@ -2147,9 +2147,10 @@ handle_print_numeric(const char *token, char *line)
     char       *st;
 
     value = strtok_r(line, " \t\n", &st);
-    if ((strcasecmp(value, "yes")  == 0) || 
-	(strcasecmp(value, "true") == 0) ||
-	(*value == '1')) {
+    if (value && (
+	    (strcasecmp(value, "yes")  == 0) || 
+	    (strcasecmp(value, "true") == 0) ||
+	    (*value == '1') )) {
 
         netsnmp_ds_set_int(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_OID_OUTPUT_FORMAT,
                                                   NETSNMP_OID_OUTPUT_NUMERIC);
@@ -3395,17 +3396,19 @@ sprint_realloc_value(u_char ** buf, size_t * buf_len,
                                             NETSNMP_DS_LIB_DONT_PRINT_UNITS)) {
             units = subtree->units;
         }
-        if (subtree && subtree->printomat) {
+        if (subtree) {
+	    if(subtree->printomat) {
             return (*subtree->printomat) (buf, buf_len, out_len,
                                           allow_realloc, variable,
                                           subtree->enums, subtree->hint,
                                           units);
-        } else {
-            return sprint_realloc_by_type(buf, buf_len, out_len,
-                                          allow_realloc, variable,
-                                          subtree->enums, subtree->hint,
-                                          units);
-        }
+	    } else {
+		return sprint_realloc_by_type(buf, buf_len, out_len,
+					      allow_realloc, variable,
+					      subtree->enums, subtree->hint,
+					      units);
+	    }
+	}
 #else
         return sprint_realloc_by_type(buf, buf_len, out_len,
                                       allow_realloc, variable,
@@ -5422,14 +5425,14 @@ _add_strings_to_oid(void *tp, char *cp,
                 (*objidlen)++;
             }
 
+            if (!cp)
+                goto bad_id;
             while (*cp && *cp != doingquote) {
                 if (*objidlen >= maxlen)
                     goto bad_id;
                 objid[*objidlen] = *cp++;
                 (*objidlen)++;
             }
-            if (!cp)
-                goto bad_id;
             cp2 = cp + 1;
             if (!*cp2)
                 cp2 = NULL;
