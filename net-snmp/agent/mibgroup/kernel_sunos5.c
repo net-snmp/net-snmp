@@ -918,8 +918,13 @@ getmib(int groupname, int subgroupname, void **statbuf, size_t *size,
     req = (struct opthdr *)(tor + 1);
     req->level = groupname;
     req->name = subgroupname;
-#if defined( SOLARIS_HAVE_RFC4293_SUPPORT )
-    req->len = 1; /* Used as a flag for S10 to grab extra data */
+    /*
+     * non-zero len field is used to request extended MIB statistics
+     * on Solaris 10 Update 4 and later. The LEGACY_MIB_SIZE macro is only
+     * available for S10U4+, so we use that to see what action to take.
+     */
+#ifdef LEGACY_MIB_SIZE
+    req->len = 1;	/* ask for extended MIBs */
 #else
     req->len = 0;
 #endif
