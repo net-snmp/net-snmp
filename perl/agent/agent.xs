@@ -869,7 +869,6 @@ nari_setValue(me, type, value)
 		snmp_log(LOG_ERR, "Non-unsigned-integer value passed to setValue with ASN_UNSIGNED/ASN_COUNTER/ASN_TIMETICKS: type was %d\n",
 			SvTYPE(value));
 		RETVAL = 0;
-          case ASN_OPAQUE:
 		break;
 	      }
 
@@ -920,6 +919,7 @@ nari_setValue(me, type, value)
 
           case ASN_OCTET_STR:
           case ASN_BIT_STR:
+          case ASN_OPAQUE:
 	      /* Check that we have been passed something with a string value (or a blessed scalar) */
 	      if (!SvPOKp(value) && (SvTYPE(value) != SVt_PVMG)) {
 		snmp_log(LOG_ERR, "Non-string value passed to setValue with ASN_OCTET_STR/ASN_BIT_STR: type was %d\n",
