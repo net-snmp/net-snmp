@@ -80,7 +80,7 @@ AC_CACHE_CHECK([for mount table location],
     if test "$ac_cv_ETC_MNTTAB" = "unknown"; then
         for i in /etc/mnttab /etc/mtab /etc/filesystems /dev/mnttab
         do
-            if test -f $i; then
+            if test -f $i -o -c $i; then
                 ac_cv_ETC_MNTTAB="$i"
                 break;
             fi
