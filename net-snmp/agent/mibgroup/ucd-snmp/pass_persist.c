@@ -784,6 +784,13 @@ close_persist_pipe(int iindex)
         close(persist_pipes[iindex].fdIn);
         persist_pipes[iindex].fdIn = -1;
     }
+
+#if defined(WIN32) && !defined (mingw32) && !defined (HAVE_SIGNAL)
+    if (!CloseHandle(persist_pipes[iindex].pid)) {
+          DEBUGMSGTL(("ucd-snmp/pass_persist","close_persist_pipe pid: close error\n"));
+        } 
+#endif
+    
 #ifdef __uClinux__
 	/*remove the pipes*/
 	unlink(fifo_in_path);
