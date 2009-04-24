@@ -643,10 +643,17 @@ get_exec_pipes(char *cmd, int *fdIn, int *fdOut, int *pid)
       return 0;
     }
     
+    DEBUGMSGTL(("util_funcs","child hProcess (stored in pid): %d\n",(int)pi.hProcess));
+    DEBUGMSGTL(("util_funcs","child dwProcessId (task manager): %d\n",(int)pi.dwProcessId));
+
     /* Set global child process handle */
     *pid = (int)pi.hProcess;
 
-    /* Close pipe handles to make sure that no handles to the write end of the
+    /* Cleanup */
+    if (!CloseHandle(pi.hThread))
+      DEBUGMSGTL(("util_funcs","get_exec_pipes CloseHandle pi.hThread: %d\n",cmd));
+
+   /* Close pipe handles to make sure that no handles to the write end of the
      * output pipe are maintained in this process or else the pipe will
      * not close when the child process exits and any calls to ReadFile 
      * will hang.
