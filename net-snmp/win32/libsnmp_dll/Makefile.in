@@ -81,6 +81,7 @@ CLEAN :
 	-@erase "..\lib\$(OUTDIR)\netsnmp.exp"
 	-@erase "..\lib\$(OUTDIR)\netsnmp.lib"
 	-@erase "..\bin\$(OUTDIR)\netsnmp.dll"
+	-@erase "..\bin\$(OUTDIR)\netsnmp.dll.manifest"
 
 "..\lib\$(OUTDIR)" :
     if not exist "..\lib\$(OUTDIR)/$(NULL)" mkdir "..\lib\$(OUTDIR)"
@@ -261,6 +262,7 @@ CLEAN :
 	-@erase "..\lib\$(OUTDIR)\netsnmp.lib"
 	-@erase "$(INTDIR)\netsnmp.pdb"
 	-@erase "..\bin\$(OUTDIR)\netsnmp.dll"
+	-@erase "..\bin\$(OUTDIR)\netsnmp.dll.manifest"
 
 "..\lib\$(OUTDIR)" :
     if not exist "..\lib\$(OUTDIR)/$(NULL)" mkdir "..\lib\$(OUTDIR)"
