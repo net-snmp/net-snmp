@@ -321,7 +321,6 @@ var_extensible_pass_persist(struct variable *vp,
                     vp->type = ASN_OCTET_STR;
                     return ((unsigned char *) buf2);
                 } 
-#ifndef WIN32   /* FIXME:  MSVC 6 doesn't have strtoull */
                 else if (!strncasecmp(buf, "integer64", 9)) {
                     static struct counter64 c64;
                     uint64_t v64 = strtoull(buf2, NULL, 10);
@@ -336,7 +335,6 @@ var_extensible_pass_persist(struct variable *vp,
                     vp->type = ASN_INTEGER64;
                     return ((unsigned char *) &c64);
                 } 
-#endif  /* WIN32 */
                 else if (!strncasecmp(buf, "integer", 7)) {
                     *var_len = sizeof(long_ret);
                     long_ret = strtol(buf2, NULL, 10);
@@ -348,7 +346,6 @@ var_extensible_pass_persist(struct variable *vp,
                     vp->type = ASN_UNSIGNED;
                     return ((unsigned char *) &long_ret);
                 } 
-#ifndef WIN32   /* FIXME:  MSVC 6 doesn't have strtoull */
                 else if (!strncasecmp(buf, "counter64", 9)) {
                     static struct counter64 c64;
                     uint64_t v64 = strtoull(buf2, NULL, 10);
@@ -363,7 +360,6 @@ var_extensible_pass_persist(struct variable *vp,
                     vp->type = ASN_COUNTER64;
                     return ((unsigned char *) &c64);
                 } 
-#endif  /* WIN32 */
                 else if (!strncasecmp(buf, "counter", 7)) {
                     *var_len = sizeof(long_ret);
                     long_ret = strtoul(buf2, NULL, 10);
