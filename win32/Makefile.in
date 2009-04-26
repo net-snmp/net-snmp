@@ -481,6 +481,7 @@ install ::
 
 	@-echo Copying compiled programs to $(PREFIX_DOS)\bin
         @-Copy win32\bin\$(CFG)\*.exe $(PREFIX_DOS)\bin > NUL:
+        @-Copy win32\bin\$(CFG)\*.manifest $(PREFIX_DOS)\bin > NUL:	
 
 	@-echo Copying (local) scripts to $(PREFIX_DOS)\bin
 	@-Copy win32\bin\$(CFG)\snmpconf $(PREFIX_DOS)\bin > NUL:

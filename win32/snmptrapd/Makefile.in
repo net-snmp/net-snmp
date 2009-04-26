@@ -32,6 +32,7 @@ CLEAN :
 	-@erase "$(INTDIR)\vc??.idb"
 	-@erase "$(INTDIR)\$(PROGNAME).pch"
 	-@erase "..\bin\$(OUTDIR)\$(PROGNAME).exe"
+	-@erase "..\bin\$(OUTDIR)\$(PROGNAME).exe.manifest"
 
 "..\bin\$(OUTDIR)" :
     if not exist "..\bin\$(OUTDIR)/$(NULL)" mkdir "..\bin\$(OUTDIR)"
@@ -117,6 +118,7 @@ CLEAN :
 	-@erase "$(INTDIR)\$(PROGNAME).bsc"
 	-@erase "$(INTDIR)\$(PROGNAME).pdb"
 	-@erase "..\bin\$(OUTDIR)\$(PROGNAME).exe"
+	-@erase "..\bin\$(OUTDIR)\$(PROGNAME).exe.manifest"
 
 "..\bin\$(OUTDIR)" :
     if not exist "..\bin\$(OUTDIR)/$(NULL)" mkdir "..\bin\$(OUTDIR)"
