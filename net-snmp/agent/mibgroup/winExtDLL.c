@@ -1,7 +1,7 @@
 /**
  * @brief winExtDLL Net-SNMP agent extension module.
  *
- * Copyright (c) 2006 Alex Burger.
+ * Copyright (c) 2006-2009 Alex Burger.
  * Copyright (c) 2009 Bart Van Assche <bart.vanassche@gmail.com>.
  *
  * This Net-SNMP agent extension module loads Windows SNMP Service Extension
@@ -28,7 +28,8 @@
  *   required for compiling this agent extension module. Some definitions in
  *   <Snmp.h> conflict with Net-SNMP definitions, e.g. ASN_OCTETSTRING. To
  *   To resolve this, create a copy of Snmp.h in the same directory as this
- *   source file (winExtDLL.c) and change all occurrences of ASN_ to MS_ASN_.
+ *   source file (winExtDLL.c), rename it to Snmp-winExtDLL.h and change all 
+ *   occurrences of ASN_ to MS_ASN_.
  *
  * @note All Windows extension DLLs are loaded during startup of the Net-SNMP
  *   service. The service must be restarted to load new modules.
