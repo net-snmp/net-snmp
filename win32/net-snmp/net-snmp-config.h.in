@@ -1670,6 +1670,10 @@ typedef unsigned int   uintptr_t;
 #define NI_MAXHOST	1025
 #endif
 
+#ifndef HAVE_STRTOULL
+#define strtoull _strtoui64
+#endif
+
 /*
  * Module configuration and control starts here.
  *
