@@ -43,7 +43,9 @@
 #include <winsock2.h>
 #include <ws2tcpip.h>
 
+#ifndef HAVE_INET_NTOP
 extern const char *inet_ntop(int, const void*, char*, size_t);
+#endif
 
 #endif
 

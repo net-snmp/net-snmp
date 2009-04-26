@@ -45,8 +45,12 @@
 #include <ws2tcpip.h>
 #undef  HAVE_IF_NAMETOINDEX
 
+#ifndef HAVE_INET_PTON
 extern int         inet_pton(int, const char*, void*);
+#endif
+#ifndef HAVE_INET_NTOP
 extern const char *inet_ntop(int, const void*, char*, size_t);
+#endif
 const struct in6_addr in6addr_any = IN6ADDR_ANY_INIT;
 #endif
 

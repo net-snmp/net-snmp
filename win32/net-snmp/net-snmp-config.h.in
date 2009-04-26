@@ -4,6 +4,14 @@
 #ifndef NET_SNMP_CONFIG_H
 #define NET_SNMP_CONFIG_H
 
+/* _MSC_VER values
+   1500 = 9.0 (2008)
+   1400 = 8.0 (2005)
+   1310 = 7.1 (2003)
+   1300 = 7.0 (2002)
+   1200 = 6.0
+*/
+
 /* Automatically set by Windows perl Configure script.
  * When compiling with the MSVC workspace, this must be set manually.
  * See the PACKAGE_VERSION variable in Unix /configure script
@@ -1561,7 +1569,10 @@ typedef unsigned int   uintptr_t;
 /* define to 1 if you do not want to set global snmp_errno */
 #define DONT_SHARE_ERROR_WITH_OTHER_THREADS 1
 
+/* Not needed for MSVC 2008 */
+#if _MSC_VER < 1500
 #define vsnprintf _vsnprintf
+#endif
 #define snprintf  _snprintf
 
 #define EADDRINUSE	WSAEADDRINUSE
@@ -1636,21 +1647,23 @@ typedef unsigned int   uintptr_t;
 #define EXTENSIBLEMIB NETSNMP_UCDAVIS_MIB
 #endif
 
-#if defined(_MSC_VER)
-/* this bit of magic enables or disables IPv6 transports */
-  #if NETSNMP_ENABLE_IPV6
-    /* "dont have" implies "compile here" for snmplib/inet_?to?.c */
+/* MSVC 6+ has inet_ntop() and inet_pton() but anything before MSVC 2008 only supports IPv4 */
+/* "have" implies "dont compile here" for snmplib/inet_?to?.c */
+#define HAVE_INET_NTOP 1
+#define HAVE_INET_PTON 1
+
+/* IPv6 transports */
+#if NETSNMP_ENABLE_IPV6
+  #define NETSNMP_TRANSPORT_TCPIPV6_DOMAIN 1
+  #define NETSNMP_TRANSPORT_UDPIPV6_DOMAIN 1
+  /* Older than MSVC 2008 - "dont have" implies "compile here" for snmplib/inet_?to?.c */
+  #if _MSC_VER < 1500
     #undef HAVE_INET_NTOP
     #undef HAVE_INET_PTON
-    #define NETSNMP_TRANSPORT_TCPIPV6_DOMAIN 1
-    #define NETSNMP_TRANSPORT_UDPIPV6_DOMAIN 1
-  #else
-    /* "have" implies "dont compile here" for snmplib/inet_?to?.c */
-    #define HAVE_INET_NTOP 1
-    #define HAVE_INET_PTON 1
-    #undef NETSNMP_TRANSPORT_TCPIPV6_DOMAIN
-    #undef NETSNMP_TRANSPORT_UDPIPV6_DOMAIN
   #endif
+#else
+  #undef NETSNMP_TRANSPORT_TCPIPV6_DOMAIN
+  #undef NETSNMP_TRANSPORT_UDPIPV6_DOMAIN
 #endif
 
 #ifndef NI_MAXHOST
