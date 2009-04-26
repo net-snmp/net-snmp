@@ -34,6 +34,7 @@ CLEAN :
 	-@erase "$(INTDIR)\winservice.res"
 	-@erase "$(INTDIR)\snmpd.pch"
 	-@erase "..\bin\$(OUTDIR)\snmpd.exe"
+	-@erase "..\bin\$(OUTDIR)\snmpd.exe.manifest"
 
 "..\bin\$(OUTDIR)" :
     if not exist "..\bin\$(OUTDIR)/$(NULL)" mkdir "..\bin\$(OUTDIR)"
@@ -125,6 +126,7 @@ CLEAN :
 	-@erase "$(INTDIR)\snmpd.pdb"
 	-@erase "$(INTDIR)\snmpd.pch"
 	-@erase "..\bin\$(OUTDIR)\snmpd.exe"
+	-@erase "..\bin\$(OUTDIR)\snmpd.exe.manifest"
 
 "..\bin\$(OUTDIR)" :
     if not exist "..\bin\$(OUTDIR)/$(NULL)" mkdir "..\bin\$(OUTDIR)"
