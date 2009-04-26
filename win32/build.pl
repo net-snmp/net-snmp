@@ -31,7 +31,9 @@ if (! ($current_pwd =~ /\\win32$/)) {
   chomp $current_pwd;
 }
 
-if (! (-d $ENV{MSVCDir})) {
+if ( -d $ENV{MSVCDir} || -d $ENV{VCINSTALLDIR}) {
+}
+else {
   print "\nPlease run VCVARS32.BAT first to set up the Visual Studio build\n" .
         "environment.\n\n";
   system("pause");
