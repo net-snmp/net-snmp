@@ -133,7 +133,7 @@ BSC32_FLAGS=/nologo /o"$(INTDIR)\libsnmp_dll.bsc"
 BSC32_SBRS= \
 	
 LINK32=link.exe
-LINK32_FLAGS=$(OPENSSL) advapi32.lib ws2_32.lib kernel32.lib user32.lib /nologo /subsystem:console /dll /pdb:none /machine:I386 /def:".\libsnmp.def" /out:"../bin/$(OUTDIR)/netsnmp.dll" /implib:"../lib/$(OUTDIR)\netsnmp.lib" 
+LINK32_FLAGS=$(OPENSSL) advapi32.lib ws2_32.lib kernel32.lib user32.lib /nologo /subsystem:console /dll /pdb:none /def:".\libsnmp.def" /out:"../bin/$(OUTDIR)/netsnmp.dll" /implib:"../lib/$(OUTDIR)\netsnmp.lib" 
 LINK32_OBJS= \
 	"$(INTDIR)\asn1.obj" \
 	"$(INTDIR)\callback.obj" \
@@ -314,7 +314,7 @@ BSC32_FLAGS=/nologo /o"$(INTDIR)\libsnmp_dll.bsc"
 BSC32_SBRS= \
 	
 LINK32=link.exe
-LINK32_FLAGS=$(OPENSSL) advapi32.lib ws2_32.lib kernel32.lib user32.lib /nologo /subsystem:console /dll /incremental:no /pdb:"$(INTDIR)\netsnmp.pdb" /debug /machine:I386 /def:".\libsnmp.def" /out:"../bin/$(OUTDIR)/netsnmp.dll" /implib:"../lib/$(OUTDIR)\netsnmp.lib" 
+LINK32_FLAGS=$(OPENSSL) advapi32.lib ws2_32.lib kernel32.lib user32.lib /nologo /subsystem:console /dll /incremental:no /pdb:"$(INTDIR)\netsnmp.pdb" /debug /def:".\libsnmp.def" /out:"../bin/$(OUTDIR)/netsnmp.dll" /implib:"../lib/$(OUTDIR)\netsnmp.lib" 
 LINK32_OBJS= \
 	"$(INTDIR)\asn1.obj" \
 	"$(INTDIR)\callback.obj" \
