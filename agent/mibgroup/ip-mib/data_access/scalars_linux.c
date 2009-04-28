@@ -57,7 +57,7 @@ netsnmp_arch_ip_scalars_ipForwarding_set(u_long value)
         value = 0;
     else {
         DEBUGMSGTL(("access:ipForwarding", "bad value %ld for %s\n",
-                    value));
+                    value, ipfw_name));
         return SNMP_ERR_WRONGVALUE;
     }
 
