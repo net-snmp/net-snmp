@@ -12,6 +12,16 @@
    1200 = 6.0
 */
 
+/* #undef NETSNMP_ENABLE_IPV6 */
+
+#ifdef NETSNMP_ENABLE_IPV6
+  /* Only use Windows API functions available on WinXP or before. */
+   #define _WIN32_WINNT _WIN32_WINNT_WINXP
+#else
+  /* Only use Windows API functions available on Win2K or before. */
+  #define _WIN32_WINNT _WIN32_WINNT_WIN2K
+#endif
+
 /* Automatically set by Windows perl Configure script.
  * When compiling with the MSVC workspace, this must be set manually.
  * See the PACKAGE_VERSION variable in Unix /configure script
@@ -1632,7 +1642,6 @@ typedef unsigned int   uintptr_t;
 #define DMALLOC_FUNC_CHECK
 #endif
 
-/* #undef NETSNMP_ENABLE_IPV6 */
 /* #undef NETSNMP_ENABLE_LOCAL_SMUX */
 
 /* define if agentx transport is to use domain sockets only */
@@ -1647,20 +1656,15 @@ typedef unsigned int   uintptr_t;
 #define EXTENSIBLEMIB NETSNMP_UCDAVIS_MIB
 #endif
 
-/* MSVC 6+ has inet_ntop() and inet_pton() but anything before MSVC 2008 only supports IPv4 */
-/* "have" implies "dont compile here" for snmplib/inet_?to?.c */
-#define HAVE_INET_NTOP 1
-#define HAVE_INET_PTON 1
+/* Windows Vista and higher have inet_ntop but older Windows does not.
+ * We'll use the Net-SNMP version instead. */
+#undef HAVE_INET_NTOP
+#undef HAVE_INET_PTON
 
 /* IPv6 transports */
 #if NETSNMP_ENABLE_IPV6
   #define NETSNMP_TRANSPORT_TCPIPV6_DOMAIN 1
   #define NETSNMP_TRANSPORT_UDPIPV6_DOMAIN 1
-  /* Older than MSVC 2008 - "dont have" implies "compile here" for snmplib/inet_?to?.c */
-  #if _MSC_VER < 1500
-    #undef HAVE_INET_NTOP
-    #undef HAVE_INET_PTON
-  #endif
 #else
   #undef NETSNMP_TRANSPORT_TCPIPV6_DOMAIN
   #undef NETSNMP_TRANSPORT_UDPIPV6_DOMAIN
