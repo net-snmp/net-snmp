@@ -321,7 +321,7 @@ init_system_mib(void)
     sysObjectIDLength = version_sysoid_len;
 
     {
-        oid sysDescr_oid[] = { 1, 3, 6, 1, 2, 1, 1, 1 };
+        const oid sysDescr_oid[] = { 1, 3, 6, 1, 2, 1, 1, 1 };
         netsnmp_register_watched_scalar(
             netsnmp_create_handler_registration(
                 "mibII/sysDescr", NULL, sysDescr_oid, OID_LENGTH(sysDescr_oid),
@@ -330,7 +330,7 @@ init_system_mib(void)
                 version_descr, 0, ASN_OCTET_STR, WATCHER_SIZE_STRLEN));
     }
     {
-        oid sysObjectID_oid[] = { 1, 3, 6, 1, 2, 1, 1, 2 };
+        const oid sysObjectID_oid[] = { 1, 3, 6, 1, 2, 1, 1, 2 };
         netsnmp_register_watched_scalar(
             netsnmp_create_handler_registration(
                 "mibII/sysObjectID", NULL,
@@ -342,7 +342,7 @@ init_system_mib(void)
                 MAX_OID_LEN, &sysObjectIDLength));
     }
     {
-        oid sysUpTime_oid[] = { 1, 3, 6, 1, 2, 1, 1, 3 };
+        const oid sysUpTime_oid[] = { 1, 3, 6, 1, 2, 1, 1, 3 };
         netsnmp_register_scalar(
             netsnmp_create_handler_registration(
                 "mibII/sysUpTime", handle_sysUpTime,
@@ -350,7 +350,7 @@ init_system_mib(void)
                 HANDLER_CAN_RONLY));
     }
     {
-        oid sysContact_oid[] = { 1, 3, 6, 1, 2, 1, 1, 4 };
+        const oid sysContact_oid[] = { 1, 3, 6, 1, 2, 1, 1, 4 };
         netsnmp_register_watched_scalar(
             netsnmp_create_update_handler_registration(
                 "mibII/sysContact", sysContact_oid, OID_LENGTH(sysContact_oid),
@@ -360,7 +360,7 @@ init_system_mib(void)
                 WATCHER_MAX_SIZE | WATCHER_SIZE_STRLEN));
     }
     {
-        oid sysName_oid[] = { 1, 3, 6, 1, 2, 1, 1, 5 };
+        const oid sysName_oid[] = { 1, 3, 6, 1, 2, 1, 1, 5 };
         netsnmp_register_watched_scalar(
             netsnmp_create_update_handler_registration(
                 "mibII/sysName", sysName_oid, OID_LENGTH(sysName_oid),
@@ -370,7 +370,7 @@ init_system_mib(void)
                 WATCHER_MAX_SIZE | WATCHER_SIZE_STRLEN));
     }
     {
-        oid sysLocation_oid[] = { 1, 3, 6, 1, 2, 1, 1, 6 };
+        const oid sysLocation_oid[] = { 1, 3, 6, 1, 2, 1, 1, 6 };
         netsnmp_register_watched_scalar(
             netsnmp_create_update_handler_registration(
                 "mibII/sysLocation", sysLocation_oid,
@@ -381,7 +381,7 @@ init_system_mib(void)
                 WATCHER_MAX_SIZE | WATCHER_SIZE_STRLEN));
     }
     {
-        oid sysServices_oid[] = { 1, 3, 6, 1, 2, 1, 1, 7 };
+        const oid sysServices_oid[] = { 1, 3, 6, 1, 2, 1, 1, 7 };
         netsnmp_register_read_only_int_scalar(
             "mibII/sysServices", sysServices_oid, OID_LENGTH(sysServices_oid),
             &sysServices, handle_sysServices);
