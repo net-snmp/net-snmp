@@ -91,13 +91,6 @@
 #include <string.h>
 #include <time.h>
 /*
- * Windows header files. 
- */
-#include <windows.h>
-#include <Snmp-winExtDLL.h>
-#include <mgmtapi.h>
-#include <winsock.h>
-/*
  * Net-SNMP header files. 
  */
 #include <net-snmp/net-snmp-config.h>
@@ -105,6 +98,13 @@
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 #include "util_funcs.h"
 #include "winExtDLL.h"
+   /*
+ * Windows header files. 
+ */
+#include <windows.h>
+#include <Snmp-winExtDLL.h>
+#include <mgmtapi.h>
+#include <winsock.h>
 
 
 #define MAX_VALUE_NAME          16383
