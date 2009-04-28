@@ -24,9 +24,6 @@ static int _additional_systemstats_v4(netsnmp_systemstats_entry* entry,
 static int _systemstats_v6(netsnmp_container* container, u_int load_flags);
 #endif
 
-static netsnmp_column_info valid_columns;
-static unsigned int my_columns[IPSYSTEMSTATSTABLE_MAX_COL];
-
 void
 netsnmp_access_systemstats_arch_init(void)
 {
