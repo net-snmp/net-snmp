@@ -3505,10 +3505,6 @@ sprint_realloc_value(u_char ** buf, size_t * buf_len,
                      const oid * objid, size_t objidlen,
                      const netsnmp_variable_list * variable)
 {
-#ifndef NETSNMP_DISABLE_MIB_LOADING
-    struct tree    *subtree = tree_head;
-#endif /* NETSNMP_DISABLE_MIB_LOADING */
-
     if (variable->type == SNMP_NOSUCHOBJECT) {
         return snmp_strcat(buf, buf_len, out_len, allow_realloc,
                            (const u_char *)
@@ -3524,17 +3520,18 @@ sprint_realloc_value(u_char ** buf, size_t * buf_len,
     } else {
 #ifndef NETSNMP_DISABLE_MIB_LOADING
         const char *units = NULL;
-        subtree = get_tree(objid, objidlen, subtree);
+        struct tree *subtree = tree_head;
+	subtree = get_tree(objid, objidlen, subtree);
         if (subtree && !netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID,
                                             NETSNMP_DS_LIB_DONT_PRINT_UNITS)) {
             units = subtree->units;
         }
         if (subtree) {
 	    if(subtree->printomat) {
-            return (*subtree->printomat) (buf, buf_len, out_len,
-                                          allow_realloc, variable,
-                                          subtree->enums, subtree->hint,
-                                          units);
+		return (*subtree->printomat) (buf, buf_len, out_len,
+					      allow_realloc, variable,
+					      subtree->enums, subtree->hint,
+					      units);
 	    } else {
 		return sprint_realloc_by_type(buf, buf_len, out_len,
 					      allow_realloc, variable,
@@ -3542,11 +3539,10 @@ sprint_realloc_value(u_char ** buf, size_t * buf_len,
 					      units);
 	    }
 	}
-#else
+#endif /* NETSNMP_DISABLE_MIB_LOADING */
         return sprint_realloc_by_type(buf, buf_len, out_len,
                                       allow_realloc, variable,
                                       NULL, NULL, NULL);
-#endif /* NETSNMP_DISABLE_MIB_LOADING */
     }
 }
 
