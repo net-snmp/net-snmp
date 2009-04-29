@@ -483,13 +483,28 @@ start_new_cached_connection(int sock, struct sockaddr_in *remote_addr,
         /* we're the server */
 
         cachep->bio = BIO_new(BIO_s_mem()); /* The one openssl reads from */
+
+        if (!cachep->bio)
+            DIEHERE("failed to create the read bio");
+
         cachep->write_bio = BIO_new(BIO_s_mem()); /* openssl writes to */
+
+        if (!cachep->write_bio) {
+            DIEHERE("failed to create the write bio");
+            BIO_free(cachep->bio);
+        }
 
         BIO_set_mem_eof_return(cachep->bio, -1);
         BIO_set_mem_eof_return(cachep->write_bio, -1);
 
         cachep->con = SSL_new(server_ctx);
 
+        if (!cachep->con) {
+            BIO_free(cachep->bio);
+            BIO_free(cachep->write_bio);
+            DIEHERE("failed to create the write bio");
+        }
+        
         /* turn on cookie exchange */
         /* XXX: we need to only create cache entries when cookies succeed */
         SSL_set_options(cachep->con, SSL_OP_COOKIE_EXCHANGE);
