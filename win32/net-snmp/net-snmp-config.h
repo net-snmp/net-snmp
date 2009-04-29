@@ -12,16 +12,6 @@
    1200 = 6.0
 */
 
-/* #undef NETSNMP_ENABLE_IPV6 */
-
-#ifdef NETSNMP_ENABLE_IPV6
-  /* Only use Windows API functions available on WinXP or before. */
-   #define _WIN32_WINNT _WIN32_WINNT_WINXP
-#else
-  /* Only use Windows API functions available on Win2K or before. */
-  #define _WIN32_WINNT _WIN32_WINNT_WIN2K
-#endif
-
 /* Automatically set by Windows perl Configure script.
  * When compiling with the MSVC workspace, this must be set manually.
  * See the PACKAGE_VERSION variable in Unix /configure script
@@ -36,6 +26,16 @@
  * MinGW 
  */
 /* #undef HAVE_WIN32_PLATFORM_SDK */
+
+/* Define NETSNMP_ENABLE_IPV6 to enable IPv6.  IPv6 is only available on
+ * Windows XP and higher.  */
+/* #undef NETSNMP_ENABLE_IPV6 */
+
+/* Only use Windows API functions available on Windows 2000 SP4 or later.  
+ * We need at least SP1 for some IPv6 defines in ws2ipdef.h
+ */
+#define _WIN32_WINNT 0x500 /*_WIN32_WINNT_WIN2K*/
+#define NTDDI_VERSION 0x05000400 /* NTDDI_WIN2KSP4 */
 
 #define INSTALL_BASE "c:/usr"
 
@@ -1663,6 +1663,10 @@ typedef unsigned int   uintptr_t;
 
 /* IPv6 transports */
 #if NETSNMP_ENABLE_IPV6
+  #ifndef IPPROTO_IPV6
+    /* Only defined in Windows XP or higher, so we need it here */
+    #define IPPROTO_IPV6 41
+  #endif
   #define NETSNMP_TRANSPORT_TCPIPV6_DOMAIN 1
   #define NETSNMP_TRANSPORT_UDPIPV6_DOMAIN 1
 #else
