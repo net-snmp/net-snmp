@@ -98,7 +98,7 @@ SNMPv3 requires an SNMP agent to define a unique "engine ID"
 in order to respond to SNMPv3 requests.
 This ID will normally be determined automatically, using two reasonably
 non-predictable values - a (pseudo-)random number and the current
-uptime in seconds. This is the recommended approach. However the
+time in seconds. This is the recommended approach. However the
 capacity exists to define the engineID in other ways:
 .IP "engineID STRING"
 specifies that the engineID should be built from the given text STRING.
@@ -115,13 +115,21 @@ The default is to use eth0.
 .\"
 .\" What if this doesn't exist ?
 .\"
-.SH ACCESS CONTROL
-.B snmpd
-supports the View-Based Access Control Model (VACM) as defined in RFC
-2575, to control who can retrieve or update information.  To this end,
-it recognizes various directives relating to access control.
-These fall into four basic groups.
-.SS SNMPv3 Users
+.SH SNMPv3 AUTHENTICATION
+SNMPv3 was originally defined using the User-Based Security Model
+(USM), which contains a private list of users and keys specific to the
+SNMPv3 protocol.  The operational community, however, declared it a
+pain to manipulate yet another database and would prefer to use
+existing infrastructure.  To that end the IETF created the ISMS
+working group to battle that problem, and the ISMS working group
+decided to tunnel SNMP over SSH and DTLS to make use existing user and
+authentication infrastructures.
+.SS SNMPv3 USM Users
+To use the USM based SNMPv3-specific users, you'll need to create
+them.  It is recommended you
+.B "use the net-snmp-config command"
+to do this, but you can also do it by directly specifying createUser
+directives yourself instead:
 .IP "createUser [-e ENGINEID] username (MD5|SHA) authpassphrase [DES|AES] [privpassphrase]"
 .IP
 MD5 and SHA are the authentication types to use.  DES and AES are the
@@ -178,12 +186,43 @@ expected to be the length needed by the algorithm (128 bits for all
 supported algorithms).  Master encryption keys, though, need to be the
 length required by the authentication algorithm not the length
 required by the encrypting algorithm (MD5: 16 bytes, SHA: 20 bytes).
+.SS SSH Support
+To use SSH, you'll need to configure sshd to invoke sshtosnmp as well
+as configure the access control settings to allow access through the
+tsm security model using the user name provided to snmpd by the ssh
+transport.
+.SS DTLS Support
+For DTLS,
+.B snmpd
+will need to be configured with it's own X.509 certificate as well as
+the certificates of the client users to be allowed to connect to the
+agent.  The access control will need to be set up as well to allow
+access through the
+.I tsm
+security model.  The CommonName of the Subject from the X.509
+certificate will be passed to snmpd as the SNMPv3 username to use.
+See the http://www.net-snmp.org/wiki/index.php/Using_DTLS web page for
+more detailed instructions for setting up DTLS.
+.IP "defX509ServerPub FILE"
+.IP "defX509ServerPriv FILE"
+These two directives specify the public and private key files for the
+certificate that
+.B snmpd
+should present to incoming connections.
+.IP "defX509ClientCerts FILE"
+This directive specifies a file containing all of the public keys (or
+CAs of public keys) for clients to connect the server with.
+.SH ACCESS CONTROL
+.B snmpd
+supports the View-Based Access Control Model (VACM) as defined in RFC
+2575, to control who can retrieve or update information.  To this end,
+it recognizes various directives relating to access control.
 .SS Traditional Access Control
 Most simple access control requirements can be specified using the
 directives \fIrouser\fR/\fIrwuser\fR (for SNMPv3) or
 \fIrocommunity\fR/\fIrwcommunity\fR (for SNMPv1 or SNMPv2c).
-.IP "rouser USER [noauth|auth|priv [OID | -V VIEW [CONTEXT]]]"
-.IP "rwuser USER [noauth|auth|priv [OID | -V VIEW [CONTEXT]]]"
+.IP "rouser [-s SECMODEL] USER [noauth|auth|priv [OID | -V VIEW [CONTEXT]]]"
+.IP "rwuser [-s SECMODEL]  USER [noauth|auth|priv [OID | -V VIEW [CONTEXT]]]"
 specify an SNMPv3 user that will be allowed read-only (GET and GETNEXT)
 or read-write (GET, GETNEXT and SET) access respectively.
 By default, this will provide access to the full OID tree for authenticated
@@ -195,6 +234,13 @@ user to the subtree rooted at the given OID, or the named view.
 An optional context can also be specified, or "context*" to denote a context
 prefix.  If no context field is specified (or the token "*" is used), the
 directive will match all possible contexts.
+.IP
+If SECMODEL is specified then it will be the security model required
+for that user (note that identical user names may come in over
+different security models and will be appropriately separated via the
+access control settings).  The default security model is "usm" and the
+other common security models are likely "tsm" when using SSH or DTLS
+support and "ksm" if the Kerberos support has been compiled in.
 .IP "rocommunity COMMUNITY [SOURCE [OID | -V VIEW [CONTEXT]]]"
 .IP "rwcommunity COMMUNITY [SOURCE [OID | -V VIEW [CONTEXT]]]"
 specify an SNMPv1 or SNMPv2c community that will be allowed read-only
@@ -249,7 +295,7 @@ mapped to a security name in the named SNMPv3 context. Otherwise the
 default context ("") will be used.
 .IP "com2secunix [-Cn CONTEXT] SECNAME SOCKPATH COMMUNITY"
 is the Unix domain sockets version of \fIcom2sec\fR.
-.IP "group GROUP {v1|v2c|usm} SECNAME"
+.IP "group GROUP {v1|v2c|usm|tsm|ksm} SECNAME"
 maps a security name (in the specified security model) into
 a named group.  Several \fIgroup\fR directives can specify the
 same group name, allowing a single access setting to apply to several 
@@ -294,7 +340,7 @@ value, but skipping the column subidentifier:
 .IP
 Note that a mask longer than 8 bits must use ':' to separate the individual
 octets.
-.IP "access GROUP CONTEXT {any|v1|v2c|usm} LEVEL PREFX READ WRITE NOTIFY"
+.IP "access GROUP CONTEXT {any|v1|v2c|usm|tsm|ksm} LEVEL PREFX READ WRITE NOTIFY"
 maps from a group of users/communities (with a particular security model
 and minimum security level, and in a specific context) to one of three views,
 depending on the request being processed.
