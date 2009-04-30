@@ -103,7 +103,16 @@ int netsnmp_register_read_only_counter32_scalar(const char *name,
 #define WATCHER_HANDLER_NAME "watcher"
 
 netsnmp_mib_handler  *netsnmp_get_watcher_handler(void);
-netsnmp_watcher_info *netsnmp_create_watcher_info(void *, size_t, u_char, int);
+
+netsnmp_watcher_info *
+netsnmp_init_watcher_info(netsnmp_watcher_info *, void *, size_t, u_char, int);
+
+netsnmp_watcher_info *
+netsnmp_init_watcher_info6(netsnmp_watcher_info *,
+			   void *, size_t, u_char, int, size_t, size_t*);
+
+netsnmp_watcher_info *
+netsnmp_create_watcher_info(void *, size_t, u_char, int);
 
 netsnmp_watcher_info *
 netsnmp_create_watcher_info6(void *, size_t, u_char, int, size_t, size_t*);
