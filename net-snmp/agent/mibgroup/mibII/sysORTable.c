@@ -194,7 +194,7 @@ extern int      system_module_count;
 #endif
 
 static netsnmp_handler_registration *sysORLastChange_reg;
-static netsnmp_watcher_info *sysORLastChange_winfo;
+static netsnmp_watcher_info sysORLastChange_winfo;
 static netsnmp_handler_registration *sysORTable_reg;
 static netsnmp_table_registration_info *sysORTable_table_info;
 
@@ -227,11 +227,12 @@ init_sysORTable(void)
             "mibII/sysORLastChange", NULL,
             sysORLastChange_oid, OID_LENGTH(sysORLastChange_oid),
             HANDLER_CAN_RONLY);
-    sysORLastChange_winfo =
-        netsnmp_create_watcher_info(
+    netsnmp_init_watcher_info(
+	    &sysORLastChange_winfo,
             &sysORLastChange, sizeof(u_long),
             ASN_TIMETICKS, WATCHER_FIXED_SIZE);
-    netsnmp_register_watched_scalar(sysORLastChange_reg, sysORLastChange_winfo);
+    netsnmp_register_watched_scalar(sysORLastChange_reg,
+				    &sysORLastChange_winfo);
 
     sysORTable_reg =
         netsnmp_create_handler_registration(
@@ -285,5 +286,4 @@ shutdown_sysORTable(void)
     sysORTable_table_info = NULL;
     netsnmp_unregister_handler(sysORLastChange_reg);
     sysORLastChange_reg = NULL;
-    SNMP_FREE(sysORLastChange_winfo);
 }
