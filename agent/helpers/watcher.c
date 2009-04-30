@@ -29,30 +29,48 @@ netsnmp_get_watcher_handler(void)
 }
 
 netsnmp_watcher_info *
+netsnmp_init_watcher_info6(netsnmp_watcher_info *winfo,
+                           void *data, size_t size, u_char type,
+                           int flags, size_t max_size, size_t* size_p)
+{
+    winfo->data = data;
+    winfo->data_size = size;
+    winfo->max_size = max_size;
+    winfo->type = type;
+    winfo->flags = flags;
+    winfo->data_size_p = size_p;
+    return winfo;
+}
+
+netsnmp_watcher_info *
 netsnmp_create_watcher_info6(void *data, size_t size, u_char type,
                              int flags, size_t max_size, size_t* size_p)
 {
     netsnmp_watcher_info *winfo = SNMP_MALLOC_TYPEDEF(netsnmp_watcher_info);
-
-    if (winfo != NULL) {
-        winfo->data = data;
-        winfo->data_size = size;
-        winfo->max_size = max_size;
-        winfo->type = type;
-        winfo->flags = flags;
-        winfo->data_size_p = size_p;
-    }
+    if (winfo)
+        netsnmp_init_watcher_info6(winfo, data, size, type, flags, max_size,
+                                   size_p);
     return winfo;
+}
+
+netsnmp_watcher_info *
+netsnmp_init_watcher_info(netsnmp_watcher_info *winfo,
+                          void *data, size_t size, u_char type, int flags)
+{
+  return netsnmp_init_watcher_info6(winfo, data, size,
+				    type, (flags ? flags : WATCHER_FIXED_SIZE),
+				    size,  /* Probably wrong for non-fixed
+					    * size data */
+				    NULL);
 }
 
 netsnmp_watcher_info *
 netsnmp_create_watcher_info(void *data, size_t size, u_char type, int flags)
 {
-    return netsnmp_create_watcher_info6(
-        data, size,
-        type, (flags ? flags : WATCHER_FIXED_SIZE),
-        size,  /* Probably wrong for non-fixed size data */
-        NULL);
+    netsnmp_watcher_info *winfo = SNMP_MALLOC_TYPEDEF(netsnmp_watcher_info);
+    if (winfo)
+        netsnmp_init_watcher_info(winfo, data, size, type, flags);
+    return winfo;
 }
 
 int
