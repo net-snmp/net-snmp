@@ -322,24 +322,26 @@ init_system_mib(void)
 
     {
         const oid sysDescr_oid[] = { 1, 3, 6, 1, 2, 1, 1, 1 };
+        static netsnmp_watcher_info sysDescr_winfo;
         netsnmp_register_watched_scalar(
             netsnmp_create_handler_registration(
                 "mibII/sysDescr", NULL, sysDescr_oid, OID_LENGTH(sysDescr_oid),
                 HANDLER_CAN_RONLY),
-            netsnmp_create_watcher_info(
-                version_descr, 0, ASN_OCTET_STR, WATCHER_SIZE_STRLEN));
+            netsnmp_init_watcher_info(&sysDescr_winfo, version_descr, 0,
+				      ASN_OCTET_STR, WATCHER_SIZE_STRLEN));
     }
     {
         const oid sysObjectID_oid[] = { 1, 3, 6, 1, 2, 1, 1, 2 };
+        static netsnmp_watcher_info sysObjectID_winfo;
         netsnmp_register_watched_scalar(
             netsnmp_create_handler_registration(
                 "mibII/sysObjectID", NULL,
                 sysObjectID_oid, OID_LENGTH(sysObjectID_oid),
                 HANDLER_CAN_RONLY),
-            netsnmp_create_watcher_info6(
-                sysObjectID, 0, ASN_OBJECT_ID,
-                WATCHER_MAX_SIZE | WATCHER_SIZE_IS_PTR,
-                MAX_OID_LEN, &sysObjectIDLength));
+            netsnmp_init_watcher_info6(
+		&sysObjectID_winfo, sysObjectID, 0, ASN_OBJECT_ID,
+		WATCHER_MAX_SIZE | WATCHER_SIZE_IS_PTR,
+		MAX_OID_LEN, &sysObjectIDLength));
     }
     {
         const oid sysUpTime_oid[] = { 1, 3, 6, 1, 2, 1, 1, 3 };
@@ -351,34 +353,37 @@ init_system_mib(void)
     }
     {
         const oid sysContact_oid[] = { 1, 3, 6, 1, 2, 1, 1, 4 };
+        static netsnmp_watcher_info sysContact_winfo;
         netsnmp_register_watched_scalar(
             netsnmp_create_update_handler_registration(
                 "mibII/sysContact", sysContact_oid, OID_LENGTH(sysContact_oid),
                 HANDLER_CAN_RWRITE, &sysContactSet),
-            netsnmp_create_watcher_info(
-                sysContact, SYS_STRING_LEN - 1, ASN_OCTET_STR,
-                WATCHER_MAX_SIZE | WATCHER_SIZE_STRLEN));
+            netsnmp_init_watcher_info(
+		&sysContact_winfo, sysContact, SYS_STRING_LEN - 1,
+		ASN_OCTET_STR, WATCHER_MAX_SIZE | WATCHER_SIZE_STRLEN));
     }
     {
         const oid sysName_oid[] = { 1, 3, 6, 1, 2, 1, 1, 5 };
+        static netsnmp_watcher_info sysName_winfo;
         netsnmp_register_watched_scalar(
             netsnmp_create_update_handler_registration(
                 "mibII/sysName", sysName_oid, OID_LENGTH(sysName_oid),
                 HANDLER_CAN_RWRITE, &sysNameSet),
-            netsnmp_create_watcher_info(
-                sysName, SYS_STRING_LEN - 1, ASN_OCTET_STR,
+            netsnmp_init_watcher_info(
+                &sysName_winfo, sysName, SYS_STRING_LEN - 1, ASN_OCTET_STR,
                 WATCHER_MAX_SIZE | WATCHER_SIZE_STRLEN));
     }
     {
         const oid sysLocation_oid[] = { 1, 3, 6, 1, 2, 1, 1, 6 };
+        static netsnmp_watcher_info sysLocation_winfo;
         netsnmp_register_watched_scalar(
             netsnmp_create_update_handler_registration(
                 "mibII/sysLocation", sysLocation_oid,
                 OID_LENGTH(sysLocation_oid),
                 HANDLER_CAN_RWRITE, &sysLocationSet),
-            netsnmp_create_watcher_info(
-                sysLocation, SYS_STRING_LEN - 1, ASN_OCTET_STR,
-                WATCHER_MAX_SIZE | WATCHER_SIZE_STRLEN));
+            netsnmp_init_watcher_info(
+		&sysLocation_winfo, sysLocation, SYS_STRING_LEN - 1,
+		ASN_OCTET_STR, WATCHER_MAX_SIZE | WATCHER_SIZE_STRLEN));
     }
     {
         const oid sysServices_oid[] = { 1, 3, 6, 1, 2, 1, 1, 7 };

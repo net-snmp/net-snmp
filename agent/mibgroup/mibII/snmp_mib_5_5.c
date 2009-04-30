@@ -85,6 +85,7 @@ init_snmp_mib_5_5(void)
         1, SNMP);
     {
         oid snmpEnableAuthenTraps_oid[] = { SNMP_OID, 30, 0 };
+	static netsnmp_watcher_info enableauthen_info;
         netsnmp_handler_registration *reg =
             netsnmp_create_update_handler_registration(
                 "mibII/snmpEnableAuthenTraps",
@@ -94,7 +95,8 @@ init_snmp_mib_5_5(void)
         netsnmp_inject_handler(reg, netsnmp_get_truthvalue());
         netsnmp_register_watched_instance(
             reg,
-            netsnmp_create_watcher_info(
+            netsnmp_init_watcher_info(
+		&enableauthen_info,
                 &snmp_enableauthentraps, sizeof(snmp_enableauthentraps),
                 ASN_INTEGER, WATCHER_FIXED_SIZE));
     }

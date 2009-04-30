@@ -45,7 +45,7 @@ void init_watched_string(void)
      * variables needed for registration
      */
     netsnmp_handler_registration *reginfo;
-    netsnmp_watcher_info *watcher_info;
+    static netsnmp_watcher_info watcher_info;
     int watcher_flags;
 
     /*
@@ -83,16 +83,15 @@ void init_watched_string(void)
     /*
      * create the watcher info for our string.
      */
-    watcher_info =
-        netsnmp_create_watcher_info6(my_string, strlen(my_string),
-                                     ASN_OCTET_STR, watcher_flags,
-                                     sizeof(my_string), NULL);
+    netsnmp_init_watcher_info6(&watcher_info, my_string, strlen(my_string),
+			       ASN_OCTET_STR, watcher_flags,
+			       sizeof(my_string), NULL);
 
     /*
      * the line below registers our "my_string" variable above as
      * accessible and makes it writable. 
      */
-    netsnmp_register_watched_instance(reginfo, watcher_info);
+    netsnmp_register_watched_instance(reginfo, &watcher_info);
 
     DEBUGMSGTL(("example_string_instance",
                 "Done initalizing example string instance\n"));
