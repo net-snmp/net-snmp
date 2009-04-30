@@ -1123,6 +1123,7 @@ dtlsudp_bootstrap(int majorid, int minorid, void *serverarg, void *clientarg) {
                        SSL_VERIFY_CLIENT_ONCE,
                        &verify_callback);
 
+    return 0;
 }
 
 
