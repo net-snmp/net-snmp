@@ -49,7 +49,13 @@ extern          "C" {
     void            debugmsg_hextli(const char *token, u_char * thedata,
                                     size_t len);
     void            debug_indent_add(int amount);
-    char           *debug_indent(void);
+    int             debug_indent_get(void);
+    /*
+     * What is said above is true for this function as well. Further this
+     * function is deprecated and only provided for backwards compatibility.
+     * Please use "%*s", debug_indent_get(), "" if you used this one before.
+     */
+    const char     *debug_indent(void);
 
     /*
      * Use these macros instead of the functions above to allow them to be
@@ -141,11 +147,11 @@ extern          "C" {
 #define __DBGMSGOIDRANGE(x) debugmsg_oidrange x
 #define __DBGMSGHEX(x)     debugmsg_hex x
 #define __DBGMSGHEXTLI(x)  debugmsg_hextli x
-#define __DBGINDENT()      debug_indent()
+#define __DBGINDENT()      debug_indent_get()
 #define __DBGINDENTADD(x)  debug_indent_add(x)
 #define __DBGINDENTMORE()  debug_indent_add(2)
 #define __DBGINDENTLESS()  debug_indent_add(-2)
-#define __DBGPRINTINDENT(token) __DBGMSGTL((token, "%s", __DBGINDENT()))
+#define __DBGPRINTINDENT(token) __DBGMSGTL((token, "%*s", __DBGINDENT(), ""))
 
 #define __DBGDUMPHEADER(token,x) \
         __DBGPRINTINDENT("dumph_" token); \
@@ -166,7 +172,7 @@ extern          "C" {
         __DBGINDENTMORE()
 
 #define __DBGDUMPSETUP(token,buf,len) \
-        debugmsg("dumpx" token, "dumpx_%s:%s", token, __DBGINDENT()); \
+        debugmsg("dumpx" token, "dumpx_%s:%*s", token, __DBGINDENT(), ""); \
         __DBGMSGHEX(("dumpx_" token,buf,len)); \
         if (debug_is_token_registered("dumpv" token) == SNMPERR_SUCCESS || \
             debug_is_token_registered("dumpv_" token) != SNMPERR_SUCCESS) { \
@@ -174,7 +180,7 @@ extern          "C" {
         } else { \
             debugmsg("dumpx_" token,"  "); \
         } \
-        debugmsg("dumpv" token, "dumpv_%s:%s", token, __DBGINDENT());
+        debugmsg("dumpv" token, "dumpv_%s:%*s", token, __DBGINDENT(), "");
 
 /******************* End   private macros ************************/
 /*****************************************************************/
@@ -193,7 +199,6 @@ extern          "C" {
 #define DEBUGMSGOIDRANGE(x) do {if (_DBG_IF_) {__DBGMSGOIDRANGE(x);} }while(0)
 #define DEBUGMSGHEX(x)     do {if (_DBG_IF_) {__DBGMSGHEX(x);} }while(0)
 #define DEBUGMSGHEXTLI(x)  do {if (_DBG_IF_) {__DBGMSGHEXTLI(x);} }while(0)
-#define DEBUGINDENT()      do {if (_DBG_IF_) {__DBGINDENT();} }while(0)
 #define DEBUGINDENTADD(x)  do {if (_DBG_IF_) {__DBGINDENTADD(x);} }while(0)
 #define DEBUGINDENTMORE()  do {if (_DBG_IF_) {__DBGINDENTMORE();} }while(0)
 #define DEBUGINDENTLESS()  do {if (_DBG_IF_) {__DBGINDENTLESS();} }while(0)
@@ -227,7 +232,6 @@ extern          "C" {
 #define DEBUGMSGHEX(x)
 #define DEBUGIF(x)        if(0)
 #define DEBUGDUMP(t,b,l,p)
-#define DEBUGINDENT()
 #define DEBUGINDENTMORE()
 #define DEBUGINDENTLESS()
 #define DEBUGINDENTADD(x)

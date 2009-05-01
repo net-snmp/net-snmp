@@ -1,5 +1,6 @@
 #include <net-snmp/net-snmp-config.h>
 
+#include <limits.h>
 #include <stdio.h>
 #if HAVE_STDLIB_H
 #include <stdlib.h>
@@ -42,27 +43,35 @@ static int      debug_print_everything = 0;
 netsnmp_token_descr dbg_tokens[MAX_DEBUG_TOKENS];
 
 /*
- * indent debugging:  provide a space padded section to return an indent for 
+ * Number of spaces to indent debug outpur. Valid range is [0,INT_MAX]
  */
-static int      debugindent = 0;
-#define INDENTMAX 80
-static char     debugindentchars[] =
-    "                                                                                ";
+static int debugindent = 0;
 
-char           *
+int
+debug_indent_get(void)
+{
+    return debugindent;
+}
+
+const char*
 debug_indent(void)
 {
-    return debugindentchars;
+#define SPACES "                                        " \
+               "                                        "
+    if ((sizeof(SPACES) - 1) < (unsigned int)debugindent) {
+        snmp_log(LOG_ERR, "Too deep indentation for debug_indent. "
+                 "Consider using \"%%*s\", debug_indent_get(), \"\" instead.");
+        return SPACES;
+    }
+    return SPACES + sizeof(SPACES) - 1 - debugindent;
+#undef SPACES
 }
 
 void
 debug_indent_add(int amount)
 {
-    if (debugindent + amount >= 0 && debugindent + amount < 80) {
-        debugindentchars[debugindent] = ' ';
-        debugindent += amount;
-        debugindentchars[debugindent] = '\0';
-    }
+    if (-debugindent <= amount && amount <= INT_MAX - debugindent)
+	debugindent += amount;
 }
 
 void
@@ -80,16 +89,6 @@ debug_config_turn_on_debugging(const char *configtoken, char *line)
 void
 snmp_debug_init(void)
 {
-    debugindentchars[0] = '\0'; /* zero out the debugging indent array. */
-    /*
-     * Hmmm....
-     *   this "init" routine seems to be called *after* processing
-     *   the command line options.   So we can't clear the debug
-     *   token array here, and will just have to rely on it being
-     *   initialised to 0 automatically.
-     * So much for trying to program responsibly :-)
-     */
-/*  memset(dbg_tokens, 0, MAX_DEBUG_TOKENS*sizeof(struct token_dscr));  */
     register_prenetsnmp_mib_handler("snmp", "doDebugging",
                                     debug_config_turn_on_debugging, NULL,
                                     "(1|0)");
@@ -412,7 +411,7 @@ debugmsg_hextli(const char *token, u_char * thedata, size_t len)
              * XXnext two lines were DEBUGPRINTINDENT(token);
              */
             sprintf(buf, "dumpx%s", token);
-            debugmsg(buf, "%s: %s", token2, debug_indent());
+            debugmsg(buf, "%s: %*s", token2, debug_indent_get(), "");
             if (sprint_realloc_hexstring
                 (&b3, &b3_len, &o3_len, 1, thedata, incr)) {
                 if (b3 != NULL) {
