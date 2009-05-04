@@ -167,6 +167,9 @@ EXPORTS
 	snmp_get_do_debugging
 	debug_indent
 	debug_indent_add
+	debug_indent_get
+	debug_config_register_tokens
+	debug_config_turn_on_debugging
 	debug_is_token_registered
 	debugmsg
 	debugmsg_hex
