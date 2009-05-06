@@ -1051,7 +1051,7 @@ void
 engineBoots_conf(const char *word, char *cptr)
 {
     engineBoots = atoi(cptr) + 1;
-    DEBUGMSGTL(("snmpv3", "engineBoots: %d\n", engineBoots));
+    DEBUGMSGTL(("snmpv3", "engineBoots: %lu\n", engineBoots));
 }
 
 /*******************************************************************-o-******

@@ -2020,7 +2020,7 @@ _snmpNotifyFilterTable_container_save_rows(int majorID, int minorID,
                                                  NETSNMP_DS_LIB_APPTYPE);
     netsnmp_container *c = (netsnmp_container *) clientarg;
 
-    DEBUGMSGTL(("internal:snmpNotifyFilterTable:_snmpNotifyFilterTable_container_save_rows", "saving %d rows\n", CONTAINER_SIZE(c)));
+    DEBUGMSGTL(("internal:snmpNotifyFilterTable:_snmpNotifyFilterTable_container_save_rows", "saving %lu rows\n", CONTAINER_SIZE(c)));
 
     read_config_store((char *) type, sep);
     read_config_store((char *) type, buf);

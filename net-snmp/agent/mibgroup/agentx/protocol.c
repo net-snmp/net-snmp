@@ -135,7 +135,7 @@ agentx_realloc_build_int(u_char ** buf, size_t * buf_len, size_t * out_len,
 #endif
     }
     DEBUGDUMPSETUP("send", (*buf + ilen), 4);
-    DEBUGMSG(("dumpv_send", "  Integer:\t%lu (0x%.2lX)\n", ivalue,
+    DEBUGMSG(("dumpv_send", "  Integer:\t%u (0x%.2X)\n", ivalue,
               ivalue));
     return 1;
 }
@@ -168,7 +168,7 @@ agentx_build_int(u_char * bufp, u_int value, int network_byte_order)
 #endif
     }
     DEBUGDUMPSETUP("send", orig_bufp, 4);
-    DEBUGMSG(("dumpv_send", "  Integer:\t%ld (0x%.2X)\n", orig_val,
+    DEBUGMSG(("dumpv_send", "  Integer:\t%u (0x%.2X)\n", orig_val,
               orig_val));
 }
 
@@ -264,8 +264,8 @@ agentx_realloc_build_oid(u_char ** buf, size_t * buf_len, size_t * out_len,
 
     DEBUGDUMPHEADER("send", "OID Header");
     DEBUGDUMPSETUP("send", (*buf + ilen), 4);
-    DEBUGMSG(("dumpv_send", "  # subids:\t%d (0x%.2X)\n", name_len,
-              name_len));
+    DEBUGMSG(("dumpv_send", "  # subids:\t%d (0x%.2X)\n", (int)name_len,
+              (unsigned int)name_len));
     DEBUGPRINTINDENT("dumpv_send");
     DEBUGMSG(("dumpv_send", "  prefix:\t%d (0x%.2X)\n", prefix, prefix));
     DEBUGPRINTINDENT("dumpv_send");
@@ -487,7 +487,7 @@ agentx_realloc_build_varbind(u_char ** buf, size_t * buf_len,
     case ASN_OPAQUE_DOUBLE:
         DEBUGDUMPHEADER("send", "Build Opaque Double");
         DEBUGPRINTINDENT("dumpv_send");
-        DEBUGMSG(("dumpv_send", "  Double:\t%lf\n", *(vp->val.doubleVal)));
+        DEBUGMSG(("dumpv_send", "  Double:\t%f\n", *(vp->val.doubleVal)));
         if (!agentx_realloc_build_double
             (buf, buf_len, out_len, allow_realloc, *(vp->val.doubleVal),
              network_order)) {
@@ -913,7 +913,7 @@ _agentx_realloc_build(u_char ** buf, size_t * buf_len, size_t * out_len,
         }
         DEBUGDUMPHEADER("send", "Response");
         DEBUGDUMPSETUP("send", (*buf + *out_len - 4), 4);
-        DEBUGMSG(("dumpv_send", "  sysUpTime:\t%d\n", pdu->time));
+        DEBUGMSG(("dumpv_send", "  sysUpTime:\t%lu\n", pdu->time));
         DEBUGINDENTLESS();
 
         if (!agentx_realloc_build_short
@@ -929,9 +929,9 @@ _agentx_realloc_build(u_char ** buf, size_t * buf_len, size_t * out_len,
         }
         DEBUGDUMPHEADER("send", "Response errors");
         DEBUGDUMPSETUP("send", (*buf + *out_len - 4), 4);
-        DEBUGMSG(("dumpv_send", "  errstat:\t%d\n", pdu->errstat));
+        DEBUGMSG(("dumpv_send", "  errstat:\t%ld\n", pdu->errstat));
         DEBUGPRINTINDENT("dumpv_send");
-        DEBUGMSG(("dumpv_send", "  errindex:\t%d\n", pdu->errindex));
+        DEBUGMSG(("dumpv_send", "  errindex:\t%ld\n", pdu->errindex));
         DEBUGINDENTLESS();
 
         /*
@@ -1074,7 +1074,7 @@ agentx_parse_int(u_char * data, u_int network_byte_order)
         value += data[0];
 #endif
     }
-    DEBUGMSG(("dumpv_recv", "  Integer:\t%ld (0x%.2X)\n", value, value));
+    DEBUGMSG(("dumpv_recv", "  Integer:\t%u (0x%.2X)\n", value, value));
 
     return value;
 }
@@ -1105,7 +1105,7 @@ agentx_parse_short(u_char * data, u_int network_byte_order)
     }
 
     DEBUGDUMPSETUP("recv", data, 2);
-    DEBUGMSG(("dumpv_recv", "  Short:\t%ld (0x%.2X)\n", value, value));
+    DEBUGMSG(("dumpv_recv", "  Short:\t%hu (0x%.2X)\n", value, value));
     return value;
 }
 
@@ -1150,7 +1150,7 @@ agentx_parse_oid(u_char * data, size_t * length, int *inc,
     *length -= 4;
 
     DEBUGMSG(("djp", "  parse_oid\n"));
-    DEBUGMSG(("djp", "  sizeof(oid) = %d\n", sizeof(oid)));
+    DEBUGMSG(("djp", "  sizeof(oid) = %d\n", (int)sizeof(oid)));
     if (n_subid == 0 && prefix == 0) {
         /*
          * Null OID 
@@ -1232,14 +1232,14 @@ agentx_parse_string(u_char * data, size_t * length,
 
     if (*length < 4) {
         DEBUGMSGTL(("agentx", "Incomplete string (too short: %d)",
-                    *length));
+                    (int)*length));
         return NULL;
     }
 
     len = agentx_parse_int(data, network_byte_order);
     if (*length < len + 4) {
         DEBUGMSGTL(("agentx", "Incomplete string (still too short: %d)",
-                    *length));
+                    (int)*length));
         return NULL;
     }
     if (len > *str_len) {
@@ -1325,7 +1325,7 @@ agentx_parse_opaque(u_char * data, size_t * length, int *type,
         *opaque_len = sizeof(double);
         memcpy(opaque_buf, &fu.c[0], sizeof(double));
         *type = ASN_OPAQUE_DOUBLE;
-        DEBUGMSG(("dumpv_recv", "Double: %lf\n", fu.doubleVal));
+        DEBUGMSG(("dumpv_recv", "Double: %f\n", fu.doubleVal));
         return cp;
 
     case ASN_OPAQUE_I64:

@@ -1393,7 +1393,7 @@ snmpv3_engineID_probe(struct session_list *slp,
             case STAT_SUCCESS:
                 in_session->s_snmp_errno = SNMPERR_INVALID_MSG; /* XX?? */
                 DEBUGMSGTL(("snmp_sess_open",
-                            "error: expected Report as response to probe: %s (%d)\n",
+                            "error: expected Report as response to probe: %s (%ld)\n",
                             snmp_errstring(response->errstat),
                             response->errstat));
                 break;
@@ -3042,7 +3042,7 @@ _snmp_build(u_char ** pkt, size_t * pkt_len, size_t * offset,
         }
 #endif                          /* !NETSNMP_NO_ZEROLENGTH_COMMUNITY */
 
-        DEBUGMSGTL(("snmp_send", "Building SNMPv%d message...\n",
+        DEBUGMSGTL(("snmp_send", "Building SNMPv%ld message...\n",
                     (1 + pdu->version)));
 #ifdef NETSNMP_USE_REVERSE_ASNENCODING
         if (netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_REVERSE_ENCODE)) {
@@ -4206,7 +4206,7 @@ _snmp_parse(void *sessp,
     case SNMP_VERSION_2c:
 #endif
 #if !defined(NETSNMP_DISABLE_SNMPV1) || !defined(NETSNMP_DISABLE_SNMPV2C)
-        DEBUGMSGTL(("snmp_api", "Parsing SNMPv%d message...\n",
+        DEBUGMSGTL(("snmp_api", "Parsing SNMPv%ld message...\n",
                     (1 + pdu->version)));
 
         /*
@@ -5049,7 +5049,7 @@ _sess_async_send(void *sessp,
     if (session->sndMsgMaxSize != 0 && length > session->sndMsgMaxSize) {
         DEBUGMSGTL(("sess_async_send",
                     "length of packet (%lu) exceeds session maximum (%lu)\n",
-                    length, session->sndMsgMaxSize));
+                    (unsigned long)length, (unsigned long)session->sndMsgMaxSize));
         session->s_snmp_errno = SNMPERR_TOO_LONG;
         SNMP_FREE(pktbuf);
         return 0;
@@ -5063,7 +5063,7 @@ _sess_async_send(void *sessp,
     if (transport->msgMaxSize != 0 && length > transport->msgMaxSize) {
         DEBUGMSGTL(("sess_async_send",
                     "length of packet (%lu) exceeds transport maximum (%lu)\n",
-                    length, transport->msgMaxSize));
+                    (unsigned long)length, (unsigned long)transport->msgMaxSize));
         session->s_snmp_errno = SNMPERR_TOO_LONG;
         SNMP_FREE(pktbuf);
         return 0;
@@ -5090,7 +5090,7 @@ _sess_async_send(void *sessp,
      * Send the message.  
      */
 
-    DEBUGMSGTL(("sess_process_packet", "sending message id#%d reqid#%d\n",
+    DEBUGMSGTL(("sess_process_packet", "sending message id#%ld reqid#%ld\n",
                 pdu->msgid, pdu->reqid));
     result = transport->f_send(transport, packet, length,
                                &(pdu->transport_data),
@@ -5384,7 +5384,7 @@ _sess_process_packet(void *sessp, netsnmp_session * sp,
     ret = snmp_parse(sessp, sp, pdu, packetptr, length);
   }
 
-  DEBUGMSGTL(("sess_process_packet", "received message id#%d reqid#%d rp_reqid#%d rp_msgid#%d\n",
+  DEBUGMSGTL(("sess_process_packet", "received message id#%ld reqid#%ld\n",
               pdu->msgid, pdu->reqid));
 
   if (ret != SNMP_ERR_NOERROR) {
@@ -5454,7 +5454,7 @@ _sess_process_packet(void *sessp, netsnmp_session * sp,
 	 * msgId must match for v3 messages.  
 	 */
 	if (rp->message_id != pdu->msgid) {
-            DEBUGMSGTL(("sess_process_packet", "unmatched msg id: %d != %d\n",
+            DEBUGMSGTL(("sess_process_packet", "unmatched msg id: %ld != %ld\n",
                         rp->message_id, pdu->msgid));
 	    continue;
 	}
@@ -5761,8 +5761,8 @@ _sess_read(void *sessp, netsnmp_large_fd_set * fdset)
              * We have no saved packet.  Allocate one.  
              */
             if ((isp->packet = (u_char *) malloc(rxbuf_len)) == NULL) {
-                DEBUGMSGTL(("sess_read", "can't malloc %d bytes for rxbuf\n",
-                            rxbuf_len));
+                DEBUGMSGTL(("sess_read", "can't malloc %lu bytes for rxbuf\n",
+                            (unsigned long)rxbuf_len));
                 return 0;
             } else {
                 rxbuf = isp->packet;
@@ -5782,8 +5782,8 @@ _sess_read(void *sessp, netsnmp_large_fd_set * fdset)
                                        isp->packet_len + rxbuf_len);
                 if (newbuf == NULL) {
                     DEBUGMSGTL(("sess_read",
-                                "can't malloc %d more for rxbuf (%d tot)\n",
-                                rxbuf_len, isp->packet_len + rxbuf_len));
+                                "can't malloc %lu more for rxbuf (%lu tot)\n",
+                                (unsigned long)rxbuf_len, (unsigned long)(isp->packet_len + rxbuf_len)));
                     return 0;
                 } else {
                     isp->packet = newbuf;
@@ -5797,8 +5797,8 @@ _sess_read(void *sessp, netsnmp_large_fd_set * fdset)
         }
     } else {
         if ((rxbuf = (u_char *) malloc(rxbuf_len)) == NULL) {
-            DEBUGMSGTL(("sess_read", "can't malloc %d bytes for rxbuf\n",
-                        rxbuf_len));
+            DEBUGMSGTL(("sess_read", "can't malloc %lu bytes for rxbuf\n",
+                        (unsigned long)rxbuf_len));
             return 0;
         }
     }
@@ -5870,8 +5870,8 @@ _sess_read(void *sessp, netsnmp_large_fd_set * fdset)
                 pdulen = asn_check_packet(pptr, isp->packet_len);
             }
 
-            DEBUGMSGTL(("sess_read", "  loop packet_len %d, PDU length %d\n",
-                        isp->packet_len, pdulen));
+            DEBUGMSGTL(("sess_read", "  loop packet_len %lu, PDU length %lu\n",
+                        (unsigned long)isp->packet_len, (unsigned long)pdulen));
              
             if ((pdulen > MAX_PACKET_LENGTH) || (pdulen < 0)) {
                 /*
@@ -5902,8 +5902,8 @@ _sess_read(void *sessp, netsnmp_large_fd_set * fdset)
                  * start, simply return and wait for more data to arrive.
                  */
                 DEBUGMSGTL(("sess_read",
-                            "pkt not complete (need %d got %d so far)\n",
-                            pdulen, isp->packet_len));
+                            "pkt not complete (need %lu got %lu so far)\n",
+                            (unsigned long)pdulen, (unsigned long)isp->packet_len));
 
                 if (pptr != isp->packet)
                     break; /* opaque freed for us outside of loop. */
@@ -5995,9 +5995,9 @@ _sess_read(void *sessp, netsnmp_large_fd_set * fdset)
          */
 
         memmove(isp->packet, pptr, isp->packet_len);
-        DEBUGMSGTL(("sess_read", "end: memmove(%p, %p, %d); realloc(%p, %d)\n",
-                    isp->packet, pptr, isp->packet_len, isp->packet,
-                    isp->packet_len));
+        DEBUGMSGTL(("sess_read", "end: memmove(%p, %p, %lu); realloc(%p, %lu)\n",
+                    isp->packet, pptr, (unsigned long)isp->packet_len,
+		    isp->packet, (unsigned long)isp->packet_len));
 
         if ((rxbuf = (u_char *)realloc(isp->packet, isp->packet_len)) == NULL) {
             /*
@@ -6200,8 +6200,8 @@ snmp_sess_select_info2(void *sessp,
                 if ((!timerisset(&earliest)
                      || (timercmp(&rp->expire, &earliest, <)))) {
                     earliest = rp->expire;
-                    DEBUGMSG(("verbose:sess_select","(to in %d.%d sec) ",
-                               earliest.tv_sec, earliest.tv_usec));
+                    DEBUGMSG(("verbose:sess_select","(to in %d.%06d sec) ",
+                               (int)earliest.tv_sec, (int)earliest.tv_usec));
                 }
             }
         }
@@ -6218,8 +6218,8 @@ snmp_sess_select_info2(void *sessp,
 
     if (netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_ALARM_DONT_USE_SIG)) {
         next_alarm = get_next_alarm_delay_time(&delta);
-        DEBUGMSGT(("sess_select","next alarm %d.%d sec\n",
-                   delta.tv_sec, delta.tv_usec));
+        DEBUGMSGT(("sess_select","next alarm %d.%06d sec\n",
+                   (int)delta.tv_sec, (int)delta.tv_usec));
     }
     if (next_alarm == 0 && requests == 0) {
         /*
@@ -6267,7 +6267,7 @@ snmp_sess_select_info2(void *sessp,
             earliest.tv_usec = 100;
         }
         DEBUGMSGT(("verbose:sess_select","timer due *real* soon. %d usec\n",
-                   earliest.tv_usec));
+                   (int)earliest.tv_usec));
     } else {
         earliest.tv_sec = (earliest.tv_sec - now.tv_sec);
         earliest.tv_usec = (earliest.tv_usec - now.tv_usec);
@@ -6275,8 +6275,8 @@ snmp_sess_select_info2(void *sessp,
             earliest.tv_sec--;
             earliest.tv_usec = (1000000L + earliest.tv_usec);
         }
-        DEBUGMSGT(("verbose:sess_select","timer due in %d.%d sec\n",
-                   earliest.tv_sec, earliest.tv_usec));
+        DEBUGMSGT(("verbose:sess_select","timer due in %d.%06d sec\n",
+                   (int)earliest.tv_sec, (int)earliest.tv_usec));
     }
 
     /*
@@ -6284,8 +6284,8 @@ snmp_sess_select_info2(void *sessp,
      */
     if ((*block || (timercmp(&earliest, timeout, <)))) {
         DEBUGMSGT(("verbose:sess_select",
-                   "setting timer to %d.%d sec, clear block (was %d)\n",
-                   earliest.tv_sec, earliest.tv_usec, *block));
+                   "setting timer to %d.%06d sec, clear block (was %d)\n",
+                   (int)earliest.tv_sec, (int)earliest.tv_usec, *block));
         *timeout = earliest;
         *block = 0;
     }
@@ -6404,7 +6404,7 @@ snmp_resend_request(struct session_list *slp, netsnmp_request_list *rp,
         xdump(packet, length, "");
     }
 
-    DEBUGMSGTL(("sess_process_packet", "resending message id#%d reqid#%d rp_reqid#%d rp_msgid#%d\n",
+    DEBUGMSGTL(("sess_process_packet", "resending message id#%ld reqid#%ld rp_reqid#%ld rp_msgid#%ld\n",
                 rp->pdu->msgid, rp->pdu->reqid, rp->request_id, rp->message_id));
     result = transport->f_send(transport, packet, length,
                                &(rp->pdu->transport_data),

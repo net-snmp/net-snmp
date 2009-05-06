@@ -3692,8 +3692,8 @@ build_oid_segment(netsnmp_variable_list * var)
 
     if (var->name_length > MAX_OID_LEN) {
         DEBUGMSGTL(("build_oid_segment",
-                    "Something terribly wrong, namelen = %d\n",
-                    var->name_length));
+                    "Something terribly wrong, namelen = %lu\n",
+                    (unsigned long)var->name_length));
         return SNMPERR_GENERR;
     }
 
@@ -3817,7 +3817,7 @@ parse_one_oid_index(oid ** oidStart, size_t * oidLen,
                 snmp_set_var_value(var, (u_char *) oidLen, sizeof(long));
             }
             DEBUGMSGTL(("parse_oid_indexes",
-                        "Parsed int(%d): %d\n", var->type,
+                        "Parsed int(%d): %ld\n", var->type,
                         *var->val.integer));
             break;
 
@@ -3828,7 +3828,7 @@ parse_one_oid_index(oid ** oidStart, size_t * oidLen,
             for (i = 0; i < 4 && i < *oidLen; ++i) {
                 if (oidIndex[i] > 255) {
                     DEBUGMSGTL(("parse_oid_indexes",
-                                "illegal oid in index: %d\n", oidIndex[0]));
+                                "illegal oid in index: %ld\n", oidIndex[0]));
                         return SNMPERR_GENERR;  /* sub-identifier too large */
                     }
                     uitmp = uitmp + (oidIndex[i] << (8*(3-i)));

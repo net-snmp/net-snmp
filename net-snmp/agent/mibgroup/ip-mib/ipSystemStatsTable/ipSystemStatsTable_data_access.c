@@ -337,7 +337,7 @@ ipSystemStatsTable_container_load(netsnmp_container *container)
                                               NETSNMP_ACCESS_SYSTEMSTATS_FREE_DONT_CLEAR);
 
     DEBUGMSGT(("verbose:ipSystemStatsTable:ipSystemStatsTable_cache_load",
-               "%d records\n", CONTAINER_SIZE(container)));
+               "%lu records\n", CONTAINER_SIZE(container)));
 
     return MFD_SUCCESS;
 }                               /* ipSystemStatsTable_container_load */

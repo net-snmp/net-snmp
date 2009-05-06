@@ -59,7 +59,7 @@ _sched_callback( unsigned int reg, void *magic )
     DEBUGMSGTL(( "disman:schedule:callback", "assignment "));
     DEBUGMSGOID(("disman:schedule:callback", entry->schedVariable,
                                              entry->schedVariable_len));
-    DEBUGMSG((   "disman:schedule:callback", " = %d\n", entry->schedValue));
+    DEBUGMSG((   "disman:schedule:callback", " = %ld\n", entry->schedValue));
 
     memset(&assign, 0, sizeof(netsnmp_variable_list));
     snmp_set_var_objid(&assign, entry->schedVariable, entry->schedVariable_len);
@@ -277,14 +277,14 @@ sched_nextTime( struct schedTable_entry *entry )
         } else {
              entry->schedNextRun = now + entry->schedInterval;
         }
-        DEBUGMSGTL(("disman:schedule:time", "periodic: (%d) %s",
+        DEBUGMSGTL(("disman:schedule:time", "periodic: (%ld) %s",
                                   entry->schedNextRun,
                            ctime(&entry->schedNextRun)));
         break;
 
     case SCHED_TYPE_ONESHOT:
         if ( entry->schedLastRun ) {
-            DEBUGMSGTL(("disman:schedule:time", "one-shot: expired (%d) %s",
+            DEBUGMSGTL(("disman:schedule:time", "one-shot: expired (%ld) %s",
                                   entry->schedNextRun,
                            ctime(&entry->schedNextRun)));
             return;
@@ -400,13 +400,13 @@ sched_nextTime( struct schedTable_entry *entry )
          * 'next_tm' now contains the time for the next scheduled run
          */
         entry->schedNextRun = mktime( &next_tm );
-        DEBUGMSGTL(("disman:schedule:time", "calendar: (%d) %s",
+        DEBUGMSGTL(("disman:schedule:time", "calendar: (%ld) %s",
                                   entry->schedNextRun,
                            ctime(&entry->schedNextRun)));
         return;
 
     default:
-        DEBUGMSGTL(("disman:schedule:time", "unknown type (%d)\n",
+        DEBUGMSGTL(("disman:schedule:time", "unknown type (%ld)\n",
                                              entry->schedType));
         return;
     }

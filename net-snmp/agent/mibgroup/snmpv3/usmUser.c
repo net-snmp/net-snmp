@@ -1189,7 +1189,7 @@ write_usmUserPublic(int action,
         }
         memcpy(uptr->userPublicString, var_val, var_val_len);
         uptr->userPublicStringLen = var_val_len;
-        DEBUGMSG(("usmUser", "setting public string: %d - ", var_val_len));
+        DEBUGMSG(("usmUser", "setting public string: %d - ", (int)var_val_len));
         DEBUGMSGHEX(("usmUser", uptr->userPublicString, var_val_len));
         DEBUGMSG(("usmUser", "\n"));
     }
@@ -1248,7 +1248,7 @@ write_usmUserStorageType(int action,
              * Convention apply.  
              */
             DEBUGMSGTL(("usmUser",
-                        "long_ret %d uptr->st %d uptr->status %d\n",
+                        "long_ret %ld uptr->st %d uptr->status %d\n",
                         long_ret, uptr->userStorageType,
                         uptr->userStatus));
 

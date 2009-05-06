@@ -395,7 +395,7 @@ ipAddressTable_container_load(netsnmp_container *container)
     }
 
     DEBUGMSGT(("verbose:ipAddressTable:ipAddressTable_cache_load",
-               "%d records\n", CONTAINER_SIZE(container)));
+               "%lu records\n", (unsigned long)CONTAINER_SIZE(container)));
 
     return MFD_SUCCESS;
 }

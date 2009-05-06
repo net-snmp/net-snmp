@@ -329,7 +329,7 @@ inetNetToMediaTable_container_load(netsnmp_container *container)
     netsnmp_access_arp_container_free(arp_container,
                                       NETSNMP_ACCESS_ARP_FREE_DONT_CLEAR);
 
-    DEBUGMSGT(("verbose:inetNetToMediaTable:inetNetToMediaTable_cache_load", "%d records\n", CONTAINER_SIZE(container)));
+    DEBUGMSGT(("verbose:inetNetToMediaTable:inetNetToMediaTable_cache_load", "%lu records\n", CONTAINER_SIZE(container)));
 
     return MFD_SUCCESS;
 }                               /* inetNetToMediaTable_container_load */

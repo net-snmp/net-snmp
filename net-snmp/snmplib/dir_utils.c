@@ -132,7 +132,7 @@ netsnmp_directory_container_read(netsnmp_container *user_container,
     closedir(dir);
 
     DEBUGMSGTL(("directory:container", "  container now has %d items\n",
-                CONTAINER_SIZE(container)));
+                (int)CONTAINER_SIZE(container)));
     
     return container;
 }

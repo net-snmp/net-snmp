@@ -163,7 +163,7 @@ get_target_sessions(char *taglist, TargetFilterFunction * filterfunct,
                             thissess.timeout = (targaddrs->timeout) * 1000;
                             thissess.retries = targaddrs->retryCount;
                             DEBUGMSGTL(("target_sessions",
-                                        "timeout: %d -> %d\n",
+                                        "timeout: %d -> %ld\n",
                                         targaddrs->timeout,
                                         thissess.timeout));
 
