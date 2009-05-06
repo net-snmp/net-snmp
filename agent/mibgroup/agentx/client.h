@@ -23,9 +23,9 @@ extern          "C" {
                                                  int);
     int             agentx_unregister_index(netsnmp_session *,
                                             netsnmp_variable_list *);
-    int             agentx_add_agentcaps(netsnmp_session *, oid *, size_t,
+    int             agentx_add_agentcaps(netsnmp_session *, const oid *, size_t,
                                          const char *);
-    int             agentx_remove_agentcaps(netsnmp_session *, oid *,
+    int             agentx_remove_agentcaps(netsnmp_session *, const oid *,
                                             size_t);
     int             agentx_send_ping(netsnmp_session *);
 

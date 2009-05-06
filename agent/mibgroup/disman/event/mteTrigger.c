@@ -80,7 +80,7 @@ _mteTrigger_dump(void)
  * Create a new row in the trigger table 
  */
 netsnmp_tdata_row *
-mteTrigger_createEntry(char *mteOwner, char *mteTName, int fixed)
+mteTrigger_createEntry(const char *mteOwner, char *mteTName, int fixed)
 {
     struct mteTrigger *entry;
     netsnmp_tdata_row *row;
@@ -803,7 +803,7 @@ mteTrigger_run( unsigned int reg, void *clientarg)
     DEBUGMSGTL(( "disman:event:delta", "delta sample: "));
     DEBUGMSGOID(("disman:event:delta", vp1->name,
                                        vp1->name_length ));
-    DEBUGMSG((   "disman:event:delta", " (%d - %d) = %d\n",
+    DEBUGMSG((   "disman:event:delta", " (%ld - %ld) = %ld\n",
                 *vp1->val.integer,  *vp2->val.integer, value));
                 vp2 = vp2->next_variable;
             } else {
@@ -833,7 +833,7 @@ mteTrigger_run( unsigned int reg, void *clientarg)
                 cmp = ( value >= entry->mteTBoolValue );
                 break;
             }
-    DEBUGMSGTL(( "disman:event:delta", "Bool comparison: (%d %s %d) %d\n",
+    DEBUGMSGTL(( "disman:event:delta", "Bool comparison: (%ld %s %ld) %d\n",
                           value, _ops[entry->mteTBoolComparison],
                           entry->mteTBoolValue, cmp));
 

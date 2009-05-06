@@ -401,8 +401,8 @@ register_read_only_int_instance_context(const char *name,
 
 int
 netsnmp_register_num_file_instance(const char *name,
-                                   oid * reg_oid, size_t reg_oid_len,
-                                   char *file_name, int asn_type, int mode,
+                                   const oid * reg_oid, size_t reg_oid_len,
+                                   const char *file_name, int asn_type, int mode,
                                    Netsnmp_Node_Handler * subhandler,
                                    const char *contextName)
 {
@@ -521,7 +521,7 @@ netsnmp_instance_ulong_handler(netsnmp_mib_handler *handler,
         /*
          * update current 
          */
-        DEBUGMSGTL(("testhandler", "updated u_long %ul -> %ul\n", *it,
+        DEBUGMSGTL(("testhandler", "updated u_long %lu -> %lu\n", *it,
                     *(requests->requestvb->val.integer)));
         *it = *(requests->requestvb->val.integer);
         break;
@@ -634,7 +634,7 @@ netsnmp_instance_long_handler(netsnmp_mib_handler *handler,
         /*
          * update current 
          */
-        DEBUGMSGTL(("testhandler", "updated u_long %ul -> %ul\n", *it,
+        DEBUGMSGTL(("testhandler", "updated u_long %lu -> %lu\n", *it,
                     *(requests->requestvb->val.integer)));
         *it = *(requests->requestvb->val.integer);
         break;

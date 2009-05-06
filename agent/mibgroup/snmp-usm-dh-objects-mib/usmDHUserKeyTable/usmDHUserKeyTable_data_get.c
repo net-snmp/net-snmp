@@ -64,7 +64,7 @@ usmDHGetUserKeyChange(struct usmUser *user, int for_auth_key,
     dh = usmDHGetUserDHptr(user, for_auth_key);
 
     if (!dh) {
-        snmp_log(LOG_ERR, "ack...  shouldn't get here: %x %d\n",
+        snmp_log(LOG_ERR, "ack...  shouldn't get here: %p %d\n",
                  user, for_auth_key);
         return MFD_ERROR;
     }

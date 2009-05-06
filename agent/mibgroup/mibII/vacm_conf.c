@@ -376,7 +376,8 @@ vacm_parse_authcommunity(const char *token, char *confline)
 void
 vacm_parse_authaccess(const char *token, char *confline)
 {
-    char *group, *view, *context, *tmp;
+    char *group, *view, *tmp;
+    const char *context;
     int  model = SNMP_SEC_MODEL_ANY;
     int  level, prefix;
     int  i;
@@ -466,9 +467,9 @@ vacm_parse_authaccess(const char *token, char *confline)
     }
     
 
-    context = strtok_r(NULL, " \t\n", &st);
-    if (context) {
-        tmp = (context + strlen(context)-1);
+    context = tmp = strtok_r(NULL, " \t\n", &st);
+    if (tmp) {
+        tmp = (tmp + strlen(tmp)-1);
         if (tmp && *tmp == '*') {
             *tmp = '\0';
             prefix = 2;
@@ -724,8 +725,8 @@ vacm_free_view(void)
 }
 
 void
-vacm_gen_com2sec(int commcount, char *community, char *addressname,
-                 char *publishtoken,
+vacm_gen_com2sec(int commcount, const char *community, const char *addressname,
+                 const char *publishtoken,
                  void (*parser)(const char *, char *),
                  char *secname, size_t secname_len,
                  char *viewname, size_t viewname_len, int version,
@@ -1275,7 +1276,7 @@ vacm_check_view(netsnmp_pdu *pdu, oid * name, size_t namelen,
     char           *contextName = vacm_default_context;
     char           *sn = NULL;
     char           *vn;
-    char           *pdu_community;
+    const char     *pdu_community;
 
     /*
      * len defined by the vacmContextName object 
@@ -1309,7 +1310,7 @@ vacm_check_view(netsnmp_pdu *pdu, oid * name, size_t namelen,
             }
 
             DEBUGMSGTL(("mibII/vacm_vars",
-                        "vacm_in_view: ver=%d, community=%s\n",
+                        "vacm_in_view: ver=%ld, community=%s\n",
                         pdu->version, buf));
             free(buf);
         }
@@ -1327,7 +1328,7 @@ vacm_check_view(netsnmp_pdu *pdu, oid * name, size_t namelen,
             ) {
             if (!netsnmp_udp_getSecName(pdu->transport_data,
                                         pdu->transport_data_length,
-                                        (char *) pdu_community,
+                                        pdu_community,
                                         pdu->community_len, &sn,
                                         &contextName)) {
                 /*
@@ -1347,7 +1348,7 @@ vacm_check_view(netsnmp_pdu *pdu, oid * name, size_t namelen,
             ) {
             if (!netsnmp_udp6_getSecName(pdu->transport_data,
                                          pdu->transport_data_length,
-                                         (char *) pdu_community,
+                                         pdu_community,
                                          pdu->community_len, &sn,
                                          &contextName)) {
                 /*
@@ -1364,7 +1365,7 @@ vacm_check_view(netsnmp_pdu *pdu, oid * name, size_t namelen,
         } else if (pdu->tDomain == netsnmp_UnixDomain){
             if (!netsnmp_unix_getSecName(pdu->transport_data,
                                          pdu->transport_data_length,
-                                         (char *) pdu_community,
+                                         pdu_community,
                                          pdu->community_len, &sn,
                                          &contextName)) {
 					sn = NULL;
@@ -1395,7 +1396,7 @@ vacm_check_view(netsnmp_pdu *pdu, oid * name, size_t namelen,
          * any legal defined v3 security model 
          */
         DEBUGMSG(("mibII/vacm_vars",
-                  "vacm_in_view: ver=%d, model=%d, secName=%s\n",
+                  "vacm_in_view: ver=%ld, model=%d, secName=%s\n",
                   pdu->version, pdu->securityModel, pdu->securityName));
         sn = pdu->securityName;
         contextName = pdu->contextName;
@@ -1415,7 +1416,7 @@ vacm_check_view(netsnmp_pdu *pdu, oid * name, size_t namelen,
     if (pdu->contextNameLen > CONTEXTNAMEINDEXLEN) {
         DEBUGMSGTL(("mibII/vacm_vars",
                     "vacm_in_view: bad ctxt length %d\n",
-                    pdu->contextNameLen));
+                    (int)pdu->contextNameLen));
         return VACM_NOSUCHCONTEXT;
     }
     /*

@@ -109,7 +109,7 @@ _init_default_mteObject_lists( int majorID, int minorID,
  * Create a new row in the object table 
  */
 netsnmp_tdata_row      *
-mteObjects_createEntry(char *owner, char *oname, int index, int flags)
+mteObjects_createEntry(const char *owner, const char *oname, int index, int flags)
 {
     struct mteObject   *entry;
     netsnmp_tdata_row  *row, *row2;
@@ -194,8 +194,8 @@ mteObjects_createEntry(char *owner, char *oname, int index, int flags)
  * Add a row to the object table 
  */
 struct mteObject *
-mteObjects_addOID(char *owner, char *oname, int index,
-                  char *oid_name_buf,       int wild )
+mteObjects_addOID(const char *owner, const char *oname, int index,
+                  const char *oid_name_buf, int wild )
 {
     netsnmp_tdata_row *row;
     struct mteObject  *entry;
@@ -245,7 +245,7 @@ mteObjects_removeEntry(netsnmp_tdata_row *row)
  * Remove all matching rows from the event table 
  */
 void
-mteObjects_removeEntries( char *owner, char *oname )
+mteObjects_removeEntries( const char *owner, char *oname )
 {
     netsnmp_tdata_row     *row;
     netsnmp_variable_list  owner_var, oname_var;

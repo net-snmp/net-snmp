@@ -43,11 +43,12 @@ extern void      init_objects_table_data(void);
 
 void          init_mteObjects(void);
 void               mteObjects_removeEntry(netsnmp_tdata_row *row);
-void               mteObjects_removeEntries(char *owner,  char *oname);
-netsnmp_tdata_row *mteObjects_createEntry(  char *owner,  char *oname,
+void               mteObjects_removeEntries(const char *owner,  char *oname);
+netsnmp_tdata_row *mteObjects_createEntry(  const char *owner,
+					    const char *oname,
                                             int   oindex,  int  flags);
-struct mteObject * mteObjects_addOID(char *owner, char *oname, int index,
-                                     char *oid_name_buf,       int wild );
+struct mteObject * mteObjects_addOID(const char *owner, const char *oname, int index,
+                                     const char *oid_name_buf, int wild );
 
 int  mteObjects_vblist(          netsnmp_variable_list *vblist,
                                  char *owner,   char   *oname,
