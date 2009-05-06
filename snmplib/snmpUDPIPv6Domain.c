@@ -1309,17 +1309,19 @@ netsnmp_udp6_getSecName(void *opaque, int olength,
                 ztcommunity ? ztcommunity : "<malloc error>", str6));
 
     for (c = com2Sec6List; c != NULL; c = c->next) {
+	char str_net[INET6_ADDRSTRLEN], str_mask[INET6_ADDRSTRLEN];
         DEBUGMSGTL(("netsnmp_udp6_getSecName",
-                    "compare <\"%s\", 0x%032x/0x%032x>", c->community,
-                    c->network, c->mask));
+                    "compare <\"%s\", %s/%s>", c->community,
+                    inet_ntop(AF_INET6, &c->network.sin6_addr, str_net, sizeof str_net),
+		    inet_ntop(AF_INET6, &c->mask.sin6_addr, str_mask, sizeof str_mask)));
 
         if ((community_len == (int)strlen(c->community)) &&
             (memcmp(community, c->community, community_len) == 0) &&
             (masked_address_are_equal(from->sin6_family,
                                       (struct sockaddr_storage *) from,
                                       (struct sockaddr_storage *) &c->mask,
-                                      (struct sockaddr_storage *) &c->
-                                      network) == 0)) {
+                                      (struct sockaddr_storage *) &c->network)
+					== 0)) {
             DEBUGMSG(("netsnmp_udp6_getSecName", "... SUCCESS\n"));
             if (secName != NULL) {
                 *secName = c->secName;
