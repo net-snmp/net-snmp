@@ -416,7 +416,7 @@ proxy_handler(netsnmp_mib_handler *handler,
              * suffix appended? 
              */
             DEBUGMSGTL(("proxy", "length=%d, base_len=%d, name_len=%d\n",
-                        ourlength, sp->base_len, sp->name_len));
+                        (int)ourlength, (int)sp->base_len, (int)sp->name_len));
             if (ourlength > (int) sp->name_len)
                 memcpy(&(sp->base[sp->base_len]), &(ourname[sp->name_len]),
                        sizeof(oid) * (ourlength - sp->name_len));
@@ -518,7 +518,7 @@ proxy_got_response(int operation, netsnmp_session * sess, int reqid,
              * Not sure if any other error codes need the same treatment. Left
              * as an exercise to the reader...
              */
-            DEBUGMSGTL(("proxy", "got error response (%d)\n", pdu->errstat));
+            DEBUGMSGTL(("proxy", "got error response (%ld)\n", pdu->errstat));
             if((cache->reqinfo->mode == MODE_GETNEXT) &&
                (SNMP_ERR_NOSUCHNAME == pdu->errstat)) {
                 DEBUGMSGTL(("proxy", "  ignoring error response\n"));
@@ -534,7 +534,7 @@ proxy_got_response(int operation, netsnmp_session * sess, int reqid,
 		 *	?func=detail&atid=112694&aid=1554261&group_id=12694
 		 */
 		DEBUGMSGTL(("proxy",
-		    "got SET error %s, index %d\n",
+		    "got SET error %s, index %ld\n",
 		    snmp_errstring(pdu->errstat), pdu->errindex));
 		netsnmp_handler_mark_requests_as_delegated(
 		    requests, REQUEST_IS_NOT_DELEGATED);
@@ -578,7 +578,7 @@ proxy_got_response(int operation, netsnmp_session * sess, int reqid,
                                   sp->base_len) != 0)) {
                 DEBUGMSGTL(( "proxy", "out of registered range... "));
                 DEBUGMSGOID(("proxy", var->name, sp->base_len));
-                DEBUGMSG((   "proxy", " (%d) != ", sp->base_len));
+                DEBUGMSG((   "proxy", " (%d) != ", (int)sp->base_len));
                 DEBUGMSGOID(("proxy", sp->base, sp->base_len));
                 DEBUGMSG((   "proxy", "\n"));
                 snmp_set_var_typed_value(request->requestvb, ASN_NULL, NULL, 0);
@@ -590,7 +590,7 @@ proxy_got_response(int operation, netsnmp_session * sess, int reqid,
                                          sp->name_len) != 0)) {
                 DEBUGMSGTL(( "proxy", "out of registered base range... "));
                 DEBUGMSGOID(("proxy", var->name, sp->name_len));
-                DEBUGMSG((   "proxy", " (%d) != ", sp->name_len));
+                DEBUGMSG((   "proxy", " (%d) != ", (int)sp->name_len));
                 DEBUGMSGOID(("proxy", sp->name, sp->name_len));
                 DEBUGMSG((   "proxy", "\n"));
                 snmp_set_var_typed_value(request->requestvb, ASN_NULL, NULL, 0);

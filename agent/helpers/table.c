@@ -394,7 +394,7 @@ table_helper_handler(netsnmp_mib_handler *handler,
             /*
              * oid is long enough to contain COLUMN info
              */
-            DEBUGMSGTL(("helper:table:col", "  have at least a column (%d)\n",
+            DEBUGMSGTL(("helper:table:col", "  have at least a column (%ld)\n",
                         var->name[oid_column_pos]));
             if (var->name[oid_column_pos] < tbl_info->min_column) {
                 DEBUGMSGTL(("helper:table:col",
@@ -450,7 +450,7 @@ table_helper_handler(netsnmp_mib_handler *handler,
                     continue;
                 if (tbl_req_info->colnum != var->name[oid_column_pos]) {
                     DEBUGMSGTL(("helper:table:col",
-                                "    which doesn't match req %d - truncating index info\n",
+                                "    which doesn't match req %ld - truncating index info\n",
                                    var->name[oid_column_pos]));
                     /*
                      * different column! truncate useless index info 
@@ -470,8 +470,8 @@ table_helper_handler(netsnmp_mib_handler *handler,
                  */
                 tbl_req_info->index_oid_len =
                     var->name_length - oid_index_pos;
-                DEBUGMSGTL(("helper:table", "    have %d bytes of index\n",
-                            tbl_req_info->index_oid_len));
+                DEBUGMSGTL(("helper:table", "    have %lu bytes of index\n",
+                            (unsigned long)tbl_req_info->index_oid_len));
                 netsnmp_assert(tbl_req_info->index_oid_len < MAX_OID_LEN);
                 memcpy(tbl_req_info->index_oid, &var->name[oid_index_pos],
                        tbl_req_info->index_oid_len * sizeof(oid));

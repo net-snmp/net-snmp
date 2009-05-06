@@ -1517,7 +1517,7 @@ write_snmpTargetAddrRowStatus(int action,
         if (name_len < snmpTargetAddrOIDLen + 1 ||
             name_len > snmpTargetAddrOIDLen + 32) {
             DEBUGMSGTL(("snmpTargetAddrEntry", "bad index length %d\n",
-                        name_len - snmpTargetAddrOIDLen));
+                        (int)(name_len - snmpTargetAddrOIDLen)));
             return SNMP_ERR_NOCREATION;
         }
 

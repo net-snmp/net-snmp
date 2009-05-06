@@ -312,7 +312,7 @@ netsnmp_c64_check_for_32bit_wrap(struct counter64 *old_val,
     if( (NULL == old_val) || (NULL == new_val) )
         return -1;
 
-    DEBUGMSGTL(("9:c64:check_wrap", "check wrap 0x%0x.0x%0x 0x%0x.0x%0x\n",
+    DEBUGMSGTL(("9:c64:check_wrap", "check wrap 0x%0lx.0x%0lx 0x%0lx.0x%0lx\n",
                 old_val->high, old_val->low, new_val->high, new_val->low));
     
     /*

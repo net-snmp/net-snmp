@@ -244,7 +244,7 @@ ipv6ScopeZoneIndexTable_container_load(netsnmp_container * container)
     netsnmp_access_scopezone_container_free(zoneindex,
                                             0x0001);
 
-    DEBUGMSGT(("verbose:ipv6ScopeZoneIndexTable:ipv6ScopeZoneIndexTable_container_load", "inserted %d records\n", CONTAINER_SIZE(container)));
+    DEBUGMSGT(("verbose:ipv6ScopeZoneIndexTable:ipv6ScopeZoneIndexTable_container_load", "inserted %lu records\n", (unsigned long)CONTAINER_SIZE(container)));
 
     return MFD_SUCCESS;
 }                               /* ipv6ScopeZoneIndexTable_container_load */

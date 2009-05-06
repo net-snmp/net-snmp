@@ -62,7 +62,7 @@ parse_mteOTable(const char *token, char *line)
     line  = read_config_read_data(ASN_OCTET_STR, line, &vp,    &len);
     line  = read_config_read_data(ASN_UNSIGNED,  line, &index, &len);
 
-    DEBUGMSG(("disman:event:conf", "(%s, %s, %d) ", owner, oname, index));
+    DEBUGMSG(("disman:event:conf", "(%s, %s, %lu) ", owner, oname, index));
 
     row   = mteObjects_createEntry( owner, oname, index, 0 );
     /* entry = (struct mteObject *)netsnmp_tdata_row_entry( row ); */
@@ -131,7 +131,7 @@ store_mteOTable(int majorID, int minorID, void *serverarg, void *clientarg)
         if ( entry->flags & MTE_OBJECT_FLAG_FIXED )
             continue;
 
-        DEBUGMSGTL(("disman:event:conf", "  Storing (%s %s %d)\n",
+        DEBUGMSGTL(("disman:event:conf", "  Storing (%s %s %ld)\n",
                          entry->mteOwner, entry->mteOName, entry->mteOIndex));
         memset(line, 0, sizeof(line));
         strcat(line, "_mteOTable ");

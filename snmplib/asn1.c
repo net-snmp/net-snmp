@@ -505,7 +505,7 @@ asn_parse_int(u_char * data,
 
     CHECK_OVERFLOW_S(value,1);
 
-    DEBUGMSG(("dumpv_recv", "  Integer:\t%ld (0x%.2X)\n", value, value));
+    DEBUGMSG(("dumpv_recv", "  Integer:\t%ld (0x%.2lX)\n", value, value));
 
     *intp = value;
     return bufp;
@@ -572,7 +572,7 @@ asn_parse_unsigned_int(u_char * data,
 
     CHECK_OVERFLOW_U(value,2);
 
-    DEBUGMSG(("dumpv_recv", "  UInteger:\t%ld (0x%.2X)\n", value, value));
+    DEBUGMSG(("dumpv_recv", "  UInteger:\t%ld (0x%.2lX)\n", value, value));
 
     *intp = value;
     return bufp;
@@ -651,7 +651,7 @@ asn_build_int(u_char * data,
         integer <<= 8;
     }
     DEBUGDUMPSETUP("send", initdatap, data - initdatap);
-    DEBUGMSG(("dumpv_send", "  Integer:\t%ld (0x%.2X)\n", *intp, *intp));
+    DEBUGMSG(("dumpv_send", "  Integer:\t%ld (0x%.2lX)\n", *intp, *intp));
     return data;
 }
 
@@ -747,7 +747,7 @@ asn_build_unsigned_int(u_char * data,
         integer <<= 8;
     }
     DEBUGDUMPSETUP("send", initdatap, data - initdatap);
-    DEBUGMSG(("dumpv_send", "  UInteger:\t%ld (0x%.2X)\n", *intp, *intp));
+    DEBUGMSG(("dumpv_send", "  UInteger:\t%ld (0x%.2lX)\n", *intp, *intp));
     return data;
 }
 
@@ -2583,15 +2583,16 @@ asn_realloc(u_char ** pkt, size_t * pkt_len)
     if (pkt != NULL && pkt_len != NULL) {
         size_t          old_pkt_len = *pkt_len;
 
-        DEBUGMSGTL(("asn_realloc", " old_pkt %8p, old_pkt_len %8x\n",
-                    *pkt, old_pkt_len));
+        DEBUGMSGTL(("asn_realloc", " old_pkt %8p, old_pkt_len %lu\n",
+                    *pkt, (unsigned long)old_pkt_len));
 
         if (snmp_realloc(pkt, pkt_len)) {
-            DEBUGMSGTL(("asn_realloc", " new_pkt %8p, new_pkt_len %8x\n",
-                        *pkt, *pkt_len));
+            DEBUGMSGTL(("asn_realloc", " new_pkt %8p, new_pkt_len %lu\n",
+                        *pkt, (unsigned long)*pkt_len));
             DEBUGMSGTL(("asn_realloc",
-                        " memmove(%8p + %08x, %8p, %08x)\n", *pkt,
-                        (*pkt_len - old_pkt_len), *pkt, old_pkt_len));
+                        " memmove(%8p + %08x, %8p, %08x)\n",
+			*pkt, (unsigned)(*pkt_len - old_pkt_len),
+			*pkt, (unsigned)old_pkt_len));
             memmove(*pkt + (*pkt_len - old_pkt_len), *pkt, old_pkt_len);
             memset(*pkt, (int) ' ', *pkt_len - old_pkt_len);
             return 1;
@@ -2782,7 +2783,7 @@ asn_realloc_rbuild_int(u_char ** pkt, size_t * pkt_len,
         } else {
             DEBUGDUMPSETUP("send", (*pkt + *pkt_len - *offset),
                            (*offset - start_offset));
-            DEBUGMSG(("dumpv_send", "  Integer:\t%ld (0x%.2X)\n", *intp,
+            DEBUGMSG(("dumpv_send", "  Integer:\t%ld (0x%.2lX)\n", *intp,
                       *intp));
             return 1;
         }
@@ -2935,7 +2936,7 @@ asn_realloc_rbuild_unsigned_int(u_char ** pkt, size_t * pkt_len,
         } else {
             DEBUGDUMPSETUP("send", (*pkt + *pkt_len - *offset),
                            (*offset - start_offset));
-            DEBUGMSG(("dumpv_send", "  UInteger:\t%lu (0x%.2X)\n", *intp,
+            DEBUGMSG(("dumpv_send", "  UInteger:\t%lu (0x%.2lX)\n", *intp,
                       *intp));
             return 1;
         }

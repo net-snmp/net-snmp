@@ -295,7 +295,7 @@ udpEndpointTable_container_load(netsnmp_container *container)
 
 
     DEBUGMSGT(("verbose:udpEndpointTable:udpEndpointTable_container_load",
-               "inserted %d records\n", CONTAINER_SIZE(container)));
+               "inserted %d records\n", (int)CONTAINER_SIZE(container)));
 
     return MFD_SUCCESS;
 }                               /* udpEndpointTable_container_load */

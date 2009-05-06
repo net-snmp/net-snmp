@@ -1111,7 +1111,7 @@ _extend_find_entry( netsnmp_request_info       *request,
      *  GET handling - find the exact entry being requested
      ***/
     if ( mode == MODE_GET ) {
-        DEBUGMSGTL(( "nsExtendTable:output2", "GET: %s / %d\n ",
+        DEBUGMSGTL(( "nsExtendTable:output2", "GET: %s / %ld\n ",
                       table_info->indexes->val.string,
                      *table_info->indexes->next_variable->val.integer));
         for ( eptr = ereg->ehead; eptr; eptr = eptr->next ) {

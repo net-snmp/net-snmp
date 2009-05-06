@@ -1506,7 +1506,7 @@ ipAddressIfIndex_check_value(ipAddressTable_rowreq_ctx * rowreq_ctx,
      * find name for ifIndex
      */
     if (NULL == netsnmp_access_interface_name_find(ipAddressIfIndex_val)) {
-        DEBUGMSGT(("ipAddressTable", "cant find name for index %d\n",
+        DEBUGMSGT(("ipAddressTable", "cant find name for index %ld\n",
                    ipAddressIfIndex_val));
         return MFD_NOT_VALID_NOW;
     }
@@ -2052,7 +2052,7 @@ ipAddressRowStatus_check_value(ipAddressTable_rowreq_ctx * rowreq_ctx,
                                     ipAddressRowStatus_val);
     if (MFD_SUCCESS != rc) {
         DEBUGMSGTL(("ipAddressTable",
-                    "row status transition from %d to %d\n",
+                    "row status transition from %d to %lu\n",
                     rowreq_ctx->ipAddressRowStatus,
                     ipAddressRowStatus_val));
         return rc;

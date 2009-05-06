@@ -94,7 +94,7 @@ header_complex_generate_varoid(netsnmp_variable_list * var)
     if (var->name_length > MAX_OID_LEN) {
         DEBUGMSGTL(("header_complex_generate_varoid",
                     "Something terribly wrong, namelen = %d\n",
-                    var->name_length));
+                    (int)var->name_length));
         return SNMPERR_GENERR;
     }
 
@@ -130,7 +130,7 @@ header_complex_parse_oid(oid * oidIndex, size_t oidLen,
             var->val_len = sizeof(long);
             oidLen--;
             DEBUGMSGTL(("header_complex_parse_oid",
-                        "Parsed int(%d): %d\n", var->type,
+                        "Parsed int(%d): %ld\n", var->type,
                         *var->val.integer));
             break;
 

@@ -846,7 +846,7 @@ write_snmpTargetParamsSecModel(int action,
         }
         if (find_sec_mod(long_ret) == NULL && long_ret >= 3) {
             DEBUGMSGTL(("snmpTargetParamsEntry",
-                        "write to snmpTargetParamsSecModel: secModel %d unsupported\n",
+                        "write to snmpTargetParamsSecModel: secModel %ld unsupported\n",
                         long_ret));
             return SNMP_ERR_INCONSISTENTVALUE;
         }
@@ -1277,7 +1277,7 @@ write_snmpTargetParamsRowStatus(int action,
         if (name_len < snmpTargetParamsOIDLen + 1 ||
             name_len > snmpTargetParamsOIDLen + 32) {
             DEBUGMSGTL(("snmpTargetParamsEntry", "bad index length %d\n",
-                        name_len - snmpTargetParamsOIDLen));
+                        (int)(name_len - snmpTargetParamsOIDLen)));
             return SNMP_ERR_NOCREATION;
         }
 

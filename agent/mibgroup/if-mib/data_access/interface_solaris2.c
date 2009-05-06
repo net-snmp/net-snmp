@@ -63,7 +63,7 @@ netsnmp_arch_interface_container_load(netsnmp_container* container,
     req_e                   req = GET_FIRST;
     int                     error = 0;
 
-    DEBUGMSGTL(("access:interface:container:arch", "load (flags %p)\n",
+    DEBUGMSGTL(("access:interface:container:arch", "load (flags %u)\n",
                 l_flags));
 
     if (container == NULL) {

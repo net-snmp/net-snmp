@@ -87,7 +87,7 @@ callback_debug_pdu(const char *ourstring, netsnmp_pdu *pdu)
     netsnmp_variable_list *vb;
     int             i = 1;
     DEBUGMSGTL((ourstring,
-                "PDU: command = %d, errstat = %d, errindex = %d\n",
+                "PDU: command = %d, errstat = %ld, errindex = %ld\n",
                 pdu->command, pdu->errstat, pdu->errindex));
     for (vb = pdu->variables; vb; vb = vb->next_variable) {
         DEBUGMSGTL((ourstring, "  var %d:", i++));

@@ -289,9 +289,10 @@ agentx_got_response(int operation,
         return 0;
     }
 
-    DEBUGMSGTL(("agentx/master", "got response errstat=%d, (req=0x%x,trans="
+    DEBUGMSGTL(("agentx/master", "got response errstat=%ld, (req=0x%x,trans="
                 "0x%x,sess=0x%x)\n",
-                pdu->errstat,pdu->reqid,pdu->transid, pdu->sessid));
+                pdu->errstat, (unsigned)pdu->reqid, (unsigned)pdu->transid,
+		(unsigned)pdu->sessid));
 
     if (pdu->errstat != AGENTX_ERR_NOERROR) {
         /* [RFC 2471 - 7.2.5.2.]
@@ -597,7 +598,7 @@ agentx_master_handler(netsnmp_mib_handler *handler,
      * send the requests out.
      */
     DEBUGMSGTL(("agentx", "sending pdu (req=0x%x,trans=0x%x,sess=0x%x)\n",
-                pdu->reqid,pdu->transid, pdu->sessid));
+                (unsigned)pdu->reqid, (unsigned)pdu->transid, (unsigned)pdu->sessid));
     result = snmp_async_send(ax_session, pdu, agentx_got_response, cb_data);
     if (result == 0) {
         snmp_free_pdu(pdu);
