@@ -81,7 +81,7 @@ netsnmp_oid_stash_create_node(void)
  */
 int
 netsnmp_oid_stash_add_data(netsnmp_oid_stash_node **root,
-                           oid * lookup, size_t lookup_len, void *mydata)
+                           const oid * lookup, size_t lookup_len, void *mydata)
 {
     netsnmp_oid_stash_node *curnode, *tmpp, *loopp;
     unsigned int    i;
@@ -152,7 +152,7 @@ netsnmp_oid_stash_add_data(netsnmp_oid_stash_node **root,
  */
 netsnmp_oid_stash_node *
 netsnmp_oid_stash_get_node(netsnmp_oid_stash_node *root,
-                           oid * lookup, size_t lookup_len)
+                           const oid * lookup, size_t lookup_len)
 {
     netsnmp_oid_stash_node *curnode, *tmpp, *loopp;
     unsigned int    i;
@@ -280,7 +280,7 @@ netsnmp_oid_stash_getnext_node(netsnmp_oid_stash_node *root,
  */
 void           *
 netsnmp_oid_stash_get_data(netsnmp_oid_stash_node *root,
-                           oid * lookup, size_t lookup_len)
+                           const oid * lookup, size_t lookup_len)
 {
     netsnmp_oid_stash_node *ret;
     ret = netsnmp_oid_stash_get_node(root, lookup, lookup_len);

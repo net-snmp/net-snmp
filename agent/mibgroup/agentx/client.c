@@ -223,7 +223,7 @@ agentx_register(netsnmp_session * ss, oid start[], size_t startlen,
     }
 
     if (response->errstat != SNMP_ERR_NOERROR) {
-        snmp_log(LOG_ERR,"registering pdu failed: %d!\n", response->errstat);
+        snmp_log(LOG_ERR,"registering pdu failed: %ld!\n", response->errstat);
         snmp_free_pdu(response);
         return 0;
     }
@@ -413,7 +413,7 @@ agentx_unregister_index(netsnmp_session * ss,
 
 int
 agentx_add_agentcaps(netsnmp_session * ss,
-                     oid * agent_cap, size_t agent_caplen,
+                     const oid * agent_cap, size_t agent_caplen,
                      const char *descr)
 {
     netsnmp_pdu    *pdu, *response;
@@ -443,7 +443,7 @@ agentx_add_agentcaps(netsnmp_session * ss,
 
 int
 agentx_remove_agentcaps(netsnmp_session * ss,
-                        oid * agent_cap, size_t agent_caplen)
+                        const oid * agent_cap, size_t agent_caplen)
 {
     netsnmp_pdu    *pdu, *response;
 

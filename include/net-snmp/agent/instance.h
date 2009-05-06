@@ -131,7 +131,7 @@ netsnmp_register_int_instance_context(const char *name,
 int
 netsnmp_register_num_file_instance(const char *name,
                                    const oid * reg_oid, size_t reg_oid_len,
-                                   char *file_name, int asn_type, int mode,
+                                   const char *file_name, int asn_type, int mode,
                                    Netsnmp_Node_Handler * subhandler,
                                    const char *contextName);
 

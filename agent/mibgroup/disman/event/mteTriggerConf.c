@@ -72,7 +72,7 @@ init_mteTriggerConf(void)
      * Find or create the specified trigger entry
      */
 struct mteTrigger *
-_find_mteTrigger_entry( char *owner, char *tname )
+_find_mteTrigger_entry( const char *owner, char *tname )
 {
     netsnmp_variable_list owner_var, tname_var;
     netsnmp_tdata_row *row;
@@ -101,7 +101,7 @@ _find_mteTrigger_entry( char *owner, char *tname )
 }
 
 struct mteTrigger *
-_find_typed_mteTrigger_entry( char *owner, char *tname, int type )
+_find_typed_mteTrigger_entry( const char *owner, char *tname, int type )
 {
     struct mteTrigger *entry = _find_mteTrigger_entry( owner, tname );
     if (!entry)
@@ -455,7 +455,7 @@ parse_mteMonitor(const char *token, char *line)
                      */
                     memcpy(oid_name_buf, buf, SPRINT_MAX_LEN);
                     cp = NULL;  /* To terminate the processing loop */
-                    DEBUGMSGTL(("disman:event:conf", "%s: Exist (%s, %d)\n",
+                    DEBUGMSGTL(("disman:event:conf", "%s: Exist (%s, %ld)\n",
                                                      tname, oid_name_buf, op));
                     break;
     
@@ -490,7 +490,7 @@ parse_mteMonitor(const char *token, char *line)
                     cp    = copy_nword(cp, buf, SPRINT_MAX_LEN);
                     value = strtol(buf, NULL, 0);
                     cp = NULL;  /* To terminate the processing loop */
-                    DEBUGMSGTL(("disman:event:conf", "%s: Bool (%s, %d, %d)\n",
+                    DEBUGMSGTL(("disman:event:conf", "%s: Bool (%s, %ld, %ld)\n",
                                               tname, oid_name_buf, op, value));
                     break;
     
@@ -511,7 +511,7 @@ parse_mteMonitor(const char *token, char *line)
                     memset( buf, 0,  strlen(buf));
                     memcpy( buf, cp, strlen(cp));
                     cp = NULL;  /* To terminate the processing loop */
-                    DEBUGMSGTL(("disman:event:conf", "%s: Thresh (%s, %d, %s)\n",
+                    DEBUGMSGTL(("disman:event:conf", "%s: Thresh (%s, %ld, %s)\n",
                                               tname, oid_name_buf, op, buf));
                     break;
                 }
