@@ -38,8 +38,8 @@ extern          "C" {
        NetSNMPStashDump *dumpfn;
     } netsnmp_oid_stash_save_info;
 
-    int             netsnmp_oid_stash_add_data(netsnmp_oid_stash_node
-                                               **root, oid * lookup,
+    int             netsnmp_oid_stash_add_data(netsnmp_oid_stash_node **root,
+					       const oid * lookup,
                                                size_t lookup_len,
                                                void *mydata);
     SNMPCallback netsnmp_oid_stash_store_all;
@@ -47,9 +47,9 @@ extern          "C" {
 
     netsnmp_oid_stash_node
         *netsnmp_oid_stash_get_node(netsnmp_oid_stash_node *root,
-                                    oid * lookup, size_t lookup_len);
-    void           *netsnmp_oid_stash_get_data(netsnmp_oid_stash_node
-                                               *root, oid * lookup,
+                                    const oid * lookup, size_t lookup_len);
+    void           *netsnmp_oid_stash_get_data(netsnmp_oid_stash_node *root,
+					       const oid * lookup,
                                                size_t lookup_len);
     netsnmp_oid_stash_node *
     netsnmp_oid_stash_getnext_node(netsnmp_oid_stash_node *root,

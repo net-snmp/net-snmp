@@ -189,7 +189,7 @@ extern void      init_trigger_table_data(void);
 
 void          init_mteTrigger(void);
 void               mteTrigger_removeEntry(netsnmp_tdata_row *row);
-netsnmp_tdata_row *mteTrigger_createEntry(char *mteOwner,
+netsnmp_tdata_row *mteTrigger_createEntry(const char *mteOwner,
                                           char *mteTriggerName, int fixed);
 void               mteTrigger_enable(    struct mteTrigger *entry );
 void               mteTrigger_disable(   struct mteTrigger *entry );
