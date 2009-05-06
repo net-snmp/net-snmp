@@ -1247,7 +1247,7 @@ retry:
             ret = response->errstat;
             if (request != SNMP_MSG_SET &&
                 response->errindex != 0) {
-                DEBUGMSGTL(("iquery", "retrying query (%d, %d)\n", ret, response->errindex));
+                DEBUGMSGTL(("iquery", "retrying query (%d, %ld)\n", ret, response->errindex));
                 pdu = snmp_fix_pdu( response, request );
                 snmp_free_pdu( response );
                 response = NULL;

@@ -532,7 +532,7 @@ ifTable_container_load(netsnmp_container *container)
                                             NETSNMP_ACCESS_INTERFACE_FREE_DONT_CLEAR);
 
     DEBUGMSGT(("verbose:ifTable:ifTable_cache_load",
-               "%d records\n", CONTAINER_SIZE(container)));
+               "%lu records\n", (unsigned long)CONTAINER_SIZE(container)));
 
     if (_first_load)
         _first_load = 0;

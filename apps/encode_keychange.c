@@ -232,8 +232,8 @@ main(int argc, char **argv)
         engineid_len = hex_to_binary2(engineid + 2,
                                       strlen((char *) engineid) - 2,
                                       (char **) &engineid);
-        DEBUGMSGTL(("encode_keychange", "engineIDLen: %d\n",
-                    engineid_len));
+        DEBUGMSGTL(("encode_keychange", "engineIDLen: %lu\n",
+                    (unsigned long)engineid_len));
     } else {
         engineid_len = setup_engineID(&engineid, (char *) engineid);
 
@@ -294,12 +294,12 @@ main(int argc, char **argv)
     QUITFUN(rval, main_quit);
 
 
-    DEBUGMSGTL(("encode_keychange", "EID (%d): ", engineid_len));
+    DEBUGMSGTL(("encode_keychange", "EID (%lu): ", (unsigned long)engineid_len));
     for (i = 0; i < (int) engineid_len; i++)
         DEBUGMSGTL(("encode_keychange", "%02x", (int) (engineid[i])));
     DEBUGMSGTL(("encode_keychange", "\n"));
 
-    DEBUGMSGTL(("encode_keychange", "old Ku (%d) (from %s): ", oldKu_len,
+    DEBUGMSGTL(("encode_keychange", "old Ku (%lu) (from %s): ", (unsigned long)oldKu_len,
                 oldpass));
     for (i = 0; i < (int) oldKu_len; i++)
         DEBUGMSGTL(("encode_keychange", "%02x", (int) (oldKu[i])));
@@ -311,8 +311,8 @@ main(int argc, char **argv)
     QUITFUN(rval, main_quit);
 
 
-    DEBUGMSGTL(("encode_keychange", "generating old Kul (%d) (from Ku): ",
-                oldkul_len));
+    DEBUGMSGTL(("encode_keychange", "generating old Kul (%lu) (from Ku): ",
+                (unsigned long)oldkul_len));
     for (i = 0; i < (int) oldkul_len; i++)
         DEBUGMSGTL(("encode_keychange", "%02x", (int) (oldkul[i])));
     DEBUGMSGTL(("encode_keychange", "\n"));
@@ -322,8 +322,8 @@ main(int argc, char **argv)
                         newKu, newKu_len, newkul, &newkul_len);
     QUITFUN(rval, main_quit);
 
-    DEBUGMSGTL(("encode_keychange", "generating new Kul (%d) (from Ku): ",
-                oldkul_len));
+    DEBUGMSGTL(("encode_keychange", "generating new Kul (%lu) (from Ku): ",
+                (unsigned long)oldkul_len));
     for (i = 0; i < (int) newkul_len; i++)
         DEBUGMSGTL(("encode_keychange", "%02x", newkul[i]));
     DEBUGMSGTL(("encode_keychange", "\n"));

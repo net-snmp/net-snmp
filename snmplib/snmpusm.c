@@ -1360,7 +1360,7 @@ usm_rgenerate_out_msg(int msgProcModel, /* (UNUSED) */
     size_t          sp_offset = 0, mac_offset = 0;
     int             rc = 0;
 
-    DEBUGMSGTL(("usm", "USM processing has begun (offset %d)\n", *offset));
+    DEBUGMSGTL(("usm", "USM processing has begun (offset %d)\n", (int)*offset));
 
     if (secStateRef != NULL) {
         /*
@@ -1488,7 +1488,7 @@ usm_rgenerate_out_msg(int msgProcModel, /* (UNUSED) */
         if ((ciphertext = (u_char *) malloc(ciphertextlen)) == NULL) {
             DEBUGMSGTL(("usm",
                         "couldn't malloc %d bytes for encrypted PDU\n",
-                        ciphertextlen));
+                        (int)ciphertextlen));
             usm_free_usmStateReference(secStateRef);
             return SNMPERR_MALLOC;
         }
@@ -2584,8 +2584,8 @@ usm_process_in_msg(int msgProcModel,    /* (UNUSED) */
 
             if (remaining % 8 != 0) {
                 DEBUGMSGTL(("usm",
-                            "Ciphertext is %lu bytes, not an integer multiple of 8 (rem %d)\n",
-                            remaining, remaining % 8));
+                            "Ciphertext is %lu bytes, not an integer multiple of 8 (rem %lu)\n",
+                            (unsigned long)remaining, (unsigned long)remaining % 8));
                 if (snmp_increment_statistic(STAT_USMSTATSDECRYPTIONERRORS) ==
                     0) {
                     DEBUGMSGTL(("usm", "%s\n", "Failed increment statistic."));
@@ -2722,7 +2722,7 @@ init_usm(void)
 {
     struct snmp_secmod_def *def;
 
-    DEBUGMSGTL(("init_usm", "unit_usm: %d %d\n", usmNoPrivProtocol[0],
+    DEBUGMSGTL(("init_usm", "unit_usm: %lu %lu\n", usmNoPrivProtocol[0],
                 usmNoPrivProtocol[1]));
 
     sc_init();                  /* initalize scapi code */
@@ -2883,7 +2883,7 @@ usm_check_secLevel(int level, struct usmUser *user)
     if (user->userStatus != RS_ACTIVE)
         return -1;
 
-    DEBUGMSGTL(("comparex", "Comparing: %d %d ", usmNoPrivProtocol[0],
+    DEBUGMSGTL(("comparex", "Comparing: %lu %lu ", usmNoPrivProtocol[0],
                 usmNoPrivProtocol[1]));
     DEBUGMSGOID(("comparex", usmNoPrivProtocol,
                  sizeof(usmNoPrivProtocol) / sizeof(oid)));

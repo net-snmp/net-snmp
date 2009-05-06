@@ -142,11 +142,11 @@ check_log_size(unsigned int clientreg, void *clientarg)
      */
     count = netsnmp_table_set_num_rows(nlmLogTable);
     DEBUGMSGTL(("notification_log",
-                "logged notifications %d; max %d\n",
+                "logged notifications %lu; max %lu\n",
                     count, max_logged));
     if (count > max_logged) {
         count = count - max_logged;
-        DEBUGMSGTL(("notification_log", "removing %d extra notifications\n",
+        DEBUGMSGTL(("notification_log", "removing %lu extra notifications\n",
                     count));
         netsnmp_notif_log_remove_oldest(count);
     }
@@ -170,7 +170,7 @@ check_log_size(unsigned int clientreg, void *clientarg)
     }
 
     if (count) {
-        DEBUGMSGTL(("notification_log", "removing %d expired notifications\n",
+        DEBUGMSGTL(("notification_log", "removing %lu expired notifications\n",
                     count));
         netsnmp_notif_log_remove_oldest(count);
     }

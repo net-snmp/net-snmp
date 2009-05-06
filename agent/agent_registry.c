@@ -1532,8 +1532,8 @@ netsnmp_subtree_find_prev(oid *name, size_t len, netsnmp_subtree *subtree,
            to actually perform a comparison */
         DEBUGMSGTL(("wtest","oid cmp: "));
         DEBUGMSGOID(("wtest", myptr->start_a, myptr->start_len));
-        DEBUGMSG(("wtest","  --- off = %d, in off = %d test = %d\n",
-                  myptr->oid_off, ll_off,
+        DEBUGMSG(("wtest","  --- off = %lu, in off = %lu test = %d\n",
+                  (unsigned long)myptr->oid_off, (unsigned long)ll_off,
                   !(ll_off && myptr->oid_off &&
                     myptr->oid_off > ll_off)));
         if (!(ll_off && myptr->oid_off && myptr->oid_off > ll_off) &&

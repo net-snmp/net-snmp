@@ -1024,7 +1024,7 @@ netsnmp_config_parse_table_set(const char *token, char *line)
         }
 
         DEBUGMSGTL(("table_set_add_table",
-                    "adding column %s(%d) of type %d (access %d)\n",
+                    "adding column %s(%ld) of type %d (access %d)\n",
                     tp->label, tp->subid, type, tp->access));
 
         switch (tp->access) {
@@ -1035,7 +1035,7 @@ netsnmp_config_parse_table_set(const char *token, char *line)
             canwrite = 1;
         case MIB_ACCESS_READONLY:
             DEBUGMSGTL(("table_set_add_table",
-                        "adding column %d of type %d\n", tp->subid, type));
+                        "adding column %ld of type %d\n", tp->subid, type));
             netsnmp_table_set_add_default_row(table_set, tp->subid, type,
                                               canwrite, NULL, 0);
             mincol = SNMP_MIN(mincol, tp->subid);
