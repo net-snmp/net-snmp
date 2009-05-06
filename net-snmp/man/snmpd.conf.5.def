@@ -465,7 +465,7 @@ as 'Network Disks' (1) or 'Fixed Disks' (2)
 Historically, the Net-SNMP agent has reported such file systems
 as 'Fixed Disks', and this is still the default behaviour.
 Setting this directive to '1' reports such file systems as
-'Network Disks', as required by the Host Resources MIB.
+\'Network Disks', as required by the Host Resources MIB.
 .SS Process Monitoring 
 The \fChrSWRun\fR group of the Host Resources MIB provides
 information about individual processes running on the local system.
