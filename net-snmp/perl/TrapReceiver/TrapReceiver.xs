@@ -191,7 +191,7 @@ int   perl_trapd_handler( netsnmp_pdu           *pdu,
         /* reference to code */
         noValuesReturned = perl_call_sv(SvRV(pcallback), G_SCALAR);
     } else {
-        snmp_log(LOG_ERR, " tried to call a perl function but failed to understand its type: (ref = %x, svrok: %lu, SVTYPE: %lu)\n", (uintptr_t)pcallback, SvROK(pcallback), SvTYPE(pcallback));
+        snmp_log(LOG_ERR, " tried to call a perl function but failed to understand its type: (ref = %p, svrok: %lu, SVTYPE: %lu)\n", pcallback, (unsigned long)SvROK(pcallback), (unsigned long)SvTYPE(pcallback));
 	callingCFfailed = 1;
     }
 
@@ -199,23 +199,23 @@ int   perl_trapd_handler( netsnmp_pdu           *pdu,
       SPAGAIN;
 
       if ( noValuesReturned == 0 ) {
-        snmp_log(LOG_WARNING, " perl callback function %x did not return a scalar, assuming %d (NETSNMPTRAPD_HANDLER_OK)\n", (uintptr_t)pcallback, NETSNMPTRAPD_HANDLER_OK);
+        snmp_log(LOG_WARNING, " perl callback function %p did not return a scalar, assuming %d (NETSNMPTRAPD_HANDLER_OK)\n", pcallback, NETSNMPTRAPD_HANDLER_OK);
       }
       else {
 	SV *rv = POPs;
 
 	if (SvTYPE(rv) != SVt_IV) {
-	  snmp_log(LOG_WARNING, " perl callback function %x returned a scalar of type %d instead of an integer, assuming %d (NETSNMPTRAPD_HANDLER_OK)\n", (uintptr_t)pcallback, SvTYPE(rv), NETSNMPTRAPD_HANDLER_OK);
+	  snmp_log(LOG_WARNING, " perl callback function %p returned a scalar of type %d instead of an integer, assuming %d (NETSNMPTRAPD_HANDLER_OK)\n", pcallback, SvTYPE(rv), NETSNMPTRAPD_HANDLER_OK);
 	}
 	else {
 	  int rvi = (IV)SvIVx(rv);
 
 	  if ((NETSNMPTRAPD_HANDLER_OK <= rvi) && (rvi <= NETSNMPTRAPD_HANDLER_FINISH)) {
-	    snmp_log(LOG_DEBUG, " perl callback function %x returns %d\n", (uintptr_t)pcallback, rvi);
+	    snmp_log(LOG_DEBUG, " perl callback function %p returns %d\n", pcallback, rvi);
 	    result = rvi;
 	  }
 	  else {
-	    snmp_log(LOG_WARNING, " perl callback function %x returned an invalid scalar integer value (%d), assuming %d (NETSNMPTRAPD_HANDLER_OK)\n", (uintptr_t)pcallback, rvi, NETSNMPTRAPD_HANDLER_OK);
+	    snmp_log(LOG_WARNING, " perl callback function %p returned an invalid scalar integer value (%d), assuming %d (NETSNMPTRAPD_HANDLER_OK)\n", pcallback, rvi, NETSNMPTRAPD_HANDLER_OK);
 	  }
 	}
       }

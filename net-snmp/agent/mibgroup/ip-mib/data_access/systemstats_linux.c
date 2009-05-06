@@ -101,7 +101,7 @@ _systemstats_v4(netsnmp_container* container, u_int load_flags)
     int             scan_count;
     char           *stats, *start = line;
     int             len;
-    uintmax_t       scan_vals[19];
+    unsigned long long scan_vals[19];
 
     DEBUGMSGTL(("access:systemstats:container:arch", "load v4 (flags %x)\n",
                 load_flags));
@@ -266,11 +266,11 @@ _additional_systemstats_v4(netsnmp_systemstats_entry* entry,
     FILE           *devin;
     char            line[1024];
     int             scan_count;
-    uintmax_t       scan_vals[6];
+    unsigned long long scan_vals[6];
     int             retval = 0;
 
     DEBUGMSGTL(("access:systemstats:container:arch",
-                "load addtional v4 (flags %p)\n", load_flags));
+                "load addtional v4 (flags %u)\n", load_flags));
 
     if (!(devin = fopen("/proc/net/netstat", "r"))) {
         DEBUGMSGTL(("access:systemstats",
@@ -341,7 +341,7 @@ _additional_systemstats_v4(netsnmp_systemstats_entry* entry,
 #if defined (NETSNMP_ENABLE_IPV6)
 
 /*
- * Load one /proc/net/snmp6 - like file (e.g. /proc/net/dev_snmp6/*)
+ * Load one /proc/net/snmp6 - like file (e.g. /proc/net/dev_snmp6)
  */ 
 static int 
 _systemstats_v6_load_file(netsnmp_systemstats_entry *entry, FILE *devin)
@@ -643,7 +643,7 @@ _systemstats_v6_load_ifstats(netsnmp_container* container, u_int load_flags)
 static int
 _systemstats_v6(netsnmp_container* container, u_int load_flags)
 {
-    DEBUGMSGTL(("access:systemstats:container:arch", "load v6 (flags %p)\n",
+    DEBUGMSGTL(("access:systemstats:container:arch", "load v6 (flags %u)\n",
                 load_flags));
 
     netsnmp_assert(container != NULL); /* load function shoulda checked this */

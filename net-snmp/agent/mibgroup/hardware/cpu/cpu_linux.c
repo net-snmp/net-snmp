@@ -219,7 +219,7 @@ void _cpu_load_swap_etc( char *buff, netsnmp_cpu_info *cpu ) {
         close(vmstatfd);
         if ( bytes_read < 0 ) {
             snmp_log_perror(STAT_FILE "read error");
-            return -1;
+            return;
         }
         vmbuff[bytes_read] = '\0';
     }
@@ -287,8 +287,6 @@ void _cpu_load_swap_etc( char *buff, netsnmp_cpu_info *cpu ) {
 	}
     }
 
-
-
     b = strstr(buff, "intr ");
     if (b) {
 	sscanf(b, "intr %llu %llu", &itot, &iticks);
@@ -306,7 +304,5 @@ void _cpu_load_swap_etc( char *buff, netsnmp_cpu_info *cpu ) {
 	if (first)
 	    snmp_log(LOG_ERR, "No ctxt line in %s\n", STAT_FILE);
     }
-
-
 }
 

@@ -135,7 +135,7 @@ _netsnmp_ioctl_ipaddress_container_load_v4(netsnmp_container *container,
     struct ifreq   *ifrp;
     struct sockaddr save_addr;
     struct sockaddr_in * si;
-    netsnmp_ipaddress_entry *entry, *bcastentry;
+    netsnmp_ipaddress_entry *entry, *bcastentry = NULL;
     struct address_flag_info addr_info;
     in_addr_t       ipval;
     _ioctl_extras           *extras;
@@ -256,7 +256,7 @@ _netsnmp_ioctl_ipaddress_container_load_v4(netsnmp_container *container,
         si = (struct sockaddr_in *) &ifrp->ifr_addr;
         entry->ia_prefix_len =
             netsnmp_ipaddress_ipv4_prefix_len(ntohl(si->sin_addr.s_addr));
-        if(addr_info.bcastflg)
+        if(bcastentry)
            bcastentry->ia_prefix_len = entry->ia_prefix_len;
 
 
@@ -272,7 +272,7 @@ _netsnmp_ioctl_ipaddress_container_load_v4(netsnmp_container *container,
         }
         extras->flags = ifrp->ifr_flags;
 
-        if(addr_info.bcastflg)
+        if(bcastentry)
            bcastentry->ia_type = IPADDRESSTYPE_BROADCAST;
         if(addr_info.anycastflg)
            entry->ia_type = IPADDRESSTYPE_ANYCAST;
@@ -287,7 +287,7 @@ _netsnmp_ioctl_ipaddress_container_load_v4(netsnmp_container *container,
          *   always preferred(1).
          */
         entry->ia_status = IPADDRESSSTATUSTC_PREFERRED;
-        if(addr_info.bcastflg)
+        if(bcastentry)
            bcastentry->ia_status = IPADDRESSSTATUSTC_PREFERRED;
 
         /*
@@ -296,18 +296,18 @@ _netsnmp_ioctl_ipaddress_container_load_v4(netsnmp_container *container,
          */
         if(IS_APIPA(ipval)) {
            entry->ia_origin = IPADDRESSORIGINTC_RANDOM;
-           if(addr_info.bcastflg)
+           if(bcastentry)
               bcastentry->ia_origin = IPADDRESSORIGINTC_RANDOM;
         }
         else {
            entry->ia_origin = IPADDRESSORIGINTC_MANUAL;
-           if(addr_info.bcastflg)
+           if(bcastentry)
               bcastentry->ia_origin = IPADDRESSORIGINTC_MANUAL;
         }
 
         DEBUGIF("access:ipaddress:container") {
             DEBUGMSGT_NC(("access:ipaddress:container",
-                          " if %d: addr len %d, index 0x%x\n",
+                          " if %d: addr len %d, index 0x%lx\n",
                           i, entry->ia_address_len, entry->if_index));
             if (4 == entry->ia_address_len)
                 DEBUGMSGT_NC(("access:ipaddress:container", " address %p\n",
@@ -321,7 +321,7 @@ _netsnmp_ioctl_ipaddress_container_load_v4(netsnmp_container *container,
         /*
          * add entry to container
          */
-        if(addr_info.bcastflg){
+        if(bcastentry){
             if (CONTAINER_INSERT(container, bcastentry) < 0) {
                 DEBUGMSGTL(("access:ipaddress:container","error with ipaddress_entry: insert broadcast entry into container failed.\n"));
                 netsnmp_access_ipaddress_entry_free(bcastentry);
@@ -465,7 +465,7 @@ _netsnmp_ioctl_ipaddress_set_v4(netsnmp_ipaddress_entry * entry)
         int   alias_idx;
 
         if (NULL == name) {
-            DEBUGMSGT(("access:ipaddress:set", "cant find name for index %d\n",
+            DEBUGMSGT(("access:ipaddress:set", "cant find name for index %ld\n",
                        entry->if_index));
             close(fd);
             return -1;

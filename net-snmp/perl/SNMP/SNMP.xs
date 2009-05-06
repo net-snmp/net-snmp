@@ -4866,7 +4866,7 @@ snmp_translate_obj(var,mode,use_long,auto_init,best_guess,include_module_name)
 
 		break;
              default:
-	       if (verbose) warn("snmp_translate_obj:unknown translation mode: %s\n", mode);
+	       if (verbose) warn("snmp_translate_obj:unknown translation mode: %d\n", mode);
            }
            if (*str_buf) {
               RETVAL = (char*)str_buf;

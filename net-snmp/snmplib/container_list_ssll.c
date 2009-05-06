@@ -499,12 +499,12 @@ _ssll_iterator_reset(ssll_iterator *it)
     /** can't use it2conf cuz we might be out of sync */
     if(NULL == it) {
         netsnmp_assert(NULL != it);
-        return NULL;
+        return 0;
     }
 
     if(NULL == it->base.container) {
         netsnmp_assert(NULL != it->base.container);
-        return NULL;
+        return 0;
     }
     t = (sl_container *)it->base.container;
     if(NULL == t)
