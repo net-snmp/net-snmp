@@ -272,7 +272,7 @@ sc_generate_keyed_hash(const oid * authtype, size_t authtypelen,
 
     u_char          buf[SNMP_MAXBUF_SMALL];
 #if  defined(NETSNMP_USE_OPENSSL) || defined(NETSNMP_USE_PKCS11)
-    size_t             buf_len = sizeof(buf);
+    unsigned int    buf_len = sizeof(buf);
 #endif
 
     DEBUGTRACE;
@@ -318,7 +318,7 @@ sc_generate_keyed_hash(const oid * authtype, size_t authtypelen,
     else {
         QUITFUN(SNMPERR_GENERR, sc_generate_keyed_hash_quit);
     }
-    if ((int)buf_len != properlength) {
+    if (buf_len != properlength) {
         QUITFUN(rval, sc_generate_keyed_hash_quit);
     }
     if ((int)*maclen > buf_len)
