@@ -497,14 +497,3 @@ diff -ru /usr/local/share/snmp/rfc.orig/SMUX-MIB.txt /usr/local/share/snmp/rfc/S
          ACCESS  read-only
          STATUS  mandatory
          DESCRIPTION
---- /usr/local/share/snmp/rfc.orig/IANA-PRINTER-MIB.txt	2009-04-02 00:57:00.000000000 +0200
-+++ /usr/local/share/snmp/rfc/IANA-PRINTER-MIB.txt	2009-04-02 01:39:12.000000000 +0200
-@@ -38,7 +38,7 @@
-                   http://www.ietf.org/copyrights/ianamib.html"
- 
-     REVISION      "200902060000Z" -- February 6, 2009
--    DESCRIPTION   "Added chWSPrint(46) "Channel Type" for Web 
-+    DESCRIPTION   "Added chWSPrint(46) 'Channel Type' for Web 
-                   Services based printing." 
- 
-     REVISION      "200509140000Z"  -- September 14, 2005
