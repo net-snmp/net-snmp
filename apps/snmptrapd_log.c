@@ -802,7 +802,7 @@ realloc_handle_ent_fmt(u_char ** buf, size_t * buf_len, size_t * out_len,
         /*
          * Write the context oid.  
          */
-        if (!sprint_realloc_objid
+        if (!sprint_realloc_hexstring
             (&temp_buf, &temp_buf_len, &temp_out_len, 1, pdu->contextEngineID,
              pdu->contextEngineIDLen)) {
             free(temp_buf);
