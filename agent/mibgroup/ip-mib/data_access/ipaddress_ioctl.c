@@ -265,7 +265,7 @@ _netsnmp_ioctl_ipaddress_container_load_v4(netsnmp_container *container,
 
         DEBUGIF("access:ipaddress:container") {
             DEBUGMSGT_NC(("access:ipaddress:container",
-                          " if %d: addr len %d, index 0x%x\n",
+                          " if %d: addr len %d, index 0x%lx\n",
                           i, entry->ia_address_len, entry->if_index));
             if (4 == entry->ia_address_len)
                 DEBUGMSGT_NC(("access:ipaddress:container", " address %p\n",
@@ -412,7 +412,7 @@ _netsnmp_ioctl_ipaddress_set_v4(netsnmp_ipaddress_entry * entry)
         int   alias_idx;
 
         if (NULL == name) {
-            DEBUGMSGT(("access:ipaddress:set", "cant find name for index %d\n",
+            DEBUGMSGT(("access:ipaddress:set", "cant find name for index %ld\n",
                        entry->if_index));
             close(fd);
             return -1;

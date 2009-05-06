@@ -964,9 +964,10 @@ main(int argc, char *argv[])
 #endif
 
 #if HAVE_UNISTD_H
-    cptr = get_persistent_directory();
-    mkdirhier( cptr, NETSNMP_AGENT_DIRECTORY_MODE, 0 );
-   
+    {
+    const char *const persistent_dir = get_persistent_directory();
+    mkdirhier( persistent_dir, NETSNMP_AGENT_DIRECTORY_MODE, 0 );
+
     uid = netsnmp_ds_get_int(NETSNMP_DS_APPLICATION_ID, 
 			     NETSNMP_DS_AGENT_USERID);
     gid = netsnmp_ds_get_int(NETSNMP_DS_APPLICATION_ID, 
@@ -974,8 +975,9 @@ main(int argc, char *argv[])
     
 #ifdef HAVE_CHOWN
     if ( uid != 0 || gid != 0 )
-        chown( cptr, uid, gid );
+        chown( persistent_dir, uid, gid );
 #endif
+    }
 
 #ifdef HAVE_SETGID
     if ((gid = netsnmp_ds_get_int(NETSNMP_DS_APPLICATION_ID, 
@@ -1201,7 +1203,7 @@ receive(void)
         DEBUGMSGTL(("snmpd/select", "select( numfds=%d, ..., tvp=%p)\n",
                     numfds, tvp));
         if(tvp)
-            DEBUGMSGTL(("timer", "tvp %d.%d\n", tvp->tv_sec, tvp->tv_usec));
+            DEBUGMSGTL(("timer", "tvp %ld.%ld\n", tvp->tv_sec, tvp->tv_usec));
         count = select(numfds, &readfds, &writefds, &exceptfds, tvp);
         DEBUGMSGTL(("snmpd/select", "returned, count = %d\n", count));
 

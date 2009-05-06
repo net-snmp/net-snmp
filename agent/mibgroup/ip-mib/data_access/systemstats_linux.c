@@ -90,7 +90,7 @@ _systemstats_v4(netsnmp_container* container, u_int load_flags)
     int             scan_count;
     char           *stats, *start = line;
     int             len;
-    uintmax_t       scan_vals[19];
+    unsigned long long scan_vals[19];
 
     DEBUGMSGTL(("access:systemstats:container:arch", "load v4 (flags %p)\n",
                 load_flags));
@@ -229,7 +229,7 @@ _systemstats_v6(netsnmp_container* container, u_int load_flags)
     const char     *filename = "/proc/net/snmp6";
     static int      warned_open = 0;
 
-    DEBUGMSGTL(("access:systemstats:container:arch", "load v6 (flags %p)\n",
+    DEBUGMSGTL(("access:systemstats:container:arch", "load v6 (flags %u)\n",
                 load_flags));
 
     netsnmp_assert(container != NULL); /* load function shoulda checked this */

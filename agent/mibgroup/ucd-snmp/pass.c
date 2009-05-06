@@ -66,7 +66,8 @@ pass_parse_config(const char *token, char *cptr)
 {
     struct extensible **ppass = &passthrus, **etmp, *ptmp;
     char           *tcptr, *endopt;
-    int             i, priority;
+    int             i;
+    unsigned long   priority;
 
     /*
      * options

@@ -150,6 +150,8 @@ PERFORMANCE OF THIS SOFTWARE.
 #include "mib_module_includes.h"
 #include "net-snmp/library/container.h"
 
+#include "snmp_perl.h"
+
 #ifndef  MIN
 #define  MIN(a,b)                     (((a) < (b)) ? (a) : (b))
 #endif
