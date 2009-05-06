@@ -278,7 +278,7 @@ shutdown_sysORTable(void)
                              SNMPD_CALLBACK_REG_SYSOR, register_cb, NULL, 1);
 
     if (table)
-        CONTAINER_CLEAR(table, &free, NULL);
+        CONTAINER_CLEAR(table, netsnmp_container_simple_free, NULL);
     netsnmp_container_table_unregister(sysORTable_reg);
     sysORTable_reg = NULL;
     table = NULL;

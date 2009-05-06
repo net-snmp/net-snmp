@@ -85,7 +85,7 @@ pthread_t thread1;
 #define IF_PREFIX_ONLINK        0x01
 #define IF_PREFIX_AUTOCONF      0x02
  
-void *netsnmp_prefix_listen(netsnmp_prefix_listen_info *listen_info);
+void *netsnmp_prefix_listen(void *formal);
 #endif
 void
 netsnmp_arch_interface_init(void)
@@ -560,7 +560,7 @@ netsnmp_arch_interface_container_load(netsnmp_container* container,
         }
         if ((scan_expected == 10) && ((stats - line) < 6)) {
             snmp_log(LOG_ERR,
-                     "interface data format error 2 (%d < 6), line ==|%s|\n",
+                     "interface data format error 2 (%ld < 6), line ==|%s|\n",
                      stats - line, line);
         }
 
@@ -923,8 +923,9 @@ netsnmp_linux_interface_get_if_speed(int fd, const char *name)
     return retspeed;
 }
 #ifdef SUPPORT_PREFIX_FLAGS
-void *netsnmp_prefix_listen(netsnmp_prefix_listen_info *listen_info)
+void *netsnmp_prefix_listen(void *formal)
 {
+    netsnmp_prefix_listen_info *listen_info = (netsnmp_prefix_listen_info *)formal;
     struct {
                 struct nlmsghdr n;
                 struct ifinfomsg r;

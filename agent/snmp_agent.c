@@ -1246,7 +1246,7 @@ init_master_agent(void)
         /*
          * No, so just specify the default port.  
          */
-        buf = "";
+        buf = strdup("");
     }
 
     DEBUGMSGTL(("snmp_agent", "final port spec: \"%s\"\n", buf));
@@ -2262,7 +2262,7 @@ netsnmp_create_subtree_cache(netsnmp_agent_session *asp)
             if (asp->pdu->errindex > maxbulk) {
                 asp->pdu->errindex = maxbulk;
                 DEBUGMSGTL(("snmp_agent",
-                            "truncating number of getbulk repeats to %d\n",
+                            "truncating number of getbulk repeats to %ld\n",
                             asp->pdu->errindex));
             }
 
@@ -2275,7 +2275,7 @@ netsnmp_create_subtree_cache(netsnmp_agent_session *asp)
                 return SNMP_ERR_GENERR;
             }
         }
-        DEBUGMSGTL(("snmp_agent", "GETBULK N = %d, M = %d, R = %d\n",
+        DEBUGMSGTL(("snmp_agent", "GETBULK N = %d, M = %ld, R = %d\n",
                     n, asp->pdu->errindex, r));
     }
 

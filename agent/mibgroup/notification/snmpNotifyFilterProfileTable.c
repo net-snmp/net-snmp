@@ -804,7 +804,7 @@ get_FilterProfileName(const char *paramName, size_t paramName_len,
      * put requested info into var structure 
      */
     snmp_varlist_add_variable(&vars, NULL, 0, ASN_PRIV_IMPLIED_OCTET_STR,
-                              (u_char *) paramName, paramName_len);
+                              (const u_char *) paramName, paramName_len);
 
     /*
      * get the data from the header_complex storage 

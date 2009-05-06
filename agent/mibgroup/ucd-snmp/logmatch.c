@@ -611,8 +611,7 @@ int logmatch_update_filename(char * pattern, char * currentFilename) {
      * since there is no need for further processing
      * -------------------------------------------------------------------
      */
-    char *tmpchar = "%";
-    if (strstr(pattern, tmpchar) == NULL) {
+    if (strstr(pattern, "%") == NULL) {
         return 0;
     }
 
