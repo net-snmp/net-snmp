@@ -11,7 +11,7 @@ create_word_array_helper(const char* cptr, size_t idx, char* tmp, size_t tmplen)
 {
     char* item;
     char** res;
-    cptr = copy_nword((char*)cptr, tmp, tmplen);
+    cptr = copy_nword(cptr, tmp, tmplen);
     item = strdup(tmp);
     if (cptr)
         res = create_word_array_helper(cptr, idx + 1, tmp, tmplen);
@@ -232,7 +232,7 @@ netsnmp_register_default_target(const char* application, const char* domain,
 				const char* target)
 {
     struct netsnmp_lookup_target *run = targets, *prev = NULL;
-    int i, res = 0;
+    int i = 0, res = 0;
     while (run && ((i = strcmp(run->application, application)) < 0 ||
 		   (i == 0 && strcmp(run->domain, domain) < 0))) {
 	prev = run;
@@ -293,7 +293,7 @@ netsnmp_register_user_target(const char* token, char* cptr)
     char* application = (char*)malloc(len);
     char* domain = (char*)malloc(len);
     char* target = (char*)malloc(len);
-    int i;
+    int i = 0;
 
     {
 	char* cp = copy_nword(cptr, application, len);
@@ -363,7 +363,7 @@ netsnmp_clear_user_target(void)
 const char*
 netsnmp_lookup_default_target(const char* application, const char* domain)
 {
-    int i;
+    int i = 0;
     struct netsnmp_lookup_target *run = targets;
     const char *res;
 

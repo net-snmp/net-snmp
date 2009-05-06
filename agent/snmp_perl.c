@@ -5,12 +5,14 @@
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 
+#include "snmp_perl.h"
+
 static PerlInterpreter *my_perl;
 
-void            boot_DynaLoader(CV * cv);
+void            boot_DynaLoader(pTHX_ CV * cv);
 
 void
-xs_init(void)
+xs_init(pTHX)
 {
     char            myfile[] = __FILE__;
     char            modulename[] = "DynaLoader::boot_DynaLoader";

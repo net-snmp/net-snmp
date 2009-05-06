@@ -103,7 +103,7 @@ system_parse_config_string(const char *token, char *cptr,
 {
     if (strlen(cptr) >= size) {
 	netsnmp_config_error("%s token too long (must be < %lu):\n\t%s",
-			     token, size, cptr);
+			     token, (unsigned long)size, cptr);
     }
 
     if (*token == 'p' && strcasecmp(token + 1, name) == 0) {

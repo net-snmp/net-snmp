@@ -434,6 +434,9 @@ main(int argc, char *argv[])
 #if HAVE_GETPWNAM && HAVE_PWD_H
     struct passwd  *info;
 #endif
+#if HAVE_UNISTD_H
+    const char     *persistent_dir;
+#endif
 
 #ifndef WIN32
     /*
@@ -964,8 +967,8 @@ main(int argc, char *argv[])
 #endif
 
 #if HAVE_UNISTD_H
-    cptr = get_persistent_directory();
-    mkdirhier( cptr, NETSNMP_AGENT_DIRECTORY_MODE, 0 );
+    persistent_dir = get_persistent_directory();
+    mkdirhier( persistent_dir, NETSNMP_AGENT_DIRECTORY_MODE, 0 );
    
     uid = netsnmp_ds_get_int(NETSNMP_DS_APPLICATION_ID, 
 			     NETSNMP_DS_AGENT_USERID);
@@ -973,7 +976,7 @@ main(int argc, char *argv[])
 			     NETSNMP_DS_AGENT_GROUPID);
     
     if ( uid != 0 || gid != 0 )
-        chown( cptr, uid, gid );
+        chown( persistent_dir, uid, gid );
 
 #ifdef HAVE_SETGID
     if ((gid = netsnmp_ds_get_int(NETSNMP_DS_APPLICATION_ID, 
@@ -1181,7 +1184,7 @@ receive(void)
         DEBUGMSGTL(("snmpd/select", "select( numfds=%d, ..., tvp=%p)\n",
                     numfds, tvp));
         if(tvp)
-            DEBUGMSGTL(("timer", "tvp %d.%d\n", tvp->tv_sec, tvp->tv_usec));
+            DEBUGMSGTL(("timer", "tvp %ld.%ld\n", tvp->tv_sec, tvp->tv_usec));
         count = select(numfds, readfds.lfs_setptr, writefds.lfs_setptr, exceptfds.lfs_setptr, tvp);
         DEBUGMSGTL(("snmpd/select", "returned, count = %d\n", count));
 

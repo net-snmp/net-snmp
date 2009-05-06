@@ -90,7 +90,8 @@ pass_persist_parse_config(const char *token, char *cptr)
 {
     struct extensible **ppass = &persistpassthrus, **etmp, *ptmp;
     char           *tcptr, *endopt;
-    int             i, priority;
+    int             i;
+    long int        priority;
 
     /*
      * options

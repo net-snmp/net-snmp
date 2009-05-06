@@ -30,7 +30,7 @@ netsnmp_get_pid_from_inode(ino64_t inode)
     char            socket_lnk[NAME_MAX + 1];
     int             filelen = 0, readlen = 0, iflag = 0;
     struct dirent  *procinfo, *pidinfo;
-    pid_t           pid;
+    pid_t           pid = 0;
     ino64_t         temp_inode;
 
     if (!(procdirs = opendir(PROC_PATH))) {
