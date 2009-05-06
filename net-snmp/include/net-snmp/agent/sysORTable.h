@@ -2,7 +2,7 @@
 #define NETSNMP_SYSORTABLE_H
 
 struct sysORTable {
-    const char      *OR_descr;
+    char            *OR_descr;
     oid             *OR_oid;
     size_t           OR_oidlen;
     netsnmp_session *OR_sess;
@@ -10,7 +10,7 @@ struct sysORTable {
 };
 
 struct register_sysOR_parameters {
-    const char      *descr;
+    char            *descr;
     oid             *name;
     size_t           namelen;
 };

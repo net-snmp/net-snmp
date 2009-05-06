@@ -31,7 +31,7 @@ erase(data_node entry)
     snmp_call_callbacks(SNMP_CALLBACK_APPLICATION, SNMPD_CALLBACK_UNREG_SYSOR,
                         &entry->data);
     free(entry->data.OR_oid);
-    free((char*)entry->data.OR_descr);
+    free(entry->data.OR_descr);
     if (entry->next == entry)
         table = NULL;
     else {
@@ -84,7 +84,7 @@ register_sysORTable_sess(oid * oidin,
     entry->data.OR_oid = (oid *) malloc(sizeof(oid) * oidlen);
     if (entry->data.OR_oid == NULL) {
         DEBUGMSGTL(("agent/sysORTable", "Failed to allocate new sysORID\n"));
-        free((char*)entry->data.OR_descr);
+        free(entry->data.OR_descr);
         free(entry);
         return SYS_ORTABLE_REGISTRATION_FAILED;
     }
