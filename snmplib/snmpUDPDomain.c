@@ -318,7 +318,7 @@ static int
 _sock_buffer_maximize(int s, int optname, const char *buftype, int size)
 {
     int            curbuf = 0;
-    size_t         curbuflen = sizeof(int);
+    socklen_t      curbuflen = sizeof(int);
     int            lo, mid, hi;
 
     /*
@@ -478,7 +478,7 @@ netsnmp_sock_buffer_set(int s, int optname, int local, int size)
 #else
     const char     *buftype;
     int            curbuf = 0;
-    size_t         curbuflen = sizeof(int);
+    socklen_t      curbuflen = sizeof(int);
 
 #   ifndef  SO_SNDBUF
     if (SO_SNDBUF == optname) {
@@ -1179,7 +1179,7 @@ netsnmp_udp_getSecName(void *opaque, int olength,
      */
 
    DEBUGMSGTL(("netsnmp_udp_getSecName", "opaque = %p (len = %d), sizeof = %d, family = %d (%d)\n",
-   opaque, olength, sizeof(netsnmp_udp_addr_pair), from->sin_family, AF_INET));
+   opaque, olength, (int)sizeof(netsnmp_udp_addr_pair), from->sin_family, AF_INET));
     if (opaque == NULL || olength != sizeof(netsnmp_udp_addr_pair) ||
         from->sin_family != AF_INET) {
         DEBUGMSGTL(("netsnmp_udp_getSecName",
@@ -1200,7 +1200,7 @@ netsnmp_udp_getSecName(void *opaque, int olength,
     }
 
     for (c = com2SecList; c != NULL; c = c->next) {
-        DEBUGMSGTL(("netsnmp_udp_getSecName","compare <\"%s\", 0x%08x/0x%08x>",
+        DEBUGMSGTL(("netsnmp_udp_getSecName","compare <\"%s\", 0x%08lx/0x%08lx>",
 		    c->community, c->network, c->mask));
         if ((community_len == strlen(c->community)) &&
 	    (memcmp(community, c->community, community_len) == 0) &&
