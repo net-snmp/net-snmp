@@ -3,6 +3,7 @@
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 #include <net-snmp/agent/hardware/memory.h>
 
+#include <sys/param.h>
 #include <sys/pstat.h>
 
 
