@@ -167,9 +167,9 @@ EXPORTS
 	snmp_get_do_debugging
 	debug_indent
 	debug_indent_add
-	debug_indent_get
-	debug_config_register_tokens
-	debug_config_turn_on_debugging
+        debug_indent_get
+        debug_config_register_tokens
+        debug_config_turn_on_debugging
 	debug_is_token_registered
 	debugmsg
 	debugmsg_hex
@@ -394,6 +394,7 @@ EXPORTS
 	netsnmp_daemonize
 	snmp_log_options_usage
 	netsnmp_container_free_list
+	netsnmp_container_simple_free
 	netsnmp_oid_stash_getnext_node
 	netsnmp_oid_stash_free
 	netsnmp_get_list_node
@@ -466,6 +467,7 @@ EXPORTS
         netsnmp_dispatch_external_events2
         netsnmp_external_event_info2
         snmp_select_info2
+        sprint_realloc_hexstring
 ;IPv6        netsnmp_udp6_parse_security
 ;IPv6        netsnmp_udp6_getSecName
 ;IPv6        netsnmp_TCPIPv6Domain
