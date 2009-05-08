@@ -728,7 +728,9 @@ read_extension_dlls_from_registry()
     /*
      * At the time an SNMP extension DLL is installed, some information about
      * the DLL is written to the registry at the following location:
-     * HKLM\SYSTEM\CurrentControlSet\Services\SNMP\Parameters\ExtensionAgents.
+     * HKLM\SYSTEM\CurrentControlSet\Services\SNMP\Parameters\ExtensionAgents or
+     * HKLM\SYSTEM\CurrentControlSet\Control\SNMP\Parameters\ExtensionAgents for
+     * Vista, Windows 7 and 2008.
      * Under this key zero or more REG_SZ values are stored with the names of
      * registry keys containing the DLL path.
      */
@@ -737,31 +739,59 @@ read_extension_dlls_from_registry()
                             "SYSTEM\\CurrentControlSet\\Services\\SNMP\\Parameters\\ExtensionAgents",
                             0, KEY_QUERY_VALUE, &hKey);
 
-    if (retCode != ERROR_SUCCESS)
-        return;
-
-    for (i = 0;; i++) {
-        valueSize = sizeof(valueName);
-        dataSize = sizeof(data);
-        retCode = RegEnumValue(hKey, i, valueName, &valueSize, NULL,
-                               &dataType, data, &dataSize);
-
-        if (retCode != ERROR_SUCCESS)
-            break;
-        if (dataType == REG_SZ) {
-            winextdll       ext_dll_info;
-
-            memset(&ext_dll_info, 0, sizeof(ext_dll_info));
-            if ((ext_dll_info.dll_name =
-                 read_extension_dlls_from_registry2(data))) {
-                xarray_push_back(&s_winextdll, &ext_dll_info);
-                DEBUGMSG(("winExtDLL", "registry key %s: DLL %s.\n",
-                          data, ext_dll_info.dll_name));
-            }
-        }
+    if (retCode == ERROR_SUCCESS) {
+      for (i = 0;; i++) {
+          valueSize = sizeof(valueName);
+          dataSize = sizeof(data);
+          retCode = RegEnumValue(hKey, i, valueName, &valueSize, NULL,
+                                 &dataType, data, &dataSize);
+  
+          if (retCode != ERROR_SUCCESS)
+              break;
+          if (dataType == REG_SZ) {
+              winextdll       ext_dll_info;
+  
+              memset(&ext_dll_info, 0, sizeof(ext_dll_info));
+              if ((ext_dll_info.dll_name =
+                   read_extension_dlls_from_registry2(data))) {
+                  xarray_push_back(&s_winextdll, &ext_dll_info);
+                  DEBUGMSG(("winExtDLL", "registry key %s: DLL %s.\n",
+                            data, ext_dll_info.dll_name));
+              }
+          }
+      }
+      RegCloseKey(hKey);
     }
 
-    RegCloseKey(hKey);
+    retCode = RegOpenKeyExA(HKEY_LOCAL_MACHINE,
+                            "SYSTEM\\CurrentControlSet\\Control\\SNMP\\Parameters\\ExtensionAgents",
+                            0, KEY_QUERY_VALUE, &hKey);
+
+    if (retCode == ERROR_SUCCESS) {
+      for (i = 0;; i++) {
+          valueSize = sizeof(valueName);
+          dataSize = sizeof(data);
+          retCode = RegEnumValue(hKey, i, valueName, &valueSize, NULL,
+                                 &dataType, data, &dataSize);
+  
+          if (retCode != ERROR_SUCCESS)
+              break;
+          if (dataType == REG_SZ) {
+              winextdll       ext_dll_info;
+  
+              memset(&ext_dll_info, 0, sizeof(ext_dll_info));
+              if ((ext_dll_info.dll_name =
+                   read_extension_dlls_from_registry2(data))) {
+                  xarray_push_back(&s_winextdll, &ext_dll_info);
+                  DEBUGMSG(("winExtDLL", "registry key %s: DLL %s.\n",
+                            data, ext_dll_info.dll_name));
+              }
+          }
+      }
+      RegCloseKey(hKey);
+    }
+
+
 }
 
 /** Store the DLL name in dynamically allocated memory. */
