@@ -194,7 +194,9 @@ LINK32_OBJS= \
     $(LINK32) @<<
   $(LINK32_FLAGS) $(LINK32_OBJS)
 <<
-
+ if exist "../bin/$(OUTDIR)/netsnmp.dll.manifest" \
+	    mt.exe -manifest "../bin/$(OUTDIR)/netsnmp.dll.manifest" -outputresource:"../bin/$(OUTDIR)/netsnmp.dll";2
+		
 !ELSEIF  "$(CFG)" == "debug"
 
 ALL : "..\bin\$(OUTDIR)\netsnmp.dll"
@@ -375,7 +377,8 @@ LINK32_OBJS= \
     $(LINK32) @<<
   $(LINK32_FLAGS) $(LINK32_OBJS)
 <<
-
+ if exist "../bin/$(OUTDIR)/netsnmp.dll.manifest" \
+	    mt.exe -manifest "../bin/$(OUTDIR)/netsnmp.dll.manifest" -outputresource:"../bin/$(OUTDIR)/netsnmp.dll";2
 !ENDIF 
 
 

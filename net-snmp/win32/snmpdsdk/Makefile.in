@@ -99,6 +99,8 @@ LINK32_OBJS= \
     $(LINK32) @<<
   $(LINK32_FLAGS) $(LINK32_OBJS)
 <<
+ if exist "..\bin\$(OUTDIR)\snmpd.exe.manifest" \
+	    mt.exe -manifest "..\bin\$(OUTDIR)\snmpd.exe.manifest" -outputresource:"..\bin\$(OUTDIR)\snmpd.exe";1
 !ELSE	# Linktype check
 	-@echo .
 	-@echo Aborting build.  Applications can not be built using --linktype=dynamic
@@ -200,6 +202,8 @@ LINK32_OBJS= \
     $(LINK32) @<<
   $(LINK32_FLAGS) $(LINK32_OBJS)
 <<
+ if exist "..\bin\$(OUTDIR)\snmpd.exe.manifest" \
+	    mt.exe -manifest "..\bin\$(OUTDIR)\snmpd.exe.manifest" -outputresource:"..\bin\$(OUTDIR)\snmpd.exe";1
 !ELSE	# Linktype check
 	-@echo .
 	-@echo Aborting build.  Applications can not be built using --linktype=dynamic
