@@ -176,7 +176,7 @@ typedef struct netsnmp_interface_entry_s {
 typedef struct _conf_if_list {
     const char     *name;
     int             type;
-    unsigned long long speed;
+    uint64_t        speed;
     struct _conf_if_list *next;
 } netsnmp_conf_if_list;
 

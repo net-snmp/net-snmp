@@ -776,7 +776,7 @@ nari_setValue(me, type, value)
         netsnmp_request_info *request;
         u_long utmp;
         long ltmp;
-        unsigned long long ulltmp;
+        uint64_t ulltmp;
         struct counter64 c64;
 	oid myoid[MAX_OID_LEN];
 	size_t myoid_len;
