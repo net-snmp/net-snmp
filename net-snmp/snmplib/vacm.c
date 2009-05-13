@@ -627,7 +627,7 @@ netsnmp_view_subtree_check(struct vacm_viewEntry *head, const char *viewName,
             }
         }
     }
-    DEBUGMSGTL(("9:vacm:checkSubtree", " %s matched\n", vp->viewName));
+    DEBUGMSGTL(("9:vacm:checkSubtree", " %s matched\n", viewName));
 
     /*
      * If we found a matching view subtree with a longer OID than the provided
