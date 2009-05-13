@@ -782,14 +782,14 @@ instead of the default \fIiquerySecName\fR.
 Once again, this user must be explicitly created and given
 suitable access rights.
 .RE
-.IP "notificationEvent ENAME NOTIFICATION [-n] [-i OID | -o OID ]*"
+.IP "notificationEvent ENAME NOTIFICATION [-m] [-i OID | -o OID ]*"
 defines a notification event named ENAME.
 This can be triggered from a given \fImonitor\fR entry by specifying
 the option \fI-e ENAME\fR (see above).
 NOTIFICATION should be the OID of the NOTIFICATION-TYPE definition
 for the notification to be generated.
 .IP
-If the \fI-n\fR option is given, the notification payload will
+If the \fI-m\fR option is given, the notification payload will
 include the standard varbinds as specified in the OBJECTS clause
 of the notification MIB definition.
 This option must come \fBafter\fR the NOTIFICATION OID
