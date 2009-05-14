@@ -502,7 +502,6 @@ parse_mteMonitor(const char *token, char *line)
                     memcpy(oid_name_buf, buf, SPRINT_MAX_LEN);
                     memset(         buf,   0, SPRINT_MAX_LEN);
                     cp  = copy_nword(cp, buf, SPRINT_MAX_LEN);
-                    if ( buf[0] != '-' )
                         value = strtol(buf, NULL, 0);
     
                     /*
@@ -512,7 +511,7 @@ parse_mteMonitor(const char *token, char *line)
                     memcpy( buf, cp, strlen(cp));
                     cp = NULL;  /* To terminate the processing loop */
                     DEBUGMSGTL(("disman:event:conf", "%s: Thresh (%s, %d, %s)\n",
-                                              tname, oid_name_buf, op, buf));
+                                              tname, oid_name_buf, value, buf));
                     break;
                 }
             }
@@ -634,7 +633,6 @@ parse_mteMonitor(const char *token, char *line)
         }
         break;
     case MTE_TRIGGER_THRESHOLD:
-        if ( buf[0] != '-' ) {
             entry->mteTThFallValue  = value;
             value = strtol(buf, NULL, 0);
             entry->mteTThRiseValue  = value;
@@ -679,10 +677,7 @@ parse_mteMonitor(const char *token, char *line)
                 memcpy(entry->mteTThFallEvent,  "_mteTriggerFalling", 18);
             }
             cp = skip_token(buf);   /* skip riseThreshold value */
-        } else {
-            /* Skip absolute threshold placeholders */
-            cp = skip_token(buf);
-        }
+
         /*
          * Parse and set (optional) Delta thresholds & events
          */
