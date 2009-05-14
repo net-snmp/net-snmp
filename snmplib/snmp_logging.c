@@ -227,6 +227,12 @@ decode_priority( char **optarg, int *pri_max )
         *optarg = *optarg + 1; /* skip '-' */
         *pri_max = decode_priority( optarg, NULL );
         if (*pri_max == -1) return -1;
+        if (pri_low < *pri_max) { 
+            int tmp = pri_low; 
+            pri_low = *pri_max; 
+            *pri_max = tmp; 
+        }
+
     }
     return pri_low;
 }
