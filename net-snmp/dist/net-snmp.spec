@@ -3,6 +3,7 @@
 #
 %define netsnmp_embedded_perl 1
 %define netsnmp_perl_modules 1
+%define netsnmp_cflags ""
 
 # ugly RHEL detector
 # SuSE build service defines rhel_version, RHEL itself defines nothing
@@ -64,6 +65,8 @@ Epoch: 2
 %if 0%{?fedora} >= 9
 Provides: net-snmp-gui
 Obsoletes: net-snmp-gui
+# newer fedoras need following macro to compile with new rpm
+%define netsnmp_cflags "-D_RPM_4_4_COMPAT"
 %else
 BuildRequires: beecrypt-devel
 %endif
@@ -126,7 +129,7 @@ exit 1
 	%{!?netsnmp_perl_modules: --without-perl-modules} \
 	%{?netsnmp_embedded_perl: --enable-as-needed --enable-embedded-perl} \
 	%{!?netsnmp_embedded_perl: --disable-embedded-perl} \
-	--with-cflags="$RPM_OPT_FLAGS"
+	--with-cflags="$RPM_OPT_FLAGS %{netsnmp_cflags}"
 
 make
 
