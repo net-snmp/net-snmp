@@ -404,13 +404,13 @@ sc_hash(const oid * hashtype, size_t hashtypelen, u_char * buf,
 {
 #if defined(NETSNMP_USE_OPENSSL) || defined(NETSNMP_USE_PKCS11)
     int            rval = SNMPERR_SUCCESS;
+    unsigned int   tmp_len;
 #endif
     int            ret;
 
 #ifdef NETSNMP_USE_OPENSSL
     const EVP_MD   *hashfn;
     EVP_MD_CTX     ctx, *cptr;
-    unsigned int   tmp_len;
 #endif
 
     DEBUGTRACE;
