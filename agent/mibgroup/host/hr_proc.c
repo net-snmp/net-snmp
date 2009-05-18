@@ -182,7 +182,10 @@ var_hrproc(struct variable * vp,
             return NULL;
 
         long_return  = (cpu->idle_ticks  - cpu->history[0].idle_hist)*100;
-        long_return /= (cpu->total_ticks - cpu->history[0].total_hist);
+        if (cpu->total_ticks > cpu->history[0].total_hist) /* avoid div. by 0 */
+            long_return /= (cpu->total_ticks - cpu->history[0].total_hist);
+        else
+            long_return = 0; 
         long_return  = 100 - long_return;
         if (long_return < 0)
             long_return = 0;
