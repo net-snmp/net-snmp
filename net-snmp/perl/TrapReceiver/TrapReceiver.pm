@@ -157,7 +157,12 @@ As an example, put the following code into a file (say
       # print the PDU info (a hash reference)
       print "PDU INFO:\n";
       foreach my $k(keys(%{$_[0]})) {
-  	printf "  %-30s %s\n", $k, $_[0]{$k};
+        if ($k eq "securityEngineID" || $k eq "contextEngineID") {
+          printf "  %-30s 0x%s\n", $k, unpack('h*', $_[0]{$k});
+        }
+        else {
+          printf "  %-30s %s\n", $k, $_[0]{$k};
+        }
       }
 
       # print the variable bindings:
