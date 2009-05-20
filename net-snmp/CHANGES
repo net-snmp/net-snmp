@@ -3,6 +3,45 @@ that have been applied in released versions.  Please see the NEWS file for
 a summary of the major changes, and the ChangeLog file for a comprehensive
 listing of all changes made to the code.
 
+*5.3.3.rc2*
+
+    snmplib:
+      - [PATCH 2505488]: to fix alarms not being triggered at the right
+	times due to large clock skews.
+
+    build:
+      - [BUG 2782700]: build failure when using --with-pkcs on Solaris
+      - [PATCH 2184039]: misc fixes for freeing memory during error
+	conditions.
+
+    mib2c:
+      - [PATCH 2136437]: make FLAG defines more 64bit friendly when huge
+	tables are encountered
+
+    perl:
+      - [PATCH 2361712]: to fix getbulk optimization during walks where end
+	conditionns are met on middle OIDs first.
+
+    ports:
+      - [PATCH 2688342]: to fix various compiler warnings
+
+    solaris:
+      - [PATCH 2012404]: deal with more than 10 interfaces. New hardcoded
+	limit is 50. A better scaling patch would be appreciated :-)
+
+    AIX:
+      - [BUG 2712670]: Agent crashes on AIX with hrStorage
+
+    HP:
+      - UX: BUG: 2779472: Filesystems missing in hrStorage table on HP-UX
+	11.31 (allow for mnttab that is a character special device)
+
+    Solaris:
+      - [PATCH 2751588]: Inconsistent data (e.g. UDP/TCP MIB scalar values
+	of zero) can be reported on Solaris 10U4+ Patch provided by Anders
+	Persson
+
+
 *5.3.3.rc1*
 
     snmplib:
