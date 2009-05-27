@@ -250,15 +250,14 @@ What's the difference between UCD-SNMP and Net-SNMP?
   and all releases on this line have been been bug-fixes only.  Release
   5.0 was the first version released under the Net-SNMP name, and all
   further development is being done on the 5.x code base.  The 4.2.x
-  code line is now almost completely dormant, and is due to be closed
-  down altogether.
+  code line is now effectively closed down, as are the older 5.x branches.
 
     Much of the work done for the various 5.x releases has involved
   some fairly significant changes to the code - in particular the
   architecture of the agent.  However attempts have been made to retain
   backwards compatibility as much as possible, and most code written
-  for earlier releases should continue to work.  The most significant
-  change from the 4.2.x ucd suite to the 5.x Net-SNMP releases was a
+  for earlier releases should continue to work.  The most visible
+  change from the 4.2.x UCD suite to the 5.x Net-SNMP releases was a
   restructuring of the header file organisation - not least a change
   from <ucd-snmp/xxx.h> to <net-snmp/yyy.h>.
 
@@ -369,14 +368,19 @@ How do I find out about new releases?
   	net-snmp-announce@lists.sourceforge.net
 
   To be added to (or removed from) this list, visit
-  http://www.net-snmp.org/lists/net-snmp-announce/.  Or you can send a
-  message to the address
-  'net-snmp-announce-request@lists.sourceforge.net' with a subject
-  line of 'subscribe' (or 'unsubscribe' as appropriate).
+        http://www.net-snmp.org/lists/net-snmp-announce/
+  Or you can send a message to the address
+        net-snmp-announce-request@lists.sourceforge.net
+  with a subject line of 'subscribe' (or 'unsubscribe' as appropriate).
 
-  Major code revisions may be announced more widely (e.g. on the
-  SNMP mailing lists, or comp.protocols.snmp) but this list is the most
-  reliable way to keep in touch with the status of this package.
+  Advance notice of upcoming releases are also made on the
+  net-snmp-users list (for "release candidates") for a week
+  or two before the full release, and on the net-snmp-coders
+  list (for "pre-releases") during the period prior to this.
+
+  Major code revisions may be announced more widely, but these
+  lists are the most reliable way to keep in touch with the
+  status of the package.
 
   Patches to fix known problems are also made available via the web site:
 
@@ -392,17 +396,20 @@ How can I find out what other people are doing?
   	net-snmp-users@lists.sourceforge.net
 
   To be added to (or removed from) this list, visit
-  http://www.net-snmp.org/lists/net-snmp-users.  Or you can send a
-  message to the address 'net-snmp-users-request@lists.sourceforge.net'
+        http://www.net-snmp.org/lists/net-snmp-users/
+  Or you can send a message to the address
+        net-snmp-users-request@lists.sourceforge.net
   with a subject line of 'subscribe' (or 'unsubscribe' as appropriate).
 
-  To find out what the developers are doing, and to help them out, please
-  read the PORTING file enclosed with the package.
+  To find out what the developers are doing, and to help them
+  out, please read the PORTING file enclosed with the package.
 
-  There is also an net-snmp IRC channel set up on the freenode.net IRC
-  chat servers (you can use irc.freenode.net to connect and/or see
-  http://www.freenode.net/ for getting started with irc).  Several
-  core developers hang out there on a regular basis.
+  There is also a #net-snmp IRC channel set up on the freenode.net
+  chat system.  You can connect to this via chat.freenode.net.
+  See http://www.freenode.net/ for more information on getting
+  started with IRC.
+    Several core developers hang out on this channel on a fairly
+  regular basis.
 
 
 
@@ -410,16 +417,11 @@ How do I submit a patch or bug report?
 -------------------------------------
 
   The best way to submit a bug report is via the bug database through
-  the interface found at http://www.net-snmp.org/bugs/.  Be sure to
-  include the version of the package that you've been working with,
-  the output of the command 'uname -a', the precise configuration or
-  command that triggers the problem and a copy of any output produced.
-
-    All patches should be submitted to the patch manager at
-  http://www.net-snmp.org/patches/.  If possible, submit a
-  bug report describing the patch as well (referencing it by its patch
-  number) since the patch manager doesn't contain a decent description
-  field.
+  the interface found at
+         http://www.net-snmp.org/bugs/
+  Be sure to include the version of the package that you've been working
+  with, the output of the command 'uname -a', the precise configuration
+  or command that triggers the problem and a copy of any output produced.
 
     Questions about using the package should be directed at the
   net-snmp-users@lists.sourceforge.net mailing list.  Note that this
@@ -436,14 +438,23 @@ How do I submit a patch or bug report?
           (most developers read both anyway)
      - don't mail the developers privately - keep everything on the list
 
-  Remember that this is basically an unsupported package.  Fundamentally
-  it's Open Source, so you have the source code.  If you need something
-  fixing badly enough, it's up to you to do the work.
-
     We can't promise to be able to solve all problems, but we'll
   certainly try and help.  But remember that this is basically an
   unsupported package.  It's Open Source, so if you need something
   fixing badly enough,  fundamentally it's up to you to do the work.
+
+    All patches should be submitted to the patch manager at
+         http://www.net-snmp.org/patches/
+  If possible, submit a bug report describing the patch as well
+  (referencing it by its patch number) since the patch manager
+  doesn't contain a decent description field.
+
+  The best way to submit patch (diff) information is by checking out
+  the current code from the development SVN trunk, making your changes
+  and then running "svn diff" after you're done.
+
+  If you're working from a source code distribution, and comparing old
+  and new versions of a code file, use "diff -u OLDFILE NEWFILE" 
 
 
 
@@ -487,8 +498,8 @@ What's the difference between SNMPv2 and SNMPv2c?
   in RFC 1905, and most recently in RFC 3416) that is "SNMPv2".
 
   The only framework based on this protocol that saw a significant
-  level of use was "Community-based SNMPv2" or "SNMPv2c" (defined in
-  RFCs 1901-1908). This retained the same administrative framework
+  level of use was "Community-based SNMPv2" or "SNMPv2c" (defined
+  in RFC 1901). This retained the same administrative framework
   as SNMPv1 (with all of the accompanying limitations), but using
   the new protocol operations.
 
@@ -522,8 +533,8 @@ What's the difference between SNMPv2 and SNMPv2c?
 Which versions of SNMP are supported in this package?
 ----------------------------------------------------
 
-  This package currently supports the original SNMPv1, Community-based
-  SNMPv2 (i.e. RFCs 1901-1908), and SNMPv3 (i.e. RFCs 3411-3418).
+  This package currently supports the original SNMPv1 (RFC 1157),
+  Community-based SNMPv2 (RFCs 1901-1908), and SNMPv3 (RFCs 3411-3418).
     The agent will respond to requests using any of these protocols,
   and all the tools take a command-line option to determine which
   version to use.
@@ -550,6 +561,9 @@ Can I use SNMPv1 requests with an SNMPv2 MIB (or vice versa)?
   only accessible using SNMPv2 or higher.  SNMPv1 requests will
   either treat such objects as an error, or skip them completely.
 
+  Note that SMIv1 is effectively obsolete, and all new MIBs
+  should be written using SMIv2.
+
   
 
 Where can I find more information about network management?
@@ -562,16 +576,10 @@ Where can I find more information about network management?
       http://www.snmplink.org/
       http://www.mibdepot.com/
 
-  There are two Usenet newsgroups which are relevant.
-	'comp.dcom.net-management'
-		which discusses general issues relating to network management
-	'comp.protocols.snmp'
-		which is specifically concerned with use of SNMP in particular
-
-  (though there is a large overlap between these two groups).
-  The SNMP group also has an FAQ (split into two parts) which discusses more
-  general issues related to SNMP, including books, software, other sites,
-  how to get an enterprise number, etc, etc.
+  The SNMP Usenet newsgroup is now mostly defunct, but although the
+  FAQ hasn't been updated for a while, it still contains a large
+  amount of useful information relating to SNMP, including books,
+  software, other sites, how to get an enterprise number, etc, etc.
   This is available from
 
       ftp://rtfm.mit.edu/pub/usenet/comp.protocols.snmp/
@@ -583,10 +591,10 @@ Where can I find more information about network management?
 Is Net-SNMP thread safe?
 -----------------------
 
-  Strictly speaking, no.  However, it should be possible to use the
-  library in a thread-safe manner.  This is covered in detail in the file
-  README.thread (shipped with the standard distribution), but can be
-  summarised as follows:
+  Strictly speaking, no.  However, it is possible to use the library within
+  a multi-threaded management application.  This is covered in detail in
+  the file README.thread (shipped with the standard distribution), but can
+  be summarised as follows:
 
     -	Call 'snmp_sess_init()' prior to activating any threads.
 	This reads in and parses MIB information (which isn't thread-safe)
@@ -599,10 +607,16 @@ Is Net-SNMP thread safe?
     -	Resource locking is not handled within the library, and is the
 	responsibility of the main application.
 
-  The applications and the agent have not been designed for threaded use.
-  It should be safe to use the agent library to embed a subagent within
-  a threaded application as long as *all* SNMP-related activity (including
+  The Net-SNMP agent has not been designed for multi-threaded use.  It
+  should be safe to use the agent library to embed a subagent within a
+  threaded application as long as *all* SNMP-related activity (including
   generating traps, and parsing MIBs) is handled within a single thread.
+
+  The command-line tools shipped as part of the Net-SNMP distribution
+  are simple single-threaded applications, and are not designed for
+  multi-threaded use.  Adapting these to a threaded model is left as
+  an exercise for the student.
+    The same holds true for the notification receiver (snmptrapd).
 
   Unfortunately, the SNMPv3 support was added about the same time as
   the thread support and since they occurred in parallel the SNMPv3
@@ -641,7 +655,7 @@ How do I add a MIB to the tools?
 
 
   There are two steps required to add a new MIB file to the tools.
-  Firstly, copy the MIB file into the appropiate location:
+  Firstly, copy the MIB file into the appropriate location:
 
 	cp MY-MIB.txt /usr/local/share/snmp/mibs
             (which makes it available to everyone on the system)
