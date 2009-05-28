@@ -56,6 +56,7 @@ TABLE OF CONTENTS
    How can I monitor my systems (disk, memory, etc)?
    Applications complain about entries in your example 'snmp.conf' file.  Why?
    OK, what should I put in snmp.conf?
+   How do I specify IPv6 addresses in tools command line arguments?
  PERL
    Where can I get the Perl SNMP package?
    How do I install the Perl SNMP modules?
@@ -832,7 +833,7 @@ I can see the system group, but nothing else.  Why?
 
 
 Why can't I see values in the <ENTERPRISE> tree?
------------------------------------------------------------
+-----------------------------------------------
 
   If you can see most of the standard information (not just the system and
   hrSystem groups), but not in the vendor-specific 'enterprises' tree, then
@@ -1455,6 +1456,26 @@ OK, what should I put in snmp.conf?
 
     You can also use the "snmpconf" command to help you generate your
   snmp.conf configuration file (just run it and answer its questions).
+
+
+
+How do I specify IPv6 addresses in tools command line arguments?
+---------------------------------------------------------------
+
+    IPv6 addresses pose a particular problem for the Net-SNMP command
+  line tools, which parse host names into pieces. In particular, normally
+  if you specify a simple host name, it assumes you want UDP in IPv4 on
+  port 161.   By default, these two commands are actually the same:
+
+            snmpget     127.0.0.1     sysUpTime.0
+            snmpget udp:127.0.0.1:161 sysUpTime.0
+
+  However, for IPv6 this causes a problem because IPv6 addresses also use
+  a colon to separate addressing parts. Thus you need to enclose the address
+  in square brackets ( [ and ] ).
+     Because most shells use these brackets too, you also likely need to quote it:
+
+            snmpget 'udp6:[::1]:161' sysUpTime.0
 
 
 
