@@ -1605,8 +1605,8 @@ Why can't tkmib locate Tk.pm?
 
 
 
-I'm trying to install your RPM, but it complains about missing Perl modules. Why?
---------------------------------------------------------------------------------
+Why does your RPM complain about missing Perl modules?
+-----------------------------------------------------
 
   This has been particularly noted on RedHat 9, complaining about the
   module "perl(Term::ReadKey)" - even if this is actually present (e.g.
