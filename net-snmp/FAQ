@@ -354,9 +354,6 @@ Does it run on Windows?
 
     Pre-compiled binaries are available from the project web site.
 
-    As of v5.4, the Net-SNMP agent is able to load the Windows SNMP
-  service extension DLLs by using the Net-SNMP winExtDLL extension.
-
     Some other Net-SNMP MIB modules, including the UCD pass-through
   extensions, do not currently work under Windows.  Volunteers to assist
   with these missing modules are likely to welcomed with open arms :-)
@@ -2059,7 +2056,7 @@ How do I add a MIB to the agent?
     -  You can write code to implement the new MIB objects, and
        include this within the agent.  This is most commonly C
        (or C++) code, although the agent can also support MIB modules
-       implemented in perl or (from 5.4) python.
+       implemented in perl.
          See the next section (CODING) for more details.
 
   Note that there is no visible difference between external commands,
@@ -2852,13 +2849,8 @@ What do the CPU statistics mean - is this the load average?
   No.  Unfortunately, the original definition of the various CPU
   statistics was a little vague.  It referred to a "percentage",
   without specifying what period this should be calculated over.
-  It was therefore implemented slightly differently on different
+  It has therefore been implemented slightly differently on different
   architectures.
-
-  The 5.4 release has clarified the situation, and standardised on
-  calculating these percentages over a minute.  The relevant MIB
-  descriptions have been updated to make the desired behaviour
-  more explicit.
 
   The Net-SNMP agent also includes "raw counters", which can be used
   to calculate the percentage usage over any desired period.  This is
@@ -2894,16 +2886,9 @@ What about multi-processor systems?
   to be investigated for each system individually.
 
   The htProcessorTable was designed to handle monitoring multi-CPU
-  machines, but the Net-SNMP implementation has up to now treated
+  machines, but the Net-SNMP implementation has traditionally treated
   most systems (with the honourable exception of Solaris, and more
   recently Linux) as implicitly single-CPU.
-
-  With the 5.4 release, there is now a cleaner framework for reporting
-  on multi-CPU equipment, and it is hoped that an increasing number
-  of systems will be able to report suitable processor information.
-  Also with the 5.4 release, for the first time the agent will report
-  the hrProcessorLoad value properly, which should provide some simple
-  per-CPU statistics.
 
 
 
