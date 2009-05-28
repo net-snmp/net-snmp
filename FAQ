@@ -49,7 +49,6 @@ TABLE OF CONTENTS
    How do I send traps and notifications?
    How do I receive traps and notifications?
    How do I receive SNMPv1 traps?
-   Why don't I receive incoming traps?
    My traphandler script doesn't work when run like this - why not?
    How can the agent receive traps and notifications?
    How big can an SNMP request (or reply) be?
@@ -353,9 +352,6 @@ Does it run on Windows?
   for how to install this are given in README.win32.
 
     Pre-compiled binaries are available from the project web site.
-
-    As of v5.4, the Net-SNMP agent is able to load the Windows SNMP
-  service extension DLLs by using the Net-SNMP winExtDLL extension.
 
     Some other Net-SNMP MIB modules, including the UCD pass-through
   extensions, do not currently work under Windows.  Volunteers to assist
@@ -1322,17 +1318,6 @@ How do I receive SNMPv1 traps?
 
 
 
-Why don't I receive incoming traps?
-----------------------------------
-
-  Starting with net-snmp 5.3, snmptrapd will no longer automatically
-  accept all incoming traps. It must be configured with authorized
-  SNMPv1/v2c community strings and/or SNMPv3 users. Non-authorized
-  traps/informs will be dropped.
-    Please refer to the snmptrapd.conf(5) manual page for details.
-
-
-
 My traphandler script doesn't work when run like this - why not?
 ---------------------------------------------------------------
 
@@ -1923,7 +1908,7 @@ What MIBs are supported?
 	- SNMPv3 framework (RFCs 2571-5, 3411-3418)
 		(including USM, VACM, Target
 		 and Notification MIBs)
-	- DisMan Event and Schedule MIBs
+	- DisMan Event MIB
 	- MTA-MIB (sendmail)
 	- private UCD/Net-SNMP agent extensions
 		(monitor specified processes and disks,
@@ -1934,8 +1919,7 @@ What MIBs are supported?
 
   Not all MIB modules are included by default on all systems, and some of
   these may need to be explicitly requested when the software is first
-  configured and built.  From Net-SNMP 5.3 and above, this primarily
-  applies to the MTA-MIB of those listed above.
+  configured and built.
 
   There are a few other MIB implementations distributed as part of the
   source tarball, but these are basically unsupported and most of the
@@ -2059,7 +2043,7 @@ How do I add a MIB to the agent?
     -  You can write code to implement the new MIB objects, and
        include this within the agent.  This is most commonly C
        (or C++) code, although the agent can also support MIB modules
-       implemented in perl or (from 5.4) python.
+       implemented in perl.
          See the next section (CODING) for more details.
 
   Note that there is no visible difference between external commands,
@@ -2852,13 +2836,8 @@ What do the CPU statistics mean - is this the load average?
   No.  Unfortunately, the original definition of the various CPU
   statistics was a little vague.  It referred to a "percentage",
   without specifying what period this should be calculated over.
-  It was therefore implemented slightly differently on different
+  It has therefore been implemented slightly differently on different
   architectures.
-
-  The 5.4 release has clarified the situation, and standardised on
-  calculating these percentages over a minute.  The relevant MIB
-  descriptions have been updated to make the desired behaviour
-  more explicit.
 
   The Net-SNMP agent also includes "raw counters", which can be used
   to calculate the percentage usage over any desired period.  This is
@@ -2894,16 +2873,9 @@ What about multi-processor systems?
   to be investigated for each system individually.
 
   The htProcessorTable was designed to handle monitoring multi-CPU
-  machines, but the Net-SNMP implementation has up to now treated
+  machines, but the Net-SNMP implementation has traditionally treated
   most systems (with the honourable exception of Solaris, and more
   recently Linux) as implicitly single-CPU.
-
-  With the 5.4 release, there is now a cleaner framework for reporting
-  on multi-CPU equipment, and it is hoped that an increasing number
-  of systems will be able to report suitable processor information.
-  Also with the 5.4 release, for the first time the agent will report
-  the hrProcessorLoad value properly, which should provide some simple
-  per-CPU statistics.
 
 
 
@@ -3441,16 +3413,16 @@ What's the difference between the various mib2c configuration files?
   and interacting with the underlying subsystem - are all left to
   the MIB programmer.
 
-    The second group of templates - 'table_data', 'container' and
-  'tdata' - all share the same basic model (although the internal
-  details are rather different).  The MIB implementer should define a
-  data structure to represent a row of the table, and the helper then
+    The second group of templates - 'table_data' and 'container' -
+  share the same basic model (although the internal details are
+  rather different).  The MIB implementer should define a data
+ structure to represent a row of the table, and the helper then
   takes care of holding the table internally, as a collection of such
   per-row data structures.  This includes identifying which row is
   required for a given request.  Retrieving or updating the appropriate
   column value is left to the MIB programmer, although the generated
   framework includes most of the necessary code.
-    Allied to this is a fourth "internal data" mib2c configuration 
+    Allied to this is a third "internal data" mib2c configuration 
   file ('create-dataset') which handles the individual columns as
   well.  This is the closest to a Plug-and-Play configuration, and
   the MIB implementer only needs to be concerned with any special
@@ -3493,9 +3465,9 @@ Which mib2c configuration file should I use?
 
     The answer to that heavily depends on the characteristics of the
   MIB objects being implemented.  Of the handler-based table frameworks,
-  'tdata' is more appropriate for tables that can be stored (or a copy
-  cached) within the agent itself, while 'iterate' is more relevant to
-  reporting data from outside the agent.
+  'table_data' is more appropriate for tables that can be stored (or a
+  copy cached) within the agent itself, while 'iterate' is more relevant
+  to reporting data from outside the agent.
     The raw interface is only suitable in very specific circumstances,
   so it's probably sensible to start with one of the other frameworks
   first, and only look at this if none of the alternatives seem to work.
@@ -3547,10 +3519,8 @@ Are there any examples, or documentation?
   use one of the newer v5 helper-based handlers.  All of these can
   be found under 'agent/mibgroup'
 
-    The 'tdata' helper is used in the new DisMan Event, Expression
-  and Schedule MIB modules (see 'disman/{event,expr,schedule}/*').
-  The similar 'dataset' helper is used in the older DisMan Event
-  MIB implementation (see 'disman/mteEvent*') and the Notification
+  The 'dataset' helper is used in the 5.2.x DisMan Event MIB
+  implementation (see 'disman/mteEvent*') and the Notification
   Log MIB (see 'notification-log-mib/*'), used by 'snmptrapd' to
   log incoming traps.
  
