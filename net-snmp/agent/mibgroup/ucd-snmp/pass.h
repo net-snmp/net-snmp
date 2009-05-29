@@ -7,6 +7,7 @@
 void            init_pass(void);
 
 config_require(util_funcs)
+config_add_mib(NET-SNMP-PASS-MIB)
 
 extern FindVarMethod var_extensible_pass;
 WriteMethod     setPass;
