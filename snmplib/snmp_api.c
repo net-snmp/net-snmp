@@ -1254,7 +1254,7 @@ snmpv3_probe_contextEngineID_rfc5343(void *slp, netsnmp_session *session) {
     static oid      snmpEngineIDoid[]   = { 1,3,6,1,6,3,10,2,1,1,0};
     static size_t   snmpEngineIDoid_len = 11;
 
-    static char     probeEngineID[] = { 0x80, 0, 0, 0, 6 };
+    static char     probeEngineID[] = { (char)0x80, 0, 0, 0, 6 };
     static size_t   probeEngineID_len = sizeof(probeEngineID);
     
     int status;
