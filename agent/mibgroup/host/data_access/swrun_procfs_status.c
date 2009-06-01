@@ -182,7 +182,7 @@ netsnmp_arch_swrun_container_load( netsnmp_container *container, u_int flags)
             cp++;
         }
         entry->hrSWRunPerfMem  = atoi( cp );   /*  rss */
-        entry->hrSWRunPerfMem *= (getpagesize()/1024);  /* in Kb */
+        entry->hrSWRunPerfMem *= (getpagesize()/1024);  /* in kB */
     }
     closedir( procdir );
 

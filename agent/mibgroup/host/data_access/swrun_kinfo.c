@@ -230,7 +230,7 @@ netsnmp_arch_swrun_container_load( netsnmp_container *container, u_int flags)
         entry->hrSWRunPerfMem  = proc_table[i].ki_vmspace->vm_tsize;
         entry->hrSWRunPerfMem += proc_table[i].ki_vmspace->vm_ssize;
         entry->hrSWRunPerfMem += proc_table[i].ki_vmspace->vm_dsize;
-        entry->hrSWRunPerfMem *= (getpagesize()/1024);  /* in Kb */
+        entry->hrSWRunPerfMem *= (getpagesize()/1024);  /* in kB */
 # endif
         entry->hrSWRunPerfCPU  = proc_table[i].ki_runtime / 100000;
         entry->hrSWRunPerfMem  = proc_table[i].ki_size / 1024;;
