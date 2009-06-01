@@ -513,9 +513,9 @@ default build configuration).
 .IP "disk PATH [ MINSPACE | MINPERCENT% ]"
 monitors the disk mounted at PATH for available disk space.
 .IP
-The minimum threshold can either be specified in Kb (MINSPACE) or
+The minimum threshold can either be specified in kB (MINSPACE) or
 as a percentage of the total disk (MINPERCENT% with a '%' character),
-defaulting to 100Kb if neither are specified.
+defaulting to 100kB if neither are specified.
 If the free disk space falls below this threshold, 
 then the corresponding \fCdskErrorFlag\fR instance will be
 set to 1, and a suitable description message reported via the
@@ -585,7 +585,7 @@ walking the \fClaTable\fR will succeed (assuming the
 even if the \fIload\fR directive is not present.
 .IP "swap MIN "
 monitors the amount of swap space available on the local system.
-If this falls below the specified threshold (MIN Kb),
+If this falls below the specified threshold (MIN kB),
 then the \fImemErrorSwap\fR object will be set to 1,
 and a suitable description message reported via \fImemSwapErrorMsg\fR.
 .RS
@@ -593,14 +593,14 @@ and a suitable description message reported via \fImemSwapErrorMsg\fR.
 This situation will \fBnot\fR automatically trigger a trap to report
 the problem - see the DisMan Event MIB section later.
 .RE
-If this directive is not specified, the default threshold is 16 Mb.
+If this directive is not specified, the default threshold is 16 MB.
 .SS Log File Monitoring
 This requires that the agent was built with support for either the
 \fIucd-snmp/file\fR or \fIucd-snmp/logmatch\fR modules respectively
 (both of which are included as part of the
 default build configuration).
 .IP "file FILE [MAXSIZE]"
-monitors the size of the specified file (in Kb).
+monitors the size of the specified file (in kB).
 If MAXSIZE is specified, and the size of the file exceeds
 this threshold, then the corresponding \fCfileErrorFlag\fR
 instance will be set to 1, and a suitable description message reported

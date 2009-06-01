@@ -97,7 +97,7 @@ netsnmp_arch_swrun_container_load( netsnmp_container *container, u_int flags)
         entry->hrSWRunPerfCPU  = (mypsinfo.pr_time.tv_sec  * 100);
         entry->hrSWRunPerfCPU += (mypsinfo.pr_time.tv_nsec / 10000000);
         entry->hrSWRunPerfMem  = (mypsinfo.pr_rssize);
-        entry->hrSWRunPerfMem *= (MU_PAGESIZE/1024);  /* in Kb */
+        entry->hrSWRunPerfMem *= (MU_PAGESIZE/1024);  /* in kB */
     }
 
     DEBUGMSGTL(("swrun:load:arch"," loaded %d entries\n",

@@ -1097,7 +1097,7 @@ if test -z "$lt_ECHO"; then
   if test "X${echo_test_string+set}" != Xset; then
     # find a string as large as possible, as long as the shell can cope with it
     for cmd in 'sed 50q "[$]0"' 'sed 20q "[$]0"' 'sed 10q "[$]0"' 'sed 2q "[$]0"' 'echo test'; do
-      # expected sizes: less than 2Kb, 1Kb, 512 bytes, 16 bytes, ...
+      # expected sizes: less than 2kB, 1kB, 512 bytes, 16 bytes, ...
       if { echo_test_string=`eval $cmd`; } 2>/dev/null &&
 	 { test "X$echo_test_string" = "X$echo_test_string"; } 2>/dev/null
       then
