@@ -356,7 +356,7 @@ snmp_parse_args(int argc,
             break;
 
         case 't':
-            session->timeout = atof(optarg) * 1000000L;
+            session->timeout = (long)(atof(optarg) * 1000000L);
             if (session->timeout <= 0) {
                 fprintf(stderr, "Invalid timeout in seconds after -t flag.\n");
                 return (-1);

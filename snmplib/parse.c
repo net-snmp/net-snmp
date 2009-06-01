@@ -4779,8 +4779,8 @@ add_mibdir(const char *dirname)
     char            tmpstr[300];
     int             count = 0;
     int             fname_len = 0;
-    char           *token;
 #if !(defined(WIN32) || defined(cygwin))
+    char           *token;
     char space;
     char newline;
     struct stat     dir_stat, idx_stat;
