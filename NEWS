@@ -3,7 +3,7 @@ Please see the CHANGES file for a more detailed list of specific bugs/patches
 that have been fixed/applied, and the ChangeLog file for a comprehensive
 listing of all changes made to the code.
 
-*5.3.3.rc1*
+*5.3.3*
 
     snmplib:
       - Change CONTAINER_INSERT to not do partial inserts with
