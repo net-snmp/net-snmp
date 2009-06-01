@@ -305,7 +305,7 @@ The state of disk storage can be monitored using:
 includeAllDisks 10%
 disk /var 20%
 disk /usr  3%
-\fI#  Keep 100 Mb free for crash dumps\fR
+\fI#  Keep 100 MB free for crash dumps\fR
 disk /mnt/crash  100000
 .fi
 .RE
@@ -393,7 +393,7 @@ monitor -u me -o hrSWRunName "high process memory" hrSWRunPerfMem > 10000
 .RE
 .PP
 This defines an explicit boolean monitor entry, looking for any process
-using more than 10Mb of active memory.  Such processes will be reported
+using more than 10MB of active memory.  Such processes will be reported
 using the (standard) DisMan trap \fCmteTriggerFired\fR,
 but adding an extra (wildcarded) varbind \fChrSWRunName\fR.
 .PP
