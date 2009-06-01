@@ -186,7 +186,7 @@ netsnmp_session *netsnmp_iquery_session(char* secName,   int   version,
         ss->securityEngineIDLen = engIDLen;
         if ( version == SNMP_VERSION_3 ) {
             ss->securityNameLen = strlen(secName);
-            memdup(&(ss->securityName), (u_char*)secName, ss->securityNameLen);
+            memdup((u_char**)&(ss->securityName), (u_char*)secName, ss->securityNameLen);
         } else {
             memdup( &(ss->community), secName, strlen(secName));
             ss->community_len = strlen(secName);
