@@ -153,7 +153,7 @@ netsnmp_arch_swrun_container_load( netsnmp_container *container, u_int flags)
         entry->hrSWRunPerfCPU  = (proc_buf->p_utime * 100);
         entry->hrSWRunPerfCPU += (proc_buf->p_stime * 100);
         entry->hrSWRunPerfMem  =  proc_buf->p_swrss;
-		/* XXX - is this reported in Kb? */
+		/* XXX - is this reported in kB? */
     }
     closedir( procdir );
 

@@ -134,7 +134,7 @@ netsnmp_arch_swrun_container_load( netsnmp_container *container, u_int flags)
         entry->hrSWRunPerfCPU  = (psinfo.pr_time.tv_sec * 100);
         entry->hrSWRunPerfCPU += (psinfo.pr_time.tv_nsec / 10000000);
         entry->hrSWRunPerfMem  =  psinfo.pr_rssize;
-		/* XXX - is this reported in Kb? */
+		/* XXX - is this reported in kB? */
     }
     closedir( procdir );
 
