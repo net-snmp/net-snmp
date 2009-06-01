@@ -565,20 +565,48 @@ This situation will \fBnot\fR automatically trigger a trap to report
 the problem - see the DisMan Event MIB section later.
 .RE
 .IP
-A maximum of 20 files can be monitored.
-.PP
-If no \fIfile\fR directives are defined, then walking the
-\fCfileTable\fR will fail (\fInoSuchObject\fR).
-.IP "logmatch NAME PATH CYCLETIME REGEX"
-monitors the specified file for occurances of the specified
-pattern REGEX.
-.\"
-.\"  XXX - Need more details here!
-.\"
+Note: A maximum of 20 files can be monitored.
 .IP
-A maximum of 50 files can be monitored.
-.PP
-If no \fIlogmatch\fR directives are defined, then walking the
+Note: If no \fIfile\fR directives are defined, then walking the
+\fCfileTable\fR will fail (\fInoSuchObject\fR).
+.IP "logmatch NAME FILE CYCLETIME REGEX"
+monitors the specified file for occurances of the specified
+pattern REGEX. The file position is stored internally so the entire file
+is only read initially, every subsequent pass will only read the new lines
+added to the file since the last read.
+.RS
+.IP NAME
+name of the logmatch instance (will appear as logMatchName under
+logMatch/logMatchTable/logMatchEntry/logMatchName in the ucd-snmp MIB tree)
+.IP FILE
+absolute path to the logfile to be monitored. Note that this path
+can contain date/time directives (like in the UNIX 'date' command). See the
+manual page for 'strftime' for the various directives accepted.
+.IP CYCLETIME
+time interval for each logfile read and internal variable update in seconds.
+Note: an SNMPGET* operation will also trigger an immediate logfile read and
+variable update.
+.IP REGEX
+the regular expression to be used. Note: DO NOT enclose the regular expression
+in quotes even if there are spaces in the expression as the quotes will also
+become part of the pattern to be matched!
+.RE
+.IP
+Example:
+.RS
+.IP
+logmatch apache-GETs /usr/local/apache/logs/access.log-%Y-%m-%d 60 GET.*HTTP.*
+.IP
+This logmatch instance is named 'apache-GETs', uses 'GET.*HTTP.*' as its
+regular expression and it will monitor the file named
+(assuming today is May 6th 2009): '/usr/local/apache/logs/access.log-2009-05-06',
+tomorrow it will look for 'access.log-2009-05-07'. The logfile is read every 60
+seconds.
+.RE
+.IP
+Note: A maximum of 250 logmatch directives can be specified.
+.IP
+Note: If no \fIlogmatch\fR directives are defined, then walking the
 \fClogMatchTable\fR will fail (\fInoSuchObject\fI).
 .SH "ACTIVE MONITORING"
 The usual behaviour of an SNMP agent is to wait for incoming SNMP requests
