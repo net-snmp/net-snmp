@@ -614,17 +614,17 @@ snmp_sess_perror(const char *prog_string, netsnmp_session * ss)
  *
  * Warning: no debug messages here.
  */
+static char _init_snmp_init_done = 0;
 static void
 _init_snmp(void)
 {
-    static char     have_done_init = 0;
 
     struct timeval  tv;
     long            tmpReqid, tmpMsgid;
 
-    if (have_done_init)
+    if (_init_snmp_init_done)
         return;
-    have_done_init = 1;
+    _init_snmp_init_done = 1;
     Reqid = 1;
 
     snmp_res_init();            /* initialize the mt locking structures */
@@ -752,6 +752,7 @@ register_default_handlers(void)
     netsnmp_register_service_handlers();
 }
 
+static int init_snmp_init_done = 0; /* To prevent double init's. */
 /**
  * Calls the functions to do config file loading and  mib module parsing
  * in the correct order.
@@ -765,13 +766,11 @@ register_default_handlers(void)
 void
 init_snmp(const char *type)
 {
-    static int      done_init = 0;      /* To prevent double init's. */
-
-    if (done_init) {
+    if (init_snmp_init_done) {
         return;
     }
 
-    done_init = 1;
+    init_snmp_init_done = 1;
 
     /*
      * make the type available everywhere else 
@@ -852,6 +851,9 @@ snmp_shutdown(const char *type)
     netsnmp_clear_default_target();
     netsnmp_clear_default_domain();
     free_etimelist();
+
+    init_snmp_init_done  = 0;
+    _init_snmp_init_done = 0;
 }
 
 

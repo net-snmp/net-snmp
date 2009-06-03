@@ -579,6 +579,10 @@ netsnmp_handler_free(netsnmp_mib_handler *handler)
          *  defined. About 30 functions down the stack, starting
          *  in clear_context() -> clear_subtree()
          */
+        if ((handler->myvoid != NULL) && (handler->data_free != NULL))
+        {
+            handler->data_free(handler->myvoid);
+        }
         SNMP_FREE(handler->handler_name);
         SNMP_FREE(handler);
     }
@@ -600,6 +604,7 @@ netsnmp_handler_dup(netsnmp_mib_handler *handler)
 
     if (h != NULL) {
         h->myvoid = handler->myvoid;
+        h->data_free = handler->data_free;
 
         if (handler->next != NULL) {
             h->next = netsnmp_handler_dup(handler->next);
