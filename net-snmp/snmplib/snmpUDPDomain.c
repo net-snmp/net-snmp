@@ -177,6 +177,7 @@ int netsnmp_udp_sendto(int fd, struct in_addr *srcip, struct sockaddr *remote,
     } cmsg;
     struct msghdr m;
 
+    memset(&cmsg, 0, sizeof(cmsg));
     cmsg.cm.cmsg_len = sizeof(struct cmsghdr) + sizeof(struct in_pktinfo);
     cmsg.cm.cmsg_level = SOL_IP;
     cmsg.cm.cmsg_type = IP_PKTINFO;
@@ -681,7 +682,6 @@ netsnmp_udp_transport(struct sockaddr_in *addr, int local)
             struct sockaddr_in client_addr;
             netsnmp_sockaddr_in2(&client_addr, client_socket, NULL);
             addr_pair.local_addr = client_addr.sin_addr;
-            client_addr.sin_port = 0;
             rc = bind(t->sock, (struct sockaddr *)&client_addr,
                   sizeof(struct sockaddr));
             if ( rc != 0 ) {
