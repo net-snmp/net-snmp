@@ -204,6 +204,7 @@ extern          "C" {
      */
 
     void            netsnmp_addrcache_initialise(void);
+    void            netsnmp_addrcache_destroy(void);
     void            netsnmp_addrcache_age(void);
 
 

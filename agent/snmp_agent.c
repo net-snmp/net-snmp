@@ -704,6 +704,18 @@ netsnmp_addrcache_initialise(void)
     }
 }
 
+void netsnmp_addrcache_destroy(void)
+{
+    int             i = 0;
+
+    for (i = 0; i < SNMP_ADDRCACHE_SIZE; i++) {
+        if (addrCache[i].status == SNMP_ADDRCACHE_USED) {
+            free(addrCache[i].addr);
+            addrCache[i].status = SNMP_ADDRCACHE_UNUSED;
+        }
+    }
+}
+
 /*
  * Adds a new entry to the cache of addresses that
  * have recently made connections to the agent.
