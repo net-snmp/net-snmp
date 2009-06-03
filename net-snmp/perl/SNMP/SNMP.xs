@@ -1392,6 +1392,8 @@ void *cb_data;
 
   case NETSNMP_CALLBACK_OP_TIMED_OUT:
     varlist_ref = &sv_undef;
+    sv_setpv(*err_str_svp, (char*)snmp_api_errstring(SNMPERR_TIMEOUT));
+    sv_setiv(*err_num_svp, SNMPERR_TIMEOUT);
     break;
   default:;
   } /* switch op */
