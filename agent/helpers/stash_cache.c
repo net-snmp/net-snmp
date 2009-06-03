@@ -62,6 +62,7 @@ netsnmp_get_timed_bare_stash_cache_handler(int timeout, oid *rootoid, size_t roo
     }
 
     handler->myvoid = cinfo;
+    handler->data_free = free;
 
     return handler;
 }

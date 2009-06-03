@@ -110,6 +110,7 @@ subagent_startup(int majorID, int minorID,
     return 0;
 }
 
+static int subagent_init_init = 0;
 /**
  * init subagent callback (local) session and connect to master agent
  *
@@ -118,12 +119,11 @@ subagent_startup(int majorID, int minorID,
 int
 subagent_init(void)
 {
-    static int init = 0;
     int rc = 0;
 
     DEBUGMSGTL(("agentx/subagent", "initializing....\n"));
 
-    if (++init != 1)
+    if (++subagent_init_init != 1)
         return 0;
 
     netsnmp_assert(netsnmp_ds_get_boolean(NETSNMP_DS_APPLICATION_ID,
@@ -678,8 +678,13 @@ subagent_shutdown(int majorID, int minorID, void *serverarg, void *clientarg)
     }
     agentx_close_session(thesession, AGENTX_CLOSE_SHUTDOWN);
     snmp_close(thesession);
-    main_session = NULL;
+    if (main_session != NULL) {
+        remove_trap_session(main_session);
+        main_session = NULL;
+    }
     DEBUGMSGTL(("agentx/subagent", "shut down finished.\n"));
+
+    subagent_init_init = 0;
     return 1;
 }
 

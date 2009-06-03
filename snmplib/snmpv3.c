@@ -744,6 +744,7 @@ free_engineID(int majorid, int minorid, void *serverarg,
     SNMP_FREE(engineID);
     SNMP_FREE(engineIDNic);
     SNMP_FREE(oldEngineID);
+    engineIDIsSet = 0;
     return 0;
 }
 

@@ -371,6 +371,7 @@ shutdown_agent(void) {
     clear_snmp_enum();
     clear_callback();
     clear_user_list();
+    netsnmp_addrcache_destroy();
 
     done_init_agent = 0;
 }
