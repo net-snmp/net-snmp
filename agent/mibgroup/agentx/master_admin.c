@@ -287,6 +287,14 @@ unregister_agentx_list(netsnmp_session * session, netsnmp_pdu *pdu)
                                     pdu->variables->name_length,
                                     pdu->priority, 0, 0,
                                     (char *) pdu->community);
+
+        if (rc == MIB_UNREGISTERED_OK)
+        {
+            /* Remove the context from the lookup cache, and the context cache */
+            lookup_cache_context_remove((char *) pdu->community);
+            remove_from_context_cache((char *) pdu->community);                                    
+        }
+                                        
     }
 
     switch (rc) {
