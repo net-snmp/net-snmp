@@ -1076,6 +1076,8 @@ main(int argc, char *argv[])
         }
     }
 
+    SOCK_STARTUP;
+
     /*
      * I'm being lazy here, and not checking the
      * return value from these registration calls.
@@ -1293,8 +1295,6 @@ main(int argc, char *argv[])
         snmp_log(LOG_WARNING, "-s and -S options are deprecated; use -Ls <facility> instead\n");
     }
     
-    SOCK_STARTUP;
-
     if (listen_ports)
         cp = listen_ports;
     else
