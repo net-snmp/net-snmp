@@ -99,10 +99,6 @@ SOURCE=..\..\apps\snmptrapd_log.c
 
 SOURCE=..\..\apps\snmptrapd_auth.c
 # End Source File
-# Begin Source File
-
-SOURCE=..\..\agent\mibgroup\notification-log-mib\notification_log.c
-# End Source File
 # End Group
 # Begin Group "Header Files"
 

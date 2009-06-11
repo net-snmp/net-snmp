@@ -15,6 +15,9 @@
 /* Define if compiling with the notification module files.  */
 #define USING_NOTIFICATION_MODULE 1
  
+/* Define if compiling with the notification-log-mib module files. */
+#define USING_NOTIFICATION_LOG_MIB_NOTIFICATION_LOG_MODULE 1
+
 /* Define if compiling with the target module files.  */
 #define USING_TARGET_MODULE 1
  
@@ -133,7 +136,7 @@
  
 /* Define if compiling with the snmpv3/usmUser module files.  */
 #define USING_SNMPV3_USMUSER_MODULE 1
- 
+
 /* Define if compiling with the notification/snmpNotifyTable module files.  */
 #define USING_NOTIFICATION_SNMPNOTIFYTABLE_MODULE 1
  
