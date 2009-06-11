@@ -32,6 +32,7 @@
 
 #ifdef WIN32
 
+#include <net-snmp/library/snmp_assert.h>
 #include <io.h>
 #include <winsock.h>
 
@@ -42,6 +43,7 @@ static int InitUPDSocket(SOCKET *sock, struct sockaddr_in *socketaddress)
 
 	if( (*sock = socket(AF_INET, SOCK_DGRAM, 0)) == SOCKET_ERROR)
 	{
+		netsnmp_assert(GetLastError() != WSANOTINITIALISED);
 		return -1;
 	}
 	socketaddress->sin_family = AF_INET;
