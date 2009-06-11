@@ -1755,13 +1755,9 @@ get_if_stats(mib2_ifEntry_t *ifp)
     if (ifp->ifType == 24)  /* Loopback */
         return (0);
 
-    if (getKstatInt(NULL, name, "ierrors", &ifp->ifInErrors) != 0) {
-        return (-1);
-    }
-
-    if (getKstatInt(NULL, name, "oerrors", &ifp->ifOutErrors) != 0) {
-        return (-1);
-    }
+    /* some? VLAN interfaces don't have error counters, so ignore failure */
+    getKstatInt(NULL, name, "ierrors", &ifp->ifInErrors);
+    getKstatInt(NULL, name, "oerrors", &ifp->ifOutErrors);
 
     /* Try to grab some additional information */
     getKstatInt(NULL, name, "collisions", &ifp->ifCollisions); 
