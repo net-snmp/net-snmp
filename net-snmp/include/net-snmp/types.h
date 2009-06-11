@@ -382,7 +382,6 @@ struct snmp_session {
 };
 
 
-#include <library/large_fd_set.h>
 typedef struct netsnmp_large_fd_set_s netsnmp_large_fd_set;
 
 
