@@ -950,6 +950,8 @@ main(int argc, char *argv[])
         }
     }
 
+    SOCK_STARTUP;
+
     /*
      * I'm being lazy here, and not checking the
      * return value from these registration calls.
@@ -1092,8 +1094,6 @@ main(int argc, char *argv[])
         snmp_enable_syslog_ident(app_name, Facility);
 #endif        
     }
-
-    SOCK_STARTUP;
 
     if (listen_ports)
         cp = listen_ports;

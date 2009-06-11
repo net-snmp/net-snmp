@@ -197,6 +197,10 @@ SOURCE=..\..\agent\mibgroup\notification\snmpNotifyFilterProfileTable.c
 # End Source File
 # Begin Source File
 
+SOURCE=..\..\agent\mibgroup\notification-log-mib\notification_log.c
+# End Source File
+# Begin Source File
+
 SOURCE=..\..\agent\mibgroup\snmp-notification-mib\snmpNotifyFilterTable\snmpNotifyFilterTable.c
 # End Source File
 # Begin Source File
