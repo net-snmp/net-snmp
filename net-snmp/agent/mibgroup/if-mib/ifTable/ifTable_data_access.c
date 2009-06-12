@@ -23,6 +23,11 @@
 #   include "mibgroup/ip-mib/ipv4InterfaceTable/ipv4InterfaceTable.h"
 #endif
 
+typedef struct cd_container_s {
+    netsnmp_container *current;
+    netsnmp_container *deleted;
+} cd_container;
+
 /*
  * flag so we know not to set row/table last change times
  * during startup.
@@ -256,10 +261,11 @@ send_linkUpDownNotifications(oid *notification_oid, size_t notification_oid_len,
  */
 static void
 _check_interface_entry_for_updates(ifTable_rowreq_ctx * rowreq_ctx,
-                                   netsnmp_container *ifcontainer)
+                                   cd_container *cdc)
 {
     char            oper_changed = 0;
     int lastchanged = rowreq_ctx->data.ifLastChange;
+    netsnmp_container *ifcontainer = cdc->current;
 
     /*
      * check for matching entry. We can do this directly, since
@@ -291,16 +297,31 @@ _check_interface_entry_for_updates(ifTable_rowreq_ctx * rowreq_ctx,
          * deleted (and thus need to update ifTableLastChanged)?
          */
         if (!rowreq_ctx->known_missing) {
-            DEBUGMSGTL(("ifTable:access", "updating missing entry\n"));
             rowreq_ctx->known_missing = 1;
+            DEBUGMSGTL(("ifTable:access", "updating missing entry %s\n",rowreq_ctx->data.ifName));
             rowreq_ctx->data.ifAdminStatus = IFADMINSTATUS_DOWN;
-            if ((!(rowreq_ctx->data.ifentry->ns_flags & NETSNMP_INTERFACE_FLAGS_HAS_LASTCHANGE))
-                && (rowreq_ctx->data.ifOperStatus != IFOPERSTATUS_DOWN))
-                oper_changed = 1;
             rowreq_ctx->data.ifOperStatus = IFOPERSTATUS_DOWN;
+            oper_changed = 1;
+        } else {
+            time_t now = netsnmp_get_agent_uptime();
+            u_long diff = (now - rowreq_ctx->data.ifLastChange) / 100;
+            DEBUGMSGTL(("verbose:ifTable:access", "missing entry for %ld seconds\n", diff));
+            if (diff > IFTABLE_REMOVE_MISSING_AFTER) {
+                DEBUGMSGTL(("ifTable:access", "marking missing entry %s for "
+                            "removal after %d seconds\n", rowreq_ctx->data.ifName,
+                            IFTABLE_REMOVE_MISSING_AFTER));
+                if (NULL == cdc->deleted)
+                   cdc->deleted = netsnmp_container_find("ifTable_deleted:linked_list");
+                if (NULL == cdc->deleted)
+                   snmp_log(LOG_ERR, "couldn't create container for deleted interface\n");
+                else {
+                   CONTAINER_INSERT(cdc->deleted, rowreq_ctx);
+                }
+            }
         }
     } else {
-        DEBUGMSGTL(("ifTable:access", "updating existing entry\n"));
+        DEBUGMSGTL(("ifTable:access", "updating existing entry %s\n",
+                    rowreq_ctx->data.ifName));
 
 #ifdef USING_IF_MIB_IFXTABLE_IFXTABLE_MODULE
         {
@@ -428,6 +449,21 @@ _add_new_interface(netsnmp_interface_entry *ifentry,
 }
 
 /**
+ * add new entry
+ */
+static void
+_delete_missing_interface(ifTable_rowreq_ctx *rowreq_ctx,
+                          netsnmp_container *container)
+{
+    DEBUGMSGTL(("ifTable:access", "removing missing entry %s\n",
+                rowreq_ctx->data.ifName));
+
+    CONTAINER_REMOVE(container, rowreq_ctx);
+
+    ifTable_release_rowreq_ctx(rowreq_ctx);
+}
+
+/**
  * container shutdown
  *
  * @param container_ptr A pointer to the container.
@@ -491,7 +527,7 @@ ifTable_container_shutdown(netsnmp_container *container_ptr)
 int
 ifTable_container_load(netsnmp_container *container)
 {
-    netsnmp_container *ifcontainer;
+    cd_container cdc;
 
     DEBUGMSGTL(("verbose:ifTable:ifTable_container_load", "called\n"));
 
@@ -504,31 +540,41 @@ ifTable_container_load(netsnmp_container *container)
     /*
      * ifTable gets its data from the netsnmp_interface API.
      */
-    ifcontainer =
+    cdc.current =
         netsnmp_access_interface_container_load(NULL,
                                                 NETSNMP_ACCESS_INTERFACE_INIT_NOFLAGS);
-    if (NULL == ifcontainer)
+    if (NULL == cdc.current)
         return MFD_RESOURCE_UNAVAILABLE;        /* msg already logged */
+
+    cdc.deleted = NULL; /* created as needed */
 
     /*
      * we just got a fresh copy of interface data. compare it to
      * what we've already got, and make any adjustements...
      */
     CONTAINER_FOR_EACH(container, (netsnmp_container_obj_func *)
-                       _check_interface_entry_for_updates, ifcontainer);
+                       _check_interface_entry_for_updates, &cdc);
 
     /*
      * now add any new interfaces
      */
-    CONTAINER_FOR_EACH(ifcontainer,
+    CONTAINER_FOR_EACH(cdc.current,
                        (netsnmp_container_obj_func *) _add_new_interface,
                        container);
+
+    /*
+     * now remove any missing interfaces
+     */
+    if (NULL != cdc.deleted)
+       CONTAINER_FOR_EACH(cdc.deleted,
+                          (netsnmp_container_obj_func *) _delete_missing_interface,
+                          container);
 
     /*
      * free the container. we've either claimed each ifentry, or released it,
      * so the dal function doesn't need to clear the container.
      */
-    netsnmp_access_interface_container_free(ifcontainer,
+    netsnmp_access_interface_container_free(cdc.current,
                                             NETSNMP_ACCESS_INTERFACE_FREE_DONT_CLEAR);
 
     DEBUGMSGT(("verbose:ifTable:ifTable_cache_load",
