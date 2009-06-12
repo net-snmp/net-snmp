@@ -48,6 +48,8 @@ extern          "C" {
      */
 #define IFTABLE_CACHE_TIMEOUT   15
 
+#define IFTABLE_REMOVE_MISSING_AFTER     (5 * 60) /* seconds */
+
     void            ifTable_container_init(netsnmp_container
                                            **container_ptr_ptr,
                                            netsnmp_cache * cache);
