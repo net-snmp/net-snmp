@@ -1,4 +1,4 @@
-.TH "netsnmp_handler_registration_s" 3 "23 Apr 2009" "Version 5.5.pre2" "net-snmp" \" -*- nroff -*-
+.TH "netsnmp_handler_registration_s" 3 "12 Jun 2009" "Version 5.5.pre3" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -67,39 +67,39 @@ The variables handlerName, contextName, and rootoid need to be allocated on the 
 .PP
 \fBdelayed_instance.c\fP, and \fBwatched.c\fP.
 .PP
-Definition at line 94 of file agent_handler.h.
+Definition at line 95 of file agent_handler.h.
 .SH "Field Documentation"
 .PP 
 .SS "char* \fBnetsnmp_handler_registration_s::contextName\fP"
 .PP
 NULL = default context. 
 .PP
-Definition at line 99 of file agent_handler.h.
+Definition at line 100 of file agent_handler.h.
 .SS "\fBnetsnmp_mib_handler\fP* \fBnetsnmp_handler_registration_s::handler\fP"
 .PP
 handler details 
 .PP
-Definition at line 110 of file agent_handler.h.
+Definition at line 111 of file agent_handler.h.
 .SS "char* \fBnetsnmp_handler_registration_s::handlerName\fP"
 .PP
 for mrTable listings, and other uses 
 .PP
-Definition at line 97 of file agent_handler.h.
+Definition at line 98 of file agent_handler.h.
 .SS "void* \fBnetsnmp_handler_registration_s::my_reg_void\fP"
 .PP
 void ptr for registeree 
 .PP
-Definition at line 125 of file agent_handler.h.
+Definition at line 126 of file agent_handler.h.
 .SS "int \fBnetsnmp_handler_registration_s::priority\fP"
 .PP
 more optional stuff 
 .PP
-Definition at line 116 of file agent_handler.h.
+Definition at line 117 of file agent_handler.h.
 .SS "oid* \fBnetsnmp_handler_registration_s::rootoid\fP"
 .PP
 where are we registered at? 
 .PP
-Definition at line 104 of file agent_handler.h.
+Definition at line 105 of file agent_handler.h.
 
 .SH "Author"
 .PP 

@@ -1,4 +1,4 @@
-.TH "stash_cache" 3 "23 Apr 2009" "Version 5.5.pre2" "net-snmp" \" -*- nroff -*-
+.TH "stash_cache" 3 "12 Jun 2009" "Version 5.5.pre3" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -57,24 +57,24 @@ This handler caches data in an optimized way which may aleviate the need for the
 .PP
 updates a given cache depending on whether it needs to or not. 
 .PP
-Definition at line 189 of file stash_cache.c.
+Definition at line 190 of file stash_cache.c.
 .SS "netsnmp_oid_stash_node** netsnmp_extract_stash_cache (\fBnetsnmp_agent_request_info\fP * reqinfo)"
 .PP
 extracts a pointer to the stash_cache info from the reqinfo structure. 
 .PP
 
 .PP
-Definition at line 108 of file stash_cache.c.
+Definition at line 109 of file stash_cache.c.
 .SS "\fBnetsnmp_mib_handler\fP* netsnmp_get_bare_stash_cache_handler (void)"
 .PP
 returns a single stash_cache handler that can be injected into a given handler chain (with a fixed timeout), but *only* if that handler chain explicitly supports stash cache processing. 
 .PP
-Definition at line 74 of file stash_cache.c.
+Definition at line 75 of file stash_cache.c.
 .SS "\fBnetsnmp_mib_handler\fP* netsnmp_get_stash_cache_handler (void)"
 .PP
 returns a stash_cache handler sub-chain that can be injected into a given (arbitrary) handler chain, using a fixed cache timeout. 
 .PP
-Definition at line 83 of file stash_cache.c.
+Definition at line 84 of file stash_cache.c.
 .SS "\fBnetsnmp_mib_handler\fP* netsnmp_get_timed_bare_stash_cache_handler (int timeout, oid * rootoid, size_t rootoid_len)"
 .PP
 returns a stash_cache handler that can be injected into a given handler chain (with the specified timeout and root OID values), but *only* if that handler chain explicitly supports stash cache processing. 
@@ -84,12 +84,12 @@ Definition at line 40 of file stash_cache.c.
 .PP
 returns a stash_cache handler sub-chain that can be injected into a given (arbitrary) handler chain, using a configurable cache timeout. 
 .PP
-Definition at line 96 of file stash_cache.c.
+Definition at line 97 of file stash_cache.c.
 .SS "void netsnmp_init_stash_cache_helper (void)"
 .PP
 initializes the stash_cache helper which then registers a stash_cache handler as a run-time injectable handler for configuration file use. 
 .PP
-Definition at line 232 of file stash_cache.c.
+Definition at line 233 of file stash_cache.c.
 .SH "Author"
 .PP 
 Generated automatically by Doxygen for net-snmp from the source code.

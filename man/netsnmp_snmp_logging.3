@@ -1,4 +1,4 @@
-.TH "generic logging for net-snmp" 3 "23 Apr 2009" "Version 5.5.pre2" "net-snmp" \" -*- nroff -*-
+.TH "generic logging for net-snmp" 3 "12 Jun 2009" "Version 5.5.pre3" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -194,7 +194,7 @@ generic logging for net-snmp \-
 .PP
 hmm, don't zero status isn't saved.. i think it's safer not to overwrite, in case a hup is just to re-read config files... 
 .PP
-Definition at line 626 of file snmp_logging.c.
+Definition at line 632 of file snmp_logging.c.
 .SS "int snmp_get_do_logging (void)"
 .PP
 Is logging done? 
@@ -206,7 +206,7 @@ Returns 0 if logging is off, 1 when it is done.
 .PP
 
 .PP
-Definition at line 483 of file snmp_logging.c.
+Definition at line 489 of file snmp_logging.c.
 .SS "int snmp_log (int priority, const char * format,  ...)"
 .PP
 This snmp logging function allows variable argument list given the specified format and priority. 
@@ -224,7 +224,7 @@ Calls the snmp_vlog function. The default logfile this function writes to is /va
 .in +1c
 \fBdelayed_instance.c\fP.
 .PP
-Definition at line 1264 of file snmp_logging.c.
+Definition at line 1270 of file snmp_logging.c.
 .SS "int snmp_vlog (int priority, const char * format, va_list ap)"
 .PP
 This snmp logging function allows variable argument list given the specified priority, format and a populated va_list structure. 
@@ -281,7 +281,7 @@ Returns 0 on success, -1 when the code could not format the log- string, -2 when
 .PP
 
 .PP
-Definition at line 1204 of file snmp_logging.c.
+Definition at line 1210 of file snmp_logging.c.
 .SH "Author"
 .PP 
 Generated automatically by Doxygen for net-snmp from the source code.

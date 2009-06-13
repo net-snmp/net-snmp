@@ -1,4 +1,4 @@
-.TH "watcher" 3 "23 Apr 2009" "Version 5.5.pre2" "net-snmp" \" -*- nroff -*-
+.TH "watcher" 3 "12 Jun 2009" "Version 5.5.pre3" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -12,7 +12,13 @@ watcher \- Watch a specified variable and process it as an instance or scalar ob
 .RI "\fBnetsnmp_mib_handler\fP * \fBnetsnmp_get_watcher_handler\fP (void)"
 .br
 .ti -1c
+.RI "netsnmp_watcher_info * \fBnetsnmp_init_watcher_info6\fP (netsnmp_watcher_info *winfo, void *data, size_t size, u_char type, int flags, size_t max_size, size_t *size_p)"
+.br
+.ti -1c
 .RI "netsnmp_watcher_info * \fBnetsnmp_create_watcher_info6\fP (void *data, size_t size, u_char type, int flags, size_t max_size, size_t *size_p)"
+.br
+.ti -1c
+.RI "netsnmp_watcher_info * \fBnetsnmp_init_watcher_info\fP (netsnmp_watcher_info *winfo, void *data, size_t size, u_char type, int flags)"
 .br
 .ti -1c
 .RI "netsnmp_watcher_info * \fBnetsnmp_create_watcher_info\fP (void *data, size_t size, u_char type, int flags)"
