@@ -1,4 +1,4 @@
-.TH "netsnmp_mib_handler_s" 3 "23 Apr 2009" "Version 5.5.pre2" "net-snmp" \" -*- nroff -*-
+.TH "netsnmp_mib_handler_s" 3 "12 Jun 2009" "Version 5.5.pre3" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -29,6 +29,10 @@ netsnmp_mib_handler_s \- the mib handler structure to be registered
 .br
 .RI "\fIif you add more members, you probably also want to update \fP"
 .ti -1c
+.RI "void(* \fBdata_free\fP )(void *\fBmyvoid\fP)"
+.br
+.RI "\fIdata free hook for myvoid \fP"
+.ti -1c
 .RI "struct \fBnetsnmp_mib_handler_s\fP * \fBnext\fP"
 .br
 .ti -1c
@@ -52,6 +56,10 @@ Definition at line 48 of file agent_handler.h.
 if you add more members, you probably also want to update 
 .PP
 _clone_handler in \fBagent_handler.c\fP. 
+.SS "void(* \fBnetsnmp_mib_handler_s::data_free\fP)(void *\fBmyvoid\fP)"
+.PP
+data free hook for myvoid 
+.PP
 .SS "int \fBnetsnmp_mib_handler_s::flags\fP"
 .PP
 for agent_handler's internal use 

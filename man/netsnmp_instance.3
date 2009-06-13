@@ -1,4 +1,4 @@
-.TH "instance" 3 "23 Apr 2009" "Version 5.5.pre2" "net-snmp" \" -*- nroff -*-
+.TH "instance" 3 "12 Jun 2009" "Version 5.5.pre3" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -72,7 +72,7 @@ instance \- Process individual MIB instances easily.
 .RI "int \fBregister_read_only_int_instance_context\fP (const char *name, const oid *reg_oid, size_t reg_oid_len, int *it, Netsnmp_Node_Handler *subhandler, const char *contextName)"
 .br
 .ti -1c
-.RI "int \fBnetsnmp_register_num_file_instance\fP (const char *name, const oid *reg_oid, size_t reg_oid_len, char *file_name, int asn_type, int mode, Netsnmp_Node_Handler *subhandler, const char *contextName)"
+.RI "int \fBnetsnmp_register_num_file_instance\fP (const char *name, const oid *reg_oid, size_t reg_oid_len, const char *file_name, int asn_type, int mode, Netsnmp_Node_Handler *subhandler, const char *contextName)"
 .br
 .ti -1c
 .RI "int \fBnetsnmp_register_int_instance\fP (const char *name, const oid *reg_oid, size_t reg_oid_len, int *it, Netsnmp_Node_Handler *subhandler)"
