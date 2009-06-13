@@ -29,6 +29,11 @@
 #if HAVE_NETINET_TCP_VAR_H
 #include <netinet/tcp_var.h>
 #endif
+#if HAVE_NETLINK_NETLINK_H
+#include <netlink/netlink.h>
+#include <netlink/msg.h>
+#include <linux/inet_diag.h>
+#endif
 
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
@@ -542,6 +547,114 @@ tcpTable_load(netsnmp_cache *cache, void *vmagic)
 #else                           /* hpux11 */
 
 #ifdef linux
+
+// see <netinet/tcp.h>
+#define TCP_ALL ((1 << (TCP_CLOSING + 1)) - 1)
+
+#if HAVE_NETLINK_NETLINK_H
+static int
+tcpTable_load_netlink()
+{
+	// TODO: perhaps use permanent nl handle?
+	struct nl_handle *nl = nl_handle_alloc();
+
+	if (nl == NULL) {
+		DEBUGMSGTL(("mibII/tcpTable", "Failed to allocate netlink handle\n"));
+		snmp_log(LOG_ERR, "snmpd: Failed to allocate netlink handle\n");
+		return -1;
+	}
+
+	if (nl_connect(nl, NETLINK_INET_DIAG) < 0) {
+		DEBUGMSGTL(("mibII/tcpTable", "Failed to connect to netlink: %s\n", nl_geterror()));
+		snmp_log(LOG_ERR, "snmpd: Couldn't connect to netlink: %s\n", nl_geterror());
+		nl_handle_destroy(nl);
+		return -1;
+	}
+
+	struct inet_diag_req req = {
+		.idiag_family = AF_INET,
+		.idiag_states = TCP_ALL,
+	};
+
+	struct nl_msg *nm = nlmsg_alloc_simple(TCPDIAG_GETSOCK, NLM_F_ROOT|NLM_F_MATCH|NLM_F_REQUEST);
+	nlmsg_append(nm, &req, sizeof(struct inet_diag_req), 0);
+
+	if (nl_send_auto_complete(nl, nm) < 0) {
+		DEBUGMSGTL(("mibII/tcpTable", "nl_send_autocomplete(): %s\n", nl_geterror()));
+		snmp_log(LOG_ERR, "snmpd: nl_send_autocomplete(): %s\n", nl_geterror());
+		nl_handle_destroy(nl);
+		return -1;
+	}
+	nlmsg_free(nm);
+
+	struct sockaddr_nl peer;
+	unsigned char *buf = NULL;
+	int running = 1, len;
+
+	while (running) {
+		if ((len = nl_recv(nl, &peer, &buf, NULL)) <= 0) {
+			DEBUGMSGTL(("mibII/tcpTable", "nl_recv(): %s\n", nl_geterror()));
+			snmp_log(LOG_ERR, "snmpd: nl_recv(): %s\n", nl_geterror());
+			nl_handle_destroy(nl);
+			return -1;
+		}
+
+		struct nlmsghdr *h = (struct nlmsghdr*)buf;
+		while (nlmsg_ok(h, len)) {
+			if (h->nlmsg_type == NLMSG_DONE) {
+				running = 0;
+				break;
+			}
+
+			struct inet_diag_msg *r = nlmsg_data(h);
+
+			if (r->idiag_family != AF_INET) {
+				h = nlmsg_next(h, &len);
+				continue;
+			}
+
+			struct inpcb    pcb, *nnew;
+			static int      linux_states[12] =
+				{ 1, 5, 3, 4, 6, 7, 11, 1, 8, 9, 2, 10 };
+
+			memcpy(&pcb.inp_laddr.s_addr, r->id.idiag_src, r->idiag_family == AF_INET ? 4 : 6);
+			memcpy(&pcb.inp_faddr.s_addr, r->id.idiag_dst, r->idiag_family == AF_INET ? 4 : 6);
+
+			pcb.inp_lport = r->id.idiag_sport;
+			pcb.inp_fport = r->id.idiag_dport;
+
+			pcb.inp_state = (r->idiag_state & 0xf) < 12 ? linux_states[r->idiag_state & 0xf] : 2;
+			if (pcb.inp_state == 5 /* established */ ||
+				pcb.inp_state == 8 /*  closeWait  */ )
+				tcp_estab++;
+			pcb.uid = r->idiag_uid;
+
+			nnew = SNMP_MALLOC_TYPEDEF(struct inpcb);
+			if (nnew == NULL) {
+				running = 0;
+				// XXX report malloc error and return -1?
+				break;
+			}
+			memcpy(nnew, &pcb, sizeof(struct inpcb));
+			nnew->inp_next = tcp_head;
+			tcp_head       = nnew;
+
+			h = nlmsg_next(h, &len);
+		}
+		free(buf);
+	}
+
+	nl_handle_destroy(nl);
+
+	if (tcp_head) {
+		DEBUGMSGTL(("mibII/tcpTable", "Loaded TCP Table using netlink\n"));
+		return 0;
+	}
+	DEBUGMSGTL(("mibII/tcpTable", "Failed to load TCP Table (netlink)\n"));
+	return -1;
+}
+#endif
+
 int
 tcpTable_load(netsnmp_cache *cache, void *vmagic)
 {
@@ -549,6 +662,12 @@ tcpTable_load(netsnmp_cache *cache, void *vmagic)
     char            line[256];
 
     tcpTable_free(cache, NULL);
+
+#if HAVE_NETLINK_NETLINK_H
+	if (tcpTable_load_netlink() == 0) {
+		return 0;
+	}
+#endif
 
     if (!(in = fopen("/proc/net/tcp", "r"))) {
         DEBUGMSGTL(("mibII/tcpTable", "Failed to load TCP Table (linux1)\n"));
