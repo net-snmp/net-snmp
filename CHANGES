@@ -140,6 +140,19 @@ listing of all changes made to the code.
 	Patch provided by Bart Van Assche
       - [PATCH 2772787]: Cleaner approach to handling large fd_sets. Based
 	on patch supplied by Bart Van Assche.
+      - top using a fixed string for indentation. Remove the DEBUGINDENT()
+	macro (that did nothing). Change the meaning of the internal
+	__DBGINDENT() macro to return the number of spaces to indent
+	instead of a string that represent the indentation level. Deprecate
+	the debug_indent function.
+      - [PATCH 2780411]: Fix compiler warnings
+      - eparate initialization from allocation for netsnmp_watcher_info
+	structures to make it possible to use statically allocated data.
+      - top using a fixed string for indentation. Remove the DEBUGINDENT()
+	macro (that did nothing). Change the meaning of the internal
+	__DBGINDENT() macro to return the number of spaces to indent
+	instead of a string that represent the indentation level. Deprecate
+	the debug_indent function.
 
     snmplib, snmpd:
       - [BUG 2001124]: Allow embedded NUL characters in usmUserPublic
@@ -415,6 +428,18 @@ listing of all changes made to the code.
 	during disman event mib cleanup processing.
       - [BUG 112694]: Patch from Bill Fenner: don't open (and clobber) an
 	agentx socket if the other transports fail to open
+      - 0 [PATCH 2564552]: provide libnetlink support for loading the tcp
+	table
+      - Allow "monitor" to handle negative threshold values. Reported by
+	Richard Gipps.
+      - Use static watcher_info for all watched variables and in int_watch.
+      - [BUG 1400101]: remove deleted interfaces from ifTable
+      - [PATCH 2012402]: don't fail on failure to look up interface error
+	counters.
+      - [PATCH 2182592]: Clean up vacmContextTable after unregistrations
+	Patch supplied by John Forsyth
+      - [PATCH 2791417]: fix snmpd segfault when run with -DALL Patch
+	supplied by Ron Roskens.
 
     snmpd, apps:
       - Parser of -LS command line argument now accepts both '-LS <level>
@@ -557,6 +582,9 @@ listing of all changes made to the code.
 	that made autoreconf -vif erase config.sub and config.guess.
       - [PATCH 2184039]: misc fixes for freeing memory during error
 	conditions.
+      - [BUG 2782700]: build failure when using --with-pkcs on Solaris
+      - [PATCH 2797251]: Support multiple initialisation and shutdown, fix
+	memory leaks Patch supplied by Ivosh
 
     building:
       - Add a variation of AC_SEARCH_LIBS where the result variable is
@@ -730,6 +758,8 @@ listing of all changes made to the code.
       - [PATCH 2709705]: Retrieve src/target IP address in Perl-based
 	agents Patch provided by fhew
       - [PATCH 276371]: to allow perl to use OPAQUEs
+      - [PATCH 2793857]: Report failed asynchronous requests.
+
 
     ports:
       - patch: 1706344: from naylor: fix compilation with cygwin
@@ -842,6 +872,8 @@ listing of all changes made to the code.
       - UX: HP-UX needs _REENTRANT defined to pick up strtok_r. Otherwise,
 	at least for 64-bit code, strtok_r will not work and will make
 	net-snmp segfault.
+      - UX: BUG: 2779472: Filesystems missing in hrStorage table on HP-UX
+	11.31 (allow for mnttab that is a character special device)
 
     IRIX:
       - [PATCH 1675869]: CPU statistics for IRIX based on PCP
@@ -898,6 +930,11 @@ listing of all changes made to the code.
 	several winExtDLL bugs.
       - [PATCH 2691876]: Applied patch by rdiez to allow compiling the
 	services using unicode.
+      - [PATCH 2693746]: improved socket startup support
+      - Build fixes for MSVC 2008. Copy and cleanup manifest files.
+      - Build fixes for MSVC 2008. IFTYPE is defined by MSVC 2008, so
+	interfaces.c variables were changed to NETSNMP_.
+      - [BUG 2779541 ]: Fixed handle leak in pass_persist.
 
 *5.4*
 
