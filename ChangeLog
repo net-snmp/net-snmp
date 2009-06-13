@@ -1,5 +1,591 @@
 -------------------------------------------------------------------------------
 
+Changes: V5.5.pre2 -> V5.5.pre3
+
+2009-06-13 01:12  hardaker
+
+   *  agent/mibgroup/mibII/tcpTable.c, configure,   
+      configure.d/config_os_libs,   
+      include/net-snmp/net-snmp-config.h.in:
+
+   CHANGES: snmpd: PATCH: 2564552: from ahmake: provide libnetlink
+   support for loading the tcp table
+
+2009-06-12 19:02  rstory
+
+   *  agent/mibgroup/if-mib/ifTable/ifTable_data_access.c,   
+      agent/mibgroup/if-mib/ifTable/ifTable_data_access.h:
+
+   CHANGES: snmpd: BUG: 1400101: remove deleted interfaces from
+   ifTable
+
+2009-06-11 23:09  hardaker
+
+   *  apps/snmptrapd.c, snmplib/winpipe.c,   
+      win32/libnetsnmptrapd/libnetsnmptrapd.dsp,   
+      win32/net-snmp/agent/mib_module_config.h,   
+      win32/netsnmpmibssdk/netsnmpmibssdk.dsp:
+
+   CHANGES: win32: PATCH: 2693746: from bvassche: improved socket
+   startup support
+
+2009-06-11 22:57  hardaker
+
+   * agent/mibgroup/kernel_sunos5.c:
+
+   CHANGES: snmpd: PATCH: 2012402: don't fail on failure to look up
+   interface error counters.
+
+2009-06-11 22:03  hardaker
+
+   * include/net-snmp/types.h:
+
+   revert previous commit to make circular dependencies back to
+   their regular insane ordering; I don't like this situation at all
+
+2009-06-11 21:42  hardaker
+
+   * include/net-snmp/types.h:
+
+   include large_fd_set.h before typedefing something based on the
+   structure
+
+2009-06-03 12:35  dts12
+
+   * perl/SNMP/SNMP.xs:
+
+   CHANGES: perl: PATCHES: 2793857: Report failed asynchronous
+   requests.
+
+2009-06-03 11:46  dts12
+
+   * agent/mibgroup/agentx/master_admin.c:
+
+   Remove patch #2182592 - revert to SVN revision 17646
+   The cleanup routines don't appear to exist.
+
+2009-06-03 10:16  dts12
+
+   * agent/mibgroup/agentx/master_admin.c:
+
+   CHANGES: snmpd: PATCH: 2182592: Clean up vacmContextTable after
+   unregistrations
+   Patch supplied by John Forsyth
+
+2009-06-03 10:12  dts12
+
+   *  agent/agent_handler.c, agent/helpers/stash_cache.c,   
+      agent/mibgroup/agentx/subagent.c, agent/snmp_agent.c,   
+      agent/snmp_vars.c, include/net-snmp/agent/agent_handler.h,   
+      include/net-snmp/agent/snmp_agent.h, snmplib/snmpUDPDomain.c,   
+      snmplib/snmp_api.c, snmplib/snmpv3.c:
+
+   CHANGES: PATCH: 2797251: Support multiple initialisation and
+   shutdown, fix memory leaks
+   Patch supplied by Ivosh
+
+2009-06-01 15:53  dts12
+
+   * man/snmpd.conf.5.def:
+
+   CHANEGS: docs: PATCHES: 2788072: Document 'logmatch'
+   functionality.
+
+2009-06-01 15:50  dts12
+
+   *  agent/mibgroup/utilities/iquery.c, snmplib/mib.c,   
+      snmplib/parse.c, snmplib/snmp_api.c, snmplib/snmp_parse_args.c,   
+      snmplib/system.c, win32/net-snmp/net-snmp-config.h,   
+      win32/net-snmp/net-snmp-config.h.in:
+
+   CHANGES: snmplib: PATCHES: 2780411: Fix compiler warnings
+
+2009-06-01 15:37  dts12
+
+   *  agent/mibgroup/host/data_access/swrun_kinfo.c,   
+      agent/mibgroup/host/data_access/swrun_kvm_proc.c,   
+      agent/mibgroup/host/data_access/swrun_procfs_psinfo.c,   
+      agent/mibgroup/host/data_access/swrun_procfs_status.c,   
+      agent/mibgroup/host/data_access/swrun_procinfo.c,   
+      agent/mibgroup/host/data_access/swrun_prpsinfo.c,   
+      agent/mibgroup/host/data_access/swrun_pstat.c, configure,   
+      local/snmpconf.dir/snmpd-data/monitor, m4/libtool.m4,   
+      man/snmpd.conf.5.def, man/snmpd.examples.5.def:
+
+   CHANGES: docs: PATCH: 2795739: Fix incorrect disk/file size
+   descriptions & unit specifiers
+
+2009-06-01 13:11  dts12
+
+   * EXAMPLE.conf.def:
+
+   Rework example configuration file to match current snmpd.conf(5)
+   structure,
+   and more clearly illustrate current best practise.
+
+2009-05-30 06:58  magfr
+
+   * agent/mib_modules.c:
+
+   Remove unused include.
+
+2009-05-29 09:14  dts12
+
+   * agent/mibgroup/ucd-snmp/pass.h:
+
+   Automatically load the example passtest MIB
+
+2009-05-29 09:08  dts12
+
+   *  local/passtest, local/passtest.pl, mibs/Makefile.in,   
+      mibs/NET-SNMP-PASS-MIB.txt:
+
+   Rework "passtest" examples to fully validate GETNEXT requests,
+   and use a legitimate MIB structure for output.
+   Add an example MIB to define that structure.
+
+2009-05-28 12:41  dts12
+
+   * FAQ:
+
+   Updates to MIBs section
+
+2009-05-28 11:56  dts12
+
+   * FAQ:
+
+   Tweak phrasing of an (overlong) question in the Perl section
+
+2009-05-28 11:31  dts12
+
+   * FAQ:
+
+   New entry in the Applications section
+
+2009-05-28 10:41  dts12
+
+   * FAQ:
+
+   Updates to Applications section
+
+2009-05-27 15:26  dts12
+
+   * FAQ:
+
+   Updates to GENERAL section.
+
+2009-05-19 17:50  alex_b
+
+   * perl/TrapReceiver/TrapReceiver.pm:
+
+   Update Perl TrapReceiver example to properly output the
+   securityEngineID and contextEngineID.
+
+2009-05-18 10:03  jsafranek
+
+   * agent/mibgroup/host/hr_proc.c:
+
+   Avoid division by zero.
+
+2009-05-15 19:22  tanders
+
+   * snmplib/scapi.c:
+
+   CHANGES: build: BUG: 2782700: build failure when using
+   --with-pkcs on
+   Solaris
+
+2009-05-15 14:59  jsafranek
+
+   * dist/net-snmp.spec:
+
+   Fix compilation of rpm packages on Fedora >= 10 - it has newer
+   RPM and the old API needs to be explicitly enabled by a macro.
+
+2009-05-14 13:39  jsafranek
+
+   * snmplib/snmp_logging.c:
+
+   The snmpcmd man page is not specific how range of log priorities
+   should be specified on command line,
+   i.e. both -LO 4-0 and -LO 0-4 are valid. All snmp commands (incl.
+   snmpd) should recognize that.
+
+2009-05-14 08:30  dts12
+
+   * agent/mibgroup/disman/event/mteTriggerConf.c:
+
+   CHANGES: snmpd: Allow "monitor" to handle negative threshold
+   values.
+   Reported by Richard Gipps.
+
+2009-05-13 22:32  tanders
+
+   * snmplib/vacm.c:
+
+   CHANGES: snmpd: PATCH: 2791417: fix snmpd segfault when run with
+   -DALL
+   Patch supplied by Ron Roskens.
+
+2009-05-13 08:02  dts12
+
+   * man/snmpd.conf.5.def:
+
+   Bring documentation of notificationEvent syntax into line with
+   reality.
+   (Uses "-m" rather than "-n" to register standard MIB payload
+   objects)
+   Inconsistency reported by Richard Gipps.
+
+2009-05-10 21:12  alex_b
+
+   *  win32/Makefile-apps.in, win32/Makefile.in,   
+      win32/libsnmp_dll/Makefile.in, win32/snmpd/Makefile.in,   
+      win32/snmpdsdk/Makefile.in, win32/snmpnetstat/Makefile.in,   
+      win32/snmptrapd/Makefile.in:
+
+   Win32: Added automatic manifest merging with mt.exe for MSVC 2008
+   etc.
+
+2009-05-08 13:12  alex_b
+
+   * agent/mibgroup/winExtDLL.c:
+
+   Changes: Win32: Add support for Windows 7, Vista and 2008 for
+   winExtDLL.
+
+2009-05-08 02:07  alex_b
+
+   * win32/libsnmp_dll/libsnmp.def, win32/libsnmp_dll/libsnmp.def.in:
+
+   Win32: Build fixes for DLL.
+
+2009-05-07 23:00  tanders
+
+   * agent/mibgroup/hardware/memory/memory_hpux.c:
+
+   build fix for HP-UX: include <sys/param.h> for DEV_BSIZE
+
+2009-05-07 05:11  nba
+
+   * agent/snmp_perl.h:
+
+   Ups, missed a new prototype header
+
+2009-05-06 22:26  nba
+
+   * man/snmpd.conf.5.def:
+
+   A man line cannot start with a '
+
+2009-05-06 22:07  nba
+
+   * snmplib/snmpUDPIPv6Domain.c:
+
+   IPv6 adresses are a bit more complicated then 32bits
+
+2009-05-06 22:06  nba
+
+   *  agent/agent_sysORTable.c, agent/helpers/instance.c,   
+      agent/mibgroup/agentx/client.c, agent/mibgroup/agentx/client.h,   
+      agent/mibgroup/disman/event/mteObjects.c,   
+      agent/mibgroup/disman/event/mteObjects.h,   
+      agent/mibgroup/disman/event/mteTrigger.c,   
+      agent/mibgroup/disman/event/mteTrigger.h,   
+      agent/mibgroup/disman/event/mteTriggerConf.c,   
+      agent/mibgroup/mibII/vacm_conf.c,   
+      include/net-snmp/agent/instance.h,   
+      include/net-snmp/agent/sysORTable.h,   
+      include/net-snmp/library/oid_stash.h, snmplib/oid_stash.c:
+
+   Sprinkle some const-ness where relevant
+
+2009-05-06 22:02  nba
+
+   * snmplib/scapi.c, snmplib/snmpUDPDomain.c:
+
+   Trivial warning fixes
+
+2009-05-06 22:00  nba
+
+   * mibs/rfcmibs.diff:
+
+   Hmmm, IANA fixed their bug too
+
+2009-05-06 21:59  nba
+
+   * README:
+
+   Update email to current
+
+2009-05-06 21:59  nba
+
+   *  agent/agent_trap.c, agent/mibgroup/hardware/cpu/cpu_linux.c,   
+      agent/mibgroup/host/hr_swrun.c,   
+      agent/mibgroup/if-mib/data_access/interface_linux.c,   
+      agent/mibgroup/ip-mib/data_access/ipaddress_ioctl.c,   
+      agent/mibgroup/ip-mib/data_access/systemstats_linux.c,   
+      agent/mibgroup/mibII/sysORTable.c,   
+      agent/mibgroup/mibII/system_mib.c,   
+      agent/mibgroup/notification/snmpNotifyFilterProfileTable.c,   
+      agent/mibgroup/ucd-snmp/logmatch.c,   
+      agent/mibgroup/ucd-snmp/pass.c,   
+      agent/mibgroup/ucd-snmp/pass_persist.c,   
+      agent/mibgroup/util_funcs/get_pid_from_inode.c,   
+      agent/snmp_agent.c, agent/snmp_perl.c, agent/snmp_vars.c,   
+      agent/snmpd.c, perl/SNMP/SNMP.xs,   
+      perl/TrapReceiver/TrapReceiver.xs, snmplib/container_list_ssll.c, 
+        snmplib/snmp_service.c:
+
+   Trivial warning fixes
+
+2009-05-06 21:49  nba
+
+   * apps/snmptrapd_log.c:
+
+   contextEngineID is a hexstring, not an object identifier
+
+2009-05-06 21:45  nba
+
+   *  agent/agent_registry.c, agent/helpers/cache_handler.c,   
+      agent/helpers/table.c, agent/helpers/table_dataset.c,   
+      agent/mibgroup/agent/extend.c, agent/mibgroup/agentx/master.c,   
+      agent/mibgroup/agentx/master_admin.c,   
+      agent/mibgroup/agentx/protocol.c,   
+      agent/mibgroup/agentx/subagent.c,   
+      agent/mibgroup/disman/event/mteObjectsConf.c,   
+      agent/mibgroup/disman/schedule/schedCore.c,   
+      agent/mibgroup/header_complex.c,   
+      agent/mibgroup/if-mib/data_access/interface.c,   
+      agent/mibgroup/if-mib/data_access/interface_solaris2.c,   
+      agent/mibgroup/if-mib/ifTable/ifTable_data_access.c,   
+      agent/mibgroup/ip-forward-mib/inetCidrRouteTable/inetCidrRouteTable_data_access.c,
+        
+      agent/mibgroup/ip-forward-mib/ipCidrRouteTable/ipCidrRouteTable_data_access.c,
+         agent/mibgroup/ip-mib/data_access/ipaddress_common.c,   
+      agent/mibgroup/ip-mib/inetNetToMediaTable/inetNetToMediaTable_data_access.c,
+         agent/mibgroup/ip-mib/ipAddressTable/ipAddressTable.c,   
+      agent/mibgroup/ip-mib/ipAddressTable/ipAddressTable_data_access.c,
+        
+      agent/mibgroup/ip-mib/ipIfStatsTable/ipIfStatsTable_data_access.c,
+        
+      agent/mibgroup/ip-mib/ipSystemStatsTable/ipSystemStatsTable_data_access.c,
+        
+      agent/mibgroup/ip-mib/ipv6ScopeZoneIndexTable/ipv6ScopeZoneIndexTable_data_access.c,
+         agent/mibgroup/notification-log-mib/notification_log.c,   
+      agent/mibgroup/snmp-notification-mib/snmpNotifyFilterTable/snmpNotifyFilterTable_data_access.c,
+        
+      agent/mibgroup/snmp-notification-mib/snmpNotifyFilterTable/snmpNotifyFilterTable_interface.c,
+         agent/mibgroup/snmpv3/usmUser.c,   
+      agent/mibgroup/target/snmpTargetAddrEntry.c,   
+      agent/mibgroup/target/snmpTargetParamsEntry.c,   
+      agent/mibgroup/target/target.c,   
+      agent/mibgroup/tcp-mib/tcpConnectionTable/tcpConnectionTable_data_access.c,
+        
+      agent/mibgroup/tcp-mib/tcpListenerTable/tcpListenerTable_data_access.c,
+         agent/mibgroup/ucd-snmp/proxy.c,   
+      agent/mibgroup/udp-mib/data_access/udp_endpoint_linux.c,   
+      agent/mibgroup/udp-mib/udpEndpointTable/udpEndpointTable_data_access.c,
+         agent/mibgroup/utilities/execute.c, apps/encode_keychange.c,   
+      snmplib/asn1.c, snmplib/dir_utils.c, snmplib/int64.c,   
+      snmplib/mib.c, snmplib/read_config.c,   
+      snmplib/snmpCallbackDomain.c, snmplib/snmp_alarm.c,   
+      snmplib/snmp_api.c, snmplib/snmp_client.c, snmplib/snmpusm.c,   
+      snmplib/snmpv3.c:
+
+   Fix format warnings from debug output
+
+2009-05-06 20:45  nba
+
+   * mibs/smistrip:
+
+   Properly recognize message syntax modules (to be able to ignore
+   them)
+
+2009-05-06 20:36  nba
+
+   * mibs/rfclist:
+
+   RFC updates
+
+2009-05-06 20:35  nba
+
+   * mibs/rfcmibs.diff:
+
+   Syntax fix for current IANA-PRINTER-MIB
+
+2009-05-06 20:34  nba
+
+   * mibs/IANAifType-MIB.txt:
+
+   Update to current IANA version
+
+2009-05-04 13:47  alex_b
+
+   * win32/libsnmp_dll/libsnmp.def, win32/libsnmp_dll/libsnmp.def.in:
+
+   Win32: Build fixes for DLL.
+
+2009-05-01 15:43  magfr
+
+   * include/net-snmp/library/snmp_debug.h, snmplib/snmp_debug.c:
+
+   NEWS: snmplib: Stop using a fixed string for indentation. Remove
+   the DEBUGINDENT() macro (that did nothing). Change the meaning of
+   the internal __DBGINDENT() macro to return the number of spaces
+   to indent instead of a string that represent the indentation
+   level. Deprecate the debug_indent function.
+
+2009-04-30 06:57  magfr
+
+   *  agent/mibgroup/examples/watched.c,   
+      agent/mibgroup/mibII/snmp_mib.c,   
+      agent/mibgroup/mibII/snmp_mib_5_5.c,   
+      agent/mibgroup/mibII/sysORTable.c,   
+      agent/mibgroup/mibII/system_mib.c, local/mib2c.int_watch.conf:
+
+   CHANGES: snmpd: Use static watcher_info for all watched variables
+   and in int_watch.
+
+2009-04-30 06:41  magfr
+
+   * agent/helpers/watcher.c, include/net-snmp/agent/watcher.h:
+
+   CHANGES: snmplib: Separate initialization from allocation for
+   netsnmp_watcher_info structures to make it possible to use
+   statically allocated data.
+
+2009-04-30 06:34  magfr
+
+   * snmplib/snmpDTLSUDPDomain.c:
+
+   Add missing return value.
+
+2009-04-30 00:18  hardaker
+
+   * man/snmpd.conf.5.def:
+
+   document the DTLS support; semi document the SSH support and
+   document the -s switch to many VACM settings
+
+2009-04-29 23:54  hardaker
+
+   * snmplib/snmpDTLSUDPDomain.c:
+
+   protect against connection opening errors and free memory on
+   failures
+
+2009-04-29 12:19  alex_b
+
+   *  win32/net-snmp/net-snmp-config.h,   
+      win32/net-snmp/net-snmp-config.h.in:
+
+   Win32: Update defines for _WIN32_WINNT and NTDDI_VERSION to
+   support Windows 2000 and higher and add IPV6 define to allow IPV6
+   code to compile.
+
+2009-04-28 06:34  magfr
+
+   * agent/mibgroup/ip-mib/data_access/systemstats_linux.c:
+
+   snmpd, Linux: Remove some unused variables.
+
+2009-04-28 06:07  magfr
+
+   * agent/mibgroup/ip-mib/data_access/scalars_linux.c:
+
+   snmpd: Add missing argument to printf-like call.
+
+2009-04-28 05:53  magfr
+
+   * agent/mibgroup/mibII/system_mib.c:
+
+   snmpd: Mark more oids as const.
+
+2009-04-28 05:51  magfr
+
+   * snmplib/mib.c:
+
+   Return a value from sprint_realloc_value even if no subtree is
+   located.
+
+2009-04-28 01:12  alex_b
+
+   *  agent/mibgroup/winExtDLL.c, win32/net-snmp/net-snmp-config.h,   
+      win32/net-snmp/net-snmp-config.h.in:
+
+   Win32: MSVC: Only use Windows API functions available on WinXP or
+   before (IPV6) or 2000 or before (no IPV6).
+
+2009-04-26 23:30  alex_b
+
+   *  win32/Makefile-apps.in, win32/libsnmp_dll/Makefile.in,   
+      win32/snmpd/Makefile.in, win32/snmpdsdk/Makefile.in,   
+      win32/snmpnetstat/Makefile.in, win32/snmptrapd/Makefile.in:
+
+   Win32: Remove machine type of I386 from LINK32_FLAGS to allow
+   compiling with MSVC 2008 as either 32 or 64-bit.
+
+2009-04-26 17:38  alex_b
+
+   *  win32/Makefile-apps.in, win32/Makefile.in,   
+      win32/libsnmp_dll/Makefile.in, win32/snmpd/Makefile.in,   
+      win32/snmpdsdk/Makefile.in, win32/snmpnetstat/Makefile.in,   
+      win32/snmptrapd/Makefile.in:
+
+   CHANGES: Win32: Build fixes for MSVC 2008. Copy and cleanup
+   manifest files.
+
+2009-04-26 15:21  alex_b
+
+   *  agent/mibgroup/ucd-snmp/pass.c,   
+      agent/mibgroup/ucd-snmp/pass_persist.c,   
+      win32/net-snmp/net-snmp-config.h,   
+      win32/net-snmp/net-snmp-config.h.in:
+
+   Win32: Re-enable pass and pass_persist Counter64 for MSVC.
+
+2009-04-26 14:34  alex_b
+
+   *  agent/mibgroup/mibII/interfaces.c,   
+      agent/mibgroup/mibII/interfaces.h, snmplib/snmpTCPIPv6Domain.c,   
+      snmplib/snmpUDPIPv6Domain.c, win32/build.pl,   
+      win32/net-snmp/net-snmp-config.h,   
+      win32/net-snmp/net-snmp-config.h.in:
+
+   CHANGES: Win32: Build fixes for MSVC 2008. IFTYPE is defined by
+   MSVC 2008, so interfaces.c variables were changed to NETSNMP_.
+
+2009-04-26 13:06  alex_b
+
+   * agent/mibgroup/winExtDLL.c:
+
+   Win32: Update build instructions in comments.
+
+2009-04-24 13:28  hardaker
+
+   * perl/agent/agent.xs:
+
+   fix the ASN_OPAQUE patch that was commited without proper diff
+   context
+
+2009-04-24 07:31  tanders
+
+   * configure, configure.d/config_os_misc4:
+
+   CHANGES: HP-UX: BUG: 2779472: Filesystems missing in hrStorage
+   table on HP-UX 11.31
+   (allow for mnttab that is a character special device)
+
+2009-04-24 01:36  alex_b
+
+   *  agent/mibgroup/ucd-snmp/pass_persist.c,   
+      agent/mibgroup/util_funcs.c:
+
+   CHANGES: Win32: BUG: 2779541 Fixed handle leak in pass_persist.
+
+-------------------------------------------------------------------------------
+
 Changes: V5.5.pre1 -> V5.5.pre2
 
 2009-04-23 22:53  hardaker
