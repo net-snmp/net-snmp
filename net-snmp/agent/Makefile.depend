@@ -1346,7 +1346,6 @@
 ./mib_modules.lo: mibgroup/udp-mib/udpEndpointTable/udpEndpointTable.h
 ./mib_modules.lo: mibgroup/udp-mib/udpEndpointTable/udpEndpointTable_data_access.h
 ./mib_modules.lo: mibgroup/if-mib/data_access/interface.h
-./mib_modules.lo: mibgroup/agentx/subagent.h
 ./mib_modules.lo: ../agent/mibgroup/mib_module_shutdown.h
 ./mib_modules.lo: ../agent/mibgroup/mib_module_inits.h
 ./object_monitor.lo: ../include/net-snmp/net-snmp-config.h
@@ -1659,7 +1658,7 @@
 ./snmp_perl.lo: ../include/net-snmp/agent/table_iterator.h
 ./snmp_perl.lo: ../include/net-snmp/agent/table_container.h
 ./snmp_perl.lo: ../include/net-snmp/agent/table_array.h
-./snmp_perl.lo: ../include/net-snmp/agent/mfd.h
+./snmp_perl.lo: ../include/net-snmp/agent/mfd.h snmp_perl.h
 ./snmp_vars.lo: ../include/net-snmp/net-snmp-config.h
 ./snmp_vars.lo: ../include/net-snmp/system/linux.h
 ./snmp_vars.lo: ../include/net-snmp/system/sysv.h
@@ -1914,7 +1913,7 @@
 ./snmp_vars.lo: mibgroup/udp-mib/udpEndpointTable/udpEndpointTable_interface.h
 ./snmp_vars.lo: mibgroup/udp-mib/udpEndpointTable/udpEndpointTable.h
 ./snmp_vars.lo: mibgroup/udp-mib/udpEndpointTable/udpEndpointTable_data_access.h
-./snmp_vars.lo: mibgroup/if-mib/data_access/interface.h
+./snmp_vars.lo: mibgroup/if-mib/data_access/interface.h snmp_perl.h
 ./snmp_vars.lo: ../agent/mibgroup/agent_module_inits.h
 ./snmpd.lo: ../include/net-snmp/net-snmp-config.h
 ./snmpd.lo: ../include/net-snmp/system/linux.h
