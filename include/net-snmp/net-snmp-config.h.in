@@ -438,6 +438,9 @@
 /* Define to 1 if you have the <netipx/ipx.h> header file. */
 #undef HAVE_NETIPX_IPX_H
 
+/* Define to 1 if you have the <netlink/netlink.h> header file. */
+#undef HAVE_NETLINK_NETLINK_H
+
 /* Define to 1 if you have the <net/if_arp.h> header file. */
 #undef HAVE_NET_IF_ARP_H
 
@@ -461,6 +464,9 @@
 
 /* Define to 1 if the system has the type `nfds_t'. */
 #undef HAVE_NFDS_T
+
+/* have libnl */
+#undef HAVE_NL
 
 /* Define to 1 if you have the `nlist' function. */
 #undef HAVE_NLIST
