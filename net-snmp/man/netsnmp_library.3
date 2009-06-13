@@ -1,4 +1,4 @@
-.TH "The Net-SNMP library" 3 "23 Apr 2009" "Version 5.5.pre2" "net-snmp" \" -*- nroff -*-
+.TH "The Net-SNMP library" 3 "12 Jun 2009" "Version 5.5.pre3" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -480,7 +480,7 @@ XXX-rks: why no SNMP_FREE(isp->packet); ??
 .PP
 XXX-rks: why no SNMP_FREE(isp->packet); ?? 
 .PP
-Definition at line 5651 of file snmp_api.c.
+Definition at line 5653 of file snmp_api.c.
 .SS "int init_agent (const char * app)"
 .PP
 Initialize the agent. 
@@ -504,7 +504,7 @@ Returns non-zero on failure and zero on success.
 .PP
 
 .PP
-Definition at line 271 of file snmp_vars.c.
+Definition at line 273 of file snmp_vars.c.
 .SS "void init_snmp (const char * type)"
 .PP
 Calls the functions to do config file loading and mib module parsing in the correct order. 
@@ -526,7 +526,7 @@ void
 .PP
 
 .PP
-Definition at line 772 of file snmp_api.c.
+Definition at line 773 of file snmp_api.c.
 .SS "int netsnmp_oid_compare_ll (const oid * in_name1, size_t len1, const oid * in_name2, size_t len2, size_t * offpt)"
 .PP
 lexicographical compare two object identifiers and return the point where they differ 
@@ -540,7 +540,7 @@ Caution: this method is called often by command responder applications (ie, agen
 .PP
 
 .PP
-Definition at line 6652 of file snmp_api.c.
+Definition at line 6654 of file snmp_api.c.
 .SS "int netsnmp_oid_equals (const oid * in_name1, size_t len1, const oid * in_name2, size_t len2)"
 .PP
 Compares 2 OIDs to determine if they are exactly equal. 
@@ -565,7 +565,7 @@ This should be faster than doing a snmp_oid_compare for different length OIDs, s
 .PP
 
 .PP
-Definition at line 6733 of file snmp_api.c.
+Definition at line 6735 of file snmp_api.c.
 .SS "int netsnmp_oid_find_prefix (const oid * in_name1, size_t len1, const oid * in_name2, size_t len2)"
 .PP
 Given two OIDs, determine the common prefix to them both. 
@@ -588,7 +588,7 @@ length of largest common index of commonality. 1 = first, 0 if none * or -1 on e
 .PP
 
 .PP
-Definition at line 6789 of file snmp_api.c.
+Definition at line 6791 of file snmp_api.c.
 .SS "int netsnmp_oid_is_subtree (const oid * in_name1, size_t len1, const oid * in_name2, size_t len2)"
 .PP
 Identical to netsnmp_oid_equals, except only the length up to len1 is compared. 
@@ -613,7 +613,7 @@ Functionally, this determines if in_name2 is equal or a subtree of in_name1
 .PP
 
 .PP
-Definition at line 6769 of file snmp_api.c.
+Definition at line 6771 of file snmp_api.c.
 .SS "int snmp_oid_compare (const oid * in_name1, size_t len1, const oid * in_name2, size_t len2)"
 .PP
 lexicographical compare two object identifiers. 
@@ -627,7 +627,7 @@ Caution: this method is called often by command responder applications (ie, agen
 .PP
 
 .PP
-Definition at line 6603 of file snmp_api.c.
+Definition at line 6605 of file snmp_api.c.
 .SS "int snmp_oidtree_compare (const oid * in_name1, size_t len1, const oid * in_name2, size_t len2)"
 .PP
 Compares 2 OIDs to determine if they are equal up until the shortest length. 
@@ -650,12 +650,12 @@ Compares 2 OIDs to determine if they are equal up until the shortest length.
 .PP
 
 .PP
-Definition at line 6705 of file snmp_api.c.
+Definition at line 6707 of file snmp_api.c.
 .SS "\fBnetsnmp_variable_list\fP* snmp_pdu_add_variable (\fBnetsnmp_pdu\fP * pdu, const oid * name, size_t name_length, u_char type, const void * value, size_t len)"
 .PP
 Library API routines concerned with variable bindings and values. 
 .PP
-Definition at line 6857 of file snmp_api.c.
+Definition at line 6859 of file snmp_api.c.
 .SS "void snmp_sess_init (\fBnetsnmp_session\fP * session)"
 .PP
 Library API routines concerned with specifying and using SNMP 'sessions' including sending and receiving requests. 
@@ -677,7 +677,7 @@ void
 .PP
 
 .PP
-Definition at line 840 of file snmp_api.c.
+Definition at line 839 of file snmp_api.c.
 .SS "int snmpv3_engineID_probe (struct session_list * slp, \fBnetsnmp_session\fP * in_session)"
 .PP
 probe for peer engineID 
@@ -709,14 +709,14 @@ the first session in slp should the internal allocated copy of in_session
 .PP
 
 .PP
-Definition at line 1346 of file snmp_api.c.
+Definition at line 1348 of file snmp_api.c.
 .SS "int snmpv3_probe_contextEngineID_rfc5343 (void * slp, \fBnetsnmp_session\fP * session)"
 .PP
 probe for engineID using RFC 5343 probing mechanisms 
 .PP
 Designed to be a callback for within a security model's probe_engineid hook. Since it's likely multiple security models won't have engineIDs to probe for then this function is a callback likely to be used by multiple future security models. E.G. both SSH and DTLS. 
 .PP
-Definition at line 1252 of file snmp_api.c.
+Definition at line 1254 of file snmp_api.c.
 .SH "Author"
 .PP 
 Generated automatically by Doxygen for net-snmp from the source code.

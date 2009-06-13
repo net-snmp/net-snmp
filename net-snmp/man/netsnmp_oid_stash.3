@@ -1,4 +1,4 @@
-.TH "Store and retrieve data referenced by an OID." 3 "23 Apr 2009" "Version 5.5.pre2" "net-snmp" \" -*- nroff -*-
+.TH "Store and retrieve data referenced by an OID." 3 "12 Jun 2009" "Version 5.5.pre3" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -17,11 +17,11 @@ Store and retrieve data referenced by an OID. \- This is essentially a way of st
 .br
 .RI "\fICreates a netsnmp_oid_stash_node. \fP"
 .ti -1c
-.RI "int \fBnetsnmp_oid_stash_add_data\fP (netsnmp_oid_stash_node **root, oid *lookup, size_t lookup_len, void *mydata)"
+.RI "int \fBnetsnmp_oid_stash_add_data\fP (netsnmp_oid_stash_node **root, const oid *lookup, size_t lookup_len, void *mydata)"
 .br
 .RI "\fIadds data to the stash at a given oid. \fP"
 .ti -1c
-.RI "netsnmp_oid_stash_node * \fBnetsnmp_oid_stash_get_node\fP (netsnmp_oid_stash_node *root, oid *lookup, size_t lookup_len)"
+.RI "netsnmp_oid_stash_node * \fBnetsnmp_oid_stash_get_node\fP (netsnmp_oid_stash_node *root, const oid *lookup, size_t lookup_len)"
 .br
 .RI "\fIreturns a node associated with a given OID. \fP"
 .ti -1c
@@ -29,7 +29,7 @@ Store and retrieve data referenced by an OID. \- This is essentially a way of st
 .br
 .RI "\fIreturns the next node associated with a given OID. \fP"
 .ti -1c
-.RI "void * \fBnetsnmp_oid_stash_get_data\fP (netsnmp_oid_stash_node *root, oid *lookup, size_t lookup_len)"
+.RI "void * \fBnetsnmp_oid_stash_get_data\fP (netsnmp_oid_stash_node *root, const oid *lookup, size_t lookup_len)"
 .br
 .RI "\fIreturns a data pointer associated with a given OID. \fP"
 .ti -1c
@@ -59,7 +59,7 @@ This is essentially a way of storing data associated with a given OID.
 It stores a bunch of data pointers within a memory tree that allows fairly efficient lookups with a heavily populated tree. 
 .SH "Function Documentation"
 .PP 
-.SS "int netsnmp_oid_stash_add_data (netsnmp_oid_stash_node ** root, oid * lookup, size_t lookup_len, void * mydata)"
+.SS "int netsnmp_oid_stash_add_data (netsnmp_oid_stash_node ** root, const oid * lookup, size_t lookup_len, void * mydata)"
 .PP
 adds data to the stash at a given oid. 
 .PP
@@ -127,7 +127,7 @@ Frees the contents of a netsnmp_oid_stash tree.
 
 .PP
 Definition at line 401 of file oid_stash.c.
-.SS "void* netsnmp_oid_stash_get_data (netsnmp_oid_stash_node * root, oid * lookup, size_t lookup_len)"
+.SS "void* netsnmp_oid_stash_get_data (netsnmp_oid_stash_node * root, const oid * lookup, size_t lookup_len)"
 .PP
 returns a data pointer associated with a given OID. 
 .PP
@@ -145,7 +145,7 @@ This is equivelent to netsnmp_oid_stash_get_node, but returns only the data not 
 
 .PP
 Definition at line 282 of file oid_stash.c.
-.SS "netsnmp_oid_stash_node* netsnmp_oid_stash_get_node (netsnmp_oid_stash_node * root, oid * lookup, size_t lookup_len)"
+.SS "netsnmp_oid_stash_node* netsnmp_oid_stash_get_node (netsnmp_oid_stash_node * root, const oid * lookup, size_t lookup_len)"
 .PP
 returns a node associated with a given OID. 
 .PP
