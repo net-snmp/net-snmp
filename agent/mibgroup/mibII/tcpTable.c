@@ -548,14 +548,14 @@ tcpTable_load(netsnmp_cache *cache, void *vmagic)
 
 #ifdef linux
 
-// see <netinet/tcp.h>
+/*  see <netinet/tcp.h> */
 #define TCP_ALL ((1 << (TCP_CLOSING + 1)) - 1)
 
 #if HAVE_NETLINK_NETLINK_H
 static int
 tcpTable_load_netlink()
 {
-	// TODO: perhaps use permanent nl handle?
+	/*  TODO: perhaps use permanent nl handle? */
 	struct nl_handle *nl = nl_handle_alloc();
 
 	if (nl == NULL) {
@@ -632,7 +632,7 @@ tcpTable_load_netlink()
 			nnew = SNMP_MALLOC_TYPEDEF(struct inpcb);
 			if (nnew == NULL) {
 				running = 0;
-				// XXX report malloc error and return -1?
+				/*  XXX report malloc error and return -1? */
 				break;
 			}
 			memcpy(nnew, &pcb, sizeof(struct inpcb));
