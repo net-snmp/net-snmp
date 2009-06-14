@@ -1158,8 +1158,8 @@ var_hrswrun(struct variable * vp,
 #ifdef _ILP32
         if(NULL != proc_buf && 0 == proc_buf->pr_rssize)
         { /* Odds on that we are looking with a 32 bit app at a 64 bit psinfo.*/
-            netsnmp_memory_load();
             netsnmp_memory_info *mem;
+            netsnmp_memory_load();
             mem = netsnmp_memory_get_byIdx( NETSNMP_MEM_TYPE_PHYSMEM, 0 );
             if (!mem) 
             {
