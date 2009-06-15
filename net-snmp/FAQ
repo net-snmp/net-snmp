@@ -86,10 +86,9 @@ TABLE OF CONTENTS
    How do I add a MIB to the agent?
    What's the difference between 'exec', 'sh', 'extend' and 'pass'?
    What's the difference between AgentX, SMUX and proxied SNMP?
-   What about 'dlmod' - what's that about?
+   What is the purpose of 'dlmod'?
    Which should I use?
    Can I use AgentX when running under Windows?
-   Can I use AgentX (or an embedded SNMP agent) in a threaded application?
    How can I run AgentX with a different socket address?
    How can I turn off SMUX support?
    How can I combine two copies of the 'mib2' tree from separate subagents?
@@ -100,12 +99,14 @@ TABLE OF CONTENTS
    After a while the agent stops responding, and starts eating CPU time.  Why?
    How can I stop other people getting at my agent?
    How can I listen on just one particular interface?
+   The agent is complaining about 'snmpd.conf'.  Where is this?
+   Why does the agent complain about 'no access control information'?
    How do I configure access control?
-   I don't understand the new access control stuff - what does it mean?
    How do I configure SNMPv3 users?
    The 'createUser' line disappears when I start the agent.  Why?
    What's the difference between /var/net-snmp and /usr/local/share/snmp?
    My new agent is ignoring the old snmpd.conf file. Why?
+   Where should the snmpd.conf file go?
    Why am I getting "Connection refused"?
    Why can't I see values in the UCDavis 'extensible' or 'disk' trees?
    Why can't I see values in the UCDavis 'memory' or 'vmstat' tree?
@@ -117,10 +118,10 @@ TABLE OF CONTENTS
    Does the agent support the RMON-MIB?
    What does "klread:  bad address" mean?
    What does "nlist err:  wombat not found" (or similar) mean?
-   How about "Can't open /dev/kmem"?
-   The agent is complaining about 'snmpd.conf'.  Where is this?
+   What does "Can't open /dev/kmem" mean?
    The system uptime (sysUpTime) returned is wrong!
    Can the agent run multi-threaded?
+   Can I use AgentX (or an embedded SNMP agent) in a threaded application?
  COMPILING
    How do I compile with 'cc' instead of 'gcc'?
    The compilation is complaining about missing libraries. Why?
@@ -1912,14 +1913,15 @@ What MIBs are supported?
 	- MTA-MIB (sendmail)
 	- private UCD/Net-SNMP agent extensions
 		(monitor specified processes and disks,
-		 memory, CPU, load average, plus extend
+		 memory, CPU, load average, + extending
 		 the agent using shell commands)
 
   See README.agent-mibs for details.
 
-  Not all MIB modules are included by default on all systems, and some of
+  Not all MIB modules are included by default on all systems.  Some of
   these may need to be explicitly requested when the software is first
-  configured and built.
+  configured and built, while others may not be available on all
+  architectures.
 
   There are a few other MIB implementations distributed as part of the
   source tarball, but these are basically unsupported and most of the
@@ -1940,9 +1942,8 @@ What protocols are supported?
 How do I configure the agent?
 ----------------------------
 
-  That depends on what you want it to do, and what stage of the process
-  you have in mind.  There are actually two very distinct ways you can
-  configure the agent.
+  That's a somewhat ambiguous question, as there are two very different
+  stages where it is possible to "configure" the agent.
 
   Firstly, you can determine what capabilities and defaults are included
   within the library and agent, at the time that the software is first
@@ -1973,63 +1974,62 @@ How do I remove a MIB from the agent?
     1) re-run 'configure' to exclude the given MIB module(s) from the
        build configuration, then recompile and reinstall:
 
-	  ./configure --with-out-mib-modules=host   ....
+	  ./configure --with-out-mib-modules=path/to/unwanted   ....
 	  make
 	  make install
 
-    2) use access control to exclude the mib from the view used to
-       query the agent:
-                                                                                
-	  com2sec public  default public
+       This specifies the path to the module code file, relative to
+       the 'agent/mibgroup' directory.  Clearly, this approach is
+       only possible if you are working with a source distribution.
+ 
+    2) disable the MIB at runtime
 
-	  group   public  v1      public
-	  group   public  v2c     public
-
-	  view    ourmib  included  system
-	  view    ourmib  included  printmib
-	  view    ourmib  excluded  host
-	  view    ourmib  included  privatemib
-
-	  access  public  "" any noauth exact ourmib none none
-
-       With v5.3 and above, this can also be done by supplying the
-       relevant view name to the "rocommunity" or similar directive:
-
-          rocommunity public default -V ourmib 
-                                                                                
-    3) disable the MIB at runtime
-
-	  snmpd -I -hr_system,hr_storage,hr_device,hr_other,....
+	  snmpd -I -unwanted
 
        Note that this relies on knowing which modules are used to
        implement the relevant MIB objects.  If you're not sure,
-       you can check which MIB modules are loaded by getting the
-       agent to report them as they are initialised:
+       you could try walking the 'nsModuleName' MIB object, which
+       indicates the module responsible for each particular range
+       of OIDs.
+       You can also check which MIB modules are loaded by getting
+       the agent to report them as they are initialised:
 
 	  snmpd -Dmib_init -H
 
-       Hopefully it should then be fairly obvious which ones to turn off.
+       From this information, it should then be fairly obvious which
+       modules to disable.
 
+    3) use access control to exclude the mib from the view used to
+       query the agent:
+
+          view    almostEverything  included   .1
+          view    almostEverything  excluded   unwantedMib
+
+          rocommunity  public  default  -V almostEverything
+
+       This approach can also be used with the full com2sec/group/access
+       configuration directives (e.g. with versions earlier than 5.3,
+       which don't support the above mechanism).
 
 
 
 I've installed a new MIB file.  Why can't I query it?
 ----------------------------------------------------
 
-  Similarly, installing a new MIB file isn't sufficient for the
-  agent to automatically support this MIB.  It's necessary to have
-  some form of code which can provide the corresponding information.
-  The next few entries, and the following section (CODING) address
-  this issue in some detail.
+  Installing a new MIB file will not magically enable the agent to know
+  what values to report for the objects defined in that MIB.  It's
+  necessary to have some code which can provide the relevant information.
+  The next few entries, and the CODING section address this issue in more
+  detail.
 
 
 
 How do I add a MIB to the agent?
 -------------------------------
 
-  As indicated above, this basically involves writing some code to
-  implement the objects defined in the new MIB.  There are three basic
-  approaches that can be used to do this:
+  Adding a MIB essentially involves writing some code to implement the
+  objects defined in the new MIB.  There are three basic approaches that
+  can be used to do this:
 
     -  The agent can invoke an external command or shell script to
        return the necessary information.  There are several possible
@@ -2055,8 +2055,9 @@ How do I add a MIB to the agent?
 What's the difference between 'exec', 'sh', 'extend' and 'pass'?
 ---------------------------------------------------------------
 
-    'exec' will fork off the specified command and return the exit status
-  and/or the output.  Any arguments are passed directly to the command.
+  'exec' will run the specified command and return the exit status and
+  output.  Any arguments are passed directly to the command, with no
+  special interpretation.
 
   'sh' is similar, but invokes a shell to run the command line given.
   This means that quoted arguments will be recognised as such, and also
@@ -2068,18 +2069,20 @@ What's the difference between 'exec', 'sh', 'extend' and 'pass'?
   displaying the results.
 
   None of these mechanisms require the command to have any knowledge of
-  the fact that they are being used in this manner.  But the output is
-  returned in a fixed format, and it is up to the receiving application
-  to interpret this appropriately.
+  SNMP, or the fact that they are being used in this manner.  But the
+  output is returned in a fixed format, and it is up to the receiving
+  application to interpret this appropriately.
 
 
   'pass' is a more general mechanism for implementing arbitrary MIB
   objects.  The specified command will be invoked for any request within
-  the named MIB subtree, and should return the information relevant to
-  the requested OID.
+  the named MIB subtree, and passed details of the requested OID.  It
+  should return the information relevant to the requested OID.
 
     'pass-persist' is similar, but the command will continue running
-  even after the initial request has been answered.
+  even after the initial request has been answered.  These two mechanisms
+  can be used to implement a particular MIB, following the correct MIB
+  structure (as opposed to the fixed format of exec/sh/extend).
 
   All of these mechanisms are described in the 'snmpd.conf(5)' man page,
   in the section entitled "Extending Agent Functionality".
@@ -2099,19 +2102,20 @@ What's the difference between AgentX, SMUX and proxied SNMP?
     SMUX and proxy SNMP both essentially use the standard SNMP packet format.
   The main difference is that a proxy SNMP subagent need not be aware that
   it is acting in such a role.  It typically listens on a non-standard port,
-  and simply receives requests as usual, forwarded from the master agent. 
-  The main issue to be aware of is that such requests will appear to come
-  from the local host, and this may affect how the access control mechanisms
-  need to be set up.
+  and simply receives requests as usual, forwarded from the master agent
+  (rather than directly).  The main issue to be aware of is that such requests
+  will appear to come from the local host, and this may affect how the access
+  control mechanisms need to be set up.
 
     SMUX uses a similar packet format, but the subagent "registers" with
   the master agent, providing a suitable password.  The Net-SNMP (and UCD)
   agent includes the possibility of acting as a SMUX master agent, but the
-  suite does not include a subagent API.   Note that the SMUX protocol has
-  essentially been superceded by AgentX, but is still provided in order to
-  support existing SMUX subagents.  However the core developers have little
-  experience (and even less interest!) in this code, so assistance with
-  SMUX-related problems is likely to be somewhat limited.
+  suite does not include a subagent API.   Note that support for SMUX is not
+  included by default, and needs to be explicitly enabled by running:
+
+		--with-mib-modules=smux
+
+  before re-compiling the agent.
     See the file 'agent/mibgroup/README.smux' for details.
 
     AgentX uses a more compact (and simpler) packet format, with a richer
@@ -2120,11 +2124,6 @@ What's the difference between AgentX, SMUX and proxied SNMP?
   subagent roles, and the agent library can also be used to embed an AgentX
   subagent within another application.
     See the file 'README.agentx' for details.
-
-  Note that support for SMUX is not configured in by default.  You will
-  need to run configure with the option
-
-		--with-mib-modules=smux
 
   AgentX support is included by default, but needs to be explicitly
   activated in the master agent.  Do this by adding the line
@@ -2135,11 +2134,12 @@ What's the difference between AgentX, SMUX and proxied SNMP?
 
 
 
-What about 'dlmod' - what's that about?
---------------------------------------
+What is the purpose of 'dlmod'?
+------------------------------
 
-  The choice of which C-coded modules to include within an agent (or
-  subagent) is usually made when the agent is first built.  Adding new
+  Most of the MIB information supplied by the Net-SNMP agent is provided
+  by C-coded implementation modules, and the choice of which modules to
+  include is usually made when the agent is first built.  Adding new
   MIB modules would therefore require re-compiling the agent.  This is
   not always convenient - particularly when working with a production
   system, and/or pre-installed binaries.
@@ -2154,42 +2154,35 @@ What about 'dlmod' - what's that about?
 
 
 
-Which should I use?
-------------------
+Which extension mechanism should I use?
+--------------------------------------
 
   That's not easy to answer in general.
 
   If there's an existing agent that already implements the desired new
   MIB, then it makes sense to re-use that, via whatever extension protocol
-  it might support.  Ideally, this would be an AgentX sub-agent, since the
-  AgentX protocol is deliberately designed for this purpose, and provides
-  a fuller and more reliable mechanism than either SMUX or proxied SNMP.
+  that agent might support.  Note that the SMUX protocol has essentially
+  been superceded by AgentX, which provides a fuller and more reliable
+  mechanism than either SMUX or proxied SNMP.  So ideally, this would
+  be the preferred extension approach.
   But if the target subagent only supports SMUX or basic SNMP, then that
   would dictate the extension protocol to use.
 
-  Implementing the module directly within the main agent (or via dlmod)
-  is probably the most efficient and reliable (since there's minimal
-  overheads between the code implementing the MIB module, and the agent
-  framework).  But it does assume that there's a suitable mechanism for
-  retrieving the necessary information.
+  Implementing the module in C within the main agent (directly or via
+  dlmod) is probably the most efficient and reliable, closely followed
+  by embedded perl extensions.  These have the advantage of
+  minimal overheads between the code implementing the MIB module, and
+  the agent framework, and no inter-process communication issues.  But
+  this does assume that there's a suitable mechanism for retrieving the
+  necessary information.
 
   If the new MIB is monitoring or managing some other subsystem, external
   to the agent, then it may be necessary to embed a subagent within the
   subsystem itself - particularly if there's no suitable public API to
   retrieve the necessary information.  In this case, AgentX is probably
   the most appropriate way forward.
-    Unless you prefer to implement the missing public management API,
-  and develop a module within the main agent instead.
-
-
-  In terms of writing C code for the Net-SNMP agent, the way that the
-  (sub-)agent receives the request is more or less irrelevant.  The
-  MIB module API was deliberately designed to be independent of any
-  extension mechanism being used - so the exact same module code could
-  be included as part of a pure-SNMP master agent, or an AgentX subagent,
-  either compiled in or dynamically loaded.   No modifications should be
-  needed to the MIB module code itself - just to how it's compiled into
-  the appropriate application.
+    Alternatively, you could implement the missing public management API
+  for that subsystem, and develop a module within the main agent instead.
 
 
 
@@ -2214,30 +2207,6 @@ Can I use AgentX when running under Windows?
 
 
 
-Can I use AgentX (or an embedded SNMP agent) in a threaded application?
------------------------------------------------------------------------
-
-  With care.
-
-  As mentioned in the earlier "thread-safe" FAQ entry, the Net-SNMP
-  agent (including the AgentX subagent) has not been designed for
-  threaded operation.  In particular, it makes use of various global
-  variables without attempting to protect them against simultaneous
-  use.  This means that it is *NOT* safe to have SNMP or AgentX
-  related processing in two separate threads.  This also applies to
-  handling GET (and SET) processing in one thread, and generating traps
-  in another.  This is still vulnerable to the usual threading problems.
-
-    However, as long as *all* of the SNMP-related activity is limited
-  to the one thread, then there should be no reason why this cannot
-  safely communicate with other threads within the same application,
-  using private (thread-safe) mechanisms.
-
-    But in terms of the Net-SNMP-provided code, the agent (and AgentX
-  subagent) should *not* be regarded as thread-safe.
-
-
-
 How can I run AgentX with a different socket address?
 ----------------------------------------------------
 
@@ -2249,7 +2218,7 @@ How can I run AgentX with a different socket address?
   registrations (and send appropriate requests) can be specified using
   the option '-x'.
     The command
-		"snmpd -x localhost:705 ...."
+		"snmpd -x tcp:localhost:705 ...."
   would start the agent listening on the TCP port 705 for connections
   from the local system.
     The same effect can also be obtained by adding the line
@@ -2257,24 +2226,22 @@ How can I run AgentX with a different socket address?
   to the file 'snmpd.conf'.
 
   The same option can be used with the Net-SNMP agent when running in
+  This also holds when the Net-SNMP agent is running in
   "subagent" mode, to specify the socket to register with (and receive
   requests from).
     So a subagent might connect to the master agent above (both running
   on the same host), using: 
-		"snmpd -X -x localhost:705 ...."
+		"snmpd -X -x tcp:localhost:705 ...."
 
   A subagent running embedded within some other application will
   typically not understand the same command-line options, so would
   need to set the same configuration programmatically:
 
      netsnmp_ds_set_string(NETSNMP_DS_APPLICATION_ID,
-                           NETSNMP_DS_AGENT_X_SOCKET, "localhost:705");
+                           NETSNMP_DS_AGENT_X_SOCKET, "tcp:localhost:705");
 
   With the example subagent code from the Net-SNMP tutorial, this line
   would be added immediately before the 'init_agent' call.
-
-  But also see the mention of AgentX security (or the lack of it!)
-  in the earlier entry.
 
   The same approach can also be used to listen on a different named
   socket, using:
@@ -2297,17 +2264,18 @@ How can I turn off SMUX support?
   agent.  Unfortunately, it's not currently possible to turn off SMUX
   support this way.
 
-  The safest approach is to re-run configure with the option
-  "--with-out-mib-modules=smux", and recompile the agent.  If this
-  is not possible, an alternative workaround might be to have the
-  agent bind to an invalid IP address.
+  The safest approach is to run
+	configure --with-out-mib-modules=smux
+  and recompile the agent.
 
-  If you put a line such as
+  If this is not possible, an alternative workaround might be to have
+  the agent bind the SMUX socket to an invalid IP address, using a
+  snmpd.conf line such as:
 
 	smuxsocket  1.0.0.0
 
-  in the snmpd.conf file, the agent will whinge at startup,
-  but won't accept any incoming SMUX requests.
+  The agent may complain at startup, but it won't accept any incoming
+  SMUX requests.
 
   If the agent complains about not recognising the "smuxsocket"
   token, then you're out of luck.  You'll either have to recompile
@@ -2350,13 +2318,13 @@ How can I combine two copies of the 'mib2' tree from separate subagents?
 What traps are sent by the agent?
 --------------------------------
 
-  The agent sends a 'coldStart(0)' trap when it first starts up, and an
-  enterprise-specific trap 'nsNotifyShutdown' (or 'ucdShutdown') when it
-  stops.  It can also be configured to send an 'authenticationFailure(4)'
-  trap when it receives an SNMPv1 request using an unknown community name.
-  The Net-SNMP agent generates an enterprise-specific trap 'nsNotifyRestart'
-  (rather than the standard 'coldStart(0)' or 'warmStart(1)' traps) on
-  receiving a HUP signal - typically after being re-configured.
+  The Net-SNMP agent sends a 'coldStart(0)' trap when it first starts up,
+  and an enterprise-specific trap 'nsNotifyShutdown' when it stops.  It
+  generates an enterprise-specific trap 'nsNotifyRestart' (rather than
+  the standard 'coldStart(0)' or 'warmStart(1)' traps) on receiving a HUP
+  signal - typically after being re-configured.  It can also be configured
+  to send an 'authenticationFailure(4)' trap when it receives an SNMPv1 
+  (or SNMPv2c) request using an unknown community name.
 
     The agent does not send 'linkUp' or 'linkDown' traps by default. It can
   be configured to do this using the directive 'linkUpDownNotifications'.
@@ -2366,9 +2334,6 @@ What traps are sent by the agent?
   monitored characteristics (disk usage, running processes, etc) enters or
   leaves an error state.  This can be configured using the 'defaultMonitors'
   directive (again documented under ACTIVE MONITORING).
-
-  Note that these facilities are only available with the v5 Net-SNMP
-  agent, and are not supported by the v4 UCD agent.
 
 
 
@@ -2386,14 +2351,16 @@ Where are these traps sent to?
   directives - irrespective of which API call was used to trigger sending
   the trap.  See the trap-related entries in the CODING section for details.
 
-    A configuration block such as
+  Note also that you typically only want *one* of the settings:
 
         trapsink   localhost
         trap2sink  localhost
         informsink localhost
 
-  will result in *three* notifications being sent for each call to
-  'send_easy_trap()' (or 'send_v2trap()').  Probably not what was wanted!
+  Including two (or all three) of these lines in the snmpd.conf file will
+  will result in multiple copies of every notifications being sent for
+  each call to 'send_easy_trap()' (or 'send_v2trap()').
+    This is probably not what was intended!
  
 
 
@@ -2418,23 +2385,23 @@ When I run the agent it runs and then quits without staying around. Why?
 
   Firstly, are you certain that this is what is happening?
 
-  The normal operation of the agent is to 'fork' itself into the
-  background, detaching itself so that it will continue running even
-  when you log out, and freeing the command line for subsequent use.
-  This looks at first sight as if the agent has died, but using 'ps'
+  The normal operation of the agent is to 'fork' itself into the background,
+  detaching itself from the controlling terminal so that it will continue
+  running even when you log out, and freeing the command line for subsequent
+  use.  This looks at first sight as if the agent has died, but using 'ps'
   to show all processes should reveal that the agent is still running.
 
-  To prevent this behaviour (such as when attempting to debug the
-  agent), you can start it with the '-f' flag.  This suppresses the
-  fork, and the agent will run as a 'normal' command.  It's also often
-  useful to use the '-Le' (or '-L') flag, to log messages to stderr.
+  To prevent this behaviour (such as when attempting to debug the agent),
+  you can start it with the '-f' flag.  This suppresses the fork, and the
+  agent will run as a 'normal' command.  It's also often useful to use the
+  '-Le' (or '-L') flag, to log messages to stderr.
 
   On the other hand, if 'ps' shows that the agent is not running, then
   this is an error, and probably show that something went wrong in
   starting the agent up.  Check the agent log file for any error messages,
   or run it with '-f -Le' and see what it reports.
 
-  Another possible cause might be an existing agent (or some other process)
+  One possible cause might be an existing agent (or some other process)
   that's already listening on the SNMP port.  Trying to start a second
   agent will fail with an error about "opening the specified endpoint".
 
@@ -2524,6 +2491,50 @@ How can I listen on just one particular interface?
 
 
 
+The agent is complaining about 'snmpd.conf'.  Where is this?
+-----------------------------------------------------------
+
+  It doesn't exist in the distribution as shipped.  You need to
+  create it to reflect your local requirement.
+    To get started, you can either just create this file manually,
+  or run snmpconf to help you create one.  At the very least, you
+  will need some form of access control configuration, if the agent
+  is to be of any use whatsoever.  This can be as simple as:
+
+       rocommunity public
+
+    See the snmpd.conf(5) manual page or relevant entries in this
+  FAQ for further details.
+
+
+
+Why does the agent complain about 'no access control information'?
+------------------------------------------------------------------
+
+  Although an SNMP agent may support a wide range of management
+  information, it is not necessarily appropriate to report the whole
+  of this to every SNMP management station who asks for it.  Some
+  information may be sensitive, and should restricted to authorized
+  administrators only.   SNMP therefore includes mechanisms for
+  controlling who has access to what information - both in terms of
+  what can be seen, and (even more importantly) what can be changed.
+
+  By default, the Net-SNMP agent starts up with a completely empty
+  access control configuration.  This means that *no* SNMP request
+  would be successful.  It is necessary to explicitly configure
+  suitable access control settings, based on who should be granted
+  access in that particular environment.
+
+  If there are no access control entries configured (perhaps because
+  no snmpd.conf configuration file has been loaded, or it contains no
+  access control settings), then the agent will not respond to any
+  SNMP requests whatsoever.  This is almost certainly not what was
+  intended, so the agent reports this situation.
+
+  See the next entry for how to configure access control settings.
+
+
+
 How do I configure access control?
 ---------------------------------
 
@@ -2551,124 +2562,6 @@ How do I configure access control?
   from particular sources, and all four can be restricted to a particular
   subtrees or (from v5.3) a named view.  See 'snmpd.conf(5)' for details.
 
-  These directives are effectively wrappers round the core access control
-  mechanism, which uses the four directives 'com2sec', 'group', 'view'
-  and 'access' to provide a more efficient and flexible control
-  over who can access which portions of the tree.
-
-    See the next entry for the gory details.
-
-
-
-I don't understand the new access control stuff - what does it mean?
--------------------------------------------------------------------
-
-  The idea behind the new access control model is to give a more flexible
-  way of specifying who can see and do what within the MIB tree.
-  It's more complicated to understand than the simple example above, but
-  that's because it can do a whole lot more.
-
-    There are four configuration keywords in the new scheme:
-	'com2sec', 'group', 'view', and 'access'
-
-  We'll consider these one at a time, starting with 'access'.
-  (Because I feel like starting with the last one, that's why - OK?)
-
-
-  The "access" keyword has the job of specifying who has access to
-  which bits of the MIB tree.  This has eight parameters, so can look
-  rather offputting. Most of these can be safely left with default values
-  in most cases (so don't you worry your pretty little head about them).
-  The syntax is
-
-	access {group} "" any noauth exact {read-tree} {write-tree} {notify-tree}
-
-  where the entries in braces need to be defined elsewhere (I'm coming
-  to that - be patient!), and the rest can be left as shown here.
-
-	[ If you really want to know, the 'sec.model' field can 
-	  be used to have an access line that's only relevant to
-	  specific versions of SNMP (such v1 or v2c) rather than
-	  "any" version, and the 'sec.level' field to ensure that
-	  the request must be authenticated or encrypted.
-	    The context and prefix fields can be used to distinguish
-	  between parallel versions of the same overall OID tree
-	]
-
-
-  The "view" keyword is used to define particular bits of the MIB tree,
-  for use in the last three fields of the access entry.
-  This has the syntax
-
-	view  {name}  included/excluded  {subtree}   {mask}
-
-  where {name} is the identifier to be used for this view (i.e. what should
-  appear in the access entry), and {subtree} is the portion of the MIB tree
-  that this name refers to (in either numeric or named form).
-    Note that the name of the view does not have to have anything to do
-  with the MIB sub-identifier names - it's purely an identifying tag for
-  use within the config file (though choosing a meaningful name is, as
-  always, a very good idea).
-  
-    The {mask} field can be used to control which elements of the OID subtree
-  should be regarded as relevant when determining which view an OID is in.
-  This is most relevant when defining "unusual" views, such as a single
-  row of a table.  In most cases, this field should be omitted.
-
-  The third field can be used to include or exclude particular portions
-  of the MIB from the named view.  A single view can be built up using
-  several 'view' lines (with the same view name), including or excluding
-  OID subtrees as appropriate.
-
-    The three view fields in the access line are used to control which
-  portions of the MIB tree a particular {group} can see (GET et al),
-  alter (SET), or request NOTIFYs on.
-
-
-
-    That's dealt with the "what" - now for the "who".
-  This is the role of the "group" and "com2sec" entries.
-
-  The "group" keyword gives general control, by mapping between a "security
-  name" (for a particular protocol version), and the internal name used in the
-  access line.  Note that the token "any" is no longer acceptable for the
-  security model - the original support for this was due due to a misreading
-  of the RFC.  You should replace any such line with separate versions for
-  each of the desired security models ('v1', 'v2c' & 'usm').
-
-    For SNMPv1 and SNMPv2c, the group line is just an intermediate step
-  between the "access" line and the "com2sec" line, which is the last bit
-  of the jigsaw.  The "com2sec" entry is used to determine a "security name"
-  from the traditional community string, taking into account where the request
-  has come from.  Thus the same community string can give access to  different
-  portions of the tree, depending on where the request is sent from.
-
-     For example, in an earlier version of the example config file, there
-  were two com2sec lines with the community string "public" - one was valid
-  from anywhere (with the security name "public") and one was only valid
-  from the local network (using the security name "mynet").
-     The group lines converted these security names into the groups "public"
-  and "mygroup" respectively, and the access lines gave these two groups
-  the ability to GET values in the 'system' sub-tree (from anywhere) or
-  the 'mib-2' sub-tree (from the local network).  Neither of these could
-  SET any values though, (since the write-tree was "none" in both cases).
-    Someone on the local machine, using the community string "private",
-  had the security name "local" and the group name "local", and hence had
-  full access (both GET and SET, as well as NOTIFY) to the whole of the
-  MIB tree (or at least everything under .1, which covers most things!)
-
-     Note that the three occurrences of "public", as community string,
-  security name and group name, were three totally separate things.
-  You can't use a community string in a security name field, or either
-  of these as a group name (or vice versa), unless you set up suitable
-  entries to map one name onto the other.
-
-    With SNMPv3, the security name is part of the basic protocol (or
-  near enough), and can be used directly in a group definition.
-
-  And here concludes our tour of the view-based access control mechanism.
-  Phew!
-
 
 
 How do I configure SNMPv3 users?
@@ -2676,49 +2569,50 @@ How do I configure SNMPv3 users?
 
   There are three ways to configure SNMPv3 users:
 
-  1) Stop the agent, and create a file /var/net-snmp/snmpd.conf,
-     containing the line
+  1) Stop the agent, and add the line
 
 	createUser {myUser} MD5 {myPassword} DES
 
-    (where {myUser} and {myPassword} are the appropriate values,
+    to the file /var/net-snmp/snmpd.conf (where {myUser} and
+    {myPassword} are the appropriate values for username and password,
     _without_ the braces!).  Then re-start the snmpd agent.
 
   2) Stop the agent, run the command
 
         net-snmp-config --create-snmpv3-user
 
-     and follow the instructions.  This will create an entry
+     and follow the prompts given.  This will create an entry
      in the /var/net-snmp/snmpd.conf file similar to the above.
      Then re-start the snmpd agent.
 
-  3) Make sure the agent is running, and will respond to a suitable
-     existing SNMPv3 user (with the same Authentication and Encryption
-     protocols as required for the new user).  Then use the 'snmpusm'
-     command to clone this template user, and change the password.
+  3) Make sure the agent is running, and will respond to an SNMPv3
+     request (using an existing user with the desired authentication
+     and privacy protocols).  Then use the 'snmpusm' command to clone
+     this template user, and change the password.
 
 
   See the access control entries above and the file 'README.snmpv3'
   for more details about how to use SNMPv3 users,
 
   Note that simply having a 'rouser' or 'rwuser' line does *not*
-  automatically create the corresponding user.  You will need the
-  above 'createUser' line (or an equivalent 'usmUser') as well.
+  automatically create the corresponding SNMPv3 user.  You will need
+  the above 'createUser' line (or an equivalent 'usmUser') as well.
 
 
 
 The 'createUser' line disappears when I start the agent.  Why?
 -------------------------------------------------------------
 
-    That's deliberate.
+  This is deliberate.
+
   The agent removes the (human-readable) 'createUser' directive, and
   replaces it with an equivalent 'usmUser' entry.  This contains the
   same information, but in a form that's only meaningful internally.
   Not only is the passphrase no longer visible in the config file, it
-  has actually been converted to a key that is only valid on the local
-  machine.  If someone stole the new usmUser line from this system,
-  they could not use that information to access any of your other agents
-  (even if the usernames and passwords were the same).
+  has actually been converted to a key that is only valid on this
+  particular system.  If someone stole the configuration file, they
+  could not use the information from the usmUser entry to access any
+  of your other agents (even if the usernames and passwords were the same).
 
 
 
@@ -2743,16 +2637,25 @@ My new agent is ignoring the old snmpd.conf file. Why?
   experienced when replacing a ready-installed version (e.g. from a vendor
   distribution), with the current release installed from the source.
 
+  Try moving the old config file to the new location, and restart the agent.
+  If you're not sure where this should go, see the next entry.
+
+
+
+Where should the snmpd.conf file go?
+-----------------------------------
+
     The default location for this file with the basic distribution is
   /usr/local/share/snmp/snmpd.conf (or PREFIX/share/snmp/snmpd.conf).
   Ready-installed versions often look for the file as /etc/snmpd.conf,
-  or /etc/snmp/snmpd.conf.  Try moving the old config file to the new
-  location, and restart the agent.
+  or /etc/snmp/snmpd.conf.
 
-    With release 5.0, the name of the package changed from "ucd-snmp"
-  to "net-snmp", and this change was reflected in the name of the persistent
-  /var directory.  So a v5 Net-SNMP agent will not look in
-  /var/ucd-snmp/snmpd.conf for settings from a v4 UCD agent.
+  If you are still not sure, try running the command
+
+      snmpd -f -Le -Dread_config 2>&1 | grep "config path"
+
+  The first line of output will display the list of locations where
+  the agent is looking for configuration information.
 
 
 
@@ -2764,7 +2667,9 @@ Why am I getting "Connection refused"?
   the TCP wrapper mechanism using the files 'hosts.allow' and 'hosts.deny'
   to control access to the service.  Some distributions may come with
   this enabled automatically - otherwise you need to explicitly activate
-  this by configuring using '--with-libwrap'.
+  this by running
+         configure --with-libwrap
+  and recompiling the agent.
 
   If TCP wrappers are enabled, and both hosts.allow and hosts.deny are
   empty, then all requests will be rejected (with "Connection refused").
@@ -2773,10 +2678,10 @@ Why am I getting "Connection refused"?
 
 		snmpd: ALL
 
-  to the file /etc/hosts.allow (or wherever this file is on your system).
-  Though be aware that doing this removes one level of protection and allows
-  anyone to try and query your agent (though the agent's own access control
-  mechanisms can still be used to restrict what - if anything - they can see).
+  to the file /etc/hosts.allow.  Be aware that doing this removes one
+  level of protection and allows anyone to try and query your agent.
+  The agent's own access control mechanisms can still be used to restrict
+  what - if anything - they can see.
 
   If you do wish to use the TCP wrappers to restrict access, it's sensible
   to have an explicit entry:
@@ -2792,20 +2697,21 @@ Why am I getting "Connection refused"?
 
   which will allow connections from localhost, and nothing else.
 
-  Note that personal firewalls (such as Linux' ipchains or iptables
-  mechanism) may have a similar effect (though typically this won't
-  be logged).  See the earlier entry
+  Note that personal firewalls, such as the Linux iptables mechanism,
+  may have a similar effect (though typically this won't be logged).
+  See the earlier entry
     Requests always seem to timeout, and don't give me anything back.  Why?
 
 
  
-Why can't I see values in the UCDavis 'extensible' or 'disk' trees?
+Why can't I see values in the UCDavis 'proc' or 'disk' trees?
 ------------------------------------------------------------------
 
-  Both these trees are designed to report things you ask it to report
-  on.  If you don't declare anything in the snmpd.conf file for it to
-  monitor, it will not report anything.  See the snmpd.conf manual page
-  and the EXAMPLE.conf file for details on configuring the agent.
+  Both these trees are designed to report precisely those things that
+  have been explicitly configured for monitoring.  If there are no
+  relevant configuration entries in the snmpd.conf file, then these
+  tables will be empty.  See the snmpd.conf manual page and the
+  EXAMPLE.conf file for details on configuring the agent.
 
   Optionally, run snmpconf -g monitoring to help you set up this
   section of the snmpd.conf file.
@@ -2815,10 +2721,15 @@ Why can't I see values in the UCDavis 'extensible' or 'disk' trees?
 Why can't I see values in the UCDavis 'memory' or 'vmstat' trees?
 ----------------------------------------------------------------
 
-  These mib modules are not supported on all operating systems, and
-  will not be included on any other system.  Currently, they are only
-  supported on Linux, HP-UX (memory only), Solaris, BSDi (vmstat on
-  BSDi4 only), Dynix, FreeBSD, NetBSD and OpenBSD.
+  These trees do not need any explicit configuration, and should
+  be present automatically.
+
+  However the C code necessary to implement these particular MIB
+  modules are not supported on all operating systems.  These trees
+  will be omitted on any system for which there is no underlying
+  code.   Currently, they are only supported on Linux, HP-UX (memory
+  only), Solaris, BSDi (vmstat on BSDi4 only), Dynix, FreeBSD, NetBSD
+  and OpenBSD.
     If you want to help port it to other systems, let us know.
 
   Note that these subtrees only report the current usage when
@@ -2826,7 +2737,7 @@ Why can't I see values in the UCDavis 'memory' or 'vmstat' trees?
   when the usage strays outside the configured bounds.
   See the earlier FAQ entry
     What traps are sent by the agent?
-  for more information.
+  or the snmpd.conf section on active monitoring, for more information.
 
 
 
@@ -2869,7 +2780,7 @@ What about multi-processor systems?
   monitor the overall CPU activity of a system, and typically reflect
   whatever the underlying operating system reports for the (single)
   CPU statistics information.  How these are handled for a multi-CPU
-  system will probably differ from one O/S to another, and will need
+  system will differ from one O/S to another, and will need
   to be investigated for each system individually.
 
   The htProcessorTable was designed to handle monitoring multi-CPU
@@ -2906,7 +2817,7 @@ The interface statistics for my subinterfaces are all zero - why?
   statistics for the physical interface itself.
 
     There's no easy way around this problem - the agent can only
-  report such values as it can find out.  If the kernel doesn't
+  report such information as is available.  If the kernel doesn't
   keep track of these figures, the agent can't report them.
 
     Sorry!
@@ -2975,8 +2886,8 @@ What does "nlist err:  wombat not found" (or similar) mean?
 
 
 
-How about "Can't open /dev/kmem"?
---------------------------------
+What does "Can't open /dev/kmem" mean?
+-------------------------------------
 
   This device is normally restricted to just being accessible by root
   (or possibly by a special group such as 'kmem' or 'sys').  The agent
@@ -2989,23 +2900,6 @@ How about "Can't open /dev/kmem"?
   to network statistics).
 
  
-
-The agent is complaining about 'snmpd.conf'.  Where is this?
------------------------------------------------------------
-
-  It doesn't exist in the distribution as shipped.  You need to
-  create it to reflect your local requirement.
-    To get started, you can either just create this file manually,
-  or run snmpconf to help you create one.  At the very least, you
-  will need some form of access control configuration, if the agent
-  is to be of any use whatsoever.  This can be as simple as:
-
-       rocommunity public
-
-    See the snmpd.conf(5) manual page or relevant entries in this
-  FAQ for further details.
-
-
 
 The system uptime (sysUpTime) returned is wrong!
 -----------------------------------------------
@@ -3067,6 +2961,30 @@ Can the agent run multi-threaded?
 
   Adding full multi-thread support directly to the agent would be
   nice.  We just need someone with time/money to do/sponsor the work.
+
+
+
+Can I use AgentX (or an embedded SNMP agent) in a threaded application?
+-----------------------------------------------------------------------
+
+  With care.
+
+  As mentioned in the earlier "thread-safe" FAQ entry, the Net-SNMP
+  agent (including the AgentX subagent) has not been designed for
+  threaded operation.  In particular, it makes use of various global
+  variables without attempting to protect them against simultaneous
+  use.  This means that it is *NOT* safe to have SNMP or AgentX
+  related processing in two separate threads.  This also applies to
+  handling GET (and SET) processing in one thread, and generating traps
+  in another.  This is still vulnerable to the usual threading problems.
+
+    However, as long as *all* of the SNMP-related activity is limited
+  to the one thread, then there should be no reason why this cannot
+  safely communicate with other threads within the same application,
+  using private (thread-safe) mechanisms.
+
+    But in terms of the Net-SNMP-provided code, the agent (and AgentX
+  subagent) should *not* be regarded as thread-safe.
 
 
 
