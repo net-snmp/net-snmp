@@ -423,28 +423,6 @@ typedef struct netsnmp_large_fd_set_s netsnmp_large_fd_set;
         void *  vp;
     } netsnmp_cvalue;
 
-#if 0
-    typedef struct netsnmp_ref_u_char {
-       u_char * val;
-    } netsnmp_ref_U_char;
-
-    typedef struct netsnmp_ref_char {
-       char * val;
-    } netsnmp_ref_void;
-
-    typedef struct netsnmp_ref_int_s {
-       int val;
-    } netsnmp_ref_int;
-
-    typedef struct netsnmp_ref_u_int_s {
-       u_int val;
-    } netsnmp_ref_int;
-
-    typedef struct netsnmp_ref_u_long_s {
-       u_long val;
-    } netsnmp_ref_u_long;
-#endif
-
     typedef struct netsnmp_ref_size_t_s {
        size_t val;
     } * netsnmp_ref_size_t;
