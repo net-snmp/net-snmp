@@ -269,6 +269,10 @@ snmp_clone_var(netsnmp_variable_list * var, netsnmp_variable_list * newvar)
             memmove(newvar->val.string, var->val.string, var->val_len);
         } else {                /* fix the pointer to new local store */
             newvar->val.string = newvar->buf;
+            /*
+             * no need for a memmove, since we copied the whole var
+             * struct (and thus var->buf) at the beginning of this function.
+             */
         }
     } else {
         newvar->val.string = NULL;
