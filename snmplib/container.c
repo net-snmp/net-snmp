@@ -104,6 +104,9 @@ netsnmp_container_register_with_compare(const char* name, netsnmp_factory *f,
 {
     container_type *ct, tmp;
 
+    if (NULL==containers)
+        return -1;
+
     tmp.name = (char *)name;
     ct = CONTAINER_FIND(containers, &tmp);
     if (NULL!=ct) {
@@ -139,6 +142,9 @@ netsnmp_container_get_factory(const char *type)
 {
     container_type ct, *found;
     
+    if (NULL==containers)
+        return NULL;
+
     ct.name = type;
     found = CONTAINER_FIND(containers, &ct);
 
@@ -174,6 +180,9 @@ static container_type *
 netsnmp_container_get_ct(const char *type)
 {
     container_type ct;
+
+    if (NULL == containers)
+        return NULL;
     
     ct.name = type;
     return CONTAINER_FIND(containers, &ct);
