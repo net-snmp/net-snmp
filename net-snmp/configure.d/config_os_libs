@@ -141,24 +141,16 @@ fi
 #
 # libnl (netlink)
 #
-AC_ARG_WITH(nl,
-[  --with-nl                   Look for and use libnl (linux only).],
-      use_nl="$withval")
-AC_ARG_ENABLE(nl,,
-       AC_MSG_ERROR([ Invalid option. Use --with-nl/--without-nl instead ]) )
 
-
-if test "x$use_nl" != "xno"; then
+if test "x$with_nl" != "xno"; then
     case $target_os in
     linux*) # Check for libnl (linux)
-       AC_CHECK_HEADERS(netlink/netlink.h,
-	   NETSNMP_SEARCH_LIBS(nl_connect, nl,
-	                       AC_DEFINE(HAVE_NL, 1, [define if you have libnl]),,, LMIBLIBS)
-       )
+	NETSNMP_SEARCH_LIBS(
+	    nl_connect, nl,
+	    [AC_CHECK_HEADERS(netlink/netlink.h)],,, LMIBLIBS)
     ;;
     esac
 fi
-AC_SUBST(LIBNL_LIBS)
 
 
 
