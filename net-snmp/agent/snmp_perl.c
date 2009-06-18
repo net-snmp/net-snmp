@@ -50,7 +50,9 @@ maybe_source_perl_startup(void)
 
     perl_construct(my_perl);
 
+#ifdef PERL_EXIT_DESTRUCT_END
     PL_exit_flags |= PERL_EXIT_DESTRUCT_END;
+#endif
 
     if (perl_parse(my_perl, xs_init, 2, (char **) embedargs, NULL))
         goto bail_out;
