@@ -988,6 +988,9 @@ NETSNMP_ARG_WITH(client-recv-buf,
 NETSNMP_ARG_WITH(elf,
   [AS_HELP_STRING([--without-elf],[use elf libraries])])
 
+NETSNMP_ARG_WITH(nl,
+  [AS_HELP_STRING([--with-nl],[use libnl to get netlink data (linux only).])])
+
 NETSNMP_ARG_WITH(libwrap,
   [  --with-libwrap[=LIBPATH]  Compile in libwrap (tcp_wrappers) support.],
   [],
@@ -1019,5 +1022,3 @@ if test "x$with_mysql" = "xyes"; then
   AC_DEFINE(NETSNMP_USE_MYSQL, 1,
     [define if you are using the mysql code for snmptrapd ...])
 fi
-
-
