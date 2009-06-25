@@ -382,50 +382,9 @@ struct snmp_session {
 };
 
 
-typedef struct netsnmp_large_fd_set_s netsnmp_large_fd_set;
-
-
+#include <net-snmp/library/types.h>
 #include <net-snmp/definitions.h>
 #include <net-snmp/library/snmp_api.h>
-
-/*
- * #include <net-snmp/library/libsnmp.h> 
- */
-
-    typedef struct netsnmp_index_s {
-       size_t      len;
-       oid         *oids;
-    } netsnmp_index;
-
-
-    typedef struct netsnmp_void_array_s {
-       size_t  size;
-       void * *array;
-    } netsnmp_void_array;
-
-    /*
-     * references to various types
-     */
-    typedef struct netsnmp_ref_void {
-       void * val;
-    } netsnmp_ref_void;
-
-    typedef union {
-        u_long  ul;
-        u_int   ui;
-        u_short us;
-        u_char  uc;
-        long    sl;
-        int     si;
-        short   ss;
-        char    sc;
-        char *  cp;
-        void *  vp;
-    } netsnmp_cvalue;
-
-    typedef struct netsnmp_ref_size_t_s {
-       size_t val;
-    } * netsnmp_ref_size_t;
 
 #ifdef __cplusplus
 }
