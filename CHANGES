@@ -436,8 +436,6 @@ listing of all changes made to the code.
       - [BUG 1400101]: remove deleted interfaces from ifTable
       - [PATCH 2012402]: don't fail on failure to look up interface error
 	counters.
-      - [PATCH 2182592]: Clean up vacmContextTable after unregistrations
-	Patch supplied by John Forsyth
       - [PATCH 2791417]: fix snmpd segfault when run with -DALL Patch
 	supplied by Ron Roskens.
 
