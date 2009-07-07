@@ -22,7 +22,7 @@
 /** a global static we'll make use of a lot to map to the right
    datatype to return (which for SNMP integer's is always a long). */
 static u_long long_ret;
-  
+static in_addr_t addr_ret;
 
 /*
  * User-defined data access functions for data in table ipCidrRouteTable 
@@ -32,18 +32,18 @@ u_long         *
 get_ipCidrRouteDest(void *data_context, size_t * ret_len)
 {
     RTENTRY *ourroute = (RTENTRY *) data_context;
-    long_ret = ((struct sockaddr_in *) (&ourroute->rt_dst))->sin_addr.s_addr;
-    *ret_len = sizeof(long_ret);
-    return &long_ret;
+    addr_ret = ((struct sockaddr_in *) (&ourroute->rt_dst))->sin_addr.s_addr;
+    *ret_len = sizeof(addr_ret);
+    return &addr_ret;
 }
 
 u_long         *
 get_ipCidrRouteMask(void *data_context, size_t * ret_len)
 {
     RTENTRY *ourroute = (RTENTRY *) data_context;
-    long_ret = ((struct sockaddr_in *) (&ourroute->rt_genmask))->sin_addr.s_addr;
-    *ret_len = sizeof(long_ret);
-    return &long_ret;
+    addr_ret = ((struct sockaddr_in *) (&ourroute->rt_genmask))->sin_addr.s_addr;
+    *ret_len = sizeof(addr_ret);
+    return &addr_ret;
 }
 
 long           *
@@ -59,9 +59,9 @@ u_long         *
 get_ipCidrRouteNextHop(void *data_context, size_t * ret_len)
 {
     RTENTRY *ourroute = (RTENTRY *) data_context;
-    long_ret = ((struct sockaddr_in *) (&ourroute->rt_gateway))->sin_addr.s_addr;
-    *ret_len = sizeof(long_ret);
-    return &long_ret;
+    addr_ret = ((struct sockaddr_in *) (&ourroute->rt_gateway))->sin_addr.s_addr;
+    *ret_len = sizeof(addr_ret);
+    return &addr_ret;
 }
 
 long           *
