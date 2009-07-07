@@ -253,6 +253,7 @@ var_extensible_pass(struct variable *vp,
     oid             newname[MAX_OID_LEN];
     int             i, rtest, fd, newlen;
     static long     long_ret;
+    static in_addr_t addr_ret;
     char            buf[SNMP_MAXBUF];
     static char     buf2[SNMP_MAXBUF];
     static oid      objid[MAX_OID_LEN];
@@ -378,13 +379,13 @@ var_extensible_pass(struct variable *vp,
                         *var_len = 0;
                         return (NULL);
                     }
-                    long_ret =
+                    addr_ret =
                         (objid[0] << (8 * 3)) + (objid[1] << (8 * 2)) +
                         (objid[2] << 8) + objid[3];
-                    long_ret = htonl(long_ret);
-                    *var_len = sizeof(long_ret);
+                    addr_ret = htonl(addr_ret);
+                    *var_len = sizeof(addr_ret);
                     vp->type = ASN_IPADDRESS;
-                    return ((unsigned char *) &long_ret);
+                    return ((unsigned char *) &addr_ret);
                 }
             }
             *var_len = 0;
