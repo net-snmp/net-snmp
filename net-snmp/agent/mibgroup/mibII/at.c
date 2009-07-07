@@ -128,9 +128,9 @@
 #ifndef solaris2
 static void     ARP_Scan_Init(void);
 #ifdef ARP_SCAN_FOUR_ARGUMENTS
-static int      ARP_Scan_Next(u_long *, char *, u_long *, u_short *);
+static int      ARP_Scan_Next(in_addr_t *, char *, u_long *, u_short *);
 #else
-static int      ARP_Scan_Next(u_long *, char *, u_long *);
+static int      ARP_Scan_Next(in_addr_t *, char *, u_long *);
 #endif
 #endif
 #endif
@@ -206,7 +206,8 @@ var_atEntry(struct variable *vp,
     oid             lowest[16];
     oid             current[16];
     static char     PhysAddr[6], LowPhysAddr[6];
-    u_long          Addr, LowAddr, foundone;
+    in_addr_t       Addr, LowAddr;
+    int             foundone;
     static in_addr_t      addr_ret;
 #ifdef ARP_SCAN_FOUR_ARGUMENTS
     u_short         ifIndex, lowIfIndex = 0;
@@ -712,11 +713,11 @@ ARP_Scan_Init(void)
 
 #ifdef ARP_SCAN_FOUR_ARGUMENTS
 static int
-ARP_Scan_Next(u_long * IPAddr, char *PhysAddr, u_long * ifType,
+ARP_Scan_Next(in_addr_t * IPAddr, char *PhysAddr, u_long * ifType,
               u_short * ifIndex)
 #else
 static int
-ARP_Scan_Next(u_long * IPAddr, char *PhysAddr, u_long * ifType)
+ARP_Scan_Next(in_addr_t * IPAddr, char *PhysAddr, u_long * ifType)
 #endif
 {
 #ifndef NETSNMP_CAN_USE_SYSCTL
