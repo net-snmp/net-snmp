@@ -114,7 +114,7 @@ netsnmp_udp_fmtaddr(netsnmp_transport *t, void *data, int len)
             sprintf(tmp, "UDP: unknown->[%s]",
                     inet_ntoa(addr_pair->local_addr));
         } else if ( t && t->flags & NETSNMP_TRANSPORT_FLAG_HOSTNAME ) {
-            host = gethostbyaddr((char *)to, 4, AF_INET);
+            host = gethostbyaddr((char *)&to->sin_addr, 4, AF_INET);
             return (host ? strdup(host->h_name) : NULL); 
         } else {
             sprintf(tmp, "UDP: [%s]:%hu->",
