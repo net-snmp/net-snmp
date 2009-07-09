@@ -1,0 +1,25 @@
+#!/bin/sh
+
+. ../eval_tools.sh
+
+HEADER Unix Transport
+
+SKIPIFNOT USING_MIBII_SYSTEM_MIB_MODULE
+SKIPIFNOT NETSNMP_TRANSPORT_UNIX_DOMAIN
+
+#
+# Begin test
+#
+
+# configure the agent to accept user initial with noAuthNoPriv
+. ./Sv3config
+
+SNMP_TRANSPORT_SPEC=unix
+export SNMP_TRANSPORT_SPEC
+SNMP_TEST_DEST=testunixsocket$$
+export SNMP_TEST_DEST
+
+. ./Stransport
+
+# cleanup
+rm -f $SNMP_TEST_DEST

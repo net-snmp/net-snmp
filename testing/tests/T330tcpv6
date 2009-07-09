@@ -1,0 +1,20 @@
+#!/bin/sh
+
+. ../eval_tools.sh
+
+HEADER TCP6 Transport
+
+SKIPIFNOT USING_MIBII_SYSTEM_MIB_MODULE
+SKIPIFNOT NETSNMP_TRANSPORT_TCPIPV6_DOMAIN
+
+#
+# Begin test
+#
+
+# configure the agent to accept user initial with noAuthNoPriv
+. ./Sv3config
+
+SNMP_TRANSPORT_SPEC=tcp6
+SNMP_TEST_DEST="[::1]:"
+
+. ./Stransport
