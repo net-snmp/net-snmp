@@ -11,9 +11,6 @@ SKIPIFNOT NETSNMP_TRANSPORT_TCPIPV6_DOMAIN
 # Begin test
 #
 
-# configure the agent to accept user initial with noAuthNoPriv
-. ./Sv3config
-
 SNMP_TRANSPORT_SPEC=tcp6
 SNMP_TEST_DEST="[::1]:"
 
