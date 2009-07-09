@@ -368,6 +368,14 @@ CONFIGTRAPD() {
     echo $* >> $SNMPTRAPD_CONFIG_FILE
 }
 
+CONFIGAPP() {
+    if [ "x$SNMPAPP_CONFIG_FILE" = "x" ]; then
+	echo "$0: failed because var: SNMPAPP_CONFIG_FILE wasn't set"
+	exit 1;
+    fi
+    echo $* >> $SNMPAPP_CONFIG_FILE
+}
+
 #
 # common to STARTAGENT and STARTTRAPD
 # log command to "invoked" file
