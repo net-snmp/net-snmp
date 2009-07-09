@@ -1,0 +1,18 @@
+#!/bin/sh
+
+. ../eval_tools.sh
+
+HEADER UDP4 Transport
+
+SKIPIFNOT USING_MIBII_SYSTEM_MIB_MODULE
+
+#
+# Begin test
+#
+
+# configure the agent to accept user initial with noAuthNoPriv
+. ./Sv3config
+
+SNMP_TRANSPORT_SPEC=udp
+
+. ./Stransport
