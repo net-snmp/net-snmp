@@ -2,7 +2,7 @@
 
 . ../eval_tools.sh
 
-HEADER UDP4 Transport
+HEADER UDP Transport
 
 SKIPIFNOT USING_MIBII_SYSTEM_MIB_MODULE
 
