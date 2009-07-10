@@ -400,13 +400,14 @@ netsnmp_sockaddr_in6_2(struct sockaddr_in6 *addr,
         }
 
         for (cp = peername; *cp && isdigit((unsigned char) *cp); cp++);
-        if (!*cp && atoi(peername) != 0) {
+        portno = atoi(peername);
+        if (!*cp &&  portno != 0) {
             /*
              * Okay, it looks like JUST a port number.  
              */
             DEBUGMSGTL(("netsnmp_sockaddr_in6", "totally numeric: %d\n",
-                        atoi(peername)));
-            addr->sin6_port = htons(atoi(peername));
+                        portno));
+            addr->sin6_port = htons(portno);
             goto resolved;
         }
 
@@ -437,13 +438,20 @@ netsnmp_sockaddr_in6_2(struct sockaddr_in6 *addr,
 #endif
 		}
                 if (*(cp + 1) == ':') {
-                    if (atoi(cp + 2) != 0 &&
+                    portno = atoi(cp+2);
+                    if (portno != 0 &&
                         inet_pton(AF_INET6, peername + 1,
                                   (void *) &(addr->sin6_addr))) {
                         DEBUGMSGTL(("netsnmp_sockaddr_in6",
                                     "IPv6 address with port suffix :%d\n",
-                                    atoi(cp + 2)));
-                        addr->sin6_port = htons(atoi(cp + 2));
+                                    portno));
+                        if (portno > 0 && portno < 0xffff) {
+                            addr->sin6_port = htons(portno);
+                        } else {
+                            DEBUGMSGTL(("netsnmp_sockaddr_in6", "invalid port number: %d", portno));
+                            return 0;
+                        }
+
 #if defined(HAVE_IF_NAMETOINDEX) && defined(HAVE_STRUCT_SOCKADDR_IN6_SIN6_SCOPE_ID)
                         addr->sin6_scope_id = if_index;
 #endif
@@ -487,13 +495,20 @@ netsnmp_sockaddr_in6_2(struct sockaddr_in6 *addr,
 	        if_index = if_nametoindex(scope_id + 1);
 #endif
 	    }
-            if (atoi(cp + 1) != 0 &&
+            portno = atoi(cp + 1);
+            if (portno != 0 &&
                 inet_pton(AF_INET6, peername,
                           (void *) &(addr->sin6_addr))) {
                 DEBUGMSGTL(("netsnmp_sockaddr_in6",
                             "IPv6 address with port suffix :%d\n",
                             atoi(cp + 1)));
-                addr->sin6_port = htons(atoi(cp + 1));
+                if (portno > 0 && portno < 0xffff) {
+                    addr->sin6_port = htons(portno);
+                } else {
+                    DEBUGMSGTL(("netsnmp_sockaddr_in6", "invalid port number: %d", portno));
+                    return 0;
+                }
+
 #if defined(HAVE_IF_NAMETOINDEX) && defined(HAVE_STRUCT_SOCKADDR_IN6_SIN6_SCOPE_ID)
                 addr->sin6_scope_id = if_index;
 #endif
@@ -521,11 +536,18 @@ netsnmp_sockaddr_in6_2(struct sockaddr_in6 *addr,
         cp = strrchr(peername, ':');
         if (cp != NULL) {
             *cp = '\0';
-            if (atoi(cp + 1) != 0) {
+            portno = atoi(cp + 1);
+            if (portno != 0) {
                 DEBUGMSGTL(("netsnmp_sockaddr_in6",
                             "hostname(?) with port suffix :%d\n",
-                            atoi(cp + 1)));
-                addr->sin6_port = htons(atoi(cp + 1));
+                            portno));
+                if (portno > 0 && portno < 0xffff) {
+                    addr->sin6_port = htons(portno);
+                } else {
+                    DEBUGMSGTL(("netsnmp_sockaddr_in6", "invalid port number: %d", portno));
+                    return 0;
+                }
+
             } else {
                 /*
                  * No idea, looks bogus but we might as well pass the full thing to
