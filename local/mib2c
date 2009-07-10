@@ -146,7 +146,7 @@ while($#ARGV >= 0) {
 	       "OBJECTID", "oid",
 	       "COUNTER64", "U64",
 	       "COUNTER", "u_long",
-	       "IPADDR", "u_long",
+	       "IPADDR", "in_addr_t",
 	       "BITS", "char",
 	       "TICKS", "u_long",
 	       "GAUGE", "u_long",
