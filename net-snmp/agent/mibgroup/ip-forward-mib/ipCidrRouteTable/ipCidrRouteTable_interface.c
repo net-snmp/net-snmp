@@ -914,7 +914,7 @@ _ipCidrRouteTable_get_column(ipCidrRouteTable_rowreq_ctx * rowreq_ctx,
          */
     case COLUMN_IPCIDRROUTEDEST:
         var->type = ASN_IPADDRESS;
-        var->val_len = sizeof(u_long);
+        var->val_len = sizeof(in_addr_t);
         (*var->val.integer) = rowreq_ctx->tbl_idx.ipCidrRouteDest;
         break;
 
@@ -923,7 +923,7 @@ _ipCidrRouteTable_get_column(ipCidrRouteTable_rowreq_ctx * rowreq_ctx,
          */
     case COLUMN_IPCIDRROUTEMASK:
         var->type = ASN_IPADDRESS;
-        var->val_len = sizeof(u_long);
+        var->val_len = sizeof(in_addr_t);
         (*var->val.integer) = rowreq_ctx->tbl_idx.ipCidrRouteMask;
         break;
 
@@ -941,7 +941,7 @@ _ipCidrRouteTable_get_column(ipCidrRouteTable_rowreq_ctx * rowreq_ctx,
          */
     case COLUMN_IPCIDRROUTENEXTHOP:
         var->type = ASN_IPADDRESS;
-        var->val_len = sizeof(u_long);
+        var->val_len = sizeof(in_addr_t);
         (*var->val.integer) = rowreq_ctx->tbl_idx.ipCidrRouteNextHop;
         break;
 
