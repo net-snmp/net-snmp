@@ -21988,11 +21988,11 @@ $as_echo "$netsnmp_cv_func_kvm_openfiles_LAGENTLIBS" >&6; }
 
  { $as_echo "$as_me:$LINENO: checking for library containing kvm_getprocs" >&5
 $as_echo_n "checking for library containing kvm_getprocs... " >&6; }
-if test "${netsnmp_cv_func_kvm_getprocs_LAGENTLIBS+set}" = set; then
+if test "${netsnmp_cv_func_kvm_getprocs_LMIBLIBS+set}" = set; then
   $as_echo_n "(cached) " >&6
 else
   netsnmp_func_search_save_LIBS="$LIBS"
-     netsnmp_target_val="$LAGENTLIBS"
+     netsnmp_target_val="$LMIBLIBS"
           netsnmp_temp_LIBS="${netsnmp_target_val}  ${LIBS}"
      netsnmp_result=no
      LIBS="${netsnmp_temp_LIBS}"
@@ -22108,13 +22108,13 @@ rm -rf conftest.dSYM
 rm -f core conftest.err conftest.$ac_objext conftest_ipa8_conftest.oo \
       conftest$ac_exeext conftest.$ac_ext
      LIBS="${netsnmp_func_search_save_LIBS}"
-     netsnmp_cv_func_kvm_getprocs_LAGENTLIBS="${netsnmp_result}"
+     netsnmp_cv_func_kvm_getprocs_LMIBLIBS="${netsnmp_result}"
 fi
-{ $as_echo "$as_me:$LINENO: result: $netsnmp_cv_func_kvm_getprocs_LAGENTLIBS" >&5
-$as_echo "$netsnmp_cv_func_kvm_getprocs_LAGENTLIBS" >&6; }
- if test "${netsnmp_cv_func_kvm_getprocs_LAGENTLIBS}" != "no" ; then
-    if test "${netsnmp_cv_func_kvm_getprocs_LAGENTLIBS}" != "none required" ; then
-       LAGENTLIBS="${netsnmp_result} ${netsnmp_target_val}"
+{ $as_echo "$as_me:$LINENO: result: $netsnmp_cv_func_kvm_getprocs_LMIBLIBS" >&5
+$as_echo "$netsnmp_cv_func_kvm_getprocs_LMIBLIBS" >&6; }
+ if test "${netsnmp_cv_func_kvm_getprocs_LMIBLIBS}" != "no" ; then
+    if test "${netsnmp_cv_func_kvm_getprocs_LMIBLIBS}" != "none required" ; then
+       LMIBLIBS="${netsnmp_result} ${netsnmp_target_val}"
     fi
 
 
@@ -22123,11 +22123,11 @@ $as_echo "$netsnmp_cv_func_kvm_getprocs_LAGENTLIBS" >&6; }
 
  { $as_echo "$as_me:$LINENO: checking for library containing kvm_getswapinfo" >&5
 $as_echo_n "checking for library containing kvm_getswapinfo... " >&6; }
-if test "${netsnmp_cv_func_kvm_getswapinfo_LAGENTLIBS+set}" = set; then
+if test "${netsnmp_cv_func_kvm_getswapinfo_LMIBLIBS+set}" = set; then
   $as_echo_n "(cached) " >&6
 else
   netsnmp_func_search_save_LIBS="$LIBS"
-     netsnmp_target_val="$LAGENTLIBS"
+     netsnmp_target_val="$LMIBLIBS"
           netsnmp_temp_LIBS="${netsnmp_target_val}  ${LIBS}"
      netsnmp_result=no
      LIBS="${netsnmp_temp_LIBS}"
@@ -22243,20 +22243,20 @@ rm -rf conftest.dSYM
 rm -f core conftest.err conftest.$ac_objext conftest_ipa8_conftest.oo \
       conftest$ac_exeext conftest.$ac_ext
      LIBS="${netsnmp_func_search_save_LIBS}"
-     netsnmp_cv_func_kvm_getswapinfo_LAGENTLIBS="${netsnmp_result}"
+     netsnmp_cv_func_kvm_getswapinfo_LMIBLIBS="${netsnmp_result}"
 fi
-{ $as_echo "$as_me:$LINENO: result: $netsnmp_cv_func_kvm_getswapinfo_LAGENTLIBS" >&5
-$as_echo "$netsnmp_cv_func_kvm_getswapinfo_LAGENTLIBS" >&6; }
- if test "${netsnmp_cv_func_kvm_getswapinfo_LAGENTLIBS}" != "no" ; then
-    if test "${netsnmp_cv_func_kvm_getswapinfo_LAGENTLIBS}" != "none required" ; then
-       LAGENTLIBS="${netsnmp_result} ${netsnmp_target_val}"
+{ $as_echo "$as_me:$LINENO: result: $netsnmp_cv_func_kvm_getswapinfo_LMIBLIBS" >&5
+$as_echo "$netsnmp_cv_func_kvm_getswapinfo_LMIBLIBS" >&6; }
+ if test "${netsnmp_cv_func_kvm_getswapinfo_LMIBLIBS}" != "no" ; then
+    if test "${netsnmp_cv_func_kvm_getswapinfo_LMIBLIBS}" != "none required" ; then
+       LMIBLIBS="${netsnmp_result} ${netsnmp_target_val}"
     fi
 
 
  fi
 
 netsnmp_save_LIBS="$LIBS"
-LIBS="$LAGENTLIBS $LIBS"
+LIBS="$LAGENTLIBS $LMIBLIBS $LIBS"
 
 
 
