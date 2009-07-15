@@ -12,7 +12,7 @@ SKIPIFNOT NETSNMP_TRANSPORT_UNIX_DOMAIN
 #
 
 SNMP_TRANSPORT_SPEC=unix
-SNMP_TEST_DEST=testunixsocket$$
+SNMP_TEST_DEST=${SNMP_TMPDIR}/testunixsocket
 
 . ./Stransport
 
