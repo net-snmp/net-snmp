@@ -406,9 +406,16 @@ _systemstats_v6_load_file(netsnmp_systemstats_entry *entry, FILE *devin)
                 entry->stats.InHdrErrors = scan_val;
                 entry->stats.columnAvail[IPSYSTEMSTATSTABLE_INHDRERRORS] = 1;
             } else if ('M' == line[5]) {
-                entry->stats.HCInMcastPkts.low = scan_val  & 0xffffffff;
-                entry->stats.HCInMcastPkts.high = scan_val >> 32;
-                entry->stats.columnAvail[IPSYSTEMSTATSTABLE_HCINMCASTPKTS] = 1;
+                if ('P' == line[10]) {
+                    entry->stats.HCInMcastPkts.low = scan_val  & 0xffffffff;
+                    entry->stats.HCInMcastPkts.high = scan_val >> 32;
+                    entry->stats.columnAvail[IPSYSTEMSTATSTABLE_HCINMCASTPKTS] = 1;
+                } else if ('O' == line[10]) {
+                    entry->stats.HCInMcastOctets.low = scan_val  & 0xffffffff;
+                    entry->stats.HCInMcastOctets.high = scan_val >> 32;
+                    entry->stats.columnAvail[IPSYSTEMSTATSTABLE_HCINMCASTOCTETS] = 1;
+                } else
+                    rc = 1;
             } else if ('N' == line[5]) {
                 entry->stats.HCInNoRoutes.low = scan_val & 0xffffffff;
                 entry->stats.HCInNoRoutes.high = scan_val >> 32;
@@ -428,6 +435,10 @@ _systemstats_v6_load_file(netsnmp_systemstats_entry *entry, FILE *devin)
             } else if ('U' == line[5]) {
                 entry->stats.InUnknownProtos = scan_val;
                 entry->stats.columnAvail[IPSYSTEMSTATSTABLE_INUNKNOWNPROTOS] = 1;
+            } else if ('O' == line[5]) {
+                entry->stats.HCInOctets.low = scan_val & 0xffffffff;
+                entry->stats.HCInOctets.high = scan_val  >> 32;
+                entry->stats.columnAvail[IPSYSTEMSTATSTABLE_HCINOCTETS] = 1;
             } else
                 rc = 1;
         } else if ('O' == line[3]) { /* Out */
@@ -440,9 +451,16 @@ _systemstats_v6_load_file(netsnmp_systemstats_entry *entry, FILE *devin)
                 entry->stats.HCOutForwDatagrams.high = scan_val >> 32;
                 entry->stats.columnAvail[IPSYSTEMSTATSTABLE_HCOUTFORWDATAGRAMS] = 1;
             } else if ('M' == line[6]) {
-                entry->stats.HCOutMcastPkts.low = scan_val & 0xffffffff;
-                entry->stats.HCOutMcastPkts.high = scan_val >> 32;
-                entry->stats.columnAvail[IPSYSTEMSTATSTABLE_HCOUTMCASTPKTS] = 1;
+                if ('P' == line[11]) {
+                    entry->stats.HCOutMcastPkts.low = scan_val & 0xffffffff;
+                    entry->stats.HCOutMcastPkts.high = scan_val >> 32;
+                    entry->stats.columnAvail[IPSYSTEMSTATSTABLE_HCOUTMCASTPKTS] = 1;
+                } else if ('O' == line[11]) {
+                    entry->stats.HCOutMcastOctets.low = scan_val & 0xffffffff;
+                    entry->stats.HCOutMcastOctets.high = scan_val >> 32;
+                    entry->stats.columnAvail[IPSYSTEMSTATSTABLE_HCOUTMCASTOCTETS] = 1;
+                } else
+                    rc = -1;
             } else if ('N' == line[6]) {
                 entry->stats.HCOutNoRoutes.low = scan_val & 0xffffffff;
                 entry->stats.HCOutNoRoutes.high = scan_val >> 32;
@@ -451,6 +469,10 @@ _systemstats_v6_load_file(netsnmp_systemstats_entry *entry, FILE *devin)
                 entry->stats.HCOutRequests.low = scan_val & 0xffffffff;
                 entry->stats.HCOutRequests.high = scan_val >> 32;
                 entry->stats.columnAvail[IPSYSTEMSTATSTABLE_HCOUTREQUESTS] = 1;
+            } else if ('O' == line[6]) {
+                entry->stats.HCOutOctets.low = scan_val & 0xffffffff;
+                entry->stats.HCOutOctets.high = scan_val >> 32;
+                entry->stats.columnAvail[IPSYSTEMSTATSTABLE_HCOUTOCTETS] = 1;
             } else
                 rc = 1;
         } else if ('R' == line[3]) { /* Reasm */
