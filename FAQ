@@ -123,14 +123,14 @@ TABLE OF CONTENTS
    Can the agent run multi-threaded?
    Can I use AgentX (or an embedded SNMP agent) in a threaded application?
  COMPILING
-   How do I compile with 'cc' instead of 'gcc'?
-   The compilation is complaining about missing libraries. Why?
-   I'm getting an error "autoheader: not found" - what's wrong?
+   How do I control the environment used to compile the software?
+   How do I control the environment used to compile the software under Windows?
+   Why does the compilation complain about missing libraries?
    How can I reduce the memory footprint?
    How can I reduce the installation footprint or speed up compilation?
+   How can I compile the project for use on an embedded system?
    How can I compile the project to use static linking?
-   Why is the project workspace empty under Visual C++?
-   Why does 'make test' skip five tests?
+   Why does 'make test' skip various tests?
    Why does 'make test' complain about a pid file?
  CODING
    How do I write C code to integrate with the agent?
@@ -2991,25 +2991,65 @@ Can I use AgentX (or an embedded SNMP agent) in a threaded application?
 COMPILING
 =========
 
-How do I compile with 'cc' instead of 'gcc'?
--------------------------------------------
+How do I control the environment used to compile the software?
+-------------------------------------------------------------
 
-  Run configure with --with-cc=cc
+  The basic mechanism for compiling the Net-SNMP project software is to
+  run "configure", followed by "make" (to compile it), "make test" (to
+  check that it's working properly) and then "make install" (to install
+  the files into the correct locations - which typicalyl needs to be done
+  as root.
 
-  Note that if you've already run configure once, it will probably have
-  detected the presence of 'gcc', cached this information, and may still
-  try to use this anyway.   In which case, simply remove the 'config.cache'
-  file before re-running configure.
+  The primary role of "configure" is to determines various aspects about
+  the system that the software is being compiled on.  However there are
+  also a number of options to configure which can be used to control
+  various aspects of the compilation environment.
+
+  The most common options are "--with-mib-modules" and "--with-out-mib-modules"
+  which control the set of MIB module code files that are included within
+  the agent binary.  Adding or removing these modules will affect what MIB
+  information the agent can return.
+     See the entry "How do I add a MIB to the agent?" for more details.
+
+  
+  The configure script can also specify the compiler to use for compiling
+  the source code  (e.g. "configure --with-cc=cc"), the flags passed to
+  this compiler (e.g. "configure --with-cflags=-g"), or to the linker
+  (e.g. "configure --with-ldflags=-Bstatic"), and various other aspects of
+  the build environment.
+     Run "configure --help" for a full list.
  
 
 
-The compilation is complaining about missing libraries. Why?
------------------------------------------------------------
+How do I control the environment used to compile the software under Windows?
+---------------------------------------------------------------------------
 
-  This has been seen in a number of guises over the years - most
-  commonly on Linux systems (although the problem may also occur
-  elsewhere).  A typical installation may not always include the full
-  set of library links required for building the Net-SNMP software.
+  If you are compiling the project within the MinGW or Cygwin environments,
+  then these use the same "configure" mechanism as Unix-based systems.  See
+  the previous entry for more information.
+
+  If you are compiling the project from within Visual Studio, then this does
+  not use the standard configure mechanism.  Instead, there is a separate
+  "Configure" script within the 'win32' directory.  This can be used enable
+  or disable various aspects of the build environment, such as support for
+  encryption or IPv6.
+    Run "Configure --help" for more information
+
+  Note that this script does not include an equivalent of "--with-mib-modules"
+  for extending the MIB information supported by the agent.  Instead, this
+  needs to be done by tweaking the build environment manually.  See the file
+  README.win32 for more details of this, and various other aspects of building
+  the project on Windows systems.
+
+
+
+Why does the compilation complain about missing libraries?
+---------------------------------------------------------
+
+  This has been seen in a number of guises over the years - most commonly
+  on Linux systems (although the problem may also occur elsewhere).  The
+  underlying problem is that typical installation may not always include
+  the full set of library links required for building the Net-SNMP software.
 
   This problem can usually be fixed by installing the missing packages
   (typically the development version of a package that is already there).
@@ -3037,20 +3077,6 @@ The compilation is complaining about missing libraries. Why?
 
   If the compilation is complaining about a .la file, then you should
   install the relevant development package, as listed above.
-
-
-
-I'm getting an error "autoheader: not found" - what's wrong?
------------------------------------------------------------
-
-    This usually appears when compiling the current development source
-  version, obtained via CVS.  Unfortunately, the timestamps on some of
-  the configure files are such that make assumes (mistakenly) that the
-  configure script needs to be re-generated.
-    A similar problem may arise relating to 'autoconf'.
-
-    In both cases, this can be corrected by running the command
-  "make -k touchit" before attempting to make the main package.
 
 
 
@@ -3111,6 +3137,77 @@ How can I reduce the installation footprint or speed up compilation?
 
 
 
+How can I compile the project for use on an embedded system?
+-----------------------------------------------------------
+
+  Although this is definitely a Frequently Asked Question on the project
+  mailing lists, it hasn't really been a Frequently _Answered_ Question.
+  The basic problem is that none of the core development team have much
+  involvement or experience with embedded systems.  And although we have
+  repeatedly put out a plea for implementation reports and advice, this
+  has not so far been particularly successful.  So the first thing to say
+  is that the following suggestions should be treated with a greater than
+  usual level of suspicion.
+
+  The second thing to say is that compiling the Net-SNMP project for use
+  on an embedded system typically means compiling the *agent* (rather than
+  the trap receiver, or command-line tools).  So that is what this entry
+  will concentrate on.
+
+  There are three main aspects to consider:
+     - how to compile the code,
+     - *what* code to compile, and
+     - how to install the resulting agent binary.
+
+  The Net-SNMP project uses the standard "configure" mechanism, so the
+  usual cross-compilation options are available - in particular "--host"
+  and "--target".  It is also possible to specify the compiler and linker
+  to use ("--with-cc" and "--with-ld"), and any special flags to pass
+  to them ("--with-cflags" and "--with-ldflags").   There shouldn't be
+  anything particularly special about compiling the Net-SNMP code, so
+  see the documentation for your target environment for more information.
+  (And please let us know if there *is* anything special that should be
+  mentioned here!)
+
+  If the aim is simply to generate an SNMP agent to run on the target
+  system, it's probably not necessary to compile the command-line tools
+  or trap receiver.  The configure option "--disable-applications" will
+  omit these elements.  See the previous entry for other potentially
+  relevant useful options.
+
+  Unfortunately, the SNMP agent (and in particular, the code for individual
+  MIB modules) is the most system-specific part of the Net-SNMP software.
+  It may prove necessary to disable particular MIB modules if they do not
+  compile successfully, or attempt to use the wrong system-specific APIs.
+  This can be done using the configure option "--with-out-mib-modules".
+  Alternatively, the option "--enable-mini-agent" will omit all but the
+  core MIB module code.  Additional modules can then be added individually
+  using "--with-mib-modules".
+
+  Further information about how to deal with problems with individual MIB
+  modules is reliant on suitable reports being forthcoming from the wider
+  Net-SNMP community.  The ball is in your court!
+
+  Finally, installing the agent binary is _not_ simply a matter of copying
+  the "snmpd" file onto the target system.  The agent typically relies on
+  a number of additional libraries (and possibly the presence of assorted
+  MIB files, unless this has been explicitly omitted).  It is normally
+  necessary to run "make install", before copying the installed framework
+  to the target system.
+
+  If the install destination needs to be different to the eventual location
+  on the target system, this can be handled using the configure options
+  "--prefix" (for the target location) and "--with-install-prefix" (for the
+  temporary install location).  Alternatively, this can be handled as part
+  of the install command:
+       make install prefix={target location} INSTALL_PREFIX={temp location}
+
+  Alternatively, if the agent is compiled with static linking (and no MIB
+  files), then it may be possible to simply copy the agent binary across to
+  the target system.  See the next entry for details.
+
+
+  
 How can I compile the project to use static linking?
 ---------------------------------------------------
 
@@ -3154,26 +3251,23 @@ How can I compile the project to use static linking?
 
 
 
-Why is the project workspace empty under Visual C++?
----------------------------------------------------
+Why does 'make test' skip various tests?
+---------------------------------------
 
-    This is probably due to the different ways that Unix and Windows
-  handle text file line termination.  Older versions of WinZip don't
-  handle this properly, and Visual C++ gets confused (poor dear!).
-  The latest version of WinZip is reported to unpack this correctly.
+  Some of the tests are only relevant to particular operating systems,
+  or rely on specific areas of functionality.  The test framework will
+  check whether the relevant elements are available before running the
+  relevant tests, and will skip them if these modules have been omitted
+  from the build environment (or do not apply to the current system).
 
-
-
-Why does 'make test' skip five tests?
------------------------------------
-
-    You mean T053agentv1trap, T054agentv2ctrap, T055agentv1mintrap,
-  T056agentv2cmintrap and T113agentxtrap?
-
-    These tests rely upon functionality in the NET-SNMP-EXAMPLES-MIB
-  which is not implemented in the default agent configuration.  To
-  include these tests, invoke the `configure` script to include
-      '--with-mib-modules="examples/example".
+  One example of this are the tests T053agentv1trap, T054agentv2ctrap,
+  T055agentv1mintrap, T056agentv2cmintrap and T113agentxtrap,  which
+  rely upon functionality from the NET-SNMP-EXAMPLES-MIB implementation.
+  This module is not included in the default agent configuration, so the
+  test framework will skip these tests.
+    To include them, run
+        "configure --with-mib-modules=examples/example"
+  and re-compile.
 
 
 
