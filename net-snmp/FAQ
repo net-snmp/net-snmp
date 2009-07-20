@@ -143,18 +143,17 @@ TABLE OF CONTENTS
    What's the difference between the various mib2c configuration files?
    Which mib2c configuration file should I use?
    How can I have mib2c generate code for both scalars and tables?
-   Are there any examples, or documentation?
+   Are there any examples, or documentation for developing MIB modules?
    Where should I put the files produced by 'mib2c'?
-   I've created a new module with 'mib2c' but it doesn't work.  Why not?
-   I've added my code to this template and it still doesn't work.  Why not?
+   Why doesn't my new MIB module report anything?
    Why does the iterator call my get_{first,next} routines so often?
    How can I get the agent to generate a trap (or inform)?
+   How can I get an AgentX sub-agent to generate a trap (or inform)?
    How can I get the agent to send an SNMPv1 (or SNMPv2c) trap?
    How can I get the agent to include varbinds with an SNMPv1 trap?
    How can I get the agent to send an SNMPv1 enterprise-specific trap?
    How can I get the agent to send an SNMPv3 trap (or inform)?
    Why does calling 'send_v2trap' generate an SNMPv1 trap (or vice versa)?
-   What if I'm using an AgentX sub-agent instead?
    How can I register a MIB module in a different (SNMPv3) context?
  MISC
    What ASN.1 parser is used?
@@ -3352,7 +3351,10 @@ How does the agent fetch the value of a MIB variable from the system?
   information held elsewhere, perhaps in the operating system kernel or
   some other application.  Handling this is much more complex - since
   a lot depends on what mechanisms are provided for retrieving (and
-  possibly updating) this information.
+  possibly updating) this information.  The mib2c tool can generate code
+  for processing SNMP requests, based on some internal cache of management
+  information, but it cannot help with populating this cache with the
+  underlying data.  That is up to the MIB implementer.
 
   See the existing MIB modules in the Net-SNMP source tree for various
   examples of assorted approaches to this task.
@@ -3366,7 +3368,8 @@ Mib2c complains about a missing "mib reference" - what does this mean?
   the definition of the MIB subtree you're trying to implement.  This
   might be because it hasn't been installed, the name is wrong, or
   (most likely), because it isn't in the default list.  See the MIBS
-  section for more details.
+  section for more details, or the next entry for suitable invocations
+  of 'mib2c'.
 
 
 
@@ -3397,9 +3400,9 @@ Mib2c complains about not having a "valid OID" - what does this mean?
 Why doesn't mib2c like the MIB file I'm giving it?
 -------------------------------------------------
 
-    This is most likely the same problem as above.  Mib2c takes the
-  name of a MIB object, not the name of a file (or a MIB module).
-  Try using the name of the MODULE-IDENTITY definition.
+  This is most likely the same problem as the previous entry.  Mib2c
+  takes the name of a MIB _object_, not the name of a file (or MIB
+  module).  Try using the name of the MODULE-IDENTITY definition.
 
     Another possibility is that the MIB may contain syntax errors.
   Try running it through 'snmptranslate' or a dedicated SMI
@@ -3411,15 +3414,14 @@ Why doesn't mib2c like the MIB file I'm giving it?
 Mib2c ignores my MIB and generates a pair of 'mib-2' code files.  Why?
 ---------------------------------------------------------------------
 
-    This is usually a sign of the same problem as above - giving
-  mib2c the name of the file containing the MIB (or of the MIB
+    This is usually a sign of the same problem as the previous entries,
+  giving mib2c the name of the file containing the MIB (or of the MIB
   itself), rather than an object within it.
 
-  Earlier versions of mib2c didn't detect this situation, and
-  rather than report an error, it merrily constructed a template
-  for a default starting point of the mib-2 node.
+  Earlier versions of mib2c didn't detect this situation, and merrily
+  constructed a template for a default starting point of the mib-2 node.
 
-  More recent versions issue the error mentioned above instead.
+  More recent versions complain about not having a valid OID instead.
 
 
 
@@ -3513,7 +3515,10 @@ Which mib2c configuration file should I use?
 
     For implementing a group of scalar objects, then the choice is
   simple - use 'mib2c.scalar.conf'.  Similarly, for generating traps
-  or informs, use 'mib2c.notify.conf'.
+  or informs, use 'mib2c.notify.conf'.  But note that this only assists
+  with the code to actually generate the trap.  It does not address the
+  issue of _when_ to send the trap.  See the FAQ entry "How can I get
+  the agent to generate a trap?" for more information.
 
 
 
@@ -3522,21 +3527,20 @@ How can I have mib2c generate code for both scalars and tables?
 
     This uses a very powerful tool called a "text editor" :-)
 
-    The v5 Net-SNMP mib2c tool uses separate configuration files to
-  generate code for scalar objects, and for tables.  This means that
-  it's not possible to automatically generate a single code file
-  that supports both scalars and tables.
+    The mib2c tool uses separate configuration files to generate code
+  for scalar objects, and for tables.  This means that it's not possible
+  to automatically generate a single code file that supports both scalars
+  and tables.
 
     Instead, the two code files need to be generated separately, and
-  then combined manually.  The handler and supporting routines from
-  one file can simply be included in the other with no changes needed.
-  The corresponding registration of these handlers can then be copied
-  from the first initialisation routine into the second.
+  then combined manually.  This will typically mean copying the handler
+  routines for the scalar object(s) into the table file, and adding the
+  code to register these handler(s) to the table initialisation routine.
 
 
 
-Are there any examples, or documentation?
--------------------------------------------
+Are there any examples, or documentation for developing MIB modules?
+-------------------------------------------------------------------
 
     Many of the MIB modules shipped with the Net-SNMP agent still
   use the v4 "traditional" MIB module API, but an increasing number
@@ -3550,21 +3554,19 @@ Are there any examples, or documentation?
   Log MIB (see 'notification-log-mib/*'), used by 'snmptrapd' to
   log incoming traps.
  
-    The basic iterator handler is used in a number of modules, such
-  as the TCP and UDP table implementations (mibII/tcpTable &
-  mibII/udpTable), VACM context handling (mibII/vacm_context) and
-  various tables relating to agent internals (agent/*).  These show
-  a number of different approaches to using the iterator helper, so
-  it's worth comparing them.
+    The basic iterator handler is used in the TCP and UDP table
+  implementations (mibII/tcpTable & mibII/udpTable), VACM context
+  handling (mibII/vacm_context) and various tables relating to agent
+  internals (agent/*).  These show a number of different approaches
+  to using the iterator helper, so it's worth comparing them.
 
     The two examples/netSnmpHostsTable* modules provide a contrast
   between the iterator and iterator_access helpers.
 
-    There are an ever-increasing number of examples based on the
-  MfD framework (see '{if,ip,tcp,udp}-mib/').  Much of this code
-  is not intended to be viewed directly, but individual files are
-  clearly commented to distinguish between internal implementation
-  and public code.
+    There are several examples based on the MfD framework (see
+  '{if,ip,tcp,udp}-mib/').  Much of this code is not intended to
+  be viewed directly, but individual files are clearly commented
+  to distinguish between internal implementation and public code.
 
     The Net-SNMP agent does not currently include any MIB modules
   using the array-user container-based helper.  The best examples
@@ -3579,7 +3581,8 @@ Where should I put the files produced by 'mib2c'?
   If you're using the main source tree to compile your new module, then
   put these two files (mymib.[ch]) in the directory 'agent/mibgroup'.
   You should then re-run configure to add in your new module
-  ("configure --with-mib-modules=mymib") and recompile.
+        configure --with-mib-modules=mymib
+  and recompile.
 
     If you've got a number of new modules to add, it might be
   sensible to put them all into a single subdirectory of 'mibgroup'.
@@ -3591,61 +3594,72 @@ Where should I put the files produced by 'mib2c'?
 		config_require(mymib/myOtherTable)
 
   If this was saved as the file 'mymib.h', then the same configure
-  line given above, would pull in all three modules.  See the
-  current contents of 'agent/mibgroup' for examples of this.
+  line given above, would pull in all three modules.  See the current
+  contents of 'agent/mibgroup' for examples of this.  Note that the
+  MfD framework will generate a similar grouping automatically.
 
 
 
-I've created a new module with 'mib2c' but it doesn't work.  Why not?
---------------------------------------------------------------------
+Why doesn't my new MIB module report anything?
+---------------------------------------------
 
-    Remember that 'mib2c' generates a template for the MIB implementation.
-  It doesn't fill in all the details for you.  In particular, it cannot
-  know how to obtain the information needed to answer particular queries.
-  That's the job of the MIB module programmer (you!) -  See the previous
-  question for how to proceed.
+    There are probably four main reasons why a new MIB module isn't working.
+  Either it hasn't been included in the running agent,  the code is present
+  but hasn't been initialised,  the module has been initialised but the
+  handler isn't being called, or there's a problem with the module code itself.
 
-    Essentially mib2c handles the syntax of the MIB implementation,
-  leaving you to concentrate on the semantics.
+  To check whether the code files are being compiled, the easiest approach is
+  simply to look at the directory where the code is located.  When the agent is
+  compiled, this should produce .o files (and probably .lo files) corresponding
+  to the C code files for this module.  Alternatively, run 'nm' (or 'strings')
+  on the MIB module library (libnetsnmpmibs), and look for the names of the
+  initialisation routines or handlers (or the text of any messages displayed by
+  the module code).
+
+  One other thing to check is whether you have multiple copies of the software
+  installed on the system.  This is a particular problem when compiling from
+  source (to include your new module), without first removing any vendor-supplied
+  version of the agent (which won't include this new code).
 
 
+  Assuming that you have confirmed that the module code is present in the agent,
+  the next step is to check whether the initialisation routine is being called
+  to register the MIB objects.  The simplest way to do this is to include a
+  suitable debugging statement within the initialisation routine, and start
+  the agent with the corresponding '-Dtoken'.  Alternatively, try walking the
+  nsModuleName column object, and look for mention of the new MIB module.
 
-I've added my code to this template and it still doesn't work.  Why not?
------------------------------------------------------------------------
 
-    It's difficult to provide a definitive answer to that.  The
-  best we can do is suggest a checklist that might help pinpoint
-  the source of the problem.  Try looking at the following:
+  Assuming the module has been registered, the next step is to check whether
+  the handler is being called, when the agent receives a suitable SNMP request.
+  Again, the simplest way to do this is to include debugging statements within
+  the handler routine, and start the agent with the corresponding '-Dtoken'.
+  Then issue an "snmpget" request for an instance within the new MIB module.
+  (This command is preferable to the usual "snmpwalk" command, as it is more
+  closely focused on the MIB module in question).
 
-    - Is the new module being compiled?
-        (Delete any .o files, and re-run 'make'
-         Are the .o files re-created?)
+  If this indicates that the handler routine isn't being called, then there are
+  two main likely causes.  Firstly, check the access control settings.  If these
+  are configured to block access to this portion of the OID tree, then the MIB
+  handler will never be called.  Secondly, several of the table helpers are
+  designed to know which rows of the table are valid, and will call the main
+  MIB handler with information about the relevant row.  If the requested row is
+  not valid (or the table is empty), then the handler will not be called.
 
-    - Is it being included in the agent library?
-        (Run 'nm' on the library and look for the names
-         of the initialisation routine and variable handlers)
 
-    - Is the initialisation routine being run?
-        (Activate the debugging code that you put into
-         this routine.  You *do* include debugging code 
-         as a matter of course, don't you?)
+  Finally, if the handler _is_ being called, but is still not returning any
+  information, then the cause probably lies with your MIB module code.  In which
+  case, it's really up to you to find the problem and fix it!  Either activate
+  any debugging code that you have included within the handler routine, or run
+  the agent under a source code debugger, and step through the handler processing.
+  In either case, it's much easier to debug these problems when processing an
+  "snmpget" request, rather than "snmpgetnext" or "snmpwalk".
 
-    - Has the module been registered with the agent?
-        (Try walking the NET-SNMP-MIB::nsModuleTable.
-        This will also check whether the agent accepts
-        requests for enterprise-specific OIDs)
-
-    - Is the module handler actually being called at all?
-        (Activate the debugging code that you put into this
-         handler, and do a single 'snmpget' or 'snmpgetnext'
-         for a suitable instance.  You *do* include debugging
-         code as a matter of course, don't you?)
-
-    - Is it returning success or an error?
-        (Activate the debugging code.... but you get the idea!)
-
-  That won't actually solve the problem, but at least you'll
-  have some idea where to look.
+  Remember that 'mib2c' simply generates template code for your MIB module.
+  It's up to you to fill in the details, to report the actual information from
+  whatever underlying subsystem is being monitored.   Mib2c cannot help with
+  the semantics of the MIB module - it's purely there to provide an initial
+  code framework, based on the _syntax_ of the MIB module objects.
 
 
 
@@ -3653,7 +3667,7 @@ Why does the iterator call my get_{first,next} routines so often?
 -----------------------------------------------------------------------
 
     The first thing to realise is that the 'get_first' and 'get_next'
-  hook routines are concerned with processing a single request, not
+  hook routines are concerned with processing a single SNMP request, not
   with walking the whole table.  A full "snmpwalk" command will typically
   involve a series of individual 'GetNext' requests, and every one of
   these will trigger a separate 'get_first/get_next/get_next/....' cycle.
@@ -3706,13 +3720,14 @@ How can I get the agent to generate a trap (or inform)?
 
     But if the trap is intended to report on a change of status
   (e.g. a network interface going up or down, or a disk filling up),
-  then actually detecting this is non-trivial.   It's necessary to
-  poll the value(s) on a regular basis, save the results and compare
-  them with the new values the next time round.
+  then actually detecting this is non-trivial.   Unless the underlying
+  system can signal this situation to the agent, then it's typically
+  necessary to poll the value(s) on a regular basis, save the results
+  and compare them with the new values the next time round.
 
     The simplest way to handle this is via the DisMan Event MIB,
   which is designed for exactly this purpose.  As long as you can
-  specify MIB object(s) to monitor, and the values or thresholds
+  specify a MIB object to monitor, and the value or thresholds
   that should trigger a notification, then this module can check
   these values regularly, and automatically send a suitable trap
   when appropriate.  See the 'snmpd.conf(5)' man page (under
@@ -3720,9 +3735,28 @@ How can I get the agent to generate a trap (or inform)?
   
     Otherwise, you'd need to use the routines documented in
   'snmp_alarm(3)' to regularly invoke a monitoring routine. This
-  could check the necessary conditions (which need not be MIB
+  would check the necessary conditions (which need not be MIB
   objects), and call the 'send_xxx_trap()' routine (as generated
   by 'mib2c.notify.conf') when appropriate.
+
+
+
+How can I get an AgentX sub-agent to generate a trap (or inform)?
+----------------------------------------------------------------
+
+  This is done in exactly the same manner as with the main SNMP agent.
+  Calling one of the routines described in 'snmp_trap_api(3)' will cause
+  the AgentX sub-agent to send a notification to the master agent, which
+  will then pass this on to the configured trap destination(s).
+  
+  One of the original design aims of the Net-SNMP AgentX support was that
+  the agent (or subagent) framework should be transparent to a MIB module
+  implementer. The interface between the agent framework and a MIB module
+  should be independent of the protocol used to receive the original request.
+  So the exact same MIB module code could be used within a traditional
+  SNMP-only agent, or an AgentX subagent, with no changes needed.
+
+    This also holds for sending traps.
 
 
 
@@ -3825,24 +3859,6 @@ Why does calling 'send_v2trap' generate an SNMPv1 trap (or vice versa)?
 
 
 
-What if I'm using an AgentX sub-agent instead?
----------------------------------------------
-
-    That doesn't matter - the routines described in 'snmp_trap_api(3)'
-  can still be used, and the subagent will do the Right Thing.
-  
-  One of the original design aims of the AgentX support was that this
-  should be transparent to a MIB module implementer.  The agent-module
-  interface should be independent of the protocol used to receive the
-  original request.  So the exact same MIB module code could be used
-  within a traditional SNMP-only agent, or an AgentX subagent, with no
-  changes needed.
-    In fact, the main agent supplied as part of the package can indeed
-  be run as an SNMP agent or an AgentX subagent, simply based on command
-  line flags (or similar configuration options).
-
-
-
 How can I register a MIB module in a different (SNMPv3) context?
 ---------------------------------------------------------------
 
@@ -3850,13 +3866,15 @@ How can I register a MIB module in a different (SNMPv3) context?
   an agent can support parallel versions of the same MIB objects,
   referring to different underlying data sets.  By default, a MIB
   module registrations will use the default empty context of "".
-  But it's also possible to explicitly register an individual MIB
-  module using a different context.
+  But it's also possible to provide MIB information using a different
+  (non-default) context.
 
-    With the v4 API, this uses the call 'register_mib_context()'
-  rather than the REGISTER_MIB macro.  This is significantly more
-  detailed, but most of the additional parameters can take fixed
-  values, if all that's needed is to change the registration context.
+    There are three aspects involved in doing this.  Firsly, it's necessary
+  to register the MIB module in this non-default context.  With the v4 API,
+  this uses the call 'register_mib_context()' rather than the REGISTER_MIB
+  macro.  This is significantly more detailed, but most of the additional
+  parameters can take fixed values, if all that's needed is to change the
+  registration context.
 
   Instead of the macro call:
         REGISTER_MIB("my_token", my_variables, variable1, my_variables_oid);
@@ -3877,20 +3895,37 @@ How can I register a MIB module in a different (SNMPv3) context?
         reg->contextName = strdup("my_context");
         netsnmp_register_handler(reg);
 
-    In either case, it will also be necessary to define suitable
-  access control entries to cover requests using the new context.
-  This can either list each context explicitly:
+
+  Secondly, it is necessary to configure the access control settings to allow
+  access to information in the new context.  This is handled automatically
+  when using the simple "rouser" or "rwuser" directives.  But if access control
+  is configured using the fuller com2sec/group/view/access mechanism, then the
+  "access" line must specify the appropriate context(s), either explicitly:
 
 	access {group} "my_context" any noauth exact  ......
 
-  or use a single entry to cover all possible contexts:
+  or using a single entry to cover all possible contexts:
 
 	access {group} ""           any noauth prefix ......
 
-  But note that *both* steps are required.  Changing the access
-  control settings won't affect the default context used for MIB
-  registrations, and registering a MIB in a non-default context
-  won't automatically configure the necessary access control settings.
+
+  Finally, the SNMP request used to retrieve (or update) the information
+  must also specify the required context.  With SNMPv3 requests, the context
+  is part of the protocol, so this can be done using a command-line option:
+
+      snmpwalk -v 3 -n my_context .....
+
+  With community-based requests (SNMPv1 and SNMPv2c), things aren't so simple.
+  Although the "rocommunity" and "rwcommunity" settings also configure access
+  for all possible contexts, there's no way to specify a non-default context
+  as part of the request.
+
+  The only way to handle non-default contexts with community-based SNMP requests
+  is to set up a mapping from the community string to the desired context.  This
+  uses the "com2sec" directive, with an additional "-Cn" parameter.   Note that
+  this also means that the access control must be configured using the full
+  com2sec/group/view/access mechanism.  The short-form access control directives
+  do not handle the mapping of community strings to non-default contexts.
 
 
 
