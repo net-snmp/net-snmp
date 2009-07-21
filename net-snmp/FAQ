@@ -26,7 +26,9 @@ TABLE OF CONTENTS
    What's the difference between SNMPv2 and SNMPv2c?
    Which versions of SNMP are supported in this package?
    Can I use SNMPv1 requests with an SNMPv2 MIB (or vice versa)?
+   How can I monitor my system with SNMP?
    Where can I find more information about network management?
+   What ports does SNMP use?
    Is Net-SNMP thread safe?
  APPLICATIONS
    How do I add a MIB?
@@ -58,6 +60,7 @@ TABLE OF CONTENTS
    OK, what should I put in snmp.conf?
    How do I specify IPv6 addresses in tools command line arguments?
  PERL
+   What is the purpose of the Perl SNMP module?
    Where can I get the Perl SNMP package?
    How do I install the Perl SNMP modules?
    But compiling this fails! Why?
@@ -569,6 +572,30 @@ Can I use SNMPv1 requests with an SNMPv2 MIB (or vice versa)?
 
   
 
+How can I monitor my system with SNMP?
+-------------------------------------
+
+  There are two main methods of using SNMP for monitoring.  One is to regularly
+  query the SNMP agent for information of interest, graphing these values and/or
+  saving them for later analysis.  That's not really the focus of the Net-SNMP
+  project - our tools are more low-level, single-shot commands.  For this sort
+  of high-level management, you're really looking at a management console
+  application (such as Nagios or OpenNMS), or a data logging application
+  (such as RRDtool, or one of its front-ends - MRTG, Cacti, etc).
+
+  The other approach is to configure the SNMP agent to monitor the relevant
+  information itself, and issue an alert when the values pass suitable limits.
+  See the section ACTIVE MONITORING in the snmpd.conf(5) man page for details.
+
+  Note that this entry makes no reference as to _what_ you should monitor, or
+  what values might be significant.  That's because it is impossible to provide
+  a universal answer to these questions.  The information to monitor, and the
+  normal operating values will ultimately depend on your local environment.
+  SNMP is simply a tool to _help_ you manage your systems - it isn't a magic
+  panacea - you still have to think for yourself!
+
+
+
 Where can I find more information about network management?
 ----------------------------------------------------------
 
@@ -588,6 +615,22 @@ Where can I find more information about network management?
       ftp://rtfm.mit.edu/pub/usenet/comp.protocols.snmp/
 
   or via any of the Web sites above.
+
+
+
+What ports does SNMP use?
+------------------------
+
+  There are three main network ports (and one named socket), which are 
+  typically used by SNMP.  These are:
+
+    - UDP port 161       - SNMP requests (GET* and SET)
+    - UDP port 162       - SNMP notifications  (Traps/Informs)
+    - TCP port 705       - AgentX
+    - /var/agentx/master - AgentX
+
+  However, these are simply the default "well-known" ports for these purposes,
+  and it is perfectly possible to accept requests on other ports.
 
 
 
@@ -1479,6 +1522,31 @@ How do I specify IPv6 addresses in tools command line arguments?
 
 PERL
 ====
+
+What is the purpose of the Perl SNMP module?
+-------------------------------------------
+
+  Short, comprehensive (but ultimately unhelpful) anwer - to provide a
+  perl interface for SNMP operations.
+
+  Longer, incomplete (but more useful) answer - there are probably two
+  main uses for the Perl SNMP module.  The first is for developing client
+  management applications, using perl to send SNMP requests, and manipulating
+  or displaying the results.  As such, this is a straight alternative to
+  various other SNMP toolkits currently available (for both perl and other
+  programming languages).
+
+  The second is as a means for extending the functionality of the Net-SNMP
+  agent, by implementing new MIB modules.  This is an alternative to the
+  other script-based extension mechanisms, but is more tightly bound to the
+  Net-SNMP agent (and hence more efficient), while still avoiding the need
+  to write C code.
+
+  It is also possible to use the perl SNMP module in the snmpd.conf file,
+  or to process incoming notifications,  but the above are probably the
+  two primary uses.
+
+
 
 Where can I get the Perl SNMP package?
 -------------------------------------
