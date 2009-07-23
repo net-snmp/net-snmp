@@ -89,6 +89,7 @@ CLEAN :
 	-@erase "$(INTDIR)\vacm_conf.obj"
 	-@erase "$(INTDIR)\vacm_vars.obj"
 	-@erase "$(INTDIR)\var_route.obj"
+	-@erase "$(INTDIR)\notification_log.obj"
 	-@erase "$(INTDIR)\vc??.idb"
 	-@erase "$(INTDIR)\versioninfo.obj"
 	-@erase "$(INTDIR)\$(PROGNAME).pch"
@@ -201,6 +202,7 @@ LIB32_OBJS= \
 	"$(INTDIR)\udp.obj" \
 	"$(INTDIR)\udpTable.obj" \
 	"$(INTDIR)\var_route.obj" \
+	"$(INTDIR)\notification_log.obj" \
 	"$(INTDIR)\dlmod.obj" \
 	"$(INTDIR)\errormib.obj" \
 	"$(INTDIR)\extensible.obj" \
@@ -302,6 +304,7 @@ CLEAN :
 	-@erase "$(INTDIR)\vacm_conf.obj"
 	-@erase "$(INTDIR)\vacm_vars.obj"
 	-@erase "$(INTDIR)\var_route.obj"
+	-@erase "$(INTDIR)\notification_log.obj"
 	-@erase "$(INTDIR)\vc??.idb"
 	-@erase "$(INTDIR)\vc??.pdb"
 	-@erase "$(INTDIR)\versioninfo.obj"
@@ -415,6 +418,7 @@ LIB32_OBJS= \
 	"$(INTDIR)\udp.obj" \
 	"$(INTDIR)\udpTable.obj" \
 	"$(INTDIR)\var_route.obj" \
+	"$(INTDIR)\notification_log.obj" \
 	"$(INTDIR)\dlmod.obj" \
 	"$(INTDIR)\errormib.obj" \
 	"$(INTDIR)\extensible.obj" \
@@ -807,6 +811,12 @@ SOURCE=..\..\agent\mibgroup\mibII\udpTable.c
 SOURCE=..\..\agent\mibgroup\mibII\var_route.c
 
 "$(INTDIR)\var_route.obj" : $(SOURCE) "$(INTDIR)"
+	$(CPP) $(CPP_PROJ) $(SOURCE)
+
+
+SOURCE=..\..\agent\mibgroup\notification-log-mib\notification_log.c
+
+"$(INTDIR)\notification_log.obj" : $(SOURCE) "$(INTDIR)"
 	$(CPP) $(CPP_PROJ) $(SOURCE)
 
 

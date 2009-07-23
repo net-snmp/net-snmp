@@ -8,6 +8,7 @@ extern          "C" {
 #if HAVE_SYSLOG_H
 #include <syslog.h>
 #endif
+#include <stdio.h>
 #include <stdarg.h>
 
 #ifndef LOG_ERR
