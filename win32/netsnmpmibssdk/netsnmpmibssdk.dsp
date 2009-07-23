@@ -216,14 +216,6 @@ SOURCE=..\..\agent\mibgroup\snmp-notification-mib\snmpNotifyFilterTable\snmpNoti
 SOURCE=..\..\agent\mibgroup\notification\snmpNotifyTable.c
 # End Source File
 # End Group
-# Begin Group "notification-log"
-
-# PROP Default_Filter ""
-# Begin Source File
-
-SOURCE=..\..\agent\mibgroup\notification-log-mib\notification_log.c
-# End Source File
-# End Group
 # Begin Group "target"
 
 # PROP Default_Filter ""
