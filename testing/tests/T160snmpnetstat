@@ -5,16 +5,16 @@
 # snmpnetstat test only works with UDP or TCP
 if [ "x$SNMP_TRANSPORT_SPEC" = "x" -o "x$SNMP_TRANSPORT_SPEC" = "xudp" ]; then
   proto=udp
+  HEADER "if snmpnetstat finds the running agent in udpTable"
   SKIPIFNOT USING_MIBII_UDPTABLE_MODULE
 elif [ "x$SNMP_TRANSPORT_SPEC" = "xtcp" ]; then
   proto=tcp
+  HEADER "if snmpnetstat finds the running agent in tcpTable"
   SKIPIFNOT USING_MIBII_TCPTABLE_MODULE
 else
   HEADER "if snmpnetstat finds the running agent in udpTable/tcpTable"
   SKIP
 fi
-
-HEADER "if snmpnetstat finds the running agent in ${proto}Table"
 
 # on some systems the agent needs to be run as root to access udpTable/tcpTable
 # - else force skip
