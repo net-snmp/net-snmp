@@ -1681,7 +1681,11 @@ typedef unsigned int   uintptr_t;
 #define NI_MAXHOST	1025
 #endif
 
-#ifndef HAVE_STRTOULL
+/* Define to 1 if you have the `strtoull' function. */
+#if defined(_MSC_VER) && _MSC_VER < 1300
+#undef HAVE_STRTOULL
+#else
+#define HAVE_STRTOULL 1
 #define strtoull _strtoui64
 #endif
 
