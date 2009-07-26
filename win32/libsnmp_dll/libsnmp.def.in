@@ -414,6 +414,7 @@ EXPORTS
 	netsnmp_udp6_agent_config_tokens_register
 	init_usm_conf
 	strtok_r
+;        strtoull
         snmp_reset_var_buffers
         netsnmp_container_add_index
         netsnmp_container_find
