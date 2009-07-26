@@ -31,7 +31,8 @@ AC_CHECK_FUNCS([fork            gai_strerror                   ] dnl
                [strcasestr                    strdup           ] dnl
                [strerror        strlcpy       strncasecmp      ] dnl
                [strtok_r        strtol        strtoul          ] dnl
-               [sysconf         times         vsnprintf        ] )
+               [strtoull        sysconf       times            ] dnl
+               [vsnprintf                                      ] )
 
 #  Agent:
 AC_CHECK_FUNCS([cgetnext        execv         gai_strerror     ] dnl

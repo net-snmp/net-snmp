@@ -288,6 +288,10 @@ SOURCE=..\..\snmplib\strtok_r.c
 # End Source File
 # Begin Source File
 
+SOURCE=..\..\snmplib\strtoull.c
+# End Source File
+# Begin Source File
+
 SOURCE=..\..\snmplib\ucd_compat.c
 # End Source File
 # Begin Source File
