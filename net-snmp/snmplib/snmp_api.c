@@ -1265,8 +1265,11 @@ snmpv3_probe_contextEngineID_rfc5343(void *slp, netsnmp_session *session) {
     if (!pdu)
         return SNMP_ERR_GENERR;
     pdu->version = SNMP_VERSION_3;
-    pdu->securityName = strdup(session->securityName);
-    pdu->securityNameLen = strlen(pdu->securityName);
+    /* don't require a securityName */
+    if (session->securityName) {
+        pdu->securityName = strdup(session->securityName);
+        pdu->securityNameLen = strlen(pdu->securityName);
+    }
     pdu->securityLevel = SNMP_SEC_LEVEL_NOAUTH;
     pdu->securityModel = session->securityModel;
     if (memdup(&pdu->contextEngineID, probeEngineID, probeEngineID_len) !=
@@ -2279,16 +2282,19 @@ snmpv3_build(u_char ** pkt, size_t * pkt_len, size_t * offset,
         }
     }
     if (pdu->securityNameLen == 0 && pdu->securityName == NULL) {
-        if (session->securityNameLen == 0) {
+        if (session->securityModel != NETSNMP_TSM_SECURITY_MODEL &&
+            session->securityNameLen == 0) {
             session->s_snmp_errno = SNMPERR_BAD_SEC_NAME;
             return -1;
         }
-        pdu->securityName = strdup(session->securityName);
-        if (pdu->securityName == NULL) {
-            session->s_snmp_errno = SNMPERR_GENERR;
-            return -1;
+        if (session->securityName) {
+            pdu->securityName = strdup(session->securityName);
+            if (pdu->securityName == NULL) {
+                session->s_snmp_errno = SNMPERR_GENERR;
+                return -1;
+            }
+            pdu->securityNameLen = session->securityNameLen;
         }
-        pdu->securityNameLen = session->securityNameLen;
     }
     if (pdu->securityLevel == 0) {
         if (session->securityLevel == 0) {
