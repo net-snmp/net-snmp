@@ -15,6 +15,3 @@ SNMP_TRANSPORT_SPEC=unix
 SNMP_TEST_DEST=${SNMP_TMPDIR}/testunixsocket
 
 . ./Stransport
-
-# cleanup
-rm -f $SNMP_TEST_DEST
