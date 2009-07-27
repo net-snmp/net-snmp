@@ -936,6 +936,8 @@ main(int argc, char *argv[])
         }
     }
 
+    SOCK_STARTUP;
+
     /*
      * I'm being lazy here, and not checking the
      * return value from these registration calls.
