@@ -120,6 +120,9 @@ if (defined($list[3][0])) {
     # IRIX/HP-UX may have lo0 at the *end* of the interface list,
     # so just check for a non-empty string
     ok(($loopback ne ''));
+  } elsif ($^O eq 'freebsd') {
+    $loopback = $list[3][-1]->val;
+    ok(($loopback =~ /^lo/));
   } else {
     ok(($loopback =~ /^lo/));
   }
@@ -301,6 +304,9 @@ sub async_cb1 {
         # IRIX/HP-UX may have lo0 at the *end* of the interface list,
         # so just check for a non-empty string
         ok(($vbr->val ne ''));
+      } elsif ($^O eq 'freebsd') {
+        $vbr = $list->[3][-1];
+        ok(($vbr->val =~ /^lo/));
       } else {
         ok(($vbr->val =~ /^lo/));
       }
