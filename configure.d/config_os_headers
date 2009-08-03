@@ -19,6 +19,7 @@ AC_HEADER_SYS_WAIT      #  <sys/wait.h>
 #  Core:
 AC_CHECK_HEADERS([getopt.h   pthread.h  regex.h      ] dnl
                  [string.h   syslog.h   unistd.h     ] dnl
+                 [stdint.h   inttypes.h              ] dnl
                  [sys/param.h        ] dnl
                  [sys/select.h       ] dnl
                  [sys/socket.h       ] dnl
