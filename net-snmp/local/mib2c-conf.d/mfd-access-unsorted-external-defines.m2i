@@ -39,7 +39,7 @@ $example_end
 /**
  * loop context
  *
- * TODO:
+ * ToDo:
  * define loop context structure
  *
  *  Since the actual loop is in the MFD handler, a loop contex parameter
@@ -358,7 +358,7 @@ ${context}_loop_get_first( $mfd_aue_param_decl, ${context}_ref_loop_ctx *loop_ct
     }
 
     /*
-     * TODO:
+     * ToDo:
      * set up loop context
      */
 @if $m2c_include_examples == 1@
@@ -393,7 +393,7 @@ $example_end
     rowreq_ctx_ref->rowreq_ctx = loop_ctx_ref->loop_ctx->rowreq_ctx;
 
     /*
-     * TODO:
+     * ToDo:
      * set local vars for index from loop_ctx_ref->loop_ctx
      *  this can be done in one of two ways:
      */
@@ -404,7 +404,7 @@ $example_end
 @   foreach $node index@
 @      include m2c_setup_node.m2i@
         /*
-         * TODO:
+         * ToDo:
          * set rowreq_ctx_ref->rowreq_ctx->tbl_idx->$node
 @      if $m2c_node_needlength == 1@
          *     and rowreq_ctx_ref->tbl_idx->${node}_len
@@ -503,7 +503,7 @@ $example_start
         return MFD_END_OF_DATA;
 
     /*
-     * TODO:
+     * ToDo:
      * set local vars for index from loop_ctx_ref->loop_ctx
      *  this can be done in one of two ways:
      */
@@ -514,7 +514,7 @@ $example_start
 @   foreach $node index@
 @      include m2c_setup_node.m2i@
         /*
-         * TODO:
+         * ToDo:
          * set rowreq_ctx_ref->rowreq_ctx->tbl_idx->$node
 @      if $m2c_node_needlength == 1@
          *     and rowreq_ctx_ref->tbl_idx->${node}_len
@@ -604,7 +604,7 @@ ${context}_loop_save_position($mfd_aue_param_decl,
     netsnmp_assert(loop_ctx_ref && save_loop_ctx_ref);
 
     /*
-     * TODO:
+     * ToDo:
      * 1) allocate new loop context, unless you can reuse a previous pointer.
      * 2) save information for the position of loop_ctx_ref in save_loop_ctx_ref.
      */
@@ -667,7 +667,7 @@ $example_start
 @    foreach $node nonindex@
 @      include m2c_setup_node.m2i@
     /*
-     * TODO:
+     * ToDo:
      * set rowreq_ctx_ref->${m2c_data_item}$node
      *     from the loop context
      */
@@ -771,7 +771,7 @@ ${context}_loop_cleanup_context( $mfd_aue_param_decl, ${context}_ref_loop_ctx *l
         ${context}_release_rowreq_ctx(loop_ctx_ref->loop_ctx->rowreq_ctx);
 
     /*
-     * TODO:
+     * ToDo:
      * release resources
      */
 @if $m2c_include_examples == 1@
@@ -881,7 +881,7 @@ $example_end
 ########################################################################
   Defining context for the loop
   -----------------------------
-    TODO : typedef ${context}_loop_context
+    ToDo : typedef ${context}_loop_context
     WHERE: ${table}_data_access.h
 
     @if $mfd_readme_verbose != 0@
@@ -931,7 +931,7 @@ $example_end
 ########################################################################
   Initialization
   --------------
-    TODO : Initialization
+    ToDo : Initialization
     FUNC : ${context}_loop_init_data
     WHERE: ${table}_data_access.c
 
@@ -944,7 +944,7 @@ $example_end
 ########################################################################
   Preparing for the loop
   ----------------------
-    TODO : initialize loop context
+    ToDo : initialize loop context
     FUNC : ${context}_loop_init_context
     WHERE: ${table}_data_access.c
 
@@ -991,7 +991,7 @@ $example_end
 ########################################################################
   The Loop
   --------
-    TODO : return raw data
+    ToDo : return raw data
     FUNC : ${context}_loop_get_first
     WHERE: ${table}_data_access.c
 
@@ -1041,7 +1041,7 @@ $example_end
 
     @end@
 
-    TODO : return raw data
+    ToDo : return raw data
     FUNC : ${context}_loop_get_next
     WHERE: ${table}_data_access.c
 
@@ -1085,7 +1085,7 @@ $example_end
 ########################################################################
   Updating the Index
   ------------------
-    TODO : update index for the raw data
+    ToDo : update index for the raw data
     FUNC : ${context}_indexes_set
     WHERE: ${table}_data_access.c
 
@@ -1101,7 +1101,7 @@ $example_end
 ########################################################################
   Saving a position in the loop
   -----------------------------
-    TODO : Saving a position in the loop
+    ToDo : Saving a position in the loop
     FUNC : ${context}_loop_save_position
     WHERE: ${table}_data_access.c
 
@@ -1135,7 +1135,7 @@ $example_end
 ########################################################################
   Returning Data For an Index
   ---------------------------
-    TODO : copy transient raw data to generated structure
+    ToDo : copy transient raw data to generated structure
     FUNC : ${context}_loop_get_data
     WHERE: ${table}_data_access.c
 
@@ -1157,7 +1157,7 @@ $example_end
 ########################################################################
   Cleaning up after the loop
   --------------------------
-    TODO : release any allocated memory
+    ToDo : release any allocated memory
     FUNC : ${context}_loop_cleanup_context
     WHERE: ${table}_data_access.c
 
