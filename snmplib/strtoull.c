@@ -1,5 +1,6 @@
 /*
- * An implementation of strtoull() for MSVC.
+ * An implementation of strtoull() for compilers that do not have this
+ * function, e.g. MSVC.
  * See also http://www.opengroup.org/onlinepubs/000095399/functions/strtoul.html
  * for more information about strtoull().
  */
@@ -19,25 +20,13 @@
 
 #include <net-snmp/net-snmp-config.h>
 
-#if !HAVE_STRTOULL
+#if !HAVE_STRTOULL || defined(STRTOULL_UNIT_TEST)
 
 #include <errno.h>
 #include <ctype.h>
 #include <limits.h>
-#ifdef HAVE_STDINT_H
-#include <stdint.h>
-#endif
-
-
-/*
- * uint64_t: C99 data type for unsigned 64-bit constants. 
- */
-#ifndef HAVE_STDINT_H
-#ifdef _MSC_VER
-typedef unsigned __int64 uint64_t;
-#else
-typedef unsigned long long uint64_t;
-#endif
+#ifdef HAVE_INTTYPES_H
+#include <inttypes.h>
 #endif
 
 /*
@@ -59,8 +48,13 @@ typedef unsigned long long uint64_t;
 #define ULLONG_MAX UINT64_C(0xffffffffffffffff)
 #endif
 
+#ifdef STRTOULL_UNIT_TEST
+uint64_t
+my_strtoull(const char *nptr, char **endptr, int base)
+#else
 uint64_t
 strtoull(const char *nptr, char **endptr, int base)
+#endif
 {
     uint64_t        result = 0;
     const char     *p;
@@ -167,13 +161,11 @@ strtoull(const char *nptr, char **endptr, int base)
     return 0;
 }
 
-#ifdef STRTOULL_UNIT_TEST
+#if defined(STRTOULL_UNIT_TEST)
 
 #include <assert.h>
 #include <stdio.h>
-#ifdef HAVE_INTTYPES_H
-#include <inttypes.h>
-#endif
+#include <stdlib.h>
 
 #ifndef PRIu64
 #ifdef _MSC_VER
@@ -197,28 +189,6 @@ struct strtoull_testcase {
     uint64_t        expected_result;
 };
 
-#ifdef __linux__
-#define HAVE_LIBC_STRTOULL
-#include <dlfcn.h>
-uint64_t libc_strtoull(const char *nptr, char **endptr, int base)
-{
-    void *libc;
-    uint64_t (*pf)(const char *, char **, int);
-    uint64_t result;
-
-    if ((libc = dlopen("libc.so.6", RTLD_LAZY)) != NULL) {
-        pf = dlsym(libc, "strtoull");
-        assert(pf);
-        result = (*pf)(nptr, endptr, base);
-        dlclose(libc);
-    }
-    else {
-        assert(! "dlopen(\"libc.so\")");
-    }
-    return result;
-}
-#endif
-
 static const struct strtoull_testcase test_input[] = {
     {"0x0", 0, 0, 3, 0},
     {"1", 0, 0, 1, 1},
@@ -239,14 +209,14 @@ static const struct strtoull_testcase test_input[] = {
     {"0x", 16, 0, 1, 0},
     {"zyyy", 0, 0, 0, 0},
     {"0xfffffffffffffffff", 0, ERANGE, 19, ULLONG_MAX},
-    {"0xfffffffffffffffffz", 0, ERANGE, 19, ULLONG_MAX},
+    {"0xfffffffffffffffffz", 0, ERANGE, 19, ULLONG_MAX}
 };
 
 int
-main(int argc, char **argv)
+main(void)
 {
     int             failure_count = 0;
-    int             i;
+    unsigned int    i;
 
     for (i = 0; i < sizeof(test_input) / sizeof(test_input[0]); i++) {
         const struct strtoull_testcase *const p = &test_input[i];
@@ -254,7 +224,7 @@ main(int argc, char **argv)
         uint64_t        result;
 
         errno = 0;
-        result = strtoull(p->nptr, &endptr, p->base);
+        result = my_strtoull(p->nptr, &endptr, p->base);
         if (errno != p->expected_errno) {
             failure_count++;
             printf("test %d failed (input \"%s\"): expected errno %d"
@@ -274,9 +244,9 @@ main(int argc, char **argv)
                    i, p->nptr, p->expected_end, (int) (endptr - p->nptr));
         }
 
-#ifdef HAVE_LIBC_STRTOULL
+#if HAVE_STRTOULL
         errno = 0;
-        result = libc_strtoull(p->nptr, &endptr, p->base);
+        result = strtoull(p->nptr, &endptr, p->base);
         if (errno != p->expected_errno) {
             failure_count++;
             printf("test %d (input \"%s\"): expected errno %d"
@@ -304,12 +274,12 @@ main(int argc, char **argv)
 
 #endif /* defined(STRTOULL_UNIT_TEST) */
 
-#endif /* !HAVE_STRTOULL */
+#endif /* !HAVE_STRTOULL || defined(STRTOULL_UNIT_TEST) */
 
 /*
  * Local variables:
  * c-basic-offset: 4
  * indent-tabs-mode: nil
- * compile-command: "gcc -Wall -Werror -DSTRTOULL_UNIT_TEST=1 -g -ldl -o strtoull-unit-test strtoull.c && ./strtoull-unit-test"
+ * compile-command: "gcc -Wall -Werror -DSTRTOULL_UNIT_TEST=1 -I../include -g -o strtoull-unit-test strtoull.c && ./strtoull-unit-test"
  * End:
  */
