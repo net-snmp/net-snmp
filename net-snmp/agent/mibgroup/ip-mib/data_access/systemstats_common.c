@@ -419,13 +419,13 @@ netsnmp_access_systemstats_entry_update_stats(netsnmp_systemstats_entry * prev_v
      */
     if (0 == need_wrap_check) {
         SNMP_FREE(prev_vals->old_stats);
+    } else {
+        /*
+         * update old stats from new stats.
+         * careful - old_stats is a pointer to stats...
+         */
+        memcpy(prev_vals->old_stats, &new_vals->stats, sizeof(new_vals->stats));
     }
-    
-    /*
-     * update old stats from new stats.
-     * careful - old_stats is a pointer to stats...
-     */
-    memcpy(prev_vals->old_stats, &new_vals->stats, sizeof(new_vals->stats));
 
     _calculate_entries(prev_vals);
 
