@@ -156,10 +156,10 @@ inetNetToMediaTable_rowreq_ctx_cleanup(inetNetToMediaTable_rowreq_ctx *
     DEBUGMSGTL(("verbose:inetNetToMediaTable:inetNetToMediaTable_rowreq_ctx_cleanup", "called\n"));
 
     netsnmp_assert(NULL != rowreq_ctx);
-
     /*
      * TODO:211:o: |-> Perform extra inetNetToMediaTable rowreq cleanup.
      */
+    SNMP_FREE(rowreq_ctx->data);
 }                               /* inetNetToMediaTable_rowreq_ctx_cleanup */
 
 /**
