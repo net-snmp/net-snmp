@@ -126,6 +126,8 @@ netsnmp_file_release(netsnmp_file * filei)
     if (NULL != filei->extras)
         netsnmp_free_all_list_data(filei->extras);
 
+    SNMP_FREE(filei);
+
     return rc;
 }
 
