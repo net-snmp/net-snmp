@@ -312,6 +312,7 @@ ipAddressPrefixTable_container_load(netsnmp_container *container)
         rowreq_ctx = NULL;
         ++count;
     }
+    ITERATOR_RELEASE(addr_it);
 
     DEBUGMSGT(("verbose:ipAddressPrefixTable:ipAddressPrefixTable_container_load", "inserted %d records\n", count));
 
