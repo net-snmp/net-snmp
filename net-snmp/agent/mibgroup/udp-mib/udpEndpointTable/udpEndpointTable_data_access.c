@@ -289,8 +289,7 @@ udpEndpointTable_container_load(netsnmp_container *container)
 
     ITERATOR_RELEASE(ep_it);
 
-    netsnmp_access_udp_endpoint_container_free(ep_c,
-                                               NETSNMP_ACCESS_UDP_ENDPOINT_FREE_DONT_CLEAR);
+    netsnmp_access_udp_endpoint_container_free(ep_c, 0);
 
 
     DEBUGMSGT(("verbose:udpEndpointTable:udpEndpointTable_container_load",
