@@ -320,7 +320,8 @@ inetNetToMediaTable_container_load(netsnmp_container *container)
         CONTAINER_REMOVE(container, ctx);
         inetNetToMediaTable_release_rowreq_ctx(ctx);
         CONTAINER_REMOVE(to_delete, NULL);
-        }
+    }
+    CONTAINER_FREE(to_delete);
 
     /*
      * free the container. we've either claimed each entry, or released it,
