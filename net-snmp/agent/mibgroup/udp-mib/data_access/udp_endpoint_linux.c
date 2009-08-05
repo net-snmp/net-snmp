@@ -252,6 +252,7 @@ _load4(netsnmp_container *container, u_int load_flags)
 
     container = netsnmp_file_text_parse(fp, container, PM_USER_FUNCTION,
                                         0, &lpi);
+    netsnmp_file_release(fp);
     return (NULL == container);
 }
 
@@ -284,7 +285,7 @@ _load6(netsnmp_container *container, u_int load_flags)
 
     container = netsnmp_file_text_parse(fp, container, PM_USER_FUNCTION,
                                         0, &lpi);
-
+    netsnmp_file_release(fp);
     return (NULL == container);
 }
 #endif /* INET6 */
