@@ -12,198 +12,104 @@ listing of all changes made to the code.
       - The -t (timeout) switch will accept floating point numbers (eg: .1)
 
     snmplib:
+      - [BUG 1619827]: Improve handling of link dependencies
+      - [PATCH  700681]: limited support for UDPv4 broadcast addresses
+      - [PATCH 1882069]: Add token for specifying an exact SNMPv3 engineID
+      - Fix assorted memory leaks
+      - Implemented RFC5343 contextEngineID probing.
       - Support for the TSM security model for use with tunneling
-      - Implemented RFC5343 contextEngineID probing. This allows for
-	probing of the contextEngineID without requiring the USM security
-	model. - implemented entirely within the library for both clients
-	and servers.
-      - Introduce printf-like versions of config_perror and config_pwarn
-	(netsnmp_config_error and netsnmp_config_warn). Replace many
-	instances of { tmpbuf[...]; sprintf(tmpbuf, ...);
-	config_p*(tmpbuf); } with netsnmp_config_*(...);
-      - Added GCC format checking attributes to the debug functions.
-      - Change snmp_sess_add_ex to consistently close and delete the
-	transport argument on failure, earlier the liveness of the
-	transport argument was undecided.
-      - Change the type of the oid arguments from oid* to const oid*.
-	Update mib2c to take advantage of the change.
-      - Convert generic source arguments from const u_char* to const void*
-	for snmp_pdu_add_variable, snmp_varlist_add_variable,
-	snmp_set_var_value, snmp_set_var_typed_value and memdup.
-      - Remove support for use of varargs.h. Now assumes that stdarg.h is
-	available.
-      - Corrected registering of multiple premib config handlers so that
-	all of them get registered as premib handlers as opposed to the
-	earlier behaviour where they always got registered as normal config
-	items.
-      - Patch: 1882069: from nschrenk: Add a exactEngineID token for
-	specifying an exact SNMPv3 engineID to use
-      - added iterator for singly linked lists; add container name in more
-	error msgs
-      - [BUG 1619827]: link against needed external libraries at library
-	link time (where they are referenced), rather than application link
-	time. Already covers most of libnetsnmpmibs' external dependencies.
-	Fixes build issues on some platforms (e.g. building with shared
-	libraries on AIX). Tested on different versions of Linux, Solaris,
-	HP-UX, AIX and IRIX.
-      - [PATCH 1592706]: Fix memory leak when cloning varbinds. Based on a
-	suggestion by Steven Dorigotti.
-      - [PATCH 700681]: limited support for UDPv4 broadcast addresses
-      - [PATCH 1895927]: change obsolete recv/send to recvfrom/sendto
-      - [BUG 1596638]: memory leak in ipCidrRouteTable, inetCidrRouteTable
-      - [BUG 1611524]: fix tcp connection table fd leak
-
 
     snmpd:
+      - [BUG 1712988]: default/configurable max # varbinds returned by GETBULK
       - [PATCH 1585146]: Extend range of available error codes
-      - patch from Wojtek Jawor to handle row deletion issues in dataset tables
-      - Added support for a user provided length variable and C string
-	values to the watcher helper.
-      - ipNetToPhysicalLastUpdated OID implemented   The value is
-	estimated with every cache reload, which is once in 60 seconds by
-	default. That means the value reported by snmpd may differ from
-	reality by one minute. If anybody needs better precision, the cache
-	timeout can be configured by setting
-	NET-SNMP-AGENT-MIB::nsCacheTimeout.1.3.6.1.2.1.4.35 to appropriate
-	value by snmpset.
-      - Enable automatic reregistering of sysORTable entries from AgentX
-	subagents. Add the sysORTable interface to the include directory.
-	Rewrite the sysORTable module to use the table_container handler.
-      - [PATCH 1901764]: for supporting logwatch files that are date based
-      - [PATCH 2053273]: to imlpement the etherlike mib (at least on linux)
-      - [PATCH 2103492]: implement RMON-MIB::etherStatsJabbers Patch from
-	Narendra K., Sandeep K. Shandilya and Shyam Iyer
-      - [BUG 1558823]: fix ipAddressTable memory leak
-      - [BUG 1712988]: default and configurable maximum number of varbinds
-	returnable to a GETBULK request
-      - [PATCH 1585146]: Extend range of available error codes Submitted by
-	Anthony Novatsis.
-      - [PATCH 1666737]: include ipv6 counts in udpInDatagrams, udpNoPorts,
-	udpInErrors, udpOutDatagrams
-      - [PATCH 1704105]: Add IPv6 support to the inetNetToMediaTable for linux
-      - [PATCH 1705594]: Fix various aspects of linux ipAddressPrefixTable
-	reporting.
-      - [PATCH 1715405]: Implement the ipv6ScopeZoneIndexTable on linux
-      - [PATCH 1723611]: Yanagi: New implementation of the rmon alarmTable
-      - [PATCH 1737439]: automatic link up/down traps on a walk; still need
-	a better interface for manually doing things on an occasional basis
-      - [PATCH 1806501]: Add a snmp_v3trap function for sending traps with
-	a snmpv3 context
-      - [PATCH 1828602]: Support ipDefaultTTL and ipForwarding SETs on
-	linux
+      - [PATCH 1654424]: Handle row deletion issues in dataset tables
+      - [PATCH 1666737]: Include IPv6 traffic in various UDP counters
+      - [PATCH 1700157]: Fix ordering of exec tokens in MIB output
+      - [PATCH 1719253]: fix skipNFSInHostResources for multiple walks
+      - [PATCH 1723611]: New implementation of the RMON alarmTable
+      - [PATCH 1737439]: automatic link up/down traps on a walk
+      - [PATCH 1806501]: Add API for sending traps with a snmpv3 context
       - [PATCH 1882621]: Add LVM support to the partition table
       - [PATCH 1893468]: fixed registration of OIDs with ranges
-      - [PATCH 1909813]: fix table_iterator hint to get_first when SORTED
-	flag is set
+      - [PATCH 1901764]: Support date-based logwatch files
+      - [PATCH 1909813]: fix table_iterator handling of SORTED hint
       - [PATCH 1916840]: new config option to set SNMPv1 trap agent address
-      - [PATCH 1927751]: implement icmpMsgStatsTable on Linux
-      - [PATCH 2023633]: add SCTP-MIB implementation (Linux only)
-      - [PATCH 2449210]: add 64-bit disk usage statistics to
-	UCD-SNMP-MIB::dskTable
-      - ipAddressSpinLock implemented
-      - patch from Wojtek Jawor to handle row deletion issues in dataset
-	tables
-      - patch: 1700157: from afrika: fixes ordering of exec tokens in the
-	resulting mib tree
-      - patch: 1708243: from nhorman: implement the ipDefaultRouteTable on
-	linux
-      - patch: 1719253: from "Christian Jung": fix skipNFSInHostResources
-	so it does not break on the second walk of the table.
-      - suppress annoying "registration != duplicate" warning for root oids
-	(otherwise, you'll get this message on almost every startup)
-      - [BUG 1558823]: fix ipAddressTable memory leak
-      - [BUG 1596638]: memory leak in ipCidrRouteTable, inetCidrRouteTable
-      - [BUG 1611524]: fix tcp connection table fd leak
+      - [PATCH 2103492]: implement RMON-MIB::etherStatsJabbers
+      - [PATCH 2449210]: add 64-bit usage statistics to UCD-SNMP-MIB::dskTable
+      - Add support for a user provided length variable
+	   and C string values to the watcher helper.
+      - Automatically reregister sysORTable entries from AgentX subagents.
+      - Fix various memory leaks
+      - Implement ipAddressSpinLock
+      - Implement ipNetToPhysicalLastUpdated
+      - Suppress annoying "registration != duplicate" warning for root oids
 
     snmptrapd:
-      - add trap handler for logging traps to a mysql database
-      - Withdraw deprecated options. (Three and a half years' warning
-	should be enough for anyone!)
-      - [PATCH 1908288]: If snmptrapd -f interrupted with ctrl-C run perl
-	END block
-      - [BUG 1955227]: Memory leak for embedded Perl on x86_64
+      - [PATCH 1908288]: Run perl END block on termination
+      - Add trap handler for logging traps to a mysql database
+      - Withdraw deprecated options.
 
     snmpnetstat:
-      - [PATCH 2564538]: to support GETBULK in v2c+ snmp versions
+      - [PATCH 2564538]: Support GETBULK in v2c+ snmp versions
 
     snmpusm:
-      - [PATCH 1591355]: Allow cloning to engineIDs that are different from
-	the agent's engineID
-
-    snmpv3:
-      - Preliminary (alpha) support for SNMP over SSH and DTLS/UDP.
-      - Preliminary (alpha) support for the TSM security model
+      - [PATCH 1591355]: Allow cloning to arbitrary engineIDs
 
     misc:
-      - Add config rereading support to the subagent generated by
-	net-snmp-config --compile-subagent
-      - [PATCH 1737727]: Add a NETSNMP_OLDAPI_ prefix to the access macros
-	that are used in the old-api helper. I did add the prefix to all
-	users in our code.
-      - [PATCH 1737727]: Replace all uses of NETSNMP_CLEAN_NAMESPACE with
-	NETSNMP_NO_LEGACY_DEFINITIONS
-      - separate user management from net-snmp-config into new
-	net-snmp-create-v3-user script
+      - Add config reread support to "net-snmp-config --compile-subagent" code
+      - Preliminary (alpha) support for SNMP over SSH and DTLS/UDP.
+      - Preliminary (alpha) support for the TSM security model
+      - Separate user management into new net-snmp-create-v3-user script
 
     build:
-      - Do not require use of --with-endianness when cross-compiling.
-      - Update to libtool 1.5.26
-      - Update to autoconf 2.63
-      - split configure template into separate pieces in configure.d/*.
-	Mostly self-contained, and significantly less confusing!
-      - Retire the config_old/new_require feature and replace it with
-	config_version_require that compares version numbers to achieve a
-	similar thing
-      - [PATCH 2091156]: correctly declare dependencies in Makefile. 'make
-	-j <N>' should work now.
-      - [BUG 2023803]: Compilation problems on HP-UX 11.31
-      - add --with-temp-file-pattern configure option
-      - a bunch of new test scripts to test Net-SNMP transport functionality
+      - Improved cross-compilation support
+      - Improved library layering & dependency handling when linking apps
+      - Improved RPM spec files, for consistency with vendor-provided packages.
+      - Mechanism for selecting build environment based on version
+      - New test scripts to test Net-SNMP transport functionality
+      - Restructure configure template
+      - Update to autoconf 2.63 & libtool 1.5.26
 
     perl:
-      - [PATCH 1956193]: beta threadable perl module code for
-	SNMPv1/SNMPv2c usage.
-      - [BUG 1619827]: link libnetsnmpagent/libnetsnmptrapd (rather than
-	snmpd/snmptrapd) against libperl.
-      - [BUG 1619827]: link net-snmp libraries and binaries against the
-	net-snmp libraries they really depend on - reflect library
-	interdependencies at link time - fix dependencies on libcrypto,
-	libpkcs11 and libkstat - install libraries in correct order
-	(important for libtool relinking) link Perl modules against the
-	exact set of libraries they depend on
+      - [BUG 1619827]: improve handling of link dependencies
+      - [PATCH 1956193]: beta threadable perl module code for SNMPv1/2c usage.
 
     python:
-      - [PATCH 1716114]: Let python build in source tree Patch provided by
-	Jochen Friedrich (Debian patch #38).
-
-    Linux:
-      - [PATCH 1724602]: mfd-based ipDefaultRouterTable implementation
-
-    MacOSX:
-      - [PATCH 1600522]: CPU HAL implementation for mach/darwin
-
-
-    FreeBSD:
-      - [PATCH 1623874]: add GNU/kFreeBSD support
-      - [BUG 1633483]: Support CPU HAL on FreeBSD4.x
-
-    Solaris:
-      - [PATCH 1719730]: support for ipSystemStatsTable and ipAddressTable
-	Part 2 (Solaris-specific new files)
-
-    Win32:
-      - [PATCH 2686248]: Applied patch by Bart Van Assche which fixes
-	several winExtDLL bugs.
-      - patch: 1706344: from naylor: fix compilation with cygwin
-      - Fix AES support
+      - [PATCH 1716114]: Let python build in source tree (Debian patch #38)
 
     AIX:
       - Add support for AIX 6.x
-      - fix default shared library building instead of forcing static
+      - Fix default shared library building instead of forcing static
+
+    FreeBSD:
+      - [BUG 1633483]: Support CPU HAL on FreeBSD4.x
+      - [PATCH 1623874]: add GNU/kFreeBSD support
 
     IRIX:
       - [PATCH 1709748]: Optimized IRIX cpu stats
       - [PATCH 1675869]: CPU statistics for IRIX based on PCP
+
+    Linux:
+      - [PATCH 1704105]: Add IPv6 support to the inetNetToMediaTable
+      - [PATCH 1705594]: Various fixes to ipAddressPrefixTable reporting
+      - [PATCH 1708243]: Implement ipDefaultRouteTable
+      - [PATCH 1715405]: Implement ipv6ScopeZoneIndexTable
+      - [PATCH 1724602]: MfD-based ipDefaultRouterTable implementation
+      - [PATCH 1828602]: Support ipDefaultTTL and ipForwarding SETs
+      - [PATCH 1927751]: Implement icmpMsgStatsTable
+      - [PATCH 2023633]: Implement SCTP-MIB
+      - [PATCH 2053273]: Implement EtherLike MIB
+
+    MacOSX:
+      - [PATCH 1600522]: CPU HAL implementation for mach/darwin
+
+    Solaris:
+      - [PATCH 1719730]: support for ipSystemStatsTable and ipAddressTable
+
+    Win32:
+      - [PATCH 2686248]: Fix several winExtDLL bugs.
+      - [PATCH 1706344]: Fix compilation with cygwin
+      - Fix AES support
 
 
 *5.4*
