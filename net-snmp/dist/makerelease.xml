@@ -342,7 +342,7 @@
           <text>We need to extract the portions of the change logs
           committed to the repository.</text>
 	  <commands>
-	    <command>svn2cl -f ChangeLog.add --break-before-msg --stop-on-copy</command>
+	    <command>svn2cl -f ChangeLog.add --break-before-msg--stop-on-copy -r HEAD:17663</command>
 	    <command>perl dist/changelogfix  &lt; ChangeLog.add &gt; ChangeLog.reallyadd</command>
 	  </commands>
 	</step>
