@@ -2669,7 +2669,7 @@
 ./strtok_r.lo: ../include/net-snmp/net-snmp-config.h 
 ./strtol.lo: ../include/net-snmp/net-snmp-config.h 
 ./strtoul.lo: ../include/net-snmp/net-snmp-config.h 
-./strtoull.lo: ../include/net-snmp/net-snmp-config.h
+./strtoull.lo: ../include/net-snmp/net-snmp-config.h 
 ./system.lo: ../include/net-snmp/net-snmp-config.h 
 ./system.lo: ../include/net-snmp/types.h 
 ./system.lo: ../include/net-snmp/library/types.h
