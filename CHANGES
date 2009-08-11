@@ -20,6 +20,7 @@ listing of all changes made to the code.
       - [BUG 2001124]: Allow embedded NUL characters in usmUserPublic
       - [BUG 2027834]: Extend string print buffer by the minimum necessary.
       - [BUG 2099985]: Added const qualifiers to time conversion routins
+      - [PATCH 2827722]: Improve strtoull to be less MSVC-specific
       - [BUG Coverity #183]: fix memory leak if IP_PKTINFO fails
       - [PATCH  700681]: limited support for UDPv4 broadcast addresses
       - [PATCH 1548670]: Fix range checks for unsigned integers
@@ -127,6 +128,8 @@ listing of all changes made to the code.
       - [BUG 2006786]: Interface name can have more than 8 characters.
       - [BUG 2018031]: Don't probe engineID in internal monitor sessions.
       - [BUG 2693670]: Don't open (& clobber) AgentX socket if other transports fail
+      - [BUG 2822355]: Fix memory leaks on udpEndpointTable (linux) Patch
+	supplied by Frank Lichtenheld
       - [PATCH 1225440]: Delay sighup till it is safe.
       - [PATCH 1257347]: Non-fixed size connection buffer
       - [PATCH 1550730]: Report errors from iterator-based handlers.
@@ -228,6 +231,7 @@ listing of all changes made to the code.
       - [PATCH 2564552]: provide libnetlink support for loading the tcp table
       - [PATCH 2686280]: Report duplicate registrations as an error
       - [PATCH 2791417]: fix snmpd segfault when run with -DALL Patch
+      - [PATCH 2822337]: Fix memory leak in ipAddressPrefixTable
       - [FEATURES 1019429]: Set supplementary groups via initgroups(3)
       - Add missing function declarations & include files.
       - Add support for a user provided length variable
@@ -254,6 +258,8 @@ listing of all changes made to the code.
       - Use the worker helpers from the register_*_instance helpers and
 	schedule the instance helpers for removal in 5.6
       - Use static watcher_info for all watched variables and in int_watch.
+      - fix possible crash when 64-bit counters in ipSystemStatsTable get
+	bigger than 2^32
 
     snmptrapd:
       - [BUG 1638225]: Fix interpretation of transport address data.
@@ -272,6 +278,8 @@ listing of all changes made to the code.
 
     apps:
       - [BUG 1964136]: Drop NULL type from snmpset usage message.
+      - [BUG 2811577]: Fix bug in GetBulk handling. Don't get confused by
+	index values that contain a ':' character.
       - [PATCH 1529523]: Close SNMP session on failure.
       - Improve parsing of -LS command line argument
 
@@ -343,6 +351,9 @@ listing of all changes made to the code.
       - Use 'config_error' to generate error messages at configure time.
       - Use LDFLAGS when building agent, helpers and mib lib
       - Use "libtool clean" to ensure removal of all libtool temp files.
+      - allow building with Perl versions that lack PERL_EXIT_DESTRUCT_END
+      - build fix for Tru64 Unix and IRIX: move _XOPEN* definitions to
+	where they are in 5.4.x and earlier
 
     documentation:
       - [BUG 1247164]: Document use of OID macros
@@ -463,6 +474,7 @@ listing of all changes made to the code.
       - [PATCH 2507249]: sctp-mib support for FreeBSD.
       - Add initial support for upcoming FreeBSD 7
       - Fix configure warning for sys/conf.h
+      - patch from Cezary Morga to fix a make test on freebsd
 
     HP-UX:
       - [BUG 2779472]: Filesystems missing in hrStorage table
@@ -608,6 +620,7 @@ listing of all changes made to the code.
 
     mib2c:
       - [BUG 1479916]: Restore consistency in row creation code.
+      - [BUG 2827269]: Suppress non-ordered TODO comments.
 
     misc:
       - Most net-snmp specific defines are now (also) available under a

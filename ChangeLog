@@ -1,5 +1,533 @@
 -------------------------------------------------------------------------------
 
+Changes: V5.5.pre3 -> V5.5.rc1
+
+2009-08-10 23:10  hardaker
+
+   * dist/makerelease.xml:
+
+   fix typo in svn2cl line
+
+2009-08-10 23:05  hardaker
+
+   * snmplib/Makefile.depend:
+
+   make depend
+
+2009-08-10 21:32  hardaker
+
+   *  man/netsnmp_access_multiplexer.3, man/netsnmp_agent.3,   
+      man/netsnmp_agent_handler.h.3, man/netsnmp_agent_registry.3,   
+      man/netsnmp_agent_trap.3, man/netsnmp_asn1_packet_parse.3,   
+      man/netsnmp_baby_steps.3, man/netsnmp_bulk_to_next.3,   
+      man/netsnmp_cache_handler.3, man/netsnmp_callback.3,   
+      man/netsnmp_container.3, man/netsnmp_container_iterator.3,   
+      man/netsnmp_container_iterator.h.3, man/netsnmp_data_list.3,   
+      man/netsnmp_debug.3, man/netsnmp_default_store.3,   
+      man/netsnmp_handler.3, man/netsnmp_instance.3,   
+      man/netsnmp_iterator_info_s.3, man/netsnmp_leaf.3,   
+      man/netsnmp_library.3, man/netsnmp_mib_maintenance.3,   
+      man/netsnmp_mib_utilities.3, man/netsnmp_mode_end_call.3,   
+      man/netsnmp_multiplexer.3,   
+      man/netsnmp_netsnmp_agent_request_info_s.3,   
+      man/netsnmp_netsnmp_column_info_t.3,   
+      man/netsnmp_netsnmp_data_list_s.3,   
+      man/netsnmp_netsnmp_handler_registration_s.3,   
+      man/netsnmp_netsnmp_iterator_info_s.3,   
+      man/netsnmp_netsnmp_mib_handler_access_methods.3,   
+      man/netsnmp_netsnmp_mib_handler_methods.3,   
+      man/netsnmp_netsnmp_mib_handler_s.3,   
+      man/netsnmp_netsnmp_monitor_callback_header_s.3,   
+      man/netsnmp_netsnmp_request_info_s.3,   
+      man/netsnmp_netsnmp_table_registration_info_s.3,   
+      man/netsnmp_netsnmp_table_request_info_s.3,   
+      man/netsnmp_null_container.3, man/netsnmp_oid_stash.3,   
+      man/netsnmp_old_api.3, man/netsnmp_read_config.3,   
+      man/netsnmp_read_only.3, man/netsnmp_row_merge.3,   
+      man/netsnmp_scalar.3, man/netsnmp_scalar_group_group.3,   
+      man/netsnmp_serialize.3, man/netsnmp_snmp_agent.3,   
+      man/netsnmp_snmp_alarm.3, man/netsnmp_snmp_client.3,   
+      man/netsnmp_snmp_logging.3, man/netsnmp_snmp_pdu.3,   
+      man/netsnmp_snmp_session.3, man/netsnmp_stash_cache.3,   
+      man/netsnmp_stash_to_next.3, man/netsnmp_table.3,   
+      man/netsnmp_table_array.3, man/netsnmp_table_container.3,   
+      man/netsnmp_table_data.3, man/netsnmp_table_dataset.3,   
+      man/netsnmp_table_generic.3, man/netsnmp_table_indexes.3,   
+      man/netsnmp_table_iterator.3, man/netsnmp_table_iterator.h.3,   
+      man/netsnmp_table_maintenance.3, man/netsnmp_table_row.3,   
+      man/netsnmp_table_rows.3, man/netsnmp_tdata.3,   
+      man/netsnmp_tools.h.3, man/netsnmp_util.3,   
+      man/netsnmp_utilities.3, man/netsnmp_variable_list.3,   
+      man/netsnmp_watcher.3:
+
+   documentation update
+
+2009-08-10 21:21  hardaker
+
+   *  dist/makerelease.xml, man/pdu_api.3, man/session_api.3,   
+      man/varbind_api.3:
+
+   Version number update
+
+2009-08-07 10:32  dts12
+
+   * CHANGES, NEWS:
+
+   Correct, consolidate, clarify and cleanup the catalog of current
+   changes.
+
+2009-08-06 07:57  dts12
+
+   * FAQ:
+
+   Expand on exec vs extend.
+
+2009-08-05 20:07  dts12
+
+   *  agent/mibgroup/udp-mib/data_access/udp_endpoint_linux.c,   
+      snmplib/file_utils.c:
+
+   CHANGES: snmpd: BUG: 2822355: Fix memory leaks on
+   udpEndpointTable (linux)
+   Patch supplied by Frank Lichtenheld
+
+2009-08-05 19:05  dts12
+
+   * 
+      agent/mibgroup/ip-mib/ipAddressPrefixTable/ipAddressPrefixTable_data_access.c:
+
+   CHANGES: snmpd: PATCHES: 2822337: Fix memory leak in
+   ipAddressPrefixTable
+
+2009-08-05 15:16  jsafranek
+
+   * agent/mibgroup/ip-mib/inetNetToMediaTable/inetNetToMediaTable.c:
+
+   Fix memory leak in NetToMediaTable.
+   When deleting row context, delete also associated data.
+
+2009-08-05 15:15  jsafranek
+
+   * 
+      agent/mibgroup/ip-mib/inetNetToMediaTable/inetNetToMediaTable_data_access.c:
+
+   Fix memory leak in NetToMediaTable.
+   The container used to track entries to delete from cache should
+   be released when it's not needed.
+
+2009-08-05 15:12  jsafranek
+
+   * 
+      agent/mibgroup/tcp-mib/tcpConnectionTable/tcpConnectionTable_data_access.c,
+        
+      agent/mibgroup/tcp-mib/tcpListenerTable/tcpListenerTable_data_access.c,
+        
+      agent/mibgroup/udp-mib/udpEndpointTable/udpEndpointTable_data_access.c:
+
+   Fix memory leak in UDP- and TCP-MIB.
+   The data from raw_data are copied to cache, so it should be
+   freed.
+
+2009-08-05 10:16  dts12
+
+   * apps/snmptable.c:
+
+   CHANGES: apps: BUG: 2811577: Fix bug in GetBulk handling.
+   Don't get confused by index values that contain a ':' character.
+
+2009-08-04 21:59  dts12
+
+   * local/mib2c-conf.d/mfd-access-unsorted-external-defines.m2i:
+
+   CHANGES: mib2c: BUG: 2827269: Suppress non-ordered TODO comments.
+
+2009-08-04 21:35  dts12
+
+   * local/mib2c.old-api.conf:
+
+   Handle generating code for a single table,
+   as well as a larger group.
+   Also addresses bug 2150285
+
+2009-08-04 21:16  magfr
+
+   * snmplib/strtoull.c:
+
+   snmplib: from "Bart van Assche & Magnus Fromreide": More updates
+   to strtoull.c
+
+2009-08-04 10:57  jsafranek
+
+   * agent/mibgroup/ip-mib/data_access/systemstats_common.c:
+
+   CHANGES: snmpd: from "Marcus Rückert": fix possible crash when
+   64-bit counters in ipSystemStatsTable get bigger than 2^32
+
+2009-08-03 19:27  magfr
+
+   *  configure, configure.d/config_os_headers,   
+      include/net-snmp/net-snmp-config.h.in, snmplib/strtoull.c:
+
+   CHANGES: snmplib: PATCH: 2827722: from "Bart Van Assche": Improve
+   strtoull to be less MSVC-specific
+
+2009-08-03 18:38  magfr
+
+   * man/Makefile.in:
+
+   remove an obsolete manual page from the set of files that should
+   be installed
+
+2009-07-27 12:41  hardaker
+
+   *  agent/Makefile.depend, agent/helpers/Makefile.depend,   
+      agent/mibgroup/Makefile.depend, apps/Makefile.depend,   
+      apps/snmpnetstat/Makefile.depend, snmplib/Makefile.depend:
+
+   make depend
+
+2009-07-27 12:11  hardaker
+
+   * man/netsnmp_Container_iterator.3:
+
+   remove an obsolete manual page
+
+2009-07-27 12:03  hardaker
+
+   * perl/SNMP/t/bulkwalk.t:
+
+   CHANGES: freebsd: patch from Cezary Morga to fix a make test on
+   freebsd
+
+2009-07-27 12:02  hardaker
+
+   *  man/netsnmp_access_multiplexer.3, man/netsnmp_agent.3,   
+      man/netsnmp_agent_handler.h.3, man/netsnmp_agent_registry.3,   
+      man/netsnmp_agent_trap.3, man/netsnmp_asn1_packet_parse.3,   
+      man/netsnmp_baby_steps.3, man/netsnmp_bulk_to_next.3,   
+      man/netsnmp_cache_handler.3, man/netsnmp_callback.3,   
+      man/netsnmp_container.3, man/netsnmp_container_iterator.3,   
+      man/netsnmp_container_iterator.h.3, man/netsnmp_data_list.3,   
+      man/netsnmp_debug.3, man/netsnmp_default_store.3,   
+      man/netsnmp_handler.3, man/netsnmp_instance.3,   
+      man/netsnmp_iterator_info_s.3, man/netsnmp_leaf.3,   
+      man/netsnmp_library.3, man/netsnmp_mib_maintenance.3,   
+      man/netsnmp_mib_utilities.3, man/netsnmp_mode_end_call.3,   
+      man/netsnmp_multiplexer.3,   
+      man/netsnmp_netsnmp_agent_request_info_s.3,   
+      man/netsnmp_netsnmp_column_info_t.3,   
+      man/netsnmp_netsnmp_data_list_s.3,   
+      man/netsnmp_netsnmp_handler_registration_s.3,   
+      man/netsnmp_netsnmp_iterator_info_s.3,   
+      man/netsnmp_netsnmp_mib_handler_access_methods.3,   
+      man/netsnmp_netsnmp_mib_handler_methods.3,   
+      man/netsnmp_netsnmp_mib_handler_s.3,   
+      man/netsnmp_netsnmp_monitor_callback_header_s.3,   
+      man/netsnmp_netsnmp_request_info_s.3,   
+      man/netsnmp_netsnmp_table_registration_info_s.3,   
+      man/netsnmp_netsnmp_table_request_info_s.3,   
+      man/netsnmp_null_container.3, man/netsnmp_oid_stash.3,   
+      man/netsnmp_old_api.3, man/netsnmp_read_config.3,   
+      man/netsnmp_read_only.3, man/netsnmp_row_merge.3,   
+      man/netsnmp_scalar.3, man/netsnmp_scalar_group_group.3,   
+      man/netsnmp_serialize.3, man/netsnmp_snmp_agent.3,   
+      man/netsnmp_snmp_alarm.3, man/netsnmp_snmp_client.3,   
+      man/netsnmp_snmp_logging.3, man/netsnmp_snmp_pdu.3,   
+      man/netsnmp_snmp_session.3, man/netsnmp_stash_cache.3,   
+      man/netsnmp_stash_to_next.3, man/netsnmp_table.3,   
+      man/netsnmp_table_array.3, man/netsnmp_table_container.3,   
+      man/netsnmp_table_data.3, man/netsnmp_table_dataset.3,   
+      man/netsnmp_table_generic.3, man/netsnmp_table_indexes.3,   
+      man/netsnmp_table_iterator.3, man/netsnmp_table_iterator.h.3,   
+      man/netsnmp_table_maintenance.3, man/netsnmp_table_row.3,   
+      man/netsnmp_table_rows.3, man/netsnmp_tdata.3,   
+      man/netsnmp_tools.h.3, man/netsnmp_util.3,   
+      man/netsnmp_utilities.3, man/netsnmp_variable_list.3,   
+      man/netsnmp_watcher.3:
+
+   documentation update
+
+2009-07-27 11:52  hardaker
+
+   *  FAQ, NEWS, README, configure, configure.ac, dist/Makefile,   
+      dist/net-snmp.spec:
+
+   Version number update
+
+2009-07-27 08:39  hardaker
+
+   * testing/tests/T350unix:
+
+   revert accidentially applied patch
+
+2009-07-27 08:37  hardaker
+
+   *  testing/tests/T350unix, testing/tests/T360dtlsudp,   
+      testing/tests/test-localhost.cert,   
+      testing/tests/test-localhost.priv, testing/tests/test-user.cert,  
+       testing/tests/test-user.priv:
+
+   added a test case for udp/dtls
+
+2009-07-27 08:36  hardaker
+
+   * snmplib/snmp_api.c:
+
+   don't require a session to carry a secName
+
+2009-07-26 21:34  alex_b
+
+   * win32/libsnmp_dll/libsnmp.def:
+
+   Win32: MSVC 6 compile fixes for Workspace build.
+
+2009-07-26 18:20  alex_b
+
+   *  README.win32, configure, configure.d/config_os_functions,   
+      include/net-snmp/library/system.h,   
+      include/net-snmp/net-snmp-config.h.in, snmplib/strtoull.c,   
+      win32/dist/build-binary.bat, win32/dist/build-binary.pl,   
+      win32/dist/installer/net-snmp.nsi, win32/libsnmp/Makefile.in,   
+      win32/libsnmp/libsnmp.dsp, win32/libsnmp_dll/Makefile.in,   
+      win32/libsnmp_dll/libsnmp.def.in,   
+      win32/libsnmp_dll/libsnmp_dll.dsp,   
+      win32/net-snmp/net-snmp-config.h,   
+      win32/net-snmp/net-snmp-config.h.in:
+
+   -Added strtoull function and configure check for systems without
+   it such as Win32 MSVC 6
+   -Win32: MSVC 6 compile fixes - requires new strtoull.c file
+   -Win32: New build-binary script to simplify building the Windows
+   binary package.
+
+2009-07-25 05:31  magfr
+
+   * testing/tests/T160snmpnetstat:
+
+   Make sure a message is written if the relevant table is missing.
+
+2009-07-23 21:29  alex_b
+
+   * README:
+
+   Update email address in README.
+
+2009-07-23 01:07  alex_b
+
+   *  win32/netsnmpmibs/netsnmpmibs.dsp,   
+      win32/netsnmpmibssdk/netsnmpmibssdk.dsp:
+
+   Win32 MSVC 2008+ fixes.
+
+2009-07-23 00:55  alex_b
+
+   *  include/net-snmp/library/snmp_logging.h,   
+      win32/netsnmpmibssdk/Makefile.in,   
+      win32/netsnmpmibssdk/netsnmpmibssdk.dsp:
+
+   Win32 MSVC 2005+ build fixes. Thanks to Bart Van Assche.
+
+2009-07-21 12:22  dts12
+
+   *  local/mib2c.container.conf, local/mib2c.iterate.conf,   
+      local/mib2c.iterate_access.conf, local/mib2c.row.conf,   
+      local/mib2c.table_data.conf:
+
+   Add simple debug output to mib2c templates.
+
+2009-07-21 12:13  dts12
+
+   * local/mib2c.table_data.conf:
+
+   Fix missing semicolon typos.
+
+2009-07-21 09:15  dts12
+
+   * FAQ:
+
+   New suggested entries.
+
+2009-07-20 19:24  dts12
+
+   * FAQ:
+
+   Updates to CODING section.
+
+2009-07-20 11:09  jsafranek
+
+   * agent/mibgroup/etherlike-mib.h:
+
+   Add missing header file from patch #2053273.
+
+2009-07-19 15:09  dts12
+
+   * FAQ:
+
+   Updates to COMPILING section.
+
+2009-07-16 12:38  jsafranek
+
+   * agent/mibgroup/ip-mib/data_access/systemstats_linux.c:
+
+   Add IPv6 octet counters.
+   New Linux kernels (e.g. 2.6.31-rc2, maybe some earlier) provide
+   counters for
+   incoming/outgoing IPv6 traffic for ipSystemStatsTable and
+   ipIfStatsTable.
+
+2009-07-15 22:46  tanders
+
+   * testing/tests/T350unix:
+
+   put temporary data to where they belong
+
+2009-07-11 21:50  tanders
+
+   * configure:
+
+   regenerate configure
+
+2009-07-11 21:04  tanders
+
+   * configure.d/config_os_libs:
+
+   build fix (e.g. for FreeBSD): adjust kvm configure tests
+
+2009-07-10 12:35  jsafranek
+
+   * snmplib/snmpUDPIPv6Domain.c:
+
+   Check IPv6 port ranges in the same way as IPv4 ports are checked.
+
+2009-07-10 07:46  jsafranek
+
+   * 
+      agent/mibgroup/ip-forward-mib/ipCidrRouteTable/ipCidrRouteTable_interface.c,
+         local/mib2c:
+
+   Fix another IPv4 address size - long has 8 bytes on 64bit Linux.
+   Also fix the default type fo^CASN_IPADDRESS in mib2c, so the
+   ipCidrRouteTable_interface.c can be safely regenerated.
+
+2009-07-09 23:42  hardaker
+
+   *  testing/tests/T300udp, testing/tests/T310tcp,   
+      testing/tests/T320udpv6, testing/tests/T330tcpv6,   
+      testing/tests/T350unix:
+
+   cleanup of testing cases to remove double include and double
+   exports
+
+2009-07-09 23:07  tanders
+
+   * testing/tests/T300udp:
+
+   be consistent with the TCP/IPv4 test
+
+2009-07-09 22:18  hardaker
+
+   *  testing/tests/Stransport, testing/tests/T300udp,   
+      testing/tests/T310tcp, testing/tests/T320udpv6,   
+      testing/tests/T330tcpv6, testing/tests/T350unix,   
+      testing/tests/T399alias:
+
+   new tests for testing defined transports
+
+2009-07-09 22:17  hardaker
+
+   * testing/TESTCONF.sh, testing/eval_tools.sh:
+
+   a CONFIGAPP macro for adding stuff to snmp.conf
+
+2009-07-08 15:12  jsafranek
+
+   * snmplib/snmpUDPDomain.c:
+
+   Fix gethostbyaddr parameter, netsnmp_udp_fmtaddr never returned a
+   hostname.
+
+2009-07-07 15:46  jsafranek
+
+   *  agent/mibgroup/mibII/ipCidrRouteTable_access.c,   
+      agent/mibgroup/ucd-snmp/pass.c,   
+      agent/mibgroup/ucd-snmp/pass_persist.c:
+
+   Fix IP address length on 64 bit systems in mibII, pass and
+   pass_persist modules.
+
+2009-07-07 15:24  jsafranek
+
+   * agent/mibgroup/mibII/at.c:
+
+   Use correctly sized IP addresses in address translation table
+   processing - u_long can make problems on bin endian 64 bit
+   systems
+
+2009-06-29 13:52  hardaker
+
+   * CHANGES:
+
+   remove entry for a patch that got reverted
+
+2009-06-25 15:24  dts12
+
+   *  include/net-snmp/library/large_fd_set.h,   
+      include/net-snmp/library/types.h, include/net-snmp/types.h,   
+      snmplib/Makefile.in:
+
+   Move non-core data types into a separate (library internals)
+   header file.
+   Move the large_fd_set data structure into this header file.
+
+2009-06-18 22:29  tanders
+
+   * agent/snmp_perl.c:
+
+   CHANGES: build: allow building with Perl versions that lack
+   PERL_EXIT_DESTRUCT_END
+
+2009-06-18 22:13  tanders
+
+   * apps/snmpnetstat/if.c:
+
+   CHANGES: build: build fix for Tru64 Unix and IRIX: move _XOPEN*
+   definitions to where they are in 5.4.x and earlier
+
+2009-06-18 06:02  magfr
+
+   *  configure, configure.d/config_os_libs,   
+      configure.d/config_project_with_enable,   
+      include/net-snmp/net-snmp-config.h.in:
+
+   Clean up --with-nl configuration
+   *  Move the _ARG_WITH to config_project_with_enable  2009-06-16 15:17
+       rstory
+
+
+   * snmplib/container.c:
+
+   check for null pointer before deref
+
+2009-06-15 23:52  rstory
+
+   * snmplib/snmp_client.c:
+
+   add comment explaining not quite obvious lack of memmove
+
+2009-06-15 19:32  magfr
+
+   * include/net-snmp/types.h:
+
+   Remove #if 0 commented code
+
+2009-06-15 15:25  dts12
+
+   * FAQ:
+
+   Updates to AGENT section.
+
+-------------------------------------------------------------------------------
+
 Changes: V5.5.pre2 -> V5.5.pre3
 
 2009-06-13 01:12  hardaker
