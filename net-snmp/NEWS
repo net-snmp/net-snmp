@@ -68,7 +68,7 @@ listing of all changes made to the code.
       - Mechanism for selecting build environment based on version
       - New test scripts to test Net-SNMP transport functionality
       - Restructure configure template
-      - Update to autoconf 2.63 & libtool 1.5.26
+      - Update to autoconf 2.63 & libtool 2.2.6
 
     perl:
       - [BUG 1619827]: improve handling of link dependencies
