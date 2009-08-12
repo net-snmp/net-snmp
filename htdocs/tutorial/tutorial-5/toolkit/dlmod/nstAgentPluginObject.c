@@ -14,6 +14,8 @@
  */
 
 static int      nstAgentPluginObject = 3;
+static oid      nstAgentPluginObject_oid[] =
+    { 1, 3, 6, 1, 4, 1, 8072, 2, 4, 1, 1, 3, 0 };
 
 /*
  * our initialization routine, automatically called by the agent 
@@ -22,8 +24,6 @@ static int      nstAgentPluginObject = 3;
 void
 init_nstAgentPluginObject(void)
 {
-    static oid      nstAgentPluginObject_oid[] =
-        { 1, 3, 6, 1, 4, 1, 8072, 2, 4, 1, 1, 3, 0 };
 
     /*
      * a debugging statement.  Run the agent with -DnstAgentPluginObject to see
@@ -57,3 +57,10 @@ init_nstAgentPluginObject(void)
     DEBUGMSGTL(("nstAgentPluginObject",
                 "Done initalizing nstAgentPluginObject module\n"));
 }
+
+void
+deinit_nstAgentPluginObject(void)
+{
+    unregister_mib(nstAgentPluginObject_oid,OID_LENGTH(nstAgentPluginObject_oid));
+}
+
