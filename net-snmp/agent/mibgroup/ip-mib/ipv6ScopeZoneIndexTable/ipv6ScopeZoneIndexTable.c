@@ -159,6 +159,8 @@ ipv6ScopeZoneIndexTable_rowreq_ctx_cleanup
     /*
      * TODO:211:o: |-> Perform extra ipv6ScopeZoneIndexTable rowreq cleanup.
      */
+    netsnmp_access_scopezone_entry_free(rowreq_ctx->data);
+    rowreq_ctx->data = NULL;
 }                               /* ipv6ScopeZoneIndexTable_rowreq_ctx_cleanup */
 
 /**
