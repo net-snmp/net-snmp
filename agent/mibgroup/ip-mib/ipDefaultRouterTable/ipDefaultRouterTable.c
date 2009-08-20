@@ -160,6 +160,8 @@ ipDefaultRouterTable_rowreq_ctx_cleanup(ipDefaultRouterTable_rowreq_ctx *
     /*
      * TODO:211:o: |-> Perform extra ipDefaultRouterTable rowreq cleanup.
      */
+    netsnmp_access_defaultrouter_entry_free(rowreq_ctx->data);
+    rowreq_ctx->data = NULL;
 }                               /* ipDefaultRouterTable_rowreq_ctx_cleanup */
 
 /**

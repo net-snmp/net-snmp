@@ -162,6 +162,8 @@ ipIfStatsTable_rowreq_ctx_cleanup(ipIfStatsTable_rowreq_ctx * rowreq_ctx)
     /*
      * TODO:211:o: |-> Perform extra ipIfStatsTable rowreq cleanup.
      */
+    netsnmp_access_systemstats_entry_free(rowreq_ctx->data);
+    rowreq_ctx->data = NULL;
 }                               /* ipIfStatsTable_rowreq_ctx_cleanup */
 
 /**
