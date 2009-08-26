@@ -413,11 +413,16 @@ snmp_get_next_reqid(void)
     if (!retVal)
         retVal = 2;
     Reqid = retVal;
-    snmp_res_unlock(MT_LIBRARY_ID, MT_LIB_REQUESTID);
     if (netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_16BIT_IDS))
-        return (retVal & 0x7fff);	/* mask to 15 bits */
+        retVal &= 0x7fff;	/* mask to 15 bits */
     else
-        return (retVal & 0x7fffffff);	/* mask to 31 bits */
+        retVal &= 0x7fffffff;	/* mask to 31 bits */
+
+    if (!retVal) {
+        Reqid = retVal = 2;
+    }
+    snmp_res_unlock(MT_LIBRARY_ID, MT_LIB_REQUESTID);
+    return retVal;
 }
 
 long
@@ -429,11 +434,16 @@ snmp_get_next_msgid(void)
     if (!retVal)
         retVal = 2;
     Msgid = retVal;
-    snmp_res_unlock(MT_LIBRARY_ID, MT_LIB_MESSAGEID);
     if (netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_16BIT_IDS))
-        return (retVal & 0x7fff);	/* mask to 15 bits */
+        retVal &= 0x7fff;	/* mask to 15 bits */
     else
-        return (retVal & 0x7fffffff);	/* mask to 31 bits */
+        retVal &= 0x7fffffff;	/* mask to 31 bits */
+
+    if (!retVal) {
+        Msgid = retVal = 2;
+    }
+    snmp_res_unlock(MT_LIBRARY_ID, MT_LIB_MESSAGEID);
+    return retVal;
 }
 
 long
@@ -445,11 +455,16 @@ snmp_get_next_sessid(void)
     if (!retVal)
         retVal = 2;
     Sessid = retVal;
-    snmp_res_unlock(MT_LIBRARY_ID, MT_LIB_SESSIONID);
     if (netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_16BIT_IDS))
-        return (retVal & 0x7fff);	/* mask to 15 bits */
+        retVal &= 0x7fff;	/* mask to 15 bits */
     else
-        return (retVal & 0x7fffffff);	/* mask to 31 bits */
+        retVal &= 0x7fffffff;	/* mask to 31 bits */
+
+    if (!retVal) {
+        Sessid = retVal = 2;
+    }
+    snmp_res_unlock(MT_LIBRARY_ID, MT_LIB_SESSIONID);
+    return retVal;
 }
 
 long
@@ -461,11 +476,16 @@ snmp_get_next_transid(void)
     if (!retVal)
         retVal = 2;
     Transid = retVal;
-    snmp_res_unlock(MT_LIBRARY_ID, MT_LIB_TRANSID);
     if (netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_16BIT_IDS))
-        return (retVal & 0x7fff);	/* mask to 15 bits */
+        retVal &= 0x7fff;	/* mask to 15 bits */
     else
-        return (retVal & 0x7fffffff);	/* mask to 31 bits */
+        retVal &= 0x7fffffff;	/* mask to 31 bits */
+
+    if (!retVal) {
+        Transid = retVal = 2;
+    }
+    snmp_res_unlock(MT_LIBRARY_ID, MT_LIB_TRANSID);
+    return retVal;
 }
 
 void
