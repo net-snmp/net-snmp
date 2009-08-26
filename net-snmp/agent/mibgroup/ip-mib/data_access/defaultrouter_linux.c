@@ -302,7 +302,6 @@ _load(netsnmp_container *container)
                                 "error with defaultrouter_entry: "
                                 "insert into container failed.\n"));
                     netsnmp_access_defaultrouter_entry_free(entry);
-                    continue;
                 }
             }
 
