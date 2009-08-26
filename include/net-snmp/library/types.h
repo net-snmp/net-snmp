@@ -8,6 +8,10 @@
 
 #include <net-snmp/types.h>
 
+#ifdef __cplusplus
+extern          "C" {
+#endif
+
     typedef struct netsnmp_index_s {
        size_t      len;
        oid         *oids;
