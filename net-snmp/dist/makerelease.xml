@@ -494,12 +494,12 @@
     <step type="section" title="Release the results">
       <text>Now we'll publish the results to the SF server</text>
       <steps>
-	<step prompt="true" type="system" stepname="publish:rsync"
+	<step pause="true" type="system" stepname="publish:rsync"
 	  title="rsync the new files">
 	  <text>This will copy the results to the SF uploads directory
-	    in your account on frs.sourceforge.net</text>
+	    in your account on frs.sourceforge.net.  Do something like:</text>
 	  <commands>
-	    <command>rsync -v net-snmp-{VERSION}.tar.gz net-snmp-{VERSION}.tar.gz.asc net-snmp-{VERSION}.zip net-snmp-{VERSION}.zip.asc frs.sourceforge.net:uploads/</command>
+	    <command>echo rsync -v net-snmp-{VERSION}.tar.gz net-snmp-{VERSION}.tar.gz.asc net-snmp-{VERSION}.zip net-snmp-{VERSION}.zip.asc hardaker,net-snmp@frs.sourceforge.net:/home/frs/project/n/ne/net-snmp/5.5' pre-releases'/</command>
 	  </commands>
 	</step>
 	<step type="system" stepname="publish:editrelease"
