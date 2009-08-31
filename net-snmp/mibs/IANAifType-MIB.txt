@@ -532,7 +532,7 @@
                    pip (248), -- Provider Instance Port on a bridge per IEEE 802.1ah PBB
                    aluELP (249), -- Alcatel-Lucent Ethernet Link Protection
                    gpon (250), -- Gigabit-capable passive optical networks (G-PON) as per ITU-T G.948
-                   gpon (251) -- Very high speed digital subscriber line Version 2 (as per ITU-T Recommendation G.993.2)
+                   vdsl2 (251) -- Very high speed digital subscriber line Version 2 (as per ITU-T Recommendation G.993.2)
                    }
 
 IANAtunnelType ::= TEXTUAL-CONVENTION
