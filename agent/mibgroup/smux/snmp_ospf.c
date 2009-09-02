@@ -275,7 +275,7 @@ struct variable13 ospf_variables[] = {
      var_ospf, 3, {14, 1, 6}}
 };
 
-oid             ospf_variables_oid[] = { MIB, 14 };
+oid             ospf_variables_oid[] = { NETSNMP_MIB2_OID, 14 };
 
 void
 init_snmp_ospf(void)

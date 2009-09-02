@@ -103,7 +103,7 @@ struct variable13 rip2_variables[] = {
      var_rip2, 3, {4, 1, 6}}
 };
 
-oid             rip2_variables_oid[] = { MIB, 23 };
+oid             rip2_variables_oid[] = { NETSNMP_MIB2_OID, 23 };
 
 void
 init_snmp_rip2(void)
