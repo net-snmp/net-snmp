@@ -36,7 +36,11 @@ SOFTWARE.
 
 #include <net-snmp/mib_api.h>
 
-#define MIB 1, 3, 6, 1, 2, 1
+#define NETSNMP_MIB2_OID 1, 3, 6, 1, 2, 1
+
+#ifndef NETSNMP_NO_LEGACY_DEFINITIONS
+#define MIB NETSNMP_MIB2_OID
+#endif
 
 #define MIB_IFTYPE_OTHER		    1
 #define MIB_IFTYPE_REGULAR1822		    2

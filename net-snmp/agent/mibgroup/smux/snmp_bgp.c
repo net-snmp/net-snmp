@@ -100,7 +100,7 @@ struct variable13 bgp_variables[] = {
      var_bgp, 3, {5, 1, 6}}
 };
 
-oid             bgp_variables_oid[] = { MIB, 15 };
+oid             bgp_variables_oid[] = { NETSNMP_MIB2_OID, 15 };
 
 void
 init_snmp_bdp(void)
