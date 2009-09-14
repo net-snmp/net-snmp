@@ -91,7 +91,10 @@ listing of all changes made to the code.
       - Introduce printf-like versions of config_perror and config_pwarn
       - Library layering improvements
       - Read def{Target,Domain} from snmp.conf as well as <app>.conf
-
+      - rename MIB macro to NETSNMP_MIB2_OID, MIB is too generic and may
+	conflict with applications.   The old MIB macro is kept for
+	backward compatibility, unless NETSNMP_NO_LEGACY_DEFINITIONS is
+	defined.
 
     snmpd:
       - [BUG  902610]: Don't discard pending data following a TRAP.
