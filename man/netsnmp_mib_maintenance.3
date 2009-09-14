@@ -1,10 +1,11 @@
-.TH "mib_maintenance" 3 "26 Aug 2009" "Version 5.5.rc2" "net-snmp" \" -*- nroff -*-
+.TH "mib_maintenance" 3 "14 Sep 2009" "Version 5.5.rc3" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
-mib_maintenance \- Routines for maintaining a MIB table.  
-
+mib_maintenance \- 
 .PP
+Routines for maintaining a MIB table.  
+
 .SS "Functions"
 
 .in +1c
@@ -54,25 +55,19 @@ Extract the table relating to a requested varbind.
 Definition at line 189 of file table_generic.c.
 .SS "netsnmp_generic_free_handler (\fBnetsnmp_mib_handler\fP * handler)"
 .PP
-Free a MIB handler structure, releasing any related resources. 
-.PP
-Possibly called automatically by 'netsnmp_unregister_handler' ? 
+Free a MIB handler structure, releasing any related resources. Possibly called automatically by 'netsnmp_unregister_handler' ? 
 .PP
 Definition at line 165 of file table_generic.c.
 .SS "\fBnetsnmp_mib_handler\fP* netsnmp_generic_get_handler (void)"
 .PP
-Create a MIB handler structure. 
-.PP
-This will typically be invoked within the corresponding 'netsnmp_generic_register' routine (or the registration code of a sub-helper based on this helper).
+Create a MIB handler structure. This will typically be invoked within the corresponding 'netsnmp_generic_register' routine (or the registration code of a sub-helper based on this helper).
 .PP
 Alternatively, it might be called from the initialisation code of a particular MIB table implementation. 
 .PP
 Definition at line 158 of file table_generic.c.
 .SS "void netsnmp_generic_insert_row (\fBnetsnmp_request_info\fP * request, void * row)"
 .PP
-Associate a (new) row with the requested varbind. 
-.PP
-The row should also be associated with any other varbinds that refer to the same index values. 
+Associate a (new) row with the requested varbind. The row should also be associated with any other varbinds that refer to the same index values. 
 .PP
 Definition at line 203 of file table_generic.c.
 .SS "int netsnmp_generic_register (\fBnetsnmp_handler_registration\fP * reginfo, void * table, \fBnetsnmp_table_registration_info\fP * table_info)"
@@ -82,9 +77,7 @@ Register a MIB table with the SNMP agent.
 Definition at line 172 of file table_generic.c.
 .SS "int netsnmp_generic_unregister (\fBnetsnmp_handler_registration\fP * reginfo)"
 .PP
-Unregister a MIB table from the SNMP agent. 
-.PP
-This should also release the internal representation of the table. ?? Is a table-specific version of this needed, or would 'netsnmp_unregister_handler' + 'netsnmp_generic_free_handler' do? 
+Unregister a MIB table from the SNMP agent. This should also release the internal representation of the table. ?? Is a table-specific version of this needed, or would 'netsnmp_unregister_handler' + 'netsnmp_generic_free_handler' do? 
 .PP
 Definition at line 183 of file table_generic.c.
 .SH "Author"

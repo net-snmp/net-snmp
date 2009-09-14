@@ -1,4 +1,4 @@
-.TH "agent_handler.h" 3 "26 Aug 2009" "Version 5.5.rc2" "net-snmp" \" -*- nroff -*-
+.TH "agent_handler.h" 3 "14 Sep 2009" "Version 5.5.rc3" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -100,10 +100,10 @@ agent_handler.h \-
 .RI "typedef int( \fBNetsnmp_Node_Handler\fP )(\fBnetsnmp_mib_handler\fP *handler, \fBnetsnmp_handler_registration\fP *reginfo, \fBnetsnmp_agent_request_info\fP *reqinfo, \fBnetsnmp_request_info\fP *requests)"
 .br
 .ti -1c
-.RI "typedef struct netsnmp_handler_args_s \fBnetsnmp_handler_args\fP"
+.RI "typedef struct \fBnetsnmp_handler_args_s\fP \fBnetsnmp_handler_args\fP"
 .br
 .ti -1c
-.RI "typedef struct netsnmp_delegated_cache_s \fBnetsnmp_delegated_cache\fP"
+.RI "typedef struct \fBnetsnmp_delegated_cache_s\fP \fBnetsnmp_delegated_cache\fP"
 .br
 .in -1c
 .SS "Functions"
@@ -167,15 +167,15 @@ agent_handler.h \-
 .RI "\fBnetsnmp_handler_registration\fP * \fBnetsnmp_create_handler_registration\fP (const char *name, Netsnmp_Node_Handler *handler_access_method, const oid *reg_oid, size_t reg_oid_len, int modes)"
 .br
 .ti -1c
-.RI "NETSNMP_INLINE netsnmp_delegated_cache * \fBnetsnmp_create_delegated_cache\fP (\fBnetsnmp_mib_handler\fP *handler, \fBnetsnmp_handler_registration\fP *reginfo, \fBnetsnmp_agent_request_info\fP *reqinfo, \fBnetsnmp_request_info\fP *requests, void *localinfo)"
+.RI "NETSNMP_INLINE \fBnetsnmp_delegated_cache\fP * \fBnetsnmp_create_delegated_cache\fP (\fBnetsnmp_mib_handler\fP *handler, \fBnetsnmp_handler_registration\fP *reginfo, \fBnetsnmp_agent_request_info\fP *reqinfo, \fBnetsnmp_request_info\fP *requests, void *localinfo)"
 .br
 .RI "\fIcreates a cache of information which can be saved for future reference. \fP"
 .ti -1c
-.RI "NETSNMP_INLINE void \fBnetsnmp_free_delegated_cache\fP (netsnmp_delegated_cache *dcache)"
+.RI "NETSNMP_INLINE void \fBnetsnmp_free_delegated_cache\fP (\fBnetsnmp_delegated_cache\fP *dcache)"
 .br
 .RI "\fIfrees a cache once you're finished using it \fP"
 .ti -1c
-.RI "NETSNMP_INLINE netsnmp_delegated_cache * \fBnetsnmp_handler_check_cache\fP (netsnmp_delegated_cache *dcache)"
+.RI "NETSNMP_INLINE \fBnetsnmp_delegated_cache\fP * \fBnetsnmp_handler_check_cache\fP (\fBnetsnmp_delegated_cache\fP *dcache)"
 .br
 .RI "\fIcheck's a given cache and returns it if it is still valid (ie, the agent still considers it to be an outstanding request. \fP"
 .ti -1c
@@ -187,7 +187,7 @@ agent_handler.h \-
 .br
 .RI "\fIclears the entire handler-registration list \fP"
 .ti -1c
-.RI "NETSNMP_INLINE void \fBnetsnmp_request_add_list_data\fP (\fBnetsnmp_request_info\fP *request, \fBnetsnmp_data_list\fP *node)"
+.RI "NETSNMP_INLINE void \fBnetsnmp_request_add_list_data\fP (\fBnetsnmp_request_info\fP *request, \fBnetsnmp_data_list\fP *\fBnode\fP)"
 .br
 .RI "\fIadd data to a request that can be extracted later by submodules \fP"
 .ti -1c
@@ -197,7 +197,7 @@ agent_handler.h \-
 .ti -1c
 .RI "void * \fBnetsnmp_request_get_list_data\fP (\fBnetsnmp_request_info\fP *request, const char *name)"
 .br
-.RI "\fIextract data from a request that was added previously by a parent module \fP"
+.RI "\fIextract data from a request that was added previously by a parent \fBmodule\fP \fP"
 .ti -1c
 .RI "NETSNMP_INLINE void \fBnetsnmp_free_request_data_set\fP (\fBnetsnmp_request_info\fP *request)"
 .br

@@ -1,10 +1,11 @@
-.TH "row_merge" 3 "26 Aug 2009" "Version 5.5.rc2" "net-snmp" \" -*- nroff -*-
+.TH "row_merge" 3 "14 Sep 2009" "Version 5.5.rc3" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
-row_merge \- Calls sub handlers with request for one row at a time.  
-
+row_merge \- 
 .PP
+Calls sub handlers with request for one row at a time.  
+
 .SS "Defines"
 
 .in +1c
@@ -33,7 +34,7 @@ row_merge \- Calls sub handlers with request for one row at a time.
 .br
 .RI "\fIfunctionally the same as calling \fBnetsnmp_register_handler()\fP but also injects a row_merge handler at the same time for you. \fP"
 .ti -1c
-.RI "netsnmp_row_merge_status * \fBnetsnmp_row_merge_status_get\fP (\fBnetsnmp_handler_registration\fP *reginfo, \fBnetsnmp_agent_request_info\fP *reqinfo, int create_missing)"
+.RI "\fBnetsnmp_row_merge_status\fP * \fBnetsnmp_row_merge_status_get\fP (\fBnetsnmp_handler_registration\fP *reginfo, \fBnetsnmp_agent_request_info\fP *reqinfo, int create_missing)"
 .br
 .RI "\fIretrieve row_merge_status \fP"
 .ti -1c
@@ -74,8 +75,6 @@ Definition at line 360 of file row_merge.c.
 .PP
 functionally the same as calling \fBnetsnmp_register_handler()\fP but also injects a row_merge handler at the same time for you. 
 .PP
-
-.PP
 Definition at line 42 of file row_merge.c.
 .SS "int netsnmp_row_merge_helper_handler (\fBnetsnmp_mib_handler\fP * handler, \fBnetsnmp_handler_registration\fP * reginfo, \fBnetsnmp_agent_request_info\fP * reqinfo, \fBnetsnmp_request_info\fP * requests)"
 .PP
@@ -84,21 +83,17 @@ Implements the row_merge handler.
 Definition at line 154 of file row_merge.c.
 .SS "int netsnmp_row_merge_status_first (\fBnetsnmp_handler_registration\fP * reginfo, \fBnetsnmp_agent_request_info\fP * reqinfo)"
 .PP
-Determine if this is the first row. 
-.PP
-returns 1 if this is the first row for this pass of the handler. 
+Determine if this is the first row. returns 1 if this is the first row for this pass of the handler. 
 .PP
 Definition at line 110 of file row_merge.c.
-.SS "netsnmp_row_merge_status* netsnmp_row_merge_status_get (\fBnetsnmp_handler_registration\fP * reginfo, \fBnetsnmp_agent_request_info\fP * reqinfo, int create_missing)"
+.SS "\fBnetsnmp_row_merge_status\fP* netsnmp_row_merge_status_get (\fBnetsnmp_handler_registration\fP * reginfo, \fBnetsnmp_agent_request_info\fP * reqinfo, int create_missing)"
 .PP
 retrieve row_merge_status 
 .PP
 Definition at line 67 of file row_merge.c.
 .SS "int netsnmp_row_merge_status_last (\fBnetsnmp_handler_registration\fP * reginfo, \fBnetsnmp_agent_request_info\fP * reqinfo)"
 .PP
-Determine if this is the last row. 
-.PP
-returns 1 if this is the last row for this pass of the handler. 
+Determine if this is the last row. returns 1 if this is the last row for this pass of the handler. 
 .PP
 Definition at line 130 of file row_merge.c.
 .SH "Author"
