@@ -49,8 +49,12 @@ static char *rcsid = "$OpenBSD: if.c,v 1.42 2005/03/13 16:05:50 mpf Exp $";
 #if HAVE_NET_IF_H
 #include <net/if.h>
 #endif
+#ifndef _XOPEN_SOURCE
 #define _XOPEN_SOURCE 1
+#endif
+#ifndef _XOPEN_SOURCE_EXTENDED
 #define _XOPEN_SOURCE_EXTENDED 1
+#endif
 #include <signal.h>
 
 #include "main.h"
