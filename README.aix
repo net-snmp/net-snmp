@@ -15,6 +15,9 @@ Starting with net-snmp 5.4.1, we build shared libraries by default on AIX
 (like on any other platform) using run-time linking. configure forces the
 use of the required "-brtl" linker flag.
 
+With net-snmp 5.5 the shared library build is broken again but the there is
+no forced static build - use --disable-shared when building.
+
 2) "grep: capacity exceeded" or "sed: Command line is too long" during configure
 
 The version of "grep" shipped with AIX versions up to (and including) 5.1
