@@ -1,22 +1,23 @@
-.TH "netsnmp_request_info_s" 3 "26 Aug 2009" "Version 5.5.rc2" "net-snmp" \" -*- nroff -*-
+.TH "netsnmp_request_info_s" 3 "14 Sep 2009" "Version 5.5.rc3" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
-netsnmp_request_info_s \- The netsnmp request info structure.  
-
+netsnmp_request_info_s \- 
 .PP
+The netsnmp request info structure.  
+
 .SH SYNOPSIS
 .br
 .PP
-\fC#include <snmp_agent.h>\fP
 .PP
+\fC#include <snmp_agent.h>\fP
 .SS "Data Fields"
 
 .in +1c
 .ti -1c
 .RI "\fBnetsnmp_variable_list\fP * \fBrequestvb\fP"
 .br
-.RI "\fIvariable bindings \fP"
+.RI "\fI\fBvariable\fP bindings \fP"
 .ti -1c
 .RI "\fBnetsnmp_data_list\fP * \fBparent_data\fP"
 .br
@@ -27,7 +28,7 @@ netsnmp_request_info_s \- The netsnmp request info structure.
 .ti -1c
 .RI "oid * \fBrange_end\fP"
 .br
-.RI "\fIdon't free, reference to (struct tree)->end \fP"
+.RI "\fIdon't free, reference to (struct \fBtree\fP)->end \fP"
 .ti -1c
 .RI "size_t \fBrange_end_len\fP"
 .br
@@ -64,7 +65,7 @@ netsnmp_request_info_s \- The netsnmp request info structure.
 .RI "struct \fBnetsnmp_request_info_s\fP * \fBprev\fP"
 .br
 .ti -1c
-.RI "struct netsnmp_subtree_s * \fBsubtree\fP"
+.RI "struct \fBnetsnmp_subtree_s\fP * \fBsubtree\fP"
 .br
 .in -1c
 .SH "Detailed Description"
@@ -91,7 +92,7 @@ can be used to pass information on a per-request basis from a helper to the late
 Definition at line 64 of file snmp_agent.h.
 .SS "oid* \fBnetsnmp_request_info_s::range_end\fP"
 .PP
-don't free, reference to (struct tree)->end 
+don't free, reference to (struct \fBtree\fP)->end 
 .PP
 Definition at line 72 of file snmp_agent.h.
 .SS "int \fBnetsnmp_request_info_s::repeat\fP"
@@ -101,7 +102,7 @@ get-bulk
 Definition at line 87 of file snmp_agent.h.
 .SS "\fBnetsnmp_variable_list\fP* \fBnetsnmp_request_info_s::requestvb\fP"
 .PP
-variable bindings 
+\fBvariable\fP bindings 
 .PP
 \fBExamples: \fP
 .in +1c

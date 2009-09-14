@@ -1,10 +1,11 @@
-.TH "storage space for defaults" 3 "26 Aug 2009" "Version 5.5.rc2" "net-snmp" \" -*- nroff -*-
+.TH "storage space for defaults" 3 "14 Sep 2009" "Version 5.5.rc3" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
-storage space for defaults \- The purpose of the default storage is three-fold:.  
-
+storage space for defaults \- 
 .PP
+The purpose of the default storage is three-fold:.  
+
 .SS "Data Structures"
 
 .in +1c
@@ -16,7 +17,7 @@ storage space for defaults \- The purpose of the default storage is three-fold:.
 
 .in +1c
 .ti -1c
-.RI "typedef struct netsnmp_ds_read_config_s \fBnetsnmp_ds_read_config\fP"
+.RI "typedef struct \fBnetsnmp_ds_read_config_s\fP \fBnetsnmp_ds_read_config\fP"
 .br
 .in -1c
 .SS "Functions"
@@ -108,7 +109,7 @@ library booleans
 .IP "\(bu" 2
 #define NETSNMP_DS_LIB_DONT_READ_CONFIGS 6
 .IP "\(bu" 2
-#define NETSNMP_DS_LIB_MIB_REPLACE 7 replace objects from latest module
+#define NETSNMP_DS_LIB_MIB_REPLACE 7 replace objects from latest \fBmodule\fP
 .IP "\(bu" 2
 #define NETSNMP_DS_LIB_PRINT_NUMERIC_ENUM 8 print only numeric enum values
 .IP "\(bu" 2
@@ -227,9 +228,7 @@ library strings
 .PP 
 .SS "int netsnmp_ds_set_boolean (int storeid, int which, int value)"
 .PP
-Stores 'true' or 'false' given an int value for value into netsnmp_ds_booleans[store][which] slot. 
-.PP
-\fBParameters:\fP
+Stores 'true' or 'false' given an int value for value into netsnmp_ds_booleans[store][which] slot. \fBParameters:\fP
 .RS 4
 \fIstoreid\fP an index to the boolean storage container's first index(store)
 .br

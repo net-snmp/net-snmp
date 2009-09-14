@@ -1,10 +1,11 @@
-.TH "watcher" 3 "26 Aug 2009" "Version 5.5.rc2" "net-snmp" \" -*- nroff -*-
+.TH "watcher" 3 "14 Sep 2009" "Version 5.5.rc3" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
-watcher \- Watch a specified variable and process it as an instance or scalar object.  
-
+watcher \- 
 .PP
+Watch a specified \fBvariable\fP and process it as an instance or scalar object.  
+
 .SS "Functions"
 
 .in +1c
@@ -12,22 +13,22 @@ watcher \- Watch a specified variable and process it as an instance or scalar ob
 .RI "\fBnetsnmp_mib_handler\fP * \fBnetsnmp_get_watcher_handler\fP (void)"
 .br
 .ti -1c
-.RI "netsnmp_watcher_info * \fBnetsnmp_init_watcher_info6\fP (netsnmp_watcher_info *winfo, void *data, size_t size, u_char type, int flags, size_t max_size, size_t *size_p)"
+.RI "\fBnetsnmp_watcher_info\fP * \fBnetsnmp_init_watcher_info6\fP (\fBnetsnmp_watcher_info\fP *winfo, void *data, size_t size, u_char type, int flags, size_t max_size, size_t *size_p)"
 .br
 .ti -1c
-.RI "netsnmp_watcher_info * \fBnetsnmp_create_watcher_info6\fP (void *data, size_t size, u_char type, int flags, size_t max_size, size_t *size_p)"
+.RI "\fBnetsnmp_watcher_info\fP * \fBnetsnmp_create_watcher_info6\fP (void *data, size_t size, u_char type, int flags, size_t max_size, size_t *size_p)"
 .br
 .ti -1c
-.RI "netsnmp_watcher_info * \fBnetsnmp_init_watcher_info\fP (netsnmp_watcher_info *winfo, void *data, size_t size, u_char type, int flags)"
+.RI "\fBnetsnmp_watcher_info\fP * \fBnetsnmp_init_watcher_info\fP (\fBnetsnmp_watcher_info\fP *winfo, void *data, size_t size, u_char type, int flags)"
 .br
 .ti -1c
-.RI "netsnmp_watcher_info * \fBnetsnmp_create_watcher_info\fP (void *data, size_t size, u_char type, int flags)"
+.RI "\fBnetsnmp_watcher_info\fP * \fBnetsnmp_create_watcher_info\fP (void *data, size_t size, u_char type, int flags)"
 .br
 .ti -1c
-.RI "int \fBnetsnmp_register_watched_instance\fP (\fBnetsnmp_handler_registration\fP *reginfo, netsnmp_watcher_info *watchinfo)"
+.RI "int \fBnetsnmp_register_watched_instance\fP (\fBnetsnmp_handler_registration\fP *reginfo, \fBnetsnmp_watcher_info\fP *watchinfo)"
 .br
 .ti -1c
-.RI "int \fBnetsnmp_register_watched_scalar\fP (\fBnetsnmp_handler_registration\fP *reginfo, netsnmp_watcher_info *watchinfo)"
+.RI "int \fBnetsnmp_register_watched_scalar\fP (\fBnetsnmp_handler_registration\fP *reginfo, \fBnetsnmp_watcher_info\fP *watchinfo)"
 .br
 .ti -1c
 .RI "int \fBnetsnmp_watcher_helper_handler\fP (\fBnetsnmp_mib_handler\fP *handler, \fBnetsnmp_handler_registration\fP *reginfo, \fBnetsnmp_agent_request_info\fP *reqinfo, \fBnetsnmp_request_info\fP *requests)"
@@ -74,10 +75,34 @@ watcher \- Watch a specified variable and process it as an instance or scalar ob
 .ti -1c
 .RI "int \fBnetsnmp_register_read_only_counter32_scalar\fP (const char *name, const oid *reg_oid, size_t reg_oid_len, u_long *it, Netsnmp_Node_Handler *subhandler)"
 .br
+.in -1c 
+.in +1c
+.ti -1c
+.RI "#define \fBNETSNMP_WATCHER_DIRECT\fP   MIB_HANDLER_CUSTOM1"
+.br
+.ti -1c
+.RI "#define \fBWATCHER_FIXED_SIZE\fP"
+.br
+.RI "\fIThe size of the watched object is constant. \fP"
+.ti -1c
+.RI "#define \fBWATCHER_MAX_SIZE\fP"
+.br
+.RI "\fIThe maximum size of the watched object is stored in max_size. \fP"
+.ti -1c
+.RI "#define \fBWATCHER_SIZE_IS_PTR\fP"
+.br
+.RI "\fIIf set then the \fBvariable\fP data_size_p points to is supposed to hold the current size of the watched object and will be updated on writes. \fP"
+.ti -1c
+.RI "#define \fBWATCHER_SIZE_STRLEN\fP"
+.br
+.RI "\fIIf set then data is suppposed to be a zero-terminated character array and both data_size and data_size_p are ignored. \fP"
+.ti -1c
+.RI "typedef struct \fBnetsnmp_watcher_info_s\fP \fBnetsnmp_watcher_info\fP"
+.br
 .in -1c
 .SH "Detailed Description"
 .PP 
-Watch a specified variable and process it as an instance or scalar object. 
+Watch a specified \fBvariable\fP and process it as an instance or scalar object. 
 .SH "Define Documentation"
 .PP 
 .SS "#define WATCHER_FIXED_SIZE"
@@ -87,9 +112,7 @@ The size of the watched object is constant.
 Definition at line 26 of file watcher.h.
 .SS "#define WATCHER_MAX_SIZE"
 .PP
-The maximum size of the watched object is stored in max_size. 
-.PP
-If WATCHER_SIZE_STRLEN is set then it is supposed that max_size + 1 bytes could be stored in the buffer. 
+The maximum size of the watched object is stored in max_size. If WATCHER_SIZE_STRLEN is set then it is supposed that max_size + 1 bytes could be stored in the buffer. 
 .PP
 \fBExamples: \fP
 .in +1c
@@ -98,9 +121,7 @@ If WATCHER_SIZE_STRLEN is set then it is supposed that max_size + 1 bytes could 
 Definition at line 32 of file watcher.h.
 .SS "#define WATCHER_SIZE_IS_PTR"
 .PP
-If set then the variable data_size_p points to is supposed to hold the current size of the watched object and will be updated on writes. 
-.PP
-\fBSince:\fP
+If set then the \fBvariable\fP data_size_p points to is supposed to hold the current size of the watched object and will be updated on writes. \fBSince:\fP
 .RS 4
 Net-SNMP 5.5 
 .RE
@@ -110,9 +131,7 @@ Net-SNMP 5.5
 Definition at line 38 of file watcher.h.
 .SS "#define WATCHER_SIZE_STRLEN"
 .PP
-If set then data is suppposed to be a zero-terminated character array and both data_size and data_size_p are ignored. 
-.PP
-Additionally \\0 is a forbidden character in the data set.
+If set then data is suppposed to be a zero-terminated character array and both data_size and data_size_p are ignored. Additionally \\0 is a forbidden character in the data set.
 .PP
 \fBSince:\fP
 .RS 4

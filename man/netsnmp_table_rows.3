@@ -1,10 +1,11 @@
-.TH "table_rows" 3 "26 Aug 2009" "Version 5.5.rc2" "net-snmp" \" -*- nroff -*-
+.TH "table_rows" 3 "14 Sep 2009" "Version 5.5.rc3" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
-table_rows \- Routines for working with the rows of a table.  
-
+table_rows \- 
 .PP
+Routines for working with the rows of a table.  
+
 .SS "Functions"
 
 .in +1c
@@ -58,9 +59,7 @@ Retrieve the first row of the table.
 Definition at line 228 of file table_generic.c.
 .SS "void* netsnmp_generic_row_get (void * table, void * row)"
 .PP
-Retrieve the given row from the table. 
-.PP
-This could either be the same data pointer, passed in, or a separate row structure sharing the same index values (or NULL).
+Retrieve the given row from the table. This could either be the same data pointer, passed in, or a separate row structure sharing the same index values (or NULL).
 .PP
 This routine also provides a means to tell whether a given row is present in the table. 
 .PP
@@ -77,9 +76,7 @@ Retrieve the row with the specified instance OIDs.
 Definition at line 270 of file table_generic.c.
 .SS "void* netsnmp_generic_row_next (void * table, void * row)"
 .PP
-Retrieve the following row from the table. 
-.PP
-If the specified row is not present, this routine should return the entry next after the position this row would have occupied. 
+Retrieve the following row from the table. If the specified row is not present, this routine should return the entry next after the position this row would have occupied. 
 .PP
 Definition at line 249 of file table_generic.c.
 .SS "void* netsnmp_generic_row_next_byidx (void * table, \fBnetsnmp_variable_list\fP * indexes)"

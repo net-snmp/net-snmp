@@ -1,15 +1,16 @@
-.TH "snmp_session" 3 "26 Aug 2009" "Version 5.5.rc2" "net-snmp" \" -*- nroff -*-
+.TH "snmp_session" 3 "14 Sep 2009" "Version 5.5.rc3" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
-snmp_session \- The snmp session structure.  
-
+snmp_session \- 
 .PP
+The snmp session structure.  
+
 .SH SYNOPSIS
 .br
 .PP
-\fC#include <types.h>\fP
 .PP
+\fC#include <types.h>\fP
 .SS "Data Fields"
 
 .in +1c
@@ -197,7 +198,7 @@ snmp_session \- The snmp session structure.
 .ti -1c
 .RI "void * \fBsecurityInfo\fP"
 .br
-.RI "\fIsecurity module specific \fP"
+.RI "\fIsecurity \fBmodule\fP specific \fP"
 .ti -1c
 .RI "void * \fBmyvoid\fP"
 .br
@@ -213,7 +214,6 @@ Definition at line 260 of file types.h.
 .SS "u_char*(* \fBsnmp_session::authenticator\fP)(u_char *, size_t *, u_char *, size_t)"
 .PP
 Authentication function or NULL if null authentication is used. 
-.PP
 .SS "netsnmp_callback \fBsnmp_session::callback\fP"
 .PP
 Function to interpret incoming data. 
@@ -228,14 +228,10 @@ Definition at line 291 of file types.h.
 .PP
 community for outgoing requests. 
 .PP
-
-.PP
 Definition at line 303 of file types.h.
 .SS "size_t \fBsnmp_session::community_len\fP"
 .PP
 Length of community name. 
-.PP
-
 .PP
 Definition at line 305 of file types.h.
 .SS "u_char* \fBsnmp_session::contextEngineID\fP"
@@ -285,9 +281,7 @@ My Domain name or dotted IP address, 0 for default.
 Definition at line 279 of file types.h.
 .SS "void* \fBsnmp_session::myvoid\fP"
 .PP
-use as you want data 
-.PP
-used by 'SNMP_FLAGS_RESP_CALLBACK' handling in the agent XXX: or should we add a new field into this structure? 
+use as you want data used by 'SNMP_FLAGS_RESP_CALLBACK' handling in the agent XXX: or should we add a new field into this structure? 
 .PP
 Definition at line 381 of file types.h.
 .SS "char* \fBsnmp_session::paramName\fP"
@@ -304,21 +298,15 @@ Definition at line 275 of file types.h.
 .PP
 Largest message to try to receive. 
 .PP
-
-.PP
 Definition at line 307 of file types.h.
 .SS "u_short \fBsnmp_session::remote_port\fP"
 .PP
-UDP port number of peer. 
-.PP
-(NO LONGER USED - USE peername INSTEAD) 
+UDP port number of peer. (NO LONGER USED - USE peername INSTEAD) 
 .PP
 Definition at line 277 of file types.h.
 .SS "int \fBsnmp_session::retries\fP"
 .PP
 Number of retries before timeout. 
-.PP
-
 .PP
 Definition at line 267 of file types.h.
 .SS "int \fBsnmp_session::s_errno\fP"
@@ -373,7 +361,7 @@ Length of contextEngineID.
 Definition at line 331 of file types.h.
 .SS "void* \fBsnmp_session::securityInfo\fP"
 .PP
-security module specific 
+security \fBmodule\fP specific 
 .PP
 Definition at line 373 of file types.h.
 .SS "int \fBsnmp_session::securityLevel\fP"
@@ -394,8 +382,6 @@ Definition at line 333 of file types.h.
 .SS "size_t \fBsnmp_session::securityNameLen\fP"
 .PP
 Length of securityName. 
-.PP
-
 .PP
 Definition at line 335 of file types.h.
 .SS "u_char \fBsnmp_session::securityPrivKey\fP[USM_PRIV_KU_LEN]"
@@ -436,8 +422,6 @@ Definition at line 297 of file types.h.
 .SS "size_t \fBsnmp_session::sndMsgMaxSize\fP"
 .PP
 Largest message to try to send. 
-.PP
-
 .PP
 Definition at line 309 of file types.h.
 .SS "long \fBsnmp_session::timeout\fP"

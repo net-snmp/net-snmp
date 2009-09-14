@@ -1,10 +1,11 @@
-.TH "asn1 parsing and datatype manipulation routines." 3 "26 Aug 2009" "Version 5.5.rc2" "net-snmp" \" -*- nroff -*-
+.TH "asn1 parsing and datatype manipulation routines." 3 "14 Sep 2009" "Version 5.5.rc3" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
-asn1 parsing and datatype manipulation routines. \- Note on.  
-
+asn1 parsing and datatype manipulation routines. \- 
 .PP
+Note on.  
+
 .SS "Defines"
 
 .in +1c
@@ -85,13 +86,43 @@ asn1 parsing and datatype manipulation routines. \- Note on.
 .RI "u_char * \fBasn_build_bitstring\fP (u_char *data, size_t *datalength, u_char type, const u_char *str, size_t strlength)"
 .br
 .ti -1c
-.RI "u_char * \fBasn_parse_unsigned_int64\fP (u_char *data, size_t *datalength, u_char *type, struct counter64 *cp, size_t countersize)"
+.RI "u_char * \fBasn_parse_unsigned_int64\fP (u_char *data, size_t *datalength, u_char *type, struct \fBcounter64\fP *cp, size_t countersize)"
 .br
 .ti -1c
-.RI "u_char * \fBasn_build_unsigned_int64\fP (u_char *data, size_t *datalength, u_char type, const struct counter64 *cp, size_t countersize)"
+.RI "u_char * \fBasn_build_unsigned_int64\fP (u_char *data, size_t *datalength, u_char type, const struct \fBcounter64\fP *cp, size_t countersize)"
 .br
 .ti -1c
 .RI "int \fBasn_realloc\fP (u_char **pkt, size_t *pkt_len)"
+.br
+.ti -1c
+.RI "int \fBasn_realloc_rbuild_length\fP (u_char **pkt, size_t *pkt_len, size_t *offset, int r, size_t length)"
+.br
+.ti -1c
+.RI "int \fBasn_realloc_rbuild_header\fP (u_char **pkt, size_t *pkt_len, size_t *offset, int r, u_char type, size_t length)"
+.br
+.ti -1c
+.RI "int \fBasn_realloc_rbuild_int\fP (u_char **pkt, size_t *pkt_len, size_t *offset, int r, u_char type, const long *intp, size_t intsize)"
+.br
+.ti -1c
+.RI "int \fBasn_realloc_rbuild_string\fP (u_char **pkt, size_t *pkt_len, size_t *offset, int r, u_char type, const u_char *str, size_t strlength)"
+.br
+.ti -1c
+.RI "int \fBasn_realloc_rbuild_unsigned_int\fP (u_char **pkt, size_t *pkt_len, size_t *offset, int r, u_char type, const u_long *intp, size_t intsize)"
+.br
+.ti -1c
+.RI "int \fBasn_realloc_rbuild_sequence\fP (u_char **pkt, size_t *pkt_len, size_t *offset, int r, u_char type, size_t length)"
+.br
+.ti -1c
+.RI "int \fBasn_realloc_rbuild_objid\fP (u_char **pkt, size_t *pkt_len, size_t *offset, int r, u_char type, const oid *objid, size_t objidlength)"
+.br
+.ti -1c
+.RI "int \fBasn_realloc_rbuild_null\fP (u_char **pkt, size_t *pkt_len, size_t *offset, int r, u_char type)"
+.br
+.ti -1c
+.RI "int \fBasn_realloc_rbuild_bitstring\fP (u_char **pkt, size_t *pkt_len, size_t *offset, int r, u_char type, const u_char *str, size_t strlength)"
+.br
+.ti -1c
+.RI "int \fBasn_realloc_rbuild_unsigned_int64\fP (u_char **pkt, size_t *pkt_len, size_t *offset, int r, u_char type, const struct \fBcounter64\fP *cp, size_t countersize)"
 .br
 .in -1c
 .SH "Detailed Description"
@@ -200,9 +231,7 @@ IS EQUIVALENT TO:
  
 .SH "Define Documentation"
 .PP 
-.SS "#define CHECK_OVERFLOW_S(x, y)"
-.PP
-\fBValue:\fP
+.SS "#define CHECK_OVERFLOW_S(x, y)"\fBValue:\fP
 .PP
 .nf
 do { int trunc = 0;                     \
@@ -219,9 +248,7 @@ do { int trunc = 0;                     \
 .fi
 .PP
 Definition at line 214 of file asn1.c.
-.SS "#define CHECK_OVERFLOW_U(x, y)"
-.PP
-\fBValue:\fP
+.SS "#define CHECK_OVERFLOW_U(x, y)"\fBValue:\fP
 .PP
 .nf
 do {                                    \

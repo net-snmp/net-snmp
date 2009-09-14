@@ -1,4 +1,4 @@
-.TH "Memory Utility Routines" 3 "26 Aug 2009" "Version 5.5.rc2" "net-snmp" \" -*- nroff -*-
+.TH "Memory Utility Routines" 3 "14 Sep 2009" "Version 5.5.rc3" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -7,7 +7,7 @@ Memory Utility Routines \-
 
 .in +1c
 .ti -1c
-.RI "#define \fBSNMP_MAXPATH\fP   1024"
+.RI "#define \fBSNMP_MAXPATH\fP   PATH_MAX"
 .br
 .ti -1c
 .RI "#define \fBSNMP_MAXBUF\fP   (1024 * 4)"
@@ -88,12 +88,6 @@ Memory Utility Routines \-
 .RI "\fIExpands to string with value of the s. \fP"
 .ti -1c
 .RI "#define \fBSNMP_MACRO_VAL_TO_STR_PRIV\fP(s)   #s"
-.br
-.ti -1c
-.RI "#define \fBFALSE\fP   0"
-.br
-.ti -1c
-.RI "#define \fBTRUE\fP   1"
 .br
 .ti -1c
 .RI "#define \fBQUITFUN\fP(e, l)"
@@ -216,19 +210,17 @@ Memory Utility Routines \-
 .ti -1c
 .RI "char * \fBnetsnmp_getenv\fP (const char *name)"
 .br
-.RI "\fINon Windows: Returns a pointer to the desired environment variable or NULL if the environment variable does not exist. \fP"
+.RI "\fINon Windows: Returns a pointer to the desired environment \fBvariable\fP or NULL if the environment \fBvariable\fP does not exist. \fP"
 .ti -1c
 .RI "int \fBnetsnmp_addrstr_hton\fP (char *ptr, size_t len)"
 .br
 .in -1c
 .SH "Define Documentation"
 .PP 
-.SS "#define DIFFTIMEVAL(now, then, diff)"
-.PP
-\fBValue:\fP
+.SS "#define DIFFTIMEVAL(now, then, diff)"\fBValue:\fP
 .PP
 .nf
-{                                                     \
+{                                                    \
         now.tv_sec--;                                   \
         now.tv_usec += 1000000L;                        \
         diff.tv_sec  = now.tv_sec  - then.tv_sec;       \
@@ -241,9 +233,7 @@ Memory Utility Routines \-
 .fi
 .PP
 Definition at line 131 of file tools.h.
-.SS "#define ISTRANSFORM(ttype, toid)"
-.PP
-\fBValue:\fP
+.SS "#define ISTRANSFORM(ttype, toid)"\fBValue:\fP
 .PP
 .nf
 !snmp_oid_compare(ttype, USM_LENGTH_OID_TRANSFORM,            \
@@ -251,9 +241,7 @@ Definition at line 131 of file tools.h.
 .fi
 .PP
 Definition at line 150 of file tools.h.
-.SS "#define QUITFUN(e, l)"
-.PP
-\fBValue:\fP
+.SS "#define QUITFUN(e, l)"\fBValue:\fP
 .PP
 .nf
 if ( (e) != SNMPERR_SUCCESS) {   \
@@ -270,37 +258,27 @@ Frees a pointer only if it is !NULL and sets its value to NULL.
 Definition at line 53 of file tools.h.
 .SS "#define SNMP_MACRO_VAL_TO_STR(s)   SNMP_MACRO_VAL_TO_STR_PRIV(s)"
 .PP
-Expands to string with value of the s. 
-.PP
-If s is macro, the resulting string is value of the macro. Example: define TEST 1234 \fBSNMP_MACRO_VAL_TO_STR(TEST)\fP expands to '1234' SNMP_MACRO_VAL_TO_STR(TEST+1) expands to '1234+1' 
+Expands to string with value of the s. If s is macro, the resulting string is value of the macro. Example: define TEST 1234 \fBSNMP_MACRO_VAL_TO_STR(TEST)\fP expands to '1234' SNMP_MACRO_VAL_TO_STR(TEST+1) expands to '1234+1' 
 .PP
 Definition at line 99 of file tools.h.
 .SS "#define SNMP_MALLOC_STRUCT(s)   (struct s *) calloc(1, sizeof(struct s))"
 .PP
 Mallocs memory of sizeof(struct s), zeros it and returns a pointer to it. 
 .PP
-
-.PP
 Definition at line 64 of file tools.h.
 .SS "#define SNMP_MALLOC_TYPEDEF(td)   (td *) calloc(1, sizeof(td))"
 .PP
 Mallocs memory of sizeof(t), zeros it and returns a pointer to it. 
-.PP
-
 .PP
 Definition at line 68 of file tools.h.
 .SS "#define SNMP_MAX(a, b)   ((a) > (b) ? (a) : (b))"
 .PP
 Computers the maximum of a and b. 
 .PP
-
-.PP
 Definition at line 85 of file tools.h.
 .SS "#define SNMP_MIN(a, b)   ((a) > (b) ? (b) : (a))"
 .PP
 Computers the minimum of a and b. 
-.PP
-
 .PP
 Definition at line 89 of file tools.h.
 .SS "#define SNMP_SWIPE_MEM(n, s)   do { if (n) free((void *)n); n = s; s=NULL; } while(0)"
@@ -312,8 +290,6 @@ Definition at line 57 of file tools.h.
 .PP
 Zeros l bytes of memory starting at s. 
 .PP
-
-.PP
 Definition at line 72 of file tools.h.
 .SH "Function Documentation"
 .PP 
@@ -324,9 +300,7 @@ Returns the difference (in msec) between the two markers.
 Definition at line 795 of file tools.c.
 .SS "marker_t atime_newMarker (void)"
 .PP
-create a new time marker. 
-.PP
-NOTE: Caller must free time marker when no longer needed. 
+create a new time marker. NOTE: Caller must free time marker when no longer needed. 
 .PP
 Definition at line 771 of file tools.c.
 .SS "int atime_ready (marker_t pm, int deltaT)"
@@ -341,9 +315,7 @@ set a time marker.
 Definition at line 782 of file tools.c.
 .SS "u_int binary_to_hex (const u_char * input, size_t len, char ** output)"
 .PP
-converts binary to hexidecimal 
-.PP
-\fBParameters:\fP
+converts binary to hexidecimal \fBParameters:\fP
 .RS 4
 \fI*input\fP Binary data. 
 .br
@@ -362,9 +334,7 @@ FIX Is there already one of these in the UCD SNMP codebase? The old one should b
 Definition at line 287 of file tools.c.
 .SS "void free_zero (void * buf, size_t size)"
 .PP
-zeros memory before freeing it. 
-.PP
-\fBParameters:\fP
+zeros memory before freeing it. \fBParameters:\fP
 .RS 4
 \fI*buf\fP Pointer at bytes to free. 
 .br
@@ -376,9 +346,7 @@ zeros memory before freeing it.
 Definition at line 185 of file tools.c.
 .SS "int hex_to_binary2 (const u_char * input, size_t len, char ** output)"
 .PP
-hex_to_binary2 
-.PP
-\fBParameters:\fP
+hex_to_binary2 \fBParameters:\fP
 .RS 4
 \fI*input\fP Printable data in base16. 
 .br
@@ -399,9 +367,7 @@ FIX Another version of 'hex-to-binary' which takes odd length input strings. It 
 Definition at line 324 of file tools.c.
 .SS "u_char* malloc_random (size_t * size)"
 .PP
-Returns pointer to allocaed & set buffer on success, size contains number of random bytes filled. 
-.PP
-buf is NULL and *size set to KMT error value upon failure.
+Returns pointer to allocaed & set buffer on success, size contains number of random bytes filled. buf is NULL and *size set to KMT error value upon failure.
 .PP
 \fBParameters:\fP
 .RS 4
@@ -423,9 +389,7 @@ Return the number of timeTicks since the given marker.
 Definition at line 898 of file tools.c.
 .SS "int memdup (u_char ** to, const void * from, size_t size)"
 .PP
-Duplicates a memory block. 
-.PP
-Copies a existing memory location from a pointer to another, newly malloced, pointer.
+Duplicates a memory block. Copies a existing memory location from a pointer to another, newly malloced, pointer.
 .PP
 \fBParameters:\fP
 .RS 4
@@ -446,16 +410,12 @@ SNMPERR_SUCCESS on success, SNMPERR_GENERR on failure.
 Definition at line 236 of file tools.c.
 .SS "char* netsnmp_getenv (const char * name)"
 .PP
-Non Windows: Returns a pointer to the desired environment variable or NULL if the environment variable does not exist. 
-.PP
-Windows: Returns a pointer to the desired environment variable if it exists. If it does not, the variable is looked up in the registry in HKCU\\Net-SNMP or HKLM\\Net-SNMP (whichever it finds first) and stores the result in the environment variable. It then returns a pointer to environment variable. 
+Non Windows: Returns a pointer to the desired environment \fBvariable\fP or NULL if the environment \fBvariable\fP does not exist. Windows: Returns a pointer to the desired environment \fBvariable\fP if it exists. If it does not, the \fBvariable\fP is looked up in the registry in HKCU\\Net-SNMP or HKLM\\Net-SNMP (whichever it finds first) and stores the result in the environment \fBvariable\fP. It then returns a pointer to environment \fBvariable\fP. 
 .PP
 Definition at line 926 of file tools.c.
 .SS "int netsnmp_hex_to_binary (u_char ** buf, size_t * buf_len, size_t * offset, int allow_realloc, const char * hex, const char * delim)"
 .PP
-convert an ASCII hex string (with specified delimiters) to binary 
-.PP
-\fBParameters:\fP
+convert an ASCII hex string (with specified delimiters) to binary \fBParameters:\fP
 .RS 4
 \fIbuf\fP address of a pointer (pointer to pointer) for the output buffer. If allow_realloc is set, the buffer may be grown via snmp_realloc to accomodate the data.
 .br
@@ -487,9 +447,7 @@ copies a (possible) unterminated string of a given length into a new buffer and 
 Definition at line 255 of file tools.c.
 .SS "int snmp_hex_to_binary (u_char ** buf, size_t * buf_len, size_t * offset, int allow_realloc, const char * hex)"
 .PP
-convert an ASCII hex string to binary 
-.PP
-\fBNote:\fP
+convert an ASCII hex string to binary \fBNote:\fP
 .RS 4
 This is a wrapper which calls netsnmp_hex_to_binary with a delimiter string of ' '.
 .RE
@@ -508,9 +466,7 @@ See netsnmp_hex_to_binary for parameter descriptions.
 Definition at line 485 of file tools.c.
 .SS "int snmp_realloc (u_char ** buf, size_t * buf_len)"
 .PP
-This function increase the size of the buffer pointed at by *buf, which is initially of size *buf_len. 
-.PP
-Contents are preserved **AT THE BOTTOM END OF THE BUFFER**. If memory can be (re-)allocated then it returns 1, else it returns 0.
+This function increase the size of the buffer pointed at by *buf, which is initially of size *buf_len. Contents are preserved **AT THE BOTTOM END OF THE BUFFER**. If memory can be (re-)allocated then it returns 1, else it returns 0.
 .PP
 \fBParameters:\fP
 .RS 4

@@ -1,15 +1,16 @@
-.TH "snmp_pdu" 3 "26 Aug 2009" "Version 5.5.rc2" "net-snmp" \" -*- nroff -*-
+.TH "snmp_pdu" 3 "14 Sep 2009" "Version 5.5.rc3" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
-snmp_pdu \- The snmp protocol data unit.  
-
+snmp_pdu \- 
 .PP
+The snmp protocol data unit.  
+
 .SH SYNOPSIS
 .br
 .PP
-\fC#include <types.h>\fP
 .PP
+\fC#include <types.h>\fP
 .SS "Data Fields"
 
 .in +1c
@@ -169,14 +170,10 @@ Definition at line 153 of file types.h.
 .PP
 community for outgoing requests. 
 .PP
-
-.PP
 Definition at line 197 of file types.h.
 .SS "size_t \fBsnmp_pdu::community_len\fP"
 .PP
 length of community name. 
-.PP
-
 .PP
 Definition at line 199 of file types.h.
 .SS "u_char* \fBsnmp_pdu::contextEngineID\fP"
@@ -248,8 +245,6 @@ Definition at line 230 of file types.h.
 .PP
 Length of securityName. 
 .PP
-
-.PP
 Definition at line 232 of file types.h.
 .SS "long \fBsnmp_pdu::sessid\fP"
 .PP
@@ -263,9 +258,7 @@ specific type
 Definition at line 210 of file types.h.
 .SS "const oid* \fBsnmp_pdu::tDomain\fP"
 .PP
-The actual transport domain. 
-.PP
-This SHOULD NOT BE FREE()D. 
+The actual transport domain. This SHOULD NOT BE FREE()D. 
 .PP
 Definition at line 187 of file types.h.
 .SS "u_long \fBsnmp_pdu::time\fP"
@@ -280,9 +273,7 @@ Unique ID for incoming transactions.
 Definition at line 159 of file types.h.
 .SS "void* \fBsnmp_pdu::transport_data\fP"
 .PP
-Transport-specific opaque data. 
-.PP
-This replaces the IP-centric address field. 
+Transport-specific opaque data. This replaces the IP-centric address field. 
 .PP
 Definition at line 180 of file types.h.
 .SS "long \fBsnmp_pdu::trap_type\fP"

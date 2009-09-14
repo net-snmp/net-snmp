@@ -1,4 +1,4 @@
-.TH "tools.h" 3 "26 Aug 2009" "Version 5.5.rc2" "net-snmp" \" -*- nroff -*-
+.TH "tools.h" 3 "14 Sep 2009" "Version 5.5.rc3" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -10,7 +10,7 @@ tools.h \-
 
 .in +1c
 .ti -1c
-.RI "#define \fBSNMP_MAXPATH\fP   1024"
+.RI "#define \fBSNMP_MAXPATH\fP   PATH_MAX"
 .br
 .ti -1c
 .RI "#define \fBSNMP_MAXBUF\fP   (1024 * 4)"
@@ -91,12 +91,6 @@ tools.h \-
 .RI "\fIExpands to string with value of the s. \fP"
 .ti -1c
 .RI "#define \fBSNMP_MACRO_VAL_TO_STR_PRIV\fP(s)   #s"
-.br
-.ti -1c
-.RI "#define \fBFALSE\fP   0"
-.br
-.ti -1c
-.RI "#define \fBTRUE\fP   1"
 .br
 .ti -1c
 .RI "#define \fBQUITFUN\fP(e, l)"
@@ -219,7 +213,7 @@ tools.h \-
 .ti -1c
 .RI "char * \fBnetsnmp_getenv\fP (const char *name)"
 .br
-.RI "\fINon Windows: Returns a pointer to the desired environment variable or NULL if the environment variable does not exist. \fP"
+.RI "\fINon Windows: Returns a pointer to the desired environment \fBvariable\fP or NULL if the environment \fBvariable\fP does not exist. \fP"
 .ti -1c
 .RI "int \fBnetsnmp_addrstr_hton\fP (char *ptr, size_t len)"
 .br
