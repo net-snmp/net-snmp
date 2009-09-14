@@ -1,10 +1,11 @@
-.TH "debug" 3 "26 Aug 2009" "Version 5.5.rc2" "net-snmp" \" -*- nroff -*-
+.TH "debug" 3 "14 Sep 2009" "Version 5.5.rc3" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
-debug \- Print out debugging information about the handler chain being called.  
-
+debug \- 
 .PP
+Print out debugging information about the handler chain being called.  
+
 .SS "Functions"
 
 .in +1c
@@ -27,7 +28,7 @@ debug \- Print out debugging information about the handler chain being called.
 .PP 
 Print out debugging information about the handler chain being called. 
 
-This is a useful module for run-time debugging of requests as the pass this handler in a calling chain. All debugging output is done via the standard debugging routines with a token name of 'helper:debug', so use the -Dhelper:debug command line flag to see the output when running the snmpd demon. It's not recommended you compile this into a handler chain during compile time, but instead use the 'injectHandler' token in the snmpd.conf file (or similar) to add it to the chain later:
+This is a useful \fBmodule\fP for run-time debugging of requests as the pass this handler in a calling chain. All debugging output is done via the standard debugging routines with a token name of 'helper:debug', so use the -Dhelper:debug command line flag to see the output when running the snmpd demon. It's not recommended you compile this into a handler chain during compile time, but instead use the 'injectHandler' token in the snmpd.conf file (or similar) to add it to the chain later:
 .PP
 injectHandler debug my_module_name
 .PP

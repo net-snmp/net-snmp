@@ -1,15 +1,16 @@
-.TH "stash_cache" 3 "26 Aug 2009" "Version 5.5.rc2" "net-snmp" \" -*- nroff -*-
+.TH "stash_cache" 3 "14 Sep 2009" "Version 5.5.rc3" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
-stash_cache \- Automatically caches data for certain handlers.  
-
+stash_cache \- 
 .PP
+Automatically caches data for certain handlers.  
+
 .SS "Functions"
 
 .in +1c
 .ti -1c
-.RI "netsnmp_stash_cache_info * \fBnetsnmp_get_new_stash_cache\fP (void)"
+.RI "\fBnetsnmp_stash_cache_info\fP * \fBnetsnmp_get_new_stash_cache\fP (void)"
 .br
 .ti -1c
 .RI "\fBnetsnmp_mib_handler\fP * \fBnetsnmp_get_timed_bare_stash_cache_handler\fP (int timeout, oid *rootoid, size_t rootoid_len)"
@@ -28,18 +29,18 @@ stash_cache \- Automatically caches data for certain handlers.
 .br
 .RI "\fIreturns a stash_cache handler sub-chain that can be injected into a given (arbitrary) handler chain, using a configurable cache timeout. \fP"
 .ti -1c
-.RI "netsnmp_oid_stash_node ** \fBnetsnmp_extract_stash_cache\fP (\fBnetsnmp_agent_request_info\fP *reqinfo)"
+.RI "\fBnetsnmp_oid_stash_node\fP ** \fBnetsnmp_extract_stash_cache\fP (\fBnetsnmp_agent_request_info\fP *reqinfo)"
 .br
 .RI "\fIextracts a pointer to the stash_cache info from the reqinfo structure. \fP"
 .ti -1c
 .RI "int \fBnetsnmp_stash_cache_helper\fP (\fBnetsnmp_mib_handler\fP *handler, \fBnetsnmp_handler_registration\fP *reginfo, \fBnetsnmp_agent_request_info\fP *reqinfo, \fBnetsnmp_request_info\fP *requests)"
 .br
 .ti -1c
-.RI "int \fB_netsnmp_stash_cache_load\fP (netsnmp_cache *cache, void *magic)"
+.RI "int \fB_netsnmp_stash_cache_load\fP (\fBnetsnmp_cache\fP *cache, void *magic)"
 .br
 .RI "\fIupdates a given cache depending on whether it needs to or not. \fP"
 .ti -1c
-.RI "void \fB_netsnmp_stash_cache_free\fP (netsnmp_cache *cache, void *magic)"
+.RI "void \fB_netsnmp_stash_cache_free\fP (\fBnetsnmp_cache\fP *cache, void *magic)"
 .br
 .ti -1c
 .RI "void \fBnetsnmp_init_stash_cache_helper\fP (void)"
@@ -53,16 +54,14 @@ Automatically caches data for certain handlers.
 This handler caches data in an optimized way which may aleviate the need for the lower level handlers to perform as much optimization. Specifically, somewhere in the lower level handlers must be a handler that supports the MODE_GET_STASH operation. Note that the table_iterator helper supports this. 
 .SH "Function Documentation"
 .PP 
-.SS "int _netsnmp_stash_cache_load (netsnmp_cache * cache, void * magic)"
+.SS "int _netsnmp_stash_cache_load (\fBnetsnmp_cache\fP * cache, void * magic)"
 .PP
 updates a given cache depending on whether it needs to or not. 
 .PP
 Definition at line 190 of file stash_cache.c.
-.SS "netsnmp_oid_stash_node** netsnmp_extract_stash_cache (\fBnetsnmp_agent_request_info\fP * reqinfo)"
+.SS "\fBnetsnmp_oid_stash_node\fP** netsnmp_extract_stash_cache (\fBnetsnmp_agent_request_info\fP * reqinfo)"
 .PP
 extracts a pointer to the stash_cache info from the reqinfo structure. 
-.PP
-
 .PP
 Definition at line 109 of file stash_cache.c.
 .SS "\fBnetsnmp_mib_handler\fP* netsnmp_get_bare_stash_cache_handler (void)"
