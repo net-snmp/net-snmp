@@ -681,8 +681,7 @@ While snmpd is running, go to /usr/local/src and modify one of the tester progra
 xstatus=1
 
 and save the file.  Sometime in the next 60 seconds, a trap will be generated.
-Change the value
-back to 0, then modify another file.
+Change the value back to 0, then modify another file.
 
 If you are unsure of the correct row number within a specific table, do an snmpwalk eg.
 
