@@ -214,7 +214,7 @@ script eg. bcc.sh in the directory below eg. /usr/local/src.
       smux mibII/mta_sendmail" --with-cc=gcc
 
 (note, see the long discussion about Perl below)
-(note, subtitute "cc" for "gcc" as appropriate)
+(note, substitute "cc" for "gcc" as appropriate)
 (note, for LM-SENSORS-MIB support, see discussion below)
 
 then call this script from the net-snmp directory ie ../bcc.sh
@@ -672,8 +672,7 @@ While snmpd is running, go to /usr/local/src and modify one of the tester progra
 xstatus=1
 
 and save the file.  Sometime in the next 60 seconds, a trap will be generated.
-Change the value
-back to 0, then modify another file.
+Change the value back to 0, then modify another file.
 
 If you are unsure of the correct row number within a specific table, do an snmpwalk eg.
 
@@ -1141,7 +1140,7 @@ when building net-snmp. All these issues *should* have been addressed
 in net-snmp 5.4 and later. If you still have problems, please let us know
 and consider:
 
-- installing GNU sed and putting in in front of your PATH
+- installing GNU sed and putting it in front of your PATH
 - installing the available Sun patches for the various sed versions
   (/usr/bin/sed, /usr/xpg4/bin/sed, /usr/ucb/sed)
 - try the suggestions below
