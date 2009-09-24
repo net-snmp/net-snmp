@@ -6,18 +6,10 @@ listing of all changes made to the code.
 
 *5.5.dev*      (SVN snapshot)
 
-    applications:
+    All applications:
       - Added the ability to "alias" transports to a more simple name
          (see the "alias" keyword in the snmp.conf manual page)
       - The -t (timeout) switch will accept floating point numbers (eg: .1)
-
-    snmplib:
-      - [BUG 1619827]: Improve handling of link dependencies
-      - [PATCH  700681]: limited support for UDPv4 broadcast addresses
-      - [PATCH 1882069]: Add token for specifying an exact SNMPv3 engineID
-      - Fix assorted memory leaks
-      - Implemented RFC5343 contextEngineID probing.
-      - Support for the TSM security model for use with tunneling
 
     snmpd:
       - [BUG 1712988]: default/configurable max # varbinds returned by GETBULK
@@ -55,13 +47,21 @@ listing of all changes made to the code.
     snmpusm:
       - [PATCH 1591355]: Allow cloning to arbitrary engineIDs
 
+    snmplib:
+      - [BUG 1619827]: Improve handling of link dependencies
+      - [PATCH  700681]: limited support for UDPv4 broadcast addresses
+      - [PATCH 1882069]: Add token for specifying an exact SNMPv3 engineID
+      - Fix assorted memory leaks
+      - Implemented RFC5343 contextEngineID probing.
+      - Support for the TSM security model for use with tunneling
+
     misc:
       - Add config reread support to "net-snmp-config --compile-subagent" code
       - Preliminary (alpha) support for SNMP over SSH and DTLS/UDP.
       - Preliminary (alpha) support for the TSM security model
       - Separate user management into new net-snmp-create-v3-user script
 
-    build:
+    building:
       - Improved cross-compilation support
       - Improved library layering & dependency handling when linking apps
       - Improved RPM spec files, for consistency with vendor-provided packages.
@@ -77,6 +77,17 @@ listing of all changes made to the code.
     python:
       - [PATCH 1716114]: Let python build in source tree (Debian patch #38)
 
+    Linux:
+      - [PATCH 1704105]: Add IPv6 support to the inetNetToMediaTable
+      - [PATCH 1705594]: Various fixes to ipAddressPrefixTable reporting
+      - [PATCH 1708243]: Implement ipDefaultRouteTable
+      - [PATCH 1715405]: Implement ipv6ScopeZoneIndexTable
+      - [PATCH 1724602]: MfD-based ipDefaultRouterTable implementation
+      - [PATCH 1828602]: Support ipDefaultTTL and ipForwarding SETs
+      - [PATCH 1927751]: Implement icmpMsgStatsTable
+      - [PATCH 2023633]: Implement SCTP-MIB
+      - [PATCH 2053273]: Implement EtherLike MIB
+
     AIX:
       - Add support for AIX 6.x
       - Fix default shared library building instead of forcing static
@@ -88,17 +99,6 @@ listing of all changes made to the code.
     IRIX:
       - [PATCH 1709748]: Optimized IRIX cpu stats
       - [PATCH 1675869]: CPU statistics for IRIX based on PCP
-
-    Linux:
-      - [PATCH 1704105]: Add IPv6 support to the inetNetToMediaTable
-      - [PATCH 1705594]: Various fixes to ipAddressPrefixTable reporting
-      - [PATCH 1708243]: Implement ipDefaultRouteTable
-      - [PATCH 1715405]: Implement ipv6ScopeZoneIndexTable
-      - [PATCH 1724602]: MfD-based ipDefaultRouterTable implementation
-      - [PATCH 1828602]: Support ipDefaultTTL and ipForwarding SETs
-      - [PATCH 1927751]: Implement icmpMsgStatsTable
-      - [PATCH 2023633]: Implement SCTP-MIB
-      - [PATCH 2053273]: Implement EtherLike MIB
 
     MacOSX:
       - [PATCH 1600522]: CPU HAL implementation for mach/darwin
