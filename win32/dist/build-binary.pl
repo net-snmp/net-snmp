@@ -411,12 +411,15 @@ close TEMP;
       s/!define PRODUCT_REVISION.*/!define PRODUCT_REVISION \"$version_rev\"/;
       s/!define PRODUCT_EXE_VERSION.*/!define PRODUCT_EXE_VERSION \"$installer_exe_version\"/;
 	  if ($ENV{LIB} =~ /\\x64/) {
-	    s/!define PRODUCT_EXE_SUFFIX.*/!define PRODUCT_EXE_SUFFIX \".x64.exe\"/;
-	    s/!define WIN32_PLATFORM.*/!define PRODUCT_EXE_SUFFIX \"x64\"/;
+            s/!define INSTALLER_PLATFORM.*/!define INSTALLER_PLATFORM \"x64\"/;
+            s/!define PRODUCT_EXE_SUFFIX.*/!define PRODUCT_EXE_SUFFIX \".x64.exe\"/;
+            s/!define WIN32_PLATFORM.*/!define PRODUCT_EXE_SUFFIX \"x64\"/;
 	  }
 	  else {
-	    s/!define PRODUCT_EXE_SUFFIX.*/!define PRODUCT_EXE_SUFFIX \".x86.exe"/;
-	    s/!define WIN32_PLATFORM.*/!define PRODUCT_EXE_SUFFIX \"x86\"/;
+            s/!define INSTALLER_PLATFORM.*/!define INSTALLER_PLATFORM \"x86\"/;
+            s/!define PRODUCT_EXE_SUFFIX.*/!define PRODUCT_EXE_SUFFIX \".x86.exe"/;
+            s/!define PRODUCT_EXE_SUFFIX.*/!define PRODUCT_EXE_SUFFIX \".x86.exe"/;
+            s/!define WIN32_PLATFORM.*/!define PRODUCT_EXE_SUFFIX \"x86\"/;
 	  }
   
       print FILE_OUT $_ . "\n";
