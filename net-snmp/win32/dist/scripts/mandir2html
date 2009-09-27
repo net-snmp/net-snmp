@@ -35,7 +35,7 @@
 
 # Location of man pages to parse
 # Below this directory should be the folders man1 to man9.
-$man_dir = "/tmp/net-snmp/man/";
+$man_dir = "/tmp/net-snmp/share/man/";
 
 # Output folder to create the HTML files
 $man_dir_html = "/tmp/net-snmp/html/";
