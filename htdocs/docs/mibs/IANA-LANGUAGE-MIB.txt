@@ -15,7 +15,7 @@ ianaLanguages MODULE-IDENTITY
                  Marina del Rey, CA 90292
 
          Tel:    +1 310 823 9358 x20
-         E-Mail: iana@iana.org"
+         E-Mail: iana&iana.org"
     DESCRIPTION
         "The MIB module registers object identifier values for
          well-known programming and scripting languages. Every
