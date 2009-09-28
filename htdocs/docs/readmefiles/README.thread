@@ -168,7 +168,7 @@ snmp_open() and snmp_sess_open() to access the opened SNMP Session.
 Error Processing
 
 Two calls were added : snmp_error() and snmp_sess_error() return the
-"errno" and "snmp_errno" values from the per session data, and a string
+&quot;errno&quot; and &quot;snmp_errno&quot; values from the per session data, and a string
 that describes the errors that they represent.  The string must be freed
 by the caller.
 
@@ -215,32 +215,32 @@ with the exception of these behaviors:
 
 Example 1 : Traditional API use.
 
-    #include "snmp_api.h"
+    #include &quot;snmp_api.h&quot;
       ...
       int liberr, syserr;
       char *errstr;
       struct snmp_session Session, *sptr;
       ...
-      snmp_sess_init(&Session);
-      Session.peername = "foo.bar.net";
-      sptr = snmp_open(&Session);
+      snmp_sess_init(&amp;Session);
+      Session.peername = &quot;foo.bar.net&quot;;
+      sptr = snmp_open(&amp;Session);
       if (sptr == NULL) {
           /* Error codes found in open calling argument */
-          snmp_error(&Session, &liberr, &syserr, &errstr);
-          printf("SNMP create error %s.\n", errstr);
+          snmp_error(&amp;Session, &amp;liberr, &amp;syserr, &amp;errstr);
+          printf(&quot;SNMP create error %s.\n&quot;, errstr);
           free(errstr);
           return 0;
       }
       /* Pass sptr to snmp_error from here forward */
       ...
       /* Change the community name */
-      free(sptr->community);
-      sptr->community = strdup("public");
-      sptr->community_len = strlen("public");
+      free(sptr-&gt;community);
+      sptr-&gt;community = strdup(&quot;public&quot;);
+      sptr-&gt;community_len = strlen(&quot;public&quot;);
       ...
       if (0 == snmp_send(sptr, pdu)) {
-          snmp_error(sptr, &liberr, &syserr, &errstr);
-          printf("SNMP write error %s.\n", errstr);
+          snmp_error(sptr, &amp;liberr, &amp;syserr, &amp;errstr);
+          printf(&quot;SNMP write error %s.\n&quot;, errstr);
           free(errstr);
           return 0;
       }
@@ -249,35 +249,35 @@ Example 1 : Traditional API use.
 
 Example 2 : Single API use.
 
-    #include "snmp_api.h"
+    #include &quot;snmp_api.h&quot;
       ...
       int liberr, syserr;
       char *errstr;
-      void *sessp;  /* <-- an opaque pointer, not a struct pointer */
+      void *sessp;  /* &lt;-- an opaque pointer, not a struct pointer */
       struct snmp_session Session, *sptr;
       ...
-      snmp_sess_init(&Session);
-      Session.peername = "foo.bar.net";
-      sessp = snmp_sess_open(&Session);
+      snmp_sess_init(&amp;Session);
+      Session.peername = &quot;foo.bar.net&quot;;
+      sessp = snmp_sess_open(&amp;Session);
       if (sessp == NULL) {
           /* Error codes found in open calling argument */
-          snmp_error(&Session, &liberr, &syserr, &errstr);
-          printf("SNMP create error %s.\n", errstr);
+          snmp_error(&amp;Session, &amp;liberr, &amp;syserr, &amp;errstr);
+          printf(&quot;SNMP create error %s.\n&quot;, errstr);
           free(errstr);
           return 0;
       }
-      sptr = snmp_sess_session(sessp); /* <-- get the snmp_session pointer */
+      sptr = snmp_sess_session(sessp); /* &lt;-- get the snmp_session pointer */
 
       /* Pass sptr to snmp_sess_error from here forward */
       ...
       /* Change the community name */
-      free(sptr->community);
-      sptr->community = strdup("public");
-      sptr->community_len = strlen("public");
+      free(sptr-&gt;community);
+      sptr-&gt;community = strdup(&quot;public&quot;);
+      sptr-&gt;community_len = strlen(&quot;public&quot;);
       ...
       if (0 == snmp_sess_send(sessp, pdu)) {
-          snmp_sess_error(sessp, &liberr, &syserr, &errstr);
-          printf("SNMP write error %s.\n", errstr);
+          snmp_sess_error(sessp, &amp;liberr, &amp;syserr, &amp;errstr);
+          printf(&quot;SNMP write error %s.\n&quot;, errstr);
           free(errstr);
           return 0;
       }
@@ -285,29 +285,29 @@ Example 2 : Single API use.
  
 Example 3. Differences Between Traditional API and Single API Usage
 5a6
->       void *sessp;  /* <-- an opaque pointer, not a struct pointer */
+&gt;       void *sessp;  /* &lt;-- an opaque pointer, not a struct pointer */
 11,13c12,14
-<       sptr = snmp_open(&Session);
-<       if (sptr == NULL) {
+&lt;       sptr = snmp_open(&amp;Session);
+&lt;       if (sptr == NULL) {
 ---
->       sessp = snmp_sess_open(&Session);
->       if (sessp == NULL) {
+&gt;       sessp = snmp_sess_open(&amp;Session);
+&gt;       if (sessp == NULL) {
 19c20,22
-<       /* Pass sptr to snmp_error from here forward */
+&lt;       /* Pass sptr to snmp_error from here forward */
 ---
->       sptr = snmp_sess_session(sessp); /* <-- get the snmp_session pointer */
-> 
->       /* Pass sptr to snmp_sess_error from here forward */
+&gt;       sptr = snmp_sess_session(sessp); /* &lt;-- get the snmp_session pointer */
+&gt; 
+&gt;       /* Pass sptr to snmp_sess_error from here forward */
 26,27c29,30
-<       if (0 == snmp_send(sptr, pdu)) {
-<           snmp_error(sptr, &liberr, &syserr, &errstr);
+&lt;       if (0 == snmp_send(sptr, pdu)) {
+&lt;           snmp_error(sptr, &amp;liberr, &amp;syserr, &amp;errstr);
 ---
->       if (0 == snmp_sess_send(sessp, pdu)) {
->           snmp_sess_error(sessp, &liberr, &syserr, &errstr);
+&gt;       if (0 == snmp_sess_send(sessp, pdu)) {
+&gt;           snmp_sess_error(sessp, &amp;liberr, &amp;syserr, &amp;errstr);
 33c36
-<       snmp_close(sptr);
+&lt;       snmp_close(sptr);
 ---
->       snmp_sess_close(sessp);
+&gt;       snmp_sess_close(sessp);
 
 
 Restrictions on Multi-threaded Use of the SNMP Library

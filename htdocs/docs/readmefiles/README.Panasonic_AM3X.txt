@@ -39,7 +39,7 @@
    --disable-dlerror 
    --with-endianness=little 
    --with-openssl=no 
-   --with-cflags="-g -mam33 -O2 -static" 
+   --with-cflags=&quot;-g -mam33 -O2 -static&quot; 
    --oldincludedir=./usr/local 
    --prefix=./usr/local 
    --exec-prefix=./usr/local 
@@ -57,7 +57,7 @@
 #--------------------------------------------------------------------------
 ./configure --with-cc=am33_2.0-linux-gnu-gcc --host=i686-pc-linux-gnu \
 --disable-dlopen --target=am33-linux --disable-dlclose --disable-dlerror \
---with-endianness=little --with-openssl=no --with-cflags="-g -mam33 -O2 -static" \
+--with-endianness=little --with-openssl=no --with-cflags=&quot;-g -mam33 -O2 -static&quot; \
 --oldincludedir=./usr/local --prefix=./usr/local --exec-prefix=./usr/local \
 --with-persistent-directory=./usr/local
 
@@ -97,9 +97,9 @@ make install
    
 2.  TESTING
 
-   You will need to know your SNMP community.  For this example, we will use "public".
+   You will need to know your SNMP community.  For this example, we will use &quot;public&quot;.
 
-   snmpwalk -v 2c -m ALL -c public -t 100 localhost .1.3 > snmpwalk.txt
+   snmpwalk -v 2c -m ALL -c public -t 100 localhost .1.3 &gt; snmpwalk.txt
    more snmpwalk.txt
 
    This should return a considerable amount of output.

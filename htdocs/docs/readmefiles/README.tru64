@@ -15,8 +15,8 @@ compiler:
 
 A recent GNU C compiler (gcc) will probably work, too.
 
-Please note that the "host" module doesn't compile on Tru64, so you *cannot*
-run configure with "--with-mib-modules=host".
+Please note that the &quot;host&quot; module doesn't compile on Tru64, so you *cannot*
+run configure with &quot;--with-mib-modules=host&quot;.
 
 2. Embedded Perl
 ----------------
@@ -39,7 +39,7 @@ There's no support for the IPv6 MIBs, though.
 4. Known problems
 -----------------
 
-"make test" is known to report the following failure:
+&quot;make test&quot; is known to report the following failure:
 
   59: testing full snmpwalk (SNMPv2c) against agent (may take time)... FAIL
 

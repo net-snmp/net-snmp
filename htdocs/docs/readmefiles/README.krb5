@@ -49,7 +49,7 @@ ksmSecurityParameters.
 If the securityLevel of the message is set to AuthPriv, the scopedPdu
 payload will be encrypted using the encryption key and algorithm of the
 AP_REQ subkey.  Note that in this case, the msgData will be a BER-encoded
-OCTET STRING corresponding to the "cipher" element of the EncryptedData
+OCTET STRING corresponding to the &quot;cipher&quot; element of the EncryptedData
 sequence defined in RFC 1510, section 6.1.
 
 Since this security model is experimental, the number assigned to this
@@ -70,7 +70,7 @@ To actually USE the Kerberos Security Model, do the following:
 
 0) Install Kerberos
 
-   Let it be stated up front - Installing Kerberos completely "cold", without
+   Let it be stated up front - Installing Kerberos completely &quot;cold&quot;, without
    any Kerberos experience at all, can be daunting (to say the least).  If you
    already have a Kerberos infrastructure at your site, then all of the hard
    work has been done.  If you do NOT, but you still want to tackle it,
@@ -106,7 +106,7 @@ To actually USE the Kerberos Security Model, do the following:
 
 2) Configure Kerberos and SNMP
 
-   Currently, net-snmp uses the "host" principal assigned to a host.  This
+   Currently, net-snmp uses the &quot;host&quot; principal assigned to a host.  This
    may change in the future.  You will want to create host principals of
    the form:
 
@@ -119,7 +119,7 @@ To actually USE the Kerberos Security Model, do the following:
    and place the encryption keys for these principals on every machine you
    wish to run a SNMP agent (you place each key on it's corresponding machine).
    Your Kerberos documentation should explain how to do this (in the case
-   of MIT Kerberos, you want to look at the "ktadd" command inside of
+   of MIT Kerberos, you want to look at the &quot;ktadd&quot; command inside of
    kadmin).
 
    If you have a Kerberos infrastructure, you likely already have these
@@ -141,7 +141,7 @@ To actually USE the Kerberos Security Model, do the following:
 3) Run the agent and client applications
 
    Note that before you do any of this, you will have to have valid Kerberos
-   credentials (generally acquired with the "kinit" program).
+   credentials (generally acquired with the &quot;kinit&quot; program).
 
    The agent should run without any additional flags.
 
@@ -157,7 +157,7 @@ To actually USE the Kerberos Security Model, do the following:
    snmpget -v 3 -Y defSecurityModel=ksm -u myname -l authNoPriv testhost \
 						system.sysDescr.0
 
-   If you wish to encrypt the payload, change the -l argument to "authPriv".
+   If you wish to encrypt the payload, change the -l argument to &quot;authPriv&quot;.
 
    If you run into problems, you can add the -Dksm flag to both the manager
    applications and the agent to get more detailed Kerberos error messages.

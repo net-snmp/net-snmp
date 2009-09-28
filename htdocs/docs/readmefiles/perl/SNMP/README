@@ -19,7 +19,7 @@ Introduction:
    ******************************NOTE NOTE NOTE**************************
      This module now relies on many other modules.  Ideally, do not try
      to build it independently, as it won't work as well.  Instead of
-     running "perl Makefile.PL" in this directory, run it in the
+     running &quot;perl Makefile.PL&quot; in this directory, run it in the
      net-snmp/perl directory instead which has a global makefile used to
      build all the sub-modules in their proper order.
    ******************************NOTE NOTE NOTE**************************
@@ -95,8 +95,8 @@ KNOWN BUGS:
 
    The make test suite likely won't work perfectly.  It relies on
    running an existing Net-SNMP SNMP agent and various configuration
-   which makes it very hard to ensure exact compatibility.  If "make
-   test" fails on you we suggest you install the module anyway.
+   which makes it very hard to ensure exact compatibility.  If &quot;make
+   test&quot; fails on you we suggest you install the module anyway.
 
    (none?)  (HA!)
 
@@ -123,7 +123,7 @@ Installation:
    Unix:
 
    cd net-snmp/perl
-   perl Makefile.PL [-NET-SNMP-CONFIG="sh ../../net-snmp-config"] [-NET-SNMP-IN-SOURCE=true]
+   perl Makefile.PL [-NET-SNMP-CONFIG=&quot;sh ../../net-snmp-config&quot;] [-NET-SNMP-IN-SOURCE=true]
    make
    make test
    make install
@@ -131,7 +131,7 @@ Installation:
    FreeBSD:
 
    cd net-snmp/perl
-   perl Makefile.PL -NET-SNMP-CONFIG="sh ../../net-snmp-config" -NET-SNMP-IN-SOURCE=true
+   perl Makefile.PL -NET-SNMP-CONFIG=&quot;sh ../../net-snmp-config&quot; -NET-SNMP-IN-SOURCE=true
    make
    make test
    make install
@@ -170,33 +170,33 @@ Installation:
 
        a.  Copy regex.h to the include folder of MSVC++
 
-           Example: "C:\Program Files\Microsoft Visual Studio .NET 2003\
-                     Vc7\include\regex.h"
+           Example: &quot;C:\Program Files\Microsoft Visual Studio .NET 2003\
+                     Vc7\include\regex.h&quot;
 
        b.  Copy gnu_regex.lib to the lib folder of MSVC++
 
-           Example: "C:\Program Files\Microsoft Visual Studio .NET 2003\
-                     Vc7\lib\gnu_regex.lib"
+           Example: &quot;C:\Program Files\Microsoft Visual Studio .NET 2003\
+                     Vc7\lib\gnu_regex.lib&quot;
 
        c.  Copy gnu_regex.dll to your %windir%\system32 folder
 
-           Example: "C:\winnt\system32\gnu_regex.dll"
+           Example: &quot;C:\winnt\system32\gnu_regex.dll&quot;
 
-   3.  Set the environment PATH to locate "nmake", "cl", and "link".
+   3.  Set the environment PATH to locate &quot;nmake&quot;, &quot;cl&quot;, and &quot;link&quot;.
        Visual Studio installs a VCVARS32.BAT batch file for this purpose.
 
    4.  Using a command prompt window, cd to the source base directory.
 
    5.  Invoke win32\nmakeperl.bat to build the Perl SNMP modules.  If you see 
-       errors, review the "nmake.out" file first.  If no errors there,
+       errors, review the &quot;nmake.out&quot; file first.  If no errors there,
        then the modules built correctly, but the tests did not rigourously
-       prove the mettle of the modules.  Review "nmaketest.out".  If the
+       prove the mettle of the modules.  Review &quot;nmaketest.out&quot;.  If the
        first three sections mostly pass, the modules are well formed.
 
        NOTE: If the tests fail, there may be a perl application left hanging.
              Use the Task Manager to remove any stale perl or snmp*.exe process.
 
-   6.  The final step is to invoke "nmake install".  If no errors occurred,
+   6.  The final step is to invoke &quot;nmake install&quot;.  If no errors occurred,
        then the SNMP modules are available for use by your Perl programs.
 
 
@@ -213,19 +213,19 @@ Installation:
 
        a.  Copy regex.h to the include folder of MSVC++
 
-           Example: "C:\Program Files\Microsoft Visual Studio .NET 2003\
-                     Vc7\include\regex.h"
+           Example: &quot;C:\Program Files\Microsoft Visual Studio .NET 2003\
+                     Vc7\include\regex.h&quot;
 
        b.  Copy gnu_regex.lib to the lib folder of MSVC++
 
-           Example: "C:\Program Files\Microsoft Visual Studio .NET 2003\
-                     Vc7\lib\gnu_regex.lib"
+           Example: &quot;C:\Program Files\Microsoft Visual Studio .NET 2003\
+                     Vc7\lib\gnu_regex.lib&quot;
 
        c.  Copy gnu_regex.dll to your %windir%\system32 folder
 
-           Example: "C:\winnt\system32\gnu_regex.dll"
+           Example: &quot;C:\winnt\system32\gnu_regex.dll&quot;
 
-   3.  Set the environment PATH to locate "nmake", "cl", and "link".
+   3.  Set the environment PATH to locate &quot;nmake&quot;, &quot;cl&quot;, and &quot;link&quot;.
        Visual Studio installs a VCVARS32.BAT for this purpose.
 
    4.  Using a command prompt window, cd to the perl directory.
@@ -248,7 +248,7 @@ Installation:
                library files from the installed Net-SNMP directory.
                To specify the installed Net-SNMP directory, use:
 
-               perl Makefile.PL CAPI=TRUE -NET-SNMP-PATH="c:\usr"
+               perl Makefile.PL CAPI=TRUE -NET-SNMP-PATH=&quot;c:\usr&quot;
 
                Note: -NET-SNMP-DEBUG has no effect while compiling against an 
                      installed copy of Net-SNMP.
@@ -413,31 +413,31 @@ Building the Perl module:
     SecName     - default 'initial', security name (v3)
     SecLevel    - default 'noAuthNoPriv', security level [noAuthNoPriv,
                   authNoPriv, authPriv] (v3)
-    SecEngineId - default <none>, security engineID, will be probed if not
+    SecEngineId - default &lt;none&gt;, security engineID, will be probed if not
                   supplied (v3)
-    ContextEngineId - default <SecEngineId>, context engineID, will be
+    ContextEngineId - default &lt;SecEngineId&gt;, context engineID, will be
                       probed if not supplied (v3)
     Context     - default '', context name (v3)
     AuthProto   - default 'MD5', authentication protocol [MD5, SHA] (v3)
-    AuthPass    - default <none>, authentication passphrase
+    AuthPass    - default &lt;none&gt;, authentication passphrase
     PrivProto   - default 'DES', privacy protocol [DES] (v3)
-    PrivPass    - default <none>, privacy passphrase (v3)
+    PrivPass    - default &lt;none&gt;, privacy passphrase (v3)
     VarFormats  - default 'undef', used by 'fget[next]', holds an hash
-                  reference of output value formatters, (e.g., {<obj> =>
-                  <sub-ref>, ... }, <obj> must match the <obj> and format
-                  used in the get operation. A special <obj>, '*', may be
-                  used to apply all <obj>s, the supplied sub is called to
+                  reference of output value formatters, (e.g., {&lt;obj&gt; =&gt;
+                  &lt;sub-ref&gt;, ... }, &lt;obj&gt; must match the &lt;obj&gt; and format
+                  used in the get operation. A special &lt;obj&gt;, '*', may be
+                  used to apply all &lt;obj&gt;s, the supplied sub is called to
                   translate the value to a new format. The sub is called
                   passing the Varbind as the arg
     TypeFormats - default 'undef', used by 'fget[next]', holds an hash
-                  reference of output value formatters, (e.g., {<type> =>
-                  <sub-ref>, ... }, the supplied sub is called to translate
+                  reference of output value formatters, (e.g., {&lt;type&gt; =&gt;
+                  &lt;sub-ref&gt;, ... }, the supplied sub is called to translate
                   the value to a new format, unless a VarFormat mathces first
-                  (e.g., $session->{TypeFormats}{INTEGER} = \&mapEnum();
+                  (e.g., $session-&gt;{TypeFormats}{INTEGER} = \&amp;mapEnum();
                    although this can be done more efficiently by enabling
                    $SNMP::use_enums or session creation param 'UseEnums')
     UseLongNames - defaults to the value of SNMP::use_long_names at time
-                  of session creation. set to non-zero to have <tags>
+                  of session creation. set to non-zero to have &lt;tags&gt;
                   for 'getnext' methods generated preferring longer Mib name
                   convention (e.g., system.sysDescr vs just sysDescr)
     UseSprintValue - defaults to the value of SNMP::use_sprint_value at time
@@ -446,17 +446,17 @@ Building the Perl module:
                   sprint_value function. This will result in certain data types
                   being returned in non-canonical format Note: values returned
                   with this option set may not be appropriate for 'set' operations
-                  (see discussion of value formats in <vars> description section)
+                  (see discussion of value formats in &lt;vars&gt; description section)
     UseEnums    - defaults to the value of SNMP::use_enums at time of session
                   creation. set to non-zero to have integer return values
                   converted to enumeration identifiers if possible, these values
                   will also be acceptable when supplied to 'set' operations
     UseNumeric  - defaults to the value of SNMP::use_numeric at time of session
-                  creation. set to non-zero to have <tags> returned by the 'get'
+                  creation. set to non-zero to have &lt;tags&gt; returned by the 'get'
                   methods untranslated (i.e. dotted-decimal).  Setting the
                   UseLongNames value for the session is highly recommended.
     BestGuess   - defaults to the value of SNMP::best_guess at time of session
-                  creation. this setting controls how <tags> are parsed.  setting 
+                  creation. this setting controls how &lt;tags&gt; are parsed.  setting 
                   to 0 causes a regular lookup.  setting to 1 causes a regular 
                   expression match (defined as -Ib in snmpcmd) and setting to 2 
                   causes a random access lookup (defined as -IR in snmpcmd).
@@ -469,51 +469,51 @@ Building the Perl module:
     SessPtr     - internal field used to cache a created session structure
 
    methods:
-    new(<fields>)   - Constructs a new SNMP::Session object. The fields are
+    new(&lt;fields&gt;)   - Constructs a new SNMP::Session object. The fields are
                       passed to the constructor as a hash list
-                      (e.g., $session = new SNMP::Session(DestHost => 'foo',
-                      Community => 'private');), returns an object reference
+                      (e.g., $session = new SNMP::Session(DestHost =&gt; 'foo',
+                      Community =&gt; 'private');), returns an object reference
                       or undef in case of error.
-    update(<fields>)- Updates the SNMP::Session object with the values fields
-                      passed in as a hash list (similar to new(<fields>))
+    update(&lt;fields&gt;)- Updates the SNMP::Session object with the values fields
+                      passed in as a hash list (similar to new(&lt;fields&gt;))
                       (WARNING! not fully implemented)
-    get(<vars>[,<callback>])
-                    - do SNMP GET, multiple <vars> formats accepted.
-                      for synchronous operation <vars> will be updated
+    get(&lt;vars&gt;[,&lt;callback&gt;])
+                    - do SNMP GET, multiple &lt;vars&gt; formats accepted.
+                      for synchronous operation &lt;vars&gt; will be updated
                       with value(s) and type(s) and will also return
-                      retrieved value(s). If <callback> supplied method
+                      retrieved value(s). If &lt;callback&gt; supplied method
                       will operate asynchronously
-    fget(<vars>[,<callback>])
+    fget(&lt;vars&gt;[,&lt;callback&gt;])
                     - do SNMP GET like 'get' and format the values according
-                      the handlers specified in $sess->{VarFormats} and
-                      $sess->{TypeFormats}. Async *not supported*
-    getnext(<vars>[,<callback>])
-                    - do SNMP GETNEXT, multiple <vars> formats accepted,
-                      returns retrieved value(s), <vars> passed as arguments are
-                      updated to indicate next lexicographical <obj>,<iid>,<val>,
-                      and <type> Note: simple string <vars>,(e.g., 'sysDescr.0')
-                      form is not updated. If <callback> supplied method
+                      the handlers specified in $sess-&gt;{VarFormats} and
+                      $sess-&gt;{TypeFormats}. Async *not supported*
+    getnext(&lt;vars&gt;[,&lt;callback&gt;])
+                    - do SNMP GETNEXT, multiple &lt;vars&gt; formats accepted,
+                      returns retrieved value(s), &lt;vars&gt; passed as arguments are
+                      updated to indicate next lexicographical &lt;obj&gt;,&lt;iid&gt;,&lt;val&gt;,
+                      and &lt;type&gt; Note: simple string &lt;vars&gt;,(e.g., 'sysDescr.0')
+                      form is not updated. If &lt;callback&gt; supplied method
                       will operate asynchronously
-    fgetnext(<vars>[,<callback>])
+    fgetnext(&lt;vars&gt;[,&lt;callback&gt;])
                     - do SNMP GETNEXT like getnext and format the values according
-                      the handlers specified in $sess->{VarFormats} and
-                      $sess->{TypeFormats}. Async *not supported*
-    set(<vars>[,<callback>])
-                    - do SNMP SET, multiple <vars> formats accepted.
-                      the value field in all <vars> formats must be in a canonical
+                      the handlers specified in $sess-&gt;{VarFormats} and
+                      $sess-&gt;{TypeFormats}. Async *not supported*
+    set(&lt;vars&gt;[,&lt;callback&gt;])
+                    - do SNMP SET, multiple &lt;vars&gt; formats accepted.
+                      the value field in all &lt;vars&gt; formats must be in a canonical
                       format (i.e., well known format) to ensure unambiguous
                       translation to SNMP MIB data value (see discussion of
-                      canonical value format <vars> description section),
-                      returns true on success or undef on error. If <callback>
+                      canonical value format &lt;vars&gt; description section),
+                      returns true on success or undef on error. If &lt;callback&gt;
                       supplied method will operate asynchronously
-    getbulk(<non-repeaters>, <max-repeaters>, <vars> [, <callback>])
+    getbulk(&lt;non-repeaters&gt;, &lt;max-repeaters&gt;, &lt;vars&gt; [, &lt;callback&gt;])
                     - do an SNMP GETBULK, from the list of Varbinds, the single
                       next lexico instance is fetched for the first n Varbinds
-                      as defined by <non-repeaters>. For remaining Varbinds,
+                      as defined by &lt;non-repeaters&gt;. For remaining Varbinds,
                       the m lexico instances are retrieved each of the remaining
-                      Varbinds, where m is <max-repeaters>.
-    bulkwalk(<non-repeaters>, <max-repeaters>, <vars> [, <callback>])
-                    - do an "SNMP bulkwalk" on the given variables.  Bulkwalk is
+                      Varbinds, where m is &lt;max-repeaters&gt;.
+    bulkwalk(&lt;non-repeaters&gt;, &lt;max-repeaters&gt;, &lt;vars&gt; [, &lt;callback&gt;])
+                    - do an &quot;SNMP bulkwalk&quot; on the given variables.  Bulkwalk is
                       implemented by sending an SNMP GETBULK request to fetch the
                       variables.  Objects are copied to the return list until the
                       sub-tree is exited.  If the request is not completed at the
@@ -529,94 +529,94 @@ Building the Perl module:
    SNMP::TrapSession - supports all applicable fields from SNMP::Session
                        (see above)
    methods:
-    new(<fields>)   - Constructs a new SNMP::TrapSession object. The fields are
+    new(&lt;fields&gt;)   - Constructs a new SNMP::TrapSession object. The fields are
                       passed to the constructor as a hash list
-                      (e.g., $trapsess = new SNMP::Session(DestHost => 'foo',
-                      Community => 'private');), returns an object reference
+                      (e.g., $trapsess = new SNMP::Session(DestHost =&gt; 'foo',
+                      Community =&gt; 'private');), returns an object reference
                       or undef in case of error.
-    trap(enterprise, agent, generic, specific, uptime, <vars>)
-       $sess->trap(enterprise=>'.1.3.6.1.4.1.2021', # or 'ucdavis' [default]
-                   agent => '127.0.0.1', # or 'localhost',[dflt 1st intf on host]
-                   generic => specific,  # can be omitted if 'specific' supplied
-                   specific => 5,        # can be omitted if 'generic' supplied
-                   uptime => 1234,       # dflt to localhost uptime (0 on win32)
-                   [[ifIndex, 1, 1],[sysLocation, 0, "here"]]); # optional vars
+    trap(enterprise, agent, generic, specific, uptime, &lt;vars&gt;)
+       $sess-&gt;trap(enterprise=&gt;'.1.3.6.1.4.1.2021', # or 'ucdavis' [default]
+                   agent =&gt; '127.0.0.1', # or 'localhost',[dflt 1st intf on host]
+                   generic =&gt; specific,  # can be omitted if 'specific' supplied
+                   specific =&gt; 5,        # can be omitted if 'generic' supplied
+                   uptime =&gt; 1234,       # dflt to localhost uptime (0 on win32)
+                   [[ifIndex, 1, 1],[sysLocation, 0, &quot;here&quot;]]); # optional vars
                                                                 # always last
     or v2 format
-    trap(oid, uptime, <vars>)
-       $sess->trap(oid => 'snmpRisingAlarm',
-                   uptime => 1234,
-                   [[ifIndex, 1, 1],[sysLocation, 0, "here"]]); # optional vars
+    trap(oid, uptime, &lt;vars&gt;)
+       $sess-&gt;trap(oid =&gt; 'snmpRisingAlarm',
+                   uptime =&gt; 1234,
+                   [[ifIndex, 1, 1],[sysLocation, 0, &quot;here&quot;]]); # optional vars
                                                                 # always last
 
 
    Acceptable variable formats:
-   <vars> may be one of the following forms:
+   &lt;vars&gt; may be one of the following forms:
 
     SNMP::VarList:  - represents an array of MIB objects to get or set,
                       implemented as a blessed reference to an array of
-                      SNMP::Varbinds, (e.g., [<varbind1>, <varbind2>, ...])
+                      SNMP::Varbinds, (e.g., [&lt;varbind1&gt;, &lt;varbind2&gt;, ...])
 
     SNMP::Varbind:  - represents a single MIB object to get or set, implemented as
                       a blessed reference to a 4 element array;
-                      [<obj>, <iid>, <val>, <type>].
-                      <obj>  - one of the following forms:
+                      [&lt;obj&gt;, &lt;iid&gt;, &lt;val&gt;, &lt;type&gt;].
+                      &lt;obj&gt;  - one of the following forms:
                              1) leaf identifier (e.g., 'sysDescr') assumed to be
                                 unique for practical purposes
                              2) fully qualified identifier (e.g.,
    			     '.iso.org.dod.internet.mgmt.mib-2.system.sysDescr')
                              3) fully qualified, dotted-decimal, numeric OID (e.g.,
                                 '.1.3.6.1.2.1.1.1')
-                      <iid>  - the dotted-decimal, instance identifier. for
+                      &lt;iid&gt;  - the dotted-decimal, instance identifier. for
                                scalar MIB objects use '0'
-   		   <val>  - the SNMP data value retrieved from or being set
+   		   &lt;val&gt;  - the SNMP data value retrieved from or being set
                                to the agents MIB. for (f)get(next) operations
-                               <val> may have a variety of formats as determined by
+                               &lt;val&gt; may have a variety of formats as determined by
                                session and package settings. However for set
-                               operations the <val> format must be canonical to
+                               operations the &lt;val&gt; format must be canonical to
                                ensure unambiguous translation. The canonical forms
                                are as follows:
-   	                    OBJECTID => dotted-decimal (e.g., .1.3.6.1.2.1.1.1)
-   			    OCTETSTR => perl scalar containing octets,
-   		            INTEGER => decimal signed integer (or enum),
-   			    NETADDR => dotted-decimal,
-   			    IPADDR => dotted-decimal,
-   			    COUNTER => decimal unsigned integer,
-   			    COUNTER64  => decimal unsigned integer,
-   			    GAUGE,  => decimal unsigned integer,
-   			    UINTEGER,  => decimal unsigned integer,
-                               TICKS,  => decimal unsigned integer,
-                               OPAQUE => perl scalar containing octets,
-          			    NULL,  => perl scalar containing nothing,
+   	                    OBJECTID =&gt; dotted-decimal (e.g., .1.3.6.1.2.1.1.1)
+   			    OCTETSTR =&gt; perl scalar containing octets,
+   		            INTEGER =&gt; decimal signed integer (or enum),
+   			    NETADDR =&gt; dotted-decimal,
+   			    IPADDR =&gt; dotted-decimal,
+   			    COUNTER =&gt; decimal unsigned integer,
+   			    COUNTER64  =&gt; decimal unsigned integer,
+   			    GAUGE,  =&gt; decimal unsigned integer,
+   			    UINTEGER,  =&gt; decimal unsigned integer,
+                               TICKS,  =&gt; decimal unsigned integer,
+                               OPAQUE =&gt; perl scalar containing octets,
+          			    NULL,  =&gt; perl scalar containing nothing,
 
 
-                      <type> - SNMP data type (see list above), this field is
+                      &lt;type&gt; - SNMP data type (see list above), this field is
                                populated by 'get' and 'getnext' operations. In
                                some cases the programmer needs to populate this
                                field when passing to a 'set' operation. this
                                field need not be supplied when the attribute
-                               indicated by <tag> is already described by loaded
+                               indicated by &lt;tag&gt; is already described by loaded
                                Mib modules. for 'set's, if a numeric OID is used
                                and the object is not currently in the loaded Mib,
-                               the <type> field must be supplied
+                               the &lt;type&gt; field must be supplied
 
-    simple string   - light weight form of <var> used to 'set' or 'get' a
+    simple string   - light weight form of &lt;var&gt; used to 'set' or 'get' a
                       single attribute without constructing an SNMP::Varbind.
-                      stored in a perl scalar, has the form '<tag>.<iid>',
+                      stored in a perl scalar, has the form '&lt;tag&gt;.&lt;iid&gt;',
                       (e.g., 'sysDescr.0'). for 'set' operations the value
                       is passed as a second arg. Note: This argument form is
                       not updated in get[next] operations as are the other forms.
 
    Acceptable callback formats:
-   <callback> may be one of the following forms:
+   &lt;callback&gt; may be one of the following forms:
 
     without arguments:
-       \&subname
+       \&amp;subname
        sub { ... }
     or with arguments:
-       [ \&subname, $arg1, ... ]
+       [ \&amp;subname, $arg1, ... ]
        [ sub { ... }, $arg1, ... ]
-       [ "method", $obj, $arg1, ... ]
+       [ &quot;method&quot;, $obj, $arg1, ... ]
 
    callback will be called when response is received or timeout
    occurs. the last argument passed to callback will be a
@@ -634,13 +634,13 @@ Building the Perl module:
    			(see man mib_api)
 
     $SNMP::verbose       - default '0', controls warning/info output of
-                           SNMP module, 0 => no output, 1 => enables warning/info
+                           SNMP module, 0 =&gt; no output, 1 =&gt; enables warning/info
                            output from SNMP module itself (is also controlled
                            by SNMP::debugging - see below)
 
     $SNMP::use_long_names - default '0', set to non-zero to enable the use of
                            longer Mib identifiers. see translateObj. will also
-                           influence the formatting of <tag> in varbinds returned
+                           influence the formatting of &lt;tag&gt; in varbinds returned
                            from 'getnext' operations. Can be set on a per session
                            basis (UseLongNames)
 
@@ -659,7 +659,7 @@ Building the Perl module:
                            OID's, instead of translating them.  Also setting
                            $SNMP::use_long_names to non-zero is highly recommended.
 
-    $SNMP::best_guess    - default '0'.  this setting controls how <tags> are 
+    $SNMP::best_guess    - default '0'.  this setting controls how &lt;tags&gt; are 
                            parsed.  setting to 0 causes a regular lookup.  setting 
                            to 1 causes a regular expression match (defined as -Ib 
                            in snmpcmd) and setting to 2 causes a random access 
@@ -672,9 +672,9 @@ Building the Perl module:
 
     $SNMP::debugging     - default '0', controls debugging output level
                            within SNMP module and libsnmp
-                           1 => enables 'SNMP::verbose' (see above)
-                           2 => level 1 plus snmp_set_do_debugging(1),
-                           3 => level 2 plus snmp_set_dump_packet(1)
+                           1 =&gt; enables 'SNMP::verbose' (see above)
+                           2 =&gt; level 1 plus snmp_set_do_debugging(1),
+                           3 =&gt; level 2 plus snmp_set_dump_packet(1)
 
     $SNMP::dump_packet   - default '0', set [non-]zero to independently set
                            snmp_set_dump_packet()
@@ -706,14 +706,14 @@ Building the Perl module:
            textualConvention - returns TEXTUAL-CONVENTION
            units         - returns UNITS
            hint          - returns HINT
-           enums         - returns hash ref {tag => num, ...}
-           ranges        - returns array ref of hash ref [{low=>num, high=>num}]
+           enums         - returns hash ref {tag =&gt; num, ...}
+           ranges        - returns array ref of hash ref [{low=&gt;num, high=&gt;num}]
            defaultValue  - returns default value
            description   - returns DESCRIPTION ($SNMP::save_descriptions must
                            be set prior to MIB initialization/parsing)
 
 
-    &SNMP::setMib(<file>) - allows dynamic parsing of the mib and explicit
+    &amp;SNMP::setMib(&lt;file&gt;) - allows dynamic parsing of the mib and explicit
                             specification of mib file independent of environment
                             variables. called with no args acts like initMib,
                             loading MIBs indicated by environment variables (see
@@ -722,32 +722,32 @@ Building the Perl module:
                             (Note: second arg not working since freeing previous
                              Mib is more involved than before).
 
-    &SNMP::initMib()     - calls library netsnmp_init_mib function if MIB not 
+    &amp;SNMP::initMib()     - calls library netsnmp_init_mib function if MIB not 
                            already loaded - does nothing if MIB already loaded.
                            Will parse directories and load modules according to
                            environment variables described in Net-SNMP
                            documentations.
                            (see man mib_api, MIBDIRS, MIBS, MIBFILE(S), etc.)
 
-    &SNMP::addMibDirs(<dir>,...) - calls library add_mibdir for each directory
+    &amp;SNMP::addMibDirs(&lt;dir&gt;,...) - calls library add_mibdir for each directory
                            supplied. will cause directory(s) to be added to
                            internal list and made available for searching in
                            subsequent loadModules calls
 
-    &SNMP::addMibFiles(<file>,...) - calls library read_mib function. The file(s)
+    &amp;SNMP::addMibFiles(&lt;file&gt;,...) - calls library read_mib function. The file(s)
                           supplied will be read and all Mib module definitions
                           contained therein will be added to internal mib tree
                           structure
 
-    &SNMP::loadModules(<mod>,...) - calls library read_module function. The
+    &amp;SNMP::loadModules(&lt;mod&gt;,...) - calls library read_module function. The
                           module(s) supplied will be searched for in the
                           current mibdirs and and added to internal mib tree
-                          structure. Passing special <mod>, 'ALL', will cause
+                          structure. Passing special &lt;mod&gt;, 'ALL', will cause
                           all known modules to be loaded.
 
-    &SNMP::unloadModules(<mod>,...) - *Not Implemented*
+    &amp;SNMP::unloadModules(&lt;mod&gt;,...) - *Not Implemented*
 
-    &SNMP::translateObj(<var>[,arg,[arg]]) - will convert a text obj tag to an 
+    &amp;SNMP::translateObj(&lt;var&gt;[,arg,[arg]]) - will convert a text obj tag to an 
                           OID and vice-versa. Any iid suffix is retained 
                           numerically.  Default behaviour when converting a 
                           numeric OID to text form is to return leaf identifier 
@@ -762,11 +762,11 @@ Building the Perl module:
                           then the Mib will be loaded. Will return 'undef' upon 
                           failure.
 
-    &SNMP::getType(<var>) - return SNMP data type for given textual identifier
+    &amp;SNMP::getType(&lt;var&gt;) - return SNMP data type for given textual identifier
                            OBJECTID, OCTETSTR, INTEGER, NETADDR, IPADDR, COUNTER
                            GAUGE, TIMETICKS, OPAQUE, or undef
 
-    &SNMP::mapEnum(<var>) - converts integer value to enumeration tag defined
+    &amp;SNMP::mapEnum(&lt;var&gt;) - converts integer value to enumeration tag defined
                             in Mib or converts tag to integer depending on
                             input. the function will return the corresponding
                             integer value *or* tag for a given MIB attribute
@@ -779,15 +779,15 @@ Building the Perl module:
                             $val = SNMP::mapEnum('ipForwarding', 'forwarding');
                             $val = SNMP::mapEnum('ipForwarding', 1);
 
-    &SNMP::MainLoop([<timeout>, [<callback>]])
+    &amp;SNMP::MainLoop([&lt;timeout&gt;, [&lt;callback&gt;]])
                       - to be used with async SNMP::Session
                         calls. MainLoop must be called after initial async calls
                         so return packets from the agent will not be processed.
                         If no args supplied this function enters an infinite loop
                         so program must be exited in a callback or externally
-                        interrupted. If <timeout
+                        interrupted. If &lt;timeout
 
-    &SNMP::finish()
+    &amp;SNMP::finish()
    		   - This function, when called from an SNMP::MainLoop()
    		     callback function, will cause the current SNMP::MainLoop
    		     to return after the callback is completed. finish() can
@@ -796,16 +796,16 @@ Building the Perl module:
    		     further requests.
 
    Exported SNMP utility functions
-   &snmp_get() - takes args of SNMP::Session::new followed by those of
+   &amp;snmp_get() - takes args of SNMP::Session::new followed by those of
                  SNMP::Session::get
 
-   &snmp_getnext() - takes args of SNMP::Session::new followed by those of
+   &amp;snmp_getnext() - takes args of SNMP::Session::new followed by those of
                      SNMP::Session::getnext
 
-   &snmp_set() - takes args of SNMP::Session::new followed by those of
+   &amp;snmp_set() - takes args of SNMP::Session::new followed by those of
                  SNMP::Session::set
 
-   &snmp_trap() - takes args of SNMP::TrapSession::new followed by those of
+   &amp;snmp_trap() - takes args of SNMP::TrapSession::new followed by those of
                   SNMP::TrapSession::trap
 
    Note: utility functions do not support async operation yet.
@@ -868,7 +868,7 @@ Acknowledgments:
    Bill Fenner
    Jef Peeraer
    Daniel Hagerty
-   Karl "Rat" Schilke and Electric Lightwave, Inc.
+   Karl &quot;Rat&quot; Schilke and Electric Lightwave, Inc.
    Perl5 Porters
    Alex Burger
 

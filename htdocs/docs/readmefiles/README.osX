@@ -3,15 +3,15 @@ $Id$
 
 This is what I had to do to get it to work for me. Your mileage may vary.
 If this doesn't work for you, or you have fixes for any problems listed,
-please post to <net-snmp-coders@lists.sourceforge.net>. Thanks!
+please post to &lt;net-snmp-coders@lists.sourceforge.net&gt;. Thanks!
 
   - ALL
 
     - nlist doesn't support icmpstat
 
        - disable the icmp module during configure by specifying
-         "--with-out-mib-modules=mibII/icmp", or at startup by adding
-         "-I -icmp" to the snmpd command line.
+         &quot;--with-out-mib-modules=mibII/icmp&quot;, or at startup by adding
+         &quot;-I -icmp&quot; to the snmpd command line.
 
 
   - 10.4.7 (Universal) and Leopard with 5.4 sources:
@@ -21,8 +21,8 @@ please post to <net-snmp-coders@lists.sourceforge.net>. Thanks!
                         --with-persistent-directory=/var/db/net-snmp \
                         --with-defaults \
                         --without-rpm \
-                        --with-mib-modules="host ucd-snmp/diskio" \
-                        --with-out-mib-modules="mibII/icmp host/hr_swrun" \
+                        --with-mib-modules=&quot;host ucd-snmp/diskio&quot; \
+                        --with-out-mib-modules=&quot;mibII/icmp host/hr_swrun&quot; \
                         --without-kmem-usage
 
        The first line sets up persistent storage in the OS X standard location.

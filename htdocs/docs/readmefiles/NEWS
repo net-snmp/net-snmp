@@ -7,8 +7,8 @@ listing of all changes made to the code.
 *5.5.dev*      (SVN snapshot)
 
     All applications:
-      - Added the ability to "alias" transports to a more simple name
-         (see the "alias" keyword in the snmp.conf manual page)
+      - Added the ability to &quot;alias&quot; transports to a more simple name
+         (see the &quot;alias&quot; keyword in the snmp.conf manual page)
       - The -t (timeout) switch will accept floating point numbers (eg: .1)
 
     snmpd:
@@ -34,7 +34,7 @@ listing of all changes made to the code.
       - Fix various memory leaks
       - Implement ipAddressSpinLock
       - Implement ipNetToPhysicalLastUpdated
-      - Suppress annoying "registration != duplicate" warning for root oids
+      - Suppress annoying &quot;registration != duplicate&quot; warning for root oids
 
     snmptrapd:
       - [PATCH 1908288]: Run perl END block on termination
@@ -56,19 +56,19 @@ listing of all changes made to the code.
       - Support for the TSM security model for use with tunneling
 
     misc:
-      - Add config reread support to "net-snmp-config --compile-subagent" code
+      - Add config reread support to &quot;net-snmp-config --compile-subagent&quot; code
       - Preliminary (alpha) support for SNMP over SSH and DTLS/UDP.
       - Preliminary (alpha) support for the TSM security model
       - Separate user management into new net-snmp-create-v3-user script
 
     building:
       - Improved cross-compilation support
-      - Improved library layering & dependency handling when linking apps
+      - Improved library layering &amp; dependency handling when linking apps
       - Improved RPM spec files, for consistency with vendor-provided packages.
       - Mechanism for selecting build environment based on version
       - New test scripts to test Net-SNMP transport functionality
       - Restructure configure template
-      - Update to autoconf 2.63 & libtool 2.2.6
+      - Update to autoconf 2.63 &amp; libtool 2.2.6
 
     perl:
       - [BUG 1619827]: improve handling of link dependencies
@@ -154,7 +154,7 @@ listing of all changes made to the code.
       - [PATCH 1534877]: to add support for skipping NFS entries in the
         host resources hrStorageTable.	See the skipNFSInHostResources
         token in the snmpd.conf file for details.
-      - A "hardware abstraction layer", to localise the O/S-specific
+      - A &quot;hardware abstraction layer&quot;, to localise the O/S-specific
         aspects of retrieving system data.  This first appeared in the
         5.3.x line, but this release now starts to actively use it for
         implementing particular MIB modules.
@@ -177,7 +177,7 @@ listing of all changes made to the code.
         emulation of an entire MIB or MIB branch.
       - A new perl module NetSNMP::agent::Support provides easier embedded 
         perl support. (patch 1369996 from Peter Martin)
-        Run "mib2c -c mib2c.perl.conf OID" to help you start using it.
+        Run &quot;mib2c -c mib2c.perl.conf OID&quot; to help you start using it.
 
     perl:
       - gettable() now supports asynchronous callback functions
@@ -249,7 +249,7 @@ listing of all changes made to the code.
     - In version 5.3 much of the authorization control was rewritten.
       There was a bug in the new code that resulted in granting write
       access to read-only users or communities which were configured
-      using the "rocommunity" or "rouser" snmpd.conf tokens.  5.3.0.1
+      using the &quot;rocommunity&quot; or &quot;rouser&quot; snmpd.conf tokens.  5.3.0.1
       fixes this problem.  Users are encouraged to immediately update
       their installations if they use either of these tokens.
 
@@ -264,7 +264,7 @@ listing of all changes made to the code.
     - shared library version number no longer matches the release number. We
       now follow the versioning scheme recommended by libtool. For the 5.3
       release this means that the libraries now have a SONAME ending with
-      ".so.10", e.g. libnetsnmp.so.10.
+      &quot;.so.10&quot;, e.g. libnetsnmp.so.10.
 
     - snmpd has not been truncating log files at startup, as documented in
       the man pages, for a while now. This default behaviour has been restored.
@@ -296,7 +296,7 @@ listing of all changes made to the code.
      - a brand new authorization scheme that is based on the VACM
        authorization scheme from snmpd.
        - Note: now drops unauthenticated notifications by default
-     - registers the snmpEngine MIB group under the "snmptrapd" context
+     - registers the snmpEngine MIB group under the &quot;snmptrapd&quot; context
 
    snmplib:
      - new helper for ascii file based scalar integers (think Linux /proc/)
@@ -350,7 +350,7 @@ listing of all changes made to the code.
           (configure using one or both of --disable-des --disable-md5)
           (This requires you have OpenSSL to support SHA1 and AES instead)
       - Diffie-Helman key negotiation (perfect-forward-secrecy - RFC2786)
-          has been implemented in both the agent and "snmpusm".
+          has been implemented in both the agent and &quot;snmpusm&quot;.
       - Better support for direct use of localized and master keys
         (randomly generated keys have more entropy than passwords). See
         the -3m -3M -3k and -3K options, and the defAuthLocalizedKey,
@@ -360,19 +360,19 @@ listing of all changes made to the code.
     library:
       - send and receive buffer sizes for UDP/TCP are configurable
       - .conf file token registration can now search multiple files
-        (separate file names to search by a :.  IE, "snmpd:agentx")
+        (separate file names to search by a :.  IE, &quot;snmpd:agentx&quot;)
 
     snmptrapd:
       - Embedded perl support for trap handlers (much faster than traphandles).
           (configure --with-embedded-perl ; see 'perldoc NetSNMP::TrapReceiver')
-      - the snmptrapd usmUser table can be controlled through SNMP & AgentX
-          (the snmptrapd registers MIBs under the "snmptrapd" SNMPv3 context)
+      - the snmptrapd usmUser table can be controlled through SNMP &amp; AgentX
+          (the snmptrapd registers MIBs under the &quot;snmptrapd&quot; SNMPv3 context)
 
     agent:
       - community strings can be mapped to individual SNMPv3 contexts
-          (see the snmpd.conf manual on "com2sec").
+          (see the snmpd.conf manual on &quot;com2sec&quot;).
       - AgentX should work properly with SNMPv3 contexts now.
-      - improved version of "exec" extension directive - "extend":
+      - improved version of &quot;exec&quot; extension directive - &quot;extend&quot;:
           supports multi-line output, configurable command input, SET
           handling, a valid relocatable MIB output structure, etc
       - more flexibility added to netsnmp_cache helper, including periodic
@@ -400,11 +400,11 @@ listing of all changes made to the code.
         - mib2c.iterate.conf: the iterator-based table config
             now produces fuller template code than before.
         - mib2c.table_data.conf and mib2c.container.conf:
-            two new "internal-row" style configs
-        - mib2c.mfd.conf: "MIBs for Dummies" (or MFD) - intended to
+            two new &quot;internal-row&quot; style configs
+        - mib2c.mfd.conf: &quot;MIBs for Dummies&quot; (or MFD) - intended to
             reduce the SNMP knowledge needed to develop MIB modules
-            and add flexibility at the same time.  Run "mib2c -S
-            mfd_interactive_setup=1 -c mib2c.mfd.conf OID" and follow
+            and add flexibility at the same time.  Run &quot;mib2c -S
+            mfd_interactive_setup=1 -c mib2c.mfd.conf OID&quot; and follow
             its guided instructions to help you tailor its results to
             meet your needs.
         - mib2c.genhtml.conf: Generates an easier-to-read HTML view of
@@ -424,7 +424,7 @@ listing of all changes made to the code.
     perl:
       - An improved SNMP::gettable() method.  Uses GETBULK if possible and
         better GETNEXT requests if not, decodes indexes from OIDs,
-        requests multiple variables at once, ...  ("perldoc SNMP" for details)
+        requests multiple variables at once, ...  (&quot;perldoc SNMP&quot; for details)
       - A NetSNMP::OID::get_indexes() function to extract index values
         from an OID.
 
@@ -507,8 +507,8 @@ listing of all changes made to the code.
 
     Building:
       - configure is now generated using autoconf 2.57.
-      - The make system now supports "make uninstall"
-      - configure & make supports a --with-install-prefix option
+      - The make system now supports &quot;make uninstall&quot;
+      - configure &amp; make supports a --with-install-prefix option
       - new configure options to disable building of the agent, apps, ...
         ./configure --help for a list of package sections that can be excluded.
       - new configure option to remove specific code pieces (mib reading, ...)
@@ -518,7 +518,7 @@ listing of all changes made to the code.
       - linkUp and linkDown notifications can be enabled
         (see the linkUpDownNotifications snmpd.conf token documentation)
       - notifications (traps) can be generated for disman/monitor events.
-        (see the snmpd.conf documentation on "monitor" and "notificatonEvent")
+        (see the snmpd.conf documentation on &quot;monitor&quot; and &quot;notificatonEvent&quot;)
       - new snmpd.conf tokens:  includeAllDisks
       - the UCD-DISKIO-MIB will now work on linux.
       - com2sec mappings for SNMP over unix sockets.
@@ -526,7 +526,7 @@ listing of all changes made to the code.
         speed of the agent's processing time.
       - for mib code using the table iterator, an auto-caching mechanism
         which can greatly speed up access at the cost of caching.
-        (see "stash_cache" in the injectHandler token docs in snmpd.conf(5))
+        (see &quot;stash_cache&quot; in the injectHandler token docs in snmpd.conf(5))
       - Some of the agent modules were completely rewritten (and
         should be faster and cleaner).
       - A number of new APIs and helper modules are available, but
@@ -543,7 +543,7 @@ listing of all changes made to the code.
       - snmptable sports 3 new options: fixed width, max-repeaters,
         left-justify.  (see snmptable -h for details)
       - mib2c walks you through instructions to help you generate code
-        "just for you".  Including some new forms of output code, like
+        &quot;just for you&quot;.  Including some new forms of output code, like
         notification code generation.  Run mib2c SOMETHING for details.
       - mib2c has about a billion other improvements, including the
         ability to generate trap generation code templates.
@@ -674,7 +674,7 @@ listing of all changes made to the code.
 *5.0.3*
 
  New:
-    - the "dist" directory contains the beginnings of some init
+    - the &quot;dist&quot; directory contains the beginnings of some init
       scripts and packaging utilities.
 
  Ports:
@@ -698,8 +698,8 @@ listing of all changes made to the code.
     - NFS file systems are better supported in the hrStorageTable
     - the memory reporting no longer accidentally reports -1 integers
     - a few memory leaks fixed in the table_iterator API
-    - fixes for Sun's "make"
-    - ds_ prefix name-space protection (-> netsnmp_ds_)
+    - fixes for Sun's &quot;make&quot;
+    - ds_ prefix name-space protection (-&gt; netsnmp_ds_)
       (run configure with --enable-ucd-compatibility for old API)
     - v1/v2c access control fixes for ipv6 addresses
     - many many misc fixes
@@ -765,12 +765,12 @@ listing of all changes made to the code.
       now, including UDP/TCP (ipv4 and ipv6), AAL5pvc, and IPX.  See
       ./configure --help for details on enabling them.
       Note: the -p and -T flags to all the applications have been
-      removed.  Use hostname strings like "tcp:localhost:9999"
+      removed.  Use hostname strings like &quot;tcp:localhost:9999&quot;
       instead.  See the snmpcmd manual page for details.
     - snmptrapd now acts as an agentx subagent and implements portions
       of the NOTIFICATION-LOG-MIB to allow captured traps and informs
       to be queried.
-    - A "net-snmp-config" script will get installed which can report
+    - A &quot;net-snmp-config&quot; script will get installed which can report
       how the various tools were built (which libraries they were
       linked against, etc).  It will also help you do other things as
       well, like setting up snmpv3.  Run net-snmp-config --help for details.
@@ -780,13 +780,13 @@ listing of all changes made to the code.
       features and fixes.
     - mib2c was completely rewritten and has a much improved
       configuration file specification.
-    - Much of the code is getting documented with "doxygen" style
-      documentation.  Run "make docs" if you have doxygen installed.
+    - Much of the code is getting documented with &quot;doxygen&quot; style
+      documentation.  Run &quot;make docs&quot; if you have doxygen installed.
     - some RMON support is available.
       (See agent/mibgroup/Rmon/README for details.)
     - The source tree has been reorganized and all the exported header
       files are now in the include subdirectory.  You can now point to
-      the includes easily without having to run "make install" first.
+      the includes easily without having to run &quot;make install&quot; first.
     - the agent now requires a configuration file to access any information.
     - The entire code base has had indent run on it to effect a
       consistent coding style.  See the CodingStyle file for details.
@@ -796,14 +796,14 @@ listing of all changes made to the code.
     - The SNMP perl module now calls init_snmp() like real net-snmp
       applications, which means it will read snmp.conf configuration
       files, etc.
-    - new perl specific configure options --with-perl-modules &
+    - new perl specific configure options --with-perl-modules &amp;
       --enable-embedded-perl.  See ./configure --help for details.
     - The beginnings of some new Perl modules (alpha level quality)
       are in the perl directory, including:
       - NetSNMP::agent which allows perl scripts to become net-snmp
         master or subagents
       - AnyData::SNMP is available that implements a perl DBI
-        interface to map SQL commands to SNMP.  Included is a "netsh"
+        interface to map SQL commands to SNMP.  Included is a &quot;netsh&quot;
         shell where SQL commands can be typed, aliases created, etc.
         See the perl/AnyData_SNMP/INSTALL file for details.
     - Beginning (alpha level quality) support for embedding perl
@@ -830,7 +830,7 @@ UCD-SNMP NEWS:
     - a 64 bit architecture socket fix
     - smux authentication fixed for multiple connected sessions.
     - dynamic module support testing in the configure
-    - memory values > 32bits are now reported as a maxed out 32bit number
+    - memory values &gt; 32bits are now reported as a maxed out 32bit number
 
 *4.2.4*
  New:
@@ -854,7 +854,7 @@ UCD-SNMP NEWS:
  New:
     - sysLocation, sysContact, sysName and snmpEnableAuthenTraps are
       persistent after being set remotely.
-    - New "ignoredisk" directive to ignore disks in the host resources mib.
+    - New &quot;ignoredisk&quot; directive to ignore disks in the host resources mib.
 
  Bug Fixes:
     - The ifTable on Linux no longer reports duplicate interfaces.
@@ -908,7 +908,7 @@ UCD-SNMP NEWS:
  New:
     - The snmpconf configuration file editor can create snmptrapd.conf files.
     - AgentX support is compiled in by default, but must be configured now.
-      (Add "master on" to your snmpd.conf file to enable agentx support)
+      (Add &quot;master on&quot; to your snmpd.conf file to enable agentx support)
 
 *4.2*
 
@@ -942,7 +942,7 @@ UCD-SNMP NEWS:
     - the agent can run as a particular user.
     - snmptable takes a -Ci argument to show table indices.
     - snmptable uses GETBULK requests when it can (unless -CB is specified).
-    - The "make test" suite contains a lot of new tests.
+    - The &quot;make test&quot; suite contains a lot of new tests.
     - cross-compiling support.
     - snmpset checks types and range values for legality.
     - Significant improvements to the AgentX support.
@@ -986,7 +986,7 @@ UCD-SNMP NEWS:
 *4.1.1*
  Fixes:
     - Better agent handling of unauthorized requests.
-    - Better "make test" support.
+    - Better &quot;make test&quot; support.
     - Misc bug fixes.
 
 *4.1*
@@ -1041,14 +1041,14 @@ UCD-SNMP NEWS:
     - historic v2party support removed.
     - complete re-write of the agent.
     - The extensible AgentX protocol is in alpha-test mode.
-      (to use, compile with the mib-module "agentx" or
-      "agentx/master" or "agentx/client").
+      (to use, compile with the mib-module &quot;agentx&quot; or
+      &quot;agentx/master&quot; or &quot;agentx/client&quot;).
     - syslog support for the agent (and everything else for that matter).
     - Per-process/per-exec-script based fix scripts implemented.
       (see snmpd.conf(5) for details)
     - many more config file options supported.
       (run any command with -H and see appropriate .conf manual pages)
-    - The start of a "make test" suite.
+    - The start of a &quot;make test&quot; suite.
     - many other things we've forgotten.
     - code is ANSI C now, and requires a ANSI C compiler.
 
@@ -1090,10 +1090,10 @@ UCD-SNMP NEWS:
       various applications.
     - The mib parser supports a variety of options dictating how
       strictly it parses mib files.
-      (see snmpcmd.1 on "-P")
+      (see snmpcmd.1 on &quot;-P&quot;)
     - Debugging output with the -D flag now accepts a list of
       debugging information types to print.
-      (see snmpcmd.1 on "-D")
+      (see snmpcmd.1 on &quot;-D&quot;)
     - Minimal multi-thread support using a modified version of the
       session API.
       (see snmp_sess_api(3))
@@ -1156,11 +1156,11 @@ UCD-SNMP NEWS:
     - the UCD-SNMP specific mib structure changed.
       - many of the table oids have changed location and have been renamed.
     - the View Based Access Control module was implemented in the agent.
-      Therefore, the "community" snmpd.conf parameter no longer
+      Therefore, the &quot;community&quot; snmpd.conf parameter no longer
       exists.  See the snmpd.conf file for how to control access via
       community names now.
     - The header file #defines have changed.  You may have to compile
-      third party applications with -DCMU_COMPATIBLE (like perl-SNMP <= V1.7).
+      third party applications with -DCMU_COMPATIBLE (like perl-SNMP &lt;= V1.7).
     - The parser is more strict about unlinked OIDs and end-of-comment
       conditions.  You may see problems in a few broken mibs that used
       to parse ok with the older parser.
@@ -1190,7 +1190,7 @@ UCD-SNMP NEWS:
 *3.3.1*
 
  New:
-    - "make install" installs the library and header files.
+    - &quot;make install&quot; installs the library and header files.
 
  Fixes:
     - compilation on many architectures (sunos for example).
@@ -1296,7 +1296,7 @@ UCD-SNMP NEWS:
     - massive improvements for netbsd, freebsd, hpux.
 
   Fixes:
-    - Massive parser improvements.  (Niels Baggesen <recnba@mediator.uni-c.dk>)
+    - Massive parser improvements.  (Niels Baggesen &lt;recnba@mediator.uni-c.dk&gt;)
     - configure script upgraded to autoconf 2.11.
 
 *3.1.1*
@@ -1318,26 +1318,26 @@ UCD-SNMP NEWS:
     - FreeBSD 2.?
 
   Fixes:
-    - snmptrap greatly improved!  (Niels Baggesen <recnba@mediator.uni-c.dk>)
+    - snmptrap greatly improved!  (Niels Baggesen &lt;recnba@mediator.uni-c.dk&gt;)
     - other small stuff.
     - default logfile location moved to /var/log if exists, else /usr/adm.
 
   New:
-    - snmptrap man page.  (Niels Baggesen <recnba@mediator.uni-c.dk>)
+    - snmptrap man page.  (Niels Baggesen &lt;recnba@mediator.uni-c.dk&gt;)
 
 *3.1*
 
   Features:
     - Pass thru extensibility added!
-    - snmpnetstat greatly improved (Niels Baggesen <recnba@mediator.uni-c.dk>)
-    - improved solaris info caching (Dan A. Dickey <ddickey@transition.com>)
+    - snmpnetstat greatly improved (Niels Baggesen &lt;recnba@mediator.uni-c.dk&gt;)
+    - improved solaris info caching (Dan A. Dickey &lt;ddickey@transition.com&gt;)
 
   Bug fixes:
-    - many fixes for solaris (Niels Baggesen <recnba@mediator.uni-c.dk>
-      and "Dan A. Dickey" <ddickey@transition.com>)
+    - many fixes for solaris (Niels Baggesen &lt;recnba@mediator.uni-c.dk&gt;
+      and &quot;Dan A. Dickey&quot; &lt;ddickey@transition.com&gt;)
     - greatly reduced memory usage by mib parser (Niels Baggesen)
     - disk checks fixed for solaris and osf.
-    - improved Mib parsing from Mike Perik <mikep@crt.com>
+    - improved Mib parsing from Mike Perik &lt;mikep@crt.com&gt;
       - TRAP-TYPE/NOTIFICATION-TYPE now handled.
       - IMPORTS definition no longer required.
       - SIZE syntax fixed.
@@ -1349,7 +1349,7 @@ UCD-SNMP NEWS:
 
 *3.0.7.2*
 
-  Major solaris patches from Niels Baggesen <recnba@mediator.uni-c.dk>. Thanks!
+  Major solaris patches from Niels Baggesen &lt;recnba@mediator.uni-c.dk&gt;. Thanks!
   Other misc patches
 
 *3.0.7.1*
@@ -1382,7 +1382,7 @@ UCD-SNMP NEWS:
     - new app:  apps/snmptrap, as requested by many, many people.
     - New man page (rough still):  snmpd.conf.5.
     - Returns new values for system.sysObjectID for each supported OS.
-    - Better OpenView support for changing the icons & etc.  See ov/README.
+    - Better OpenView support for changing the icons &amp; etc.  See ov/README.
 
   Bug fixes.
     - -p PORT -l LOGFILE now work as advertised.
@@ -1415,7 +1415,7 @@ UCD-SNMP NEWS:
     - found a memory leak in the CMU routing table implementation.
     - More configure cleanups, mostly for Solaris.
     - snmp_open calls getservbyname only once now, at the request of Gary
-      Hayward <gah@dirac.bellcore.com>.  Mainly for Perl users.
+      Hayward &lt;gah@dirac.bellcore.com&gt;.  Mainly for Perl users.
 
   New example file:  EXAMPLE.conf file (created at build time).
 

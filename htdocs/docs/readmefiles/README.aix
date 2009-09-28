@@ -13,22 +13,22 @@ on AIX which caused embedded Perl to be disabled as well.
 
 Starting with net-snmp 5.4.1, we build shared libraries by default on AIX
 (like on any other platform) using run-time linking. configure forces the
-use of the required "-brtl" linker flag.
+use of the required &quot;-brtl&quot; linker flag.
 
 With net-snmp 5.5 the shared library build is broken again but the there is
 no forced static build - use --disable-shared when building.
 
-2) "grep: capacity exceeded" or "sed: Command line is too long" during configure
+2) &quot;grep: capacity exceeded&quot; or &quot;sed: Command line is too long&quot; during configure
 
-The version of "grep" shipped with AIX versions up to (and including) 5.1
+The version of &quot;grep&quot; shipped with AIX versions up to (and including) 5.1
 has a known limitation of only supporting a maximum of 2048 characters per line.
-This may cause a significant number of "grep: capacity exceeded" errors during
+This may cause a significant number of &quot;grep: capacity exceeded&quot; errors during
 configure which breaks the build. See bug 1367794 for details. The fix is to 
 either install GNU grep (and have it in PATH before the AIX grep) or to upgrade
 to AIX 5.2 or later.
 
 There's a similar issue with AIX /usr/bin/sed up to at least AIX 5.3 that 
-causes a significant number of "sed: Command line is too long." errors during
+causes a significant number of &quot;sed: Command line is too long.&quot; errors during
 configure. The fix is to install GNU sed.
 
 3) nlist errors with 64-bit kernels

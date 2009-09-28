@@ -4,7 +4,7 @@ OID version 0.01
 The NetSNMP::OID class is a simple wrapper around a C-based net-snmp
 oid.  The OID is internally stored as a C array of integers for speed
 purposes when doing comparisons, etc.  The standard logical expression
-operators (<, >, ==, ...) are overloaded such that lexographical
+operators (&lt;, &gt;, ==, ...) are overloaded such that lexographical
 comparisons may be done with them.
 
 INSTALLATION

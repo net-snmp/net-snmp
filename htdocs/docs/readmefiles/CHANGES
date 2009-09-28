@@ -90,7 +90,7 @@ listing of all changes made to the code.
       - Improve netsnmp_watcher_info to handle statically allocated data.
       - Introduce printf-like versions of config_perror and config_pwarn
       - Library layering improvements
-      - Read def{Target,Domain} from snmp.conf as well as <app>.conf
+      - Read def{Target,Domain} from snmp.conf as well as &lt;app&gt;.conf
       - rename MIB macro to NETSNMP_MIB2_OID, MIB is too generic and may
 	conflict with applications.   The old MIB macro is kept for
 	backward compatibility, unless NETSNMP_NO_LEGACY_DEFINITIONS is
@@ -99,7 +99,7 @@ listing of all changes made to the code.
     snmpd:
       - [BUG  902610]: Don't discard pending data following a TRAP.
       - [BUG  902801]: Fix ordering of SMUX-registered subtrees.
-      - [BUG 1046327]: Reset "includeAllDisks" flag when reloading.
+      - [BUG 1046327]: Reset &quot;includeAllDisks&quot; flag when reloading.
       - [BUG 1102058]: Skip non-mounted disks (e.g. swap partitions)
       - [BUG 1397895]: include missing interface declarations
       - [BUG 1400101]: remove deleted interfaces from ifTable
@@ -130,7 +130,7 @@ listing of all changes made to the code.
       - [BUG 2003144]: Increase size of AgentX packet build buffer
       - [BUG 2006786]: Interface name can have more than 8 characters.
       - [BUG 2018031]: Don't probe engineID in internal monitor sessions.
-      - [BUG 2693670]: Don't open (& clobber) AgentX socket if other transports fail
+      - [BUG 2693670]: Don't open (&amp; clobber) AgentX socket if other transports fail
       - [BUG 2822355]: Fix memory leaks on udpEndpointTable (linux) Patch
 	supplied by Frank Lichtenheld
       - [PATCH 1225440]: Delay sighup till it is safe.
@@ -190,7 +190,7 @@ listing of all changes made to the code.
       - [PATCH 1723611]: New implementation of the RMON alarmTable
       - [PATCH 1729629]: Fix memory leak in disman agent.
       - [PATCH 1737439]: automatic link up/down traps on a walk
-      - [PATCH 1744157]: Report duplicate "extend/exec" identifiers.
+      - [PATCH 1744157]: Report duplicate &quot;extend/exec&quot; identifiers.
       - [PATCH 1746831]: fix process checking race condition under Linux and platform #ifdefs
       - [PATCH 1752934]: Fix off-by-one qsort error in table utilities.
       - [PATCH 1753437]: Fix error index on failing SET requests
@@ -225,7 +225,7 @@ listing of all changes made to the code.
       - [PATCH 2103492]: implement RMON-MIB::etherStatsJabbers
       - [PATCH 2124288]: Fix setting of usmUserPrivProtocol at creation.
       - [PATCH 2162652]: patch to fix simple hrfs checks when NFS is in use.
-      - [PATCH 2384779]: Fix handling of GetBulk with N>0,M==0
+      - [PATCH 2384779]: Fix handling of GetBulk with N&gt;0,M==0
       - [PATCH 2406378]: Fix hrSWRunPerfMem on 64-bit Solaris systems
       - [PATCH 2431353]: Make some C++ compilers happier
       - [PATCH 2435681]: Enable if-mib rewrite (with sysctl backend) on NetBSD
@@ -236,10 +236,10 @@ listing of all changes made to the code.
       - [PATCH 2791417]: fix snmpd segfault when run with -DALL Patch
       - [PATCH 2822337]: Fix memory leak in ipAddressPrefixTable
       - [FEATURES 1019429]: Set supplementary groups via initgroups(3)
-      - Add missing function declarations & include files.
+      - Add missing function declarations &amp; include files.
       - Add support for a user provided length variable
 	   and C string values to the watcher helper.
-      - Allow "monitor" to handle negative threshold values.
+      - Allow &quot;monitor&quot; to handle negative threshold values.
       - Automatically reregister sysORTable entries from AgentX subagents.
       - Clean up notification registrations during Event MIB cleanup
       - Enforce the lower limit on scalar_groups
@@ -256,7 +256,7 @@ listing of all changes made to the code.
       - Reimplementation of snmpMPDStats.
       - Reimplementation of usmStats.
       - Remove unused variables.
-      - Suppress annoying "registration != duplicate" warning for root oids
+      - Suppress annoying &quot;registration != duplicate&quot; warning for root oids
       - Unify all snmpd statistic variables with a common handler.
       - Use the worker helpers from the register_*_instance helpers and
 	schedule the instance helpers for removal in 5.6
@@ -317,7 +317,7 @@ listing of all changes made to the code.
       - [PATCH 1625135]: configure location of python interpreter 
       - [PATCH 1678300]: compile-subagent doesn't call shutdown_ methods
       - [PATCH 1681073]: #ifdef based config_error instead of special cases
-      - [PATCH 1728241]: Add configure check for <sys/uio.h>
+      - [PATCH 1728241]: Add configure check for &lt;sys/uio.h&gt;
       - [PATCH 1728230]: add configure check for gai_strerror()
       - [PATCH 1728233]: make sure type nfds_t is defined
       - [PATCH 1728237]: Move variable declaration at the top of netsnmp_udp_sendto
@@ -325,13 +325,13 @@ listing of all changes made to the code.
       - [PATCH 1728247]: Add type check for int??_t and uint??_t
       - [PATCH 1899762]: Tweak embedded_perl configure checks.
       - [PATCH 2000874]: Cleanup transport selection.
-      - [PATCH 2091156]: correctly declare dependencies in Makefile. 'make -j <N>' should work now.
+      - [PATCH 2091156]: correctly declare dependencies in Makefile. 'make -j &lt;N&gt;' should work now.
       - [PATCH 2184039]: Fixes for freeing memory during error conditions.
       - [PATCH 2797251]: Support multiple initialisation/shutdown, fix memory leaks
       - Add a variation of AC_SEARCH_LIBS where the result is settable.
-      - Add "BuildRequires: perl-ExtUtils-Embed" to the spec file
+      - Add &quot;BuildRequires: perl-ExtUtils-Embed&quot; to the spec file
       - Add '--with-temp-file-pattern' configure option
-      - Assume target platform supports mem{cpy,move,set} & str{,r}chr
+      - Assume target platform supports mem{cpy,move,set} &amp; str{,r}chr
       - Disable inlining on solaris (due to linking errors)
       - Disable MIB-specific tests if the agent omits the necessary modules.
       - '--disable-as-needed' reverts to linking system libs into applications
@@ -341,7 +341,7 @@ listing of all changes made to the code.
       - Fix checks for support of static inline functions
       - Fix compilation on IRIX
       - Fix macro for '--with-features-of'
-      - Improve library layering & dependency handling when linking apps
+      - Improve library layering &amp; dependency handling when linking apps
       - Improve robustness of sed/grep/etc commans (using autoconf macros)
       - Improve RPM spec files, for consistency with vendor-provided packages.
       - Mechanism for selecting build environment based on version
@@ -350,17 +350,17 @@ listing of all changes made to the code.
       - Remove Net-SNMP special-case handling of standard functionality.
       - Restructure configure template
       - Stricter checks on '--with-persistent-mask' values
-      - Update to autoconf 2.63 & libtool 2.2.6
+      - Update to autoconf 2.63 &amp; libtool 2.2.6
       - Use 'config_error' to generate error messages at configure time.
       - Use LDFLAGS when building agent, helpers and mib lib
-      - Use "libtool clean" to ensure removal of all libtool temp files.
+      - Use &quot;libtool clean&quot; to ensure removal of all libtool temp files.
       - allow building with Perl versions that lack PERL_EXIT_DESTRUCT_END
       - build fix for Tru64 Unix and IRIX: move _XOPEN* definitions to
 	where they are in 5.4.x and earlier
 
     documentation:
       - [BUG 1247164]: Document use of OID macros
-      - [BUG 1407476]: Clarify MIB parsing toggle options & comment handling.
+      - [BUG 1407476]: Clarify MIB parsing toggle options &amp; comment handling.
       - [BUG 1614104]: broken snmpd(8) manual page in 5.4
       - [BUG 2027129]: fix typo in snmpcmd.1
       - [PATCH 1604580]: SNMP(3) manual page corrections
@@ -382,7 +382,7 @@ listing of all changes made to the code.
     misc:
       - [PATCH 1737727]: Add a NETSNMP_OLDAPI_ prefix to old-api access macros.
       - [PATCH 1737727]: Replace NETSNMP_CLEAN_NAMESPACE with NETSNMP_NO_LEGACY_DEFINITIONS
-      - Add config reread support to "net-snmp-config --compile-subagent" code.
+      - Add config reread support to &quot;net-snmp-config --compile-subagent&quot; code.
       - Avoid calling debug macros with wrong number of arguments.
       - Don't use the legacy symbol SNMPTRAPD_DISABLE_AGENTX
       - Preliminary (alpha) support for SNMP over SSH and DTLS/UDP.
@@ -427,8 +427,8 @@ listing of all changes made to the code.
       - [PATCH 1956193]: beta threadable perl module code for SNMPv1/2c usage.
       - [PATCH 2021444]: Support SNMPv2c in gettable processing
       - [PATCH 2022948]: Fix for Counter64 in perl subagent
-      - [PATCH 2182079]: Fix various perl warnings & allow use of "use strict"
-      - [PATCH 2272347]: Implement "implied" in MIB hash
+      - [PATCH 2182079]: Fix various perl warnings &amp; allow use of &quot;use strict&quot;
+      - [PATCH 2272347]: Implement &quot;implied&quot; in MIB hash
       - [PATCH 2361712]: Fix getbulk optimization during walks
       - [PATCH 2709705]: Retrieve src/target IP address in Perl-based agents
       - [PATCH 2763717]: Allow perl to use OPAQUEs
@@ -449,7 +449,7 @@ listing of all changes made to the code.
       - [PATCH 2074817]: Fix regexp engine CPU performance issues
       - [PATCH 2260828]: Fix python snmpwalk memory leak
       - [PATCH 2580979]: Fix python session pointers on 64-bit systems.
-      - [PATCH 2667415]: Support "UseNumeric" option.
+      - [PATCH 2667415]: Support &quot;UseNumeric&quot; option.
       - [PATCH 2775800]: Allow threading to continue when a request is sent
 
     test:
@@ -468,7 +468,7 @@ listing of all changes made to the code.
       - Add support for AIX 6.x
       - Build fixes for embedded Perl
       - Fix default shared library building instead of forcing static
-      - Use "-Wl,-brtl" when compiling with gcc
+      - Use &quot;-Wl,-brtl&quot; when compiling with gcc
 
     FreeBSD:
       - [BUG 1073782]: Restore PerfStat values for FreeBSD 5.x systems.
@@ -631,10 +631,10 @@ listing of all changes made to the code.
 	well as the autoconf variables can now be turned off by a special
 	define.
       - [BUG 1585250]: don't use deprecated options in start script
-      - "make test" fixes for non-UDP transports
+      - &quot;make test&quot; fixes for non-UDP transports
       - [BUG 1577913]: add missing manual pages for executables, supplied
 	by Debian
-      - [PATCH 1596028]: from "Stephen J. Friedl": const fixes for the
+      - [PATCH 1596028]: from &quot;Stephen J. Friedl&quot;: const fixes for the
 	mib_api(3) manual page
       - RPM spec file fixes for 64-bit platforms
 
@@ -643,7 +643,7 @@ listing of all changes made to the code.
       - build fix for mibII/udpTable
 
     Tru64:
-      - fix "auto_nlist failed on arptab_size at location 0" errors
+      - fix &quot;auto_nlist failed on arptab_size at location 0&quot; errors
 
     IRIX:
       - proper implementation for UCD-SNMP-MIB::laTable (avoiding nlist)

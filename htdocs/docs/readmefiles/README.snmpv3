@@ -20,12 +20,12 @@ CREATING THE FIRST USER:
   First, you need to create a new snmpv3 user and give them rights to
   do things:
 
-    net-snmp-config --create-snmpv3-user -a "my_password" myuser
+    net-snmp-config --create-snmpv3-user -a &quot;my_password&quot; myuser
 
   WARNING: SNMPv3 pass phrases must be at least 8 characters long!
 
-  The above line creates the user "myuser" with a password of
-  "my_password" (and uses MD5 and DES for protection).  (Note that
+  The above line creates the user &quot;myuser&quot; with a password of
+  &quot;my_password&quot; (and uses MD5 and DES for protection).  (Note that
   encryption support isn't enabled in the binary releases downloadable
   from the net-snmp web site.)  net-snmp-config will also add a line
   to your snmpd.conf file to let that user have read/write access to
@@ -54,26 +54,26 @@ CREATING A SECOND USER:
   modifying the user database using the snmp protocol itself:
 
   Now, lets create a second user using the first user (just for fun)
-  for both authentication purposes and as a template (or "cloning
-  source"):
+  for both authentication purposes and as a template (or &quot;cloning
+  source&quot;):
 
     snmpusm -v 3 -u myuser -l authNoPriv -a MD5 -A my_password localhost create wes myuser
 
-  The above should have created the user "wes" with the same password as
-  the "myuser" user.  So then, you need to change his password using:
+  The above should have created the user &quot;wes&quot; with the same password as
+  the &quot;myuser&quot; user.  So then, you need to change his password using:
 
     snmpusm -v 3 -u wes -l authNoPriv -a MD5 -A my_password localhost passwd my_password new_passphrase
 
   See, wasn't that easy?  You can now create users.  Wheeee....
 
   But, you'll have to add a configuration line that allows them access
-  to do things.  Do this with another "rwuser" line in your
+  to do things.  Do this with another &quot;rwuser&quot; line in your
   /usr/local/share/snmp/snmpd.conf file (you'll need to stop and start 
   the agent again, or send the agent a SIGHUP signal):
 
     rwuser wes
 
-  Or, optional use the "rouser" token instead of the "rwuser" token to
+  Or, optional use the &quot;rouser&quot; token instead of the &quot;rwuser&quot; token to
   only grant them read-only access.
 
   Now, test your new user:
@@ -90,7 +90,7 @@ put something like this in your $HOME/.snmp/snmp.conf file (make it
 readable only by you!!!):
 
   defSecurityName wes
-  defContext ""
+  defContext &quot;&quot;
   defAuthType MD5
   defSecurityLevel authNoPriv
   defAuthPassphrase new_passphrase

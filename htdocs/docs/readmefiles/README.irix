@@ -7,17 +7,17 @@ Some notes for the IRIX port
 net-snmp 5.3.1 and later have been compiled successfully on IRIX 6.5 using the 
 MIPSpro C compiler 7.4.4m in C99 mode:
 
-	CC=c99 ./configure && make && make install
+	CC=c99 ./configure &amp;&amp; make &amp;&amp; make install
 
-Please note that the "host" module doesn't compile on IRIX, so you *cannot*
-configure with "--with-mib-modules=host".
+Please note that the &quot;host&quot; module doesn't compile on IRIX, so you *cannot*
+configure with &quot;--with-mib-modules=host&quot;.
 
 Compiling with gcc may be possible, but is unsupported at this point in time
 due to difficulties with the IRIX system headers. Brent Bice has reported
 a successful build of net-snmp 5.4 with gcc 3.4.6 on a IP30 machine using:
 
-	CFLAGS="-D_PAGESZ=16384 -D_MIPS3_ADDRSPACE -DIP30 -DR10000 -DMP \
-	        -DCELL_PREPARE -DBHV_PREPARE" ./configure ...
+	CFLAGS=&quot;-D_PAGESZ=16384 -D_MIPS3_ADDRSPACE -DIP30 -DR10000 -DMP \
+	        -DCELL_PREPARE -DBHV_PREPARE&quot; ./configure ...
 
 See http://techpubs.sgi.com/library/tpl/cgi-bin/getdoc.cgi/0620/bks/\
 SGI_Developer/books/DevDriver_PG/sgi_html/ch10.html and 
