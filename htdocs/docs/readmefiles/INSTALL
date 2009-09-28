@@ -19,9 +19,9 @@ QUICK INSTRUCTIONS
 ==================
 
   1) Run ./configure
-     (type &quot;./configure --help&quot; for a quick usage summary.)
+     (type "./configure --help" for a quick usage summary.)
      (--prefix=PATH will change the default /usr/local installation path.)
-     (see &quot;Compilers and Options&quot; on changing the compiler to use)
+     (see "Compilers and Options" on changing the compiler to use)
 
   2) Optionally edit include/net-snmp/net-snmp-config.h
      (due to prompting done by the configure script, this is very rarely

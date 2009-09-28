@@ -34,17 +34,7 @@ see Patch #1675869:
   http://sf.net/support/tracker.php?aid=1675869
 
 
-3. Perl
--------
-
-When compiling with Perl support, it's recommended to specify
-
-  ./configure --enable-as-needed
-
-for proper libperl linking.
-
-
-4. Known Issues
+3. Known Issues
 ---------------
 
 Accessing certain MIB objects on IRIX64 machines (i.e. when running a 64-bit 
@@ -56,7 +46,7 @@ IRIX64) by using
    ./configure --without-kmem-usage ...
 
 
-5. Feedback
+3. Feedback
 -----------
 
 Please also see README and PORTING.

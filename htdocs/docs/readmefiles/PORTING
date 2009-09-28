@@ -15,7 +15,7 @@ http://www.net-snmp.org/cvs/.
 
 If you send patches to us, it would greatly help us if you sent them
 to us based on the current checked out copy from CVS.  To do this,
-send us the output of &quot;cvs diff -u&quot; run in the top level net-snmp
+send us the output of "cvs diff -u" run in the top level net-snmp
 source tree after you have modified the files that will fix the
 problem or add the feature you're submitting the patch for.
 
@@ -51,7 +51,7 @@ In configure.in:
 
 Then in your source code:
   #ifdef HAVE_HEADDIR_HEADER_H
-    #include &lt;headdir/header.h&gt;
+    #include <headdir/header.h>
   #ENDIF
 
 --- LIBRARY ROUTIENS
@@ -75,17 +75,13 @@ In source code:
 --- STRUCTURE MEMBER CHECKS
 
 In configure.in:
-  AC_CHECK_STRUCT_FOR([
+  AC_CHECK_MEMBERS([struct STRUCTURE.MEMBER],,,[[
 #include lines
-], STRUCTURE, MEMBER)
-   ^^^^^^^^^  ^^^^^^  (change)
-
-In acconfig.h:
-  #undef STRUCT_STRUCTURE_HAS_MEMBER
-                ^^^^^^^^^     ^^^^^^  (change)
+]])
+                           ^^^^^^^^^ ^^^^^^  (change)
 
 In source code:
-  #ifdef STRUCT_STRUCTURE_HAS_MEMBER
+  #ifdef HAVE_STRUCT_STRUCTURE_MEMBER
     /* use it */
   #endif
 
