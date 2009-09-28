@@ -1,0 +1,2413 @@
+<!--#set var="section" value="documentation" -->
+<!--#include virtual="/page-top.html" -->
+<!-- CONTENT START -->
+<h2>INTRODUCTION</h2>
+<ul>
+<p>
+This is a summary of information regarding objects below the <b>sctpMIB</b>
+MIB object, which is defined within the <b>SCTP-MIB</b> MIB
+document as <b>.1.3.6.1.2.1.104</b>.
+</p>
+</ul>
+<h2>TABLE OF CONTENTS</h2>
+<ul>
+<h3><a href="#objects_Current">Current Objects</a></h3>
+<ul>
+<li><a href="#scalar_current">Scalars</a></li>
+  <li><a href="#sctpAssocTable">sctpAssocTable</a></li>
+  <li><a href="#sctpAssocLocalAddrTable">sctpAssocLocalAddrTable</a></li>
+  <li><a href="#sctpAssocRemAddrTable">sctpAssocRemAddrTable</a></li>
+  <li><a href="#sctpLookupLocalPortTable">sctpLookupLocalPortTable</a></li>
+  <li><a href="#sctpLookupRemPortTable">sctpLookupRemPortTable</a></li>
+  <li><a href="#sctpLookupRemHostNameTable">sctpLookupRemHostNameTable</a></li>
+  <li><a href="#sctpLookupRemPrimIPAddrTable">sctpLookupRemPrimIPAddrTable</a></li>
+  <li><a href="#sctpLookupRemIPAddrTable">sctpLookupRemIPAddrTable</a></li>
+</ul>
+<h3><a href="#objects_Deprecated">Deprecated Objects</a></h3>
+<ul>
+<li><a href="#scalar_notcurrent">Deprecated Scalars</a></li>
+</ul>
+<h3><a href="#notifications">Notifications</a></h3>
+<h3><a href="#textconventions">Textual Conventions</a></h3>
+<h3><a href="#treeview">Tree-based view</a></h3>
+</ul>
+<a name="objects_Current" />
+<a name="scalar_current" />
+<h2>SCALAR OBJECTS</h2>
+<ul>
+<table>
+<tr><th>Name</th><th>Type</th><th>Access</th><th>OID</th><th>Description</th></tr>
+  <tr>
+  <td>
+<a name="sctpCurrEstab" />
+1
+<br /><b>sctpCurrEstab</b>
+
+</td><td>
+  GAUGE
+
+  </td><td>ReadOnly</td>
+    <td>.1.3.6.1.2.1.104.1.1.1</td>
+<td>
+<pre>
+The number of associations for which the current state is
+either ESTABLISHED, SHUTDOWN-RECEIVED or SHUTDOWN-PENDING.
+</pre>
+<p><i>Also see Reference:
+<pre>
+Section 4 in RFC2960 covers the SCTP   Association state
+diagram.
+</pre>
+</i></p>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="sctpActiveEstabs" />
+2
+<br /><b>sctpActiveEstabs</b>
+
+</td><td>
+  COUNTER
+
+  </td><td>ReadOnly</td>
+    <td>.1.3.6.1.2.1.104.1.1.2</td>
+<td>
+<pre>
+The number of times that associations have made a direct
+transition to the ESTABLISHED state from the COOKIE-ECHOED
+state: COOKIE-ECHOED -> ESTABLISHED. The upper layer initiated
+the association attempt.
+</pre>
+<p><i>Also see Reference:
+<pre>
+Section 4 in RFC2960 covers the SCTP   Association state
+diagram.
+</pre>
+</i></p>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="sctpPassiveEstabs" />
+3
+<br /><b>sctpPassiveEstabs</b>
+
+</td><td>
+  COUNTER
+
+  </td><td>ReadOnly</td>
+    <td>.1.3.6.1.2.1.104.1.1.3</td>
+<td>
+<pre>
+The number of times that associations have made a direct
+transition to the ESTABLISHED state from the CLOSED state:
+CLOSED -> ESTABLISHED. The remote endpoint initiated the
+association attempt.
+</pre>
+<p><i>Also see Reference:
+<pre>
+Section 4 in RFC2960 covers the SCTP   Association state
+diagram.
+</pre>
+</i></p>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="sctpAborteds" />
+4
+<br /><b>sctpAborteds</b>
+
+</td><td>
+  COUNTER
+
+  </td><td>ReadOnly</td>
+    <td>.1.3.6.1.2.1.104.1.1.4</td>
+<td>
+<pre>
+The number of times that associations have made a direct
+transition to the CLOSED state from any state using the
+primitive 'ABORT': AnyState --Abort--> CLOSED. Ungraceful
+termination of the association.
+</pre>
+<p><i>Also see Reference:
+<pre>
+Section 4 in RFC2960 covers the SCTP   Association state
+diagram.
+</pre>
+</i></p>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="sctpShutdowns" />
+5
+<br /><b>sctpShutdowns</b>
+
+</td><td>
+  COUNTER
+
+  </td><td>ReadOnly</td>
+    <td>.1.3.6.1.2.1.104.1.1.5</td>
+<td>
+<pre>
+The number of times that associations have made a direct
+transition to the CLOSED state from either the SHUTDOWN-SENT
+state or the SHUTDOWN-ACK-SENT state. Graceful termination of
+the association.
+</pre>
+<p><i>Also see Reference:
+<pre>
+Section 4 in RFC2960 covers the SCTP   Association state
+diagram.
+</pre>
+</i></p>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="sctpOutOfBlues" />
+6
+<br /><b>sctpOutOfBlues</b>
+
+</td><td>
+  COUNTER
+
+  </td><td>ReadOnly</td>
+    <td>.1.3.6.1.2.1.104.1.1.6</td>
+<td>
+<pre>
+The number of out of the blue packets received by the host.
+An out of the blue packet is an SCTP packet correctly formed,
+including the proper checksum, but for which the receiver was
+unable to identify an appropriate association.
+</pre>
+<p><i>Also see Reference:
+<pre>
+Section 8.4 in RFC2960 deals with the Out-Of-The-Blue
+(OOTB) packet definition and procedures.
+</pre>
+</i></p>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="sctpChecksumErrors" />
+7
+<br /><b>sctpChecksumErrors</b>
+
+</td><td>
+  COUNTER
+
+  </td><td>ReadOnly</td>
+    <td>.1.3.6.1.2.1.104.1.1.7</td>
+<td>
+<pre>
+The number of SCTP packets received with an invalid
+checksum.
+</pre>
+<p><i>Also see Reference:
+<pre>
+The checksum is located at the end of the SCTP packet as per
+Section 3.1 in RFC2960. RFC3309 updates SCTP to use a 32 bit
+CRC checksum.
+</pre>
+</i></p>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="sctpOutCtrlChunks" />
+8
+<br /><b>sctpOutCtrlChunks</b>
+
+</td><td>
+  COUNTER64
+
+  </td><td>ReadOnly</td>
+    <td>.1.3.6.1.2.1.104.1.1.8</td>
+<td>
+<pre>
+The number of SCTP control chunks sent (retransmissions are
+not included). Control chunks are those chunks different from
+DATA.
+</pre>
+<p><i>Also see Reference:
+<pre>
+Sections 1.3.5 and 1.4 in RFC2960 refer to control chunk as
+those chunks different from those that contain user
+information, i.e., DATA chunks.
+</pre>
+</i></p>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="sctpOutOrderChunks" />
+9
+<br /><b>sctpOutOrderChunks</b>
+
+</td><td>
+  COUNTER64
+
+  </td><td>ReadOnly</td>
+    <td>.1.3.6.1.2.1.104.1.1.9</td>
+<td>
+<pre>
+The number of SCTP ordered data chunks sent (retransmissions
+are not included).
+</pre>
+<p><i>Also see Reference:
+<pre>
+Section 3.3.1 in RFC2960 defines the ordered data chunk.
+</pre>
+</i></p>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="sctpOutUnorderChunks" />
+10
+<br /><b>sctpOutUnorderChunks</b>
+
+</td><td>
+  COUNTER64
+
+  </td><td>ReadOnly</td>
+    <td>.1.3.6.1.2.1.104.1.1.10</td>
+<td>
+<pre>
+The number of SCTP unordered chunks (data chunks in which the
+U bit is set to 1) sent (retransmissions are not included).
+</pre>
+<p><i>Also see Reference:
+<pre>
+Section 3.3.1 in RFC2960 defines the unordered data chunk.
+</pre>
+</i></p>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="sctpInCtrlChunks" />
+11
+<br /><b>sctpInCtrlChunks</b>
+
+</td><td>
+  COUNTER64
+
+  </td><td>ReadOnly</td>
+    <td>.1.3.6.1.2.1.104.1.1.11</td>
+<td>
+<pre>
+The number of SCTP control chunks received (no duplicate
+chunks included).
+</pre>
+<p><i>Also see Reference:
+<pre>
+Sections 1.3.5 and 1.4 in RFC2960 refer to control chunk as
+those chunks different from those that contain user
+information, i.e., DATA chunks.
+</pre>
+</i></p>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="sctpInOrderChunks" />
+12
+<br /><b>sctpInOrderChunks</b>
+
+</td><td>
+  COUNTER64
+
+  </td><td>ReadOnly</td>
+    <td>.1.3.6.1.2.1.104.1.1.12</td>
+<td>
+<pre>
+The number of SCTP ordered data chunks received (no duplicate
+chunks included).
+</pre>
+<p><i>Also see Reference:
+<pre>
+Section 3.3.1 in RFC2960 defines the ordered data chunk.
+</pre>
+</i></p>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="sctpInUnorderChunks" />
+13
+<br /><b>sctpInUnorderChunks</b>
+
+</td><td>
+  COUNTER64
+
+  </td><td>ReadOnly</td>
+    <td>.1.3.6.1.2.1.104.1.1.13</td>
+<td>
+<pre>
+The number of SCTP unordered chunks (data chunks in which the
+U bit is set to 1) received (no duplicate chunks included).
+</pre>
+<p><i>Also see Reference:
+<pre>
+Section 3.3.1 in RFC2960 defines the unordered data chunk.
+</pre>
+</i></p>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="sctpFragUsrMsgs" />
+14
+<br /><b>sctpFragUsrMsgs</b>
+
+</td><td>
+  COUNTER64
+
+  </td><td>ReadOnly</td>
+    <td>.1.3.6.1.2.1.104.1.1.14</td>
+<td>
+<pre>
+The number of user messages that have to be fragmented
+because of the MTU.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="sctpReasmUsrMsgs" />
+15
+<br /><b>sctpReasmUsrMsgs</b>
+
+</td><td>
+  COUNTER64
+
+  </td><td>ReadOnly</td>
+    <td>.1.3.6.1.2.1.104.1.1.15</td>
+<td>
+<pre>
+The number of user messages reassembled, after conversion
+into DATA chunks.
+</pre>
+<p><i>Also see Reference:
+<pre>
+Section 6.9 in RFC2960 includes a description of the
+reassembly process.
+</pre>
+</i></p>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="sctpOutSCTPPacks" />
+16
+<br /><b>sctpOutSCTPPacks</b>
+
+</td><td>
+  COUNTER64
+
+  </td><td>ReadOnly</td>
+    <td>.1.3.6.1.2.1.104.1.1.16</td>
+<td>
+<pre>
+The number of SCTP packets sent. Retransmitted DATA chunks
+are included.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="sctpInSCTPPacks" />
+17
+<br /><b>sctpInSCTPPacks</b>
+
+</td><td>
+  COUNTER64
+
+  </td><td>ReadOnly</td>
+    <td>.1.3.6.1.2.1.104.1.1.17</td>
+<td>
+<pre>
+The number of SCTP packets received. Duplicates are
+included.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="sctpDiscontinuityTime" />
+18
+<br /><b>sctpDiscontinuityTime</b>
+
+</td><td>
+  TICKS
+ <br>
+ <a href="#TimeStamp">TimeStamp</a>
+
+  </td><td>ReadOnly</td>
+    <td>.1.3.6.1.2.1.104.1.1.18</td>
+<td>
+<p>
+Note: this object is based on the <a href="#TimeStamp"> TimeStamp TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+The value of sysUpTime on the most recent occasion at which
+any one or more of this general statistics counters suffered a
+discontinuity.  The relevant counters are the specific
+instances associated with this interface of any Counter32 or
+Counter64 object contained in the SCTP layer statistics
+(defined below sctpStats branch).  If no such discontinuities
+have occurred since the last re-initialization of the local
+management subsystem, then this object contains a zero value.
+</pre>
+<p><i>Also see Reference:
+<pre>
+The inclusion of this object is recommended by RFC2578.
+</pre>
+</i></p>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="sctpRtoAlgorithm" />
+1
+<br /><b>sctpRtoAlgorithm</b>
+
+</td><td>
+  INTEGER
+      <table class="enum">
+      <tr><th>Value</th><th>Label/Meaning</th></tr>
+        <tr><td>1</td><td>other</td></tr>
+        <tr><td>2</td><td>vanj</td></tr>
+      </table>
+
+  </td><td>ReadOnly</td>
+    <td>.1.3.6.1.2.1.104.1.2.1</td>
+<td>
+<pre>
+The algorithm used to determine the timeout value (T3-rtx)
+used for re-transmitting unacknowledged chunks.
+</pre>
+<p><i>Also see Reference:
+<pre>
+Section 6.3.1 and 6.3.2 in RFC2960 cover the RTO calculation
+and retransmission timer rules.
+</pre>
+</i></p>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="sctpRtoMin" />
+2
+<br /><b>sctpRtoMin</b>
+
+</td><td>
+  UNSIGNED32
+
+  </td><td>ReadOnly</td>
+    <td>.1.3.6.1.2.1.104.1.2.2</td>
+<td>
+<pre>
+The minimum value permitted by a SCTP implementation for the
+retransmission timeout value, measured in milliseconds.  More
+refined semantics for objects of this type depend upon the
+algorithm used to determine the retransmission timeout value.
+
+A retransmission time value of zero means immediate
+retransmission.
+
+The value of this object has to be lower than or equal to
+stcpRtoMax's value.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="sctpRtoMax" />
+3
+<br /><b>sctpRtoMax</b>
+
+</td><td>
+  UNSIGNED32
+
+  </td><td>ReadOnly</td>
+    <td>.1.3.6.1.2.1.104.1.2.3</td>
+<td>
+<pre>
+The maximum value permitted by a SCTP implementation for the
+retransmission timeout value, measured in milliseconds.  More
+refined semantics for objects of this type depend upon the
+algorithm used to determine the retransmission timeout value.
+
+A retransmission time value of zero means immediate re-
+transmission.
+
+The value of this object has to be greater than or equal to
+stcpRtoMin's value.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="sctpRtoInitial" />
+4
+<br /><b>sctpRtoInitial</b>
+
+</td><td>
+  UNSIGNED32
+
+  </td><td>ReadOnly</td>
+    <td>.1.3.6.1.2.1.104.1.2.4</td>
+<td>
+<pre>
+The initial value for the retransmission timer.
+A retransmission time value of zero means immediate re-
+       transmission.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="sctpMaxAssocs" />
+5
+<br /><b>sctpMaxAssocs</b>
+
+</td><td>
+  INTEGER32
+      <br />Legal values:
+        -1
+        ,
+        0 .. 2147483647
+
+  </td><td>ReadOnly</td>
+    <td>.1.3.6.1.2.1.104.1.2.5</td>
+<td>
+<pre>
+The limit on the total number of associations the entity can
+support. In entities where the maximum number of associations
+is dynamic, this object should contain the value -1.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="sctpValCookieLife" />
+6
+<br /><b>sctpValCookieLife</b>
+
+</td><td>
+  UNSIGNED32
+
+  </td><td>ReadOnly</td>
+    <td>.1.3.6.1.2.1.104.1.2.6</td>
+<td>
+<pre>
+Valid cookie life in the 4-way start-up handshake procedure.
+</pre>
+<p><i>Also see Reference:
+<pre>
+Section 5.1.3 in RFC2960 explains the cookie generation
+process. Recommended value is per section 14 in RFC2960.
+</pre>
+</i></p>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="sctpMaxInitRetr" />
+7
+<br /><b>sctpMaxInitRetr</b>
+
+</td><td>
+  UNSIGNED32
+
+  </td><td>ReadOnly</td>
+    <td>.1.3.6.1.2.1.104.1.2.7</td>
+<td>
+<pre>
+The maximum number of retransmissions at the start-up phase
+(INIT and COOKIE ECHO chunks). 
+</pre>
+<p><i>Also see Reference:
+<pre>
+Section 5.1.4, 5.1.6 in RFC2960 refers to Max.Init.Retransmit
+parameter. Recommended value is per section 14 in RFC2960.
+</pre>
+</i></p>
+</td>
+  </tr>
+</table>
+</ul>
+
+<h2>TABLE OBJECTS</h2>
+<a name="sctpAssocTable" /><h3>Table sctpAssocTable</h3>
+<ul>
+  <table>
+  <tr><td class="label">Table Name</td><td>sctpAssocTable</td></tr>
+  <tr><td class="label">In MIB</td><td>SCTP-MIB</td></tr>
+  <tr><td class="label">Registered at OID</td><td>.1.3.6.1.2.1.104.1.3</td></tr>
+  <tr><td class="label">Table Description</td>
+<td>
+<pre>
+A table containing SCTP association-specific information.
+</pre>
+</td>
+</tr>
+<tr><td class="label"><a name="sctpAssocEntry" />Row Description</td>
+<td>
+<pre>
+General common variables and statistics for the whole
+association.
+</pre>
+</td>
+</tr>
+  </table>
+
+  <h4>sctpAssocTable Indexes:</h4>
+
+<table>
+<tr class="label"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
+  <tr>
+  <td>
+<a name="sctpAssocId" />
+1
+<br /><b>sctpAssocId</b>
+
+</td><td>
+  UNSIGNED32
+      <br />Legal values:
+        1 .. 2147483647
+
+  </td><td>NoAccess</td>
+<td>
+<pre>
+Association Identification. Value identifying the
+association. 
+</pre>
+</td>
+  </tr>
+</table>
+
+  <h4>Other sctpAssocTable Columns:</h4>
+<table>
+<tr class="label"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
+  <tr>
+  <td>
+<a name="sctpAssocRemHostName" />
+2
+<br /><b>sctpAssocRemHostName</b>
+
+</td><td>
+  OCTETSTR
+      <br />Legal Lengths:
+        0 .. 255
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+The peer's DNS name. This object needs to have the same
+format as the encoding in the DNS protocol.  This implies that
+the domain name can be up to 255 octets long, each octet being
+0<=x<=255 as value with US-ASCII A-Z having a case insensitive
+matching.
+
+If no DNS domain name was received from the peer at init time
+(embedded in the INIT or INIT-ACK chunk), this object is
+meaningless. In such cases the object MUST contain a zero-
+length string value. Otherwise, it contains the remote host
+name received at init time.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="sctpAssocLocalPort" />
+3
+<br /><b>sctpAssocLocalPort</b>
+
+</td><td>
+  UNSIGNED32
+      <br />Legal values:
+        1 .. 65535
+ <br>
+ <a href="#InetPortNumber">InetPortNumber</a>
+
+  </td><td>ReadOnly</td>
+<td>
+<p>
+Note: this object is based on the <a href="#InetPortNumber"> InetPortNumber TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+The local SCTP port number used for this association.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="sctpAssocRemPort" />
+4
+<br /><b>sctpAssocRemPort</b>
+
+</td><td>
+  UNSIGNED32
+      <br />Legal values:
+        1 .. 65535
+ <br>
+ <a href="#InetPortNumber">InetPortNumber</a>
+
+  </td><td>ReadOnly</td>
+<td>
+<p>
+Note: this object is based on the <a href="#InetPortNumber"> InetPortNumber TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+The remote SCTP port number used for this association.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="sctpAssocRemPrimAddrType" />
+5
+<br /><b>sctpAssocRemPrimAddrType</b>
+
+</td><td>
+  INTEGER
+ <br>
+ <a href="#InetAddressType">InetAddressType</a>
+     <br>(ENUM list below)
+
+  </td><td>ReadOnly</td>
+<td>
+<p>
+Note: this object is based on the <a href="#InetAddressType"> InetAddressType TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+The internet type of primary remote IP address. 
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="sctpAssocRemPrimAddr" />
+6
+<br /><b>sctpAssocRemPrimAddr</b>
+
+</td><td>
+  OCTETSTR
+      <br />Legal Lengths:
+        0 .. 255
+ <br>
+ <a href="#InetAddress">InetAddress</a>
+
+  </td><td>ReadOnly</td>
+<td>
+<p>
+Note: this object is based on the <a href="#InetAddress"> InetAddress TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+The primary remote IP address. The type of this address is
+determined by the value of sctpAssocRemPrimAddrType.
+
+The client side will know this value after INIT_ACK message
+reception, the server side will know this value when sending
+INIT_ACK message. However, values will be filled in at
+established(4) state.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="sctpAssocHeartBeatInterval" />
+7
+<br /><b>sctpAssocHeartBeatInterval</b>
+
+</td><td>
+  UNSIGNED32
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+The current heartbeat interval..
+Zero value means no HeartBeat, even when the concerned
+       sctpAssocRemAddrHBFlag object is true.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="sctpAssocState" />
+8
+<br /><b>sctpAssocState</b>
+
+</td><td>
+  INTEGER
+      <table class="enum">
+      <tr><th>Value</th><th>Label/Meaning</th></tr>
+        <tr><td>1</td><td>closed</td></tr>
+        <tr><td>2</td><td>cookieWait</td></tr>
+        <tr><td>3</td><td>cookieEchoed</td></tr>
+        <tr><td>4</td><td>established</td></tr>
+        <tr><td>5</td><td>shutdownPending</td></tr>
+        <tr><td>6</td><td>shutdownSent</td></tr>
+        <tr><td>7</td><td>shutdownReceived</td></tr>
+        <tr><td>8</td><td>shutdownAckSent</td></tr>
+        <tr><td>9</td><td>deleteTCB</td></tr>
+      </table>
+
+  </td><td>ReadWrite</td>
+<td>
+<pre>
+The state of this SCTP association.
+As in TCP, deleteTCB(9) is the only value that may be set by a
+       management station. If any other value is received, then the
+       agent must return a wrongValue error.
+If a management station sets this object to the value
+       deleteTCB(9), then this has the effect of deleting the TCB (as
+       defined in SCTP) of the corresponding association on the
+       managed node, resulting in immediate termination of the
+       association.
+As an implementation-specific option, an ABORT chunk may be
+       sent from the managed node to the other SCTP endpoint as a
+       result of setting the deleteTCB(9) value. The ABORT chunk
+       implies an ungraceful association shutdown.
+</pre>
+<p><i>Also see Reference:
+<pre>
+Section 4 in RFC2960 covers the SCTP Association state
+diagram.
+</pre>
+</i></p>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="sctpAssocInStreams" />
+9
+<br /><b>sctpAssocInStreams</b>
+
+</td><td>
+  UNSIGNED32
+      <br />Legal values:
+        1 .. 65535
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+Inbound Streams according to the negotiation at association
+start up.
+</pre>
+<p><i>Also see Reference:
+<pre>
+Section 1.3 in RFC2960 includes a definition of stream.
+Section 5.1.1 in RFC2960 covers the streams negotiation
+process.
+</pre>
+</i></p>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="sctpAssocOutStreams" />
+10
+<br /><b>sctpAssocOutStreams</b>
+
+</td><td>
+  UNSIGNED32
+      <br />Legal values:
+        1 .. 65535
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+Outbound Streams according to the negotiation at association
+start up. 
+</pre>
+<p><i>Also see Reference:
+<pre>
+Section 1.3 in RFC2960 includes a definition of stream.
+Section 5.1.1 in RFC2960 covers the streams negotiation
+process.
+</pre>
+</i></p>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="sctpAssocMaxRetr" />
+11
+<br /><b>sctpAssocMaxRetr</b>
+
+</td><td>
+  UNSIGNED32
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+The maximum number of data retransmissions in the association
+context. This value is specific for each association and the
+upper layer can change it by calling the appropriate
+primitives. This value has to be smaller than the addition of
+all the maximum number for all the paths
+(sctpAssocRemAddrMaxPathRtx).
+
+A value of zero value means no retransmissions.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="sctpAssocPrimProcess" />
+12
+<br /><b>sctpAssocPrimProcess</b>
+
+</td><td>
+  UNSIGNED32
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+This object identifies the system level process which holds
+primary responsibility for the SCTP association.
+Wherever possible, this should be the system's native unique
+identification number. The special value 0 can be used to
+indicate that no primary process is known.
+
+Note that the value of this object can be used as a pointer
+into the swRunTable of the HOST-RESOURCES-MIB(if the value is
+smaller than 2147483647) or into the sysApplElmtRunTable of
+the SYSAPPL-MIB.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="sctpAssocT1expireds" />
+13
+<br /><b>sctpAssocT1expireds</b>
+
+</td><td>
+  COUNTER
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+The T1 timer determines how long to wait for an
+acknowledgement after sending an INIT or COOKIE-ECHO chunk.
+This object reflects the number of times the T1 timer expires
+without having received the acknowledgement.
+
+Discontinuities in the value of this counter can occur at re-
+initialization of the management system, and at other times as
+indicated by the value of sctpAssocDiscontinuityTime.
+</pre>
+<p><i>Also see Reference:
+<pre>
+Section 5 in RFC2960.
+</pre>
+</i></p>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="sctpAssocT2expireds" />
+14
+<br /><b>sctpAssocT2expireds</b>
+
+</td><td>
+  COUNTER
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+The T2 timer determines how long to wait for an
+acknowledgement after sending a SHUTDOWN or SHUTDOWN-ACK
+chunk. This object reflects the number of times that T2- timer
+expired.
+
+Discontinuities in the value of this counter can occur at re-
+initialization of the management system, and at other times as
+indicated by the value of sctpAssocDiscontinuityTime.
+</pre>
+<p><i>Also see Reference:
+<pre>
+Section 9.2 in RFC2960.
+</pre>
+</i></p>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="sctpAssocRtxChunks" />
+15
+<br /><b>sctpAssocRtxChunks</b>
+
+</td><td>
+  COUNTER
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+When T3-rtx expires, the DATA chunks that triggered the T3
+timer will be re-sent according with the retransmissions
+rules. Every DATA chunk that was included in the SCTP packet
+that triggered the T3-rtx timer must be added to the value of
+this counter.
+
+Discontinuities in the value of this counter can occur at re-
+initialization of the management system, and at other times as
+indicated by the value of sctpAssocDiscontinuityTime.
+</pre>
+<p><i>Also see Reference:
+<pre>
+Section 6 in RFC2960 covers the retransmission process and
+rules.
+</pre>
+</i></p>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="sctpAssocStartTime" />
+16
+<br /><b>sctpAssocStartTime</b>
+
+</td><td>
+  TICKS
+ <br>
+ <a href="#TimeStamp">TimeStamp</a>
+
+  </td><td>ReadOnly</td>
+<td>
+<p>
+Note: this object is based on the <a href="#TimeStamp"> TimeStamp TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+The value of sysUpTime at the time that the association
+represented by this row enters the ESTABLISHED state, i.e.,
+the sctpAssocState object is set to established(4). The
+value of this object will be zero:
+- before the association enters the established(4)
+  state, or
+
+- if the established(4) state was entered prior to
+  the last re-initialization of the local network management
+  subsystem.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="sctpAssocDiscontinuityTime" />
+17
+<br /><b>sctpAssocDiscontinuityTime</b>
+
+</td><td>
+  TICKS
+ <br>
+ <a href="#TimeStamp">TimeStamp</a>
+
+  </td><td>ReadOnly</td>
+<td>
+<p>
+Note: this object is based on the <a href="#TimeStamp"> TimeStamp TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+The value of sysUpTime on the most recent occasion at which
+any one or more of this SCTP association counters suffered a
+discontinuity.  The relevant counters are the specific
+instances associated with this interface of any Counter32 or
+Counter64 object contained in the sctpAssocTable or
+sctpLocalAddrTable or sctpRemAddrTable.  If no such
+discontinuities have occurred since the last re-initialization
+of the local management subsystem, then this object contains a
+zero value. 
+</pre>
+<p><i>Also see Reference:
+<pre>
+The inclusion of this object is recommended by RFC2578.
+</pre>
+</i></p>
+</td>
+  </tr>
+</table>
+</ul>
+<a name="sctpAssocLocalAddrTable" /><h3>Table sctpAssocLocalAddrTable</h3>
+<ul>
+  <table>
+  <tr><td class="label">Table Name</td><td>sctpAssocLocalAddrTable</td></tr>
+  <tr><td class="label">In MIB</td><td>SCTP-MIB</td></tr>
+  <tr><td class="label">Registered at OID</td><td>.1.3.6.1.2.1.104.1.4</td></tr>
+  <tr><td class="label">Table Description</td>
+<td>
+<pre>
+Expanded table of sctpAssocTable based on the AssocId index.
+This table shows data related to each local IP address which
+is used by this association.
+</pre>
+</td>
+</tr>
+<tr><td class="label"><a name="sctpAssocLocalAddrEntry" />Row Description</td>
+<td>
+<pre>
+Local information about the available addresses. There will
+be an entry for every local IP address defined for this
+
+association.
+Implementors need to be aware that if the size of
+sctpAssocLocalAddr exceeds 114 octets then OIDs of column
+instances in this table will have more than 128 sub-
+identifiers and cannot be accessed using SNMPv1, SNMPv2c, or
+SNMPv3.
+</pre>
+</td>
+</tr>
+  </table>
+
+  <h4>sctpAssocLocalAddrTable Indexes:</h4>
+
+<table>
+<tr class="label"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
+  <tr>
+  <td>
+<a name="sctpAssocId" />
+1
+<br /><b>sctpAssocId</b>
+
+</td><td>
+  UNSIGNED32
+      <br />Legal values:
+        1 .. 2147483647
+
+  </td><td>NoAccess</td>
+<td>
+<pre>
+Association Identification. Value identifying the
+association. 
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="sctpAssocLocalAddrType" />
+1
+<br /><b>sctpAssocLocalAddrType</b>
+
+</td><td>
+  INTEGER
+ <br>
+ <a href="#InetAddressType">InetAddressType</a>
+     <br>(ENUM list below)
+
+  </td><td>NoAccess</td>
+<td>
+<p>
+Note: this object is based on the <a href="#InetAddressType"> InetAddressType TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+Internet type of local IP address used for this association.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="sctpAssocLocalAddr" />
+2
+<br /><b>sctpAssocLocalAddr</b>
+
+</td><td>
+  OCTETSTR
+      <br />Legal Lengths:
+        0 .. 255
+ <br>
+ <a href="#InetAddress">InetAddress</a>
+
+  </td><td>NoAccess</td>
+<td>
+<p>
+Note: this object is based on the <a href="#InetAddress"> InetAddress TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+The value of a local IP address available for this
+association. The type of this address is determined by the
+value of sctpAssocLocalAddrType.
+</pre>
+</td>
+  </tr>
+</table>
+
+  <h4>Other sctpAssocLocalAddrTable Columns:</h4>
+<table>
+<tr class="label"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
+  <tr>
+  <td>
+<a name="sctpAssocLocalAddrStartTime" />
+3
+<br /><b>sctpAssocLocalAddrStartTime</b>
+
+</td><td>
+  TICKS
+ <br>
+ <a href="#TimeStamp">TimeStamp</a>
+
+  </td><td>ReadOnly</td>
+<td>
+<p>
+Note: this object is based on the <a href="#TimeStamp"> TimeStamp TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+The value of sysUpTime at the time that this row was
+created.
+</pre>
+</td>
+  </tr>
+</table>
+</ul>
+<a name="sctpAssocRemAddrTable" /><h3>Table sctpAssocRemAddrTable</h3>
+<ul>
+  <table>
+  <tr><td class="label">Table Name</td><td>sctpAssocRemAddrTable</td></tr>
+  <tr><td class="label">In MIB</td><td>SCTP-MIB</td></tr>
+  <tr><td class="label">Registered at OID</td><td>.1.3.6.1.2.1.104.1.5</td></tr>
+  <tr><td class="label">Table Description</td>
+<td>
+<pre>
+Expanded table of sctpAssocTable based on the AssocId index.
+This table shows data related to each remote peer IP address
+which is used by this association.
+</pre>
+</td>
+</tr>
+<tr><td class="label"><a name="sctpAssocRemAddrEntry" />Row Description</td>
+<td>
+<pre>
+Information about the most important variables for every
+remote IP address. There will be an entry for every remote IP
+address defined for this association.
+
+Implementors need to be aware that if the size of
+sctpAssocRemAddr exceeds 114 octets then OIDs of column
+instances in this table will have more than 128 sub-
+identifiers and cannot be accessed using SNMPv1, SNMPv2c, or
+SNMPv3.
+</pre>
+</td>
+</tr>
+  </table>
+
+  <h4>sctpAssocRemAddrTable Indexes:</h4>
+
+<table>
+<tr class="label"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
+  <tr>
+  <td>
+<a name="sctpAssocId" />
+1
+<br /><b>sctpAssocId</b>
+
+</td><td>
+  UNSIGNED32
+      <br />Legal values:
+        1 .. 2147483647
+
+  </td><td>NoAccess</td>
+<td>
+<pre>
+Association Identification. Value identifying the
+association. 
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="sctpAssocRemAddrType" />
+1
+<br /><b>sctpAssocRemAddrType</b>
+
+</td><td>
+  INTEGER
+ <br>
+ <a href="#InetAddressType">InetAddressType</a>
+     <br>(ENUM list below)
+
+  </td><td>NoAccess</td>
+<td>
+<p>
+Note: this object is based on the <a href="#InetAddressType"> InetAddressType TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+Internet type of a remote IP address available for this
+association.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="sctpAssocRemAddr" />
+2
+<br /><b>sctpAssocRemAddr</b>
+
+</td><td>
+  OCTETSTR
+      <br />Legal Lengths:
+        0 .. 255
+ <br>
+ <a href="#InetAddress">InetAddress</a>
+
+  </td><td>NoAccess</td>
+<td>
+<p>
+Note: this object is based on the <a href="#InetAddress"> InetAddress TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+The value of a remote IP address available for this
+association. The type of this address is determined by the
+value of sctpAssocLocalAddrType.
+</pre>
+</td>
+  </tr>
+</table>
+
+  <h4>Other sctpAssocRemAddrTable Columns:</h4>
+<table>
+<tr class="label"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
+  <tr>
+  <td>
+<a name="sctpAssocRemAddrActive" />
+3
+<br /><b>sctpAssocRemAddrActive</b>
+
+</td><td>
+  INTEGER
+ <br>
+ <a href="#TruthValue">TruthValue</a>
+     <br>(ENUM list below)
+
+  </td><td>ReadOnly</td>
+<td>
+<p>
+Note: this object is based on the <a href="#TruthValue"> TruthValue TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+This object gives information about the reachability of this
+specific remote IP address.
+
+When the object is set to 'true' (1), the remote IP address is
+understood as Active. Active means that the threshold of no
+answers received from this IP address has not been reached.
+
+When the object is set to 'false' (2), the remote IP address
+is understood as Inactive. Inactive means that either no
+heartbeat or any other message was received from this address,
+reaching the threshold defined by the protocol.
+</pre>
+<p><i>Also see Reference:
+<pre>
+The remote transport states are defined as Active and
+Inactive in the SCTP, RFC2960.
+</pre>
+</i></p>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="sctpAssocRemAddrHBActive" />
+4
+<br /><b>sctpAssocRemAddrHBActive</b>
+
+</td><td>
+  INTEGER
+ <br>
+ <a href="#TruthValue">TruthValue</a>
+     <br>(ENUM list below)
+
+  </td><td>ReadOnly</td>
+<td>
+<p>
+Note: this object is based on the <a href="#TruthValue"> TruthValue TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+This object indicates whether the optional Heartbeat check
+associated to one destination transport address is activated
+or not (value equal to true or false, respectively). 
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="sctpAssocRemAddrRTO" />
+5
+<br /><b>sctpAssocRemAddrRTO</b>
+
+</td><td>
+  UNSIGNED32
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+The current Retransmission Timeout. T3-rtx timer as defined
+in the protocol SCTP.
+</pre>
+<p><i>Also see Reference:
+<pre>
+Section 6.3 in RFC2960 deals with the Retransmission Timer
+Management.
+</pre>
+</i></p>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="sctpAssocRemAddrMaxPathRtx" />
+6
+<br /><b>sctpAssocRemAddrMaxPathRtx</b>
+
+</td><td>
+  UNSIGNED32
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+Maximum number of DATA chunks retransmissions allowed to a
+remote IP address before it is considered inactive, as defined
+in RFC2960.
+</pre>
+<p><i>Also see Reference:
+<pre>
+Section 8.2, 8.3 and 14 in RFC2960.
+</pre>
+</i></p>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="sctpAssocRemAddrRtx" />
+7
+<br /><b>sctpAssocRemAddrRtx</b>
+
+</td><td>
+  COUNTER
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+Number of DATA chunks retransmissions to this specific IP
+address. When T3-rtx expires, the DATA chunk that triggered
+the T3 timer will be re-sent according to the retransmissions
+rules. Every DATA chunk that is included in a SCTP packet and
+was transmitted to this specific IP address before, will be
+included in this counter.
+
+Discontinuities in the value of this counter can occur at re-
+initialization of the management system, and at other times as
+indicated by the value of sctpAssocDiscontinuityTime.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="sctpAssocRemAddrStartTime" />
+8
+<br /><b>sctpAssocRemAddrStartTime</b>
+
+</td><td>
+  TICKS
+ <br>
+ <a href="#TimeStamp">TimeStamp</a>
+
+  </td><td>ReadOnly</td>
+<td>
+<p>
+Note: this object is based on the <a href="#TimeStamp"> TimeStamp TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+The value of sysUpTime at the time that this row was
+created.
+</pre>
+</td>
+  </tr>
+</table>
+</ul>
+<a name="sctpLookupLocalPortTable" /><h3>Table sctpLookupLocalPortTable</h3>
+<ul>
+  <table>
+  <tr><td class="label">Table Name</td><td>sctpLookupLocalPortTable</td></tr>
+  <tr><td class="label">In MIB</td><td>SCTP-MIB</td></tr>
+  <tr><td class="label">Registered at OID</td><td>.1.3.6.1.2.1.104.1.6</td></tr>
+  <tr><td class="label">Table Description</td>
+<td>
+<pre>
+With the use of this table, a list of associations which are
+using the specified local port can be retrieved.
+</pre>
+</td>
+</tr>
+<tr><td class="label"><a name="sctpLookupLocalPortEntry" />Row Description</td>
+<td>
+<pre>
+This table is indexed by local port and association ID.
+Specifying a local port, we would get a list of the
+associations whose local port is the one specified.
+</pre>
+</td>
+</tr>
+  </table>
+
+  <h4>sctpLookupLocalPortTable Indexes:</h4>
+
+<table>
+<tr class="label"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
+  <tr>
+  <td>
+<a name="sctpAssocLocalPort" />
+3
+<br /><b>sctpAssocLocalPort</b>
+
+</td><td>
+  UNSIGNED32
+      <br />Legal values:
+        1 .. 65535
+ <br>
+ <a href="#InetPortNumber">InetPortNumber</a>
+
+  </td><td>ReadOnly</td>
+<td>
+<p>
+Note: this object is based on the <a href="#InetPortNumber"> InetPortNumber TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+The local SCTP port number used for this association.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="sctpAssocId" />
+1
+<br /><b>sctpAssocId</b>
+
+</td><td>
+  UNSIGNED32
+      <br />Legal values:
+        1 .. 2147483647
+
+  </td><td>NoAccess</td>
+<td>
+<pre>
+Association Identification. Value identifying the
+association. 
+</pre>
+</td>
+  </tr>
+</table>
+
+  <h4>Other sctpLookupLocalPortTable Columns:</h4>
+<table>
+<tr class="label"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
+  <tr>
+  <td>
+<a name="sctpLookupLocalPortStartTime" />
+1
+<br /><b>sctpLookupLocalPortStartTime</b>
+
+</td><td>
+  TICKS
+ <br>
+ <a href="#TimeStamp">TimeStamp</a>
+
+  </td><td>ReadOnly</td>
+<td>
+<p>
+Note: this object is based on the <a href="#TimeStamp"> TimeStamp TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+The value of sysUpTime at the time that this row was created.
+As the table will be created after the sctpAssocTable
+       creation, this value could be equal to the sctpAssocStartTime
+       object from the main table.
+</pre>
+</td>
+  </tr>
+</table>
+</ul>
+<a name="sctpLookupRemPortTable" /><h3>Table sctpLookupRemPortTable</h3>
+<ul>
+  <table>
+  <tr><td class="label">Table Name</td><td>sctpLookupRemPortTable</td></tr>
+  <tr><td class="label">In MIB</td><td>SCTP-MIB</td></tr>
+  <tr><td class="label">Registered at OID</td><td>.1.3.6.1.2.1.104.1.7</td></tr>
+  <tr><td class="label">Table Description</td>
+<td>
+<pre>
+With the use of this table, a list of associations which are
+using the specified remote port can be got
+</pre>
+</td>
+</tr>
+<tr><td class="label"><a name="sctpLookupRemPortEntry" />Row Description</td>
+<td>
+<pre>
+This table is indexed by remote port and association ID.
+Specifying a remote port we would get a list of the
+associations whose local port is the one specified 
+</pre>
+</td>
+</tr>
+  </table>
+
+  <h4>sctpLookupRemPortTable Indexes:</h4>
+
+<table>
+<tr class="label"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
+  <tr>
+  <td>
+<a name="sctpAssocRemPort" />
+4
+<br /><b>sctpAssocRemPort</b>
+
+</td><td>
+  UNSIGNED32
+      <br />Legal values:
+        1 .. 65535
+ <br>
+ <a href="#InetPortNumber">InetPortNumber</a>
+
+  </td><td>ReadOnly</td>
+<td>
+<p>
+Note: this object is based on the <a href="#InetPortNumber"> InetPortNumber TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+The remote SCTP port number used for this association.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="sctpAssocId" />
+1
+<br /><b>sctpAssocId</b>
+
+</td><td>
+  UNSIGNED32
+      <br />Legal values:
+        1 .. 2147483647
+
+  </td><td>NoAccess</td>
+<td>
+<pre>
+Association Identification. Value identifying the
+association. 
+</pre>
+</td>
+  </tr>
+</table>
+
+  <h4>Other sctpLookupRemPortTable Columns:</h4>
+<table>
+<tr class="label"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
+  <tr>
+  <td>
+<a name="sctpLookupRemPortStartTime" />
+1
+<br /><b>sctpLookupRemPortStartTime</b>
+
+</td><td>
+  TICKS
+ <br>
+ <a href="#TimeStamp">TimeStamp</a>
+
+  </td><td>ReadOnly</td>
+<td>
+<p>
+Note: this object is based on the <a href="#TimeStamp"> TimeStamp TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+The value of sysUpTime at the time that this row was created.
+As the table will be created after the sctpAssocTable
+       creation, this value could be equal to the sctpAssocStartTime
+       object from the main table.
+</pre>
+</td>
+  </tr>
+</table>
+</ul>
+<a name="sctpLookupRemHostNameTable" /><h3>Table sctpLookupRemHostNameTable</h3>
+<ul>
+  <table>
+  <tr><td class="label">Table Name</td><td>sctpLookupRemHostNameTable</td></tr>
+  <tr><td class="label">In MIB</td><td>SCTP-MIB</td></tr>
+  <tr><td class="label">Registered at OID</td><td>.1.3.6.1.2.1.104.1.8</td></tr>
+  <tr><td class="label">Table Description</td>
+<td>
+<pre>
+With the use of this table, a list of associations with that
+particular host can be retrieved.
+</pre>
+</td>
+</tr>
+<tr><td class="label"><a name="sctpLookupRemHostNameEntry" />Row Description</td>
+<td>
+<pre>
+This table is indexed by remote host name and association ID.
+Specifying a host name we would get a list of the associations
+specifying that host name as the remote one.
+
+Implementors need to be aware that if the size of
+sctpAssocRemHostName exceeds 115 octets then OIDs of column
+instances in this table will have more than 128 sub-
+identifiers and cannot be accessed using SNMPv1, SNMPv2c, or
+SNMPv3.
+</pre>
+</td>
+</tr>
+  </table>
+
+  <h4>sctpLookupRemHostNameTable Indexes:</h4>
+
+<table>
+<tr class="label"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
+  <tr>
+  <td>
+<a name="sctpAssocRemHostName" />
+2
+<br /><b>sctpAssocRemHostName</b>
+
+</td><td>
+  OCTETSTR
+      <br />Legal Lengths:
+        0 .. 255
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+The peer's DNS name. This object needs to have the same
+format as the encoding in the DNS protocol.  This implies that
+the domain name can be up to 255 octets long, each octet being
+0<=x<=255 as value with US-ASCII A-Z having a case insensitive
+matching.
+
+If no DNS domain name was received from the peer at init time
+(embedded in the INIT or INIT-ACK chunk), this object is
+meaningless. In such cases the object MUST contain a zero-
+length string value. Otherwise, it contains the remote host
+name received at init time.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="sctpAssocId" />
+1
+<br /><b>sctpAssocId</b>
+
+</td><td>
+  UNSIGNED32
+      <br />Legal values:
+        1 .. 2147483647
+
+  </td><td>NoAccess</td>
+<td>
+<pre>
+Association Identification. Value identifying the
+association. 
+</pre>
+</td>
+  </tr>
+</table>
+
+  <h4>Other sctpLookupRemHostNameTable Columns:</h4>
+<table>
+<tr class="label"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
+  <tr>
+  <td>
+<a name="sctpLookupRemHostNameStartTime" />
+1
+<br /><b>sctpLookupRemHostNameStartTime</b>
+
+</td><td>
+  TICKS
+ <br>
+ <a href="#TimeStamp">TimeStamp</a>
+
+  </td><td>ReadOnly</td>
+<td>
+<p>
+Note: this object is based on the <a href="#TimeStamp"> TimeStamp TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+The value of sysUpTime at the time that this row was created.
+As the table will be created after the sctpAssocTable
+       creation, this value could be equal to the sctpAssocStartTime
+       object from the main table.
+</pre>
+</td>
+  </tr>
+</table>
+</ul>
+<a name="sctpLookupRemPrimIPAddrTable" /><h3>Table sctpLookupRemPrimIPAddrTable</h3>
+<ul>
+  <table>
+  <tr><td class="label">Table Name</td><td>sctpLookupRemPrimIPAddrTable</td></tr>
+  <tr><td class="label">In MIB</td><td>SCTP-MIB</td></tr>
+  <tr><td class="label">Registered at OID</td><td>.1.3.6.1.2.1.104.1.9</td></tr>
+  <tr><td class="label">Table Description</td>
+<td>
+<pre>
+With the use of this table, a list of associations that have
+the specified IP address as primary within the remote set of
+active addresses can be retrieved.
+</pre>
+</td>
+</tr>
+<tr><td class="label"><a name="sctpLookupRemPrimIPAddrEntry" />Row Description</td>
+<td>
+<pre>
+This table is indexed by primary address and association ID.
+Specifying a primary address, we would get a list of the
+associations that have the specified remote IP address marked
+as primary.
+Implementors need to be aware that if the size of
+sctpAssocRemPrimAddr exceeds 114 octets then OIDs of column
+instances in this table will have more than 128 sub-
+identifiers and cannot be accessed using SNMPv1, SNMPv2c, or
+SNMPv3.
+</pre>
+</td>
+</tr>
+  </table>
+
+  <h4>sctpLookupRemPrimIPAddrTable Indexes:</h4>
+
+<table>
+<tr class="label"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
+  <tr>
+  <td>
+<a name="sctpAssocRemPrimAddrType" />
+5
+<br /><b>sctpAssocRemPrimAddrType</b>
+
+</td><td>
+  INTEGER
+ <br>
+ <a href="#InetAddressType">InetAddressType</a>
+     <br>(ENUM list below)
+
+  </td><td>ReadOnly</td>
+<td>
+<p>
+Note: this object is based on the <a href="#InetAddressType"> InetAddressType TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+The internet type of primary remote IP address. 
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="sctpAssocRemPrimAddr" />
+6
+<br /><b>sctpAssocRemPrimAddr</b>
+
+</td><td>
+  OCTETSTR
+      <br />Legal Lengths:
+        0 .. 255
+ <br>
+ <a href="#InetAddress">InetAddress</a>
+
+  </td><td>ReadOnly</td>
+<td>
+<p>
+Note: this object is based on the <a href="#InetAddress"> InetAddress TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+The primary remote IP address. The type of this address is
+determined by the value of sctpAssocRemPrimAddrType.
+
+The client side will know this value after INIT_ACK message
+reception, the server side will know this value when sending
+INIT_ACK message. However, values will be filled in at
+established(4) state.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="sctpAssocId" />
+1
+<br /><b>sctpAssocId</b>
+
+</td><td>
+  UNSIGNED32
+      <br />Legal values:
+        1 .. 2147483647
+
+  </td><td>NoAccess</td>
+<td>
+<pre>
+Association Identification. Value identifying the
+association. 
+</pre>
+</td>
+  </tr>
+</table>
+
+  <h4>Other sctpLookupRemPrimIPAddrTable Columns:</h4>
+<table>
+<tr class="label"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
+  <tr>
+  <td>
+<a name="sctpLookupRemPrimIPAddrStartTime" />
+1
+<br /><b>sctpLookupRemPrimIPAddrStartTime</b>
+
+</td><td>
+  TICKS
+ <br>
+ <a href="#TimeStamp">TimeStamp</a>
+
+  </td><td>ReadOnly</td>
+<td>
+<p>
+Note: this object is based on the <a href="#TimeStamp"> TimeStamp TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+The value of SysUpTime at the time that this row was created.
+As the table will be created after the sctpAssocTable
+       creation, this value could be equal to the sctpAssocStartTime
+       object from the main table.
+</pre>
+</td>
+  </tr>
+</table>
+</ul>
+<a name="sctpLookupRemIPAddrTable" /><h3>Table sctpLookupRemIPAddrTable</h3>
+<ul>
+  <table>
+  <tr><td class="label">Table Name</td><td>sctpLookupRemIPAddrTable</td></tr>
+  <tr><td class="label">In MIB</td><td>SCTP-MIB</td></tr>
+  <tr><td class="label">Registered at OID</td><td>.1.3.6.1.2.1.104.1.10</td></tr>
+  <tr><td class="label">Table Description</td>
+<td>
+<pre>
+With the use of this table, a list of associations that have
+the specified IP address as one of the remote ones can be
+retrieved. 
+</pre>
+</td>
+</tr>
+<tr><td class="label"><a name="sctpLookupRemIPAddrEntry" />Row Description</td>
+<td>
+<pre>
+This table is indexed by a remote IP address and association
+ID. Specifying an IP address we would get a list of the
+associations that have the specified IP address included
+within the set of remote IP addresses.
+</pre>
+</td>
+</tr>
+  </table>
+
+  <h4>sctpLookupRemIPAddrTable Indexes:</h4>
+
+<table>
+<tr class="label"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
+  <tr>
+  <td>
+<a name="sctpAssocRemAddrType" />
+1
+<br /><b>sctpAssocRemAddrType</b>
+
+</td><td>
+  INTEGER
+ <br>
+ <a href="#InetAddressType">InetAddressType</a>
+     <br>(ENUM list below)
+
+  </td><td>NoAccess</td>
+<td>
+<p>
+Note: this object is based on the <a href="#InetAddressType"> InetAddressType TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+Internet type of a remote IP address available for this
+association.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="sctpAssocRemAddr" />
+2
+<br /><b>sctpAssocRemAddr</b>
+
+</td><td>
+  OCTETSTR
+      <br />Legal Lengths:
+        0 .. 255
+ <br>
+ <a href="#InetAddress">InetAddress</a>
+
+  </td><td>NoAccess</td>
+<td>
+<p>
+Note: this object is based on the <a href="#InetAddress"> InetAddress TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+The value of a remote IP address available for this
+association. The type of this address is determined by the
+value of sctpAssocLocalAddrType.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="sctpAssocId" />
+1
+<br /><b>sctpAssocId</b>
+
+</td><td>
+  UNSIGNED32
+      <br />Legal values:
+        1 .. 2147483647
+
+  </td><td>NoAccess</td>
+<td>
+<pre>
+Association Identification. Value identifying the
+association. 
+</pre>
+</td>
+  </tr>
+</table>
+
+  <h4>Other sctpLookupRemIPAddrTable Columns:</h4>
+<table>
+<tr class="label"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
+  <tr>
+  <td>
+<a name="sctpLookupRemIPAddrStartTime" />
+1
+<br /><b>sctpLookupRemIPAddrStartTime</b>
+
+</td><td>
+  TICKS
+ <br>
+ <a href="#TimeStamp">TimeStamp</a>
+
+  </td><td>ReadOnly</td>
+<td>
+<p>
+Note: this object is based on the <a href="#TimeStamp"> TimeStamp TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+The value of SysUpTime at the time that this row was created.
+As the table will be created after the sctpAssocTable
+       creation, this value could be equal to the sctpAssocStartTime
+       object from the main table.
+</pre>
+</td>
+  </tr>
+</table>
+</ul>
+<a name="objects_Deprecated" />
+  <hr />
+  <h1><font color="red">DEPRECATED OR OBSOLETE OR HISTORIC OBJECTS</font></h1>
+  <br>
+  <table class="deprecated"><tr><td>
+<a name="scalar_notcurrent" />
+<h2>SCALAR OBJECTS</h2>
+<ul>
+<table>
+<tr><th>Name</th><th>Type</th><th>Access</th><th>OID</th><th>Description</th></tr>
+</table>
+</ul>
+
+<h2>TABLE OBJECTS</h2>
+
+<br>
+  </table>
+<hr />
+<a name="notifications" />
+<h2>NOTIFICATIONS</h2>
+<ul>
+<p>
+</ul>
+
+
+<br>
+<hr />
+<a name="textconventions" />
+<h2>TEXTUAL CONVENTIONS</h2>
+<ul>
+<p>
+These TEXTUAL-CONVENTIONS are used in other parts of the document
+above.  They are SNMP's way of defining a datatype that is used
+repeatedly by other MIB objects.  Any implementation implementing
+objects that use one of these definitions must follow its DESCRIPTION
+clause as well as the DESCRIPTION clause of the object itself.
+</p>
+<table><tr class="label"><th>Name</th><th>Type</th><th>Description</th></tr>
+<tr><td><a name="InetPortNumber">InetPortNumber</td><td>UNSIGNED32</td><td><pre>Represents a 16 bit port number of an Internet transport
+layer protocol.  Port numbers are assigned by IANA.  A
+         current list of all assignments is available from
+         <http://www.iana.org/>.
+The value zero is object-specific and must be defined as
+         part of the description of any object that uses this
+         syntax.  Examples of the usage of zero might include
+         situations where a port number is unknown, or when the
+         value zero is used as a wildcard in a filter.</pre></td></tr>
+<tr><td><a name="TimeStamp">TimeStamp</td><td>TICKS</td><td><pre>The value of the sysUpTime object at which a specific
+occurrence happened.  The specific occurrence must be
+
+defined in the description of any object defined using this
+type.
+
+If sysUpTime is reset to zero as a result of a re-
+initialization of the network management (sub)system, then
+the values of all TimeStamp objects are also reset.
+However, after approximately 497 days without a re-
+initialization, the sysUpTime object will reach 2^^32-1 and
+then increment around to zero; in this case, existing values
+of TimeStamp objects do not change.  This can lead to
+ambiguities in the value of TimeStamp objects.</pre></td></tr>
+<tr><td><a name="TruthValue">TruthValue</td><td>INTEGER<table class="enums"><tr><th>Value</th><th>Label/Meaning</th></tr><tr><td>1</td><td>true</td></tr><tr><td>2</td><td>false</td></tr></table></td><td><pre>Represents a boolean value.</pre></td></tr>
+<tr><td><a name="InetAddress">InetAddress</td><td>OCTETSTR</td><td><pre>Denotes a generic Internet address.
+An InetAddress value is always interpreted within the context
+         of an InetAddressType value.  Every usage of the InetAddress
+         textual convention is required to specify the InetAddressType
+         object that provides the context.  It is suggested that the
+         InetAddressType object be logically registered before the
+         object(s) that use the InetAddress textual convention, if
+         they appear in the same logical row.
+The value of an InetAddress object must always be
+         consistent with the value of the associated InetAddressType
+         object.  Attempts to set an InetAddress object to a value
+         inconsistent with the associated InetAddressType
+         must fail with an inconsistentValue error.
+When this textual convention is used as the syntax of an
+         index object, there may be issues with the limit of 128
+         sub-identifiers specified in SMIv2, STD 58.  In this case,
+         the object definition MUST include a 'SIZE' clause to
+         limit the number of potential instance sub-identifiers;
+         otherwise the applicable constraints MUST be stated in
+         the appropriate conceptual row DESCRIPTION clauses, or
+         in the surrounding documentation if there is no single
+         DESCRIPTION clause that is appropriate.</pre></td></tr>
+<tr><td><a name="InetAddressType">InetAddressType</td><td>INTEGER<table class="enums"><tr><th>Value</th><th>Label/Meaning</th></tr><tr><td>0</td><td>unknown</td></tr><tr><td>1</td><td>ipv4</td></tr><tr><td>2</td><td>ipv6</td></tr><tr><td>3</td><td>ipv4z</td></tr><tr><td>4</td><td>ipv6z</td></tr><tr><td>16</td><td>dns</td></tr></table></td><td><pre>A value that represents a type of Internet address.
+unknown(0)  An unknown address type.  This value MUST
+                     be used if the value of the corresponding
+                     InetAddress object is a zero-length string.
+                     It may also be used to indicate an IP address
+                     that is not in one of the formats defined
+                     below.
+ipv4(1)     An IPv4 address as defined by the
+                     InetAddressIPv4 textual convention.
+ipv6(2)     An IPv6 address as defined by the
+                     InetAddressIPv6 textual convention.
+ipv4z(3)    A non-global IPv4 address including a zone
+                     index as defined by the InetAddressIPv4z
+                     textual convention.
+ipv6z(4)    A non-global IPv6 address including a zone
+                     index as defined by the InetAddressIPv6z
+                     textual convention.
+dns(16)     A DNS domain name as defined by the
+                     InetAddressDNS textual convention.
+Each definition of a concrete InetAddressType value must be
+         accompanied by a definition of a textual convention for use
+         with that InetAddressType.
+To support future extensions, the InetAddressType textual
+         convention SHOULD NOT be sub-typed in object type definitions.
+         It MAY be sub-typed in compliance statements in order to
+         require only a subset of these address types for a compliant
+         implementation.
+Implementations must ensure that InetAddressType objects
+         and any dependent objects (e.g., InetAddress objects) are
+         consistent.  An inconsistentValue error must be generated
+         if an attempt to change an InetAddressType object would,
+         for example, lead to an undefined InetAddress value.  In
+particular, InetAddressType/InetAddress pairs must be
+         changed together if the address type changes (e.g., from
+         ipv6(2) to ipv4(1)).</pre></td></tr>
+</table></ul>
+
+<a name="treeview" />
+<h2>TREE VIEW</h2>
+<p>Tree view generated by running: <b>snmptranslate -Tp SCTP-MIB::sctpMIB</b></p>
+<pre>
++--<a href="#sctpMIB">sctpMIB</a>(104)
+   |
+   +--<a href="#sctpObjects">sctpObjects</a>(1)
+   |  |
+   |  +--<a href="#sctpStats">sctpStats</a>(1)
+   |  |  |
+   |  |  +-- -R-- Gauge     <a href="#sctpCurrEstab">sctpCurrEstab</a>(1)
+   |  |  +-- -R-- Counter   <a href="#sctpActiveEstabs">sctpActiveEstabs</a>(2)
+   |  |  +-- -R-- Counter   <a href="#sctpPassiveEstabs">sctpPassiveEstabs</a>(3)
+   |  |  +-- -R-- Counter   <a href="#sctpAborteds">sctpAborteds</a>(4)
+   |  |  +-- -R-- Counter   <a href="#sctpShutdowns">sctpShutdowns</a>(5)
+   |  |  +-- -R-- Counter   <a href="#sctpOutOfBlues">sctpOutOfBlues</a>(6)
+   |  |  +-- -R-- Counter   <a href="#sctpChecksumErrors">sctpChecksumErrors</a>(7)
+   |  |  +-- -R-- Counter64 <a href="#sctpOutCtrlChunks">sctpOutCtrlChunks</a>(8)
+   |  |  +-- -R-- Counter64 <a href="#sctpOutOrderChunks">sctpOutOrderChunks</a>(9)
+   |  |  +-- -R-- Counter64 <a href="#sctpOutUnorderChunks">sctpOutUnorderChunks</a>(10)
+   |  |  +-- -R-- Counter64 <a href="#sctpInCtrlChunks">sctpInCtrlChunks</a>(11)
+   |  |  +-- -R-- Counter64 <a href="#sctpInOrderChunks">sctpInOrderChunks</a>(12)
+   |  |  +-- -R-- Counter64 <a href="#sctpInUnorderChunks">sctpInUnorderChunks</a>(13)
+   |  |  +-- -R-- Counter64 <a href="#sctpFragUsrMsgs">sctpFragUsrMsgs</a>(14)
+   |  |  +-- -R-- Counter64 <a href="#sctpReasmUsrMsgs">sctpReasmUsrMsgs</a>(15)
+   |  |  +-- -R-- Counter64 <a href="#sctpOutSCTPPacks">sctpOutSCTPPacks</a>(16)
+   |  |  +-- -R-- Counter64 <a href="#sctpInSCTPPacks">sctpInSCTPPacks</a>(17)
+   |  |  +-- -R-- TimeTicks <a href="#sctpDiscontinuityTime">sctpDiscontinuityTime</a>(18)
+   |  |           Textual Convention: <a href="#TimeStamp">TimeStamp</a>
+   |  |
+   |  +--<a href="#sctpParams">sctpParams</a>(2)
+   |  |  |
+   |  |  +-- -R-- EnumVal   <a href="#sctpRtoAlgorithm">sctpRtoAlgorithm</a>(1)
+   |  |  |        Values: other(1), vanj(2)
+   |  |  +-- -R-- Unsigned  <a href="#sctpRtoMin">sctpRtoMin</a>(2)
+   |  |  +-- -R-- Unsigned  <a href="#sctpRtoMax">sctpRtoMax</a>(3)
+   |  |  +-- -R-- Unsigned  <a href="#sctpRtoInitial">sctpRtoInitial</a>(4)
+   |  |  +-- -R-- Integer32 <a href="#sctpMaxAssocs">sctpMaxAssocs</a>(5)
+   |  |  |        Range: -1 | 0..2147483647
+   |  |  +-- -R-- Unsigned  <a href="#sctpValCookieLife">sctpValCookieLife</a>(6)
+   |  |  +-- -R-- Unsigned  <a href="#sctpMaxInitRetr">sctpMaxInitRetr</a>(7)
+   |  |
+   |  +--<a href="#sctpAssocTable">sctpAssocTable</a>(3)
+   |  |  |
+   |  |  +--<a href="#sctpAssocEntry">sctpAssocEntry</a>(1)
+   |  |     |  Index: sctpAssocId
+   |  |     |
+   |  |     +-- ---- Unsigned  <a href="#sctpAssocId">sctpAssocId</a>(1)
+   |  |     |        Range: 1..2147483647
+   |  |     +-- -R-- String    <a href="#sctpAssocRemHostName">sctpAssocRemHostName</a>(2)
+   |  |     |        Size: 0..255
+   |  |     +-- -R-- Unsigned  <a href="#sctpAssocLocalPort">sctpAssocLocalPort</a>(3)
+   |  |     |        Textual Convention: <a href="#InetPortNumber">InetPortNumber</a>
+   |  |     |        Range: 1..65535
+   |  |     +-- -R-- Unsigned  <a href="#sctpAssocRemPort">sctpAssocRemPort</a>(4)
+   |  |     |        Textual Convention: <a href="#InetPortNumber">InetPortNumber</a>
+   |  |     |        Range: 1..65535
+   |  |     +-- -R-- EnumVal   <a href="#sctpAssocRemPrimAddrType">sctpAssocRemPrimAddrType</a>(5)
+   |  |     |        Textual Convention: <a href="#InetAddressType">InetAddressType</a>
+   |  |     |        Values: unknown(0), ipv4(1), ipv6(2), ipv4z(3), ipv6z(4), dns(16)
+   |  |     +-- -R-- String    <a href="#sctpAssocRemPrimAddr">sctpAssocRemPrimAddr</a>(6)
+   |  |     |        Textual Convention: <a href="#InetAddress">InetAddress</a>
+   |  |     |        Size: 0..255
+   |  |     +-- -R-- Unsigned  <a href="#sctpAssocHeartBeatInterval">sctpAssocHeartBeatInterval</a>(7)
+   |  |     +-- -RW- EnumVal   <a href="#sctpAssocState">sctpAssocState</a>(8)
+   |  |     |        Values: closed(1), cookieWait(2), cookieEchoed(3), established(4), shutdownPending(5), shutdownSent(6), shutdownReceived(7), shutdownAckSent(8), deleteTCB(9)
+   |  |     +-- -R-- Unsigned  <a href="#sctpAssocInStreams">sctpAssocInStreams</a>(9)
+   |  |     |        Range: 1..65535
+   |  |     +-- -R-- Unsigned  <a href="#sctpAssocOutStreams">sctpAssocOutStreams</a>(10)
+   |  |     |        Range: 1..65535
+   |  |     +-- -R-- Unsigned  <a href="#sctpAssocMaxRetr">sctpAssocMaxRetr</a>(11)
+   |  |     +-- -R-- Unsigned  <a href="#sctpAssocPrimProcess">sctpAssocPrimProcess</a>(12)
+   |  |     +-- -R-- Counter   <a href="#sctpAssocT1expireds">sctpAssocT1expireds</a>(13)
+   |  |     +-- -R-- Counter   <a href="#sctpAssocT2expireds">sctpAssocT2expireds</a>(14)
+   |  |     +-- -R-- Counter   <a href="#sctpAssocRtxChunks">sctpAssocRtxChunks</a>(15)
+   |  |     +-- -R-- TimeTicks <a href="#sctpAssocStartTime">sctpAssocStartTime</a>(16)
+   |  |     |        Textual Convention: <a href="#TimeStamp">TimeStamp</a>
+   |  |     +-- -R-- TimeTicks <a href="#sctpAssocDiscontinuityTime">sctpAssocDiscontinuityTime</a>(17)
+   |  |              Textual Convention: <a href="#TimeStamp">TimeStamp</a>
+   |  |
+   |  +--<a href="#sctpAssocLocalAddrTable">sctpAssocLocalAddrTable</a>(4)
+   |  |  |
+   |  |  +--<a href="#sctpAssocLocalAddrEntry">sctpAssocLocalAddrEntry</a>(1)
+   |  |     |  Index: sctpAssocId, sctpAssocLocalAddrType, sctpAssocLocalAddr
+   |  |     |
+   |  |     +-- ---- EnumVal   <a href="#sctpAssocLocalAddrType">sctpAssocLocalAddrType</a>(1)
+   |  |     |        Textual Convention: <a href="#InetAddressType">InetAddressType</a>
+   |  |     |        Values: unknown(0), ipv4(1), ipv6(2), ipv4z(3), ipv6z(4), dns(16)
+   |  |     +-- ---- String    <a href="#sctpAssocLocalAddr">sctpAssocLocalAddr</a>(2)
+   |  |     |        Textual Convention: <a href="#InetAddress">InetAddress</a>
+   |  |     |        Size: 0..255
+   |  |     +-- -R-- TimeTicks <a href="#sctpAssocLocalAddrStartTime">sctpAssocLocalAddrStartTime</a>(3)
+   |  |              Textual Convention: <a href="#TimeStamp">TimeStamp</a>
+   |  |
+   |  +--<a href="#sctpAssocRemAddrTable">sctpAssocRemAddrTable</a>(5)
+   |  |  |
+   |  |  +--<a href="#sctpAssocRemAddrEntry">sctpAssocRemAddrEntry</a>(1)
+   |  |     |  Index: sctpAssocId, sctpAssocRemAddrType, sctpAssocRemAddr
+   |  |     |
+   |  |     +-- ---- EnumVal   <a href="#sctpAssocRemAddrType">sctpAssocRemAddrType</a>(1)
+   |  |     |        Textual Convention: <a href="#InetAddressType">InetAddressType</a>
+   |  |     |        Values: unknown(0), ipv4(1), ipv6(2), ipv4z(3), ipv6z(4), dns(16)
+   |  |     +-- ---- String    <a href="#sctpAssocRemAddr">sctpAssocRemAddr</a>(2)
+   |  |     |        Textual Convention: <a href="#InetAddress">InetAddress</a>
+   |  |     |        Size: 0..255
+   |  |     +-- -R-- EnumVal   <a href="#sctpAssocRemAddrActive">sctpAssocRemAddrActive</a>(3)
+   |  |     |        Textual Convention: <a href="#TruthValue">TruthValue</a>
+   |  |     |        Values: true(1), false(2)
+   |  |     +-- -R-- EnumVal   <a href="#sctpAssocRemAddrHBActive">sctpAssocRemAddrHBActive</a>(4)
+   |  |     |        Textual Convention: <a href="#TruthValue">TruthValue</a>
+   |  |     |        Values: true(1), false(2)
+   |  |     +-- -R-- Unsigned  <a href="#sctpAssocRemAddrRTO">sctpAssocRemAddrRTO</a>(5)
+   |  |     +-- -R-- Unsigned  <a href="#sctpAssocRemAddrMaxPathRtx">sctpAssocRemAddrMaxPathRtx</a>(6)
+   |  |     +-- -R-- Counter   <a href="#sctpAssocRemAddrRtx">sctpAssocRemAddrRtx</a>(7)
+   |  |     +-- -R-- TimeTicks <a href="#sctpAssocRemAddrStartTime">sctpAssocRemAddrStartTime</a>(8)
+   |  |              Textual Convention: <a href="#TimeStamp">TimeStamp</a>
+   |  |
+   |  +--<a href="#sctpLookupLocalPortTable">sctpLookupLocalPortTable</a>(6)
+   |  |  |
+   |  |  +--<a href="#sctpLookupLocalPortEntry">sctpLookupLocalPortEntry</a>(1)
+   |  |     |  Index: sctpAssocLocalPort, sctpAssocId
+   |  |     |
+   |  |     +-- -R-- TimeTicks <a href="#sctpLookupLocalPortStartTime">sctpLookupLocalPortStartTime</a>(1)
+   |  |              Textual Convention: <a href="#TimeStamp">TimeStamp</a>
+   |  |
+   |  +--<a href="#sctpLookupRemPortTable">sctpLookupRemPortTable</a>(7)
+   |  |  |
+   |  |  +--<a href="#sctpLookupRemPortEntry">sctpLookupRemPortEntry</a>(1)
+   |  |     |  Index: sctpAssocRemPort, sctpAssocId
+   |  |     |
+   |  |     +-- -R-- TimeTicks <a href="#sctpLookupRemPortStartTime">sctpLookupRemPortStartTime</a>(1)
+   |  |              Textual Convention: <a href="#TimeStamp">TimeStamp</a>
+   |  |
+   |  +--<a href="#sctpLookupRemHostNameTable">sctpLookupRemHostNameTable</a>(8)
+   |  |  |
+   |  |  +--<a href="#sctpLookupRemHostNameEntry">sctpLookupRemHostNameEntry</a>(1)
+   |  |     |  Index: sctpAssocRemHostName, sctpAssocId
+   |  |     |
+   |  |     +-- -R-- TimeTicks <a href="#sctpLookupRemHostNameStartTime">sctpLookupRemHostNameStartTime</a>(1)
+   |  |              Textual Convention: <a href="#TimeStamp">TimeStamp</a>
+   |  |
+   |  +--<a href="#sctpLookupRemPrimIPAddrTable">sctpLookupRemPrimIPAddrTable</a>(9)
+   |  |  |
+   |  |  +--<a href="#sctpLookupRemPrimIPAddrEntry">sctpLookupRemPrimIPAddrEntry</a>(1)
+   |  |     |  Index: sctpAssocRemPrimAddrType, sctpAssocRemPrimAddr, sctpAssocId
+   |  |     |
+   |  |     +-- -R-- TimeTicks <a href="#sctpLookupRemPrimIPAddrStartTime">sctpLookupRemPrimIPAddrStartTime</a>(1)
+   |  |              Textual Convention: <a href="#TimeStamp">TimeStamp</a>
+   |  |
+   |  +--<a href="#sctpLookupRemIPAddrTable">sctpLookupRemIPAddrTable</a>(10)
+   |     |
+   |     +--<a href="#sctpLookupRemIPAddrEntry">sctpLookupRemIPAddrEntry</a>(1)
+   |        |  Index: sctpAssocRemAddrType, sctpAssocRemAddr, sctpAssocId
+   |        |
+   |        +-- -R-- TimeTicks <a href="#sctpLookupRemIPAddrStartTime">sctpLookupRemIPAddrStartTime</a>(1)
+   |                 Textual Convention: <a href="#TimeStamp">TimeStamp</a>
+   |
+   +--<a href="#sctpMibConformance">sctpMibConformance</a>(2)
+      |
+      +--<a href="#sctpMibCompliances">sctpMibCompliances</a>(1)
+      |  |
+      |  +--<a href="#sctpMibCompliance">sctpMibCompliance</a>(1)
+      |
+      +--<a href="#sctpMibGroups">sctpMibGroups</a>(2)
+         |
+         +--<a href="#sctpLayerParamsGroup">sctpLayerParamsGroup</a>(1)
+         +--<a href="#sctpStatsGroup">sctpStatsGroup</a>(2)
+         +--<a href="#sctpPerAssocParamsGroup">sctpPerAssocParamsGroup</a>(3)
+         +--<a href="#sctpPerAssocStatsGroup">sctpPerAssocStatsGroup</a>(4)
+         +--<a href="#sctpInverseGroup">sctpInverseGroup</a>(5)
+</pre>
+<!-- CONTENT END -->
+<!--#include virtual="/page-bottom.html" -->
+
