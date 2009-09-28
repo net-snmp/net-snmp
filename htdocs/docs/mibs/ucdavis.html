@@ -1739,6 +1739,108 @@ Percentage of inodes used on disk
   </tr>
   <tr>
   <td>
+<a name="dskTotalLow" />
+11
+<br /><b>dskTotalLow</b>
+
+</td><td>
+  UNSIGNED32
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+Total size of the disk/partion (kBytes).
+Together with dskTotalHigh composes 64-bit number.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="dskTotalHigh" />
+12
+<br /><b>dskTotalHigh</b>
+
+</td><td>
+  UNSIGNED32
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+Total size of the disk/partion (kBytes).
+Together with dskTotalLow composes 64-bit number.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="dskAvailLow" />
+13
+<br /><b>dskAvailLow</b>
+
+</td><td>
+  UNSIGNED32
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+Available space on the disk (kBytes).
+Together with dskAvailHigh composes 64-bit number.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="dskAvailHigh" />
+14
+<br /><b>dskAvailHigh</b>
+
+</td><td>
+  UNSIGNED32
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+Available space on the disk (kBytes).
+Together with dskAvailLow composes 64-bit number.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="dskUsedLow" />
+15
+<br /><b>dskUsedLow</b>
+
+</td><td>
+  UNSIGNED32
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+Used space on the disk (kBytes).
+Together with dskUsedHigh composes 64-bit number.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="dskUsedHigh" />
+16
+<br /><b>dskUsedHigh</b>
+
+</td><td>
+  UNSIGNED32
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+Used space on the disk (kBytes).
+Together with dskUsedLow composes 64-bit number.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
 <a name="dskErrorFlag" />
 100
 <br /><b>dskErrorFlag</b>
@@ -2929,6 +3031,12 @@ configured action.  Will always return 0 when read.</pre></td></tr>
    |     +-- -R-- Integer32 <a href="#dskUsed">dskUsed</a>(8)
    |     +-- -R-- Integer32 <a href="#dskPercent">dskPercent</a>(9)
    |     +-- -R-- Integer32 <a href="#dskPercentNode">dskPercentNode</a>(10)
+   |     +-- -R-- Unsigned  <a href="#dskTotalLow">dskTotalLow</a>(11)
+   |     +-- -R-- Unsigned  <a href="#dskTotalHigh">dskTotalHigh</a>(12)
+   |     +-- -R-- Unsigned  <a href="#dskAvailLow">dskAvailLow</a>(13)
+   |     +-- -R-- Unsigned  <a href="#dskAvailHigh">dskAvailHigh</a>(14)
+   |     +-- -R-- Unsigned  <a href="#dskUsedLow">dskUsedLow</a>(15)
+   |     +-- -R-- Unsigned  <a href="#dskUsedHigh">dskUsedHigh</a>(16)
    |     +-- -R-- EnumVal   <a href="#dskErrorFlag">dskErrorFlag</a>(100)
    |     |        Textual Convention: <a href="#UCDErrorFlag">UCDErrorFlag</a>
    |     |        Values: noError(0), error(1)

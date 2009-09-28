@@ -206,8 +206,6 @@ Indicates the number of leading one bits that form the
 mask to be logical-ANDed with the destination address
 before being compared to the value in the
 
-
-
 inetCidrRouteDest field.
 
 The values for the index objects inetCidrRouteDest and
@@ -297,8 +295,7 @@ Note: this object is based on the <a href="#InetAddress"> InetAddress TEXTUAL-CO
 <pre>
 On remote routes, the address of the next system en
 route.  For non-remote routes, a zero length string.
-
-            The type of this address is determined by the value of
+The type of this address is determined by the value of
             the inetCidrRouteNextHopType object.
 </pre>
 </td>
@@ -539,8 +536,6 @@ set to -1.
 An alternate routing metric for this route.  The
 semantics of this metric are determined by the routing-
 
-
-
 protocol specified in the route's inetCidrRouteProto
 value.  If this metric is not used, its value should be
 set to -1.
@@ -755,8 +750,6 @@ policy applies.
 |   PRECEDENCE    |    TYPE OF SERVICE    |  0  |
 |                 |                       |     |
 +-----+-----+-----+-----+-----+-----+-----+-----+
-
-
 
              IP TOS                IP TOS
    Field     Policy      Field     Policy
@@ -1182,8 +1175,6 @@ policy applies.
    1 0 0 0  ==>  16      1 0 0 1  ==>  18
    1 0 1 0  ==>  20      1 0 1 1  ==>  22
 
-
-
    1 1 0 0  ==>  24      1 1 0 1  ==>  26
    1 1 1 0  ==>  28      1 1 1 1  ==>  30
 </pre>
@@ -1411,8 +1402,6 @@ An alternate routing metric for this route.  The
 semantics of this metric are determined by the routing-
 protocol specified in the route's ipCidrRouteProto
 value.  If this metric is not used, its value should be
-
-
 
 set to -1.
 </pre>

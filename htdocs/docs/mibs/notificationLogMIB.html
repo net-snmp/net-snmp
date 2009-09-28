@@ -250,8 +250,6 @@ If an application changes the limit while there are
 Notifications in the log, the oldest Notifications are discarded
 to bring the log down to the new limit.
 
-
-
 A value of 0 indicates no limit.
 
 Please be aware that contention between multiple managers
@@ -637,8 +635,7 @@ Note: this object is based on the <a href="#SnmpEngineID"> SnmpEngineID TEXTUAL-
 <pre>
 The identification of the SNMP engine at which the Notification
 originated.
-
-     If the log can contain Notifications from only one engine
+If the log can contain Notifications from only one engine
      or the Trap is in SNMPv1 format, this object is a zero-length
      string.
 </pre>
@@ -1023,7 +1020,6 @@ as IpAddress.
 
 IPv6 addresses are represented using TAddress or
 InetAddress, and so the underlying datatype is
-
 
 OCTET STRING, and their value would be stored in
 the nlmLogVariableOctetStringVal column.
