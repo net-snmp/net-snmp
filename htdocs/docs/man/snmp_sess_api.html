@@ -1,182 +1,343 @@
-<!--#set var="section" value="documentation" -->
-<!--#include virtual="/page-top.html" -->
-<!-- CONTENT START -->
-    <h1>SNMP_SESS_API</h1>Section: Net-SNMP (3)<br />
-    Updated: 07 Mar 2002<br />
-    <a href="#index">Index</a> <a href="../index.html">Return to Main Contents</a>
-    <hr />
-    <a name="lbAB" id="lbAB">&nbsp;</a>
+Content-type: text/html
 
-    <h2>NAME</h2>snmp_sess_init, snmp_sess_open, snmp_sess_session, snmp_sess_send, snmp_sess_async_send, snmp_sess_select_info,
-    snmp_sess_read, snmp_sess_timeout, snmp_sess_close, snmp_sess_error - session functions <a name="lbAC" id="lbAC">&nbsp;</a>
+<HTML><HEAD><TITLE>Manpage of SNMP_SESS_API</TITLE>
+</HEAD><BODY>
+<H1>SNMP_SESS_API</H1>
+Section: Net-SNMP (3)<BR>Updated: 07 Mar 2002<BR><A HREF="#index">Index</A>
+<A HREF="http://localhost/cgi-bin/man/man2html">Return to Main Contents</A><HR>
 
-    <h2>SYNOPSIS</h2><b>#include &lt;<a href="file:/usr/include/net-snmp/session_api.h">net-snmp/session_api.h</a>&gt;</b>
 
-    <p><b>void snmp_sess_init(struct snmp_session *</b><i>session</i><b>);</b></p>
+<A NAME="lbAB">&nbsp;</A>
+<H2>NAME</H2>
 
-    <p><b>void *snmp_sess_open(struct snmp_session *</b><i>session</i><b>);</b></p>
+snmp_sess_init, snmp_sess_open, snmp_sess_session,
+snmp_sess_send, snmp_sess_async_send,
+snmp_sess_select_info, snmp_sess_read,
+snmp_sess_timeout, snmp_sess_close, snmp_sess_error - session functions
+<A NAME="lbAC">&nbsp;</A>
+<H2>SYNOPSIS</H2>
 
-    <p><b>struct snmp_session *snmp_sess_session(void *</b><i>handle</i><b>);</b></p>
+<B>#include &lt;<A HREF="file:/usr/include/net-snmp/session_api.h">net-snmp/session_api.h</A>&gt;</B>
 
-    <p><b>int snmp_sess_send(void *</b><i>handle</i><b>, struct snmp_pdu *</b><i>pdu</i><b>);</b></p>
+<P>
 
-    <p><b>int snmp_sess_async_send(void *</b><i>handle</i><b>,</b><br />
-    <b>struct snmp_pdu *</b><i>pdu</i><b>,</b><br />
-    <b>snmp_callback</b> <i>callback</i><b>,</b><br />
-    <b>void *</b><i>callbackData</i><b>);</b></p>
+<B>void snmp_sess_init(struct snmp_session *</B><I>session</I><B>);</B>
 
-    <p><b>int snmp_sess_select_info(void *</b><i>handle</i><b>,</b><br />
-    <b>int *</b><i>numfds</i><b>, fd_set *</b><i>fdset</i><b>,</b><br />
-    <b>struct timeval *</b><i>timeout</i><b>,</b><br />
-    <b>int *</b><i>block</i><b>);</b></p>
+<P>
 
-    <p><b>int snmp_sess_read(void *</b><i>handle</i><b>, fd_set *</b><i>fdset</i><b>);</b></p>
+<B>void *snmp_sess_open(struct snmp_session *</B><I>session</I><B>);</B>
 
-    <p><b>void snmp_sess_timeout(void *</b><i>handle</i><b>);</b></p>
+<P>
 
-    <p><b>int snmp_sess_close(void *</b><i>handle</i><b>);</b></p>
+<B>struct snmp_session *snmp_sess_session(void *</B><I>handle</I><B>);</B>
 
-    <p><b>void snmp_sess_error(void *</b><i>handle</i><b>, int *</b><i>pcliberr</i><b>,</b><br />
-    <b>int *</b><i>psnmperr</i><b>, char **</b><i>pperrstring</i><b>);</b> <a name="lbAD" id="lbAD">&nbsp;</a></p>
+<P>
 
-    <h2>DESCRIPTION</h2>These functions define a subset of the API that can be used to manage single SNMP sessions in a
-    multi-threaded application. Except for <b>snmp_sess_session()</b>, these functions are single session versions of the
-    traditional SNMP library API.
+<B>int snmp_sess_send(void *</B><I>handle</I><B>, struct snmp_pdu *</B><I>pdu</I><B>);</B>
 
-    <p>Note that these functions use an opaque pointer (<i>handle</i> in the above prototypes) to identify a single session in
-    lieu of a <i>session</i> pointer (as in the traditional API).</p>
+<P>
 
-    <p><b>snmp_sess_init()</b> prepares a struct snmp_session that sources transport characteristics and common information that
-    will be used for a set of SNMP transactions. After this structure is passed to <b>snmp_sess_open()</b> to create an SNMP
-    session, the structure is no longer used. Instead the opaque pointer returned by <b>snmp_sess_open()</b> is used to refer to
-    that session henceforth.</p>
+<B>int snmp_sess_async_send(void *</B><I>handle</I><B>,</B>
 
-    <p>SNMP sessions that are created with <b>snmp_sess_open()</b> are not affected by, and SHOULD NOT BE USED WITH,
-    <b>snmp_select_info()</b>, <b>snmp_read()</b>, <b>snmp_timeout()</b> nor <b>snmp_close()</b>. Rather the equivalent single
-    session functions described here should be used.</p>
+<BR>
 
-    <p><b>snmp_sess_init()</b> and <b>snmp_sess_open()</b> each take as input a pointer to a struct snmp_session object. This
-    structure contains information for a set of transactions that will share similar transport characteristics.
-    <b>snmp_sess_session()</b> takes the opaque session handle and returns a pointer to its associated struct snmp_session.</p>
+<B>                         struct snmp_pdu *</B><I>pdu</I><B>, </B>
 
-    <p><b>snmp_sess_send()</b> and <b>snmp_sess_async_send()</b> each take a <i>pdu</i> parameter, which points to a struct
-    snmp_pdu object containing information that describes a transaction that will be performed over an open session.</p>
+<BR>
 
-    <p>Consult snmp_api.h for the definitions of these structures.</p>
+<B>                         snmp_callback </B><I>callback</I><B>, </B>
 
-    <p><b>snmp_sess_select_info()</b>, <b>snmp_sess_read()</b> and <b>snmp_sess_timeout()</b> provide an interface for the use of
-    the <b><a href="select.html">select</a></b>(2) system call so that SNMP transactions for a single session can occur
-    asynchronously.</p>
+<BR>
 
-    <p><b>snmp_sess_select_info()</b> is passed the information that would have been passed to <b><a href=
-    "select.html">select</a></b>(2) in the absence of SNMP. For example, this might include file descriptors associated with the
-    main loop of a graphical application. This information is modified so that SNMP will get the service it requires from the
-    call to <b><a href="select.html">select</a></b>(2). In this case, <i>numfds</i>, <i>fdset</i> and <i>timeout</i> correspond
-    to the <i>nfds</i>, <i>readfds</i> and <i>timeout</i> arguments to <b><a href="select.html">select</a></b>(2) respectively.
-    The only exception is that timeout must ALWAYS point to an allocated (but perhaps uninitialized) <i>struct timeval</i> (it
-    cannot be NULL as for <b><a href="select.html">select</a></b>(2)). If <i>timeout</i> would have been passed as NULL,
-    <i>block</i> is instead set to true, and <i>timeout</i> is treated as undefined. This same rule applies upon return from
-    <b>snmp_select_info()</b>.</p>
+<B>                         void *</B><I>callbackData</I><B>);</B>
 
-    <p>After calling <b>snmp_sess_select_info() ,</b> <b><a href="select.html">select</a></b>(2) should be called with the
-    returned data. When it returns, <b>snmp_sess_read()</b> should then be called with the <i>fd_set</i> returned from
-    <b><a href="select.html">select</a></b>(2). This will read any input from this session's SNMP socket. If <b><a href=
-    "select.html">select</a></b>(2) times out (that is, it returns zero), <b>snmp_sess_timeout()</b> should be called to see if a
-    timeout has occurred on the SNMP session. <a name="lbAE" id="lbAE">&nbsp;</a></p>
+<P>
 
-    <h2>DIAGNOSTICS</h2>
+<B>int snmp_sess_select_info(void *</B><I>handle</I><B>,</B>
 
-    <p>Error return status from <b>snmp_sess_open()</b> is indicated by return of a NULL pointer. Error return status from
-    <b>snmp_sess_close()</b> and <b>snmp_sess_send()</b> is indicated by a return value of 0. A successful status will return
-    1.</p>
+<BR>
 
-    <p>Further information can be obtained by using <b>snmp_sess_error()</b> to see what type of error has occurred. This
-    function returns the SNMP <i>snmp_errno</i> variable, the value of the system <i>errno</i> variable, and a string
-    interpretation of both variables. The string must be freed after use by the caller.</p>
+<B>                          int *</B><I>numfds</I><B>, fd_set *</B><I>fdset</I><B>, </B>
 
-    <p>For errors returned by <b>snmp_sess_open()</b>, use the corresponding function <b>snmp_error()</b> instead of
-    <b>snmp_sess_error()</b>.</p>
+<BR>
 
-    <p>Consult snmp_api.h for the complete set of SNMP library error values. The SNMP library error value <i>snmperr</i> can be
-    one of the following values:</p>
+<B>                          struct timeval *</B><I>timeout</I><B>, </B>
 
-    <dl compact="compact">
-      <dd>
-        <dl compact="compact">
-          <dt>SNMPERR_GENERR</dt>
+<BR>
 
-          <dd>A generic error occurred.</dd>
+<B>                          int *</B><I>block</I><B>);</B>
 
-          <dt>SNMPERR_BAD_LOCPORT</dt>
+<P>
 
-          <dd>The local port was bad because it had already been allocated or permission was denied.</dd>
+<B>int snmp_sess_read(void *</B><I>handle</I><B>, fd_set *</B><I>fdset</I><B>);</B>
 
-          <dt>SNMPERR_BAD_ADDRESS</dt>
+<P>
 
-          <dd>The host name or address given was not useable.</dd>
+<B>void snmp_sess_timeout(void *</B><I>handle</I><B>);</B>
 
-          <dt>SNMPERR_BAD_SESSION</dt>
+<P>
 
-          <dd>The specified session was not open.</dd>
+<B>int snmp_sess_close(void *</B><I>handle</I><B>);</B>
 
-          <dt>SNMPERR_TOO_LONG</dt>
+<P>
 
-          <dt>SNMPERR_NO_SOCKET</dt>
+<B>void snmp_sess_error(void *</B><I>handle</I><B>, int *</B><I>pcliberr</I><B>, </B>
 
-          <dt>SNMPERR_V2_IN_V1</dt>
+<BR>
 
-          <dt>SNMPERR_V1_IN_V2</dt>
+<B>                    int *</B><I>psnmperr</I><B>, char **</B><I>pperrstring</I><B>);</B>
 
-          <dt>SNMPERR_BAD_REPEATERS</dt>
+<A NAME="lbAD">&nbsp;</A>
+<H2>DESCRIPTION</H2>
 
-          <dt>SNMPERR_BAD_REPETITIONS</dt>
+These functions define a subset of the API that can be used
+to manage single SNMP sessions in a multi-threaded application.
+Except for
+<B>snmp_sess_session()</B>,
 
-          <dt>SNMPERR_BAD_ASN1_BUILD</dt>
+these functions are single session versions of the traditional
+SNMP library API.
+<P>
 
-          <dt>SNMPERR_BAD_SENDTO</dt>
+Note that these functions use an opaque pointer
+(<I>handle</I>
 
-          <dt>SNMPERR_BAD_RCVFROM</dt>
+in the above prototypes) to identify a single session in lieu of a
+<I>session</I>
 
-          <dt>SNMPERR_BAD_PARSE</dt>
+pointer (as in the traditional API).
+<P>
 
-          <dt>SNMPERR_BAD_VERSION</dt>
+<B>snmp_sess_init()</B>
 
-          <dt>SNMPERR_BAD_COMMUNITY</dt>
+prepares a struct snmp_session that sources transport characteristics
+and common information that will be used for a set of SNMP transactions.
+After this structure is passed to
+<B>snmp_sess_open()</B>
 
-          <dt>SNMPERR_NOAUTH_DESPRIV</dt>
+to create an SNMP session, the structure is no longer used.  Instead
+the opaque pointer returned by
+<B>snmp_sess_open()</B>
 
-          <dt>SNMPERR_ABORT</dt>
+is used to refer to that session henceforth.
+<P>
 
-          <dt>SNMPERR_UNKNOWN_PDU</dt>
+SNMP sessions that are created with
+<B>snmp_sess_open()</B>
 
-          <dt>SNMPERR_TIMEOUT</dt>
-        </dl>
-      </dd>
-    </dl>
+are not affected by, and SHOULD NOT BE USED WITH,
+<B>snmp_select_info()</B>, <B>snmp_read()</B>, <B>snmp_timeout()</B> nor
 
-    <p><a name="lbAF" id="lbAF">&nbsp;</a></p>
+<B>snmp_close()</B>.
 
-    <h2>SEE ALSO</h2><b><a href="select.html">select</a></b>(2), <b><a href="snmp_api.html">snmp_api</a></b>(3),
-    <b>snmp_api.h</b>
-    <hr />
-    <a name="index" id="index">&nbsp;</a>
+Rather the equivalent single session functions described here should
+be used.
+<P>
 
-    <h2>Index</h2>
+<B>snmp_sess_init()</B>
 
-    <dl>
-      <dt><a href="#lbAB">NAME</a></dt>
+and
+<B>snmp_sess_open()</B>
 
-      <dt><a href="#lbAC">SYNOPSIS</a></dt>
+each take as input a pointer to a struct snmp_session object.
+This structure contains information for a set of transactions that
+will share similar transport characteristics.
+<B>snmp_sess_session()</B>
 
-      <dt><a href="#lbAD">DESCRIPTION</a></dt>
+takes the opaque session handle and returns a pointer to
+its associated struct snmp_session.
+<P>
 
-      <dt><a href="#lbAE">DIAGNOSTICS</a></dt>
+<B>snmp_sess_send()</B>
 
-      <dt><a href="#lbAF">SEE ALSO</a></dt>
-    </dl>
-    <hr />
-    This document was created by <a href="http://localhost/cgi-bin/man/man2html">man2html</a>, using the manual pages.<br />
-    Time: 13:12:01 GMT, September 23, 2007
-<!-- CONTENT END -->
-<!--#include virtual="/page-bottom.html" -->
+and
+<B>snmp_sess_async_send()</B>
 
+each take a
+<I>pdu</I>
+
+parameter, which points to a struct snmp_pdu object containing
+information that describes a transaction that will be performed over
+an open session.
+<P>
+
+Consult snmp_api.h for the definitions of these structures.
+<P>
+
+<B>snmp_sess_select_info()</B>, <B>snmp_sess_read()</B> and <B>snmp_sess_timeout()</B>
+
+provide an interface for the use of the
+<B><A HREF="http://localhost/cgi-bin/man/man2html?2+select">select</A></B>(2)
+
+system call so that SNMP transactions for a single session can occur
+asynchronously.
+<P>
+
+<B>snmp_sess_select_info()</B>
+
+is passed the information that would have been passed to
+<B><A HREF="http://localhost/cgi-bin/man/man2html?2+select">select</A></B>(2)
+
+in the absence of SNMP.  For example, this might include file
+descriptors associated with the main loop of a graphical
+application. This information is modified so that SNMP will get the
+service it requires from the call to
+<B><A HREF="http://localhost/cgi-bin/man/man2html?2+select">select</A></B>(2).
+
+In this case,
+<I>numfds</I>, <I>fdset</I> and <I>timeout</I>
+
+correspond to the
+<I>nfds</I>, <I>readfds</I> and <I>timeout</I>
+
+arguments to
+<B><A HREF="http://localhost/cgi-bin/man/man2html?2+select">select</A></B>(2)
+
+respectively.  The only exception is that timeout must ALWAYS point to
+an allocated (but perhaps uninitialized)
+<I>struct timeval</I>
+
+(it cannot be NULL as for
+<B><A HREF="http://localhost/cgi-bin/man/man2html?2+select">select</A></B>(2)).
+
+If
+<I>timeout</I>
+
+would have been passed as NULL,
+<I>block</I>
+
+is instead set to true, and
+<I>timeout</I>
+
+is treated as undefined.  This same rule applies upon return from
+<B>snmp_select_info()</B>.
+
+<P>
+
+After calling
+<B>snmp_sess_select_info() ,</B>
+
+<B><A HREF="http://localhost/cgi-bin/man/man2html?2+select">select</A></B>(2)
+
+should be called with the returned data.  When it returns,
+<B>snmp_sess_read()</B>
+
+should then be called with the
+<I>fd_set</I>
+
+returned from
+<B><A HREF="http://localhost/cgi-bin/man/man2html?2+select">select</A></B>(2).
+
+This will read any input from this session's SNMP socket.  If
+<B><A HREF="http://localhost/cgi-bin/man/man2html?2+select">select</A></B>(2)
+
+times out (that is, it returns zero),
+<B>snmp_sess_timeout()</B>
+
+should be called to see if a timeout has occurred on the SNMP
+session.
+<A NAME="lbAE">&nbsp;</A>
+<H2>DIAGNOSTICS</H2>
+
+<P>
+
+Error return status from 
+<B>snmp_sess_open()</B>
+
+is indicated by return of a NULL pointer.
+Error return status from 
+<B>snmp_sess_close()</B>
+
+and
+<B>snmp_sess_send()</B>
+
+is indicated by a return value of 0.  A successful status will return
+1.
+<P>
+
+Further information can be obtained by using
+<B>snmp_sess_error()</B>
+
+to see what type of error has occurred.  This function returns the
+SNMP
+<I>snmp_errno</I>
+
+variable, the value of the system
+<I>errno</I>
+
+variable, and a string interpretation of both variables.  The string
+must be freed after use by the caller.
+<P>
+
+For errors returned by
+<B>snmp_sess_open()</B>,
+
+use the corresponding function
+<B>snmp_error()</B>
+
+instead of
+<B>snmp_sess_error()</B>.
+
+<P>
+
+Consult snmp_api.h for the complete set of SNMP library
+error values.
+The SNMP library error value
+<I>snmperr</I>
+
+can be one of the following values:
+<DL COMPACT><DT><DD>
+<DL COMPACT>
+<DT>SNMPERR_GENERR<DD>
+A generic error occurred.
+<DT>SNMPERR_BAD_LOCPORT<DD>
+The local port was bad because it had already been
+allocated or permission was denied.
+<DT>SNMPERR_BAD_ADDRESS<DD>
+The host name or address given was not useable.
+<DT>SNMPERR_BAD_SESSION<DD>
+The specified session was not open.
+<DT>SNMPERR_TOO_LONG<DD>
+<DT>SNMPERR_NO_SOCKET<DD>
+<DT>SNMPERR_V2_IN_V1<DD>
+<DT>SNMPERR_V1_IN_V2<DD>
+<DT>SNMPERR_BAD_REPEATERS<DD>
+<DT>SNMPERR_BAD_REPETITIONS<DD>
+<DT>SNMPERR_BAD_ASN1_BUILD<DD>
+<DT>SNMPERR_BAD_SENDTO<DD>
+<DT>SNMPERR_BAD_RCVFROM<DD>
+<DT>SNMPERR_BAD_PARSE<DD>
+<DT>SNMPERR_BAD_VERSION<DD>
+<DT>SNMPERR_BAD_COMMUNITY<DD>
+<DT>SNMPERR_NOAUTH_DESPRIV<DD>
+<DT>SNMPERR_ABORT<DD>
+<DT>SNMPERR_UNKNOWN_PDU<DD>
+<DT>SNMPERR_TIMEOUT<DD>
+</DL>
+</DL>
+
+<P>
+
+<A NAME="lbAF">&nbsp;</A>
+<H2>SEE ALSO</H2>
+
+<B><A HREF="http://localhost/cgi-bin/man/man2html?2+select">select</A></B>(2), <B><A HREF="http://localhost/cgi-bin/man/man2html?3+snmp_api">snmp_api</A></B>(3), <B>snmp_api.h</B>
+
+<P>
+
+<HR>
+<A NAME="index">&nbsp;</A><H2>Index</H2>
+<DL>
+<DT><A HREF="#lbAB">NAME</A><DD>
+<DT><A HREF="#lbAC">SYNOPSIS</A><DD>
+<DT><A HREF="#lbAD">DESCRIPTION</A><DD>
+<DT><A HREF="#lbAE">DIAGNOSTICS</A><DD>
+<DT><A HREF="#lbAF">SEE ALSO</A><DD>
+</DL>
+<HR>
+This document was created by
+<A HREF="http://localhost/cgi-bin/man/man2html">man2html</A>,
+using the manual pages.<BR>
+Time: 19:05:39 GMT, September 28, 2009
+</BODY>
+</HTML>

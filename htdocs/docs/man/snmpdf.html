@@ -1,48 +1,84 @@
-<!--#set var="section" value="documentation" -->
-<!--#include virtual="/page-top.html" -->
-<!-- CONTENT START -->
-    <h1>SNMPDF</h1>Section: Net-SNMP (1)<br />
-    Updated: 25 Jul 2003<br />
-    <a href="#index">Index</a> <a href="../index.html">Return to Main Contents</a>
-    <hr />
-    <a name="lbAB" id="lbAB">&nbsp;</a>
+Content-type: text/html
 
-    <h2>NAME</h2>snmpdf - display disk space usage on a network entity via SNMP <a name="lbAC" id="lbAC">&nbsp;</a>
+<HTML><HEAD><TITLE>Manpage of SNMPDF</TITLE>
+</HEAD><BODY>
+<H1>SNMPDF</H1>
+Section: Net-SNMP (1)<BR>Updated: 25 Jul 2003<BR><A HREF="#index">Index</A>
+<A HREF="http://localhost/cgi-bin/man/man2html">Return to Main Contents</A><HR>
 
-    <h2>SYNOPSIS</h2><b>snmpdf</b> [COMMON OPTIONS] [-Cu] AGENT <a name="lbAD" id="lbAD">&nbsp;</a>
 
-    <h2>DESCRIPTION</h2><b>snmpdf</b> is simply a networked verison of the typical df command. It checks the disk space on the
-    remote machine by examining the HOST-RESOURCES-MIB's hrStorageTable or the UCD-SNMP-MIB's dskTable. By default, the
-    hrStorageTable is preferred as it typically contains more information. However, the -Cu argument can be passed to snmpdf to
-    force the usage of the dskTable.
+<A NAME="lbAB">&nbsp;</A>
+<H2>NAME</H2>
 
-    <p>AGENT identifies a target SNMP agent, which is instrumented to monitor the gievn objects. At its simplest, the AGENT
-    specification will consist of a hostname or an IPv4 address. In this situation, the command will attempt communication with
-    the agent, using UDP/IPv4 to port 161 of the given target host. See the <i><a href="snmpcmd.html">snmpcmd</a>(1)</i> manual
-    page for a full list of the possible formats for AGENT.</p>
+snmpdf - display disk space usage on a network entity via SNMP
+<A NAME="lbAC">&nbsp;</A>
+<H2>SYNOPSIS</H2>
 
-    <p>See the <i><a href="snmpd.conf.html">snmpd.conf</a>(5)</i> manual page on setting up the dskTable using the <i>disk</i>
-    directive in the snmpd.conf file. <a name="lbAE" id="lbAE">&nbsp;</a></p>
+<B>snmpdf</B>
 
-    <h2>OPTIONS</h2>
+[COMMON OPTIONS] [-Cu] AGENT
+<A NAME="lbAD">&nbsp;</A>
+<H2>DESCRIPTION</H2>
 
-    <dl compact="compact">
-      <dt><b>COMMON OPTIONS</b></dt>
+<B>snmpdf</B>
 
-      <dd>Please see <i><a href="snmpcmd.html">snmpcmd</a>(1)</i> for a list of possible values for COMMON OPTIONS as well as
-      their descriptions.</dd>
+is simply a networked verison of the typical df command.  It
+checks the disk space on the remote machine by examining the
+HOST-RESOURCES-MIB's hrStorageTable or the UCD-SNMP-MIB's dskTable.
+By default, the hrStorageTable is preferred as it typically contains
+more information.  However, the -Cu argument can be passed to snmpdf
+to force the usage of the dskTable.
+<P>
 
-      <dt><b>-Cu</b></dt>
+AGENT identifies a target SNMP agent, which is instrumented
+to monitor the gievn objects.  At its simplest, the AGENT
+specification will consist of a hostname or an IPv4
+address.  In this situation, the command will attempt
+communication with the agent, using UDP/IPv4 to port 161
+of the given target host. See the
+<I><A HREF="http://localhost/cgi-bin/man/man2html?1+snmpcmd">snmpcmd</A>(1)</I>
 
-      <dd>Forces the command to use dskTable in mib UCD-SNMP-MIB instead of the default to determine the storage information.
-      Generally, the default use of hrStorageTable in mib HOST-RESOURCES-MIB is preferred because it typically contains more
-      information.</dd>
-    </dl><a name="lbAF" id="lbAF">&nbsp;</a>
+manual page for a full list of the possible formats for AGENT.
+<P>
 
-    <h2>EXAMPLES</h2>
+See the
+<I><A HREF="http://localhost/cgi-bin/man/man2html?5+snmpd.conf">snmpd.conf</A>(5)</I>
 
-    <p>% snmpdf -v 2c -c public localhost</p>
-    <pre>
+manual page on setting up the dskTable using the 
+<I>disk</I>
+
+directive in the snmpd.conf file.
+<A NAME="lbAE">&nbsp;</A>
+<H2>OPTIONS</H2>
+
+<DL COMPACT>
+<DT><B>COMMON OPTIONS</B>
+
+<DD>
+Please see
+<I><A HREF="http://localhost/cgi-bin/man/man2html?1+snmpcmd">snmpcmd</A>(1)</I>
+
+for a list of possible values for COMMON OPTIONS
+as well as their descriptions.
+<DT><B>-Cu</B>
+
+<DD>
+Forces the command to use dskTable in mib
+UCD-SNMP-MIB instead of the default to determine
+the storage information. Generally, the default
+use of hrStorageTable in mib HOST-RESOURCES-MIB
+is preferred because it typically contains
+more information.
+</DL>
+<A NAME="lbAF">&nbsp;</A>
+<H2>EXAMPLES</H2>
+
+<P>
+
+% snmpdf -v 2c -c public localhost
+<P>
+
+<PRE>
 Description       size (kB)         Used    Available Used%
 /                   7524587      2186910      5337677   29%
 /proc                     0            0            0    0%
@@ -53,30 +89,28 @@ Description       size (kB)         Used    Available Used%
 /vol                      0            0            0    0%
 Real Memory          524288       447456        76832   85%
 Swap Space          1420296       195192      1225104   13%
-</pre><a name="lbAG" id="lbAG">&nbsp;</a>
+</PRE>
 
-    <h2>SEE ALSO</h2><a href="snmpd.conf.html">snmpd.conf</a>(5), <a href="snmp.conf.html">snmp.conf</a>(5)
-    <hr />
-    <a name="index" id="index">&nbsp;</a>
+<A NAME="lbAG">&nbsp;</A>
+<H2>SEE ALSO</H2>
 
-    <h2>Index</h2>
+<A HREF="http://localhost/cgi-bin/man/man2html?5+snmpd.conf">snmpd.conf</A>(5), <A HREF="http://localhost/cgi-bin/man/man2html?5+snmp.conf">snmp.conf</A>(5)
+<P>
 
-    <dl>
-      <dt><a href="#lbAB">NAME</a></dt>
-
-      <dt><a href="#lbAC">SYNOPSIS</a></dt>
-
-      <dt><a href="#lbAD">DESCRIPTION</a></dt>
-
-      <dt><a href="#lbAE">OPTIONS</a></dt>
-
-      <dt><a href="#lbAF">EXAMPLES</a></dt>
-
-      <dt><a href="#lbAG">SEE ALSO</a></dt>
-    </dl>
-    <hr />
-    This document was created by <a href="http://localhost/cgi-bin/man/man2html">man2html</a>, using the manual pages.<br />
-    Time: 13:12:00 GMT, September 23, 2007
-<!-- CONTENT END -->
-<!--#include virtual="/page-bottom.html" -->
-
+<HR>
+<A NAME="index">&nbsp;</A><H2>Index</H2>
+<DL>
+<DT><A HREF="#lbAB">NAME</A><DD>
+<DT><A HREF="#lbAC">SYNOPSIS</A><DD>
+<DT><A HREF="#lbAD">DESCRIPTION</A><DD>
+<DT><A HREF="#lbAE">OPTIONS</A><DD>
+<DT><A HREF="#lbAF">EXAMPLES</A><DD>
+<DT><A HREF="#lbAG">SEE ALSO</A><DD>
+</DL>
+<HR>
+This document was created by
+<A HREF="http://localhost/cgi-bin/man/man2html">man2html</A>,
+using the manual pages.<BR>
+Time: 19:05:39 GMT, September 28, 2009
+</BODY>
+</HTML>

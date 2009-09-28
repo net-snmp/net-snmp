@@ -1,184 +1,209 @@
-<!--#set var="section" value="documentation" -->
-<!--#include virtual="/page-top.html" -->
-<!-- CONTENT START -->
-    <h1>stash_cache</h1>Section: net-snmp (3)<br />
-    Updated: 27 Jul 2007<br />
-    <a href="#index">Index</a> <a href="../index.html">Return to Main Contents</a>
-    <hr />
-    <a name="lbAB" id="lbAB">&nbsp;</a>
+Content-type: text/html
 
-    <h2>NAME</h2>stash_cache - Automatically caches data for certain handlers.
+<HTML><HEAD><TITLE>Manpage of stash_cache</TITLE>
+</HEAD><BODY>
+<H1>stash_cache</H1>
+Section: net-snmp (3)<BR>Updated: 23 Sep 2009<BR><A HREF="#index">Index</A>
+<A HREF="http://localhost/cgi-bin/man/man2html">Return to Main Contents</A><HR>
 
-    <p><a name="lbAC" id="lbAC">&nbsp;</a></p>
 
-    <h3>Functions</h3>
 
-    <p><br />
-    <b>netsnmp_stash_cache_info</b> * <b>netsnmp_get_new_stash_cache</b> (void)<br />
-    <br />
-    <b>netsnmp_mib_handler</b> * <b>netsnmp_get_timed_bare_stash_cache_handler</b> (int timeout, oid *rootoid, size_t
-    rootoid_len)<br />
-    <i>returns a stash_cache handler that can be injected into a given handler chain (with the specified timeout and root OID
-    values), but *only* if that handler chain explicitly supports stash cache processing.</i><br />
-    <b>netsnmp_mib_handler</b> * <b>netsnmp_get_bare_stash_cache_handler</b> (void)<br />
-    <i>returns a single stash_cache handler that can be injected into a given handler chain (with a fixed timeout), but *only* if
-    that handler chain explicitly supports stash cache processing.</i><br />
-    <b>netsnmp_mib_handler</b> * <b>netsnmp_get_stash_cache_handler</b> (void)<br />
-    <i>returns a stash_cache handler sub-chain that can be injected into a given (arbitrary) handler chain, using a fixed cache
-    timeout.</i><br />
-    <b>netsnmp_mib_handler</b> * <b>netsnmp_get_timed_stash_cache_handler</b> (int timeout, oid *rootoid, size_t
-    rootoid_len)<br />
-    <i>returns a stash_cache handler sub-chain that can be injected into a given (arbitrary) handler chain, using a configurable
-    cache timeout.</i><br />
-    <b>netsnmp_oid_stash_node</b> ** <b>netsnmp_extract_stash_cache</b> (<b>netsnmp_agent_request_info</b> *reqinfo)<br />
-    <i>extracts a pointer to the stash_cache info from the reqinfo structure.</i><br />
-    int <b>netsnmp_stash_cache_helper</b> (<b>netsnmp_mib_handler</b> *handler, <b>netsnmp_handler_registration</b> *reginfo,
-    <b>netsnmp_agent_request_info</b> *reqinfo, <b>netsnmp_request_info</b> *requests)<br />
-    <br />
-    int <b>_netsnmp_stash_cache_load</b> (<b>netsnmp_cache</b> *cache, void *magic)<br />
-    <i>updates a given cache depending on whether it needs to or not.</i><br />
-    void <b>_netsnmp_stash_cache_free</b> (<b>netsnmp_cache</b> *cache, void *magic)<br />
-    <br />
-    void <b>netsnmp_init_stash_cache_helper</b> (void)<br />
-    <i>initializes the stash_cache helper which then registers a stash_cache handler as a run-time injectable handler for
-    configuration file use.</i> <a name="lbAD" id="lbAD">&nbsp;</a></p>
+<A NAME="lbAB">&nbsp;</A>
+<H2>NAME</H2>
 
-    <h2>Detailed Description</h2>
+stash_cache - 
+<P>
 
-    <p>Automatically caches data for certain handlers.</p>
+Automatically caches data for certain handlers.  
+<P>
+<A NAME="lbAC">&nbsp;</A>
+<H3>Functions</H3>
 
-    <p>This handler caches data in an optimized way which may aleviate the need for the lower level handlers to perform as much
-    optimization. Specifically, somewhere in the lower level handlers must be a handler that supports the MODE_GET_STASH
-    operation. Note that the table_iterator helper supports this. <a name="lbAE" id="lbAE">&nbsp;</a></p>
+<P>
 
-    <h2>Function Documentation</h2>
+<BR>
 
-    <p><a name="lbAF" id="lbAF">&nbsp;</a></p>
+<B>netsnmp_stash_cache_info</B> * <B>netsnmp_get_new_stash_cache</B> (void)
 
-    <h3>int _netsnmp_stash_cache_load (<b>netsnmp_cache</b> * cache, void * magic)</h3>
+<BR>
 
-    <p>updates a given cache depending on whether it needs to or not.</p>
+<BR>
 
-    <p>Definition at line 190 of file stash_cache.c.</p>
+<B>netsnmp_mib_handler</B> * <B>netsnmp_get_timed_bare_stash_cache_handler</B> (int timeout, oid *rootoid, size_t rootoid_len)
 
-    <p>References netsnmp_stash_cache_info_s::cache, netsnmp_cache_s::cache_hint, netsnmp_handler_args_s::handler,
-    netsnmp_cache_s::magic, netsnmp_agent_request_info_s::mode, netsnmp_agent_add_list_data(), netsnmp_call_next_handler(),
-    netsnmp_create_data_list(), netsnmp_get_new_stash_cache(), netsnmp_mib_handler_s::next, NULL,
-    netsnmp_handler_args_s::reginfo, netsnmp_handler_args_s::reqinfo, and netsnmp_handler_args_s::requests.</p>
+<BR>
 
-    <p>Referenced by netsnmp_get_timed_bare_stash_cache_handler(). <a name="lbAG" id="lbAG">&nbsp;</a></p>
+<I>returns a stash_cache handler that can be injected into a given handler chain (with the specified timeout and root OID values), but *only* if that handler chain explicitly supports stash cache processing. </I>
 
-    <h3><b>netsnmp_oid_stash_node</b>** netsnmp_extract_stash_cache (<b>netsnmp_agent_request_info</b> * reqinfo)</h3>
+<BR>
 
-    <p>extracts a pointer to the stash_cache info from the reqinfo structure.</p>
+<B>netsnmp_mib_handler</B> * <B>netsnmp_get_bare_stash_cache_handler</B> (void)
 
-    <p>Definition at line 112 of file stash_cache.c.</p>
+<BR>
 
-    <p>References netsnmp_agent_get_list_data().</p>
+<I>returns a single stash_cache handler that can be injected into a given handler chain (with a fixed timeout), but *only* if that handler chain explicitly supports stash cache processing. </I>
 
-    <p>Referenced by netsnmp_stash_to_next_helper(), and netsnmp_table_iterator_helper_handler(). <a name="lbAH" id=
-    "lbAH">&nbsp;</a></p>
+<BR>
 
-    <h3><b>netsnmp_mib_handler</b>* netsnmp_get_bare_stash_cache_handler (void)</h3>
+<B>netsnmp_mib_handler</B> * <B>netsnmp_get_stash_cache_handler</B> (void)
 
-    <p>returns a single stash_cache handler that can be injected into a given handler chain (with a fixed timeout), but *only* if
-    that handler chain explicitly supports stash cache processing.</p>
+<BR>
 
-    <p>Definition at line 78 of file stash_cache.c.</p>
+<I>returns a stash_cache handler sub-chain that can be injected into a given (arbitrary) handler chain, using a fixed cache timeout. </I>
 
-    <p>References netsnmp_get_timed_bare_stash_cache_handler(), and NULL.</p>
+<BR>
 
-    <p>Referenced by netsnmp_get_stash_cache_handler(). <a name="lbAI" id="lbAI">&nbsp;</a></p>
+<B>netsnmp_mib_handler</B> * <B>netsnmp_get_timed_stash_cache_handler</B> (int timeout, oid *rootoid, size_t rootoid_len)
 
-    <h3><b>netsnmp_mib_handler</b>* netsnmp_get_stash_cache_handler (void)</h3>
+<BR>
 
-    <p>returns a stash_cache handler sub-chain that can be injected into a given (arbitrary) handler chain, using a fixed cache
-    timeout.</p>
+<I>returns a stash_cache handler sub-chain that can be injected into a given (arbitrary) handler chain, using a configurable cache timeout. </I>
 
-    <p>Definition at line 87 of file stash_cache.c.</p>
+<BR>
 
-    <p>References netsnmp_get_bare_stash_cache_handler(), netsnmp_get_stash_to_next_handler(), and
-    netsnmp_mib_handler_s::next.</p>
+<B>netsnmp_oid_stash_node</B> ** <B>netsnmp_extract_stash_cache</B> (<B>netsnmp_agent_request_info</B> *reqinfo)
 
-    <p>Referenced by netsnmp_init_stash_cache_helper(). <a name="lbAJ" id="lbAJ">&nbsp;</a></p>
+<BR>
 
-    <h3><b>netsnmp_mib_handler</b>* netsnmp_get_timed_bare_stash_cache_handler (int timeout, oid * rootoid, size_t
-    rootoid_len)</h3>
+<I>extracts a pointer to the stash_cache info from the reqinfo structure. </I>
 
-    <p>returns a stash_cache handler that can be injected into a given handler chain (with the specified timeout and root OID
-    values), but *only* if that handler chain explicitly supports stash cache processing.</p>
+<BR>
 
-    <p>Definition at line 44 of file stash_cache.c.</p>
+int <B>netsnmp_stash_cache_helper</B> (<B>netsnmp_mib_handler</B> *handler, <B>netsnmp_handler_registration</B> *reginfo, <B>netsnmp_agent_request_info</B> *reqinfo, <B>netsnmp_request_info</B> *requests)
 
-    <p>References _netsnmp_stash_cache_free(), _netsnmp_stash_cache_load(), netsnmp_mib_handler_s::myvoid,
-    netsnmp_cache_create(), netsnmp_cache_handler_get(), netsnmp_create_handler(), netsnmp_handler_free(),
-    netsnmp_stash_cache_helper(), netsnmp_mib_handler_s::next, and NULL.</p>
+<BR>
 
-    <p>Referenced by netsnmp_get_bare_stash_cache_handler(), and netsnmp_get_timed_stash_cache_handler(). <a name="lbAK" id=
-    "lbAK">&nbsp;</a></p>
+<BR>
 
-    <h3><b>netsnmp_mib_handler</b>* netsnmp_get_timed_stash_cache_handler (int timeout, oid * rootoid, size_t rootoid_len)</h3>
+int <B>_netsnmp_stash_cache_load</B> (<B>netsnmp_cache</B> *cache, void *magic)
 
-    <p>returns a stash_cache handler sub-chain that can be injected into a given (arbitrary) handler chain, using a configurable
-    cache timeout.</p>
+<BR>
 
-    <p>Definition at line 100 of file stash_cache.c.</p>
+<I>updates a given cache depending on whether it needs to or not. </I>
 
-    <p>References netsnmp_get_stash_to_next_handler(), netsnmp_get_timed_bare_stash_cache_handler(), and
-    netsnmp_mib_handler_s::next. <a name="lbAL" id="lbAL">&nbsp;</a></p>
+<BR>
 
-    <h3>void netsnmp_init_stash_cache_helper (void)</h3>
+void <B>_netsnmp_stash_cache_free</B> (<B>netsnmp_cache</B> *cache, void *magic)
 
-    <p>initializes the stash_cache helper which then registers a stash_cache handler as a run-time injectable handler for
-    configuration file use.</p>
+<BR>
 
-    <p>Definition at line 233 of file stash_cache.c.</p>
+<BR>
 
-    <p>References netsnmp_get_stash_cache_handler(), and netsnmp_register_handler_by_name().</p>
+void <B>netsnmp_init_stash_cache_helper</B> (void)
 
-    <p>Referenced by netsnmp_init_helpers().</p>
-    <hr />
-    <a name="index" id="index">&nbsp;</a>
+<BR>
 
-    <h2>Index</h2>
+<I>initializes the stash_cache helper which then registers a stash_cache handler as a run-time injectable handler for configuration file use. </I>
 
-    <dl>
-      <dt><a href="#lbAB">NAME</a></dt>
 
-      <dd>
-        <dl>
-          <dt><a href="#lbAC">Functions</a></dt>
-        </dl>
-      </dd>
+<A NAME="lbAD">&nbsp;</A>
+<H2>Detailed Description</H2>
 
-      <dt><a href="#lbAD">Detailed Description</a></dt>
+<P>
 
-      <dt><a href="#lbAE">Function Documentation</a></dt>
+Automatically caches data for certain handlers. 
+<P>
+This handler caches data in an optimized way which may aleviate the need for the lower level handlers to perform as much optimization. Specifically, somewhere in the lower level handlers must be a handler that supports the MODE_GET_STASH operation. Note that the table_iterator helper supports this. 
+<A NAME="lbAE">&nbsp;</A>
+<H2>Function Documentation</H2>
 
-      <dd>
-        <dl>
-          <dt><a href="#lbAF">int _netsnmp_stash_cache_load (<b>netsnmp_cache</b> * cache, void * magic)</a></dt>
+<P>
 
-          <dt><a href="#lbAG"><b>netsnmp_oid_stash_node</b>** netsnmp_extract_stash_cache (<b>netsnmp_agent_request_info</b> *
-          reqinfo)</a></dt>
+<A NAME="lbAF">&nbsp;</A>
+<H3>int _netsnmp_stash_cache_load (<B>netsnmp_cache</B> * cache, void * magic)</H3>
 
-          <dt><a href="#lbAH"><b>netsnmp_mib_handler</b>* netsnmp_get_bare_stash_cache_handler (void)</a></dt>
+<P>
 
-          <dt><a href="#lbAI"><b>netsnmp_mib_handler</b>* netsnmp_get_stash_cache_handler (void)</a></dt>
+updates a given cache depending on whether it needs to or not. 
+<P>
 
-          <dt><a href="#lbAJ"><b>netsnmp_mib_handler</b>* netsnmp_get_timed_bare_stash_cache_handler (int timeout, oid * rootoid,
-          size_t rootoid_len)</a></dt>
+Definition at line 190 of file stash_cache.c.
+<A NAME="lbAG">&nbsp;</A>
+<H3><B>netsnmp_oid_stash_node</B>** netsnmp_extract_stash_cache (<B>netsnmp_agent_request_info</B> * reqinfo)</H3>
 
-          <dt><a href="#lbAK"><b>netsnmp_mib_handler</b>* netsnmp_get_timed_stash_cache_handler (int timeout, oid * rootoid,
-          size_t rootoid_len)</a></dt>
+<P>
 
-          <dt><a href="#lbAL">void netsnmp_init_stash_cache_helper (void)</a></dt>
-        </dl>
-      </dd>
-    </dl>
-    <hr />
-    This document was created by <a href="http://localhost/cgi-bin/man/man2html">man2html</a>, using the manual pages.<br />
-    Time: 13:12:01 GMT, September 23, 2007
-<!-- CONTENT END -->
-<!--#include virtual="/page-bottom.html" -->
+extracts a pointer to the stash_cache info from the reqinfo structure. 
+<P>
 
+Definition at line 109 of file stash_cache.c.
+<A NAME="lbAH">&nbsp;</A>
+<H3><B>netsnmp_mib_handler</B>* netsnmp_get_bare_stash_cache_handler (void)</H3>
+
+<P>
+
+returns a single stash_cache handler that can be injected into a given handler chain (with a fixed timeout), but *only* if that handler chain explicitly supports stash cache processing. 
+<P>
+
+Definition at line 75 of file stash_cache.c.
+<A NAME="lbAI">&nbsp;</A>
+<H3><B>netsnmp_mib_handler</B>* netsnmp_get_stash_cache_handler (void)</H3>
+
+<P>
+
+returns a stash_cache handler sub-chain that can be injected into a given (arbitrary) handler chain, using a fixed cache timeout. 
+<P>
+
+Definition at line 84 of file stash_cache.c.
+<A NAME="lbAJ">&nbsp;</A>
+<H3><B>netsnmp_mib_handler</B>* netsnmp_get_timed_bare_stash_cache_handler (int timeout, oid * rootoid, size_t rootoid_len)</H3>
+
+<P>
+
+returns a stash_cache handler that can be injected into a given handler chain (with the specified timeout and root OID values), but *only* if that handler chain explicitly supports stash cache processing. 
+<P>
+
+Definition at line 40 of file stash_cache.c.
+<A NAME="lbAK">&nbsp;</A>
+<H3><B>netsnmp_mib_handler</B>* netsnmp_get_timed_stash_cache_handler (int timeout, oid * rootoid, size_t rootoid_len)</H3>
+
+<P>
+
+returns a stash_cache handler sub-chain that can be injected into a given (arbitrary) handler chain, using a configurable cache timeout. 
+<P>
+
+Definition at line 97 of file stash_cache.c.
+<A NAME="lbAL">&nbsp;</A>
+<H3>void netsnmp_init_stash_cache_helper (void)</H3>
+
+<P>
+
+initializes the stash_cache helper which then registers a stash_cache handler as a run-time injectable handler for configuration file use. 
+<P>
+
+Definition at line 233 of file stash_cache.c.
+<A NAME="lbAM">&nbsp;</A>
+<H2>Author</H2>
+
+<P>
+
+Generated automatically by Doxygen for net-snmp from the source code.
+<P>
+
+<HR>
+<A NAME="index">&nbsp;</A><H2>Index</H2>
+<DL>
+<DT><A HREF="#lbAB">NAME</A><DD>
+<DL>
+<DT><A HREF="#lbAC">Functions</A><DD>
+</DL>
+<DT><A HREF="#lbAD">Detailed Description</A><DD>
+<DT><A HREF="#lbAE">Function Documentation</A><DD>
+<DL>
+<DT><A HREF="#lbAF">int _netsnmp_stash_cache_load (<B>netsnmp_cache</B> * cache, void * magic)</A><DD>
+<DT><A HREF="#lbAG"><B>netsnmp_oid_stash_node</B>** netsnmp_extract_stash_cache (<B>netsnmp_agent_request_info</B> * reqinfo)</A><DD>
+<DT><A HREF="#lbAH"><B>netsnmp_mib_handler</B>* netsnmp_get_bare_stash_cache_handler (void)</A><DD>
+<DT><A HREF="#lbAI"><B>netsnmp_mib_handler</B>* netsnmp_get_stash_cache_handler (void)</A><DD>
+<DT><A HREF="#lbAJ"><B>netsnmp_mib_handler</B>* netsnmp_get_timed_bare_stash_cache_handler (int timeout, oid * rootoid, size_t rootoid_len)</A><DD>
+<DT><A HREF="#lbAK"><B>netsnmp_mib_handler</B>* netsnmp_get_timed_stash_cache_handler (int timeout, oid * rootoid, size_t rootoid_len)</A><DD>
+<DT><A HREF="#lbAL">void netsnmp_init_stash_cache_helper (void)</A><DD>
+</DL>
+<DT><A HREF="#lbAM">Author</A><DD>
+</DL>
+<HR>
+This document was created by
+<A HREF="http://localhost/cgi-bin/man/man2html">man2html</A>,
+using the manual pages.<BR>
+Time: 19:05:38 GMT, September 28, 2009
+</BODY>
+</HTML>

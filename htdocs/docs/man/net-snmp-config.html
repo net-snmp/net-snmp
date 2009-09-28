@@ -1,140 +1,117 @@
-<!--#set var="section" value="documentation" -->
-<!--#include virtual="/page-top.html" -->
-<!-- CONTENT START -->
-    <h1>net-snmp-config</h1>Section: Net-SNMP (1)<br />
-    Updated: 16 Nov 2006<br />
-    <a href="#index">Index</a> <a href="../index.html">Return to Main Contents</a>
-    <hr />
-    <a name="lbAB" id="lbAB">&nbsp;</a>
+Content-type: text/html
 
-    <h2>NAME</h2>net-snmp-config - returns information about installed net-snmp libraries and binaries <a name="lbAC" id=
-    "lbAC">&nbsp;</a>
+<HTML><HEAD><TITLE>Manpage of net-snmp-config</TITLE>
+</HEAD><BODY>
+<H1>net-snmp-config</H1>
+Section: Net-SNMP (1)<BR>Updated: 16 Nov 2006<BR><A HREF="#index">Index</A>
+<A HREF="http://localhost/cgi-bin/man/man2html">Return to Main Contents</A><HR>
 
-    <h2>SYNOPSIS</h2>
 
-    <p><b>net-snmp-config</b> [OPTIONS] <a name="lbAD" id="lbAD">&nbsp;</a></p>
+<A NAME="lbAB">&nbsp;</A>
+<H2>NAME</H2>
 
-    <h2>DESCRIPTION</h2>
+net-snmp-config - returns information about installed net-snmp libraries and binaries 
+<A NAME="lbAC">&nbsp;</A>
+<H2>SYNOPSIS</H2>
 
-    <p>The <i>net-snmp-config</i> shell script is designed to retrieve the configuration information about the libraries and
-    binaries dealing with the Simple Network Management Protocol (SNMP), built from the <b>net-snmp</b> source package. The
-    information is particularily useful for applications that need to link against the SNMP libraries and hence must know about
-    any other libraries that must be linked in as well.</p>
+<P>
 
-    <p><a name="lbAE" id="lbAE">&nbsp;</a></p>
+<B>net-snmp-config</B>
 
-    <h2>OPTIONS</h2>
+[OPTIONS]
+<A NAME="lbAD">&nbsp;</A>
+<H2>DESCRIPTION</H2>
 
-    <dl compact="compact">
-      <dt><b>--version</b></dt>
+<P>
 
-      <dd>displays the net-snmp version number</dd>
+The <I>net-snmp-config</I> shell script is designed to retrieve the
+configuration information about the libraries and binaries dealing with
+the Simple Network Management Protocol (SNMP), built from the 
+<B>net-snmp </B>
 
-      <dt><b>--indent-options</b></dt>
+source package. The information is particularily useful for
+applications that need to link against the SNMP libraries and hence
+must know about any other libraries that must be linked in as well.
+<P>
+<A NAME="lbAE">&nbsp;</A>
+<H2>OPTIONS</H2>
 
-      <dd>displays the indent options from the Coding Style</dd>
+<DL COMPACT>
+<DT><B>--version</B><DD>
+displays the net-snmp version number
+<DT><B>--indent-options</B><DD>
+displays the indent options from the Coding Style
+<DT><B>--debug-tokens</B><DD>
+displays a example command line to search to source
+code for a list of available debug tokens
+</DL>
+<P>
 
-      <dt><b>--debug-tokens</b></dt>
+SNMP Setup commands:
+<DL COMPACT>
+<DT><B>--create-snmpv3-user</B> [-ro] [-a authpass] [-x privpass] [-X DES|AES]<DD>
+[-A MD5|SHA] [username]
+</DL>
+<P>
 
-      <dd>displays a example command line to search to source code for a list of available debug tokens</dd>
-    </dl>
+These options produce the various compilation flags needed when
+building external SNMP applications:
+<DL COMPACT>
+<DT><B>--base-cflags</B><DD>
+lists additional compilation flags needed
+for external applications (excludes <B>-I</B>. and
+extra developer warning flags, if any)
+<DT><B>--cflags</B><DD>
+lists additional compilation flags needed
+<DT><B>--libs</B><DD>
+lists libraries needed for building applications
+<DT><B>--agent-libs</B><DD>
+lists libraries needed for building subagents
+<DT><B>--netsnmp-libs</B><DD>
+lists netsnmp specific libraries
+<DT><B>--external-libs</B><DD>
+lists libraries needed by netsnmp libs
+<DT><B>--netsnmp-agent-libs</B><DD>
+lists netsnmp specific agent libraries
+<DT>
+<B>--external-agent-libs</B> lists libraries needed by netsnmp libs
+</DL>
+<P>
 
-    <p>SNMP Setup commands:</p>
+<DD>Automated subagent building (produces an OUTPUTNAME binary file):
+[This feature has not been extensively tested,  use at your own risk.]
+<DL COMPACT>
+<DT><B>--compile-subagent</B> OUTPUTNAME [--norm] [--cflags flags]<DD>
+[--ldflags flags] mibmodule1.c [...]]
+<DT><B>--norm</B><DD>
+leave the generated .c file around to read.
+<DT><B>--cflags</B> flags<DD>
+extra cflags to use (e.g. <B>-I</B>...).
+<DT><B>--ldflags</B> flags<DD>
+extra ld flags to use (e.g. <B>-L</B>... <B>-l</B>...).
+<DT><DD>
+Details on how the net-nsmp package was compiled:
+<DT><B>--configure-options</B><DD>
+Display original configure arguments
+<DT><B>--snmpd-module-list</B><DD>
+Display the modules compiled into the agent
+<DT><B>--prefix</B><DD>
+Display the installation prefix
+<P>
+</DL>
 
-    <dl compact="compact">
-      <dt><b>--create-snmpv3-user</b> [-ro] [-a authpass] [-x privpass] [-X DES|AES]</dt>
-
-      <dd>[-A MD5|SHA] [username]</dd>
-    </dl>
-
-    <p>These options produce the various compilation flags needed when building external SNMP applications:</p>
-
-    <dl compact="compact">
-      <dt><b>--base-cflags</b></dt>
-
-      <dd>lists additional compilation flags needed for external applications (excludes <b>-I</b>. and extra developer warning
-      flags, if any)</dd>
-
-      <dt><b>--cflags</b></dt>
-
-      <dd>lists additional compilation flags needed</dd>
-
-      <dt><b>--libs</b></dt>
-
-      <dd>lists libraries needed for building applications</dd>
-
-      <dt><b>--agent-libs</b></dt>
-
-      <dd>lists libraries needed for building subagents</dd>
-
-      <dt><b>--netsnmp-libs</b></dt>
-
-      <dd>lists netsnmp specific libraries</dd>
-
-      <dt><b>--external-libs</b></dt>
-
-      <dd>lists libraries needed by netsnmp libs</dd>
-
-      <dt><b>--netsnmp-agent-libs</b></dt>
-
-      <dd>lists netsnmp specific agent libraries</dd>
-
-      <dt><b>--external-agent-libs</b> lists libraries needed by netsnmp libs</dt>
-    </dl>
-
-    <dl>
-      <dd>Automated subagent building (produces an OUTPUTNAME binary file): [This feature has not been extensively tested, use at
-      your own risk.]</dd>
-    </dl>
-
-    <dl compact="compact">
-      <dt><b>--compile-subagent</b> OUTPUTNAME [--norm] [--cflags flags]</dt>
-
-      <dd>[--ldflags flags] mibmodule1.c [...]]</dd>
-
-      <dt><b>--norm</b></dt>
-
-      <dd>leave the generated .c file around to read.</dd>
-
-      <dt><b>--cflags</b> flags</dt>
-
-      <dd>extra cflags to use (e.g. <b>-I</b>...).</dd>
-
-      <dt><b>--ldflags</b> flags</dt>
-
-      <dd>extra ld flags to use (e.g. <b>-L</b>... <b>-l</b>...).</dd>
-
-      <dd>Details on how the net-nsmp package was compiled:</dd>
-
-      <dt><b>--configure-options</b></dt>
-
-      <dd>Display original configure arguments</dd>
-
-      <dt><b>--snmpd-module-list</b></dt>
-
-      <dd>Display the modules compiled into the agent</dd>
-
-      <dt><b>--prefix</b></dt>
-
-      <dd>Display the installation prefix</dd>
-    </dl>
-    <hr />
-    <a name="index" id="index">&nbsp;</a>
-
-    <h2>Index</h2>
-
-    <dl>
-      <dt><a href="#lbAB">NAME</a></dt>
-
-      <dt><a href="#lbAC">SYNOPSIS</a></dt>
-
-      <dt><a href="#lbAD">DESCRIPTION</a></dt>
-
-      <dt><a href="#lbAE">OPTIONS</a></dt>
-    </dl>
-    <hr />
-    This document was created by <a href="http://localhost/cgi-bin/man/man2html">man2html</a>, using the manual pages.<br />
-    Time: 13:12:00 GMT, September 23, 2007
-<!-- CONTENT END -->
-<!--#include virtual="/page-bottom.html" -->
-
+<HR>
+<A NAME="index">&nbsp;</A><H2>Index</H2>
+<DL>
+<DT><A HREF="#lbAB">NAME</A><DD>
+<DT><A HREF="#lbAC">SYNOPSIS</A><DD>
+<DT><A HREF="#lbAD">DESCRIPTION</A><DD>
+<DT><A HREF="#lbAE">OPTIONS</A><DD>
+</DL>
+<HR>
+This document was created by
+<A HREF="http://localhost/cgi-bin/man/man2html">man2html</A>,
+using the manual pages.<BR>
+Time: 19:05:39 GMT, September 28, 2009
+</BODY>
+</HTML>

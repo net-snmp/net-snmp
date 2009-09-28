@@ -1,101 +1,112 @@
-<!--#set var="section" value="documentation" -->
-<!--#include virtual="/page-top.html" -->
-<!-- CONTENT START -->
-    <h1>encode_keychange</h1>Section: Net-SNMP (1)<br />
-    Updated: 16 Nov 2006<br />
-    <a href="#index">Index</a> <a href="../index.html">Return to Main Contents</a>
-    <hr />
-    <a name="lbAB" id="lbAB">&nbsp;</a>
+Content-type: text/html
 
-    <h2>NAME</h2>encode_keychange - produce the KeyChange string for SNMPv3 <a name="lbAC" id="lbAC">&nbsp;</a>
+<HTML><HEAD><TITLE>Manpage of encode_keychange</TITLE>
+</HEAD><BODY>
+<H1>encode_keychange</H1>
+Section: Net-SNMP (1)<BR>Updated: 16 Nov 2006<BR><A HREF="#index">Index</A>
+<A HREF="http://localhost/cgi-bin/man/man2html">Return to Main Contents</A><HR>
 
-    <h2>SYNOPSIS</h2><b>encode_keychange</b> -t md5|sha1 [<i>OPTIONS</i>] <a name="lbAD" id="lbAD">&nbsp;</a>
 
-    <h2>DESCRIPTION</h2><b>encode_keychange</b> produces a KeyChange string using the old and new passphrases as described in
-    Section 5 of RFC 2274 "User-based Security Model (USM) for version 3 of the Simple Network Management Protocol (SNMPv3)".
-    <b>-t</b> option is mandatory and specifies the hash transform type to use.
+<A NAME="lbAB">&nbsp;</A>
+<H2>NAME</H2>
 
-    <p>The transform is used to convert passphrase to master key for a given user (Ku), convert master key to the localized key
-    (Kul), and to hash the old Kul with the random bits.</p>
+encode_keychange - produce the KeyChange string for SNMPv3
+<A NAME="lbAC">&nbsp;</A>
+<H2>SYNOPSIS</H2>
 
-    <p>Passphrases are obtained by examining a number of sources until success (in order listed):</p>
+<B>encode_keychange </B>
 
-    <dl compact="compact">
-      <dd>command line options (see <b>-N</b> and <b>-O</b> options below);</dd>
+-t md5|sha1
+[<I>OPTIONS</I>]
+<A NAME="lbAD">&nbsp;</A>
+<H2>DESCRIPTION</H2>
 
-      <dd>the file <b>$HOME/.snmp/passphrase.ek</b> which should only contain two lines with old and new passphrase;</dd>
+<B>encode_keychange</B>
 
-      <dd>standard input <b>-or-</b> user input from the terminal.</dd>
-    </dl>
+produces a KeyChange string using the old and new passphrases 
+as described in Section 5 of RFC 2274 &quot;User-based Security Model (USM) for 
+version 3 of the Simple Network Management Protocol (SNMPv3)&quot;. <B>-t</B>
+option is mandatory and specifies the hash transform type to use.
+<P>
+The transform is used to convert passphrase to master key for a given
+user (Ku), convert master key to the localized key (Kul), and to hash the 
+old Kul with the random bits. 
+<P>
+Passphrases are obtained by examining a number of sources until success
+(in order listed):
+<DL COMPACT>
+<DT><DD>
+command line options (see 
+<B>-N</B>
 
-    <p><a name="lbAE" id="lbAE">&nbsp;</a></p>
+and
+<B>-O</B>
 
-    <h2>OPTIONS</h2>
+options below);
+<DT><DD>
+the file 
+<B>$HOME/.snmp/passphrase.ek</B>
 
-    <dl compact="compact">
-      <dt><b>-E</b> [0x]&lt;<i>engineID</i>&gt; EngineID used for Kul generation.</dt>
+which should only contain two lines with old and new passphrase;
+<DT><DD>
+standard input <B>-or-</B>  user input from the terminal.
+</DL>
+<P>
 
-      <dd>&lt;<i>engineID</i>&gt; is intepreted as a hex string when preceeded by 0x, otherwise it is treated as a text string.
-      If no &lt;<i>engineID</i>&gt; is specified, it is constructed from the first IP address for the local host.</dd>
+<P>
+<A NAME="lbAE">&nbsp;</A>
+<H2>OPTIONS</H2>
 
-      <dt><b>-f</b></dt>
+<DL COMPACT>
+<DT><B>-E</B> [0x]&lt;<I>engineID</I>&gt; EngineID used for Kul generation.<DD>
+&lt;<I>engineID</I>&gt; is intepreted as a hex string when preceeded by 0x,
+otherwise it is treated as a text string. If no &lt;<I>engineID</I>&gt; is
+specified, it is constructed from the first IP address for the local
+host.
+<DT><B>-f</B><DD>
+Force passphrases to be read from standard input.
+<DT><B>-h</B><DD>
+Display the help message.
+<DT><B>-N</B> &quot;&lt;<I>new_passphrase</I>&gt;&quot;<DD>
+Passphrase used to generate the new Ku.
+<DT><B>-O</B> &quot;&lt;<I>old_passphrase</I>&gt;&quot;<DD>
+Passphrase used to generate the old Ku.
+<DT><B>-P</B><DD>
+Turn off the prompt for passphrases when getting data from standard input.
+<DT><B>-v</B><DD>
+Be verbose.
+<DT><B>-V</B><DD>
+Echo passphrases to terminal.
+</DL>
+<P>
 
-      <dd>Force passphrases to be read from standard input.</dd>
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<A NAME="lbAF">&nbsp;</A>
+<H2>SEE ALSO</H2>
 
-      <dt><b>-h</b></dt>
+The localized key method is defined in RFC 2274, Sections 2.6 and A.2, and
+originally documented in
+<DL COMPACT>
+<DT><DD>
+U. Blumenthal, N. C. Hien, B. Wijnen,
+&quot;Key Derivation for Network Management Applications&quot;,
+IEEE Network Magazine, April/May issue, 1997.
+<P>
+</DL>
 
-      <dd>Display the help message.</dd>
-
-      <dt><b>-N</b> "&lt;<i>new_passphrase</i>&gt;"</dt>
-
-      <dd>Passphrase used to generate the new Ku.</dd>
-
-      <dt><b>-O</b> "&lt;<i>old_passphrase</i>&gt;"</dt>
-
-      <dd>Passphrase used to generate the old Ku.</dd>
-
-      <dt><b>-P</b></dt>
-
-      <dd>Turn off the prompt for passphrases when getting data from standard input.</dd>
-
-      <dt><b>-v</b></dt>
-
-      <dd>Be verbose.</dd>
-
-      <dt><b>-V</b></dt>
-
-      <dd>Echo passphrases to terminal.</dd>
-    </dl>
-
-    <p><br />
-    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <a name="lbAF" id=
-    "lbAF">&nbsp;</a></p>
-
-    <h2>SEE ALSO</h2>The localized key method is defined in RFC 2274, Sections 2.6 and A.2, and originally documented in
-
-    <dl compact="compact">
-      <dd>U. Blumenthal, N. C. Hien, B. Wijnen, "Key Derivation for Network Management Applications", IEEE Network Magazine,
-      April/May issue, 1997.</dd>
-    </dl>
-    <hr />
-    <a name="index" id="index">&nbsp;</a>
-
-    <h2>Index</h2>
-
-    <dl>
-      <dt><a href="#lbAB">NAME</a></dt>
-
-      <dt><a href="#lbAC">SYNOPSIS</a></dt>
-
-      <dt><a href="#lbAD">DESCRIPTION</a></dt>
-
-      <dt><a href="#lbAE">OPTIONS</a></dt>
-
-      <dt><a href="#lbAF">SEE ALSO</a></dt>
-    </dl>
-    <hr />
-    This document was created by <a href="http://localhost/cgi-bin/man/man2html">man2html</a>, using the manual pages.<br />
-    Time: 13:12:00 GMT, September 23, 2007
-<!-- CONTENT END -->
-<!--#include virtual="/page-bottom.html" -->
-
+<HR>
+<A NAME="index">&nbsp;</A><H2>Index</H2>
+<DL>
+<DT><A HREF="#lbAB">NAME</A><DD>
+<DT><A HREF="#lbAC">SYNOPSIS</A><DD>
+<DT><A HREF="#lbAD">DESCRIPTION</A><DD>
+<DT><A HREF="#lbAE">OPTIONS</A><DD>
+<DT><A HREF="#lbAF">SEE ALSO</A><DD>
+</DL>
+<HR>
+This document was created by
+<A HREF="http://localhost/cgi-bin/man/man2html">man2html</A>,
+using the manual pages.<BR>
+Time: 19:05:39 GMT, September 28, 2009
+</BODY>
+</HTML>

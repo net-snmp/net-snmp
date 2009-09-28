@@ -1,356 +1,271 @@
-<!--#set var="section" value="documentation" -->
-<!--#include virtual="/page-top.html" -->
-<!-- CONTENT START -->
-    <h1>MIB2C.CONF</h1>Section: Net-SNMP (5)<br />
-    Updated: 28 Apr 2004<br />
-    <a href="#index">Index</a> <a href="../index.html">Return to Main Contents</a>
-    <hr />
-    <a name="lbAB" id="lbAB">&nbsp;</a>
-
-    <h2>NAME</h2>mib2c.conf -- How to write mib2c.conf files to do ANYTHING based on MIB input. <a name="lbAC" id=
-    "lbAC">&nbsp;</a>
-
-    <h2>SYNOPSIS</h2>% cat &gt; mib2c.test.conf &lt;&lt; EOF @foreach $t table@<br />
-    &nbsp;&nbsp;Starting&nbsp;table&nbsp;$t<br />
-    &nbsp;&nbsp;@foreach&nbsp;$c&nbsp;column@<br />
-    &nbsp;&nbsp;&nbsp;&nbsp;echo&nbsp;$t&nbsp;has&nbsp;column&nbsp;$c&nbsp;which&nbsp;has&nbsp;a&nbsp;syntax&nbsp;of&nbsp;$c.syntax<br />
-
-    &nbsp;&nbsp;@end@
-
-    <p>@end@ EOF</p>
-
-    <p>% mib2c -c mib2c.test.conf internet <a name="lbAD" id="lbAD">&nbsp;</a></p>
-
-    <h2>DESCRIPTION</h2>The mib2c.conf script language is a MIB-particular language designed to easily process MIB nodes in ways
-    that you want. mib2c is a misnomer (for historical purposes), because you can produce anything (not just C code). Look in the
-    Net-SNMP "local" directory for a bunch of example mib2c.*.conf files and behold the power before you. <a name="lbAE" id=
-    "lbAE">&nbsp;</a>
-
-    <h2>COMMANDS</h2>
-
-    <p>All commands within mib2c.conf files are embraced by @ signs. Anything with an @ sign at the front and back of the line is
-    generally supposed to be a mib2c specific command. These are detailed here:</p>
-
-    <dl compact="compact">
-      <dt>@open FILE@</dt>
-
-      <dd>writes generated output to FILE note that for file specifications, opening '-' will print to stdout.</dd>
-
-      <dt>@append FILE@</dt>
-
-      <dd>appends the given FILE</dd>
-
-      <dt>@close FILE@</dt>
-
-      <dd>closes the given FILE</dd>
-
-      <dt>@push@</dt>
-
-      <dd>save the current outputs, then clear outputs. Use with @open@ and @pop@ to write to a new file without interfering with
-      current outputs.</dd>
-
-      <dt>@pop@</dt>
-
-      <dd>pop up the process() stack one level. Use after a @push@ to return to the previous set of open files.</dd>
-
-      <dt>@foreach $VAR scalar@</dt>
-
-      <dd>repeat iterate over code until @end@ setting $VAR to all known scalars</dd>
-
-      <dt>@foreach $VAR table@</dt>
-
-      <dd>repeat iterate over code until @end@ setting $VAR to all known tables</dd>
-
-      <dt>@foreach $VAR column@</dt>
-
-      <dd>repeat iterate over code until @end@ setting $VAR to all known columns within a given table. Obviously this must be
-      called within a foreach-table clause.</dd>
-
-      <dt>@foreach $VAR nonindex@</dt>
-
-      <dd>repeat iterate over code until @end@ setting $VAR to all known non-index columns within a given table. Obviously this
-      must be called within a foreach-table clause.</dd>
-
-      <dt>@foreach $VAR internalindex@</dt>
-
-      <dd>repeat iterate over code until @end@ setting $VAR to all known internal index columns within a given table. Obviously
-      this must be called within a foreach-table clause.</dd>
-
-      <dt>@foreach $VAR externalindex@</dt>
-
-      <dd>repeat iterate over code until @end@ setting $VAR to all known external index columns within a given table. Obviously
-      this must be called within a foreach-table clause.</dd>
-
-      <dt>@foreach $VAR index@</dt>
-
-      <dd>repeat iterate over code until @end@ setting $VAR to all known indexes within a given table. Obviously this must be
-      called within a foreach-table clause.</dd>
-
-      <dt>@foreach $VAR notifications@</dt>
-
-      <dd>repeat iterate over code until @end@ setting $VAR to all known notifications</dd>
-
-      <dt>@foreach $VAR varbinds@</dt>
-
-      <dd>repeat iterate over code until @end@ setting $VAR to all known varbinds Obviously this must be called within a
-      foreach-notifications clause.</dd>
-
-      <dt>@foreach $LABEL, $VALUE enum@</dt>
-
-      <dd>repeat iterate over code until @end@ setting $LABEL and $VALUE to the label and values from the enum list.</dd>
-
-      <dt>@foreach $RANGE_START, $RANGE_END range NODE@</dt>
-
-      <dd>repeat iterate over code until @end@ setting $RANGE_START and $RANGE_END to the legal accepted range set for a given
-      mib NODE.</dd>
-
-      <dt>@foreach $var stuff a b c d@</dt>
-
-      <dd>repeat iterate over values a, b, c, d as assigned generically (ie, the values are taken straight from the list with no
-      mib-expansion, etc).</dd>
-
-      <dt>@while expression@</dt>
-
-      <dd>repeat iterate over code until the expression is false</dd>
-
-      <dt>@eval $VAR = expression@</dt>
-
-      <dd>evaluates expression and assigns the results to $VAR. This is not a full perl eval, but sort of a ""psuedo"" eval
-      useful for simple expressions while keeping the same variable name space. See below for a full-blown export to perl.</dd>
-
-      <dt>@perleval STUFF@</dt>
-
-      <dd>evaluates STUFF directly in perl. Note that all mib2c variables interpereted within .conf files are in $vars{NAME} and
-      that a warning will be printed if STUFF does not return 0. (adding a 'return 0;' at the end of STUFF is a workaround.</dd>
-
-      <dt>@startperl@</dt>
-
-      <dt>@endperl@</dt>
-
-      <dd>treats everything between these tags as perl code, and evaluates it.</dd>
-
-      <dt>@next@</dt>
-
-      <dd>restart foreach; should only be used inside a conditional. skips out of current conditional, then continues to skip to
-      end for the current foreach clause.</dd>
-
-      <dt>@if expression@</dt>
-
-      <dd>evaluates expression, and if expression is true processes contained part until appropriate @end@ is reached. If the
-      expression is false, the next @elsif expression@ expression (if it exists) will be evaluated, until an expression is true.
-      If no such expression exists and an @else@ clause is found, it will be evaluated.</dd>
-
-      <dt>@ifconf file@</dt>
-
-      <dd>If the specified file can be found in the conf file search path, and if found processes contained part until an
-      appropriate @end@ is found. As with a regular @if expression@, @elsif expression@ and @else@ can be used.</dd>
-
-      <dt>@ifdir dir@</dt>
-
-      <dd>If the specified directory exists, process contained part until an appropriate @end@ is found. As with a regular @if
-      expression@, @elsif expression@ and @else@ can be used.</dd>
-
-      <dt>@define NAME@</dt>
-
-      <dt>@enddefine@</dt>
-
-      <dd>Memorizes ""stuff"" between the define and enddefine tags for later calling as NAME by @calldefine NAME@.</dd>
-
-      <dt>@calldefine NAME@</dt>
-
-      <dd>Executes stuff previously memorized as NAME.</dd>
-
-      <dt>@printf expression stuff1, stuff2, ...@</dt>
-
-      <dd>Like all the other printf's you know and love.</dd>
-
-      <dt>@run FILE@</dt>
-
-      <dd>Sources the contents of FILE as a mib2c file, but does not affect current files opened.</dd>
-
-      <dt>@include FILE@</dt>
-
-      <dd>Sources the contents of FILE as a mib2c file and appends its output to the current output.</dd>
-
-      <dt>@prompt $var QUESTION@</dt>
-
-      <dd>Presents the user with QUESTION, expects a response and puts it in $var</dd>
-
-      <dt>@print STUFF@</dt>
-
-      <dd>Prints stuff directly to the users screen (ie, not to where normal mib2c output goes)</dd>
-
-      <dt>@quit@</dt>
-
-      <dd>Bail out (silently)</dd>
-
-      <dt>@exit@</dt>
-
-      <dd>Bail out!</dd>
-    </dl><a name="lbAF" id="lbAF">&nbsp;</a>
-
-    <h2>VARIABLES</h2>
-
-    <p>Variables in the mib2c language look very similar to perl variables, in that they start with a "$". They can be used for
-    anything you want, but most typically they'll hold mib node names being processed by @foreach ...@ clauses.</p>
-
-    <p>They also have a special properties when they are a mib node, such that adding special suffixes to them will allow them to
-    be interpreted in some fashion. The easiest way to understand this is through an example. If the variable 'x' contained the
-    word 'ifType' then some magical things happen. In mib2c output, anytime $x is seen it is replaced with "ifType". Additional
-    suffixes can be used to get other aspects of that mib node though. If $x.objectID is seen, it'll be replaced by the OID for
-    ifType: ".1.3.6.1.2.1.2.2.1.3". Other suffixes that can appear after a dot are listed below.</p>
-
-    <p>One last thing: you can use things like $vartext immediately ending in some other text, you can use {}s to get proper
-    expansion of only part of the mib2c input. IE, $xtext will produce "$xtext", but ${x}text will produce "ifTypetext"
-    instead.</p>
-
-    <dl compact="compact">
-      <dt>$var.uc</dt>
-
-      <dd>all upper case version of $var</dd>
-
-      <dt>$var.objectID</dt>
-
-      <dd>dotted, fully-qualified, and numeric OID</dd>
-
-      <dt>$var.commaoid</dt>
-
-      <dd>comma separated numeric OID for array initialization</dd>
-
-      <dt>$var.oidlength</dt>
-
-      <dd>length of the oid</dd>
-
-      <dt>$var.subid</dt>
-
-      <dd>last number component of oid</dd>
-
-      <dt>$var.module</dt>
-
-      <dd>MIB name that the object comes from</dd>
-
-      <dt>$var.parent</dt>
-
-      <dd>contains the label of the parent node of $var.</dd>
-
-      <dt>$var.isscalar</dt>
-
-      <dd>returns 1 if var contains the name of a scalar</dd>
-
-      <dt>$var.iscolumn</dt>
-
-      <dd>returns 1 if var contains the name of a column</dd>
-
-      <dt>$var.children</dt>
-
-      <dd>returns 1 if var has children</dd>
-
-      <dt>$var.perltype</dt>
-
-      <dd>node's perl SYNTAX ($SNMP::MIB{node}{'syntax'})</dd>
-
-      <dt>$var.type</dt>
-
-      <dd>node's ASN_XXX type (Net-SNMP specific #define)</dd>
-
-      <dt>$var.decl</dt>
-
-      <dd>C data type (char, u_long, ...)</dd>
-
-      <dt>$var.readable</dt>
-
-      <dd>1 if an object is readable, 0 if not</dd>
-
-      <dt>$var.settable</dt>
-
-      <dd>1 if an object is writable, 0 if not</dd>
-
-      <dt>$var.creatable</dt>
-
-      <dd>1 if a column object can be created as part of a new row, 0 if not</dd>
-
-      <dt>$var.noaccess</dt>
-
-      <dd>1 if not-accessible, 0 if not</dd>
-
-      <dt>$var.accessible</dt>
-
-      <dd>1 if accessible, 0 if not</dd>
-
-      <dt>$var.rowstatus</dt>
-
-      <dd>1 if an object is a RowStatus object, 0 if not 'settable', 'creatable' and 'rowstatus' can also be used with table
-      variables to indicate whether it contains writable, creatable or RowStatus column objects</dd>
-
-      <dt>$var.hasdefval</dt>
-
-      <dd>returns 1 if var has a DEFVAL clause</dd>
-
-      <dt>$var.defval</dt>
-
-      <dd>node's DEFVAL</dd>
-
-      <dt>$var.hashint</dt>
-
-      <dd>returns 1 if var has a HINT clause</dd>
-
-      <dt>$var.hint</dt>
-
-      <dd>node's HINT</dd>
-
-      <dt>$var.ranges</dt>
-
-      <dd>returns 1 if var has a value range defined</dd>
-
-      <dt>$var.enums</dt>
-
-      <dd>returns 1 if var has enums defined for it.</dd>
-
-      <dt>$var.access</dt>
-
-      <dd>node's access type</dd>
-
-      <dt>$var.status</dt>
-
-      <dd>node's status</dd>
-
-      <dt>$var.syntax</dt>
-
-      <dd>node's syntax</dd>
-
-      <dt>$var.reference</dt>
-
-      <dd>node's reference</dd>
-
-      <dt>$var.description</dt>
-
-      <dd>node's description</dd>
-    </dl><a name="lbAG" id="lbAG">&nbsp;</a>
-
-    <h2>SEE ALSO</h2>
-
-    <p><a href="mib2c.html">mib2c</a>(1)</p>
-    <hr />
-    <a name="index" id="index">&nbsp;</a>
-
-    <h2>Index</h2>
-
-    <dl>
-      <dt><a href="#lbAB">NAME</a></dt>
-
-      <dt><a href="#lbAC">SYNOPSIS</a></dt>
-
-      <dt><a href="#lbAD">DESCRIPTION</a></dt>
-
-      <dt><a href="#lbAE">COMMANDS</a></dt>
-
-      <dt><a href="#lbAF">VARIABLES</a></dt>
-
-      <dt><a href="#lbAG">SEE ALSO</a></dt>
-    </dl>
-    <hr />
-    This document was created by <a href="http://localhost/cgi-bin/man/man2html">man2html</a>, using the manual pages.<br />
-    Time: 13:12:01 GMT, September 23, 2007
-<!-- CONTENT END -->
-<!--#include virtual="/page-bottom.html" -->
-
+Content-type: text/html
+
+<HTML><HEAD><TITLE>Manpage of MIB2C.CONF</TITLE>
+</HEAD><BODY>
+<H1>MIB2C.CONF</H1>
+Section: Net-SNMP (5)<BR>Updated: 28 Apr 2004<BR><A HREF="#index">Index</A>
+<A HREF="http://localhost/cgi-bin/man/man2html">Return to Main Contents</A><HR>
+
+
+<A NAME="lbAB">&nbsp;</A>
+<H2>NAME</H2>
+
+mib2c.conf -- How to write mib2c.conf files to do ANYTHING based on MIB input.
+<A NAME="lbAC">&nbsp;</A>
+<H2>SYNOPSIS</H2>
+
+% cat &gt; mib2c.test.conf  &lt;&lt; EOF
+@foreach $t table@
+<BR>&nbsp;&nbsp;Starting&nbsp;table&nbsp;$t
+<BR>&nbsp;&nbsp;@foreach&nbsp;$c&nbsp;column@
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;echo&nbsp;$t&nbsp;has&nbsp;column&nbsp;$c&nbsp;which&nbsp;has&nbsp;a&nbsp;syntax&nbsp;of&nbsp;$c.syntax
+<BR>&nbsp;&nbsp;@end@
+<P>
+@end@
+EOF
+<P>
+% mib2c -c mib2c.test.conf internet
+<A NAME="lbAD">&nbsp;</A>
+<H2>DESCRIPTION</H2>
+
+The mib2c.conf script language is a MIB-particular language designed
+to easily process MIB nodes in ways that you want.  mib2c is a
+misnomer (for historical purposes), because you can produce anything
+(not just C code).  Look in the Net-SNMP &quot;local&quot; directory for a bunch
+of example mib2c.*.conf files and behold the power before you.
+<A NAME="lbAE">&nbsp;</A>
+<H2>COMMANDS</H2>
+
+<P>
+
+All commands within mib2c.conf files are embraced by @ signs.
+Anything with an @ sign at the front and back of the line is generally
+supposed to be a mib2c specific command.  These are detailed here:
+<DL COMPACT>
+<DT>@open FILE@<DD>
+writes generated output to FILE
+note that for file specifications, opening '-' will print to stdout.
+<DT>@append FILE@<DD>
+appends the given FILE
+<DT>@close FILE@<DD>
+closes the given FILE
+<DT>@push@<DD>
+save the current outputs, then clear outputs. Use with @open@
+and @pop@ to write to a new file without interfering with current
+outputs.
+<DT>@pop@<DD>
+pop up the process() stack one level. Use after a @push@ to return to
+the previous set of open files.
+<DT>@foreach $VAR scalar@<DD>
+repeat iterate over code until @end@ setting $VAR to all known scalars
+<DT>@foreach $VAR table@<DD>
+repeat iterate over code until @end@ setting $VAR to all known tables
+<DT>@foreach $VAR column@<DD>
+repeat iterate over code until @end@ setting $VAR to all known
+columns within a given table.  Obviously this must be called
+within a foreach-table clause.
+<DT>@foreach $VAR nonindex@<DD>
+repeat iterate over code until @end@ setting $VAR to all known
+non-index columns within a given table.  Obviously this must be called
+within a foreach-table clause.
+<DT>@foreach $VAR internalindex@<DD>
+repeat iterate over code until @end@ setting $VAR to all known internal
+index columns within a given table.  Obviously this must be called
+within a foreach-table clause.
+<DT>@foreach $VAR externalindex@<DD>
+repeat iterate over code until @end@ setting $VAR to all known external
+index columns within a given table.  Obviously this must be called
+within a foreach-table clause.
+<DT>@foreach $VAR index@<DD>
+repeat iterate over code until @end@ setting $VAR to all known
+indexes within a given table.  Obviously this must be called
+within a foreach-table clause.
+<DT>@foreach $VAR notifications@<DD>
+repeat iterate over code until @end@ setting $VAR to all known notifications
+<DT>@foreach $VAR varbinds@<DD>
+repeat iterate over code until @end@ setting $VAR to all known varbinds
+Obviously this must be called within a foreach-notifications clause.
+<DT>@foreach $LABEL, $VALUE enum@<DD>
+repeat iterate over code until @end@ setting $LABEL and $VALUE
+to the label and values from the enum list.
+<DT>@foreach $RANGE_START, $RANGE_END range NODE@<DD>
+repeat iterate over code until @end@ setting $RANGE_START and $RANGE_END
+to the legal accepted range set for a given mib NODE.
+<DT>@foreach $var stuff a b c d@<DD>
+repeat iterate over values a, b, c, d as assigned generically
+(ie, the values are taken straight from the list with no
+mib-expansion, etc).
+<DT>@while expression@<DD>
+repeat iterate over code until the expression is false
+<DT>@eval $VAR = expression@<DD>
+evaluates expression and assigns the results to $VAR.  This is
+not a full perl eval, but sort of a &quot;&quot;psuedo&quot;&quot; eval useful for
+simple expressions while keeping the same variable name space.
+See below for a full-blown export to perl.
+<DT>@perleval STUFF@<DD>
+evaluates STUFF directly in perl.  Note that all mib2c variables
+interpereted within .conf files are in $vars{NAME} and that
+a warning will be printed if STUFF does not return 0. (adding a
+'return 0;' at the end of STUFF is a workaround.
+<DT>@startperl@<DD>
+<DT>@endperl@<DD>
+treats everything between these tags as perl code, and evaluates it.
+<DT>@next@<DD>
+restart foreach; should only be used inside a conditional.
+skips out of current conditional, then continues to skip to
+end for the current foreach clause.
+<DT>@if expression@<DD>
+evaluates expression, and if expression is true processes
+contained part until appropriate @end@ is reached.  If the
+expression is false, the next @elsif expression@ expression
+(if it exists) will be evaluated, until an expression is
+true. If no such expression exists and an @else@
+clause is found, it will be evaluated.
+<DT>@ifconf file@<DD>
+If the specified file can be found in the conf file search path,
+and if found processes contained part until an appropriate @end@ is
+found. As with a regular @if expression@, @elsif expression@ and
+@else@ can be used.
+<DT>@ifdir dir@<DD>
+If the specified directory exists, process contained part until an
+appropriate @end@ is found. As with a regular @if expression@,
+@elsif expression@ and @else@ can be used.
+<DT>@define NAME@<DD>
+<DT>@enddefine@<DD>
+Memorizes &quot;&quot;stuff&quot;&quot; between the define and enddefine tags for
+later calling as NAME by @calldefine NAME@.
+<DT>@calldefine NAME@<DD>
+Executes stuff previously memorized as NAME.
+<DT>@printf expression stuff1, stuff2, ...@<DD>
+Like all the other printf's you know and love.
+<DT>@run FILE@<DD>
+Sources the contents of FILE as a mib2c file,
+but does not affect current files opened.
+<DT>@include FILE@<DD>
+Sources the contents of FILE as a mib2c file and appends its
+output to the current output.
+<DT>@prompt $var QUESTION@<DD>
+Presents the user with QUESTION, expects a response and puts it in $var
+<DT>@print STUFF@<DD>
+Prints stuff directly to the users screen (ie, not to where
+normal mib2c output goes)
+<DT>@quit@<DD>
+Bail out (silently)
+<DT>@exit@<DD>
+Bail out!
+</DL>
+<A NAME="lbAF">&nbsp;</A>
+<H2>VARIABLES</H2>
+
+<P>
+
+Variables in the mib2c language look very similar to perl variables,
+in that they start with a &quot;$&quot;.  They can be used for anything you
+want, but most typically they'll hold mib node names being processed
+by @foreach ...@ clauses.
+<P>
+
+They also have a special properties when they are a mib node, such that
+adding special suffixes to them will allow them to be interpreted in
+some fashion.  The easiest way to understand this is through an
+example.  If the variable 'x' contained the word 'ifType' then some
+magical things happen.  In mib2c output, anytime $x is seen it is
+replaced with &quot;ifType&quot;.  Additional suffixes can be used to get other
+aspects of that mib node though.  If $x.objectID is seen, it'll be
+replaced by the OID for ifType: &quot;.1.3.6.1.2.1.2.2.1.3&quot;.  Other
+suffixes that can appear after a dot are listed below.
+<P>
+
+One last thing: you can use things like $vartext immediately ending in
+some other text, you can use {}s to get proper expansion of only part
+of the mib2c input.  IE, $xtext will produce &quot;$xtext&quot;, but ${x}text
+will produce &quot;ifTypetext&quot; instead.
+<DL COMPACT>
+<DT>$var.uc<DD>
+all upper case version of $var
+<DT>$var.objectID<DD>
+dotted, fully-qualified, and numeric OID
+<DT>$var.commaoid<DD>
+comma separated numeric OID for array initialization
+<DT>$var.oidlength<DD>
+length of the oid
+<DT>$var.subid<DD>
+last number component of oid
+<DT>$var.module<DD>
+MIB name that the object comes from
+<DT>$var.parent<DD>
+contains the label of the parent node of $var.
+<DT>$var.isscalar<DD>
+returns 1 if var contains the name of a scalar
+<DT>$var.iscolumn<DD>
+returns 1 if var contains the name of a column
+<DT>$var.children<DD>
+returns 1 if var has children
+<DT>$var.perltype<DD>
+node's perl SYNTAX ($SNMP::MIB{node}{'syntax'})
+<DT>$var.type<DD>
+node's ASN_XXX type (Net-SNMP specific #define)
+<DT>$var.decl<DD>
+C data type (char, u_long, ...)
+<DT>$var.readable<DD>
+1 if an object is readable, 0 if not
+<DT>$var.settable<DD>
+1 if an object is writable, 0 if not
+<DT>$var.creatable<DD>
+1 if a column object can be created as part of a new row, 0 if not
+<DT>$var.noaccess<DD>
+1 if not-accessible, 0 if not
+<DT>$var.accessible<DD>
+1 if accessible, 0 if not
+<DT>$var.rowstatus<DD>
+1 if an object is a RowStatus object, 0 if not
+'settable', 'creatable' and 'rowstatus' can also be used with table variables
+to indicate whether it contains writable, creatable or RowStatus column objects
+<DT>$var.hasdefval<DD>
+returns 1 if var has a DEFVAL clause
+<DT>$var.defval<DD>
+node's DEFVAL
+<DT>$var.hashint<DD>
+returns 1 if var has a HINT clause
+<DT>$var.hint<DD>
+node's HINT
+<DT>$var.ranges<DD>
+returns 1 if var has a value range defined
+<DT>$var.enums<DD>
+returns 1 if var has enums defined for it.
+<DT>$var.access<DD>
+node's access type
+<DT>$var.status<DD>
+node's status
+<DT>$var.syntax<DD>
+node's syntax
+<DT>$var.reference<DD>
+node's reference
+<DT>$var.description<DD>
+node's description
+</DL>
+<A NAME="lbAG">&nbsp;</A>
+<H2>SEE ALSO</H2>
+
+<P>
+
+<A HREF="http://localhost/cgi-bin/man/man2html?1+mib2c">mib2c</A>(1)
+<P>
+
+<HR>
+<A NAME="index">&nbsp;</A><H2>Index</H2>
+<DL>
+<DT><A HREF="#lbAB">NAME</A><DD>
+<DT><A HREF="#lbAC">SYNOPSIS</A><DD>
+<DT><A HREF="#lbAD">DESCRIPTION</A><DD>
+<DT><A HREF="#lbAE">COMMANDS</A><DD>
+<DT><A HREF="#lbAF">VARIABLES</A><DD>
+<DT><A HREF="#lbAG">SEE ALSO</A><DD>
+</DL>
+<HR>
+This document was created by
+<A HREF="http://localhost/cgi-bin/man/man2html">man2html</A>,
+using the manual pages.<BR>
+Time: 19:05:39 GMT, September 28, 2009
+</BODY>
+</HTML>

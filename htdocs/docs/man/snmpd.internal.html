@@ -1,165 +1,182 @@
-<!--#set var="section" value="documentation" -->
-<!--#include virtual="/page-top.html" -->
-<!-- CONTENT START -->
-    <h1>SNMPD.INTERNAL</h1>Section: Net-SNMP (5)<br />
-    Updated: 08 Feb 2002<br />
-    <a href="#index">Index</a> <a href="../index.html">Return to Main Contents</a>
-    <hr />
-    <a name="lbAB" id="lbAB">&nbsp;</a>
+Content-type: text/html
 
-    <h2>NAME</h2>snmpd.internal - internal configuration of the Net-SNMP agent <a name="lbAC" id="lbAC">&nbsp;</a>
+<HTML><HEAD><TITLE>Manpage of SNMPD.INTERNAL</TITLE>
+</HEAD><BODY>
+<H1>SNMPD.INTERNAL</H1>
+Section: Net-SNMP (5)<BR>Updated: 08 Feb 2002<BR><A HREF="#index">Index</A>
+<A HREF="http://localhost/cgi-bin/man/man2html">Return to Main Contents</A><HR>
 
-    <h2>DESCRIPTION</h2>The <i><a href="snmpd.conf.html">snmpd.conf</a>(5)</i> man page defines the syntax and behaviour of the
-    main configuration directives that can be used to control the operation of the Net-SNMP agent, and the management information
-    it provides.
 
-    <p>However there are several other configuration directives (many of which, though not all, start with a leading underscore)
-    that are recognised by the agent. These are typically used to retain configuration across agent restarts, and are not
-    intended for direct user access. This man page list these directives, giving a brief indication of where they are used. For
-    full details - see the relevant source files. If you can't follow that source, you probably shouldn't be fiddling with these
-    directives! <a name="lbAD" id="lbAD">&nbsp;</a></p>
+<A NAME="lbAB">&nbsp;</A>
+<H2>NAME</H2>
 
-    <h2>AGENT BEHAVIOUR</h2>
+snmpd.internal - internal configuration of the Net-SNMP agent
+<A NAME="lbAC">&nbsp;</A>
+<H2>DESCRIPTION</H2>
 
-    <dl compact="compact">
-      <dt>quit</dt>
-    </dl><a name="lbAE" id="lbAE">&nbsp;</a>
+The
+<I><A HREF="http://localhost/cgi-bin/man/man2html?5+snmpd.conf">snmpd.conf</A>(5)</I>
 
-    <h2>ACCESS CONTROL</h2><a name="lbAF" id="lbAF">&nbsp;</a>
+man page defines the syntax and behaviour of the main
+configuration directives that can be used to control the
+operation of the Net-SNMP agent, and the management information
+it provides.
+<P>
 
-    <h3>VACM Configuration</h3>
+However there are several other configuration directives
+(many of which, though not all, start with a leading underscore)
+that are recognised by the agent.  These are typically used
+to retain configuration across agent restarts, and are not
+intended for direct user access.
+This man page list these directives, giving a brief indication
+of where they are used.  For full details - see the relevant source
+files.  If you can't follow that source, you probably shouldn't
+be fiddling with these directives!
+<A NAME="lbAD">&nbsp;</A>
+<H2>AGENT BEHAVIOUR</H2>
 
-    <dl compact="compact">
-      <dt>vacmView / vacmGroup / vacmAccess</dt>
+<DL COMPACT>
+<DT>quit<DD>
 
-      <dd>These directives are used to retain dynamically configured access control settings.</dd>
-    </dl><a name="lbAG" id="lbAG">&nbsp;</a>
 
-    <h2>SYSTEM INFORMATION</h2><a name="lbAH" id="lbAH">&nbsp;</a>
 
-    <h3>System Group</h3>
+</DL>
+<A NAME="lbAE">&nbsp;</A>
+<H2>ACCESS CONTROL</H2>
 
-    <dl compact="compact">
-      <dt>setSerialNo</dt>
 
-      <dd>This directive is used to implement the advisory lock object snmpSetSerialNo.</dd>
 
-      <dt>psyslocation / psyscontact / psysname</dt>
+<A NAME="lbAF">&nbsp;</A>
+<H3>VACM Configuration</H3>
 
-      <dd>These directives are used to retain dynamically configured system settings. They will be overridden by the
-      corresponding <i>sysLocation</i>, <i>sysContact</i> and <i>sysName</i> directives.</dd>
-    </dl><a name="lbAI" id="lbAI">&nbsp;</a>
+<DL COMPACT>
+<DT>vacmView / vacmGroup / vacmAccess  <DD>
+These directives are used to retain dynamically configured
+access control settings.
 
-    <h2>ACTIVE MONITORING</h2><a name="lbAJ" id="lbAJ">&nbsp;</a>
+</DL>
+<A NAME="lbAG">&nbsp;</A>
+<H2>SYSTEM INFORMATION</H2>
 
-    <h3>Notification Handling</h3>
+<A NAME="lbAH">&nbsp;</A>
+<H3>System Group</H3>
 
-    <dl compact="compact">
-      <dt>pauthtrapenable</dt>
+<DL COMPACT>
+<DT>setSerialNo <DD>
+This directive is used to implement the advisory lock object
+snmpSetSerialNo.
+<DT>psyslocation / psyscontact / psysname <DD>
+These directives are used to retain dynamically configured
+system settings.
+They will be overridden by the corresponding
+<I>sysLocation</I>, <I>sysContact</I> and <I>sysName</I> directives.
 
-      <dd>This directive is used to retain the dynamically configured setting of whether the agent should generate
-      authenticationFailure traps. It will be overridden by the corresponding <i>authtrapenable</i> directive.</dd>
 
-      <dt>snmpNotify*Table</dt>
 
-      <dt>targetAddr / targetParams</dt>
 
-      <dd>These directives are used to retain dynamically configured notification destination settings.</dd>
-    </dl><a name="lbAK" id="lbAK">&nbsp;</a>
 
-    <h3>DisMan Event MIB</h3>
+</DL>
+<A NAME="lbAI">&nbsp;</A>
+<H2>ACTIVE MONITORING</H2>
 
-    <dl compact="compact">
-      <dt>_mteE*Table, _mteOTable, _mteT*Table</dt>
+<A NAME="lbAJ">&nbsp;</A>
+<H3>Notification Handling</H3>
 
-      <dd>These directives are used to retain dynamically configured event, object and monitor trigger settings.</dd>
+<DL COMPACT>
+<DT>pauthtrapenable<DD>
+This directive is used to retain the dynamically configured
+setting of whether the agent should generate authenticationFailure
+traps.
+It will be overridden by the corresponding
+<I>authtrapenable</I> directive.
+<DT>snmpNotify*Table <DD>
+<DT>targetAddr / targetParams <DD>
+These directives are used to retain dynamically configured
+notification destination settings.
+</DL>
+<A NAME="lbAK">&nbsp;</A>
+<H3>DisMan Event MIB</H3>
 
-      <dt>mteObjectsTable / mteTriggerTable</dt>
+<DL COMPACT>
+<DT>_mteE*Table, _mteOTable, _mteT*Table <DD>
+These directives are used to retain dynamically configured
+event, object and monitor trigger settings.
+<DT>mteObjectsTable / mteTriggerTable <DD>
+These directives are for compatibility with the previous
+<I>disman/event-mib</I> implementation.
+</DL>
+<A NAME="lbAL">&nbsp;</A>
+<H3>DisMan Schedule MIB</H3>
 
-      <dd>These directives are for compatibility with the previous <i>disman/event-mib</i> implementation.</dd>
-    </dl><a name="lbAL" id="lbAL">&nbsp;</a>
+<DL COMPACT>
+<DT>_schedTable <DD>
+This directive is used to retain dynamically configured
+scheduled events.
+</DL>
+<A NAME="lbAM">&nbsp;</A>
+<H2>EXTENDING AGENT FUNCTIONALITY</H2>
 
-    <h3>DisMan Schedule MIB</h3>
+<A NAME="lbAN">&nbsp;</A>
+<H3>Arbitrary Extension Commands</H3>
 
-    <dl compact="compact">
-      <dt>_schedTable</dt>
+<DL COMPACT>
+<DT>extend-sh <DD>
+<DT>exec2 / sh2 / execFix2 <DD>
+These directives were defined by analogy with equivalent directives
+in the previous <I>ucd-snmp/extensible</I> implementation.
+They are deprecated, and should not be used.
 
-      <dd>This directive is used to retain dynamically configured scheduled events.</dd>
-    </dl><a name="lbAM" id="lbAM">&nbsp;</a>
 
-    <h2>EXTENDING AGENT FUNCTIONALITY</h2><a name="lbAN" id="lbAN">&nbsp;</a>
 
-    <h3>Arbitrary Extension Commands</h3>
 
-    <dl compact="compact">
-      <dt>extend-sh</dt>
 
-      <dt>exec2 / sh2 / execFix2</dt>
 
-      <dd>These directives were defined by analogy with equivalent directives in the previous <i>ucd-snmp/extensible</i>
-      implementation. They are deprecated, and should not be used.</dd>
-    </dl><a name="lbAO" id="lbAO">&nbsp;</a>
 
-    <h2>FILES</h2>/usr/local/etc/snmp/snmpd.conf <a name="lbAP" id="lbAP">&nbsp;</a>
+</DL>
+<A NAME="lbAO">&nbsp;</A>
+<H2>FILES</H2>
 
-    <h2>SEE ALSO</h2><a href="snmpconf.html">snmpconf</a>(1), <a href="snmpd.conf.html">snmpd.conf</a>(5), <a href=
-    "snmp.conf.html">snmp.conf</a>(5), <a href="snmp_config.html">snmp_config</a>(5), <a href="snmpd.html">snmpd</a>(8),
-    EXAMPLE.conf, <a href="read_config.html">read_config</a>(3).
-    <hr />
-    <a name="index" id="index">&nbsp;</a>
+/usr/local/etc/snmp/snmpd.conf
+<A NAME="lbAP">&nbsp;</A>
+<H2>SEE ALSO</H2>
 
-    <h2>Index</h2>
+<A HREF="http://localhost/cgi-bin/man/man2html?1+snmpconf">snmpconf</A>(1), <A HREF="http://localhost/cgi-bin/man/man2html?5+snmpd.conf">snmpd.conf</A>(5), <A HREF="http://localhost/cgi-bin/man/man2html?5+snmp.conf">snmp.conf</A>(5), <A HREF="http://localhost/cgi-bin/man/man2html?5+snmp_config">snmp_config</A>(5), <A HREF="http://localhost/cgi-bin/man/man2html?8+snmpd">snmpd</A>(8), EXAMPLE.conf, <A HREF="http://localhost/cgi-bin/man/man2html?3+read_config">read_config</A>(3).
 
-    <dl>
-      <dt><a href="#lbAB">NAME</a></dt>
 
-      <dt><a href="#lbAC">DESCRIPTION</a></dt>
 
-      <dt><a href="#lbAD">AGENT BEHAVIOUR</a></dt>
+<P>
 
-      <dt><a href="#lbAE">ACCESS CONTROL</a></dt>
-
-      <dd>
-        <dl>
-          <dt><a href="#lbAF">VACM Configuration</a></dt>
-        </dl>
-      </dd>
-
-      <dt><a href="#lbAG">SYSTEM INFORMATION</a></dt>
-
-      <dd>
-        <dl>
-          <dt><a href="#lbAH">System Group</a></dt>
-        </dl>
-      </dd>
-
-      <dt><a href="#lbAI">ACTIVE MONITORING</a></dt>
-
-      <dd>
-        <dl>
-          <dt><a href="#lbAJ">Notification Handling</a></dt>
-
-          <dt><a href="#lbAK">DisMan Event MIB</a></dt>
-
-          <dt><a href="#lbAL">DisMan Schedule MIB</a></dt>
-        </dl>
-      </dd>
-
-      <dt><a href="#lbAM">EXTENDING AGENT FUNCTIONALITY</a></dt>
-
-      <dd>
-        <dl>
-          <dt><a href="#lbAN">Arbitrary Extension Commands</a></dt>
-        </dl>
-      </dd>
-
-      <dt><a href="#lbAO">FILES</a></dt>
-
-      <dt><a href="#lbAP">SEE ALSO</a></dt>
-    </dl>
-    <hr />
-    This document was created by <a href="http://localhost/cgi-bin/man/man2html">man2html</a>, using the manual pages.<br />
-    Time: 13:12:01 GMT, September 23, 2007
-<!-- CONTENT END -->
-<!--#include virtual="/page-bottom.html" -->
-
+<HR>
+<A NAME="index">&nbsp;</A><H2>Index</H2>
+<DL>
+<DT><A HREF="#lbAB">NAME</A><DD>
+<DT><A HREF="#lbAC">DESCRIPTION</A><DD>
+<DT><A HREF="#lbAD">AGENT BEHAVIOUR</A><DD>
+<DT><A HREF="#lbAE">ACCESS CONTROL</A><DD>
+<DL>
+<DT><A HREF="#lbAF">VACM Configuration</A><DD>
+</DL>
+<DT><A HREF="#lbAG">SYSTEM INFORMATION</A><DD>
+<DL>
+<DT><A HREF="#lbAH">System Group</A><DD>
+</DL>
+<DT><A HREF="#lbAI">ACTIVE MONITORING</A><DD>
+<DL>
+<DT><A HREF="#lbAJ">Notification Handling</A><DD>
+<DT><A HREF="#lbAK">DisMan Event MIB</A><DD>
+<DT><A HREF="#lbAL">DisMan Schedule MIB</A><DD>
+</DL>
+<DT><A HREF="#lbAM">EXTENDING AGENT FUNCTIONALITY</A><DD>
+<DL>
+<DT><A HREF="#lbAN">Arbitrary Extension Commands</A><DD>
+</DL>
+<DT><A HREF="#lbAO">FILES</A><DD>
+<DT><A HREF="#lbAP">SEE ALSO</A><DD>
+</DL>
+<HR>
+This document was created by
+<A HREF="http://localhost/cgi-bin/man/man2html">man2html</A>,
+using the manual pages.<BR>
+Time: 19:05:39 GMT, September 28, 2009
+</BODY>
+</HTML>

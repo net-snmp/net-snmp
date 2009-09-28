@@ -1,108 +1,185 @@
-<!--#set var="section" value="documentation" -->
-<!--#include virtual="/page-top.html" -->
-<!-- CONTENT START -->
-    <h1>SNMPWALK</h1>Section: Net-SNMP (1)<br />
-    Updated: 08 Feb 2002<br />
-    <a href="#index">Index</a> <a href="../index.html">Return to Main Contents</a>
-    <hr />
-    <a name="lbAB" id="lbAB">&nbsp;</a>
+Content-type: text/html
 
-    <h2>NAME</h2>snmpwalk - retrieve a subtree of management values using SNMP GETNEXT requests <a name="lbAC" id=
-    "lbAC">&nbsp;</a>
+<HTML><HEAD><TITLE>Manpage of SNMPWALK</TITLE>
+</HEAD><BODY>
+<H1>SNMPWALK</H1>
+Section: Net-SNMP (1)<BR>Updated: 08 Feb 2002<BR><A HREF="#index">Index</A>
+<A HREF="http://localhost/cgi-bin/man/man2html">Return to Main Contents</A><HR>
 
-    <h2>SYNOPSIS</h2><b>snmpwalk</b> [APPLICATION OPTIONS] [COMMON OPTIONS] [OID] <a name="lbAD" id="lbAD">&nbsp;</a>
 
-    <h2>DESCRIPTION</h2><b>snmpwalk</b> is an SNMP application that uses SNMP GETNEXT requests to query a network entity for a
-    tree of information.
+<A NAME="lbAB">&nbsp;</A>
+<H2>NAME</H2>
 
-    <p>An object identifier (OID) may be given on the command line. This OID specifies which portion of the object identifier
-    space will be searched using GETNEXT requests. All variables in the subtree below the given OID are queried and their values
-    presented to the user. Each variable name is given in the format specified in <i><a href=
-    "variables.html">variables</a>(5)</i>.</p>
+snmpwalk - retrieve a subtree of management values using SNMP GETNEXT requests
+<A NAME="lbAC">&nbsp;</A>
+<H2>SYNOPSIS</H2>
 
-    <p>If no OID argument is present, <b>snmpwalk</b> will search the subtree rooted at SNMPv2-SMI::mib-2 (including any MIB
-    object values from other MIB modules, that are defined as lying within this subtree). If the network entity has an error
-    processing the request packet, an error packet will be returned and a message will be shown, helping to pinpoint why the
-    request was malformed.</p>
+<B>snmpwalk</B>
 
-    <p>If the tree search causes attempts to search beyond the end of the MIB, the message "End of MIB" will be displayed.
-    <a name="lbAE" id="lbAE">&nbsp;</a></p>
+[APPLICATION OPTIONS] [COMMON OPTIONS] [OID]
+<A NAME="lbAD">&nbsp;</A>
+<H2>DESCRIPTION</H2>
 
-    <h2>OPTIONS</h2>
+<B>snmpwalk</B>
 
-    <dl compact="compact">
-      <dt><b>-Cc</b></dt>
+is an SNMP application that uses SNMP GETNEXT requests to query a
+network entity for a tree of information.
+<P>
 
-      <dd>Do not check whether the returned OIDs are increasing. Some agents (LaserJets are an example) return OIDs out of order,
-      but can complete the walk anyway. Other agents return OIDs that are out of order and can cause <b>snmpwalk</b> to loop
-      indefinitely. By default, <b>snmpwalk</b> tries to detect this behavior and warns you when it hits an agent acting
-      illegally. Use <b>-Cc</b> to turn off this check.</dd>
+An object identifier (OID) may be given on the command line.  This OID
+specifies which portion of the object identifier space will be
+searched using GETNEXT requests.  All variables in the subtree
+below the given OID are queried and their values presented to the user.
+Each variable name is given in the format specified in
+<I><A HREF="http://localhost/cgi-bin/man/man2html?5+variables">variables</A>(5)</I>.
 
-      <dt><b>-Ci</b></dt>
+<P>
 
-      <dd>Include the given OID in the search range. Normally <b>snmpwalk</b> uses GETNEXT requests starting with the OID you
-      specified and returns all results in the MIB subtree rooted at that OID. Sometimes, you may wish to include the OID
-      specified on the command line in the printed results if it is a valid OID in the tree itself. This option lets you do this
-      explicitly.</dd>
+If no OID argument is present,
+<B>snmpwalk</B>
 
-      <dt><b>-CI</b></dt>
+will search the subtree rooted at SNMPv2-SMI::mib-2
+(including any MIB object values from other MIB modules,
+that are defined as lying within this subtree).
+If the network entity has an error processing the request packet, an
+error packet will be returned and a message will be shown, helping to
+pinpoint why the request was malformed.
+<P>
 
-      <dd>In fact, the given OID will be retrieved automatically if the main subtree walk returns no useable values. This allows
-      a walk of a single instance to behave as generally expected, and return the specified instance value. This option turns off
-      this final GET request, so a walk of a single instance will return nothing.</dd>
+If the tree search causes attempts to search beyond the end of the
+MIB, the message &quot;End of MIB&quot; will be displayed.
+<A NAME="lbAE">&nbsp;</A>
+<H2>OPTIONS</H2>
 
-      <dt><b>-Cp</b></dt>
+<DL COMPACT>
+<DT><B>-Cc</B>
 
-      <dd>Upon completion of the walk, print the number of variables found.</dd>
+<DD>
+Do not check whether the returned OIDs are increasing.  Some agents
+(LaserJets are an example) return OIDs out of order, but can
+complete the walk anyway.  Other agents return OIDs that are out of
+order and can cause
+<B>snmpwalk</B>
 
-      <dt><b>-Ct</b></dt>
+to loop indefinitely.  By default,
+<B>snmpwalk</B>
 
-      <dd>Upon completion of the walk, print the total wall-clock time it took to collect the data (in seconds). Note that the
-      timer is started just before the beginning of the data request series and stopped just after it finishes. Most importantly,
-      this means that it does not include snmp library initialization, shutdown, argument processing, and any other
-      overhead.</dd>
-    </dl>
+tries to detect this behavior and warns you when it hits an agent
+acting illegally.  Use
+<B>-Cc</B>
 
-    <p>In addition to these options, <b>snmpwalk</b> takes the common options described in the <i><a href=
-    "snmpcmd.html">snmpcmd</a>(1)</i> manual page. <a name="lbAF" id="lbAF">&nbsp;</a></p>
+to turn off this check.
+<DT><B>-CE {OID}</B>
 
-    <h2>EXAMPLE</h2>The command:
+<DD>
+End the walk at the specified OID, rather than a simple subtree.
+This can be used to walk a partial subtree, selected columns of
+a table, or even two or more tables within a single command.
+<DT><B>-Ci</B>
 
-    <p>snmpwalk -Os -c public -v 1 zeus system</p>
+<DD>
+Include the given OID in the search range.  Normally
+<B>snmpwalk</B>
 
-    <p>will retrieve all of the variables under system:</p>
+uses GETNEXT requests starting with the OID you specified and returns
+all results in the MIB subtree rooted at that OID.  Sometimes, you may
+wish to include the OID specified on the command line in the printed
+results if it is a valid OID in the tree itself.  This option lets you
+do this explicitly.
+<DT><B>-CI</B>
 
-    <p>sysDescr.0 = STRING: "SunOS zeus.net.cmu.edu 4.1.3_U1 1 sun4m"<br />
-    sysObjectID.0 = OID: enterprises.hp.nm.hpsystem.10.1.1<br />
-    sysUpTime.0 = Timeticks: (155274552) 17 days, 23:19:05<br />
-    sysContact.0 = STRING: ""<br />
-    sysName.0 = STRING: "zeus.net.cmu.edu"<br />
-    sysLocation.0 = STRING: ""<br />
-    sysServices.0 = INTEGER: 72 <a name="lbAG" id="lbAG">&nbsp;</a></p>
+<DD>
+In fact, the given OID will be retrieved automatically if the main
+subtree walk returns no useable values.  This allows a walk of a
+single instance to behave as generally expected, and return the
+specified instance value.
+This option turns off this final GET request, so a walk of a
+single instance will return nothing.
+<DT><B>-Cp</B>
 
-    <h2>SEE ALSO</h2><a href="snmpcmd.html">snmpcmd</a>(1), <a href="snmpbulkwalk.html">snmpbulkwalk</a>(1), <a href=
-    "variables.html">variables</a>(5).
-    <hr />
-    <a name="index" id="index">&nbsp;</a>
+<DD>
+Upon completion of the walk, print the number of variables found.
+<DT><B>-Ct</B>
 
-    <h2>Index</h2>
+<DD>
+Upon completion of the walk, print the total wall-clock time it took
+to collect the data (in seconds).  Note that the timer is started just
+before the beginning of the data request series and stopped just after
+it finishes.  Most importantly, this means that it does not include
+snmp library initialization, shutdown, argument processing, and any
+other overhead.
+</DL>
+<P>
 
-    <dl>
-      <dt><a href="#lbAB">NAME</a></dt>
+In addition to these options,
+<B>snmpwalk</B>
 
-      <dt><a href="#lbAC">SYNOPSIS</a></dt>
+takes the common options described in the 
+<I><A HREF="http://localhost/cgi-bin/man/man2html?1+snmpcmd">snmpcmd</A>(1)</I>
 
-      <dt><a href="#lbAD">DESCRIPTION</a></dt>
+manual page.
+<A NAME="lbAF">&nbsp;</A>
+<H2>EXAMPLES</H2>
 
-      <dt><a href="#lbAE">OPTIONS</a></dt>
+The command:
+<P>
 
-      <dt><a href="#lbAF">EXAMPLE</a></dt>
+snmpwalk -Os -c public -v 1 zeus system
+<P>
 
-      <dt><a href="#lbAG">SEE ALSO</a></dt>
-    </dl>
-    <hr />
-    This document was created by <a href="http://localhost/cgi-bin/man/man2html">man2html</a>, using the manual pages.<br />
-    Time: 13:12:00 GMT, September 23, 2007
-<!-- CONTENT END -->
-<!--#include virtual="/page-bottom.html" -->
+will retrieve all of the variables under system:
+<P>
 
+sysDescr.0 = STRING: &quot;SunOS zeus.net.cmu.edu 4.1.3_U1 1 sun4m&quot;
+<BR>
+
+sysObjectID.0 = OID: enterprises.hp.nm.hpsystem.10.1.1
+<BR>
+
+sysUpTime.0 = Timeticks: (155274552) 17 days, 23:19:05
+<BR>
+
+sysContact.0 = STRING: &quot;&quot;
+<BR>
+
+sysName.0 = STRING: &quot;zeus.net.cmu.edu&quot;
+<BR>
+
+sysLocation.0 = STRING: &quot;&quot;
+<BR>
+
+sysServices.0 = INTEGER: 72
+<BR>
+
+(plus the contents of the sysORTable).
+<P>
+The command:
+<P>
+
+snmpwalk -Os -c public -v 1 -CE sysORTable zeus system
+<P>
+
+will retrieve the scalar values, but omit the sysORTable.
+<A NAME="lbAG">&nbsp;</A>
+<H2>SEE ALSO</H2>
+
+<A HREF="http://localhost/cgi-bin/man/man2html?1+snmpcmd">snmpcmd</A>(1), <A HREF="http://localhost/cgi-bin/man/man2html?1+snmpbulkwalk">snmpbulkwalk</A>(1), <A HREF="http://localhost/cgi-bin/man/man2html?5+variables">variables</A>(5).
+<P>
+
+<HR>
+<A NAME="index">&nbsp;</A><H2>Index</H2>
+<DL>
+<DT><A HREF="#lbAB">NAME</A><DD>
+<DT><A HREF="#lbAC">SYNOPSIS</A><DD>
+<DT><A HREF="#lbAD">DESCRIPTION</A><DD>
+<DT><A HREF="#lbAE">OPTIONS</A><DD>
+<DT><A HREF="#lbAF">EXAMPLES</A><DD>
+<DT><A HREF="#lbAG">SEE ALSO</A><DD>
+</DL>
+<HR>
+This document was created by
+<A HREF="http://localhost/cgi-bin/man/man2html">man2html</A>,
+using the manual pages.<BR>
+Time: 19:05:39 GMT, September 28, 2009
+</BODY>
+</HTML>

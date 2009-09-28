@@ -1,110 +1,173 @@
-<!--#set var="section" value="documentation" -->
-<!--#include virtual="/page-top.html" -->
-<!-- CONTENT START -->
-    <h1>iterator_info_s</h1>Section: net-snmp (3)<br />
-    Updated: 27 Jul 2007<br />
-    <a href="#index">Index</a> <a href="../index.html">Return to Main Contents</a>
-    <hr />
-    <a name="lbAB" id="lbAB">&nbsp;</a>
+Content-type: text/html
 
-    <h2>NAME</h2>iterator_info_s - Holds iterator information containing functions which should be called by the iterator_handler
-    to loop over your data set and sort it in a SNMP specific manner.
+<HTML><HEAD><TITLE>Manpage of iterator_info_s</TITLE>
+</HEAD><BODY>
+<H1>iterator_info_s</H1>
+Section: net-snmp (3)<BR>Updated: 23 Sep 2009<BR><A HREF="#index">Index</A>
+<A HREF="http://localhost/cgi-bin/man/man2html">Return to Main Contents</A><HR>
 
-    <p><a name="lbAC" id="lbAC">&nbsp;</a></p>
 
-    <h2>SYNOPSIS</h2><br />
 
-    <p><a name="lbAD" id="lbAD">&nbsp;</a></p>
+<A NAME="lbAB">&nbsp;</A>
+<H2>NAME</H2>
 
-    <h3>Data Fields</h3>
+iterator_info_s - 
+<P>
 
-    <p><br />
-    <b>netsnmp_container</b> <b>c</b><br />
-    <br />
-    <b>Netsnmp_Iterator_Loop_Key</b> * <b>get_first</b><br />
-    <br />
-    <b>Netsnmp_Iterator_Loop_Key</b> * <b>get_next</b><br />
-    <br />
-    <b>Netsnmp_Iterator_Loop_Data</b> * <b>get_data</b><br />
-    <br />
-    <b>Netsnmp_Iterator_Data</b> * <b>free_user_ctx</b><br />
-    <br />
-    <b>Netsnmp_Iterator_Ctx</b> * <b>init_loop_ctx</b><br />
-    <br />
-    <b>Netsnmp_Iterator_Ctx</b> * <b>cleanup_loop_ctx</b><br />
-    <br />
-    <b>Netsnmp_Iterator_Ctx_Dup</b> * <b>save_pos</b><br />
-    <br />
-    <b>Netsnmp_Iterator_Data</b> * <b>release_data</b><br />
-    <br />
-    <b>Netsnmp_Iterator_Data</b> * <b>insert_data</b><br />
-    <br />
-    <b>Netsnmp_Iterator_Data</b> * <b>remove_data</b><br />
-    <br />
-    <b>Netsnmp_Iterator_Op</b> * <b>get_size</b><br />
-    <br />
-    int <b>sorted</b><br />
-    <br />
-    void * <b>user_ctx</b><br />
-    <i>This can be used by client handlers to store any information they need.</i> <a name="lbAE" id="lbAE">&nbsp;</a></p>
+Holds iterator information containing functions which should be called by the iterator_handler to loop over your data set and sort it in a SNMP specific manner.  
+<P>
+<A NAME="lbAC">&nbsp;</A>
+<H2>SYNOPSIS</H2>
 
-    <h2>Detailed Description</h2>
+<BR>
 
-    <p>Holds iterator information containing functions which should be called by the iterator_handler to loop over your data set
-    and sort it in a SNMP specific manner.</p>
+<P>
 
-    <p>The iterator_info typedef can be used instead of directly calling this struct if you would prefer.</p>
+<A NAME="lbAD">&nbsp;</A>
+<H3>Data Fields</H3>
 
-    <p>Definition at line 43 of file container_iterator.c. <a name="lbAF" id="lbAF">&nbsp;</a></p>
+<P>
 
-    <h2>Field Documentation</h2>
+<BR>
 
-    <p><a name="lbAG" id="lbAG">&nbsp;</a></p>
+<B>netsnmp_container</B> <B>c</B>
 
-    <h3>void* <b>iterator_info_s::user_ctx</b></h3>
+<BR>
 
-    <p>This can be used by client handlers to store any information they need.</p>
+<BR>
 
-    <p>Definition at line 73 of file container_iterator.c.</p>
+Netsnmp_Iterator_Loop_Key * <B>get_first</B>
 
-    <p>Referenced by netsnmp_container_iterator_get().</p>
+<BR>
 
-    <p><a name="lbAH" id="lbAH">&nbsp;</a></p>
+<BR>
 
-    <h2>Author</h2>
+Netsnmp_Iterator_Loop_Key * <B>get_next</B>
 
-    <p>Generated automatically by Doxygen for net-snmp from the source code.</p>
-    <hr />
-    <a name="index" id="index">&nbsp;</a>
+<BR>
 
-    <h2>Index</h2>
+<BR>
 
-    <dl>
-      <dt><a href="#lbAB">NAME</a></dt>
+Netsnmp_Iterator_Loop_Data * <B>get_data</B>
 
-      <dt><a href="#lbAC">SYNOPSIS</a></dt>
+<BR>
 
-      <dd>
-        <dl>
-          <dt><a href="#lbAD">Data Fields</a></dt>
-        </dl>
-      </dd>
+<BR>
 
-      <dt><a href="#lbAE">Detailed Description</a></dt>
+Netsnmp_Iterator_Data * <B>free_user_ctx</B>
 
-      <dt><a href="#lbAF">Field Documentation</a></dt>
+<BR>
 
-      <dd>
-        <dl>
-          <dt><a href="#lbAG">void* <b>iterator_info_s::user_ctx</b></a></dt>
-        </dl>
-      </dd>
+<BR>
 
-      <dt><a href="#lbAH">Author</a></dt>
-    </dl>
-    <hr />
-    This document was created by <a href="http://localhost/cgi-bin/man/man2html">man2html</a>, using the manual pages.<br />
-    Time: 13:12:01 GMT, September 23, 2007
-<!-- CONTENT END -->
-<!--#include virtual="/page-bottom.html" -->
+Netsnmp_Iterator_Ctx * <B>init_loop_ctx</B>
 
+<BR>
+
+<BR>
+
+Netsnmp_Iterator_Ctx * <B>cleanup_loop_ctx</B>
+
+<BR>
+
+<BR>
+
+Netsnmp_Iterator_Ctx_Dup * <B>save_pos</B>
+
+<BR>
+
+<BR>
+
+Netsnmp_Iterator_Data * <B>release_data</B>
+
+<BR>
+
+<BR>
+
+Netsnmp_Iterator_Data * <B>insert_data</B>
+
+<BR>
+
+<BR>
+
+Netsnmp_Iterator_Data * <B>remove_data</B>
+
+<BR>
+
+<BR>
+
+Netsnmp_Iterator_Op * <B>get_size</B>
+
+<BR>
+
+<BR>
+
+int <B>sorted</B>
+
+<BR>
+
+<BR>
+
+void * <B>user_ctx</B>
+
+<BR>
+
+<I>This can be used by client handlers to store any information they need. </I>
+
+
+<A NAME="lbAE">&nbsp;</A>
+<H2>Detailed Description</H2>
+
+<P>
+
+Holds iterator information containing functions which should be called by the iterator_handler to loop over your data set and sort it in a SNMP specific manner. 
+<P>
+The iterator_info typedef can be used instead of directly calling this struct if you would prefer. 
+<P>
+
+Definition at line 39 of file container_iterator.c.
+<A NAME="lbAF">&nbsp;</A>
+<H2>Field Documentation</H2>
+
+<P>
+
+<A NAME="lbAG">&nbsp;</A>
+<H3>void* <B>iterator_info_s::user_ctx</B></H3>
+
+<P>
+
+This can be used by client handlers to store any information they need. 
+<P>
+
+Definition at line 69 of file container_iterator.c.
+<P>
+<A NAME="lbAH">&nbsp;</A>
+<H2>Author</H2>
+
+<P>
+
+Generated automatically by Doxygen for net-snmp from the source code.
+<P>
+
+<HR>
+<A NAME="index">&nbsp;</A><H2>Index</H2>
+<DL>
+<DT><A HREF="#lbAB">NAME</A><DD>
+<DT><A HREF="#lbAC">SYNOPSIS</A><DD>
+<DL>
+<DT><A HREF="#lbAD">Data Fields</A><DD>
+</DL>
+<DT><A HREF="#lbAE">Detailed Description</A><DD>
+<DT><A HREF="#lbAF">Field Documentation</A><DD>
+<DL>
+<DT><A HREF="#lbAG">void* <B>iterator_info_s::user_ctx</B></A><DD>
+</DL>
+<DT><A HREF="#lbAH">Author</A><DD>
+</DL>
+<HR>
+This document was created by
+<A HREF="http://localhost/cgi-bin/man/man2html">man2html</A>,
+using the manual pages.<BR>
+Time: 19:05:37 GMT, September 28, 2009
+</BODY>
+</HTML>

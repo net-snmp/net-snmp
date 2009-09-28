@@ -1,176 +1,197 @@
-<!--#set var="section" value="documentation" -->
-<!--#include virtual="/page-top.html" -->
-<!-- CONTENT START -->
-    <h1>scalar</h1>Section: net-snmp (3)<br />
-    Updated: 27 Jul 2007<br />
-    <a href="#index">Index</a> <a href="../index.html">Return to Main Contents</a>
-    <hr />
-    <a name="lbAB" id="lbAB">&nbsp;</a>
+Content-type: text/html
 
-    <h2>NAME</h2>scalar - Process scalars easily.
+<HTML><HEAD><TITLE>Manpage of scalar</TITLE>
+</HEAD><BODY>
+<H1>scalar</H1>
+Section: net-snmp (3)<BR>Updated: 23 Sep 2009<BR><A HREF="#index">Index</A>
+<A HREF="http://localhost/cgi-bin/man/man2html">Return to Main Contents</A><HR>
 
-    <p><a name="lbAC" id="lbAC">&nbsp;</a></p>
 
-    <h3>Functions</h3>
 
-    <p><br />
-    <b>netsnmp_mib_handler</b> * <b>netsnmp_get_scalar_handler</b> (void)<br />
-    <i>Creates a scalar handler calling netsnmp_create_handler with a handler name defaulted to 'scalar' and access method,
-    netsnmp_scalar_helper_handler.</i><br />
-    int <b>netsnmp_register_scalar</b> (<b>netsnmp_handler_registration</b> *reginfo)<br />
-    <i>This function registers a scalar helper handler.</i><br />
-    int <b>netsnmp_register_read_only_scalar</b> (<b>netsnmp_handler_registration</b> *reginfo)<br />
-    <i>This function registers a read only scalar helper handler.</i><br />
-    int <b>netsnmp_scalar_helper_handler</b> (<b>netsnmp_mib_handler</b> *handler, <b>netsnmp_handler_registration</b> *reginfo,
-    <b>netsnmp_agent_request_info</b> *reqinfo, <b>netsnmp_request_info</b> *requests)<br />
-    <a name="lbAD" id="lbAD">&nbsp;</a></p>
+<A NAME="lbAB">&nbsp;</A>
+<H2>NAME</H2>
 
-    <h2>Detailed Description</h2>
+scalar - 
+<P>
 
-    <p>Process scalars easily.</p>
+Process scalars easily.  
+<P>
+<A NAME="lbAC">&nbsp;</A>
+<H3>Functions</H3>
 
-    <p><a name="lbAE" id="lbAE">&nbsp;</a></p>
+<P>
 
-    <h2>Function Documentation</h2>
+<BR>
 
-    <p><a name="lbAF" id="lbAF">&nbsp;</a></p>
+<B>netsnmp_mib_handler</B> * <B>netsnmp_get_scalar_handler</B> (void)
 
-    <h3><b>netsnmp_mib_handler</b>* netsnmp_get_scalar_handler (void)</h3>
+<BR>
 
-    <p>Creates a scalar handler calling netsnmp_create_handler with a handler name defaulted to 'scalar' and access method,
-    netsnmp_scalar_helper_handler.</p>
+<I>Creates a scalar handler calling netsnmp_create_handler with a handler name defaulted to 'scalar' and access method, netsnmp_scalar_helper_handler. </I>
 
-    <p><b>Returns:</b></p>
+<BR>
 
-    <dl compact="compact">
-      <dd>Returns a pointer to a netsnmp_mib_handler struct which contains the handler's name and the access method</dd>
-    </dl>
+int <B>netsnmp_register_scalar</B> (<B>netsnmp_handler_registration</B> *reginfo)
 
-    <p><b>See also:</b></p>
+<BR>
 
-    <dl compact="compact">
-      <dd>
-        <b>netsnmp_get_scalar_handler</b>
+<I>This function registers a scalar helper handler. </I>
 
-        <p><b>netsnmp_register_scalar</b></p>
-      </dd>
-    </dl>
+<BR>
 
-    <p>Definition at line 46 of file scalar.c.</p>
+int <B>netsnmp_register_read_only_scalar</B> (<B>netsnmp_handler_registration</B> *reginfo)
 
-    <p>References netsnmp_create_handler(), and netsnmp_scalar_helper_handler().</p>
+<BR>
 
-    <p>Referenced by netsnmp_register_read_only_scalar(), netsnmp_register_scalar(), and netsnmp_register_scalar_group().
-    <a name="lbAG" id="lbAG">&nbsp;</a></p>
+<I>This function registers a read only scalar helper handler. </I>
 
-    <h3>int netsnmp_register_read_only_scalar (<b>netsnmp_handler_registration</b> * reginfo)</h3>
+<BR>
 
-    <p>This function registers a read only scalar helper handler.</p>
+int <B>netsnmp_scalar_helper_handler</B> (<B>netsnmp_mib_handler</B> *handler, <B>netsnmp_handler_registration</B> *reginfo, <B>netsnmp_agent_request_info</B> *reqinfo, <B>netsnmp_request_info</B> *requests)
 
-    <p>This function is very similar to netsnmp_register_scalar the only addition is that the 'read_only' handler is injected
-    into the handler chain prior to injecting the serialize handler and registering reginfo.</p>
+<BR>
 
-    <p><b>Parameters:</b></p>
 
-    <dl compact="compact">
-      <dd><i>reginfo</i> a handler registration structure which could get created using netsnmp_create_handler_registration. Used
-      to register a read only scalar helper handler.</dd>
-    </dl>
+<A NAME="lbAD">&nbsp;</A>
+<H2>Detailed Description</H2>
 
-    <p><b>Returns:</b></p>
+<P>
 
-    <dl compact="compact">
-      <dd>MIB_REGISTERED_OK is returned if the registration was a success. Failures are MIB_REGISTRATION_FAILURE and
-      MIB_DUPLICATE_REGISTRATION.</dd>
-    </dl>
+Process scalars easily. 
+<A NAME="lbAE">&nbsp;</A>
+<H2>Function Documentation</H2>
 
-    <p><b>See also:</b></p>
+<P>
 
-    <dl compact="compact">
-      <dd>
-        <b>netsnmp_register_scalar</b>
+<A NAME="lbAF">&nbsp;</A>
+<H3><B>netsnmp_mib_handler</B>* netsnmp_get_scalar_handler (void)</H3>
 
-        <p><b>netsnmp_get_scalar_handler</b></p>
-      </dd>
-    </dl>
+<P>
 
-    <p>Definition at line 109 of file scalar.c.</p>
+Creates a scalar handler calling netsnmp_create_handler with a handler name defaulted to 'scalar' and access method, netsnmp_scalar_helper_handler. <B>Returns:</B>
+<DL COMPACT><DT><DD>
+Returns a pointer to a netsnmp_mib_handler struct which contains the handler's name and the access method
+</DL>
 
-    <p>References netsnmp_get_instance_handler(), netsnmp_get_read_only_handler(), netsnmp_get_scalar_handler(),
-    netsnmp_inject_handler(), netsnmp_register_serialize(), netsnmp_handler_registration_s::rootoid, and
-    netsnmp_handler_registration_s::rootoid_len. <a name="lbAH" id="lbAH">&nbsp;</a></p>
+<P>
 
-    <h3>int netsnmp_register_scalar (<b>netsnmp_handler_registration</b> * reginfo)</h3>
+<B>See also:</B>
+<DL COMPACT><DT><DD>
+<B>netsnmp_get_scalar_handler</B> 
+<P>
 
-    <p>This function registers a scalar helper handler.</p>
+<B>netsnmp_register_scalar</B> 
+</DL>
 
-    <p>The registered OID, reginfo-&gt;rootoid, space is extended for the instance subid using realloc() but the
-    reginfo-&gt;rootoid_len length is not extended just yet. .This function subsequently injects the instance, scalar, and
-    serialize helper handlers before actually registering reginfo.</p>
+<P>
 
-    <p>Each handler is injected/pushed to the top of the handler chain list and will be processed last in first out, LIFO.</p>
+<P>
+<P>
 
-    <p><b>Parameters:</b></p>
+Definition at line 47 of file scalar.c.
+<A NAME="lbAG">&nbsp;</A>
+<H3>int netsnmp_register_read_only_scalar (<B>netsnmp_handler_registration</B> * reginfo)</H3>
 
-    <dl compact="compact">
-      <dd><i>reginfo</i> a handler registration structure which could get created using netsnmp_create_handler_registration. Used
-      to register a scalar helper handler.</dd>
-    </dl>
+<P>
 
-    <p><b>Returns:</b></p>
+This function registers a read only scalar helper handler. This function is very similar to netsnmp_register_scalar the only addition is that the 'read_only' handler is injected into the handler chain prior to injecting the serialize handler and registering reginfo.
+<P>
 
-    <dl compact="compact">
-      <dd>MIB_REGISTERED_OK is returned if the registration was a success. Failures are MIB_REGISTRATION_FAILURE and
-      MIB_DUPLICATE_REGISTRATION.</dd>
-    </dl>
+<B>Parameters:</B>
+<DL COMPACT><DT><DD>
+<I>reginfo</I> a handler registration structure which could get created using netsnmp_create_handler_registration. Used to register a read only scalar helper handler.
+</DL>
 
-    <p><b>See also:</b></p>
+<P>
 
-    <dl compact="compact">
-      <dd>
-        <b>netsnmp_register_read_only_scalar</b>
+<B>Returns:</B>
+<DL COMPACT><DT><DD>
+MIB_REGISTERED_OK is returned if the registration was a success. Failures are MIB_REGISTRATION_FAILURE and MIB_DUPLICATE_REGISTRATION.
+</DL>
 
-        <p><b>netsnmp_get_scalar_handler</b></p>
-      </dd>
-    </dl>
+<P>
 
-    <p>Definition at line 74 of file scalar.c.</p>
+<B>See also:</B>
+<DL COMPACT><DT><DD>
+<B>netsnmp_register_scalar</B> 
+<P>
 
-    <p>References netsnmp_get_instance_handler(), netsnmp_get_scalar_handler(), netsnmp_inject_handler(),
-    netsnmp_register_serialize(), netsnmp_handler_registration_s::rootoid, and netsnmp_handler_registration_s::rootoid_len.</p>
+<B>netsnmp_get_scalar_handler</B> 
+</DL>
 
-    <p>Referenced by netsnmp_register_watched_scalar(), and netsnmp_watched_timestamp_register().</p>
-    <hr />
-    <a name="index" id="index">&nbsp;</a>
+<P>
 
-    <h2>Index</h2>
+<P>
+<P>
 
-    <dl>
-      <dt><a href="#lbAB">NAME</a></dt>
+Definition at line 110 of file scalar.c.
+<A NAME="lbAH">&nbsp;</A>
+<H3>int netsnmp_register_scalar (<B>netsnmp_handler_registration</B> * reginfo)</H3>
 
-      <dd>
-        <dl>
-          <dt><a href="#lbAC">Functions</a></dt>
-        </dl>
-      </dd>
+<P>
 
-      <dt><a href="#lbAD">Detailed Description</a></dt>
+This function registers a scalar helper handler. The registered OID, reginfo-&gt;rootoid, space is extended for the instance subid using realloc() but the reginfo-&gt;rootoid_len length is not extended just yet. .This function subsequently injects the instance, scalar, and serialize helper handlers before actually registering reginfo.
+<P>
 
-      <dt><a href="#lbAE">Function Documentation</a></dt>
+Each handler is injected/pushed to the top of the handler chain list and will be processed last in first out, LIFO.
+<P>
 
-      <dd>
-        <dl>
-          <dt><a href="#lbAF"><b>netsnmp_mib_handler</b>* netsnmp_get_scalar_handler (void)</a></dt>
+<B>Parameters:</B>
+<DL COMPACT><DT><DD>
+<I>reginfo</I> a handler registration structure which could get created using netsnmp_create_handler_registration. Used to register a scalar helper handler.
+</DL>
 
-          <dt><a href="#lbAG">int netsnmp_register_read_only_scalar (<b>netsnmp_handler_registration</b> * reginfo)</a></dt>
+<P>
 
-          <dt><a href="#lbAH">int netsnmp_register_scalar (<b>netsnmp_handler_registration</b> * reginfo)</a></dt>
-        </dl>
-      </dd>
-    </dl>
-    <hr />
-    This document was created by <a href="http://localhost/cgi-bin/man/man2html">man2html</a>, using the manual pages.<br />
-    Time: 13:12:01 GMT, September 23, 2007
-<!-- CONTENT END -->
-<!--#include virtual="/page-bottom.html" -->
+<B>Returns:</B>
+<DL COMPACT><DT><DD>
+MIB_REGISTERED_OK is returned if the registration was a success. Failures are MIB_REGISTRATION_FAILURE and MIB_DUPLICATE_REGISTRATION.
+</DL>
 
+<P>
+
+<B>See also:</B>
+<DL COMPACT><DT><DD>
+<B>netsnmp_register_read_only_scalar</B> 
+<P>
+
+<B>netsnmp_get_scalar_handler</B> 
+</DL>
+
+<P>
+
+<P>
+<P>
+
+Definition at line 75 of file scalar.c.
+<A NAME="lbAI">&nbsp;</A>
+<H2>Author</H2>
+
+<P>
+
+Generated automatically by Doxygen for net-snmp from the source code.
+<P>
+
+<HR>
+<A NAME="index">&nbsp;</A><H2>Index</H2>
+<DL>
+<DT><A HREF="#lbAB">NAME</A><DD>
+<DL>
+<DT><A HREF="#lbAC">Functions</A><DD>
+</DL>
+<DT><A HREF="#lbAD">Detailed Description</A><DD>
+<DT><A HREF="#lbAE">Function Documentation</A><DD>
+<DL>
+<DT><A HREF="#lbAF"><B>netsnmp_mib_handler</B>* netsnmp_get_scalar_handler (void)</A><DD>
+<DT><A HREF="#lbAG">int netsnmp_register_read_only_scalar (<B>netsnmp_handler_registration</B> * reginfo)</A><DD>
+<DT><A HREF="#lbAH">int netsnmp_register_scalar (<B>netsnmp_handler_registration</B> * reginfo)</A><DD>
+</DL>
+<DT><A HREF="#lbAI">Author</A><DD>
+</DL>
+<HR>
+This document was created by
+<A HREF="http://localhost/cgi-bin/man/man2html">man2html</A>,
+using the manual pages.<BR>
+Time: 19:05:38 GMT, September 28, 2009
+</BODY>
+</HTML>

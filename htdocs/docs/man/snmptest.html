@@ -1,51 +1,96 @@
-<!--#set var="section" value="documentation" -->
-<!--#include virtual="/page-top.html" -->
-<!-- CONTENT START -->
-    <h1>SNMPTEST</h1>Section: Net-SNMP (1)<br />
-    Updated: 25 Jul 2003<br />
-    <a href="#index">Index</a> <a href="../index.html">Return to Main Contents</a>
-    <hr />
-    <a name="lbAB" id="lbAB">&nbsp;</a>
+Content-type: text/html
 
-    <h2>NAME</h2>snmptest - communicates with a network entity using SNMP requests <a name="lbAC" id="lbAC">&nbsp;</a>
+<HTML><HEAD><TITLE>Manpage of SNMPTEST</TITLE>
+</HEAD><BODY>
+<H1>SNMPTEST</H1>
+Section: Net-SNMP (1)<BR>Updated: 25 Jul 2003<BR><A HREF="#index">Index</A>
+<A HREF="http://localhost/cgi-bin/man/man2html">Return to Main Contents</A><HR>
 
-    <h2>SYNOPSIS</h2><b>snmptest</b> [COMMON OPTIONS] AGENT <a name="lbAD" id="lbAD">&nbsp;</a>
 
-    <h2>DESCRIPTION</h2><b>snmptest</b> is a flexible SNMP application that can monitor and manage information on a network
-    entity.
+<A NAME="lbAB">&nbsp;</A>
+<H2>NAME</H2>
 
-    <p>After invoking the program, a command line interpreter proceeds to accept commands. This intepreter enables the user to
-    send different types of SNMP requests to target agents.</p>
+snmptest - communicates with a network entity using SNMP requests
+<A NAME="lbAC">&nbsp;</A>
+<H2>SYNOPSIS</H2>
 
-    <p>AGENT identifies a target SNMP agent, which is instrumented to monitor the gievn objects. At its simplest, the AGENT
-    specification will consist of a hostname or an IPv4 address. In this situation, the command will attempt communication with
-    the agent, using UDP/IPv4 to port 161 of the given target host. See <a href="snmpcmd.html">snmpcmd</a>(1) for a full list of
-    the possible formats for AGENT.</p>
+<B>snmptest</B>
 
-    <p>Once snmptest is invoked, the command line intepreter will prompt with:</p>
+[COMMON OPTIONS] AGENT
+<A NAME="lbAD">&nbsp;</A>
+<H2>DESCRIPTION</H2>
 
-    <p><b>Variable:</b></p>
+<B>snmptest</B>
 
-    <p>At this point you can enter one or more variable names, one per line. A blank line ends the parameter input and will send
-    the request (variables entered) in a single packet, to the remote entity. Each variable name is given in the format specified
-    in <i><a href="variables.html">variables</a>(5)</i>. For example:</p>
+is a flexible SNMP application that can monitor and manage information
+on a network entity.
+<P>
 
-    <p>snmptest -c public -v 1 zeus<br />
-    <b>Variable:</b> system.sysDescr.0<br />
-    <b>Variable:</b></p>
+After invoking the program, a command line interpreter proceeds to
+accept commands.  This intepreter enables the user to send different
+types of SNMP requests to target agents.
+<P>
 
-    <p>will return some information about the request and reply packets, as well as the information:</p>
+AGENT identifies a target SNMP agent, which is instrumented
+to monitor the gievn objects.  At its simplest, the AGENT
+specification will consist of a hostname or an IPv4
+address.  In this situation, the command will attempt
+communication with the agent, using UDP/IPv4 to port 161
+of the given target host. See <A HREF="http://localhost/cgi-bin/man/man2html?1+snmpcmd">snmpcmd</A>(1) for a full list of
+the possible formats for AGENT.
+<P>
 
-    <p>requestid 0x5992478A errstat 0x0 errindex 0x0<br />
-    system.sysDescr.0 = STRING: "Unix 4.3BSD"</p>
+Once snmptest is invoked, the command line intepreter will prompt with:
+<P>
 
-    <p>The errstatus value shows the error status code for the call. The possible values for errstat are in the header file
-    snmp.h. The errindex value identifies the variable that has the given error. Index values are assigned to all the variables
-    entered at the "Variable": prompt. The first value is assigned an index of 1.</p>
+<B>Variable:</B>
 
-    <p>Upon startup, the program defaults to sending a GET request packet. The type of request can be changed by typing one of
-    the following commands at the "Variable:" prompt:</p>
-    <pre>
+<P>
+
+At this point you can enter one or more variable names, one per line.
+A blank line ends the parameter input and will send the request
+(variables entered) in a single packet, to the remote entity.
+Each variable name is given
+in the format specified in 
+<I><A HREF="http://localhost/cgi-bin/man/man2html?5+variables">variables</A>(5)</I>.
+
+For example:
+<P>
+
+snmptest -c public -v 1 zeus
+<BR>
+
+<B>Variable:</B> system.sysDescr.0
+
+<BR>
+
+<B>Variable:</B>
+
+<P>
+
+will return some information about the request and reply packets, as
+well as the information:
+<P>
+
+requestid 0x5992478A errstat 0x0 errindex 0x0
+<BR>
+
+system.sysDescr.0 = STRING: &quot;Unix 4.3BSD&quot;
+<P>
+
+The errstatus value shows the error status code for the call.
+The possible values for errstat are in the header file snmp.h.
+The errindex value identifies the variable that has the given error.
+Index values are assigned to all the variables entered at the &quot;Variable&quot;:
+prompt. The first value is assigned an index of 1.
+<P>
+
+Upon startup, the program defaults to sending a GET request packet.
+The type of request can be changed by typing one of the following
+commands at the &quot;Variable:&quot; prompt:
+<P>
+
+<PRE>
 $G - send a GET request
 $N - send a GETNEXT request
 $S - send a SET request
@@ -53,34 +98,56 @@ $B - send a GETBULK request
      Note: GETBULK is not available in SNMPv1
 $I - send an Inform request
 $T - send an SNMPv2 Trap request
-</pre>
+</PRE>
 
-    <p>Other values that can be entered at the "Variable:" prompt are:</p>
-    <pre>
+<P>
+
+Other values that can be entered at the &quot;Variable:&quot; prompt are:
+<P>
+
+<PRE>
 $D - toggle the dumping of each sent and received packet
 $QP - toggle a quicker, less verbose output form
 $Q - Quit the program
-</pre>
+</PRE>
 
-    <p>Request Types:</p>
+<P>
 
-    <p>GET Request:</p>
+Request Types:
+<P>
 
-    <p>When in "GET request" mode ($G or default), the user can enter an OID at the "Variable:" prompt. The user can enter
-    multiple OIDs, one per prompt. The user enters a blank line to send the GET request.</p>
+GET Request:
+<P>
 
-    <p>GETNEXT Request:</p>
+When in &quot;GET request&quot; mode ($G or default), the user can enter
+an OID at the &quot;Variable:&quot; prompt. The user can enter multiple
+OIDs, one per prompt. The user enters a blank line to send
+the GET request.
+<P>
 
-    <p>The "GETNEXT request" mode ($N) is simlar to the "Get request" mode, described above.</p>
+GETNEXT Request:
+<P>
 
-    <p>SET Request:</p>
+The &quot;GETNEXT request&quot; mode ($N) is simlar to the &quot;Get request&quot;
+mode, described above.
+<P>
 
-    <p>When in the "SET request" mode ($S), more information is requested by the prompt for each variable. The prompt:</p>
-    <pre>
+SET Request:
+<P>
+
+When in the &quot;SET request&quot; mode ($S), more information is requested by the
+prompt for each variable.  The prompt:
+<P>
+
+<PRE>
 Type [i|s|x|d|n|o|t|a]:
-</pre>requests the type of the variable be entered. Depending on the type of value you want to set, you can type one of the
-following:
-    <pre>
+</PRE>
+
+requests the type of the variable be entered.  Depending on the type
+of value you want to set, you can type one of the following:
+<P>
+
+<PRE>
 i - integer
 u - unsigned integer
 s - octet string in ASCII
@@ -90,38 +157,64 @@ a - ip address in dotted IP notation
 o - object identifier
 n - null
 t - timeticks
-</pre>At this point a value will be prompted for:
+</PRE>
 
-    <p>Value:</p>
+At this point a value will be prompted for:
+<P>
 
-    <p>If this is an integer value, just type the integer (in decimal). If it is a decimal string, type in white-space separated
-    decimal numbers, one per byte of the string. Again type a blank line at the prompt for the variable name to send the
-    packet.</p>
+Value:
+<P>
 
-    <p>GETBULK Request:</p>
+If this is an integer value, just type the integer (in decimal).  If
+it is a decimal string, type in white-space separated decimal numbers,
+one per byte of the string.  Again type a blank line at the prompt for
+the variable name to send the packet.
+<P>
 
-    <p>The "GETBULK request" mode ($B) is similar to the "Set request" mode. GETBULK, however, is not available in SNMPv1.</p>
+GETBULK Request:
+<P>
 
-    <p>Inform Request:</p>
+The &quot;GETBULK request&quot; mode ($B) is similar to the &quot;Set request&quot; mode.
+GETBULK, however, is not available in SNMPv1.
+<P>
 
-    <p>The "Inform request" mode ($I) is similar to the "Set request" mode. This type of request, however, is not available in
-    SNMPv1. Also, the _agent_ specified on the snmptest command should correspond to the target snmptrapd agent.</p>
+Inform Request:
+<P>
 
-    <p>SNMPv2 Trap Request:</p>
+The &quot;Inform request&quot; mode ($I) is similar to the &quot;Set request&quot; mode.
+This type of request, however, is not available in SNMPv1. Also,
+the _agent_ specified on the snmptest command should correspond
+to the target snmptrapd agent.
+<P>
 
-    <p>The "SNMPv2 Trap Request" mode ($T) is similar to the "Set request" mode. This type of request, however, is not available
-    in SNMPv1. Also, the _agent_ specified on the snmptest command should correspond to the target snmptrapd agent. <a name=
-    "lbAE" id="lbAE">&nbsp;</a></p>
+SNMPv2 Trap Request:
+<P>
 
-    <h2>OPTIONS</h2><b>snmptest</b> takes the common options described in the <i><a href="snmpcmd.html">snmpcmd</a>(1)</i> manual
-    page. <a name="lbAF" id="lbAF">&nbsp;</a>
+The &quot;SNMPv2 Trap Request&quot; mode ($T) is similar to the &quot;Set request&quot; mode.
+This type of request, however, is not available in SNMPv1. Also,
+the _agent_ specified on the snmptest command should correspond
+to the target snmptrapd agent.
+<A NAME="lbAE">&nbsp;</A>
+<H2>OPTIONS</H2>
 
-    <h2>EXAMPLES</h2>
+<B>snmptest</B>
 
-    <p>The following is an example of sending a GET request for two OIDs:</p>
+takes the common options described in the 
+<I><A HREF="http://localhost/cgi-bin/man/man2html?1+snmpcmd">snmpcmd</A>(1)</I>
 
-    <p>% snmptest -v 2c -c public testhost:9999</p>
-    <pre>
+manual page.
+<A NAME="lbAF">&nbsp;</A>
+<H2>EXAMPLES</H2>
+
+<P>
+
+The following is an example of sending a GET request for two OIDs:
+<P>
+
+% snmptest -v 2c -c public testhost:9999
+<P>
+
+<PRE>
 Variable: system.sysDescr.0
 Variable: system.sysContact.0
 Variable:
@@ -129,20 +222,28 @@ Received Get Response from 128.2.56.220
 requestid 0x7D9FCD63 errstat 0x0 errindex 0x0
 SNMPv2-MIB::sysDescr.0 = STRING: SunOS testhost 5.9 Generic_112233-02 sun4u
 SNMPv2-MIB::sysContact.0 = STRING: x1111
-</pre>
+</PRE>
 
-    <p>The following is an example of sending a GETNEXT request:</p>
-    <pre>
+<P>
+
+The following is an example of sending a GETNEXT request:
+<P>
+
+<PRE>
 Variable: SNMPv2-MIB::sysORUpTime
 Variable:
 Received Get Response from 128.2.56.220
 requestid 0x7D9FCD64 errstat 0x0 errindex 0x0
 SNMPv2-MIB::sysORUpTime.1 = Timeticks: (6) 0:00:00.06
 Variable:
-</pre>
+</PRE>
 
-    <p>The following is an example of sending a SET request:</p>
-    <pre>
+<P>
+
+The following is an example of sending a SET request:
+<P>
+
+<PRE>
 Variable: $S
 Request type is Set Request
 Variable: system.sysLocation.0
@@ -153,10 +254,14 @@ Received Get Response from 128.2.56.220
 requestid 0x7D9FCD65 errstat 0x0 errindex 0x0
 SNMPv2-MIB::sysLocation.0 = STRING: building A
 Variable:
-</pre>
+</PRE>
 
-    <p>The following is an example of sending a GETBULK request:</p>
-    <pre>
+<P>
+
+The following is an example of sending a GETBULK request:
+<P>
+
+<PRE>
 Variable: $B
 Request type is Bulk Request
 Enter a blank line to terminate the list of non-repeaters
@@ -174,10 +279,14 @@ SNMPv2-MIB::sysORLastChange.0 = Timeticks: (58) 0:00:00.58
 SNMPv2-MIB::sysLocation.0 = STRING: bldg A
 SNMPv2-MIB::sysORID.1 = OID: IF-MIB::ifMIB
 Variable:
-</pre>
+</PRE>
 
-    <p>The following is an example of sending an Inform request:</p>
-    <pre>
+<P>
+
+The following is an example of sending an Inform request:
+<P>
+
+<PRE>
 snmptest -v 2c -c public snmptrapd_host
 Variable: $I
 Request type is Inform Request
@@ -188,14 +297,21 @@ Value: x12345
 Variable:
 Inform Acknowledged
 Variable:
-</pre>
+</PRE>
 
-    <p>The snmptrapd_host will show:</p>
+<P>
 
-    <p>snmptrapd_host [&lt;ip address&gt;]: Trap SNMPv2-MIB::sysContact.0 = STRING: x12345</p>
+The snmptrapd_host will show:
+<P>
 
-    <p>The following is an example of sending an SNMPv2 Trap request:</p>
-    <pre>
+snmptrapd_host [&lt;ip address&gt;]: Trap SNMPv2-MIB::sysContact.0 = STRING:
+x12345
+<P>
+
+The following is an example of sending an SNMPv2 Trap request:
+<P>
+
+<PRE>
 snmptest -v 2c -c public snmptrapd_host
 Variable: $T
 Request type is SNMPv2 Trap Request
@@ -204,37 +320,38 @@ Variable: system.sysLocation.0
 Type [i|u|s|x|d|n|o|t|a]: s
 Value: building a
 Variable:
-</pre>
+</PRE>
 
-    <p>The snmptrapd_host will show:</p>
-    <pre>
+<P>
+
+The snmptrapd_host will show:
+<P>
+
+<PRE>
 snmptrapd_host [&lt;ip address&gt;]: Trap SNMPv2-MIB::sys.0 = STRING:
 building a
-</pre><a name="lbAG" id="lbAG">&nbsp;</a>
+</PRE>
 
-    <h2>SEE ALSO</h2><a href="snmpcmd.html">snmpcmd</a>(1), <a href="snmpget.html">snmpget</a>(1), <a href=
-    "snmpset.html">snmpset</a>(1), <a href="variables.html">variables</a>(5)
-    <hr />
-    <a name="index" id="index">&nbsp;</a>
+<A NAME="lbAG">&nbsp;</A>
+<H2>SEE ALSO</H2>
 
-    <h2>Index</h2>
+<A HREF="http://localhost/cgi-bin/man/man2html?1+snmpcmd">snmpcmd</A>(1), <A HREF="http://localhost/cgi-bin/man/man2html?1+snmpget">snmpget</A>(1), <A HREF="http://localhost/cgi-bin/man/man2html?1+snmpset">snmpset</A>(1), <A HREF="http://localhost/cgi-bin/man/man2html?5+variables">variables</A>(5)
+<P>
 
-    <dl>
-      <dt><a href="#lbAB">NAME</a></dt>
-
-      <dt><a href="#lbAC">SYNOPSIS</a></dt>
-
-      <dt><a href="#lbAD">DESCRIPTION</a></dt>
-
-      <dt><a href="#lbAE">OPTIONS</a></dt>
-
-      <dt><a href="#lbAF">EXAMPLES</a></dt>
-
-      <dt><a href="#lbAG">SEE ALSO</a></dt>
-    </dl>
-    <hr />
-    This document was created by <a href="http://localhost/cgi-bin/man/man2html">man2html</a>, using the manual pages.<br />
-    Time: 13:12:00 GMT, September 23, 2007
-<!-- CONTENT END -->
-<!--#include virtual="/page-bottom.html" -->
-
+<HR>
+<A NAME="index">&nbsp;</A><H2>Index</H2>
+<DL>
+<DT><A HREF="#lbAB">NAME</A><DD>
+<DT><A HREF="#lbAC">SYNOPSIS</A><DD>
+<DT><A HREF="#lbAD">DESCRIPTION</A><DD>
+<DT><A HREF="#lbAE">OPTIONS</A><DD>
+<DT><A HREF="#lbAF">EXAMPLES</A><DD>
+<DT><A HREF="#lbAG">SEE ALSO</A><DD>
+</DL>
+<HR>
+This document was created by
+<A HREF="http://localhost/cgi-bin/man/man2html">man2html</A>,
+using the manual pages.<BR>
+Time: 19:05:39 GMT, September 28, 2009
+</BODY>
+</HTML>

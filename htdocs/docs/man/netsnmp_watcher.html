@@ -1,93 +1,303 @@
-<!--#set var="section" value="documentation" -->
-<!--#include virtual="/page-top.html" -->
-<!-- CONTENT START -->
-    <h1>watcher</h1>Section: net-snmp (3)<br />
-    Updated: 27 Jul 2007<br />
-    <a href="#index">Index</a> <a href="../index.html">Return to Main Contents</a>
-    <hr />
-    <a name="lbAB" id="lbAB">&nbsp;</a>
+Content-type: text/html
 
-    <h2>NAME</h2>watcher - Watch a specified variable and process it as an instance or scalar object.
+<HTML><HEAD><TITLE>Manpage of watcher</TITLE>
+</HEAD><BODY>
+<H1>watcher</H1>
+Section: net-snmp (3)<BR>Updated: 23 Sep 2009<BR><A HREF="#index">Index</A>
+<A HREF="http://localhost/cgi-bin/man/man2html">Return to Main Contents</A><HR>
 
-    <p><a name="lbAC" id="lbAC">&nbsp;</a></p>
 
-    <h3>Functions</h3>
 
-    <p><br />
-    <b>netsnmp_mib_handler</b> * <b>netsnmp_get_watcher_handler</b> (void)<br />
-    <br />
-    <b>netsnmp_watcher_info</b> * <b>netsnmp_create_watcher_info</b> (void *data, size_t size, u_char type, int flags)<br />
-    <br />
-    int <b>netsnmp_register_watched_instance</b> (<b>netsnmp_handler_registration</b> *reginfo, <b>netsnmp_watcher_info</b>
-    *watchinfo)<br />
-    <br />
-    int <b>netsnmp_register_watched_scalar</b> (<b>netsnmp_handler_registration</b> *reginfo, <b>netsnmp_watcher_info</b>
-    *watchinfo)<br />
-    <br />
-    int <b>netsnmp_watcher_helper_handler</b> (<b>netsnmp_mib_handler</b> *handler, <b>netsnmp_handler_registration</b> *reginfo,
-    <b>netsnmp_agent_request_info</b> *reqinfo, <b>netsnmp_request_info</b> *requests)<br />
-    <br />
-    <b>netsnmp_mib_handler</b> * <b>netsnmp_get_watched_timestamp_handler</b> (void)<br />
-    <br />
-    int <b>netsnmp_watched_timestamp_register</b> (<b>netsnmp_mib_handler</b> *whandler, <b>netsnmp_handler_registration</b>
-    *reginfo, <b>marker_t</b> timestamp)<br />
-    <br />
-    int <b>netsnmp_register_watched_timestamp</b> (<b>netsnmp_handler_registration</b> *reginfo, <b>marker_t</b> timestamp)<br />
-    <br />
-    int <b>netsnmp_watched_timestamp_handler</b> (<b>netsnmp_mib_handler</b> *handler, <b>netsnmp_handler_registration</b>
-    *reginfo, <b>netsnmp_agent_request_info</b> *reqinfo, <b>netsnmp_request_info</b> *requests)<br />
-    <br />
-    <b>netsnmp_mib_handler</b> * <b>netsnmp_get_watched_spinlock_handler</b> (void)<br />
-    <br />
-    int <b>netsnmp_register_watched_spinlock</b> (<b>netsnmp_handler_registration</b> *reginfo, int *spinlock)<br />
-    <br />
-    int <b>netsnmp_watched_spinlock_handler</b> (<b>netsnmp_mib_handler</b> *handler, <b>netsnmp_handler_registration</b>
-    *reginfo, <b>netsnmp_agent_request_info</b> *reqinfo, <b>netsnmp_request_info</b> *requests)<br />
-    <br />
-    int <b>netsnmp_register_ulong_scalar</b> (const char *name, oid *reg_oid, size_t reg_oid_len, u_long *it,
-    <b>Netsnmp_Node_Handler</b> *subhandler)<br />
-    <br />
-    int <b>netsnmp_register_read_only_ulong_scalar</b> (const char *name, oid *reg_oid, size_t reg_oid_len, u_long *it,
-    <b>Netsnmp_Node_Handler</b> *subhandler)<br />
-    <br />
-    int <b>netsnmp_register_long_scalar</b> (const char *name, oid *reg_oid, size_t reg_oid_len, long *it,
-    <b>Netsnmp_Node_Handler</b> *subhandler)<br />
-    <br />
-    int <b>netsnmp_register_read_only_long_scalar</b> (const char *name, oid *reg_oid, size_t reg_oid_len, long *it,
-    <b>Netsnmp_Node_Handler</b> *subhandler)<br />
-    <br />
-    int <b>netsnmp_register_int_scalar</b> (const char *name, oid *reg_oid, size_t reg_oid_len, int *it,
-    <b>Netsnmp_Node_Handler</b> *subhandler)<br />
-    <br />
-    int <b>netsnmp_register_read_only_int_scalar</b> (const char *name, oid *reg_oid, size_t reg_oid_len, int *it,
-    <b>Netsnmp_Node_Handler</b> *subhandler)<br />
-    <br />
-    int <b>netsnmp_register_read_only_counter32_scalar</b> (const char *name, oid *reg_oid, size_t reg_oid_len, u_long *it,
-    <b>Netsnmp_Node_Handler</b> *subhandler)<br />
-    <a name="lbAD" id="lbAD">&nbsp;</a></p>
+<A NAME="lbAB">&nbsp;</A>
+<H2>NAME</H2>
 
-    <h2>Detailed Description</h2>
+watcher - 
+<P>
 
-    <p>Watch a specified variable and process it as an instance or scalar object.</p>
-    <hr />
-    <a name="index" id="index">&nbsp;</a>
+Watch a specified <B>variable</B> and process it as an instance or scalar object.  
+<P>
+<A NAME="lbAC">&nbsp;</A>
+<H3>Functions</H3>
 
-    <h2>Index</h2>
+<P>
 
-    <dl>
-      <dt><a href="#lbAB">NAME</a></dt>
+<BR>
 
-      <dd>
-        <dl>
-          <dt><a href="#lbAC">Functions</a></dt>
-        </dl>
-      </dd>
+<B>netsnmp_mib_handler</B> * <B>netsnmp_get_watcher_handler</B> (void)
 
-      <dt><a href="#lbAD">Detailed Description</a></dt>
-    </dl>
-    <hr />
-    This document was created by <a href="http://localhost/cgi-bin/man/man2html">man2html</a>, using the manual pages.<br />
-    Time: 13:12:01 GMT, September 23, 2007
-<!-- CONTENT END -->
-<!--#include virtual="/page-bottom.html" -->
+<BR>
 
+<BR>
+
+<B>netsnmp_watcher_info</B> * <B>netsnmp_init_watcher_info6</B> (<B>netsnmp_watcher_info</B> *winfo, void *data, size_t size, u_char type, int flags, size_t max_size, size_t *size_p)
+
+<BR>
+
+<BR>
+
+<B>netsnmp_watcher_info</B> * <B>netsnmp_create_watcher_info6</B> (void *data, size_t size, u_char type, int flags, size_t max_size, size_t *size_p)
+
+<BR>
+
+<BR>
+
+<B>netsnmp_watcher_info</B> * <B>netsnmp_init_watcher_info</B> (<B>netsnmp_watcher_info</B> *winfo, void *data, size_t size, u_char type, int flags)
+
+<BR>
+
+<BR>
+
+<B>netsnmp_watcher_info</B> * <B>netsnmp_create_watcher_info</B> (void *data, size_t size, u_char type, int flags)
+
+<BR>
+
+<BR>
+
+int <B>netsnmp_register_watched_instance</B> (<B>netsnmp_handler_registration</B> *reginfo, <B>netsnmp_watcher_info</B> *watchinfo)
+
+<BR>
+
+<BR>
+
+int <B>netsnmp_register_watched_scalar</B> (<B>netsnmp_handler_registration</B> *reginfo, <B>netsnmp_watcher_info</B> *watchinfo)
+
+<BR>
+
+<BR>
+
+int <B>netsnmp_watcher_helper_handler</B> (<B>netsnmp_mib_handler</B> *handler, <B>netsnmp_handler_registration</B> *reginfo, <B>netsnmp_agent_request_info</B> *reqinfo, <B>netsnmp_request_info</B> *requests)
+
+<BR>
+
+<BR>
+
+<B>netsnmp_mib_handler</B> * <B>netsnmp_get_watched_timestamp_handler</B> (void)
+
+<BR>
+
+<BR>
+
+int <B>netsnmp_watched_timestamp_register</B> (<B>netsnmp_mib_handler</B> *whandler, <B>netsnmp_handler_registration</B> *reginfo, marker_t timestamp)
+
+<BR>
+
+<BR>
+
+int <B>netsnmp_register_watched_timestamp</B> (<B>netsnmp_handler_registration</B> *reginfo, marker_t timestamp)
+
+<BR>
+
+<BR>
+
+int <B>netsnmp_watched_timestamp_handler</B> (<B>netsnmp_mib_handler</B> *handler, <B>netsnmp_handler_registration</B> *reginfo, <B>netsnmp_agent_request_info</B> *reqinfo, <B>netsnmp_request_info</B> *requests)
+
+<BR>
+
+<BR>
+
+<B>netsnmp_mib_handler</B> * <B>netsnmp_get_watched_spinlock_handler</B> (void)
+
+<BR>
+
+<BR>
+
+int <B>netsnmp_register_watched_spinlock</B> (<B>netsnmp_handler_registration</B> *reginfo, int *spinlock)
+
+<BR>
+
+<BR>
+
+int <B>netsnmp_watched_spinlock_handler</B> (<B>netsnmp_mib_handler</B> *handler, <B>netsnmp_handler_registration</B> *reginfo, <B>netsnmp_agent_request_info</B> *reqinfo, <B>netsnmp_request_info</B> *requests)
+
+<BR>
+
+<BR>
+
+int <B>netsnmp_register_ulong_scalar</B> (const char *name, const oid *reg_oid, size_t reg_oid_len, u_long *it, Netsnmp_Node_Handler *subhandler)
+
+<BR>
+
+<BR>
+
+int <B>netsnmp_register_read_only_ulong_scalar</B> (const char *name, const oid *reg_oid, size_t reg_oid_len, u_long *it, Netsnmp_Node_Handler *subhandler)
+
+<BR>
+
+<BR>
+
+int <B>netsnmp_register_long_scalar</B> (const char *name, const oid *reg_oid, size_t reg_oid_len, long *it, Netsnmp_Node_Handler *subhandler)
+
+<BR>
+
+<BR>
+
+int <B>netsnmp_register_read_only_long_scalar</B> (const char *name, const oid *reg_oid, size_t reg_oid_len, long *it, Netsnmp_Node_Handler *subhandler)
+
+<BR>
+
+<BR>
+
+int <B>netsnmp_register_int_scalar</B> (const char *name, const oid *reg_oid, size_t reg_oid_len, int *it, Netsnmp_Node_Handler *subhandler)
+
+<BR>
+
+<BR>
+
+int <B>netsnmp_register_read_only_int_scalar</B> (const char *name, const oid *reg_oid, size_t reg_oid_len, int *it, Netsnmp_Node_Handler *subhandler)
+
+<BR>
+
+<BR>
+
+int <B>netsnmp_register_read_only_counter32_scalar</B> (const char *name, const oid *reg_oid, size_t reg_oid_len, u_long *it, Netsnmp_Node_Handler *subhandler)
+
+<BR>
+
+
+
+<BR>
+
+#define <B>NETSNMP_WATCHER_DIRECT</B>   MIB_HANDLER_CUSTOM1
+
+<BR>
+
+<BR>
+
+#define <B>WATCHER_FIXED_SIZE</B>
+
+<BR>
+
+<I>The size of the watched object is constant. </I>
+
+<BR>
+
+#define <B>WATCHER_MAX_SIZE</B>
+
+<BR>
+
+<I>The maximum size of the watched object is stored in max_size. </I>
+
+<BR>
+
+#define <B>WATCHER_SIZE_IS_PTR</B>
+
+<BR>
+
+<I>If set then the </I><B>variable</B> data_size_p points to is supposed to hold the current size of the watched object and will be updated on writes. 
+
+<BR>
+
+#define <B>WATCHER_SIZE_STRLEN</B>
+
+<BR>
+
+<I>If set then data is suppposed to be a zero-terminated character array and both data_size and data_size_p are ignored. </I>
+
+<BR>
+
+typedef struct <B>netsnmp_watcher_info_s</B> <B>netsnmp_watcher_info</B>
+
+<BR>
+
+
+<A NAME="lbAD">&nbsp;</A>
+<H2>Detailed Description</H2>
+
+<P>
+
+Watch a specified <B>variable</B> and process it as an instance or scalar object. 
+<A NAME="lbAE">&nbsp;</A>
+<H2>Define Documentation</H2>
+
+<P>
+
+<A NAME="lbAF">&nbsp;</A>
+<H3>#define WATCHER_FIXED_SIZE</H3>
+
+<P>
+
+The size of the watched object is constant. 
+<P>
+
+Definition at line 26 of file watcher.h.
+<A NAME="lbAG">&nbsp;</A>
+<H3>#define WATCHER_MAX_SIZE</H3>
+
+<P>
+
+The maximum size of the watched object is stored in max_size. If WATCHER_SIZE_STRLEN is set then it is supposed that max_size + 1 bytes could be stored in the buffer. 
+<P>
+
+<B>Examples: </B>
+
+<B>watched.c</B>.
+<P>
+
+Definition at line 32 of file watcher.h.
+<A NAME="lbAH">&nbsp;</A>
+<H3>#define WATCHER_SIZE_IS_PTR</H3>
+
+<P>
+
+If set then the <B>variable</B> data_size_p points to is supposed to hold the current size of the watched object and will be updated on writes. <B>Since:</B>
+<DL COMPACT><DT><DD>
+Net-SNMP 5.5 
+</DL>
+
+<P>
+
+<P>
+<P>
+
+Definition at line 38 of file watcher.h.
+<A NAME="lbAI">&nbsp;</A>
+<H3>#define WATCHER_SIZE_STRLEN</H3>
+
+<P>
+
+If set then data is suppposed to be a zero-terminated character array and both data_size and data_size_p are ignored. Additionally \0 is a forbidden character in the data set.
+<P>
+
+<B>Since:</B>
+<DL COMPACT><DT><DD>
+Net-SNMP 5.5 
+</DL>
+
+<P>
+
+<P>
+<P>
+
+Definition at line 45 of file watcher.h.
+<A NAME="lbAJ">&nbsp;</A>
+<H2>Author</H2>
+
+<P>
+
+Generated automatically by Doxygen for net-snmp from the source code.
+<P>
+
+<HR>
+<A NAME="index">&nbsp;</A><H2>Index</H2>
+<DL>
+<DT><A HREF="#lbAB">NAME</A><DD>
+<DL>
+<DT><A HREF="#lbAC">Functions</A><DD>
+</DL>
+<DT><A HREF="#lbAD">Detailed Description</A><DD>
+<DT><A HREF="#lbAE">Define Documentation</A><DD>
+<DL>
+<DT><A HREF="#lbAF">#define WATCHER_FIXED_SIZE</A><DD>
+<DT><A HREF="#lbAG">#define WATCHER_MAX_SIZE</A><DD>
+<DT><A HREF="#lbAH">#define WATCHER_SIZE_IS_PTR</A><DD>
+<DT><A HREF="#lbAI">#define WATCHER_SIZE_STRLEN</A><DD>
+</DL>
+<DT><A HREF="#lbAJ">Author</A><DD>
+</DL>
+<HR>
+This document was created by
+<A HREF="http://localhost/cgi-bin/man/man2html">man2html</A>,
+using the manual pages.<BR>
+Time: 19:05:38 GMT, September 28, 2009
+</BODY>
+</HTML>

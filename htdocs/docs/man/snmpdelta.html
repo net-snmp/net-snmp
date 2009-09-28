@@ -1,101 +1,151 @@
-<!--#set var="section" value="documentation" -->
-<!--#include virtual="/page-top.html" -->
-<!-- CONTENT START -->
-    <h1>SNMPDELTA</h1>Section: Net-SNMP (1)<br />
-    Updated: 25 Jul 2003<br />
-    <a href="#index">Index</a> <a href="../index.html">Return to Main Contents</a>
-    <hr />
-    <a name="lbAB" id="lbAB">&nbsp;</a>
+Content-type: text/html
 
-    <h2>NAME</h2>snmpdelta - Monitor delta differences in SNMP Counter values <a name="lbAC" id="lbAC">&nbsp;</a>
+<HTML><HEAD><TITLE>Manpage of SNMPDELTA</TITLE>
+</HEAD><BODY>
+<H1>SNMPDELTA</H1>
+Section: Net-SNMP (1)<BR>Updated: 25 Jul 2003<BR><A HREF="#index">Index</A>
+<A HREF="http://localhost/cgi-bin/man/man2html">Return to Main Contents</A><HR>
 
-    <h2>SYNOPSIS</h2><b>snmpdelta</b> [ common options ] [-Cf] [ -Ct ] [ -Cs ] [ -CS ] [ -Cm ] [ -CF configfile ] [ -Cl ] [ -Cp
-    period ] [ -CP Peaks ] [ -Ck ] [ -CT ] AGENT OID [ OID ... ] <a name="lbAD" id="lbAD">&nbsp;</a>
 
-    <h2>DESCRIPTION</h2><b>snmpdelta</b> will monitor the specified integer valued OIDs, and report changes over time.
+<A NAME="lbAB">&nbsp;</A>
+<H2>NAME</H2>
 
-    <p>AGENT identifies a target SNMP agent, which is instrumented to monitor the given objects. At its simplest, the AGENT
-    specification will consist of a hostname or an IPv4 address. In this situation, the command will attempt communication with
-    the agent, using UDP/IPv4 to port 161 of the given target host. See <a href="snmpcmd.html">snmpcmd</a>(1) for a full list of
-    the possible formats for AGENT.</p>
+snmpdelta - Monitor delta differences in SNMP Counter values
+<A NAME="lbAC">&nbsp;</A>
+<H2>SYNOPSIS</H2>
 
-    <p>OID is an object identifier which uniquely identifies the object type within a MIB. Multiple OIDs can be specified on a
-    single snmpdelta command.</p>
+<B>snmpdelta</B>
 
-    <p><a name="lbAE" id="lbAE">&nbsp;</a></p>
+[ common options ] [-Cf] [ -Ct ] [ -Cs ] [ -CS ] [ -Cm ] [ -CF configfile ] [ -Cl ] [ -Cp period ] [ -CP Peaks ] [ -Ck ] [ -CT ] AGENT OID [ OID ... ]
+<A NAME="lbAD">&nbsp;</A>
+<H2>DESCRIPTION</H2>
 
-    <h2>OPTIONS</h2>
+<B>snmpdelta</B>
 
-    <dl compact="compact">
-      <dt><b>COMMON OPTIONS</b></dt>
+will monitor the specified integer valued OIDs, and report changes
+over time.
+<P>
 
-      <dd>Please see <i><a href="snmpcmd.html">snmpcmd</a>(1)</i> for a list of possible values for COMMON OPTIONS as well as
-      their descriptions.</dd>
+AGENT identifies a target SNMP agent, which is instrumented
+to monitor the given objects.  At its simplest, the AGENT
+specification will consist of a hostname or an IPv4
+address.  In this situation, the command will attempt
+communication with the agent, using UDP/IPv4 to port 161
+of the given target host. See <A HREF="http://localhost/cgi-bin/man/man2html?1+snmpcmd">snmpcmd</A>(1) for a full list of
+the possible formats for AGENT.
+<P>
 
-      <dt><b>-Cf</b></dt>
+OID is an object identifier which uniquely
+identifies the object type within a MIB. Multiple
+OIDs can be specified on a single snmpdelta command.
+<P>
 
-      <dd>Don't fix errors and retry the request. Without this option, if multiple oids have been specified for a single request
-      and if the request for one or more of the oids fails, snmpdelta will retry the request so that data for oids apart from the
-      ones that failed will still be returned. Specifying -Cf tells <i>snmpdelta</i> not to retry a request, even if there are
-      multiple oids specified.</dd>
+<A NAME="lbAE">&nbsp;</A>
+<H2>OPTIONS</H2>
 
-      <dt><b>-Ct</b></dt>
+<DL COMPACT>
+<DT><B>COMMON OPTIONS</B>
 
-      <dd>Flag will determine time interval from the monitored entity.</dd>
+<DD>
+Please see
+<I><A HREF="http://localhost/cgi-bin/man/man2html?1+snmpcmd">snmpcmd</A>(1)</I>
 
-      <dt><b>-Cs</b></dt>
+for a list of possible values for COMMON OPTIONS
+as well as their descriptions.
+<DT><B>-Cf</B>
 
-      <dd>Flag will display a timestamp.</dd>
+<DD>
+Don't fix errors and retry the request.
+Without this option, if multiple oids have been specified for
+a single request and if the request for one or more of the
+oids fails, snmpdelta will retry the request so that data for
+oids apart from the ones that failed will still be returned. 
+Specifying -Cf tells
+<I>snmpdelta</I>
 
-      <dt><b>-CS</b></dt>
+not to retry a request, even
+if there are multiple oids specified.
+<DT><B>-Ct</B>
 
-      <dd>Generates a "sum count" in addition to the individual instance counts. The "sum count" is the total of all the
-      individual deltas for each time period.</dd>
+<DD>
+Flag will determine time interval from the monitored entity.
+<DT><B>-Cs</B>
 
-      <dt><b>-Cm</b></dt>
+<DD>
+Flag will display a timestamp.
+<DT><B>-CS</B>
 
-      <dd>Prints the max value ever attained.</dd>
+<DD>
+Generates a &quot;sum count&quot; in addition to the individual instance
+counts.  The &quot;sum count&quot; is the total of all the individual
+deltas for each time period.
+<DT><B>-Cm</B>
 
-      <dt><b>-CF configfile</b></dt>
+<DD>
+Prints the max value ever attained.
+<DT><B>-CF configfile</B>
 
-      <dd>Tells <b>snmpdelta</b> to read it's configuration from the specified file. This options allows the input to be set up
-      in advance rather than having to be specified on the command line.</dd>
+<DD>
+Tells
+<B>snmpdelta</B>
 
-      <dt><b>-Cl</b></dt>
+to read it's configuration from the specified file.
+This options allows the input to be set up in advance rather
+than having to be specified on the command line.
+<DT><B>-Cl</B>
 
-      <dd>Tells <b>snmpdelta</b> to write it's configuration to files whose names correspond to the MIB instances monitored. For
-      example, snmpdelta -Cl localhost ifInOctets.1 will create a file "localhost-ifInOctets.1".</dd>
+<DD>
+Tells
+<B>snmpdelta</B>
 
-      <dt><b>-Cp</b></dt>
+to write it's configuration to files whose names correspond to the MIB
+instances monitored.  For example, snmpdelta -Cl localhost ifInOctets.1
+will create a file &quot;localhost-ifInOctets.1&quot;.
+<DT><B>-Cp</B>
 
-      <dd>Specifies the number of seconds between polling periods. Polling constitutes sending a request to the agent. The
-      default polling period is one second.</dd>
+<DD>
+Specifies the number of seconds between polling periods.
+Polling constitutes sending a request to the agent. The
+default polling period is one second.
+<DT><B>-CP peaks</B>
 
-      <dt><b>-CP peaks</b></dt>
+<DD>
+Specifies the reporting period in number of polling periods.
+If this option is specified, snmpdelta polls the agent
+<I>peaks</I>
 
-      <dd>Specifies the reporting period in number of polling periods. If this option is specified, snmpdelta polls the agent
-      <i>peaks</i> number of times before reporting the results. The result reported includes the average value over the
-      reporting period. In addition, the highest polled value within the reporting period is shown.</dd>
+number of times before reporting the results.
+The result reported includes the average value over
+the reporting period. In addition, the highest polled
+value within the reporting period is shown.
+<DT><B>-Ck</B>
 
-      <dt><b>-Ck</b></dt>
+<DD>
+When the polling period (-Cp) is an increment of 60 seconds
+and the timestamp is displayed in the output (-Cs), then
+the default display shows the timestamp in the format
+hh:mm mm/dd. This option causes the timestamp format
+to be hh:mm:ss mm/dd.
+<DT><B>-CT</B>
 
-      <dd>When the polling period (-Cp) is an increment of 60 seconds and the timestamp is displayed in the output (-Cs), then
-      the default display shows the timestamp in the format hh:mm mm/dd. This option causes the timestamp format to be hh:mm:ss
-      mm/dd.</dd>
+<DD>
+Makes 
+<B>snmpdelta</B>
 
-      <dt><b>-CT</b></dt>
+print its output in tabular form.
+<DT><B>-Cv vars/pkt</B>
 
-      <dd>Makes <b>snmpdelta</b> print its output in tabular form.</dd>
+<DD>
+Specifies the maximum number of oids allowed to be packaged
+in a single PDU. Multiple PDUs can be created in a single
+request. The default value of variables per packet is 60.
+This option is useful if a request response results in an
+error becaues the packet is too big.
+</DL>
+<A NAME="lbAF">&nbsp;</A>
+<H2>EXAMPLES</H2>
 
-      <dt><b>-Cv vars/pkt</b></dt>
-
-      <dd>Specifies the maximum number of oids allowed to be packaged in a single PDU. Multiple PDUs can be created in a single
-      request. The default value of variables per packet is 60. This option is useful if a request response results in an error
-      becaues the packet is too big.</dd>
-    </dl><a name="lbAF" id="lbAF">&nbsp;</a>
-
-    <h2>EXAMPLES</h2>
-    <pre>
+<PRE>
 $ snmpdelta -c public -v 1 -Cs localhost IF-MIB::ifInUcastPkts.3 IF-MIB::ifOutUcastPkts.3
 [20:15:43 6/14] ifInUcastPkts.3 /1 sec: 158
 [20:15:43 6/14] ifOutUcastPkts.3 /1 sec: 158
@@ -123,38 +173,41 @@ localhost       ifInUcastPkts.3 ifOutUcastPkts.3
 [20:16:05 6/14] 184.00  184.00
 [20:16:06 6/14] 158.00  158.00
 ^C
-</pre>
+</PRE>
 
-    <p>The following example uses a number of options. Since the <i>Cl</i> option is specified, the output is sent to a file and
-    not to the screen.</p>
-    <pre>
+<P>
+
+The following example uses a number of options. Since the 
+<I>Cl </I>
+
+option is specified, the output is sent to a file and not to the
+screen.
+<P>
+
+<PRE>
 $ snmpdelta -c public -v 1 -Ct -Cs -CS -Cm -Cl -Cp 60 -CP 60
   interlink.sw.net.cmu.edu .1.3.6.1.2.1.2.2.1.16.3 .1.3.6.1.2.1.2.2.1.16.4
 fi
-</pre><a name="lbAG" id="lbAG">&nbsp;</a>
+</PRE><A NAME="lbAG">&nbsp;</A>
+<H2>SEE ALSO</H2>
 
-    <h2>SEE ALSO</h2><a href="snmpcmd.html">snmpcmd</a>(1), <a href="variables.html">variables</a>(5).
-    <hr />
-    <a name="index" id="index">&nbsp;</a>
+<A HREF="http://localhost/cgi-bin/man/man2html?1+snmpcmd">snmpcmd</A>(1), <A HREF="http://localhost/cgi-bin/man/man2html?5+variables">variables</A>(5).
+<P>
 
-    <h2>Index</h2>
-
-    <dl>
-      <dt><a href="#lbAB">NAME</a></dt>
-
-      <dt><a href="#lbAC">SYNOPSIS</a></dt>
-
-      <dt><a href="#lbAD">DESCRIPTION</a></dt>
-
-      <dt><a href="#lbAE">OPTIONS</a></dt>
-
-      <dt><a href="#lbAF">EXAMPLES</a></dt>
-
-      <dt><a href="#lbAG">SEE ALSO</a></dt>
-    </dl>
-    <hr />
-    This document was created by <a href="http://localhost/cgi-bin/man/man2html">man2html</a>, using the manual pages.<br />
-    Time: 13:12:00 GMT, September 23, 2007
-<!-- CONTENT END -->
-<!--#include virtual="/page-bottom.html" -->
-
+<HR>
+<A NAME="index">&nbsp;</A><H2>Index</H2>
+<DL>
+<DT><A HREF="#lbAB">NAME</A><DD>
+<DT><A HREF="#lbAC">SYNOPSIS</A><DD>
+<DT><A HREF="#lbAD">DESCRIPTION</A><DD>
+<DT><A HREF="#lbAE">OPTIONS</A><DD>
+<DT><A HREF="#lbAF">EXAMPLES</A><DD>
+<DT><A HREF="#lbAG">SEE ALSO</A><DD>
+</DL>
+<HR>
+This document was created by
+<A HREF="http://localhost/cgi-bin/man/man2html">man2html</A>,
+using the manual pages.<BR>
+Time: 19:05:39 GMT, September 28, 2009
+</BODY>
+</HTML>

@@ -1,226 +1,303 @@
-<!--#set var="section" value="documentation" -->
-<!--#include virtual="/page-top.html" -->
-<!-- CONTENT START -->
-    <h1>MIB2C</h1>Section: Net-SNMP (1)<br />
-    Updated: 25 Jul 2003<br />
-    <a href="#index">Index</a> <a href="../index.html">Return to Main Contents</a>
-    <hr />
-    <a name="lbAB" id="lbAB">&nbsp;</a>
-
-    <h2>NAME</h2>mib2c -- generate template code for extending the agent <a name="lbAC" id="lbAC">&nbsp;</a>
-
-    <h2>SYNOPSIS</h2><b>mib2c</b> [-h] -c CONFIGFILE [-I PATH] [-f OUTNAME] [-i][q][-S VAR=VAL] MIBNODE <a name="lbAD" id=
-    "lbAD">&nbsp;</a>
-
-    <h2>DESCRIPTION</h2>The mib2c tool is designed to take a portion of the MIB tree (as defined by a MIB file) and generate the
-    template C code necessary to implement the relevant management objects within it.
-
-    <p>In order to implement a new MIB module, three files are necessary:</p>
-
-    <p><br />
-    - MIB definition file<br />
-    - C header file<br />
-    - C implementation file.</p>
-
-    <p>The mib2c tool uses the MIB definition file to produce the two C code files. Thus, mib2c generates a template that you can
-    edit to add logic necessary to obtain information from the operating system or application to complete the module.</p>
-
-    <p>MIBNODE is the top level mib node you want to generate code for. You must give mib2c a mib node (e.g. ifTable) on the
-    command line, not a mib file. This is the single most common mistake.</p>
-
-    <p>The mib2c tool accepts both SMIv1 and SMIv2 MIBs.</p>
-
-    <p>mib2c needs to be able to find and load a MIB file in order to generate C code for the MIB. To enable mib2c to find the
-    MIB file, set the MIBS environment variable to include the MIB file you are using. An example of setting this environment
-    variable is:</p>
-
-    <p><br />
-    &nbsp;&nbsp;&nbsp;MIBS=+NET-SNMP-TUTORIAL-MIB</p>
-
-    <p><br />
-    &nbsp;&nbsp;&nbsp;or</p>
-
-    <p><br />
-    &nbsp;&nbsp;&nbsp;MIBS=ALL</p>
-
-    <p>The first example ensures that mib2c finds the NET-SNMP-TUTORIAL-MIB mib, in addition to the default MIB modules. The
-    default list of MIB modules is set when the suite is first configured and built and basically corresponds to the list of
-    modules that the agent supports. The second example ensures that mib2c finds all MIBs in the search location for MIB files.
-    The default search location for MIB files is /usr/local/share/snmp/mibs. This search location can be modified by the MIBDIRS
-    environment variable.</p>
-
-    <p>Both the MIB files to be loaded and the MIB file search location can also be configured in the snmp.conf file. Please see
-    <a href="snmp.conf.html">snmp.conf</a>(5) for more information.</p>
-
-    <p>The generated *.c and *.h files will be created in the current working directory. <a name="lbAE" id="lbAE">&nbsp;</a></p>
-
-    <h2>OPTIONS</h2>
-
-    <dl compact="compact">
-      <dt><b>-h</b></dt>
-
-      <dd>Display a help message.</dd>
-
-      <dt><b>-c</b> <i>CONFIGFILE</i></dt>
-
-      <dd>Use CONFIGFILE when generating code. These files will be searched for first in the current directory and then in the
-      /usr/local/share directory (which is where the default mib2c configuration files can be found). Running mib2c without the
-      -c CONFIGFILE option will display a description of the valid values for CONFIGFILE, that is, the available config files,
-      including new ones that you might author.</dd>
-
-      <dd>For example,</dd>
-
-      <dd>% mib2c ifTable</dd>
-
-      <dd>will display a description of the currently available values for CONFIGFILE.</dd>
-
-      <dd>The following values are supported for CONFIGFILE:</dd>
-
-      <dd>mib2c.mfd.conf<br />
-      mib2c.scalar.conf<br />
-      mib2c.int_watch.conf<br />
-      mib2c.iterate.conf<br />
-      mib2c.create-dataset.conf<br />
-      mib2c.array-user.conf<br />
-      mib2c.column_defines.conf<br />
-      mib2c.column_enums.conf</dd>
-
-      <dd>GENERATING CODE FOR SCALAR OBJECTS:</dd>
-
-      <dd>
-        If you're writing code for some scalars, run:
-
-        <p><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt>mib2c -c mib2c.scalar.conf MIBNODE<br /></p>
-      </dd>
-
-      <dd>
-        If you want to magically "tie" integer variables to integer scalars, use:
-
-        <p><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt>mib2c -c mib2c.int_watch.conf MIBNODE<br /></p>
-      </dd>
-
-      <dd>
-        GENERATING CODE FOR TABLES:
-
-        <p>The recommended configuration file for tables is the MIBs for Dummies, or MFD, configuration file. It hides as much of
-        the SNMP details as possible, generating small, easy to understand functions. It is also the most flexible and well
-        documented configuration file. See the agent/mibgroup/if-mib/ifTable/ifTable*.c files for an example:</p>
-
-        <p><br />
-        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;mib2c&nbsp;-c&nbsp;mib2c.mfd.conf&nbsp;MIBNODE</p>
-
-        <p>If your table data is kept somewhere else (e.g. it's in the kernel and not in the memory of the agent itself) and you
-        need to "iterate" over it to find the right data for the SNMP row being accessed. See the
-        agent/mibgroup/mibII/vacm_context.c file for an example:</p>
-
-        <p><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt>mib2c -c mib2c.iterate.conf MIBNODE<br /></p>
-
-        <p>If your table data is kept in the agent (i.e. it's not located in an external source) and is purely data driven (i.e.
-        you do not need to perform any work when a set occurs). See the agent/mibgroup/examples/data_set.c file for an example of
-        such a table:</p>
-
-        <p><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt>mib2c -c mib2c.create-dataset.conf MIBNODE<br /></p>
-
-        <p>If your table data is kept in the agent (i.e. it's not located in an external source), and you can keep your data
-        sorted by the table index but you do need to perform work when a set occurs:</p>
-
-        <p><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt>mib2c -c mib2c.array-user.conf MIBNODE<br /></p>
-
-        <p>GENERATING HEADER FILE DEFINITIONS</p>
-
-        <p>To generate just a header with a define for each column number in your table:</p>
-
-        <p><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt>mib2c -c mib2c.column_defines.conf MIBNODE<br /></p>
-
-        <p>To generate just a header with a define for each enum for any column containing enums:</p>
-
-        <p><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt>mib2c -c mib2c.column_enums.conf MIBNODE<br /></p>
-
-        <p><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt>GENERATING CODE FOR THE 4.X LINE OF CODE (THE OLDER
-        API)<br /></p>
-
-        <p><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt>mib2c -c mib2c.old-api.conf MIBNODE<br /></p>
-      </dd>
-
-      <dt><b>-I</b><i>PATH</i></dt>
-
-      <dd>Search for configuration files in PATH. Multiple paths can be specified using multiple -I switches or by using one with
-      a comma separated list of paths in it.</dd>
-
-      <dt><b>-f</b> <i>OUTNAME</i></dt>
-
-      <dd>Places the output code into OUTNAME.c and OUTNAME.h. Normally, mib2c will place the output code into files which
-      correspond to the table names it is generating code for, which is probably what you want anyway.</dd>
-
-      <dt><b>-i</b></dt>
-
-      <dd>Do not run indent on the resulting code.</dd>
-
-      <dt><b>-q</b></dt>
-
-      <dd>Run in "quiet" mode, which minimizes the status messages mib2c generates.</dd>
-
-      <dt><b>-S</b><i>VAR=VAL</i></dt>
-
-      <dd>Preset a variable VAR, in the mib2c.*.conf file, to the value VAL. None of the existing mib2c configuration files
-      (mib2c.*.conf) currently makes use of this feature, however, so this option should be considered available only for future
-      use.</dd>
-    </dl><a name="lbAF" id="lbAF">&nbsp;</a>
-
-    <h2>EXAMPLES</h2>
-
-    <p>The following generates C template code for the header and implementation files to implement
-    UCD-DEMO-MIB::ucdDemoPublic.</p>
-
-    <dl compact="compact">
-      <dd>% mib2c -c mib2c.scalar.conf ucdDemoPublic<br />
-      writing to ucdDemoPublic.h<br />
-      writing to ucdDemoPublic.c<br />
-      running indent on ucdDemoPublic.h<br />
-      running indent on ucdDemoPublic.c</dd>
-    </dl>
-
-    <p>The resulting ucdDemoPublic.c and ucdDemoPublic.h files are generated the current working directory.</p>
-
-    <p>The following generates C template code for the header and implementation files for the module to implement
-    TCP-MIB::tcpConnTable.</p>
-
-    <dl compact="compact">
-      <dd>% mib2c -c mib2c.iterate.conf tcpConnTable<br />
-      writing to tcpConnTable.h<br />
-      writing to tcpConnTable.c<br />
-      running indent on tcpConnTable.h<br />
-      running indent on tcpConnTable.c</dd>
-    </dl>
-
-    <p>The resulting tcpConnTable.c and tcpConnTable.h files are generated in the current working directory.</p>
-
-    <p><a name="lbAG" id="lbAG">&nbsp;</a></p>
-
-    <h2>SEE ALSO</h2>
-
-    <p><a href="snmpcmd.html">snmpcmd</a>(1), <a href="snmp.conf.html">snmp.conf</a>(5)</p>
-    <hr />
-    <a name="index" id="index">&nbsp;</a>
-
-    <h2>Index</h2>
-
-    <dl>
-      <dt><a href="#lbAB">NAME</a></dt>
-
-      <dt><a href="#lbAC">SYNOPSIS</a></dt>
-
-      <dt><a href="#lbAD">DESCRIPTION</a></dt>
-
-      <dt><a href="#lbAE">OPTIONS</a></dt>
-
-      <dt><a href="#lbAF">EXAMPLES</a></dt>
-
-      <dt><a href="#lbAG">SEE ALSO</a></dt>
-    </dl>
-    <hr />
-    This document was created by <a href="http://localhost/cgi-bin/man/man2html">man2html</a>, using the manual pages.<br />
-    Time: 13:12:00 GMT, September 23, 2007
-<!-- CONTENT END -->
-<!--#include virtual="/page-bottom.html" -->
-
+Content-type: text/html
+
+<HTML><HEAD><TITLE>Manpage of MIB2C</TITLE>
+</HEAD><BODY>
+<H1>MIB2C</H1>
+Section: Net-SNMP (1)<BR>Updated: 25 Jul 2003<BR><A HREF="#index">Index</A>
+<A HREF="http://localhost/cgi-bin/man/man2html">Return to Main Contents</A><HR>
+
+
+<A NAME="lbAB">&nbsp;</A>
+<H2>NAME</H2>
+
+mib2c -- generate template code for extending the agent
+<A NAME="lbAC">&nbsp;</A>
+<H2>SYNOPSIS</H2>
+
+<B>mib2c</B>
+
+[-h] -c CONFIGFILE [-I PATH] [-f OUTNAME] [-i][q][-S VAR=VAL] MIBNODE
+<A NAME="lbAD">&nbsp;</A>
+<H2>DESCRIPTION</H2>
+
+The mib2c tool is designed to take a portion of the MIB tree (as defined
+by a MIB file) and generate the template C code necessary to implement
+the relevant management objects within it.
+<P>
+
+In order to implement a new MIB module, three files are necessary:
+<P>
+
+<BR>
+
+- MIB definition file
+<BR>
+
+- C header file
+<BR>
+
+- C implementation file.
+<P>
+
+The mib2c tool uses the MIB definition file to produce the two C
+code files. Thus, mib2c generates a template that you can edit
+to add logic necessary to obtain information from the
+operating system or application to complete the module.
+<P>
+
+MIBNODE is the top level mib node you want to generate code for.
+You must give mib2c a mib node (e.g. ifTable) on the command line,
+not a mib file.  This is the single most common mistake.
+<P>
+
+The mib2c tool accepts both SMIv1 and SMIv2 MIBs.
+<P>
+
+mib2c needs to be able to find and load a MIB file in order to generate
+C code for the MIB. To enable mib2c to find the MIB file, set the
+MIBS environment variable to include the MIB file you are using.
+An example of setting this environment variable is:
+<P>
+
+<BR>&nbsp;&nbsp;&nbsp;MIBS=+NET-SNMP-TUTORIAL-MIB
+<P>
+
+<BR>&nbsp;&nbsp;&nbsp;or
+<P>
+
+<BR>&nbsp;&nbsp;&nbsp;MIBS=ALL
+<P>
+
+The first example ensures that mib2c finds the NET-SNMP-TUTORIAL-MIB
+mib, in addition to the default MIB modules. The default list of MIB
+modules is set when the suite is first configured and built and
+basically corresponds to the list of modules that the agent supports.
+The second example ensures that mib2c finds all MIBs in the search
+location for MIB files. The default search location for MIB files is
+/usr/local/share/snmp/mibs. This search location can be modified
+by the MIBDIRS environment variable.
+<P>
+
+Both the MIB files to be loaded and the MIB file search location can
+also be configured in the snmp.conf file. Please see <A HREF="http://localhost/cgi-bin/man/man2html?5+snmp.conf">snmp.conf</A>(5) for
+more information.
+<P>
+
+The generated *.c and *.h files will be created in the current working
+directory.
+<A NAME="lbAE">&nbsp;</A>
+<H2>OPTIONS</H2>
+
+<DL COMPACT>
+<DT><B>-h</B>
+
+<DD>
+Display a help message.
+<DT><B>-c</B><I> CONFIGFILE</I>
+
+<DD>
+Use CONFIGFILE when generating code.  These files will be searched for
+first in the current directory and then in the /usr/local/share directory
+(which is where the default mib2c configuration files can be found).
+Running mib2c without the -c CONFIGFILE option will display
+a description of the valid values for CONFIGFILE, that is,
+the available config files, including new ones that you might
+author.
+<DT><DD>
+For example,
+<DT><DD>
+% mib2c ifTable
+<DT><DD>
+will display a description of the currently available values
+for CONFIGFILE.
+<DT><DD>
+The following values are supported for CONFIGFILE:
+<DT><DD>
+mib2c.mfd.conf
+<BR>
+
+mib2c.scalar.conf
+<BR>
+
+mib2c.int_watch.conf
+<BR>
+
+mib2c.iterate.conf
+<BR>
+
+mib2c.create-dataset.conf
+<BR>
+
+mib2c.array-user.conf
+<BR>
+
+mib2c.column_defines.conf
+<BR>
+
+mib2c.column_enums.conf
+<DT><DD>
+GENERATING CODE FOR SCALAR OBJECTS:
+<DT><DD>
+If you're writing code for some scalars, run:
+<P>
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>mib2c -c mib2c.scalar.conf MIBNODE<BR>
+<DT><DD>
+If you want to magically &quot;tie&quot; integer variables to integer
+scalars, use:
+<P>
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>mib2c -c mib2c.int_watch.conf MIBNODE<BR>
+<DT><DD>
+GENERATING CODE FOR TABLES:
+<P>
+The recommended configuration file for tables is the MIBs for
+Dummies, or MFD, configuration file. It hides as much of the SNMP
+details as possible, generating small, easy to understand functions.
+It is also the most flexible and well documented configuration file.
+See the agent/mibgroup/if-mib/ifTable/ifTable*.c files for an example:
+<P>
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;mib2c&nbsp;-c&nbsp;mib2c.mfd.conf&nbsp;MIBNODE
+<P>
+If your table data is kept somewhere else (e.g. it's in the
+kernel and not in the memory of the agent itself) and you need to
+&quot;iterate&quot; over it to find the right data for the SNMP row being
+accessed.  See the agent/mibgroup/mibII/vacm_context.c file for an
+example:
+<P>
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>mib2c -c mib2c.iterate.conf MIBNODE<BR>
+<P>
+If your table data is kept in the agent (i.e. it's not located in
+an external source) and is purely data driven (i.e. you do not need
+to perform any work when a set occurs).  See the
+agent/mibgroup/examples/data_set.c file for an example of such a
+table:
+<P>
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>mib2c -c mib2c.create-dataset.conf MIBNODE<BR>
+<P>
+If your table data is kept in the agent (i.e. it's not located in
+an external source), and you can keep your data sorted by the table
+index but you do need to perform work when a set occurs:
+<P>
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>mib2c -c mib2c.array-user.conf MIBNODE<BR>
+<P>
+GENERATING HEADER FILE DEFINITIONS
+<P>
+To generate just a header with a define for each column number in
+your table:
+<P>
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>mib2c -c mib2c.column_defines.conf MIBNODE<BR>
+<P>
+To generate just a header with a define for each enum for any
+column containing enums:
+<P>
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>mib2c -c mib2c.column_enums.conf MIBNODE<BR>
+<P>
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>GENERATING CODE FOR THE 4.X LINE OF CODE (THE OLDER API)<BR>
+<P>
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>mib2c -c mib2c.old-api.conf MIBNODE<BR>
+<DT><B>-I</B><I>PATH</I>
+
+<DD>
+Search for configuration files in PATH.  Multiple paths can be
+specified using multiple -I switches or by using one with a comma
+separated list of paths in it.
+<DT><B>-f</B><I> OUTNAME</I>
+
+<DD>
+Places the output code into OUTNAME.c and OUTNAME.h. Normally, mib2c
+will place the output code into files which correspond to the table
+names it is generating code for, which is probably what you want anyway.
+<DT><B>-i</B>
+
+<DD>
+Do not run indent on the resulting code.
+<DT><B>-q</B>
+
+<DD>
+Run in &quot;quiet&quot; mode, which minimizes the status messages
+mib2c generates.
+<DT><B>-S</B><I>VAR=VAL</I>
+
+<DD>
+Preset a variable VAR, in the mib2c.*.conf file, to the value
+VAL. None of the existing mib2c configuration files
+(mib2c.*.conf) currently makes use of this feature, however,
+so this option should be considered available only for future use.
+</DL>
+<A NAME="lbAF">&nbsp;</A>
+<H2>EXAMPLES</H2>
+
+<P>
+
+The following generates C template code for the header and implementation
+files to implement UCD-DEMO-MIB::ucdDemoPublic.
+<DL COMPACT>
+<DT><DD>
+% mib2c -c mib2c.scalar.conf ucdDemoPublic
+<BR>
+
+writing to ucdDemoPublic.h
+<BR>
+
+writing to ucdDemoPublic.c
+<BR>
+
+running indent on ucdDemoPublic.h
+<BR>
+
+running indent on ucdDemoPublic.c
+</DL>
+<P>
+
+The resulting ucdDemoPublic.c and ucdDemoPublic.h files are
+generated the current working directory.
+<P>
+
+The following generates C template code for the header and implementation
+files  for the module to implement TCP-MIB::tcpConnTable.
+<DL COMPACT>
+<DT><DD>
+% mib2c -c mib2c.iterate.conf tcpConnTable
+<BR>
+
+writing to tcpConnTable.h
+<BR>
+
+writing to tcpConnTable.c
+<BR>
+
+running indent on tcpConnTable.h
+<BR>
+
+running indent on tcpConnTable.c
+</DL>
+<P>
+
+The resulting tcpConnTable.c and tcpConnTable.h files are generated
+in the current working directory.
+<P>
+
+<A NAME="lbAG">&nbsp;</A>
+<H2>SEE ALSO</H2>
+
+<P>
+
+<A HREF="http://localhost/cgi-bin/man/man2html?1+snmpcmd">snmpcmd</A>(1), <A HREF="http://localhost/cgi-bin/man/man2html?5+snmp.conf">snmp.conf</A>(5)
+<P>
+
+<HR>
+<A NAME="index">&nbsp;</A><H2>Index</H2>
+<DL>
+<DT><A HREF="#lbAB">NAME</A><DD>
+<DT><A HREF="#lbAC">SYNOPSIS</A><DD>
+<DT><A HREF="#lbAD">DESCRIPTION</A><DD>
+<DT><A HREF="#lbAE">OPTIONS</A><DD>
+<DT><A HREF="#lbAF">EXAMPLES</A><DD>
+<DT><A HREF="#lbAG">SEE ALSO</A><DD>
+</DL>
+<HR>
+This document was created by
+<A HREF="http://localhost/cgi-bin/man/man2html">man2html</A>,
+using the manual pages.<BR>
+Time: 19:05:39 GMT, September 28, 2009
+</BODY>
+</HTML>

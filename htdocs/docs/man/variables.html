@@ -1,62 +1,80 @@
-<!--#set var="section" value="documentation" -->
-<!--#include virtual="/page-top.html" -->
-<!-- CONTENT START -->
-    <h1>VARIABLES</h1>Section: Net-SNMP (5)<br />
-    Updated: 02 Mar 1999<br />
-    <a href="#index">Index</a> <a href="../index.html">Return to Main Contents</a>
-    <hr />
-    <a name="lbAB" id="lbAB">&nbsp;</a>
+Content-type: text/html
 
-    <h2>NAME</h2><br />
-    &nbsp;&nbsp;&nbsp;&nbsp;variables&nbsp;-&nbsp;Format&nbsp;of&nbsp;specifying&nbsp;variable&nbsp;names&nbsp;to&nbsp;SNMP&nbsp;tools.
-    <a name="lbAC" id="lbAC">&nbsp;</a>
+<HTML><HEAD><TITLE>Manpage of VARIABLES</TITLE>
+</HEAD><BODY>
+<H1>VARIABLES</H1>
+Section: Net-SNMP (5)<BR>Updated: 02 Mar 1999<BR><A HREF="#index">Index</A>
+<A HREF="http://localhost/cgi-bin/man/man2html">Return to Main Contents</A><HR>
 
-    <h2>SYNOPSIS</h2><br />
-    &nbsp;&nbsp;&nbsp;&nbsp;system.sysdescr.0 <a name="lbAD" id="lbAD">&nbsp;</a>
 
-    <h2>DESCRIPTION</h2>Variable names are in the format of Object Identifiers (ASN.1). There are several methods of
-    representation. Each variable name is given in the format of A.B.C.D..., where A, B, C, and D are subidentifiers in one of
-    two forms of notation. Each subidentifier may be encoded as a decimal integer, or a symbol as found in the RFC1066 MIB. The
-    case of the symbols is not significant.<br />
-    If there is no leading "." in the variable name, the name will be formed as if having been preceded with
-    "iso.org.dod.internet.mgmt.mib.". A "." must be placed before the first variable if the user is to fully specify the name.
-    For example:
+<A NAME="lbAB">&nbsp;</A>
+<H2>NAME</H2>
 
-    <p><i>1.1.0 system.sysDescr.0 and 1.sysDescr.0</i></p>
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;variables&nbsp;-&nbsp;Format&nbsp;of&nbsp;specifying&nbsp;variable&nbsp;names&nbsp;to&nbsp;SNMP&nbsp;tools.
+<A NAME="lbAC">&nbsp;</A>
+<H2>SYNOPSIS</H2>
 
-    <p>all refer to the same variable name. Likewise:</p>
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;system.sysdescr.0
+<A NAME="lbAD">&nbsp;</A>
+<H2>DESCRIPTION</H2>
 
-    <p><i>.1.3.6.1.2.1.1.1.0 .iso.org.dod.internet.mgmt.mib.system.sysdescr.0 .1.3.6.1.2.1.1.sysdescr.0</i></p>
+Variable names are in the format of Object Identifiers (ASN.1).  There are
+several methods of representation. Each variable name is given in the format of A.B.C.D...,
+where A, B, C, and D are subidentifiers in one of two forms of notation.
+Each subidentifier may be encoded as a decimal integer, or a symbol as found in
+the RFC1066 MIB.  The case of the symbols is not significant.
+<BR>
 
-    <p>All refer to the same variable name.</p>
+If there is no leading &quot;.&quot; in the variable name, the name will be formed
+as if having been preceded with &quot;iso.org.dod.internet.mgmt.mib.&quot;.  A &quot;.&quot; must
+be placed before the first variable if the user is to fully specify the name.
+For example:
+<P>
 
-    <p>The description of the variables in the MIB is given in the set of MIB files defined by the MIBS environment variable (or
-    the default list defined at compilation time) and the MIB files in the /usr/local/share/snmp/mibs directory (or the MIBDIRS
-    environment variable). <a name="lbAE" id="lbAE">&nbsp;</a></p>
+<I>1.1.0  system.sysDescr.0 and 1.sysDescr.0</I>
 
-    <h2>SEE ALSO</h2>RFC 1065, RFC 1066, RFC 1067, ISO IS 8824(ASN.1) <a name="lbAF" id="lbAF">&nbsp;</a>
+<P>
 
-    <h2>BUGS</h2>The parser of the MIB files file is not expected to handle bizarre (although correct) interpretations of the
-    ASN.1 notation.
-    <hr />
-    <a name="index" id="index">&nbsp;</a>
+all refer to the same variable name.  Likewise:
+<P>
 
-    <h2>Index</h2>
+<I>.1.3.6.1.2.1.1.1.0 .iso.org.dod.internet.mgmt.mib.system.sysdescr.0 .1.3.6.1.2.1.1.sysdescr.0</I>
 
-    <dl>
-      <dt><a href="#lbAB">NAME</a></dt>
+<P>
 
-      <dt><a href="#lbAC">SYNOPSIS</a></dt>
+All refer to the same variable name.
+<P>
 
-      <dt><a href="#lbAD">DESCRIPTION</a></dt>
+The description of the variables in the MIB is given in the set of MIB
+files defined by the MIBS environment variable (or the default list
+defined at compilation time) and the MIB files in the
+/usr/local/share/snmp/mibs directory (or the MIBDIRS environment variable).
+<A NAME="lbAE">&nbsp;</A>
+<H2>SEE ALSO</H2>
 
-      <dt><a href="#lbAE">SEE ALSO</a></dt>
+RFC 1065, RFC 1066, RFC 1067, ISO IS 8824(ASN.1)
+<A NAME="lbAF">&nbsp;</A>
+<H2>BUGS</H2>
 
-      <dt><a href="#lbAF">BUGS</a></dt>
-    </dl>
-    <hr />
-    This document was created by <a href="http://localhost/cgi-bin/man/man2html">man2html</a>, using the manual pages.<br />
-    Time: 13:12:01 GMT, September 23, 2007
-<!-- CONTENT END -->
-<!--#include virtual="/page-bottom.html" -->
+The parser of the MIB files file is not expected to handle bizarre
+(although correct) interpretations of the ASN.1 notation.
+<P>
+<P>
+<P>
 
+<HR>
+<A NAME="index">&nbsp;</A><H2>Index</H2>
+<DL>
+<DT><A HREF="#lbAB">NAME</A><DD>
+<DT><A HREF="#lbAC">SYNOPSIS</A><DD>
+<DT><A HREF="#lbAD">DESCRIPTION</A><DD>
+<DT><A HREF="#lbAE">SEE ALSO</A><DD>
+<DT><A HREF="#lbAF">BUGS</A><DD>
+</DL>
+<HR>
+This document was created by
+<A HREF="http://localhost/cgi-bin/man/man2html">man2html</A>,
+using the manual pages.<BR>
+Time: 19:05:39 GMT, September 28, 2009
+</BODY>
+</HTML>

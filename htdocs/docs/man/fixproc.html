@@ -1,74 +1,85 @@
-<!--#set var="section" value="documentation" -->
-<!--#include virtual="/page-top.html" -->
-<!-- CONTENT START -->
-    <h1>fixproc</h1>Section: Net-SNMP (1)<br />
-    Updated: 16 Nov 2006<br />
-    <a href="#index">Index</a> <a href="../index.html">Return to Main Contents</a>
-    <hr />
-    <a name="lbAB" id="lbAB">&nbsp;</a>
+Content-type: text/html
 
-    <h2>NAME</h2>fixproc - Fixes a process by performing the specified action. <a name="lbAC" id="lbAC">&nbsp;</a>
+<HTML><HEAD><TITLE>Manpage of fixproc</TITLE>
+</HEAD><BODY>
+<H1>fixproc</H1>
+Section: Net-SNMP (1)<BR>Updated: 16 Nov 2006<BR><A HREF="#index">Index</A>
+<A HREF="http://localhost/cgi-bin/man/man2html">Return to Main Contents</A><HR>
 
-    <h2>SYNOPSIS</h2>
 
-    <p><b>fixproc</b> [<i>-min n</i>] [<i>-max n</i>] [<i>-check | -kill | -restart | -exist | -fix</i>] proc ... <a name="lbAD"
-    id="lbAD">&nbsp;</a></p>
+<A NAME="lbAB">&nbsp;</A>
+<H2>NAME</H2>
 
-    <h2>DESCRIPTION</h2>
+fixproc - Fixes a process by performing the specified action.
+<A NAME="lbAC">&nbsp;</A>
+<H2>SYNOPSIS</H2>
 
-    <p>Fixes a process named "proc" by performing the specified action. The actions can be check, kill, restart, exist, or fix.
-    The action is specified on the command line or is read from a default database, which describes the default action to take
-    for each process. The database format and the meaning of each action are described below. <a name="lbAE" id=
-    "lbAE">&nbsp;</a></p>
+<P>
 
-    <h2>OPTIONS</h2>
+<B>fixproc</B>
 
-    <dl compact="compact">
-      <dt><b>-min n</b></dt>
+[<I>-min n</I>]
+[<I>-max n</I>]
+[<I>-check | -kill | -restart | -exist | -fix</I>]
+proc ...
+<A NAME="lbAD">&nbsp;</A>
+<H2>DESCRIPTION</H2>
 
-      <dd>minimum number of processes that should be running, defaults to 1</dd>
+<P>
 
-      <dt><b>-max n</b></dt>
+Fixes a process named &quot;proc&quot; by performing the specified action.  The
+actions can be check, kill, restart, exist, or fix.  The action is specified
+on the command line or is read from a default database, which describes
+the default action to take for each process.  The database format and
+the meaning of each action are described below.
+<A NAME="lbAE">&nbsp;</A>
+<H2>OPTIONS</H2>
 
-      <dd>maximum number of processes that should be running, defaults to 1</dd>
+<DL COMPACT>
+<DT><B>-min n</B>
 
-      <dt><b>-check</b></dt>
+<DD>
+minimum number of processes that should be running, defaults to 1
+<DT><B>-max n</B>
 
-      <dd>check process against database /local/etc/fixproc.conf.</dd>
+<DD>
+maximum number of processes that should be running, defaults to 1
+<DT><B>-check</B>
 
-      <dt><b>-kill</b></dt>
+<DD>
+check process against database /local/etc/fixproc.conf.
+<DT><B>-kill</B>
 
-      <dd>kill process, wait 5 seconds, kill -9 if still exist</dd>
+<DD>
+kill process, wait 5 seconds, kill -9 if still exist
+<DT><B>-restart</B>
 
-      <dt><b>-restart</b></dt>
+<DD>
+kill process, wait 5 seconds, kill -9 if still exist, then start again
+<DT><B>-exist</B>
 
-      <dd>kill process, wait 5 seconds, kill -9 if still exist, then start again</dd>
+<DD>
+checks if proc exists in ps &amp;&amp; (min &lt;= num. of processes &lt;= max)
+<DT><B>-fix</B>
 
-      <dt><b>-exist</b></dt>
+<DD>
+check process against database /local/etc/fixproc.conf. Perform defined
+action, if check fails.
+<P>
+</DL>
 
-      <dd>checks if proc exists in ps &amp;&amp; (min &lt;= num. of processes &lt;= max)</dd>
-
-      <dt><b>-fix</b></dt>
-
-      <dd>check process against database /local/etc/fixproc.conf. Perform defined action, if check fails.</dd>
-    </dl>
-    <hr />
-    <a name="index" id="index">&nbsp;</a>
-
-    <h2>Index</h2>
-
-    <dl>
-      <dt><a href="#lbAB">NAME</a></dt>
-
-      <dt><a href="#lbAC">SYNOPSIS</a></dt>
-
-      <dt><a href="#lbAD">DESCRIPTION</a></dt>
-
-      <dt><a href="#lbAE">OPTIONS</a></dt>
-    </dl>
-    <hr />
-    This document was created by <a href="http://localhost/cgi-bin/man/man2html">man2html</a>, using the manual pages.<br />
-    Time: 13:12:00 GMT, September 23, 2007
-<!-- CONTENT END -->
-<!--#include virtual="/page-bottom.html" -->
-
+<HR>
+<A NAME="index">&nbsp;</A><H2>Index</H2>
+<DL>
+<DT><A HREF="#lbAB">NAME</A><DD>
+<DT><A HREF="#lbAC">SYNOPSIS</A><DD>
+<DT><A HREF="#lbAD">DESCRIPTION</A><DD>
+<DT><A HREF="#lbAE">OPTIONS</A><DD>
+</DL>
+<HR>
+This document was created by
+<A HREF="http://localhost/cgi-bin/man/man2html">man2html</A>,
+using the manual pages.<BR>
+Time: 19:05:39 GMT, September 28, 2009
+</BODY>
+</HTML>

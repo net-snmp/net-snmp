@@ -1,305 +1,392 @@
-<!--#set var="section" value="documentation" -->
-<!--#include virtual="/page-top.html" -->
-<!-- CONTENT START -->
-    <h1>table_iterator</h1>Section: net-snmp (3)<br />
-    Updated: 27 Jul 2007<br />
-    <a href="#index">Index</a> <a href="../index.html">Return to Main Contents</a>
-    <hr />
-    <a name="lbAB" id="lbAB">&nbsp;</a>
-
-    <h2>NAME</h2>table_iterator - The table iterator helper is designed to simplify the task of writing a table handler for the
-    net-snmp agent when the data being accessed is not in an oid sorted form and must be accessed externally.
-
-    <p><a name="lbAC" id="lbAC">&nbsp;</a></p>
-
-    <h3>Data Structures</h3>
-
-    <p><br />
-    struct <b>ti_cache_info_s</b><br />
-    <br />
-    struct <b>netsnmp_iterator_info_s</b><br />
-    <i>Holds iterator information containing functions which should be called by the iterator_handler to loop over your data set
-    and sort it in a SNMP specific manner.</i><br />
-    struct <b>netsnmp_iterator_info_s</b><br />
-    <i>Holds iterator information containing functions which should be called by the iterator_handler to loop over your data set
-    and sort it in a SNMP specific manner.</i> <a name="lbAD" id="lbAD">&nbsp;</a></p>
-
-    <h3>Defines</h3>
-
-    <p><br />
-    #define <b>TI_REQUEST_CACHE</b> 'ti_cache'<br />
-    <br />
-    #define <b>TABLE_ITERATOR_NOTAGAIN</b> 255<br />
-    <br />
-    #define <b>TABLE_ITERATOR_NAME</b> 'table_iterator'<br />
-    <a name="lbAE" id="lbAE">&nbsp;</a></p>
-
-    <h3>Typedefs</h3>
-
-    <p><br />
-    typedef <b>ti_cache_info_s</b> <b>ti_cache_info</b><br />
-    <br />
-    typedef <b>netsnmp_variable_list</b> *( <b>Netsnmp_First_Data_Point</b> )(void **loop_context, void **data_context,
-    <b>netsnmp_variable_list</b> *, struct <b>netsnmp_iterator_info_s</b> *)<br />
-    <br />
-    typedef <b>netsnmp_variable_list</b> *( <b>Netsnmp_Next_Data_Point</b> )(void **loop_context, void **data_context,
-    <b>netsnmp_variable_list</b> *, struct <b>netsnmp_iterator_info_s</b> *)<br />
-    <br />
-    typedef void *( <b>Netsnmp_Make_Data_Context</b> )(void *loop_context, struct <b>netsnmp_iterator_info_s</b> *)<br />
-    <br />
-    typedef void( <b>Netsnmp_Free_Loop_Context</b> )(void *, struct <b>netsnmp_iterator_info_s</b> *)<br />
-    <br />
-    typedef void( <b>Netsnmp_Free_Data_Context</b> )(void *, struct <b>netsnmp_iterator_info_s</b> *)<br />
-    <br />
-    typedef <b>netsnmp_iterator_info_s</b> <b>netsnmp_iterator_info</b><br />
-    <i>Typedefs the</i> <b>netsnmp_iterator_info_s</b> struct into netsnmp_iterator_info. <a name="lbAF" id="lbAF">&nbsp;</a></p>
-
-    <h3>Functions</h3>
-
-    <p><br />
-    <b>netsnmp_iterator_info</b> * <b>netsnmp_iterator_create_table</b> (<b>Netsnmp_First_Data_Point</b> *firstDP,
-    <b>Netsnmp_Next_Data_Point</b> *nextDP, <b>Netsnmp_First_Data_Point</b> *getidx, <b>netsnmp_variable_list</b> *indexes)<br />
-    <br />
-    void <b>netsnmp_iterator_delete_table</b> (<b>netsnmp_iterator_info</b> *iinfo)<br />
-    <br />
-    <b>netsnmp_mib_handler</b> * <b>netsnmp_get_table_iterator_handler</b> (<b>netsnmp_iterator_info</b> *iinfo)<br />
-    <i>returns a netsnmp_mib_handler object for the table_iterator helper</i><br />
-    int <b>netsnmp_register_table_iterator</b> (<b>netsnmp_handler_registration</b> *reginfo, <b>netsnmp_iterator_info</b>
-    *iinfo)<br />
-    <i>Creates and registers a table iterator helper handler calling netsnmp_create_handler with a handler name set to
-    TABLE_ITERATOR_NAME and access method, netsnmp_table_iterator_helper_handler.</i><br />
-    NETSNMP_INLINE void * <b>netsnmp_extract_iterator_context</b> (<b>netsnmp_request_info</b> *request)<br />
-    <i>extracts the table_iterator specific data from a request.</i><br />
-    NETSNMP_INLINE void <b>netsnmp_insert_iterator_context</b> (<b>netsnmp_request_info</b> *request, void *data)<br />
-    <i>inserts table_iterator specific data for a newly created row into a request</i><br />
-    int <b>netsnmp_table_iterator_helper_handler</b> (<b>netsnmp_mib_handler</b> *handler, <b>netsnmp_handler_registration</b>
-    *reginfo, <b>netsnmp_agent_request_info</b> *reqinfo, <b>netsnmp_request_info</b> *requests)<br />
-    <br />
-    void * <b>netsnmp_iterator_row_first</b> (<b>netsnmp_iterator_info</b> *iinfo)<br />
-    <br />
-    void * <b>netsnmp_iterator_row_get</b> (<b>netsnmp_iterator_info</b> *iinfo, void *row)<br />
-    <br />
-    void * <b>netsnmp_iterator_row_next</b> (<b>netsnmp_iterator_info</b> *iinfo, void *row)<br />
-    <br />
-    void * <b>netsnmp_iterator_row_get_byidx</b> (<b>netsnmp_iterator_info</b> *iinfo, <b>netsnmp_variable_list</b>
-    *indexes)<br />
-    <br />
-    void * <b>netsnmp_iterator_row_next_byidx</b> (<b>netsnmp_iterator_info</b> *iinfo, <b>netsnmp_variable_list</b>
-    *indexes)<br />
-    <br />
-    void * <b>netsnmp_iterator_row_get_byoid</b> (<b>netsnmp_iterator_info</b> *iinfo, oid *instance, size_t len)<br />
-    <br />
-    void * <b>netsnmp_iterator_row_next_byoid</b> (<b>netsnmp_iterator_info</b> *iinfo, oid *instance, size_t len)<br />
-    <br />
-    int <b>netsnmp_iterator_row_count</b> (<b>netsnmp_iterator_info</b> *iinfo)<br />
-    <a name="lbAG" id="lbAG">&nbsp;</a></p>
-
-    <h3>Variables</h3>
-
-    <p><br />
-    <b>Netsnmp_Node_Handler</b> <b>netsnmp_table_iterator_helper_handler</b><br />
-    <a name="lbAH" id="lbAH">&nbsp;</a></p>
+Content-type: text/html
 
-    <h2>Detailed Description</h2>
+<HTML><HEAD><TITLE>Manpage of table_iterator</TITLE>
+</HEAD><BODY>
+<H1>table_iterator</H1>
+Section: net-snmp (3)<BR>Updated: 23 Sep 2009<BR><A HREF="#index">Index</A>
+<A HREF="http://localhost/cgi-bin/man/man2html">Return to Main Contents</A><HR>
 
-    <p>The table iterator helper is designed to simplify the task of writing a table handler for the net-snmp agent when the data
-    being accessed is not in an oid sorted form and must be accessed externally.</p>
 
-    <p>Functionally, it is a specialized version of the more generic table helper but easies the burden of GETNEXT processing by
-    manually looping through all the data indexes retrieved through function calls which should be supplied by the module that
-    wishes help. The module the table_iterator helps should, afterwards, never be called for the case of 'MODE_GETNEXT' and only
-    for the GET and SET related modes instead.</p>
 
-    <p>The fundamental notion between the table iterator is that it allows your code to iterate over each 'row' within your data
-    storage mechanism, without requiring that it be sorted in a SNMP-index-compliant manner. Through the get_first_data_point and
-    get_next_data_point hooks, the table_iterator helper will repeatedly call your hooks to find the 'proper' row of data that
-    needs processing. The following concepts are important:</p>
+<A NAME="lbAB">&nbsp;</A>
+<H2>NAME</H2>
 
-    <dl compact="compact">
-      <dt>*</dt>
+table_iterator - 
+<P>
 
-      <dd>A loop context is a pointer which indicates where in the current processing of a set of rows you currently are. Allows
-      the get_*_data_point routines to move from one row to the next, once the iterator handler has identified the appropriate
-      row for this request, the job of the loop context is done. The most simple example would be a pointer to an integer which
-      simply counts rows from 1 to X. More commonly, it might be a pointer to a linked list node, or someother internal or
-      external reference to a data set (file seek value, array pointer, ...). If allocated during iteration, either the
-      free_loop_context_at_end (preferably) or the free_loop_context pointers should be set.</dd>
-    </dl>
+The table iterator helper is designed to simplify the task of writing a table handler for the net-snmp agent when the data being accessed is not in an oid sorted form and must be accessed externally.  
+<P>
+<A NAME="lbAC">&nbsp;</A>
+<H3>Data Structures</H3>
 
-    <dl compact="compact">
-      <dt>*</dt>
+<P>
 
-      <dd>A data context is something that your handler code can use in order to retrieve the rest of the data for the needed
-      row. This data can be accessed in your handler via netsnmp_extract_iterator_context api with the netsnmp_request_info
-      structure that's passed in. The important difference between a loop context and a data context is that multiple data
-      contexts can be kept by the table_iterator helper, where as only one loop context will ever be held by the table_iterator
-      helper. If allocated during iteration the free_data_context pointer should be set to an appropriate function.</dd>
-    </dl>
+<BR>
 
-    <p>The table iterator operates in a series of steps that call your code hooks from your netsnmp_iterator_info registration
-    pointer.</p>
+struct <B>ti_cache_info_s</B>
 
-    <dl compact="compact">
-      <dt>*</dt>
+<BR>
 
-      <dd>the get_first_data_point hook is called at the beginning of processing. It should set the variable list to a list of
-      indexes for the given table. It should also set the loop_context and maybe a data_context which you will get a pointer back
-      to when it needs to call your code to retrieve actual data later. The list of indexes should be returned after being
-      update.</dd>
-    </dl>
+<BR>
 
-    <dl compact="compact">
-      <dt>*</dt>
+struct <B>netsnmp_iterator_info_s</B>
 
-      <dd>the get_next_data_point hook is then called repeatedly and is passed the loop context and the data context for it to
-      update. The indexes, loop context and data context should all be updated if more data is available, otherwise they should
-      be left alone and a NULL should be returned. Ideally, it should update the loop context without the need to reallocate it.
-      If reallocation is necessary for every iterative step, then the free_loop_context function pointer should be set. If not,
-      then the free_loop_context_at_end pointer should be set, which is more efficient since a malloc/free will only be performed
-      once for every iteration.</dd>
-    </dl>
+<BR>
 
-    <p><a name="lbAI" id="lbAI">&nbsp;</a></p>
+<I>Holds iterator information containing functions which should be called by the iterator_handler to loop over your data set and sort it in a SNMP specific manner. </I>
 
-    <h2>Typedef Documentation</h2>
 
-    <p><a name="lbAJ" id="lbAJ">&nbsp;</a></p>
+<A NAME="lbAD">&nbsp;</A>
+<H3>Defines</H3>
 
-    <h3>struct <b>netsnmp_iterator_info_s</b> <b>netsnmp_iterator_info</b></h3>
+<P>
 
-    <p>Typedefs the <b>netsnmp_iterator_info_s</b> struct into netsnmp_iterator_info.</p>
+<BR>
 
-    <p><a name="lbAK" id="lbAK">&nbsp;</a></p>
+#define <B>TI_REQUEST_CACHE</B>   'ti_cache'
 
-    <h2>Function Documentation</h2>
+<BR>
 
-    <p><a name="lbAL" id="lbAL">&nbsp;</a></p>
+<BR>
 
-    <h3>void * netsnmp_extract_iterator_context (<b>netsnmp_request_info</b> * request)</h3>
+#define <B>TABLE_ITERATOR_NOTAGAIN</B>   255
 
-    <p>extracts the table_iterator specific data from a request.</p>
+<BR>
 
-    <p>This function extracts the table iterator specific data from a netsnmp_request_info object. Calls
-    netsnmp_request_get_list_data with request-&gt;parent_data set with data from a request that was added previously by a module
-    and TABLE_ITERATOR_NAME handler name.</p>
+<BR>
 
-    <p><b>Parameters:</b></p>
+#define <B>TABLE_ITERATOR_NAME</B>   'table_iterator'
 
-    <dl compact="compact">
-      <dd><i>request</i> the netsnmp request info structure</dd>
-    </dl>
+<BR>
 
-    <p><b>Returns:</b></p>
 
-    <dl compact="compact">
-      <dd>a void pointer(request-&gt;parent_data-&gt;data), otherwise NULL is returned if request is NULL or
-      request-&gt;parent_data is NULL or request-&gt;parent_data object is not found.the net</dd>
-    </dl>
+<A NAME="lbAE">&nbsp;</A>
+<H3>Typedefs</H3>
 
-    <p>Definition at line 234 of file table_iterator.c.</p>
+<P>
 
-    <p>References netsnmp_request_get_list_data(), and TABLE_ITERATOR_NAME. <a name="lbAM" id="lbAM">&nbsp;</a></p>
+<BR>
 
-    <h3><b>netsnmp_mib_handler</b> * netsnmp_get_table_iterator_handler (<b>netsnmp_iterator_info</b> * iinfo)</h3>
+typedef struct <B>ti_cache_info_s</B> <B>ti_cache_info</B>
 
-    <p>returns a netsnmp_mib_handler object for the table_iterator helper</p>
+<BR>
 
-    <p>Definition at line 169 of file table_iterator.c.</p>
+<BR>
 
-    <p>References netsnmp_mib_handler_s::myvoid, netsnmp_create_handler(), netsnmp_table_iterator_helper_handler, NULL, and
-    TABLE_ITERATOR_NAME.</p>
+typedef <B>netsnmp_variable_list</B> *( <B>Netsnmp_First_Data_Point</B> )(void **loop_context, void **data_context, <B>netsnmp_variable_list</B> *, struct <B>netsnmp_iterator_info_s</B> *)
 
-    <p>Referenced by netsnmp_register_table_iterator(). <a name="lbAN" id="lbAN">&nbsp;</a></p>
+<BR>
 
-    <h3>void netsnmp_insert_iterator_context (<b>netsnmp_request_info</b> * request, void * data)</h3>
+<BR>
 
-    <p>inserts table_iterator specific data for a newly created row into a request</p>
+typedef <B>netsnmp_variable_list</B> *( <B>Netsnmp_Next_Data_Point</B> )(void **loop_context, void **data_context, <B>netsnmp_variable_list</B> *, struct <B>netsnmp_iterator_info_s</B> *)
 
-    <p>Definition at line 242 of file table_iterator.c.</p>
+<BR>
 
-    <p>References build_oid_noalloc(), netsnmp_table_request_info_s::indexes, netsnmp_create_data_list(),
-    netsnmp_extract_table_info(), netsnmp_request_add_list_data(), netsnmp_request_info_s::next, NULL,
-    netsnmp_request_info_s::prev, snmp_oid_compare(), and TABLE_ITERATOR_NAME. <a name="lbAO" id="lbAO">&nbsp;</a></p>
+<BR>
 
-    <h3>int netsnmp_register_table_iterator (<b>netsnmp_handler_registration</b> * reginfo, <b>netsnmp_iterator_info</b> *
-    iinfo)</h3>
+typedef void *( <B>Netsnmp_Make_Data_Context</B> )(void *loop_context, struct <B>netsnmp_iterator_info_s</B> *)
 
-    <p>Creates and registers a table iterator helper handler calling netsnmp_create_handler with a handler name set to
-    TABLE_ITERATOR_NAME and access method, netsnmp_table_iterator_helper_handler.</p>
+<BR>
 
-    <p>If NOT_SERIALIZED is not defined the function injects the serialize handler into the calling chain prior to calling
-    netsnmp_register_table.</p>
+<BR>
 
-    <p><b>Parameters:</b></p>
+typedef void( <B>Netsnmp_Free_Loop_Context</B> )(void *, struct <B>netsnmp_iterator_info_s</B> *)
 
-    <dl compact="compact">
-      <dd><i>reginfo</i> is a pointer to a netsnmp_handler_registration struct<br />
-      <i>iinfo</i> is a pointer to a netsnmp_iterator_info struct</dd>
-    </dl>
+<BR>
 
-    <p><b>Returns:</b></p>
+<BR>
 
-    <dl compact="compact">
-      <dd>MIB_REGISTERED_OK is returned if the registration was a success. Failures are MIB_REGISTRATION_FAILED,
-      MIB_DUPLICATE_REGISTRATION. If iinfo is NULL, SNMPERR_GENERR is returned.</dd>
-    </dl>
+typedef void( <B>Netsnmp_Free_Data_Context</B> )(void *, struct <B>netsnmp_iterator_info_s</B> *)
 
-    <p>Definition at line 205 of file table_iterator.c.</p>
+<BR>
 
-    <p>References HANDLER_CAN_STASH, netsnmp_table_registration_info_s::indexes, netsnmp_iterator_info_s::indexes,
-    netsnmp_handler_registration_s::modes, netsnmp_get_table_iterator_handler(), netsnmp_inject_handler(),
-    netsnmp_register_table(), snmp_clone_varbind(), and netsnmp_iterator_info_s::table_reginfo.</p>
-    <hr />
-    <a name="index" id="index">&nbsp;</a>
+<BR>
 
-    <h2>Index</h2>
+typedef struct <B>netsnmp_iterator_info_s</B> <B>netsnmp_iterator_info</B>
 
-    <dl>
-      <dt><a href="#lbAB">NAME</a></dt>
+<BR>
 
-      <dd>
-        <dl>
-          <dt><a href="#lbAC">Data Structures</a></dt>
+<I>Typedefs the </I><B>netsnmp_iterator_info_s</B> struct into netsnmp_iterator_info. 
 
-          <dt><a href="#lbAD">Defines</a></dt>
 
-          <dt><a href="#lbAE">Typedefs</a></dt>
+<A NAME="lbAF">&nbsp;</A>
+<H3>Functions</H3>
 
-          <dt><a href="#lbAF">Functions</a></dt>
+<P>
 
-          <dt><a href="#lbAG">Variables</a></dt>
-        </dl>
-      </dd>
+<BR>
 
-      <dt><a href="#lbAH">Detailed Description</a></dt>
+<B>netsnmp_iterator_info</B> * <B>netsnmp_iterator_create_table</B> (Netsnmp_First_Data_Point *firstDP, Netsnmp_Next_Data_Point *nextDP, Netsnmp_First_Data_Point *getidx, <B>netsnmp_variable_list</B> *indexes)
 
-      <dt><a href="#lbAI">Typedef Documentation</a></dt>
+<BR>
 
-      <dd>
-        <dl>
-          <dt><a href="#lbAJ">struct <b>netsnmp_iterator_info_s</b> <b>netsnmp_iterator_info</b></a></dt>
-        </dl>
-      </dd>
+<BR>
 
-      <dt><a href="#lbAK">Function Documentation</a></dt>
+void <B>netsnmp_iterator_delete_table</B> (<B>netsnmp_iterator_info</B> *iinfo)
 
-      <dd>
-        <dl>
-          <dt><a href="#lbAL">void * netsnmp_extract_iterator_context (<b>netsnmp_request_info</b> * request)</a></dt>
+<BR>
 
-          <dt><a href="#lbAM"><b>netsnmp_mib_handler</b> * netsnmp_get_table_iterator_handler (<b>netsnmp_iterator_info</b> *
-          iinfo)</a></dt>
+<BR>
 
-          <dt><a href="#lbAN">void netsnmp_insert_iterator_context (<b>netsnmp_request_info</b> * request, void * data)</a></dt>
+<B>netsnmp_mib_handler</B> * <B>netsnmp_get_table_iterator_handler</B> (<B>netsnmp_iterator_info</B> *iinfo)
 
-          <dt><a href="#lbAO">int netsnmp_register_table_iterator (<b>netsnmp_handler_registration</b> * reginfo,
-          <b>netsnmp_iterator_info</b> * iinfo)</a></dt>
-        </dl>
-      </dd>
-    </dl>
-    <hr />
-    This document was created by <a href="http://localhost/cgi-bin/man/man2html">man2html</a>, using the manual pages.<br />
-    Time: 13:12:01 GMT, September 23, 2007
-<!-- CONTENT END -->
-<!--#include virtual="/page-bottom.html" -->
+<BR>
 
+<I>returns a netsnmp_mib_handler object for the table_iterator helper </I>
+
+<BR>
+
+int <B>netsnmp_register_table_iterator</B> (<B>netsnmp_handler_registration</B> *reginfo, <B>netsnmp_iterator_info</B> *iinfo)
+
+<BR>
+
+<I>Creates and registers a table iterator helper handler calling netsnmp_create_handler with a handler name set to TABLE_ITERATOR_NAME and access method, netsnmp_table_iterator_helper_handler. </I>
+
+<BR>
+
+NETSNMP_INLINE void * <B>netsnmp_extract_iterator_context</B> (<B>netsnmp_request_info</B> *request)
+
+<BR>
+
+<I>extracts the table_iterator specific data from a request. </I>
+
+<BR>
+
+NETSNMP_INLINE void <B>netsnmp_insert_iterator_context</B> (<B>netsnmp_request_info</B> *request, void *data)
+
+<BR>
+
+<I>inserts table_iterator specific data for a newly created row into a request </I>
+
+<BR>
+
+int <B>netsnmp_table_iterator_helper_handler</B> (<B>netsnmp_mib_handler</B> *handler, <B>netsnmp_handler_registration</B> *reginfo, <B>netsnmp_agent_request_info</B> *reqinfo, <B>netsnmp_request_info</B> *requests)
+
+<BR>
+
+<BR>
+
+void * <B>netsnmp_iterator_row_first</B> (<B>netsnmp_iterator_info</B> *iinfo)
+
+<BR>
+
+<BR>
+
+void * <B>netsnmp_iterator_row_get</B> (<B>netsnmp_iterator_info</B> *iinfo, void *row)
+
+<BR>
+
+<BR>
+
+void * <B>netsnmp_iterator_row_next</B> (<B>netsnmp_iterator_info</B> *iinfo, void *row)
+
+<BR>
+
+<BR>
+
+void * <B>netsnmp_iterator_row_get_byidx</B> (<B>netsnmp_iterator_info</B> *iinfo, <B>netsnmp_variable_list</B> *indexes)
+
+<BR>
+
+<BR>
+
+void * <B>netsnmp_iterator_row_next_byidx</B> (<B>netsnmp_iterator_info</B> *iinfo, <B>netsnmp_variable_list</B> *indexes)
+
+<BR>
+
+<BR>
+
+void * <B>netsnmp_iterator_row_get_byoid</B> (<B>netsnmp_iterator_info</B> *iinfo, oid *instance, size_t len)
+
+<BR>
+
+<BR>
+
+void * <B>netsnmp_iterator_row_next_byoid</B> (<B>netsnmp_iterator_info</B> *iinfo, oid *instance, size_t len)
+
+<BR>
+
+<BR>
+
+int <B>netsnmp_iterator_row_count</B> (<B>netsnmp_iterator_info</B> *iinfo)
+
+<BR>
+
+
+<A NAME="lbAG">&nbsp;</A>
+<H3>Variables</H3>
+
+<P>
+
+<BR>
+
+Netsnmp_Node_Handler <B>netsnmp_table_iterator_helper_handler</B>
+
+<BR>
+
+
+<A NAME="lbAH">&nbsp;</A>
+<H2>Detailed Description</H2>
+
+<P>
+
+The table iterator helper is designed to simplify the task of writing a table handler for the net-snmp agent when the data being accessed is not in an oid sorted form and must be accessed externally. 
+<P>
+Functionally, it is a specialized version of the more generic table helper but easies the burden of GETNEXT processing by manually looping through all the data indexes retrieved through function calls which should be supplied by the <B>module</B> that wishes help. The <B>module</B> the table_iterator helps should, afterwards, never be called for the case of 'MODE_GETNEXT' and only for the GET and SET related modes instead.
+<P>
+
+The fundamental notion between the table iterator is that it allows your code to iterate over each 'row' within your data storage mechanism, without requiring that it be sorted in a SNMP-index-compliant manner. Through the get_first_data_point and get_next_data_point hooks, the table_iterator helper will repeatedly call your hooks to find the 'proper' row of data that needs processing. The following concepts are important:
+<P>
+
+<DL COMPACT>
+<DT>*<DD>
+A loop context is a pointer which indicates where in the current processing of a set of rows you currently are. Allows the get_*_data_point routines to move from one row to the next, once the iterator handler has identified the appropriate row for this request, the job of the loop context is done. The most simple example would be a pointer to an integer which simply counts rows from 1 to X. More commonly, it might be a pointer to a linked list <B>node</B>, or someother internal or external reference to a data set (file seek value, array pointer, ...). If allocated during iteration, either the free_loop_context_at_end (preferably) or the free_loop_context pointers should be set.
+</DL>
+<P>
+
+<P>
+
+<DL COMPACT>
+<DT>*<DD>
+A data context is something that your handler code can use in order to retrieve the rest of the data for the needed row. This data can be accessed in your handler via netsnmp_extract_iterator_context api with the netsnmp_request_info structure that's passed in. The important difference between a loop context and a data context is that multiple data contexts can be kept by the table_iterator helper, where as only one loop context will ever be held by the table_iterator helper. If allocated during iteration the free_data_context pointer should be set to an appropriate function.
+</DL>
+<P>
+
+<P>
+
+The table iterator operates in a series of steps that call your code hooks from your netsnmp_iterator_info registration pointer.
+<P>
+
+<DL COMPACT>
+<DT>*<DD>
+the get_first_data_point hook is called at the beginning of processing. It should set the <B>variable</B> list to a list of indexes for the given table. It should also set the loop_context and maybe a data_context which you will get a pointer back to when it needs to call your code to retrieve actual data later. The list of indexes should be returned after being update.
+</DL>
+<P>
+
+<P>
+
+<DL COMPACT>
+<DT>*<DD>
+the get_next_data_point hook is then called repeatedly and is passed the loop context and the data context for it to update. The indexes, loop context and data context should all be updated if more data is available, otherwise they should be left alone and a NULL should be returned. Ideally, it should update the loop context without the need to reallocate it. If reallocation is necessary for every iterative step, then the free_loop_context function pointer should be set. If not, then the free_loop_context_at_end pointer should be set, which is more efficient since a malloc/free will only be performed once for every iteration. 
+</DL>
+<P>
+
+<P>
+<A NAME="lbAI">&nbsp;</A>
+<H2>Typedef Documentation</H2>
+
+<P>
+
+<A NAME="lbAJ">&nbsp;</A>
+<H3>struct <B>netsnmp_iterator_info_s</B> <B>netsnmp_iterator_info</B></H3>
+
+<P>
+
+Typedefs the <B>netsnmp_iterator_info_s</B> struct into netsnmp_iterator_info. 
+<A NAME="lbAK">&nbsp;</A>
+<H2>Function Documentation</H2>
+
+<P>
+
+<A NAME="lbAL">&nbsp;</A>
+<H3>void * netsnmp_extract_iterator_context (<B>netsnmp_request_info</B> * request)</H3>
+
+<P>
+
+extracts the table_iterator specific data from a request. This function extracts the table iterator specific data from a netsnmp_request_info object. Calls netsnmp_request_get_list_data with request-&gt;parent_data set with data from a request that was added previously by a <B>module</B> and TABLE_ITERATOR_NAME handler name.
+<P>
+
+<B>Parameters:</B>
+<DL COMPACT><DT><DD>
+<I>request</I> the netsnmp request info structure
+</DL>
+
+<P>
+
+<B>Returns:</B>
+<DL COMPACT><DT><DD>
+a void pointer(request-&gt;parent_data-&gt;data), otherwise NULL is returned if request is NULL or request-&gt;parent_data is NULL or request-&gt;parent_data object is not found.the net 
+</DL>
+
+<P>
+
+<P>
+<A NAME="lbAM">&nbsp;</A>
+<H3><B>netsnmp_mib_handler</B> * netsnmp_get_table_iterator_handler (<B>netsnmp_iterator_info</B> * iinfo)</H3>
+
+<P>
+
+returns a netsnmp_mib_handler object for the table_iterator helper 
+<A NAME="lbAN">&nbsp;</A>
+<H3>void netsnmp_insert_iterator_context (<B>netsnmp_request_info</B> * request, void * data)</H3>
+
+<P>
+
+inserts table_iterator specific data for a newly created row into a request 
+<A NAME="lbAO">&nbsp;</A>
+<H3>int netsnmp_register_table_iterator (<B>netsnmp_handler_registration</B> * reginfo, <B>netsnmp_iterator_info</B> * iinfo)</H3>
+
+<P>
+
+Creates and registers a table iterator helper handler calling netsnmp_create_handler with a handler name set to TABLE_ITERATOR_NAME and access method, netsnmp_table_iterator_helper_handler. If NOT_SERIALIZED is not defined the function injects the serialize handler into the calling chain prior to calling netsnmp_register_table.
+<P>
+
+<B>Parameters:</B>
+<DL COMPACT><DT><DD>
+<I>reginfo</I> is a pointer to a netsnmp_handler_registration struct
+<BR>
+
+<I>iinfo</I> is a pointer to a netsnmp_iterator_info struct
+</DL>
+
+<P>
+
+<B>Returns:</B>
+<DL COMPACT><DT><DD>
+MIB_REGISTERED_OK is returned if the registration was a success. Failures are MIB_REGISTRATION_FAILED, MIB_DUPLICATE_REGISTRATION. If iinfo is NULL, SNMPERR_GENERR is returned. 
+</DL>
+
+<P>
+
+<P>
+<A NAME="lbAP">&nbsp;</A>
+<H2>Author</H2>
+
+<P>
+
+Generated automatically by Doxygen for net-snmp from the source code.
+<P>
+
+<HR>
+<A NAME="index">&nbsp;</A><H2>Index</H2>
+<DL>
+<DT><A HREF="#lbAB">NAME</A><DD>
+<DL>
+<DT><A HREF="#lbAC">Data Structures</A><DD>
+<DT><A HREF="#lbAD">Defines</A><DD>
+<DT><A HREF="#lbAE">Typedefs</A><DD>
+<DT><A HREF="#lbAF">Functions</A><DD>
+<DT><A HREF="#lbAG">Variables</A><DD>
+</DL>
+<DT><A HREF="#lbAH">Detailed Description</A><DD>
+<DT><A HREF="#lbAI">Typedef Documentation</A><DD>
+<DL>
+<DT><A HREF="#lbAJ">struct <B>netsnmp_iterator_info_s</B> <B>netsnmp_iterator_info</B></A><DD>
+</DL>
+<DT><A HREF="#lbAK">Function Documentation</A><DD>
+<DL>
+<DT><A HREF="#lbAL">void * netsnmp_extract_iterator_context (<B>netsnmp_request_info</B> * request)</A><DD>
+<DT><A HREF="#lbAM"><B>netsnmp_mib_handler</B> * netsnmp_get_table_iterator_handler (<B>netsnmp_iterator_info</B> * iinfo)</A><DD>
+<DT><A HREF="#lbAN">void netsnmp_insert_iterator_context (<B>netsnmp_request_info</B> * request, void * data)</A><DD>
+<DT><A HREF="#lbAO">int netsnmp_register_table_iterator (<B>netsnmp_handler_registration</B> * reginfo, <B>netsnmp_iterator_info</B> * iinfo)</A><DD>
+</DL>
+<DT><A HREF="#lbAP">Author</A><DD>
+</DL>
+<HR>
+This document was created by
+<A HREF="http://localhost/cgi-bin/man/man2html">man2html</A>,
+using the manual pages.<BR>
+Time: 19:05:38 GMT, September 28, 2009
+</BODY>
+</HTML>

@@ -1,109 +1,144 @@
-<!--#set var="section" value="documentation" -->
-<!--#include virtual="/page-top.html" -->
-<!-- CONTENT START -->
-    <h1>SNMPSET</h1>Section: Net-SNMP (1)<br />
-    Updated: 08 Feb 2002<br />
-    <a href="#index">Index</a> <a href="../index.html">Return to Main Contents</a>
-    <hr />
-    <a name="lbAB" id="lbAB">&nbsp;</a>
+Content-type: text/html
 
-    <h2>NAME</h2>snmpset - communicates with a network entity using SNMP SET requests <a name="lbAC" id="lbAC">&nbsp;</a>
+<HTML><HEAD><TITLE>Manpage of SNMPSET</TITLE>
+</HEAD><BODY>
+<H1>SNMPSET</H1>
+Section: Net-SNMP (1)<BR>Updated: 08 Feb 2002<BR><A HREF="#index">Index</A>
+<A HREF="http://localhost/cgi-bin/man/man2html">Return to Main Contents</A><HR>
 
-    <h2>SYNOPSIS</h2><b>snmpset</b> [COMMON OPTIONS] OID TYPE VALUE [OID TYPE VALUE]... <a name="lbAD" id="lbAD">&nbsp;</a>
 
-    <h2>DESCRIPTION</h2><b>snmpset</b> is an SNMP application that uses the SNMP SET request to set information on a network
-    entity. One or more object identifiers (OIDs) must be given as arguments on the command line. A type and a value to be set
-    must accompany each object identifier. Each variable name is given in the format specified in <i><a href=
-    "variables.html">variables</a>(5)</i>.
+<A NAME="lbAB">&nbsp;</A>
+<H2>NAME</H2>
 
-    <p>The <i>TYPE</i> is a single character, one of:</p>
+snmpset - communicates with a network entity using SNMP SET requests
+<A NAME="lbAC">&nbsp;</A>
+<H2>SYNOPSIS</H2>
 
-    <dl compact="compact">
-      <dd>
-        <dl compact="compact">
-          <dt><b>i</b></dt>
+<B>snmpset</B>
 
-          <dd>INTEGER</dd>
+[COMMON OPTIONS] OID TYPE VALUE [OID TYPE VALUE]...
+<A NAME="lbAD">&nbsp;</A>
+<H2>DESCRIPTION</H2>
 
-          <dt><b>u</b></dt>
+<B>snmpset</B>
 
-          <dd>UNSIGNED</dd>
+is an SNMP application that uses the SNMP SET request to set
+information on a network entity.  One or more object identifiers
+(OIDs) must be given as arguments on the command line.  A type and a
+value to be set must accompany each object identifier.  Each variable
+name is given in the format specified in
+<I><A HREF="http://localhost/cgi-bin/man/man2html?5+variables">variables</A>(5)</I>.
 
-          <dt><b>s</b></dt>
+<P>
 
-          <dd>STRING</dd>
+The
+<I>TYPE</I>
 
-          <dt><b>x</b></dt>
+is a single character, one of:
+<DL COMPACT><DT><DD>
 
-          <dd>HEX STRING</dd>
+<DL COMPACT>
+<DT><B>i</B>
 
-          <dt><b>d</b></dt>
+<DD>
+INTEGER
+<DT><B>u</B>
 
-          <dd>DECIMAL STRING</dd>
+<DD>
+UNSIGNED
+<DT><B>s</B>
 
-          <dt><b>n</b></dt>
+<DD>
+STRING
+<DT><B>x</B>
 
-          <dd>NULLOBJ</dd>
+<DD>
+HEX STRING
+<DT><B>d</B>
 
-          <dt><b>o</b></dt>
+<DD>
+DECIMAL STRING
+<DT><B>n</B>
 
-          <dd>OBJID</dd>
+<DD>
+NULLOBJ
+<DT><B>o</B>
 
-          <dt><b>t</b></dt>
+<DD>
+OBJID
+<DT><B>t</B>
 
-          <dd>TIMETICKS</dd>
+<DD>
+TIMETICKS
+<DT><B>a</B>
 
-          <dt><b>a</b></dt>
+<DD>
+IPADDRESS
+<DT><B>b</B>
 
-          <dd>IPADDRESS</dd>
+<DD>
+BITS
 
-          <dt><b>b</b></dt>
+</DL>
+</DL>
 
-          <dd>BITS</dd>
-        </dl>
-      </dd>
-    </dl>Most of these will use the obvious corresponding ASN.1 type. 's', 'x', 'd' and 'b' are all different ways of specifying
-    an OCTET STRING value, and the 'u' unsigned type is also used for handling Gauge32 values.
+Most of these will use the obvious corresponding ASN.1 type.
+'s', 'x', 'd' and 'b' are all different ways of specifying an OCTET STRING
+value, and the 'u' unsigned type is also used for handling Gauge32 values.
+<P>
 
-    <p>If you have the proper MIB file loaded, you can, in most cases, replace the type with an '=' sign. For an object of type
-    OCTET STRING this will assume a string like the 's' type notation. For other types it will do "The Right Thing".</p>
+If you have the proper MIB file loaded, you can, in most cases, replace the
+type with an '=' sign. For an object of type OCTET STRING this will assume
+a string like the 's' type notation. For other types it will do &quot;The
+Right Thing&quot;.
+<P>
 
-    <p>For example:</p>
+For example:
+<P>
 
-    <p>snmpset -c private -v 1 test-hub system.sysContact.0 s <a href="mailto:dpz@noc.rutgers.edu">dpz@noc.rutgers.edu</a>
-    ip.ipforwarding.0 = 2</p>
+snmpset -c private -v 1 test-hub system.sysContact.0 s <A HREF="mailto:dpz@noc.rutgers.edu">dpz@noc.rutgers.edu</A> ip.ipforwarding.0 = 2
+<P>
 
-    <p>will set the variables sysContact.0 and ipForwarding.0:</p>
+will set the variables sysContact.0 and ipForwarding.0:
+<P>
 
-    <p>system.sysContact.0 = STRING: "<a href="mailto:dpz@noc.rutgers.edu">dpz@noc.rutgers.edu</a>"<br />
-    ip.ipForwarding.0 = INTEGER: <a href="not-forwarding.html">not-forwarding</a>(2)</p>
+system.sysContact.0 = STRING: &quot;<A HREF="mailto:dpz@noc.rutgers.edu">dpz@noc.rutgers.edu</A>&quot;
+<BR>
 
-    <p>If the network entity has an error processing the request packet, an error packet will be returned and a message will be
-    shown, helping to pinpoint in what way the request was malformed. <a name="lbAE" id="lbAE">&nbsp;</a></p>
+ip.ipForwarding.0 = INTEGER: <A HREF="http://localhost/cgi-bin/man/man2html?2+not-forwarding">not-forwarding</A>(2)
+<P>
 
-    <h2>OPTIONS</h2><b>snmpset</b> takes the common options described in the <i><a href="snmpcmd.html">snmpcmd</a>(1)</i> manual
-    page. <a name="lbAF" id="lbAF">&nbsp;</a>
+If the network entity has an error processing the request packet, an
+error packet will be returned and a message will be shown, helping to
+pinpoint in what way the request was malformed.
+<A NAME="lbAE">&nbsp;</A>
+<H2>OPTIONS</H2>
 
-    <h2>SEE ALSO</h2><a href="snmpcmd.html">snmpcmd</a>(1), <a href="variables.html">variables</a>(5).
-    <hr />
-    <a name="index" id="index">&nbsp;</a>
+<B>snmpset</B>
 
-    <h2>Index</h2>
+takes the common options described in the
+<I><A HREF="http://localhost/cgi-bin/man/man2html?1+snmpcmd">snmpcmd</A>(1)</I>
 
-    <dl>
-      <dt><a href="#lbAB">NAME</a></dt>
+manual page.
+<A NAME="lbAF">&nbsp;</A>
+<H2>SEE ALSO</H2>
 
-      <dt><a href="#lbAC">SYNOPSIS</a></dt>
+<A HREF="http://localhost/cgi-bin/man/man2html?1+snmpcmd">snmpcmd</A>(1), <A HREF="http://localhost/cgi-bin/man/man2html?5+variables">variables</A>(5).
+<P>
 
-      <dt><a href="#lbAD">DESCRIPTION</a></dt>
-
-      <dt><a href="#lbAE">OPTIONS</a></dt>
-
-      <dt><a href="#lbAF">SEE ALSO</a></dt>
-    </dl>
-    <hr />
-    This document was created by <a href="http://localhost/cgi-bin/man/man2html">man2html</a>, using the manual pages.<br />
-    Time: 13:12:00 GMT, September 23, 2007
-<!-- CONTENT END -->
-<!--#include virtual="/page-bottom.html" -->
-
+<HR>
+<A NAME="index">&nbsp;</A><H2>Index</H2>
+<DL>
+<DT><A HREF="#lbAB">NAME</A><DD>
+<DT><A HREF="#lbAC">SYNOPSIS</A><DD>
+<DT><A HREF="#lbAD">DESCRIPTION</A><DD>
+<DT><A HREF="#lbAE">OPTIONS</A><DD>
+<DT><A HREF="#lbAF">SEE ALSO</A><DD>
+</DL>
+<HR>
+This document was created by
+<A HREF="http://localhost/cgi-bin/man/man2html">man2html</A>,
+using the manual pages.<BR>
+Time: 19:05:39 GMT, September 28, 2009
+</BODY>
+</HTML>

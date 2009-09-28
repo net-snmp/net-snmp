@@ -1,94 +1,150 @@
-<!--#set var="section" value="documentation" -->
-<!--#include virtual="/page-top.html" -->
-<!-- CONTENT START -->
-    <h1>SNMPSTATUS</h1>Section: Net-SNMP (1)<br />
-    Updated: 25 Jul 2003<br />
-    <a href="#index">Index</a> <a href="../index.html">Return to Main Contents</a>
-    <hr />
-    <a name="lbAB" id="lbAB">&nbsp;</a>
+Content-type: text/html
 
-    <h2>NAME</h2>snmpstatus - retrieves a fixed set of management information from a network entity <a name="lbAC" id=
-    "lbAC">&nbsp;</a>
+<HTML><HEAD><TITLE>Manpage of SNMPSTATUS</TITLE>
+</HEAD><BODY>
+<H1>SNMPSTATUS</H1>
+Section: Net-SNMP (1)<BR>Updated: 25 Jul 2003<BR><A HREF="#index">Index</A>
+<A HREF="http://localhost/cgi-bin/man/man2html">Return to Main Contents</A><HR>
 
-    <h2>SYNOPSIS</h2><b>snmpstatus</b> [COMMON OPTIONS] [-Cf] AGENT <a name="lbAD" id="lbAD">&nbsp;</a>
 
-    <h2>DESCRIPTION</h2><b>snmpstatus</b> is an SNMP application that retrieves several important statistics from a network
-    entity.
+<A NAME="lbAB">&nbsp;</A>
+<H2>NAME</H2>
 
-    <p>AGENT identifies a target SNMP agent, which is instrumented to monitor the given objects. At its simplest, the AGENT
-    specification will consist of a hostname or an IPv4 address. n this situation, the command will attempt communication with
-    the agent, using UDP/IPv4 to port 161 of the given target host.</p>
+snmpstatus - retrieves a fixed set of management information from a network entity
+<A NAME="lbAC">&nbsp;</A>
+<H2>SYNOPSIS</H2>
 
-    <p>See the <i><a href="snmpcmd.html">snmpcmd</a>(1)</i> manual page for a full list of the possible formats for AGENT.</p>
+<B>snmpstatus</B>
 
-    <p>The information returned is:</p>
+[COMMON OPTIONS] [-Cf] AGENT
+<A NAME="lbAD">&nbsp;</A>
+<H2>DESCRIPTION</H2>
 
-    <dl compact="compact">
-      <dd>The IP address of the entity.<br />
-      A textual description of the entity (sysDescr.0)<br />
-      The uptime of the entity's SNMP agent (sysUpTime.0)<br />
-      The sum of received packets on all interfaces (ifInUCastPkts.* + ifInNUCastPkts.*)<br />
-      The sum of transmitted packets on all interfaces (ifOutUCastPkts.* + ifOutNUCastPkts.*)<br />
-      The number of IP input packets (ipInReceives.0)<br />
-      The number of IP output packets (ipOutRequests.0)</dd>
-    </dl>
+<B>snmpstatus</B>
 
-    <p>For example:</p>
+is an SNMP application that retrieves several important statistics
+from a network entity.
+<P>
 
-    <p>snmpstatus -c public -v 1 netdev-kbox.cc.cmu.edu</p>
+AGENT identifies a target SNMP agent, which is instrumented
+to monitor the given objects.  At its simplest, the AGENT
+specification will consist of a hostname or an IPv4 address.
+n this situation, the command will attempt communication with
+the agent, using UDP/IPv4 to port 161 of the given target host.
+<P>
 
-    <p>will produce output similar to the following:</p>
+See the 
+<I><A HREF="http://localhost/cgi-bin/man/man2html?1+snmpcmd">snmpcmd</A>(1)</I>
 
-    <p>[128.2.56.220]=&gt;[Kinetics FastPath2] Up: 1 day, 4:43:31<br />
-    Interfaces: 1, Recv/Trans packets: 262874/39867 | IP: 31603/15805</p>
+manual page for a full list of the possible formats for AGENT.
+<P>
 
-    <p><b>snmpstatus</b> also checks the operational status of all interfaces (ifOperStatus.*), and if it finds any that are not
-    running, it will report in a manner similar to this:</p>
+The information returned is:
+<DL COMPACT>
+<DT><DD>
+The IP address of the entity.
+<BR>
 
-    <p>2 interfaces are down!</p>
+A textual description of the entity (sysDescr.0)
+<BR>
 
-    <p>If the network entity has an error processing the request packet, an error packet will be returned and a message will be
-    shown, helping to pinpoint in what way the request was malformed. <b>snmpstatus</b> will attempt to reform its request to
-    eliminate the malformed variable (unless the <b>-Cf</b> option is given, see below), but this variable will then be missing
-    from the displayed data.</p>
+The uptime of the entity's SNMP agent (sysUpTime.0)
+<BR>
 
-    <p><a name="lbAE" id="lbAE">&nbsp;</a></p>
+The sum of received packets on all interfaces
+(ifInUCastPkts.* + ifInNUCastPkts.*)
+<BR>
 
-    <h2>OPTIONS</h2>
+The sum of transmitted packets on all interfaces
+(ifOutUCastPkts.* + ifOutNUCastPkts.*)
+<BR>
 
-    <dl compact="compact">
-      <dt><b>COMMON OPTIONS</b></dt>
+The number of IP input packets (ipInReceives.0)
+<BR>
 
-      <dd>Please see <i><a href="snmpcmd.html">snmpcmd</a>(1)</i> for a list of possible values for COMMON OPTIONS as well as
-      their descriptions.</dd>
+The number of IP output packets (ipOutRequests.0)
+</DL>
+<P>
 
-      <dt><b>-Cf</b></dt>
+For example:
+<P>
 
-      <dd>By default, snmpstatus will try to fix errors returned by the agent and retry a request. In this situation, the command
-      will display the data that it can. If the -Cf option is specified, then snmpstatus will not try to fix errors, and the
-      error will cause the command to terminate.</dd>
-    </dl><a name="lbAF" id="lbAF">&nbsp;</a>
+snmpstatus -c public -v 1 netdev-kbox.cc.cmu.edu
+<P>
 
-    <h2>SEE ALSO</h2><a href="snmpcmd.html">snmpcmd</a>(1), <a href="snmpget.html">snmpget</a>(1)
-    <hr />
-    <a name="index" id="index">&nbsp;</a>
+will produce output similar to the following:
+<P>
 
-    <h2>Index</h2>
+[128.2.56.220]=&gt;[Kinetics FastPath2] Up: 1 day, 4:43:31
+<BR>
 
-    <dl>
-      <dt><a href="#lbAB">NAME</a></dt>
+Interfaces: 1,  Recv/Trans packets: 262874/39867 |
+IP: 31603/15805
+<P>
 
-      <dt><a href="#lbAC">SYNOPSIS</a></dt>
+<B>snmpstatus</B>
 
-      <dt><a href="#lbAD">DESCRIPTION</a></dt>
+also checks the operational status of all interfaces (ifOperStatus.*),
+and if it finds any that are not running, it will report in a manner
+similar to this:
+<P>
 
-      <dt><a href="#lbAE">OPTIONS</a></dt>
+2 interfaces are down!
+<P>
 
-      <dt><a href="#lbAF">SEE ALSO</a></dt>
-    </dl>
-    <hr />
-    This document was created by <a href="http://localhost/cgi-bin/man/man2html">man2html</a>, using the manual pages.<br />
-    Time: 13:12:00 GMT, September 23, 2007
-<!-- CONTENT END -->
-<!--#include virtual="/page-bottom.html" -->
+If the network entity has an error processing the request packet, an
+error packet will be returned and a message will be shown, helping to
+pinpoint in what way the request was malformed.
+<B>snmpstatus</B>
 
+will attempt to reform its request to eliminate the malformed
+variable (unless the
+<B>-Cf</B>
+
+option is given, see below), but this variable will then be missing
+from the displayed data.
+<P>
+
+<A NAME="lbAE">&nbsp;</A>
+<H2>OPTIONS</H2>
+
+<DL COMPACT>
+<DT><B>COMMON OPTIONS</B>
+
+<DD>
+Please see
+<I><A HREF="http://localhost/cgi-bin/man/man2html?1+snmpcmd">snmpcmd</A>(1)</I>
+
+for a list of possible values for COMMON OPTIONS
+as well as their descriptions.
+<DT><B>-Cf</B>
+
+<DD>
+By default, snmpstatus will try to fix errors returned
+by the agent and retry a request. In this situation,
+the command will display the data that it can. If the -Cf option
+is specified, then snmpstatus will not try to fix
+errors, and the error will cause the command to terminate.
+</DL>
+<A NAME="lbAF">&nbsp;</A>
+<H2>SEE ALSO</H2>
+
+<A HREF="http://localhost/cgi-bin/man/man2html?1+snmpcmd">snmpcmd</A>(1), <A HREF="http://localhost/cgi-bin/man/man2html?1+snmpget">snmpget</A>(1)
+<P>
+
+<HR>
+<A NAME="index">&nbsp;</A><H2>Index</H2>
+<DL>
+<DT><A HREF="#lbAB">NAME</A><DD>
+<DT><A HREF="#lbAC">SYNOPSIS</A><DD>
+<DT><A HREF="#lbAD">DESCRIPTION</A><DD>
+<DT><A HREF="#lbAE">OPTIONS</A><DD>
+<DT><A HREF="#lbAF">SEE ALSO</A><DD>
+</DL>
+<HR>
+This document was created by
+<A HREF="http://localhost/cgi-bin/man/man2html">man2html</A>,
+using the manual pages.<BR>
+Time: 19:05:39 GMT, September 28, 2009
+</BODY>
+</HTML>

@@ -1,244 +1,412 @@
-<!--#set var="section" value="documentation" -->
-<!--#include virtual="/page-top.html" -->
-<!-- CONTENT START -->
-    <h1>SNMPUSM</h1>Section: Net-SNMP (1)<br />
-    Updated: 22 Oct 2005<br />
-    <a href="#index">Index</a> <a href="../index.html">Return to Main Contents</a>
-    <hr />
-    <a name="lbAB" id="lbAB">&nbsp;</a>
+Content-type: text/html
 
-    <h2>NAME</h2>snmpusm - creates and maintains SNMPv3 users on a network entity <a name="lbAC" id="lbAC">&nbsp;</a>
+<HTML><HEAD><TITLE>Manpage of SNMPUSM</TITLE>
+</HEAD><BODY>
+<H1>SNMPUSM</H1>
+Section: Net-SNMP (1)<BR>Updated: 22 Oct 2005<BR><A HREF="#index">Index</A>
+<A HREF="http://localhost/cgi-bin/man/man2html">Return to Main Contents</A><HR>
 
-    <h2>SYNOPSIS</h2><b>snmpusm</b> [COMMON OPTIONS] <b>create</b> USER [CLONEFROM-USER]<br />
-    <b>snmpusm</b> [COMMON OPTIONS] <b>delete</b> USER<br />
-    <b>snmpusm</b> [COMMON OPTIONS] <b>cloneFrom</b> USER CLONEFROM-USER<br />
-    <b>snmpusm</b> [COMMON OPTIONS] [-Ca] [-Cx] <b>passwd</b> OLD-PASSPHRASE NEW-PASSPHRASE [USER]<br />
-    <b>snmpusm</b> [COMMON OPTIONS] &lt;-Ca | -Cx&gt; -Ck <b>passwd</b> OLD-KEY-OR-PASSPHRASE NEW-KEY-OR-PASSPHRASE [USER]<br />
-    <b>snmpusm</b> [COMMON OPTIONS] [-Ca] [-Cx] <b>changekey</b> [USER]
 
-    <p><a name="lbAD" id="lbAD">&nbsp;</a></p>
+<A NAME="lbAB">&nbsp;</A>
+<H2>NAME</H2>
 
-    <h2>DESCRIPTION</h2><b>snmpusm</b> is an SNMP application that can be used to do simple maintenance on the users known to an
-    SNMP agent, by manipulating the agent's User-based Security Module (USM) table. The user needs write access to the
-    usmUserTable MIB table. This tool can be used to create, delete, clone, and change the passphrase of users configured on a
-    running SNMP agent.
+snmpusm - creates and maintains SNMPv3 users on a network entity
+<A NAME="lbAC">&nbsp;</A>
+<H2>SYNOPSIS</H2>
 
-    <p><a name="lbAE" id="lbAE">&nbsp;</a></p>
+<B>snmpusm</B>
 
-    <h2>OPTIONS</h2>Common options for all <b>snmpusm</b> commands:
+[COMMON OPTIONS]
+<B>create</B>
 
-    <dl compact="compact">
-      <dt><b>-CE</b> <i>ENGINE-ID</i></dt>
+USER [CLONEFROM-USER]
+<BR>
 
-      <dd>Set usmUserEngineID to be used as part of the index of the usmUserTable. Default is to use the contextEngineID (set via
-      -E or probed) as the usmUserEngineID.</dd>
+<B>snmpusm</B>
 
-      <dt><b>-Cp</b> <i>STRING</i></dt>
+[COMMON OPTIONS]
+<B>delete</B>
 
-      <dd>Set the usmUserPublic value of the (new) user to the specified STRING.</dd>
-    </dl>
+USER
+<BR>
 
-    <p>Options for the <b>passwd</b> and <b>changekey</b> commands:</p>
+<B>snmpusm</B>
 
-    <dl compact="compact">
-      <dt><b>-Ca</b></dt>
+[COMMON OPTIONS]
+<B>cloneFrom</B>
 
-      <dd>Change the authentication key.</dd>
+USER CLONEFROM-USER
+<BR>
 
-      <dt><b>-Cx</b></dt>
+<B>snmpusm</B>
 
-      <dd>Change the privacy key.</dd>
+[COMMON OPTIONS] [-Ca] [-Cx]
+<B>passwd</B>
 
-      <dt><b>-Ck</b></dt>
+OLD-PASSPHRASE NEW-PASSPHRASE [USER]
+<BR>
 
-      <dd>Allows to use localized key (must start with 0x) instead of passphrase. When this option is used, either the -Ca or -Cx
-      option (but not both) must also be used.</dd>
-    </dl><a name="lbAF" id="lbAF">&nbsp;</a>
+<B>snmpusm</B>
 
-    <h2>CREATING USERS</h2>
+[COMMON OPTIONS] &lt;-Ca | -Cx&gt; -Ck
+<B>passwd</B>
 
-    <p>An unauthenticated SNMPv3 user can be created using the command</p>
+OLD-KEY-OR-PASSPHRASE NEW-KEY-OR-PASSPHRASE [USER]
+<BR>
 
-    <dl compact="compact">
-      <dd><b>snmpusm</b> [OPTIONS] create USER</dd>
-    </dl>
+<B>snmpusm</B>
 
-    <p>This constructs an (inactive) entry in the usmUserTable, with no authentication or privacy settings. In principle, this
-    user should be useable for 'noAuthNoPriv' requests, but in practise the Net-SNMP agent will not allow such an entry to be
-    made active.</p>
+[COMMON OPTIONS] [-Ca] [-Cx]
+<B>changekey</B>
 
-    <p>In order to activate this entry, it is necessary to "clone" an existing user, using the command</p>
+[USER]
+<P>
+<A NAME="lbAD">&nbsp;</A>
+<H2>DESCRIPTION</H2>
 
-    <dl compact="compact">
-      <dd><b>snmpusm</b> [OPTIONS] cloneFrom USER CLONEFROM-USER</dd>
-    </dl>
+<B>snmpusm</B>
 
-    <p>The USER entry then inherits the same authentication and privacy settings (including pass phrases) as the CLONEFROM
-    user.</p>
+is an SNMP application that can be used to do simple maintenance on 
+the users known to an SNMP agent, by manipulating the agent's
+User-based Security Module (USM) table.  The user needs
+write access to the usmUserTable MIB table.  This tool can be
+used to create, delete, clone, and change the passphrase of users
+configured on a running SNMP agent.
+<P>
+<A NAME="lbAE">&nbsp;</A>
+<H2>OPTIONS</H2>
 
-    <p>These two steps can be combined into one, by using the command</p>
+Common options for all
+<B>snmpusm</B>
 
-    <dl compact="compact">
-      <dd><b>snmpusm</b> [OPTIONS] create USER CLONEFROM-USER</dd>
-    </dl>
+commands:
+<DL COMPACT>
+<DT><B>-CE</B><I> ENGINE-ID</I>
 
-    <p>The two forms of the <b>create</b> sub-command require that the user being created does not already exist. The
-    <b>cloneFrom</b> sub-command requires that the user being cloned to <i>does</i> already exist.</p>
+<DD>
+Set usmUserEngineID to be used as part of the index of the usmUserTable.
+Default is to use the contextEngineID (set via -E or probed) as the 
+usmUserEngineID.
+<DT><B>-Cp</B><I> STRING</I>
 
-    <p>Cloning is the only way to specify which authentication and privacy protocols to use for a given user, and it is only
-    possible to do this once. Subsequent attempts to reclone onto the same user will appear to succeed, but will be silently
-    ignored. This (somewhat unexpected) behaviour is mandated by the SNMPv3 USM specifications (RFC 3414). To change the
-    authentication and privacy settings for a given user, it is necessary to delete and recreate the user entry. This is
-    <i>not</i> necessary for simply changing the pass phrases (see below). This means that the agent must be initialized with at
-    least one user for each combination of authentication and privacy protocols. See the <i><a href=
-    "snmpd.conf.html">snmpd.conf</a>(5)</i> manual page for details of the <b>createUser</b> configuration directive.</p>
+<DD>
+Set the usmUserPublic value of the (new) user to the specified STRING.
+</DL>
+<P>
 
-    <p><a name="lbAG" id="lbAG">&nbsp;</a></p>
+Options for the
+<B>passwd </B>
 
-    <h2>DELETING USERS</h2>A user can be deleted from the usmUserTable using the command
+and
+<B>changekey</B>
 
-    <dl compact="compact">
-      <dd><b>snmpusm</b> [OPTIONS] delete USER</dd>
-    </dl><a name="lbAH" id="lbAH">&nbsp;</a>
+commands:
+<DL COMPACT>
+<DT><B>-Ca</B>
 
-    <h2>CHANGING PASS PHRASES</h2>User profiles contain private keys that are never transmitted over the wire in clear text
-    (regardless of whether the administration requests are encrypted or not). To change the secret key for a user, it is
-    necessary to specify the user's old passphrase as well as the new one. This uses the command
+<DD>
+Change the authentication key.
+<DT><B>-Cx</B>
 
-    <dl compact="compact">
-      <dd><b>snmpusm</b> [OPTIONS] [-Ca] [-Cx] passwd OLD-PASSPHRASE NEW-PASSPHRASE [USER]</dd>
-    </dl>
+<DD>
+Change the privacy key.
+<DT><B>-Ck</B>
 
-    <p>After cloning a new user entry from the appropriate template, you should immediately change the new user's passphrase.</p>
+<DD>
+Allows to use localized key (must start with 0x) instead of passphrase.
+When this option is used, either the -Ca or -Cx option (but not both) must also
+be used.
+<P>
+</DL>
+<A NAME="lbAF">&nbsp;</A>
+<H2>CREATING USERS</H2>
 
-    <p>If USER is not specified, this command will change the passphrase of the (SNMPv3) user issuing the command. If the -Ca or
-    -Cx options are specified, then only the authentication or privacy keys are changed. If these options are not specified, then
-    both the authentication and privacy keys are changed.</p>
+<P>
 
-    <dl compact="compact">
-      <dd><b>snmpusm</b> [OPTIONS] [-Ca] [-Cx] changekey [USER]</dd>
-    </dl>
+An unauthenticated SNMPv3 user can be created using the command
+<DL COMPACT>
+<DT><DD>
+<B>snmpusm</B>
 
-    <p>This command changes the key in a perfect-forward-secrecy compliant way through a diffie-helman exchange. The remote agent
-    must support the SNMP-USM-DH-OBJECTS-MIB for this command to work. The resulting keys are printed to the console and may be
-    then set in future command invocations using the --defAuthLocalizedKey and --defPrivLocalizedKey options or in your snmp.conf
-    file using the defAuthLocalizedKey and defPrivLocalizedKey keywords.</p>
+[OPTIONS] create USER
+</DL>
+<P>
 
-    <p>Note that since these keys are randomly generated based on a diffie helman exchange, they are no longer derived from a
-    more easily typed password. They are, however, much more secure.</p>
+This constructs an (inactive) entry in the usmUserTable,
+with no authentication or privacy settings.
+In principle, this user should be useable for 'noAuthNoPriv' requests,
+but in practise the Net-SNMP agent will not allow such an entry
+to be made active.
+<P>
+<P>
 
-    <p>To change from a localized key back to a password, the following variant of the <b>passwd</b> sub-command is used:</p>
+In order to activate this entry, it is necessary to &quot;clone&quot; an existing
+user, using the command
+<DL COMPACT>
+<DT><DD>
+<B>snmpusm</B>
 
-    <dl compact="compact">
-      <dd><b>snmpusm</b> [OPTIONS] &lt;-Ca | -Cx&gt; -Ck passwd OLD-KEY-OR-PASSPHRASE NEW-KEY-OR-PASSPHRASE [USER]</dd>
-    </dl>
+[OPTIONS] cloneFrom USER CLONEFROM-USER
+</DL>
+<P>
 
-    <p>Either the -Ca or the -Cx option must be specified. The OLD-KEY-OR-PASSPHRASE and/or NEW-KEY-OR-PASSPHRASE arguments can
-    either be a passphrase or a localized key starting with "0x", e.g. as printed out by the <b>changekey</b> sub-command.</p>
+The USER entry then inherits the same authentication and privacy
+settings (including pass phrases) as the CLONEFROM user.
+<P>
+<P>
 
-    <p><a name="lbAI" id="lbAI">&nbsp;</a></p>
+These two steps can be combined into one, by using the command
+<DL COMPACT>
+<DT><DD>
+<B>snmpusm</B>
 
-    <h2>EXAMPLES</h2>
+[OPTIONS] create USER CLONEFROM-USER
+<P>
+</DL>
+<P>
 
-    <p>Let's assume for our examples that the following VACM and USM configurations lines were in the snmpd.conf file for a
-    Net-SNMP agent. These lines set up a default user called "initial" with the authentication passphrase "setup_passphrase" so
-    that we can perform the initial setup of an agent:</p>
+The two forms of the
+<B>create</B>
 
-    <dl compact="compact">
-      <dd>
-        <pre>
+sub-command require that the user being created does not already exist.
+The
+<B>cloneFrom</B>
+
+sub-command requires that the user being cloned to
+<I>does</I>
+
+already exist.
+<P>
+<P>
+
+Cloning is the only way to specify which authentication and privacy
+protocols to use for a given user, and it is only possible to do this
+once.  Subsequent attempts to reclone onto the same user will appear
+to succeed, but will be silently ignored.
+This (somewhat unexpected) behaviour is mandated by the SNMPv3
+USM specifications (RFC 3414).
+To change the authentication and privacy settings for a given user,
+it is necessary to delete and recreate the user entry.
+This is
+<I>not</I>
+
+necessary for simply changing the pass phrases (see below).
+This means that the agent must be initialized with at least one
+user for each combination of authentication and privacy protocols.
+See the
+<I><A HREF="http://localhost/cgi-bin/man/man2html?5+snmpd.conf">snmpd.conf</A>(5)</I>
+
+manual page for details of the
+<B>createUser</B>
+
+configuration directive.
+<P>
+<A NAME="lbAG">&nbsp;</A>
+<H2>DELETING USERS</H2>
+
+A user can be deleted from the usmUserTable using the command
+<DL COMPACT>
+<DT><DD>
+<B>snmpusm</B>
+
+[OPTIONS] delete USER
+<P>
+</DL>
+<A NAME="lbAH">&nbsp;</A>
+<H2>CHANGING PASS PHRASES</H2>
+
+User profiles contain private keys that are never
+transmitted over the wire in clear text (regardless of whether the
+administration requests are encrypted or not).  
+To change the secret key for a user, it is necessary to specify the
+user's old passphrase as well as the new one.
+This uses the command
+<DL COMPACT>
+<DT><DD>
+<B>snmpusm</B>
+
+[OPTIONS] [-Ca] [-Cx] passwd OLD-PASSPHRASE NEW-PASSPHRASE [USER]
+<P>
+</DL>
+<P>
+
+After cloning a new user entry from the appropriate template,
+you should immediately change the new user's passphrase.
+<P>
+<P>
+
+If USER is not specified, this command will change the passphrase
+of the (SNMPv3) user issuing the command.  If the -Ca or -Cx options
+are specified, then only the authentication or privacy keys are changed.  If
+these options are not specified, then both the authentication and privacy keys
+are changed.
+<P>
+<DL COMPACT>
+<DT><DD>
+<B>snmpusm</B>
+
+[OPTIONS] [-Ca] [-Cx] changekey [USER]
+<P>
+</DL>
+<P>
+
+This command changes the key in a perfect-forward-secrecy compliant
+way through a diffie-helman exchange.  The remote agent must support
+the SNMP-USM-DH-OBJECTS-MIB for this command to work.  The resulting
+keys are printed to the console and may be then set in future command
+invocations using the --defAuthLocalizedKey and --defPrivLocalizedKey
+options or in your snmp.conf file using the defAuthLocalizedKey and
+defPrivLocalizedKey keywords.
+<P>
+<P>
+
+Note that since these keys are randomly generated based on a
+diffie helman exchange, they are no longer derived from a more easily
+typed password.  They are, however, much more secure.
+<P>
+<P>
+
+To change from a localized key back to a password, the following variant
+of the 
+<B>passwd</B>
+
+sub-command is used:
+<P>
+<DL COMPACT>
+<DT><DD>
+<B>snmpusm</B>
+
+[OPTIONS] &lt;-Ca | -Cx&gt; -Ck passwd OLD-KEY-OR-PASSPHRASE NEW-KEY-OR-PASSPHRASE [USER]
+<P>
+</DL>
+<P>
+
+Either the -Ca or the -Cx option must be specified.  The OLD-KEY-OR-PASSPHRASE
+and/or NEW-KEY-OR-PASSPHRASE arguments can either be a passphrase or a
+localized key starting with &quot;0x&quot;, e.g. as printed out by the
+<B>changekey</B>
+
+sub-command.
+<P>
+<A NAME="lbAI">&nbsp;</A>
+<H2>EXAMPLES</H2>
+
+<P>
+
+Let's assume for our examples that the following VACM and USM
+configurations lines were in the snmpd.conf file for a Net-SNMP agent.
+These lines set up a default user called &quot;initial&quot; with the
+authentication passphrase &quot;setup_passphrase&quot; so that we can perform
+the initial setup of an agent:
+<P>
+
+<DL COMPACT><DT><DD>
+<PRE>
 # VACM configuration entries
 rwuser initial
 # lets add the new user we'll create too:
 rwuser wes
 # USM configuration entries
 createUser initial MD5 setup_passphrase DES
-</pre>
-      </dd>
-    </dl>
+</PRE>
 
-    <p>Note: the "initial" user's setup should be removed after creating a real user that you grant administrative privileges to
-    (like the user "wes" we'll be creating in this example.</p>
+</DL>
 
-    <p>Note: passphrases must be 8 characters <i>minimum</i> in length. <a name="lbAJ" id="lbAJ">&nbsp;</a></p>
+<P>
 
-    <h3>Create a new user</h3>
+Note: the &quot;initial&quot; user's setup should be removed after creating a
+real user that you grant administrative privileges to (like the user
+&quot;wes&quot; we'll be creating in this example.
+<P>
 
-    <p>snmpusm -v3 -u initial -n "" -l authNoPriv -a MD5 -A setup_passphrase localhost create wes initial</p>
+Note: passphrases must be 8 characters
+<I>minimum</I>
 
-    <dl compact="compact">
-      <dd>Creates a new user, here named "wes" using the user "initial" to do it. "wes" is cloned from "initial" in the process,
-      so he inherits that user's passphrase ("setup_passphrase").</dd>
-    </dl><a name="lbAK" id="lbAK">&nbsp;</a>
+in length.
+<A NAME="lbAJ">&nbsp;</A>
+<H3>Create a new user</H3>
 
-    <h3>Change the user's passphrase</h3>
+<P>
 
-    <p>snmpusm -v 3 -u wes -n "" -l authNoPriv -a MD5 -A setup_passphrase localhost passwd setup_passphrase new_passphrase</p>
+snmpusm -v3 -u initial -n &quot;&quot; -l authNoPriv -a MD5 -A setup_passphrase
+localhost create wes initial
+<DL COMPACT>
+<DT><DD>
+Creates a new user, here named &quot;wes&quot; using the user &quot;initial&quot; to do
+it.  &quot;wes&quot; is cloned from &quot;initial&quot; in the process, so he inherits
+that user's passphrase (&quot;setup_passphrase&quot;).
+</DL>
+<A NAME="lbAK">&nbsp;</A>
+<H3>Change the user's passphrase</H3>
 
-    <dl compact="compact">
-      <dd>After creating the user "wes" with the same passphrase as the "initial" user, we need to change his passphrase for him.
-      The above command changes it from "setup_passphrase", which was inherited from the initial user, to "new_passphrase".</dd>
-    </dl><a name="lbAL" id="lbAL">&nbsp;</a>
+<P>
 
-    <h3>Test the new user</h3>
+snmpusm -v 3 -u wes -n &quot;&quot; -l authNoPriv -a MD5 -A setup_passphrase
+localhost passwd setup_passphrase new_passphrase
+<DL COMPACT>
+<DT><DD>
+After creating the user &quot;wes&quot; with the same passphrase as the
+&quot;initial&quot; user, we need to change his passphrase for him.  The above
+command changes it from &quot;setup_passphrase&quot;, which was inherited from
+the initial user, to &quot;new_passphrase&quot;.
+</DL>
+<A NAME="lbAL">&nbsp;</A>
+<H3>Test the new user</H3>
 
-    <p>snmpget -v 3 -u wes -n "" -l authNoPriv -a MD5 -A new_passphrase localhost sysUpTime.0</p>
+<P>
 
-    <dl compact="compact">
-      <dd>If the above commands were successful, this command should have properly performed an authenticated SNMPv3 GET request
-      to the agent.</dd>
-    </dl>
+snmpget -v 3 -u wes -n &quot;&quot; -l authNoPriv -a MD5 -A new_passphrase
+localhost sysUpTime.0
+<DL COMPACT>
+<DT><DD>
+If the above commands were successful, this command should have
+properly performed an authenticated SNMPv3 GET request to the agent.
+</DL>
+<P>
 
-    <p>Now, go remove the vacm "group" snmpd.conf entry for the "initial" user and you have a valid user 'wes' that you can use
-    for future transactions instead of initial.</p>
+Now, go remove the vacm &quot;group&quot; snmpd.conf entry for the &quot;initial&quot;
+user and you have a valid user 'wes' that you can use for future
+transactions instead of initial.
+<P>
+<A NAME="lbAM">&nbsp;</A>
+<H2>WARNING</H2>
 
-    <p><a name="lbAM" id="lbAM">&nbsp;</a></p>
+Manipulating the usmUserTable using this command can
+<I>only</I>
 
-    <h2>WARNING</h2>Manipulating the usmUserTable using this command can <i>only</i> be done using SNMPv3. This command will not
-    work with the community-based versions, even if they have write access to the table.
+be done using SNMPv3.
+This command will not work with the community-based versions,
+even if they have write access to the table.
+<P>
+<A NAME="lbAN">&nbsp;</A>
+<H2>SEE ALSO</H2>
 
-    <p><a name="lbAN" id="lbAN">&nbsp;</a></p>
+<A HREF="http://localhost/cgi-bin/man/man2html?5+snmpd.conf">snmpd.conf</A>(5), <A HREF="http://localhost/cgi-bin/man/man2html?5+snmp.conf">snmp.conf</A>(5), RFC 3414
+<P>
 
-    <h2>SEE ALSO</h2><a href="snmpd.conf.html">snmpd.conf</a>(5), <a href="snmp.conf.html">snmp.conf</a>(5), RFC 3414
-    <hr />
-    <a name="index" id="index">&nbsp;</a>
-
-    <h2>Index</h2>
-
-    <dl>
-      <dt><a href="#lbAB">NAME</a></dt>
-
-      <dt><a href="#lbAC">SYNOPSIS</a></dt>
-
-      <dt><a href="#lbAD">DESCRIPTION</a></dt>
-
-      <dt><a href="#lbAE">OPTIONS</a></dt>
-
-      <dt><a href="#lbAF">CREATING USERS</a></dt>
-
-      <dt><a href="#lbAG">DELETING USERS</a></dt>
-
-      <dt><a href="#lbAH">CHANGING PASS PHRASES</a></dt>
-
-      <dt><a href="#lbAI">EXAMPLES</a></dt>
-
-      <dd>
-        <dl>
-          <dt><a href="#lbAJ">Create a new user</a></dt>
-
-          <dt><a href="#lbAK">Change the user's passphrase</a></dt>
-
-          <dt><a href="#lbAL">Test the new user</a></dt>
-        </dl>
-      </dd>
-
-      <dt><a href="#lbAM">WARNING</a></dt>
-
-      <dt><a href="#lbAN">SEE ALSO</a></dt>
-    </dl>
-    <hr />
-    This document was created by <a href="http://localhost/cgi-bin/man/man2html">man2html</a>, using the manual pages.<br />
-    Time: 13:12:00 GMT, September 23, 2007
-<!-- CONTENT END -->
-<!--#include virtual="/page-bottom.html" -->
-
+<HR>
+<A NAME="index">&nbsp;</A><H2>Index</H2>
+<DL>
+<DT><A HREF="#lbAB">NAME</A><DD>
+<DT><A HREF="#lbAC">SYNOPSIS</A><DD>
+<DT><A HREF="#lbAD">DESCRIPTION</A><DD>
+<DT><A HREF="#lbAE">OPTIONS</A><DD>
+<DT><A HREF="#lbAF">CREATING USERS</A><DD>
+<DT><A HREF="#lbAG">DELETING USERS</A><DD>
+<DT><A HREF="#lbAH">CHANGING PASS PHRASES</A><DD>
+<DT><A HREF="#lbAI">EXAMPLES</A><DD>
+<DL>
+<DT><A HREF="#lbAJ">Create a new user</A><DD>
+<DT><A HREF="#lbAK">Change the user's passphrase</A><DD>
+<DT><A HREF="#lbAL">Test the new user</A><DD>
+</DL>
+<DT><A HREF="#lbAM">WARNING</A><DD>
+<DT><A HREF="#lbAN">SEE ALSO</A><DD>
+</DL>
+<HR>
+This document was created by
+<A HREF="http://localhost/cgi-bin/man/man2html">man2html</A>,
+using the manual pages.<BR>
+Time: 19:05:39 GMT, September 28, 2009
+</BODY>
+</HTML>

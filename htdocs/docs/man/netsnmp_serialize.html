@@ -1,121 +1,137 @@
-<!--#set var="section" value="documentation" -->
-<!--#include virtual="/page-top.html" -->
-<!-- CONTENT START -->
-    <h1>serialize</h1>Section: net-snmp (3)<br />
-    Updated: 27 Jul 2007<br />
-    <a href="#index">Index</a> <a href="../index.html">Return to Main Contents</a>
-    <hr />
-    <a name="lbAB" id="lbAB">&nbsp;</a>
+Content-type: text/html
 
-    <h2>NAME</h2>serialize - Calls sub handlers one request at a time.
+<HTML><HEAD><TITLE>Manpage of serialize</TITLE>
+</HEAD><BODY>
+<H1>serialize</H1>
+Section: net-snmp (3)<BR>Updated: 23 Sep 2009<BR><A HREF="#index">Index</A>
+<A HREF="http://localhost/cgi-bin/man/man2html">Return to Main Contents</A><HR>
 
-    <p><a name="lbAC" id="lbAC">&nbsp;</a></p>
 
-    <h3>Functions</h3>
 
-    <p><br />
-    <b>netsnmp_mib_handler</b> * <b>netsnmp_get_serialize_handler</b> (void)<br />
-    <i>returns a serialize handler that can be injected into a given handler chain.</i><br />
-    int <b>netsnmp_register_serialize</b> (<b>netsnmp_handler_registration</b> *reginfo)<br />
-    <i>functionally the same as calling</i> <b>netsnmp_register_handler()</b> but also injects a serialize handler at the same
-    time for you.<br />
-    int <b>netsnmp_serialize_helper_handler</b> (<b>netsnmp_mib_handler</b> *handler, <b>netsnmp_handler_registration</b>
-    *reginfo, <b>netsnmp_agent_request_info</b> *reqinfo, <b>netsnmp_request_info</b> *requests)<br />
-    <i>Implements the serial handler.</i><br />
-    void <b>netsnmp_init_serialize</b> (void)<br />
-    <i>initializes the serialize helper which then registers a serialize handler as a run-time injectable handler for
-    configuration file use.</i> <a name="lbAD" id="lbAD">&nbsp;</a></p>
+<A NAME="lbAB">&nbsp;</A>
+<H2>NAME</H2>
 
-    <h2>Detailed Description</h2>
+serialize - 
+<P>
 
-    <p>Calls sub handlers one request at a time.</p>
+Calls sub handlers one request at a time.  
+<P>
+<A NAME="lbAC">&nbsp;</A>
+<H3>Functions</H3>
 
-    <p>This functionally passes in one request at a time into lower handlers rather than a whole bunch of requests at once. This
-    is useful for handlers that don't want to iterate through the request lists themselves. Generally, this is probably less
-    efficient so use with caution. The serialize handler might be useable to dynamically fix handlers with broken looping code,
-    however. <a name="lbAE" id="lbAE">&nbsp;</a></p>
+<P>
 
-    <h2>Function Documentation</h2>
+<BR>
 
-    <p><a name="lbAF" id="lbAF">&nbsp;</a></p>
+<B>netsnmp_mib_handler</B> * <B>netsnmp_get_serialize_handler</B> (void)
 
-    <h3><b>netsnmp_mib_handler</b>* netsnmp_get_serialize_handler (void)</h3>
+<BR>
 
-    <p>returns a serialize handler that can be injected into a given handler chain.</p>
+<I>returns a serialize handler that can be injected into a given handler chain. </I>
 
-    <p>Definition at line 31 of file serialize.c.</p>
+<BR>
 
-    <p>References netsnmp_create_handler(), and netsnmp_serialize_helper_handler().</p>
+int <B>netsnmp_register_serialize</B> (<B>netsnmp_handler_registration</B> *reginfo)
 
-    <p>Referenced by netsnmp_init_serialize(), and netsnmp_register_serialize(). <a name="lbAG" id="lbAG">&nbsp;</a></p>
+<BR>
 
-    <h3>void netsnmp_init_serialize (void)</h3>
+<I>functionally the same as calling </I><B>netsnmp_register_handler()</B> but also injects a serialize handler at the same time for you. 
 
-    <p>initializes the serialize helper which then registers a serialize handler as a run-time injectable handler for
-    configuration file use.</p>
+<BR>
 
-    <p>Definition at line 93 of file serialize.c.</p>
+int <B>netsnmp_serialize_helper_handler</B> (<B>netsnmp_mib_handler</B> *handler, <B>netsnmp_handler_registration</B> *reginfo, <B>netsnmp_agent_request_info</B> *reqinfo, <B>netsnmp_request_info</B> *requests)
 
-    <p>References netsnmp_get_serialize_handler(), and netsnmp_register_handler_by_name(). <a name="lbAH" id=
-    "lbAH">&nbsp;</a></p>
+<BR>
 
-    <h3>int netsnmp_register_serialize (<b>netsnmp_handler_registration</b> * reginfo)</h3>
+<I>Implements the serial handler. </I>
 
-    <p>functionally the same as calling <b>netsnmp_register_handler()</b> but also injects a serialize handler at the same time
-    for you.</p>
+<BR>
 
-    <p>Definition at line 40 of file serialize.c.</p>
+void <B>netsnmp_init_serialize</B> (void)
 
-    <p>References netsnmp_get_serialize_handler(), netsnmp_inject_handler(), and netsnmp_register_handler().</p>
+<BR>
 
-    <p>Referenced by netsnmp_register_instance(), netsnmp_register_read_only_instance(), netsnmp_register_read_only_scalar(),
-    netsnmp_register_scalar(), and netsnmp_register_scalar_group(). <a name="lbAI" id="lbAI">&nbsp;</a></p>
+<I>initializes the serialize helper which then registers a serialize handler as a run-time injectable handler for configuration file use. </I>
 
-    <h3>int netsnmp_serialize_helper_handler (<b>netsnmp_mib_handler</b> * handler, <b>netsnmp_handler_registration</b> *
-    reginfo, <b>netsnmp_agent_request_info</b> * reqinfo, <b>netsnmp_request_info</b> * requests)</h3>
 
-    <p>Implements the serial handler.</p>
+<A NAME="lbAD">&nbsp;</A>
+<H2>Detailed Description</H2>
 
-    <p>Definition at line 48 of file serialize.c.</p>
+<P>
 
-    <p>References netsnmp_call_next_handler(), netsnmp_request_info_s::next, and NULL.</p>
+Calls sub handlers one request at a time. 
+<P>
+This functionally passes in one request at a time into lower handlers rather than a whole bunch of requests at once. This is useful for handlers that don't want to iterate through the request lists themselves. Generally, this is probably less efficient so use with caution. The serialize handler might be useable to dynamically fix handlers with broken looping code, however. 
+<A NAME="lbAE">&nbsp;</A>
+<H2>Function Documentation</H2>
 
-    <p>Referenced by netsnmp_get_serialize_handler().</p>
-    <hr />
-    <a name="index" id="index">&nbsp;</a>
+<P>
 
-    <h2>Index</h2>
+<A NAME="lbAF">&nbsp;</A>
+<H3><B>netsnmp_mib_handler</B>* netsnmp_get_serialize_handler (void)</H3>
 
-    <dl>
-      <dt><a href="#lbAB">NAME</a></dt>
+<P>
 
-      <dd>
-        <dl>
-          <dt><a href="#lbAC">Functions</a></dt>
-        </dl>
-      </dd>
+returns a serialize handler that can be injected into a given handler chain. 
+<P>
 
-      <dt><a href="#lbAD">Detailed Description</a></dt>
+Definition at line 25 of file serialize.c.
+<A NAME="lbAG">&nbsp;</A>
+<H3>void netsnmp_init_serialize (void)</H3>
 
-      <dt><a href="#lbAE">Function Documentation</a></dt>
+<P>
 
-      <dd>
-        <dl>
-          <dt><a href="#lbAF"><b>netsnmp_mib_handler</b>* netsnmp_get_serialize_handler (void)</a></dt>
+initializes the serialize helper which then registers a serialize handler as a run-time injectable handler for configuration file use. 
+<P>
 
-          <dt><a href="#lbAG">void netsnmp_init_serialize (void)</a></dt>
+Definition at line 87 of file serialize.c.
+<A NAME="lbAH">&nbsp;</A>
+<H3>int netsnmp_register_serialize (<B>netsnmp_handler_registration</B> * reginfo)</H3>
 
-          <dt><a href="#lbAH">int netsnmp_register_serialize (<b>netsnmp_handler_registration</b> * reginfo)</a></dt>
+<P>
 
-          <dt><a href="#lbAI">int netsnmp_serialize_helper_handler (<b>netsnmp_mib_handler</b> * handler,
-          <b>netsnmp_handler_registration</b> * reginfo, <b>netsnmp_agent_request_info</b> * reqinfo, <b>netsnmp_request_info</b>
-          * requests)</a></dt>
-        </dl>
-      </dd>
-    </dl>
-    <hr />
-    This document was created by <a href="http://localhost/cgi-bin/man/man2html">man2html</a>, using the manual pages.<br />
-    Time: 13:12:01 GMT, September 23, 2007
-<!-- CONTENT END -->
-<!--#include virtual="/page-bottom.html" -->
+functionally the same as calling <B>netsnmp_register_handler()</B> but also injects a serialize handler at the same time for you. 
+<P>
 
+Definition at line 34 of file serialize.c.
+<A NAME="lbAI">&nbsp;</A>
+<H3>int netsnmp_serialize_helper_handler (<B>netsnmp_mib_handler</B> * handler, <B>netsnmp_handler_registration</B> * reginfo, <B>netsnmp_agent_request_info</B> * reqinfo, <B>netsnmp_request_info</B> * requests)</H3>
+
+<P>
+
+Implements the serial handler. 
+<P>
+
+Definition at line 42 of file serialize.c.
+<A NAME="lbAJ">&nbsp;</A>
+<H2>Author</H2>
+
+<P>
+
+Generated automatically by Doxygen for net-snmp from the source code.
+<P>
+
+<HR>
+<A NAME="index">&nbsp;</A><H2>Index</H2>
+<DL>
+<DT><A HREF="#lbAB">NAME</A><DD>
+<DL>
+<DT><A HREF="#lbAC">Functions</A><DD>
+</DL>
+<DT><A HREF="#lbAD">Detailed Description</A><DD>
+<DT><A HREF="#lbAE">Function Documentation</A><DD>
+<DL>
+<DT><A HREF="#lbAF"><B>netsnmp_mib_handler</B>* netsnmp_get_serialize_handler (void)</A><DD>
+<DT><A HREF="#lbAG">void netsnmp_init_serialize (void)</A><DD>
+<DT><A HREF="#lbAH">int netsnmp_register_serialize (<B>netsnmp_handler_registration</B> * reginfo)</A><DD>
+<DT><A HREF="#lbAI">int netsnmp_serialize_helper_handler (<B>netsnmp_mib_handler</B> * handler, <B>netsnmp_handler_registration</B> * reginfo, <B>netsnmp_agent_request_info</B> * reqinfo, <B>netsnmp_request_info</B> * requests)</A><DD>
+</DL>
+<DT><A HREF="#lbAJ">Author</A><DD>
+</DL>
+<HR>
+This document was created by
+<A HREF="http://localhost/cgi-bin/man/man2html">man2html</A>,
+using the manual pages.<BR>
+Time: 19:05:38 GMT, September 28, 2009
+</BODY>
+</HTML>

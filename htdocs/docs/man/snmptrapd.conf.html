@@ -1,309 +1,366 @@
-<!--#set var="section" value="documentation" -->
-<!--#include virtual="/page-top.html" -->
-<!-- CONTENT START -->
-    <h1>SNMPTRAPD.CONF</h1>Section: Net-SNMP (5)<br />
-    Updated: 29 Jun 2005<br />
-    <a href="#index">Index</a> <a href="../index.html">Return to Main Contents</a>
-    <hr />
-    <a name="lbAB" id="lbAB">&nbsp;</a>
-
-    <h2>NAME</h2>snmptrapd.conf - configuration file for the Net-SNMP notification receiver <a name="lbAC" id="lbAC">&nbsp;</a>
-
-    <h2>DESCRIPTION</h2>The Net-SNMP notification receiver (trap daemon) uses one or more configuration files to control its
-    operation and how incoming traps (and INFORM requests) should be processed. This file (<b>snmptrapd.conf</b>) can be located
-    in one of several locations, as described in the <i><a href="snmp_config.html">snmp_config</a>(5)</i> manual page. <a name=
-    "lbAD" id="lbAD">&nbsp;</a>
-
-    <h2>IMPORTANT</h2>Previously, <b>snmptrapd</b> would accept all incoming notifications, and log them automatically (even if
-    no explicit configuration was provided). Starting with release 5.3, access control checks will be applied to incoming
-    notifications. If <b>snmptrapd</b> is run without a suitable configuration file (or equivalent access control settings), then
-    such traps <b>WILL NOT</b> be processed. See the section <b>ACCESS CONTROL</b> for more details.
-
-    <p>As with the agent configuration, the <i>snmptrapd.conf</i> directives can be divided into four distinct groups. <a name=
-    "lbAE" id="lbAE">&nbsp;</a></p>
-
-    <h2>TRAPD BEHAVIOUR</h2>
-
-    <dl compact="compact">
-      <dt>snmpTrapdAddr [&lt;transport-specifier&gt;:]&lt;transport-address&gt;[,...]</dt>
-
-      <dd>defines a list of listening addresses, on which to receive incoming SNMP notifications. See the section <b>LISTENING
-      ADDRESSES</b> in the <i><a href="snmpd.html">snmpd</a>(8)</i> manual page for more information about the format of
-      listening addresses.</dd>
-
-      <dd>The default behaviour is to listen on UDP port 162 on all IPv4 interfaces.</dd>
-
-      <dt>doNotRetainNotificationLogs yes</dt>
-
-      <dd>disables support for the NOTIFICATION-LOG-MIB. Normally the snmptrapd program keeps a record of the traps received,
-      which can be retrieved by querying the nlmLogTable and nlmLogvariableTable tables. This directive can be used to suppress
-      this behaviour.</dd>
-
-      <dd>See the <i><a href="snmptrapd.html">snmptrapd</a>(8)</i> manual page and the NOTIFICATION-LOG-MIB for details.</dd>
-
-      <dt>doNotLogTraps yes</dt>
-
-      <dd>disables the logging of notifications altogether. This is useful if the <b>snmptrapd</b> application should only run
-      traphandle hooks and should not log traps to any location.</dd>
-
-      <dt>doNotFork yes</dt>
-
-      <dd>do not fork from the calling shell.</dd>
-
-      <dt>pidFile PATH</dt>
-
-      <dd>defines a file in which to store the process ID of the notification receiver. By default, this ID is not saved.</dd>
-    </dl><a name="lbAF" id="lbAF">&nbsp;</a>
-
-    <h2>ACCESS CONTROL</h2>Starting with release 5.3, it is necessary to explicitly specify who is authorised to send traps and
-    informs to the notification receiver (and what types of processing these are allowed to trigger). This uses an extension of
-    the VACM model, used in the main SNMP agent.
-
-    <p>There are currently three types of processing that can be specified:</p>
-
-    <dl compact="compact">
-      <dd>
-        <dl compact="compact">
-          <dt>log</dt>
-
-          <dd>log the details of the notification - either in a specified file, to standard output (or stderr), or via
-          <i>syslog</i> (or similar).</dd>
-
-          <dt>execute</dt>
-
-          <dd>pass the details of the trap to a specified handler program, including embedded perl.</dd>
-
-          <dt>net</dt>
-
-          <dd>forward the trap to another notification receiver.</dd>
-        </dl>
-      </dd>
-    </dl>
-
-    <p>In the following directives, <i>TYPES</i> will be a (comma-separated) list of one or more of these tokens. Most commonly,
-    this will typically be <i>log,execute,net</i> to cover any style of processing for a particular category of notification. But
-    it is perfectly possible (even desirable) to limit certain notification sources to selected processing only.</p>
-
-    <dl compact="compact">
-      <dt>authCommunity TYPES COMMUNITY [SOURCE [OID | -v VIEW ]]</dt>
-
-      <dd>authorises traps (and SNMPv2c INFORM requests) with the specified community to trigger the types of processing listed.
-      By default, this will allow any notification using this community to be processed. The SOURCE field can be used to specify
-      that the configuration should only apply to notifications received from particular sources - see <i><a href=
-      "snmpd.conf.html">snmpd.conf</a>(5)</i> for more details.</dd>
-
-      <dt>authUser TYPES [-s MODEL] USER [LEVEL [OID | -v VIEW ]]</dt>
-
-      <dd>authorises SNMPv3 notifications with the specified user to trigger the types of processing listed. By default, this
-      will accept authenticated requests. (<i>authNoPriv</i> or <i>authPriv</i>). The LEVEL field can be used to allow
-      unauthenticated notifications (<i>noauth</i>), or to require encryption (<i>priv</i>), just as for the SNMP agent.</dd>
-
-      <dd>
-        With both of these directives, the OID (or <i>-v VIEW</i>) field can be used to retrict this configuration to the
-        processing of particular notifications.
-
-        <dl compact="compact">
-          <dd>
-            <dl compact="compact">
-              <dt>Note:</dt>
-
-              <dd>Unlike the VACM processing described in RFC 3415, this view is <b>only</b> matched against the snmpTrapOID
-              value of the incoming notification. It is not applied to the payload varbinds held within that notification.</dd>
-            </dl>
-          </dd>
-        </dl>
-      </dd>
-
-      <dt>authGroup TYPES [-s MODEL] GROUP [LEVEL [OID | -v VIEW ]]</dt>
-
-      <dt>authAccess TYPES [-s MODEL] GROUP VIEW [LEVEL [CONTEXT]]</dt>
-
-      <dt>setAccess GROUP CONTEXT MODEL LEVEL PREFIX VIEW TYPES</dt>
-
-      <dd>authorise notifications in the specified GROUP (configured using the <i>group</i> directive) to trigger the types of
-      processing listed. See <i><a href="snmpd.conf.html">snmpd.conf</a>(5)</i> for more details.</dd>
-
-      <dt>createUser username (MD5|SHA) authpassphrase [DES|AES]</dt>
-
-      <dd>See the <i><a href="snmpd.conf.html">snmpd.conf</a>(5)</i> manual page for a description of how to create SNMPv3 users.
-      This is roughly the same, but the file name changes to snmptrapd.conf from snmpd.conf.</dd>
-
-      <dt>disableAuthorization yes</dt>
-
-      <dd>will disable the above access control checks, and revert to the previous behaviour of accepting all incoming
-      notifications.</dd>
-    </dl><a name="lbAG" id="lbAG">&nbsp;</a>
-
-    <h2>LOGGING</h2>
-
-    <dl compact="compact">
-      <dt>format1 FORMAT</dt>
-
-      <dt>format2 FORMAT</dt>
-
-      <dd>specify the format used to display SNMPv1 TRAPs and SNMPv2 notifications respectively. Note that SNMPv2c and SNMPv3
-      both use the same SNMPv2 PDU format.</dd>
-
-      <dd>See <i><a href="snmptrapd.html">snmptrapd</a>(8)</i> for the layout characters available.</dd>
-
-      <dt>ignoreAuthFailure yes</dt>
-
-      <dd>
-        instructs the receiver to ignore <i>authenticationFailure</i> traps.
-
-        <dl compact="compact">
-          <dd>
-            <dl compact="compact">
-              <dt>Note:</dt>
-
-              <dd>This currently only affects the logging of such notifications. <i>authenticationFailure</i> traps will still be
-              passed to trap handler scripts, and forwarded to other notification receivers. This behaviour should not be relied
-              on, as it is likely to change in future versions.</dd>
-            </dl>
-          </dd>
-        </dl>
-      </dd>
-
-      <dt>logOption string</dt>
-
-      <dd>specifies where notifications should be logged - to standard output, standard error, a specified file or via
-      <i>syslog</i>. See the section LOGGING OPTIONS in the <i><a href="snmpcmd.html">snmpcmd</a>(1)</i> manual page for
-      details.</dd>
-
-      <dt>outputOption string</dt>
-
-      <dd>specifies various characteristics of how OIDs and other values should be displayed. See the section OUTPUT OPTIONS in
-      the <i><a href="snmpcmd.html">snmpcmd</a>(1)</i> manual page for details.</dd>
-
-      <dt>printEventNumbers yes</dt>
-
-      <dd>enables specialised logging of event-related notifications from the (long obsolete) M2M-MIB.</dd>
-    </dl><a name="lbAH" id="lbAH">&nbsp;</a>
-
-    <h2>NOTIFICATION PROCESSING</h2>As well as logging incoming notifications, they can also be forwarded on to another
-    notification receiver, or passed to an external program for specialised processing.
-
-    <dl compact="compact">
-      <dt>traphandle OID|default PROGRAM [ARGS ...]</dt>
-
-      <dd>invokes the specified program (with the given arguments) whenever a notification is received that matches the OID
-      token. For SNMPv2c and SNMPv3 notifications, this token will be compared against the snmpTrapOID value taken from the
-      notification. For SNMPv1 traps, the generic and specific trap values and the enterprise OID will be converted into the
-      equivalent OID (following RFC 2576).</dd>
-
-      <dd>Typically, the OID token will be the name (or numeric OID) of a NOTIFICATION-TYPE object, and the specified program
-      will be invoked for notifications that match this OID exactly. However this token also supports a simple form of wildcard
-      suffixing. By appending the character notification based within subtree rooted at the specified OID. For example, an OID
-      token of .1.3.6.1.4.1* would match any enterprise specific notification (including the specified OID itself). An OID token
-      of .1.3.6.1.4.1.* would would work in much the same way, but would not match this exact OID - just notifications that lay
-      strictly below this root. Note that this syntax does not support full regular expressions or wildcards - an OID token of
-      the form oid.*.subids is <b>not</b> valid.</dd>
-
-      <dd>If the OID field is the token <i>default</i> then the program will be invoked for any notification not matching another
-      (OID specific) <i>traphandle</i> entry.</dd>
-    </dl>
-
-    <p>Details of the notification are fed to the program via its standard input. Note that this will always use the SNMPv2-style
-    notification format, with SNMPv1 traps being converted as per RFC 2576, before being passed to the program. The input format
-    is as follows, one entry per line:</p>
-
-    <dl compact="compact">
-      <dd>
-        <dl compact="compact">
-          <dt>HOSTNAME</dt>
-
-          <dd>The name of the host that sent the notification, as determined by <i><a href=
-          "gethostbyaddr.html">gethostbyaddr</a>(3)</i>.<br /></dd>
-
-          <dt>IPADDRESS</dt>
-
-          <dd>The IP address of the host that sent the notification.</dd>
-
-          <dt>VARBINDS</dt>
-
-          <dd>A list of variable bindings describing the contents of the notification, one per line. The first token on each line
-          (up until a space) is the OID of the varind, and the remainder of the line is its value. The format of both of these
-          are controlled by the <i>outputOption</i> directive (or similar configuration).</dd>
-
-          <dd>The first OID should always be SNMPv2-MIB::sysUpTime.0, and the second should be SNMPv2-MIB::snmpTrapOID.0. The
-          remaining lines will contain the payload varbind list. For SNMPv1 traps, the final OID will be
-          SNMPv2-MIB::snmpTrapEnterprise.0.<br /></dd>
-
-          <dt>Example:</dt>
-
-          <dd>
-            A <b>traptoemail</b> script has been included in the Net-SNMP package that can be used within a <i>traphandle</i>
-            directive:<br />
-
-            <dl compact="compact">
-              <dd>traphandle default /usr/bin/perl /usr/local/bin/traptoemail -s mysmtp.somewhere.com -f <a href=
-              "mailto:admin@somewhere.com">admin@somewhere.com</a> <a href="mailto:me@somewhere.com">me@somewhere.com</a></dd>
-            </dl>
-          </dd>
-        </dl>
-      </dd>
-    </dl>
-
-    <dl compact="compact">
-      <dt>forward OID|default DESTINATION</dt>
-
-      <dd>forwards notifications that match the specified OID to another receiver listening on DESTINATION. The interpretation of
-      OID (and <i>default</i>) is the same as for the <i>traphandle</i> directive).</dd>
-
-      <dd>See the section <b>LISTENING ADDRESSES</b> in the <i><a href="snmpd.html">snmpd</a>(8)</i> manual page for more
-      information about the format of listening addresses.</dd>
-    </dl><a name="lbAI" id="lbAI">&nbsp;</a>
-
-    <h2>NOTES</h2>
-
-    <dl compact="compact">
-      <dt>o</dt>
-
-      <dd>The daemon blocks while executing the <i>traphandle</i> commands. (This should be fixed in the future with an
-      appropriate signal catch and wait() combination).</dd>
-
-      <dt>o</dt>
-
-      <dd>All directives listed with a value of "yes" actually accept a range of boolean values. These will accept any of
-      <i>1</i>, <i>yes</i> or <i>true</i> to enable the corresponding behaviour, or any of <i>0</i>, <i>no</i> or <i>false</i> to
-      disable it. The default in each case is for the feature to be turned off, so these directives are typically only used to
-      enable the appropriate behaviour.</dd>
-    </dl><a name="lbAJ" id="lbAJ">&nbsp;</a>
-
-    <h2>FILES</h2>/usr/local/etc/snmp/snmptrapd.conf <a name="lbAK" id="lbAK">&nbsp;</a>
-
-    <h2>SEE ALSO</h2><a href="snmp_config.html">snmp_config</a>(5), <a href="snmptrapd.html">snmptrapd</a>(8), <a href=
-    "syslog.html">syslog</a>(8), <a href="variables.html">variables</a>(5), <a href="snmpd.conf.html">snmpd.conf</a>(5), <a href=
-    "read_config.html">read_config</a>(3).
-    <hr />
-    <a name="index" id="index">&nbsp;</a>
-
-    <h2>Index</h2>
-
-    <dl>
-      <dt><a href="#lbAB">NAME</a></dt>
-
-      <dt><a href="#lbAC">DESCRIPTION</a></dt>
-
-      <dt><a href="#lbAD">IMPORTANT</a></dt>
-
-      <dt><a href="#lbAE">TRAPD BEHAVIOUR</a></dt>
-
-      <dt><a href="#lbAF">ACCESS CONTROL</a></dt>
-
-      <dt><a href="#lbAG">LOGGING</a></dt>
-
-      <dt><a href="#lbAH">NOTIFICATION PROCESSING</a></dt>
-
-      <dt><a href="#lbAI">NOTES</a></dt>
-
-      <dt><a href="#lbAJ">FILES</a></dt>
-
-      <dt><a href="#lbAK">SEE ALSO</a></dt>
-    </dl>
-    <hr />
-    This document was created by <a href="http://localhost/cgi-bin/man/man2html">man2html</a>, using the manual pages.<br />
-    Time: 13:12:01 GMT, September 23, 2007
-<!-- CONTENT END -->
-<!--#include virtual="/page-bottom.html" -->
-
+Content-type: text/html
+
+<HTML><HEAD><TITLE>Manpage of SNMPTRAPD.CONF</TITLE>
+</HEAD><BODY>
+<H1>SNMPTRAPD.CONF</H1>
+Section: Net-SNMP (5)<BR>Updated: 29 Jun 2005<BR><A HREF="#index">Index</A>
+<A HREF="http://localhost/cgi-bin/man/man2html">Return to Main Contents</A><HR>
+
+
+<A NAME="lbAB">&nbsp;</A>
+<H2>NAME</H2>
+
+snmptrapd.conf - configuration file for the Net-SNMP notification receiver
+<A NAME="lbAC">&nbsp;</A>
+<H2>DESCRIPTION</H2>
+
+The Net-SNMP notification receiver (trap daemon) uses one or more
+configuration files to control its operation and how incoming traps
+(and INFORM requests) should be processed.
+This file (<B>snmptrapd.conf</B>) can be located in
+one of several locations, as described in the
+<I><A HREF="http://localhost/cgi-bin/man/man2html?5+snmp_config">snmp_config</A>(5)</I>
+
+manual page.
+<A NAME="lbAD">&nbsp;</A>
+<H2>IMPORTANT</H2>
+
+Previously,
+<B>snmptrapd</B>
+
+would accept all incoming notifications, and log them automatically
+(even if no explicit configuration was provided).
+Starting with release 5.3, access control checks will be applied to
+incoming notifications. If
+<B>snmptrapd</B>
+
+is run without a suitable configuration file (or equivalent access
+control settings), then such traps <B>WILL NOT</B>
+be processed.
+See the section <B>ACCESS CONTROL</B> for more details.
+<P>
+
+As with the agent configuration, the
+<I>snmptrapd.conf</I>
+
+directives can be divided into four distinct groups.
+<A NAME="lbAE">&nbsp;</A>
+<H2>TRAPD BEHAVIOUR</H2>
+
+<DL COMPACT>
+<DT>snmpTrapdAddr [&lt;transport-specifier&gt;:]&lt;transport-address&gt;[,...]<DD>
+defines a list of listening addresses, on which to receive
+incoming SNMP notifications.
+See the section 
+<B>LISTENING ADDRESSES</B>
+
+in the
+<I><A HREF="http://localhost/cgi-bin/man/man2html?8+snmpd">snmpd</A>(8)</I>
+
+manual page for more information about the format of listening
+addresses.
+<DT><DD>
+The default behaviour is to
+listen on UDP port 162 on all IPv4 interfaces.
+<DT>doNotRetainNotificationLogs yes<DD>
+disables support for the NOTIFICATION-LOG-MIB.
+Normally the snmptrapd program keeps a record of the traps
+received, which can be retrieved by querying
+the nlmLogTable and nlmLogvariableTable tables.  
+This directive can be used to suppress this behaviour.
+<DT><DD>
+See the 
+<I><A HREF="http://localhost/cgi-bin/man/man2html?8+snmptrapd">snmptrapd</A>(8) </I>
+
+manual page and the NOTIFICATION-LOG-MIB for details.
+<DT>doNotLogTraps yes<DD>
+disables the logging of notifications altogether.
+This is useful if the <B>snmptrapd</B> application should
+only run traphandle hooks and should not log traps to any location.
+<DT>doNotFork yes<DD>
+do not fork from the calling shell.
+<DT>pidFile PATH<DD>
+defines a file in which to store the process ID of the
+notification receiver.  By default, this ID is not saved.
+</DL>
+<A NAME="lbAF">&nbsp;</A>
+<H2>ACCESS CONTROL</H2>
+
+Starting with release 5.3, it is necessary to explicitly specify
+who is authorised to send traps and informs to the notification
+receiver (and what types of processing these are allowed to trigger).
+This uses an extension of the VACM model, used in the main SNMP agent.
+<P>
+
+There are currently three types of processing that can be specified:
+<DL COMPACT><DT><DD>
+<DL COMPACT>
+<DT>log<DD>
+log the details of the notification - either in a specified file,
+to standard output (or stderr), or via <I>syslog</I> (or similar).
+<DT>execute<DD>
+pass the details of the trap to a specified handler program, including
+embedded perl.
+<DT>net<DD>
+forward the trap to another notification receiver.
+</DL>
+</DL>
+
+<P>
+
+In the following directives, <I>TYPES</I> will be a (comma-separated)
+list of one or more of these tokens.  Most commonly, this will
+typically be <I>log,execute,net</I> to cover any style of processing
+for a particular category of notification. But it is perfectly
+possible (even desirable) to limit certain notification sources to
+selected processing only.
+<DL COMPACT>
+<DT>authCommunity   TYPES COMMUNITY  [SOURCE [OID | -v VIEW ]]<DD>
+authorises traps (and SNMPv2c INFORM requests) with the specified
+community to trigger the types of processing listed.
+By default, this will allow any notification using this community
+to be processed.  The SOURCE field can be used to specify that the
+configuration should only apply to notifications received from
+particular sources - see <I><A HREF="http://localhost/cgi-bin/man/man2html?5+snmpd.conf">snmpd.conf</A>(5)</I> for more details.
+<DT>authUser   TYPES [-s MODEL] USER  [LEVEL [OID | -v VIEW ]]<DD>
+authorises SNMPv3 notifications with the specified
+user to trigger the types of processing listed.
+By default, this will accept authenticated requests.
+(<I>authNoPriv</I> or <I>authPriv</I>). The LEVEL field can
+be used to allow unauthenticated notifications (<I>noauth</I>),
+or to require encryption (<I>priv</I>), just as for the SNMP agent.
+<DT><DD>
+With both of these directives, the OID (or <I>-v VIEW</I>) field
+can be used to retrict this configuration to the processing of
+particular notifications.
+<DL COMPACT><DT><DD>
+<DL COMPACT>
+<DT>Note:<DD>
+Unlike the VACM processing described in RFC 3415, this view is
+<B>only</B> matched against the snmpTrapOID value of the
+incoming notification.  It is not applied to the payload varbinds
+held within that notification.
+</DL>
+</DL>
+
+<DT>authGroup  TYPES [-s MODEL] GROUP  [LEVEL [OID | -v VIEW ]]<DD>
+<DT>authAccess TYPES [-s MODEL] GROUP VIEW  [LEVEL [CONTEXT]]<DD>
+<DT>setAccess GROUP CONTEXT MODEL LEVEL PREFIX VIEW TYPES<DD>
+authorise notifications in the specified GROUP
+(configured using the <I>group</I> directive)
+to trigger the types of processing listed.
+See <I><A HREF="http://localhost/cgi-bin/man/man2html?5+snmpd.conf">snmpd.conf</A>(5)</I> for more details.
+<DT>createUser username (MD5|SHA) authpassphrase [DES|AES]<DD>
+See the 
+<I><A HREF="http://localhost/cgi-bin/man/man2html?5+snmpd.conf">snmpd.conf</A>(5)</I>
+
+manual page for a description of how to create SNMPv3 users.  This
+is roughly the same, but the file name changes to snmptrapd.conf from
+snmpd.conf.
+<DT>disableAuthorization yes<DD>
+will disable the above access control checks, and revert to the
+previous behaviour of accepting all incoming notifications.
+<DT><DD>
+
+
+</DL>
+<A NAME="lbAG">&nbsp;</A>
+<H2>LOGGING</H2>
+
+<DL COMPACT>
+<DT>format1 FORMAT<DD>
+<DT>format2 FORMAT<DD>
+specify the format used to display SNMPv1 TRAPs and SNMPv2
+notifications respectively.  Note that SNMPv2c and SNMPv3
+both use the same SNMPv2 PDU format.
+<DT><DD>
+See
+<I><A HREF="http://localhost/cgi-bin/man/man2html?8+snmptrapd">snmptrapd</A>(8)</I>
+
+for the layout characters available.
+<DT>ignoreAuthFailure yes<DD>
+instructs the receiver to ignore <I>authenticationFailure</I> traps.
+<DL COMPACT><DT><DD>
+<DL COMPACT>
+<DT>Note:<DD>
+This currently only affects the logging of such notifications.
+<I>authenticationFailure</I> traps will still be passed to trap
+handler scripts, and forwarded to other notification receivers.
+This behaviour should not be relied on, as it is likely
+to change in future versions.
+</DL>
+</DL>
+
+<DT>logOption string<DD>
+specifies where notifications should be logged - to standard
+output, standard error, a specified file or via <I>syslog</I>.
+See the section LOGGING OPTIONS in the
+<I><A HREF="http://localhost/cgi-bin/man/man2html?1+snmpcmd">snmpcmd</A>(1)</I> manual page for details.
+<DT>outputOption string<DD>
+specifies various characteristics of how OIDs and other values
+should be displayed.
+See the section OUTPUT OPTIONS in the
+<I><A HREF="http://localhost/cgi-bin/man/man2html?1+snmpcmd">snmpcmd</A>(1)</I> manual page for details.
+</DL>
+<A NAME="lbAH">&nbsp;</A>
+<H2>MySQL Logging</H2>
+
+There are two configuration variables that work together to control
+when queued traps are logged to the MySQL database. A non-zero
+value must be specified for sqlSaveInterval to enable MySQL logging.
+
+<DL COMPACT>
+<DT>sqlMaxQueue max<DD>
+specifies the maximum number of traps to queue before a forced flush
+to the MySQL database.
+
+<DT>sqlSaveInterval seconds<DD>
+specified the number of seconds between periodic queue flushes.
+A value of 0 for will disable MySQL logging.
+</DL>
+<A NAME="lbAI">&nbsp;</A>
+<H2>NOTIFICATION PROCESSING</H2>
+
+As well as logging incoming notifications, they can also
+be forwarded on to another notification receiver, or passed
+to an external program for specialised processing.
+<DL COMPACT>
+<DT>traphandle OID|default PROGRAM [ARGS ...]<DD>
+invokes the specified program (with the given arguments) whenever a
+notification is received that matches the OID token.  For SNMPv2c and
+SNMPv3 notifications, this token will be compared against the
+snmpTrapOID value taken from the notification.  For SNMPv1 traps,
+the generic and specific trap values and the enterprise OID will be
+converted into the equivalent OID (following RFC 2576).
+<DT><DD>
+Typically, the OID token will be the name (or numeric OID) of a
+NOTIFICATION-TYPE object, and the specified program will be invoked for
+notifications that match this OID exactly.  However this token also
+supports a simple form of wildcard suffixing.  By appending the character
+
+notification based within subtree rooted at the specified OID.
+For example, an OID token of .1.3.6.1.4.1* would match any enterprise
+specific notification (including the specified OID itself).
+An OID token of .1.3.6.1.4.1.* would would work in much the same way,
+but would not match this exact OID - just notifications that lay strictly
+below this root.
+Note that this syntax does not support full regular expressions or
+wildcards - an OID token of the form oid.*.subids is <B>not</B> valid.
+<DT><DD>
+If the OID field is the token <I>default</I> then the program will be
+invoked for any notification not matching another (OID specific)
+<I>traphandle</I> entry.
+</DL>
+<P>
+
+Details of the notification are fed to the program via its standard input.
+Note that this will always use the SNMPv2-style notification format, with
+SNMPv1 traps being converted as per RFC 2576, before being passed to the
+program.
+The input format is as follows, one entry per line:
+<DL COMPACT><DT><DD>
+<DL COMPACT>
+<DT>HOSTNAME<DD>
+The name of the host that sent the notification, as determined by
+<I><A HREF="http://localhost/cgi-bin/man/man2html?3+gethostbyaddr">gethostbyaddr</A>(3)</I>.
+
+<BR>
+
+<DT>IPADDRESS<DD>
+The IP address of the host that sent the notification.
+
+
+
+<DT>VARBINDS<DD>
+A list of variable bindings describing the contents of the notification,
+one per line.  The first token on each line (up until a space) is the
+OID of the varind, and the remainder of the line is its value.
+The format of both of these are controlled by the <I>outputOption</I>
+directive (or similar configuration).
+<DT><DD>
+The first OID should always be SNMPv2-MIB::sysUpTime.0,
+and the second should be SNMPv2-MIB::snmpTrapOID.0.
+The remaining lines will contain the payload varbind list.
+For SNMPv1 traps, the final OID will be SNMPv2-MIB::snmpTrapEnterprise.0.
+<BR>
+
+<DT>Example:<DD>
+A <B>traptoemail</B> script has been included in the Net-SNMP package that
+can be used within a <I>traphandle</I> directive:
+<BR>
+
+<DL COMPACT><DT><DD>
+
+traphandle default /usr/bin/perl /usr/local/bin/traptoemail -s mysmtp.somewhere.com -f <A HREF="mailto:admin@somewhere.com">admin@somewhere.com</A> <A HREF="mailto:me@somewhere.com">me@somewhere.com</A>
+</DL>
+
+</DL>
+</DL>
+
+<DL COMPACT>
+<DT>forward OID|default DESTINATION<DD>
+forwards notifications that match the specified OID
+to another receiver listening on DESTINATION.
+The interpretation of OID (and <I>default</I>) is the same
+as for the <I>traphandle</I> directive).
+<DT><DD>
+See the section 
+<B>LISTENING ADDRESSES</B>
+
+in the
+<I><A HREF="http://localhost/cgi-bin/man/man2html?8+snmpd">snmpd</A>(8)</I>
+
+manual page for more information about the format of listening
+addresses.
+
+</DL>
+<A NAME="lbAJ">&nbsp;</A>
+<H2>NOTES</H2>
+
+<DL COMPACT>
+<DT>o<DD>
+The daemon blocks while executing the <I>traphandle</I> commands.
+(This should
+be fixed in the future with an appropriate signal catch and wait()
+combination).
+<DT>o<DD>
+All directives listed with a value of &quot;yes&quot; actually accept a range
+of boolean values.  These will accept any of <I>1</I>, <I>yes</I> or
+<I>true</I> to enable the corresponding behaviour, 
+or any of <I>0</I>, <I>no</I> or <I>false</I> to disable it.
+The default in each case is for the feature to be turned off, so these
+directives are typically only used to enable the appropriate behaviour.
+</DL>
+<A NAME="lbAK">&nbsp;</A>
+<H2>FILES</H2>
+
+/usr/local/etc/snmp/snmptrapd.conf
+<A NAME="lbAL">&nbsp;</A>
+<H2>SEE ALSO</H2>
+
+<A HREF="http://localhost/cgi-bin/man/man2html?5+snmp_config">snmp_config</A>(5), <A HREF="http://localhost/cgi-bin/man/man2html?8+snmptrapd">snmptrapd</A>(8), <A HREF="http://localhost/cgi-bin/man/man2html?8+syslog">syslog</A>(8), <A HREF="http://localhost/cgi-bin/man/man2html?5+variables">variables</A>(5), <A HREF="http://localhost/cgi-bin/man/man2html?5+snmpd.conf">snmpd.conf</A>(5), <A HREF="http://localhost/cgi-bin/man/man2html?3+read_config">read_config</A>(3).
+<P>
+<P>
+
+<HR>
+<A NAME="index">&nbsp;</A><H2>Index</H2>
+<DL>
+<DT><A HREF="#lbAB">NAME</A><DD>
+<DT><A HREF="#lbAC">DESCRIPTION</A><DD>
+<DT><A HREF="#lbAD">IMPORTANT</A><DD>
+<DT><A HREF="#lbAE">TRAPD BEHAVIOUR</A><DD>
+<DT><A HREF="#lbAF">ACCESS CONTROL</A><DD>
+<DT><A HREF="#lbAG">LOGGING</A><DD>
+<DT><A HREF="#lbAH">MySQL Logging</A><DD>
+<DT><A HREF="#lbAI">NOTIFICATION PROCESSING</A><DD>
+<DT><A HREF="#lbAJ">NOTES</A><DD>
+<DT><A HREF="#lbAK">FILES</A><DD>
+<DT><A HREF="#lbAL">SEE ALSO</A><DD>
+</DL>
+<HR>
+This document was created by
+<A HREF="http://localhost/cgi-bin/man/man2html">man2html</A>,
+using the manual pages.<BR>
+Time: 19:05:39 GMT, September 28, 2009
+</BODY>
+</HTML>

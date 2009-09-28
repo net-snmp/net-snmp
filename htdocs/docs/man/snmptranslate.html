@@ -1,196 +1,243 @@
-<!--#set var="section" value="documentation" -->
-<!--#include virtual="/page-top.html" -->
-<!-- CONTENT START -->
-    <h1>SNMPTRANSLATE</h1>Section: Net-SNMP (1)<br />
-    Updated: 25 Jul 2003<br />
-    <a href="#index">Index</a> <a href="../index.html">Return to Main Contents</a>
-    <hr />
-    <a name="lbAB" id="lbAB">&nbsp;</a>
+Content-type: text/html
 
-    <h2>NAME</h2>snmptranslate - translate MIB OID names between numeric and textual forms <a name="lbAC" id="lbAC">&nbsp;</a>
+<HTML><HEAD><TITLE>Manpage of SNMPTRANSLATE</TITLE>
+</HEAD><BODY>
+<H1>SNMPTRANSLATE</H1>
+Section: Net-SNMP (1)<BR>Updated: 25 Jul 2003<BR><A HREF="#index">Index</A>
+<A HREF="http://localhost/cgi-bin/man/man2html">Return to Main Contents</A><HR>
 
-    <h2>SYNOPSIS</h2><b>snmptranslate</b> [OPTIONS] OID [OID]... <a name="lbAD" id="lbAD">&nbsp;</a>
 
-    <h2>DESCRIPTION</h2><b>snmptranslate</b> is an application that translates one or more SNMP object identifier values from
-    their symbolic (textual) forms into their numerical forms (or vice versa).
+<A NAME="lbAB">&nbsp;</A>
+<H2>NAME</H2>
 
-    <p>OID is either a numeric or textual object identifier. <a name="lbAE" id="lbAE">&nbsp;</a></p>
+snmptranslate - translate MIB OID names between numeric and textual forms
+<A NAME="lbAC">&nbsp;</A>
+<H2>SYNOPSIS</H2>
 
-    <h2>OPTIONS</h2>
+<B>snmptranslate</B>
 
-    <dl compact="compact">
-      <dt><b>-D</b> <i>TOKEN[,...]</i></dt>
+[OPTIONS] OID [OID]...
+<A NAME="lbAD">&nbsp;</A>
+<H2>DESCRIPTION</H2>
 
-      <dd>Turn on debugging output for the given <i>TOKEN</i>(s). Try <i>ALL</i> for extremely verbose output.</dd>
+<B>snmptranslate</B>
 
-      <dt><b>-h</b></dt>
+is an application that translates one or more SNMP object identifier
+values from their symbolic (textual) forms into their numerical forms
+(or vice versa).  
+<P>
 
-      <dd>Display a brief usage message and then exit.</dd>
+OID is either a numeric or textual object identifier.
+<A NAME="lbAE">&nbsp;</A>
+<H2>OPTIONS</H2>
 
-      <dt><b>-m</b> <i>MIBLIST</i></dt>
+<DL COMPACT>
+<DT><B>-D </B><I>TOKEN[,...]</I>
 
-      <dd>Specifies a colon separated list of MIB modules to load for this application. This overrides the environment variable
-      MIBS.</dd>
+<DD>
+Turn on debugging output for the given
+<I>TOKEN</I>(s).
 
-      <dd>The special keyword <i>ALL</i> is used to specify all modules in all directories when searching for MIB files. Every
-      file whose name does not begin with "." will be parsed as if it were a MIB file.</dd>
+Try
+<I>ALL</I>
 
-      <dt><b>-M</b> <i>DIRLIST</i></dt>
+for extremely verbose output.
+<DT><B>-h</B>
 
-      <dd>Specifies a colon separated list of directories to search for MIBs. This overrides the environment variable
-      MIBDIRS.</dd>
+<DD>
+Display a brief usage message and then exit.
+<DT><B>-m</B><I> MIBLIST</I>
 
-      <dt><b>-T</b> <i>TRANSOPTS</i></dt>
+<DD>
+Specifies a colon separated list of MIB modules to load for this
+application.  This overrides the environment variable MIBS.
+<DT><DD>
+The special keyword
+<I>ALL</I>
 
-      <dd>
-        Provides control over the translation of the OID values. The following <i>TRANSOPTS</i> are available:
+is used to specify all modules in all directories when searching for MIB
+files.  Every file whose name does not begin with &quot;.&quot; will be parsed as
+if it were a MIB file.
+<DT><B>-M</B><I> DIRLIST</I>
 
-        <dl compact="compact">
-          <dd>
-            <dl compact="compact">
-              <dt><b>-Td</b></dt>
+<DD>
+Specifies a colon separated list of directories to search for MIBs.
+This overrides the environment variable MIBDIRS.
+<DT><B>-T</B><I> TRANSOPTS</I>
 
-              <dd>Print full details of the specified OID.</dd>
+<DD>
+Provides control over the translation of the OID values.  The
+following
+<I>TRANSOPTS</I>
 
-              <dt><b>-Tp</b></dt>
+are available:
+<DL COMPACT><DT><DD>
+<DL COMPACT>
+<DT><B>-Td</B>
 
-              <dd>Print a graphical tree, rooted at the specified OID.</dd>
+<DD>
+Print full details of the specified OID.
+<DT><B>-Tp</B>
 
-              <dt><b>-Ta</b></dt>
+<DD>
+Print a graphical tree, rooted at the specified OID.
+<DT><B>-Ta</B>
 
-              <dd>Dump the loaded MIB in a trivial form.</dd>
+<DD>
+Dump the loaded MIB in a trivial form.
+<DT><B>-Tl</B>
 
-              <dt><b>-Tl</b></dt>
+<DD>
+Dump a labeled form of all objects.
+<DT><B>-To</B>
 
-              <dd>Dump a labeled form of all objects.</dd>
+<DD>
+Dump a numeric form of all objects.
+<DT><B>-Ts</B>
 
-              <dt><b>-To</b></dt>
+<DD>
+Dump a symbolic form of all objects.
+<DT><B>-Tt</B>
 
-              <dd>Dump a numeric form of all objects.</dd>
+<DD>
+Dump a tree form of the loaded MIBs (mostly useful for debugging).
+<DT><B>-Tz</B>
 
-              <dt><b>-Ts</b></dt>
+<DD>
+Dump a numeric and labeled form of all objects (compatible with MIB2SCHEMA format).
+</DL>
+</DL>
 
-              <dd>Dump a symbolic form of all objects.</dd>
+<DT><B>-V</B>
 
-              <dt><b>-Tt</b></dt>
+<DD>
+Display version information for the application and then exit.
+<DT><B>-w</B><I> WIDTH</I>
 
-              <dd>Dump a tree form of the loaded MIBs (mostly useful for debugging).</dd>
+<DD>
+Specifies the width of
+<B>-Tp</B>
 
-              <dt><b>-Tz</b></dt>
+and
+<B>-Td</B>
 
-              <dd>Dump a numeric and labeled form of all objects (compatible with MIB2SCHEMA format).</dd>
-            </dl>
-          </dd>
-        </dl>
-      </dd>
+output. The default is very large.
+</DL>
+<P>
 
-      <dt><b>-V</b></dt>
+In addition to the above options, 
+<B>snmptranslate</B>
 
-      <dd>Display version information for the application and then exit.</dd>
+takes the OID input 
+(<B>-I</B>),
 
-      <dt><b>-w</b> <i>WIDTH</i></dt>
+MIB parsing
+(<B>-M</B>)
 
-      <dd>Specifies the width of <b>-Tp</b> and <b>-Td</b> output. The default is very large.</dd>
-    </dl>
+and OID output
+(<B>-O</B>)
 
-    <p>In addition to the above options, <b>snmptranslate</b> takes the OID input (<b>-I</b>), MIB parsing (<b>-M</b>) and OID
-    output (<b>-O</b>) options described in the <b>INPUT OPTIONS</b>, <b>MIB PARSING OPTIONS</b> and <b>OUTPUT OPTIONS</b>
-    sections of the <i><a href="snmpcmd.html">snmpcmd</a>(1)</i> manual page. <a name="lbAF" id="lbAF">&nbsp;</a></p>
+options described in the 
+<B>INPUT OPTIONS</B>, <B>MIB PARSING OPTIONS</B> and <B>OUTPUT OPTIONS</B>
 
-    <h2>EXAMPLES</h2>
+sections of the
+<I><A HREF="http://localhost/cgi-bin/man/man2html?1+snmpcmd">snmpcmd</A>(1) </I>
 
-    <dl compact="compact">
-      <dt>*</dt>
+manual page.
+<A NAME="lbAF">&nbsp;</A>
+<H2>EXAMPLES</H2>
 
-      <dd>snmptranslate -On -IR sysDescr<br />
-      will translate "sysDescr" to a more qualified form:</dd>
+<DL COMPACT>
+<DT>*<DD>
+snmptranslate -On -IR sysDescr
+<BR>
 
-      <dd>system.sysDescr</dd>
+will translate &quot;sysDescr&quot; to a more qualified form:
+<DT><DD>
+system.sysDescr
+<DT>*<DD>
+snmptranslate -Onf -IR sysDescr
+<BR>
 
-      <dt>*</dt>
+will translate &quot;sysDecr&quot; to:
+<DT><DD>
+.iso.org.dod.internet.mgmt.mib-2.system.sysDescr
 
-      <dd>snmptranslate -Onf -IR sysDescr<br />
-      will translate "sysDecr" to:</dd>
+<DT>*<DD>
+snmptranslate -Td -OS system.sysDescr
+<BR>
 
-      <dd>.iso.org.dod.internet.mgmt.mib-2.system.sysDescr</dd>
-
-      <dt>*</dt>
-
-      <dd>snmptranslate -Td -OS system.sysDescr<br />
-      will translate "sysDecr" into:</dd>
-
-      <dd>
-        <pre>
+will translate &quot;sysDecr&quot; into:
+<DT><DD>
+<PRE>
 SNMPv2-MIB::sysDescr
 sysDescr OBJECT-TYPE
   -- FROM SNMPv2-MIB
   -- TEXTUAL CONVENTION DisplayString
   SYNTAX OCTET STRING (0..255)
-  DISPLAY-HINT "255a"
+  DISPLAY-HINT &quot;255a&quot;
   MAX-ACCESS read-only
   STATUS current
-  DESCRIPTION "A textual description of the entity. This
+  DESCRIPTION &quot;A textual description of the entity. This
                value should include the full name and
                version identification of the system's
                hardware type, software operating-system,
-               and networking software."
-::= { <a href="iso.html">iso</a>(1) <a href="org.html">org</a>(3) <a href="dod.html">dod</a>(6) <a href=
-"internet.html">internet</a>(1) <a href="mgmt.html">mgmt</a>(2) <a href="mib-2.html">mib-2</a>(1) <a href=
-"system.html">system</a>(1) 1 }
-</pre>
-      </dd>
+               and networking software.&quot;
+::= { <A HREF="http://localhost/cgi-bin/man/man2html?1+iso">iso</A>(1) <A HREF="http://localhost/cgi-bin/man/man2html?3+org">org</A>(3) <A HREF="http://localhost/cgi-bin/man/man2html?6+dod">dod</A>(6) <A HREF="http://localhost/cgi-bin/man/man2html?1+internet">internet</A>(1) <A HREF="http://localhost/cgi-bin/man/man2html?2+mgmt">mgmt</A>(2) <A HREF="http://localhost/cgi-bin/man/man2html?1+mib-2">mib-2</A>(1) <A HREF="http://localhost/cgi-bin/man/man2html?1+system">system</A>(1) 1 }
+</PRE>
 
-      <dt>*</dt>
+<DT>*<DD>
+snmptranslate -Tp -OS system
+<BR>
 
-      <dd>snmptranslate -Tp -OS system<br />
-      will print the following tree:</dd>
-
-      <dd>
-        <pre>
-+<a href="--system.html">--system</a>(1)
+will print the following tree:
+<DT><DD>
+<PRE>
++<A HREF="http://localhost/cgi-bin/man/man2html?1+--system">--system</A>(1)
    |
-   +-- -R-- String    <a href="sysDescr.html">sysDescr</a>(1)
+   +-- -R-- String    <A HREF="http://localhost/cgi-bin/man/man2html?1+sysDescr">sysDescr</A>(1)
    |        Textual Convention: DisplayString
    |        Size: 0..255
-   +-- -R-- ObjID     <a href="sysObjectID.html">sysObjectID</a>(2)
-   +-- -R-- TimeTicks <a href="sysUpTime.html">sysUpTime</a>(3)
-   +-- -RW- String    <a href="sysContact.html">sysContact</a>(4)
+   +-- -R-- ObjID     <A HREF="http://localhost/cgi-bin/man/man2html?2+sysObjectID">sysObjectID</A>(2)
+   +-- -R-- TimeTicks <A HREF="http://localhost/cgi-bin/man/man2html?3+sysUpTime">sysUpTime</A>(3)
+   +-- -RW- String    <A HREF="http://localhost/cgi-bin/man/man2html?4+sysContact">sysContact</A>(4)
    |        Textual Convention: DisplayString
    |        Size: 0..255
-   +-- -RW- String    <a href="sysName.html">sysName</a>(5)
+   +-- -RW- String    <A HREF="http://localhost/cgi-bin/man/man2html?5+sysName">sysName</A>(5)
    |        Textual Convention: DisplayString
    |        Size: 0..255
-   +-- -RW- String    <a href="sysLocation.html">sysLocation</a>(6)
+   +-- -RW- String    <A HREF="http://localhost/cgi-bin/man/man2html?6+sysLocation">sysLocation</A>(6)
    |        Textual Convention: DisplayString
    |        Size: 0..255
-   +-- -R-- Integer   <a href="sysServices.html">sysServices</a>(7)
-   +-- -R-- TimeTicks <a href="sysORLastChange.html">sysORLastChange</a>(8)
+   +-- -R-- Integer   <A HREF="http://localhost/cgi-bin/man/man2html?7+sysServices">sysServices</A>(7)
+   +-- -R-- TimeTicks <A HREF="http://localhost/cgi-bin/man/man2html?8+sysORLastChange">sysORLastChange</A>(8)
    |        Textual Convention: TimeStamp
    |
-   +<a href="--sysORTable.html">--sysORTable</a>(9)
+   +<A HREF="http://localhost/cgi-bin/man/man2html?9+--sysORTable">--sysORTable</A>(9)
       |
-      +<a href="--sysOREntry.html">--sysOREntry</a>(1)
+      +<A HREF="http://localhost/cgi-bin/man/man2html?1+--sysOREntry">--sysOREntry</A>(1)
          |
-         +-- ---- Integer   <a href="sysORIndex.html">sysORIndex</a>(1)
-         +-- -R-- ObjID     <a href="sysORID.html">sysORID</a>(2)
-         +-- -R-- String    <a href="sysORDescr.html">sysORDescr</a>(3)
+         +-- ---- Integer   <A HREF="http://localhost/cgi-bin/man/man2html?1+sysORIndex">sysORIndex</A>(1)
+         +-- -R-- ObjID     <A HREF="http://localhost/cgi-bin/man/man2html?2+sysORID">sysORID</A>(2)
+         +-- -R-- String    <A HREF="http://localhost/cgi-bin/man/man2html?3+sysORDescr">sysORDescr</A>(3)
          |        Textual Convention: DisplayString
          |        Size: 0..255
-         +-- -R-- TimeTicks <a href="sysORUpTime.html">sysORUpTime</a>(4)
+         +-- -R-- TimeTicks <A HREF="http://localhost/cgi-bin/man/man2html?4+sysORUpTime">sysORUpTime</A>(4)
                   Textual Convention: TimeStamp
 
-</pre>
-      </dd>
-    </dl>
+</PRE>
 
-    <dl compact="compact">
-      <dt>*</dt>
+</DL>
+<P>
 
-      <dd>snmptranslate -Ta | head<br />
-      will produce the following dump:</dd>
+<DL COMPACT>
+<DT>*<DD>
+snmptranslate -Ta | head
+<BR>
 
-      <dd>
-        <pre>
+will produce the following dump:
+<DT><DD>
+<PRE>
 dump DEFINITIONS ::= BEGIN
 org ::= { iso 3 }
 dod ::= { org 6 }
@@ -201,52 +248,42 @@ experimental ::= { internet 3 }
 private ::= { internet 4 }
 security ::= { internet 5 }
 snmpV2 ::= { internet 6 }
-</pre>
-      </dd>
-    </dl>
+</PRE>
 
-    <dl compact="compact">
-      <dt>*</dt>
+</DL>
+<P>
 
-      <dd>snmptranslate -Tl | head<br />
-      will produce the following dump:</dd>
+<DL COMPACT>
+<DT>*<DD>
+snmptranslate -Tl | head
+<BR>
 
-      <dd>
-        <pre>
-<a href=".iso.html">.iso</a>(1)<a href=".org.html">.org</a>(3)
-<a href=".iso.html">.iso</a>(1)<a href=".org.html">.org</a>(3)<a href=".dod.html">.dod</a>(6)
-<a href=".iso.html">.iso</a>(1)<a href=".org.html">.org</a>(3)<a href=".dod.html">.dod</a>(6)<a href=
-".internet.html">.internet</a>(1)
-<a href=".iso.html">.iso</a>(1)<a href=".org.html">.org</a>(3)<a href=".dod.html">.dod</a>(6)<a href=
-".internet.html">.internet</a>(1)<a href=".directory.html">.directory</a>(1)
-<a href=".iso.html">.iso</a>(1)<a href=".org.html">.org</a>(3)<a href=".dod.html">.dod</a>(6)<a href=
-".internet.html">.internet</a>(1)<a href=".mgmt.html">.mgmt</a>(2)
-<a href=".iso.html">.iso</a>(1)<a href=".org.html">.org</a>(3)<a href=".dod.html">.dod</a>(6)<a href=
-".internet.html">.internet</a>(1)<a href=".mgmt.html">.mgmt</a>(2)<a href=".mib-2.html">.mib-2</a>(1)
-<a href=".iso.html">.iso</a>(1)<a href=".org.html">.org</a>(3)<a href=".dod.html">.dod</a>(6)<a href=
-".internet.html">.internet</a>(1)<a href=".mgmt.html">.mgmt</a>(2)<a href=".mib-2.html">.mib-2</a>(1)<a href=
-".system.html">.system</a>(1)
-<a href=".iso.html">.iso</a>(1)<a href=".org.html">.org</a>(3)<a href=".dod.html">.dod</a>(6)<a href=
-".internet.html">.internet</a>(1)<a href=".mgmt.html">.mgmt</a>(2)<a href=".mib-2.html">.mib-2</a>(1)<a href=
-".system.html">.system</a>(1)<a href=".sysDescr.html">.sysDescr</a>(1)
-<a href=".iso.html">.iso</a>(1)<a href=".org.html">.org</a>(3)<a href=".dod.html">.dod</a>(6)<a href=
-".internet.html">.internet</a>(1)<a href=".mgmt.html">.mgmt</a>(2)<a href=".mib-2.html">.mib-2</a>(1)<a href=
-".system.html">.system</a>(1)<a href=".sysObjectID.html">.sysObjectID</a>(2)
-<a href=".iso.html">.iso</a>(1)<a href=".org.html">.org</a>(3)<a href=".dod.html">.dod</a>(6)<a href=
-".internet.html">.internet</a>(1)<a href=".mgmt.html">.mgmt</a>(2)<a href=".mib-2.html">.mib-2</a>(1)<a href=
-".system.html">.system</a>(1)<a href=".sysUpTime.html">.sysUpTime</a>(3)
-</pre>
-      </dd>
-    </dl>
+will produce the following dump:
+<DT><DD>
+<PRE>
+<A HREF="http://localhost/cgi-bin/man/man2html?1+.iso">.iso</A>(1)<A HREF="http://localhost/cgi-bin/man/man2html?3+.org">.org</A>(3)
+<A HREF="http://localhost/cgi-bin/man/man2html?1+.iso">.iso</A>(1)<A HREF="http://localhost/cgi-bin/man/man2html?3+.org">.org</A>(3)<A HREF="http://localhost/cgi-bin/man/man2html?6+.dod">.dod</A>(6)
+<A HREF="http://localhost/cgi-bin/man/man2html?1+.iso">.iso</A>(1)<A HREF="http://localhost/cgi-bin/man/man2html?3+.org">.org</A>(3)<A HREF="http://localhost/cgi-bin/man/man2html?6+.dod">.dod</A>(6)<A HREF="http://localhost/cgi-bin/man/man2html?1+.internet">.internet</A>(1)
+<A HREF="http://localhost/cgi-bin/man/man2html?1+.iso">.iso</A>(1)<A HREF="http://localhost/cgi-bin/man/man2html?3+.org">.org</A>(3)<A HREF="http://localhost/cgi-bin/man/man2html?6+.dod">.dod</A>(6)<A HREF="http://localhost/cgi-bin/man/man2html?1+.internet">.internet</A>(1)<A HREF="http://localhost/cgi-bin/man/man2html?1+.directory">.directory</A>(1)
+<A HREF="http://localhost/cgi-bin/man/man2html?1+.iso">.iso</A>(1)<A HREF="http://localhost/cgi-bin/man/man2html?3+.org">.org</A>(3)<A HREF="http://localhost/cgi-bin/man/man2html?6+.dod">.dod</A>(6)<A HREF="http://localhost/cgi-bin/man/man2html?1+.internet">.internet</A>(1)<A HREF="http://localhost/cgi-bin/man/man2html?2+.mgmt">.mgmt</A>(2)
+<A HREF="http://localhost/cgi-bin/man/man2html?1+.iso">.iso</A>(1)<A HREF="http://localhost/cgi-bin/man/man2html?3+.org">.org</A>(3)<A HREF="http://localhost/cgi-bin/man/man2html?6+.dod">.dod</A>(6)<A HREF="http://localhost/cgi-bin/man/man2html?1+.internet">.internet</A>(1)<A HREF="http://localhost/cgi-bin/man/man2html?2+.mgmt">.mgmt</A>(2)<A HREF="http://localhost/cgi-bin/man/man2html?1+.mib-2">.mib-2</A>(1)
+<A HREF="http://localhost/cgi-bin/man/man2html?1+.iso">.iso</A>(1)<A HREF="http://localhost/cgi-bin/man/man2html?3+.org">.org</A>(3)<A HREF="http://localhost/cgi-bin/man/man2html?6+.dod">.dod</A>(6)<A HREF="http://localhost/cgi-bin/man/man2html?1+.internet">.internet</A>(1)<A HREF="http://localhost/cgi-bin/man/man2html?2+.mgmt">.mgmt</A>(2)<A HREF="http://localhost/cgi-bin/man/man2html?1+.mib-2">.mib-2</A>(1)<A HREF="http://localhost/cgi-bin/man/man2html?1+.system">.system</A>(1)
+<A HREF="http://localhost/cgi-bin/man/man2html?1+.iso">.iso</A>(1)<A HREF="http://localhost/cgi-bin/man/man2html?3+.org">.org</A>(3)<A HREF="http://localhost/cgi-bin/man/man2html?6+.dod">.dod</A>(6)<A HREF="http://localhost/cgi-bin/man/man2html?1+.internet">.internet</A>(1)<A HREF="http://localhost/cgi-bin/man/man2html?2+.mgmt">.mgmt</A>(2)<A HREF="http://localhost/cgi-bin/man/man2html?1+.mib-2">.mib-2</A>(1)<A HREF="http://localhost/cgi-bin/man/man2html?1+.system">.system</A>(1)<A HREF="http://localhost/cgi-bin/man/man2html?1+.sysDescr">.sysDescr</A>(1)
+<A HREF="http://localhost/cgi-bin/man/man2html?1+.iso">.iso</A>(1)<A HREF="http://localhost/cgi-bin/man/man2html?3+.org">.org</A>(3)<A HREF="http://localhost/cgi-bin/man/man2html?6+.dod">.dod</A>(6)<A HREF="http://localhost/cgi-bin/man/man2html?1+.internet">.internet</A>(1)<A HREF="http://localhost/cgi-bin/man/man2html?2+.mgmt">.mgmt</A>(2)<A HREF="http://localhost/cgi-bin/man/man2html?1+.mib-2">.mib-2</A>(1)<A HREF="http://localhost/cgi-bin/man/man2html?1+.system">.system</A>(1)<A HREF="http://localhost/cgi-bin/man/man2html?2+.sysObjectID">.sysObjectID</A>(2)
+<A HREF="http://localhost/cgi-bin/man/man2html?1+.iso">.iso</A>(1)<A HREF="http://localhost/cgi-bin/man/man2html?3+.org">.org</A>(3)<A HREF="http://localhost/cgi-bin/man/man2html?6+.dod">.dod</A>(6)<A HREF="http://localhost/cgi-bin/man/man2html?1+.internet">.internet</A>(1)<A HREF="http://localhost/cgi-bin/man/man2html?2+.mgmt">.mgmt</A>(2)<A HREF="http://localhost/cgi-bin/man/man2html?1+.mib-2">.mib-2</A>(1)<A HREF="http://localhost/cgi-bin/man/man2html?1+.system">.system</A>(1)<A HREF="http://localhost/cgi-bin/man/man2html?3+.sysUpTime">.sysUpTime</A>(3)
+</PRE>
 
-    <dl compact="compact">
-      <dt>*</dt>
+</DL>
+<P>
 
-      <dd>snmptranslate -To | head<br />
-      will produce the following dump</dd>
+<DL COMPACT>
+<DT>*<DD>
+snmptranslate -To | head
+<BR>
 
-      <dd>
-        <pre>
+will produce the following dump
+<DT><DD>
+<PRE>
 .1.3
 .1.3.6
 .1.3.6.1
@@ -257,18 +294,19 @@ snmpV2 ::= { internet 6 }
 .1.3.6.1.2.1.1.1
 .1.3.6.1.2.1.1.2
 .1.3.6.1.2.1.1.3
-</pre>
-      </dd>
-    </dl>
+</PRE>
 
-    <dl compact="compact">
-      <dt>*</dt>
+</DL>
+<P>
 
-      <dd>snmptranslate -Ts | head<br />
-      will produce the following dump</dd>
+<DL COMPACT>
+<DT>*<DD>
+snmptranslate -Ts | head
+<BR>
 
-      <dd>
-        <pre>
+will produce the following dump
+<DT><DD>
+<PRE>
 .iso.org
 .iso.org.dod
 .iso.org.dod.internet
@@ -279,54 +317,52 @@ snmpV2 ::= { internet 6 }
 .iso.org.dod.internet.mgmt.mib-2.system.sysDescr
 .iso.org.dod.internet.mgmt.mib-2.system.sysObjectID
 .iso.org.dod.internet.mgmt.mib-2.system.sysUpTime
-</pre>
-      </dd>
-    </dl>
+</PRE>
 
-    <dl compact="compact">
-      <dt>*</dt>
+</DL>
+<P>
 
-      <dd>snmptranslate -Tt | head<br />
-      will produce the following dump</dd>
+<DL COMPACT>
+<DT>*<DD>
+snmptranslate -Tt | head
+<BR>
 
-      <dd>
-        <pre>
-  <a href="org.html">org</a>(3) type=0
-    <a href="dod.html">dod</a>(6) type=0
-      <a href="internet.html">internet</a>(1) type=0
-        <a href="directory.html">directory</a>(1) type=0
-        <a href="mgmt.html">mgmt</a>(2) type=0
-          <a href="mib-2.html">mib-2</a>(1) type=0
-            <a href="system.html">system</a>(1) type=0
-              <a href="sysDescr.html">sysDescr</a>(1) type=2 tc=4 hint=255a
-              <a href="sysObjectID.html">sysObjectID</a>(2) type=1
-              <a href="sysUpTime.html">sysUpTime</a>(3) type=8
-</pre>
-      </dd>
-    </dl><a name="lbAG" id="lbAG">&nbsp;</a>
+will produce the following dump
+<DT><DD>
+<PRE>
+  <A HREF="http://localhost/cgi-bin/man/man2html?3+org">org</A>(3) type=0
+    <A HREF="http://localhost/cgi-bin/man/man2html?6+dod">dod</A>(6) type=0
+      <A HREF="http://localhost/cgi-bin/man/man2html?1+internet">internet</A>(1) type=0
+        <A HREF="http://localhost/cgi-bin/man/man2html?1+directory">directory</A>(1) type=0
+        <A HREF="http://localhost/cgi-bin/man/man2html?2+mgmt">mgmt</A>(2) type=0
+          <A HREF="http://localhost/cgi-bin/man/man2html?1+mib-2">mib-2</A>(1) type=0
+            <A HREF="http://localhost/cgi-bin/man/man2html?1+system">system</A>(1) type=0
+              <A HREF="http://localhost/cgi-bin/man/man2html?1+sysDescr">sysDescr</A>(1) type=2 tc=4 hint=255a
+              <A HREF="http://localhost/cgi-bin/man/man2html?2+sysObjectID">sysObjectID</A>(2) type=1
+              <A HREF="http://localhost/cgi-bin/man/man2html?3+sysUpTime">sysUpTime</A>(3) type=8
+</PRE>
 
-    <h2>SEE ALSO</h2><a href="snmpcmd.html">snmpcmd</a>(1), <a href="variables.html">variables</a>(5), RFC 2578-2580.
-    <hr />
-    <a name="index" id="index">&nbsp;</a>
+</DL>
+<A NAME="lbAG">&nbsp;</A>
+<H2>SEE ALSO</H2>
 
-    <h2>Index</h2>
+<A HREF="http://localhost/cgi-bin/man/man2html?1+snmpcmd">snmpcmd</A>(1), <A HREF="http://localhost/cgi-bin/man/man2html?5+variables">variables</A>(5), RFC 2578-2580.
+<P>
 
-    <dl>
-      <dt><a href="#lbAB">NAME</a></dt>
-
-      <dt><a href="#lbAC">SYNOPSIS</a></dt>
-
-      <dt><a href="#lbAD">DESCRIPTION</a></dt>
-
-      <dt><a href="#lbAE">OPTIONS</a></dt>
-
-      <dt><a href="#lbAF">EXAMPLES</a></dt>
-
-      <dt><a href="#lbAG">SEE ALSO</a></dt>
-    </dl>
-    <hr />
-    This document was created by <a href="http://localhost/cgi-bin/man/man2html">man2html</a>, using the manual pages.<br />
-    Time: 13:12:00 GMT, September 23, 2007
-<!-- CONTENT END -->
-<!--#include virtual="/page-bottom.html" -->
-
+<HR>
+<A NAME="index">&nbsp;</A><H2>Index</H2>
+<DL>
+<DT><A HREF="#lbAB">NAME</A><DD>
+<DT><A HREF="#lbAC">SYNOPSIS</A><DD>
+<DT><A HREF="#lbAD">DESCRIPTION</A><DD>
+<DT><A HREF="#lbAE">OPTIONS</A><DD>
+<DT><A HREF="#lbAF">EXAMPLES</A><DD>
+<DT><A HREF="#lbAG">SEE ALSO</A><DD>
+</DL>
+<HR>
+This document was created by
+<A HREF="http://localhost/cgi-bin/man/man2html">man2html</A>,
+using the manual pages.<BR>
+Time: 19:05:39 GMT, September 28, 2009
+</BODY>
+</HTML>

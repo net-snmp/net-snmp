@@ -1,98 +1,182 @@
-<!--#set var="section" value="documentation" -->
-<!--#include virtual="/page-top.html" -->
-<!-- CONTENT START -->
-    <h1>SNMP_CONFIG</h1>Section: Net-SNMP (5)<br />
-    Updated: 5 May 2005<br />
-    <a href="#index">Index</a> <a href="../index.html">Return to Main Contents</a>
-    <hr />
-    <a name="lbAB" id="lbAB">&nbsp;</a>
+Content-type: text/html
 
-    <h2>NAME</h2>snmp_config - handling of Net-SNMP configuration files <a name="lbAC" id="lbAC">&nbsp;</a>
+<HTML><HEAD><TITLE>Manpage of SNMP_CONFIG</TITLE>
+</HEAD><BODY>
+<H1>SNMP_CONFIG</H1>
+Section: Net-SNMP (5)<BR>Updated: 5 May 2005<BR><A HREF="#index">Index</A>
+<A HREF="http://localhost/cgi-bin/man/man2html">Return to Main Contents</A><HR>
 
-    <h2>DESCRIPTION</h2>The Net-SNMP package uses various configuration files to configure its applications. This manual page
-    merely describes the overall nature of them, so that the other manual pages don't have to. <a name="lbAD" id=
-    "lbAD">&nbsp;</a>
 
-    <h2>DIRECTORIES SEARCHED</h2>First off, there are numerous places that configuration files can be found and read from. By
-    default, the applications look for configuration files in the following 4 directories, in order: /usr/local/etc/snmp,
-    /usr/local/share/snmp, /usr/local/lib/snmp, and $HOME/.snmp. In each of these directories, it looks for files with the
-    extension of both <i>conf</i> and <i>local.conf</i> (reading the second ones last). In this manner, there are 8 default
-    places a configuration file can exist for any given configuration file type.
+<A NAME="lbAB">&nbsp;</A>
+<H2>NAME</H2>
 
-    <p>Additionally, the above default search path can be overridden by setting the environment variable SNMPCONFPATH to a
-    colon-separated list of directories to search for. The path for the persistent data should be included when running
-    applications that use persistent storage, such as snmpd.</p>
+snmp_config - handling of Net-SNMP configuration files
+<A NAME="lbAC">&nbsp;</A>
+<H2>DESCRIPTION</H2>
 
-    <p>Applications will read persistent configuration files in the following order of preference:</p>
+The Net-SNMP package uses various configuration files to configure its 
+applications.  This manual page merely describes the overall nature of 
+them, so that the other manual pages don't have to.
+<A NAME="lbAD">&nbsp;</A>
+<H2>DIRECTORIES SEARCHED</H2>
 
-    <dl compact="compact">
-      <dd>
-        <p>file in <b>SNMP_PERSISTENT_FILE</b> environment variable</p>
+First off, there are numerous places that configuration files can be
+found and read from.  By default, the applications look for
+configuration files in the following 4 directories, in order:
+/usr/local/etc/snmp,
+/usr/local/share/snmp, /usr/local/lib/snmp, and $HOME/.snmp.  In each of these
+directories, it looks for files with the extension of both
+<I>conf</I> and <I>local.conf</I>
 
-        <p>directories in <b>SNMPCONFPATH</b> environment variable</p>
+(reading the second ones last).  In this manner, there are
+8 default places a configuration file can exist for any given
+configuration file type.
+<P>
 
-        <p>directory defined by <b>persistentDir</b> snmp.conf variable</p>
+Additionally, the above default search path can be overridden by
+setting the environment variable SNMPCONFPATH to a colon-separated
+list of directories to search for.  The path for the persistent
+data should be included when running applications that use
+persistent storage, such as snmpd.
+<P>
 
-        <p>directory in <b>SNMP_PERSISTENT_DIR</b> environment variable</p>
+Applications will read persistent configuration files 
+in the following order of preference:
+<DL COMPACT><DT><DD>
+<P>
 
-        <p>default <b>/var/net-snmp</b> directory</p>
-      </dd>
-    </dl>
+file in 
+<B>SNMP_PERSISTENT_FILE</B>
 
-    <p>Finally, applications will write persistent configuration files in the following order of preference:</p>
+environment variable
+<P>
 
-    <dl compact="compact">
-      <dd>
-        <p>file in <b>SNMP_PERSISTENT_FILE</b> environment variable</p>
+directories in 
+<B>SNMPCONFPATH</B>
 
-        <p>directory defined by <b>persistentDir</b> snmp.conf variable</p>
+environment variable
+<P>
 
-        <p>directory in <b>SNMP_PERSISTENT_DIR</b> environment variable</p>
+directory defined by 
+<B>persistentDir </B>
 
-        <p>default <b>/var/net-snmp</b> directory</p>
-      </dd>
-    </dl>
+snmp.conf variable
+<P>
 
-    <p>Note: When using SNMP_PERSISTENT_FILE, the filename should match the application name. For example,
-    /var/net-snmp/snmpd.conf. <a name="lbAE" id="lbAE">&nbsp;</a></p>
+directory in 
+<B>SNMP_PERSISTENT_DIR </B>
 
-    <h2>CONFIGURATION FILE TYPES</h2>Each application may use multiple configuration files, which will configure various
-    different aspects of the application. For instance, the SNMP agent (<b>snmpd</b>) knows how to understand configuration
-    directives in both the snmpd.conf and the snmp.conf files. In fact, most applications understand how to read the contents of
-    the snmp.conf files. Note, however, that configuration directives understood in one file may not be understood in another
-    file. For further information, read the associated manual page with each configuration file type. Also, most of the
-    applications support a <b>-H</b> switch on the command line that will list the configuration files it will look for and the
-    directives in each one that it understands.
+environment variable
+<P>
 
-    <p>The snmp.conf configuration file is intended to be a application suite wide configuration file that supports directives
-    that are useful for controlling the fundamental nature of all of the SNMP applications, such as how they all manipulate and
-    parse the textual SNMP MIB files. <a name="lbAF" id="lbAF">&nbsp;</a></p>
+default 
+<B>/var/net-snmp </B>
 
-    <h2>SWITCHING CONFIGURATION TYPES IN MID-FILE</h2>It's possible to switch in mid-file the configuration type that the parser
-    is supposed to be reading. Since that sentence doesn't make much sense, lets give you an example: say that you wanted to turn
-    on packet dumping output for the agent by default, but you didn't want to do that for the rest of the applications (ie,
-    snmpget, snmpwalk, ...). Normally to enable packet dumping in the configuration file you'd need to put a line like:
+directory
+</DL>
 
-    <dl compact="compact">
-      <dd>dumpPacket true</dd>
-    </dl>
+<P>
 
-    <p>into the snmp.conf file. But, this would turn it on for all of the applications. So, instead, you can put the same line in
-    the snmpd.conf file so that it only applies to the snmpd daemon. However, you need to tell the parser to expect this line.
-    You do this by putting a special type specification token inside a [] set. In other words, inside your snmpd.conf file you
-    could put the above snmp.conf directive by adding a line like so:</p>
+Finally, applications will write persistent configuration files 
+in the following order of preference:
+<DL COMPACT><DT><DD>
+<P>
 
-    <dl compact="compact">
-      <dd>[snmp] dumpPacket true</dd>
-    </dl>
+file in 
+<B>SNMP_PERSISTENT_FILE</B>
 
-    <p>This tells the parser to parse the above line as if it were inside a snmp.conf file instead of an snmpd.conf file. If you
-    want to parse a bunch of lines rather than just one then you can make the context switch apply to the remainder of the file
-    or until the next context switch directive by putting the special token on a line by itself:</p>
+environment variable
+<P>
 
-    <dl compact="compact">
-      <dd>
-        <pre>
+directory defined by 
+<B>persistentDir </B>
+
+snmp.conf variable
+<P>
+
+directory in 
+<B>SNMP_PERSISTENT_DIR </B>
+
+environment variable
+<P>
+
+default 
+<B>/var/net-snmp </B>
+
+directory
+</DL>
+
+<P>
+
+Note:  When using SNMP_PERSISTENT_FILE, the filename should match the 
+application name.  For example, /var/net-snmp/snmpd.conf.
+<A NAME="lbAE">&nbsp;</A>
+<H2>CONFIGURATION FILE TYPES</H2>
+
+Each application may use multiple configuration files, which will
+configure various different aspects of the application.  For instance, 
+the SNMP agent
+(<B>snmpd</B>)
+
+knows how to understand configuration
+directives in both the snmpd.conf and the snmp.conf files.  In fact,
+most applications understand how to read the contents of the snmp.conf 
+files.  Note, however, that configuration directives understood in one 
+file may not be understood in another file.  For further information,
+read the associated manual page with each configuration file type.
+Also, most of the applications support a 
+<B>-H</B>
+
+switch on the command line that will list the configuration files it
+will look for and the directives in each one that it understands.
+<P>
+
+The snmp.conf configuration file is intended to be a application suite 
+wide configuration file that supports directives that are useful for
+controlling the fundamental nature of all of the SNMP applications,
+such as how they all manipulate and parse the textual SNMP MIB files.
+<A NAME="lbAF">&nbsp;</A>
+<H2>SWITCHING CONFIGURATION TYPES IN MID-FILE</H2>
+
+It's possible to switch in mid-file the configuration type that the
+parser is supposed to be reading.  Since that sentence doesn't make
+much sense, lets give you an example: say that you wanted to turn on
+packet dumping output for the agent by default, but you didn't want to
+do that for the rest of the applications (ie, snmpget, snmpwalk, ...).
+Normally to enable packet dumping in the configuration file
+you'd need to put a line like:
+<P>
+
+<DL COMPACT><DT><DD>
+dumpPacket true
+</DL>
+
+<P>
+
+into the snmp.conf file.  But, this would turn it on for all of the
+applications.  So, instead, you can put the same line in the
+snmpd.conf file so that it only applies to the snmpd daemon.  However,
+you need to tell the parser to expect this line.  You do this by
+putting a special type specification token inside a [] set.  In other
+words, inside your snmpd.conf file you could put the above snmp.conf
+directive by adding a line like so:
+<P>
+
+<DL COMPACT><DT><DD>
+[snmp] dumpPacket true
+</DL>
+
+<P>
+
+This tells the parser to parse the above line as if it were inside a
+snmp.conf file instead of an snmpd.conf file.  If you want to parse a
+bunch of lines rather than just one then you can make the context
+switch apply to the remainder of the file or until the next context
+switch directive by putting the special token on a line by itself:
+<P>
+
+<DL COMPACT><DT><DD>
+<PRE>
 # make this file handle snmp.conf tokens:
 [snmp]
 dumpPacket true
@@ -100,47 +184,52 @@ logTimestamp true
 # return to our original snmpd.conf tokens:
 [snmpd]
 rocommunity mypublic
-</pre>
-      </dd>
-    </dl><a name="lbAG" id="lbAG">&nbsp;</a>
+</DL>
+</PRE><A NAME="lbAG">&nbsp;</A>
+<H2>COMMENTS</H2>
 
-    <h2>COMMENTS</h2>
+<P>
 
-    <p>Any lines beginning with the character '#' in the configuration files are treated as a comment and are not parsed.
-    <a name="lbAH" id="lbAH">&nbsp;</a></p>
+Any lines beginning with the character '#' in the configuration files
+are treated as a comment and are not parsed.
+<A NAME="lbAH">&nbsp;</A>
+<H2>API INTERFACE</H2>
 
-    <h2>API INTERFACE</h2>
+<P>
 
-    <p>Information about writing C code that makes use of this system in either the agent's MIB modules or in applications can be
-    found in the <i><a href="read_config.html">read_config</a>(3)</i> manual page. <a name="lbAI" id="lbAI">&nbsp;</a></p>
+Information about writing C code that makes use of this system in
+either the agent's MIB modules or in applications can be found in the
+<I><A HREF="http://localhost/cgi-bin/man/man2html?3+read_config">read_config</A>(3)</I>
 
-    <h2>SEE ALSO</h2><a href="snmpconf.html">snmpconf</a>(1), <a href="read_config.html">read_config</a>(3), <a href=
-    "snmp.conf.html">snmp.conf</a>(5), <a href="snmpd.conf.html">snmpd.conf</a>(5)
-    <hr />
-    <a name="index" id="index">&nbsp;</a>
+manual page.
+<A NAME="lbAI">&nbsp;</A>
+<H2>SEE ALSO</H2>
 
-    <h2>Index</h2>
+<A HREF="http://localhost/cgi-bin/man/man2html?1+snmpconf">snmpconf</A>(1),
+<A HREF="http://localhost/cgi-bin/man/man2html?3+read_config">read_config</A>(3),
+<A HREF="http://localhost/cgi-bin/man/man2html?5+snmp.conf">snmp.conf</A>(5),
+<A HREF="http://localhost/cgi-bin/man/man2html?5+snmpd.conf">snmpd.conf</A>(5)
 
-    <dl>
-      <dt><a href="#lbAB">NAME</a></dt>
 
-      <dt><a href="#lbAC">DESCRIPTION</a></dt>
 
-      <dt><a href="#lbAD">DIRECTORIES SEARCHED</a></dt>
+<P>
 
-      <dt><a href="#lbAE">CONFIGURATION FILE TYPES</a></dt>
-
-      <dt><a href="#lbAF">SWITCHING CONFIGURATION TYPES IN MID-FILE</a></dt>
-
-      <dt><a href="#lbAG">COMMENTS</a></dt>
-
-      <dt><a href="#lbAH">API INTERFACE</a></dt>
-
-      <dt><a href="#lbAI">SEE ALSO</a></dt>
-    </dl>
-    <hr />
-    This document was created by <a href="http://localhost/cgi-bin/man/man2html">man2html</a>, using the manual pages.<br />
-    Time: 13:12:01 GMT, September 23, 2007
-<!-- CONTENT END -->
-<!--#include virtual="/page-bottom.html" -->
-
+<HR>
+<A NAME="index">&nbsp;</A><H2>Index</H2>
+<DL>
+<DT><A HREF="#lbAB">NAME</A><DD>
+<DT><A HREF="#lbAC">DESCRIPTION</A><DD>
+<DT><A HREF="#lbAD">DIRECTORIES SEARCHED</A><DD>
+<DT><A HREF="#lbAE">CONFIGURATION FILE TYPES</A><DD>
+<DT><A HREF="#lbAF">SWITCHING CONFIGURATION TYPES IN MID-FILE</A><DD>
+<DT><A HREF="#lbAG">COMMENTS</A><DD>
+<DT><A HREF="#lbAH">API INTERFACE</A><DD>
+<DT><A HREF="#lbAI">SEE ALSO</A><DD>
+</DL>
+<HR>
+This document was created by
+<A HREF="http://localhost/cgi-bin/man/man2html">man2html</A>,
+using the manual pages.<BR>
+Time: 19:05:39 GMT, September 28, 2009
+</BODY>
+</HTML>

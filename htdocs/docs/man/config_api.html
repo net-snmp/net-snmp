@@ -1,0 +1,563 @@
+Content-type: text/html
+
+<HTML><HEAD><TITLE>Manpage of CONFIG_API</TITLE>
+</HEAD><BODY>
+<H1>CONFIG_API</H1>
+Section: Net-SNMP (3)<BR>Updated: 07 Mar 2002<BR><A HREF="#index">Index</A>
+<A HREF="http://localhost/cgi-bin/man/man2html">Return to Main Contents</A><HR>
+
+
+<A NAME="lbAB">&nbsp;</A>
+<H2>NAME</H2>
+
+register_config_handler, register_premib_handler
+unregister_config_handler, register_mib_handlers, read_configs,
+read_premib_configs, config_perror, config_pwarn - config_api functions
+<A NAME="lbAC">&nbsp;</A>
+<H2>SYNOPSIS</H2>
+
+<B>#include &lt;<A HREF="file:/usr/include/net-snmp/config_api.h">net-snmp/config_api.h</A>&gt;</B>
+
+<P>
+
+<B>struct config_line *</B>
+
+<BR>
+
+<B>  register_config_handler(const char *</B><I>filePrefix</I><B>,</B>
+
+<BR>
+
+<B>                     const char *</B><I>token</I><B>,</B>
+
+<BR>
+
+<B>                     void (*</B><I>parser</I><B>)(const char *, char *),</B>
+
+<BR>
+
+<B>                     void (*</B><I>releaser</I><B>)(void),</B>
+
+<BR>
+
+<B>                     const char *usageLine</B><I>);</I>
+
+<P>
+
+<B>struct config_line *</B>
+
+<BR>
+
+<B>  register_premib_handler(const char *</B><I>filePrefix</I><B>, </B>
+
+<BR>
+
+<B>                     const char *</B><I>token</I><B>,</B>
+
+<BR>
+
+<B>                     void (*</B><I>parser</I><B>)(const char *, char *),</B>
+
+<BR>
+
+<B>                     void (*</B><I>releaser</I><B>)(void),</B>
+
+<BR>
+
+<B>                     const char *</B><I>usageLine</I><B>);</B>
+
+<P>
+
+<B>void register_mib_handlers(void);</B>
+
+<P>
+
+<B>void unregister_config_handler(const char *</B><I>filePrefix</I><B>,</B>
+
+<BR>
+
+<B>                     const char *</B><I>token</I><B>);</B>
+
+<BR>
+
+<P>
+
+<B>void unregister_all_config_handlers(void);</B>
+
+<BR>
+
+<A NAME="lbAD">&nbsp;</A>
+<H3>Application Handlers</H3>
+
+<P>
+
+<B>struct config_line *</B>
+
+<BR>
+
+<B>  register_app_config_handler(const char *</B><I>token</I><B>,</B>
+
+<BR>
+
+<B>                     void (*</B><I>parser</I><B>)(const char *, char *),</B>
+
+<BR>
+
+<B>                     void (*</B><I>releaser</I><B>)(void),</B>
+
+<BR>
+
+<B>                     const char *usageLine</B><I>);</I>
+
+<P>
+
+<B>struct config_line *</B>
+
+<BR>
+
+<B>  register_app_premib_handler(const char *</B><I>token</I><B>,</B>
+
+<BR>
+
+<B>                     void (*</B><I>parser</I><B>)(const char *, char *),</B>
+
+<BR>
+
+<B>                     void (*</B><I>releaser</I><B>)(void),</B>
+
+<BR>
+
+<B>                     const char *</B><I>usageLine</I><B>);</B>
+
+<P>
+
+<B>void unregister_app_config_handler(const char *</B><I>token</I><B>);</B>
+
+<BR>
+
+<A NAME="lbAE">&nbsp;</A>
+<H3>Reading Configuration Files</H3>
+
+<P>
+
+<B>void read_premib_configs(void);</B>
+
+<BR>
+
+<B>void read_configs(void);</B>
+
+<BR>
+
+<A NAME="lbAF">&nbsp;</A>
+<H3>Help Strings and Errors</H3>
+
+<P>
+
+<B>void read_config_print_usage(char *</B><I>lead</I><B>);</B>
+
+<BR>
+
+<B>void config_pwarn(const char *</B><I>string</I><B>);</B>
+
+<BR>
+
+<B>void config_perror(const char *</B><I>string</I><B>);</B>
+
+<P>
+<A NAME="lbAG">&nbsp;</A>
+<H2>DESCRIPTION</H2>
+
+The functions are a fairly extensible system of parsing various
+configuration files at the run time of an application.  The
+configuration file flow is broken into the following phases:
+<DL COMPACT><DT><DD>
+<DL COMPACT>
+<DT>1.<DD>
+Registration of handlers.
+<DT>2.<DD>
+Reading of the configuration files for pre-MIB parsing requirements.
+<DT>3.<DD>
+Reading and parsing of the textual MIB files.
+<DT>4.<DD>
+Reading of the configuration files for configuration directives.
+<DT>5.<DD>
+Optionally re-reading the configuration files at a future date.
+</DL>
+</DL>
+
+<P>
+
+The idea is that the calling application is able to register
+<I>handlers</I>
+
+for certain
+<I>tokens</I>
+
+specified in certain named
+<I>configuration files.</I>
+
+The 
+<B>read_configs()</B>
+
+function can then be called to look for all relevant configuration files,
+match the first word on each line against the list of registered tokens
+and pass the remainder of the line to the appropriate registered handler.
+<A NAME="lbAH">&nbsp;</A>
+<H2>REGISTERING A HANDLER</H2>
+
+<DL COMPACT>
+<DT><B>register_config_handler()</B>
+
+<DD>
+Registers a configuration handler routine, which should be called
+to process configuration directives starting with the specified token.
+For example:
+</DL>
+<P>
+
+<DL COMPACT><DT><DD>
+<DL COMPACT><DT><DD>
+register_config_handler(&quot;snmp&quot;, &quot;exampleToken&quot;, example_handler, NULL, &quot;ARG1 [ARG2]&quot;);
+</DL>
+
+</DL>
+
+<DL COMPACT>
+<DT><DD>
+would register the
+<B>example_handler()</B>
+
+function so that it will get called every time the first word of a
+line in the 
+<I>snmp.conf</I>
+
+configuration file(s) matches &quot;exampleToken&quot;.
+<BR>
+
+Calling the appropriate handlers to process the configuration file directives
+is the responsibility of 
+<B>read_configs() </B>
+
+(see below).
+<DT><B>register_premib_handler()</B>
+
+<DD>
+Similar to the
+<B>register_config_handler()</B>
+
+function, but the registered handler routine will be called
+<I>before</I> the textual MIBs are read in.
+This is typically used for tokens that will affect the configuration of
+the MIB parser, and will normally only be used within the SNMP library itself.
+<DT><B>register_mib_handlers()</B>
+
+<DD>
+Initialisation routine to register the internal SNMP library configuration handlers.
+<DT><B>unregister_config_handler()</B>
+
+<DD>
+Removes the registered configuration handler for the specified
+<I>filePrefix</I>
+
+and
+<I>token</I>.
+
+<DT><B>unregister_all_config_handlers()</B>
+
+<DD>
+Removes all registered configuration handlers.
+<P>
+</DL>
+<A NAME="lbAI">&nbsp;</A>
+<H3>Token Handlers</H3>
+
+<P>
+
+Handler functions should have the following signature:
+<P>
+
+<DL COMPACT><DT><DD>
+<B>void handler(const char *</B><I>token</I><B>, char *</B><I>line</I><B>);</B>
+
+</DL>
+
+<P>
+
+The function will be called with two arguments, the first being the
+token that triggered the call to this function (i.e. the token used
+when registering the handler), and the second
+being the remainder of the configuration file line (i.e. everything
+following the white space following the matched token).
+<P>
+<A NAME="lbAJ">&nbsp;</A>
+<H3>Freeing Handlers</H3>
+
+<P>
+
+If the token handler function dynamically allocates resources when
+processing a configuration entry, then these may need to be released
+before re-reading the configuration files.
+If the fourth parameter (
+<I>releaser</I>
+
+) passed to
+<B>register_config_handler</B>
+
+is non-NULL, then this specifies a function to be called before
+re-reading the configuration files.  This function should free any
+resources allocated by the token handler function and reset its notion
+of the configuration to its default.  The token handler function can
+then safely be called again.
+No arguments are passed to the resource freeing handler.
+<BR>
+
+Note that this function is not called when the handler is
+unregistered individually (but <I>is</I> called as part of
+<B>unregister_all_config_handlers()</B>
+
+).
+<P>
+<A NAME="lbAK">&nbsp;</A>
+<H3>Application Handlers</H3>
+
+<DL COMPACT>
+<DT><B>register_app_config_handler()</B>
+
+<DD>
+<DT><B>register_app_premib_handler()</B>
+
+<DD>
+<DT><B>unregister_app_config_handler()</B>
+
+<DD>
+These functions are analagous to 
+<B>register_config_handler()</B>, <B>register_premib_handler()</B> and 
+
+<B>unregister_config_handler()</B>
+
+but do not require the file type argument (which is filled in by the
+application).  It is intended that MIB modules written for the agent
+use these functions to allow the agent to have more control over which
+configuration files are read (typically the
+<I>snmpd.conf</I>
+
+files).
+</DL>
+<A NAME="lbAL">&nbsp;</A>
+<H2>READING CONFIGURATION FILES</H2>
+
+<DL COMPACT>
+<DT><B>read_premib_configs()</B>
+
+<DD>
+<DT><B>read_configs()</B>
+
+<DD>
+These routines process the configuration files found in the
+configuration search path (see below).  For each entry, the
+handler registered for that configuration token is called.
+</DL>
+<P>
+
+<B>read_premib_configs()</B>
+
+is run before the MIB files are read in, and processes those
+configuration tokens registered using
+<B>register_premib_handler()</B>
+
+(or
+<B>register_app_premib_handler()</B>
+
+).
+All other entries are ignored.
+<P>
+
+<B>read_configs()</B>
+
+is run after the MIB files have been read in, and processes those
+configuration tokens registered using
+<B>register_config_handler()</B>
+
+(or
+<B>register_app_config_handler()</B>
+
+).
+If it encounters a configuration token for which no handler has
+been registered (either pre- or post-mib), then it will display
+a warning message, and continue processing with the next line
+of the configuration file.
+<A NAME="lbAM">&nbsp;</A>
+<H3>Configuration Search Path</H3>
+
+<P>
+
+The configuration files to be read are found by searching a list
+of configuration directories for appropriately named files.
+In each such directory, the library will look for files named
+ snmp.conf,
+ snmp.local.conf,
+<I>app</I>.conf,
+<I>app</I>.local.conf,
+(where <I>app</I> is the appication-specific filePrefix used to
+register configuration handlers).
+It is not necessary for any or all of these files to be present
+in each directory.  Missing files will be silently skipped.
+<BR>
+
+The idea behind the two different suffixes is that the first file can
+be shared (via rdist or an NFS mount) across a large number of
+machines and the second file can be used to configure local settings
+for one particular machine.
+<P>
+
+The default list of directories to search is
+/usr/local/etc/snmp, followed by /usr/local/share/snmp, followed by /usr/local/lib/snmp,
+followed by $HOME/.snmp.
+This list can be changed by setting the environmental variable
+<I>SNMPCONFPATH</I>
+
+to be a (colon separated) list of directories to search.
+<BR>
+
+<A NAME="lbAN">&nbsp;</A>
+<H3>init_snmp()</H3>
+
+<P>
+
+The normal mode of operation would be to register the application-specific
+configuration handlers, and then invoke
+<B>init_snmp()</B>.
+
+This would call the routines listed above to register the internal library
+configuration handlers, process any configuration tokens registered with
+<B>register_premib_handler(),</B>
+
+read in the textual MIB files using
+<B>init_mib(),</B>
+
+and finally parse the configuration file tokens registered with 
+<B>register_config_handler()</B>.
+
+<P>
+
+If the 
+<B>init_snmp()</B>
+
+function is used, none of these functions need to be explicitly
+called by the application.
+<A NAME="lbAO">&nbsp;</A>
+<H2>HELP STRINGS AND ERRORS</H2>
+
+<P>
+
+The
+<I>usageLine</I>
+
+parameter passed to
+<B>register_config_handler()</B>
+
+and similar calls, is used to display help information when the
+<B>read_config_print_usage()</B>
+
+function is called.  This function is used by all of the applications
+when the 
+<B>-H</B>
+
+flag is passed on the command line.  It prints a summary of all of the
+configuration file lines, and the associated files, that the
+configuration system understands.  The
+<I>usageLine</I>
+
+parameter should be a list of arguments expected after the token, and
+not a lengthy description (which should go into a manual page
+instead).  The
+<I>lead</I>
+
+prefix will be prepended to each line that the function prints to
+stderr, where it displays its output.
+<P>
+
+The
+<B>init_snmp()</B>
+
+function should be called before the
+<B>read_config_print_usage()</B>
+
+function is called, so that the library can register its configuration 
+file directives as well for the 
+<B>read_config_print_usage()</B>
+
+function to display.
+<A NAME="lbAP">&nbsp;</A>
+<H3>Error Handling Functions</H3>
+
+<P>
+
+The two functions
+<B>config_pwarn()</B>
+
+and
+<B>config_perror()</B>
+
+both take an error string as an argument and print it to stderr along
+with the file and line number that caused the error.  A call to the
+second function will also force 
+<B>read_configs() </B>
+
+to eventually return with an error code indicating to it's calling
+function that it should abort the operation of the application.
+<A NAME="lbAQ">&nbsp;</A>
+<H2>ENVIRONMENT VARIABLES</H2>
+
+<DL COMPACT>
+<DT>SNMPCONFPATH<DD>
+A colon separated list of directories to search for configuration
+files in.
+Default: /usr/local/etc/snmp:/usr/local/share/snmp:/usr/local/lib/snmp:$HOME/.snmp
+</DL>
+<A NAME="lbAR">&nbsp;</A>
+<H2>SEE ALSO</H2>
+
+<B><A HREF="http://localhost/cgi-bin/man/man2html?3+mib_api">mib_api</A></B>(3), <B><A HREF="http://localhost/cgi-bin/man/man2html?3+snmp_api">snmp_api</A></B>(3)
+
+
+
+
+<P>
+
+<HR>
+<A NAME="index">&nbsp;</A><H2>Index</H2>
+<DL>
+<DT><A HREF="#lbAB">NAME</A><DD>
+<DT><A HREF="#lbAC">SYNOPSIS</A><DD>
+<DL>
+<DT><A HREF="#lbAD">Application Handlers</A><DD>
+<DT><A HREF="#lbAE">Reading Configuration Files</A><DD>
+<DT><A HREF="#lbAF">Help Strings and Errors</A><DD>
+</DL>
+<DT><A HREF="#lbAG">DESCRIPTION</A><DD>
+<DT><A HREF="#lbAH">REGISTERING A HANDLER</A><DD>
+<DL>
+<DT><A HREF="#lbAI">Token Handlers</A><DD>
+<DT><A HREF="#lbAJ">Freeing Handlers</A><DD>
+<DT><A HREF="#lbAK">Application Handlers</A><DD>
+</DL>
+<DT><A HREF="#lbAL">READING CONFIGURATION FILES</A><DD>
+<DL>
+<DT><A HREF="#lbAM">Configuration Search Path</A><DD>
+<DT><A HREF="#lbAN">init_snmp()</A><DD>
+</DL>
+<DT><A HREF="#lbAO">HELP STRINGS AND ERRORS</A><DD>
+<DL>
+<DT><A HREF="#lbAP">Error Handling Functions</A><DD>
+</DL>
+<DT><A HREF="#lbAQ">ENVIRONMENT VARIABLES</A><DD>
+<DT><A HREF="#lbAR">SEE ALSO</A><DD>
+</DL>
+<HR>
+This document was created by
+<A HREF="http://localhost/cgi-bin/man/man2html">man2html</A>,
+using the manual pages.<BR>
+Time: 19:05:37 GMT, September 28, 2009
+</BODY>
+</HTML>

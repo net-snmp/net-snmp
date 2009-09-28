@@ -1,57 +1,86 @@
-<!--#set var="section" value="documentation" -->
-<!--#include virtual="/page-top.html" -->
-<!-- CONTENT START -->
-    <h1>SNMPGETNEXT</h1>Section: Net-SNMP (1)<br />
-    Updated: 08 Feb 2002<br />
-    <a href="#index">Index</a> <a href="../index.html">Return to Main Contents</a>
-    <hr />
-    <a name="lbAB" id="lbAB">&nbsp;</a>
+Content-type: text/html
 
-    <h2>NAME</h2>snmpgetnext - communicates with a network entity using SNMP GETNEXT requests <a name="lbAC" id="lbAC">&nbsp;</a>
+<HTML><HEAD><TITLE>Manpage of SNMPGETNEXT</TITLE>
+</HEAD><BODY>
+<H1>SNMPGETNEXT</H1>
+Section: Net-SNMP (1)<BR>Updated: 08 Feb 2002<BR><A HREF="#index">Index</A>
+<A HREF="http://localhost/cgi-bin/man/man2html">Return to Main Contents</A><HR>
 
-    <h2>SYNOPSIS</h2><b>snmpgetnext</b> [COMMON OPTIONS] [-Cf] OID [OID]... <a name="lbAD" id="lbAD">&nbsp;</a>
 
-    <h2>DESCRIPTION</h2><b>snmpget</b> is an SNMP application that uses the SNMP GETNEXT request to query for information on a
-    network entity. One or more object identifiers (OIDs) may be given as arguments on the command line. Each variable name is
-    given in the format specified in <i><a href="variables.html">variables</a>(5)</i>. For each one, the variable that is
-    lexicographically "next" in the remote entity's MIB will be returned.
+<A NAME="lbAB">&nbsp;</A>
+<H2>NAME</H2>
 
-    <p>For example:</p>
+snmpgetnext - communicates with a network entity using SNMP GETNEXT requests
+<A NAME="lbAC">&nbsp;</A>
+<H2>SYNOPSIS</H2>
 
-    <p>snmpgetnext -c public zeus interfaces.ifTable.ifEntry.ifType.1</p>
+<B>snmpgetnext</B>
 
-    <p>will retrieve the variable interfaces.ifTable.ifEntry.ifType.2:</p>
+[COMMON OPTIONS] [-Cf] OID [OID]...
+<A NAME="lbAD">&nbsp;</A>
+<H2>DESCRIPTION</H2>
 
-    <p>interfaces.ifTable.ifEntry.ifType.2 = softwareLoopback(24)</p>
+<B>snmpget</B>
 
-    <p>If the network entity has an error processing the request packet, an error message will be shown, helping to pinpoint in
-    what way the request was malformed. <a name="lbAE" id="lbAE">&nbsp;</a></p>
+is an SNMP application that uses the SNMP GETNEXT request to query for
+information on a network entity.  One or more object identifiers
+(OIDs) may be given as arguments on the command line.  Each variable
+name is given in the format specified in
+<I><A HREF="http://localhost/cgi-bin/man/man2html?5+variables">variables</A>(5)</I>.
 
-    <h2>OPTIONS</h2><b>snmpgetnext</b> takes the common options described in the <i><a href="snmpcmd.html">snmpcmd</a>(1)</i>
-    manual page and also the <b>-Cf</b> option described in the <i><a href="snmpget.html">snmpget</a>(1)</i> manual page.
-    <a name="lbAF" id="lbAF">&nbsp;</a>
+For each one, the variable that is lexicographically &quot;next&quot; in the
+remote entity's MIB will be returned.
+<P>
 
-    <h2>SEE ALSO</h2><a href="snmpcmd.html">snmpcmd</a>(1), <a href="snmpget.html">snmpget</a>(1), <a href=
-    "variables.html">variables</a>(5).
-    <hr />
-    <a name="index" id="index">&nbsp;</a>
+For example:
+<P>
 
-    <h2>Index</h2>
+snmpgetnext -c public zeus interfaces.ifTable.ifEntry.ifType.1
+<P>
 
-    <dl>
-      <dt><a href="#lbAB">NAME</a></dt>
+will retrieve the variable interfaces.ifTable.ifEntry.ifType.2:
+<P>
 
-      <dt><a href="#lbAC">SYNOPSIS</a></dt>
+interfaces.ifTable.ifEntry.ifType.2 = softwareLoopback(24)
+<P>
 
-      <dt><a href="#lbAD">DESCRIPTION</a></dt>
+If the network entity has an error processing the request packet, an
+error message will be shown, helping to pinpoint in what way the
+request was malformed.
+<A NAME="lbAE">&nbsp;</A>
+<H2>OPTIONS</H2>
 
-      <dt><a href="#lbAE">OPTIONS</a></dt>
+<B>snmpgetnext</B>
 
-      <dt><a href="#lbAF">SEE ALSO</a></dt>
-    </dl>
-    <hr />
-    This document was created by <a href="http://localhost/cgi-bin/man/man2html">man2html</a>, using the manual pages.<br />
-    Time: 13:12:00 GMT, September 23, 2007
-<!-- CONTENT END -->
-<!--#include virtual="/page-bottom.html" -->
+takes the common options described in the
+<I><A HREF="http://localhost/cgi-bin/man/man2html?1+snmpcmd">snmpcmd</A>(1)</I>
 
+manual page and also the
+<B>-Cf</B>
+
+option described in the
+<I><A HREF="http://localhost/cgi-bin/man/man2html?1+snmpget">snmpget</A>(1)</I>
+
+manual page.
+<A NAME="lbAF">&nbsp;</A>
+<H2>SEE ALSO</H2>
+
+<A HREF="http://localhost/cgi-bin/man/man2html?1+snmpcmd">snmpcmd</A>(1), <A HREF="http://localhost/cgi-bin/man/man2html?1+snmpget">snmpget</A>(1), <A HREF="http://localhost/cgi-bin/man/man2html?5+variables">variables</A>(5).
+<P>
+
+<HR>
+<A NAME="index">&nbsp;</A><H2>Index</H2>
+<DL>
+<DT><A HREF="#lbAB">NAME</A><DD>
+<DT><A HREF="#lbAC">SYNOPSIS</A><DD>
+<DT><A HREF="#lbAD">DESCRIPTION</A><DD>
+<DT><A HREF="#lbAE">OPTIONS</A><DD>
+<DT><A HREF="#lbAF">SEE ALSO</A><DD>
+</DL>
+<HR>
+This document was created by
+<A HREF="http://localhost/cgi-bin/man/man2html">man2html</A>,
+using the manual pages.<BR>
+Time: 19:05:39 GMT, September 28, 2009
+</BODY>
+</HTML>

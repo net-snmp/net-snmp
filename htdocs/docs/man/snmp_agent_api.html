@@ -1,20 +1,23 @@
-<!--#set var="section" value="documentation" -->
-<!--#include virtual="/page-top.html" -->
-<!-- CONTENT START -->
-    <h1>SNMP_AGENT_API</h1>Section: Net-SNMP (3)<br />
-    Updated: 02 Apr 2001<br />
-    <a href="#index">Index</a> <a href="../index.html">Return to Main Contents</a>
-    <hr />
-    <a name="lbAB" id="lbAB">&nbsp;</a>
+Content-type: text/html
 
-    <h2>NAME</h2>snmp_agent_api - embedding an agent into a external application <a name="lbAC" id="lbAC">&nbsp;</a>
+<HTML><HEAD><TITLE>Manpage of SNMP_AGENT_API</TITLE>
+</HEAD><BODY>
+<H1>SNMP_AGENT_API</H1>
+Section: Net-SNMP (3)<BR>Updated: 02 Apr 2001<BR><A HREF="#index">Index</A>
+<A HREF="http://localhost/cgi-bin/man/man2html">Return to Main Contents</A><HR>
 
-    <h2>SYNOPSIS</h2>
-    <pre>
-#include &lt;<a href="file:/usr/include/net-snmp/net-snmp-config.h">net-snmp/net-snmp-config.h</a>&gt;
-#include &lt;<a href="file:/usr/include/net-snmp/net-snmp-includes.h">net-snmp/net-snmp-includes.h</a>&gt;
-#include &lt;<a href=
-"file:/usr/include/net-snmp/agent/net-snmp-agent-includes.h">net-snmp/agent/net-snmp-agent-includes.h</a>&gt;
+
+<A NAME="lbAB">&nbsp;</A>
+<H2>NAME</H2>
+
+snmp_agent_api - embedding an agent into a external application
+<A NAME="lbAC">&nbsp;</A>
+<H2>SYNOPSIS</H2>
+
+<PRE>
+#include &lt;<A HREF="file:/usr/include/net-snmp/net-snmp-config.h">net-snmp/net-snmp-config.h</A>&gt;
+#include &lt;<A HREF="file:/usr/include/net-snmp/net-snmp-includes.h">net-snmp/net-snmp-includes.h</A>&gt;
+#include &lt;<A HREF="file:/usr/include/net-snmp/agent/net-snmp-agent-includes.h">net-snmp/agent/net-snmp-agent-includes.h</A>&gt;
 
 int
 main (int argc, char *argv[])
@@ -30,13 +33,13 @@ main (int argc, char *argv[])
                              NETSNMP_DS_AGENT_ROLE, 1);
   }
 
-  init_agent("yourappname");
+  init_agent(&quot;yourappname&quot;);
 
   /*  Initialize your MIB code here.  */
   init_my_mib_code();
 
   /*  `yourappname' will be used to read yourappname.conf files.  */
-  init_snmp("yourappname");
+  init_snmp(&quot;yourappname&quot;);
 
   /*  If we're going to be a SNMP master agent...  */
   if (!agentx_subagent)
@@ -44,120 +47,146 @@ main (int argc, char *argv[])
 
   /*  Your main loop here...  */
   while (whatever) {
-      /* if you use select(), see <a href="snmp_api.html">snmp_api</a>(3) */
+      /* if you use select(), see <A HREF="http://localhost/cgi-bin/man/man2html?3+snmp_api">snmp_api</A>(3) */
       /*     --- OR ---  */
       agent_check_and_process(0); /* 0 == don't block */
   }
 
   /*  At shutdown time:  */
-  snmp_shutdown("yourappname");
+  snmp_shutdown(&quot;yourappname&quot;);
 }
 
 Then:
 $(CC) ... `net-snmp-config --agent-libs`
 
-</pre><a name="lbAD" id="lbAD">&nbsp;</a>
+</PRE>
 
-    <h2>DESCRIPTION</h2>
+<A NAME="lbAD">&nbsp;</A>
+<H2>DESCRIPTION</H2>
 
-    <p>Our goal is to create a easy to use interface to the Net-SNMP package such that you can take code that you have written
-    that has been designed to be a Net-SNMP MIB module and embed it into an external application where you can either chose to be
-    a SNMP master agent or an AgentX sub-agent using the same MIB module code. Our suggestion is that you use our (or another)
-    SNMP agent as the AgentX master agent and chose to become an AgentX subagent which then attaches to the master.</p>
+<P>
 
-    <p>The Net-SNMP package provides a pair of libraries that enables easy embedding of an SNMP or AgentX agent into an external
-    software package. AgentX is an extensible protocol designed to allow multiple SNMP sub-agents all run on one machine under a
-    single SNMP master agent. It is defined in RFC 2741.</p>
+Our goal is to create a easy to use interface to the Net-SNMP package
+such that you can take code that you have written that has been
+designed to be a Net-SNMP MIB module and embed it into an external
+application where you can either chose to be a SNMP master agent or an
+AgentX sub-agent using the same MIB module code.  Our suggestion is
+that you use our (or another) SNMP agent as the AgentX master agent
+and chose to become an AgentX subagent which then attaches to the
+master.
+<P>
 
-    <p>You will need to perform a few tasks in order to accomplish this. First off, you will need to initialize both the SNMP
-    library and the SNMP agent library. As indicated above, this is done slightly differently depending on whether or not you are
-    going to perform as a master agent or an AgentX sub-agent. <a name="lbAE" id="lbAE">&nbsp;</a></p>
+The Net-SNMP package provides a pair of libraries that enables easy
+embedding of an SNMP or AgentX agent into an external software
+package. AgentX is an extensible protocol designed to allow multiple
+SNMP sub-agents all run on one machine under a single SNMP master
+agent.  It is defined in RFC 2741.
+<P>
 
-    <h2>CONFIGURATION</h2>
+You will need to perform a few tasks in order to accomplish
+this. First off, you will need to initialize both the SNMP library and
+the SNMP agent library. As indicated above, this is done slightly
+differently depending on whether or not you are going to perform as a
+master agent or an AgentX sub-agent.
+<A NAME="lbAE">&nbsp;</A>
+<H2>CONFIGURATION</H2>
 
-    <p>If you intend to operate as an AgentX sub-agent, you will have to configured the Net-SNMP package with agentx support
-    (which is turned on by default, so just don't turn it off)</p>
+<P>
 
-    <p>Additionally, you will need to link against the net-snmp libraries (use the output of "net-snmp-config --agent-libs" to
-    get a library list) and call subagent_pre_init() as indicated above. <a name="lbAF" id="lbAF">&nbsp;</a></p>
+If you intend to operate as an AgentX sub-agent, you will have to
+configured the Net-SNMP package with agentx support (which is turned
+on by default, so just don't turn it off)
+<P>
 
-    <h2>COMPILING</h2>
+Additionally, you will need to link against the net-snmp libraries
+(use the output of &quot;net-snmp-config --agent-libs&quot; to get a library
+list) and call subagent_pre_init() as indicated above.
+<A NAME="lbAF">&nbsp;</A>
+<H2>COMPILING</H2>
 
-    <p>In order to make use of any of the above API, you will need to link against at least the four libraries listed above.
-    <a name="lbAG" id="lbAG">&nbsp;</a></p>
+<P>
 
-    <h2>FUNCTIONS</h2>
+In order to make use of any of the above API, you will need to link
+against at least the four libraries listed above.
+<A NAME="lbAG">&nbsp;</A>
+<H2>FUNCTIONS</H2>
 
-    <p>where to find out more information on them. It is certainly not a complete list of what is available within all the
-    net-snmp libraries.</p>
+<P>
 
-    <dl compact="compact">
-      <dt>snmp_enable_stderrlog()</dt>
+where to find out more information on them.  It is certainly not a
+complete list of what is available within all the net-snmp libraries. 
+<DL COMPACT>
+<DT>snmp_enable_stderrlog()<DD>
+Logs error output from the SNMP agent to the standard error stream.
+<DT>netsnmp_ds_set_boolean()<DD>
+Please see the
+<I><A HREF="http://localhost/cgi-bin/man/man2html?3+default_store">default_store</A>(3)</I>
 
-      <dd>Logs error output from the SNMP agent to the standard error stream.</dd>
+manual page for more information
+about this API.
+<DT>init_agent(char *name)<DD>
+Initializes the embedded agent.  This should be called before the
+<B>init_snmp()</B>
 
-      <dt>netsnmp_ds_set_boolean()</dt>
+call.  
+<I>name</I>
 
-      <dd>Please see the <i><a href="default_store.html">default_store</a>(3)</i> manual page for more information about this
-      API.</dd>
+is used to dictate what .conf file to read when
+<B>init_snmp()</B>
 
-      <dt>init_agent(char *name)</dt>
+is called later.
+<DT>init_snmp(char *name)<DD>
+Initializes the SNMP library.  Note that one of the things this will
+do will be to read configuration files in an effort to configure your
+application. It will attempt to read the configuration files named by
+the
+<I>name</I>
 
-      <dd>Initializes the embedded agent. This should be called before the <b>init_snmp()</b> call. <i>name</i> is used to
-      dictate what .conf file to read when <b>init_snmp()</b> is called later.</dd>
+string that you passed in.  It can be used to configure access
+control, for instance.   Please see the
+<I><A HREF="http://localhost/cgi-bin/man/man2html?3+read_config">read_config</A>(3)</I>, <I><A HREF="http://localhost/cgi-bin/man/man2html?5+snmp_config">snmp_config</A>(5)</I>, and <I><A HREF="http://localhost/cgi-bin/man/man2html?5+snmpd.conf">snmpd.conf</A>(5)</I>
 
-      <dt>init_snmp(char *name)</dt>
+manual pages for further details on this subject.
+<DT>init_master_agent(void)<DD>
+Initializes the master agent and causes it to listen for SNMP requests 
+on its default UDP port of 161.
+<DT>agent_check_and_process(int block)<DD>
+This checks for packets arriving on the SNMP port and processes them
+if some are found.  If 
+<I>block</I>
 
-      <dd>Initializes the SNMP library. Note that one of the things this will do will be to read configuration files in an effort
-      to configure your application. It will attempt to read the configuration files named by the <i>name</i> string that you
-      passed in. It can be used to configure access control, for instance. Please see the <i><a href=
-      "read_config.html">read_config</a>(3)</i>, <i><a href="snmp_config.html">snmp_config</a>(5)</i>, and <i><a href=
-      "snmpd.conf.html">snmpd.conf</a>(5)</i> manual pages for further details on this subject.</dd>
+is non-zero, the function call will block until a packet arrives or an 
+alarm must be run (see
+<I><A HREF="http://localhost/cgi-bin/man/man2html?3+snmp_alarm">snmp_alarm</A>(3)</I>).
 
-      <dt>init_master_agent(void)</dt>
+The return value from this function is a positive integer if packets
+were processed, zero if an alarm occurred and -1 if an error occured.
+<DT>snmp_shutdown(char *name);<DD>
+This shuts down the agent, saving any needed persistent storage, etc.
+</DL>
+<A NAME="lbAH">&nbsp;</A>
+<H2>SEE ALSO</H2>
 
-      <dd>Initializes the master agent and causes it to listen for SNMP requests on its default UDP port of 161.</dd>
+<A HREF="http://www.net-snmp.org/tutorial-5/toolkit/,">http://www.net-snmp.org/tutorial-5/toolkit/,</A> <A HREF="http://localhost/cgi-bin/man/man2html?2+select">select</A>(2), <A HREF="http://localhost/cgi-bin/man/man2html?3+snmp_api">snmp_api</A>(3),
+<A HREF="http://localhost/cgi-bin/man/man2html?3+default_store">default_store</A>(3), <A HREF="http://localhost/cgi-bin/man/man2html?3+snmp_alarm">snmp_alarm</A>(3), <A HREF="http://localhost/cgi-bin/man/man2html?3+read_config">read_config</A>(3), <A HREF="http://localhost/cgi-bin/man/man2html?5+snmp_config">snmp_config</A>(5),
+<A HREF="http://localhost/cgi-bin/man/man2html?5+snmpd.conf">snmpd.conf</A>(5)
+<P>
 
-      <dt>agent_check_and_process(int block)</dt>
-
-      <dd>This checks for packets arriving on the SNMP port and processes them if some are found. If <i>block</i> is non-zero,
-      the function call will block until a packet arrives or an alarm must be run (see <i><a href=
-      "snmp_alarm.html">snmp_alarm</a>(3)</i>). The return value from this function is a positive integer if packets were
-      processed, zero if an alarm occurred and -1 if an error occured.</dd>
-
-      <dt>snmp_shutdown(char *name);</dt>
-
-      <dd>This shuts down the agent, saving any needed persistent storage, etc.</dd>
-    </dl><a name="lbAH" id="lbAH">&nbsp;</a>
-
-    <h2>SEE ALSO</h2><a href="http://www.net-snmp.org/tutorial-5/toolkit/,">http://www.net-snmp.org/tutorial-5/toolkit/,</a>
-    <a href="select.html">select</a>(2), <a href="snmp_api.html">snmp_api</a>(3), <a href=
-    "default_store.html">default_store</a>(3), <a href="snmp_alarm.html">snmp_alarm</a>(3), <a href=
-    "read_config.html">read_config</a>(3), <a href="snmp_config.html">snmp_config</a>(5), <a href=
-    "snmpd.conf.html">snmpd.conf</a>(5)
-    <hr />
-    <a name="index" id="index">&nbsp;</a>
-
-    <h2>Index</h2>
-
-    <dl>
-      <dt><a href="#lbAB">NAME</a></dt>
-
-      <dt><a href="#lbAC">SYNOPSIS</a></dt>
-
-      <dt><a href="#lbAD">DESCRIPTION</a></dt>
-
-      <dt><a href="#lbAE">CONFIGURATION</a></dt>
-
-      <dt><a href="#lbAF">COMPILING</a></dt>
-
-      <dt><a href="#lbAG">FUNCTIONS</a></dt>
-
-      <dt><a href="#lbAH">SEE ALSO</a></dt>
-    </dl>
-    <hr />
-    This document was created by <a href="http://localhost/cgi-bin/man/man2html">man2html</a>, using the manual pages.<br />
-    Time: 13:12:01 GMT, September 23, 2007
-<!-- CONTENT END -->
-<!--#include virtual="/page-bottom.html" -->
-
+<HR>
+<A NAME="index">&nbsp;</A><H2>Index</H2>
+<DL>
+<DT><A HREF="#lbAB">NAME</A><DD>
+<DT><A HREF="#lbAC">SYNOPSIS</A><DD>
+<DT><A HREF="#lbAD">DESCRIPTION</A><DD>
+<DT><A HREF="#lbAE">CONFIGURATION</A><DD>
+<DT><A HREF="#lbAF">COMPILING</A><DD>
+<DT><A HREF="#lbAG">FUNCTIONS</A><DD>
+<DT><A HREF="#lbAH">SEE ALSO</A><DD>
+</DL>
+<HR>
+This document was created by
+<A HREF="http://localhost/cgi-bin/man/man2html">man2html</A>,
+using the manual pages.<BR>
+Time: 19:05:38 GMT, September 28, 2009
+</BODY>
+</HTML>

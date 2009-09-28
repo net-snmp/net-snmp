@@ -1,79 +1,155 @@
-<!--#set var="section" value="documentation" -->
-<!--#include virtual="/page-top.html" -->
-<!-- CONTENT START -->
-    <h1>DEFAULT_STORE</h1>Section: Net-SNMP (3)<br />
-    Updated: 25 Jun 2002<br />
-    <a href="#index">Index</a> <a href="../index.html">Return to Main Contents</a>
-    <hr />
-    <a name="lbAB" id="lbAB">&nbsp;</a>
+Content-type: text/html
 
-    <h2>NAME</h2>default_store - generic storage of global data. <a name="lbAC" id="lbAC">&nbsp;</a>
+<HTML><HEAD><TITLE>Manpage of DEFAULT_STORE</TITLE>
+</HEAD><BODY>
+<H1>DEFAULT_STORE</H1>
+Section: Net-SNMP (3)<BR>Updated: 25 Jun 2002<BR><A HREF="#index">Index</A>
+<A HREF="http://localhost/cgi-bin/man/man2html">Return to Main Contents</A><HR>
 
-    <h2>SYNOPSIS</h2><b>#include &lt;<a href=
-    "file:/usr/include/net-snmp/net-snmp-config.h">net-snmp/net-snmp-config.h</a>&gt;</b><br />
-    <b>#include &lt;<a href="file:/usr/include/net-snmp/config_api.h">net-snmp/config_api.h</a>&gt;</b>
 
-    <p><b>int netsnmp_ds_set_boolean(int</b> <i>store</i><b>, int</b> <i>which</i><b>, int</b> <i>val</i><b>);</b><br />
-    <b>int netsnmp_ds_get_boolean(int</b> <i>store</i><b>, int</b> <i>which</i><b>);</b><br />
-    <b>int netsnmp_ds_set_int(int</b> <i>store</i><b>, int</b> <i>which</i><b>, int</b> <i>val</i><b>);</b><br />
-    <b>int netsnmp_ds_get_int(int</b> <i>store</i><b>, int</b> <i>which</i><b>);</b><br />
-    <b>int netsnmp_ds_set_string(int</b> <i>store</i><b>, int</b> <i>which</i><b>,</b><br />
-    <b>const char *</b><i>val</i><b>);</b><br />
-    <b>char *netsnmp_ds_get_string(int</b> <i>store</i><b>, int</b> <i>which</i><b>);</b><br />
-    <b>int netsnmp_ds_register_config(u_char</b> <i>type</i><b>,</b><br />
-    <b>const char *</b><i>ftype</i><b>,</b><br />
-    <b>const char *</b><i>token</i><b>,</b><br />
-    <b>int</b> <i>store</i><b>, int</b> <i>which</i><b>);</b><br />
-    <b>int netsnmp_ds_register_premib(u_char</b> <i>type</i><b>,</b><br />
-    <b>const char *</b><i>ftype</i><b>,</b><br />
-    <b>const char *</b><i>token</i><b>,</b><br />
-    <b>int</b> <i>store</i><b>, int</b> <i>which</i><b>);</b><br />
-    <b>void netsnmp_ds_shutdown(void);</b> <a name="lbAD" id="lbAD">&nbsp;</a></p>
+<A NAME="lbAB">&nbsp;</A>
+<H2>NAME</H2>
 
-    <h2>DESCRIPTION</h2>The purpose of the default storage is three-fold:
+default_store - generic storage of global data.
+<A NAME="lbAC">&nbsp;</A>
+<H2>SYNOPSIS</H2>
 
-    <dl compact="compact">
-      <dt>1)</dt>
+<B>#include &lt;<A HREF="file:/usr/include/net-snmp/net-snmp-config.h">net-snmp/net-snmp-config.h</A>&gt;</B>
 
-      <dd>To create a global storage space without creating a whole bunch of globally accessible variables or a whole bunch of
-      access functions to work with more privately restricted variables.</dd>
+<BR>
 
-      <dt>2)</dt>
+<B>#include &lt;<A HREF="file:/usr/include/net-snmp/config_api.h">net-snmp/config_api.h</A>&gt;</B>
 
-      <dd>To provide a single location where the thread locking needs to be implemented. At the time of this writing, however,
-      thread locking is not yet in place.</dd>
+<P>
+<B>int netsnmp_ds_set_boolean(int </B><I>store</I><B>, int </B><I>which</I><B>, int </B><I>val</I><B>);</B>
 
-      <dt>3)</dt>
+<BR>
 
-      <dd>To reduce the number of cross dependencies between code pieces that may or may not be linked together in the long run.
-      This provides for a single location in which configuration data, for example, can be stored for a separate section of code
-      that may not be linked in to the application in question.</dd>
-    </dl>
+<B>int netsnmp_ds_get_boolean(int </B><I>store</I><B>, int </B><I>which</I><B>);</B>
 
-    <p>The functions defined here implement these goals.</p>
+<BR>
 
-    <p>Currently, three data types are supported: booleans, integers, and strings. Each of these data types have separate storage
-    spaces. In addition, the storage space for each data type is divided further by the application level. Currently, there are
-    two storage spaces. The first is reserved for the SNMP library itself. The second is intended for use in applications and is
-    not modified or checked by the library, and, therefore, this is the space usable by you.</p>
+<B>int netsnmp_ds_set_int(int </B><I>store</I><B>, int </B><I>which</I><B>, int </B><I>val</I><B>);</B>
 
-    <p>You can think of these storage spaces as being 3 arrays, something like bool_storage[storeid][which],
-    int_storage[storeid][which], and string_storage[storeid][which]. The data is then accessed through the functions defined
-    below. For data you wish to store, you should use a <i>store</i> parameter of <b>NETSNMP_DS_APPLICATION_ID</b>.</p>
+<BR>
 
-    <p>The storage space used by the library (for which the <i>store</i> parameter is <b>NETSNMP_DS_LIBRARY_ID</b>) is defined in
-    the default_store.h file, which currently contains the following defines:</p>
-    <pre>
+<B>int netsnmp_ds_get_int(int </B><I>store</I><B>, int </B><I>which</I><B>);</B>
+
+<BR>
+
+<B>int netsnmp_ds_set_string(int </B><I>store</I><B>, int </B><I>which</I><B>, </B>
+
+<BR>
+
+<B>                          const char *</B><I>val</I><B>);</B>
+
+<BR>
+
+<B>char *netsnmp_ds_get_string(int </B><I>store</I><B>, int </B><I>which</I><B>);</B>
+
+<BR>
+
+<B>int netsnmp_ds_register_config(u_char </B><I>type</I><B>, </B>
+
+<BR>
+
+<B>                               const char *</B><I>ftype</I><B>,</B>
+
+<BR>
+
+<B>                               const char *</B><I>token</I><B>,</B>
+
+<BR>
+
+<B>                               int </B><I>store</I><B>, int </B><I>which</I><B>);</B>
+
+<BR>
+
+<B>int netsnmp_ds_register_premib(u_char </B><I>type</I><B>, </B>
+
+<BR>
+
+<B>                               const char *</B><I>ftype</I><B>,</B>
+
+<BR>
+
+<B>                               const char *</B><I>token</I><B>,</B>
+
+<BR>
+
+<B>                               int </B><I>store</I><B>, int </B><I>which</I><B>);</B>
+
+<BR>
+
+<B>void netsnmp_ds_shutdown(void);</B>
+
+
+<A NAME="lbAD">&nbsp;</A>
+<H2>DESCRIPTION</H2>
+
+The purpose of the default storage is three-fold:
+<DL COMPACT>
+<DT>1)<DD>
+To create a global storage space without creating a whole bunch of
+globally accessible variables or a whole bunch of access functions to
+work with more privately restricted variables.
+<DT>2)<DD>
+To provide a single location where the thread locking needs to be
+implemented. At the time of this writing, however, thread locking is not
+yet in place.
+<DT>3)<DD>
+To reduce the number of cross dependencies between code pieces that
+may or may not be linked together in the long run. This provides for a
+single location in which configuration data, for example, can be
+stored for a separate section of code that may not be linked in to
+the application in question.
+</DL>
+<P>
+
+The functions defined here implement these goals.
+<P>
+
+Currently, three data types are supported: booleans, integers, and
+strings. Each of these data types have separate storage
+spaces. In addition, the storage space for each data type is divided
+further by the application level.   Currently, there are two storage
+spaces. The first is reserved for the SNMP library itself. The second 
+is intended for use in applications and is not modified or checked by
+the library, and, therefore, this is the space usable by you.
+<P>
+
+You can think of these storage spaces as being 3 arrays, something
+like bool_storage[storeid][which], int_storage[storeid][which], and
+string_storage[storeid][which].  The data is then accessed through the 
+functions defined below.  For data you wish to store, you should use a 
+<I>store</I>
+
+parameter of
+<B>NETSNMP_DS_APPLICATION_ID</B>.
+
+<P>
+
+The storage space used by the library (for which the 
+<I>store</I>
+
+parameter is
+<B>NETSNMP_DS_LIBRARY_ID</B>)
+
+is defined in the default_store.h file, which currently contains the 
+following defines: 
+<P>
+
+<PRE>
      */
 /**
- * @def NETSNMP_DS_LIBRARY_ID These definitions correspond with the "storid" argument to the API 
+ * @def NETSNMP_DS_LIBRARY_ID These definitions correspond with the &quot;storid&quot; argument to the API 
  */
 #define NETSNMP_DS_LIBRARY_ID     0
 #define NETSNMP_DS_APPLICATION_ID 1
 #define NETSNMP_DS_TOKEN_ID       2
 
     /*
-     * These definitions correspond with the "which" argument to the API,
+     * These definitions correspond with the &quot;which&quot; argument to the API,
      * when the storeid argument is NETSNMP_DS_LIBRARY_ID 
      */
     /*
@@ -118,23 +194,30 @@
 #define NETSNMP_DS_LIB_DISABLE_PERSISTENT_LOAD  35 /* don't load persistent file */
 #define NETSNMP_DS_LIB_DISABLE_PERSISTENT_SAVE  36 /* don't save persistent file */
 #define NETSNMP_DS_LIB_APPEND_LOGFILES     37 /* append, don't overwrite, log files */
+#define NETSNMP_DS_LIB_NO_DISCOVERY        38 /* don't support RFC5343 contextEngineID discovery */
+#define NETSNMP_DS_LIB_TSM_USE_PREFIX      39 /* TSM's simple security name mapping */
+#define NETSNMP_DS_LIB_ALLOW_SELF_SIGNED   40 /* Certs for DTLS */
 
     /*
      * library integers 
      */
-#define NETSNMP_DS_LIB_MIB_WARNINGS  0
-#define NETSNMP_DS_LIB_SECLEVEL      1
-#define NETSNMP_DS_LIB_SNMPVERSION   2
-#define NETSNMP_DS_LIB_DEFAULT_PORT  3
-#define NETSNMP_DS_LIB_OID_OUTPUT_FORMAT  4
-#define NETSNMP_DS_LIB_PRINT_SUFFIX_ONLY  NETSNMP_DS_LIB_OID_OUTPUT_FORMAT
+#define NETSNMP_DS_LIB_MIB_WARNINGS         0
+#define NETSNMP_DS_LIB_SECLEVEL             1
+#define NETSNMP_DS_LIB_SNMPVERSION          2
+#define NETSNMP_DS_LIB_DEFAULT_PORT         3
+#define NETSNMP_DS_LIB_OID_OUTPUT_FORMAT    4
+#define NETSNMP_DS_LIB_PRINT_SUFFIX_ONLY    NETSNMP_DS_LIB_OID_OUTPUT_FORMAT
 #define NETSNMP_DS_LIB_STRING_OUTPUT_FORMAT 5
-#define NETSNMP_DS_LIB_HEX_OUTPUT_LENGTH 6
-#define NETSNMP_DS_LIB_SERVERSENDBUF   7 /* send buffer (server) */
-#define NETSNMP_DS_LIB_SERVERRECVBUF   8 /* receive buffer (server) */
-#define NETSNMP_DS_LIB_CLIENTSENDBUF   9 /* send buffer (client) */
-#define NETSNMP_DS_LIB_CLIENTRECVBUF  10 /* receive buffer (client) */
-
+#define NETSNMP_DS_LIB_HEX_OUTPUT_LENGTH    6
+#define NETSNMP_DS_LIB_SERVERSENDBUF        7 /* send buffer (server) */
+#define NETSNMP_DS_LIB_SERVERRECVBUF        8 /* receive buffer (server) */
+#define NETSNMP_DS_LIB_CLIENTSENDBUF        9 /* send buffer (client) */
+#define NETSNMP_DS_LIB_CLIENTRECVBUF       10 /* receive buffer (client) */
+#define NETSNMP_DS_SSHDOMAIN_SOCK_PERM     11
+#define NETSNMP_DS_SSHDOMAIN_DIR_PERM      12
+#define NETSNMP_DS_SSHDOMAIN_SOCK_USER     12
+#define NETSNMP_DS_SSHDOMAIN_SOCK_GROUP    13
+    
     /*
      * special meanings for the default SNMP version slot (NETSNMP_DS_LIB_SNMPVERSION) 
      */
@@ -173,112 +256,209 @@
 #define NETSNMP_DS_LIB_APPTYPES          20
 #define NETSNMP_DS_LIB_KSM_KEYTAB        21
 #define NETSNMP_DS_LIB_KSM_SERVICE_NAME  22
+/* for the client */
+#define NETSNMP_DS_LIB_X509_CLIENT_PUB   23
+#define NETSNMP_DS_LIB_X509_CLIENT_PRIV  24
+#define NETSNMP_DS_LIB_X509_SERVER_CERTS 25
+/* for the server */
+#define NETSNMP_DS_LIB_X509_SERVER_PUB   26
+#define NETSNMP_DS_LIB_X509_SERVER_PRIV  27
+#define NETSNMP_DS_LIB_X509_CLIENT_CERTS 28
+#define NETSNMP_DS_LIB_SSHTOSNMP_SOCKET  29
 
     /*
-</pre><a name="lbAE" id="lbAE">&nbsp;</a>
+</PRE>
 
-    <h2>FUNCTIONS</h2>
+<A NAME="lbAE">&nbsp;</A>
+<H2>FUNCTIONS</H2>
 
-    <dl compact="compact">
-      <dt><b>int netsnmp_ds_set_boolean(int</b> <i>store</i><b>, int</b> <i>which</i><b>, int</b> <i>val</i><b>);</b></dt>
+<DL COMPACT>
+<DT><B>int netsnmp_ds_set_boolean(int </B><I>store</I><B>, int </B><I>which</I><B>, int </B><I>val</I><B>);</B>
 
-      <dd>Stores <i>TRUE</i> if <i>val</i> != 0 or else <i>FALSE</i> into the bool_storage[store][which] slot. Returns
-      <b>SNMPERR_GENERR</b> if the <i>store</i> and <i>which</i> parameters do not correspond to a valid slot, or
-      <b>SNMPERR_SUCCESS</b> otherwise.</dd>
+<DD>
+Stores
+<I>TRUE</I>
 
-      <dt><b>int netsnmp_ds_get_boolean(int</b> <i>store</i><b>, int</b> <i>which</i><b>);</b></dt>
+if 
+<I>val</I>
 
-      <dd>Returns 1 if bool_storage[store][which] is <i>TRUE</i> or 0 if not. May also return <b>SNMPERR_GENERR</b> if the
-      <i>store</i> and <i>which</i> parameters do not correspond to a valid slot.</dd>
+!= 0 or else
+<I>FALSE</I>
 
-      <dt><b>int netsnmp_ds_set_string(int</b> <i>store</i><b>, int</b> <i>which</i><b>, const char *</b><i>val</i><b>);</b></dt>
+into the bool_storage[store][which] slot.  Returns
+<B>SNMPERR_GENERR</B>
 
-      <dd>Stores <i>val</i> into the string_storage[store][which] slot. Returns <b>SNMPERR_SUCCESS</b> normally, or
-      <b>SNMPERR_GENERR</b> if the <i>store</i> and <i>which</i> parameters do not correspond to a valid slot.</dd>
+if the
+<I>store</I> and <I>which</I>
 
-      <dt><b>char *netsnmp_ds_get_string(int</b> <i>store</i><b>, int</b> <i>which</i><b>);</b></dt>
+parameters do not correspond to a valid slot, or
+<B>SNMPERR_SUCCESS</B>
 
-      <dd>Returns the string which has been stored in the string_storage[store][which] slot, or <b>NULL</b> if the <i>store</i>
-      and <i>which</i> parameters do not correspond to a valid slot.</dd>
+otherwise.
+<DT><B>int netsnmp_ds_get_boolean(int </B><I>store</I><B>, int </B><I>which</I><B>);</B>
 
-      <dt><b>netsnmp_ds_set_int(int</b> <i>store</i><b>, int</b> <i>which</i><b>, int</b> <i>val</i><b>);</b></dt>
+<DD>
+Returns 1 if bool_storage[store][which] is 
+<I>TRUE</I>
 
-      <dd>Stores <i>val</i> into the int_storage[store][which] slot. Returns <b>SNMPERR_GENERR</b> if the <i>store</i> and
-      <i>which</i> parameters do not correspond to a valid slot, or <b>SNMPERR_SUCCESS</b> otherwise.</dd>
+or 0 if not.  May also return
+<B>SNMPERR_GENERR</B>
 
-      <dt><b>int netsnmp_ds_get_int(int</b> <i>store</i><b>, int</b> <i>which</i><b>);</b></dt>
+if the 
+<I>store</I> and <I>which</I>
 
-      <dd>Returns the integer which has been stored in the int_storage[store][which] slot, or <b>SNMPERR_GENERR</b> if the
-      <i>store</i> and <i>which</i> parameters do not correspond to a valid slot.</dd>
+parameters do not correspond to a valid slot.
+<DT><B>int netsnmp_ds_set_string(int </B><I>store</I><B>, int </B><I>which</I><B>, const char *</B><I>val</I><B>);</B>
 
-      <dt><b>void netsnmp_ds_shutdown(void);</b></dt>
+<DD>
+Stores
+<I>val</I>
 
-      <dd>Reclaims memory used to hold information gathered by <b>netsnmp_ds_register_config</b> and
-      <b>netsnmp_ds_register_premib</b>.</dd>
+into the string_storage[store][which] slot.  Returns
+<B>SNMPERR_SUCCESS</B>
 
-      <dt><b>int netsnmp_ds_register_config(u_char</b> <i>type</i><b>, const char *</b><i>ftype</i><b>, const char
-      *</b><i>token</i><b>, int</b> <i>store</i><b>, int</b> <i>which</i><b>);</b></dt>
+normally, or 
+<B>SNMPERR_GENERR</B>
 
-      <dd>
-        Registers a configuration file directive <i>token</i> and attaches it to a default storage type and slot. Specifically,
-        <i>store</i> and <i>which</i> indicate the storage slot in the data type indicated by <i>type,</i> where <i>type</i> is
-        one of the following constants: <b>ASN_BOOLEAN</b>, <b>ASN_INTEGER</b>, or <b>ASN_OCTET_STR</b>. The <i>ftype</i>
-        variable indicates the file name base string searched for the <i>token</i> keyword. For example, the following call:
+if the 
+<I>store</I> and <I>which</I>
 
-        <dl compact="compact">
-          <dd>
-            <dl compact="compact">
-              <dd>netsnmp_ds_register_config(ASN_INTEGER, "snmp", "testtoken", DS_APPLICATION_ID, 5)</dd>
-            </dl>
-          </dd>
-        </dl>
-      </dd>
+parameters do not correspond to a valid slot.
+<DT><B>char *netsnmp_ds_get_string(int </B><I>store</I><B>, int </B><I>which</I><B>);</B>
 
-      <dd>
-        would indicate that when the snmp.conf file(s) were found and parsed, that any line beginning with the word "testtoken"
-        should be read and the value after "testtoken" should be stored into the int_storage[DS_APPLICATION_ID][5] slot. For
-        example the following line in the configuration file:
+<DD>
+Returns the string which has been stored in the
+string_storage[store][which] slot, or
+<B>NULL</B>
 
-        <dl compact="compact">
-          <dd>
-            <dl compact="compact">
-              <dd>testtoken 502</dd>
-            </dl>
-          </dd>
-        </dl>
-      </dd>
+if the
+<I>store</I> and <I>which</I>
 
-      <dd>would set int_storage[DS_APPLICATION_ID][5] = 502. This function returns <b>SNMPERR_SUCCESS</b> if the registration was
-      made successfully, or <b>SNMPERR_GENERR</b> if the registration was not made (perhaps because the <i>store</i> and
-      <i>which</i> parameters do not correspond to a valid slot, or because of a memory allocation failure).</dd>
+parameters do not correspond to a valid slot.
+<DT><B>netsnmp_ds_set_int(int </B><I>store</I><B>, int </B><I>which</I><B>, int </B><I>val</I><B>);</B>
 
-      <dt><b>int netsnmp_ds_register_premib(u_char</b> <i>type</i><b>, const char *</b><i>ftype</i><b>, const char
-      *</b><i>token</i><b>, int</b> <i>store</i><b>, int</b> <i>which</i><b>);</b></dt>
+<DD>
+Stores
+<I>val</I>
 
-      <dd>Analogous to the preceeding function, but the <i>token</i> is processed before MIBs are read (this is therefore useful
-      for controlling MIB processing options).</dd>
-    </dl><a name="lbAF" id="lbAF">&nbsp;</a>
+into the int_storage[store][which] slot.  Returns
+<B>SNMPERR_GENERR</B>
 
-    <h2>SEE ALSO</h2><b><a href="snmp_config.html">snmp_config</a></b>(5), <b><a href="read_config.html">read_config</a></b>(3)
-    <hr />
-    <a name="index" id="index">&nbsp;</a>
+if the
+<I>store</I> and <I>which</I>
 
-    <h2>Index</h2>
+parameters do not correspond to a valid slot, or
+<B>SNMPERR_SUCCESS</B>
 
-    <dl>
-      <dt><a href="#lbAB">NAME</a></dt>
+otherwise.
+<DT><B>int netsnmp_ds_get_int(int </B><I>store</I><B>, int </B><I>which</I><B>);</B>
 
-      <dt><a href="#lbAC">SYNOPSIS</a></dt>
+<DD>
+Returns the integer which has been stored in the
+int_storage[store][which] slot, or
+<B>SNMPERR_GENERR</B>
 
-      <dt><a href="#lbAD">DESCRIPTION</a></dt>
+if the
+<I>store</I> and <I>which</I>
 
-      <dt><a href="#lbAE">FUNCTIONS</a></dt>
+parameters do not correspond to a valid slot.
+<DT><B>void netsnmp_ds_shutdown(void);</B>
 
-      <dt><a href="#lbAF">SEE ALSO</a></dt>
-    </dl>
-    <hr />
-    This document was created by <a href="http://localhost/cgi-bin/man/man2html">man2html</a>, using the manual pages.<br />
-    Time: 13:12:01 GMT, September 23, 2007
-<!-- CONTENT END -->
-<!--#include virtual="/page-bottom.html" -->
+<DD>
+Reclaims memory used to hold information gathered by
+<B>netsnmp_ds_register_config</B> and <B>netsnmp_ds_register_premib</B>.
 
+<DT><B>int netsnmp_ds_register_config(u_char </B><I>type</I><B>, const char *</B><I>ftype</I><B>, const char *</B><I>token</I><B>, int </B><I>store</I><B>, int </B><I>which</I><B>);</B>
+
+<DD>
+Registers a configuration file directive 
+<I>token</I>
+
+and attaches it to 
+a default storage type and slot.  Specifically,
+<I>store</I>
+
+and
+<I>which</I>
+
+indicate the storage slot in the data type indicated by
+<I>type,</I>
+
+where
+<I>type</I>
+
+is one of the following constants:
+<B>ASN_BOOLEAN</B>, <B>ASN_INTEGER</B>, or <B>ASN_OCTET_STR</B>.
+
+The
+<I>ftype</I>
+
+variable indicates the file name base string searched for the
+<I>token</I>
+
+keyword.  For example, the following call:
+<DL COMPACT><DT><DD>
+<DL COMPACT>
+<DT><DD>
+netsnmp_ds_register_config(ASN_INTEGER, &quot;snmp&quot;, &quot;testtoken&quot;, DS_APPLICATION_ID, 5)
+</DL>
+</DL>
+
+<DT><DD>
+would indicate that when the snmp.conf file(s) were found and parsed,
+that any line beginning with the word &quot;testtoken&quot; should be read and
+the value after &quot;testtoken&quot; should be stored into the
+int_storage[DS_APPLICATION_ID][5] slot.  For example the following
+line in the configuration file:
+<DL COMPACT><DT><DD>
+<DL COMPACT>
+<DT><DD>
+testtoken 502
+</DL>
+</DL>
+
+<DT><DD>
+would set int_storage[DS_APPLICATION_ID][5] = 502.  This function returns
+<B>SNMPERR_SUCCESS</B>
+
+if the registration was made successfully, or 
+<B>SNMPERR_GENERR</B>
+
+if the registration was not made (perhaps because the
+<I>store</I> and <I>which</I>
+
+parameters do not correspond to a valid slot, or because of a memory
+allocation failure).
+<DT><B>int netsnmp_ds_register_premib(u_char </B><I>type</I><B>, const char *</B><I>ftype</I><B>, const char *</B><I>token</I><B>, int </B><I>store</I><B>, int </B><I>which</I><B>);</B>
+
+<DD>
+Analogous to the preceeding function, but the
+<I>token</I>
+
+is processed before MIBs are read (this is therefore useful for controlling
+MIB processing options).
+</DL>
+<A NAME="lbAF">&nbsp;</A>
+<H2>SEE ALSO</H2>
+
+<B><A HREF="http://localhost/cgi-bin/man/man2html?5+snmp_config">snmp_config</A></B>(5), <B><A HREF="http://localhost/cgi-bin/man/man2html?3+read_config">read_config</A></B>(3)
+
+<P>
+<P>
+
+<HR>
+<A NAME="index">&nbsp;</A><H2>Index</H2>
+<DL>
+<DT><A HREF="#lbAB">NAME</A><DD>
+<DT><A HREF="#lbAC">SYNOPSIS</A><DD>
+<DT><A HREF="#lbAD">DESCRIPTION</A><DD>
+<DT><A HREF="#lbAE">FUNCTIONS</A><DD>
+<DT><A HREF="#lbAF">SEE ALSO</A><DD>
+</DL>
+<HR>
+This document was created by
+<A HREF="http://localhost/cgi-bin/man/man2html">man2html</A>,
+using the manual pages.<BR>
+Time: 19:05:37 GMT, September 28, 2009
+</BODY>
+</HTML>

@@ -1,192 +1,222 @@
-<!--#set var="section" value="documentation" -->
-<!--#include virtual="/page-top.html" -->
-<!-- CONTENT START -->
-    <h1>row_merge</h1>Section: net-snmp (3)<br />
-    Updated: 27 Jul 2007<br />
-    <a href="#index">Index</a> <a href="../index.html">Return to Main Contents</a>
-    <hr />
-    <a name="lbAB" id="lbAB">&nbsp;</a>
+Content-type: text/html
 
-    <h2>NAME</h2>row_merge - Calls sub handlers with request for one row at a time.
+<HTML><HEAD><TITLE>Manpage of row_merge</TITLE>
+</HEAD><BODY>
+<H1>row_merge</H1>
+Section: net-snmp (3)<BR>Updated: 23 Sep 2009<BR><A HREF="#index">Index</A>
+<A HREF="http://localhost/cgi-bin/man/man2html">Return to Main Contents</A><HR>
 
-    <p><a name="lbAC" id="lbAC">&nbsp;</a></p>
 
-    <h3>Defines</h3>
 
-    <p><br />
-    #define <b>ROW_MERGE_WAITING</b> 0<br />
-    <br />
-    #define <b>ROW_MERGE_ACTIVE</b> 1<br />
-    <br />
-    #define <b>ROW_MERGE_DONE</b> 2<br />
-    <br />
-    #define <b>ROW_MERGE_HEAD</b> 3<br />
-    <a name="lbAD" id="lbAD">&nbsp;</a></p>
+<A NAME="lbAB">&nbsp;</A>
+<H2>NAME</H2>
 
-    <h3>Functions</h3>
+row_merge - 
+<P>
 
-    <p><br />
-    <b>netsnmp_mib_handler</b> * <b>netsnmp_get_row_merge_handler</b> (int prefix_len)<br />
-    <i>returns a row_merge handler that can be injected into a given handler chain.</i><br />
-    int <b>netsnmp_register_row_merge</b> (<b>netsnmp_handler_registration</b> *reginfo)<br />
-    <i>functionally the same as calling</i> <b>netsnmp_register_handler()</b> but also injects a row_merge handler at the same
-    time for you.<br />
-    <b>netsnmp_row_merge_status</b> * <b>netsnmp_row_merge_status_get</b> (<b>netsnmp_handler_registration</b> *reginfo,
-    <b>netsnmp_agent_request_info</b> *reqinfo, int create_missing)<br />
-    <i>retrieve row_merge_status</i><br />
-    int <b>netsnmp_row_merge_status_first</b> (<b>netsnmp_handler_registration</b> *reginfo, <b>netsnmp_agent_request_info</b>
-    *reqinfo)<br />
-    <i>Determine if this is the first row.</i><br />
-    int <b>netsnmp_row_merge_status_last</b> (<b>netsnmp_handler_registration</b> *reginfo, <b>netsnmp_agent_request_info</b>
-    *reqinfo)<br />
-    <i>Determine if this is the last row.</i><br />
-    int <b>netsnmp_row_merge_helper_handler</b> (<b>netsnmp_mib_handler</b> *handler, <b>netsnmp_handler_registration</b>
-    *reginfo, <b>netsnmp_agent_request_info</b> *reqinfo, <b>netsnmp_request_info</b> *requests)<br />
-    <i>Implements the row_merge handler.</i><br />
-    void <b>netsnmp_init_row_merge</b> (void)<br />
-    <i>initializes the row_merge helper which then registers a row_merge handler as a run-time injectable handler for
-    configuration file use.</i> <a name="lbAE" id="lbAE">&nbsp;</a></p>
+Calls sub handlers with request for one row at a time.  
+<P>
+<A NAME="lbAC">&nbsp;</A>
+<H3>Defines</H3>
 
-    <h2>Detailed Description</h2>
+<P>
 
-    <p>Calls sub handlers with request for one row at a time.</p>
+<BR>
 
-    <p>This helper splits a whole bunch of requests into chunks based on the row index that they refer to, and passes all
-    requests for a given row to the lower handlers. This is useful for handlers that don't want to process multiple rows at the
-    same time, but are happy to iterate through the request list for a single row. <a name="lbAF" id="lbAF">&nbsp;</a></p>
+#define <B>ROW_MERGE_WAITING</B>   0
 
-    <h2>Function Documentation</h2>
+<BR>
 
-    <p><a name="lbAG" id="lbAG">&nbsp;</a></p>
+<BR>
 
-    <h3><b>netsnmp_mib_handler</b>* netsnmp_get_row_merge_handler (int prefix_len)</h3>
+#define <B>ROW_MERGE_ACTIVE</B>   1
 
-    <p>returns a row_merge handler that can be injected into a given handler chain.</p>
+<BR>
 
-    <p>Definition at line 28 of file row_merge.c.</p>
+<BR>
 
-    <p>References netsnmp_mib_handler_s::myvoid, netsnmp_create_handler(), netsnmp_row_merge_helper_handler(), and NULL.</p>
+#define <B>ROW_MERGE_DONE</B>   2
 
-    <p>Referenced by netsnmp_init_row_merge(), and netsnmp_register_row_merge(). <a name="lbAH" id="lbAH">&nbsp;</a></p>
+<BR>
 
-    <h3>void netsnmp_init_row_merge (void)</h3>
+<BR>
 
-    <p>initializes the row_merge helper which then registers a row_merge handler as a run-time injectable handler for
-    configuration file use.</p>
+#define <B>ROW_MERGE_HEAD</B>   3
 
-    <p>Definition at line 360 of file row_merge.c.</p>
+<BR>
 
-    <p>References netsnmp_get_row_merge_handler(), and netsnmp_register_handler_by_name(). <a name="lbAI" id=
-    "lbAI">&nbsp;</a></p>
 
-    <h3>int netsnmp_register_row_merge (<b>netsnmp_handler_registration</b> * reginfo)</h3>
+<A NAME="lbAD">&nbsp;</A>
+<H3>Functions</H3>
 
-    <p>functionally the same as calling <b>netsnmp_register_handler()</b> but also injects a row_merge handler at the same time
-    for you.</p>
+<P>
 
-    <p>Definition at line 42 of file row_merge.c.</p>
+<BR>
 
-    <p>References netsnmp_get_row_merge_handler(), netsnmp_inject_handler(), netsnmp_register_handler(), and
-    netsnmp_handler_registration_s::rootoid_len. <a name="lbAJ" id="lbAJ">&nbsp;</a></p>
+<B>netsnmp_mib_handler</B> * <B>netsnmp_get_row_merge_handler</B> (int prefix_len)
 
-    <h3>int netsnmp_row_merge_helper_handler (<b>netsnmp_mib_handler</b> * handler, <b>netsnmp_handler_registration</b> *
-    reginfo, <b>netsnmp_agent_request_info</b> * reqinfo, <b>netsnmp_request_info</b> * requests)</h3>
+<BR>
 
-    <p>Implements the row_merge handler.</p>
+<I>returns a row_merge handler that can be injected into a given handler chain. </I>
 
-    <p>Definition at line 154 of file row_merge.c.</p>
+<BR>
 
-    <p>References netsnmp_row_merge_status_x::count, netsnmp_agent_request_info_s::mode, netsnmp_mib_handler_s::myvoid,
-    variable_list::name, variable_list::name_length, netsnmp_call_next_handler(), netsnmp_row_merge_status_get(),
-    netsnmp_request_info_s::next, NULL, netsnmp_request_info_s::prev, netsnmp_request_info_s::processed,
-    netsnmp_request_info_s::requestvb, netsnmp_handler_registration_s::rootoid, netsnmp_handler_registration_s::rootoid_len,
-    ROW_MERGE_DONE, ROW_MERGE_WAITING, netsnmp_row_merge_status_x::rows, netsnmp_row_merge_status_x::saved_requests,
-    netsnmp_row_merge_status_x::saved_status, and SNMP_FREE.</p>
+int <B>netsnmp_register_row_merge</B> (<B>netsnmp_handler_registration</B> *reginfo)
 
-    <p>Referenced by netsnmp_get_row_merge_handler(). <a name="lbAK" id="lbAK">&nbsp;</a></p>
+<BR>
 
-    <h3>int netsnmp_row_merge_status_first (<b>netsnmp_handler_registration</b> * reginfo, <b>netsnmp_agent_request_info</b> *
-    reqinfo)</h3>
+<I>functionally the same as calling </I><B>netsnmp_register_handler()</B> but also injects a row_merge handler at the same time for you. 
 
-    <p>Determine if this is the first row.</p>
+<BR>
 
-    <p>returns 1 if this is the first row for this pass of the handler.</p>
+<B>netsnmp_row_merge_status</B> * <B>netsnmp_row_merge_status_get</B> (<B>netsnmp_handler_registration</B> *reginfo, <B>netsnmp_agent_request_info</B> *reqinfo, int create_missing)
 
-    <p>Definition at line 110 of file row_merge.c.</p>
+<BR>
 
-    <p>References netsnmp_row_merge_status_x::count, netsnmp_row_merge_status_x::current, netsnmp_row_merge_status_get(), and
-    NULL. <a name="lbAL" id="lbAL">&nbsp;</a></p>
+<I>retrieve row_merge_status </I>
 
-    <h3><b>netsnmp_row_merge_status</b>* netsnmp_row_merge_status_get (<b>netsnmp_handler_registration</b> * reginfo,
-    <b>netsnmp_agent_request_info</b> * reqinfo, int create_missing)</h3>
+<BR>
 
-    <p>retrieve row_merge_status</p>
+int <B>netsnmp_row_merge_status_first</B> (<B>netsnmp_handler_registration</B> *reginfo, <B>netsnmp_agent_request_info</B> *reqinfo)
 
-    <p>Definition at line 67 of file row_merge.c.</p>
+<BR>
 
-    <p>References netsnmp_agent_add_list_data(), netsnmp_agent_get_list_data(), netsnmp_create_data_list(), NULL, snmp_log(), and
-    SNMP_MALLOC_TYPEDEF.</p>
+<I>Determine if this is the first row. </I>
 
-    <p>Referenced by netsnmp_row_merge_helper_handler(), netsnmp_row_merge_status_first(), and netsnmp_row_merge_status_last().
-    <a name="lbAM" id="lbAM">&nbsp;</a></p>
+<BR>
 
-    <h3>int netsnmp_row_merge_status_last (<b>netsnmp_handler_registration</b> * reginfo, <b>netsnmp_agent_request_info</b> *
-    reqinfo)</h3>
+int <B>netsnmp_row_merge_status_last</B> (<B>netsnmp_handler_registration</B> *reginfo, <B>netsnmp_agent_request_info</B> *reqinfo)
 
-    <p>Determine if this is the last row.</p>
+<BR>
 
-    <p>returns 1 if this is the last row for this pass of the handler.</p>
+<I>Determine if this is the last row. </I>
 
-    <p>Definition at line 130 of file row_merge.c.</p>
+<BR>
 
-    <p>References netsnmp_row_merge_status_x::count, netsnmp_row_merge_status_x::current, netsnmp_row_merge_status_get(), NULL,
-    and netsnmp_row_merge_status_x::rows.</p>
-    <hr />
-    <a name="index" id="index">&nbsp;</a>
+int <B>netsnmp_row_merge_helper_handler</B> (<B>netsnmp_mib_handler</B> *handler, <B>netsnmp_handler_registration</B> *reginfo, <B>netsnmp_agent_request_info</B> *reqinfo, <B>netsnmp_request_info</B> *requests)
 
-    <h2>Index</h2>
+<BR>
 
-    <dl>
-      <dt><a href="#lbAB">NAME</a></dt>
+<I>Implements the row_merge handler. </I>
 
-      <dd>
-        <dl>
-          <dt><a href="#lbAC">Defines</a></dt>
+<BR>
 
-          <dt><a href="#lbAD">Functions</a></dt>
-        </dl>
-      </dd>
+void <B>netsnmp_init_row_merge</B> (void)
 
-      <dt><a href="#lbAE">Detailed Description</a></dt>
+<BR>
 
-      <dt><a href="#lbAF">Function Documentation</a></dt>
+<I>initializes the row_merge helper which then registers a row_merge handler as a run-time injectable handler for configuration file use. </I>
 
-      <dd>
-        <dl>
-          <dt><a href="#lbAG"><b>netsnmp_mib_handler</b>* netsnmp_get_row_merge_handler (int prefix_len)</a></dt>
 
-          <dt><a href="#lbAH">void netsnmp_init_row_merge (void)</a></dt>
+<A NAME="lbAE">&nbsp;</A>
+<H2>Detailed Description</H2>
 
-          <dt><a href="#lbAI">int netsnmp_register_row_merge (<b>netsnmp_handler_registration</b> * reginfo)</a></dt>
+<P>
 
-          <dt><a href="#lbAJ">int netsnmp_row_merge_helper_handler (<b>netsnmp_mib_handler</b> * handler,
-          <b>netsnmp_handler_registration</b> * reginfo, <b>netsnmp_agent_request_info</b> * reqinfo, <b>netsnmp_request_info</b>
-          * requests)</a></dt>
+Calls sub handlers with request for one row at a time. 
+<P>
+This helper splits a whole bunch of requests into chunks based on the row index that they refer to, and passes all requests for a given row to the lower handlers. This is useful for handlers that don't want to process multiple rows at the same time, but are happy to iterate through the request list for a single row. 
+<A NAME="lbAF">&nbsp;</A>
+<H2>Function Documentation</H2>
 
-          <dt><a href="#lbAK">int netsnmp_row_merge_status_first (<b>netsnmp_handler_registration</b> * reginfo,
-          <b>netsnmp_agent_request_info</b> * reqinfo)</a></dt>
+<P>
 
-          <dt><a href="#lbAL"><b>netsnmp_row_merge_status</b>* netsnmp_row_merge_status_get (<b>netsnmp_handler_registration</b>
-          * reginfo, <b>netsnmp_agent_request_info</b> * reqinfo, int create_missing)</a></dt>
+<A NAME="lbAG">&nbsp;</A>
+<H3><B>netsnmp_mib_handler</B>* netsnmp_get_row_merge_handler (int prefix_len)</H3>
 
-          <dt><a href="#lbAM">int netsnmp_row_merge_status_last (<b>netsnmp_handler_registration</b> * reginfo,
-          <b>netsnmp_agent_request_info</b> * reqinfo)</a></dt>
-        </dl>
-      </dd>
-    </dl>
-    <hr />
-    This document was created by <a href="http://localhost/cgi-bin/man/man2html">man2html</a>, using the manual pages.<br />
-    Time: 13:12:01 GMT, September 23, 2007
-<!-- CONTENT END -->
-<!--#include virtual="/page-bottom.html" -->
+<P>
 
+returns a row_merge handler that can be injected into a given handler chain. 
+<P>
+
+Definition at line 28 of file row_merge.c.
+<A NAME="lbAH">&nbsp;</A>
+<H3>void netsnmp_init_row_merge (void)</H3>
+
+<P>
+
+initializes the row_merge helper which then registers a row_merge handler as a run-time injectable handler for configuration file use. 
+<P>
+
+Definition at line 360 of file row_merge.c.
+<A NAME="lbAI">&nbsp;</A>
+<H3>int netsnmp_register_row_merge (<B>netsnmp_handler_registration</B> * reginfo)</H3>
+
+<P>
+
+functionally the same as calling <B>netsnmp_register_handler()</B> but also injects a row_merge handler at the same time for you. 
+<P>
+
+Definition at line 42 of file row_merge.c.
+<A NAME="lbAJ">&nbsp;</A>
+<H3>int netsnmp_row_merge_helper_handler (<B>netsnmp_mib_handler</B> * handler, <B>netsnmp_handler_registration</B> * reginfo, <B>netsnmp_agent_request_info</B> * reqinfo, <B>netsnmp_request_info</B> * requests)</H3>
+
+<P>
+
+Implements the row_merge handler. 
+<P>
+
+Definition at line 154 of file row_merge.c.
+<A NAME="lbAK">&nbsp;</A>
+<H3>int netsnmp_row_merge_status_first (<B>netsnmp_handler_registration</B> * reginfo, <B>netsnmp_agent_request_info</B> * reqinfo)</H3>
+
+<P>
+
+Determine if this is the first row. returns 1 if this is the first row for this pass of the handler. 
+<P>
+
+Definition at line 110 of file row_merge.c.
+<A NAME="lbAL">&nbsp;</A>
+<H3><B>netsnmp_row_merge_status</B>* netsnmp_row_merge_status_get (<B>netsnmp_handler_registration</B> * reginfo, <B>netsnmp_agent_request_info</B> * reqinfo, int create_missing)</H3>
+
+<P>
+
+retrieve row_merge_status 
+<P>
+
+Definition at line 67 of file row_merge.c.
+<A NAME="lbAM">&nbsp;</A>
+<H3>int netsnmp_row_merge_status_last (<B>netsnmp_handler_registration</B> * reginfo, <B>netsnmp_agent_request_info</B> * reqinfo)</H3>
+
+<P>
+
+Determine if this is the last row. returns 1 if this is the last row for this pass of the handler. 
+<P>
+
+Definition at line 130 of file row_merge.c.
+<A NAME="lbAN">&nbsp;</A>
+<H2>Author</H2>
+
+<P>
+
+Generated automatically by Doxygen for net-snmp from the source code.
+<P>
+
+<HR>
+<A NAME="index">&nbsp;</A><H2>Index</H2>
+<DL>
+<DT><A HREF="#lbAB">NAME</A><DD>
+<DL>
+<DT><A HREF="#lbAC">Defines</A><DD>
+<DT><A HREF="#lbAD">Functions</A><DD>
+</DL>
+<DT><A HREF="#lbAE">Detailed Description</A><DD>
+<DT><A HREF="#lbAF">Function Documentation</A><DD>
+<DL>
+<DT><A HREF="#lbAG"><B>netsnmp_mib_handler</B>* netsnmp_get_row_merge_handler (int prefix_len)</A><DD>
+<DT><A HREF="#lbAH">void netsnmp_init_row_merge (void)</A><DD>
+<DT><A HREF="#lbAI">int netsnmp_register_row_merge (<B>netsnmp_handler_registration</B> * reginfo)</A><DD>
+<DT><A HREF="#lbAJ">int netsnmp_row_merge_helper_handler (<B>netsnmp_mib_handler</B> * handler, <B>netsnmp_handler_registration</B> * reginfo, <B>netsnmp_agent_request_info</B> * reqinfo, <B>netsnmp_request_info</B> * requests)</A><DD>
+<DT><A HREF="#lbAK">int netsnmp_row_merge_status_first (<B>netsnmp_handler_registration</B> * reginfo, <B>netsnmp_agent_request_info</B> * reqinfo)</A><DD>
+<DT><A HREF="#lbAL"><B>netsnmp_row_merge_status</B>* netsnmp_row_merge_status_get (<B>netsnmp_handler_registration</B> * reginfo, <B>netsnmp_agent_request_info</B> * reqinfo, int create_missing)</A><DD>
+<DT><A HREF="#lbAM">int netsnmp_row_merge_status_last (<B>netsnmp_handler_registration</B> * reginfo, <B>netsnmp_agent_request_info</B> * reqinfo)</A><DD>
+</DL>
+<DT><A HREF="#lbAN">Author</A><DD>
+</DL>
+<HR>
+This document was created by
+<A HREF="http://localhost/cgi-bin/man/man2html">man2html</A>,
+using the manual pages.<BR>
+Time: 19:05:38 GMT, September 28, 2009
+</BODY>
+</HTML>

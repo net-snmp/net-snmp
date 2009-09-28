@@ -1,81 +1,123 @@
-<!--#set var="section" value="documentation" -->
-<!--#include virtual="/page-top.html" -->
-<!-- CONTENT START -->
-    <h1>SNMPBULKGET</h1>Section: Net-SNMP (1)<br />
-    Updated: 08 Feb 2002<br />
-    <a href="#index">Index</a> <a href="../index.html">Return to Main Contents</a>
-    <hr />
-    <a name="lbAB" id="lbAB">&nbsp;</a>
+Content-type: text/html
 
-    <h2>NAME</h2>snmpbulkget - communicates with a network entity using SNMP GETBULK requests. <a name="lbAC" id=
-    "lbAC">&nbsp;</a>
+<HTML><HEAD><TITLE>Manpage of SNMPBULKGET</TITLE>
+</HEAD><BODY>
+<H1>SNMPBULKGET</H1>
+Section: Net-SNMP (1)<BR>Updated: 08 Feb 2002<BR><A HREF="#index">Index</A>
+<A HREF="http://localhost/cgi-bin/man/man2html">Return to Main Contents</A><HR>
 
-    <h2>SYNOPSIS</h2><b>snmpbulkget</b> [APPLICATION OPTIONS] [COMMON OPTIONS] OID [OID]... <a name="lbAD" id="lbAD">&nbsp;</a>
 
-    <h2>DESCRIPTION</h2><b>snmpbulkget</b> is an SNMP application that uses the SNMP GETBULK request to query a network entity
-    efficiently for information. One or more object identifiers (OIDs) may be given as arguments on the command line. Each
-    variable name is given in the format specified in <i><a href="variables.html">variables</a>(5)</i>.
+<A NAME="lbAB">&nbsp;</A>
+<H2>NAME</H2>
 
-    <p>If the network entity has an error processing the request packet, an error packet will be returned and a message will be
-    shown, helping to pinpoint why the request was malformed. <a name="lbAE" id="lbAE">&nbsp;</a></p>
+snmpbulkget - communicates with a network entity using SNMP GETBULK requests.
+<A NAME="lbAC">&nbsp;</A>
+<H2>SYNOPSIS</H2>
 
-    <h2>OPTIONS</h2>
+<B>snmpbulkget</B>
 
-    <dl compact="compact">
-      <dt><b>-Cn</b><i>&lt;NUM&gt;</i></dt>
+[APPLICATION OPTIONS] [COMMON OPTIONS] OID [OID]...
+<A NAME="lbAD">&nbsp;</A>
+<H2>DESCRIPTION</H2>
 
-      <dd>Set the <i>non-repeaters</i> field in the GETBULK PDU. This specifies the number of supplied variables that should not
-      be iterated over. The default is 0.</dd>
+<B>snmpbulkget</B>
 
-      <dt><b>-Cr</b><i>&lt;NUM&gt;</i></dt>
+is an SNMP application that uses the SNMP GETBULK request to query a
+network entity efficiently for information.  One or more object
+identifiers (OIDs) may be given as arguments on the command line.
+Each variable name is given in the format specified in
+<I><A HREF="http://localhost/cgi-bin/man/man2html?5+variables">variables</A>(5)</I>.
 
-      <dd>Set the <i>max-repetitions</i> field in the GETBULK PDU. This specifies the maximum number of iterations over the
-      repeating variables. The default is 10.</dd>
-    </dl>
+<P>
 
-    <p>In addition to these options, <b>snmpbulkget</b> takes the common options described in the <i><a href=
-    "snmpcmd.html">snmpcmd</a>(1)</i> manual page. <a name="lbAF" id="lbAF">&nbsp;</a></p>
+If the network entity has an error processing the request packet, an
+error packet will be returned and a message will be shown, helping to
+pinpoint why the request was malformed.
+<A NAME="lbAE">&nbsp;</A>
+<H2>OPTIONS</H2>
 
-    <h2>EXAMPLE</h2>The command:
+<DL COMPACT>
+<DT><B>-Cn</B><I>&lt;NUM&gt;</I>
 
-    <p>snmpbulkget -v2c -Cn1 -Cr5 -Os -c public zeus system ifTable</p>
+<DD>
+Set the
+<I>non-repeaters</I>
 
-    <p>will retrieve the variable system.sysDescr.0 (which is the lexicographically next object to system) and the first 5
-    objects in the ifTable:</p>
+field in the GETBULK PDU.  This specifies the number of supplied
+variables that should not be iterated over.  The default is 0.
+<DT><B>-Cr</B><I>&lt;NUM&gt;</I>
 
-    <p>sysDescr.0 = STRING: "SunOS zeus.net.cmu.edu 4.1.3_U1 1 sun4m"<br />
-    ifIndex.1 = INTEGER: 1<br />
-    ifIndex.2 = INTEGER: 2<br />
-    ifDescr.1 = STRING: "lo0"<br />
-    et cetera. <a name="lbAG" id="lbAG">&nbsp;</a></p>
+<DD>
+Set the
+<I>max-repetitions</I>
 
-    <h2>NOTE</h2>As the name implies, <b>snmpbulkget</b> utilizes the SNMP GETBULK message, which is not available in SNMPv1.
-    <a name="lbAH" id="lbAH">&nbsp;</a>
+field in the GETBULK PDU.  This specifies the maximum number of
+iterations over the repeating variables.  The default is 10.
+</DL>
+<P>
 
-    <h2>SEE ALSO</h2><a href="snmpcmd.html">snmpcmd</a>(1), <a href="variables.html">variables</a>(5), RFC 1905.
-    <hr />
-    <a name="index" id="index">&nbsp;</a>
+In addition to these options,
+<B>snmpbulkget</B>
 
-    <h2>Index</h2>
+takes the common options described in the 
+<I><A HREF="http://localhost/cgi-bin/man/man2html?1+snmpcmd">snmpcmd</A>(1)</I>
 
-    <dl>
-      <dt><a href="#lbAB">NAME</a></dt>
+manual page.
+<A NAME="lbAF">&nbsp;</A>
+<H2>EXAMPLE</H2>
 
-      <dt><a href="#lbAC">SYNOPSIS</a></dt>
+The command:
+<P>
 
-      <dt><a href="#lbAD">DESCRIPTION</a></dt>
+snmpbulkget -v2c -Cn1 -Cr5 -Os -c public zeus system ifTable
+<P>
 
-      <dt><a href="#lbAE">OPTIONS</a></dt>
+will retrieve the variable system.sysDescr.0 (which is the
+lexicographically next object to system) and the first 5 objects in
+the ifTable:
+<P>
 
-      <dt><a href="#lbAF">EXAMPLE</a></dt>
+sysDescr.0 = STRING: &quot;SunOS zeus.net.cmu.edu 4.1.3_U1 1 sun4m&quot;
+<BR>
 
-      <dt><a href="#lbAG">NOTE</a></dt>
+ifIndex.1 = INTEGER: 1
+<BR>
 
-      <dt><a href="#lbAH">SEE ALSO</a></dt>
-    </dl>
-    <hr />
-    This document was created by <a href="http://localhost/cgi-bin/man/man2html">man2html</a>, using the manual pages.<br />
-    Time: 13:12:00 GMT, September 23, 2007
-<!-- CONTENT END -->
-<!--#include virtual="/page-bottom.html" -->
+ifIndex.2 = INTEGER: 2
+<BR>
 
+ifDescr.1 = STRING: &quot;lo0&quot;
+<BR>
+
+et cetera.
+<A NAME="lbAG">&nbsp;</A>
+<H2>NOTE</H2>
+
+As the name implies,
+<B>snmpbulkget</B>
+
+utilizes the SNMP GETBULK message, which is not available in SNMPv1.
+<A NAME="lbAH">&nbsp;</A>
+<H2>SEE ALSO</H2>
+
+<A HREF="http://localhost/cgi-bin/man/man2html?1+snmpcmd">snmpcmd</A>(1), <A HREF="http://localhost/cgi-bin/man/man2html?5+variables">variables</A>(5), RFC 1905.
+<P>
+
+<HR>
+<A NAME="index">&nbsp;</A><H2>Index</H2>
+<DL>
+<DT><A HREF="#lbAB">NAME</A><DD>
+<DT><A HREF="#lbAC">SYNOPSIS</A><DD>
+<DT><A HREF="#lbAD">DESCRIPTION</A><DD>
+<DT><A HREF="#lbAE">OPTIONS</A><DD>
+<DT><A HREF="#lbAF">EXAMPLE</A><DD>
+<DT><A HREF="#lbAG">NOTE</A><DD>
+<DT><A HREF="#lbAH">SEE ALSO</A><DD>
+</DL>
+<HR>
+This document was created by
+<A HREF="http://localhost/cgi-bin/man/man2html">man2html</A>,
+using the manual pages.<BR>
+Time: 19:05:39 GMT, September 28, 2009
+</BODY>
+</HTML>

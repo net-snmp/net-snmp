@@ -1,91 +1,112 @@
-<!--#set var="section" value="documentation" -->
-<!--#include virtual="/page-top.html" -->
-<!-- CONTENT START -->
-    <h1>baby_steps</h1>Section: net-snmp (3)<br />
-    Updated: 27 Jul 2007<br />
-    <a href="#index">Index</a> <a href="../index.html">Return to Main Contents</a>
-    <hr />
-    <a name="lbAB" id="lbAB">&nbsp;</a>
+Content-type: text/html
 
-    <h2>NAME</h2>baby_steps - Calls your handler in baby_steps for set processing.
+<HTML><HEAD><TITLE>Manpage of baby_steps</TITLE>
+</HEAD><BODY>
+<H1>baby_steps</H1>
+Section: net-snmp (3)<BR>Updated: 23 Sep 2009<BR><A HREF="#index">Index</A>
+<A HREF="http://localhost/cgi-bin/man/man2html">Return to Main Contents</A><HR>
 
-    <p><a name="lbAC" id="lbAC">&nbsp;</a></p>
 
-    <h3>Modules</h3>
 
-    <p><br />
-    <b>baby_steps_access_multiplexer: calls individual access methods based on baby_step mode.</b><br />
-    <a name="lbAD" id="lbAD">&nbsp;</a></p>
+<A NAME="lbAB">&nbsp;</A>
+<H2>NAME</H2>
 
-    <h3>Functions</h3>
+baby_steps - 
+<P>
 
-    <p><br />
-    <b>netsnmp_mib_handler</b> * <b>netsnmp_baby_steps_handler_get</b> (u_long modes)<br />
-    <i>returns a baby_steps handler that can be injected into a given handler chain.</i><br />
-    void <b>netsnmp_baby_steps_handler_init</b> (void)<br />
-    <i>initializes the baby_steps helper which then registers a baby_steps handler as a run-time injectable handler for
-    configuration file use.</i> <a name="lbAE" id="lbAE">&nbsp;</a></p>
+Calls your handler in baby_steps for set processing.  
+<P>
+<A NAME="lbAC">&nbsp;</A>
+<H3>Modules</H3>
 
-    <h2>Detailed Description</h2>
+<P>
 
-    <p>Calls your handler in baby_steps for set processing.</p>
+<BR>
 
-    <p><a name="lbAF" id="lbAF">&nbsp;</a></p>
+<B>baby_steps_access_multiplexer: calls individual access methods based on baby_step mode.</B>
 
-    <h2>Function Documentation</h2>
+<BR>
 
-    <p><a name="lbAG" id="lbAG">&nbsp;</a></p>
 
-    <h3><b>netsnmp_mib_handler</b>* netsnmp_baby_steps_handler_get (u_long modes)</h3>
+<A NAME="lbAD">&nbsp;</A>
+<H3>Functions</H3>
 
-    <p>returns a baby_steps handler that can be injected into a given handler chain.</p>
+<P>
 
-    <p>Definition at line 58 of file baby_steps.c.</p>
+<BR>
 
-    <p>References netsnmp_mib_handler_s::myvoid, netsnmp_create_handler(), netsnmp_handler_free(), NULL,
-    netsnmp_baby_steps_modes_s::registered, snmp_log(), and SNMP_MALLOC_TYPEDEF.</p>
+<B>netsnmp_mib_handler</B> * <B>netsnmp_baby_steps_handler_get</B> (u_long modes)
 
-    <p>Referenced by netsnmp_baby_steps_handler_init(). <a name="lbAH" id="lbAH">&nbsp;</a></p>
+<BR>
 
-    <h3>void netsnmp_baby_steps_handler_init (void)</h3>
+<I>returns a baby_steps handler that can be injected into a given handler chain. </I>
 
-    <p>initializes the baby_steps helper which then registers a baby_steps handler as a run-time injectable handler for
-    configuration file use.</p>
+<BR>
 
-    <p>Definition at line 319 of file baby_steps.c.</p>
+void <B>netsnmp_baby_steps_handler_init</B> (void)
 
-    <p>References netsnmp_baby_steps_handler_get(), and netsnmp_register_handler_by_name().</p>
-    <hr />
-    <a name="index" id="index">&nbsp;</a>
+<BR>
 
-    <h2>Index</h2>
+<I>initializes the baby_steps helper which then registers a baby_steps handler as a run-time injectable handler for configuration file use. </I>
 
-    <dl>
-      <dt><a href="#lbAB">NAME</a></dt>
 
-      <dd>
-        <dl>
-          <dt><a href="#lbAC">Modules</a></dt>
+<A NAME="lbAE">&nbsp;</A>
+<H2>Detailed Description</H2>
 
-          <dt><a href="#lbAD">Functions</a></dt>
-        </dl>
-      </dd>
+<P>
 
-      <dt><a href="#lbAE">Detailed Description</a></dt>
+Calls your handler in baby_steps for set processing. 
+<A NAME="lbAF">&nbsp;</A>
+<H2>Function Documentation</H2>
 
-      <dt><a href="#lbAF">Function Documentation</a></dt>
+<P>
 
-      <dd>
-        <dl>
-          <dt><a href="#lbAG"><b>netsnmp_mib_handler</b>* netsnmp_baby_steps_handler_get (u_long modes)</a></dt>
+<A NAME="lbAG">&nbsp;</A>
+<H3><B>netsnmp_mib_handler</B>* netsnmp_baby_steps_handler_get (u_long modes)</H3>
 
-          <dt><a href="#lbAH">void netsnmp_baby_steps_handler_init (void)</a></dt>
-        </dl>
-      </dd>
-    </dl>
-    <hr />
-    This document was created by <a href="http://localhost/cgi-bin/man/man2html">man2html</a>, using the manual pages.<br />
-    Time: 13:12:01 GMT, September 23, 2007
-<!-- CONTENT END -->
-<!--#include virtual="/page-bottom.html" -->
+<P>
 
+returns a baby_steps handler that can be injected into a given handler chain. 
+<P>
+
+Definition at line 58 of file baby_steps.c.
+<A NAME="lbAH">&nbsp;</A>
+<H3>void netsnmp_baby_steps_handler_init (void)</H3>
+
+<P>
+
+initializes the baby_steps helper which then registers a baby_steps handler as a run-time injectable handler for configuration file use. 
+<P>
+
+Definition at line 319 of file baby_steps.c.
+<A NAME="lbAI">&nbsp;</A>
+<H2>Author</H2>
+
+<P>
+
+Generated automatically by Doxygen for net-snmp from the source code.
+<P>
+
+<HR>
+<A NAME="index">&nbsp;</A><H2>Index</H2>
+<DL>
+<DT><A HREF="#lbAB">NAME</A><DD>
+<DL>
+<DT><A HREF="#lbAC">Modules</A><DD>
+<DT><A HREF="#lbAD">Functions</A><DD>
+</DL>
+<DT><A HREF="#lbAE">Detailed Description</A><DD>
+<DT><A HREF="#lbAF">Function Documentation</A><DD>
+<DL>
+<DT><A HREF="#lbAG"><B>netsnmp_mib_handler</B>* netsnmp_baby_steps_handler_get (u_long modes)</A><DD>
+<DT><A HREF="#lbAH">void netsnmp_baby_steps_handler_init (void)</A><DD>
+</DL>
+<DT><A HREF="#lbAI">Author</A><DD>
+</DL>
+<HR>
+This document was created by
+<A HREF="http://localhost/cgi-bin/man/man2html">man2html</A>,
+using the manual pages.<BR>
+Time: 19:05:37 GMT, September 28, 2009
+</BODY>
+</HTML>

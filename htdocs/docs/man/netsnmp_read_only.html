@@ -1,90 +1,107 @@
-<!--#set var="section" value="documentation" -->
-<!--#include virtual="/page-top.html" -->
-<!-- CONTENT START -->
-    <h1>read_only</h1>Section: net-snmp (3)<br />
-    Updated: 27 Jul 2007<br />
-    <a href="#index">Index</a> <a href="../index.html">Return to Main Contents</a>
-    <hr />
-    <a name="lbAB" id="lbAB">&nbsp;</a>
+Content-type: text/html
 
-    <h2>NAME</h2>read_only - Make your handler read_only automatically The only purpose of this handler is to return an
-    appropriate error for any requests passed to it in a SET mode.
+<HTML><HEAD><TITLE>Manpage of read_only</TITLE>
+</HEAD><BODY>
+<H1>read_only</H1>
+Section: net-snmp (3)<BR>Updated: 23 Sep 2009<BR><A HREF="#index">Index</A>
+<A HREF="http://localhost/cgi-bin/man/man2html">Return to Main Contents</A><HR>
 
-    <p><a name="lbAC" id="lbAC">&nbsp;</a></p>
 
-    <h3>Functions</h3>
 
-    <p><br />
-    <b>netsnmp_mib_handler</b> * <b>netsnmp_get_read_only_handler</b> (void)<br />
-    <i>returns a read_only handler that can be injected into a given handler chain.</i><br />
-    int <b>netsnmp_read_only_helper</b> (<b>netsnmp_mib_handler</b> *handler, <b>netsnmp_handler_registration</b> *reginfo,
-    <b>netsnmp_agent_request_info</b> *reqinfo, <b>netsnmp_request_info</b> *requests)<br />
-    <br />
-    void <b>netsnmp_init_read_only_helper</b> (void)<br />
-    <i>initializes the read_only helper which then registers a read_only handler as a run-time injectable handler for
-    configuration file use.</i> <a name="lbAD" id="lbAD">&nbsp;</a></p>
+<A NAME="lbAB">&nbsp;</A>
+<H2>NAME</H2>
 
-    <h2>Detailed Description</h2>
+read_only - 
+<P>
 
-    <p>Make your handler read_only automatically The only purpose of this handler is to return an appropriate error for any
-    requests passed to it in a SET mode.</p>
+Make your handler read_only automatically The only purpose of this handler is to return an appropriate error for any requests passed to it in a SET mode.  
+<P>
+<A NAME="lbAC">&nbsp;</A>
+<H3>Functions</H3>
 
-    <p>Inserting it into your handler chain will ensure you're never asked to perform a SET request so you can ignore those error
-    conditions. <a name="lbAE" id="lbAE">&nbsp;</a></p>
+<P>
 
-    <h2>Function Documentation</h2>
+<BR>
 
-    <p><a name="lbAF" id="lbAF">&nbsp;</a></p>
+<B>netsnmp_mib_handler</B> * <B>netsnmp_get_read_only_handler</B> (void)
 
-    <h3><b>netsnmp_mib_handler</b>* netsnmp_get_read_only_handler (void)</h3>
+<BR>
 
-    <p>returns a read_only handler that can be injected into a given handler chain.</p>
+<I>returns a read_only handler that can be injected into a given handler chain. </I>
 
-    <p>Definition at line 29 of file read_only.c.</p>
+<BR>
 
-    <p>References netsnmp_mib_handler_s::flags, MIB_HANDLER_AUTO_NEXT, netsnmp_create_handler(), netsnmp_read_only_helper(), and
-    NULL.</p>
+int <B>netsnmp_read_only_helper</B> (<B>netsnmp_mib_handler</B> *handler, <B>netsnmp_handler_registration</B> *reginfo, <B>netsnmp_agent_request_info</B> *reqinfo, <B>netsnmp_request_info</B> *requests)
 
-    <p>Referenced by netsnmp_init_read_only_helper(), netsnmp_register_read_only_instance(), netsnmp_register_read_only_scalar(),
-    and netsnmp_register_read_only_table_data(). <a name="lbAG" id="lbAG">&nbsp;</a></p>
+<BR>
 
-    <h3>void netsnmp_init_read_only_helper (void)</h3>
+<BR>
 
-    <p>initializes the read_only helper which then registers a read_only handler as a run-time injectable handler for
-    configuration file use.</p>
+void <B>netsnmp_init_read_only_helper</B> (void)
 
-    <p>Definition at line 81 of file read_only.c.</p>
+<BR>
 
-    <p>References netsnmp_get_read_only_handler(), and netsnmp_register_handler_by_name().</p>
-    <hr />
-    <a name="index" id="index">&nbsp;</a>
+<I>initializes the read_only helper which then registers a read_only handler as a run-time injectable handler for configuration file use. </I>
 
-    <h2>Index</h2>
 
-    <dl>
-      <dt><a href="#lbAB">NAME</a></dt>
+<A NAME="lbAD">&nbsp;</A>
+<H2>Detailed Description</H2>
 
-      <dd>
-        <dl>
-          <dt><a href="#lbAC">Functions</a></dt>
-        </dl>
-      </dd>
+<P>
 
-      <dt><a href="#lbAD">Detailed Description</a></dt>
+Make your handler read_only automatically The only purpose of this handler is to return an appropriate error for any requests passed to it in a SET mode. 
+<P>
+Inserting it into your handler chain will ensure you're never asked to perform a SET request so you can ignore those error conditions. 
+<A NAME="lbAE">&nbsp;</A>
+<H2>Function Documentation</H2>
 
-      <dt><a href="#lbAE">Function Documentation</a></dt>
+<P>
 
-      <dd>
-        <dl>
-          <dt><a href="#lbAF"><b>netsnmp_mib_handler</b>* netsnmp_get_read_only_handler (void)</a></dt>
+<A NAME="lbAF">&nbsp;</A>
+<H3><B>netsnmp_mib_handler</B>* netsnmp_get_read_only_handler (void)</H3>
 
-          <dt><a href="#lbAG">void netsnmp_init_read_only_helper (void)</a></dt>
-        </dl>
-      </dd>
-    </dl>
-    <hr />
-    This document was created by <a href="http://localhost/cgi-bin/man/man2html">man2html</a>, using the manual pages.<br />
-    Time: 13:12:01 GMT, September 23, 2007
-<!-- CONTENT END -->
-<!--#include virtual="/page-bottom.html" -->
+<P>
 
+returns a read_only handler that can be injected into a given handler chain. 
+<P>
+
+Definition at line 23 of file read_only.c.
+<A NAME="lbAG">&nbsp;</A>
+<H3>void netsnmp_init_read_only_helper (void)</H3>
+
+<P>
+
+initializes the read_only helper which then registers a read_only handler as a run-time injectable handler for configuration file use. 
+<P>
+
+Definition at line 72 of file read_only.c.
+<A NAME="lbAH">&nbsp;</A>
+<H2>Author</H2>
+
+<P>
+
+Generated automatically by Doxygen for net-snmp from the source code.
+<P>
+
+<HR>
+<A NAME="index">&nbsp;</A><H2>Index</H2>
+<DL>
+<DT><A HREF="#lbAB">NAME</A><DD>
+<DL>
+<DT><A HREF="#lbAC">Functions</A><DD>
+</DL>
+<DT><A HREF="#lbAD">Detailed Description</A><DD>
+<DT><A HREF="#lbAE">Function Documentation</A><DD>
+<DL>
+<DT><A HREF="#lbAF"><B>netsnmp_mib_handler</B>* netsnmp_get_read_only_handler (void)</A><DD>
+<DT><A HREF="#lbAG">void netsnmp_init_read_only_helper (void)</A><DD>
+</DL>
+<DT><A HREF="#lbAH">Author</A><DD>
+</DL>
+<HR>
+This document was created by
+<A HREF="http://localhost/cgi-bin/man/man2html">man2html</A>,
+using the manual pages.<BR>
+Time: 19:05:38 GMT, September 28, 2009
+</BODY>
+</HTML>

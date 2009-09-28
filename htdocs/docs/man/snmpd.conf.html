@@ -1,1737 +1,1934 @@
-<!--#set var="section" value="documentation" -->
-<!--#include virtual="/page-top.html" -->
-<!-- CONTENT START -->
-    <h1>SNMPD.CONF</h1>Section: Net-SNMP (5)<br />
-    Updated: 08 Feb 2002<br />
-    <a href="#index">Index</a> <a href="../index.html">Return to Main Contents</a>
-    <hr />
-    <a name="lbAB" id="lbAB">&nbsp;</a>
+Content-type: text/html
 
-    <h2>NAME</h2>snmpd.conf - configuration file for the Net-SNMP SNMP agent <a name="lbAC" id="lbAC">&nbsp;</a>
+<HTML><HEAD><TITLE>Manpage of SNMPD.CONF</TITLE>
+</HEAD><BODY>
+<H1>SNMPD.CONF</H1>
+Section: Net-SNMP (5)<BR>Updated: 08 Feb 2002<BR><A HREF="#index">Index</A>
+<A HREF="http://localhost/cgi-bin/man/man2html">Return to Main Contents</A><HR>
 
-    <h2>DESCRIPTION</h2>The Net-SNMP agent uses one or more configuration files to control its operation and the management
-    information provided. These files (<b>snmpd.conf</b> and <b>snmpd.local.conf</b>) can be located in one of several locations,
-    as described in the <i><a href="snmp_config.html">snmp_config</a>(5)</i> manual page.
 
-    <p>The (perl) application <b>snmpconf</b> can be used to generate configuration files for the most common agent requirements.
-    See the <i><a href="snmpconf.html">snmpconf</a>(1)</i> manual page for more information, or try running the command:</p>
+<A NAME="lbAB">&nbsp;</A>
+<H2>NAME</H2>
 
-    <dl compact="compact">
-      <dd>
-        <dl compact="compact">
-          <dt>snmpconf -g basic_setup</dt>
-        </dl>
-      </dd>
-    </dl>
+snmpd.conf - configuration file for the Net-SNMP SNMP agent
+<A NAME="lbAC">&nbsp;</A>
+<H2>DESCRIPTION</H2>
 
-    <p>There are a large number of directives that can be specified, but these mostly fall into four distinct categories:</p>
+The Net-SNMP agent uses one or more configuration files
+to control its operation and the management information
+provided.
+These files (<B>snmpd.conf</B> and <B>snmpd.local.conf</B>)
+can be located in one of several locations, as described in the
+<I><A HREF="http://localhost/cgi-bin/man/man2html?5+snmp_config">snmp_config</A>(5) </I>
 
-    <dl compact="compact">
-      <dt>*</dt>
+manual page.
+<P>
 
-      <dd>those controlling who can access the agent</dd>
+The (perl) application
+<B>snmpconf</B>
 
-      <dt>*</dt>
+can be used to generate configuration files for the
+most common agent requirements.  See the
+<I><A HREF="http://localhost/cgi-bin/man/man2html?1+snmpconf">snmpconf</A>(1)</I>
 
-      <dd>those configuring the information that is supplied by the agent</dd>
+manual page for more information, or try running the
+command:
+<DL COMPACT><DT><DD>
+<DL COMPACT>
+<DT>snmpconf -g basic_setup<DD>
+</DL>
+</DL>
 
-      <dt>*</dt>
+<P>
 
-      <dd>those controlling active monitoring of the local system</dd>
+There are a large number of directives that can be specified,
+but these mostly fall into four distinct categories:
+<DL COMPACT>
+<DT>*<DD>
+those controlling who can access the agent
+<DT>*<DD>
+those configuring the information that is supplied by the agent
+<DT>*<DD>
+those controlling active monitoring of the local system
+<DT>*<DD>
+those concerned with extending the functionality of the agent.
+</DL>
+<P>
 
-      <dt>*</dt>
+Some directives don't fall naturally into any of these four
+categories, but this covers the majority of the contents of
+a typical
+<B>snmpd.conf</B>
 
-      <dd>those concerned with extending the functionality of the agent.</dd>
-    </dl>
+file.
+A full list of recognised directives can be obtained by running
+the command:
+<DL COMPACT><DT><DD>
+<DL COMPACT>
+<DT>snmpd -H<DD>
+</DL>
+</DL>
 
-    <p>Some directives don't fall naturally into any of these four categories, but this covers the majority of the contents of a
-    typical <b>snmpd.conf</b> file. A full list of recognised directives can be obtained by running the command:</p>
+<A NAME="lbAD">&nbsp;</A>
+<H2>AGENT BEHAVIOUR</H2>
 
-    <dl compact="compact">
-      <dd>
-        <dl compact="compact">
-          <dt>snmpd -H</dt>
-        </dl>
-      </dd>
-    </dl><a name="lbAD" id="lbAD">&nbsp;</a>
+Although most configuration directives are concerned with the MIB
+information supplied by the agent, there are a handful of directives that
+control the behaviour of <I>snmpd</I> considered simply as a daemon
+providing a network service.
+<DL COMPACT>
+<DT>agentaddress [&lt;transport-specifier&gt;:]&lt;transport-address&gt;[,...]<DD>
+defines a list of listening addresses, on which to receive incoming
+SNMP requests.
+See the section 
+<B>LISTENING ADDRESSES</B>
 
-    <h2>AGENT BEHAVIOUR</h2>Although most configuration directives are concerned with the MIB information supplied by the agent,
-    there are a handful of directives that control the behaviour of <i>snmpd</i> considered simply as a daemon providing a
-    network service.
+in the
+<I><A HREF="http://localhost/cgi-bin/man/man2html?8+snmpd">snmpd</A>(8)</I>
 
-    <dl compact="compact">
-      <dt>agentaddress [&lt;transport-specifier&gt;:]&lt;transport-address&gt;[,...]</dt>
+manual page for more information about the format of listening
+addresses.
+<DT><DD>
+The default behaviour is to
+listen on UDP port 161 on all IPv4 interfaces.
+<DT>agentgroup {GROUP|#GID}<DD>
+changes to the specified group after opening the listening port(s).
+This may refer to a group by name (GROUP), or a numeric group ID
+starting with '#' (#GID).
+<DT>agentuser {USER|#UID}<DD>
+changes to the specified user after opening the listening port(s).
+This may refer to a user by name (USER), or a numeric user ID
+starting with '#' (#UID).
+<DT>leave_pidfile yes<DD>
+instructs the agent to not remove its pid file on shutdown. Equivalent to
+specifying &quot;-U&quot; on the command line.
+<DT>maxGetbulkRepeats NUM<DD>
+Sets the maximum number of responses allowed for a single variable in
+a getbulk request.  Set to 0 to enable the default and set it to -1 to
+enable unlimited.  Because memory is allocated ahead of time, sitting
+this to unlimited is not considered safe if your user population can
+not be trusted.  A repeat number greater than this will be truncated
+to this value.
+<DT><DD>
+This is set by default to -1.
+<DT>maxGetbulkResponses NUM<DD>
+Sets the maximum number of responses allowed for a getbulk request.
+This is set by default to 100.  Set to 0 to enable the default and set
+it to -1 to enable unlimited.  Because memory is allocated ahead of
+time, sitting this to unlimited is not considered safe if your user
+population can not be trusted.
+<DT><DD>
+In general, the total number of responses will not be allowed to
+exceed the maxGetbulkResponses number and the total number returned
+will be an integer multiple of the number of variables requested times
+the calculated number of repeats allow to fit below this number.
+<DT><DD>
+Also not that processing of maxGetbulkRepeats is handled first.
+</DL>
+<A NAME="lbAE">&nbsp;</A>
+<H3>SNMPv3 Configuration</H3>
 
-      <dd>defines a list of listening addresses, on which to receive incoming SNMP requests. See the section <b>LISTENING
-      ADDRESSES</b> in the <i><a href="snmpd.html">snmpd</a>(8)</i> manual page for more information about the format of
-      listening addresses.</dd>
+SNMPv3 requires an SNMP agent to define a unique &quot;engine ID&quot;
+in order to respond to SNMPv3 requests.
+This ID will normally be determined automatically, using two reasonably
+non-predictable values - a (pseudo-)random number and the current
+time in seconds. This is the recommended approach. However the
+capacity exists to define the engineID in other ways:
+<DL COMPACT>
+<DT>engineID STRING<DD>
+specifies that the engineID should be built from the given text STRING.
+<DT>engineIDType 1|2|3<DD>
+specifies that the engineID should be built from the IPv4 address (1),
+IPv6 address (2) or MAC address (3).  Note that changing the IP address
+(or switching the network interface card) may cause problems.
+<DT>engineIDNic INTERFACE<DD>
+defines which interface to use when determining the MAC address.
+If <I>engineIDType 3</I> is not specified, then this directive
+has no effect.
+<DT><DD>
+The default is to use eth0.
 
-      <dd>The default behaviour is to listen on UDP port 161 on all IPv4 interfaces.</dd>
 
-      <dt>agentgroup {GROUP|#GID}</dt>
 
-      <dd>changes to the specified group after opening the listening port(s). This may refer to a group by name (GROUP), or a
-      numeric group ID starting with '#' (#GID).</dd>
+</DL>
+<A NAME="lbAF">&nbsp;</A>
+<H2>SNMPv3 AUTHENTICATION</H2>
 
-      <dt>agentuser {USER|#UID}</dt>
+SNMPv3 was originally defined using the User-Based Security Model
+(USM), which contains a private list of users and keys specific to the
+SNMPv3 protocol.  The operational community, however, declared it a
+pain to manipulate yet another database and would prefer to use
+existing infrastructure.  To that end the IETF created the ISMS
+working group to battle that problem, and the ISMS working group
+decided to tunnel SNMP over SSH and DTLS to make use existing user and
+authentication infrastructures.
+<A NAME="lbAG">&nbsp;</A>
+<H3>SNMPv3 USM Users</H3>
 
-      <dd>changes to the specified user after opening the listening port(s). This may refer to a user by name (USER), or a
-      numeric user ID starting with '#' (#UID).</dd>
+To use the USM based SNMPv3-specific users, you'll need to create
+them.  It is recommended you
+<B>use the net-snmp-config command</B>
 
-      <dt>leave_pidfile yes</dt>
+to do this, but you can also do it by directly specifying createUser
+directives yourself instead:
+<DL COMPACT>
+<DT>createUser [-e ENGINEID] username (MD5|SHA) authpassphrase [DES|AES] [privpassphrase]<DD>
+<DT><DD>
+MD5 and SHA are the authentication types to use.  DES and AES are the
+privacy protocols to use.  If the privacy
+passphrase is not specified, it is assumed to be the same as the
+authentication passphrase.  Note that the users created will be
+useless unless they are also added to the VACM access control tables
+described above.
+<DT><DD>
+SHA authentication and DES/AES privacy require OpenSSL to be installed and
+the agent to be built with OpenSSL support.  MD5 authentication may be
+used without OpenSSL.
+<DT><DD>
+Warning: the minimum pass phrase length is 8 characters.
+<DT><DD>
+SNMPv3 users can be created at runtime using the
+<I><A HREF="http://localhost/cgi-bin/man/man2html?1+snmpusm">snmpusm</A>(1)</I>
 
-      <dd>instructs the agent to not remove its pid file on shutdown. Equivalent to specifying "-U" on the command line.</dd>
-
-      <dt>maxGetbulkRepeats NUM</dt>
-
-      <dd>Sets the maximum number of responses allowed for a single variable in a getbulk request. Set to 0 to enable the default
-      and set it to -1 to enable unlimited. Because memory is allocated ahead of time, sitting this to unlimited is not
-      considered safe if your user population can not be trusted. A repeat number greater than this will be truncated to this
-      value.</dd>
-
-      <dd>This is set by default to -1.</dd>
-
-      <dt>maxGetbulkResponses NUM</dt>
-
-      <dd>Sets the maximum number of responses allowed for a getbulk request. This is set by default to 100. Set to 0 to enable
-      the default and set it to -1 to enable unlimited. Because memory is allocated ahead of time, sitting this to unlimited is
-      not considered safe if your user population can not be trusted.</dd>
-
-      <dd>In general, the total number of responses will not be allowed to exceed the maxGetbulkResponses number and the total
-      number returned will be an integer multiple of the number of variables requested times the calculated number of repeats
-      allow to fit below this number.</dd>
-
-      <dd>Also not that processing of maxGetbulkRepeats is handled first.</dd>
-    </dl><a name="lbAE" id="lbAE">&nbsp;</a>
-
-    <h3>SNMPv3 Configuration</h3>SNMPv3 requires an SNMP agent to define a unique "engine ID" in order to respond to SNMPv3
-    requests. This ID will normally be determined automatically, using two reasonably non-predictable values - a (pseudo-)random
-    number and the current uptime in seconds. This is the recommended approach. However the capacity exists to define the
-    engineID in other ways:
-
-    <dl compact="compact">
-      <dt>engineID STRING</dt>
-
-      <dd>specifies that the engineID should be built from the given text STRING.</dd>
-
-      <dt>engineIDType 1|2|3</dt>
-
-      <dd>specifies that the engineID should be built from the IPv4 address (1), IPv6 address (2) or MAC address (3). Note that
-      changing the IP address (or switching the network interface card) may cause problems.</dd>
-
-      <dt>engineIDNic INTERFACE</dt>
-
-      <dd>defines which interface to use when determining the MAC address. If <i>engineIDType 3</i> is not specified, then this
-      directive has no effect.</dd>
-
-      <dd>The default is to use eth0.</dd>
-    </dl><a name="lbAF" id="lbAF">&nbsp;</a>
-
-    <h2>ACCESS CONTROL</h2><b>snmpd</b> supports the View-Based Access Control Model (VACM) as defined in RFC 2575, to control
-    who can retrieve or update information. To this end, it recognizes various directives relating to access control. These fall
-    into four basic groups. <a name="lbAG" id="lbAG">&nbsp;</a>
-
-    <h3>SNMPv3 Users</h3>
-
-    <dl compact="compact">
-      <dt>createUser [-e ENGINEID] username (MD5|SHA) authpassphrase [DES|AES] [privpassphrase]</dt>
-
-      <dd>MD5 and SHA are the authentication types to use. DES and AES are the privacy protocols to use. If the privacy
-      passphrase is not specified, it is assumed to be the same as the authentication passphrase. Note that the users created
-      will be useless unless they are also added to the VACM access control tables described above.</dd>
-
-      <dd>SHA authentication and DES/AES privacy require OpenSSL to be installed and the agent to be built with OpenSSL support.
-      MD5 authentication may be used without OpenSSL.</dd>
-
-      <dd>Warning: the minimum pass phrase length is 8 characters.</dd>
-
-      <dd>SNMPv3 users can be created at runtime using the <i><a href="snmpusm.html">snmpusm</a>(1)</i> command.</dd>
-
-      <dd>Instead of figuring out how to use this directive and where to put it (see below), just run "net-snmp-config
-      --create-snmpv3-user" instead, which will add one of these lines to the right place.</dd>
-
-      <dd>This directive should be placed into the /var/net-snmp/snmpd.conf file instead of the other normal locations. The
-      reason is that the information is read from the file and then the line is removed (eliminating the storage of the master
-      password for that user) and replaced with the key that is derived from it. This key is a localized key, so that if it is
-      stolen it can not be used to access other agents. If the password is stolen, however, it can be.</dd>
-
-      <dd>If you need to localize the user to a particular EngineID (this is useful mostly in the similar snmptrapd.conf file),
-      you can use the -e argument to specify an EngineID as a hex value (EG, "0x01020304").</dd>
-
-      <dd>If you want to generate either your master or localized keys directly, replace the given password with a hexstring
-      (preceeded by a "0x") and precede the hex string by a -m or -l token (respectively). EGs:</dd>
-
-      <dd>
-        <dl compact="compact">
-          <dd>
-            <pre>
+command.
+<DT><DD>
+Instead of figuring out how to use this directive and where to put it
+(see below), just run &quot;net-snmp-config --create-snmpv3-user&quot; instead,
+which will add one of these lines to the right place.
+<DT><DD>
+This directive should be placed into the
+/var/net-snmp/snmpd.conf file instead of the other normal
+locations.  The reason is that the information is read from the file
+and then the line is removed (eliminating the storage of the master
+password for that user) and replaced with the key that is derived from
+it.  This key is a localized key, so that if it is stolen it can not
+be used to access other agents.  If the password is stolen, however,
+it can be.
+<DT><DD>
+If you need to localize the user to a particular EngineID (this is
+useful mostly in the similar snmptrapd.conf file), you can use the -e
+argument to specify an EngineID as a hex value (EG, &quot;0x01020304&quot;).
+<DT><DD>
+If you want to generate either your master or localized keys directly,
+replace the given password with a hexstring (preceeded by a &quot;0x&quot;) and
+precede the hex string by a -m or -l token (respectively).  EGs:
+<DT><DD>
+<DL COMPACT><DT><DD>
+<PRE>
 [these keys are *not* secure but are easy to visually parse for
 counting purposes.  Please generate random keys instead of using
 these examples]
 
 createUser myuser SHA -l 0x0001020304050607080900010203040506070809 AES -l 0x00010203040506070809000102030405
 createUser myuser SHA -m 0x0001020304050607080900010203040506070809 AES -m 0x0001020304050607080900010203040506070809
-</pre>
-          </dd>
-        </dl>
-      </dd>
-
-      <dd>Due to the way localization happens, localized privacy keys are expected to be the length needed by the algorithm (128
-      bits for all supported algorithms). Master encryption keys, though, need to be the length required by the authentication
-      algorithm not the length required by the encrypting algorithm (MD5: 16 bytes, SHA: 20 bytes).</dd>
-    </dl><a name="lbAH" id="lbAH">&nbsp;</a>
-
-    <h3>Traditional Access Control</h3>Most simple access control requirements can be specified using the directives
-    <i>rouser</i>/<i>rwuser</i> (for SNMPv3) or <i>rocommunity</i>/<i>rwcommunity</i> (for SNMPv1 or SNMPv2c).
-
-    <dl compact="compact">
-      <dt>rouser USER [noauth|auth|priv [OID | -V VIEW [CONTEXT]]]</dt>
-
-      <dt>rwuser USER [noauth|auth|priv [OID | -V VIEW [CONTEXT]]]</dt>
-
-      <dd>specify an SNMPv3 user that will be allowed read-only (GET and GETNEXT) or read-write (GET, GETNEXT and SET) access
-      respectively. By default, this will provide access to the full OID tree for authenticated (including encrypted) SNMPv3
-      requests, using the default context. An alternative minimum security level can be specified using <i>noauth</i> (to allow
-      unauthenticated requests), or <i>priv</i> (to enforce use of encryption). The OID field restricts access for that user to
-      the subtree rooted at the given OID, or the named view. An optional context can also be specified, or "context*" to denote
-      a context prefix. If no context field is specified (or the token "*" is used), the directive will match all possible
-      contexts.</dd>
-
-      <dt>rocommunity COMMUNITY [SOURCE [OID | -V VIEW [CONTEXT]]]</dt>
-
-      <dt>rwcommunity COMMUNITY [SOURCE [OID | -V VIEW [CONTEXT]]]</dt>
-
-      <dd>specify an SNMPv1 or SNMPv2c community that will be allowed read-only (GET and GETNEXT) or read-write (GET, GETNEXT and
-      SET) access respectively. By default, this will provide access to the full OID tree for such requests, regardless of where
-      they were sent from. The SOURCE token can be used to restrict access to requests from the specified system(s) - see
-      <i>com2sec</i> for the full details. The OID field restricts access for that community to the subtree rooted at the given
-      OID, or named view. Contexts are typically less relevant to community-based SNMP versions, but the same behaviour applies
-      here.</dd>
-
-      <dt>rocommunity6 COMMUNITY [SOURCE [OID | -V VIEW [CONTEXT]]]</dt>
-
-      <dt>rwcommunity6 COMMUNITY [SOURCE [OID | -V VIEW [CONTEXT]]]</dt>
-
-      <dd>are directives relating to requests received using IPv6 (if the agent supports such transport domains). The
-      interpretation of the SOURCE, OID, VIEW and CONTEXT tokens are exactly the same as for the IPv4 versions.</dd>
-    </dl>
-
-    <p>In each case, only one directive should be specified for a given SNMPv3 user, or community string. It is <b>not</b>
-    appropriate to specify both <i>rouser</i> and <i>rwuser</i> directives referring to the same SNMPv3 user (or equivalent
-    community settings). The <i>rwuser</i> directive provides all the access of <i>rouser</i> (as well as allowing SET support).
-    The same holds true for the community-based directives.</p>
-
-    <p>More complex access requirements (such as access to two or more distinct OID subtrees, or different views for GET and SET
-    requests) should use one of the other access control mechanisms. Note that if several distinct communities or SNMPv3 users
-    need to be granted the same level of access, it would also be more efficient to use the main VACM configuration directives.
-    <a name="lbAI" id="lbAI">&nbsp;</a></p>
-
-    <h3>VACM Configuration</h3>The full flexibility of the VACM is available using four configuration directives -
-    <i>com2sec</i>, <i>group</i>, <i>view</i> and <i>access</i>. These provide direct configuration of the underlying VACM
-    tables.
-
-    <dl compact="compact">
-      <dt>com2sec [-Cn CONTEXT] SECNAME SOURCE COMMUNITY</dt>
-
-      <dt>com2sec6 [-Cn CONTEXT] SECNAME SOURCE COMMUNITY</dt>
-
-      <dd>map an SNMPv1 or SNMPv2c community string to a security name - either from a particular range of source addresses, or
-      globally (<i>"default"</i>). A restricted source can either be a specific hostname (or address), or a subnet - represented
-      as IP/MASK (e.g. 10.10.10.0/255.255.255.0), or IP/BITS (e.g. 10.10.10.0/24), or the IPv6 equivalents.</dd>
-
-      <dd>The same community string can be specified in several separate directives (presumably with different source tokens),
-      and the first source/community combination that matches the incoming request will be selected. Various source/community
-      combinations can also map to the same security name.</dd>
-
-      <dd>If a CONTEXT is specified (using <i>-Cn</i>), the community string will be mapped to a security name in the named
-      SNMPv3 context. Otherwise the default context ("") will be used.</dd>
-
-      <dt>com2secunix [-Cn CONTEXT] SECNAME SOCKPATH COMMUNITY</dt>
-
-      <dd>is the Unix domain sockets version of <i>com2sec</i>.</dd>
-
-      <dt>group GROUP {v1|v2c|usm} SECNAME</dt>
-
-      <dd>maps a security name (in the specified security model) into a named group. Several <i>group</i> directives can specify
-      the same group name, allowing a single access setting to apply to several users and/or community strings.</dd>
-
-      <dd>Note that groups must be set up for the two community-based models separately - a single <i>com2sec</i> (or equivalent)
-      directive will typically be accompanied by <b>two</b> <i>group</i> directives.</dd>
-
-      <dt>view VNAME TYPE OID [MASK]</dt>
-
-      <dd>defines a named "view" - a subset of the overall OID tree. This is most commonly a single subtree, but several
-      <i>view</i> directives can be given with the same view name (VNAME), to build up a more complex collection of OIDs. TYPE is
-      either <i>included</i> or <i>excluded</i>, which can again define a more complex view (e.g by excluding certain sensitive
-      objects from an otherwise accessible subtree).</dd>
-
-      <dd>
-        MASK is a list of hex octets (optionally separated by '.' or ':') with the set bits indicating which subidentifiers in
-        the view OID to match against. If not specified, this defaults to matching the OID exactly (all bits set), thus defining
-        a simple OID subtree. So:
-
-        <dl compact="compact">
-          <dd>
-            <dl compact="compact">
-              <dd>view iso1 included .iso 0xf0<br />
-              view iso2 included .iso<br />
-              view iso3 included .iso.org.dod.mgmt 0xf0</dd>
-            </dl>
-          </dd>
-        </dl>
-      </dd>
-
-      <dd>would all define the same view, covering the whole of the '<a href="iso.html">iso</a>(1)' subtree (with the third
-      example ignoring the subidentifiers not covered by the mask).</dd>
-
-      <dd>
-        More usefully, the mask can be used to define a view covering a particular row (or rows) in a table, by matching against
-        the appropriate table index value, but skipping the column subidentifier:
-
-        <dl compact="compact">
-          <dd>
-            <dl compact="compact">
-              <dd>
-                <dl compact="compact">
-                  <dt>view ifRow4 included .1.3.6.1.2.1.2.2.1.0.4 0xff:a0</dt>
-                </dl>
-              </dd>
-            </dl>
-          </dd>
-        </dl>
-      </dd>
-
-      <dd>Note that a mask longer than 8 bits must use ':' to separate the individual octets.</dd>
-
-      <dt>access GROUP CONTEXT {any|v1|v2c|usm} LEVEL PREFX READ WRITE NOTIFY</dt>
-
-      <dd>maps from a group of users/communities (with a particular security model and minimum security level, and in a specific
-      context) to one of three views, depending on the request being processed.</dd>
-
-      <dd>LEVEL is one of <i>noauth</i>, <i>auth</i>, or <i>priv</i>. PREFX specifies how CONTEXT should be matched against the
-      context of the incoming request, either <i>exact</i> or <i>prefix</i>. READ, WRITE and NOTIFY specifies the view to be used
-      for GET*, SET and TRAP/INFORM requests (althought the NOTIFY view is not currently used). For v1 or v2c access, LEVEL will
-      need to be <i>noauth</i>.</dd>
-    </dl><a name="lbAJ" id="lbAJ">&nbsp;</a>
-
-    <h3>Typed-View Configuration</h3>The final group of directives extend the VACM approach into a more flexible mechanism, which
-    can be applied to other access control requirements. Rather than the fixed three views of the standard VACM mechanism, this
-    can be used to configure various different view types. As far as the main SNMP agent is concerned, the two main view types
-    are <i>read</i> and <i>write</i>, corresponding to the READ and WRITE views of the main <i>access</i> directive. See the
-    '<a href="snmptrapd.conf.html">snmptrapd.conf</a>(5)' man page for discussion of other view types.
-
-    <dl compact="compact">
-      <dt>authcommunity TYPES COMMUNITY [SOURCE [OID | -V VIEW [CONTEXT]]]</dt>
-
-      <dd>is an alternative to the <i>rocommunity</i>/<i>rwcommunity</i> directives. TYPES will usually be <i>read</i> or
-      <i>read,write</i> respectively. The view specification can either be an OID subtree (as before), or a named view (defined
-      using the <i>view</i> directive) for greater flexibility. If this is omitted, then access will be allowed to the full OID
-      tree. If CONTEXT is specified, access is configured within this SNMPv3 context. Otherwise the default context ("") is
-      used.</dd>
-
-      <dt>authuser TYPES [-s MODEL] USER [LEVEL [OID | -V VIEW [CONTEXT]]]</dt>
-
-      <dd>is an alternative to the <i>rouser</i>/<i>rwuser</i> directives. The fields TYPES, OID, VIEW and CONTEXT have the same
-      meaning as for <i>authcommunity</i>.</dd>
-
-      <dt>authgroup TYPES [-s MODEL] GROUP [LEVEL [OID | -V VIEW [CONTEXT]]]</dt>
-
-      <dd>is a companion to the <i>authuser</i> directive, specifying access for a particular group (defined using the
-      <i>group</i> directive as usual). Both <i>authuser</i> and <i>authgroup</i> default to authenticated requests - LEVEL can
-      also be specified as <i>noauth</i> or <i>priv</i> to allow unauthenticated requests, or require encryption respectively.
-      Both <i>authuser</i> and <i>authgroup</i> directives also default to configuring access for SNMPv3/USM requests - use the
-      '-s' flag to specify an alternative security model (using the same values as for <i>access</i> above).</dd>
-
-      <dt>authaccess TYPES [-s MODEL] GROUP VIEW [LEVEL [CONTEXT]]</dt>
-
-      <dd>also configures the access for a particular group, specifying the name and type of view to apply. The MODEL and LEVEL
-      fields are interpreted in the same way as for <i>authgroup</i>. If CONTEXT is specified, access is configured within this
-      SNMPv3 context (or contexts with this prefix if the CONTEXT field ends with '*'). Otherwise the default context ("") is
-      used.</dd>
-
-      <dt>setaccess GROUP CONTEXT MODEL LEVEL PREFIX VIEW TYPES</dt>
-
-      <dd>is a direct equivalent to the original <i>access</i> directive, typically listing the view types as <i>read</i> or
-      <i>read,write</i> as appropriate. (or see '<a href="snmptrapd.conf.html">snmptrapd.conf</a>(5)' for other possibilities).
-      All other fields have the same interpretation as with <i>access</i>.</dd>
-    </dl><a name="lbAK" id="lbAK">&nbsp;</a>
-
-    <h2>SYSTEM INFORMATION</h2>Most of the information reported by the Net-SNMP agent is retrieved from the underlying system, or
-    dynamically configured via SNMP SET requests (and retained from one run of the agent to the next). However, certain MIB
-    objects can be configured or controlled via the <i><a href="snmpd.conf.html">snmpd.conf</a>(5)</i> file. <a name="lbAL" id=
-    "lbAL">&nbsp;</a>
-
-    <h3>System Group</h3>Most of the scalar objects in the 'system' group can be configured in this way:
-
-    <dl compact="compact">
-      <dt>sysLocation STRING</dt>
-
-      <dt>sysContact STRING</dt>
-
-      <dt>sysName STRING</dt>
-
-      <dd>set the system location, system contact or system name (sysLocation.0, sysContact.0 and sysName.0) for the agent
-      respectively. Ordinarily these objects are writeable via suitably authorized SNMP SET requests. However, specifying one of
-      these directives makes the corresponding object read-only, and attempts to SET it will result in a <i>notWritable</i> error
-      response.</dd>
-
-      <dt>sysServices NUMBER</dt>
-
-      <dd>sets the value of the sysServices.0 object. For a host system, a good value is 72 (application + end-to-end layers). If
-      this directive is not specified, then no value will be reported for the sysServices.0 object.</dd>
-
-      <dt>sysDescr STRING</dt>
-
-      <dt>sysObjectID OID</dt>
-
-      <dd>sets the system description or object ID for the agent. Although these MIB objects are not SNMP-writable, these
-      directives can be used by a network administrator to configure suitable values for them.</dd>
-    </dl><a name="lbAM" id="lbAM">&nbsp;</a>
-
-    <h3>Interfaces Group</h3>
-
-    <dl compact="compact">
-      <dt>interface NAME TYPE SPEED</dt>
-
-      <dd>can be used to provide appropriate type and speed settings for interfaces where the agent fails to determine this
-      information correctly. TYPE is a type value as given in the IANAifType-MIB, and can be specified numerically or by name
-      (assuming this MIB is loaded).</dd>
-    </dl><a name="lbAN" id="lbAN">&nbsp;</a>
-
-    <h3>Host Resources Group</h3>This requires that the agent was built with support for the <i>host</i> module (which is now
-    included as part of the default build configuration on the major supported platforms).
-
-    <dl compact="compact">
-      <dt>ignoreDisk STRING</dt>
-
-      <dd>
-        controls which disk devices are scanned as part of populating the hrDiskStorageTable (and hrDeviceTable). The HostRes
-        implementation code includes a list of disk device patterns appropriate for the current operating system, some of which
-        may cause the agent to block when trying to open the corresponding disk devices. This might lead to a timeout when
-        walking these tables, possibly resulting in inconsistent behaviour. This directive can be used to specify particular
-        devices (either individually or wildcarded) that should not be checked.
-
-        <dl compact="compact">
-          <dd>
-            <dl compact="compact">
-              <dt>Note:</dt>
-
-              <dd>Please consult the source (<i>host/hr_disk.c</i>) and check for the <i>Add_HR_Disk_entry</i> calls relevant for
-              a particular O/S to determine the list of devices that will be scanned.</dd>
-            </dl>
-          </dd>
-        </dl>
-      </dd>
-
-      <dd>The pattern can include one or more wildcard expressions. See <i><a href=
-      "snmpd.examples.html">snmpd.examples</a>(5)</i> for illustration of the wildcard syntax.</dd>
-
-      <dt>skipNFSInHostResources true</dt>
-
-      <dd>controls whether NFS and NFS-like file systems should be omitted from the hrStorageTable (true or 1) or not (false or
-      0, which is the default). If the Net-SNMP agent gets hung on NFS-mounted filesystems, you can try setting this to '1'.</dd>
-
-      <dt>storageUseNFS [1|2]</dt>
-
-      <dd>controls how NFS and NFS-like file systems should be reported in the hrStorageTable. as 'Network Disks' (1) or 'Fixed
-      Disks' (2) Historically, the Net-SNMP agent has reported such file systems as 'Fixed Disks', and this is still the default
-      behaviour. Setting this directive to '1' reports such file systems as</dd>
-    </dl><a name="lbAO" id="lbAO">&nbsp;</a>
-
-    <h3>Process Monitoring</h3>The hrSWRun group of the Host Resources MIB provides information about individual processes
-    running on the local system. The prTable of the UCD-SNMP-MIB complements this by reporting on selected services (which may
-    involve multiple processes). This requires that the agent was built with support for the <i>ucd-snmp/proc</i> module (which
-    is included as part of the default build configuration).
-
-    <dl compact="compact">
-      <dt>proc NAME [MAX [MIN]]</dt>
-
-      <dd>monitors the number of processes called NAME (as reported by "/bin/ps -e") running on the local system.</dd>
-
-      <dd>
-        If the number of NAMEd processes is less than MIN or greater than MAX, then the corresponding prErrorFlag instance will
-        be set to 1, and a suitable description message reported via the prErrMessage instance.
-
-        <dl compact="compact">
-          <dd>
-            <dl compact="compact">
-              <dt>Note:</dt>
-
-              <dd>This situation will <b>not</b> automatically trigger a trap to report the problem - see the DisMan Event MIB
-              section later.</dd>
-            </dl>
-          </dd>
-        </dl>
-      </dd>
-
-      <dd>If neither MAX nor MIN are specified (or are both 0), they will default to <b>infinity</b> and 1 respectively ("at
-      least one"). If only MAX is specified, MIN will default to 0 ("no more than MAX").</dd>
-
-      <dt>procfix NAME PROG ARGS</dt>
-
-      <dd>
-        registers a command that can be run to fix errors with the given process NAME. This will be invoked when the
-        corresponding prErrFix instance is set to 1.
-
-        <dl compact="compact">
-          <dd>
-            <dl compact="compact">
-              <dt>Note:</dt>
-
-              <dd>This command will <b>not</b> be invoked automatically.</dd>
-            </dl>
-          </dd>
-        </dl>
-      </dd>
-
-      <dd>The <i>procfix</i> directive must be specified <b>after</b> the matching <i>proc</i> directive, and cannot be used on
-      its own.</dd>
-    </dl>
-
-    <p>If no <i>proc</i> directives are defined, then walking the prTable will fail (<i>noSuchObject).</i> <a name="lbAP" id=
-    "lbAP">&nbsp;</a></p>
-
-    <h3>Disk Usage Monitoring</h3>This requires that the agent was built with support for the <i>ucd-snmp/disk</i> module (which
-    is included as part of the default build configuration).
-
-    <dl compact="compact">
-      <dt>disk PATH [ MINSPACE | MINPERCENT% ]</dt>
-
-      <dd>monitors the disk mounted at PATH for available disk space.</dd>
-
-      <dd>
-        The minimum threshold can either be specified in Kb (MINSPACE) or as a percentage of the total disk (MINPERCENT% with a
-        '%' character), defaulting to 100Kb if neither are specified. If the free disk space falls below this threshold, then the
-        corresponding dskErrorFlag instance will be set to 1, and a suitable description message reported via the dskErrorMsg
-        instance.
-
-        <dl compact="compact">
-          <dd>
-            <dl compact="compact">
-              <dt>Note:</dt>
-
-              <dd>This situation will <b>not</b> automatically trigger a trap to report the problem - see the DisMan Event MIB
-              section later.</dd>
-            </dl>
-          </dd>
-        </dl>
-      </dd>
-
-      <dt>includeAllDisks MINPERCENT%</dt>
-
-      <dd>
-        configures monitoring of all disks found on the system, using the specified (percentage) threshold. The threshold for
-        individual disks can be adjusted using suitable <i>disk</i> directives (which can come either before or after the
-        <i>includeAllDisks</i> directive).
-
-        <dl compact="compact">
-          <dd>
-            <dl compact="compact">
-              <dt>Note:</dt>
-
-              <dd>Whether <i>disk</i> directives appears before or after <i>includeAllDisks</i> may affect the indexing of the
-              dskTable.</dd>
-            </dl>
-          </dd>
-        </dl>
-      </dd>
-
-      <dd>Only one <i>includeAllDisks</i> directive should be specified - any subsequent copies will be ignored.</dd>
-
-      <dd>The list of mounted disks will be determined when the agent starts using the <a href="setmntent.html">setmntent</a>(3)
-      and <a href="getmntent.html">getmntent</a>(3), or <a href="fopen.html">fopen</a>(3) and <a href=
-      "getmntent.html">getmntent</a>(3), or <a href="setfsent.html">setfsent</a>(3) and <a href="getfsent.html">getfsent</a>(3)
-      system calls. If none of the above system calls are available then the root partition "/" (which is assumed to exist on any
-      UNIX based system) will be monitored. Disks mounted after the agent has started will not be monitored.</dd>
-    </dl>
-
-    <p>If neither any <i>disk</i> directives or <i>includeAllDisks</i> are defined, then walking the dskTable will fail
-    (<i>noSuchObject).</i> <a name="lbAQ" id="lbAQ">&nbsp;</a></p>
-
-    <h3>System Load Monitoring</h3>This requires that the agent was built with support for either the <i>ucd-snmp/loadave</i>
-    module or the <i>ucd-snmp/memory</i> module respectively (both of which are included as part of the default build
-    configuration).
-
-    <dl compact="compact">
-      <dt>load MAX1 [MAX5 [MAX15]]</dt>
-
-      <dd>
-        monitors the load average of the local system, specifying thresholds for the 1-minute, 5-minute and 15-minute averages.
-        If any of these loads exceed the associated maximum value, then the corresponding laErrorFlag instance will be set to 1,
-        and a suitable description message reported via the laErrMessage instance.
-
-        <dl compact="compact">
-          <dd>
-            <dl compact="compact">
-              <dt>Note:</dt>
-
-              <dd>This situation will <b>not</b> automatically trigger a trap to report the problem - see the DisMan Event MIB
-              section later.</dd>
-            </dl>
-          </dd>
-        </dl>
-      </dd>
-
-      <dd>If the MAX15 threshold is omitted, it will default to the MAX5 value. If both MAX5 and MAX15 are omitted, they will
-      default to the MAX1 value. If this directive is not specified, all three thresholds will default to a value of
-      DEFMAXLOADAVE.</dd>
-
-      <dd>If a threshold value of 0 is given, the agent will not report errors via the relevant laErrorFlag or laErrMessage
-      instances, regardless of the current load.</dd>
-    </dl>
-
-    <p>Unlike the <i>proc</i> and <i>disk</i> directives, walking the walking the laTable will succeed (assuming the
-    <i>ucd-snmp/loadave</i> module was configured into the agent), even if the <i>load</i> directive is not present.</p>
-
-    <dl compact="compact">
-      <dt>swap MIN</dt>
-
-      <dd>
-        monitors the amount of swap space available on the local system. If this falls below the specified threshold (MIN Kb),
-        then the <i>memErrorSwap</i> object will be set to 1, and a suitable description message reported via
-        <i>memSwapErrorMsg</i>.
-
-        <dl compact="compact">
-          <dd>
-            <dl compact="compact">
-              <dt>Note:</dt>
-
-              <dd>This situation will <b>not</b> automatically trigger a trap to report the problem - see the DisMan Event MIB
-              section later.</dd>
-            </dl>
-          </dd>
-        </dl>If this directive is not specified, the default threshold is 16 Mb.
-      </dd>
-    </dl><a name="lbAR" id="lbAR">&nbsp;</a>
-
-    <h3>Log File Monitoring</h3>This requires that the agent was built with support for either the <i>ucd-snmp/file</i> or
-    <i>ucd-snmp/logmatch</i> modules respectively (both of which are included as part of the default build configuration).
-
-    <dl compact="compact">
-      <dt>file FILE [MAXSIZE]</dt>
-
-      <dd>
-        monitors the size of the specified file (in Kb). If MAXSIZE is specified, and the size of the file exceeds this
-        threshold, then the corresponding fileErrorFlag instance will be set to 1, and a suitable description message reported
-        via the fileErrorMsg instance.
-
-        <dl compact="compact">
-          <dd>
-            <dl compact="compact">
-              <dt>Note:</dt>
-
-              <dd>This situation will <b>not</b> automatically trigger a trap to report the problem - see the DisMan Event MIB
-              section later.</dd>
-            </dl>
-          </dd>
-        </dl>
-      </dd>
-
-      <dd>A maximum of 20 files can be monitored.</dd>
-    </dl>
-
-    <p>If no <i>file</i> directives are defined, then walking the fileTable will fail (<i>noSuchObject</i>).</p>
-
-    <dl compact="compact">
-      <dt>logmatch NAME PATH CYCLETIME REGEX</dt>
-
-      <dd>monitors the specified file for occurances of the specified pattern REGEX.</dd>
-
-      <dd>A maximum of 50 files can be monitored.</dd>
-    </dl>
-
-    <p>If no <i>logmatch</i> directives are defined, then walking the logMatchTable will fail (<i>noSuchObject).</i> <a name=
-    "lbAS" id="lbAS">&nbsp;</a></p>
-
-    <h2>ACTIVE MONITORING</h2>The usual behaviour of an SNMP agent is to wait for incoming SNMP requests and respond to them - if
-    no requests are received, an agent will typically not initiate any actions. This section describes various directives that
-    can configure <i>snmpd</i> to take a more active role. <a name="lbAT" id="lbAT">&nbsp;</a>
-
-    <h3>Notification Handling</h3>
-
-    <dl compact="compact">
-      <dt>trapcommunity STRING</dt>
-
-      <dd>defines the default community string to be used when sending traps. Note that this directive must be used prior to any
-      community-based trap destination directives that need to use it.</dd>
-
-      <dt>trapsink HOST [COMMUNITY [PORT]]</dt>
-
-      <dt>trap2sink HOST [COMMUNITY [PORT]]</dt>
-
-      <dt>informsink HOST [COMMUNITY [PORT]]</dt>
-
-      <dd>define the address of a notification receiver that should be sent SNMPv1 TRAPs, SNMPv2c TRAP2s, or SNMPv2 INFORM
-      notifications respectively. See the section <b>LISTENING ADDRESSES</b> in the <i><a href="snmpd.html">snmpd</a>(8)</i>
-      manual page for more information about the format of listening addresses. If COMMUNITY is not specified, the most recent
-      <i>trapcommunity</i> string will be used.</dd>
-
-      <dd>
-        If the transport address does not include an explicit port specification, then PORT will be used. If this is not
-        specified, the well known SNMP trap port (162) will be used.
-
-        <dl compact="compact">
-          <dd>
-            <dl compact="compact">
-              <dt>Note:</dt>
-
-              <dd>This mechanism is being deprecated, and the listening port should be specified via the transport specification
-              HOST instead.</dd>
-            </dl>
-          </dd>
-        </dl>
-      </dd>
-
-      <dd>
-        If several sink directives are specified, multiple copies of each notification (in the appropriate formats) will be
-        generated.
-
-        <dl compact="compact">
-          <dd>
-            <dl compact="compact">
-              <dt>Note:</dt>
-
-              <dd>It is <b>not</b> normally appropriate to list two (or all three) sink directives with the same
-              destination.</dd>
-            </dl>
-          </dd>
-        </dl>
-      </dd>
-
-      <dt>trapsess [SNMPCMD_ARGS] HOST</dt>
-
-      <dd>provides a more generic mechanism for defining notification destinations. <i>SNMPCMD_ARGS</i> should be the
-      command-line options required for an equivalent <i>snmptrap</i> (or <i>snmpinform</i>) command to send the desired
-      notification. The option <i>-Ci</i> can be used (with <i>-v2c</i> or <i>-v3</i>) to generate an INFORM notification rather
-      than an unacknowledged TRAP.</dd>
-
-      <dd>This is the appropriate directive for defining SNMPv3 trap receivers. See <a href=
-      "http://www.net-snmp.org/tutorial/tutorial-5/commands/snmptrap-v3.html">http://www.net-snmp.org/tutorial/tutorial-5/commands/snmptrap-v3.html</a>
-      for more information about SNMPv3 notification behaviour.</dd>
-
-      <dt>authtrapenable {1|2}</dt>
-
-      <dd>determines whether to generate authentication failure traps (<i><a href="enabled.html">enabled</a>(1)</i>) or not
-      (<i><a href="disabled.html">disabled</a>(2)</i> - the default). Ordinarily the corresponding MIB object
-      (snmpEnableAuthenTraps.0) is read-write, but specifying this directive makes this object read-only, and attempts to set the
-      value via SET requests will result in a <i>notWritable</i> error response.</dd>
-    </dl><a name="lbAU" id="lbAU">&nbsp;</a>
-
-    <h3>DisMan Event MIB</h3>The previous directives can be used to configure where traps should be sent, but are not concerned
-    with <i>when</i> to send such traps (or what traps should be generated). This is the domain of the Event MIB - developed by
-    the Distributed Management (DisMan) working group of the IETF.
-
-    <p>This requires that the agent was built with support for the <i>disman/event</i> module (which is now included as part of
-    the default build configuration for the most recent distribution).</p>
-
-    <dl compact="compact">
-      <dd>
-        <dl compact="compact">
-          <dt>Note:</dt>
-
-          <dd>The behaviour of the latest implementation differs in some minor respects from the previous code - nothing too
-          significant, but existing scripts may possibly need some minor adjustments.</dd>
-        </dl>
-      </dd>
-    </dl>
-
-    <dl compact="compact">
-      <dt>iquerySecName NAME</dt>
-
-      <dt>agentSecName NAME</dt>
-
-      <dd>specifies the default SNMPv3 username, to be used when making internal queries to retrieve any necessary information
-      (either for evaluating the monitored expression, or building a notification payload). These internal queries always use
-      SNMPv3, even if normal querying of the agent is done using SNMPv1 or SNMPv2c.</dd>
-
-      <dd>Note that this user must also be explicitly created (<i>createUser</i>) and given appropriate access rights (e.g.
-      <i>rouser</i>). This directive is purely concerned with defining <i>which</i> user should be used - not with actually
-      setting this user up.</dd>
-
-      <dt>monitor [OPTIONS] NAME EXPRESSION</dt>
-
-      <dd>defines a MIB object to monitor. If the EXPRESSION condition holds (see below), then this will trigger the
-      corresponding event, and either send a notification or apply a SET assignment (or both). Note that the event will only be
-      triggered once, when the expression first matches. This monitor entry will not fire again until the monitored condition
-      first becomes false, and then matches again. NAME is an administrative name for this expression, and is used for indexing
-      the mteTriggerTable (and related tables). Note also that such monitors use an internal SNMPv3 request to retrieve the
-      values being monitored (even if normal agent queries typically use SNMPv1 or SNMPv2c). See the <i>iquerySecName</i> token
-      described above.</dd>
-
-      <dt><i>EXPRESSION</i></dt>
-
-      <dd>
-        There are three types of monitor expression supported by the Event MIB - existence, boolean and threshold tests.
-
-        <dl compact="compact">
-          <dd>
-            <dl compact="compact">
-              <dt>OID | ! OID | != OID</dt>
-
-              <dd>defines an <i>existence(0)</i> monitor test. A bare OID specifies a <i>present(0)</i> test, which will fire
-              when (an instance of) the monitored OID is created. An expression of the form <i>! OID</i> specifies an <i><a href=
-              "absent.html">absent</a>(1)</i> test, which will fire when the monitored OID is delected. An expression of the form
-              <i>!= OID</i> specifies a <i><a href="changed.html">changed</a>(2)</i> test, which will fire whenever the monitored
-              value(s) change. Note that there <b>must</b> be whitespace before the OID token.</dd>
-
-              <dt>OID OP VALUE</dt>
-
-              <dd>defines a <i><a href="boolean.html">boolean</a>(1)</i> monitor test. OP should be one of the defined comparison
-              operators (!=, ==, &lt;, &lt;=, &gt;, &gt;=) and VALUE should be an integer value to compare against. Note that
-              there <b>must</b> be whitespace around the OP token. A comparison such as OID !=0 will not be handled
-              correctly.</dd>
-
-              <dt>OID MIN MAX [DMIN DMAX]</dt>
-
-              <dd>defines a <i><a href="threshold.html">threshold</a>(2)</i> monitor test. MIN and MAX are integer values,
-              specifying lower and upper thresholds. If the value of the monitored OID falls below the lower threshold (MIN) or
-              rises above the upper threshold (MAX), then the monitor entry will trigger the corresponding event.</dd>
-
-              <dd>Note that the rising threshold event will only be re-armed when the monitored value falls below the
-              <b>lower</b> threshold (MIN). Similarly, the falling threshold event will be re-armed by the upper threshold
-              (MAX).</dd>
-
-              <dd>The optional parameters DMIN and DMAX configure a pair of similar threshold tests, but working with the delta
-              differences between successive sample values.</dd>
-            </dl>
-          </dd>
-        </dl>
-      </dd>
-
-      <dt><i>OPTIONS</i></dt>
-
-      <dd>
-        There are various options to control the behaviour of the monitored expression. These include:
-
-        <dl compact="compact">
-          <dd>
-            <dl compact="compact">
-              <dt>-D</dt>
-
-              <dd>indicates that the expression should be evaluated using delta differences between sample values (rather than
-              the values themselves).</dd>
-
-              <dt>-d OID</dt>
-
-              <dt>-di OID</dt>
-
-              <dd>specifies a discontinuity marker for validating delta differences. A <i>-di</i> object instance will be used
-              exactly as given. A <i>-d</i> object will have the instance subidentifiers from the corresponding (wildcarded)
-              expression object appended. If the <i>-I</i> flag is specified, then there is no difference between these two
-              options.</dd>
-
-              <dd>This option also implies <i>-D</i>.</dd>
-
-              <dt>-e EVENT</dt>
-
-              <dd>specifies the event to be invoked when this monitor entry is triggered. If this option is not given, the
-              monitor entry will generate one of the standard notifications defined in the DISMAN-EVENT-MIB.</dd>
-
-              <dt>-I</dt>
-
-              <dd>indicates that the monitored expression should be applied to the specified OID as a single instance. By
-              default, the OID will be treated as a wildcarded object, and the monitor expanded to cover all matching
-              instances.</dd>
-
-              <dt>-i OID</dt>
-
-              <dt>-o OID</dt>
-
-              <dd>define additional varbinds to be added to the notification payload when this monitor trigger fires. For a
-              wildcarded expression, the suffix of the matched instance will be added to any OIDs specified using <i>-o</i>,
-              while OIDs specified using <i>-i</i> will be treated as exact instances. If the <i>-I</i> flag is specified, then
-              there is no difference between these two options.</dd>
-
-              <dd>See <i>strictDisman</i> for details of the ordering of notification payloads.</dd>
-
-              <dt>-r FREQUENCY</dt>
-
-              <dd>monitors the given expression every FREQUENCY seconds. By default, the expression will be evaluated every 600s
-              (10 minutes).</dd>
-
-              <dt>-S</dt>
-
-              <dd>indicates that the monitor expression should <i>not</i> be evaluated when the agent first starts up. The first
-              evaluation will be done once the first repeat interval has expired.</dd>
-
-              <dt>-s</dt>
-
-              <dd>
-                indicates that the monitor expression <i>should</i> be evaluated when the agent first starts up. This is the
-                default behaviour.
-
-                <dl compact="compact">
-                  <dd>
-                    <dl compact="compact">
-                      <dt>Note:</dt>
-
-                      <dd>Notifications triggered by this initial evaluation will be sent <i>before</i> the coldStart trap.</dd>
-                    </dl>
-                  </dd>
-                </dl>
-              </dd>
-
-              <dt>-u SECNAME</dt>
-
-              <dd>specifies a security name to use for scanning the local host, instead of the default <i>iquerySecName</i>. Once
-              again, this user must be explicitly created and given suitable access rights.</dd>
-            </dl>
-          </dd>
-        </dl>
-      </dd>
-
-      <dt>notificationEvent ENAME NOTIFICATION [-n] [-i OID | -o OID ]*</dt>
-
-      <dd>defines a notification event named ENAME. This can be triggered from a given <i>monitor</i> entry by specifying the
-      option <i>-e ENAME</i> (see above). NOTIFICATION should be the OID of the NOTIFICATION-TYPE definition for the notification
-      to be generated.</dd>
-
-      <dd>If the <i>-n</i> option is given, the notification payload will include the standard varbinds as specified in the
-      OBJECTS clause of the notification MIB definition. This option must come <b>after</b> the NOTIFICATION OID (and the
-      relevant MIB file must be available and loaded by the agent). Otherwise, these varbinds must be listed explicitly (either
-      here or in the corresponding <i>monitor</i> directive).</dd>
-
-      <dd>The <i>-i OID</i> and <i>-o OID</i> options specify additional varbinds to be appended to the notification payload,
-      after the standard list. If the monitor entry that triggered this event involved a wildcarded expression, the suffix of the
-      matched instance will be added to any OIDs specified using <i>-o</i>, while OIDs specified using <i>-i</i> will be treated
-      as exact instances. If the <i>-I</i> flag was specified to the <i>monitor</i> directive, then there is no difference
-      between these two options.</dd>
-
-      <dt>setEvent ENAME [-I] OID = VALUE</dt>
-
-      <dd>defines a set event named ENAME, assigning the (integer) VALUE to the specified OID. This can be triggered from a given
-      <i>monitor</i> entry by specifying the option <i>-e ENAME</i> (see above).</dd>
-
-      <dd>If the monitor entry that triggered this event involved a wildcarded expression, the suffix of the matched instance
-      will normally be added to the OID. If the <i>-I</i> flag was specified to either of the <i>monitor</i> or <i>setEvent</i>
-      directives, the specified OID will be regarded as an exact single instance.</dd>
-
-      <dt>strictDisman yes</dt>
-
-      <dd>The definition of SNMP notifications states that the varbinds defined in the OBJECT clause should come first (in the
-      order specified), followed by any "extra" varbinds that the notification generator feels might be useful. The most natural
-      approach would be to associate these mandatory varbinds with the <i>notificationEvent</i> entry, and append any varbinds
-      associated with the monitor entry that triggered the notification to the end of this list. This is the default behaviour of
-      the Net-SNMP Event MIB implementation.</dd>
-
-      <dd>
-        Unfortunately, the DisMan Event MIB specifications actually state that the trigger-related varbinds should come
-        <b>first</b>, followed by the event-related ones. This directive can be used to restore this strictly-correct (but
-        inappropriate) behaviour.
-
-        <dl compact="compact">
-          <dd>
-            <dl compact="compact">
-              <dt>Note:</dt>
-
-              <dd>Strict DisMan ordering may result in generating invalid notifications payload lists if the <i>notificationEvent
-              -n</i> flag is used together with <i>monitor -o</i> (or <i>-i</i>) varbind options.</dd>
-            </dl>
-          </dd>
-        </dl>
-      </dd>
-
-      <dd>If no <i>monitor</i> entries specify payload varbinds, then the setting of this directive is irrelevant.</dd>
-
-      <dt>linkUpDownNotifications yes</dt>
-
-      <dd>will configure the Event MIB tables to monitor the ifTable for network interfaces being taken up or down, and
-      triggering a <i>linkUp</i> or <i>linkDown</i> notification as appropriate.</dd>
-
-      <dd>
-        This is exactly equivalent to the configuration:
-
-        <dl compact="compact">
-          <dd>
-            <dl compact="compact">
-              <dd>
-                <pre>
+</PRE>
+
+</DL>
+
+<DT><DD>
+Due to the way localization happens, localized privacy keys are
+expected to be the length needed by the algorithm (128 bits for all
+supported algorithms).  Master encryption keys, though, need to be the
+length required by the authentication algorithm not the length
+required by the encrypting algorithm (MD5: 16 bytes, SHA: 20 bytes).
+</DL>
+<A NAME="lbAH">&nbsp;</A>
+<H3>SSH Support</H3>
+
+To use SSH, you'll need to configure sshd to invoke sshtosnmp as well
+as configure the access control settings to allow access through the
+tsm security model using the user name provided to snmpd by the ssh
+transport.
+<A NAME="lbAI">&nbsp;</A>
+<H3>DTLS Support</H3>
+
+For DTLS,
+<B>snmpd</B>
+
+will need to be configured with it's own X.509 certificate as well as
+the certificates of the client users to be allowed to connect to the
+agent.  The access control will need to be set up as well to allow
+access through the
+<I>tsm</I>
+
+security model.  The CommonName of the Subject from the X.509
+certificate will be passed to snmpd as the SNMPv3 username to use.
+See the <A HREF="http://www.net-snmp.org/wiki/index.php/Using_DTLS">http://www.net-snmp.org/wiki/index.php/Using_DTLS</A> web page for
+more detailed instructions for setting up DTLS.
+<DL COMPACT>
+<DT>defX509ServerPub FILE<DD>
+<DT>defX509ServerPriv FILE<DD>
+These two directives specify the public and private key files for the
+certificate that
+<B>snmpd</B>
+
+should present to incoming connections.
+<DT>defX509ClientCerts FILE<DD>
+This directive specifies a file containing all of the public keys (or
+CAs of public keys) for clients to connect the server with.
+</DL>
+<A NAME="lbAJ">&nbsp;</A>
+<H2>ACCESS CONTROL</H2>
+
+<B>snmpd</B>
+
+supports the View-Based Access Control Model (VACM) as defined in RFC
+2575, to control who can retrieve or update information.  To this end,
+it recognizes various directives relating to access control.
+<A NAME="lbAK">&nbsp;</A>
+<H3>Traditional Access Control</H3>
+
+Most simple access control requirements can be specified using the
+directives <I>rouser</I>/<I>rwuser</I> (for SNMPv3) or
+<I>rocommunity</I>/<I>rwcommunity</I> (for SNMPv1 or SNMPv2c).
+<DL COMPACT>
+<DT>rouser [-s SECMODEL] USER [noauth|auth|priv [OID | -V VIEW [CONTEXT]]]<DD>
+<DT>rwuser [-s SECMODEL]  USER [noauth|auth|priv [OID | -V VIEW [CONTEXT]]]<DD>
+specify an SNMPv3 user that will be allowed read-only (GET and GETNEXT)
+or read-write (GET, GETNEXT and SET) access respectively.
+By default, this will provide access to the full OID tree for authenticated
+(including encrypted) SNMPv3 requests, using the default context.
+An alternative minimum security level can be specified using <I>noauth</I>
+(to allow unauthenticated requests), or <I>priv</I> (to enforce use of
+encryption).  The OID field restricts access for that
+user to the subtree rooted at the given OID, or the named view.
+An optional context can also be specified, or &quot;context*&quot; to denote a context
+prefix.  If no context field is specified (or the token &quot;*&quot; is used), the
+directive will match all possible contexts.
+<DT><DD>
+If SECMODEL is specified then it will be the security model required
+for that user (note that identical user names may come in over
+different security models and will be appropriately separated via the
+access control settings).  The default security model is &quot;usm&quot; and the
+other common security models are likely &quot;tsm&quot; when using SSH or DTLS
+support and &quot;ksm&quot; if the Kerberos support has been compiled in.
+<DT>rocommunity COMMUNITY [SOURCE [OID | -V VIEW [CONTEXT]]]<DD>
+<DT>rwcommunity COMMUNITY [SOURCE [OID | -V VIEW [CONTEXT]]]<DD>
+specify an SNMPv1 or SNMPv2c community that will be allowed read-only
+(GET and GETNEXT) or read-write (GET, GETNEXT and SET) access respectively.
+By default, this will provide access to the full OID tree for such requests,
+regardless of where they were sent from. The SOURCE token can be used to
+restrict access to requests from the specified system(s) - see
+<I>com2sec</I> for the full details.  The OID field restricts access for
+that community to the subtree rooted at the given OID, or named view.
+Contexts are typically less relevant to community-based SNMP versions,
+but the same behaviour applies here.
+<DT>rocommunity6 COMMUNITY [SOURCE [OID | -V VIEW [CONTEXT]]]<DD>
+<DT>rwcommunity6 COMMUNITY [SOURCE [OID | -V VIEW [CONTEXT]]]<DD>
+are directives relating to requests received using IPv6
+(if the agent supports such transport domains).
+The interpretation of the SOURCE, OID, VIEW and CONTEXT tokens are exactly
+the same as for the IPv4 versions.
+</DL>
+<P>
+
+In each case, only one directive should be specified for a given SNMPv3 user,
+or community string.
+It is <B>not</B> appropriate to specify both <I>rouser</I>
+and <I>rwuser</I> directives referring to the same SNMPv3 user (or equivalent
+community settings). The <I>rwuser</I> directive provides all the access
+of <I>rouser</I> (as well as allowing SET support).
+The same holds true for the community-based directives.
+<P>
+
+More complex access requirements (such as access to two
+or more distinct OID subtrees, or different views for GET and SET requests)
+should use one of the other access control mechanisms.
+Note that if several distinct communities or SNMPv3 users need to be granted
+the same level of access, it would also be more efficient to use the main VACM
+configuration directives.
+<A NAME="lbAL">&nbsp;</A>
+<H3>VACM Configuration</H3>
+
+The full flexibility of the VACM is available using four configuration
+directives - <I>com2sec</I>, <I>group</I>, <I>view</I> and <I>access</I>.
+These provide direct configuration of the underlying VACM tables.
+<DL COMPACT>
+<DT>com2sec  [-Cn CONTEXT] SECNAME SOURCE COMMUNITY<DD>
+<DT>com2sec6 [-Cn CONTEXT] SECNAME SOURCE COMMUNITY<DD>
+map an SNMPv1 or SNMPv2c community string to a security name - either from
+a particular range of source addresses, or globally (<I>&quot;default&quot;</I>).
+A restricted source can either be a specific hostname (or address), or
+a subnet - represented as IP/MASK (e.g. 10.10.10.0/255.255.255.0), or
+IP/BITS (e.g. 10.10.10.0/24), or the IPv6 equivalents.
+<DT><DD>
+The same community string can be specified in several separate directives
+(presumably with different source tokens), and the first source/community
+combination that matches the incoming request will be selected.
+Various source/community combinations can also map to the same security name.
+<DT><DD>
+If a CONTEXT is specified (using <I>-Cn</I>), the community string will be
+mapped to a security name in the named SNMPv3 context. Otherwise the
+default context (&quot;&quot;) will be used.
+<DT>com2secunix [-Cn CONTEXT] SECNAME SOCKPATH COMMUNITY<DD>
+is the Unix domain sockets version of <I>com2sec</I>.
+<DT>group GROUP {v1|v2c|usm|tsm|ksm} SECNAME<DD>
+maps a security name (in the specified security model) into
+a named group.  Several <I>group</I> directives can specify the
+same group name, allowing a single access setting to apply to several 
+users and/or community strings.
+<DT><DD>
+Note that groups must be set up for the two community-based models separately -
+a single <I>com2sec</I> (or equivalent) directive will typically be
+accompanied by <B>two</B> <I>group</I> directives.
+<DT>view VNAME TYPE OID [MASK]<DD>
+defines a named &quot;view&quot; - a subset of the overall OID tree. This is most
+commonly a single subtree, but several <I>view</I> directives can be given
+with the same view name (VNAME), to build up a more complex collection of OIDs.
+TYPE is either <I>included</I> or <I>excluded</I>, which can again define
+a more complex view (e.g by excluding certain sensitive objects
+from an otherwise accessible subtree).
+<DT><DD>
+MASK is a list of hex octets (optionally separated by '.' or ':') with
+the set bits indicating which subidentifiers in the view OID to match
+against.  If not specified, this defaults to matching the OID exactly
+(all bits set), thus defining a simple OID subtree.  So:
+<DL COMPACT><DT><DD>
+<DL COMPACT><DT><DD>
+view iso1 included .iso  0xf0
+<BR>
+
+view iso2 included .iso
+<BR>
+
+view iso3 included .iso.org.dod.mgmt  0xf0
+</DL>
+
+</DL>
+
+<DT><DD>
+would all define the same view, covering the whole of the '<A HREF="http://localhost/cgi-bin/man/man2html?1+iso">iso</A>(1)' subtree
+(with the third example ignoring the subidentifiers not covered by the mask).
+<DT><DD>
+More usefully, the mask can be used to define a view covering a particular
+row (or rows) in a table, by matching against the appropriate table index
+value, but skipping the column subidentifier:
+<DL COMPACT><DT><DD>
+<DL COMPACT><DT><DD>
+<DL COMPACT>
+<DT>view ifRow4 included .1.3.6.1.2.1.2.2.1.0.4  0xff:a0<DD>
+</DL>
+</DL>
+
+</DL>
+
+<DT><DD>
+Note that a mask longer than 8 bits must use ':' to separate the individual
+octets.
+<DT>access GROUP CONTEXT {any|v1|v2c|usm|tsm|ksm} LEVEL PREFX READ WRITE NOTIFY<DD>
+maps from a group of users/communities (with a particular security model
+and minimum security level, and in a specific context) to one of three views,
+depending on the request being processed.
+<DT><DD>
+LEVEL is one of <I>noauth</I>, <I>auth</I>, or <I>priv</I>.
+PREFX specifies how CONTEXT should be matched against the context of
+the incoming request, either <I>exact</I> or <I>prefix</I>.
+READ, WRITE and NOTIFY specifies the view to be used for GET*, SET
+and TRAP/INFORM requests (althought the NOTIFY view is not currently used).
+For v1 or v2c access, LEVEL will need to be <I>noauth</I>.
+</DL>
+<A NAME="lbAM">&nbsp;</A>
+<H3>Typed-View Configuration</H3>
+
+The final group of directives extend the VACM approach into a more flexible
+mechanism, which can be applied to other access control requirements. Rather than
+the fixed three views of the standard VACM mechanism, this can be used to
+configure various different view types.  As far as the main SNMP agent is
+concerned, the two main view types are <I>read</I> and <I>write</I>,
+corresponding to the READ and WRITE views of the main <I>access</I> directive.
+See the '<A HREF="http://localhost/cgi-bin/man/man2html?5+snmptrapd.conf">snmptrapd.conf</A>(5)' man page for discussion of other view types.
+<DL COMPACT>
+<DT>authcommunity TYPES  COMMUNITY   [SOURCE [OID | -V VIEW [CONTEXT]]]<DD>
+is an alternative to the <I>rocommunity</I>/<I>rwcommunity</I> directives.
+TYPES will usually be <I>read</I> or <I>read,write</I> respectively.
+The view specification can either be an OID subtree (as before),
+or a named view (defined using the
+<I>view</I> directive) for greater flexibility.  If this is omitted,
+then access will be allowed to the full OID tree.
+If CONTEXT is specified, access is configured within this SNMPv3 context.
+Otherwise the default context (&quot;&quot;) is used.
+<DT>authuser   TYPES [-s MODEL] USER  [LEVEL [OID | -V VIEW [CONTEXT]]]<DD>
+is an alternative to the <I>rouser</I>/<I>rwuser</I> directives.
+The fields TYPES, OID, VIEW and CONTEXT have the same meaning as for
+<I>authcommunity</I>.
+<DT>authgroup  TYPES [-s MODEL] GROUP [LEVEL [OID | -V VIEW [CONTEXT]]]<DD>
+is a companion to the <I>authuser</I> directive, specifying access
+for a particular group (defined using the <I>group</I> directive as usual).
+Both <I>authuser</I> and <I>authgroup</I> default to authenticated requests -
+LEVEL can also be specified as <I>noauth</I> or <I>priv</I> to allow
+unauthenticated requests, or require encryption respectively.
+Both <I>authuser</I> and <I>authgroup</I> directives also default to configuring
+access for SNMPv3/USM requests - use the '-s' flag to specify an alternative
+security model (using the same values as for <I>access</I> above).
+<DT>authaccess TYPES [-s MODEL] GROUP VIEW [LEVEL [CONTEXT]]<DD>
+also configures the access for a particular group,
+specifying the name and type of view to apply. The MODEL and LEVEL fields
+are interpreted in the same way as for <I>authgroup</I>.
+If CONTEXT is specified, access is configured within this SNMPv3 context
+(or contexts with this prefix if the CONTEXT field ends with '*').
+Otherwise the default context (&quot;&quot;) is used.
+<DT>setaccess GROUP CONTEXT MODEL LEVEL PREFIX VIEW TYPES<DD>
+is a direct equivalent to the original <I>access</I> directive, typically
+listing the view types as <I>read</I> or <I>read,write</I> as appropriate.
+(or see '<A HREF="http://localhost/cgi-bin/man/man2html?5+snmptrapd.conf">snmptrapd.conf</A>(5)' for other possibilities).
+All other fields have the same interpretation as with <I>access</I>.
+</DL>
+<A NAME="lbAN">&nbsp;</A>
+<H2>SYSTEM INFORMATION</H2>
+
+Most of the information reported by the Net-SNMP agent is retrieved
+from the underlying system, or dynamically configured via SNMP SET requests
+(and retained from one run of the agent to the next).
+However, certain MIB objects can be configured or controlled via
+the <I><A HREF="http://localhost/cgi-bin/man/man2html?5+snmpd.conf">snmpd.conf</A>(5)</I> file.
+<A NAME="lbAO">&nbsp;</A>
+<H3>System Group</H3>
+
+Most of the scalar objects in the 'system' group can be configured
+in this way:
+<DL COMPACT>
+<DT>sysLocation STRING<DD>
+<DT>sysContact STRING<DD>
+<DT>sysName STRING<DD>
+set the system location, system contact or system name
+(sysLocation.0, sysContact.0 and sysName.0) for the agent respectively.
+Ordinarily these objects are writeable via suitably authorized SNMP SET
+requests.  However, specifying one of these directives makes the
+corresponding object read-only, and attempts to SET it will result in
+a <I>notWritable</I> error response.
+<DT>sysServices NUMBER<DD>
+sets the value of the sysServices.0 object.
+For a host system, a good value is 72 (application + end-to-end layers).
+If this directive is not specified, then no value will be reported
+for the sysServices.0 object.
+<DT>sysDescr STRING<DD>
+<DT>sysObjectID OID<DD>
+sets the system description or object ID for the agent.
+Although these MIB objects are not SNMP-writable, these directives can be
+used by a network administrator to configure suitable values for them.
+</DL>
+<A NAME="lbAP">&nbsp;</A>
+<H3>Interfaces Group</H3>
+
+<DL COMPACT>
+<DT>interface NAME TYPE SPEED<DD>
+can be used to provide appropriate type and speed settings for
+interfaces where the agent fails to determine this information correctly.
+TYPE is a type value as given in the IANAifType-MIB,
+and can be specified numerically or by name (assuming this MIB is loaded).
+</DL>
+<A NAME="lbAQ">&nbsp;</A>
+<H3>Host Resources Group</H3>
+
+This requires that the agent was built with support for the
+<I>host</I> module (which is now included as part of the default build 
+configuration on the major supported platforms).
+
+
+
+<DL COMPACT>
+<DT>ignoreDisk STRING<DD>
+controls which disk devices are scanned as part of populating the
+hrDiskStorageTable (and hrDeviceTable).
+The HostRes implementation code includes a list of disk device patterns
+appropriate for the current operating system, some of which may cause
+the agent to block when trying to open the corresponding disk devices.
+This might lead to a timeout when walking these tables, possibly
+resulting in inconsistent behaviour.  This directive can be used
+to specify particular devices (either individually or wildcarded)
+that should not be checked.
+<DL COMPACT><DT><DD>
+<DL COMPACT>
+<DT>Note:<DD>
+Please consult the source (<I>host/hr_disk.c</I>) and check for the
+<I>Add_HR_Disk_entry</I> calls relevant for a particular O/S
+to determine the list of devices that will be scanned.
+</DL>
+</DL>
+
+<DT><DD>
+The pattern can include one or more wildcard expressions.
+See <I><A HREF="http://localhost/cgi-bin/man/man2html?5+snmpd.examples">snmpd.examples</A>(5)</I> for illustration of the wildcard syntax.
+<DT>skipNFSInHostResources true<DD>
+controls whether NFS and NFS-like file systems should be omitted
+from the hrStorageTable (true or 1) or not (false or 0, which is the default).
+If the Net-SNMP agent gets hung on NFS-mounted filesystems, you
+can try setting this to '1'.
+<DT>storageUseNFS [1|2]<DD>
+controls how NFS and NFS-like file systems should be reported
+in the hrStorageTable.
+as 'Network Disks' (1) or 'Fixed Disks' (2)
+Historically, the Net-SNMP agent has reported such file systems
+as 'Fixed Disks', and this is still the default behaviour.
+Setting this directive to '1' reports such file systems as
+'Network Disks', as required by the Host Resources MIB.
+</DL>
+<A NAME="lbAR">&nbsp;</A>
+<H3>Process Monitoring </H3>
+
+The hrSWRun group of the Host Resources MIB provides
+information about individual processes running on the local system.
+The prTable of the UCD-SNMP-MIB complements this by reporting
+on selected services (which may involve multiple processes).
+This requires that the agent was built with support for the
+<I>ucd-snmp/proc</I> module (which is included as part of the
+default build configuration).
+<DL COMPACT>
+<DT>proc NAME [MAX [MIN]]<DD>
+monitors the number of processes called NAME (as reported by &quot;/bin/ps -e&quot;)
+running on the local system.
+<DT><DD>
+If the number of NAMEd processes is less than MIN or greater than MAX,
+then the corresponding prErrorFlag instance will be
+set to 1, and a suitable description message reported via the
+prErrMessage instance.
+<DL COMPACT><DT><DD>
+<DL COMPACT>
+<DT>Note:<DD>
+This situation will <B>not</B> automatically trigger a trap to report
+the problem - see the DisMan Event MIB section later.
+</DL>
+</DL>
+
+<DT><DD>
+If neither MAX nor MIN are specified (or are both 0), they will
+default to <B>infinity</B> and 1 respectively (&quot;at least one&quot;).
+If only MAX is specified, MIN will default to 0 (&quot;no more than MAX&quot;).
+<DT>procfix NAME PROG ARGS<DD>
+registers a command that can be run to fix errors with the given
+process NAME.  This will be invoked when the corresponding
+prErrFix instance is set to 1.
+<DL COMPACT><DT><DD>
+<DL COMPACT>
+<DT>Note:<DD>
+This command will <B>not</B> be invoked automatically.
+
+</DL>
+</DL>
+
+<DT><DD>
+The <I>procfix</I> directive must be specified <B>after</B> the matching
+<I>proc</I> directive, and cannot be used on its own.
+</DL>
+<P>
+
+If no <I>proc</I> directives are defined, then walking the
+prTable will fail (<I>noSuchObject).
+</I><A NAME="lbAS">&nbsp;</A>
+<H3>Disk Usage Monitoring</H3>
+
+This requires that the agent was built with support for the
+<I>ucd-snmp/disk</I> module (which is included as part of the
+default build configuration).
+<DL COMPACT>
+<DT>disk PATH [ MINSPACE | MINPERCENT% ]<DD>
+monitors the disk mounted at PATH for available disk space.
+<DT><DD>
+The minimum threshold can either be specified in kB (MINSPACE) or
+as a percentage of the total disk (MINPERCENT% with a '%' character),
+defaulting to 100kB if neither are specified.
+If the free disk space falls below this threshold, 
+then the corresponding dskErrorFlag instance will be
+set to 1, and a suitable description message reported via the
+dskErrorMsg instance.
+<DL COMPACT><DT><DD>
+<DL COMPACT>
+<DT>Note:<DD>
+This situation will <B>not</B> automatically trigger a trap to report
+the problem - see the DisMan Event MIB section later.
+</DL>
+</DL>
+
+<DT>includeAllDisks MINPERCENT%<DD>
+configures monitoring of all disks found on the system,
+using the specified (percentage) threshold.
+The threshold for individual disks can be adjusted using suitable
+<I>disk</I> directives (which can come either before or after the
+<I>includeAllDisks</I> directive).
+<DL COMPACT><DT><DD>
+<DL COMPACT>
+<DT>Note:<DD>
+Whether <I>disk</I> directives appears before or after <I>includeAllDisks</I> 
+may affect the indexing of the dskTable.
+</DL>
+</DL>
+
+<DT><DD>
+Only one <I>includeAllDisks</I> directive should be specified - any
+subsequent copies will be ignored.
+<DT><DD>
+The list of mounted disks will be determined when the agent starts using the
+<A HREF="http://localhost/cgi-bin/man/man2html?3+setmntent">setmntent</A>(3) and <A HREF="http://localhost/cgi-bin/man/man2html?3+getmntent">getmntent</A>(3), or <A HREF="http://localhost/cgi-bin/man/man2html?3+fopen">fopen</A>(3) and <A HREF="http://localhost/cgi-bin/man/man2html?3+getmntent">getmntent</A>(3),  or
+<A HREF="http://localhost/cgi-bin/man/man2html?3+setfsent">setfsent</A>(3)  and  <A HREF="http://localhost/cgi-bin/man/man2html?3+getfsent">getfsent</A>(3) system calls. If none of the above
+system calls are available then the root partition  &quot;/&quot;
+(which  is  assumed to exist on any UNIX based system) will be monitored.
+Disks mounted after the agent has started will not be monitored.
+
+
+
+</DL>
+<P>
+
+If neither any <I>disk</I> directives or <I>includeAllDisks</I> are defined,
+then walking the dskTable will fail (<I>noSuchObject).
+</I><A NAME="lbAT">&nbsp;</A>
+<H3>System Load Monitoring</H3>
+
+This requires that the agent was built with support for either the
+<I>ucd-snmp/loadave</I> module or the <I>ucd-snmp/memory</I> module
+respectively (both of which are included as part of the
+default build configuration).
+<DL COMPACT>
+<DT>load MAX1 [MAX5 [MAX15]]<DD>
+monitors the load average of the local system, specifying
+thresholds for the 1-minute, 5-minute and 15-minute averages.
+If any of these loads exceed the associated maximum value, 
+then the corresponding laErrorFlag instance will be
+set to 1, and a suitable description message reported via the
+laErrMessage instance.
+<DL COMPACT><DT><DD>
+<DL COMPACT>
+<DT>Note:<DD>
+This situation will <B>not</B> automatically trigger a trap to report
+the problem - see the DisMan Event MIB section later.
+</DL>
+</DL>
+
+<DT><DD>
+If the MAX15 threshold is omitted, it will default to the MAX5 value.
+If both MAX5 and MAX15 are omitted, they will default to the MAX1 value.
+If this directive is not specified, all three thresholds will
+default to a value of DEFMAXLOADAVE.
+<DT><DD>
+If a threshold value of 0 is given, the agent will not report errors
+via the relevant laErrorFlag or laErrMessage instances,
+regardless of the current load.
+</DL>
+<P>
+
+Unlike the <I>proc</I> and <I>disk</I> directives, walking the
+walking the laTable will succeed (assuming the
+<I>ucd-snmp/loadave</I> module was configured into the agent),
+even if the <I>load</I> directive is not present.
+<DL COMPACT>
+<DT>swap MIN <DD>
+monitors the amount of swap space available on the local system.
+If this falls below the specified threshold (MIN kB),
+then the <I>memErrorSwap</I> object will be set to 1,
+and a suitable description message reported via <I>memSwapErrorMsg</I>.
+<DL COMPACT><DT><DD>
+<DL COMPACT>
+<DT>Note:<DD>
+This situation will <B>not</B> automatically trigger a trap to report
+the problem - see the DisMan Event MIB section later.
+</DL>
+</DL>
+
+If this directive is not specified, the default threshold is 16 MB.
+</DL>
+<A NAME="lbAU">&nbsp;</A>
+<H3>Log File Monitoring</H3>
+
+This requires that the agent was built with support for either the
+<I>ucd-snmp/file</I> or <I>ucd-snmp/logmatch</I> modules respectively
+(both of which are included as part of the
+default build configuration).
+<DL COMPACT>
+<DT>file FILE [MAXSIZE]<DD>
+monitors the size of the specified file (in kB).
+If MAXSIZE is specified, and the size of the file exceeds
+this threshold, then the corresponding fileErrorFlag
+instance will be set to 1, and a suitable description message reported
+via the fileErrorMsg instance.
+<DL COMPACT><DT><DD>
+<DL COMPACT>
+<DT>Note:<DD>
+This situation will <B>not</B> automatically trigger a trap to report
+the problem - see the DisMan Event MIB section later.
+</DL>
+</DL>
+
+<DT><DD>
+Note: A maximum of 20 files can be monitored.
+<DT><DD>
+Note: If no <I>file</I> directives are defined, then walking the
+fileTable will fail (<I>noSuchObject</I>).
+<DT>logmatch NAME FILE CYCLETIME REGEX<DD>
+monitors the specified file for occurances of the specified
+pattern REGEX. The file position is stored internally so the entire file
+is only read initially, every subsequent pass will only read the new lines
+added to the file since the last read.
+<DL COMPACT><DT><DD>
+<DL COMPACT>
+<DT>NAME<DD>
+name of the logmatch instance (will appear as logMatchName under
+logMatch/logMatchTable/logMatchEntry/logMatchName in the ucd-snmp MIB tree)
+<DT>FILE<DD>
+absolute path to the logfile to be monitored. Note that this path
+can contain date/time directives (like in the UNIX 'date' command). See the
+manual page for 'strftime' for the various directives accepted.
+<DT>CYCLETIME<DD>
+time interval for each logfile read and internal variable update in seconds.
+Note: an SNMPGET* operation will also trigger an immediate logfile read and
+variable update.
+<DT>REGEX<DD>
+the regular expression to be used. Note: DO NOT enclose the regular expression
+in quotes even if there are spaces in the expression as the quotes will also
+become part of the pattern to be matched!
+</DL>
+</DL>
+
+<DT><DD>
+Example:
+<DL COMPACT><DT><DD>
+<DL COMPACT>
+<DT><DD>
+logmatch apache-GETs /usr/local/apache/logs/access.log-%Y-%m-%d 60 GET.*HTTP.*
+<DT><DD>
+This logmatch instance is named 'apache-GETs', uses 'GET.*HTTP.*' as its
+regular expression and it will monitor the file named
+(assuming today is May 6th 2009): '/usr/local/apache/logs/access.log-2009-05-06',
+tomorrow it will look for 'access.log-2009-05-07'. The logfile is read every 60
+seconds.
+</DL>
+</DL>
+
+<DT><DD>
+Note: A maximum of 250 logmatch directives can be specified.
+<DT><DD>
+Note: If no <I>logmatch</I> directives are defined, then walking the
+logMatchTable will fail (<I>noSuchObject).
+</DL>
+</I><A NAME="lbAV">&nbsp;</A>
+<H2>ACTIVE MONITORING</H2>
+
+The usual behaviour of an SNMP agent is to wait for incoming SNMP requests
+and respond to them - if no requests are received, an agent will typically
+not initiate any actions. This section describes various directives that
+can configure <I>snmpd</I> to take a more active role.
+<A NAME="lbAW">&nbsp;</A>
+<H3>Notification Handling</H3>
+
+<DL COMPACT>
+<DT>trapcommunity STRING<DD>
+defines the default community string to be used when sending traps.
+Note that this directive must be used prior to any community-based
+trap destination directives that need to use it.
+<DT>trapsink HOST [COMMUNITY [PORT]]<DD>
+<DT>trap2sink HOST [COMMUNITY [PORT]]<DD>
+<DT>informsink HOST [COMMUNITY [PORT]]<DD>
+define the address of a notification receiver that should be sent
+SNMPv1 TRAPs, SNMPv2c TRAP2s, or SNMPv2 INFORM notifications respectively.
+See the section 
+<B>LISTENING ADDRESSES</B>
+
+in the
+<I><A HREF="http://localhost/cgi-bin/man/man2html?8+snmpd">snmpd</A>(8)</I>
+
+manual page for more information about the format of listening
+addresses.
+If COMMUNITY is not specified, the most recent <I>trapcommunity</I>
+string will be used.
+<DT><DD>
+If the transport address does not include an explicit
+port specification, then PORT will be used.
+If this is not specified, the well known SNMP trap
+port (162) will be used.
+<DL COMPACT><DT><DD>
+<DL COMPACT>
+<DT>Note:<DD>
+This mechanism is being deprecated, and the listening port
+should be specified via the transport specification HOST instead.
+</DL>
+</DL>
+
+<DT><DD>
+If several sink directives are specified, multiple
+copies of each notification (in the appropriate formats)
+will be generated.
+<DL COMPACT><DT><DD>
+<DL COMPACT>
+<DT>Note:<DD>
+It is <B>not</B> normally appropriate to list two (or all three)
+sink directives with the same destination.
+</DL>
+</DL>
+
+<DT>trapsess [SNMPCMD_ARGS] HOST<DD>
+provides a more generic mechanism for defining notification destinations.
+<I>SNMPCMD_ARGS</I>
+
+should be the command-line options required for an equivalent
+<I>snmptrap</I> (or <I>snmpinform</I>) command to send the desired notification.
+The option <I>-Ci</I> can be used (with <I>-v2c</I> or <I>-v3</I>) to generate
+an INFORM notification rather than an unacknowledged TRAP.
+<DT><DD>
+This is the appropriate directive for defining SNMPv3 trap receivers.
+See
+<A HREF="http://www.net-snmp.org/tutorial/tutorial-5/commands/snmptrap-v3.html">http://www.net-snmp.org/tutorial/tutorial-5/commands/snmptrap-v3.html</A>
+for more information about SNMPv3 notification behaviour.
+<DT>authtrapenable {1|2}<DD>
+determines whether to generate authentication failure traps
+(<I><A HREF="http://localhost/cgi-bin/man/man2html?1+enabled">enabled</A>(1)</I>) or not (<I><A HREF="http://localhost/cgi-bin/man/man2html?2+disabled">disabled</A>(2)</I> - the default).
+Ordinarily the corresponding MIB
+object (snmpEnableAuthenTraps.0) is read-write, but specifying
+this directive makes this object read-only, and attempts to set the
+value via SET requests will result in a <I>notWritable</I> error response.
+
+<DT>v1trapaddress HOST<DD>
+defines the agent address, which is inserted into SNMPv1 TRAPs. Arbitrary local 
+IPv4 address is chosen if this option is ommited. This option is useful mainly 
+when the agent is visible from outside world by specific address only (e.g. 
+because of network address translation or firewall).
+</DL>
+<A NAME="lbAX">&nbsp;</A>
+<H3>DisMan Event MIB</H3>
+
+The previous directives can be used to configure where traps should
+be sent, but are not concerned with <I>when</I> to send such traps
+(or what traps should be generated).  This is the domain of the
+Event MIB - developed by the Distributed Management (DisMan)
+working group of the IETF.
+<P>
+
+This requires that the agent was built with support for the
+<I>disman/event</I> module (which is now included as part of the
+default build configuration for the most recent distribution).
+<DL COMPACT><DT><DD>
+<DL COMPACT>
+<DT>Note:<DD>
+The behaviour of the latest implementation differs in some minor
+respects from the previous code - nothing too significant, but
+existing scripts may possibly need some minor adjustments.
+</DL>
+</DL>
+
+<DL COMPACT>
+<DT>iquerySecName NAME<DD>
+<DT>agentSecName NAME<DD>
+specifies the default SNMPv3 username, to be used when making internal
+queries to retrieve any necessary information (either for evaluating
+the monitored expression, or building a notification payload).
+These internal queries always use SNMPv3, even if normal querying
+of the agent is done using SNMPv1 or SNMPv2c.
+<DT><DD>
+Note that this user must also be explicitly created (<I>createUser</I>)
+and given appropriate access rights (e.g. <I>rouser</I>).  This
+directive is purely concerned with defining <I>which</I> user should
+be used - not with actually setting this user up.
+
+
+
+
+
+
+<DT>monitor [OPTIONS] NAME EXPRESSION<DD>
+defines a MIB object to monitor.
+If the EXPRESSION condition holds (see below), then this will trigger
+the corresponding event, and either send a notification or apply
+a SET assignment (or both).
+Note that the event will only be triggered once, when the expression
+first matches.  This monitor entry will not fire again until the
+monitored condition first becomes false, and then matches again.
+NAME is an administrative name for this expression, and is used for
+indexing the mteTriggerTable (and related tables).
+Note also that such monitors use an internal SNMPv3 request to retrieve
+the values being monitored (even if normal agent queries typically use
+SNMPv1 or SNMPv2c).  See the <I>iquerySecName</I> token described above.
+<DT><I>EXPRESSION</I><DD>
+There are three types of monitor expression supported by the Event MIB -
+existence, boolean and threshold tests.
+<DL COMPACT><DT><DD>
+<DL COMPACT>
+<DT>OID | ! OID | != OID<DD>
+defines an <I>existence(0)</I> monitor test.
+A bare OID specifies a <I>present(0)</I> test, which will fire when
+(an instance of) the monitored OID is created.
+An expression of the form <I>! OID</I> specifies an <I><A HREF="http://localhost/cgi-bin/man/man2html?1+absent">absent</A>(1)</I> test,
+which will fire when the monitored OID is delected.
+An expression of the form <I>!= OID</I> specifies a <I><A HREF="http://localhost/cgi-bin/man/man2html?2+changed">changed</A>(2)</I> test,
+which will fire whenever the monitored value(s) change.
+Note that there <B>must</B> be whitespace before the OID token.
+<DT>OID OP VALUE<DD>
+defines a <I><A HREF="http://localhost/cgi-bin/man/man2html?1+boolean">boolean</A>(1)</I> monitor test.
+OP should be one of the defined
+comparison operators (!=, ==, &lt;, &lt;=, &gt;, &gt;=) and VALUE should be an
+integer value to compare against.
+Note that there <B>must</B> be whitespace around the OP token.
+A comparison such as OID !=0 will not be handled correctly.
+<DT>OID MIN MAX [DMIN DMAX]<DD>
+defines a <I><A HREF="http://localhost/cgi-bin/man/man2html?2+threshold">threshold</A>(2)</I> monitor test.
+MIN and MAX are integer values, specifying lower and upper thresholds.
+If the value of the monitored OID falls below the lower threshold (MIN)
+or rises above the upper threshold (MAX), then the monitor entry will
+trigger the corresponding event.
+<DT><DD>
+Note that the rising threshold event will only be re-armed when
+the monitored value falls below the <B>lower</B> threshold (MIN).
+Similarly, the falling threshold event will be re-armed by
+the upper threshold (MAX).
+<DT><DD>
+The optional parameters DMIN and DMAX configure a pair of
+similar threshold tests, but working with the delta
+differences between successive sample values.
+</DL>
+</DL>
+
+<DT><I>OPTIONS</I><DD>
+There are various options to control the behaviour of the monitored
+expression.  These include:
+<DL COMPACT><DT><DD>
+<DL COMPACT>
+<DT>-D<DD>
+indicates that the expression should be evaluated using delta differences
+between sample values (rather than the values themselves).
+<DT>-d OID<DD>
+<DT>-di OID<DD>
+specifies a discontinuity marker for validating delta differences.
+A <I>-di</I> object instance will be used exactly as given.
+A <I>-d</I> object will have the instance subidentifiers from the
+corresponding (wildcarded) expression object appended.
+If the <I>-I</I> flag is specified, then there is no difference
+between these two options.
+<DT><DD>
+This option also implies <I>-D</I>.
+<DT>-e EVENT<DD>
+specifies the event to be invoked when this monitor entry is triggered.
+If this option is not given, the monitor entry will generate one
+of the standard notifications defined in the DISMAN-EVENT-MIB.
+<DT>-I<DD>
+indicates that the monitored expression should be applied to the
+specified OID as a single instance.  By default, the OID will
+be treated as a wildcarded object, and the monitor expanded
+to cover all matching instances.
+<DT>-i OID<DD>
+<DT>-o OID<DD>
+define additional varbinds to be added to the notification payload
+when this monitor trigger fires.
+For a wildcarded expression, the suffix of the matched instance
+will be added to any OIDs specified using <I>-o</I>, while OIDs
+specified using <I>-i</I> will be treated as exact instances.
+If the <I>-I</I> flag is specified, then there is no difference
+between these two options.
+<DT><DD>
+See <I>strictDisman</I> for details of the ordering of notification payloads.
+<DT>-r FREQUENCY<DD>
+monitors the given expression every FREQUENCY seconds.
+By default, the expression will be evaluated every 600s (10 minutes). 
+<DT>-S<DD>
+indicates that the monitor expression should <I>not</I> be evaluated
+when the agent first starts up.  The first evaluation will be done
+once the first repeat interval has expired.
+<DT>-s<DD>
+indicates that the monitor expression <I>should</I> be evaluated when the
+agent first starts up.  This is the default behaviour.
+<DL COMPACT><DT><DD>
+<DL COMPACT>
+<DT>Note:<DD>
+Notifications triggered by this initial evaluation will be sent
+<I>before</I> the coldStart trap.
+</DL>
+</DL>
+
+<DT>-u SECNAME<DD>
+specifies a security name to use for scanning the local host,
+instead of the default <I>iquerySecName</I>.
+Once again, this user must be explicitly created and given
+suitable access rights.
+</DL>
+</DL>
+
+<DT>notificationEvent ENAME NOTIFICATION [-m] [-i OID | -o OID ]*<DD>
+defines a notification event named ENAME.
+This can be triggered from a given <I>monitor</I> entry by specifying
+the option <I>-e ENAME</I> (see above).
+NOTIFICATION should be the OID of the NOTIFICATION-TYPE definition
+for the notification to be generated.
+<DT><DD>
+If the <I>-m</I> option is given, the notification payload will
+include the standard varbinds as specified in the OBJECTS clause
+of the notification MIB definition.
+This option must come <B>after</B> the NOTIFICATION OID
+(and the relevant MIB file must be available and loaded by the agent).
+Otherwise, these varbinds must
+be listed explicitly (either here or in the corresponding
+<I>monitor</I> directive).
+<DT><DD>
+The <I>-i OID</I> and <I>-o OID</I> options specify additional
+varbinds to be appended to the notification payload, after the
+standard list.
+If the monitor entry that triggered this event involved a
+wildcarded expression, the suffix of the matched instance
+will be added to any OIDs specified using <I>-o</I>, while OIDs
+specified using <I>-i</I> will be treated as exact instances.
+If the <I>-I</I> flag was specified to the <I>monitor</I> directive,
+then there is no difference between these two options.
+<DT>setEvent ENAME [-I] OID = VALUE <DD>
+defines a set event named ENAME, assigning the (integer) VALUE
+to the specified OID.
+This can be triggered from a given <I>monitor</I> entry by specifying
+the option <I>-e ENAME</I> (see above).
+<DT><DD>
+If the monitor entry that triggered this event involved a
+wildcarded expression, the suffix of the matched instance
+will normally be added to the OID.
+If the <I>-I</I> flag was specified to either of the
+<I>monitor</I> or <I>setEvent</I> directives, the
+specified OID will be regarded as an exact single instance.
+<DT>strictDisman yes<DD>
+The definition of SNMP notifications states that the
+varbinds defined in the OBJECT clause should come first
+(in the order specified), followed by any &quot;extra&quot; varbinds
+that the notification generator feels might be useful.
+The most natural approach would be to associate these
+mandatory varbinds with the <I>notificationEvent</I> entry,
+and append any varbinds associated with the monitor entry
+that triggered the notification to the end of this list.
+This is the default behaviour of the Net-SNMP Event MIB implementation.
+<DT><DD>
+Unfortunately, the DisMan Event MIB specifications actually
+state that the trigger-related varbinds should come <B>first</B>,
+followed by the event-related ones.  This directive can be used to
+restore this strictly-correct (but inappropriate) behaviour.
+<DL COMPACT><DT><DD>
+<DL COMPACT>
+<DT>Note:<DD>
+Strict DisMan ordering may result in generating invalid notifications
+payload lists if the <I>notificationEvent -n</I> flag is used together
+with <I>monitor -o</I> (or <I>-i</I>) varbind options.
+</DL>
+</DL>
+
+<DT><DD>
+If no <I>monitor</I> entries specify payload varbinds,
+then the setting of this directive is irrelevant.
+<DT>linkUpDownNotifications yes<DD>
+will configure the Event MIB tables to monitor the ifTable
+for network interfaces being taken up or down, and triggering
+a <I>linkUp</I> or <I>linkDown</I> notification as appropriate.
+<DT><DD>
+This is exactly equivalent to the configuration:
+<DL COMPACT><DT><DD>
+<DL COMPACT>
+<DT><DD>
+<PRE>
 notificationEvent  linkUpTrap    linkUp   ifIndex ifAdminStatus ifOperStatus
 notificationEvent  linkDownTrap  linkDown ifIndex ifAdminStatus ifOperStatus
 
-monitor  -r 60 -e linkUpTrap   "Generate linkUp" ifOperStatus != 2
-monitor  -r 60 -e linkDownTrap "Generate linkDown" ifOperStatus == 2
-</pre>
-              </dd>
-            </dl>
-          </dd>
-        </dl>
-      </dd>
-
-      <dt>defaultMonitors yes</dt>
-
-      <dd>will configure the Event MIB tables to monitor the various UCD-SNMP-MIB tables for problems (as indicated by the
-      appropriate xxErrFlag column objects).</dd>
-
-      <dd>
-        This is exactly equivalent to the configuration:
-
-        <dl compact="compact">
-          <dd>
-            <dl compact="compact">
-              <dd>
-                <pre>
-monitor -o prNames -o prErrMessage "process table" prErrorFlag != 0
-monitor -o memErrorName -o memSwapErrorMsg "memory" memSwapError != 0
-monitor -o extNames -o extOutput "extTable" extResult != 0
-monitor -o dskPath -o dskErrorMsg "dskTable" dskErrorFlag != 0
-monitor -o laNames -o laErrMessage  "laTable" laErrorFlag != 0
-monitor -o fileName -o fileErrorMsg  "fileTable" fileErrorFlag != 0
-</pre>
-              </dd>
-            </dl>
-          </dd>
-        </dl>
-      </dd>
-    </dl>
-
-    <p>In both these latter cases, the snmpd.conf must also contain a <i>iquerySecName</i> directive, together with a
-    corresponding <i>createUser</i> entry and suitable access control configuration. <a name="lbAV" id="lbAV">&nbsp;</a></p>
-
-    <h3>DisMan Schedule MIB</h3>The DisMan working group also produced a mechanism for scheduling particular actions (a specified
-    SET assignment) at given times. This requires that the agent was built with support for the <i>disman/schedule</i> module
-    (which is included as part of the default build configuration for the most recent distribution).
-
-    <p>There are three ways of specifying the scheduled action:</p>
-
-    <dl compact="compact">
-      <dt>repeat FREQUENCY OID = VALUE</dt>
-
-      <dd>configures a SET assignment of the (integer) VALUE to the MIB instance OID, to be run every FREQUENCY seconds.</dd>
-
-      <dt>cron MINUTE HOUR DAY MONTH WEEKDAY OID = VALUE</dt>
-
-      <dd>
-        configures a SET assignment of the (integer) VALUE to the MIB instance OID, to be run at the times specified by the
-        fields MINUTE to WEEKDAY. These follow the same pattern as the equivalent <i><a href="crontab.html">crontab</a>(5)</i>
-        fields.
-
-        <dl compact="compact">
-          <dd>
-            <dl compact="compact">
-              <dt>Note:</dt>
-
-              <dd>These fields should be specified as a (comma-separated) list of numeric values. Named values for the MONTH and
-              WEEKDAY fields are not supported, and neither are value ranges. A wildcard match can be specified as '*'.</dd>
-            </dl>
-          </dd>
-        </dl>
-      </dd>
-
-      <dd>The DAY field can also accept negative values, to indicate days counting backwards from the end of the month.</dd>
-
-      <dt>at MINUTE HOUR DAY MONTH WEEKDAY OID = VALUE</dt>
-
-      <dd>configures a one-shot SET assignment, to be run at the first matching time as specified by the fields MINUTE to
-      WEEKDAY. The interpretation of these fields is exactly the same as for the <i>cron</i> directive.</dd>
-    </dl><a name="lbAW" id="lbAW">&nbsp;</a>
-
-    <h2>EXTENDING AGENT FUNCTIONALITY</h2>One of the first distinguishing features of the original UCD suite was the ability to
-    extend the functionality of the agent - not just by recompiling with code for new MIB modules, but also by configuring the
-    running agent to report additional information. There are a number of techniques to support this, including:
-
-    <dl compact="compact">
-      <dt>*</dt>
-
-      <dd>running external commands (<i>exec</i>, <i>extend</i>, <i>pass</i>)</dd>
-
-      <dt>*</dt>
-
-      <dd>loading new code dynamically (embedded perl, <i>dlmod</i>)</dd>
-
-      <dt>*</dt>
-
-      <dd>communicating with other agents (<i>proxy</i>, SMUX, AgentX)</dd>
-    </dl><a name="lbAX" id="lbAX">&nbsp;</a>
-
-    <h3>Arbitrary Extension Commands</h3>The earliest extension mechanism was the ability to run arbitrary commands or shell
-    scripts. Such commands do not need to be aware of SNMP operations, or conform to any particular behaviour - the MIB
-    structures are designed to accommodate any form of command output. Use of this mechanism requires that the agent was built
-    with support for the <i>ucd-snmp/extensible</i> and/or <i>agent/extend</i> modules (which are both included as part of the
-    default build configuration).
-
-    <dl compact="compact">
-      <dt>exec [MIBOID] NAME PROG ARGS</dt>
-
-      <dt>sh [MIBOID] NAME PROG ARGS</dt>
-
-      <dd>
-        invoke the named PROG with arguments of ARGS. By default the exit status and first line of output from the command will
-        be reported via the extTable, discarding any additional output.
-
-        <dl compact="compact">
-          <dd>
-            <dl compact="compact">
-              <dt>Note:</dt>
-
-              <dd>Entries in this table appear in the order they are read from the configuration file. This means that adding new
-              <i>exec</i> (or <i>sh</i>) directives and restarting the agent, may affect the indexing of other entries.</dd>
-            </dl>
-          </dd>
-        </dl>
-      </dd>
-
-      <dd>The PROG argument for <i>exec</i> directives must be a full path to a real binary, as it is executed via the exec()
-      system call. To invoke a shell script, use the <i>sh</i> directive instead.</dd>
-
-      <dd>
-        If MIBOID is specified, then the results will be rooted at this point in the OID tree, returning the exit statement as
-        MIBOID.100.0 and the entire command output in a pseudo-table based at MIBNUM.101 - with one 'row' for each line of
-        output.
-
-        <dl compact="compact">
-          <dd>
-            <dl compact="compact">
-              <dt>Note:</dt>
-
-              <dd>The layout of this "relocatable" form of <i>exec</i> (or <i>sh</i>) output does not strictly form a valid MIB
-              structure. This mechanism is being deprecated - please see the <i>extend</i> directive (described below)
-              instead.</dd>
-            </dl>
-          </dd>
-        </dl>
-      </dd>
-
-      <dd>In either case, the exit statement and output will be cached for 30s after the initial query. This cache can be flushed
-      by a SET request of the integer value 1 to the MIB instance versionClearCache.0.</dd>
-
-      <dt>execfix NAME PROG ARGS</dt>
-
-      <dd>
-        registers a command that can be invoked on demand - typically to respond to or fix errors with the corresponding
-        <i>exec</i> or <i>sh</i> entry. When the <i>extErrFix</i> instance for a given NAMEd entry is set to the integer value of
-        1, this command will be called.
-
-        <dl compact="compact">
-          <dd>
-            <dl compact="compact">
-              <dt>Note:</dt>
-
-              <dd>This directive can only be used in combination with a corresponding <i>exec</i> or <i>sh</i> directive, which
-              must be defined first. Attempting to define an unaccompanied <i>execfix</i> directive will fail.</dd>
-            </dl>
-          </dd>
-        </dl>
-      </dd>
-    </dl>
-
-    <p><i>exec</i> and <i>sh</i> extensions can only be configured via the snmpd.conf file. They cannot be set up via SNMP SET
-    requests.</p>
-
-    <dl compact="compact">
-      <dt>extend [MIBOID] NAME PROG ARGS</dt>
-
-      <dd>works in a similar manner to the <i>exec</i> directive, but with a number of improvements. The MIB tables
-      (<i>nsExtendConfigTable</i> etc) are indexed by the NAME token, so are unaffected by the order in which entries are read
-      from the configuration files. There are <i>two</i> result tables - one (<i>nsExtendOutput1Table</i>) containing the exit
-      status, the first line and full output (as a single string) for each <i>extend</i> entry, and the other
-      (<i>nsExtendOutput2Table</i>) containing the complete output as a series of separate lines.</dd>
-
-      <dd>If MIBOID is specified, then the configuration and result tables will be rooted at this point in the OID tree, but are
-      otherwise structured in exactly the same way. This means that several separate <i>extend</i> directives can specify the
-      same MIBOID root, without conflicting.</dd>
-
-      <dd>The exit status and output is cached for each entry individually, and can be cleared (and the caching behaviour
-      configured) using the nsCacheTable.</dd>
-
-      <dt>extendfix NAME PROG ARGS</dt>
-
-      <dd>registers a command that can be invoked on demand, by setting the appropriate <i>nsExtendRunType</i> instance to the
-      value <i><a href="run-command.html">run-command</a>(3)</i>. Unlike the equivalent <i>execfix</i>, this directive does not
-      need to be paired with a corresponding <i>extend</i> entry, and can appear on its own.</dd>
-    </dl>
-
-    <p>Both <i>extend</i> and <i>extendfix</i> directives can be configured dynamically, using SNMP SET requests to the
-    NET-SNMP-EXTEND-MIB. <a name="lbAY" id="lbAY">&nbsp;</a></p>
-
-    <h3>MIB-Specific Extension Commands</h3>The first group of extension directives invoke arbitrary commands, and rely on the
-    MIB structure (and management applications) having the flexibility to accommodate and interpret the output. This is a
-    convenient way to make information available quickly and simply, but is of no use when implementing specific MIB objects,
-    where the extension must conform to the structure of the MIB (rather than vice versa). The remaining extension mechanisms are
-    all concerned with such MIB-specific situations - starting with "pass-through" scripts. Use of this mechanism requires that
-    the agent was built with support for the <i>ucd-snmp/pass</i> and <i>ucd-snmp/pass_persist</i> modules (which are both
-    included as part of the default build configuration).
-
-    <dl compact="compact">
-      <dt>pass [-p priority] MIBOID PROG</dt>
-
-      <dd>
-        will pass control of the subtree rooted at MIBOID to the specified PROG command. GET and GETNEXT requests for OIDs within
-        this tree will trigger this command, called as:
-
-        <dl compact="compact">
-          <dd>
-            <dl compact="compact">
-              <dd>PROG -g OID</dd>
-
-              <dd>PROG -n OID</dd>
-            </dl>
-          </dd>
-        </dl>
-      </dd>
-
-      <dd>respectively, where OID is the requested OID. The PROG command should return the response varbind as three separate
-      lines printed to stdout - the first line should be the OID of the returned value, the second should be its TYPE (one of the
-      text strings <b>integer, gauge, counter, timeticks, ipaddress, objectid,</b> or <b>string</b> ), and the third should be
-      the value itself.</dd>
-
-      <dd>
-        If the command cannot return an appropriate varbind - e.g the specified OID did not correspond to a valid instance for a
-        GET request, or there were no following instances for a GETNEXT - then it should exit without producing any output. This
-        will result in an SNMP <i>noSuchName</i> error, or a <i>noSuchInstance</i> exception.
-
-        <dl compact="compact">
-          <dd>
-            <dl compact="compact">
-              <dd>
-                <dl compact="compact">
-                  <dt>Note:</dt>
-
-                  <dd>The SMIv2 type <b>counter64</b> and SNMPv2 <i>noSuchObject</i> exception are not supported.</dd>
-                </dl>
-              </dd>
-            </dl>
-          </dd>
-        </dl>
-      </dd>
-
-      <dd>
-        A SET request will result in the command being called as:
-
-        <dl compact="compact">
-          <dd>
-            <dl compact="compact">
-              <dd>PROG -s OID TYPE VALUE</dd>
-            </dl>
-          </dd>
-        </dl>
-      </dd>
-
-      <dd>where TYPE is one of the tokens listed above, indicating the type of the value passed as the third parameter.</dd>
-
-      <dd>
-        If the assignment is successful, the PROG command should exit without producing any output. Errors should be indicated by
-        writing one of the strings <b>not-writable,</b> or <b>wrong-type</b> to stdout, and the agent will generate the
-        appropriate error response.
-
-        <dl compact="compact">
-          <dd>
-            <dl compact="compact">
-              <dd>
-                <dl compact="compact">
-                  <dt>Note:</dt>
-
-                  <dd>The other SNMPv2 errors are not supported.</dd>
-                </dl>
-              </dd>
-            </dl>
-          </dd>
-        </dl>
-      </dd>
-
-      <dd>In either case, the command should exit once it has finished processing. Each request (and each varbind within a single
-      request) will trigger a separate invocation of the command.</dd>
-
-      <dd>The default registration priority is 127. This can be changed by supplying the optional -p flag, with lower priority
-      registrations being used in preference to higher priority values.</dd>
-
-      <dt>pass_persist [-p priority] MIBOID PROG</dt>
-
-      <dd>will also pass control of the subtree rooted at MIBOID to the specified PROG command. However this command will
-      continue to run after the initial request has been answered, so subsequent requests can be processed without the startup
-      overheads.</dd>
-
-      <dd>Upon initialization, PROG will be passed the string "PING\n" on stdin, and should respond by printing "PONG\n" to
-      stdout.</dd>
-
-      <dd>For GET and GETNEXT requests, PROG will be passed two lines on stdin, the command (<i>get</i> or <i>getnext</i>) and
-      the requested OID. It should respond by printing three lines to stdout - the OID for the result varbind, the TYPE and the
-      VALUE itself - exactly as for the <i>pass</i> directive above. If the command cannot return an appropriate varbind, it
-      should print print "NONE\n" to stdout (but continue running).</dd>
-
-      <dd>For SET requests, PROG will be passed three lines on stdin, the command (<i>set</i>) and the requested OID, followed by
-      the type and value (both on the same line). If the assignment is successful, the command should print "DONE\n" to stdout.
-      Errors should be indicated by writing one of the strings <b>not-writable,</b> <b>wrong-type,</b> <b>wrong-length,</b>
-      <b>wrong-value</b> or <b>inconsistent-value</b> to stdout, and the agent will generate the appropriate error response. In
-      either case, the command should continue running.</dd>
-
-      <dd>The registration priority can be changed using the optional -p flag, just as for the <i>pass</i> directive.</dd>
-    </dl>
-
-    <p><i>pass</i> and <i>pass_persist</i> extensions can only be configured via the snmpd.conf file. They cannot be set up via
-    SNMP SET requests. <a name="lbAZ" id="lbAZ">&nbsp;</a></p>
-
-    <h3>Embedded Perl Support</h3>Programs using the previous extension mechanisms can be written in any convenient programming
-    language - including perl, which is a common choice for pass-through extensions in particular. However the Net-SNMP agent
-    also includes support for embedded perl technology (similar to <i>mod_perl</i> for the Apache web server). This allows the
-    agent to interpret perl scripts directly, thus avoiding the overhead of spawning processes and initializing the perl system
-    when a request is received.
-
-    <p>Use of this mechanism requires that the agent was built with support for the embedded perl mechanism, which is not part of
-    the default build environment. It must be explicitly included by specifying the '--enable-embedded-perl' option to the
-    configure script when the package is first built.</p>
-
-    <p>If enabled, the following directives will be recognised:</p>
-
-    <dl compact="compact">
-      <dt>disablePerl true</dt>
-
-      <dd>will turn off embedded perl support entirely (e.g. if there are problems with the perl installation).</dd>
-
-      <dt>perlInitFile FILE</dt>
-
-      <dd>loads the specified initialisation file (if present) immediately before the first <i>perl</i> directive is parsed. If
-      not explicitly specified, the agent will look for the default initialisation file /usr/local/share/snmp/snmp_perl.pl.</dd>
-
-      <dd>The default initialisation file creates an instance of a NetSNMP::agent object - a variable $agent which can be used to
-      register perl-based MIB handler routines.</dd>
-
-      <dt>perl EXPRESSION</dt>
-
-      <dd>
-        evaluates the given expression. This would typically register a handler routine to be called when a section of the OID
-        tree was requested:
-
-        <dl compact="compact">
-          <dd>
-            <dl compact="compact">
-              <dd>
-                <pre>
+monitor  -r 60 -e linkUpTrap   &quot;Generate linkUp&quot; ifOperStatus != 2
+monitor  -r 60 -e linkDownTrap &quot;Generate linkDown&quot; ifOperStatus == 2
+</PRE>
+
+</DL>
+</DL>
+
+<DT>defaultMonitors yes<DD>
+will configure the Event MIB tables to monitor the various
+UCD-SNMP-MIB tables for problems (as indicated by
+the appropriate xxErrFlag column objects).
+<DT><DD>
+This is exactly equivalent to the configuration:
+<DL COMPACT><DT><DD>
+<DL COMPACT>
+<DT><DD>
+<PRE>
+monitor -o prNames -o prErrMessage &quot;process table&quot; prErrorFlag != 0
+monitor -o memErrorName -o memSwapErrorMsg &quot;memory&quot; memSwapError != 0
+monitor -o extNames -o extOutput &quot;extTable&quot; extResult != 0
+monitor -o dskPath -o dskErrorMsg &quot;dskTable&quot; dskErrorFlag != 0
+monitor -o laNames -o laErrMessage  &quot;laTable&quot; laErrorFlag != 0
+monitor -o fileName -o fileErrorMsg  &quot;fileTable&quot; fileErrorFlag != 0
+</PRE>
+
+</DL>
+</DL>
+
+</DL>
+<P>
+
+In both these latter cases, the snmpd.conf must also contain a
+<I>iquerySecName</I> directive, together with a corresponding
+<I>createUser</I> entry and suitable access control configuration.
+<A NAME="lbAY">&nbsp;</A>
+<H3>DisMan Schedule MIB</H3>
+
+The DisMan working group also produced a mechanism for scheduling
+particular actions (a specified SET assignment) at given times.
+This requires that the agent was built with support for the
+<I>disman/schedule</I> module (which is included as part of the
+default build configuration for the most recent distribution).
+<P>
+
+There are three ways of specifying the scheduled action:
+<DL COMPACT>
+<DT>repeat FREQUENCY OID = VALUE<DD>
+configures a SET assignment of the (integer) VALUE to the MIB instance
+OID, to be run every FREQUENCY seconds.
+<DT>cron MINUTE HOUR DAY MONTH WEEKDAY  OID = VALUE<DD>
+configures a SET assignment of the (integer) VALUE to the MIB instance
+OID, to be run at the times specified by the fields MINUTE to WEEKDAY.
+These follow the same pattern as the equivalent <I><A HREF="http://localhost/cgi-bin/man/man2html?5+crontab">crontab</A>(5)</I> fields.
+<DL COMPACT><DT><DD>
+<DL COMPACT>
+<DT>Note:<DD>
+These fields should be specified as a (comma-separated) list of numeric
+values.  Named values for the MONTH and WEEKDAY fields are not supported,
+and neither are value ranges. A wildcard match can be specified as '*'.
+</DL>
+</DL>
+
+<DT><DD>
+The DAY field can also accept negative values, to indicate days counting
+backwards from the end of the month.
+<DT>at MINUTE HOUR DAY MONTH WEEKDAY  OID = VALUE<DD>
+configures a one-shot SET assignment, to be run at the first matching
+time as specified by the fields MINUTE to WEEKDAY.  The interpretation
+of these fields is exactly the same as for the <I>cron</I> directive.
+</DL>
+<A NAME="lbAZ">&nbsp;</A>
+<H2>EXTENDING AGENT FUNCTIONALITY</H2>
+
+One of the first distinguishing features of the original UCD suite was
+the ability to extend the functionality of the agent - not just by
+recompiling with code for new MIB modules, but also by configuring the running agent to
+report additional information. There are a number of techniques to
+support this, including:
+<DL COMPACT>
+<DT>*<DD>
+running external commands (<I>exec</I>, <I>extend</I>, <I>pass</I>)
+<DT>*<DD>
+loading new code dynamically (embedded perl, <I>dlmod</I>)
+<DT>*<DD>
+communicating with other agents (<I>proxy</I>, SMUX, AgentX)
+</DL>
+<A NAME="lbBA">&nbsp;</A>
+<H3>Arbitrary Extension Commands</H3>
+
+The earliest extension mechanism was the ability to run arbitrary
+commands or shell scripts. Such commands do not need to be aware of
+SNMP operations, or conform to any particular behaviour - the MIB
+structures are designed to accommodate any form of command output.
+Use of this mechanism requires that the agent was built with support for the
+<I>ucd-snmp/extensible</I> and/or <I>agent/extend</I> modules (which
+are both included as part of the default build configuration).
+<DL COMPACT>
+<DT>exec [MIBOID] NAME PROG ARGS<DD>
+<DT>sh [MIBOID] NAME PROG ARGS<DD>
+invoke the named PROG with arguments of ARGS.  By default the exit
+status and first line of output from the command will be reported via
+the extTable, discarding any additional output.
+<DL COMPACT><DT><DD>
+<DL COMPACT>
+<DT>Note:<DD>
+Entries in this table appear in the order they are read from the
+configuration file.  This means that adding new <I>exec</I> (or <I>sh</I>)
+directives and restarting the agent, may affect the indexing of other
+entries.
+</DL>
+</DL>
+
+<DT><DD>
+The PROG argument for <I>exec</I> directives must be a full path
+to a real binary, as it is executed via the exec() system call.
+To invoke a shell script, use the <I>sh</I> directive instead.
+<DT><DD>
+If MIBOID is specified, then the results will be rooted at this point
+in the OID tree, returning the exit statement as MIBOID.100.0
+and the entire command output in a pseudo-table based at
+MIBNUM.101 - with one 'row' for each line of output.
+<DL COMPACT><DT><DD>
+<DL COMPACT>
+<DT>Note:<DD>
+The layout of this &quot;relocatable&quot; form of <I>exec</I> (or <I>sh</I>) output
+does not strictly form a valid MIB structure.  This mechanism is being
+deprecated - please see the <I>extend</I> directive (described below) instead.
+</DL>
+</DL>
+
+<DT><DD>
+The agent does not cache the exit status or output of the executed program.
+
+
+
+<DT>execfix NAME PROG ARGS<DD>
+registers a command that can be invoked on demand - typically to respond
+to or fix errors with the corresponding <I>exec</I> or <I>sh</I> entry.
+When the <I>extErrFix</I> instance for a given NAMEd entry is set to the
+integer value of 1, this command will be called.
+<DL COMPACT><DT><DD>
+<DL COMPACT>
+<DT>Note:<DD>
+This directive can only be used in combination with a corresponding
+<I>exec</I> or <I>sh</I> directive, which must be defined first.
+Attempting to define an unaccompanied <I>execfix</I> directive will fail.
+</DL>
+</DL>
+
+</DL>
+<P>
+
+<I>exec</I> and <I>sh</I> extensions can only be configured via the
+snmpd.conf file.  They cannot be set up via SNMP SET requests.
+<DL COMPACT>
+<DT>extend [MIBOID] NAME PROG ARGS<DD>
+works in a similar manner to the <I>exec</I> directive, but with a number
+of improvements.  The MIB tables (<I>nsExtendConfigTable</I>
+etc) are indexed by the NAME token, so are unaffected by the order in
+which entries are read from the configuration files.
+There are <I>two</I> result tables - one (<I>nsExtendOutput1Table</I>)
+containing the exit status, the first line and full output (as a single string)
+for each <I>extend</I> entry, and the other (<I>nsExtendOutput2Table</I>)
+containing the complete output as a series of separate lines.
+<DT><DD>
+If MIBOID is specified, then the configuration and result tables will be rooted
+at this point in the OID tree, but are otherwise structured in exactly
+the same way. This means that several separate <I>extend</I>
+directives can specify the same MIBOID root, without conflicting.
+<DT><DD>
+The exit status and output is cached for each entry individually, and
+can be cleared (and the caching behaviour configured)
+using the nsCacheTable.
+<DT>extendfix NAME PROG ARGS<DD>
+registers a command that can be invoked on demand, by setting the
+appropriate <I>nsExtendRunType</I> instance to the value
+<I><A HREF="http://localhost/cgi-bin/man/man2html?3+run-command">run-command</A>(3)</I>.  Unlike the equivalent <I>execfix</I>,
+this directive does not need to be paired with a corresponding
+<I>extend</I> entry, and can appear on its own.
+</DL>
+<P>
+
+Both <I>extend</I> and <I>extendfix</I> directives can be configured
+dynamically, using SNMP SET requests to the NET-SNMP-EXTEND-MIB.
+<A NAME="lbBB">&nbsp;</A>
+<H3>MIB-Specific Extension Commands</H3>
+
+The first group of extension directives invoke arbitrary commands,
+and rely on the MIB structure (and management applications) having
+the flexibility to accommodate and interpret the output.  This is a
+convenient way to make information available quickly and simply, but
+is of no use when implementing specific MIB objects, where the extension
+must conform to the structure of the MIB (rather than vice versa).
+The remaining extension mechanisms are all concerned with such
+MIB-specific situations - starting with &quot;pass-through&quot; scripts.
+Use of this mechanism requires that the agent was built with support for the
+<I>ucd-snmp/pass</I> and <I>ucd-snmp/pass_persist</I> modules (which
+are both included as part of the default build configuration).
+<DL COMPACT>
+<DT>pass [-p priority] MIBOID PROG<DD>
+will pass control of the subtree rooted at MIBOID to the specified
+PROG command.  GET and GETNEXT requests for OIDs within this tree will
+trigger this command, called as:
+<DL COMPACT><DT><DD>
+<DL COMPACT>
+<DT><DD>
+PROG -g OID
+<DT><DD>
+PROG -n OID
+</DL>
+</DL>
+
+<DT><DD>
+respectively, where OID is the requested OID.
+The PROG command should return the response varbind as three separate
+lines printed to stdout - the first line should be the OID of the returned
+value, the second should be its TYPE (one of the text strings
+<B>integer, gauge, counter, timeticks, ipaddress, objectid,</B>
+
+or
+<B>string</B>
+
+), and the third should be the value itself.
+<DT><DD>
+If the command cannot return an appropriate varbind - e.g the specified
+OID did not correspond to a valid instance for a GET request, or there
+were no following instances for a GETNEXT - then it should exit without
+producing any output.  This will result in an SNMP <I>noSuchName</I>
+error, or a <I>noSuchInstance</I> exception.
+<DL COMPACT><DT><DD>
+<DL COMPACT><DT><DD>
+<DL COMPACT>
+<DT>Note:<DD>
+The SMIv2 type <B>counter64</B>
+and SNMPv2 <I>noSuchObject</I> exception are not supported.
+</DL>
+</DL>
+
+</DL>
+
+<DT><DD>
+A SET request will result in the command being called as:
+<DL COMPACT><DT><DD>
+<DL COMPACT>
+<DT><DD>
+PROG -s OID TYPE VALUE
+</DL>
+</DL>
+
+<DT><DD>
+where TYPE is one of the tokens listed above, indicating the type of the
+value passed as the third parameter.
+
+
+
+
+
+
+
+
+
+<DT><DD>
+If the assignment is successful, the PROG command should exit without producing
+any output. Errors should be indicated by writing one of the strings
+<B>not-writable, </B>
+
+or 
+<B>wrong-type</B>
+
+to stdout,
+and the agent will generate the appropriate error response.
+<DL COMPACT><DT><DD>
+<DL COMPACT><DT><DD>
+<DL COMPACT>
+<DT>Note:<DD>
+The other SNMPv2 errors are not supported.
+</DL>
+</DL>
+
+</DL>
+
+<DT><DD>
+In either case, the command should exit once it has finished processing.
+Each request (and each varbind within a single request) will trigger
+a separate invocation of the command.
+<DT><DD>
+The default registration priority is 127.  This can be
+changed by supplying the optional -p flag, with lower priority
+registrations being used in preference to higher priority values.
+<DT>pass_persist [-p priority] MIBOID PROG<DD>
+will also pass control of the subtree rooted at MIBOID to the specified
+PROG command.  However this command will continue to run after the initial
+request has been answered, so subsequent requests can be processed without
+the startup overheads.
+<DT><DD>
+Upon initialization, PROG will be passed the string &quot;PING\n&quot; on stdin,
+and should respond by printing &quot;PONG\n&quot; to stdout.
+<DT><DD>
+For GET and GETNEXT requests, PROG will be passed two lines on stdin,
+the command (<I>get</I> or <I>getnext</I>) and the requested OID.
+It should respond by printing three lines to stdout - 
+the OID for the result varbind, the TYPE and the VALUE itself -
+exactly as for the <I>pass</I> directive above.
+If the command cannot return an appropriate varbind,
+it should print print &quot;NONE\n&quot; to stdout (but continue running).
+<DT><DD>
+For SET requests, PROG will be passed three lines on stdin,
+the command (<I>set</I>) and the requested OID,
+followed by the type and value (both on the same line).
+If the assignment is successful, the command should print
+&quot;DONE\n&quot; to stdout.
+Errors should be indicated by writing one of the strings
+<B>not-writable, </B>
+
+<B>wrong-type,</B>
+
+<B>wrong-length,</B>
+
+<B>wrong-value</B>
+
+or
+<B>inconsistent-value</B>
+
+to stdout,
+and the agent will generate the appropriate error response.
+In either case, the command should continue running.
+<DT><DD>
+The registration priority can be changed using the optional
+-p flag, just as for the <I>pass</I> directive.
+</DL>
+<P>
+
+<I>pass</I> and <I>pass_persist</I> extensions can only be configured via the
+snmpd.conf file.  They cannot be set up via SNMP SET requests.
+
+
+
+<A NAME="lbBC">&nbsp;</A>
+<H3>Embedded Perl Support</H3>
+
+Programs using the previous extension mechanisms can be written in any convenient
+programming language - including perl, which is a common choice for
+pass-through extensions in particular.  However the Net-SNMP agent
+also includes support for embedded perl technology (similar to
+<I>mod_perl</I> for the Apache web server).  This allows the agent
+to interpret perl scripts directly, thus avoiding the overhead of
+spawning processes and initializing the perl system when a request is received.
+<P>
+
+Use of this mechanism requires that the agent was built with support for the embedded
+perl mechanism, which is not part of the default build environment. It
+must be explicitly included by specifying the '--enable-embedded-perl'
+option to the configure script when the package is first built.
+<P>
+
+If enabled, the following directives will be recognised:
+<DL COMPACT>
+<DT>disablePerl true<DD>
+will turn off embedded perl support entirely (e.g. if there are problems
+with the perl installation).
+<DT>perlInitFile FILE<DD>
+loads the specified initialisation file (if present)
+immediately before the first <I>perl</I> directive is parsed.
+If not explicitly specified, the agent will look for the default
+initialisation file /usr/local/share/snmp/snmp_perl.pl.
+<DT><DD>
+The default initialisation file
+creates an instance of a NetSNMP::agent object - a variable
+$agent which can be used to register perl-based MIB handler routines.
+<DT>perl EXPRESSION<DD>
+evaluates the given expression.  This would typically register a
+handler routine to be called when a section of the OID tree was
+requested:
+<DL COMPACT><DT><DD>
+<DL COMPACT><DT><DD>
+<PRE>
 perl use Data::Dumper;
-perl sub myroutine  { print "got called: ",Dumper(@_),"\n"; }
+perl sub myroutine  { print &quot;got called: &quot;,Dumper(@_),&quot;\n&quot;; }
 perl $agent-&gt;register('mylink', '.1.3.6.1.8765', \&amp;myroutine);
-</pre>
-              </dd>
-            </dl>
-          </dd>
-        </dl>
-      </dd>
-
-      <dd>
-        This expression could also source an external file:
-
-        <dl compact="compact">
-          <dd>
-            <dl compact="compact">
-              <dd>perl 'do /path/to/file.pl';</dd>
-            </dl>
-          </dd>
-        </dl>
-      </dd>
-
-      <dd>or perform any other perl-based processing that might be required.</dd>
-    </dl><a name="lbBA" id="lbBA">&nbsp;</a>
-
-    <h3>Dynamically Loadable Modules</h3>Most of the MIBs supported by the Net-SNMP agent are implemented as C code modules,
-    which were compiled and linked into the agent libraries when the suite was first built. Such implementation modules can also
-    be compiled independently and loaded into the running agent once it has started. Use of this mechanism requires that the
-    agent was built with support for the <i>ucd-snmp/dlmod</i> module (which is included as part of the default build
-    configuration).
-
-    <dl compact="compact">
-      <dt>dlmod NAME PATH</dt>
-
-      <dd>
-        will load the shared object module from the file PATH (an absolute filename), and call the initialisation routine
-        <i>init_NAME</i>.
-
-        <dl compact="compact">
-          <dd>
-            <dl compact="compact">
-              <dt>Note:</dt>
-
-              <dd>If the specified PATH is not a fully qualified filename, it will be interpreted relative to
-              /usr/local/lib/snmp/dlmod, and .so will be appended to the filename.</dd>
-            </dl>
-          </dd>
-        </dl>
-      </dd>
-    </dl>
-
-    <p>This functionality can also be configured using SNMP SET requests to the UCD-DLMOD-MIB. <a name="lbBB" id=
-    "lbBB">&nbsp;</a></p>
-
-    <h3>Proxy Support</h3>Another mechanism for extending the functionality of the agent is to pass selected requests (or
-    selected varbinds) to another SNMP agent, which can be running on the same host (presumably listening on a different port),
-    or on a remote system. This can be viewed either as the main agent delegating requests to the remote one, or acting as a
-    proxy for it. Use of this mechanism requires that the agent was built with support for the <i>ucd-snmp/proxy</i> module
-    (which is included as part of the default build configuration).
-
-    <dl compact="compact">
-      <dt>proxy [-Cn CONTEXTNAME] [SNMPCMD_ARGS] HOST OID [REMOTEOID]</dt>
-
-      <dd>
-        will pass any incoming requests under OID to the agent listening on the port specified by the transport address HOST. See
-        the section <b>LISTENING ADDRESSES</b> in the <i><a href="snmpd.html">snmpd</a>(8)</i> manual page for more information
-        about the format of listening addresses.
-
-        <dl compact="compact">
-          <dd>
-            <dl compact="compact">
-              <dt>Note:</dt>
-
-              <dd>To proxy the entire MIB tree, use the OID .1.3 (<b>not</b> the top-level .1)</dd>
-            </dl>
-          </dd>
-        </dl>
-      </dd>
-    </dl>
-
-    <p>The <i>SNMPCMD_ARGS</i> should provide sufficient version and administrative information to generate a valid SNMP request
-    (see <i><a href="snmpcmd.html">snmpcmd</a>(1)</i>).</p>
-
-    <dl compact="compact">
-      <dt>Note:</dt>
-
-      <dd>The proxied request will <i>not</i> use the administrative settings from the original request.</dd>
-    </dl>
-
-    <p>If a CONTEXTNAME is specified, this will register the proxy delegation within the named context in the local agent.
-    Defining multiple <i>proxy</i> directives for the same OID but different contexts can be used to query several remote agents
-    through a single proxy, by specifying the appropriate SNMPv3 context in the incoming request (or using suitable configured
-    community strings - see the <i>com2sec</i> directive).</p>
-
-    <p>Specifying the REMOID parameter will map the local MIB tree rooted at OID to an equivalent subtree rooted at REMOID on the
-    remote agent. <a name="lbBC" id="lbBC">&nbsp;</a></p>
-
-    <h3>SMUX Sub-Agents</h3>The Net-SNMP agent supports the SMUX protocol (RFC 1227) to communicate with SMUX-based subagents
-    (such as <i>gated</i>, <i>zebra</i> or <i>quagga</i>). Use of this mechanism requires that the agent was built with support
-    for the <i>smux</i> module, which is not part of the default build environment, and must be explicitly included by specifying
-    the '--with-mib-modules=smux' option to the configure script when the package is first built.
-
-    <dl compact="compact">
-      <dd>
-        <dl compact="compact">
-          <dt>Note:</dt>
-
-          <dd>This extension protocol has been officially deprecated in favour of AgentX (see below).</dd>
-        </dl>
-      </dd>
-    </dl>
-
-    <dl compact="compact">
-      <dt>smuxpeer OID PASS</dt>
-
-      <dd>will register a subtree for SMUX-based processing, to be authenticated using the password PASS. If a subagent (or
-      "peer") connects to the agent and registers this subtree then requests for OIDs within it will be passed to that SMUX
-      subagent for processing.</dd>
-
-      <dd>
-        A suitable entry for an OSPF routing daemon (such as <i>gated</i>, <i>zebra</i> or <i>quagga</i>) might be something like
-
-        <dl compact="compact">
-          <dd>
-            <dl compact="compact">
-              <dd><i>smuxpeer .1.3.6.1.2.1.14 ospf_pass</i></dd>
-            </dl>
-          </dd>
-        </dl>
-      </dd>
-
-      <dt>smuxsocket &lt;IPv4-address&gt;</dt>
-
-      <dd>defines the IPv4 address for SMUX peers to communicate with the Net-SNMP agent. The default is to listen on all IPv4
-      interfaces ("0.0.0.0"), unless the package has been configured with "--enable-local-smux" at build time, which causes it to
-      only listen on 127.0.0.1 by default. SMUX uses the well-known TCP port 199.</dd>
-    </dl>
-
-    <p>Note the Net-SNMP agent will only operate as a SMUX <i>master</i> agent. It does not support acting in a SMUX subagent
-    role. <a name="lbBD" id="lbBD">&nbsp;</a></p>
-
-    <h3>AgentX Sub-Agents</h3>The Net-SNMP agent supports the AgentX protocol (RFC 2741) in both master and subagent roles. Use
-    of this mechanism requires that the agent was built with support for the <i>agentx</i> module (which is included as part of
-    the default build configuration), and also that this support is explicitly enabled (e.g. via the <i>snmpd.conf</i> file).
-
-    <p>There are two directives specifically relevant to running as an AgentX master agent:</p>
-
-    <dl compact="compact">
-      <dt>master agentx</dt>
-
-      <dd>will enable the AgentX functionality and cause the agent to start listening for incoming AgentX registrations. This can
-      also be activated by specifying the '-x' command-line option (to specify an alternative listening socket).</dd>
-
-      <dt>agentXPerms SOCKPERMS [DIRPERMS [USER|UID [GROUP|GID]]]</dt>
-
-      <dd>Defines the permissions and ownership of the AgentX Unix Domain socket, and the parent directories of this socket.
-      SOCKPERMS and DIRPERMS must be octal digits (see <i><a href="chmod.html">chmod</a>(1)</i> ). By default this socket will
-      only be accessible to subagents which have the same userid as the agent.</dd>
-    </dl>
-
-    <p>There is one directive specifically relevant to running as an AgentX sub-agent:</p>
-
-    <dl compact="compact">
-      <dt>agentXPingInterval NUM</dt>
-
-      <dd>will make the subagent try and reconnect every NUM seconds to the master if it ever becomes (or starts)
-      disconnected.</dd>
-    </dl>
-
-    <p>The remaining directives are relevant to both AgentX master and sub-agents:</p>
-
-    <dl compact="compact">
-      <dt>agentXSocket [&lt;transport-specifier&gt;:]&lt;transport-address&gt;[,...]</dt>
-
-      <dd>
-        defines the address the master agent listens at, or the subagent should connect to. The default is the Unix Domain socket
-        "/var/agentx/master". Another common alternative is tcp:localhost:705. See the section <b>LISTENING ADDRESSES</b> in the
-        <i><a href="snmpd.html">snmpd</a>(8)</i> manual page for more information about the format of addresses.
-
-        <dl compact="compact">
-          <dd>
-            <dl compact="compact">
-              <dt>Note:</dt>
-
-              <dd>Specifying an AgentX socket does <b>not</b> automatically enable AgentX functionality (unlike the '-x'
-              command-line option).</dd>
-            </dl>
-          </dd>
-        </dl>
-      </dd>
-
-      <dt>agentXTimeout NUM</dt>
-
-      <dd>defines the timeout period (NUM seconds) for an AgentX request. Default is 1 second.</dd>
-
-      <dt>agentXRetries NUM</dt>
-
-      <dd>defines the number of retries for an AgentX request. Default is 5 retries.</dd>
-    </dl>
-
-    <p>net-snmp ships with both C and Perl APIs to develop your own AgentX subagent. <a name="lbBE" id="lbBE">&nbsp;</a></p>
-
-    <h2>OTHER CONFIGURATION</h2>
-
-    <dl compact="compact">
-      <dt>override [-rw] OID TYPE VALUE</dt>
-
-      <dd>
-        This directive allows you to override a particular OID with a different value (and possibly a different type of value).
-        The -rw flag will allow snmp SETs to modify it's value as well. (note that if you're overriding original functionality,
-        that functionality will be entirely lost. Thus SETS will do nothing more than modify the internal overridden value and
-        will not perform any of the original functionality intended to be provided by the MIB object. It's an emulation only.) An
-        example:
-
-        <dl compact="compact">
-          <dd>
-            <dl compact="compact">
-              <dd>override sysDescr.0 octet_str "my own sysDescr"</dd>
-            </dl>
-          </dd>
-        </dl>
-      </dd>
-
-      <dd>That line will set the sysDescr.0 value to "my own sysDescr" as well as make it modifiable with SNMP SETs as well
-      (which is actually illegal according to the MIB specifications).</dd>
-
-      <dd>Note that care must be taken when using this. For example, if you try to override a property of the 3rd interface in
-      the ifTable with a new value and later the numbering within the ifTable changes it's index ordering you'll end up with
-      problems and your modified value won't appear in the right place in the table.</dd>
-
-      <dd>Valid TYPEs are: integer, uinteger, octet_str, object_id, counter, null (for gauges, use "uinteger"; for bit strings,
-      use "octet_str"). Note that setting an object to "null" effectively delete's it as being accessible. No VALUE needs to be
-      given if the object type is null.</dd>
-
-      <dd>More types should be available in the future.</dd>
-    </dl>
-
-    <p>If you're trying to figure out aspects of the various mib modules (possibly some that you've added yourself), the
-    following may help you spit out some useful debugging information. First off, please read the snmpd manual page on the -D
-    flag. Then the following configuration snmpd.conf token, combined with the -D flag, can produce useful output:</p>
-
-    <dl compact="compact">
-      <dt>injectHandler HANDLER modulename</dt>
-
-      <dd>
-        This will insert new handlers into the section of the mib tree referenced by "modulename". The types of handlers
-        available for insertion are:
-
-        <dl compact="compact">
-          <dd>
-            <dl compact="compact">
-              <dt>stash_cache</dt>
-
-              <dd>
-                Caches information returned from the lower level. This greatly help the performance of the agent, at the cost of
-                caching the data such that its no longer "live" for 30 seconds (in this future, this will be configurable). Note
-                that this means snmpd will use more memory as well while the information is cached. Currently this only works for
-                handlers registered using the table_iterator support, which is only a few mib tables. To use it, you need to make
-                sure to install it before the table_iterator point in the chain, so to do this:
-
-                <p><br />
-                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;injectHandler&nbsp;stash_cache&nbsp;NAME&nbsp;table_iterator</p>
-
-                <p>If you want a table to play with, try walking the nsModuleTable with and without this injected.</p>
-              </dd>
-
-              <dt>debug</dt>
-
-              <dd>Prints out lots of debugging information when the -Dhelper:debug flag is passed to the snmpd application.</dd>
-
-              <dt>read_only</dt>
-
-              <dd>Forces turning off write support for the given module.</dd>
-
-              <dt>serialize</dt>
-
-              <dd>If a module is failing to handle multiple requests properly (using the new 5.0 module API), this will force the
-              module to only receive one request at a time.</dd>
-
-              <dt>bulk_to_next</dt>
-
-              <dd>If a module registers to handle getbulk support, but for some reason is failing to implement it properly, this
-              module will convert all getbulk requests to getnext requests before the final module receives it.</dd>
-            </dl>
-          </dd>
-        </dl>
-      </dd>
-
-      <dt>dontLogTCPWrappersConnects</dt>
-
-      <dd>If the <b>snmpd</b> was compiled with TCP Wrapper support, it logs every connection made to the agent. This setting
-      disables the log messages for accepted connections. Denied connections will still be logged.</dd>
-
-      <dt>Figuring out module names</dt>
-
-      <dd>To figure out which modules you can inject things into, run <b>snmpwalk</b> on the nsModuleTable which will give a list
-      of all named modules registered within the agent.</dd>
-    </dl><a name="lbBF" id="lbBF">&nbsp;</a>
-
-    <h3>Internal Data tables</h3>
-
-    <dl compact="compact">
-      <dt>table NAME</dt>
-
-      <dt>add_row NAME INDEX(ES) VALUE(S)</dt>
-    </dl><a name="lbBG" id="lbBG">&nbsp;</a>
-
-    <h2>NOTES</h2>
-
-    <dl compact="compact">
-      <dt>o</dt>
-
-      <dd>The Net-SNMP agent can be instructed to re-read the various configuration files, either via an <b>snmpset</b>
-      assignment of <a href="integer.html">integer</a>(1) to UCD-SNMP-MIB::versionUpdateConfig.0 (.1.3.6.1.4.1.2021.100.11.0), or
-      by sending a <b>kill -HUP</b> signal to the agent process.</dd>
-
-      <dt>o</dt>
-
-      <dd>All directives listed with a value of "yes" actually accept a range of boolean values. These will accept any of
-      <i>1</i>, <i>yes</i> or <i>true</i> to enable the corresponding behaviour, or any of <i>0</i>, <i>no</i> or <i>false</i> to
-      disable it. The default in each case is for the feature to be turned off, so these directives are typically only used to
-      enable the appropriate behaviour.</dd>
-    </dl><a name="lbBH" id="lbBH">&nbsp;</a>
-
-    <h2>EXAMPLE CONFIGURATION FILE</h2>See the EXAMPLE.CONF file in the top level source directory for a more detailed example of
-    how the above information is used in real examples. <a name="lbBI" id="lbBI">&nbsp;</a>
-
-    <h2>FILES</h2>/usr/local/etc/snmp/snmpd.conf <a name="lbBJ" id="lbBJ">&nbsp;</a>
-
-    <h2>SEE ALSO</h2><a href="snmpconf.html">snmpconf</a>(1), <a href="snmpusm.html">snmpusm</a>(1), <a href=
-    "snmp.conf.html">snmp.conf</a>(5), <a href="snmp_config.html">snmp_config</a>(5), <a href="snmpd.html">snmpd</a>(8),
-    EXAMPLE.conf, <a href="read_config.html">read_config</a>(3).
-    <hr />
-    <a name="index" id="index">&nbsp;</a>
-
-    <h2>Index</h2>
-
-    <dl>
-      <dt><a href="#lbAB">NAME</a></dt>
-
-      <dt><a href="#lbAC">DESCRIPTION</a></dt>
-
-      <dt><a href="#lbAD">AGENT BEHAVIOUR</a></dt>
-
-      <dd>
-        <dl>
-          <dt><a href="#lbAE">SNMPv3 Configuration</a></dt>
-        </dl>
-      </dd>
-
-      <dt><a href="#lbAF">ACCESS CONTROL</a></dt>
-
-      <dd>
-        <dl>
-          <dt><a href="#lbAG">SNMPv3 Users</a></dt>
-
-          <dt><a href="#lbAH">Traditional Access Control</a></dt>
-
-          <dt><a href="#lbAI">VACM Configuration</a></dt>
-
-          <dt><a href="#lbAJ">Typed-View Configuration</a></dt>
-        </dl>
-      </dd>
-
-      <dt><a href="#lbAK">SYSTEM INFORMATION</a></dt>
-
-      <dd>
-        <dl>
-          <dt><a href="#lbAL">System Group</a></dt>
-
-          <dt><a href="#lbAM">Interfaces Group</a></dt>
-
-          <dt><a href="#lbAN">Host Resources Group</a></dt>
-
-          <dt><a href="#lbAO">Process Monitoring</a></dt>
-
-          <dt><a href="#lbAP">Disk Usage Monitoring</a></dt>
-
-          <dt><a href="#lbAQ">System Load Monitoring</a></dt>
-
-          <dt><a href="#lbAR">Log File Monitoring</a></dt>
-        </dl>
-      </dd>
-
-      <dt><a href="#lbAS">ACTIVE MONITORING</a></dt>
-
-      <dd>
-        <dl>
-          <dt><a href="#lbAT">Notification Handling</a></dt>
-
-          <dt><a href="#lbAU">DisMan Event MIB</a></dt>
-
-          <dt><a href="#lbAV">DisMan Schedule MIB</a></dt>
-        </dl>
-      </dd>
-
-      <dt><a href="#lbAW">EXTENDING AGENT FUNCTIONALITY</a></dt>
-
-      <dd>
-        <dl>
-          <dt><a href="#lbAX">Arbitrary Extension Commands</a></dt>
-
-          <dt><a href="#lbAY">MIB-Specific Extension Commands</a></dt>
-
-          <dt><a href="#lbAZ">Embedded Perl Support</a></dt>
-
-          <dt><a href="#lbBA">Dynamically Loadable Modules</a></dt>
-
-          <dt><a href="#lbBB">Proxy Support</a></dt>
-
-          <dt><a href="#lbBC">SMUX Sub-Agents</a></dt>
-
-          <dt><a href="#lbBD">AgentX Sub-Agents</a></dt>
-        </dl>
-      </dd>
-
-      <dt><a href="#lbBE">OTHER CONFIGURATION</a></dt>
-
-      <dd>
-        <dl>
-          <dt><a href="#lbBF">Internal Data tables</a></dt>
-        </dl>
-      </dd>
-
-      <dt><a href="#lbBG">NOTES</a></dt>
-
-      <dt><a href="#lbBH">EXAMPLE CONFIGURATION FILE</a></dt>
-
-      <dt><a href="#lbBI">FILES</a></dt>
-
-      <dt><a href="#lbBJ">SEE ALSO</a></dt>
-    </dl>
-    <hr />
-    This document was created by <a href="http://localhost/cgi-bin/man/man2html">man2html</a>, using the manual pages.<br />
-    Time: 13:12:01 GMT, September 23, 2007
-<!-- CONTENT END -->
-<!--#include virtual="/page-bottom.html" -->
-
+</PRE>
+
+</DL>
+
+</DL>
+
+<DT><DD>
+This expression could also source an external file:
+<DL COMPACT><DT><DD>
+<DL COMPACT><DT><DD>
+perl 'do /path/to/file.pl';
+</DL>
+
+</DL>
+
+<DT><DD>
+or perform any other perl-based processing that might be required.
+
+
+
+</DL>
+<A NAME="lbBD">&nbsp;</A>
+<H3>Dynamically Loadable Modules</H3>
+
+Most of the MIBs supported by the Net-SNMP agent are implemented as
+C code modules, which were compiled and linked into the agent libraries
+when the suite was first built.  Such implementation modules can also be
+compiled independently and loaded into the running agent once it has
+started.  Use of this mechanism requires that the agent was built with support for the
+<I>ucd-snmp/dlmod</I> module (which is included as part of the default
+build configuration).
+<DL COMPACT>
+<DT>dlmod NAME PATH<DD>
+will load the shared object module from the file PATH (an absolute
+filename), and call the initialisation routine <I>init_NAME</I>.
+<DL COMPACT><DT><DD>
+<DL COMPACT>
+<DT>Note:<DD>
+If the specified PATH is not a fully qualified filename, it will
+be interpreted relative to /usr/local/lib/snmp/dlmod, and .so
+will be appended to the filename.
+</DL>
+</DL>
+
+</DL>
+<P>
+
+This functionality can also be configured using SNMP SET requests
+to the UCD-DLMOD-MIB.
+<A NAME="lbBE">&nbsp;</A>
+<H3>Proxy Support</H3>
+
+Another mechanism for extending the functionality of the agent
+is to pass selected requests (or selected varbinds) to another
+SNMP agent, which can be running on the same host (presumably
+listening on a different port), or on a remote system.
+This can be viewed either as the main agent delegating requests to
+the remote one, or acting as a proxy for it.
+Use of this mechanism requires that the agent was built with support for the
+<I>ucd-snmp/proxy</I> module (which is included as part of the
+default build configuration).
+<DL COMPACT>
+<DT>proxy [-Cn CONTEXTNAME] [SNMPCMD_ARGS] HOST OID [REMOTEOID]<DD>
+will pass any incoming requests under OID to the agent listening
+on the port specified by the transport address HOST.
+See the section 
+<B>LISTENING ADDRESSES</B>
+
+in the
+<I><A HREF="http://localhost/cgi-bin/man/man2html?8+snmpd">snmpd</A>(8)</I>
+
+manual page for more information about the format of listening
+addresses.
+<DL COMPACT><DT><DD>
+<DL COMPACT>
+<DT>Note:<DD>
+To proxy the entire MIB tree, use the OID .1.3
+(<B>not</B> the top-level .1)
+</DL>
+</DL>
+
+</DL>
+<P>
+
+The <I>SNMPCMD_ARGS</I> should provide sufficient version and
+administrative information to generate a valid SNMP request
+(see <I><A HREF="http://localhost/cgi-bin/man/man2html?1+snmpcmd">snmpcmd</A>(1)</I>).
+<DL COMPACT>
+<DT>Note:<DD>
+The proxied request will <I>not</I> use the administrative
+settings from the original request.
+
+</DL>
+<P>
+
+If a CONTEXTNAME is specified, this will register the proxy
+delegation within the named context in the local agent.
+Defining multiple <I>proxy</I> directives for the same OID but
+different contexts can be used to query several remote agents
+through a single proxy, by specifying the appropriate SNMPv3
+context in the incoming request (or using suitable configured
+community strings - see the <I>com2sec</I> directive).
+<P>
+
+Specifying the REMOID parameter will map the local MIB tree
+rooted at OID to an equivalent subtree rooted at REMOID
+on the remote agent.
+<A NAME="lbBF">&nbsp;</A>
+<H3>SMUX Sub-Agents</H3>
+
+The Net-SNMP agent supports the SMUX protocol (RFC 1227) to communicate
+with SMUX-based subagents (such as <I>gated</I>, <I>zebra</I> or <I>quagga</I>).
+Use of this mechanism requires that the agent was built with support for the
+<I>smux</I> module, which is not part of the default build environment, and
+must be explicitly included by specifying the '--with-mib-modules=smux'
+option to the configure script when the package is first built.
+<DL COMPACT><DT><DD>
+<DL COMPACT>
+<DT>Note:<DD>
+This extension protocol has been officially deprecated in
+favour of AgentX (see below).
+</DL>
+</DL>
+
+<DL COMPACT>
+<DT>smuxpeer OID PASS<DD>
+will register a subtree for SMUX-based processing, to be
+authenticated using the password PASS.  If a subagent
+(or &quot;peer&quot;) connects to the agent and registers this subtree
+
+
+
+then requests for OIDs within it will be passed to that
+SMUX subagent for processing.
+<DT><DD>
+A suitable entry for an OSPF routing daemon (such as <I>gated</I>,
+<I>zebra</I> or <I>quagga</I>) might be something like
+<DL COMPACT><DT><DD>
+<DL COMPACT><DT><DD>
+<I>smuxpeer .1.3.6.1.2.1.14 ospf_pass</I>
+
+</DL>
+
+</DL>
+
+<DT>smuxsocket &lt;IPv4-address&gt;<DD>
+defines the IPv4 address for SMUX peers to communicate with the Net-SNMP agent.
+The default is to listen on all IPv4 interfaces (&quot;0.0.0.0&quot;), unless the 
+package has been configured with &quot;--enable-local-smux&quot; at build time, which 
+causes it to only listen on 127.0.0.1 by default. SMUX uses the well-known
+TCP port 199.
+</DL>
+<P>
+
+Note the Net-SNMP agent will only operate as a SMUX <I>master</I>
+agent. It does not support acting in a SMUX subagent role.
+<A NAME="lbBG">&nbsp;</A>
+<H3>AgentX Sub-Agents</H3>
+
+The Net-SNMP agent supports the AgentX protocol (RFC 2741) in
+both master and subagent roles.
+Use of this mechanism requires that the agent was built with support for the
+<I>agentx</I> module (which is included as part of the
+default build configuration), and also that this support is
+explicitly enabled (e.g. via the <I>snmpd.conf</I> file).
+<P>
+
+There are two directives specifically relevant to running as
+an AgentX master agent:
+<DL COMPACT>
+<DT>master agentx<DD>
+will enable the AgentX functionality and cause the agent to
+start listening for incoming AgentX registrations.
+This can also be activated by specifying the '-x' command-line
+option (to specify an alternative listening socket).
+<DT>agentXPerms SOCKPERMS [DIRPERMS [USER|UID [GROUP|GID]]]<DD>
+Defines the permissions and ownership of the AgentX Unix Domain socket,
+and the parent directories of this socket.
+SOCKPERMS and DIRPERMS must be octal digits (see 
+<I><A HREF="http://localhost/cgi-bin/man/man2html?1+chmod">chmod</A>(1)</I>
+
+). By default this socket will only be accessible to subagents which 
+have the same userid as the agent.
+</DL>
+<P>
+
+There is one directive specifically relevant to running as
+an AgentX sub-agent:
+<DL COMPACT>
+<DT>agentXPingInterval NUM<DD>
+will make the subagent try and reconnect every NUM seconds to the
+master if it ever becomes (or starts) disconnected.
+</DL>
+<P>
+
+The remaining directives are relevant to both AgentX master
+and sub-agents:
+<DL COMPACT>
+<DT>agentXSocket [&lt;transport-specifier&gt;:]&lt;transport-address&gt;[,...]<DD>
+defines the address the master agent listens at, or the subagent
+should connect to.
+The default is the Unix Domain socket &quot;/var/agentx/master&quot;.
+Another common alternative is tcp:localhost:705.
+See the section
+<B>LISTENING ADDRESSES</B>
+
+in the
+<I><A HREF="http://localhost/cgi-bin/man/man2html?8+snmpd">snmpd</A>(8)</I>
+
+manual page for more information about the format of addresses.
+<DL COMPACT><DT><DD>
+<DL COMPACT>
+<DT>Note:<DD>
+Specifying an AgentX socket does <B>not</B> automatically enable
+AgentX functionality (unlike the '-x' command-line option).
+</DL>
+</DL>
+
+<DT>agentXTimeout NUM<DD>
+defines the timeout period (NUM seconds) for an AgentX request.
+Default is 1 second.
+<DT>agentXRetries NUM<DD>
+defines the number of retries for an AgentX request.
+Default is 5 retries.
+</DL>
+<P>
+
+net-snmp ships with both C and Perl APIs to develop your own AgentX
+subagent.
+<A NAME="lbBH">&nbsp;</A>
+<H2>OTHER CONFIGURATION</H2>
+
+<DL COMPACT>
+<DT>override [-rw] OID TYPE VALUE<DD>
+This directive allows you to override a particular OID with a
+different value (and possibly a different type of value).  The -rw
+flag will allow snmp SETs to modify it's value as well. (note that if
+you're overriding original functionality, that functionality will be
+entirely lost.  Thus SETS will do nothing more than modify the
+internal overridden value and will not perform any of the original
+functionality intended to be provided by the MIB object.  It's an
+emulation only.)  An example:
+<DL COMPACT><DT><DD>
+<DL COMPACT>
+<DT><DD>
+override sysDescr.0 octet_str &quot;my own sysDescr&quot;
+</DL>
+</DL>
+
+<DT><DD>
+That line will set the sysDescr.0 value to &quot;my own sysDescr&quot; as well
+as make it modifiable with SNMP SETs as well (which is actually
+illegal according to the MIB specifications).
+<DT><DD>
+Note that care must be taken when using this.  For example, if you try
+to override a property of the 3rd interface in the ifTable with a new
+value and later the numbering within the ifTable changes it's index
+ordering you'll end up with problems and your modified value won't
+appear in the right place in the table.
+<DT><DD>
+Valid TYPEs are: integer, uinteger, octet_str, object_id, counter,
+null (for gauges, use &quot;uinteger&quot;; for bit strings, use &quot;octet_str&quot;).
+Note that setting an object to &quot;null&quot; effectively delete's it as being
+accessible.  No VALUE needs to be given if the object type is null.
+<DT><DD>
+More types should be available in the future.
+</DL>
+<P>
+
+If you're trying to figure out aspects of the various mib modules
+(possibly some that you've added yourself), the following may help you
+spit out some useful debugging information.  First off, please read
+the snmpd manual page on the -D flag.  Then the following
+configuration snmpd.conf token, combined with the -D flag, can produce
+useful output:
+<DL COMPACT>
+<DT>injectHandler HANDLER modulename<DD>
+This will insert new handlers into the section of the mib tree
+referenced by &quot;modulename&quot;.  The types of handlers available for
+insertion are:
+<DL COMPACT><DT><DD>
+<DL COMPACT>
+<DT>stash_cache<DD>
+Caches information returned from the lower level.  This
+greatly help the performance of the agent, at the cost
+of caching the data such that its no longer &quot;live&quot; for
+30 seconds (in this future, this will be configurable).
+Note that this means snmpd will use more memory as well
+while the information is cached.  Currently this only
+works for handlers registered using the table_iterator
+support, which is only a few mib tables.  To use it,
+you need to make sure to install it before the
+table_iterator point in the chain, so to do this:
+<P>
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;injectHandler&nbsp;stash_cache&nbsp;NAME&nbsp;table_iterator
+<P>
+If you want a table to play with, try walking the
+nsModuleTable with and without this injected.
+<P>
+<DT>debug<DD>
+Prints out lots of debugging information when
+the -Dhelper:debug flag is passed to the snmpd
+application.
+<P>
+<DT>read_only<DD>
+Forces turning off write support for the given module.
+<P>
+<DT>serialize<DD>
+If a module is failing to handle multiple requests
+properly (using the new 5.0 module API), this will force
+the module to only receive one request at a time.
+<P>
+<DT>bulk_to_next<DD>
+If a module registers to handle getbulk support, but
+for some reason is failing to implement it properly,
+this module will convert all getbulk requests to
+getnext requests before the final module receives it.
+</DL>
+</DL>
+
+<DT>dontLogTCPWrappersConnects<DD>
+If the <B>snmpd</B> was compiled with TCP Wrapper support, it
+logs every connection made to the agent. This setting disables
+the log messages for accepted connections. Denied connections will
+still be logged.
+<DT>Figuring out module names<DD>
+To figure out which modules you can inject things into,
+run <B>snmpwalk</B> on the nsModuleTable which will give
+a list of all named modules registered within the agent.
+</DL>
+<A NAME="lbBI">&nbsp;</A>
+<H3>Internal Data tables</H3>
+
+<DL COMPACT>
+<DT>table NAME<DD>
+
+<DT>add_row NAME INDEX(ES) VALUE(S)<DD>
+
+</DL>
+<A NAME="lbBJ">&nbsp;</A>
+<H2>NOTES</H2>
+
+<DL COMPACT>
+<DT>o<DD>
+The Net-SNMP agent can be instructed to re-read the various configuration files,
+either via an <B>snmpset</B> assignment of <A HREF="http://localhost/cgi-bin/man/man2html?1+integer">integer</A>(1) to
+UCD-SNMP-MIB::versionUpdateConfig.0 (.1.3.6.1.4.1.2021.100.11.0),
+or by sending a <B>kill -HUP</B> signal to the agent process.
+<DT>o<DD>
+All directives listed with a value of &quot;yes&quot; actually accept a range
+of boolean values.  These will accept any of <I>1</I>, <I>yes</I> or
+<I>true</I> to enable the corresponding behaviour, 
+or any of <I>0</I>, <I>no</I> or <I>false</I> to disable it.
+The default in each case is for the feature to be turned off, so these
+directives are typically only used to enable the appropriate behaviour.
+</DL>
+<A NAME="lbBK">&nbsp;</A>
+<H2>EXAMPLE CONFIGURATION FILE</H2>
+
+See the EXAMPLE.CONF file in the top level source directory for a more
+detailed example of how the above information is used in real
+examples.
+<A NAME="lbBL">&nbsp;</A>
+<H2>FILES</H2>
+
+/usr/local/etc/snmp/snmpd.conf
+<A NAME="lbBM">&nbsp;</A>
+<H2>SEE ALSO</H2>
+
+<A HREF="http://localhost/cgi-bin/man/man2html?1+snmpconf">snmpconf</A>(1), <A HREF="http://localhost/cgi-bin/man/man2html?1+snmpusm">snmpusm</A>(1), <A HREF="http://localhost/cgi-bin/man/man2html?5+snmp.conf">snmp.conf</A>(5), <A HREF="http://localhost/cgi-bin/man/man2html?5+snmp_config">snmp_config</A>(5), <A HREF="http://localhost/cgi-bin/man/man2html?8+snmpd">snmpd</A>(8), EXAMPLE.conf, <A HREF="http://localhost/cgi-bin/man/man2html?3+read_config">read_config</A>(3).
+
+
+
+<P>
+
+<HR>
+<A NAME="index">&nbsp;</A><H2>Index</H2>
+<DL>
+<DT><A HREF="#lbAB">NAME</A><DD>
+<DT><A HREF="#lbAC">DESCRIPTION</A><DD>
+<DT><A HREF="#lbAD">AGENT BEHAVIOUR</A><DD>
+<DL>
+<DT><A HREF="#lbAE">SNMPv3 Configuration</A><DD>
+</DL>
+<DT><A HREF="#lbAF">SNMPv3 AUTHENTICATION</A><DD>
+<DL>
+<DT><A HREF="#lbAG">SNMPv3 USM Users</A><DD>
+<DT><A HREF="#lbAH">SSH Support</A><DD>
+<DT><A HREF="#lbAI">DTLS Support</A><DD>
+</DL>
+<DT><A HREF="#lbAJ">ACCESS CONTROL</A><DD>
+<DL>
+<DT><A HREF="#lbAK">Traditional Access Control</A><DD>
+<DT><A HREF="#lbAL">VACM Configuration</A><DD>
+<DT><A HREF="#lbAM">Typed-View Configuration</A><DD>
+</DL>
+<DT><A HREF="#lbAN">SYSTEM INFORMATION</A><DD>
+<DL>
+<DT><A HREF="#lbAO">System Group</A><DD>
+<DT><A HREF="#lbAP">Interfaces Group</A><DD>
+<DT><A HREF="#lbAQ">Host Resources Group</A><DD>
+<DT><A HREF="#lbAR">Process Monitoring </A><DD>
+<DT><A HREF="#lbAS">Disk Usage Monitoring</A><DD>
+<DT><A HREF="#lbAT">System Load Monitoring</A><DD>
+<DT><A HREF="#lbAU">Log File Monitoring</A><DD>
+</DL>
+<DT><A HREF="#lbAV">ACTIVE MONITORING</A><DD>
+<DL>
+<DT><A HREF="#lbAW">Notification Handling</A><DD>
+<DT><A HREF="#lbAX">DisMan Event MIB</A><DD>
+<DT><A HREF="#lbAY">DisMan Schedule MIB</A><DD>
+</DL>
+<DT><A HREF="#lbAZ">EXTENDING AGENT FUNCTIONALITY</A><DD>
+<DL>
+<DT><A HREF="#lbBA">Arbitrary Extension Commands</A><DD>
+<DT><A HREF="#lbBB">MIB-Specific Extension Commands</A><DD>
+<DT><A HREF="#lbBC">Embedded Perl Support</A><DD>
+<DT><A HREF="#lbBD">Dynamically Loadable Modules</A><DD>
+<DT><A HREF="#lbBE">Proxy Support</A><DD>
+<DT><A HREF="#lbBF">SMUX Sub-Agents</A><DD>
+<DT><A HREF="#lbBG">AgentX Sub-Agents</A><DD>
+</DL>
+<DT><A HREF="#lbBH">OTHER CONFIGURATION</A><DD>
+<DL>
+<DT><A HREF="#lbBI">Internal Data tables</A><DD>
+</DL>
+<DT><A HREF="#lbBJ">NOTES</A><DD>
+<DT><A HREF="#lbBK">EXAMPLE CONFIGURATION FILE</A><DD>
+<DT><A HREF="#lbBL">FILES</A><DD>
+<DT><A HREF="#lbBM">SEE ALSO</A><DD>
+</DL>
+<HR>
+This document was created by
+<A HREF="http://localhost/cgi-bin/man/man2html">man2html</A>,
+using the manual pages.<BR>
+Time: 19:05:39 GMT, September 28, 2009
+</BODY>
+</HTML>

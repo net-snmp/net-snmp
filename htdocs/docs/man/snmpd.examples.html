@@ -1,791 +1,930 @@
-<!--#set var="section" value="documentation" -->
-<!--#include virtual="/page-top.html" -->
-<!-- CONTENT START -->
-    <h1>SNMPD.EXAMPLES</h1>Section: Net-SNMP (5)<br />
-    Updated: 05 Dec 2005<br />
-    <a href="#index">Index</a> <a href="../index.html">Return to Main Contents</a>
-    <hr />
-    <a name="lbAB" id="lbAB">&nbsp;</a>
+Content-type: text/html
 
-    <h2>NAME</h2>snmpd.examples - example configuration for the Net-SNMP agent <a name="lbAC" id="lbAC">&nbsp;</a>
+<HTML><HEAD><TITLE>Manpage of SNMPD.EXAMPLES</TITLE>
+</HEAD><BODY>
+<H1>SNMPD.EXAMPLES</H1>
+Section: Net-SNMP (5)<BR>Updated: 05 Dec 2005<BR><A HREF="#index">Index</A>
+<A HREF="http://localhost/cgi-bin/man/man2html">Return to Main Contents</A><HR>
 
-    <h2>DESCRIPTION</h2>The <i><a href="snmpd.conf.html">snmpd.conf</a>(5)</i> man page defines the syntax and behaviour of the
-    various configuration directives that can be used to control the operation of the Net-SNMP agent, and the management
-    information it provides.
 
-    <p>This companion man page illustrates these directives, showing some practical examples of how they might be used. <a name=
-    "lbAD" id="lbAD">&nbsp;</a></p>
+<A NAME="lbAB">&nbsp;</A>
+<H2>NAME</H2>
 
-    <h2>AGENT BEHAVIOUR</h2><a name="lbAE" id="lbAE">&nbsp;</a>
+snmpd.examples - example configuration for the Net-SNMP agent
+<A NAME="lbAC">&nbsp;</A>
+<H2>DESCRIPTION</H2>
 
-    <h3>Listening addresses</h3>The default agent behaviour (listing on the standard SNMP UDP port on all interfaces) is
-    equivalent to the directive:
+The
+<I><A HREF="http://localhost/cgi-bin/man/man2html?5+snmpd.conf">snmpd.conf</A>(5)</I>
 
-    <dl compact="compact">
-      <dd>agentaddress udp:161</dd>
-    </dl>or simply
+man page defines the syntax and behaviour of the various
+configuration directives that can be used to control the
+operation of the Net-SNMP agent, and the management information
+it provides.
+<P>
 
-    <dl compact="compact">
-      <dd>agentaddress 161</dd>
-    </dl>The agent can be configured to <i>only</i> accept requests sent to the local loopback interface (again listening on the
-    SNMP UDP port), using:
+This companion man page illustrates these directives, showing
+some practical examples of how they might be used.
+<A NAME="lbAD">&nbsp;</A>
+<H2>AGENT BEHAVIOUR</H2>
 
-    <dl compact="compact">
-      <dd>agentaddress localhost:161 <i># (udp implicit)</i></dd>
-    </dl>or
+<A NAME="lbAE">&nbsp;</A>
+<H3>Listening addresses</H3>
 
-    <dl compact="compact">
-      <dd>agentaddress 127.0.0.1 <i># (udp and standard port implicit)</i></dd>
-    </dl>It can be configured to accept both UDP and TCP requests (over both IPv4 and IPv6), using:
+The default agent behaviour (listing on the standard SNMP UDP port on
+all interfaces) is equivalent to the directive:
+<DL COMPACT><DT><DD>
+agentaddress udp:161
+</DL>
 
-    <dl compact="compact">
-      <dd>agentaddress udp:161,tcp:161,udp6:161,tcp6:161</dd>
-    </dl>Other combinations are also valid. <a name="lbAF" id="lbAF">&nbsp;</a>
+or simply
+<DL COMPACT><DT><DD>
+agentaddress 161
+</DL>
 
-    <h3>Run-time privileges</h3>The agent can be configured to relinquish any privileged access once it has opened the initial
-    listening ports. Given a suitable "snmp" group (defined in <i>/etc/group</i>), this could be done using the directives:
+The agent can be configured to <I>only</I> accept requests sent to the
+local loopback interface (again listening on the SNMP UDP port), using:
+<DL COMPACT><DT><DD>
+agentaddress localhost:161     <I># (udp implicit)</I>
+</DL>
 
-    <dl compact="compact">
-      <dd>
-        <pre>
+or
+<DL COMPACT><DT><DD>
+agentaddress 127.0.0.1     <I># (udp and standard port implicit)</I>
+</DL>
+
+It can be configured to accept both UDP and TCP requests (over both IPv4
+and IPv6), using:
+<DL COMPACT><DT><DD>
+agentaddress udp:161,tcp:161,udp6:161,tcp6:161
+</DL>
+
+
+
+
+Other combinations are also valid.
+<A NAME="lbAF">&nbsp;</A>
+<H3>Run-time privileges</H3>
+
+The agent can be configured to relinquish any privileged access once it
+has opened the initial listening ports.  Given a suitable &quot;snmp&quot; group
+(defined in <I>/etc/group</I>), this could be done using the directives:
+<DL COMPACT><DT><DD>
+<PRE>
 agentuser  nobody
 agentgroup snmp
-</pre>
-      </dd>
-    </dl>A similar effect could be achieved using numeric UID and/or GID values:
+</PRE>
 
-    <dl compact="compact">
-      <dd>
-        <pre>
+</DL>
+
+A similar effect could be achieved using numeric UID and/or GID values:
+<DL COMPACT><DT><DD>
+<PRE>
 agentuser  #10
 agentgroup #10
-</pre>
-      </dd>
-    </dl><a name="lbAG" id="lbAG">&nbsp;</a>
+</PRE>
 
-    <h3>SNMPv3 Configuration</h3>Rather than being generated pseudo-randomly, the engine ID for the agent could be calculated
-    based on the MAC address of the second network interface (<i>eth1</i>), using the directives:
+</DL>
 
-    <dl compact="compact">
-      <dd>engineIDType 3 engineIDNic eth1</dd>
-    </dl>or it could be calculated from the (first) IP address, using:
 
-    <dl compact="compact">
-      <dd>engineIDType 1</dd>
-    </dl>or it could be specified explicitly, using:
 
-    <dl compact="compact">
-      <dd>engineID "XXX - WHAT FORMAT"</dd>
-    </dl><a name="lbAH" id="lbAH">&nbsp;</a>
 
-    <h2>ACCESS CONTROL</h2><a name="lbAI" id="lbAI">&nbsp;</a>
 
-    <h3>SNMPv3 Users</h3>The following directives will create three users, all using exactly the same authentication and
-    encryption settings:
+<A NAME="lbAG">&nbsp;</A>
+<H3>SNMPv3 Configuration</H3>
 
-    <dl compact="compact">
-      <dd>
-        <pre>
-createUser me     MD5 "single pass phrase"
-createUser myself MD5 "single pass phrase" DES
-createUser andI   MD5 "single pass phrase" DES "single pass phrase"
-</pre>
-      </dd>
-    </dl>Note that this defines three <i>distinct</i> users, who could be granted different levels of access. Changing the
-    passphrase for any one of these would not affect the other two.
+Rather than being generated pseudo-randomly,
+the engine ID for the agent could be calculated based on the MAC address
+of the second network interface (<I>eth1</I>), using the directives:
+<DL COMPACT><DT><DD>
+engineIDType 3
+engineIDNic  eth1
+</DL>
 
-    <p>Separate pass phrases can be specified for authentication and encryption:</p>
+or it could be calculated from the (first) IP address, using:
+<DL COMPACT><DT><DD>
+engineIDType 1
+</DL>
 
-    <dl compact="compact">
-      <dd>createUser onering SHA "to rule them all" AES "to bind them"</dd>
-    </dl>Remember that these <i>createUser</i> directives should be defined in the /var/net-snmp/snmpd.conf file, rather than the
-    usual location. <a name="lbAJ" id="lbAJ">&nbsp;</a>
+or it could be specified explicitly, using:
+<DL COMPACT><DT><DD>
+engineID &quot;XXX - WHAT FORMAT&quot;
+</DL>
 
-    <h3>Traditional Access Control</h3>The SNMPv3 users defined above can be granted access to the full MIB tree using the
-    directives:
 
-    <dl compact="compact">
-      <dd>
-        <pre>
+
+
+<A NAME="lbAH">&nbsp;</A>
+<H2>ACCESS CONTROL</H2>
+
+<A NAME="lbAI">&nbsp;</A>
+<H3>SNMPv3 Users</H3>
+
+The following directives will create three users, all using exactly
+the same authentication and encryption settings:
+<DL COMPACT><DT><DD>
+<PRE>
+createUser me     MD5 &quot;single pass phrase&quot;
+createUser myself MD5 &quot;single pass phrase&quot; DES
+createUser andI   MD5 &quot;single pass phrase&quot; DES &quot;single pass phrase&quot;
+</PRE>
+
+</DL>
+
+Note that this defines three <I>distinct</I> users, who could be granted
+different levels of access.  Changing the passphrase for any one of
+these would not affect the other two.
+<P>
+
+Separate pass phrases can be specified for authentication and
+encryption:
+<DL COMPACT><DT><DD>
+createUser onering SHA &quot;to rule them all&quot; AES &quot;to bind them&quot;
+</DL>
+
+Remember that these <I>createUser</I> directives should be defined in the
+/var/net-snmp/snmpd.conf file, rather than the usual location.
+
+
+
+
+<A NAME="lbAJ">&nbsp;</A>
+<H3>Traditional Access Control</H3>
+
+The SNMPv3 users defined above can be granted access to the full
+MIB tree using the directives:
+<DL COMPACT><DT><DD>
+<PRE>
 rouser me
 rwuser onering
-</pre>
-      </dd>
-    </dl>Or selective access to individual subtrees using:
+</PRE>
 
-    <dl compact="compact">
-      <dd>
-        <pre>
+</DL>
+
+Or selective access to individual subtrees using:
+<DL COMPACT><DT><DD>
+<PRE>
 rouser myself   .1.3.6.1.2
 rwuser andI     system
-</pre>
-      </dd>
-    </dl>
+</PRE>
 
-    <p>Note that a combination repeating the same user, such as:</p>
+</DL>
 
-    <dl compact="compact">
-      <dd>
-        <pre>
+<P>
+
+Note that a combination repeating the same user, such as:
+<DL COMPACT><DT><DD>
+<PRE>
 rouser onering
 rwuser onering
-</pre>
-      </dd>
-    </dl>should <b>not</b> be used. This would configure the user <i>onering</i> with read-only access (and ignore the
-    <i>rwuser</i> entry altogether). The same holds for the community-based directives.
+</PRE>
 
-    <p>The directives:</p>
+</DL>
 
-    <dl compact="compact">
-      <dd>
-        <pre>
+should <B>not</B> be used. This would configure the user <I>onering</I>
+with read-only access (and ignore the <I>rwuser</I> entry altogether).
+The same holds for the community-based directives.
+<P>
+
+The directives:
+<DL COMPACT><DT><DD>
+<PRE>
 rocommunity public
 rwcommunity private
-</pre>
-      </dd>
-    </dl>would define the commonly-expected read and write community strings for SNMPv1 and SNMPv2c requests. This behaviour is
-    <b>not</b> configured by default, and would need to be set up explicitly.
+</PRE>
 
-    <dl compact="compact">
-      <dd>
-        <dl compact="compact">
-          <dt>Note:</dt>
+</DL>
 
-          <dd>It would also be a very good idea to change <i>private</i> to something a little less predictable!</dd>
-        </dl>
-      </dd>
-    </dl>
+would define the commonly-expected read and write community strings
+for SNMPv1 and SNMPv2c requests.  This behaviour is <B>not</B>
+configured by default, and would need to be set up explicitly.
+<DL COMPACT><DT><DD>
+<DL COMPACT>
+<DT>Note:<DD>
+It would also be a very good idea to change <I>private</I> to something
+a little less predictable!
+</DL>
+</DL>
 
-    <p>A slightly less vulnerable configuration might restrict what information could be retrieved:</p>
+<P>
 
-    <dl compact="compact">
-      <dd>rocommunity public default system</dd>
-    </dl>or the management systems that settings could be manipulated from:
+A slightly less vulnerable configuration might restrict what information
+could be retrieved:
+<DL COMPACT><DT><DD>
+rocommunity public   default system
+</DL>
 
-    <dl compact="compact">
-      <dd>rwcommunity private 10.10.10.0/24</dd>
-    </dl>or a combination of the two. <a name="lbAK" id="lbAK">&nbsp;</a>
+or the management systems that settings could be manipulated from:
+<DL COMPACT><DT><DD>
+rwcommunity private  10.10.10.0/24
+</DL>
 
-    <h3>VACM Configuration</h3>This last pair of settings are equivalent to the full VACM definitions:
+or a combination of the two.
+<A NAME="lbAK">&nbsp;</A>
+<H3>VACM Configuration</H3>
 
-    <dl compact="compact">
-      <dd>
-        <pre>
-<i>#         sec.name  source        community</i>
+This last pair of settings are equivalent to the full VACM definitions:
+<DL COMPACT><DT><DD>
+<PRE>
+<I>#         sec.name  source        community</I>
 com2sec   public    default       public
 com2sec   mynet     10.10.10.0/24 private
 com2sec6  mynet     fec0::/64     private
 
-<i>#                  sec.model  sec.name</i>
+<I>#                  sec.model  sec.name</I>
 group  worldGroup  v1         public
 group  worldGroup  v2c        public
 group  myGroup     v1         mynet
 group  myGroup     v2c        mynet
 
-<i>#              incl/excl   subtree     [mask]</i>
+<I>#              incl/excl   subtree     [mask]</I>
 view   all     included    .1
 view   sysView included    system
 
-<i>#              context model level   prefix  read    write  notify (unused)</i>
-access  worldGroup  ""  any  noauth  exact   system  none   none
-access  myGroup     ""  any  noauth  exact   all     all    none
-</pre>
-      </dd>
-    </dl>
+<I>#              context model level   prefix  read    write  notify (unused)</I>
+access  worldGroup  &quot;&quot;  any  noauth  exact   system  none   none
+access  myGroup     &quot;&quot;  any  noauth  exact   all     all    none
+</PRE>
 
-    <p>There are several points to note in this example:</p>
+</DL>
 
-    <p>The <i>group</i> directives must be repeated for both SNMPv1 and SNMPv2c requests.</p>
+<P>
 
-    <p>The <i>com2sec</i> security name is distinct from the community string that is mapped to it. They can be the same
-    ("public") or different ("mynet"/"private") - but what appears in the <i>group</i> directive is the security name, regardless
-    of the original community string.</p>
+There are several points to note in this example:
+<P>
 
-    <p>Both of the <i>view</i> directives are defining simple OID subtrees, so neither of these require an explicit mask. The
-    same holds for the "combined subtree2 view defined below. In fact, a mask field is only needed when defining row slices
-    across a table (or similar views), and can almost always be omitted.</p>
+The <I>group</I> directives must be repeated for 
+both SNMPv1 and SNMPv2c requests.
+<P>
 
-    <p>In general, it is advisible not to mix traditional and VACM-based access configuration settings, as these can sometimes
-    interfere with each other in unexpected ways. Choose a particular style of access configuration, and stick to it. <a name=
-    "lbAL" id="lbAL">&nbsp;</a></p>
+The <I>com2sec</I> security name is distinct from the community
+string that is mapped to it. They can be the same (&quot;public&quot;)
+or different (&quot;mynet&quot;/&quot;private&quot;) - but what appears in the
+<I>group</I> directive is the security name, regardless of
+the original community string.
+<P>
 
-    <h3>Typed-View Configuration</h3>A similar configuration could also be configured as follows:
+Both of the <I>view</I> directives are defining simple OID
+subtrees, so neither of these require an explicit mask.
+The same holds for the &quot;combined subtree2 view defined below.
+In fact, a mask field is only needed when defining row slices
+across a table (or similar views), and can almost always be omitted.
+<P>
 
-    <dl compact="compact">
-      <dd>
-        <pre>
+In general, it is advisible not to mix traditional and VACM-based
+access configuration settings, as these can sometimes interfere
+with each other in unexpected ways.  Choose a particular style
+of access configuration, and stick to it.
+
+
+
+
+
+
+<A NAME="lbAL">&nbsp;</A>
+<H3>Typed-View Configuration</H3>
+
+A similar configuration could also be configured as follows:
+<DL COMPACT><DT><DD>
+<PRE>
 view   sys2View included    system
 view   sys2View included    .1.3.6.1.2.1.25.1
 
 authcommunity read       public  default      -v sys2View
 authcommunity read,write private 10.10.10.0/8
-</pre>
-      </dd>
-    </dl>
+</PRE>
 
-    <p>This mechanism allows multi-subtree (or other non-simple) views to be used with the one-line <i>rocommunity</i> style of
-    configuration.</p>
+</DL>
 
-    <p>It would also support configuring "write-only" access, should this be required. <a name="lbAM" id="lbAM">&nbsp;</a></p>
+<P>
 
-    <h2>SYSTEM INFORMATION</h2><a name="lbAN" id="lbAN">&nbsp;</a>
+This mechanism allows multi-subtree (or other non-simple) views to
+be used with the one-line <I>rocommunity</I> style of configuration.
+<P>
 
-    <h3>System Group</h3>The full contents of the 'system' group (with the exception of sysUpTime) can be explicitly configured
-    using:
+It would also support configuring &quot;write-only&quot; access, should this
+be required.
 
-    <dl compact="compact">
-      <dd>
-        <pre>
-<i># Override 'uname -a' and hardcoded system OID - inherently read-only values</i>
+
+
+<A NAME="lbAM">&nbsp;</A>
+<H2>SYSTEM INFORMATION</H2>
+
+<A NAME="lbAN">&nbsp;</A>
+<H3>System Group</H3>
+
+The full contents of the 'system' group (with the exception of sysUpTime)
+can be explicitly configured using:
+<DL COMPACT><DT><DD>
+<PRE>
+<I># Override 'uname -a' and hardcoded system OID - inherently read-only values</I>
 sysDescr     Universal Turing Machine mk I
 sysObjectID  .1.3.6.1.4.1.8072.3.2.1066
 
-<i># Override default values from 'configure' - makes these objects read-only</i>
-sysContact   <a href="mailto:Alan.Turing@pre-cs.man.ac.uk">Alan.Turing@pre-cs.man.ac.uk</a>
+<I># Override default values from 'configure' - makes these objects read-only</I>
+sysContact   <A HREF="mailto:Alan.Turing@pre-cs.man.ac.uk">Alan.Turing@pre-cs.man.ac.uk</A>
 sysName      tortoise.turing.com
 sysLocation  An idea in the mind of AT
 
-<i># Standard end-host behaviour</i>
+<I># Standard end-host behaviour</I>
 sysServices  72
-</pre>
-      </dd>
-    </dl><a name="lbAO" id="lbAO">&nbsp;</a>
+</PRE>
 
-    <h3>Host Resources Group</h3>The list of devices probed for potential inclusion in the hrDiskStorageTable (and hrDeviceTable)
-    can be amended using any of the following directives:
+</DL>
 
-    <dl compact="compact">
-      <dd>ignoredisk /dev/rdsk/c0t2d0</dd>
-    </dl>which prevents the device <i>/dev/rdsk/c0t2d0</i> from being scanned,
+<A NAME="lbAO">&nbsp;</A>
+<H3>Host Resources Group</H3>
 
-    <dl compact="compact">
-      <dd>
-        <pre>
+The list of devices probed for potential inclusion in the
+hrDiskStorageTable (and hrDeviceTable) can be amended using
+any of the following directives:
+<DL COMPACT><DT><DD>
+ignoredisk /dev/rdsk/c0t2d0
+</DL>
+
+which prevents the device <I>/dev/rdsk/c0t2d0</I> from being scanned,
+<DL COMPACT><DT><DD>
+<PRE>
 ignoredisk /dev/rdsk/c0t[!6]d0
 ignoredisk /dev/rdsk/c0t[0-57-9a-f]d0
-</pre>
-      </dd>
-    </dl>either of which prevents all devices <i>/dev/rdsk/c0t</i>X<i>d0</i> (except .../<i>c0t6d0</i>) from being scanned,
+</PRE>
 
-    <dl compact="compact">
-      <dd>ignoredisk /dev/rdsk/c1*</dd>
-    </dl>which prevents all devices whose device names start with <i>/dev/rdsk/c1</i> from being scanned, or
+</DL>
 
-    <dl compact="compact">
-      <dd>ignoredisk /dev/rdsk/c?t0d0</dd>
-    </dl>which prevents all devices <i>/dev/rdsk/c</i>X<i>t0d0</i> (where 'X' is any single character) from being scanned.
-    <a name="lbAP" id="lbAP">&nbsp;</a>
+either of which prevents all devices <I>/dev/rdsk/c0t</I>X<I>d0</I>
+(except .../<I>c0t6d0</I>) from being scanned,
+<DL COMPACT><DT><DD>
+ignoredisk /dev/rdsk/c1*
+</DL>
 
-    <h3>Process Monitoring</h3>The list of services running on a system can be monitored (and provision made for correcting any
-    problems), using:
+which prevents all devices whose device names start with <I>/dev/rdsk/c1</I>
+from being scanned, or
+<DL COMPACT><DT><DD>
+ignoredisk /dev/rdsk/c?t0d0
+</DL>
 
-    <dl compact="compact">
-      <dd>
-        <pre>
-<i># At least one web server process must be running at all times</i>
+which prevents all devices <I>/dev/rdsk/c</I>X<I>t0d0</I>
+(where 'X' is any single character) from being scanned.
+<A NAME="lbAP">&nbsp;</A>
+<H3>Process Monitoring </H3>
+
+The list of services running on a system can be monitored
+(and provision made for correcting any problems), using:
+<DL COMPACT><DT><DD>
+<PRE>
+<I># At least one web server process must be running at all times</I>
 proc    httpd
 procfix httpd  /etc/rc.d/init.d/httpd restart
 
-<i># There should never be more than 10 mail processes running
-#    (more implies a probable mail storm, so shut down the mail system)</i>
+<I># There should never be more than 10 mail processes running
+#    (more implies a probable mail storm, so shut down the mail system)</I>
 proc    sendmail   10
 procfix sendmail  /etc/rc.d/init.d/sendmail stop
 
-<i># There should be a single network management agent running
-#   ("There can be only one")</i>
+<I># There should be a single network management agent running
+#   (&quot;There can be only one&quot;)</I>
 proc    snmpd    1  1
-</pre>
-      </dd>
-    </dl>Also see the "DisMan Event MIB" section later on. <a name="lbAQ" id="lbAQ">&nbsp;</a>
+</PRE>
 
-    <h3>Disk Usage Monitoring</h3>The state of disk storage can be monitored using:
+</DL>
 
-    <dl compact="compact">
-      <dd>
-        <pre>
+Also see the &quot;DisMan Event MIB&quot; section later on.
+<A NAME="lbAQ">&nbsp;</A>
+<H3>Disk Usage Monitoring</H3>
+
+The state of disk storage can be monitored using:
+<DL COMPACT><DT><DD>
+<PRE>
 includeAllDisks 10%
 disk /var 20%
 disk /usr  3%
-<i>#  Keep 100 Mb free for crash dumps</i>
+<I>#  Keep 100 MB free for crash dumps</I>
 disk /mnt/crash  100000
-</pre>
-      </dd>
-    </dl><a name="lbAR" id="lbAR">&nbsp;</a>
+</PRE>
 
-    <h3>System Load Monitoring</h3>A simple check for an overloaded system might be:
+</DL>
 
-    <dl compact="compact">
-      <dd>load 10</dd>
-    </dl>A more refined check (to allow brief periods of heavy use, but recognise sustained medium-heavy load) might be:
+<A NAME="lbAR">&nbsp;</A>
+<H3>System Load Monitoring</H3>
 
-    <dl compact="compact">
-      <dd>load 30 10 5</dd>
-    </dl><a name="lbAS" id="lbAS">&nbsp;</a>
+A simple check for an overloaded system might be:
+<DL COMPACT><DT><DD>
+load 10
+</DL>
 
-    <h3>Log File Monitoring</h3><i>TODO</i>
+A more refined check (to allow brief periods of heavy use,
+but recognise sustained medium-heavy load) might be:
+<DL COMPACT><DT><DD>
+load 30 10 5
+</DL>
 
-    <dl compact="compact">
-      <dd>file FILE [MAXSIZE]</dd>
-    </dl>
+<A NAME="lbAS">&nbsp;</A>
+<H3>Log File Monitoring</H3>
 
-    <dl compact="compact">
-      <dd>logmatch NAME PATH CYCLETIME REGEX</dd>
-    </dl><a name="lbAT" id="lbAT">&nbsp;</a>
+<I>TODO</I>
 
-    <h2>ACTIVE MONITORING</h2><a name="lbAU" id="lbAU">&nbsp;</a>
+<DL COMPACT><DT><DD>
+file FILE [MAXSIZE]
+</DL>
 
-    <h3>Notification Handling</h3>Configuring the agent to report invalid access attempts might be done by:
+<DL COMPACT><DT><DD>
+logmatch NAME PATH CYCLETIME REGEX
+</DL>
 
-    <dl compact="compact">
-      <dd>
-        <pre>
+<A NAME="lbAT">&nbsp;</A>
+<H2>ACTIVE MONITORING</H2>
+
+<A NAME="lbAU">&nbsp;</A>
+<H3>Notification Handling</H3>
+
+Configuring the agent to report invalid access attempts might be done by:
+<DL COMPACT><DT><DD>
+<PRE>
 authtrapenable 1
 trapcommunity  public
 trap2sink      localhost
-</pre>
-      </dd>
-    </dl>Alternatively, the second and third directives could be combined (and an acknowledgement requested) using:
+</PRE>
 
-    <dl compact="compact">
-      <dd>informsink localhost public</dd>
-    </dl>A configuration with repeated sink destinations, such as:
+</DL>
 
-    <dl compact="compact">
-      <dd>
-        <pre>
+Alternatively, the second and third directives could be combined
+(and an acknowledgement requested) using:
+<DL COMPACT><DT><DD>
+informsink     localhost  public
+</DL>
+
+A configuration with repeated sink destinations, such as:
+<DL COMPACT><DT><DD>
+<PRE>
 trapsink       localhost
 trap2sink      localhost
 informsink     localhost
-</pre>
-      </dd>
-    </dl>should <b>NOT</b> be used, as this will cause multiple copies of each trap to be sent to the same trap receiver.
+</PRE>
 
-    <p><i>TODO - discuss SNMPv3 traps</i></p>
+</DL>
 
-    <dl compact="compact">
-      <dd>trapsess <i>snmpv3 options</i> localhost:162</dd>
-    </dl>
+should <B>NOT</B> be used, as this will cause multiple copies
+of each trap to be sent to the same trap receiver.
+<P>
 
-    <p><i>TODO - mention trapd access configuration</i></p>
+<I>TODO - discuss SNMPv3 traps</I>
 
-    <p><a name="lbAV" id="lbAV">&nbsp;</a></p>
+<DL COMPACT><DT><DD>
+trapsess  <I>snmpv3 options</I>  localhost:162
+</DL>
 
-    <h3>DisMan Event MIB</h3>The simplest configuration for active self-monitoring of the agent, by the agent, for the agent, is
-    probably:
+<P>
 
-    <dl compact="compact">
-      <dd>
-        <pre>
-<i># Set up the credentials to retrieve monitored values</i>
-createUser    _internal MD5 "the first sign of madness"
+<I>TODO - mention trapd access configuration</I>
+
+<P>
+<A NAME="lbAV">&nbsp;</A>
+<H3>DisMan Event MIB</H3>
+
+The simplest configuration for active self-monitoring of
+the agent, by the agent, for the agent, is probably:
+<DL COMPACT><DT><DD>
+<PRE>
+<I># Set up the credentials to retrieve monitored values</I>
+createUser    _internal MD5 &quot;the first sign of madness&quot;
 iquerySecName _internal
 rouser        _internal
 
-<i># Active the standard monitoring entries</i>
+<I># Active the standard monitoring entries</I>
 defaultMonitors         yes
 linkUpDownNotifications yes
 
-<i># If there's a problem, then tell someone!</i>
+<I># If there's a problem, then tell someone!</I>
 trap2sink localhost
-</pre>
-      </dd>
-    </dl>
+</PRE>
 
-    <p>The first block sets up a suitable user for retrieving the information to by monitored, while the following pair of
-    directives activates various built-in monitoring entries.</p>
+</DL>
 
-    <p>Note that the DisMan directives are not themselves sufficient to actively report problems - there also needs to be a
-    suitable destination configured to actually send the resulting notifications to.</p>
+<P>
 
-    <p>A more detailed monitor example is given by:</p>
+The first block sets up a suitable user for retrieving the
+information to by monitored, while the following pair of
+directives activates various built-in monitoring entries.
+<P>
 
-    <dl compact="compact">
-      <dd>monitor -u me -o hrSWRunName "high process memory" hrSWRunPerfMem &gt; 10000</dd>
-    </dl>
+Note that the DisMan directives are not themselves sufficient to
+actively report problems - there also needs to be a suitable
+destination configured to actually send the resulting notifications to.
+<P>
 
-    <p>This defines an explicit boolean monitor entry, looking for any process using more than 10Mb of active memory. Such
-    processes will be reported using the (standard) DisMan trap mteTriggerFired, but adding an extra (wildcarded) varbind
-    hrSWRunName.</p>
+A more detailed monitor example is given by:
+<DL COMPACT><DT><DD>
+monitor -u me -o hrSWRunName &quot;high process memory&quot; hrSWRunPerfMem &gt; 10000
+</DL>
 
-    <p>This entry also specifies an explicit user (<i>me</i>, as defined earlier) for retrieving the monitored values, and
-    building the trap.</p>
+<P>
 
-    <p>Objects that could potentially fluctuate around the specified level are better monitored using a threshold monitor
-    entry:</p>
+This defines an explicit boolean monitor entry, looking for any process
+using more than 10MB of active memory.  Such processes will be reported
+using the (standard) DisMan trap mteTriggerFired,
+but adding an extra (wildcarded) varbind hrSWRunName.
+<P>
 
-    <dl compact="compact">
-      <dd>monitor -D -r 10 "network traffic" ifInOctets 1000000 5000000</dd>
-    </dl>
+This entry also specifies an explicit user (<I>me</I>, as defined
+earlier) for retrieving the monitored values, and building the trap.
+<P>
 
-    <p>This will send a mteTriggerRising trap whenever the incoming traffic rises above (roughly) 500 kB/s on any network
-    interface, and a corresponding mteTriggerFalling trap when it falls below 100 kB/s again.</p>
+Objects that could potentially fluctuate around the specified level
+are better monitored using a threshold monitor entry: 
+<DL COMPACT><DT><DD>
+monitor -D -r 10 &quot;network traffic&quot; ifInOctets 1000000 5000000
+</DL>
 
-    <p>Note that this monitors the deltas between successive samples (<i>-D</i>) rather than the actual sample values themselves.
-    The same effect could be obtained using:</p>
+<P>
 
-    <dl compact="compact">
-      <dd>monitor -r 10 "network traffic" ifInOctets - - 1000000 5000000</dd>
-    </dl>
+This will send a mteTriggerRising trap whenever the incoming
+traffic rises above (roughly) 500 kB/s on any network interface,
+and a corresponding mteTriggerFalling trap when it falls below
+100 kB/s again.
+<P>
 
-    <p>The <i>linkUpDownNotifications</i> directive above is broadly equivalent to:</p>
+Note that this monitors the deltas between successive samples (<I>-D</I>)
+rather than the actual sample values themselves.  The same effect
+could be obtained using:
+<DL COMPACT><DT><DD>
+monitor -r 10 &quot;network traffic&quot; ifInOctets - - 1000000 5000000
+</DL>
 
-    <dl compact="compact">
-      <dd>
-        <pre>
+<P>
+
+The <I>linkUpDownNotifications</I> directive above is broadly
+equivalent to:
+<DL COMPACT><DT><DD>
+<PRE>
 notificationEvent  linkUpTrap    linkUp   ifIndex ifAdminStatus ifOperStatus
 notificationEvent  linkDownTrap  linkDown ifIndex ifAdminStatus ifOperStatus
 
-monitor  -r 60 -e linkUpTrap   "Generate linkUp"   ifOperStatus != 2
-monitor  -r 60 -e linkDownTrap "Generate linkDown" ifOperStatus == 2
-</pre>
-      </dd>
-    </dl>
+monitor  -r 60 -e linkUpTrap   &quot;Generate linkUp&quot;   ifOperStatus != 2
+monitor  -r 60 -e linkDownTrap &quot;Generate linkDown&quot; ifOperStatus == 2
+</PRE>
 
-    <p>This defines the traps to be sent (using <i>notificationEvent</i>), and explicitly references the relevant notification in
-    the corresponding monitor entry (rather than using the default DisMan traps).</p>
+</DL>
 
-    <p>The <i>defaultMonitors</i> directive above is equivalent to a series of (boolean) monitor entries:</p>
+<P>
 
-    <dl compact="compact">
-      <dd>
-        <pre>
-monitor -o prNames      -o prErrMessage  "procTable" prErrorFlag   != 0
-monitor -o memErrorName -o memSwapErrorMsg "memory"  memSwapError  != 0
-monitor -o extNames     -o extOutput     "extTable"  extResult     != 0
-monitor -o dskPath      -o dskErrorMsg   "dskTable"  dskErrorFlag  != 0
-monitor -o laNames      -o laErrMessage  "laTable"   laErrorFlag   != 0
-monitor -o fileName     -o fileErrorMsg  "fileTable" fileErrorFlag != 0
-</pre>
-      </dd>
-    </dl>and will send a trap whenever any of these entries indicate a problem.
+This defines the traps to be sent (using <I>notificationEvent</I>),
+and explicitly references the relevant notification in the corresponding
+monitor entry (rather than using the default DisMan traps).
+<P>
 
-    <p>An alternative approach would be to automatically invoke the corresponding "fix" action:</p>
+The <I>defaultMonitors</I> directive above is equivalent to a series
+of (boolean) monitor entries:
+<DL COMPACT><DT><DD>
+<PRE>
+monitor -o prNames      -o prErrMessage  &quot;procTable&quot; prErrorFlag   != 0
+monitor -o memErrorName -o memSwapErrorMsg &quot;memory&quot;  memSwapError  != 0
+monitor -o extNames     -o extOutput     &quot;extTable&quot;  extResult     != 0
+monitor -o dskPath      -o dskErrorMsg   &quot;dskTable&quot;  dskErrorFlag  != 0
+monitor -o laNames      -o laErrMessage  &quot;laTable&quot;   laErrorFlag   != 0
+monitor -o fileName     -o fileErrorMsg  &quot;fileTable&quot; fileErrorFlag != 0
+</PRE>
 
-    <dl compact="compact">
-      <dd>
-        <pre>
+</DL>
+
+and will send a trap whenever any of these entries indicate a problem.
+<P>
+
+An alternative approach would be to automatically invoke the corresponding
+&quot;fix&quot; action:
+<DL COMPACT><DT><DD>
+<PRE>
 setEvent   prFixIt  prErrFix = 1
-monitor -e prFixIt "procTable" prErrorFlag   != 0
-</pre>
-      </dd>
-    </dl>(and similarly for any of the other <i>defaultMonitor</i> entries). <a name="lbAW" id="lbAW">&nbsp;</a>
+monitor -e prFixIt &quot;procTable&quot; prErrorFlag   != 0
+</PRE>
 
-    <h3>DisMan Schedule MIB</h3>The agent could be configured to reload its configuration once an hour, using:
+</DL>
 
-    <dl compact="compact">
-      <dd>repeat 3600 versionUpdateConfig.0 = 1</dd>
-    </dl>
+(and similarly for any of the other <I>defaultMonitor</I> entries).
+<A NAME="lbAW">&nbsp;</A>
+<H3>DisMan Schedule MIB</H3>
 
-    <p>Alternatively this could be configured to be run at specific times of day (perhaps following rotation of the logs):</p>
+The agent could be configured to reload its configuration
+once an hour, using:
+<DL COMPACT><DT><DD>
+repeat 3600 versionUpdateConfig.0 = 1
+</DL>
 
-    <dl compact="compact">
-      <dd>cron 10 0 * * * versionUpdateConfig.0 = 1</dd>
-    </dl>
+<P>
 
-    <p>The one-shot style of scheduling is rather less common, but the secret SNMP virus could be activated on the next occurance
-    of Friday 13th using:</p>
+Alternatively this could be configured to be run at specific
+times of day (perhaps following rotation of the logs):
+<DL COMPACT><DT><DD>
+cron 10 0 * * * versionUpdateConfig.0 = 1
+</DL>
 
-    <dl compact="compact">
-      <dd>at 13 13 13 * 5 snmpVirus.0 = 1</dd>
-    </dl><a name="lbAX" id="lbAX">&nbsp;</a>
+<P>
 
-    <h2>EXTENDING AGENT FUNCTIONALITY</h2><a name="lbAY" id="lbAY">&nbsp;</a>
+The one-shot style of scheduling is rather less common, but the
+secret SNMP virus could be activated on the next occurance of Friday 13th using:
+<DL COMPACT><DT><DD>
+at   13 13 13 * 5 snmpVirus.0 = 1
+</DL>
 
-    <h3>Arbitrary Extension Commands</h3><i>Old Style</i>
+<A NAME="lbAX">&nbsp;</A>
+<H2>EXTENDING AGENT FUNCTIONALITY</H2>
 
-    <dl compact="compact">
-      <dd>
-        <pre>
-exec [MIBOID] NAME PROG ARGS"
-sh   [MIBOID] NAME PROG ARGS"
-execfix NAME PROG ARGS"
-</pre>
-      </dd>
-    </dl><i>New Style</i>
+<A NAME="lbAY">&nbsp;</A>
+<H3>Arbitrary Extension Commands</H3>
 
-    <dl compact="compact">
-      <dd>
-        <pre>
-extend [MIBOID] NAME PROG ARGS"
-extendfix [MIBOID] NAME PROG ARGS"
-</pre>
-      </dd>
-    </dl><a name="lbAZ" id="lbAZ">&nbsp;</a>
+<I>Old Style</I>
 
-    <h3>MIB-Specific Extension Commands</h3><i>One-Shot</i>
+<DL COMPACT><DT><DD>
+<PRE>
+exec [MIBOID] NAME PROG ARGS&quot;
+sh   [MIBOID] NAME PROG ARGS&quot;
+execfix NAME PROG ARGS&quot;
+</PRE>
 
-    <dl compact="compact">
-      <dd>"pass [-p priority] MIBOID PROG"</dd>
-    </dl>
+</DL>
 
-    <dl compact="compact">
-      <dd>
-        <i>Persistent</i>
+<I>New Style</I>
 
-        <dl compact="compact">
-          <dd>"pass_persist [-p priority] MIBOID PROG"</dd>
-        </dl>
-      </dd>
-    </dl><a name="lbBA" id="lbBA">&nbsp;</a>
+<DL COMPACT><DT><DD>
+<PRE>
+extend [MIBOID] NAME PROG ARGS&quot;
+extendfix [MIBOID] NAME PROG ARGS&quot;
+</PRE>
 
-    <h3>Embedded Perl Support</h3>If embedded perl support is enabled in the agent, the default initialisation is equivalent to
-    the directives:
+</DL>
 
-    <dl compact="compact">
-      <dd>
-        <pre>
+<A NAME="lbAZ">&nbsp;</A>
+<H3>MIB-Specific Extension Commands</H3>
+
+<I>One-Shot</I>
+
+<DL COMPACT><DT><DD>
+&quot;pass [-p priority] MIBOID PROG&quot;
+</DL>
+
+<DL COMPACT>
+<DT><DD>
+<I>Persistent</I>
+
+<DL COMPACT><DT><DD>
+&quot;pass_persist [-p priority] MIBOID PROG&quot;
+</DL>
+
+</DL>
+<A NAME="lbBA">&nbsp;</A>
+<H3>Embedded Perl Support</H3>
+
+If embedded perl support is enabled in the agent, the default
+initialisation is equivalent to the directives:
+<DL COMPACT><DT><DD>
+<PRE>
 disablePerl  false
 perlInitFile /usr/local/share/snmp/snmp_perl.pl
-</pre>
-      </dd>
-    </dl>The main mechanism for defining embedded perl scripts is the <i>perl</i> directive. A very simple (if somewhat
-    pointless) MIB handler could be registered using:
+</PRE>
 
-    <dl compact="compact">
-      <dd>
-        <pre>
+</DL>
+
+The main mechanism for defining embedded perl scripts is the
+<I>perl</I> directive.  A very simple (if somewhat pointless)
+MIB handler could be registered using:
+<DL COMPACT><DT><DD>
+<PRE>
 perl use Data::Dumper;
-perl sub myroutine  { print "got called: ",Dumper(@_),"\n"; }
+perl sub myroutine  { print &quot;got called: &quot;,Dumper(@_),&quot;\n&quot;; }
 perl $agent-&gt;register('mylink', '.1.3.6.1.8765', \&amp;myroutine);
-</pre>
-      </dd>
-    </dl>
+</PRE>
 
-    <p>This relies on the <i>$agent</i> object, defined in the example snmp_perl.pl file.</p>
+</DL>
 
-    <p>A more realistic MIB handler might be:</p>
+<P>
 
-    <dl compact="compact">
-      <dd>
-        <pre>
-<i>XXX - WHAT ???</i>
-</pre>
-      </dd>
-    </dl>Alternatively, this code could be stored in an external file, and loaded using:
+This relies on the <I>$agent</I> object, defined in the example
+snmp_perl.pl file.
+<P>
 
-    <dl compact="compact">
-      <dd>perl 'do /usr/local/share/snmp/perl_example.pl';</dd>
-    </dl><a name="lbBB" id="lbBB">&nbsp;</a>
+A more realistic MIB handler might be:
+<DL COMPACT><DT><DD>
+<PRE>
+<I>XXX - WHAT ???</I>
+</PRE>
 
-    <h3>Dynamically Loadable Modules</h3><i>TODO</i>
+</DL>
 
-    <dl compact="compact">
-      <dd>dlmod NAME PATH"</dd>
-    </dl><a name="lbBC" id="lbBC">&nbsp;</a>
+Alternatively, this code could be stored in an external file,
+and loaded using:
+<DL COMPACT><DT><DD>
+perl 'do /usr/local/share/snmp/perl_example.pl';
+</DL>
 
-    <h3>Proxy Support</h3>A configuration for acting as a simple proxy for two other SNMP agents (running on remote systems)
-    might be:
 
-    <dl compact="compact">
-      <dd>
-        <pre>
+
+
+<A NAME="lbBB">&nbsp;</A>
+<H3>Dynamically Loadable Modules</H3>
+
+<I>TODO</I>
+
+<DL COMPACT><DT><DD>
+dlmod NAME PATH&quot;
+</DL>
+
+<A NAME="lbBC">&nbsp;</A>
+<H3>Proxy Support</H3>
+
+A configuration for acting as a simple proxy for two other
+SNMP agents (running on remote systems) might be:
+<DL COMPACT><DT><DD>
+<PRE>
 com2sec -Cn rem1context  rem1user default  remotehost1
 com2sec -Cn rem2context  rem2user default  remotehost2
 
 proxy -Cn rem1context  -v 1 -c public  remotehost1  .1.3
 proxy -Cn rem2context  -v 1 -c public  remotehost2  .1.3
-</pre>
-      </dd>
-    </dl>(plus suitable access control entries).
+</PRE>
 
-    <p>The same <i>proxy</i> directives would also work with (incoming) SNMPv3 requests, which can specify a context directly. It
-    would probably be more sensible to use contexts of <i>remotehost1</i> and <i>remotehost2</i> - the names above were chosen to
-    indicate how these directives work together.</p>
+</DL>
 
-    <p>Note that the administrative settings for the proxied request are specified explicitly, and are independent of the
-    settings from the incoming request.</p>
+(plus suitable access control entries).
+<P>
 
-    <p>An alternative use for the proxy directive is to pass part of the OID tree to another agent (either on a remote host or
-    listening on a different port on the same system), while handling the rest internally:</p>
+The same <I>proxy</I> directives would also work with
+(incoming) SNMPv3 requests, which can specify a context directly.
+It would probably be more sensible to use contexts of
+<I>remotehost1</I> and <I>remotehost2</I> - the names above were
+chosen to indicate how these directives work together.
+<P>
 
-    <dl compact="compact">
-      <dd>proxy -v 1 -c public localhost:6161 .1.3.6.1.4.1.99</dd>
-    </dl>This mechanism can be used to link together two separate SNMP agents.
+Note that the administrative settings for the proxied request
+are specified explicitly, and are independent of the settings
+from the incoming request.
+<P>
 
-    <p>A less usual approach is to map one subtree into a different area of the overall MIB tree (either locally or on a remote
-    system):</p>
+An alternative use for the proxy directive is to pass
+part of the OID tree to another agent (either on a remote host
+or listening on a different port on the same system),
+while handling the rest internally:
+<DL COMPACT><DT><DD>
+proxy -v 1 -c public  localhost:6161  .1.3.6.1.4.1.99
+</DL>
 
-    <dl compact="compact">
-      <dd>
-        <pre>
-<i># uses SNMPv3 to access the MIB tree .1.3.6.1.2.1.1 on 'remotehost'
-# and maps this to the local tree .1.3.6.1.3.10</i>
+This mechanism can be used to link together two separate SNMP agents.
+<P>
+
+A less usual approach is to map one subtree into a different area
+of the overall MIB tree (either locally or on a remote system):
+<DL COMPACT><DT><DD>
+<PRE>
+<I># uses SNMPv3 to access the MIB tree .1.3.6.1.2.1.1 on 'remotehost'
+# and maps this to the local tree .1.3.6.1.3.10</I>
 proxy -v 3 -l noAuthNoPriv -u user remotehost .1.3.6.1.3.10 .1.3.6.1.2.1.1
-</pre>
-      </dd>
-    </dl><a name="lbBD" id="lbBD">&nbsp;</a>
+</PRE>
 
-    <h3>SMUX Sub-Agents</h3>
+</DL>
 
-    <dl compact="compact">
-      <dd>
-        <pre>
+<A NAME="lbBD">&nbsp;</A>
+<H3>SMUX Sub-Agents</H3>
+
+<DL COMPACT><DT><DD>
+<PRE>
 smuxsocket 127.0.0.1
 smuxpeer .1.3.6.1.2.1.14 ospf_pass
-</pre>
-      </dd>
-    </dl><a name="lbBE" id="lbBE">&nbsp;</a>
+</PRE>
 
-    <h3>AgentX Sub-Agents</h3>The Net-SNMP agent could be configured to operate as an AgentX master agent (listening on a
-    non-standard named socket, and running using the access privileges defined earlier), using:
+</DL>
 
-    <dl compact="compact">
-      <dd>
-        <pre>
+<A NAME="lbBE">&nbsp;</A>
+<H3>AgentX Sub-Agents</H3>
+
+The Net-SNMP agent could be configured to operate as an AgentX master
+agent (listening on a non-standard named socket, and running using
+the access privileges defined earlier), using:
+<DL COMPACT><DT><DD>
+<PRE>
 master agentx
 agentXSocket /tmp/agentx/master
 agentXPerms  0660 0550 nobody snmp
-</pre>
-      </dd>
-    </dl>A sub-agent wishing to connect to this master agent would need the same <i>agentXSocket</i> directive, or the equivalent
-    code:
+</PRE>
 
-    <dl compact="compact">
-      <dd>
-        <pre>
+</DL>
+
+
+
+
+
+A sub-agent wishing to connect to this master agent would need
+the same <I>agentXSocket</I> directive, or the equivalent code:
+<DL COMPACT><DT><DD>
+<PRE>
 netsnmp_ds_set_string(NETSNMP_DS_APPLICATION_ID, NETSNMP_DS_AGENT_X_SOCKET, 
-                      "/tmp/agentx/master");
-</pre>
-      </dd>
-    </dl>
+                      &quot;/tmp/agentx/master&quot;);
+</PRE>
 
-    <p>A loopback networked AgentX configuration could be set up using:</p>
+</DL>
 
-    <dl compact="compact">
-      <dd>
-        <pre>
+<P>
+
+A loopback networked AgentX configuration could be set up using:
+<DL COMPACT><DT><DD>
+<PRE>
 agentXSocket   tcp:localhost:705
 agentXTimeout  5
 agentXRetries  2
-</pre>
-      </dd>
-    </dl>on the master side, and:
+</PRE>
 
-    <dl compact="compact">
-      <dd>
-        <pre>
+</DL>
+
+on the master side, and:
+<DL COMPACT><DT><DD>
+<PRE>
 agentXSocket   tcp:localhost:705
 agentXTimeout  10
 agentXRetries  1
 agentXPingInterval 600
-</pre>
-      </dd>
-    </dl>on the client.
+</PRE>
 
-    <p>Note that the timeout and retry settings can be asymmetric for the two directions, and the sub-agent can poll the master
-    agent at regular intervals (600s = every 10 minutes), to ensure the connection is still working. <a name="lbBF" id=
-    "lbBF">&nbsp;</a></p>
+</DL>
 
-    <h2>OTHER CONFIGURATION</h2>
+on the client.
+<P>
 
-    <dl compact="compact">
-      <dd>override sysDescr.0 octet_str "my own sysDescr"</dd>
-    </dl>
+Note that the timeout and retry settings can be asymmetric
+for the two directions, and the sub-agent can poll the master agent
+at regular intervals (600s = every 10 minutes), to ensure the
+connection is still working.
+<A NAME="lbBF">&nbsp;</A>
+<H2>OTHER CONFIGURATION</H2>
 
-    <dl compact="compact">
-      <dd>injectHandler stash_cache NAME table_iterator</dd>
-    </dl><a name="lbBG" id="lbBG">&nbsp;</a>
+<DL COMPACT><DT><DD>
+override sysDescr.0 octet_str &quot;my own sysDescr&quot;
+</DL>
 
-    <h2>FILES</h2>/usr/local/etc/snmp/snmpd.conf <a name="lbBH" id="lbBH">&nbsp;</a>
+<DL COMPACT><DT><DD>
+injectHandler stash_cache NAME table_iterator
+</DL>
 
-    <h2>SEE ALSO</h2><a href="snmpconf.html">snmpconf</a>(1), <a href="snmpd.conf.html">snmpd.conf</a>(5), <a href=
-    "snmp.conf.html">snmp.conf</a>(5), <a href="snmp_config.html">snmp_config</a>(5), <a href="snmpd.html">snmpd</a>(8),
-    EXAMPLE.conf, <a href="read_config.html">read_config</a>(3).
-    <hr />
-    <a name="index" id="index">&nbsp;</a>
+<A NAME="lbBG">&nbsp;</A>
+<H2>FILES</H2>
 
-    <h2>Index</h2>
+/usr/local/etc/snmp/snmpd.conf
+<A NAME="lbBH">&nbsp;</A>
+<H2>SEE ALSO</H2>
 
-    <dl>
-      <dt><a href="#lbAB">NAME</a></dt>
+<A HREF="http://localhost/cgi-bin/man/man2html?1+snmpconf">snmpconf</A>(1), <A HREF="http://localhost/cgi-bin/man/man2html?5+snmpd.conf">snmpd.conf</A>(5), <A HREF="http://localhost/cgi-bin/man/man2html?5+snmp.conf">snmp.conf</A>(5), <A HREF="http://localhost/cgi-bin/man/man2html?5+snmp_config">snmp_config</A>(5), <A HREF="http://localhost/cgi-bin/man/man2html?8+snmpd">snmpd</A>(8), EXAMPLE.conf, <A HREF="http://localhost/cgi-bin/man/man2html?3+read_config">read_config</A>(3).
 
-      <dt><a href="#lbAC">DESCRIPTION</a></dt>
 
-      <dt><a href="#lbAD">AGENT BEHAVIOUR</a></dt>
 
-      <dd>
-        <dl>
-          <dt><a href="#lbAE">Listening addresses</a></dt>
+<P>
 
-          <dt><a href="#lbAF">Run-time privileges</a></dt>
-
-          <dt><a href="#lbAG">SNMPv3 Configuration</a></dt>
-        </dl>
-      </dd>
-
-      <dt><a href="#lbAH">ACCESS CONTROL</a></dt>
-
-      <dd>
-        <dl>
-          <dt><a href="#lbAI">SNMPv3 Users</a></dt>
-
-          <dt><a href="#lbAJ">Traditional Access Control</a></dt>
-
-          <dt><a href="#lbAK">VACM Configuration</a></dt>
-
-          <dt><a href="#lbAL">Typed-View Configuration</a></dt>
-        </dl>
-      </dd>
-
-      <dt><a href="#lbAM">SYSTEM INFORMATION</a></dt>
-
-      <dd>
-        <dl>
-          <dt><a href="#lbAN">System Group</a></dt>
-
-          <dt><a href="#lbAO">Host Resources Group</a></dt>
-
-          <dt><a href="#lbAP">Process Monitoring</a></dt>
-
-          <dt><a href="#lbAQ">Disk Usage Monitoring</a></dt>
-
-          <dt><a href="#lbAR">System Load Monitoring</a></dt>
-
-          <dt><a href="#lbAS">Log File Monitoring</a></dt>
-        </dl>
-      </dd>
-
-      <dt><a href="#lbAT">ACTIVE MONITORING</a></dt>
-
-      <dd>
-        <dl>
-          <dt><a href="#lbAU">Notification Handling</a></dt>
-
-          <dt><a href="#lbAV">DisMan Event MIB</a></dt>
-
-          <dt><a href="#lbAW">DisMan Schedule MIB</a></dt>
-        </dl>
-      </dd>
-
-      <dt><a href="#lbAX">EXTENDING AGENT FUNCTIONALITY</a></dt>
-
-      <dd>
-        <dl>
-          <dt><a href="#lbAY">Arbitrary Extension Commands</a></dt>
-
-          <dt><a href="#lbAZ">MIB-Specific Extension Commands</a></dt>
-
-          <dt><a href="#lbBA">Embedded Perl Support</a></dt>
-
-          <dt><a href="#lbBB">Dynamically Loadable Modules</a></dt>
-
-          <dt><a href="#lbBC">Proxy Support</a></dt>
-
-          <dt><a href="#lbBD">SMUX Sub-Agents</a></dt>
-
-          <dt><a href="#lbBE">AgentX Sub-Agents</a></dt>
-        </dl>
-      </dd>
-
-      <dt><a href="#lbBF">OTHER CONFIGURATION</a></dt>
-
-      <dt><a href="#lbBG">FILES</a></dt>
-
-      <dt><a href="#lbBH">SEE ALSO</a></dt>
-    </dl>
-    <hr />
-    This document was created by <a href="http://localhost/cgi-bin/man/man2html">man2html</a>, using the manual pages.<br />
-    Time: 13:12:01 GMT, September 23, 2007
-<!-- CONTENT END -->
-<!--#include virtual="/page-bottom.html" -->
-
+<HR>
+<A NAME="index">&nbsp;</A><H2>Index</H2>
+<DL>
+<DT><A HREF="#lbAB">NAME</A><DD>
+<DT><A HREF="#lbAC">DESCRIPTION</A><DD>
+<DT><A HREF="#lbAD">AGENT BEHAVIOUR</A><DD>
+<DL>
+<DT><A HREF="#lbAE">Listening addresses</A><DD>
+<DT><A HREF="#lbAF">Run-time privileges</A><DD>
+<DT><A HREF="#lbAG">SNMPv3 Configuration</A><DD>
+</DL>
+<DT><A HREF="#lbAH">ACCESS CONTROL</A><DD>
+<DL>
+<DT><A HREF="#lbAI">SNMPv3 Users</A><DD>
+<DT><A HREF="#lbAJ">Traditional Access Control</A><DD>
+<DT><A HREF="#lbAK">VACM Configuration</A><DD>
+<DT><A HREF="#lbAL">Typed-View Configuration</A><DD>
+</DL>
+<DT><A HREF="#lbAM">SYSTEM INFORMATION</A><DD>
+<DL>
+<DT><A HREF="#lbAN">System Group</A><DD>
+<DT><A HREF="#lbAO">Host Resources Group</A><DD>
+<DT><A HREF="#lbAP">Process Monitoring </A><DD>
+<DT><A HREF="#lbAQ">Disk Usage Monitoring</A><DD>
+<DT><A HREF="#lbAR">System Load Monitoring</A><DD>
+<DT><A HREF="#lbAS">Log File Monitoring</A><DD>
+</DL>
+<DT><A HREF="#lbAT">ACTIVE MONITORING</A><DD>
+<DL>
+<DT><A HREF="#lbAU">Notification Handling</A><DD>
+<DT><A HREF="#lbAV">DisMan Event MIB</A><DD>
+<DT><A HREF="#lbAW">DisMan Schedule MIB</A><DD>
+</DL>
+<DT><A HREF="#lbAX">EXTENDING AGENT FUNCTIONALITY</A><DD>
+<DL>
+<DT><A HREF="#lbAY">Arbitrary Extension Commands</A><DD>
+<DT><A HREF="#lbAZ">MIB-Specific Extension Commands</A><DD>
+<DT><A HREF="#lbBA">Embedded Perl Support</A><DD>
+<DT><A HREF="#lbBB">Dynamically Loadable Modules</A><DD>
+<DT><A HREF="#lbBC">Proxy Support</A><DD>
+<DT><A HREF="#lbBD">SMUX Sub-Agents</A><DD>
+<DT><A HREF="#lbBE">AgentX Sub-Agents</A><DD>
+</DL>
+<DT><A HREF="#lbBF">OTHER CONFIGURATION</A><DD>
+<DT><A HREF="#lbBG">FILES</A><DD>
+<DT><A HREF="#lbBH">SEE ALSO</A><DD>
+</DL>
+<HR>
+This document was created by
+<A HREF="http://localhost/cgi-bin/man/man2html">man2html</A>,
+using the manual pages.<BR>
+Time: 19:05:39 GMT, September 28, 2009
+</BODY>
+</HTML>

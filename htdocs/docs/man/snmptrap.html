@@ -1,116 +1,177 @@
-<!--#set var="section" value="documentation" -->
-<!--#include virtual="/page-top.html" -->
-<!-- CONTENT START -->
-    <h1>SNMPTRAP</h1>Section: Net-SNMP (1)<br />
-    Updated: 08 Feb 2002<br />
-    <a href="#index">Index</a> <a href="../index.html">Return to Main Contents</a>
-    <hr />
-    <a name="lbAB" id="lbAB">&nbsp;</a>
+Content-type: text/html
 
-    <h2>NAME</h2>snmptrap, snmpinform - sends an SNMP notification to a manager <a name="lbAC" id="lbAC">&nbsp;</a>
+<HTML><HEAD><TITLE>Manpage of SNMPTRAP</TITLE>
+</HEAD><BODY>
+<H1>SNMPTRAP</H1>
+Section: Net-SNMP (1)<BR>Updated: 08 Feb 2002<BR><A HREF="#index">Index</A>
+<A HREF="http://localhost/cgi-bin/man/man2html">Return to Main Contents</A><HR>
 
-    <h2>SYNOPSIS</h2><b>snmptrap -v 1</b> [COMMON OPTIONS] [-Ci] enterprise-oid agent generic-trap specific-trap uptime [OID TYPE
-    VALUE]...
 
-    <p><b>snmptrap -v [2c|3]</b> [COMMON OPTIONS] [-Ci] uptime trap-oid [OID TYPE VALUE]...</p>
+<A NAME="lbAB">&nbsp;</A>
+<H2>NAME</H2>
 
-    <p><b>snmpinform -v [2c|3]</b> [COMMON OPTIONS] uptime trap-oid [OID TYPE VALUE]... <a name="lbAD" id="lbAD">&nbsp;</a></p>
+snmptrap, snmpinform - sends an SNMP notification to a manager
+<A NAME="lbAC">&nbsp;</A>
+<H2>SYNOPSIS</H2>
 
-    <h2>DESCRIPTION</h2><b>snmptrap</b> is an SNMP application that uses the SNMP TRAP operation to send information to a network
-    manager. One or more object identifiers (OIDs) can be given as arguments on the command line. A type and a value must
-    accompany each object identifier. Each variable name is given in the format specified in <i><a href=
-    "variables.html">variables</a>(5)</i>.
+<B>snmptrap -v 1</B>
 
-    <p>When invoked as <b>snmpinform,</b> or when <b>-Ci</b> is added to the command line flags of snmptrap, it sends an
-    INFORM-PDU, expecting a response from the trap receiver, retransmitting if required. Otherwise it sends an TRAP-PDU or
-    TRAP2-PDU.</p>
+[COMMON OPTIONS] [-Ci] enterprise-oid agent generic-trap specific-trap uptime [OID TYPE VALUE]...
+<P>
 
-    <p>If any of the required version 1 parameters, <i>enterprise-oid</i>, <i>agent</i>, and <i>uptime</i> are specified as
-    empty, it defaults to <i>1.3.6.1.4.1.3.1.1 (enterprises.cmu.1.1)</i>, <i>hostname</i>, and <i>host-uptime</i>
-    respectively.</p>
+<B>snmptrap -v [2c|3]</B>
 
-    <p>The <i>TYPE</i> is a single character, one of:</p>
+[COMMON OPTIONS] [-Ci] uptime trap-oid [OID TYPE VALUE]...
+<P>
 
-    <dl compact="compact">
-      <dd>
-        <dl compact="compact">
-          <dt><b>i</b></dt>
+<B>snmpinform -v [2c|3]</B>
 
-          <dd>INTEGER</dd>
+[COMMON OPTIONS] uptime trap-oid [OID TYPE VALUE]...
+<A NAME="lbAD">&nbsp;</A>
+<H2>DESCRIPTION</H2>
 
-          <dt><b>u</b></dt>
+<B>snmptrap</B>
 
-          <dd>UNSIGNED</dd>
+is an SNMP application that uses the SNMP TRAP operation to send
+information to a network manager.  One or more object identifiers
+(OIDs) can be given as arguments on the command line.  A type and a
+value must accompany each object identifier.  Each variable name is
+given in the format specified in 
+<I><A HREF="http://localhost/cgi-bin/man/man2html?5+variables">variables</A>(5)</I>.
 
-          <dt><b>c</b></dt>
+<P>
 
-          <dd>COUNTER32</dd>
+When invoked as
+<B>snmpinform,</B>
 
-          <dt><b>s</b></dt>
+or when
+<B>-Ci</B>
 
-          <dd>STRING</dd>
+is added to the command line flags of snmptrap, it sends an
+INFORM-PDU, expecting a response from the trap receiver,
+retransmitting if required.  Otherwise it sends an TRAP-PDU or
+TRAP2-PDU.
+<P>
 
-          <dt><b>x</b></dt>
+If any of the required version 1 parameters, 
+<I>enterprise-oid</I>,
 
-          <dd>HEX STRING</dd>
+<I>agent</I>,
 
-          <dt><b>d</b></dt>
+and
+<I>uptime</I>
 
-          <dd>DECIMAL STRING</dd>
+are specified as empty, it defaults to
+<I>1.3.6.1.4.1.3.1.1 (enterprises.cmu.1.1)</I>,
 
-          <dt><b>n</b></dt>
+<I>hostname</I>,
 
-          <dd>NULLOBJ</dd>
+and
+<I>host-uptime</I>
 
-          <dt><b>o</b></dt>
+respectively.
+<P>
 
-          <dd>OBJID</dd>
+The
+<I>TYPE</I>
 
-          <dt><b>t</b></dt>
+is a single character, one of:
+<DL COMPACT><DT><DD>
 
-          <dd>TIMETICKS</dd>
+<DL COMPACT>
+<DT><B>i</B>
 
-          <dt><b>a</b></dt>
+<DD>
+INTEGER
+<DT><B>u</B>
 
-          <dd>IPADDRESS</dd>
+<DD>
+UNSIGNED
+<DT><B>c</B>
 
-          <dt><b>b</b></dt>
+<DD>
+COUNTER32
+<DT><B>s</B>
 
-          <dd>BITS</dd>
-        </dl>
-      </dd>
-    </dl>which are handled in the same way as the <b>snmpset</b> command.
+<DD>
+STRING
+<DT><B>x</B>
 
-    <p>For example:</p>
+<DD>
+HEX STRING
+<DT><B>d</B>
 
-    <p>snmptrap -v 1 -c public manager enterprises.spider test-hub 3 0 '' interfaces.iftable.ifentry.ifindex.1 i 1</p>
+<DD>
+DECIMAL STRING
+<DT><B>n</B>
 
-    <p>will send a generic linkUp trap to manager, for interface 1. <a name="lbAE" id="lbAE">&nbsp;</a></p>
+<DD>
+NULLOBJ
+<DT><B>o</B>
 
-    <h2>OPTIONS</h2><b>snmptrap</b> takes the common options described in the <i><a href="snmpcmd.html">snmpcmd</a>(1)</i> manual
-    page in addition to the <b>-Ci</b> option described above. <a name="lbAF" id="lbAF">&nbsp;</a>
+<DD>
+OBJID
+<DT><B>t</B>
 
-    <h2>SEE ALSO</h2><a href="snmpcmd.html">snmpcmd</a>(1), <a href="snmpset.html">snmpset</a>(1), <a href=
-    "variables.html">variables</a>(5).
-    <hr />
-    <a name="index" id="index">&nbsp;</a>
+<DD>
+TIMETICKS
+<DT><B>a</B>
 
-    <h2>Index</h2>
+<DD>
+IPADDRESS
+<DT><B>b</B>
 
-    <dl>
-      <dt><a href="#lbAB">NAME</a></dt>
+<DD>
+BITS
 
-      <dt><a href="#lbAC">SYNOPSIS</a></dt>
+</DL>
+</DL>
 
-      <dt><a href="#lbAD">DESCRIPTION</a></dt>
+which are handled in the same way as the
+<B>snmpset</B>
 
-      <dt><a href="#lbAE">OPTIONS</a></dt>
+command.
+<P>
 
-      <dt><a href="#lbAF">SEE ALSO</a></dt>
-    </dl>
-    <hr />
-    This document was created by <a href="http://localhost/cgi-bin/man/man2html">man2html</a>, using the manual pages.<br />
-    Time: 13:12:00 GMT, September 23, 2007
-<!-- CONTENT END -->
-<!--#include virtual="/page-bottom.html" -->
+For example:
+<P>
 
+snmptrap -v 1 -c public manager enterprises.spider test-hub 3 0 '' interfaces.iftable.ifentry.ifindex.1 i 1
+<P>
+
+will send a generic linkUp trap to manager, for interface 1.
+<A NAME="lbAE">&nbsp;</A>
+<H2>OPTIONS</H2>
+
+<B>snmptrap</B>
+
+takes the common options described in the
+<I><A HREF="http://localhost/cgi-bin/man/man2html?1+snmpcmd">snmpcmd</A>(1) </I>
+
+manual page in
+addition to the 
+<B>-Ci</B>
+
+option described above.
+<A NAME="lbAF">&nbsp;</A>
+<H2>SEE ALSO</H2>
+
+<A HREF="http://localhost/cgi-bin/man/man2html?1+snmpcmd">snmpcmd</A>(1), <A HREF="http://localhost/cgi-bin/man/man2html?1+snmpset">snmpset</A>(1), <A HREF="http://localhost/cgi-bin/man/man2html?5+variables">variables</A>(5).
+<P>
+
+<HR>
+<A NAME="index">&nbsp;</A><H2>Index</H2>
+<DL>
+<DT><A HREF="#lbAB">NAME</A><DD>
+<DT><A HREF="#lbAC">SYNOPSIS</A><DD>
+<DT><A HREF="#lbAD">DESCRIPTION</A><DD>
+<DT><A HREF="#lbAE">OPTIONS</A><DD>
+<DT><A HREF="#lbAF">SEE ALSO</A><DD>
+</DL>
+<HR>
+This document was created by
+<A HREF="http://localhost/cgi-bin/man/man2html">man2html</A>,
+using the manual pages.<BR>
+Time: 19:05:39 GMT, September 28, 2009
+</BODY>
+</HTML>
