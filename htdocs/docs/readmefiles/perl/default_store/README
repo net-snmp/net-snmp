@@ -8,7 +8,7 @@ To install:
   make install
 
 To compile in the source tree before the net-snmp itself has been installed:
-  perl Makefile.PL -NET-SNMP-CONFIG=&quot;sh ../../net-snmp-config&quot; -NET-SNMP-IN-SOURCE=true
+  perl Makefile.PL -NET-SNMP-CONFIG="sh ../../net-snmp-config" -NET-SNMP-IN-SOURCE=true
   make
   make test
   make install
