@@ -1,0 +1,166 @@
+<!--#set var="section" value="development" -->
+<!--#include virtual="/page-top.html" -->
+<!-- CONTENT START -->
+  <div class="navigation" id="top">
+    <div class="tabs">
+      <ul>
+        <li><a href="index.html"><span>Main Page</span></a></li>
+
+        <li><a href="pages.html"><span>Related Pages</span></a></li>
+
+        <li><a href="modules.html"><span>Modules</span></a></li>
+
+        <li><a href="annotated.html"><span>Data Structures</span></a></li>
+
+        <li class="current"><a href="files.html"><span>Files</span></a></li>
+
+        <li><a href="examples.html"><span>Examples</span></a></li>
+      </ul>
+    </div>
+
+    <div class="tabs">
+      <ul>
+        <li><a href="files.html"><span>File List</span></a></li>
+
+        <li><a href="globals.html"><span>Globals</span></a></li>
+      </ul>
+    </div>
+
+    <h1>strtok_r.c</h1>
+
+    <div class="fragment">
+      <pre class="fragment">
+<a name="l00001" id="l00001"></a>00001 
+<a name="l00002" id="l00002"></a>00002 <span class=
+"comment">/*      $NetBSD: strtok_r.c,v 1.9 2003/08/07 16:43:53 agc Exp $ */</span>
+<a name="l00003" id="l00003"></a>00003 
+<a name="l00004" id="l00004"></a>00004 <span class="comment">/*</span>
+<a name="l00005" id="l00005"></a>00005 <span class=
+"comment"> * Copyright (c) 1988 Regents of the University of California.</span>
+<a name="l00006" id="l00006"></a>00006 <span class="comment"> * All rights reserved.</span>
+<a name="l00007" id="l00007"></a>00007 <span class="comment"> *</span>
+<a name="l00008" id="l00008"></a>00008 <span class=
+"comment"> * Redistribution and use in source and binary forms, with or without</span>
+<a name="l00009" id="l00009"></a>00009 <span class=
+"comment"> * modification, are permitted provided that the following conditions</span>
+<a name="l00010" id="l00010"></a>00010 <span class="comment"> * are met:</span>
+<a name="l00011" id="l00011"></a>00011 <span class=
+"comment"> * 1. Redistributions of source code must retain the above copyright</span>
+<a name="l00012" id="l00012"></a>00012 <span class=
+"comment"> *    notice, this list of conditions and the following disclaimer.</span>
+<a name="l00013" id="l00013"></a>00013 <span class=
+"comment"> * 2. Redistributions in binary form must reproduce the above copyright</span>
+<a name="l00014" id="l00014"></a>00014 <span class=
+"comment"> *    notice, this list of conditions and the following disclaimer in the</span>
+<a name="l00015" id="l00015"></a>00015 <span class=
+"comment"> *    documentation and/or other materials provided with the distribution.</span>
+<a name="l00016" id="l00016"></a>00016 <span class=
+"comment"> * 3. Neither the name of the University nor the names of its contributors</span>
+<a name="l00017" id="l00017"></a>00017 <span class=
+"comment"> *    may be used to endorse or promote products derived from this software</span>
+<a name="l00018" id="l00018"></a>00018 <span class="comment"> *    without specific prior written permission.</span>
+<a name="l00019" id="l00019"></a>00019 <span class="comment"> *</span>
+<a name="l00020" id="l00020"></a>00020 <span class=
+"comment"> * THIS SOFTWARE IS PROVIDED BY THE REGENTS AND CONTRIBUTORS ``AS IS'' AND</span>
+<a name="l00021" id="l00021"></a>00021 <span class=
+"comment"> * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE</span>
+<a name="l00022" id="l00022"></a>00022 <span class=
+"comment"> * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE</span>
+<a name="l00023" id="l00023"></a>00023 <span class=
+"comment"> * ARE DISCLAIMED.  IN NO EVENT SHALL THE REGENTS OR CONTRIBUTORS BE LIABLE</span>
+<a name="l00024" id="l00024"></a>00024 <span class=
+"comment"> * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL</span>
+<a name="l00025" id="l00025"></a>00025 <span class=
+"comment"> * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS</span>
+<a name="l00026" id="l00026"></a>00026 <span class=
+"comment"> * OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)</span>
+<a name="l00027" id="l00027"></a>00027 <span class=
+"comment"> * HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT</span>
+<a name="l00028" id="l00028"></a>00028 <span class=
+"comment"> * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY</span>
+<a name="l00029" id="l00029"></a>00029 <span class=
+"comment"> * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF</span>
+<a name="l00030" id="l00030"></a>00030 <span class="comment"> * SUCH DAMAGE.</span>
+<a name="l00031" id="l00031"></a>00031 <span class="comment"> */</span>
+<a name="l00032" id="l00032"></a>00032 <span class="preprocessor">#include &lt;net-snmp/net-snmp-config.h&gt;</span>
+<a name="l00033" id="l00033"></a>00033 
+<a name="l00034" id="l00034"></a>00034 <span class="preprocessor">#if !HAVE_STRTOK_R</span>
+<a name="l00035" id="l00035"></a>00035 
+<a name="l00036" id="l00036"></a>00036 <span class="preprocessor">#ifndef WIN32</span>
+<a name="l00037" id="l00037"></a>00037 <span class="preprocessor">#include &lt;sys/cdefs.h&gt;</span>
+<a name="l00038" id="l00038"></a>00038 <span class="preprocessor">#endif</span>
+<a name="l00039" id="l00039"></a>00039 
+<a name="l00040" id="l00040"></a>00040 <span class="preprocessor">#include &lt;string.h&gt;</span>
+<a name="l00041" id="l00041"></a>00041 
+<a name="l00042" id="l00042"></a>00042 <span class="comment">/*</span>
+<a name="l00043" id="l00043"></a>00043 <span class="comment"> * thread-save version of strtok</span>
+<a name="l00044" id="l00044"></a>00044 <span class="comment"> */</span>
+<a name="l00045" id="l00045"></a>00045 <span class="keywordtype">char</span> *
+<a name="l00046" id="l00046"></a>00046 strtok_r(<span class="keywordtype">char</span> *s, <span class=
+"keyword">const</span> <span class="keywordtype">char</span> *delim, <span class="keywordtype">char</span> **lasts)
+<a name="l00047" id="l00047"></a>00047 {
+<a name="l00048" id="l00048"></a>00048         <span class="keyword">const</span> <span class="keywordtype">char</span> *spanp;
+<a name="l00049" id="l00049"></a>00049         <span class="keywordtype">int</span> c, sc;
+<a name="l00050" id="l00050"></a>00050         <span class="keywordtype">char</span> *<a class="code" href=
+"structtok.html">tok</a>;
+<a name="l00051" id="l00051"></a>00051 
+<a name="l00052" id="l00052"></a>00052         <span class="comment">/* s may be NULL */</span>
+<a name="l00053" id="l00053"></a>00053         <span class="comment">/*assert(delim != NULL);*/</span>
+<a name="l00054" id="l00054"></a>00054         <span class="comment">/*assert(lasts != NULL);*/</span>
+<a name="l00055" id="l00055"></a>00055 
+<a name="l00056" id="l00056"></a>00056         <span class="keywordflow">if</span> (s == NULL &amp;&amp; (s = *lasts) == NULL)
+<a name="l00057" id="l00057"></a>00057                 <span class="keywordflow">return</span> (NULL);
+<a name="l00058" id="l00058"></a>00058 
+<a name="l00059" id="l00059"></a>00059         <span class="comment">/*</span>
+<a name="l00060" id="l00060"></a>00060 <span class=
+"comment">         * Skip (span) leading delimiters (s += strspn(s, delim), sort of).</span>
+<a name="l00061" id="l00061"></a>00061 <span class="comment">         */</span>
+<a name="l00062" id="l00062"></a>00062 cont:
+<a name="l00063" id="l00063"></a>00063         c = *s++;
+<a name="l00064" id="l00064"></a>00064         <span class="keywordflow">for</span> (spanp = delim; (sc = *spanp++) != 0;) {
+<a name="l00065" id="l00065"></a>00065                 <span class="keywordflow">if</span> (c == sc)
+<a name="l00066" id="l00066"></a>00066                         <span class="keywordflow">goto</span> cont;
+<a name="l00067" id="l00067"></a>00067         }
+<a name="l00068" id="l00068"></a>00068 
+<a name="l00069" id="l00069"></a>00069         <span class="keywordflow">if</span> (c == 0) {           <span class=
+"comment">/* no non-delimiter characters */</span>
+<a name="l00070" id="l00070"></a>00070                 *lasts = NULL;
+<a name="l00071" id="l00071"></a>00071                 <span class="keywordflow">return</span> (NULL);
+<a name="l00072" id="l00072"></a>00072         }
+<a name="l00073" id="l00073"></a>00073         tok = s - 1;
+<a name="l00074" id="l00074"></a>00074 
+<a name="l00075" id="l00075"></a>00075         <span class="comment">/*</span>
+<a name="l00076" id="l00076"></a>00076 <span class=
+"comment">         * Scan token (scan for delimiters: s += strcspn(s, delim), sort of).</span>
+<a name="l00077" id="l00077"></a>00077 <span class=
+"comment">         * Note that delim must have one NUL; we stop if we see that, too.</span>
+<a name="l00078" id="l00078"></a>00078 <span class="comment">         */</span>
+<a name="l00079" id="l00079"></a>00079         <span class="keywordflow">for</span> (;;) {
+<a name="l00080" id="l00080"></a>00080                 c = *s++;
+<a name="l00081" id="l00081"></a>00081                 spanp = delim;
+<a name="l00082" id="l00082"></a>00082                 <span class="keywordflow">do</span> {
+<a name="l00083" id="l00083"></a>00083                         <span class="keywordflow">if</span> ((sc = *spanp++) == c) {
+<a name="l00084" id="l00084"></a>00084                                 <span class="keywordflow">if</span> (c == 0)
+<a name="l00085" id="l00085"></a>00085                                         s = NULL;
+<a name="l00086" id="l00086"></a>00086                                 <span class="keywordflow">else</span>
+<a name="l00087" id="l00087"></a>00087                                         s[-1] = 0;
+<a name="l00088" id="l00088"></a>00088                                 *lasts = s;
+<a name="l00089" id="l00089"></a>00089                                 <span class="keywordflow">return</span> (tok);
+<a name="l00090" id="l00090"></a>00090                         }
+<a name="l00091" id="l00091"></a>00091                 } <span class="keywordflow">while</span> (sc != 0);
+<a name="l00092" id="l00092"></a>00092         }
+<a name="l00093" id="l00093"></a>00093         <span class="comment">/* NOTREACHED */</span>
+<a name="l00094" id="l00094"></a>00094 }
+<a name="l00095" id="l00095"></a>00095 <span class="preprocessor">#endif                          </span><span class=
+"comment">/* !HAVE_STRTOK_R */</span>
+</pre>
+    </div>
+  </div>
+  <hr size="1" />
+
+  <address style="text-align: right;">
+    <small>Generated on 28 Sep 2009 for net-snmp by  <a href="http://www.doxygen.org/index.html"><img class="footer" src=
+    "doxygen.png" alt="doxygen" /></a> 1.6.1</small>
+<!-- CONTENT END -->
+<!--#include virtual="/page-bottom.html" -->
+

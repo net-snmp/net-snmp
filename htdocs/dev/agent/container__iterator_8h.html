@@ -1,0 +1,155 @@
+<!--#set var="section" value="development" -->
+<!--#include virtual="/page-top.html" -->
+<!-- CONTENT START -->
+  <div class="navigation" id="top">
+    <div class="tabs">
+      <ul>
+        <li><a href="index.html"><span>Main Page</span></a></li>
+
+        <li><a href="pages.html"><span>Related Pages</span></a></li>
+
+        <li><a href="modules.html"><span>Modules</span></a></li>
+
+        <li><a href="annotated.html"><span>Data Structures</span></a></li>
+
+        <li class="current"><a href="files.html"><span>Files</span></a></li>
+
+        <li><a href="examples.html"><span>Examples</span></a></li>
+      </ul>
+    </div>
+
+    <div class="tabs">
+      <ul>
+        <li><a href="files.html"><span>File List</span></a></li>
+
+        <li><a href="globals.html"><span>Globals</span></a></li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="contents">
+    <h1>container_iterator.h File Reference</h1><code>#include "container.h"</code><br />
+
+    <p><a href="container__iterator_8h_source.html">Go to the source code of this file.</a></p>
+
+    <table border="0" cellpadding="0" cellspacing="0">
+      <tr>
+        <td colspan="2">
+          <h2>Typedefs</h2>
+        </td>
+      </tr>
+
+      <tr>
+        <td class="memItemLeft" align="right" valign="top"><a class="anchor" id="gab33854b9a639a2b0b78b84ed3765b72e" name=
+        "gab33854b9a639a2b0b78b84ed3765b72e"></a>
+        <!-- doxytag: member="container_iterator.h::Netsnmp_Iterator_Loop_Key" ref="gab33854b9a639a2b0b78b84ed3765b72e" args=")(void *iterator_ctx, netsnmp_ref_void *loop_ctx, netsnmp_ref_void *key)" -->
+        typedef int( </td>
+
+        <td class="memItemRight" valign="bottom"><b>Netsnmp_Iterator_Loop_Key</b> )(void *iterator_ctx, <a class="el" href=
+        "structnetsnmp__ref__void.html">netsnmp_ref_void</a> *loop_ctx, <a class="el" href=
+        "structnetsnmp__ref__void.html">netsnmp_ref_void</a> *key)</td>
+      </tr>
+
+      <tr>
+        <td class="memItemLeft" align="right" valign="top"><a class="anchor" id="ga63b0e3de7012b387e534140b2a05aeda" name=
+        "ga63b0e3de7012b387e534140b2a05aeda"></a>
+        <!-- doxytag: member="container_iterator.h::Netsnmp_Iterator_Loop_Data" ref="ga63b0e3de7012b387e534140b2a05aeda" args=")(void *iterator_ctx, netsnmp_ref_void *loop_ctx, netsnmp_ref_void *data)" -->
+        typedef int( </td>
+
+        <td class="memItemRight" valign="bottom"><b>Netsnmp_Iterator_Loop_Data</b> )(void *iterator_ctx, <a class="el" href=
+        "structnetsnmp__ref__void.html">netsnmp_ref_void</a> *loop_ctx, <a class="el" href=
+        "structnetsnmp__ref__void.html">netsnmp_ref_void</a> *data)</td>
+      </tr>
+
+      <tr>
+        <td class="memItemLeft" align="right" valign="top"><a class="anchor" id="gaa84f07a0634c4ab54de9341ffe32345a" name=
+        "gaa84f07a0634c4ab54de9341ffe32345a"></a>
+        <!-- doxytag: member="container_iterator.h::Netsnmp_Iterator_Ctx" ref="gaa84f07a0634c4ab54de9341ffe32345a" args=")(void *iterator_ctx, netsnmp_ref_void *loop_ctx)" -->
+        typedef int( </td>
+
+        <td class="memItemRight" valign="bottom"><b>Netsnmp_Iterator_Ctx</b> )(void *iterator_ctx, <a class="el" href=
+        "structnetsnmp__ref__void.html">netsnmp_ref_void</a> *loop_ctx)</td>
+      </tr>
+
+      <tr>
+        <td class="memItemLeft" align="right" valign="top"><a class="anchor" id="ga62667687e860d8ffa1c820e6b23f5e6d" name=
+        "ga62667687e860d8ffa1c820e6b23f5e6d"></a>
+        <!-- doxytag: member="container_iterator.h::Netsnmp_Iterator_Ctx_Dup" ref="ga62667687e860d8ffa1c820e6b23f5e6d" args=")(void *iterator_ctx, netsnmp_ref_void *loop_ctx, netsnmp_ref_void *dup_ctx, int reuse)" -->
+        typedef int( </td>
+
+        <td class="memItemRight" valign="bottom"><b>Netsnmp_Iterator_Ctx_Dup</b> )(void *iterator_ctx, <a class="el" href=
+        "structnetsnmp__ref__void.html">netsnmp_ref_void</a> *loop_ctx, <a class="el" href=
+        "structnetsnmp__ref__void.html">netsnmp_ref_void</a> *dup_ctx, int reuse)</td>
+      </tr>
+
+      <tr>
+        <td class="memItemLeft" align="right" valign="top"><a class="anchor" id="gad8fc5663a690942854f09e182b411de8" name=
+        "gad8fc5663a690942854f09e182b411de8"></a>
+        <!-- doxytag: member="container_iterator.h::Netsnmp_Iterator_Op" ref="gad8fc5663a690942854f09e182b411de8" args=")(void *iterator_ctx)" -->
+        typedef int( </td>
+
+        <td class="memItemRight" valign="bottom"><b>Netsnmp_Iterator_Op</b> )(void *iterator_ctx)</td>
+      </tr>
+
+      <tr>
+        <td class="memItemLeft" align="right" valign="top"><a class="anchor" id="ga04c086878d2b6b12840d50e424355244" name=
+        "ga04c086878d2b6b12840d50e424355244"></a>
+        <!-- doxytag: member="container_iterator.h::Netsnmp_Iterator_Data" ref="ga04c086878d2b6b12840d50e424355244" args=")(void *iterator_ctx, const void *data)" -->
+        typedef int( </td>
+
+        <td class="memItemRight" valign="bottom"><b>Netsnmp_Iterator_Data</b> )(void *iterator_ctx, const void *data)</td>
+      </tr>
+
+      <tr>
+        <td colspan="2">
+          <h2>Functions</h2>
+        </td>
+      </tr>
+
+      <tr>
+        <td class="memItemLeft" align="right" valign="top"><a class="anchor" id="ga4f7fc986b99933a533e323f25a9c065b" name=
+        "ga4f7fc986b99933a533e323f25a9c065b"></a>
+        <!-- doxytag: member="container_iterator.h::netsnmp_container_iterator_init" ref="ga4f7fc986b99933a533e323f25a9c065b" args="(void)" -->
+        void </td>
+
+        <td class="memItemRight" valign="bottom"><b>netsnmp_container_iterator_init</b> (void)</td>
+      </tr>
+
+      <tr>
+        <td class="memItemLeft" align="right" valign="top"><a class="anchor" id="ga966b27fe89dd5feee67076d6d2d5293e" name=
+        "ga966b27fe89dd5feee67076d6d2d5293e"></a>
+        <!-- doxytag: member="container_iterator.h::netsnmp_container_iterator_get" ref="ga966b27fe89dd5feee67076d6d2d5293e" args="(void *iterator_user_ctx, netsnmp_container_compare *compare, Netsnmp_Iterator_Loop_Key *get_first, Netsnmp_Iterator_Loop_Key *get_next, Netsnmp_Iterator_Loop_Data *get_data, Netsnmp_Iterator_Ctx_Dup *save_pos, Netsnmp_Iterator_Ctx *init_loop_ctx, Netsnmp_Iterator_Ctx *cleanup_loop_ctx, Netsnmp_Iterator_Data *free_user_ctx, int sorted)" -->
+        <a class="el" href="structnetsnmp__container__s.html">netsnmp_container</a> * </td>
+
+        <td class="memItemRight" valign="bottom"><b>netsnmp_container_iterator_get</b> (void *iterator_user_ctx,
+        netsnmp_container_compare *compare, Netsnmp_Iterator_Loop_Key *get_first, Netsnmp_Iterator_Loop_Key *get_next,
+        Netsnmp_Iterator_Loop_Data *get_data, Netsnmp_Iterator_Ctx_Dup *save_pos, Netsnmp_Iterator_Ctx *init_loop_ctx,
+        Netsnmp_Iterator_Ctx *cleanup_loop_ctx, Netsnmp_Iterator_Data *free_user_ctx, int sorted)</td>
+      </tr>
+
+      <tr>
+        <td class="memItemLeft" align="right" valign="top"><a class="anchor" id="gae38b95537ccb7dd3821dd63165f009b4" name=
+        "gae38b95537ccb7dd3821dd63165f009b4"></a>
+        <!-- doxytag: member="container_iterator.h::netsnmp_container_iterator_set_data_cb" ref="gae38b95537ccb7dd3821dd63165f009b4" args="(netsnmp_container *c, Netsnmp_Iterator_Data *insert_data, Netsnmp_Iterator_Data *remove_data, Netsnmp_Iterator_Op *get_size)" -->
+        void </td>
+
+        <td class="memItemRight" valign="bottom"><b>netsnmp_container_iterator_set_data_cb</b> (<a class="el" href=
+        "structnetsnmp__container__s.html">netsnmp_container</a> *c, Netsnmp_Iterator_Data *insert_data, Netsnmp_Iterator_Data
+        *remove_data, Netsnmp_Iterator_Op *get_size)</td>
+      </tr>
+    </table>
+    <hr />
+    <a name="_details"></a>
+
+    <h2>Detailed Description</h2>
+
+    <p>Definition in file <a class="el" href="container__iterator_8h_source.html">container_iterator.h</a>.</p>
+  </div>
+  <hr size="1" />
+
+  <address style="text-align: right;">
+    <small>Generated on 28 Sep 2009 for net-snmp by  <a href="http://www.doxygen.org/index.html"><img class="footer" src=
+    "doxygen.png" alt="doxygen" /></a> 1.6.1</small>
+<!-- CONTENT END -->
+<!--#include virtual="/page-bottom.html" -->
+

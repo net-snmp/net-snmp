@@ -1,0 +1,153 @@
+<!--#set var="section" value="development" -->
+<!--#include virtual="/page-top.html" -->
+<!-- CONTENT START -->
+  <div class="navigation" id="top">
+    <div class="tabs">
+      <ul>
+        <li><a href="index.html"><span>Main Page</span></a></li>
+
+        <li><a href="pages.html"><span>Related Pages</span></a></li>
+
+        <li><a href="modules.html"><span>Modules</span></a></li>
+
+        <li><a href="annotated.html"><span>Data Structures</span></a></li>
+
+        <li><a href="files.html"><span>Files</span></a></li>
+
+        <li><a href="examples.html"><span>Examples</span></a></li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="contents">
+    <h1>table_row<br />
+    <small>[<a class="el" href="group__table.html">table</a>]</small></h1>
+
+    <p>Helps you implement a table shared across two or more subagents, or otherwise split into individual row slices. <a href=
+    "#_details">More...</a></p>
+
+    <table border="0" cellpadding="0" cellspacing="0">
+      <tr>
+        <td colspan="2">
+          <h2>Functions</h2>
+        </td>
+      </tr>
+
+      <tr>
+        <td class="memItemLeft" align="right" valign="top"><a class="el" href=
+        "structnetsnmp__mib__handler__s.html">netsnmp_mib_handler</a> * </td>
+
+        <td class="memItemRight" valign="bottom"><a class="el" href=
+        "group__table__row.html#ga704fb34b1de4fdf63ad8611d0282d6d0">netsnmp_table_row_handler_get</a> (void *row)</td>
+      </tr>
+
+      <tr>
+        <td class="mdescLeft"> </td>
+
+        <td class="mdescRight">returns a netsnmp_mib_handler object for the table_container helper <a href=
+        "#ga704fb34b1de4fdf63ad8611d0282d6d0"></a><br /></td>
+      </tr>
+
+      <tr>
+        <td class="memItemLeft" align="right" valign="top"><a class="anchor" id="ga3474985b344a4a9bad0c4971378558c3" name=
+        "ga3474985b344a4a9bad0c4971378558c3"></a>
+        <!-- doxytag: member="table_row::netsnmp_table_row_register" ref="ga3474985b344a4a9bad0c4971378558c3" args="(netsnmp_handler_registration *reginfo, netsnmp_table_registration_info *tabreg, void *row, netsnmp_variable_list *index)" -->
+        int </td>
+
+        <td class="memItemRight" valign="bottom"><b>netsnmp_table_row_register</b> (<a class="el" href=
+        "structnetsnmp__handler__registration__s.html">netsnmp_handler_registration</a> *reginfo, <a class="el" href=
+        "structnetsnmp__table__registration__info__s.html">netsnmp_table_registration_info</a> *tabreg, void *row, <a class="el"
+        href="structvariable__list.html">netsnmp_variable_list</a> *index)</td>
+      </tr>
+
+      <tr>
+        <td class="memItemLeft" align="right" valign="top">void * </td>
+
+        <td class="memItemRight" valign="bottom"><a class="el" href=
+        "group__table__row.html#ga4b0927a8f27e7f2cb3d3c74a28176eb1">netsnmp_table_row_extract</a> (<a class="el" href=
+        "structnetsnmp__request__info__s.html">netsnmp_request_info</a> *request)</td>
+      </tr>
+
+      <tr>
+        <td class="mdescLeft"> </td>
+
+        <td class="mdescRight">return the row data structure supplied to the table_row helper <a href=
+        "#ga4b0927a8f27e7f2cb3d3c74a28176eb1"></a><br /></td>
+      </tr>
+    </table>
+    <hr />
+    <a name="_details"></a>
+
+    <h2>Detailed Description</h2>
+
+    <p>Helps you implement a table shared across two or more subagents, or otherwise split into individual row slices.</p>
+    <hr />
+
+    <h2>Function Documentation</h2><a class="anchor" id="ga4b0927a8f27e7f2cb3d3c74a28176eb1" name=
+    "ga4b0927a8f27e7f2cb3d3c74a28176eb1"></a>
+    <!-- doxytag: member="table_row.c::netsnmp_table_row_extract" ref="ga4b0927a8f27e7f2cb3d3c74a28176eb1" args="(netsnmp_request_info *request)" -->
+
+    <div class="memitem">
+      <div class="memproto">
+        <table class="memname">
+          <tr>
+            <td class="memname">void* netsnmp_table_row_extract</td>
+
+            <td>(</td>
+
+            <td class="paramtype"><a class="el" href="structnetsnmp__request__info__s.html">netsnmp_request_info</a> * </td>
+
+            <td class="paramname"><em>request</em></td>
+
+            <td> ) </td>
+
+            <td></td>
+          </tr>
+        </table>
+      </div>
+
+      <div class="memdoc">
+        <p>return the row data structure supplied to the table_row helper</p>
+
+        <p>Definition at line <a class="el" href="table__row_8c_source.html#l00158">158</a> of file <a class="el" href=
+        "table__row_8c_source.html">table_row.c</a>.</p>
+      </div>
+    </div><a class="anchor" id="ga704fb34b1de4fdf63ad8611d0282d6d0" name="ga704fb34b1de4fdf63ad8611d0282d6d0"></a>
+    <!-- doxytag: member="table_row.c::netsnmp_table_row_handler_get" ref="ga704fb34b1de4fdf63ad8611d0282d6d0" args="(void *row)" -->
+
+    <div class="memitem">
+      <div class="memproto">
+        <table class="memname">
+          <tr>
+            <td class="memname"><a class="el" href="structnetsnmp__mib__handler__s.html">netsnmp_mib_handler</a>*
+            netsnmp_table_row_handler_get</td>
+
+            <td>(</td>
+
+            <td class="paramtype">void * </td>
+
+            <td class="paramname"><em>row</em></td>
+
+            <td> ) </td>
+
+            <td></td>
+          </tr>
+        </table>
+      </div>
+
+      <div class="memdoc">
+        <p>returns a netsnmp_mib_handler object for the table_container helper</p>
+
+        <p>Definition at line <a class="el" href="table__row_8c_source.html#l00075">75</a> of file <a class="el" href=
+        "table__row_8c_source.html">table_row.c</a>.</p>
+      </div>
+    </div>
+  </div>
+  <hr size="1" />
+
+  <address style="text-align: right;">
+    <small>Generated on 28 Sep 2009 for net-snmp by  <a href="http://www.doxygen.org/index.html"><img class="footer" src=
+    "doxygen.png" alt="doxygen" /></a> 1.6.1</small>
+<!-- CONTENT END -->
+<!--#include virtual="/page-bottom.html" -->
+

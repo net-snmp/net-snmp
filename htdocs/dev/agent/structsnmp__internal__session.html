@@ -1,0 +1,181 @@
+<!--#set var="section" value="development" -->
+<!--#include virtual="/page-top.html" -->
+<!-- CONTENT START -->
+  <div class="navigation" id="top">
+    <div class="tabs">
+      <ul>
+        <li><a href="index.html"><span>Main Page</span></a></li>
+
+        <li><a href="pages.html"><span>Related Pages</span></a></li>
+
+        <li><a href="modules.html"><span>Modules</span></a></li>
+
+        <li class="current"><a href="annotated.html"><span>Data Structures</span></a></li>
+
+        <li><a href="files.html"><span>Files</span></a></li>
+
+        <li><a href="examples.html"><span>Examples</span></a></li>
+      </ul>
+    </div>
+
+    <div class="tabs">
+      <ul>
+        <li><a href="annotated.html"><span>Data Structures</span></a></li>
+
+        <li><a href="functions.html"><span>Data Fields</span></a></li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="contents">
+    <h1>snmp_internal_session Struct Reference<br />
+    <small>[<a class="el" href="group__library.html">The Net-SNMP library</a>]</small></h1>
+    <!-- doxytag: class="snmp_internal_session" -->
+
+    <table border="0" cellpadding="0" cellspacing="0">
+      <tr>
+        <td colspan="2">
+          <h2>Data Fields</h2>
+        </td>
+      </tr>
+
+      <tr>
+        <td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a1ee62dcb40c7dfd36a4747d205c50362" name=
+        "a1ee62dcb40c7dfd36a4747d205c50362"></a>
+        <!-- doxytag: member="snmp_internal_session::requests" ref="a1ee62dcb40c7dfd36a4747d205c50362" args="" -->
+        <a class="el" href="structrequest__list.html">netsnmp_request_list</a> * </td>
+
+        <td class="memItemRight" valign="bottom"><b>requests</b></td>
+      </tr>
+
+      <tr>
+        <td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a4302888d8bf0df2c5cfb74c6155b4639" name=
+        "a4302888d8bf0df2c5cfb74c6155b4639"></a>
+        <!-- doxytag: member="snmp_internal_session::requestsEnd" ref="a4302888d8bf0df2c5cfb74c6155b4639" args="" -->
+        <a class="el" href="structrequest__list.html">netsnmp_request_list</a> * </td>
+
+        <td class="memItemRight" valign="bottom"><b>requestsEnd</b></td>
+      </tr>
+
+      <tr>
+        <td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a4f0a78023e5646e52a7a9ca58a8d5e0a" name=
+        "a4f0a78023e5646e52a7a9ca58a8d5e0a"></a>
+        <!-- doxytag: member="snmp_internal_session::hook_pre" ref="a4f0a78023e5646e52a7a9ca58a8d5e0a" args=")(netsnmp_session *, netsnmp_transport *, void *, int)" -->
+        int(* </td>
+
+        <td class="memItemRight" valign="bottom"><b>hook_pre</b> )(<a class="el" href=
+        "structsnmp__session.html">netsnmp_session</a> *, <a class="el" href=
+        "structnetsnmp__transport__s.html">netsnmp_transport</a> *, void *, int)</td>
+      </tr>
+
+      <tr>
+        <td class="memItemLeft" align="right" valign="top"><a class="anchor" id="ad12c6aadc0b87230ec55223de9c07c24" name=
+        "ad12c6aadc0b87230ec55223de9c07c24"></a>
+        <!-- doxytag: member="snmp_internal_session::hook_parse" ref="ad12c6aadc0b87230ec55223de9c07c24" args=")(netsnmp_session *, netsnmp_pdu *, u_char *, size_t)" -->
+        int(* </td>
+
+        <td class="memItemRight" valign="bottom"><b>hook_parse</b> )(<a class="el" href=
+        "structsnmp__session.html">netsnmp_session</a> *, <a class="el" href="structsnmp__pdu.html">netsnmp_pdu</a> *, u_char *,
+        size_t)</td>
+      </tr>
+
+      <tr>
+        <td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a2d6c4364b19126f999a8197b7c1fd6cb" name=
+        "a2d6c4364b19126f999a8197b7c1fd6cb"></a>
+        <!-- doxytag: member="snmp_internal_session::hook_post" ref="a2d6c4364b19126f999a8197b7c1fd6cb" args=")(netsnmp_session *, netsnmp_pdu *, int)" -->
+        int(* </td>
+
+        <td class="memItemRight" valign="bottom"><b>hook_post</b> )(<a class="el" href=
+        "structsnmp__session.html">netsnmp_session</a> *, <a class="el" href="structsnmp__pdu.html">netsnmp_pdu</a> *, int)</td>
+      </tr>
+
+      <tr>
+        <td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a6ee5a054244afeeffab805961dd42b89" name=
+        "a6ee5a054244afeeffab805961dd42b89"></a>
+        <!-- doxytag: member="snmp_internal_session::hook_build" ref="a6ee5a054244afeeffab805961dd42b89" args=")(netsnmp_session *, netsnmp_pdu *, u_char *, size_t *)" -->
+        int(* </td>
+
+        <td class="memItemRight" valign="bottom"><b>hook_build</b> )(<a class="el" href=
+        "structsnmp__session.html">netsnmp_session</a> *, <a class="el" href="structsnmp__pdu.html">netsnmp_pdu</a> *, u_char *,
+        size_t *)</td>
+      </tr>
+
+      <tr>
+        <td class="memItemLeft" align="right" valign="top"><a class="anchor" id="ac5df7c1ea14d100771191679afbeaf7a" name=
+        "ac5df7c1ea14d100771191679afbeaf7a"></a>
+        <!-- doxytag: member="snmp_internal_session::hook_realloc_build" ref="ac5df7c1ea14d100771191679afbeaf7a" args=")(netsnmp_session *, netsnmp_pdu *, u_char **, size_t *, size_t *)" -->
+        int(* </td>
+
+        <td class="memItemRight" valign="bottom"><b>hook_realloc_build</b> )(<a class="el" href=
+        "structsnmp__session.html">netsnmp_session</a> *, <a class="el" href="structsnmp__pdu.html">netsnmp_pdu</a> *, u_char **,
+        size_t *, size_t *)</td>
+      </tr>
+
+      <tr>
+        <td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a91f2969e87162a284fbdbafd7bccd364" name=
+        "a91f2969e87162a284fbdbafd7bccd364"></a>
+        <!-- doxytag: member="snmp_internal_session::check_packet" ref="a91f2969e87162a284fbdbafd7bccd364" args=")(u_char *, size_t)" -->
+        int(* </td>
+
+        <td class="memItemRight" valign="bottom"><b>check_packet</b> )(u_char *, size_t)</td>
+      </tr>
+
+      <tr>
+        <td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a766b5c54f938f01ae7d33ffeabc9de61" name=
+        "a766b5c54f938f01ae7d33ffeabc9de61"></a>
+        <!-- doxytag: member="snmp_internal_session::hook_create_pdu" ref="a766b5c54f938f01ae7d33ffeabc9de61" args=")(netsnmp_transport *, void *, size_t)" -->
+        <a class="el" href="structsnmp__pdu.html">netsnmp_pdu</a> *(* </td>
+
+        <td class="memItemRight" valign="bottom"><b>hook_create_pdu</b> )(<a class="el" href=
+        "structnetsnmp__transport__s.html">netsnmp_transport</a> *, void *, size_t)</td>
+      </tr>
+
+      <tr>
+        <td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a2665004831bfbf090144e4f3d7767c2b" name=
+        "a2665004831bfbf090144e4f3d7767c2b"></a>
+        <!-- doxytag: member="snmp_internal_session::packet" ref="a2665004831bfbf090144e4f3d7767c2b" args="" -->
+        u_char * </td>
+
+        <td class="memItemRight" valign="bottom"><b>packet</b></td>
+      </tr>
+
+      <tr>
+        <td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a27727017bffd032e164a82789d9e4e34" name=
+        "a27727017bffd032e164a82789d9e4e34"></a>
+        <!-- doxytag: member="snmp_internal_session::packet_len" ref="a27727017bffd032e164a82789d9e4e34" args="" -->
+        size_t </td>
+
+        <td class="memItemRight" valign="bottom"><b>packet_len</b></td>
+      </tr>
+
+      <tr>
+        <td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a75ed52b4b40ef28db1d4905a9e4361d1" name=
+        "a75ed52b4b40ef28db1d4905a9e4361d1"></a>
+        <!-- doxytag: member="snmp_internal_session::packet_size" ref="a75ed52b4b40ef28db1d4905a9e4361d1" args="" -->
+        size_t </td>
+
+        <td class="memItemRight" valign="bottom"><b>packet_size</b></td>
+      </tr>
+    </table>
+    <hr />
+    <a name="_details"></a>
+
+    <h2>Detailed Description</h2>
+
+    <p>Definition at line <a class="el" href="snmp__api_8c_source.html#l00204">204</a> of file <a class="el" href=
+    "snmp__api_8c_source.html">snmp_api.c</a>.</p>
+    <hr />
+    The documentation for this struct was generated from the following file:
+
+    <ul>
+      <li><a class="el" href="snmp__api_8c_source.html">snmp_api.c</a></li>
+    </ul>
+  </div>
+  <hr size="1" />
+
+  <address style="text-align: right;">
+    <small>Generated on 28 Sep 2009 for net-snmp by  <a href="http://www.doxygen.org/index.html"><img class="footer" src=
+    "doxygen.png" alt="doxygen" /></a> 1.6.1</small>
+<!-- CONTENT END -->
+<!--#include virtual="/page-bottom.html" -->
+

@@ -1,0 +1,631 @@
+<!--#set var="section" value="development" -->
+<!--#include virtual="/page-top.html" -->
+<!-- CONTENT START -->
+  <div class="navigation" id="top">
+    <div class="tabs">
+      <ul>
+        <li><a href="index.html"><span>Main Page</span></a></li>
+
+        <li><a href="pages.html"><span>Related Pages</span></a></li>
+
+        <li><a href="modules.html"><span>Modules</span></a></li>
+
+        <li><a href="annotated.html"><span>Data Structures</span></a></li>
+
+        <li class="current"><a href="files.html"><span>Files</span></a></li>
+
+        <li><a href="examples.html"><span>Examples</span></a></li>
+      </ul>
+    </div>
+
+    <div class="tabs">
+      <ul>
+        <li><a href="files.html"><span>File List</span></a></li>
+
+        <li><a href="globals.html"><span>Globals</span></a></li>
+      </ul>
+    </div>
+
+    <h1>snmpTCPIPv6Domain.c</h1>
+
+    <div class="fragment">
+      <pre class="fragment">
+<a name="l00001" id="l00001"></a>00001 <span class="preprocessor">#include &lt;net-snmp/net-snmp-config.h&gt;</span>
+<a name="l00002" id="l00002"></a>00002 
+<a name="l00003" id="l00003"></a>00003 <span class="preprocessor">#ifdef NETSNMP_TRANSPORT_TCPIPV6_DOMAIN</span>
+<a name="l00004" id="l00004"></a>00004 
+<a name="l00005" id="l00005"></a>00005 <span class="comment">/*</span>
+<a name="l00006" id="l00006"></a>00006 <span class="comment"> * hack-o-matic for Cygwin to use winsock2</span>
+<a name="l00007" id="l00007"></a>00007 <span class="comment">*/</span>
+<a name="l00008" id="l00008"></a>00008 <span class="preprocessor">#if defined(cygwin)</span>
+<a name="l00009" id="l00009"></a>00009 <span class="preprocessor">#undef HAVE_UNISTD_H</span>
+<a name="l00010" id="l00010"></a>00010 <span class="preprocessor">#undef HAVE_NETINET_IN_H</span>
+<a name="l00011" id="l00011"></a>00011 <span class="preprocessor">#undef HAVE_ARPA_INET_H</span>
+<a name="l00012" id="l00012"></a>00012 <span class="preprocessor">#undef HAVE_NET_IF_H</span>
+<a name="l00013" id="l00013"></a>00013 <span class="preprocessor">#undef HAVE_NETDB_H</span>
+<a name="l00014" id="l00014"></a>00014 <span class="preprocessor">#undef HAVE_SYS_PARAM_H</span>
+<a name="l00015" id="l00015"></a>00015 <span class="preprocessor">#undef HAVE_SYS_SELECT_H</span>
+<a name="l00016" id="l00016"></a>00016 <span class="preprocessor">#undef HAVE_SYS_SOCKET_H</span>
+<a name="l00017" id="l00017"></a>00017 <span class="preprocessor">#undef HAVE_IN_ADDR_T</span>
+<a name="l00018" id="l00018"></a>00018 <span class="preprocessor">#endif</span>
+<a name="l00019" id="l00019"></a>00019 
+<a name="l00020" id="l00020"></a>00020 <span class="preprocessor">#include &lt;stdio.h&gt;</span>
+<a name="l00021" id="l00021"></a>00021 <span class="preprocessor">#include &lt;sys/types.h&gt;</span>
+<a name="l00022" id="l00022"></a>00022 <span class="preprocessor">#include &lt;errno.h&gt;</span>
+<a name="l00023" id="l00023"></a>00023 
+<a name="l00024" id="l00024"></a>00024 <span class="preprocessor">#if HAVE_STRING_H</span>
+<a name="l00025" id="l00025"></a>00025 <span class="preprocessor">#include &lt;string.h&gt;</span>
+<a name="l00026" id="l00026"></a>00026 <span class="preprocessor">#else</span>
+<a name="l00027" id="l00027"></a>00027 <span class="preprocessor">#include &lt;strings.h&gt;</span>
+<a name="l00028" id="l00028"></a>00028 <span class="preprocessor">#endif</span>
+<a name="l00029" id="l00029"></a>00029 <span class="preprocessor">#if HAVE_STDLIB_H</span>
+<a name="l00030" id="l00030"></a>00030 <span class="preprocessor">#include &lt;stdlib.h&gt;</span>
+<a name="l00031" id="l00031"></a>00031 <span class="preprocessor">#endif</span>
+<a name="l00032" id="l00032"></a>00032 <span class="preprocessor">#if HAVE_UNISTD_H</span>
+<a name="l00033" id="l00033"></a>00033 <span class="preprocessor">#include &lt;unistd.h&gt;</span>
+<a name="l00034" id="l00034"></a>00034 <span class="preprocessor">#endif</span>
+<a name="l00035" id="l00035"></a>00035 <span class="preprocessor">#if HAVE_SYS_SOCKET_H</span>
+<a name="l00036" id="l00036"></a>00036 <span class="preprocessor">#include &lt;sys/socket.h&gt;</span>
+<a name="l00037" id="l00037"></a>00037 <span class="preprocessor">#endif</span>
+<a name="l00038" id="l00038"></a>00038 
+<a name="l00039" id="l00039"></a>00039 <span class="preprocessor">#if defined(HAVE_WINSOCK_H) || defined(cygwin)</span>
+<a name="l00040" id="l00040"></a>00040     <span class="comment">/*</span>
+<a name="l00041" id="l00041"></a>00041 <span class="comment">     * Windows IPv6 support is part of WinSock2 only</span>
+<a name="l00042" id="l00042"></a>00042 <span class="comment">     */</span>
+<a name="l00043" id="l00043"></a>00043 <span class="preprocessor">#include &lt;winsock2.h&gt;</span>
+<a name="l00044" id="l00044"></a>00044 <span class="preprocessor">#include &lt;ws2tcpip.h&gt;</span>
+<a name="l00045" id="l00045"></a>00045 
+<a name="l00046" id="l00046"></a>00046 <span class="preprocessor">#ifndef HAVE_INET_NTOP</span>
+<a name="l00047" id="l00047"></a>00047 <span class="keyword">extern</span> <span class="keyword">const</span> <span class=
+"keywordtype">char</span> *inet_ntop(<span class="keywordtype">int</span>, <span class="keyword">const</span> <span class=
+"keywordtype">void</span>*, <span class="keywordtype">char</span>*, <span class="keywordtype">size_t</span>);
+<a name="l00048" id="l00048"></a>00048 <span class="preprocessor">#endif</span>
+<a name="l00049" id="l00049"></a>00049 
+<a name="l00050" id="l00050"></a>00050 <span class="preprocessor">#endif</span>
+<a name="l00051" id="l00051"></a>00051 
+<a name="l00052" id="l00052"></a>00052 <span class="preprocessor">#if HAVE_NETINET_IN_H</span>
+<a name="l00053" id="l00053"></a>00053 <span class="preprocessor">#include &lt;netinet/in.h&gt;</span>
+<a name="l00054" id="l00054"></a>00054 <span class="preprocessor">#endif</span>
+<a name="l00055" id="l00055"></a>00055 <span class="preprocessor">#if HAVE_ARPA_INET_H</span>
+<a name="l00056" id="l00056"></a>00056 <span class="preprocessor">#include &lt;arpa/inet.h&gt;</span>
+<a name="l00057" id="l00057"></a>00057 <span class="preprocessor">#endif</span>
+<a name="l00058" id="l00058"></a>00058 <span class="preprocessor">#if HAVE_NETDB_H</span>
+<a name="l00059" id="l00059"></a>00059 <span class="preprocessor">#include &lt;netdb.h&gt;</span>
+<a name="l00060" id="l00060"></a>00060 <span class="preprocessor">#endif</span>
+<a name="l00061" id="l00061"></a>00061 <span class="preprocessor">#if HAVE_FCNTL_H</span>
+<a name="l00062" id="l00062"></a>00062 <span class="preprocessor">#include &lt;fcntl.h&gt;</span>
+<a name="l00063" id="l00063"></a>00063 <span class="preprocessor">#endif</span>
+<a name="l00064" id="l00064"></a>00064 
+<a name="l00065" id="l00065"></a>00065 <span class="preprocessor">#if HAVE_DMALLOC_H</span>
+<a name="l00066" id="l00066"></a>00066 <span class="preprocessor">#include &lt;dmalloc.h&gt;</span>
+<a name="l00067" id="l00067"></a>00067 <span class="preprocessor">#endif</span>
+<a name="l00068" id="l00068"></a>00068 
+<a name="l00069" id="l00069"></a>00069 <span class="preprocessor">#include &lt;net-snmp/types.h&gt;</span>
+<a name="l00070" id="l00070"></a>00070 <span class="preprocessor">#include &lt;net-snmp/output_api.h&gt;</span>
+<a name="l00071" id="l00071"></a>00071 <span class="preprocessor">#include &lt;net-snmp/config_api.h&gt;</span>
+<a name="l00072" id="l00072"></a>00072 
+<a name="l00073" id="l00073"></a>00073 <span class="preprocessor">#include &lt;net-snmp/library/snmp_transport.h&gt;</span>
+<a name="l00074" id="l00074"></a>00074 <span class="preprocessor">#include &lt;net-snmp/library/snmpUDPDomain.h&gt;</span>
+<a name="l00075" id="l00075"></a>00075 <span class="preprocessor">#include &lt;net-snmp/library/snmpUDPIPv6Domain.h&gt;</span>
+<a name="l00076" id="l00076"></a>00076 <span class="preprocessor">#include &lt;net-snmp/library/snmpTCPIPv6Domain.h&gt;</span>
+<a name="l00077" id="l00077"></a>00077 
+<a name="l00078" id="l00078"></a>00078 oid netsnmp_TCPIPv6Domain[] = { TRANSPORT_DOMAIN_TCP_IPV6 };
+<a name="l00079" id="l00079"></a>00079 <span class="keyword">static</span> <a class="code" href=
+"structnetsnmp__tdomain__s.html">netsnmp_tdomain</a> tcp6Domain;
+<a name="l00080" id="l00080"></a>00080 
+<a name="l00081" id="l00081"></a>00081 <span class="comment">/*</span>
+<a name="l00082" id="l00082"></a>00082 <span class=
+"comment"> * Return a string representing the address in data, or else the "far end"</span>
+<a name="l00083" id="l00083"></a>00083 <span class="comment"> * address if data is NULL.  </span>
+<a name="l00084" id="l00084"></a>00084 <span class="comment"> */</span>
+<a name="l00085" id="l00085"></a>00085 
+<a name="l00086" id="l00086"></a>00086 <span class="keyword">static</span> <span class="keywordtype">char</span> *
+<a name="l00087" id="l00087"></a>00087 netsnmp_tcp6_fmtaddr(<a class="code" href=
+"structnetsnmp__transport__s.html">netsnmp_transport</a> *t, <span class="keywordtype">void</span> *data, <span class=
+"keywordtype">int</span> len)
+<a name="l00088" id="l00088"></a>00088 {
+<a name="l00089" id="l00089"></a>00089     <span class="keyword">struct </span>sockaddr_in6 *to = NULL;
+<a name="l00090" id="l00090"></a>00090 
+<a name="l00091" id="l00091"></a>00091     DEBUGMSGTL((<span class="stringliteral">"netsnmp_tcp6"</span>, <span class=
+"stringliteral">"fmtaddr: t = %p, data = %p, len = %d\n"</span>, t,
+<a name="l00092" id="l00092"></a>00092                 data, len));
+<a name="l00093" id="l00093"></a>00093     <span class="keywordflow">if</span> (data != NULL &amp;&amp; len == <span class=
+"keyword">sizeof</span>(<span class="keyword">struct</span> sockaddr_in6)) {
+<a name="l00094" id="l00094"></a>00094         to = (<span class="keyword">struct </span>sockaddr_in6 *) data;
+<a name="l00095" id="l00095"></a>00095     } <span class="keywordflow">else</span> <span class=
+"keywordflow">if</span> (t != NULL &amp;&amp; t-&gt;data != NULL) {
+<a name="l00096" id="l00096"></a>00096         to = (<span class="keyword">struct </span>sockaddr_in6 *) t-&gt;data;
+<a name="l00097" id="l00097"></a>00097     }
+<a name="l00098" id="l00098"></a>00098     <span class="keywordflow">if</span> (to == NULL) {
+<a name="l00099" id="l00099"></a>00099         <span class="keywordflow">return</span> strdup(<span class=
+"stringliteral">"TCP/IPv6: unknown"</span>);
+<a name="l00100" id="l00100"></a>00100     } <span class="keywordflow">else</span> {
+<a name="l00101" id="l00101"></a>00101         <span class="keywordtype">char</span> addr[INET6_ADDRSTRLEN];
+<a name="l00102" id="l00102"></a>00102         <span class="keywordtype">char</span> tmp[INET6_ADDRSTRLEN + 18];
+<a name="l00103" id="l00103"></a>00103 
+<a name="l00104" id="l00104"></a>00104         sprintf(tmp, <span class="stringliteral">"TCP/IPv6: [%s]:%hu"</span>,
+<a name="l00105" id="l00105"></a>00105                 inet_ntop(AF_INET6, (<span class=
+"keywordtype">void</span> *) &amp;(to-&gt;sin6_addr), addr,
+<a name="l00106" id="l00106"></a>00106                           INET6_ADDRSTRLEN), ntohs(to-&gt;sin6_port));
+<a name="l00107" id="l00107"></a>00107         <span class="keywordflow">return</span> strdup(tmp);
+<a name="l00108" id="l00108"></a>00108     }
+<a name="l00109" id="l00109"></a>00109 }
+<a name="l00110" id="l00110"></a>00110 
+<a name="l00111" id="l00111"></a>00111 <span class="comment">/*</span>
+<a name="l00112" id="l00112"></a>00112 <span class=
+"comment"> * You can write something into opaque that will subsequently get passed back </span>
+<a name="l00113" id="l00113"></a>00113 <span class=
+"comment"> * to your send function if you like.  For instance, you might want to</span>
+<a name="l00114" id="l00114"></a>00114 <span class=
+"comment"> * remember where a PDU came from, so that you can send a reply there...  </span>
+<a name="l00115" id="l00115"></a>00115 <span class="comment"> */</span>
+<a name="l00116" id="l00116"></a>00116 
+<a name="l00117" id="l00117"></a>00117 <span class="keyword">static</span> <span class="keywordtype">int</span>
+<a name="l00118" id="l00118"></a>00118 netsnmp_tcp6_recv(<a class="code" href=
+"structnetsnmp__transport__s.html">netsnmp_transport</a> *t, <span class="keywordtype">void</span> *buf, <span class=
+"keywordtype">int</span> size,
+<a name="l00119" id="l00119"></a>00119                   <span class="keywordtype">void</span> **opaque, <span class=
+"keywordtype">int</span> *olength)
+<a name="l00120" id="l00120"></a>00120 {
+<a name="l00121" id="l00121"></a>00121     <span class="keywordtype">int</span> rc = -1;
+<a name="l00122" id="l00122"></a>00122 
+<a name="l00123" id="l00123"></a>00123     <span class="keywordflow">if</span> (t != NULL &amp;&amp; t-&gt;sock &gt;= 0) {
+<a name="l00124" id="l00124"></a>00124         <span class="keywordflow">while</span> (rc &lt; 0) {
+<a name="l00125" id="l00125"></a>00125             rc = recvfrom(t-&gt;sock, buf, size, 0, NULL, NULL);
+<a name="l00126" id="l00126"></a>00126             <span class="keywordflow">if</span> (rc &lt; 0 &amp;&amp; errno != EINTR) {
+<a name="l00127" id="l00127"></a>00127                 DEBUGMSGTL((<span class=
+"stringliteral">"netsnmp_tcp6"</span>, <span class="stringliteral">"recv fd %d err %d (\"%s\")\n"</span>,
+<a name="l00128" id="l00128"></a>00128                             t-&gt;sock, errno, strerror(errno)));
+<a name="l00129" id="l00129"></a>00129                 <span class="keywordflow">return</span> -1;
+<a name="l00130" id="l00130"></a>00130             }
+<a name="l00131" id="l00131"></a>00131         }
+<a name="l00132" id="l00132"></a>00132         DEBUGMSGTL((<span class="stringliteral">"netsnmp_tcp6"</span>, <span class=
+"stringliteral">"recv fd %d got %d bytes\n"</span>, t-&gt;sock, rc));
+<a name="l00133" id="l00133"></a>00133     } <span class="keywordflow">else</span> {
+<a name="l00134" id="l00134"></a>00134         <span class="keywordflow">return</span> -1;
+<a name="l00135" id="l00135"></a>00135     }
+<a name="l00136" id="l00136"></a>00136 
+<a name="l00137" id="l00137"></a>00137     <span class="keywordflow">if</span> (opaque != NULL &amp;&amp; olength != NULL) {
+<a name="l00138" id="l00138"></a>00138         <span class="keywordflow">if</span> (t-&gt;data_length &gt; 0) {
+<a name="l00139" id="l00139"></a>00139             <span class=
+"keywordflow">if</span> ((*opaque = malloc(t-&gt;data_length)) != NULL) {
+<a name="l00140" id="l00140"></a>00140                 memcpy(*opaque, t-&gt;data, t-&gt;data_length);
+<a name="l00141" id="l00141"></a>00141                 *olength = t-&gt;data_length;
+<a name="l00142" id="l00142"></a>00142             } <span class="keywordflow">else</span> {
+<a name="l00143" id="l00143"></a>00143                 *olength = 0;
+<a name="l00144" id="l00144"></a>00144             }
+<a name="l00145" id="l00145"></a>00145         } <span class="keywordflow">else</span> {
+<a name="l00146" id="l00146"></a>00146             *opaque = NULL;
+<a name="l00147" id="l00147"></a>00147             *olength = 0;
+<a name="l00148" id="l00148"></a>00148         }
+<a name="l00149" id="l00149"></a>00149     }
+<a name="l00150" id="l00150"></a>00150 
+<a name="l00151" id="l00151"></a>00151     <span class="keywordflow">return</span> rc;
+<a name="l00152" id="l00152"></a>00152 }
+<a name="l00153" id="l00153"></a>00153 
+<a name="l00154" id="l00154"></a>00154 <span class="keyword">static</span> <span class="keywordtype">int</span>
+<a name="l00155" id="l00155"></a>00155 netsnmp_tcp6_send(<a class="code" href=
+"structnetsnmp__transport__s.html">netsnmp_transport</a> *t, <span class="keywordtype">void</span> *buf, <span class=
+"keywordtype">int</span> size,
+<a name="l00156" id="l00156"></a>00156                   <span class="keywordtype">void</span> **opaque, <span class=
+"keywordtype">int</span> *olength)
+<a name="l00157" id="l00157"></a>00157 {
+<a name="l00158" id="l00158"></a>00158     <span class="keywordtype">int</span> rc = -1;
+<a name="l00159" id="l00159"></a>00159 
+<a name="l00160" id="l00160"></a>00160     <span class="keywordflow">if</span> (t != NULL &amp;&amp; t-&gt;sock &gt;= 0) {
+<a name="l00161" id="l00161"></a>00161         <span class="keywordflow">while</span> (rc &lt; 0) {
+<a name="l00162" id="l00162"></a>00162             rc = sendto(t-&gt;sock, buf, size, 0, NULL, 0);
+<a name="l00163" id="l00163"></a>00163             <span class="keywordflow">if</span> (rc &lt; 0 &amp;&amp; errno != EINTR) {
+<a name="l00164" id="l00164"></a>00164                 <span class="keywordflow">break</span>;
+<a name="l00165" id="l00165"></a>00165             }
+<a name="l00166" id="l00166"></a>00166         }
+<a name="l00167" id="l00167"></a>00167     }
+<a name="l00168" id="l00168"></a>00168     <span class="keywordflow">return</span> rc;
+<a name="l00169" id="l00169"></a>00169 }
+<a name="l00170" id="l00170"></a>00170 
+<a name="l00171" id="l00171"></a>00171 <span class="keyword">static</span> <span class="keywordtype">int</span>
+<a name="l00172" id="l00172"></a>00172 netsnmp_tcp6_close(<a class="code" href=
+"structnetsnmp__transport__s.html">netsnmp_transport</a> *t)
+<a name="l00173" id="l00173"></a>00173 {
+<a name="l00174" id="l00174"></a>00174     <span class="keywordtype">int</span> rc = -1;
+<a name="l00175" id="l00175"></a>00175     <span class="keywordflow">if</span> (t != NULL &amp;&amp; t-&gt;sock &gt;= 0) {
+<a name="l00176" id="l00176"></a>00176         DEBUGMSGTL((<span class="stringliteral">"netsnmp_tcp6"</span>, <span class=
+"stringliteral">"close fd %d\n"</span>, t-&gt;sock));
+<a name="l00177" id="l00177"></a>00177 <span class="preprocessor">#ifndef HAVE_CLOSESOCKET</span>
+<a name="l00178" id="l00178"></a>00178         rc = close(t-&gt;sock);
+<a name="l00179" id="l00179"></a>00179 <span class="preprocessor">#else</span>
+<a name="l00180" id="l00180"></a>00180         rc = closesocket(t-&gt;sock);
+<a name="l00181" id="l00181"></a>00181 <span class="preprocessor">#endif</span>
+<a name="l00182" id="l00182"></a>00182         t-&gt;sock = -1;
+<a name="l00183" id="l00183"></a>00183     }
+<a name="l00184" id="l00184"></a>00184     <span class="keywordflow">return</span> rc;
+<a name="l00185" id="l00185"></a>00185 }
+<a name="l00186" id="l00186"></a>00186 
+<a name="l00187" id="l00187"></a>00187 <span class="keyword">static</span> <span class="keywordtype">int</span>
+<a name="l00188" id="l00188"></a>00188 netsnmp_tcp6_accept(<a class="code" href=
+"structnetsnmp__transport__s.html">netsnmp_transport</a> *t)
+<a name="l00189" id="l00189"></a>00189 {
+<a name="l00190" id="l00190"></a>00190     <span class="keyword">struct </span>sockaddr_in6 *farend = NULL;
+<a name="l00191" id="l00191"></a>00191     <span class="keywordtype">int</span>             newsock = -1, sockflags = 0;
+<a name="l00192" id="l00192"></a>00192     socklen_t       farendlen = <span class="keyword">sizeof</span>(<span class=
+"keyword">struct </span>sockaddr_in6);
+<a name="l00193" id="l00193"></a>00193     <span class="keywordtype">char</span>           *str = NULL;
+<a name="l00194" id="l00194"></a>00194 
+<a name="l00195" id="l00195"></a>00195     farend = (<span class="keyword">struct </span>sockaddr_in6 *) malloc(<span class=
+"keyword">sizeof</span>(<span class="keyword">struct</span> sockaddr_in6));
+<a name="l00196" id="l00196"></a>00196 
+<a name="l00197" id="l00197"></a>00197     <span class="keywordflow">if</span> (farend == NULL) {
+<a name="l00198" id="l00198"></a>00198         <span class="comment">/*</span>
+<a name="l00199" id="l00199"></a>00199 <span class=
+"comment">         * Indicate that the acceptance of this socket failed.  </span>
+<a name="l00200" id="l00200"></a>00200 <span class="comment">         */</span>
+<a name="l00201" id="l00201"></a>00201         DEBUGMSGTL((<span class="stringliteral">"netsnmp_tcp6"</span>, <span class=
+"stringliteral">"accept: malloc failed\n"</span>));
+<a name="l00202" id="l00202"></a>00202         <span class="keywordflow">return</span> -1;
+<a name="l00203" id="l00203"></a>00203     }
+<a name="l00204" id="l00204"></a>00204 
+<a name="l00205" id="l00205"></a>00205     <span class="keywordflow">if</span> (t != NULL &amp;&amp; t-&gt;sock &gt;= 0) {
+<a name="l00206" id="l00206"></a>00206         newsock = accept(t-&gt;sock, (<span class=
+"keyword">struct</span> sockaddr *) farend, &amp;farendlen);
+<a name="l00207" id="l00207"></a>00207 
+<a name="l00208" id="l00208"></a>00208         <span class="keywordflow">if</span> (newsock &lt; 0) {
+<a name="l00209" id="l00209"></a>00209             DEBUGMSGTL((<span class="stringliteral">"netsnmp_tcp6"</span>,<span class=
+"stringliteral">"accept failed rc %d errno %d \"%s\"\n"</span>,
+<a name="l00210" id="l00210"></a>00210                         newsock, errno, strerror(errno)));
+<a name="l00211" id="l00211"></a>00211             free(farend);
+<a name="l00212" id="l00212"></a>00212             <span class="keywordflow">return</span> newsock;
+<a name="l00213" id="l00213"></a>00213         }
+<a name="l00214" id="l00214"></a>00214 
+<a name="l00215" id="l00215"></a>00215         <span class="keywordflow">if</span> (t-&gt;data != NULL) {
+<a name="l00216" id="l00216"></a>00216             free(t-&gt;data);
+<a name="l00217" id="l00217"></a>00217         }
+<a name="l00218" id="l00218"></a>00218 
+<a name="l00219" id="l00219"></a>00219         t-&gt;data = farend;
+<a name="l00220" id="l00220"></a>00220         t-&gt;data_length = farendlen;
+<a name="l00221" id="l00221"></a>00221         str = netsnmp_tcp6_fmtaddr(NULL, farend, farendlen);
+<a name="l00222" id="l00222"></a>00222         DEBUGMSGTL((<span class="stringliteral">"netsnmp_tcp6"</span>, <span class=
+"stringliteral">"accept succeeded (from %s)\n"</span>, str));
+<a name="l00223" id="l00223"></a>00223         free(str);
+<a name="l00224" id="l00224"></a>00224 
+<a name="l00225" id="l00225"></a>00225         <span class="comment">/*</span>
+<a name="l00226" id="l00226"></a>00226 <span class="comment">         * Try to make the new socket blocking.  </span>
+<a name="l00227" id="l00227"></a>00227 <span class="comment">         */</span>
+<a name="l00228" id="l00228"></a>00228 
+<a name="l00229" id="l00229"></a>00229 <span class="preprocessor">#ifdef WIN32</span>
+<a name="l00230" id="l00230"></a>00230         ioctlsocket(newsock, FIONBIO, &amp;sockflags);
+<a name="l00231" id="l00231"></a>00231 <span class="preprocessor">#else</span>
+<a name="l00232" id="l00232"></a>00232         <span class=
+"keywordflow">if</span> ((sockflags = fcntl(newsock, F_GETFL, 0)) &gt;= 0) {
+<a name="l00233" id="l00233"></a>00233             fcntl(newsock, F_SETFL, (sockflags &amp; ~O_NONBLOCK));
+<a name="l00234" id="l00234"></a>00234         } <span class="keywordflow">else</span> {
+<a name="l00235" id="l00235"></a>00235             DEBUGMSGTL((<span class="stringliteral">"netsnmp_tcp6"</span>, <span class=
+"stringliteral">"accept: couldn't f_getfl of fd %d\n"</span>,
+<a name="l00236" id="l00236"></a>00236                         newsock));
+<a name="l00237" id="l00237"></a>00237         }
+<a name="l00238" id="l00238"></a>00238 <span class="preprocessor">#endif</span>
+<a name="l00239" id="l00239"></a>00239 
+<a name="l00240" id="l00240"></a>00240         <span class="comment">/*</span>
+<a name="l00241" id="l00241"></a>00241 <span class=
+"comment">         * Allow user to override the send and receive buffers. Default is</span>
+<a name="l00242" id="l00242"></a>00242 <span class=
+"comment">         * to use os default.  Don't worry too much about errors --</span>
+<a name="l00243" id="l00243"></a>00243 <span class="comment">         * just plough on regardless.  </span>
+<a name="l00244" id="l00244"></a>00244 <span class="comment">         */</span>
+<a name="l00245" id="l00245"></a>00245         netsnmp_sock_buffer_set(newsock, SO_SNDBUF, 1, 0);
+<a name="l00246" id="l00246"></a>00246         netsnmp_sock_buffer_set(newsock, SO_RCVBUF, 1, 0);
+<a name="l00247" id="l00247"></a>00247 
+<a name="l00248" id="l00248"></a>00248         <span class="keywordflow">return</span> newsock;
+<a name="l00249" id="l00249"></a>00249     } <span class="keywordflow">else</span> {
+<a name="l00250" id="l00250"></a>00250         free(farend);
+<a name="l00251" id="l00251"></a>00251         <span class="keywordflow">return</span> -1;
+<a name="l00252" id="l00252"></a>00252     }
+<a name="l00253" id="l00253"></a>00253 }
+<a name="l00254" id="l00254"></a>00254 
+<a name="l00255" id="l00255"></a>00255 
+<a name="l00256" id="l00256"></a>00256 
+<a name="l00257" id="l00257"></a>00257 <span class="comment">/*</span>
+<a name="l00258" id="l00258"></a>00258 <span class=
+"comment"> * Open a TCP/IPv6-based transport for SNMP.  Local is TRUE if addr is the</span>
+<a name="l00259" id="l00259"></a>00259 <span class=
+"comment"> * local address to bind to (i.e. this is a server-type session); otherwise</span>
+<a name="l00260" id="l00260"></a>00260 <span class="comment"> * addr is the remote address to send things to.  </span>
+<a name="l00261" id="l00261"></a>00261 <span class="comment"> */</span>
+<a name="l00262" id="l00262"></a>00262 
+<a name="l00263" id="l00263"></a>00263 <a class="code" href="structnetsnmp__transport__s.html">netsnmp_transport</a> *
+<a name="l00264" id="l00264"></a>00264 netsnmp_tcp6_transport(<span class=
+"keyword">struct</span> sockaddr_in6 *addr, <span class="keywordtype">int</span> local)
+<a name="l00265" id="l00265"></a>00265 {
+<a name="l00266" id="l00266"></a>00266     <a class="code" href=
+"structnetsnmp__transport__s.html">netsnmp_transport</a> *t = NULL;
+<a name="l00267" id="l00267"></a>00267     <span class="keywordtype">int</span>             rc = 0;
+<a name="l00268" id="l00268"></a>00268     <span class="keywordtype">char</span>           *str = NULL;
+<a name="l00269" id="l00269"></a>00269 
+<a name="l00270" id="l00270"></a>00270     <span class=
+"keywordflow">if</span> (addr == NULL || addr-&gt;sin6_family != AF_INET6) {
+<a name="l00271" id="l00271"></a>00271         <span class="keywordflow">return</span> NULL;
+<a name="l00272" id="l00272"></a>00272     }
+<a name="l00273" id="l00273"></a>00273 
+<a name="l00274" id="l00274"></a>00274     t = (<a class="code" href=
+"structnetsnmp__transport__s.html">netsnmp_transport</a> *) malloc(<span class="keyword">sizeof</span>(<a class="code" href=
+"structnetsnmp__transport__s.html">netsnmp_transport</a>));
+<a name="l00275" id="l00275"></a>00275     <span class="keywordflow">if</span> (t == NULL) {
+<a name="l00276" id="l00276"></a>00276         <span class="keywordflow">return</span> NULL;
+<a name="l00277" id="l00277"></a>00277     }
+<a name="l00278" id="l00278"></a>00278     memset(t, 0, <span class="keyword">sizeof</span>(<a class="code" href=
+"structnetsnmp__transport__s.html">netsnmp_transport</a>));
+<a name="l00279" id="l00279"></a>00279 
+<a name="l00280" id="l00280"></a>00280     str = netsnmp_tcp6_fmtaddr(NULL, (<span class="keywordtype">void</span> *)addr,
+<a name="l00281" id="l00281"></a>00281                                   <span class="keyword">sizeof</span>(<span class=
+"keyword">struct</span> sockaddr_in6));
+<a name="l00282" id="l00282"></a>00282     DEBUGMSGTL((<span class="stringliteral">"netsnmp_tcp6"</span>, <span class=
+"stringliteral">"open %s %s\n"</span>, local ? <span class="stringliteral">"local"</span> : <span class=
+"stringliteral">"remote"</span>,
+<a name="l00283" id="l00283"></a>00283                 str));
+<a name="l00284" id="l00284"></a>00284     free(str);
+<a name="l00285" id="l00285"></a>00285 
+<a name="l00286" id="l00286"></a>00286     memset(t, 0, <span class="keyword">sizeof</span>(<a class="code" href=
+"structnetsnmp__transport__s.html">netsnmp_transport</a>));
+<a name="l00287" id="l00287"></a>00287 
+<a name="l00288" id="l00288"></a>00288     t-&gt;data = malloc(<span class="keyword">sizeof</span>(<span class=
+"keyword">struct</span> sockaddr_in6));
+<a name="l00289" id="l00289"></a>00289     <span class="keywordflow">if</span> (t-&gt;data == NULL) {
+<a name="l00290" id="l00290"></a>00290         netsnmp_transport_free(t);
+<a name="l00291" id="l00291"></a>00291         <span class="keywordflow">return</span> NULL;
+<a name="l00292" id="l00292"></a>00292     }
+<a name="l00293" id="l00293"></a>00293     t-&gt;data_length = <span class="keyword">sizeof</span>(<span class=
+"keyword">struct </span>sockaddr_in6);
+<a name="l00294" id="l00294"></a>00294     memcpy(t-&gt;data, addr, <span class="keyword">sizeof</span>(<span class=
+"keyword">struct</span> sockaddr_in6));
+<a name="l00295" id="l00295"></a>00295 
+<a name="l00296" id="l00296"></a>00296     t-&gt;domain = netsnmp_TCPIPv6Domain;
+<a name="l00297" id="l00297"></a>00297     t-&gt;domain_length = <span class=
+"keyword">sizeof</span>(netsnmp_TCPIPv6Domain) / <span class="keyword">sizeof</span>(oid);
+<a name="l00298" id="l00298"></a>00298 
+<a name="l00299" id="l00299"></a>00299     t-&gt;sock = socket(PF_INET6, SOCK_STREAM, 0);
+<a name="l00300" id="l00300"></a>00300     <span class="keywordflow">if</span> (t-&gt;sock &lt; 0) {
+<a name="l00301" id="l00301"></a>00301         netsnmp_transport_free(t);
+<a name="l00302" id="l00302"></a>00302         <span class="keywordflow">return</span> NULL;
+<a name="l00303" id="l00303"></a>00303     }
+<a name="l00304" id="l00304"></a>00304 
+<a name="l00305" id="l00305"></a>00305     t-&gt;flags = NETSNMP_TRANSPORT_FLAG_STREAM;
+<a name="l00306" id="l00306"></a>00306 
+<a name="l00307" id="l00307"></a>00307     <span class="keywordflow">if</span> (local) {
+<a name="l00308" id="l00308"></a>00308         <span class="keywordtype">int</span> sockflags = 0, opt = 1;
+<a name="l00309" id="l00309"></a>00309 
+<a name="l00310" id="l00310"></a>00310         <span class="comment">/*</span>
+<a name="l00311" id="l00311"></a>00311 <span class=
+"comment">         * This session is inteneded as a server, so we must bind on to the</span>
+<a name="l00312" id="l00312"></a>00312 <span class=
+"comment">         * given IP address, which may include an interface address, or could</span>
+<a name="l00313" id="l00313"></a>00313 <span class=
+"comment">         * be INADDR_ANY, but certainly includes a port number.</span>
+<a name="l00314" id="l00314"></a>00314 <span class="comment">         */</span>
+<a name="l00315" id="l00315"></a>00315 
+<a name="l00316" id="l00316"></a>00316 <span class="preprocessor">#ifdef IPV6_V6ONLY</span>
+<a name="l00317" id="l00317"></a>00317         <span class=
+"comment">/* Try to restrict PF_INET6 socket to IPv6 communications only. */</span>
+<a name="l00318" id="l00318"></a>00318         {
+<a name="l00319" id="l00319"></a>00319           <span class="keywordtype">int</span> one=1;
+<a name="l00320" id="l00320"></a>00320           <span class=
+"keywordflow">if</span> (setsockopt(t-&gt;sock, IPPROTO_IPV6, IPV6_V6ONLY, (<span class=
+"keywordtype">char</span> *)&amp;one, <span class="keyword">sizeof</span>(one)) != 0) {
+<a name="l00321" id="l00321"></a>00321             DEBUGMSGTL((<span class="stringliteral">"netsnmp_udp6"</span>, <span class=
+"stringliteral">"couldn't set IPV6_V6ONLY to %d bytes: %s\n"</span>, one, strerror(errno)));
+<a name="l00322" id="l00322"></a>00322           } 
+<a name="l00323" id="l00323"></a>00323         }
+<a name="l00324" id="l00324"></a>00324 <span class="preprocessor">#endif</span>
+<a name="l00325" id="l00325"></a>00325 
+<a name="l00326" id="l00326"></a>00326         t-&gt;flags |= NETSNMP_TRANSPORT_FLAG_LISTEN;
+<a name="l00327" id="l00327"></a>00327         t-&gt;local = (<span class="keywordtype">unsigned</span> <span class=
+"keywordtype">char</span>*)malloc(18);
+<a name="l00328" id="l00328"></a>00328         <span class="keywordflow">if</span> (t-&gt;local == NULL) {
+<a name="l00329" id="l00329"></a>00329             netsnmp_tcp6_close(t);
+<a name="l00330" id="l00330"></a>00330             netsnmp_transport_free(t);
+<a name="l00331" id="l00331"></a>00331             <span class="keywordflow">return</span> NULL;
+<a name="l00332" id="l00332"></a>00332         }
+<a name="l00333" id="l00333"></a>00333         memcpy(t-&gt;local, addr-&gt;sin6_addr.s6_addr, 16);
+<a name="l00334" id="l00334"></a>00334         t-&gt;local[16] = (addr-&gt;sin6_port &amp; 0xff00) &gt;&gt; 8;
+<a name="l00335" id="l00335"></a>00335         t-&gt;local[17] = (addr-&gt;sin6_port &amp; 0x00ff) &gt;&gt; 0;
+<a name="l00336" id="l00336"></a>00336         t-&gt;local_length = 18;
+<a name="l00337" id="l00337"></a>00337 
+<a name="l00338" id="l00338"></a>00338         <span class="comment">/*</span>
+<a name="l00339" id="l00339"></a>00339 <span class="comment">         * We should set SO_REUSEADDR too.  </span>
+<a name="l00340" id="l00340"></a>00340 <span class="comment">         */</span>
+<a name="l00341" id="l00341"></a>00341 
+<a name="l00342" id="l00342"></a>00342         setsockopt(t-&gt;sock, SOL_SOCKET, SO_REUSEADDR, (<span class=
+"keywordtype">void</span> *)&amp;opt, <span class="keyword">sizeof</span>(opt));
+<a name="l00343" id="l00343"></a>00343 
+<a name="l00344" id="l00344"></a>00344         rc = bind(t-&gt;sock, (<span class="keyword">struct</span> sockaddr *) addr,
+<a name="l00345" id="l00345"></a>00345                   <span class="keyword">sizeof</span>(<span class=
+"keyword">struct</span> sockaddr_in6));
+<a name="l00346" id="l00346"></a>00346         <span class="keywordflow">if</span> (rc != 0) {
+<a name="l00347" id="l00347"></a>00347             netsnmp_tcp6_close(t);
+<a name="l00348" id="l00348"></a>00348             netsnmp_transport_free(t);
+<a name="l00349" id="l00349"></a>00349             <span class="keywordflow">return</span> NULL;
+<a name="l00350" id="l00350"></a>00350         }
+<a name="l00351" id="l00351"></a>00351 
+<a name="l00352" id="l00352"></a>00352         <span class="comment">/*</span>
+<a name="l00353" id="l00353"></a>00353 <span class=
+"comment">         * Since we are going to be letting select() tell us when connections</span>
+<a name="l00354" id="l00354"></a>00354 <span class=
+"comment">         * are ready to be accept()ed, we need to make the socket n0n-blocking</span>
+<a name="l00355" id="l00355"></a>00355 <span class=
+"comment">         * to avoid the race condition described in W. R. Stevens, ``Unix</span>
+<a name="l00356" id="l00356"></a>00356 <span class=
+"comment">         * Network Programming Volume I Second Edition'', pp. 422--4, which</span>
+<a name="l00357" id="l00357"></a>00357 <span class="comment">         * could otherwise wedge the agent.</span>
+<a name="l00358" id="l00358"></a>00358 <span class="comment">         */</span>
+<a name="l00359" id="l00359"></a>00359 
+<a name="l00360" id="l00360"></a>00360 <span class="preprocessor">#ifdef WIN32</span>
+<a name="l00361" id="l00361"></a>00361         opt = 1;
+<a name="l00362" id="l00362"></a>00362         ioctlsocket(t-&gt;sock, FIONBIO, &amp;opt);
+<a name="l00363" id="l00363"></a>00363 <span class="preprocessor">#else</span>
+<a name="l00364" id="l00364"></a>00364         sockflags = fcntl(t-&gt;sock, F_GETFL, 0);
+<a name="l00365" id="l00365"></a>00365         fcntl(t-&gt;sock, F_SETFL, sockflags | O_NONBLOCK);
+<a name="l00366" id="l00366"></a>00366 <span class="preprocessor">#endif</span>
+<a name="l00367" id="l00367"></a>00367 
+<a name="l00368" id="l00368"></a>00368         <span class="comment">/*</span>
+<a name="l00369" id="l00369"></a>00369 <span class="comment">         * Now sit here and wait for connections to arrive.  </span>
+<a name="l00370" id="l00370"></a>00370 <span class="comment">         */</span>
+<a name="l00371" id="l00371"></a>00371 
+<a name="l00372" id="l00372"></a>00372         rc = listen(t-&gt;sock, NETSNMP_STREAM_QUEUE_LEN);
+<a name="l00373" id="l00373"></a>00373         <span class="keywordflow">if</span> (rc != 0) {
+<a name="l00374" id="l00374"></a>00374             netsnmp_tcp6_close(t);
+<a name="l00375" id="l00375"></a>00375             netsnmp_transport_free(t);
+<a name="l00376" id="l00376"></a>00376             <span class="keywordflow">return</span> NULL;
+<a name="l00377" id="l00377"></a>00377         }
+<a name="l00378" id="l00378"></a>00378         
+<a name="l00379" id="l00379"></a>00379         <span class="comment">/*</span>
+<a name="l00380" id="l00380"></a>00380 <span class=
+"comment">         * no buffer size on listen socket - doesn't make sense</span>
+<a name="l00381" id="l00381"></a>00381 <span class="comment">         */</span>
+<a name="l00382" id="l00382"></a>00382 
+<a name="l00383" id="l00383"></a>00383     } <span class="keywordflow">else</span> {
+<a name="l00384" id="l00384"></a>00384         t-&gt;remote = (<span class="keywordtype">unsigned</span> <span class=
+"keywordtype">char</span>*)malloc(18);
+<a name="l00385" id="l00385"></a>00385         <span class="keywordflow">if</span> (t-&gt;remote == NULL) {
+<a name="l00386" id="l00386"></a>00386             netsnmp_tcp6_close(t);
+<a name="l00387" id="l00387"></a>00387             netsnmp_transport_free(t);
+<a name="l00388" id="l00388"></a>00388             <span class="keywordflow">return</span> NULL;
+<a name="l00389" id="l00389"></a>00389         }
+<a name="l00390" id="l00390"></a>00390         memcpy(t-&gt;remote, addr-&gt;sin6_addr.s6_addr, 16);
+<a name="l00391" id="l00391"></a>00391         t-&gt;remote[16] = (addr-&gt;sin6_port &amp; 0xff00) &gt;&gt; 8;
+<a name="l00392" id="l00392"></a>00392         t-&gt;remote[17] = (addr-&gt;sin6_port &amp; 0x00ff) &gt;&gt; 0;
+<a name="l00393" id="l00393"></a>00393         t-&gt;remote_length = 18;
+<a name="l00394" id="l00394"></a>00394 
+<a name="l00395" id="l00395"></a>00395         <span class="comment">/*</span>
+<a name="l00396" id="l00396"></a>00396 <span class=
+"comment">         * This is a client-type session, so attempt to connect to the far</span>
+<a name="l00397" id="l00397"></a>00397 <span class=
+"comment">         * end.  We don't go non-blocking here because it's not obvious what</span>
+<a name="l00398" id="l00398"></a>00398 <span class=
+"comment">         * you'd then do if you tried to do snmp_sends before the connection</span>
+<a name="l00399" id="l00399"></a>00399 <span class="comment">         * had completed.  So this can block.</span>
+<a name="l00400" id="l00400"></a>00400 <span class="comment">         */</span>
+<a name="l00401" id="l00401"></a>00401 
+<a name="l00402" id="l00402"></a>00402         rc = connect(t-&gt;sock, (<span class="keyword">struct</span> sockaddr *) addr,
+<a name="l00403" id="l00403"></a>00403                      <span class="keyword">sizeof</span>(<span class=
+"keyword">struct</span> sockaddr_in6));
+<a name="l00404" id="l00404"></a>00404 
+<a name="l00405" id="l00405"></a>00405         DEBUGMSGTL((<span class="stringliteral">"netsnmp_tcp6"</span>, <span class=
+"stringliteral">"connect returns %d\n"</span>, rc));
+<a name="l00406" id="l00406"></a>00406 
+<a name="l00407" id="l00407"></a>00407         <span class="keywordflow">if</span> (rc &lt; 0) {
+<a name="l00408" id="l00408"></a>00408             netsnmp_tcp6_close(t);
+<a name="l00409" id="l00409"></a>00409             netsnmp_transport_free(t);
+<a name="l00410" id="l00410"></a>00410             <span class="keywordflow">return</span> NULL;
+<a name="l00411" id="l00411"></a>00411         }
+<a name="l00412" id="l00412"></a>00412 
+<a name="l00413" id="l00413"></a>00413         <span class="comment">/*</span>
+<a name="l00414" id="l00414"></a>00414 <span class=
+"comment">         * Allow user to override the send and receive buffers. Default is</span>
+<a name="l00415" id="l00415"></a>00415 <span class=
+"comment">         * to use os default.  Don't worry too much about errors --</span>
+<a name="l00416" id="l00416"></a>00416 <span class="comment">         * just plough on regardless.  </span>
+<a name="l00417" id="l00417"></a>00417 <span class="comment">         */</span>
+<a name="l00418" id="l00418"></a>00418         netsnmp_sock_buffer_set(t-&gt;sock, SO_SNDBUF, local, 0);
+<a name="l00419" id="l00419"></a>00419         netsnmp_sock_buffer_set(t-&gt;sock, SO_RCVBUF, local, 0);
+<a name="l00420" id="l00420"></a>00420     }
+<a name="l00421" id="l00421"></a>00421 
+<a name="l00422" id="l00422"></a>00422     <span class="comment">/*</span>
+<a name="l00423" id="l00423"></a>00423 <span class=
+"comment">     * Message size is not limited by this transport (hence msgMaxSize</span>
+<a name="l00424" id="l00424"></a>00424 <span class=
+"comment">     * is equal to the maximum legal size of an SNMP message).  </span>
+<a name="l00425" id="l00425"></a>00425 <span class="comment">     */</span>
+<a name="l00426" id="l00426"></a>00426 
+<a name="l00427" id="l00427"></a>00427     t-&gt;msgMaxSize = 0x7fffffff;
+<a name="l00428" id="l00428"></a>00428     t-&gt;f_recv     = netsnmp_tcp6_recv;
+<a name="l00429" id="l00429"></a>00429     t-&gt;f_send     = netsnmp_tcp6_send;
+<a name="l00430" id="l00430"></a>00430     t-&gt;f_close    = netsnmp_tcp6_close;
+<a name="l00431" id="l00431"></a>00431     t-&gt;f_accept   = netsnmp_tcp6_accept;
+<a name="l00432" id="l00432"></a>00432     t-&gt;f_fmtaddr  = netsnmp_tcp6_fmtaddr;
+<a name="l00433" id="l00433"></a>00433 
+<a name="l00434" id="l00434"></a>00434     <span class="keywordflow">return</span> t;
+<a name="l00435" id="l00435"></a>00435 }
+<a name="l00436" id="l00436"></a>00436 
+<a name="l00437" id="l00437"></a>00437 <span class="comment">/*</span>
+<a name="l00438" id="l00438"></a>00438 <span class="comment"> * Not extern but still defined in snmpUDPIPv6Domain.c</span>
+<a name="l00439" id="l00439"></a>00439 <span class="comment"> */</span>
+<a name="l00440" id="l00440"></a>00440 <span class="keyword">extern</span> <span class="keywordtype">int</span>
+<a name="l00441" id="l00441"></a>00441 netsnmp_sockaddr_in6_2(<span class="keyword">struct</span> sockaddr_in6*, <span class=
+"keyword">const</span> <span class="keywordtype">char</span>*, <span class="keyword">const</span> <span class=
+"keywordtype">char</span>*);
+<a name="l00442" id="l00442"></a>00442 
+<a name="l00443" id="l00443"></a>00443 <a class="code" href="structnetsnmp__transport__s.html">netsnmp_transport</a> *
+<a name="l00444" id="l00444"></a>00444 netsnmp_tcp6_create_tstring(<span class="keyword">const</span> <span class=
+"keywordtype">char</span> *str, <span class="keywordtype">int</span> local,
+<a name="l00445" id="l00445"></a>00445                             <span class="keyword">const</span> <span class=
+"keywordtype">char</span> *default_target)
+<a name="l00446" id="l00446"></a>00446 {
+<a name="l00447" id="l00447"></a>00447     <span class="keyword">struct </span>sockaddr_in6 addr;
+<a name="l00448" id="l00448"></a>00448 
+<a name="l00449" id="l00449"></a>00449     <span class=
+"keywordflow">if</span> (netsnmp_sockaddr_in6_2(&amp;addr, str, default_target)) {
+<a name="l00450" id="l00450"></a>00450         <span class="keywordflow">return</span> netsnmp_tcp6_transport(&amp;addr, local);
+<a name="l00451" id="l00451"></a>00451     } <span class="keywordflow">else</span> {
+<a name="l00452" id="l00452"></a>00452         <span class="keywordflow">return</span> NULL;
+<a name="l00453" id="l00453"></a>00453     }
+<a name="l00454" id="l00454"></a>00454 }
+<a name="l00455" id="l00455"></a>00455 
+<a name="l00456" id="l00456"></a>00456 
+<a name="l00457" id="l00457"></a>00457 <span class="comment">/*</span>
+<a name="l00458" id="l00458"></a>00458 <span class="comment"> * See:</span>
+<a name="l00459" id="l00459"></a>00459 <span class="comment"> * </span>
+<a name="l00460" id="l00460"></a>00460 <span class=
+"comment"> * http://www.ietf.org/internet-drafts/draft-ietf-ops-taddress-mib-01.txt</span>
+<a name="l00461" id="l00461"></a>00461 <span class="comment"> * </span>
+<a name="l00462" id="l00462"></a>00462 <span class=
+"comment"> * (or newer equivalent) for details of the TC which we are using for</span>
+<a name="l00463" id="l00463"></a>00463 <span class="comment"> * the mapping here.  </span>
+<a name="l00464" id="l00464"></a>00464 <span class="comment"> */</span>
+<a name="l00465" id="l00465"></a>00465 
+<a name="l00466" id="l00466"></a>00466 <a class="code" href="structnetsnmp__transport__s.html">netsnmp_transport</a> *
+<a name="l00467" id="l00467"></a>00467 netsnmp_tcp6_create_ostring(<span class="keyword">const</span> u_char * o, <span class=
+"keywordtype">size_t</span> o_len, <span class="keywordtype">int</span> local)
+<a name="l00468" id="l00468"></a>00468 {
+<a name="l00469" id="l00469"></a>00469     <span class="keyword">struct </span>sockaddr_in6 addr;
+<a name="l00470" id="l00470"></a>00470 
+<a name="l00471" id="l00471"></a>00471     <span class="keywordflow">if</span> (o_len == 18) {
+<a name="l00472" id="l00472"></a>00472         memset((u_char *) &amp; addr, 0, <span class="keyword">sizeof</span>(<span class=
+"keyword">struct</span> sockaddr_in6));
+<a name="l00473" id="l00473"></a>00473         addr.sin6_family = AF_INET6;
+<a name="l00474" id="l00474"></a>00474         memcpy((u_char *) &amp; (addr.sin6_addr.s6_addr), o, 16);
+<a name="l00475" id="l00475"></a>00475         addr.sin6_port = (o[16] &lt;&lt; 8) + o[17];
+<a name="l00476" id="l00476"></a>00476         <span class="keywordflow">return</span> netsnmp_tcp6_transport(&amp;addr, local);
+<a name="l00477" id="l00477"></a>00477     }
+<a name="l00478" id="l00478"></a>00478     <span class="keywordflow">return</span> NULL;
+<a name="l00479" id="l00479"></a>00479 }
+<a name="l00480" id="l00480"></a>00480 
+<a name="l00481" id="l00481"></a>00481 
+<a name="l00482" id="l00482"></a>00482 <span class="keywordtype">void</span>
+<a name="l00483" id="l00483"></a>00483 netsnmp_tcp6_ctor(<span class="keywordtype">void</span>)
+<a name="l00484" id="l00484"></a>00484 {
+<a name="l00485" id="l00485"></a>00485     tcp6Domain.name = netsnmp_TCPIPv6Domain;
+<a name="l00486" id="l00486"></a>00486     tcp6Domain.name_length = <span class=
+"keyword">sizeof</span>(netsnmp_TCPIPv6Domain) / <span class="keyword">sizeof</span>(oid);
+<a name="l00487" id="l00487"></a>00487     tcp6Domain.f_create_from_tstring_new = netsnmp_tcp6_create_tstring;
+<a name="l00488" id="l00488"></a>00488     tcp6Domain.f_create_from_ostring = netsnmp_tcp6_create_ostring;
+<a name="l00489" id="l00489"></a>00489     tcp6Domain.prefix = (<span class="keyword">const</span> <span class=
+"keywordtype">char</span>**)calloc(4, <span class="keyword">sizeof</span>(<span class="keywordtype">char</span> *));
+<a name="l00490" id="l00490"></a>00490     tcp6Domain.prefix[0] = <span class="stringliteral">"tcp6"</span>;
+<a name="l00491" id="l00491"></a>00491     tcp6Domain.prefix[1] = <span class="stringliteral">"tcpv6"</span>;
+<a name="l00492" id="l00492"></a>00492     tcp6Domain.prefix[2] = <span class="stringliteral">"tcpipv6"</span>;
+<a name="l00493" id="l00493"></a>00493 
+<a name="l00494" id="l00494"></a>00494     netsnmp_tdomain_register(&amp;tcp6Domain);
+<a name="l00495" id="l00495"></a>00495 }
+<a name="l00496" id="l00496"></a>00496 
+<a name="l00497" id="l00497"></a>00497 <span class="preprocessor">#endif </span><span class=
+"comment">/* NETSNMP_TRANSPORT_TCPIPV6_DOMAIN */</span>
+<a name="l00498" id="l00498"></a>00498 
+</pre>
+    </div>
+  </div>
+  <hr size="1" />
+
+  <address style="text-align: right;">
+    <small>Generated on 28 Sep 2009 for net-snmp by  <a href="http://www.doxygen.org/index.html"><img class="footer" src=
+    "doxygen.png" alt="doxygen" /></a> 1.6.1</small>
+<!-- CONTENT END -->
+<!--#include virtual="/page-bottom.html" -->
+

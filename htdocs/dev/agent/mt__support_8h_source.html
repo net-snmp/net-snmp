@@ -1,0 +1,140 @@
+<!--#set var="section" value="development" -->
+<!--#include virtual="/page-top.html" -->
+<!-- CONTENT START -->
+  <div class="navigation" id="top">
+    <div class="tabs">
+      <ul>
+        <li><a href="index.html"><span>Main Page</span></a></li>
+
+        <li><a href="pages.html"><span>Related Pages</span></a></li>
+
+        <li><a href="modules.html"><span>Modules</span></a></li>
+
+        <li><a href="annotated.html"><span>Data Structures</span></a></li>
+
+        <li class="current"><a href="files.html"><span>Files</span></a></li>
+
+        <li><a href="examples.html"><span>Examples</span></a></li>
+      </ul>
+    </div>
+
+    <div class="tabs">
+      <ul>
+        <li><a href="files.html"><span>File List</span></a></li>
+
+        <li><a href="globals.html"><span>Globals</span></a></li>
+      </ul>
+    </div>
+
+    <h1>mt_support.h</h1>
+
+    <div class="fragment">
+      <pre class="fragment">
+<a name="l00001" id="l00001"></a>00001 <span class="comment">/*</span>
+<a name="l00002" id="l00002"></a>00002 <span class=
+"comment"> * mt_support.h - multi-thread resource locking support declarations </span>
+<a name="l00003" id="l00003"></a>00003 <span class="comment"> */</span>
+<a name="l00004" id="l00004"></a>00004 <span class="comment">/*</span>
+<a name="l00005" id="l00005"></a>00005 <span class="comment"> * Author: Markku Laukkanen</span>
+<a name="l00006" id="l00006"></a>00006 <span class="comment"> * Created: 6-Sep-1999</span>
+<a name="l00007" id="l00007"></a>00007 <span class="comment"> * History:</span>
+<a name="l00008" id="l00008"></a>00008 <span class="comment"> *  8-Sep-1999 M. Slifcak method names changed;</span>
+<a name="l00009" id="l00009"></a>00009 <span class=
+"comment"> *                        use array of resource locking structures.</span>
+<a name="l00010" id="l00010"></a>00010 <span class="comment"> */</span>
+<a name="l00011" id="l00011"></a>00011 
+<a name="l00012" id="l00012"></a>00012 <span class="preprocessor">#ifndef MT_SUPPORT_H</span>
+<a name="l00013" id="l00013"></a>00013 <span class="preprocessor">#define MT_SUPPORT_H</span>
+<a name="l00014" id="l00014"></a>00014 
+<a name="l00015" id="l00015"></a>00015 <span class="preprocessor">#ifdef __cplusplus</span>
+<a name="l00016" id="l00016"></a>00016 <span class="keyword">extern</span>          <span class="stringliteral">"C"</span> {
+<a name="l00017" id="l00017"></a>00017 <span class="preprocessor">#endif</span>
+<a name="l00018" id="l00018"></a>00018   
+<a name="l00019" id="l00019"></a>00019 <span class="comment">/*</span>
+<a name="l00020" id="l00020"></a>00020 <span class="comment"> * Lock group identifiers </span>
+<a name="l00021" id="l00021"></a>00021 <span class="comment"> */</span>
+<a name="l00022" id="l00022"></a>00022 
+<a name="l00023" id="l00023"></a>00023 <span class="preprocessor">#define MT_LIBRARY_ID      0</span>
+<a name="l00024" id="l00024"></a>00024 <span class="preprocessor">#define MT_APPLICATION_ID  1</span>
+<a name="l00025" id="l00025"></a>00025 <span class="preprocessor">#define MT_TOKEN_ID        2</span>
+<a name="l00026" id="l00026"></a>00026 
+<a name="l00027" id="l00027"></a>00027 <span class="preprocessor">#define MT_MAX_IDS         3    </span><span class=
+"comment">/* one greater than last from above */</span>
+<a name="l00028" id="l00028"></a>00028 <span class="preprocessor">#define MT_MAX_SUBIDS      10</span>
+<a name="l00029" id="l00029"></a>00029 
+<a name="l00030" id="l00030"></a>00030 
+<a name="l00031" id="l00031"></a>00031 <span class="comment">/*</span>
+<a name="l00032" id="l00032"></a>00032 <span class="comment"> * Lock resource identifiers for library resources </span>
+<a name="l00033" id="l00033"></a>00033 <span class="comment"> */</span>
+<a name="l00034" id="l00034"></a>00034 
+<a name="l00035" id="l00035"></a>00035 <span class="preprocessor">#define MT_LIB_NONE        0</span>
+<a name="l00036" id="l00036"></a>00036 <span class="preprocessor">#define MT_LIB_SESSION     1</span>
+<a name="l00037" id="l00037"></a>00037 <span class="preprocessor">#define MT_LIB_REQUESTID   2</span>
+<a name="l00038" id="l00038"></a>00038 <span class="preprocessor">#define MT_LIB_MESSAGEID   3</span>
+<a name="l00039" id="l00039"></a>00039 <span class="preprocessor">#define MT_LIB_SESSIONID   4</span>
+<a name="l00040" id="l00040"></a>00040 <span class="preprocessor">#define MT_LIB_TRANSID     5</span>
+<a name="l00041" id="l00041"></a>00041 
+<a name="l00042" id="l00042"></a>00042 <span class="preprocessor">#define MT_LIB_MAXIMUM     6    </span><span class=
+"comment">/* must be one greater than the last one */</span>
+<a name="l00043" id="l00043"></a>00043 
+<a name="l00044" id="l00044"></a>00044 
+<a name="l00045" id="l00045"></a>00045 <span class="preprocessor">#if defined(NETSNMP_REENTRANT) || defined(WIN32)</span>
+<a name="l00046" id="l00046"></a>00046 
+<a name="l00047" id="l00047"></a>00047 <span class="preprocessor">#if HAVE_PTHREAD_H</span>
+<a name="l00048" id="l00048"></a>00048 <span class="preprocessor">#include &lt;pthread.h&gt;</span>
+<a name="l00049" id="l00049"></a>00049 <span class="keyword">typedef</span> pthread_mutex_t mutex_type;
+<a name="l00050" id="l00050"></a>00050 <span class="preprocessor">#ifdef pthread_mutexattr_default</span>
+<a name="l00051" id="l00051"></a>00051 <span class="preprocessor">#define MT_MUTEX_INIT_DEFAULT pthread_mutexattr_default</span>
+<a name="l00052" id="l00052"></a>00052 <span class="preprocessor">#else</span>
+<a name="l00053" id="l00053"></a>00053 <span class="preprocessor">#define MT_MUTEX_INIT_DEFAULT 0</span>
+<a name="l00054" id="l00054"></a>00054 <span class="preprocessor">#endif</span>
+<a name="l00055" id="l00055"></a>00055 
+<a name="l00056" id="l00056"></a>00056 <span class="preprocessor">#elif defined(WIN32) || defined(cygwin)</span>
+<a name="l00057" id="l00057"></a>00057 
+<a name="l00058" id="l00058"></a>00058 <span class="preprocessor">#include &lt;windows.h&gt;</span>
+<a name="l00059" id="l00059"></a>00059 <span class="keyword">typedef</span> CRITICAL_SECTION mutex_type;
+<a name="l00060" id="l00060"></a>00060 
+<a name="l00061" id="l00061"></a>00061 <span class="preprocessor">#else  </span><span class=
+"comment">/*  HAVE_PTHREAD_H  */</span>
+<a name="l00062" id="l00062"></a>00062 error <span class="stringliteral">"There is no re-entrant support as defined."</span>
+<a name="l00063" id="l00063"></a>00063 <span class="preprocessor">#endif </span><span class=
+"comment">/*  HAVE_PTHREAD_H  */</span>
+<a name="l00064" id="l00064"></a>00064 
+<a name="l00065" id="l00065"></a>00065 
+<a name="l00066" id="l00066"></a>00066 <span class="keywordtype">int</span>             snmp_res_init(<span class=
+"keywordtype">void</span>);
+<a name="l00067" id="l00067"></a>00067 <span class="keywordtype">int</span>             snmp_res_lock(<span class=
+"keywordtype">int</span> groupID, <span class="keywordtype">int</span> resourceID);
+<a name="l00068" id="l00068"></a>00068 <span class="keywordtype">int</span>             snmp_res_unlock(<span class=
+"keywordtype">int</span> groupID, <span class="keywordtype">int</span> resourceID);
+<a name="l00069" id="l00069"></a>00069 <span class="keywordtype">int</span>             snmp_res_destroy_mutex(<span class=
+"keywordtype">int</span> groupID, <span class="keywordtype">int</span> resourceID);
+<a name="l00070" id="l00070"></a>00070 
+<a name="l00071" id="l00071"></a>00071 <span class="preprocessor">#else </span><span class=
+"comment">/*  NETSNMP_REENTRANT  */</span>
+<a name="l00072" id="l00072"></a>00072 
+<a name="l00073" id="l00073"></a>00073 <span class="preprocessor">#ifndef WIN32</span>
+<a name="l00074" id="l00074"></a>00074 <span class="preprocessor">#define snmp_res_init() do {} while (0)</span>
+<a name="l00075" id="l00075"></a>00075 <span class="preprocessor">#define snmp_res_lock(x,y) do {} while (0)</span>
+<a name="l00076" id="l00076"></a>00076 <span class="preprocessor">#define snmp_res_unlock(x,y) do {} while (0)</span>
+<a name="l00077" id="l00077"></a>00077 <span class="preprocessor">#define snmp_res_destroy_mutex(x,y) do {} while (0)</span>
+<a name="l00078" id="l00078"></a>00078 <span class="preprocessor">#endif </span><span class="comment">/*  WIN32  */</span>
+<a name="l00079" id="l00079"></a>00079 
+<a name="l00080" id="l00080"></a>00080 <span class="preprocessor">#endif </span><span class=
+"comment">/*  NETSNMP_REENTRANT  */</span>
+<a name="l00081" id="l00081"></a>00081 
+<a name="l00082" id="l00082"></a>00082 <span class="preprocessor">#ifdef __cplusplus</span>
+<a name="l00083" id="l00083"></a>00083 }
+<a name="l00084" id="l00084"></a>00084 <span class="preprocessor">#endif</span>
+<a name="l00085" id="l00085"></a>00085 <span class="preprocessor">#endif </span><span class="comment">/*  MT_SUPPORT_H  */</span>
+</pre>
+    </div>
+  </div>
+  <hr size="1" />
+
+  <address style="text-align: right;">
+    <small>Generated on 28 Sep 2009 for net-snmp by  <a href="http://www.doxygen.org/index.html"><img class="footer" src=
+    "doxygen.png" alt="doxygen" /></a> 1.6.1</small>
+<!-- CONTENT END -->
+<!--#include virtual="/page-bottom.html" -->
+

@@ -1,0 +1,276 @@
+<!--#set var="section" value="development" -->
+<!--#include virtual="/page-top.html" -->
+<!-- CONTENT START -->
+  <div class="navigation" id="top">
+    <div class="tabs">
+      <ul>
+        <li><a href="index.html"><span>Main Page</span></a></li>
+
+        <li><a href="pages.html"><span>Related Pages</span></a></li>
+
+        <li><a href="modules.html"><span>Modules</span></a></li>
+
+        <li><a href="annotated.html"><span>Data Structures</span></a></li>
+
+        <li class="current"><a href="files.html"><span>Files</span></a></li>
+
+        <li><a href="examples.html"><span>Examples</span></a></li>
+      </ul>
+    </div>
+
+    <div class="tabs">
+      <ul>
+        <li><a href="files.html"><span>File List</span></a></li>
+
+        <li><a href="globals.html"><span>Globals</span></a></li>
+      </ul>
+    </div>
+
+    <h1>table_data.h</h1>
+
+    <div class="fragment">
+      <pre class="fragment">
+<a name="l00001" id="l00001"></a>00001 <span class="comment">/*</span>
+<a name="l00002" id="l00002"></a>00002 <span class="comment"> * table_iterator.h </span>
+<a name="l00003" id="l00003"></a>00003 <span class="comment"> */</span>
+<a name="l00004" id="l00004"></a>00004 <span class="preprocessor">#ifndef _TABLE_DATA_HANDLER_H_</span>
+<a name="l00005" id="l00005"></a>00005 <span class="preprocessor">#define _TABLE_DATA_HANDLER_H_</span>
+<a name="l00006" id="l00006"></a>00006 
+<a name="l00007" id="l00007"></a>00007 <span class="preprocessor">#ifdef __cplusplus</span>
+<a name="l00008" id="l00008"></a>00008 <span class="keyword">extern</span>          <span class="stringliteral">"C"</span> {
+<a name="l00009" id="l00009"></a>00009 <span class="preprocessor">#endif</span>
+<a name="l00010" id="l00010"></a>00010 
+<a name="l00011" id="l00011"></a>00011     <span class="comment">/*</span>
+<a name="l00012" id="l00012"></a>00012 <span class=
+"comment">     * This helper is designed to completely automate the task of storing</span>
+<a name="l00013" id="l00013"></a>00013 <span class=
+"comment">     * tables of data within the agent that are not tied to external data</span>
+<a name="l00014" id="l00014"></a>00014 <span class=
+"comment">     * sources (like the kernel, hardware, or other processes, etc).  IE,</span>
+<a name="l00015" id="l00015"></a>00015 <span class=
+"comment">     * all rows within a table are expected to be added manually using</span>
+<a name="l00016" id="l00016"></a>00016 <span class="comment">     * functions found below.</span>
+<a name="l00017" id="l00017"></a>00017 <span class="comment">     */</span>
+<a name="l00018" id="l00018"></a>00018 
+<a name="l00019" id="l00019"></a>00019 <span class="preprocessor">#define TABLE_DATA_NAME "table_data"</span>
+<a name="l00020" id="l00020"></a>00020 <span class="preprocessor">#define TABLE_DATA_ROW  "table_data"</span>
+<a name="l00021" id="l00021"></a>00021 <span class="preprocessor">#define TABLE_DATA_TABLE "table_data_table"</span>
+<a name="l00022" id="l00022"></a>00022 
+<a name="l00023" id="l00023"></a><a class="code" href="structnetsnmp__table__row__s.html">00023</a>     <span class=
+"keyword">typedef</span> <span class="keyword">struct </span><a class="code" href=
+"structnetsnmp__table__row__s.html">netsnmp_table_row_s</a> {
+<a name="l00024" id="l00024"></a>00024         <a class="code" href="structvariable__list.html" title=
+"The netsnmp variable list binding structure, it&amp;#39;s typedef&amp;#39;d to netsnmp_variable_list...">netsnmp_variable_list</a> *indexes; <span class="comment">/* stored permanently if store_indexes = 1 */</span>
+<a name="l00025" id="l00025"></a>00025         oid            *index_oid;
+<a name="l00026" id="l00026"></a>00026         <span class="keywordtype">size_t</span>          index_oid_len;
+<a name="l00027" id="l00027"></a>00027         <span class="keywordtype">void</span>           *data;   <span class=
+"comment">/* the data to store */</span>
+<a name="l00028" id="l00028"></a>00028 
+<a name="l00029" id="l00029"></a>00029         <span class="keyword">struct </span><a class="code" href=
+"structnetsnmp__table__row__s.html">netsnmp_table_row_s</a> *next, *prev;        <span class=
+"comment">/* if used in a list */</span>
+<a name="l00030" id="l00030"></a>00030     } <a class="code" href="structnetsnmp__table__row__s.html">netsnmp_table_row</a>;
+<a name="l00031" id="l00031"></a>00031 
+<a name="l00032" id="l00032"></a><a class="code" href="structnetsnmp__table__data__s.html">00032</a>     <span class=
+"keyword">typedef</span> <span class="keyword">struct </span><a class="code" href=
+"structnetsnmp__table__data__s.html">netsnmp_table_data_s</a> {
+<a name="l00033" id="l00033"></a>00033         <a class="code" href="structvariable__list.html" title=
+"The netsnmp variable list binding structure, it&amp;#39;s typedef&amp;#39;d to netsnmp_variable_list...">netsnmp_variable_list</a> *indexes_template;        <span class="comment">/* containing only types */</span>
+<a name="l00034" id="l00034"></a>00034         <span class="keywordtype">char</span>           *name;   <span class=
+"comment">/* if !NULL, it's registered globally */</span>
+<a name="l00035" id="l00035"></a>00035         <span class="keywordtype">int</span>             flags;  <span class=
+"comment">/* not currently used */</span>
+<a name="l00036" id="l00036"></a>00036         <span class="keywordtype">int</span>             store_indexes;
+<a name="l00037" id="l00037"></a>00037         <a class="code" href=
+"structnetsnmp__table__row__s.html">netsnmp_table_row</a> *first_row;
+<a name="l00038" id="l00038"></a>00038         <a class="code" href=
+"structnetsnmp__table__row__s.html">netsnmp_table_row</a> *last_row;
+<a name="l00039" id="l00039"></a>00039     } <a class="code" href="structnetsnmp__table__data__s.html">netsnmp_table_data</a>;
+<a name="l00040" id="l00040"></a>00040 
+<a name="l00041" id="l00041"></a>00041 <span class="comment">/* =================================</span>
+<a name="l00042" id="l00042"></a>00042 <span class="comment"> * Table Data API: Table maintenance</span>
+<a name="l00043" id="l00043"></a>00043 <span class="comment"> * ================================= */</span>
+<a name="l00044" id="l00044"></a>00044 
+<a name="l00045" id="l00045"></a>00045     <span class=
+"keywordtype">void</span>       netsnmp_table_data_generate_index_oid( <a class="code" href=
+"structnetsnmp__table__row__s.html">netsnmp_table_row</a>  *row);
+<a name="l00046" id="l00046"></a>00046 
+<a name="l00047" id="l00047"></a>00047     <a class="code" href=
+"structnetsnmp__table__data__s.html">netsnmp_table_data</a> *<a class="code" href=
+"group__table__data.html#gac0cc1567de4c67a31b398a145de6d5b1" title=
+"creates and returns a pointer to table data set">netsnmp_create_table_data</a>(<span class="keyword">const</span> <span class=
+"keywordtype">char</span> *name);
+<a name="l00048" id="l00048"></a>00048     <a class="code" href=
+"structnetsnmp__table__row__s.html">netsnmp_table_row</a>  *<a class="code" href=
+"group__table__data.html#gafdadce2dee8bc75b2b0dfd8e634e46a3" title=
+"creates and returns a pointer to table data set">netsnmp_create_table_data_row</a>(<span class="keywordtype">void</span>);
+<a name="l00049" id="l00049"></a>00049     <a class="code" href=
+"structnetsnmp__table__row__s.html">netsnmp_table_row</a>  *<a class="code" href=
+"group__table__data.html#ga255af6ddcb7eea49cfe00de56bd87f37" title=
+"clones a data row.">netsnmp_table_data_clone_row</a>( <a class="code" href=
+"structnetsnmp__table__row__s.html">netsnmp_table_row</a>  *row);
+<a name="l00050" id="l00050"></a>00050     <span class="keywordtype">void</span>               *<a class="code" href=
+"group__table__data.html#ga4f84f680e50132cb614f5152db053bd0" title=
+"deletes a row&amp;#39;s memory.">netsnmp_table_data_delete_row</a>(<a class="code" href=
+"structnetsnmp__table__row__s.html">netsnmp_table_row</a>  *row);
+<a name="l00051" id="l00051"></a>00051     <span class="keywordtype">int</span>                 <a class="code" href=
+"group__table__data.html#gafa6a070da8369ec7a3c87e4fdcd014de" title=
+"Adds a row of data to a given table (stored in proper lexographical order).">netsnmp_table_data_add_row</a>(   <a class="code"
+href="structnetsnmp__table__data__s.html">netsnmp_table_data</a> *table,
+<a name="l00052" id="l00052"></a>00052                                                       <a class="code" href=
+"structnetsnmp__table__row__s.html">netsnmp_table_row</a>  *row);
+<a name="l00053" id="l00053"></a>00053     <span class="keywordtype">void</span>
+<a name="l00054" id="l00054"></a>00054        <a class="code" href="group__table__data.html#gac54daadf206eda5d207a9484d0732921"
+title="swaps out origrow with newrow.">netsnmp_table_data_replace_row</a>(<a class="code" href=
+"structnetsnmp__table__data__s.html">netsnmp_table_data</a> *table,
+<a name="l00055" id="l00055"></a>00055                                       <a class="code" href=
+"structnetsnmp__table__row__s.html">netsnmp_table_row</a> *origrow,
+<a name="l00056" id="l00056"></a>00056                                       <a class="code" href=
+"structnetsnmp__table__row__s.html">netsnmp_table_row</a> *newrow);
+<a name="l00057" id="l00057"></a>00057     <a class="code" href=
+"structnetsnmp__table__row__s.html">netsnmp_table_row</a> *<a class="code" href=
+"group__table__data.html#gaec69da662a26edd1cd3cee5fd6338768" title=
+"removes a row of data to a given table and returns it (no free&amp;#39;s called)">netsnmp_table_data_remove_row</a>(<a class=
+"code" href="structnetsnmp__table__data__s.html">netsnmp_table_data</a> *table,
+<a name="l00058" id="l00058"></a>00058                                                      <a class="code" href=
+"structnetsnmp__table__row__s.html">netsnmp_table_row</a>  *row);
+<a name="l00059" id="l00059"></a>00059     <span class="keywordtype">void</span>   *<a class="code" href=
+"group__table__data.html#ga5339c8a53e8462d692bd8c63d8f50a41" title=
+"removes and frees a row of data to a given table and returns the void *">netsnmp_table_data_remove_and_delete_row</a>(<a class=
+"code" href="structnetsnmp__table__data__s.html">netsnmp_table_data</a> *table,
+<a name="l00060" id="l00060"></a>00060                                                      <a class="code" href=
+"structnetsnmp__table__row__s.html">netsnmp_table_row</a>  *row);
+<a name="l00061" id="l00061"></a>00061 
+<a name="l00062" id="l00062"></a>00062 <span class="comment">/* =================================</span>
+<a name="l00063" id="l00063"></a>00063 <span class="comment"> * Table Data API: MIB maintenance</span>
+<a name="l00064" id="l00064"></a>00064 <span class="comment"> * ================================= */</span>
+<a name="l00065" id="l00065"></a>00065 
+<a name="l00066" id="l00066"></a>00066     <a class="code" href="structnetsnmp__mib__handler__s.html" title=
+"the mib handler structure to be registered">netsnmp_mib_handler</a> *
+<a name="l00067" id="l00067"></a>00067         <a class="code" href="group__table__data.html#gabe777fbdc55077859785626d0a4e97de"
+title="Creates a table_data handler and returns it.">netsnmp_get_table_data_handler</a>(<a class="code" href=
+"structnetsnmp__table__data__s.html">netsnmp_table_data</a>           *table);
+<a name="l00068" id="l00068"></a>00068 
+<a name="l00069" id="l00069"></a>00069     <span class="keywordtype">int</span> <a class="code" href=
+"group__table__data.html#ga9c5f1d84e2c7f625e786667a2ef1f0b5" title=
+"registers a handler as a data table.">netsnmp_register_table_data</a>(<a class="code" href=
+"structnetsnmp__handler__registration__s.html" title="Root registration info.">netsnmp_handler_registration</a>    *reginfo,
+<a name="l00070" id="l00070"></a>00070                                     <a class="code" href=
+"structnetsnmp__table__data__s.html">netsnmp_table_data</a>              *table,
+<a name="l00071" id="l00071"></a>00071                                     <a class="code" href=
+"structnetsnmp__table__registration__info__s.html" title=
+"Table registration structure.">netsnmp_table_registration_info</a> *table_info);
+<a name="l00072" id="l00072"></a>00072     <span class="keywordtype">int</span> <a class="code" href=
+"group__table__data.html#ga144f64e4c2a50595d3eec9e727ec6472" title=
+"registers a handler as a read-only data table If table_info != NULL, it registers...">netsnmp_register_read_only_table_data</a>(
+<a name="l00073" id="l00073"></a>00073                                     <a class="code" href=
+"structnetsnmp__handler__registration__s.html" title="Root registration info.">netsnmp_handler_registration</a>    *reginfo,
+<a name="l00074" id="l00074"></a>00074                                     <a class="code" href=
+"structnetsnmp__table__data__s.html">netsnmp_table_data</a>              *table,
+<a name="l00075" id="l00075"></a>00075                                     <a class="code" href=
+"structnetsnmp__table__registration__info__s.html" title=
+"Table registration structure.">netsnmp_table_registration_info</a> *table_info);
+<a name="l00076" id="l00076"></a>00076     Netsnmp_Node_Handler netsnmp_table_data_helper_handler;
+<a name="l00077" id="l00077"></a>00077 
+<a name="l00078" id="l00078"></a>00078     <a class="code" href=
+"structnetsnmp__table__data__s.html">netsnmp_table_data</a> *<a class="code" href=
+"group__table__data.html#gabd005dd85f7ca5c8fcfb5a82444bc3b6" title=
+"extracts the table being accessed passed from the table_data helper">netsnmp_extract_table</a>(    <a class="code" href=
+"structnetsnmp__request__info__s.html" title="The netsnmp request info structure.">netsnmp_request_info</a> *);
+<a name="l00079" id="l00079"></a>00079     <a class="code" href=
+"structnetsnmp__table__row__s.html">netsnmp_table_row</a>  *<a class="code" href=
+"group__table__data.html#ga0fae612cdbaef2df9006cc01a0c22c57" title=
+"extracts the row being accessed passed from the table_data helper">netsnmp_extract_table_row</a>(<a class="code" href=
+"structnetsnmp__request__info__s.html" title="The netsnmp request info structure.">netsnmp_request_info</a> *);
+<a name="l00080" id="l00080"></a>00080     <span class="keywordtype">void</span>          *<a class="code" href=
+"group__table__data.html#gaf5572e2cbd11d9de887a7620242d9b2b" title=
+"extracts the data from the row being accessed passed from the table_data helper">netsnmp_extract_table_row_data</a>(<a class=
+"code" href="structnetsnmp__request__info__s.html" title="The netsnmp request info structure.">netsnmp_request_info</a> *);
+<a name="l00081" id="l00081"></a>00081     <span class="keywordtype">void</span> <a class="code" href=
+"group__table__data.html#ga8cee7bbabffb2633b8cf4c85715dacc5" title=
+"inserts a newly created table_data row into a request">netsnmp_insert_table_row</a>(<a class="code" href=
+"structnetsnmp__request__info__s.html" title="The netsnmp request info structure.">netsnmp_request_info</a> *, <a class="code"
+href="structnetsnmp__table__row__s.html">netsnmp_table_row</a> *);
+<a name="l00082" id="l00082"></a>00082 
+<a name="l00083" id="l00083"></a>00083     <span class="keywordtype">int</span> netsnmp_table_data_build_result(<a class="code"
+href="structnetsnmp__handler__registration__s.html" title="Root registration info.">netsnmp_handler_registration</a> *reginfo,
+<a name="l00084" id="l00084"></a>00084                                         <a class="code" href=
+"structnetsnmp__agent__request__info__s.html" title=
+"The agent transaction request structure.">netsnmp_agent_request_info</a>   *reqinfo,
+<a name="l00085" id="l00085"></a>00085                                         <a class="code" href=
+"structnetsnmp__request__info__s.html" title="The netsnmp request info structure.">netsnmp_request_info</a>         *request,
+<a name="l00086" id="l00086"></a>00086                                         <a class="code" href=
+"structnetsnmp__table__row__s.html">netsnmp_table_row</a> *row, <span class="keywordtype">int</span> column,
+<a name="l00087" id="l00087"></a>00087                                         u_char type, u_char * result_data,
+<a name="l00088" id="l00088"></a>00088                                         <span class=
+"keywordtype">size_t</span> result_data_len);
+<a name="l00089" id="l00089"></a>00089 
+<a name="l00090" id="l00090"></a>00090 <span class="comment">/* =================================</span>
+<a name="l00091" id="l00091"></a>00091 <span class="comment"> * Table Data API: Row operations</span>
+<a name="l00092" id="l00092"></a>00092 <span class="comment"> * ================================= */</span>
+<a name="l00093" id="l00093"></a>00093 
+<a name="l00094" id="l00094"></a>00094     <a class="code" href=
+"structnetsnmp__table__row__s.html">netsnmp_table_row</a> *<a class="code" href=
+"group__table__data.html#ga22709ef5a1d6198937526679b0a0e503" title=
+"returns the first row in the table">netsnmp_table_data_get_first_row</a>(
+<a name="l00095" id="l00095"></a>00095                                               <a class="code" href=
+"structnetsnmp__table__data__s.html">netsnmp_table_data</a>    *table);
+<a name="l00096" id="l00096"></a>00096     <a class="code" href=
+"structnetsnmp__table__row__s.html">netsnmp_table_row</a> *<a class="code" href=
+"group__table__data.html#ga5946b9b88fd3d284d6994a5c4b6eaa62" title=
+"returns the next row in the table">netsnmp_table_data_get_next_row</a>(
+<a name="l00097" id="l00097"></a>00097                                               <a class="code" href=
+"structnetsnmp__table__data__s.html">netsnmp_table_data</a>    *table,
+<a name="l00098" id="l00098"></a>00098                                               <a class="code" href=
+"structnetsnmp__table__row__s.html">netsnmp_table_row</a>     *row);
+<a name="l00099" id="l00099"></a>00099 
+<a name="l00100" id="l00100"></a>00100     <a class="code" href=
+"structnetsnmp__table__row__s.html">netsnmp_table_row</a> *<a class="code" href=
+"group__table__data.html#ga55bc29a38deeb0decd31b24ab6ae6f36" title=
+"finds the data in &amp;quot;datalist&amp;quot; stored at &amp;quot;indexes&amp;quot;">netsnmp_table_data_get</a>(<a class="code"
+href="structnetsnmp__table__data__s.html">netsnmp_table_data</a>    *table,
+<a name="l00101" id="l00101"></a>00101                                               <a class="code" href=
+"structvariable__list.html" title=
+"The netsnmp variable list binding structure, it&amp;#39;s typedef&amp;#39;d to netsnmp_variable_list...">netsnmp_variable_list</a> *indexes);
+<a name="l00102" id="l00102"></a>00102 
+<a name="l00103" id="l00103"></a>00103     <a class="code" href=
+"structnetsnmp__table__row__s.html">netsnmp_table_row</a> *<a class="code" href=
+"group__table__data.html#ga9c7ccab692b0d45f5c18c4b95d50a360" title=
+"finds the data in &amp;quot;datalist&amp;quot; stored at the searchfor oid">netsnmp_table_data_get_from_oid</a>(
+<a name="l00104" id="l00104"></a>00104                                               <a class="code" href=
+"structnetsnmp__table__data__s.html">netsnmp_table_data</a>    *table,
+<a name="l00105" id="l00105"></a>00105                                               oid *  searchfor,
+<a name="l00106" id="l00106"></a>00106                                               <span class=
+"keywordtype">size_t</span> searchfor_len);
+<a name="l00107" id="l00107"></a>00107 
+<a name="l00108" id="l00108"></a>00108     <span class="keywordtype">int</span> netsnmp_table_data_num_rows(<a class="code" href=
+"structnetsnmp__table__data__s.html">netsnmp_table_data</a> *table);
+<a name="l00109" id="l00109"></a>00109 
+<a name="l00110" id="l00110"></a>00110 
+<a name="l00111" id="l00111"></a>00111 <span class="comment">/* =================================</span>
+<a name="l00112" id="l00112"></a>00112 <span class="comment"> * Table Data API: Index operations</span>
+<a name="l00113" id="l00113"></a>00113 <span class="comment"> * ================================= */</span>
+<a name="l00114" id="l00114"></a>00114 
+<a name="l00115" id="l00115"></a>00115 <span class=
+"preprocessor">#define netsnmp_table_data_add_index(thetable, type) snmp_varlist_add_variable(&amp;thetable-&gt;indexes_template, NULL, 0, type, NULL, 0)</span>
+<a name="l00116" id="l00116"></a>00116 <span class=
+"preprocessor">#define netsnmp_table_row_add_index(row, type, value, value_len) snmp_varlist_add_variable(&amp;row-&gt;indexes, NULL, 0, type, (const u_char *) value, value_len)</span>
+<a name="l00117" id="l00117"></a>00117 
+<a name="l00118" id="l00118"></a>00118 
+<a name="l00119" id="l00119"></a>00119 <span class="preprocessor">#ifdef __cplusplus</span>
+<a name="l00120" id="l00120"></a>00120 }
+<a name="l00121" id="l00121"></a>00121 <span class="preprocessor">#endif</span>
+<a name="l00122" id="l00122"></a>00122 
+<a name="l00123" id="l00123"></a>00123 <span class="preprocessor">#endif                          </span><span class=
+"comment">/* _TABLE_DATA_HANDLER_H_ */</span>
+</pre>
+    </div>
+  </div>
+  <hr size="1" />
+
+  <address style="text-align: right;">
+    <small>Generated on 28 Sep 2009 for net-snmp by  <a href="http://www.doxygen.org/index.html"><img class="footer" src=
+    "doxygen.png" alt="doxygen" /></a> 1.6.1</small>
+<!-- CONTENT END -->
+<!--#include virtual="/page-bottom.html" -->
+

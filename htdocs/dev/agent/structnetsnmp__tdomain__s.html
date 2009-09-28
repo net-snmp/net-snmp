@@ -1,0 +1,124 @@
+<!--#set var="section" value="development" -->
+<!--#include virtual="/page-top.html" -->
+<!-- CONTENT START -->
+  <div class="navigation" id="top">
+    <div class="tabs">
+      <ul>
+        <li><a href="index.html"><span>Main Page</span></a></li>
+
+        <li><a href="pages.html"><span>Related Pages</span></a></li>
+
+        <li><a href="modules.html"><span>Modules</span></a></li>
+
+        <li class="current"><a href="annotated.html"><span>Data Structures</span></a></li>
+
+        <li><a href="files.html"><span>Files</span></a></li>
+
+        <li><a href="examples.html"><span>Examples</span></a></li>
+      </ul>
+    </div>
+
+    <div class="tabs">
+      <ul>
+        <li><a href="annotated.html"><span>Data Structures</span></a></li>
+
+        <li><a href="functions.html"><span>Data Fields</span></a></li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="contents">
+    <h1>netsnmp_tdomain_s Struct Reference</h1><!-- doxytag: class="netsnmp_tdomain_s" -->
+
+    <table border="0" cellpadding="0" cellspacing="0">
+      <tr>
+        <td colspan="2">
+          <h2>Data Fields</h2>
+        </td>
+      </tr>
+
+      <tr>
+        <td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a227266e5a2f25481f883348a79c38efb" name=
+        "a227266e5a2f25481f883348a79c38efb"></a>
+        <!-- doxytag: member="netsnmp_tdomain_s::name" ref="a227266e5a2f25481f883348a79c38efb" args="" -->
+        const oid * </td>
+
+        <td class="memItemRight" valign="bottom"><b>name</b></td>
+      </tr>
+
+      <tr>
+        <td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a19cde6f1448c7daaabc8b8a7e9fb260d" name=
+        "a19cde6f1448c7daaabc8b8a7e9fb260d"></a>
+        <!-- doxytag: member="netsnmp_tdomain_s::name_length" ref="a19cde6f1448c7daaabc8b8a7e9fb260d" args="" -->
+        size_t </td>
+
+        <td class="memItemRight" valign="bottom"><b>name_length</b></td>
+      </tr>
+
+      <tr>
+        <td class="memItemLeft" align="right" valign="top"><a class="anchor" id="aaf4650377d5344a80e228b9b56a05a89" name=
+        "aaf4650377d5344a80e228b9b56a05a89"></a>
+        <!-- doxytag: member="netsnmp_tdomain_s::prefix" ref="aaf4650377d5344a80e228b9b56a05a89" args="" -->
+        const char ** </td>
+
+        <td class="memItemRight" valign="bottom"><b>prefix</b></td>
+      </tr>
+
+      <tr>
+        <td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a9a8741d658a72eae5ec0d686527223d9" name=
+        "a9a8741d658a72eae5ec0d686527223d9"></a>
+        <!-- doxytag: member="netsnmp_tdomain_s::f_create_from_tstring" ref="a9a8741d658a72eae5ec0d686527223d9" args=")(const char *, int)" -->
+        <a class="el" href="structnetsnmp__transport__s.html">netsnmp_transport</a> *(* </td>
+
+        <td class="memItemRight" valign="bottom"><b>f_create_from_tstring</b> )(const char *, int)</td>
+      </tr>
+
+      <tr>
+        <td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a9021418e13cfa0e57d56c962819d5b34" name=
+        "a9021418e13cfa0e57d56c962819d5b34"></a>
+        <!-- doxytag: member="netsnmp_tdomain_s::f_create_from_ostring" ref="a9021418e13cfa0e57d56c962819d5b34" args=")(const u_char *, size_t, int)" -->
+        <a class="el" href="structnetsnmp__transport__s.html">netsnmp_transport</a> *(* </td>
+
+        <td class="memItemRight" valign="bottom"><b>f_create_from_ostring</b> )(const u_char *, size_t, int)</td>
+      </tr>
+
+      <tr>
+        <td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a0217028e202f3fcdfc959989f83c3954" name=
+        "a0217028e202f3fcdfc959989f83c3954"></a>
+        <!-- doxytag: member="netsnmp_tdomain_s::next" ref="a0217028e202f3fcdfc959989f83c3954" args="" -->
+        struct <a class="el" href="structnetsnmp__tdomain__s.html">netsnmp_tdomain_s</a> * </td>
+
+        <td class="memItemRight" valign="bottom"><b>next</b></td>
+      </tr>
+
+      <tr>
+        <td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a44825059cdf6db54b1447eedcd770fa6" name=
+        "a44825059cdf6db54b1447eedcd770fa6"></a>
+        <!-- doxytag: member="netsnmp_tdomain_s::f_create_from_tstring_new" ref="a44825059cdf6db54b1447eedcd770fa6" args=")(const char *, int, const char *)" -->
+        <a class="el" href="structnetsnmp__transport__s.html">netsnmp_transport</a> *(* </td>
+
+        <td class="memItemRight" valign="bottom"><b>f_create_from_tstring_new</b> )(const char *, int, const char *)</td>
+      </tr>
+    </table>
+    <hr />
+    <a name="_details"></a>
+
+    <h2>Detailed Description</h2>
+
+    <p>Definition at line <a class="el" href="snmp__transport_8h_source.html#l00133">133</a> of file <a class="el" href=
+    "snmp__transport_8h_source.html">snmp_transport.h</a>.</p>
+    <hr />
+    The documentation for this struct was generated from the following file:
+
+    <ul>
+      <li><a class="el" href="snmp__transport_8h_source.html">snmp_transport.h</a></li>
+    </ul>
+  </div>
+  <hr size="1" />
+
+  <address style="text-align: right;">
+    <small>Generated on 28 Sep 2009 for net-snmp by  <a href="http://www.doxygen.org/index.html"><img class="footer" src=
+    "doxygen.png" alt="doxygen" /></a> 1.6.1</small>
+<!-- CONTENT END -->
+<!--#include virtual="/page-bottom.html" -->
+

@@ -1,0 +1,202 @@
+<!--#set var="section" value="development" -->
+<!--#include virtual="/page-top.html" -->
+<!-- CONTENT START -->
+  <div class="navigation" id="top">
+    <div class="tabs">
+      <ul>
+        <li><a href="index.html"><span>Main Page</span></a></li>
+
+        <li><a href="pages.html"><span>Related Pages</span></a></li>
+
+        <li><a href="modules.html"><span>Modules</span></a></li>
+
+        <li><a href="annotated.html"><span>Data Structures</span></a></li>
+
+        <li class="current"><a href="files.html"><span>Files</span></a></li>
+
+        <li><a href="examples.html"><span>Examples</span></a></li>
+      </ul>
+    </div>
+
+    <div class="tabs">
+      <ul>
+        <li><a href="files.html"><span>File List</span></a></li>
+
+        <li><a href="globals.html"><span>Globals</span></a></li>
+      </ul>
+    </div>
+
+    <h1>notification.c</h1>
+
+    <div class="fragment">
+      <pre class="fragment">
+<a name="l00001" id="l00001"></a>00001 
+<a name="l00022" id="l00022"></a>00022 <span class="comment">/*</span>
+<a name="l00023" id="l00023"></a>00023 <span class="comment"> * start be including the appropriate header files </span>
+<a name="l00024" id="l00024"></a>00024 <span class="comment"> */</span>
+<a name="l00025" id="l00025"></a>00025 <span class="preprocessor">#include &lt;net-snmp/net-snmp-config.h&gt;</span>
+<a name="l00026" id="l00026"></a>00026 <span class="preprocessor">#include &lt;net-snmp/net-snmp-includes.h&gt;</span>
+<a name="l00027" id="l00027"></a>00027 <span class=
+"preprocessor">#include &lt;net-snmp/agent/net-snmp-agent-includes.h&gt;</span>
+<a name="l00028" id="l00028"></a>00028 
+<a name="l00029" id="l00029"></a>00029 <span class="comment">/*</span>
+<a name="l00030" id="l00030"></a>00030 <span class="comment"> * contains prototypes </span>
+<a name="l00031" id="l00031"></a>00031 <span class="comment"> */</span>
+<a name="l00032" id="l00032"></a>00032 <span class="preprocessor">#include "notification.h"</span>
+<a name="l00033" id="l00033"></a>00033 
+<a name="l00034" id="l00034"></a>00034 <span class="comment">/*</span>
+<a name="l00035" id="l00035"></a>00035 <span class="comment"> * our initialization routine</span>
+<a name="l00036" id="l00036"></a>00036 <span class=
+"comment"> * (to get called, the function name must match init_FILENAME() </span>
+<a name="l00037" id="l00037"></a>00037 <span class="comment"> */</span>
+<a name="l00038" id="l00038"></a>00038 <span class="keywordtype">void</span>
+<a name="l00039" id="l00039"></a>00039 init_notification(<span class="keywordtype">void</span>)
+<a name="l00040" id="l00040"></a>00040 {
+<a name="l00041" id="l00041"></a>00041     DEBUGMSGTL((<span class="stringliteral">"example_notification"</span>,
+<a name="l00042" id="l00042"></a>00042                 <span class=
+"stringliteral">"initializing (setting callback alarm)\n"</span>));
+<a name="l00043" id="l00043"></a>00043     <a class="code" href="group__snmp__alarm.html#ga6eb45344f1145c3e323824411089cefe"
+title=
+"This function registers function callbacks to occur at a specific time in the future...">snmp_alarm_register</a>(30,     <span class="comment">/* seconds */</span>
+<a name="l00044" id="l00044"></a>00044                         SA_REPEAT,      <span class=
+"comment">/* repeat (every 30 seconds). */</span>
+<a name="l00045" id="l00045"></a>00045                         send_example_notification,      <span class=
+"comment">/* our callback */</span>
+<a name="l00046" id="l00046"></a>00046                         NULL    <span class="comment">/* no callback data needed */</span>
+<a name="l00047" id="l00047"></a>00047         );
+<a name="l00048" id="l00048"></a>00048 }
+<a name="l00049" id="l00049"></a>00049 
+<a name="l00077" id="l00077"></a>00077 <span class="keywordtype">void</span>
+<a name="l00078" id="l00078"></a>00078 send_example_notification(<span class="keywordtype">unsigned</span> <span class=
+"keywordtype">int</span> clientreg, <span class="keywordtype">void</span> *clientarg)
+<a name="l00079" id="l00079"></a>00079 {
+<a name="l00080" id="l00080"></a>00080     <span class="comment">/*</span>
+<a name="l00081" id="l00081"></a>00081 <span class=
+"comment">     * define the OID for the notification we're going to send</span>
+<a name="l00082" id="l00082"></a>00082 <span class=
+"comment">     * NET-SNMP-EXAMPLES-MIB::netSnmpExampleHeartbeatNotification </span>
+<a name="l00083" id="l00083"></a>00083 <span class="comment">     */</span>
+<a name="l00084" id="l00084"></a>00084     oid             notification_oid[] =
+<a name="l00085" id="l00085"></a>00085         { 1, 3, 6, 1, 4, 1, 8072, 2, 3, 0, 1 };
+<a name="l00086" id="l00086"></a>00086     <span class=
+"keywordtype">size_t</span>          notification_oid_len = OID_LENGTH(notification_oid);
+<a name="l00087" id="l00087"></a>00087     <span class="keyword">static</span> u_long count = 0;
+<a name="l00088" id="l00088"></a>00088 
+<a name="l00089" id="l00089"></a>00089     <span class="comment">/*</span>
+<a name="l00090" id="l00090"></a>00090 <span class=
+"comment">     * In the notification, we have to assign our notification OID to</span>
+<a name="l00091" id="l00091"></a>00091 <span class="comment">     * the snmpTrapOID.0 object. Here is it's definition. </span>
+<a name="l00092" id="l00092"></a>00092 <span class="comment">     */</span>
+<a name="l00093" id="l00093"></a>00093     oid             objid_snmptrap[] = { 1, 3, 6, 1, 6, 3, 1, 1, 4, 1, 0 };
+<a name="l00094" id="l00094"></a>00094     <span class=
+"keywordtype">size_t</span>          objid_snmptrap_len = OID_LENGTH(objid_snmptrap);
+<a name="l00095" id="l00095"></a>00095 
+<a name="l00096" id="l00096"></a>00096     <span class="comment">/*</span>
+<a name="l00097" id="l00097"></a>00097 <span class=
+"comment">     * define the OIDs for the varbinds we're going to include</span>
+<a name="l00098" id="l00098"></a>00098 <span class="comment">     *  with the notification -</span>
+<a name="l00099" id="l00099"></a>00099 <span class=
+"comment">     * NET-SNMP-EXAMPLES-MIB::netSnmpExampleHeartbeatRate  and</span>
+<a name="l00100" id="l00100"></a>00100 <span class="comment">     * NET-SNMP-EXAMPLES-MIB::netSnmpExampleHeartbeatName </span>
+<a name="l00101" id="l00101"></a>00101 <span class="comment">     */</span>
+<a name="l00102" id="l00102"></a>00102     oid      hbeat_rate_oid[]   = { 1, 3, 6, 1, 4, 1, 8072, 2, 3, 2, 1, 0 };
+<a name="l00103" id="l00103"></a>00103     <span class=
+"keywordtype">size_t</span>   hbeat_rate_oid_len = OID_LENGTH(hbeat_rate_oid);
+<a name="l00104" id="l00104"></a>00104     oid      hbeat_name_oid[]   = { 1, 3, 6, 1, 4, 1, 8072, 2, 3, 2, 2, 0 };
+<a name="l00105" id="l00105"></a>00105     <span class=
+"keywordtype">size_t</span>   hbeat_name_oid_len = OID_LENGTH(hbeat_name_oid);
+<a name="l00106" id="l00106"></a>00106 
+<a name="l00107" id="l00107"></a>00107     <span class="comment">/*</span>
+<a name="l00108" id="l00108"></a>00108 <span class=
+"comment">     * here is where we store the variables to be sent in the trap </span>
+<a name="l00109" id="l00109"></a>00109 <span class="comment">     */</span>
+<a name="l00110" id="l00110"></a>00110     <a class="code" href="structvariable__list.html" title=
+"The netsnmp variable list binding structure, it&amp;#39;s typedef&amp;#39;d to netsnmp_variable_list...">netsnmp_variable_list</a> *notification_vars = NULL;
+<a name="l00111" id="l00111"></a>00111     <span class="keyword">const</span> <span class=
+"keywordtype">char</span> *heartbeat_name = <span class="stringliteral">"A girl named Maria"</span>;
+<a name="l00112" id="l00112"></a>00112 <span class="preprocessor">#ifdef  RANDOM_HEARTBEAT</span>
+<a name="l00113" id="l00113"></a>00113     <span class="keywordtype">int</span>  heartbeat_rate = rand() % 60;
+<a name="l00114" id="l00114"></a>00114 <span class="preprocessor">#else</span>
+<a name="l00115" id="l00115"></a>00115     <span class="keywordtype">int</span>  heartbeat_rate = 30;
+<a name="l00116" id="l00116"></a>00116 <span class="preprocessor">#endif</span>
+<a name="l00117" id="l00117"></a>00117 
+<a name="l00118" id="l00118"></a>00118     DEBUGMSGTL((<span class="stringliteral">"example_notification"</span>, <span class=
+"stringliteral">"defining the trap\n"</span>));
+<a name="l00119" id="l00119"></a>00119 
+<a name="l00120" id="l00120"></a>00120     <span class="comment">/*</span>
+<a name="l00121" id="l00121"></a>00121 <span class="comment">     * add in the trap definition object </span>
+<a name="l00122" id="l00122"></a>00122 <span class="comment">     */</span>
+<a name="l00123" id="l00123"></a>00123     snmp_varlist_add_variable(&amp;notification_vars,
+<a name="l00124" id="l00124"></a>00124                               <span class="comment">/*</span>
+<a name="l00125" id="l00125"></a>00125 <span class="comment">                               * the snmpTrapOID.0 variable </span>
+<a name="l00126" id="l00126"></a>00126 <span class="comment">                               */</span>
+<a name="l00127" id="l00127"></a>00127                               objid_snmptrap, objid_snmptrap_len,
+<a name="l00128" id="l00128"></a>00128                               <span class="comment">/*</span>
+<a name="l00129" id="l00129"></a>00129 <span class="comment">                               * value type is an OID </span>
+<a name="l00130" id="l00130"></a>00130 <span class="comment">                               */</span>
+<a name="l00131" id="l00131"></a>00131                               ASN_OBJECT_ID,
+<a name="l00132" id="l00132"></a>00132                               <span class="comment">/*</span>
+<a name="l00133" id="l00133"></a>00133 <span class=
+"comment">                               * value contents is our notification OID </span>
+<a name="l00134" id="l00134"></a>00134 <span class="comment">                               */</span>
+<a name="l00135" id="l00135"></a>00135                               (u_char *) notification_oid,
+<a name="l00136" id="l00136"></a>00136                               <span class="comment">/*</span>
+<a name="l00137" id="l00137"></a>00137 <span class=
+"comment">                               * size in bytes = oid length * sizeof(oid) </span>
+<a name="l00138" id="l00138"></a>00138 <span class="comment">                               */</span>
+<a name="l00139" id="l00139"></a>00139                               notification_oid_len * <span class=
+"keyword">sizeof</span>(oid));
+<a name="l00140" id="l00140"></a>00140 
+<a name="l00141" id="l00141"></a>00141     <span class="comment">/*</span>
+<a name="l00142" id="l00142"></a>00142 <span class=
+"comment">     * add in the additional objects defined as part of the trap</span>
+<a name="l00143" id="l00143"></a>00143 <span class="comment">     */</span>
+<a name="l00144" id="l00144"></a>00144 
+<a name="l00145" id="l00145"></a>00145     snmp_varlist_add_variable(&amp;notification_vars,
+<a name="l00146" id="l00146"></a>00146                                hbeat_rate_oid, hbeat_rate_oid_len,
+<a name="l00147" id="l00147"></a>00147                                ASN_INTEGER,
+<a name="l00148" id="l00148"></a>00148                               (u_char *)&amp;heartbeat_rate,
+<a name="l00149" id="l00149"></a>00149                                   <span class="keyword">sizeof</span>(heartbeat_rate));
+<a name="l00150" id="l00150"></a>00150 
+<a name="l00151" id="l00151"></a>00151     <span class="comment">/*</span>
+<a name="l00152" id="l00152"></a>00152 <span class=
+"comment">     * if we want to insert additional objects, we do it here </span>
+<a name="l00153" id="l00153"></a>00153 <span class="comment">     */</span>
+<a name="l00154" id="l00154"></a>00154     <span class="keywordflow">if</span> (heartbeat_rate &lt; 30 ) {
+<a name="l00155" id="l00155"></a>00155         snmp_varlist_add_variable(&amp;notification_vars,
+<a name="l00156" id="l00156"></a>00156                                hbeat_name_oid, hbeat_name_oid_len,
+<a name="l00157" id="l00157"></a>00157                                ASN_OCTET_STR,
+<a name="l00158" id="l00158"></a>00158                                heartbeat_name, strlen(heartbeat_name));
+<a name="l00159" id="l00159"></a>00159     }
+<a name="l00160" id="l00160"></a>00160 
+<a name="l00161" id="l00161"></a>00161     <span class="comment">/*</span>
+<a name="l00162" id="l00162"></a>00162 <span class=
+"comment">     * send the trap out.  This will send it to all registered</span>
+<a name="l00163" id="l00163"></a>00163 <span class=
+"comment">     * receivers (see the "SETTING UP TRAP AND/OR INFORM DESTINATIONS"</span>
+<a name="l00164" id="l00164"></a>00164 <span class="comment">     * section of the snmpd.conf manual page. </span>
+<a name="l00165" id="l00165"></a>00165 <span class="comment">     */</span>
+<a name="l00166" id="l00166"></a>00166     ++count;
+<a name="l00167" id="l00167"></a>00167     DEBUGMSGTL((<span class="stringliteral">"example_notification"</span>, <span class=
+"stringliteral">"sending trap %ld\n"</span>,count));
+<a name="l00168" id="l00168"></a>00168     <a class="code" href="group__agent__trap.html#gac9fa0228d574f715b60cd93b87968a15"
+title="Uses the supplied list of variable bindings to form an SNMPv2 trap, which is sent...">send_v2trap</a>(notification_vars);
+<a name="l00169" id="l00169"></a>00169 
+<a name="l00170" id="l00170"></a>00170     <span class="comment">/*</span>
+<a name="l00171" id="l00171"></a>00171 <span class="comment">     * free the created notification variable list </span>
+<a name="l00172" id="l00172"></a>00172 <span class="comment">     */</span>
+<a name="l00173" id="l00173"></a>00173     DEBUGMSGTL((<span class="stringliteral">"example_notification"</span>, <span class=
+"stringliteral">"cleaning up\n"</span>));
+<a name="l00174" id="l00174"></a>00174     snmp_free_varbind(notification_vars);
+<a name="l00175" id="l00175"></a>00175 }
+</pre>
+    </div>
+  </div>
+  <hr size="1" />
+
+  <address style="text-align: right;">
+    <small>Generated on 28 Sep 2009 for net-snmp by  <a href="http://www.doxygen.org/index.html"><img class="footer" src=
+    "doxygen.png" alt="doxygen" /></a> 1.6.1</small>
+<!-- CONTENT END -->
+<!--#include virtual="/page-bottom.html" -->
+

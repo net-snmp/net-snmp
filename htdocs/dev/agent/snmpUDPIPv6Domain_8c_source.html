@@ -1,0 +1,1769 @@
+<!--#set var="section" value="development" -->
+<!--#include virtual="/page-top.html" -->
+<!-- CONTENT START -->
+  <div class="navigation" id="top">
+    <div class="tabs">
+      <ul>
+        <li><a href="index.html"><span>Main Page</span></a></li>
+
+        <li><a href="pages.html"><span>Related Pages</span></a></li>
+
+        <li><a href="modules.html"><span>Modules</span></a></li>
+
+        <li><a href="annotated.html"><span>Data Structures</span></a></li>
+
+        <li class="current"><a href="files.html"><span>Files</span></a></li>
+
+        <li><a href="examples.html"><span>Examples</span></a></li>
+      </ul>
+    </div>
+
+    <div class="tabs">
+      <ul>
+        <li><a href="files.html"><span>File List</span></a></li>
+
+        <li><a href="globals.html"><span>Globals</span></a></li>
+      </ul>
+    </div>
+
+    <h1>snmpUDPIPv6Domain.c</h1>
+
+    <div class="fragment">
+      <pre class="fragment">
+<a name="l00001" id="l00001"></a>00001 <span class="preprocessor">#include &lt;net-snmp/net-snmp-config.h&gt;</span>
+<a name="l00002" id="l00002"></a>00002 
+<a name="l00003" id="l00003"></a>00003 <span class="preprocessor">#ifdef NETSNMP_TRANSPORT_UDPIPV6_DOMAIN</span>
+<a name="l00004" id="l00004"></a>00004 
+<a name="l00005" id="l00005"></a>00005 <span class="comment">/*</span>
+<a name="l00006" id="l00006"></a>00006 <span class="comment"> * hack-o-matic for Cygwin to use winsock2</span>
+<a name="l00007" id="l00007"></a>00007 <span class="comment">*/</span>
+<a name="l00008" id="l00008"></a>00008 <span class="preprocessor">#if defined(cygwin)</span>
+<a name="l00009" id="l00009"></a>00009 <span class="preprocessor">#undef HAVE_UNISTD_H</span>
+<a name="l00010" id="l00010"></a>00010 <span class="preprocessor">#undef HAVE_NETINET_IN_H</span>
+<a name="l00011" id="l00011"></a>00011 <span class="preprocessor">#undef HAVE_ARPA_INET_H</span>
+<a name="l00012" id="l00012"></a>00012 <span class="preprocessor">#undef HAVE_NET_IF_H</span>
+<a name="l00013" id="l00013"></a>00013 <span class="preprocessor">#undef HAVE_NETDB_H</span>
+<a name="l00014" id="l00014"></a>00014 <span class="preprocessor">#undef HAVE_SYS_PARAM_H</span>
+<a name="l00015" id="l00015"></a>00015 <span class="preprocessor">#undef HAVE_SYS_SELECT_H</span>
+<a name="l00016" id="l00016"></a>00016 <span class="preprocessor">#undef HAVE_SYS_SOCKET_H</span>
+<a name="l00017" id="l00017"></a>00017 <span class="preprocessor">#undef HAVE_IN_ADDR_T</span>
+<a name="l00018" id="l00018"></a>00018 <span class="preprocessor">#endif</span>
+<a name="l00019" id="l00019"></a>00019 
+<a name="l00020" id="l00020"></a>00020 <span class="preprocessor">#include &lt;stdio.h&gt;</span>
+<a name="l00021" id="l00021"></a>00021 <span class="preprocessor">#include &lt;sys/types.h&gt;</span>
+<a name="l00022" id="l00022"></a>00022 <span class="preprocessor">#include &lt;ctype.h&gt;</span>
+<a name="l00023" id="l00023"></a>00023 <span class="preprocessor">#include &lt;errno.h&gt;</span>
+<a name="l00024" id="l00024"></a>00024 
+<a name="l00025" id="l00025"></a>00025 <span class="preprocessor">#if HAVE_STRING_H</span>
+<a name="l00026" id="l00026"></a>00026 <span class="preprocessor">#include &lt;string.h&gt;</span>
+<a name="l00027" id="l00027"></a>00027 <span class="preprocessor">#else</span>
+<a name="l00028" id="l00028"></a>00028 <span class="preprocessor">#include &lt;strings.h&gt;</span>
+<a name="l00029" id="l00029"></a>00029 <span class="preprocessor">#endif</span>
+<a name="l00030" id="l00030"></a>00030 <span class="preprocessor">#if HAVE_STDLIB_H</span>
+<a name="l00031" id="l00031"></a>00031 <span class="preprocessor">#include &lt;stdlib.h&gt;</span>
+<a name="l00032" id="l00032"></a>00032 <span class="preprocessor">#endif</span>
+<a name="l00033" id="l00033"></a>00033 <span class="preprocessor">#if HAVE_UNISTD_H</span>
+<a name="l00034" id="l00034"></a>00034 <span class="preprocessor">#include &lt;unistd.h&gt;</span>
+<a name="l00035" id="l00035"></a>00035 <span class="preprocessor">#endif</span>
+<a name="l00036" id="l00036"></a>00036 <span class="preprocessor">#if HAVE_SYS_SOCKET_H</span>
+<a name="l00037" id="l00037"></a>00037 <span class="preprocessor">#include &lt;sys/socket.h&gt;</span>
+<a name="l00038" id="l00038"></a>00038 <span class="preprocessor">#endif</span>
+<a name="l00039" id="l00039"></a>00039 
+<a name="l00040" id="l00040"></a>00040 <span class="preprocessor">#if defined(HAVE_WINSOCK_H) || defined(cygwin)</span>
+<a name="l00041" id="l00041"></a>00041     <span class="comment">/*</span>
+<a name="l00042" id="l00042"></a>00042 <span class="comment">     *  Windows IPv6 support is part of WinSock2 only</span>
+<a name="l00043" id="l00043"></a>00043 <span class="comment">     */</span>
+<a name="l00044" id="l00044"></a>00044 <span class="preprocessor">#include &lt;winsock2.h&gt;</span>
+<a name="l00045" id="l00045"></a>00045 <span class="preprocessor">#include &lt;ws2tcpip.h&gt;</span>
+<a name="l00046" id="l00046"></a>00046 <span class="preprocessor">#undef  HAVE_IF_NAMETOINDEX</span>
+<a name="l00047" id="l00047"></a>00047 
+<a name="l00048" id="l00048"></a>00048 <span class="preprocessor">#ifndef HAVE_INET_PTON</span>
+<a name="l00049" id="l00049"></a>00049 <span class="keyword">extern</span> <span class=
+"keywordtype">int</span>         inet_pton(<span class="keywordtype">int</span>, <span class="keyword">const</span> <span class=
+"keywordtype">char</span>*, <span class="keywordtype">void</span>*);
+<a name="l00050" id="l00050"></a>00050 <span class="preprocessor">#endif</span>
+<a name="l00051" id="l00051"></a>00051 <span class="preprocessor">#ifndef HAVE_INET_NTOP</span>
+<a name="l00052" id="l00052"></a>00052 <span class="keyword">extern</span> <span class="keyword">const</span> <span class=
+"keywordtype">char</span> *inet_ntop(<span class="keywordtype">int</span>, <span class="keyword">const</span> <span class=
+"keywordtype">void</span>*, <span class="keywordtype">char</span>*, <span class="keywordtype">size_t</span>);
+<a name="l00053" id="l00053"></a>00053 <span class="preprocessor">#endif</span>
+<a name="l00054" id="l00054"></a>00054 <span class="keyword">const</span> <span class=
+"keyword">struct </span>in6_addr in6addr_any = IN6ADDR_ANY_INIT;
+<a name="l00055" id="l00055"></a>00055 <span class="preprocessor">#endif</span>
+<a name="l00056" id="l00056"></a>00056 
+<a name="l00057" id="l00057"></a>00057 <span class="preprocessor">#if HAVE_NETINET_IN_H</span>
+<a name="l00058" id="l00058"></a>00058 <span class="preprocessor">#include &lt;netinet/in.h&gt;</span>
+<a name="l00059" id="l00059"></a>00059 <span class="preprocessor">#endif</span>
+<a name="l00060" id="l00060"></a>00060 <span class="preprocessor">#if HAVE_ARPA_INET_H</span>
+<a name="l00061" id="l00061"></a>00061 <span class="preprocessor">#include &lt;arpa/inet.h&gt;</span>
+<a name="l00062" id="l00062"></a>00062 <span class="preprocessor">#endif</span>
+<a name="l00063" id="l00063"></a>00063 <span class="preprocessor">#if HAVE_NETDB_H</span>
+<a name="l00064" id="l00064"></a>00064 <span class="preprocessor">#include &lt;netdb.h&gt;</span>
+<a name="l00065" id="l00065"></a>00065 <span class="preprocessor">#endif</span>
+<a name="l00066" id="l00066"></a>00066 <span class="preprocessor">#if HAVE_NET_IF_H</span>
+<a name="l00067" id="l00067"></a>00067 <span class="preprocessor">#include &lt;net/if.h&gt;</span>
+<a name="l00068" id="l00068"></a>00068 <span class="preprocessor">#endif</span>
+<a name="l00069" id="l00069"></a>00069 
+<a name="l00070" id="l00070"></a>00070 <span class="preprocessor">#if HAVE_DMALLOC_H</span>
+<a name="l00071" id="l00071"></a>00071 <span class="preprocessor">#include &lt;dmalloc.h&gt;</span>
+<a name="l00072" id="l00072"></a>00072 <span class="preprocessor">#endif</span>
+<a name="l00073" id="l00073"></a>00073 
+<a name="l00074" id="l00074"></a>00074 <span class="preprocessor">#if HAVE_STRUCT_SOCKADDR_STORAGE_SS_FAMILY</span>
+<a name="l00075" id="l00075"></a>00075 <span class="preprocessor">#define SS_FAMILY ss_family</span>
+<a name="l00076" id="l00076"></a>00076 <span class="preprocessor">#elif HAVE_STRUCT_SOCKADDR_STORAGE___SS_FAMILY</span>
+<a name="l00077" id="l00077"></a>00077 <span class="preprocessor">#define SS_FAMILY __ss_family</span>
+<a name="l00078" id="l00078"></a>00078 <span class="preprocessor">#endif</span>
+<a name="l00079" id="l00079"></a>00079 
+<a name="l00080" id="l00080"></a>00080 <span class="preprocessor">#include &lt;net-snmp/types.h&gt;</span>
+<a name="l00081" id="l00081"></a>00081 <span class="preprocessor">#include &lt;net-snmp/output_api.h&gt;</span>
+<a name="l00082" id="l00082"></a>00082 <span class="preprocessor">#include &lt;net-snmp/config_api.h&gt;</span>
+<a name="l00083" id="l00083"></a>00083 
+<a name="l00084" id="l00084"></a>00084 <span class="preprocessor">#include &lt;net-snmp/library/snmp_transport.h&gt;</span>
+<a name="l00085" id="l00085"></a>00085 <span class="preprocessor">#include &lt;net-snmp/library/snmpUDPIPv6Domain.h&gt;</span>
+<a name="l00086" id="l00086"></a>00086 
+<a name="l00087" id="l00087"></a>00087 oid netsnmp_UDPIPv6Domain[] = { TRANSPORT_DOMAIN_UDP_IPV6 };
+<a name="l00088" id="l00088"></a>00088 <span class="keyword">static</span> <a class="code" href=
+"structnetsnmp__tdomain__s.html">netsnmp_tdomain</a> udp6Domain;
+<a name="l00089" id="l00089"></a>00089 
+<a name="l00090" id="l00090"></a>00090 <span class="comment">/*</span>
+<a name="l00091" id="l00091"></a>00091 <span class="comment"> * from snmpUDPDomain. not static, but not public, either.</span>
+<a name="l00092" id="l00092"></a>00092 <span class="comment"> * (ie don't put it in a public header.)</span>
+<a name="l00093" id="l00093"></a>00093 <span class="comment"> */</span>
+<a name="l00094" id="l00094"></a>00094 <span class="keyword">extern</span> <span class=
+"keywordtype">void</span> _netsnmp_udp_sockopt_set(<span class="keywordtype">int</span> fd, <span class=
+"keywordtype">int</span> server);
+<a name="l00095" id="l00095"></a>00095 
+<a name="l00096" id="l00096"></a>00096 <span class="comment">/*</span>
+<a name="l00097" id="l00097"></a>00097 <span class=
+"comment"> * Return a string representing the address in data, or else the "far end"</span>
+<a name="l00098" id="l00098"></a>00098 <span class="comment"> * address if data is NULL.  </span>
+<a name="l00099" id="l00099"></a>00099 <span class="comment"> */</span>
+<a name="l00100" id="l00100"></a>00100 
+<a name="l00101" id="l00101"></a>00101 <span class="keyword">static</span> <span class="keywordtype">char</span> *
+<a name="l00102" id="l00102"></a>00102 netsnmp_udp6_fmtaddr(<a class="code" href=
+"structnetsnmp__transport__s.html">netsnmp_transport</a> *t, <span class="keywordtype">void</span> *data, <span class=
+"keywordtype">int</span> len)
+<a name="l00103" id="l00103"></a>00103 {
+<a name="l00104" id="l00104"></a>00104     <span class="keyword">struct </span>sockaddr_in6 *to = NULL;
+<a name="l00105" id="l00105"></a>00105 
+<a name="l00106" id="l00106"></a>00106     DEBUGMSGTL((<span class="stringliteral">"netsnmp_udp6"</span>, <span class=
+"stringliteral">"fmtaddr: t = %p, data = %p, len = %d\n"</span>, t,
+<a name="l00107" id="l00107"></a>00107                 data, len));
+<a name="l00108" id="l00108"></a>00108     <span class="keywordflow">if</span> (data != NULL &amp;&amp; len == <span class=
+"keyword">sizeof</span>(<span class="keyword">struct</span> sockaddr_in6)) {
+<a name="l00109" id="l00109"></a>00109         to = (<span class="keyword">struct </span>sockaddr_in6 *) data;
+<a name="l00110" id="l00110"></a>00110     } <span class="keywordflow">else</span> <span class=
+"keywordflow">if</span> (t != NULL &amp;&amp; t-&gt;data != NULL) {
+<a name="l00111" id="l00111"></a>00111         to = (<span class="keyword">struct </span>sockaddr_in6 *) t-&gt;data;
+<a name="l00112" id="l00112"></a>00112     }
+<a name="l00113" id="l00113"></a>00113     <span class="keywordflow">if</span> (to == NULL) {
+<a name="l00114" id="l00114"></a>00114         <span class="keywordflow">return</span> strdup(<span class=
+"stringliteral">"UDP/IPv6: unknown"</span>);
+<a name="l00115" id="l00115"></a>00115     } <span class="keywordflow">else</span> {
+<a name="l00116" id="l00116"></a>00116         <span class="keywordtype">char</span> addr[INET6_ADDRSTRLEN];
+<a name="l00117" id="l00117"></a>00117         <span class="keywordtype">char</span> tmp[INET6_ADDRSTRLEN + 18];
+<a name="l00118" id="l00118"></a>00118 
+<a name="l00119" id="l00119"></a>00119         sprintf(tmp, <span class="stringliteral">"UDP/IPv6: [%s]:%hu"</span>,
+<a name="l00120" id="l00120"></a>00120                 inet_ntop(AF_INET6, (<span class=
+"keywordtype">void</span> *) &amp;(to-&gt;sin6_addr), addr,
+<a name="l00121" id="l00121"></a>00121                           INET6_ADDRSTRLEN), ntohs(to-&gt;sin6_port));
+<a name="l00122" id="l00122"></a>00122         <span class="keywordflow">return</span> strdup(tmp);
+<a name="l00123" id="l00123"></a>00123     }
+<a name="l00124" id="l00124"></a>00124 }
+<a name="l00125" id="l00125"></a>00125 
+<a name="l00126" id="l00126"></a>00126 
+<a name="l00127" id="l00127"></a>00127 
+<a name="l00128" id="l00128"></a>00128 <span class="comment">/*</span>
+<a name="l00129" id="l00129"></a>00129 <span class=
+"comment"> * You can write something into opaque that will subsequently get passed back </span>
+<a name="l00130" id="l00130"></a>00130 <span class=
+"comment"> * to your send function if you like.  For instance, you might want to</span>
+<a name="l00131" id="l00131"></a>00131 <span class=
+"comment"> * remember where a PDU came from, so that you can send a reply there...  </span>
+<a name="l00132" id="l00132"></a>00132 <span class="comment"> */</span>
+<a name="l00133" id="l00133"></a>00133 
+<a name="l00134" id="l00134"></a>00134 <span class="keyword">static</span> <span class="keywordtype">int</span>
+<a name="l00135" id="l00135"></a>00135 netsnmp_udp6_recv(<a class="code" href=
+"structnetsnmp__transport__s.html">netsnmp_transport</a> *t, <span class="keywordtype">void</span> *buf, <span class=
+"keywordtype">int</span> size,
+<a name="l00136" id="l00136"></a>00136                   <span class="keywordtype">void</span> **opaque, <span class=
+"keywordtype">int</span> *olength)
+<a name="l00137" id="l00137"></a>00137 {
+<a name="l00138" id="l00138"></a>00138     <span class="keywordtype">int</span>             rc = -1;
+<a name="l00139" id="l00139"></a>00139     socklen_t       fromlen = <span class="keyword">sizeof</span>(<span class=
+"keyword">struct </span>sockaddr_in6);
+<a name="l00140" id="l00140"></a>00140     <span class="keyword">struct </span>sockaddr *from;
+<a name="l00141" id="l00141"></a>00141 
+<a name="l00142" id="l00142"></a>00142     <span class="keywordflow">if</span> (t != NULL &amp;&amp; t-&gt;sock &gt;= 0) {
+<a name="l00143" id="l00143"></a>00143         from = (<span class="keyword">struct </span>sockaddr *) malloc(<span class=
+"keyword">sizeof</span>(<span class="keyword">struct</span> sockaddr_in6));
+<a name="l00144" id="l00144"></a>00144         <span class="keywordflow">if</span> (from == NULL) {
+<a name="l00145" id="l00145"></a>00145             *opaque = NULL;
+<a name="l00146" id="l00146"></a>00146             *olength = 0;
+<a name="l00147" id="l00147"></a>00147             <span class="keywordflow">return</span> -1;
+<a name="l00148" id="l00148"></a>00148         } <span class="keywordflow">else</span> {
+<a name="l00149" id="l00149"></a>00149             memset(from, 0, fromlen);
+<a name="l00150" id="l00150"></a>00150         }
+<a name="l00151" id="l00151"></a>00151 
+<a name="l00152" id="l00152"></a>00152         <span class="keywordflow">while</span> (rc &lt; 0) {
+<a name="l00153" id="l00153"></a>00153           rc = recvfrom(t-&gt;sock, buf, size, 0, from, &amp;fromlen);
+<a name="l00154" id="l00154"></a>00154           <span class="keywordflow">if</span> (rc &lt; 0 &amp;&amp; errno != EINTR) {
+<a name="l00155" id="l00155"></a>00155             <span class="keywordflow">break</span>;
+<a name="l00156" id="l00156"></a>00156           }
+<a name="l00157" id="l00157"></a>00157         }
+<a name="l00158" id="l00158"></a>00158 
+<a name="l00159" id="l00159"></a>00159         <span class="keywordflow">if</span> (rc &gt;= 0) {
+<a name="l00160" id="l00160"></a>00160             <span class=
+"keywordtype">char</span> *str = netsnmp_udp6_fmtaddr(NULL, from, fromlen);
+<a name="l00161" id="l00161"></a>00161             DEBUGMSGTL((<span class="stringliteral">"netsnmp_udp6"</span>,
+<a name="l00162" id="l00162"></a>00162                         <span class=
+"stringliteral">"recvfrom fd %d got %d bytes (from %s)\n"</span>, t-&gt;sock,
+<a name="l00163" id="l00163"></a>00163                         rc, str));
+<a name="l00164" id="l00164"></a>00164             free(str);
+<a name="l00165" id="l00165"></a>00165         } <span class="keywordflow">else</span> {
+<a name="l00166" id="l00166"></a>00166             DEBUGMSGTL((<span class="stringliteral">"netsnmp_udp6"</span>, <span class=
+"stringliteral">"recvfrom fd %d err %d (\"%s\")\n"</span>,
+<a name="l00167" id="l00167"></a>00167                         t-&gt;sock, errno, strerror(errno)));
+<a name="l00168" id="l00168"></a>00168         }
+<a name="l00169" id="l00169"></a>00169         *opaque = (<span class="keywordtype">void</span> *) from;
+<a name="l00170" id="l00170"></a>00170         *olength = <span class="keyword">sizeof</span>(<span class=
+"keyword">struct </span>sockaddr_in6);
+<a name="l00171" id="l00171"></a>00171     }
+<a name="l00172" id="l00172"></a>00172     <span class="keywordflow">return</span> rc;
+<a name="l00173" id="l00173"></a>00173 }
+<a name="l00174" id="l00174"></a>00174 
+<a name="l00175" id="l00175"></a>00175 
+<a name="l00176" id="l00176"></a>00176 
+<a name="l00177" id="l00177"></a>00177 <span class="keyword">static</span> <span class="keywordtype">int</span>
+<a name="l00178" id="l00178"></a>00178 netsnmp_udp6_send(<a class="code" href=
+"structnetsnmp__transport__s.html">netsnmp_transport</a> *t, <span class="keywordtype">void</span> *buf, <span class=
+"keywordtype">int</span> size,
+<a name="l00179" id="l00179"></a>00179                   <span class="keywordtype">void</span> **opaque, <span class=
+"keywordtype">int</span> *olength)
+<a name="l00180" id="l00180"></a>00180 {
+<a name="l00181" id="l00181"></a>00181     <span class="keywordtype">int</span> rc = -1;
+<a name="l00182" id="l00182"></a>00182     <span class="keyword">struct </span>sockaddr *to = NULL;
+<a name="l00183" id="l00183"></a>00183 
+<a name="l00184" id="l00184"></a>00184     <span class=
+"keywordflow">if</span> (opaque != NULL &amp;&amp; *opaque != NULL &amp;&amp;
+<a name="l00185" id="l00185"></a>00185         *olength == <span class="keyword">sizeof</span>(<span class=
+"keyword">struct</span> sockaddr_in6)) {
+<a name="l00186" id="l00186"></a>00186         to = (<span class="keyword">struct </span>sockaddr *) (*opaque);
+<a name="l00187" id="l00187"></a>00187     } <span class="keywordflow">else</span> <span class=
+"keywordflow">if</span> (t != NULL &amp;&amp; t-&gt;data != NULL &amp;&amp;
+<a name="l00188" id="l00188"></a>00188                t-&gt;data_length == <span class="keyword">sizeof</span>(<span class=
+"keyword">struct</span> sockaddr_in6)) {
+<a name="l00189" id="l00189"></a>00189         to = (<span class="keyword">struct </span>sockaddr *) (t-&gt;data);
+<a name="l00190" id="l00190"></a>00190     }
+<a name="l00191" id="l00191"></a>00191 
+<a name="l00192" id="l00192"></a>00192     <span class=
+"keywordflow">if</span> (to != NULL &amp;&amp; t != NULL &amp;&amp; t-&gt;sock &gt;= 0) {
+<a name="l00193" id="l00193"></a>00193         <span class=
+"keywordtype">char</span> *str = netsnmp_udp6_fmtaddr(NULL, (<span class="keywordtype">void</span> *)to,
+<a name="l00194" id="l00194"></a>00194                                             <span class=
+"keyword">sizeof</span>(<span class="keyword">struct</span> sockaddr_in6));
+<a name="l00195" id="l00195"></a>00195         DEBUGMSGTL((<span class="stringliteral">"netsnmp_udp6"</span>, <span class=
+"stringliteral">"send %d bytes from %p to %s on fd %d\n"</span>,
+<a name="l00196" id="l00196"></a>00196                     size, buf, str, t-&gt;sock));
+<a name="l00197" id="l00197"></a>00197         free(str);
+<a name="l00198" id="l00198"></a>00198         <span class="keywordflow">while</span> (rc &lt; 0) {
+<a name="l00199" id="l00199"></a>00199             rc = sendto(t-&gt;sock, buf, size, 0, to,<span class=
+"keyword">sizeof</span>(<span class="keyword">struct</span> sockaddr_in6));
+<a name="l00200" id="l00200"></a>00200             <span class="keywordflow">if</span> (rc &lt; 0 &amp;&amp; errno != EINTR) {
+<a name="l00201" id="l00201"></a>00201                 <span class="keywordflow">break</span>;
+<a name="l00202" id="l00202"></a>00202             }
+<a name="l00203" id="l00203"></a>00203         }
+<a name="l00204" id="l00204"></a>00204     }
+<a name="l00205" id="l00205"></a>00205     <span class="keywordflow">return</span> rc;
+<a name="l00206" id="l00206"></a>00206 }
+<a name="l00207" id="l00207"></a>00207 
+<a name="l00208" id="l00208"></a>00208 
+<a name="l00209" id="l00209"></a>00209 
+<a name="l00210" id="l00210"></a>00210 <span class="keyword">static</span> <span class="keywordtype">int</span>
+<a name="l00211" id="l00211"></a>00211 netsnmp_udp6_close(<a class="code" href=
+"structnetsnmp__transport__s.html">netsnmp_transport</a> *t)
+<a name="l00212" id="l00212"></a>00212 {
+<a name="l00213" id="l00213"></a>00213     <span class="keywordtype">int</span> rc = -1;
+<a name="l00214" id="l00214"></a>00214     <span class="keywordflow">if</span> (t != NULL &amp;&amp; t-&gt;sock &gt;= 0) {
+<a name="l00215" id="l00215"></a>00215         DEBUGMSGTL((<span class="stringliteral">"netsnmp_udp6"</span>, <span class=
+"stringliteral">"close fd %d\n"</span>, t-&gt;sock));
+<a name="l00216" id="l00216"></a>00216 <span class="preprocessor">#ifndef HAVE_CLOSESOCKET</span>
+<a name="l00217" id="l00217"></a>00217         rc = close(t-&gt;sock);
+<a name="l00218" id="l00218"></a>00218 <span class="preprocessor">#else</span>
+<a name="l00219" id="l00219"></a>00219         rc = closesocket(t-&gt;sock);
+<a name="l00220" id="l00220"></a>00220 <span class="preprocessor">#endif</span>
+<a name="l00221" id="l00221"></a>00221         t-&gt;sock = -1;
+<a name="l00222" id="l00222"></a>00222     }
+<a name="l00223" id="l00223"></a>00223     <span class="keywordflow">return</span> rc;
+<a name="l00224" id="l00224"></a>00224 }
+<a name="l00225" id="l00225"></a>00225 
+<a name="l00226" id="l00226"></a>00226 
+<a name="l00227" id="l00227"></a>00227 
+<a name="l00228" id="l00228"></a>00228 <span class="comment">/*</span>
+<a name="l00229" id="l00229"></a>00229 <span class=
+"comment"> * Open a UDP/IPv6-based transport for SNMP.  Local is TRUE if addr is the</span>
+<a name="l00230" id="l00230"></a>00230 <span class=
+"comment"> * local address to bind to (i.e. this is a server-type session); otherwise</span>
+<a name="l00231" id="l00231"></a>00231 <span class="comment"> * addr is the remote address to send things to.  </span>
+<a name="l00232" id="l00232"></a>00232 <span class="comment"> */</span>
+<a name="l00233" id="l00233"></a>00233 
+<a name="l00234" id="l00234"></a>00234 <a class="code" href="structnetsnmp__transport__s.html">netsnmp_transport</a> *
+<a name="l00235" id="l00235"></a>00235 netsnmp_udp6_transport(<span class=
+"keyword">struct</span> sockaddr_in6 *addr, <span class="keywordtype">int</span> local)
+<a name="l00236" id="l00236"></a>00236 {
+<a name="l00237" id="l00237"></a>00237     <a class="code" href=
+"structnetsnmp__transport__s.html">netsnmp_transport</a> *t = NULL;
+<a name="l00238" id="l00238"></a>00238     <span class="keywordtype">int</span>             rc = 0;
+<a name="l00239" id="l00239"></a>00239     <span class="keywordtype">char</span>           *str = NULL;
+<a name="l00240" id="l00240"></a>00240 
+<a name="l00241" id="l00241"></a>00241     <span class=
+"keywordflow">if</span> (addr == NULL || addr-&gt;sin6_family != AF_INET6) {
+<a name="l00242" id="l00242"></a>00242         <span class="keywordflow">return</span> NULL;
+<a name="l00243" id="l00243"></a>00243     }
+<a name="l00244" id="l00244"></a>00244 
+<a name="l00245" id="l00245"></a>00245     t = (<a class="code" href=
+"structnetsnmp__transport__s.html">netsnmp_transport</a> *) malloc(<span class="keyword">sizeof</span>(<a class="code" href=
+"structnetsnmp__transport__s.html">netsnmp_transport</a>));
+<a name="l00246" id="l00246"></a>00246     <span class="keywordflow">if</span> (t == NULL) {
+<a name="l00247" id="l00247"></a>00247         <span class="keywordflow">return</span> NULL;
+<a name="l00248" id="l00248"></a>00248     }
+<a name="l00249" id="l00249"></a>00249 
+<a name="l00250" id="l00250"></a>00250     str = netsnmp_udp6_fmtaddr(NULL, (<span class="keywordtype">void</span> *) addr,
+<a name="l00251" id="l00251"></a>00251                                   <span class="keyword">sizeof</span>(<span class=
+"keyword">struct</span> sockaddr_in6));
+<a name="l00252" id="l00252"></a>00252     DEBUGMSGTL((<span class="stringliteral">"netsnmp_udp6"</span>, <span class=
+"stringliteral">"open %s %s\n"</span>, local ? <span class="stringliteral">"local"</span> : <span class=
+"stringliteral">"remote"</span>,
+<a name="l00253" id="l00253"></a>00253                 str));
+<a name="l00254" id="l00254"></a>00254     free(str);
+<a name="l00255" id="l00255"></a>00255 
+<a name="l00256" id="l00256"></a>00256     memset(t, 0, <span class="keyword">sizeof</span>(<a class="code" href=
+"structnetsnmp__transport__s.html">netsnmp_transport</a>));
+<a name="l00257" id="l00257"></a>00257 
+<a name="l00258" id="l00258"></a>00258     t-&gt;domain = netsnmp_UDPIPv6Domain;
+<a name="l00259" id="l00259"></a>00259     t-&gt;domain_length =
+<a name="l00260" id="l00260"></a>00260         <span class="keyword">sizeof</span>(netsnmp_UDPIPv6Domain) / <span class=
+"keyword">sizeof</span>(netsnmp_UDPIPv6Domain[0]);
+<a name="l00261" id="l00261"></a>00261 
+<a name="l00262" id="l00262"></a>00262     t-&gt;sock = socket(PF_INET6, SOCK_DGRAM, 0);
+<a name="l00263" id="l00263"></a>00263     <span class="keywordflow">if</span> (t-&gt;sock &lt; 0) {
+<a name="l00264" id="l00264"></a>00264         netsnmp_transport_free(t);
+<a name="l00265" id="l00265"></a>00265         <span class="keywordflow">return</span> NULL;
+<a name="l00266" id="l00266"></a>00266     }
+<a name="l00267" id="l00267"></a>00267 
+<a name="l00268" id="l00268"></a>00268     _netsnmp_udp_sockopt_set(t-&gt;sock, local);
+<a name="l00269" id="l00269"></a>00269 
+<a name="l00270" id="l00270"></a>00270     <span class="keywordflow">if</span> (local) {
+<a name="l00271" id="l00271"></a>00271         <span class="comment">/*</span>
+<a name="l00272" id="l00272"></a>00272 <span class=
+"comment">         * This session is inteneded as a server, so we must bind on to the</span>
+<a name="l00273" id="l00273"></a>00273 <span class=
+"comment">         * given IP address, which may include an interface address, or could</span>
+<a name="l00274" id="l00274"></a>00274 <span class=
+"comment">         * be INADDR_ANY, but certainly includes a port number.</span>
+<a name="l00275" id="l00275"></a>00275 <span class="comment">         */</span>
+<a name="l00276" id="l00276"></a>00276 
+<a name="l00277" id="l00277"></a>00277 <span class="preprocessor">#ifdef IPV6_V6ONLY</span>
+<a name="l00278" id="l00278"></a>00278         <span class=
+"comment">/* Try to restrict PF_INET6 socket to IPv6 communications only. */</span>
+<a name="l00279" id="l00279"></a>00279         {
+<a name="l00280" id="l00280"></a>00280           <span class="keywordtype">int</span> one=1;
+<a name="l00281" id="l00281"></a>00281           <span class=
+"keywordflow">if</span> (setsockopt(t-&gt;sock, IPPROTO_IPV6, IPV6_V6ONLY, (<span class=
+"keywordtype">char</span> *)&amp;one, <span class="keyword">sizeof</span>(one)) != 0) {
+<a name="l00282" id="l00282"></a>00282             DEBUGMSGTL((<span class="stringliteral">"netsnmp_udp6"</span>, <span class=
+"stringliteral">"couldn't set IPV6_V6ONLY to %d bytes: %s\n"</span>, one, strerror(errno)));
+<a name="l00283" id="l00283"></a>00283           } 
+<a name="l00284" id="l00284"></a>00284         }
+<a name="l00285" id="l00285"></a>00285 <span class="preprocessor">#endif</span>
+<a name="l00286" id="l00286"></a>00286 
+<a name="l00287" id="l00287"></a>00287         rc = bind(t-&gt;sock, (<span class="keyword">struct</span> sockaddr *) addr,
+<a name="l00288" id="l00288"></a>00288                   <span class="keyword">sizeof</span>(<span class=
+"keyword">struct</span> sockaddr_in6));
+<a name="l00289" id="l00289"></a>00289         <span class="keywordflow">if</span> (rc != 0) {
+<a name="l00290" id="l00290"></a>00290             netsnmp_udp6_close(t);
+<a name="l00291" id="l00291"></a>00291             netsnmp_transport_free(t);
+<a name="l00292" id="l00292"></a>00292             <span class="keywordflow">return</span> NULL;
+<a name="l00293" id="l00293"></a>00293         }
+<a name="l00294" id="l00294"></a>00294         t-&gt;local = (<span class="keywordtype">unsigned</span> <span class=
+"keywordtype">char</span>*)malloc(18);
+<a name="l00295" id="l00295"></a>00295         <span class="keywordflow">if</span> (t-&gt;local == NULL) {
+<a name="l00296" id="l00296"></a>00296             netsnmp_udp6_close(t);
+<a name="l00297" id="l00297"></a>00297             netsnmp_transport_free(t);
+<a name="l00298" id="l00298"></a>00298             <span class="keywordflow">return</span> NULL;
+<a name="l00299" id="l00299"></a>00299         }
+<a name="l00300" id="l00300"></a>00300         memcpy(t-&gt;local, addr-&gt;sin6_addr.s6_addr, 16);
+<a name="l00301" id="l00301"></a>00301         t-&gt;local[16] = (addr-&gt;sin6_port &amp; 0xff00) &gt;&gt; 8;
+<a name="l00302" id="l00302"></a>00302         t-&gt;local[17] = (addr-&gt;sin6_port &amp; 0x00ff) &gt;&gt; 0;
+<a name="l00303" id="l00303"></a>00303         t-&gt;local_length = 18;
+<a name="l00304" id="l00304"></a>00304         t-&gt;data = NULL;
+<a name="l00305" id="l00305"></a>00305         t-&gt;data_length = 0;
+<a name="l00306" id="l00306"></a>00306     } <span class="keywordflow">else</span> {
+<a name="l00307" id="l00307"></a>00307         <span class="comment">/*</span>
+<a name="l00308" id="l00308"></a>00308 <span class="comment">         * This is a client session.  Save the address in the</span>
+<a name="l00309" id="l00309"></a>00309 <span class=
+"comment">         * transport-specific data pointer for later use by netsnmp_udp6_send.</span>
+<a name="l00310" id="l00310"></a>00310 <span class="comment">         */</span>
+<a name="l00311" id="l00311"></a>00311 
+<a name="l00312" id="l00312"></a>00312         t-&gt;data = malloc(<span class="keyword">sizeof</span>(<span class=
+"keyword">struct</span> sockaddr_in6));
+<a name="l00313" id="l00313"></a>00313         <span class="keywordflow">if</span> (t-&gt;data == NULL) {
+<a name="l00314" id="l00314"></a>00314             netsnmp_udp6_close(t);
+<a name="l00315" id="l00315"></a>00315             netsnmp_transport_free(t);
+<a name="l00316" id="l00316"></a>00316             <span class="keywordflow">return</span> NULL;
+<a name="l00317" id="l00317"></a>00317         }
+<a name="l00318" id="l00318"></a>00318         memcpy(t-&gt;data, addr, <span class="keyword">sizeof</span>(<span class=
+"keyword">struct</span> sockaddr_in6));
+<a name="l00319" id="l00319"></a>00319         t-&gt;data_length = <span class="keyword">sizeof</span>(<span class=
+"keyword">struct </span>sockaddr_in6);
+<a name="l00320" id="l00320"></a>00320         t-&gt;remote = (<span class="keywordtype">unsigned</span> <span class=
+"keywordtype">char</span>*)malloc(18);
+<a name="l00321" id="l00321"></a>00321         <span class="keywordflow">if</span> (t-&gt;remote == NULL) {
+<a name="l00322" id="l00322"></a>00322             netsnmp_udp6_close(t);
+<a name="l00323" id="l00323"></a>00323             netsnmp_transport_free(t);
+<a name="l00324" id="l00324"></a>00324             <span class="keywordflow">return</span> NULL;
+<a name="l00325" id="l00325"></a>00325         }
+<a name="l00326" id="l00326"></a>00326         memcpy(t-&gt;remote, addr-&gt;sin6_addr.s6_addr, 16);
+<a name="l00327" id="l00327"></a>00327         t-&gt;remote[16] = (addr-&gt;sin6_port &amp; 0xff00) &gt;&gt; 8;
+<a name="l00328" id="l00328"></a>00328         t-&gt;remote[17] = (addr-&gt;sin6_port &amp; 0x00ff) &gt;&gt; 0;
+<a name="l00329" id="l00329"></a>00329         t-&gt;remote_length = 18;
+<a name="l00330" id="l00330"></a>00330     }
+<a name="l00331" id="l00331"></a>00331 
+<a name="l00332" id="l00332"></a>00332     <span class="comment">/*</span>
+<a name="l00333" id="l00333"></a>00333 <span class=
+"comment">     * 16-bit length field, 8 byte UDP header, 40 byte IPv6 header.  </span>
+<a name="l00334" id="l00334"></a>00334 <span class="comment">     */</span>
+<a name="l00335" id="l00335"></a>00335 
+<a name="l00336" id="l00336"></a>00336     t-&gt;msgMaxSize = 0xffff - 8 - 40;
+<a name="l00337" id="l00337"></a>00337     t-&gt;f_recv     = netsnmp_udp6_recv;
+<a name="l00338" id="l00338"></a>00338     t-&gt;f_send     = netsnmp_udp6_send;
+<a name="l00339" id="l00339"></a>00339     t-&gt;f_close    = netsnmp_udp6_close;
+<a name="l00340" id="l00340"></a>00340     t-&gt;f_accept   = NULL;
+<a name="l00341" id="l00341"></a>00341     t-&gt;f_fmtaddr  = netsnmp_udp6_fmtaddr;
+<a name="l00342" id="l00342"></a>00342 
+<a name="l00343" id="l00343"></a>00343     <span class="keywordflow">return</span> t;
+<a name="l00344" id="l00344"></a>00344 }
+<a name="l00345" id="l00345"></a>00345 
+<a name="l00346" id="l00346"></a>00346 
+<a name="l00347" id="l00347"></a>00347 <span class="comment">/*</span>
+<a name="l00348" id="l00348"></a>00348 <span class="comment"> * Not extern but used from here and snmpTCPIPv6Domain.C</span>
+<a name="l00349" id="l00349"></a>00349 <span class="comment"> */</span>
+<a name="l00350" id="l00350"></a>00350 <span class="keywordtype">int</span>
+<a name="l00351" id="l00351"></a>00351 netsnmp_sockaddr_in6_2(<span class="keyword">struct</span> sockaddr_in6 *addr,
+<a name="l00352" id="l00352"></a>00352                        <span class="keyword">const</span> <span class=
+"keywordtype">char</span> *inpeername, <span class="keyword">const</span> <span class="keywordtype">char</span> *default_target)
+<a name="l00353" id="l00353"></a>00353 {
+<a name="l00354" id="l00354"></a>00354     <span class="keywordtype">char</span>           *cp = NULL, *peername = NULL;
+<a name="l00355" id="l00355"></a>00355     <span class="keywordtype">char</span>            debug_addr[INET6_ADDRSTRLEN];
+<a name="l00356" id="l00356"></a>00356 <span class="preprocessor">#if HAVE_GETADDRINFO</span>
+<a name="l00357" id="l00357"></a>00357     <span class="keyword">struct </span>addrinfo *addrs = NULL;
+<a name="l00358" id="l00358"></a>00358     <span class="keyword">struct </span>addrinfo hint;
+<a name="l00359" id="l00359"></a>00359     <span class="keywordtype">int</span>             err;
+<a name="l00360" id="l00360"></a>00360 <span class="preprocessor">#elif HAVE_GETIPNODEBYNAME</span>
+<a name="l00361" id="l00361"></a>00361     <span class="keyword">struct </span>hostent *hp = NULL;
+<a name="l00362" id="l00362"></a>00362     <span class="keywordtype">int</span>             err;
+<a name="l00363" id="l00363"></a>00363 <span class="preprocessor">#elif HAVE_GETHOSTBYNAME</span>
+<a name="l00364" id="l00364"></a>00364     <span class="keyword">struct </span>hostent *hp = NULL;
+<a name="l00365" id="l00365"></a>00365 <span class="preprocessor">#endif</span>
+<a name="l00366" id="l00366"></a>00366     <span class="keywordtype">int</span>             portno;
+<a name="l00367" id="l00367"></a>00367 
+<a name="l00368" id="l00368"></a>00368     <span class="keywordflow">if</span> (addr == NULL) {
+<a name="l00369" id="l00369"></a>00369         <span class="keywordflow">return</span> 0;
+<a name="l00370" id="l00370"></a>00370     }
+<a name="l00371" id="l00371"></a>00371 
+<a name="l00372" id="l00372"></a>00372     DEBUGMSGTL((<span class="stringliteral">"netsnmp_sockaddr_in6"</span>,
+<a name="l00373" id="l00373"></a>00373                 <span class=
+"stringliteral">"addr %p, peername \"%s\", default_target \"%s\"\n"</span>,
+<a name="l00374" id="l00374"></a>00374                 addr, inpeername ? inpeername : <span class=
+"stringliteral">"[NIL]"</span>,
+<a name="l00375" id="l00375"></a>00375                 default_target ? default_target : <span class=
+"stringliteral">"[NIL]"</span>));
+<a name="l00376" id="l00376"></a>00376 
+<a name="l00377" id="l00377"></a>00377     memset(addr, 0, <span class="keyword">sizeof</span>(<span class=
+"keyword">struct</span> sockaddr_in6));
+<a name="l00378" id="l00378"></a>00378     addr-&gt;sin6_family = AF_INET6;
+<a name="l00379" id="l00379"></a>00379     addr-&gt;sin6_addr = in6addr_any;
+<a name="l00380" id="l00380"></a>00380     addr-&gt;sin6_port = htons((u_short)SNMP_PORT);
+<a name="l00381" id="l00381"></a>00381 
+<a name="l00382" id="l00382"></a>00382     {
+<a name="l00383" id="l00383"></a>00383       <span class=
+"keywordtype">int</span> port = netsnmp_ds_get_int(NETSNMP_DS_LIBRARY_ID,
+<a name="l00384" id="l00384"></a>00384                                     NETSNMP_DS_LIB_DEFAULT_PORT);
+<a name="l00385" id="l00385"></a>00385       <span class="keywordflow">if</span> (port != 0)
+<a name="l00386" id="l00386"></a>00386         addr-&gt;sin6_port = htons((u_short)port);
+<a name="l00387" id="l00387"></a>00387       <span class="keywordflow">else</span> <span class=
+"keywordflow">if</span> (default_target != NULL)
+<a name="l00388" id="l00388"></a>00388         netsnmp_sockaddr_in6_2(addr, default_target, NULL);
+<a name="l00389" id="l00389"></a>00389     }
+<a name="l00390" id="l00390"></a>00390 
+<a name="l00391" id="l00391"></a>00391     <span class="keywordflow">if</span> (inpeername != NULL) {
+<a name="l00392" id="l00392"></a>00392         <span class="comment">/*</span>
+<a name="l00393" id="l00393"></a>00393 <span class=
+"comment">         * Duplicate the peername because we might want to mank around with</span>
+<a name="l00394" id="l00394"></a>00394 <span class="comment">         * it.  </span>
+<a name="l00395" id="l00395"></a>00395 <span class="comment">         */</span>
+<a name="l00396" id="l00396"></a>00396 
+<a name="l00397" id="l00397"></a>00397         peername = strdup(inpeername);
+<a name="l00398" id="l00398"></a>00398         <span class="keywordflow">if</span> (peername == NULL) {
+<a name="l00399" id="l00399"></a>00399             <span class="keywordflow">return</span> 0;
+<a name="l00400" id="l00400"></a>00400         }
+<a name="l00401" id="l00401"></a>00401 
+<a name="l00402" id="l00402"></a>00402         <span class=
+"keywordflow">for</span> (cp = peername; *cp &amp;&amp; isdigit((<span class="keywordtype">unsigned</span> <span class=
+"keywordtype">char</span>) *cp); cp++);
+<a name="l00403" id="l00403"></a>00403         portno = atoi(peername);
+<a name="l00404" id="l00404"></a>00404         <span class="keywordflow">if</span> (!*cp &amp;&amp;  portno != 0) {
+<a name="l00405" id="l00405"></a>00405             <span class="comment">/*</span>
+<a name="l00406" id="l00406"></a>00406 <span class="comment">             * Okay, it looks like JUST a port number.  </span>
+<a name="l00407" id="l00407"></a>00407 <span class="comment">             */</span>
+<a name="l00408" id="l00408"></a>00408             DEBUGMSGTL((<span class=
+"stringliteral">"netsnmp_sockaddr_in6"</span>, <span class="stringliteral">"totally numeric: %d\n"</span>,
+<a name="l00409" id="l00409"></a>00409                         portno));
+<a name="l00410" id="l00410"></a>00410             addr-&gt;sin6_port = htons(portno);
+<a name="l00411" id="l00411"></a>00411             <span class="keywordflow">goto</span> resolved;
+<a name="l00412" id="l00412"></a>00412         }
+<a name="l00413" id="l00413"></a>00413 
+<a name="l00414" id="l00414"></a>00414         <span class="comment">/*</span>
+<a name="l00415" id="l00415"></a>00415 <span class=
+"comment">         * See if it is an IPv6 address, which covered with square brankets</span>
+<a name="l00416" id="l00416"></a>00416 <span class="comment">         * with an appended :port.  </span>
+<a name="l00417" id="l00417"></a>00417 <span class="comment">         */</span>
+<a name="l00418" id="l00418"></a>00418         <span class="keywordflow">if</span> (*peername == <span class=
+"charliteral">'['</span>) {
+<a name="l00419" id="l00419"></a>00419             cp = strchr(peername, <span class="charliteral">']'</span>);
+<a name="l00420" id="l00420"></a>00420             <span class="keywordflow">if</span> (cp != NULL) {
+<a name="l00421" id="l00421"></a>00421               <span class="comment">/*</span>
+<a name="l00422" id="l00422"></a>00422 <span class=
+"comment">               * See if it is an IPv6 link-local address with interface</span>
+<a name="l00423" id="l00423"></a>00423 <span class=
+"comment">               * name as &lt;zone_id&gt;, like fe80::1234%eth0.</span>
+<a name="l00424" id="l00424"></a>00424 <span class=
+"comment">               * Please refer to the internet draft, IPv6 Scoped Address Architecture</span>
+<a name="l00425" id="l00425"></a>00425 <span class=
+"comment">               * http://www.ietf.org/internet-drafts/draft-ietf-ipngwg-scoping-arch-04.txt</span>
+<a name="l00426" id="l00426"></a>00426 <span class="comment">               *</span>
+<a name="l00427" id="l00427"></a>00427 <span class="comment">               */</span>
+<a name="l00428" id="l00428"></a>00428                 <span class="keywordtype">char</span> *scope_id;
+<a name="l00429" id="l00429"></a>00429 <span class="preprocessor">#ifdef HAVE_IF_NAMETOINDEX</span>
+<a name="l00430" id="l00430"></a>00430                 <span class="keywordtype">unsigned</span> <span class=
+"keywordtype">int</span> if_index = 0;
+<a name="l00431" id="l00431"></a>00431 <span class="preprocessor">#endif</span>
+<a name="l00432" id="l00432"></a>00432                 *cp = <span class="charliteral">'\0'</span>;
+<a name="l00433" id="l00433"></a>00433                 scope_id = strchr(peername + 1, <span class="charliteral">'%'</span>);
+<a name="l00434" id="l00434"></a>00434                 <span class="keywordflow">if</span> (scope_id != NULL) {
+<a name="l00435" id="l00435"></a>00435                     *scope_id = <span class="charliteral">'\0'</span>;
+<a name="l00436" id="l00436"></a>00436 <span class="preprocessor">#ifdef HAVE_IF_NAMETOINDEX</span>
+<a name="l00437" id="l00437"></a>00437                     if_index = if_nametoindex(scope_id + 1);
+<a name="l00438" id="l00438"></a>00438 <span class="preprocessor">#endif</span>
+<a name="l00439" id="l00439"></a>00439                 }
+<a name="l00440" id="l00440"></a>00440                 <span class="keywordflow">if</span> (*(cp + 1) == <span class=
+"charliteral">':'</span>) {
+<a name="l00441" id="l00441"></a>00441                     portno = atoi(cp+2);
+<a name="l00442" id="l00442"></a>00442                     <span class="keywordflow">if</span> (portno != 0 &amp;&amp;
+<a name="l00443" id="l00443"></a>00443                         inet_pton(AF_INET6, peername + 1,
+<a name="l00444" id="l00444"></a>00444                                   (<span class=
+"keywordtype">void</span> *) &amp;(addr-&gt;sin6_addr))) {
+<a name="l00445" id="l00445"></a>00445                         DEBUGMSGTL((<span class=
+"stringliteral">"netsnmp_sockaddr_in6"</span>,
+<a name="l00446" id="l00446"></a>00446                                     <span class=
+"stringliteral">"IPv6 address with port suffix :%d\n"</span>,
+<a name="l00447" id="l00447"></a>00447                                     portno));
+<a name="l00448" id="l00448"></a>00448                         <span class=
+"keywordflow">if</span> (portno &gt; 0 &amp;&amp; portno &lt; 0xffff) {
+<a name="l00449" id="l00449"></a>00449                             addr-&gt;sin6_port = htons(portno);
+<a name="l00450" id="l00450"></a>00450                         } <span class="keywordflow">else</span> {
+<a name="l00451" id="l00451"></a>00451                             DEBUGMSGTL((<span class=
+"stringliteral">"netsnmp_sockaddr_in6"</span>, <span class="stringliteral">"invalid port number: %d"</span>, portno));
+<a name="l00452" id="l00452"></a>00452                             <span class="keywordflow">return</span> 0;
+<a name="l00453" id="l00453"></a>00453                         }
+<a name="l00454" id="l00454"></a>00454 
+<a name="l00455" id="l00455"></a>00455 <span class=
+"preprocessor">#if defined(HAVE_IF_NAMETOINDEX) &amp;&amp; defined(HAVE_STRUCT_SOCKADDR_IN6_SIN6_SCOPE_ID)</span>
+<a name="l00456" id="l00456"></a>00456                         addr-&gt;sin6_scope_id = if_index;
+<a name="l00457" id="l00457"></a>00457 <span class="preprocessor">#endif</span>
+<a name="l00458" id="l00458"></a>00458                         <span class="keywordflow">goto</span> resolved;
+<a name="l00459" id="l00459"></a>00459                     }
+<a name="l00460" id="l00460"></a>00460                 } <span class="keywordflow">else</span> {
+<a name="l00461" id="l00461"></a>00461                     <span class="keywordflow">if</span> (inet_pton
+<a name="l00462" id="l00462"></a>00462                         (AF_INET6, peername + 1,
+<a name="l00463" id="l00463"></a>00463                          (<span class=
+"keywordtype">void</span> *) &amp;(addr-&gt;sin6_addr))) {
+<a name="l00464" id="l00464"></a>00464                         DEBUGMSGTL((<span class=
+"stringliteral">"netsnmp_sockaddr_in6"</span>,
+<a name="l00465" id="l00465"></a>00465                                     <span class=
+"stringliteral">"IPv6 address with square brankets\n"</span>));
+<a name="l00466" id="l00466"></a>00466                         portno = netsnmp_ds_get_int(NETSNMP_DS_LIBRARY_ID, 
+<a name="l00467" id="l00467"></a>00467                                                     NETSNMP_DS_LIB_DEFAULT_PORT);
+<a name="l00468" id="l00468"></a>00468                         <span class="keywordflow">if</span> (portno &lt;= 0)
+<a name="l00469" id="l00469"></a>00469                             portno = SNMP_PORT;
+<a name="l00470" id="l00470"></a>00470                         addr-&gt;sin6_port = htons(portno);
+<a name="l00471" id="l00471"></a>00471 <span class=
+"preprocessor">#if defined(HAVE_IF_NAMETOINDEX) &amp;&amp; defined(HAVE_STRUCT_SOCKADDR_IN6_SIN6_SCOPE_ID)</span>
+<a name="l00472" id="l00472"></a>00472                         addr-&gt;sin6_scope_id = if_index;
+<a name="l00473" id="l00473"></a>00473 <span class="preprocessor">#endif</span>
+<a name="l00474" id="l00474"></a>00474                         <span class="keywordflow">goto</span> resolved;
+<a name="l00475" id="l00475"></a>00475                     }
+<a name="l00476" id="l00476"></a>00476                 }
+<a name="l00477" id="l00477"></a>00477                 <span class="keywordflow">if</span> (scope_id != NULL) {
+<a name="l00478" id="l00478"></a>00478                   *scope_id = <span class="charliteral">'%'</span>;
+<a name="l00479" id="l00479"></a>00479                 }
+<a name="l00480" id="l00480"></a>00480                 *cp = <span class="charliteral">']'</span>;
+<a name="l00481" id="l00481"></a>00481             }
+<a name="l00482" id="l00482"></a>00482         }
+<a name="l00483" id="l00483"></a>00483 
+<a name="l00484" id="l00484"></a>00484         cp = strrchr(peername, <span class="charliteral">':'</span>);
+<a name="l00485" id="l00485"></a>00485         <span class="keywordflow">if</span> (cp != NULL) {
+<a name="l00486" id="l00486"></a>00486             <span class="keywordtype">char</span> *scope_id;
+<a name="l00487" id="l00487"></a>00487 <span class="preprocessor">#ifdef HAVE_IF_NAMETOINDEX</span>
+<a name="l00488" id="l00488"></a>00488             <span class="keywordtype">unsigned</span> <span class=
+"keywordtype">int</span> if_index = 0;
+<a name="l00489" id="l00489"></a>00489 <span class="preprocessor">#endif</span>
+<a name="l00490" id="l00490"></a>00490             *cp = <span class="charliteral">'\0'</span>;
+<a name="l00491" id="l00491"></a>00491             scope_id = strchr(peername + 1, <span class="charliteral">'%'</span>);
+<a name="l00492" id="l00492"></a>00492             <span class="keywordflow">if</span> (scope_id != NULL) {
+<a name="l00493" id="l00493"></a>00493                 *scope_id = <span class="charliteral">'\0'</span>;
+<a name="l00494" id="l00494"></a>00494 <span class="preprocessor">#ifdef HAVE_IF_NAMETOINDEX</span>
+<a name="l00495" id="l00495"></a>00495                 if_index = if_nametoindex(scope_id + 1);
+<a name="l00496" id="l00496"></a>00496 <span class="preprocessor">#endif</span>
+<a name="l00497" id="l00497"></a>00497             }
+<a name="l00498" id="l00498"></a>00498             portno = atoi(cp + 1);
+<a name="l00499" id="l00499"></a>00499             <span class="keywordflow">if</span> (portno != 0 &amp;&amp;
+<a name="l00500" id="l00500"></a>00500                 inet_pton(AF_INET6, peername,
+<a name="l00501" id="l00501"></a>00501                           (<span class=
+"keywordtype">void</span> *) &amp;(addr-&gt;sin6_addr))) {
+<a name="l00502" id="l00502"></a>00502                 DEBUGMSGTL((<span class="stringliteral">"netsnmp_sockaddr_in6"</span>,
+<a name="l00503" id="l00503"></a>00503                             <span class=
+"stringliteral">"IPv6 address with port suffix :%d\n"</span>,
+<a name="l00504" id="l00504"></a>00504                             atoi(cp + 1)));
+<a name="l00505" id="l00505"></a>00505                 <span class=
+"keywordflow">if</span> (portno &gt; 0 &amp;&amp; portno &lt; 0xffff) {
+<a name="l00506" id="l00506"></a>00506                     addr-&gt;sin6_port = htons(portno);
+<a name="l00507" id="l00507"></a>00507                 } <span class="keywordflow">else</span> {
+<a name="l00508" id="l00508"></a>00508                     DEBUGMSGTL((<span class=
+"stringliteral">"netsnmp_sockaddr_in6"</span>, <span class="stringliteral">"invalid port number: %d"</span>, portno));
+<a name="l00509" id="l00509"></a>00509                     <span class="keywordflow">return</span> 0;
+<a name="l00510" id="l00510"></a>00510                 }
+<a name="l00511" id="l00511"></a>00511 
+<a name="l00512" id="l00512"></a>00512 <span class=
+"preprocessor">#if defined(HAVE_IF_NAMETOINDEX) &amp;&amp; defined(HAVE_STRUCT_SOCKADDR_IN6_SIN6_SCOPE_ID)</span>
+<a name="l00513" id="l00513"></a>00513                 addr-&gt;sin6_scope_id = if_index;
+<a name="l00514" id="l00514"></a>00514 <span class="preprocessor">#endif</span>
+<a name="l00515" id="l00515"></a>00515                 <span class="keywordflow">goto</span> resolved;
+<a name="l00516" id="l00516"></a>00516             }
+<a name="l00517" id="l00517"></a>00517             <span class="keywordflow">if</span> (scope_id != NULL) {
+<a name="l00518" id="l00518"></a>00518               *scope_id = <span class="charliteral">'%'</span>;
+<a name="l00519" id="l00519"></a>00519             }
+<a name="l00520" id="l00520"></a>00520             *cp = <span class="charliteral">':'</span>;
+<a name="l00521" id="l00521"></a>00521         }
+<a name="l00522" id="l00522"></a>00522 
+<a name="l00523" id="l00523"></a>00523         <span class="comment">/*</span>
+<a name="l00524" id="l00524"></a>00524 <span class="comment">         * See if it is JUST an IPv6 address.  </span>
+<a name="l00525" id="l00525"></a>00525 <span class="comment">         */</span>
+<a name="l00526" id="l00526"></a>00526         <span class="keywordflow">if</span> (inet_pton(AF_INET6, peername, (<span class=
+"keywordtype">void</span> *) &amp;(addr-&gt;sin6_addr))) {
+<a name="l00527" id="l00527"></a>00527             DEBUGMSGTL((<span class=
+"stringliteral">"netsnmp_sockaddr_in6"</span>, <span class="stringliteral">"just IPv6 address\n"</span>));
+<a name="l00528" id="l00528"></a>00528             <span class="keywordflow">goto</span> resolved;
+<a name="l00529" id="l00529"></a>00529         }
+<a name="l00530" id="l00530"></a>00530 
+<a name="l00531" id="l00531"></a>00531         <span class="comment">/*</span>
+<a name="l00532" id="l00532"></a>00532 <span class=
+"comment">         * Well, it must be a hostname then, possibly with an appended :port.</span>
+<a name="l00533" id="l00533"></a>00533 <span class="comment">         * Sort that out first.  </span>
+<a name="l00534" id="l00534"></a>00534 <span class="comment">         */</span>
+<a name="l00535" id="l00535"></a>00535 
+<a name="l00536" id="l00536"></a>00536         cp = strrchr(peername, <span class="charliteral">':'</span>);
+<a name="l00537" id="l00537"></a>00537         <span class="keywordflow">if</span> (cp != NULL) {
+<a name="l00538" id="l00538"></a>00538             *cp = <span class="charliteral">'\0'</span>;
+<a name="l00539" id="l00539"></a>00539             portno = atoi(cp + 1);
+<a name="l00540" id="l00540"></a>00540             <span class="keywordflow">if</span> (portno != 0) {
+<a name="l00541" id="l00541"></a>00541                 DEBUGMSGTL((<span class="stringliteral">"netsnmp_sockaddr_in6"</span>,
+<a name="l00542" id="l00542"></a>00542                             <span class=
+"stringliteral">"hostname(?) with port suffix :%d\n"</span>,
+<a name="l00543" id="l00543"></a>00543                             portno));
+<a name="l00544" id="l00544"></a>00544                 <span class=
+"keywordflow">if</span> (portno &gt; 0 &amp;&amp; portno &lt; 0xffff) {
+<a name="l00545" id="l00545"></a>00545                     addr-&gt;sin6_port = htons(portno);
+<a name="l00546" id="l00546"></a>00546                 } <span class="keywordflow">else</span> {
+<a name="l00547" id="l00547"></a>00547                     DEBUGMSGTL((<span class=
+"stringliteral">"netsnmp_sockaddr_in6"</span>, <span class="stringliteral">"invalid port number: %d"</span>, portno));
+<a name="l00548" id="l00548"></a>00548                     <span class="keywordflow">return</span> 0;
+<a name="l00549" id="l00549"></a>00549                 }
+<a name="l00550" id="l00550"></a>00550 
+<a name="l00551" id="l00551"></a>00551             } <span class="keywordflow">else</span> {
+<a name="l00552" id="l00552"></a>00552                 <span class="comment">/*</span>
+<a name="l00553" id="l00553"></a>00553 <span class=
+"comment">                 * No idea, looks bogus but we might as well pass the full thing to</span>
+<a name="l00554" id="l00554"></a>00554 <span class="comment">                 * the name resolver below.  </span>
+<a name="l00555" id="l00555"></a>00555 <span class="comment">                 */</span>
+<a name="l00556" id="l00556"></a>00556                 *cp = <span class="charliteral">':'</span>;
+<a name="l00557" id="l00557"></a>00557                 DEBUGMSGTL((<span class="stringliteral">"netsnmp_sockaddr_in6"</span>,
+<a name="l00558" id="l00558"></a>00558                             <span class=
+"stringliteral">"hostname(?) with embedded ':'?\n"</span>));
+<a name="l00559" id="l00559"></a>00559             }
+<a name="l00560" id="l00560"></a>00560             <span class="comment">/*</span>
+<a name="l00561" id="l00561"></a>00561 <span class="comment">             * Fall through.  </span>
+<a name="l00562" id="l00562"></a>00562 <span class="comment">             */</span>
+<a name="l00563" id="l00563"></a>00563         }
+<a name="l00564" id="l00564"></a>00564 
+<a name="l00565" id="l00565"></a>00565         <span class="keywordflow">if</span> (peername[0] == <span class=
+"charliteral">'\0'</span>) {
+<a name="l00566" id="l00566"></a>00566           DEBUGMSGTL((<span class=
+"stringliteral">"netsnmp_sockaddr_in6"</span>, <span class="stringliteral">"empty hostname\n"</span>));
+<a name="l00567" id="l00567"></a>00567           free(peername);
+<a name="l00568" id="l00568"></a>00568           <span class="keywordflow">return</span> 0;
+<a name="l00569" id="l00569"></a>00569         }
+<a name="l00570" id="l00570"></a>00570 
+<a name="l00571" id="l00571"></a>00571 <span class="preprocessor">#if HAVE_GETADDRINFO</span>
+<a name="l00572" id="l00572"></a>00572         memset(&amp;hint, 0, <span class="keyword">sizeof</span> hint);
+<a name="l00573" id="l00573"></a>00573         hint.ai_flags = 0;
+<a name="l00574" id="l00574"></a>00574         hint.ai_family = PF_INET6;
+<a name="l00575" id="l00575"></a>00575         hint.ai_socktype = SOCK_DGRAM;
+<a name="l00576" id="l00576"></a>00576         hint.ai_protocol = 0;
+<a name="l00577" id="l00577"></a>00577 
+<a name="l00578" id="l00578"></a>00578         err = getaddrinfo(peername, NULL, &amp;hint, &amp;addrs);
+<a name="l00579" id="l00579"></a>00579         <span class="keywordflow">if</span> (err != 0) {
+<a name="l00580" id="l00580"></a>00580 <span class="preprocessor">#if HAVE_GAI_STRERROR</span>
+<a name="l00581" id="l00581"></a>00581             <a class="code" href=
+"group__snmp__logging.html#ga9ba905368ea1c551b969af44b13e37c2" title=
+"This snmp logging function allows variable argument list given the specified format...">snmp_log</a>(LOG_ERR, <span class=
+"stringliteral">"getaddrinfo(\"%s\", NULL, ...): %s\n"</span>, peername,
+<a name="l00582" id="l00582"></a>00582                      gai_strerror(err));
+<a name="l00583" id="l00583"></a>00583 <span class="preprocessor">#else</span>
+<a name="l00584" id="l00584"></a>00584             <a class="code" href=
+"group__snmp__logging.html#ga9ba905368ea1c551b969af44b13e37c2" title=
+"This snmp logging function allows variable argument list given the specified format...">snmp_log</a>(LOG_ERR, <span class=
+"stringliteral">"getaddrinfo(\"%s\", NULL, ...): (error %d)\n"</span>,
+<a name="l00585" id="l00585"></a>00585                      peername, err);
+<a name="l00586" id="l00586"></a>00586 <span class="preprocessor">#endif</span>
+<a name="l00587" id="l00587"></a>00587             free(peername);
+<a name="l00588" id="l00588"></a>00588             <span class="keywordflow">return</span> 0;
+<a name="l00589" id="l00589"></a>00589         }
+<a name="l00590" id="l00590"></a>00590         <span class="keywordflow">if</span> (addrs != NULL) {
+<a name="l00591" id="l00591"></a>00591         DEBUGMSGTL((<span class=
+"stringliteral">"netsnmp_sockaddr_in6"</span>, <span class="stringliteral">"hostname (resolved okay)\n"</span>));
+<a name="l00592" id="l00592"></a>00592         memcpy(&amp;addr-&gt;sin6_addr,
+<a name="l00593" id="l00593"></a>00593                &amp;((<span class=
+"keyword">struct</span> sockaddr_in6 *) addrs-&gt;ai_addr)-&gt;sin6_addr,
+<a name="l00594" id="l00594"></a>00594                <span class="keyword">sizeof</span>(<span class=
+"keyword">struct</span> in6_addr));
+<a name="l00595" id="l00595"></a>00595                 freeaddrinfo(addrs);
+<a name="l00596" id="l00596"></a>00596         }
+<a name="l00597" id="l00597"></a>00597                 <span class="keywordflow">else</span> {
+<a name="l00598" id="l00598"></a>00598         DEBUGMSGTL((<span class=
+"stringliteral">"netsnmp_sockaddr_in6"</span>, <span class="stringliteral">"Failed to resolve IPv6 hostname\n"</span>));
+<a name="l00599" id="l00599"></a>00599                 }
+<a name="l00600" id="l00600"></a>00600 <span class="preprocessor">#elif HAVE_GETIPNODEBYNAME</span>
+<a name="l00601" id="l00601"></a>00601         hp = getipnodebyname(peername, AF_INET6, 0, &amp;err);
+<a name="l00602" id="l00602"></a>00602         <span class="keywordflow">if</span> (hp == NULL) {
+<a name="l00603" id="l00603"></a>00603             DEBUGMSGTL((<span class="stringliteral">"netsnmp_sockaddr_in6"</span>,
+<a name="l00604" id="l00604"></a>00604                         <span class=
+"stringliteral">"hostname (couldn't resolve = %d)\n"</span>, err));
+<a name="l00605" id="l00605"></a>00605             free(peername);
+<a name="l00606" id="l00606"></a>00606             <span class="keywordflow">return</span> 0;
+<a name="l00607" id="l00607"></a>00607         }
+<a name="l00608" id="l00608"></a>00608         DEBUGMSGTL((<span class=
+"stringliteral">"netsnmp_sockaddr_in6"</span>, <span class="stringliteral">"hostname (resolved okay)\n"</span>));
+<a name="l00609" id="l00609"></a>00609         memcpy(&amp;(addr-&gt;sin6_addr), hp-&gt;h_addr, hp-&gt;h_length);
+<a name="l00610" id="l00610"></a>00610 <span class="preprocessor">#elif HAVE_GETHOSTBYNAME</span>
+<a name="l00611" id="l00611"></a>00611         hp = gethostbyname(peername);
+<a name="l00612" id="l00612"></a>00612         <span class="keywordflow">if</span> (hp == NULL) {
+<a name="l00613" id="l00613"></a>00613             DEBUGMSGTL((<span class="stringliteral">"netsnmp_sockaddr_in6"</span>,
+<a name="l00614" id="l00614"></a>00614                         <span class=
+"stringliteral">"hostname (couldn't resolve)\n"</span>));
+<a name="l00615" id="l00615"></a>00615             free(peername);
+<a name="l00616" id="l00616"></a>00616             <span class="keywordflow">return</span> 0;
+<a name="l00617" id="l00617"></a>00617         } <span class="keywordflow">else</span> {
+<a name="l00618" id="l00618"></a>00618             <span class="keywordflow">if</span> (hp-&gt;h_addrtype != AF_INET6) {
+<a name="l00619" id="l00619"></a>00619                 DEBUGMSGTL((<span class="stringliteral">"netsnmp_sockaddr_in6"</span>,
+<a name="l00620" id="l00620"></a>00620                             <span class=
+"stringliteral">"hostname (not AF_INET6!)\n"</span>));
+<a name="l00621" id="l00621"></a>00621                 free(peername);
+<a name="l00622" id="l00622"></a>00622                 <span class="keywordflow">return</span> 0;
+<a name="l00623" id="l00623"></a>00623             } <span class="keywordflow">else</span> {
+<a name="l00624" id="l00624"></a>00624                 DEBUGMSGTL((<span class="stringliteral">"netsnmp_sockaddr_in6"</span>,
+<a name="l00625" id="l00625"></a>00625                             <span class=
+"stringliteral">"hostname (resolved okay)\n"</span>));
+<a name="l00626" id="l00626"></a>00626                 memcpy(&amp;(addr-&gt;sin6_addr), hp-&gt;h_addr, hp-&gt;h_length);
+<a name="l00627" id="l00627"></a>00627             }
+<a name="l00628" id="l00628"></a>00628         }
+<a name="l00629" id="l00629"></a>00629 <span class="preprocessor">#else                           </span><span class=
+"comment">/*HAVE_GETHOSTBYNAME */</span>
+<a name="l00630" id="l00630"></a>00630         <span class="comment">/*</span>
+<a name="l00631" id="l00631"></a>00631 <span class="comment">         * There is no name resolving function available.  </span>
+<a name="l00632" id="l00632"></a>00632 <span class="comment">         */</span>
+<a name="l00633" id="l00633"></a>00633         <a class="code" href=
+"group__snmp__logging.html#ga9ba905368ea1c551b969af44b13e37c2" title=
+"This snmp logging function allows variable argument list given the specified format...">snmp_log</a>(LOG_ERR,
+<a name="l00634" id="l00634"></a>00634                  <span class=
+"stringliteral">"no getaddrinfo()/getipnodebyname()/gethostbyname()\n"</span>);
+<a name="l00635" id="l00635"></a>00635         free(peername);
+<a name="l00636" id="l00636"></a>00636         <span class="keywordflow">return</span> 0;
+<a name="l00637" id="l00637"></a>00637 <span class="preprocessor">#endif                          </span><span class=
+"comment">/*HAVE_GETHOSTBYNAME */</span>
+<a name="l00638" id="l00638"></a>00638     } <span class="keywordflow">else</span> {
+<a name="l00639" id="l00639"></a>00639         DEBUGMSGTL((<span class=
+"stringliteral">"netsnmp_sockaddr_in6"</span>, <span class="stringliteral">"NULL peername"</span>));
+<a name="l00640" id="l00640"></a>00640         <span class="keywordflow">return</span> 0;
+<a name="l00641" id="l00641"></a>00641     }
+<a name="l00642" id="l00642"></a>00642 
+<a name="l00643" id="l00643"></a>00643   resolved:
+<a name="l00644" id="l00644"></a>00644     DEBUGMSGTL((<span class="stringliteral">"netsnmp_sockaddr_in6"</span>, <span class=
+"stringliteral">"return { AF_INET6, [%s]:%hu }\n"</span>,
+<a name="l00645" id="l00645"></a>00645                 inet_ntop(AF_INET6, &amp;addr-&gt;sin6_addr, debug_addr,
+<a name="l00646" id="l00646"></a>00646                           <span class=
+"keyword">sizeof</span>(debug_addr)), ntohs(addr-&gt;sin6_port)));
+<a name="l00647" id="l00647"></a>00647     free(peername);
+<a name="l00648" id="l00648"></a>00648     <span class="keywordflow">return</span> 1;
+<a name="l00649" id="l00649"></a>00649 }
+<a name="l00650" id="l00650"></a>00650 
+<a name="l00651" id="l00651"></a>00651 
+<a name="l00652" id="l00652"></a>00652 <span class="keywordtype">int</span>
+<a name="l00653" id="l00653"></a>00653 netsnmp_sockaddr_in6(<span class="keyword">struct</span> sockaddr_in6 *addr,
+<a name="l00654" id="l00654"></a>00654                      <span class="keyword">const</span> <span class=
+"keywordtype">char</span> *inpeername, <span class="keywordtype">int</span> remote_port)
+<a name="l00655" id="l00655"></a>00655 {
+<a name="l00656" id="l00656"></a>00656     <span class="keywordtype">char</span> buf[<span class=
+"keyword">sizeof</span>(remote_port) * 3 + 2];
+<a name="l00657" id="l00657"></a>00657     sprintf(buf, <span class="stringliteral">":%u"</span>, remote_port);
+<a name="l00658" id="l00658"></a>00658     <span class=
+"keywordflow">return</span> netsnmp_sockaddr_in6_2(addr, inpeername, remote_port ? buf : NULL);
+<a name="l00659" id="l00659"></a>00659 }
+<a name="l00660" id="l00660"></a>00660 
+<a name="l00661" id="l00661"></a>00661 <span class="comment">/*</span>
+<a name="l00662" id="l00662"></a>00662 <span class="comment"> * int</span>
+<a name="l00663" id="l00663"></a>00663 <span class="comment"> * inet_make_mask_addr( int pf, void *dst, int masklength )</span>
+<a name="l00664" id="l00664"></a>00664 <span class=
+"comment"> *      convert from bit length specified masklength to network format, </span>
+<a name="l00665" id="l00665"></a>00665 <span class="comment"> *      which fills 1 from until specified bit length.</span>
+<a name="l00666" id="l00666"></a>00666 <span class=
+"comment"> *      dst is usally the structer of sockaddr_in or sockaddr_in6. </span>
+<a name="l00667" id="l00667"></a>00667 <span class=
+"comment"> *      makelength must be an interger from 0 to 32 if pf is PF_INET,</span>
+<a name="l00668" id="l00668"></a>00668 <span class="comment"> *      or from 0 to 128 if pf is PF_INET6.</span>
+<a name="l00669" id="l00669"></a>00669 <span class="comment"> * return:</span>
+<a name="l00670" id="l00670"></a>00670 <span class="comment"> *      0 if the input data, masklength was valid for </span>
+<a name="l00671" id="l00671"></a>00671 <span class="comment"> *      the specified protocol family.</span>
+<a name="l00672" id="l00672"></a>00672 <span class="comment"> *      -1 if the the input data wasn't valid.</span>
+<a name="l00673" id="l00673"></a>00673 <span class="comment"> */</span>
+<a name="l00674" id="l00674"></a>00674 
+<a name="l00675" id="l00675"></a>00675 <span class="keywordtype">int</span>
+<a name="l00676" id="l00676"></a>00676 inet_make_mask_addr(<span class="keywordtype">int</span> pf, <span class=
+"keywordtype">void</span> *dst, <span class="keywordtype">int</span> masklength)
+<a name="l00677" id="l00677"></a>00677 {
+<a name="l00678" id="l00678"></a>00678 
+<a name="l00679" id="l00679"></a>00679     <span class="keywordtype">unsigned</span> <span class=
+"keywordtype">long</span>   Mask = 0;
+<a name="l00680" id="l00680"></a>00680     <span class="keywordtype">int</span>             maskBit = 0x80000000L;
+<a name="l00681" id="l00681"></a>00681     <span class="keywordtype">unsigned</span> <span class=
+"keywordtype">char</span>   mask = 0;
+<a name="l00682" id="l00682"></a>00682     <span class="keywordtype">unsigned</span> <span class=
+"keywordtype">char</span>   maskbit = 0x80L;
+<a name="l00683" id="l00683"></a>00683     <span class="keywordtype">int</span>             i, j, jj;
+<a name="l00684" id="l00684"></a>00684 
+<a name="l00685" id="l00685"></a>00685 
+<a name="l00686" id="l00686"></a>00686     <span class="keywordflow">switch</span> (pf) {
+<a name="l00687" id="l00687"></a>00687     <span class="keywordflow">case</span> PF_INET:
+<a name="l00688" id="l00688"></a>00688         <span class="keywordflow">if</span> (masklength &lt; 0 || masklength &gt; 32)
+<a name="l00689" id="l00689"></a>00689             <span class="keywordflow">return</span> -1;
+<a name="l00690" id="l00690"></a>00690 
+<a name="l00691" id="l00691"></a>00691         ((<span class="keyword">struct </span>in_addr *) dst)-&gt;s_addr = 0;
+<a name="l00692" id="l00692"></a>00692 
+<a name="l00693" id="l00693"></a>00693         <span class="keywordflow">while</span> (masklength--) {
+<a name="l00694" id="l00694"></a>00694             Mask |= maskBit;
+<a name="l00695" id="l00695"></a>00695             maskBit &gt;&gt;= 1;
+<a name="l00696" id="l00696"></a>00696         }
+<a name="l00697" id="l00697"></a>00697         ((<span class="keyword">struct </span>in_addr *) dst)-&gt;s_addr = htonl(Mask);
+<a name="l00698" id="l00698"></a>00698         <span class="keywordflow">break</span>;
+<a name="l00699" id="l00699"></a>00699 
+<a name="l00700" id="l00700"></a>00700     <span class="keywordflow">case</span> PF_INET6:
+<a name="l00701" id="l00701"></a>00701         <span class="keywordflow">if</span> (masklength &lt; 0 || masklength &gt; 128)
+<a name="l00702" id="l00702"></a>00702             <span class="keywordflow">return</span> -1;
+<a name="l00703" id="l00703"></a>00703 
+<a name="l00704" id="l00704"></a>00704 
+<a name="l00705" id="l00705"></a>00705         <span class="keywordflow">for</span> (i = 0; i &lt; 16; i++) {
+<a name="l00706" id="l00706"></a>00706             (*(u_char *) (&amp;((<span class=
+"keyword">struct</span> in6_addr *) dst)-&gt;s6_addr[i])) = 0x00;
+<a name="l00707" id="l00707"></a>00707         }
+<a name="l00708" id="l00708"></a>00708 
+<a name="l00709" id="l00709"></a>00709         j = (int) masklength / 8;
+<a name="l00710" id="l00710"></a>00710         jj = masklength % 8;
+<a name="l00711" id="l00711"></a>00711 
+<a name="l00712" id="l00712"></a>00712         <span class="keywordflow">for</span> (i = 0; i &lt; j; i++) {
+<a name="l00713" id="l00713"></a>00713             (*(u_char *) (&amp;((<span class=
+"keyword">struct</span> in6_addr *) dst)-&gt;s6_addr[i])) = 0xff;
+<a name="l00714" id="l00714"></a>00714         }
+<a name="l00715" id="l00715"></a>00715         <span class="keywordflow">while</span> (jj--) {
+<a name="l00716" id="l00716"></a>00716             mask |= maskbit;
+<a name="l00717" id="l00717"></a>00717             maskbit &gt;&gt;= 1;
+<a name="l00718" id="l00718"></a>00718         }
+<a name="l00719" id="l00719"></a>00719 
+<a name="l00720" id="l00720"></a>00720         <span class="keywordflow">if</span> (j &lt; <span class=
+"keyword">sizeof</span> (((<span class="keyword">struct</span> in6_addr *) dst)-&gt;s6_addr)){
+<a name="l00721" id="l00721"></a>00721             (*(u_char *) (&amp;((<span class=
+"keyword">struct</span> in6_addr *) dst)-&gt;s6_addr[j])) = mask;
+<a name="l00722" id="l00722"></a>00722         }
+<a name="l00723" id="l00723"></a>00723 
+<a name="l00724" id="l00724"></a>00724         <span class="keywordflow">break</span>;
+<a name="l00725" id="l00725"></a>00725     <span class="keywordflow">default</span>:
+<a name="l00726" id="l00726"></a>00726         <span class="keywordflow">return</span> -1;              <span class=
+"comment">/* unsupported protocol family */</span>
+<a name="l00727" id="l00727"></a>00727     }
+<a name="l00728" id="l00728"></a>00728     <span class="keywordflow">return</span> 0;
+<a name="l00729" id="l00729"></a>00729 }
+<a name="l00730" id="l00730"></a>00730 
+<a name="l00731" id="l00731"></a>00731 <span class="comment">/*</span>
+<a name="l00732" id="l00732"></a>00732 <span class="comment"> * int</span>
+<a name="l00733" id="l00733"></a>00733 <span class="comment"> * inet_addr_complement( int pf, void *src, void *dst )</span>
+<a name="l00734" id="l00734"></a>00734 <span class="comment"> *      convert from src to dst, which all bits </span>
+<a name="l00735" id="l00735"></a>00735 <span class="comment"> *      are bit-compliment of src.</span>
+<a name="l00736" id="l00736"></a>00736 <span class="comment"> *      Src, dst are ususally sockaddr_in or sockaddr_in6.  </span>
+<a name="l00737" id="l00737"></a>00737 <span class="comment"> * return:</span>
+<a name="l00738" id="l00738"></a>00738 <span class="comment"> *      0 if the input data src and dst have the same size</span>
+<a name="l00739" id="l00739"></a>00739 <span class="comment"> *      -1 if the the input data wasn't valid.</span>
+<a name="l00740" id="l00740"></a>00740 <span class="comment"> */</span>
+<a name="l00741" id="l00741"></a>00741 
+<a name="l00742" id="l00742"></a>00742 <span class="keywordtype">int</span>
+<a name="l00743" id="l00743"></a>00743 inet_addr_complement(<span class="keywordtype">int</span> pf, <span class=
+"keywordtype">void</span> *src, <span class="keywordtype">void</span> *dst)
+<a name="l00744" id="l00744"></a>00744 {
+<a name="l00745" id="l00745"></a>00745 
+<a name="l00746" id="l00746"></a>00746     <span class="keywordtype">int</span>             i;
+<a name="l00747" id="l00747"></a>00747 
+<a name="l00748" id="l00748"></a>00748     <span class="keywordflow">if</span> (<span class=
+"keyword">sizeof</span>(src) != <span class="keyword">sizeof</span>(dst))
+<a name="l00749" id="l00749"></a>00749         <span class="keywordflow">return</span> -1;
+<a name="l00750" id="l00750"></a>00750 
+<a name="l00751" id="l00751"></a>00751     <span class="keywordflow">switch</span> (pf) {
+<a name="l00752" id="l00752"></a>00752     <span class="keywordflow">case</span> PF_INET:
+<a name="l00753" id="l00753"></a>00753         ((<span class="keyword">struct </span>in_addr *) dst)-&gt;s_addr =
+<a name="l00754" id="l00754"></a>00754             ~((<span class="keyword">struct </span>in_addr *) src)-&gt;s_addr;
+<a name="l00755" id="l00755"></a>00755         <span class="keywordflow">break</span>;
+<a name="l00756" id="l00756"></a>00756     <span class="keywordflow">case</span> PF_INET6:
+<a name="l00757" id="l00757"></a>00757         <span class="keywordflow">for</span> (i = 0; i &lt; 16; i++) {
+<a name="l00758" id="l00758"></a>00758             (*(u_char *) (&amp;((<span class=
+"keyword">struct</span> in6_addr *) dst)-&gt;s6_addr[i])) =
+<a name="l00759" id="l00759"></a>00759                 (~(*(u_char *) (&amp;((<span class=
+"keyword">struct </span>in6_addr *) src)-&gt;s6_addr[i])))
+<a name="l00760" id="l00760"></a>00760                 &amp; 0xff;
+<a name="l00761" id="l00761"></a>00761         }
+<a name="l00762" id="l00762"></a>00762         <span class="keywordflow">break</span>;
+<a name="l00763" id="l00763"></a>00763     <span class="keywordflow">default</span>:
+<a name="l00764" id="l00764"></a>00764         <span class="keywordflow">return</span> -1;
+<a name="l00765" id="l00765"></a>00765     }
+<a name="l00766" id="l00766"></a>00766     <span class="keywordflow">return</span> 0;
+<a name="l00767" id="l00767"></a>00767 }
+<a name="l00768" id="l00768"></a>00768 
+<a name="l00769" id="l00769"></a>00769 <span class="comment">/*</span>
+<a name="l00770" id="l00770"></a>00770 <span class="comment"> * int</span>
+<a name="l00771" id="l00771"></a>00771 <span class="comment"> * inet_addr_and( int pf, void *src1, void *src2, void *dst) </span>
+<a name="l00772" id="l00772"></a>00772 <span class=
+"comment"> *      take AND operation on src1 and src2, and output the result to dst.</span>
+<a name="l00773" id="l00773"></a>00773 <span class=
+"comment"> *      Src1, src2, and dst are ususally sockaddr_in or sockaddr_in6.  </span>
+<a name="l00774" id="l00774"></a>00774 <span class="comment"> * return:</span>
+<a name="l00775" id="l00775"></a>00775 <span class="comment"> *      0 if the input data src and dst have the same size</span>
+<a name="l00776" id="l00776"></a>00776 <span class="comment"> *      -1 if the the input data are not the same size</span>
+<a name="l00777" id="l00777"></a>00777 <span class="comment"> */</span>
+<a name="l00778" id="l00778"></a>00778 
+<a name="l00779" id="l00779"></a>00779 <span class="keywordtype">int</span>
+<a name="l00780" id="l00780"></a>00780 inet_addr_and(<span class="keywordtype">int</span> pf, <span class=
+"keywordtype">void</span> *src1, <span class="keywordtype">void</span> *src2, <span class="keywordtype">void</span> *dst)
+<a name="l00781" id="l00781"></a>00781 {
+<a name="l00782" id="l00782"></a>00782     <span class="keywordtype">int</span>             i;
+<a name="l00783" id="l00783"></a>00783 
+<a name="l00784" id="l00784"></a>00784     <span class="keywordflow">if</span> (<span class=
+"keyword">sizeof</span>(src1) != <span class="keyword">sizeof</span>(src2) || <span class=
+"keyword">sizeof</span>(src2) != <span class="keyword">sizeof</span>(dst))
+<a name="l00785" id="l00785"></a>00785         <span class="keywordflow">return</span> -1;
+<a name="l00786" id="l00786"></a>00786 
+<a name="l00787" id="l00787"></a>00787     <span class="keywordflow">switch</span> (pf) {
+<a name="l00788" id="l00788"></a>00788     <span class="keywordflow">case</span> PF_INET:
+<a name="l00789" id="l00789"></a>00789         ((<span class="keyword">struct </span>in_addr *) dst)-&gt;s_addr =
+<a name="l00790" id="l00790"></a>00790             ((<span class=
+"keyword">struct </span>in_addr *) src1)-&gt;s_addr &amp; ((<span class="keyword">struct </span>in_addr *) src2)-&gt;
+<a name="l00791" id="l00791"></a>00791             s_addr;
+<a name="l00792" id="l00792"></a>00792         <span class="keywordflow">break</span>;
+<a name="l00793" id="l00793"></a>00793 
+<a name="l00794" id="l00794"></a>00794     <span class="keywordflow">case</span> PF_INET6:
+<a name="l00795" id="l00795"></a>00795         <span class="keywordflow">for</span> (i = 0; i &lt; 16; i++) {
+<a name="l00796" id="l00796"></a>00796             (*(u_char *) (&amp;((<span class=
+"keyword">struct</span> in6_addr *) dst)-&gt;s6_addr[i])) =
+<a name="l00797" id="l00797"></a>00797                 (*(u_char *) (&amp;((<span class=
+"keyword">struct </span>in6_addr *) src1)-&gt;s6_addr[i])) &amp;
+<a name="l00798" id="l00798"></a>00798                 (*(u_char *) (&amp;((<span class=
+"keyword">struct</span> in6_addr *) src2)-&gt;s6_addr[i]));
+<a name="l00799" id="l00799"></a>00799         }
+<a name="l00800" id="l00800"></a>00800         <span class="keywordflow">break</span>;
+<a name="l00801" id="l00801"></a>00801     <span class="keywordflow">default</span>:
+<a name="l00802" id="l00802"></a>00802         <span class="keywordflow">return</span> -1;
+<a name="l00803" id="l00803"></a>00803     }
+<a name="l00804" id="l00804"></a>00804     <span class="keywordflow">return</span> 0;
+<a name="l00805" id="l00805"></a>00805 }
+<a name="l00806" id="l00806"></a>00806 
+<a name="l00807" id="l00807"></a>00807 
+<a name="l00808" id="l00808"></a>00808 <span class="comment">/*</span>
+<a name="l00809" id="l00809"></a>00809 <span class="comment"> * int</span>
+<a name="l00810" id="l00810"></a>00810 <span class="comment"> * inet_addrs_consistence (int pf, void *net, void *mask ) </span>
+<a name="l00811" id="l00811"></a>00811 <span class=
+"comment"> *      This function checks if the network address net is consistent</span>
+<a name="l00812" id="l00812"></a>00812 <span class="comment"> *      with the netmask address, mask.</span>
+<a name="l00813" id="l00813"></a>00813 <span class=
+"comment"> *      Net and mask are ususally sockaddr_in or sockaddr_in6.  </span>
+<a name="l00814" id="l00814"></a>00814 <span class="comment"> * Note:</span>
+<a name="l00815" id="l00815"></a>00815 <span class="comment"> *      Must spefiey protocol family in pf.</span>
+<a name="l00816" id="l00816"></a>00816 <span class="comment"> * return:</span>
+<a name="l00817" id="l00817"></a>00817 <span class=
+"comment"> *      0 if there is no consistence with address "net" and "mask".</span>
+<a name="l00818" id="l00818"></a>00818 <span class=
+"comment"> *      -1 if network address is inconsistent with netmask address, for </span>
+<a name="l00819" id="l00819"></a>00819 <span class=
+"comment"> *      instance, network address is 192.168.0.128 in spite of netmask, </span>
+<a name="l00820" id="l00820"></a>00820 <span class="comment"> *      which is 255.255.255.0. </span>
+<a name="l00821" id="l00821"></a>00821 <span class=
+"comment"> *      The case that the size of net and mask are different also returns -1.</span>
+<a name="l00822" id="l00822"></a>00822 <span class="comment"> */</span>
+<a name="l00823" id="l00823"></a>00823 
+<a name="l00824" id="l00824"></a>00824 <span class="keywordtype">int</span>
+<a name="l00825" id="l00825"></a>00825 inet_addrs_consistence(<span class="keywordtype">int</span> pf, <span class=
+"keywordtype">void</span> *net, <span class="keywordtype">void</span> *mask)
+<a name="l00826" id="l00826"></a>00826 {
+<a name="l00827" id="l00827"></a>00827     <span class="keyword">struct </span>sockaddr_in *tmp, *dst;
+<a name="l00828" id="l00828"></a>00828     <span class="keyword">struct </span>sockaddr_in6 *tmp6, *dst6;
+<a name="l00829" id="l00829"></a>00829     <span class="keywordtype">int</span>             ret;
+<a name="l00830" id="l00830"></a>00830 
+<a name="l00831" id="l00831"></a>00831     <span class="keywordflow">switch</span> (pf) {
+<a name="l00832" id="l00832"></a>00832     <span class="keywordflow">case</span> PF_INET:
+<a name="l00833" id="l00833"></a>00833         tmp = (<span class="keyword">struct </span>sockaddr_in *) malloc(<span class=
+"keyword">sizeof</span>(<span class="keyword">struct</span> sockaddr_in));
+<a name="l00834" id="l00834"></a>00834         <span class="keywordflow">if</span> (!tmp) {
+<a name="l00835" id="l00835"></a>00835             config_perror(<span class=
+"stringliteral">"Resource failure in inet_addr_consistence()"</span>);
+<a name="l00836" id="l00836"></a>00836             <span class="keywordflow">return</span> -1;
+<a name="l00837" id="l00837"></a>00837         }
+<a name="l00838" id="l00838"></a>00838         memset(tmp, 0, <span class="keyword">sizeof</span>(*tmp));
+<a name="l00839" id="l00839"></a>00839         tmp-&gt;sin_family = PF_INET;
+<a name="l00840" id="l00840"></a>00840         <span class="keywordflow">if</span> (inet_addr_complement
+<a name="l00841" id="l00841"></a>00841             (PF_INET, (<span class=
+"keyword">struct</span> in_addr *) mask, &amp;tmp-&gt;sin_addr) != 0) {
+<a name="l00842" id="l00842"></a>00842             config_perror(<span class=
+"stringliteral">"Fail in function of inet_addr_complement()"</span>);
+<a name="l00843" id="l00843"></a>00843             free(tmp);
+<a name="l00844" id="l00844"></a>00844             <span class="keywordflow">return</span> -1;
+<a name="l00845" id="l00845"></a>00845         }
+<a name="l00846" id="l00846"></a>00846         dst = (<span class="keyword">struct </span>sockaddr_in *) malloc(<span class=
+"keyword">sizeof</span>(<span class="keyword">struct</span> sockaddr_in));
+<a name="l00847" id="l00847"></a>00847         <span class="keywordflow">if</span> (!dst) {
+<a name="l00848" id="l00848"></a>00848             config_perror(<span class=
+"stringliteral">"Resource failure in inet_addr_consistence()"</span>);
+<a name="l00849" id="l00849"></a>00849             free(tmp);
+<a name="l00850" id="l00850"></a>00850             <span class="keywordflow">return</span> -1;
+<a name="l00851" id="l00851"></a>00851         }
+<a name="l00852" id="l00852"></a>00852         memset(dst, 0, <span class="keyword">sizeof</span>(*dst));
+<a name="l00853" id="l00853"></a>00853         dst-&gt;sin_family = PF_INET;
+<a name="l00854" id="l00854"></a>00854         <span class="keywordflow">if</span> (inet_addr_and
+<a name="l00855" id="l00855"></a>00855             (PF_INET, (<span class=
+"keyword">struct</span> in_addr *) net, &amp;tmp-&gt;sin_addr,
+<a name="l00856" id="l00856"></a>00856              &amp;dst-&gt;sin_addr) != 0) {
+<a name="l00857" id="l00857"></a>00857             config_perror(<span class=
+"stringliteral">"Fail in function of inet_addr_and()"</span>);
+<a name="l00858" id="l00858"></a>00858             free(dst);
+<a name="l00859" id="l00859"></a>00859             free(tmp);
+<a name="l00860" id="l00860"></a>00860             <span class="keywordflow">return</span> -1;
+<a name="l00861" id="l00861"></a>00861         }
+<a name="l00862" id="l00862"></a>00862         ret = ((dst-&gt;sin_addr.s_addr == INADDR_ANY) ? 0 : -1);
+<a name="l00863" id="l00863"></a>00863         free(dst);
+<a name="l00864" id="l00864"></a>00864         free(tmp);
+<a name="l00865" id="l00865"></a>00865         <span class="keywordflow">break</span>;
+<a name="l00866" id="l00866"></a>00866     <span class="keywordflow">case</span> PF_INET6:
+<a name="l00867" id="l00867"></a>00867         tmp6 = (<span class="keyword">struct </span>sockaddr_in6 *) malloc(<span class=
+"keyword">sizeof</span>(<span class="keyword">struct</span> sockaddr_in6));
+<a name="l00868" id="l00868"></a>00868         <span class="keywordflow">if</span> (!tmp6) {
+<a name="l00869" id="l00869"></a>00869             config_perror(<span class=
+"stringliteral">"Resource failure in inet_addr_consistence()"</span>);
+<a name="l00870" id="l00870"></a>00870             <span class="keywordflow">return</span> -1;
+<a name="l00871" id="l00871"></a>00871         }
+<a name="l00872" id="l00872"></a>00872         memset(tmp6, 0, <span class="keyword">sizeof</span>(*tmp6));
+<a name="l00873" id="l00873"></a>00873         tmp6-&gt;sin6_family = PF_INET6;
+<a name="l00874" id="l00874"></a>00874         <span class="keywordflow">if</span> (inet_addr_complement
+<a name="l00875" id="l00875"></a>00875             (PF_INET6, (<span class=
+"keyword">struct</span> in6_addr *) mask, &amp;tmp6-&gt;sin6_addr) != 0) {
+<a name="l00876" id="l00876"></a>00876             config_perror(<span class=
+"stringliteral">"Fail in function of inet_addr_complement()"</span>);
+<a name="l00877" id="l00877"></a>00877             free(tmp6);
+<a name="l00878" id="l00878"></a>00878             <span class="keywordflow">return</span> -1;
+<a name="l00879" id="l00879"></a>00879         }
+<a name="l00880" id="l00880"></a>00880         dst6 = (<span class="keyword">struct </span>sockaddr_in6 *) malloc(<span class=
+"keyword">sizeof</span>(<span class="keyword">struct</span> sockaddr_in6));
+<a name="l00881" id="l00881"></a>00881         <span class="keywordflow">if</span> (!dst6) {
+<a name="l00882" id="l00882"></a>00882             config_perror(<span class=
+"stringliteral">"Resource failure in inet_addr_consistence()"</span>);
+<a name="l00883" id="l00883"></a>00883             free(tmp6);
+<a name="l00884" id="l00884"></a>00884             <span class="keywordflow">return</span> -1;
+<a name="l00885" id="l00885"></a>00885         }
+<a name="l00886" id="l00886"></a>00886         memset(dst6, 0, <span class="keyword">sizeof</span>(*dst6));
+<a name="l00887" id="l00887"></a>00887         dst6-&gt;sin6_family = PF_INET6;
+<a name="l00888" id="l00888"></a>00888         <span class="keywordflow">if</span> (inet_addr_and
+<a name="l00889" id="l00889"></a>00889             (PF_INET6, (<span class=
+"keyword">struct</span> in6_addr *) net, &amp;tmp6-&gt;sin6_addr,
+<a name="l00890" id="l00890"></a>00890              &amp;dst6-&gt;sin6_addr)) {
+<a name="l00891" id="l00891"></a>00891             config_perror(<span class=
+"stringliteral">"Fail in function of inet_addr_and()"</span>);
+<a name="l00892" id="l00892"></a>00892             free(dst6);
+<a name="l00893" id="l00893"></a>00893             free(tmp6);
+<a name="l00894" id="l00894"></a>00894             <span class="keywordflow">return</span> -1;
+<a name="l00895" id="l00895"></a>00895         }
+<a name="l00896" id="l00896"></a>00896         ret = (IN6_IS_ADDR_UNSPECIFIED(&amp;dst6-&gt;sin6_addr) == 1 ? 0 : -1);
+<a name="l00897" id="l00897"></a>00897         free(dst6);
+<a name="l00898" id="l00898"></a>00898         free(tmp6);
+<a name="l00899" id="l00899"></a>00899         <span class="keywordflow">break</span>;
+<a name="l00900" id="l00900"></a>00900     <span class="keywordflow">default</span>:
+<a name="l00901" id="l00901"></a>00901         <span class="keywordflow">return</span> -1;
+<a name="l00902" id="l00902"></a>00902     }
+<a name="l00903" id="l00903"></a>00903     <span class="keywordflow">return</span> ret;
+<a name="l00904" id="l00904"></a>00904 }
+<a name="l00905" id="l00905"></a>00905 
+<a name="l00906" id="l00906"></a>00906 <span class="comment">/*</span>
+<a name="l00907" id="l00907"></a>00907 <span class="comment"> * int</span>
+<a name="l00908" id="l00908"></a>00908 <span class="comment"> * masked_address_are_equal (pf, from, mask, network) </span>
+<a name="l00909" id="l00909"></a>00909 <span class=
+"comment"> *      This function takes AND operation on address "from" and "mask",</span>
+<a name="l00910" id="l00910"></a>00910 <span class="comment"> *      and check the result is equal to address "network". </span>
+<a name="l00911" id="l00911"></a>00911 <span class=
+"comment"> *      From, net and mask are ususally sockaddr_in or sockaddr_in6.  </span>
+<a name="l00912" id="l00912"></a>00912 <span class="comment"> * Note:</span>
+<a name="l00913" id="l00913"></a>00913 <span class="comment"> *      Must spefiey protocol family in pf.</span>
+<a name="l00914" id="l00914"></a>00914 <span class="comment"> * return:</span>
+<a name="l00915" id="l00915"></a>00915 <span class=
+"comment"> *      0 if address "from" masked by address "mask" is eqaul to </span>
+<a name="l00916" id="l00916"></a>00916 <span class="comment"> *      address "network". </span>
+<a name="l00917" id="l00917"></a>00917 <span class=
+"comment"> *      -1 if address "from" masked by address "mask" isn't eqaul to </span>
+<a name="l00918" id="l00918"></a>00918 <span class="comment"> *      address "network". For instance, address "from" is </span>
+<a name="l00919" id="l00919"></a>00919 <span class=
+"comment"> *       192.168.0.129 and "mask" is 255.255.255.128. Then, masked </span>
+<a name="l00920" id="l00920"></a>00920 <span class=
+"comment"> *      address is 192.168.0.128. If address "network" is 192.168.0.128,</span>
+<a name="l00921" id="l00921"></a>00921 <span class="comment"> *      return 0, otherwise -1.</span>
+<a name="l00922" id="l00922"></a>00922 <span class=
+"comment"> *      Also retunn -1 if each address family of from, mask, network</span>
+<a name="l00923" id="l00923"></a>00923 <span class="comment"> *      isn't the same.</span>
+<a name="l00924" id="l00924"></a>00924 <span class="comment"> */</span>
+<a name="l00925" id="l00925"></a>00925 
+<a name="l00926" id="l00926"></a>00926 <span class="keywordtype">int</span>
+<a name="l00927" id="l00927"></a>00927 masked_address_are_equal(<span class="keywordtype">int</span> af, <span class=
+"keyword">struct</span> sockaddr_storage *from,
+<a name="l00928" id="l00928"></a>00928                          <span class="keyword">struct</span> sockaddr_storage *mask,
+<a name="l00929" id="l00929"></a>00929                          <span class="keyword">struct</span> sockaddr_storage *network)
+<a name="l00930" id="l00930"></a>00930 {
+<a name="l00931" id="l00931"></a>00931 
+<a name="l00932" id="l00932"></a>00932     <span class="keyword">struct </span>sockaddr_storage ss;
+<a name="l00933" id="l00933"></a>00933     memset(&amp;ss, 0, <span class="keyword">sizeof</span>(ss));
+<a name="l00934" id="l00934"></a>00934 
+<a name="l00935" id="l00935"></a>00935     <span class="keywordflow">switch</span> (af) {
+<a name="l00936" id="l00936"></a>00936     <span class="keywordflow">case</span> PF_INET:
+<a name="l00937" id="l00937"></a>00937         <span class=
+"keywordflow">if</span> (mask-&gt;SS_FAMILY != PF_INET || network-&gt;SS_FAMILY != PF_INET) {
+<a name="l00938" id="l00938"></a>00938             <span class="keywordflow">return</span> -1;
+<a name="l00939" id="l00939"></a>00939         }
+<a name="l00940" id="l00940"></a>00940         ss.SS_FAMILY = PF_INET;
+<a name="l00941" id="l00941"></a>00941         inet_addr_and(PF_INET,
+<a name="l00942" id="l00942"></a>00942                       &amp;((<span class=
+"keyword">struct</span> sockaddr_in *) from)-&gt;sin_addr,
+<a name="l00943" id="l00943"></a>00943                       &amp;((<span class=
+"keyword">struct</span> sockaddr_in *) mask)-&gt;sin_addr,
+<a name="l00944" id="l00944"></a>00944                       &amp;((<span class=
+"keyword">struct</span> sockaddr_in *) &amp;ss)-&gt;sin_addr);
+<a name="l00945" id="l00945"></a>00945         <span class="keywordflow">if</span> (((<span class=
+"keyword">struct</span> sockaddr_in *) &amp;ss)-&gt;sin_addr.s_addr ==
+<a name="l00946" id="l00946"></a>00946             ((<span class=
+"keyword">struct</span> sockaddr_in *) network)-&gt;sin_addr.s_addr) {
+<a name="l00947" id="l00947"></a>00947             <span class="keywordflow">return</span> 0;
+<a name="l00948" id="l00948"></a>00948         } <span class="keywordflow">else</span> {
+<a name="l00949" id="l00949"></a>00949             <span class="keywordflow">return</span> -1;
+<a name="l00950" id="l00950"></a>00950         }
+<a name="l00951" id="l00951"></a>00951         <span class="keywordflow">break</span>;
+<a name="l00952" id="l00952"></a>00952     <span class="keywordflow">case</span> PF_INET6:
+<a name="l00953" id="l00953"></a>00953         <span class=
+"keywordflow">if</span> (mask-&gt;SS_FAMILY != PF_INET6 || network-&gt;SS_FAMILY != PF_INET6) {
+<a name="l00954" id="l00954"></a>00954             <span class="keywordflow">return</span> -1;
+<a name="l00955" id="l00955"></a>00955         }
+<a name="l00956" id="l00956"></a>00956         ss.SS_FAMILY = PF_INET6;
+<a name="l00957" id="l00957"></a>00957         inet_addr_and(PF_INET6,
+<a name="l00958" id="l00958"></a>00958                       &amp;((<span class=
+"keyword">struct</span> sockaddr_in6 *) from)-&gt;sin6_addr,
+<a name="l00959" id="l00959"></a>00959                       &amp;((<span class=
+"keyword">struct</span> sockaddr_in6 *) mask)-&gt;sin6_addr,
+<a name="l00960" id="l00960"></a>00960                       &amp;((<span class=
+"keyword">struct</span> sockaddr_in6 *) &amp;ss)-&gt;sin6_addr);
+<a name="l00961" id="l00961"></a>00961 <span class="preprocessor">#ifndef IN6_ARE_ADDR_EQUAL</span>
+<a name="l00962" id="l00962"></a>00962 <span class="preprocessor">#define IN6_ARE_ADDR_EQUAL(a,b) IN6_ADDR_EQUAL(a,b)</span>
+<a name="l00963" id="l00963"></a>00963 <span class="preprocessor">#endif</span>
+<a name="l00964" id="l00964"></a>00964         <span class="keywordflow">if</span> (IN6_ARE_ADDR_EQUAL(&amp;((<span class=
+"keyword">struct</span> sockaddr_in6 *) &amp;ss)-&gt;sin6_addr,
+<a name="l00965" id="l00965"></a>00965                                &amp;((<span class=
+"keyword">struct</span> sockaddr_in6 *) network)-&gt;
+<a name="l00966" id="l00966"></a>00966                                sin6_addr) == 1) {
+<a name="l00967" id="l00967"></a>00967             <span class="keywordflow">return</span> 0;
+<a name="l00968" id="l00968"></a>00968         } <span class="keywordflow">else</span> {
+<a name="l00969" id="l00969"></a>00969             <span class="keywordflow">return</span> -1;
+<a name="l00970" id="l00970"></a>00970         }
+<a name="l00971" id="l00971"></a>00971         <span class="keywordflow">break</span>;
+<a name="l00972" id="l00972"></a>00972     <span class="keywordflow">default</span>:
+<a name="l00973" id="l00973"></a>00973         <span class="keywordflow">return</span> -1;
+<a name="l00974" id="l00974"></a>00974     }
+<a name="l00975" id="l00975"></a>00975 }
+<a name="l00976" id="l00976"></a>00976 
+<a name="l00977" id="l00977"></a>00977 <span class=
+"preprocessor">#if !defined(NETSNMP_DISABLE_SNMPV1) || !defined(NETSNMP_DISABLE_SNMPV2C)</span>
+<a name="l00978" id="l00978"></a>00978 <span class="comment">/*</span>
+<a name="l00979" id="l00979"></a>00979 <span class=
+"comment"> * The following functions provide the "com2sec6" configuration token</span>
+<a name="l00980" id="l00980"></a>00980 <span class="comment"> * functionality for compatibility.  </span>
+<a name="l00981" id="l00981"></a>00981 <span class="comment"> */</span>
+<a name="l00982" id="l00982"></a>00982 
+<a name="l00983" id="l00983"></a>00983 <span class="preprocessor">#define EXAMPLE_NETWORK       "NETWORK"</span>
+<a name="l00984" id="l00984"></a>00984 <span class="preprocessor">#define EXAMPLE_COMMUNITY     "COMMUNITY"</span>
+<a name="l00985" id="l00985"></a>00985 
+<a name="l00986" id="l00986"></a>00986 <span class="keyword">typedef</span> <span class="keyword">struct </span>_com2Sec6Entry {
+<a name="l00987" id="l00987"></a>00987     <span class="keywordtype">char</span>            community[COMMUNITY_MAX_LEN];
+<a name="l00988" id="l00988"></a>00988     <span class="keyword">struct </span>sockaddr_in6 network;
+<a name="l00989" id="l00989"></a>00989     <span class="keyword">struct </span>sockaddr_in6 mask;
+<a name="l00990" id="l00990"></a>00990     <span class="keywordtype">char</span>            secName[VACMSTRINGLEN];
+<a name="l00991" id="l00991"></a>00991     <span class="keywordtype">char</span>            contextName[VACMSTRINGLEN];
+<a name="l00992" id="l00992"></a>00992     <span class="keyword">struct </span>_com2Sec6Entry *next;
+<a name="l00993" id="l00993"></a>00993 } com2Sec6Entry;
+<a name="l00994" id="l00994"></a>00994 
+<a name="l00995" id="l00995"></a>00995 com2Sec6Entry  *com2Sec6List = NULL, *com2Sec6ListLast = NULL;
+<a name="l00996" id="l00996"></a>00996 
+<a name="l00997" id="l00997"></a>00997 
+<a name="l00998" id="l00998"></a>00998 <span class="keywordtype">void</span>
+<a name="l00999" id="l00999"></a>00999 memmove_com2Sec6Entry(com2Sec6Entry * c,
+<a name="l01000" id="l01000"></a>01000                       <span class="keywordtype">char</span> *secName,
+<a name="l01001" id="l01001"></a>01001                       <span class="keywordtype">char</span> *community,
+<a name="l01002" id="l01002"></a>01002                       <span class="keyword">struct</span> sockaddr_in6 net, <span class=
+"keyword">struct</span> sockaddr_in6 mask,
+<a name="l01003" id="l01003"></a>01003                       <span class="keywordtype">char</span> *contextName)
+<a name="l01004" id="l01004"></a>01004 {
+<a name="l01005" id="l01005"></a>01005     snprintf(c-&gt;secName, strlen(secName) + 1, <span class=
+"stringliteral">"%s"</span>, secName);
+<a name="l01006" id="l01006"></a>01006     snprintf(c-&gt;contextName, strlen(contextName) + 1, <span class=
+"stringliteral">"%s"</span>, contextName);
+<a name="l01007" id="l01007"></a>01007     snprintf(c-&gt;community, strlen(community) + 1, <span class=
+"stringliteral">"%s"</span>, community);
+<a name="l01008" id="l01008"></a>01008     memmove(&amp;c-&gt;network, &amp;net, <span class="keyword">sizeof</span>(net));
+<a name="l01009" id="l01009"></a>01009     memmove(&amp;c-&gt;mask, &amp;mask, <span class="keyword">sizeof</span>(mask));
+<a name="l01010" id="l01010"></a>01010     c-&gt;next = NULL;
+<a name="l01011" id="l01011"></a>01011 }
+<a name="l01012" id="l01012"></a>01012 
+<a name="l01013" id="l01013"></a>01013 
+<a name="l01014" id="l01014"></a>01014 <span class="preprocessor">#ifndef IPV6_STRING_LEN</span>
+<a name="l01015" id="l01015"></a>01015 <span class="preprocessor">#define IPV6_STRING_LEN 55</span>
+<a name="l01016" id="l01016"></a>01016 <span class="preprocessor">#endif</span>
+<a name="l01017" id="l01017"></a>01017 
+<a name="l01018" id="l01018"></a>01018 <span class="keywordtype">void</span>
+<a name="l01019" id="l01019"></a>01019 netsnmp_udp6_parse_security(<span class="keyword">const</span> <span class=
+"keywordtype">char</span> *token, <span class="keywordtype">char</span> *param)
+<a name="l01020" id="l01020"></a>01020 {
+<a name="l01021" id="l01021"></a>01021     <span class="keywordtype">char</span>            secName[VACMSTRINGLEN];
+<a name="l01022" id="l01022"></a>01022     <span class="keywordtype">char</span>            contextName[VACMSTRINGLEN];
+<a name="l01023" id="l01023"></a>01023     <span class="keywordtype">char</span>            community[COMMUNITY_MAX_LEN];
+<a name="l01024" id="l01024"></a>01024     <span class="keywordtype">char</span>            source[IPV6_STRING_LEN];
+<a name="l01025" id="l01025"></a>01025     <span class=
+"keywordtype">char</span>           *cp = NULL, *strnetwork = NULL, *strmask = NULL;
+<a name="l01026" id="l01026"></a>01026     com2Sec6Entry  *e = NULL;
+<a name="l01027" id="l01027"></a>01027     <span class="keyword">struct </span>sockaddr_in6 net, mask;
+<a name="l01028" id="l01028"></a>01028     <span class="keyword">struct </span>sockaddr_in tmp;
+<a name="l01029" id="l01029"></a>01029 
+<a name="l01030" id="l01030"></a>01030     memset(&amp;net, 0, <span class="keyword">sizeof</span>(net));
+<a name="l01031" id="l01031"></a>01031     memset(&amp;mask, 0, <span class="keyword">sizeof</span>(mask));
+<a name="l01032" id="l01032"></a>01032     memset(&amp;tmp, 0, <span class="keyword">sizeof</span>(tmp));
+<a name="l01033" id="l01033"></a>01033     net.sin6_family = AF_INET6;
+<a name="l01034" id="l01034"></a>01034     mask.sin6_family = AF_INET6;
+<a name="l01035" id="l01035"></a>01035     tmp.sin_family = AF_INET;
+<a name="l01036" id="l01036"></a>01036 
+<a name="l01037" id="l01037"></a>01037 
+<a name="l01038" id="l01038"></a>01038     <span class="comment">/*</span>
+<a name="l01039" id="l01039"></a>01039 <span class=
+"comment">     * Get security, source address/netmask and community strings.  </span>
+<a name="l01040" id="l01040"></a>01040 <span class="comment">     */</span>
+<a name="l01041" id="l01041"></a>01041     cp = copy_nword( param, secName, <span class="keyword">sizeof</span>(secName));
+<a name="l01042" id="l01042"></a>01042     <span class="keywordflow">if</span> (strcmp(secName, <span class=
+"stringliteral">"-Cn"</span>) == 0) {
+<a name="l01043" id="l01043"></a>01043         <span class="keywordflow">if</span> (!cp) {
+<a name="l01044" id="l01044"></a>01044             config_perror(<span class=
+"stringliteral">"missing CONTEXT_NAME parameter"</span>);
+<a name="l01045" id="l01045"></a>01045             <span class="keywordflow">return</span>;
+<a name="l01046" id="l01046"></a>01046         }
+<a name="l01047" id="l01047"></a>01047         cp = copy_nword( cp, contextName, <span class=
+"keyword">sizeof</span>(contextName));
+<a name="l01048" id="l01048"></a>01048         cp = copy_nword( cp, secName, <span class="keyword">sizeof</span>(secName));
+<a name="l01049" id="l01049"></a>01049     } <span class="keywordflow">else</span> {
+<a name="l01050" id="l01050"></a>01050         contextName[0] = <span class="charliteral">'\0'</span>;
+<a name="l01051" id="l01051"></a>01051     }
+<a name="l01052" id="l01052"></a>01052     <span class="keywordflow">if</span> (secName[0] == <span class=
+"charliteral">'\0'</span>) {
+<a name="l01053" id="l01053"></a>01053         config_perror(<span class="stringliteral">"missing NAME parameter"</span>);
+<a name="l01054" id="l01054"></a>01054         <span class="keywordflow">return</span>;
+<a name="l01055" id="l01055"></a>01055     } <span class="keywordflow">else</span> <span class=
+"keywordflow">if</span> (strlen(secName) &gt; (VACMSTRINGLEN - 1)) {
+<a name="l01056" id="l01056"></a>01056         config_perror(<span class="stringliteral">"security name too long"</span>);
+<a name="l01057" id="l01057"></a>01057         <span class="keywordflow">return</span>;
+<a name="l01058" id="l01058"></a>01058     }
+<a name="l01059" id="l01059"></a>01059     cp = copy_nword( cp, source, <span class="keyword">sizeof</span>(source));
+<a name="l01060" id="l01060"></a>01060     <span class="keywordflow">if</span> (source[0] == <span class=
+"charliteral">'\0'</span>) {
+<a name="l01061" id="l01061"></a>01061         config_perror(<span class="stringliteral">"missing SOURCE parameter"</span>);
+<a name="l01062" id="l01062"></a>01062         <span class="keywordflow">return</span>;
+<a name="l01063" id="l01063"></a>01063     } <span class="keywordflow">else</span> <span class=
+"keywordflow">if</span> (strncmp(source, EXAMPLE_NETWORK, strlen(EXAMPLE_NETWORK)) ==
+<a name="l01064" id="l01064"></a>01064                0) {
+<a name="l01065" id="l01065"></a>01065         config_perror(<span class=
+"stringliteral">"example config NETWORK not properly configured"</span>);
+<a name="l01066" id="l01066"></a>01066         <span class="keywordflow">return</span>;
+<a name="l01067" id="l01067"></a>01067     }
+<a name="l01068" id="l01068"></a>01068     cp = copy_nword( cp, community, <span class="keyword">sizeof</span>(community));
+<a name="l01069" id="l01069"></a>01069     <span class="keywordflow">if</span> (community[0] == <span class=
+"charliteral">'\0'</span>) {
+<a name="l01070" id="l01070"></a>01070         config_perror(<span class="stringliteral">"missing COMMUNITY parameter\n"</span>);
+<a name="l01071" id="l01071"></a>01071         <span class="keywordflow">return</span>;
+<a name="l01072" id="l01072"></a>01072     } <span class="keywordflow">else</span>
+<a name="l01073" id="l01073"></a>01073         <span class="keywordflow">if</span> (strncmp
+<a name="l01074" id="l01074"></a>01074             (community, EXAMPLE_COMMUNITY, strlen(EXAMPLE_COMMUNITY))
+<a name="l01075" id="l01075"></a>01075             == 0) {
+<a name="l01076" id="l01076"></a>01076         config_perror(<span class=
+"stringliteral">"example config COMMUNITY not properly configured"</span>);
+<a name="l01077" id="l01077"></a>01077         <span class="keywordflow">return</span>;
+<a name="l01078" id="l01078"></a>01078     } <span class="keywordflow">else</span> <span class=
+"keywordflow">if</span> (strlen(community) &gt; (COMMUNITY_MAX_LEN - 1)) {
+<a name="l01079" id="l01079"></a>01079         config_perror(<span class="stringliteral">"community name too long"</span>);
+<a name="l01080" id="l01080"></a>01080         <span class="keywordflow">return</span>;
+<a name="l01081" id="l01081"></a>01081     }
+<a name="l01082" id="l01082"></a>01082 
+<a name="l01083" id="l01083"></a>01083     <span class="comment">/*</span>
+<a name="l01084" id="l01084"></a>01084 <span class="comment">     * Process the source address/netmask string.  </span>
+<a name="l01085" id="l01085"></a>01085 <span class="comment">     */</span>
+<a name="l01086" id="l01086"></a>01086     cp = strchr(source, <span class="charliteral">'/'</span>);
+<a name="l01087" id="l01087"></a>01087     <span class="keywordflow">if</span> (cp != NULL) {
+<a name="l01088" id="l01088"></a>01088         <span class="comment">/*</span>
+<a name="l01089" id="l01089"></a>01089 <span class="comment">         * Mask given.  </span>
+<a name="l01090" id="l01090"></a>01090 <span class="comment">         */</span>
+<a name="l01091" id="l01091"></a>01091         *cp = <span class="charliteral">'\0'</span>;
+<a name="l01092" id="l01092"></a>01092         strmask = cp + 1;
+<a name="l01093" id="l01093"></a>01093     }
+<a name="l01094" id="l01094"></a>01094 
+<a name="l01095" id="l01095"></a>01095     <span class="comment">/*</span>
+<a name="l01096" id="l01096"></a>01096 <span class="comment">     * Deal with the network part first.  </span>
+<a name="l01097" id="l01097"></a>01097 <span class="comment">     */</span>
+<a name="l01098" id="l01098"></a>01098     <span class="keywordflow">if</span> ((strcmp(source, <span class=
+"stringliteral">"default"</span>) == 0) || (strcmp(source, <span class="stringliteral">"::"</span>) == 0)) {
+<a name="l01099" id="l01099"></a>01099         <span class="keywordflow">if</span> ((strnetwork = strdup(<span class=
+"stringliteral">"0::0"</span>)) != NULL)
+<a name="l01100" id="l01100"></a>01100         {
+<a name="l01101" id="l01101"></a>01101             <span class="keywordflow">if</span> ((strmask = strdup(<span class=
+"stringliteral">"0::0"</span>)) != NULL)
+<a name="l01102" id="l01102"></a>01102             {
+<a name="l01103" id="l01103"></a>01103         
+<a name="l01104" id="l01104"></a>01104                 inet_pton(AF_INET6, strnetwork, &amp;net.sin6_addr);
+<a name="l01105" id="l01105"></a>01105                 inet_pton(AF_INET6, strmask, &amp;mask.sin6_addr);
+<a name="l01106" id="l01106"></a>01106                 
+<a name="l01107" id="l01107"></a>01107                 e = (com2Sec6Entry *) malloc(<span class=
+"keyword">sizeof</span>(com2Sec6Entry));
+<a name="l01108" id="l01108"></a>01108                 <span class="keywordflow">if</span> (e != NULL) {
+<a name="l01109" id="l01109"></a>01109                     memmove_com2Sec6Entry(e, secName, community, net, mask, contextName);
+<a name="l01110" id="l01110"></a>01110                     <span class="keywordflow">if</span> (com2Sec6ListLast != NULL) {
+<a name="l01111" id="l01111"></a>01111                         com2Sec6ListLast-&gt;next = e;
+<a name="l01112" id="l01112"></a>01112                         com2Sec6ListLast = e;
+<a name="l01113" id="l01113"></a>01113                     } <span class="keywordflow">else</span> {
+<a name="l01114" id="l01114"></a>01114                         com2Sec6ListLast = com2Sec6List = e;
+<a name="l01115" id="l01115"></a>01115                     }
+<a name="l01116" id="l01116"></a>01116                 }
+<a name="l01117" id="l01117"></a>01117                 <span class="keywordflow">else</span> {
+<a name="l01118" id="l01118"></a>01118                     config_perror (<span class="stringliteral">"memory error"</span>);
+<a name="l01119" id="l01119"></a>01119                 }
+<a name="l01120" id="l01120"></a>01120                 free (strmask);
+<a name="l01121" id="l01121"></a>01121             }
+<a name="l01122" id="l01122"></a>01122             <span class="keywordflow">else</span> {
+<a name="l01123" id="l01123"></a>01123                 DEBUGMSGTL((<span class=
+"stringliteral">"netsnmp_udp6_parse_security"</span>,
+<a name="l01124" id="l01124"></a>01124                             <span class=
+"stringliteral">"Couldn't allocate enough memory\n"</span>));
+<a name="l01125" id="l01125"></a>01125             }
+<a name="l01126" id="l01126"></a>01126             free (strnetwork);
+<a name="l01127" id="l01127"></a>01127         }
+<a name="l01128" id="l01128"></a>01128         <span class="keywordflow">else</span> {
+<a name="l01129" id="l01129"></a>01129             DEBUGMSGTL((<span class="stringliteral">"netsnmp_udp6_parse_security"</span>,
+<a name="l01130" id="l01130"></a>01130                         <span class=
+"stringliteral">"Couldn't allocate enough memory\n"</span>));
+<a name="l01131" id="l01131"></a>01131         }
+<a name="l01132" id="l01132"></a>01132     } <span class="keywordflow">else</span> {
+<a name="l01133" id="l01133"></a>01133         <span class="comment">/*</span>
+<a name="l01134" id="l01134"></a>01134 <span class="comment">         * Try interpreting as IPv6 address.  </span>
+<a name="l01135" id="l01135"></a>01135 <span class="comment">         */</span>
+<a name="l01136" id="l01136"></a>01136         <span class=
+"keywordflow">if</span> (inet_pton(AF_INET6, source, &amp;net.sin6_addr) == 1) {
+<a name="l01137" id="l01137"></a>01137             <span class=
+"keywordflow">if</span> (strmask == NULL || *strmask == <span class="charliteral">'\0'</span>) {
+<a name="l01138" id="l01138"></a>01138                 inet_make_mask_addr(PF_INET6, &amp;mask.sin6_addr, 128);
+<a name="l01139" id="l01139"></a>01139             } <span class="keywordflow">else</span> {
+<a name="l01140" id="l01140"></a>01140                 <span class="keywordflow">if</span> (strchr(strmask, <span class=
+"charliteral">':'</span>)) {
+<a name="l01141" id="l01141"></a>01141                     <span class=
+"keywordflow">if</span> (inet_pton(PF_INET6, strmask, &amp;net.sin6_addr) != 1) {
+<a name="l01142" id="l01142"></a>01142                         config_perror(<span class="stringliteral">"bad mask"</span>);
+<a name="l01143" id="l01143"></a>01143                         <span class="keywordflow">return</span>;
+<a name="l01144" id="l01144"></a>01144                     }
+<a name="l01145" id="l01145"></a>01145                 } <span class="keywordflow">else</span> {
+<a name="l01146" id="l01146"></a>01146                     <span class="keywordflow">if</span> (inet_make_mask_addr
+<a name="l01147" id="l01147"></a>01147                         (PF_INET6, &amp;mask.sin6_addr, atoi(strmask)) != 0) {
+<a name="l01148" id="l01148"></a>01148                         config_perror(<span class="stringliteral">"bad mask"</span>);
+<a name="l01149" id="l01149"></a>01149                         <span class="keywordflow">return</span>;
+<a name="l01150" id="l01150"></a>01150 
+<a name="l01151" id="l01151"></a>01151                     }
+<a name="l01152" id="l01152"></a>01152                 }
+<a name="l01153" id="l01153"></a>01153             }
+<a name="l01154" id="l01154"></a>01154             <span class="comment">/*</span>
+<a name="l01155" id="l01155"></a>01155 <span class=
+"comment">             * Check that the network and mask are consistent.  </span>
+<a name="l01156" id="l01156"></a>01156 <span class="comment">             */</span>
+<a name="l01157" id="l01157"></a>01157             <span class="keywordflow">if</span> (inet_addrs_consistence
+<a name="l01158" id="l01158"></a>01158                 (PF_INET6, &amp;net.sin6_addr, &amp;mask.sin6_addr) != 0) {
+<a name="l01159" id="l01159"></a>01159                 config_perror(<span class="stringliteral">"source/mask mismatch"</span>);
+<a name="l01160" id="l01160"></a>01160                 <span class="keywordflow">return</span>;
+<a name="l01161" id="l01161"></a>01161             }
+<a name="l01162" id="l01162"></a>01162 
+<a name="l01163" id="l01163"></a>01163             e = (com2Sec6Entry *) malloc(<span class=
+"keyword">sizeof</span>(com2Sec6Entry));
+<a name="l01164" id="l01164"></a>01164             <span class="keywordflow">if</span> (e == NULL) {
+<a name="l01165" id="l01165"></a>01165                 config_perror(<span class="stringliteral">"memory error"</span>);
+<a name="l01166" id="l01166"></a>01166                 <span class="keywordflow">return</span>;
+<a name="l01167" id="l01167"></a>01167             }
+<a name="l01168" id="l01168"></a>01168 
+<a name="l01169" id="l01169"></a>01169             <span class="comment">/*</span>
+<a name="l01170" id="l01170"></a>01170 <span class=
+"comment">             * Everything is okay.  Copy the parameters to the structure allocated</span>
+<a name="l01171" id="l01171"></a>01171 <span class="comment">             * above and add it to END of the list.  </span>
+<a name="l01172" id="l01172"></a>01172 <span class="comment">             */</span>
+<a name="l01173" id="l01173"></a>01173             <span class=
+"keywordflow">if</span> (strmask != NULL &amp;&amp; strnetwork != NULL) {
+<a name="l01174" id="l01174"></a>01174                 DEBUGMSGTL((<span class=
+"stringliteral">"netsnmp_udp6_parse_security"</span>,
+<a name="l01175" id="l01175"></a>01175                             <span class=
+"stringliteral">"&lt;\"%s\", %s/%s&gt; =&gt; \"%s\"\n"</span>, community,
+<a name="l01176" id="l01176"></a>01176                             strnetwork, strmask, secName));
+<a name="l01177" id="l01177"></a>01177                 free(strmask);
+<a name="l01178" id="l01178"></a>01178                 free(strnetwork);
+<a name="l01179" id="l01179"></a>01179             } <span class="keywordflow">else</span> {
+<a name="l01180" id="l01180"></a>01180                 DEBUGMSGTL((<span class=
+"stringliteral">"netsnmp_udp6_parse_security"</span>,
+<a name="l01181" id="l01181"></a>01181                             <span class=
+"stringliteral">"Couldn't allocate enough memory\n"</span>));
+<a name="l01182" id="l01182"></a>01182             }
+<a name="l01183" id="l01183"></a>01183             memmove_com2Sec6Entry(e, secName, community, net, mask,
+<a name="l01184" id="l01184"></a>01184                                   contextName);
+<a name="l01185" id="l01185"></a>01185             <span class="keywordflow">if</span> (com2Sec6ListLast != NULL) {
+<a name="l01186" id="l01186"></a>01186                 com2Sec6ListLast-&gt;next = e;
+<a name="l01187" id="l01187"></a>01187                 com2Sec6ListLast = e;
+<a name="l01188" id="l01188"></a>01188             } <span class="keywordflow">else</span> {
+<a name="l01189" id="l01189"></a>01189                 com2Sec6ListLast = com2Sec6List = e;
+<a name="l01190" id="l01190"></a>01190             }
+<a name="l01191" id="l01191"></a>01191 
+<a name="l01192" id="l01192"></a>01192 <span class="preprocessor">#if HAVE_GETADDRINFO</span>
+<a name="l01193" id="l01193"></a>01193 
+<a name="l01194" id="l01194"></a>01194         } <span class="keywordflow">else</span> {
+<a name="l01195" id="l01195"></a>01195             <span class="comment">/*</span>
+<a name="l01196" id="l01196"></a>01196 <span class="comment">             * Nope, Must be a hostname.  </span>
+<a name="l01197" id="l01197"></a>01197 <span class="comment">             */</span>
+<a name="l01198" id="l01198"></a>01198             <span class="keyword">struct </span>addrinfo hints, *ai, *res;
+<a name="l01199" id="l01199"></a>01199             <span class="keywordtype">char</span>            hbuf[NI_MAXHOST];
+<a name="l01200" id="l01200"></a>01200             <span class="keywordtype">int</span>             gai_error;
+<a name="l01201" id="l01201"></a>01201 
+<a name="l01202" id="l01202"></a>01202             memset(&amp;hints, 0, <span class="keyword">sizeof</span>(hints));
+<a name="l01203" id="l01203"></a>01203             hints.ai_family = PF_INET6;
+<a name="l01204" id="l01204"></a>01204             hints.ai_socktype = SOCK_DGRAM;
+<a name="l01205" id="l01205"></a>01205             <span class=
+"keywordflow">if</span> ((gai_error = getaddrinfo(source, NULL, &amp;hints, &amp;res)) != 0) {
+<a name="l01206" id="l01206"></a>01206                 config_perror(gai_strerror(gai_error));
+<a name="l01207" id="l01207"></a>01207                 <span class="keywordflow">return</span>;
+<a name="l01208" id="l01208"></a>01208             }
+<a name="l01209" id="l01209"></a>01209 
+<a name="l01210" id="l01210"></a>01210             <span class=
+"keywordflow">for</span> (ai = res; ai != NULL; ai = ai-&gt;ai_next) {
+<a name="l01211" id="l01211"></a>01211                 <span class="keywordflow">if</span> (getnameinfo
+<a name="l01212" id="l01212"></a>01212                     (ai-&gt;ai_addr, ai-&gt;ai_addrlen, hbuf, <span class=
+"keyword">sizeof</span>(hbuf), NULL,
+<a name="l01213" id="l01213"></a>01213                      0, NI_NUMERICHOST)) {
+<a name="l01214" id="l01214"></a>01214                     config_perror(<span class=
+"stringliteral">"getnameinfo failed"</span>);
+<a name="l01215" id="l01215"></a>01215                 }
+<a name="l01216" id="l01216"></a>01216                 memmove(&amp;net, ai-&gt;ai_addr, <span class=
+"keyword">sizeof</span>(<span class="keyword">struct</span> sockaddr_in6));
+<a name="l01217" id="l01217"></a>01217                 inet_make_mask_addr(PF_INET6, &amp;mask.sin6_addr, 128);
+<a name="l01218" id="l01218"></a>01218 
+<a name="l01219" id="l01219"></a>01219                 e = (com2Sec6Entry *) malloc(<span class=
+"keyword">sizeof</span>(com2Sec6Entry));
+<a name="l01220" id="l01220"></a>01220                 <span class="keywordflow">if</span> (e == NULL) {
+<a name="l01221" id="l01221"></a>01221                     config_perror(<span class="stringliteral">"memory error"</span>);
+<a name="l01222" id="l01222"></a>01222                     <span class="keywordflow">return</span>;
+<a name="l01223" id="l01223"></a>01223                 }
+<a name="l01224" id="l01224"></a>01224 
+<a name="l01225" id="l01225"></a>01225                 <span class="comment">/*</span>
+<a name="l01226" id="l01226"></a>01226 <span class=
+"comment">                 * Everything is okay.  Copy the parameters to the structure allocated</span>
+<a name="l01227" id="l01227"></a>01227 <span class="comment">                 * above and add it to END of the list.  </span>
+<a name="l01228" id="l01228"></a>01228 <span class="comment">                 */</span>
+<a name="l01229" id="l01229"></a>01229                 DEBUGMSGTL((<span class=
+"stringliteral">"netsnmp_udp6_parse_security"</span>,
+<a name="l01230" id="l01230"></a>01230                             <span class=
+"stringliteral">"&lt;\"%s\", %s&gt; =&gt; \"%s\"\n"</span>, community, hbuf,
+<a name="l01231" id="l01231"></a>01231                             secName));
+<a name="l01232" id="l01232"></a>01232                 memmove_com2Sec6Entry(e, secName, community, net, mask,
+<a name="l01233" id="l01233"></a>01233                                       contextName);
+<a name="l01234" id="l01234"></a>01234                 <span class="keywordflow">if</span> (com2Sec6ListLast != NULL) {
+<a name="l01235" id="l01235"></a>01235                     com2Sec6ListLast-&gt;next = e;
+<a name="l01236" id="l01236"></a>01236                     com2Sec6ListLast = e;
+<a name="l01237" id="l01237"></a>01237                 } <span class="keywordflow">else</span> {
+<a name="l01238" id="l01238"></a>01238                     com2Sec6ListLast = com2Sec6List = e;
+<a name="l01239" id="l01239"></a>01239                 }
+<a name="l01240" id="l01240"></a>01240             }
+<a name="l01241" id="l01241"></a>01241             <span class="keywordflow">if</span> (res != NULL)
+<a name="l01242" id="l01242"></a>01242                 freeaddrinfo(res);
+<a name="l01243" id="l01243"></a>01243 
+<a name="l01244" id="l01244"></a>01244 <span class="preprocessor">#endif </span><span class=
+"comment">/* HAVE_GETADDRINFO */</span>
+<a name="l01245" id="l01245"></a>01245 
+<a name="l01246" id="l01246"></a>01246         }
+<a name="l01247" id="l01247"></a>01247         <span class="comment">/*</span>
+<a name="l01248" id="l01248"></a>01248 <span class="comment">         * free(strnetwork); </span>
+<a name="l01249" id="l01249"></a>01249 <span class="comment">         */</span>
+<a name="l01250" id="l01250"></a>01250     }
+<a name="l01251" id="l01251"></a>01251 }
+<a name="l01252" id="l01252"></a>01252 
+<a name="l01253" id="l01253"></a>01253 <span class="keywordtype">void</span>
+<a name="l01254" id="l01254"></a>01254 netsnmp_udp6_com2Sec6List_free(<span class="keywordtype">void</span>)
+<a name="l01255" id="l01255"></a>01255 {
+<a name="l01256" id="l01256"></a>01256     com2Sec6Entry  *e = com2Sec6List;
+<a name="l01257" id="l01257"></a>01257     <span class="keywordflow">while</span> (e != NULL) {
+<a name="l01258" id="l01258"></a>01258         com2Sec6Entry  *tmp = e;
+<a name="l01259" id="l01259"></a>01259         e = e-&gt;next;
+<a name="l01260" id="l01260"></a>01260         free(tmp);
+<a name="l01261" id="l01261"></a>01261     }
+<a name="l01262" id="l01262"></a>01262     com2Sec6List = com2Sec6ListLast = NULL;
+<a name="l01263" id="l01263"></a>01263 }
+<a name="l01264" id="l01264"></a>01264 
+<a name="l01265" id="l01265"></a>01265 <span class="preprocessor">#endif </span><span class=
+"comment">/* support for community based SNMP */</span>
+<a name="l01266" id="l01266"></a>01266 
+<a name="l01267" id="l01267"></a>01267 <span class="keywordtype">void</span>
+<a name="l01268" id="l01268"></a>01268 netsnmp_udp6_agent_config_tokens_register(<span class="keywordtype">void</span>)
+<a name="l01269" id="l01269"></a>01269 {
+<a name="l01270" id="l01270"></a>01270 <span class=
+"preprocessor">#if !defined(NETSNMP_DISABLE_SNMPV1) || !defined(NETSNMP_DISABLE_SNMPV2C)</span>
+<a name="l01271" id="l01271"></a>01271     register_app_config_handler(<span class=
+"stringliteral">"com2sec6"</span>, netsnmp_udp6_parse_security,
+<a name="l01272" id="l01272"></a>01272                                 netsnmp_udp6_com2Sec6List_free,
+<a name="l01273" id="l01273"></a>01273                                 <span class=
+"stringliteral">"[-Cn CONTEXT] secName IPv6-network-address[/netmask] community"</span>);
+<a name="l01274" id="l01274"></a>01274 <span class="preprocessor">#endif </span><span class=
+"comment">/* support for community based SNMP */</span>
+<a name="l01275" id="l01275"></a>01275 }
+<a name="l01276" id="l01276"></a>01276 
+<a name="l01277" id="l01277"></a>01277 
+<a name="l01278" id="l01278"></a>01278 
+<a name="l01279" id="l01279"></a>01279 <span class=
+"preprocessor">#if !defined(NETSNMP_DISABLE_SNMPV1) || !defined(NETSNMP_DISABLE_SNMPV2C)</span>
+<a name="l01280" id="l01280"></a>01280 <span class="comment">/*</span>
+<a name="l01281" id="l01281"></a>01281 <span class=
+"comment"> * Return 0 if there are no com2sec entries, or return 1 if there ARE com2sec </span>
+<a name="l01282" id="l01282"></a>01282 <span class=
+"comment"> * entries.  On return, if a com2sec entry matched the passed parameters,</span>
+<a name="l01283" id="l01283"></a>01283 <span class=
+"comment"> * then *secName points at the appropriate security name, or is NULL if the</span>
+<a name="l01284" id="l01284"></a>01284 <span class="comment"> * parameters did not match any com2sec entry.  </span>
+<a name="l01285" id="l01285"></a>01285 <span class="comment"> */</span>
+<a name="l01286" id="l01286"></a>01286 
+<a name="l01287" id="l01287"></a>01287 <span class="keywordtype">int</span>
+<a name="l01288" id="l01288"></a>01288 netsnmp_udp6_getSecName(<span class="keywordtype">void</span> *opaque, <span class=
+"keywordtype">int</span> olength,
+<a name="l01289" id="l01289"></a>01289                         <span class="keyword">const</span> <span class=
+"keywordtype">char</span> *community,
+<a name="l01290" id="l01290"></a>01290                         <span class="keywordtype">int</span> community_len, <span class=
+"keywordtype">char</span> **secName, <span class="keywordtype">char</span> **contextName)
+<a name="l01291" id="l01291"></a>01291 {
+<a name="l01292" id="l01292"></a>01292     com2Sec6Entry  *c;
+<a name="l01293" id="l01293"></a>01293     <span class="keyword">struct </span>sockaddr_in6 *from = (<span class=
+"keyword">struct </span>sockaddr_in6 *) opaque;
+<a name="l01294" id="l01294"></a>01294     <span class="keywordtype">char</span>           *ztcommunity = NULL;
+<a name="l01295" id="l01295"></a>01295     <span class="keywordtype">char</span>            str6[INET6_ADDRSTRLEN];
+<a name="l01296" id="l01296"></a>01296 
+<a name="l01297" id="l01297"></a>01297     <span class="keywordflow">if</span> (secName != NULL) {
+<a name="l01298" id="l01298"></a>01298         *secName = NULL;  <span class="comment">/* Haven't found anything yet */</span>
+<a name="l01299" id="l01299"></a>01299     }
+<a name="l01300" id="l01300"></a>01300 
+<a name="l01301" id="l01301"></a>01301     <span class="comment">/*</span>
+<a name="l01302" id="l01302"></a>01302 <span class=
+"comment">     * Special case if there are NO entries (as opposed to no MATCHING</span>
+<a name="l01303" id="l01303"></a>01303 <span class="comment">     * entries).  </span>
+<a name="l01304" id="l01304"></a>01304 <span class="comment">     */</span>
+<a name="l01305" id="l01305"></a>01305 
+<a name="l01306" id="l01306"></a>01306     <span class="keywordflow">if</span> (com2Sec6List == NULL) {
+<a name="l01307" id="l01307"></a>01307         DEBUGMSGTL((<span class=
+"stringliteral">"netsnmp_udp6_getSecName"</span>, <span class="stringliteral">"no com2sec entries\n"</span>));
+<a name="l01308" id="l01308"></a>01308         <span class="keywordflow">return</span> 0;
+<a name="l01309" id="l01309"></a>01309     }
+<a name="l01310" id="l01310"></a>01310 
+<a name="l01311" id="l01311"></a>01311     <span class="comment">/*</span>
+<a name="l01312" id="l01312"></a>01312 <span class="comment">     * If there is no IPv6 source address, </span>
+<a name="l01313" id="l01313"></a>01313 <span class="comment">     * then there can be no valid security name.  </span>
+<a name="l01314" id="l01314"></a>01314 <span class="comment">     */</span>
+<a name="l01315" id="l01315"></a>01315 
+<a name="l01316" id="l01316"></a>01316     <span class="keywordflow">if</span> (opaque == NULL || olength != <span class=
+"keyword">sizeof</span>(<span class="keyword">struct</span> sockaddr_in6)
+<a name="l01317" id="l01317"></a>01317         || from-&gt;sin6_family != PF_INET6) {
+<a name="l01318" id="l01318"></a>01318         DEBUGMSGTL((<span class="stringliteral">"netsnmp_udp6_getSecName"</span>,
+<a name="l01319" id="l01319"></a>01319                     <span class=
+"stringliteral">"no IPv6 source address in PDU?\n"</span>));
+<a name="l01320" id="l01320"></a>01320         <span class="keywordflow">return</span> 1;
+<a name="l01321" id="l01321"></a>01321     }
+<a name="l01322" id="l01322"></a>01322 
+<a name="l01323" id="l01323"></a>01323     ztcommunity = (<span class="keywordtype">char</span> *) malloc(community_len + 1);
+<a name="l01324" id="l01324"></a>01324     <span class="keywordflow">if</span> (ztcommunity != NULL) {
+<a name="l01325" id="l01325"></a>01325         memcpy(ztcommunity, community, community_len);
+<a name="l01326" id="l01326"></a>01326         ztcommunity[community_len] = <span class="charliteral">'\0'</span>;
+<a name="l01327" id="l01327"></a>01327     }
+<a name="l01328" id="l01328"></a>01328 
+<a name="l01329" id="l01329"></a>01329     inet_ntop(AF_INET6, &amp;from-&gt;sin6_addr, str6, <span class=
+"keyword">sizeof</span>(str6));
+<a name="l01330" id="l01330"></a>01330     DEBUGMSGTL((<span class="stringliteral">"netsnmp_udp6_getSecName"</span>, <span class=
+"stringliteral">"resolve &lt;\"%s\", %s&gt;\n"</span>,
+<a name="l01331" id="l01331"></a>01331                 ztcommunity ? ztcommunity : <span class=
+"stringliteral">"&lt;malloc error&gt;"</span>, str6));
+<a name="l01332" id="l01332"></a>01332 
+<a name="l01333" id="l01333"></a>01333     <span class="keywordflow">for</span> (c = com2Sec6List; c != NULL; c = c-&gt;next) {
+<a name="l01334" id="l01334"></a>01334         <span class=
+"keywordtype">char</span> str_net[INET6_ADDRSTRLEN], str_mask[INET6_ADDRSTRLEN];
+<a name="l01335" id="l01335"></a>01335         DEBUGMSGTL((<span class="stringliteral">"netsnmp_udp6_getSecName"</span>,
+<a name="l01336" id="l01336"></a>01336                     <span class=
+"stringliteral">"compare &lt;\"%s\", %s/%s&gt;"</span>, c-&gt;community,
+<a name="l01337" id=
+"l01337"></a>01337                     inet_ntop(AF_INET6, &amp;c-&gt;network.sin6_addr, str_net, <span class="keyword">sizeof</span> str_net),
+<a name="l01338" id="l01338"></a>01338                     inet_ntop(AF_INET6, &amp;c-&gt;mask.sin6_addr, str_mask, <span class=
+"keyword">sizeof</span> str_mask)));
+<a name="l01339" id="l01339"></a>01339 
+<a name="l01340" id="l01340"></a>01340         <span class="keywordflow">if</span> ((community_len == (<span class=
+"keywordtype">int</span>)strlen(c-&gt;community)) &amp;&amp;
+<a name="l01341" id="l01341"></a>01341             (memcmp(community, c-&gt;community, community_len) == 0) &amp;&amp;
+<a name="l01342" id="l01342"></a>01342             (masked_address_are_equal(from-&gt;sin6_family,
+<a name="l01343" id="l01343"></a>01343                                       (<span class=
+"keyword">struct</span> sockaddr_storage *) from,
+<a name="l01344" id="l01344"></a>01344                                       (<span class=
+"keyword">struct</span> sockaddr_storage *) &amp;c-&gt;mask,
+<a name="l01345" id="l01345"></a>01345                                       (<span class=
+"keyword">struct</span> sockaddr_storage *) &amp;c-&gt;network)
+<a name="l01346" id="l01346"></a>01346                                         == 0)) {
+<a name="l01347" id="l01347"></a>01347             DEBUGMSG((<span class=
+"stringliteral">"netsnmp_udp6_getSecName"</span>, <span class="stringliteral">"... SUCCESS\n"</span>));
+<a name="l01348" id="l01348"></a>01348             <span class="keywordflow">if</span> (secName != NULL) {
+<a name="l01349" id="l01349"></a>01349                 *secName = c-&gt;secName;
+<a name="l01350" id="l01350"></a>01350                 *contextName = c-&gt;contextName;
+<a name="l01351" id="l01351"></a>01351             }
+<a name="l01352" id="l01352"></a>01352             <span class="keywordflow">break</span>;
+<a name="l01353" id="l01353"></a>01353         }
+<a name="l01354" id="l01354"></a>01354         DEBUGMSG((<span class=
+"stringliteral">"netsnmp_udp6_getSecName"</span>, <span class="stringliteral">"... nope\n"</span>));
+<a name="l01355" id="l01355"></a>01355     }
+<a name="l01356" id="l01356"></a>01356     <span class="keywordflow">if</span> (ztcommunity != NULL) {
+<a name="l01357" id="l01357"></a>01357         free(ztcommunity);
+<a name="l01358" id="l01358"></a>01358     }
+<a name="l01359" id="l01359"></a>01359     <span class="keywordflow">return</span> 1;
+<a name="l01360" id="l01360"></a>01360 }
+<a name="l01361" id="l01361"></a>01361 <span class="preprocessor">#endif </span><span class=
+"comment">/* support for community based SNMP */</span>
+<a name="l01362" id="l01362"></a>01362 
+<a name="l01363" id="l01363"></a>01363 <a class="code" href="structnetsnmp__transport__s.html">netsnmp_transport</a> *
+<a name="l01364" id="l01364"></a>01364 netsnmp_udp6_create_tstring(<span class="keyword">const</span> <span class=
+"keywordtype">char</span> *str, <span class="keywordtype">int</span> local,
+<a name="l01365" id="l01365"></a>01365                             <span class="keyword">const</span> <span class=
+"keywordtype">char</span> *default_target)
+<a name="l01366" id="l01366"></a>01366 {
+<a name="l01367" id="l01367"></a>01367     <span class="keyword">struct </span>sockaddr_in6 addr;
+<a name="l01368" id="l01368"></a>01368 
+<a name="l01369" id="l01369"></a>01369     <span class=
+"keywordflow">if</span> (netsnmp_sockaddr_in6_2(&amp;addr, str, default_target)) {
+<a name="l01370" id="l01370"></a>01370         <span class="keywordflow">return</span> netsnmp_udp6_transport(&amp;addr, local);
+<a name="l01371" id="l01371"></a>01371     } <span class="keywordflow">else</span> {
+<a name="l01372" id="l01372"></a>01372         <span class="keywordflow">return</span> NULL;
+<a name="l01373" id="l01373"></a>01373     }
+<a name="l01374" id="l01374"></a>01374 }
+<a name="l01375" id="l01375"></a>01375 
+<a name="l01376" id="l01376"></a>01376 
+<a name="l01377" id="l01377"></a>01377 <span class="comment">/*</span>
+<a name="l01378" id="l01378"></a>01378 <span class="comment"> * See:</span>
+<a name="l01379" id="l01379"></a>01379 <span class="comment"> * </span>
+<a name="l01380" id="l01380"></a>01380 <span class=
+"comment"> * http://www.ietf.org/internet-drafts/draft-ietf-ops-taddress-mib-01.txt</span>
+<a name="l01381" id="l01381"></a>01381 <span class="comment"> * </span>
+<a name="l01382" id="l01382"></a>01382 <span class=
+"comment"> * (or newer equivalent) for details of the TC which we are using for</span>
+<a name="l01383" id="l01383"></a>01383 <span class="comment"> * the mapping here.  </span>
+<a name="l01384" id="l01384"></a>01384 <span class="comment"> */</span>
+<a name="l01385" id="l01385"></a>01385 
+<a name="l01386" id="l01386"></a>01386 <a class="code" href="structnetsnmp__transport__s.html">netsnmp_transport</a> *
+<a name="l01387" id="l01387"></a>01387 netsnmp_udp6_create_ostring(<span class="keyword">const</span> u_char * o, <span class=
+"keywordtype">size_t</span> o_len, <span class="keywordtype">int</span> local)
+<a name="l01388" id="l01388"></a>01388 {
+<a name="l01389" id="l01389"></a>01389     <span class="keyword">struct </span>sockaddr_in6 addr;
+<a name="l01390" id="l01390"></a>01390 
+<a name="l01391" id="l01391"></a>01391     <span class="keywordflow">if</span> (o_len == 18) {
+<a name="l01392" id="l01392"></a>01392         memset((u_char *) &amp; addr, 0, <span class="keyword">sizeof</span>(<span class=
+"keyword">struct</span> sockaddr_in6));
+<a name="l01393" id="l01393"></a>01393         addr.sin6_family = AF_INET6;
+<a name="l01394" id="l01394"></a>01394         memcpy((u_char *) &amp; (addr.sin6_addr.s6_addr), o, 16);
+<a name="l01395" id="l01395"></a>01395         addr.sin6_port = (o[16] &lt;&lt; 8) + o[17];
+<a name="l01396" id="l01396"></a>01396         <span class="keywordflow">return</span> netsnmp_udp6_transport(&amp;addr, local);
+<a name="l01397" id="l01397"></a>01397     }
+<a name="l01398" id="l01398"></a>01398     <span class="keywordflow">return</span> NULL;
+<a name="l01399" id="l01399"></a>01399 }
+<a name="l01400" id="l01400"></a>01400 
+<a name="l01401" id="l01401"></a>01401 
+<a name="l01402" id="l01402"></a>01402 <span class="keywordtype">void</span>
+<a name="l01403" id="l01403"></a>01403 netsnmp_udp6_ctor(<span class="keywordtype">void</span>)
+<a name="l01404" id="l01404"></a>01404 {
+<a name="l01405" id="l01405"></a>01405     udp6Domain.name = netsnmp_UDPIPv6Domain;
+<a name="l01406" id="l01406"></a>01406     udp6Domain.name_length = <span class=
+"keyword">sizeof</span>(netsnmp_UDPIPv6Domain) / <span class="keyword">sizeof</span>(oid);
+<a name="l01407" id="l01407"></a>01407     udp6Domain.f_create_from_tstring_new = netsnmp_udp6_create_tstring;
+<a name="l01408" id="l01408"></a>01408     udp6Domain.f_create_from_ostring = netsnmp_udp6_create_ostring;
+<a name="l01409" id="l01409"></a>01409     udp6Domain.prefix = (<span class="keyword">const</span> <span class=
+"keywordtype">char</span>**)calloc(5, <span class="keyword">sizeof</span>(<span class="keywordtype">char</span> *));
+<a name="l01410" id="l01410"></a>01410     udp6Domain.prefix[0] = <span class="stringliteral">"udp6"</span>;
+<a name="l01411" id="l01411"></a>01411     udp6Domain.prefix[1] = <span class="stringliteral">"ipv6"</span>;
+<a name="l01412" id="l01412"></a>01412     udp6Domain.prefix[2] = <span class="stringliteral">"udpv6"</span>;
+<a name="l01413" id="l01413"></a>01413     udp6Domain.prefix[3] = <span class="stringliteral">"udpipv6"</span>;
+<a name="l01414" id="l01414"></a>01414 
+<a name="l01415" id="l01415"></a>01415     netsnmp_tdomain_register(&amp;udp6Domain);
+<a name="l01416" id="l01416"></a>01416 }
+<a name="l01417" id="l01417"></a>01417 
+<a name="l01418" id="l01418"></a>01418 <span class="preprocessor">#else</span>
+<a name="l01419" id="l01419"></a>01419 
+<a name="l01420" id="l01420"></a>01420 <span class="preprocessor">#ifdef NETSNMP_DLL</span>
+<a name="l01421" id="l01421"></a>01421 <span class="comment">/* need this hook for win32 MSVC++ DLL build */</span>
+<a name="l01422" id="l01422"></a>01422 <span class="keywordtype">void</span>
+<a name="l01423" id="l01423"></a>01423 netsnmp_udp6_agent_config_tokens_register(<span class="keywordtype">void</span>)
+<a name="l01424" id="l01424"></a>01424 { }
+<a name="l01425" id="l01425"></a>01425 <span class="preprocessor">#endif</span>
+<a name="l01426" id="l01426"></a>01426 
+<a name="l01427" id="l01427"></a>01427 <span class="preprocessor">#endif </span><span class=
+"comment">/* NETSNMP_TRANSPORT_UDPIPV6_DOMAIN */</span>
+<a name="l01428" id="l01428"></a>01428 
+</pre>
+    </div>
+  </div>
+  <hr size="1" />
+
+  <address style="text-align: right;">
+    <small>Generated on 28 Sep 2009 for net-snmp by  <a href="http://www.doxygen.org/index.html"><img class="footer" src=
+    "doxygen.png" alt="doxygen" /></a> 1.6.1</small>
+<!-- CONTENT END -->
+<!--#include virtual="/page-bottom.html" -->
+

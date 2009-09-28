@@ -1,0 +1,354 @@
+<!--#set var="section" value="development" -->
+<!--#include virtual="/page-top.html" -->
+<!-- CONTENT START -->
+  <div class="navigation" id="top">
+    <div class="tabs">
+      <ul>
+        <li><a href="index.html"><span>Main Page</span></a></li>
+
+        <li><a href="pages.html"><span>Related Pages</span></a></li>
+
+        <li><a href="modules.html"><span>Modules</span></a></li>
+
+        <li><a href="annotated.html"><span>Data Structures</span></a></li>
+
+        <li class="current"><a href="files.html"><span>Files</span></a></li>
+
+        <li><a href="examples.html"><span>Examples</span></a></li>
+      </ul>
+    </div>
+
+    <div class="tabs">
+      <ul>
+        <li><a href="files.html"><span>File List</span></a></li>
+
+        <li><a href="globals.html"><span>Globals</span></a></li>
+      </ul>
+    </div>
+
+    <h1>table_generic.c</h1>
+
+    <div class="fragment">
+      <pre class="fragment">
+<a name="l00001" id="l00001"></a>00001 <span class="comment">/*</span>
+<a name="l00002" id="l00002"></a>00002 <span class="comment"> * table_generic.c</span>
+<a name="l00003" id="l00003"></a>00003 <span class="comment"> *</span>
+<a name="l00004" id="l00004"></a>00004 <span class="comment"> *    Generic table API framework</span>
+<a name="l00005" id="l00005"></a>00005 <span class="comment"> */</span>
+<a name="l00006" id="l00006"></a>00006 
+<a name="l00018" id="l00018"></a>00018 <span class="comment">/* =======================================================</span>
+<a name="l00019" id="l00019"></a>00019 <span class="comment"> * </span>
+<a name="l00020" id="l00020"></a>00020 <span class="comment"> *  Table Maintenance:</span>
+<a name="l00021" id="l00021"></a>00021 <span class="comment"> *      create/delete table</span>
+<a name="l00022" id="l00022"></a>00022 <span class="comment"> *      create/copy/clone/delete row</span>
+<a name="l00023" id="l00023"></a>00023 <span class="comment"> *      add/replace/remove row</span>
+<a name="l00024" id="l00024"></a>00024 <span class="comment"> *</span>
+<a name="l00025" id="l00025"></a>00025 <span class="comment"> * ======================================================= */</span>
+<a name="l00026" id="l00026"></a>00026 
+<a name="l00059" id="l00059"></a>00059 <span class="keywordtype">void</span> *
+<a name="l00060" id="l00060"></a><a class="code" href=
+"group__table__maintenance.html#ga2dae0e20fa8d8352c1f065da5485155b">00060</a> <a class="code" href=
+"group__table__maintenance.html#ga2dae0e20fa8d8352c1f065da5485155b" title=
+"Create a structure to represent the table.">netsnmp_generic_create_table</a>( <span class="keyword">const</span> <span class=
+"keywordtype">char</span> *name, <span class="keywordtype">int</span> flags ) {
+<a name="l00061" id="l00061"></a>00061 }
+<a name="l00062" id="l00062"></a>00062 
+<a name="l00067" id="l00067"></a>00067 <span class="keywordtype">void</span>
+<a name="l00068" id="l00068"></a><a class="code" href=
+"group__table__maintenance.html#ga29460959abf24bf3f05c32eac1a1194e">00068</a> <a class="code" href=
+"group__table__maintenance.html#ga29460959abf24bf3f05c32eac1a1194e" title=
+"Release the structure representing a table.">netsnmp_generic_delete_table</a>( <span class="keywordtype">void</span> *table ) {
+<a name="l00069" id="l00069"></a>00069 }
+<a name="l00070" id="l00070"></a>00070 
+<a name="l00075" id="l00075"></a>00075 <span class="keywordtype">void</span> *
+<a name="l00076" id="l00076"></a><a class="code" href=
+"group__table__maintenance.html#ga9f5039604610308581321b215728a875">00076</a> <a class="code" href=
+"group__table__maintenance.html#ga9f5039604610308581321b215728a875" title=
+"Create a new row structure suitable for this style of table.">netsnmp_generic_create_row</a>( <span class=
+"keywordtype">void</span> ) {
+<a name="l00077" id="l00077"></a>00077 }
+<a name="l00078" id="l00078"></a>00078 
+<a name="l00081" id="l00081"></a>00081 <span class="keywordtype">void</span> *
+<a name="l00082" id="l00082"></a><a class="code" href=
+"group__table__maintenance.html#ga4c6b4251a4fe479002a0ce0b04856fc6">00082</a> <a class="code" href=
+"group__table__maintenance.html#ga4c6b4251a4fe479002a0ce0b04856fc6" title=
+"Create a new copy of the specified row.">netsnmp_generic_clone_row</a>( <span class="keywordtype">void</span> *row ) {
+<a name="l00083" id="l00083"></a>00083 }
+<a name="l00084" id="l00084"></a>00084 
+<a name="l00089" id="l00089"></a>00089 <span class="keywordtype">int</span>
+<a name="l00090" id="l00090"></a><a class="code" href=
+"group__table__maintenance.html#ga32262ca93137a37dd5505ab662be4e5a">00090</a> <a class="code" href=
+"group__table__maintenance.html#ga32262ca93137a37dd5505ab662be4e5a" title=
+"Copy the contents of one row into another.">netsnmp_generic_copy_row</a>( <span class=
+"keywordtype">void</span> *dst_row, <span class="keywordtype">void</span> *src_row ) {
+<a name="l00091" id="l00091"></a>00091 }
+<a name="l00092" id="l00092"></a>00092 
+<a name="l00097" id="l00097"></a>00097 <span class="keywordtype">void</span>
+<a name="l00098" id="l00098"></a><a class="code" href=
+"group__table__maintenance.html#ga90f2e37b35c62064067d635d35a162d0">00098</a> <a class="code" href=
+"group__table__maintenance.html#ga90f2e37b35c62064067d635d35a162d0" title=
+"Delete a row data structure.">netsnmp_generic_delete_row</a>( <span class="keywordtype">void</span> *row ) {
+<a name="l00099" id="l00099"></a>00099 }
+<a name="l00100" id="l00100"></a>00100 
+<a name="l00103" id="l00103"></a>00103 <span class="keywordtype">int</span>
+<a name="l00104" id="l00104"></a><a class="code" href=
+"group__table__maintenance.html#gabd12b099c47dc358877cb07e1c09490f">00104</a> <a class="code" href=
+"group__table__maintenance.html#gabd12b099c47dc358877cb07e1c09490f" title=
+"Add a row to the table.">netsnmp_generic_add_row</a>( <span class="keywordtype">void</span> *table, <span class=
+"keywordtype">void</span> *row ) {
+<a name="l00105" id="l00105"></a>00105 }
+<a name="l00106" id="l00106"></a>00106 
+<a name="l00112" id="l00112"></a>00112 <span class="keywordtype">int</span>
+<a name="l00113" id="l00113"></a><a class="code" href=
+"group__table__maintenance.html#gabea775e88ec15582a9759d25228ddf2d">00113</a> <a class="code" href=
+"group__table__maintenance.html#gabea775e88ec15582a9759d25228ddf2d" title=
+"Replace one row with another in the table.">netsnmp_generic_replace_row</a>( <span class=
+"keywordtype">void</span> *table, <span class="keywordtype">void</span> *old_row, <span class=
+"keywordtype">void</span> *new_row ) {
+<a name="l00114" id="l00114"></a>00114 }
+<a name="l00115" id="l00115"></a>00115 
+<a name="l00120" id="l00120"></a>00120 <span class="keywordtype">void</span> *
+<a name="l00121" id="l00121"></a><a class="code" href=
+"group__table__maintenance.html#ga4b869d4947d72cb554c9748ae3757070">00121</a> <a class="code" href=
+"group__table__maintenance.html#ga4b869d4947d72cb554c9748ae3757070" title=
+"Remove a row from the table.">netsnmp_generic_remove_row</a>( <span class="keywordtype">void</span> *table, <span class=
+"keywordtype">void</span> *row ) {
+<a name="l00122" id="l00122"></a>00122 }
+<a name="l00123" id="l00123"></a>00123 
+<a name="l00126" id="l00126"></a>00126 <span class="keywordtype">void</span>
+<a name="l00127" id="l00127"></a><a class="code" href=
+"group__table__maintenance.html#ga57ca0a142ea72ce0f2e8cf9fdf6001f5">00127</a> <a class="code" href=
+"group__table__maintenance.html#ga57ca0a142ea72ce0f2e8cf9fdf6001f5" title=
+"Remove and delete a row from the table.">netsnmp_generic_remove_delete_row</a>( <span class=
+"keywordtype">void</span> *table, <span class="keywordtype">void</span> *row ) {
+<a name="l00128" id="l00128"></a>00128 }
+<a name="l00129" id="l00129"></a>00129 
+<a name="l00132" id="l00132"></a>00132 <span class="comment">/* =======================================================</span>
+<a name="l00133" id="l00133"></a>00133 <span class="comment"> * </span>
+<a name="l00134" id="l00134"></a>00134 <span class="comment"> *  MIB Maintenance:</span>
+<a name="l00135" id="l00135"></a>00135 <span class="comment"> *      create a handler registration</span>
+<a name="l00136" id="l00136"></a>00136 <span class="comment"> *      register/unregister table</span>
+<a name="l00137" id="l00137"></a>00137 <span class="comment"> *      extract table from request</span>
+<a name="l00138" id="l00138"></a>00138 <span class="comment"> *      extract/insert row</span>
+<a name="l00139" id="l00139"></a>00139 <span class="comment"> *</span>
+<a name="l00140" id="l00140"></a>00140 <span class="comment"> * ======================================================= */</span>
+<a name="l00141" id="l00141"></a>00141 
+<a name="l00157" id="l00157"></a>00157 <a class="code" href="structnetsnmp__mib__handler__s.html" title=
+"the mib handler structure to be registered">netsnmp_mib_handler</a> *
+<a name="l00158" id="l00158"></a><a class="code" href=
+"group__mib__maintenance.html#gac0b7c51d2b0d0abec32d3c47b18a94a1">00158</a> <a class="code" href=
+"group__mib__maintenance.html#gac0b7c51d2b0d0abec32d3c47b18a94a1" title=
+"Create a MIB handler structure.">netsnmp_generic_get_handler</a>(<span class="keywordtype">void</span> <span class=
+"comment">/* table specific */</span> ) {
+<a name="l00159" id="l00159"></a>00159 
+<a name="l00160" id="l00160"></a>00160 }
+<a name="l00161" id="l00161"></a>00161 
+<a name="l00165" id="l00165"></a><a class="code" href=
+"group__mib__maintenance.html#ga130cc71c4cc9a748747374701c3950f0">00165</a> <a class="code" href=
+"group__mib__maintenance.html#ga130cc71c4cc9a748747374701c3950f0" title=
+"Free a MIB handler structure, releasing any related resources.">netsnmp_generic_free_handler</a>( <a class="code" href=
+"structnetsnmp__mib__handler__s.html" title="the mib handler structure to be registered">netsnmp_mib_handler</a> *handler ) {
+<a name="l00166" id="l00166"></a>00166 
+<a name="l00167" id="l00167"></a>00167 }
+<a name="l00168" id="l00168"></a>00168 
+<a name="l00171" id="l00171"></a>00171 <span class="keywordtype">int</span>
+<a name="l00172" id="l00172"></a><a class="code" href=
+"group__mib__maintenance.html#ga5546c53b0d150b4ebc1f924f118c8c69">00172</a> <a class="code" href=
+"group__mib__maintenance.html#ga5546c53b0d150b4ebc1f924f118c8c69" title=
+"Register a MIB table with the SNMP agent.">netsnmp_generic_register</a>(<a class="code" href=
+"structnetsnmp__handler__registration__s.html" title="Root registration info.">netsnmp_handler_registration</a>    *reginfo,
+<a name="l00173" id="l00173"></a>00173                          <span class=
+"keywordtype">void</span>                            *table,
+<a name="l00174" id="l00174"></a>00174                          <a class="code" href=
+"structnetsnmp__table__registration__info__s.html" title=
+"Table registration structure.">netsnmp_table_registration_info</a> *table_info) {
+<a name="l00175" id="l00175"></a>00175 }
+<a name="l00176" id="l00176"></a>00176 
+<a name="l00182" id="l00182"></a>00182 <span class="keywordtype">int</span>
+<a name="l00183" id="l00183"></a><a class="code" href=
+"group__mib__maintenance.html#ga8af593d5f9707aff295bc25b35acf9dd">00183</a> <a class="code" href=
+"group__mib__maintenance.html#ga8af593d5f9707aff295bc25b35acf9dd" title=
+"Unregister a MIB table from the SNMP agent.">netsnmp_generic_unregister</a>(<a class="code" href=
+"structnetsnmp__handler__registration__s.html" title="Root registration info.">netsnmp_handler_registration</a>    *reginfo) {
+<a name="l00184" id="l00184"></a>00184 }
+<a name="l00185" id="l00185"></a>00185 
+<a name="l00188" id="l00188"></a>00188 <span class="keywordtype">void</span>
+<a name="l00189" id="l00189"></a><a class="code" href=
+"group__mib__maintenance.html#ga5789c5a863d09526ce3613fd52fcd244">00189</a> <a class="code" href=
+"group__mib__maintenance.html#ga5789c5a863d09526ce3613fd52fcd244" title=
+"Extract the table relating to a requested varbind.">netsnmp_generic_extract_table</a>( <a class="code" href=
+"structnetsnmp__request__info__s.html" title="The netsnmp request info structure.">netsnmp_request_info</a> *request ) {
+<a name="l00190" id="l00190"></a>00190 }
+<a name="l00191" id="l00191"></a>00191 
+<a name="l00194" id="l00194"></a>00194 <span class="keywordtype">void</span>
+<a name="l00195" id="l00195"></a><a class="code" href=
+"group__mib__maintenance.html#ga6273d2cf3363e9bad9b5452a2b7801af">00195</a> <a class="code" href=
+"group__mib__maintenance.html#ga6273d2cf3363e9bad9b5452a2b7801af" title=
+"Extract the row relating to a requested varbind.">netsnmp_generic_extract_row</a>( <a class="code" href=
+"structnetsnmp__request__info__s.html" title="The netsnmp request info structure.">netsnmp_request_info</a> *request ) {
+<a name="l00196" id="l00196"></a>00196 }
+<a name="l00197" id="l00197"></a>00197 
+<a name="l00202" id="l00202"></a>00202 <span class="keywordtype">void</span>
+<a name="l00203" id="l00203"></a><a class="code" href=
+"group__mib__maintenance.html#ga3292520c3165d9049b2b7fe85252377b">00203</a> <a class="code" href=
+"group__mib__maintenance.html#ga3292520c3165d9049b2b7fe85252377b" title=
+"Associate a (new) row with the requested varbind.">netsnmp_generic_insert_row</a>( <a class="code" href=
+"structnetsnmp__request__info__s.html" title=
+"The netsnmp request info structure.">netsnmp_request_info</a> *request, <span class="keywordtype">void</span> *row ) {
+<a name="l00204" id="l00204"></a>00204 }
+<a name="l00205" id="l00205"></a>00205 
+<a name="l00208" id="l00208"></a>00208 <span class="comment">/* =======================================================</span>
+<a name="l00209" id="l00209"></a>00209 <span class="comment"> * </span>
+<a name="l00210" id="l00210"></a>00210 <span class="comment"> *  Row Operations</span>
+<a name="l00211" id="l00211"></a>00211 <span class="comment"> *      get first/this/next row</span>
+<a name="l00212" id="l00212"></a>00212 <span class="comment"> *      get row/next row by index</span>
+<a name="l00213" id="l00213"></a>00213 <span class="comment"> *      get row/next row by OID</span>
+<a name="l00214" id="l00214"></a>00214 <span class="comment"> *      number of rows</span>
+<a name="l00215" id="l00215"></a>00215 <span class="comment"> *</span>
+<a name="l00216" id="l00216"></a>00216 <span class="comment"> * ======================================================= */</span>
+<a name="l00217" id="l00217"></a>00217 
+<a name="l00227" id="l00227"></a>00227 <span class="keywordtype">void</span> *
+<a name="l00228" id="l00228"></a><a class="code" href=
+"group__table__rows.html#ga70eda63c962a726c5fae9bf42e4fc72f">00228</a> <a class="code" href=
+"group__table__rows.html#ga70eda63c962a726c5fae9bf42e4fc72f" title=
+"Retrieve the first row of the table.">netsnmp_generic_row_first</a>( <span class="keywordtype">void</span> *table ) {
+<a name="l00229" id="l00229"></a>00229 }
+<a name="l00230" id="l00230"></a>00230 
+<a name="l00239" id="l00239"></a>00239 <span class="keywordtype">void</span> *
+<a name="l00240" id="l00240"></a><a class="code" href=
+"group__table__rows.html#ga43909b1bb3c167599feb91cf56e6a3dc">00240</a> <a class="code" href=
+"group__table__rows.html#ga43909b1bb3c167599feb91cf56e6a3dc" title=
+"Retrieve the given row from the table.">netsnmp_generic_row_get</a>( <span class="keywordtype">void</span> *table, <span class=
+"keywordtype">void</span> *row ) {
+<a name="l00241" id="l00241"></a>00241 }
+<a name="l00242" id="l00242"></a>00242 
+<a name="l00248" id="l00248"></a>00248 <span class="keywordtype">void</span> *
+<a name="l00249" id="l00249"></a><a class="code" href=
+"group__table__rows.html#ga9989f2219ce1a130134e96a124bd6bac">00249</a> <a class="code" href=
+"group__table__rows.html#ga9989f2219ce1a130134e96a124bd6bac" title=
+"Retrieve the following row from the table.">netsnmp_generic_row_next</a>( <span class=
+"keywordtype">void</span> *table, <span class="keywordtype">void</span> *row ) {
+<a name="l00250" id="l00250"></a>00250 }
+<a name="l00251" id="l00251"></a>00251 
+<a name="l00254" id="l00254"></a>00254 <span class="keywordtype">void</span> *
+<a name="l00255" id="l00255"></a><a class="code" href=
+"group__table__rows.html#ga8195a1a85f8987ca7800bef9764f0e11">00255</a> <a class="code" href=
+"group__table__rows.html#ga8195a1a85f8987ca7800bef9764f0e11" title=
+"Retrieve the row with the specified index values.">netsnmp_generic_row_get_byidx</a>(  <span class=
+"keywordtype">void</span> *table,
+<a name="l00256" id="l00256"></a>00256                                 <a class="code" href="structvariable__list.html" title=
+"The netsnmp variable list binding structure, it&amp;#39;s typedef&amp;#39;d to netsnmp_variable_list...">netsnmp_variable_list</a> *indexes ) {
+<a name="l00257" id="l00257"></a>00257 }
+<a name="l00258" id="l00258"></a>00258 
+<a name="l00261" id="l00261"></a>00261 <span class="keywordtype">void</span> *
+<a name="l00262" id="l00262"></a><a class="code" href=
+"group__table__rows.html#gab93d9f20e3367ca2820a44fd1aedc0e0">00262</a> <a class="code" href=
+"group__table__rows.html#gab93d9f20e3367ca2820a44fd1aedc0e0" title=
+"Retrieve the next row after the specified index values.">netsnmp_generic_row_next_byidx</a>( <span class=
+"keywordtype">void</span> *table,
+<a name="l00263" id="l00263"></a>00263                                 <a class="code" href="structvariable__list.html" title=
+"The netsnmp variable list binding structure, it&amp;#39;s typedef&amp;#39;d to netsnmp_variable_list...">netsnmp_variable_list</a> *indexes ) {
+<a name="l00264" id="l00264"></a>00264 
+<a name="l00265" id="l00265"></a>00265 }
+<a name="l00266" id="l00266"></a>00266 
+<a name="l00269" id="l00269"></a>00269 <span class="keywordtype">void</span> *
+<a name="l00270" id="l00270"></a><a class="code" href=
+"group__table__rows.html#ga63d8b219fe436f14484aede7ab1c9b0e">00270</a> <a class="code" href=
+"group__table__rows.html#ga63d8b219fe436f14484aede7ab1c9b0e" title=
+"Retrieve the row with the specified instance OIDs.">netsnmp_generic_row_get_byoid</a>(  <span class=
+"keywordtype">void</span> *table, oid *instance, <span class="keywordtype">size_t</span> len ) {
+<a name="l00271" id="l00271"></a>00271 }
+<a name="l00272" id="l00272"></a>00272 
+<a name="l00275" id="l00275"></a>00275 <span class="keywordtype">void</span> *
+<a name="l00276" id="l00276"></a><a class="code" href=
+"group__table__rows.html#gae10f4daf4b7e0e3fbfeea45d431d2c44">00276</a> <a class="code" href=
+"group__table__rows.html#gae10f4daf4b7e0e3fbfeea45d431d2c44" title=
+"Retrieve the next row after the specified instance OIDs.">netsnmp_generic_row_next_byoid</a>( <span class=
+"keywordtype">void</span> *table, oid *instance, <span class="keywordtype">size_t</span> len ) {
+<a name="l00277" id="l00277"></a>00277 }
+<a name="l00278" id="l00278"></a>00278 
+<a name="l00281" id="l00281"></a>00281 <span class="keywordtype">int</span>
+<a name="l00282" id="l00282"></a><a class="code" href=
+"group__table__rows.html#ga8e873f7826d5d144d1c021701e5896ce">00282</a> <a class="code" href=
+"group__table__rows.html#ga8e873f7826d5d144d1c021701e5896ce" title=
+"Report the number of rows in the table.">netsnmp_generic_row_count</a>( <span class="keywordtype">void</span> *table ) {
+<a name="l00283" id="l00283"></a>00283 }
+<a name="l00284" id="l00284"></a>00284 
+<a name="l00287" id="l00287"></a>00287 <span class="comment">/* =======================================================</span>
+<a name="l00288" id="l00288"></a>00288 <span class="comment"> * </span>
+<a name="l00289" id="l00289"></a>00289 <span class="comment"> *  Index Operations</span>
+<a name="l00290" id="l00290"></a>00290 <span class="comment"> *      get table index structure</span>
+<a name="l00291" id="l00291"></a>00291 <span class="comment"> *      get row index values/OIDs</span>
+<a name="l00292" id="l00292"></a>00292 <span class="comment"> *      compare row with index/OIDs</span>
+<a name="l00293" id="l00293"></a>00293 <span class="comment"> *      subtree comparisons (index/OIDs)</span>
+<a name="l00294" id="l00294"></a>00294 <span class="comment"> *</span>
+<a name="l00295" id="l00295"></a>00295 <span class="comment"> * ======================================================= */</span>
+<a name="l00296" id="l00296"></a>00296 
+<a name="l00306" id="l00306"></a>00306 <a class="code" href="structvariable__list.html" title=
+"The netsnmp variable list binding structure, it&amp;#39;s typedef&amp;#39;d to netsnmp_variable_list...">netsnmp_variable_list</a> *
+<a name="l00307" id="l00307"></a><a class="code" href=
+"group__table__indexes.html#ga94fa6a5f11866aae44a1ef47c15f7328">00307</a> <a class="code" href=
+"group__table__indexes.html#ga94fa6a5f11866aae44a1ef47c15f7328" title=
+"Retrieve the indexing structure of the table.">netsnmp_generic_idx</a>( <span class="keywordtype">void</span> *table ) {
+<a name="l00308" id="l00308"></a>00308 }
+<a name="l00309" id="l00309"></a>00309 
+<a name="l00312" id="l00312"></a>00312 <a class="code" href="structvariable__list.html" title=
+"The netsnmp variable list binding structure, it&amp;#39;s typedef&amp;#39;d to netsnmp_variable_list...">netsnmp_variable_list</a> *
+<a name="l00313" id="l00313"></a><a class="code" href=
+"group__table__indexes.html#ga8fd240900eac8f9058e49fffda3d727f">00313</a> <a class="code" href=
+"group__table__indexes.html#ga8fd240900eac8f9058e49fffda3d727f" title=
+"Report the index values for a row.">netsnmp_generic_row_idx</a>( <span class="keywordtype">void</span> *row ) {
+<a name="l00314" id="l00314"></a>00314 }
+<a name="l00315" id="l00315"></a>00315 
+<a name="l00318" id="l00318"></a>00318 <span class="keywordtype">size_t</span>
+<a name="l00319" id="l00319"></a><a class="code" href=
+"group__table__indexes.html#ga6ebe062a8fba997eca4ad3e44e18ea70">00319</a> <a class="code" href=
+"group__table__indexes.html#ga6ebe062a8fba997eca4ad3e44e18ea70" title=
+"Report the instance OIDs for a row.">netsnmp_generic_row_oid</a>( <span class="keywordtype">void</span> *row, oid *instances ) {
+<a name="l00320" id="l00320"></a>00320 }
+<a name="l00321" id="l00321"></a>00321 
+<a name="l00324" id="l00324"></a>00324 <span class="keywordtype">int</span>
+<a name="l00325" id="l00325"></a><a class="code" href=
+"group__table__indexes.html#ga3b5af3f93a94a5a56abd3b27ca67fd38">00325</a> <a class="code" href=
+"group__table__indexes.html#ga3b5af3f93a94a5a56abd3b27ca67fd38" title=
+"Compare a row against the specified index values.">netsnmp_generic_compare_idx</a>( <span class=
+"keywordtype">void</span> *row, <a class="code" href="structvariable__list.html" title=
+"The netsnmp variable list binding structure, it&amp;#39;s typedef&amp;#39;d to netsnmp_variable_list...">netsnmp_variable_list</a> *index ) {
+<a name="l00326" id="l00326"></a>00326 }
+<a name="l00327" id="l00327"></a>00327 
+<a name="l00330" id="l00330"></a>00330 <span class="keywordtype">int</span>
+<a name="l00331" id="l00331"></a><a class="code" href=
+"group__table__indexes.html#gaf37ab1ba7c7aa18e0d7f467ce7af151d">00331</a> <a class="code" href=
+"group__table__indexes.html#gaf37ab1ba7c7aa18e0d7f467ce7af151d" title=
+"Compare a row against the specified instance OIDs.">netsnmp_generic_compare_oid</a>( <span class=
+"keywordtype">void</span> *row, oid *instances, <span class="keywordtype">size_t</span> len ) {
+<a name="l00332" id="l00332"></a>00332 }
+<a name="l00333" id="l00333"></a>00333 
+<a name="l00336" id="l00336"></a>00336 <span class="keywordtype">int</span>
+<a name="l00337" id="l00337"></a><a class="code" href=
+"group__table__indexes.html#ga011248711f5088f68b4ad4b8e24a2bf1">00337</a> <a class="code" href=
+"group__table__indexes.html#ga011248711f5088f68b4ad4b8e24a2bf1" title=
+"Check if a row lies within a subtree of index values.">netsnmp_generic_compare_subtree_idx</a>( <span class=
+"keywordtype">void</span> *row, <a class="code" href="structvariable__list.html" title=
+"The netsnmp variable list binding structure, it&amp;#39;s typedef&amp;#39;d to netsnmp_variable_list...">netsnmp_variable_list</a> *index ) {
+<a name="l00338" id="l00338"></a>00338 }
+<a name="l00339" id="l00339"></a>00339 
+<a name="l00342" id="l00342"></a>00342 <span class="keywordtype">int</span>
+<a name="l00343" id="l00343"></a><a class="code" href=
+"group__table__indexes.html#ga669834b88e31c336b098e70c623f3da7">00343</a> <a class="code" href=
+"group__table__indexes.html#ga669834b88e31c336b098e70c623f3da7" title=
+"Check if a row lies within a subtree of instance OIDs.">netsnmp_generic_compare_subtree_oid</a>( <span class=
+"keywordtype">void</span> *row, oid *instances, <span class="keywordtype">size_t</span> len ) {
+<a name="l00344" id="l00344"></a>00344 }
+<a name="l00345" id="l00345"></a>00345 
+</pre>
+    </div>
+  </div>
+  <hr size="1" />
+
+  <address style="text-align: right;">
+    <small>Generated on 28 Sep 2009 for net-snmp by  <a href="http://www.doxygen.org/index.html"><img class="footer" src=
+    "doxygen.png" alt="doxygen" /></a> 1.6.1</small>
+<!-- CONTENT END -->
+<!--#include virtual="/page-bottom.html" -->
+

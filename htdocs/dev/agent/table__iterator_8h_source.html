@@ -1,0 +1,257 @@
+<!--#set var="section" value="development" -->
+<!--#include virtual="/page-top.html" -->
+<!-- CONTENT START -->
+  <div class="navigation" id="top">
+    <div class="tabs">
+      <ul>
+        <li><a href="index.html"><span>Main Page</span></a></li>
+
+        <li><a href="pages.html"><span>Related Pages</span></a></li>
+
+        <li><a href="modules.html"><span>Modules</span></a></li>
+
+        <li><a href="annotated.html"><span>Data Structures</span></a></li>
+
+        <li class="current"><a href="files.html"><span>Files</span></a></li>
+
+        <li><a href="examples.html"><span>Examples</span></a></li>
+      </ul>
+    </div>
+
+    <div class="tabs">
+      <ul>
+        <li><a href="files.html"><span>File List</span></a></li>
+
+        <li><a href="globals.html"><span>Globals</span></a></li>
+      </ul>
+    </div>
+
+    <h1>table_iterator.h</h1><a href="table__iterator_8h.html">Go to the documentation of this file.</a>
+
+    <div class="fragment">
+      <pre class="fragment">
+<a name="l00001" id="l00001"></a>00001 <span class=
+"comment">/* Portions of this file are subject to the following copyright(s).  See</span>
+<a name="l00002" id="l00002"></a>00002 <span class=
+"comment"> * the Net-SNMP's COPYING file for more details and other copyrights</span>
+<a name="l00003" id="l00003"></a>00003 <span class="comment"> * that may apply:</span>
+<a name="l00004" id="l00004"></a>00004 <span class="comment"> */</span>
+<a name="l00005" id="l00005"></a>00005 <span class="comment">/*</span>
+<a name="l00006" id="l00006"></a>00006 <span class="comment"> * Portions of this file are copyrighted by:</span>
+<a name="l00007" id="l00007"></a>00007 <span class=
+"comment"> * Copyright &copy; 2003 Sun Microsystems, Inc. All rights reserved.</span>
+<a name="l00008" id="l00008"></a>00008 <span class=
+"comment"> * Use is subject to license terms specified in the COPYING file</span>
+<a name="l00009" id="l00009"></a>00009 <span class="comment"> * distributed with the Net-SNMP package.</span>
+<a name="l00010" id="l00010"></a>00010 <span class="comment"> */</span>
+<a name="l00016" id="l00016"></a>00016 <span class="preprocessor">#ifndef _TABLE_ITERATOR_HANDLER_H_</span>
+<a name="l00017" id="l00017"></a>00017 <span class="preprocessor">#define _TABLE_ITERATOR_HANDLER_H_</span>
+<a name="l00018" id="l00018"></a>00018 
+<a name="l00019" id="l00019"></a>00019 <span class="preprocessor">#ifdef __cplusplus</span>
+<a name="l00020" id="l00020"></a>00020 <span class="keyword">extern</span>          <span class="stringliteral">"C"</span> {
+<a name="l00021" id="l00021"></a>00021 <span class="preprocessor">#endif</span>
+<a name="l00022" id="l00022"></a>00022 
+<a name="l00023" id="l00023"></a>00023     <span class="keyword">struct </span><a class="code" href=
+"structnetsnmp__iterator__info__s.html" title=
+"Holds iterator information containing functions which should be called by the iterator_handler...">netsnmp_iterator_info_s</a>;
+<a name="l00024" id="l00024"></a>00024 
+<a name="l00025" id="l00025"></a>00025     <span class="keyword">typedef</span> <a class="code" href="structvariable__list.html"
+title=
+"The netsnmp variable list binding structure, it&amp;#39;s typedef&amp;#39;d to netsnmp_variable_list...">netsnmp_variable_list</a> *
+<a name="l00026" id="l00026"></a>00026                (Netsnmp_First_Data_Point) (<span class=
+"keywordtype">void</span> **loop_context,
+<a name="l00027" id="l00027"></a>00027                                            <span class=
+"keywordtype">void</span> **data_context,
+<a name="l00028" id="l00028"></a>00028                                            <a class="code" href=
+"structvariable__list.html" title=
+"The netsnmp variable list binding structure, it&amp;#39;s typedef&amp;#39;d to netsnmp_variable_list...">netsnmp_variable_list</a> *,
+<a name="l00029" id="l00029"></a>00029                                            <span class="keyword">struct</span> <a class=
+"code" href="structnetsnmp__iterator__info__s.html" title=
+"Holds iterator information containing functions which should be called by the iterator_handler...">netsnmp_iterator_info_s</a> *);
+<a name="l00030" id="l00030"></a>00030     <span class="keyword">typedef</span> <a class="code" href="structvariable__list.html"
+title=
+"The netsnmp variable list binding structure, it&amp;#39;s typedef&amp;#39;d to netsnmp_variable_list...">netsnmp_variable_list</a> *
+<a name="l00031" id="l00031"></a>00031                (Netsnmp_Next_Data_Point)  (<span class=
+"keywordtype">void</span> **loop_context,
+<a name="l00032" id="l00032"></a>00032                                            <span class=
+"keywordtype">void</span> **data_context,
+<a name="l00033" id="l00033"></a>00033                                            <a class="code" href=
+"structvariable__list.html" title=
+"The netsnmp variable list binding structure, it&amp;#39;s typedef&amp;#39;d to netsnmp_variable_list...">netsnmp_variable_list</a> *,
+<a name="l00034" id="l00034"></a>00034                                            <span class="keyword">struct</span> <a class=
+"code" href="structnetsnmp__iterator__info__s.html" title=
+"Holds iterator information containing functions which should be called by the iterator_handler...">netsnmp_iterator_info_s</a> *);
+<a name="l00035" id="l00035"></a>00035     <span class="keyword">typedef</span> <span class=
+"keywordtype">void</span> *(Netsnmp_Make_Data_Context) (<span class="keywordtype">void</span> *loop_context,
+<a name="l00036" id="l00036"></a>00036                                              <span class="keyword">struct</span> <a class=
+"code" href="structnetsnmp__iterator__info__s.html" title=
+"Holds iterator information containing functions which should be called by the iterator_handler...">netsnmp_iterator_info_s</a> *);
+<a name="l00037" id="l00037"></a>00037     <span class="keyword">typedef</span> void  (Netsnmp_Free_Loop_Context) (<span class=
+"keywordtype">void</span> *,
+<a name="l00038" id="l00038"></a>00038                                              <span class="keyword">struct </span><a class=
+"code" href="structnetsnmp__iterator__info__s.html" title=
+"Holds iterator information containing functions which should be called by the iterator_handler...">netsnmp_iterator_info_s</a> *);
+<a name="l00039" id="l00039"></a>00039     <span class="keyword">typedef</span> void  (Netsnmp_Free_Data_Context) (<span class=
+"keywordtype">void</span> *,
+<a name="l00040" id="l00040"></a>00040                                              <span class="keyword">struct </span><a class=
+"code" href="structnetsnmp__iterator__info__s.html" title=
+"Holds iterator information containing functions which should be called by the iterator_handler...">netsnmp_iterator_info_s</a> *);
+<a name="l00041" id="l00041"></a>00041 
+<a name="l00053" id="l00053"></a><a class="code" href="structnetsnmp__iterator__info__s.html">00053</a>     <span class=
+"keyword">typedef</span> <span class="keyword">struct </span><a class="code" href="structnetsnmp__iterator__info__s.html" title=
+"Holds iterator information containing functions which should be called by the iterator_handler...">netsnmp_iterator_info_s</a> {
+<a name="l00057" id="l00057"></a><a class="code" href=
+"structnetsnmp__iterator__info__s.html#a98224fb1d34bf8794bc2e45eab33ce56">00057</a>         Netsnmp_First_Data_Point *<a class=
+"code" href="structnetsnmp__iterator__info__s.html#a98224fb1d34bf8794bc2e45eab33ce56" title=
+"Responsible for: returning the first set of &amp;quot;index&amp;quot; data, a loop-context...">get_first_data_point</a>;
+<a name="l00058" id="l00058"></a>00058 
+<a name="l00062" id="l00062"></a><a class="code" href=
+"structnetsnmp__iterator__info__s.html#a9df181621eb551784037a5bfbea1e9a0">00062</a>         Netsnmp_Next_Data_Point *<a class=
+"code" href="structnetsnmp__iterator__info__s.html#a9df181621eb551784037a5bfbea1e9a0" title=
+"Given the previous loop context, this should return the next loop context, associated...">get_next_data_point</a>;
+<a name="l00063" id="l00063"></a>00063 
+<a name="l00068" id="l00068"></a><a class="code" href=
+"structnetsnmp__iterator__info__s.html#a17fbe4838bb67d1d1a7f6cfbdf6750ba">00068</a>         Netsnmp_Make_Data_Context *<a class=
+"code" href="structnetsnmp__iterator__info__s.html#a17fbe4838bb67d1d1a7f6cfbdf6750ba" title=
+"If a data context wasn&amp;#39;t supplied by the get_first_data_point or get_next_data_point...">make_data_context</a>;
+<a name="l00069" id="l00069"></a>00069 
+<a name="l00075" id="l00075"></a><a class="code" href=
+"structnetsnmp__iterator__info__s.html#ab6cbc4dc5f00074e5ae1b0a04a3360a9">00075</a>         Netsnmp_Free_Loop_Context *<a class=
+"code" href="structnetsnmp__iterator__info__s.html#ab6cbc4dc5f00074e5ae1b0a04a3360a9" title=
+"A function which should free the loop context.">free_loop_context</a>;
+<a name="l00076" id="l00076"></a>00076 
+<a name="l00082" id="l00082"></a><a class="code" href=
+"structnetsnmp__iterator__info__s.html#a21a0de492a8c6986be23bce6061c08a0">00082</a>        Netsnmp_Free_Data_Context *<a class=
+"code" href="structnetsnmp__iterator__info__s.html#a21a0de492a8c6986be23bce6061c08a0" title=
+"Frees a data context.">free_data_context</a>;
+<a name="l00083" id="l00083"></a>00083 
+<a name="l00090" id="l00090"></a><a class="code" href=
+"structnetsnmp__iterator__info__s.html#a79677e673db89809584498816821d1b0">00090</a>         Netsnmp_Free_Loop_Context *<a class=
+"code" href="structnetsnmp__iterator__info__s.html#a79677e673db89809584498816821d1b0" title=
+"Frees a loop context at the end of the entire iteration sequence.">free_loop_context_at_end</a>;
+<a name="l00091" id="l00091"></a>00091 
+<a name="l00094" id="l00094"></a><a class="code" href=
+"structnetsnmp__iterator__info__s.html#a643d6825accd25ea6d48e4da1bf44b5b">00094</a>         <span class=
+"keywordtype">void</span>           *<a class="code" href=
+"structnetsnmp__iterator__info__s.html#a643d6825accd25ea6d48e4da1bf44b5b" title=
+"This can be used by client handlers to store any information they need.">myvoid</a>;
+<a name="l00095" id="l00095"></a>00095         <span class="keywordtype">int</span>             flags;
+<a name="l00096" id="l00096"></a>00096 <span class="preprocessor">#define NETSNMP_ITERATOR_FLAG_SORTED    0x01</span>
+<a name="l00097" id="l00097"></a>00097 
+<a name="l00100" id="l00100"></a><a class="code" href=
+"structnetsnmp__iterator__info__s.html#a2322feee30ec894a07007d2fa43fc5f2">00100</a>         <a class="code" href=
+"structnetsnmp__table__registration__info__s.html" title=
+"Table registration structure.">netsnmp_table_registration_info</a> *<a class="code" href=
+"structnetsnmp__iterator__info__s.html#a2322feee30ec894a07007d2fa43fc5f2" title=
+"A pointer to the netsnmp_table_registration_info object this iterator is registered...">table_reginfo</a>;
+<a name="l00101" id="l00101"></a>00101 
+<a name="l00102" id="l00102"></a>00102         <span class="comment">/* Experimental extension - Use At Your Own Risk</span>
+<a name="l00103" id="l00103"></a>00103 <span class=
+"comment">           (these two fields may change/disappear without warning) */</span>
+<a name="l00104" id="l00104"></a>00104         Netsnmp_First_Data_Point *get_row_indexes;
+<a name="l00105" id="l00105"></a>00105         <a class="code" href="structvariable__list.html" title=
+"The netsnmp variable list binding structure, it&amp;#39;s typedef&amp;#39;d to netsnmp_variable_list...">netsnmp_variable_list</a> *indexes;
+<a name="l00106" id="l00106"></a>00106     } <a class="code" href="structnetsnmp__iterator__info__s.html" title=
+"Holds iterator information containing functions which should be called by the iterator_handler...">netsnmp_iterator_info</a>;
+<a name="l00107" id="l00107"></a>00107 
+<a name="l00108" id="l00108"></a>00108 <span class="preprocessor">#define TABLE_ITERATOR_NAME "table_iterator"</span>
+<a name="l00109" id="l00109"></a>00109 
+<a name="l00110" id="l00110"></a>00110 <span class="comment">/* ============================</span>
+<a name="l00111" id="l00111"></a>00111 <span class="comment"> * Iterator API: Table maintenance</span>
+<a name="l00112" id="l00112"></a>00112 <span class="comment"> * ============================ */</span>
+<a name="l00113" id="l00113"></a>00113         <span class="comment">/* N/A */</span>
+<a name="l00114" id="l00114"></a>00114 
+<a name="l00115" id="l00115"></a>00115 <span class="comment">/* ============================</span>
+<a name="l00116" id="l00116"></a>00116 <span class="comment"> * Iterator API: MIB maintenance</span>
+<a name="l00117" id="l00117"></a>00117 <span class="comment"> * ============================ */</span>
+<a name="l00118" id="l00118"></a>00118 
+<a name="l00119" id="l00119"></a>00119     <a class="code" href="structnetsnmp__mib__handler__s.html" title=
+"the mib handler structure to be registered">netsnmp_mib_handler</a>
+<a name="l00120" id="l00120"></a>00120           *<a class="code" href=
+"group__table__iterator.html#gac72db9799a31046c476f5d8638d689a3" title=
+"returns a netsnmp_mib_handler object for the table_iterator helper">netsnmp_get_table_iterator_handler</a>(<a class="code" href=
+"structnetsnmp__iterator__info__s.html" title=
+"Holds iterator information containing functions which should be called by the iterator_handler...">netsnmp_iterator_info</a> *iinfo);
+<a name="l00121" id="l00121"></a>00121     <span class="keywordtype">int</span>    <a class="code" href=
+"group__table__iterator.html#ga3f10f7be6c67bed6f7284bdfe13c6a23" title=
+"Creates and registers a table iterator helper handler calling netsnmp_create_handler...">netsnmp_register_table_iterator</a>(   <a class="code"
+href="structnetsnmp__handler__registration__s.html" title="Root registration info.">netsnmp_handler_registration</a>
+<a name="l00122" id="l00122"></a>00122                                                                     *reginfo,
+<a name="l00123" id="l00123"></a>00123                                               <a class="code" href=
+"structnetsnmp__iterator__info__s.html" title=
+"Holds iterator information containing functions which should be called by the iterator_handler...">netsnmp_iterator_info</a> *iinfo);
+<a name="l00124" id="l00124"></a>00124     <span class="keywordtype">void</span>  netsnmp_iterator_delete_table(<a class="code"
+href="structnetsnmp__iterator__info__s.html" title=
+"Holds iterator information containing functions which should be called by the iterator_handler...">netsnmp_iterator_info</a> *iinfo);
+<a name="l00125" id="l00125"></a>00125 
+<a name="l00126" id="l00126"></a>00126     <span class="keywordtype">void</span> *<a class="code" href=
+"group__table__iterator.html#ga10027da7b08c561e38845bfc20659a41" title=
+"extracts the table_iterator specific data from a request.">netsnmp_extract_iterator_context</a>(<a class="code" href=
+"structnetsnmp__request__info__s.html" title="The netsnmp request info structure.">netsnmp_request_info</a> *);
+<a name="l00127" id="l00127"></a>00127     <span class="keywordtype">void</span>   <a class="code" href=
+"group__table__iterator.html#ga6a33283792ad8980ee20154b1993d09c" title=
+"inserts table_iterator specific data for a newly created row into a request">netsnmp_insert_iterator_context</a>(<a class="code"
+href="structnetsnmp__request__info__s.html" title="The netsnmp request info structure.">netsnmp_request_info</a> *, <span class=
+"keywordtype">void</span> *);
+<a name="l00128" id="l00128"></a>00128 
+<a name="l00129" id="l00129"></a>00129     Netsnmp_Node_Handler netsnmp_table_iterator_helper_handler;
+<a name="l00130" id="l00130"></a>00130 
+<a name="l00131" id="l00131"></a>00131 
+<a name="l00132" id="l00132"></a>00132 <span class="comment">/* ============================</span>
+<a name="l00133" id="l00133"></a>00133 <span class="comment"> * Iterator API: Row operations</span>
+<a name="l00134" id="l00134"></a>00134 <span class="comment"> * ============================ */</span>
+<a name="l00135" id="l00135"></a>00135 
+<a name="l00136" id="l00136"></a>00136 <span class="keywordtype">void</span> *netsnmp_iterator_row_first(      <a class="code"
+href="structnetsnmp__iterator__info__s.html" title=
+"Holds iterator information containing functions which should be called by the iterator_handler...">netsnmp_iterator_info</a> *);
+<a name="l00137" id="l00137"></a>00137 <span class="keywordtype">void</span> *netsnmp_iterator_row_get(        <a class="code"
+href="structnetsnmp__iterator__info__s.html" title=
+"Holds iterator information containing functions which should be called by the iterator_handler...">netsnmp_iterator_info</a> *, <span class="keywordtype">void</span> *);
+<a name="l00138" id="l00138"></a>00138 <span class="keywordtype">void</span> *netsnmp_iterator_row_next(       <a class="code"
+href="structnetsnmp__iterator__info__s.html" title=
+"Holds iterator information containing functions which should be called by the iterator_handler...">netsnmp_iterator_info</a> *, <span class="keywordtype">void</span> *);
+<a name="l00139" id="l00139"></a>00139 <span class="keywordtype">void</span> *netsnmp_iterator_row_get_byidx(  <a class="code"
+href="structnetsnmp__iterator__info__s.html" title=
+"Holds iterator information containing functions which should be called by the iterator_handler...">netsnmp_iterator_info</a> *,
+<a name="l00140" id="l00140"></a>00140                                        <a class="code" href="structvariable__list.html"
+title=
+"The netsnmp variable list binding structure, it&amp;#39;s typedef&amp;#39;d to netsnmp_variable_list...">netsnmp_variable_list</a> *);
+<a name="l00141" id="l00141"></a>00141 <span class="keywordtype">void</span> *netsnmp_iterator_row_next_byidx( <a class="code"
+href="structnetsnmp__iterator__info__s.html" title=
+"Holds iterator information containing functions which should be called by the iterator_handler...">netsnmp_iterator_info</a> *,
+<a name="l00142" id="l00142"></a>00142                                        <a class="code" href="structvariable__list.html"
+title=
+"The netsnmp variable list binding structure, it&amp;#39;s typedef&amp;#39;d to netsnmp_variable_list...">netsnmp_variable_list</a> *);
+<a name="l00143" id="l00143"></a>00143 <span class="keywordtype">void</span> *netsnmp_iterator_row_get_byoid(  <a class="code"
+href="structnetsnmp__iterator__info__s.html" title=
+"Holds iterator information containing functions which should be called by the iterator_handler...">netsnmp_iterator_info</a> *, oid *, <span class="keywordtype">size_t</span>);
+<a name="l00144" id="l00144"></a>00144 <span class="keywordtype">void</span> *netsnmp_iterator_row_next_byoid( <a class="code"
+href="structnetsnmp__iterator__info__s.html" title=
+"Holds iterator information containing functions which should be called by the iterator_handler...">netsnmp_iterator_info</a> *, oid *, <span class="keywordtype">size_t</span>);
+<a name="l00145" id="l00145"></a>00145 <span class="keywordtype">int</span>   netsnmp_iterator_row_count(      <a class="code"
+href="structnetsnmp__iterator__info__s.html" title=
+"Holds iterator information containing functions which should be called by the iterator_handler...">netsnmp_iterator_info</a> *);
+<a name="l00146" id="l00146"></a>00146 
+<a name="l00147" id="l00147"></a>00147 
+<a name="l00148" id="l00148"></a>00148 <span class="comment">/* ============================</span>
+<a name="l00149" id="l00149"></a>00149 <span class="comment"> * Iterator API: Index operations</span>
+<a name="l00150" id="l00150"></a>00150 <span class="comment"> * ============================ */</span>
+<a name="l00151" id="l00151"></a>00151 
+<a name="l00152" id="l00152"></a>00152 <span class="preprocessor">#ifdef __cplusplus</span>
+<a name="l00153" id="l00153"></a>00153 }
+<a name="l00154" id="l00154"></a>00154 <span class="preprocessor">#endif</span>
+<a name="l00155" id="l00155"></a>00155 
+<a name="l00156" id="l00156"></a>00156 <span class="preprocessor">#endif                          </span><span class=
+"comment">/* _TABLE_ITERATOR_HANDLER_H_ */</span>
+<a name="l00157" id="l00157"></a>00157 
+</pre>
+    </div>
+  </div>
+  <hr size="1" />
+
+  <address style="text-align: right;">
+    <small>Generated on 28 Sep 2009 for net-snmp by  <a href="http://www.doxygen.org/index.html"><img class="footer" src=
+    "doxygen.png" alt="doxygen" /></a> 1.6.1</small>
+<!-- CONTENT END -->
+<!--#include virtual="/page-bottom.html" -->
+

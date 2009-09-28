@@ -1,0 +1,245 @@
+<!--#set var="section" value="development" -->
+<!--#include virtual="/page-top.html" -->
+<!-- CONTENT START -->
+  <div class="navigation" id="top">
+    <div class="tabs">
+      <ul>
+        <li><a href="index.html"><span>Main Page</span></a></li>
+
+        <li><a href="pages.html"><span>Related Pages</span></a></li>
+
+        <li><a href="modules.html"><span>Modules</span></a></li>
+
+        <li><a href="annotated.html"><span>Data Structures</span></a></li>
+
+        <li class="current"><a href="files.html"><span>Files</span></a></li>
+
+        <li><a href="examples.html"><span>Examples</span></a></li>
+      </ul>
+    </div>
+
+    <div class="tabs">
+      <ul>
+        <li><a href="files.html"><span>File List</span></a></li>
+
+        <li><a href="globals.html"><span>Globals</span></a></li>
+      </ul>
+    </div>
+
+    <h1>data_set.c</h1>
+
+    <div class="fragment">
+      <pre class="fragment">
+<a name="l00001" id="l00001"></a>00001 
+<a name="l00063" id="l00063"></a>00063 <span class="comment">/*</span>
+<a name="l00064" id="l00064"></a>00064 <span class="comment"> * start be including the appropriate header files </span>
+<a name="l00065" id="l00065"></a>00065 <span class="comment"> */</span>
+<a name="l00066" id="l00066"></a>00066 <span class="preprocessor">#include &lt;net-snmp/net-snmp-config.h&gt;</span>
+<a name="l00067" id="l00067"></a>00067 <span class="preprocessor">#include &lt;net-snmp/net-snmp-includes.h&gt;</span>
+<a name="l00068" id="l00068"></a>00068 <span class=
+"preprocessor">#include &lt;net-snmp/agent/net-snmp-agent-includes.h&gt;</span>
+<a name="l00069" id="l00069"></a>00069 
+<a name="l00070" id="l00070"></a>00070 <span class="comment">/*</span>
+<a name="l00071" id="l00071"></a>00071 <span class=
+"comment"> * our initialization routine, automatically called by the agent </span>
+<a name="l00072" id="l00072"></a>00072 <span class="comment"> */</span>
+<a name="l00073" id="l00073"></a>00073 <span class="comment">/*</span>
+<a name="l00074" id="l00074"></a>00074 <span class=
+"comment"> * (to get called, the function name must match init_FILENAME() </span>
+<a name="l00075" id="l00075"></a>00075 <span class="comment"> */</span>
+<a name="l00076" id="l00076"></a>00076 <span class="keywordtype">void</span>
+<a name="l00077" id="l00077"></a>00077 init_data_set(<span class="keywordtype">void</span>)
+<a name="l00078" id="l00078"></a>00078 {
+<a name="l00079" id="l00079"></a>00079     <a class="code" href=
+"structnetsnmp__table__data__set__s.html">netsnmp_table_data_set</a> *table_set;
+<a name="l00080" id="l00080"></a>00080     <a class="code" href="structnetsnmp__table__row__s.html">netsnmp_table_row</a> *row;
+<a name="l00081" id="l00081"></a>00081 
+<a name="l00082" id="l00082"></a>00082     <span class="comment">/*</span>
+<a name="l00083" id="l00083"></a>00083 <span class=
+"comment">     * the OID we want to register our integer at.  This should be the</span>
+<a name="l00084" id="l00084"></a>00084 <span class=
+"comment">     * * OID node for the entire table.  In our case this is the</span>
+<a name="l00085" id="l00085"></a>00085 <span class="comment">     * * netSnmpIETFWGTable oid definition </span>
+<a name="l00086" id="l00086"></a>00086 <span class="comment">     */</span>
+<a name="l00087" id="l00087"></a>00087     oid             my_registration_oid[] =
+<a name="l00088" id="l00088"></a>00088         { 1, 3, 6, 1, 4, 1, 8072, 2, 2, 1 };
+<a name="l00089" id="l00089"></a>00089 
+<a name="l00090" id="l00090"></a>00090     <span class="comment">/*</span>
+<a name="l00091" id="l00091"></a>00091 <span class=
+"comment">     * a debugging statement.  Run the agent with -Dexample_data_set to see</span>
+<a name="l00092" id="l00092"></a>00092 <span class="comment">     * * the output of this debugging statement. </span>
+<a name="l00093" id="l00093"></a>00093 <span class="comment">     */</span>
+<a name="l00094" id="l00094"></a>00094     DEBUGMSGTL((<span class="stringliteral">"example_data_set"</span>,
+<a name="l00095" id="l00095"></a>00095                 <span class=
+"stringliteral">"Initalizing example dataset table\n"</span>));
+<a name="l00096" id="l00096"></a>00096 
+<a name="l00097" id="l00097"></a>00097     <span class="comment">/*</span>
+<a name="l00098" id="l00098"></a>00098 <span class=
+"comment">     * It's going to be the "working group chairs" table, since I'm</span>
+<a name="l00099" id="l00099"></a>00099 <span class=
+"comment">     * * sitting at an IETF convention while I'm writing this.</span>
+<a name="l00100" id="l00100"></a>00100 <span class="comment">     * *</span>
+<a name="l00101" id="l00101"></a>00101 <span class="comment">     * *  column 1 = index = string = WG name</span>
+<a name="l00102" id="l00102"></a>00102 <span class="comment">     * *  column 2 = string = chair #1</span>
+<a name="l00103" id="l00103"></a>00103 <span class=
+"comment">     * *  column 3 = string = chair #2  (most WGs have 2 chairs now)</span>
+<a name="l00104" id="l00104"></a>00104 <span class="comment">     */</span>
+<a name="l00105" id="l00105"></a>00105 
+<a name="l00106" id="l00106"></a>00106     table_set = <a class="code" href=
+"group__table__dataset.html#gab523c6783716afd206f0512f93ef6503" title=
+"Create a netsnmp_table_data_set structure given a table_data definition.">netsnmp_create_table_data_set</a>(<span class=
+"stringliteral">"netSnmpIETFWGTable"</span>);
+<a name="l00107" id="l00107"></a>00107 
+<a name="l00108" id="l00108"></a>00108     <span class="comment">/*</span>
+<a name="l00109" id="l00109"></a>00109 <span class="comment">     * allow the creation of new rows via SNMP SETs </span>
+<a name="l00110" id="l00110"></a>00110 <span class="comment">     */</span>
+<a name="l00111" id="l00111"></a>00111     table_set-&gt;allow_creation = 1;
+<a name="l00112" id="l00112"></a>00112 
+<a name="l00113" id="l00113"></a>00113     <span class="comment">/*</span>
+<a name="l00114" id="l00114"></a>00114 <span class=
+"comment">     * set up what a row "should" look like, starting with the index </span>
+<a name="l00115" id="l00115"></a>00115 <span class="comment">     */</span>
+<a name="l00116" id="l00116"></a>00116     <a class="code" href="group__table__dataset.html#gac5453f15d00c7d58881ba43109ca7709"
+title="adds an index to the table.">netsnmp_table_dataset_add_index</a>(table_set, ASN_OCTET_STR);
+<a name="l00117" id="l00117"></a>00117 
+<a name="l00118" id="l00118"></a>00118     <span class="comment">/*</span>
+<a name="l00119" id="l00119"></a>00119 <span class=
+"comment">     * define what the columns should look like.  both are octet strings here </span>
+<a name="l00120" id="l00120"></a>00120 <span class="comment">     */</span>
+<a name="l00121" id="l00121"></a>00121     <a class="code" href="group__table__dataset.html#ga26ffb5722ae066cfbcfe1f0f37bc072e"
+title="adds multiple data column definitions to each row.">netsnmp_table_set_multi_add_default_row</a>(table_set,
+<a name="l00122" id="l00122"></a>00122                                             <span class="comment">/*</span>
+<a name="l00123" id="l00123"></a>00123 <span class=
+"comment">                                             * column 2 = OCTET STRING,</span>
+<a name="l00124" id="l00124"></a>00124 <span class="comment">                                             * writable = 1,</span>
+<a name="l00125" id="l00125"></a>00125 <span class=
+"comment">                                             * default value = NULL,</span>
+<a name="l00126" id="l00126"></a>00126 <span class=
+"comment">                                             * default value len = 0 </span>
+<a name="l00127" id="l00127"></a>00127 <span class="comment">                                             */</span>
+<a name="l00128" id="l00128"></a>00128                                             2, ASN_OCTET_STR, 1, NULL, 0,
+<a name="l00129" id="l00129"></a>00129                                             <span class="comment">/*</span>
+<a name="l00130" id="l00130"></a>00130 <span class="comment">                                             * similar </span>
+<a name="l00131" id="l00131"></a>00131 <span class="comment">                                             */</span>
+<a name="l00132" id="l00132"></a>00132                                             3, ASN_OCTET_STR, 1, NULL, 0,
+<a name="l00133" id="l00133"></a>00133                                             0 <span class="comment">/* done */</span> );
+<a name="l00134" id="l00134"></a>00134 
+<a name="l00135" id="l00135"></a>00135     <span class="comment">/*</span>
+<a name="l00136" id="l00136"></a>00136 <span class="comment">     * register the table </span>
+<a name="l00137" id="l00137"></a>00137 <span class="comment">     */</span>
+<a name="l00138" id="l00138"></a>00138     <span class="comment">/*</span>
+<a name="l00139" id="l00139"></a>00139 <span class=
+"comment">     * if we wanted to handle specific data in a specific way, or note</span>
+<a name="l00140" id="l00140"></a>00140 <span class=
+"comment">     * * when requests came in we could change the NULL below to a valid</span>
+<a name="l00141" id="l00141"></a>00141 <span class=
+"comment">     * * handler method in which we could over ride the default</span>
+<a name="l00142" id="l00142"></a>00142 <span class="comment">     * * behaviour of the table_dataset helper </span>
+<a name="l00143" id="l00143"></a>00143 <span class="comment">     */</span>
+<a name="l00144" id="l00144"></a>00144     <a class="code" href="group__table__dataset.html#gac3daf62b5ff07dd03bc5b993e93ab103"
+title=
+"register a given data_set at a given oid (specified in the netsnmp_handler_registration...">netsnmp_register_table_data_set</a>(netsnmp_create_handler_registration
+<a name="l00145" id="l00145"></a>00145                                     (<span class=
+"stringliteral">"netSnmpIETFWGTable"</span>, NULL,
+<a name="l00146" id="l00146"></a>00146                                      my_registration_oid,
+<a name="l00147" id="l00147"></a>00147                                      OID_LENGTH(my_registration_oid),
+<a name="l00148" id="l00148"></a>00148                                      HANDLER_CAN_RWRITE), table_set, NULL);
+<a name="l00149" id="l00149"></a>00149 
+<a name="l00150" id="l00150"></a>00150 
+<a name="l00151" id="l00151"></a>00151     <span class="comment">/*</span>
+<a name="l00152" id="l00152"></a>00152 <span class="comment">     * create the a row for the table, and add the data </span>
+<a name="l00153" id="l00153"></a>00153 <span class="comment">     */</span>
+<a name="l00154" id="l00154"></a>00154     row = <a class="code" href=
+"group__table__data.html#gafdadce2dee8bc75b2b0dfd8e634e46a3" title=
+"creates and returns a pointer to table data set">netsnmp_create_table_data_row</a>();
+<a name="l00155" id="l00155"></a>00155     <span class="comment">/*</span>
+<a name="l00156" id="l00156"></a>00156 <span class="comment">     * set the index to the IETF WG name "snmpv3" </span>
+<a name="l00157" id="l00157"></a>00157 <span class="comment">     */</span>
+<a name="l00158" id="l00158"></a>00158     netsnmp_table_row_add_index(row, ASN_OCTET_STR, <span class=
+"stringliteral">"snmpv3"</span>,
+<a name="l00159" id="l00159"></a>00159                                 strlen(<span class="stringliteral">"snmpv3"</span>));
+<a name="l00160" id="l00160"></a>00160 
+<a name="l00161" id="l00161"></a>00161 
+<a name="l00162" id="l00162"></a>00162     <span class="comment">/*</span>
+<a name="l00163" id="l00163"></a>00163 <span class="comment">     * set column 2 to be the WG chair name "Russ Mundy" </span>
+<a name="l00164" id="l00164"></a>00164 <span class="comment">     */</span>
+<a name="l00165" id="l00165"></a>00165     <a class="code" href="group__table__dataset.html#gaaa497e6eec3b370c5901905696bc78af"
+title="sets a given column in a row with data given a type, value, and length.">netsnmp_set_row_column</a>(row, 2, ASN_OCTET_STR,
+<a name="l00166" id="l00166"></a>00166                            <span class=
+"stringliteral">"Russ Mundy"</span>, strlen(<span class="stringliteral">"Russ Mundy"</span>));
+<a name="l00167" id="l00167"></a>00167     <a class="code" href="group__table__dataset.html#ga5dce210cd4d59eb8b01478ee5d0dc348"
+title="marks a given column in a row as writable or not.">netsnmp_mark_row_column_writable</a>(row, 2, 1);        <span class=
+"comment">/* make writable via SETs */</span>
+<a name="l00168" id="l00168"></a>00168 
+<a name="l00169" id="l00169"></a>00169     <span class="comment">/*</span>
+<a name="l00170" id="l00170"></a>00170 <span class=
+"comment">     * set column 3 to be the WG chair name "David Harrington" </span>
+<a name="l00171" id="l00171"></a>00171 <span class="comment">     */</span>
+<a name="l00172" id="l00172"></a>00172     <a class="code" href="group__table__dataset.html#gaaa497e6eec3b370c5901905696bc78af"
+title=
+"sets a given column in a row with data given a type, value, and length.">netsnmp_set_row_column</a>(row, 3, ASN_OCTET_STR, <span class="stringliteral">"David Harrington"</span>,
+<a name="l00173" id="l00173"></a>00173                            strlen(<span class="stringliteral">"David Harrington"</span>));
+<a name="l00174" id="l00174"></a>00174     <a class="code" href="group__table__dataset.html#ga5dce210cd4d59eb8b01478ee5d0dc348"
+title="marks a given column in a row as writable or not.">netsnmp_mark_row_column_writable</a>(row, 3, 1);        <span class=
+"comment">/* make writable via SETs */</span>
+<a name="l00175" id="l00175"></a>00175 
+<a name="l00176" id="l00176"></a>00176     <span class="comment">/*</span>
+<a name="l00177" id="l00177"></a>00177 <span class="comment">     * add the row to the table </span>
+<a name="l00178" id="l00178"></a>00178 <span class="comment">     */</span>
+<a name="l00179" id="l00179"></a>00179     <a class="code" href="group__table__dataset.html#gacaa808db27144a4f967024bd7c9b6b25"
+title="adds a new row to a dataset table">netsnmp_table_dataset_add_row</a>(table_set, row);
+<a name="l00180" id="l00180"></a>00180 
+<a name="l00181" id="l00181"></a>00181 <span class="preprocessor">#ifdef ADD_MORE_DATA</span>
+<a name="l00182" id="l00182"></a>00182     <span class="comment">/*</span>
+<a name="l00183" id="l00183"></a>00183 <span class="comment">     * add the data, for the second row </span>
+<a name="l00184" id="l00184"></a>00184 <span class="comment">     */</span>
+<a name="l00185" id="l00185"></a>00185     row = <a class="code" href=
+"group__table__data.html#gafdadce2dee8bc75b2b0dfd8e634e46a3" title=
+"creates and returns a pointer to table data set">netsnmp_create_table_data_row</a>();
+<a name="l00186" id="l00186"></a>00186     netsnmp_table_row_add_index(row, ASN_OCTET_STR, <span class=
+"stringliteral">"snmpconf"</span>,
+<a name="l00187" id="l00187"></a>00187                                 strlen(<span class="stringliteral">"snmpconf"</span>));
+<a name="l00188" id="l00188"></a>00188     <a class="code" href="group__table__dataset.html#gaaa497e6eec3b370c5901905696bc78af"
+title=
+"sets a given column in a row with data given a type, value, and length.">netsnmp_set_row_column</a>(row, 2, ASN_OCTET_STR, <span class="stringliteral">"David Partain"</span>,
+<a name="l00189" id="l00189"></a>00189                            strlen(<span class="stringliteral">"David Partain"</span>));
+<a name="l00190" id="l00190"></a>00190     <a class="code" href="group__table__dataset.html#ga5dce210cd4d59eb8b01478ee5d0dc348"
+title="marks a given column in a row as writable or not.">netsnmp_mark_row_column_writable</a>(row, 2, 1);        <span class=
+"comment">/* make writable */</span>
+<a name="l00191" id="l00191"></a>00191     <a class="code" href="group__table__dataset.html#gaaa497e6eec3b370c5901905696bc78af"
+title=
+"sets a given column in a row with data given a type, value, and length.">netsnmp_set_row_column</a>(row, 3, ASN_OCTET_STR, <span class="stringliteral">"Jon Saperia"</span>,
+<a name="l00192" id="l00192"></a>00192                            strlen(<span class="stringliteral">"Jon Saperia"</span>));
+<a name="l00193" id="l00193"></a>00193     <a class="code" href="group__table__dataset.html#ga5dce210cd4d59eb8b01478ee5d0dc348"
+title="marks a given column in a row as writable or not.">netsnmp_mark_row_column_writable</a>(row, 3, 1);        <span class=
+"comment">/* make writable */</span>
+<a name="l00194" id="l00194"></a>00194     <a class="code" href="group__table__dataset.html#gacaa808db27144a4f967024bd7c9b6b25"
+title="adds a new row to a dataset table">netsnmp_table_dataset_add_row</a>(table_set, row);
+<a name="l00195" id="l00195"></a>00195 <span class="preprocessor">#endif</span>
+<a name="l00196" id="l00196"></a>00196 
+<a name="l00197" id="l00197"></a>00197     <span class="comment">/*</span>
+<a name="l00198" id="l00198"></a>00198 <span class=
+"comment">     * Finally, this actually allows the "add_row" token it the</span>
+<a name="l00199" id="l00199"></a>00199 <span class="comment">     * * snmpd.conf file to add rows to this table.</span>
+<a name="l00200" id="l00200"></a>00200 <span class="comment">     * * Example snmpd.conf line:</span>
+<a name="l00201" id="l00201"></a>00201 <span class=
+"comment">     * *   add_row netSnmpIETFWGTable eos "Glenn Waters" "Dale Francisco"</span>
+<a name="l00202" id="l00202"></a>00202 <span class="comment">     */</span>
+<a name="l00203" id="l00203"></a>00203     <a class="code" href="group__table__dataset.html#ga0abcc64b2de9687425d8402c0b3377da"
+title=
+"registers a table_dataset so that the &amp;quot;add_row&amp;quot; snmpd.conf token can be...">netsnmp_register_auto_data_table</a>(table_set, NULL);
+<a name="l00204" id="l00204"></a>00204 
+<a name="l00205" id="l00205"></a>00205     DEBUGMSGTL((<span class="stringliteral">"example_data_set"</span>, <span class=
+"stringliteral">"Done initializing.\n"</span>));
+<a name="l00206" id="l00206"></a>00206 }
+</pre>
+    </div>
+  </div>
+  <hr size="1" />
+
+  <address style="text-align: right;">
+    <small>Generated on 28 Sep 2009 for net-snmp by  <a href="http://www.doxygen.org/index.html"><img class="footer" src=
+    "doxygen.png" alt="doxygen" /></a> 1.6.1</small>
+<!-- CONTENT END -->
+<!--#include virtual="/page-bottom.html" -->
+

@@ -1,0 +1,115 @@
+<!--#set var="section" value="development" -->
+<!--#include virtual="/page-top.html" -->
+<!-- CONTENT START -->
+  <div class="navigation" id="top">
+    <div class="tabs">
+      <ul>
+        <li><a href="index.html"><span>Main Page</span></a></li>
+
+        <li><a href="pages.html"><span>Related Pages</span></a></li>
+
+        <li><a href="modules.html"><span>Modules</span></a></li>
+
+        <li><a href="annotated.html"><span>Data Structures</span></a></li>
+
+        <li class="current"><a href="files.html"><span>Files</span></a></li>
+
+        <li><a href="examples.html"><span>Examples</span></a></li>
+      </ul>
+    </div>
+
+    <div class="tabs">
+      <ul>
+        <li><a href="files.html"><span>File List</span></a></li>
+
+        <li><a href="globals.html"><span>Globals</span></a></li>
+      </ul>
+    </div>
+
+    <h1>stash_cache.h</h1>
+
+    <div class="fragment">
+      <pre class="fragment">
+<a name="l00001" id="l00001"></a>00001 <span class="preprocessor">#ifndef STASH_CACHE_H</span>
+<a name="l00002" id="l00002"></a>00002 <span class="preprocessor">#define STASH_CACHE_H</span>
+<a name="l00003" id="l00003"></a>00003 
+<a name="l00004" id="l00004"></a>00004 <span class="preprocessor">#include &lt;net-snmp/library/oid_stash.h&gt;</span>
+<a name="l00005" id="l00005"></a>00005 <span class="preprocessor">#include &lt;<a class="code" href=
+"tools_8h.html">net-snmp/library/tools.h</a>&gt;</span>
+<a name="l00006" id="l00006"></a>00006 
+<a name="l00007" id="l00007"></a>00007 <span class="preprocessor">#define STASH_CACHE_NAME "stash_cache"</span>
+<a name="l00008" id="l00008"></a>00008 
+<a name="l00009" id="l00009"></a><a class="code" href="structnetsnmp__stash__cache__info__s.html">00009</a> <span class=
+"keyword">typedef</span> <span class="keyword">struct </span><a class="code" href=
+"structnetsnmp__stash__cache__info__s.html">netsnmp_stash_cache_info_s</a> {
+<a name="l00010" id="l00010"></a>00010    <span class="keywordtype">int</span>                      cache_valid;
+<a name="l00011" id="l00011"></a>00011    marker_t                 cache_time;
+<a name="l00012" id="l00012"></a>00012    <a class="code" href=
+"structnetsnmp__oid__stash__node__s.html">netsnmp_oid_stash_node</a>  *cache;
+<a name="l00013" id="l00013"></a>00013    <span class="keywordtype">int</span>                      cache_length;
+<a name="l00014" id="l00014"></a>00014 } <a class="code" href=
+"structnetsnmp__stash__cache__info__s.html">netsnmp_stash_cache_info</a>;
+<a name="l00015" id="l00015"></a>00015 
+<a name="l00016" id="l00016"></a><a class="code" href="structnetsnmp__stash__cache__data__s.html">00016</a> <span class=
+"keyword">typedef</span> <span class="keyword">struct </span><a class="code" href=
+"structnetsnmp__stash__cache__data__s.html">netsnmp_stash_cache_data_s</a> {
+<a name="l00017" id="l00017"></a>00017    <span class="keywordtype">void</span>              *data;
+<a name="l00018" id="l00018"></a>00018    <span class="keywordtype">size_t</span>             data_len;
+<a name="l00019" id="l00019"></a>00019    u_char             data_type;
+<a name="l00020" id="l00020"></a>00020 } <a class="code" href=
+"structnetsnmp__stash__cache__data__s.html">netsnmp_stash_cache_data</a>;
+<a name="l00021" id="l00021"></a>00021 
+<a name="l00022" id="l00022"></a>00022 <span class="comment">/* function prototypes */</span>
+<a name="l00023" id="l00023"></a>00023 <span class="keywordtype">void</span> <a class="code" href=
+"group__stash__cache.html#ga1c63c8751fa6b9faa28bddc990d6c42a" title=
+"initializes the stash_cache helper which then registers a stash_cache handler as...">netsnmp_init_stash_cache_helper</a>(<span class="keywordtype">void</span>);
+<a name="l00024" id="l00024"></a>00024 <a class="code" href="structnetsnmp__mib__handler__s.html" title=
+"the mib handler structure to be registered">netsnmp_mib_handler</a> *<a class="code" href=
+"group__stash__cache.html#ga0295f6299cbcfdfc63726cff7c8b5a92" title=
+"returns a single stash_cache handler that can be injected into a given handler chain...">netsnmp_get_bare_stash_cache_handler</a>(<span class="keywordtype">void</span>);
+<a name="l00025" id="l00025"></a>00025 <a class="code" href="structnetsnmp__mib__handler__s.html" title=
+"the mib handler structure to be registered">netsnmp_mib_handler</a> *<a class="code" href=
+"group__stash__cache.html#gac5cd7baa84ff4f0398e15daa5d112e1f" title=
+"returns a stash_cache handler sub-chain that can be injected into a given (arbitrary)...">netsnmp_get_stash_cache_handler</a>(<span class="keywordtype">void</span>);
+<a name="l00026" id="l00026"></a>00026 <a class="code" href="structnetsnmp__mib__handler__s.html" title=
+"the mib handler structure to be registered">netsnmp_mib_handler</a> *<a class="code" href=
+"group__stash__cache.html#ga45f64f391cc2bc8ccc33b0208e5bb12d" title=
+"returns a stash_cache handler that can be injected into a given handler chain (with...">netsnmp_get_timed_bare_stash_cache_handler</a>(<span class="keywordtype">int</span> timeout,
+<a name="l00027" id="l00027"></a>00027                                            oid *rootoid, <span class=
+"keywordtype">size_t</span> rootoid_len);
+<a name="l00028" id="l00028"></a>00028 <a class="code" href="structnetsnmp__mib__handler__s.html" title=
+"the mib handler structure to be registered">netsnmp_mib_handler</a> *<a class="code" href=
+"group__stash__cache.html#gaa17f6ceaeb5f178f11f51421d6e4adc4" title=
+"returns a stash_cache handler sub-chain that can be injected into a given (arbitrary)...">netsnmp_get_timed_stash_cache_handler</a>(<span class="keywordtype">int</span> timeout,
+<a name="l00029" id="l00029"></a>00029                                            oid *rootoid, <span class=
+"keywordtype">size_t</span> rootoid_len);
+<a name="l00030" id="l00030"></a>00030 Netsnmp_Node_Handler netsnmp_stash_cache_helper;
+<a name="l00031" id="l00031"></a>00031 <a class="code" href=
+"structnetsnmp__oid__stash__node__s.html">netsnmp_oid_stash_node</a>  **<a class="code" href=
+"group__stash__cache.html#ga9c9dcbe0bb7fb4ba2623a27d943334db" title=
+"extracts a pointer to the stash_cache info from the reqinfo structure.">netsnmp_extract_stash_cache</a>(<a class="code" href=
+"structnetsnmp__agent__request__info__s.html" title=
+"The agent transaction request structure.">netsnmp_agent_request_info</a> *reqinfo);
+<a name="l00032" id="l00032"></a>00032 <span class="keywordtype">int</span> netsnmp_stash_cache_update(<a class="code" href=
+"structnetsnmp__mib__handler__s.html" title=
+"the mib handler structure to be registered">netsnmp_mib_handler</a> *handler, <a class="code" href=
+"structnetsnmp__handler__registration__s.html" title=
+"Root registration info.">netsnmp_handler_registration</a> *reginfo, <a class="code" href=
+"structnetsnmp__agent__request__info__s.html" title=
+"The agent transaction request structure.">netsnmp_agent_request_info</a> *reqinfo, <a class="code" href=
+"structnetsnmp__request__info__s.html" title="The netsnmp request info structure.">netsnmp_request_info</a> *requests, <a class=
+"code" href="structnetsnmp__stash__cache__info__s.html">netsnmp_stash_cache_info</a> *cinfo);
+<a name="l00033" id="l00033"></a>00033 
+<a name="l00034" id="l00034"></a>00034 
+<a name="l00035" id="l00035"></a>00035 <span class="preprocessor">#endif </span><span class="comment">/* STASH_CACHE_H */</span>
+</pre>
+    </div>
+  </div>
+  <hr size="1" />
+
+  <address style="text-align: right;">
+    <small>Generated on 28 Sep 2009 for net-snmp by  <a href="http://www.doxygen.org/index.html"><img class="footer" src=
+    "doxygen.png" alt="doxygen" /></a> 1.6.1</small>
+<!-- CONTENT END -->
+<!--#include virtual="/page-bottom.html" -->
+

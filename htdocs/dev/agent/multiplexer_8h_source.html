@@ -1,0 +1,97 @@
+<!--#set var="section" value="development" -->
+<!--#include virtual="/page-top.html" -->
+<!-- CONTENT START -->
+  <div class="navigation" id="top">
+    <div class="tabs">
+      <ul>
+        <li><a href="index.html"><span>Main Page</span></a></li>
+
+        <li><a href="pages.html"><span>Related Pages</span></a></li>
+
+        <li><a href="modules.html"><span>Modules</span></a></li>
+
+        <li><a href="annotated.html"><span>Data Structures</span></a></li>
+
+        <li class="current"><a href="files.html"><span>Files</span></a></li>
+
+        <li><a href="examples.html"><span>Examples</span></a></li>
+      </ul>
+    </div>
+
+    <div class="tabs">
+      <ul>
+        <li><a href="files.html"><span>File List</span></a></li>
+
+        <li><a href="globals.html"><span>Globals</span></a></li>
+      </ul>
+    </div>
+
+    <h1>multiplexer.h</h1>
+
+    <div class="fragment">
+      <pre class="fragment">
+<a name="l00001" id="l00001"></a>00001 <span class="preprocessor">#ifndef NETSNMP_MULTIPLEXER_H</span>
+<a name="l00002" id="l00002"></a>00002 <span class="preprocessor">#define NETSNMP_MULTIPLEXER_H</span>
+<a name="l00003" id="l00003"></a>00003 
+<a name="l00004" id="l00004"></a>00004 <span class="preprocessor">#ifdef __cplusplus</span>
+<a name="l00005" id="l00005"></a>00005 <span class="keyword">extern</span>          <span class="stringliteral">"C"</span> {
+<a name="l00006" id="l00006"></a>00006 <span class="preprocessor">#endif</span>
+<a name="l00007" id="l00007"></a>00007 
+<a name="l00008" id="l00008"></a>00008 <span class="comment">/*</span>
+<a name="l00009" id="l00009"></a>00009 <span class="comment"> * The multiplexer helper </span>
+<a name="l00010" id="l00010"></a>00010 <span class="comment"> */</span>
+<a name="l00011" id="l00011"></a>00011 
+<a name="l00018" id="l00018"></a><a class="code" href="structnetsnmp__mib__handler__methods__s.html">00018</a> <span class=
+"keyword">typedef</span> <span class="keyword">struct </span><a class="code" href=
+"structnetsnmp__mib__handler__methods__s.html">netsnmp_mib_handler_methods_s</a> {
+<a name="l00020" id="l00020"></a><a class="code" href=
+"structnetsnmp__mib__handler__methods__s.html#ab4f6741610386751e6d5abd56d3bee25">00020</a>     <a class="code" href=
+"structnetsnmp__mib__handler__s.html" title="the mib handler structure to be registered">netsnmp_mib_handler</a> *<a class="code"
+href="structnetsnmp__mib__handler__methods__s.html#ab4f6741610386751e6d5abd56d3bee25" title=
+"called when a GET request is received">get_handler</a>;
+<a name="l00022" id="l00022"></a><a class="code" href=
+"structnetsnmp__mib__handler__methods__s.html#ab6c238c91d66e56abcc4545fa0a03257">00022</a>     <a class="code" href=
+"structnetsnmp__mib__handler__s.html" title="the mib handler structure to be registered">netsnmp_mib_handler</a> *<a class="code"
+href="structnetsnmp__mib__handler__methods__s.html#ab6c238c91d66e56abcc4545fa0a03257" title=
+"called when a GETNEXT request is received">getnext_handler</a>;
+<a name="l00024" id="l00024"></a><a class="code" href=
+"structnetsnmp__mib__handler__methods__s.html#a4bd33364da80e3507bcd1f03f77813af">00024</a>     <a class="code" href=
+"structnetsnmp__mib__handler__s.html" title="the mib handler structure to be registered">netsnmp_mib_handler</a> *<a class="code"
+href="structnetsnmp__mib__handler__methods__s.html#a4bd33364da80e3507bcd1f03f77813af" title=
+"called when a GETBULK request is received">getbulk_handler</a>;
+<a name="l00026" id="l00026"></a><a class="code" href=
+"structnetsnmp__mib__handler__methods__s.html#a19a977b78f5b94dd2897076036287f3a">00026</a>     <a class="code" href=
+"structnetsnmp__mib__handler__s.html" title="the mib handler structure to be registered">netsnmp_mib_handler</a> *<a class="code"
+href="structnetsnmp__mib__handler__methods__s.html#a19a977b78f5b94dd2897076036287f3a" title=
+"called when a SET request is received">set_handler</a>;
+<a name="l00027" id="l00027"></a>00027 } <a class="code" href="structnetsnmp__mib__handler__methods.html" title=
+"Defines the subhandlers to be called by the multiplexer helper.">netsnmp_mib_handler_methods</a>;
+<a name="l00028" id="l00028"></a>00028 
+<a name="l00031" id="l00031"></a>00031 <a class="code" href="structnetsnmp__mib__handler__s.html" title=
+"the mib handler structure to be registered">netsnmp_mib_handler</a>
+<a name="l00032" id="l00032"></a>00032     *<a class="code" href="group__multiplexer.html#ga687486adbcf8b7401eda718146f67d90"
+title=
+"returns a multiplixer handler given a netsnmp_mib_handler_methods structure of subhandlers...">netsnmp_get_multiplexer_handler</a>(<a class="code"
+href="structnetsnmp__mib__handler__methods.html" title=
+"Defines the subhandlers to be called by the multiplexer helper.">netsnmp_mib_handler_methods</a> *);
+<a name="l00033" id="l00033"></a>00033 
+<a name="l00034" id="l00034"></a>00034 Netsnmp_Node_Handler <a class="code" href=
+"group__multiplexer.html#gaec644e0b5d8f75a91a2b1eb04457d3f0" title=
+"implements the multiplexer helper">netsnmp_multiplexer_helper_handler</a>;
+<a name="l00035" id="l00035"></a>00035 
+<a name="l00036" id="l00036"></a>00036 <span class="preprocessor">#ifdef __cplusplus</span>
+<a name="l00037" id="l00037"></a>00037 }
+<a name="l00038" id="l00038"></a>00038 <span class="preprocessor">#endif</span>
+<a name="l00039" id="l00039"></a>00039 <span class="preprocessor">#endif                          </span><span class=
+"comment">/* NETSNMP_MULTIPLEXER_H */</span>
+</pre>
+    </div>
+  </div>
+  <hr size="1" />
+
+  <address style="text-align: right;">
+    <small>Generated on 28 Sep 2009 for net-snmp by  <a href="http://www.doxygen.org/index.html"><img class="footer" src=
+    "doxygen.png" alt="doxygen" /></a> 1.6.1</small>
+<!-- CONTENT END -->
+<!--#include virtual="/page-bottom.html" -->
+

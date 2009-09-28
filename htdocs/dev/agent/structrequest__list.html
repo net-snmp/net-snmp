@@ -1,0 +1,160 @@
+<!--#set var="section" value="development" -->
+<!--#include virtual="/page-top.html" -->
+<!-- CONTENT START -->
+  <div class="navigation" id="top">
+    <div class="tabs">
+      <ul>
+        <li><a href="index.html"><span>Main Page</span></a></li>
+
+        <li><a href="pages.html"><span>Related Pages</span></a></li>
+
+        <li><a href="modules.html"><span>Modules</span></a></li>
+
+        <li class="current"><a href="annotated.html"><span>Data Structures</span></a></li>
+
+        <li><a href="files.html"><span>Files</span></a></li>
+
+        <li><a href="examples.html"><span>Examples</span></a></li>
+      </ul>
+    </div>
+
+    <div class="tabs">
+      <ul>
+        <li><a href="annotated.html"><span>Data Structures</span></a></li>
+
+        <li><a href="functions.html"><span>Data Fields</span></a></li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="contents">
+    <h1>request_list Struct Reference</h1><!-- doxytag: class="request_list" -->
+
+    <table border="0" cellpadding="0" cellspacing="0">
+      <tr>
+        <td colspan="2">
+          <h2>Data Fields</h2>
+        </td>
+      </tr>
+
+      <tr>
+        <td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a62148eabddbb5def5d57b8d2ab673856" name=
+        "a62148eabddbb5def5d57b8d2ab673856"></a>
+        <!-- doxytag: member="request_list::next_request" ref="a62148eabddbb5def5d57b8d2ab673856" args="" -->
+        struct <a class="el" href="structrequest__list.html">request_list</a> * </td>
+
+        <td class="memItemRight" valign="bottom"><b>next_request</b></td>
+      </tr>
+
+      <tr>
+        <td class="memItemLeft" align="right" valign="top"><a class="anchor" id="afc78a698e3e3d730e468f1ad7b1e78c7" name=
+        "afc78a698e3e3d730e468f1ad7b1e78c7"></a>
+        <!-- doxytag: member="request_list::request_id" ref="afc78a698e3e3d730e468f1ad7b1e78c7" args="" -->
+        long </td>
+
+        <td class="memItemRight" valign="bottom"><b>request_id</b></td>
+      </tr>
+
+      <tr>
+        <td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a99a550a501c2d07a869d59596e3aea91" name=
+        "a99a550a501c2d07a869d59596e3aea91"></a>
+        <!-- doxytag: member="request_list::message_id" ref="a99a550a501c2d07a869d59596e3aea91" args="" -->
+        long </td>
+
+        <td class="memItemRight" valign="bottom"><b>message_id</b></td>
+      </tr>
+
+      <tr>
+        <td class="memItemLeft" align="right" valign="top"><a class="anchor" id="aaa57cbe193436786604b5ad0a6ae1435" name=
+        "aaa57cbe193436786604b5ad0a6ae1435"></a>
+        <!-- doxytag: member="request_list::callback" ref="aaa57cbe193436786604b5ad0a6ae1435" args="" -->
+        netsnmp_callback </td>
+
+        <td class="memItemRight" valign="bottom"><b>callback</b></td>
+      </tr>
+
+      <tr>
+        <td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a57c2dd72c7f7bafeecbe7645c70c759c" name=
+        "a57c2dd72c7f7bafeecbe7645c70c759c"></a>
+        <!-- doxytag: member="request_list::cb_data" ref="a57c2dd72c7f7bafeecbe7645c70c759c" args="" -->
+        void * </td>
+
+        <td class="memItemRight" valign="bottom"><b>cb_data</b></td>
+      </tr>
+
+      <tr>
+        <td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a0fdecebc31bf3382d950d0cd7e1361b9" name=
+        "a0fdecebc31bf3382d950d0cd7e1361b9"></a>
+        <!-- doxytag: member="request_list::retries" ref="a0fdecebc31bf3382d950d0cd7e1361b9" args="" -->
+        int </td>
+
+        <td class="memItemRight" valign="bottom"><b>retries</b></td>
+      </tr>
+
+      <tr>
+        <td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a9b99d2da49e6ec32ea7a32e9a5593e2a" name=
+        "a9b99d2da49e6ec32ea7a32e9a5593e2a"></a>
+        <!-- doxytag: member="request_list::timeout" ref="a9b99d2da49e6ec32ea7a32e9a5593e2a" args="" -->
+        u_long </td>
+
+        <td class="memItemRight" valign="bottom"><b>timeout</b></td>
+      </tr>
+
+      <tr>
+        <td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a49304fc21ce1df39a079295d18bb011c" name=
+        "a49304fc21ce1df39a079295d18bb011c"></a>
+        <!-- doxytag: member="request_list::time" ref="a49304fc21ce1df39a079295d18bb011c" args="" -->
+        struct timeval </td>
+
+        <td class="memItemRight" valign="bottom"><b>time</b></td>
+      </tr>
+
+      <tr>
+        <td class="memItemLeft" align="right" valign="top"><a class="anchor" id="aa18891e11f9164beb81dbd9c0384d360" name=
+        "aa18891e11f9164beb81dbd9c0384d360"></a>
+        <!-- doxytag: member="request_list::expire" ref="aa18891e11f9164beb81dbd9c0384d360" args="" -->
+        struct timeval </td>
+
+        <td class="memItemRight" valign="bottom"><b>expire</b></td>
+      </tr>
+
+      <tr>
+        <td class="memItemLeft" align="right" valign="top"><a class="anchor" id="ab0517c8c966b2ee592c08a1f0b2e9768" name=
+        "ab0517c8c966b2ee592c08a1f0b2e9768"></a>
+        <!-- doxytag: member="request_list::session" ref="ab0517c8c966b2ee592c08a1f0b2e9768" args="" -->
+        struct <a class="el" href="structsnmp__session.html">snmp_session</a> * </td>
+
+        <td class="memItemRight" valign="bottom"><b>session</b></td>
+      </tr>
+
+      <tr>
+        <td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a291e3b6419bedc152373743151cf96ca" name=
+        "a291e3b6419bedc152373743151cf96ca"></a>
+        <!-- doxytag: member="request_list::pdu" ref="a291e3b6419bedc152373743151cf96ca" args="" -->
+        <a class="el" href="structsnmp__pdu.html">netsnmp_pdu</a> * </td>
+
+        <td class="memItemRight" valign="bottom"><b>pdu</b></td>
+      </tr>
+    </table>
+    <hr />
+    <a name="_details"></a>
+
+    <h2>Detailed Description</h2>
+
+    <p>Definition at line <a class="el" href="snmp__api_8h_source.html#l00070">70</a> of file <a class="el" href=
+    "snmp__api_8h_source.html">snmp_api.h</a>.</p>
+    <hr />
+    The documentation for this struct was generated from the following file:
+
+    <ul>
+      <li><a class="el" href="snmp__api_8h_source.html">snmp_api.h</a></li>
+    </ul>
+  </div>
+  <hr size="1" />
+
+  <address style="text-align: right;">
+    <small>Generated on 28 Sep 2009 for net-snmp by  <a href="http://www.doxygen.org/index.html"><img class="footer" src=
+    "doxygen.png" alt="doxygen" /></a> 1.6.1</small>
+<!-- CONTENT END -->
+<!--#include virtual="/page-bottom.html" -->
+

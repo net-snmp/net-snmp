@@ -1,0 +1,124 @@
+<!--#set var="section" value="development" -->
+<!--#include virtual="/page-top.html" -->
+<!-- CONTENT START -->
+  <div class="navigation" id="top">
+    <div class="tabs">
+      <ul>
+        <li><a href="index.html"><span>Main Page</span></a></li>
+
+        <li><a href="pages.html"><span>Related Pages</span></a></li>
+
+        <li><a href="modules.html"><span>Modules</span></a></li>
+
+        <li class="current"><a href="annotated.html"><span>Data Structures</span></a></li>
+
+        <li><a href="files.html"><span>Files</span></a></li>
+
+        <li><a href="examples.html"><span>Examples</span></a></li>
+      </ul>
+    </div>
+
+    <div class="tabs">
+      <ul>
+        <li><a href="annotated.html"><span>Data Structures</span></a></li>
+
+        <li><a href="functions.html"><span>Data Fields</span></a></li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="contents">
+    <h1>netsnmp_ssh_addr_pair_s Struct Reference</h1><!-- doxytag: class="netsnmp_ssh_addr_pair_s" -->
+
+    <table border="0" cellpadding="0" cellspacing="0">
+      <tr>
+        <td colspan="2">
+          <h2>Data Fields</h2>
+        </td>
+      </tr>
+
+      <tr>
+        <td class="memItemLeft" align="right" valign="top"><a class="anchor" id="afe70c387be389aab1bf0a79fd7327dce" name=
+        "afe70c387be389aab1bf0a79fd7327dce"></a>
+        <!-- doxytag: member="netsnmp_ssh_addr_pair_s::remote_addr" ref="afe70c387be389aab1bf0a79fd7327dce" args="" -->
+        struct sockaddr_in </td>
+
+        <td class="memItemRight" valign="bottom"><b>remote_addr</b></td>
+      </tr>
+
+      <tr>
+        <td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a0bdaccaf087cd42b3e1b519a18d71f30" name=
+        "a0bdaccaf087cd42b3e1b519a18d71f30"></a>
+        <!-- doxytag: member="netsnmp_ssh_addr_pair_s::local_addr" ref="a0bdaccaf087cd42b3e1b519a18d71f30" args="" -->
+        struct in_addr </td>
+
+        <td class="memItemRight" valign="bottom"><b>local_addr</b></td>
+      </tr>
+
+      <tr>
+        <td class="memItemLeft" align="right" valign="top"><a class="anchor" id="afa09199103804d0e7e68d4a4227697e2" name=
+        "afa09199103804d0e7e68d4a4227697e2"></a>
+        <!-- doxytag: member="netsnmp_ssh_addr_pair_s::session" ref="afa09199103804d0e7e68d4a4227697e2" args="" -->
+        LIBSSH2_SESSION * </td>
+
+        <td class="memItemRight" valign="bottom"><b>session</b></td>
+      </tr>
+
+      <tr>
+        <td class="memItemLeft" align="right" valign="top"><a class="anchor" id="af5b577a5fdefcbc509639c52e62284e6" name=
+        "af5b577a5fdefcbc509639c52e62284e6"></a>
+        <!-- doxytag: member="netsnmp_ssh_addr_pair_s::channel" ref="af5b577a5fdefcbc509639c52e62284e6" args="" -->
+        LIBSSH2_CHANNEL * </td>
+
+        <td class="memItemRight" valign="bottom"><b>channel</b></td>
+      </tr>
+
+      <tr>
+        <td class="memItemLeft" align="right" valign="top"><a class="anchor" id="ad1db8b2a34c5f6ff92f462c485296ec2" name=
+        "ad1db8b2a34c5f6ff92f462c485296ec2"></a>
+        <!-- doxytag: member="netsnmp_ssh_addr_pair_s::username" ref="ad1db8b2a34c5f6ff92f462c485296ec2" args="[MAX_NAME_LENGTH+1]" -->
+        char </td>
+
+        <td class="memItemRight" valign="bottom"><b>username</b> [MAX_NAME_LENGTH+1]</td>
+      </tr>
+
+      <tr>
+        <td class="memItemLeft" align="right" valign="top"><a class="anchor" id="ac8ca348920662a53801017c28d174a2f" name=
+        "ac8ca348920662a53801017c28d174a2f"></a>
+        <!-- doxytag: member="netsnmp_ssh_addr_pair_s::unix_socket_end" ref="ac8ca348920662a53801017c28d174a2f" args="" -->
+        struct sockaddr_un </td>
+
+        <td class="memItemRight" valign="bottom"><b>unix_socket_end</b></td>
+      </tr>
+
+      <tr>
+        <td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a6f19f422fc03dbac55f353457d5ef2f9" name=
+        "a6f19f422fc03dbac55f353457d5ef2f9"></a>
+        <!-- doxytag: member="netsnmp_ssh_addr_pair_s::socket_path" ref="a6f19f422fc03dbac55f353457d5ef2f9" args="[MAXPATHLEN]" -->
+        char </td>
+
+        <td class="memItemRight" valign="bottom"><b>socket_path</b> [MAXPATHLEN]</td>
+      </tr>
+    </table>
+    <hr />
+    <a name="_details"></a>
+
+    <h2>Detailed Description</h2>
+
+    <p>Definition at line <a class="el" href="snmpSSHDomain_8c_source.html#l00074">74</a> of file <a class="el" href=
+    "snmpSSHDomain_8c_source.html">snmpSSHDomain.c</a>.</p>
+    <hr />
+    The documentation for this struct was generated from the following file:
+
+    <ul>
+      <li><a class="el" href="snmpSSHDomain_8c_source.html">snmpSSHDomain.c</a></li>
+    </ul>
+  </div>
+  <hr size="1" />
+
+  <address style="text-align: right;">
+    <small>Generated on 28 Sep 2009 for net-snmp by  <a href="http://www.doxygen.org/index.html"><img class="footer" src=
+    "doxygen.png" alt="doxygen" /></a> 1.6.1</small>
+<!-- CONTENT END -->
+<!--#include virtual="/page-bottom.html" -->
+

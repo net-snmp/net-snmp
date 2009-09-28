@@ -1,0 +1,66 @@
+<!--#set var="section" value="development" -->
+<!--#include virtual="/page-top.html" -->
+<!-- CONTENT START -->
+  <div class="navigation" id="top">
+    <div class="tabs">
+      <ul>
+        <li><a href="index.html"><span>Main Page</span></a></li>
+
+        <li><a href="pages.html"><span>Related Pages</span></a></li>
+
+        <li><a href="modules.html"><span>Modules</span></a></li>
+
+        <li><a href="annotated.html"><span>Data Structures</span></a></li>
+
+        <li class="current"><a href="files.html"><span>Files</span></a></li>
+
+        <li><a href="examples.html"><span>Examples</span></a></li>
+      </ul>
+    </div>
+
+    <div class="tabs">
+      <ul>
+        <li><a href="files.html"><span>File List</span></a></li>
+
+        <li><a href="globals.html"><span>Globals</span></a></li>
+      </ul>
+    </div>
+
+    <h1>debug_handler.h</h1>
+
+    <div class="fragment">
+      <pre class="fragment">
+<a name="l00001" id="l00001"></a>00001 <span class="preprocessor">#ifndef DEBUG_HANDLER_H</span>
+<a name="l00002" id="l00002"></a>00002 <span class="preprocessor">#define DEBUG_HANDLER_H</span>
+<a name="l00003" id="l00003"></a>00003 
+<a name="l00004" id="l00004"></a>00004 <span class="preprocessor">#ifdef __cplusplus</span>
+<a name="l00005" id="l00005"></a>00005 <span class="keyword">extern</span>          <span class="stringliteral">"C"</span> {
+<a name="l00006" id="l00006"></a>00006 <span class="preprocessor">#endif</span>
+<a name="l00007" id="l00007"></a>00007 
+<a name="l00008" id="l00008"></a>00008 <a class="code" href="structnetsnmp__mib__handler__s.html" title=
+"the mib handler structure to be registered">netsnmp_mib_handler</a> *<a class="code" href=
+"group__debug.html#ga80c3e76c83986cbd7155c31b75b2e3ac" title=
+"returns a debug handler that can be injected into a given handler chain.">netsnmp_get_debug_handler</a>(<span class=
+"keywordtype">void</span>);
+<a name="l00009" id="l00009"></a>00009 <span class="keywordtype">void</span>            <a class="code" href=
+"group__debug.html#gad033abfa995d7a5beff5a20b2f84ff79" title=
+"initializes the debug helper which then registers a debug handler as a run-time injectable...">netsnmp_init_debug_helper</a>(<span class="keywordtype">void</span>);
+<a name="l00010" id="l00010"></a>00010 
+<a name="l00011" id="l00011"></a>00011 Netsnmp_Node_Handler netsnmp_debug_helper;
+<a name="l00012" id="l00012"></a>00012 
+<a name="l00013" id="l00013"></a>00013 <span class="preprocessor">#ifdef __cplusplus</span>
+<a name="l00014" id="l00014"></a>00014 }
+<a name="l00015" id="l00015"></a>00015 <span class="preprocessor">#endif</span>
+<a name="l00016" id="l00016"></a>00016 <span class="preprocessor">#endif                          </span><span class=
+"comment">/* DEBUG_HANDLER_H */</span>
+</pre>
+    </div>
+  </div>
+  <hr size="1" />
+
+  <address style="text-align: right;">
+    <small>Generated on 28 Sep 2009 for net-snmp by  <a href="http://www.doxygen.org/index.html"><img class="footer" src=
+    "doxygen.png" alt="doxygen" /></a> 1.6.1</small>
+<!-- CONTENT END -->
+<!--#include virtual="/page-bottom.html" -->
+

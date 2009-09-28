@@ -1,0 +1,937 @@
+<!--#set var="section" value="development" -->
+<!--#include virtual="/page-top.html" -->
+<!-- CONTENT START -->
+  <div class="navigation" id="top">
+    <div class="tabs">
+      <ul>
+        <li><a href="index.html"><span>Main Page</span></a></li>
+
+        <li><a href="pages.html"><span>Related Pages</span></a></li>
+
+        <li><a href="modules.html"><span>Modules</span></a></li>
+
+        <li><a href="annotated.html"><span>Data Structures</span></a></li>
+
+        <li class="current"><a href="files.html"><span>Files</span></a></li>
+
+        <li><a href="examples.html"><span>Examples</span></a></li>
+      </ul>
+    </div>
+
+    <div class="tabs">
+      <ul>
+        <li><a href="files.html"><span>File List</span></a></li>
+
+        <li><a href="globals.html"><span>Globals</span></a></li>
+      </ul>
+    </div>
+
+    <h1>mib.h</h1>
+
+    <div class="fragment">
+      <pre class="fragment">
+<a name="l00001" id="l00001"></a>00001 <span class="preprocessor">#ifndef MIB_H</span>
+<a name="l00002" id="l00002"></a>00002 <span class="preprocessor">#define MIB_H</span>
+<a name="l00003" id="l00003"></a>00003 
+<a name="l00004" id="l00004"></a>00004 <span class="preprocessor">#ifdef __cplusplus</span>
+<a name="l00005" id="l00005"></a>00005 <span class="keyword">extern</span>          <span class="stringliteral">"C"</span> {
+<a name="l00006" id="l00006"></a>00006 <span class="preprocessor">#endif</span>
+<a name="l00007" id="l00007"></a>00007     <span class="comment">/*</span>
+<a name="l00008" id="l00008"></a>00008 <span class=
+"comment">     * mib.h - Definitions for the variables as defined in the MIB</span>
+<a name="l00009" id="l00009"></a>00009 <span class="comment">     *</span>
+<a name="l00010" id="l00010"></a>00010 <span class="comment">     * Update: 1998-07-17 &lt;jhy@gsu.edu&gt;</span>
+<a name="l00011" id="l00011"></a>00011 <span class="comment">     * Added prototypes for print_oid_report* functions.</span>
+<a name="l00012" id="l00012"></a>00012 <span class="comment">     */</span>
+<a name="l00013" id="l00013"></a>00013 <span class="comment">/***********************************************************</span>
+<a name="l00014" id="l00014"></a>00014 <span class="comment">        Copyright 1988, 1989 by Carnegie Mellon University</span>
+<a name="l00015" id="l00015"></a>00015 
+<a name="l00016" id="l00016"></a>00016 <span class="comment">                      All Rights Reserved</span>
+<a name="l00017" id="l00017"></a>00017 
+<a name="l00018" id="l00018"></a>00018 <span class=
+"comment">Permission to use, copy, modify, and distribute this software and its </span>
+<a name="l00019" id="l00019"></a>00019 <span class=
+"comment">documentation for any purpose and without fee is hereby granted, </span>
+<a name="l00020" id="l00020"></a>00020 <span class=
+"comment">provided that the above copyright notice appear in all copies and that</span>
+<a name="l00021" id="l00021"></a>00021 <span class=
+"comment">both that copyright notice and this permission notice appear in </span>
+<a name="l00022" id="l00022"></a>00022 <span class="comment">supporting documentation, and that the name of CMU not be</span>
+<a name="l00023" id="l00023"></a>00023 <span class=
+"comment">used in advertising or publicity pertaining to distribution of the</span>
+<a name="l00024" id="l00024"></a>00024 <span class="comment">software without specific, written prior permission.  </span>
+<a name="l00025" id="l00025"></a>00025 
+<a name="l00026" id="l00026"></a>00026 <span class=
+"comment">CMU DISCLAIMS ALL WARRANTIES WITH REGARD TO THIS SOFTWARE, INCLUDING</span>
+<a name="l00027" id="l00027"></a>00027 <span class=
+"comment">ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS, IN NO EVENT SHALL</span>
+<a name="l00028" id="l00028"></a>00028 <span class=
+"comment">CMU BE LIABLE FOR ANY SPECIAL, INDIRECT OR CONSEQUENTIAL DAMAGES OR</span>
+<a name="l00029" id="l00029"></a>00029 <span class=
+"comment">ANY DAMAGES WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS,</span>
+<a name="l00030" id="l00030"></a>00030 <span class=
+"comment">WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION,</span>
+<a name="l00031" id="l00031"></a>00031 <span class=
+"comment">ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS</span>
+<a name="l00032" id="l00032"></a>00032 <span class="comment">SOFTWARE.</span>
+<a name="l00033" id="l00033"></a>00033 <span class=
+"comment">******************************************************************/</span>
+<a name="l00034" id="l00034"></a>00034 
+<a name="l00035" id="l00035"></a>00035 <span class="preprocessor">#include &lt;stdio.h&gt;</span>              <span class=
+"comment">/* for FILE */</span>
+<a name="l00036" id="l00036"></a>00036 
+<a name="l00037" id="l00037"></a>00037 <span class="preprocessor">#include &lt;net-snmp/mib_api.h&gt;</span>
+<a name="l00038" id="l00038"></a>00038 
+<a name="l00039" id="l00039"></a>00039 <span class="preprocessor">#define NETSNMP_MIB2_OID 1, 3, 6, 1, 2, 1</span>
+<a name="l00040" id="l00040"></a>00040 
+<a name="l00041" id="l00041"></a>00041 <span class="preprocessor">#ifndef NETSNMP_NO_LEGACY_DEFINITIONS</span>
+<a name="l00042" id="l00042"></a>00042 <span class="preprocessor">#define MIB NETSNMP_MIB2_OID</span>
+<a name="l00043" id="l00043"></a>00043 <span class="preprocessor">#endif</span>
+<a name="l00044" id="l00044"></a>00044 
+<a name="l00045" id="l00045"></a>00045 <span class="preprocessor">#define MIB_IFTYPE_OTHER                    1</span>
+<a name="l00046" id="l00046"></a>00046 <span class="preprocessor">#define MIB_IFTYPE_REGULAR1822              2</span>
+<a name="l00047" id="l00047"></a>00047 <span class="preprocessor">#define MIB_IFTYPE_HDH1822                  3</span>
+<a name="l00048" id="l00048"></a>00048 <span class="preprocessor">#define MIB_IFTYPE_DDNX25                   4</span>
+<a name="l00049" id="l00049"></a>00049 <span class="preprocessor">#define MIB_IFTYPE_RFC877X25                5</span>
+<a name="l00050" id="l00050"></a>00050 <span class="preprocessor">#define MIB_IFTYPE_ETHERNETCSMACD           6</span>
+<a name="l00051" id="l00051"></a>00051 <span class="preprocessor">#define MIB_IFTYPE_ISO88023CSMACD           7</span>
+<a name="l00052" id="l00052"></a>00052 <span class="preprocessor">#define MIB_IFTYPE_ISO88024TOKENBUS         8</span>
+<a name="l00053" id="l00053"></a>00053 <span class="preprocessor">#define MIB_IFTYPE_ISO88025TOKENRING        9</span>
+<a name="l00054" id="l00054"></a>00054 <span class="preprocessor">#define MIB_IFTYPE_ISO88026MAN              10</span>
+<a name="l00055" id="l00055"></a>00055 <span class="preprocessor">#define MIB_IFTYPE_STARLAN                  11</span>
+<a name="l00056" id="l00056"></a>00056 <span class="preprocessor">#define MIB_IFTYPE_PROTEON10MBIT            12</span>
+<a name="l00057" id="l00057"></a>00057 <span class="preprocessor">#define MIB_IFTYPE_PROTEON80MBIT            13</span>
+<a name="l00058" id="l00058"></a>00058 <span class="preprocessor">#define MIB_IFTYPE_HYPERCHANNEL             14</span>
+<a name="l00059" id="l00059"></a>00059 <span class="preprocessor">#define MIB_IFTYPE_FDDI                     15</span>
+<a name="l00060" id="l00060"></a>00060 <span class="preprocessor">#define MIB_IFTYPE_LAPB                     16</span>
+<a name="l00061" id="l00061"></a>00061 <span class="preprocessor">#define MIB_IFTYPE_SDLC                     17</span>
+<a name="l00062" id="l00062"></a>00062 <span class="preprocessor">#define MIB_IFTYPE_T1CARRIER                18</span>
+<a name="l00063" id="l00063"></a>00063 <span class="preprocessor">#define MIB_IFTYPE_CEPT                     19</span>
+<a name="l00064" id="l00064"></a>00064 <span class="preprocessor">#define MIB_IFTYPE_BASICISDN                20</span>
+<a name="l00065" id="l00065"></a>00065 <span class="preprocessor">#define MIB_IFTYPE_PRIMARYISDN              21</span>
+<a name="l00066" id="l00066"></a>00066 <span class="preprocessor">#define MIB_IFTYPE_PROPPOINTTOPOINTSERIAL   22</span>
+<a name="l00067" id="l00067"></a>00067 
+<a name="l00068" id="l00068"></a>00068 <span class="preprocessor">#define MIB_IFSTATUS_UP         1</span>
+<a name="l00069" id="l00069"></a>00069 <span class="preprocessor">#define MIB_IFSTATUS_DOWN       2</span>
+<a name="l00070" id="l00070"></a>00070 <span class="preprocessor">#define MIB_IFSTATUS_TESTING    3</span>
+<a name="l00071" id="l00071"></a>00071 
+<a name="l00072" id="l00072"></a>00072 <span class="preprocessor">#define MIB_FORWARD_GATEWAY     1</span>
+<a name="l00073" id="l00073"></a>00073 <span class="preprocessor">#define MIB_FORWARD_HOST        2</span>
+<a name="l00074" id="l00074"></a>00074 
+<a name="l00075" id="l00075"></a>00075 <span class="preprocessor">#define MIB_IPROUTETYPE_OTHER   1</span>
+<a name="l00076" id="l00076"></a>00076 <span class="preprocessor">#define MIB_IPROUTETYPE_INVALID 2</span>
+<a name="l00077" id="l00077"></a>00077 <span class="preprocessor">#define MIB_IPROUTETYPE_DIRECT  3</span>
+<a name="l00078" id="l00078"></a>00078 <span class="preprocessor">#define MIB_IPROUTETYPE_REMOTE  4</span>
+<a name="l00079" id="l00079"></a>00079 
+<a name="l00080" id="l00080"></a>00080 <span class="preprocessor">#define MIB_IPROUTEPROTO_OTHER      1</span>
+<a name="l00081" id="l00081"></a>00081 <span class="preprocessor">#define MIB_IPROUTEPROTO_LOCAL      2</span>
+<a name="l00082" id="l00082"></a>00082 <span class="preprocessor">#define MIB_IPROUTEPROTO_NETMGMT    3</span>
+<a name="l00083" id="l00083"></a>00083 <span class="preprocessor">#define MIB_IPROUTEPROTO_ICMP       4</span>
+<a name="l00084" id="l00084"></a>00084 <span class="preprocessor">#define MIB_IPROUTEPROTO_EGP        5</span>
+<a name="l00085" id="l00085"></a>00085 <span class="preprocessor">#define MIB_IPROUTEPROTO_GGP        6</span>
+<a name="l00086" id="l00086"></a>00086 <span class="preprocessor">#define MIB_IPROUTEPROTO_HELLO      7</span>
+<a name="l00087" id="l00087"></a>00087 <span class="preprocessor">#define MIB_IPROUTEPROTO_RIP        8</span>
+<a name="l00088" id="l00088"></a>00088 <span class="preprocessor">#define MIB_IPROUTEPROTO_ISIS       9</span>
+<a name="l00089" id="l00089"></a>00089 <span class="preprocessor">#define MIB_IPROUTEPROTO_ESIS       10</span>
+<a name="l00090" id="l00090"></a>00090 <span class="preprocessor">#define MIB_IPROUTEPROTO_CISCOIGRP  11</span>
+<a name="l00091" id="l00091"></a>00091 <span class="preprocessor">#define MIB_IPROUTEPROTO_BBNSPFIGP  12</span>
+<a name="l00092" id="l00092"></a>00092 <span class="preprocessor">#define MIB_IPROUTEPROTO_OIGP       13</span>
+<a name="l00093" id="l00093"></a>00093 
+<a name="l00094" id="l00094"></a>00094 <span class="preprocessor">#define MIB_TCPRTOALG_OTHER     1</span>
+<a name="l00095" id="l00095"></a>00095 <span class="preprocessor">#define MIB_TCPRTOALG_CONSTANT  2</span>
+<a name="l00096" id="l00096"></a>00096 <span class="preprocessor">#define MIB_TCPRTOALG_RSRE      3</span>
+<a name="l00097" id="l00097"></a>00097 <span class="preprocessor">#define MIB_TCPRTOALG_VANJ      4</span>
+<a name="l00098" id="l00098"></a>00098 
+<a name="l00099" id="l00099"></a>00099 <span class="preprocessor">#define MIB_TCPCONNSTATE_CLOSED         1</span>
+<a name="l00100" id="l00100"></a>00100 <span class="preprocessor">#define MIB_TCPCONNSTATE_LISTEN         2</span>
+<a name="l00101" id="l00101"></a>00101 <span class="preprocessor">#define MIB_TCPCONNSTATE_SYNSENT        3</span>
+<a name="l00102" id="l00102"></a>00102 <span class="preprocessor">#define MIB_TCPCONNSTATE_SYNRECEIVED    4</span>
+<a name="l00103" id="l00103"></a>00103 <span class="preprocessor">#define MIB_TCPCONNSTATE_ESTABLISHED    5</span>
+<a name="l00104" id="l00104"></a>00104 <span class="preprocessor">#define MIB_TCPCONNSTATE_FINWAIT1       6</span>
+<a name="l00105" id="l00105"></a>00105 <span class="preprocessor">#define MIB_TCPCONNSTATE_FINWAIT2       7</span>
+<a name="l00106" id="l00106"></a>00106 <span class="preprocessor">#define MIB_TCPCONNSTATE_CLOSEWAIT      8</span>
+<a name="l00107" id="l00107"></a>00107 <span class="preprocessor">#define MIB_TCPCONNSTATE_LASTACK        9</span>
+<a name="l00108" id="l00108"></a>00108 <span class="preprocessor">#define MIB_TCPCONNSTATE_CLOSING        10</span>
+<a name="l00109" id="l00109"></a>00109 <span class="preprocessor">#define MIB_TCPCONNSTATE_TIMEWAIT       11</span>
+<a name="l00110" id="l00110"></a>00110 
+<a name="l00111" id="l00111"></a>00111 <span class="preprocessor">#define MIB_EGPNEIGHSTATE_IDLE          1</span>
+<a name="l00112" id="l00112"></a>00112 <span class="preprocessor">#define MIB_EGPNEIGHSTATE_AQUISITION    2</span>
+<a name="l00113" id="l00113"></a>00113 <span class="preprocessor">#define MIB_EGPNEIGHSTATE_DOWN          3</span>
+<a name="l00114" id="l00114"></a>00114 <span class="preprocessor">#define MIB_EGPNEIGHSTATE_UP            4</span>
+<a name="l00115" id="l00115"></a>00115 <span class="preprocessor">#define MIB_EGPNEIGHSTATE_CEASE         5</span>
+<a name="l00116" id="l00116"></a>00116 
+<a name="l00117" id="l00117"></a>00117     <span class="keyword">struct </span><a class="code" href="structvariable__list.html"
+title=
+"The netsnmp variable list binding structure, it&amp;#39;s typedef&amp;#39;d to netsnmp_variable_list...">variable_list</a>;
+<a name="l00118" id="l00118"></a>00118     <span class="keyword">struct </span><a class="code" href=
+"structenum__list.html">enum_list</a>;
+<a name="l00119" id="l00119"></a>00119 
+<a name="l00120" id="l00120"></a>00120     <span class="keywordtype">void</span>            print_ascii_dump(FILE *);
+<a name="l00121" id="l00121"></a>00121     <span class="keywordtype">void</span>            register_mib_handlers(<span class=
+"keywordtype">void</span>);
+<a name="l00122" id="l00122"></a>00122     <span class="keywordtype">void</span>            <a class="code" href=
+"group__mib__utilities.html#ga19de60dd547c6e8decfc13d56270d285">netsnmp_set_mib_directory</a>(<span class=
+"keyword">const</span> <span class="keywordtype">char</span> *dir);
+<a name="l00123" id="l00123"></a>00123     <span class="keywordtype">char</span>            *<a class="code" href=
+"group__mib__utilities.html#ga139a824603d7ffb3dd2ff44612c2d6d2">netsnmp_get_mib_directory</a>(<span class=
+"keywordtype">void</span>);
+<a name="l00124" id="l00124"></a>00124     <span class="keywordtype">void</span>            <a class="code" href=
+"group__mib__utilities.html#ga68a70a3a149e744096183954dc6adcdd">netsnmp_fixup_mib_directory</a>(<span class=
+"keywordtype">void</span>);
+<a name="l00125" id="l00125"></a>00125     <span class="keywordtype">void</span>            netsnmp_mibindex_load( <span class=
+"keywordtype">void</span> );
+<a name="l00126" id="l00126"></a>00126     <span class="keywordtype">char</span> *          netsnmp_mibindex_lookup( <span class=
+"keyword">const</span> <span class="keywordtype">char</span> * );
+<a name="l00127" id="l00127"></a>00127     FILE *          netsnmp_mibindex_new( <span class="keyword">const</span> <span class=
+"keywordtype">char</span> * );
+<a name="l00128" id="l00128"></a>00128     <span class=
+"keywordtype">int</span>             sprint_realloc_description(u_char ** buf, <span class="keywordtype">size_t</span> * buf_len,
+<a name="l00129" id="l00129"></a>00129                                 <span class=
+"keywordtype">size_t</span> * out_len, <span class="keywordtype">int</span> allow_realloc,
+<a name="l00130" id="l00130"></a>00130                                 oid * objid, <span class=
+"keywordtype">size_t</span> objidlen, <span class="keywordtype">int</span> width);
+<a name="l00131" id="l00131"></a>00131     <span class="keywordtype">int</span>             <a class="code" href=
+"group__mib__utilities.html#ga01c1f66f4afdfbbcca1ed3cbb572e739">get_wild_node</a>(<span class="keyword">const</span> <span class=
+"keywordtype">char</span> *, oid *, <span class="keywordtype">size_t</span> *);
+<a name="l00132" id="l00132"></a>00132     <span class="keywordtype">int</span>             get_node(<span class=
+"keyword">const</span> <span class="keywordtype">char</span> *, oid *, <span class="keywordtype">size_t</span> *);
+<a name="l00133" id="l00133"></a>00133     <span class="keyword">struct </span><a class="code" href=
+"structtree.html">tree</a>    *get_tree(<span class="keyword">const</span> oid *, <span class=
+"keywordtype">size_t</span>, <span class="keyword">struct</span> <a class="code" href="structtree.html">tree</a> *);
+<a name="l00134" id="l00134"></a>00134     <span class="keyword">struct </span><a class="code" href=
+"structtree.html">tree</a>    *<a class="code" href="group__mib__utilities.html#ga5830964581bdd9a3d10e9c626c275a07" title=
+"Retrieves the tree head.">get_tree_head</a>(<span class="keywordtype">void</span>);
+<a name="l00135" id="l00135"></a>00135     <span class="keywordtype">void</span>            <a class="code" href=
+"group__mib__utilities.html#ga55465148bf9a11dc0cdce43f359649ae" title=
+"Set&amp;#39;s the printing function printomat in a subtree according it&amp;#39;s type.">set_function</a>(<span class=
+"keyword">struct</span> <a class="code" href="structtree.html">tree</a> *);
+<a name="l00136" id="l00136"></a>00136 
+<a name="l00137" id="l00137"></a>00137     <span class=
+"keywordtype">int</span>             parse_one_oid_index(oid ** oidStart, <span class="keywordtype">size_t</span> * oidLen,
+<a name="l00138" id="l00138"></a>00138                                         <a class="code" href="structvariable__list.html"
+title=
+"The netsnmp variable list binding structure, it&amp;#39;s typedef&amp;#39;d to netsnmp_variable_list...">netsnmp_variable_list</a> * data,
+<a name="l00139" id="l00139"></a>00139                                         <span class="keywordtype">int</span> complete);
+<a name="l00140" id="l00140"></a>00140     <span class=
+"keywordtype">int</span>             parse_oid_indexes(oid * oidIndex, <span class="keywordtype">size_t</span> oidLen,
+<a name="l00141" id="l00141"></a>00141                                       <a class="code" href="structvariable__list.html"
+title=
+"The netsnmp variable list binding structure, it&amp;#39;s typedef&amp;#39;d to netsnmp_variable_list...">netsnmp_variable_list</a> * data);
+<a name="l00142" id="l00142"></a>00142     <span class=
+"keywordtype">int</span>             build_oid_noalloc(oid * in, <span class="keywordtype">size_t</span> in_len,
+<a name="l00143" id="l00143"></a>00143                                       <span class=
+"keywordtype">size_t</span> * out_len, oid * prefix,
+<a name="l00144" id="l00144"></a>00144                                       <span class="keywordtype">size_t</span> prefix_len,
+<a name="l00145" id="l00145"></a>00145                                       <a class="code" href="structvariable__list.html"
+title=
+"The netsnmp variable list binding structure, it&amp;#39;s typedef&amp;#39;d to netsnmp_variable_list...">netsnmp_variable_list</a> * indexes);
+<a name="l00146" id="l00146"></a>00146     <span class="keywordtype">int</span>             <a class="code" href=
+"group__mib__utilities.html#ga438e30e7500b071916fec5592384f956">build_oid</a>(oid ** out, <span class=
+"keywordtype">size_t</span> * out_len, oid * prefix,
+<a name="l00147" id="l00147"></a>00147                               <span class="keywordtype">size_t</span> prefix_len,
+<a name="l00148" id="l00148"></a>00148                               <a class="code" href="structvariable__list.html" title=
+"The netsnmp variable list binding structure, it&amp;#39;s typedef&amp;#39;d to netsnmp_variable_list...">netsnmp_variable_list</a> * indexes);
+<a name="l00149" id="l00149"></a>00149     <span class="keywordtype">int</span>             <a class="code" href=
+"group__mib__utilities.html#ga0d3a6feb3852ee6f6901f442ff9900cf" title=
+"Takes the value in VAR and turns it into an OID segment in var-&amp;gt;name.">build_oid_segment</a>(<a class="code" href=
+"structvariable__list.html" title=
+"The netsnmp variable list binding structure, it&amp;#39;s typedef&amp;#39;d to netsnmp_variable_list...">netsnmp_variable_list</a> * var);
+<a name="l00150" id="l00150"></a>00150 
+<a name="l00151" id="l00151"></a>00151     <span class=
+"keywordtype">int</span>             sprint_realloc_variable(u_char ** buf, <span class="keywordtype">size_t</span> * buf_len,
+<a name="l00152" id="l00152"></a>00152                                    <span class=
+"keywordtype">size_t</span> * out_len, <span class="keywordtype">int</span> allow_realloc,
+<a name="l00153" id="l00153"></a>00153                                    <span class=
+"keyword">const</span> oid * objid, <span class="keywordtype">size_t</span> objidlen,
+<a name="l00154" id="l00154"></a>00154                                    <span class="keyword">const</span> <a class="code"
+href="structvariable__list.html" title=
+"The netsnmp variable list binding structure, it&amp;#39;s typedef&amp;#39;d to netsnmp_variable_list...">netsnmp_variable_list</a> * <a class="code"
+href="structvariable.html">variable</a>);
+<a name="l00155" id="l00155"></a>00155 
+<a name="l00156" id="l00156"></a>00156 <span class="preprocessor">#ifndef NETSNMP_DISABLE_MIB_LOADING</span>
+<a name="l00157" id="l00157"></a>00157     <span class="keyword">struct </span><a class="code" href=
+"structtree.html">tree</a>    *
+<a name="l00158" id="l00158"></a>00158 <span class="preprocessor">#else</span>
+<a name="l00159" id="l00159"></a>00159     <span class="keywordtype">void</span>
+<a name="l00160" id="l00160"></a>00160 <span class="preprocessor">#endif</span>
+<a name="l00161" id="l00161"></a>00161                     netsnmp_sprint_realloc_objid_tree(u_char ** buf,
+<a name="l00162" id="l00162"></a>00162                                                       <span class=
+"keywordtype">size_t</span> * buf_len,
+<a name="l00163" id="l00163"></a>00163                                                       <span class=
+"keywordtype">size_t</span> * out_len,
+<a name="l00164" id="l00164"></a>00164                                                       <span class=
+"keywordtype">int</span> allow_realloc,
+<a name="l00165" id="l00165"></a>00165                                                       <span class=
+"keywordtype">int</span> *buf_overflow,
+<a name="l00166" id="l00166"></a>00166                                                       <span class=
+"keyword">const</span> oid * objid,
+<a name="l00167" id="l00167"></a>00167                                                       <span class=
+"keywordtype">size_t</span> objidlen);
+<a name="l00168" id="l00168"></a>00168 
+<a name="l00169" id="l00169"></a>00169     <span class="keywordtype">void</span>
+<a name="l00170" id="l00170"></a>00170                     netsnmp_sprint_realloc_objid(u_char ** buf,
+<a name="l00171" id="l00171"></a>00171                                                  <span class=
+"keywordtype">size_t</span> * buf_len,
+<a name="l00172" id="l00172"></a>00172                                                  <span class=
+"keywordtype">size_t</span> * out_len,
+<a name="l00173" id="l00173"></a>00173                                                  <span class=
+"keywordtype">int</span> allow_realloc,
+<a name="l00174" id="l00174"></a>00174                                                  <span class=
+"keywordtype">int</span> *buf_overflow,
+<a name="l00175" id="l00175"></a>00175                                                  <span class=
+"keyword">const</span> oid * objid,
+<a name="l00176" id="l00176"></a>00176                                                  <span class=
+"keywordtype">size_t</span> objidlen);
+<a name="l00177" id="l00177"></a>00177 
+<a name="l00178" id="l00178"></a>00178     <span class=
+"keywordtype">int</span>             sprint_realloc_value(u_char ** buf, <span class="keywordtype">size_t</span> * buf_len,
+<a name="l00179" id="l00179"></a>00179                                  <span class=
+"keywordtype">size_t</span> * out_len, <span class="keywordtype">int</span> allow_realloc,
+<a name="l00180" id="l00180"></a>00180                                  <span class=
+"keyword">const</span> oid * objid, <span class="keywordtype">size_t</span> objidlen,
+<a name="l00181" id="l00181"></a>00181                                  <span class="keyword">const</span> <a class="code" href=
+"structvariable__list.html" title=
+"The netsnmp variable list binding structure, it&amp;#39;s typedef&amp;#39;d to netsnmp_variable_list...">netsnmp_variable_list</a> * <a class="code"
+href="structvariable.html">variable</a>);
+<a name="l00182" id="l00182"></a>00182 
+<a name="l00183" id="l00183"></a>00183     <span class=
+"keywordtype">int</span>             sprint_realloc_objid(u_char ** buf, <span class="keywordtype">size_t</span> * buf_len,
+<a name="l00184" id="l00184"></a>00184                                  <span class=
+"keywordtype">size_t</span> * out_len, <span class="keywordtype">int</span> allow_realloc,
+<a name="l00185" id="l00185"></a>00185                                  <span class=
+"keyword">const</span> oid * objid, <span class="keywordtype">size_t</span> objidlen);
+<a name="l00186" id="l00186"></a>00186 
+<a name="l00187" id="l00187"></a>00187     <span class="keywordtype">int</span>             <a class="code" href=
+"group__mib__utilities.html#gaabc12c361abdca75234c11dccb34871b" title=
+"Universal print routine, prints a variable into a buffer according to the variable...">sprint_realloc_by_type</a>(u_char ** buf, <span class="keywordtype">size_t</span> * buf_len,
+<a name="l00188" id="l00188"></a>00188                                            <span class=
+"keywordtype">size_t</span> * out_len,
+<a name="l00189" id="l00189"></a>00189                                            <span class=
+"keywordtype">int</span> allow_realloc,
+<a name="l00190" id="l00190"></a>00190                                            <span class="keyword">const</span> <a class=
+"code" href="structvariable__list.html" title=
+"The netsnmp variable list binding structure, it&amp;#39;s typedef&amp;#39;d to netsnmp_variable_list...">netsnmp_variable_list</a> * var,
+<a name="l00191" id="l00191"></a>00191                                            <span class="keyword">const</span> <span class=
+"keyword">struct</span> <a class="code" href="structenum__list.html">enum_list</a> *enums,
+<a name="l00192" id="l00192"></a>00192                                            <span class="keyword">const</span> <span class=
+"keywordtype">char</span> *hint,
+<a name="l00193" id="l00193"></a>00193                                            <span class="keyword">const</span> <span class=
+"keywordtype">char</span> *units);
+<a name="l00194" id="l00194"></a>00194 
+<a name="l00195" id="l00195"></a>00195     <span class=
+"keywordtype">int</span>             sprint_realloc_hexstring(u_char ** buf,
+<a name="l00196" id="l00196"></a>00196                                              <span class=
+"keywordtype">size_t</span> * buf_len,
+<a name="l00197" id="l00197"></a>00197                                              <span class=
+"keywordtype">size_t</span> * out_len,
+<a name="l00198" id="l00198"></a>00198                                              <span class=
+"keywordtype">int</span> allow_realloc,
+<a name="l00199" id="l00199"></a>00199                                              <span class=
+"keyword">const</span> u_char *, <span class="keywordtype">size_t</span>);
+<a name="l00200" id="l00200"></a>00200 
+<a name="l00201" id="l00201"></a>00201     <span class="keywordtype">int</span>             <a class="code" href=
+"group__mib__utilities.html#ga7ff1971fc340b2789d48895086bf3230" title=
+"Prints an ascii string into a buffer.">sprint_realloc_asciistring</a>(u_char ** buf,
+<a name="l00202" id="l00202"></a>00202                                                <span class=
+"keywordtype">size_t</span> * buf_len,
+<a name="l00203" id="l00203"></a>00203                                                <span class=
+"keywordtype">size_t</span> * out_len,
+<a name="l00204" id="l00204"></a>00204                                                <span class=
+"keywordtype">int</span> allow_realloc,
+<a name="l00205" id="l00205"></a>00205                                                <span class=
+"keyword">const</span> u_char * cp,
+<a name="l00206" id="l00206"></a>00206                                                <span class=
+"keywordtype">size_t</span> len);
+<a name="l00207" id="l00207"></a>00207 
+<a name="l00208" id="l00208"></a>00208     <span class="keywordtype">int</span>             <a class="code" href=
+"group__mib__utilities.html#gabe71c710f2173fb85512d08c088ea12e" title=
+"Prints an octet string into a buffer.">sprint_realloc_octet_string</a>(u_char ** buf,
+<a name="l00209" id="l00209"></a>00209                                                 <span class=
+"keywordtype">size_t</span> * buf_len,
+<a name="l00210" id="l00210"></a>00210                                                 <span class=
+"keywordtype">size_t</span> * out_len,
+<a name="l00211" id="l00211"></a>00211                                                 <span class=
+"keywordtype">int</span> allow_realloc,
+<a name="l00212" id="l00212"></a>00212                                                 <span class=
+"keyword">const</span> <a class="code" href="structvariable__list.html" title=
+"The netsnmp variable list binding structure, it&amp;#39;s typedef&amp;#39;d to netsnmp_variable_list...">netsnmp_variable_list</a> *,
+<a name="l00213" id="l00213"></a>00213                                                 <span class=
+"keyword">const</span> <span class="keyword">struct</span> <a class="code" href="structenum__list.html">enum_list</a> *,
+<a name="l00214" id="l00214"></a>00214                                                 <span class=
+"keyword">const</span> <span class="keywordtype">char</span> *,
+<a name="l00215" id="l00215"></a>00215                                                 <span class=
+"keyword">const</span> <span class="keywordtype">char</span> *);
+<a name="l00216" id="l00216"></a>00216 
+<a name="l00217" id="l00217"></a>00217     <span class="keywordtype">int</span>             <a class="code" href=
+"group__mib__utilities.html#ga0e42660c74b91d68e088b53e41ba6658" title=
+"Prints an object identifier into a buffer.">sprint_realloc_opaque</a>(u_char ** buf, <span class=
+"keywordtype">size_t</span> * buf_len,
+<a name="l00218" id="l00218"></a>00218                                           <span class=
+"keywordtype">size_t</span> * out_len,
+<a name="l00219" id="l00219"></a>00219                                           <span class=
+"keywordtype">int</span> allow_realloc,
+<a name="l00220" id="l00220"></a>00220                                           <span class="keyword">const</span> <a class=
+"code" href="structvariable__list.html" title=
+"The netsnmp variable list binding structure, it&amp;#39;s typedef&amp;#39;d to netsnmp_variable_list...">netsnmp_variable_list</a> *,
+<a name="l00221" id="l00221"></a>00221                                           <span class="keyword">const</span> <span class=
+"keyword">struct</span> <a class="code" href="structenum__list.html">enum_list</a> *, <span class=
+"keyword">const</span> <span class="keywordtype">char</span> *,
+<a name="l00222" id="l00222"></a>00222                                           <span class="keyword">const</span> <span class=
+"keywordtype">char</span> *);
+<a name="l00223" id="l00223"></a>00223 
+<a name="l00224" id="l00224"></a>00224     <span class="keywordtype">int</span>             <a class="code" href=
+"group__mib__utilities.html#ga58c583005d5df719f3866ff0f06ec800" title=
+"Prints an object identifier into a buffer.">sprint_realloc_object_identifier</a>(u_char ** buf,
+<a name="l00225" id="l00225"></a>00225                                                      <span class=
+"keywordtype">size_t</span> * buf_len,
+<a name="l00226" id="l00226"></a>00226                                                      <span class=
+"keywordtype">size_t</span> * out_len,
+<a name="l00227" id="l00227"></a>00227                                                      <span class=
+"keywordtype">int</span> allow_realloc,
+<a name="l00228" id="l00228"></a>00228                                                      <span class=
+"keyword">const</span> <a class="code" href="structvariable__list.html" title=
+"The netsnmp variable list binding structure, it&amp;#39;s typedef&amp;#39;d to netsnmp_variable_list...">netsnmp_variable_list</a>
+<a name="l00229" id="l00229"></a>00229                                                      *, <span class=
+"keyword">const</span> <span class="keyword">struct</span> <a class="code" href="structenum__list.html">enum_list</a> *,
+<a name="l00230" id="l00230"></a>00230                                                      <span class=
+"keyword">const</span> <span class="keywordtype">char</span> *,
+<a name="l00231" id="l00231"></a>00231                                                      <span class=
+"keyword">const</span> <span class="keywordtype">char</span> *);
+<a name="l00232" id="l00232"></a>00232 
+<a name="l00233" id="l00233"></a>00233     <span class="keywordtype">int</span>             <a class="code" href=
+"group__mib__utilities.html#gad53723cfb568c73dc3b7af48985f96d2" title=
+"Prints a timetick variable into a buffer.">sprint_realloc_timeticks</a>(u_char ** buf,
+<a name="l00234" id="l00234"></a>00234                                              <span class=
+"keywordtype">size_t</span> * buf_len,
+<a name="l00235" id="l00235"></a>00235                                              <span class=
+"keywordtype">size_t</span> * out_len,
+<a name="l00236" id="l00236"></a>00236                                              <span class=
+"keywordtype">int</span> allow_realloc,
+<a name="l00237" id="l00237"></a>00237                                              <span class="keyword">const</span> <a class=
+"code" href="structvariable__list.html" title=
+"The netsnmp variable list binding structure, it&amp;#39;s typedef&amp;#39;d to netsnmp_variable_list...">netsnmp_variable_list</a> *,
+<a name="l00238" id="l00238"></a>00238                                              <span class=
+"keyword">const</span> <span class="keyword">struct</span> <a class="code" href="structenum__list.html">enum_list</a> *,
+<a name="l00239" id="l00239"></a>00239                                              <span class=
+"keyword">const</span> <span class="keywordtype">char</span> *, <span class="keyword">const</span> <span class=
+"keywordtype">char</span> *);
+<a name="l00240" id="l00240"></a>00240 
+<a name="l00241" id="l00241"></a>00241     <span class="keywordtype">int</span>             <a class="code" href=
+"group__mib__utilities.html#ga810f08416e69b816e28c33ed3c447e95" title=
+"Prints an integer according to the hint into a buffer.">sprint_realloc_hinted_integer</a>(u_char ** buf,
+<a name="l00242" id="l00242"></a>00242                                                   <span class=
+"keywordtype">size_t</span> * buf_len,
+<a name="l00243" id="l00243"></a>00243                                                   <span class=
+"keywordtype">size_t</span> * out_len,
+<a name="l00244" id="l00244"></a>00244                                                   <span class=
+"keywordtype">int</span> allow_realloc, <span class="keywordtype">long</span>,
+<a name="l00245" id="l00245"></a>00245                                                   <span class=
+"keyword">const</span> <span class="keywordtype">char</span>, <span class="keyword">const</span> <span class=
+"keywordtype">char</span> *,
+<a name="l00246" id="l00246"></a>00246                                                   <span class=
+"keyword">const</span> <span class="keywordtype">char</span> *);
+<a name="l00247" id="l00247"></a>00247 
+<a name="l00248" id="l00248"></a>00248     <span class="keywordtype">int</span>             <a class="code" href=
+"group__mib__utilities.html#ga97e7b0a5f5da3d51d9ae32a89f901390" title=
+"Prints an integer into a buffer.">sprint_realloc_integer</a>(u_char ** buf, <span class="keywordtype">size_t</span> * buf_len,
+<a name="l00249" id="l00249"></a>00249                                            <span class=
+"keywordtype">size_t</span> * out_len,
+<a name="l00250" id="l00250"></a>00250                                            <span class=
+"keywordtype">int</span> allow_realloc,
+<a name="l00251" id="l00251"></a>00251                                            <span class="keyword">const</span> <a class=
+"code" href="structvariable__list.html" title=
+"The netsnmp variable list binding structure, it&amp;#39;s typedef&amp;#39;d to netsnmp_variable_list...">netsnmp_variable_list</a> *,
+<a name="l00252" id="l00252"></a>00252                                            <span class="keyword">const</span> <span class=
+"keyword">struct</span> <a class="code" href="structenum__list.html">enum_list</a> *,
+<a name="l00253" id="l00253"></a>00253                                            <span class="keyword">const</span> <span class=
+"keywordtype">char</span> *, <span class="keyword">const</span> <span class="keywordtype">char</span> *);
+<a name="l00254" id="l00254"></a>00254 
+<a name="l00255" id="l00255"></a>00255     <span class="keywordtype">int</span>             <a class="code" href=
+"group__mib__utilities.html#gaccef8ad447c854b262acdf0c8f135084" title=
+"Prints an unsigned integer into a buffer.">sprint_realloc_uinteger</a>(u_char ** buf,
+<a name="l00256" id="l00256"></a>00256                                             <span class=
+"keywordtype">size_t</span> * buf_len,
+<a name="l00257" id="l00257"></a>00257                                             <span class=
+"keywordtype">size_t</span> * out_len,
+<a name="l00258" id="l00258"></a>00258                                             <span class=
+"keywordtype">int</span> allow_realloc,
+<a name="l00259" id="l00259"></a>00259                                             <span class="keyword">const</span> <a class=
+"code" href="structvariable__list.html" title=
+"The netsnmp variable list binding structure, it&amp;#39;s typedef&amp;#39;d to netsnmp_variable_list...">netsnmp_variable_list</a> *,
+<a name="l00260" id="l00260"></a>00260                                             <span class=
+"keyword">const</span> <span class="keyword">struct</span> <a class="code" href="structenum__list.html">enum_list</a> *,
+<a name="l00261" id="l00261"></a>00261                                             <span class=
+"keyword">const</span> <span class="keywordtype">char</span> *, <span class="keyword">const</span> <span class=
+"keywordtype">char</span> *);
+<a name="l00262" id="l00262"></a>00262 
+<a name="l00263" id="l00263"></a>00263     <span class="keywordtype">int</span>             <a class="code" href=
+"group__mib__utilities.html#gafe1758bc15693fc502e648c05f5c83f3" title=
+"Prints a gauge value into a buffer.">sprint_realloc_gauge</a>(u_char ** buf, <span class="keywordtype">size_t</span> * buf_len,
+<a name="l00264" id="l00264"></a>00264                                          <span class=
+"keywordtype">size_t</span> * out_len,
+<a name="l00265" id="l00265"></a>00265                                          <span class=
+"keywordtype">int</span> allow_realloc,
+<a name="l00266" id="l00266"></a>00266                                          <span class="keyword">const</span> <a class=
+"code" href="structvariable__list.html" title=
+"The netsnmp variable list binding structure, it&amp;#39;s typedef&amp;#39;d to netsnmp_variable_list...">netsnmp_variable_list</a> *,
+<a name="l00267" id="l00267"></a>00267                                          <span class="keyword">const</span> <span class=
+"keyword">struct</span> <a class="code" href="structenum__list.html">enum_list</a> *, <span class=
+"keyword">const</span> <span class="keywordtype">char</span> *,
+<a name="l00268" id="l00268"></a>00268                                          <span class="keyword">const</span> <span class=
+"keywordtype">char</span> *);
+<a name="l00269" id="l00269"></a>00269 
+<a name="l00270" id="l00270"></a>00270     <span class="keywordtype">int</span>             <a class="code" href=
+"group__mib__utilities.html#gaac841b689bafe52506f128201d57c51b" title=
+"Prints a counter value into a buffer.">sprint_realloc_counter</a>(u_char ** buf, <span class=
+"keywordtype">size_t</span> * buf_len,
+<a name="l00271" id="l00271"></a>00271                                            <span class=
+"keywordtype">size_t</span> * out_len,
+<a name="l00272" id="l00272"></a>00272                                            <span class=
+"keywordtype">int</span> allow_realloc,
+<a name="l00273" id="l00273"></a>00273                                            <span class="keyword">const</span> <a class=
+"code" href="structvariable__list.html" title=
+"The netsnmp variable list binding structure, it&amp;#39;s typedef&amp;#39;d to netsnmp_variable_list...">netsnmp_variable_list</a> *,
+<a name="l00274" id="l00274"></a>00274                                            <span class="keyword">const</span> <span class=
+"keyword">struct</span> <a class="code" href="structenum__list.html">enum_list</a> *,
+<a name="l00275" id="l00275"></a>00275                                            <span class="keyword">const</span> <span class=
+"keywordtype">char</span> *, <span class="keyword">const</span> <span class="keywordtype">char</span> *);
+<a name="l00276" id="l00276"></a>00276 
+<a name="l00277" id="l00277"></a>00277     <span class="keywordtype">int</span>             <a class="code" href=
+"group__mib__utilities.html#gab83236b9b61e69a06d1dc022eb3fb549" title=
+"Prints a network address into a buffer.">sprint_realloc_networkaddress</a>(u_char ** buf,
+<a name="l00278" id="l00278"></a>00278                                                   <span class=
+"keywordtype">size_t</span> * buf_len,
+<a name="l00279" id="l00279"></a>00279                                                   <span class=
+"keywordtype">size_t</span> * out_len,
+<a name="l00280" id="l00280"></a>00280                                                   <span class=
+"keywordtype">int</span> allow_realloc,
+<a name="l00281" id="l00281"></a>00281                                                   <span class=
+"keyword">const</span> <a class="code" href="structvariable__list.html" title=
+"The netsnmp variable list binding structure, it&amp;#39;s typedef&amp;#39;d to netsnmp_variable_list...">netsnmp_variable_list</a> *,
+<a name="l00282" id="l00282"></a>00282                                                   <span class=
+"keyword">const</span> <span class="keyword">struct</span> <a class="code" href="structenum__list.html">enum_list</a> *,
+<a name="l00283" id="l00283"></a>00283                                                   <span class=
+"keyword">const</span> <span class="keywordtype">char</span> *,
+<a name="l00284" id="l00284"></a>00284                                                   <span class=
+"keyword">const</span> <span class="keywordtype">char</span> *);
+<a name="l00285" id="l00285"></a>00285 
+<a name="l00286" id="l00286"></a>00286     <span class="keywordtype">int</span>             <a class="code" href=
+"group__mib__utilities.html#gab65bcc37615acd994e02c08ece83a96f" title=
+"Prints an ip-address into a buffer.">sprint_realloc_ipaddress</a>(u_char ** buf,
+<a name="l00287" id="l00287"></a>00287                                              <span class=
+"keywordtype">size_t</span> * buf_len,
+<a name="l00288" id="l00288"></a>00288                                              <span class=
+"keywordtype">size_t</span> * out_len,
+<a name="l00289" id="l00289"></a>00289                                              <span class=
+"keywordtype">int</span> allow_realloc,
+<a name="l00290" id="l00290"></a>00290                                              <span class="keyword">const</span> <a class=
+"code" href="structvariable__list.html" title=
+"The netsnmp variable list binding structure, it&amp;#39;s typedef&amp;#39;d to netsnmp_variable_list...">netsnmp_variable_list</a> *,
+<a name="l00291" id="l00291"></a>00291                                              <span class=
+"keyword">const</span> <span class="keyword">struct</span> <a class="code" href="structenum__list.html">enum_list</a> *,
+<a name="l00292" id="l00292"></a>00292                                              <span class=
+"keyword">const</span> <span class="keywordtype">char</span> *, <span class="keyword">const</span> <span class=
+"keywordtype">char</span> *);
+<a name="l00293" id="l00293"></a>00293 
+<a name="l00294" id="l00294"></a>00294     <span class="keywordtype">int</span>             <a class="code" href=
+"group__mib__utilities.html#gaa78ab15d7af7e907e57da5b42dbce9e4" title=
+"Prints a null value into a buffer.">sprint_realloc_null</a>(u_char ** buf, <span class="keywordtype">size_t</span> * buf_len,
+<a name="l00295" id="l00295"></a>00295                                         <span class="keywordtype">size_t</span> * out_len,
+<a name="l00296" id="l00296"></a>00296                                         <span class=
+"keywordtype">int</span> allow_realloc,
+<a name="l00297" id="l00297"></a>00297                                         <span class="keyword">const</span> <a class="code"
+href="structvariable__list.html" title=
+"The netsnmp variable list binding structure, it&amp;#39;s typedef&amp;#39;d to netsnmp_variable_list...">netsnmp_variable_list</a> *,
+<a name="l00298" id="l00298"></a>00298                                         <span class="keyword">const</span> <span class=
+"keyword">struct</span> <a class="code" href="structenum__list.html">enum_list</a> *, <span class=
+"keyword">const</span> <span class="keywordtype">char</span> *,
+<a name="l00299" id="l00299"></a>00299                                         <span class="keyword">const</span> <span class=
+"keywordtype">char</span> *);
+<a name="l00300" id="l00300"></a>00300 
+<a name="l00301" id="l00301"></a>00301     <span class="keywordtype">int</span>             <a class="code" href=
+"group__mib__utilities.html#gafe6d528aa10dfac467956837ffa7c3ba" title=
+"Prints a bit string into a buffer.">sprint_realloc_bitstring</a>(u_char ** buf,
+<a name="l00302" id="l00302"></a>00302                                              <span class=
+"keywordtype">size_t</span> * buf_len,
+<a name="l00303" id="l00303"></a>00303                                              <span class=
+"keywordtype">size_t</span> * out_len,
+<a name="l00304" id="l00304"></a>00304                                              <span class=
+"keywordtype">int</span> allow_realloc,
+<a name="l00305" id="l00305"></a>00305                                              <span class="keyword">const</span> <a class=
+"code" href="structvariable__list.html" title=
+"The netsnmp variable list binding structure, it&amp;#39;s typedef&amp;#39;d to netsnmp_variable_list...">netsnmp_variable_list</a> *,
+<a name="l00306" id="l00306"></a>00306                                              <span class=
+"keyword">const</span> <span class="keyword">struct</span> <a class="code" href="structenum__list.html">enum_list</a> *,
+<a name="l00307" id="l00307"></a>00307                                              <span class=
+"keyword">const</span> <span class="keywordtype">char</span> *, <span class="keyword">const</span> <span class=
+"keywordtype">char</span> *);
+<a name="l00308" id="l00308"></a>00308 
+<a name="l00309" id="l00309"></a>00309     <span class=
+"keywordtype">int</span>             sprint_realloc_nsapaddress(u_char ** buf,
+<a name="l00310" id="l00310"></a>00310                                                <span class=
+"keywordtype">size_t</span> * buf_len,
+<a name="l00311" id="l00311"></a>00311                                                <span class=
+"keywordtype">size_t</span> * out_len,
+<a name="l00312" id="l00312"></a>00312                                                <span class=
+"keywordtype">int</span> allow_realloc,
+<a name="l00313" id="l00313"></a>00313                                                <span class=
+"keyword">const</span> <a class="code" href="structvariable__list.html" title=
+"The netsnmp variable list binding structure, it&amp;#39;s typedef&amp;#39;d to netsnmp_variable_list...">netsnmp_variable_list</a> *,
+<a name="l00314" id="l00314"></a>00314                                                <span class=
+"keyword">const</span> <span class="keyword">struct</span> <a class="code" href="structenum__list.html">enum_list</a> *,
+<a name="l00315" id="l00315"></a>00315                                                <span class=
+"keyword">const</span> <span class="keywordtype">char</span> *, <span class="keyword">const</span> <span class=
+"keywordtype">char</span> *);
+<a name="l00316" id="l00316"></a>00316 
+<a name="l00317" id="l00317"></a>00317     <span class="keywordtype">int</span>             <a class="code" href=
+"group__mib__utilities.html#ga911270821df5b87de7a97dc5deb8f485" title=
+"Prints a counter into a buffer.">sprint_realloc_counter64</a>(u_char ** buf,
+<a name="l00318" id="l00318"></a>00318                                              <span class=
+"keywordtype">size_t</span> * buf_len,
+<a name="l00319" id="l00319"></a>00319                                              <span class=
+"keywordtype">size_t</span> * out_len,
+<a name="l00320" id="l00320"></a>00320                                              <span class=
+"keywordtype">int</span> allow_realloc,
+<a name="l00321" id="l00321"></a>00321                                              <span class="keyword">const</span> <a class=
+"code" href="structvariable__list.html" title=
+"The netsnmp variable list binding structure, it&amp;#39;s typedef&amp;#39;d to netsnmp_variable_list...">netsnmp_variable_list</a> *,
+<a name="l00322" id="l00322"></a>00322                                              <span class=
+"keyword">const</span> <span class="keyword">struct</span> <a class="code" href="structenum__list.html">enum_list</a> *,
+<a name="l00323" id="l00323"></a>00323                                              <span class=
+"keyword">const</span> <span class="keywordtype">char</span> *, <span class="keyword">const</span> <span class=
+"keywordtype">char</span> *);
+<a name="l00324" id="l00324"></a>00324 
+<a name="l00325" id="l00325"></a>00325     <span class="keywordtype">int</span>             <a class="code" href=
+"group__mib__utilities.html#ga7ac6acaf3e0df6e8e99c225a6e8067d3" title=
+"Fallback routine for a bad type, prints &amp;quot;Variable has bad type&amp;quot; into a...">sprint_realloc_badtype</a>(u_char ** buf, <span class="keywordtype">size_t</span> * buf_len,
+<a name="l00326" id="l00326"></a>00326                                            <span class=
+"keywordtype">size_t</span> * out_len,
+<a name="l00327" id="l00327"></a>00327                                            <span class=
+"keywordtype">int</span> allow_realloc,
+<a name="l00328" id="l00328"></a>00328                                            <span class="keyword">const</span> <a class=
+"code" href="structvariable__list.html" title=
+"The netsnmp variable list binding structure, it&amp;#39;s typedef&amp;#39;d to netsnmp_variable_list...">netsnmp_variable_list</a> *,
+<a name="l00329" id="l00329"></a>00329                                            <span class="keyword">const</span> <span class=
+"keyword">struct</span> <a class="code" href="structenum__list.html">enum_list</a> *,
+<a name="l00330" id="l00330"></a>00330                                            <span class="keyword">const</span> <span class=
+"keywordtype">char</span> *, <span class="keyword">const</span> <span class="keywordtype">char</span> *);
+<a name="l00331" id="l00331"></a>00331 
+<a name="l00332" id="l00332"></a>00332 <span class="preprocessor">#ifdef NETSNMP_WITH_OPAQUE_SPECIAL_TYPES</span>
+<a name="l00333" id="l00333"></a>00333     <span class=
+"keywordtype">int</span>             sprint_realloc_float(u_char ** buf, <span class="keywordtype">size_t</span> * buf_len,
+<a name="l00334" id="l00334"></a>00334                                          <span class=
+"keywordtype">size_t</span> * out_len,
+<a name="l00335" id="l00335"></a>00335                                          <span class=
+"keywordtype">int</span> allow_realloc,
+<a name="l00336" id="l00336"></a>00336                                          <span class="keyword">const</span> <a class=
+"code" href="structvariable__list.html" title=
+"The netsnmp variable list binding structure, it&amp;#39;s typedef&amp;#39;d to netsnmp_variable_list...">netsnmp_variable_list</a> *,
+<a name="l00337" id="l00337"></a>00337                                          <span class="keyword">const</span> <span class=
+"keyword">struct</span> <a class="code" href="structenum__list.html">enum_list</a> *, <span class=
+"keyword">const</span> <span class="keywordtype">char</span> *,
+<a name="l00338" id="l00338"></a>00338                                          <span class="keyword">const</span> <span class=
+"keywordtype">char</span> *);
+<a name="l00339" id="l00339"></a>00339 
+<a name="l00340" id="l00340"></a>00340     <span class=
+"keywordtype">int</span>             sprint_realloc_double(u_char ** buf, <span class="keywordtype">size_t</span> * buf_len,
+<a name="l00341" id="l00341"></a>00341                                           <span class=
+"keywordtype">size_t</span> * out_len,
+<a name="l00342" id="l00342"></a>00342                                           <span class=
+"keywordtype">int</span> allow_realloc,
+<a name="l00343" id="l00343"></a>00343                                           <span class="keyword">const</span> <a class=
+"code" href="structvariable__list.html" title=
+"The netsnmp variable list binding structure, it&amp;#39;s typedef&amp;#39;d to netsnmp_variable_list...">netsnmp_variable_list</a> *,
+<a name="l00344" id="l00344"></a>00344                                           <span class="keyword">const</span> <span class=
+"keyword">struct</span> <a class="code" href="structenum__list.html">enum_list</a> *, <span class=
+"keyword">const</span> <span class="keywordtype">char</span> *,
+<a name="l00345" id="l00345"></a>00345                                           <span class="keyword">const</span> <span class=
+"keywordtype">char</span> *);
+<a name="l00346" id="l00346"></a>00346 <span class="preprocessor">#endif</span>
+<a name="l00347" id="l00347"></a>00347 
+<a name="l00348" id="l00348"></a>00348 
+<a name="l00349" id="l00349"></a>00349     <span class="keywordtype">int</span>             snprint_by_type(<span class=
+"keywordtype">char</span> *buf, <span class="keywordtype">size_t</span> buf_len,
+<a name="l00350" id="l00350"></a>00350                                     <a class="code" href="structvariable__list.html"
+title="The netsnmp variable list binding structure, it&amp;#39;s typedef&amp;#39;d to netsnmp_variable_list...">netsnmp_variable_list</a> * var,
+<a name="l00351" id="l00351"></a>00351                                     <span class="keyword">const</span> <span class=
+"keyword">struct</span> <a class="code" href="structenum__list.html">enum_list</a> *enums,
+<a name="l00352" id="l00352"></a>00352                                     <span class="keyword">const</span> <span class=
+"keywordtype">char</span> *hint, <span class="keyword">const</span> <span class="keywordtype">char</span> *units);
+<a name="l00353" id="l00353"></a>00353 
+<a name="l00354" id="l00354"></a>00354     <span class="keywordtype">int</span>             snprint_hexstring(<span class=
+"keywordtype">char</span> *buf, <span class="keywordtype">size_t</span> buf_len,
+<a name="l00355" id="l00355"></a>00355                                       <span class=
+"keyword">const</span> u_char *, <span class="keywordtype">size_t</span>);
+<a name="l00356" id="l00356"></a>00356 
+<a name="l00357" id="l00357"></a>00357     <span class="keywordtype">int</span>             snprint_asciistring(<span class=
+"keywordtype">char</span> *buf, <span class="keywordtype">size_t</span> buf_len,
+<a name="l00358" id="l00358"></a>00358                                         <span class=
+"keyword">const</span> u_char * cp, <span class="keywordtype">size_t</span> len);
+<a name="l00359" id="l00359"></a>00359 
+<a name="l00360" id="l00360"></a>00360     <span class="keywordtype">int</span>             snprint_octet_string(<span class=
+"keywordtype">char</span> *buf, <span class="keywordtype">size_t</span> buf_len,
+<a name="l00361" id="l00361"></a>00361                                          <span class="keyword">const</span> <a class=
+"code" href="structvariable__list.html" title=
+"The netsnmp variable list binding structure, it&amp;#39;s typedef&amp;#39;d to netsnmp_variable_list...">netsnmp_variable_list</a> *,
+<a name="l00362" id="l00362"></a>00362                                          <span class="keyword">const</span> <span class=
+"keyword">struct</span> <a class="code" href="structenum__list.html">enum_list</a> *, <span class=
+"keyword">const</span> <span class="keywordtype">char</span> *,
+<a name="l00363" id="l00363"></a>00363                                          <span class="keyword">const</span> <span class=
+"keywordtype">char</span> *);
+<a name="l00364" id="l00364"></a>00364 
+<a name="l00365" id="l00365"></a>00365     <span class="keywordtype">int</span>             snprint_opaque(<span class=
+"keywordtype">char</span> *buf, <span class="keywordtype">size_t</span> buf_len,
+<a name="l00366" id="l00366"></a>00366                                    <span class="keyword">const</span> <a class="code"
+href="structvariable__list.html" title=
+"The netsnmp variable list binding structure, it&amp;#39;s typedef&amp;#39;d to netsnmp_variable_list...">netsnmp_variable_list</a> *,
+<a name="l00367" id="l00367"></a>00367                                    <span class="keyword">const</span> <span class=
+"keyword">struct</span> <a class="code" href="structenum__list.html">enum_list</a> *, <span class=
+"keyword">const</span> <span class="keywordtype">char</span> *,
+<a name="l00368" id="l00368"></a>00368                                    <span class="keyword">const</span> <span class=
+"keywordtype">char</span> *);
+<a name="l00369" id="l00369"></a>00369 
+<a name="l00370" id="l00370"></a>00370     <span class=
+"keywordtype">int</span>             snprint_object_identifier(<span class="keywordtype">char</span> *buf, <span class=
+"keywordtype">size_t</span> buf_len,
+<a name="l00371" id="l00371"></a>00371                                               <span class="keyword">const</span> <a class=
+"code" href="structvariable__list.html" title=
+"The netsnmp variable list binding structure, it&amp;#39;s typedef&amp;#39;d to netsnmp_variable_list...">netsnmp_variable_list</a> *,
+<a name="l00372" id="l00372"></a>00372                                               <span class=
+"keyword">const</span> <span class="keyword">struct</span> <a class="code" href="structenum__list.html">enum_list</a> *,
+<a name="l00373" id="l00373"></a>00373                                               <span class=
+"keyword">const</span> <span class="keywordtype">char</span> *, <span class="keyword">const</span> <span class=
+"keywordtype">char</span> *);
+<a name="l00374" id="l00374"></a>00374 
+<a name="l00375" id="l00375"></a>00375     <span class="keywordtype">int</span>             snprint_timeticks(<span class=
+"keywordtype">char</span> *buf, <span class="keywordtype">size_t</span> buf_len,
+<a name="l00376" id="l00376"></a>00376                                       <span class="keyword">const</span> <a class="code"
+href="structvariable__list.html" title=
+"The netsnmp variable list binding structure, it&amp;#39;s typedef&amp;#39;d to netsnmp_variable_list...">netsnmp_variable_list</a> *,
+<a name="l00377" id="l00377"></a>00377                                       <span class="keyword">const</span> <span class=
+"keyword">struct</span> <a class="code" href="structenum__list.html">enum_list</a> *, <span class=
+"keyword">const</span> <span class="keywordtype">char</span> *,
+<a name="l00378" id="l00378"></a>00378                                       <span class="keyword">const</span> <span class=
+"keywordtype">char</span> *);
+<a name="l00379" id="l00379"></a>00379 
+<a name="l00380" id="l00380"></a>00380     <span class="keywordtype">int</span>             snprint_hinted_integer(<span class=
+"keywordtype">char</span> *buf, <span class="keywordtype">size_t</span> buf_len,
+<a name="l00381" id="l00381"></a>00381                                            <span class=
+"keywordtype">long</span>, <span class="keyword">const</span> <span class="keywordtype">char</span> *,
+<a name="l00382" id="l00382"></a>00382                                            <span class="keyword">const</span> <span class=
+"keywordtype">char</span> *);
+<a name="l00383" id="l00383"></a>00383 
+<a name="l00384" id="l00384"></a>00384     <span class="keywordtype">int</span>             snprint_integer(<span class=
+"keywordtype">char</span> *buf, <span class="keywordtype">size_t</span> buf_len,
+<a name="l00385" id="l00385"></a>00385                                     <span class="keyword">const</span> <a class="code"
+href="structvariable__list.html" title=
+"The netsnmp variable list binding structure, it&amp;#39;s typedef&amp;#39;d to netsnmp_variable_list...">netsnmp_variable_list</a> *,
+<a name="l00386" id="l00386"></a>00386                                     <span class="keyword">const</span> <span class=
+"keyword">struct</span> <a class="code" href="structenum__list.html">enum_list</a> *, <span class=
+"keyword">const</span> <span class="keywordtype">char</span> *,
+<a name="l00387" id="l00387"></a>00387                                     <span class="keyword">const</span> <span class=
+"keywordtype">char</span> *);
+<a name="l00388" id="l00388"></a>00388 
+<a name="l00389" id="l00389"></a>00389     <span class="keywordtype">int</span>             snprint_uinteger(<span class=
+"keywordtype">char</span> *buf, <span class="keywordtype">size_t</span> buf_len,
+<a name="l00390" id="l00390"></a>00390                                      <span class="keyword">const</span> <a class="code"
+href="structvariable__list.html" title=
+"The netsnmp variable list binding structure, it&amp;#39;s typedef&amp;#39;d to netsnmp_variable_list...">netsnmp_variable_list</a> *,
+<a name="l00391" id="l00391"></a>00391                                      <span class="keyword">const</span> <span class=
+"keyword">struct</span> <a class="code" href="structenum__list.html">enum_list</a> *, <span class=
+"keyword">const</span> <span class="keywordtype">char</span> *,
+<a name="l00392" id="l00392"></a>00392                                      <span class="keyword">const</span> <span class=
+"keywordtype">char</span> *);
+<a name="l00393" id="l00393"></a>00393 
+<a name="l00394" id="l00394"></a>00394     <span class="keywordtype">int</span>             snprint_gauge(<span class=
+"keywordtype">char</span> *buf, <span class="keywordtype">size_t</span> buf_len,
+<a name="l00395" id="l00395"></a>00395                                   <span class="keyword">const</span> <a class="code" href=
+"structvariable__list.html" title=
+"The netsnmp variable list binding structure, it&amp;#39;s typedef&amp;#39;d to netsnmp_variable_list...">netsnmp_variable_list</a> *,
+<a name="l00396" id="l00396"></a>00396                                   <span class="keyword">const</span> <span class=
+"keyword">struct</span> <a class="code" href="structenum__list.html">enum_list</a> *, <span class=
+"keyword">const</span> <span class="keywordtype">char</span> *,
+<a name="l00397" id="l00397"></a>00397                                   <span class="keyword">const</span> <span class=
+"keywordtype">char</span> *);
+<a name="l00398" id="l00398"></a>00398 
+<a name="l00399" id="l00399"></a>00399     <span class="keywordtype">int</span>             snprint_counter(<span class=
+"keywordtype">char</span> *buf, <span class="keywordtype">size_t</span> buf_len,
+<a name="l00400" id="l00400"></a>00400                                     <span class="keyword">const</span> <a class="code"
+href="structvariable__list.html" title=
+"The netsnmp variable list binding structure, it&amp;#39;s typedef&amp;#39;d to netsnmp_variable_list...">netsnmp_variable_list</a> *,
+<a name="l00401" id="l00401"></a>00401                                     <span class="keyword">const</span> <span class=
+"keyword">struct</span> <a class="code" href="structenum__list.html">enum_list</a> *, <span class=
+"keyword">const</span> <span class="keywordtype">char</span> *,
+<a name="l00402" id="l00402"></a>00402                                     <span class="keyword">const</span> <span class=
+"keywordtype">char</span> *);
+<a name="l00403" id="l00403"></a>00403 
+<a name="l00404" id="l00404"></a>00404     <span class="keywordtype">int</span>             snprint_networkaddress(<span class=
+"keywordtype">char</span> *buf, <span class="keywordtype">size_t</span> buf_len,
+<a name="l00405" id="l00405"></a>00405                                            <span class="keyword">const</span> <a class=
+"code" href="structvariable__list.html" title=
+"The netsnmp variable list binding structure, it&amp;#39;s typedef&amp;#39;d to netsnmp_variable_list...">netsnmp_variable_list</a> *,
+<a name="l00406" id="l00406"></a>00406                                            <span class="keyword">const</span> <span class=
+"keyword">struct</span> <a class="code" href="structenum__list.html">enum_list</a> *,
+<a name="l00407" id="l00407"></a>00407                                            <span class="keyword">const</span> <span class=
+"keywordtype">char</span> *, <span class="keyword">const</span> <span class="keywordtype">char</span> *);
+<a name="l00408" id="l00408"></a>00408 
+<a name="l00409" id="l00409"></a>00409     <span class="keywordtype">int</span>             snprint_ipaddress(<span class=
+"keywordtype">char</span> *buf, <span class="keywordtype">size_t</span> buf_len,
+<a name="l00410" id="l00410"></a>00410                                       <span class="keyword">const</span> <a class="code"
+href="structvariable__list.html" title=
+"The netsnmp variable list binding structure, it&amp;#39;s typedef&amp;#39;d to netsnmp_variable_list...">netsnmp_variable_list</a> *,
+<a name="l00411" id="l00411"></a>00411                                       <span class="keyword">const</span> <span class=
+"keyword">struct</span> <a class="code" href="structenum__list.html">enum_list</a> *, <span class=
+"keyword">const</span> <span class="keywordtype">char</span> *,
+<a name="l00412" id="l00412"></a>00412                                       <span class="keyword">const</span> <span class=
+"keywordtype">char</span> *);
+<a name="l00413" id="l00413"></a>00413 
+<a name="l00414" id="l00414"></a>00414     <span class="keywordtype">int</span>             snprint_null(<span class=
+"keywordtype">char</span> *buf, <span class="keywordtype">size_t</span> buf_len,
+<a name="l00415" id="l00415"></a>00415                                  <span class="keyword">const</span> <a class="code" href=
+"structvariable__list.html" title=
+"The netsnmp variable list binding structure, it&amp;#39;s typedef&amp;#39;d to netsnmp_variable_list...">netsnmp_variable_list</a> *,
+<a name="l00416" id="l00416"></a>00416                                  <span class="keyword">const</span> <span class=
+"keyword">struct</span> <a class="code" href="structenum__list.html">enum_list</a> *, <span class=
+"keyword">const</span> <span class="keywordtype">char</span> *,
+<a name="l00417" id="l00417"></a>00417                                  <span class="keyword">const</span> <span class=
+"keywordtype">char</span> *);
+<a name="l00418" id="l00418"></a>00418 
+<a name="l00419" id="l00419"></a>00419     <span class="keywordtype">int</span>             snprint_bitstring(<span class=
+"keywordtype">char</span> *buf, <span class="keywordtype">size_t</span> buf_len,
+<a name="l00420" id="l00420"></a>00420                                       <span class="keyword">const</span> <a class="code"
+href="structvariable__list.html" title=
+"The netsnmp variable list binding structure, it&amp;#39;s typedef&amp;#39;d to netsnmp_variable_list...">netsnmp_variable_list</a> *,
+<a name="l00421" id="l00421"></a>00421                                       <span class="keyword">const</span> <span class=
+"keyword">struct</span> <a class="code" href="structenum__list.html">enum_list</a> *, <span class=
+"keyword">const</span> <span class="keywordtype">char</span> *,
+<a name="l00422" id="l00422"></a>00422                                       <span class="keyword">const</span> <span class=
+"keywordtype">char</span> *);
+<a name="l00423" id="l00423"></a>00423 
+<a name="l00424" id="l00424"></a>00424     <span class="keywordtype">int</span>             snprint_nsapaddress(<span class=
+"keywordtype">char</span> *buf, <span class="keywordtype">size_t</span> buf_len,
+<a name="l00425" id="l00425"></a>00425                                         <span class="keyword">const</span> <a class="code"
+href="structvariable__list.html" title=
+"The netsnmp variable list binding structure, it&amp;#39;s typedef&amp;#39;d to netsnmp_variable_list...">netsnmp_variable_list</a> *,
+<a name="l00426" id="l00426"></a>00426                                         <span class="keyword">const</span> <span class=
+"keyword">struct</span> <a class="code" href="structenum__list.html">enum_list</a> *, <span class=
+"keyword">const</span> <span class="keywordtype">char</span> *,
+<a name="l00427" id="l00427"></a>00427                                         <span class="keyword">const</span> <span class=
+"keywordtype">char</span> *);
+<a name="l00428" id="l00428"></a>00428 
+<a name="l00429" id="l00429"></a>00429     <span class="keywordtype">int</span>             snprint_counter64(<span class=
+"keywordtype">char</span> *buf, <span class="keywordtype">size_t</span> buf_len,
+<a name="l00430" id="l00430"></a>00430                                       <span class="keyword">const</span> <a class="code"
+href="structvariable__list.html" title=
+"The netsnmp variable list binding structure, it&amp;#39;s typedef&amp;#39;d to netsnmp_variable_list...">netsnmp_variable_list</a> *,
+<a name="l00431" id="l00431"></a>00431                                       <span class="keyword">const</span> <span class=
+"keyword">struct</span> <a class="code" href="structenum__list.html">enum_list</a> *, <span class=
+"keyword">const</span> <span class="keywordtype">char</span> *,
+<a name="l00432" id="l00432"></a>00432                                       <span class="keyword">const</span> <span class=
+"keywordtype">char</span> *);
+<a name="l00433" id="l00433"></a>00433 
+<a name="l00434" id="l00434"></a>00434     <span class="keywordtype">int</span>             snprint_badtype(<span class=
+"keywordtype">char</span> *buf, <span class="keywordtype">size_t</span> buf_len,
+<a name="l00435" id="l00435"></a>00435                                     <span class="keyword">const</span> <a class="code"
+href="structvariable__list.html" title=
+"The netsnmp variable list binding structure, it&amp;#39;s typedef&amp;#39;d to netsnmp_variable_list...">netsnmp_variable_list</a> *,
+<a name="l00436" id="l00436"></a>00436                                     <span class="keyword">const</span> <span class=
+"keyword">struct</span> <a class="code" href="structenum__list.html">enum_list</a> *, <span class=
+"keyword">const</span> <span class="keywordtype">char</span> *,
+<a name="l00437" id="l00437"></a>00437                                     <span class="keyword">const</span> <span class=
+"keywordtype">char</span> *);
+<a name="l00438" id="l00438"></a>00438 
+<a name="l00439" id="l00439"></a>00439 <span class="preprocessor">#ifdef NETSNMP_WITH_OPAQUE_SPECIAL_TYPES</span>
+<a name="l00440" id="l00440"></a>00440     <span class="keywordtype">int</span>             snprint_float(<span class=
+"keywordtype">char</span> *buf, <span class="keywordtype">size_t</span> buf_len,
+<a name="l00441" id="l00441"></a>00441                                   <span class="keyword">const</span> <a class="code" href=
+"structvariable__list.html" title=
+"The netsnmp variable list binding structure, it&amp;#39;s typedef&amp;#39;d to netsnmp_variable_list...">netsnmp_variable_list</a> *,
+<a name="l00442" id="l00442"></a>00442                                   <span class="keyword">const</span> <span class=
+"keyword">struct</span> <a class="code" href="structenum__list.html">enum_list</a> *, <span class=
+"keyword">const</span> <span class="keywordtype">char</span> *,
+<a name="l00443" id="l00443"></a>00443                                   <span class="keyword">const</span> <span class=
+"keywordtype">char</span> *);
+<a name="l00444" id="l00444"></a>00444 
+<a name="l00445" id="l00445"></a>00445     <span class="keywordtype">int</span>             snprint_double(<span class=
+"keywordtype">char</span> *buf, <span class="keywordtype">size_t</span> buf_len,
+<a name="l00446" id="l00446"></a>00446                                    <span class="keyword">const</span> <a class="code"
+href="structvariable__list.html" title=
+"The netsnmp variable list binding structure, it&amp;#39;s typedef&amp;#39;d to netsnmp_variable_list...">netsnmp_variable_list</a> *,
+<a name="l00447" id="l00447"></a>00447                                    <span class="keyword">const</span> <span class=
+"keyword">struct</span> <a class="code" href="structenum__list.html">enum_list</a> *, <span class=
+"keyword">const</span> <span class="keywordtype">char</span> *,
+<a name="l00448" id="l00448"></a>00448                                    <span class="keyword">const</span> <span class=
+"keywordtype">char</span> *);
+<a name="l00449" id="l00449"></a>00449 <span class="preprocessor">#endif</span>
+<a name="l00450" id="l00450"></a>00450 
+<a name="l00451" id="l00451"></a>00451     <span class="keywordtype">void</span>            print_oid_report(FILE *);
+<a name="l00452" id="l00452"></a>00452     <span class=
+"keywordtype">void</span>            print_oid_report_enable_labeledoid(<span class="keywordtype">void</span>);
+<a name="l00453" id="l00453"></a>00453     <span class=
+"keywordtype">void</span>            print_oid_report_enable_oid(<span class="keywordtype">void</span>);
+<a name="l00454" id="l00454"></a>00454     <span class=
+"keywordtype">void</span>            print_oid_report_enable_suffix(<span class="keywordtype">void</span>);
+<a name="l00455" id="l00455"></a>00455     <span class=
+"keywordtype">void</span>            print_oid_report_enable_symbolic(<span class="keywordtype">void</span>);
+<a name="l00456" id="l00456"></a>00456     <span class=
+"keywordtype">void</span>            print_oid_report_enable_mibchildoid(<span class="keywordtype">void</span>);
+<a name="l00457" id="l00457"></a>00457 
+<a name="l00458" id="l00458"></a>00458     <span class="keyword">const</span> <span class=
+"keywordtype">char</span>     *parse_octet_hint(<span class="keyword">const</span> <span class=
+"keywordtype">char</span> *hint, <span class="keyword">const</span> <span class="keywordtype">char</span> *value,
+<a name="l00459" id="l00459"></a>00459                                      <span class=
+"keywordtype">unsigned</span> <span class="keywordtype">char</span> **new_val, <span class=
+"keywordtype">int</span> *new_val_len);
+<a name="l00460" id="l00460"></a>00460 
+<a name="l00461" id="l00461"></a>00461     <span class="keywordtype">void</span>            clear_tree_flags(<span class=
+"keyword">register</span> <span class="keyword">struct</span> <a class="code" href="structtree.html">tree</a> *tp);
+<a name="l00462" id="l00462"></a>00462 
+<a name="l00463" id="l00463"></a>00463     <span class="keywordtype">char</span>           *snmp_out_toggle_options(<span class=
+"keywordtype">char</span> *);
+<a name="l00464" id="l00464"></a>00464     <span class=
+"keywordtype">void</span>            snmp_out_toggle_options_usage(<span class="keyword">const</span> <span class=
+"keywordtype">char</span> *, FILE *);
+<a name="l00465" id="l00465"></a>00465     <span class="keywordtype">char</span>           *snmp_in_toggle_options(<span class=
+"keywordtype">char</span> *);
+<a name="l00466" id="l00466"></a>00466     <span class="keywordtype">char</span>           *snmp_in_options(<span class=
+"keywordtype">char</span> *, <span class="keywordtype">int</span>, <span class="keywordtype">char</span> * <span class=
+"keyword">const</span> *);
+<a name="l00467" id="l00467"></a>00467     <span class="keywordtype">void</span>            <a class="code" href=
+"group__mib__utilities.html#ga13ca3f3244082039f1bd93a477fc0e97" title=
+"Prints out a help usage for the in* toggle options.">snmp_in_toggle_options_usage</a>(<span class=
+"keyword">const</span> <span class="keywordtype">char</span> *, FILE *);
+<a name="l00468" id="l00468"></a>00468     u_char          mib_to_asn_type(<span class="keywordtype">int</span> mib_type);
+<a name="l00469" id="l00469"></a>00469 
+<a name="l00470" id="l00470"></a>00470 
+<a name="l00471" id="l00471"></a>00471     <span class="keywordtype">int</span>             <a class="code" href=
+"group__mib__utilities.html#ga5b5e00f313a49465d2f774e0eefb4aac" title=
+"Converts a string to its OID form.">netsnmp_str2oid</a>(<span class="keyword">const</span> <span class=
+"keywordtype">char</span> *S, oid * O, <span class="keywordtype">int</span> L);
+<a name="l00472" id="l00472"></a>00472 
+<a name="l00473" id="l00473"></a>00473 
+<a name="l00474" id="l00474"></a>00474 <span class="preprocessor">#define NETSNMP_STRING_OUTPUT_GUESS  1</span>
+<a name="l00475" id="l00475"></a>00475 <span class="preprocessor">#define NETSNMP_STRING_OUTPUT_ASCII  2</span>
+<a name="l00476" id="l00476"></a>00476 <span class="preprocessor">#define NETSNMP_STRING_OUTPUT_HEX    3</span>
+<a name="l00477" id="l00477"></a>00477 
+<a name="l00478" id="l00478"></a>00478 <span class="preprocessor">#define NETSNMP_OID_OUTPUT_SUFFIX  1</span>
+<a name="l00479" id="l00479"></a>00479 <span class="preprocessor">#define NETSNMP_OID_OUTPUT_MODULE  2</span>
+<a name="l00480" id="l00480"></a>00480 <span class="preprocessor">#define NETSNMP_OID_OUTPUT_FULL    3</span>
+<a name="l00481" id="l00481"></a>00481 <span class="preprocessor">#define NETSNMP_OID_OUTPUT_NUMERIC 4</span>
+<a name="l00482" id="l00482"></a>00482 <span class="preprocessor">#define NETSNMP_OID_OUTPUT_UCD     5</span>
+<a name="l00483" id="l00483"></a>00483 <span class="preprocessor">#define NETSNMP_OID_OUTPUT_NONE    6</span>
+<a name="l00484" id="l00484"></a>00484 <span class="preprocessor">#ifdef __cplusplus</span>
+<a name="l00485" id="l00485"></a>00485 }
+<a name="l00486" id="l00486"></a>00486 <span class="preprocessor">#endif</span>
+<a name="l00487" id="l00487"></a>00487 <span class="preprocessor">#endif                          </span><span class=
+"comment">/* MIB_H */</span>
+</pre>
+    </div>
+  </div>
+  <hr size="1" />
+
+  <address style="text-align: right;">
+    <small>Generated on 28 Sep 2009 for net-snmp by  <a href="http://www.doxygen.org/index.html"><img class="footer" src=
+    "doxygen.png" alt="doxygen" /></a> 1.6.1</small>
+<!-- CONTENT END -->
+<!--#include virtual="/page-bottom.html" -->
+

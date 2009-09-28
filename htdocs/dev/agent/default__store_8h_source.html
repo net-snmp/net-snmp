@@ -1,0 +1,333 @@
+<!--#set var="section" value="development" -->
+<!--#include virtual="/page-top.html" -->
+<!-- CONTENT START -->
+  <div class="navigation" id="top">
+    <div class="tabs">
+      <ul>
+        <li><a href="index.html"><span>Main Page</span></a></li>
+
+        <li><a href="pages.html"><span>Related Pages</span></a></li>
+
+        <li><a href="modules.html"><span>Modules</span></a></li>
+
+        <li><a href="annotated.html"><span>Data Structures</span></a></li>
+
+        <li class="current"><a href="files.html"><span>Files</span></a></li>
+
+        <li><a href="examples.html"><span>Examples</span></a></li>
+      </ul>
+    </div>
+
+    <div class="tabs">
+      <ul>
+        <li><a href="files.html"><span>File List</span></a></li>
+
+        <li><a href="globals.html"><span>Globals</span></a></li>
+      </ul>
+    </div>
+
+    <h1>default_store.h</h1>
+
+    <div class="fragment">
+      <pre class="fragment">
+<a name="l00001" id="l00001"></a>00001 <span class=
+"comment">/* Portions of this file are subject to the following copyright(s).  See</span>
+<a name="l00002" id="l00002"></a>00002 <span class=
+"comment"> * the Net-SNMP's COPYING file for more details and other copyrights</span>
+<a name="l00003" id="l00003"></a>00003 <span class="comment"> * that may apply:</span>
+<a name="l00004" id="l00004"></a>00004 <span class="comment"> */</span>
+<a name="l00005" id="l00005"></a>00005 <span class="comment">/*</span>
+<a name="l00006" id="l00006"></a>00006 <span class="comment"> * Portions of this file are copyrighted by:</span>
+<a name="l00007" id="l00007"></a>00007 <span class=
+"comment"> * Copyright &copy; 2003 Sun Microsystems, Inc. All rights reserved.</span>
+<a name="l00008" id="l00008"></a>00008 <span class=
+"comment"> * Use is subject to license terms specified in the COPYING file</span>
+<a name="l00009" id="l00009"></a>00009 <span class="comment"> * distributed with the Net-SNMP package.</span>
+<a name="l00010" id="l00010"></a>00010 <span class="comment"> */</span>
+<a name="l00011" id="l00011"></a>00011 <span class="comment">/*</span>
+<a name="l00012" id="l00012"></a>00012 <span class="comment"> * Note:</span>
+<a name="l00013" id="l00013"></a>00013 <span class=
+"comment"> *    If new default_store entries are added to this header file,</span>
+<a name="l00014" id="l00014"></a>00014 <span class=
+"comment"> *    then remember to run 'perl/default_store/gen' to update the</span>
+<a name="l00015" id="l00015"></a>00015 <span class="comment"> *    corresponding perl interface.</span>
+<a name="l00016" id="l00016"></a>00016 <span class="comment"> */</span>
+<a name="l00017" id="l00017"></a>00017 <span class="comment">/*</span>
+<a name="l00018" id="l00018"></a>00018 <span class="comment"> * @file default_store.h: storage space for defaults</span>
+<a name="l00019" id="l00019"></a>00019 <span class="comment"> *</span>
+<a name="l00020" id="l00020"></a>00020 <span class="comment"> * @addtogroup default_store</span>
+<a name="l00021" id="l00021"></a>00021 <span class="comment"> *</span>
+<a name="l00022" id="l00022"></a>00022 <span class="comment"> * @{</span>
+<a name="l00023" id="l00023"></a>00023 <span class="comment"> */</span>
+<a name="l00024" id="l00024"></a>00024 <span class="preprocessor">#ifndef DEFAULT_STORE_H</span>
+<a name="l00025" id="l00025"></a>00025 <span class="preprocessor">#define DEFAULT_STORE_H</span>
+<a name="l00026" id="l00026"></a>00026 
+<a name="l00027" id="l00027"></a>00027 <span class="preprocessor">#ifdef __cplusplus</span>
+<a name="l00028" id="l00028"></a>00028 <span class="keyword">extern</span>          <span class="stringliteral">"C"</span> {
+<a name="l00029" id="l00029"></a>00029 <span class="preprocessor">#endif</span>
+<a name="l00030" id="l00030"></a>00030 
+<a name="l00031" id="l00031"></a>00031 <span class="preprocessor">#define NETSNMP_DS_MAX_IDS 3</span>
+<a name="l00032" id="l00032"></a>00032 <span class="preprocessor">#define NETSNMP_DS_MAX_SUBIDS 48        </span><span class=
+"comment">/* needs to be a multiple of 8 */</span>
+<a name="l00033" id="l00033"></a>00033 
+<a name="l00034" id="l00034"></a>00034     <span class="comment">/*</span>
+<a name="l00035" id="l00035"></a>00035 <span class="comment">     * begin storage definitions </span>
+<a name="l00036" id="l00036"></a>00036 <span class="comment">     */</span>
+<a name="l00040" id="l00040"></a>00040 <span class="preprocessor">#define NETSNMP_DS_LIBRARY_ID     0</span>
+<a name="l00041" id="l00041"></a>00041 <span class="preprocessor">#define NETSNMP_DS_APPLICATION_ID 1</span>
+<a name="l00042" id="l00042"></a>00042 <span class="preprocessor">#define NETSNMP_DS_TOKEN_ID       2</span>
+<a name="l00043" id="l00043"></a>00043 
+<a name="l00044" id="l00044"></a>00044     <span class="comment">/*</span>
+<a name="l00045" id="l00045"></a>00045 <span class=
+"comment">     * These definitions correspond with the "which" argument to the API,</span>
+<a name="l00046" id="l00046"></a>00046 <span class="comment">     * when the storeid argument is NETSNMP_DS_LIBRARY_ID </span>
+<a name="l00047" id="l00047"></a>00047 <span class="comment">     */</span>
+<a name="l00048" id="l00048"></a>00048     <span class="comment">/*</span>
+<a name="l00049" id="l00049"></a>00049 <span class="comment">     * library booleans </span>
+<a name="l00050" id="l00050"></a>00050 <span class="comment">     */</span>
+<a name="l00051" id="l00051"></a>00051 <span class="preprocessor">#define NETSNMP_DS_LIB_MIB_ERRORS          0</span>
+<a name="l00052" id="l00052"></a>00052 <span class="preprocessor">#define NETSNMP_DS_LIB_SAVE_MIB_DESCRS     1</span>
+<a name="l00053" id="l00053"></a>00053 <span class="preprocessor">#define NETSNMP_DS_LIB_MIB_COMMENT_TERM    2</span>
+<a name="l00054" id="l00054"></a>00054 <span class="preprocessor">#define NETSNMP_DS_LIB_MIB_PARSE_LABEL     3</span>
+<a name="l00055" id="l00055"></a>00055 <span class="preprocessor">#define NETSNMP_DS_LIB_DUMP_PACKET         4</span>
+<a name="l00056" id="l00056"></a>00056 <span class="preprocessor">#define NETSNMP_DS_LIB_LOG_TIMESTAMP       5</span>
+<a name="l00057" id="l00057"></a>00057 <span class=
+"preprocessor">#define NETSNMP_DS_LIB_DONT_READ_CONFIGS   6    </span><span class=
+"comment">/* don't read normal config files */</span>
+<a name="l00058" id="l00058"></a>00058 <span class=
+"preprocessor">#define NETSNMP_DS_LIB_DISABLE_CONFIG_LOAD      NETSNMP_DS_LIB_DONT_READ_CONFIGS</span>
+<a name="l00059" id="l00059"></a>00059 <span class=
+"preprocessor">#define NETSNMP_DS_LIB_MIB_REPLACE         7    </span><span class=
+"comment">/* replace objects from latest module */</span>
+<a name="l00060" id="l00060"></a>00060 <span class=
+"preprocessor">#define NETSNMP_DS_LIB_PRINT_NUMERIC_ENUM  8    </span><span class=
+"comment">/* print only numeric enum values */</span>
+<a name="l00061" id="l00061"></a>00061 <span class=
+"preprocessor">#define NETSNMP_DS_LIB_PRINT_NUMERIC_OIDS  9    </span><span class=
+"comment">/* print only numeric enum values */</span>
+<a name="l00062" id="l00062"></a>00062 <span class=
+"preprocessor">#define NETSNMP_DS_LIB_DONT_BREAKDOWN_OIDS 10   </span><span class=
+"comment">/* dont print oid indexes specially */</span>
+<a name="l00063" id="l00063"></a>00063 <span class=
+"preprocessor">#define NETSNMP_DS_LIB_ALARM_DONT_USE_SIG  11   </span><span class=
+"comment">/* don't use the alarm() signal */</span>
+<a name="l00064" id="l00064"></a>00064 <span class=
+"preprocessor">#define NETSNMP_DS_LIB_PRINT_FULL_OID      12   </span><span class=
+"comment">/* print fully qualified oids */</span>
+<a name="l00065" id="l00065"></a>00065 <span class=
+"preprocessor">#define NETSNMP_DS_LIB_QUICK_PRINT         13   </span><span class=
+"comment">/* print very brief output for parsing */</span>
+<a name="l00066" id="l00066"></a>00066 <span class=
+"preprocessor">#define NETSNMP_DS_LIB_RANDOM_ACCESS       14   </span><span class=
+"comment">/* random access to oid labels */</span>
+<a name="l00067" id="l00067"></a>00067 <span class=
+"preprocessor">#define NETSNMP_DS_LIB_REGEX_ACCESS        15   </span><span class=
+"comment">/* regex matching to oid labels */</span>
+<a name="l00068" id="l00068"></a>00068 <span class=
+"preprocessor">#define NETSNMP_DS_LIB_DONT_CHECK_RANGE    16   </span><span class=
+"comment">/* don't check values for ranges on send */</span>
+<a name="l00069" id="l00069"></a>00069 <span class=
+"preprocessor">#define NETSNMP_DS_LIB_NO_TOKEN_WARNINGS   17   </span><span class=
+"comment">/* no warn about unknown config tokens */</span>
+<a name="l00070" id="l00070"></a>00070 <span class=
+"preprocessor">#define NETSNMP_DS_LIB_NUMERIC_TIMETICKS   18   </span><span class=
+"comment">/* print timeticks as a number */</span>
+<a name="l00071" id="l00071"></a>00071 <span class=
+"preprocessor">#define NETSNMP_DS_LIB_ESCAPE_QUOTES       19   </span><span class=
+"comment">/* shell escape quote marks in oids */</span>
+<a name="l00072" id="l00072"></a>00072 <span class=
+"preprocessor">#define NETSNMP_DS_LIB_REVERSE_ENCODE      20   </span><span class=
+"comment">/* encode packets from back to front */</span>
+<a name="l00073" id="l00073"></a>00073 <span class=
+"preprocessor">#define NETSNMP_DS_LIB_PRINT_BARE_VALUE    21   </span><span class=
+"comment">/* just print value (not OID = value) */</span>
+<a name="l00074" id="l00074"></a>00074 <span class=
+"preprocessor">#define NETSNMP_DS_LIB_EXTENDED_INDEX      22   </span><span class=
+"comment">/* print extended index format [x1][x2] */</span>
+<a name="l00075" id="l00075"></a>00075 <span class=
+"preprocessor">#define NETSNMP_DS_LIB_PRINT_HEX_TEXT      23   </span><span class=
+"comment">/* print ASCII text along with hex strings */</span>
+<a name="l00076" id="l00076"></a>00076 <span class=
+"preprocessor">#define NETSNMP_DS_LIB_PRINT_UCD_STYLE_OID 24   </span><span class=
+"comment">/* print OID's using the UCD-style prefix suppression */</span>
+<a name="l00077" id="l00077"></a>00077 <span class=
+"preprocessor">#define NETSNMP_DS_LIB_READ_UCD_STYLE_OID  25   </span><span class=
+"comment">/* require top-level OIDs to be prefixed with a dot */</span>
+<a name="l00078" id="l00078"></a>00078 <span class=
+"preprocessor">#define NETSNMP_DS_LIB_HAVE_READ_PREMIB_CONFIG 26       </span><span class=
+"comment">/* have the pre-mib parsing config tokens been processed */</span>
+<a name="l00079" id="l00079"></a>00079 <span class=
+"preprocessor">#define NETSNMP_DS_LIB_HAVE_READ_CONFIG    27   </span><span class=
+"comment">/* have the config tokens been processed */</span>
+<a name="l00080" id="l00080"></a>00080 <span class="preprocessor">#define NETSNMP_DS_LIB_QUICKE_PRINT        28   </span>
+<a name="l00081" id="l00081"></a>00081 <span class=
+"preprocessor">#define NETSNMP_DS_LIB_DONT_PRINT_UNITS    29 </span><span class="comment">/* don't print UNITS suffix */</span>
+<a name="l00082" id="l00082"></a>00082 <span class=
+"preprocessor">#define NETSNMP_DS_LIB_NO_DISPLAY_HINT     30 </span><span class="comment">/* don't apply DISPLAY-HINTs */</span>
+<a name="l00083" id="l00083"></a>00083 <span class=
+"preprocessor">#define NETSNMP_DS_LIB_16BIT_IDS           31   </span><span class=
+"comment">/* restrict requestIDs, etc to 16-bit values */</span>
+<a name="l00084" id="l00084"></a>00084 <span class=
+"preprocessor">#define NETSNMP_DS_LIB_DONT_PERSIST_STATE  32   </span><span class=
+"comment">/* don't load config and don't load/save persistent file */</span>
+<a name="l00085" id="l00085"></a>00085 <span class=
+"preprocessor">#define NETSNMP_DS_LIB_2DIGIT_HEX_OUTPUT   33   </span><span class=
+"comment">/* print a leading 0 on hex values &lt;= 'f' */</span>
+<a name="l00086" id="l00086"></a>00086 <span class=
+"preprocessor">#define NETSNMP_DS_LIB_IGNORE_NO_COMMUNITY 34   </span><span class=
+"comment">/* don't complain if no community is specified in the command arguments */</span>
+<a name="l00087" id="l00087"></a>00087 <span class=
+"preprocessor">#define NETSNMP_DS_LIB_DISABLE_PERSISTENT_LOAD  35 </span><span class=
+"comment">/* don't load persistent file */</span>
+<a name="l00088" id="l00088"></a>00088 <span class=
+"preprocessor">#define NETSNMP_DS_LIB_DISABLE_PERSISTENT_SAVE  36 </span><span class=
+"comment">/* don't save persistent file */</span>
+<a name="l00089" id="l00089"></a>00089 <span class=
+"preprocessor">#define NETSNMP_DS_LIB_APPEND_LOGFILES     37 </span><span class=
+"comment">/* append, don't overwrite, log files */</span>
+<a name="l00090" id="l00090"></a>00090 <span class=
+"preprocessor">#define NETSNMP_DS_LIB_NO_DISCOVERY        38 </span><span class=
+"comment">/* don't support RFC5343 contextEngineID discovery */</span>
+<a name="l00091" id="l00091"></a>00091 <span class=
+"preprocessor">#define NETSNMP_DS_LIB_TSM_USE_PREFIX      39 </span><span class=
+"comment">/* TSM's simple security name mapping */</span>
+<a name="l00092" id="l00092"></a>00092 <span class=
+"preprocessor">#define NETSNMP_DS_LIB_ALLOW_SELF_SIGNED   40 </span><span class="comment">/* Certs for DTLS */</span>
+<a name="l00093" id="l00093"></a>00093 
+<a name="l00094" id="l00094"></a>00094     <span class="comment">/*</span>
+<a name="l00095" id="l00095"></a>00095 <span class="comment">     * library integers </span>
+<a name="l00096" id="l00096"></a>00096 <span class="comment">     */</span>
+<a name="l00097" id="l00097"></a>00097 <span class="preprocessor">#define NETSNMP_DS_LIB_MIB_WARNINGS         0</span>
+<a name="l00098" id="l00098"></a>00098 <span class="preprocessor">#define NETSNMP_DS_LIB_SECLEVEL             1</span>
+<a name="l00099" id="l00099"></a>00099 <span class="preprocessor">#define NETSNMP_DS_LIB_SNMPVERSION          2</span>
+<a name="l00100" id="l00100"></a>00100 <span class="preprocessor">#define NETSNMP_DS_LIB_DEFAULT_PORT         3</span>
+<a name="l00101" id="l00101"></a>00101 <span class="preprocessor">#define NETSNMP_DS_LIB_OID_OUTPUT_FORMAT    4</span>
+<a name="l00102" id="l00102"></a>00102 <span class=
+"preprocessor">#define NETSNMP_DS_LIB_PRINT_SUFFIX_ONLY    NETSNMP_DS_LIB_OID_OUTPUT_FORMAT</span>
+<a name="l00103" id="l00103"></a>00103 <span class="preprocessor">#define NETSNMP_DS_LIB_STRING_OUTPUT_FORMAT 5</span>
+<a name="l00104" id="l00104"></a>00104 <span class="preprocessor">#define NETSNMP_DS_LIB_HEX_OUTPUT_LENGTH    6</span>
+<a name="l00105" id="l00105"></a>00105 <span class=
+"preprocessor">#define NETSNMP_DS_LIB_SERVERSENDBUF        7 </span><span class="comment">/* send buffer (server) */</span>
+<a name="l00106" id="l00106"></a>00106 <span class=
+"preprocessor">#define NETSNMP_DS_LIB_SERVERRECVBUF        8 </span><span class="comment">/* receive buffer (server) */</span>
+<a name="l00107" id="l00107"></a>00107 <span class=
+"preprocessor">#define NETSNMP_DS_LIB_CLIENTSENDBUF        9 </span><span class="comment">/* send buffer (client) */</span>
+<a name="l00108" id="l00108"></a>00108 <span class=
+"preprocessor">#define NETSNMP_DS_LIB_CLIENTRECVBUF       10 </span><span class="comment">/* receive buffer (client) */</span>
+<a name="l00109" id="l00109"></a>00109 <span class="preprocessor">#define NETSNMP_DS_SSHDOMAIN_SOCK_PERM     11</span>
+<a name="l00110" id="l00110"></a>00110 <span class="preprocessor">#define NETSNMP_DS_SSHDOMAIN_DIR_PERM      12</span>
+<a name="l00111" id="l00111"></a>00111 <span class="preprocessor">#define NETSNMP_DS_SSHDOMAIN_SOCK_USER     12</span>
+<a name="l00112" id="l00112"></a>00112 <span class="preprocessor">#define NETSNMP_DS_SSHDOMAIN_SOCK_GROUP    13</span>
+<a name="l00113" id="l00113"></a>00113     
+<a name="l00114" id="l00114"></a>00114     <span class="comment">/*</span>
+<a name="l00115" id="l00115"></a>00115 <span class=
+"comment">     * special meanings for the default SNMP version slot (NETSNMP_DS_LIB_SNMPVERSION) </span>
+<a name="l00116" id="l00116"></a>00116 <span class="comment">     */</span>
+<a name="l00117" id="l00117"></a>00117 <span class="preprocessor">#ifndef NETSNMP_DISABLE_SNMPV1</span>
+<a name="l00118" id="l00118"></a>00118 <span class=
+"preprocessor">#define NETSNMP_DS_SNMP_VERSION_1    128        </span><span class="comment">/* bogus */</span>
+<a name="l00119" id="l00119"></a>00119 <span class="preprocessor">#endif</span>
+<a name="l00120" id="l00120"></a>00120 <span class="preprocessor">#ifndef NETSNMP_DISABLE_SNMPV2C</span>
+<a name="l00121" id="l00121"></a>00121 <span class="preprocessor">#define NETSNMP_DS_SNMP_VERSION_2c   1  </span><span class=
+"comment">/* real */</span>
+<a name="l00122" id="l00122"></a>00122 <span class="preprocessor">#endif</span>
+<a name="l00123" id="l00123"></a>00123 <span class="preprocessor">#define NETSNMP_DS_SNMP_VERSION_3    3  </span><span class=
+"comment">/* real */</span>
+<a name="l00124" id="l00124"></a>00124 
+<a name="l00125" id="l00125"></a>00125 
+<a name="l00126" id="l00126"></a>00126     <span class="comment">/*</span>
+<a name="l00127" id="l00127"></a>00127 <span class="comment">     * library strings </span>
+<a name="l00128" id="l00128"></a>00128 <span class="comment">     */</span>
+<a name="l00129" id="l00129"></a>00129 <span class="preprocessor">#define NETSNMP_DS_LIB_SECNAME           0</span>
+<a name="l00130" id="l00130"></a>00130 <span class="preprocessor">#define NETSNMP_DS_LIB_CONTEXT           1</span>
+<a name="l00131" id="l00131"></a>00131 <span class="preprocessor">#define NETSNMP_DS_LIB_PASSPHRASE        2</span>
+<a name="l00132" id="l00132"></a>00132 <span class="preprocessor">#define NETSNMP_DS_LIB_AUTHPASSPHRASE    3</span>
+<a name="l00133" id="l00133"></a>00133 <span class="preprocessor">#define NETSNMP_DS_LIB_PRIVPASSPHRASE    4</span>
+<a name="l00134" id="l00134"></a>00134 <span class="preprocessor">#define NETSNMP_DS_LIB_OPTIONALCONFIG    5</span>
+<a name="l00135" id="l00135"></a>00135 <span class="preprocessor">#define NETSNMP_DS_LIB_APPTYPE           6</span>
+<a name="l00136" id="l00136"></a>00136 <span class="preprocessor">#define NETSNMP_DS_LIB_COMMUNITY         7</span>
+<a name="l00137" id="l00137"></a>00137 <span class="preprocessor">#define NETSNMP_DS_LIB_PERSISTENT_DIR    8</span>
+<a name="l00138" id="l00138"></a>00138 <span class="preprocessor">#define NETSNMP_DS_LIB_CONFIGURATION_DIR 9</span>
+<a name="l00139" id="l00139"></a>00139 <span class="preprocessor">#define NETSNMP_DS_LIB_SECMODEL          10</span>
+<a name="l00140" id="l00140"></a>00140 <span class="preprocessor">#define NETSNMP_DS_LIB_MIBDIRS           11</span>
+<a name="l00141" id="l00141"></a>00141 <span class="preprocessor">#define NETSNMP_DS_LIB_OIDSUFFIX         12</span>
+<a name="l00142" id="l00142"></a>00142 <span class="preprocessor">#define NETSNMP_DS_LIB_OIDPREFIX         13</span>
+<a name="l00143" id="l00143"></a>00143 <span class="preprocessor">#define NETSNMP_DS_LIB_CLIENT_ADDR       14</span>
+<a name="l00144" id="l00144"></a>00144 <span class="preprocessor">#define NETSNMP_DS_LIB_TEMP_FILE_PATTERN 15</span>
+<a name="l00145" id="l00145"></a>00145 <span class="preprocessor">#define NETSNMP_DS_LIB_AUTHMASTERKEY     16</span>
+<a name="l00146" id="l00146"></a>00146 <span class="preprocessor">#define NETSNMP_DS_LIB_PRIVMASTERKEY     17</span>
+<a name="l00147" id="l00147"></a>00147 <span class="preprocessor">#define NETSNMP_DS_LIB_AUTHLOCALIZEDKEY  18</span>
+<a name="l00148" id="l00148"></a>00148 <span class="preprocessor">#define NETSNMP_DS_LIB_PRIVLOCALIZEDKEY  19</span>
+<a name="l00149" id="l00149"></a>00149 <span class="preprocessor">#define NETSNMP_DS_LIB_APPTYPES          20</span>
+<a name="l00150" id="l00150"></a>00150 <span class="preprocessor">#define NETSNMP_DS_LIB_KSM_KEYTAB        21</span>
+<a name="l00151" id="l00151"></a>00151 <span class="preprocessor">#define NETSNMP_DS_LIB_KSM_SERVICE_NAME  22</span>
+<a name="l00152" id="l00152"></a>00152 <span class="comment">/* for the client */</span>
+<a name="l00153" id="l00153"></a>00153 <span class="preprocessor">#define NETSNMP_DS_LIB_X509_CLIENT_PUB   23</span>
+<a name="l00154" id="l00154"></a>00154 <span class="preprocessor">#define NETSNMP_DS_LIB_X509_CLIENT_PRIV  24</span>
+<a name="l00155" id="l00155"></a>00155 <span class="preprocessor">#define NETSNMP_DS_LIB_X509_SERVER_CERTS 25</span>
+<a name="l00156" id="l00156"></a>00156 <span class="comment">/* for the server */</span>
+<a name="l00157" id="l00157"></a>00157 <span class="preprocessor">#define NETSNMP_DS_LIB_X509_SERVER_PUB   26</span>
+<a name="l00158" id="l00158"></a>00158 <span class="preprocessor">#define NETSNMP_DS_LIB_X509_SERVER_PRIV  27</span>
+<a name="l00159" id="l00159"></a>00159 <span class="preprocessor">#define NETSNMP_DS_LIB_X509_CLIENT_CERTS 28</span>
+<a name="l00160" id="l00160"></a>00160 <span class="preprocessor">#define NETSNMP_DS_LIB_SSHTOSNMP_SOCKET  29</span>
+<a name="l00161" id="l00161"></a>00161 
+<a name="l00162" id="l00162"></a>00162     <span class="comment">/*</span>
+<a name="l00163" id="l00163"></a>00163 <span class="comment">     * end storage definitions </span>
+<a name="l00164" id="l00164"></a>00164 <span class="comment">     */</span>
+<a name="l00165" id="l00165"></a>00165 
+<a name="l00166" id="l00166"></a>00166     <span class="keywordtype">int</span>             <a class="code" href=
+"group__default__store.html#ga1281eefe7d7f516e41f711d9289e1a06" title=
+"Stores &amp;quot;true&amp;quot; or &amp;quot;false&amp;quot; given an int value for value into netsnmp_ds_booleans[s...">netsnmp_ds_set_boolean</a>(<span class="keywordtype">int</span> storeid, <span class="keywordtype">int</span> which, <span class="keywordtype">int</span> value);
+<a name="l00167" id="l00167"></a>00167     <span class="keywordtype">int</span>             netsnmp_ds_get_boolean(<span class=
+"keywordtype">int</span> storeid, <span class="keywordtype">int</span> which);
+<a name="l00168" id="l00168"></a>00168     <span class=
+"keywordtype">int</span>             netsnmp_ds_toggle_boolean(<span class="keywordtype">int</span> storeid, <span class=
+"keywordtype">int</span> which);
+<a name="l00169" id="l00169"></a>00169     <span class="keywordtype">int</span>             netsnmp_ds_set_int(<span class=
+"keywordtype">int</span> storeid, <span class="keywordtype">int</span> which, <span class="keywordtype">int</span> value);
+<a name="l00170" id="l00170"></a>00170     <span class="keywordtype">int</span>             netsnmp_ds_get_int(<span class=
+"keywordtype">int</span> storeid, <span class="keywordtype">int</span> which);
+<a name="l00171" id="l00171"></a>00171     <span class="keywordtype">int</span>             netsnmp_ds_set_string(<span class=
+"keywordtype">int</span> storeid, <span class="keywordtype">int</span> which,
+<a name="l00172" id="l00172"></a>00172                                   <span class="keyword">const</span> <span class=
+"keywordtype">char</span> *value);
+<a name="l00173" id="l00173"></a>00173     <span class="keywordtype">char</span>           *netsnmp_ds_get_string(<span class=
+"keywordtype">int</span> storeid, <span class="keywordtype">int</span> which);
+<a name="l00174" id="l00174"></a>00174     <span class="keywordtype">int</span>             netsnmp_ds_set_void(<span class=
+"keywordtype">int</span> storeid, <span class="keywordtype">int</span> which, <span class="keywordtype">void</span> *value);
+<a name="l00175" id="l00175"></a>00175     <span class="keywordtype">void</span>           *netsnmp_ds_get_void(<span class=
+"keywordtype">int</span> storeid, <span class="keywordtype">int</span> which);
+<a name="l00176" id="l00176"></a>00176     <span class=
+"keywordtype">int</span>             netsnmp_ds_register_config(u_char type, <span class="keyword">const</span> <span class=
+"keywordtype">char</span> *ftype,
+<a name="l00177" id="l00177"></a>00177                                        <span class="keyword">const</span> <span class=
+"keywordtype">char</span> *token, <span class="keywordtype">int</span> storeid,
+<a name="l00178" id="l00178"></a>00178                                        <span class="keywordtype">int</span> which);
+<a name="l00179" id="l00179"></a>00179     <span class=
+"keywordtype">int</span>             netsnmp_ds_register_premib(u_char type, <span class="keyword">const</span> <span class=
+"keywordtype">char</span> *ftype,
+<a name="l00180" id="l00180"></a>00180                                        <span class="keyword">const</span> <span class=
+"keywordtype">char</span> *token, <span class="keywordtype">int</span> storeid,
+<a name="l00181" id="l00181"></a>00181                                        <span class="keywordtype">int</span> which);
+<a name="l00182" id="l00182"></a>00182     <span class="keywordtype">int</span>             netsnmp_ds_parse_boolean(<span class=
+"keywordtype">char</span> *line);
+<a name="l00183" id="l00183"></a>00183     <span class="keywordtype">void</span>            netsnmp_ds_shutdown(<span class=
+"keywordtype">void</span>);
+<a name="l00184" id="l00184"></a>00184 
+<a name="l00185" id="l00185"></a>00185 <span class="preprocessor">#ifdef __cplusplus</span>
+<a name="l00186" id="l00186"></a>00186 }
+<a name="l00187" id="l00187"></a>00187 <span class="preprocessor">#endif</span>
+<a name="l00188" id="l00188"></a>00188 <span class="preprocessor">#endif                          </span><span class=
+"comment">/* DEFAULT_STORE_H */</span>
+<a name="l00189" id="l00189"></a>00189 
+</pre>
+    </div>
+  </div>
+  <hr size="1" />
+
+  <address style="text-align: right;">
+    <small>Generated on 28 Sep 2009 for net-snmp by  <a href="http://www.doxygen.org/index.html"><img class="footer" src=
+    "doxygen.png" alt="doxygen" /></a> 1.6.1</small>
+<!-- CONTENT END -->
+<!--#include virtual="/page-bottom.html" -->
+

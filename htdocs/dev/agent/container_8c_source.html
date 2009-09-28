@@ -1,0 +1,746 @@
+<!--#set var="section" value="development" -->
+<!--#include virtual="/page-top.html" -->
+<!-- CONTENT START -->
+  <div class="navigation" id="top">
+    <div class="tabs">
+      <ul>
+        <li><a href="index.html"><span>Main Page</span></a></li>
+
+        <li><a href="pages.html"><span>Related Pages</span></a></li>
+
+        <li><a href="modules.html"><span>Modules</span></a></li>
+
+        <li><a href="annotated.html"><span>Data Structures</span></a></li>
+
+        <li class="current"><a href="files.html"><span>Files</span></a></li>
+
+        <li><a href="examples.html"><span>Examples</span></a></li>
+      </ul>
+    </div>
+
+    <div class="tabs">
+      <ul>
+        <li><a href="files.html"><span>File List</span></a></li>
+
+        <li><a href="globals.html"><span>Globals</span></a></li>
+      </ul>
+    </div>
+
+    <h1>container.c</h1>
+
+    <div class="fragment">
+      <pre class="fragment">
+<a name="l00001" id="l00001"></a>00001 <span class=
+"comment">/* Portions of this file are subject to the following copyright(s).  See</span>
+<a name="l00002" id="l00002"></a>00002 <span class=
+"comment"> * the Net-SNMP's COPYING file for more details and other copyrights</span>
+<a name="l00003" id="l00003"></a>00003 <span class="comment"> * that may apply:</span>
+<a name="l00004" id="l00004"></a>00004 <span class="comment"> */</span>
+<a name="l00005" id="l00005"></a>00005 <span class="comment">/*</span>
+<a name="l00006" id="l00006"></a>00006 <span class="comment"> * Portions of this file are copyrighted by:</span>
+<a name="l00007" id="l00007"></a>00007 <span class="comment"> * Copyright (C) 2007 Apple, Inc. All rights reserved.</span>
+<a name="l00008" id="l00008"></a>00008 <span class=
+"comment"> * Use is subject to license terms specified in the COPYING file</span>
+<a name="l00009" id="l00009"></a>00009 <span class="comment"> * distributed with the Net-SNMP package.</span>
+<a name="l00010" id="l00010"></a>00010 <span class="comment"> */</span>
+<a name="l00011" id="l00011"></a>00011 <span class="preprocessor">#include &lt;net-snmp/net-snmp-config.h&gt;</span>
+<a name="l00012" id="l00012"></a>00012 <span class="preprocessor">#include &lt;net-snmp/net-snmp-includes.h&gt;</span>
+<a name="l00013" id="l00013"></a>00013 <span class="preprocessor">#include &lt;net-snmp/library/container.h&gt;</span>
+<a name="l00014" id="l00014"></a>00014 <span class=
+"preprocessor">#include &lt;net-snmp/library/container_binary_array.h&gt;</span>
+<a name="l00015" id="l00015"></a>00015 <span class="preprocessor">#include &lt;net-snmp/library/container_list_ssll.h&gt;</span>
+<a name="l00016" id="l00016"></a>00016 <span class="preprocessor">#include &lt;net-snmp/library/container_null.h&gt;</span>
+<a name="l00017" id="l00017"></a>00017 
+<a name="l00021" id="l00021"></a>00021 <span class=
+"comment">/*------------------------------------------------------------------</span>
+<a name="l00022" id="l00022"></a>00022 <span class="comment"> */</span>
+<a name="l00023" id="l00023"></a>00023 <span class="keyword">static</span> <a class="code" href=
+"structnetsnmp__container__s.html">netsnmp_container</a> *containers = NULL;
+<a name="l00024" id="l00024"></a>00024 
+<a name="l00025" id="l00025"></a><a class="code" href="structcontainer__type__s.html">00025</a> <span class=
+"keyword">typedef</span> <span class="keyword">struct </span><a class="code" href=
+"structcontainer__type__s.html">container_type_s</a> {
+<a name="l00026" id="l00026"></a>00026    <span class="keyword">const</span> <span class=
+"keywordtype">char</span>                 *name;
+<a name="l00027" id="l00027"></a>00027    <a class="code" href=
+"structnetsnmp__factory__s.html">netsnmp_factory</a>            *factory;
+<a name="l00028" id="l00028"></a>00028    netsnmp_container_compare  *compare;
+<a name="l00029" id="l00029"></a>00029 } <a class="code" href="structcontainer__type__s.html">container_type</a>;
+<a name="l00030" id="l00030"></a>00030 
+<a name="l00031" id="l00031"></a>00031 <a class="code" href="structnetsnmp__factory__s.html">netsnmp_factory</a> *
+<a name="l00032" id="l00032"></a>00032 netsnmp_container_get_factory(<span class="keyword">const</span> <span class=
+"keywordtype">char</span> *type);
+<a name="l00033" id="l00033"></a>00033 
+<a name="l00034" id="l00034"></a>00034 <span class=
+"comment">/*------------------------------------------------------------------</span>
+<a name="l00035" id="l00035"></a>00035 <span class="comment"> */</span>
+<a name="l00036" id="l00036"></a>00036 <span class="keyword">static</span> <span class="keywordtype">void</span> 
+<a name="l00037" id="l00037"></a>00037 _factory_free(<span class="keywordtype">void</span> *dat, <span class=
+"keywordtype">void</span> *context)
+<a name="l00038" id="l00038"></a>00038 {
+<a name="l00039" id="l00039"></a>00039     <a class="code" href=
+"structcontainer__type__s.html">container_type</a> *data = (<a class="code" href=
+"structcontainer__type__s.html">container_type</a> *)dat;
+<a name="l00040" id="l00040"></a>00040     <span class="keywordflow">if</span> (data == NULL)
+<a name="l00041" id="l00041"></a>00041         <span class="keywordflow">return</span>;
+<a name="l00042" id="l00042"></a>00042     
+<a name="l00043" id="l00043"></a>00043     <span class="keywordflow">if</span> (data-&gt;name != NULL) {
+<a name="l00044" id="l00044"></a>00044         DEBUGMSGTL((<span class="stringliteral">"container"</span>, <span class=
+"stringliteral">"  _factory_free_list() called for %s\n"</span>,
+<a name="l00045" id="l00045"></a>00045                     data-&gt;name));
+<a name="l00046" id="l00046"></a>00046         free((<span class="keywordtype">void</span> *)data-&gt;name); <span class=
+"comment">/* SNMP_FREE wasted on object about to be freed */</span>
+<a name="l00047" id="l00047"></a>00047     }
+<a name="l00048" id="l00048"></a>00048     free(data); <span class="comment">/* SNMP_FREE wasted on param */</span>
+<a name="l00049" id="l00049"></a>00049 }
+<a name="l00050" id="l00050"></a>00050 
+<a name="l00051" id="l00051"></a>00051 <span class=
+"comment">/*------------------------------------------------------------------</span>
+<a name="l00052" id="l00052"></a>00052 <span class="comment"> */</span>
+<a name="l00053" id="l00053"></a>00053 <span class="keywordtype">void</span>
+<a name="l00054" id="l00054"></a>00054 netsnmp_container_init_list(<span class="keywordtype">void</span>)
+<a name="l00055" id="l00055"></a>00055 {
+<a name="l00056" id="l00056"></a>00056     <span class="keywordflow">if</span> (NULL != containers)
+<a name="l00057" id="l00057"></a>00057         <span class="keywordflow">return</span>;
+<a name="l00058" id="l00058"></a>00058 
+<a name="l00059" id="l00059"></a>00059     <span class="comment">/*</span>
+<a name="l00060" id="l00060"></a>00060 <span class="comment">     * create a binary arry container to hold container</span>
+<a name="l00061" id="l00061"></a>00061 <span class="comment">     * factories</span>
+<a name="l00062" id="l00062"></a>00062 <span class="comment">     */</span>
+<a name="l00063" id="l00063"></a>00063     containers = netsnmp_container_get_binary_array();
+<a name="l00064" id="l00064"></a>00064     containers-&gt;compare = netsnmp_compare_cstring;
+<a name="l00065" id="l00065"></a>00065 
+<a name="l00066" id="l00066"></a>00066     <span class="comment">/*</span>
+<a name="l00067" id="l00067"></a>00067 <span class="comment">     * register containers</span>
+<a name="l00068" id="l00068"></a>00068 <span class="comment">     */</span>
+<a name="l00069" id="l00069"></a>00069     netsnmp_container_binary_array_init();
+<a name="l00070" id="l00070"></a>00070     netsnmp_container_ssll_init();
+<a name="l00071" id="l00071"></a>00071     netsnmp_container_null_init();
+<a name="l00072" id="l00072"></a>00072 
+<a name="l00073" id="l00073"></a>00073     <span class="comment">/*</span>
+<a name="l00074" id="l00074"></a>00074 <span class="comment">     * default aliases for some containers</span>
+<a name="l00075" id="l00075"></a>00075 <span class="comment">     */</span>
+<a name="l00076" id="l00076"></a>00076     netsnmp_container_register(<span class="stringliteral">"table_container"</span>,
+<a name="l00077" id="l00077"></a>00077                                netsnmp_container_get_factory(<span class=
+"stringliteral">"binary_array"</span>));
+<a name="l00078" id="l00078"></a>00078     netsnmp_container_register(<span class="stringliteral">"linked_list"</span>,
+<a name="l00079" id="l00079"></a>00079                                netsnmp_container_get_factory(<span class=
+"stringliteral">"sorted_singly_linked_list"</span>));
+<a name="l00080" id="l00080"></a>00080     netsnmp_container_register(<span class="stringliteral">"ssll_container"</span>,
+<a name="l00081" id="l00081"></a>00081                                netsnmp_container_get_factory(<span class=
+"stringliteral">"sorted_singly_linked_list"</span>));
+<a name="l00082" id="l00082"></a>00082 
+<a name="l00083" id="l00083"></a>00083     netsnmp_container_register_with_compare
+<a name="l00084" id="l00084"></a>00084         (<span class=
+"stringliteral">"cstring"</span>, netsnmp_container_get_factory(<span class="stringliteral">"binary_array"</span>),
+<a name="l00085" id="l00085"></a>00085          netsnmp_compare_direct_cstring);
+<a name="l00086" id="l00086"></a>00086 
+<a name="l00087" id="l00087"></a>00087     netsnmp_container_register_with_compare
+<a name="l00088" id="l00088"></a>00088         (<span class=
+"stringliteral">"string"</span>, netsnmp_container_get_factory(<span class="stringliteral">"binary_array"</span>),
+<a name="l00089" id="l00089"></a>00089          netsnmp_compare_cstring);
+<a name="l00090" id="l00090"></a>00090     netsnmp_container_register_with_compare
+<a name="l00091" id="l00091"></a>00091         (<span class=
+"stringliteral">"string_binary_array"</span>, netsnmp_container_get_factory(<span class="stringliteral">"binary_array"</span>),
+<a name="l00092" id="l00092"></a>00092          netsnmp_compare_cstring);
+<a name="l00093" id="l00093"></a>00093 
+<a name="l00094" id="l00094"></a>00094 }
+<a name="l00095" id="l00095"></a>00095 
+<a name="l00096" id="l00096"></a>00096 <span class="keywordtype">void</span>
+<a name="l00097" id="l00097"></a>00097 netsnmp_container_free_list(<span class="keywordtype">void</span>)
+<a name="l00098" id="l00098"></a>00098 {
+<a name="l00099" id="l00099"></a>00099     DEBUGMSGTL((<span class="stringliteral">"container"</span>, <span class=
+"stringliteral">"netsnmp_container_free_list() called\n"</span>));
+<a name="l00100" id="l00100"></a>00100     <span class="keywordflow">if</span> (containers == NULL)
+<a name="l00101" id="l00101"></a>00101         <span class="keywordflow">return</span>;
+<a name="l00102" id="l00102"></a>00102 
+<a name="l00103" id="l00103"></a>00103     <span class="comment">/*</span>
+<a name="l00104" id="l00104"></a>00104 <span class="comment">     * free memory used by each factory entry</span>
+<a name="l00105" id="l00105"></a>00105 <span class="comment">     */</span>
+<a name="l00106" id="l00106"></a>00106     CONTAINER_FOR_EACH(containers, ((netsnmp_container_obj_func *)_factory_free), NULL);
+<a name="l00107" id="l00107"></a>00107 
+<a name="l00108" id="l00108"></a>00108     <span class="comment">/*</span>
+<a name="l00109" id="l00109"></a>00109 <span class="comment">     * free factory container</span>
+<a name="l00110" id="l00110"></a>00110 <span class="comment">     */</span>
+<a name="l00111" id="l00111"></a>00111     CONTAINER_FREE(containers);
+<a name="l00112" id="l00112"></a>00112     containers = NULL;
+<a name="l00113" id="l00113"></a>00113 }
+<a name="l00114" id="l00114"></a>00114 
+<a name="l00115" id="l00115"></a>00115 <span class="keywordtype">int</span>
+<a name="l00116" id="l00116"></a>00116 netsnmp_container_register_with_compare(<span class="keyword">const</span> <span class=
+"keywordtype">char</span>* name, <a class="code" href="structnetsnmp__factory__s.html">netsnmp_factory</a> *f,
+<a name="l00117" id="l00117"></a>00117                                         netsnmp_container_compare  *c)
+<a name="l00118" id="l00118"></a>00118 {
+<a name="l00119" id="l00119"></a>00119     <a class="code" href="structcontainer__type__s.html">container_type</a> *ct, tmp;
+<a name="l00120" id="l00120"></a>00120 
+<a name="l00121" id="l00121"></a>00121     <span class="keywordflow">if</span> (NULL==containers)
+<a name="l00122" id="l00122"></a>00122         <span class="keywordflow">return</span> -1;
+<a name="l00123" id="l00123"></a>00123 
+<a name="l00124" id="l00124"></a>00124     tmp.name = (<span class="keywordtype">char</span> *)name;
+<a name="l00125" id="l00125"></a>00125     ct = (<a class="code" href=
+"structcontainer__type__s.html">container_type</a> *)CONTAINER_FIND(containers, &amp;tmp);
+<a name="l00126" id="l00126"></a>00126     <span class="keywordflow">if</span> (NULL!=ct) {
+<a name="l00127" id="l00127"></a>00127         DEBUGMSGT((<span class="stringliteral">"container_registry"</span>,
+<a name="l00128" id="l00128"></a>00128                    <span class=
+"stringliteral">"replacing previous container factory\n"</span>));
+<a name="l00129" id="l00129"></a>00129         ct-&gt;factory = f;
+<a name="l00130" id="l00130"></a>00130     }
+<a name="l00131" id="l00131"></a>00131     <span class="keywordflow">else</span> {
+<a name="l00132" id="l00132"></a>00132         ct = <a class="code" href="group__util.html#ga9cd013bb193de5048149afeb9d94e424"
+title="Mallocs memory of sizeof(t), zeros it and returns a pointer to it.">SNMP_MALLOC_TYPEDEF</a>(<a class="code" href=
+"structcontainer__type__s.html">container_type</a>);
+<a name="l00133" id="l00133"></a>00133         <span class="keywordflow">if</span> (NULL == ct)
+<a name="l00134" id="l00134"></a>00134             <span class="keywordflow">return</span> -1;
+<a name="l00135" id="l00135"></a>00135         ct-&gt;name = strdup(name);
+<a name="l00136" id="l00136"></a>00136         ct-&gt;factory = f;
+<a name="l00137" id="l00137"></a>00137         ct-&gt;compare = c;
+<a name="l00138" id="l00138"></a>00138         CONTAINER_INSERT(containers, ct);
+<a name="l00139" id="l00139"></a>00139     }
+<a name="l00140" id="l00140"></a>00140     DEBUGMSGT((<span class="stringliteral">"container_registry"</span>, <span class=
+"stringliteral">"registered container factory %s (%s)\n"</span>,
+<a name="l00141" id="l00141"></a>00141                ct-&gt;name, f-&gt;product));
+<a name="l00142" id="l00142"></a>00142 
+<a name="l00143" id="l00143"></a>00143     <span class="keywordflow">return</span> 0;
+<a name="l00144" id="l00144"></a>00144 }
+<a name="l00145" id="l00145"></a>00145 
+<a name="l00146" id="l00146"></a>00146 <span class="keywordtype">int</span>
+<a name="l00147" id="l00147"></a>00147 netsnmp_container_register(<span class="keyword">const</span> <span class=
+"keywordtype">char</span>* name, <a class="code" href="structnetsnmp__factory__s.html">netsnmp_factory</a> *f)
+<a name="l00148" id="l00148"></a>00148 {
+<a name="l00149" id="l00149"></a>00149     <span class=
+"keywordflow">return</span> netsnmp_container_register_with_compare(name, f, NULL);
+<a name="l00150" id="l00150"></a>00150 }
+<a name="l00151" id="l00151"></a>00151 
+<a name="l00152" id="l00152"></a>00152 <span class=
+"comment">/*------------------------------------------------------------------</span>
+<a name="l00153" id="l00153"></a>00153 <span class="comment"> */</span>
+<a name="l00154" id="l00154"></a>00154 <a class="code" href="structnetsnmp__factory__s.html">netsnmp_factory</a> *
+<a name="l00155" id="l00155"></a>00155 netsnmp_container_get_factory(<span class="keyword">const</span> <span class=
+"keywordtype">char</span> *type)
+<a name="l00156" id="l00156"></a>00156 {
+<a name="l00157" id="l00157"></a>00157     <a class="code" href="structcontainer__type__s.html">container_type</a> ct, *found;
+<a name="l00158" id="l00158"></a>00158     
+<a name="l00159" id="l00159"></a>00159     <span class="keywordflow">if</span> (NULL==containers)
+<a name="l00160" id="l00160"></a>00160         <span class="keywordflow">return</span> NULL;
+<a name="l00161" id="l00161"></a>00161 
+<a name="l00162" id="l00162"></a>00162     ct.name = type;
+<a name="l00163" id="l00163"></a>00163     found = (<a class="code" href=
+"structcontainer__type__s.html">container_type</a> *)CONTAINER_FIND(containers, &amp;ct);
+<a name="l00164" id="l00164"></a>00164 
+<a name="l00165" id="l00165"></a>00165     <span class="keywordflow">return</span> found ? found-&gt;factory : NULL;
+<a name="l00166" id="l00166"></a>00166 }
+<a name="l00167" id="l00167"></a>00167 
+<a name="l00168" id="l00168"></a>00168 <a class="code" href="structnetsnmp__factory__s.html">netsnmp_factory</a> *
+<a name="l00169" id="l00169"></a>00169 netsnmp_container_find_factory(<span class="keyword">const</span> <span class=
+"keywordtype">char</span> *type_list)
+<a name="l00170" id="l00170"></a>00170 {
+<a name="l00171" id="l00171"></a>00171     <a class="code" href="structnetsnmp__factory__s.html">netsnmp_factory</a>   *f = NULL;
+<a name="l00172" id="l00172"></a>00172     <span class="keywordtype">char</span>              *list, *entry;
+<a name="l00173" id="l00173"></a>00173     <span class="keywordtype">char</span>              *st = NULL;
+<a name="l00174" id="l00174"></a>00174 
+<a name="l00175" id="l00175"></a>00175     <span class="keywordflow">if</span> (NULL==type_list)
+<a name="l00176" id="l00176"></a>00176         <span class="keywordflow">return</span> NULL;
+<a name="l00177" id="l00177"></a>00177 
+<a name="l00178" id="l00178"></a>00178     list = strdup(type_list);
+<a name="l00179" id="l00179"></a>00179     entry = strtok_r(list, <span class="stringliteral">":"</span>, &amp;st);
+<a name="l00180" id="l00180"></a>00180     <span class="keywordflow">while</span>(entry) {
+<a name="l00181" id="l00181"></a>00181         f = netsnmp_container_get_factory(entry);
+<a name="l00182" id="l00182"></a>00182         <span class="keywordflow">if</span> (NULL != f)
+<a name="l00183" id="l00183"></a>00183             <span class="keywordflow">break</span>;
+<a name="l00184" id="l00184"></a>00184         entry = strtok_r(NULL, <span class="stringliteral">":"</span>, &amp;st);
+<a name="l00185" id="l00185"></a>00185     }
+<a name="l00186" id="l00186"></a>00186 
+<a name="l00187" id="l00187"></a>00187     free(list);
+<a name="l00188" id="l00188"></a>00188     <span class="keywordflow">return</span> f;
+<a name="l00189" id="l00189"></a>00189 }
+<a name="l00190" id="l00190"></a>00190 
+<a name="l00191" id="l00191"></a>00191 <span class=
+"comment">/*------------------------------------------------------------------</span>
+<a name="l00192" id="l00192"></a>00192 <span class="comment"> */</span>
+<a name="l00193" id="l00193"></a>00193 <span class="keyword">static</span> <a class="code" href=
+"structcontainer__type__s.html">container_type</a> *
+<a name="l00194" id="l00194"></a>00194 netsnmp_container_get_ct(<span class="keyword">const</span> <span class=
+"keywordtype">char</span> *type)
+<a name="l00195" id="l00195"></a>00195 {
+<a name="l00196" id="l00196"></a>00196     <a class="code" href="structcontainer__type__s.html">container_type</a> ct;
+<a name="l00197" id="l00197"></a>00197 
+<a name="l00198" id="l00198"></a>00198     <span class="keywordflow">if</span> (NULL == containers)
+<a name="l00199" id="l00199"></a>00199         <span class="keywordflow">return</span> NULL;
+<a name="l00200" id="l00200"></a>00200     
+<a name="l00201" id="l00201"></a>00201     ct.name = type;
+<a name="l00202" id="l00202"></a>00202     <span class="keywordflow">return</span> (<a class="code" href=
+"structcontainer__type__s.html">container_type</a> *)CONTAINER_FIND(containers, &amp;ct);
+<a name="l00203" id="l00203"></a>00203 }
+<a name="l00204" id="l00204"></a>00204 
+<a name="l00205" id="l00205"></a>00205 <span class="keyword">static</span> <a class="code" href=
+"structcontainer__type__s.html">container_type</a> *
+<a name="l00206" id="l00206"></a>00206 netsnmp_container_find_ct(<span class="keyword">const</span> <span class=
+"keywordtype">char</span> *type_list)
+<a name="l00207" id="l00207"></a>00207 {
+<a name="l00208" id="l00208"></a>00208     <a class="code" href="structcontainer__type__s.html">container_type</a>    *ct = NULL;
+<a name="l00209" id="l00209"></a>00209     <span class="keywordtype">char</span>              *list, *entry;
+<a name="l00210" id="l00210"></a>00210     <span class="keywordtype">char</span>              *st = NULL;
+<a name="l00211" id="l00211"></a>00211 
+<a name="l00212" id="l00212"></a>00212     <span class="keywordflow">if</span> (NULL==type_list)
+<a name="l00213" id="l00213"></a>00213         <span class="keywordflow">return</span> NULL;
+<a name="l00214" id="l00214"></a>00214 
+<a name="l00215" id="l00215"></a>00215     list = strdup(type_list);
+<a name="l00216" id="l00216"></a>00216     entry = strtok_r(list, <span class="stringliteral">":"</span>, &amp;st);
+<a name="l00217" id="l00217"></a>00217     <span class="keywordflow">while</span>(entry) {
+<a name="l00218" id="l00218"></a>00218         ct = netsnmp_container_get_ct(entry);
+<a name="l00219" id="l00219"></a>00219         <span class="keywordflow">if</span> (NULL != ct)
+<a name="l00220" id="l00220"></a>00220             <span class="keywordflow">break</span>;
+<a name="l00221" id="l00221"></a>00221         entry = strtok_r(NULL, <span class="stringliteral">":"</span>, &amp;st);
+<a name="l00222" id="l00222"></a>00222     }
+<a name="l00223" id="l00223"></a>00223 
+<a name="l00224" id="l00224"></a>00224     free(list);
+<a name="l00225" id="l00225"></a>00225     <span class="keywordflow">return</span> ct;
+<a name="l00226" id="l00226"></a>00226 }
+<a name="l00227" id="l00227"></a>00227 
+<a name="l00228" id="l00228"></a>00228 
+<a name="l00229" id="l00229"></a>00229 
+<a name="l00230" id="l00230"></a>00230 <span class=
+"comment">/*------------------------------------------------------------------</span>
+<a name="l00231" id="l00231"></a>00231 <span class="comment"> */</span>
+<a name="l00232" id="l00232"></a>00232 <a class="code" href="structnetsnmp__container__s.html">netsnmp_container</a> *
+<a name="l00233" id="l00233"></a>00233 netsnmp_container_get(<span class="keyword">const</span> <span class=
+"keywordtype">char</span> *type)
+<a name="l00234" id="l00234"></a>00234 {
+<a name="l00235" id="l00235"></a>00235     <a class="code" href="structnetsnmp__container__s.html">netsnmp_container</a> *c;
+<a name="l00236" id="l00236"></a>00236     <a class="code" href=
+"structcontainer__type__s.html">container_type</a> *ct = netsnmp_container_get_ct(type);
+<a name="l00237" id="l00237"></a>00237     <span class="keywordflow">if</span> (ct) {
+<a name="l00238" id="l00238"></a>00238         c = (<a class="code" href=
+"structnetsnmp__container__s.html">netsnmp_container</a> *)(ct-&gt;factory-&gt;produce());
+<a name="l00239" id="l00239"></a>00239         <span class="keywordflow">if</span> (c &amp;&amp; ct-&gt;compare)
+<a name="l00240" id="l00240"></a>00240             c-&gt;compare = ct-&gt;compare;
+<a name="l00241" id="l00241"></a>00241         <span class="keywordflow">return</span> c;
+<a name="l00242" id="l00242"></a>00242     }
+<a name="l00243" id="l00243"></a>00243 
+<a name="l00244" id="l00244"></a>00244     <span class="keywordflow">return</span> NULL;
+<a name="l00245" id="l00245"></a>00245 }
+<a name="l00246" id="l00246"></a>00246 
+<a name="l00247" id="l00247"></a>00247 <span class=
+"comment">/*------------------------------------------------------------------</span>
+<a name="l00248" id="l00248"></a>00248 <span class="comment"> */</span>
+<a name="l00249" id="l00249"></a>00249 <a class="code" href="structnetsnmp__container__s.html">netsnmp_container</a> *
+<a name="l00250" id="l00250"></a>00250 netsnmp_container_find(<span class="keyword">const</span> <span class=
+"keywordtype">char</span> *type)
+<a name="l00251" id="l00251"></a>00251 {
+<a name="l00252" id="l00252"></a>00252     <a class="code" href=
+"structcontainer__type__s.html">container_type</a> *ct = netsnmp_container_find_ct(type);
+<a name="l00253" id="l00253"></a>00253     <a class="code" href=
+"structnetsnmp__container__s.html">netsnmp_container</a> *c = ct ? (<a class="code" href=
+"structnetsnmp__container__s.html">netsnmp_container</a> *)(ct-&gt;factory-&gt;produce()) : NULL;
+<a name="l00254" id="l00254"></a>00254 
+<a name="l00255" id="l00255"></a>00255     <span class="comment">/*</span>
+<a name="l00256" id="l00256"></a>00256 <span class="comment">     * provide default compare</span>
+<a name="l00257" id="l00257"></a>00257 <span class="comment">     */</span>
+<a name="l00258" id="l00258"></a>00258     <span class="keywordflow">if</span> (c) {
+<a name="l00259" id="l00259"></a>00259         <span class="keywordflow">if</span> (ct-&gt;compare)
+<a name="l00260" id="l00260"></a>00260             c-&gt;compare = ct-&gt;compare;
+<a name="l00261" id="l00261"></a>00261         <span class="keywordflow">else</span> <span class=
+"keywordflow">if</span> (NULL == c-&gt;compare)
+<a name="l00262" id="l00262"></a>00262             c-&gt;compare = netsnmp_compare_netsnmp_index;
+<a name="l00263" id="l00263"></a>00263     }
+<a name="l00264" id="l00264"></a>00264 
+<a name="l00265" id="l00265"></a>00265     <span class="keywordflow">return</span> c;
+<a name="l00266" id="l00266"></a>00266 }
+<a name="l00267" id="l00267"></a>00267 
+<a name="l00268" id="l00268"></a>00268 <span class=
+"comment">/*------------------------------------------------------------------</span>
+<a name="l00269" id="l00269"></a>00269 <span class="comment"> */</span>
+<a name="l00270" id="l00270"></a>00270 <span class="keywordtype">void</span>
+<a name="l00271" id="l00271"></a>00271 netsnmp_container_add_index(<a class="code" href=
+"structnetsnmp__container__s.html">netsnmp_container</a> *primary,
+<a name="l00272" id="l00272"></a>00272                             <a class="code" href=
+"structnetsnmp__container__s.html">netsnmp_container</a> *new_index)
+<a name="l00273" id="l00273"></a>00273 {
+<a name="l00274" id="l00274"></a>00274     <a class="code" href=
+"structnetsnmp__container__s.html">netsnmp_container</a> *curr = primary;
+<a name="l00275" id="l00275"></a>00275 
+<a name="l00276" id="l00276"></a>00276     <span class="keywordflow">if</span>((NULL == new_index) || (NULL == primary)) {
+<a name="l00277" id="l00277"></a>00277         <a class="code" href=
+"group__snmp__logging.html#ga9ba905368ea1c551b969af44b13e37c2" title=
+"This snmp logging function allows variable argument list given the specified format...">snmp_log</a>(LOG_ERR, <span class=
+"stringliteral">"add index called with null pointer\n"</span>);
+<a name="l00278" id="l00278"></a>00278         <span class="keywordflow">return</span>;
+<a name="l00279" id="l00279"></a>00279     }
+<a name="l00280" id="l00280"></a>00280 
+<a name="l00281" id="l00281"></a>00281     <span class="keywordflow">while</span>(curr-&gt;next)
+<a name="l00282" id="l00282"></a>00282         curr = curr-&gt;next;
+<a name="l00283" id="l00283"></a>00283 
+<a name="l00284" id="l00284"></a>00284     curr-&gt;next = new_index;
+<a name="l00285" id="l00285"></a>00285     new_index-&gt;prev = curr;
+<a name="l00286" id="l00286"></a>00286 }
+<a name="l00287" id="l00287"></a>00287 
+<a name="l00288" id="l00288"></a>00288 <span class="preprocessor">#ifndef NETSNMP_USE_INLINE </span><span class=
+"comment">/* default is to inline */</span>
+<a name="l00289" id="l00289"></a>00289 
+<a name="l00290" id="l00290"></a>00290 <span class=
+"comment">/*------------------------------------------------------------------</span>
+<a name="l00291" id="l00291"></a>00291 <span class="comment"> * These functions should EXACTLY match the inline version in</span>
+<a name="l00292" id="l00292"></a>00292 <span class="comment"> * container.h. If you change one, change them both.</span>
+<a name="l00293" id="l00293"></a>00293 <span class="comment"> */</span>
+<a name="l00294" id="l00294"></a>00294 <span class="keywordtype">int</span> CONTAINER_INSERT_HELPER(<a class="code" href=
+"structnetsnmp__container__s.html">netsnmp_container</a>* x, <span class="keyword">const</span> <span class=
+"keywordtype">void</span>* k)
+<a name="l00295" id="l00295"></a>00295 {
+<a name="l00296" id="l00296"></a>00296     <span class=
+"keywordflow">while</span>(x &amp;&amp; x-&gt;insert_filter &amp;&amp; x-&gt;insert_filter(x,k) == 1)
+<a name="l00297" id="l00297"></a>00297         x = x-&gt;next;
+<a name="l00298" id="l00298"></a>00298     <span class="keywordflow">if</span>(x) {
+<a name="l00299" id="l00299"></a>00299         <span class="keywordtype">int</span> rc = x-&gt;insert(x,k);
+<a name="l00300" id="l00300"></a>00300         <span class="keywordflow">if</span>(rc)
+<a name="l00301" id="l00301"></a>00301             <a class="code" href=
+"group__snmp__logging.html#ga9ba905368ea1c551b969af44b13e37c2" title=
+"This snmp logging function allows variable argument list given the specified format...">snmp_log</a>(LOG_DEBUG,<span class=
+"stringliteral">"error on subcontainer '%s' insert (%d)\n"</span>,
+<a name="l00302" id="l00302"></a>00302                      x-&gt;container_name ? x-&gt;container_name : <span class=
+"stringliteral">""</span>, rc);
+<a name="l00303" id="l00303"></a>00303         <span class="keywordflow">else</span> {
+<a name="l00304" id="l00304"></a>00304             rc = CONTAINER_INSERT_HELPER(x-&gt;next, k);
+<a name="l00305" id="l00305"></a>00305             <span class="keywordflow">if</span>(rc)
+<a name="l00306" id="l00306"></a>00306                 x-&gt;remove(x,k);
+<a name="l00307" id="l00307"></a>00307         }
+<a name="l00308" id="l00308"></a>00308         <span class="keywordflow">return</span> rc;
+<a name="l00309" id="l00309"></a>00309     }
+<a name="l00310" id="l00310"></a>00310     <span class="keywordflow">return</span> 0;
+<a name="l00311" id="l00311"></a>00311 }
+<a name="l00312" id="l00312"></a>00312 
+<a name="l00313" id="l00313"></a>00313 <span class=
+"comment">/*------------------------------------------------------------------</span>
+<a name="l00314" id="l00314"></a>00314 <span class="comment"> * These functions should EXACTLY match the inline version in</span>
+<a name="l00315" id="l00315"></a>00315 <span class="comment"> * container.h. If you change one, change them both.</span>
+<a name="l00316" id="l00316"></a>00316 <span class="comment"> */</span>
+<a name="l00317" id="l00317"></a>00317 <span class="keywordtype">int</span> CONTAINER_INSERT(<a class="code" href=
+"structnetsnmp__container__s.html">netsnmp_container</a>* x, <span class="keyword">const</span> <span class=
+"keywordtype">void</span>* k)
+<a name="l00318" id="l00318"></a>00318 {
+<a name="l00320" id="l00320"></a>00320     <span class="keywordflow">while</span>(x-&gt;prev)
+<a name="l00321" id="l00321"></a>00321         x = x-&gt;prev;
+<a name="l00322" id="l00322"></a>00322     <span class="keywordflow">return</span> CONTAINER_INSERT_HELPER(x, k);
+<a name="l00323" id="l00323"></a>00323 }
+<a name="l00324" id="l00324"></a>00324 
+<a name="l00325" id="l00325"></a>00325 <span class=
+"comment">/*------------------------------------------------------------------</span>
+<a name="l00326" id="l00326"></a>00326 <span class="comment"> * These functions should EXACTLY match the inline version in</span>
+<a name="l00327" id="l00327"></a>00327 <span class="comment"> * container.h. If you change one, change them both.</span>
+<a name="l00328" id="l00328"></a>00328 <span class="comment"> */</span>
+<a name="l00329" id="l00329"></a>00329 <span class="keywordtype">int</span> CONTAINER_REMOVE(<a class="code" href=
+"structnetsnmp__container__s.html">netsnmp_container</a> *x, <span class="keyword">const</span> <span class=
+"keywordtype">void</span> *k)
+<a name="l00330" id="l00330"></a>00330 {
+<a name="l00331" id="l00331"></a>00331     <span class="keywordtype">int</span> rc2, rc = 0;
+<a name="l00332" id="l00332"></a>00332     
+<a name="l00334" id="l00334"></a>00334     <span class="keywordflow">while</span>(x-&gt;next)
+<a name="l00335" id="l00335"></a>00335         x = x-&gt;next;
+<a name="l00336" id="l00336"></a>00336     <span class="keywordflow">while</span>(x) {
+<a name="l00337" id="l00337"></a>00337         rc2 = x-&gt;remove(x,k);
+<a name="l00339" id="l00339"></a>00339         <span class=
+"keywordflow">if</span> ((rc2) &amp;&amp; (NULL == x-&gt;insert_filter)) {
+<a name="l00340" id="l00340"></a>00340             <a class="code" href=
+"group__snmp__logging.html#ga9ba905368ea1c551b969af44b13e37c2" title=
+"This snmp logging function allows variable argument list given the specified format...">snmp_log</a>(LOG_ERR,<span class=
+"stringliteral">"error on subcontainer '%s' remove (%d)\n"</span>,
+<a name="l00341" id="l00341"></a>00341                      x-&gt;container_name ? x-&gt;container_name : <span class=
+"stringliteral">""</span>, rc2);
+<a name="l00342" id="l00342"></a>00342             rc = rc2;
+<a name="l00343" id="l00343"></a>00343         }
+<a name="l00344" id="l00344"></a>00344         x = x-&gt;prev;
+<a name="l00345" id="l00345"></a>00345         
+<a name="l00346" id="l00346"></a>00346     }
+<a name="l00347" id="l00347"></a>00347     <span class="keywordflow">return</span> rc;
+<a name="l00348" id="l00348"></a>00348 }
+<a name="l00349" id="l00349"></a>00349 
+<a name="l00350" id="l00350"></a>00350 <span class=
+"comment">/*------------------------------------------------------------------</span>
+<a name="l00351" id="l00351"></a>00351 <span class="comment"> * These functions should EXACTLY match the inline version in</span>
+<a name="l00352" id="l00352"></a>00352 <span class="comment"> * container.h. If you change one, change them both.</span>
+<a name="l00353" id="l00353"></a>00353 <span class="comment"> */</span>
+<a name="l00354" id="l00354"></a>00354 <span class="keywordtype">int</span> CONTAINER_FREE(<a class="code" href=
+"structnetsnmp__container__s.html">netsnmp_container</a> *x)
+<a name="l00355" id="l00355"></a>00355 {
+<a name="l00356" id="l00356"></a>00356     <span class="keywordtype">int</span>  rc2, rc = 0;
+<a name="l00357" id="l00357"></a>00357         
+<a name="l00359" id="l00359"></a>00359     <span class="keywordflow">while</span>(x-&gt;next)
+<a name="l00360" id="l00360"></a>00360         x = x-&gt;next;
+<a name="l00361" id="l00361"></a>00361     <span class="keywordflow">while</span>(x) {
+<a name="l00362" id="l00362"></a>00362         <a class="code" href=
+"structnetsnmp__container__s.html">netsnmp_container</a> *tmp;
+<a name="l00363" id="l00363"></a>00363         <span class="keyword">const</span> <span class="keywordtype">char</span> *name;
+<a name="l00364" id="l00364"></a>00364         tmp = x-&gt;prev;
+<a name="l00365" id="l00365"></a>00365         name = x-&gt;container_name;
+<a name="l00366" id="l00366"></a>00366         <span class="keywordflow">if</span> (NULL != x-&gt;container_name)
+<a name="l00367" id="l00367"></a>00367             <a class="code" href="group__util.html#ga951e93edb6f0ea941e26155e3f8912a6"
+title="Frees a pointer only if it is !NULL and sets its value to NULL.">SNMP_FREE</a>(x-&gt;container_name);
+<a name="l00368" id="l00368"></a>00368         rc2 = x-&gt;cfree(x);
+<a name="l00369" id="l00369"></a>00369         <span class="keywordflow">if</span> (rc2) {
+<a name="l00370" id="l00370"></a>00370             <a class="code" href=
+"group__snmp__logging.html#ga9ba905368ea1c551b969af44b13e37c2" title=
+"This snmp logging function allows variable argument list given the specified format...">snmp_log</a>(LOG_ERR,<span class=
+"stringliteral">"error on subcontainer '%s' cfree (%d)\n"</span>,
+<a name="l00371" id="l00371"></a>00371                      name ? name : <span class="stringliteral">""</span>, rc2);
+<a name="l00372" id="l00372"></a>00372             rc = rc2;
+<a name="l00373" id="l00373"></a>00373         }
+<a name="l00374" id="l00374"></a>00374         x = tmp;
+<a name="l00375" id="l00375"></a>00375     }
+<a name="l00376" id="l00376"></a>00376     <span class="keywordflow">return</span> rc;
+<a name="l00377" id="l00377"></a>00377 }
+<a name="l00378" id="l00378"></a>00378 
+<a name="l00379" id="l00379"></a>00379 <span class=
+"comment">/*------------------------------------------------------------------</span>
+<a name="l00380" id="l00380"></a>00380 <span class=
+"comment"> * These functions should EXACTLY match the function version in</span>
+<a name="l00381" id="l00381"></a>00381 <span class="comment"> * container.c. If you change one, change them both.</span>
+<a name="l00382" id="l00382"></a>00382 <span class="comment"> */</span>
+<a name="l00383" id="l00383"></a>00383 <span class="comment">/*</span>
+<a name="l00384" id="l00384"></a>00384 <span class=
+"comment"> * clear all containers. When clearing the *first* container, and</span>
+<a name="l00385" id="l00385"></a>00385 <span class=
+"comment"> * *only* the first container, call the function f for each item.</span>
+<a name="l00386" id="l00386"></a>00386 <span class=
+"comment"> * After calling this function, all containers should be empty.</span>
+<a name="l00387" id="l00387"></a>00387 <span class="comment"> */</span>
+<a name="l00388" id="l00388"></a>00388 <span class="keywordtype">void</span> CONTAINER_CLEAR(<a class="code" href=
+"structnetsnmp__container__s.html">netsnmp_container</a> *x, netsnmp_container_obj_func *f,
+<a name="l00389" id="l00389"></a>00389                     <span class="keywordtype">void</span> *c)
+<a name="l00390" id="l00390"></a>00390 {
+<a name="l00392" id="l00392"></a>00392     <span class="keywordflow">while</span>(x-&gt;next)
+<a name="l00393" id="l00393"></a>00393         x = x-&gt;next;
+<a name="l00394" id="l00394"></a>00394     <span class="keywordflow">while</span>(x-&gt;prev) {
+<a name="l00395" id="l00395"></a>00395         x-&gt;clear(x, NULL, c);
+<a name="l00396" id="l00396"></a>00396         x = x-&gt;prev;
+<a name="l00397" id="l00397"></a>00397     }
+<a name="l00398" id="l00398"></a>00398     x-&gt;clear(x, f, c);
+<a name="l00399" id="l00399"></a>00399 }
+<a name="l00400" id="l00400"></a>00400 
+<a name="l00401" id="l00401"></a>00401 <span class=
+"comment">/*------------------------------------------------------------------</span>
+<a name="l00402" id="l00402"></a>00402 <span class=
+"comment"> * These functions should EXACTLY match the function version in</span>
+<a name="l00403" id="l00403"></a>00403 <span class="comment"> * container.c. If you change one, change them both.</span>
+<a name="l00404" id="l00404"></a>00404 <span class="comment"> */</span>
+<a name="l00405" id="l00405"></a>00405 <span class="comment">/*</span>
+<a name="l00406" id="l00406"></a>00406 <span class="comment"> * Find a sub-container with the given name</span>
+<a name="l00407" id="l00407"></a>00407 <span class="comment"> */</span>
+<a name="l00408" id="l00408"></a>00408 <a class="code" href=
+"structnetsnmp__container__s.html">netsnmp_container</a> *SUBCONTAINER_FIND(<a class="code" href=
+"structnetsnmp__container__s.html">netsnmp_container</a> *x,
+<a name="l00409" id="l00409"></a>00409                                      <span class="keyword">const</span> <span class=
+"keywordtype">char</span>* name)
+<a name="l00410" id="l00410"></a>00410 {
+<a name="l00411" id="l00411"></a>00411     <span class="keywordflow">if</span> ((NULL == x) || (NULL == name))
+<a name="l00412" id="l00412"></a>00412         <span class="keywordflow">return</span> NULL;
+<a name="l00413" id="l00413"></a>00413     
+<a name="l00415" id="l00415"></a>00415     <span class="keywordflow">while</span>(x-&gt;prev)
+<a name="l00416" id="l00416"></a>00416         x = x-&gt;prev;
+<a name="l00417" id="l00417"></a>00417     <span class="keywordflow">while</span>(x) {
+<a name="l00418" id="l00418"></a>00418         <span class=
+"keywordflow">if</span> ((NULL != x-&gt;container_name) &amp;&amp; (0 == strcmp(name,x-&gt;container_name)))
+<a name="l00419" id="l00419"></a>00419             <span class="keywordflow">break</span>;
+<a name="l00420" id="l00420"></a>00420         x = x-&gt;next;
+<a name="l00421" id="l00421"></a>00421     }
+<a name="l00422" id="l00422"></a>00422     <span class="keywordflow">return</span> x;
+<a name="l00423" id="l00423"></a>00423 }
+<a name="l00424" id="l00424"></a>00424 <span class="preprocessor">#endif</span>
+<a name="l00425" id="l00425"></a>00425 
+<a name="l00426" id="l00426"></a>00426 
+<a name="l00427" id="l00427"></a>00427 <span class=
+"comment">/*------------------------------------------------------------------</span>
+<a name="l00428" id="l00428"></a>00428 <span class="comment"> */</span>
+<a name="l00429" id="l00429"></a>00429 <span class="keywordtype">void</span>
+<a name="l00430" id="l00430"></a>00430 netsnmp_init_container(<a class="code" href=
+"structnetsnmp__container__s.html">netsnmp_container</a>         *c,
+<a name="l00431" id="l00431"></a>00431                        netsnmp_container_rc      *init,
+<a name="l00432" id="l00432"></a>00432                        netsnmp_container_rc      *cfree,
+<a name="l00433" id="l00433"></a>00433                        netsnmp_container_size    *size,
+<a name="l00434" id="l00434"></a>00434                        netsnmp_container_compare *cmp,
+<a name="l00435" id="l00435"></a>00435                        netsnmp_container_op      *ins,
+<a name="l00436" id="l00436"></a>00436                        netsnmp_container_op      *rem,
+<a name="l00437" id="l00437"></a>00437                        netsnmp_container_rtn     *fnd)
+<a name="l00438" id="l00438"></a>00438 {
+<a name="l00439" id="l00439"></a>00439     <span class="keywordflow">if</span> (c == NULL)
+<a name="l00440" id="l00440"></a>00440         <span class="keywordflow">return</span>;
+<a name="l00441" id="l00441"></a>00441 
+<a name="l00442" id="l00442"></a>00442     c-&gt;init = init;
+<a name="l00443" id="l00443"></a>00443     c-&gt;cfree = cfree;
+<a name="l00444" id="l00444"></a>00444     c-&gt;get_size = size;
+<a name="l00445" id="l00445"></a>00445     c-&gt;compare = cmp;
+<a name="l00446" id="l00446"></a>00446     c-&gt;insert = ins;
+<a name="l00447" id="l00447"></a>00447     c-&gt;remove = rem;
+<a name="l00448" id="l00448"></a>00448     c-&gt;find = fnd;
+<a name="l00449" id="l00449"></a>00449 }
+<a name="l00450" id="l00450"></a>00450 
+<a name="l00451" id="l00451"></a>00451 <span class=
+"comment">/*------------------------------------------------------------------</span>
+<a name="l00452" id="l00452"></a>00452 <span class="comment"> *</span>
+<a name="l00453" id="l00453"></a>00453 <span class="comment"> * simple comparison routines</span>
+<a name="l00454" id="l00454"></a>00454 <span class="comment"> *</span>
+<a name="l00455" id="l00455"></a>00455 <span class="comment"> */</span>
+<a name="l00456" id="l00456"></a>00456 <span class="keywordtype">int</span>
+<a name="l00457" id="l00457"></a>00457 netsnmp_compare_netsnmp_index(<span class="keyword">const</span> <span class=
+"keywordtype">void</span> *lhs, <span class="keyword">const</span> <span class="keywordtype">void</span> *rhs)
+<a name="l00458" id="l00458"></a>00458 {
+<a name="l00459" id="l00459"></a>00459     <span class="keywordtype">int</span> rc;
+<a name="l00460" id="l00460"></a>00460     netsnmp_assert((NULL != lhs) &amp;&amp; (NULL != rhs));
+<a name="l00461" id="l00461"></a>00461     DEBUGIF(<span class="stringliteral">"compare:index"</span>) {
+<a name="l00462" id="l00462"></a>00462         DEBUGMSGT((<span class="stringliteral">"compare:index"</span>, <span class=
+"stringliteral">"compare "</span>));
+<a name="l00463" id="l00463"></a>00463         DEBUGMSGSUBOID((<span class="stringliteral">"compare:index"</span>, ((<span class=
+"keyword">const</span> <a class="code" href="structnetsnmp__index__s.html">netsnmp_index</a> *) lhs)-&gt;oids,
+<a name="l00464" id="l00464"></a>00464                      ((<span class="keyword">const</span> <a class="code" href=
+"structnetsnmp__index__s.html">netsnmp_index</a> *) lhs)-&gt;len));
+<a name="l00465" id="l00465"></a>00465         DEBUGMSG((<span class="stringliteral">"compare:index"</span>, <span class=
+"stringliteral">" to "</span>));
+<a name="l00466" id="l00466"></a>00466         DEBUGMSGSUBOID((<span class="stringliteral">"compare:index"</span>, ((<span class=
+"keyword">const</span> <a class="code" href="structnetsnmp__index__s.html">netsnmp_index</a> *) rhs)-&gt;oids,
+<a name="l00467" id="l00467"></a>00467                      ((<span class="keyword">const</span> <a class="code" href=
+"structnetsnmp__index__s.html">netsnmp_index</a> *) rhs)-&gt;len));
+<a name="l00468" id="l00468"></a>00468         DEBUGMSG((<span class="stringliteral">"compare:index"</span>, <span class=
+"stringliteral">"\n"</span>));
+<a name="l00469" id="l00469"></a>00469     }
+<a name="l00470" id="l00470"></a>00470     rc = <a class="code" href="group__library.html#gab5b48a42c19a801547e025ed40b4561e"
+title="lexicographical compare two object identifiers.">snmp_oid_compare</a>(((<span class="keyword">const</span> <a class="code"
+href="structnetsnmp__index__s.html">netsnmp_index</a> *) lhs)-&gt;oids,
+<a name="l00471" id="l00471"></a>00471                           ((<span class="keyword">const</span> <a class="code" href=
+"structnetsnmp__index__s.html">netsnmp_index</a> *) lhs)-&gt;len,
+<a name="l00472" id="l00472"></a>00472                           ((<span class="keyword">const</span> <a class="code" href=
+"structnetsnmp__index__s.html">netsnmp_index</a> *) rhs)-&gt;oids,
+<a name="l00473" id="l00473"></a>00473                           ((<span class="keyword">const</span> <a class="code" href=
+"structnetsnmp__index__s.html">netsnmp_index</a> *) rhs)-&gt;len);
+<a name="l00474" id="l00474"></a>00474     DEBUGMSGT((<span class="stringliteral">"compare:index"</span>, <span class=
+"stringliteral">"result was %d\n"</span>, rc));
+<a name="l00475" id="l00475"></a>00475     <span class="keywordflow">return</span> rc;
+<a name="l00476" id="l00476"></a>00476 }
+<a name="l00477" id="l00477"></a>00477 
+<a name="l00478" id="l00478"></a>00478 <span class="keywordtype">int</span>
+<a name="l00479" id="l00479"></a>00479 netsnmp_ncompare_netsnmp_index(<span class="keyword">const</span> <span class=
+"keywordtype">void</span> *lhs, <span class="keyword">const</span> <span class="keywordtype">void</span> *rhs)
+<a name="l00480" id="l00480"></a>00480 {
+<a name="l00481" id="l00481"></a>00481     <span class="keywordtype">int</span> rc;
+<a name="l00482" id="l00482"></a>00482     netsnmp_assert((NULL != lhs) &amp;&amp; (NULL != rhs));
+<a name="l00483" id="l00483"></a>00483     DEBUGIF(<span class="stringliteral">"compare:index"</span>) {
+<a name="l00484" id="l00484"></a>00484         DEBUGMSGT((<span class="stringliteral">"compare:index"</span>, <span class=
+"stringliteral">"compare "</span>));
+<a name="l00485" id="l00485"></a>00485         DEBUGMSGSUBOID((<span class="stringliteral">"compare:index"</span>, ((<span class=
+"keyword">const</span> <a class="code" href="structnetsnmp__index__s.html">netsnmp_index</a> *) lhs)-&gt;oids,
+<a name="l00486" id="l00486"></a>00486                      ((<span class="keyword">const</span> <a class="code" href=
+"structnetsnmp__index__s.html">netsnmp_index</a> *) lhs)-&gt;len));
+<a name="l00487" id="l00487"></a>00487         DEBUGMSG((<span class="stringliteral">"compare:index"</span>, <span class=
+"stringliteral">" to "</span>));
+<a name="l00488" id="l00488"></a>00488         DEBUGMSGSUBOID((<span class="stringliteral">"compare:index"</span>, ((<span class=
+"keyword">const</span> <a class="code" href="structnetsnmp__index__s.html">netsnmp_index</a> *) rhs)-&gt;oids,
+<a name="l00489" id="l00489"></a>00489                      ((<span class="keyword">const</span> <a class="code" href=
+"structnetsnmp__index__s.html">netsnmp_index</a> *) rhs)-&gt;len));
+<a name="l00490" id="l00490"></a>00490         DEBUGMSG((<span class="stringliteral">"compare:index"</span>, <span class=
+"stringliteral">"\n"</span>));
+<a name="l00491" id="l00491"></a>00491     }
+<a name="l00492" id="l00492"></a>00492     rc = snmp_oid_ncompare(((<span class="keyword">const</span> <a class="code" href=
+"structnetsnmp__index__s.html">netsnmp_index</a> *) lhs)-&gt;oids,
+<a name="l00493" id="l00493"></a>00493                            ((<span class="keyword">const</span> <a class="code" href=
+"structnetsnmp__index__s.html">netsnmp_index</a> *) lhs)-&gt;len,
+<a name="l00494" id="l00494"></a>00494                            ((<span class="keyword">const</span> <a class="code" href=
+"structnetsnmp__index__s.html">netsnmp_index</a> *) rhs)-&gt;oids,
+<a name="l00495" id="l00495"></a>00495                            ((<span class="keyword">const</span> <a class="code" href=
+"structnetsnmp__index__s.html">netsnmp_index</a> *) rhs)-&gt;len,
+<a name="l00496" id="l00496"></a>00496                            ((<span class="keyword">const</span> <a class="code" href=
+"structnetsnmp__index__s.html">netsnmp_index</a> *) rhs)-&gt;len);
+<a name="l00497" id="l00497"></a>00497     DEBUGMSGT((<span class="stringliteral">"compare:index"</span>, <span class=
+"stringliteral">"result was %d\n"</span>, rc));
+<a name="l00498" id="l00498"></a>00498     <span class="keywordflow">return</span> rc;
+<a name="l00499" id="l00499"></a>00499 }
+<a name="l00500" id="l00500"></a>00500 
+<a name="l00501" id="l00501"></a>00501 <span class="keywordtype">int</span>
+<a name="l00502" id="l00502"></a>00502 netsnmp_compare_cstring(<span class="keyword">const</span> <span class=
+"keywordtype">void</span> * lhs, <span class="keyword">const</span> <span class="keywordtype">void</span> * rhs)
+<a name="l00503" id="l00503"></a>00503 {
+<a name="l00504" id="l00504"></a>00504     <span class="keywordflow">return</span> strcmp(((<span class=
+"keyword">const</span> <a class="code" href="structcontainer__type__s.html">container_type</a>*)lhs)-&gt;name,
+<a name="l00505" id="l00505"></a>00505                   ((<span class="keyword">const</span> <a class="code" href=
+"structcontainer__type__s.html">container_type</a>*)rhs)-&gt;name);
+<a name="l00506" id="l00506"></a>00506 }
+<a name="l00507" id="l00507"></a>00507 
+<a name="l00508" id="l00508"></a>00508 <span class="keywordtype">int</span>
+<a name="l00509" id="l00509"></a>00509 netsnmp_ncompare_cstring(<span class="keyword">const</span> <span class=
+"keywordtype">void</span> * lhs, <span class="keyword">const</span> <span class="keywordtype">void</span> * rhs)
+<a name="l00510" id="l00510"></a>00510 {
+<a name="l00511" id="l00511"></a>00511     <span class="keywordflow">return</span> strncmp(((<span class=
+"keyword">const</span> <a class="code" href="structcontainer__type__s.html">container_type</a>*)lhs)-&gt;name,
+<a name="l00512" id="l00512"></a>00512                    ((<span class="keyword">const</span> <a class="code" href=
+"structcontainer__type__s.html">container_type</a>*)rhs)-&gt;name,
+<a name="l00513" id="l00513"></a>00513                    strlen(((<span class="keyword">const</span> <a class="code" href=
+"structcontainer__type__s.html">container_type</a>*)rhs)-&gt;name));
+<a name="l00514" id="l00514"></a>00514 }
+<a name="l00515" id="l00515"></a>00515 
+<a name="l00516" id="l00516"></a>00516 <span class="keywordtype">int</span>
+<a name="l00517" id="l00517"></a>00517 netsnmp_compare_direct_cstring(<span class="keyword">const</span> <span class=
+"keywordtype">void</span> * lhs, <span class="keyword">const</span> <span class="keywordtype">void</span> * rhs)
+<a name="l00518" id="l00518"></a>00518 {
+<a name="l00519" id="l00519"></a>00519     <span class="keywordflow">return</span> strcmp((<span class=
+"keyword">const</span> <span class="keywordtype">char</span>*)lhs, (<span class="keyword">const</span> <span class=
+"keywordtype">char</span>*)rhs);
+<a name="l00520" id="l00520"></a>00520 }
+<a name="l00521" id="l00521"></a>00521 
+<a name="l00522" id="l00522"></a>00522 <span class="comment">/*</span>
+<a name="l00523" id="l00523"></a>00523 <span class="comment"> * compare two memory buffers</span>
+<a name="l00524" id="l00524"></a>00524 <span class="comment"> *</span>
+<a name="l00525" id="l00525"></a>00525 <span class=
+"comment"> * since snmp strings aren't NULL terminated, we can't use strcmp. So</span>
+<a name="l00526" id="l00526"></a>00526 <span class=
+"comment"> * compare up to the length of the smaller, and then use length to</span>
+<a name="l00527" id="l00527"></a>00527 <span class="comment"> * break any ties.</span>
+<a name="l00528" id="l00528"></a>00528 <span class="comment"> */</span>
+<a name="l00529" id="l00529"></a>00529 <span class="keywordtype">int</span>
+<a name="l00530" id="l00530"></a>00530 netsnmp_compare_mem(<span class="keyword">const</span> <span class=
+"keywordtype">char</span> * lhs, <span class="keywordtype">size_t</span> lhs_len,
+<a name="l00531" id="l00531"></a>00531                     <span class="keyword">const</span> <span class=
+"keywordtype">char</span> * rhs, <span class="keywordtype">size_t</span> rhs_len)
+<a name="l00532" id="l00532"></a>00532 {
+<a name="l00533" id="l00533"></a>00533     <span class="keywordtype">int</span> rc, min = <a class="code" href=
+"group__util.html#gad1976dec11cfd62abaa4ecedad948f18" title="Computers the minimum of a and b.">SNMP_MIN</a>(lhs_len, rhs_len);
+<a name="l00534" id="l00534"></a>00534 
+<a name="l00535" id="l00535"></a>00535     rc = memcmp(lhs, rhs, min);
+<a name="l00536" id="l00536"></a>00536     <span class="keywordflow">if</span>((rc==0) &amp;&amp; (lhs_len != rhs_len)) {
+<a name="l00537" id="l00537"></a>00537         <span class="keywordflow">if</span>(lhs_len &lt; rhs_len)
+<a name="l00538" id="l00538"></a>00538             rc = -1;
+<a name="l00539" id="l00539"></a>00539         <span class="keywordflow">else</span>
+<a name="l00540" id="l00540"></a>00540             rc = 1;
+<a name="l00541" id="l00541"></a>00541     }
+<a name="l00542" id="l00542"></a>00542 
+<a name="l00543" id="l00543"></a>00543     <span class="keywordflow">return</span> rc;
+<a name="l00544" id="l00544"></a>00544 }
+<a name="l00545" id="l00545"></a>00545 
+<a name="l00546" id="l00546"></a>00546 <span class=
+"comment">/*------------------------------------------------------------------</span>
+<a name="l00547" id="l00547"></a>00547 <span class="comment"> * netsnmp_container_simple_free</span>
+<a name="l00548" id="l00548"></a>00548 <span class="comment"> *</span>
+<a name="l00549" id="l00549"></a>00549 <span class=
+"comment"> * useful function to pass to CONTAINER_FOR_EACH, when a simple</span>
+<a name="l00550" id="l00550"></a>00550 <span class="comment"> * free is needed for every item.</span>
+<a name="l00551" id="l00551"></a>00551 <span class="comment"> */</span>
+<a name="l00552" id="l00552"></a>00552 <span class="keywordtype">void</span> 
+<a name="l00553" id="l00553"></a>00553 netsnmp_container_simple_free(<span class="keywordtype">void</span> *data, <span class=
+"keywordtype">void</span> *context)
+<a name="l00554" id="l00554"></a>00554 {
+<a name="l00555" id="l00555"></a>00555     <span class="keywordflow">if</span> (data == NULL)
+<a name="l00556" id="l00556"></a>00556         <span class="keywordflow">return</span>;
+<a name="l00557" id="l00557"></a>00557     
+<a name="l00558" id="l00558"></a>00558     DEBUGMSGTL((<span class="stringliteral">"verbose:container"</span>,
+<a name="l00559" id="l00559"></a>00559                 <span class=
+"stringliteral">"netsnmp_container_simple_free) called for %p/%p\n"</span>,
+<a name="l00560" id="l00560"></a>00560                 data, context));
+<a name="l00561" id="l00561"></a>00561     free((<span class="keywordtype">void</span>*)data); <span class=
+"comment">/* SNMP_FREE wasted on param */</span>
+<a name="l00562" id="l00562"></a>00562 }
+</pre>
+    </div>
+  </div>
+  <hr size="1" />
+
+  <address style="text-align: right;">
+    <small>Generated on 28 Sep 2009 for net-snmp by  <a href="http://www.doxygen.org/index.html"><img class="footer" src=
+    "doxygen.png" alt="doxygen" /></a> 1.6.1</small>
+<!-- CONTENT END -->
+<!--#include virtual="/page-bottom.html" -->
+

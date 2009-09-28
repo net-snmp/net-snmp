@@ -1,0 +1,88 @@
+<!--#set var="section" value="development" -->
+<!--#include virtual="/page-top.html" -->
+<!-- CONTENT START -->
+  <div class="navigation" id="top">
+    <div class="tabs">
+      <ul>
+        <li><a href="index.html"><span>Main Page</span></a></li>
+
+        <li><a href="pages.html"><span>Related Pages</span></a></li>
+
+        <li><a href="modules.html"><span>Modules</span></a></li>
+
+        <li><a href="annotated.html"><span>Data Structures</span></a></li>
+
+        <li class="current"><a href="files.html"><span>Files</span></a></li>
+
+        <li><a href="examples.html"><span>Examples</span></a></li>
+      </ul>
+    </div>
+
+    <div class="tabs">
+      <ul>
+        <li><a href="files.html"><span>File List</span></a></li>
+
+        <li><a href="globals.html"><span>Globals</span></a></li>
+      </ul>
+    </div>
+
+    <h1>scalar_group.h</h1>
+
+    <div class="fragment">
+      <pre class="fragment">
+<a name="l00001" id="l00001"></a>00001 <span class="comment">/*</span>
+<a name="l00002" id="l00002"></a>00002 <span class="comment"> * scalar.h </span>
+<a name="l00003" id="l00003"></a>00003 <span class="comment"> */</span>
+<a name="l00004" id="l00004"></a>00004 <span class="preprocessor">#ifndef NETSNMP_SCALAR_GROUP_H</span>
+<a name="l00005" id="l00005"></a>00005 <span class="preprocessor">#define NETSNMP_SCALAR_GROUP_H</span>
+<a name="l00006" id="l00006"></a>00006 
+<a name="l00007" id="l00007"></a>00007 <span class="preprocessor">#ifdef __cplusplus</span>
+<a name="l00008" id="l00008"></a>00008 <span class="keyword">extern</span> <span class="stringliteral">"C"</span> {
+<a name="l00009" id="l00009"></a>00009 <span class="preprocessor">#endif</span>
+<a name="l00010" id="l00010"></a>00010 
+<a name="l00011" id="l00011"></a>00011 <span class="comment">/*</span>
+<a name="l00012" id="l00012"></a>00012 <span class=
+"comment"> * The scalar group helper is designed to implement a group of</span>
+<a name="l00013" id="l00013"></a>00013 <span class="comment"> * scalar objects all in one go, making use of the scalar and</span>
+<a name="l00014" id="l00014"></a>00014 <span class="comment"> * instance helpers.</span>
+<a name="l00015" id="l00015"></a>00015 <span class="comment"> *</span>
+<a name="l00016" id="l00016"></a>00016 <span class=
+"comment"> * GETNEXTs are auto-converted to a GET.  Non-valid GETs are dropped.</span>
+<a name="l00017" id="l00017"></a>00017 <span class=
+"comment"> * The client-provided handler just needs to check the OID name to</span>
+<a name="l00018" id="l00018"></a>00018 <span class=
+"comment"> * see which object is being requested, but can otherwise assume that</span>
+<a name="l00019" id="l00019"></a>00019 <span class="comment"> * things are fine.</span>
+<a name="l00020" id="l00020"></a>00020 <span class="comment"> */</span>
+<a name="l00021" id="l00021"></a>00021 
+<a name="l00022" id="l00022"></a><a class="code" href="structnetsnmp__scalar__group__s.html">00022</a> <span class=
+"keyword">typedef</span> <span class="keyword">struct </span><a class="code" href=
+"structnetsnmp__scalar__group__s.html">netsnmp_scalar_group_s</a> {
+<a name="l00023" id="l00023"></a>00023     oid lbound;         <span class=
+"comment">/* XXX - or do we need a more flexible arrangement? */</span>
+<a name="l00024" id="l00024"></a>00024     oid ubound;
+<a name="l00025" id="l00025"></a>00025 } <a class="code" href="structnetsnmp__scalar__group__s.html">netsnmp_scalar_group</a>;
+<a name="l00026" id="l00026"></a>00026 
+<a name="l00027" id="l00027"></a>00027 <span class="keywordtype">int</span> netsnmp_register_scalar_group(<a class="code" href=
+"structnetsnmp__handler__registration__s.html" title="Root registration info.">netsnmp_handler_registration</a> *reginfo,
+<a name="l00028" id="l00028"></a>00028                                   oid first, oid last);
+<a name="l00029" id="l00029"></a>00029 <a class="code" href="structnetsnmp__mib__handler__s.html" title=
+"the mib handler structure to be registered">netsnmp_mib_handler</a> *netsnmp_get_scalar_group_handler(oid first, oid last);
+<a name="l00030" id="l00030"></a>00030 Netsnmp_Node_Handler netsnmp_scalar_group_helper_handler;
+<a name="l00031" id="l00031"></a>00031 
+<a name="l00032" id="l00032"></a>00032 <span class="preprocessor">#ifdef __cplusplus</span>
+<a name="l00033" id="l00033"></a>00033 }
+<a name="l00034" id="l00034"></a>00034 <span class="preprocessor">#endif</span>
+<a name="l00035" id="l00035"></a>00035 
+<a name="l00036" id="l00036"></a>00036 <span class="preprocessor">#endif </span>
+</pre>
+    </div>
+  </div>
+  <hr size="1" />
+
+  <address style="text-align: right;">
+    <small>Generated on 28 Sep 2009 for net-snmp by  <a href="http://www.doxygen.org/index.html"><img class="footer" src=
+    "doxygen.png" alt="doxygen" /></a> 1.6.1</small>
+<!-- CONTENT END -->
+<!--#include virtual="/page-bottom.html" -->
+

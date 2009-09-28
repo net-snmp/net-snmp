@@ -1,0 +1,278 @@
+<!--#set var="section" value="development" -->
+<!--#include virtual="/page-top.html" -->
+<!-- CONTENT START -->
+  <div class="navigation" id="top">
+    <div class="tabs">
+      <ul>
+        <li><a href="index.html"><span>Main Page</span></a></li>
+
+        <li><a href="pages.html"><span>Related Pages</span></a></li>
+
+        <li><a href="modules.html"><span>Modules</span></a></li>
+
+        <li class="current"><a href="annotated.html"><span>Data Structures</span></a></li>
+
+        <li><a href="files.html"><span>Files</span></a></li>
+
+        <li><a href="examples.html"><span>Examples</span></a></li>
+      </ul>
+    </div>
+
+    <div class="tabs">
+      <ul>
+        <li><a href="annotated.html"><span>Data Structures</span></a></li>
+
+        <li><a href="functions.html"><span>Data Fields</span></a></li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="contents">
+    <h1>netsnmp_monitor_callback_header_s Struct Reference</h1><!-- doxytag: class="netsnmp_monitor_callback_header_s" -->
+
+    <p>callback header <a href="#_details">More...</a></p>
+
+    <p><code>#include &lt;<a class="el" href="object__monitor_8h_source.html">object_monitor.h</a>&gt;</code></p>
+
+    <table border="0" cellpadding="0" cellspacing="0">
+      <tr>
+        <td colspan="2">
+          <h2>Data Fields</h2>
+        </td>
+      </tr>
+
+      <tr>
+        <td class="memItemLeft" align="right" valign="top">unsigned int </td>
+
+        <td class="memItemRight" valign="bottom"><a class="el" href=
+        "structnetsnmp__monitor__callback__header__s.html#a3daae8cbf244063183e029e71b63405d">event</a></td>
+      </tr>
+
+      <tr>
+        <td class="mdescLeft"> </td>
+
+        <td class="mdescRight">callback type <a href="#a3daae8cbf244063183e029e71b63405d"></a><br /></td>
+      </tr>
+
+      <tr>
+        <td class="memItemLeft" align="right" valign="top"><a class="el" href=
+        "structnetsnmp__index__s.html">netsnmp_index</a> </td>
+
+        <td class="memItemRight" valign="bottom"><a class="el" href=
+        "structnetsnmp__monitor__callback__header__s.html#aa7142ca955b52c07f05a094c533800a8">monitored_object</a></td>
+      </tr>
+
+      <tr>
+        <td class="mdescLeft"> </td>
+
+        <td class="mdescRight">registered oid <a href="#aa7142ca955b52c07f05a094c533800a8"></a><br /></td>
+      </tr>
+
+      <tr>
+        <td class="memItemLeft" align="right" valign="top">int </td>
+
+        <td class="memItemRight" valign="bottom"><a class="el" href=
+        "structnetsnmp__monitor__callback__header__s.html#a0400bb85c44da2b56cab2134c5585294">priority</a></td>
+      </tr>
+
+      <tr>
+        <td class="mdescLeft"> </td>
+
+        <td class="mdescRight">priority <a href="#a0400bb85c44da2b56cab2134c5585294"></a><br /></td>
+      </tr>
+
+      <tr>
+        <td class="memItemLeft" align="right" valign="top">void * </td>
+
+        <td class="memItemRight" valign="bottom"><a class="el" href=
+        "structnetsnmp__monitor__callback__header__s.html#a1a9b341f2f09c59f1e5e3e969e35c5f6">watcher_data</a></td>
+      </tr>
+
+      <tr>
+        <td class="mdescLeft"> </td>
+
+        <td class="mdescRight">pointer given by watcher at registration <a href=
+        "#a1a9b341f2f09c59f1e5e3e969e35c5f6"></a><br /></td>
+      </tr>
+
+      <tr>
+        <td class="memItemLeft" align="right" valign="top">void * </td>
+
+        <td class="memItemRight" valign="bottom"><a class="el" href=
+        "structnetsnmp__monitor__callback__header__s.html#aa386ef0eb972bcbf9bce74ef53dc26e4">object_info</a></td>
+      </tr>
+
+      <tr>
+        <td class="mdescLeft"> </td>
+
+        <td class="mdescRight">pointer passed from the monitored object <a href=
+        "#aa386ef0eb972bcbf9bce74ef53dc26e4"></a><br /></td>
+      </tr>
+
+      <tr>
+        <td class="memItemLeft" align="right" valign="top">struct<br class="typebreak" />
+        <a class="el" href="structnetsnmp__monitor__callback__header__s.html">netsnmp_monitor_callback_header_s</a> * </td>
+
+        <td class="memItemRight" valign="bottom"><a class="el" href=
+        "structnetsnmp__monitor__callback__header__s.html#a9084d1ff64e289486d476a01a4d00686">private</a></td>
+      </tr>
+
+      <tr>
+        <td class="mdescLeft"> </td>
+
+        <td class="mdescRight">DO NOT USE, INTERNAL USE ONLY. <a href="#a9084d1ff64e289486d476a01a4d00686"></a><br /></td>
+      </tr>
+
+      <tr>
+        <td class="memItemLeft" align="right" valign="top"><a class="anchor" id="af08564a7f132310f782153241b76fee2" name=
+        "af08564a7f132310f782153241b76fee2"></a>
+        <!-- doxytag: member="netsnmp_monitor_callback_header_s::refs" ref="af08564a7f132310f782153241b76fee2" args="" -->
+        int </td>
+
+        <td class="memItemRight" valign="bottom"><b>refs</b></td>
+      </tr>
+    </table>
+    <hr />
+    <a name="_details"></a>
+
+    <h2>Detailed Description</h2>
+
+    <p>callback header</p>
+
+    <p>Definition at line <a class="el" href="object__monitor_8h_source.html#l00064">64</a> of file <a class="el" href=
+    "object__monitor_8h_source.html">object_monitor.h</a>.</p>
+    <hr />
+
+    <h2>Field Documentation</h2><a class="anchor" id="a3daae8cbf244063183e029e71b63405d" name=
+    "a3daae8cbf244063183e029e71b63405d"></a>
+    <!-- doxytag: member="netsnmp_monitor_callback_header_s::event" ref="a3daae8cbf244063183e029e71b63405d" args="" -->
+
+    <div class="memitem">
+      <div class="memproto">
+        <table class="memname">
+          <tr>
+            <td class="memname">unsigned int <a class="el" href=
+            "structnetsnmp__monitor__callback__header__s.html#a3daae8cbf244063183e029e71b63405d">netsnmp_monitor_callback_header_s::event</a></td>
+          </tr>
+        </table>
+      </div>
+
+      <div class="memdoc">
+        <p>callback type</p>
+
+        <p>Definition at line <a class="el" href="object__monitor_8h_source.html#l00067">67</a> of file <a class="el" href=
+        "object__monitor_8h_source.html">object_monitor.h</a>.</p>
+      </div>
+    </div><a class="anchor" id="aa7142ca955b52c07f05a094c533800a8" name="aa7142ca955b52c07f05a094c533800a8"></a>
+    <!-- doxytag: member="netsnmp_monitor_callback_header_s::monitored_object" ref="aa7142ca955b52c07f05a094c533800a8" args="" -->
+
+    <div class="memitem">
+      <div class="memproto">
+        <table class="memname">
+          <tr>
+            <td class="memname"><a class="el" href="structnetsnmp__index__s.html">netsnmp_index</a> <a class="el" href=
+            "structnetsnmp__monitor__callback__header__s.html#aa7142ca955b52c07f05a094c533800a8">netsnmp_monitor_callback_header_s::monitored_object</a></td>
+          </tr>
+        </table>
+      </div>
+
+      <div class="memdoc">
+        <p>registered oid</p>
+
+        <p>Definition at line <a class="el" href="object__monitor_8h_source.html#l00070">70</a> of file <a class="el" href=
+        "object__monitor_8h_source.html">object_monitor.h</a>.</p>
+      </div>
+    </div><a class="anchor" id="aa386ef0eb972bcbf9bce74ef53dc26e4" name="aa386ef0eb972bcbf9bce74ef53dc26e4"></a>
+    <!-- doxytag: member="netsnmp_monitor_callback_header_s::object_info" ref="aa386ef0eb972bcbf9bce74ef53dc26e4" args="" -->
+
+    <div class="memitem">
+      <div class="memproto">
+        <table class="memname">
+          <tr>
+            <td class="memname">void* <a class="el" href=
+            "structnetsnmp__monitor__callback__header__s.html#aa386ef0eb972bcbf9bce74ef53dc26e4">netsnmp_monitor_callback_header_s::object_info</a></td>
+          </tr>
+        </table>
+      </div>
+
+      <div class="memdoc">
+        <p>pointer passed from the monitored object</p>
+
+        <p>Definition at line <a class="el" href="object__monitor_8h_source.html#l00079">79</a> of file <a class="el" href=
+        "object__monitor_8h_source.html">object_monitor.h</a>.</p>
+      </div>
+    </div><a class="anchor" id="a0400bb85c44da2b56cab2134c5585294" name="a0400bb85c44da2b56cab2134c5585294"></a>
+    <!-- doxytag: member="netsnmp_monitor_callback_header_s::priority" ref="a0400bb85c44da2b56cab2134c5585294" args="" -->
+
+    <div class="memitem">
+      <div class="memproto">
+        <table class="memname">
+          <tr>
+            <td class="memname">int <a class="el" href=
+            "structnetsnmp__monitor__callback__header__s.html#a0400bb85c44da2b56cab2134c5585294">netsnmp_monitor_callback_header_s::priority</a></td>
+          </tr>
+        </table>
+      </div>
+
+      <div class="memdoc">
+        <p>priority</p>
+
+        <p>Definition at line <a class="el" href="object__monitor_8h_source.html#l00073">73</a> of file <a class="el" href=
+        "object__monitor_8h_source.html">object_monitor.h</a>.</p>
+      </div>
+    </div><a class="anchor" id="a9084d1ff64e289486d476a01a4d00686" name="a9084d1ff64e289486d476a01a4d00686"></a>
+    <!-- doxytag: member="netsnmp_monitor_callback_header_s::private" ref="a9084d1ff64e289486d476a01a4d00686" args="" -->
+
+    <div class="memitem">
+      <div class="memproto">
+        <table class="memname">
+          <tr>
+            <td class="memname">struct <a class="el" href=
+            "structnetsnmp__monitor__callback__header__s.html">netsnmp_monitor_callback_header_s</a>* <a class="el" href=
+            "structnetsnmp__monitor__callback__header__s.html#a9084d1ff64e289486d476a01a4d00686">netsnmp_monitor_callback_header_s::private</a>
+            <code>[read]</code></td>
+          </tr>
+        </table>
+      </div>
+
+      <div class="memdoc">
+        <p>DO NOT USE, INTERNAL USE ONLY.</p>
+
+        <p>Definition at line <a class="el" href="object__monitor_8h_source.html#l00082">82</a> of file <a class="el" href=
+        "object__monitor_8h_source.html">object_monitor.h</a>.</p>
+      </div>
+    </div><a class="anchor" id="a1a9b341f2f09c59f1e5e3e969e35c5f6" name="a1a9b341f2f09c59f1e5e3e969e35c5f6"></a>
+    <!-- doxytag: member="netsnmp_monitor_callback_header_s::watcher_data" ref="a1a9b341f2f09c59f1e5e3e969e35c5f6" args="" -->
+
+    <div class="memitem">
+      <div class="memproto">
+        <table class="memname">
+          <tr>
+            <td class="memname">void* <a class="el" href=
+            "structnetsnmp__monitor__callback__header__s.html#a1a9b341f2f09c59f1e5e3e969e35c5f6">netsnmp_monitor_callback_header_s::watcher_data</a></td>
+          </tr>
+        </table>
+      </div>
+
+      <div class="memdoc">
+        <p>pointer given by watcher at registration</p>
+
+        <p>Definition at line <a class="el" href="object__monitor_8h_source.html#l00076">76</a> of file <a class="el" href=
+        "object__monitor_8h_source.html">object_monitor.h</a>.</p>
+      </div>
+    </div>
+    <hr />
+    The documentation for this struct was generated from the following file:
+
+    <ul>
+      <li><a class="el" href="object__monitor_8h_source.html">object_monitor.h</a></li>
+    </ul>
+  </div>
+  <hr size="1" />
+
+  <address style="text-align: right;">
+    <small>Generated on 28 Sep 2009 for net-snmp by  <a href="http://www.doxygen.org/index.html"><img class="footer" src=
+    "doxygen.png" alt="doxygen" /></a> 1.6.1</small>
+<!-- CONTENT END -->
+<!--#include virtual="/page-bottom.html" -->
+

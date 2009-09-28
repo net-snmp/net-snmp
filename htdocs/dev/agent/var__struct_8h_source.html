@@ -1,0 +1,218 @@
+<!--#set var="section" value="development" -->
+<!--#include virtual="/page-top.html" -->
+<!-- CONTENT START -->
+  <div class="navigation" id="top">
+    <div class="tabs">
+      <ul>
+        <li><a href="index.html"><span>Main Page</span></a></li>
+
+        <li><a href="pages.html"><span>Related Pages</span></a></li>
+
+        <li><a href="modules.html"><span>Modules</span></a></li>
+
+        <li><a href="annotated.html"><span>Data Structures</span></a></li>
+
+        <li class="current"><a href="files.html"><span>Files</span></a></li>
+
+        <li><a href="examples.html"><span>Examples</span></a></li>
+      </ul>
+    </div>
+
+    <div class="tabs">
+      <ul>
+        <li><a href="files.html"><span>File List</span></a></li>
+
+        <li><a href="globals.html"><span>Globals</span></a></li>
+      </ul>
+    </div>
+
+    <h1>var_struct.h</h1>
+
+    <div class="fragment">
+      <pre class="fragment">
+<a name="l00001" id="l00001"></a>00001 <span class="preprocessor">#ifndef VAR_STRUCT_H</span>
+<a name="l00002" id="l00002"></a>00002 <span class="preprocessor">#define VAR_STRUCT_H</span>
+<a name="l00003" id="l00003"></a>00003 <span class="comment">/*</span>
+<a name="l00004" id="l00004"></a>00004 <span class=
+"comment"> * The subtree structure contains a subtree prefix which applies to</span>
+<a name="l00005" id="l00005"></a>00005 <span class="comment"> * all variables in the associated variable list.</span>
+<a name="l00006" id="l00006"></a>00006 <span class="comment"> *</span>
+<a name="l00007" id="l00007"></a>00007 <span class="comment"> * By converting to a tree of subtree structures, entries can</span>
+<a name="l00008" id="l00008"></a>00008 <span class="comment"> * now be subtrees of another subtree in the structure. i.e:</span>
+<a name="l00009" id="l00009"></a>00009 <span class="comment"> * 1.2</span>
+<a name="l00010" id="l00010"></a>00010 <span class="comment"> * 1.2.0</span>
+<a name="l00011" id="l00011"></a>00011 <span class="comment"> */</span>
+<a name="l00012" id="l00012"></a>00012 
+<a name="l00013" id="l00013"></a>00013 <span class="preprocessor">#define UCD_REGISTRY_OID_MAX_LEN        128</span>
+<a name="l00014" id="l00014"></a>00014 
+<a name="l00015" id="l00015"></a>00015 <span class="comment">/*</span>
+<a name="l00016" id="l00016"></a>00016 <span class="comment"> * subtree flags </span>
+<a name="l00017" id="l00017"></a>00017 <span class="comment"> */</span>
+<a name="l00018" id="l00018"></a>00018 <span class="preprocessor">#define FULLY_QUALIFIED_INSTANCE    0x01</span>
+<a name="l00019" id="l00019"></a>00019 <span class="preprocessor">#define SUBTREE_ATTACHED                0x02</span>
+<a name="l00020" id="l00020"></a>00020 
+<a name="l00021" id="l00021"></a><a class="code" href="structnetsnmp__subtree__s.html">00021</a> <span class=
+"keyword">typedef</span> <span class="keyword">struct </span><a class="code" href=
+"structnetsnmp__subtree__s.html">netsnmp_subtree_s</a> {
+<a name="l00022" id="l00022"></a>00022     oid            *name_a;     <span class=
+"comment">/* objid prefix of registered subtree */</span>
+<a name="l00023" id="l00023"></a>00023     u_char          namelen;    <span class=
+"comment">/* number of subid's in name above */</span>
+<a name="l00024" id="l00024"></a>00024     oid            *start_a;    <span class=
+"comment">/* objid of start of covered range */</span>
+<a name="l00025" id="l00025"></a>00025     u_char          start_len;  <span class=
+"comment">/* number of subid's in start name */</span>
+<a name="l00026" id="l00026"></a>00026     oid            *end_a;      <span class=
+"comment">/* objid of end of covered range   */</span>
+<a name="l00027" id="l00027"></a>00027     u_char          end_len;    <span class=
+"comment">/* number of subid's in end name */</span>
+<a name="l00028" id="l00028"></a>00028     <span class="keyword">struct </span><a class="code" href=
+"structvariable.html">variable</a> *variables; <span class="comment">/* pointer to variables array */</span>
+<a name="l00029" id="l00029"></a>00029     <span class="keywordtype">int</span>             variables_len;      <span class=
+"comment">/* number of entries in above array */</span>
+<a name="l00030" id="l00030"></a>00030     <span class="keywordtype">int</span>             variables_width;    <span class=
+"comment">/* sizeof each variable entry */</span>
+<a name="l00031" id="l00031"></a>00031     <span class="keywordtype">char</span>           *label_a;    <span class=
+"comment">/* calling module's label */</span>
+<a name="l00032" id="l00032"></a>00032     <a class="code" href="structsnmp__session.html" title=
+"The snmp session structure.">netsnmp_session</a> *session;
+<a name="l00033" id="l00033"></a>00033     u_char          flags;
+<a name="l00034" id="l00034"></a>00034     u_char          priority;
+<a name="l00035" id="l00035"></a>00035     <span class="keywordtype">int</span>             timeout;
+<a name="l00036" id="l00036"></a>00036     <span class="keyword">struct </span><a class="code" href=
+"structnetsnmp__subtree__s.html">netsnmp_subtree_s</a> *next;       <span class="comment">/* List of 'sibling' subtrees */</span>
+<a name="l00037" id="l00037"></a>00037     <span class="keyword">struct </span><a class="code" href=
+"structnetsnmp__subtree__s.html">netsnmp_subtree_s</a> *prev;       <span class="comment">/* (doubly-linked list) */</span>
+<a name="l00038" id="l00038"></a>00038     <span class="keyword">struct </span><a class="code" href=
+"structnetsnmp__subtree__s.html">netsnmp_subtree_s</a> *children;   <span class="comment">/* List of 'child' subtrees */</span>
+<a name="l00039" id="l00039"></a>00039     <span class="keywordtype">int</span>             range_subid;
+<a name="l00040" id="l00040"></a>00040     oid             range_ubound;
+<a name="l00041" id="l00041"></a>00041     <a class="code" href="structnetsnmp__handler__registration__s.html" title=
+"Root registration info.">netsnmp_handler_registration</a> *reginfo;      <span class="comment">/* new API */</span>
+<a name="l00042" id="l00042"></a>00042     <span class="keywordtype">int</span>             cacheid;
+<a name="l00043" id="l00043"></a>00043     <span class="keywordtype">int</span>             global_cacheid;
+<a name="l00044" id="l00044"></a>00044     <span class="keywordtype">size_t</span>          oid_off;
+<a name="l00045" id="l00045"></a>00045 } <a class="code" href="structnetsnmp__subtree__s.html">netsnmp_subtree</a>;
+<a name="l00046" id="l00046"></a>00046 
+<a name="l00047" id="l00047"></a>00047 <span class="comment">/*</span>
+<a name="l00048" id="l00048"></a>00048 <span class=
+"comment"> * This is a new variable structure that doesn't have as much memory</span>
+<a name="l00049" id="l00049"></a>00049 <span class=
+"comment"> * tied up in the object identifier.  It's elements have also been re-arranged</span>
+<a name="l00050" id="l00050"></a>00050 <span class=
+"comment"> * so that the name field can be variable length.  Any number of these</span>
+<a name="l00051" id="l00051"></a>00051 <span class=
+"comment"> * structures can be created with lengths tailor made to a particular</span>
+<a name="l00052" id="l00052"></a>00052 <span class=
+"comment"> * application.  The first 5 elements of the structure must remain constant.</span>
+<a name="l00053" id="l00053"></a>00053 <span class="comment"> */</span>
+<a name="l00054" id="l00054"></a><a class="code" href="structvariable1.html">00054</a> <span class=
+"keyword">struct </span><a class="code" href="structvariable1.html">variable1</a> {
+<a name="l00055" id="l00055"></a>00055     u_char          magic;      <span class=
+"comment">/* passed to function as a hint */</span>
+<a name="l00056" id="l00056"></a>00056     u_char          type;       <span class="comment">/* type of variable */</span>
+<a name="l00057" id="l00057"></a>00057     u_short         acl;        <span class=
+"comment">/* access control list for variable */</span>
+<a name="l00058" id="l00058"></a>00058     FindVarMethod  *findVar;    <span class=
+"comment">/* function that finds variable */</span>
+<a name="l00059" id="l00059"></a>00059     u_char          namelen;    <span class="comment">/* length of name below */</span>
+<a name="l00060" id="l00060"></a>00060     oid             name[1];    <span class=
+"comment">/* object identifier of variable */</span>
+<a name="l00061" id="l00061"></a>00061 };
+<a name="l00062" id="l00062"></a>00062 
+<a name="l00063" id="l00063"></a><a class="code" href="structvariable2.html">00063</a> <span class=
+"keyword">struct </span><a class="code" href="structvariable2.html">variable2</a> {
+<a name="l00064" id="l00064"></a>00064     u_char          magic;      <span class=
+"comment">/* passed to function as a hint */</span>
+<a name="l00065" id="l00065"></a>00065     u_char          type;       <span class="comment">/* type of variable */</span>
+<a name="l00066" id="l00066"></a>00066     u_short         acl;        <span class=
+"comment">/* access control list for variable */</span>
+<a name="l00067" id="l00067"></a>00067     FindVarMethod  *findVar;    <span class=
+"comment">/* function that finds variable */</span>
+<a name="l00068" id="l00068"></a>00068     u_char          namelen;    <span class="comment">/* length of name below */</span>
+<a name="l00069" id="l00069"></a>00069     oid             name[2];    <span class=
+"comment">/* object identifier of variable */</span>
+<a name="l00070" id="l00070"></a>00070 };
+<a name="l00071" id="l00071"></a>00071 
+<a name="l00072" id="l00072"></a><a class="code" href="structvariable3.html">00072</a> <span class=
+"keyword">struct </span><a class="code" href="structvariable3.html">variable3</a> {
+<a name="l00073" id="l00073"></a>00073     u_char          magic;      <span class=
+"comment">/* passed to function as a hint */</span>
+<a name="l00074" id="l00074"></a>00074     u_char          type;       <span class="comment">/* type of variable */</span>
+<a name="l00075" id="l00075"></a>00075     u_short         acl;        <span class=
+"comment">/* access control list for variable */</span>
+<a name="l00076" id="l00076"></a>00076     FindVarMethod  *findVar;    <span class=
+"comment">/* function that finds variable */</span>
+<a name="l00077" id="l00077"></a>00077     u_char          namelen;    <span class="comment">/* length of name below */</span>
+<a name="l00078" id="l00078"></a>00078     oid             name[3];    <span class=
+"comment">/* object identifier of variable */</span>
+<a name="l00079" id="l00079"></a>00079 };
+<a name="l00080" id="l00080"></a>00080 
+<a name="l00081" id="l00081"></a><a class="code" href="structvariable4.html">00081</a> <span class=
+"keyword">struct </span><a class="code" href="structvariable4.html">variable4</a> {
+<a name="l00082" id="l00082"></a>00082     u_char          magic;      <span class=
+"comment">/* passed to function as a hint */</span>
+<a name="l00083" id="l00083"></a>00083     u_char          type;       <span class="comment">/* type of variable */</span>
+<a name="l00084" id="l00084"></a>00084     u_short         acl;        <span class=
+"comment">/* access control list for variable */</span>
+<a name="l00085" id="l00085"></a>00085     FindVarMethod  *findVar;    <span class=
+"comment">/* function that finds variable */</span>
+<a name="l00086" id="l00086"></a>00086     u_char          namelen;    <span class="comment">/* length of name below */</span>
+<a name="l00087" id="l00087"></a>00087     oid             name[4];    <span class=
+"comment">/* object identifier of variable */</span>
+<a name="l00088" id="l00088"></a>00088 };
+<a name="l00089" id="l00089"></a>00089 
+<a name="l00090" id="l00090"></a><a class="code" href="structvariable7.html">00090</a> <span class=
+"keyword">struct </span><a class="code" href="structvariable7.html">variable7</a> {
+<a name="l00091" id="l00091"></a>00091     u_char          magic;      <span class=
+"comment">/* passed to function as a hint */</span>
+<a name="l00092" id="l00092"></a>00092     u_char          type;       <span class="comment">/* type of variable */</span>
+<a name="l00093" id="l00093"></a>00093     u_short         acl;        <span class=
+"comment">/* access control list for variable */</span>
+<a name="l00094" id="l00094"></a>00094     FindVarMethod  *findVar;    <span class=
+"comment">/* function that finds variable */</span>
+<a name="l00095" id="l00095"></a>00095     u_char          namelen;    <span class="comment">/* length of name below */</span>
+<a name="l00096" id="l00096"></a>00096     oid             name[7];    <span class=
+"comment">/* object identifier of variable */</span>
+<a name="l00097" id="l00097"></a>00097 };
+<a name="l00098" id="l00098"></a>00098 
+<a name="l00099" id="l00099"></a><a class="code" href="structvariable8.html">00099</a> <span class=
+"keyword">struct </span><a class="code" href="structvariable8.html">variable8</a> {
+<a name="l00100" id="l00100"></a>00100     u_char          magic;      <span class=
+"comment">/* passed to function as a hint */</span>
+<a name="l00101" id="l00101"></a>00101     u_char          type;       <span class="comment">/* type of variable */</span>
+<a name="l00102" id="l00102"></a>00102     u_short         acl;        <span class=
+"comment">/* access control list for variable */</span>
+<a name="l00103" id="l00103"></a>00103     FindVarMethod  *findVar;    <span class=
+"comment">/* function that finds variable */</span>
+<a name="l00104" id="l00104"></a>00104     u_char          namelen;    <span class="comment">/* length of name below */</span>
+<a name="l00105" id="l00105"></a>00105     oid             name[8];    <span class=
+"comment">/* object identifier of variable */</span>
+<a name="l00106" id="l00106"></a>00106 };
+<a name="l00107" id="l00107"></a>00107 
+<a name="l00108" id="l00108"></a><a class="code" href="structvariable13.html">00108</a> <span class=
+"keyword">struct </span><a class="code" href="structvariable13.html">variable13</a> {
+<a name="l00109" id="l00109"></a>00109     u_char          magic;      <span class=
+"comment">/* passed to function as a hint */</span>
+<a name="l00110" id="l00110"></a>00110     u_char          type;       <span class="comment">/* type of variable */</span>
+<a name="l00111" id="l00111"></a>00111     u_short         acl;        <span class=
+"comment">/* access control list for variable */</span>
+<a name="l00112" id="l00112"></a>00112     FindVarMethod  *findVar;    <span class=
+"comment">/* function that finds variable */</span>
+<a name="l00113" id="l00113"></a>00113     u_char          namelen;    <span class="comment">/* length of name below */</span>
+<a name="l00114" id="l00114"></a>00114     oid             name[13];   <span class=
+"comment">/* object identifier of variable */</span>
+<a name="l00115" id="l00115"></a>00115 };
+<a name="l00116" id="l00116"></a>00116 <span class="preprocessor">#endif                          </span><span class=
+"comment">/* VAR_STRUCT_H */</span>
+</pre>
+    </div>
+  </div>
+  <hr size="1" />
+
+  <address style="text-align: right;">
+    <small>Generated on 28 Sep 2009 for net-snmp by  <a href="http://www.doxygen.org/index.html"><img class="footer" src=
+    "doxygen.png" alt="doxygen" /></a> 1.6.1</small>
+<!-- CONTENT END -->
+<!--#include virtual="/page-bottom.html" -->
+

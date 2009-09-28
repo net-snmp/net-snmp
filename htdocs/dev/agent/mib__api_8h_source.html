@@ -1,0 +1,166 @@
+<!--#set var="section" value="development" -->
+<!--#include virtual="/page-top.html" -->
+<!-- CONTENT START -->
+  <div class="navigation" id="top">
+    <div class="tabs">
+      <ul>
+        <li><a href="index.html"><span>Main Page</span></a></li>
+
+        <li><a href="pages.html"><span>Related Pages</span></a></li>
+
+        <li><a href="modules.html"><span>Modules</span></a></li>
+
+        <li><a href="annotated.html"><span>Data Structures</span></a></li>
+
+        <li class="current"><a href="files.html"><span>Files</span></a></li>
+
+        <li><a href="examples.html"><span>Examples</span></a></li>
+      </ul>
+    </div>
+
+    <div class="tabs">
+      <ul>
+        <li><a href="files.html"><span>File List</span></a></li>
+
+        <li><a href="globals.html"><span>Globals</span></a></li>
+      </ul>
+    </div>
+
+    <h1>mib_api.h</h1>
+
+    <div class="fragment">
+      <pre class="fragment">
+<a name="l00001" id="l00001"></a>00001 <span class="preprocessor">#ifndef NET_SNMP_MIB_API_H</span>
+<a name="l00002" id="l00002"></a>00002 <span class="preprocessor">#define NET_SNMP_MIB_API_H</span>
+<a name="l00003" id="l00003"></a>00003 
+<a name="l00008" id="l00008"></a>00008 <span class="preprocessor">#include &lt;net-snmp/types.h&gt;</span>
+<a name="l00009" id="l00009"></a>00009 
+<a name="l00010" id="l00010"></a>00010 <span class="preprocessor">#ifdef __cplusplus</span>
+<a name="l00011" id="l00011"></a>00011 <span class="keyword">extern</span>          <span class="stringliteral">"C"</span> {
+<a name="l00012" id="l00012"></a>00012 <span class="preprocessor">#endif</span>
+<a name="l00013" id="l00013"></a>00013 
+<a name="l00014" id="l00014"></a>00014     <span class="comment">/* Initialisation and Shutdown */</span>
+<a name="l00015" id="l00015"></a>00015     <span class="keywordtype">void</span>            <a class="code" href=
+"group__mib__utilities.html#gae4976578d871e017d0deffd30afff243" title=
+"Initialises the mib reader.">netsnmp_init_mib</a>(<span class="keywordtype">void</span>);
+<a name="l00016" id="l00016"></a>00016 <span class="preprocessor">#ifndef NETSNMP_NO_LEGACY_DEFINITIONS</span>
+<a name="l00017" id="l00017"></a>00017     <span class="keywordtype">void</span>            init_mib(<span class=
+"keywordtype">void</span>);
+<a name="l00018" id="l00018"></a>00018     <span class="keywordtype">void</span>            init_mib_internals(<span class=
+"keywordtype">void</span>);
+<a name="l00019" id="l00019"></a>00019 <span class="preprocessor">#endif</span>
+<a name="l00020" id="l00020"></a>00020     <span class="keywordtype">void</span>            <a class="code" href=
+"group__mib__utilities.html#ga547cc885aaf7bab97893eef9d0c40486" title="Unloads all mibs.">shutdown_mib</a>(<span class=
+"keywordtype">void</span>);
+<a name="l00021" id="l00021"></a>00021 
+<a name="l00022" id="l00022"></a>00022      <span class="comment">/* Reading and Parsing MIBs */</span>
+<a name="l00023" id="l00023"></a>00023     <span class="keywordtype">int</span>             add_mibdir(<span class=
+"keyword">const</span> <span class="keywordtype">char</span> *);
+<a name="l00024" id="l00024"></a>00024     <span class="keyword">struct </span><a class="code" href=
+"structtree.html">tree</a>    *netsnmp_read_module(<span class="keyword">const</span> <span class="keywordtype">char</span> *);
+<a name="l00025" id="l00025"></a>00025 <span class="preprocessor">#ifndef NETSNMP_NO_LEGACY_DEFINITIONS</span>
+<a name="l00026" id="l00026"></a>00026     <span class="keyword">struct </span><a class="code" href=
+"structtree.html">tree</a>    *read_module(<span class="keyword">const</span> <span class="keywordtype">char</span> *);
+<a name="l00027" id="l00027"></a>00027 <span class="preprocessor">#endif</span>
+<a name="l00028" id="l00028"></a>00028     <span class="keyword">struct </span><a class="code" href=
+"structtree.html">tree</a>    *read_mib(<span class="keyword">const</span> <span class="keywordtype">char</span> *);
+<a name="l00029" id="l00029"></a>00029     <span class="keyword">struct </span><a class="code" href=
+"structtree.html">tree</a>    *read_all_mibs(<span class="keywordtype">void</span>);
+<a name="l00030" id="l00030"></a>00030     <span class="keywordtype">void</span>            add_module_replacement(<span class=
+"keyword">const</span> <span class="keywordtype">char</span> *, <span class="keyword">const</span> <span class=
+"keywordtype">char</span> *,
+<a name="l00031" id="l00031"></a>00031                                            <span class="keyword">const</span> <span class=
+"keywordtype">char</span> *, <span class="keywordtype">int</span>);
+<a name="l00032" id="l00032"></a>00032 
+<a name="l00033" id="l00033"></a>00033          <span class="comment">/* from ucd-compat.h */</span>
+<a name="l00034" id="l00034"></a>00034     <span class="keywordtype">void</span>            snmp_set_mib_warnings(<span class=
+"keywordtype">int</span>);
+<a name="l00035" id="l00035"></a>00035     <span class="keywordtype">void</span>            snmp_set_mib_errors(<span class=
+"keywordtype">int</span>);
+<a name="l00036" id="l00036"></a>00036     <span class=
+"keywordtype">void</span>            snmp_set_save_descriptions(<span class="keywordtype">int</span>);
+<a name="l00037" id="l00037"></a>00037 
+<a name="l00038" id="l00038"></a>00038 
+<a name="l00039" id="l00039"></a>00039      <span class="comment">/* Searching the MIB Tree */</span>
+<a name="l00040" id="l00040"></a>00040     oid            *<a class="code" href=
+"group__mib__utilities.html#gacc48b7be12a42c7c4e388e8775c60557" title=
+"Given a string, parses an oid out of it (if possible).">snmp_parse_oid</a>(<span class="keyword">const</span> <span class=
+"keywordtype">char</span> *, oid *, <span class="keywordtype">size_t</span> *);
+<a name="l00041" id="l00041"></a>00041     <span class="keywordtype">int</span>             <a class="code" href=
+"group__mib__utilities.html#ga1e4e5be57e55313a6c2bd2aabc065966" title=
+"Reads an object identifier from an input string into internal OID form.">read_objid</a>(<span class=
+"keyword">const</span> <span class="keywordtype">char</span> *, oid *, <span class="keywordtype">size_t</span> *);
+<a name="l00042" id="l00042"></a>00042     <span class="keywordtype">int</span>             get_module_node(<span class=
+"keyword">const</span> <span class="keywordtype">char</span> *, <span class="keyword">const</span> <span class=
+"keywordtype">char</span> *, oid *, <span class="keywordtype">size_t</span> *);
+<a name="l00043" id="l00043"></a>00043 
+<a name="l00044" id="l00044"></a>00044      <span class="comment">/* Output */</span>
+<a name="l00045" id="l00045"></a>00045     <span class="keywordtype">void</span>            <a class="code" href=
+"group__mib__utilities.html#ga7b129eb1cbb37274d4acb14fbc45c004" title="Prints the MIBs to the file fp.">print_mib</a>(FILE * fp);
+<a name="l00046" id="l00046"></a>00046 
+<a name="l00047" id="l00047"></a>00047     <span class="keywordtype">void</span>            <a class="code" href=
+"group__mib__utilities.html#gad14430381d06c229a4fb13ca94bdca66" title="Prints an oid to stdout.">print_objid</a>(<span class=
+"keyword">const</span> oid * objid, <span class="keywordtype">size_t</span> objidlen);
+<a name="l00048" id="l00048"></a>00048     <span class="keywordtype">void</span>           <a class="code" href=
+"group__mib__utilities.html#ga736eaa6bfa15535aff702a2ae14f3727" title=
+"Prints an oid to a file descriptor.">fprint_objid</a>(FILE * fp,
+<a name="l00049" id="l00049"></a>00049                                 <span class=
+"keyword">const</span> oid * objid, <span class="keywordtype">size_t</span> objidlen);
+<a name="l00050" id="l00050"></a>00050     <span class="keywordtype">int</span>           snprint_objid(<span class=
+"keywordtype">char</span> *buf, <span class="keywordtype">size_t</span> buf_len,
+<a name="l00051" id="l00051"></a>00051                                 <span class=
+"keyword">const</span> oid * objid, <span class="keywordtype">size_t</span> objidlen);
+<a name="l00052" id="l00052"></a>00052 
+<a name="l00053" id="l00053"></a>00053     <span class="keywordtype">void</span>            <a class="code" href=
+"group__mib__utilities.html#ga3ad2e46fc532f09e1fd97c06b9c5f0b0" title=
+"Prints on oid description on stdout.">print_description</a>(oid * objid, <span class=
+"keywordtype">size_t</span> objidlen, <span class="keywordtype">int</span> width);
+<a name="l00054" id="l00054"></a>00054     <span class="keywordtype">void</span>           <a class="code" href=
+"group__mib__utilities.html#gaeef53f656646fe9c5cb8d8986cdfe53d" title=
+"Prints on oid description into a file descriptor.">fprint_description</a>(FILE * fp,
+<a name="l00055" id="l00055"></a>00055                                 oid * objid, <span class=
+"keywordtype">size_t</span> objidlen, <span class="keywordtype">int</span> width);
+<a name="l00056" id="l00056"></a>00056     <span class="keywordtype">int</span>           snprint_description(<span class=
+"keywordtype">char</span> *buf, <span class="keywordtype">size_t</span> buf_len,
+<a name="l00057" id="l00057"></a>00057                                 oid * objid, <span class=
+"keywordtype">size_t</span> objidlen, <span class="keywordtype">int</span> width);
+<a name="l00058" id="l00058"></a>00058 
+<a name="l00059" id="l00059"></a>00059 <span class="preprocessor">#ifdef __cplusplus</span>
+<a name="l00060" id="l00060"></a>00060 }
+<a name="l00061" id="l00061"></a>00061 <span class="preprocessor">#endif</span>
+<a name="l00062" id="l00062"></a>00062 
+<a name="l00063" id="l00063"></a>00063     <span class="comment">/*</span>
+<a name="l00064" id="l00064"></a>00064 <span class="comment">     *  For the initial release, this will just refer to the</span>
+<a name="l00065" id="l00065"></a>00065 <span class="comment">     *  relevant UCD header files.</span>
+<a name="l00066" id="l00066"></a>00066 <span class=
+"comment">     *    In due course, the routines relevant to this area of the</span>
+<a name="l00067" id="l00067"></a>00067 <span class="comment">     *  API will be identified, and listed here directly.</span>
+<a name="l00068" id="l00068"></a>00068 <span class="comment">     *</span>
+<a name="l00069" id="l00069"></a>00069 <span class=
+"comment">     *  But for the time being, this header file is a placeholder,</span>
+<a name="l00070" id="l00070"></a>00070 <span class=
+"comment">     *  to allow application writers to adopt the new header file names.</span>
+<a name="l00071" id="l00071"></a>00071 <span class="comment">     */</span>
+<a name="l00072" id="l00072"></a>00072 
+<a name="l00073" id="l00073"></a>00073 <span class="preprocessor">#include &lt;net-snmp/library/snmp_api.h&gt;</span>
+<a name="l00074" id="l00074"></a>00074 <span class="preprocessor">#include &lt;net-snmp/library/mib.h&gt;</span>
+<a name="l00075" id="l00075"></a>00075 <span class="preprocessor">#ifndef NETSNMP_DISABLE_MIB_LOADING</span>
+<a name="l00076" id="l00076"></a>00076 <span class="preprocessor">#include &lt;net-snmp/library/parse.h&gt;</span>
+<a name="l00077" id="l00077"></a>00077 <span class="preprocessor">#endif</span>
+<a name="l00078" id="l00078"></a>00078 <span class="preprocessor">#include &lt;net-snmp/library/callback.h&gt;</span>
+<a name="l00079" id="l00079"></a>00079 <span class="preprocessor">#include &lt;net-snmp/library/oid_stash.h&gt;</span>
+<a name="l00080" id="l00080"></a>00080 <span class="preprocessor">#include &lt;net-snmp/library/ucd_compat.h&gt;</span>
+<a name="l00081" id="l00081"></a>00081 
+<a name="l00082" id="l00082"></a>00082 <span class="preprocessor">#endif                          </span><span class=
+"comment">/* NET_SNMP_MIB_API_H */</span>
+</pre>
+    </div>
+  </div>
+  <hr size="1" />
+
+  <address style="text-align: right;">
+    <small>Generated on 28 Sep 2009 for net-snmp by  <a href="http://www.doxygen.org/index.html"><img class="footer" src=
+    "doxygen.png" alt="doxygen" /></a> 1.6.1</small>
+<!-- CONTENT END -->
+<!--#include virtual="/page-bottom.html" -->
+

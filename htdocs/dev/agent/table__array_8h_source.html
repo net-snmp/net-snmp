@@ -1,0 +1,261 @@
+<!--#set var="section" value="development" -->
+<!--#include virtual="/page-top.html" -->
+<!-- CONTENT START -->
+  <div class="navigation" id="top">
+    <div class="tabs">
+      <ul>
+        <li><a href="index.html"><span>Main Page</span></a></li>
+
+        <li><a href="pages.html"><span>Related Pages</span></a></li>
+
+        <li><a href="modules.html"><span>Modules</span></a></li>
+
+        <li><a href="annotated.html"><span>Data Structures</span></a></li>
+
+        <li class="current"><a href="files.html"><span>Files</span></a></li>
+
+        <li><a href="examples.html"><span>Examples</span></a></li>
+      </ul>
+    </div>
+
+    <div class="tabs">
+      <ul>
+        <li><a href="files.html"><span>File List</span></a></li>
+
+        <li><a href="globals.html"><span>Globals</span></a></li>
+      </ul>
+    </div>
+
+    <h1>table_array.h</h1>
+
+    <div class="fragment">
+      <pre class="fragment">
+<a name="l00001" id="l00001"></a>00001 <span class="comment">/*</span>
+<a name="l00002" id="l00002"></a>00002 <span class="comment"> * table_array.h</span>
+<a name="l00003" id="l00003"></a>00003 <span class="comment"> * $Id: table_array.h 12757 2005-09-12 15:24:16Z dts12 $</span>
+<a name="l00004" id="l00004"></a>00004 <span class="comment"> */</span>
+<a name="l00005" id="l00005"></a>00005 <span class="preprocessor">#ifndef _TABLE_ARRAY_HANDLER_H_</span>
+<a name="l00006" id="l00006"></a>00006 <span class="preprocessor">#define _TABLE_ARRAY_HANDLER_H_</span>
+<a name="l00007" id="l00007"></a>00007 
+<a name="l00008" id="l00008"></a>00008 <span class="preprocessor">#ifdef __cplusplus</span>
+<a name="l00009" id="l00009"></a>00009 <span class="keyword">extern</span>          <span class="stringliteral">"C"</span> {
+<a name="l00010" id="l00010"></a>00010 <span class="preprocessor">#endif</span>
+<a name="l00011" id="l00011"></a>00011 
+<a name="l00012" id="l00012"></a>00012     <span class="comment">/*</span>
+<a name="l00013" id="l00013"></a>00013 <span class=
+"comment">     * The table array helper is designed to simplify the task of</span>
+<a name="l00014" id="l00014"></a>00014 <span class=
+"comment">     * writing a table handler for the net-snmp agent when the data being</span>
+<a name="l00015" id="l00015"></a>00015 <span class=
+"comment">     * accessed is in an oid sorted form and must be accessed externally.</span>
+<a name="l00016" id="l00016"></a>00016 <span class="comment">     * </span>
+<a name="l00017" id="l00017"></a>00017 <span class="comment">     * Functionally, it is a specialized version of the more</span>
+<a name="l00018" id="l00018"></a>00018 <span class=
+"comment">     * generic table helper but easies the burden of GETNEXT processing by</span>
+<a name="l00019" id="l00019"></a>00019 <span class="comment">     * retrieving the appropriate row for ead index through</span>
+<a name="l00020" id="l00020"></a>00020 <span class=
+"comment">     * function calls which should be supplied by the module that wishes</span>
+<a name="l00021" id="l00021"></a>00021 <span class=
+"comment">     * help.  The module the table_array helps should, afterwards,</span>
+<a name="l00022" id="l00022"></a>00022 <span class=
+"comment">     * never be called for the case of "MODE_GETNEXT" and only for the GET</span>
+<a name="l00023" id="l00023"></a>00023 <span class="comment">     * and SET related modes instead.</span>
+<a name="l00024" id="l00024"></a>00024 <span class="comment">     */</span>
+<a name="l00025" id="l00025"></a>00025 
+<a name="l00026" id="l00026"></a>00026 <span class="preprocessor">#include &lt;net-snmp/library/container.h&gt;</span>
+<a name="l00027" id="l00027"></a>00027 <span class="preprocessor">#include &lt;net-snmp/agent/table.h&gt;</span>
+<a name="l00028" id="l00028"></a>00028 
+<a name="l00029" id="l00029"></a>00029 <span class="preprocessor">#define TABLE_ARRAY_NAME "table_array"</span>
+<a name="l00030" id="l00030"></a>00030 
+<a name="l00031" id="l00031"></a>00031     <span class="comment">/*</span>
+<a name="l00032" id="l00032"></a>00032 <span class=
+"comment">     * group_item is to allow us to keep a list of requests without</span>
+<a name="l00033" id="l00033"></a>00033 <span class="comment">     * disrupting the actual netsnmp_request_info list.</span>
+<a name="l00034" id="l00034"></a>00034 <span class="comment">     */</span>
+<a name="l00035" id="l00035"></a><a class="code" href="structnetsnmp__request__group__item__s.html">00035</a>     <span class=
+"keyword">typedef</span> <span class="keyword">struct </span><a class="code" href=
+"structnetsnmp__request__group__item__s.html">netsnmp_request_group_item_s</a> {
+<a name="l00036" id="l00036"></a>00036         <a class="code" href="structnetsnmp__request__info__s.html" title=
+"The netsnmp request info structure.">netsnmp_request_info</a> *ri;
+<a name="l00037" id="l00037"></a>00037         <a class="code" href="structnetsnmp__table__request__info__s.html" title=
+"The table request info structure.">netsnmp_table_request_info</a> *tri;
+<a name="l00038" id="l00038"></a>00038         <span class="keyword">struct </span><a class="code" href=
+"structnetsnmp__request__group__item__s.html">netsnmp_request_group_item_s</a> *next;
+<a name="l00039" id="l00039"></a>00039     } <a class="code" href=
+"structnetsnmp__request__group__item__s.html">netsnmp_request_group_item</a>;
+<a name="l00040" id="l00040"></a>00040 
+<a name="l00041" id="l00041"></a>00041     <span class="comment">/*</span>
+<a name="l00042" id="l00042"></a>00042 <span class=
+"comment">     * structure to keep a list of requests for each unique index</span>
+<a name="l00043" id="l00043"></a>00043 <span class="comment">     */</span>
+<a name="l00044" id="l00044"></a><a class="code" href="structnetsnmp__request__group__s.html">00044</a>     <span class=
+"keyword">typedef</span> <span class="keyword">struct </span><a class="code" href=
+"structnetsnmp__request__group__s.html">netsnmp_request_group_s</a> {
+<a name="l00045" id="l00045"></a>00045        <span class="comment">/*</span>
+<a name="l00046" id="l00046"></a>00046 <span class=
+"comment">        * index for this row. points to someone else's memory, so</span>
+<a name="l00047" id="l00047"></a>00047 <span class="comment">        * don't free it!</span>
+<a name="l00048" id="l00048"></a>00048 <span class="comment">        */</span>
+<a name="l00049" id="l00049"></a>00049         <a class="code" href=
+"structnetsnmp__index__s.html">netsnmp_index</a>               index;
+<a name="l00050" id="l00050"></a>00050 
+<a name="l00051" id="l00051"></a>00051        <span class="comment">/*</span>
+<a name="l00052" id="l00052"></a>00052 <span class="comment">        * container in which rows belong</span>
+<a name="l00053" id="l00053"></a>00053 <span class="comment">        */</span>
+<a name="l00054" id="l00054"></a>00054         <a class="code" href=
+"structnetsnmp__container__s.html">netsnmp_container</a>           *table;
+<a name="l00055" id="l00055"></a>00055 
+<a name="l00056" id="l00056"></a>00056        <span class="comment">/*</span>
+<a name="l00057" id="l00057"></a>00057 <span class="comment">        * actual old and new rows</span>
+<a name="l00058" id="l00058"></a>00058 <span class="comment">        */</span>
+<a name="l00059" id="l00059"></a>00059         <a class="code" href=
+"structnetsnmp__index__s.html">netsnmp_index</a>               *existing_row;
+<a name="l00060" id="l00060"></a>00060         <a class="code" href=
+"structnetsnmp__index__s.html">netsnmp_index</a>               *undo_info;
+<a name="l00061" id="l00061"></a>00061 
+<a name="l00062" id="l00062"></a>00062        <span class="comment">/*</span>
+<a name="l00063" id="l00063"></a>00063 <span class="comment">        * flags</span>
+<a name="l00064" id="l00064"></a>00064 <span class="comment">        */</span>
+<a name="l00065" id="l00065"></a>00065        <span class="keywordtype">char</span>                          row_created;
+<a name="l00066" id="l00066"></a>00066        <span class="keywordtype">char</span>                          row_deleted;
+<a name="l00067" id="l00067"></a>00067        <span class="keywordtype">char</span>                          fill1;
+<a name="l00068" id="l00068"></a>00068        <span class="keywordtype">char</span>                          fill2;
+<a name="l00069" id="l00069"></a>00069 
+<a name="l00070" id="l00070"></a>00070        <span class="comment">/*</span>
+<a name="l00071" id="l00071"></a>00071 <span class="comment">        * requests for this row</span>
+<a name="l00072" id="l00072"></a>00072 <span class="comment">        */</span>
+<a name="l00073" id="l00073"></a>00073         <a class="code" href=
+"structnetsnmp__request__group__item__s.html">netsnmp_request_group_item</a>  *list;
+<a name="l00074" id="l00074"></a>00074 
+<a name="l00075" id="l00075"></a>00075         <span class="keywordtype">int</span>                          status;
+<a name="l00076" id="l00076"></a>00076 
+<a name="l00077" id="l00077"></a>00077         <span class="keywordtype">void</span>                        *rg_void;
+<a name="l00078" id="l00078"></a>00078 
+<a name="l00079" id="l00079"></a>00079     } <a class="code" href=
+"structnetsnmp__request__group__s.html">netsnmp_request_group</a>;
+<a name="l00080" id="l00080"></a>00080 
+<a name="l00081" id="l00081"></a>00081     <span class=
+"keyword">typedef</span> int     (Netsnmp_User_Row_Operation_c) (<span class="keyword">const</span> <span class=
+"keywordtype">void</span> *lhs,
+<a name="l00082" id="l00082"></a>00082                                                     <span class=
+"keyword">const</span> <span class="keywordtype">void</span> *rhs);
+<a name="l00083" id="l00083"></a>00083     <span class=
+"keyword">typedef</span> int     (Netsnmp_User_Row_Operation) (<span class="keywordtype">void</span> *lhs, <span class=
+"keywordtype">void</span> *rhs);
+<a name="l00084" id="l00084"></a>00084     <span class="keyword">typedef</span> int     (Netsnmp_User_Get_Processor) (<a class=
+"code" href="structnetsnmp__request__info__s.html" title="The netsnmp request info structure.">netsnmp_request_info</a> *,
+<a name="l00085" id="l00085"></a>00085                                                   <a class="code" href=
+"structnetsnmp__index__s.html">netsnmp_index</a>
+<a name="l00086" id="l00086"></a>00086                                                   *,
+<a name="l00087" id="l00087"></a>00087                                                   <a class="code" href=
+"structnetsnmp__table__request__info__s.html" title="The table request info structure.">netsnmp_table_request_info</a>
+<a name="l00088" id="l00088"></a>00088                                                   *);
+<a name="l00089" id="l00089"></a>00089     <span class="keyword">typedef</span> netsnmp_index
+<a name="l00090" id="l00090"></a>00090         *(UserRowMethod) (netsnmp_index *);
+<a name="l00091" id="l00091"></a>00091     <span class=
+"keyword">typedef</span> int     (Netsnmp_User_Row_Action) (netsnmp_index *,
+<a name="l00092" id="l00092"></a>00092                                                netsnmp_index *,
+<a name="l00093" id="l00093"></a>00093                                                <a class="code" href=
+"structnetsnmp__request__group__s.html">netsnmp_request_group</a> *);
+<a name="l00094" id="l00094"></a>00094     <span class="keyword">typedef</span> void    (Netsnmp_User_Group_Method) (<a class=
+"code" href="structnetsnmp__request__group__s.html">netsnmp_request_group</a> *);
+<a name="l00095" id="l00095"></a>00095 
+<a name="l00096" id="l00096"></a>00096     <span class="comment">/*</span>
+<a name="l00097" id="l00097"></a>00097 <span class="comment">     * structure for array callbacks</span>
+<a name="l00098" id="l00098"></a>00098 <span class="comment">     */</span>
+<a name="l00099" id="l00099"></a><a class="code" href="structnetsnmp__table__array__callbacks__s.html">00099</a>     <span class=
+"keyword">typedef</span> <span class="keyword">struct </span><a class="code" href=
+"structnetsnmp__table__array__callbacks__s.html">netsnmp_table_array_callbacks_s</a> {
+<a name="l00100" id="l00100"></a>00100 
+<a name="l00101" id="l00101"></a>00101         Netsnmp_User_Row_Operation   *row_copy;
+<a name="l00102" id="l00102"></a>00102         Netsnmp_User_Row_Operation_c *row_compare;
+<a name="l00103" id="l00103"></a>00103 
+<a name="l00104" id="l00104"></a>00104         Netsnmp_User_Get_Processor *get_value;
+<a name="l00105" id="l00105"></a>00105 
+<a name="l00106" id="l00106"></a>00106 
+<a name="l00107" id="l00107"></a>00107         Netsnmp_User_Row_Action *can_activate;
+<a name="l00108" id="l00108"></a>00108         Netsnmp_User_Row_Action *activated;
+<a name="l00109" id="l00109"></a>00109         Netsnmp_User_Row_Action *can_deactivate;
+<a name="l00110" id="l00110"></a>00110         Netsnmp_User_Row_Action *deactivated;
+<a name="l00111" id="l00111"></a>00111         Netsnmp_User_Row_Action *can_delete;
+<a name="l00112" id="l00112"></a>00112 
+<a name="l00113" id="l00113"></a>00113         UserRowMethod  *create_row;
+<a name="l00114" id="l00114"></a>00114         UserRowMethod  *duplicate_row;
+<a name="l00115" id="l00115"></a>00115         UserRowMethod  *delete_row;    <span class=
+"comment">/* always returns NULL */</span>
+<a name="l00116" id="l00116"></a>00116 
+<a name="l00117" id="l00117"></a>00117         Netsnmp_User_Group_Method *set_reserve1;
+<a name="l00118" id="l00118"></a>00118         Netsnmp_User_Group_Method *set_reserve2;
+<a name="l00119" id="l00119"></a>00119         Netsnmp_User_Group_Method *set_action;
+<a name="l00120" id="l00120"></a>00120         Netsnmp_User_Group_Method *set_commit;
+<a name="l00121" id="l00121"></a>00121         Netsnmp_User_Group_Method *set_free;
+<a name="l00122" id="l00122"></a>00122         Netsnmp_User_Group_Method *set_undo;
+<a name="l00123" id="l00123"></a>00123 
+<a name="l00125" id="l00125"></a><a class="code" href=
+"structnetsnmp__table__array__callbacks__s.html#a982c578025c2c044e4b02447241be31b">00125</a>        <a class="code" href=
+"structnetsnmp__container__s.html">netsnmp_container</a>* <a class="code" href=
+"structnetsnmp__table__array__callbacks__s.html#a982c578025c2c044e4b02447241be31b" title=
+"not callbacks, but this is a useful place for them.">container</a>;
+<a name="l00126" id="l00126"></a>00126        <span class="keywordtype">char</span> can_set;
+<a name="l00127" id="l00127"></a>00127 
+<a name="l00128" id="l00128"></a>00128     } <a class="code" href=
+"structnetsnmp__table__array__callbacks__s.html">netsnmp_table_array_callbacks</a>;
+<a name="l00129" id="l00129"></a>00129 
+<a name="l00130" id="l00130"></a>00130 
+<a name="l00131" id="l00131"></a>00131     <span class="keywordtype">int</span>            
+<a name="l00132" id="l00132"></a>00132         <a class="code" href="group__table__array.html#gad051fdc2caf7833b7f1b8d57368d5d29"
+title="register specified callbacks for the specified table/oid.">netsnmp_table_container_register</a>(<a class="code" href=
+"structnetsnmp__handler__registration__s.html" title="Root registration info.">netsnmp_handler_registration</a> *reginfo,
+<a name="l00133" id="l00133"></a>00133                                      <a class="code" href=
+"structnetsnmp__table__registration__info__s.html" title="Table registration structure.">netsnmp_table_registration_info</a>
+<a name="l00134" id="l00134"></a>00134                                      *tabreq,
+<a name="l00135" id="l00135"></a>00135                                      <a class="code" href=
+"structnetsnmp__table__array__callbacks__s.html">netsnmp_table_array_callbacks</a> *cb,
+<a name="l00136" id="l00136"></a>00136                                      <a class="code" href=
+"structnetsnmp__container__s.html">netsnmp_container</a> *container,
+<a name="l00137" id="l00137"></a>00137                                      <span class="keywordtype">int</span> group_rows);
+<a name="l00138" id="l00138"></a>00138 
+<a name="l00139" id="l00139"></a>00139     <span class="keywordtype">int</span> netsnmp_table_array_register(<a class="code"
+href="structnetsnmp__handler__registration__s.html" title="Root registration info.">netsnmp_handler_registration</a> *reginfo,
+<a name="l00140" id="l00140"></a>00140                                      <a class="code" href=
+"structnetsnmp__table__registration__info__s.html" title=
+"Table registration structure.">netsnmp_table_registration_info</a> *tabreq,
+<a name="l00141" id="l00141"></a>00141                                      <a class="code" href=
+"structnetsnmp__table__array__callbacks__s.html">netsnmp_table_array_callbacks</a> *cb,
+<a name="l00142" id="l00142"></a>00142                                      <a class="code" href=
+"structnetsnmp__container__s.html">netsnmp_container</a> *container,
+<a name="l00143" id="l00143"></a>00143                                      <span class="keywordtype">int</span> group_rows);
+<a name="l00144" id="l00144"></a>00144 
+<a name="l00145" id="l00145"></a>00145     <a class="code" href=
+"structnetsnmp__container__s.html">netsnmp_container</a> * <a class="code" href=
+"group__table__array.html#gaed9fbac9fa05186a7613d45e20f6c40e" title=
+"find the context data used by the table_array helper">netsnmp_extract_array_context</a>(netsnmp_request_info *);
+<a name="l00146" id="l00146"></a>00146 
+<a name="l00147" id="l00147"></a>00147     Netsnmp_Node_Handler netsnmp_table_array_helper_handler;
+<a name="l00148" id="l00148"></a>00148 
+<a name="l00149" id="l00149"></a>00149     <span class="keywordtype">int</span>
+<a name="l00150" id="l00150"></a>00150     <a class="code" href="group__table__array.html#ga0405df004a738525568725efd8e5e2f6"
+title="this function is called to validate RowStatus transitions.">netsnmp_table_array_check_row_status</a>(<a class="code" href=
+"structnetsnmp__table__array__callbacks__s.html">netsnmp_table_array_callbacks</a> *cb,
+<a name="l00151" id="l00151"></a>00151                                          <a class="code" href=
+"structnetsnmp__request__group__s.html">netsnmp_request_group</a> *ag,
+<a name="l00152" id="l00152"></a>00152                                          <span class=
+"keywordtype">long</span> *rs_new, <span class="keywordtype">long</span> *rs_old);
+<a name="l00153" id="l00153"></a>00153 
+<a name="l00154" id="l00154"></a>00154 <span class="preprocessor">#ifdef __cplusplus</span>
+<a name="l00155" id="l00155"></a>00155 }
+<a name="l00156" id="l00156"></a>00156 <span class="preprocessor">#endif</span>
+<a name="l00157" id="l00157"></a>00157 
+<a name="l00158" id="l00158"></a>00158 <span class="preprocessor">#endif                          </span><span class=
+"comment">/* _TABLE_ARRAY_HANDLER_H_ */</span>
+</pre>
+    </div>
+  </div>
+  <hr size="1" />
+
+  <address style="text-align: right;">
+    <small>Generated on 28 Sep 2009 for net-snmp by  <a href="http://www.doxygen.org/index.html"><img class="footer" src=
+    "doxygen.png" alt="doxygen" /></a> 1.6.1</small>
+<!-- CONTENT END -->
+<!--#include virtual="/page-bottom.html" -->
+

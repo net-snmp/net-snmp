@@ -1,0 +1,922 @@
+<!--#set var="section" value="development" -->
+<!--#include virtual="/page-top.html" -->
+<!-- CONTENT START -->
+  <div class="navigation" id="top">
+    <div class="tabs">
+      <ul>
+        <li><a href="index.html"><span>Main Page</span></a></li>
+
+        <li><a href="pages.html"><span>Related Pages</span></a></li>
+
+        <li><a href="modules.html"><span>Modules</span></a></li>
+
+        <li><a href="annotated.html"><span>Data Structures</span></a></li>
+
+        <li class="current"><a href="files.html"><span>Files</span></a></li>
+
+        <li><a href="examples.html"><span>Examples</span></a></li>
+      </ul>
+    </div>
+
+    <div class="tabs">
+      <ul>
+        <li><a href="files.html"><span>File List</span></a></li>
+
+        <li><a href="globals.html"><span>Globals</span></a></li>
+      </ul>
+    </div>
+
+    <h1>snmp_api.h</h1>
+
+    <div class="fragment">
+      <pre class="fragment">
+<a name="l00001" id="l00001"></a>00001 <span class=
+"comment">/* Portions of this file are subject to the following copyright(s).  See</span>
+<a name="l00002" id="l00002"></a>00002 <span class=
+"comment"> * the Net-SNMP's COPYING file for more details and other copyrights</span>
+<a name="l00003" id="l00003"></a>00003 <span class="comment"> * that may apply:</span>
+<a name="l00004" id="l00004"></a>00004 <span class="comment"> */</span>
+<a name="l00005" id="l00005"></a>00005 <span class="comment">/*</span>
+<a name="l00006" id="l00006"></a>00006 <span class="comment"> * Portions of this file are copyrighted by:</span>
+<a name="l00007" id="l00007"></a>00007 <span class=
+"comment"> * Copyright &copy; 2003 Sun Microsystems, Inc. All rights reserved.</span>
+<a name="l00008" id="l00008"></a>00008 <span class=
+"comment"> * Use is subject to license terms specified in the COPYING file</span>
+<a name="l00009" id="l00009"></a>00009 <span class="comment"> * distributed with the Net-SNMP package.</span>
+<a name="l00010" id="l00010"></a>00010 <span class="comment"> */</span>
+<a name="l00011" id="l00011"></a>00011 <span class="preprocessor">#ifndef SNMP_API_H</span>
+<a name="l00012" id="l00012"></a>00012 <span class="preprocessor">#define SNMP_API_H</span>
+<a name="l00013" id="l00013"></a>00013 
+<a name="l00014" id="l00014"></a>00014 <span class="comment">/*</span>
+<a name="l00015" id="l00015"></a>00015 <span class="comment"> * @file snmp_api.h - API for access to snmp.</span>
+<a name="l00016" id="l00016"></a>00016 <span class="comment"> * </span>
+<a name="l00017" id="l00017"></a>00017 <span class="comment"> * @addtogroup library</span>
+<a name="l00018" id="l00018"></a>00018 <span class="comment"> *</span>
+<a name="l00019" id="l00019"></a>00019 <span class=
+"comment"> * Caution: when using this library in a multi-threaded application,</span>
+<a name="l00020" id="l00020"></a>00020 <span class=
+"comment"> * the values of global variables "snmp_errno" and "snmp_detail"</span>
+<a name="l00021" id="l00021"></a>00021 <span class="comment"> * cannot be reliably determined.  Suggest using snmp_error()</span>
+<a name="l00022" id="l00022"></a>00022 <span class="comment"> * to obtain the library error codes.</span>
+<a name="l00023" id="l00023"></a>00023 <span class="comment"> *</span>
+<a name="l00024" id="l00024"></a>00024 <span class="comment"> * @{</span>
+<a name="l00025" id="l00025"></a>00025 <span class="comment"> */</span>
+<a name="l00026" id="l00026"></a>00026 
+<a name="l00027" id="l00027"></a>00027 <span class="preprocessor">#include &lt;net-snmp/types.h&gt;</span>
+<a name="l00028" id="l00028"></a>00028 <span class="preprocessor">#include &lt;net-snmp/varbind_api.h&gt;</span>
+<a name="l00029" id="l00029"></a>00029 <span class="preprocessor">#include &lt;net-snmp/pdu_api.h&gt;</span>
+<a name="l00030" id="l00030"></a>00030 <span class="preprocessor">#include &lt;net-snmp/session_api.h&gt;</span>
+<a name="l00031" id="l00031"></a>00031 
+<a name="l00032" id="l00032"></a>00032 <span class="preprocessor">#ifndef DONT_SHARE_ERROR_WITH_OTHER_THREADS</span>
+<a name="l00033" id="l00033"></a>00033 <span class="preprocessor">#define SET_SNMP_ERROR(x) snmp_errno=(x)</span>
+<a name="l00034" id="l00034"></a>00034 <span class="preprocessor">#else</span>
+<a name="l00035" id="l00035"></a>00035 <span class="preprocessor">#define SET_SNMP_ERROR(x)</span>
+<a name="l00036" id="l00036"></a>00036 <span class="preprocessor">#endif</span>
+<a name="l00037" id="l00037"></a>00037 
+<a name="l00038" id="l00038"></a>00038 
+<a name="l00039" id="l00039"></a>00039 <span class="preprocessor">#ifdef __cplusplus</span>
+<a name="l00040" id="l00040"></a>00040 <span class="keyword">extern</span>          <span class="stringliteral">"C"</span> {
+<a name="l00041" id="l00041"></a>00041 <span class="preprocessor">#endif</span>
+<a name="l00042" id="l00042"></a>00042 
+<a name="l00043" id="l00043"></a>00043 <span class="comment">/***********************************************************</span>
+<a name="l00044" id="l00044"></a>00044 <span class="comment">        Copyright 1989 by Carnegie Mellon University</span>
+<a name="l00045" id="l00045"></a>00045 
+<a name="l00046" id="l00046"></a>00046 <span class="comment">                      All Rights Reserved</span>
+<a name="l00047" id="l00047"></a>00047 
+<a name="l00048" id="l00048"></a>00048 <span class=
+"comment">Permission to use, copy, modify, and distribute this software and its</span>
+<a name="l00049" id="l00049"></a>00049 <span class=
+"comment">documentation for any purpose and without fee is hereby granted,</span>
+<a name="l00050" id="l00050"></a>00050 <span class=
+"comment">provided that the above copyright notice appear in all copies and that</span>
+<a name="l00051" id="l00051"></a>00051 <span class=
+"comment">both that copyright notice and this permission notice appear in</span>
+<a name="l00052" id="l00052"></a>00052 <span class="comment">supporting documentation, and that the name of CMU not be</span>
+<a name="l00053" id="l00053"></a>00053 <span class=
+"comment">used in advertising or publicity pertaining to distribution of the</span>
+<a name="l00054" id="l00054"></a>00054 <span class="comment">software without specific, written prior permission.</span>
+<a name="l00055" id="l00055"></a>00055 
+<a name="l00056" id="l00056"></a>00056 <span class=
+"comment">CMU DISCLAIMS ALL WARRANTIES WITH REGARD TO THIS SOFTWARE, INCLUDING</span>
+<a name="l00057" id="l00057"></a>00057 <span class=
+"comment">ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS, IN NO EVENT SHALL</span>
+<a name="l00058" id="l00058"></a>00058 <span class=
+"comment">CMU BE LIABLE FOR ANY SPECIAL, INDIRECT OR CONSEQUENTIAL DAMAGES OR</span>
+<a name="l00059" id="l00059"></a>00059 <span class=
+"comment">ANY DAMAGES WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS,</span>
+<a name="l00060" id="l00060"></a>00060 <span class=
+"comment">WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION,</span>
+<a name="l00061" id="l00061"></a>00061 <span class=
+"comment">ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS</span>
+<a name="l00062" id="l00062"></a>00062 <span class="comment">SOFTWARE.</span>
+<a name="l00063" id="l00063"></a>00063 <span class=
+"comment">******************************************************************/</span>
+<a name="l00064" id="l00064"></a>00064 
+<a name="l00065" id="l00065"></a>00065 <span class="keyword">struct </span>timeval;
+<a name="l00066" id="l00066"></a>00066 <span class="comment">/*</span>
+<a name="l00067" id="l00067"></a>00067 <span class=
+"comment"> * A list of all the outstanding requests for a particular session.</span>
+<a name="l00068" id="l00068"></a>00068 <span class="comment"> */</span>
+<a name="l00069" id="l00069"></a>00069 <span class="preprocessor">#ifdef SNMP_NEED_REQUEST_LIST</span>
+<a name="l00070" id="l00070"></a><a class="code" href="structrequest__list.html">00070</a> <span class=
+"keyword">typedef</span> <span class="keyword">struct </span><a class="code" href="structrequest__list.html">request_list</a> {
+<a name="l00071" id="l00071"></a>00071     <span class="keyword">struct </span><a class="code" href=
+"structrequest__list.html">request_list</a> *next_request;
+<a name="l00072" id="l00072"></a>00072     <span class="keywordtype">long</span>            request_id;     <span class=
+"comment">/* request id */</span>
+<a name="l00073" id="l00073"></a>00073     <span class="keywordtype">long</span>            message_id;     <span class=
+"comment">/* message id */</span>
+<a name="l00074" id="l00074"></a>00074     netsnmp_callback callback;      <span class=
+"comment">/* user callback per request (NULL if unused) */</span>
+<a name="l00075" id="l00075"></a>00075     <span class="keywordtype">void</span>           *cb_data;        <span class=
+"comment">/* user callback data per request (NULL if unused) */</span>
+<a name="l00076" id="l00076"></a>00076     <span class="keywordtype">int</span>             retries;        <span class=
+"comment">/* Number of retries */</span>
+<a name="l00077" id="l00077"></a>00077     u_long          timeout;        <span class=
+"comment">/* length to wait for timeout */</span>
+<a name="l00078" id="l00078"></a>00078     <span class="keyword">struct </span>timeval  time;   <span class=
+"comment">/* Time this request was made */</span>
+<a name="l00079" id="l00079"></a>00079     <span class="keyword">struct </span>timeval  expire; <span class=
+"comment">/* time this request is due to expire */</span>
+<a name="l00080" id="l00080"></a>00080     <span class="keyword">struct </span><a class="code" href="structsnmp__session.html"
+title="The snmp session structure.">snmp_session</a> *session;
+<a name="l00081" id="l00081"></a>00081     <a class="code" href="structsnmp__pdu.html" title=
+"The snmp protocol data unit.">netsnmp_pdu</a>    *pdu;    <span class="comment">/* The pdu for this request</span>
+<a name="l00082" id="l00082"></a>00082 <span class=
+"comment">                             * (saved so it can be retransmitted */</span>
+<a name="l00083" id="l00083"></a>00083 } <a class="code" href="structrequest__list.html">netsnmp_request_list</a>;
+<a name="l00084" id="l00084"></a>00084 <span class="preprocessor">#endif                          </span><span class=
+"comment">/* SNMP_NEED_REQUEST_LIST */</span>
+<a name="l00085" id="l00085"></a>00085 
+<a name="l00086" id="l00086"></a>00086     <span class="comment">/*</span>
+<a name="l00087" id="l00087"></a>00087 <span class=
+"comment">     * Set fields in session and pdu to the following to get a default or unconfigured value.</span>
+<a name="l00088" id="l00088"></a>00088 <span class="comment">     */</span>
+<a name="l00089" id="l00089"></a>00089 <span class="preprocessor">#define SNMP_DEFAULT_COMMUNITY_LEN  0   </span><span class=
+"comment">/* to get a default community name */</span>
+<a name="l00090" id="l00090"></a>00090 <span class="preprocessor">#define SNMP_DEFAULT_RETRIES        -1</span>
+<a name="l00091" id="l00091"></a>00091 <span class="preprocessor">#define SNMP_DEFAULT_TIMEOUT        -1</span>
+<a name="l00092" id="l00092"></a>00092 <span class="preprocessor">#define SNMP_DEFAULT_REMPORT        0</span>
+<a name="l00093" id="l00093"></a>00093 <span class="preprocessor">#define SNMP_DEFAULT_REQID          -1</span>
+<a name="l00094" id="l00094"></a>00094 <span class="preprocessor">#define SNMP_DEFAULT_MSGID          -1</span>
+<a name="l00095" id="l00095"></a>00095 <span class="preprocessor">#define SNMP_DEFAULT_ERRSTAT        -1</span>
+<a name="l00096" id="l00096"></a>00096 <span class="preprocessor">#define SNMP_DEFAULT_ERRINDEX       -1</span>
+<a name="l00097" id="l00097"></a>00097 <span class="preprocessor">#define SNMP_DEFAULT_ADDRESS        0</span>
+<a name="l00098" id="l00098"></a>00098 <span class="preprocessor">#define SNMP_DEFAULT_PEERNAME       NULL</span>
+<a name="l00099" id="l00099"></a>00099 <span class="preprocessor">#define SNMP_DEFAULT_ENTERPRISE_LENGTH  0</span>
+<a name="l00100" id="l00100"></a>00100 <span class="preprocessor">#define SNMP_DEFAULT_TIME           0</span>
+<a name="l00101" id="l00101"></a>00101 <span class="preprocessor">#define SNMP_DEFAULT_VERSION        -1</span>
+<a name="l00102" id="l00102"></a>00102 <span class="preprocessor">#define SNMP_DEFAULT_SECMODEL       -1</span>
+<a name="l00103" id="l00103"></a>00103 <span class="preprocessor">#define SNMP_DEFAULT_CONTEXT        ""</span>
+<a name="l00104" id="l00104"></a>00104 <span class="preprocessor">#ifndef NETSNMP_DISABLE_MD5</span>
+<a name="l00105" id="l00105"></a>00105 <span class=
+"preprocessor">#define SNMP_DEFAULT_AUTH_PROTO     usmHMACMD5AuthProtocol</span>
+<a name="l00106" id="l00106"></a>00106 <span class="preprocessor">#else</span>
+<a name="l00107" id="l00107"></a>00107 <span class=
+"preprocessor">#define SNMP_DEFAULT_AUTH_PROTO     usmHMACSHA1AuthProtocol</span>
+<a name="l00108" id="l00108"></a>00108 <span class="preprocessor">#endif</span>
+<a name="l00109" id="l00109"></a>00109 <span class=
+"preprocessor">#define SNMP_DEFAULT_AUTH_PROTOLEN  USM_LENGTH_OID_TRANSFORM</span>
+<a name="l00110" id="l00110"></a>00110 <span class="preprocessor">#ifndef NETSNMP_DISABLE_DES</span>
+<a name="l00111" id="l00111"></a>00111 <span class="preprocessor">#define SNMP_DEFAULT_PRIV_PROTO     usmDESPrivProtocol</span>
+<a name="l00112" id="l00112"></a>00112 <span class="preprocessor">#else</span>
+<a name="l00113" id="l00113"></a>00113 <span class="preprocessor">#define SNMP_DEFAULT_PRIV_PROTO     usmAESPrivProtocol</span>
+<a name="l00114" id="l00114"></a>00114 <span class="preprocessor">#endif</span>
+<a name="l00115" id="l00115"></a>00115 <span class=
+"preprocessor">#define SNMP_DEFAULT_PRIV_PROTOLEN  USM_LENGTH_OID_TRANSFORM</span>
+<a name="l00116" id="l00116"></a>00116 
+<a name="l00117" id="l00117"></a>00117     NETSNMP_IMPORT <span class="keyword">const</span> <span class=
+"keywordtype">char</span> *snmp_api_errstring(<span class="keywordtype">int</span>);
+<a name="l00118" id="l00118"></a>00118     NETSNMP_IMPORT <span class="keywordtype">void</span>     snmp_perror(<span class=
+"keyword">const</span> <span class="keywordtype">char</span> *);
+<a name="l00119" id="l00119"></a>00119     NETSNMP_IMPORT <span class="keywordtype">void</span>     snmp_set_detail(<span class=
+"keyword">const</span> <span class="keywordtype">char</span> *);
+<a name="l00120" id="l00120"></a>00120 
+<a name="l00121" id="l00121"></a>00121 <span class="preprocessor">#define SNMP_MAX_MSG_SIZE          1472 </span><span class=
+"comment">/* ethernet MTU minus IP/UDP header */</span>
+<a name="l00122" id="l00122"></a>00122 <span class=
+"preprocessor">#define SNMP_MAX_MSG_V3_HDRS       (4+3+4+7+7+3+7+16)   </span><span class="comment">/* fudge factor=16 */</span>
+<a name="l00123" id="l00123"></a>00123 <span class="preprocessor">#define SNMP_MAX_ENG_SIZE          32</span>
+<a name="l00124" id="l00124"></a>00124 <span class="preprocessor">#define SNMP_MAX_SEC_NAME_SIZE     256</span>
+<a name="l00125" id="l00125"></a>00125 <span class="preprocessor">#define SNMP_MAX_CONTEXT_SIZE      256</span>
+<a name="l00126" id="l00126"></a>00126 <span class="preprocessor">#define SNMP_SEC_PARAM_BUF_SIZE    256</span>
+<a name="l00127" id="l00127"></a>00127 
+<a name="l00128" id="l00128"></a>00128     <span class="comment">/*</span>
+<a name="l00129" id="l00129"></a>00129 <span class="comment">     * set to one to ignore unauthenticated Reports </span>
+<a name="l00130" id="l00130"></a>00130 <span class="comment">     */</span>
+<a name="l00131" id="l00131"></a>00131 <span class="preprocessor">#define SNMPV3_IGNORE_UNAUTH_REPORTS 0</span>
+<a name="l00132" id="l00132"></a>00132 
+<a name="l00133" id="l00133"></a>00133     <span class="comment">/*</span>
+<a name="l00134" id="l00134"></a>00134 <span class="comment">     * authoritative engine definitions </span>
+<a name="l00135" id="l00135"></a>00135 <span class="comment">     */</span>
+<a name="l00136" id="l00136"></a>00136 <span class="preprocessor">#define SNMP_SESS_NONAUTHORITATIVE 0    </span><span class=
+"comment">/* should be 0 to default to this */</span>
+<a name="l00137" id="l00137"></a>00137 <span class="preprocessor">#define SNMP_SESS_AUTHORITATIVE    1    </span><span class=
+"comment">/* don't learn engineIDs */</span>
+<a name="l00138" id="l00138"></a>00138 <span class="preprocessor">#define SNMP_SESS_UNKNOWNAUTH      2    </span><span class=
+"comment">/* sometimes (like NRs) */</span>
+<a name="l00139" id="l00139"></a>00139 
+<a name="l00140" id="l00140"></a>00140     <span class="comment">/*</span>
+<a name="l00141" id="l00141"></a>00141 <span class="comment">     * to determine type of Report from varbind_list </span>
+<a name="l00142" id="l00142"></a>00142 <span class="comment">     */</span>
+<a name="l00143" id="l00143"></a>00143 <span class="preprocessor">#define REPORT_STATS_LEN 9</span>
+<a name="l00144" id="l00144"></a>00144 <span class="preprocessor">#define REPORT_snmpUnknownSecurityModels_NUM 1</span>
+<a name="l00145" id="l00145"></a>00145 <span class="preprocessor">#define REPORT_snmpInvalidMsgs_NUM 2</span>
+<a name="l00146" id="l00146"></a>00146 <span class="preprocessor">#define REPORT_usmStatsUnsupportedSecLevels_NUM 1</span>
+<a name="l00147" id="l00147"></a>00147 <span class="preprocessor">#define REPORT_usmStatsNotInTimeWindows_NUM 2</span>
+<a name="l00148" id="l00148"></a>00148 <span class="preprocessor">#define REPORT_usmStatsUnknownUserNames_NUM 3</span>
+<a name="l00149" id="l00149"></a>00149 <span class="preprocessor">#define REPORT_usmStatsUnknownEngineIDs_NUM 4</span>
+<a name="l00150" id="l00150"></a>00150 <span class="preprocessor">#define REPORT_usmStatsWrongDigests_NUM 5</span>
+<a name="l00151" id="l00151"></a>00151 <span class="preprocessor">#define REPORT_usmStatsDecryptionErrors_NUM 6</span>
+<a name="l00152" id="l00152"></a>00152 
+<a name="l00153" id="l00153"></a>00153 <span class="preprocessor">#define SNMP_DETAIL_SIZE        512</span>
+<a name="l00154" id="l00154"></a>00154 
+<a name="l00155" id="l00155"></a>00155 <span class="preprocessor">#define SNMP_FLAGS_UDP_BROADCAST   0x800</span>
+<a name="l00156" id="l00156"></a>00156 <span class=
+"preprocessor">#define SNMP_FLAGS_RESP_CALLBACK   0x400      </span><span class=
+"comment">/* Additional callback on response */</span>
+<a name="l00157" id="l00157"></a>00157 <span class=
+"preprocessor">#define SNMP_FLAGS_USER_CREATED    0x200      </span><span class="comment">/* USM user has been created */</span>
+<a name="l00158" id="l00158"></a>00158 <span class=
+"preprocessor">#define SNMP_FLAGS_DONT_PROBE      0x100      </span><span class=
+"comment">/* don't probe for an engineID */</span>
+<a name="l00159" id="l00159"></a>00159 <span class="preprocessor">#define SNMP_FLAGS_STREAM_SOCKET   0x80</span>
+<a name="l00160" id="l00160"></a>00160 <span class="preprocessor">#define SNMP_FLAGS_LISTENING       0x40 </span><span class=
+"comment">/* Server stream sockets only */</span>
+<a name="l00161" id="l00161"></a>00161 <span class="preprocessor">#define SNMP_FLAGS_SUBSESSION      0x20</span>
+<a name="l00162" id="l00162"></a>00162 <span class="preprocessor">#define SNMP_FLAGS_STRIKE2         0x02</span>
+<a name="l00163" id="l00163"></a>00163 <span class="preprocessor">#define SNMP_FLAGS_STRIKE1         0x01</span>
+<a name="l00164" id="l00164"></a>00164 
+<a name="l00165" id="l00165"></a>00165 <span class="preprocessor">#define CLEAR_SNMP_STRIKE_FLAGS(x) \</span>
+<a name="l00166" id="l00166"></a>00166 <span class=
+"preprocessor">        x &amp;= ~(SNMP_FLAGS_STRIKE2|SNMP_FLAGS_STRIKE1)</span>
+<a name="l00167" id="l00167"></a>00167 
+<a name="l00168" id="l00168"></a>00168     <span class="comment">/*</span>
+<a name="l00169" id="l00169"></a>00169 <span class="comment">     * returns '1' if the session is to be regarded as dead,</span>
+<a name="l00170" id="l00170"></a>00170 <span class=
+"comment">     * otherwise set the strike flags appropriately, and return 0</span>
+<a name="l00171" id="l00171"></a>00171 <span class="comment">     */</span>
+<a name="l00172" id="l00172"></a>00172 <span class="preprocessor">#define SET_SNMP_STRIKE_FLAGS(x) \</span>
+<a name="l00173" id="l00173"></a>00173 <span class=
+"preprocessor">        ((   x &amp; SNMP_FLAGS_STRIKE2 ) ? 1 :                             \</span>
+<a name="l00174" id="l00174"></a>00174 <span class=
+"preprocessor">         ((( x &amp; SNMP_FLAGS_STRIKE1 ) ? ( x |= SNMP_FLAGS_STRIKE2 ) :   \</span>
+<a name="l00175" id="l00175"></a>00175 <span class=
+"preprocessor">                                        ( x |= SNMP_FLAGS_STRIKE1 )),   \</span>
+<a name="l00176" id="l00176"></a>00176 <span class="preprocessor">                                        0))</span>
+<a name="l00177" id="l00177"></a>00177 
+<a name="l00178" id="l00178"></a>00178     <span class="comment">/*</span>
+<a name="l00179" id="l00179"></a>00179 <span class="comment">     * Error return values.</span>
+<a name="l00180" id="l00180"></a>00180 <span class="comment">     *</span>
+<a name="l00181" id="l00181"></a>00181 <span class="comment">     * SNMPERR_SUCCESS is the non-PDU "success" code.</span>
+<a name="l00182" id="l00182"></a>00182 <span class="comment">     *</span>
+<a name="l00183" id="l00183"></a>00183 <span class=
+"comment">     * XXX  These should be merged with SNMP_ERR_* defines and confined</span>
+<a name="l00184" id="l00184"></a>00184 <span class="comment">     *      to values &lt; 0.  ???</span>
+<a name="l00185" id="l00185"></a>00185 <span class="comment">     */</span>
+<a name="l00186" id="l00186"></a>00186 <span class=
+"preprocessor">#define SNMPERR_SUCCESS                 (0)     </span><span class=
+"comment">/* XXX  Non-PDU "success" code. */</span>
+<a name="l00187" id="l00187"></a>00187 <span class="preprocessor">#define SNMPERR_GENERR                  (-1)</span>
+<a name="l00188" id="l00188"></a>00188 <span class="preprocessor">#define SNMPERR_BAD_LOCPORT             (-2)</span>
+<a name="l00189" id="l00189"></a>00189 <span class="preprocessor">#define SNMPERR_BAD_ADDRESS             (-3)</span>
+<a name="l00190" id="l00190"></a>00190 <span class="preprocessor">#define SNMPERR_BAD_SESSION             (-4)</span>
+<a name="l00191" id="l00191"></a>00191 <span class="preprocessor">#define SNMPERR_TOO_LONG                (-5)</span>
+<a name="l00192" id="l00192"></a>00192 <span class="preprocessor">#define SNMPERR_NO_SOCKET               (-6)</span>
+<a name="l00193" id="l00193"></a>00193 <span class="preprocessor">#define SNMPERR_V2_IN_V1                (-7)</span>
+<a name="l00194" id="l00194"></a>00194 <span class="preprocessor">#define SNMPERR_V1_IN_V2                (-8)</span>
+<a name="l00195" id="l00195"></a>00195 <span class="preprocessor">#define SNMPERR_BAD_REPEATERS           (-9)</span>
+<a name="l00196" id="l00196"></a>00196 <span class="preprocessor">#define SNMPERR_BAD_REPETITIONS         (-10)</span>
+<a name="l00197" id="l00197"></a>00197 <span class="preprocessor">#define SNMPERR_BAD_ASN1_BUILD          (-11)</span>
+<a name="l00198" id="l00198"></a>00198 <span class="preprocessor">#define SNMPERR_BAD_SENDTO              (-12)</span>
+<a name="l00199" id="l00199"></a>00199 <span class="preprocessor">#define SNMPERR_BAD_PARSE               (-13)</span>
+<a name="l00200" id="l00200"></a>00200 <span class="preprocessor">#define SNMPERR_BAD_VERSION             (-14)</span>
+<a name="l00201" id="l00201"></a>00201 <span class="preprocessor">#define SNMPERR_BAD_SRC_PARTY           (-15)</span>
+<a name="l00202" id="l00202"></a>00202 <span class="preprocessor">#define SNMPERR_BAD_DST_PARTY           (-16)</span>
+<a name="l00203" id="l00203"></a>00203 <span class="preprocessor">#define SNMPERR_BAD_CONTEXT             (-17)</span>
+<a name="l00204" id="l00204"></a>00204 <span class="preprocessor">#define SNMPERR_BAD_COMMUNITY           (-18)</span>
+<a name="l00205" id="l00205"></a>00205 <span class="preprocessor">#define SNMPERR_NOAUTH_DESPRIV          (-19)</span>
+<a name="l00206" id="l00206"></a>00206 <span class="preprocessor">#define SNMPERR_BAD_ACL                 (-20)</span>
+<a name="l00207" id="l00207"></a>00207 <span class="preprocessor">#define SNMPERR_BAD_PARTY               (-21)</span>
+<a name="l00208" id="l00208"></a>00208 <span class="preprocessor">#define SNMPERR_ABORT                   (-22)</span>
+<a name="l00209" id="l00209"></a>00209 <span class="preprocessor">#define SNMPERR_UNKNOWN_PDU             (-23)</span>
+<a name="l00210" id="l00210"></a>00210 <span class="preprocessor">#define SNMPERR_TIMEOUT                 (-24)</span>
+<a name="l00211" id="l00211"></a>00211 <span class="preprocessor">#define SNMPERR_BAD_RECVFROM            (-25)</span>
+<a name="l00212" id="l00212"></a>00212 <span class="preprocessor">#define SNMPERR_BAD_ENG_ID              (-26)</span>
+<a name="l00213" id="l00213"></a>00213 <span class="preprocessor">#define SNMPERR_BAD_SEC_NAME            (-27)</span>
+<a name="l00214" id="l00214"></a>00214 <span class="preprocessor">#define SNMPERR_BAD_SEC_LEVEL           (-28)</span>
+<a name="l00215" id="l00215"></a>00215 <span class="preprocessor">#define SNMPERR_ASN_PARSE_ERR           (-29)</span>
+<a name="l00216" id="l00216"></a>00216 <span class="preprocessor">#define SNMPERR_UNKNOWN_SEC_MODEL       (-30)</span>
+<a name="l00217" id="l00217"></a>00217 <span class="preprocessor">#define SNMPERR_INVALID_MSG             (-31)</span>
+<a name="l00218" id="l00218"></a>00218 <span class="preprocessor">#define SNMPERR_UNKNOWN_ENG_ID          (-32)</span>
+<a name="l00219" id="l00219"></a>00219 <span class="preprocessor">#define SNMPERR_UNKNOWN_USER_NAME       (-33)</span>
+<a name="l00220" id="l00220"></a>00220 <span class="preprocessor">#define SNMPERR_UNSUPPORTED_SEC_LEVEL   (-34)</span>
+<a name="l00221" id="l00221"></a>00221 <span class="preprocessor">#define SNMPERR_AUTHENTICATION_FAILURE  (-35)</span>
+<a name="l00222" id="l00222"></a>00222 <span class="preprocessor">#define SNMPERR_NOT_IN_TIME_WINDOW      (-36)</span>
+<a name="l00223" id="l00223"></a>00223 <span class="preprocessor">#define SNMPERR_DECRYPTION_ERR          (-37)</span>
+<a name="l00224" id="l00224"></a>00224 <span class="preprocessor">#define SNMPERR_SC_GENERAL_FAILURE      (-38)</span>
+<a name="l00225" id="l00225"></a>00225 <span class="preprocessor">#define SNMPERR_SC_NOT_CONFIGURED       (-39)</span>
+<a name="l00226" id="l00226"></a>00226 <span class="preprocessor">#define SNMPERR_KT_NOT_AVAILABLE        (-40)</span>
+<a name="l00227" id="l00227"></a>00227 <span class="preprocessor">#define SNMPERR_UNKNOWN_REPORT          (-41)</span>
+<a name="l00228" id="l00228"></a>00228 <span class="preprocessor">#define SNMPERR_USM_GENERICERROR                (-42)</span>
+<a name="l00229" id="l00229"></a>00229 <span class="preprocessor">#define SNMPERR_USM_UNKNOWNSECURITYNAME         (-43)</span>
+<a name="l00230" id="l00230"></a>00230 <span class="preprocessor">#define SNMPERR_USM_UNSUPPORTEDSECURITYLEVEL    (-44)</span>
+<a name="l00231" id="l00231"></a>00231 <span class="preprocessor">#define SNMPERR_USM_ENCRYPTIONERROR             (-45)</span>
+<a name="l00232" id="l00232"></a>00232 <span class="preprocessor">#define SNMPERR_USM_AUTHENTICATIONFAILURE       (-46)</span>
+<a name="l00233" id="l00233"></a>00233 <span class="preprocessor">#define SNMPERR_USM_PARSEERROR                  (-47)</span>
+<a name="l00234" id="l00234"></a>00234 <span class="preprocessor">#define SNMPERR_USM_UNKNOWNENGINEID             (-48)</span>
+<a name="l00235" id="l00235"></a>00235 <span class="preprocessor">#define SNMPERR_USM_NOTINTIMEWINDOW             (-49)</span>
+<a name="l00236" id="l00236"></a>00236 <span class="preprocessor">#define SNMPERR_USM_DECRYPTIONERROR             (-50)</span>
+<a name="l00237" id="l00237"></a>00237 <span class="preprocessor">#define SNMPERR_NOMIB                   (-51)</span>
+<a name="l00238" id="l00238"></a>00238 <span class="preprocessor">#define SNMPERR_RANGE                   (-52)</span>
+<a name="l00239" id="l00239"></a>00239 <span class="preprocessor">#define SNMPERR_MAX_SUBID               (-53)</span>
+<a name="l00240" id="l00240"></a>00240 <span class="preprocessor">#define SNMPERR_BAD_SUBID               (-54)</span>
+<a name="l00241" id="l00241"></a>00241 <span class="preprocessor">#define SNMPERR_LONG_OID                (-55)</span>
+<a name="l00242" id="l00242"></a>00242 <span class="preprocessor">#define SNMPERR_BAD_NAME                (-56)</span>
+<a name="l00243" id="l00243"></a>00243 <span class="preprocessor">#define SNMPERR_VALUE                   (-57)</span>
+<a name="l00244" id="l00244"></a>00244 <span class="preprocessor">#define SNMPERR_UNKNOWN_OBJID           (-58)</span>
+<a name="l00245" id="l00245"></a>00245 <span class="preprocessor">#define SNMPERR_NULL_PDU                (-59)</span>
+<a name="l00246" id="l00246"></a>00246 <span class="preprocessor">#define SNMPERR_NO_VARS                 (-60)</span>
+<a name="l00247" id="l00247"></a>00247 <span class="preprocessor">#define SNMPERR_VAR_TYPE                (-61)</span>
+<a name="l00248" id="l00248"></a>00248 <span class="preprocessor">#define SNMPERR_MALLOC                  (-62)</span>
+<a name="l00249" id="l00249"></a>00249 <span class="preprocessor">#define SNMPERR_KRB5                    (-63)</span>
+<a name="l00250" id="l00250"></a>00250 <span class="preprocessor">#define SNMPERR_PROTOCOL                (-64)</span>
+<a name="l00251" id="l00251"></a>00251 <span class="preprocessor">#define SNMPERR_OID_NONINCREASING       (-65)</span>
+<a name="l00252" id="l00252"></a>00252 <span class="preprocessor">#define SNMPERR_JUST_A_CONTEXT_PROBE    (-66)</span>
+<a name="l00253" id="l00253"></a>00253 
+<a name="l00254" id="l00254"></a>00254 <span class="preprocessor">#define SNMPERR_MAX                     (-66)</span>
+<a name="l00255" id="l00255"></a>00255 
+<a name="l00256" id="l00256"></a>00256 
+<a name="l00257" id="l00257"></a>00257     <span class="comment">/*</span>
+<a name="l00258" id="l00258"></a>00258 <span class="comment">     * void</span>
+<a name="l00259" id="l00259"></a>00259 <span class="comment">     * snmp_free_pdu(pdu)</span>
+<a name="l00260" id="l00260"></a>00260 <span class="comment">     *     netsnmp_pdu *pdu;</span>
+<a name="l00261" id="l00261"></a>00261 <span class="comment">     *</span>
+<a name="l00262" id="l00262"></a>00262 <span class=
+"comment">     * Frees the pdu and any malloc'd data associated with it.</span>
+<a name="l00263" id="l00263"></a>00263 <span class="comment">     */</span>
+<a name="l00264" id="l00264"></a>00264 
+<a name="l00265" id="l00265"></a>00265     <span class="keywordtype">void</span>            snmp_free_var_internals(<a class=
+"code" href="structvariable__list.html" title=
+"The netsnmp variable list binding structure, it&amp;#39;s typedef&amp;#39;d to netsnmp_variable_list...">netsnmp_variable_list</a> *);     <span class="comment">/* frees contents only */</span>
+<a name="l00266" id="l00266"></a>00266 
+<a name="l00267" id="l00267"></a>00267 
+<a name="l00268" id="l00268"></a>00268     <span class="comment">/*</span>
+<a name="l00269" id="l00269"></a>00269 <span class="comment">     * This routine must be supplied by the application:</span>
+<a name="l00270" id="l00270"></a>00270 <span class="comment">     *</span>
+<a name="l00271" id="l00271"></a>00271 <span class=
+"comment">     * u_char *authenticator(pdu, length, community, community_len)</span>
+<a name="l00272" id="l00272"></a>00272 <span class=
+"comment">     * u_char *pdu;         The rest of the PDU to be authenticated</span>
+<a name="l00273" id="l00273"></a>00273 <span class=
+"comment">     * int *length;         The length of the PDU (updated by the authenticator)</span>
+<a name="l00274" id="l00274"></a>00274 <span class=
+"comment">     * u_char *community;   The community name to authenticate under.</span>
+<a name="l00275" id="l00275"></a>00275 <span class="comment">     * int  community_len   The length of the community name.</span>
+<a name="l00276" id="l00276"></a>00276 <span class="comment">     *</span>
+<a name="l00277" id="l00277"></a>00277 <span class=
+"comment">     * Returns the authenticated pdu, or NULL if authentication failed.</span>
+<a name="l00278" id="l00278"></a>00278 <span class=
+"comment">     * If null authentication is used, the authenticator in snmp_session can be</span>
+<a name="l00279" id="l00279"></a>00279 <span class="comment">     * set to NULL(0).</span>
+<a name="l00280" id="l00280"></a>00280 <span class="comment">     */</span>
+<a name="l00281" id="l00281"></a>00281 
+<a name="l00282" id="l00282"></a>00282 
+<a name="l00283" id="l00283"></a>00283 
+<a name="l00284" id="l00284"></a>00284     <span class="comment">/*</span>
+<a name="l00285" id="l00285"></a>00285 <span class="comment">     * This routine must be supplied by the application:</span>
+<a name="l00286" id="l00286"></a>00286 <span class="comment">     *</span>
+<a name="l00287" id="l00287"></a>00287 <span class="comment">     * int callback(operation, session, reqid, pdu, magic)</span>
+<a name="l00288" id="l00288"></a>00288 <span class="comment">     * int operation;</span>
+<a name="l00289" id="l00289"></a>00289 <span class=
+"comment">     * netsnmp_session *session;    The session authenticated under.</span>
+<a name="l00290" id="l00290"></a>00290 <span class=
+"comment">     * int reqid;                       The request id of this pdu (0 for TRAP)</span>
+<a name="l00291" id="l00291"></a>00291 <span class="comment">     * netsnmp_pdu *pdu;        The pdu information.</span>
+<a name="l00292" id="l00292"></a>00292 <span class=
+"comment">     * void *magic                      A link to the data for this routine.</span>
+<a name="l00293" id="l00293"></a>00293 <span class="comment">     *</span>
+<a name="l00294" id="l00294"></a>00294 <span class=
+"comment">     * Returns 1 if request was successful, 0 if it should be kept pending.</span>
+<a name="l00295" id="l00295"></a>00295 <span class=
+"comment">     * Any data in the pdu must be copied because it will be freed elsewhere.</span>
+<a name="l00296" id="l00296"></a>00296 <span class="comment">     * Operations are defined below:</span>
+<a name="l00297" id="l00297"></a>00297 <span class="comment">     */</span>
+<a name="l00298" id="l00298"></a>00298 
+<a name="l00299" id="l00299"></a>00299 <span class="preprocessor">#define NETSNMP_CALLBACK_OP_RECEIVED_MESSAGE    1</span>
+<a name="l00300" id="l00300"></a>00300 <span class="preprocessor">#define NETSNMP_CALLBACK_OP_TIMED_OUT           2</span>
+<a name="l00301" id="l00301"></a>00301 <span class="preprocessor">#define NETSNMP_CALLBACK_OP_SEND_FAILED         3</span>
+<a name="l00302" id="l00302"></a>00302 <span class="preprocessor">#define NETSNMP_CALLBACK_OP_CONNECT             4</span>
+<a name="l00303" id="l00303"></a>00303 <span class="preprocessor">#define NETSNMP_CALLBACK_OP_DISCONNECT          5</span>
+<a name="l00304" id="l00304"></a>00304 
+<a name="l00305" id="l00305"></a>00305     <span class="keywordtype">long</span>            snmp_get_next_msgid(<span class=
+"keywordtype">void</span>);
+<a name="l00306" id="l00306"></a>00306     <span class="keywordtype">long</span>            snmp_get_next_reqid(<span class=
+"keywordtype">void</span>);
+<a name="l00307" id="l00307"></a>00307     <span class="keywordtype">long</span>            snmp_get_next_sessid(<span class=
+"keywordtype">void</span>);
+<a name="l00308" id="l00308"></a>00308     <span class="keywordtype">long</span>            snmp_get_next_transid(<span class=
+"keywordtype">void</span>);
+<a name="l00309" id="l00309"></a>00309 
+<a name="l00310" id="l00310"></a>00310     <span class="keywordtype">int</span>             <a class="code" href=
+"group__library.html#gab5b48a42c19a801547e025ed40b4561e" title=
+"lexicographical compare two object identifiers.">snmp_oid_compare</a>(<span class="keyword">const</span> oid *, <span class=
+"keywordtype">size_t</span>, <span class="keyword">const</span> oid *,
+<a name="l00311" id="l00311"></a>00311                                      <span class="keywordtype">size_t</span>);
+<a name="l00312" id="l00312"></a>00312     <span class="keywordtype">int</span>             snmp_oid_ncompare(<span class=
+"keyword">const</span> oid *, <span class="keywordtype">size_t</span>, <span class="keyword">const</span> oid *,
+<a name="l00313" id="l00313"></a>00313                                       <span class=
+"keywordtype">size_t</span>, <span class="keywordtype">size_t</span>);
+<a name="l00314" id="l00314"></a>00314     <span class="keywordtype">int</span>             <a class="code" href=
+"group__library.html#gace28f8eaec4515824af587316d677b5b" title=
+"Compares 2 OIDs to determine if they are equal up until the shortest length.">snmp_oidtree_compare</a>(<span class=
+"keyword">const</span> oid *, <span class="keywordtype">size_t</span>, <span class="keyword">const</span> oid *,
+<a name="l00315" id="l00315"></a>00315                                          <span class="keywordtype">size_t</span>);
+<a name="l00316" id="l00316"></a>00316     <span class="keywordtype">int</span>             snmp_oidsubtree_compare(<span class=
+"keyword">const</span> oid *, <span class="keywordtype">size_t</span>, <span class="keyword">const</span> oid *,
+<a name="l00317" id="l00317"></a>00317                                          <span class="keywordtype">size_t</span>);
+<a name="l00318" id="l00318"></a>00318     <span class="keywordtype">int</span>             <a class="code" href=
+"group__library.html#gaeb875fc97dbfab6ef31a3c947a0c70e1" title=
+"lexicographical compare two object identifiers and return the point where they differ...">netsnmp_oid_compare_ll</a>(<span class="keyword">const</span> oid * in_name1,
+<a name="l00319" id="l00319"></a>00319                                            <span class=
+"keywordtype">size_t</span> len1, <span class="keyword">const</span> oid * in_name2,
+<a name="l00320" id="l00320"></a>00320                                            <span class=
+"keywordtype">size_t</span> len2, <span class="keywordtype">size_t</span> *offpt);
+<a name="l00321" id="l00321"></a>00321     <span class="keywordtype">int</span>             <a class="code" href=
+"group__library.html#gae881bb815fa4afe6eadb60a43165ee06" title=
+"Compares 2 OIDs to determine if they are exactly equal.">netsnmp_oid_equals</a>(<span class=
+"keyword">const</span> oid *, <span class="keywordtype">size_t</span>, <span class="keyword">const</span> oid *,
+<a name="l00322" id="l00322"></a>00322                                        <span class="keywordtype">size_t</span>);
+<a name="l00323" id="l00323"></a>00323     <span class="keywordtype">int</span>             netsnmp_oid_tree_equals(<span class=
+"keyword">const</span> oid *, <span class="keywordtype">size_t</span>, <span class="keyword">const</span> oid *,
+<a name="l00324" id="l00324"></a>00324                                             <span class="keywordtype">size_t</span>);
+<a name="l00325" id="l00325"></a>00325     <span class="keywordtype">int</span>             <a class="code" href=
+"group__library.html#gabae0f344a20723b28df151347e427430" title=
+"Identical to netsnmp_oid_equals, except only the length up to len1 is compared.">netsnmp_oid_is_subtree</a>(<span class=
+"keyword">const</span> oid *, <span class="keywordtype">size_t</span>, <span class="keyword">const</span> oid *,
+<a name="l00326" id="l00326"></a>00326                                            <span class="keywordtype">size_t</span>);
+<a name="l00327" id="l00327"></a>00327     <span class="keywordtype">int</span>             <a class="code" href=
+"group__library.html#ga3e58b642395084b49ba78c54222effbc" title=
+"Given two OIDs, determine the common prefix to them both.">netsnmp_oid_find_prefix</a>(<span class=
+"keyword">const</span> oid * in_name1, <span class="keywordtype">size_t</span> len1,
+<a name="l00328" id="l00328"></a>00328                                             <span class=
+"keyword">const</span> oid * in_name2, <span class="keywordtype">size_t</span> len2);
+<a name="l00329" id="l00329"></a>00329     <span class="keywordtype">void</span>            <a class="code" href=
+"group__library.html#gabffeb17504035f40677c3819d6505c80" title=
+"Calls the functions to do config file loading and mib module parsing in the correct...">init_snmp</a>(<span class=
+"keyword">const</span> <span class="keywordtype">char</span> *);
+<a name="l00330" id="l00330"></a>00330     u_char         *snmp_pdu_build(<a class="code" href="structsnmp__pdu.html" title=
+"The snmp protocol data unit.">netsnmp_pdu</a> *, u_char *, <span class="keywordtype">size_t</span> *);
+<a name="l00331" id="l00331"></a>00331 <span class="preprocessor">#ifdef NETSNMP_USE_REVERSE_ASNENCODING</span>
+<a name="l00332" id="l00332"></a>00332     u_char         *snmp_pdu_rbuild(<a class="code" href="structsnmp__pdu.html" title=
+"The snmp protocol data unit.">netsnmp_pdu</a> *, u_char *, <span class="keywordtype">size_t</span> *);
+<a name="l00333" id="l00333"></a>00333 <span class="preprocessor">#endif</span>
+<a name="l00334" id="l00334"></a>00334     <span class="keywordtype">int</span>             snmpv3_parse(<a class="code" href=
+"structsnmp__pdu.html" title="The snmp protocol data unit.">netsnmp_pdu</a> *, u_char *, <span class=
+"keywordtype">size_t</span> *,
+<a name="l00335" id="l00335"></a>00335                                  u_char **, <a class="code" href=
+"structsnmp__session.html" title="The snmp session structure.">netsnmp_session</a> *);
+<a name="l00336" id="l00336"></a>00336     <span class="keywordtype">int</span>             snmpv3_packet_build(<a class="code"
+href="structsnmp__session.html" title="The snmp session structure.">netsnmp_session</a> *,
+<a name="l00337" id="l00337"></a>00337                                         <a class="code" href="structsnmp__pdu.html" title=
+"The snmp protocol data unit.">netsnmp_pdu</a> *pdu, u_char * packet,
+<a name="l00338" id="l00338"></a>00338                                         <span class=
+"keywordtype">size_t</span> * out_length,
+<a name="l00339" id="l00339"></a>00339                                         u_char * pdu_data,
+<a name="l00340" id="l00340"></a>00340                                         <span class=
+"keywordtype">size_t</span> pdu_data_len);
+<a name="l00341" id="l00341"></a>00341     <span class="keywordtype">int</span>             snmpv3_packet_rbuild(<a class="code"
+href="structsnmp__session.html" title="The snmp session structure.">netsnmp_session</a> *,
+<a name="l00342" id="l00342"></a>00342                                          <a class="code" href="structsnmp__pdu.html"
+title="The snmp protocol data unit.">netsnmp_pdu</a> *pdu, u_char * packet,
+<a name="l00343" id="l00343"></a>00343                                          <span class=
+"keywordtype">size_t</span> * out_length,
+<a name="l00344" id="l00344"></a>00344                                          u_char * pdu_data,
+<a name="l00345" id="l00345"></a>00345                                          <span class=
+"keywordtype">size_t</span> pdu_data_len);
+<a name="l00346" id="l00346"></a>00346     <span class="keywordtype">int</span>             snmpv3_make_report(<a class="code"
+href="structsnmp__pdu.html" title="The snmp protocol data unit.">netsnmp_pdu</a> *pdu, <span class=
+"keywordtype">int</span> error);
+<a name="l00347" id="l00347"></a>00347     <span class="keywordtype">int</span>             snmpv3_get_report_type(<a class=
+"code" href="structsnmp__pdu.html" title="The snmp protocol data unit.">netsnmp_pdu</a> *pdu);
+<a name="l00348" id="l00348"></a>00348     <span class="keywordtype">int</span>             snmp_pdu_parse(<a class="code" href=
+"structsnmp__pdu.html" title="The snmp protocol data unit.">netsnmp_pdu</a> *pdu, u_char * data,
+<a name="l00349" id="l00349"></a>00349                                    <span class="keywordtype">size_t</span> * length);
+<a name="l00350" id="l00350"></a>00350     u_char         *snmpv3_scopedPDU_parse(<a class="code" href="structsnmp__pdu.html"
+title="The snmp protocol data unit.">netsnmp_pdu</a> *pdu, u_char * cp,
+<a name="l00351" id="l00351"></a>00351                                            <span class=
+"keywordtype">size_t</span> * length);
+<a name="l00352" id="l00352"></a>00352     <span class="keywordtype">void</span>            snmp_store(<span class=
+"keyword">const</span> <span class="keywordtype">char</span> *type);
+<a name="l00353" id="l00353"></a>00353     <span class="keywordtype">void</span>            <a class="code" href=
+"group__library.html#gaf72d1debded9aa8c360466dd5f03de26" title=
+"Shuts down the application, saving any needed persistent storage, and appropriate...">snmp_shutdown</a>(<span class=
+"keyword">const</span> <span class="keywordtype">char</span> *type);
+<a name="l00354" id="l00354"></a>00354     <span class="keywordtype">int</span>             snmp_add_var(<a class="code" href=
+"structsnmp__pdu.html" title="The snmp protocol data unit.">netsnmp_pdu</a> *, <span class=
+"keyword">const</span> oid *, <span class="keywordtype">size_t</span>, <span class="keywordtype">char</span>,
+<a name="l00355" id="l00355"></a>00355                                  <span class="keyword">const</span> <span class=
+"keywordtype">char</span> *);
+<a name="l00356" id="l00356"></a>00356     oid            *snmp_duplicate_objid(<span class=
+"keyword">const</span> oid * objToCopy, <span class="keywordtype">size_t</span>);
+<a name="l00357" id="l00357"></a>00357     u_int           snmp_increment_statistic(<span class="keywordtype">int</span> which);
+<a name="l00358" id="l00358"></a>00358     u_int           snmp_increment_statistic_by(<span class=
+"keywordtype">int</span> which, <span class="keywordtype">int</span> count);
+<a name="l00359" id="l00359"></a>00359     u_int           snmp_get_statistic(<span class="keywordtype">int</span> which);
+<a name="l00360" id="l00360"></a>00360     <span class="keywordtype">void</span>            snmp_init_statistics(<span class=
+"keywordtype">void</span>);
+<a name="l00361" id="l00361"></a>00361     <span class="keywordtype">int</span>             create_user_from_session(<a class=
+"code" href="structsnmp__session.html" title="The snmp session structure.">netsnmp_session</a> * session);
+<a name="l00362" id="l00362"></a>00362     <span class="keywordtype">int</span> snmp_get_fd_for_session(<span class=
+"keyword">struct</span> <a class="code" href="structsnmp__session.html" title=
+"The snmp session structure.">snmp_session</a> *sessp);
+<a name="l00363" id="l00363"></a>00363     <span class="keywordtype">int</span> <a class="code" href=
+"group__library.html#gac5827cb7fcbd5fcb022f701e8c09a901" title=
+"probe for engineID using RFC 5343 probing mechanisms">snmpv3_probe_contextEngineID_rfc5343</a>(<span class=
+"keywordtype">void</span> *slp,
+<a name="l00364" id="l00364"></a>00364                                              <a class="code" href=
+"structsnmp__session.html" title="The snmp session structure.">netsnmp_session</a> *session);
+<a name="l00365" id="l00365"></a>00365 
+<a name="l00366" id="l00366"></a>00366     <span class="comment">/*</span>
+<a name="l00367" id="l00367"></a>00367 <span class="comment">     * New re-allocating reverse encoding functions.  </span>
+<a name="l00368" id="l00368"></a>00368 <span class="comment">     */</span>
+<a name="l00369" id="l00369"></a>00369 <span class="preprocessor">#ifdef NETSNMP_USE_REVERSE_ASNENCODING</span>
+<a name="l00370" id="l00370"></a>00370 
+<a name="l00371" id="l00371"></a>00371     <span class=
+"keywordtype">int</span>        snmpv3_packet_realloc_rbuild(u_char ** pkt, <span class="keywordtype">size_t</span> * pkt_len,
+<a name="l00372" id="l00372"></a>00372                                      <span class="keywordtype">size_t</span> * offset,
+<a name="l00373" id="l00373"></a>00373                                      <a class="code" href="structsnmp__session.html"
+title="The snmp session structure.">netsnmp_session</a> * session,
+<a name="l00374" id="l00374"></a>00374                                      <a class="code" href="structsnmp__pdu.html" title=
+"The snmp protocol data unit.">netsnmp_pdu</a> *pdu, u_char * pdu_data,
+<a name="l00375" id="l00375"></a>00375                                      <span class=
+"keywordtype">size_t</span> pdu_data_len);
+<a name="l00376" id="l00376"></a>00376 
+<a name="l00377" id="l00377"></a>00377     <span class=
+"keywordtype">int</span>        snmp_pdu_realloc_rbuild(u_char ** pkt, <span class="keywordtype">size_t</span> * pkt_len,
+<a name="l00378" id="l00378"></a>00378                                 <span class=
+"keywordtype">size_t</span> * offset, <a class="code" href="structsnmp__pdu.html" title=
+"The snmp protocol data unit.">netsnmp_pdu</a> *pdu);
+<a name="l00379" id="l00379"></a>00379 <span class="preprocessor">#endif</span>
+<a name="l00380" id="l00380"></a>00380 
+<a name="l00381" id="l00381"></a>00381 
+<a name="l00382" id="l00382"></a>00382 
+<a name="l00383" id="l00383"></a>00383 <span class="keyword">struct </span><a class="code" href=
+"structnetsnmp__transport__s.html">netsnmp_transport_s</a>;
+<a name="l00384" id="l00384"></a>00384 
+<a name="l00385" id="l00385"></a>00385     <span class="comment">/*</span>
+<a name="l00386" id="l00386"></a>00386 <span class="comment">     * Extended open; fpre_parse has changed.  </span>
+<a name="l00387" id="l00387"></a>00387 <span class="comment">     */</span>
+<a name="l00388" id="l00388"></a>00388 
+<a name="l00389" id="l00389"></a>00389     <a class="code" href="structsnmp__session.html" title=
+"The snmp session structure.">netsnmp_session</a> *snmp_open_ex(<a class="code" href="structsnmp__session.html" title=
+"The snmp session structure.">netsnmp_session</a> *,
+<a name="l00390" id="l00390"></a>00390                                   <span class=
+"keywordtype">int</span> (*fpre_parse) (<a class="code" href="structsnmp__session.html" title=
+"The snmp session structure.">netsnmp_session</a> *,
+<a name="l00391" id="l00391"></a>00391                                                      <span class="keyword">struct</span>
+<a name="l00392" id="l00392"></a>00392                                                      <a class="code" href=
+"structnetsnmp__transport__s.html">netsnmp_transport_s</a> *,
+<a name="l00393" id="l00393"></a>00393                                                      <span class=
+"keywordtype">void</span> *, <span class="keywordtype">int</span>),
+<a name="l00394" id="l00394"></a>00394                                   <span class=
+"keywordtype">int</span> (*fparse) (<a class="code" href="structsnmp__session.html" title=
+"The snmp session structure.">netsnmp_session</a> *,
+<a name="l00395" id="l00395"></a>00395                                                  <a class="code" href=
+"structsnmp__pdu.html" title="The snmp protocol data unit.">netsnmp_pdu</a> *, u_char *,
+<a name="l00396" id="l00396"></a>00396                                                  <span class="keywordtype">size_t</span>),
+<a name="l00397" id="l00397"></a>00397                                   <span class=
+"keywordtype">int</span> (*fpost_parse) (<a class="code" href="structsnmp__session.html" title=
+"The snmp session structure.">netsnmp_session</a> *,
+<a name="l00398" id="l00398"></a>00398                                                       <a class="code" href=
+"structsnmp__pdu.html" title="The snmp protocol data unit.">netsnmp_pdu</a> *, <span class="keywordtype">int</span>),
+<a name="l00399" id="l00399"></a>00399                                   <span class=
+"keywordtype">int</span> (*fbuild) (<a class="code" href="structsnmp__session.html" title=
+"The snmp session structure.">netsnmp_session</a> *,
+<a name="l00400" id="l00400"></a>00400                                                  <a class="code" href=
+"structsnmp__pdu.html" title="The snmp protocol data unit.">netsnmp_pdu</a> *, u_char *,
+<a name="l00401" id="l00401"></a>00401                                                  <span class=
+"keywordtype">size_t</span> *),
+<a name="l00402" id="l00402"></a>00402                                   <span class=
+"keywordtype">int</span> (*frbuild) (<a class="code" href="structsnmp__session.html" title=
+"The snmp session structure.">netsnmp_session</a> *,
+<a name="l00403" id="l00403"></a>00403                                                   <a class="code" href=
+"structsnmp__pdu.html" title="The snmp protocol data unit.">netsnmp_pdu</a> *, u_char **,
+<a name="l00404" id="l00404"></a>00404                                                   <span class=
+"keywordtype">size_t</span> *, <span class="keywordtype">size_t</span> *),
+<a name="l00405" id="l00405"></a>00405                                   <span class=
+"keywordtype">int</span> (*fcheck) (u_char *, <span class="keywordtype">size_t</span>));
+<a name="l00406" id="l00406"></a>00406 
+<a name="l00407" id="l00407"></a>00407     <span class="comment">/*</span>
+<a name="l00408" id="l00408"></a>00408 <span class=
+"comment">     * provided for backwards compatability.  Don't use these functions.</span>
+<a name="l00409" id="l00409"></a>00409 <span class="comment">     * See snmp_debug.h and snmp_debug.c instead.</span>
+<a name="l00410" id="l00410"></a>00410 <span class="comment">     */</span>
+<a name="l00411" id="l00411"></a>00411 
+<a name="l00412" id="l00412"></a>00412     <span class="keywordtype">void</span>            snmp_set_do_debugging(<span class=
+"keywordtype">int</span>);
+<a name="l00413" id="l00413"></a>00413     <span class="keywordtype">int</span>             snmp_get_do_debugging(<span class=
+"keywordtype">void</span>);
+<a name="l00414" id="l00414"></a>00414 
+<a name="l00415" id="l00415"></a>00415 
+<a name="l00416" id="l00416"></a>00416 
+<a name="l00417" id="l00417"></a>00417     <span class="keywordtype">void</span>            snmp_sess_error(<span class=
+"keywordtype">void</span> *, <span class="keywordtype">int</span> *, <span class="keywordtype">int</span> *, <span class=
+"keywordtype">char</span> **);
+<a name="l00418" id="l00418"></a>00418     <span class="keywordtype">void</span>            netsnmp_sess_log_error(<span class=
+"keywordtype">int</span> priority,
+<a name="l00419" id="l00419"></a>00419                                            <span class="keyword">const</span> <span class=
+"keywordtype">char</span> *prog_string,
+<a name="l00420" id="l00420"></a>00420                                            <a class="code" href="structsnmp__session.html"
+title="The snmp session structure.">netsnmp_session</a> * ss);
+<a name="l00421" id="l00421"></a>00421     <span class="keywordtype">void</span>            snmp_sess_perror(<span class=
+"keyword">const</span> <span class="keywordtype">char</span> *prog_string,
+<a name="l00422" id="l00422"></a>00422                                      <a class="code" href="structsnmp__session.html"
+title="The snmp session structure.">netsnmp_session</a> * ss);
+<a name="l00423" id="l00423"></a>00423     <span class="keyword">const</span> <span class=
+"keywordtype">char</span> *    snmp_pdu_type(<span class="keywordtype">int</span> type);
+<a name="l00424" id="l00424"></a>00424 
+<a name="l00425" id="l00425"></a>00425     <span class="comment">/*</span>
+<a name="l00426" id="l00426"></a>00426 <span class=
+"comment">     * Return the netsnmp_transport structure associated with the given opaque</span>
+<a name="l00427" id="l00427"></a>00427 <span class="comment">     * pointer.  </span>
+<a name="l00428" id="l00428"></a>00428 <span class="comment">     */</span>
+<a name="l00429" id="l00429"></a>00429 
+<a name="l00430" id="l00430"></a>00430     <span class="keyword">struct </span><a class="code" href=
+"structnetsnmp__transport__s.html">netsnmp_transport_s</a> *snmp_sess_transport(<span class="keywordtype">void</span> *);
+<a name="l00431" id="l00431"></a>00431     <span class="keywordtype">void</span>            snmp_sess_transport_set(<span class=
+"keywordtype">void</span> *,
+<a name="l00432" id="l00432"></a>00432                                             <span class="keyword">struct</span> <a class=
+"code" href="structnetsnmp__transport__s.html">netsnmp_transport_s</a> *);
+<a name="l00433" id="l00433"></a>00433 
+<a name="l00434" id="l00434"></a>00434     <span class="comment">/*</span>
+<a name="l00435" id="l00435"></a>00435 <span class=
+"comment">     * EXPERIMENTAL API EXTENSIONS ------------------------------------------ </span>
+<a name="l00436" id="l00436"></a>00436 <span class="comment">     * </span>
+<a name="l00437" id="l00437"></a>00437 <span class="comment">     * snmp_sess_add_ex, snmp_sess_add, snmp_add </span>
+<a name="l00438" id="l00438"></a>00438 <span class="comment">     * </span>
+<a name="l00439" id="l00439"></a>00439 <span class=
+"comment">     * Analogous to snmp_open family of functions, but taking an</span>
+<a name="l00440" id="l00440"></a>00440 <span class=
+"comment">     * netsnmp_transport pointer as an extra argument.  Unlike snmp_open et</span>
+<a name="l00441" id="l00441"></a>00441 <span class=
+"comment">     * al. it doesn't attempt to interpret the in_session-&gt;peername as a</span>
+<a name="l00442" id="l00442"></a>00442 <span class=
+"comment">     * transport endpoint specifier, but instead uses the supplied transport.</span>
+<a name="l00443" id="l00443"></a>00443 <span class="comment">     * JBPN</span>
+<a name="l00444" id="l00444"></a>00444 <span class="comment">     * </span>
+<a name="l00445" id="l00445"></a>00445 <span class="comment">     */</span>
+<a name="l00446" id="l00446"></a>00446 
+<a name="l00447" id="l00447"></a>00447     <span class="keywordtype">void</span>           *snmp_sess_add_ex(<a class="code"
+href="structsnmp__session.html" title="The snmp session structure.">netsnmp_session</a> *,
+<a name="l00448" id="l00448"></a>00448                                      <span class="keyword">struct</span> <a class="code"
+href="structnetsnmp__transport__s.html">netsnmp_transport_s</a> *,
+<a name="l00449" id="l00449"></a>00449                                      <span class=
+"keywordtype">int</span> (*fpre_parse) (<a class="code" href="structsnmp__session.html" title=
+"The snmp session structure.">netsnmp_session</a> *,
+<a name="l00450" id="l00450"></a>00450                                                         <span class=
+"keyword">struct</span>
+<a name="l00451" id="l00451"></a>00451                                                         <a class="code" href=
+"structnetsnmp__transport__s.html">netsnmp_transport_s</a>
+<a name="l00452" id="l00452"></a>00452                                                         *, <span class=
+"keywordtype">void</span> *, <span class="keywordtype">int</span>),
+<a name="l00453" id="l00453"></a>00453                                      <span class=
+"keywordtype">int</span> (*fparse) (<a class="code" href="structsnmp__session.html" title=
+"The snmp session structure.">netsnmp_session</a> *,
+<a name="l00454" id="l00454"></a>00454                                                     <span class=
+"keyword">struct</span> <a class="code" href="structsnmp__pdu.html" title="The snmp protocol data unit.">snmp_pdu</a> *,
+<a name="l00455" id="l00455"></a>00455                                                     u_char *, <span class=
+"keywordtype">size_t</span>),
+<a name="l00456" id="l00456"></a>00456                                      <span class=
+"keywordtype">int</span> (*fpost_parse) (<a class="code" href="structsnmp__session.html" title=
+"The snmp session structure.">netsnmp_session</a> *,
+<a name="l00457" id="l00457"></a>00457                                                          <span class=
+"keyword">struct</span> <a class="code" href="structsnmp__pdu.html" title="The snmp protocol data unit.">snmp_pdu</a> *,
+<a name="l00458" id="l00458"></a>00458                                                          <span class=
+"keywordtype">int</span>),
+<a name="l00459" id="l00459"></a>00459                                      <span class=
+"keywordtype">int</span> (*fbuild) (<a class="code" href="structsnmp__session.html" title=
+"The snmp session structure.">netsnmp_session</a> *,
+<a name="l00460" id="l00460"></a>00460                                                     <span class=
+"keyword">struct</span> <a class="code" href="structsnmp__pdu.html" title="The snmp protocol data unit.">snmp_pdu</a> *,
+<a name="l00461" id="l00461"></a>00461                                                     u_char *, <span class=
+"keywordtype">size_t</span> *),
+<a name="l00462" id="l00462"></a>00462                                      <span class=
+"keywordtype">int</span> (*frbuild) (<a class="code" href="structsnmp__session.html" title=
+"The snmp session structure.">netsnmp_session</a> *,
+<a name="l00463" id="l00463"></a>00463                                                      <span class=
+"keyword">struct</span> <a class="code" href="structsnmp__pdu.html" title="The snmp protocol data unit.">snmp_pdu</a> *,
+<a name="l00464" id="l00464"></a>00464                                                      u_char **, <span class=
+"keywordtype">size_t</span> *,
+<a name="l00465" id="l00465"></a>00465                                                      <span class=
+"keywordtype">size_t</span> *),
+<a name="l00466" id="l00466"></a>00466                                      <span class=
+"keywordtype">int</span> (*fcheck) (u_char *, <span class="keywordtype">size_t</span>),
+<a name="l00467" id="l00467"></a>00467                                      <a class="code" href="structsnmp__pdu.html" title=
+"The snmp protocol data unit.">netsnmp_pdu</a> *(*fcreate_pdu) (<span class="keyword">struct</span>
+<a name="l00468" id="l00468"></a>00468                                                                   <a class="code" href=
+"structnetsnmp__transport__s.html">netsnmp_transport_s</a>
+<a name="l00469" id="l00469"></a>00469                                                                   *,
+<a name="l00470" id="l00470"></a>00470                                                                   <span class=
+"keywordtype">void</span> *,
+<a name="l00471" id="l00471"></a>00471                                                                   <span class=
+"keywordtype">size_t</span>));
+<a name="l00472" id="l00472"></a>00472 
+<a name="l00473" id="l00473"></a>00473     <span class="keywordtype">void</span>           *snmp_sess_add(<a class="code" href=
+"structsnmp__session.html" title="The snmp session structure.">netsnmp_session</a> *,
+<a name="l00474" id="l00474"></a>00474                                   <span class="keyword">struct</span> <a class="code"
+href="structnetsnmp__transport__s.html">netsnmp_transport_s</a> *,
+<a name="l00475" id="l00475"></a>00475                                   <span class=
+"keywordtype">int</span> (*fpre_parse) (<a class="code" href="structsnmp__session.html" title=
+"The snmp session structure.">netsnmp_session</a> *,
+<a name="l00476" id="l00476"></a>00476                                                      <span class="keyword">struct</span>
+<a name="l00477" id="l00477"></a>00477                                                      <a class="code" href=
+"structnetsnmp__transport__s.html">netsnmp_transport_s</a> *,
+<a name="l00478" id="l00478"></a>00478                                                      <span class=
+"keywordtype">void</span> *, <span class="keywordtype">int</span>),
+<a name="l00479" id="l00479"></a>00479                                   <span class=
+"keywordtype">int</span> (*fpost_parse) (<a class="code" href="structsnmp__session.html" title=
+"The snmp session structure.">netsnmp_session</a> *,
+<a name="l00480" id="l00480"></a>00480                                                       <a class="code" href=
+"structsnmp__pdu.html" title="The snmp protocol data unit.">netsnmp_pdu</a> *, <span class="keywordtype">int</span>));
+<a name="l00481" id="l00481"></a>00481 
+<a name="l00482" id="l00482"></a>00482     <a class="code" href="structsnmp__session.html" title=
+"The snmp session structure.">netsnmp_session</a> *snmp_add(<a class="code" href="structsnmp__session.html" title=
+"The snmp session structure.">netsnmp_session</a> *,
+<a name="l00483" id="l00483"></a>00483                               <span class="keyword">struct</span> <a class="code" href=
+"structnetsnmp__transport__s.html">netsnmp_transport_s</a> *,
+<a name="l00484" id="l00484"></a>00484                               <span class=
+"keywordtype">int</span> (*fpre_parse) (<a class="code" href="structsnmp__session.html" title=
+"The snmp session structure.">netsnmp_session</a> *,
+<a name="l00485" id="l00485"></a>00485                                                  <span class=
+"keyword">struct</span> <a class="code" href="structnetsnmp__transport__s.html">netsnmp_transport_s</a>
+<a name="l00486" id="l00486"></a>00486                                                  *, <span class=
+"keywordtype">void</span> *, <span class="keywordtype">int</span>),
+<a name="l00487" id="l00487"></a>00487                               <span class=
+"keywordtype">int</span> (*fpost_parse) (<a class="code" href="structsnmp__session.html" title=
+"The snmp session structure.">netsnmp_session</a> *,
+<a name="l00488" id="l00488"></a>00488                                                   <a class="code" href=
+"structsnmp__pdu.html" title="The snmp protocol data unit.">netsnmp_pdu</a> *, <span class="keywordtype">int</span>));
+<a name="l00489" id="l00489"></a>00489     <a class="code" href="structsnmp__session.html" title=
+"The snmp session structure.">netsnmp_session</a> *snmp_add_full(<a class="code" href="structsnmp__session.html" title=
+"The snmp session structure.">netsnmp_session</a> * in_session,
+<a name="l00490" id="l00490"></a>00490                                    <span class="keyword">struct</span> <a class="code"
+href="structnetsnmp__transport__s.html">netsnmp_transport_s</a> *transport,
+<a name="l00491" id="l00491"></a>00491                                    <span class=
+"keywordtype">int</span> (*fpre_parse) (<a class="code" href="structsnmp__session.html" title=
+"The snmp session structure.">netsnmp_session</a> *,
+<a name="l00492" id="l00492"></a>00492                                                       <span class="keyword">struct</span>
+<a name="l00493" id="l00493"></a>00493                                                       <a class="code" href=
+"structnetsnmp__transport__s.html">netsnmp_transport_s</a>
+<a name="l00494" id="l00494"></a>00494                                                       *, <span class=
+"keywordtype">void</span> *, <span class="keywordtype">int</span>),
+<a name="l00495" id="l00495"></a>00495                                    <span class=
+"keywordtype">int</span> (*fparse) (<a class="code" href="structsnmp__session.html" title=
+"The snmp session structure.">netsnmp_session</a> *,
+<a name="l00496" id="l00496"></a>00496                                                   <a class="code" href=
+"structsnmp__pdu.html" title="The snmp protocol data unit.">netsnmp_pdu</a> *, u_char *,
+<a name="l00497" id="l00497"></a>00497                                                   <span class=
+"keywordtype">size_t</span>),
+<a name="l00498" id="l00498"></a>00498                                    <span class=
+"keywordtype">int</span> (*fpost_parse) (<a class="code" href="structsnmp__session.html" title=
+"The snmp session structure.">netsnmp_session</a> *,
+<a name="l00499" id="l00499"></a>00499                                                        <a class="code" href=
+"structsnmp__pdu.html" title="The snmp protocol data unit.">netsnmp_pdu</a> *, <span class="keywordtype">int</span>),
+<a name="l00500" id="l00500"></a>00500                                    <span class=
+"keywordtype">int</span> (*fbuild) (<a class="code" href="structsnmp__session.html" title=
+"The snmp session structure.">netsnmp_session</a> *,
+<a name="l00501" id="l00501"></a>00501                                                   <a class="code" href=
+"structsnmp__pdu.html" title="The snmp protocol data unit.">netsnmp_pdu</a> *, u_char *,
+<a name="l00502" id="l00502"></a>00502                                                   <span class=
+"keywordtype">size_t</span> *),
+<a name="l00503" id="l00503"></a>00503                                    <span class=
+"keywordtype">int</span> (*frbuild) (<a class="code" href="structsnmp__session.html" title=
+"The snmp session structure.">netsnmp_session</a> *,
+<a name="l00504" id="l00504"></a>00504                                                    <a class="code" href=
+"structsnmp__pdu.html" title="The snmp protocol data unit.">netsnmp_pdu</a> *,
+<a name="l00505" id="l00505"></a>00505                                                    u_char **, <span class=
+"keywordtype">size_t</span> *,
+<a name="l00506" id="l00506"></a>00506                                                    <span class=
+"keywordtype">size_t</span> *),
+<a name="l00507" id="l00507"></a>00507                                    <span class=
+"keywordtype">int</span> (*fcheck) (u_char *, <span class="keywordtype">size_t</span>),
+<a name="l00508" id="l00508"></a>00508                                    <a class="code" href="structsnmp__pdu.html" title=
+"The snmp protocol data unit.">netsnmp_pdu</a> *(*fcreate_pdu) (<span class="keyword">struct</span>
+<a name="l00509" id="l00509"></a>00509                                                                 <a class="code" href=
+"structnetsnmp__transport__s.html">netsnmp_transport_s</a>
+<a name="l00510" id="l00510"></a>00510                                                                 *, <span class=
+"keywordtype">void</span> *,
+<a name="l00511" id="l00511"></a>00511                                                                 <span class=
+"keywordtype">size_t</span>)
+<a name="l00512" id="l00512"></a>00512         );
+<a name="l00513" id="l00513"></a>00513     <span class="comment">/*</span>
+<a name="l00514" id="l00514"></a>00514 <span class="comment">     * end single session API </span>
+<a name="l00515" id="l00515"></a>00515 <span class="comment">     */</span>
+<a name="l00516" id="l00516"></a>00516 
+<a name="l00517" id="l00517"></a>00517     <span class="comment">/*</span>
+<a name="l00518" id="l00518"></a>00518 <span class="comment">     * generic statistic counters </span>
+<a name="l00519" id="l00519"></a>00519 <span class="comment">     */</span>
+<a name="l00520" id="l00520"></a>00520 
+<a name="l00521" id="l00521"></a>00521     <span class="comment">/*</span>
+<a name="l00522" id="l00522"></a>00522 <span class="comment">     * snmpv3 statistics </span>
+<a name="l00523" id="l00523"></a>00523 <span class="comment">     */</span>
+<a name="l00524" id="l00524"></a>00524 
+<a name="l00525" id="l00525"></a>00525     <span class="comment">/*</span>
+<a name="l00526" id="l00526"></a>00526 <span class="comment">     * mpd stats </span>
+<a name="l00527" id="l00527"></a>00527 <span class="comment">     */</span>
+<a name="l00528" id="l00528"></a>00528 <span class="preprocessor">#define   STAT_SNMPUNKNOWNSECURITYMODELS     0</span>
+<a name="l00529" id="l00529"></a>00529 <span class="preprocessor">#define   STAT_SNMPINVALIDMSGS               1</span>
+<a name="l00530" id="l00530"></a>00530 <span class="preprocessor">#define   STAT_SNMPUNKNOWNPDUHANDLERS        2</span>
+<a name="l00531" id="l00531"></a>00531 <span class=
+"preprocessor">#define   STAT_MPD_STATS_START               STAT_SNMPUNKNOWNSECURITYMODELS</span>
+<a name="l00532" id="l00532"></a>00532 <span class=
+"preprocessor">#define   STAT_MPD_STATS_END                 STAT_SNMPUNKNOWNPDUHANDLERS</span>
+<a name="l00533" id="l00533"></a>00533 
+<a name="l00534" id="l00534"></a>00534     <span class="comment">/*</span>
+<a name="l00535" id="l00535"></a>00535 <span class="comment">     * usm stats </span>
+<a name="l00536" id="l00536"></a>00536 <span class="comment">     */</span>
+<a name="l00537" id="l00537"></a>00537 <span class="preprocessor">#define   STAT_USMSTATSUNSUPPORTEDSECLEVELS  3</span>
+<a name="l00538" id="l00538"></a>00538 <span class="preprocessor">#define   STAT_USMSTATSNOTINTIMEWINDOWS      4</span>
+<a name="l00539" id="l00539"></a>00539 <span class="preprocessor">#define   STAT_USMSTATSUNKNOWNUSERNAMES      5</span>
+<a name="l00540" id="l00540"></a>00540 <span class="preprocessor">#define   STAT_USMSTATSUNKNOWNENGINEIDS      6</span>
+<a name="l00541" id="l00541"></a>00541 <span class="preprocessor">#define   STAT_USMSTATSWRONGDIGESTS          7</span>
+<a name="l00542" id="l00542"></a>00542 <span class="preprocessor">#define   STAT_USMSTATSDECRYPTIONERRORS      8</span>
+<a name="l00543" id="l00543"></a>00543 <span class=
+"preprocessor">#define   STAT_USM_STATS_START               STAT_USMSTATSUNSUPPORTEDSECLEVELS</span>
+<a name="l00544" id="l00544"></a>00544 <span class=
+"preprocessor">#define   STAT_USM_STATS_END                 STAT_USMSTATSDECRYPTIONERRORS</span>
+<a name="l00545" id="l00545"></a>00545 
+<a name="l00546" id="l00546"></a>00546     <span class="comment">/*</span>
+<a name="l00547" id="l00547"></a>00547 <span class="comment">     * snmp counters </span>
+<a name="l00548" id="l00548"></a>00548 <span class="comment">     */</span>
+<a name="l00549" id="l00549"></a>00549 <span class="preprocessor">#define  STAT_SNMPINPKTS                     9</span>
+<a name="l00550" id="l00550"></a>00550 <span class="preprocessor">#define  STAT_SNMPOUTPKTS                    10</span>
+<a name="l00551" id="l00551"></a>00551 <span class="preprocessor">#define  STAT_SNMPINBADVERSIONS              11</span>
+<a name="l00552" id="l00552"></a>00552 <span class="preprocessor">#define  STAT_SNMPINBADCOMMUNITYNAMES        12</span>
+<a name="l00553" id="l00553"></a>00553 <span class="preprocessor">#define  STAT_SNMPINBADCOMMUNITYUSES         13</span>
+<a name="l00554" id="l00554"></a>00554 <span class="preprocessor">#define  STAT_SNMPINASNPARSEERRS             14</span>
+<a name="l00555" id="l00555"></a>00555     <span class="comment">/*</span>
+<a name="l00556" id="l00556"></a>00556 <span class="comment">     * #define  STAT_SNMPINBADTYPES              15 </span>
+<a name="l00557" id="l00557"></a>00557 <span class="comment">     */</span>
+<a name="l00558" id="l00558"></a>00558 <span class="preprocessor">#define  STAT_SNMPINTOOBIGS                  16</span>
+<a name="l00559" id="l00559"></a>00559 <span class="preprocessor">#define  STAT_SNMPINNOSUCHNAMES              17</span>
+<a name="l00560" id="l00560"></a>00560 <span class="preprocessor">#define  STAT_SNMPINBADVALUES                18</span>
+<a name="l00561" id="l00561"></a>00561 <span class="preprocessor">#define  STAT_SNMPINREADONLYS                19</span>
+<a name="l00562" id="l00562"></a>00562 <span class="preprocessor">#define  STAT_SNMPINGENERRS                  20</span>
+<a name="l00563" id="l00563"></a>00563 <span class="preprocessor">#define  STAT_SNMPINTOTALREQVARS             21</span>
+<a name="l00564" id="l00564"></a>00564 <span class="preprocessor">#define  STAT_SNMPINTOTALSETVARS             22</span>
+<a name="l00565" id="l00565"></a>00565 <span class="preprocessor">#define  STAT_SNMPINGETREQUESTS              23</span>
+<a name="l00566" id="l00566"></a>00566 <span class="preprocessor">#define  STAT_SNMPINGETNEXTS                 24</span>
+<a name="l00567" id="l00567"></a>00567 <span class="preprocessor">#define  STAT_SNMPINSETREQUESTS              25</span>
+<a name="l00568" id="l00568"></a>00568 <span class="preprocessor">#define  STAT_SNMPINGETRESPONSES             26</span>
+<a name="l00569" id="l00569"></a>00569 <span class="preprocessor">#define  STAT_SNMPINTRAPS                    27</span>
+<a name="l00570" id="l00570"></a>00570 <span class="preprocessor">#define  STAT_SNMPOUTTOOBIGS                 28</span>
+<a name="l00571" id="l00571"></a>00571 <span class="preprocessor">#define  STAT_SNMPOUTNOSUCHNAMES             29</span>
+<a name="l00572" id="l00572"></a>00572 <span class="preprocessor">#define  STAT_SNMPOUTBADVALUES               30</span>
+<a name="l00573" id="l00573"></a>00573     <span class="comment">/*</span>
+<a name="l00574" id="l00574"></a>00574 <span class="comment">     * #define  STAT_SNMPOUTREADONLYS            31 </span>
+<a name="l00575" id="l00575"></a>00575 <span class="comment">     */</span>
+<a name="l00576" id="l00576"></a>00576 <span class="preprocessor">#define  STAT_SNMPOUTGENERRS                 32</span>
+<a name="l00577" id="l00577"></a>00577 <span class="preprocessor">#define  STAT_SNMPOUTGETREQUESTS             33</span>
+<a name="l00578" id="l00578"></a>00578 <span class="preprocessor">#define  STAT_SNMPOUTGETNEXTS                34</span>
+<a name="l00579" id="l00579"></a>00579 <span class="preprocessor">#define  STAT_SNMPOUTSETREQUESTS             35</span>
+<a name="l00580" id="l00580"></a>00580 <span class="preprocessor">#define  STAT_SNMPOUTGETRESPONSES            36</span>
+<a name="l00581" id="l00581"></a>00581 <span class="preprocessor">#define  STAT_SNMPOUTTRAPS                   37</span>
+<a name="l00582" id="l00582"></a>00582     <span class="comment">/*</span>
+<a name="l00583" id="l00583"></a>00583 <span class="comment">     * AUTHTRAPENABLE                            38 </span>
+<a name="l00584" id="l00584"></a>00584 <span class="comment">     */</span>
+<a name="l00585" id="l00585"></a>00585 <span class="preprocessor">#define  STAT_SNMPSILENTDROPS                39</span>
+<a name="l00586" id="l00586"></a>00586 <span class="preprocessor">#define  STAT_SNMPPROXYDROPS                 40</span>
+<a name="l00587" id="l00587"></a>00587 <span class=
+"preprocessor">#define  STAT_SNMP_STATS_START               STAT_SNMPINPKTS</span>
+<a name="l00588" id="l00588"></a>00588 <span class=
+"preprocessor">#define  STAT_SNMP_STATS_END                 STAT_SNMPPROXYDROPS</span>
+<a name="l00589" id="l00589"></a>00589 
+<a name="l00590" id="l00590"></a>00590     <span class="comment">/*</span>
+<a name="l00591" id="l00591"></a>00591 <span class="comment">     * target mib counters </span>
+<a name="l00592" id="l00592"></a>00592 <span class="comment">     */</span>
+<a name="l00593" id="l00593"></a>00593 <span class="preprocessor">#define  STAT_SNMPUNAVAILABLECONTEXTS        41</span>
+<a name="l00594" id="l00594"></a>00594 <span class="preprocessor">#define  STAT_SNMPUNKNOWNCONTEXTS            42</span>
+<a name="l00595" id="l00595"></a>00595 <span class=
+"preprocessor">#define  STAT_TARGET_STATS_START             STAT_SNMPUNAVAILABLECONTEXTS</span>
+<a name="l00596" id="l00596"></a>00596 <span class=
+"preprocessor">#define  STAT_TARGET_STATS_END               STAT_SNMPUNKNOWNCONTEXTS</span>
+<a name="l00597" id="l00597"></a>00597 
+<a name="l00598" id="l00598"></a>00598 <span class="preprocessor">#define  MAX_STATS                           43</span>
+<a name="l00599" id="l00599"></a>00599 
+<a name="l00600" id="l00600"></a>00600 <span class="preprocessor">#ifdef __cplusplus</span>
+<a name="l00601" id="l00601"></a>00601 }
+<a name="l00602" id="l00602"></a>00602 <span class="preprocessor">#endif</span>
+<a name="l00603" id="l00603"></a>00603 <span class="preprocessor">#endif                          </span><span class=
+"comment">/* SNMP_API_H */</span>
+</pre>
+    </div>
+  </div>
+  <hr size="1" />
+
+  <address style="text-align: right;">
+    <small>Generated on 28 Sep 2009 for net-snmp by  <a href="http://www.doxygen.org/index.html"><img class="footer" src=
+    "doxygen.png" alt="doxygen" /></a> 1.6.1</small>
+<!-- CONTENT END -->
+<!--#include virtual="/page-bottom.html" -->
+

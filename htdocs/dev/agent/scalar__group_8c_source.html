@@ -1,0 +1,349 @@
+<!--#set var="section" value="development" -->
+<!--#include virtual="/page-top.html" -->
+<!-- CONTENT START -->
+  <div class="navigation" id="top">
+    <div class="tabs">
+      <ul>
+        <li><a href="index.html"><span>Main Page</span></a></li>
+
+        <li><a href="pages.html"><span>Related Pages</span></a></li>
+
+        <li><a href="modules.html"><span>Modules</span></a></li>
+
+        <li><a href="annotated.html"><span>Data Structures</span></a></li>
+
+        <li class="current"><a href="files.html"><span>Files</span></a></li>
+
+        <li><a href="examples.html"><span>Examples</span></a></li>
+      </ul>
+    </div>
+
+    <div class="tabs">
+      <ul>
+        <li><a href="files.html"><span>File List</span></a></li>
+
+        <li><a href="globals.html"><span>Globals</span></a></li>
+      </ul>
+    </div>
+
+    <h1>scalar_group.c</h1>
+
+    <div class="fragment">
+      <pre class="fragment">
+<a name="l00001" id="l00001"></a>00001 <span class="preprocessor">#include &lt;net-snmp/net-snmp-config.h&gt;</span>
+<a name="l00002" id="l00002"></a>00002 
+<a name="l00003" id="l00003"></a>00003 <span class="preprocessor">#include &lt;net-snmp/net-snmp-includes.h&gt;</span>
+<a name="l00004" id="l00004"></a>00004 <span class=
+"preprocessor">#include &lt;net-snmp/agent/net-snmp-agent-includes.h&gt;</span>
+<a name="l00005" id="l00005"></a>00005 
+<a name="l00006" id="l00006"></a>00006 <span class="preprocessor">#include &lt;net-snmp/agent/scalar_group.h&gt;</span>
+<a name="l00007" id="l00007"></a>00007 
+<a name="l00008" id="l00008"></a>00008 <span class="preprocessor">#include &lt;stdlib.h&gt;</span>
+<a name="l00009" id="l00009"></a>00009 <span class="preprocessor">#if HAVE_STRING_H</span>
+<a name="l00010" id="l00010"></a>00010 <span class="preprocessor">#include &lt;string.h&gt;</span>
+<a name="l00011" id="l00011"></a>00011 <span class="preprocessor">#else</span>
+<a name="l00012" id="l00012"></a>00012 <span class="preprocessor">#include &lt;strings.h&gt;</span>
+<a name="l00013" id="l00013"></a>00013 <span class="preprocessor">#endif</span>
+<a name="l00014" id="l00014"></a>00014 
+<a name="l00015" id="l00015"></a>00015 <span class="preprocessor">#include &lt;net-snmp/agent/instance.h&gt;</span>
+<a name="l00016" id="l00016"></a>00016 <span class="preprocessor">#include &lt;net-snmp/agent/serialize.h&gt;</span>
+<a name="l00017" id="l00017"></a>00017 
+<a name="l00023" id="l00023"></a>00023 <a class="code" href="structnetsnmp__mib__handler__s.html" title=
+"the mib handler structure to be registered">netsnmp_mib_handler</a> *
+<a name="l00024" id="l00024"></a>00024 netsnmp_get_scalar_group_handler(oid first, oid last)
+<a name="l00025" id="l00025"></a>00025 {
+<a name="l00026" id="l00026"></a>00026     <a class="code" href="structnetsnmp__mib__handler__s.html" title=
+"the mib handler structure to be registered">netsnmp_mib_handler</a>  *ret    = NULL;
+<a name="l00027" id="l00027"></a>00027     <a class="code" href=
+"structnetsnmp__scalar__group__s.html">netsnmp_scalar_group</a> *sgroup = NULL;
+<a name="l00028" id="l00028"></a>00028 
+<a name="l00029" id="l00029"></a>00029     ret = <a class="code" href="group__handler.html#ga169c1653d481ed3d7df0c1795d99ca0c"
+title="creates a netsnmp_mib_handler structure given a name and a access method.">netsnmp_create_handler</a>(<span class=
+"stringliteral">"scalar_group"</span>,
+<a name="l00030" id="l00030"></a>00030                                   netsnmp_scalar_group_helper_handler);
+<a name="l00031" id="l00031"></a>00031     <span class="keywordflow">if</span> (ret) {
+<a name="l00032" id="l00032"></a>00032         sgroup = <a class="code" href=
+"group__util.html#ga9cd013bb193de5048149afeb9d94e424" title=
+"Mallocs memory of sizeof(t), zeros it and returns a pointer to it.">SNMP_MALLOC_TYPEDEF</a>(<a class="code" href=
+"structnetsnmp__scalar__group__s.html">netsnmp_scalar_group</a>);
+<a name="l00033" id="l00033"></a>00033         <span class="keywordflow">if</span> (NULL == sgroup) {
+<a name="l00034" id="l00034"></a>00034             <a class="code" href="group__handler.html#gac0eb7f89dee961df2d09084fd7925952"
+title="free&amp;#39;s the resourceses associated with a given handler">netsnmp_handler_free</a>(ret);
+<a name="l00035" id="l00035"></a>00035             ret = NULL;
+<a name="l00036" id="l00036"></a>00036         }
+<a name="l00037" id="l00037"></a>00037         <span class="keywordflow">else</span> {
+<a name="l00038" id="l00038"></a>00038             sgroup-&gt;lbound = first;
+<a name="l00039" id="l00039"></a>00039             sgroup-&gt;ubound = last;
+<a name="l00040" id="l00040"></a>00040             ret-&gt;<a class="code" href=
+"structnetsnmp__mib__handler__s.html#a74067d02cea4a059cd0fce7790b77b18" title=
+"for handler&amp;#39;s internal use">myvoid</a> = (<span class="keywordtype">void</span> *)sgroup;
+<a name="l00041" id="l00041"></a>00041         }
+<a name="l00042" id="l00042"></a>00042     }
+<a name="l00043" id="l00043"></a>00043     <span class="keywordflow">return</span> ret;
+<a name="l00044" id="l00044"></a>00044 }
+<a name="l00045" id="l00045"></a>00045 
+<a name="l00046" id="l00046"></a>00046 <span class="keywordtype">int</span>
+<a name="l00047" id="l00047"></a>00047 netsnmp_register_scalar_group(<a class="code" href=
+"structnetsnmp__handler__registration__s.html" title="Root registration info.">netsnmp_handler_registration</a> *reginfo,
+<a name="l00048" id="l00048"></a>00048                               oid first, oid last)
+<a name="l00049" id="l00049"></a>00049 {
+<a name="l00050" id="l00050"></a>00050     <a class="code" href="group__handler.html#ga6649d75b3eaf98d70704754d3d8235f3" title=
+"inject a new handler into the calling chain of the handlers definedy by the netsnmp_handler_registra...">netsnmp_inject_handler</a>(reginfo, <a class="code"
+href="group__instance.html#gad2180b5fcf3d54213ad1b34e6913e198" title=
+"Creates an instance helper handler, calls netsnmp_create_handler, which then could...">netsnmp_get_instance_handler</a>());
+<a name="l00051" id="l00051"></a>00051     <a class="code" href="group__handler.html#ga6649d75b3eaf98d70704754d3d8235f3" title=
+"inject a new handler into the calling chain of the handlers definedy by the netsnmp_handler_registra...">netsnmp_inject_handler</a>(reginfo, netsnmp_get_scalar_group_handler(first, last));
+<a name="l00052" id="l00052"></a>00052     <span class="keywordflow">return</span> <a class="code" href=
+"group__serialize.html#ga09c511d8a9c3b00a72884600a623d8a2" title=
+"functionally the same as calling netsnmp_register_handler() but also injects a serialize...">netsnmp_register_serialize</a>(reginfo);
+<a name="l00053" id="l00053"></a>00053 }
+<a name="l00054" id="l00054"></a>00054 
+<a name="l00055" id="l00055"></a>00055 
+<a name="l00056" id="l00056"></a>00056 <span class="keywordtype">int</span>
+<a name="l00057" id="l00057"></a>00057 netsnmp_scalar_group_helper_handler(<a class="code" href=
+"structnetsnmp__mib__handler__s.html" title="the mib handler structure to be registered">netsnmp_mib_handler</a> *handler,
+<a name="l00058" id="l00058"></a>00058                                 <a class="code" href=
+"structnetsnmp__handler__registration__s.html" title="Root registration info.">netsnmp_handler_registration</a> *reginfo,
+<a name="l00059" id="l00059"></a>00059                                 <a class="code" href=
+"structnetsnmp__agent__request__info__s.html" title=
+"The agent transaction request structure.">netsnmp_agent_request_info</a> *reqinfo,
+<a name="l00060" id="l00060"></a>00060                                 <a class="code" href=
+"structnetsnmp__request__info__s.html" title="The netsnmp request info structure.">netsnmp_request_info</a> *requests)
+<a name="l00061" id="l00061"></a>00061 {
+<a name="l00062" id="l00062"></a>00062     <a class="code" href="structvariable__list.html" title=
+"The netsnmp variable list binding structure, it&amp;#39;s typedef&amp;#39;d to netsnmp_variable_list...">netsnmp_variable_list</a> *var = requests-&gt;<a class="code"
+href="structnetsnmp__request__info__s.html#a455d87f6b7178fe19ea564c60c0ccb6f" title="variable bindings">requestvb</a>;
+<a name="l00063" id="l00063"></a>00063 
+<a name="l00064" id="l00064"></a>00064     <a class="code" href=
+"structnetsnmp__scalar__group__s.html">netsnmp_scalar_group</a> *sgroup = (<a class="code" href=
+"structnetsnmp__scalar__group__s.html">netsnmp_scalar_group</a> *)handler-&gt;<a class="code" href=
+"structnetsnmp__mib__handler__s.html#a74067d02cea4a059cd0fce7790b77b18" title="for handler&amp;#39;s internal use">myvoid</a>;
+<a name="l00065" id="l00065"></a>00065     <span class="keywordtype">int</span>             ret, cmp;
+<a name="l00066" id="l00066"></a>00066     <span class="keywordtype">int</span>             namelen;
+<a name="l00067" id="l00067"></a>00067     oid             subid, root_tmp[MAX_OID_LEN], *root_save;
+<a name="l00068" id="l00068"></a>00068 
+<a name="l00069" id="l00069"></a>00069     DEBUGMSGTL((<span class="stringliteral">"helper:scalar_group"</span>, <span class=
+"stringliteral">"Got request:\n"</span>));
+<a name="l00070" id="l00070"></a>00070     namelen = <a class="code" href="group__util.html#gad1976dec11cfd62abaa4ecedad948f18"
+title="Computers the minimum of a and b.">SNMP_MIN</a>(requests-&gt;<a class="code" href=
+"structnetsnmp__request__info__s.html#a455d87f6b7178fe19ea564c60c0ccb6f" title="variable bindings">requestvb</a>-&gt;<a class=
+"code" href="structvariable__list.html#a089e5b1a422bf8e693510ff5408a57a7" title=
+"number of subid&amp;#39;s in name">name_length</a>,
+<a name="l00071" id="l00071"></a>00071                        reginfo-&gt;rootoid_len);
+<a name="l00072" id="l00072"></a>00072     cmp = <a class="code" href="group__library.html#gab5b48a42c19a801547e025ed40b4561e"
+title="lexicographical compare two object identifiers.">snmp_oid_compare</a>(requests-&gt;<a class="code" href=
+"structnetsnmp__request__info__s.html#a455d87f6b7178fe19ea564c60c0ccb6f" title="variable bindings">requestvb</a>-&gt;<a class=
+"code" href="structvariable__list.html#a7b5bdda01921550d24ea53033ce76146" title=
+"Object identifier of variable.">name</a>, namelen,
+<a name="l00073" id="l00073"></a>00073                            reginfo-&gt;<a class="code" href=
+"structnetsnmp__handler__registration__s.html#a264722b6b9385237fbcb5f8bc144d470" title=
+"where are we registered at?">rootoid</a>, reginfo-&gt;rootoid_len);
+<a name="l00074" id="l00074"></a>00074 
+<a name="l00075" id="l00075"></a>00075     DEBUGMSGTL(( <span class="stringliteral">"helper:scalar_group"</span>, <span class=
+"stringliteral">"  cmp=%d, oid:"</span>, cmp));
+<a name="l00076" id="l00076"></a>00076     DEBUGMSGOID((<span class=
+"stringliteral">"helper:scalar_group"</span>, var-&gt;<a class="code" href=
+"structvariable__list.html#a7b5bdda01921550d24ea53033ce76146" title="Object identifier of variable.">name</a>, var-&gt;<a class=
+"code" href="structvariable__list.html#a089e5b1a422bf8e693510ff5408a57a7" title=
+"number of subid&amp;#39;s in name">name_length</a>));
+<a name="l00077" id="l00077"></a>00077     DEBUGMSG((   <span class="stringliteral">"helper:scalar_group"</span>, <span class=
+"stringliteral">"\n"</span>));
+<a name="l00078" id="l00078"></a>00078 
+<a name="l00079" id="l00079"></a>00079     <span class="comment">/*</span>
+<a name="l00080" id="l00080"></a>00080 <span class=
+"comment">     * copy root oid to root_tmp, set instance to 0. (subid set later on)</span>
+<a name="l00081" id="l00081"></a>00081 <span class=
+"comment">     * save rootoid, since we'll replace it before calling next handler,</span>
+<a name="l00082" id="l00082"></a>00082 <span class="comment">     * and need to restore it afterwards.</span>
+<a name="l00083" id="l00083"></a>00083 <span class="comment">     */</span>
+<a name="l00084" id="l00084"></a>00084     memcpy(root_tmp, reginfo-&gt;<a class="code" href=
+"structnetsnmp__handler__registration__s.html#a264722b6b9385237fbcb5f8bc144d470" title=
+"where are we registered at?">rootoid</a>, reginfo-&gt;rootoid_len * <span class="keyword">sizeof</span>(oid));
+<a name="l00085" id="l00085"></a>00085     root_tmp[reginfo-&gt;rootoid_len + 1] = 0;
+<a name="l00086" id="l00086"></a>00086     root_save = reginfo-&gt;<a class="code" href=
+"structnetsnmp__handler__registration__s.html#a264722b6b9385237fbcb5f8bc144d470" title="where are we registered at?">rootoid</a>;
+<a name="l00087" id="l00087"></a>00087 
+<a name="l00088" id="l00088"></a>00088     ret = SNMP_ERR_NOCREATION;
+<a name="l00089" id="l00089"></a>00089     <span class="keywordflow">switch</span> (reqinfo-&gt;mode) {
+<a name="l00090" id="l00090"></a>00090     <span class="comment">/*</span>
+<a name="l00091" id="l00091"></a>00091 <span class=
+"comment">     * The handling of "exact" requests is basically the same.</span>
+<a name="l00092" id="l00092"></a>00092 <span class=
+"comment">     * The only difference between GET and SET requests is the</span>
+<a name="l00093" id="l00093"></a>00093 <span class="comment">     *     error/exception to return on failure.</span>
+<a name="l00094" id="l00094"></a>00094 <span class="comment">     */</span>
+<a name="l00095" id="l00095"></a>00095     <span class="keywordflow">case</span> MODE_GET:
+<a name="l00096" id="l00096"></a>00096         ret = SNMP_NOSUCHOBJECT;
+<a name="l00097" id="l00097"></a>00097         <span class="comment">/* Fallthrough */</span>
+<a name="l00098" id="l00098"></a>00098 
+<a name="l00099" id="l00099"></a>00099     <span class="keywordflow">case</span> MODE_SET_RESERVE1:
+<a name="l00100" id="l00100"></a>00100     <span class="keywordflow">case</span> MODE_SET_RESERVE2:
+<a name="l00101" id="l00101"></a>00101     <span class="keywordflow">case</span> MODE_SET_ACTION:
+<a name="l00102" id="l00102"></a>00102     <span class="keywordflow">case</span> MODE_SET_COMMIT:
+<a name="l00103" id="l00103"></a>00103     <span class="keywordflow">case</span> MODE_SET_UNDO:
+<a name="l00104" id="l00104"></a>00104     <span class="keywordflow">case</span> MODE_SET_FREE:
+<a name="l00105" id="l00105"></a>00105         <span class="keywordflow">if</span> (cmp != 0 ||
+<a name="l00106" id="l00106"></a>00106             requests-&gt;<a class="code" href=
+"structnetsnmp__request__info__s.html#a455d87f6b7178fe19ea564c60c0ccb6f" title="variable bindings">requestvb</a>-&gt;<a class=
+"code" href="structvariable__list.html#a089e5b1a422bf8e693510ff5408a57a7" title=
+"number of subid&amp;#39;s in name">name_length</a> &lt;= reginfo-&gt;rootoid_len) {
+<a name="l00107" id="l00107"></a>00107             <span class="comment">/*</span>
+<a name="l00108" id="l00108"></a>00108 <span class=
+"comment">             * Common prefix doesn't match, or only *just* matches </span>
+<a name="l00109" id="l00109"></a>00109 <span class=
+"comment">             *  the registered root (so can't possibly match a scalar)</span>
+<a name="l00110" id="l00110"></a>00110 <span class="comment">             */</span>
+<a name="l00111" id="l00111"></a>00111             <a class="code" href=
+"group__snmp__agent.html#gac0668f1fd9036ebc88a734d9d4a6a59b" title=
+"set error for a request">netsnmp_set_request_error</a>(reqinfo, requests, ret);
+<a name="l00112" id="l00112"></a>00112             <span class="keywordflow">return</span> SNMP_ERR_NOERROR;
+<a name="l00113" id="l00113"></a>00113         } <span class="keywordflow">else</span> {
+<a name="l00114" id="l00114"></a>00114             <span class="comment">/*</span>
+<a name="l00115" id="l00115"></a>00115 <span class="comment">             * Otherwise,</span>
+<a name="l00116" id="l00116"></a>00116 <span class=
+"comment">             *     extract the object subidentifier from the request, </span>
+<a name="l00117" id="l00117"></a>00117 <span class=
+"comment">             *     check this is (probably) valid, and then fudge the</span>
+<a name="l00118" id="l00118"></a>00118 <span class=
+"comment">             *     registered 'rootoid' to match, before passing the</span>
+<a name="l00119" id="l00119"></a>00119 <span class=
+"comment">             *     request off to the next handler ('scalar').</span>
+<a name="l00120" id="l00120"></a>00120 <span class="comment">             *</span>
+<a name="l00121" id="l00121"></a>00121 <span class=
+"comment">             * Note that we don't bother checking instance subidentifiers</span>
+<a name="l00122" id="l00122"></a>00122 <span class="comment">             *     here.  That's left to the scalar helper.</span>
+<a name="l00123" id="l00123"></a>00123 <span class="comment">             */</span>
+<a name="l00124" id="l00124"></a>00124             subid = requests-&gt;<a class="code" href=
+"structnetsnmp__request__info__s.html#a455d87f6b7178fe19ea564c60c0ccb6f" title="variable bindings">requestvb</a>-&gt;<a class=
+"code" href="structvariable__list.html#a7b5bdda01921550d24ea53033ce76146" title=
+"Object identifier of variable.">name</a>[reginfo-&gt;rootoid_len];
+<a name="l00125" id="l00125"></a>00125             <span class="keywordflow">if</span> (subid &lt; sgroup-&gt;lbound ||
+<a name="l00126" id="l00126"></a>00126                 subid &gt; sgroup-&gt;ubound) {
+<a name="l00127" id="l00127"></a>00127                 <a class="code" href=
+"group__snmp__agent.html#gac0668f1fd9036ebc88a734d9d4a6a59b" title=
+"set error for a request">netsnmp_set_request_error</a>(reqinfo, requests, ret);
+<a name="l00128" id="l00128"></a>00128                 <span class="keywordflow">return</span> SNMP_ERR_NOERROR;
+<a name="l00129" id="l00129"></a>00129             }
+<a name="l00130" id="l00130"></a>00130             root_tmp[reginfo-&gt;rootoid_len] = subid;
+<a name="l00131" id="l00131"></a>00131             reginfo-&gt;rootoid_len += 2;
+<a name="l00132" id="l00132"></a>00132             reginfo-&gt;<a class="code" href=
+"structnetsnmp__handler__registration__s.html#a264722b6b9385237fbcb5f8bc144d470" title=
+"where are we registered at?">rootoid</a> = root_tmp;
+<a name="l00133" id="l00133"></a>00133             ret = <a class="code" href=
+"group__handler.html#gae45d1dbf0999b242f4f45714c7a63c1b" title=
+"calls the next handler in the chain after the current one with with appropriate NULL...">netsnmp_call_next_handler</a>(handler, reginfo, reqinfo,
+<a name="l00134" id="l00134"></a>00134                                             requests);
+<a name="l00135" id="l00135"></a>00135             reginfo-&gt;<a class="code" href=
+"structnetsnmp__handler__registration__s.html#a264722b6b9385237fbcb5f8bc144d470" title=
+"where are we registered at?">rootoid</a> = root_save;
+<a name="l00136" id="l00136"></a>00136             reginfo-&gt;rootoid_len -= 2;
+<a name="l00137" id="l00137"></a>00137             <span class="keywordflow">return</span> ret;
+<a name="l00138" id="l00138"></a>00138         }
+<a name="l00139" id="l00139"></a>00139         <span class="keywordflow">break</span>;
+<a name="l00140" id="l00140"></a>00140 
+<a name="l00141" id="l00141"></a>00141     <span class="keywordflow">case</span> MODE_GETNEXT:
+<a name="l00142" id="l00142"></a>00142         <span class="comment">/*</span>
+<a name="l00143" id="l00143"></a>00143 <span class=
+"comment">         * If we're being asked for something before (or exactly matches)</span>
+<a name="l00144" id="l00144"></a>00144 <span class=
+"comment">         *     the registered root OID, then start with the first object.</span>
+<a name="l00145" id="l00145"></a>00145 <span class=
+"comment">         * If we're being asked for something that exactly matches an object</span>
+<a name="l00146" id="l00146"></a>00146 <span class="comment">         *    OID, then that's what we pass down.</span>
+<a name="l00147" id="l00147"></a>00147 <span class=
+"comment">         * Otherwise, we pass down the OID of the *next* object....</span>
+<a name="l00148" id="l00148"></a>00148 <span class="comment">         */</span>
+<a name="l00149" id="l00149"></a>00149         <span class="keywordflow">if</span> (cmp &lt; 0 ||
+<a name="l00150" id="l00150"></a>00150             requests-&gt;<a class="code" href=
+"structnetsnmp__request__info__s.html#a455d87f6b7178fe19ea564c60c0ccb6f" title="variable bindings">requestvb</a>-&gt;<a class=
+"code" href="structvariable__list.html#a089e5b1a422bf8e693510ff5408a57a7" title=
+"number of subid&amp;#39;s in name">name_length</a> &lt;= reginfo-&gt;rootoid_len) {
+<a name="l00151" id="l00151"></a>00151             subid  = sgroup-&gt;lbound;
+<a name="l00152" id="l00152"></a>00152         } <span class="keywordflow">else</span> <span class=
+"keywordflow">if</span> (requests-&gt;<a class="code" href=
+"structnetsnmp__request__info__s.html#a455d87f6b7178fe19ea564c60c0ccb6f" title="variable bindings">requestvb</a>-&gt;<a class=
+"code" href="structvariable__list.html#a089e5b1a422bf8e693510ff5408a57a7" title=
+"number of subid&amp;#39;s in name">name_length</a> == reginfo-&gt;rootoid_len+1)
+<a name="l00153" id="l00153"></a>00153             subid = requests-&gt;<a class="code" href=
+"structnetsnmp__request__info__s.html#a455d87f6b7178fe19ea564c60c0ccb6f" title="variable bindings">requestvb</a>-&gt;<a class=
+"code" href="structvariable__list.html#a7b5bdda01921550d24ea53033ce76146" title=
+"Object identifier of variable.">name</a>[reginfo-&gt;rootoid_len];
+<a name="l00154" id="l00154"></a>00154         <span class="keywordflow">else</span>
+<a name="l00155" id="l00155"></a>00155             subid = requests-&gt;<a class="code" href=
+"structnetsnmp__request__info__s.html#a455d87f6b7178fe19ea564c60c0ccb6f" title="variable bindings">requestvb</a>-&gt;<a class=
+"code" href="structvariable__list.html#a7b5bdda01921550d24ea53033ce76146" title=
+"Object identifier of variable.">name</a>[reginfo-&gt;rootoid_len]+1;
+<a name="l00156" id="l00156"></a>00156 
+<a name="l00157" id="l00157"></a>00157         <span class="comment">/*</span>
+<a name="l00158" id="l00158"></a>00158 <span class=
+"comment">         * ... always assuming this is (potentially) valid, of course.</span>
+<a name="l00159" id="l00159"></a>00159 <span class="comment">         */</span>
+<a name="l00160" id="l00160"></a>00160         <span class="keywordflow">if</span> (subid &lt; sgroup-&gt;lbound)
+<a name="l00161" id="l00161"></a>00161             subid = sgroup-&gt;lbound;
+<a name="l00162" id="l00162"></a>00162         <span class="keywordflow">else</span> <span class=
+"keywordflow">if</span> (subid &gt; sgroup-&gt;ubound)
+<a name="l00163" id="l00163"></a>00163             <span class="keywordflow">return</span> SNMP_ERR_NOERROR;
+<a name="l00164" id="l00164"></a>00164         
+<a name="l00165" id="l00165"></a>00165         root_tmp[reginfo-&gt;rootoid_len] = subid;
+<a name="l00166" id="l00166"></a>00166         reginfo-&gt;rootoid_len += 2;
+<a name="l00167" id="l00167"></a>00167         reginfo-&gt;<a class="code" href=
+"structnetsnmp__handler__registration__s.html#a264722b6b9385237fbcb5f8bc144d470" title=
+"where are we registered at?">rootoid</a> = root_tmp;
+<a name="l00168" id="l00168"></a>00168         ret = <a class="code" href=
+"group__handler.html#gae45d1dbf0999b242f4f45714c7a63c1b" title=
+"calls the next handler in the chain after the current one with with appropriate NULL...">netsnmp_call_next_handler</a>(handler, reginfo, reqinfo,
+<a name="l00169" id="l00169"></a>00169                                             requests);
+<a name="l00170" id="l00170"></a>00170         <span class="comment">/*</span>
+<a name="l00171" id="l00171"></a>00171 <span class=
+"comment">         * If we didn't get an answer (due to holes in the group)</span>
+<a name="l00172" id="l00172"></a>00172 <span class="comment">         *   set things up to retry again.</span>
+<a name="l00173" id="l00173"></a>00173 <span class="comment">         */</span>
+<a name="l00174" id="l00174"></a>00174         <span class="keywordflow">if</span> (!requests-&gt;delegated &amp;&amp;
+<a name="l00175" id="l00175"></a>00175             (requests-&gt;<a class="code" href=
+"structnetsnmp__request__info__s.html#a455d87f6b7178fe19ea564c60c0ccb6f" title="variable bindings">requestvb</a>-&gt;<a class=
+"code" href="structvariable__list.html#a8bd719974b3554116631ea80dc88b6aa" title="ASN type of variable.">type</a> == ASN_NULL ||
+<a name="l00176" id="l00176"></a>00176              requests-&gt;<a class="code" href=
+"structnetsnmp__request__info__s.html#a455d87f6b7178fe19ea564c60c0ccb6f" title="variable bindings">requestvb</a>-&gt;<a class=
+"code" href="structvariable__list.html#a8bd719974b3554116631ea80dc88b6aa" title=
+"ASN type of variable.">type</a> == SNMP_NOSUCHOBJECT ||
+<a name="l00177" id="l00177"></a>00177              requests-&gt;<a class="code" href=
+"structnetsnmp__request__info__s.html#a455d87f6b7178fe19ea564c60c0ccb6f" title="variable bindings">requestvb</a>-&gt;<a class=
+"code" href="structvariable__list.html#a8bd719974b3554116631ea80dc88b6aa" title=
+"ASN type of variable.">type</a> == SNMP_NOSUCHINSTANCE)) {
+<a name="l00178" id="l00178"></a>00178             snmp_set_var_objid(requests-&gt;<a class="code" href=
+"structnetsnmp__request__info__s.html#a455d87f6b7178fe19ea564c60c0ccb6f" title="variable bindings">requestvb</a>,
+<a name="l00179" id="l00179"></a>00179                                reginfo-&gt;<a class="code" href=
+"structnetsnmp__handler__registration__s.html#a264722b6b9385237fbcb5f8bc144d470" title=
+"where are we registered at?">rootoid</a>, reginfo-&gt;rootoid_len - 1);
+<a name="l00180" id="l00180"></a>00180             requests-&gt;<a class="code" href=
+"structnetsnmp__request__info__s.html#a455d87f6b7178fe19ea564c60c0ccb6f" title="variable bindings">requestvb</a>-&gt;<a class=
+"code" href="structvariable__list.html#a7b5bdda01921550d24ea53033ce76146" title=
+"Object identifier of variable.">name</a>[reginfo-&gt;rootoid_len - 2] = ++subid;
+<a name="l00181" id="l00181"></a>00181             requests-&gt;<a class="code" href=
+"structnetsnmp__request__info__s.html#a455d87f6b7178fe19ea564c60c0ccb6f" title="variable bindings">requestvb</a>-&gt;<a class=
+"code" href="structvariable__list.html#a8bd719974b3554116631ea80dc88b6aa" title=
+"ASN type of variable.">type</a> = ASN_PRIV_RETRY;
+<a name="l00182" id="l00182"></a>00182         }
+<a name="l00183" id="l00183"></a>00183         reginfo-&gt;<a class="code" href=
+"structnetsnmp__handler__registration__s.html#a264722b6b9385237fbcb5f8bc144d470" title=
+"where are we registered at?">rootoid</a> = root_save;
+<a name="l00184" id="l00184"></a>00184         reginfo-&gt;rootoid_len -= 2;
+<a name="l00185" id="l00185"></a>00185         <span class="keywordflow">return</span> ret;
+<a name="l00186" id="l00186"></a>00186     }
+<a name="l00187" id="l00187"></a>00187     <span class="comment">/*</span>
+<a name="l00188" id="l00188"></a>00188 <span class="comment">     * got here only if illegal mode found </span>
+<a name="l00189" id="l00189"></a>00189 <span class="comment">     */</span>
+<a name="l00190" id="l00190"></a>00190     <span class="keywordflow">return</span> SNMP_ERR_GENERR;
+<a name="l00191" id="l00191"></a>00191 }
+<a name="l00192" id="l00192"></a>00192 
+</pre>
+    </div>
+  </div>
+  <hr size="1" />
+
+  <address style="text-align: right;">
+    <small>Generated on 28 Sep 2009 for net-snmp by  <a href="http://www.doxygen.org/index.html"><img class="footer" src=
+    "doxygen.png" alt="doxygen" /></a> 1.6.1</small>
+<!-- CONTENT END -->
+<!--#include virtual="/page-bottom.html" -->
+

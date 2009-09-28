@@ -1,0 +1,162 @@
+<!--#set var="section" value="development" -->
+<!--#include virtual="/page-top.html" -->
+<!-- CONTENT START -->
+  <div class="navigation" id="top">
+    <div class="tabs">
+      <ul>
+        <li><a href="index.html"><span>Main Page</span></a></li>
+
+        <li><a href="pages.html"><span>Related Pages</span></a></li>
+
+        <li><a href="modules.html"><span>Modules</span></a></li>
+
+        <li><a href="annotated.html"><span>Data Structures</span></a></li>
+
+        <li class="current"><a href="files.html"><span>Files</span></a></li>
+
+        <li><a href="examples.html"><span>Examples</span></a></li>
+      </ul>
+    </div>
+
+    <div class="tabs">
+      <ul>
+        <li><a href="files.html"><span>File List</span></a></li>
+
+        <li><a href="globals.html"><span>Globals</span></a></li>
+      </ul>
+    </div>
+
+    <h1>mode_end_call.c</h1>
+
+    <div class="fragment">
+      <pre class="fragment">
+<a name="l00001" id="l00001"></a>00001 <span class=
+"comment">/* Portions of this file are subject to the following copyright(s).  See</span>
+<a name="l00002" id="l00002"></a>00002 <span class=
+"comment"> * the Net-SNMP's COPYING file for more details and other copyrights</span>
+<a name="l00003" id="l00003"></a>00003 <span class="comment"> * that may apply:</span>
+<a name="l00004" id="l00004"></a>00004 <span class="comment"> */</span>
+<a name="l00005" id="l00005"></a>00005 <span class="comment">/*</span>
+<a name="l00006" id="l00006"></a>00006 <span class="comment"> * Portions of this file are copyrighted by:</span>
+<a name="l00007" id="l00007"></a>00007 <span class=
+"comment"> * Copyright &copy; 2003 Sun Microsystems, Inc. All rights reserved.</span>
+<a name="l00008" id="l00008"></a>00008 <span class=
+"comment"> * Use is subject to license terms specified in the COPYING file</span>
+<a name="l00009" id="l00009"></a>00009 <span class="comment"> * distributed with the Net-SNMP package.</span>
+<a name="l00010" id="l00010"></a>00010 <span class="comment"> */</span>
+<a name="l00011" id="l00011"></a>00011 <span class="preprocessor">#include &lt;net-snmp/net-snmp-config.h&gt;</span>
+<a name="l00012" id="l00012"></a>00012 
+<a name="l00013" id="l00013"></a>00013 <span class="preprocessor">#include &lt;net-snmp/net-snmp-includes.h&gt;</span>
+<a name="l00014" id="l00014"></a>00014 <span class=
+"preprocessor">#include &lt;net-snmp/agent/net-snmp-agent-includes.h&gt;</span>
+<a name="l00015" id="l00015"></a>00015 
+<a name="l00016" id="l00016"></a>00016 <span class="preprocessor">#include &lt;net-snmp/agent/mode_end_call.h&gt;</span>
+<a name="l00017" id="l00017"></a>00017 
+<a name="l00044" id="l00044"></a>00044 <a class="code" href="structnetsnmp__mib__handler__s.html" title=
+"the mib handler structure to be registered">netsnmp_mib_handler</a> *
+<a name="l00045" id="l00045"></a><a class="code" href=
+"group__mode__end__call.html#ga255d74b6d1346b92c2339898cdffa882">00045</a> <a class="code" href=
+"group__mode__end__call.html#ga255d74b6d1346b92c2339898cdffa882" title=
+"returns a mode_end_call handler that can be injected into a given handler chain.">netsnmp_get_mode_end_call_handler</a>(<a class="code"
+href="structnetsnmp__mode__handler__list__s.html">netsnmp_mode_handler_list</a> *endlist)
+<a name="l00046" id="l00046"></a>00046 {
+<a name="l00047" id="l00047"></a>00047     <a class="code" href="structnetsnmp__mib__handler__s.html" title=
+"the mib handler structure to be registered">netsnmp_mib_handler</a> *me =
+<a name="l00048" id="l00048"></a>00048         <a class="code" href="group__handler.html#ga169c1653d481ed3d7df0c1795d99ca0c"
+title="creates a netsnmp_mib_handler structure given a name and a access method.">netsnmp_create_handler</a>(<span class=
+"stringliteral">"mode_end_call"</span>,
+<a name="l00049" id="l00049"></a>00049                                netsnmp_mode_end_call_helper);
+<a name="l00050" id="l00050"></a>00050 
+<a name="l00051" id="l00051"></a>00051     <span class="keywordflow">if</span> (!me)
+<a name="l00052" id="l00052"></a>00052         <span class="keywordflow">return</span> NULL;
+<a name="l00053" id="l00053"></a>00053 
+<a name="l00054" id="l00054"></a>00054     me-&gt;<a class="code" href=
+"structnetsnmp__mib__handler__s.html#a74067d02cea4a059cd0fce7790b77b18" title=
+"for handler&amp;#39;s internal use">myvoid</a> = endlist;
+<a name="l00055" id="l00055"></a>00055     <span class="keywordflow">return</span> me;
+<a name="l00056" id="l00056"></a>00056 }
+<a name="l00057" id="l00057"></a>00057 
+<a name="l00064" id="l00064"></a>00064 <a class="code" href=
+"structnetsnmp__mode__handler__list__s.html">netsnmp_mode_handler_list</a> *
+<a name="l00065" id="l00065"></a><a class="code" href=
+"group__mode__end__call.html#gae769dbfd2025157f2200cd904c9c239f">00065</a> <a class="code" href=
+"group__mode__end__call.html#gae769dbfd2025157f2200cd904c9c239f" title=
+"adds a mode specific callback to the callback list.">netsnmp_mode_end_call_add_mode_callback</a>(<a class="code" href=
+"structnetsnmp__mode__handler__list__s.html">netsnmp_mode_handler_list</a> *endlist,
+<a name="l00066" id="l00066"></a>00066                                         <span class="keywordtype">int</span> mode,
+<a name="l00067" id="l00067"></a>00067                                         <a class="code" href=
+"structnetsnmp__mib__handler__s.html" title="the mib handler structure to be registered">netsnmp_mib_handler</a> *callbackh) {
+<a name="l00068" id="l00068"></a>00068     <a class="code" href=
+"structnetsnmp__mode__handler__list__s.html">netsnmp_mode_handler_list</a> *ptr, *ptr2;
+<a name="l00069" id="l00069"></a>00069     ptr = <a class="code" href="group__util.html#ga9cd013bb193de5048149afeb9d94e424"
+title="Mallocs memory of sizeof(t), zeros it and returns a pointer to it.">SNMP_MALLOC_TYPEDEF</a>(<a class="code" href=
+"structnetsnmp__mode__handler__list__s.html">netsnmp_mode_handler_list</a>);
+<a name="l00070" id="l00070"></a>00070     <span class="keywordflow">if</span> (!ptr)
+<a name="l00071" id="l00071"></a>00071         <span class="keywordflow">return</span> NULL;
+<a name="l00072" id="l00072"></a>00072     
+<a name="l00073" id="l00073"></a>00073     ptr-&gt;mode = mode;
+<a name="l00074" id="l00074"></a>00074     ptr-&gt;callback_handler = callbackh;
+<a name="l00075" id="l00075"></a>00075     ptr-&gt;next = NULL;
+<a name="l00076" id="l00076"></a>00076 
+<a name="l00077" id="l00077"></a>00077     <span class="keywordflow">if</span> (!endlist)
+<a name="l00078" id="l00078"></a>00078         <span class="keywordflow">return</span> ptr;
+<a name="l00079" id="l00079"></a>00079 
+<a name="l00080" id="l00080"></a>00080     <span class="comment">/* get to end */</span>
+<a name="l00081" id="l00081"></a>00081     <span class=
+"keywordflow">for</span>(ptr2 = endlist; ptr2-&gt;next != NULL; ptr2 = ptr2-&gt;next);
+<a name="l00082" id="l00082"></a>00082 
+<a name="l00083" id="l00083"></a>00083     ptr2-&gt;next = ptr;
+<a name="l00084" id="l00084"></a>00084     <span class="keywordflow">return</span> endlist;
+<a name="l00085" id="l00085"></a>00085 }
+<a name="l00086" id="l00086"></a>00086     
+<a name="l00088" id="l00088"></a>00088 <span class="keywordtype">int</span>
+<a name="l00089" id="l00089"></a>00089 netsnmp_mode_end_call_helper(<a class="code" href="structnetsnmp__mib__handler__s.html"
+title="the mib handler structure to be registered">netsnmp_mib_handler</a> *handler,
+<a name="l00090" id="l00090"></a>00090                             <a class="code" href=
+"structnetsnmp__handler__registration__s.html" title="Root registration info.">netsnmp_handler_registration</a> *reginfo,
+<a name="l00091" id="l00091"></a>00091                             <a class="code" href=
+"structnetsnmp__agent__request__info__s.html" title=
+"The agent transaction request structure.">netsnmp_agent_request_info</a> *reqinfo,
+<a name="l00092" id="l00092"></a>00092                             <a class="code" href="structnetsnmp__request__info__s.html"
+title="The netsnmp request info structure.">netsnmp_request_info</a> *requests)
+<a name="l00093" id="l00093"></a>00093 {
+<a name="l00094" id="l00094"></a>00094 
+<a name="l00095" id="l00095"></a>00095     <span class="keywordtype">int</span>             ret;
+<a name="l00096" id="l00096"></a>00096     <span class="keywordtype">int</span>             ret2 = SNMP_ERR_NOERROR;
+<a name="l00097" id="l00097"></a>00097     <a class="code" href=
+"structnetsnmp__mode__handler__list__s.html">netsnmp_mode_handler_list</a> *ptr;
+<a name="l00098" id="l00098"></a>00098 
+<a name="l00099" id="l00099"></a>00099     <span class="comment">/* always call the real handlers first */</span>
+<a name="l00100" id="l00100"></a>00100     ret = <a class="code" href="group__handler.html#gae45d1dbf0999b242f4f45714c7a63c1b"
+title=
+"calls the next handler in the chain after the current one with with appropriate NULL...">netsnmp_call_next_handler</a>(handler, reginfo, reqinfo,
+<a name="l00101" id="l00101"></a>00101                                     requests);
+<a name="l00102" id="l00102"></a>00102 
+<a name="l00103" id="l00103"></a>00103     <span class="comment">/* then call the callback handlers */</span>
+<a name="l00104" id="l00104"></a>00104     <span class="keywordflow">for</span>(ptr = handler-&gt;<a class="code" href=
+"structnetsnmp__mib__handler__s.html#a74067d02cea4a059cd0fce7790b77b18" title=
+"for handler&amp;#39;s internal use">myvoid</a>; ptr; ptr = ptr-&gt;next) {
+<a name="l00105" id="l00105"></a>00105         <span class="keywordflow">if</span> (ptr-&gt;mode == NETSNMP_MODE_END_ALL_MODES ||
+<a name="l00106" id="l00106"></a>00106             reqinfo-&gt;mode == ptr-&gt;mode) {
+<a name="l00107" id="l00107"></a>00107             ret2 = <a class="code" href=
+"group__handler.html#gad9c9c2c88fc86c2838bfab9fd87270cb" title=
+"calls a handler with with appropriate NULL checking of arguments, etc.">netsnmp_call_handler</a>(ptr-&gt;callback_handler, reginfo,
+<a name="l00108" id="l00108"></a>00108                                              reqinfo, requests);
+<a name="l00109" id="l00109"></a>00109             <span class="keywordflow">if</span> (ret != SNMP_ERR_NOERROR)
+<a name="l00110" id="l00110"></a>00110                 ret = ret2;
+<a name="l00111" id="l00111"></a>00111         }
+<a name="l00112" id="l00112"></a>00112     }
+<a name="l00113" id="l00113"></a>00113     
+<a name="l00114" id="l00114"></a>00114     <span class="keywordflow">return</span> ret2;
+<a name="l00115" id="l00115"></a>00115 }
+</pre>
+    </div>
+  </div>
+  <hr size="1" />
+
+  <address style="text-align: right;">
+    <small>Generated on 28 Sep 2009 for net-snmp by  <a href="http://www.doxygen.org/index.html"><img class="footer" src=
+    "doxygen.png" alt="doxygen" /></a> 1.6.1</small>
+<!-- CONTENT END -->
+<!--#include virtual="/page-bottom.html" -->
+

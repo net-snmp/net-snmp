@@ -1,0 +1,412 @@
+<!--#set var="section" value="development" -->
+<!--#include virtual="/page-top.html" -->
+<!-- CONTENT START -->
+  <div class="navigation" id="top">
+    <div class="tabs">
+      <ul>
+        <li><a href="index.html"><span>Main Page</span></a></li>
+
+        <li><a href="pages.html"><span>Related Pages</span></a></li>
+
+        <li><a href="modules.html"><span>Modules</span></a></li>
+
+        <li><a href="annotated.html"><span>Data Structures</span></a></li>
+
+        <li class="current"><a href="files.html"><span>Files</span></a></li>
+
+        <li><a href="examples.html"><span>Examples</span></a></li>
+      </ul>
+    </div>
+
+    <div class="tabs">
+      <ul>
+        <li><a href="files.html"><span>File List</span></a></li>
+
+        <li><a href="globals.html"><span>Globals</span></a></li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="contents">
+    <h1>large_fd_set.c File Reference</h1>
+
+    <p>Macro's and functions for manipulation of large file descriptor sets. <a href="#_details">More...</a></p><code>#include
+    &lt;net-snmp/net-snmp-config.h&gt;</code><br />
+    <code>#include &lt;stdio.h&gt;</code><br />
+    <code>#include &lt;net-snmp/library/snmp_assert.h&gt;</code><br />
+    <code>#include &lt;<a class="el" href="large__fd__set_8h_source.html">net-snmp/library/large_fd_set.h</a>&gt;</code><br />
+
+    <p><a href="large__fd__set_8c_source.html">Go to the source code of this file.</a></p>
+
+    <table border="0" cellpadding="0" cellspacing="0">
+      <tr>
+        <td colspan="2">
+          <h2>Functions</h2>
+        </td>
+      </tr>
+
+      <tr>
+        <td class="memItemLeft" align="right" valign="top"><a class="anchor" id="ab04260aa85eadf2102e66c13e2fcf8da" name=
+        "ab04260aa85eadf2102e66c13e2fcf8da"></a>
+        <!-- doxytag: member="large_fd_set.c::netsnmp_large_fd_setfd" ref="ab04260aa85eadf2102e66c13e2fcf8da" args="(int fd, netsnmp_large_fd_set *fdset)" -->
+        void </td>
+
+        <td class="memItemRight" valign="bottom"><b>netsnmp_large_fd_setfd</b> (int fd, <a class="el" href=
+        "structnetsnmp__large__fd__set__s.html">netsnmp_large_fd_set</a> *fdset)</td>
+      </tr>
+
+      <tr>
+        <td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a99c8521828e1023c349566ba49da438b" name=
+        "a99c8521828e1023c349566ba49da438b"></a>
+        <!-- doxytag: member="large_fd_set.c::netsnmp_large_fd_clr" ref="a99c8521828e1023c349566ba49da438b" args="(int fd, netsnmp_large_fd_set *fdset)" -->
+        void </td>
+
+        <td class="memItemRight" valign="bottom"><b>netsnmp_large_fd_clr</b> (int fd, <a class="el" href=
+        "structnetsnmp__large__fd__set__s.html">netsnmp_large_fd_set</a> *fdset)</td>
+      </tr>
+
+      <tr>
+        <td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a1eaff48e738f5634f62996181e6e2563" name=
+        "a1eaff48e738f5634f62996181e6e2563"></a>
+        <!-- doxytag: member="large_fd_set.c::netsnmp_large_fd_is_set" ref="a1eaff48e738f5634f62996181e6e2563" args="(int fd, netsnmp_large_fd_set *fdset)" -->
+        int </td>
+
+        <td class="memItemRight" valign="bottom"><b>netsnmp_large_fd_is_set</b> (int fd, <a class="el" href=
+        "structnetsnmp__large__fd__set__s.html">netsnmp_large_fd_set</a> *fdset)</td>
+      </tr>
+
+      <tr>
+        <td class="memItemLeft" align="right" valign="top">void </td>
+
+        <td class="memItemRight" valign="bottom"><a class="el" href=
+        "large__fd__set_8c.html#a2e26908893f0594f9eb900c816a021c0">netsnmp_large_fd_set_init</a> (<a class="el" href=
+        "structnetsnmp__large__fd__set__s.html">netsnmp_large_fd_set</a> *fdset, int setsize)</td>
+      </tr>
+
+      <tr>
+        <td class="mdescLeft"> </td>
+
+        <td class="mdescRight">Initialize a netsnmp_large_fd_set structure. <a href=
+        "#a2e26908893f0594f9eb900c816a021c0"></a><br /></td>
+      </tr>
+
+      <tr>
+        <td class="memItemLeft" align="right" valign="top">void </td>
+
+        <td class="memItemRight" valign="bottom"><a class="el" href=
+        "large__fd__set_8c.html#a70912da51cccac26ecf51388f6a2a8bd">netsnmp_large_fd_set_resize</a> (<a class="el" href=
+        "structnetsnmp__large__fd__set__s.html">netsnmp_large_fd_set</a> *fdset, int setsize)</td>
+      </tr>
+
+      <tr>
+        <td class="mdescLeft"> </td>
+
+        <td class="mdescRight">Modify the size of a file descriptor set and preserve the first min(fdset-&gt;lfs_setsize,
+        setsize) file descriptors. <a href="#a70912da51cccac26ecf51388f6a2a8bd"></a><br /></td>
+      </tr>
+
+      <tr>
+        <td class="memItemLeft" align="right" valign="top">void </td>
+
+        <td class="memItemRight" valign="bottom"><a class="el" href=
+        "large__fd__set_8c.html#a2bac85898fa582b08bb0e4a92d9f3107">netsnmp_large_fd_set_cleanup</a> (<a class="el" href=
+        "structnetsnmp__large__fd__set__s.html">netsnmp_large_fd_set</a> *fdset)</td>
+      </tr>
+
+      <tr>
+        <td class="mdescLeft"> </td>
+
+        <td class="mdescRight">Deallocate the memory allocated by netsnmp_large_fd_set_init. <a href=
+        "#a2bac85898fa582b08bb0e4a92d9f3107"></a><br /></td>
+      </tr>
+
+      <tr>
+        <td class="memItemLeft" align="right" valign="top">void </td>
+
+        <td class="memItemRight" valign="bottom"><a class="el" href=
+        "large__fd__set_8c.html#ab75fccd8c7a37c43a89d4bbf2e9011d4">netsnmp_copy_fd_set_to_large_fd_set</a> (<a class="el" href=
+        "structnetsnmp__large__fd__set__s.html">netsnmp_large_fd_set</a> *dst, const fd_set *src)</td>
+      </tr>
+
+      <tr>
+        <td class="mdescLeft"> </td>
+
+        <td class="mdescRight">Copy an fd_set to a netsnmp_large_fd_set structure. <a href=
+        "#ab75fccd8c7a37c43a89d4bbf2e9011d4"></a><br /></td>
+      </tr>
+
+      <tr>
+        <td class="memItemLeft" align="right" valign="top">int </td>
+
+        <td class="memItemRight" valign="bottom"><a class="el" href=
+        "large__fd__set_8c.html#a6da313d6a1f5e13da20ba26cbe961a67">netsnmp_copy_large_fd_set_to_fd_set</a> (fd_set *dst, const
+        <a class="el" href="structnetsnmp__large__fd__set__s.html">netsnmp_large_fd_set</a> *src)</td>
+      </tr>
+
+      <tr>
+        <td class="mdescLeft"> </td>
+
+        <td class="mdescRight">Copy a netsnmp_large_fd_set structure into an fd_set. <a href=
+        "#a6da313d6a1f5e13da20ba26cbe961a67"></a><br /></td>
+      </tr>
+    </table>
+    <hr />
+    <a name="_details"></a>
+
+    <h2>Detailed Description</h2>
+
+    <p>Macro's and functions for manipulation of large file descriptor sets.</p>
+
+    <p>Definition in file <a class="el" href="large__fd__set_8c_source.html">large_fd_set.c</a>.</p>
+    <hr />
+
+    <h2>Function Documentation</h2><a class="anchor" id="ab75fccd8c7a37c43a89d4bbf2e9011d4" name=
+    "ab75fccd8c7a37c43a89d4bbf2e9011d4"></a>
+    <!-- doxytag: member="large_fd_set.c::netsnmp_copy_fd_set_to_large_fd_set" ref="ab75fccd8c7a37c43a89d4bbf2e9011d4" args="(netsnmp_large_fd_set *dst, const fd_set *src)" -->
+
+    <div class="memitem">
+      <div class="memproto">
+        <table class="memname">
+          <tr>
+            <td class="memname">void netsnmp_copy_fd_set_to_large_fd_set</td>
+
+            <td>(</td>
+
+            <td class="paramtype"><a class="el" href="structnetsnmp__large__fd__set__s.html">netsnmp_large_fd_set</a> * </td>
+
+            <td class="paramname"><em>dst</em>,</td>
+          </tr>
+
+          <tr>
+            <td class="paramkey"></td>
+
+            <td></td>
+
+            <td class="paramtype">const fd_set * </td>
+
+            <td class="paramname"><em>src</em></td>
+
+            <td> </td>
+          </tr>
+
+          <tr>
+            <td></td>
+
+            <td>)</td>
+
+            <td></td>
+
+            <td></td>
+
+            <td></td>
+          </tr>
+        </table>
+      </div>
+
+      <div class="memdoc">
+        <p>Copy an fd_set to a netsnmp_large_fd_set structure.</p>
+
+        <dl class="note">
+          <dt><b>Note:</b></dt>
+
+          <dd>dst must have been initialized before this function is called.</dd>
+        </dl>
+
+        <p>Definition at line <a class="el" href="large__fd__set_8c_source.html#l00168">168</a> of file <a class="el" href=
+        "large__fd__set_8c_source.html">large_fd_set.c</a>.</p>
+      </div>
+    </div><a class="anchor" id="a6da313d6a1f5e13da20ba26cbe961a67" name="a6da313d6a1f5e13da20ba26cbe961a67"></a>
+    <!-- doxytag: member="large_fd_set.c::netsnmp_copy_large_fd_set_to_fd_set" ref="a6da313d6a1f5e13da20ba26cbe961a67" args="(fd_set *dst, const netsnmp_large_fd_set *src)" -->
+
+    <div class="memitem">
+      <div class="memproto">
+        <table class="memname">
+          <tr>
+            <td class="memname">int netsnmp_copy_large_fd_set_to_fd_set</td>
+
+            <td>(</td>
+
+            <td class="paramtype">fd_set * </td>
+
+            <td class="paramname"><em>dst</em>,</td>
+          </tr>
+
+          <tr>
+            <td class="paramkey"></td>
+
+            <td></td>
+
+            <td class="paramtype">const <a class="el" href="structnetsnmp__large__fd__set__s.html">netsnmp_large_fd_set</a>
+            * </td>
+
+            <td class="paramname"><em>src</em></td>
+
+            <td> </td>
+          </tr>
+
+          <tr>
+            <td></td>
+
+            <td>)</td>
+
+            <td></td>
+
+            <td></td>
+
+            <td></td>
+          </tr>
+        </table>
+      </div>
+
+      <div class="memdoc">
+        <p>Copy a netsnmp_large_fd_set structure into an fd_set.</p>
+
+        <dl class="return">
+          <dt><b>Returns:</b></dt>
+
+          <dd>0 upon success, -1 when copying fails because *src is too large to fit into *dst.</dd>
+        </dl>
+
+        <p>Definition at line <a class="el" href="large__fd__set_8c_source.html#l00176">176</a> of file <a class="el" href=
+        "large__fd__set_8c_source.html">large_fd_set.c</a>.</p>
+      </div>
+    </div><a class="anchor" id="a2bac85898fa582b08bb0e4a92d9f3107" name="a2bac85898fa582b08bb0e4a92d9f3107"></a>
+    <!-- doxytag: member="large_fd_set.c::netsnmp_large_fd_set_cleanup" ref="a2bac85898fa582b08bb0e4a92d9f3107" args="(netsnmp_large_fd_set *fdset)" -->
+
+    <div class="memitem">
+      <div class="memproto">
+        <table class="memname">
+          <tr>
+            <td class="memname">void netsnmp_large_fd_set_cleanup</td>
+
+            <td>(</td>
+
+            <td class="paramtype"><a class="el" href="structnetsnmp__large__fd__set__s.html">netsnmp_large_fd_set</a> * </td>
+
+            <td class="paramname"><em>fdset</em></td>
+
+            <td> ) </td>
+
+            <td></td>
+          </tr>
+        </table>
+      </div>
+
+      <div class="memdoc">
+        <p>Deallocate the memory allocated by netsnmp_large_fd_set_init.</p>
+
+        <p>Definition at line <a class="el" href="large__fd__set_8c_source.html#l00160">160</a> of file <a class="el" href=
+        "large__fd__set_8c_source.html">large_fd_set.c</a>.</p>
+      </div>
+    </div><a class="anchor" id="a2e26908893f0594f9eb900c816a021c0" name="a2e26908893f0594f9eb900c816a021c0"></a>
+    <!-- doxytag: member="large_fd_set.c::netsnmp_large_fd_set_init" ref="a2e26908893f0594f9eb900c816a021c0" args="(netsnmp_large_fd_set *fdset, int setsize)" -->
+
+    <div class="memitem">
+      <div class="memproto">
+        <table class="memname">
+          <tr>
+            <td class="memname">void netsnmp_large_fd_set_init</td>
+
+            <td>(</td>
+
+            <td class="paramtype"><a class="el" href="structnetsnmp__large__fd__set__s.html">netsnmp_large_fd_set</a> * </td>
+
+            <td class="paramname"><em>fdset</em>,</td>
+          </tr>
+
+          <tr>
+            <td class="paramkey"></td>
+
+            <td></td>
+
+            <td class="paramtype">int </td>
+
+            <td class="paramname"><em>setsize</em></td>
+
+            <td> </td>
+          </tr>
+
+          <tr>
+            <td></td>
+
+            <td>)</td>
+
+            <td></td>
+
+            <td></td>
+
+            <td></td>
+          </tr>
+        </table>
+      </div>
+
+      <div class="memdoc">
+        <p>Initialize a netsnmp_large_fd_set structure.</p>
+
+        <p>Note: this function only initializes the lfs_setsize and lfs_setptr members of netsnmp_large_fd_set, not the file
+        descriptor set itself. The file descriptor set must be initialized separately, e.g. via <a class="el" href=
+        "large__fd__set_8h.html#acb096042c57f6f01d18dcaebbaea24d5" title=
+        "Remove socket fd from the set *fdset.">NETSNMP_LARGE_FD_CLR()</a>.</p>
+
+        <p>Definition at line <a class="el" href="large__fd__set_8c_source.html#l00115">115</a> of file <a class="el" href=
+        "large__fd__set_8c_source.html">large_fd_set.c</a>.</p>
+      </div>
+    </div><a class="anchor" id="a70912da51cccac26ecf51388f6a2a8bd" name="a70912da51cccac26ecf51388f6a2a8bd"></a>
+    <!-- doxytag: member="large_fd_set.c::netsnmp_large_fd_set_resize" ref="a70912da51cccac26ecf51388f6a2a8bd" args="(netsnmp_large_fd_set *fdset, int setsize)" -->
+
+    <div class="memitem">
+      <div class="memproto">
+        <table class="memname">
+          <tr>
+            <td class="memname">void netsnmp_large_fd_set_resize</td>
+
+            <td>(</td>
+
+            <td class="paramtype"><a class="el" href="structnetsnmp__large__fd__set__s.html">netsnmp_large_fd_set</a> * </td>
+
+            <td class="paramname"><em>fdset</em>,</td>
+          </tr>
+
+          <tr>
+            <td class="paramkey"></td>
+
+            <td></td>
+
+            <td class="paramtype">int </td>
+
+            <td class="paramname"><em>setsize</em></td>
+
+            <td> </td>
+          </tr>
+
+          <tr>
+            <td></td>
+
+            <td>)</td>
+
+            <td></td>
+
+            <td></td>
+
+            <td></td>
+          </tr>
+        </table>
+      </div>
+
+      <div class="memdoc">
+        <p>Modify the size of a file descriptor set and preserve the first min(fdset-&gt;lfs_setsize, setsize) file
+        descriptors.</p>
+
+        <p>Definition at line <a class="el" href="large__fd__set_8c_source.html#l00123">123</a> of file <a class="el" href=
+        "large__fd__set_8c_source.html">large_fd_set.c</a>.</p>
+      </div>
+    </div>
+  </div>
+  <hr size="1" />
+
+  <address style="text-align: right;">
+    <small>Generated on 28 Sep 2009 for net-snmp by  <a href="http://www.doxygen.org/index.html"><img class="footer" src=
+    "doxygen.png" alt="doxygen" /></a> 1.6.1</small>
+<!-- CONTENT END -->
+<!--#include virtual="/page-bottom.html" -->
+

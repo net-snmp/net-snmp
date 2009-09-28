@@ -1,0 +1,160 @@
+<!--#set var="section" value="development" -->
+<!--#include virtual="/page-top.html" -->
+<!-- CONTENT START -->
+  <div class="navigation" id="top">
+    <div class="tabs">
+      <ul>
+        <li><a href="index.html"><span>Main Page</span></a></li>
+
+        <li><a href="pages.html"><span>Related Pages</span></a></li>
+
+        <li><a href="modules.html"><span>Modules</span></a></li>
+
+        <li class="current"><a href="annotated.html"><span>Data Structures</span></a></li>
+
+        <li><a href="files.html"><span>Files</span></a></li>
+
+        <li><a href="examples.html"><span>Examples</span></a></li>
+      </ul>
+    </div>
+
+    <div class="tabs">
+      <ul>
+        <li><a href="annotated.html"><span>Data Structures</span></a></li>
+
+        <li><a href="functions.html"><span>Data Fields</span></a></li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="contents">
+    <h1>snmp_secmod_def Struct Reference</h1><!-- doxytag: class="snmp_secmod_def" -->
+
+    <table border="0" cellpadding="0" cellspacing="0">
+      <tr>
+        <td colspan="2">
+          <h2>Data Fields</h2>
+        </td>
+      </tr>
+
+      <tr>
+        <td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a9e2b8541afaa5b73c17ff847381494a4" name=
+        "a9e2b8541afaa5b73c17ff847381494a4"></a>
+        <!-- doxytag: member="snmp_secmod_def::session_open" ref="a9e2b8541afaa5b73c17ff847381494a4" args="" -->
+        SecmodSessionCallback * </td>
+
+        <td class="memItemRight" valign="bottom"><b>session_open</b></td>
+      </tr>
+
+      <tr>
+        <td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a4d9503c20aa3e5388b5c71a760880246" name=
+        "a4d9503c20aa3e5388b5c71a760880246"></a>
+        <!-- doxytag: member="snmp_secmod_def::session_close" ref="a4d9503c20aa3e5388b5c71a760880246" args="" -->
+        SecmodSessionCallback * </td>
+
+        <td class="memItemRight" valign="bottom"><b>session_close</b></td>
+      </tr>
+
+      <tr>
+        <td class="memItemLeft" align="right" valign="top"><a class="anchor" id="afc7034770acd87e21c6ba41535c674e8" name=
+        "afc7034770acd87e21c6ba41535c674e8"></a>
+        <!-- doxytag: member="snmp_secmod_def::pdu_free" ref="afc7034770acd87e21c6ba41535c674e8" args="" -->
+        SecmodPduCallback * </td>
+
+        <td class="memItemRight" valign="bottom"><b>pdu_free</b></td>
+      </tr>
+
+      <tr>
+        <td class="memItemLeft" align="right" valign="top"><a class="anchor" id="ab25de62259c03cfe0778ca8687384ade" name=
+        "ab25de62259c03cfe0778ca8687384ade"></a>
+        <!-- doxytag: member="snmp_secmod_def::pdu_clone" ref="ab25de62259c03cfe0778ca8687384ade" args="" -->
+        Secmod2PduCallback * </td>
+
+        <td class="memItemRight" valign="bottom"><b>pdu_clone</b></td>
+      </tr>
+
+      <tr>
+        <td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a79b0678c2a2db6f22a4598902fa1614c" name=
+        "a79b0678c2a2db6f22a4598902fa1614c"></a>
+        <!-- doxytag: member="snmp_secmod_def::pdu_timeout" ref="a79b0678c2a2db6f22a4598902fa1614c" args="" -->
+        SecmodPduCallback * </td>
+
+        <td class="memItemRight" valign="bottom"><b>pdu_timeout</b></td>
+      </tr>
+
+      <tr>
+        <td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a61efa57b997aa5aec9b12feba6013c09" name=
+        "a61efa57b997aa5aec9b12feba6013c09"></a>
+        <!-- doxytag: member="snmp_secmod_def::pdu_free_state_ref" ref="a61efa57b997aa5aec9b12feba6013c09" args="" -->
+        SecmodFreeState * </td>
+
+        <td class="memItemRight" valign="bottom"><b>pdu_free_state_ref</b></td>
+      </tr>
+
+      <tr>
+        <td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a1262feb97e9c2eace77e9edc568bb220" name=
+        "a1262feb97e9c2eace77e9edc568bb220"></a>
+        <!-- doxytag: member="snmp_secmod_def::encode_reverse" ref="a1262feb97e9c2eace77e9edc568bb220" args="" -->
+        SecmodOutMsg * </td>
+
+        <td class="memItemRight" valign="bottom"><b>encode_reverse</b></td>
+      </tr>
+
+      <tr>
+        <td class="memItemLeft" align="right" valign="top"><a class="anchor" id="ae830f512049de523c039518fe01c7be1" name=
+        "ae830f512049de523c039518fe01c7be1"></a>
+        <!-- doxytag: member="snmp_secmod_def::encode_forward" ref="ae830f512049de523c039518fe01c7be1" args="" -->
+        SecmodOutMsg * </td>
+
+        <td class="memItemRight" valign="bottom"><b>encode_forward</b></td>
+      </tr>
+
+      <tr>
+        <td class="memItemLeft" align="right" valign="top"><a class="anchor" id="acb19c6a3b4d87a67b14813ad66d11510" name=
+        "acb19c6a3b4d87a67b14813ad66d11510"></a>
+        <!-- doxytag: member="snmp_secmod_def::decode" ref="acb19c6a3b4d87a67b14813ad66d11510" args="" -->
+        SecmodInMsg * </td>
+
+        <td class="memItemRight" valign="bottom"><b>decode</b></td>
+      </tr>
+
+      <tr>
+        <td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a97a7043186b61008b76cf2016e7d5b49" name=
+        "a97a7043186b61008b76cf2016e7d5b49"></a>
+        <!-- doxytag: member="snmp_secmod_def::handle_report" ref="a97a7043186b61008b76cf2016e7d5b49" args="" -->
+        SecmodHandleReport * </td>
+
+        <td class="memItemRight" valign="bottom"><b>handle_report</b></td>
+      </tr>
+
+      <tr>
+        <td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a81b8af786cabe6313e6931ca966438de" name=
+        "a81b8af786cabe6313e6931ca966438de"></a>
+        <!-- doxytag: member="snmp_secmod_def::probe_engineid" ref="a81b8af786cabe6313e6931ca966438de" args="" -->
+        SecmodDiscoveryMethod * </td>
+
+        <td class="memItemRight" valign="bottom"><b>probe_engineid</b></td>
+      </tr>
+    </table>
+    <hr />
+    <a name="_details"></a>
+
+    <h2>Detailed Description</h2>
+
+    <p>Definition at line <a class="el" href="snmp__secmod_8h_source.html#l00104">104</a> of file <a class="el" href=
+    "snmp__secmod_8h_source.html">snmp_secmod.h</a>.</p>
+    <hr />
+    The documentation for this struct was generated from the following file:
+
+    <ul>
+      <li><a class="el" href="snmp__secmod_8h_source.html">snmp_secmod.h</a></li>
+    </ul>
+  </div>
+  <hr size="1" />
+
+  <address style="text-align: right;">
+    <small>Generated on 28 Sep 2009 for net-snmp by  <a href="http://www.doxygen.org/index.html"><img class="footer" src=
+    "doxygen.png" alt="doxygen" /></a> 1.6.1</small>
+<!-- CONTENT END -->
+<!--#include virtual="/page-bottom.html" -->
+

@@ -1,0 +1,199 @@
+<!--#set var="section" value="development" -->
+<!--#include virtual="/page-top.html" -->
+<!-- CONTENT START -->
+  <div class="navigation" id="top">
+    <div class="tabs">
+      <ul>
+        <li><a href="index.html"><span>Main Page</span></a></li>
+
+        <li><a href="pages.html"><span>Related Pages</span></a></li>
+
+        <li><a href="modules.html"><span>Modules</span></a></li>
+
+        <li class="current"><a href="annotated.html"><span>Data Structures</span></a></li>
+
+        <li><a href="files.html"><span>Files</span></a></li>
+
+        <li><a href="examples.html"><span>Examples</span></a></li>
+      </ul>
+    </div>
+
+    <div class="tabs">
+      <ul>
+        <li><a href="annotated.html"><span>Data Structures</span></a></li>
+
+        <li><a href="functions.html"><span>Data Fields</span></a></li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="contents">
+    <h1>table_container_data_s Struct Reference</h1><!-- doxytag: class="table_container_data_s" -->
+
+    <table border="0" cellpadding="0" cellspacing="0">
+      <tr>
+        <td colspan="2">
+          <h2>Data Fields</h2>
+        </td>
+      </tr>
+
+      <tr>
+        <td class="memItemLeft" align="right" valign="top"><a class="el" href=
+        "structnetsnmp__table__registration__info__s.html">netsnmp_table_registration_info</a> * </td>
+
+        <td class="memItemRight" valign="bottom"><a class="el" href=
+        "structtable__container__data__s.html#aeba3aa29bbbd3740039f3a242c327ba5">tblreg_info</a></td>
+      </tr>
+
+      <tr>
+        <td class="mdescLeft"> </td>
+
+        <td class="mdescRight">registration info for the table <a href="#aeba3aa29bbbd3740039f3a242c327ba5"></a><br /></td>
+      </tr>
+
+      <tr>
+        <td class="memItemLeft" align="right" valign="top"><a class="el" href=
+        "structnetsnmp__container__s.html">netsnmp_container</a> * </td>
+
+        <td class="memItemRight" valign="bottom"><a class="el" href=
+        "structtable__container__data__s.html#a16e2afe9c39315ce0235fbbba78b3ddb">table</a></td>
+      </tr>
+
+      <tr>
+        <td class="mdescLeft"> </td>
+
+        <td class="mdescRight">container for the table rows <a href="#a16e2afe9c39315ce0235fbbba78b3ddb"></a><br /></td>
+      </tr>
+
+      <tr>
+        <td class="memItemLeft" align="right" valign="top">int </td>
+
+        <td class="memItemRight" valign="bottom"><a class="el" href=
+        "structtable__container__data__s.html#a186c07aa141a94a1549dc75b39283aa2">group_rows</a></td>
+      </tr>
+
+      <tr>
+        <td class="mdescLeft"> </td>
+
+        <td class="mdescRight">do we want to group rows with the same index together when calling callbacks? <a href=
+        "#a186c07aa141a94a1549dc75b39283aa2"></a><br /></td>
+      </tr>
+
+      <tr>
+        <td class="memItemLeft" align="right" valign="top"><a class="el" href=
+        "structnetsnmp__table__array__callbacks__s.html">netsnmp_table_array_callbacks</a> * </td>
+
+        <td class="memItemRight" valign="bottom"><a class="el" href=
+        "structtable__container__data__s.html#aed51d730c0cc00f892bdd4936ff237c8">cb</a></td>
+      </tr>
+
+      <tr>
+        <td class="mdescLeft"> </td>
+
+        <td class="mdescRight">callbacks for this table <a href="#aed51d730c0cc00f892bdd4936ff237c8"></a><br /></td>
+      </tr>
+    </table>
+    <hr />
+    <a name="_details"></a>
+
+    <h2>Detailed Description</h2>
+
+    <p>Definition at line <a class="el" href="table__array_8c_source.html#l00045">45</a> of file <a class="el" href=
+    "table__array_8c_source.html">table_array.c</a>.</p>
+    <hr />
+
+    <h2>Field Documentation</h2><a class="anchor" id="aed51d730c0cc00f892bdd4936ff237c8" name=
+    "aed51d730c0cc00f892bdd4936ff237c8"></a>
+    <!-- doxytag: member="table_container_data_s::cb" ref="aed51d730c0cc00f892bdd4936ff237c8" args="" -->
+
+    <div class="memitem">
+      <div class="memproto">
+        <table class="memname">
+          <tr>
+            <td class="memname"><a class="el" href=
+            "structnetsnmp__table__array__callbacks__s.html">netsnmp_table_array_callbacks</a>* <a class="el" href=
+            "structtable__container__data__s.html#aed51d730c0cc00f892bdd4936ff237c8">table_container_data_s::cb</a></td>
+          </tr>
+        </table>
+      </div>
+
+      <div class="memdoc">
+        <p>callbacks for this table</p>
+
+        <p>Definition at line <a class="el" href="table__array_8c_source.html#l00062">62</a> of file <a class="el" href=
+        "table__array_8c_source.html">table_array.c</a>.</p>
+      </div>
+    </div><a class="anchor" id="a186c07aa141a94a1549dc75b39283aa2" name="a186c07aa141a94a1549dc75b39283aa2"></a>
+    <!-- doxytag: member="table_container_data_s::group_rows" ref="a186c07aa141a94a1549dc75b39283aa2" args="" -->
+
+    <div class="memitem">
+      <div class="memproto">
+        <table class="memname">
+          <tr>
+            <td class="memname">int <a class="el" href=
+            "structtable__container__data__s.html#a186c07aa141a94a1549dc75b39283aa2">table_container_data_s::group_rows</a></td>
+          </tr>
+        </table>
+      </div>
+
+      <div class="memdoc">
+        <p>do we want to group rows with the same index together when calling callbacks?</p>
+
+        <p>Definition at line <a class="el" href="table__array_8c_source.html#l00059">59</a> of file <a class="el" href=
+        "table__array_8c_source.html">table_array.c</a>.</p>
+      </div>
+    </div><a class="anchor" id="a16e2afe9c39315ce0235fbbba78b3ddb" name="a16e2afe9c39315ce0235fbbba78b3ddb"></a>
+    <!-- doxytag: member="table_container_data_s::table" ref="a16e2afe9c39315ce0235fbbba78b3ddb" args="" -->
+
+    <div class="memitem">
+      <div class="memproto">
+        <table class="memname">
+          <tr>
+            <td class="memname"><a class="el" href="structnetsnmp__container__s.html">netsnmp_container</a>* <a class="el" href=
+            "structtable__container__data__s.html#a16e2afe9c39315ce0235fbbba78b3ddb">table_container_data_s::table</a></td>
+          </tr>
+        </table>
+      </div>
+
+      <div class="memdoc">
+        <p>container for the table rows</p>
+
+        <p>Definition at line <a class="el" href="table__array_8c_source.html#l00051">51</a> of file <a class="el" href=
+        "table__array_8c_source.html">table_array.c</a>.</p>
+      </div>
+    </div><a class="anchor" id="aeba3aa29bbbd3740039f3a242c327ba5" name="aeba3aa29bbbd3740039f3a242c327ba5"></a>
+    <!-- doxytag: member="table_container_data_s::tblreg_info" ref="aeba3aa29bbbd3740039f3a242c327ba5" args="" -->
+
+    <div class="memitem">
+      <div class="memproto">
+        <table class="memname">
+          <tr>
+            <td class="memname"><a class="el" href=
+            "structnetsnmp__table__registration__info__s.html">netsnmp_table_registration_info</a>* <a class="el" href=
+            "structtable__container__data__s.html#aeba3aa29bbbd3740039f3a242c327ba5">table_container_data_s::tblreg_info</a></td>
+          </tr>
+        </table>
+      </div>
+
+      <div class="memdoc">
+        <p>registration info for the table</p>
+
+        <p>Definition at line <a class="el" href="table__array_8c_source.html#l00048">48</a> of file <a class="el" href=
+        "table__array_8c_source.html">table_array.c</a>.</p>
+      </div>
+    </div>
+    <hr />
+    The documentation for this struct was generated from the following file:
+
+    <ul>
+      <li><a class="el" href="table__array_8c_source.html">table_array.c</a></li>
+    </ul>
+  </div>
+  <hr size="1" />
+
+  <address style="text-align: right;">
+    <small>Generated on 28 Sep 2009 for net-snmp by  <a href="http://www.doxygen.org/index.html"><img class="footer" src=
+    "doxygen.png" alt="doxygen" /></a> 1.6.1</small>
+<!-- CONTENT END -->
+<!--#include virtual="/page-bottom.html" -->
+

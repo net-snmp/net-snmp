@@ -1,0 +1,352 @@
+<!--#set var="section" value="development" -->
+<!--#include virtual="/page-top.html" -->
+<!-- CONTENT START -->
+  <div class="navigation" id="top">
+    <div class="tabs">
+      <ul>
+        <li><a href="index.html"><span>Main Page</span></a></li>
+
+        <li><a href="pages.html"><span>Related Pages</span></a></li>
+
+        <li><a href="modules.html"><span>Modules</span></a></li>
+
+        <li><a href="annotated.html"><span>Data Structures</span></a></li>
+
+        <li class="current"><a href="files.html"><span>Files</span></a></li>
+
+        <li><a href="examples.html"><span>Examples</span></a></li>
+      </ul>
+    </div>
+
+    <div class="tabs">
+      <ul>
+        <li><a href="files.html"><span>File List</span></a></li>
+
+        <li><a href="globals.html"><span>Globals</span></a></li>
+      </ul>
+    </div>
+
+    <h1>delayed_instance.c</h1>
+
+    <div class="fragment">
+      <pre class="fragment">
+<a name="l00001" id="l00001"></a>00001 
+<a name="l00025" id="l00025"></a>00025 <span class="preprocessor">#include &lt;net-snmp/net-snmp-config.h&gt;</span>
+<a name="l00026" id="l00026"></a>00026 <span class="preprocessor">#include &lt;net-snmp/net-snmp-includes.h&gt;</span>
+<a name="l00027" id="l00027"></a>00027 <span class=
+"preprocessor">#include &lt;net-snmp/agent/net-snmp-agent-includes.h&gt;</span>
+<a name="l00028" id="l00028"></a>00028 
+<a name="l00029" id="l00029"></a>00029 <span class="preprocessor">#include "delayed_instance.h"</span>
+<a name="l00030" id="l00030"></a>00030 
+<a name="l00031" id="l00031"></a>00031 <span class="keyword">static</span> u_long   delay_time = 1;
+<a name="l00032" id="l00032"></a>00032 
+<a name="l00033" id="l00033"></a>00033 <span class="keywordtype">void</span>
+<a name="l00034" id="l00034"></a>00034 init_delayed_instance(<span class="keywordtype">void</span>)
+<a name="l00035" id="l00035"></a>00035 {
+<a name="l00036" id="l00036"></a>00036     <span class="keyword">static</span> oid      my_delayed_oid[] =
+<a name="l00037" id="l00037"></a>00037         { 1, 3, 6, 1, 4, 1, 8072, 2, 1, 2, 0 };
+<a name="l00038" id="l00038"></a>00038     <span class="comment">/*</span>
+<a name="l00039" id="l00039"></a>00039 <span class="comment">     * delayed handler test</span>
+<a name="l00040" id="l00040"></a>00040 <span class="comment">     */</span>
+<a name="l00041" id="l00041"></a>00041     <a class="code" href="structnetsnmp__handler__registration__s.html" title=
+"Root registration info.">netsnmp_handler_registration</a> *my_test;
+<a name="l00042" id="l00042"></a>00042 
+<a name="l00043" id="l00043"></a>00043     my_test =
+<a name="l00044" id="l00044"></a>00044         netsnmp_create_handler_registration(<span class=
+"stringliteral">"delayed_instance_example"</span>,
+<a name="l00045" id="l00045"></a>00045                                             delayed_instance_handler,
+<a name="l00046" id="l00046"></a>00046                                             my_delayed_oid,
+<a name="l00047" id="l00047"></a>00047                                             OID_LENGTH(my_delayed_oid),
+<a name="l00048" id="l00048"></a>00048                                             HANDLER_CAN_RWRITE);
+<a name="l00049" id="l00049"></a>00049 
+<a name="l00050" id="l00050"></a>00050     <a class="code" href="group__instance.html#ga9f743af6acf477e9030b789dadb63f5c" title=
+"This function registers an instance helper handler, which is a way of registering...">netsnmp_register_instance</a>(my_test);
+<a name="l00051" id="l00051"></a>00051 }
+<a name="l00052" id="l00052"></a>00052 
+<a name="l00053" id="l00053"></a>00053 <span class="preprocessor">#define DELAYED_INSTANCE_SET_NAME "test_delayed"</span>
+<a name="l00054" id="l00054"></a>00054 
+<a name="l00055" id="l00055"></a>00055 <span class="keywordtype">int</span>
+<a name="l00056" id="l00056"></a>00056 delayed_instance_handler(<a class="code" href="structnetsnmp__mib__handler__s.html" title=
+"the mib handler structure to be registered">netsnmp_mib_handler</a> *handler,
+<a name="l00057" id="l00057"></a>00057                          <a class="code" href=
+"structnetsnmp__handler__registration__s.html" title="Root registration info.">netsnmp_handler_registration</a> *reginfo,
+<a name="l00058" id="l00058"></a>00058                          <a class="code" href=
+"structnetsnmp__agent__request__info__s.html" title=
+"The agent transaction request structure.">netsnmp_agent_request_info</a> *reqinfo,
+<a name="l00059" id="l00059"></a>00059                          <a class="code" href="structnetsnmp__request__info__s.html"
+title="The netsnmp request info structure.">netsnmp_request_info</a> *requests)
+<a name="l00060" id="l00060"></a>00060 {
+<a name="l00061" id="l00061"></a>00061 
+<a name="l00062" id="l00062"></a>00062     DEBUGMSGTL((<span class="stringliteral">"delayed_instance"</span>, <span class=
+"stringliteral">"Got request, mode = %d:\n"</span>,
+<a name="l00063" id="l00063"></a>00063                 reqinfo-&gt;mode));
+<a name="l00064" id="l00064"></a>00064 
+<a name="l00065" id="l00065"></a>00065     <span class="keywordflow">switch</span> (reqinfo-&gt;mode) {
+<a name="l00066" id="l00066"></a>00066         <span class="comment">/*</span>
+<a name="l00067" id="l00067"></a>00067 <span class=
+"comment">         * here we merely mention that we'll answer this request</span>
+<a name="l00068" id="l00068"></a>00068 <span class=
+"comment">         * later.  we don't actually care about the mode type in this</span>
+<a name="l00069" id="l00069"></a>00069 <span class=
+"comment">         * example, but for certain cases you may, so I'll leave in the</span>
+<a name="l00070" id="l00070"></a>00070 <span class="comment">         * otherwise useless switch and case statements </span>
+<a name="l00071" id="l00071"></a>00071 <span class="comment">         */</span>
+<a name="l00072" id="l00072"></a>00072 
+<a name="l00073" id="l00073"></a>00073     <span class="keywordflow">default</span>:
+<a name="l00074" id="l00074"></a>00074         <span class="comment">/*</span>
+<a name="l00075" id="l00075"></a>00075 <span class=
+"comment">         * mark this variable as something that can't be handled now.</span>
+<a name="l00076" id="l00076"></a>00076 <span class="comment">         * We'll answer it later. </span>
+<a name="l00077" id="l00077"></a>00077 <span class="comment">         */</span>
+<a name="l00078" id="l00078"></a>00078         requests-&gt;delegated = 1;
+<a name="l00079" id="l00079"></a>00079 
+<a name="l00080" id="l00080"></a>00080         <span class="comment">/*</span>
+<a name="l00081" id="l00081"></a>00081 <span class="comment">         * register an alarm to update the results at a later</span>
+<a name="l00082" id="l00082"></a>00082 <span class=
+"comment">         * time.  Normally, we might have to query something else</span>
+<a name="l00083" id="l00083"></a>00083 <span class=
+"comment">         * (like an external request sent to a different network</span>
+<a name="l00084" id="l00084"></a>00084 <span class=
+"comment">         * or system socket, etc), but for this example we'll do</span>
+<a name="l00085" id="l00085"></a>00085 <span class=
+"comment">         * something really simply and just insert an alarm for a</span>
+<a name="l00086" id="l00086"></a>00086 <span class="comment">         * certain period of time </span>
+<a name="l00087" id="l00087"></a>00087 <span class="comment">         */</span>
+<a name="l00088" id="l00088"></a>00088         <a class="code" href="group__snmp__alarm.html#ga6eb45344f1145c3e323824411089cefe"
+title=
+"This function registers function callbacks to occur at a specific time in the future...">snmp_alarm_register</a>(delay_time, <span class="comment">/* seconds */</span>
+<a name="l00089" id="l00089"></a>00089                             0,  <span class="comment">/* dont repeat. */</span>
+<a name="l00090" id="l00090"></a>00090                             return_delayed_response,    <span class=
+"comment">/* the function</span>
+<a name="l00091" id="l00091"></a>00091 <span class=
+"comment">                                                         * to call */</span>
+<a name="l00092" id="l00092"></a>00092                             <span class="comment">/*</span>
+<a name="l00093" id="l00093"></a>00093 <span class=
+"comment">                             * here we create a "cache" of useful</span>
+<a name="l00094" id="l00094"></a>00094 <span class=
+"comment">                             * information that we'll want later</span>
+<a name="l00095" id="l00095"></a>00095 <span class=
+"comment">                             * on.  This argument is passed back</span>
+<a name="l00096" id="l00096"></a>00096 <span class=
+"comment">                             * to us in the callback function for</span>
+<a name="l00097" id="l00097"></a>00097 <span class="comment">                             * an alarm </span>
+<a name="l00098" id="l00098"></a>00098 <span class="comment">                             */</span>
+<a name="l00099" id="l00099"></a>00099                             (<span class="keywordtype">void</span> *)
+<a name="l00100" id="l00100"></a>00100                             <a class="code" href=
+"group__handler.html#ga1b1324a6635e13db666189caa91b6b04" title=
+"creates a cache of information which can be saved for future reference.">netsnmp_create_delegated_cache</a>(handler,
+<a name="l00101" id="l00101"></a>00101                                                            reginfo,
+<a name="l00102" id="l00102"></a>00102                                                            reqinfo,
+<a name="l00103" id="l00103"></a>00103                                                            requests,
+<a name="l00104" id="l00104"></a>00104                                                            NULL));
+<a name="l00105" id="l00105"></a>00105         <span class="keywordflow">break</span>;
+<a name="l00106" id="l00106"></a>00106 
+<a name="l00107" id="l00107"></a>00107     }
+<a name="l00108" id="l00108"></a>00108 
+<a name="l00109" id="l00109"></a>00109     <span class="keywordflow">return</span> SNMP_ERR_NOERROR;
+<a name="l00110" id="l00110"></a>00110 }
+<a name="l00111" id="l00111"></a>00111 
+<a name="l00112" id="l00112"></a>00112 <span class="keywordtype">void</span>
+<a name="l00113" id="l00113"></a>00113 return_delayed_response(<span class="keywordtype">unsigned</span> <span class=
+"keywordtype">int</span> clientreg, <span class="keywordtype">void</span> *clientarg)
+<a name="l00114" id="l00114"></a>00114 {
+<a name="l00115" id="l00115"></a>00115     <span class="comment">/*</span>
+<a name="l00116" id="l00116"></a>00116 <span class="comment">     * extract the cache from the passed argument </span>
+<a name="l00117" id="l00117"></a>00117 <span class="comment">     */</span>
+<a name="l00118" id="l00118"></a>00118     <a class="code" href=
+"structnetsnmp__delegated__cache__s.html">netsnmp_delegated_cache</a> *cache = (<a class="code" href=
+"structnetsnmp__delegated__cache__s.html">netsnmp_delegated_cache</a> *) clientarg;
+<a name="l00119" id="l00119"></a>00119 
+<a name="l00120" id="l00120"></a>00120     <a class="code" href="structnetsnmp__request__info__s.html" title=
+"The netsnmp request info structure.">netsnmp_request_info</a> *requests;
+<a name="l00121" id="l00121"></a>00121     <a class="code" href="structnetsnmp__agent__request__info__s.html" title=
+"The agent transaction request structure.">netsnmp_agent_request_info</a> *reqinfo;
+<a name="l00122" id="l00122"></a>00122     u_long         *delay_time_cache = NULL;
+<a name="l00123" id="l00123"></a>00123 
+<a name="l00124" id="l00124"></a>00124     <span class="comment">/*</span>
+<a name="l00125" id="l00125"></a>00125 <span class=
+"comment">     * here we double check that the cache we created earlier is still</span>
+<a name="l00126" id="l00126"></a>00126 <span class=
+"comment">     * * valid.  If not, the request timed out for some reason and we</span>
+<a name="l00127" id="l00127"></a>00127 <span class=
+"comment">     * * don't need to keep processing things.  Should never happen, but</span>
+<a name="l00128" id="l00128"></a>00128 <span class="comment">     * * this double checks. </span>
+<a name="l00129" id="l00129"></a>00129 <span class="comment">     */</span>
+<a name="l00130" id="l00130"></a>00130     cache = <a class="code" href="group__handler.html#ga5bce39313c473465dc3128127a3da75f"
+title=
+"check&amp;#39;s a given cache and returns it if it is still valid (ie, the agent still...">netsnmp_handler_check_cache</a>(cache);
+<a name="l00131" id="l00131"></a>00131 
+<a name="l00132" id="l00132"></a>00132     <span class="keywordflow">if</span> (!cache) {
+<a name="l00133" id="l00133"></a>00133         <a class="code" href=
+"group__snmp__logging.html#ga9ba905368ea1c551b969af44b13e37c2" title=
+"This snmp logging function allows variable argument list given the specified format...">snmp_log</a>(LOG_ERR, <span class=
+"stringliteral">"illegal call to return delayed response\n"</span>);
+<a name="l00134" id="l00134"></a>00134         <span class="keywordflow">return</span>;
+<a name="l00135" id="l00135"></a>00135     }
+<a name="l00136" id="l00136"></a>00136 
+<a name="l00137" id="l00137"></a>00137     <span class="comment">/*</span>
+<a name="l00138" id="l00138"></a>00138 <span class=
+"comment">     * re-establish the previous pointers we are used to having </span>
+<a name="l00139" id="l00139"></a>00139 <span class="comment">     */</span>
+<a name="l00140" id="l00140"></a>00140     reqinfo = cache-&gt;reqinfo;
+<a name="l00141" id="l00141"></a>00141     requests = cache-&gt;requests;
+<a name="l00142" id="l00142"></a>00142 
+<a name="l00143" id="l00143"></a>00143     DEBUGMSGTL((<span class="stringliteral">"delayed_instance"</span>,
+<a name="l00144" id="l00144"></a>00144                 <span class=
+"stringliteral">"continuing delayed request, mode = %d\n"</span>,
+<a name="l00145" id="l00145"></a>00145                 cache-&gt;reqinfo-&gt;mode));
+<a name="l00146" id="l00146"></a>00146 
+<a name="l00147" id="l00147"></a>00147     <span class="comment">/*</span>
+<a name="l00148" id="l00148"></a>00148 <span class=
+"comment">     * mention that it's no longer delegated, and we've now answered</span>
+<a name="l00149" id="l00149"></a>00149 <span class="comment">     * the query (which we'll do down below). </span>
+<a name="l00150" id="l00150"></a>00150 <span class="comment">     */</span>
+<a name="l00151" id="l00151"></a>00151     requests-&gt;delegated = 0;
+<a name="l00152" id="l00152"></a>00152 
+<a name="l00153" id="l00153"></a>00153     <span class="keywordflow">switch</span> (cache-&gt;reqinfo-&gt;mode) {
+<a name="l00154" id="l00154"></a>00154         <span class="comment">/*</span>
+<a name="l00155" id="l00155"></a>00155 <span class=
+"comment">         * registering as an instance means we don't need to deal with</span>
+<a name="l00156" id="l00156"></a>00156 <span class=
+"comment">         * getnext processing, so we don't handle it here at all.</span>
+<a name="l00157" id="l00157"></a>00157 <span class="comment">         * </span>
+<a name="l00158" id="l00158"></a>00158 <span class=
+"comment">         * However, since the instance handler already reset the mode</span>
+<a name="l00159" id="l00159"></a>00159 <span class=
+"comment">         * back to GETNEXT from the faked GET mode, we need to do the</span>
+<a name="l00160" id="l00160"></a>00160 <span class=
+"comment">         * same thing in both cases.  This should be fixed in future</span>
+<a name="l00161" id="l00161"></a>00161 <span class="comment">         * versions of net-snmp hopefully. </span>
+<a name="l00162" id="l00162"></a>00162 <span class="comment">         */</span>
+<a name="l00163" id="l00163"></a>00163 
+<a name="l00164" id="l00164"></a>00164     <span class="keywordflow">case</span> MODE_GET:
+<a name="l00165" id="l00165"></a>00165     <span class="keywordflow">case</span> MODE_GETNEXT:
+<a name="l00166" id="l00166"></a>00166         <span class="comment">/*</span>
+<a name="l00167" id="l00167"></a>00167 <span class="comment">         * return the currend delay time </span>
+<a name="l00168" id="l00168"></a>00168 <span class="comment">         */</span>
+<a name="l00169" id="l00169"></a>00169         <a class="code" href="group__snmp__client.html#gae3f88533cfdd61ec2b603963ef8a3394"
+title=
+"snmp_set_var_typed_value is used to set data into the netsnmp_variable_list structure...">snmp_set_var_typed_value</a>(cache-&gt;requests-&gt;<a class="code"
+href="structnetsnmp__request__info__s.html#a455d87f6b7178fe19ea564c60c0ccb6f" title="variable bindings">requestvb</a>,
+<a name="l00170" id="l00170"></a>00170                                  ASN_INTEGER,
+<a name="l00171" id="l00171"></a>00171                                  (u_char *) &amp; delay_time,
+<a name="l00172" id="l00172"></a>00172                                  <span class="keyword">sizeof</span>(delay_time));
+<a name="l00173" id="l00173"></a>00173         <span class="keywordflow">break</span>;
+<a name="l00174" id="l00174"></a>00174 
+<a name="l00175" id="l00175"></a>00175     <span class="keywordflow">case</span> MODE_SET_RESERVE1:
+<a name="l00176" id="l00176"></a>00176         <span class="comment">/*</span>
+<a name="l00177" id="l00177"></a>00177 <span class="comment">         * check type </span>
+<a name="l00178" id="l00178"></a>00178 <span class="comment">         */</span>
+<a name="l00179" id="l00179"></a>00179         <span class="keywordflow">if</span> (requests-&gt;<a class="code" href=
+"structnetsnmp__request__info__s.html#a455d87f6b7178fe19ea564c60c0ccb6f" title="variable bindings">requestvb</a>-&gt;<a class=
+"code" href="structvariable__list.html#a8bd719974b3554116631ea80dc88b6aa" title=
+"ASN type of variable.">type</a> != ASN_INTEGER) {
+<a name="l00180" id="l00180"></a>00180             <span class="comment">/*</span>
+<a name="l00181" id="l00181"></a>00181 <span class="comment">             * not an integer.  Bad dog, no bone. </span>
+<a name="l00182" id="l00182"></a>00182 <span class="comment">             */</span>
+<a name="l00183" id="l00183"></a>00183             <a class="code" href=
+"group__snmp__agent.html#gac0668f1fd9036ebc88a734d9d4a6a59b" title=
+"set error for a request">netsnmp_set_request_error</a>(reqinfo, requests,
+<a name="l00184" id="l00184"></a>00184                                       SNMP_ERR_WRONGTYPE);
+<a name="l00185" id="l00185"></a>00185             <span class="comment">/*</span>
+<a name="l00186" id="l00186"></a>00186 <span class="comment">             * we don't need the cache any longer </span>
+<a name="l00187" id="l00187"></a>00187 <span class="comment">             */</span>
+<a name="l00188" id="l00188"></a>00188             <a class="code" href="group__handler.html#gab06f90f7b3c942c5fa19bc29a994e657"
+title="frees a cache once you&amp;#39;re finished using it">netsnmp_free_delegated_cache</a>(cache);
+<a name="l00189" id="l00189"></a>00189             <span class="keywordflow">return</span>;
+<a name="l00190" id="l00190"></a>00190         }
+<a name="l00191" id="l00191"></a>00191         <span class="keywordflow">break</span>;
+<a name="l00192" id="l00192"></a>00192 
+<a name="l00193" id="l00193"></a>00193     <span class="keywordflow">case</span> MODE_SET_RESERVE2:
+<a name="l00194" id="l00194"></a>00194         <span class="comment">/*</span>
+<a name="l00195" id="l00195"></a>00195 <span class="comment">         * store old value for UNDO support in the future. </span>
+<a name="l00196" id="l00196"></a>00196 <span class="comment">         */</span>
+<a name="l00197" id="l00197"></a>00197         <a class="code" href="group__util.html#gae28321822c83004ae8eedcc3de2b2fde" title=
+"Duplicates a memory block.">memdup</a>((u_char **) &amp; delay_time_cache,
+<a name="l00198" id="l00198"></a>00198                (u_char *) &amp; delay_time, <span class=
+"keyword">sizeof</span>(delay_time));
+<a name="l00199" id="l00199"></a>00199 
+<a name="l00200" id="l00200"></a>00200         <span class="comment">/*</span>
+<a name="l00201" id="l00201"></a>00201 <span class="comment">         * malloc failed </span>
+<a name="l00202" id="l00202"></a>00202 <span class="comment">         */</span>
+<a name="l00203" id="l00203"></a>00203         <span class="keywordflow">if</span> (delay_time_cache == NULL) {
+<a name="l00204" id="l00204"></a>00204             <a class="code" href=
+"group__snmp__agent.html#gac0668f1fd9036ebc88a734d9d4a6a59b" title=
+"set error for a request">netsnmp_set_request_error</a>(reqinfo, requests,
+<a name="l00205" id="l00205"></a>00205                                       SNMP_ERR_RESOURCEUNAVAILABLE);
+<a name="l00206" id="l00206"></a>00206             <a class="code" href="group__handler.html#gab06f90f7b3c942c5fa19bc29a994e657"
+title="frees a cache once you&amp;#39;re finished using it">netsnmp_free_delegated_cache</a>(cache);
+<a name="l00207" id="l00207"></a>00207             <span class="keywordflow">return</span>;
+<a name="l00208" id="l00208"></a>00208         }
+<a name="l00209" id="l00209"></a>00209 
+<a name="l00210" id="l00210"></a>00210         <span class="comment">/*</span>
+<a name="l00211" id="l00211"></a>00211 <span class=
+"comment">         * Add our temporary information to the request itself.</span>
+<a name="l00212" id="l00212"></a>00212 <span class="comment">         * This is then retrivable later.  The free function</span>
+<a name="l00213" id="l00213"></a>00213 <span class="comment">         * passed auto-frees it when the request is later</span>
+<a name="l00214" id="l00214"></a>00214 <span class="comment">         * deleted.  </span>
+<a name="l00215" id="l00215"></a>00215 <span class="comment">         */</span>
+<a name="l00216" id="l00216"></a>00216         <a class="code" href="group__handler.html#gacc092f27f7c4203fe20665c8341023c8"
+title="add data to a request that can be extracted later by submodules">netsnmp_request_add_list_data</a>(requests,
+<a name="l00217" id="l00217"></a>00217                                       <a class="code" href=
+"group__data__list.html#ga3dc286b678474c6adb610460ea71b03e" title=
+"adds creates a data_list node given a name, data and a free function ptr.">netsnmp_create_data_list</a>
+<a name="l00218" id="l00218"></a>00218                                       (DELAYED_INSTANCE_SET_NAME,
+<a name="l00219" id="l00219"></a>00219                                        delay_time_cache, free));
+<a name="l00220" id="l00220"></a>00220         <span class="keywordflow">break</span>;
+<a name="l00221" id="l00221"></a>00221 
+<a name="l00222" id="l00222"></a>00222     <span class="keywordflow">case</span> MODE_SET_ACTION:
+<a name="l00223" id="l00223"></a>00223         <span class="comment">/*</span>
+<a name="l00224" id="l00224"></a>00224 <span class="comment">         * update current value </span>
+<a name="l00225" id="l00225"></a>00225 <span class="comment">         */</span>
+<a name="l00226" id="l00226"></a>00226         delay_time = *(requests-&gt;<a class="code" href=
+"structnetsnmp__request__info__s.html#a455d87f6b7178fe19ea564c60c0ccb6f" title="variable bindings">requestvb</a>-&gt;<a class=
+"code" href="structvariable__list.html#a6ed7c00d712b83c174823b1cff6e9e29" title="value of variable">val</a>.integer);
+<a name="l00227" id="l00227"></a>00227         DEBUGMSGTL((<span class="stringliteral">"testhandler"</span>, <span class=
+"stringliteral">"updated delay_time -&gt; %d\n"</span>,
+<a name="l00228" id="l00228"></a>00228                     delay_time));
+<a name="l00229" id="l00229"></a>00229         <span class="keywordflow">break</span>;
+<a name="l00230" id="l00230"></a>00230 
+<a name="l00231" id="l00231"></a>00231     <span class="keywordflow">case</span> MODE_SET_UNDO:
+<a name="l00232" id="l00232"></a>00232         <span class="comment">/*</span>
+<a name="l00233" id="l00233"></a>00233 <span class=
+"comment">         * ack, something somewhere failed.  We reset back to the</span>
+<a name="l00234" id="l00234"></a>00234 <span class="comment">         * previously old value by extracting the previosuly</span>
+<a name="l00235" id="l00235"></a>00235 <span class="comment">         * stored information back out of the request </span>
+<a name="l00236" id="l00236"></a>00236 <span class="comment">         */</span>
+<a name="l00237" id="l00237"></a>00237         delay_time =
+<a name="l00238" id="l00238"></a>00238             *((u_long *) <a class="code" href=
+"group__handler.html#gac8ebe16c4ca9e9e8d06fadcaa2650079" title=
+"extract data from a request that was added previously by a parent module">netsnmp_request_get_list_data</a>(requests,
+<a name="l00239" id="l00239"></a>00239                                                        DELAYED_INSTANCE_SET_NAME));
+<a name="l00240" id="l00240"></a>00240         <span class="keywordflow">break</span>;
+<a name="l00241" id="l00241"></a>00241 
+<a name="l00242" id="l00242"></a>00242     <span class="keywordflow">case</span> MODE_SET_COMMIT:
+<a name="l00243" id="l00243"></a>00243     <span class="keywordflow">case</span> MODE_SET_FREE:
+<a name="l00244" id="l00244"></a>00244         <span class="comment">/*</span>
+<a name="l00245" id="l00245"></a>00245 <span class=
+"comment">         * the only thing to do here is free the old memdup'ed</span>
+<a name="l00246" id="l00246"></a>00246 <span class=
+"comment">         * value, but it's auto-freed by the datalist recovery, so</span>
+<a name="l00247" id="l00247"></a>00247 <span class="comment">         * we don't have anything to actually do here </span>
+<a name="l00248" id="l00248"></a>00248 <span class="comment">         */</span>
+<a name="l00249" id="l00249"></a>00249         <span class="keywordflow">break</span>;
+<a name="l00250" id="l00250"></a>00250     }
+<a name="l00251" id="l00251"></a>00251 
+<a name="l00252" id="l00252"></a>00252     <span class="comment">/*</span>
+<a name="l00253" id="l00253"></a>00253 <span class="comment">     * free the information cache </span>
+<a name="l00254" id="l00254"></a>00254 <span class="comment">     */</span>
+<a name="l00255" id="l00255"></a>00255     <a class="code" href="group__handler.html#gab06f90f7b3c942c5fa19bc29a994e657" title=
+"frees a cache once you&amp;#39;re finished using it">netsnmp_free_delegated_cache</a>(cache);
+<a name="l00256" id="l00256"></a>00256 }
+</pre>
+    </div>
+  </div>
+  <hr size="1" />
+
+  <address style="text-align: right;">
+    <small>Generated on 28 Sep 2009 for net-snmp by  <a href="http://www.doxygen.org/index.html"><img class="footer" src=
+    "doxygen.png" alt="doxygen" /></a> 1.6.1</small>
+<!-- CONTENT END -->
+<!--#include virtual="/page-bottom.html" -->
+

@@ -1,0 +1,263 @@
+<!--#set var="section" value="development" -->
+<!--#include virtual="/page-top.html" -->
+<!-- CONTENT START -->
+  <div class="navigation" id="top">
+    <div class="tabs">
+      <ul>
+        <li><a href="index.html"><span>Main Page</span></a></li>
+
+        <li><a href="pages.html"><span>Related Pages</span></a></li>
+
+        <li><a href="modules.html"><span>Modules</span></a></li>
+
+        <li class="current"><a href="annotated.html"><span>Data Structures</span></a></li>
+
+        <li><a href="files.html"><span>Files</span></a></li>
+
+        <li><a href="examples.html"><span>Examples</span></a></li>
+      </ul>
+    </div>
+
+    <div class="tabs">
+      <ul>
+        <li><a href="annotated.html"><span>Data Structures</span></a></li>
+
+        <li><a href="functions.html"><span>Data Fields</span></a></li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="contents">
+    <h1>netsnmp_table_array_callbacks_s Struct Reference</h1><!-- doxytag: class="netsnmp_table_array_callbacks_s" -->
+
+    <table border="0" cellpadding="0" cellspacing="0">
+      <tr>
+        <td colspan="2">
+          <h2>Data Fields</h2>
+        </td>
+      </tr>
+
+      <tr>
+        <td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a766ff860ee632ec6b7bed6d21fc8b8e5" name=
+        "a766ff860ee632ec6b7bed6d21fc8b8e5"></a>
+        <!-- doxytag: member="netsnmp_table_array_callbacks_s::row_copy" ref="a766ff860ee632ec6b7bed6d21fc8b8e5" args="" -->
+        Netsnmp_User_Row_Operation * </td>
+
+        <td class="memItemRight" valign="bottom"><b>row_copy</b></td>
+      </tr>
+
+      <tr>
+        <td class="memItemLeft" align="right" valign="top"><a class="anchor" id="aede89732af1c26af80326305876fa45d" name=
+        "aede89732af1c26af80326305876fa45d"></a>
+        <!-- doxytag: member="netsnmp_table_array_callbacks_s::row_compare" ref="aede89732af1c26af80326305876fa45d" args="" -->
+        Netsnmp_User_Row_Operation_c * </td>
+
+        <td class="memItemRight" valign="bottom"><b>row_compare</b></td>
+      </tr>
+
+      <tr>
+        <td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a5ec744f5ca237f4c00b32126cefbba12" name=
+        "a5ec744f5ca237f4c00b32126cefbba12"></a>
+        <!-- doxytag: member="netsnmp_table_array_callbacks_s::get_value" ref="a5ec744f5ca237f4c00b32126cefbba12" args="" -->
+        Netsnmp_User_Get_Processor * </td>
+
+        <td class="memItemRight" valign="bottom"><b>get_value</b></td>
+      </tr>
+
+      <tr>
+        <td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a6a4189035d19f911f1c046499f66a32f" name=
+        "a6a4189035d19f911f1c046499f66a32f"></a>
+        <!-- doxytag: member="netsnmp_table_array_callbacks_s::can_activate" ref="a6a4189035d19f911f1c046499f66a32f" args="" -->
+        Netsnmp_User_Row_Action * </td>
+
+        <td class="memItemRight" valign="bottom"><b>can_activate</b></td>
+      </tr>
+
+      <tr>
+        <td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a6c9556dd0951d25609f8672faec3eded" name=
+        "a6c9556dd0951d25609f8672faec3eded"></a>
+        <!-- doxytag: member="netsnmp_table_array_callbacks_s::activated" ref="a6c9556dd0951d25609f8672faec3eded" args="" -->
+        Netsnmp_User_Row_Action * </td>
+
+        <td class="memItemRight" valign="bottom"><b>activated</b></td>
+      </tr>
+
+      <tr>
+        <td class="memItemLeft" align="right" valign="top"><a class="anchor" id="ab791fa02fd9fc10ffc673ae1a2c5738f" name=
+        "ab791fa02fd9fc10ffc673ae1a2c5738f"></a>
+        <!-- doxytag: member="netsnmp_table_array_callbacks_s::can_deactivate" ref="ab791fa02fd9fc10ffc673ae1a2c5738f" args="" -->
+        Netsnmp_User_Row_Action * </td>
+
+        <td class="memItemRight" valign="bottom"><b>can_deactivate</b></td>
+      </tr>
+
+      <tr>
+        <td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a98186a9c799581738e19261c6860147d" name=
+        "a98186a9c799581738e19261c6860147d"></a>
+        <!-- doxytag: member="netsnmp_table_array_callbacks_s::deactivated" ref="a98186a9c799581738e19261c6860147d" args="" -->
+        Netsnmp_User_Row_Action * </td>
+
+        <td class="memItemRight" valign="bottom"><b>deactivated</b></td>
+      </tr>
+
+      <tr>
+        <td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a2a95ea163510c05fb68f5d41b49c2136" name=
+        "a2a95ea163510c05fb68f5d41b49c2136"></a>
+        <!-- doxytag: member="netsnmp_table_array_callbacks_s::can_delete" ref="a2a95ea163510c05fb68f5d41b49c2136" args="" -->
+        Netsnmp_User_Row_Action * </td>
+
+        <td class="memItemRight" valign="bottom"><b>can_delete</b></td>
+      </tr>
+
+      <tr>
+        <td class="memItemLeft" align="right" valign="top"><a class="anchor" id="af95661de4c3bec84232adff371ace38f" name=
+        "af95661de4c3bec84232adff371ace38f"></a>
+        <!-- doxytag: member="netsnmp_table_array_callbacks_s::create_row" ref="af95661de4c3bec84232adff371ace38f" args="" -->
+        UserRowMethod * </td>
+
+        <td class="memItemRight" valign="bottom"><b>create_row</b></td>
+      </tr>
+
+      <tr>
+        <td class="memItemLeft" align="right" valign="top"><a class="anchor" id="aab0bad777db217d0641c7bdf77da27d6" name=
+        "aab0bad777db217d0641c7bdf77da27d6"></a>
+        <!-- doxytag: member="netsnmp_table_array_callbacks_s::duplicate_row" ref="aab0bad777db217d0641c7bdf77da27d6" args="" -->
+        UserRowMethod * </td>
+
+        <td class="memItemRight" valign="bottom"><b>duplicate_row</b></td>
+      </tr>
+
+      <tr>
+        <td class="memItemLeft" align="right" valign="top"><a class="anchor" id="accf351527d1af9469f32a37dc3ecf545" name=
+        "accf351527d1af9469f32a37dc3ecf545"></a>
+        <!-- doxytag: member="netsnmp_table_array_callbacks_s::delete_row" ref="accf351527d1af9469f32a37dc3ecf545" args="" -->
+        UserRowMethod * </td>
+
+        <td class="memItemRight" valign="bottom"><b>delete_row</b></td>
+      </tr>
+
+      <tr>
+        <td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a2c04431c2c03e852932ecbd366e239b3" name=
+        "a2c04431c2c03e852932ecbd366e239b3"></a>
+        <!-- doxytag: member="netsnmp_table_array_callbacks_s::set_reserve1" ref="a2c04431c2c03e852932ecbd366e239b3" args="" -->
+        Netsnmp_User_Group_Method * </td>
+
+        <td class="memItemRight" valign="bottom"><b>set_reserve1</b></td>
+      </tr>
+
+      <tr>
+        <td class="memItemLeft" align="right" valign="top"><a class="anchor" id="af6f142d7d85f38ca5ee63850b8b2935a" name=
+        "af6f142d7d85f38ca5ee63850b8b2935a"></a>
+        <!-- doxytag: member="netsnmp_table_array_callbacks_s::set_reserve2" ref="af6f142d7d85f38ca5ee63850b8b2935a" args="" -->
+        Netsnmp_User_Group_Method * </td>
+
+        <td class="memItemRight" valign="bottom"><b>set_reserve2</b></td>
+      </tr>
+
+      <tr>
+        <td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a4b5016dd708c09a61a145cb0905b87df" name=
+        "a4b5016dd708c09a61a145cb0905b87df"></a>
+        <!-- doxytag: member="netsnmp_table_array_callbacks_s::set_action" ref="a4b5016dd708c09a61a145cb0905b87df" args="" -->
+        Netsnmp_User_Group_Method * </td>
+
+        <td class="memItemRight" valign="bottom"><b>set_action</b></td>
+      </tr>
+
+      <tr>
+        <td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a22bf2f93a3c68bb65cafed2bed4bc5d0" name=
+        "a22bf2f93a3c68bb65cafed2bed4bc5d0"></a>
+        <!-- doxytag: member="netsnmp_table_array_callbacks_s::set_commit" ref="a22bf2f93a3c68bb65cafed2bed4bc5d0" args="" -->
+        Netsnmp_User_Group_Method * </td>
+
+        <td class="memItemRight" valign="bottom"><b>set_commit</b></td>
+      </tr>
+
+      <tr>
+        <td class="memItemLeft" align="right" valign="top"><a class="anchor" id="aeca9f1f4b2cfab39d35ad8e0551548f0" name=
+        "aeca9f1f4b2cfab39d35ad8e0551548f0"></a>
+        <!-- doxytag: member="netsnmp_table_array_callbacks_s::set_free" ref="aeca9f1f4b2cfab39d35ad8e0551548f0" args="" -->
+        Netsnmp_User_Group_Method * </td>
+
+        <td class="memItemRight" valign="bottom"><b>set_free</b></td>
+      </tr>
+
+      <tr>
+        <td class="memItemLeft" align="right" valign="top"><a class="anchor" id="ab6e8486f0c4d60ac1ed184bebc49c8c4" name=
+        "ab6e8486f0c4d60ac1ed184bebc49c8c4"></a>
+        <!-- doxytag: member="netsnmp_table_array_callbacks_s::set_undo" ref="ab6e8486f0c4d60ac1ed184bebc49c8c4" args="" -->
+        Netsnmp_User_Group_Method * </td>
+
+        <td class="memItemRight" valign="bottom"><b>set_undo</b></td>
+      </tr>
+
+      <tr>
+        <td class="memItemLeft" align="right" valign="top"><a class="el" href=
+        "structnetsnmp__container__s.html">netsnmp_container</a> * </td>
+
+        <td class="memItemRight" valign="bottom"><a class="el" href=
+        "structnetsnmp__table__array__callbacks__s.html#a982c578025c2c044e4b02447241be31b">container</a></td>
+      </tr>
+
+      <tr>
+        <td class="mdescLeft"> </td>
+
+        <td class="mdescRight">not callbacks, but this is a useful place for them. <a href=
+        "#a982c578025c2c044e4b02447241be31b"></a><br /></td>
+      </tr>
+
+      <tr>
+        <td class="memItemLeft" align="right" valign="top"><a class="anchor" id="ac9001343b7a60f44217aaf41c6abe8d3" name=
+        "ac9001343b7a60f44217aaf41c6abe8d3"></a>
+        <!-- doxytag: member="netsnmp_table_array_callbacks_s::can_set" ref="ac9001343b7a60f44217aaf41c6abe8d3" args="" -->
+        char </td>
+
+        <td class="memItemRight" valign="bottom"><b>can_set</b></td>
+      </tr>
+    </table>
+    <hr />
+    <a name="_details"></a>
+
+    <h2>Detailed Description</h2>
+
+    <p>Definition at line <a class="el" href="table__array_8h_source.html#l00099">99</a> of file <a class="el" href=
+    "table__array_8h_source.html">table_array.h</a>.</p>
+    <hr />
+
+    <h2>Field Documentation</h2><a class="anchor" id="a982c578025c2c044e4b02447241be31b" name=
+    "a982c578025c2c044e4b02447241be31b"></a>
+    <!-- doxytag: member="netsnmp_table_array_callbacks_s::container" ref="a982c578025c2c044e4b02447241be31b" args="" -->
+
+    <div class="memitem">
+      <div class="memproto">
+        <table class="memname">
+          <tr>
+            <td class="memname"><a class="el" href="structnetsnmp__container__s.html">netsnmp_container</a>* <a class="el" href=
+            "structnetsnmp__table__array__callbacks__s.html#a982c578025c2c044e4b02447241be31b">netsnmp_table_array_callbacks_s::container</a></td>
+          </tr>
+        </table>
+      </div>
+
+      <div class="memdoc">
+        <p>not callbacks, but this is a useful place for them.</p>
+
+        <p>..</p>
+
+        <p>Definition at line <a class="el" href="table__array_8h_source.html#l00125">125</a> of file <a class="el" href=
+        "table__array_8h_source.html">table_array.h</a>.</p>
+      </div>
+    </div>
+    <hr />
+    The documentation for this struct was generated from the following file:
+
+    <ul>
+      <li><a class="el" href="table__array_8h_source.html">table_array.h</a></li>
+    </ul>
+  </div>
+  <hr size="1" />
+
+  <address style="text-align: right;">
+    <small>Generated on 28 Sep 2009 for net-snmp by  <a href="http://www.doxygen.org/index.html"><img class="footer" src=
+    "doxygen.png" alt="doxygen" /></a> 1.6.1</small>
+<!-- CONTENT END -->
+<!--#include virtual="/page-bottom.html" -->
+

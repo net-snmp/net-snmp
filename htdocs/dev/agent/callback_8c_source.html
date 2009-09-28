@@ -1,0 +1,621 @@
+<!--#set var="section" value="development" -->
+<!--#include virtual="/page-top.html" -->
+<!-- CONTENT START -->
+  <div class="navigation" id="top">
+    <div class="tabs">
+      <ul>
+        <li><a href="index.html"><span>Main Page</span></a></li>
+
+        <li><a href="pages.html"><span>Related Pages</span></a></li>
+
+        <li><a href="modules.html"><span>Modules</span></a></li>
+
+        <li><a href="annotated.html"><span>Data Structures</span></a></li>
+
+        <li class="current"><a href="files.html"><span>Files</span></a></li>
+
+        <li><a href="examples.html"><span>Examples</span></a></li>
+      </ul>
+    </div>
+
+    <div class="tabs">
+      <ul>
+        <li><a href="files.html"><span>File List</span></a></li>
+
+        <li><a href="globals.html"><span>Globals</span></a></li>
+      </ul>
+    </div>
+
+    <h1>callback.c</h1>
+
+    <div class="fragment">
+      <pre class="fragment">
+<a name="l00001" id="l00001"></a>00001 <span class="comment">/*</span>
+<a name="l00002" id="l00002"></a>00002 <span class="comment"> * callback.c: A generic callback mechanism </span>
+<a name="l00003" id="l00003"></a>00003 <span class="comment"> */</span>
+<a name="l00004" id="l00004"></a>00004 <span class=
+"comment">/* Portions of this file are subject to the following copyright(s).  See</span>
+<a name="l00005" id="l00005"></a>00005 <span class=
+"comment"> * the Net-SNMP's COPYING file for more details and other copyrights</span>
+<a name="l00006" id="l00006"></a>00006 <span class="comment"> * that may apply:</span>
+<a name="l00007" id="l00007"></a>00007 <span class="comment"> */</span>
+<a name="l00008" id="l00008"></a>00008 <span class="comment">/*</span>
+<a name="l00009" id="l00009"></a>00009 <span class="comment"> * Portions of this file are copyrighted by:</span>
+<a name="l00010" id="l00010"></a>00010 <span class=
+"comment"> * Copyright &copy; 2003 Sun Microsystems, Inc. All rights reserved.</span>
+<a name="l00011" id="l00011"></a>00011 <span class=
+"comment"> * Use is subject to license terms specified in the COPYING file</span>
+<a name="l00012" id="l00012"></a>00012 <span class="comment"> * distributed with the Net-SNMP package.</span>
+<a name="l00013" id="l00013"></a>00013 <span class="comment"> */</span>
+<a name="l00019" id="l00019"></a>00019 <span class="preprocessor">#include &lt;net-snmp/net-snmp-config.h&gt;</span>
+<a name="l00020" id="l00020"></a>00020 <span class="preprocessor">#include &lt;sys/types.h&gt;</span>
+<a name="l00021" id="l00021"></a>00021 <span class="preprocessor">#include &lt;stdio.h&gt;</span>
+<a name="l00022" id="l00022"></a>00022 <span class="preprocessor">#if HAVE_STDLIB_H</span>
+<a name="l00023" id="l00023"></a>00023 <span class="preprocessor">#include &lt;stdlib.h&gt;</span>
+<a name="l00024" id="l00024"></a>00024 <span class="preprocessor">#endif</span>
+<a name="l00025" id="l00025"></a>00025 <span class="preprocessor">#if HAVE_WINSOCK_H</span>
+<a name="l00026" id="l00026"></a>00026 <span class="preprocessor">#include &lt;winsock.h&gt;</span>
+<a name="l00027" id="l00027"></a>00027 <span class="preprocessor">#endif</span>
+<a name="l00028" id="l00028"></a>00028 <span class="preprocessor">#if HAVE_NETINET_IN_H</span>
+<a name="l00029" id="l00029"></a>00029 <span class="preprocessor">#include &lt;netinet/in.h&gt;</span>
+<a name="l00030" id="l00030"></a>00030 <span class="preprocessor">#endif</span>
+<a name="l00031" id="l00031"></a>00031 <span class="preprocessor">#if HAVE_STRING_H</span>
+<a name="l00032" id="l00032"></a>00032 <span class="preprocessor">#include &lt;string.h&gt;</span>
+<a name="l00033" id="l00033"></a>00033 <span class="preprocessor">#else</span>
+<a name="l00034" id="l00034"></a>00034 <span class="preprocessor">#include &lt;strings.h&gt;</span>
+<a name="l00035" id="l00035"></a>00035 <span class="preprocessor">#endif</span>
+<a name="l00036" id="l00036"></a>00036 
+<a name="l00037" id="l00037"></a>00037 <span class="preprocessor">#if HAVE_DMALLOC_H</span>
+<a name="l00038" id="l00038"></a>00038 <span class="preprocessor">#include &lt;dmalloc.h&gt;</span>
+<a name="l00039" id="l00039"></a>00039 <span class="preprocessor">#endif</span>
+<a name="l00040" id="l00040"></a>00040 
+<a name="l00041" id="l00041"></a>00041 <span class="preprocessor">#if HAVE_SYS_SOCKET_H</span>
+<a name="l00042" id="l00042"></a>00042 <span class="preprocessor">#include &lt;sys/socket.h&gt;</span>
+<a name="l00043" id="l00043"></a>00043 <span class="preprocessor">#endif</span>
+<a name="l00044" id="l00044"></a>00044 <span class="preprocessor">#if HAVE_SYS_TIME_H</span>
+<a name="l00045" id="l00045"></a>00045 <span class="preprocessor">#include &lt;sys/time.h&gt;</span>
+<a name="l00046" id="l00046"></a>00046 <span class="preprocessor">#endif</span>
+<a name="l00047" id="l00047"></a>00047 
+<a name="l00048" id="l00048"></a>00048 <span class="preprocessor">#include &lt;net-snmp/types.h&gt;</span>
+<a name="l00049" id="l00049"></a>00049 <span class="preprocessor">#include &lt;net-snmp/output_api.h&gt;</span>
+<a name="l00050" id="l00050"></a>00050 <span class="preprocessor">#include &lt;net-snmp/utilities.h&gt;</span>
+<a name="l00051" id="l00051"></a>00051 
+<a name="l00052" id="l00052"></a>00052 <span class="preprocessor">#include &lt;net-snmp/library/callback.h&gt;</span>
+<a name="l00053" id="l00053"></a>00053 <span class="preprocessor">#include &lt;net-snmp/library/snmp_api.h&gt;</span>
+<a name="l00054" id="l00054"></a>00054 
+<a name="l00055" id="l00055"></a>00055 <span class="comment">/*</span>
+<a name="l00056" id="l00056"></a>00056 <span class=
+"comment"> * the inline callback methods use major/minor to index into arrays.</span>
+<a name="l00057" id="l00057"></a>00057 <span class=
+"comment"> * all users in this function do range checking before calling these</span>
+<a name="l00058" id="l00058"></a>00058 <span class=
+"comment"> * functions, so it is redundant for them to check again. But if you</span>
+<a name="l00059" id="l00059"></a>00059 <span class=
+"comment"> * want to be paranoid, define this var, and additional range checks</span>
+<a name="l00060" id="l00060"></a>00060 <span class="comment"> * will be performed.</span>
+<a name="l00061" id="l00061"></a>00061 <span class="comment"> * #define NETSNMP_PARANOID_LEVEL_HIGH 1 </span>
+<a name="l00062" id="l00062"></a>00062 <span class="comment"> */</span>
+<a name="l00063" id="l00063"></a>00063 
+<a name="l00064" id="l00064"></a>00064 <span class="keyword">static</span> <span class=
+"keywordtype">int</span> _callback_need_init = 1;
+<a name="l00065" id="l00065"></a>00065 <span class="keyword">static</span> <span class="keyword">struct </span><a class="code"
+href="structsnmp__gen__callback.html">snmp_gen_callback</a>
+<a name="l00066" id="l00066"></a>00066                *thecallbacks[MAX_CALLBACK_IDS][MAX_CALLBACK_SUBIDS];
+<a name="l00067" id="l00067"></a>00067 
+<a name="l00068" id="l00068"></a>00068 <span class="preprocessor">#define CALLBACK_NAME_LOGGING 1</span>
+<a name="l00069" id="l00069"></a>00069 <span class="preprocessor">#ifdef CALLBACK_NAME_LOGGING</span>
+<a name="l00070" id="l00070"></a>00070 <span class="keyword">static</span> <span class="keyword">const</span> <span class=
+"keywordtype">char</span> *types[MAX_CALLBACK_IDS] = { <span class="stringliteral">"LIB"</span>, <span class=
+"stringliteral">"APP"</span> };
+<a name="l00071" id="l00071"></a>00071 <span class="keyword">static</span> <span class="keyword">const</span> <span class=
+"keywordtype">char</span> *lib[MAX_CALLBACK_SUBIDS] = {
+<a name="l00072" id="l00072"></a>00072     <span class="stringliteral">"POST_READ_CONFIG"</span>, <span class=
+"comment">/* 0 */</span>
+<a name="l00073" id="l00073"></a>00073     <span class="stringliteral">"STORE_DATA"</span>, <span class="comment">/* 1 */</span>
+<a name="l00074" id="l00074"></a>00074     <span class="stringliteral">"SHUTDOWN"</span>, <span class="comment">/* 2 */</span>
+<a name="l00075" id="l00075"></a>00075     <span class="stringliteral">"POST_PREMIB_READ_CONFIG"</span>, <span class=
+"comment">/* 3 */</span>
+<a name="l00076" id="l00076"></a>00076     <span class="stringliteral">"LOGGING"</span>, <span class="comment">/* 4 */</span>
+<a name="l00077" id="l00077"></a>00077     <span class="stringliteral">"SESSION_INIT"</span>, <span class=
+"comment">/* 5 */</span>
+<a name="l00078" id="l00078"></a>00078     NULL, <span class="comment">/* 6 */</span>
+<a name="l00079" id="l00079"></a>00079     NULL, <span class="comment">/* 7 */</span>
+<a name="l00080" id="l00080"></a>00080     NULL, <span class="comment">/* 8 */</span>
+<a name="l00081" id="l00081"></a>00081     NULL, <span class="comment">/* 9 */</span>
+<a name="l00082" id="l00082"></a>00082     NULL, <span class="comment">/* 10 */</span>
+<a name="l00083" id="l00083"></a>00083     NULL, <span class="comment">/* 11 */</span>
+<a name="l00084" id="l00084"></a>00084     NULL, <span class="comment">/* 12 */</span>
+<a name="l00085" id="l00085"></a>00085     NULL, <span class="comment">/* 13 */</span>
+<a name="l00086" id="l00086"></a>00086     NULL, <span class="comment">/* 14 */</span>
+<a name="l00087" id="l00087"></a>00087     NULL <span class="comment">/* 15 */</span>
+<a name="l00088" id="l00088"></a>00088 };
+<a name="l00089" id="l00089"></a>00089 <span class="preprocessor">#endif</span>
+<a name="l00090" id="l00090"></a>00090 
+<a name="l00091" id="l00091"></a>00091 <span class="comment">/*</span>
+<a name="l00092" id="l00092"></a>00092 <span class=
+"comment"> * extremely simplistic locking, just to find problems were the</span>
+<a name="l00093" id="l00093"></a>00093 <span class=
+"comment"> * callback list is modified while being traversed. Not intended</span>
+<a name="l00094" id="l00094"></a>00094 <span class=
+"comment"> * to do any real protection, or in any way imply that this code</span>
+<a name="l00095" id="l00095"></a>00095 <span class=
+"comment"> * has been evaluated for use in a multi-threaded environment.</span>
+<a name="l00096" id="l00096"></a>00096 <span class=
+"comment"> * In 5.2, it was a single lock. For 5.3, it has been updated to</span>
+<a name="l00097" id="l00097"></a>00097 <span class=
+"comment"> * a lock per callback, since a particular callback may trigger</span>
+<a name="l00098" id="l00098"></a>00098 <span class="comment"> * registration/unregistration of other callbacks (eg AgentX</span>
+<a name="l00099" id="l00099"></a>00099 <span class="comment"> * subagents do this).</span>
+<a name="l00100" id="l00100"></a>00100 <span class="comment"> */</span>
+<a name="l00101" id="l00101"></a>00101 <span class="preprocessor">#define LOCK_PER_CALLBACK_SUBID 1</span>
+<a name="l00102" id="l00102"></a>00102 <span class="preprocessor">#ifdef LOCK_PER_CALLBACK_SUBID</span>
+<a name="l00103" id="l00103"></a>00103 <span class="keyword">static</span> <span class=
+"keywordtype">int</span> _locks[MAX_CALLBACK_IDS][MAX_CALLBACK_SUBIDS];
+<a name="l00104" id="l00104"></a>00104 <span class="preprocessor">#define CALLBACK_LOCK(maj,min) ++_locks[maj][min]</span>
+<a name="l00105" id="l00105"></a>00105 <span class="preprocessor">#define CALLBACK_UNLOCK(maj,min) --_locks[maj][min]</span>
+<a name="l00106" id="l00106"></a>00106 <span class="preprocessor">#define CALLBACK_LOCK_COUNT(maj,min) _locks[maj][min]</span>
+<a name="l00107" id="l00107"></a>00107 <span class="preprocessor">#else</span>
+<a name="l00108" id="l00108"></a>00108 <span class="keyword">static</span> <span class="keywordtype">int</span> _lock;
+<a name="l00109" id="l00109"></a>00109 <span class="preprocessor">#define CALLBACK_LOCK(maj,min) ++_lock</span>
+<a name="l00110" id="l00110"></a>00110 <span class="preprocessor">#define CALLBACK_UNLOCK(maj,min) --_lock</span>
+<a name="l00111" id="l00111"></a>00111 <span class="preprocessor">#define CALLBACK_LOCK_COUNT(maj,min) _lock</span>
+<a name="l00112" id="l00112"></a>00112 <span class="preprocessor">#endif</span>
+<a name="l00113" id="l00113"></a>00113 
+<a name="l00114" id="l00114"></a>00114 NETSNMP_STATIC_INLINE <span class="keywordtype">int</span>
+<a name="l00115" id="l00115"></a>00115 _callback_lock(<span class="keywordtype">int</span> major, <span class=
+"keywordtype">int</span> minor, <span class="keyword">const</span> <span class="keywordtype">char</span>* warn, <span class=
+"keywordtype">int</span> assert)
+<a name="l00116" id="l00116"></a>00116 {
+<a name="l00117" id="l00117"></a>00117     <span class="keywordtype">int</span> lock_holded=0;
+<a name="l00118" id="l00118"></a>00118     <span class="keyword">struct </span>timeval lock_time = { 0, 1000 };
+<a name="l00119" id="l00119"></a>00119 
+<a name="l00120" id="l00120"></a>00120 <span class="preprocessor">#ifdef NETSNMP_PARANOID_LEVEL_HIGH</span>
+<a name="l00121" id="l00121"></a>00121     <span class=
+"keywordflow">if</span> (major &gt;= MAX_CALLBACK_IDS || minor &gt;= MAX_CALLBACK_SUBIDS) {
+<a name="l00122" id="l00122"></a>00122         netsnmp_assert(<span class="stringliteral">"bad callback id"</span>);
+<a name="l00123" id="l00123"></a>00123         <span class="keywordflow">return</span> 1;
+<a name="l00124" id="l00124"></a>00124     }
+<a name="l00125" id="l00125"></a>00125 <span class="preprocessor">#endif</span>
+<a name="l00126" id="l00126"></a>00126     
+<a name="l00127" id="l00127"></a>00127 <span class="preprocessor">#ifdef CALLBACK_NAME_LOGGING</span>
+<a name="l00128" id="l00128"></a>00128     DEBUGMSGTL((<span class="stringliteral">"9:callback:lock"</span>, <span class=
+"stringliteral">"locked (%s,%s)\n"</span>,
+<a name="l00129" id="l00129"></a>00129                 types[major], (SNMP_CALLBACK_LIBRARY == major) ?
+<a name="l00130" id="l00130"></a>00130                 SNMP_STRORNULL(lib[minor]) : <span class="stringliteral">"null"</span>));
+<a name="l00131" id="l00131"></a>00131 <span class="preprocessor">#endif</span>
+<a name="l00132" id="l00132"></a>00132     <span class=
+"keywordflow">while</span> (CALLBACK_LOCK_COUNT(major,minor) &gt;= 1 &amp;&amp; ++lock_holded &lt; 100)
+<a name="l00133" id="l00133"></a>00133         select(0, NULL, NULL, NULL, &amp;lock_time);
+<a name="l00134" id="l00134"></a>00134 
+<a name="l00135" id="l00135"></a>00135     <span class="keywordflow">if</span>(lock_holded &gt;= 100) {
+<a name="l00136" id="l00136"></a>00136         <span class="keywordflow">if</span> (NULL != warn)
+<a name="l00137" id="l00137"></a>00137             <a class="code" href=
+"group__snmp__logging.html#ga9ba905368ea1c551b969af44b13e37c2" title=
+"This snmp logging function allows variable argument list given the specified format...">snmp_log</a>(LOG_WARNING,
+<a name="l00138" id="l00138"></a>00138                      <span class=
+"stringliteral">"lock in _callback_lock sleeps more than 100 milliseconds in %s\n"</span>, warn);
+<a name="l00139" id="l00139"></a>00139         <span class="keywordflow">if</span> (assert)
+<a name="l00140" id="l00140"></a>00140             netsnmp_assert(lock_holded &lt; 100);
+<a name="l00141" id="l00141"></a>00141         
+<a name="l00142" id="l00142"></a>00142         <span class="keywordflow">return</span> 1;
+<a name="l00143" id="l00143"></a>00143     }
+<a name="l00144" id="l00144"></a>00144 
+<a name="l00145" id="l00145"></a>00145     CALLBACK_LOCK(major,minor);
+<a name="l00146" id="l00146"></a>00146     <span class="keywordflow">return</span> 0;
+<a name="l00147" id="l00147"></a>00147 }
+<a name="l00148" id="l00148"></a>00148 
+<a name="l00149" id="l00149"></a>00149 NETSNMP_STATIC_INLINE <span class="keywordtype">void</span>
+<a name="l00150" id="l00150"></a>00150 _callback_unlock(<span class="keywordtype">int</span> major, <span class=
+"keywordtype">int</span> minor)
+<a name="l00151" id="l00151"></a>00151 {
+<a name="l00152" id="l00152"></a>00152 <span class="preprocessor">#ifdef NETSNMP_PARANOID_LEVEL_HIGH</span>
+<a name="l00153" id="l00153"></a>00153     <span class=
+"keywordflow">if</span> (major &gt;= MAX_CALLBACK_IDS || minor &gt;= MAX_CALLBACK_SUBIDS) {
+<a name="l00154" id="l00154"></a>00154         netsnmp_assert(<span class="stringliteral">"bad callback id"</span>);
+<a name="l00155" id="l00155"></a>00155         <span class="keywordflow">return</span>;
+<a name="l00156" id="l00156"></a>00156     }
+<a name="l00157" id="l00157"></a>00157 <span class="preprocessor">#endif</span>
+<a name="l00158" id="l00158"></a>00158     
+<a name="l00159" id="l00159"></a>00159     CALLBACK_UNLOCK(major,minor);
+<a name="l00160" id="l00160"></a>00160 
+<a name="l00161" id="l00161"></a>00161 <span class="preprocessor">#ifdef CALLBACK_NAME_LOGGING</span>
+<a name="l00162" id="l00162"></a>00162     DEBUGMSGTL((<span class="stringliteral">"9:callback:lock"</span>, <span class=
+"stringliteral">"unlocked (%s,%s)\n"</span>,
+<a name="l00163" id="l00163"></a>00163                 types[major], (SNMP_CALLBACK_LIBRARY == major) ?
+<a name="l00164" id="l00164"></a>00164                 SNMP_STRORNULL(lib[minor]) : <span class="stringliteral">"null"</span>));
+<a name="l00165" id="l00165"></a>00165 <span class="preprocessor">#endif</span>
+<a name="l00166" id="l00166"></a>00166 }
+<a name="l00167" id="l00167"></a>00167 
+<a name="l00168" id="l00168"></a>00168 
+<a name="l00169" id="l00169"></a>00169 <span class="comment">/*</span>
+<a name="l00170" id="l00170"></a>00170 <span class="comment"> * the chicken. or the egg.  You pick. </span>
+<a name="l00171" id="l00171"></a>00171 <span class="comment"> */</span>
+<a name="l00172" id="l00172"></a>00172 <span class="keywordtype">void</span>
+<a name="l00173" id="l00173"></a>00173 init_callbacks(<span class="keywordtype">void</span>)
+<a name="l00174" id="l00174"></a>00174 {
+<a name="l00175" id="l00175"></a>00175     <span class="comment">/*</span>
+<a name="l00176" id="l00176"></a>00176 <span class="comment">     * (poses a problem if you put init_callbacks() inside of</span>
+<a name="l00177" id="l00177"></a>00177 <span class=
+"comment">     * init_snmp() and then want the app to register a callback before</span>
+<a name="l00178" id="l00178"></a>00178 <span class="comment">     * init_snmp() is called in the first place.  -- Wes </span>
+<a name="l00179" id="l00179"></a>00179 <span class="comment">     */</span>
+<a name="l00180" id="l00180"></a>00180     <span class="keywordflow">if</span> (0 == _callback_need_init)
+<a name="l00181" id="l00181"></a>00181         <span class="keywordflow">return</span>;
+<a name="l00182" id="l00182"></a>00182     
+<a name="l00183" id="l00183"></a>00183     _callback_need_init = 0;
+<a name="l00184" id="l00184"></a>00184     
+<a name="l00185" id="l00185"></a>00185     memset(thecallbacks, 0, <span class="keyword">sizeof</span>(thecallbacks)); 
+<a name="l00186" id="l00186"></a>00186 <span class="preprocessor">#ifdef LOCK_PER_CALLBACK_SUBID</span>
+<a name="l00187" id="l00187"></a>00187     memset(_locks, 0, <span class="keyword">sizeof</span>(_locks));
+<a name="l00188" id="l00188"></a>00188 <span class="preprocessor">#else</span>
+<a name="l00189" id="l00189"></a>00189     _lock = 0;
+<a name="l00190" id="l00190"></a>00190 <span class="preprocessor">#endif</span>
+<a name="l00191" id="l00191"></a>00191     
+<a name="l00192" id="l00192"></a>00192     DEBUGMSGTL((<span class="stringliteral">"callback"</span>, <span class=
+"stringliteral">"initialized\n"</span>));
+<a name="l00193" id="l00193"></a>00193 }
+<a name="l00194" id="l00194"></a>00194 
+<a name="l00229" id="l00229"></a>00229 <span class="keywordtype">int</span>
+<a name="l00230" id="l00230"></a><a class="code" href=
+"group__callback.html#gaa74bcb0ea6a8b7270f5e26746ba1fff1">00230</a> <a class="code" href=
+"group__callback.html#gaa74bcb0ea6a8b7270f5e26746ba1fff1" title=
+"This function registers a generic callback function.">snmp_register_callback</a>(<span class=
+"keywordtype">int</span> major, <span class="keywordtype">int</span> minor, SNMPCallback * new_callback,
+<a name="l00231" id="l00231"></a>00231                        <span class="keywordtype">void</span> *arg)
+<a name="l00232" id="l00232"></a>00232 {
+<a name="l00233" id="l00233"></a>00233     <span class=
+"keywordflow">return</span> netsnmp_register_callback( major, minor, new_callback, arg,
+<a name="l00234" id="l00234"></a>00234                                       NETSNMP_CALLBACK_DEFAULT_PRIORITY);
+<a name="l00235" id="l00235"></a>00235 }
+<a name="l00236" id="l00236"></a>00236 
+<a name="l00237" id="l00237"></a>00237 <span class="keywordtype">int</span>
+<a name="l00238" id="l00238"></a>00238 netsnmp_register_callback(<span class="keywordtype">int</span> major, <span class=
+"keywordtype">int</span> minor, SNMPCallback * new_callback,
+<a name="l00239" id="l00239"></a>00239                           <span class="keywordtype">void</span> *arg, <span class=
+"keywordtype">int</span> priority)
+<a name="l00240" id="l00240"></a>00240 {
+<a name="l00241" id="l00241"></a>00241     <span class="keyword">struct </span><a class="code" href=
+"structsnmp__gen__callback.html">snmp_gen_callback</a> *newscp = NULL, *scp = NULL;
+<a name="l00242" id="l00242"></a>00242     <span class="keyword">struct </span><a class="code" href=
+"structsnmp__gen__callback.html">snmp_gen_callback</a> **prevNext = &amp;(thecallbacks[major][minor]);
+<a name="l00243" id="l00243"></a>00243 
+<a name="l00244" id="l00244"></a>00244     <span class=
+"keywordflow">if</span> (major &gt;= MAX_CALLBACK_IDS || minor &gt;= MAX_CALLBACK_SUBIDS) {
+<a name="l00245" id="l00245"></a>00245         <span class="keywordflow">return</span> SNMPERR_GENERR;
+<a name="l00246" id="l00246"></a>00246     }
+<a name="l00247" id="l00247"></a>00247 
+<a name="l00248" id="l00248"></a>00248     <span class="keywordflow">if</span> (_callback_need_init)
+<a name="l00249" id="l00249"></a>00249         init_callbacks();
+<a name="l00250" id="l00250"></a>00250 
+<a name="l00251" id="l00251"></a>00251     _callback_lock(major,minor, <span class=
+"stringliteral">"netsnmp_register_callback"</span>, 1);
+<a name="l00252" id="l00252"></a>00252     
+<a name="l00253" id="l00253"></a>00253     <span class="keywordflow">if</span> ((newscp = <a class="code" href=
+"group__util.html#ga6356941968481380ea6f4a646df4aaf9" title=
+"Mallocs memory of sizeof(struct s), zeros it and returns a pointer to it.">SNMP_MALLOC_STRUCT</a>(<a class="code" href=
+"structsnmp__gen__callback.html">snmp_gen_callback</a>)) == NULL) {
+<a name="l00254" id="l00254"></a>00254         _callback_unlock(major,minor);
+<a name="l00255" id="l00255"></a>00255         <span class="keywordflow">return</span> SNMPERR_GENERR;
+<a name="l00256" id="l00256"></a>00256     } <span class="keywordflow">else</span> {
+<a name="l00257" id="l00257"></a>00257         newscp-&gt;priority = priority;
+<a name="l00258" id="l00258"></a>00258         newscp-&gt;sc_client_arg = arg;
+<a name="l00259" id="l00259"></a>00259         newscp-&gt;sc_callback = new_callback;
+<a name="l00260" id="l00260"></a>00260         newscp-&gt;next = NULL;
+<a name="l00261" id="l00261"></a>00261 
+<a name="l00262" id="l00262"></a>00262         <span class=
+"keywordflow">for</span> (scp = thecallbacks[major][minor]; scp != NULL;
+<a name="l00263" id="l00263"></a>00263              scp = scp-&gt;next) {
+<a name="l00264" id="l00264"></a>00264             <span class=
+"keywordflow">if</span> (newscp-&gt;priority &lt; scp-&gt;priority) {
+<a name="l00265" id="l00265"></a>00265                 newscp-&gt;next = scp;
+<a name="l00266" id="l00266"></a>00266                 <span class="keywordflow">break</span>;
+<a name="l00267" id="l00267"></a>00267             }
+<a name="l00268" id="l00268"></a>00268             prevNext = &amp;(scp-&gt;next);
+<a name="l00269" id="l00269"></a>00269         }
+<a name="l00270" id="l00270"></a>00270 
+<a name="l00271" id="l00271"></a>00271         *prevNext = newscp;
+<a name="l00272" id="l00272"></a>00272 
+<a name="l00273" id="l00273"></a>00273         DEBUGMSGTL((<span class="stringliteral">"callback"</span>, <span class=
+"stringliteral">"registered (%d,%d) at %p with priority %d\n"</span>,
+<a name="l00274" id="l00274"></a>00274                     major, minor, newscp, priority));
+<a name="l00275" id="l00275"></a>00275         _callback_unlock(major,minor);
+<a name="l00276" id="l00276"></a>00276         <span class="keywordflow">return</span> SNMPERR_SUCCESS;
+<a name="l00277" id="l00277"></a>00277     }
+<a name="l00278" id="l00278"></a>00278 }
+<a name="l00279" id="l00279"></a>00279 
+<a name="l00297" id="l00297"></a>00297 <span class="keywordtype">int</span>
+<a name="l00298" id="l00298"></a><a class="code" href=
+"group__callback.html#ga9812d01ed88b541cd6c7a64d004564d4">00298</a> <a class="code" href=
+"group__callback.html#ga9812d01ed88b541cd6c7a64d004564d4" title=
+"This function calls the callback function for each registered callback of type major...">snmp_call_callbacks</a>(<span class=
+"keywordtype">int</span> major, <span class="keywordtype">int</span> minor, <span class="keywordtype">void</span> *caller_arg)
+<a name="l00299" id="l00299"></a>00299 {
+<a name="l00300" id="l00300"></a>00300     <span class="keyword">struct </span><a class="code" href=
+"structsnmp__gen__callback.html">snmp_gen_callback</a> *scp;
+<a name="l00301" id="l00301"></a>00301     <span class="keywordtype">unsigned</span> <span class=
+"keywordtype">int</span>    count = 0;
+<a name="l00302" id="l00302"></a>00302     
+<a name="l00303" id="l00303"></a>00303     <span class=
+"keywordflow">if</span> (major &gt;= MAX_CALLBACK_IDS || minor &gt;= MAX_CALLBACK_SUBIDS) {
+<a name="l00304" id="l00304"></a>00304         <span class="keywordflow">return</span> SNMPERR_GENERR;
+<a name="l00305" id="l00305"></a>00305     }
+<a name="l00306" id="l00306"></a>00306     
+<a name="l00307" id="l00307"></a>00307     <span class="keywordflow">if</span> (_callback_need_init)
+<a name="l00308" id="l00308"></a>00308         init_callbacks();
+<a name="l00309" id="l00309"></a>00309 
+<a name="l00310" id="l00310"></a>00310 <span class="preprocessor">#ifdef LOCK_PER_CALLBACK_SUBID</span>
+<a name="l00311" id="l00311"></a>00311     _callback_lock(major,minor,<span class=
+"stringliteral">"snmp_call_callbacks"</span>, 1);
+<a name="l00312" id="l00312"></a>00312 <span class="preprocessor">#else</span>
+<a name="l00313" id="l00313"></a>00313     <span class="comment">/*</span>
+<a name="l00314" id="l00314"></a>00314 <span class="comment">     * Notes:</span>
+<a name="l00315" id="l00315"></a>00315 <span class=
+"comment">     * - this gets hit the first time a trap is sent after a new trap</span>
+<a name="l00316" id="l00316"></a>00316 <span class=
+"comment">     *   destination has been added (session init cb during send trap cb)</span>
+<a name="l00317" id="l00317"></a>00317 <span class="comment">     */</span>
+<a name="l00318" id="l00318"></a>00318     _callback_lock(major,minor, NULL, 0);
+<a name="l00319" id="l00319"></a>00319 <span class="preprocessor">#endif</span>
+<a name="l00320" id="l00320"></a>00320 
+<a name="l00321" id="l00321"></a>00321     DEBUGMSGTL((<span class="stringliteral">"callback"</span>, <span class=
+"stringliteral">"START calling callbacks for maj=%d min=%d\n"</span>,
+<a name="l00322" id="l00322"></a>00322                 major, minor));
+<a name="l00323" id="l00323"></a>00323 
+<a name="l00324" id="l00324"></a>00324     <span class="comment">/*</span>
+<a name="l00325" id="l00325"></a>00325 <span class="comment">     * for each registered callback of type major and minor </span>
+<a name="l00326" id="l00326"></a>00326 <span class="comment">     */</span>
+<a name="l00327" id="l00327"></a>00327     <span class=
+"keywordflow">for</span> (scp = thecallbacks[major][minor]; scp != NULL; scp = scp-&gt;next) {
+<a name="l00328" id="l00328"></a>00328 
+<a name="l00329" id="l00329"></a>00329         <span class="comment">/*</span>
+<a name="l00330" id="l00330"></a>00330 <span class="comment">         * skip unregistered callbacks</span>
+<a name="l00331" id="l00331"></a>00331 <span class="comment">         */</span>
+<a name="l00332" id="l00332"></a>00332         <span class="keywordflow">if</span>(NULL == scp-&gt;sc_callback)
+<a name="l00333" id="l00333"></a>00333             <span class="keywordflow">continue</span>;
+<a name="l00334" id="l00334"></a>00334 
+<a name="l00335" id="l00335"></a>00335         DEBUGMSGTL((<span class="stringliteral">"callback"</span>, <span class=
+"stringliteral">"calling a callback for maj=%d min=%d\n"</span>,
+<a name="l00336" id="l00336"></a>00336                     major, minor));
+<a name="l00337" id="l00337"></a>00337 
+<a name="l00338" id="l00338"></a>00338         <span class="comment">/*</span>
+<a name="l00339" id="l00339"></a>00339 <span class="comment">         * call them </span>
+<a name="l00340" id="l00340"></a>00340 <span class="comment">         */</span>
+<a name="l00341" id="l00341"></a>00341         (*(scp-&gt;sc_callback)) (major, minor, caller_arg,
+<a name="l00342" id="l00342"></a>00342                                scp-&gt;sc_client_arg);
+<a name="l00343" id="l00343"></a>00343         count++;
+<a name="l00344" id="l00344"></a>00344     }
+<a name="l00345" id="l00345"></a>00345 
+<a name="l00346" id="l00346"></a>00346     DEBUGMSGTL((<span class="stringliteral">"callback"</span>,
+<a name="l00347" id="l00347"></a>00347                 <span class=
+"stringliteral">"END calling callbacks for maj=%d min=%d (%d called)\n"</span>,
+<a name="l00348" id="l00348"></a>00348                 major, minor, count));
+<a name="l00349" id="l00349"></a>00349 
+<a name="l00350" id="l00350"></a>00350     _callback_unlock(major,minor);
+<a name="l00351" id="l00351"></a>00351     <span class="keywordflow">return</span> SNMPERR_SUCCESS;
+<a name="l00352" id="l00352"></a>00352 }
+<a name="l00353" id="l00353"></a>00353 
+<a name="l00354" id="l00354"></a>00354 <span class="keywordtype">int</span>
+<a name="l00355" id="l00355"></a>00355 snmp_count_callbacks(<span class="keywordtype">int</span> major, <span class=
+"keywordtype">int</span> minor)
+<a name="l00356" id="l00356"></a>00356 {
+<a name="l00357" id="l00357"></a>00357     <span class="keywordtype">int</span>             count = 0;
+<a name="l00358" id="l00358"></a>00358     <span class="keyword">struct </span><a class="code" href=
+"structsnmp__gen__callback.html">snmp_gen_callback</a> *scp;
+<a name="l00359" id="l00359"></a>00359 
+<a name="l00360" id="l00360"></a>00360     <span class=
+"keywordflow">if</span> (major &gt;= MAX_CALLBACK_IDS || minor &gt;= MAX_CALLBACK_SUBIDS) {
+<a name="l00361" id="l00361"></a>00361         <span class="keywordflow">return</span> SNMPERR_GENERR;
+<a name="l00362" id="l00362"></a>00362     }
+<a name="l00363" id="l00363"></a>00363     
+<a name="l00364" id="l00364"></a>00364     <span class="keywordflow">if</span> (_callback_need_init)
+<a name="l00365" id="l00365"></a>00365         init_callbacks();
+<a name="l00366" id="l00366"></a>00366 
+<a name="l00367" id="l00367"></a>00367     <span class=
+"keywordflow">for</span> (scp = thecallbacks[major][minor]; scp != NULL; scp = scp-&gt;next) {
+<a name="l00368" id="l00368"></a>00368         count++;
+<a name="l00369" id="l00369"></a>00369     }
+<a name="l00370" id="l00370"></a>00370 
+<a name="l00371" id="l00371"></a>00371     <span class="keywordflow">return</span> count;
+<a name="l00372" id="l00372"></a>00372 }
+<a name="l00373" id="l00373"></a>00373 
+<a name="l00374" id="l00374"></a>00374 <span class="keywordtype">int</span>
+<a name="l00375" id="l00375"></a>00375 snmp_callback_available(<span class="keywordtype">int</span> major, <span class=
+"keywordtype">int</span> minor)
+<a name="l00376" id="l00376"></a>00376 {
+<a name="l00377" id="l00377"></a>00377     <span class=
+"keywordflow">if</span> (major &gt;= MAX_CALLBACK_IDS || minor &gt;= MAX_CALLBACK_SUBIDS) {
+<a name="l00378" id="l00378"></a>00378         <span class="keywordflow">return</span> SNMPERR_GENERR;
+<a name="l00379" id="l00379"></a>00379     }
+<a name="l00380" id="l00380"></a>00380     
+<a name="l00381" id="l00381"></a>00381     <span class="keywordflow">if</span> (_callback_need_init)
+<a name="l00382" id="l00382"></a>00382         init_callbacks();
+<a name="l00383" id="l00383"></a>00383 
+<a name="l00384" id="l00384"></a>00384     <span class="keywordflow">if</span> (thecallbacks[major][minor] != NULL) {
+<a name="l00385" id="l00385"></a>00385         <span class="keywordflow">return</span> SNMPERR_SUCCESS;
+<a name="l00386" id="l00386"></a>00386     }
+<a name="l00387" id="l00387"></a>00387 
+<a name="l00388" id="l00388"></a>00388     <span class="keywordflow">return</span> SNMPERR_GENERR;
+<a name="l00389" id="l00389"></a>00389 }
+<a name="l00390" id="l00390"></a>00390 
+<a name="l00417" id="l00417"></a>00417 <span class="keywordtype">int</span>
+<a name="l00418" id="l00418"></a><a class="code" href=
+"group__callback.html#ga5c66a4113fa371927b907e5dfc44cd9f">00418</a> <a class="code" href=
+"group__callback.html#ga5c66a4113fa371927b907e5dfc44cd9f" title=
+"This function unregisters a specified callback function given a major and minor type...">snmp_unregister_callback</a>(<span class="keywordtype">int</span> major, <span class="keywordtype">int</span> minor, SNMPCallback * target,
+<a name="l00419" id="l00419"></a>00419                          <span class="keywordtype">void</span> *arg, <span class=
+"keywordtype">int</span> matchargs)
+<a name="l00420" id="l00420"></a>00420 {
+<a name="l00421" id="l00421"></a>00421     <span class="keyword">struct </span><a class="code" href=
+"structsnmp__gen__callback.html">snmp_gen_callback</a> *scp = thecallbacks[major][minor];
+<a name="l00422" id="l00422"></a>00422     <span class="keyword">struct </span><a class="code" href=
+"structsnmp__gen__callback.html">snmp_gen_callback</a> **prevNext = &amp;(thecallbacks[major][minor]);
+<a name="l00423" id="l00423"></a>00423     <span class="keywordtype">int</span>             count = 0;
+<a name="l00424" id="l00424"></a>00424 
+<a name="l00425" id="l00425"></a>00425     <span class=
+"keywordflow">if</span> (major &gt;= MAX_CALLBACK_IDS || minor &gt;= MAX_CALLBACK_SUBIDS)
+<a name="l00426" id="l00426"></a>00426         <span class="keywordflow">return</span> SNMPERR_GENERR;
+<a name="l00427" id="l00427"></a>00427 
+<a name="l00428" id="l00428"></a>00428     <span class="keywordflow">if</span> (_callback_need_init)
+<a name="l00429" id="l00429"></a>00429         init_callbacks();
+<a name="l00430" id="l00430"></a>00430 
+<a name="l00431" id="l00431"></a>00431 <span class="preprocessor">#ifdef LOCK_PER_CALLBACK_SUBID</span>
+<a name="l00432" id="l00432"></a>00432     _callback_lock(major,minor,<span class=
+"stringliteral">"snmp_unregister_callback"</span>, 1);
+<a name="l00433" id="l00433"></a>00433 <span class="preprocessor">#else</span>
+<a name="l00434" id="l00434"></a>00434     <span class="comment">/*</span>
+<a name="l00435" id="l00435"></a>00435 <span class="comment">     * Notes;</span>
+<a name="l00436" id="l00436"></a>00436 <span class=
+"comment">     * - this gets hit at shutdown, during cleanup. No easy fix.</span>
+<a name="l00437" id="l00437"></a>00437 <span class="comment">     */</span>
+<a name="l00438" id="l00438"></a>00438     _callback_lock(major,minor,<span class=
+"stringliteral">"snmp_unregister_callback"</span>, 0);
+<a name="l00439" id="l00439"></a>00439 <span class="preprocessor">#endif</span>
+<a name="l00440" id="l00440"></a>00440 
+<a name="l00441" id="l00441"></a>00441     <span class="keywordflow">while</span> (scp != NULL) {
+<a name="l00442" id="l00442"></a>00442         <span class="keywordflow">if</span> ((scp-&gt;sc_callback == target) &amp;&amp;
+<a name="l00443" id="l00443"></a>00443             (!matchargs || (scp-&gt;sc_client_arg == arg))) {
+<a name="l00444" id="l00444"></a>00444             DEBUGMSGTL((<span class="stringliteral">"callback"</span>, <span class=
+"stringliteral">"unregistering (%d,%d) at %p\n"</span>, major,
+<a name="l00445" id="l00445"></a>00445                         minor, scp));
+<a name="l00446" id="l00446"></a>00446             <span class="keywordflow">if</span>(1 == CALLBACK_LOCK_COUNT(major,minor)) {
+<a name="l00447" id="l00447"></a>00447                 *prevNext = scp-&gt;next;
+<a name="l00448" id="l00448"></a>00448                 <a class="code" href="group__util.html#ga951e93edb6f0ea941e26155e3f8912a6"
+title="Frees a pointer only if it is !NULL and sets its value to NULL.">SNMP_FREE</a>(scp);
+<a name="l00449" id="l00449"></a>00449                 scp = *prevNext;
+<a name="l00450" id="l00450"></a>00450             }
+<a name="l00451" id="l00451"></a>00451             <span class="keywordflow">else</span> {
+<a name="l00452" id="l00452"></a>00452                 scp-&gt;sc_callback = NULL;
+<a name="l00454" id="l00454"></a>00454             }
+<a name="l00455" id="l00455"></a>00455             count++;
+<a name="l00456" id="l00456"></a>00456         } <span class="keywordflow">else</span> {
+<a name="l00457" id="l00457"></a>00457             prevNext = &amp;(scp-&gt;next);
+<a name="l00458" id="l00458"></a>00458             scp = scp-&gt;next;
+<a name="l00459" id="l00459"></a>00459         }
+<a name="l00460" id="l00460"></a>00460     }
+<a name="l00461" id="l00461"></a>00461 
+<a name="l00462" id="l00462"></a>00462     _callback_unlock(major,minor);
+<a name="l00463" id="l00463"></a>00463     <span class="keywordflow">return</span> count;
+<a name="l00464" id="l00464"></a>00464 }
+<a name="l00465" id="l00465"></a>00465 
+<a name="l00473" id="l00473"></a>00473 <span class="keywordtype">int</span>
+<a name="l00474" id="l00474"></a><a class="code" href=
+"group__callback.html#ga691a6855c9bc8212c8dc9ec596822c76">00474</a> <a class="code" href=
+"group__callback.html#ga691a6855c9bc8212c8dc9ec596822c76" title=
+"find and clear client args that match ptr">netsnmp_callback_clear_client_arg</a>(<span class=
+"keywordtype">void</span> *ptr, <span class="keywordtype">int</span> i, <span class="keywordtype">int</span> j)
+<a name="l00475" id="l00475"></a>00475 {
+<a name="l00476" id="l00476"></a>00476     <span class="keyword">struct </span><a class="code" href=
+"structsnmp__gen__callback.html">snmp_gen_callback</a> *scp = NULL;
+<a name="l00477" id="l00477"></a>00477     <span class="keywordtype">int</span> rc = 0;
+<a name="l00478" id="l00478"></a>00478 
+<a name="l00479" id="l00479"></a>00479     <span class="comment">/*</span>
+<a name="l00480" id="l00480"></a>00480 <span class=
+"comment">     * don't init i and j before loop, since the caller specified</span>
+<a name="l00481" id="l00481"></a>00481 <span class=
+"comment">     * the starting point explicitly. But *after* the i loop has</span>
+<a name="l00482" id="l00482"></a>00482 <span class="comment">     * finished executing once, init j to 0 for the next pass</span>
+<a name="l00483" id="l00483"></a>00483 <span class="comment">     * through the subids.</span>
+<a name="l00484" id="l00484"></a>00484 <span class="comment">     */</span>
+<a name="l00485" id="l00485"></a>00485     <span class="keywordflow">for</span> (; i &lt; MAX_CALLBACK_IDS; i++,j=0) {
+<a name="l00486" id="l00486"></a>00486         <span class="keywordflow">for</span> (; j &lt; MAX_CALLBACK_SUBIDS; j++) {
+<a name="l00487" id="l00487"></a>00487             scp = thecallbacks[i][j]; 
+<a name="l00488" id="l00488"></a>00488             <span class="keywordflow">while</span> (scp != NULL) {
+<a name="l00489" id="l00489"></a>00489                 <span class=
+"keywordflow">if</span> ((NULL != scp-&gt;sc_callback) &amp;&amp;
+<a name="l00490" id="l00490"></a>00490                     (scp-&gt;sc_client_arg != NULL) &amp;&amp;
+<a name="l00491" id="l00491"></a>00491                     (scp-&gt;sc_client_arg == ptr)) {
+<a name="l00492" id="l00492"></a>00492                     DEBUGMSGTL((<span class=
+"stringliteral">"9:callback"</span>, <span class="stringliteral">"  clearing %p at [%d,%d]\n"</span>, ptr, i, j));
+<a name="l00493" id="l00493"></a>00493                     scp-&gt;sc_client_arg = NULL;
+<a name="l00494" id="l00494"></a>00494                     ++rc;
+<a name="l00495" id="l00495"></a>00495                 }
+<a name="l00496" id="l00496"></a>00496                 scp = scp-&gt;next;
+<a name="l00497" id="l00497"></a>00497             }
+<a name="l00498" id="l00498"></a>00498         }
+<a name="l00499" id="l00499"></a>00499     }
+<a name="l00500" id="l00500"></a>00500 
+<a name="l00501" id="l00501"></a>00501     <span class="keywordflow">if</span> (0 != rc) {
+<a name="l00502" id="l00502"></a>00502         DEBUGMSGTL((<span class="stringliteral">"callback"</span>, <span class=
+"stringliteral">"removed %d client args\n"</span>, rc));
+<a name="l00503" id="l00503"></a>00503     }
+<a name="l00504" id="l00504"></a>00504 
+<a name="l00505" id="l00505"></a>00505     <span class="keywordflow">return</span> rc;
+<a name="l00506" id="l00506"></a>00506 }
+<a name="l00507" id="l00507"></a>00507 
+<a name="l00508" id="l00508"></a>00508 <span class="keywordtype">void</span>
+<a name="l00509" id="l00509"></a>00509 clear_callback(<span class="keywordtype">void</span>)
+<a name="l00510" id="l00510"></a>00510 {
+<a name="l00511" id="l00511"></a>00511     <span class="keywordtype">unsigned</span> <span class=
+"keywordtype">int</span> i = 0, j = 0;
+<a name="l00512" id="l00512"></a>00512     <span class="keyword">struct </span><a class="code" href=
+"structsnmp__gen__callback.html">snmp_gen_callback</a> *scp = NULL;
+<a name="l00513" id="l00513"></a>00513 
+<a name="l00514" id="l00514"></a>00514     <span class="keywordflow">if</span> (_callback_need_init)
+<a name="l00515" id="l00515"></a>00515         init_callbacks();
+<a name="l00516" id="l00516"></a>00516 
+<a name="l00517" id="l00517"></a>00517     DEBUGMSGTL((<span class="stringliteral">"callback"</span>, <span class=
+"stringliteral">"clear callback\n"</span>));
+<a name="l00518" id="l00518"></a>00518     <span class="keywordflow">for</span> (i = 0; i &lt; MAX_CALLBACK_IDS; i++) {
+<a name="l00519" id="l00519"></a>00519         <span class="keywordflow">for</span> (j = 0; j &lt; MAX_CALLBACK_SUBIDS; j++) {
+<a name="l00520" id="l00520"></a>00520             _callback_lock(i,j, <span class="stringliteral">"clear_callback"</span>, 1);
+<a name="l00521" id="l00521"></a>00521             scp = thecallbacks[i][j];
+<a name="l00522" id="l00522"></a>00522             <span class="keywordflow">while</span> (scp != NULL) {
+<a name="l00523" id="l00523"></a>00523                 thecallbacks[i][j] = scp-&gt;next;
+<a name="l00524" id="l00524"></a>00524                 <span class="comment">/*</span>
+<a name="l00525" id="l00525"></a>00525 <span class=
+"comment">                 * if there is a client arg, check for duplicates</span>
+<a name="l00526" id="l00526"></a>00526 <span class="comment">                 * and then free it.</span>
+<a name="l00527" id="l00527"></a>00527 <span class="comment">                 */</span>
+<a name="l00528" id="l00528"></a>00528                 <span class=
+"keywordflow">if</span> ((NULL != scp-&gt;sc_callback) &amp;&amp;
+<a name="l00529" id="l00529"></a>00529                     (scp-&gt;sc_client_arg != NULL)) {
+<a name="l00530" id="l00530"></a>00530                     <span class="keywordtype">void</span> *tmp_arg;
+<a name="l00531" id="l00531"></a>00531                     <span class="comment">/*</span>
+<a name="l00532" id="l00532"></a>00532 <span class=
+"comment">                     * save the client arg, then set it to null so that it</span>
+<a name="l00533" id="l00533"></a>00533 <span class=
+"comment">                     * won't look like a duplicate, then check for duplicates</span>
+<a name="l00534" id="l00534"></a>00534 <span class=
+"comment">                     * starting at the current i,j (earlier dups should have</span>
+<a name="l00535" id="l00535"></a>00535 <span class=
+"comment">                     * already been found) and free the pointer.</span>
+<a name="l00536" id="l00536"></a>00536 <span class="comment">                     */</span>
+<a name="l00537" id="l00537"></a>00537                     tmp_arg = scp-&gt;sc_client_arg;
+<a name="l00538" id="l00538"></a>00538                     scp-&gt;sc_client_arg = NULL;
+<a name="l00539" id="l00539"></a>00539                     DEBUGMSGTL((<span class=
+"stringliteral">"9:callback"</span>, <span class="stringliteral">"  freeing %p at [%d,%d]\n"</span>, tmp_arg, i, j));
+<a name="l00540" id="l00540"></a>00540                     (void)<a class="code" href=
+"group__callback.html#ga691a6855c9bc8212c8dc9ec596822c76" title=
+"find and clear client args that match ptr">netsnmp_callback_clear_client_arg</a>(tmp_arg, i, j);
+<a name="l00541" id="l00541"></a>00541                     free(tmp_arg);
+<a name="l00542" id="l00542"></a>00542                 }
+<a name="l00543" id="l00543"></a>00543                 <a class="code" href="group__util.html#ga951e93edb6f0ea941e26155e3f8912a6"
+title="Frees a pointer only if it is !NULL and sets its value to NULL.">SNMP_FREE</a>(scp);
+<a name="l00544" id="l00544"></a>00544                 scp = thecallbacks[i][j];
+<a name="l00545" id="l00545"></a>00545             }
+<a name="l00546" id="l00546"></a>00546             _callback_unlock(i,j);
+<a name="l00547" id="l00547"></a>00547         }
+<a name="l00548" id="l00548"></a>00548     }
+<a name="l00549" id="l00549"></a>00549 }
+<a name="l00550" id="l00550"></a>00550 
+<a name="l00551" id="l00551"></a>00551 <span class="keyword">struct </span><a class="code" href=
+"structsnmp__gen__callback.html">snmp_gen_callback</a> *
+<a name="l00552" id="l00552"></a>00552 snmp_callback_list(<span class="keywordtype">int</span> major, <span class=
+"keywordtype">int</span> minor)
+<a name="l00553" id="l00553"></a>00553 {
+<a name="l00554" id="l00554"></a>00554     <span class="keywordflow">if</span> (_callback_need_init)
+<a name="l00555" id="l00555"></a>00555         init_callbacks();
+<a name="l00556" id="l00556"></a>00556 
+<a name="l00557" id="l00557"></a>00557     <span class="keywordflow">return</span> (thecallbacks[major][minor]);
+<a name="l00558" id="l00558"></a>00558 }
+</pre>
+    </div>
+  </div>
+  <hr size="1" />
+
+  <address style="text-align: right;">
+    <small>Generated on 28 Sep 2009 for net-snmp by  <a href="http://www.doxygen.org/index.html"><img class="footer" src=
+    "doxygen.png" alt="doxygen" /></a> 1.6.1</small>
+<!-- CONTENT END -->
+<!--#include virtual="/page-bottom.html" -->
+

@@ -1,0 +1,321 @@
+<!--#set var="section" value="development" -->
+<!--#include virtual="/page-top.html" -->
+<!-- CONTENT START -->
+  <div class="navigation" id="top">
+    <div class="tabs">
+      <ul>
+        <li><a href="index.html"><span>Main Page</span></a></li>
+
+        <li><a href="pages.html"><span>Related Pages</span></a></li>
+
+        <li><a href="modules.html"><span>Modules</span></a></li>
+
+        <li><a href="annotated.html"><span>Data Structures</span></a></li>
+
+        <li class="current"><a href="files.html"><span>Files</span></a></li>
+
+        <li><a href="examples.html"><span>Examples</span></a></li>
+      </ul>
+    </div>
+
+    <div class="tabs">
+      <ul>
+        <li><a href="files.html"><span>File List</span></a></li>
+
+        <li><a href="globals.html"><span>Globals</span></a></li>
+      </ul>
+    </div>
+
+    <h1>snmp_auth.c</h1>
+
+    <div class="fragment">
+      <pre class="fragment">
+<a name="l00001" id="l00001"></a>00001 <span class="comment">/*</span>
+<a name="l00002" id="l00002"></a>00002 <span class="comment"> * snmp_auth.c</span>
+<a name="l00003" id="l00003"></a>00003 <span class="comment"> *</span>
+<a name="l00004" id="l00004"></a>00004 <span class="comment"> * Community name parse/build routines.</span>
+<a name="l00005" id="l00005"></a>00005 <span class="comment"> */</span>
+<a name="l00006" id="l00006"></a>00006 <span class=
+"comment">/**********************************************************************</span>
+<a name="l00007" id="l00007"></a>00007 <span class=
+"comment">    Copyright 1988, 1989, 1991, 1992 by Carnegie Mellon University</span>
+<a name="l00008" id="l00008"></a>00008 
+<a name="l00009" id="l00009"></a>00009 <span class="comment">                         All Rights Reserved</span>
+<a name="l00010" id="l00010"></a>00010 
+<a name="l00011" id="l00011"></a>00011 <span class=
+"comment">Permission to use, copy, modify, and distribute this software and its</span>
+<a name="l00012" id="l00012"></a>00012 <span class=
+"comment">documentation for any purpose and without fee is hereby granted,</span>
+<a name="l00013" id="l00013"></a>00013 <span class=
+"comment">provided that the above copyright notice appear in all copies and that</span>
+<a name="l00014" id="l00014"></a>00014 <span class=
+"comment">both that copyright notice and this permission notice appear in</span>
+<a name="l00015" id="l00015"></a>00015 <span class="comment">supporting documentation, and that the name of CMU not be</span>
+<a name="l00016" id="l00016"></a>00016 <span class=
+"comment">used in advertising or publicity pertaining to distribution of the</span>
+<a name="l00017" id="l00017"></a>00017 <span class="comment">software without specific, written prior permission.</span>
+<a name="l00018" id="l00018"></a>00018 
+<a name="l00019" id="l00019"></a>00019 <span class=
+"comment">CMU DISCLAIMS ALL WARRANTIES WITH REGARD TO THIS SOFTWARE, INCLUDING</span>
+<a name="l00020" id="l00020"></a>00020 <span class=
+"comment">ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS, IN NO EVENT SHALL</span>
+<a name="l00021" id="l00021"></a>00021 <span class=
+"comment">CMU BE LIABLE FOR ANY SPECIAL, INDIRECT OR CONSEQUENTIAL DAMAGES OR</span>
+<a name="l00022" id="l00022"></a>00022 <span class=
+"comment">ANY DAMAGES WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS,</span>
+<a name="l00023" id="l00023"></a>00023 <span class=
+"comment">WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION,</span>
+<a name="l00024" id="l00024"></a>00024 <span class=
+"comment">ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS</span>
+<a name="l00025" id="l00025"></a>00025 <span class="comment">SOFTWARE.</span>
+<a name="l00026" id="l00026"></a>00026 <span class=
+"comment">******************************************************************/</span>
+<a name="l00027" id="l00027"></a>00027 
+<a name="l00028" id="l00028"></a>00028 <span class="preprocessor">#include &lt;net-snmp/net-snmp-config.h&gt;</span>
+<a name="l00029" id="l00029"></a>00029 
+<a name="l00030" id="l00030"></a>00030 <span class="preprocessor">#ifdef KINETICS</span>
+<a name="l00031" id="l00031"></a>00031 <span class="preprocessor">#include "gw.h"</span>
+<a name="l00032" id="l00032"></a>00032 <span class="preprocessor">#include "fp4/cmdmacro.h"</span>
+<a name="l00033" id="l00033"></a>00033 <span class="preprocessor">#endif</span>
+<a name="l00034" id="l00034"></a>00034 
+<a name="l00035" id="l00035"></a>00035 <span class="preprocessor">#include &lt;stdio.h&gt;</span>
+<a name="l00036" id="l00036"></a>00036 <span class="preprocessor">#if HAVE_STDLIB_H</span>
+<a name="l00037" id="l00037"></a>00037 <span class="preprocessor">#include &lt;stdlib.h&gt;</span>
+<a name="l00038" id="l00038"></a>00038 <span class="preprocessor">#endif</span>
+<a name="l00039" id="l00039"></a>00039 <span class="preprocessor">#if HAVE_STRING_H</span>
+<a name="l00040" id="l00040"></a>00040 <span class="preprocessor">#include &lt;string.h&gt;</span>
+<a name="l00041" id="l00041"></a>00041 <span class="preprocessor">#else</span>
+<a name="l00042" id="l00042"></a>00042 <span class="preprocessor">#include &lt;strings.h&gt;</span>
+<a name="l00043" id="l00043"></a>00043 <span class="preprocessor">#endif</span>
+<a name="l00044" id="l00044"></a>00044 <span class="preprocessor">#include &lt;sys/types.h&gt;</span>
+<a name="l00045" id="l00045"></a>00045 <span class="preprocessor">#if TIME_WITH_SYS_TIME</span>
+<a name="l00046" id="l00046"></a>00046 <span class="preprocessor"># ifdef WIN32</span>
+<a name="l00047" id="l00047"></a>00047 <span class="preprocessor">#  include &lt;sys/timeb.h&gt;</span>
+<a name="l00048" id="l00048"></a>00048 <span class="preprocessor"># else</span>
+<a name="l00049" id="l00049"></a>00049 <span class="preprocessor">#  include &lt;sys/time.h&gt;</span>
+<a name="l00050" id="l00050"></a>00050 <span class="preprocessor"># endif</span>
+<a name="l00051" id="l00051"></a>00051 <span class="preprocessor"># include &lt;time.h&gt;</span>
+<a name="l00052" id="l00052"></a>00052 <span class="preprocessor">#else</span>
+<a name="l00053" id="l00053"></a>00053 <span class="preprocessor"># if HAVE_SYS_TIME_H</span>
+<a name="l00054" id="l00054"></a>00054 <span class="preprocessor">#  include &lt;sys/time.h&gt;</span>
+<a name="l00055" id="l00055"></a>00055 <span class="preprocessor"># else</span>
+<a name="l00056" id="l00056"></a>00056 <span class="preprocessor">#  include &lt;time.h&gt;</span>
+<a name="l00057" id="l00057"></a>00057 <span class="preprocessor"># endif</span>
+<a name="l00058" id="l00058"></a>00058 <span class="preprocessor">#endif</span>
+<a name="l00059" id="l00059"></a>00059 <span class="preprocessor">#if HAVE_SYS_SELECT_H</span>
+<a name="l00060" id="l00060"></a>00060 <span class="preprocessor">#include &lt;sys/select.h&gt;</span>
+<a name="l00061" id="l00061"></a>00061 <span class="preprocessor">#endif</span>
+<a name="l00062" id="l00062"></a>00062 <span class="preprocessor">#if HAVE_NETINET_IN_H</span>
+<a name="l00063" id="l00063"></a>00063 <span class="preprocessor">#include &lt;netinet/in.h&gt;</span>
+<a name="l00064" id="l00064"></a>00064 <span class="preprocessor">#endif</span>
+<a name="l00065" id="l00065"></a>00065 <span class="preprocessor">#if HAVE_ARPA_INET_H</span>
+<a name="l00066" id="l00066"></a>00066 <span class="preprocessor">#include &lt;arpa/inet.h&gt;</span>
+<a name="l00067" id="l00067"></a>00067 <span class="preprocessor">#endif</span>
+<a name="l00068" id="l00068"></a>00068 
+<a name="l00069" id="l00069"></a>00069 <span class="preprocessor">#if HAVE_DMALLOC_H</span>
+<a name="l00070" id="l00070"></a>00070 <span class="preprocessor">#include &lt;dmalloc.h&gt;</span>
+<a name="l00071" id="l00071"></a>00071 <span class="preprocessor">#endif</span>
+<a name="l00072" id="l00072"></a>00072 
+<a name="l00073" id="l00073"></a>00073 <span class="preprocessor">#if HAVE_WINSOCK_H</span>
+<a name="l00074" id="l00074"></a>00074 <span class="preprocessor">#include &lt;winsock.h&gt;</span>
+<a name="l00075" id="l00075"></a>00075 <span class="preprocessor">#endif</span>
+<a name="l00076" id="l00076"></a>00076 
+<a name="l00077" id="l00077"></a>00077 <span class="preprocessor">#ifdef vms</span>
+<a name="l00078" id="l00078"></a>00078 <span class="preprocessor">#include &lt;in.h&gt;</span>
+<a name="l00079" id="l00079"></a>00079 <span class="preprocessor">#endif</span>
+<a name="l00080" id="l00080"></a>00080 
+<a name="l00081" id="l00081"></a>00081 <span class="preprocessor">#include &lt;net-snmp/types.h&gt;</span>
+<a name="l00082" id="l00082"></a>00082 <span class="preprocessor">#include &lt;net-snmp/output_api.h&gt;</span>
+<a name="l00083" id="l00083"></a>00083 <span class="preprocessor">#include &lt;net-snmp/utilities.h&gt;</span>
+<a name="l00084" id="l00084"></a>00084 
+<a name="l00085" id="l00085"></a>00085 <span class="preprocessor">#include &lt;net-snmp/library/asn1.h&gt;</span>
+<a name="l00086" id="l00086"></a>00086 <span class="preprocessor">#include &lt;net-snmp/library/snmp_api.h&gt;</span>
+<a name="l00087" id="l00087"></a>00087 <span class="preprocessor">#include &lt;net-snmp/library/mib.h&gt;</span>
+<a name="l00088" id="l00088"></a>00088 <span class="preprocessor">#include &lt;net-snmp/library/md5.h&gt;</span>
+<a name="l00089" id="l00089"></a>00089 <span class="preprocessor">#include &lt;net-snmp/library/scapi.h&gt;</span>
+<a name="l00090" id="l00090"></a>00090 
+<a name="l00091" id="l00091"></a>00091 <span class="comment">/*</span>
+<a name="l00092" id="l00092"></a>00092 <span class="comment"> * Globals.</span>
+<a name="l00093" id="l00093"></a>00093 <span class="comment"> */</span>
+<a name="l00094" id="l00094"></a>00094 
+<a name="l00095" id="l00095"></a>00095 <span class=
+"preprocessor">#if !defined(NETSNMP_DISABLE_SNMPV1) || !defined(NETSNMP_DISABLE_SNMPV2C)</span>
+<a name="l00096" id="l00096"></a>00096 <span class=
+"comment">/*******************************************************************-o-******</span>
+<a name="l00097" id="l00097"></a>00097 <span class="comment"> * snmp_comstr_parse</span>
+<a name="l00098" id="l00098"></a>00098 <span class="comment"> *</span>
+<a name="l00099" id="l00099"></a>00099 <span class="comment"> * Parameters:</span>
+<a name="l00100" id="l00100"></a>00100 <span class="comment"> *      *data           (I)   Message.</span>
+<a name="l00101" id="l00101"></a>00101 <span class="comment"> *      *length         (I/O) Bytes left in message.</span>
+<a name="l00102" id="l00102"></a>00102 <span class="comment"> *      *psid           (O)   Community string.</span>
+<a name="l00103" id="l00103"></a>00103 <span class="comment"> *      *slen           (O)   Length of community string.</span>
+<a name="l00104" id="l00104"></a>00104 <span class="comment"> *      *version        (O)   Message version.</span>
+<a name="l00105" id="l00105"></a>00105 <span class="comment"> *      </span>
+<a name="l00106" id="l00106"></a>00106 <span class="comment"> * Returns:</span>
+<a name="l00107" id="l00107"></a>00107 <span class="comment"> *      Pointer to the remainder of data.</span>
+<a name="l00108" id="l00108"></a>00108 <span class="comment"> *</span>
+<a name="l00109" id="l00109"></a>00109 <span class="comment"> *</span>
+<a name="l00110" id="l00110"></a>00110 <span class=
+"comment"> * Parse the header of a community string-based message such as that found</span>
+<a name="l00111" id="l00111"></a>00111 <span class="comment"> * in SNMPv1 and SNMPv2c.</span>
+<a name="l00112" id="l00112"></a>00112 <span class="comment"> */</span>
+<a name="l00113" id="l00113"></a>00113 u_char         *
+<a name="l00114" id="l00114"></a>00114 snmp_comstr_parse(u_char * data,
+<a name="l00115" id="l00115"></a>00115                   <span class="keywordtype">size_t</span> * length,
+<a name="l00116" id="l00116"></a>00116                   u_char * psid, <span class=
+"keywordtype">size_t</span> * slen, <span class="keywordtype">long</span> *version)
+<a name="l00117" id="l00117"></a>00117 {
+<a name="l00118" id="l00118"></a>00118     u_char          type;
+<a name="l00119" id="l00119"></a>00119     <span class="keywordtype">long</span>            ver;
+<a name="l00120" id="l00120"></a>00120     <span class="keywordtype">size_t</span>          origlen = *slen;
+<a name="l00121" id="l00121"></a>00121 
+<a name="l00122" id="l00122"></a>00122     <span class="comment">/*</span>
+<a name="l00123" id="l00123"></a>00123 <span class="comment">     * Message is an ASN.1 SEQUENCE.</span>
+<a name="l00124" id="l00124"></a>00124 <span class="comment">     */</span>
+<a name="l00125" id="l00125"></a>00125     data = asn_parse_sequence(data, length, &amp;type,
+<a name="l00126" id="l00126"></a>00126                               (ASN_SEQUENCE | ASN_CONSTRUCTOR),
+<a name="l00127" id="l00127"></a>00127                               <span class="stringliteral">"auth message"</span>);
+<a name="l00128" id="l00128"></a>00128     <span class="keywordflow">if</span> (data == NULL) {
+<a name="l00129" id="l00129"></a>00129         <span class="keywordflow">return</span> NULL;
+<a name="l00130" id="l00130"></a>00130     }
+<a name="l00131" id="l00131"></a>00131 
+<a name="l00132" id="l00132"></a>00132     <span class="comment">/*</span>
+<a name="l00133" id="l00133"></a>00133 <span class="comment">     * First field is the version.</span>
+<a name="l00134" id="l00134"></a>00134 <span class="comment">     */</span>
+<a name="l00135" id="l00135"></a>00135     DEBUGDUMPHEADER(<span class="stringliteral">"recv"</span>, <span class=
+"stringliteral">"SNMP version"</span>);
+<a name="l00136" id="l00136"></a>00136     data = asn_parse_int(data, length, &amp;type, &amp;ver, <span class=
+"keyword">sizeof</span>(ver));
+<a name="l00137" id="l00137"></a>00137     DEBUGINDENTLESS();
+<a name="l00138" id="l00138"></a>00138     *version = ver;
+<a name="l00139" id="l00139"></a>00139     <span class="keywordflow">if</span> (data == NULL) {
+<a name="l00140" id="l00140"></a>00140         ERROR_MSG(<span class="stringliteral">"bad parse of version"</span>);
+<a name="l00141" id="l00141"></a>00141         <span class="keywordflow">return</span> NULL;
+<a name="l00142" id="l00142"></a>00142     }
+<a name="l00143" id="l00143"></a>00143 
+<a name="l00144" id="l00144"></a>00144     <span class="comment">/*</span>
+<a name="l00145" id="l00145"></a>00145 <span class=
+"comment">     * second field is the community string for SNMPv1 &amp; SNMPv2c </span>
+<a name="l00146" id="l00146"></a>00146 <span class="comment">     */</span>
+<a name="l00147" id="l00147"></a>00147     DEBUGDUMPHEADER(<span class="stringliteral">"recv"</span>, <span class=
+"stringliteral">"community string"</span>);
+<a name="l00148" id="l00148"></a>00148     data = asn_parse_string(data, length, &amp;type, psid, slen);
+<a name="l00149" id="l00149"></a>00149     DEBUGINDENTLESS();
+<a name="l00150" id="l00150"></a>00150     <span class="keywordflow">if</span> (data == NULL) {
+<a name="l00151" id="l00151"></a>00151         ERROR_MSG(<span class="stringliteral">"bad parse of community"</span>);
+<a name="l00152" id="l00152"></a>00152         <span class="keywordflow">return</span> NULL;
+<a name="l00153" id="l00153"></a>00153     }
+<a name="l00154" id="l00154"></a>00154     psid[<a class="code" href="group__util.html#gad1976dec11cfd62abaa4ecedad948f18" title=
+"Computers the minimum of a and b.">SNMP_MIN</a>(*slen, origlen - 1)] = <span class="charliteral">'\0'</span>;
+<a name="l00155" id="l00155"></a>00155     <span class="keywordflow">return</span> (u_char *) data;
+<a name="l00156" id="l00156"></a>00156 
+<a name="l00157" id="l00157"></a>00157 }                               <span class="comment">/* end snmp_comstr_parse() */</span>
+<a name="l00158" id="l00158"></a>00158 
+<a name="l00159" id="l00159"></a>00159 
+<a name="l00160" id="l00160"></a>00160 
+<a name="l00161" id="l00161"></a>00161 
+<a name="l00162" id="l00162"></a>00162 <span class=
+"comment">/*******************************************************************-o-******</span>
+<a name="l00163" id="l00163"></a>00163 <span class="comment"> * snmp_comstr_build</span>
+<a name="l00164" id="l00164"></a>00164 <span class="comment"> *</span>
+<a name="l00165" id="l00165"></a>00165 <span class="comment"> * Parameters:</span>
+<a name="l00166" id="l00166"></a>00166 <span class="comment"> *      *data</span>
+<a name="l00167" id="l00167"></a>00167 <span class="comment"> *      *length</span>
+<a name="l00168" id="l00168"></a>00168 <span class="comment"> *      *psid</span>
+<a name="l00169" id="l00169"></a>00169 <span class="comment"> *      *slen</span>
+<a name="l00170" id="l00170"></a>00170 <span class="comment"> *      *version</span>
+<a name="l00171" id="l00171"></a>00171 <span class="comment"> *       messagelen</span>
+<a name="l00172" id="l00172"></a>00172 <span class="comment"> *      </span>
+<a name="l00173" id="l00173"></a>00173 <span class="comment"> * Returns:</span>
+<a name="l00174" id="l00174"></a>00174 <span class="comment"> *      Pointer into 'data' after built section.</span>
+<a name="l00175" id="l00175"></a>00175 <span class="comment"> *</span>
+<a name="l00176" id="l00176"></a>00176 <span class="comment"> *</span>
+<a name="l00177" id="l00177"></a>00177 <span class=
+"comment"> * Build the header of a community string-based message such as that found</span>
+<a name="l00178" id="l00178"></a>00178 <span class="comment"> * in SNMPv1 and SNMPv2c.</span>
+<a name="l00179" id="l00179"></a>00179 <span class="comment"> *</span>
+<a name="l00180" id="l00180"></a>00180 <span class=
+"comment"> * NOTE:        The length of the message will have to be inserted later,</span>
+<a name="l00181" id="l00181"></a>00181 <span class="comment"> *              if not known.</span>
+<a name="l00182" id="l00182"></a>00182 <span class="comment"> *</span>
+<a name="l00183" id="l00183"></a>00183 <span class=
+"comment"> * NOTE:        Version is an 'int'.  (CMU had it as a long, but was passing</span>
+<a name="l00184" id="l00184"></a>00184 <span class=
+"comment"> *              in a *int.  Grrr.)  Assign version to verfix and pass in</span>
+<a name="l00185" id="l00185"></a>00185 <span class=
+"comment"> *              that to asn_build_int instead which expects a long.  -- WH</span>
+<a name="l00186" id="l00186"></a>00186 <span class="comment"> */</span>
+<a name="l00187" id="l00187"></a>00187 u_char         *
+<a name="l00188" id="l00188"></a>00188 snmp_comstr_build(u_char * data,
+<a name="l00189" id="l00189"></a>00189                   <span class="keywordtype">size_t</span> * length,
+<a name="l00190" id="l00190"></a>00190                   u_char * psid,
+<a name="l00191" id="l00191"></a>00191                   <span class="keywordtype">size_t</span> * slen, <span class=
+"keywordtype">long</span> *version, <span class="keywordtype">size_t</span> messagelen)
+<a name="l00192" id="l00192"></a>00192 {
+<a name="l00193" id="l00193"></a>00193     <span class="keywordtype">long</span>            verfix = *version;
+<a name="l00194" id="l00194"></a>00194     u_char         *h1 = data;
+<a name="l00195" id="l00195"></a>00195     u_char         *h1e;
+<a name="l00196" id="l00196"></a>00196     <span class="keywordtype">size_t</span>          hlength = *length;
+<a name="l00197" id="l00197"></a>00197 
+<a name="l00198" id="l00198"></a>00198 
+<a name="l00199" id="l00199"></a>00199     <span class="comment">/*</span>
+<a name="l00200" id="l00200"></a>00200 <span class=
+"comment">     * Build the the message wrapper (note length will be inserted later).</span>
+<a name="l00201" id="l00201"></a>00201 <span class="comment">     */</span>
+<a name="l00202" id="l00202"></a>00202     data =
+<a name="l00203" id="l00203"></a>00203         asn_build_sequence(data, length,
+<a name="l00204" id="l00204"></a>00204                            (u_char) (ASN_SEQUENCE | ASN_CONSTRUCTOR), 0);
+<a name="l00205" id="l00205"></a>00205     <span class="keywordflow">if</span> (data == NULL) {
+<a name="l00206" id="l00206"></a>00206         <span class="keywordflow">return</span> NULL;
+<a name="l00207" id="l00207"></a>00207     }
+<a name="l00208" id="l00208"></a>00208     h1e = data;
+<a name="l00209" id="l00209"></a>00209 
+<a name="l00210" id="l00210"></a>00210 
+<a name="l00211" id="l00211"></a>00211     <span class="comment">/*</span>
+<a name="l00212" id="l00212"></a>00212 <span class="comment">     * Store the version field.</span>
+<a name="l00213" id="l00213"></a>00213 <span class="comment">     */</span>
+<a name="l00214" id="l00214"></a>00214     data = asn_build_int(data, length,
+<a name="l00215" id="l00215"></a>00215                          (u_char) (ASN_UNIVERSAL | ASN_PRIMITIVE |
+<a name="l00216" id="l00216"></a>00216                                    ASN_INTEGER), &amp;verfix, <span class=
+"keyword">sizeof</span>(verfix));
+<a name="l00217" id="l00217"></a>00217     <span class="keywordflow">if</span> (data == NULL) {
+<a name="l00218" id="l00218"></a>00218         <span class="keywordflow">return</span> NULL;
+<a name="l00219" id="l00219"></a>00219     }
+<a name="l00220" id="l00220"></a>00220 
+<a name="l00221" id="l00221"></a>00221 
+<a name="l00222" id="l00222"></a>00222     <span class="comment">/*</span>
+<a name="l00223" id="l00223"></a>00223 <span class="comment">     * Store the community string.</span>
+<a name="l00224" id="l00224"></a>00224 <span class="comment">     */</span>
+<a name="l00225" id="l00225"></a>00225     data = asn_build_string(data, length,
+<a name="l00226" id="l00226"></a>00226                             (u_char) (ASN_UNIVERSAL | ASN_PRIMITIVE |
+<a name="l00227" id="l00227"></a>00227                                       ASN_OCTET_STR), psid,
+<a name="l00228" id="l00228"></a>00228                             *(u_char *) slen);
+<a name="l00229" id="l00229"></a>00229     <span class="keywordflow">if</span> (data == NULL) {
+<a name="l00230" id="l00230"></a>00230         <span class="keywordflow">return</span> NULL;
+<a name="l00231" id="l00231"></a>00231     }
+<a name="l00232" id="l00232"></a>00232 
+<a name="l00233" id="l00233"></a>00233 
+<a name="l00234" id="l00234"></a>00234     <span class="comment">/*</span>
+<a name="l00235" id="l00235"></a>00235 <span class="comment">     * Insert length.</span>
+<a name="l00236" id="l00236"></a>00236 <span class="comment">     */</span>
+<a name="l00237" id="l00237"></a>00237     asn_build_sequence(h1, &amp;hlength,
+<a name="l00238" id="l00238"></a>00238                        (u_char) (ASN_SEQUENCE | ASN_CONSTRUCTOR),
+<a name="l00239" id="l00239"></a>00239                        data - h1e + messagelen);
+<a name="l00240" id="l00240"></a>00240 
+<a name="l00241" id="l00241"></a>00241 
+<a name="l00242" id="l00242"></a>00242     <span class="keywordflow">return</span> data;
+<a name="l00243" id="l00243"></a>00243 
+<a name="l00244" id="l00244"></a>00244 }                               <span class="comment">/* end snmp_comstr_build() */</span>
+<a name="l00245" id="l00245"></a>00245 <span class="preprocessor">#endif </span><span class=
+"comment">/* support for community based SNMP */</span>
+</pre>
+    </div>
+  </div>
+  <hr size="1" />
+
+  <address style="text-align: right;">
+    <small>Generated on 28 Sep 2009 for net-snmp by  <a href="http://www.doxygen.org/index.html"><img class="footer" src=
+    "doxygen.png" alt="doxygen" /></a> 1.6.1</small>
+<!-- CONTENT END -->
+<!--#include virtual="/page-bottom.html" -->
+

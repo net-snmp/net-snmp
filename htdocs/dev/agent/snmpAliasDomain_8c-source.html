@@ -1,0 +1,171 @@
+<!--#set var="section" value="development" -->
+<!--#include virtual="/page-top.html" -->
+<!-- CONTENT START -->
+  <div class="navigation" id="top">
+    <div class="tabs">
+      <ul>
+        <li><a href="index.html"><span>Main Page</span></a></li>
+
+        <li><a href="pages.html"><span>Related Pages</span></a></li>
+
+        <li><a href="modules.html"><span>Modules</span></a></li>
+
+        <li><a href="annotated.html"><span>Data Structures</span></a></li>
+
+        <li class="current"><a href="files.html"><span>Files</span></a></li>
+
+        <li><a href="examples.html"><span>Examples</span></a></li>
+      </ul>
+    </div>
+
+    <div class="tabs">
+      <ul>
+        <li><a href="files.html"><span>File List</span></a></li>
+
+        <li><a href="globals.html"><span>Globals</span></a></li>
+      </ul>
+    </div>
+
+    <h1>snmpAliasDomain.c</h1>
+
+    <div class="fragment">
+      <pre class="fragment">
+<a name="l00001" id="l00001"></a>00001 <span class="preprocessor">#include &lt;net-snmp/net-snmp-config.h&gt;</span>
+<a name="l00002" id="l00002"></a>00002 
+<a name="l00003" id="l00003"></a>00003 <span class="preprocessor">#include &lt;stdio.h&gt;</span>
+<a name="l00004" id="l00004"></a>00004 <span class="preprocessor">#include &lt;sys/types.h&gt;</span>
+<a name="l00005" id="l00005"></a>00005 <span class="preprocessor">#include &lt;errno.h&gt;</span>
+<a name="l00006" id="l00006"></a>00006 
+<a name="l00007" id="l00007"></a>00007 <span class="preprocessor">#if HAVE_STRING_H</span>
+<a name="l00008" id="l00008"></a>00008 <span class="preprocessor">#include &lt;string.h&gt;</span>
+<a name="l00009" id="l00009"></a>00009 <span class="preprocessor">#else</span>
+<a name="l00010" id="l00010"></a>00010 <span class="preprocessor">#include &lt;strings.h&gt;</span>
+<a name="l00011" id="l00011"></a>00011 <span class="preprocessor">#endif</span>
+<a name="l00012" id="l00012"></a>00012 <span class="preprocessor">#if HAVE_STDLIB_H</span>
+<a name="l00013" id="l00013"></a>00013 <span class="preprocessor">#include &lt;stdlib.h&gt;</span>
+<a name="l00014" id="l00014"></a>00014 <span class="preprocessor">#endif</span>
+<a name="l00015" id="l00015"></a>00015 <span class="preprocessor">#if HAVE_UNISTD_H</span>
+<a name="l00016" id="l00016"></a>00016 <span class="preprocessor">#include &lt;unistd.h&gt;</span>
+<a name="l00017" id="l00017"></a>00017 <span class="preprocessor">#endif</span>
+<a name="l00018" id="l00018"></a>00018 
+<a name="l00019" id="l00019"></a>00019 <span class="preprocessor">#if HAVE_DMALLOC_H</span>
+<a name="l00020" id="l00020"></a>00020 <span class="preprocessor">#include &lt;dmalloc.h&gt;</span>
+<a name="l00021" id="l00021"></a>00021 <span class="preprocessor">#endif</span>
+<a name="l00022" id="l00022"></a>00022 
+<a name="l00023" id="l00023"></a>00023 <span class="preprocessor">#include &lt;net-snmp/types.h&gt;</span>
+<a name="l00024" id="l00024"></a>00024 <span class="preprocessor">#include &lt;net-snmp/output_api.h&gt;</span>
+<a name="l00025" id="l00025"></a>00025 <span class="preprocessor">#include &lt;net-snmp/utilities.h&gt;</span>
+<a name="l00026" id="l00026"></a>00026 <span class="preprocessor">#include &lt;net-snmp/config_api.h&gt;</span>
+<a name="l00027" id="l00027"></a>00027 
+<a name="l00028" id="l00028"></a>00028 <span class="preprocessor">#include &lt;net-snmp/library/snmp_transport.h&gt;</span>
+<a name="l00029" id="l00029"></a>00029 
+<a name="l00030" id="l00030"></a>00030 oid netsnmp_snmpALIASDomain[] = { 1,3,6,1,4,1,8072,3,3,7 };
+<a name="l00031" id="l00031"></a>00031 <span class="keyword">static</span> netsnmp_tdomain aliasDomain;
+<a name="l00032" id="l00032"></a>00032 
+<a name="l00033" id="l00033"></a>00033 <span class="comment">/* simple storage mechanism */</span>
+<a name="l00034" id="l00034"></a>00034 <span class="keyword">static</span> <a class="code" href=
+"structnetsnmp__data__list__s.html" title="used to iterate through lists of data">netsnmp_data_list</a> *alias_memory = NULL;
+<a name="l00035" id="l00035"></a>00035 
+<a name="l00036" id="l00036"></a>00036 <span class="comment">/* An alias parser */</span>
+<a name="l00037" id="l00037"></a>00037 <span class="keywordtype">void</span>
+<a name="l00038" id="l00038"></a>00038 parse_alias_config(<span class="keyword">const</span> <span class=
+"keywordtype">char</span> *token, <span class="keywordtype">char</span> *line) {
+<a name="l00039" id="l00039"></a>00039     <span class="keywordtype">char</span> aliasname[SPRINT_MAX_LEN];
+<a name="l00040" id="l00040"></a>00040     <span class="keywordtype">char</span> transportdef[SPRINT_MAX_LEN];
+<a name="l00041" id="l00041"></a>00041     <span class=
+"comment">/* copy the first word (the alias) out and then assume the rest is</span>
+<a name="l00042" id="l00042"></a>00042 <span class="comment">       transport */</span>
+<a name="l00043" id="l00043"></a>00043     line = copy_nword(line, aliasname, <span class="keyword">sizeof</span>(aliasname));
+<a name="l00044" id="l00044"></a>00044     line = copy_nword(line, transportdef, <span class=
+"keyword">sizeof</span>(transportdef));
+<a name="l00045" id="l00045"></a>00045     <span class="keywordflow">if</span> (line)
+<a name="l00046" id="l00046"></a>00046         config_perror(<span class="stringliteral">"more data than expected"</span>);
+<a name="l00047" id="l00047"></a>00047     <a class="code" href="group__data__list.html#g6b5bf9a2a3044347373f4e4ccf84b5d6" title=
+"adds data to a datalist">netsnmp_data_list_add_node</a>(&amp;alias_memory,
+<a name="l00048" id="l00048"></a>00048                                <a class="code" href=
+"group__data__list.html#g3dc286b678474c6adb610460ea71b03e" title=
+"adds creates a data_list node given a name, data and a free function ptr.">netsnmp_create_data_list</a>(aliasname,
+<a name="l00049" id="l00049"></a>00049                                                         strdup(transportdef),
+<a name="l00050" id="l00050"></a>00050                                                         &amp;free));
+<a name="l00051" id="l00051"></a>00051 }
+<a name="l00052" id="l00052"></a>00052 
+<a name="l00053" id="l00053"></a>00053 <span class="keywordtype">void</span>
+<a name="l00054" id="l00054"></a>00054 free_alias_config(<span class="keywordtype">void</span>) {
+<a name="l00055" id="l00055"></a>00055     <a class="code" href="group__data__list.html#gd2df98a488f7c6e3d6e179136e52d4e3" title=
+"frees all data and nodes in a list.">netsnmp_free_all_list_data</a>(alias_memory);
+<a name="l00056" id="l00056"></a>00056     alias_memory = NULL;
+<a name="l00057" id="l00057"></a>00057 }
+<a name="l00058" id="l00058"></a>00058 
+<a name="l00059" id="l00059"></a>00059 <span class="comment">/*</span>
+<a name="l00060" id="l00060"></a>00060 <span class=
+"comment"> * Open a ALIAS-based transport for SNMP.  Local is TRUE if addr is the local</span>
+<a name="l00061" id="l00061"></a>00061 <span class=
+"comment"> * address to bind to (i.e. this is a server-type session); otherwise addr is </span>
+<a name="l00062" id="l00062"></a>00062 <span class="comment"> * the remote address to send things to.  </span>
+<a name="l00063" id="l00063"></a>00063 <span class="comment"> */</span>
+<a name="l00064" id="l00064"></a>00064 
+<a name="l00065" id="l00065"></a>00065 netsnmp_transport *
+<a name="l00066" id="l00066"></a>00066 netsnmp_alias_create_tstring(<span class="keyword">const</span> <span class=
+"keywordtype">char</span> *str, <span class="keywordtype">int</span> local,
+<a name="l00067" id="l00067"></a>00067                            <span class="keyword">const</span> <span class=
+"keywordtype">char</span> *default_target)
+<a name="l00068" id="l00068"></a>00068 {
+<a name="l00069" id="l00069"></a>00069     <span class="keyword">const</span> <span class="keywordtype">char</span> *aliasdata;
+<a name="l00070" id="l00070"></a>00070 
+<a name="l00071" id="l00071"></a>00071     aliasdata = (<span class="keyword">const</span> <span class=
+"keywordtype">char</span>*)<a class="code" href="group__data__list.html#g9bf1a62a625bd48320376f27ecee41c0" title=
+"returns a data_list node&amp;#39;s data for a given name within a data_list">netsnmp_get_list_data</a>(alias_memory, str);
+<a name="l00072" id="l00072"></a>00072     <span class="keywordflow">if</span> (!aliasdata) {
+<a name="l00073" id="l00073"></a>00073         <a class="code" href="group__snmp__logging.html#g9ba905368ea1c551b969af44b13e37c2"
+title="This snmp logging function allows variable argument list given the specified format...">snmp_log</a>(LOG_ERR, <span class=
+"stringliteral">"No alias found for %s\n"</span>, str);
+<a name="l00074" id="l00074"></a>00074         <span class="keywordflow">return</span> NULL;
+<a name="l00075" id="l00075"></a>00075     }
+<a name="l00076" id="l00076"></a>00076 
+<a name="l00077" id="l00077"></a>00077     <span class=
+"keywordflow">return</span> netsnmp_tdomain_transport(aliasdata,local,default_target);
+<a name="l00078" id="l00078"></a>00078 }
+<a name="l00079" id="l00079"></a>00079 
+<a name="l00080" id="l00080"></a>00080 
+<a name="l00081" id="l00081"></a>00081 
+<a name="l00082" id="l00082"></a>00082 netsnmp_transport *
+<a name="l00083" id="l00083"></a>00083 netsnmp_alias_create_ostring(<span class="keyword">const</span> u_char * o, <span class=
+"keywordtype">size_t</span> o_len, <span class="keywordtype">int</span> local)
+<a name="l00084" id="l00084"></a>00084 {
+<a name="l00085" id="l00085"></a>00085     fprintf(stderr, <span class="stringliteral">"make ostring\n"</span>);
+<a name="l00086" id="l00086"></a>00086     <span class="keywordflow">return</span> NULL;
+<a name="l00087" id="l00087"></a>00087 }
+<a name="l00088" id="l00088"></a>00088 
+<a name="l00089" id="l00089"></a>00089 <span class="keywordtype">void</span>
+<a name="l00090" id="l00090"></a>00090 netsnmp_alias_ctor(<span class="keywordtype">void</span>)
+<a name="l00091" id="l00091"></a>00091 {
+<a name="l00092" id="l00092"></a>00092     aliasDomain.name = netsnmp_snmpALIASDomain;
+<a name="l00093" id="l00093"></a>00093     aliasDomain.name_length = <span class=
+"keyword">sizeof</span>(netsnmp_snmpALIASDomain) / <span class="keyword">sizeof</span>(oid);
+<a name="l00094" id="l00094"></a>00094     aliasDomain.prefix = (<span class="keyword">const</span> <span class=
+"keywordtype">char</span> **)calloc(2, <span class="keyword">sizeof</span>(<span class="keywordtype">char</span> *));
+<a name="l00095" id="l00095"></a>00095     aliasDomain.prefix[0] = <span class="stringliteral">"alias"</span>;
+<a name="l00096" id="l00096"></a>00096 
+<a name="l00097" id="l00097"></a>00097     aliasDomain.f_create_from_tstring_new = netsnmp_alias_create_tstring;
+<a name="l00098" id="l00098"></a>00098     aliasDomain.f_create_from_ostring = netsnmp_alias_create_ostring;
+<a name="l00099" id="l00099"></a>00099 
+<a name="l00100" id="l00100"></a>00100     netsnmp_tdomain_register(&amp;aliasDomain);
+<a name="l00101" id="l00101"></a>00101 
+<a name="l00102" id="l00102"></a>00102     <a class="code" href="group__read__config.html#g9a3e481d8eb7d3ef08efa25b9a186c3b"
+title=
+"register_config_handler registers handlers for certain tokens specified in certain...">register_config_handler</a>(<span class=
+"stringliteral">"snmp"</span>, <span class="stringliteral">"alias"</span>, parse_alias_config,
+<a name="l00103" id="l00103"></a>00103                             free_alias_config, <span class=
+"stringliteral">"NAME TRANSPORT_DEFINITION"</span>);
+<a name="l00104" id="l00104"></a>00104 }
+</pre>
+    </div>
+  </div>
+  <hr size="1" />
+
+  <address style="text-align: right;">
+    <small>Generated on Wed Aug 26 10:35:42 2009 for net-snmp by  <a href="http://www.doxygen.org/index.html"><img src=
+    "doxygen.png" alt="doxygen" align="middle" border="0" /></a> 1.5.7.1</small>
+<!-- CONTENT END -->
+<!--#include virtual="/page-bottom.html" -->
+

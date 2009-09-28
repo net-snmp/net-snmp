@@ -1,0 +1,1124 @@
+<!--#set var="section" value="development" -->
+<!--#include virtual="/page-top.html" -->
+<!-- CONTENT START -->
+  <div class="navigation" id="top">
+    <div class="tabs">
+      <ul>
+        <li><a href="index.html"><span>Main Page</span></a></li>
+
+        <li><a href="pages.html"><span>Related Pages</span></a></li>
+
+        <li><a href="modules.html"><span>Modules</span></a></li>
+
+        <li><a href="annotated.html"><span>Data Structures</span></a></li>
+
+        <li class="current"><a href="files.html"><span>Files</span></a></li>
+
+        <li><a href="examples.html"><span>Examples</span></a></li>
+      </ul>
+    </div>
+
+    <div class="tabs">
+      <ul>
+        <li><a href="files.html"><span>File List</span></a></li>
+
+        <li><a href="globals.html"><span>Globals</span></a></li>
+      </ul>
+    </div>
+
+    <h1>tools.c</h1>
+
+    <div class="fragment">
+      <pre class="fragment">
+<a name="l00001" id="l00001"></a>00001 <span class="comment">/*</span>
+<a name="l00002" id="l00002"></a>00002 <span class="comment"> * tools.c</span>
+<a name="l00003" id="l00003"></a>00003 <span class="comment"> */</span>
+<a name="l00004" id="l00004"></a>00004 
+<a name="l00005" id="l00005"></a>00005 <span class="preprocessor">#define NETSNMP_TOOLS_C 1 </span><span class=
+"comment">/* dont re-define malloc wrappers here */</span>
+<a name="l00006" id="l00006"></a>00006 
+<a name="l00007" id="l00007"></a>00007 <span class="preprocessor">#include &lt;net-snmp/net-snmp-config.h&gt;</span>
+<a name="l00008" id="l00008"></a>00008 
+<a name="l00009" id="l00009"></a>00009 <span class="preprocessor">#include &lt;ctype.h&gt;</span>
+<a name="l00010" id="l00010"></a>00010 <span class="preprocessor">#include &lt;stdio.h&gt;</span>
+<a name="l00011" id="l00011"></a>00011 <span class="preprocessor">#include &lt;sys/types.h&gt;</span>
+<a name="l00012" id="l00012"></a>00012 <span class="preprocessor">#if TIME_WITH_SYS_TIME</span>
+<a name="l00013" id="l00013"></a>00013 <span class="preprocessor"># ifdef WIN32</span>
+<a name="l00014" id="l00014"></a>00014 <span class="preprocessor">#  include &lt;sys/timeb.h&gt;</span>
+<a name="l00015" id="l00015"></a>00015 <span class="preprocessor"># else</span>
+<a name="l00016" id="l00016"></a>00016 <span class="preprocessor">#  include &lt;sys/time.h&gt;</span>
+<a name="l00017" id="l00017"></a>00017 <span class="preprocessor"># endif</span>
+<a name="l00018" id="l00018"></a>00018 <span class="preprocessor"># include &lt;time.h&gt;</span>
+<a name="l00019" id="l00019"></a>00019 <span class="preprocessor">#else</span>
+<a name="l00020" id="l00020"></a>00020 <span class="preprocessor"># if HAVE_SYS_TIME_H</span>
+<a name="l00021" id="l00021"></a>00021 <span class="preprocessor">#  include &lt;sys/time.h&gt;</span>
+<a name="l00022" id="l00022"></a>00022 <span class="preprocessor"># else</span>
+<a name="l00023" id="l00023"></a>00023 <span class="preprocessor">#  include &lt;time.h&gt;</span>
+<a name="l00024" id="l00024"></a>00024 <span class="preprocessor"># endif</span>
+<a name="l00025" id="l00025"></a>00025 <span class="preprocessor">#endif</span>
+<a name="l00026" id="l00026"></a>00026 <span class="preprocessor">#ifdef HAVE_SYS_SOCKET_H</span>
+<a name="l00027" id="l00027"></a>00027 <span class="preprocessor">#include &lt;sys/socket.h&gt;</span>
+<a name="l00028" id="l00028"></a>00028 <span class="preprocessor">#endif</span>
+<a name="l00029" id="l00029"></a>00029 <span class="preprocessor">#if HAVE_WINSOCK_H</span>
+<a name="l00030" id="l00030"></a>00030 <span class="preprocessor">#include &lt;winsock.h&gt;</span>
+<a name="l00031" id="l00031"></a>00031 <span class="preprocessor">#endif</span>
+<a name="l00032" id="l00032"></a>00032 <span class="preprocessor">#ifdef HAVE_STDLIB_H</span>
+<a name="l00033" id="l00033"></a>00033 <span class="preprocessor">#include &lt;stdlib.h&gt;</span>
+<a name="l00034" id="l00034"></a>00034 <span class="preprocessor">#endif</span>
+<a name="l00035" id="l00035"></a>00035 <span class="preprocessor">#if HAVE_STRING_H</span>
+<a name="l00036" id="l00036"></a>00036 <span class="preprocessor">#include &lt;string.h&gt;</span>
+<a name="l00037" id="l00037"></a>00037 <span class="preprocessor">#else</span>
+<a name="l00038" id="l00038"></a>00038 <span class="preprocessor">#include &lt;strings.h&gt;</span>
+<a name="l00039" id="l00039"></a>00039 <span class="preprocessor">#endif</span>
+<a name="l00040" id="l00040"></a>00040 <span class="preprocessor">#ifdef HAVE_NETINET_IN_H</span>
+<a name="l00041" id="l00041"></a>00041 <span class="preprocessor">#include &lt;netinet/in.h&gt;</span>
+<a name="l00042" id="l00042"></a>00042 <span class="preprocessor">#endif</span>
+<a name="l00043" id="l00043"></a>00043 <span class="preprocessor">#ifdef HAVE_ARPA_INET_H</span>
+<a name="l00044" id="l00044"></a>00044 <span class="preprocessor">#include &lt;arpa/inet.h&gt;</span>
+<a name="l00045" id="l00045"></a>00045 <span class="preprocessor">#endif</span>
+<a name="l00046" id="l00046"></a>00046 <span class="preprocessor">#ifdef cygwin</span>
+<a name="l00047" id="l00047"></a>00047 <span class="preprocessor">#include &lt;windows.h&gt;</span>
+<a name="l00048" id="l00048"></a>00048 <span class="preprocessor">#endif</span>
+<a name="l00049" id="l00049"></a>00049 
+<a name="l00050" id="l00050"></a>00050 <span class="preprocessor">#if HAVE_DMALLOC_H</span>
+<a name="l00051" id="l00051"></a>00051 <span class="preprocessor">#include &lt;dmalloc.h&gt;</span>
+<a name="l00052" id="l00052"></a>00052 <span class="preprocessor">#endif</span>
+<a name="l00053" id="l00053"></a>00053 
+<a name="l00054" id="l00054"></a>00054 <span class="preprocessor">#include &lt;net-snmp/types.h&gt;</span>
+<a name="l00055" id="l00055"></a>00055 <span class="preprocessor">#include &lt;net-snmp/output_api.h&gt;</span>
+<a name="l00056" id="l00056"></a>00056 <span class="preprocessor">#include &lt;net-snmp/utilities.h&gt;</span>
+<a name="l00057" id="l00057"></a>00057 <span class="preprocessor">#include &lt;<a class="code" href=
+"tools_8h.html">net-snmp/library/tools.h</a>&gt;</span>     <span class="comment">/* for "internal" definitions */</span>
+<a name="l00058" id="l00058"></a>00058 
+<a name="l00059" id="l00059"></a>00059 <span class="preprocessor">#include &lt;net-snmp/library/snmp_api.h&gt;</span>
+<a name="l00060" id="l00060"></a>00060 <span class="preprocessor">#include &lt;net-snmp/library/mib.h&gt;</span>
+<a name="l00061" id="l00061"></a>00061 <span class="preprocessor">#include &lt;net-snmp/library/scapi.h&gt;</span>
+<a name="l00062" id="l00062"></a>00062 
+<a name="l00063" id="l00063"></a>00063 <span class="preprocessor">#ifdef WIN32</span>
+<a name="l00064" id="l00064"></a>00064 
+<a name="l00067" id="l00067"></a>00067 <span class="keywordtype">char</span> * netsnmp_strdup( <span class=
+"keyword">const</span> <span class="keywordtype">char</span> * ptr)
+<a name="l00068" id="l00068"></a>00068 {
+<a name="l00069" id="l00069"></a>00069     <span class="keywordflow">return</span> strdup(ptr);
+<a name="l00070" id="l00070"></a>00070 }
+<a name="l00074" id="l00074"></a>00074 <span class="keywordtype">void</span> * netsnmp_calloc(<span class=
+"keywordtype">size_t</span> nmemb, <span class="keywordtype">size_t</span> size)
+<a name="l00075" id="l00075"></a>00075 {
+<a name="l00076" id="l00076"></a>00076     <span class="keywordflow">return</span> calloc(nmemb, size);
+<a name="l00077" id="l00077"></a>00077 }
+<a name="l00078" id="l00078"></a>00078 
+<a name="l00082" id="l00082"></a>00082 <span class="keywordtype">void</span> * netsnmp_malloc(<span class=
+"keywordtype">size_t</span> size)
+<a name="l00083" id="l00083"></a>00083 {
+<a name="l00084" id="l00084"></a>00084     <span class="keywordflow">return</span> malloc(size);
+<a name="l00085" id="l00085"></a>00085 }
+<a name="l00086" id="l00086"></a>00086 
+<a name="l00090" id="l00090"></a>00090 <span class="keywordtype">void</span> * netsnmp_realloc( <span class=
+"keywordtype">void</span> * ptr, <span class="keywordtype">size_t</span> size)
+<a name="l00091" id="l00091"></a>00091 {
+<a name="l00092" id="l00092"></a>00092     <span class="keywordflow">return</span> realloc(ptr, size);
+<a name="l00093" id="l00093"></a>00093 }
+<a name="l00094" id="l00094"></a>00094 
+<a name="l00099" id="l00099"></a>00099 <span class="keywordtype">void</span> netsnmp_free( <span class=
+"keywordtype">void</span> * ptr)
+<a name="l00100" id="l00100"></a>00100 {
+<a name="l00101" id="l00101"></a>00101     <span class="keywordflow">if</span> (ptr)
+<a name="l00102" id="l00102"></a>00102         free(ptr);
+<a name="l00103" id="l00103"></a>00103 }
+<a name="l00104" id="l00104"></a>00104 <span class="preprocessor">#endif </span><span class="comment">/* WIN32 */</span>
+<a name="l00105" id="l00105"></a>00105 
+<a name="l00120" id="l00120"></a>00120 <span class="keywordtype">int</span>
+<a name="l00121" id="l00121"></a><a class="code" href="group__util.html#ga7b42d706225a788adcfeaad9b24717de">00121</a> <a class=
+"code" href="group__util.html#ga7b42d706225a788adcfeaad9b24717de" title=
+"This function increase the size of the buffer pointed at by *buf, which is initially...">snmp_realloc</a>(u_char ** buf, <span class="keywordtype">size_t</span> * buf_len)
+<a name="l00122" id="l00122"></a>00122 {
+<a name="l00123" id="l00123"></a>00123     u_char         *new_buf = NULL;
+<a name="l00124" id="l00124"></a>00124     <span class="keywordtype">size_t</span>          new_buf_len = 0;
+<a name="l00125" id="l00125"></a>00125 
+<a name="l00126" id="l00126"></a>00126     <span class="keywordflow">if</span> (buf == NULL) {
+<a name="l00127" id="l00127"></a>00127         <span class="keywordflow">return</span> 0;
+<a name="l00128" id="l00128"></a>00128     }
+<a name="l00129" id="l00129"></a>00129 
+<a name="l00130" id="l00130"></a>00130     <span class="keywordflow">if</span> (*buf_len &lt;= 255) {
+<a name="l00131" id="l00131"></a>00131         new_buf_len = *buf_len + 256;
+<a name="l00132" id="l00132"></a>00132     } <span class="keywordflow">else</span> <span class=
+"keywordflow">if</span> (*buf_len &gt; 255 &amp;&amp; *buf_len &lt;= 8191) {
+<a name="l00133" id="l00133"></a>00133         new_buf_len = *buf_len * 2;
+<a name="l00134" id="l00134"></a>00134     } <span class="keywordflow">else</span> <span class=
+"keywordflow">if</span> (*buf_len &gt; 8191) {
+<a name="l00135" id="l00135"></a>00135         new_buf_len = *buf_len + 8192;
+<a name="l00136" id="l00136"></a>00136     }
+<a name="l00137" id="l00137"></a>00137 
+<a name="l00138" id="l00138"></a>00138     <span class="keywordflow">if</span> (*buf == NULL) {
+<a name="l00139" id="l00139"></a>00139         new_buf = (u_char *) malloc(new_buf_len);
+<a name="l00140" id="l00140"></a>00140     } <span class="keywordflow">else</span> {
+<a name="l00141" id="l00141"></a>00141         new_buf = (u_char *) realloc(*buf, new_buf_len);
+<a name="l00142" id="l00142"></a>00142     }
+<a name="l00143" id="l00143"></a>00143 
+<a name="l00144" id="l00144"></a>00144     <span class="keywordflow">if</span> (new_buf != NULL) {
+<a name="l00145" id="l00145"></a>00145         *buf = new_buf;
+<a name="l00146" id="l00146"></a>00146         *buf_len = new_buf_len;
+<a name="l00147" id="l00147"></a>00147         <span class="keywordflow">return</span> 1;
+<a name="l00148" id="l00148"></a>00148     } <span class="keywordflow">else</span> {
+<a name="l00149" id="l00149"></a>00149         <span class="keywordflow">return</span> 0;
+<a name="l00150" id="l00150"></a>00150     }
+<a name="l00151" id="l00151"></a>00151 }
+<a name="l00152" id="l00152"></a>00152 
+<a name="l00153" id="l00153"></a>00153 <span class="keywordtype">int</span>
+<a name="l00154" id="l00154"></a>00154 snmp_strcat(u_char ** buf, <span class="keywordtype">size_t</span> * buf_len, <span class=
+"keywordtype">size_t</span> * out_len,
+<a name="l00155" id="l00155"></a>00155             <span class="keywordtype">int</span> allow_realloc, <span class=
+"keyword">const</span> u_char * s)
+<a name="l00156" id="l00156"></a>00156 {
+<a name="l00157" id="l00157"></a>00157     <span class=
+"keywordflow">if</span> (buf == NULL || buf_len == NULL || out_len == NULL) {
+<a name="l00158" id="l00158"></a>00158         <span class="keywordflow">return</span> 0;
+<a name="l00159" id="l00159"></a>00159     }
+<a name="l00160" id="l00160"></a>00160 
+<a name="l00161" id="l00161"></a>00161     <span class="keywordflow">if</span> (s == NULL) {
+<a name="l00162" id="l00162"></a>00162         <span class="comment">/*</span>
+<a name="l00163" id="l00163"></a>00163 <span class=
+"comment">         * Appending a NULL string always succeeds since it is a NOP.  </span>
+<a name="l00164" id="l00164"></a>00164 <span class="comment">         */</span>
+<a name="l00165" id="l00165"></a>00165         <span class="keywordflow">return</span> 1;
+<a name="l00166" id="l00166"></a>00166     }
+<a name="l00167" id="l00167"></a>00167 
+<a name="l00168" id="l00168"></a>00168     <span class="keywordflow">while</span> ((*out_len + strlen((<span class=
+"keyword">const</span> <span class="keywordtype">char</span> *) s) + 1) &gt;= *buf_len) {
+<a name="l00169" id="l00169"></a>00169         <span class="keywordflow">if</span> (!(allow_realloc &amp;&amp; <a class="code"
+href="group__util.html#ga7b42d706225a788adcfeaad9b24717de" title=
+"This function increase the size of the buffer pointed at by *buf, which is initially...">snmp_realloc</a>(buf, buf_len))) {
+<a name="l00170" id="l00170"></a>00170             <span class="keywordflow">return</span> 0;
+<a name="l00171" id="l00171"></a>00171         }
+<a name="l00172" id="l00172"></a>00172     }
+<a name="l00173" id="l00173"></a>00173 
+<a name="l00174" id="l00174"></a>00174     strcpy((<span class="keywordtype">char</span> *) (*buf + *out_len), (<span class=
+"keyword">const</span> <span class="keywordtype">char</span> *) s);
+<a name="l00175" id="l00175"></a>00175     *out_len += strlen((<span class="keywordtype">char</span> *) (*buf + *out_len));
+<a name="l00176" id="l00176"></a>00176     <span class="keywordflow">return</span> 1;
+<a name="l00177" id="l00177"></a>00177 }
+<a name="l00178" id="l00178"></a>00178 
+<a name="l00184" id="l00184"></a>00184 <span class="keywordtype">void</span>
+<a name="l00185" id="l00185"></a><a class="code" href="group__util.html#ga26a103aafde4d6dcf72c8e30c7d05bd9">00185</a> <a class=
+"code" href="group__util.html#ga26a103aafde4d6dcf72c8e30c7d05bd9" title=
+"zeros memory before freeing it.">free_zero</a>(<span class="keywordtype">void</span> *buf, <span class=
+"keywordtype">size_t</span> size)
+<a name="l00186" id="l00186"></a>00186 {
+<a name="l00187" id="l00187"></a>00187     <span class="keywordflow">if</span> (buf) {
+<a name="l00188" id="l00188"></a>00188         memset(buf, 0, size);
+<a name="l00189" id="l00189"></a>00189         free(buf);
+<a name="l00190" id="l00190"></a>00190     }
+<a name="l00191" id="l00191"></a>00191 
+<a name="l00192" id="l00192"></a>00192 }                               <span class="comment">/* end free_zero() */</span>
+<a name="l00193" id="l00193"></a>00193 
+<a name="l00204" id="l00204"></a>00204 u_char         *
+<a name="l00205" id="l00205"></a><a class="code" href="group__util.html#ga76b7f8b21c44e2f8b274a0db8b57d5a1">00205</a> <a class=
+"code" href="group__util.html#ga76b7f8b21c44e2f8b274a0db8b57d5a1" title=
+"Returns pointer to allocaed &amp;amp; set buffer on success, size contains number of...">malloc_random</a>(<span class=
+"keywordtype">size_t</span> * size)
+<a name="l00206" id="l00206"></a>00206 {
+<a name="l00207" id="l00207"></a>00207     <span class="keywordtype">int</span>             rval = SNMPERR_SUCCESS;
+<a name="l00208" id="l00208"></a>00208     u_char         *buf = (u_char *) calloc(1, *size);
+<a name="l00209" id="l00209"></a>00209 
+<a name="l00210" id="l00210"></a>00210     <span class="keywordflow">if</span> (buf) {
+<a name="l00211" id="l00211"></a>00211         rval = sc_random(buf, size);
+<a name="l00212" id="l00212"></a>00212 
+<a name="l00213" id="l00213"></a>00213         <span class="keywordflow">if</span> (rval &lt; 0) {
+<a name="l00214" id="l00214"></a>00214             <a class="code" href="group__util.html#ga26a103aafde4d6dcf72c8e30c7d05bd9"
+title="zeros memory before freeing it.">free_zero</a>(buf, *size);
+<a name="l00215" id="l00215"></a>00215             buf = NULL;
+<a name="l00216" id="l00216"></a>00216         } <span class="keywordflow">else</span> {
+<a name="l00217" id="l00217"></a>00217             *size = rval;
+<a name="l00218" id="l00218"></a>00218         }
+<a name="l00219" id="l00219"></a>00219     }
+<a name="l00220" id="l00220"></a>00220 
+<a name="l00221" id="l00221"></a>00221     <span class="keywordflow">return</span> buf;
+<a name="l00222" id="l00222"></a>00222 
+<a name="l00223" id="l00223"></a>00223 }                               <span class="comment">/* end malloc_random() */</span>
+<a name="l00224" id="l00224"></a>00224 
+<a name="l00235" id="l00235"></a>00235 <span class="keywordtype">int</span>
+<a name="l00236" id="l00236"></a><a class="code" href="group__util.html#gae28321822c83004ae8eedcc3de2b2fde">00236</a> <a class=
+"code" href="group__util.html#gae28321822c83004ae8eedcc3de2b2fde" title=
+"Duplicates a memory block.">memdup</a>(u_char ** to, <span class="keyword">const</span> <span class=
+"keywordtype">void</span> * from, <span class="keywordtype">size_t</span> size)
+<a name="l00237" id="l00237"></a>00237 {
+<a name="l00238" id="l00238"></a>00238     <span class="keywordflow">if</span> (to == NULL)
+<a name="l00239" id="l00239"></a>00239         <span class="keywordflow">return</span> SNMPERR_GENERR;
+<a name="l00240" id="l00240"></a>00240     <span class="keywordflow">if</span> (from == NULL) {
+<a name="l00241" id="l00241"></a>00241         *to = NULL;
+<a name="l00242" id="l00242"></a>00242         <span class="keywordflow">return</span> SNMPERR_SUCCESS;
+<a name="l00243" id="l00243"></a>00243     }
+<a name="l00244" id="l00244"></a>00244     <span class="keywordflow">if</span> ((*to = (u_char *) malloc(size)) == NULL)
+<a name="l00245" id="l00245"></a>00245         <span class="keywordflow">return</span> SNMPERR_GENERR;
+<a name="l00246" id="l00246"></a>00246     memcpy(*to, from, size);
+<a name="l00247" id="l00247"></a>00247     <span class="keywordflow">return</span> SNMPERR_SUCCESS;
+<a name="l00248" id="l00248"></a>00248 
+<a name="l00249" id="l00249"></a>00249 }                               <span class="comment">/* end memdup() */</span>
+<a name="l00250" id="l00250"></a>00250 
+<a name="l00254" id="l00254"></a>00254 <span class="keywordtype">char</span>           *
+<a name="l00255" id="l00255"></a><a class="code" href="group__util.html#ga06867ff53bb86b745f23c52aa5e78829">00255</a> <a class=
+"code" href="group__util.html#ga06867ff53bb86b745f23c52aa5e78829" title=
+"copies a (possible) unterminated string of a given length into a new buffer and null...">netsnmp_strdup_and_null</a>(<span class="keyword">const</span> u_char * from, <span class="keywordtype">size_t</span> from_len)
+<a name="l00256" id="l00256"></a>00256 {
+<a name="l00257" id="l00257"></a>00257     <span class="keywordtype">char</span>         *ret;
+<a name="l00258" id="l00258"></a>00258 
+<a name="l00259" id="l00259"></a>00259     <span class=
+"keywordflow">if</span> (from_len == 0 || from[from_len - 1] != <span class="charliteral">'\0'</span>) {
+<a name="l00260" id="l00260"></a>00260         ret = (<span class="keywordtype">char</span> *)malloc(from_len + 1);
+<a name="l00261" id="l00261"></a>00261         <span class="keywordflow">if</span> (!ret)
+<a name="l00262" id="l00262"></a>00262             <span class="keywordflow">return</span> NULL;
+<a name="l00263" id="l00263"></a>00263         ret[from_len] = <span class="charliteral">'\0'</span>;
+<a name="l00264" id="l00264"></a>00264     } <span class="keywordflow">else</span> {
+<a name="l00265" id="l00265"></a>00265         ret = (<span class="keywordtype">char</span> *)malloc(from_len);
+<a name="l00266" id="l00266"></a>00266         <span class="keywordflow">if</span> (!ret)
+<a name="l00267" id="l00267"></a>00267             <span class="keywordflow">return</span> NULL;
+<a name="l00268" id="l00268"></a>00268         ret[from_len - 1] = <span class="charliteral">'\0'</span>;
+<a name="l00269" id="l00269"></a>00269     }
+<a name="l00270" id="l00270"></a>00270     memcpy(ret, from, from_len);
+<a name="l00271" id="l00271"></a>00271     <span class="keywordflow">return</span> ret;
+<a name="l00272" id="l00272"></a>00272 }
+<a name="l00273" id="l00273"></a>00273 
+<a name="l00286" id="l00286"></a>00286 u_int
+<a name="l00287" id="l00287"></a><a class="code" href="group__util.html#gafb1770dd180ccdd29dafc90cf50d3204">00287</a> <a class=
+"code" href="group__util.html#gafb1770dd180ccdd29dafc90cf50d3204" title=
+"converts binary to hexidecimal">binary_to_hex</a>(<span class="keyword">const</span> u_char * input, <span class=
+"keywordtype">size_t</span> len, <span class="keywordtype">char</span> **output)
+<a name="l00288" id="l00288"></a>00288 {
+<a name="l00289" id="l00289"></a>00289     u_int           olen = (len * 2) + 1;
+<a name="l00290" id="l00290"></a>00290     <span class="keywordtype">char</span>           *s = (<span class=
+"keywordtype">char</span> *) calloc(1, olen), *op = s;
+<a name="l00291" id="l00291"></a>00291     <span class="keyword">const</span> u_char   *ip = input;
+<a name="l00292" id="l00292"></a>00292 
+<a name="l00293" id="l00293"></a>00293 
+<a name="l00294" id="l00294"></a>00294     <span class="keywordflow">while</span> (ip - input &lt; (<span class=
+"keywordtype">int</span>) len) {
+<a name="l00295" id="l00295"></a>00295         *op++ = VAL2HEX((*ip &gt;&gt; 4) &amp; 0xf);
+<a name="l00296" id="l00296"></a>00296         *op++ = VAL2HEX(*ip &amp; 0xf);
+<a name="l00297" id="l00297"></a>00297         ip++;
+<a name="l00298" id="l00298"></a>00298     }
+<a name="l00299" id="l00299"></a>00299     *op = <span class="charliteral">'\0'</span>;
+<a name="l00300" id="l00300"></a>00300 
+<a name="l00301" id="l00301"></a>00301     *output = s;
+<a name="l00302" id="l00302"></a>00302     <span class="keywordflow">return</span> olen;
+<a name="l00303" id="l00303"></a>00303 
+<a name="l00304" id="l00304"></a>00304 }                               <span class="comment">/* end binary_to_hex() */</span>
+<a name="l00305" id="l00305"></a>00305 
+<a name="l00306" id="l00306"></a>00306 
+<a name="l00307" id="l00307"></a>00307 
+<a name="l00308" id="l00308"></a>00308 
+<a name="l00323" id="l00323"></a>00323 <span class="keywordtype">int</span>
+<a name="l00324" id="l00324"></a><a class="code" href="group__util.html#gafbe460eb2f249c0d347ab38d94a802ae">00324</a> <a class=
+"code" href="group__util.html#gafbe460eb2f249c0d347ab38d94a802ae" title="hex_to_binary2">hex_to_binary2</a>(<span class=
+"keyword">const</span> u_char * input, <span class="keywordtype">size_t</span> len, <span class=
+"keywordtype">char</span> **output)
+<a name="l00325" id="l00325"></a>00325 {
+<a name="l00326" id="l00326"></a>00326     u_int           olen = (len / 2) + (len % 2);
+<a name="l00327" id="l00327"></a>00327     <span class="keywordtype">char</span>           *s = (<span class=
+"keywordtype">char</span> *) calloc(1, (olen) ? olen : 1), *op = s;
+<a name="l00328" id="l00328"></a>00328     <span class="keyword">const</span> u_char   *ip = input;
+<a name="l00329" id="l00329"></a>00329 
+<a name="l00330" id="l00330"></a>00330 
+<a name="l00331" id="l00331"></a>00331     *output = NULL;
+<a name="l00332" id="l00332"></a>00332     *op = 0;
+<a name="l00333" id="l00333"></a>00333     <span class="keywordflow">if</span> (len % 2) {
+<a name="l00334" id="l00334"></a>00334         <span class="keywordflow">if</span> (!isxdigit(*ip))
+<a name="l00335" id="l00335"></a>00335             <span class="keywordflow">goto</span> hex_to_binary2_quit;
+<a name="l00336" id="l00336"></a>00336         *op++ = HEX2VAL(*ip);
+<a name="l00337" id="l00337"></a>00337         ip++;
+<a name="l00338" id="l00338"></a>00338     }
+<a name="l00339" id="l00339"></a>00339 
+<a name="l00340" id="l00340"></a>00340     <span class="keywordflow">while</span> (ip - input &lt; (<span class=
+"keywordtype">int</span>) len) {
+<a name="l00341" id="l00341"></a>00341         <span class="keywordflow">if</span> (!isxdigit(*ip))
+<a name="l00342" id="l00342"></a>00342             <span class="keywordflow">goto</span> hex_to_binary2_quit;
+<a name="l00343" id="l00343"></a>00343         *op = HEX2VAL(*ip) &lt;&lt; 4;
+<a name="l00344" id="l00344"></a>00344         ip++;
+<a name="l00345" id="l00345"></a>00345 
+<a name="l00346" id="l00346"></a>00346         <span class="keywordflow">if</span> (!isxdigit(*ip))
+<a name="l00347" id="l00347"></a>00347             <span class="keywordflow">goto</span> hex_to_binary2_quit;
+<a name="l00348" id="l00348"></a>00348         *op++ += HEX2VAL(*ip);
+<a name="l00349" id="l00349"></a>00349         ip++;
+<a name="l00350" id="l00350"></a>00350     }
+<a name="l00351" id="l00351"></a>00351 
+<a name="l00352" id="l00352"></a>00352     *output = s;
+<a name="l00353" id="l00353"></a>00353     <span class="keywordflow">return</span> olen;
+<a name="l00354" id="l00354"></a>00354 
+<a name="l00355" id="l00355"></a>00355   hex_to_binary2_quit:
+<a name="l00356" id="l00356"></a>00356     <a class="code" href="group__util.html#ga26a103aafde4d6dcf72c8e30c7d05bd9" title=
+"zeros memory before freeing it.">free_zero</a>(s, olen);
+<a name="l00357" id="l00357"></a>00357     <span class="keywordflow">return</span> -1;
+<a name="l00358" id="l00358"></a>00358 
+<a name="l00359" id="l00359"></a>00359 }                               <span class="comment">/* end hex_to_binary2() */</span>
+<a name="l00360" id="l00360"></a>00360 
+<a name="l00361" id="l00361"></a>00361 <span class="keywordtype">int</span>
+<a name="l00362" id="l00362"></a>00362 snmp_decimal_to_binary(u_char ** buf, <span class=
+"keywordtype">size_t</span> * buf_len, <span class="keywordtype">size_t</span> * out_len,
+<a name="l00363" id="l00363"></a>00363                        <span class="keywordtype">int</span> allow_realloc, <span class=
+"keyword">const</span> <span class="keywordtype">char</span> *decimal)
+<a name="l00364" id="l00364"></a>00364 {
+<a name="l00365" id="l00365"></a>00365     <span class="keywordtype">int</span>             subid = 0;
+<a name="l00366" id="l00366"></a>00366     <span class="keyword">const</span> <span class=
+"keywordtype">char</span>     *cp = decimal;
+<a name="l00367" id="l00367"></a>00367 
+<a name="l00368" id="l00368"></a>00368     <span class="keywordflow">if</span> (buf == NULL || buf_len == NULL || out_len == NULL
+<a name="l00369" id="l00369"></a>00369         || decimal == NULL) {
+<a name="l00370" id="l00370"></a>00370         <span class="keywordflow">return</span> 0;
+<a name="l00371" id="l00371"></a>00371     }
+<a name="l00372" id="l00372"></a>00372 
+<a name="l00373" id="l00373"></a>00373     <span class="keywordflow">while</span> (*cp != <span class=
+"charliteral">'\0'</span>) {
+<a name="l00374" id="l00374"></a>00374         <span class="keywordflow">if</span> (isspace((<span class=
+"keywordtype">int</span>) *cp) || *cp == <span class="charliteral">'.'</span>) {
+<a name="l00375" id="l00375"></a>00375             cp++;
+<a name="l00376" id="l00376"></a>00376             <span class="keywordflow">continue</span>;
+<a name="l00377" id="l00377"></a>00377         }
+<a name="l00378" id="l00378"></a>00378         <span class="keywordflow">if</span> (!isdigit((<span class=
+"keywordtype">int</span>) *cp)) {
+<a name="l00379" id="l00379"></a>00379             <span class="keywordflow">return</span> 0;
+<a name="l00380" id="l00380"></a>00380         }
+<a name="l00381" id="l00381"></a>00381         <span class="keywordflow">if</span> ((subid = atoi(cp)) &gt; 255) {
+<a name="l00382" id="l00382"></a>00382             <span class="keywordflow">return</span> 0;
+<a name="l00383" id="l00383"></a>00383         }
+<a name="l00384" id="l00384"></a>00384         <span class="keywordflow">if</span> ((*out_len &gt;= *buf_len) &amp;&amp;
+<a name="l00385" id="l00385"></a>00385             !(allow_realloc &amp;&amp; <a class="code" href=
+"group__util.html#ga7b42d706225a788adcfeaad9b24717de" title=
+"This function increase the size of the buffer pointed at by *buf, which is initially...">snmp_realloc</a>(buf, buf_len))) {
+<a name="l00386" id="l00386"></a>00386             <span class="keywordflow">return</span> 0;
+<a name="l00387" id="l00387"></a>00387         }
+<a name="l00388" id="l00388"></a>00388         *(*buf + *out_len) = (u_char) subid;
+<a name="l00389" id="l00389"></a>00389         (*out_len)++;
+<a name="l00390" id="l00390"></a>00390         <span class="keywordflow">while</span> (isdigit((<span class=
+"keywordtype">int</span>) *cp)) {
+<a name="l00391" id="l00391"></a>00391             cp++;
+<a name="l00392" id="l00392"></a>00392         }
+<a name="l00393" id="l00393"></a>00393     }
+<a name="l00394" id="l00394"></a>00394     <span class="keywordflow">return</span> 1;
+<a name="l00395" id="l00395"></a>00395 }
+<a name="l00396" id="l00396"></a>00396 
+<a name="l00424" id="l00424"></a>00424 <span class="keywordtype">int</span>
+<a name="l00425" id="l00425"></a><a class="code" href="group__util.html#ga8c1a230e987560600de9f81e55480c0a">00425</a> <a class=
+"code" href="group__util.html#ga8c1a230e987560600de9f81e55480c0a" title=
+"convert an ASCII hex string (with specified delimiters) to binary">netsnmp_hex_to_binary</a>(u_char ** buf, <span class=
+"keywordtype">size_t</span> * buf_len, <span class="keywordtype">size_t</span> * offset,
+<a name="l00426" id="l00426"></a>00426                       <span class="keywordtype">int</span> allow_realloc, <span class=
+"keyword">const</span> <span class="keywordtype">char</span> *hex, <span class="keyword">const</span> <span class=
+"keywordtype">char</span> *delim)
+<a name="l00427" id="l00427"></a>00427 {
+<a name="l00428" id="l00428"></a>00428     <span class="keywordtype">int</span>             subid = 0;
+<a name="l00429" id="l00429"></a>00429     <span class="keyword">const</span> <span class=
+"keywordtype">char</span>     *cp = hex;
+<a name="l00430" id="l00430"></a>00430 
+<a name="l00431" id="l00431"></a>00431     <span class=
+"keywordflow">if</span> (buf == NULL || buf_len == NULL || offset == NULL || hex == NULL) {
+<a name="l00432" id="l00432"></a>00432         <span class="keywordflow">return</span> 0;
+<a name="l00433" id="l00433"></a>00433     }
+<a name="l00434" id="l00434"></a>00434 
+<a name="l00435" id="l00435"></a>00435     <span class="keywordflow">if</span> ((*cp == <span class=
+"charliteral">'0'</span>) &amp;&amp; ((*(cp + 1) == <span class="charliteral">'x'</span>) || (*(cp + 1) == <span class=
+"charliteral">'X'</span>))) {
+<a name="l00436" id="l00436"></a>00436         cp += 2;
+<a name="l00437" id="l00437"></a>00437     }
+<a name="l00438" id="l00438"></a>00438 
+<a name="l00439" id="l00439"></a>00439     <span class="keywordflow">while</span> (*cp != <span class=
+"charliteral">'\0'</span>) {
+<a name="l00440" id="l00440"></a>00440         <span class="keywordflow">if</span> (!isxdigit((<span class=
+"keywordtype">int</span>) *cp) ||
+<a name="l00441" id="l00441"></a>00441             !isxdigit((<span class="keywordtype">int</span>) *(cp+1))) {
+<a name="l00442" id="l00442"></a>00442             <span class=
+"keywordflow">if</span> ((NULL != delim) &amp;&amp; (NULL != strchr(delim, *cp))) {
+<a name="l00443" id="l00443"></a>00443                 cp++;
+<a name="l00444" id="l00444"></a>00444                 <span class="keywordflow">continue</span>;
+<a name="l00445" id="l00445"></a>00445             }
+<a name="l00446" id="l00446"></a>00446             <span class="keywordflow">return</span> 0;
+<a name="l00447" id="l00447"></a>00447         }
+<a name="l00448" id="l00448"></a>00448         <span class="keywordflow">if</span> (sscanf(cp, <span class=
+"stringliteral">"%2x"</span>, &amp;subid) == 0) {
+<a name="l00449" id="l00449"></a>00449             <span class="keywordflow">return</span> 0;
+<a name="l00450" id="l00450"></a>00450         }
+<a name="l00451" id="l00451"></a>00451         <span class="comment">/*</span>
+<a name="l00452" id="l00452"></a>00452 <span class="comment">         * if we dont' have enough space, realloc.</span>
+<a name="l00453" id="l00453"></a>00453 <span class="comment">         * (snmp_realloc will adjust buf_len to new size)</span>
+<a name="l00454" id="l00454"></a>00454 <span class="comment">         */</span>
+<a name="l00455" id="l00455"></a>00455         <span class="keywordflow">if</span> ((*offset &gt;= *buf_len) &amp;&amp;
+<a name="l00456" id="l00456"></a>00456             !(allow_realloc &amp;&amp; <a class="code" href=
+"group__util.html#ga7b42d706225a788adcfeaad9b24717de" title=
+"This function increase the size of the buffer pointed at by *buf, which is initially...">snmp_realloc</a>(buf, buf_len))) {
+<a name="l00457" id="l00457"></a>00457             <span class="keywordflow">return</span> 0;
+<a name="l00458" id="l00458"></a>00458         }
+<a name="l00459" id="l00459"></a>00459         *(*buf + *offset) = (u_char) subid;
+<a name="l00460" id="l00460"></a>00460         (*offset)++;
+<a name="l00461" id="l00461"></a>00461         <span class="keywordflow">if</span> (*++cp == <span class=
+"charliteral">'\0'</span>) {
+<a name="l00462" id="l00462"></a>00462             <span class="comment">/*</span>
+<a name="l00463" id="l00463"></a>00463 <span class="comment">             * Odd number of hex digits is an error.  </span>
+<a name="l00464" id="l00464"></a>00464 <span class="comment">             */</span>
+<a name="l00465" id="l00465"></a>00465             <span class="keywordflow">return</span> 0;
+<a name="l00466" id="l00466"></a>00466         } <span class="keywordflow">else</span> {
+<a name="l00467" id="l00467"></a>00467             cp++;
+<a name="l00468" id="l00468"></a>00468         }
+<a name="l00469" id="l00469"></a>00469     }
+<a name="l00470" id="l00470"></a>00470     <span class="keywordflow">return</span> 1;
+<a name="l00471" id="l00471"></a>00471 }
+<a name="l00472" id="l00472"></a>00472 
+<a name="l00484" id="l00484"></a>00484 <span class="keywordtype">int</span>
+<a name="l00485" id="l00485"></a><a class="code" href="group__util.html#ga1a102bbccc7a51e7f98b0c1da33497db">00485</a> <a class=
+"code" href="group__util.html#ga1a102bbccc7a51e7f98b0c1da33497db" title=
+"convert an ASCII hex string to binary">snmp_hex_to_binary</a>(u_char ** buf, <span class=
+"keywordtype">size_t</span> * buf_len, <span class="keywordtype">size_t</span> * offset,
+<a name="l00486" id="l00486"></a>00486                    <span class="keywordtype">int</span> allow_realloc, <span class=
+"keyword">const</span> <span class="keywordtype">char</span> *hex)
+<a name="l00487" id="l00487"></a>00487 {
+<a name="l00488" id="l00488"></a>00488     <span class="keywordflow">return</span> <a class="code" href=
+"group__util.html#ga8c1a230e987560600de9f81e55480c0a" title=
+"convert an ASCII hex string (with specified delimiters) to binary">netsnmp_hex_to_binary</a>(buf, buf_len, offset, allow_realloc, hex, <span class="stringliteral">" "</span>);
+<a name="l00489" id="l00489"></a>00489 }
+<a name="l00490" id="l00490"></a>00490 
+<a name="l00491" id="l00491"></a>00491 <span class=
+"comment">/*******************************************************************-o-******</span>
+<a name="l00492" id="l00492"></a>00492 <span class="comment"> * dump_chunk</span>
+<a name="l00493" id="l00493"></a>00493 <span class="comment"> *</span>
+<a name="l00494" id="l00494"></a>00494 <span class="comment"> * Parameters:</span>
+<a name="l00495" id="l00495"></a>00495 <span class="comment"> *      *title  (May be NULL.)</span>
+<a name="l00496" id="l00496"></a>00496 <span class="comment"> *      *buf</span>
+<a name="l00497" id="l00497"></a>00497 <span class="comment"> *       size</span>
+<a name="l00498" id="l00498"></a>00498 <span class="comment"> */</span>
+<a name="l00499" id="l00499"></a>00499 <span class="keywordtype">void</span>
+<a name="l00500" id="l00500"></a>00500 dump_chunk(<span class="keyword">const</span> <span class=
+"keywordtype">char</span> *debugtoken, <span class="keyword">const</span> <span class=
+"keywordtype">char</span> *title, <span class="keyword">const</span> u_char * buf,
+<a name="l00501" id="l00501"></a>00501            <span class="keywordtype">int</span> size)
+<a name="l00502" id="l00502"></a>00502 {
+<a name="l00503" id="l00503"></a>00503     u_int           printunit = 64;     <span class=
+"comment">/* XXX  Make global. */</span>
+<a name="l00504" id="l00504"></a>00504     <span class="keywordtype">char</span>            chunk[SNMP_MAXBUF], *s, *sp;
+<a name="l00505" id="l00505"></a>00505 
+<a name="l00506" id="l00506"></a>00506     <span class="keywordflow">if</span> (title &amp;&amp; (*title != <span class=
+"charliteral">'\0'</span>)) {
+<a name="l00507" id="l00507"></a>00507         DEBUGMSGTL((debugtoken, <span class="stringliteral">"%s\n"</span>, title));
+<a name="l00508" id="l00508"></a>00508     }
+<a name="l00509" id="l00509"></a>00509 
+<a name="l00510" id="l00510"></a>00510 
+<a name="l00511" id="l00511"></a>00511     memset(chunk, 0, SNMP_MAXBUF);
+<a name="l00512" id="l00512"></a>00512     size = <a class="code" href="group__util.html#gafb1770dd180ccdd29dafc90cf50d3204"
+title="converts binary to hexidecimal">binary_to_hex</a>(buf, size, &amp;s);
+<a name="l00513" id="l00513"></a>00513     sp = s;
+<a name="l00514" id="l00514"></a>00514 
+<a name="l00515" id="l00515"></a>00515     <span class="keywordflow">while</span> (size &gt; 0) {
+<a name="l00516" id="l00516"></a>00516         <span class="keywordflow">if</span> (size &gt; (<span class=
+"keywordtype">int</span>) printunit) {
+<a name="l00517" id="l00517"></a>00517             strncpy(chunk, sp, printunit);
+<a name="l00518" id="l00518"></a>00518             chunk[printunit] = <span class="charliteral">'\0'</span>;
+<a name="l00519" id="l00519"></a>00519             DEBUGMSGTL((debugtoken, <span class="stringliteral">"\t%s\n"</span>, chunk));
+<a name="l00520" id="l00520"></a>00520         } <span class="keywordflow">else</span> {
+<a name="l00521" id="l00521"></a>00521             DEBUGMSGTL((debugtoken, <span class="stringliteral">"\t%s\n"</span>, sp));
+<a name="l00522" id="l00522"></a>00522         }
+<a name="l00523" id="l00523"></a>00523 
+<a name="l00524" id="l00524"></a>00524         sp += printunit;
+<a name="l00525" id="l00525"></a>00525         size -= printunit;
+<a name="l00526" id="l00526"></a>00526     }
+<a name="l00527" id="l00527"></a>00527 
+<a name="l00528" id="l00528"></a>00528 
+<a name="l00529" id="l00529"></a>00529     <a class="code" href="group__util.html#ga951e93edb6f0ea941e26155e3f8912a6" title=
+"Frees a pointer only if it is !NULL and sets its value to NULL.">SNMP_FREE</a>(s);
+<a name="l00530" id="l00530"></a>00530 
+<a name="l00531" id="l00531"></a>00531 }                               <span class="comment">/* end dump_chunk() */</span>
+<a name="l00532" id="l00532"></a>00532 
+<a name="l00533" id="l00533"></a>00533 
+<a name="l00534" id="l00534"></a>00534 
+<a name="l00535" id="l00535"></a>00535 
+<a name="l00536" id="l00536"></a>00536 <span class=
+"comment">/*******************************************************************-o-******</span>
+<a name="l00537" id="l00537"></a>00537 <span class="comment"> * dump_snmpEngineID</span>
+<a name="l00538" id="l00538"></a>00538 <span class="comment"> *</span>
+<a name="l00539" id="l00539"></a>00539 <span class="comment"> * Parameters:</span>
+<a name="l00540" id="l00540"></a>00540 <span class="comment"> *      *estring</span>
+<a name="l00541" id="l00541"></a>00541 <span class="comment"> *      *estring_len</span>
+<a name="l00542" id="l00542"></a>00542 <span class="comment"> *      </span>
+<a name="l00543" id="l00543"></a>00543 <span class="comment"> * Returns:</span>
+<a name="l00544" id="l00544"></a>00544 <span class=
+"comment"> *      Allocated memory pointing to a string of buflen char representing</span>
+<a name="l00545" id="l00545"></a>00545 <span class="comment"> *      a printf'able form of the snmpEngineID.</span>
+<a name="l00546" id="l00546"></a>00546 <span class="comment"> *</span>
+<a name="l00547" id="l00547"></a>00547 <span class="comment"> *      -OR- NULL on error.</span>
+<a name="l00548" id="l00548"></a>00548 <span class="comment"> *</span>
+<a name="l00549" id="l00549"></a>00549 <span class="comment"> *</span>
+<a name="l00550" id="l00550"></a>00550 <span class=
+"comment"> * Translates the snmpEngineID TC into a printable string.  From RFC 2271,</span>
+<a name="l00551" id="l00551"></a>00551 <span class="comment"> * Section 5 (pp. 36-37):</span>
+<a name="l00552" id="l00552"></a>00552 <span class="comment"> *</span>
+<a name="l00553" id="l00553"></a>00553 <span class=
+"comment"> * First bit:   0       Bit string structured by means non-SNMPv3.</span>
+<a name="l00554" id="l00554"></a>00554 <span class=
+"comment"> *              1       Structure described by SNMPv3 SnmpEngineID TC.</span>
+<a name="l00555" id="l00555"></a>00555 <span class="comment"> *  </span>
+<a name="l00556" id="l00556"></a>00556 <span class=
+"comment"> * Bytes 1-4:           Enterprise ID.  (High bit of first byte is ignored.)</span>
+<a name="l00557" id="l00557"></a>00557 <span class="comment"> *  </span>
+<a name="l00558" id="l00558"></a>00558 <span class="comment"> * Byte 5:      0       (RESERVED by IANA.)</span>
+<a name="l00559" id="l00559"></a>00559 <span class="comment"> *              1       IPv4 address.           (   4 octets)</span>
+<a name="l00560" id="l00560"></a>00560 <span class="comment"> *              2       IPv6 address.           (  16 octets)</span>
+<a name="l00561" id="l00561"></a>00561 <span class="comment"> *              3       MAC address.            (   6 octets)</span>
+<a name="l00562" id="l00562"></a>00562 <span class="comment"> *              4       Locally defined text.   (0-27 octets)</span>
+<a name="l00563" id="l00563"></a>00563 <span class="comment"> *              5       Locally defined octets. (0-27 octets)</span>
+<a name="l00564" id="l00564"></a>00564 <span class="comment"> *              6-127   (RESERVED for enterprise.)</span>
+<a name="l00565" id="l00565"></a>00565 <span class="comment"> *  </span>
+<a name="l00566" id="l00566"></a>00566 <span class="comment"> * Bytes 6-32:          (Determined by byte 5.)</span>
+<a name="l00567" id="l00567"></a>00567 <span class="comment"> *  </span>
+<a name="l00568" id="l00568"></a>00568 <span class="comment"> *</span>
+<a name="l00569" id="l00569"></a>00569 <span class=
+"comment"> * Non-printable characters are given in hex.  Text is given in quotes.</span>
+<a name="l00570" id="l00570"></a>00570 <span class=
+"comment"> * IP and MAC addresses are given in standard (UN*X) conventions.  Sections</span>
+<a name="l00571" id="l00571"></a>00571 <span class="comment"> * are comma separated.</span>
+<a name="l00572" id="l00572"></a>00572 <span class="comment"> *</span>
+<a name="l00573" id="l00573"></a>00573 <span class=
+"comment"> * esp, remaining_len and s trace the state of the constructed buffer.</span>
+<a name="l00574" id="l00574"></a>00574 <span class=
+"comment"> * s will be defined if there is something to return, and it will point</span>
+<a name="l00575" id="l00575"></a>00575 <span class="comment"> * to the end of the constructed buffer.</span>
+<a name="l00576" id="l00576"></a>00576 <span class="comment"> *</span>
+<a name="l00577" id="l00577"></a>00577 <span class="comment"> *</span>
+<a name="l00578" id="l00578"></a>00578 <span class="comment"> * ASSUME  "Text" means printable characters.</span>
+<a name="l00579" id="l00579"></a>00579 <span class="comment"> *</span>
+<a name="l00580" id="l00580"></a>00580 <span class=
+"comment"> * XXX  Must the snmpEngineID always have a minimum length of 12?</span>
+<a name="l00581" id="l00581"></a>00581 <span class="comment"> *      (Cf. part 2 of the TC definition.)</span>
+<a name="l00582" id="l00582"></a>00582 <span class="comment"> * XXX  Does not enforce upper-bound of 32 bytes.</span>
+<a name="l00583" id="l00583"></a>00583 <span class=
+"comment"> * XXX  Need a switch to decide whether to use DNS name instead of a simple</span>
+<a name="l00584" id="l00584"></a>00584 <span class="comment"> *      IP address.</span>
+<a name="l00585" id="l00585"></a>00585 <span class="comment"> *</span>
+<a name="l00586" id="l00586"></a>00586 <span class=
+"comment"> * FIX  Use something other than snprint_hexstring which doesn't add </span>
+<a name="l00587" id="l00587"></a>00587 <span class="comment"> *      trailing spaces and (sometimes embedded) newlines...</span>
+<a name="l00588" id="l00588"></a>00588 <span class="comment"> */</span>
+<a name="l00589" id="l00589"></a>00589 <span class="preprocessor">#ifdef NETSNMP_ENABLE_TESTING_CODE</span>
+<a name="l00590" id="l00590"></a>00590 <span class="keywordtype">char</span>           *
+<a name="l00591" id="l00591"></a>00591 dump_snmpEngineID(<span class="keyword">const</span> u_char * estring, <span class=
+"keywordtype">size_t</span> * estring_len)
+<a name="l00592" id="l00592"></a>00592 {
+<a name="l00593" id="l00593"></a>00593 <span class="preprocessor">#define eb(b)   ( *(esp+b) &amp; 0xff )</span>
+<a name="l00594" id="l00594"></a>00594 
+<a name="l00595" id="l00595"></a>00595     <span class=
+"keywordtype">int</span>             rval = SNMPERR_SUCCESS, gotviolation = 0, slen = 0;
+<a name="l00596" id="l00596"></a>00596     u_int           remaining_len;
+<a name="l00597" id="l00597"></a>00597 
+<a name="l00598" id="l00598"></a>00598     <span class="keywordtype">char</span>            buf[SNMP_MAXBUF], *s = NULL, *t;
+<a name="l00599" id="l00599"></a>00599     <span class="keyword">const</span> u_char   *esp = estring;
+<a name="l00600" id="l00600"></a>00600 
+<a name="l00601" id="l00601"></a>00601     <span class="keyword">struct </span>in_addr  iaddr;
+<a name="l00602" id="l00602"></a>00602 
+<a name="l00603" id="l00603"></a>00603 
+<a name="l00604" id="l00604"></a>00604 
+<a name="l00605" id="l00605"></a>00605     <span class="comment">/*</span>
+<a name="l00606" id="l00606"></a>00606 <span class="comment">     * Sanity check.</span>
+<a name="l00607" id="l00607"></a>00607 <span class="comment">     */</span>
+<a name="l00608" id="l00608"></a>00608     <span class="keywordflow">if</span> (!estring || (*estring_len &lt;= 0)) {
+<a name="l00609" id="l00609"></a>00609         QUITFUN(SNMPERR_GENERR, dump_snmpEngineID_quit);
+<a name="l00610" id="l00610"></a>00610     }
+<a name="l00611" id="l00611"></a>00611     remaining_len = *estring_len;
+<a name="l00612" id="l00612"></a>00612     memset(buf, 0, SNMP_MAXBUF);
+<a name="l00613" id="l00613"></a>00613 
+<a name="l00614" id="l00614"></a>00614 
+<a name="l00615" id="l00615"></a>00615 
+<a name="l00616" id="l00616"></a>00616     <span class="comment">/*</span>
+<a name="l00617" id="l00617"></a>00617 <span class=
+"comment">     * Test first bit.  Return immediately with a hex string, or</span>
+<a name="l00618" id="l00618"></a>00618 <span class="comment">     * begin by formatting the enterprise ID.</span>
+<a name="l00619" id="l00619"></a>00619 <span class="comment">     */</span>
+<a name="l00620" id="l00620"></a>00620     <span class="keywordflow">if</span> (!(*esp &amp; 0x80)) {
+<a name="l00621" id="l00621"></a>00621         snprint_hexstring(buf, SNMP_MAXBUF, esp, remaining_len);
+<a name="l00622" id="l00622"></a>00622         s = strchr(buf, <span class="charliteral">'\0'</span>);
+<a name="l00623" id="l00623"></a>00623         s -= 1;
+<a name="l00624" id="l00624"></a>00624         <span class="keywordflow">goto</span> dump_snmpEngineID_quit;
+<a name="l00625" id="l00625"></a>00625     }
+<a name="l00626" id="l00626"></a>00626 
+<a name="l00627" id="l00627"></a>00627     s = buf;
+<a name="l00628" id="l00628"></a>00628     s += sprintf(s, <span class=
+"stringliteral">"enterprise %d, "</span>, ((*(esp + 0) &amp; 0x7f) &lt;&lt; 24) |
+<a name="l00629" id="l00629"></a>00629                  ((*(esp + 1) &amp; 0xff) &lt;&lt; 16) |
+<a name="l00630" id="l00630"></a>00630                  ((*(esp + 2) &amp; 0xff) &lt;&lt; 8) | ((*(esp + 3) &amp; 0xff)));
+<a name="l00631" id="l00631"></a>00631     <span class="comment">/*</span>
+<a name="l00632" id="l00632"></a>00632 <span class="comment">     * XXX  Ick. </span>
+<a name="l00633" id="l00633"></a>00633 <span class="comment">     */</span>
+<a name="l00634" id="l00634"></a>00634 
+<a name="l00635" id="l00635"></a>00635     <span class="keywordflow">if</span> (remaining_len &lt; 5) {    <span class=
+"comment">/* XXX  Violating string. */</span>
+<a name="l00636" id="l00636"></a>00636         <span class="keywordflow">goto</span> dump_snmpEngineID_quit;
+<a name="l00637" id="l00637"></a>00637     }
+<a name="l00638" id="l00638"></a>00638 
+<a name="l00639" id="l00639"></a>00639     esp += 4;                   <span class=
+"comment">/* Incremented one more in the switch below. */</span>
+<a name="l00640" id="l00640"></a>00640     remaining_len -= 5;
+<a name="l00641" id="l00641"></a>00641 
+<a name="l00642" id="l00642"></a>00642 
+<a name="l00643" id="l00643"></a>00643 
+<a name="l00644" id="l00644"></a>00644     <span class="comment">/*</span>
+<a name="l00645" id="l00645"></a>00645 <span class="comment">     * Act on the fifth byte.</span>
+<a name="l00646" id="l00646"></a>00646 <span class="comment">     */</span>
+<a name="l00647" id="l00647"></a>00647     <span class="keywordflow">switch</span> ((<span class=
+"keywordtype">int</span>) *esp++) {
+<a name="l00648" id="l00648"></a>00648     <span class="keywordflow">case</span> 1:                    <span class=
+"comment">/* IPv4 address. */</span>
+<a name="l00649" id="l00649"></a>00649 
+<a name="l00650" id="l00650"></a>00650         <span class="keywordflow">if</span> (remaining_len &lt; 4)
+<a name="l00651" id="l00651"></a>00651             <span class="keywordflow">goto</span> dump_snmpEngineID_violation;
+<a name="l00652" id="l00652"></a>00652         memcpy(&amp;iaddr.s_addr, esp, 4);
+<a name="l00653" id="l00653"></a>00653 
+<a name="l00654" id="l00654"></a>00654         <span class="keywordflow">if</span> (!(t = inet_ntoa(iaddr)))
+<a name="l00655" id="l00655"></a>00655             <span class="keywordflow">goto</span> dump_snmpEngineID_violation;
+<a name="l00656" id="l00656"></a>00656         s += sprintf(s, <span class="stringliteral">"%s"</span>, t);
+<a name="l00657" id="l00657"></a>00657 
+<a name="l00658" id="l00658"></a>00658         esp += 4;
+<a name="l00659" id="l00659"></a>00659         remaining_len -= 4;
+<a name="l00660" id="l00660"></a>00660         <span class="keywordflow">break</span>;
+<a name="l00661" id="l00661"></a>00661 
+<a name="l00662" id="l00662"></a>00662     <span class="keywordflow">case</span> 2:                    <span class=
+"comment">/* IPv6 address. */</span>
+<a name="l00663" id="l00663"></a>00663 
+<a name="l00664" id="l00664"></a>00664         <span class="keywordflow">if</span> (remaining_len &lt; 16)
+<a name="l00665" id="l00665"></a>00665             <span class="keywordflow">goto</span> dump_snmpEngineID_violation;
+<a name="l00666" id="l00666"></a>00666 
+<a name="l00667" id="l00667"></a>00667         s += sprintf(s,
+<a name="l00668" id="l00668"></a>00668                      <span class=
+"stringliteral">"%02X%02X %02X%02X %02X%02X %02X%02X::"</span>
+<a name="l00669" id="l00669"></a>00669                      <span class=
+"stringliteral">"%02X%02X %02X%02X %02X%02X %02X%02X"</span>,
+<a name="l00670" id="l00670"></a>00670                      eb(0), eb(1), eb(2), eb(3),
+<a name="l00671" id="l00671"></a>00671                      eb(4), eb(5), eb(6), eb(7),
+<a name="l00672" id="l00672"></a>00672                      eb(8), eb(9), eb(10), eb(11),
+<a name="l00673" id="l00673"></a>00673                      eb(12), eb(13), eb(14), eb(15));
+<a name="l00674" id="l00674"></a>00674 
+<a name="l00675" id="l00675"></a>00675         esp += 16;
+<a name="l00676" id="l00676"></a>00676         remaining_len -= 16;
+<a name="l00677" id="l00677"></a>00677         <span class="keywordflow">break</span>;
+<a name="l00678" id="l00678"></a>00678 
+<a name="l00679" id="l00679"></a>00679     <span class="keywordflow">case</span> 3:                    <span class=
+"comment">/* MAC address. */</span>
+<a name="l00680" id="l00680"></a>00680 
+<a name="l00681" id="l00681"></a>00681         <span class="keywordflow">if</span> (remaining_len &lt; 6)
+<a name="l00682" id="l00682"></a>00682             <span class="keywordflow">goto</span> dump_snmpEngineID_violation;
+<a name="l00683" id="l00683"></a>00683 
+<a name="l00684" id="l00684"></a>00684         s += sprintf(s, <span class=
+"stringliteral">"%02X:%02X:%02X:%02X:%02X:%02X"</span>,
+<a name="l00685" id="l00685"></a>00685                      eb(0), eb(1), eb(2), eb(3), eb(4), eb(5));
+<a name="l00686" id="l00686"></a>00686 
+<a name="l00687" id="l00687"></a>00687         esp += 6;
+<a name="l00688" id="l00688"></a>00688         remaining_len -= 6;
+<a name="l00689" id="l00689"></a>00689         <span class="keywordflow">break</span>;
+<a name="l00690" id="l00690"></a>00690 
+<a name="l00691" id="l00691"></a>00691     <span class="keywordflow">case</span> 4:                    <span class=
+"comment">/* Text. */</span>
+<a name="l00692" id="l00692"></a>00692 
+<a name="l00693" id="l00693"></a>00693         <span class="comment">/*</span>
+<a name="l00694" id="l00694"></a>00694 <span class="comment">         * Doesn't exist on all (many) architectures </span>
+<a name="l00695" id="l00695"></a>00695 <span class="comment">         */</span>
+<a name="l00696" id="l00696"></a>00696         <span class="comment">/*</span>
+<a name="l00697" id="l00697"></a>00697 <span class="comment">         * s += snprintf(s, remaining_len+3, "\"%s\"", esp); </span>
+<a name="l00698" id="l00698"></a>00698 <span class="comment">         */</span>
+<a name="l00699" id="l00699"></a>00699         s += sprintf(s, <span class="stringliteral">"\"%s\""</span>, esp);
+<a name="l00700" id="l00700"></a>00700         <span class="keywordflow">goto</span> dump_snmpEngineID_quit;
+<a name="l00701" id="l00701"></a>00701         <span class="keywordflow">break</span>;
+<a name="l00702" id="l00702"></a>00702      <span class="comment">/*NOTREACHED*/</span> <span class=
+"keywordflow">case</span> 5:    <span class="comment">/* Octets. */</span>
+<a name="l00703" id="l00703"></a>00703 
+<a name="l00704" id="l00704"></a>00704         snprint_hexstring(s, (SNMP_MAXBUF - (s-buf)),
+<a name="l00705" id="l00705"></a>00705                           esp, remaining_len);
+<a name="l00706" id="l00706"></a>00706         s = strchr(buf, <span class="charliteral">'\0'</span>);
+<a name="l00707" id="l00707"></a>00707         s -= 1;
+<a name="l00708" id="l00708"></a>00708         <span class="keywordflow">goto</span> dump_snmpEngineID_quit;
+<a name="l00709" id="l00709"></a>00709         <span class="keywordflow">break</span>;
+<a name="l00710" id="l00710"></a>00710        <span class="comment">/*NOTREACHED*/</span> dump_snmpEngineID_violation:
+<a name="l00711" id="l00711"></a>00711     <span class="keywordflow">case</span> 0:                    <span class=
+"comment">/* Violation of RESERVED, </span>
+<a name="l00712" id="l00712"></a>00712 <span class=
+"comment">                                 * *   -OR- of expected length.</span>
+<a name="l00713" id="l00713"></a>00713 <span class="comment">                                 */</span>
+<a name="l00714" id="l00714"></a>00714         gotviolation = 1;
+<a name="l00715" id="l00715"></a>00715         s += sprintf(s, <span class="stringliteral">"!!! "</span>);
+<a name="l00716" id="l00716"></a>00716 
+<a name="l00717" id="l00717"></a>00717     <span class="keywordflow">default</span>:                   <span class=
+"comment">/* Unknown encoding. */</span>
+<a name="l00718" id="l00718"></a>00718 
+<a name="l00719" id="l00719"></a>00719         <span class="keywordflow">if</span> (!gotviolation) {
+<a name="l00720" id="l00720"></a>00720             s += sprintf(s, <span class="stringliteral">"??? "</span>);
+<a name="l00721" id="l00721"></a>00721         }
+<a name="l00722" id="l00722"></a>00722         snprint_hexstring(s, (SNMP_MAXBUF - (s-buf)),
+<a name="l00723" id="l00723"></a>00723                           esp, remaining_len);
+<a name="l00724" id="l00724"></a>00724         s = strchr(buf, <span class="charliteral">'\0'</span>);
+<a name="l00725" id="l00725"></a>00725         s -= 1;
+<a name="l00726" id="l00726"></a>00726 
+<a name="l00727" id="l00727"></a>00727         <span class="keywordflow">goto</span> dump_snmpEngineID_quit;
+<a name="l00728" id="l00728"></a>00728 
+<a name="l00729" id="l00729"></a>00729     }                           <span class="comment">/* endswitch */</span>
+<a name="l00730" id="l00730"></a>00730 
+<a name="l00731" id="l00731"></a>00731 
+<a name="l00732" id="l00732"></a>00732 
+<a name="l00733" id="l00733"></a>00733     <span class="comment">/*</span>
+<a name="l00734" id="l00734"></a>00734 <span class=
+"comment">     * Cases 1-3 (IP and MAC addresses) should not have trailing</span>
+<a name="l00735" id="l00735"></a>00735 <span class="comment">     * octets, but perhaps they do.  Throw them in too.  XXX</span>
+<a name="l00736" id="l00736"></a>00736 <span class="comment">     */</span>
+<a name="l00737" id="l00737"></a>00737     <span class="keywordflow">if</span> (remaining_len &gt; 0) {
+<a name="l00738" id="l00738"></a>00738         s += sprintf(s, <span class="stringliteral">" (??? "</span>);
+<a name="l00739" id="l00739"></a>00739 
+<a name="l00740" id="l00740"></a>00740         snprint_hexstring(s, (SNMP_MAXBUF - (s-buf)),
+<a name="l00741" id="l00741"></a>00741                           esp, remaining_len);
+<a name="l00742" id="l00742"></a>00742         s = strchr(buf, <span class="charliteral">'\0'</span>);
+<a name="l00743" id="l00743"></a>00743         s -= 1;
+<a name="l00744" id="l00744"></a>00744 
+<a name="l00745" id="l00745"></a>00745         s += sprintf(s, <span class="stringliteral">")"</span>);
+<a name="l00746" id="l00746"></a>00746     }
+<a name="l00747" id="l00747"></a>00747 
+<a name="l00748" id="l00748"></a>00748 
+<a name="l00749" id="l00749"></a>00749 
+<a name="l00750" id="l00750"></a>00750   dump_snmpEngineID_quit:
+<a name="l00751" id="l00751"></a>00751     <span class="keywordflow">if</span> (s) {
+<a name="l00752" id="l00752"></a>00752         slen = s - buf + 1;
+<a name="l00753" id="l00753"></a>00753         s = calloc(1, slen);
+<a name="l00754" id="l00754"></a>00754         memcpy(s, buf, (slen) - 1);
+<a name="l00755" id="l00755"></a>00755     }
+<a name="l00756" id="l00756"></a>00756 
+<a name="l00757" id="l00757"></a>00757     memset(buf, 0, SNMP_MAXBUF);        <span class=
+"comment">/* XXX -- Overkill? XXX: Yes! */</span>
+<a name="l00758" id="l00758"></a>00758 
+<a name="l00759" id="l00759"></a>00759     <span class="keywordflow">return</span> s;
+<a name="l00760" id="l00760"></a>00760 
+<a name="l00761" id="l00761"></a>00761 <span class="preprocessor">#undef eb</span>
+<a name="l00762" id="l00762"></a>00762 }                               <span class="comment">/* end dump_snmpEngineID() */</span>
+<a name="l00763" id="l00763"></a>00763 <span class="preprocessor">#endif                          </span><span class=
+"comment">/* NETSNMP_ENABLE_TESTING_CODE */</span>
+<a name="l00764" id="l00764"></a>00764 
+<a name="l00765" id="l00765"></a>00765 
+<a name="l00770" id="l00770"></a>00770 marker_t
+<a name="l00771" id="l00771"></a><a class="code" href="group__util.html#gadd8427286d982acba71489f0a3012dfb">00771</a> <a class=
+"code" href="group__util.html#gadd8427286d982acba71489f0a3012dfb" title=
+"create a new time marker.">atime_newMarker</a>(<span class="keywordtype">void</span>)
+<a name="l00772" id="l00772"></a>00772 {
+<a name="l00773" id="l00773"></a>00773     marker_t        pm = (marker_t) calloc(1, <span class=
+"keyword">sizeof</span>(<span class="keyword">struct</span> timeval));
+<a name="l00774" id="l00774"></a>00774     gettimeofday((<span class="keyword">struct</span> timeval *) pm, NULL);
+<a name="l00775" id="l00775"></a>00775     <span class="keywordflow">return</span> pm;
+<a name="l00776" id="l00776"></a>00776 }
+<a name="l00777" id="l00777"></a>00777 
+<a name="l00781" id="l00781"></a>00781 <span class="keywordtype">void</span>
+<a name="l00782" id="l00782"></a><a class="code" href="group__util.html#gaac74a9b90a9483019e8872d0c923567c">00782</a> <a class=
+"code" href="group__util.html#gaac74a9b90a9483019e8872d0c923567c" title="set a time marker.">atime_setMarker</a>(marker_t pm)
+<a name="l00783" id="l00783"></a>00783 {
+<a name="l00784" id="l00784"></a>00784     <span class="keywordflow">if</span> (!pm)
+<a name="l00785" id="l00785"></a>00785         <span class="keywordflow">return</span>;
+<a name="l00786" id="l00786"></a>00786 
+<a name="l00787" id="l00787"></a>00787     gettimeofday((<span class="keyword">struct</span> timeval *) pm, NULL);
+<a name="l00788" id="l00788"></a>00788 }
+<a name="l00789" id="l00789"></a>00789 
+<a name="l00790" id="l00790"></a>00790 
+<a name="l00794" id="l00794"></a>00794 <span class="keywordtype">long</span>
+<a name="l00795" id="l00795"></a><a class="code" href="group__util.html#gaee67c956c1fcd842e739e2a8e9f57365">00795</a> <a class=
+"code" href="group__util.html#gaee67c956c1fcd842e739e2a8e9f57365" title=
+"Returns the difference (in msec) between the two markers.">atime_diff</a>(marker_t first, marker_t second)
+<a name="l00796" id="l00796"></a>00796 {
+<a name="l00797" id="l00797"></a>00797     <span class="keyword">struct </span>timeval *tv1, *tv2, diff;
+<a name="l00798" id="l00798"></a>00798 
+<a name="l00799" id="l00799"></a>00799     tv1 = (<span class="keyword">struct </span>timeval *) first;
+<a name="l00800" id="l00800"></a>00800     tv2 = (<span class="keyword">struct </span>timeval *) second;
+<a name="l00801" id="l00801"></a>00801 
+<a name="l00802" id="l00802"></a>00802     diff.tv_sec = tv2-&gt;tv_sec - tv1-&gt;tv_sec - 1;
+<a name="l00803" id="l00803"></a>00803     diff.tv_usec = tv2-&gt;tv_usec - tv1-&gt;tv_usec + 1000000;
+<a name="l00804" id="l00804"></a>00804 
+<a name="l00805" id="l00805"></a>00805     <span class="keywordflow">return</span> (diff.tv_sec * 1000 + diff.tv_usec / 1000);
+<a name="l00806" id="l00806"></a>00806 }
+<a name="l00807" id="l00807"></a>00807 
+<a name="l00811" id="l00811"></a>00811 u_long
+<a name="l00812" id="l00812"></a><a class="code" href="group__util.html#ga1d44372c028e3c38de4161c52c226948">00812</a> <a class=
+"code" href="group__util.html#ga1d44372c028e3c38de4161c52c226948" title=
+"Returns the difference (in u_long msec) between the two markers.">uatime_diff</a>(marker_t first, marker_t second)
+<a name="l00813" id="l00813"></a>00813 {
+<a name="l00814" id="l00814"></a>00814     <span class="keyword">struct </span>timeval *tv1, *tv2, diff;
+<a name="l00815" id="l00815"></a>00815 
+<a name="l00816" id="l00816"></a>00816     tv1 = (<span class="keyword">struct </span>timeval *) first;
+<a name="l00817" id="l00817"></a>00817     tv2 = (<span class="keyword">struct </span>timeval *) second;
+<a name="l00818" id="l00818"></a>00818 
+<a name="l00819" id="l00819"></a>00819     diff.tv_sec = tv2-&gt;tv_sec - tv1-&gt;tv_sec - 1;
+<a name="l00820" id="l00820"></a>00820     diff.tv_usec = tv2-&gt;tv_usec - tv1-&gt;tv_usec + 1000000;
+<a name="l00821" id="l00821"></a>00821 
+<a name="l00822" id="l00822"></a>00822     <span class=
+"keywordflow">return</span> (((u_long) diff.tv_sec) * 1000 + diff.tv_usec / 1000);
+<a name="l00823" id="l00823"></a>00823 }
+<a name="l00824" id="l00824"></a>00824 
+<a name="l00829" id="l00829"></a>00829 u_long
+<a name="l00830" id="l00830"></a><a class="code" href="group__util.html#ga96b8aa8b0c5556f923dcfe9b56443606">00830</a> <a class=
+"code" href="group__util.html#ga96b8aa8b0c5556f923dcfe9b56443606" title=
+"Returns the difference (in u_long 1/100th secs) between the two markers (functionally...">uatime_hdiff</a>(marker_t first, marker_t second)
+<a name="l00831" id="l00831"></a>00831 {
+<a name="l00832" id="l00832"></a>00832     <span class="keyword">struct </span>timeval *tv1, *tv2, diff;
+<a name="l00833" id="l00833"></a>00833     u_long          res;
+<a name="l00834" id="l00834"></a>00834 
+<a name="l00835" id="l00835"></a>00835     tv1 = (<span class="keyword">struct </span>timeval *) first;
+<a name="l00836" id="l00836"></a>00836     tv2 = (<span class="keyword">struct </span>timeval *) second;
+<a name="l00837" id="l00837"></a>00837 
+<a name="l00838" id="l00838"></a>00838     diff.tv_sec = tv2-&gt;tv_sec - tv1-&gt;tv_sec - 1;
+<a name="l00839" id="l00839"></a>00839     diff.tv_usec = tv2-&gt;tv_usec - tv1-&gt;tv_usec + 1000000;
+<a name="l00840" id="l00840"></a>00840 
+<a name="l00841" id="l00841"></a>00841     res = ((u_long) diff.tv_sec) * 100 + diff.tv_usec / 10000;
+<a name="l00842" id="l00842"></a>00842     <span class="keywordflow">return</span> res;
+<a name="l00843" id="l00843"></a>00843 }
+<a name="l00844" id="l00844"></a>00844 
+<a name="l00849" id="l00849"></a>00849 <span class="keywordtype">int</span>
+<a name="l00850" id="l00850"></a><a class="code" href="group__util.html#ga43a00cd4f3496eb42fb99285a2da8481">00850</a> <a class=
+"code" href="group__util.html#ga43a00cd4f3496eb42fb99285a2da8481" title=
+"Test: Has (marked time plus delta) exceeded current time (in msec) ? Returns 0 if...">atime_ready</a>(marker_t pm, <span class=
+"keywordtype">int</span> deltaT)
+<a name="l00851" id="l00851"></a>00851 {
+<a name="l00852" id="l00852"></a>00852     marker_t        now;
+<a name="l00853" id="l00853"></a>00853     <span class="keywordtype">long</span>            diff;
+<a name="l00854" id="l00854"></a>00854     <span class="keywordflow">if</span> (!pm)
+<a name="l00855" id="l00855"></a>00855         <span class="keywordflow">return</span> 0;
+<a name="l00856" id="l00856"></a>00856 
+<a name="l00857" id="l00857"></a>00857     now = <a class="code" href="group__util.html#gadd8427286d982acba71489f0a3012dfb"
+title="create a new time marker.">atime_newMarker</a>();
+<a name="l00858" id="l00858"></a>00858 
+<a name="l00859" id="l00859"></a>00859     diff = <a class="code" href="group__util.html#gaee67c956c1fcd842e739e2a8e9f57365"
+title="Returns the difference (in msec) between the two markers.">atime_diff</a>(pm, now);
+<a name="l00860" id="l00860"></a>00860     free(now);
+<a name="l00861" id="l00861"></a>00861     <span class="keywordflow">if</span> (diff &lt; deltaT)
+<a name="l00862" id="l00862"></a>00862         <span class="keywordflow">return</span> 0;
+<a name="l00863" id="l00863"></a>00863 
+<a name="l00864" id="l00864"></a>00864     <span class="keywordflow">return</span> 1;
+<a name="l00865" id="l00865"></a>00865 }
+<a name="l00866" id="l00866"></a>00866 
+<a name="l00871" id="l00871"></a>00871 <span class="keywordtype">int</span>
+<a name="l00872" id="l00872"></a><a class="code" href="group__util.html#ga15b21d7af289044a10e22b6111f43523">00872</a> <a class=
+"code" href="group__util.html#ga15b21d7af289044a10e22b6111f43523" title=
+"Test: Has (marked time plus delta) exceeded current time (in msec) ? Returns 0 if...">uatime_ready</a>(marker_t pm, <span class=
+"keywordtype">unsigned</span> <span class="keywordtype">int</span> deltaT)
+<a name="l00873" id="l00873"></a>00873 {
+<a name="l00874" id="l00874"></a>00874     marker_t        now;
+<a name="l00875" id="l00875"></a>00875     u_long          diff;
+<a name="l00876" id="l00876"></a>00876     <span class="keywordflow">if</span> (!pm)
+<a name="l00877" id="l00877"></a>00877         <span class="keywordflow">return</span> 0;
+<a name="l00878" id="l00878"></a>00878 
+<a name="l00879" id="l00879"></a>00879     now = <a class="code" href="group__util.html#gadd8427286d982acba71489f0a3012dfb"
+title="create a new time marker.">atime_newMarker</a>();
+<a name="l00880" id="l00880"></a>00880 
+<a name="l00881" id="l00881"></a>00881     diff = <a class="code" href="group__util.html#ga1d44372c028e3c38de4161c52c226948"
+title="Returns the difference (in u_long msec) between the two markers.">uatime_diff</a>(pm, now);
+<a name="l00882" id="l00882"></a>00882     free(now);
+<a name="l00883" id="l00883"></a>00883     <span class="keywordflow">if</span> (diff &lt; deltaT)
+<a name="l00884" id="l00884"></a>00884         <span class="keywordflow">return</span> 0;
+<a name="l00885" id="l00885"></a>00885 
+<a name="l00886" id="l00886"></a>00886     <span class="keywordflow">return</span> 1;
+<a name="l00887" id="l00887"></a>00887 }
+<a name="l00888" id="l00888"></a>00888 
+<a name="l00889" id="l00889"></a>00889 
+<a name="l00890" id="l00890"></a>00890         <span class="comment">/*</span>
+<a name="l00891" id="l00891"></a>00891 <span class="comment">         * Time-related utility functions</span>
+<a name="l00892" id="l00892"></a>00892 <span class="comment">         */</span>
+<a name="l00893" id="l00893"></a>00893 
+<a name="l00897" id="l00897"></a>00897 <span class="keywordtype">int</span>
+<a name="l00898" id="l00898"></a><a class="code" href="group__util.html#gad8f70e6754e69772a113c07f8607d5eb">00898</a> <a class=
+"code" href="group__util.html#gad8f70e6754e69772a113c07f8607d5eb" title=
+"Return the number of timeTicks since the given marker.">marker_tticks</a>(marker_t pm)
+<a name="l00899" id="l00899"></a>00899 {
+<a name="l00900" id="l00900"></a>00900     <span class="keywordtype">int</span>             res;
+<a name="l00901" id="l00901"></a>00901     marker_t        now = <a class="code" href=
+"group__util.html#gadd8427286d982acba71489f0a3012dfb" title="create a new time marker.">atime_newMarker</a>();
+<a name="l00902" id="l00902"></a>00902 
+<a name="l00903" id="l00903"></a>00903     res = <a class="code" href="group__util.html#gaee67c956c1fcd842e739e2a8e9f57365"
+title="Returns the difference (in msec) between the two markers.">atime_diff</a>(pm, now);
+<a name="l00904" id="l00904"></a>00904     free(now);
+<a name="l00905" id="l00905"></a>00905     <span class="keywordflow">return</span> res / 10;            <span class=
+"comment">/* atime_diff works in msec, not csec */</span>
+<a name="l00906" id="l00906"></a>00906 }
+<a name="l00907" id="l00907"></a>00907 
+<a name="l00908" id="l00908"></a>00908 <span class="keywordtype">int</span>
+<a name="l00909" id="l00909"></a>00909 timeval_tticks(<span class="keyword">struct</span> timeval *tv)
+<a name="l00910" id="l00910"></a>00910 {
+<a name="l00911" id="l00911"></a>00911     <span class="keywordflow">return</span> <a class="code" href=
+"group__util.html#gad8f70e6754e69772a113c07f8607d5eb" title=
+"Return the number of timeTicks since the given marker.">marker_tticks</a>((marker_t) tv);
+<a name="l00912" id="l00912"></a>00912 }
+<a name="l00913" id="l00913"></a>00913 
+<a name="l00926" id="l00926"></a><a class="code" href=
+"group__util.html#ga1816d1ce1e701fcbce27b20159433313">00926</a> <span class="keywordtype">char</span> *<a class="code" href=
+"group__util.html#ga1816d1ce1e701fcbce27b20159433313" title=
+"Non Windows: Returns a pointer to the desired environment variable or NULL if the...">netsnmp_getenv</a>(<span class=
+"keyword">const</span> <span class="keywordtype">char</span> *name)
+<a name="l00927" id="l00927"></a>00927 {
+<a name="l00928" id="l00928"></a>00928 <span class="preprocessor">#if !defined (WIN32) &amp;&amp; !defined (cygwin)</span>
+<a name="l00929" id="l00929"></a>00929   <span class="keywordflow">return</span> (getenv(name));
+<a name="l00930" id="l00930"></a>00930 <span class="preprocessor">#else</span>
+<a name="l00931" id="l00931"></a>00931   <span class="keywordtype">char</span> *temp = NULL;  
+<a name="l00932" id="l00932"></a>00932   HKEY hKey;
+<a name="l00933" id="l00933"></a>00933   <span class="keywordtype">unsigned</span> <span class=
+"keywordtype">char</span> * key_value = NULL;
+<a name="l00934" id="l00934"></a>00934   DWORD key_value_size = 0;
+<a name="l00935" id="l00935"></a>00935   DWORD key_value_type = 0;
+<a name="l00936" id="l00936"></a>00936   DWORD getenv_worked = 0;
+<a name="l00937" id="l00937"></a>00937 
+<a name="l00938" id="l00938"></a>00938   DEBUGMSGTL((<span class="stringliteral">"read_config"</span>, <span class=
+"stringliteral">"netsnmp_getenv called with name: %s\n"</span>,name));
+<a name="l00939" id="l00939"></a>00939 
+<a name="l00940" id="l00940"></a>00940   <span class="keywordflow">if</span> (!(name))
+<a name="l00941" id="l00941"></a>00941     <span class="keywordflow">return</span> NULL;
+<a name="l00942" id="l00942"></a>00942   
+<a name="l00943" id="l00943"></a>00943   <span class="comment">/* Try environment variable first */</span> 
+<a name="l00944" id="l00944"></a>00944   temp = getenv(name);
+<a name="l00945" id="l00945"></a>00945   <span class="keywordflow">if</span> (temp) {
+<a name="l00946" id="l00946"></a>00946     getenv_worked = 1;
+<a name="l00947" id="l00947"></a>00947     DEBUGMSGTL((<span class="stringliteral">"read_config"</span>, <span class=
+"stringliteral">"netsnmp_getenv will return from ENV: %s\n"</span>,temp));
+<a name="l00948" id="l00948"></a>00948   }
+<a name="l00949" id="l00949"></a>00949   
+<a name="l00950" id="l00950"></a>00950   <span class="comment">/* Next try HKCU */</span>
+<a name="l00951" id="l00951"></a>00951   <span class="keywordflow">if</span> (temp == NULL)
+<a name="l00952" id="l00952"></a>00952   {
+<a name="l00953" id="l00953"></a>00953     <span class="keywordflow">if</span> (RegOpenKeyExA(
+<a name="l00954" id="l00954"></a>00954           HKEY_CURRENT_USER, 
+<a name="l00955" id="l00955"></a>00955           <span class="stringliteral">"SOFTWARE\\Net-SNMP"</span>, 
+<a name="l00956" id="l00956"></a>00956           0, 
+<a name="l00957" id="l00957"></a>00957           KEY_QUERY_VALUE, 
+<a name="l00958" id="l00958"></a>00958           &amp;hKey) == ERROR_SUCCESS) {   
+<a name="l00959" id="l00959"></a>00959       
+<a name="l00960" id="l00960"></a>00960       <span class="keywordflow">if</span> (RegQueryValueExA(
+<a name="l00961" id="l00961"></a>00961             hKey, 
+<a name="l00962" id="l00962"></a>00962             name, 
+<a name="l00963" id="l00963"></a>00963             NULL, 
+<a name="l00964" id="l00964"></a>00964             &amp;key_value_type, 
+<a name="l00965" id="l00965"></a>00965             NULL,               <span class="comment">/* Just get the size */</span>
+<a name="l00966" id="l00966"></a>00966             &amp;key_value_size) == ERROR_SUCCESS) {
+<a name="l00967" id="l00967"></a>00967 
+<a name="l00968" id="l00968"></a>00968         <span class="keywordflow">if</span> (key_value)
+<a name="l00969" id="l00969"></a>00969           <a class="code" href="group__util.html#ga951e93edb6f0ea941e26155e3f8912a6"
+title="Frees a pointer only if it is !NULL and sets its value to NULL.">SNMP_FREE</a>(key_value);
+<a name="l00970" id="l00970"></a>00970 
+<a name="l00971" id="l00971"></a>00971         <span class=
+"comment">/* Allocate memory needed +1 to allow RegQueryValueExA to NULL terminate the</span>
+<a name="l00972" id="l00972"></a>00972 <span class=
+"comment">         * string data in registry is missing one (which is unlikely).</span>
+<a name="l00973" id="l00973"></a>00973 <span class="comment">         */</span>
+<a name="l00974" id="l00974"></a>00974         key_value = (<span class="keywordtype">char</span> *) malloc((<span class=
+"keyword">sizeof</span>(<span class="keywordtype">char</span>) * key_value_size)+<span class="keyword">sizeof</span>(char));
+<a name="l00975" id="l00975"></a>00975         
+<a name="l00976" id="l00976"></a>00976         <span class="keywordflow">if</span> (RegQueryValueExA(
+<a name="l00977" id="l00977"></a>00977               hKey, 
+<a name="l00978" id="l00978"></a>00978               name, 
+<a name="l00979" id="l00979"></a>00979               NULL, 
+<a name="l00980" id="l00980"></a>00980               &amp;key_value_type, 
+<a name="l00981" id="l00981"></a>00981               key_value, 
+<a name="l00982" id="l00982"></a>00982               &amp;key_value_size) == ERROR_SUCCESS) {
+<a name="l00983" id="l00983"></a>00983         }
+<a name="l00984" id="l00984"></a>00984         temp = key_value;
+<a name="l00985" id="l00985"></a>00985       }
+<a name="l00986" id="l00986"></a>00986       RegCloseKey(hKey);
+<a name="l00987" id="l00987"></a>00987       <span class="keywordflow">if</span> (temp)
+<a name="l00988" id="l00988"></a>00988         DEBUGMSGTL((<span class="stringliteral">"read_config"</span>, <span class=
+"stringliteral">"netsnmp_getenv will return from HKCU: %s\n"</span>,temp));
+<a name="l00989" id="l00989"></a>00989     }
+<a name="l00990" id="l00990"></a>00990   }
+<a name="l00991" id="l00991"></a>00991 
+<a name="l00992" id="l00992"></a>00992   <span class="comment">/* Next try HKLM */</span>
+<a name="l00993" id="l00993"></a>00993   <span class="keywordflow">if</span> (temp == NULL)
+<a name="l00994" id="l00994"></a>00994   {
+<a name="l00995" id="l00995"></a>00995     <span class="keywordflow">if</span> (RegOpenKeyExA(
+<a name="l00996" id="l00996"></a>00996           HKEY_LOCAL_MACHINE, 
+<a name="l00997" id="l00997"></a>00997           <span class="stringliteral">"SOFTWARE\\Net-SNMP"</span>, 
+<a name="l00998" id="l00998"></a>00998           0, 
+<a name="l00999" id="l00999"></a>00999           KEY_QUERY_VALUE, 
+<a name="l01000" id="l01000"></a>01000           &amp;hKey) == ERROR_SUCCESS) {   
+<a name="l01001" id="l01001"></a>01001       
+<a name="l01002" id="l01002"></a>01002       <span class="keywordflow">if</span> (RegQueryValueExA(
+<a name="l01003" id="l01003"></a>01003             hKey, 
+<a name="l01004" id="l01004"></a>01004             name, 
+<a name="l01005" id="l01005"></a>01005             NULL, 
+<a name="l01006" id="l01006"></a>01006             &amp;key_value_type, 
+<a name="l01007" id="l01007"></a>01007             NULL,               <span class="comment">/* Just get the size */</span>
+<a name="l01008" id="l01008"></a>01008             &amp;key_value_size) == ERROR_SUCCESS) {
+<a name="l01009" id="l01009"></a>01009 
+<a name="l01010" id="l01010"></a>01010         <span class="keywordflow">if</span> (key_value)
+<a name="l01011" id="l01011"></a>01011           <a class="code" href="group__util.html#ga951e93edb6f0ea941e26155e3f8912a6"
+title="Frees a pointer only if it is !NULL and sets its value to NULL.">SNMP_FREE</a>(key_value);
+<a name="l01012" id="l01012"></a>01012 
+<a name="l01013" id="l01013"></a>01013         <span class=
+"comment">/* Allocate memory needed +1 to allow RegQueryValueExA to NULL terminate the</span>
+<a name="l01014" id="l01014"></a>01014 <span class=
+"comment">         * string data in registry is missing one (which is unlikely).</span>
+<a name="l01015" id="l01015"></a>01015 <span class="comment">         */</span>
+<a name="l01016" id="l01016"></a>01016         key_value = (<span class="keywordtype">char</span> *) malloc((<span class=
+"keyword">sizeof</span>(<span class="keywordtype">char</span>) * key_value_size)+<span class="keyword">sizeof</span>(char));
+<a name="l01017" id="l01017"></a>01017         
+<a name="l01018" id="l01018"></a>01018         <span class="keywordflow">if</span> (RegQueryValueExA(
+<a name="l01019" id="l01019"></a>01019               hKey, 
+<a name="l01020" id="l01020"></a>01020               name, 
+<a name="l01021" id="l01021"></a>01021               NULL, 
+<a name="l01022" id="l01022"></a>01022               &amp;key_value_type, 
+<a name="l01023" id="l01023"></a>01023               key_value, 
+<a name="l01024" id="l01024"></a>01024               &amp;key_value_size) == ERROR_SUCCESS) {
+<a name="l01025" id="l01025"></a>01025         }
+<a name="l01026" id="l01026"></a>01026         temp = key_value;
+<a name="l01027" id="l01027"></a>01027 
+<a name="l01028" id="l01028"></a>01028       }
+<a name="l01029" id="l01029"></a>01029       RegCloseKey(hKey);
+<a name="l01030" id="l01030"></a>01030       <span class="keywordflow">if</span> (temp)
+<a name="l01031" id="l01031"></a>01031         DEBUGMSGTL((<span class="stringliteral">"read_config"</span>, <span class=
+"stringliteral">"netsnmp_getenv will return from HKLM: %s\n"</span>,temp));
+<a name="l01032" id="l01032"></a>01032     }
+<a name="l01033" id="l01033"></a>01033   }
+<a name="l01034" id="l01034"></a>01034   
+<a name="l01035" id="l01035"></a>01035   <span class="keywordflow">if</span> (temp &amp;&amp; !getenv_worked) {
+<a name="l01036" id="l01036"></a>01036     setenv(name, temp, 1);
+<a name="l01037" id="l01037"></a>01037     <a class="code" href="group__util.html#ga951e93edb6f0ea941e26155e3f8912a6" title=
+"Frees a pointer only if it is !NULL and sets its value to NULL.">SNMP_FREE</a>(temp);
+<a name="l01038" id="l01038"></a>01038   }
+<a name="l01039" id="l01039"></a>01039 
+<a name="l01040" id="l01040"></a>01040   DEBUGMSGTL((<span class="stringliteral">"read_config"</span>, <span class=
+"stringliteral">"netsnmp_getenv returning: %s\n"</span>,getenv(name)));
+<a name="l01041" id="l01041"></a>01041 
+<a name="l01042" id="l01042"></a>01042   <span class="keywordflow">return</span>(getenv(name));
+<a name="l01043" id="l01043"></a>01043 <span class="preprocessor">#endif</span>
+<a name="l01044" id="l01044"></a>01044 }
+<a name="l01045" id="l01045"></a>01045 
+<a name="l01046" id="l01046"></a>01046 <span class="comment">/*</span>
+<a name="l01047" id="l01047"></a>01047 <span class="comment"> * swap the order of an inet addr string</span>
+<a name="l01048" id="l01048"></a>01048 <span class="comment"> */</span>
+<a name="l01049" id="l01049"></a>01049 <span class="keywordtype">int</span>
+<a name="l01050" id="l01050"></a>01050 netsnmp_addrstr_hton(<span class="keywordtype">char</span> *ptr, <span class=
+"keywordtype">size_t</span> len)
+<a name="l01051" id="l01051"></a>01051 {
+<a name="l01052" id="l01052"></a>01052 <span class="preprocessor">#ifndef WORDS_BIGENDIAN</span>
+<a name="l01053" id="l01053"></a>01053     <span class="keywordtype">char</span> tmp[8];
+<a name="l01054" id="l01054"></a>01054     
+<a name="l01055" id="l01055"></a>01055     <span class="keywordflow">if</span> (8 == len) {
+<a name="l01056" id="l01056"></a>01056         tmp[0] = ptr[6];
+<a name="l01057" id="l01057"></a>01057         tmp[1] = ptr[7];
+<a name="l01058" id="l01058"></a>01058         tmp[2] = ptr[4];
+<a name="l01059" id="l01059"></a>01059         tmp[3] = ptr[5];
+<a name="l01060" id="l01060"></a>01060         tmp[4] = ptr[2];
+<a name="l01061" id="l01061"></a>01061         tmp[5] = ptr[3];
+<a name="l01062" id="l01062"></a>01062         tmp[6] = ptr[0];
+<a name="l01063" id="l01063"></a>01063         tmp[7] = ptr[1];
+<a name="l01064" id="l01064"></a>01064         memcpy (ptr, &amp;tmp, 8);
+<a name="l01065" id="l01065"></a>01065     }
+<a name="l01066" id="l01066"></a>01066     <span class="keywordflow">else</span> <span class=
+"keywordflow">if</span> (32 == len) {
+<a name="l01067" id="l01067"></a>01067         netsnmp_addrstr_hton(ptr   , 8);
+<a name="l01068" id="l01068"></a>01068         netsnmp_addrstr_hton(ptr+8 , 8);
+<a name="l01069" id="l01069"></a>01069         netsnmp_addrstr_hton(ptr+16, 8);
+<a name="l01070" id="l01070"></a>01070         netsnmp_addrstr_hton(ptr+24, 8);
+<a name="l01071" id="l01071"></a>01071     }
+<a name="l01072" id="l01072"></a>01072     <span class="keywordflow">else</span>
+<a name="l01073" id="l01073"></a>01073         <span class="keywordflow">return</span> -1;
+<a name="l01074" id="l01074"></a>01074 <span class="preprocessor">#endif</span>
+<a name="l01075" id="l01075"></a>01075 
+<a name="l01076" id="l01076"></a>01076     <span class="keywordflow">return</span> 0;
+<a name="l01077" id="l01077"></a>01077 }
+</pre>
+    </div>
+  </div>
+  <hr size="1" />
+
+  <address style="text-align: right;">
+    <small>Generated on 28 Sep 2009 for net-snmp by  <a href="http://www.doxygen.org/index.html"><img class="footer" src=
+    "doxygen.png" alt="doxygen" /></a> 1.6.1</small>
+<!-- CONTENT END -->
+<!--#include virtual="/page-bottom.html" -->
+

@@ -1,0 +1,725 @@
+<!--#set var="section" value="development" -->
+<!--#include virtual="/page-top.html" -->
+<!-- CONTENT START -->
+  <div class="navigation" id="top">
+    <div class="tabs">
+      <ul>
+        <li><a href="index.html"><span>Main Page</span></a></li>
+
+        <li><a href="pages.html"><span>Related Pages</span></a></li>
+
+        <li><a href="modules.html"><span>Modules</span></a></li>
+
+        <li><a href="annotated.html"><span>Data Structures</span></a></li>
+
+        <li class="current"><a href="files.html"><span>Files</span></a></li>
+
+        <li><a href="examples.html"><span>Examples</span></a></li>
+      </ul>
+    </div>
+
+    <div class="tabs">
+      <ul>
+        <li><a href="files.html"><span>File List</span></a></li>
+
+        <li><a href="globals.html"><span>Globals</span></a></li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="contents">
+    <h1>tools.h File Reference</h1>
+
+    <p><a href="tools_8h_source.html">Go to the source code of this file.</a></p>
+
+    <table border="0" cellpadding="0" cellspacing="0">
+      <tr>
+        <td colspan="2">
+          <h2>Defines</h2>
+        </td>
+      </tr>
+
+      <tr>
+        <td class="memItemLeft" align="right" valign="top"><a class="anchor" id="ga688c3aa414ca0df35b96ee5887c96a6f" name=
+        "ga688c3aa414ca0df35b96ee5887c96a6f"></a>
+        <!-- doxytag: member="tools.h::SNMP_MAXPATH" ref="ga688c3aa414ca0df35b96ee5887c96a6f" args="" -->
+        #define </td>
+
+        <td class="memItemRight" valign="bottom"><b>SNMP_MAXPATH</b>   PATH_MAX</td>
+      </tr>
+
+      <tr>
+        <td class="memItemLeft" align="right" valign="top"><a class="anchor" id="gadd4a3c52fccbeb0c1e59e526410359af" name=
+        "gadd4a3c52fccbeb0c1e59e526410359af"></a>
+        <!-- doxytag: member="tools.h::SNMP_MAXBUF" ref="gadd4a3c52fccbeb0c1e59e526410359af" args="" -->
+        #define </td>
+
+        <td class="memItemRight" valign="bottom"><b>SNMP_MAXBUF</b>   (1024 * 4)</td>
+      </tr>
+
+      <tr>
+        <td class="memItemLeft" align="right" valign="top"><a class="anchor" id="ga2ec66fd78ae497a04fccbbca1d83db72" name=
+        "ga2ec66fd78ae497a04fccbbca1d83db72"></a>
+        <!-- doxytag: member="tools.h::SNMP_MAXBUF_MEDIUM" ref="ga2ec66fd78ae497a04fccbbca1d83db72" args="" -->
+        #define </td>
+
+        <td class="memItemRight" valign="bottom"><b>SNMP_MAXBUF_MEDIUM</b>   1024</td>
+      </tr>
+
+      <tr>
+        <td class="memItemLeft" align="right" valign="top"><a class="anchor" id="ga9c464d6073f6e6363a790b73201032bd" name=
+        "ga9c464d6073f6e6363a790b73201032bd"></a>
+        <!-- doxytag: member="tools.h::SNMP_MAXBUF_SMALL" ref="ga9c464d6073f6e6363a790b73201032bd" args="" -->
+        #define </td>
+
+        <td class="memItemRight" valign="bottom"><b>SNMP_MAXBUF_SMALL</b>   512</td>
+      </tr>
+
+      <tr>
+        <td class="memItemLeft" align="right" valign="top"><a class="anchor" id="ga15444598872922f2904b3eae9122ef4b" name=
+        "ga15444598872922f2904b3eae9122ef4b"></a>
+        <!-- doxytag: member="tools.h::SNMP_MAXBUF_MESSAGE" ref="ga15444598872922f2904b3eae9122ef4b" args="" -->
+        #define </td>
+
+        <td class="memItemRight" valign="bottom"><b>SNMP_MAXBUF_MESSAGE</b>   1500</td>
+      </tr>
+
+      <tr>
+        <td class="memItemLeft" align="right" valign="top"><a class="anchor" id="gae7ee3a2dedea11458fb7e7bd3eb0c870" name=
+        "gae7ee3a2dedea11458fb7e7bd3eb0c870"></a>
+        <!-- doxytag: member="tools.h::SNMP_MAXOID" ref="gae7ee3a2dedea11458fb7e7bd3eb0c870" args="" -->
+        #define </td>
+
+        <td class="memItemRight" valign="bottom"><b>SNMP_MAXOID</b>   64</td>
+      </tr>
+
+      <tr>
+        <td class="memItemLeft" align="right" valign="top"><a class="anchor" id="ga2f677cec78aa9fc04c649c1286d30b39" name=
+        "ga2f677cec78aa9fc04c649c1286d30b39"></a>
+        <!-- doxytag: member="tools.h::SNMP_MAX_CMDLINE_OIDS" ref="ga2f677cec78aa9fc04c649c1286d30b39" args="" -->
+        #define </td>
+
+        <td class="memItemRight" valign="bottom"><b>SNMP_MAX_CMDLINE_OIDS</b>   128</td>
+      </tr>
+
+      <tr>
+        <td class="memItemLeft" align="right" valign="top"><a class="anchor" id="ga01fdf844512e930bb3ecddac4fe56c6e" name=
+        "ga01fdf844512e930bb3ecddac4fe56c6e"></a>
+        <!-- doxytag: member="tools.h::SNMP_FILEMODE_CLOSED" ref="ga01fdf844512e930bb3ecddac4fe56c6e" args="" -->
+        #define </td>
+
+        <td class="memItemRight" valign="bottom"><b>SNMP_FILEMODE_CLOSED</b>   0600</td>
+      </tr>
+
+      <tr>
+        <td class="memItemLeft" align="right" valign="top"><a class="anchor" id="ga3ba9dd1e300d94b4bba1f76f00df297f" name=
+        "ga3ba9dd1e300d94b4bba1f76f00df297f"></a>
+        <!-- doxytag: member="tools.h::SNMP_FILEMODE_OPEN" ref="ga3ba9dd1e300d94b4bba1f76f00df297f" args="" -->
+        #define </td>
+
+        <td class="memItemRight" valign="bottom"><b>SNMP_FILEMODE_OPEN</b>   0644</td>
+      </tr>
+
+      <tr>
+        <td class="memItemLeft" align="right" valign="top"><a class="anchor" id="gaa04cfd9a988babfbfbc6bd909ed883be" name=
+        "gaa04cfd9a988babfbfbc6bd909ed883be"></a>
+        <!-- doxytag: member="tools.h::BYTESIZE" ref="gaa04cfd9a988babfbfbc6bd909ed883be" args="(bitsize)" -->
+        #define </td>
+
+        <td class="memItemRight" valign="bottom"><b>BYTESIZE</b>(bitsize)   ((bitsize + 7) &gt;&gt; 3)</td>
+      </tr>
+
+      <tr>
+        <td class="memItemLeft" align="right" valign="top"><a class="anchor" id="gae0349e25aed55824890bb7bd2fa6af3e" name=
+        "gae0349e25aed55824890bb7bd2fa6af3e"></a>
+        <!-- doxytag: member="tools.h::ROUNDUP8" ref="gae0349e25aed55824890bb7bd2fa6af3e" args="(x)" -->
+        #define </td>
+
+        <td class="memItemRight" valign="bottom"><b>ROUNDUP8</b>(x)   ( ( (x+7) &gt;&gt; 3 ) * 8 )</td>
+      </tr>
+
+      <tr>
+        <td class="memItemLeft" align="right" valign="top"><a class="anchor" id="ga9ee6d897f46cceb17af49d7ff9325e24" name=
+        "ga9ee6d897f46cceb17af49d7ff9325e24"></a>
+        <!-- doxytag: member="tools.h::SNMP_STRORNULL" ref="ga9ee6d897f46cceb17af49d7ff9325e24" args="(x)" -->
+        #define </td>
+
+        <td class="memItemRight" valign="bottom"><b>SNMP_STRORNULL</b>(x)   ( x ? x : "(null)")</td>
+      </tr>
+
+      <tr>
+        <td class="memItemLeft" align="right" valign="top">#define </td>
+
+        <td class="memItemRight" valign="bottom"><a class="el" href=
+        "group__util.html#ga951e93edb6f0ea941e26155e3f8912a6">SNMP_FREE</a>(s)   do { if (s) { free((void *)s); s=NULL; } }
+        while(0)</td>
+      </tr>
+
+      <tr>
+        <td class="mdescLeft"> </td>
+
+        <td class="mdescRight">Frees a pointer only if it is !NULL and sets its value to NULL. <a href=
+        "group__util.html#ga951e93edb6f0ea941e26155e3f8912a6"></a><br /></td>
+      </tr>
+
+      <tr>
+        <td class="memItemLeft" align="right" valign="top">#define </td>
+
+        <td class="memItemRight" valign="bottom"><a class="el" href=
+        "group__util.html#ga15e5a68e6d21430ddd4312fec64e5027">SNMP_SWIPE_MEM</a>(n, s)   do { if (n) free((void *)n); n = s;
+        s=NULL; } while(0)</td>
+      </tr>
+
+      <tr>
+        <td class="mdescLeft"> </td>
+
+        <td class="mdescRight">Frees pointer n only if it is !NULL, sets n to s and sets s to NULL. <a href=
+        "group__util.html#ga15e5a68e6d21430ddd4312fec64e5027"></a><br /></td>
+      </tr>
+
+      <tr>
+        <td class="memItemLeft" align="right" valign="top">#define </td>
+
+        <td class="memItemRight" valign="bottom"><a class="el" href=
+        "group__util.html#ga6356941968481380ea6f4a646df4aaf9">SNMP_MALLOC_STRUCT</a>(s)   (struct s *) calloc(1, sizeof(struct
+        s))</td>
+      </tr>
+
+      <tr>
+        <td class="mdescLeft"> </td>
+
+        <td class="mdescRight">Mallocs memory of sizeof(struct s), zeros it and returns a pointer to it. <a href=
+        "group__util.html#ga6356941968481380ea6f4a646df4aaf9"></a><br /></td>
+      </tr>
+
+      <tr>
+        <td class="memItemLeft" align="right" valign="top">#define </td>
+
+        <td class="memItemRight" valign="bottom"><a class="el" href=
+        "group__util.html#ga9cd013bb193de5048149afeb9d94e424">SNMP_MALLOC_TYPEDEF</a>(td)   (td *) calloc(1, sizeof(td))</td>
+      </tr>
+
+      <tr>
+        <td class="mdescLeft"> </td>
+
+        <td class="mdescRight">Mallocs memory of sizeof(t), zeros it and returns a pointer to it. <a href=
+        "group__util.html#ga9cd013bb193de5048149afeb9d94e424"></a><br /></td>
+      </tr>
+
+      <tr>
+        <td class="memItemLeft" align="right" valign="top">#define </td>
+
+        <td class="memItemRight" valign="bottom"><a class="el" href=
+        "group__util.html#ga190280d08c828c153ec2755b9c263227">SNMP_ZERO</a>(s, l)   do { if (s) memset(s, 0, l); } while(0)</td>
+      </tr>
+
+      <tr>
+        <td class="mdescLeft"> </td>
+
+        <td class="mdescRight">Zeros l bytes of memory starting at s. <a href=
+        "group__util.html#ga190280d08c828c153ec2755b9c263227"></a><br /></td>
+      </tr>
+
+      <tr>
+        <td class="memItemLeft" align="right" valign="top"><a class="anchor" id="gab54417c7c018570043920af66ba7457f" name=
+        "gab54417c7c018570043920af66ba7457f"></a>
+        <!-- doxytag: member="tools.h::TOUPPER" ref="gab54417c7c018570043920af66ba7457f" args="(c)" -->
+        #define </td>
+
+        <td class="memItemRight" valign="bottom"><b>TOUPPER</b>(c)   (c &gt;= 'a' &amp;&amp; c &lt;= 'z' ? c - ('a' - 'A') :
+        c)</td>
+      </tr>
+
+      <tr>
+        <td class="memItemLeft" align="right" valign="top"><a class="anchor" id="gad4771ad2e5dd6a87c83ecf879b7985de" name=
+        "gad4771ad2e5dd6a87c83ecf879b7985de"></a>
+        <!-- doxytag: member="tools.h::TOLOWER" ref="gad4771ad2e5dd6a87c83ecf879b7985de" args="(c)" -->
+        #define </td>
+
+        <td class="memItemRight" valign="bottom"><b>TOLOWER</b>(c)   (c &gt;= 'A' &amp;&amp; c &lt;= 'Z' ? c + ('a' - 'A') :
+        c)</td>
+      </tr>
+
+      <tr>
+        <td class="memItemLeft" align="right" valign="top"><a class="anchor" id="ga10334939731a211462809df2ec1ae597" name=
+        "ga10334939731a211462809df2ec1ae597"></a>
+        <!-- doxytag: member="tools.h::HEX2VAL" ref="ga10334939731a211462809df2ec1ae597" args="(s)" -->
+        #define </td>
+
+        <td class="memItemRight" valign="bottom"><b>HEX2VAL</b>(s)   ((isalpha(s) ? (TOLOWER(s)-'a'+10) : (TOLOWER(s)-'0')) &amp;
+        0xf)</td>
+      </tr>
+
+      <tr>
+        <td class="memItemLeft" align="right" valign="top"><a class="anchor" id="ga7e6e411a3c5e530ed96926a6801e3c20" name=
+        "ga7e6e411a3c5e530ed96926a6801e3c20"></a>
+        <!-- doxytag: member="tools.h::VAL2HEX" ref="ga7e6e411a3c5e530ed96926a6801e3c20" args="(s)" -->
+        #define </td>
+
+        <td class="memItemRight" valign="bottom"><b>VAL2HEX</b>(s)   ( (s) + (((s) &gt;= 10) ? ('a'-10) : '0') )</td>
+      </tr>
+
+      <tr>
+        <td class="memItemLeft" align="right" valign="top">#define </td>
+
+        <td class="memItemRight" valign="bottom"><a class="el" href=
+        "group__util.html#gaa70d7b83d1001df95cf64280e9545564">SNMP_MAX</a>(a, b)   ((a) &gt; (b) ? (a) : (b))</td>
+      </tr>
+
+      <tr>
+        <td class="mdescLeft"> </td>
+
+        <td class="mdescRight">Computers the maximum of a and b. <a href=
+        "group__util.html#gaa70d7b83d1001df95cf64280e9545564"></a><br /></td>
+      </tr>
+
+      <tr>
+        <td class="memItemLeft" align="right" valign="top">#define </td>
+
+        <td class="memItemRight" valign="bottom"><a class="el" href=
+        "group__util.html#gad1976dec11cfd62abaa4ecedad948f18">SNMP_MIN</a>(a, b)   ((a) &gt; (b) ? (b) : (a))</td>
+      </tr>
+
+      <tr>
+        <td class="mdescLeft"> </td>
+
+        <td class="mdescRight">Computers the minimum of a and b. <a href=
+        "group__util.html#gad1976dec11cfd62abaa4ecedad948f18"></a><br /></td>
+      </tr>
+
+      <tr>
+        <td class="memItemLeft" align="right" valign="top">#define </td>
+
+        <td class="memItemRight" valign="bottom"><a class="el" href=
+        "group__util.html#ga5d58fec0dd81779c027ad243253897e0">SNMP_MACRO_VAL_TO_STR</a>(s)   SNMP_MACRO_VAL_TO_STR_PRIV(s)</td>
+      </tr>
+
+      <tr>
+        <td class="mdescLeft"> </td>
+
+        <td class="mdescRight">Expands to string with value of the s. <a href=
+        "group__util.html#ga5d58fec0dd81779c027ad243253897e0"></a><br /></td>
+      </tr>
+
+      <tr>
+        <td class="memItemLeft" align="right" valign="top"><a class="anchor" id="ga8fadb3abdda9cd683d2b4b46a6b5f32d" name=
+        "ga8fadb3abdda9cd683d2b4b46a6b5f32d"></a>
+        <!-- doxytag: member="tools.h::SNMP_MACRO_VAL_TO_STR_PRIV" ref="ga8fadb3abdda9cd683d2b4b46a6b5f32d" args="(s)" -->
+        #define </td>
+
+        <td class="memItemRight" valign="bottom"><b>SNMP_MACRO_VAL_TO_STR_PRIV</b>(s)   #s</td>
+      </tr>
+
+      <tr>
+        <td class="memItemLeft" align="right" valign="top">#define </td>
+
+        <td class="memItemRight" valign="bottom"><b>QUITFUN</b>(e, l)</td>
+      </tr>
+
+      <tr>
+        <td class="memItemLeft" align="right" valign="top">#define </td>
+
+        <td class="memItemRight" valign="bottom"><b>DIFFTIMEVAL</b>(now, then, diff)</td>
+      </tr>
+
+      <tr>
+        <td class="memItemLeft" align="right" valign="top"><a class="anchor" id="gae96b45b99bccd0eb7ed9e9766dbe00c9" name=
+        "gae96b45b99bccd0eb7ed9e9766dbe00c9"></a>
+        <!-- doxytag: member="tools.h::USM_LENGTH_OID_TRANSFORM" ref="gae96b45b99bccd0eb7ed9e9766dbe00c9" args="" -->
+        #define </td>
+
+        <td class="memItemRight" valign="bottom"><b>USM_LENGTH_OID_TRANSFORM</b>   10</td>
+      </tr>
+
+      <tr>
+        <td class="memItemLeft" align="right" valign="top">#define </td>
+
+        <td class="memItemRight" valign="bottom"><b>ISTRANSFORM</b>(ttype, toid)</td>
+      </tr>
+
+      <tr>
+        <td class="memItemLeft" align="right" valign="top"><a class="anchor" id="ga72aa0161c1a423e4e95bfd8069bc91b4" name=
+        "ga72aa0161c1a423e4e95bfd8069bc91b4"></a>
+        <!-- doxytag: member="tools.h::ENGINETIME_MAX" ref="ga72aa0161c1a423e4e95bfd8069bc91b4" args="" -->
+        #define </td>
+
+        <td class="memItemRight" valign="bottom"><b>ENGINETIME_MAX</b>   2147483647</td>
+      </tr>
+
+      <tr>
+        <td class="memItemLeft" align="right" valign="top"><a class="anchor" id="ga476dd2e72571d762f3a6c6831735675e" name=
+        "ga476dd2e72571d762f3a6c6831735675e"></a>
+        <!-- doxytag: member="tools.h::ENGINEBOOT_MAX" ref="ga476dd2e72571d762f3a6c6831735675e" args="" -->
+        #define </td>
+
+        <td class="memItemRight" valign="bottom"><b>ENGINEBOOT_MAX</b>   2147483647</td>
+      </tr>
+
+      <tr>
+        <td class="memItemLeft" align="right" valign="top"><a class="anchor" id="gab133b4957931586fabc6ea31b2b76b6d" name=
+        "gab133b4957931586fabc6ea31b2b76b6d"></a>
+        <!-- doxytag: member="tools.h::snmp_cstrcat" ref="gab133b4957931586fabc6ea31b2b76b6d" args="(b, l, o, a, s)" -->
+        #define </td>
+
+        <td class="memItemRight" valign="bottom"><b>snmp_cstrcat</b>(b, l, o, a, s)   snmp_strcat(b,l,o,a,(const u_char *)s)</td>
+      </tr>
+
+      <tr>
+        <td colspan="2">
+          <h2>Typedefs</h2>
+        </td>
+      </tr>
+
+      <tr>
+        <td class="memItemLeft" align="right" valign="top"><a class="anchor" id="gaf7a2cb94c76e0414a050651bba3a7c89" name=
+        "gaf7a2cb94c76e0414a050651bba3a7c89"></a>
+        <!-- doxytag: member="tools.h::marker_t" ref="gaf7a2cb94c76e0414a050651bba3a7c89" args="" -->
+        typedef void * </td>
+
+        <td class="memItemRight" valign="bottom"><b>marker_t</b></td>
+      </tr>
+
+      <tr>
+        <td colspan="2">
+          <h2>Functions</h2>
+        </td>
+      </tr>
+
+      <tr>
+        <td class="memItemLeft" align="right" valign="top">int </td>
+
+        <td class="memItemRight" valign="bottom"><a class="el" href=
+        "group__util.html#ga7b42d706225a788adcfeaad9b24717de">snmp_realloc</a> (u_char **buf, size_t *buf_len)</td>
+      </tr>
+
+      <tr>
+        <td class="mdescLeft"> </td>
+
+        <td class="mdescRight">This function increase the size of the buffer pointed at by *buf, which is initially of size
+        *buf_len. <a href="group__util.html#ga7b42d706225a788adcfeaad9b24717de"></a><br /></td>
+      </tr>
+
+      <tr>
+        <td class="memItemLeft" align="right" valign="top">void </td>
+
+        <td class="memItemRight" valign="bottom"><a class="el" href=
+        "group__util.html#ga26a103aafde4d6dcf72c8e30c7d05bd9">free_zero</a> (void *buf, size_t size)</td>
+      </tr>
+
+      <tr>
+        <td class="mdescLeft"> </td>
+
+        <td class="mdescRight">zeros memory before freeing it. <a href=
+        "group__util.html#ga26a103aafde4d6dcf72c8e30c7d05bd9"></a><br /></td>
+      </tr>
+
+      <tr>
+        <td class="memItemLeft" align="right" valign="top">u_char * </td>
+
+        <td class="memItemRight" valign="bottom"><a class="el" href=
+        "group__util.html#ga76b7f8b21c44e2f8b274a0db8b57d5a1">malloc_random</a> (size_t *size)</td>
+      </tr>
+
+      <tr>
+        <td class="mdescLeft"> </td>
+
+        <td class="mdescRight">Returns pointer to allocaed &amp; set buffer on success, size contains number of random bytes
+        filled. <a href="group__util.html#ga76b7f8b21c44e2f8b274a0db8b57d5a1"></a><br /></td>
+      </tr>
+
+      <tr>
+        <td class="memItemLeft" align="right" valign="top"><a class="anchor" id="gaf8c38f67fb20fad45695c2b9bca249e5" name=
+        "gaf8c38f67fb20fad45695c2b9bca249e5"></a>
+        <!-- doxytag: member="tools.h::malloc_zero" ref="gaf8c38f67fb20fad45695c2b9bca249e5" args="(size_t size)" -->
+        u_char * </td>
+
+        <td class="memItemRight" valign="bottom"><b>malloc_zero</b> (size_t size)</td>
+      </tr>
+
+      <tr>
+        <td class="memItemLeft" align="right" valign="top">int </td>
+
+        <td class="memItemRight" valign="bottom"><a class="el" href=
+        "group__util.html#gae28321822c83004ae8eedcc3de2b2fde">memdup</a> (u_char **to, const void *from, size_t size)</td>
+      </tr>
+
+      <tr>
+        <td class="mdescLeft"> </td>
+
+        <td class="mdescRight">Duplicates a memory block. <a href=
+        "group__util.html#gae28321822c83004ae8eedcc3de2b2fde"></a><br /></td>
+      </tr>
+
+      <tr>
+        <td class="memItemLeft" align="right" valign="top">u_int </td>
+
+        <td class="memItemRight" valign="bottom"><a class="el" href=
+        "group__util.html#gafb1770dd180ccdd29dafc90cf50d3204">binary_to_hex</a> (const u_char *input, size_t len, char
+        **output)</td>
+      </tr>
+
+      <tr>
+        <td class="mdescLeft"> </td>
+
+        <td class="mdescRight">converts binary to hexidecimal <a href=
+        "group__util.html#gafb1770dd180ccdd29dafc90cf50d3204"></a><br /></td>
+      </tr>
+
+      <tr>
+        <td class="memItemLeft" align="right" valign="top">int </td>
+
+        <td class="memItemRight" valign="bottom"><a class="el" href=
+        "group__util.html#ga8c1a230e987560600de9f81e55480c0a">netsnmp_hex_to_binary</a> (u_char **buf, size_t *buf_len, size_t
+        *offset, int allow_realloc, const char *hex, const char *delim)</td>
+      </tr>
+
+      <tr>
+        <td class="mdescLeft"> </td>
+
+        <td class="mdescRight">convert an ASCII hex string (with specified delimiters) to binary <a href=
+        "group__util.html#ga8c1a230e987560600de9f81e55480c0a"></a><br /></td>
+      </tr>
+
+      <tr>
+        <td class="memItemLeft" align="right" valign="top">int </td>
+
+        <td class="memItemRight" valign="bottom"><a class="el" href=
+        "group__util.html#ga1a102bbccc7a51e7f98b0c1da33497db">snmp_hex_to_binary</a> (u_char **buf, size_t *buf_len, size_t
+        *offset, int allow_realloc, const char *hex)</td>
+      </tr>
+
+      <tr>
+        <td class="mdescLeft"> </td>
+
+        <td class="mdescRight">convert an ASCII hex string to binary <a href=
+        "group__util.html#ga1a102bbccc7a51e7f98b0c1da33497db"></a><br /></td>
+      </tr>
+
+      <tr>
+        <td class="memItemLeft" align="right" valign="top">int </td>
+
+        <td class="memItemRight" valign="bottom"><a class="el" href=
+        "group__util.html#gafbe460eb2f249c0d347ab38d94a802ae">hex_to_binary2</a> (const u_char *input, size_t len, char
+        **output)</td>
+      </tr>
+
+      <tr>
+        <td class="mdescLeft"> </td>
+
+        <td class="mdescRight">hex_to_binary2 <a href="group__util.html#gafbe460eb2f249c0d347ab38d94a802ae"></a><br /></td>
+      </tr>
+
+      <tr>
+        <td class="memItemLeft" align="right" valign="top"><a class="anchor" id="ga96568575d5eeaff613077163cf156856" name=
+        "ga96568575d5eeaff613077163cf156856"></a>
+        <!-- doxytag: member="tools.h::snmp_decimal_to_binary" ref="ga96568575d5eeaff613077163cf156856" args="(u_char **buf, size_t *buf_len, size_t *out_len, int allow_realloc, const char *decimal)" -->
+        int </td>
+
+        <td class="memItemRight" valign="bottom"><b>snmp_decimal_to_binary</b> (u_char **buf, size_t *buf_len, size_t *out_len,
+        int allow_realloc, const char *decimal)</td>
+      </tr>
+
+      <tr>
+        <td class="memItemLeft" align="right" valign="top"><a class="anchor" id="ga23468abcec7955847df399f184ca8fae" name=
+        "ga23468abcec7955847df399f184ca8fae"></a>
+        <!-- doxytag: member="tools.h::snmp_strcat" ref="ga23468abcec7955847df399f184ca8fae" args="(u_char **buf, size_t *buf_len, size_t *out_len, int allow_realloc, const u_char *s)" -->
+        int </td>
+
+        <td class="memItemRight" valign="bottom"><b>snmp_strcat</b> (u_char **buf, size_t *buf_len, size_t *out_len, int
+        allow_realloc, const u_char *s)</td>
+      </tr>
+
+      <tr>
+        <td class="memItemLeft" align="right" valign="top">char * </td>
+
+        <td class="memItemRight" valign="bottom"><a class="el" href=
+        "group__util.html#ga06867ff53bb86b745f23c52aa5e78829">netsnmp_strdup_and_null</a> (const u_char *from, size_t
+        from_len)</td>
+      </tr>
+
+      <tr>
+        <td class="mdescLeft"> </td>
+
+        <td class="mdescRight">copies a (possible) unterminated string of a given length into a new buffer and null terminates it
+        as well (new buffer MAY be one byte longer to account for this <a href=
+        "group__util.html#ga06867ff53bb86b745f23c52aa5e78829"></a><br /></td>
+      </tr>
+
+      <tr>
+        <td class="memItemLeft" align="right" valign="top"><a class="anchor" id="ga19ec3048261c57f353c4071f37da732b" name=
+        "ga19ec3048261c57f353c4071f37da732b"></a>
+        <!-- doxytag: member="tools.h::dump_chunk" ref="ga19ec3048261c57f353c4071f37da732b" args="(const char *debugtoken, const char *title, const u_char *buf, int size)" -->
+        void </td>
+
+        <td class="memItemRight" valign="bottom"><b>dump_chunk</b> (const char *debugtoken, const char *title, const u_char *buf,
+        int size)</td>
+      </tr>
+
+      <tr>
+        <td class="memItemLeft" align="right" valign="top"><a class="anchor" id="gaec261f3c0ced150c01f5ea49a3d9b0bf" name=
+        "gaec261f3c0ced150c01f5ea49a3d9b0bf"></a>
+        <!-- doxytag: member="tools.h::dump_snmpEngineID" ref="gaec261f3c0ced150c01f5ea49a3d9b0bf" args="(const u_char *buf, size_t *buflen)" -->
+        char * </td>
+
+        <td class="memItemRight" valign="bottom"><b>dump_snmpEngineID</b> (const u_char *buf, size_t *buflen)</td>
+      </tr>
+
+      <tr>
+        <td class="memItemLeft" align="right" valign="top">marker_t </td>
+
+        <td class="memItemRight" valign="bottom"><a class="el" href=
+        "group__util.html#gadd8427286d982acba71489f0a3012dfb">atime_newMarker</a> (void)</td>
+      </tr>
+
+      <tr>
+        <td class="mdescLeft"> </td>
+
+        <td class="mdescRight">create a new time marker. <a href=
+        "group__util.html#gadd8427286d982acba71489f0a3012dfb"></a><br /></td>
+      </tr>
+
+      <tr>
+        <td class="memItemLeft" align="right" valign="top">void </td>
+
+        <td class="memItemRight" valign="bottom"><a class="el" href=
+        "group__util.html#gaac74a9b90a9483019e8872d0c923567c">atime_setMarker</a> (marker_t pm)</td>
+      </tr>
+
+      <tr>
+        <td class="mdescLeft"> </td>
+
+        <td class="mdescRight">set a time marker. <a href="group__util.html#gaac74a9b90a9483019e8872d0c923567c"></a><br /></td>
+      </tr>
+
+      <tr>
+        <td class="memItemLeft" align="right" valign="top">long </td>
+
+        <td class="memItemRight" valign="bottom"><a class="el" href=
+        "group__util.html#gaee67c956c1fcd842e739e2a8e9f57365">atime_diff</a> (marker_t first, marker_t second)</td>
+      </tr>
+
+      <tr>
+        <td class="mdescLeft"> </td>
+
+        <td class="mdescRight">Returns the difference (in msec) between the two markers. <a href=
+        "group__util.html#gaee67c956c1fcd842e739e2a8e9f57365"></a><br /></td>
+      </tr>
+
+      <tr>
+        <td class="memItemLeft" align="right" valign="top">u_long </td>
+
+        <td class="memItemRight" valign="bottom"><a class="el" href=
+        "group__util.html#ga1d44372c028e3c38de4161c52c226948">uatime_diff</a> (marker_t first, marker_t second)</td>
+      </tr>
+
+      <tr>
+        <td class="mdescLeft"> </td>
+
+        <td class="mdescRight">Returns the difference (in u_long msec) between the two markers. <a href=
+        "group__util.html#ga1d44372c028e3c38de4161c52c226948"></a><br /></td>
+      </tr>
+
+      <tr>
+        <td class="memItemLeft" align="right" valign="top">u_long </td>
+
+        <td class="memItemRight" valign="bottom"><a class="el" href=
+        "group__util.html#ga96b8aa8b0c5556f923dcfe9b56443606">uatime_hdiff</a> (marker_t first, marker_t second)</td>
+      </tr>
+
+      <tr>
+        <td class="mdescLeft"> </td>
+
+        <td class="mdescRight">Returns the difference (in u_long 1/100th secs) between the two markers (functionally this is what
+        sysUpTime needs). <a href="group__util.html#ga96b8aa8b0c5556f923dcfe9b56443606"></a><br /></td>
+      </tr>
+
+      <tr>
+        <td class="memItemLeft" align="right" valign="top">int </td>
+
+        <td class="memItemRight" valign="bottom"><a class="el" href=
+        "group__util.html#ga43a00cd4f3496eb42fb99285a2da8481">atime_ready</a> (marker_t pm, int deltaT)</td>
+      </tr>
+
+      <tr>
+        <td class="mdescLeft"> </td>
+
+        <td class="mdescRight">Test: Has (marked time plus delta) exceeded current time (in msec) ? Returns 0 if test fails or
+        cannot be tested (no marker). <a href="group__util.html#ga43a00cd4f3496eb42fb99285a2da8481"></a><br /></td>
+      </tr>
+
+      <tr>
+        <td class="memItemLeft" align="right" valign="top">int </td>
+
+        <td class="memItemRight" valign="bottom"><a class="el" href=
+        "group__util.html#ga15b21d7af289044a10e22b6111f43523">uatime_ready</a> (marker_t pm, unsigned int deltaT)</td>
+      </tr>
+
+      <tr>
+        <td class="mdescLeft"> </td>
+
+        <td class="mdescRight">Test: Has (marked time plus delta) exceeded current time (in msec) ? Returns 0 if test fails or
+        cannot be tested (no marker). <a href="group__util.html#ga15b21d7af289044a10e22b6111f43523"></a><br /></td>
+      </tr>
+
+      <tr>
+        <td class="memItemLeft" align="right" valign="top">int </td>
+
+        <td class="memItemRight" valign="bottom"><a class="el" href=
+        "group__util.html#gad8f70e6754e69772a113c07f8607d5eb">marker_tticks</a> (marker_t pm)</td>
+      </tr>
+
+      <tr>
+        <td class="mdescLeft"> </td>
+
+        <td class="mdescRight">Return the number of timeTicks since the given marker. <a href=
+        "group__util.html#gad8f70e6754e69772a113c07f8607d5eb"></a><br /></td>
+      </tr>
+
+      <tr>
+        <td class="memItemLeft" align="right" valign="top"><a class="anchor" id="ga75860e37dee879aaf49c34ea1b0a099c" name=
+        "ga75860e37dee879aaf49c34ea1b0a099c"></a>
+        <!-- doxytag: member="tools.h::timeval_tticks" ref="ga75860e37dee879aaf49c34ea1b0a099c" args="(struct timeval *tv)" -->
+        int </td>
+
+        <td class="memItemRight" valign="bottom"><b>timeval_tticks</b> (struct timeval *tv)</td>
+      </tr>
+
+      <tr>
+        <td class="memItemLeft" align="right" valign="top">char * </td>
+
+        <td class="memItemRight" valign="bottom"><a class="el" href=
+        "group__util.html#ga1816d1ce1e701fcbce27b20159433313">netsnmp_getenv</a> (const char *name)</td>
+      </tr>
+
+      <tr>
+        <td class="mdescLeft"> </td>
+
+        <td class="mdescRight">Non Windows: Returns a pointer to the desired environment <a class="el" href=
+        "structvariable.html">variable</a> or NULL if the environment <a class="el" href="structvariable.html">variable</a> does
+        not exist. <a href="group__util.html#ga1816d1ce1e701fcbce27b20159433313"></a><br /></td>
+      </tr>
+
+      <tr>
+        <td class="memItemLeft" align="right" valign="top"><a class="anchor" id="ga894f095eacb20a9a848d60df4c6f6436" name=
+        "ga894f095eacb20a9a848d60df4c6f6436"></a>
+        <!-- doxytag: member="tools.h::netsnmp_addrstr_hton" ref="ga894f095eacb20a9a848d60df4c6f6436" args="(char *ptr, size_t len)" -->
+        int </td>
+
+        <td class="memItemRight" valign="bottom"><b>netsnmp_addrstr_hton</b> (char *ptr, size_t len)</td>
+      </tr>
+    </table>
+    <hr />
+    <a name="_details"></a>
+
+    <h2>Detailed Description</h2>
+
+    <p>Definition in file <a class="el" href="tools_8h_source.html">tools.h</a>.</p>
+  </div>
+  <hr size="1" />
+
+  <address style="text-align: right;">
+    <small>Generated on 28 Sep 2009 for net-snmp by  <a href="http://www.doxygen.org/index.html"><img class="footer" src=
+    "doxygen.png" alt="doxygen" /></a> 1.6.1</small>
+<!-- CONTENT END -->
+<!--#include virtual="/page-bottom.html" -->
+

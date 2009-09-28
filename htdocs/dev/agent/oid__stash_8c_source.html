@@ -1,0 +1,505 @@
+<!--#set var="section" value="development" -->
+<!--#include virtual="/page-top.html" -->
+<!-- CONTENT START -->
+  <div class="navigation" id="top">
+    <div class="tabs">
+      <ul>
+        <li><a href="index.html"><span>Main Page</span></a></li>
+
+        <li><a href="pages.html"><span>Related Pages</span></a></li>
+
+        <li><a href="modules.html"><span>Modules</span></a></li>
+
+        <li><a href="annotated.html"><span>Data Structures</span></a></li>
+
+        <li class="current"><a href="files.html"><span>Files</span></a></li>
+
+        <li><a href="examples.html"><span>Examples</span></a></li>
+      </ul>
+    </div>
+
+    <div class="tabs">
+      <ul>
+        <li><a href="files.html"><span>File List</span></a></li>
+
+        <li><a href="globals.html"><span>Globals</span></a></li>
+      </ul>
+    </div>
+
+    <h1>oid_stash.c</h1>
+
+    <div class="fragment">
+      <pre class="fragment">
+<a name="l00001" id="l00001"></a>00001 <span class="preprocessor">#include &lt;net-snmp/net-snmp-config.h&gt;</span>
+<a name="l00002" id="l00002"></a>00002 
+<a name="l00003" id="l00003"></a>00003 <span class="preprocessor">#include &lt;string.h&gt;</span>
+<a name="l00004" id="l00004"></a>00004 
+<a name="l00005" id="l00005"></a>00005 <span class="preprocessor">#include &lt;stdlib.h&gt;</span>
+<a name="l00006" id="l00006"></a>00006 <span class="preprocessor">#include &lt;sys/types.h&gt;</span>
+<a name="l00007" id="l00007"></a>00007 
+<a name="l00008" id="l00008"></a>00008 <span class="preprocessor">#include &lt;net-snmp/net-snmp-includes.h&gt;</span>
+<a name="l00009" id="l00009"></a>00009 
+<a name="l00018" id="l00018"></a>00018 <span class="comment">/*</span>
+<a name="l00019" id="l00019"></a>00019 <span class="comment"> * xxx-rks: when you have some spare time:</span>
+<a name="l00020" id="l00020"></a>00020 <span class="comment"> *</span>
+<a name="l00021" id="l00021"></a>00021 <span class=
+"comment"> * b) basically, everything currently creates one node per sub-oid,</span>
+<a name="l00022" id="l00022"></a>00022 <span class=
+"comment"> *    which is less than optimal. add code to create nodes with the</span>
+<a name="l00023" id="l00023"></a>00023 <span class=
+"comment"> *    longest possible OID per node, and split nodes when necessary</span>
+<a name="l00024" id="l00024"></a>00024 <span class="comment"> *    during adds.</span>
+<a name="l00025" id="l00025"></a>00025 <span class="comment"> *</span>
+<a name="l00026" id="l00026"></a>00026 <span class=
+"comment"> * c) If you are feeling really ambitious, also merge split nodes if</span>
+<a name="l00027" id="l00027"></a>00027 <span class="comment"> *    possible on a delete.</span>
+<a name="l00028" id="l00028"></a>00028 <span class="comment"> *</span>
+<a name="l00029" id="l00029"></a>00029 <span class="comment"> * xxx-wes: uh, right, like I *ever* have that much time.</span>
+<a name="l00030" id="l00030"></a>00030 <span class="comment"> *</span>
+<a name="l00031" id="l00031"></a>00031 <span class="comment"> */</span>
+<a name="l00032" id="l00032"></a>00032 
+<a name="l00033" id="l00033"></a>00033 <span class=
+"comment">/***************************************************************************</span>
+<a name="l00034" id="l00034"></a>00034 <span class="comment"> *</span>
+<a name="l00035" id="l00035"></a>00035 <span class="comment"> *</span>
+<a name="l00036" id="l00036"></a>00036 <span class=
+"comment"> ***************************************************************************/</span>
+<a name="l00037" id="l00037"></a>00037 
+<a name="l00045" id="l00045"></a>00045 <a class="code" href=
+"structnetsnmp__oid__stash__node__s.html">netsnmp_oid_stash_node</a> *
+<a name="l00046" id="l00046"></a><a class="code" href=
+"group__oid__stash.html#gaaf5a8d0c873ffab2b0003cb344c2ede5">00046</a> <a class="code" href=
+"group__oid__stash.html#gaaf5a8d0c873ffab2b0003cb344c2ede5" title=
+"Create an netsnmp_oid_stash node.">netsnmp_oid_stash_create_sized_node</a>(<span class="keywordtype">size_t</span> mysize)
+<a name="l00047" id="l00047"></a>00047 {
+<a name="l00048" id="l00048"></a>00048     <a class="code" href=
+"structnetsnmp__oid__stash__node__s.html">netsnmp_oid_stash_node</a> *ret;
+<a name="l00049" id="l00049"></a>00049     ret = <a class="code" href="group__util.html#ga9cd013bb193de5048149afeb9d94e424"
+title="Mallocs memory of sizeof(t), zeros it and returns a pointer to it.">SNMP_MALLOC_TYPEDEF</a>(<a class="code" href=
+"structnetsnmp__oid__stash__node__s.html">netsnmp_oid_stash_node</a>);
+<a name="l00050" id="l00050"></a>00050     <span class="keywordflow">if</span> (!ret)
+<a name="l00051" id="l00051"></a>00051         <span class="keywordflow">return</span> NULL;
+<a name="l00052" id="l00052"></a>00052     ret-&gt;children = (<a class="code" href=
+"structnetsnmp__oid__stash__node__s.html">netsnmp_oid_stash_node</a>**) calloc(mysize, <span class=
+"keyword">sizeof</span>(<a class="code" href="structnetsnmp__oid__stash__node__s.html">netsnmp_oid_stash_node</a> *));
+<a name="l00053" id="l00053"></a>00053     <span class="keywordflow">if</span> (!ret-&gt;children) {
+<a name="l00054" id="l00054"></a>00054         free(ret);
+<a name="l00055" id="l00055"></a>00055         <span class="keywordflow">return</span> NULL;
+<a name="l00056" id="l00056"></a>00056     }
+<a name="l00057" id="l00057"></a>00057     ret-&gt;children_size = mysize;
+<a name="l00058" id="l00058"></a>00058     <span class="keywordflow">return</span> ret;
+<a name="l00059" id="l00059"></a>00059 }
+<a name="l00060" id="l00060"></a>00060 
+<a name="l00065" id="l00065"></a>00065 NETSNMP_INLINE <a class="code" href=
+"structnetsnmp__oid__stash__node__s.html">netsnmp_oid_stash_node</a> *
+<a name="l00066" id="l00066"></a><a class="code" href=
+"group__oid__stash.html#ga47eb52e48868cb90b12753697545b0e6">00066</a> <a class="code" href=
+"group__oid__stash.html#ga47eb52e48868cb90b12753697545b0e6" title=
+"Creates a netsnmp_oid_stash_node.">netsnmp_oid_stash_create_node</a>(<span class="keywordtype">void</span>)
+<a name="l00067" id="l00067"></a>00067 {
+<a name="l00068" id="l00068"></a>00068     <span class="keywordflow">return</span> <a class="code" href=
+"group__oid__stash.html#gaaf5a8d0c873ffab2b0003cb344c2ede5" title=
+"Create an netsnmp_oid_stash node.">netsnmp_oid_stash_create_sized_node</a>(OID_STASH_CHILDREN_SIZE);
+<a name="l00069" id="l00069"></a>00069 }
+<a name="l00070" id="l00070"></a>00070 
+<a name="l00082" id="l00082"></a>00082 <span class="keywordtype">int</span>
+<a name="l00083" id="l00083"></a><a class="code" href=
+"group__oid__stash.html#ga550530ef9aa07c3b1ae1c362b54d52ab">00083</a> <a class="code" href=
+"group__oid__stash.html#ga550530ef9aa07c3b1ae1c362b54d52ab" title=
+"adds data to the stash at a given oid.">netsnmp_oid_stash_add_data</a>(<a class="code" href=
+"structnetsnmp__oid__stash__node__s.html">netsnmp_oid_stash_node</a> **root,
+<a name="l00084" id="l00084"></a>00084                            <span class="keyword">const</span> oid * lookup, <span class=
+"keywordtype">size_t</span> lookup_len, <span class="keywordtype">void</span> *mydata)
+<a name="l00085" id="l00085"></a>00085 {
+<a name="l00086" id="l00086"></a>00086     <a class="code" href=
+"structnetsnmp__oid__stash__node__s.html">netsnmp_oid_stash_node</a> *curnode, *tmpp, *loopp;
+<a name="l00087" id="l00087"></a>00087     <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span>    i;
+<a name="l00088" id="l00088"></a>00088 
+<a name="l00089" id="l00089"></a>00089     <span class="keywordflow">if</span> (!root || !lookup || lookup_len == 0)
+<a name="l00090" id="l00090"></a>00090         <span class="keywordflow">return</span> SNMPERR_GENERR;
+<a name="l00091" id="l00091"></a>00091 
+<a name="l00092" id="l00092"></a>00092     <span class="keywordflow">if</span> (!*root) {
+<a name="l00093" id="l00093"></a>00093         *root = <a class="code" href=
+"group__oid__stash.html#ga47eb52e48868cb90b12753697545b0e6" title=
+"Creates a netsnmp_oid_stash_node.">netsnmp_oid_stash_create_node</a>();
+<a name="l00094" id="l00094"></a>00094         <span class="keywordflow">if</span> (!*root)
+<a name="l00095" id="l00095"></a>00095             <span class="keywordflow">return</span> SNMPERR_MALLOC;
+<a name="l00096" id="l00096"></a>00096     }
+<a name="l00097" id="l00097"></a>00097     DEBUGMSGTL(( <span class="stringliteral">"oid_stash"</span>, <span class=
+"stringliteral">"stash_add_data "</span>));
+<a name="l00098" id="l00098"></a>00098     DEBUGMSGOID((<span class="stringliteral">"oid_stash"</span>, lookup, lookup_len));
+<a name="l00099" id="l00099"></a>00099     DEBUGMSG((   <span class="stringliteral">"oid_stash"</span>, <span class=
+"stringliteral">"\n"</span>));
+<a name="l00100" id="l00100"></a>00100     tmpp = NULL;
+<a name="l00101" id="l00101"></a>00101     <span class=
+"keywordflow">for</span> (curnode = *root, i = 0; i &lt; lookup_len; i++) {
+<a name="l00102" id="l00102"></a>00102         tmpp = curnode-&gt;children[lookup[i] % curnode-&gt;children_size];
+<a name="l00103" id="l00103"></a>00103         <span class="keywordflow">if</span> (!tmpp) {
+<a name="l00104" id="l00104"></a>00104             <span class="comment">/*</span>
+<a name="l00105" id="l00105"></a>00105 <span class="comment">             * no child in array at all </span>
+<a name="l00106" id="l00106"></a>00106 <span class="comment">             */</span>
+<a name="l00107" id="l00107"></a>00107             tmpp = curnode-&gt;children[lookup[i] % curnode-&gt;children_size] =
+<a name="l00108" id="l00108"></a>00108                 <a class="code" href=
+"group__oid__stash.html#ga47eb52e48868cb90b12753697545b0e6" title=
+"Creates a netsnmp_oid_stash_node.">netsnmp_oid_stash_create_node</a>();
+<a name="l00109" id="l00109"></a>00109             tmpp-&gt;value = lookup[i];
+<a name="l00110" id="l00110"></a>00110             tmpp-&gt;parent = curnode;
+<a name="l00111" id="l00111"></a>00111         } <span class="keywordflow">else</span> {
+<a name="l00112" id="l00112"></a>00112             <span class=
+"keywordflow">for</span> (loopp = tmpp; loopp; loopp = loopp-&gt;next_sibling) {
+<a name="l00113" id="l00113"></a>00113                 <span class="keywordflow">if</span> (loopp-&gt;value == lookup[i])
+<a name="l00114" id="l00114"></a>00114                     <span class="keywordflow">break</span>;
+<a name="l00115" id="l00115"></a>00115             }
+<a name="l00116" id="l00116"></a>00116             <span class="keywordflow">if</span> (loopp) {
+<a name="l00117" id="l00117"></a>00117                 tmpp = loopp;
+<a name="l00118" id="l00118"></a>00118             } <span class="keywordflow">else</span> {
+<a name="l00119" id="l00119"></a>00119                 <span class="comment">/*</span>
+<a name="l00120" id="l00120"></a>00120 <span class="comment">                 * none exists.  Create it </span>
+<a name="l00121" id="l00121"></a>00121 <span class="comment">                 */</span>
+<a name="l00122" id="l00122"></a>00122                 loopp = <a class="code" href=
+"group__oid__stash.html#ga47eb52e48868cb90b12753697545b0e6" title=
+"Creates a netsnmp_oid_stash_node.">netsnmp_oid_stash_create_node</a>();
+<a name="l00123" id="l00123"></a>00123                 loopp-&gt;value = lookup[i];
+<a name="l00124" id="l00124"></a>00124                 loopp-&gt;next_sibling = tmpp;
+<a name="l00125" id="l00125"></a>00125                 loopp-&gt;parent = curnode;
+<a name="l00126" id="l00126"></a>00126                 tmpp-&gt;prev_sibling = loopp;
+<a name="l00127" id="l00127"></a>00127                 curnode-&gt;children[lookup[i] % curnode-&gt;children_size] =
+<a name="l00128" id="l00128"></a>00128                     loopp;
+<a name="l00129" id="l00129"></a>00129                 tmpp = loopp;
+<a name="l00130" id="l00130"></a>00130             }
+<a name="l00131" id="l00131"></a>00131             <span class="comment">/*</span>
+<a name="l00132" id="l00132"></a>00132 <span class="comment">             * tmpp now points to the proper node </span>
+<a name="l00133" id="l00133"></a>00133 <span class="comment">             */</span>
+<a name="l00134" id="l00134"></a>00134         }
+<a name="l00135" id="l00135"></a>00135         curnode = tmpp;
+<a name="l00136" id="l00136"></a>00136     }
+<a name="l00137" id="l00137"></a>00137     <span class="comment">/*</span>
+<a name="l00138" id="l00138"></a>00138 <span class="comment">     * tmpp now points to the exact match </span>
+<a name="l00139" id="l00139"></a>00139 <span class="comment">     */</span>
+<a name="l00140" id="l00140"></a>00140     <span class="keywordflow">if</span> (curnode-&gt;thedata)
+<a name="l00141" id="l00141"></a>00141         <span class="keywordflow">return</span> SNMPERR_GENERR;
+<a name="l00142" id="l00142"></a>00142     <span class="keywordflow">if</span> (NULL == tmpp)
+<a name="l00143" id="l00143"></a>00143         <span class="keywordflow">return</span> SNMPERR_GENERR;
+<a name="l00144" id="l00144"></a>00144     tmpp-&gt;thedata = mydata;
+<a name="l00145" id="l00145"></a>00145     <span class="keywordflow">return</span> SNMPERR_SUCCESS;
+<a name="l00146" id="l00146"></a>00146 }
+<a name="l00147" id="l00147"></a>00147 
+<a name="l00153" id="l00153"></a>00153 <a class="code" href=
+"structnetsnmp__oid__stash__node__s.html">netsnmp_oid_stash_node</a> *
+<a name="l00154" id="l00154"></a><a class="code" href=
+"group__oid__stash.html#gaa567642790e9e95ba492cb53a3d554e9">00154</a> <a class="code" href=
+"group__oid__stash.html#gaa567642790e9e95ba492cb53a3d554e9" title=
+"returns a node associated with a given OID.">netsnmp_oid_stash_get_node</a>(<a class="code" href=
+"structnetsnmp__oid__stash__node__s.html">netsnmp_oid_stash_node</a> *root,
+<a name="l00155" id="l00155"></a>00155                            <span class="keyword">const</span> oid * lookup, <span class=
+"keywordtype">size_t</span> lookup_len)
+<a name="l00156" id="l00156"></a>00156 {
+<a name="l00157" id="l00157"></a>00157     <a class="code" href=
+"structnetsnmp__oid__stash__node__s.html">netsnmp_oid_stash_node</a> *curnode, *tmpp, *loopp;
+<a name="l00158" id="l00158"></a>00158     <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span>    i;
+<a name="l00159" id="l00159"></a>00159 
+<a name="l00160" id="l00160"></a>00160     <span class="keywordflow">if</span> (!root)
+<a name="l00161" id="l00161"></a>00161         <span class="keywordflow">return</span> NULL;
+<a name="l00162" id="l00162"></a>00162     tmpp = NULL;
+<a name="l00163" id="l00163"></a>00163     <span class="keywordflow">for</span> (curnode = root, i = 0; i &lt; lookup_len; i++) {
+<a name="l00164" id="l00164"></a>00164         tmpp = curnode-&gt;children[lookup[i] % curnode-&gt;children_size];
+<a name="l00165" id="l00165"></a>00165         <span class="keywordflow">if</span> (!tmpp) {
+<a name="l00166" id="l00166"></a>00166             <span class="keywordflow">return</span> NULL;
+<a name="l00167" id="l00167"></a>00167         } <span class="keywordflow">else</span> {
+<a name="l00168" id="l00168"></a>00168             <span class=
+"keywordflow">for</span> (loopp = tmpp; loopp; loopp = loopp-&gt;next_sibling) {
+<a name="l00169" id="l00169"></a>00169                 <span class="keywordflow">if</span> (loopp-&gt;value == lookup[i])
+<a name="l00170" id="l00170"></a>00170                     <span class="keywordflow">break</span>;
+<a name="l00171" id="l00171"></a>00171             }
+<a name="l00172" id="l00172"></a>00172             <span class="keywordflow">if</span> (loopp) {
+<a name="l00173" id="l00173"></a>00173                 tmpp = loopp;
+<a name="l00174" id="l00174"></a>00174             } <span class="keywordflow">else</span> {
+<a name="l00175" id="l00175"></a>00175                 <span class="keywordflow">return</span> NULL;
+<a name="l00176" id="l00176"></a>00176             }
+<a name="l00177" id="l00177"></a>00177         }
+<a name="l00178" id="l00178"></a>00178         curnode = tmpp;
+<a name="l00179" id="l00179"></a>00179     }
+<a name="l00180" id="l00180"></a>00180     <span class="keywordflow">return</span> tmpp;
+<a name="l00181" id="l00181"></a>00181 }
+<a name="l00182" id="l00182"></a>00182 
+<a name="l00190" id="l00190"></a>00190 <a class="code" href=
+"structnetsnmp__oid__stash__node__s.html">netsnmp_oid_stash_node</a> *
+<a name="l00191" id="l00191"></a><a class="code" href=
+"group__oid__stash.html#gac01c6a62fa0db8ae20fab02c1e9cc945">00191</a> <a class="code" href=
+"group__oid__stash.html#gac01c6a62fa0db8ae20fab02c1e9cc945" title=
+"returns the next node associated with a given OID.">netsnmp_oid_stash_getnext_node</a>(<a class="code" href=
+"structnetsnmp__oid__stash__node__s.html">netsnmp_oid_stash_node</a> *root,
+<a name="l00192" id="l00192"></a>00192                                oid * lookup, <span class=
+"keywordtype">size_t</span> lookup_len)
+<a name="l00193" id="l00193"></a>00193 {
+<a name="l00194" id="l00194"></a>00194     <a class="code" href=
+"structnetsnmp__oid__stash__node__s.html">netsnmp_oid_stash_node</a> *curnode, *tmpp, *loopp;
+<a name="l00195" id="l00195"></a>00195     <span class="keywordtype">unsigned</span> <span class=
+"keywordtype">int</span>    i, j, bigger_than = 0, do_bigger = 0;
+<a name="l00196" id="l00196"></a>00196 
+<a name="l00197" id="l00197"></a>00197     <span class="keywordflow">if</span> (!root)
+<a name="l00198" id="l00198"></a>00198         <span class="keywordflow">return</span> NULL;
+<a name="l00199" id="l00199"></a>00199     tmpp = NULL;
+<a name="l00200" id="l00200"></a>00200 
+<a name="l00201" id="l00201"></a>00201     <span class="comment">/* get closest matching node */</span>
+<a name="l00202" id="l00202"></a>00202     <span class="keywordflow">for</span> (curnode = root, i = 0; i &lt; lookup_len; i++) {
+<a name="l00203" id="l00203"></a>00203         tmpp = curnode-&gt;children[lookup[i] % curnode-&gt;children_size];
+<a name="l00204" id="l00204"></a>00204         <span class="keywordflow">if</span> (!tmpp) {
+<a name="l00205" id="l00205"></a>00205             <span class="keywordflow">break</span>;
+<a name="l00206" id="l00206"></a>00206         } <span class="keywordflow">else</span> {
+<a name="l00207" id="l00207"></a>00207             <span class=
+"keywordflow">for</span> (loopp = tmpp; loopp; loopp = loopp-&gt;next_sibling) {
+<a name="l00208" id="l00208"></a>00208                 <span class="keywordflow">if</span> (loopp-&gt;value == lookup[i])
+<a name="l00209" id="l00209"></a>00209                     <span class="keywordflow">break</span>;
+<a name="l00210" id="l00210"></a>00210             }
+<a name="l00211" id="l00211"></a>00211             <span class="keywordflow">if</span> (loopp) {
+<a name="l00212" id="l00212"></a>00212                 tmpp = loopp;
+<a name="l00213" id="l00213"></a>00213             } <span class="keywordflow">else</span> {
+<a name="l00214" id="l00214"></a>00214                 <span class="keywordflow">break</span>;
+<a name="l00215" id="l00215"></a>00215             }
+<a name="l00216" id="l00216"></a>00216         }
+<a name="l00217" id="l00217"></a>00217         curnode = tmpp;
+<a name="l00218" id="l00218"></a>00218     }
+<a name="l00219" id="l00219"></a>00219 
+<a name="l00220" id="l00220"></a>00220     <span class="comment">/* find the *next* node lexographically greater */</span>
+<a name="l00221" id="l00221"></a>00221     <span class="keywordflow">if</span> (!curnode)
+<a name="l00222" id="l00222"></a>00222         <span class="keywordflow">return</span> NULL; <span class=
+"comment">/* ack! */</span>
+<a name="l00223" id="l00223"></a>00223 
+<a name="l00224" id="l00224"></a>00224     <span class="keywordflow">if</span> (i+1 &lt; lookup_len) {
+<a name="l00225" id="l00225"></a>00225         bigger_than = lookup[i+1];
+<a name="l00226" id="l00226"></a>00226         do_bigger = 1;
+<a name="l00227" id="l00227"></a>00227     }
+<a name="l00228" id="l00228"></a>00228 
+<a name="l00229" id="l00229"></a>00229     <span class="keywordflow">do</span> {
+<a name="l00230" id="l00230"></a>00230         <span class="comment">/* check the children first */</span>
+<a name="l00231" id="l00231"></a>00231         tmpp = NULL;
+<a name="l00232" id="l00232"></a>00232         <span class=
+"comment">/* next child must be (next) greater than our next search node */</span>
+<a name="l00233" id="l00233"></a>00233         <span class=
+"comment">/* XXX: should start this loop at best_nums[i]%... and wrap */</span>
+<a name="l00234" id="l00234"></a>00234         <span class=
+"keywordflow">for</span>(j = 0; j &lt; curnode-&gt;children_size; j++) {
+<a name="l00235" id="l00235"></a>00235             <span class="keywordflow">for</span> (loopp = curnode-&gt;children[j];
+<a name="l00236" id="l00236"></a>00236                  loopp; loopp = loopp-&gt;next_sibling) {
+<a name="l00237" id="l00237"></a>00237                 <span class=
+"keywordflow">if</span> ((!do_bigger || loopp-&gt;value &gt; bigger_than) &amp;&amp;
+<a name="l00238" id="l00238"></a>00238                     (!tmpp || tmpp-&gt;value &gt; loopp-&gt;value)) {
+<a name="l00239" id="l00239"></a>00239                     tmpp = loopp;
+<a name="l00240" id="l00240"></a>00240                     <span class=
+"comment">/* XXX: can do better and include min_nums[i] */</span>
+<a name="l00241" id="l00241"></a>00241                     <span class=
+"keywordflow">if</span> (tmpp-&gt;value &lt;= curnode-&gt;children_size-1) {
+<a name="l00242" id="l00242"></a>00242                         <span class="comment">/* best we can do. */</span>
+<a name="l00243" id="l00243"></a>00243                         <span class="keywordflow">goto</span> done_this_loop;
+<a name="l00244" id="l00244"></a>00244                     }
+<a name="l00245" id="l00245"></a>00245                 }
+<a name="l00246" id="l00246"></a>00246             }
+<a name="l00247" id="l00247"></a>00247         }
+<a name="l00248" id="l00248"></a>00248 
+<a name="l00249" id="l00249"></a>00249       done_this_loop:
+<a name="l00250" id="l00250"></a>00250         <span class="keywordflow">if</span> (tmpp &amp;&amp; tmpp-&gt;thedata)
+<a name="l00251" id="l00251"></a>00251             <span class="comment">/* found a node with data.  Go with it. */</span>
+<a name="l00252" id="l00252"></a>00252             <span class="keywordflow">return</span> tmpp;
+<a name="l00253" id="l00253"></a>00253 
+<a name="l00254" id="l00254"></a>00254         <span class="keywordflow">if</span> (tmpp) {
+<a name="l00255" id="l00255"></a>00255             <span class=
+"comment">/* found a child node without data, maybe find a grandchild? */</span>
+<a name="l00256" id="l00256"></a>00256             do_bigger = 0;
+<a name="l00257" id="l00257"></a>00257             curnode = tmpp;
+<a name="l00258" id="l00258"></a>00258         } <span class="keywordflow">else</span> {
+<a name="l00259" id="l00259"></a>00259             <span class=
+"comment">/* no respectable children (the bums), we'll have to go up.</span>
+<a name="l00260" id="l00260"></a>00260 <span class=
+"comment">               But to do so, they must be better than our current best_num + 1.</span>
+<a name="l00261" id="l00261"></a>00261 <span class="comment">            */</span>
+<a name="l00262" id="l00262"></a>00262             do_bigger = 1;
+<a name="l00263" id="l00263"></a>00263             bigger_than = curnode-&gt;value;
+<a name="l00264" id="l00264"></a>00264             curnode = curnode-&gt;parent;
+<a name="l00265" id="l00265"></a>00265         }
+<a name="l00266" id="l00266"></a>00266     } <span class="keywordflow">while</span> (curnode);
+<a name="l00267" id="l00267"></a>00267 
+<a name="l00268" id="l00268"></a>00268     <span class="comment">/* fell off the top */</span>
+<a name="l00269" id="l00269"></a>00269     <span class="keywordflow">return</span> NULL;
+<a name="l00270" id="l00270"></a>00270 }
+<a name="l00271" id="l00271"></a>00271 
+<a name="l00281" id="l00281"></a>00281 <span class="keywordtype">void</span>           *
+<a name="l00282" id="l00282"></a><a class="code" href=
+"group__oid__stash.html#ga0e10dfa723e95153374b3b87f5a73934">00282</a> <a class="code" href=
+"group__oid__stash.html#ga0e10dfa723e95153374b3b87f5a73934" title=
+"returns a data pointer associated with a given OID.">netsnmp_oid_stash_get_data</a>(<a class="code" href=
+"structnetsnmp__oid__stash__node__s.html">netsnmp_oid_stash_node</a> *root,
+<a name="l00283" id="l00283"></a>00283                            <span class="keyword">const</span> oid * lookup, <span class=
+"keywordtype">size_t</span> lookup_len)
+<a name="l00284" id="l00284"></a>00284 {
+<a name="l00285" id="l00285"></a>00285     <a class="code" href=
+"structnetsnmp__oid__stash__node__s.html">netsnmp_oid_stash_node</a> *ret;
+<a name="l00286" id="l00286"></a>00286     ret = <a class="code" href="group__oid__stash.html#gaa567642790e9e95ba492cb53a3d554e9"
+title="returns a node associated with a given OID.">netsnmp_oid_stash_get_node</a>(root, lookup, lookup_len);
+<a name="l00287" id="l00287"></a>00287     <span class="keywordflow">if</span> (ret)
+<a name="l00288" id="l00288"></a>00288         <span class="keywordflow">return</span> ret-&gt;thedata;
+<a name="l00289" id="l00289"></a>00289     <span class="keywordflow">return</span> NULL;
+<a name="l00290" id="l00290"></a>00290 }
+<a name="l00291" id="l00291"></a>00291 
+<a name="l00303" id="l00303"></a>00303 <span class="keywordtype">int</span>
+<a name="l00304" id="l00304"></a><a class="code" href=
+"group__oid__stash.html#gaafa8739f36e9a822aeeffd904279717d">00304</a> <a class="code" href=
+"group__oid__stash.html#gaafa8739f36e9a822aeeffd904279717d" title=
+"a wrapper around netsnmp_oid_stash_store for use with a snmp_alarm.">netsnmp_oid_stash_store_all</a>(<span class=
+"keywordtype">int</span> majorID, <span class="keywordtype">int</span> minorID,
+<a name="l00305" id="l00305"></a>00305                             <span class="keywordtype">void</span> *serverarg, <span class=
+"keywordtype">void</span> *clientarg) {
+<a name="l00306" id="l00306"></a>00306     oid oidbase[MAX_OID_LEN];
+<a name="l00307" id="l00307"></a>00307     <a class="code" href=
+"structnetsnmp__oid__stash__save__info__s.html">netsnmp_oid_stash_save_info</a> *sinfo;
+<a name="l00308" id="l00308"></a>00308     
+<a name="l00309" id="l00309"></a>00309     <span class="keywordflow">if</span> (!clientarg)
+<a name="l00310" id="l00310"></a>00310         <span class="keywordflow">return</span> SNMP_ERR_NOERROR;
+<a name="l00311" id="l00311"></a>00311     
+<a name="l00312" id="l00312"></a>00312     sinfo = (<a class="code" href=
+"structnetsnmp__oid__stash__save__info__s.html">netsnmp_oid_stash_save_info</a> *) clientarg;
+<a name="l00313" id="l00313"></a>00313     <a class="code" href="group__oid__stash.html#gae703951c514045459f350815fc78d507"
+title="stores data in a starsh tree to peristent storage.">netsnmp_oid_stash_store</a>(*(sinfo-&gt;root), sinfo-&gt;token, sinfo-&gt;dumpfn,
+<a name="l00314" id="l00314"></a>00314                             oidbase,0);
+<a name="l00315" id="l00315"></a>00315     <span class="keywordflow">return</span> SNMP_ERR_NOERROR;
+<a name="l00316" id="l00316"></a>00316 }
+<a name="l00317" id="l00317"></a>00317 
+<a name="l00333" id="l00333"></a>00333 <span class="keywordtype">void</span>
+<a name="l00334" id="l00334"></a><a class="code" href=
+"group__oid__stash.html#gae703951c514045459f350815fc78d507">00334</a> <a class="code" href=
+"group__oid__stash.html#gae703951c514045459f350815fc78d507" title=
+"stores data in a starsh tree to peristent storage.">netsnmp_oid_stash_store</a>(<a class="code" href=
+"structnetsnmp__oid__stash__node__s.html">netsnmp_oid_stash_node</a> *root,
+<a name="l00335" id="l00335"></a>00335                         <span class="keyword">const</span> <span class=
+"keywordtype">char</span> *tokenname, NetSNMPStashDump *dumpfn,
+<a name="l00336" id="l00336"></a>00336                         oid *curoid, <span class="keywordtype">size_t</span> curoid_len) {
+<a name="l00337" id="l00337"></a>00337 
+<a name="l00338" id="l00338"></a>00338     <span class="keywordtype">char</span> buf[SNMP_MAXBUF];
+<a name="l00339" id="l00339"></a>00339     <a class="code" href=
+"structnetsnmp__oid__stash__node__s.html">netsnmp_oid_stash_node</a> *tmpp;
+<a name="l00340" id="l00340"></a>00340     <span class="keywordtype">char</span> *cp;
+<a name="l00341" id="l00341"></a>00341     <span class=
+"keywordtype">char</span> *appname = netsnmp_ds_get_string(NETSNMP_DS_LIBRARY_ID, 
+<a name="l00342" id="l00342"></a>00342                                           NETSNMP_DS_LIB_APPTYPE);
+<a name="l00343" id="l00343"></a>00343     <span class="keywordtype">int</span> i;
+<a name="l00344" id="l00344"></a>00344     
+<a name="l00345" id="l00345"></a>00345     <span class="keywordflow">if</span> (!tokenname || !root || !curoid || !dumpfn)
+<a name="l00346" id="l00346"></a>00346         <span class="keywordflow">return</span>;
+<a name="l00347" id="l00347"></a>00347 
+<a name="l00348" id="l00348"></a>00348     <span class=
+"keywordflow">for</span> (i = 0; i &lt; (int)root-&gt;children_size; i++) {
+<a name="l00349" id="l00349"></a>00349         <span class="keywordflow">if</span> (root-&gt;children[i]) {
+<a name="l00350" id="l00350"></a>00350             <span class=
+"keywordflow">for</span> (tmpp = root-&gt;children[i]; tmpp; tmpp = tmpp-&gt;next_sibling) {
+<a name="l00351" id="l00351"></a>00351                 curoid[curoid_len] = tmpp-&gt;value;
+<a name="l00352" id="l00352"></a>00352                 <span class="keywordflow">if</span> (tmpp-&gt;thedata) {
+<a name="l00353" id="l00353"></a>00353                     snprintf(buf, <span class="keyword">sizeof</span>(buf), <span class=
+"stringliteral">"%s "</span>, tokenname);
+<a name="l00354" id="l00354"></a>00354                     cp = read_config_save_objid(buf+strlen(buf), curoid,
+<a name="l00355" id="l00355"></a>00355                                                 curoid_len+1);
+<a name="l00356" id="l00356"></a>00356                     *cp++ = <span class="charliteral">' '</span>;
+<a name="l00357" id="l00357"></a>00357                     *cp = <span class="charliteral">'\0'</span>;
+<a name="l00358" id="l00358"></a>00358                     <span class="keywordflow">if</span> ((*dumpfn)(cp, <span class=
+"keyword">sizeof</span>(buf) - strlen(buf),
+<a name="l00359" id="l00359"></a>00359                                   tmpp-&gt;thedata, tmpp))
+<a name="l00360" id="l00360"></a>00360                         <a class="code" href=
+"group__read__config.html#gae3adadf24d35a919f4b7a603e47583df" title=
+"read_config_store intended for use by applications to store permenant configuration...">read_config_store</a>(appname, buf);
+<a name="l00361" id="l00361"></a>00361                 }
+<a name="l00362" id="l00362"></a>00362                 <a class="code" href=
+"group__oid__stash.html#gae703951c514045459f350815fc78d507" title=
+"stores data in a starsh tree to peristent storage.">netsnmp_oid_stash_store</a>(tmpp, tokenname, dumpfn,
+<a name="l00363" id="l00363"></a>00363                                         curoid, curoid_len+1);
+<a name="l00364" id="l00364"></a>00364             }
+<a name="l00365" id="l00365"></a>00365         }
+<a name="l00366" id="l00366"></a>00366     }
+<a name="l00367" id="l00367"></a>00367 }
+<a name="l00368" id="l00368"></a>00368 
+<a name="l00373" id="l00373"></a>00373 <span class="keywordtype">void</span> 
+<a name="l00374" id="l00374"></a><a class="code" href=
+"group__oid__stash.html#ga19826a6f962e8cba28fcd4e40f218796">00374</a> <a class="code" href=
+"group__oid__stash.html#ga19826a6f962e8cba28fcd4e40f218796" title=
+"For debugging: dump the netsnmp_oid_stash tree to stdout.">oid_stash_dump</a>(<a class="code" href=
+"structnetsnmp__oid__stash__node__s.html">netsnmp_oid_stash_node</a> *root, <span class="keywordtype">char</span> *prefix)
+<a name="l00375" id="l00375"></a>00375 {
+<a name="l00376" id="l00376"></a>00376     <span class="keywordtype">char</span>            myprefix[MAX_OID_LEN * 4];
+<a name="l00377" id="l00377"></a>00377     <a class="code" href=
+"structnetsnmp__oid__stash__node__s.html">netsnmp_oid_stash_node</a> *tmpp;
+<a name="l00378" id="l00378"></a>00378     <span class=
+"keywordtype">int</span>             prefix_len = strlen(prefix) + 1;    <span class="comment">/* actually it's +2 */</span>
+<a name="l00379" id="l00379"></a>00379     <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span>    i;
+<a name="l00380" id="l00380"></a>00380 
+<a name="l00381" id="l00381"></a>00381     memset(myprefix, <span class="charliteral">' '</span>, MAX_OID_LEN * 4);
+<a name="l00382" id="l00382"></a>00382     myprefix[prefix_len] = <span class="charliteral">'\0'</span>;
+<a name="l00383" id="l00383"></a>00383 
+<a name="l00384" id="l00384"></a>00384     <span class="keywordflow">for</span> (i = 0; i &lt; root-&gt;children_size; i++) {
+<a name="l00385" id="l00385"></a>00385         <span class="keywordflow">if</span> (root-&gt;children[i]) {
+<a name="l00386" id="l00386"></a>00386             <span class=
+"keywordflow">for</span> (tmpp = root-&gt;children[i]; tmpp; tmpp = tmpp-&gt;next_sibling) {
+<a name="l00387" id="l00387"></a>00387                 printf(<span class=
+"stringliteral">"%s%ld@%d: %s\n"</span>, prefix, tmpp-&gt;value, i,
+<a name="l00388" id="l00388"></a>00388                        (tmpp-&gt;thedata) ? <span class=
+"stringliteral">"DATA"</span> : <span class="stringliteral">""</span>);
+<a name="l00389" id="l00389"></a>00389                 <a class="code" href=
+"group__oid__stash.html#ga19826a6f962e8cba28fcd4e40f218796" title=
+"For debugging: dump the netsnmp_oid_stash tree to stdout.">oid_stash_dump</a>(tmpp, myprefix);
+<a name="l00390" id="l00390"></a>00390             }
+<a name="l00391" id="l00391"></a>00391         }
+<a name="l00392" id="l00392"></a>00392     }
+<a name="l00393" id="l00393"></a>00393 }
+<a name="l00394" id="l00394"></a>00394 
+<a name="l00400" id="l00400"></a>00400 <span class="keywordtype">void</span>
+<a name="l00401" id="l00401"></a><a class="code" href=
+"group__oid__stash.html#ga8b3ab7792cfc2014af022a6eb2ecabc0">00401</a> <a class="code" href=
+"group__oid__stash.html#ga8b3ab7792cfc2014af022a6eb2ecabc0" title=
+"Frees the contents of a netsnmp_oid_stash tree.">netsnmp_oid_stash_free</a>(<a class="code" href=
+"structnetsnmp__oid__stash__node__s.html">netsnmp_oid_stash_node</a> **root,
+<a name="l00402" id="l00402"></a>00402                        NetSNMPStashFreeNode *freefn) {
+<a name="l00403" id="l00403"></a>00403 
+<a name="l00404" id="l00404"></a>00404     <a class="code" href=
+"structnetsnmp__oid__stash__node__s.html">netsnmp_oid_stash_node</a> *curnode, *tmpp;
+<a name="l00405" id="l00405"></a>00405     <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span>    i;
+<a name="l00406" id="l00406"></a>00406 
+<a name="l00407" id="l00407"></a>00407     <span class="keywordflow">if</span> (!root || !*root)
+<a name="l00408" id="l00408"></a>00408         <span class="keywordflow">return</span>;
+<a name="l00409" id="l00409"></a>00409 
+<a name="l00410" id="l00410"></a>00410     <span class="comment">/* loop through all our children and free each node */</span>
+<a name="l00411" id="l00411"></a>00411     <span class="keywordflow">for</span> (i = 0; i &lt; (*root)-&gt;children_size; i++) {
+<a name="l00412" id="l00412"></a>00412         <span class="keywordflow">if</span> ((*root)-&gt;children[i]) {
+<a name="l00413" id="l00413"></a>00413             <span class=
+"keywordflow">for</span>(tmpp = (*root)-&gt;children[i]; tmpp; tmpp = curnode) {
+<a name="l00414" id="l00414"></a>00414                 <span class="keywordflow">if</span> (tmpp-&gt;thedata) {
+<a name="l00415" id="l00415"></a>00415                     <span class="keywordflow">if</span> (freefn)
+<a name="l00416" id="l00416"></a>00416                         (*freefn)(tmpp-&gt;thedata);
+<a name="l00417" id="l00417"></a>00417                     <span class="keywordflow">else</span>
+<a name="l00418" id="l00418"></a>00418                         free(tmpp-&gt;thedata);
+<a name="l00419" id="l00419"></a>00419                 }
+<a name="l00420" id="l00420"></a>00420                 curnode = tmpp-&gt;next_sibling;
+<a name="l00421" id="l00421"></a>00421                 <a class="code" href=
+"group__oid__stash.html#ga8b3ab7792cfc2014af022a6eb2ecabc0" title=
+"Frees the contents of a netsnmp_oid_stash tree.">netsnmp_oid_stash_free</a>(&amp;tmpp, freefn);
+<a name="l00422" id="l00422"></a>00422             }
+<a name="l00423" id="l00423"></a>00423         }
+<a name="l00424" id="l00424"></a>00424     }
+<a name="l00425" id="l00425"></a>00425     free((*root)-&gt;children);
+<a name="l00426" id="l00426"></a>00426     free (*root);
+<a name="l00427" id="l00427"></a>00427     *root = NULL;
+<a name="l00428" id="l00428"></a>00428 }
+<a name="l00429" id="l00429"></a>00429 
+<a name="l00430" id="l00430"></a>00430 <span class="keywordtype">void</span>
+<a name="l00431" id="l00431"></a>00431 netsnmp_oid_stash_no_free(<span class="keywordtype">void</span> *bogus)
+<a name="l00432" id="l00432"></a>00432 {
+<a name="l00433" id="l00433"></a>00433     <span class="comment">/* noop */</span>
+<a name="l00434" id="l00434"></a>00434 }
+<a name="l00435" id="l00435"></a>00435 
+</pre>
+    </div>
+  </div>
+  <hr size="1" />
+
+  <address style="text-align: right;">
+    <small>Generated on 28 Sep 2009 for net-snmp by  <a href="http://www.doxygen.org/index.html"><img class="footer" src=
+    "doxygen.png" alt="doxygen" /></a> 1.6.1</small>
+<!-- CONTENT END -->
+<!--#include virtual="/page-bottom.html" -->
+

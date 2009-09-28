@@ -1,0 +1,170 @@
+<!--#set var="section" value="development" -->
+<!--#include virtual="/page-top.html" -->
+<!-- CONTENT START -->
+  <div class="navigation" id="top">
+    <div class="tabs">
+      <ul>
+        <li><a href="index.html"><span>Main Page</span></a></li>
+
+        <li><a href="pages.html"><span>Related Pages</span></a></li>
+
+        <li><a href="modules.html"><span>Modules</span></a></li>
+
+        <li class="current"><a href="annotated.html"><span>Data Structures</span></a></li>
+
+        <li><a href="files.html"><span>Files</span></a></li>
+
+        <li><a href="examples.html"><span>Examples</span></a></li>
+      </ul>
+    </div>
+
+    <div class="tabs">
+      <ul>
+        <li><a href="annotated.html"><span>Data Structures</span></a></li>
+
+        <li><a href="functions.html"><span>Data Fields</span></a></li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="contents">
+    <h1>netsnmp_table_data_set_storage_s Struct Reference</h1><!-- doxytag: class="netsnmp_table_data_set_storage_s" -->
+
+    <table border="0" cellpadding="0" cellspacing="0">
+      <tr>
+        <td colspan="2">
+          <h2>Data Fields</h2>
+        </td>
+      </tr>
+
+      <tr>
+        <td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a5a8e524c2fc6bb7642050219a30da8cd" name=
+        "a5a8e524c2fc6bb7642050219a30da8cd"></a>
+        <!-- doxytag: member="netsnmp_table_data_set_storage_s::column" ref="a5a8e524c2fc6bb7642050219a30da8cd" args="" -->
+        unsigned int </td>
+
+        <td class="memItemRight" valign="bottom"><b>column</b></td>
+      </tr>
+
+      <tr>
+        <td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a7c63269aeecd54ee5a9e390bfdf97a1c" name=
+        "a7c63269aeecd54ee5a9e390bfdf97a1c"></a>
+        <!-- doxytag: member="netsnmp_table_data_set_storage_s::writable" ref="a7c63269aeecd54ee5a9e390bfdf97a1c" args="" -->
+        char </td>
+
+        <td class="memItemRight" valign="bottom"><b>writable</b></td>
+      </tr>
+
+      <tr>
+        <td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a2a4aa448aadc017c74e0da332c5f3a04" name=
+        "a2a4aa448aadc017c74e0da332c5f3a04"></a>
+        <!-- doxytag: member="netsnmp_table_data_set_storage_s::change_ok_fn" ref="a2a4aa448aadc017c74e0da332c5f3a04" args="" -->
+        Netsnmp_Value_Change_Ok * </td>
+
+        <td class="memItemRight" valign="bottom"><b>change_ok_fn</b></td>
+      </tr>
+
+      <tr>
+        <td class="memItemLeft" align="right" valign="top"><a class="anchor" id="adf1ac43bba8c0e355b66d1345260843b" name=
+        "adf1ac43bba8c0e355b66d1345260843b"></a>
+        <!-- doxytag: member="netsnmp_table_data_set_storage_s::my_change_data" ref="adf1ac43bba8c0e355b66d1345260843b" args="" -->
+        void * </td>
+
+        <td class="memItemRight" valign="bottom"><b>my_change_data</b></td>
+      </tr>
+
+      <tr>
+        <td class="memItemLeft" align="right" valign="top"><a class="anchor" id="ae2ffba72673f0281e21fdac5bef9f341" name=
+        "ae2ffba72673f0281e21fdac5bef9f341"></a>
+        <!-- doxytag: member="netsnmp_table_data_set_storage_s::type" ref="ae2ffba72673f0281e21fdac5bef9f341" args="" -->
+        u_char </td>
+
+        <td class="memItemRight" valign="bottom"><b>type</b></td>
+      </tr>
+
+      <tr>
+        <td class="memItemLeft"><a class="anchor" id="addee023a1bfc07650bf637c3916eef00" name=
+        "addee023a1bfc07650bf637c3916eef00"></a>
+        <!-- doxytag: member="netsnmp_table_data_set_storage_s::data" ref="addee023a1bfc07650bf637c3916eef00" args="" -->
+        union {</td>
+      </tr>
+
+      <tr>
+        <td class="memItemLeft">   void *   <b>voidp</b></td>
+      </tr>
+
+      <tr>
+        <td class="memItemLeft">   long *   <b>integer</b></td>
+      </tr>
+
+      <tr>
+        <td class="memItemLeft">   u_char *   <b>string</b></td>
+      </tr>
+
+      <tr>
+        <td class="memItemLeft">   oid *   <b>objid</b></td>
+      </tr>
+
+      <tr>
+        <td class="memItemLeft">   u_char *   <b>bitstring</b></td>
+      </tr>
+
+      <tr>
+        <td class="memItemLeft">   struct <a class="el" href="structcounter64.html">counter64</a> *   <b>counter64</b></td>
+      </tr>
+
+      <tr>
+        <td class="memItemLeft">   float *   <b>floatVal</b></td>
+      </tr>
+
+      <tr>
+        <td class="memItemLeft">   double *   <b>doubleVal</b></td>
+      </tr>
+
+      <tr>
+        <td class="memItemLeft" valign="top">} </td>
+
+        <td class="memItemRight" valign="bottom"><b>data</b></td>
+      </tr>
+
+      <tr>
+        <td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a2d0e69a4adf780debbe2d7606d6f91ce" name=
+        "a2d0e69a4adf780debbe2d7606d6f91ce"></a>
+        <!-- doxytag: member="netsnmp_table_data_set_storage_s::data_len" ref="a2d0e69a4adf780debbe2d7606d6f91ce" args="" -->
+        u_long </td>
+
+        <td class="memItemRight" valign="bottom"><b>data_len</b></td>
+      </tr>
+
+      <tr>
+        <td class="memItemLeft" align="right" valign="top"><a class="anchor" id="aab562e98ee1c115400f0bbcd8bdb7a9a" name=
+        "aab562e98ee1c115400f0bbcd8bdb7a9a"></a>
+        <!-- doxytag: member="netsnmp_table_data_set_storage_s::next" ref="aab562e98ee1c115400f0bbcd8bdb7a9a" args="" -->
+        struct<br class="typebreak" />
+        <a class="el" href="structnetsnmp__table__data__set__storage__s.html">netsnmp_table_data_set_storage_s</a> * </td>
+
+        <td class="memItemRight" valign="bottom"><b>next</b></td>
+      </tr>
+    </table>
+    <hr />
+    <a name="_details"></a>
+
+    <h2>Detailed Description</h2>
+
+    <p>Definition at line <a class="el" href="table__dataset_8h_source.html#l00035">35</a> of file <a class="el" href=
+    "table__dataset_8h_source.html">table_dataset.h</a>.</p>
+    <hr />
+    The documentation for this struct was generated from the following file:
+
+    <ul>
+      <li><a class="el" href="table__dataset_8h_source.html">table_dataset.h</a></li>
+    </ul>
+  </div>
+  <hr size="1" />
+
+  <address style="text-align: right;">
+    <small>Generated on 28 Sep 2009 for net-snmp by  <a href="http://www.doxygen.org/index.html"><img class="footer" src=
+    "doxygen.png" alt="doxygen" /></a> 1.6.1</small>
+<!-- CONTENT END -->
+<!--#include virtual="/page-bottom.html" -->
+

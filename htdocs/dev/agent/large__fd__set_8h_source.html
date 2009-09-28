@@ -1,0 +1,196 @@
+<!--#set var="section" value="development" -->
+<!--#include virtual="/page-top.html" -->
+<!-- CONTENT START -->
+  <div class="navigation" id="top">
+    <div class="tabs">
+      <ul>
+        <li><a href="index.html"><span>Main Page</span></a></li>
+
+        <li><a href="pages.html"><span>Related Pages</span></a></li>
+
+        <li><a href="modules.html"><span>Modules</span></a></li>
+
+        <li><a href="annotated.html"><span>Data Structures</span></a></li>
+
+        <li class="current"><a href="files.html"><span>Files</span></a></li>
+
+        <li><a href="examples.html"><span>Examples</span></a></li>
+      </ul>
+    </div>
+
+    <div class="tabs">
+      <ul>
+        <li><a href="files.html"><span>File List</span></a></li>
+
+        <li><a href="globals.html"><span>Globals</span></a></li>
+      </ul>
+    </div>
+
+    <h1>large_fd_set.h</h1><a href="large__fd__set_8h.html">Go to the documentation of this file.</a>
+
+    <div class="fragment">
+      <pre class="fragment">
+<a name="l00001" id="l00001"></a>00001 
+<a name="l00008" id="l00008"></a>00008 <span class="preprocessor">#ifndef LARGE_FD_SET_H</span>
+<a name="l00009" id="l00009"></a>00009 <span class="preprocessor">#define LARGE_FD_SET_H</span>
+<a name="l00010" id="l00010"></a>00010 
+<a name="l00011" id="l00011"></a>00011 
+<a name="l00012" id="l00012"></a>00012 <span class="preprocessor">#include &lt;net-snmp/net-snmp-config.h&gt;</span>
+<a name="l00013" id="l00013"></a>00013 <span class="preprocessor">#include &lt;net-snmp/types.h&gt;</span>
+<a name="l00014" id="l00014"></a>00014 
+<a name="l00015" id="l00015"></a>00015 <span class="preprocessor">#ifdef HAVE_SYS_SELECT_H</span>
+<a name="l00016" id="l00016"></a>00016 <span class="preprocessor">#include &lt;sys/select.h&gt;</span>
+<a name="l00017" id="l00017"></a>00017 <span class="preprocessor">#endif</span>
+<a name="l00018" id="l00018"></a>00018 
+<a name="l00019" id="l00019"></a>00019 <span class=
+"preprocessor">#if defined(HAVE_WINSOCK_H) &amp;&amp; ! defined(_WINSOCKAPI_)</span>
+<a name="l00020" id="l00020"></a>00020 <span class=
+"preprocessor">#error &lt;winsock.h&gt; or &lt;winsock2.h&gt; must have been included before this file.</span>
+<a name="l00021" id="l00021"></a>00021 <span class="preprocessor">#endif</span>
+<a name="l00022" id="l00022"></a>00022 
+<a name="l00023" id="l00023"></a>00023 
+<a name="l00024" id="l00024"></a>00024 <span class="preprocessor">#ifdef __cplusplus</span>
+<a name="l00025" id="l00025"></a>00025 <span class="keyword">extern</span> <span class="stringliteral">"C"</span> {
+<a name="l00026" id="l00026"></a>00026 <span class="preprocessor">#endif</span>
+<a name="l00027" id="l00027"></a>00027 
+<a name="l00028" id="l00028"></a>00028 
+<a name="l00029" id="l00029"></a>00029 
+<a name="l00034" id="l00034"></a><a class="code" href=
+"large__fd__set_8h.html#aaf24b418cc48c6237cea14ba291a9629">00034</a> <span class=
+"preprocessor">#define NETSNMP_LARGE_FD_SET(fd, fdset) \</span>
+<a name="l00035" id="l00035"></a>00035 <span class="preprocessor">                    netsnmp_large_fd_setfd(fd, fdset)</span>
+<a name="l00036" id="l00036"></a>00036 
+<a name="l00042" id="l00042"></a><a class="code" href=
+"large__fd__set_8h.html#acb096042c57f6f01d18dcaebbaea24d5">00042</a> <span class=
+"preprocessor">#define NETSNMP_LARGE_FD_CLR(fd, fdset) \</span>
+<a name="l00043" id="l00043"></a>00043 <span class="preprocessor">                    netsnmp_large_fd_clr(fd, fdset)</span>
+<a name="l00044" id="l00044"></a>00044 
+<a name="l00049" id="l00049"></a><a class="code" href=
+"large__fd__set_8h.html#aefdeecf5aa249eaee3e687cfa4922e14">00049</a> <span class=
+"preprocessor">#define NETSNMP_LARGE_FD_ISSET(fd, fdset) \</span>
+<a name="l00050" id="l00050"></a>00050 <span class="preprocessor">                    netsnmp_large_fd_is_set(fd, fdset)</span>
+<a name="l00051" id="l00051"></a>00051 
+<a name="l00052" id="l00052"></a>00052 <span class="preprocessor">#if ! defined(cygwin) &amp;&amp; defined(HAVE_WINSOCK_H)</span>
+<a name="l00053" id="l00053"></a>00053 
+<a name="l00055" id="l00055"></a>00055 <span class=
+"preprocessor">#define NETSNMP_FD_SET_BYTES(setsize) (sizeof(fd_set) + sizeof(SOCKET) * (setsize - FD_SETSIZE))</span>
+<a name="l00056" id="l00056"></a>00056 
+<a name="l00058" id="l00058"></a>00058 <span class="preprocessor">#define NETSNMP_LARGE_FD_ZERO(fdset) \</span>
+<a name="l00059" id="l00059"></a>00059 <span class=
+"preprocessor">    do { (fdset)-&gt;lfs_setptr-&gt;fd_count = 0; } while(0)</span>
+<a name="l00060" id="l00060"></a>00060 
+<a name="l00061" id="l00061"></a>00061 
+<a name="l00062" id="l00062"></a>00062 <span class="keywordtype">void</span>   netsnmp_large_fd_setfd( SOCKET fd, <a class="code"
+href="structnetsnmp__large__fd__set__s.html" title=
+"Structure for holding a set of file descriptors, similar to fd_set.">netsnmp_large_fd_set</a> *fdset);
+<a name="l00063" id="l00063"></a>00063 <span class="keywordtype">void</span>   netsnmp_large_fd_clr(   SOCKET fd, <a class="code"
+href="structnetsnmp__large__fd__set__s.html" title=
+"Structure for holding a set of file descriptors, similar to fd_set.">netsnmp_large_fd_set</a> *fdset);
+<a name="l00064" id="l00064"></a>00064 <span class="keywordtype">int</span>    netsnmp_large_fd_is_set(SOCKET fd, <a class="code"
+href="structnetsnmp__large__fd__set__s.html" title=
+"Structure for holding a set of file descriptors, similar to fd_set.">netsnmp_large_fd_set</a> *fdset);
+<a name="l00065" id="l00065"></a>00065 
+<a name="l00066" id="l00066"></a>00066 <span class="preprocessor">#else</span>
+<a name="l00067" id="l00067"></a>00067 
+<a name="l00074" id="l00074"></a><a class="code" href=
+"large__fd__set_8h.html#a9920b575752573c9afbba528629b2f52">00074</a> <span class=
+"preprocessor">#define NETSNMP_FD_MASK_SIZE sizeof(((fd_set*)0)-&gt;fds_bits)</span>
+<a name="l00075" id="l00075"></a>00075 
+<a name="l00077" id="l00077"></a><a class="code" href=
+"large__fd__set_8h.html#a82b687501117a641b47b00554a98ffa2">00077</a> <span class=
+"preprocessor">#define NETSNMP_BITS_PER_FD_MASK (8 * NETSNMP_FD_MASK_SIZE)</span>
+<a name="l00078" id="l00078"></a>00078 
+<a name="l00080" id="l00080"></a><a class="code" href=
+"large__fd__set_8h.html#af8c391502a413074b0776ddde8d494f9">00080</a> <span class=
+"preprocessor">#define NETSNMP_FD_SET_ELEM_COUNT(setsize) \</span>
+<a name="l00081" id="l00081"></a>00081 <span class=
+"preprocessor">    (setsize + NETSNMP_BITS_PER_FD_MASK - 1) / NETSNMP_BITS_PER_FD_MASK</span>
+<a name="l00082" id="l00082"></a>00082 
+<a name="l00084" id="l00084"></a><a class="code" href=
+"large__fd__set_8h.html#a665a0531fe466f76777c370d3ce2e31d">00084</a> <span class=
+"preprocessor">#define NETSNMP_FD_SET_BYTES(setsize) \</span>
+<a name="l00085" id="l00085"></a>00085 <span class=
+"preprocessor">    (NETSNMP_FD_SET_ELEM_COUNT(setsize) * NETSNMP_FD_MASK_SIZE)</span>
+<a name="l00086" id="l00086"></a>00086 
+<a name="l00088" id="l00088"></a><a class="code" href=
+"large__fd__set_8h.html#a15e2b3532107235cacb0b1bf015326b8">00088</a> <span class=
+"preprocessor">#define NETSNMP_LARGE_FD_ZERO(fdset)                       \</span>
+<a name="l00089" id="l00089"></a>00089 <span class=
+"preprocessor">  do {                                                     \</span>
+<a name="l00090" id="l00090"></a>00090 <span class=
+"preprocessor">    int __i;                                               \</span>
+<a name="l00091" id="l00091"></a>00091 <span class=
+"preprocessor">    fd_set *__arr = &amp;(fdset)-&gt;lfs_set;                     \</span>
+<a name="l00092" id="l00092"></a>00092 <span class=
+"preprocessor">    __i = NETSNMP_FD_SET_ELEM_COUNT((fdset)-&gt;lfs_setsize); \</span>
+<a name="l00093" id="l00093"></a>00093 <span class=
+"preprocessor">    for ( ; __i &gt; 0; __i--)                                \</span>
+<a name="l00094" id="l00094"></a>00094 <span class=
+"preprocessor">      __arr-&gt;fds_bits[__i - 1] = 0;                        \</span>
+<a name="l00095" id="l00095"></a>00095 <span class="preprocessor">  } while (0)</span>
+<a name="l00096" id="l00096"></a>00096 
+<a name="l00097" id="l00097"></a>00097 
+<a name="l00098" id="l00098"></a>00098 <span class="keywordtype">void</span>   netsnmp_large_fd_setfd( <span class=
+"keywordtype">int</span> fd, <a class="code" href="structnetsnmp__large__fd__set__s.html" title=
+"Structure for holding a set of file descriptors, similar to fd_set.">netsnmp_large_fd_set</a> *fdset);
+<a name="l00099" id="l00099"></a>00099 <span class="keywordtype">void</span>   netsnmp_large_fd_clr(   <span class=
+"keywordtype">int</span> fd, <a class="code" href="structnetsnmp__large__fd__set__s.html" title=
+"Structure for holding a set of file descriptors, similar to fd_set.">netsnmp_large_fd_set</a> *fdset);
+<a name="l00100" id="l00100"></a>00100 <span class="keywordtype">int</span>    netsnmp_large_fd_is_set(<span class=
+"keywordtype">int</span> fd, <a class="code" href="structnetsnmp__large__fd__set__s.html" title=
+"Structure for holding a set of file descriptors, similar to fd_set.">netsnmp_large_fd_set</a> *fdset);
+<a name="l00101" id="l00101"></a>00101 
+<a name="l00102" id="l00102"></a>00102 <span class="preprocessor">#endif</span>
+<a name="l00103" id="l00103"></a>00103 
+<a name="l00112" id="l00112"></a>00112 <span class="keywordtype">void</span>   <a class="code" href=
+"large__fd__set_8c.html#a2e26908893f0594f9eb900c816a021c0" title=
+"Initialize a netsnmp_large_fd_set structure.">netsnmp_large_fd_set_init</a>(   <a class="code" href=
+"structnetsnmp__large__fd__set__s.html" title=
+"Structure for holding a set of file descriptors, similar to fd_set.">netsnmp_large_fd_set</a> *fdset, <span class=
+"keywordtype">int</span> setsize);
+<a name="l00113" id="l00113"></a>00113 
+<a name="l00118" id="l00118"></a>00118 <span class="keywordtype">void</span>   <a class="code" href=
+"large__fd__set_8c.html#a70912da51cccac26ecf51388f6a2a8bd" title=
+"Modify the size of a file descriptor set and preserve the first min(fdset-&amp;gt;lfs_setsize...">netsnmp_large_fd_set_resize</a>( <a class="code"
+href="structnetsnmp__large__fd__set__s.html" title=
+"Structure for holding a set of file descriptors, similar to fd_set.">netsnmp_large_fd_set</a> *fdset, <span class=
+"keywordtype">int</span> setsize);
+<a name="l00119" id="l00119"></a>00119 
+<a name="l00121" id="l00121"></a>00121 <span class="keywordtype">void</span>   <a class="code" href=
+"large__fd__set_8c.html#a2bac85898fa582b08bb0e4a92d9f3107" title=
+"Deallocate the memory allocated by netsnmp_large_fd_set_init.">netsnmp_large_fd_set_cleanup</a>(<a class="code" href=
+"structnetsnmp__large__fd__set__s.html" title=
+"Structure for holding a set of file descriptors, similar to fd_set.">netsnmp_large_fd_set</a> *fdset);
+<a name="l00122" id="l00122"></a>00122 
+<a name="l00128" id="l00128"></a>00128 <span class="keywordtype">void</span>   <a class="code" href=
+"large__fd__set_8c.html#ab75fccd8c7a37c43a89d4bbf2e9011d4" title=
+"Copy an fd_set to a netsnmp_large_fd_set structure.">netsnmp_copy_fd_set_to_large_fd_set</a>(<a class="code" href=
+"structnetsnmp__large__fd__set__s.html" title=
+"Structure for holding a set of file descriptors, similar to fd_set.">netsnmp_large_fd_set</a> *dst,
+<a name="l00129" id="l00129"></a>00129                                                    <span class=
+"keyword">const</span> fd_set *src);
+<a name="l00130" id="l00130"></a>00130 
+<a name="l00137" id="l00137"></a>00137 <span class="keywordtype">int</span>    <a class="code" href=
+"large__fd__set_8c.html#a6da313d6a1f5e13da20ba26cbe961a67" title=
+"Copy a netsnmp_large_fd_set structure into an fd_set.">netsnmp_copy_large_fd_set_to_fd_set</a>(              fd_set *dst,
+<a name="l00138" id="l00138"></a>00138                                      <span class="keyword">const</span> <a class="code"
+href="structnetsnmp__large__fd__set__s.html" title=
+"Structure for holding a set of file descriptors, similar to fd_set.">netsnmp_large_fd_set</a> *src);
+<a name="l00139" id="l00139"></a>00139 
+<a name="l00140" id="l00140"></a>00140 <span class="preprocessor">#ifdef __cplusplus</span>
+<a name="l00141" id="l00141"></a>00141 }
+<a name="l00142" id="l00142"></a>00142 <span class="preprocessor">#endif</span>
+<a name="l00143" id="l00143"></a>00143 
+<a name="l00144" id="l00144"></a>00144 
+<a name="l00145" id="l00145"></a>00145 <span class="preprocessor">#endif </span><span class="comment">/* LARGE_FD_SET_H */</span>
+</pre>
+    </div>
+  </div>
+  <hr size="1" />
+
+  <address style="text-align: right;">
+    <small>Generated on 28 Sep 2009 for net-snmp by  <a href="http://www.doxygen.org/index.html"><img class="footer" src=
+    "doxygen.png" alt="doxygen" /></a> 1.6.1</small>
+<!-- CONTENT END -->
+<!--#include virtual="/page-bottom.html" -->
+

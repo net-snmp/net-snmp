@@ -1,0 +1,181 @@
+<!--#set var="section" value="development" -->
+<!--#include virtual="/page-top.html" -->
+<!-- CONTENT START -->
+  <div class="navigation" id="top">
+    <div class="tabs">
+      <ul>
+        <li><a href="index.html"><span>Main Page</span></a></li>
+
+        <li><a href="pages.html"><span>Related Pages</span></a></li>
+
+        <li><a href="modules.html"><span>Modules</span></a></li>
+
+        <li class="current"><a href="annotated.html"><span>Data Structures</span></a></li>
+
+        <li><a href="files.html"><span>Files</span></a></li>
+
+        <li><a href="examples.html"><span>Examples</span></a></li>
+      </ul>
+    </div>
+
+    <div class="tabs">
+      <ul>
+        <li><a href="annotated.html"><span>Data Structures</span></a></li>
+
+        <li><a href="functions.html"><span>Data Fields</span></a></li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="contents">
+    <h1>netsnmp_large_fd_set_s Struct Reference</h1><!-- doxytag: class="netsnmp_large_fd_set_s" -->
+
+    <p>Structure for holding a set of file descriptors, similar to fd_set. <a href="#_details">More...</a></p>
+
+    <p><code>#include &lt;<a class="el" href="library_2types_8h_source.html">types.h</a>&gt;</code></p>
+
+    <table border="0" cellpadding="0" cellspacing="0">
+      <tr>
+        <td colspan="2">
+          <h2>Data Fields</h2>
+        </td>
+      </tr>
+
+      <tr>
+        <td class="memItemLeft" align="right" valign="top">unsigned </td>
+
+        <td class="memItemRight" valign="bottom"><a class="el" href=
+        "structnetsnmp__large__fd__set__s.html#aeda7a4457bc29ec701b170acc4866ee7">lfs_setsize</a></td>
+      </tr>
+
+      <tr>
+        <td class="mdescLeft"> </td>
+
+        <td class="mdescRight">Maximum set size. <a href="#aeda7a4457bc29ec701b170acc4866ee7"></a><br /></td>
+      </tr>
+
+      <tr>
+        <td class="memItemLeft" align="right" valign="top">fd_set * </td>
+
+        <td class="memItemRight" valign="bottom"><a class="el" href=
+        "structnetsnmp__large__fd__set__s.html#a18d71a0c3608a3db3b72e8e9f3bfcc7a">lfs_setptr</a></td>
+      </tr>
+
+      <tr>
+        <td class="mdescLeft"> </td>
+
+        <td class="mdescRight">Points to lfs_set if lfs_setsize &lt;= FD_SETSIZE, and otherwise to dynamically allocated memory.
+        <a href="#a18d71a0c3608a3db3b72e8e9f3bfcc7a"></a><br /></td>
+      </tr>
+
+      <tr>
+        <td class="memItemLeft" align="right" valign="top">fd_set </td>
+
+        <td class="memItemRight" valign="bottom"><a class="el" href=
+        "structnetsnmp__large__fd__set__s.html#a1cf4b891f5e8e08f3b5b281b15799937">lfs_set</a></td>
+      </tr>
+
+      <tr>
+        <td class="mdescLeft"> </td>
+
+        <td class="mdescRight">File descriptor / socket set data if lfs_setsize &lt;= FD_SETSIZE. <a href=
+        "#a1cf4b891f5e8e08f3b5b281b15799937"></a><br /></td>
+      </tr>
+    </table>
+    <hr />
+    <a name="_details"></a>
+
+    <h2>Detailed Description</h2>
+
+    <p>Structure for holding a set of file descriptors, similar to fd_set.</p>
+
+    <p>This structure however can hold so-called large file descriptors (&gt;= FD_SETSIZE or 1024) on Unix systems or more than
+    FD_SETSIZE (64) sockets on Windows systems.</p>
+
+    <p>It is safe to allocate this structure on the stack.</p>
+
+    <p>This structure must be initialized by calling <a class="el" href=
+    "large__fd__set_8c.html#a2e26908893f0594f9eb900c816a021c0" title=
+    "Initialize a netsnmp_large_fd_set structure.">netsnmp_large_fd_set_init()</a> and must be cleaned up via <a class="el" href=
+    "large__fd__set_8c.html#a2bac85898fa582b08bb0e4a92d9f3107" title=
+    "Deallocate the memory allocated by netsnmp_large_fd_set_init.">netsnmp_large_fd_set_cleanup()</a>. If this last function is
+    not called this may result in a memory leak.</p>
+
+    <p>Definition at line <a class="el" href="library_2types_8h_source.html#l00065">65</a> of file <a class="el" href=
+    "library_2types_8h_source.html">library/types.h</a>.</p>
+    <hr />
+
+    <h2>Field Documentation</h2><a class="anchor" id="a1cf4b891f5e8e08f3b5b281b15799937" name=
+    "a1cf4b891f5e8e08f3b5b281b15799937"></a>
+    <!-- doxytag: member="netsnmp_large_fd_set_s::lfs_set" ref="a1cf4b891f5e8e08f3b5b281b15799937" args="" -->
+
+    <div class="memitem">
+      <div class="memproto">
+        <table class="memname">
+          <tr>
+            <td class="memname">fd_set <a class="el" href=
+            "structnetsnmp__large__fd__set__s.html#a1cf4b891f5e8e08f3b5b281b15799937">netsnmp_large_fd_set_s::lfs_set</a></td>
+          </tr>
+        </table>
+      </div>
+
+      <div class="memdoc">
+        <p>File descriptor / socket set data if lfs_setsize &lt;= FD_SETSIZE.</p>
+
+        <p>Definition at line <a class="el" href="library_2types_8h_source.html#l00074">74</a> of file <a class="el" href=
+        "library_2types_8h_source.html">library/types.h</a>.</p>
+      </div>
+    </div><a class="anchor" id="a18d71a0c3608a3db3b72e8e9f3bfcc7a" name="a18d71a0c3608a3db3b72e8e9f3bfcc7a"></a>
+    <!-- doxytag: member="netsnmp_large_fd_set_s::lfs_setptr" ref="a18d71a0c3608a3db3b72e8e9f3bfcc7a" args="" -->
+
+    <div class="memitem">
+      <div class="memproto">
+        <table class="memname">
+          <tr>
+            <td class="memname">fd_set* <a class="el" href=
+            "structnetsnmp__large__fd__set__s.html#a18d71a0c3608a3db3b72e8e9f3bfcc7a">netsnmp_large_fd_set_s::lfs_setptr</a></td>
+          </tr>
+        </table>
+      </div>
+
+      <div class="memdoc">
+        <p>Points to lfs_set if lfs_setsize &lt;= FD_SETSIZE, and otherwise to dynamically allocated memory.</p>
+
+        <p>Definition at line <a class="el" href="library_2types_8h_source.html#l00072">72</a> of file <a class="el" href=
+        "library_2types_8h_source.html">library/types.h</a>.</p>
+      </div>
+    </div><a class="anchor" id="aeda7a4457bc29ec701b170acc4866ee7" name="aeda7a4457bc29ec701b170acc4866ee7"></a>
+    <!-- doxytag: member="netsnmp_large_fd_set_s::lfs_setsize" ref="aeda7a4457bc29ec701b170acc4866ee7" args="" -->
+
+    <div class="memitem">
+      <div class="memproto">
+        <table class="memname">
+          <tr>
+            <td class="memname">unsigned <a class="el" href=
+            "structnetsnmp__large__fd__set__s.html#aeda7a4457bc29ec701b170acc4866ee7">netsnmp_large_fd_set_s::lfs_setsize</a></td>
+          </tr>
+        </table>
+      </div>
+
+      <div class="memdoc">
+        <p>Maximum set size.</p>
+
+        <p>Definition at line <a class="el" href="library_2types_8h_source.html#l00067">67</a> of file <a class="el" href=
+        "library_2types_8h_source.html">library/types.h</a>.</p>
+      </div>
+    </div>
+    <hr />
+    The documentation for this struct was generated from the following file:
+
+    <ul>
+      <li><a class="el" href="library_2types_8h_source.html">library/types.h</a></li>
+    </ul>
+  </div>
+  <hr size="1" />
+
+  <address style="text-align: right;">
+    <small>Generated on 28 Sep 2009 for net-snmp by  <a href="http://www.doxygen.org/index.html"><img class="footer" src=
+    "doxygen.png" alt="doxygen" /></a> 1.6.1</small>
+<!-- CONTENT END -->
+<!--#include virtual="/page-bottom.html" -->
+
