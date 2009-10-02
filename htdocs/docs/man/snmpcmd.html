@@ -56,7 +56,7 @@ in the
 <I>snmp.conf</I>
 
 file, see
-<I><A HREF="http://localhost/cgi-bin/man/man2html?5+snmp.conf">snmp.conf</A>(5).</I>
+<I><A HREF="snmp.conf.html>snmp.conf</A>(5).</I>
 
 <DT><B>-a</B><I> authProtocol</I>
 
@@ -75,7 +75,7 @@ messages.  Overrides the <I>defAuthPassphrase</I> token in the
 
 file. It is insecure to specify pass phrases on the command line,
 see
-<I><A HREF="http://localhost/cgi-bin/man/man2html?5+snmp.conf">snmp.conf</A>(5).</I>
+<I><A HREF="snmp.conf.html>snmp.conf</A>(5).</I>
 
 <DT><B>-c</B><I> community</I>
 
@@ -272,7 +272,7 @@ Overrides the <I>defPrivPassphrase</I> token in the
 
 file.
 It is insecure to specify pass phrases on the command line, see
-<I><A HREF="http://localhost/cgi-bin/man/man2html?5+snmp.conf">snmp.conf</A>(5).</I>
+<I><A HREF="snmp.conf.html>snmp.conf</A>(5).</I>
 
 <DT><B>-Z</B><I> boots,time</I>
 
@@ -295,7 +295,7 @@ file and sets its value to &quot;value&quot;. Overrides the corresponding token 
 <I>snmp.conf</I>
 
 file. See
-<I><A HREF="http://localhost/cgi-bin/man/man2html?5+snmp.conf">snmp.conf</A>(5)</I>
+<I><A HREF="snmp.conf.html>snmp.conf</A>(5)</I>
 
 for the full list of tokens.
 <P>
@@ -630,7 +630,7 @@ Removes the symbolic labels from enumeration values:
 <DL COMPACT><DT><DD>
 <PRE>
     $ snmpget -c public -v 1 localhost ipForwarding.0
-    IP-MIB::ipForwarding.0 = INTEGER: <A HREF="http://localhost/cgi-bin/man/man2html?1+forwarding">forwarding</A>(1)
+    IP-MIB::ipForwarding.0 = INTEGER: <A HREF="forwarding.html>forwarding</A>(1)
     $ snmpget -c public -v 1 <B>-Oe</B> localhost ipForwarding.0
     IP-MIB::ipForwarding.0 = INTEGER: 1
 </PRE>
@@ -736,7 +736,7 @@ Display the varbind value only, not the OID:
 <DL COMPACT><DT><DD>
 <PRE>
     $ snmpget -c public -v 1 <B>-Oe</B> localhost ipForwarding.0
-    INTEGER: <A HREF="http://localhost/cgi-bin/man/man2html?1+forwarding">forwarding</A>(1)
+    INTEGER: <A HREF="forwarding.html>forwarding</A>(1)
 </PRE>
 
 </DL>
@@ -770,7 +770,7 @@ a traditional array-style index format:
 
 Most of these options can also be configured via configuration tokens.
 See the
-<I><A HREF="http://localhost/cgi-bin/man/man2html?5+snmp.conf">snmp.conf</A>(5)</I>
+<I><A HREF="snmp.conf.html>snmp.conf</A>(5)</I>
 
 manual page for details.
 <P>
@@ -1049,23 +1049,23 @@ option.
 <DL COMPACT>
 <DT>/usr/local/etc/snmp/snmpd.conf<DD>
 Agent configuration file. See
-<I><A HREF="http://localhost/cgi-bin/man/man2html?5+snmpd.conf">snmpd.conf</A>(5)</I>.
+<I><A HREF="snmpd.conf.html>snmpd.conf</A>(5)</I>.
 
 <DT>/usr/local/etc/snmp/snmp.conf<DD>
 <DT>~/.snmp/snmp.conf<DD>
 Application configuration files. See 
-<I><A HREF="http://localhost/cgi-bin/man/man2html?5+snmp.conf">snmp.conf</A>(5)</I>.
+<I><A HREF="snmp.conf.html>snmp.conf</A>(5)</I>.
 
 <P>
 </DL>
 <A NAME="lbAM">&nbsp;</A>
 <H2>SEE ALSO</H2>
 
-<A HREF="http://localhost/cgi-bin/man/man2html?1+snmpget">snmpget</A>(1), <A HREF="http://localhost/cgi-bin/man/man2html?1+snmpgetnext">snmpgetnext</A>(1), <A HREF="http://localhost/cgi-bin/man/man2html?1+snmpset">snmpset</A>(1),
-<A HREF="http://localhost/cgi-bin/man/man2html?1+snmpbulkget">snmpbulkget</A>(1), <A HREF="http://localhost/cgi-bin/man/man2html?1+snmpbulkwalk">snmpbulkwalk</A>(1), <A HREF="http://localhost/cgi-bin/man/man2html?1+snmpwalk">snmpwalk</A>(1),
-<A HREF="http://localhost/cgi-bin/man/man2html?1+snmptable">snmptable</A>(1), <A HREF="http://localhost/cgi-bin/man/man2html?1+snmpnetstat">snmpnetstat</A>(1), <A HREF="http://localhost/cgi-bin/man/man2html?1+snmpdelta">snmpdelta</A>(1), <A HREF="http://localhost/cgi-bin/man/man2html?1+snmptrap">snmptrap</A>(1), <A HREF="http://localhost/cgi-bin/man/man2html?1+snmpinform">snmpinform</A>(1),
-<A HREF="http://localhost/cgi-bin/man/man2html?1+snmpusm">snmpusm</A>(1), <A HREF="http://localhost/cgi-bin/man/man2html?1+snmpstatus">snmpstatus</A>(1), <A HREF="http://localhost/cgi-bin/man/man2html?1+snmptest">snmptest</A>(1),
-<A HREF="http://localhost/cgi-bin/man/man2html?5+snmp.conf">snmp.conf</A>(5).
+<A HREF="snmpset.html>snmpset</A>(1),
+<A HREF="snmpwalk.html>snmpwalk</A>(1),
+<A HREF="snmpinform.html>snmpinform</A>(1),
+<A HREF="snmptest.html>snmptest</A>(1),
+<A HREF="snmp.conf.html>snmp.conf</A>(5).
 <P>
 <P>
 

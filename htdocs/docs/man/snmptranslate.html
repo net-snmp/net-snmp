@@ -141,7 +141,7 @@ options described in the
 <B>INPUT OPTIONS</B>, <B>MIB PARSING OPTIONS</B> and <B>OUTPUT OPTIONS</B>
 
 sections of the
-<I><A HREF="http://localhost/cgi-bin/man/man2html?1+snmpcmd">snmpcmd</A>(1) </I>
+<I><A HREF="snmpcmd.html>snmpcmd</A>(1) </I>
 
 manual page.
 <A NAME="lbAF">&nbsp;</A>
@@ -183,7 +183,7 @@ sysDescr OBJECT-TYPE
                version identification of the system's
                hardware type, software operating-system,
                and networking software.&quot;
-::= { <A HREF="http://localhost/cgi-bin/man/man2html?1+iso">iso</A>(1) <A HREF="http://localhost/cgi-bin/man/man2html?3+org">org</A>(3) <A HREF="http://localhost/cgi-bin/man/man2html?6+dod">dod</A>(6) <A HREF="http://localhost/cgi-bin/man/man2html?1+internet">internet</A>(1) <A HREF="http://localhost/cgi-bin/man/man2html?2+mgmt">mgmt</A>(2) <A HREF="http://localhost/cgi-bin/man/man2html?1+mib-2">mib-2</A>(1) <A HREF="http://localhost/cgi-bin/man/man2html?1+system">system</A>(1) 1 }
+::= { <A HREF="system.html>system</A>(1) 1 }
 </PRE>
 
 <DT>*<DD>
@@ -193,36 +193,36 @@ snmptranslate -Tp -OS system
 will print the following tree:
 <DT><DD>
 <PRE>
-+<A HREF="http://localhost/cgi-bin/man/man2html?1+--system">--system</A>(1)
++<A HREF="--system.html>--system</A>(1)
    |
-   +-- -R-- String    <A HREF="http://localhost/cgi-bin/man/man2html?1+sysDescr">sysDescr</A>(1)
+   +-- -R-- String    <A HREF="sysDescr.html>sysDescr</A>(1)
    |        Textual Convention: DisplayString
    |        Size: 0..255
-   +-- -R-- ObjID     <A HREF="http://localhost/cgi-bin/man/man2html?2+sysObjectID">sysObjectID</A>(2)
-   +-- -R-- TimeTicks <A HREF="http://localhost/cgi-bin/man/man2html?3+sysUpTime">sysUpTime</A>(3)
-   +-- -RW- String    <A HREF="http://localhost/cgi-bin/man/man2html?4+sysContact">sysContact</A>(4)
+   +-- -R-- ObjID     <A HREF="sysObjectID.html>sysObjectID</A>(2)
+   +-- -R-- TimeTicks <A HREF="sysUpTime.html>sysUpTime</A>(3)
+   +-- -RW- String    <A HREF="sysContact.html>sysContact</A>(4)
    |        Textual Convention: DisplayString
    |        Size: 0..255
-   +-- -RW- String    <A HREF="http://localhost/cgi-bin/man/man2html?5+sysName">sysName</A>(5)
+   +-- -RW- String    <A HREF="sysName.html>sysName</A>(5)
    |        Textual Convention: DisplayString
    |        Size: 0..255
-   +-- -RW- String    <A HREF="http://localhost/cgi-bin/man/man2html?6+sysLocation">sysLocation</A>(6)
+   +-- -RW- String    <A HREF="sysLocation.html>sysLocation</A>(6)
    |        Textual Convention: DisplayString
    |        Size: 0..255
-   +-- -R-- Integer   <A HREF="http://localhost/cgi-bin/man/man2html?7+sysServices">sysServices</A>(7)
-   +-- -R-- TimeTicks <A HREF="http://localhost/cgi-bin/man/man2html?8+sysORLastChange">sysORLastChange</A>(8)
+   +-- -R-- Integer   <A HREF="sysServices.html>sysServices</A>(7)
+   +-- -R-- TimeTicks <A HREF="sysORLastChange.html>sysORLastChange</A>(8)
    |        Textual Convention: TimeStamp
    |
-   +<A HREF="http://localhost/cgi-bin/man/man2html?9+--sysORTable">--sysORTable</A>(9)
+   +<A HREF="--sysORTable.html>--sysORTable</A>(9)
       |
-      +<A HREF="http://localhost/cgi-bin/man/man2html?1+--sysOREntry">--sysOREntry</A>(1)
+      +<A HREF="--sysOREntry.html>--sysOREntry</A>(1)
          |
-         +-- ---- Integer   <A HREF="http://localhost/cgi-bin/man/man2html?1+sysORIndex">sysORIndex</A>(1)
-         +-- -R-- ObjID     <A HREF="http://localhost/cgi-bin/man/man2html?2+sysORID">sysORID</A>(2)
-         +-- -R-- String    <A HREF="http://localhost/cgi-bin/man/man2html?3+sysORDescr">sysORDescr</A>(3)
+         +-- ---- Integer   <A HREF="sysORIndex.html>sysORIndex</A>(1)
+         +-- -R-- ObjID     <A HREF="sysORID.html>sysORID</A>(2)
+         +-- -R-- String    <A HREF="sysORDescr.html>sysORDescr</A>(3)
          |        Textual Convention: DisplayString
          |        Size: 0..255
-         +-- -R-- TimeTicks <A HREF="http://localhost/cgi-bin/man/man2html?4+sysORUpTime">sysORUpTime</A>(4)
+         +-- -R-- TimeTicks <A HREF="sysORUpTime.html>sysORUpTime</A>(4)
                   Textual Convention: TimeStamp
 
 </PRE>
@@ -261,16 +261,16 @@ snmptranslate -Tl | head
 will produce the following dump:
 <DT><DD>
 <PRE>
-<A HREF="http://localhost/cgi-bin/man/man2html?1+.iso">.iso</A>(1)<A HREF="http://localhost/cgi-bin/man/man2html?3+.org">.org</A>(3)
-<A HREF="http://localhost/cgi-bin/man/man2html?1+.iso">.iso</A>(1)<A HREF="http://localhost/cgi-bin/man/man2html?3+.org">.org</A>(3)<A HREF="http://localhost/cgi-bin/man/man2html?6+.dod">.dod</A>(6)
-<A HREF="http://localhost/cgi-bin/man/man2html?1+.iso">.iso</A>(1)<A HREF="http://localhost/cgi-bin/man/man2html?3+.org">.org</A>(3)<A HREF="http://localhost/cgi-bin/man/man2html?6+.dod">.dod</A>(6)<A HREF="http://localhost/cgi-bin/man/man2html?1+.internet">.internet</A>(1)
-<A HREF="http://localhost/cgi-bin/man/man2html?1+.iso">.iso</A>(1)<A HREF="http://localhost/cgi-bin/man/man2html?3+.org">.org</A>(3)<A HREF="http://localhost/cgi-bin/man/man2html?6+.dod">.dod</A>(6)<A HREF="http://localhost/cgi-bin/man/man2html?1+.internet">.internet</A>(1)<A HREF="http://localhost/cgi-bin/man/man2html?1+.directory">.directory</A>(1)
-<A HREF="http://localhost/cgi-bin/man/man2html?1+.iso">.iso</A>(1)<A HREF="http://localhost/cgi-bin/man/man2html?3+.org">.org</A>(3)<A HREF="http://localhost/cgi-bin/man/man2html?6+.dod">.dod</A>(6)<A HREF="http://localhost/cgi-bin/man/man2html?1+.internet">.internet</A>(1)<A HREF="http://localhost/cgi-bin/man/man2html?2+.mgmt">.mgmt</A>(2)
-<A HREF="http://localhost/cgi-bin/man/man2html?1+.iso">.iso</A>(1)<A HREF="http://localhost/cgi-bin/man/man2html?3+.org">.org</A>(3)<A HREF="http://localhost/cgi-bin/man/man2html?6+.dod">.dod</A>(6)<A HREF="http://localhost/cgi-bin/man/man2html?1+.internet">.internet</A>(1)<A HREF="http://localhost/cgi-bin/man/man2html?2+.mgmt">.mgmt</A>(2)<A HREF="http://localhost/cgi-bin/man/man2html?1+.mib-2">.mib-2</A>(1)
-<A HREF="http://localhost/cgi-bin/man/man2html?1+.iso">.iso</A>(1)<A HREF="http://localhost/cgi-bin/man/man2html?3+.org">.org</A>(3)<A HREF="http://localhost/cgi-bin/man/man2html?6+.dod">.dod</A>(6)<A HREF="http://localhost/cgi-bin/man/man2html?1+.internet">.internet</A>(1)<A HREF="http://localhost/cgi-bin/man/man2html?2+.mgmt">.mgmt</A>(2)<A HREF="http://localhost/cgi-bin/man/man2html?1+.mib-2">.mib-2</A>(1)<A HREF="http://localhost/cgi-bin/man/man2html?1+.system">.system</A>(1)
-<A HREF="http://localhost/cgi-bin/man/man2html?1+.iso">.iso</A>(1)<A HREF="http://localhost/cgi-bin/man/man2html?3+.org">.org</A>(3)<A HREF="http://localhost/cgi-bin/man/man2html?6+.dod">.dod</A>(6)<A HREF="http://localhost/cgi-bin/man/man2html?1+.internet">.internet</A>(1)<A HREF="http://localhost/cgi-bin/man/man2html?2+.mgmt">.mgmt</A>(2)<A HREF="http://localhost/cgi-bin/man/man2html?1+.mib-2">.mib-2</A>(1)<A HREF="http://localhost/cgi-bin/man/man2html?1+.system">.system</A>(1)<A HREF="http://localhost/cgi-bin/man/man2html?1+.sysDescr">.sysDescr</A>(1)
-<A HREF="http://localhost/cgi-bin/man/man2html?1+.iso">.iso</A>(1)<A HREF="http://localhost/cgi-bin/man/man2html?3+.org">.org</A>(3)<A HREF="http://localhost/cgi-bin/man/man2html?6+.dod">.dod</A>(6)<A HREF="http://localhost/cgi-bin/man/man2html?1+.internet">.internet</A>(1)<A HREF="http://localhost/cgi-bin/man/man2html?2+.mgmt">.mgmt</A>(2)<A HREF="http://localhost/cgi-bin/man/man2html?1+.mib-2">.mib-2</A>(1)<A HREF="http://localhost/cgi-bin/man/man2html?1+.system">.system</A>(1)<A HREF="http://localhost/cgi-bin/man/man2html?2+.sysObjectID">.sysObjectID</A>(2)
-<A HREF="http://localhost/cgi-bin/man/man2html?1+.iso">.iso</A>(1)<A HREF="http://localhost/cgi-bin/man/man2html?3+.org">.org</A>(3)<A HREF="http://localhost/cgi-bin/man/man2html?6+.dod">.dod</A>(6)<A HREF="http://localhost/cgi-bin/man/man2html?1+.internet">.internet</A>(1)<A HREF="http://localhost/cgi-bin/man/man2html?2+.mgmt">.mgmt</A>(2)<A HREF="http://localhost/cgi-bin/man/man2html?1+.mib-2">.mib-2</A>(1)<A HREF="http://localhost/cgi-bin/man/man2html?1+.system">.system</A>(1)<A HREF="http://localhost/cgi-bin/man/man2html?3+.sysUpTime">.sysUpTime</A>(3)
+<A HREF=".org.html>.org</A>(3)
+<A HREF=".dod.html>.dod</A>(6)
+<A HREF=".internet.html>.internet</A>(1)
+<A HREF=".directory.html>.directory</A>(1)
+<A HREF=".mgmt.html>.mgmt</A>(2)
+<A HREF=".mib-2.html>.mib-2</A>(1)
+<A HREF=".system.html>.system</A>(1)
+<A HREF=".sysDescr.html>.sysDescr</A>(1)
+<A HREF=".sysObjectID.html>.sysObjectID</A>(2)
+<A HREF=".sysUpTime.html>.sysUpTime</A>(3)
 </PRE>
 
 </DL>
@@ -330,23 +330,23 @@ snmptranslate -Tt | head
 will produce the following dump
 <DT><DD>
 <PRE>
-  <A HREF="http://localhost/cgi-bin/man/man2html?3+org">org</A>(3) type=0
-    <A HREF="http://localhost/cgi-bin/man/man2html?6+dod">dod</A>(6) type=0
-      <A HREF="http://localhost/cgi-bin/man/man2html?1+internet">internet</A>(1) type=0
-        <A HREF="http://localhost/cgi-bin/man/man2html?1+directory">directory</A>(1) type=0
-        <A HREF="http://localhost/cgi-bin/man/man2html?2+mgmt">mgmt</A>(2) type=0
-          <A HREF="http://localhost/cgi-bin/man/man2html?1+mib-2">mib-2</A>(1) type=0
-            <A HREF="http://localhost/cgi-bin/man/man2html?1+system">system</A>(1) type=0
-              <A HREF="http://localhost/cgi-bin/man/man2html?1+sysDescr">sysDescr</A>(1) type=2 tc=4 hint=255a
-              <A HREF="http://localhost/cgi-bin/man/man2html?2+sysObjectID">sysObjectID</A>(2) type=1
-              <A HREF="http://localhost/cgi-bin/man/man2html?3+sysUpTime">sysUpTime</A>(3) type=8
+  <A HREF="org.html>org</A>(3) type=0
+    <A HREF="dod.html>dod</A>(6) type=0
+      <A HREF="internet.html>internet</A>(1) type=0
+        <A HREF="directory.html>directory</A>(1) type=0
+        <A HREF="mgmt.html>mgmt</A>(2) type=0
+          <A HREF="mib-2.html>mib-2</A>(1) type=0
+            <A HREF="system.html>system</A>(1) type=0
+              <A HREF="sysDescr.html>sysDescr</A>(1) type=2 tc=4 hint=255a
+              <A HREF="sysObjectID.html>sysObjectID</A>(2) type=1
+              <A HREF="sysUpTime.html>sysUpTime</A>(3) type=8
 </PRE>
 
 </DL>
 <A NAME="lbAG">&nbsp;</A>
 <H2>SEE ALSO</H2>
 
-<A HREF="http://localhost/cgi-bin/man/man2html?1+snmpcmd">snmpcmd</A>(1), <A HREF="http://localhost/cgi-bin/man/man2html?5+variables">variables</A>(5), RFC 2578-2580.
+<A HREF="variables.html>variables</A>(5), RFC 2578-2580.
 <P>
 
 <HR>

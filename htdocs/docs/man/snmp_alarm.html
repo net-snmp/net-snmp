@@ -164,7 +164,7 @@ represented by
 
 stand for &quot;high resolution&quot;).  The operation of this function is
 dependent on the provision of the
-<B><A HREF="http://localhost/cgi-bin/man/man2html?2+setitimer">setitimer</A></B>(2)
+<B><A HREF="setitimer.html>setitimer</A></B>(2)
 
 system call by the operating system.  If this system call is not
 available, the alarm will be scheduled as if
@@ -198,10 +198,10 @@ The default behaviour of the snmp_alarm subsystem is to request
 <I>SIGALRM</I>
 
 signals from the operating system via the
-<B><A HREF="http://localhost/cgi-bin/man/man2html?2+alarm">alarm</A></B>(2)
+<B><A HREF="alarm.html>alarm</A></B>(2)
 
 or
-<B><A HREF="http://localhost/cgi-bin/man/man2html?2+setitimer">setitimer</A></B>(2)
+<B><A HREF="setitimer.html>setitimer</A></B>(2)
 
 system calls.  This has the disadvantage, however, that no other part
 of the application can use the
@@ -217,7 +217,7 @@ functionality, the snmp_alarm subsystem will not work correctly).
 <P>
 
 If your application runs a 
-<B><A HREF="http://localhost/cgi-bin/man/man2html?2+select">select</A></B>(2)-based
+<B><A HREF="select.html>select</A></B>(2)-based
 
 event loop, however, there is no need to use
 <I>SIGALRM</I>
@@ -241,13 +241,13 @@ Then,
 
 takes alarms into account when calculating the timeout value to be
 used for
-<B><A HREF="http://localhost/cgi-bin/man/man2html?2+select">select</A></B>(2).
+<B><A HREF="select.html>select</A></B>(2).
 
 All you need to do is call
 <B>run_alarms()</B>
 
 when
-<B><A HREF="http://localhost/cgi-bin/man/man2html?2+select">select</A></B>(2)
+<B><A HREF="select.html>select</A></B>(2)
 
 times out (return value of zero).  This is the approach taken in the
 agent; see
@@ -255,16 +255,16 @@ agent; see
 
 Furthermore, when using this method, high resolution alarms do not
 depend on the presence of the
-<B><A HREF="http://localhost/cgi-bin/man/man2html?2+setitimer">setitimer</A></B>(2)
+<B><A HREF="setitimer.html>setitimer</A></B>(2)
 
 system call, although overall precision is of course still determined
 by the underlying operating system.  Recommended.
 <A NAME="lbAH">&nbsp;</A>
 <H2>SEE ALSO</H2>
 
-<B><A HREF="http://localhost/cgi-bin/man/man2html?3+snmp_api">snmp_api</A></B>(3), <B><A HREF="http://localhost/cgi-bin/man/man2html?3+default_store">default_store</A></B>(3), <B><A HREF="http://localhost/cgi-bin/man/man2html?3+snmp_select_info">snmp_select_info</A></B>(3), 
+<B><A HREF="snmp_select_info.html>snmp_select_info</A></B>(3), 
 
-<B><A HREF="http://localhost/cgi-bin/man/man2html?2+alarm">alarm</A></B>(2), <B><A HREF="http://localhost/cgi-bin/man/man2html?2+setitimer">setitimer</A></B>(2), <B><A HREF="http://localhost/cgi-bin/man/man2html?2+select">select</A></B>(2)
+<B><A HREF="select.html>select</A></B>(2)
 
 
 

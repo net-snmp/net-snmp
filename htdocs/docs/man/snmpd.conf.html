@@ -19,7 +19,7 @@ to control its operation and the management information
 provided.
 These files (<B>snmpd.conf</B> and <B>snmpd.local.conf</B>)
 can be located in one of several locations, as described in the
-<I><A HREF="http://localhost/cgi-bin/man/man2html?5+snmp_config">snmp_config</A>(5) </I>
+<I><A HREF="snmp_config.html>snmp_config</A>(5) </I>
 
 manual page.
 <P>
@@ -29,7 +29,7 @@ The (perl) application
 
 can be used to generate configuration files for the
 most common agent requirements.  See the
-<I><A HREF="http://localhost/cgi-bin/man/man2html?1+snmpconf">snmpconf</A>(1)</I>
+<I><A HREF="snmpconf.html>snmpconf</A>(1)</I>
 
 manual page for more information, or try running the
 command:
@@ -84,7 +84,7 @@ See the section
 <B>LISTENING ADDRESSES</B>
 
 in the
-<I><A HREF="http://localhost/cgi-bin/man/man2html?8+snmpd">snmpd</A>(8)</I>
+<I><A HREF="snmpd.html>snmpd</A>(8)</I>
 
 manual page for more information about the format of listening
 addresses.
@@ -188,7 +188,7 @@ used without OpenSSL.
 Warning: the minimum pass phrase length is 8 characters.
 <DT><DD>
 SNMPv3 users can be created at runtime using the
-<I><A HREF="http://localhost/cgi-bin/man/man2html?1+snmpusm">snmpusm</A>(1)</I>
+<I><A HREF="snmpusm.html>snmpusm</A>(1)</I>
 
 command.
 <DT><DD>
@@ -397,7 +397,7 @@ view iso3 included .iso.org.dod.mgmt  0xf0
 </DL>
 
 <DT><DD>
-would all define the same view, covering the whole of the '<A HREF="http://localhost/cgi-bin/man/man2html?1+iso">iso</A>(1)' subtree
+would all define the same view, covering the whole of the '<A HREF="iso.html>iso</A>(1)' subtree
 (with the third example ignoring the subidentifiers not covered by the mask).
 <DT><DD>
 More usefully, the mask can be used to define a view covering a particular
@@ -436,7 +436,7 @@ the fixed three views of the standard VACM mechanism, this can be used to
 configure various different view types.  As far as the main SNMP agent is
 concerned, the two main view types are <I>read</I> and <I>write</I>,
 corresponding to the READ and WRITE views of the main <I>access</I> directive.
-See the '<A HREF="http://localhost/cgi-bin/man/man2html?5+snmptrapd.conf">snmptrapd.conf</A>(5)' man page for discussion of other view types.
+See the '<A HREF="snmptrapd.conf.html>snmptrapd.conf</A>(5)' man page for discussion of other view types.
 <DL COMPACT>
 <DT>authcommunity TYPES  COMMUNITY   [SOURCE [OID | -V VIEW [CONTEXT]]]<DD>
 is an alternative to the <I>rocommunity</I>/<I>rwcommunity</I> directives.
@@ -470,7 +470,7 @@ Otherwise the default context (&quot;&quot;) is used.
 <DT>setaccess GROUP CONTEXT MODEL LEVEL PREFIX VIEW TYPES<DD>
 is a direct equivalent to the original <I>access</I> directive, typically
 listing the view types as <I>read</I> or <I>read,write</I> as appropriate.
-(or see '<A HREF="http://localhost/cgi-bin/man/man2html?5+snmptrapd.conf">snmptrapd.conf</A>(5)' for other possibilities).
+(or see '<A HREF="snmptrapd.conf.html>snmptrapd.conf</A>(5)' for other possibilities).
 All other fields have the same interpretation as with <I>access</I>.
 </DL>
 <A NAME="lbAN">&nbsp;</A>
@@ -480,7 +480,7 @@ Most of the information reported by the Net-SNMP agent is retrieved
 from the underlying system, or dynamically configured via SNMP SET requests
 (and retained from one run of the agent to the next).
 However, certain MIB objects can be configured or controlled via
-the <I><A HREF="http://localhost/cgi-bin/man/man2html?5+snmpd.conf">snmpd.conf</A>(5)</I> file.
+the <I><A HREF="snmpd.conf.html>snmpd.conf</A>(5)</I> file.
 <A NAME="lbAO">&nbsp;</A>
 <H3>System Group</H3>
 
@@ -548,7 +548,7 @@ to determine the list of devices that will be scanned.
 
 <DT><DD>
 The pattern can include one or more wildcard expressions.
-See <I><A HREF="http://localhost/cgi-bin/man/man2html?5+snmpd.examples">snmpd.examples</A>(5)</I> for illustration of the wildcard syntax.
+See <I><A HREF="snmpd.examples.html>snmpd.examples</A>(5)</I> for illustration of the wildcard syntax.
 <DT>skipNFSInHostResources true<DD>
 controls whether NFS and NFS-like file systems should be omitted
 from the hrStorageTable (true or 1) or not (false or 0, which is the default).
@@ -658,8 +658,8 @@ Only one <I>includeAllDisks</I> directive should be specified - any
 subsequent copies will be ignored.
 <DT><DD>
 The list of mounted disks will be determined when the agent starts using the
-<A HREF="http://localhost/cgi-bin/man/man2html?3+setmntent">setmntent</A>(3) and <A HREF="http://localhost/cgi-bin/man/man2html?3+getmntent">getmntent</A>(3), or <A HREF="http://localhost/cgi-bin/man/man2html?3+fopen">fopen</A>(3) and <A HREF="http://localhost/cgi-bin/man/man2html?3+getmntent">getmntent</A>(3),  or
-<A HREF="http://localhost/cgi-bin/man/man2html?3+setfsent">setfsent</A>(3)  and  <A HREF="http://localhost/cgi-bin/man/man2html?3+getfsent">getfsent</A>(3) system calls. If none of the above
+<A HREF="getmntent.html>getmntent</A>(3),  or
+<A HREF="getfsent.html>getfsent</A>(3) system calls. If none of the above
 system calls are available then the root partition  &quot;/&quot;
 (which  is  assumed to exist on any UNIX based system) will be monitored.
 Disks mounted after the agent has started will not be monitored.
@@ -823,7 +823,7 @@ See the section
 <B>LISTENING ADDRESSES</B>
 
 in the
-<I><A HREF="http://localhost/cgi-bin/man/man2html?8+snmpd">snmpd</A>(8)</I>
+<I><A HREF="snmpd.html>snmpd</A>(8)</I>
 
 manual page for more information about the format of listening
 addresses.
@@ -869,7 +869,7 @@ See
 for more information about SNMPv3 notification behaviour.
 <DT>authtrapenable {1|2}<DD>
 determines whether to generate authentication failure traps
-(<I><A HREF="http://localhost/cgi-bin/man/man2html?1+enabled">enabled</A>(1)</I>) or not (<I><A HREF="http://localhost/cgi-bin/man/man2html?2+disabled">disabled</A>(2)</I> - the default).
+(<I><A HREF="disabled.html>disabled</A>(2)</I> - the default).
 Ordinarily the corresponding MIB
 object (snmpEnableAuthenTraps.0) is read-write, but specifying
 this directive makes this object read-only, and attempts to set the
@@ -944,20 +944,20 @@ existence, boolean and threshold tests.
 defines an <I>existence(0)</I> monitor test.
 A bare OID specifies a <I>present(0)</I> test, which will fire when
 (an instance of) the monitored OID is created.
-An expression of the form <I>! OID</I> specifies an <I><A HREF="http://localhost/cgi-bin/man/man2html?1+absent">absent</A>(1)</I> test,
+An expression of the form <I>! OID</I> specifies an <I><A HREF="absent.html>absent</A>(1)</I> test,
 which will fire when the monitored OID is delected.
-An expression of the form <I>!= OID</I> specifies a <I><A HREF="http://localhost/cgi-bin/man/man2html?2+changed">changed</A>(2)</I> test,
+An expression of the form <I>!= OID</I> specifies a <I><A HREF="changed.html>changed</A>(2)</I> test,
 which will fire whenever the monitored value(s) change.
 Note that there <B>must</B> be whitespace before the OID token.
 <DT>OID OP VALUE<DD>
-defines a <I><A HREF="http://localhost/cgi-bin/man/man2html?1+boolean">boolean</A>(1)</I> monitor test.
+defines a <I><A HREF="boolean.html>boolean</A>(1)</I> monitor test.
 OP should be one of the defined
 comparison operators (!=, ==, &lt;, &lt;=, &gt;, &gt;=) and VALUE should be an
 integer value to compare against.
 Note that there <B>must</B> be whitespace around the OP token.
 A comparison such as OID !=0 will not be handled correctly.
 <DT>OID MIN MAX [DMIN DMAX]<DD>
-defines a <I><A HREF="http://localhost/cgi-bin/man/man2html?2+threshold">threshold</A>(2)</I> monitor test.
+defines a <I><A HREF="threshold.html>threshold</A>(2)</I> monitor test.
 MIN and MAX are integer values, specifying lower and upper thresholds.
 If the value of the monitored OID falls below the lower threshold (MIN)
 or rises above the upper threshold (MAX), then the monitor entry will
@@ -1167,7 +1167,7 @@ OID, to be run every FREQUENCY seconds.
 <DT>cron MINUTE HOUR DAY MONTH WEEKDAY  OID = VALUE<DD>
 configures a SET assignment of the (integer) VALUE to the MIB instance
 OID, to be run at the times specified by the fields MINUTE to WEEKDAY.
-These follow the same pattern as the equivalent <I><A HREF="http://localhost/cgi-bin/man/man2html?5+crontab">crontab</A>(5)</I> fields.
+These follow the same pattern as the equivalent <I><A HREF="crontab.html>crontab</A>(5)</I> fields.
 <DL COMPACT><DT><DD>
 <DL COMPACT>
 <DT>Note:<DD>
@@ -1291,7 +1291,7 @@ using the nsCacheTable.
 <DT>extendfix NAME PROG ARGS<DD>
 registers a command that can be invoked on demand, by setting the
 appropriate <I>nsExtendRunType</I> instance to the value
-<I><A HREF="http://localhost/cgi-bin/man/man2html?3+run-command">run-command</A>(3)</I>.  Unlike the equivalent <I>execfix</I>,
+<I><A HREF="run-command.html>run-command</A>(3)</I>.  Unlike the equivalent <I>execfix</I>,
 this directive does not need to be paired with a corresponding
 <I>extend</I> entry, and can appear on its own.
 </DL>
@@ -1563,7 +1563,7 @@ See the section
 <B>LISTENING ADDRESSES</B>
 
 in the
-<I><A HREF="http://localhost/cgi-bin/man/man2html?8+snmpd">snmpd</A>(8)</I>
+<I><A HREF="snmpd.html>snmpd</A>(8)</I>
 
 manual page for more information about the format of listening
 addresses.
@@ -1580,7 +1580,7 @@ To proxy the entire MIB tree, use the OID .1.3
 
 The <I>SNMPCMD_ARGS</I> should provide sufficient version and
 administrative information to generate a valid SNMP request
-(see <I><A HREF="http://localhost/cgi-bin/man/man2html?1+snmpcmd">snmpcmd</A>(1)</I>).
+(see <I><A HREF="snmpcmd.html>snmpcmd</A>(1)</I>).
 <DL COMPACT>
 <DT>Note:<DD>
 The proxied request will <I>not</I> use the administrative
@@ -1673,7 +1673,7 @@ option (to specify an alternative listening socket).
 Defines the permissions and ownership of the AgentX Unix Domain socket,
 and the parent directories of this socket.
 SOCKPERMS and DIRPERMS must be octal digits (see 
-<I><A HREF="http://localhost/cgi-bin/man/man2html?1+chmod">chmod</A>(1)</I>
+<I><A HREF="chmod.html>chmod</A>(1)</I>
 
 ). By default this socket will only be accessible to subagents which 
 have the same userid as the agent.
@@ -1701,7 +1701,7 @@ See the section
 <B>LISTENING ADDRESSES</B>
 
 in the
-<I><A HREF="http://localhost/cgi-bin/man/man2html?8+snmpd">snmpd</A>(8)</I>
+<I><A HREF="snmpd.html>snmpd</A>(8)</I>
 
 manual page for more information about the format of addresses.
 <DL COMPACT><DT><DD>
@@ -1839,7 +1839,7 @@ a list of all named modules registered within the agent.
 <DL COMPACT>
 <DT>o<DD>
 The Net-SNMP agent can be instructed to re-read the various configuration files,
-either via an <B>snmpset</B> assignment of <A HREF="http://localhost/cgi-bin/man/man2html?1+integer">integer</A>(1) to
+either via an <B>snmpset</B> assignment of <A HREF="integer.html>integer</A>(1) to
 UCD-SNMP-MIB::versionUpdateConfig.0 (.1.3.6.1.4.1.2021.100.11.0),
 or by sending a <B>kill -HUP</B> signal to the agent process.
 <DT>o<DD>
@@ -1863,7 +1863,7 @@ examples.
 <A NAME="lbBM">&nbsp;</A>
 <H2>SEE ALSO</H2>
 
-<A HREF="http://localhost/cgi-bin/man/man2html?1+snmpconf">snmpconf</A>(1), <A HREF="http://localhost/cgi-bin/man/man2html?1+snmpusm">snmpusm</A>(1), <A HREF="http://localhost/cgi-bin/man/man2html?5+snmp.conf">snmp.conf</A>(5), <A HREF="http://localhost/cgi-bin/man/man2html?5+snmp_config">snmp_config</A>(5), <A HREF="http://localhost/cgi-bin/man/man2html?8+snmpd">snmpd</A>(8), EXAMPLE.conf, <A HREF="http://localhost/cgi-bin/man/man2html?3+read_config">read_config</A>(3).
+<A HREF="read_config.html>read_config</A>(3).
 
 
 

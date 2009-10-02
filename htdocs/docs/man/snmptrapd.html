@@ -115,19 +115,19 @@ To get a list of compiled modules, run snmptrapd with the arguments
 
 <DD>
 Specify where logging output should be directed (standard error or output,
-to a file or via syslog).  See LOGGING OPTIONS in <I><A HREF="http://localhost/cgi-bin/man/man2html?1+snmpcmd">snmpcmd</A>(1)</I> for details.
+to a file or via syslog).  See LOGGING OPTIONS in <I><A HREF="snmpcmd.html>snmpcmd</A>(1)</I> for details.
 <DT><B>-m</B> <I>MIBLIST</I>
 
 <DD>
 Specifies a colon separated list of MIB modules to load for this
 application.  This overrides the environment variable MIBS.
-See <I><A HREF="http://localhost/cgi-bin/man/man2html?1+snmpcmd">snmpcmd</A>(1)</I> for details.
+See <I><A HREF="snmpcmd.html>snmpcmd</A>(1)</I> for details.
 <DT><B>-M</B> <I>DIRLIST</I>
 
 <DD>
 Specifies a colon separated list of directories to search for MIBs.
 This overrides the environment variable MIBDIRS.
-See <I><A HREF="http://localhost/cgi-bin/man/man2html?1+snmpcmd">snmpcmd</A>(1)</I> for details.
+See <I><A HREF="snmpcmd.html>snmpcmd</A>(1)</I> for details.
 <DT><B>-n</B>
 
 <DD>
@@ -147,7 +147,7 @@ See the section
 <B>OUTPUT OPTIONS</B>
 
 in the
-<I><A HREF="http://localhost/cgi-bin/man/man2html?1+snmpcmd">snmpcmd</A>(1)</I>
+<I><A HREF="snmpcmd.html>snmpcmd</A>(1)</I>
 
 manual page for details.
 <DT><B>-t</B>
@@ -167,7 +167,7 @@ Print version information for the trap daemon and then exit.
 <DD>
 Connect to the AgentX master agent on the specified address,
 rather than the default &quot;/var/agentx/master&quot;.
-See <I><A HREF="http://localhost/cgi-bin/man/man2html?8+snmpd">snmpd</A>(8)</I> for details of the format of such addresses.
+See <I><A HREF="snmpd.html>snmpd</A>(8)</I> for details of the format of such addresses.
 <DT><B>--</B><I>name=value</I>
 
 <DD>
@@ -178,7 +178,7 @@ file and sets its value to &quot;value&quot;. Overrides the corresponding token 
 <I>snmptrapd.conf</I>
 
 file. See
-<I><A HREF="http://localhost/cgi-bin/man/man2html?5+snmptrapd.conf">snmptrapd.conf</A>(5)</I>
+<I><A HREF="snmptrapd.conf.html>snmptrapd.conf</A>(5)</I>
 
 for the full list of tokens.
 </DL>
@@ -190,7 +190,7 @@ for the full list of tokens.
 <B>snmptrapd</B>
 
 interprets format strings similarly to
-<I><A HREF="http://localhost/cgi-bin/man/man2html?3+printf">printf</A>(3)</I>.
+<I><A HREF="printf.html>printf</A>(3)</I>.
 
 It understands the following formatting sequences:
 <DL COMPACT><DT><DD>
@@ -277,7 +277,7 @@ user and context for v3)
 <DD>
 decimal number of seconds since the operating system epoch (as
 returned by
-<I><A HREF="http://localhost/cgi-bin/man/man2html?2+time">time</A>(2)</I>)
+<I><A HREF="time.html>time</A>(2)</I>)
 
 <DT><B>%T</B>
 
@@ -318,7 +318,7 @@ the year field from the sysUpTime.0 varbind
 
 In addition to these values, an optional field
 width and precision may also be specified , just as in 
-<I><A HREF="http://localhost/cgi-bin/man/man2html?3+printf">printf</A>(3)</I>,
+<I><A HREF="printf.html>printf</A>(3)</I>,
 
 and a flag value. The following flags are supported:
 <DL COMPACT><DT><DD>
@@ -391,7 +391,7 @@ by specifying one or more listening addresses as arguments to
 <B>snmptrapd</B>.
 
 See the
-<I><A HREF="http://localhost/cgi-bin/man/man2html?8+snmpd">snmpd</A>(8)</I>
+<I><A HREF="snmpd.html>snmpd</A>(8)</I>
 
 manual page for more information about the format of listening
 addresses.
@@ -411,13 +411,13 @@ the MIB itself.
 <H2>EXTENSIBILITY AND CONFIGURATION</H2>
 
 See the
-<I><A HREF="http://localhost/cgi-bin/man/man2html?5+snmptrapd.conf">snmptrapd.conf</A>(5)</I>
+<I><A HREF="snmptrapd.conf.html>snmptrapd.conf</A>(5)</I>
 
 manual page.
 <A NAME="lbAK">&nbsp;</A>
 <H2>SEE ALSO</H2>
 
-<A HREF="http://localhost/cgi-bin/man/man2html?1+snmpcmd">snmpcmd</A>(1), <A HREF="http://localhost/cgi-bin/man/man2html?8+snmpd">snmpd</A>(8), <A HREF="http://localhost/cgi-bin/man/man2html?3+printf">printf</A>(3), <A HREF="http://localhost/cgi-bin/man/man2html?5+snmptrapd.conf">snmptrapd.conf</A>(5), <A HREF="http://localhost/cgi-bin/man/man2html?8+syslog">syslog</A>(8), <A HREF="http://localhost/cgi-bin/man/man2html?5+variables">variables</A>(5)
+<A HREF="variables.html>variables</A>(5)
 <P>
 
 <HR>

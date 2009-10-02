@@ -19,7 +19,7 @@ configuration files to control its operation and how incoming traps
 (and INFORM requests) should be processed.
 This file (<B>snmptrapd.conf</B>) can be located in
 one of several locations, as described in the
-<I><A HREF="http://localhost/cgi-bin/man/man2html?5+snmp_config">snmp_config</A>(5)</I>
+<I><A HREF="snmp_config.html>snmp_config</A>(5)</I>
 
 manual page.
 <A NAME="lbAD">&nbsp;</A>
@@ -55,7 +55,7 @@ See the section
 <B>LISTENING ADDRESSES</B>
 
 in the
-<I><A HREF="http://localhost/cgi-bin/man/man2html?8+snmpd">snmpd</A>(8)</I>
+<I><A HREF="snmpd.html>snmpd</A>(8)</I>
 
 manual page for more information about the format of listening
 addresses.
@@ -70,7 +70,7 @@ the nlmLogTable and nlmLogvariableTable tables.
 This directive can be used to suppress this behaviour.
 <DT><DD>
 See the 
-<I><A HREF="http://localhost/cgi-bin/man/man2html?8+snmptrapd">snmptrapd</A>(8) </I>
+<I><A HREF="snmptrapd.html>snmptrapd</A>(8) </I>
 
 manual page and the NOTIFICATION-LOG-MIB for details.
 <DT>doNotLogTraps yes<DD>
@@ -121,7 +121,7 @@ community to trigger the types of processing listed.
 By default, this will allow any notification using this community
 to be processed.  The SOURCE field can be used to specify that the
 configuration should only apply to notifications received from
-particular sources - see <I><A HREF="http://localhost/cgi-bin/man/man2html?5+snmpd.conf">snmpd.conf</A>(5)</I> for more details.
+particular sources - see <I><A HREF="snmpd.conf.html>snmpd.conf</A>(5)</I> for more details.
 <DT>authUser   TYPES [-s MODEL] USER  [LEVEL [OID | -v VIEW ]]<DD>
 authorises SNMPv3 notifications with the specified
 user to trigger the types of processing listed.
@@ -149,10 +149,10 @@ held within that notification.
 authorise notifications in the specified GROUP
 (configured using the <I>group</I> directive)
 to trigger the types of processing listed.
-See <I><A HREF="http://localhost/cgi-bin/man/man2html?5+snmpd.conf">snmpd.conf</A>(5)</I> for more details.
+See <I><A HREF="snmpd.conf.html>snmpd.conf</A>(5)</I> for more details.
 <DT>createUser username (MD5|SHA) authpassphrase [DES|AES]<DD>
 See the 
-<I><A HREF="http://localhost/cgi-bin/man/man2html?5+snmpd.conf">snmpd.conf</A>(5)</I>
+<I><A HREF="snmpd.conf.html>snmpd.conf</A>(5)</I>
 
 manual page for a description of how to create SNMPv3 users.  This
 is roughly the same, but the file name changes to snmptrapd.conf from
@@ -175,7 +175,7 @@ notifications respectively.  Note that SNMPv2c and SNMPv3
 both use the same SNMPv2 PDU format.
 <DT><DD>
 See
-<I><A HREF="http://localhost/cgi-bin/man/man2html?8+snmptrapd">snmptrapd</A>(8)</I>
+<I><A HREF="snmptrapd.html>snmptrapd</A>(8)</I>
 
 for the layout characters available.
 <DT>ignoreAuthFailure yes<DD>
@@ -195,12 +195,12 @@ to change in future versions.
 specifies where notifications should be logged - to standard
 output, standard error, a specified file or via <I>syslog</I>.
 See the section LOGGING OPTIONS in the
-<I><A HREF="http://localhost/cgi-bin/man/man2html?1+snmpcmd">snmpcmd</A>(1)</I> manual page for details.
+<I><A HREF="snmpcmd.html>snmpcmd</A>(1)</I> manual page for details.
 <DT>outputOption string<DD>
 specifies various characteristics of how OIDs and other values
 should be displayed.
 See the section OUTPUT OPTIONS in the
-<I><A HREF="http://localhost/cgi-bin/man/man2html?1+snmpcmd">snmpcmd</A>(1)</I> manual page for details.
+<I><A HREF="snmpcmd.html>snmpcmd</A>(1)</I> manual page for details.
 </DL>
 <A NAME="lbAH">&nbsp;</A>
 <H2>MySQL Logging</H2>
@@ -262,7 +262,7 @@ The input format is as follows, one entry per line:
 <DL COMPACT>
 <DT>HOSTNAME<DD>
 The name of the host that sent the notification, as determined by
-<I><A HREF="http://localhost/cgi-bin/man/man2html?3+gethostbyaddr">gethostbyaddr</A>(3)</I>.
+<I><A HREF="gethostbyaddr.html>gethostbyaddr</A>(3)</I>.
 
 <BR>
 
@@ -308,7 +308,7 @@ See the section
 <B>LISTENING ADDRESSES</B>
 
 in the
-<I><A HREF="http://localhost/cgi-bin/man/man2html?8+snmpd">snmpd</A>(8)</I>
+<I><A HREF="snmpd.html>snmpd</A>(8)</I>
 
 manual page for more information about the format of listening
 addresses.
@@ -338,7 +338,7 @@ directives are typically only used to enable the appropriate behaviour.
 <A NAME="lbAL">&nbsp;</A>
 <H2>SEE ALSO</H2>
 
-<A HREF="http://localhost/cgi-bin/man/man2html?5+snmp_config">snmp_config</A>(5), <A HREF="http://localhost/cgi-bin/man/man2html?8+snmptrapd">snmptrapd</A>(8), <A HREF="http://localhost/cgi-bin/man/man2html?8+syslog">syslog</A>(8), <A HREF="http://localhost/cgi-bin/man/man2html?5+variables">variables</A>(5), <A HREF="http://localhost/cgi-bin/man/man2html?5+snmpd.conf">snmpd.conf</A>(5), <A HREF="http://localhost/cgi-bin/man/man2html?3+read_config">read_config</A>(3).
+<A HREF="read_config.html>read_config</A>(3).
 <P>
 <P>
 

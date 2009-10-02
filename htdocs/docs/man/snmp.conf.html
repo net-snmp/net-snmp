@@ -17,7 +17,7 @@ snmp.conf - configuration files for the Net-SNMP applications
 Applications built using the Net-SNMP libraries typically use one or
 more configuration files to control various aspects of their operation.
 These files (<B>snmp.conf</B> and <B>snmp.local.conf</B>) can be located
-in one of several locations, as described in the <I><A HREF="http://localhost/cgi-bin/man/man2html?5+snmp_config">snmp_config</A>(5)</I>
+in one of several locations, as described in the <I><A HREF="snmp_config.html>snmp_config</A>(5)</I>
 manual page.
 <P>
 
@@ -37,7 +37,7 @@ As well as application-specific configuration tokens, there are
 several directives that relate to standard library behaviour,
 relevant to most Net-SNMP applications.  Many of these correspond
 to standard command-line options, which are described in the
-<I><A HREF="http://localhost/cgi-bin/man/man2html?1+snmpcmd">snmpcmd</A>(1)</I> manual page.
+<I><A HREF="snmpcmd.html>snmpcmd</A>(1)</I> manual page.
 <P>
 
 These directives can be divided into several distinct groups.
@@ -55,7 +55,7 @@ connection should be in a specific domain.
 defines the default UDP port that client SNMP applications will
 attempt to connect to.  This can be overridden by explicitly
 including a port number in the <I>AGENT</I> specification.
-See the <I><A HREF="http://localhost/cgi-bin/man/man2html?1+snmpcmd">snmpcmd</A>(1)</I> manual page for more details.
+See the <I><A HREF="snmpcmd.html>snmpcmd</A>(1)</I> manual page for more details.
 <DT><DD>
 If not specified, the default value for this token is 161.
 <DT>defVersion (1|2c|3)<DD>
@@ -97,7 +97,7 @@ However certain (broken) agents cannot handle ID values greater than
 2^16 - this option allows interoperability with such agents.
 <DT>clientaddr [&lt;transport-specifier&gt;:]&lt;transport-address&gt;<DD>
 specifies the source address to be used by command-line applications
-when sending SNMP requests. See <I><A HREF="http://localhost/cgi-bin/man/man2html?1+snmpcmd">snmpcmd</A>(1)</I> for more information
+when sending SNMP requests. See <I><A HREF="snmpcmd.html>snmpcmd</A>(1)</I> for more information
 about the format of addresses.
 <DT><DD>
 This value is also used by <B>snmpd</B> when generating notifications.
@@ -293,7 +293,7 @@ of the buffer used when sending SNMP responses.
 <DT>mibdirs DIRLIST<DD>
 specifies a list of directories to search for MIB files.
 This operates in the same way as the <B>-M</B> option -
-see <I><A HREF="http://localhost/cgi-bin/man/man2html?1+snmpcmd">snmpcmd</A>(1)</I> for details.
+see <I><A HREF="snmpcmd.html>snmpcmd</A>(1)</I> for details.
 Note that this value can be overridden by the
 <B>MIBDIRS</B>
 
@@ -301,7 +301,7 @@ environment variable, and the <B>-M</B> option.
 <DT>mibs MIBLIST<DD>
 specifies a list of MIB modules (not files) that should be loaded.
 This operates in the same way as the <B>-m</B> option -
-see <I><A HREF="http://localhost/cgi-bin/man/man2html?1+snmpcmd">snmpcmd</A>(1)</I> for details.
+see <I><A HREF="snmpcmd.html>snmpcmd</A>(1)</I> for details.
 Note that this list can be overridden by the
 <B>MIBS</B>
 
@@ -412,7 +412,7 @@ values to set. Equivalent to
 <A NAME="lbAK">&nbsp;</A>
 <H2>SEE ALSO</H2>
 
-<A HREF="http://localhost/cgi-bin/man/man2html?5+snmp_config">snmp_config</A>(5), <A HREF="http://localhost/cgi-bin/man/man2html?3+read_config">read_config</A>(3), <A HREF="http://localhost/cgi-bin/man/man2html?1+snmpcmd">snmpcmd</A>(1).
+<A HREF="snmpcmd.html>snmpcmd</A>(1).
 
 
 

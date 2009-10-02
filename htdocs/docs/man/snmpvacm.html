@@ -92,7 +92,7 @@ These
 commands effectively create or delete rows in the appropriate one of
 these tables, and match the equivalent configure directives
 which are documented in the
-<I><A HREF="http://localhost/cgi-bin/man/man2html?5+snmpd.conf">snmpd.conf</A>(5)</I>
+<I><A HREF="snmpd.conf.html>snmpd.conf</A>(5)</I>
 
 man page.
 <P>
@@ -388,10 +388,10 @@ AUTHTYPE
 <DT><DD>
 The style of access that this entry should be applied to.
 See
-<I><A HREF="http://localhost/cgi-bin/man/man2html?5+snmpd.conf">snmpd.conf</A>(5)</I>
+<I><A HREF="snmpd.conf.html>snmpd.conf</A>(5)</I>
 
 and
-<I><A HREF="http://localhost/cgi-bin/man/man2html?5+snmptrapd.conf">snmptrapd.conf</A>(5)</I>
+<I><A HREF="snmptrapd.conf.html>snmptrapd.conf</A>(5)</I>
 
 for details of valid tokens.
 </DL>
@@ -429,7 +429,7 @@ Given a pre-existing user
 <I>dave</I>
 
 (which could be set up using the
-<I><A HREF="http://localhost/cgi-bin/man/man2html?1+snmpusm">snmpusm</A>(1)</I>
+<I><A HREF="snmpusm.html>snmpusm</A>(1)</I>
 
 command),
 we could configure full read-write access to the whole OID tree
@@ -447,7 +447,7 @@ snmpvacm localhost createAccess  RWGroup 3 1 1 all all none
 
 This creates a new security group named &quot;RWGroup&quot; containing the SNMPv3 user &quot;dave&quot;,
 a new view &quot;all&quot; containing the full OID tree based on
-<I><A HREF="http://localhost/cgi-bin/man/man2html?1+.iso">.iso</A>(1)</I>
+<I><A HREF=".iso.html>.iso</A>(1)</I>
 
 , and then allows those users in the group &quot;RWGroup&quot; (i.e. &quot;dave&quot;)
 both read- and write-access to the view &quot;all&quot; (i.e. the full OID tree)
@@ -471,7 +471,7 @@ snmpvacm localhost createAccess  ROGroup 3 0 1 sysView none none
 
 This creates a new security group named &quot;ROGroup&quot; containing the (pre-existing)
 user &quot;wes&quot;, a new view &quot;sysView&quot; containing just the OID tree based on
-<I><A HREF="http://localhost/cgi-bin/man/man2html?1+.iso">.iso</A>(1)<A HREF="http://localhost/cgi-bin/man/man2html?3+.org">.org</A>(3)<A HREF="http://localhost/cgi-bin/man/man2html?6+.dod">.dod</A>(6)<A HREF="http://localhost/cgi-bin/man/man2html?1+.inet">.inet</A>(1)<A HREF="http://localhost/cgi-bin/man/man2html?2+.mgmt">.mgmt</A>(2)<A HREF="http://localhost/cgi-bin/man/man2html?1+.mib-2">.mib-2</A>(1)<A HREF="http://localhost/cgi-bin/man/man2html?1+.system">.system</A>(1)</I>
+<I><A HREF=".system.html>.system</A>(1)</I>
 
 , and then allows those users in the group &quot;ROGroup&quot; (i.e. &quot;wes&quot;)
 read-access, but not write-access to the view &quot;sysView&quot; (i.e. the system group).
@@ -530,8 +530,8 @@ and
 <A NAME="lbAQ">&nbsp;</A>
 <H2>SEE ALSO</H2>
 
-<A HREF="http://localhost/cgi-bin/man/man2html?1+snmpcmd">snmpcmd</A>(1), <A HREF="http://localhost/cgi-bin/man/man2html?1+snmpusm">snmpusm</A>(1),
-<A HREF="http://localhost/cgi-bin/man/man2html?5+snmpd.conf">snmpd.conf</A>(5), <A HREF="http://localhost/cgi-bin/man/man2html?5+snmp.conf">snmp.conf</A>(5), RFC 2575, Net-SNMP project FAQ
+<A HREF="snmpusm.html>snmpusm</A>(1),
+<A HREF="snmp.conf.html>snmp.conf</A>(5), RFC 2575, Net-SNMP project FAQ
 <P>
 
 <HR>

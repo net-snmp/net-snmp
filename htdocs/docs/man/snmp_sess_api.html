@@ -167,7 +167,7 @@ Consult snmp_api.h for the definitions of these structures.
 <B>snmp_sess_select_info()</B>, <B>snmp_sess_read()</B> and <B>snmp_sess_timeout()</B>
 
 provide an interface for the use of the
-<B><A HREF="http://localhost/cgi-bin/man/man2html?2+select">select</A></B>(2)
+<B><A HREF="select.html>select</A></B>(2)
 
 system call so that SNMP transactions for a single session can occur
 asynchronously.
@@ -176,13 +176,13 @@ asynchronously.
 <B>snmp_sess_select_info()</B>
 
 is passed the information that would have been passed to
-<B><A HREF="http://localhost/cgi-bin/man/man2html?2+select">select</A></B>(2)
+<B><A HREF="select.html>select</A></B>(2)
 
 in the absence of SNMP.  For example, this might include file
 descriptors associated with the main loop of a graphical
 application. This information is modified so that SNMP will get the
 service it requires from the call to
-<B><A HREF="http://localhost/cgi-bin/man/man2html?2+select">select</A></B>(2).
+<B><A HREF="select.html>select</A></B>(2).
 
 In this case,
 <I>numfds</I>, <I>fdset</I> and <I>timeout</I>
@@ -191,14 +191,14 @@ correspond to the
 <I>nfds</I>, <I>readfds</I> and <I>timeout</I>
 
 arguments to
-<B><A HREF="http://localhost/cgi-bin/man/man2html?2+select">select</A></B>(2)
+<B><A HREF="select.html>select</A></B>(2)
 
 respectively.  The only exception is that timeout must ALWAYS point to
 an allocated (but perhaps uninitialized)
 <I>struct timeval</I>
 
 (it cannot be NULL as for
-<B><A HREF="http://localhost/cgi-bin/man/man2html?2+select">select</A></B>(2)).
+<B><A HREF="select.html>select</A></B>(2)).
 
 If
 <I>timeout</I>
@@ -217,7 +217,7 @@ is treated as undefined.  This same rule applies upon return from
 After calling
 <B>snmp_sess_select_info() ,</B>
 
-<B><A HREF="http://localhost/cgi-bin/man/man2html?2+select">select</A></B>(2)
+<B><A HREF="select.html>select</A></B>(2)
 
 should be called with the returned data.  When it returns,
 <B>snmp_sess_read()</B>
@@ -226,10 +226,10 @@ should then be called with the
 <I>fd_set</I>
 
 returned from
-<B><A HREF="http://localhost/cgi-bin/man/man2html?2+select">select</A></B>(2).
+<B><A HREF="select.html>select</A></B>(2).
 
 This will read any input from this session's SNMP socket.  If
-<B><A HREF="http://localhost/cgi-bin/man/man2html?2+select">select</A></B>(2)
+<B><A HREF="select.html>select</A></B>(2)
 
 times out (that is, it returns zero),
 <B>snmp_sess_timeout()</B>
@@ -321,7 +321,7 @@ The specified session was not open.
 <A NAME="lbAF">&nbsp;</A>
 <H2>SEE ALSO</H2>
 
-<B><A HREF="http://localhost/cgi-bin/man/man2html?2+select">select</A></B>(2), <B><A HREF="http://localhost/cgi-bin/man/man2html?3+snmp_api">snmp_api</A></B>(3), <B>snmp_api.h</B>
+<B><A HREF="snmp_api.html>snmp_api</A></B>(3), <B>snmp_api.h</B>
 
 <P>
 
