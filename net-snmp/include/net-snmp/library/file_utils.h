@@ -1,7 +1,7 @@
 #ifndef NETSNMP_FILE_UTILS_H
 #define NETSNMP_FILE_UTILS_H
 
-#ifdef _cplusplus
+#ifdef __cplusplus
 extern "C" {
 #endif
 
@@ -82,7 +82,7 @@ extern "C" {
 
     
         
-#ifdef _cplusplus
+#ifdef __cplusplus
 }
 #endif
 

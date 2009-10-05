@@ -1,7 +1,7 @@
 #ifndef NETSNMP_TEXT_UTILS_H
 #define NETSNMP_TEXT_UTILS_H
 
-#ifdef _cplusplus
+#ifdef __cplusplus
 extern "C" {
 #endif
 
@@ -106,7 +106,7 @@ extern "C" {
 #define PMLP_TYPE_BOOLEAN                                   4
 
         
-#ifdef _cplusplus
+#ifdef __cplusplus
 }
 #endif
 
