@@ -11,7 +11,7 @@
 #ifndef NETSNMP_DIR_UTILS_H
 #define NETSNMP_DIR_UTILS_H
 
-#ifdef _cplusplus
+#ifdef __cplusplus
 extern "C" {
 #endif
 
@@ -34,7 +34,7 @@ extern "C" {
 
     
         
-#ifdef _cplusplus
+#ifdef __cplusplus
 }
 #endif
 
