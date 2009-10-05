@@ -310,9 +310,8 @@ main(int argc, char *argv[])
                  */
                 for (vars = response->variables; vars;
                      vars = vars->next_variable) {
-                    if ((vars->name_length < end_len)
-                        || (memcmp(end_oid, vars->name, end_len * sizeof(oid))
-                            <= 0)) {
+                    if (snmp_oid_compare(end_oid, end_len,
+                                         vars->name, vars->name_length) <= 0) {
                         /*
                          * not part of this subtree 
                          */
