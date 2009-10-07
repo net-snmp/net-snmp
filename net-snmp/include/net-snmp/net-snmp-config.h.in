@@ -1216,6 +1216,9 @@
 /* umask permissions to set up persistent files with */
 #undef NETSNMP_PERSISTENT_MASK
 
+/* Size prefix to use to printf a size_t or ssize_t */
+#undef NETSNMP_PRIz
+
 /* Define to 1 if you want to build with reentrant/threaded code (incomplete).
    */
 #undef NETSNMP_REENTRANT
