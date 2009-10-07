@@ -1544,11 +1544,6 @@ view_parse_oid(oid * oidIndex, size_t oidLen,
     viewName[0][viewNameL] = 0;
 
     for (i = 0; i < subtreeL; i++) {
-	if (oidIndex[i + viewNameL + 1] > 255) {
-	    free(*viewName);
-	    free(*subtree);
-	    return SNMP_ERR_INCONSISTENTNAME;
-	}
         subtree[0][i] = (oid) oidIndex[i + viewNameL + 1];
     }
 
