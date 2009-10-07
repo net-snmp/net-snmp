@@ -1735,5 +1735,11 @@ typedef unsigned int   uintptr_t;
 #define HAVE_STRUCT_SOCKADDR_STORAGE_SS_FAMILY 1
 #endif
 
+#ifdef _WIN64
+#define NETSNMP_PRIz "I64"
+#else
+#define NETSNMP_PRIz ""
+#endif
+
 #endif /* NET_SNMP_CONFIG_H */
 
