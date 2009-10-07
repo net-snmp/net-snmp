@@ -441,8 +441,8 @@ var_smux_write(int action,
                 return SNMP_ERR_GENERR;
             }
 
-            DEBUGMSGTL(("smux", "[var_smux_write] Peeked at %d bytes\n",
-                        len));
+            DEBUGMSGTL(("smux", "[var_smux_write] Peeked at %" NETSNMP_PRIz
+                        "d bytes\n", len));
             DEBUGDUMPSETUP("var_smux_write", buf, len);
 
             /*
@@ -477,8 +477,8 @@ var_smux_write(int action,
                 return SNMP_ERR_GENERR;
             }
 
-            DEBUGMSGTL(("smux", "[var_smux_write] Received %d bytes\n",
-                        len));
+            DEBUGMSGTL(("smux", "[var_smux_write] Received %" NETSNMP_PRIz
+                        "d bytes\n", len));
 
             if (buf[0] == SMUX_TRAP) {
                 DEBUGMSGTL(("smux", "[var_smux_write] Received trap\n"));
@@ -740,8 +740,8 @@ smux_pdu_process(int fd, u_char * data, size_t length)
     size_t          len;
     u_char         *ptr, type;
 
-    DEBUGMSGTL(("smux", "[smux_pdu_process] Processing %d bytes\n",
-                length));
+    DEBUGMSGTL(("smux", "[smux_pdu_process] Processing %" NETSNMP_PRIz
+                "d bytes\n", length));
 
     error = 0;
     ptr = data;
@@ -827,8 +827,8 @@ smux_open_process(int fd, u_char * ptr, size_t * len, int *fail)
         return ((ptr += *len));
     }
     DEBUGMSGTL(("smux",
-                "[smux_open_process] version %d, len %d, type %d\n",
-                version, *len, (int) type));
+                "[smux_open_process] version %d, len %" NETSNMP_PRIz
+                "u, type %d\n", version, *len, (int) type));
 
     oid_name_len = MAX_OID_LEN;
     if ((ptr = asn_parse_objid(ptr, len, &type, oid_name,
@@ -842,8 +842,8 @@ smux_open_process(int fd, u_char * ptr, size_t * len, int *fail)
     if (snmp_get_do_debugging()) {
         DEBUGMSGTL(("smux", "[smux_open_process] smux peer: %s\n",
                     oid_print));
-        DEBUGMSGTL(("smux", "[smux_open_process] len %d, type %d\n", *len,
-                    (int) type));
+        DEBUGMSGTL(("smux", "[smux_open_process] len %" NETSNMP_PRIz
+                    "u, type %d\n", *len, (int) type));
     }
 
     string_len = SMUXMAXSTRLEN;
@@ -859,8 +859,8 @@ smux_open_process(int fd, u_char * ptr, size_t * len, int *fail)
         for (i = 0; i < (int) string_len; i++)
             DEBUGMSG(("smux", "%c", descr[i]));
         DEBUGMSG(("smux", "\n"));
-        DEBUGMSGTL(("smux", "[smux_open_process] len %d, type %d\n", *len,
-                    (int) type));
+        DEBUGMSGTL(("smux", "[smux_open_process] len %" NETSNMP_PRIz
+                    "u, type %d\n", *len, (int) type));
     }
     descr[string_len] = 0;
 
@@ -877,8 +877,8 @@ smux_open_process(int fd, u_char * ptr, size_t * len, int *fail)
         for (i = 0; i < (int) string_len; i++)
             DEBUGMSG(("smux", "%c", passwd[i]));
         DEBUGMSG(("smux", "\n"));
-        DEBUGMSGTL(("smux", "[smux_open_process] len %d, type %d\n", *len,
-                    (int) type));
+        DEBUGMSGTL(("smux", "[smux_open_process] len %" NETSNMP_PRIz
+                    "u, type %d\n", *len, (int) type));
     }
     passwd[string_len] = '\0';
     if (!smux_auth_peer(oid_name, oid_name_len, passwd, fd)) {
@@ -1576,8 +1576,8 @@ smux_parse_var(u_char * varbind,
      */
     len = SMUXMAXPKTSIZE;
     DEBUGMSGTL(("smux",
-                "[smux_parse_var] Asn coded len of var %d, type %d\n",
-                var_val_len, (int) *vartype));
+                "[smux_parse_var] Asn coded len of var %" NETSNMP_PRIz
+                "u, type %d\n", var_val_len, (int) *vartype));
 
     switch ((short) *vartype) {
     case ASN_INTEGER:

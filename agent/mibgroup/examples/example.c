@@ -450,7 +450,8 @@ write_exampleint(int action,
             return SNMP_ERR_WRONGTYPE;
         }
         if (var_val_len > sizeof(long)) {
-            DEBUGMSGTL(("example", "wrong length %x", var_val_len));
+            DEBUGMSGTL(("example", "wrong length %" NETSNMP_PRIz "u",
+                        var_val_len));
             return SNMP_ERR_WRONGLENGTH;
         }
 
@@ -535,7 +536,8 @@ write_exampletrap(int action,
             return SNMP_ERR_WRONGTYPE;
         }
         if (var_val_len > sizeof(long)) {
-            DEBUGMSGTL(("example", "wrong length %x", var_val_len));
+            DEBUGMSGTL(("example", "wrong length %" NETSNMP_PRIz "u",
+                        var_val_len));
             return SNMP_ERR_WRONGLENGTH;
         }
 
@@ -645,7 +647,8 @@ write_exampletrap2(int action,
             return SNMP_ERR_WRONGTYPE;
         }
         if (var_val_len > sizeof(long)) {
-            DEBUGMSGTL(("example", "wrong length %x", var_val_len));
+            DEBUGMSGTL(("example", "wrong length %" NETSNMP_PRIz "u",
+                        var_val_len));
             return SNMP_ERR_WRONGLENGTH;
         }
 

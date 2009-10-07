@@ -189,3 +189,32 @@ if test $netsnmp_cv_sys_ioctl_h_has_SIOCGIFADDR = yes; then
    [define if SIOCGIFADDR exists in sys/ioctl.h])
 fi
 
+##
+#   Check how to print a size_t variable
+##
+
+AC_CACHE_CHECK(
+    [the underlying type of a size_t],
+    netsnmp_cv_size_t_type,
+    [m4_foreach([TYPE], [[int],[long],[long long],[short],[char]],
+     [if [[ x$netsnmp_cv_size_t_type = x ]] ; then
+         AC_COMPILE_IFELSE(
+	     [AC_LANG_PROGRAM(
+[AC_INCLUDES_DEFAULT()
+extern unsigned TYPE variable;
+extern size_t variable;],
+                 [])],
+             [netsnmp_cv_size_t_type="TYPE"])
+     fi
+    ])])
+
+AC_MSG_CHECKING([how to printf a size_t])
+case "$netsnmp_cv_size_t_type" in
+    char|short|int) netsnmp_PRIz="" ;;
+    long) netsnmp_PRIz="l" ;;
+    "long long") netsnmp_PRIz="ll" ;;
+    *) AC_MSG_ERROR([underlying type of size_t not known]) ;;
+esac
+AC_MSG_RESULT($netsnmp_PRIz)
+AC_DEFINE_UNQUOTED([NETSNMP_PRIz], ["$netsnmp_PRIz"],
+                   [Size prefix to use to printf a size_t or ssize_t])
