@@ -653,8 +653,7 @@ snmp_set_var_objid(netsnmp_variable_list * vp,
 {
     size_t          len = sizeof(oid) * name_length;
 
-    if (vp->name != vp->name_loc && vp->name != NULL &&
-        vp->name_length > (sizeof(vp->name_loc) / sizeof(oid))) {
+    if (vp->name != vp->name_loc && vp->name != NULL) {
         /*
          * Probably previously-allocated "big storage".  Better free it
          * else memory leaks possible.  
