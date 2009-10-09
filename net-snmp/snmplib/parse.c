@@ -2159,12 +2159,12 @@ parse_ranges(FILE * fp, struct range_list **retp)
             nexttype = get_token(fp, nexttoken, MAXTOKEN);
         else
             taken = 0;
-        high = low = strtol(nexttoken, NULL, 10);
+        high = low = strtoul(nexttoken, NULL, 10);
         nexttype = get_token(fp, nexttoken, MAXTOKEN);
         if (nexttype == RANGE) {
             nexttype = get_token(fp, nexttoken, MAXTOKEN);
             errno = 0;
-            high = strtol(nexttoken, NULL, 10);
+            high = strtoul(nexttoken, NULL, 10);
             if ( errno == ERANGE ) {
                 if (netsnmp_ds_get_int(NETSNMP_DS_LIBRARY_ID,
                                        NETSNMP_DS_LIB_MIB_WARNINGS))
