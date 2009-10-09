@@ -4715,11 +4715,30 @@ print_tree_node(u_char ** buf, size_t * buf_len,
             if (!snmp_strcat(buf, buf_len, out_len, allow_realloc, " ("))
                 return 0;
             while (rp) {
-                if (rp->low == rp->high)
-                    sprintf(str, "%s%d", (first ? "" : " | "), rp->low );
-                else
-                    sprintf(str, "%s%d..%d", (first ? "" : " | "),
-                                              rp->low, rp->high);
+                switch (tp->type) {
+                case TYPE_INTEGER:
+                case TYPE_INTEGER32:
+                    if (rp->low == rp->high)
+                        sprintf(str, "%s%d", (first ? "" : " | "), rp->low );
+                    else
+                        sprintf(str, "%s%d..%d", (first ? "" : " | "),
+                                rp->low, rp->high);
+                    break;
+                case TYPE_UNSIGNED32:
+                case TYPE_OCTETSTR:
+                case TYPE_GAUGE:
+                case TYPE_UINTEGER:
+                    if (rp->low == rp->high)
+                        sprintf(str, "%s%u", (first ? "" : " | "),
+                                (unsigned)rp->low );
+                    else
+                        sprintf(str, "%s%u..%u", (first ? "" : " | "),
+                                (unsigned)rp->low, (unsigned)rp->high);
+                    break;
+                default:
+                    /* No other range types allowed */
+                    break;
+                }
                 if (!snmp_strcat(buf, buf_len, out_len, allow_realloc, str))
                     return 0;
                 if (first)
