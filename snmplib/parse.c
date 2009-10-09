@@ -939,6 +939,32 @@ free_node(struct node *np)
     free((char *) np);
 }
 
+static void
+print_range_value(FILE * fp, int type, struct range_list * rp)
+{
+    switch (type) {
+    case TYPE_INTEGER:
+    case TYPE_INTEGER32:
+        if (rp->low == rp->high)
+            fprintf(fp, "%d", rp->low);
+        else
+            fprintf(fp, "%d..%d", rp->low, rp->high);
+        break;
+    case TYPE_UNSIGNED32:
+    case TYPE_OCTETSTR:
+    case TYPE_GAUGE:
+    case TYPE_UINTEGER:
+        if (rp->low == rp->high)
+            fprintf(fp, "%u", (unsigned)rp->low);
+        else
+            fprintf(fp, "%u..%u", (unsigned)rp->low, (unsigned)rp->high);
+        break;
+    default:
+        /* No other range types allowed */
+        break;
+    }
+}
+
 #ifdef TEST
 static void
 print_nodes(FILE * fp, struct node *root)
@@ -961,10 +987,12 @@ print_nodes(FILE * fp, struct node *root)
             }
         }
         if (np->ranges) {
-            fprintf(fp, "  Ranges: \n");
+            fprintf(fp, "  Ranges: ");
             for (rp = np->ranges; rp; rp = rp->next) {
-                fprintf(fp, "    %d..%d\n", rp->low, rp->high);
+                fprintf(fp, "\n    ");
+                print_range_value(fp, np->type, rp);
             }
+            fprintf(fp, "\n");
         }
         if (np->indexes) {
             fprintf(fp, "  Indexes: \n");
@@ -5385,10 +5413,7 @@ print_mib_leaves(FILE * f, struct tree *tp, int width)
             while (rp) {
                 if (rp != tp->ranges)
                     fprintf(f, " | ");
-                if (rp->low == rp->high)
-                    fprintf(f, "%d", rp->low);
-                else
-                    fprintf(f, "%d..%d", rp->low, rp->high);
+                print_range_value(f, tp->type, rp);
                 rp = rp->next;
             }
             fprintf(f, "\n");
