@@ -971,7 +971,6 @@ print_nodes(FILE * fp, struct node *root)
 {
     struct enum_list *ep;
     struct index_list *ip;
-    struct range_list *rp;
     struct varbind_list *vp;
     struct node    *np;
 
@@ -987,6 +986,7 @@ print_nodes(FILE * fp, struct node *root)
             }
         }
         if (np->ranges) {
+            struct range_list *rp;
             fprintf(fp, "  Ranges: ");
             for (rp = np->ranges; rp; rp = rp->next) {
                 fprintf(fp, "\n    ");
