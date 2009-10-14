@@ -372,7 +372,7 @@ sc_generate_keyed_hash(const oid * authtype, size_t authtypelen,
 #endif                          /* NETSNMP_ENABLE_TESTING_CODE */
 
   sc_generate_keyed_hash_quit:
-    SNMP_ZERO(buf, SNMP_MAXBUF_SMALL);
+    memset(buf, 0, SNMP_MAXBUF_SMALL);
     return rval;
 }                               /* end sc_generate_keyed_hash() */
 
@@ -586,7 +586,7 @@ sc_check_keyed_hash(const oid * authtype, size_t authtypelen,
 
 
   sc_check_keyed_hash_quit:
-    SNMP_ZERO(buf, SNMP_MAXBUF_SMALL);
+    memset(buf, 0, SNMP_MAXBUF_SMALL);
 
     return rval;
 
