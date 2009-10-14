@@ -351,11 +351,11 @@ main(int argc, char **argv)
     SNMP_ZERO(oldpass, strlen(oldpass));
     SNMP_ZERO(newpass, strlen(newpass));
 
-    SNMP_ZERO(oldKu, oldKu_len);
-    SNMP_ZERO(newKu, newKu_len);
+    memset(oldKu, 0, oldKu_len);
+    memset(newKu, 0, newKu_len);
 
-    SNMP_ZERO(oldkul, oldkul_len);
-    SNMP_ZERO(newkul, newkul_len);
+    memset(oldkul, 0, oldkul_len);
+    memset(newkul, 0, newkul_len);
 
     SNMP_ZERO(s, strlen(s));
 
@@ -613,7 +613,7 @@ get_user_passphrases(void)
 
 
   get_user_passphrases_quit:
-    SNMP_ZERO(buf, SNMP_MAXBUF);
+    memset(buf, 0, SNMP_MAXBUF);
 
     if (obuf != oldpass) {
         SNMP_ZERO(obuf, strlen(obuf));
@@ -762,7 +762,7 @@ snmp_getpassphrase(const char *prompt, int bvisible)
     if (bufp)
         memcpy(bufp, buffer, len + 1);
 
-    SNMP_ZERO(buffer, SNMP_MAXBUF);
+    memset(buffer, 0, SNMP_MAXBUF);
 
 
     return bufp;
