@@ -317,9 +317,11 @@ init_agent(const char *app)
      * initialize agentx configs
      */
     agentx_config_init();
+#if defined(USING_AGENTX_SUBAGENT_MODULE)
     if(netsnmp_ds_get_boolean(NETSNMP_DS_APPLICATION_ID,
                               NETSNMP_DS_AGENT_ROLE) == SUB_AGENT)
         subagent_init();
+#endif
 #endif
 
     /*
