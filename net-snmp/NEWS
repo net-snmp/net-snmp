@@ -3,7 +3,13 @@ Please see the CHANGES file for a more detailed list of specific bugs/patches
 that have been fixed/applied, and the ChangeLog file for a comprehensive
 listing of all changes made to the code.
 
+*5.4.3*
+
+    snmpd:
+      - Fix CVE-2008-4309 (GETBULK issue reported by Oscar Mira-Sanchez)
+
 *5.4.2*
+
     snmplib:
       - [PATCH 1921861]: Avoid endless loop after truncating 64bit int
       - Better handling of CONTAINER_INSERT failures with multiple indices
