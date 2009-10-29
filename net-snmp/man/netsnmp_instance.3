@@ -1,10 +1,11 @@
-.TH "instance" 3 "5 Sep 2008" "Version 5.4.2" "net-snmp" \" -*- nroff -*-
+.TH "instance" 3 "29 Oct 2009" "Version 5.4.3.pre1" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
-instance \- Process individual MIB instances easily.  
-
+instance \- 
 .PP
+Process individual MIB instances easily.  
+
 .SS "Functions"
 
 .in +1c
@@ -21,61 +22,61 @@ instance \- Process individual MIB instances easily.
 .br
 .RI "\fIThis function injects a 'read only' handler into the handler chain prior to serializing/registering the handler. \fP"
 .ti -1c
-.RI "int \fBnetsnmp_register_read_only_ulong_instance\fP (const char *name, oid *reg_oid, size_t reg_oid_len, u_long *it, \fBNetsnmp_Node_Handler\fP *subhandler)"
+.RI "int \fBnetsnmp_register_read_only_ulong_instance\fP (const char *name, oid *reg_oid, size_t reg_oid_len, u_long *it, Netsnmp_Node_Handler *subhandler)"
 .br
 .ti -1c
-.RI "int \fBnetsnmp_register_ulong_instance\fP (const char *name, oid *reg_oid, size_t reg_oid_len, u_long *it, \fBNetsnmp_Node_Handler\fP *subhandler)"
+.RI "int \fBnetsnmp_register_ulong_instance\fP (const char *name, oid *reg_oid, size_t reg_oid_len, u_long *it, Netsnmp_Node_Handler *subhandler)"
 .br
 .ti -1c
-.RI "int \fBnetsnmp_register_read_only_counter32_instance\fP (const char *name, oid *reg_oid, size_t reg_oid_len, u_long *it, \fBNetsnmp_Node_Handler\fP *subhandler)"
+.RI "int \fBnetsnmp_register_read_only_counter32_instance\fP (const char *name, oid *reg_oid, size_t reg_oid_len, u_long *it, Netsnmp_Node_Handler *subhandler)"
 .br
 .ti -1c
-.RI "int \fBnetsnmp_register_read_only_long_instance\fP (const char *name, oid *reg_oid, size_t reg_oid_len, long *it, \fBNetsnmp_Node_Handler\fP *subhandler)"
+.RI "int \fBnetsnmp_register_read_only_long_instance\fP (const char *name, oid *reg_oid, size_t reg_oid_len, long *it, Netsnmp_Node_Handler *subhandler)"
 .br
 .ti -1c
-.RI "int \fBnetsnmp_register_long_instance\fP (const char *name, oid *reg_oid, size_t reg_oid_len, long *it, \fBNetsnmp_Node_Handler\fP *subhandler)"
+.RI "int \fBnetsnmp_register_long_instance\fP (const char *name, oid *reg_oid, size_t reg_oid_len, long *it, Netsnmp_Node_Handler *subhandler)"
 .br
 .ti -1c
-.RI "int \fBnetsnmp_register_read_only_uint_instance\fP (const char *name, oid *reg_oid, size_t reg_oid_len, unsigned int *it, \fBNetsnmp_Node_Handler\fP *subhandler)"
+.RI "int \fBnetsnmp_register_read_only_uint_instance\fP (const char *name, oid *reg_oid, size_t reg_oid_len, unsigned int *it, Netsnmp_Node_Handler *subhandler)"
 .br
 .ti -1c
-.RI "int \fBnetsnmp_register_uint_instance\fP (const char *name, oid *reg_oid, size_t reg_oid_len, unsigned int *it, \fBNetsnmp_Node_Handler\fP *subhandler)"
+.RI "int \fBnetsnmp_register_uint_instance\fP (const char *name, oid *reg_oid, size_t reg_oid_len, unsigned int *it, Netsnmp_Node_Handler *subhandler)"
 .br
 .ti -1c
-.RI "int \fBnetsnmp_register_read_only_int_instance\fP (const char *name, oid *reg_oid, size_t reg_oid_len, int *it, \fBNetsnmp_Node_Handler\fP *subhandler)"
+.RI "int \fBnetsnmp_register_read_only_int_instance\fP (const char *name, oid *reg_oid, size_t reg_oid_len, int *it, Netsnmp_Node_Handler *subhandler)"
 .br
 .ti -1c
-.RI "int \fBregister_read_only_int_instance\fP (const char *name, oid *reg_oid, size_t reg_oid_len, int *it, \fBNetsnmp_Node_Handler\fP *subhandler)"
+.RI "int \fBregister_read_only_int_instance\fP (const char *name, oid *reg_oid, size_t reg_oid_len, int *it, Netsnmp_Node_Handler *subhandler)"
 .br
 .ti -1c
-.RI "int \fBnetsnmp_register_read_only_ulong_instance_context\fP (const char *name, oid *reg_oid, size_t reg_oid_len, u_long *it, \fBNetsnmp_Node_Handler\fP *subhandler, const char *contextName)"
+.RI "int \fBnetsnmp_register_read_only_ulong_instance_context\fP (const char *name, oid *reg_oid, size_t reg_oid_len, u_long *it, Netsnmp_Node_Handler *subhandler, const char *contextName)"
 .br
 .ti -1c
-.RI "int \fBnetsnmp_register_ulong_instance_context\fP (const char *name, oid *reg_oid, size_t reg_oid_len, u_long *it, \fBNetsnmp_Node_Handler\fP *subhandler, const char *contextName)"
+.RI "int \fBnetsnmp_register_ulong_instance_context\fP (const char *name, oid *reg_oid, size_t reg_oid_len, u_long *it, Netsnmp_Node_Handler *subhandler, const char *contextName)"
 .br
 .ti -1c
-.RI "int \fBnetsnmp_register_read_only_counter32_instance_context\fP (const char *name, oid *reg_oid, size_t reg_oid_len, u_long *it, \fBNetsnmp_Node_Handler\fP *subhandler, const char *contextName)"
+.RI "int \fBnetsnmp_register_read_only_counter32_instance_context\fP (const char *name, oid *reg_oid, size_t reg_oid_len, u_long *it, Netsnmp_Node_Handler *subhandler, const char *contextName)"
 .br
 .ti -1c
-.RI "int \fBnetsnmp_register_read_only_long_instance_context\fP (const char *name, oid *reg_oid, size_t reg_oid_len, long *it, \fBNetsnmp_Node_Handler\fP *subhandler, const char *contextName)"
+.RI "int \fBnetsnmp_register_read_only_long_instance_context\fP (const char *name, oid *reg_oid, size_t reg_oid_len, long *it, Netsnmp_Node_Handler *subhandler, const char *contextName)"
 .br
 .ti -1c
-.RI "int \fBnetsnmp_register_long_instance_context\fP (const char *name, oid *reg_oid, size_t reg_oid_len, long *it, \fBNetsnmp_Node_Handler\fP *subhandler, const char *contextName)"
+.RI "int \fBnetsnmp_register_long_instance_context\fP (const char *name, oid *reg_oid, size_t reg_oid_len, long *it, Netsnmp_Node_Handler *subhandler, const char *contextName)"
 .br
 .ti -1c
-.RI "int \fBnetsnmp_register_int_instance_context\fP (const char *name, oid *reg_oid, size_t reg_oid_len, int *it, \fBNetsnmp_Node_Handler\fP *subhandler, const char *contextName)"
+.RI "int \fBnetsnmp_register_int_instance_context\fP (const char *name, oid *reg_oid, size_t reg_oid_len, int *it, Netsnmp_Node_Handler *subhandler, const char *contextName)"
 .br
 .ti -1c
-.RI "int \fBnetsnmp_register_read_only_int_instance_context\fP (const char *name, oid *reg_oid, size_t reg_oid_len, int *it, \fBNetsnmp_Node_Handler\fP *subhandler, const char *contextName)"
+.RI "int \fBnetsnmp_register_read_only_int_instance_context\fP (const char *name, oid *reg_oid, size_t reg_oid_len, int *it, Netsnmp_Node_Handler *subhandler, const char *contextName)"
 .br
 .ti -1c
-.RI "int \fBregister_read_only_int_instance_context\fP (const char *name, oid *reg_oid, size_t reg_oid_len, int *it, \fBNetsnmp_Node_Handler\fP *subhandler, const char *contextName)"
+.RI "int \fBregister_read_only_int_instance_context\fP (const char *name, oid *reg_oid, size_t reg_oid_len, int *it, Netsnmp_Node_Handler *subhandler, const char *contextName)"
 .br
 .ti -1c
-.RI "int \fBnetsnmp_register_num_file_instance\fP (const char *name, oid *reg_oid, size_t reg_oid_len, char *file_name, int asn_type, int mode, \fBNetsnmp_Node_Handler\fP *subhandler, const char *contextName)"
+.RI "int \fBnetsnmp_register_num_file_instance\fP (const char *name, oid *reg_oid, size_t reg_oid_len, char *file_name, int asn_type, int mode, Netsnmp_Node_Handler *subhandler, const char *contextName)"
 .br
 .ti -1c
-.RI "int \fBnetsnmp_register_int_instance\fP (const char *name, oid *reg_oid, size_t reg_oid_len, int *it, \fBNetsnmp_Node_Handler\fP *subhandler)"
+.RI "int \fBnetsnmp_register_int_instance\fP (const char *name, oid *reg_oid, size_t reg_oid_len, int *it, Netsnmp_Node_Handler *subhandler)"
 .br
 .RI "\fIThis function registers an int helper handler to a specified OID. \fP"
 .ti -1c
@@ -103,14 +104,11 @@ instance \- Process individual MIB instances easily.
 .SH "Detailed Description"
 .PP 
 Process individual MIB instances easily. 
-.PP
 .SH "Function Documentation"
 .PP 
 .SS "\fBnetsnmp_mib_handler\fP* netsnmp_get_instance_handler (void)"
 .PP
-Creates an instance helper handler, calls netsnmp_create_handler, which then could be registered, using \fBnetsnmp_register_handler()\fP. 
-.PP
-\fBReturns:\fP
+Creates an instance helper handler, calls netsnmp_create_handler, which then could be registered, using \fBnetsnmp_register_handler()\fP. \fBReturns:\fP
 .RS 4
 Returns a pointer to a netsnmp_mib_handler struct which contains the handler's name and the access method 
 .RE
@@ -118,22 +116,14 @@ Returns a pointer to a netsnmp_mib_handler struct which contains the handler's n
 
 .PP
 Definition at line 48 of file instance.c.
-.PP
-References netsnmp_create_handler(), and netsnmp_instance_helper_handler().
-.PP
-Referenced by netsnmp_register_instance(), netsnmp_register_read_only_instance(), netsnmp_register_read_only_scalar(), netsnmp_register_scalar(), and netsnmp_register_scalar_group().
 .SS "int netsnmp_instance_num_file_handler (\fBnetsnmp_mib_handler\fP * handler, \fBnetsnmp_handler_registration\fP * reginfo, \fBnetsnmp_agent_request_info\fP * reqinfo, \fBnetsnmp_request_info\fP * requests)"
 .PP
+fall through 
+.PP
 Definition at line 741 of file instance.c.
-.PP
-References netsnmp_mib_handler_s::access_method, netsnmp_num_file_instance_s::file_name, netsnmp_num_file_instance_s::filep, netsnmp_vardata::integer, memdup(), netsnmp_agent_request_info_s::mode, netsnmp_mib_handler_s::myvoid, netsnmp_call_next_handler(), netsnmp_create_data_list(), netsnmp_request_add_list_data(), netsnmp_request_get_list_data(), netsnmp_set_request_error(), netsnmp_mib_handler_s::next, NULL, netsnmp_request_info_s::requestvb, snmp_set_var_typed_value(), variable_list::type, netsnmp_num_file_instance_s::type, and variable_list::val.
-.PP
-Referenced by netsnmp_register_num_file_instance().
 .SS "int netsnmp_register_instance (\fBnetsnmp_handler_registration\fP * reginfo)"
 .PP
-This function registers an instance helper handler, which is a way of registering an exact OID such that GENEXT requests are handled entirely by the helper. 
-.PP
-First need to inject it into the calling chain of the handler defined by the netsnmp_handler_registration struct, reginfo. The new handler is injected at the top of the list and will be the new handler to be called first. This function also injects a serialize handler before actually calling netsnmp_register_handle, registering reginfo.
+This function registers an instance helper handler, which is a way of registering an exact OID such that GENEXT requests are handled entirely by the helper. First need to inject it into the calling chain of the handler defined by the netsnmp_handler_registration struct, reginfo. The new handler is injected at the top of the list and will be the new handler to be called first. This function also injects a serialize handler before actually calling netsnmp_register_handle, registering reginfo.
 .PP
 \fBParameters:\fP
 .RS 4
@@ -152,15 +142,9 @@ MIB_REGISTERED_OK is returned if the registration was a success. Failures are MI
 \fBdelayed_instance.c\fP.
 .PP
 Definition at line 73 of file instance.c.
+.SS "int netsnmp_register_int_instance (const char * name, oid * reg_oid, size_t reg_oid_len, int * it, Netsnmp_Node_Handler * subhandler)"
 .PP
-References netsnmp_mib_handler_s::flags, MIB_HANDLER_INSTANCE, netsnmp_get_instance_handler(), netsnmp_inject_handler(), and netsnmp_register_serialize().
-.PP
-Referenced by netsnmp_register_int_instance(), netsnmp_register_int_instance_context(), netsnmp_register_long_instance(), netsnmp_register_long_instance_context(), netsnmp_register_num_file_instance(), netsnmp_register_uint_instance(), netsnmp_register_ulong_instance(), netsnmp_register_ulong_instance_context(), and netsnmp_register_watched_instance().
-.SS "int netsnmp_register_int_instance (const char * name, oid * reg_oid, size_t reg_oid_len, int * it, \fBNetsnmp_Node_Handler\fP * subhandler)"
-.PP
-This function registers an int helper handler to a specified OID. 
-.PP
-\fBParameters:\fP
+This function registers an int helper handler to a specified OID. \fBParameters:\fP
 .RS 4
 \fIname\fP the name used for registration pruposes.
 .br
@@ -185,13 +169,9 @@ MIB_REGISTERED_OK is returned if the registration was a success. Failures are MI
 \fBscalar_int.c\fP.
 .PP
 Definition at line 460 of file instance.c.
-.PP
-References HANDLER_CAN_RWRITE, netsnmp_instance_int_handler(), netsnmp_register_instance(), and NULL.
 .SS "int netsnmp_register_read_only_instance (\fBnetsnmp_handler_registration\fP * reginfo)"
 .PP
-This function injects a 'read only' handler into the handler chain prior to serializing/registering the handler. 
-.PP
-The only purpose of this 'read only' handler is to return an appropriate error for any requests passed to it in a SET mode. Inserting it into your handler chain will ensure you're never asked to perform a SET request so you can ignore those error conditions.
+This function injects a 'read only' handler into the handler chain prior to serializing/registering the handler. The only purpose of this 'read only' handler is to return an appropriate error for any requests passed to it in a SET mode. Inserting it into your handler chain will ensure you're never asked to perform a SET request so you can ignore those error conditions.
 .PP
 \fBParameters:\fP
 .RS 4
@@ -206,7 +186,6 @@ MIB_REGISTERED_OK is returned if the registration was a success. Failures are MI
 
 .PP
 Definition at line 100 of file instance.c.
-.PP
-References netsnmp_get_instance_handler(), netsnmp_get_read_only_handler(), netsnmp_inject_handler(), and netsnmp_register_serialize().
-.PP
-Referenced by netsnmp_register_num_file_instance(), netsnmp_register_read_only_counter32_instance(), netsnmp_register_read_only_counter32_instance_context(), netsnmp_register_read_only_int_instance(), netsnmp_register_read_only_int_instance_context(), netsnmp_register_read_only_long_instance(), netsnmp_register_read_only_long_instance_context(), netsnmp_register_read_only_uint_instance(), netsnmp_register_read_only_ulong_instance(), and netsnmp_register_read_only_ulong_instance_context().
+.SH "Author"
+.PP 
+Generated automatically by Doxygen for net-snmp from the source code.

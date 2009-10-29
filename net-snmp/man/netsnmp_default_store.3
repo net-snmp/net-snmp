@@ -1,10 +1,11 @@
-.TH "storage space for defaults" 3 "5 Sep 2008" "Version 5.4.2" "net-snmp" \" -*- nroff -*-
+.TH "storage space for defaults" 3 "29 Oct 2009" "Version 5.4.3.pre1" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
-storage space for defaults \- The purpose of the default storage is three-fold:.  
-
+storage space for defaults \- 
 .PP
+The purpose of the default storage is three-fold:.  
+
 .SS "Data Structures"
 
 .in +1c
@@ -16,7 +17,7 @@ storage space for defaults \- The purpose of the default storage is three-fold:.
 
 .in +1c
 .ti -1c
-.RI "typedef \fBnetsnmp_ds_read_config_s\fP \fBnetsnmp_ds_read_config\fP"
+.RI "typedef struct \fBnetsnmp_ds_read_config_s\fP \fBnetsnmp_ds_read_config\fP"
 .br
 .in -1c
 .SS "Functions"
@@ -69,7 +70,7 @@ storage space for defaults \- The purpose of the default storage is three-fold:.
 .SH "Detailed Description"
 .PP 
 The purpose of the default storage is three-fold:. 
-.PP
+
 1) To create a global storage space without creating a whole bunch of globally accessible variables or a whole bunch of access functions to work with more privately restricted variables.
 .PP
 2) To provide a single location where the thread lock- ing needs to be implemented. At the time of this writing, however, thread locking is not yet in place.
@@ -108,7 +109,7 @@ library booleans
 .IP "\(bu" 2
 #define NETSNMP_DS_LIB_DONT_READ_CONFIGS 6
 .IP "\(bu" 2
-#define NETSNMP_DS_LIB_MIB_REPLACE 7 replace objects from latest module
+#define NETSNMP_DS_LIB_MIB_REPLACE 7 replace objects from latest \fBmodule\fP
 .IP "\(bu" 2
 #define NETSNMP_DS_LIB_PRINT_NUMERIC_ENUM 8 print only numeric enum values
 .IP "\(bu" 2
@@ -227,9 +228,7 @@ library strings
 .PP 
 .SS "int netsnmp_ds_set_boolean (int storeid, int which, int value)"
 .PP
-Stores 'true' or 'false' given an int value for value into netsnmp_ds_booleans[store][which] slot. 
-.PP
-\fBParameters:\fP
+Stores 'true' or 'false' given an int value for value into netsnmp_ds_booleans[store][which] slot. \fBParameters:\fP
 .RS 4
 \fIstoreid\fP an index to the boolean storage container's first index(store)
 .br
@@ -246,5 +245,6 @@ Returns SNMPPERR_GENERR if the storeid and which parameters do not correspond to
 
 .PP
 Definition at line 197 of file default_store.c.
-.PP
-Referenced by init_agent(), netsnmp_ds_handle_config(), read_configs(), read_premib_configs(), setup_tree(), and snmp_out_toggle_options().
+.SH "Author"
+.PP 
+Generated automatically by Doxygen for net-snmp from the source code.

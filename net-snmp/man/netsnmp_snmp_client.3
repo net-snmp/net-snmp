@@ -1,37 +1,8 @@
-.TH "various PDU processing routines" 3 "5 Sep 2008" "Version 5.4.2" "net-snmp" \" -*- nroff -*-
+.TH "various PDU processing routines" 3 "29 Oct 2009" "Version 5.4.3.pre1" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
 various PDU processing routines \- 
-.SS "Defines"
-
-.in +1c
-.ti -1c
-.RI "#define \fBBSD4_2\fP"
-.br
-.ti -1c
-.RI "#define \fBNFDBITS\fP   (sizeof(\fBfd_mask\fP) * NBBY)"
-.br
-.ti -1c
-.RI "#define \fBFD_SET\fP(n, p)   ((p)->fds_bits[(n)/NFDBITS] |= (1 << ((n) % NFDBITS)))"
-.br
-.ti -1c
-.RI "#define \fBFD_CLR\fP(n, p)   ((p)->fds_bits[(n)/NFDBITS] &= ~(1 << ((n) % NFDBITS)))"
-.br
-.ti -1c
-.RI "#define \fBFD_ISSET\fP(n, p)   ((p)->fds_bits[(n)/NFDBITS] & (1 << ((n) % NFDBITS)))"
-.br
-.ti -1c
-.RI "#define \fBFD_ZERO\fP(p)   memset((p), 0, sizeof(*(p)))"
-.br
-.in -1c
-.SS "Typedefs"
-
-.in +1c
-.ti -1c
-.RI "typedef long \fBfd_mask\fP"
-.br
-.in -1c
 .SS "Functions"
 
 .in +1c
@@ -131,9 +102,7 @@ various PDU processing routines \-
 .PP 
 .SS "int snmp_set_var_typed_value (\fBnetsnmp_variable_list\fP * newvar, u_char type, const u_char * val_str, size_t val_len)"
 .PP
-snmp_set_var_typed_value is used to set data into the netsnmp_variable_list structure. 
-.PP
-Used to return data to the snmp request via the netsnmp_request_info structure's requestvb pointer.
+snmp_set_var_typed_value is used to set data into the netsnmp_variable_list structure. Used to return data to the snmp request via the netsnmp_request_info structure's requestvb pointer.
 .PP
 \fBParameters:\fP
 .RS 4
@@ -157,15 +126,12 @@ returns 0 on success and 1 on a malloc error
 .in +1c
 \fBdelayed_instance.c\fP.
 .PP
-Definition at line 686 of file snmp_client.c.
-.PP
-References snmp_set_var_value(), and variable_list::type.
-.PP
-Referenced by _reorder_getbulk(), check_getnext_results(), handle_pdu(), netsnmp_check_getnext_reply(), netsnmp_create_subtree_cache(), netsnmp_instance_counter32_handler(), netsnmp_instance_int_handler(), netsnmp_instance_long_handler(), netsnmp_instance_num_file_handler(), netsnmp_instance_uint_handler(), netsnmp_instance_ulong_handler(), netsnmp_stash_cache_helper(), netsnmp_table_build_result(), netsnmp_table_data_build_result(), netsnmp_watched_timestamp_handler(), netsnmp_watcher_helper_handler(), snmp_replace_var_types(), and snmp_reset_var_types().
+Definition at line 687 of file snmp_client.c.
 .SS "int snmp_set_var_value (\fBnetsnmp_variable_list\fP * vars, const u_char * value, size_t len)"
 .PP
-Definition at line 753 of file snmp_client.c.
+FALL THROUGH 
 .PP
-References variable_list::buf, netsnmp_vardata::counter64, netsnmp_vardata::integer, NULL, netsnmp_vardata::objid, snmp_log(), snmp_set_detail(), netsnmp_vardata::string, variable_list::type, variable_list::val, and variable_list::val_len.
-.PP
-Referenced by parse_one_oid_index(), snmp_set_var_typed_integer(), snmp_set_var_typed_value(), and snmp_varlist_add_variable().
+Definition at line 754 of file snmp_client.c.
+.SH "Author"
+.PP 
+Generated automatically by Doxygen for net-snmp from the source code.

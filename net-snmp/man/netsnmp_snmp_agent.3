@@ -1,4 +1,4 @@
-.TH "net-snmp agent related processing" 3 "5 Sep 2008" "Version 5.4.2" "net-snmp" \" -*- nroff -*-
+.TH "net-snmp agent related processing" 3 "29 Oct 2009" "Version 5.4.3.pre1" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -33,10 +33,10 @@ net-snmp agent related processing \-
 
 .in +1c
 .ti -1c
-.RI "typedef \fB_agent_nsap\fP \fBagent_nsap\fP"
+.RI "typedef struct \fB_agent_nsap\fP \fBagent_nsap\fP"
 .br
 .ti -1c
-.RI "typedef \fBagent_set_cache_s\fP \fBagent_set_cache\fP"
+.RI "typedef struct \fBagent_set_cache_s\fP \fBagent_set_cache\fP"
 .br
 .in -1c
 .SS "Enumerations"
@@ -122,6 +122,9 @@ net-snmp agent related processing \-
 .RI "void \fBnetsnmp_addrcache_initialise\fP (void)"
 .br
 .ti -1c
+.RI "void \fBnetsnmp_addrcache_destroy\fP (void)"
+.br
+.ti -1c
 .RI "int \fBnetsnmp_addrcache_add\fP (const char *addr)"
 .br
 .ti -1c
@@ -167,7 +170,7 @@ net-snmp agent related processing \-
 .RI "void \fBnetsnmp_remove_and_free_agent_snmp_session\fP (\fBnetsnmp_agent_session\fP *asp)"
 .br
 .ti -1c
-.RI "void \fBnetsnmp_free_agent_snmp_session_by_session\fP (\fBnetsnmp_session\fP *sess, void(*free_request)(netsnmp_request_list *))"
+.RI "void \fBnetsnmp_free_agent_snmp_session_by_session\fP (\fBnetsnmp_session\fP *sess, void(*free_request)(\fBnetsnmp_request_list\fP *))"
 .br
 .ti -1c
 .RI "int \fBhandle_snmp_packet\fP (int op, \fBnetsnmp_session\fP *session, int reqid, \fBnetsnmp_pdu\fP *pdu, void *magic)"
@@ -237,7 +240,7 @@ net-snmp agent related processing \-
 .br
 .RI "\fIset error for all requests \fP"
 .ti -1c
-.RI "u_long \fBnetsnmp_marker_uptime\fP (\fBmarker_t\fP pm)"
+.RI "u_long \fBnetsnmp_marker_uptime\fP (marker_t pm)"
 .br
 .ti -1c
 .RI "u_long \fBnetsnmp_timeval_uptime\fP (struct timeval *tv)"
@@ -266,11 +269,11 @@ net-snmp agent related processing \-
 .ti -1c
 .RI "int \fBnetsnmp_set_request_error\fP (\fBnetsnmp_agent_request_info\fP *reqinfo, \fBnetsnmp_request_info\fP *request, int error_value)"
 .br
-.RI "\fIdeprecated, use netsnmp_request_set_error instead \fP"
+.RI "\fIset error for a request \fP"
 .ti -1c
 .RI "int \fBnetsnmp_set_mode_request_error\fP (int mode, \fBnetsnmp_request_info\fP *request, int error_value)"
 .br
-.RI "\fIdeprecated, use netsnmp_request_set_error instead \fP"
+.RI "\fIset error for a request \fP"
 .ti -1c
 .RI "int \fBnetsnmp_set_all_requests_error\fP (\fBnetsnmp_agent_request_info\fP *reqinfo, \fBnetsnmp_request_info\fP *requests, int error_value)"
 .br
@@ -283,7 +286,7 @@ net-snmp agent related processing \-
 .RI "oid \fBversion_sysoid\fP [] = { NETSNMP_SYSTEM_MIB }"
 .br
 .ti -1c
-.RI "int \fBversion_sysoid_len\fP = OID_LENGTH(\fBversion_sysoid\fP)"
+.RI "int \fBversion_sysoid_len\fP = OID_LENGTH(version_sysoid)"
 .br
 .ti -1c
 .RI "int \fBlog_addresses\fP = 0"
@@ -304,7 +307,7 @@ net-snmp agent related processing \-
 .RI "\fBnetsnmp_session\fP * \fBmain_session\fP = NULL"
 .br
 .ti -1c
-.RI "timeval \fBstarttime\fP"
+.RI "struct timeval \fBstarttime\fP"
 .br
 .in -1c
 .SH "Function Documentation"
@@ -313,16 +316,10 @@ net-snmp agent related processing \-
 .PP
 set error for a request 
 .PP
-Definition at line 3395 of file snmp_agent.c.
-.PP
-References netsnmp_request_info_s::delegated, netsnmp_request_info_s::processed, REQUEST_IS_NOT_DELEGATED, netsnmp_request_info_s::requestvb, snmp_log(), netsnmp_request_info_s::status, and variable_list::type.
-.PP
-Referenced by netsnmp_request_set_error(), netsnmp_request_set_error_all(), netsnmp_request_set_error_idx(), netsnmp_set_mode_request_error(), and netsnmp_set_request_error().
+Definition at line 3414 of file snmp_agent.c.
 .SS "int agent_check_and_process (int block)"
 .PP
-This function checks for packets arriving on the SNMP port and processes them(snmp_read) if some are found, using the select(). 
-.PP
-If block is non zero, the function call blocks until a packet arrives
+This function checks for packets arriving on the SNMP port and processes them(snmp_read) if some are found, using the select(). If block is non zero, the function call blocks until a packet arrives
 .PP
 \fBParameters:\fP
 .RS 4
@@ -337,35 +334,19 @@ Returns a positive integer if packets were processed, and -1 if an error was fou
 
 .PP
 Definition at line 566 of file snmp_agent.c.
-.PP
-References FD_ZERO, netsnmp_check_outstanding_agent_requests(), NULL, run_alarms(), snmp_log(), snmp_log_perror(), snmp_read(), snmp_select_info(), and snmp_timeout().
 .SS "int check_getnext_results (\fBnetsnmp_agent_session\fP * asp)"
 .PP
-returns 1 if there are valid GETNEXT requests left. 
+returns 1 if there are valid GETNEXT requests left. Returns 0 if not. 
 .PP
-Returns 0 if not. 
-.PP
-Definition at line 2796 of file snmp_agent.c.
-.PP
-References netsnmp_request_info_s::inclusive, netsnmp_request_info_s::index, netsnmp_agent_session_s::mode, variable_list::name, variable_list::name_length, netsnmp_request_info_s::next, NULL, netsnmp_agent_session_s::oldmode, netsnmp_request_info_s::range_end, netsnmp_request_info_s::range_end_len, netsnmp_request_info_s::requestvb, snmp_oid_compare(), snmp_set_var_objid(), snmp_set_var_typed_value(), netsnmp_agent_session_s::treecache, netsnmp_agent_session_s::treecache_num, and variable_list::type.
-.PP
-Referenced by handle_getnext_loop().
+Definition at line 2815 of file snmp_agent.c.
 .SS "int handle_getnext_loop (\fBnetsnmp_agent_session\fP * asp)"
 .PP
-repeatedly calls getnext handlers looking for an answer till all requests are satisified. 
+repeatedly calls getnext handlers looking for an answer till all requests are satisified. It's expected that one pass has been made before entering this function 
 .PP
-It's expected that one pass has been made before entering this function 
-.PP
-Definition at line 2913 of file snmp_agent.c.
-.PP
-References check_acm(), check_getnext_results(), handle_var_requests(), netsnmp_check_for_delegated(), netsnmp_reassign_requests(), netsnmp_running, and variable_list::next_variable.
-.PP
-Referenced by check_delayed_request(), and handle_pdu().
+Definition at line 2932 of file snmp_agent.c.
 .SS "int handle_pdu (\fBnetsnmp_agent_session\fP * asp)"
 .PP
-This function calls into netsnmp_set_mode_request_error, sets error_value given a reqinfo->mode value. 
-.PP
-It's used to send specific errors back to the agent to process accordingly.
+This function calls into netsnmp_set_mode_request_error, sets error_value given a reqinfo->mode value. It's used to send specific errors back to the agent to process accordingly.
 .PP
 If error_value is set to SNMP_NOSUCHOBJECT, SNMP_NOSUCHINSTANCE, or SNMP_ENDOFMIBVIEW the following is applicable: Sets the error_value to request->requestvb->type if reqinfo->mode value is set to MODE_GET. If the reqinfo->mode value is set to MODE_GETNEXT or MODE_GETBULK the code calls snmp_log logging an error message.
 .PP
@@ -432,45 +413,32 @@ Returns error_value under all conditions.
 .PP
 
 .PP
-Definition at line 3207 of file snmp_agent.c.
-.PP
-References check_acm(), snmp_pdu::command, count_varbinds(), snmp_pdu::flags, get_set_cache(), handle_getnext_loop(), handle_set_loop(), handle_var_requests(), netsnmp_agent_session_s::mode, netsnmp_create_subtree_cache(), variable_list::next_variable, NULL, netsnmp_agent_session_s::oldmode, netsnmp_agent_session_s::pdu, netsnmp_agent_session_s::requests, snmp_increment_statistic(), snmp_replace_var_types(), snmp_set_var_typed_value(), netsnmp_agent_session_s::status, variable_list::type, snmp_pdu::variables, and netsnmp_agent_session_s::vbcount.
-.PP
-Referenced by netsnmp_handle_request().
+Definition at line 3226 of file snmp_agent.c.
 .SS "int handle_snmp_packet (int op, \fBnetsnmp_session\fP * session, int reqid, \fBnetsnmp_pdu\fP * pdu, void * magic)"
 .PP
 handles an incoming SNMP packet into the agent 
 .PP
-Definition at line 1754 of file snmp_agent.c.
-.PP
-References check_access(), snmp_pdu::command, snmp_pdu::errstat, init_agent_snmp_session(), netsnmp_handle_request(), netsnmp_remove_and_free_agent_snmp_session(), NULL, netsnmp_agent_session_s::pdu, snmp_session::s_snmp_errno, send_easy_trap(), netsnmp_agent_session_s::session, snmp_free_pdu(), snmp_increment_statistic(), snmp_send(), netsnmp_agent_session_s::status, and snmp_pdu::version.
-.PP
-Referenced by netsnmp_register_agent_nsap().
+Definition at line 1771 of file snmp_agent.c.
 .SS "\fBnetsnmp_request_info\fP* netsnmp_add_varbind_to_cache (\fBnetsnmp_agent_session\fP * asp, int vbcount, \fBnetsnmp_variable_list\fP * varbind_ptr, \fBnetsnmp_subtree\fP * tp)"
 .PP
-Definition at line 1863 of file snmp_agent.c.
+\fBTodo\fP
+.RS 4
+make this be more intelligent about ranges. Right now we merely take the highest level commonality of a registration range and use that. At times we might be able to be smarter about checking the range itself as opposed to the \fBnode\fP above where the range exists, but I doubt this will come up all that frequently. 
+.RE
 .PP
-References netsnmp_request_info_s::agent_req_info, netsnmp_agent_session_s::cache_store, netsnmp_subtree_s::cacheid, snmp_pdu::command, netsnmp_request_info_s::delegated, netsnmp_subtree_s::end_a, netsnmp_subtree_s::end_len, netsnmp_subtree_s::global_cacheid, netsnmp_request_info_s::inclusive, netsnmp_request_info_s::index, variable_list::name, variable_list::name_length, netsnmp_acm_check_subtree(), netsnmp_free_request_data_sets(), netsnmp_get_local_cachid(), netsnmp_get_or_add_local_cachid(), netsnmp_oid_find_prefix(), netsnmp_request_info_s::next, netsnmp_subtree_s::next, NULL, netsnmp_request_info_s::parent_data, netsnmp_agent_session_s::pdu, netsnmp_request_info_s::prev, netsnmp_request_info_s::processed, netsnmp_request_info_s::range_end, netsnmp_request_info_s::range_end_len, netsnmp_agent_session_s::reqinfo, netsnmp_agent_session_s::requests, netsnmp_tree_cache_s::requests_begin, netsnmp_tree_cache_s::requests_end, netsnmp_request_info_s::requestvb, netsnmp_request_info_s::requestvb_start, netsnmp_subtree_s::start_a, netsnmp_subtree_s::start_len, netsnmp_request_info_s::status, netsnmp_tree_cache_s::subtree, netsnmp_request_info_s::subtree, netsnmp_agent_session_s::treecache, netsnmp_agent_session_s::treecache_len, netsnmp_agent_session_s::treecache_num, and variable_list::type.
+
 .PP
-Referenced by netsnmp_create_subtree_cache(), and netsnmp_reassign_requests().
+Definition at line 1880 of file snmp_agent.c.
 .SS "int netsnmp_check_transaction_id (int transaction_id)"
 .PP
-Decide if the requested transaction_id is still being processed within the agent. 
-.PP
-This is used to validate whether a delayed cache (containing possibly freed pointers) is still usable.
+Decide if the requested transaction_id is still being processed within the agent. This is used to validate whether a delayed cache (containing possibly freed pointers) is still usable.
 .PP
 returns SNMPERR_SUCCESS if it's still valid, or SNMPERR_GENERR if not. 
 .PP
-Definition at line 2699 of file snmp_agent.c.
-.PP
-References agent_delegated_list, netsnmp_agent_session_s::next, and NULL.
-.PP
-Referenced by check_delayed_request(), and netsnmp_handler_check_cache().
+Definition at line 2718 of file snmp_agent.c.
 .SS "int netsnmp_request_set_error (\fBnetsnmp_request_info\fP * request, int error_value)"
 .PP
-set error for a request 
-.PP
-\fBParameters:\fP
+set error for a request \fBParameters:\fP
 .RS 4
 \fIrequest\fP request which has error 
 .br
@@ -479,16 +447,10 @@ set error for a request
 .PP
 
 .PP
-Definition at line 3463 of file snmp_agent.c.
-.PP
-References _request_set_error(), netsnmp_request_info_s::agent_req_info, and netsnmp_agent_request_info_s::mode.
-.PP
-Referenced by netsnmp_remove_delegated_requests_for_session().
+Definition at line 3482 of file snmp_agent.c.
 .SS "NETSNMP_INLINE int netsnmp_request_set_error_all (\fBnetsnmp_request_info\fP * requests, int error)"
 .PP
-set error for all requests 
-.PP
-\fBParameters:\fP
+set error for all requests \fBParameters:\fP
 .RS 4
 \fIrequests\fP request list 
 .br
@@ -504,16 +466,10 @@ SNMPERR_SUCCESS, or an error code
 .PP
 paranoid sanity checks 
 .PP
-Definition at line 3506 of file snmp_agent.c.
-.PP
-References _request_set_error(), netsnmp_request_info_s::agent_req_info, netsnmp_agent_request_info_s::mode, netsnmp_request_info_s::next, NULL, and snmp_log().
-.PP
-Referenced by netsnmp_cache_helper_handler(), netsnmp_multiplexer_helper_handler(), netsnmp_read_only_helper(), and netsnmp_set_all_requests_error().
+Definition at line 3525 of file snmp_agent.c.
 .SS "int netsnmp_request_set_error_idx (\fBnetsnmp_request_info\fP * request, int error_value, int idx)"
 .PP
-set error for a request within a request list 
-.PP
-\fBParameters:\fP
+set error for a request within a request list \fBParameters:\fP
 .RS 4
 \fIrequest\fP head of the request list 
 .br
@@ -524,14 +480,10 @@ set error for a request within a request list
 .PP
 
 .PP
-Definition at line 3478 of file snmp_agent.c.
-.PP
-References _request_set_error(), netsnmp_request_info_s::agent_req_info, netsnmp_agent_request_info_s::mode, and netsnmp_request_info_s::next.
+Definition at line 3497 of file snmp_agent.c.
 .SS "int netsnmp_set_all_requests_error (\fBnetsnmp_agent_request_info\fP * reqinfo, \fBnetsnmp_request_info\fP * requests, int error_value)"
 .PP
-set error for all request 
-.PP
-\fBDeprecated\fP
+set error for all request \fBDeprecated\fP
 .RS 4
 use netsnmp_request_set_error_all 
 .RE
@@ -552,12 +504,10 @@ error_value
 .PP
 
 .PP
-Definition at line 3680 of file snmp_agent.c.
-.PP
-References netsnmp_request_set_error_all().
+Definition at line 3699 of file snmp_agent.c.
 .SS "int netsnmp_set_mode_request_error (int mode, \fBnetsnmp_request_info\fP * request, int error_value)"
 .PP
-deprecated, use netsnmp_request_set_error instead 
+set error for a request deprecated, use netsnmp_request_set_error instead
 .PP
 \fBDeprecated\fP
 .RS 4
@@ -580,12 +530,10 @@ error_value
 .PP
 
 .PP
-Definition at line 3664 of file snmp_agent.c.
-.PP
-References _request_set_error().
+Definition at line 3683 of file snmp_agent.c.
 .SS "int netsnmp_set_request_error (\fBnetsnmp_agent_request_info\fP * reqinfo, \fBnetsnmp_request_info\fP * request, int error_value)"
 .PP
-deprecated, use netsnmp_request_set_error instead 
+set error for a request deprecated, use netsnmp_request_set_error instead
 .PP
 \fBDeprecated\fP
 .RS 4
@@ -612,15 +560,12 @@ error_value
 .in +1c
 \fBdelayed_instance.c\fP.
 .PP
-Definition at line 3645 of file snmp_agent.c.
-.PP
-References _request_set_error(), and netsnmp_agent_request_info_s::mode.
-.PP
-Referenced by netsnmp_call_handlers(), netsnmp_instance_counter32_handler(), netsnmp_instance_helper_handler(), netsnmp_instance_int_handler(), netsnmp_instance_long_handler(), netsnmp_instance_num_file_handler(), netsnmp_instance_uint_handler(), netsnmp_instance_ulong_handler(), netsnmp_scalar_group_helper_handler(), netsnmp_scalar_helper_handler(), netsnmp_table_data_set_helper_handler(), netsnmp_watched_spinlock_handler(), netsnmp_watched_timestamp_handler(), netsnmp_watcher_helper_handler(), and table_helper_handler().
+Definition at line 3664 of file snmp_agent.c.
 .SS "int netsnmp_wrap_up_request (\fBnetsnmp_agent_session\fP * asp, int status)"
 .PP
-Definition at line 1501 of file snmp_agent.c.
+if asp->pdu 
 .PP
-References _fix_endofmibview(), _reorder_getbulk(), snmp_pdu::command, count_varbinds(), snmp_pdu::errindex, snmp_pdu::errstat, netsnmp_agent_session_s::index, variable_list::name, variable_list::name_length, netsnmp_processing_set, netsnmp_remove_and_free_agent_snmp_session(), variable_list::next_variable, NULL, netsnmp_agent_session_s::orig_pdu, netsnmp_agent_session_s::pdu, save_set_cache(), netsnmp_agent_session_s::session, SNMP_FREE, snmp_free_pdu(), snmp_increment_statistic(), snmp_increment_statistic_by(), snmp_log(), snmp_perror(), snmp_send(), sprint_realloc_objid(), netsnmp_agent_session_s::status, variable_list::type, snmp_pdu::variables, and snmp_pdu::version.
-.PP
-Referenced by check_delayed_request(), and netsnmp_handle_request().
+Definition at line 1518 of file snmp_agent.c.
+.SH "Author"
+.PP 
+Generated automatically by Doxygen for net-snmp from the source code.
