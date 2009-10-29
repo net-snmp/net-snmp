@@ -1,4 +1,4 @@
-.TH "snmp_alarm" 3 "5 Sep 2008" "Version 5.4.2" "net-snmp" \" -*- nroff -*-
+.TH "snmp_alarm" 3 "29 Oct 2009" "Version 5.4.3.pre1" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -10,7 +10,7 @@ snmp_alarm \-
 
 .in +1c
 .ti -1c
-.RI "timeval \fBt\fP"
+.RI "struct timeval \fBt\fP"
 .br
 .ti -1c
 .RI "unsigned int \fBflags\fP"
@@ -19,10 +19,10 @@ snmp_alarm \-
 .RI "unsigned int \fBclientreg\fP"
 .br
 .ti -1c
-.RI "timeval \fBt_last\fP"
+.RI "struct timeval \fBt_last\fP"
 .br
 .ti -1c
-.RI "timeval \fBt_next\fP"
+.RI "struct timeval \fBt_next\fP"
 .br
 .ti -1c
 .RI "void * \fBclientarg\fP"
@@ -31,7 +31,7 @@ snmp_alarm \-
 .RI "SNMPAlarmCallback * \fBthecallback\fP"
 .br
 .ti -1c
-.RI "\fBsnmp_alarm\fP * \fBnext\fP"
+.RI "struct \fBsnmp_alarm\fP * \fBnext\fP"
 .br
 .in -1c
 .SH "Detailed Description"

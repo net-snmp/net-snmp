@@ -1,4 +1,4 @@
-.TH "Maintain a registry of MIB subtrees, together with related information regarding mibmodule, sessions, etc" 3 "5 Sep 2008" "Version 5.4.2" "net-snmp" \" -*- nroff -*-
+.TH "Maintain a registry of MIB subtrees, together with related information regarding mibmodule, sessions, etc" 3 "29 Oct 2009" "Version 5.4.3.pre1" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -30,10 +30,10 @@ Maintain a registry of MIB subtrees, together with related information regarding
 
 .in +1c
 .ti -1c
-.RI "typedef \fBlookup_cache_s\fP \fBlookup_cache\fP"
+.RI "typedef struct \fBlookup_cache_s\fP \fBlookup_cache\fP"
 .br
 .ti -1c
-.RI "typedef \fBlookup_cache_context_s\fP \fBlookup_cache_context\fP"
+.RI "typedef struct \fBlookup_cache_context_s\fP \fBlookup_cache_context\fP"
 .br
 .in -1c
 .SS "Functions"
@@ -210,16 +210,14 @@ Maintain a registry of MIB subtrees, together with related information regarding
 .RI "int \fBexternal_signal_scheduled\fP [NUM_EXTERNAL_SIGS]"
 .br
 .ti -1c
-.RI "void(*[NUM_EXTERNAL_SIGS]) \fBexternal_signal_handler\fP (int)"
+.RI "void(* \fBexternal_signal_handler\fP [NUM_EXTERNAL_SIGS])(int)"
 .br
 .in -1c
 .SH "Function Documentation"
 .PP 
 .SS "int netsnmp_acm_check_subtree (\fBnetsnmp_pdu\fP * pdu, oid * name, size_t namelen)"
 .PP
-checks to see if everything within a given subtree is either: in view, not in view, or possibly both. 
-.PP
-If the entire subtree is not-in-view we can use this information to skip calling the sub-handlers entirely. 
+checks to see if everything within a given subtree is either: in view, not in view, or possibly both. If the entire subtree is not-in-view we can use this information to skip calling the sub-handlers entirely. 
 .PP
 \fBReturns:\fP
 .RS 4
@@ -229,15 +227,9 @@ If the entire subtree is not-in-view we can use this information to skip calling
 
 .PP
 Definition at line 1323 of file agent_registry.c.
-.PP
-References view_parameters::check_subtree, view_parameters::errorcode, snmp_pdu::flags, view_parameters::name, view_parameters::namelen, view_parameters::pdu, snmp_call_callbacks(), and snmp_pdu::version.
-.PP
-Referenced by netsnmp_add_varbind_to_cache().
 .SS "int netsnmp_get_lookup_cache_size (void)"
 .PP
-retrieves the current value of the lookup cache size 
-.PP
-\fBReturns:\fP
+retrieves the current value of the lookup cache size \fBReturns:\fP
 .RS 4
 the current lookup cache size 
 .RE
@@ -245,15 +237,9 @@ the current lookup cache size
 
 .PP
 Definition at line 1396 of file agent_registry.c.
-.PP
-References lookup_cache_size.
-.PP
-Referenced by netsnmp_register_mib(), and unregister_mib_context().
 .SS "void netsnmp_set_lookup_cache_size (int newsize)"
 .PP
-set the lookup cache size for optimized agent registration performance. 
-.PP
-\fBParameters:\fP
+set the lookup cache size for optimized agent registration performance. \fBParameters:\fP
 .RS 4
 \fInewsize\fP set to the maximum size of a cache for a given context. Set to 0 to completely disable caching, or to -1 to set to the default cache size (8), or to a number of your chosing. The rough guide is that it should be equal to the maximum number of simultanious managers you expect to talk to the agent (M) times 80% (or so, he says randomly) the average number (N) of varbinds you expect to receive in a given request for a manager. ie, M times N. Bigger does NOT necessarily mean better. Certainly 16 should be an upper limit. 32 is the hard coded limit. 
 .RE
@@ -261,15 +247,9 @@ set the lookup cache size for optimized agent registration performance.
 
 .PP
 Definition at line 1383 of file agent_registry.c.
-.PP
-References lookup_cache_size, SUBTREE_DEFAULT_CACHE_SIZE, and SUBTREE_MAX_CACHE_SIZE.
-.PP
-Referenced by init_master_agent(), netsnmp_register_mib(), and unregister_mib_context().
 .SS "int unregister_mib_context (oid * name, size_t len, int priority, int range_subid, oid range_ubound, const char * context)"
 .PP
-Unregisters an OID that has an associated context name value. 
-.PP
-Typically used when a module has multiple contexts defined. The parameters priority, range_subid, and range_ubound should be used in conjunction with agentx, see RFC 2741, otherwise these values should always be 0.
+Unregisters an OID that has an associated context name value. Typically used when a \fBmodule\fP has multiple contexts defined. The parameters priority, range_subid, and range_ubound should be used in conjunction with agentx, see RFC 2741, otherwise these values should always be 0.
 .PP
 \fBParameters:\fP
 .RS 4
@@ -293,7 +273,6 @@ Typically used when a module has multiple contexts defined. The parameters prior
 
 .PP
 Definition at line 969 of file agent_registry.c.
-.PP
-References netsnmp_subtree_s::children, netsnmp_get_lookup_cache_size(), netsnmp_oid_equals(), netsnmp_set_lookup_cache_size(), netsnmp_subtree_find(), netsnmp_subtree_find_first(), netsnmp_subtree_free(), netsnmp_subtree_unload(), netsnmp_subtree_s::next, and NULL.
-.PP
-Referenced by netsnmp_register_mib(), netsnmp_unregister_handler(), remove_tree_entry(), and unregister_mib_range().
+.SH "Author"
+.PP 
+Generated automatically by Doxygen for net-snmp from the source code.

@@ -1,10 +1,11 @@
-.TH "mode_end_call" 3 "5 Sep 2008" "Version 5.4.2" "net-snmp" \" -*- nroff -*-
+.TH "mode_end_call" 3 "29 Oct 2009" "Version 5.4.3.pre1" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
-mode_end_call \- At the end of a series of requests, call another handler hook.  
-
+mode_end_call \- 
 .PP
+At the end of a series of requests, call another handler hook.  
+
 .SS "Functions"
 
 .in +1c
@@ -23,7 +24,7 @@ mode_end_call \- At the end of a series of requests, call another handler hook.
 .SH "Detailed Description"
 .PP 
 At the end of a series of requests, call another handler hook. 
-.PP
+
 Handlers that want to loop through a series of requests and then receive a callback at the end of a particular MODE can use this helper to make this possible. For most modules, this is not needed as the handler itself could perform a for() loop around the request list and then perform its actions afterwards. However, if something like the serialize helper is in use this isn't possible because not all the requests for a given handler are being passed downward in a single group. Thus, this helper *must* be added above other helpers like the serialize helper to be useful.
 .PP
 Multiple mode specific handlers can be registered and will be called in the order they were regestered in. Callbacks regesterd with a mode of NETSNMP_MODE_END_ALL_MODES will be called for all modes. 
@@ -31,9 +32,7 @@ Multiple mode specific handlers can be registered and will be called in the orde
 .PP 
 .SS "\fBnetsnmp_mib_handler\fP* netsnmp_get_mode_end_call_handler (\fBnetsnmp_mode_handler_list\fP * endlist)"
 .PP
-returns a mode_end_call handler that can be injected into a given handler chain. 
-.PP
-\fBParameters:\fP
+returns a mode_end_call handler that can be injected into a given handler chain. \fBParameters:\fP
 .RS 4
 \fIendlist\fP The callback list for the handler to make use of. 
 .RE
@@ -46,13 +45,9 @@ An injectable Net-SNMP handler.
 
 .PP
 Definition at line 45 of file mode_end_call.c.
-.PP
-References netsnmp_mib_handler_s::myvoid, netsnmp_create_handler(), netsnmp_mode_end_call_helper(), and NULL.
 .SS "\fBnetsnmp_mode_handler_list\fP* netsnmp_mode_end_call_add_mode_callback (\fBnetsnmp_mode_handler_list\fP * endlist, int mode, \fBnetsnmp_mib_handler\fP * callbackh)"
 .PP
-adds a mode specific callback to the callback list. 
-.PP
-\fBParameters:\fP
+adds a mode specific callback to the callback list. \fBParameters:\fP
 .RS 4
 \fIendlist\fP the information structure for the mode_end_call helper. Can be NULL to create a new list. 
 .br
@@ -69,5 +64,6 @@ the new registration information list upon success.
 
 .PP
 Definition at line 65 of file mode_end_call.c.
-.PP
-References netsnmp_mode_handler_list_s::callback_handler, netsnmp_mode_handler_list_s::mode, netsnmp_mode_handler_list_s::next, NULL, and SNMP_MALLOC_TYPEDEF.
+.SH "Author"
+.PP 
+Generated automatically by Doxygen for net-snmp from the source code.

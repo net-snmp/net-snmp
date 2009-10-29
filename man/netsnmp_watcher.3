@@ -1,10 +1,11 @@
-.TH "watcher" 3 "5 Sep 2008" "Version 5.4.2" "net-snmp" \" -*- nroff -*-
+.TH "watcher" 3 "29 Oct 2009" "Version 5.4.3.pre1" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
-watcher \- Watch a specified variable and process it as an instance or scalar object.  
-
+watcher \- 
 .PP
+Watch a specified \fBvariable\fP and process it as an instance or scalar object.  
+
 .SS "Functions"
 
 .in +1c
@@ -27,10 +28,10 @@ watcher \- Watch a specified variable and process it as an instance or scalar ob
 .RI "\fBnetsnmp_mib_handler\fP * \fBnetsnmp_get_watched_timestamp_handler\fP (void)"
 .br
 .ti -1c
-.RI "int \fBnetsnmp_watched_timestamp_register\fP (\fBnetsnmp_mib_handler\fP *whandler, \fBnetsnmp_handler_registration\fP *reginfo, \fBmarker_t\fP timestamp)"
+.RI "int \fBnetsnmp_watched_timestamp_register\fP (\fBnetsnmp_mib_handler\fP *whandler, \fBnetsnmp_handler_registration\fP *reginfo, marker_t timestamp)"
 .br
 .ti -1c
-.RI "int \fBnetsnmp_register_watched_timestamp\fP (\fBnetsnmp_handler_registration\fP *reginfo, \fBmarker_t\fP timestamp)"
+.RI "int \fBnetsnmp_register_watched_timestamp\fP (\fBnetsnmp_handler_registration\fP *reginfo, marker_t timestamp)"
 .br
 .ti -1c
 .RI "int \fBnetsnmp_watched_timestamp_handler\fP (\fBnetsnmp_mib_handler\fP *handler, \fBnetsnmp_handler_registration\fP *reginfo, \fBnetsnmp_agent_request_info\fP *reqinfo, \fBnetsnmp_request_info\fP *requests)"
@@ -45,29 +46,30 @@ watcher \- Watch a specified variable and process it as an instance or scalar ob
 .RI "int \fBnetsnmp_watched_spinlock_handler\fP (\fBnetsnmp_mib_handler\fP *handler, \fBnetsnmp_handler_registration\fP *reginfo, \fBnetsnmp_agent_request_info\fP *reqinfo, \fBnetsnmp_request_info\fP *requests)"
 .br
 .ti -1c
-.RI "int \fBnetsnmp_register_ulong_scalar\fP (const char *name, oid *reg_oid, size_t reg_oid_len, u_long *it, \fBNetsnmp_Node_Handler\fP *subhandler)"
+.RI "int \fBnetsnmp_register_ulong_scalar\fP (const char *name, oid *reg_oid, size_t reg_oid_len, u_long *it, Netsnmp_Node_Handler *subhandler)"
 .br
 .ti -1c
-.RI "int \fBnetsnmp_register_read_only_ulong_scalar\fP (const char *name, oid *reg_oid, size_t reg_oid_len, u_long *it, \fBNetsnmp_Node_Handler\fP *subhandler)"
+.RI "int \fBnetsnmp_register_read_only_ulong_scalar\fP (const char *name, oid *reg_oid, size_t reg_oid_len, u_long *it, Netsnmp_Node_Handler *subhandler)"
 .br
 .ti -1c
-.RI "int \fBnetsnmp_register_long_scalar\fP (const char *name, oid *reg_oid, size_t reg_oid_len, long *it, \fBNetsnmp_Node_Handler\fP *subhandler)"
+.RI "int \fBnetsnmp_register_long_scalar\fP (const char *name, oid *reg_oid, size_t reg_oid_len, long *it, Netsnmp_Node_Handler *subhandler)"
 .br
 .ti -1c
-.RI "int \fBnetsnmp_register_read_only_long_scalar\fP (const char *name, oid *reg_oid, size_t reg_oid_len, long *it, \fBNetsnmp_Node_Handler\fP *subhandler)"
+.RI "int \fBnetsnmp_register_read_only_long_scalar\fP (const char *name, oid *reg_oid, size_t reg_oid_len, long *it, Netsnmp_Node_Handler *subhandler)"
 .br
 .ti -1c
-.RI "int \fBnetsnmp_register_int_scalar\fP (const char *name, oid *reg_oid, size_t reg_oid_len, int *it, \fBNetsnmp_Node_Handler\fP *subhandler)"
+.RI "int \fBnetsnmp_register_int_scalar\fP (const char *name, oid *reg_oid, size_t reg_oid_len, int *it, Netsnmp_Node_Handler *subhandler)"
 .br
 .ti -1c
-.RI "int \fBnetsnmp_register_read_only_int_scalar\fP (const char *name, oid *reg_oid, size_t reg_oid_len, int *it, \fBNetsnmp_Node_Handler\fP *subhandler)"
+.RI "int \fBnetsnmp_register_read_only_int_scalar\fP (const char *name, oid *reg_oid, size_t reg_oid_len, int *it, Netsnmp_Node_Handler *subhandler)"
 .br
 .ti -1c
-.RI "int \fBnetsnmp_register_read_only_counter32_scalar\fP (const char *name, oid *reg_oid, size_t reg_oid_len, u_long *it, \fBNetsnmp_Node_Handler\fP *subhandler)"
+.RI "int \fBnetsnmp_register_read_only_counter32_scalar\fP (const char *name, oid *reg_oid, size_t reg_oid_len, u_long *it, Netsnmp_Node_Handler *subhandler)"
 .br
 .in -1c
 .SH "Detailed Description"
 .PP 
-Watch a specified variable and process it as an instance or scalar object. 
-.PP
-
+Watch a specified \fBvariable\fP and process it as an instance or scalar object. 
+.SH "Author"
+.PP 
+Generated automatically by Doxygen for net-snmp from the source code.

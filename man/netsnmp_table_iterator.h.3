@@ -1,4 +1,4 @@
-.TH "table_iterator.h" 3 "5 Sep 2008" "Version 5.4.2" "net-snmp" \" -*- nroff -*-
+.TH "table_iterator.h" 3 "29 Oct 2009" "Version 5.4.3.pre1" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -43,7 +43,7 @@ table_iterator.h \-
 .RI "typedef void( \fBNetsnmp_Free_Data_Context\fP )(void *, struct \fBnetsnmp_iterator_info_s\fP *)"
 .br
 .ti -1c
-.RI "typedef \fBnetsnmp_iterator_info_s\fP \fBnetsnmp_iterator_info\fP"
+.RI "typedef struct \fBnetsnmp_iterator_info_s\fP \fBnetsnmp_iterator_info\fP"
 .br
 .RI "\fITypedefs the \fBnetsnmp_iterator_info_s\fP struct into netsnmp_iterator_info. \fP"
 .in -1c
@@ -98,7 +98,7 @@ table_iterator.h \-
 
 .in +1c
 .ti -1c
-.RI "\fBNetsnmp_Node_Handler\fP \fBnetsnmp_table_iterator_helper_handler\fP"
+.RI "Netsnmp_Node_Handler \fBnetsnmp_table_iterator_helper_handler\fP"
 .br
 .in -1c
 .SH "Detailed Description"
