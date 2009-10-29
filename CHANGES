@@ -3,6 +3,119 @@ that have been applied in released versions.  Please see the NEWS file for
 a summary of the major changes, and the ChangeLog file for a comprehensive
 listing of all changes made to the code. 
       
+* 5.4.3 *
+
+    snmplib:
+      - [BUG 2838243]: Correct the output of unsigned values.
+      - [PATCH 2043018]: fix recvfrom hangs
+      - [PATCH 2258229]: Remove misleading comment
+      - [PATCH 2479700]: Fix zoned IP address used as table indices
+      - [PATCH 2492377]: Fix typo/bug in snmp_enable_callback()
+      - [PATCH 2505488]: Fix alarm behaviour on large clock skews
+      - [PATCH 2538169]: Prevent infinite retries for invalid error-index
+      - [PATCH 2688345]: Fix netsnmp_assert() for Visual Studio
+      - [PATCH 2689362]: Fix handling of IPv6 hostnames
+      - [PATCH 2713841]: Fix runtime errors triggered by high-ASCII chars
+      - [PATCH 2780411]: Fix compiler warnings
+      - [PATCH 2797251]: Fix memory leaks
+      - [PATCH 2871747]: Fix memory leak in OID processing
+      - Change the parsing of ranges to accept all valid values
+      - Fix extern "C" wrapping
+      - Make -LN stop dumping core.
+      - Make bad debug levels report the offending symbol
+
+    snmpd:
+      - [BUG 1693039]: Be silent when insert fails.
+      - [PATCH 1257347]: Non-fixed size connection buffer
+      - [PATCH 1550730]: Report errors from iterator-based handlers
+      - [PATCH 1977439]: Fix pass/_persist bug with SET oid value
+      - [PATCH 2012402]: Handle failure to look up interface error counters
+      - [PATCH 2082726]: correctly report NIC speeds higher than 4Gbit/s
+      - [PATCH 2124288]: Fix setting of usmUserPrivProtocol at creation
+      - [PATCH 2162652]: Fix simple hrfs checks when NFS is in use
+      - [PATCH 2384779]: Fix handling of GetBulk with N>0,M==0
+      - [PATCH 2686280]: Report duplicate registrations as an error
+      - [PATCH 2693670]: Don't open AgentX sockets if other transports fail
+      - [PATCH 2791417]: Fix snmpd segfault when run with -DALL
+      - [PATCH 2797251]: Support multiple initialisation and shutdown
+      - [PATCH 2822337]: Fix memory leak in ipAddressPrefixTable
+      - Allow "monitor" to handle negative threshold values
+      - Clean up notification
+      - Fix CVE-2008-4309 (GETBULK issue reported by Oscar Mira-Sanchez)
+      - Fix creation of views using snmpusm
+      - Fix memory leak when multiple interfaces have the same IPv6 address
+      - Fix possible crash when 64-bit counters exceed 2^32
+      - Fix two bugs with smux password support
+      - Improve parsing of -LS command line argument
+      - Register CPU/memory hardware modules with nsCacheTable
+
+    snmptrapd:
+      - [PATCH 2726302]: Pass results of Perl trap handlers to trap daemon
+      - Remove glibc-specific printf-formatting tokens
+
+    apps:
+      - [BUG 2811577]: Fix bug in GetBulk handling
+      - Improve parsing of -LS command line argument
+
+    build:
+      - [BUG 2095983]: Fix errors in find-requires helper script
+      - [BUG 2782700]: Build failure when using --with-pkcs on Solaris
+      - [PATCH 2184039]: Misc fixes for freeing memory
+
+    docs:
+      - [PATCH 2788072]: Document 'logmatch' functionality.
+      - [PATCH 2795739]: Fix incorrect disk/file size descriptions & unit
+	specifiers
+
+    mib2c:
+      - [BUG 2827269]: Suppress non-ordered TODO comments
+      - [PATCH 2136437]: make FLAG defines more 64bit friendly when huge
+	tables are encountered
+      - [PATCH 2316127]: Fix bug in iterate_access generated code.
+
+    perl:
+      - [BUG 1554817]: Fix class assigment so getRootOID works properly
+      - [PATCH 2022948]: Fix for Counter64 in perl subagent
+      - [PATCH 2182079]: Fix various warnings & allow use of "use strict"
+      - [PATCH 2361712]: Fix getbulk optimization during walks
+      - [PATCH 2793857]: Report failed asynchronous requests
+
+    python:
+      - [BUG 2258935]: Python Extension Module fails on Solaris
+      - [PATCH 2074817]: Fix regexp engine CPU performance issues
+      - [PATCH 2260828]: Fix python snmpwalk memory leak
+      - [PATCH 2580979]: Fix python session pointers on 64-bit systems
+      - [PATCH 2667415]: Support "UseNumeric" option
+
+    AIX:
+      - [BUG 2712670]: Agent crashes on AIX with hrStorage
+
+    *BSD:
+      - [PATCH 2435793]: Support 64-bit IF-MIB counters on sysctl systems
+      - Fix a make test
+
+    HP-UX:
+      - [BUG 2779472]: Filesystems missing in hrStorage table (HP-UX 11.31)
+      - [PATCH 2088726]: Fix an issue reporting negative memory values
+
+    Linux:
+      - [BUG 2822355]: Fix memory leaks on udpEndpointTable
+
+    Solaris:
+      - [PATCH 2012404]: Deal with more than 10 interfaces
+      - [PATCH 2406378]: Fix hrSWRunPerfMem on 64-bit Solaris systems
+      - [PATCH 2751588]: Inconsistent data (e.g. UDP/TCP MIB scalar values
+	of zero) can be reported on Solaris 10U4+
+      - Protect against missing package version
+
+    Win32:
+      - [BUG 2779541]: Fixed handle leak in pass_persist
+      - [PATCH 2686248]: Applied patch by Bart Van Assche
+      - [PATCH 2688342]: Fix various VS2005 compiler warnings
+      - [PATCH 2691876]: Applied patch by rdiez to allow
+      - [PATCH 2693746]: improved socket startup support
+
+
 * 5.4.2 *
 
     snmplib:
