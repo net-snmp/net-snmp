@@ -1,0 +1,145 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+  <meta content="text/html; charset=ISO-8859-1"
+ http-equiv="content-type">
+  <title>Configuration Overview</title>
+</head>
+<body>
+<h1>Overview</h1>
+Start by reading the <span style="font-weight: bold;">snmp_config</span>
+manual page that describes how the
+Net-SNMP configuration files operate and
+how they all work together.&nbsp; Note:&nbsp; When using Windows, all
+configuration files should be placed in the <span
+ style="font-weight: bold;">(install
+folder)\etc\snmp</span> folder.<br>
+<br>
+<span style="font-weight: bold;">Note:&nbsp; The Net-SNMP configuration
+files generally contain sensitive
+information such as passphrases and community strings so permissions
+should be set to restrict who can read the files.</span><br
+ style="font-weight: bold;">
+<br>
+A Perl script called snmpconf is included which can be used to
+create configuration files.&nbsp; Full documentation on using snmpconf
+is available in the 'Applications' section.<br>
+<br>
+To run snmpconf, use the following command line:<br>
+<br>
+<span style="font-family: monospace; font-weight: bold;">snmpconf -i</span><br>
+<h2>Environment / registry variables<br>
+</h2>
+During compilation of Net-SNMP, the default search path for
+configuration files is set to a value which under Windows is normally <span
+ style="font-weight: bold;">c:/usr/etc/snmp</span>.&nbsp; Similarly the
+default share path is set to <span style="font-weight: bold;">c:/usr/share/snmp</span>.&nbsp;
+The conf path is used to locate configuration files such as <span
+ style="font-weight: bold;">snmp.conf</span>, <span
+ style="font-weight: bold;">snmpd.conf</span> etc, and the share path
+is used by programs such as <span style="font-weight: bold;">snmpconf </span>and
+<span style="font-weight: bold;">mib2c</span> to store supporting files.<br>
+<br>
+As explained in the <span style="font-weight: bold;">snmp_config</span>
+manual, the default search path can be changed by modifying the <span
+ style="font-weight: bold;">SNMPCONFPATH </span>environment
+variable.&nbsp; Similarly, the default share path can be set by
+modifying the <span style="font-weight: bold;">SNMPSHAREPATH </span>environment
+variable.&nbsp; <br>
+<br>
+There are two ways to set Net-SNMP environment variables under
+Windows.&nbsp; The first way is to simply set the environment variable
+using the System Control Panel (<span style="font-weight: bold;">Advanced</span>
+tab - <span style="font-weight: bold;">Environment variables</span>).&nbsp;
+The environment variables can be defined as either <span
+ style="font-weight: bold;">System </span>or <span
+ style="font-weight: bold;">User </span>specific.&nbsp; <span
+ style="font-weight: bold;">System </span>is the recommended choice as
+it allows the variable to be used by all users.<br>
+<br>
+The second and preferred way is to add the environment variables as
+string values (REG_SZ) to the registry under the
+HKEY_LOCAL_MACHINE\Software\Net-SNMP or the
+HKEY_CURRENT_USER\Software\Net-SNMP key.&nbsp; Creating a string value
+with the environment variable name and assigning a string value to it
+is equivalent to defining the environment variable.&nbsp; This is a
+feature of Net-SNMP and not a standard Windows feature.&nbsp; Any
+environment variable used by Net-SNMP can be defined this way; it is
+not limited to just <span style="font-weight: bold;">SNMPCONFPATH</span>
+and <span style="font-weight: bold;">SNMPSHAREPATH</span>.<br>
+<br>
+For example, if Net-SNMP was compiled to use <span
+ style="font-weight: bold;">c:\usr</span> (such as the Windows binary
+available from the Net-SNMP site), but it was installed in the folder <span
+ style="font-weight: bold;">c:\Net-SNMP</span>, then the following
+environment variables or registry keys must be created so that the
+applications know where to find the configuration and supporting files:<br>
+<br>
+Method 1: Environment variables:<br>
+<ul>
+  <li>SNMPCONFPATH=c:/Net-SNMP/etc/snmp;c:/Net-SNMP/snmp/persist</li>
+  <li>SNMPSHAREPATH=c:/Net-SNMP/share/snmp</li>
+</ul>
+Method 2: Registry:<br>
+<ul>
+  <li>HKEY_LOCAL_MACHINE\Software\Net-SNMP\SNMPCONFPATH=c:/Net-SNMP/etc/snmp;c:/Net-SNMP/snmp/persist</li>
+  <li>HKEY_LOCAL_MACHINE\Software\Net-SNMP\SNMPSHAREPATH=c:/Net-SNMP/share/snmp</li>
+</ul>
+During the installation of the Windows binary from the Net-SNMP site,
+the installer automatcially creates the following registry keys:<br>
+<ul>
+  <li>HKEY_LOCAL_MACHINE\Software\Net-SNMP\SNMPCONFPATH=(install
+  folder)/etc/snmp;(install folder)/snmp/persist</li>
+  <li>HKEY_LOCAL_MACHINE\Software\Net-SNMP\SNMPSHAREPATH=(install
+folder)/share/snmp</li>
+</ul>
+<div style="margin-left: 40px;"></div>
+If Net-SNMP is installed in a folder other than the default <span
+ style="font-weight: bold;">c:\usr</span> folder, then the above
+registry keys or environment variables must match, and the <span
+ style="font-weight: bold;">snmp.conf</span>
+file must contain a definition for <span style="font-weight: bold;">mibdirs</span>,
+<span style="font-weight: bold;">persistentDir </span>and <span
+ style="font-weight: bold;">tempFilePattern</span>.&nbsp; For example,
+if Net-SNMP was installed in <span style="font-weight: bold;">c:\Net-SNMP</span>,
+the snmp.conf file must contain:<br>
+<br>
+<div style="margin-left: 40px; font-family: monospace;">mibdirs
+c:/net-snmp/share/snmp/mibs<br>
+persistentDir c:/net-snmp/snmp/persist<br>
+tempFilePattern c:/net-snmp/temp/snmpdXXXXXX<br>
+</div>
+<p>The registry is the recommended method for defining the <span
+ style="font-weight: bold;">SNMPCONFPATH </span>and <span
+ style="font-weight: bold;">SNMPSHAREPATH </span>variables.&nbsp; Due
+to a
+limitation in the Windows Service Control Manager (SCM), if any system
+environment variables are changed, the system will need to be rebooted
+to allow the services to access the changed environment variables (see
+Microsoft knowledge base article 821761).&nbsp; Therefore, when running
+<span style="font-weight: bold;">snmpd </span>or <span
+ style="font-weight: bold;">snmptrapd </span>as a service, if <span
+ style="font-weight: bold;">SNMPCONFPATH</span> or <span
+ style="font-weight: bold;">SNMPSHAREPATH</span>
+is changed, a reboot will be required after setting the environment
+variables, otherwise the services may fail to start.&nbsp; Using the
+registry to store the environment variables eliminates this problem.<br>
+</p>
+<p><b>Note1: All paths contained in
+configuration files must use forward
+slashes (Unix convention), NOT back
+slashes.</b></p>
+<p><b>Note2:</b> HKEY_CURRENT_USER can be used instead of
+HKEY_LOCAL_MACHINE if desired. All applications will search for
+SNMPCONFPATH and SNMPSHAREPATH (and any other variable normally defined
+as an environment variable) in the following order:<br>
+</p>
+<ul>
+  <li>Environment space</li>
+  <li>HKEY_CURRENT_USER\Software\Net-SNMP\</li>
+  <li>HKEY_LOCAL_MACHINE\Software\Net-SNMP\</li>
+</ul>
+<p></p>
+<br>
+</body>
+</html>

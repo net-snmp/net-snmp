@@ -1,0 +1,55 @@
+#!/usr/bin/perl
+#
+# This program generates a simple HTML document from a text file.
+#
+# Written by:     Alex Burger
+# Date:           March 18th, 2004
+# 
+
+# Set to 1 to use fixed width font (<tt>)
+$fixed_width = 0;
+
+open (FILE, @ARGV[0]) || die "Could not open file \'@ARGV[0]\'. $!";
+
+
+print '<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">' . "\n";
+print '<html>' . "\n";
+print '<head>' . "\n";
+print "<title></title>\n";
+print '</head>' . "\n";
+print '<body>' . "\n";
+if ($fixed_width == 1) {
+  print "<p><tt>\n";
+}
+else {
+  print "<p>\n";
+}
+
+while ($line = <FILE>) {
+  chomp $line;
+  $line =~ s/&/\&amp;/g;
+  $line =~ s/</\&lt;/g;
+  $line =~ s/>/\&gt;/g;
+  $line =~ s/\"/\&quot;/g;
+  if ($line eq "") {
+    if ($fixed_width == 1) {
+      print "</tt></p>\n";
+      print "<p><tt>\n";
+    }
+    else {
+      print "</p>\n";
+      print "<p>\n";
+    }
+  }
+  else {
+    print "$line<br />\n";
+  }
+}
+
+if ($fixed_width == 1) {
+  print "</tt>\n";
+}
+print "</p>\n";
+print "</body>\n";
+print "</html>\n";
+  
