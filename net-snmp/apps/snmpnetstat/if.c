@@ -138,7 +138,8 @@ _set_address( struct _if_info *cur_if )
         /*
          * Always want a numeric interface IP address
          */
-        snprintf( cur_if->ip, 128, "%lu.%lu.%lu.%lu",
+        snprintf( cur_if->ip, 128, "%" NETSNMP_PRIo "u.%" NETSNMP_PRIo "u."
+                  "%" NETSNMP_PRIo "u.%" NETSNMP_PRIo "u",
                   vp2->name[10],
                   vp2->name[11],
                   vp2->name[12],

@@ -384,7 +384,7 @@ oid_stash_dump(netsnmp_oid_stash_node *root, char *prefix)
     for (i = 0; i < root->children_size; i++) {
         if (root->children[i]) {
             for (tmpp = root->children[i]; tmpp; tmpp = tmpp->next_sibling) {
-                printf("%s%ld@%d: %s\n", prefix, tmpp->value, i,
+                printf("%s%" NETSNMP_PRIo "d@%d: %s\n", prefix, tmpp->value, i,
                        (tmpp->thedata) ? "DATA" : "");
                 oid_stash_dump(tmpp, myprefix);
             }

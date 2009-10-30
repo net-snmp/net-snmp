@@ -2722,8 +2722,8 @@ init_usm(void)
 {
     struct snmp_secmod_def *def;
 
-    DEBUGMSGTL(("init_usm", "unit_usm: %lu %lu\n", usmNoPrivProtocol[0],
-                usmNoPrivProtocol[1]));
+    DEBUGMSGTL(("init_usm", "unit_usm: %" NETSNMP_PRIo "u %" NETSNMP_PRIo "u\n",
+                usmNoPrivProtocol[0], usmNoPrivProtocol[1]));
 
     sc_init();                  /* initalize scapi code */
 
@@ -2883,8 +2883,8 @@ usm_check_secLevel(int level, struct usmUser *user)
     if (user->userStatus != RS_ACTIVE)
         return -1;
 
-    DEBUGMSGTL(("comparex", "Comparing: %lu %lu ", usmNoPrivProtocol[0],
-                usmNoPrivProtocol[1]));
+    DEBUGMSGTL(("comparex", "Comparing: %" NETSNMP_PRIo "u %" NETSNMP_PRIo "u ",
+                usmNoPrivProtocol[0], usmNoPrivProtocol[1]));
     DEBUGMSGOID(("comparex", usmNoPrivProtocol,
                  sizeof(usmNoPrivProtocol) / sizeof(oid)));
     DEBUGMSG(("comparex", "\n"));

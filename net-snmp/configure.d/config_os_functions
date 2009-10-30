@@ -218,3 +218,33 @@ esac
 AC_MSG_RESULT($netsnmp_PRIz)
 AC_DEFINE_UNQUOTED([NETSNMP_PRIz], ["$netsnmp_PRIz"],
                    [Size prefix to use to printf a size_t or ssize_t])
+
+##
+#   Check how to print a uint32_t variable
+##
+
+AC_CACHE_CHECK(
+    [the underlying type of an uint32_t],
+    netsnmp_cv_uint32_t_type,
+    [m4_foreach([TYPE], [[char],[short],[int],[long],[long long]],
+     [if [[ x$netsnmp_cv_uint32_t_type = x ]] ; then
+         AC_COMPILE_IFELSE(
+	     [AC_LANG_PROGRAM(
+[AC_INCLUDES_DEFAULT()
+extern unsigned TYPE variable;
+extern uint32_t variable;],
+                 [])],
+             [netsnmp_cv_uint32_t_type="TYPE"])
+     fi
+    ])])
+
+AC_MSG_CHECKING([how to printf a uint32_t])
+case "$netsnmp_cv_uint32_t_type" in
+    char|short|int) netsnmp_PRI32="" ;;
+    long) netsnmp_PRI32="l" ;;
+    "long long") netsnmp_PRI32="ll" ;;
+    *) AC_MSG_ERROR([underlying type of uint32_t not known]) ;;
+esac
+AC_MSG_RESULT($netsnmp_PRI32)
+AC_DEFINE_UNQUOTED([NETSNMP_PRI32], ["$netsnmp_PRI32"],
+                   [Size prefix to use to printf a uint32_t])

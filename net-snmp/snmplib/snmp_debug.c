@@ -347,12 +347,12 @@ debugmsg_oidrange(const char *token, const oid * theoid, size_t len,
         rc = sprint_realloc_objid(&buf, &buf_len, &out_len, 1, theoid,
                                   var_subid-1);  /* Adjust for C's 0-based array indexing */
         if (rc) {
-            sprintf(tmpbuf, ".%lu--%lu", theoid[var_subid - 1],
-                    range_ubound);
+            sprintf(tmpbuf, ".%" NETSNMP_PRIo "u--%" NETSNMP_PRIo "u",
+                    theoid[var_subid - 1], range_ubound);
             rc = snmp_cstrcat(&buf, &buf_len, &out_len, 1, tmpbuf);
             if (rc) {
                 for (i = var_subid; i < len; i++) {
-                    sprintf(tmpbuf, ".%lu", theoid[i]);
+                    sprintf(tmpbuf, ".%" NETSNMP_PRIo "u", theoid[i]);
                     if (!snmp_cstrcat(&buf, &buf_len, &out_len, 1, tmpbuf)) {
                         break;
                     }

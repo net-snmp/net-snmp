@@ -3828,7 +3828,8 @@ parse_one_oid_index(oid ** oidStart, size_t * oidLen,
             for (i = 0; i < 4 && i < *oidLen; ++i) {
                 if (oidIndex[i] > 255) {
                     DEBUGMSGTL(("parse_oid_indexes",
-                                "illegal oid in index: %ld\n", oidIndex[0]));
+                                "illegal oid in index: %" NETSNMP_PRIo "d\n",
+                                oidIndex[0]));
                         return SNMPERR_GENERR;  /* sub-identifier too large */
                     }
                     uitmp = uitmp + (oidIndex[i] << (8*(3-i)));
@@ -4001,7 +4002,9 @@ dump_realloc_oid_to_inetaddress(const int addr_type, const oid * objid, size_t o
                     (addr_type == IPV4Z && objidlen != 8))
                     return 2;
 
-                len = sprintf(p, "%lu.%lu.%lu.%lu", objid[0], objid[1], objid[2], objid[3]);
+                len = sprintf(p, "%" NETSNMP_PRIo "u.%" NETSNMP_PRIo "u."
+                              "%" NETSNMP_PRIo "u.%" NETSNMP_PRIo "u",
+                              objid[0], objid[1], objid[2], objid[3]);
                 p += len;
                 if (addr_type == IPV4Z) {
                     zc = (unsigned char*)&zone;
@@ -4024,7 +4027,7 @@ dump_realloc_oid_to_inetaddress(const int addr_type, const oid * objid, size_t o
 
                 len = 0;
                 for (i = 0; i < 16; i ++) {
-                    len = snprintf(p, 4, "%02lx:", objid[i]);
+                    len = snprintf(p, 4, "%02" NETSNMP_PRIo "x:", objid[i]);
                     p += len;
                 }
                 p-- ; /* do not include the last ':' */
@@ -4139,7 +4142,7 @@ _oid_finish_printing(const oid * objid, size_t objidlen,
     }
 
     while (objidlen-- > 0) {    /* output rest of name, uninterpreted */
-        sprintf(intbuf, "%lu.", *objid++);
+        sprintf(intbuf, "%" NETSNMP_PRIo "u.", *objid++);
         if (!*buf_overflow && !snmp_strcat(buf, buf_len, out_len,
                                            allow_realloc,
                                            (const u_char *) intbuf)) {
@@ -4427,7 +4430,7 @@ _get_realloc_symbol(const oid * objid, size_t objidlen,
                         *buf_overflow = 1;
                     }
                 } else {
-                    sprintf(intbuf, "%lu", *objid);
+                    sprintf(intbuf, "%" NETSNMP_PRIo "u", *objid);
                     if (!*buf_overflow
                         && !snmp_strcat(buf, buf_len, out_len,
                                         allow_realloc,
@@ -4436,7 +4439,7 @@ _get_realloc_symbol(const oid * objid, size_t objidlen,
                     }
                 }
             } else {
-                sprintf(intbuf, "%lu", *objid);
+                sprintf(intbuf, "%" NETSNMP_PRIo "u", *objid);
                 if (!*buf_overflow && !snmp_strcat(buf, buf_len, out_len,
                                                    allow_realloc,
                                                    (const u_char *)
@@ -4491,7 +4494,8 @@ _get_realloc_symbol(const oid * objid, size_t objidlen,
         case TYPE_IPADDR:
             if (objidlen < 4)
                 goto finish_it;
-            sprintf(intbuf, "%lu.%lu.%lu.%lu",
+            sprintf(intbuf, "%" NETSNMP_PRIo "u.%" NETSNMP_PRIo "u."
+                    "%" NETSNMP_PRIo "u.%" NETSNMP_PRIo "u",
                     objid[0], objid[1], objid[2], objid[3]);
             objid += 4;
             objidlen -= 4;
@@ -4506,7 +4510,7 @@ _get_realloc_symbol(const oid * objid, size_t objidlen,
                 oid             ntype = *objid++;
 
                 objidlen--;
-                sprintf(intbuf, "%lu.", ntype);
+                sprintf(intbuf, "%" NETSNMP_PRIo "u.", ntype);
                 if (!*buf_overflow && !snmp_strcat(buf, buf_len, out_len,
                                                    allow_realloc,
                                                    (const u_char *)
@@ -4515,7 +4519,8 @@ _get_realloc_symbol(const oid * objid, size_t objidlen,
                 }
 
                 if (ntype == 1 && objidlen >= 4) {
-                    sprintf(intbuf, "%lu.%lu.%lu.%lu",
+                    sprintf(intbuf, "%" NETSNMP_PRIo "u.%" NETSNMP_PRIo "u."
+                            "%" NETSNMP_PRIo "u.%" NETSNMP_PRIo "u",
                             objid[0], objid[1], objid[2], objid[3]);
                     if (!*buf_overflow
                         && !snmp_strcat(buf, buf_len, out_len,
@@ -4726,7 +4731,7 @@ sprint_realloc_description(u_char ** buf, size_t * buf_len,
             break;
     }
     while (objidlen > 1) {
-        sprintf(tmpbuf, " %lu", *objid);
+        sprintf(tmpbuf, " %" NETSNMP_PRIo "u", *objid);
         len = strlen(tmpbuf);
         if (pos + len + 2 > width) {
             if (!snmp_cstrcat(buf, buf_len, out_len, allow_realloc, "\n     "))
@@ -4739,7 +4744,7 @@ sprint_realloc_description(u_char ** buf, size_t * buf_len,
         objid++;
         objidlen--;
     }
-    sprintf(tmpbuf, " %lu }", *objid);
+    sprintf(tmpbuf, " %" NETSNMP_PRIo "u }", *objid);
     len = strlen(tmpbuf);
     if (pos + len + 2 > width) {
         if (!snmp_cstrcat(buf, buf_len, out_len, allow_realloc, "\n     "))

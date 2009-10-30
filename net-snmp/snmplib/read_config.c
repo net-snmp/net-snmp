@@ -1776,7 +1776,7 @@ read_config_save_objid(char *saveto, oid * objid, size_t len)
      * in case len=0, this makes it easier to read it back in 
      */
     for (i = 0; i < (int) len; i++) {
-        sprintf(saveto, ".%ld", objid[i]);
+        sprintf(saveto, ".%" NETSNMP_PRIo "d", objid[i]);
         saveto += strlen(saveto);
     }
     return saveto;

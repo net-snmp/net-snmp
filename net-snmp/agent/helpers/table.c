@@ -394,7 +394,8 @@ table_helper_handler(netsnmp_mib_handler *handler,
             /*
              * oid is long enough to contain COLUMN info
              */
-            DEBUGMSGTL(("helper:table:col", "  have at least a column (%ld)\n",
+            DEBUGMSGTL(("helper:table:col",
+                        "  have at least a column (%" NETSNMP_PRIo "d)\n",
                         var->name[oid_column_pos]));
             if (var->name[oid_column_pos] < tbl_info->min_column) {
                 DEBUGMSGTL(("helper:table:col",
@@ -450,8 +451,9 @@ table_helper_handler(netsnmp_mib_handler *handler,
                     continue;
                 if (tbl_req_info->colnum != var->name[oid_column_pos]) {
                     DEBUGMSGTL(("helper:table:col",
-                                "    which doesn't match req %ld - truncating index info\n",
-                                   var->name[oid_column_pos]));
+                                "    which doesn't match req "
+                                "%" NETSNMP_PRIo "d - truncating index info\n",
+                                var->name[oid_column_pos]));
                     /*
                      * different column! truncate useless index info 
                      */
