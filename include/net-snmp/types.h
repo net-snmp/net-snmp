@@ -41,20 +41,10 @@
 #include <netinet/in.h>		/* For definition of in_addr_t */
 #endif
 
+#include <net-snmp/library/oid.h>
+
 #ifdef __cplusplus
 extern "C" {
-#endif
-
-#ifndef MAX_SUBID               /* temporary - duplicate definition protection */
-#ifndef EIGHTBIT_SUBIDS
-typedef uint32_t oid;
-#define MAX_SUBID   0xFFFFFFFF
-#define NETSNMP_PRIo NETSNMP_PRI32
-#else
-typedef uint8_t oid;
-#define MAX_SUBID   0xFF
-#define NETSNMP_PRIo ""
-#endif
 #endif
 
 #ifndef HAVE_SOCKLEN_T

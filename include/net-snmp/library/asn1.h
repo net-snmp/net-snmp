@@ -1,6 +1,8 @@
 #ifndef ASN1_H
 #define ASN1_H
 
+#include <net-snmp/library/oid.h>
+
 #ifdef __cplusplus
 extern          "C" {
 #endif
