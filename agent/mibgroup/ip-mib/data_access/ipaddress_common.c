@@ -211,7 +211,8 @@ netsnmp_access_ipaddress_entry_set(netsnmp_ipaddress_entry * entry)
      * make sure interface and ifIndex match up
      */
     if (NULL == netsnmp_access_interface_name_find(entry->if_index)) {
-        DEBUGMSGT(("access:ipaddress:set", "cant find name for index %ld\n",
+        DEBUGMSGT(("access:ipaddress:set",
+                   "cant find name for index %" NETSNMP_PRIo "d\n",
                   entry->if_index));
         return -1;
     }

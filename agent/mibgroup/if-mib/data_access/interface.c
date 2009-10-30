@@ -462,7 +462,8 @@ _access_interface_entry_save_name(const char *name, oid index)
     tmp = se_find_value_in_slist("interfaces", name);
     if (tmp == SE_DNE) {
         se_add_pair_to_slist("interfaces", strdup(name), index);
-        DEBUGMSGTL(("access:interface:ifIndex", "saved ifIndex %lu for %s\n",
+        DEBUGMSGTL(("access:interface:ifIndex",
+                    "saved ifIndex %" NETSNMP_PRIo "u for %s\n",
                     index, name));
     }
     else
@@ -473,8 +474,9 @@ _access_interface_entry_save_name(const char *name, oid index)
                          "interfaces will appear multiple times in IF-MIB.\n");
                 logged = 1;
             }
-            DEBUGMSGTL(("access:interface:ifIndex", "index %lu != tmp for %s\n",
-                         index, name));
+            DEBUGMSGTL(("access:interface:ifIndex",
+                        "index %" NETSNMP_PRIo "u != tmp for %s\n",
+                        index, name));
         }
 }
 

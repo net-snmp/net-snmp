@@ -1735,6 +1735,9 @@ typedef unsigned int   uintptr_t;
 #define HAVE_STRUCT_SOCKADDR_STORAGE_SS_FAMILY 1
 #endif
 
+/* Size prefix to use to printf a uint32_t */
+#define NETSNMP_PRI32 ""
+
 #ifdef _WIN64
 #define NETSNMP_PRIz "I64"
 #else
