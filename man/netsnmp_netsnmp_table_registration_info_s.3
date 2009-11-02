@@ -1,15 +1,16 @@
-.TH "netsnmp_table_registration_info_s" 3 "10 Jul 2008" "Version 5.2.4" "net-snmp" \" -*- nroff -*-
+.TH "netsnmp_table_registration_info_s" 3 "2 Nov 2009" "Version 5.2.5.pre1" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
-netsnmp_table_registration_info_s \- Table registration structure.  
-
+netsnmp_table_registration_info_s \- 
 .PP
+Table registration structure.  
+
 .SH SYNOPSIS
 .br
 .PP
-\fC#include <table.h>\fP
 .PP
+\fC#include <table.h>\fP
 .SS "Data Fields"
 
 .in +1c
@@ -46,23 +47,21 @@ Definition at line 74 of file table.h.
 list of varbinds with only 'type' set 
 .PP
 Definition at line 76 of file table.h.
-.SS "unsigned int \fBnetsnmp_table_registration_info_s::number_indexes\fP"
-.PP
-calculated automatically 
-.PP
-Definition at line 78 of file table.h.
-.SS "unsigned int \fBnetsnmp_table_registration_info_s::min_column\fP"
-.PP
-the minimum columns number. 
-.PP
-If there are columns in-between which are not valid, use valid_columns to get automatic column range checking. 
-.PP
-Definition at line 85 of file table.h.
 .SS "unsigned int \fBnetsnmp_table_registration_info_s::max_column\fP"
 .PP
 the maximum columns number 
 .PP
 Definition at line 87 of file table.h.
+.SS "unsigned int \fBnetsnmp_table_registration_info_s::min_column\fP"
+.PP
+the minimum columns number. If there are columns in-between which are not valid, use valid_columns to get automatic column range checking. 
+.PP
+Definition at line 85 of file table.h.
+.SS "unsigned int \fBnetsnmp_table_registration_info_s::number_indexes\fP"
+.PP
+calculated automatically 
+.PP
+Definition at line 78 of file table.h.
 .SS "\fBnetsnmp_column_info\fP* \fBnetsnmp_table_registration_info_s::valid_columns\fP"
 .PP
 more details on columns 

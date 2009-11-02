@@ -1,15 +1,16 @@
-.TH "netsnmp_mib_handler_s" 3 "10 Jul 2008" "Version 5.2.4" "net-snmp" \" -*- nroff -*-
+.TH "netsnmp_mib_handler_s" 3 "2 Nov 2009" "Version 5.2.5.pre1" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
-netsnmp_mib_handler_s \- the mib handler structure to be registered  
-
+netsnmp_mib_handler_s \- 
 .PP
+the mib handler structure to be registered  
+
 .SH SYNOPSIS
 .br
 .PP
-\fC#include <agent_handler.h>\fP
 .PP
+\fC#include <agent_handler.h>\fP
 .SS "Data Fields"
 
 .in +1c
@@ -47,21 +48,19 @@ the mib handler structure to be registered
 Definition at line 46 of file agent_handler.h.
 .SH "Field Documentation"
 .PP 
-.SS "void* \fBnetsnmp_mib_handler_s::myvoid\fP"
+.SS "int(* \fBnetsnmp_mib_handler_s::access_method\fP)(struct \fBnetsnmp_mib_handler_s\fP *, struct \fBnetsnmp_handler_registration_s\fP *, struct \fBnetsnmp_agent_request_info_s\fP *, struct \fBnetsnmp_request_info_s\fP *)"
 .PP
-for handler's internal use 
-.PP
-Definition at line 49 of file agent_handler.h.
+if you add more members, you probably also want to update _clone_handler in \fBsnmp_agent.c\fP. 
 .SS "int \fBnetsnmp_mib_handler_s::flags\fP"
 .PP
 for agent_handler's internal use 
 .PP
 Definition at line 51 of file agent_handler.h.
-.SS "int(* \fBnetsnmp_mib_handler_s::access_method\fP)(struct \fBnetsnmp_mib_handler_s\fP *, struct \fBnetsnmp_handler_registration_s\fP *, struct \fBnetsnmp_agent_request_info_s\fP *, struct \fBnetsnmp_request_info_s\fP *)"
+.SS "void* \fBnetsnmp_mib_handler_s::myvoid\fP"
 .PP
-if you add more members, you probably also want to update 
+for handler's internal use 
 .PP
-_clone_handler in \fBsnmp_agent.c\fP. 
+Definition at line 49 of file agent_handler.h.
 
 .SH "Author"
 .PP 

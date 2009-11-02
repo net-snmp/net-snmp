@@ -1,4 +1,4 @@
-.TH "A generic callback mechanism" 3 "10 Jul 2008" "Version 5.2.4" "net-snmp" \" -*- nroff -*-
+.TH "A generic callback mechanism" 3 "2 Nov 2009" "Version 5.2.5.pre1" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -38,16 +38,14 @@ A generic callback mechanism \-
 .RI "void \fBclear_callback\fP (void)"
 .br
 .ti -1c
-.RI "struct snmp_gen_callback * \fBsnmp_callback_list\fP (int major, int minor)"
+.RI "struct \fBsnmp_gen_callback\fP * \fBsnmp_callback_list\fP (int major, int minor)"
 .br
 .in -1c
 .SH "Function Documentation"
 .PP 
 .SS "int netsnmp_callback_clear_client_arg (void * ptr, int i, int j)"
 .PP
-find and clear client args that match ptr 
-.PP
-\fBParameters:\fP
+find and clear client args that match ptr \fBParameters:\fP
 .RS 4
 \fIptr\fP pointer to search for 
 .br
@@ -61,9 +59,7 @@ find and clear client args that match ptr
 Definition at line 346 of file callback.c.
 .SS "int snmp_call_callbacks (int major, int minor, void * caller_arg)"
 .PP
-This function calls the callback function for each registered callback of type major and minor. 
-.PP
-\fBParameters:\fP
+This function calls the callback function for each registered callback of type major and minor. \fBParameters:\fP
 .RS 4
 \fImajor\fP is the SNMP callback major type used
 .br
@@ -89,9 +85,7 @@ Returns SNMPERR_GENERR if major is >= MAX_CALLBACK_IDS or minor is >= MAX_CALLBA
 Definition at line 182 of file callback.c.
 .SS "int snmp_register_callback (int major, int minor, SNMPCallback * new_callback, void * arg)"
 .PP
-This function registers a generic callback function. 
-.PP
-The major and minor values are used to set the new_callback function into a global static multi-dimensional array of type struct snmp_gen_callback. The function makes sure to append this callback function at the end of the link list, snmp_gen_callback->next.
+This function registers a generic callback function. The major and minor values are used to set the new_callback function into a global static multi-dimensional array of type struct \fBsnmp_gen_callback\fP. The function makes sure to append this callback function at the end of the link list, snmp_gen_callback->next.
 .PP
 \fBParameters:\fP
 .RS 4
@@ -129,7 +123,7 @@ SNMP_CALLBACK_SESSION_INIT
 .PP
 \fBReturns:\fP
 .RS 4
-Returns SNMPERR_GENERR if major is >= MAX_CALLBACK_IDS or minor is >= MAX_CALLBACK_SUBIDS or a snmp_gen_callback pointer could not be allocated, otherwise SNMPERR_SUCCESS is returned.
+Returns SNMPERR_GENERR if major is >= MAX_CALLBACK_IDS or minor is >= MAX_CALLBACK_SUBIDS or a \fBsnmp_gen_callback\fP pointer could not be allocated, otherwise SNMPERR_SUCCESS is returned.
 .IP "\(bu" 2
 #define MAX_CALLBACK_IDS 2
 .IP "\(bu" 2
@@ -149,9 +143,7 @@ Returns SNMPERR_GENERR if major is >= MAX_CALLBACK_IDS or minor is >= MAX_CALLBA
 Definition at line 115 of file callback.c.
 .SS "int snmp_unregister_callback (int major, int minor, SNMPCallback * target, void * arg, int matchargs)"
 .PP
-This function unregisters a specified callback function given a major and minor type. 
-.PP
-Note: no bound checking on major and minor.
+This function unregisters a specified callback function given a major and minor type. Note: no bound checking on major and minor.
 .PP
 \fBParameters:\fP
 .RS 4
@@ -161,9 +153,9 @@ Note: no bound checking on major and minor.
 .br
 \fItarget\fP is the callback function that will be unregistered.
 .br
-\fIarg\fP is a void pointer used for comparison against the registered callback's sc_client_arg variable.
+\fIarg\fP is a void pointer used for comparison against the registered callback's sc_client_arg \fBvariable\fP.
 .br
-\fImatchargs\fP is an integer used to bypass the comparison of arg and the callback's sc_client_arg variable only when matchargs is set to 0.
+\fImatchargs\fP is an integer used to bypass the comparison of arg and the callback's sc_client_arg \fBvariable\fP only when matchargs is set to 0.
 .RE
 .PP
 \fBReturns:\fP
@@ -183,3 +175,6 @@ Returns the number of callbacks that were unregistered.
 set cleanup flag? 
 .PP
 Definition at line 295 of file callback.c.
+.SH "Author"
+.PP 
+Generated automatically by Doxygen for net-snmp from the source code.

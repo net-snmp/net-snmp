@@ -1,25 +1,26 @@
-.TH "table_container" 3 "10 Jul 2008" "Version 5.2.4" "net-snmp" \" -*- nroff -*-
+.TH "table_container" 3 "2 Nov 2009" "Version 5.2.5.pre1" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
-table_container \- Helps you implement a table when data can be found via a netsnmp_container.  
-
+table_container \- 
 .PP
+Helps you implement a table when data can be found via a netsnmp_container.  
+
 .SS "Functions"
 
 .in +1c
 .ti -1c
-.RI "\fBnetsnmp_mib_handler\fP * \fBnetsnmp_container_table_handler_get\fP (\fBnetsnmp_table_registration_info\fP *tabreg, netsnmp_container *container, char key_type)"
+.RI "\fBnetsnmp_mib_handler\fP * \fBnetsnmp_container_table_handler_get\fP (\fBnetsnmp_table_registration_info\fP *tabreg, \fBnetsnmp_container\fP *container, char key_type)"
 .br
 .RI "\fIregister specified callbacks for the specified table/oid. \fP"
 .ti -1c
-.RI "int \fBnetsnmp_container_table_register\fP (\fBnetsnmp_handler_registration\fP *reginfo, \fBnetsnmp_table_registration_info\fP *tabreg, netsnmp_container *container, char key_type)"
+.RI "int \fBnetsnmp_container_table_register\fP (\fBnetsnmp_handler_registration\fP *reginfo, \fBnetsnmp_table_registration_info\fP *tabreg, \fBnetsnmp_container\fP *container, char key_type)"
 .br
 .in -1c
 .SH "Detailed Description"
 .PP 
 Helps you implement a table when data can be found via a netsnmp_container. 
-.PP
+
 The table_container handler is used (automatically) in conjuntion with the \fBtable\fP handler.
 .PP
 This handler will use the index information provided by the \fBtable\fP handler to find the row needed to process the request.
@@ -30,7 +31,7 @@ The current key types are:
 .PP
 TABLE_CONTAINER_KEY_NETSNMP_INDEX The container should do comparisons based on a key that may be cast to a netsnmp index (netsnmp_index *). This index contains only the index portion of the OID, not the entire OID.
 .PP
-TABLE_CONTAINER_KEY_VARBIND_INDEX The container should do comparisons based on a key that may be cast to a netsnmp variable list (netsnmp_variable_list *). This variable list will contain one varbind for each index component.
+TABLE_CONTAINER_KEY_VARBIND_INDEX The container should do comparisons based on a key that may be cast to a netsnmp \fBvariable\fP list (netsnmp_variable_list *). This \fBvariable\fP list will contain one varbind for each index component.
 .PP
 TABLE_CONTAINER_KEY_VARBIND_RAW (NOTE: unimplemented) While not yet implemented, future plans include passing the request varbind with the full OID to a container.
 .PP
@@ -55,8 +56,11 @@ If a row is found, it will be inserted into the request's data list. The sub-han
 This helper and it's API are still being tested and are subject to change. 
 .SH "Function Documentation"
 .PP 
-.SS "\fBnetsnmp_mib_handler\fP* netsnmp_container_table_handler_get (\fBnetsnmp_table_registration_info\fP * tabreg, netsnmp_container * container, char key_type)"
+.SS "\fBnetsnmp_mib_handler\fP* netsnmp_container_table_handler_get (\fBnetsnmp_table_registration_info\fP * tabreg, \fBnetsnmp_container\fP * container, char key_type)"
 .PP
 register specified callbacks for the specified table/oid. 
 .PP
 Definition at line 157 of file table_container.c.
+.SH "Author"
+.PP 
+Generated automatically by Doxygen for net-snmp from the source code.

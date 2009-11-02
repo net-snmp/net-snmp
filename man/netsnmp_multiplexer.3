@@ -1,10 +1,11 @@
-.TH "multiplexer" 3 "10 Jul 2008" "Version 5.2.4" "net-snmp" \" -*- nroff -*-
+.TH "multiplexer" 3 "2 Nov 2009" "Version 5.2.5.pre1" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
-multiplexer \- Splits mode requests into calls to different handlers.  
-
+multiplexer \- 
 .PP
+Splits mode requests into calls to different handlers.  
+
 .SS "Functions"
 
 .in +1c
@@ -20,7 +21,7 @@ multiplexer \- Splits mode requests into calls to different handlers.
 .SH "Detailed Description"
 .PP 
 Splits mode requests into calls to different handlers. 
-.PP
+
 The multiplexer helper lets you split the calling chain depending on the calling mode (get vs getnext vs set). Useful if you want different routines to handle different aspects of SNMP requests, which is very common for GET vs SET type actions.
 .PP
 Functionally:
@@ -47,3 +48,6 @@ Definition at line 37 of file multiplexer.c.
 implements the multiplexer helper 
 .PP
 Definition at line 58 of file multiplexer.c.
+.SH "Author"
+.PP 
+Generated automatically by Doxygen for net-snmp from the source code.
