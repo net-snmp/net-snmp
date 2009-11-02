@@ -3,7 +3,92 @@ that have been applied in released versions.  Please see the NEWS file for
 a summary of the major changes, and the ChangeLog file for a comprehensive
 listing of all changes made to the code.
 
+*5.2.6*
+
+    snmplib:
+      - [BUG 2027834]: Extend string print buffer by the minimum necessary
+      - [BUG 2217367]: Fix a memory leak (backport of Patch 1616912)
+      - [BUG 2838243]: Correct the output of unsigned values
+      - [PATCH 2003450]: Fix a couple of 64-bit problems
+      - [PATCH 2043018]: Fix recvfrom hangs
+      - [PATCH 2258229]: Remove misleading comment
+      - [PATCH 2479700]: Fix zoned IP address used as table indices
+      - [PATCH 2505488]: Fix alarm behaviour on large clock skews
+      - [PATCH 2538169]: Prevent infinite retries for invalid error-index
+      - [PATCH 2689362]: Fix handling of IPv6 hostnames
+      - [PATCH 2713841]: Fix runtime errors triggered by high-ASCII chars
+      - Change the parsing of ranges to accept all valid values
+      - Make -LN stop dumping core.
+      - Make bad debug levels report the offending symbol
+
+    snmpd:
+      - [BUG 1693039]: Be silent when insert fails
+      - [BUG 2003144]: Increase size of AgentX packet build buffer
+      - [BUG 2023803]: Remove irrelevant configure dependency (HP-UX 11)
+      - [PATCH 1550730]: Report errors from iterator-based handlers
+      - [PATCH 1944581]: Don't core dump on long string index values
+      - [PATCH 1977439]: Fix pass/_persist bug with SET oid value
+      - [PATCH 2014204]: Support -g {groupname}
+      - [PATCH 2022936]: Fix AgentX Counter64 decoding on 64-bit architectures
+      - [PATCH 2082726]: correctly report NIC speeds higher than 4Gbit/s
+      - [PATCH 2124288]: Fix setting of usmUserPrivProtocol at creation
+      - [PATCH 2384779]: Fix handling of GetBulk with N>0,M==0
+      - [PATCH 2693670]: Don't open AgentX sockets if other transports fail
+      - Fix CVE-2008-4309 (GETBULK issue reported by Oscar Mira-Sanchez)
+      - Fix memory leak when multiple interfaces have the same IPv6 address
+      - Fix possible crash when 64-bit counters exceed 2^32
+      - Fix two bugs with smux password support.
+      - Improve parsing of -LS command line argument
+
+    snmptrapd:
+      - Remove glibc-specific printf-formatting tokens
+
+    apps:
+      - [BUG 1964136]: Drop NULL type from snmpset usage
+      - [BUG 2811577]: Fix bug in GetBulk handling
+      - Improve parsing of -LS command line argument
+
+    build:
+      - Limit the use of _KERNEL definitions in configure
+      - [BUG 2023803]: Compilation problems on HP-UX 11.31
+      - [BUG 2782700]: build failure when using --with-pkcs on Solaris
+      - [PATCH 1681035]: improve net-snmp-config /bin/sh compatibility
+      - [PATCH 1899762]: Tweak embedded_perl configure checks
+      - [PATCH 2184039]: Misc fixes for freeing memory
+      - add --with-temp-file-pattern configure option
+
+    documentation:
+      - [BUG 2027129]: fix typo in snmpcmd.1
+
+    mib2c:
+      - [BUG 2827269]: Suppress non-ordered TODO comments
+      - [PATCH 2316127]: Fix bug in iterate_access generated code
+
+    perl:
+      - [BUG 1554817]: Fix class assigment so getRootOID works properly
+      - [PATCH 2021444]: Support SNMPv2c in gettable
+      - [PATCH 2022948]: Fix for Counter64 in perl subagent
+
+    AIX:
+      - [BUG 2712670]: Agent crashes on AIX with hrStorage
+
+    *BSD:
+      - Fix a make test
+
+    HP:
+      - UX: BUG: 2779472: Filesystems missing in hrStorage
+
+    Solaris:
+      - [PATCH 2012404]: deal with more than 10 interfaces
+      - [PATCH 2751588]: Fix inconsistent/zero data being reported
+      - Protect against missing package version
+
+    Win32:
+      - [PATCH 2688342]: Fix various VS2005 compiler warnings
+
+
 *5.2.5*
+
     snmplib:
       - Change CONTAINER_INSERT to not do partial inserts
       - Corrected registering of
