@@ -1,10 +1,11 @@
-.TH "bulk_to_next" 3 "10 Jul 2008" "Version 5.2.4" "net-snmp" \" -*- nroff -*-
+.TH "bulk_to_next" 3 "2 Nov 2009" "Version 5.2.5.pre1" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
-bulk_to_next \- Convert GETBULK requests into GETNEXT requests for the handler.  
-
+bulk_to_next \- 
 .PP
+Convert GETBULK requests into GETNEXT requests for the handler.  
+
 .SS "Functions"
 
 .in +1c
@@ -27,7 +28,7 @@ bulk_to_next \- Convert GETBULK requests into GETNEXT requests for the handler.
 .SH "Detailed Description"
 .PP 
 Convert GETBULK requests into GETNEXT requests for the handler. 
-.PP
+
 The only purpose of this handler is to convert a GETBULK request to a GETNEXT request. It is inserted into handler chains where the handler has not set the HANDLER_CAN_GETBULK flag. 
 .SH "Function Documentation"
 .PP 
@@ -46,3 +47,6 @@ Definition at line 31 of file bulk_to_next.c.
 initializes the bulk_to_next helper which then registers a bulk_to_next handler as a run-time injectable handler for configuration file use. 
 .PP
 Definition at line 131 of file bulk_to_next.c.
+.SH "Author"
+.PP 
+Generated automatically by Doxygen for net-snmp from the source code.

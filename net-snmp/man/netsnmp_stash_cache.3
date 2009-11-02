@@ -1,29 +1,30 @@
-.TH "stash_cache" 3 "10 Jul 2008" "Version 5.2.4" "net-snmp" \" -*- nroff -*-
+.TH "stash_cache" 3 "2 Nov 2009" "Version 5.2.5.pre1" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
-stash_cache \- Automatically caches data for certain handlers.  
-
+stash_cache \- 
 .PP
+Automatically caches data for certain handlers.  
+
 .SS "Functions"
 
 .in +1c
 .ti -1c
-.RI "netsnmp_stash_cache_info * \fBnetsnmp_get_new_stash_cache\fP (void)"
+.RI "\fBnetsnmp_stash_cache_info\fP * \fBnetsnmp_get_new_stash_cache\fP (void)"
 .br
 .ti -1c
 .RI "\fBnetsnmp_mib_handler\fP * \fBnetsnmp_get_stash_cache_handler\fP (void)"
 .br
 .RI "\fIreturns a stash_cache handler that can be injected into a given handler chain. \fP"
 .ti -1c
-.RI "netsnmp_oid_stash_node ** \fBnetsnmp_extract_stash_cache\fP (\fBnetsnmp_agent_request_info\fP *reqinfo)"
+.RI "\fBnetsnmp_oid_stash_node\fP ** \fBnetsnmp_extract_stash_cache\fP (\fBnetsnmp_agent_request_info\fP *reqinfo)"
 .br
 .RI "\fIextracts a pointer to the stash_cache info from the reqinfo structure. \fP"
 .ti -1c
 .RI "int \fBnetsnmp_stash_cache_helper\fP (\fBnetsnmp_mib_handler\fP *handler, \fBnetsnmp_handler_registration\fP *reginfo, \fBnetsnmp_agent_request_info\fP *reqinfo, \fBnetsnmp_request_info\fP *requests)"
 .br
 .ti -1c
-.RI "int \fBnetsnmp_stash_cache_update\fP (\fBnetsnmp_mib_handler\fP *handler, \fBnetsnmp_handler_registration\fP *reginfo, \fBnetsnmp_agent_request_info\fP *reqinfo, \fBnetsnmp_request_info\fP *requests, netsnmp_stash_cache_info *cinfo)"
+.RI "int \fBnetsnmp_stash_cache_update\fP (\fBnetsnmp_mib_handler\fP *handler, \fBnetsnmp_handler_registration\fP *reginfo, \fBnetsnmp_agent_request_info\fP *reqinfo, \fBnetsnmp_request_info\fP *requests, \fBnetsnmp_stash_cache_info\fP *cinfo)"
 .br
 .RI "\fIupdates a given cache depending on whether it needs to or not. \fP"
 .ti -1c
@@ -34,15 +35,13 @@ stash_cache \- Automatically caches data for certain handlers.
 .SH "Detailed Description"
 .PP 
 Automatically caches data for certain handlers. 
-.PP
+
 This handler caches data in an optimized way which may aleviate the need for the lower level handlers to perform as much optimization. Specifically, somewhere in the lower level handlers must be a handler that supports the MODE_GET_STASH operation. Note that the table_iterator helper supports this. 
 .SH "Function Documentation"
 .PP 
-.SS "netsnmp_oid_stash_node** netsnmp_extract_stash_cache (\fBnetsnmp_agent_request_info\fP * reqinfo)"
+.SS "\fBnetsnmp_oid_stash_node\fP** netsnmp_extract_stash_cache (\fBnetsnmp_agent_request_info\fP * reqinfo)"
 .PP
 extracts a pointer to the stash_cache info from the reqinfo structure. 
-.PP
-
 .PP
 Definition at line 65 of file stash_cache.c.
 .SS "\fBnetsnmp_mib_handler\fP* netsnmp_get_stash_cache_handler (void)"
@@ -55,8 +54,11 @@ Definition at line 43 of file stash_cache.c.
 initializes the stash_cache helper which then registers a stash_cache handler as a run-time injectable handler for configuration file use. 
 .PP
 Definition at line 189 of file stash_cache.c.
-.SS "int netsnmp_stash_cache_update (\fBnetsnmp_mib_handler\fP * handler, \fBnetsnmp_handler_registration\fP * reginfo, \fBnetsnmp_agent_request_info\fP * reqinfo, \fBnetsnmp_request_info\fP * requests, netsnmp_stash_cache_info * cinfo)"
+.SS "int netsnmp_stash_cache_update (\fBnetsnmp_mib_handler\fP * handler, \fBnetsnmp_handler_registration\fP * reginfo, \fBnetsnmp_agent_request_info\fP * reqinfo, \fBnetsnmp_request_info\fP * requests, \fBnetsnmp_stash_cache_info\fP * cinfo)"
 .PP
 updates a given cache depending on whether it needs to or not. 
 .PP
 Definition at line 144 of file stash_cache.c.
+.SH "Author"
+.PP 
+Generated automatically by Doxygen for net-snmp from the source code.

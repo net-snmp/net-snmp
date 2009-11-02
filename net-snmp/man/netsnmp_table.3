@@ -1,40 +1,38 @@
-.TH "table" 3 "10 Jul 2008" "Version 5.2.4" "net-snmp" \" -*- nroff -*-
+.TH "table" 3 "2 Nov 2009" "Version 5.2.5.pre1" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
-table \- Helps you implement a table.  
-
+table \- 
 .PP
+Helps you implement a table.  
+
 .SS "Modules"
 
 .in +1c
 .ti -1c
 .RI "\fBtable_array\fP"
 .br
-.RI "\fIHelps you implement a table when data can be stored locally. \fP"
 .PP
-.in +1c
 
+.RI "\fIHelps you implement a table when data can be stored locally. \fP"
 .ti -1c
 .RI "\fBtable_container\fP"
 .br
-.RI "\fIHelps you implement a table when data can be found via a netsnmp_container. \fP"
 .PP
-.in +1c
 
+.RI "\fIHelps you implement a table when data can be found via a netsnmp_container. \fP"
 .ti -1c
 .RI "\fBtable_data\fP"
 .br
-.RI "\fIHelps you implement a table with datamatted storage. \fP"
 .PP
-.in +1c
 
+.RI "\fIHelps you implement a table with datamatted storage. \fP"
 .ti -1c
 .RI "\fBtable_iterator\fP"
 .br
-.RI "\fIThe table iterator helper is designed to simplify the task of writing a table handler for the net-snmp agent when the data being accessed is not in an oid sorted form and must be accessed externally. \fP"
 .PP
 
+.RI "\fIThe table iterator helper is designed to simplify the task of writing a table handler for the net-snmp agent when the data being accessed is not in an oid sorted form and must be accessed externally. \fP"
 .in -1c
 .SS "Defines"
 
@@ -102,7 +100,7 @@ table \- Helps you implement a table.
 .SH "Detailed Description"
 .PP 
 Helps you implement a table. 
-.PP
+
 This handler helps you implement a table by doing some of the processing for you.
 .PP
 This handler truly shows the power of the new handler mechanism. By creating a table handler and injecting it into your calling chain, or by using the \fBnetsnmp_register_table()\fP function to register your table, you get access to some pre-parsed information. Specifically, the table handler pulls out the column number and indexes from the request oid so that you don't have to do the complex work to do that parsing within your own code.
@@ -112,16 +110,12 @@ To do this, the table handler needs to know up front how your table is structure
 .PP 
 .SS "int netsnmp_check_getnext_reply (\fBnetsnmp_request_info\fP * request, oid * prefix, size_t prefix_len, \fBnetsnmp_variable_list\fP * newvar, \fBnetsnmp_variable_list\fP ** outvar)"
 .PP
-checks the original request against the current data being passed in if its greater than the request oid but less than the current valid return, set the current valid return to the new value. 
-.PP
-returns 1 if outvar was replaced with the oid from newvar (success). returns 0 if not. 
+checks the original request against the current data being passed in if its greater than the request oid but less than the current valid return, set the current valid return to the new value. returns 1 if outvar was replaced with the oid from newvar (success). returns 0 if not. 
 .PP
 Definition at line 888 of file table.c.
 .SS "NETSNMP_INLINE \fBnetsnmp_table_request_info\fP* netsnmp_extract_table_info (\fBnetsnmp_request_info\fP * request)"
 .PP
-Extracts the processed table information from a given request. 
-.PP
-Call this from subhandlers on a request to extract the processed netsnmp_request_info information. The resulting information includes the index values and the column number.
+Extracts the processed table information from a given request. Call this from subhandlers on a request to extract the processed netsnmp_request_info information. The resulting information includes the index values and the column number.
 .PP
 \fBParameters:\fP
 .RS 4
@@ -143,9 +137,7 @@ extracts the registered netsnmp_table_registration_info object from a netsnmp_ha
 Definition at line 138 of file table.c.
 .SS "\fBnetsnmp_mib_handler\fP* netsnmp_get_table_handler (\fBnetsnmp_table_registration_info\fP * tabreq)"
 .PP
-Given a netsnmp_table_registration_info object, creates a table handler. 
-.PP
-You can use this table handler by injecting it into a calling chain. When the handler gets called, it'll do processing and store it's information into the request->parent_data structure.
+Given a netsnmp_table_registration_info object, creates a table handler. You can use this table handler by injecting it into a calling chain. When the handler gets called, it'll do processing and store it's information into the request->parent_data structure.
 .PP
 The table helper handler pulls out the column number and indexes from the request oid so that you don't have to do the complex work of parsing within your own code.
 .PP
@@ -179,9 +171,7 @@ creates a table handler given the netsnmp_table_registration_info object, insert
 Definition at line 737 of file table.c.
 .SS "int netsnmp_table_build_oid (\fBnetsnmp_handler_registration\fP * reginfo, \fBnetsnmp_request_info\fP * reqinfo, \fBnetsnmp_table_request_info\fP * table_info)"
 .PP
-given a registration info object, a request object and the table info object it builds the request->requestvb->name oid from the index values and column information found in the table_info object. 
-.PP
-Index values are extracted from the table_info varbinds. 
+given a registration info object, a request object and the table info object it builds the request->requestvb->name oid from the index values and column information found in the table_info object. Index values are extracted from the table_info varbinds. 
 .PP
 .Entry
 .PP
@@ -190,23 +180,17 @@ Index values are extracted from the table_info varbinds.
 Definition at line 788 of file table.c.
 .SS "int netsnmp_table_build_oid_from_index (\fBnetsnmp_handler_registration\fP * reginfo, \fBnetsnmp_request_info\fP * reqinfo, \fBnetsnmp_table_request_info\fP * table_info)"
 .PP
-given a registration info object, a request object and the table info object it builds the request->requestvb->name oid from the index values and column information found in the table_info object. 
-.PP
-Index values are extracted from the table_info index oid. 
+given a registration info object, a request object and the table info object it builds the request->requestvb->name oid from the index values and column information found in the table_info object. Index values are extracted from the table_info index oid. 
 .PP
 Definition at line 825 of file table.c.
 .SS "int netsnmp_table_build_result (\fBnetsnmp_handler_registration\fP * reginfo, \fBnetsnmp_request_info\fP * reqinfo, \fBnetsnmp_table_request_info\fP * table_info, u_char type, u_char * result, size_t result_len)"
 .PP
-Builds the result to be returned to the agent given the table information. 
-.PP
-Use this function to return results from lowel level handlers to the agent. It takes care of building the proper resulting oid (containing proper indexing) and inserts the result value into the returning varbind. 
+Builds the result to be returned to the agent given the table information. Use this function to return results from lowel level handlers to the agent. It takes care of building the proper resulting oid (containing proper indexing) and inserts the result value into the returning varbind. 
 .PP
 Definition at line 755 of file table.c.
 .SS "int netsnmp_update_indexes_from_variable_list (\fBnetsnmp_table_request_info\fP * tri)"
 .PP
 builds an oid given a set of indexes. 
-.PP
-
 .PP
 Definition at line 870 of file table.c.
 .SS "int netsnmp_update_variable_list_from_index (\fBnetsnmp_table_request_info\fP * tri)"
@@ -218,8 +202,6 @@ Definition at line 854 of file table.c.
 .PP
 implements the table helper handler 
 .PP
-
-.PP
 XXX-rks: memory leak. add cleanup handler?
 .PP
 none available
@@ -229,3 +211,6 @@ got one ok
 for loop 
 .PP
 Definition at line 146 of file table.c.
+.SH "Author"
+.PP 
+Generated automatically by Doxygen for net-snmp from the source code.

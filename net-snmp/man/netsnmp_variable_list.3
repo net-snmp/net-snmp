@@ -1,26 +1,27 @@
-.TH "variable_list" 3 "10 Jul 2008" "Version 5.2.4" "net-snmp" \" -*- nroff -*-
+.TH "variable_list" 3 "2 Nov 2009" "Version 5.2.5.pre1" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
-variable_list \- The netsnmp variable list binding structure, it's typedef'd to netsnmp_variable_list.  
-
+variable_list \- 
 .PP
+The netsnmp \fBvariable\fP list binding structure, it's typedef'd to netsnmp_variable_list.  
+
 .SH SYNOPSIS
 .br
 .PP
-\fC#include <snmp_api.h>\fP
 .PP
+\fC#include <snmp_api.h>\fP
 .SS "Data Fields"
 
 .in +1c
 .ti -1c
 .RI "struct \fBvariable_list\fP * \fBnext_variable\fP"
 .br
-.RI "\fINULL for last variable. \fP"
+.RI "\fINULL for last \fBvariable\fP. \fP"
 .ti -1c
 .RI "oid * \fBname\fP"
 .br
-.RI "\fIObject identifier of variable. \fP"
+.RI "\fIObject identifier of \fBvariable\fP. \fP"
 .ti -1c
 .RI "size_t \fBname_length\fP"
 .br
@@ -28,11 +29,11 @@ variable_list \- The netsnmp variable list binding structure, it's typedef'd to 
 .ti -1c
 .RI "u_char \fBtype\fP"
 .br
-.RI "\fIASN type of variable. \fP"
+.RI "\fIASN type of \fBvariable\fP. \fP"
 .ti -1c
-.RI "netsnmp_vardata \fBval\fP"
+.RI "\fBnetsnmp_vardata\fP \fBval\fP"
 .br
-.RI "\fIvalue of variable \fP"
+.RI "\fIvalue of \fBvariable\fP \fP"
 .ti -1c
 .RI "size_t \fBval_len\fP"
 .br
@@ -59,7 +60,7 @@ variable_list \- The netsnmp variable list binding structure, it's typedef'd to 
 .in -1c
 .SH "Detailed Description"
 .PP 
-The netsnmp variable list binding structure, it's typedef'd to netsnmp_variable_list. 
+The netsnmp \fBvariable\fP list binding structure, it's typedef'd to netsnmp_variable_list. 
 .PP
 \fBExamples: \fP
 .in +1c
@@ -69,14 +70,22 @@ The netsnmp variable list binding structure, it's typedef'd to netsnmp_variable_
 Definition at line 515 of file snmp_api.h.
 .SH "Field Documentation"
 .PP 
-.SS "struct \fBvariable_list\fP* \fBvariable_list::next_variable\fP\fC [read]\fP"
+.SS "u_char \fBvariable_list::buf\fP[40]"
 .PP
-NULL for last variable. 
+90 percentile < 40. 
 .PP
-Definition at line 517 of file snmp_api.h.
+Definition at line 531 of file snmp_api.h.
+.SS "void* \fBvariable_list::data\fP"
+.PP
+(Opaque) hook for additional data 
+.PP
+Definition at line 533 of file snmp_api.h.
+.SS "void(* \fBvariable_list::dataFreeHook\fP)(void *)"
+.PP
+callback to free above 
 .SS "oid* \fBvariable_list::name\fP"
 .PP
-Object identifier of variable. 
+Object identifier of \fBvariable\fP. 
 .PP
 Definition at line 519 of file snmp_api.h.
 .SS "size_t \fBvariable_list::name_length\fP"
@@ -84,18 +93,28 @@ Definition at line 519 of file snmp_api.h.
 number of subid's in name 
 .PP
 Definition at line 521 of file snmp_api.h.
+.SS "oid \fBvariable_list::name_loc\fP[MAX_OID_LEN]"
+.PP
+90 percentile < 24. 
+.PP
+Definition at line 529 of file snmp_api.h.
+.SS "struct \fBvariable_list\fP* \fBvariable_list::next_variable\fP\fC [read]\fP"
+.PP
+NULL for last \fBvariable\fP. 
+.PP
+Definition at line 517 of file snmp_api.h.
 .SS "u_char \fBvariable_list::type\fP"
 .PP
-ASN type of variable. 
+ASN type of \fBvariable\fP. 
 .PP
 \fBExamples: \fP
 .in +1c
 \fBdelayed_instance.c\fP.
 .PP
 Definition at line 523 of file snmp_api.h.
-.SS "netsnmp_vardata \fBvariable_list::val\fP"
+.SS "\fBnetsnmp_vardata\fP \fBvariable_list::val\fP"
 .PP
-value of variable 
+value of \fBvariable\fP 
 .PP
 \fBExamples: \fP
 .in +1c
@@ -107,30 +126,6 @@ Definition at line 525 of file snmp_api.h.
 the length of the value to be copied into buf 
 .PP
 Definition at line 527 of file snmp_api.h.
-.SS "oid \fBvariable_list::name_loc\fP[MAX_OID_LEN]"
-.PP
-90 percentile < 24. 
-.PP
-
-.PP
-Definition at line 529 of file snmp_api.h.
-.SS "u_char \fBvariable_list::buf\fP[40]"
-.PP
-90 percentile < 40. 
-.PP
-
-.PP
-Definition at line 531 of file snmp_api.h.
-.SS "void* \fBvariable_list::data\fP"
-.PP
-(Opaque) hook for additional data 
-.PP
-Definition at line 533 of file snmp_api.h.
-.SS "void(* \fBvariable_list::dataFreeHook\fP)(void *)"
-.PP
-callback to free above 
-.PP
-
 
 .SH "Author"
 .PP 

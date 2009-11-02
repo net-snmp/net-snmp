@@ -1,15 +1,16 @@
-.TH "netsnmp_table_request_info_s" 3 "10 Jul 2008" "Version 5.2.4" "net-snmp" \" -*- nroff -*-
+.TH "netsnmp_table_request_info_s" 3 "2 Nov 2009" "Version 5.2.5.pre1" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
-netsnmp_table_request_info_s \- The table request info structure.  
-
+netsnmp_table_request_info_s \- 
 .PP
+The table request info structure.  
+
 .SH SYNOPSIS
 .br
 .PP
-\fC#include <table.h>\fP
 .PP
+\fC#include <table.h>\fP
 .SS "Data Fields"
 
 .in +1c
@@ -47,16 +48,16 @@ Definition at line 102 of file table.h.
 0 if OID not long enough 
 .PP
 Definition at line 104 of file table.h.
-.SS "unsigned int \fBnetsnmp_table_request_info_s::number_indexes\fP"
-.PP
-0 if failure to parse any 
-.PP
-Definition at line 106 of file table.h.
 .SS "\fBnetsnmp_variable_list\fP* \fBnetsnmp_table_request_info_s::indexes\fP"
 .PP
 contents freed by helper upon exit 
 .PP
 Definition at line 108 of file table.h.
+.SS "unsigned int \fBnetsnmp_table_request_info_s::number_indexes\fP"
+.PP
+0 if failure to parse any 
+.PP
+Definition at line 106 of file table.h.
 
 .SH "Author"
 .PP 
