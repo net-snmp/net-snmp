@@ -261,81 +261,83 @@ static void
 usage(char *prog)
 {
 #ifdef WIN32SERVICE
-    printf("\nUsage:  %s [-register] [-quiet] [OPTIONS] [LISTENING ADDRESSES]",
-           prog);
-    printf("\n        %s [-unregister] [-quiet]", prog);
+    printf("\nUsage:  %s [-register] [-quiet] [OPTIONS] [LISTENING ADDRESSES]"
+           "\n        %s [-unregister] [-quiet]", prog, prog);
 #else
     printf("\nUsage:  %s [OPTIONS] [LISTENING ADDRESSES]", prog);
 #endif
-    printf("\n");
-    printf("\n\tVersion:  %s\n", netsnmp_get_version());
-    printf("\tWeb:      http://www.net-snmp.org/\n");
-    printf("\tEmail:    net-snmp-coders@lists.sourceforge.net\n");
-    printf("\n  -a\t\t\tlog addresses\n");
-    printf("  -A\t\t\tappend to the logfile rather than truncating it\n");
-    printf("  -c FILE[,...]\t\tread FILE(s) as configuration file(s)\n");
-    printf("  -C\t\t\tdo not read the default configuration files\n");
-    printf("  -d\t\t\tdump sent and received SNMP packets\n");
-    printf("  -DTOKEN[,...]\tturn on debugging output for the given TOKEN(s)\n"
+    printf("\n"
+           "\n\tVersion:  %s\n"
+           "\tWeb:      http://www.net-snmp.org/\n"
+           "\tEmail:    net-snmp-coders@lists.sourceforge.net\n"
+           "\n  -a\t\t\tlog addresses\n"
+           "  -A\t\t\tappend to the logfile rather than truncating it\n"
+           "  -c FILE[,...]\t\tread FILE(s) as configuration file(s)\n"
+           "  -C\t\t\tdo not read the default configuration files\n"
+           "  -d\t\t\tdump sent and received SNMP packets\n"
+           "  -DTOKEN[,...]\tturn on debugging output for the given TOKEN(s)\n"
 	   "\t\t\t  (try ALL for extremely verbose output)\n"
-	   "\t\t\t  Don't put space(s) between -D and TOKEN(s).\n");
-    printf("  -f\t\t\tdo not fork from the shell\n");
+	   "\t\t\t  Don't put space(s) between -D and TOKEN(s).\n"
+           "  -f\t\t\tdo not fork from the shell\n"
 #if HAVE_UNISTD_H
-    printf("  -g GID\t\tchange to this numeric gid after opening\n"
-	   "\t\t\t  transport endpoints\n");
+           "  -g GID\t\tchange to this numeric gid after opening\n"
+	   "\t\t\t  transport endpoints\n"
 #endif
-    printf("  -h, --help\t\tdisplay this usage message\n");
-    printf("  -H\t\t\tdisplay configuration file directives understood\n");
-    printf("  -I [-]INITLIST\tlist of mib modules to initialize (or not)\n");
-    printf("\t\t\t  (run snmpd with -Dmib_init for a list)\n");
-    printf("  -L <LOGOPTS>\t\ttoggle options controlling where to log to\n");
+           "  -h, --help\t\tdisplay this usage message\n"
+           "  -H\t\t\tdisplay configuration file directives understood\n"
+           "  -I [-]INITLIST\tlist of mib modules to initialize (or not)\n"
+           "\t\t\t  (run snmpd with -Dmib_init for a list)\n"
+           "  -L <LOGOPTS>\t\ttoggle options controlling where to log to\n",
+           netsnmp_get_version());
     snmp_log_options_usage("\t", stdout);
-    printf("  -m MIBLIST\t\tuse MIBLIST instead of the default MIB list\n");
-    printf("  -M DIRLIST\t\tuse DIRLIST as the list of locations\n\t\t\t  to look for MIBs\n");
-    printf("  -p FILE\t\tstore process id in FILE\n");
-    printf("  -q\t\t\tprint information in a more parsable format\n");
-    printf("  -r\t\t\tdo not exit if files only accessible to root\n"
-	   "\t\t\t  cannot be opened\n");
+    printf("  -m MIBLIST\t\tuse MIBLIST instead of the default MIB list\n"
+           "  -M DIRLIST\t\tuse DIRLIST as the list of locations\n"
+           "\t\t\t  to look for MIBs\n"
+           "  -p FILE\t\tstore process id in FILE\n"
+           "  -q\t\t\tprint information in a more parsable format\n"
+           "  -r\t\t\tdo not exit if files only accessible to root\n"
+	   "\t\t\t  cannot be opened\n"
 #ifdef WIN32SERVICE
-    printf("  -register\t\tregister as a Windows service\n");
-    printf("  \t\t\t  (followed by -quiet to prevent message popups)\n");
-    printf("  \t\t\t  (followed by the startup parameter list)\n");
-    printf("  \t\t\t  Note that some parameters are not relevant when running as a service\n");
+           "  -register\t\tregister as a Windows service\n"
+           "  \t\t\t  (followed by -quiet to prevent message popups)\n"
+           "  \t\t\t  (followed by the startup parameter list)\n"
+           "  \t\t\t  Note that some parameters are not relevant when running as a service\n"
 #endif
 #if HAVE_UNISTD_H
-    printf("  -u UID\t\tchange to this uid (numeric or textual) after\n"
-	   "\t\t\t  opening transport endpoints\n");
+           "  -u UID\t\tchange to this uid (numeric or textual) after\n"
+	   "\t\t\t  opening transport endpoints\n"
 #endif
 #ifdef WIN32SERVICE
-    printf("  -unregister\t\tunregister as a Windows service\n");
-    printf("  \t\t\t  (followed -quiet to prevent message popups)\n");
+           "  -unregister\t\tunregister as a Windows service\n"
+           "  \t\t\t  (followed -quiet to prevent message popups)\n"
 #endif
-    printf("  -v, --version\t\tdisplay version information\n");
-    printf("  -V\t\t\tverbose display\n");
+           "  -v, --version\t\tdisplay version information\n"
+           "  -V\t\t\tverbose display\n"
 #if defined(USING_AGENTX_SUBAGENT_MODULE)|| defined(USING_AGENTX_MASTER_MODULE)
-    printf("  -x ADDRESS\t\tuse ADDRESS as AgentX address\n");
+           "  -x ADDRESS\t\tuse ADDRESS as AgentX address\n"
 #endif
 #ifdef USING_AGENTX_SUBAGENT_MODULE
-    printf("  -X\t\t\trun as an AgentX subagent rather than as an\n"
-	   "\t\t\t  SNMP master agent\n");
+           "  -X\t\t\trun as an AgentX subagent rather than as an\n"
+	   "\t\t\t  SNMP master agent\n"
 #endif
 
-    printf("\nDeprecated options:\n");
-    printf("  -l FILE\t\tuse -Lf <FILE> instead\n");
-    printf("  -P\t\t\tuse -p instead\n");
-    printf("  -s\t\t\tuse -Lsd instead\n");
-    printf("  -S d|i|0-7\t\tuse -Ls <facility> instead\n");
+           "\nDeprecated options:\n"
+           "  -l FILE\t\tuse -Lf <FILE> instead\n"
+           "  -P\t\t\tuse -p instead\n"
+           "  -s\t\t\tuse -Lsd instead\n"
+           "  -S d|i|0-7\t\tuse -Ls <facility> instead\n"
 
-    printf("\n");
+           "\n");
     exit(1);
 }
 
 static void
 version(void)
 {
-    printf("\nNET-SNMP version:  %s\n", netsnmp_get_version());
-    printf("Web:               http://www.net-snmp.org/\n");
-    printf("Email:             net-snmp-coders@lists.sourceforge.net\n\n");
+    printf("\nNET-SNMP version:  %s\n"
+           "Web:               http://www.net-snmp.org/\n"
+           "Email:             net-snmp-coders@lists.sourceforge.net\n\n",
+           netsnmp_get_version());
     exit(0);
 }
 
