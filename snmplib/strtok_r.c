@@ -31,8 +31,6 @@
  */
 #include <net-snmp/net-snmp-config.h>
 
-#if !HAVE_STRTOK_R
-
 #ifndef WIN32
 #include <sys/cdefs.h>
 #endif
@@ -92,4 +90,3 @@ cont:
 	}
 	/* NOTREACHED */
 }
-#endif                          /* !HAVE_STRTOK_R */
