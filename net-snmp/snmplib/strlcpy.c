@@ -5,8 +5,6 @@
  */
 #include <net-snmp/net-snmp-config.h>
 
-#if !HAVE_STRLCPY
-
 #if HAVE_STRING_H
 #include <string.h>
 #else
@@ -41,5 +39,3 @@ strlcpy(char *dest, const char *src, size_t len)
 	dest[new_len] = '\0'; 
 	return (src_len); 
 }
-
-#endif                    /* !HAVE_STRLCPY */

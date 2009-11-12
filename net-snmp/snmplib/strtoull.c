@@ -20,8 +20,6 @@
 
 #include <net-snmp/net-snmp-config.h>
 
-#if !HAVE_STRTOULL || defined(STRTOULL_UNIT_TEST)
-
 #include <errno.h>
 #include <ctype.h>
 #include <limits.h>
@@ -273,8 +271,6 @@ main(void)
 }
 
 #endif /* defined(STRTOULL_UNIT_TEST) */
-
-#endif /* !HAVE_STRTOULL || defined(STRTOULL_UNIT_TEST) */
 
 /*
  * Local variables:
