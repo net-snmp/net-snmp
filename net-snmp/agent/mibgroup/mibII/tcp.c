@@ -272,10 +272,10 @@ tcp_handler(netsnmp_mib_handler          *handler,
         type = ASN_GAUGE;
         break;
     case TCPINSEGS:
-        ret_value = tcpstat.tcpInSegs;
+        ret_value = tcpstat.tcpInSegs & 0xffffffff;
         break;
     case TCPOUTSEGS:
-        ret_value = tcpstat.tcpOutSegs;
+        ret_value = tcpstat.tcpOutSegs & 0xffffffff;
         break;
     case TCPRETRANSSEGS:
         ret_value = tcpstat.tcpRetransSegs;
@@ -366,14 +366,14 @@ tcp_handler(netsnmp_mib_handler          *handler,
         type = ASN_GAUGE;
         break;
     case TCPINSEGS:
-        ret_value = tcpstat.tcps_rcvtotal;
+        ret_value = tcpstat.tcps_rcvtotal & 0xffffffff;
         break;
     case TCPOUTSEGS:
         /*
          * RFC 1213 defines this as the number of segments sent
          * "excluding those containing only retransmitted octets"
          */
-        ret_value = tcpstat.tcps_sndtotal - tcpstat.tcps_sndrexmitpack;
+        ret_value = (tcpstat.tcps_sndtotal - tcpstat.tcps_sndrexmitpack) & 0xffffffff;
         break;
     case TCPRETRANSSEGS:
         ret_value = tcpstat.tcps_sndrexmitpack;
