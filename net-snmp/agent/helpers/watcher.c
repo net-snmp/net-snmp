@@ -106,10 +106,16 @@ get_data_size(const netsnmp_watcher_info* winfo)
 {
     if (winfo->flags & WATCHER_SIZE_STRLEN)
         return strlen((const char*)winfo->data);
-    else if (winfo->flags & WATCHER_SIZE_IS_PTR)
-        return *winfo->data_size_p;
-    else
-        return winfo->data_size;
+    else {
+        size_t res;
+        if (winfo->flags & WATCHER_SIZE_IS_PTR)
+            res = *winfo->data_size_p;
+        else
+            res = winfo->data_size;
+        if (winfo->flags & WATCHER_SIZE_UNIT_OIDS)
+          res *= sizeof(oid);
+        return res;
+    }
 }
 
 NETSNMP_STATIC_INLINE void
@@ -118,10 +124,14 @@ set_data(netsnmp_watcher_info* winfo, void* data, size_t size)
     memcpy(winfo->data, data, size);
     if (winfo->flags & WATCHER_SIZE_STRLEN)
         ((char*)winfo->data)[size] = '\0';
-    else if (winfo->flags & WATCHER_SIZE_IS_PTR)
-        *winfo->data_size_p = size;
-    else
-        winfo->data_size = size;
+    else {
+        if (winfo->flags & WATCHER_SIZE_UNIT_OIDS)
+          size /= sizeof(oid);
+        if (winfo->flags & WATCHER_SIZE_IS_PTR)
+            *winfo->data_size_p = size;
+        else
+            winfo->data_size = size;
+    }
 }
 
 typedef struct {

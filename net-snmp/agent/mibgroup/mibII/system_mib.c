@@ -340,8 +340,8 @@ init_system_mib(void)
                 HANDLER_CAN_RONLY),
             netsnmp_init_watcher_info6(
 		&sysObjectID_winfo, sysObjectID, 0, ASN_OBJECT_ID,
-		WATCHER_MAX_SIZE | WATCHER_SIZE_IS_PTR,
-		MAX_OID_LEN, &sysObjectIDLength));
+                WATCHER_MAX_SIZE | WATCHER_SIZE_IS_PTR | WATCHER_SIZE_UNIT_OIDS,
+                MAX_OID_LEN, &sysObjectIDLength));
     }
     {
         const oid sysUpTime_oid[] = { 1, 3, 6, 1, 2, 1, 1, 3 };
