@@ -23,26 +23,33 @@ extern "C" {
 /** The size of the watched object is constant.
  *  @hideinitializer
  */
-#define WATCHER_FIXED_SIZE    0x01
+#define WATCHER_FIXED_SIZE     0x01
 /** The maximum size of the watched object is stored in max_size.
  *  If WATCHER_SIZE_STRLEN is set then it is supposed that max_size + 1
  *  bytes could be stored in the buffer.
  *  @hideinitializer
  */
-#define WATCHER_MAX_SIZE      0x02
+#define WATCHER_MAX_SIZE       0x02
 /** If set then the variable data_size_p points to is supposed to hold the
  *  current size of the watched object and will be updated on writes.
  *  @hideinitializer
  *  @since Net-SNMP 5.5
  */
-#define WATCHER_SIZE_IS_PTR   0x04
+#define WATCHER_SIZE_IS_PTR    0x04
 /** If set then data is suppposed to be a zero-terminated character array
  *  and both data_size and data_size_p are ignored. Additionally \\0 is a
  *  forbidden character in the data set.
  *  @hideinitializer
  *  @since Net-SNMP 5.5
  */
-#define WATCHER_SIZE_STRLEN   0x08
+#define WATCHER_SIZE_STRLEN    0x08
+/** If set then size is in units of object identifiers.
+ *  This is useful if you have an OID and tracks the OID_LENGTH of it as
+ *  opposed to it's size.
+ *  @hideinitializer
+ *  @since Net-SNMP 5.5.1
+ */
+#define WATCHER_SIZE_UNIT_OIDS 0x10
 
 typedef struct netsnmp_watcher_info_s {
     void     *data;
