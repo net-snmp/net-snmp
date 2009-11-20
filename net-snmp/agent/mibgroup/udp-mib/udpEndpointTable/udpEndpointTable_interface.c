@@ -158,7 +158,7 @@ _udpEndpointTable_initialize_interface(udpEndpointTable_registration *
 
     /*
      * Define the minimum and maximum accessible columns.  This
-     * optimizes retrival. 
+     * optimizes retrieval. 
      */
     tbl_info->min_column = UDPENDPOINTTABLE_MIN_COL;
     tbl_info->max_column = UDPENDPOINTTABLE_MAX_COL;

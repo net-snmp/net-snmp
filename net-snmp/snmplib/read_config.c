@@ -1067,7 +1067,7 @@ read_config_files_in_path(const char *path, struct config_files *ctmp,
 #endif
 
         /*
-         * for proper persistent storage retrival, we need to read old backup
+         * for proper persistent storage retrieval, we need to read old backup
          * copies of the previous storage files.  If the application in
          * question has died without the proper call to snmp_clean_persistent,
          * then we read all the configuration files we can, starting with

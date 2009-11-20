@@ -163,7 +163,7 @@ _ipIfStatsTable_initialize_interface(ipIfStatsTable_registration * reg_ptr,
 
     /*
      * Define the minimum and maximum accessible columns.  This
-     * optimizes retrival. 
+     * optimizes retrieval. 
      */
     tbl_info->min_column = IPIFSTATSTABLE_MIN_COL;
     tbl_info->max_column = IPIFSTATSTABLE_MAX_COL;

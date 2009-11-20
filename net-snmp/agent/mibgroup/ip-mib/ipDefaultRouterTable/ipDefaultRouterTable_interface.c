@@ -153,7 +153,7 @@ _ipDefaultRouterTable_initialize_interface
 
     /*
      * Define the minimum and maximum accessible columns.  This
-     * optimizes retrival. 
+     * optimizes retrieval. 
      */
     tbl_info->min_column = IPDEFAULTROUTERTABLE_MIN_COL;
     tbl_info->max_column = IPDEFAULTROUTERTABLE_MAX_COL;

@@ -73,7 +73,7 @@ initialize_table_ipCidrRouteTable(void)
                                      0);
 
     /** Define the minimum and maximum accessible columns.  This
-        optimizes retrival. */
+        optimizes retrieval. */
     table_info->min_column = 1;
     table_info->max_column = 16;
 

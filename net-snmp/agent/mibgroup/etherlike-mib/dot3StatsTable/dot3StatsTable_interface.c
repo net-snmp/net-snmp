@@ -145,7 +145,7 @@ _dot3StatsTable_initialize_interface(dot3StatsTable_registration * reg_ptr,
 
     /*
      * Define the minimum and maximum accessible columns.  This
-     * optimizes retrival. 
+     * optimizes retrieval. 
      */
     tbl_info->min_column = DOT3STATSTABLE_MIN_COL;
     tbl_info->max_column = DOT3STATSTABLE_MAX_COL;

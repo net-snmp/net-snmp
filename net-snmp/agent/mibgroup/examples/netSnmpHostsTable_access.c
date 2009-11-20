@@ -167,7 +167,7 @@ netSnmpHostsTable_context_convert_function(void *loop_context,
 
 /** Create a data_context for non-existent rows that SETs are performed on.
  *  return a void * pointer which will be passed to subsequent get_XXX
- *  and set_XXX functions for data retrival and modification during
+ *  and set_XXX functions for data retrieval and modification during
  *  this SET request.
  *
  *  The indexs are encoded (in order) into the index_data pointer if it

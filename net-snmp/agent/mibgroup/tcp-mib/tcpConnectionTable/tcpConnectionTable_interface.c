@@ -191,7 +191,7 @@ _tcpConnectionTable_initialize_interface(tcpConnectionTable_registration *
 
     /*
      * Define the minimum and maximum accessible columns.  This
-     * optimizes retrival. 
+     * optimizes retrieval. 
      */
     tbl_info->min_column = TCPCONNECTIONTABLE_MIN_COL;
     tbl_info->max_column = TCPCONNECTIONTABLE_MAX_COL;

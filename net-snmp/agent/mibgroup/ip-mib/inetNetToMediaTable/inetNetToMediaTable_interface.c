@@ -180,7 +180,7 @@ _inetNetToMediaTable_initialize_interface(inetNetToMediaTable_registration
 
     /*
      * Define the minimum and maximum accessible columns.  This
-     * optimizes retrival. 
+     * optimizes retrieval. 
      */
     tbl_info->min_column = INETNETTOMEDIATABLE_MIN_COL;
     tbl_info->max_column = INETNETTOMEDIATABLE_MAX_COL;

@@ -220,7 +220,7 @@ _ifTable_initialize_interface(ifTable_registration * reg_ptr, u_long flags)
 
     /*
      * Define the minimum and maximum accessible columns.  This
-     * optimizes retrival. 
+     * optimizes retrieval. 
      */
     tbl_info->min_column = IFTABLE_MIN_COL;
     tbl_info->max_column = IFTABLE_MAX_COL;

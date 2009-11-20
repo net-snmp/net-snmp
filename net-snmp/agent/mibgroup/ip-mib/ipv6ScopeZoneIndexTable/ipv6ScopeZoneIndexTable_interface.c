@@ -153,7 +153,7 @@ _ipv6ScopeZoneIndexTable_initialize_interface
 
     /*
      * Define the minimum and maximum accessible columns.  This
-     * optimizes retrival. 
+     * optimizes retrieval. 
      */
     tbl_info->min_column = IPV6SCOPEZONEINDEXTABLE_MIN_COL;
     tbl_info->max_column = IPV6SCOPEZONEINDEXTABLE_MAX_COL;
