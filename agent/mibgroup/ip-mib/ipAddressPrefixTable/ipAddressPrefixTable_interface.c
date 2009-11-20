@@ -155,7 +155,7 @@ void
 
     /*
      * Define the minimum and maximum accessible columns.  This
-     * optimizes retrival. 
+     * optimizes retrieval. 
      */
     tbl_info->min_column = IPADDRESSPREFIXTABLE_MIN_COL;
     tbl_info->max_column = IPADDRESSPREFIXTABLE_MAX_COL;

@@ -174,7 +174,7 @@ _ipAddressTable_initialize_interface(ipAddressTable_registration * reg_ptr,
 
     /*
      * Define the minimum and maximum accessible columns.  This
-     * optimizes retrival. 
+     * optimizes retrieval. 
      */
     tbl_info->min_column = IPADDRESSTABLE_MIN_COL;
     tbl_info->max_column = IPADDRESSTABLE_MAX_COL;

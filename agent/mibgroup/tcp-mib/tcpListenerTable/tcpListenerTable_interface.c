@@ -150,7 +150,7 @@ _tcpListenerTable_initialize_interface(tcpListenerTable_registration *
 
     /*
      * Define the minimum and maximum accessible columns.  This
-     * optimizes retrival. 
+     * optimizes retrieval. 
      */
     tbl_info->min_column = TCPLISTENERTABLE_MIN_COL;
     tbl_info->max_column = TCPLISTENERTABLE_MAX_COL;

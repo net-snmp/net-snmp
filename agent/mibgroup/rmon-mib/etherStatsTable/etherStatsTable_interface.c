@@ -181,7 +181,7 @@ _etherStatsTable_initialize_interface(etherStatsTable_registration *
 
     /*
      * Define the minimum and maximum accessible columns.  This
-     * optimizes retrival. 
+     * optimizes retrieval. 
      */
     tbl_info->min_column = ETHERSTATSTABLE_MIN_COL;
     tbl_info->max_column = ETHERSTATSTABLE_MAX_COL;

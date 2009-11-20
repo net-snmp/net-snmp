@@ -186,7 +186,7 @@ _ifXTable_initialize_interface(ifXTable_registration * reg_ptr,
 
     /*
      * Define the minimum and maximum accessible columns.  This
-     * optimizes retrival. 
+     * optimizes retrieval. 
      */
     tbl_info->min_column = IFXTABLE_MIN_COL;
     tbl_info->max_column = IFXTABLE_MAX_COL;

@@ -204,7 +204,7 @@
 #include "struct.h"
 #include "util_funcs/header_generic.h"
 
-/* if you want caching enabled for speed retrival purposes, set this to 5?*/
+/* if you want caching enabled for speed retrieval purposes, set this to 5?*/
 #define MINLOADFREQ 0                     /* min reload frequency in seconds */
 #ifdef linux
 static unsigned long LastLoad = 0;        /* ET in secs at last table load */

@@ -71,7 +71,7 @@ initialize_table_netSnmpHostsTable(void)
                                      0);
 
     /** Define the minimum and maximum accessible columns.  This
-        optimizes retrival. */
+        optimizes retrieval. */
     table_info->min_column = 2;
     table_info->max_column = 5;
 

@@ -192,7 +192,7 @@ _ipv4InterfaceTable_initialize_interface(ipv4InterfaceTable_registration *
 
     /*
      * Define the minimum and maximum accessible columns.  This
-     * optimizes retrival. 
+     * optimizes retrieval. 
      */
     tbl_info->min_column = IPV4INTERFACETABLE_MIN_COL;
     tbl_info->max_column = IPV4INTERFACETABLE_MAX_COL;

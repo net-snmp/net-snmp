@@ -182,7 +182,7 @@ _usmDHUserKeyTable_initialize_interface(usmDHUserKeyTable_registration *
 
     /*
      * Define the minimum and maximum accessible columns.  This
-     * optimizes retrival. 
+     * optimizes retrieval. 
      */
     tbl_info->min_column = USMDHUSERKEYTABLE_MIN_COL;
     tbl_info->max_column = USMDHUSERKEYTABLE_MAX_COL;

@@ -208,7 +208,7 @@ void
 
     /*
      * Define the minimum and maximum accessible columns.  This
-     * optimizes retrival. 
+     * optimizes retrieval. 
      */
     tbl_info->min_column = SNMPNOTIFYFILTERTABLE_MIN_COL;
     tbl_info->max_column = SNMPNOTIFYFILTERTABLE_MAX_COL;

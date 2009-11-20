@@ -576,7 +576,7 @@ netsnmp_table_iterator_helper_handler(netsnmp_mib_handler *handler,
                     if (request->processed)
                         continue;
 
-                    /* XXX: store in an array for faster retrival */
+                    /* XXX: store in an array for faster retrieval */
                     table_info = netsnmp_extract_table_info(request);
                     if (table_info == NULL) {
                         /*

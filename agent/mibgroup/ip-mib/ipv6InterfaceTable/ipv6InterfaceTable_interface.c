@@ -192,7 +192,7 @@ _ipv6InterfaceTable_initialize_interface(ipv6InterfaceTable_registration *
 
     /*
      * Define the minimum and maximum accessible columns.  This
-     * optimizes retrival. 
+     * optimizes retrieval. 
      */
     tbl_info->min_column = IPV6INTERFACETABLE_MIN_COL;
     tbl_info->max_column = IPV6INTERFACETABLE_MAX_COL;

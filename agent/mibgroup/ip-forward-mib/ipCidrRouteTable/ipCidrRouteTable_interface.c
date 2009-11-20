@@ -178,7 +178,7 @@ _ipCidrRouteTable_initialize_interface(ipCidrRouteTable_registration *
 
     /*
      * Define the minimum and maximum accessible columns.  This
-     * optimizes retrival. 
+     * optimizes retrieval. 
      */
     tbl_info->min_column = IPCIDRROUTETABLE_MIN_COL;
     tbl_info->max_column = IPCIDRROUTETABLE_MAX_COL;
