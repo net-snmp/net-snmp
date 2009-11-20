@@ -126,7 +126,7 @@ typedef struct {
 } xarray;
 
 /**
- * Information managed by winExtDll about Windows SNMP extension DLL's.
+ * Information managed by winExtDLL about Windows SNMP extension DLL's.
  */
 typedef struct {
     char           *dll_name;                        /**< Dynamically allocated DLL name. */
@@ -141,7 +141,7 @@ typedef struct {
 } winextdll;
 
 /**
- * Information managed by winExtDll about a single view of a Windows SNMP
+ * Information managed by winExtDLL about a single view of a Windows SNMP
  * extension DLL.
  */
 typedef struct {
