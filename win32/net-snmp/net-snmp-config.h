@@ -12,6 +12,11 @@
    1200 = 6.0
 */
 
+#ifdef _MSC_VER
+// Disable warning 4018: signed/unsigned mismatch.
+#pragma warning (disable: 4018)
+#endif
+
 /* Automatically set by Windows perl Configure script.
  * When compiling with the MSVC workspace, this must be set manually.
  * See the PACKAGE_VERSION variable in Unix /configure script
@@ -1721,6 +1726,7 @@ typedef unsigned int   uintptr_t;
 
 /* Define if compiling with the winExtDLL module.  */
 /* #undef USING_WINEXTDLL_MODULE */
+#define USING_WINEXTDLL_MODULE 1
 
 /*
  * Module configuration and control ends here.
