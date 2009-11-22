@@ -228,9 +228,6 @@
 /* Define to 1 if you have the <asm/page.h> header file. */
 /* #undef HAVE_ASM_PAGE_H */
 
-/* Define to 1 if you have the `bcopy' function. */
-/* #undef HAVE_BCOPY */
-
 /* Define to 1 if you have the `cgetnext' function. */
 /* #undef HAVE_CGETNEXT */
 
@@ -312,9 +309,6 @@
 
 /* Define to 1 if you have the `if_nameindex' function. */
 /* #undef HAVE_IF_NAMEINDEX */
-
-/* Define to 1 if you have the `index' function. */
-/* #undef HAVE_INDEX */
 
 /* Define to 1 if you have the <inet/mib2.h> header file. */
 /* #undef HAVE_INET_MIB2_H */
@@ -423,12 +417,6 @@
 
 /* Define to 1 if you have the <malloc.h> header file. */
 #define HAVE_MALLOC_H 1
-
-/* Define to 1 if you have the `memcpy' function. */
-#define HAVE_MEMCPY 1
-
-/* Define to 1 if you have the `memmove' function. */
-#define HAVE_MEMMOVE 1
 
 /* Define to 1 if you have the <memory.h> header file. */
 #define HAVE_MEMORY_H 1
@@ -684,9 +672,6 @@
 
 /* Define to 1 if you have the `strcasestr' function. */
 /* #undef HAVE_STRCASESTR */
-
-/* Define to 1 if you have the `strchr' function. */
-#define HAVE_STRCHR 1
 
 /* Define to 1 if you have the `strdup' function. */
 #define HAVE_STRDUP 1
@@ -1325,44 +1310,6 @@
 
 /* got ssize_t? */
 /* #undef HAVE_SSIZE_T */
-
-#ifndef HAVE_STRCHR
-#ifdef HAVE_INDEX
-# define strchr(a,b) index(a,b)
-# define strrchr(a,b) rindex(a,b)
-#endif
-#endif
-
-#ifndef HAVE_INDEX
-#ifdef HAVE_STRCHR
-# define index(a,b) strchr(a,b)
-# define rindex(a,b) strrchr(a,b)
-#endif
-#endif
-
-#ifndef HAVE_MEMCPY
-#ifdef HAVE_BCOPY
-# define memcpy(d, s, n) bcopy ((s), (d), (n))
-# define memmove(d, s, n) bcopy ((s), (d), (n))
-# define memcmp bcmp
-#endif
-#endif
-
-#ifndef HAVE_MEMMOVE
-#ifdef HAVE_MEMCPY
-# define memmove memcpy
-#endif
-#endif
-
-#if notused /* dont step on other defns of bcopy,bzero, and bcmp */
-#ifndef HAVE_BCOPY
-#ifdef HAVE_MEMCPY
-# define bcopy(s, d, n) memcpy ((d), (s), (n))
-# define bzero(p,n) memset((p),(0),(n))
-# define bcmp memcmp
-#endif
-#endif
-#endif
 
 /* If you have openssl 0.9.7 or above, you likely have AES support. */
 /* #undef NETSNMP_USE_OPENSSL */
