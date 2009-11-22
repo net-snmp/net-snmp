@@ -555,9 +555,6 @@ create_explanaition(CRTL_ENTRY_T * evptr, u_char is_rising,
     return descr;
 }
 
-extern void     send_enterprise_trap_vars(int, int, oid *, int,
-                                          netsnmp_variable_list *);
-
 static netsnmp_variable_list *
 oa_bind_var(netsnmp_variable_list * prev,
             void *value, int type, size_t sz_val, oid * oid, size_t sz_oid)

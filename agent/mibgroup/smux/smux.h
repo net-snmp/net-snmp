@@ -65,8 +65,6 @@ extern u_char  *smux_snmp_process(int, oid *, size_t *, size_t *, u_char *,
 extern int      smux_process(int);
 extern void     smux_parse_peer_auth(const char *, char *);
 extern void     smux_free_peer_auth(void);
-extern void     send_enterprise_trap_vars(int, int, oid *, int,
-                                          netsnmp_variable_list *);
 
 /* Add socket-fd to list */
 int smux_snmp_select_list_add(int sd);
