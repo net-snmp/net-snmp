@@ -65,7 +65,7 @@ extern          "C" {
     netsnmp_variable_list *find_varbind_of_type(netsnmp_variable_list *
                                                 var_ptr, u_char type);
     netsnmp_variable_list *find_varbind_in_list(netsnmp_variable_list *vblist,
-                                                oid *name, size_t len);
+                                                const oid *name, size_t len);
 
     netsnmp_pdu    *snmp_split_pdu(netsnmp_pdu *, int skipCount,
                                    int copyCount);
