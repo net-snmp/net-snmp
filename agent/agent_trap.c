@@ -632,7 +632,7 @@ convert_v1pdu_to_v2( netsnmp_pdu* template_v1pdu )
  */
 int
 netsnmp_send_traps(int trap, int specific,
-                          oid * enterprise, int enterprise_length,
+                          const oid * enterprise, int enterprise_length,
                           netsnmp_variable_list * vars,
                           char * context, int flags)
 {
@@ -857,7 +857,7 @@ netsnmp_send_traps(int trap, int specific,
 void
 send_enterprise_trap_vars(int trap,
                           int specific,
-                          oid * enterprise, int enterprise_length,
+                          const oid * enterprise, int enterprise_length,
                           netsnmp_variable_list * vars)
 {
     netsnmp_send_traps(trap, specific,
