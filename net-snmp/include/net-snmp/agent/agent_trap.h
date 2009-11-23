@@ -20,11 +20,11 @@ void            send_trap_vars_with_context(int trap, int specific,
                                           netsnmp_variable_list *vars, 
 										  char *context);
 void            send_enterprise_trap_vars(int trap, int specific,
-                                          oid * enterprise,
+                                          const oid * enterprise,
                                           int enterprise_length,
                                           netsnmp_variable_list * vars);
 int             netsnmp_send_traps(int trap, int specific,
-                          oid * enterprise, int enterprise_length,
+                          const oid * enterprise, int enterprise_length,
                           netsnmp_variable_list * vars,
                           /* These next two are currently unused */
                           char * context, int flags);
