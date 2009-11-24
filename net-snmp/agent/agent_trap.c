@@ -727,7 +727,7 @@ netsnmp_send_traps(int trap, int specific,
                 !snmp_varlist_add_variable( &(template_v2pdu->variables),
                      snmptrapenterprise_oid, snmptrapenterprise_oid_len,
                      ASN_OBJECT_ID,
-                     (char*)enterprise, enterprise_length*sizeof(oid))) {
+                     enterprise, enterprise_length*sizeof(oid))) {
                 snmp_log(LOG_WARNING,
                      "send_trap: failed to add snmpEnterprise to v2 trap\n");
                 snmp_free_pdu(template_v2pdu);
