@@ -338,9 +338,9 @@ _mteEvent_fire_notify( struct mteEvent   *entry,     /* The event to fire  */
                        oid *suffix, size_t sfx_len ) /* Matching instance  */
 {
     netsnmp_variable_list *var, *v2;
-    oid    snmptrap_oid[]   = { 1,3,6,1,6,3,1,1,4,1,0 };
-    size_t snmptrap_oid_len = OID_LENGTH(snmptrap_oid);
-    netsnmp_session *s;
+    extern const oid       snmptrap_oid[];
+    extern const size_t    snmptrap_oid_len;
+    netsnmp_session       *s;
 
          /*
           * The Event-MIB specification says that objects from the
