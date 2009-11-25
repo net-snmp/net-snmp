@@ -87,6 +87,7 @@ INCLUDESUBDIRHEADERS=README \
         getopt.h \
         lcd_time.h \
         mt_support.h \
+        oid.h \
         oid_stash.h \
         snmp_enum.h \
         snmp_secmod.h \
