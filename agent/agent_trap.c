@@ -81,34 +81,33 @@ struct trap_sink *sinks = NULL;
 
 extern struct timeval starttime;
 
-oid             objid_enterprisetrap[] = { NETSNMP_NOTIFICATION_MIB };
-oid             trap_version_id[] = { NETSNMP_SYSTEM_MIB };
-int             enterprisetrap_len;
-int             trap_version_id_len;
+const oid       objid_enterprisetrap[] = { NETSNMP_NOTIFICATION_MIB };
+const oid       trap_version_id[] = { NETSNMP_SYSTEM_MIB };
+const int       enterprisetrap_len = OID_LENGTH(objid_enterprisetrap);
+const int       trap_version_id_len = OID_LENGTH(trap_version_id);
 
 #define SNMPV2_TRAPS_PREFIX	SNMP_OID_SNMPMODULES,1,1,5
-oid             trap_prefix[]    = { SNMPV2_TRAPS_PREFIX };
-oid             cold_start_oid[] = { SNMPV2_TRAPS_PREFIX, 1 };  /* SNMPv2-MIB */
-oid             warm_start_oid[] = { SNMPV2_TRAPS_PREFIX, 2 };  /* SNMPv2-MIB */
-oid             link_down_oid[]  = { SNMPV2_TRAPS_PREFIX, 3 };  /* IF-MIB */
-oid             link_up_oid[]    = { SNMPV2_TRAPS_PREFIX, 4 };  /* IF-MIB */
-oid             auth_fail_oid[]  = { SNMPV2_TRAPS_PREFIX, 5 };  /* SNMPv2-MIB */
-oid             egp_xxx_oid[]    = { SNMPV2_TRAPS_PREFIX, 99 }; /* ??? */
+const oid       trap_prefix[]    = { SNMPV2_TRAPS_PREFIX };
+const oid       cold_start_oid[] = { SNMPV2_TRAPS_PREFIX, 1 };  /* SNMPv2-MIB */
+const oid       warm_start_oid[] = { SNMPV2_TRAPS_PREFIX, 2 };  /* SNMPv2-MIB */
+const oid       link_down_oid[]  = { SNMPV2_TRAPS_PREFIX, 3 };  /* IF-MIB */
+const oid       link_up_oid[]    = { SNMPV2_TRAPS_PREFIX, 4 };  /* IF-MIB */
+const oid       auth_fail_oid[]  = { SNMPV2_TRAPS_PREFIX, 5 };  /* SNMPv2-MIB */
+const oid       egp_xxx_oid[]    = { SNMPV2_TRAPS_PREFIX, 99 }; /* ??? */
 
 #define SNMPV2_TRAP_OBJS_PREFIX	SNMP_OID_SNMPMODULES,1,1,4
-oid             snmptrap_oid[] = { SNMPV2_TRAP_OBJS_PREFIX, 1, 0 };
-oid             snmptrapenterprise_oid[] =
-    { SNMPV2_TRAP_OBJS_PREFIX, 3, 0 };
-oid             sysuptime_oid[] = { SNMP_OID_MIB2, 1, 3, 0 };
-size_t          snmptrap_oid_len;
-size_t          snmptrapenterprise_oid_len;
-size_t          sysuptime_oid_len;
+const oid       snmptrap_oid[] = { SNMPV2_TRAP_OBJS_PREFIX, 1, 0 };
+const oid       snmptrapenterprise_oid[] = { SNMPV2_TRAP_OBJS_PREFIX, 3, 0 };
+const oid       sysuptime_oid[] = { SNMP_OID_MIB2, 1, 3, 0 };
+const size_t    snmptrap_oid_len = OID_LENGTH(snmptrap_oid);
+const size_t    snmptrapenterprise_oid_len = OID_LENGTH(snmptrapenterprise_oid);
+const size_t    sysuptime_oid_len = OID_LENGTH(sysuptime_oid);
 
 #define SNMPV2_COMM_OBJS_PREFIX	SNMP_OID_SNMPMODULES,18,1
-oid             agentaddr_oid[] = { SNMPV2_COMM_OBJS_PREFIX, 3, 0 };
-size_t          agentaddr_oid_len;
-oid             community_oid[] = { SNMPV2_COMM_OBJS_PREFIX, 4, 0 };
-size_t          community_oid_len;
+const oid       agentaddr_oid[] = { SNMPV2_COMM_OBJS_PREFIX, 3, 0 };
+const size_t    agentaddr_oid_len = OID_LENGTH(agentaddr_oid);
+const oid       community_oid[] = { SNMPV2_COMM_OBJS_PREFIX, 4, 0 };
+const size_t    community_oid_len = OID_LENGTH(community_oid);
 #if !defined(NETSNMP_DISABLE_SNMPV1) || !defined(NETSNMP_DISABLE_SNMPV2C)
 char           *snmp_trapcommunity = NULL;
 #endif
@@ -142,13 +141,6 @@ int             snmp_enableauthentrapsset = 0;
 void
 init_traps(void)
 {
-    enterprisetrap_len  = OID_LENGTH(objid_enterprisetrap);
-    trap_version_id_len = OID_LENGTH(trap_version_id);
-    snmptrap_oid_len    = OID_LENGTH(snmptrap_oid);
-    snmptrapenterprise_oid_len = OID_LENGTH(snmptrapenterprise_oid);
-    sysuptime_oid_len   = OID_LENGTH(sysuptime_oid);
-    agentaddr_oid_len   = OID_LENGTH(agentaddr_oid);
-    community_oid_len   = OID_LENGTH(community_oid);
 }
 
 static void

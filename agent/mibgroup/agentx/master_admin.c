@@ -412,11 +412,11 @@ remove_agent_caps_list(netsnmp_session * session, netsnmp_pdu *pdu)
 int
 agentx_notify(netsnmp_session * session, netsnmp_pdu *pdu)
 {
-    netsnmp_session *sp;
+    netsnmp_session       *sp;
     netsnmp_variable_list *var;
-    int             got_sysuptime = 0;
-    extern oid      sysuptime_oid[], snmptrap_oid[];
-    extern size_t   sysuptime_oid_len, snmptrap_oid_len;
+    int                    got_sysuptime = 0;
+    extern const oid       sysuptime_oid[], snmptrap_oid[];
+    extern const size_t    sysuptime_oid_len, snmptrap_oid_len;
 
     sp = find_agentx_session(session, pdu->sessid);
     if (sp == NULL)

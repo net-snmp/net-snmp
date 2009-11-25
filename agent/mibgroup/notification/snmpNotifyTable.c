@@ -103,8 +103,8 @@ _checkFilter(const char* paramName, netsnmp_pdu *pdu)
     size_t                 profileNameLen;
     struct vacm_viewEntry *vp, *head;
     int                    vb_oid_excluded = 0;
-    extern oid             snmptrap_oid[];
-    extern size_t          snmptrap_oid_len;
+    extern const oid       snmptrap_oid[];
+    extern const size_t    snmptrap_oid_len;
 
     netsnmp_assert(NULL != paramName);
     netsnmp_assert(NULL != pdu);
