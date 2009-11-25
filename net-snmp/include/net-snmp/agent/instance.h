@@ -1,5 +1,5 @@
 /*
- * testhandler.h 
+ * instance.h 
  */
 #ifndef NETSNMP_INSTANCE_H
 #define NETSNMP_INSTANCE_H
