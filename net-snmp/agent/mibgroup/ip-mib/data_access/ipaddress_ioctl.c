@@ -328,6 +328,7 @@ _netsnmp_ioctl_ipaddress_container_load_v4(netsnmp_container *container,
                 netsnmp_access_ipaddress_entry_free(entry);
                 continue;
             }
+            bcastentry = NULL;
         }
 
         if (CONTAINER_INSERT(container, entry) < 0) {
