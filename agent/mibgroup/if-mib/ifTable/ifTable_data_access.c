@@ -374,6 +374,7 @@ _check_interface_entry_for_updates(ifTable_rowreq_ctx * rowreq_ctx,
      */
     if (oper_changed) {
         rowreq_ctx->data.ifLastChange = netsnmp_get_agent_uptime();
+#ifdef USING_IF_MIB_IFXTABLE_IFXTABLE_MODULE
         if (rowreq_ctx->data.ifLinkUpDownTrapEnable == 1) {
             if (rowreq_ctx->data.ifOperStatus == IFOPERSTATUS_UP) {
                 oid notification_oid[] = { 1, 3, 6, 1, 6, 3, 1, 1, 5, 4 };
@@ -389,6 +390,7 @@ _check_interface_entry_for_updates(ifTable_rowreq_ctx * rowreq_ctx,
                                              rowreq_ctx->data.ifOperStatus);
             }
         }
+#endif
     }
 
     else
