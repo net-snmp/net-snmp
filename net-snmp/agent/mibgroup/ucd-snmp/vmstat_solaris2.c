@@ -528,6 +528,7 @@ update_stats(unsigned int registrationNumber, void *clientarg)
         time_diff =
             (snapshot[0].css_time -
              snapshot[number_of_snapshots].css_time) / 1000000;
+        if ( time_diff == 0 ) { time_diff = 1; }  /* Protect against division-by-zero */
 
         DEBUGMSGTL(("ucd-snmp/vmstat_solaris2.c:update_stats",
                     "time_diff: %lld\n", time_diff));
