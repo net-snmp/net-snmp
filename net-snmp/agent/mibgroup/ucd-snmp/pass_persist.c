@@ -787,7 +787,7 @@ close_persist_pipe(int iindex)
     }
 
 #if defined(WIN32) && !defined (mingw32) && !defined (HAVE_SIGNAL)
-    if (!CloseHandle(persist_pipes[iindex].pid)) {
+    if (!CloseHandle((HANDLE)persist_pipes[iindex].pid)) {
           DEBUGMSGTL(("ucd-snmp/pass_persist","close_persist_pipe pid: close error\n"));
         } 
 #endif
