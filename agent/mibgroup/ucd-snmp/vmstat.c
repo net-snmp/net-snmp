@@ -73,11 +73,11 @@ vmstat_handler(netsnmp_mib_handler          *handler,
          */
         case CPURAWUSER:
              snmp_set_var_typed_integer(requests->requestvb, ASN_COUNTER,
-                                        info->user_ticks );
+                                        info->user_ticks & 0xffffffff);
              break;
         case CPURAWNICE:
              snmp_set_var_typed_integer(requests->requestvb, ASN_COUNTER,
-                                        info->nice_ticks );
+                                        info->nice_ticks & 0xffffffff);
              break;
         case CPURAWSYSTEM:
              /*
@@ -88,29 +88,29 @@ vmstat_handler(netsnmp_mib_handler          *handler,
               *   if it has a non-zero value.
               */
              snmp_set_var_typed_integer(requests->requestvb, ASN_COUNTER,
-                                        info->sys2_ticks ?
+                                       (info->sys2_ticks ?
                                         info->sys2_ticks :
-                                        info->sys_ticks );
+                                        info->sys_ticks ) & 0xffffffff);
              break;
         case CPURAWIDLE:
              snmp_set_var_typed_integer(requests->requestvb, ASN_COUNTER,
-                                        info->idle_ticks );
+                                        info->idle_ticks & 0xffffffff);
              break;
         case CPURAWWAIT:
              snmp_set_var_typed_integer(requests->requestvb, ASN_COUNTER,
-                                        info->wait_ticks );
+                                        info->wait_ticks & 0xffffffff);
              break;
         case CPURAWKERNEL:
              snmp_set_var_typed_integer(requests->requestvb, ASN_COUNTER,
-                                        info->kern_ticks );
+                                        info->kern_ticks & 0xffffffff);
              break;
         case CPURAWINTR:
              snmp_set_var_typed_integer(requests->requestvb, ASN_COUNTER,
-                                        info->intrpt_ticks );
+                                        info->intrpt_ticks & 0xffffffff);
              break;
         case CPURAWSOFTIRQ:
              snmp_set_var_typed_integer(requests->requestvb, ASN_COUNTER,
-                                        info->sirq_ticks );
+                                        info->sirq_ticks & 0xffffffff);
              break;
 
         /*
@@ -158,11 +158,11 @@ vmstat_handler(netsnmp_mib_handler          *handler,
          */
         case SYSRAWINTERRUPTS:
              snmp_set_var_typed_integer(requests->requestvb, ASN_COUNTER,
-                                        info->nInterrupts );
+                                        info->nInterrupts & 0xffffffff);
              break;
         case SYSRAWCONTEXT:
              snmp_set_var_typed_integer(requests->requestvb, ASN_COUNTER,
-                                        info->nCtxSwitches );
+                                        info->nCtxSwitches & 0xffffffff);
              break;
         case SYSINTERRUPTS:
              if ( info->history && info->history[0].total_hist ) {
@@ -184,11 +184,11 @@ vmstat_handler(netsnmp_mib_handler          *handler,
          */
         case RAWSWAPIN:
              snmp_set_var_typed_integer(requests->requestvb, ASN_COUNTER,
-                                        info->swapIn );
+                                        info->swapIn & 0xffffffff);
              break;
         case RAWSWAPOUT:
              snmp_set_var_typed_integer(requests->requestvb, ASN_COUNTER,
-                                        info->swapOut );
+                                        info->swapOut & 0xffffffff);
              break;
         case SWAPIN:
              if ( info->history && info->history[0].total_hist ) {
@@ -212,11 +212,11 @@ vmstat_handler(netsnmp_mib_handler          *handler,
          */
         case IORAWSENT:
              snmp_set_var_typed_integer(requests->requestvb, ASN_COUNTER,
-                                        info->pageOut );
+                                        info->pageOut & 0xffffffff);
              break;
         case IORAWRECEIVE:
              snmp_set_var_typed_integer(requests->requestvb, ASN_COUNTER,
-                                        info->pageIn );
+                                        info->pageIn & 0xffffffff);
              break;
         case IOSENT:
              if ( info->history && info->history[0].total_hist ) {
