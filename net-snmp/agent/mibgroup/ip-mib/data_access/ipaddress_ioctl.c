@@ -528,7 +528,7 @@ _get_interface_count(int sd, struct ifconf * ifc)
                  */
                 snmp_log(LOG_ERR, "bad rc from ioctl, errno %d", errno);
                 SNMP_FREE(ifc->ifc_buf);
-                break;
+                return -1;
             }
             /*
              * Otherwise, it could just be that the buffer is too small.  
