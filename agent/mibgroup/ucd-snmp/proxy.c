@@ -4,7 +4,7 @@
  */
 /*
  * Portions of this file are copyrighted by:
- * Copyright @ 2003 Sun Microsystems, Inc. All rights reserved.
+ * Copyright @ 2009 Sun Microsystems, Inc. All rights reserved.
  * Use is subject to license terms specified in the COPYING file
  * distributed with the Net-SNMP package.
  */
@@ -401,6 +401,8 @@ proxy_handler(netsnmp_mib_handler *handler,
                 /*
                  * too large 
                  */
+                if (pdu)
+                    snmp_free_pdu(pdu);
                 snmp_log(LOG_ERR,
                          "proxy oid request length is too long\n");
                 return SNMP_ERR_NOERROR;
@@ -430,6 +432,8 @@ proxy_handler(netsnmp_mib_handler *handler,
      */
     if (!proxy_fill_in_session(handler, reqinfo, (void **)&configured)) {
         netsnmp_set_request_error(reqinfo, requests, SNMP_ERR_GENERR);
+        if (pdu)
+            snmp_free_pdu(pdu);
         return SNMP_ERR_NOERROR;
     }
 
