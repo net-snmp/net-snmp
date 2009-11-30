@@ -462,7 +462,7 @@ handle_subagent_response(int op, netsnmp_session * session, int reqid,
              u = u->next_variable, v = v->next_variable) {
             if (snmp_oid_compare
                 (u->val.objid, u->val_len / sizeof(oid), nullOid,
-                 nullOidLen) != 0) {
+                 nullOidLen/sizeof(oid)) != 0) {
                 /*
                  * The master agent requested scoping for this variable.  
                  */
