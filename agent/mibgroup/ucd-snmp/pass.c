@@ -420,13 +420,8 @@ var_extensible_pass(struct variable *vp,
                 else if (!strncasecmp(buf, "integer64", 9)) {
                     static struct counter64 c64;
                     uint64_t v64 = strtoull(buf2, NULL, 10);
-                    if (sizeof(long) > 4) {    /* 64-bit machine */
-                        c64.high = v64 >> 32;
-                        c64.low = v64 & 0xffffffff;
-                    }
-                    else {    /* 32-bit machine */
-                        *((uint64_t *) &c64) = v64;
-                    }
+                    c64.high = (unsigned long)(v64 >> 32);
+                    c64.low  = (unsigned long)(v64 & 0xffffffff);
                     *var_len = sizeof(c64);
                     vp->type = ASN_INTEGER64;
                     return ((unsigned char *) &c64);
@@ -445,13 +440,8 @@ var_extensible_pass(struct variable *vp,
                 else if (!strncasecmp(buf, "counter64", 9)) {
                     static struct counter64 c64;
                     uint64_t v64 = strtoull(buf2, NULL, 10);
-                    if (sizeof(long) > 4) {    /* 64-bit machine */
-                        c64.high = v64 >> 32;
-                        c64.low = v64 & 0xffffffff;
-                    }
-                    else {    /* 32-bit machine */
-                        *((uint64_t *) &c64) = v64;
-                    }
+                    c64.high = (unsigned long)(v64 >> 32);
+                    c64.low  = (unsigned long)(v64 & 0xffffffff);
                     *var_len = sizeof(c64);
                     vp->type = ASN_COUNTER64;
                     return ((unsigned char *) &c64);
