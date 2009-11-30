@@ -881,7 +881,7 @@ nari_setValue(me, type, value)
 	      else if (SvPOKp(value)) {
 	          /* Might be OK - got a string, so try to convert it, allowing base 10, octal, and hex forms */
 	          stringptr = SvPV(value, stringlen);
-		  ulltmp = strtoul( stringptr, NULL, 0 );
+		  ulltmp = strtoull( stringptr, NULL, 0 );
 		  if (errno == EINVAL) {
 		  	snmp_log(LOG_ERR, "Could not convert string to number in setValue: '%s'", stringptr);
 			RETVAL = 0;
