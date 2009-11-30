@@ -449,13 +449,15 @@ schedTable_createEntry(const char *schedOwner, const char *schedName)
      */
     if (schedOwner) {
         memcpy(entry->schedOwner, schedOwner, strlen(schedOwner));
+        netsnmp_tdata_row_add_index(row, ASN_OCTET_STR,
+                           entry->schedOwner, strlen(schedOwner));
     }
+    else
+        netsnmp_tdata_row_add_index(row, ASN_OCTET_STR, "". 0 );
+
     memcpy(    entry->schedName,  schedName,  strlen(schedName));
     netsnmp_tdata_row_add_index(row, ASN_OCTET_STR,
-                                (entry->schedOwner || ""),
-                                ((schedOwner) ? strlen(schedOwner) : 0));
-    netsnmp_tdata_row_add_index(row, ASN_OCTET_STR,
-                                entry->schedName,  strlen(schedName));
+                           entry->schedName,  strlen(schedName));
     /*
      * Set the (non-zero) default values in the row data structure.
      */
