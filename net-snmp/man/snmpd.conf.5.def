@@ -488,9 +488,12 @@ This situation will \fBnot\fR automatically trigger a trap to report
 the problem - see the DisMan Event MIB section later.
 .RE
 .IP
-If neither MAX nor MIN are specified (or are both 0), they will
+If neither MAX nor MIN are specified, they will
 default to \fBinfinity\fR and 1 respectively ("at least one").
 If only MAX is specified, MIN will default to 0 ("no more than MAX").
+If MAX is 0 (and MIN is not), this indicates infinity ("at least MIN").
+If both MAX and MIN are 0, this indicates a process that should \fBnot\fP
+be running.
 .IP "procfix NAME PROG ARGS"
 registers a command that can be run to fix errors with the given
 process NAME.  This will be invoked when the corresponding
