@@ -65,7 +65,7 @@ agentx_synch_input(int op,
     struct synch_state *state = (struct synch_state *) magic;
     struct timeval  now, diff;
 
-    if (reqid != state->reqid) {
+    if (!state || reqid != state->reqid) {
         return handle_agentx_packet(op, session, reqid, pdu, magic);
     }
 
@@ -137,6 +137,9 @@ agentx_open_session(netsnmp_session * ss)
 		 's', "Net-SNMP AgentX sub-agent");
 
     if (agentx_synch_response(ss, pdu, &response) != STAT_SUCCESS)
+        return 0;
+
+    if (!response)
         return 0;
 
     if (response->errstat != SNMP_ERR_NOERROR) {
