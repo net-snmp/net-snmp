@@ -531,7 +531,7 @@ struct variable_list {
     netsnmp_vardata val;
    /** the length of the value to be copied into buf */
    size_t          val_len;
-   /** 90 percentile < 24. */
+   /** buffer to hold the OID */
    oid             name_loc[MAX_OID_LEN];  
    /** 90 percentile < 40. */
    u_char          buf[40];
