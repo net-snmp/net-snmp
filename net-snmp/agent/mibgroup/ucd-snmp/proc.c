@@ -293,7 +293,7 @@ var_extensible_proc(struct variable *vp,
                         proc->name, (int) long_ret);
                 else
                     snprintf(errmsg, sizeof(errmsg),
-                        "No %s process running", proc->name) long_ret);
+                        "No %s process running", proc->name);
             } else if (proc->max && long_ret > proc->max) {
                 snprintf(errmsg, sizeof(errmsg),
                         "Too many %s running (# = %d)",
