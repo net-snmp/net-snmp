@@ -837,10 +837,7 @@ netsnmp_table_build_oid_from_index(netsnmp_handler_registration *reginfo,
     memcpy(&tmpoid[len], table_info->index_oid,
            table_info->index_oid_len * sizeof(oid));
     len += table_info->index_oid_len;
-    if (var->name && var->name != var->name_loc)
-        SNMP_FREE(var->name);
-    snmp_clone_mem((void **) &var->name, tmpoid, len * sizeof(oid));
-    var->name_length = len;
+    snmp_set_var_objid( var, tmpoid, len );
 
     return SNMPERR_SUCCESS;
 }
