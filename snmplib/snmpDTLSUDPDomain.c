@@ -566,7 +566,8 @@ netsnmp_dtlsudp_recv(netsnmp_transport *t, void *buf, int size,
 
 	while (rc < 0) {
 #if defined(linux) && defined(IP_PKTINFO)
-            rc = netsnmp_udp_recvfrom(t->sock, buf, size, from, &fromlen, &(addr_pair->local_addr));
+            rc = netsnmp_udp_recvfrom(t->sock, buf, size, from, &fromlen,
+                            &(addr_pair->local_addr), &(addr_pair->if_index));
 #else
             rc = recvfrom(t->sock, buf, size, NETSNMP_DONTWAIT, from, &fromlen);
 #endif /* linux && IP_PKTINFO */
@@ -628,7 +629,9 @@ netsnmp_dtlsudp_recv(netsnmp_transport *t, void *buf, int size,
 #if defined(XXXFIXME) && defined(linux) && defined(IP_PKTINFO)
                 /* XXX: before this can work, we need to remember address we
                    received it from (addr_pair) */
-                    rc2 = netsnmp_udp_sendto(cachep->sock, addr_pair->local_addr, addr_pair->remote_addr, outbuf, outsize);
+                    rc2 = netsnmp_udp_sendto(cachep->sock, addr_pair->local_addr,
+                                    addr_pair->if_index, addr_pair->remote_addr,
+                                    outbuf, outsize);
 #else
                     rc2 = sendto(t->sock, outbuf, outsize, 0, &cachep->sockaddr, sizeof(struct sockaddr));
 #endif /* linux && IP_PKTINFO */
