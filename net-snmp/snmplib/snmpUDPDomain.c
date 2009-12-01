@@ -76,6 +76,7 @@ static netsnmp_tdomain udpDomain;
 typedef struct netsnmp_udp_addr_pair_s {
     struct sockaddr_in remote_addr;
     struct in_addr local_addr;
+    int if_index;
 } netsnmp_udp_addr_pair;
 
 /*
@@ -131,7 +132,7 @@ netsnmp_udp_fmtaddr(netsnmp_transport *t, void *data, int len)
 
 # define netsnmp_dstaddr(x) (&(((struct in_pktinfo *)(CMSG_DATA(x)))->ipi_addr))
 
-int netsnmp_udp_recvfrom(int s, void *buf, int len, struct sockaddr *from, socklen_t *fromlen, struct in_addr *dstip)
+int netsnmp_udp_recvfrom(int s, void *buf, int len, struct sockaddr *from, socklen_t *fromlen, struct in_addr *dstip, int *if_index)
 {
     int r;
     struct iovec iov[1];
@@ -155,20 +156,21 @@ int netsnmp_udp_recvfrom(int s, void *buf, int len, struct sockaddr *from, sockl
     if (r == -1) {
         return -1;
     }
-    
+
     DEBUGMSGTL(("netsnmp_udp", "got source addr: %s\n", inet_ntoa(((struct sockaddr_in *)from)->sin_addr)));
     for (cmsgptr = CMSG_FIRSTHDR(&msg); cmsgptr != NULL; cmsgptr = CMSG_NXTHDR(&msg, cmsgptr)) {
         if (cmsgptr->cmsg_level == SOL_IP && cmsgptr->cmsg_type == IP_PKTINFO) {
             memcpy((void *) dstip, netsnmp_dstaddr(cmsgptr), sizeof(struct in_addr));
-            DEBUGMSGTL(("netsnmp_udp", "got destination (local) addr %s\n",
-                    inet_ntoa(*dstip)));
+            *if_index = (((struct in_pktinfo *)(CMSG_DATA(cmsgptr)))->ipi_ifindex);
+            DEBUGMSGTL(("netsnmp_udp", "got destination (local) addr %s, iface %d\n",
+                    inet_ntoa(*dstip), *if_index));
         }
     }
     return r;
 }
 
-int netsnmp_udp_sendto(int fd, struct in_addr *srcip, struct sockaddr *remote,
-			void *data, int len)
+int netsnmp_udp_sendto(int fd, struct in_addr *srcip, int if_index, struct sockaddr *remote,
+                void *data, int len)
 {
     struct iovec iov = { data, len };
     struct {
@@ -176,12 +178,13 @@ int netsnmp_udp_sendto(int fd, struct in_addr *srcip, struct sockaddr *remote,
         struct in_pktinfo ipi;
     } cmsg;
     struct msghdr m;
+    int ret;
 
     memset(&cmsg, 0, sizeof(cmsg));
     cmsg.cm.cmsg_len = sizeof(struct cmsghdr) + sizeof(struct in_pktinfo);
     cmsg.cm.cmsg_level = SOL_IP;
     cmsg.cm.cmsg_type = IP_PKTINFO;
-    cmsg.ipi.ipi_ifindex = 0;
+    cmsg.ipi.ipi_ifindex = if_index;
     cmsg.ipi.ipi_spec_dst.s_addr = (srcip ? srcip->s_addr : INADDR_ANY);
 
     m.msg_name		= remote;
@@ -192,7 +195,20 @@ int netsnmp_udp_sendto(int fd, struct in_addr *srcip, struct sockaddr *remote,
     m.msg_controllen	= sizeof(cmsg);
     m.msg_flags		= 0;
 
-    return sendmsg(fd, &m, MSG_NOSIGNAL|MSG_DONTWAIT);
+    DEBUGMSGTL(("netsnmp_udp", "netsnmp_udp_sendto: sending from %s iface %d\n",
+            (srcip ? inet_ntoa(*srcip) : "NULL"), if_index));
+    errno = 0;
+    ret = sendmsg(fd, &m, MSG_NOSIGNAL|MSG_DONTWAIT);
+    if (ret < 0 && errno == EINVAL && srcip) {
+        /* The error might be caused by broadcast srcip (i.e. we're responding
+         * to broadcast request) - sendmsg does not like it. Try to resend it
+         * with global address. */
+        cmsg.ipi.ipi_spec_dst.s_addr = INADDR_ANY;
+        DEBUGMSGTL(("netsnmp_udp",
+                "netsnmp_udp_sendto: re-sending the message\n"));
+        ret = sendmsg(fd, &m, MSG_NOSIGNAL|MSG_DONTWAIT);
+    }
+    return ret;
 }
 #endif /* linux && IP_PKTINFO */
 
@@ -224,7 +240,8 @@ netsnmp_udp_recv(netsnmp_transport *t, void *buf, int size,
 
 	while (rc < 0) {
 #if defined(linux) && defined(IP_PKTINFO)
-            rc = netsnmp_udp_recvfrom(t->sock, buf, size, from, &fromlen, &(addr_pair->local_addr));
+            rc = netsnmp_udp_recvfrom(t->sock, buf, size, from, &fromlen,
+                    &(addr_pair->local_addr), &(addr_pair->if_index));
 #else
             rc = recvfrom(t->sock, buf, size, NETSNMP_DONTWAIT, from, &fromlen);
 #endif /* linux && IP_PKTINFO */
@@ -277,7 +294,9 @@ netsnmp_udp_send(netsnmp_transport *t, void *buf, int size,
         free(str);
 	while (rc < 0) {
 #if defined(linux) && defined(IP_PKTINFO)
-            rc = netsnmp_udp_sendto(t->sock, addr_pair ? &(addr_pair->local_addr) : NULL, to, buf, size);
+            rc = netsnmp_udp_sendto(t->sock,
+                    addr_pair ? &(addr_pair->local_addr) : NULL,
+                    addr_pair ? addr_pair->if_index : 0, to, buf, size);
 #else
             rc = sendto(t->sock, buf, size, 0, to, sizeof(struct sockaddr));
 #endif /* linux && IP_PKTINFO */
