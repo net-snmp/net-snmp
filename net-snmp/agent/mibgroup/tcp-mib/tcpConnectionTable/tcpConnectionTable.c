@@ -155,6 +155,8 @@ tcpConnectionTable_rowreq_ctx_cleanup(tcpConnectionTable_rowreq_ctx *
     /*
      * TODO:211:o: |-> Perform extra tcpConnectionTable rowreq cleanup.
      */
+    netsnmp_access_tcpconn_entry_free(rowreq_ctx->data);
+    rowreq_ctx->data = NULL;
 }                               /* tcpConnectionTable_rowreq_ctx_cleanup */
 
 /**
