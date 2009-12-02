@@ -362,7 +362,7 @@ udpTable_next_entry( void **loop_context,
 {
     UDPTABLE_ENTRY_TYPE	 *entry = (UDPTABLE_ENTRY_TYPE *)*loop_context;
     long port;
-    in_addr_t addr;
+    long addr;
 
     if (!entry)
         return NULL;
@@ -377,7 +377,7 @@ udpTable_next_entry( void **loop_context,
 #else
     addr = UDP_ADDRESS_TO_NETWORK_ORDER((in_addr_t)entry->UDPTABLE_LOCALADDRESS);
     snmp_set_var_value(index, (u_char *)&addr,
-                                 sizeof(entry->UDPTABLE_LOCALADDRESS));
+                                 sizeof(addr));
 #endif
     port = UDP_PORT_TO_HOST_ORDER(entry->UDPTABLE_LOCALPORT);
     snmp_set_var_value(index->next_variable,
