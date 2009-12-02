@@ -254,7 +254,8 @@ tcpListenerTable_container_load(netsnmp_container *container)
      * free the container. we've either claimed each entry, or released it,
      * so the dal function doesn't need to clear the container.
      */
-    netsnmp_access_tcpconn_container_free(raw_data, 0);
+    netsnmp_access_tcpconn_container_free(raw_data,
+                                          NETSNMP_ACCESS_TCPCONN_FREE_DONT_CLEAR);
 
     DEBUGMSGT(("verbose:tcpListenerTable:tcpListenerTable_cache_load",
                "%d records\n", CONTAINER_SIZE(container)));
