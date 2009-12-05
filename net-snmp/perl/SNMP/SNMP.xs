@@ -2969,7 +2969,7 @@ snmp_read_module(module)
         if (!strcmp(module,"ALL")) {
            read_all_mibs();
         } else {
-           read_module(module);
+           netsnmp_read_module(module);
         }
         if (get_tree_head()) {
            if (verbose) warn("Read %s\n", module);
