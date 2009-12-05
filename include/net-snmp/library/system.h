@@ -137,7 +137,7 @@ SOFTWARE.
     unsigned long   strtoul(const char *, char **, int);
 #endif
 #ifndef HAVE_STRTOULL
-    unsigned long   strtoull(const char *, char **, int);
+    unsigned long long strtoull(const char *, char **, int);
 #endif
 #ifndef HAVE_STRTOK_R
     char           *strtok_r(char *, const char *, char **);
