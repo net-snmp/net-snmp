@@ -1173,7 +1173,7 @@ netsnmp_udp_getSecName(void *opaque, int olength,
                        size_t community_len, const char **secName,
                        const char **contextName)
 {
-    com2SecEntry   *c;
+    const com2SecEntry *c;
     netsnmp_udp_addr_pair *addr_pair = (netsnmp_udp_addr_pair *) opaque;
     struct sockaddr_in *from = (struct sockaddr_in *) &(addr_pair->remote_addr);
     char           *ztcommunity = NULL;
