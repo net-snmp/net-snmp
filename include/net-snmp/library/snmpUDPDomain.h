@@ -39,8 +39,8 @@ void            netsnmp_udp_parse_security(const char *token, char *param);
 int             netsnmp_udp_getSecName(void *opaque, int olength,
                                        const char *community,
                                        size_t community_len,
-                                       char **secname,
-                                       char **contextName);
+                                       const char **secname,
+                                       const char **contextName);
 
 int             netsnmp_sock_buffer_set(int s, int optname, int local,
                                         int size);

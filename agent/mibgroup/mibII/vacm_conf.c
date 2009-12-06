@@ -1249,8 +1249,8 @@ vacm_check_view_contents(netsnmp_pdu *pdu, oid * name, size_t namelen,
     struct vacm_groupEntry *gp;
     struct vacm_viewEntry *vp;
     char            vacm_default_context[1] = "";
-    char           *contextName = vacm_default_context;
-    char           *sn = NULL;
+    const char     *contextName = vacm_default_context;
+    const char     *sn = NULL;
     char           *vn;
     const char     *pdu_community;
 
