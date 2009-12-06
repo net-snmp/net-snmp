@@ -507,7 +507,7 @@ typedef struct _com2SecUnixEntry {
     struct _com2SecUnixEntry *next;
 } com2SecUnixEntry;
 
-com2SecUnixEntry   *com2SecUnixList = NULL, *com2SecUnixListLast = NULL;
+static com2SecUnixEntry   *com2SecUnixList = NULL, *com2SecUnixListLast = NULL;
 
 
 int
