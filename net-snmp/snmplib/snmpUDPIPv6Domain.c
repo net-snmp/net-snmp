@@ -1290,7 +1290,7 @@ netsnmp_udp6_getSecName(void *opaque, int olength,
                         int community_len,
                         const char **secName, const char **contextName)
 {
-    com2Sec6Entry  *c;
+    const com2Sec6Entry *c;
     struct sockaddr_in6 *from = (struct sockaddr_in6 *) opaque;
     char           *ztcommunity = NULL;
     char            str6[INET6_ADDRSTRLEN];
