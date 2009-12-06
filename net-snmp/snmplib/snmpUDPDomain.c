@@ -1170,8 +1170,8 @@ netsnmp_udp_agent_config_tokens_register(void)
 int
 netsnmp_udp_getSecName(void *opaque, int olength,
                        const char *community,
-                       size_t community_len, char **secName,
-                       char **contextName)
+                       size_t community_len, const char **secName,
+                       const char **contextName)
 {
     com2SecEntry   *c;
     netsnmp_udp_addr_pair *addr_pair = (netsnmp_udp_addr_pair *) opaque;

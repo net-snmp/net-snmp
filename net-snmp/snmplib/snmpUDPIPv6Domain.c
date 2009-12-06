@@ -1287,7 +1287,8 @@ netsnmp_udp6_agent_config_tokens_register(void)
 int
 netsnmp_udp6_getSecName(void *opaque, int olength,
                         const char *community,
-                        int community_len, char **secName, char **contextName)
+                        int community_len,
+                        const char **secName, const char **contextName)
 {
     com2Sec6Entry  *c;
     struct sockaddr_in6 *from = (struct sockaddr_in6 *) opaque;

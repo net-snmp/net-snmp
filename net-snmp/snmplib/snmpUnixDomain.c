@@ -514,7 +514,7 @@ int
 netsnmp_unix_getSecName(void *opaque, int olength,
                         const char *community,
                         size_t community_len,
-                        char **secName, char **contextName)
+                        const char **secName, const char **contextName)
 {
     com2SecUnixEntry   *c;
     struct sockaddr_un *to = (struct sockaddr_un *) opaque;

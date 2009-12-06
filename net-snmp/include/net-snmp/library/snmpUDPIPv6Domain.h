@@ -36,8 +36,9 @@ void            netsnmp_udp6_parse_security(const char *token,
 
 int             netsnmp_udp6_getSecName(void *opaque, int olength,
                                         const char *community,
-                                        int community_len, char **secname,
-                                        char **contextName);
+                                        int community_len,
+                                        const char **secname,
+                                        const char **contextName);
 
 /*
  * "Constructor" for transport domain object.  
