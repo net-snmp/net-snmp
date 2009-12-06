@@ -992,7 +992,7 @@ typedef struct _com2Sec6Entry {
     struct _com2Sec6Entry *next;
 } com2Sec6Entry;
 
-com2Sec6Entry  *com2Sec6List = NULL, *com2Sec6ListLast = NULL;
+static com2Sec6Entry  *com2Sec6List = NULL, *com2Sec6ListLast = NULL;
 
 
 void

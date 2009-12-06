@@ -958,7 +958,7 @@ typedef struct _com2SecEntry {
     struct _com2SecEntry *next;
 } com2SecEntry;
 
-com2SecEntry   *com2SecList = NULL, *com2SecListLast = NULL;
+static com2SecEntry   *com2SecList = NULL, *com2SecListLast = NULL;
 
 void
 netsnmp_udp_parse_security(const char *token, char *param)
