@@ -890,13 +890,14 @@ getbulk_table_entries(netsnmp_session * ss)
 					              NETSNMP_DS_LIB_OID_OUTPUT_FORMAT));
 			    exit(1);
                         }
-                        name_p = strchr(name_p, '.') + 1;
-                        if ( name_p == 1 ) {
+                        name_p = strchr(name_p, '.');
+                        if ( name_p == NULL ) {
                             /* The 'strchr' call above failed, i.e. the results
                              * don't seem to include instance subidentifiers! */
                             running = 0;
                             break;
                         }
+                        name_p++;  /* Move on to the instance identifier */
                     }
                     for (row = 0; row < entries; row++)
                         if (strcmp(name_p, indices[row]) == 0)
