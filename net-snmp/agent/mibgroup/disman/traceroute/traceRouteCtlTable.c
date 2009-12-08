@@ -4171,11 +4171,7 @@ run_traceRoute(unsigned int clientreg, void *clientarg)
         freehostinfo(hi);
 
 
-#ifdef HAVE_SETLINEBUF
-        setlinebuf(stdout);
-#else
-        setvbuf(stdout, NULL, _IOLBF, 0);
-#endif
+        netsnmp_set_line_buffering(stdout);
 
         outip = (struct ip *) malloc(packlen);
         if (outip == NULL) {

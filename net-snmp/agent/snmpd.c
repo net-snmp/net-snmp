@@ -906,10 +906,6 @@ main(int argc, char *argv[])
     *cptr = 0;
     *argvptr = NULL;
 
-#ifdef BUFSIZ
-    setvbuf(stdout, NULL, _IOLBF, BUFSIZ);
-#endif
-
     SOCK_STARTUP;
     init_agent(app_name);        /* do what we need to do first. */
     init_mib_modules();
