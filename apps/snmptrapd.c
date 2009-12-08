@@ -661,12 +661,6 @@ main(int argc, char *argv[])
     register_config_handler("snmptrapd", "outputOption",
                             parse_config_outputOption, NULL, "string");
 
-#ifdef WIN32
-    setvbuf(stdout, NULL, _IONBF, BUFSIZ);
-#else
-    setvbuf(stdout, NULL, _IOLBF, BUFSIZ);
-#endif
-
     /*
      * Add some options if they are available.  
      */
