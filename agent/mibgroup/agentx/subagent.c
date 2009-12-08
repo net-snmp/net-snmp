@@ -648,11 +648,11 @@ agentx_registration_callback(int majorID, int minorID, void *serverarg,
 
 
 int
-agentx_sysOR_callback(int majorID, int minorID, void *serverarg,
+agentx_sysOR_callback(int majorID, int minorID, const void *serverarg,
                       void *clientarg)
 {
-    struct register_sysOR_parameters *reg_parms =
-        (struct register_sysOR_parameters *) serverarg;
+    const struct register_sysOR_parameters *reg_parms =
+        (const struct register_sysOR_parameters *) serverarg;
     netsnmp_session *agentx_ss = (netsnmp_session *) clientarg;
 
     if (minorID == SNMPD_CALLBACK_REG_SYSOR)
