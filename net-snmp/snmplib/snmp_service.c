@@ -11,7 +11,7 @@ create_word_array_helper(const char* cptr, size_t idx, char* tmp, size_t tmplen)
 {
     char* item;
     char** res;
-    cptr = copy_nword(cptr, tmp, tmplen);
+    cptr = copy_nword((char *)cptr, tmp, tmplen);
     item = strdup(tmp);
     if (cptr)
         res = create_word_array_helper(cptr, idx + 1, tmp, tmplen);
