@@ -114,6 +114,7 @@ int             strncasecmp(const char *s1, const char *s2, size_t n);
 
 #include "struct.h"
 #include "extensible.h"
+#include "mibgroup/util_funcs.h"
 #include "utilities/execute.h"
 #include "util_funcs/header_simple_table.h"
 
