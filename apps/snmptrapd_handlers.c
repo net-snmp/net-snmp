@@ -355,7 +355,7 @@ static netsnmp_handler_map handlers[] = {
  * to be applied to *all* incoming traps
  */
 netsnmp_trapd_handler *
-netsnmp_add_global_traphandler(int list, Netsnmp_Trap_Handler handler)
+netsnmp_add_global_traphandler(int list, Netsnmp_Trap_Handler *handler)
 {
     netsnmp_trapd_handler *traph;
 
@@ -401,7 +401,7 @@ netsnmp_add_global_traphandler(int list, Netsnmp_Trap_Handler handler)
  * traps with no specific trap handlers of their own.
  */
 netsnmp_trapd_handler *
-netsnmp_add_default_traphandler( Netsnmp_Trap_Handler handler) {
+netsnmp_add_default_traphandler(Netsnmp_Trap_Handler *handler) {
     return netsnmp_add_global_traphandler(NETSNMPTRAPD_DEFAULT_HANDLER,
                                           handler);
 }
