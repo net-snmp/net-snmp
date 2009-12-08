@@ -57,6 +57,10 @@ static char *rcsid = "$OpenBSD: main.c,v 1.52 2005/02/10 14:25:08 itojun Exp $";
 #include "main.h"
 #include "netstat.h"
 
+#if HAVE_WINSOCK_H
+#include "winstub.h"
+#endif
+
 int	Aflag;		/* show addresses of protocol control block */
 int	aflag;		/* show all sockets (including servers) */
 int	bflag;		/* show bytes instead of packets */
