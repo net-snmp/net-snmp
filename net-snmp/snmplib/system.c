@@ -1102,14 +1102,13 @@ netsnmp_mktemp(void)
 #else
     if (mktemp(name)) {
 # ifndef WIN32
-        fd = open(name, O_CREAT | O_EXCL | O_WRONLY);
+        fd = open(name, O_CREAT | O_EXCL | O_WRONLY, S_IRUSR | S_IWUSR);
 # else
         /*
          * Win32 needs _S_IREAD | _S_IWRITE to set permissions on file
          * after closing
          */
-        fd = _open(name, _O_CREAT,
-                   _S_IREAD | _S_IWRITE | _O_EXCL | _O_WRONLY);
+        fd = _open(name, _O_CREAT | _O_EXCL | _O_WRONLY, _S_IREAD | _S_IWRITE);
 # endif
     }
 #endif
