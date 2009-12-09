@@ -100,8 +100,6 @@
 netsnmp_log_handler *logh_head = NULL;
 netsnmp_log_handler *logh_priorities[LOG_DEBUG+1];
 
-static int      newline = 1;	 /* MTCRITICAL_RESOURCE */
-
 static char syslogname[64] = DEFAULT_LOG_ID;
 
 void
@@ -983,6 +981,8 @@ netsnmp_remove_loghandler( netsnmp_log_handler *logh )
 int
 log_handler_stdouterr(  netsnmp_log_handler* logh, int pri, const char *str)
 {
+    static int      newline = 1;	 /* MTCRITICAL_RESOURCE */
+    char           *newline_ptr;
     char            sbuf[40];
 
     if (netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID, 
@@ -991,7 +991,12 @@ log_handler_stdouterr(  netsnmp_log_handler* logh, int pri, const char *str)
     } else {
         strcpy(sbuf, "");
     }
-    newline = str[strlen(str) - 1] == '\n';	/* XXX - Eh ? */
+    /*
+     * Remember whether or not the current line ends with a newline for the
+     * next call of log_handler_stdouterr().
+     */
+    newline_ptr = strrchr(str, '\n');
+    newline = newline_ptr && newline_ptr[1] == 0;
 
     if (logh->imagic)
        printf(         "%s%s", sbuf, str);
