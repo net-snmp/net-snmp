@@ -59,7 +59,10 @@ _load_v4(netsnmp_container *container, int idx_offset)
     char            line[128];
     int             rc = 0;
     netsnmp_arp_entry *entry;
-    
+    char           arp[3*NETSNMP_ACCESS_ARP_PHYSADDR_BUF_SIZE+1];
+    char           *arp_token;
+    int             i;
+
     netsnmp_assert(NULL != container);
 
 #define PROCFILE "/proc/net/arp"
@@ -79,23 +82,22 @@ _load_v4(netsnmp_container *container, int idx_offset)
      */
     while (fgets(line, sizeof(line), in)) {
         
-        int             za, zb, zc, zd, ze, zf, zg, zh, zi, zj;
+        int             za, zb, zc, zd;
         int             tmp_flags;
         char            ifname[21];
 
         rc = sscanf(line,
-                    "%d.%d.%d.%d 0x%*x 0x%x %x:%x:%x:%x:%x:%x %*[^ ] %20s\n",
-                    &za, &zb, &zc, &zd, &tmp_flags, &ze, &zf, &zg, &zh, &zi,
-                    &zj, ifname);
-        if (12 != rc) {            
+                    "%d.%d.%d.%d 0x%*x 0x%x %96s %*[^ ] %20s\n",
+                    &za, &zb, &zc, &zd, &tmp_flags, arp, ifname);
+        if (7 != rc) {
             snmp_log(LOG_ERR, PROCFILE " data format error (%d!=12)\n", rc);
             snmp_log(LOG_ERR, " line ==|%s|\n", line);
             continue;
         }
         DEBUGMSGTL(("access:arp:container",
                     "ip addr %d.%d.%d.%d, flags 0x%X, hw addr "
-                    "%x:%x:%x:%x:%x:%x, name %s\n",
-                    za,zb,zc,zd, tmp_flags, ze,zf,zg,zh,zi,zj, ifname ));
+                    "%s, name %s\n",
+                    za,zb,zc,zd, tmp_flags, arp, ifname ));
 
         /*
          */
@@ -134,13 +136,10 @@ _load_v4(netsnmp_container *container, int idx_offset)
         /*
          * parse hw addr
          */
-        entry->arp_physaddress[0] = ze;
-        entry->arp_physaddress[1] = zf;
-        entry->arp_physaddress[2] = zg;
-        entry->arp_physaddress[3] = zh;
-        entry->arp_physaddress[4] = zi;
-        entry->arp_physaddress[5] = zj;
-        entry->arp_physaddress_len = 6;
+        for (arp_token = strtok(arp, ":"), i=0; arp_token != NULL; arp_token = strtok(NULL, ":"), i++) {
+            entry->arp_physaddress[i] = strtol(arp_token, NULL, 16);
+        }
+        entry->arp_physaddress_len = i;
 
         /*
          * what can we do with hw? from arp manpage:
