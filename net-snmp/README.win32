@@ -576,17 +576,9 @@ steps to build using build.bat:
 2.  Initialize the Visual Studio build environment by running VCVARS32.bat
     which can be found in the bin folder of your Visual Studio install folder.
 
-3. If you are using MS VC++ 6.0, edit the win32\libsnmp_dll\libsnmp.def file.  Change:
+3.  Run win32\build.bat
 
-   ;        strtoull
-
-    to:
-
-           strtoull
-
-4.  Run win32\build.bat
-
-5.  The following screen will appear:
+4.  The following screen will appear:
 
     Net-SNMP build and install options
     ==================================
@@ -615,7 +607,7 @@ steps to build using build.bat:
 
     Select option to set / toggle:  
 
-6.  Toggle the options on and off as desired by typing the line number 
+5.  Toggle the options on and off as desired by typing the line number 
     followed by <enter>.  
 
     To compile with OpenSSL, the OpenSSL library and header files must 
@@ -635,7 +627,7 @@ steps to build using build.bat:
 
     When you are ready to build, type f <enter>
 
-7.  Building will begin.  Following is a sample screen shot of a quiet build:
+6.  Building will begin.  Following is a sample screen shot of a quiet build:
 
     Building...
     
@@ -657,7 +649,7 @@ steps to build using build.bat:
     
     Done!
 
-8.  If the folder that Net-SNMP was installed to is ever changed, modify the 
+7.  If the folder that Net-SNMP was installed to is ever changed, modify the 
     system environment variables or registry keys as explained in the 
     'Configuration_Overview.html' file located in win32/dist/htmlhelp.
 
@@ -682,20 +674,12 @@ first by the Configure script.  Following are sample steps to:
 2.  Initialize the Visual Studio build environment by running VCVARS32.bat
     which can be found in the bin folder of your Visual Studio install folder.
 
-3. If you are using MS VC++ 6.0, edit the win32\libsnmp_dll\libsnmp.def file.  Change:
-
-   ;        strtoull
-
-    to:
-
-           strtoull
-
-4.  Type (all on one line):
+3.  Type (all on one line):
 
       perl Configure --with-sdk --with-ssl --config=debug
            --prefix="c:/usr"
 
-5.  The make files will be generated, and a configuration summary will appear:
+4.  The make files will be generated, and a configuration summary will appear:
 
     ---------------------------------------------------------
                 Net-SNMP configuration summary:
@@ -707,7 +691,7 @@ first by the Configure script.  Following are sample steps to:
       Prefix / Destdir:           c:/usr
       OpenSSL:                    enabled
 
-6.  Type:
+5.  Type:
 
       nmake clean
       nmake
@@ -900,21 +884,13 @@ features may be disabled if the Platform SDK is not used.  See the section
 
         #define NETSNMP_USE_DLL 1
 
-5. If you are using MS VC++ 6.0, edit the win32\libsnmp_dll\libsnmp.def file.  Change:
-
-   ;        strtoull
-
-    to:
-
-           strtoull
-
-6.  Optional: Make a backup of the new net-snmp-config.h which contains 
+5.  Optional: Make a backup of the new net-snmp-config.h which contains 
     settings for a DLL build of Net-SNMP:
 
     Copy win32\net-snmp\net-snmp-config.h to 
     win32\net-snmp\dll-config.h.
 
-7. Build the DLL
+6. Build the DLL
 
    MS VC++ 6.0:
    ------------
