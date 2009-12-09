@@ -188,7 +188,7 @@ To see what Windows modules are being loaded, you can shut down the
 service and then run snmpd.exe from the command line with winExtDLL 
 debugging enabled using (all on one line):
 
- snmpd.exe -I-udp,udpTable,tcp,tcpTable,icmp,ip,interfaces,system_mib,
+ snmpd.exe -Lo -I-udp,udpTable,tcp,tcpTable,icmp,ip,interfaces,system_mib,
  sysORTable -DwinExtDLL
 
 The Windows DLL snmpmib.dll (SNMPMIB) contains SNMP traffic statistics
