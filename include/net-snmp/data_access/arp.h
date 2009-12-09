@@ -17,8 +17,8 @@ extern          "C" {
 #   define NETSNMP_ACCESS_ARP_IPADDR_BUF_SIZE 4
 #endif
 
-/** MAC address is 6 - do we want to support anything larger? */
-#define NETSNMP_ACCESS_ARP_PHYSADDR_BUF_SIZE 6
+/** MAC address is 6, InfiniBand uses more, 32 must be enough for near future.*/
+#define NETSNMP_ACCESS_ARP_PHYSADDR_BUF_SIZE 32
 
 /*************************************************************
  * constants for enums for the MIB node
@@ -78,7 +78,7 @@ typedef struct netsnmp_arp_s {
    u_char    arp_physaddress[NETSNMP_ACCESS_ARP_PHYSADDR_BUF_SIZE];
    u_char    arp_ipaddress[NETSNMP_ACCESS_ARP_IPADDR_BUF_SIZE];
 
-   u_char    arp_physaddress_len;/* phys address len, 6 */
+   u_char    arp_physaddress_len;/* phys address len, max 32 */
    u_char    arp_ipaddress_len;  /* ip address len, 4 | 16 */
    u_char    arp_type;           /* inetNetToMediaType 1-5 */
    u_char    arp_state;          /* inetNetToMediaState 1-7 */
