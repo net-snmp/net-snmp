@@ -242,28 +242,15 @@ Configure / nmake:
 
 Workspace:
 
--modify win32\net-snmp\net-snmp-config.h and add:
+-in file win32\net-snmp\net-snmp-config.h modify
+ /* #undef USING_WINEXTDLL_MODULE */ into the following:
  #define USING_WINEXTDLL_MODULE 1
-
--modify win32\netsnmpmibssdk\netsnmpmibssdk.dsp:
- uncomment winExtDLL lines
-
- add to lines that contain # ADD LIB32 (line that contains iphlpapi.lib): 
-  MgmtAPI.lib snmpapi.lib 
- 
- add near the bottom of the file:
-
-  # Begin Source File
-
-  SOURCE=..\..\agent\mibgroup\winExtDLL.c
-  # End Source File
-
 
 -This extension requires the PSDK including the Snmp.h header file.
  Including Snmp.h will conflict with existing Net-SNMP defines for
- ASN_OCTETSTRING etc.  To resolve this, create a copy of Snmp.h in
- the PSDK include/ folder called Snmp-winExtDLL.h and change all
- occurances of ASN_ to MS_ASN_
+ ASN_OCTETSTRING etc.  To resolve this, copy Snmp.h from the PSDK
+ include/ folder to win32/Snmp-winExtDLL.h in the Net-SNMP project
+ and change all occurrences of ASN_ to MS_ASN_
 
 
 ***************************************************************************
@@ -791,19 +778,11 @@ features may be disabled if the Platform SDK is not used.  See the section
    b.  Click "Yes to All" to convert the workspace
    c.  Click "Build->Configuration Manager" and select either Release or Debug for 
        'Active Solution Configuration' and click "Close"
-   d.  Right-click the "libagent" project, and select "Rebuild"
-   e.  Right-click the "libhelpers" project, and select "Rebuild"
-   f.  Right-click the "libnetsnmptrapd" project, and select "Rebuild"
-   g.  Right-click the "snmplib" project, and select "Rebuild"
-   h.  Right-click the "netsnmpmibs(sdk)" project, and select "Rebuild"
-   i.  Click "Build->Batch Build..." 
-   j.  Set Release and/or Debug in 'Project configurations' to suit making
-       sure libagent, libhelpers, libnetsnmptrapd, snmplib and netsnmpmibs are 
-       NOT selected.
-   k.  Click "Rebuild".
-   l.  When building is done, View the Output window, clip and
+   d.  Click "Build->Batch Build..." 
+   e.  Click "Rebuild".
+   f.  When building is done, View the Output window, clip and
        save to a text file if there is some information to share.
-   m.  Click "File->Close Solution".
+   g.  Click "File->Close Solution".
 
    Dynamic build (uses NetSNMP.DLL)
    ================================
@@ -816,19 +795,10 @@ features may be disabled if the Platform SDK is not used.  See the section
    ------------
    a. Open win32.dsw or win32sdk.dsw.
    b. Click "Build->Batch Build..."  
-   c. Set Release and/or Debug in 'Project configurations' to suit for the 
-      applications.  Make sure the following are NOT selected:
-
-      libagent
-      libhelpers
-      libsnmp
-      netsnmpmib(sdk)
-      libnetsnmptrapd
-
-   d. Click "ReBuild All".
-   e. When building is done, View the Output window, clip and
+   c. Click "Rebuild All".
+   d. When building is done, View the Output window, clip and
       save to a text file if there is some information to share.
-   f. Click "File->Close Workspace".
+   e. Click "File->Close Workspace".
 
    MS VC++ 7.0+:
    -------------
@@ -838,14 +808,7 @@ features may be disabled if the Platform SDK is not used.  See the section
       'Active Solution Configuration' and click "Close"
    d. Click "Build->Batch Build..." 
    e. Set Release and/or Debug in 'Project configurations' to suit for the 
-      applications.  Make sure the following are NOT selected:
-
-      libagent
-      libhelpers
-      libsnmp
-      netsnmpmib(sdk)
-      libnetsnmptrapd
-
+      applications.
    f. Click "Rebuild".
    g. When building is done, View the Output window, clip and
       save to a text file if there is some information to share.
