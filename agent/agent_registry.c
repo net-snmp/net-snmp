@@ -663,7 +663,7 @@ netsnmp_subtree_load(netsnmp_subtree *new_sub, const char *context_name)
 	    if (next && (next->namelen  == new_sub->namelen) &&
 		(next->priority == new_sub->priority)) {
                 if (new_sub->namelen != 1) /* ignore root OID dups */
-                    snmp_log(LOG_ERR, "duplicate registration (%s, %s)", next->label_a, new_sub->label_a);
+                    snmp_log(LOG_ERR, "duplicate registration (%s, %s)\n", next->label_a, new_sub->label_a);
 		return MIB_DUPLICATE_REGISTRATION;
 	    }
 
