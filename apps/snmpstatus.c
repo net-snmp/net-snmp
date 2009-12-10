@@ -1,5 +1,6 @@
 /*
- * snmpstatus.c - send snmp GET requests to a network entity.
+ * snmpstatus.c - retrieves a fixed set of management information from
+ * a network entity.
  *
  */
 /***********************************************************************

@@ -1,5 +1,5 @@
 /*
- * snmpdf.c - send snmp GET requests to a network entity.
+ * snmpdf.c - display disk space usage on a network entity via SNMP.
  *
  */
 
