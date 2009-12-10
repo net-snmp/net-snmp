@@ -15,21 +15,11 @@
  *   to install the Windows Extension DLLs and to make sure that information
  *   about these DLLs is present in the registry.
  *
- * @note The extension DLLs provided by Microsoft use the same OID ranges as
- *   some of the MIB implementations included with Net-SNMP. In case of
- *   overlapping OID ranges, the built-in Net-SNMP module will be loaded and
- *   not the external DLL. Additionally, a message will be logged in the
- *   Net-SNMP log. In case an extension DLL should be loaded by Net-SNMP but
- *   it is not loaded, disable loading of the Net-SNMP module through the -I-
- *   command line option. An example:
- *     -I-ip,icmp,tcp,udp
- *
  * @note The <Snmp.h> header file from the Microsoft Windows Platform SDK is
  *   required for compiling this agent extension module. Some definitions in
  *   <Snmp.h> conflict with Net-SNMP definitions, e.g. ASN_OCTETSTRING. To
- *   To resolve this, create a copy of Snmp.h in the same directory as this
- *   source file (winExtDLL.c), rename it to Snmp-winExtDLL.h and change all 
- *   occurrences of ASN_ to MS_ASN_.
+ *   resolve this, copy the SDK header file Snmp.h to win32/Snmp-winExtDLL.h
+ *   in the Net-SNMP source tree and change all occurrences of ASN_ to MS_ASN_.
  *
  * @note All Windows extension DLLs are loaded during startup of the Net-SNMP
  *   service. The service must be restarted to load new modules.
