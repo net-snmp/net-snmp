@@ -1451,8 +1451,8 @@ snprint_oid(const oid * const name, const size_t name_len)
     buf_len = 0;
     buf = NULL;
     buf_overflow = 0;
-    netsnmp_sprint_realloc_objid(&buf, &buf_len, &out_len, 1,
-                                 &buf_overflow, name, name_len);
+    netsnmp_sprint_realloc_objid_tree(&buf, &buf_len, &out_len, 1,
+                                      &buf_overflow, name, name_len);
     assert(buf);
     assert(!buf_overflow);
     return buf;
