@@ -434,6 +434,7 @@ register_netsnmp_handler(winextdll_view * const ext_dll_view_info)
                  oid_name,
                  previously_registered_view->winextdll_info->dll_name,
                  ext_dll_view_info->winextdll_info->dll_name);
+        free(oid_name);
 
         previously_registered_view->winextdll_info = ext_dll_info;
         memset(ext_dll_view_info, 0, sizeof(*ext_dll_view_info));
@@ -494,6 +495,8 @@ var_winExtDLL(netsnmp_mib_handler *handler,
 #endif
 
     if (ext_dll_info == 0) {
+        DEBUGMSG(("winExtDLL",
+                  "internal error: no matching extension DLL found.\n"));
         assert(0);
         return SNMP_ERR_GENERR;
     }
@@ -522,6 +525,8 @@ var_winExtDLL(netsnmp_mib_handler *handler,
         nRequestType = SNMP_EXTENSION_SET_CLEANUP;
         break;
     default:
+        DEBUGMSG(("winExtDLL",
+                  "internal error: invalid mode %d.\n", reqinfo->mode));
         assert(0);
         return SNMP_ERR_NOERROR;
     }
@@ -559,8 +564,12 @@ var_winExtDLL(netsnmp_mib_handler *handler,
          */
         request->status = convert_to_windows_varbind_list(&win_varbinds,
                                                           netsnmp_varbinds);
-        if (request->status != SNMP_ERR_NOERROR)
+        if (request->status != SNMP_ERR_NOERROR) {
+            DEBUGMSG(("winExtDLL",
+                      "converting varbind list to Windows format failed with"
+                      " error code %d.\n", request->status));
             continue;
+        }
 
         if (ext_dll_info->pfSnmpExtensionQueryEx) {
             result = ext_dll_info->pfSnmpExtensionQueryEx(nRequestType,
@@ -965,10 +974,15 @@ send_trap(const AsnObjectIdentifier * const pEnterprise,
         vb2_oid[vb2_oid_len++] = SpecificTrap;
     } else {
         /*
-         * Generic trap: compute the OID snmpTraps + "." + GenericTrap. 
+         * Generic trap: compute the OID snmpTraps + "." + GenericTrap.
+         * Since the GenericTrap values are those defined in SNMPv1, since
+         * these values start at zero, and since the corresponding values in
+         * SNMPv2 start at one, translate the GenericTrap value accordingly.
+         * See also http://www.ietf.org/rfc/rfc1214.txt and
+         * http://www.ietf.org/rfc/rfc3418.txt.
          */
         copy_oid(vb2_oid, &vb2_oid_len, snmptraps_oid, snmptraps_oid_len);
-        vb2_oid[vb2_oid_len++] = GenericTrap;
+        vb2_oid[vb2_oid_len++] = GenericTrap + 1;
     }
 
     /*
