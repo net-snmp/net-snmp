@@ -192,17 +192,6 @@ init_mteTriggerTable(void)
     se_add_pair_to_slist("mteBooleanOperators", strdup(">="),
                          MTETRIGGERBOOLEANCOMPARISON_GREATEROREQUAL);
 
-#ifdef NETSNMP_TRANSPORT_CALLBACK_DOMAIN
-    /*
-     * open a 'callback' session to the main agent 
-     */
-    if (mte_callback_sess == NULL) {
-        mte_callback_sess = netsnmp_callback_open(callback_master_num,
-                                                  NULL, NULL, NULL);
-        DEBUGMSGTL(("mteTriggerTable", "created callback session = %08x\n",
-                    mte_callback_sess));
-    }
-#endif
     DEBUGMSGTL(("mteTriggerTable", "done.\n"));
 }
 
@@ -3062,6 +3051,11 @@ mte_get_response(struct mteTriggerTable_data *item, netsnmp_pdu *pdu)
         /*
          * send to the local agent 
          */
+
+        if (mte_callback_sess == NULL)
+            mte_callback_sess =  netsnmp_query_get_default_session();
+        if (!mte_callback_sess)
+            return NULL;
 
         status = snmp_synch_response(mte_callback_sess, pdu, &response);
 
