@@ -647,8 +647,8 @@ agentx_registration_callback(int majorID, int minorID, void *serverarg,
 }
 
 
-int
-agentx_sysOR_callback(int majorID, int minorID, const void *serverarg,
+static int
+agentx_sysOR_callback(int majorID, int minorID, void *serverarg,
                       void *clientarg)
 {
     const struct register_sysOR_parameters *reg_parms =
@@ -857,7 +857,10 @@ subagent_open_master_session(void)
 static void
 agentx_reopen_sysORTable(const struct sysORTable* data, void* v)
 {
-  agentx_sysOR_callback(0, SNMPD_CALLBACK_REG_SYSOR, data, v);
+    netsnmp_session *agentx_ss = (netsnmp_session *) v;
+  
+    agentx_add_agentcaps(agentx_ss, data->OR_oid, data->OR_oidlen,
+                         data->OR_descr);
 }
 
 /*
