@@ -10,6 +10,9 @@
  * allows Net-SNMP to be a replacement for the Windows SNMP service, and makes
  * it possible to use the SNMPv3 protocol.
  *
+ * @see See also <a href="http://msdn.microsoft.com/en-us/library/aa378988(VS.85).aspx">SNMP Functions</a>
+ *   for more information about Microsoft's SNMP Extension Agent API.
+ *
  * @note In order to use this agent extension module, the Windows SNMP service
  *   must be installed first and must be disabled. This is the only way
  *   to install the Windows Extension DLLs and to make sure that information
@@ -153,6 +156,12 @@ typedef struct {
 
 
 /*
+ * External functions declarations. 
+ */
+void __declspec(dllimport) SNMP_FUNC_TYPE SnmpSvcInitUptime(void);
+
+
+/*
  * Local functions declarations. 
  */
 static int      basename_equals(const char *path, const char *basename);
@@ -226,6 +235,8 @@ init_winExtDLL(void)
 
     DEBUGMSG(("winExtDLL", "init_winExtDLL started.\n"));
 
+    SnmpSvcInitUptime();
+
     read_extension_dlls_from_registry();
 
     DEBUGMSG(("winExtDLL",
@@ -288,7 +299,7 @@ init_winExtDLL(void)
         view.idLength = 0;
         view.ids = 0;
         result =
-            ext_dll_info->pfSnmpExtensionInit(0,
+            ext_dll_info->pfSnmpExtensionInit(GetTickCount() / 10,
                                               &ext_dll_info->
                                               subagentTrapEvent, &view);
 
