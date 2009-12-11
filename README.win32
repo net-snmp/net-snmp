@@ -135,17 +135,8 @@ SNMP service.  See the section 'Co-existence with Microsoft SNMP services'.
 Limitations
 -----------
 
-- For an unknown reason, linkUp/Down generic traps are not received from the 
-  Windows SNMP RFC1156Agent extension.  The DLL has an exported function called
-  Mib2DLLEntry, but the use for this function is not known so this may or may 
-  not be related.  Other extensions are able to send traps without any issues.
-
 - When using HP Insight Agents, some parts of the enterprises.232 tree are not
   accessible.  The cause of this is not known.
-
-- sysUpTime.0 does not report the correct uptime for the agent.  This is
-  because the Windows extension checks for the uptime of the SNMP service,
-  which is not running when Net-SNMP is running.
 
 - When using winExtDLL, hrSystemUptime.0 reports the system uptime in thousands
   of a second instead of hundreds of a second. This is well known behavior of
