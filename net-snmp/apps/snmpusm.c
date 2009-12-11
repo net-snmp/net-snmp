@@ -127,6 +127,7 @@ int             doauthkey = 0, doprivkey = 0, uselocalizedkey = 0;
 size_t          usmUserEngineIDLen = 0;
 u_char         *usmUserEngineID = NULL;
 char           *usmUserPublic_val = NULL;
+int             docreateandwait = 0;
 
 
 void
@@ -137,19 +138,21 @@ usage(void)
     fprintf(stderr, " COMMAND\n\n");
     snmp_parse_args_descriptions(stderr);
     fprintf(stderr, "\nsnmpusm commands:\n");
-    fprintf(stderr, "  [options] create     USER [CLONEFROM-USER]\n");
-    fprintf(stderr, "  [options] delete     USER\n");
-    fprintf(stderr, "  [options] cloneFrom  USER CLONEFROM-USER\n");
-    fprintf(stderr, "  [options] activate   USER\n");
-    fprintf(stderr, "  [options] deactivate USER\n");
-    fprintf(stderr, "  [options] [-Ca] [-Cx] changekey [USER]\n");
+    fprintf(stderr, "  [options]               create     USER [CLONEFROM-USER]\n");
+    fprintf(stderr, "  [options]               delete     USER\n");
+    fprintf(stderr, "  [options]               activate   USER\n");
+    fprintf(stderr, "  [options]               deactivate USER\n");
+    fprintf(stderr, "  [options] [-Cw]         cloneFrom  USER CLONEFROM-USER\n");
+    fprintf(stderr, "  [options] [-Ca] [-Cx]   changekey  [USER]\n");
     fprintf(stderr,
-            "  [options] [-Ca] [-Cx] passwd OLD-PASSPHRASE NEW-PASSPHRASE [USER]\n");
+            "  [options] [-Ca] [-Cx]   passwd     OLD-PASSPHRASE NEW-PASSPHRASE [USER]\n");
     fprintf(stderr,
-            "  [options] (-Ca|-Cx) -Ck passwd OLD-KEY-OR-PASSPHRASE NEW-KEY-OR-PASSPHRASE [USER]\n");
+            "  [options] (-Ca|-Cx) -Ck passwd     OLD-KEY-OR-PASS NEW-KEY-OR-PASS [USER]\n");
     fprintf(stderr, "\nsnmpusm options:\n");
     fprintf(stderr, "\t-CE ENGINE-ID\tSet usmUserEngineID (e.g. 800000020109840301).\n");
     fprintf(stderr, "\t-Cp STRING\tSet usmUserPublic value to STRING.\n");
+    fprintf(stderr, "\t-Cw\t\tCreate the user with createAndWait.\n");
+    fprintf(stderr, "\t\t\t(it won't be active until you active it)\n");
     fprintf(stderr, "\t-Cx\t\tChange the privacy key.\n");
     fprintf(stderr, "\t-Ca\t\tChange the authentication key.\n");
     fprintf(stderr, "\t-Ck\t\tAllows to use localized key (must start with 0x)\n");
@@ -296,6 +299,10 @@ optProc(int argc, char *const *argv, int opt)
                     exit(1);
                 }
                 optind++;
+                break;
+
+            case 'w':
+                docreateandwait = 1;
                 break;
 
 	    case 'E': {
@@ -708,7 +715,11 @@ main(int argc, char *argv[])
              */
             setup_oid(usmUserStatus, &name_length,
                       usmUserEngineID, usmUserEngineIDLen, argv[arg-1]);
-            longvar = RS_CREATEANDGO;
+            if (docreateandwait) {
+                longvar = RS_CREATEANDWAIT;
+            } else {
+                longvar = RS_CREATEANDGO;
+            }
             snmp_pdu_add_variable(pdu, usmUserStatus, name_length,
                                   ASN_INTEGER, (u_char *) & longvar,
                                   sizeof(longvar));
