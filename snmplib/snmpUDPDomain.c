@@ -73,6 +73,10 @@
 
 static netsnmp_tdomain udpDomain;
 
+/*
+ * needs to be in sync with the definitions in snmplib/snmpTCPDomain.c 
+ * and perl/agent/agent.xs 
+ */
 typedef struct netsnmp_udp_addr_pair_s {
     struct sockaddr_in remote_addr;
     struct in_addr local_addr;

@@ -15,10 +15,14 @@
 
 typedef netsnmp_handler_registration *NetSNMP__agent__netsnmp_handler_registration;
 
-/* Copied from snmpUDPDomain.c */
+/*
+ * needs to be in sync with the definitions in snmplib/snmpUDPDomain.c
+ * and snmplib/snmpTCPDomain.c
+ */
 typedef struct netsnmp_udp_addr_pair_s {
 	struct sockaddr_in remote_addr;
 	struct in_addr local_addr;
+        int if_index;
 } netsnmp_udp_addr_pair;
 
 typedef struct handler_cb_data_s {
