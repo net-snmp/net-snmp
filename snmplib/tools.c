@@ -43,6 +43,14 @@
 #ifdef HAVE_ARPA_INET_H
 #include <arpa/inet.h>
 #endif
+#ifdef HAVE_CRTDBG_H
+/*
+ * Define _CRTDBG_MAP_ALLOC such that in debug builds (when _DEBUG has been
+ * defined) e.g. malloc() is rerouted to _malloc_dbg().
+ */
+#define _CRTDBG_MAP_ALLOC 1
+#include <crtdbg.h>
+#endif
 #ifdef cygwin
 #include <windows.h>
 #endif
@@ -63,6 +71,9 @@
 #ifdef WIN32
 /**
  * This function is a wrapper for the strdup function.
+ *
+ * @note The strdup() implementation calls _malloc_dbg() when linking with
+ * MSVCRT??D.dll and malloc() when linking with MSVCRT??.dll
  */
 char * netsnmp_strdup( const char * ptr)
 {
