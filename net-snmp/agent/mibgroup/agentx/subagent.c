@@ -167,8 +167,6 @@ struct agent_netsnmp_set_info *
 save_set_vars(netsnmp_session * ss, netsnmp_pdu *pdu)
 {
     struct agent_netsnmp_set_info *ptr;
-    struct timeval  now;
-    extern struct timeval starttime;
 
     ptr = (struct agent_netsnmp_set_info *)
         malloc(sizeof(struct agent_netsnmp_set_info));
@@ -181,8 +179,7 @@ save_set_vars(netsnmp_session * ss, netsnmp_pdu *pdu)
     ptr->transID = pdu->transid;
     ptr->sess = ss;
     ptr->mode = SNMP_MSG_INTERNAL_SET_RESERVE1;
-    gettimeofday(&now, NULL);
-    ptr->uptime = calculate_time_diff(&now, &starttime);
+    ptr->uptime = netsnmp_get_agent_uptime();
 
     ptr->var_list = snmp_clone_varbind(pdu->variables);
     if (ptr->var_list == NULL) {

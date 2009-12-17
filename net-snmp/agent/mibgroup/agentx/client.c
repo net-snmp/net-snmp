@@ -48,8 +48,6 @@
 #include "agentx/client.h"
 #include "agentx/subagent.h"
 
-extern struct timeval starttime;
-
         /*
          * AgentX handling utility routines
          *
@@ -63,7 +61,7 @@ agentx_synch_input(int op,
                    int reqid, netsnmp_pdu *pdu, void *magic)
 {
     struct synch_state *state = (struct synch_state *) magic;
-    struct timeval  now, diff;
+    marker_t starttime;
 
     if (!state || reqid != state->reqid) {
         return handle_agentx_packet(op, session, reqid, pdu, magic);
@@ -80,17 +78,9 @@ agentx_synch_input(int op,
             /*
              * Synchronise sysUpTime with the master agent
              */
-            gettimeofday(&now, NULL);
-            now.tv_sec--;
-            now.tv_usec += 1000000L;
-            diff.tv_sec = pdu->time / 100;
-            diff.tv_usec = (pdu->time - (diff.tv_sec * 100)) * 10000;
-            starttime.tv_sec = now.tv_sec - diff.tv_sec;
-            starttime.tv_usec = now.tv_usec - diff.tv_usec;
-            if (starttime.tv_usec > 1000000L) {
-                starttime.tv_usec -= 1000000L;
-                starttime.tv_sec++;
-            }
+	    starttime = netsnmp_get_starttime();
+	    atime_hsubtract(starttime, pdu->time - netsnmp_get_agent_uptime(),
+			    starttime);
         }
     } else if (op == NETSNMP_CALLBACK_OP_TIMED_OUT) {
         state->pdu = NULL;

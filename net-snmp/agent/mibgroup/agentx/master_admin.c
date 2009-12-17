@@ -48,9 +48,6 @@
 #include <net-snmp/agent/agent_sysORTable.h>
 #include "master.h"
 
-extern struct timeval starttime;
-
-
 
 netsnmp_session *
 find_agentx_session(netsnmp_session * session, int sessid)
@@ -109,7 +106,7 @@ open_agentx_session(netsnmp_session * session, netsnmp_pdu *pdu)
     sp->securityAuthProtoLen = pdu->variables->name_length;
     sp->securityName = strdup((char *) pdu->variables->val.string);
     gettimeofday(&now, NULL);
-    sp->engineTime = calculate_sectime_diff(&now, &starttime);
+    sp->engineTime = calculate_sectime_diff(&now, netsnmp_get_starttime());
 
     sp->subsession = session;   /* link back to head */
     sp->flags |= SNMP_FLAGS_SUBSESSION;
@@ -479,7 +476,6 @@ handle_master_agentx_packet(int operation,
                             int reqid, netsnmp_pdu *pdu, void *magic)
 {
     netsnmp_agent_session *asp;
-    struct timeval  now;
 
     if (operation == NETSNMP_CALLBACK_OP_DISCONNECT) {
         DEBUGMSGTL(("agentx/master",
@@ -578,8 +574,7 @@ handle_master_agentx_packet(int operation,
         break;
     }
 
-    gettimeofday(&now, NULL);
-    asp->pdu->time = calculate_time_diff(&now, &starttime);
+    asp->pdu->time = netsnmp_get_agent_uptime();
     asp->pdu->command = AGENTX_MSG_RESPONSE;
     asp->pdu->errstat = asp->status;
     DEBUGMSGTL(("agentx/master", "send response, stat %d (req=0x%lx,trans="

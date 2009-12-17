@@ -27,7 +27,7 @@
 #include <net/if_types.h>
 #include <net/if_media.h>
 
-extern struct timeval starttime;
+#define starttime (*(struct timeval*)netsnmp_get_starttime())
 
 int
 netsnmp_openbsd_interface_get_if_speed(char *name, u_int *speed, u_int *speed_high);

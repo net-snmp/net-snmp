@@ -122,8 +122,6 @@ SOFTWARE.
     int             setenv(const char *, const char *, int);
 #endif
 
-    int             calculate_time_diff(struct timeval *,
-                                        struct timeval *);
     u_int           calculate_sectime_diff(struct timeval *now,
                                            struct timeval *then);
 

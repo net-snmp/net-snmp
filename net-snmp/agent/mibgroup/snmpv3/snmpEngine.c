@@ -67,8 +67,6 @@ init_snmpEngine(void)
     register_snmpEngine_scalars();
 }
 
-extern struct timeval starttime;
-
 #ifdef NETSNMP_ENABLE_TESTING_CODE
 int             write_engineBoots(int, u_char *, u_char, size_t, u_char *,
                                   oid *, size_t);

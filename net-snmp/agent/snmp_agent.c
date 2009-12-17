@@ -3613,8 +3613,6 @@ netsnmp_request_set_error_all( netsnmp_request_info *requests, int error)
     return result;
 }
 
-extern struct timeval starttime;
-
                 /*
                  * Return the value of 'sysUpTime' at the given marker 
                  */
@@ -3622,7 +3620,7 @@ u_long
 netsnmp_marker_uptime(marker_t pm)
 {
     u_long          res;
-    marker_t        start = (marker_t) & starttime;
+    marker_t        start = netsnmp_get_starttime();
 
     res = uatime_hdiff(start, pm);
     return res;                 /* atime_diff works in msec, not csec */

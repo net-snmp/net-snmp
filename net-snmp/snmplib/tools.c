@@ -774,6 +774,31 @@ dump_snmpEngineID(const u_char * estring, size_t * estring_len)
 #endif                          /* NETSNMP_ENABLE_TESTING_CODE */
 
 
+static struct timeval starttime;
+
+/**
+ * Set the time at which Net-SNMP started either to the current time
+ * (if s == NULL) or to *s (if s is not NULL).
+ */
+void            
+netsnmp_set_starttime(marker_t s)
+{
+    if (s)
+        starttime = *(struct timeval*)s;
+    else
+        gettimeofday(&starttime, 0);
+}
+
+/**
+ * Return a pointer to the variable in which the Net-SNMP start time has
+ * been stored.
+ */
+marker_t        
+netsnmp_get_starttime(void)
+{
+    return &starttime;
+}
+
 /**
  * create a new time marker.
  * NOTE: Caller must free time marker when no longer needed.
@@ -805,13 +830,9 @@ atime_setMarker(marker_t pm)
 long
 atime_diff(marker_t first, marker_t second)
 {
-    struct timeval *tv1, *tv2, diff;
+    struct timeval diff;
 
-    tv1 = (struct timeval *) first;
-    tv2 = (struct timeval *) second;
-
-    diff.tv_sec = tv2->tv_sec - tv1->tv_sec - 1;
-    diff.tv_usec = tv2->tv_usec - tv1->tv_usec + 1000000;
+    NETSNMP_TIMERSUB((struct timeval *) second, (struct timeval *) first, &diff);
 
     return (diff.tv_sec * 1000 + diff.tv_usec / 1000);
 }
@@ -822,13 +843,9 @@ atime_diff(marker_t first, marker_t second)
 u_long
 uatime_diff(marker_t first, marker_t second)
 {
-    struct timeval *tv1, *tv2, diff;
+    struct timeval diff;
 
-    tv1 = (struct timeval *) first;
-    tv2 = (struct timeval *) second;
-
-    diff.tv_sec = tv2->tv_sec - tv1->tv_sec - 1;
-    diff.tv_usec = tv2->tv_usec - tv1->tv_usec + 1000000;
+    NETSNMP_TIMERSUB((struct timeval *) second, (struct timeval *) first, &diff);
 
     return (((u_long) diff.tv_sec) * 1000 + diff.tv_usec / 1000);
 }
@@ -840,16 +857,25 @@ uatime_diff(marker_t first, marker_t second)
 u_long
 uatime_hdiff(marker_t first, marker_t second)
 {
-    struct timeval *tv1, *tv2, diff;
-    u_long          res;
+    struct timeval diff;
 
-    tv1 = (struct timeval *) first;
-    tv2 = (struct timeval *) second;
+    NETSNMP_TIMERSUB((struct timeval *) second, (struct timeval *) first, &diff);
+    return ((u_long) diff.tv_sec) * 100 + diff.tv_usec / 10000;
+}
 
-    diff.tv_sec = tv2->tv_sec - tv1->tv_sec - 1;
-    diff.tv_usec = tv2->tv_usec - tv1->tv_usec + 1000000;
+/**
+ * Compute *res = *a - hundredths / 100.0.
+ *
+ * @note The pointers a and res may be identical.
+ */
+marker_t
+atime_hsubtract(marker_t a, u_long hundredths, marker_t res)
+{
+    struct timeval  b;
 
-    res = ((u_long) diff.tv_sec) * 100 + diff.tv_usec / 10000;
+    b.tv_sec = hundredths / 100;
+    b.tv_usec = (hundredths - (b.tv_sec * 100)) * 10000L;
+    NETSNMP_TIMERSUB((struct timeval *) a, &b, (struct timeval *) res);
     return res;
 }
 
@@ -873,53 +899,6 @@ atime_ready(marker_t pm, int deltaT)
         return 0;
 
     return 1;
-}
-
-/**
- * Test: Has (marked time plus delta) exceeded current time (in msec) ?
- * Returns 0 if test fails or cannot be tested (no marker).
- */
-int
-uatime_ready(marker_t pm, unsigned int deltaT)
-{
-    marker_t        now;
-    u_long          diff;
-    if (!pm)
-        return 0;
-
-    now = atime_newMarker();
-
-    diff = uatime_diff(pm, now);
-    free(now);
-    if (diff < deltaT)
-        return 0;
-
-    return 1;
-}
-
-
-        /*
-         * Time-related utility functions
-         */
-
-/**
- * Return the number of timeTicks since the given marker 
- */
-int
-marker_tticks(marker_t pm)
-{
-    int             res;
-    marker_t        now = atime_newMarker();
-
-    res = atime_diff(pm, now);
-    free(now);
-    return res / 10;            /* atime_diff works in msec, not csec */
-}
-
-int
-timeval_tticks(struct timeval *tv)
-{
-    return marker_tticks((marker_t) tv);
 }
 
 /**
