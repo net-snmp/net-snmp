@@ -95,6 +95,8 @@ SOFTWARE.
 
 #include <net-snmp/types.h>
 
+#include <net-snmp/agent/ds_agent.h>
+#include <net-snmp/library/default_store.h>
 #include <net-snmp/library/snmp_api.h>
 #include <net-snmp/library/snmp_client.h>
 #include <net-snmp/library/snmp_secmod.h>
@@ -1195,10 +1197,36 @@ netsnmp_query_set_default_session( netsnmp_session *sess) {
     _def_query_session = sess;
 }
 
+/**
+ * Return a pointer to the default internal query session.
+ */
 netsnmp_session *
-netsnmp_query_get_default_session( void ) {
+netsnmp_query_get_default_session_unchecked( void ) {
     DEBUGMSGTL(("iquery", "get default session %p\n", _def_query_session));
     return _def_query_session;
+}
+
+/**
+ * Return a pointer to the default internal query session and log a
+ * warning message once if this session does not exist.
+ */
+netsnmp_session *
+netsnmp_query_get_default_session( void ) {
+    static int warning_logged = 0;
+
+    if (! _def_query_session && ! warning_logged) {
+        if (! netsnmp_ds_get_string(NETSNMP_DS_APPLICATION_ID,
+                                    NETSNMP_DS_AGENT_INTERNAL_SECNAME)) {
+            snmp_log(LOG_WARNING,
+                     "iquerySecName has not been configured - internal queries will fail\n");
+        } else {
+            snmp_log(LOG_WARNING,
+                     "default session is not available - internal queries will fail\n");
+        }
+        warning_logged = 1;
+    }
+
+    return netsnmp_query_get_default_session_unchecked();
 }
 
 

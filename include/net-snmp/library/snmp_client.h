@@ -81,6 +81,7 @@ extern          "C" {
 
 
 void              netsnmp_query_set_default_session(netsnmp_session *);
+netsnmp_session * netsnmp_query_get_default_session_unchecked( void );
 netsnmp_session * netsnmp_query_get_default_session( void );
 int netsnmp_query_get(     netsnmp_variable_list *, netsnmp_session *);
 int netsnmp_query_getnext( netsnmp_variable_list *, netsnmp_session *);
