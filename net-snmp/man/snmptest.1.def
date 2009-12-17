@@ -44,7 +44,7 @@ accept commands.  This intepreter enables the user to send different
 types of SNMP requests to target agents.
 .PP
 AGENT identifies a target SNMP agent, which is instrumented
-to monitor the gievn objects.  At its simplest, the AGENT
+to monitor the given objects.  At its simplest, the AGENT
 specification will consist of a hostname or an IPv4
 address.  In this situation, the command will attempt
 communication with the agent, using UDP/IPv4 to port 161
