@@ -109,7 +109,7 @@ open_agentx_session(netsnmp_session * session, netsnmp_pdu *pdu)
     sp->securityAuthProtoLen = pdu->variables->name_length;
     sp->securityName = strdup((char *) pdu->variables->val.string);
     gettimeofday(&now, NULL);
-    sp->engineTime = calculate_time_diff(&now, &starttime);
+    sp->engineTime = calculate_sectime_diff(&now, &starttime);
 
     sp->subsession = session;   /* link back to head */
     sp->flags |= SNMP_FLAGS_SUBSESSION;
