@@ -54,9 +54,6 @@ _init_default_iquery_session( int majorID, int minorID,
     if (secName)
         netsnmp_query_set_default_session(
              netsnmp_iquery_user_session(secName));
-    else
-        snmp_log(LOG_WARNING,
-                 "iquerySecName has not been configured - internal queries will fail\n");
     return SNMPERR_SUCCESS;
 }
 
@@ -74,7 +71,7 @@ _tweak_default_iquery_session( int majorID, int minorID,
 {
     u_char eID[SNMP_MAXBUF_SMALL];
     size_t elen;
-    netsnmp_session *s = netsnmp_query_get_default_session();
+    netsnmp_session *s = netsnmp_query_get_default_session_unchecked();
 
     if ( s && s->securityEngineIDLen == 0 ) {
         elen = snmpv3_get_engineID(eID, sizeof(eID));
