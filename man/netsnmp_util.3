@@ -217,22 +217,6 @@ Memory Utility Routines \-
 .in -1c
 .SH "Define Documentation"
 .PP 
-.SS "#define DIFFTIMEVAL(now, then, diff)"\fBValue:\fP
-.PP
-.nf
-{                                                    \
-        now.tv_sec--;                                   \
-        now.tv_usec += 1000000L;                        \
-        diff.tv_sec  = now.tv_sec  - then.tv_sec;       \
-        diff.tv_usec = now.tv_usec - then.tv_usec;      \
-        if (diff.tv_usec > 1000000L){                   \
-                diff.tv_usec -= 1000000L;               \
-                diff.tv_sec++;                          \
-        }                                               \
-}
-.fi
-.PP
-Definition at line 131 of file tools.h.
 .SS "#define ISTRANSFORM(ttype, toid)"\fBValue:\fP
 .PP
 .nf
