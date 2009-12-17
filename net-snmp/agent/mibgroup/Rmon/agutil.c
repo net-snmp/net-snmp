@@ -208,7 +208,7 @@ AGUTIL_sys_up_time(void)
     current.tv_usec += 1000000L;
     delta.tv_sec = current.tv_sec - starttime.tv_sec;
     delta.tv_usec = current.tv_usec - starttime.tv_usec;
-    if (delta.tv_usec > 1000000L) {
+    if (delta.tv_usec >= 1000000L) {
         delta.tv_usec -= 1000000L;
         delta.tv_sec++;
     }
