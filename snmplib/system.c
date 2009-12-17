@@ -1067,7 +1067,7 @@ calculate_sectime_diff(struct timeval *now, struct timeval *then)
     tmp.tv_usec += 1000000L;
     diff.tv_sec = tmp.tv_sec - then->tv_sec;
     diff.tv_usec = tmp.tv_usec - then->tv_usec;
-    if (diff.tv_usec > 1000000L) {
+    if (diff.tv_usec >= 1000000L) {
         diff.tv_usec -= 1000000L;
         diff.tv_sec++;
     }
