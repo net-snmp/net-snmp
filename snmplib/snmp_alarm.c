@@ -99,13 +99,7 @@ sa_update_entry(struct snmp_alarm *a)
         a->t_last.tv_sec = t_now.tv_sec;
         a->t_last.tv_usec = t_now.tv_usec;
 
-        a->t_next.tv_sec = t_now.tv_sec + a->t.tv_sec;
-        a->t_next.tv_usec = t_now.tv_usec + a->t.tv_usec;
-
-        while (a->t_next.tv_usec >= 1000000) {
-            a->t_next.tv_usec -= 1000000;
-            a->t_next.tv_sec += 1;
-        }
+        NETSNMP_TIMERADD(&t_now, &a->t, &a->t_next);
     } else if (a->t_next.tv_sec == 0 && a->t_next.tv_usec == 0) {
         /*
          * We've been called but not reset for the next call.  
@@ -118,13 +112,7 @@ sa_update_entry(struct snmp_alarm *a)
                 return;
             }
 
-            a->t_next.tv_sec = a->t_last.tv_sec + a->t.tv_sec;
-            a->t_next.tv_usec = a->t_last.tv_usec + a->t.tv_usec;
-
-            while (a->t_next.tv_usec >= 1000000) {
-                a->t_next.tv_usec -= 1000000;
-                a->t_next.tv_sec += 1;
-            }
+            NETSNMP_TIMERADD(&a->t_last, &a->t, &a->t_next);
         } else {
             /*
              * Single time call, remove it.  
@@ -255,9 +243,7 @@ run_alarms(void)
 
         gettimeofday(&t_now, NULL);
 
-        if ((a->t_next.tv_sec < t_now.tv_sec) ||
-            ((a->t_next.tv_sec == t_now.tv_sec) &&
-             (a->t_next.tv_usec < t_now.tv_usec))) {
+        if (timercmp(&a->t_next, &t_now, <)) {
             clientreg = a->clientreg;
             DEBUGMSGTL(("snmp_alarm", "run alarm %d\n", clientreg));
             (*(a->thecallback)) (clientreg, a->clientarg);
@@ -294,16 +280,14 @@ int
 get_next_alarm_delay_time(struct timeval *delta)
 {
     struct snmp_alarm *sa_ptr;
-    struct timeval  t_diff, t_now;
+    struct timeval  t_now;
 
     sa_ptr = sa_find_next();
 
     if (sa_ptr) {
         gettimeofday(&t_now, NULL);
 
-        if ((t_now.tv_sec > sa_ptr->t_next.tv_sec) ||
-            ((t_now.tv_sec == sa_ptr->t_next.tv_sec) &&
-             (t_now.tv_usec > sa_ptr->t_next.tv_usec))) {
+        if (timercmp(&t_now, &sa_ptr->t_next, >)) {
             /*
              * Time has already passed.  Return the smallest possible amount of
              * time.  
@@ -315,16 +299,8 @@ get_next_alarm_delay_time(struct timeval *delta)
             /*
              * Time is still in the future.  
              */
-            t_diff.tv_sec = sa_ptr->t_next.tv_sec - t_now.tv_sec;
-            t_diff.tv_usec = sa_ptr->t_next.tv_usec - t_now.tv_usec;
+            NETSNMP_TIMERSUB(&sa_ptr->t_next, &t_now, delta);
 
-            while (t_diff.tv_usec < 0) {
-                t_diff.tv_sec -= 1;
-                t_diff.tv_usec += 1000000;
-            }
-
-            delta->tv_sec = t_diff.tv_sec;
-            delta->tv_usec = t_diff.tv_usec;
             return sa_ptr->clientreg;
         }
     }

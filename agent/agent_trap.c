@@ -79,8 +79,6 @@ struct trap_sink {
 
 struct trap_sink *sinks = NULL;
 
-extern struct timeval starttime;
-
 const oid       objid_enterprisetrap[] = { NETSNMP_NOTIFICATION_MIB };
 const oid       trap_version_id[] = { NETSNMP_SYSTEM_MIB };
 const int       enterprisetrap_len = OID_LENGTH(objid_enterprisetrap);

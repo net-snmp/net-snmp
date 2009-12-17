@@ -234,8 +234,6 @@ u_char          return_buf[258];
 u_char          return_buf[256];        /* nee 64 */
 #endif
 
-struct timeval  starttime;
-
 int             callback_master_num = -1;
 
 #ifdef NETSNMP_TRANSPORT_CALLBACK_DOMAIN
@@ -283,9 +281,7 @@ init_agent(const char *app)
     /*
      * get current time (ie, the time the agent started) 
      */
-    gettimeofday(&starttime, NULL);
-    starttime.tv_sec--;
-    starttime.tv_usec += 1000000L;
+    netsnmp_set_starttime(NULL);
 
     /*
      * we handle alarm signals ourselves in the select loop 
