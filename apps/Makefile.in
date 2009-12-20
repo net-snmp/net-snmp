@@ -34,6 +34,7 @@ INSTALLBINPROGS	= snmpget$(EXEEXT) 			\
 		snmptest$(EXEEXT)			\
 		encode_keychange$(EXEEXT) 		\
 		snmpdf$(EXEEXT) 			\
+		agentxtrap$(EXEEXT)			\
 		snmpvacm$(EXEEXT)                       \
                 $(SSHINSTALLBINPROGS)
 
@@ -138,6 +139,9 @@ snmpusm$(EXEEXT):    snmpusm.$(OSUFFIX) $(USELIBS)
 
 snmpvacm$(EXEEXT):    snmpvacm.$(OSUFFIX) $(USELIBS)
 	$(LINK) ${CFLAGS} -o $@ snmpvacm.$(OSUFFIX) $(LOCAL_LIBS) ${LDFLAGS} ${LIBS} 
+
+agentxtrap$(EXEEXT):    agentxtrap.$(OSUFFIX) $(USEAGENTLIBS)
+	$(LINK) ${CFLAGS} -o $@ agentxtrap.$(OSUFFIX) $(LOCAL_LIBS) ${LDFLAGS} $(USEAGENTLIBS) ${LIBS}
 
 snmpgetnext$(EXEEXT):    snmpgetnext.$(OSUFFIX) $(USELIBS)
 	$(LINK) ${CFLAGS} -o $@ snmpgetnext.$(OSUFFIX) $(LOCAL_LIBS) ${LDFLAGS} ${LIBS} 
