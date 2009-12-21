@@ -375,7 +375,7 @@ set_an_alarm(void)
  *
  * @param clientarg is a void pointer used by the callback function.  This 
  *	pointer is assigned to snmp_alarm->clientarg and passed into the
- *	callback function for the client's specifc needs.
+ *	callback function for the client's specific needs.
  *
  * @return Returns a unique unsigned integer(which is also passed as the first 
  *	argument of each callback), which can then be used to remove the
@@ -421,7 +421,7 @@ snmp_alarm_register(unsigned int when, unsigned int flags,
  *
  * @param cd is a void pointer used by the callback function.  This 
  *	pointer is assigned to snmp_alarm->clientarg and passed into the
- *	callback function for the client's specifc needs.
+ *	callback function for the client's specific needs.
  *
  * @return Returns a unique unsigned integer(which is also passed as the first 
  *	argument of each callback), which can then be used to remove the
