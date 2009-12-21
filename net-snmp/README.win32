@@ -70,7 +70,7 @@ The next subsection relates to items that are built using Visual Studio
 
   -  All Visual Studio project (.dsp) files are cleaned, and 
      a) Generate code to use Multi-Threaded DLL (/MD) "C" run-time library;
-     b) Provide the same preprocesor defines (WIN32,_CONSOLE,_MBCS);
+     b) Provide the same preprocessor defines (WIN32,_CONSOLE,_MBCS);
      c) Remove unnecessary references to GDI, ODBC, and "C" libraries;
      d) Debug versions build source browsing and debugging information;
      e) Provide consistent include search paths.
@@ -137,6 +137,11 @@ Limitations
 
 - When using HP Insight Agents, some parts of the enterprises.232 tree are not
   accessible.  The cause of this is not known.
+
+- When using winExtDLL, hrSystemUptime.0 reports the system uptime in thousands
+  of a second instead of hundreds of a second. This is well known behavior of
+  the Microsoft DLL that implements this MIB object. For more information,
+  see also https://connect.microsoft.com/onecare/feedback/ViewFeedback.aspx?FeedbackID=504908.
 
 
 Enabling the Windows SNMP extension agents
@@ -272,7 +277,7 @@ receiver (snmptrapd) will fail to start as it will not be able to bind to the
 default TCP/IP port of 162.
 
 It is not a requirement to install the Net-SNMP agent (snmpd) or trap receiver
-(snmptrapd).  All the command line utilties such as snmpget.exe, snmpset.exe 
+(snmptrapd).  All the command line utilities such as snmpget.exe, snmpset.exe 
 and the Perl modules will work without the Net-SNMP services.  All the 
 utilities will work against any SNMP agent.
 
@@ -359,7 +364,7 @@ the Microsoft agent and subagents.  To this, follow these steps:
             The above will enable proxy, pass and pass_persist support.  See the
             snmpd man page for more information on the -I switch.
  
-            If you are forwarding a section of the tree that is not immplemented
+            If you are forwarding a section of the tree that is not implemented
             in Net-SNMP such as 'host', you do not need to use the -I switch as
             Net-SNMP will forward the request.  This may cause issues in the 
             future if newer versions of Net-SNMP implement the section of the
