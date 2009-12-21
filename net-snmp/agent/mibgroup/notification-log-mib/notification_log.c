@@ -657,7 +657,7 @@ log_notification(netsnmp_pdu *pdu, netsnmp_transport *transport)
                                    ASN_OBJECT_ID, vptr->val.string,
                                    vptr->val_len);
 
-        } else {
+        } else if (nlmLogVarTable) {
             netsnmp_table_row *myrow;
             myrow = netsnmp_create_table_data_row();
 
