@@ -578,13 +578,21 @@ netsnmp_table_data_set_helper_handler(netsnmp_mib_handler *handler,
         case MODE_GET:
         case MODE_GETNEXT:
         case MODE_GETBULK:     /* XXXWWW */
-            if (data && data->data.voidp)
+            if (!data || data->type == SNMP_NOSUCHINSTANCE) {
+                netsnmp_set_request_error(reqinfo, request,
+                                          SNMP_NOSUCHINSTANCE);
+            } else {
+                /*
+                 * Note: data->data.voidp can be NULL, e.g. when a zero-length
+                 * octet string has been stored in the table cache.
+                 */
                 netsnmp_table_data_build_result(reginfo, reqinfo, request,
                                                 row,
                                                 table_info->colnum,
                                                 data->type,
                                                 data->data.voidp,
                                                 data->data_len);
+            }
             break;
 
         case MODE_SET_RESERVE1:
@@ -1221,8 +1229,24 @@ netsnmp_mark_row_column_writable(netsnmp_table_row *row, int column,
 }
 
 /**
- * sets a given column in a row with data given a type, value, and
- * length.  Data is memdup'ed by the function.
+ * Sets a given column in a row with data given a type, value,
+ * and length. Data is memdup'ed by the function, at least if
+ * type != SNMP_NOSUCHINSTANCE and if value_len > 0.
+ *
+ * @param[in] row       Pointer to the row to be modified.
+ * @param[in] column    Index of the column to be modified.
+ * @param[in] type      Either the ASN type of the value to be set or
+ *   SNMP_NOSUCHINSTANCE.
+ * @param[in] value     If type != SNMP_NOSUCHINSTANCE, pointer to the
+ *   new value. May be NULL if value_len == 0, e.g. when storing a
+ *   zero-length octet string. Ignored when type == SNMP_NOSUCHINSTANCE.
+ * @param[in] value_len If type != SNMP_NOSUCHINSTANCE, number of bytes
+ *   occupied by *value. Ignored when type == SNMP_NOSUCHINSTANCE.
+ *
+ * @return SNMPERR_SUCCESS upon success; SNMPERR_MALLOC when out of memory;
+ *   or SNMPERR_GENERR when row == 0 or when type does not match the datatype
+ *   of the data stored in *row. 
+ *
  */
 int
 netsnmp_set_row_column(netsnmp_table_row *row, unsigned int column,
@@ -1252,22 +1276,28 @@ netsnmp_set_row_column(netsnmp_table_row *row, unsigned int column,
         row->data = data;
     }
 
-    if (value) {
-        if (data->type != type)
-            return SNMPERR_GENERR;
+    /* Transitions from / to SNMP_NOSUCHINSTANCE are allowed, but no other transitions. */
+    if (data->type != type && data->type != SNMP_NOSUCHINSTANCE
+        && type != SNMP_NOSUCHINSTANCE)
+        return SNMPERR_GENERR;
 
-        SNMP_FREE(data->data.voidp);
-        if (value_len) {
-            if (memdup(&data->data.string, value, (value_len)) !=
-                SNMPERR_SUCCESS) {
-                snmp_log(LOG_CRIT, "no memory in netsnmp_set_row_column");
-                return SNMPERR_MALLOC;
-            }
-        } else {
-            data->data.string = malloc(1);
-        }
-        data->data_len = value_len;
+    /* Return now if neither the type nor the data itself has been modified. */
+    if (data->type == type && data->data_len == value_len
+        && (value == NULL || memcmp(&data->data.string, value, value_len) == 0))
+            return SNMPERR_SUCCESS;
+
+    /* Reallocate memory and store the new value. */
+    data->data.voidp = realloc(data->data.voidp, value ? value_len : 0);
+    if (value && value_len && !data->data.voidp) {
+        data->data_len = 0;
+        data->type = SNMP_NOSUCHINSTANCE;
+        snmp_log(LOG_CRIT, "no memory in netsnmp_set_row_column");
+        return SNMPERR_MALLOC;
     }
+    if (value && value_len)
+        memcpy(data->data.string, value, value_len);
+    data->type = type;
+    data->data_len = value_len;
     return SNMPERR_SUCCESS;
 }
 
