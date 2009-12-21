@@ -1162,7 +1162,8 @@ read_config_files_in_path(const char *path, struct config_files *ctmp,
 void
 read_config_files(int when)
 {
-    const char     *confpath, *perspath, *persfile, *envconfpath;
+    const char     *confpath, *persfile, *envconfpath;
+    char           *perspath;
     struct config_files *ctmp = config_files;
 
     if (netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID,
@@ -1188,9 +1189,11 @@ read_config_files(int when)
     for (; ctmp != NULL; ctmp = ctmp->next) {
 
         /*
-         * read the config files 
+         * read the config files. strdup() the result of
+         * get_persistent_directory() to avoid that parsing the "persistentDir"
+         * keyword transforms the perspath pointer into a dangling pointer.
          */
-        perspath = get_persistent_directory();
+        perspath = strdup(get_persistent_directory());
         if (envconfpath == NULL) {
             /*
              * read just the config files (no persistent stuff), since
@@ -1210,6 +1213,7 @@ read_config_files(int when)
             read_config_files_in_path(envconfpath, ctmp, when, perspath,
                                       persfile);
         }
+        free(perspath);
     }
 
     if (config_errors) {
