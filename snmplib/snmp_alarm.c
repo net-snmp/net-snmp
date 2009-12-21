@@ -391,40 +391,9 @@ unsigned int
 snmp_alarm_register(unsigned int when, unsigned int flags,
                     SNMPAlarmCallback * thecallback, void *clientarg)
 {
-    struct snmp_alarm **sa_pptr;
-    if (thealarms != NULL) {
-        for (sa_pptr = &thealarms; (*sa_pptr) != NULL;
-             sa_pptr = &((*sa_pptr)->next));
-    } else {
-        sa_pptr = &thealarms;
-    }
+    const struct timeval t = { when, when == 0 };
 
-    *sa_pptr = SNMP_MALLOC_STRUCT(snmp_alarm);
-    if (*sa_pptr == NULL)
-        return 0;
-
-    if (0 == when) {
-        (*sa_pptr)->t.tv_sec = 0;
-        (*sa_pptr)->t.tv_usec = 1;
-    } else {
-        (*sa_pptr)->t.tv_sec = when;
-        (*sa_pptr)->t.tv_usec = 0;
-    }
-    (*sa_pptr)->flags = flags;
-    (*sa_pptr)->clientarg = clientarg;
-    (*sa_pptr)->thecallback = thecallback;
-    (*sa_pptr)->clientreg = regnum++;
-    (*sa_pptr)->next = NULL;
-    sa_update_entry(*sa_pptr);
-
-    DEBUGMSGTL(("snmp_alarm",
-		"registered alarm %d, t = %ld.%03ld, flags=0x%02x\n",
-                (*sa_pptr)->clientreg, (*sa_pptr)->t.tv_sec,
-                ((*sa_pptr)->t.tv_usec / 1000), (*sa_pptr)->flags));
-
-    if (start_alarms)
-        set_an_alarm();
-    return (*sa_pptr)->clientreg;
+    return snmp_alarm_register_hr(t, flags, thecallback, clientarg);
 }
 
 
