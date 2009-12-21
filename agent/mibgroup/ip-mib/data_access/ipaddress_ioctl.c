@@ -135,7 +135,6 @@ _netsnmp_ioctl_ipaddress_container_load_v4(netsnmp_container *container,
     struct ifreq   *ifrp;
     struct sockaddr save_addr;
     struct sockaddr_in * si;
-    netsnmp_ipaddress_entry *entry, *bcastentry = NULL;
     struct address_flag_info addr_info;
     in_addr_t       ipval;
     _ioctl_extras           *extras;
@@ -156,6 +155,7 @@ _netsnmp_ioctl_ipaddress_container_load_v4(netsnmp_container *container,
 
     ifrp = ifc.ifc_req;
     for(i=0; i < interfaces; ++i, ++ifrp) {
+        netsnmp_ipaddress_entry *entry, *bcastentry = NULL;
 
         DEBUGMSGTL(("access:ipaddress:container",
                     " interface %d, %s\n", i, ifrp->ifr_name));
