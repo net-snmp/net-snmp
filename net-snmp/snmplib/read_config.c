@@ -1189,7 +1189,8 @@ read_config_files(int when)
              */
             read_config_files_in_path(confpath, ctmp, when, perspath,
                                       persfile);
-            perspath = get_persistent_directory();
+            free(perspath);
+            perspath = strdup(get_persistent_directory());
             read_config_files_in_path(perspath, ctmp, when, perspath,
                                       persfile);
         }
