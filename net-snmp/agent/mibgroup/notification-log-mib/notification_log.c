@@ -586,8 +586,9 @@ log_notification(netsnmp_pdu *pdu, netsnmp_transport *transport)
     u_long          tmpul;
     int             col;
 
-    if (netsnmp_ds_get_boolean(NETSNMP_DS_APPLICATION_ID,
-                               NETSNMP_DS_APP_DONT_LOG)) {
+    if (!nlmLogVarTable
+        || netsnmp_ds_get_boolean(NETSNMP_DS_APPLICATION_ID,
+                                  NETSNMP_DS_APP_DONT_LOG)) {
         return;
     }
 
@@ -657,7 +658,7 @@ log_notification(netsnmp_pdu *pdu, netsnmp_transport *transport)
                                    ASN_OBJECT_ID, vptr->val.string,
                                    vptr->val_len);
 
-        } else if (nlmLogVarTable) {
+        } else {
             netsnmp_table_row *myrow;
             myrow = netsnmp_create_table_data_row();
 
