@@ -1639,6 +1639,7 @@ read_config_read_octet_string(char *readfrom, u_char ** str, size_t * len)
     u_int           tmp;
     int             i;
     size_t          ilen;
+    size_t          allocated_len;
 
     if (readfrom == NULL || str == NULL)
         return NULL;
@@ -1666,6 +1667,7 @@ read_config_read_octet_string(char *readfrom, u_char ** str, size_t * len)
          * malloc data space if needed (+1 for good measure) 
          */
         if (*str == NULL) {
+            allocated_len = ilen + 1;
             if ((cptr = (u_char *) malloc(ilen + 1)) == NULL) {
                 return NULL;
             }
@@ -1675,6 +1677,7 @@ read_config_read_octet_string(char *readfrom, u_char ** str, size_t * len)
              * don't require caller to have +1 for good measure, and 
              * bail if not enough space.
              */
+            allocated_len = *len;
             if (ilen > *len) {
                 snmp_log(LOG_WARNING,"buffer too small to read octet string (%d < %d)\n",
                          *len, ilen);
@@ -1704,7 +1707,7 @@ read_config_read_octet_string(char *readfrom, u_char ** str, size_t * len)
         /*
          * only null terminate if we have the space
          */
-        if (ilen > *len) {
+        if (allocated_len > *len) {
             ilen = *len-1;
             *cptr++ = '\0';
         }
