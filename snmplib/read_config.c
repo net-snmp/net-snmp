@@ -1652,12 +1652,25 @@ read_config_save_octet_string(char *saveto, u_char * str, size_t len)
     return saveto;
 }
 
-/*
- * read_config_read_octet_string(): reads an octet string that was
- * saved by the read_config_save_octet_string() function 
+/**
+ * Reads an octet string that was saved by the
+ * read_config_save_octet_string() function.
+ *
+ * @param[in]     readfrom Pointer to the input data to be parsed.
+ * @param[in,out] str      Pointer to the output buffer pointer. If *str == NULL,
+ *   an output buffer will be allocated that is one byte larger than the data
+ *   stored.
+ * @param[in,out] len      If str != NULL, *len is the size of the buffer *str
+ *   points at. If str == NULL, the value passed via *len is ignored.
+ *   Before this function returns the number of bytes read will be stored
+ *   in *len.
+ *
+ * @return A pointer to the next character in the input to be parsed if
+ *   parsing succeeded; NULL if an error occurred.
  */
 char           *
-read_config_read_octet_string(char *readfrom, u_char ** str, size_t * len)
+read_config_read_octet_string(const char *readfrom, u_char ** str,
+                              size_t * len)
 {
     u_char         *cptr = NULL;
     char           *cptr1;
@@ -1762,6 +1775,43 @@ read_config_read_octet_string(char *readfrom, u_char ** str, size_t * len)
     return readfrom;
 }
 
+/**
+ * Reads an ASCII string that was saved by the
+ * read_config_save_octet_string() function.
+ *
+ * @param[in]     readfrom Input data to be parsed.
+ * @param[in,out] str      Pointer to the output buffer pointer. If NULL, an
+ *   output buffer will be allocated that is one byte larger than the data
+ *   stored.
+ * @param[in,out] len      If str != NULL, *len is the size of the buffer *str
+ *   points at. If str == NULL, the number of bytes read will be stored in
+ *   *len. The output buffer will be terminated with a '\0' character. This
+ *   character is not included in the count *len.
+ *
+ * @return A pointer to the next character in the input to be parsed if
+ *   parsing succeeded; NULL if an error occurred.
+ */
+char           *
+read_config_read_ascii_string(const char *readfrom, u_char ** str,
+                              size_t * len)
+{
+    char           *result = NULL;
+
+    /*
+     * If the caller has allocated a buffer (*str != NULL), reserve the last
+     * character of that buffer for storing a '\0' character.
+     */
+    if (str && *str && len && *len)
+        (*len)--;
+    result = read_config_read_octet_string(readfrom, str, len);
+    /*
+     * Terminate the string that has been read. It is assumed that if
+     * read_config_read_octet_string() allocated a buffer, that it also
+     * allocated space for the terminating '\0' character.
+     */
+    (*str)[*len] = 0;
+    return result;
+}
 
 /*
  * read_config_save_objid(): saves an objid as a numerical string 

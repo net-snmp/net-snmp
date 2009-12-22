@@ -68,7 +68,10 @@ extern          "C" {
     char           *read_config_save_octet_string(char *saveto,
                                                   u_char * str,
                                                   size_t len);
-    char           *read_config_read_octet_string(char *readfrom,
+    char           *read_config_read_octet_string(const char *readfrom,
+                                                  u_char ** str,
+                                                  size_t * len);
+    char           *read_config_read_ascii_string(const char *readfrom,
                                                   u_char ** str,
                                                   size_t * len);
     char           *read_config_read_objid(char *readfrom, oid ** objid,
