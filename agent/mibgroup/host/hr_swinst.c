@@ -130,7 +130,7 @@ int             header_hrswinst(struct variable *, oid *, size_t *, int,
 int             header_hrswInstEntry(struct variable *, oid *, size_t *,
                                      int, size_t *, WriteMethod **);
 
-#define starttime (*(struct timeval*)netsnmp_get_starttime())
+#define starttime (*(const struct timeval*)netsnmp_get_agent_starttime())
 
         /*********************
 	 *

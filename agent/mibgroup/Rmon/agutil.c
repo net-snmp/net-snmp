@@ -201,7 +201,7 @@ u_long
 AGUTIL_sys_up_time(void)
 {
     struct timeval  current, delta;
-    const struct timeval* const starttime_ptr = netsnmp_get_starttime();
+    const struct timeval* const starttime_ptr = netsnmp_get_agent_starttime();
 
     gettimeofday(&current, NULL);
     NETSNMP_TIMERSUB(&current, starttime_ptr, &delta);

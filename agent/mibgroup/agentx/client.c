@@ -78,9 +78,7 @@ agentx_synch_input(int op,
             /*
              * Synchronise sysUpTime with the master agent
              */
-	    starttime = netsnmp_get_starttime();
-	    atime_hsubtract(starttime, pdu->time - netsnmp_get_agent_uptime(),
-			    starttime);
+            netsnmp_set_agent_uptime(pdu->time);
         }
     } else if (op == NETSNMP_CALLBACK_OP_TIMED_OUT) {
         state->pdu = NULL;

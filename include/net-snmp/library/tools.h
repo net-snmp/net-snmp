@@ -8,6 +8,10 @@
 #ifndef _TOOLS_H
 #define _TOOLS_H
 
+
+#include <net-snmp/library/types.h>
+
+
 #ifdef __cplusplus
 extern          "C" {
 #endif
@@ -121,6 +125,25 @@ extern          "C" {
 		goto l ;		\
 	}
 
+    /*
+     * DIFFTIMEVAL
+     *      Set <diff> to the difference between <now> (current) and <then> (past).
+     *
+     * ASSUMES that all inputs are (struct timeval)'s.
+     * Cf. system.c:calculate_time_diff().
+     */
+#define DIFFTIMEVAL(now, then, diff) 			\
+{							\
+	now.tv_sec--;					\
+	now.tv_usec += 1000000L;			\
+	diff.tv_sec  = now.tv_sec  - then.tv_sec;	\
+	diff.tv_usec = now.tv_usec - then.tv_usec;	\
+	if (diff.tv_usec > 1000000L){			\
+		diff.tv_usec -= 1000000L;		\
+		diff.tv_sec++;				\
+	}						\
+}
+
 /**
  * Compute res = a + b.
  *
@@ -215,20 +238,16 @@ extern          "C" {
                                const u_char * buf, int size);
     char           *dump_snmpEngineID(const u_char * buf, size_t * buflen);
 
-    /** A pointer to an opaque time marker value. */
-    typedef void   *marker_t;
-
-    marker_t        netsnmp_get_starttime(void);
-    void            netsnmp_set_starttime(marker_t s);
-
     marker_t        atime_newMarker(void);
     void            atime_setMarker(marker_t pm);
-    long            atime_diff(marker_t first, marker_t second);
-    u_long          uatime_diff(marker_t first, marker_t second);       /* 1/1000th sec */
-    u_long          uatime_hdiff(marker_t first, marker_t second);      /* 1/100th sec */
-    marker_t        atime_hsubtract(marker_t a, u_long hundredths, marker_t res);
-    int             atime_ready(marker_t pm, int deltaT);
+    long            atime_diff(const_marker_t first, const_marker_t second);
+    u_long          uatime_diff(const_marker_t first, const_marker_t second);       /* 1/1000th sec */
+    u_long          uatime_hdiff(const_marker_t first, const_marker_t second);      /* 1/100th sec */
+    int             atime_ready(const_marker_t pm, int deltaT);
+    int             uatime_ready(const_marker_t pm, unsigned int deltaT);
 
+    int             marker_tticks(const_marker_t pm);
+    int             timeval_tticks(const struct timeval *tv);
     char            *netsnmp_getenv(const char *name);
 
     int             netsnmp_addrstr_hton(char *ptr, size_t len);
