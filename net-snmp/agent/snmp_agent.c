@@ -3620,7 +3620,7 @@ u_long
 netsnmp_marker_uptime(marker_t pm)
 {
     u_long          res;
-    marker_t        start = netsnmp_get_starttime();
+    const_marker_t  start = netsnmp_get_agent_starttime();
 
     res = uatime_hdiff(start, pm);
     return res;                 /* atime_diff works in msec, not csec */
@@ -3635,6 +3635,33 @@ netsnmp_timeval_uptime(struct timeval * tv)
     return netsnmp_marker_uptime((marker_t) tv);
 }
 
+
+struct timeval  starttime;
+
+/**
+ * Return a pointer to the variable in which the Net-SNMP start time has
+ * been stored.
+ */
+const_marker_t        
+netsnmp_get_agent_starttime(void)
+{
+    return &starttime;
+}
+
+/**
+ * Set the time at which Net-SNMP started either to the current time
+ * (if s == NULL) or to *s (if s is not NULL).
+ */
+void            
+netsnmp_set_agent_starttime(marker_t s)
+{
+    if (s)
+        starttime = *(struct timeval*)s;
+    else
+        gettimeofday(&starttime, 0);
+}
+
+
                 /*
                  * Return the current value of 'sysUpTime' 
                  */
@@ -3645,6 +3672,18 @@ netsnmp_get_agent_uptime(void)
     gettimeofday(&now, NULL);
 
     return netsnmp_timeval_uptime(&now);
+}
+
+void
+netsnmp_set_agent_uptime(u_long hsec)
+{
+    struct timeval  now;
+    struct timeval  new_uptime;
+
+    gettimeofday(&now, NULL);
+    new_uptime.tv_sec = hsec / 100;
+    new_uptime.tv_usec = (hsec - new_uptime.tv_sec * 100) * 10000L;
+    NETSNMP_TIMERSUB(&now, &new_uptime, &starttime);
 }
 
 

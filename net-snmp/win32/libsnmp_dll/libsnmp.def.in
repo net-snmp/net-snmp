@@ -249,6 +249,7 @@ EXPORTS
 	config_pwarn
 	copy_word
 	copy_nword
+	calculate_time_diff
 	calculate_sectime_diff
 	vacm_is_configured
 	vacm_createGroupEntry
@@ -291,11 +292,8 @@ EXPORTS
 	snmp_save_persistent
 	usm_store_users
 	snmp_store
-	netsnmp_set_starttime
-	netsnmp_get_starttime
 	atime_diff
 	uatime_hdiff
-	atime_hsubtract
 	atime_newMarker
 	atime_setMarker
 	atime_ready

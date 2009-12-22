@@ -262,7 +262,10 @@ extern          "C" {
 
     u_long          netsnmp_marker_uptime(marker_t pm);
     u_long          netsnmp_timeval_uptime(struct timeval *tv);
+    const_marker_t  netsnmp_get_agent_starttime(void);
+    void            netsnmp_set_agent_starttime(marker_t s);
     u_long          netsnmp_get_agent_uptime(void);
+    void            netsnmp_set_agent_uptime(u_long hsec);
     int             netsnmp_check_transaction_id(int transaction_id);
     int             netsnmp_agent_check_packet(netsnmp_session *,
                                                struct netsnmp_transport_s

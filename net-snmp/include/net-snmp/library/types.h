@@ -12,6 +12,15 @@
 extern          "C" {
 #endif
 
+
+    /** A pointer to an opaque time marker value. */
+    typedef void   * marker_t;
+
+    /** A pointer to an opaque time marker value that should not be modified. */
+    typedef const void * const_marker_t;
+
+
+
     typedef struct netsnmp_index_s {
        size_t      len;
        oid         *oids;

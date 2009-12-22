@@ -210,7 +210,7 @@
 static unsigned long LastLoad = 0;        /* ET in secs at last table load */
 #endif
 
-#define starttime (*(struct timeval*)netsnmp_get_starttime())
+#define starttime (*(const struct timeval*)netsnmp_get_agent_starttime())
 
 struct variable3 interfaces_variables[] = {
     {NETSNMP_IFNUMBER, ASN_INTEGER, NETSNMP_OLDAPI_RONLY,

@@ -49,7 +49,7 @@
 #   define ARCH_PROMISC_FLAG IFF_PROMISC
 #endif
 
-#define starttime (*(struct timeval*)netsnmp_get_starttime())
+#define starttime (*(const struct timeval*)netsnmp_get_agent_starttime())
 
 /* sa_len roundup macro. */
 #define ROUNDUP(a) \

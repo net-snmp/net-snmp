@@ -281,7 +281,7 @@ init_agent(const char *app)
     /*
      * get current time (ie, the time the agent started) 
      */
-    netsnmp_set_starttime(NULL);
+    netsnmp_set_agent_starttime(NULL);
 
     /*
      * we handle alarm signals ourselves in the select loop 
