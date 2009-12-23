@@ -8,7 +8,7 @@ extern          "C" {
 struct address_flag_info {
     int bcastflg;
     int anycastflg;
-    struct in_addr *inp;
+    in_addr_t addr;
 };
  
 #define IS_APIPA(a)  (((in_addr_t)(a << 16)) == 0xFEA90000)
