@@ -236,8 +236,8 @@ _netsnmp_ioctl_ipaddress_container_load_v4(netsnmp_container *container,
            }
            bcastentry->if_index = entry->if_index;
            bcastentry->ns_ia_index = ++idx_offset;
-           bcastentry->ia_address_len = sizeof(addr_info.inp->s_addr);
-           memcpy(bcastentry->ia_address, &addr_info.inp->s_addr,
+           bcastentry->ia_address_len = sizeof(addr_info.addr);
+           memcpy(bcastentry->ia_address, &addr_info.addr,
                   bcastentry->ia_address_len);
         }
 #endif
