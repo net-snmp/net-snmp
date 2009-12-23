@@ -478,11 +478,11 @@ netsnmp_access_other_info_get(int index, int family)
         if(index == rtmp->ifa_index){
            for (; RTA_OK(rtatp, rtattrlen); rtatp = RTA_NEXT(rtatp, rtattrlen)) {
                 if(rtatp->rta_type == IFA_BROADCAST){
-                   addr.inp = (struct in_addr *)RTA_DATA(rtatp);
+                   addr.addr = ((struct in_addr *)RTA_DATA(rtatp))->s_addr;
                    addr.bcastflg = 1;
                 }
                 if(rtatp->rta_type == IFA_ANYCAST){
-                   addr.inp = (struct in_addr *)RTA_DATA(rtatp);
+                   addr.addr = ((struct in_addr *)RTA_DATA(rtatp))->s_addr;
                    addr.anycastflg = 1;
                 }
            }
