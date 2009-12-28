@@ -93,7 +93,11 @@ register_string_index(oid * name, size_t name_len, char *cp)
     if (res == NULL) {
         return NULL;
     } else {
-        char           *rv = strdup(res->val.string);
+        char           *rv = malloc(res->val_len + 1);
+        if (rv) {
+            memcpy(rv, res->val.string, res->val_len);
+            rv[res->val_len] = 0;
+        }
         free(res);
         return rv;
     }
