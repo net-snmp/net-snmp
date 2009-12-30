@@ -8,10 +8,6 @@
 #ifndef _TOOLS_H
 #define _TOOLS_H
 
-
-#include <net-snmp/library/types.h>
-
-
 #ifdef __cplusplus
 extern          "C" {
 #endif
@@ -237,6 +233,10 @@ extern          "C" {
     void            dump_chunk(const char *debugtoken, const char *title,
                                const u_char * buf, int size);
     char           *dump_snmpEngineID(const u_char * buf, size_t * buflen);
+
+    /** A pointer to an opaque time marker value. */
+    typedef void   *marker_t;
+    typedef const void* const_marker_t;
 
     marker_t        atime_newMarker(void);
     void            atime_setMarker(marker_t pm);
