@@ -60,7 +60,7 @@ netsnmp_arch_tcpconn_entry_copy(netsnmp_tcpconn_entry *lhs,
  * delete an entry
  */
 int
-netsnmp_arch_tcpconn_delete(netsnmp_tcpconn_entry *entry)
+netsnmp_arch_tcpconn_entry_delete(netsnmp_tcpconn_entry *entry)
 {
     if (NULL == entry)
         return -1;
