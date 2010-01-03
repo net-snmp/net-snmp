@@ -49,6 +49,11 @@ typedef struct netsnmp_systemstats_s {
 /*
  * init
  */
+void netsnmp_access_systemstats_init(void);
+
+/*
+ * init
+ */
 netsnmp_container * netsnmp_access_systemstats_container_init(u_int init_flags);
 #define NETSNMP_ACCESS_SYSTEMSTATS_INIT_NOFLAGS               0x0000
 #define NETSNMP_ACCESS_SYSTEMSTATS_INIT_ADDL_IDX_BY_ADDR      0x0001

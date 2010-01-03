@@ -253,11 +253,18 @@ config_require(ip-mib/inetNetToMediaTable/inetNetToMediaTable_data_access)
                                             * rowreq_ctx,
                                             u_long *
                                             inetNetToMediaState_val_ptr);
+
     int
         inetNetToMediaRowStatus_get(inetNetToMediaTable_rowreq_ctx *
                                     rowreq_ctx,
                                     u_long *
                                     inetNetToMediaRowStatus_val_ptr);
+
+    int
+        inetNetToMediaRowStatus_set(inetNetToMediaTable_rowreq_ctx *
+                                    rowreq_ctx,
+                                    u_long
+                                    inetNetToMediaRowStatus_val);
 
 
     int
