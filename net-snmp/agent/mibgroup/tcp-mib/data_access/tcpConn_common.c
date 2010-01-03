@@ -189,7 +189,7 @@ netsnmp_access_tcpconn_entry_set(netsnmp_tcpconn_entry * entry)
     if (! (entry->flags & NETSNMP_ACCESS_TCPCONN_DELETE))
         return -1;
     
-    rc = netsnmp_arch_tcpconn_delete(entry);
+    rc = netsnmp_arch_tcpconn_entry_delete(entry);
     
     return rc;
 }
