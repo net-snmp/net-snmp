@@ -2109,4 +2109,217 @@ read_config_store_data_prefix(char prefix, int type, char *storeto,
         }
     return NULL;
 }
+
 /** @} */
+
+#ifdef READ_CONFIG_UNIT_TEST
+
+#include <assert.h>
+
+int
+read64(U64 * i64, const char *str)
+{
+    assert(0);
+}
+
+int
+snmp_get_do_debugging(void)
+{
+    return 0;
+}
+
+int
+debug_is_token_registered(const char *token)
+{
+    assert(0);
+}
+
+void
+debugmsg(const char *token, const char *format, ...)
+{
+    assert(0);
+}
+
+void
+debugmsgtoken(const char *token, const char *format, ...)
+{
+    assert(0);
+}
+
+int
+snmp_log(int priority, const char *format, ...)
+{
+#if 0
+    va_list         ap;
+
+    va_start(ap, format);
+    vprintf(format, ap);
+    va_end(ap);
+#endif
+    return 0;
+}
+
+void
+snmp_log_perror(const char *s)
+{
+    assert(0);
+}
+
+int
+snmp_vlog(int priority, const char *format, va_list ap)
+{
+    assert(0);
+}
+
+int
+netsnmp_ds_set_boolean(int storeid, int which, int value)
+{
+    assert(0);
+}
+
+int
+netsnmp_ds_get_boolean(int storeid, int which)
+{
+    assert(0);
+}
+
+int
+netsnmp_ds_set_string(int storeid, int which, const char *value)
+{
+    assert(0);
+}
+
+char           *
+netsnmp_ds_get_string(int storeid, int which)
+{
+    assert(0);
+}
+
+char           *
+netsnmp_getenv(const char *name)
+{
+    assert(0);
+}
+
+int
+snmp_call_callbacks(int major, int minor, void *caller_arg)
+{
+    assert(0);
+}
+
+int
+mkdirhier(const char *pathname, mode_t mode, int skiplast)
+{
+    assert(0);
+}
+
+int
+read_objid(const char *input, oid * output, size_t * out_len)
+{
+    assert(0);
+}
+
+struct read_config_testcase {
+    /*
+     * inputs 
+     */
+    char           *(*pf) (const char *readfrom, u_char ** str,
+                           size_t * len);
+    const char     *readfrom;
+    size_t          obuf_len;
+
+    /*
+     * expected outputs 
+     */
+    size_t          expected_offset;
+    const u_char   *expected_output;
+    size_t          expected_len;
+};
+
+static const u_char obuf1[] = { 1, 0, 2 };
+static const u_char obuf2[] = { 'a', 'b', 'c', 0 };
+static const u_char obuf3[] = { 1, 3, 2 };
+static const u_char zbuf[] = { 0, 0, 0 };
+
+static const struct read_config_testcase test_input[] = {
+    {&read_config_read_octet_string, "0x010002", 1, -1, NULL, 1},
+    {&read_config_read_octet_string, "0x010002", 2, -1, NULL, 2},
+    {&read_config_read_octet_string, "0x010002", 3, -1, obuf1, 3},
+    {&read_config_read_octet_string, "0x010002", 4, -1, obuf1, 3},
+    {&read_config_read_octet_string, "0x010002", 0, -1, obuf1, 3},
+
+    {&read_config_read_octet_string, "abc", 1, -1, zbuf, 0},
+    {&read_config_read_octet_string, "abc", 2, -1, obuf2, 1},
+    {&read_config_read_octet_string, "abc", 3, -1, obuf2, 2},
+    {&read_config_read_octet_string, "abc", 4, -1, obuf2, 3},
+    {&read_config_read_octet_string, "abc", 0, -1, obuf2, 3},
+
+    {&read_config_read_ascii_string, "0x010302", 1, -1, NULL, 0},
+    {&read_config_read_ascii_string, "0x010302", 2, -1, NULL, 1},
+    {&read_config_read_ascii_string, "0x010302", 3, -1, NULL, 2},
+    {&read_config_read_ascii_string, "0x010302", 4, -1, obuf3, 3},
+    {&read_config_read_ascii_string, "0x010302", 0, -1, obuf3, 3},
+
+    {&read_config_read_ascii_string, "abc", 1, -1, obuf2, 0},
+    {&read_config_read_ascii_string, "abc", 2, -1, obuf2, 0},
+    {&read_config_read_ascii_string, "abc", 3, -1, obuf2, 1},
+    {&read_config_read_ascii_string, "abc", 4, -1, obuf2, 2},
+    {&read_config_read_ascii_string, "abc", 5, -1, obuf2, 3},
+    {&read_config_read_ascii_string, "abc", 0, -1, obuf2, 3},
+};
+
+int
+main(int argc, char **argv)
+{
+    int             failure_count = 0;
+    unsigned int    i, j;
+
+    printf("Start of unit test.\n");
+    for (i = 0; i < sizeof(test_input) / sizeof(test_input[0]); i++) {
+        const struct read_config_testcase *const p = &test_input[i];
+        size_t          len = p->obuf_len;
+        u_char         *str = len > 0 ? malloc(len) : NULL;
+        char           *result;
+        size_t          offset;
+
+        printf("Test %d ...\n", i);
+        fflush(stdout);
+        result = (p->pf) (p->readfrom, &str, &len);
+        offset = result ? result - p->readfrom : -1;
+        if (offset != p->expected_offset) {
+            failure_count++;
+            printf("test %d: expected offset %zd, got offset %zd\n",
+                   i, p->expected_offset, offset);
+        } else if (len != p->expected_len) {
+            failure_count++;
+            printf("test %d: expected length %d, got length %d\n",
+                   i, p->expected_len, len);
+        } else if (len >= 0 && p->expected_output
+                   && memcmp(str, p->expected_output, len) != 0) {
+            failure_count++;
+            printf("test %d: output buffer mismatch\n", i);
+            printf("Expected: ");
+            for (j = 0; j < p->expected_len; ++j)
+                printf("%02x ", p->expected_output[j]);
+            printf("\nActual:   ");
+            for (j = 0; j < len; ++j)
+                printf("%02x ", str[j]);
+            printf("\n");
+        }
+
+        if (str)
+            free(str);
+    }
+    if (failure_count == 0)
+        printf("All %d tests passed.\n", i);
+    return 0;
+}
+#endif                          /* READ_CONFIG_UNIT_TEST */
+
+/*
+ * Local variables:
+ * c-basic-offset: 4
+ * indent-tabs-mode: nil
+ * compile-command: "gcc -Wall -DREAD_CONFIG_UNIT_TEST=1 -I../include -g -o read_config-unit-test read_config.c && ./read_config-unit-test"
+ * End:
+ */
