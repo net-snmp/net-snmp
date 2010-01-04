@@ -3811,7 +3811,7 @@ parse_one_oid_index(oid ** oidStart, size_t * oidLen,
         case ASN_TIMETICKS:
             if (*oidLen) {
                 snmp_set_var_value(var, (u_char *) oidIndex++,
-                                   sizeof(long));
+                                   sizeof(oid));
                 --(*oidLen);
             } else {
                 snmp_set_var_value(var, (u_char *) oidLen, sizeof(long));
