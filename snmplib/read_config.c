@@ -1686,7 +1686,7 @@ read_config_read_octet_string(const char *readfrom, u_char ** str,
          * A hex string submitted. How long? 
          */
         readfrom += 2;
-        cptr1 = skip_not_white(readfrom);
+        cptr1 = skip_not_white((char *) readfrom);
         if (cptr1)
             ilen = (cptr1 - readfrom);
         else
@@ -1718,7 +1718,7 @@ read_config_read_octet_string(const char *readfrom, u_char ** str,
                          (unsigned long)*len, (unsigned long)ilen);
                 DEBUGMSGTL(("read_config_read_octet_string",
                             "buffer too small (%lu < %lu)", (unsigned long)*len, (unsigned long)ilen));
-                cptr1 = skip_not_white(readfrom);
+                cptr1 = skip_not_white((char *) readfrom);
                 return skip_white(cptr1);
             }
             cptr = *str;
@@ -1746,7 +1746,7 @@ read_config_read_octet_string(const char *readfrom, u_char ** str,
             ilen = *len-1;
             *cptr++ = '\0';
         }
-        readfrom = skip_white(readfrom);
+        readfrom = skip_white((char *) readfrom);
     } else {
         /*
          * Normal string 
@@ -1757,7 +1757,7 @@ read_config_read_octet_string(const char *readfrom, u_char ** str,
          */
         if (*str == NULL) {
             char            buf[SNMP_MAXBUF];
-            readfrom = copy_nword(readfrom, buf, sizeof(buf));
+            readfrom = copy_nword((char *) readfrom, buf, sizeof(buf));
 
             *len = strlen(buf);
             if ((cptr = (u_char *) malloc(*len + 1)) == NULL)
@@ -1767,12 +1767,12 @@ read_config_read_octet_string(const char *readfrom, u_char ** str,
                 memcpy(cptr, buf, *len + 1);
             }
         } else {
-            readfrom = copy_nword(readfrom, (char *) *str, *len);
+            readfrom = copy_nword((char *) readfrom, (char *) *str, *len);
             *len = strlen((char *) *str);
         }
     }
 
-    return readfrom;
+    return (char *) readfrom;
 }
 
 /**
@@ -2320,6 +2320,6 @@ main(int argc, char **argv)
  * Local variables:
  * c-basic-offset: 4
  * indent-tabs-mode: nil
- * compile-command: "gcc -Wall -DREAD_CONFIG_UNIT_TEST=1 -I../include -g -o read_config-unit-test read_config.c && ./read_config-unit-test"
+ * compile-command: "gcc -Wall -Werror -DREAD_CONFIG_UNIT_TEST=1 -I../include -g -o read_config-unit-test read_config.c && ./read_config-unit-test"
  * End:
  */
