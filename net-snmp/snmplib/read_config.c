@@ -1768,7 +1768,8 @@ read_config_read_octet_string(const char *readfrom, u_char ** str,
             }
         } else {
             readfrom = copy_nword((char *) readfrom, (char *) *str, *len);
-            *len = strlen((char *) *str);
+            if (*len)
+                *len = strlen((char *) *str);
         }
     }
 
