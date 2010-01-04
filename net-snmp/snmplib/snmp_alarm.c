@@ -391,7 +391,15 @@ unsigned int
 snmp_alarm_register(unsigned int when, unsigned int flags,
                     SNMPAlarmCallback * thecallback, void *clientarg)
 {
-    const struct timeval t = { when, when == 0 };
+    struct timeval  t;
+
+    if (0 == when) {
+        t.tv_sec = 0;
+        t.tv_usec = 1;
+    } else {
+        t.tv_sec = when;
+        t.tv_usec = 0;
+    }
 
     return snmp_alarm_register_hr(t, flags, thecallback, clientarg);
 }
