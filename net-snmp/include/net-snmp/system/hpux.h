@@ -80,5 +80,15 @@
 #  define NETSNMP_ENABLE_INLINE 0
 #endif
 
+/*
+ * prevent sigaction being redefined to cma_sigaction
+ * (causing build errors on HP-UX 10.20, at least)
+ */
+#ifdef hpux10
+#ifndef _CMA_NOWRAPPERS_
+#  define _CMA_NOWRAPPERS_ 1
+#endif
+#endif
+
 /* define the extra mib modules that are supported */
 #define NETSNMP_INCLUDE_HOST_RESOURCES
