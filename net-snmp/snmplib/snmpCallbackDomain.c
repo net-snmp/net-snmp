@@ -548,8 +548,8 @@ netsnmp_clear_callback_list(void)
 
 	if (tr != NULL) {
 	    tr->f_close(tr);
-  	    netsnmp_transport_remove_from_list(&trlist, list->transport);
-	    netsnmp_transport_free(list->transport);
+  	    netsnmp_transport_remove_from_list(&trlist, tr);
+	    netsnmp_transport_free(tr);
 	}
 	list = next;
     }
