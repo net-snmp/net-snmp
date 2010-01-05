@@ -430,6 +430,7 @@ sh_count_procs(char *procname)
       if(len <= 0) continue;
       cmdline[len] = 0;
       while(--len && !cmdline[len]);
+      if(len <= 0) continue;
       while(--len) if(!cmdline[len]) cmdline[len] = ' ';
       if(!strncmp(cmdline,procname,plen)) total++;
 #else
