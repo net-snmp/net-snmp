@@ -1239,6 +1239,7 @@ netsnmp_create_session_v3(PyObject *self, PyObject *args)
     return NULL;
 
   __libraries_init("python");
+  snmp_sess_init(&session);
 
   if (version == 3) {
     session.version = SNMP_VERSION_3;
@@ -1337,7 +1338,7 @@ netsnmp_create_session_v3(PyObject *self, PyObject *args)
     }
   }
   
-  ss = snmp_open(&session);
+  ss = snmp_sess_open(&session);
 
  end:
   if (ss == NULL) {
