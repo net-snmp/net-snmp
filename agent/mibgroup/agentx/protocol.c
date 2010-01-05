@@ -1148,10 +1148,7 @@ agentx_parse_oid(u_char * data, size_t * length, int *inc,
         /*
          * Null OID 
          */
-        *int_ptr = 0;
-        int_ptr++;
-        *int_ptr = 0;
-        int_ptr++;
+        memset(int_ptr, 0, 2 * sizeof(oid));
         *oid_len = 2;
         DEBUGPRINTINDENT("dumpv_recv");
         DEBUGMSG(("dumpv_recv", "OID: NULL (0.0)\n"));
