@@ -60,9 +60,13 @@ extern          "C" {
 #endif
 
     char           *skip_white(char *);
+    const char     *skip_white_const(const char *);
     char           *skip_not_white(char *);
+    const char     *skip_not_white_const(const char *);
     char           *skip_token(char *);
+    const char     *skip_token_const(const char *);
     char           *copy_nword(char *, char *, int);
+    const char     *copy_nword_const(const char *, char *, int);
     char           *copy_word(char *, char *);  /* do not use */
     void            read_config_with_type(const char *, const char *);
     char           *read_config_save_octet_string(char *saveto,
@@ -71,7 +75,10 @@ extern          "C" {
     char           *read_config_read_octet_string(const char *readfrom,
                                                   u_char ** str,
                                                   size_t * len);
-    char           *read_config_read_ascii_string(const char *readfrom,
+    const char     *read_config_read_octet_string_const(const char *readfrom,
+                                                        u_char ** str,
+                                                        size_t * len);
+    const char     *read_config_read_ascii_string(const char *readfrom,
                                                   u_char ** str,
                                                   size_t * len);
     char           *read_config_read_objid(char *readfrom, oid ** objid,
