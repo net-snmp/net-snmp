@@ -83,6 +83,9 @@ extern          "C" {
                                                   size_t * len);
     char           *read_config_read_objid(char *readfrom, oid ** objid,
                                            size_t * len);
+    const char     *read_config_read_objid_const(const char *readfrom,
+                                                 oid ** objid,
+                                                 size_t * len);
     char           *read_config_save_objid(char *saveto, oid * objid,
                                            size_t len);
     char           *read_config_read_data(int type, char *readfrom,

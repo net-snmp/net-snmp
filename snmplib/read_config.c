@@ -1882,6 +1882,14 @@ read_config_save_objid(char *saveto, oid * objid, size_t len)
 char           *
 read_config_read_objid(char *readfrom, oid ** objid, size_t * len)
 {
+    return NETSNMP_REMOVE_CONST(char *,
+             read_config_read_objid_const(NETSNMP_REMOVE_CONST(char*, readfrom),
+                                          objid, len));
+}
+
+const char     *
+read_config_read_objid_const(const char *readfrom, oid ** objid, size_t * len)
+{
 
     if (objid == NULL || readfrom == NULL || len == NULL)
         return NULL;
@@ -1903,7 +1911,7 @@ read_config_read_objid(char *readfrom, oid ** objid, size_t * len)
          * qualify the string for read_objid 
          */
         char            buf[SPRINT_MAX_LEN];
-        copy_nword(readfrom, buf, sizeof(buf));
+        copy_nword_const(readfrom, buf, sizeof(buf));
 
         if (!read_objid(buf, *objid, len)) {
             DEBUGMSGTL(("read_config_read_objid", "Invalid OID"));
@@ -1912,7 +1920,7 @@ read_config_read_objid(char *readfrom, oid ** objid, size_t * len)
         }
     }
 
-    readfrom = skip_token(readfrom);
+    readfrom = skip_token_const(readfrom);
     return readfrom;
 }
 
