@@ -122,10 +122,10 @@ SOFTWARE.
     int             setenv(const char *, const char *, int);
 #endif
 
-    int             calculate_time_diff(struct timeval *,
-                                        struct timeval *);
-    u_int           calculate_sectime_diff(struct timeval *now,
-                                           struct timeval *then);
+    int             calculate_time_diff(const struct timeval *,
+                                        const struct timeval *);
+    u_int           calculate_sectime_diff(const struct timeval *now,
+                                           const struct timeval *then);
 
 #ifndef HAVE_STRCASESTR
     char           *strcasestr(const char *, const char *);
