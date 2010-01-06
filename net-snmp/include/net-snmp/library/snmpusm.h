@@ -225,7 +225,7 @@ extern          "C" {
     void            usm_save_user(struct usmUser *user, const char *token,
                                   const char *type);
     SNMPCallback    usm_store_users;
-    struct usmUser *usm_read_user(char *line);
+    struct usmUser *usm_read_user(const char *line);
     void            usm_parse_config_usmUser(const char *token,
                                              char *line);
 
