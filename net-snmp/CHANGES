@@ -7,6 +7,8 @@ listing of all changes made to the code.
 
     snmplib:
       - [BUG 2838243]: Correct the output of unsigned values.
+      - [BUG 2919320]: Avoid accessing freed memory
+      - [BUG 2922390]: Fix test for missing contextName parameter
       - [PATCH 2043018]: fix recvfrom hangs
       - [PATCH 2258229]: Remove misleading comment
       - [PATCH 2479700]: Fix zoned IP address used as table indices
@@ -20,12 +22,20 @@ listing of all changes made to the code.
       - [PATCH 2797251]: Fix memory leaks
       - [PATCH 2871747]: Fix memory leak in OID processing
       - Change the parsing of ranges to accept all valid values
+      - Ensure O_CREATE mask is always specified
       - Fix extern "C" wrapping
       - Make -LN stop dumping core.
       - Make bad debug levels report the offending symbol
 
     snmpd:
       - [BUG 1693039]: Be silent when insert fails.
+      - [BUG 2822360]: Fix memory leak when building table OIDs
+      - [BUG 2841008]: Protect against crash following failed AgentX response
+      - [BUG 2873858]: Fix handling of schedOwner index.
+      - [BUG 2894059]: Handle errors when counting interfaces
+      - [BUG 2897000]: Suppress 32-bit counter truncation warnings.
+      - [BUG 2914410]: Fix crash on empty command lines
+      - [BUG 2924140]: Fix termination of CPU/FPU types
       - [PATCH 1257347]: Non-fixed size connection buffer
       - [PATCH 1550730]: Report errors from iterator-based handlers
       - [PATCH 1977439]: Fix pass/_persist bug with SET oid value
@@ -39,19 +49,33 @@ listing of all changes made to the code.
       - [PATCH 2791417]: Fix snmpd segfault when run with -DALL
       - [PATCH 2797251]: Support multiple initialisation and shutdown
       - [PATCH 2822337]: Fix memory leak in ipAddressPrefixTable
+      - [PATCH 2877518]: Fix handling of scoped AgentX variables
+      - [PATCH 2883155]: Fix memory leak in proxy handling.
+      - [PATCH 2887816]: Protect against division-by-zero crash
+      - [PATCH 2901029]: Fix compiler warning on CloseHandle()
+      - [PATCH 2911323]: Fix agent lockup when monitoring AgentX-delegated information
+      - [PATCH 2912584]: Fix null OID handling in Agentx on 64bit
       - Allow "monitor" to handle negative threshold values
       - Clean up notification
+      - Ensure O_CREATE mask is always specified
       - Fix CVE-2008-4309 (GETBULK issue reported by Oscar Mira-Sanchez)
       - Fix creation of views using snmpusm
+      - Fix invalid access to memory in TCP-MIB
+      - Fix logging of 'truncating integer values' in IP-MIB and TCP-MIB
       - Fix memory leak when multiple interfaces have the same IPv6 address
       - Fix possible crash when 64-bit counters exceed 2^32
       - Fix two bugs with smux password support
+      - Fix udpTable indexes on big-endian 64bit Linux.
       - Improve parsing of -LS command line argument
       - Register CPU/memory hardware modules with nsCacheTable
+      - Support large HW addresses (>6bytes)
 
     snmptrapd:
       - [PATCH 2726302]: Pass results of Perl trap handlers to trap daemon
       - Remove glibc-specific printf-formatting tokens
+
+    snmptable:
+      - [BUG 2837998]: Handle missing instance subidentifiers in results
 
     apps:
       - [BUG 2811577]: Fix bug in GetBulk handling
@@ -64,13 +88,12 @@ listing of all changes made to the code.
 
     docs:
       - [PATCH 2788072]: Document 'logmatch' functionality.
-      - [PATCH 2795739]: Fix incorrect disk/file size descriptions & unit
-	specifiers
+      - [PATCH 2795739]: Fix incorrect disk/file size descriptions & unit specifiers
 
     mib2c:
       - [BUG 2827269]: Suppress non-ordered TODO comments
-      - [PATCH 2136437]: make FLAG defines more 64bit friendly when huge
-	tables are encountered
+      - [BUG 2888569]: Fix generation of table columns array
+      - [PATCH 2136437]: Improve 64-bit handling of large table FLAG defines 
       - [PATCH 2316127]: Fix bug in iterate_access generated code.
 
     perl:
@@ -79,9 +102,11 @@ listing of all changes made to the code.
       - [PATCH 2182079]: Fix various warnings & allow use of "use strict"
       - [PATCH 2361712]: Fix getbulk optimization during walks
       - [PATCH 2793857]: Report failed asynchronous requests
+      - [PATCH 2890931]: Better handling of Counter64 values.
 
     python:
       - [BUG 2258935]: Python Extension Module fails on Solaris
+      - [BUG 2919379]: Initialise SNMP sessions properly
       - [PATCH 2074817]: Fix regexp engine CPU performance issues
       - [PATCH 2260828]: Fix python snmpwalk memory leak
       - [PATCH 2580979]: Fix python session pointers on 64-bit systems
