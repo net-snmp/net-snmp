@@ -104,7 +104,7 @@ void devla_getstats(unsigned int regno, void * dummy);
 static mach_port_t masterPort;		/* to communicate with I/O Kit	*/
 #endif                          /* darwin */
 
-void            diskio_parse_config(const char *, char *);
+static int      getstats(void);
 
 #if defined (freebsd4) || defined(freebsd5)
 void		devla_getstats(unsigned int regno, void *dummy);
@@ -772,7 +772,8 @@ void devla_getstats(unsigned int regno, void * dummy) {
     }
 }
 
-int getstats(void)
+static int
+getstats(void)
 {
     FILE* parts;
     time_t now;
