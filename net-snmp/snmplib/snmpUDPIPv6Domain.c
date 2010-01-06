@@ -777,7 +777,7 @@ inet_addr_complement(int pf, void *src, void *dst)
  */
 
 int
-inet_addr_and(int pf, void *src1, void *src2, void *dst)
+inet_addr_and(int pf, const void *src1, const void *src2, void *dst)
 {
     int             i;
 
@@ -787,15 +787,15 @@ inet_addr_and(int pf, void *src1, void *src2, void *dst)
     switch (pf) {
     case PF_INET:
         ((struct in_addr *) dst)->s_addr =
-            ((struct in_addr *) src1)->s_addr & ((struct in_addr *) src2)->
+            ((const struct in_addr *) src1)->s_addr & ((const struct in_addr *) src2)->
             s_addr;
         break;
 
     case PF_INET6:
         for (i = 0; i < 16; i++) {
             (*(u_char *) (&((struct in6_addr *) dst)->s6_addr[i])) =
-                (*(u_char *) (&((struct in6_addr *) src1)->s6_addr[i])) &
-                (*(u_char *) (&((struct in6_addr *) src2)->s6_addr[i]));
+                (*(const u_char *) (&((const struct in6_addr *) src1)->s6_addr[i])) &
+                (*(const u_char *) (&((const struct in6_addr *) src2)->s6_addr[i]));
         }
         break;
     default:
@@ -812,7 +812,7 @@ inet_addr_and(int pf, void *src1, void *src2, void *dst)
  *      with the netmask address, mask.
  *      Net and mask are ususally sockaddr_in or sockaddr_in6.  
  * Note:
- *      Must spefiey protocol family in pf.
+ *      Must specify protocol family in pf.
  * return:
  *      0 if there is no consistence with address "net" and "mask".
  *      -1 if network address is inconsistent with netmask address, for 
@@ -910,7 +910,7 @@ inet_addrs_consistence(int pf, void *net, void *mask)
  *      and check the result is equal to address "network". 
  *      From, net and mask are ususally sockaddr_in or sockaddr_in6.  
  * Note:
- *      Must spefiey protocol family in pf.
+ *      Must specify protocol family in pf.
  * return:
  *      0 if address "from" masked by address "mask" is eqaul to 
  *      address "network". 
@@ -924,9 +924,9 @@ inet_addrs_consistence(int pf, void *net, void *mask)
  */
 
 int
-masked_address_are_equal(int af, struct sockaddr_storage *from,
-                         struct sockaddr_storage *mask,
-                         struct sockaddr_storage *network)
+masked_address_are_equal(int af, const struct sockaddr_storage *from,
+                         const struct sockaddr_storage *mask,
+                         const struct sockaddr_storage *network)
 {
 
     struct sockaddr_storage ss;
@@ -939,11 +939,11 @@ masked_address_are_equal(int af, struct sockaddr_storage *from,
         }
         ss.SS_FAMILY = PF_INET;
         inet_addr_and(PF_INET,
-                      &((struct sockaddr_in *) from)->sin_addr,
-                      &((struct sockaddr_in *) mask)->sin_addr,
+                      &((const struct sockaddr_in *) from)->sin_addr,
+                      &((const struct sockaddr_in *) mask)->sin_addr,
                       &((struct sockaddr_in *) &ss)->sin_addr);
-        if (((struct sockaddr_in *) &ss)->sin_addr.s_addr ==
-            ((struct sockaddr_in *) network)->sin_addr.s_addr) {
+        if (((const struct sockaddr_in *) &ss)->sin_addr.s_addr ==
+            ((const struct sockaddr_in *) network)->sin_addr.s_addr) {
             return 0;
         } else {
             return -1;
@@ -955,14 +955,14 @@ masked_address_are_equal(int af, struct sockaddr_storage *from,
         }
         ss.SS_FAMILY = PF_INET6;
         inet_addr_and(PF_INET6,
-                      &((struct sockaddr_in6 *) from)->sin6_addr,
-                      &((struct sockaddr_in6 *) mask)->sin6_addr,
+                      &((const struct sockaddr_in6 *) from)->sin6_addr,
+                      &((const struct sockaddr_in6 *) mask)->sin6_addr,
                       &((struct sockaddr_in6 *) &ss)->sin6_addr);
 #ifndef IN6_ARE_ADDR_EQUAL
 #define IN6_ARE_ADDR_EQUAL(a,b) IN6_ADDR_EQUAL(a,b)
 #endif
-        if (IN6_ARE_ADDR_EQUAL(&((struct sockaddr_in6 *) &ss)->sin6_addr,
-                               &((struct sockaddr_in6 *) network)->
+        if (IN6_ARE_ADDR_EQUAL(&((const struct sockaddr_in6 *) &ss)->sin6_addr,
+                               &((const struct sockaddr_in6 *) network)->
                                sin6_addr) == 1) {
             return 0;
         } else {
@@ -1341,9 +1341,9 @@ netsnmp_udp6_getSecName(void *opaque, int olength,
         if ((community_len == (int)strlen(c->community)) &&
             (memcmp(community, c->community, community_len) == 0) &&
             (masked_address_are_equal(from->sin6_family,
-                                      (struct sockaddr_storage *) from,
-                                      (struct sockaddr_storage *) &c->mask,
-                                      (struct sockaddr_storage *) &c->network)
+                                      (const struct sockaddr_storage *) from,
+                                      (const struct sockaddr_storage *) &c->mask,
+                                      (const struct sockaddr_storage *) &c->network)
 					== 0)) {
             DEBUGMSG(("netsnmp_udp6_getSecName", "... SUCCESS\n"));
             if (secName != NULL) {
