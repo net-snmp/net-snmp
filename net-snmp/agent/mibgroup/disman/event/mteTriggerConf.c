@@ -24,19 +24,16 @@ init_mteTriggerConf(void)
     /*
      * Register config handler for user-level (fixed) triggers ...
      */
-    snmpd_register_config_handler("monitor",
-				  (void(*)(const char*, char*))
-				  parse_mteMonitor,
-				  NULL,
-                                  "triggername [-I] [-i OID | -o OID]* [-e event] expression ");
-    snmpd_register_config_handler("defaultMonitors",
-                                  (void(*)(const char*, char*))
-				  parse_default_mteMonitors,
-				  NULL, "yes|no");
-    snmpd_register_config_handler("linkUpDownNotifications",
-				  (void(*)(const char*, char*))
-				  parse_linkUpDown_traps,
-				  NULL, "yes|no");
+    snmpd_register_const_config_handler("monitor",
+                                        parse_mteMonitor,
+                                        NULL,
+                                        "triggername [-I] [-i OID | -o OID]* [-e event] expression ");
+    snmpd_register_const_config_handler("defaultMonitors",
+                                        parse_default_mteMonitors,
+                                        NULL, "yes|no");
+    snmpd_register_const_config_handler("linkUpDownNotifications",
+                                        parse_linkUpDown_traps,
+                                        NULL, "yes|no");
 
     /*
      * ... for persistent storage of various event table entries ...
@@ -150,7 +147,7 @@ parse_mteMonitor(const char *token, const char *line)
 {
     char   buf[  SPRINT_MAX_LEN];
     char   tname[MTE_STR1_LEN+1];
-    char  *cp;
+    const char  *cp;
     long   test = 0;
 
     char   ename[MTE_STR1_LEN+1];
@@ -189,9 +186,9 @@ parse_mteMonitor(const char *token, const char *line)
     memset( buf,   0, sizeof(buf));
     memset( tname, 0, sizeof(tname));
     memset( ename, 0, sizeof(ename));
-    for (cp = copy_nword(line, buf, SPRINT_MAX_LEN);
+    for (cp = copy_nword_const(line, buf, SPRINT_MAX_LEN);
          ;
-         cp = copy_nword(cp,   buf, SPRINT_MAX_LEN)) {
+         cp = copy_nword_const(cp,   buf, SPRINT_MAX_LEN)) {
 
         if ( buf[0] == '-' ) {
             switch (buf[1]) {
@@ -204,7 +201,7 @@ parse_mteMonitor(const char *token, const char *line)
             case 'r':
             case 'u':
                 /* skip option parameter */
-                cp = skip_token( cp );
+                cp = skip_token_const( cp );
                 break;
             case 'D':
             case 'I':
@@ -218,7 +215,7 @@ parse_mteMonitor(const char *token, const char *line)
                  *      Handle either case.
                  */
                 if (cp && *cp != '-')
-                    cp = skip_token( cp );
+                    cp = skip_token_const( cp );
                 break;
             case '0':
             case '1':
@@ -282,7 +279,7 @@ parse_mteMonitor(const char *token, const char *line)
         * Otherwise the first token is the OID to be monitored.
         *   Skip it and look at the next token (if any).
         */
-        cp = copy_nword(cp,   buf, SPRINT_MAX_LEN);
+        cp = copy_nword_const(cp,   buf, SPRINT_MAX_LEN);
         if (cp) {
             /*
              * If this is a numeric value, then it'll be the MIN
@@ -321,9 +318,9 @@ parse_mteMonitor(const char *token, const char *line)
      * Now start parsing again at the beginning of the directive,
      *   extracting the various options...
      */
-    for (cp = copy_nword(line, buf, SPRINT_MAX_LEN);
+    for (cp = copy_nword_const(line, buf, SPRINT_MAX_LEN);
          ;
-         cp = copy_nword(cp,   buf, SPRINT_MAX_LEN)) {
+         cp = copy_nword_const(cp,   buf, SPRINT_MAX_LEN)) {
 
         if (buf[0] == '-' ) {
             switch (buf[1]) {
@@ -338,7 +335,7 @@ parse_mteMonitor(const char *token, const char *line)
                 memset( oid_name_buf, 0, sizeof(oid_name_buf));
                 memset(     name_buf, 0, sizeof(    name_buf));
                 name_buf_len = MAX_OID_LEN;
-                cp = copy_nword(cp, oid_name_buf, MTE_STR1_LEN);
+                cp = copy_nword_const(cp, oid_name_buf, MTE_STR1_LEN);
                 if (!snmp_parse_oid(oid_name_buf, name_buf, &name_buf_len)) {
                     snmp_log(LOG_ERR, "discontinuity OID: %s\n", oid_name_buf);
                     config_perror("unknown discontinuity OID");
@@ -352,7 +349,7 @@ parse_mteMonitor(const char *token, const char *line)
                 break;
     
             case 'e':   /*  event */
-                cp     = copy_nword(cp, ename, MTE_STR1_LEN);
+                cp     = copy_nword_const(cp, ename, MTE_STR1_LEN);
                 break;
     
             case 'I':   /* value instance */
@@ -373,7 +370,7 @@ parse_mteMonitor(const char *token, const char *line)
                     continue;
                 }
                 idx++;
-                cp     = copy_nword(cp, buf, SPRINT_MAX_LEN);
+                cp     = copy_nword_const(cp, buf, SPRINT_MAX_LEN);
                 object = mteObjects_addOID( "snmpd.conf", tname, idx, buf, 0 );
                 if (!object) {
                     snmp_log(LOG_ERR, "Unknown payload OID: %s\n", buf);
@@ -385,7 +382,7 @@ parse_mteMonitor(const char *token, const char *line)
     
             case 'o':   /*  object  */
                 idx++;
-                cp     = copy_nword(cp, buf, SPRINT_MAX_LEN);
+                cp     = copy_nword_const(cp, buf, SPRINT_MAX_LEN);
                 object = mteObjects_addOID( "snmpd.conf", tname, idx, buf, 1 );
                 if (!object) {
                     snmp_log(LOG_ERR, "Unknown payload OID: %s\n", buf);
@@ -396,7 +393,7 @@ parse_mteMonitor(const char *token, const char *line)
                 break;
     
             case 'r':   /*  repeat frequency */
-                cp     = copy_nword(cp, buf, SPRINT_MAX_LEN);
+                cp     = copy_nword_const(cp, buf, SPRINT_MAX_LEN);
                 repeat = strtoul(buf, NULL, 0);
                 break;
     
@@ -412,7 +409,7 @@ parse_mteMonitor(const char *token, const char *line)
                 break;
     
             case 'u':   /*  user */
-                cp     = copy_nword(cp, buf, SPRINT_MAX_LEN);
+                cp     = copy_nword_const(cp, buf, SPRINT_MAX_LEN);
                 sess   = netsnmp_iquery_user_session(buf);
                 if (NULL == sess) {
                     snmp_log(LOG_ERR, "user name %s not found\n", buf);
@@ -453,7 +450,7 @@ parse_mteMonitor(const char *token, const char *line)
                        } else {
                            op = MTE_EXIST_ABSENT;
                        }
-                       cp = copy_nword(cp, buf, SPRINT_MAX_LEN);
+                       cp = copy_nword_const(cp, buf, SPRINT_MAX_LEN);
                     }
                     /*
                      * ... then extract the monitored OID.
@@ -471,7 +468,7 @@ parse_mteMonitor(const char *token, const char *line)
                      *   identify the boolean operator ...
                      */
                     memcpy(oid_name_buf, buf, SPRINT_MAX_LEN);
-                    cp = copy_nword(cp, buf, SPRINT_MAX_LEN);
+                    cp = copy_nword_const(cp, buf, SPRINT_MAX_LEN);
                     if (buf[0] == '!') {
                        op = MTE_BOOL_UNEQUAL;
                     } else if (buf[0] == '=') {
@@ -493,7 +490,7 @@ parse_mteMonitor(const char *token, const char *line)
                      * ... then extract the comparison value.
                      *     (ignoring anything that remains)
                      */
-                    cp    = copy_nword(cp, buf, SPRINT_MAX_LEN);
+                    cp    = copy_nword_const(cp, buf, SPRINT_MAX_LEN);
                     value = strtol(buf, NULL, 0);
                     cp = NULL;  /* To terminate the processing loop */
                     DEBUGMSGTL(("disman:event:conf", "%s: Bool (%s, %ld, %ld)\n",
@@ -507,7 +504,7 @@ parse_mteMonitor(const char *token, const char *line)
                      */
                     memcpy(oid_name_buf, buf, SPRINT_MAX_LEN);
                     memset(         buf,   0, SPRINT_MAX_LEN);
-                    cp  = copy_nword(cp, buf, SPRINT_MAX_LEN);
+                    cp  = copy_nword_const(cp, buf, SPRINT_MAX_LEN);
                         value = strtol(buf, NULL, 0);
     
                     /*
@@ -695,7 +692,7 @@ parse_mteMonitor(const char *token, const char *line)
             }
             value = strtol(cp, NULL, 0);
             entry->mteTThDFallValue  = value;
-            cp = skip_token(cp);
+            cp = skip_token_const(cp);
             value = strtol(cp, NULL, 0);
             entry->mteTThDRiseValue  = value;
             /*
