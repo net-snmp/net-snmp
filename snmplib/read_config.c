@@ -1491,6 +1491,13 @@ config_pwarn(const char *str)
 char           *
 skip_white(char *ptr)
 {
+    return NETSNMP_REMOVE_CONST(char *,
+               skip_white_const(NETSNMP_REMOVE_CONST(char *, ptr)));
+}
+
+const char     *
+skip_white_const(const char *ptr)
+{
     if (ptr == NULL)
         return (NULL);
     while (*ptr != 0 && isspace((unsigned char)*ptr))
@@ -1502,6 +1509,13 @@ skip_white(char *ptr)
 
 char           *
 skip_not_white(char *ptr)
+{
+    return NETSNMP_REMOVE_CONST(char *,
+               skip_not_white_const(NETSNMP_REMOVE_CONST(char *, ptr)));
+}
+
+const char     *
+skip_not_white_const(const char *ptr)
 {
     if (ptr == NULL)
         return (NULL);
@@ -1515,9 +1529,16 @@ skip_not_white(char *ptr)
 char           *
 skip_token(char *ptr)
 {
-    ptr = skip_white(ptr);
-    ptr = skip_not_white(ptr);
-    ptr = skip_white(ptr);
+    return NETSNMP_REMOVE_CONST(char *,
+               skip_token_const(NETSNMP_REMOVE_CONST(char *, ptr)));
+}
+
+const char     *
+skip_token_const(const char *ptr)
+{
+    ptr = skip_white_const(ptr);
+    ptr = skip_not_white_const(ptr);
+    ptr = skip_white_const(ptr);
     return (ptr);
 }
 
@@ -1537,6 +1558,13 @@ skip_token(char *ptr)
 
 char           *
 copy_nword(char *from, char *to, int len)
+{
+    return NETSNMP_REMOVE_CONST(char *,
+               copy_nword_const(NETSNMP_REMOVE_CONST(char *, from), to, len));
+}
+
+const char           *
+copy_nword_const(const char *from, char *to, int len)
 {
     char            quote;
     if (!from || !to)
@@ -1586,9 +1614,9 @@ copy_nword(char *from, char *to, int len)
     }
     if (len > 0)
         *to = 0;
-    from = skip_white(from);
+    from = skip_white_const(from);
     return (from);
-}                               /* copy_word */
+}                               /* copy_nword */
 
 /*
  * copy_word
@@ -1666,14 +1694,23 @@ read_config_save_octet_string(char *saveto, u_char * str, size_t len)
  *   in *len.
  *
  * @return A pointer to the next character in the input to be parsed if
- *   parsing succeeded; NULL if an error occurred.
+ *   parsing succeeded; NULL when the end of the input string has been reached
+ *   or if an error occurred.
  */
 char           *
 read_config_read_octet_string(const char *readfrom, u_char ** str,
                               size_t * len)
 {
+    return NETSNMP_REMOVE_CONST(char *,
+               read_config_read_octet_string_const(readfrom, str, len));
+}
+
+const char     *
+read_config_read_octet_string_const(const char *readfrom, u_char ** str,
+                                    size_t * len)
+{
     u_char         *cptr = NULL;
-    char           *cptr1;
+    const char     *cptr1;
     u_int           tmp;
     int             i;
     size_t          ilen;
@@ -1686,7 +1723,7 @@ read_config_read_octet_string(const char *readfrom, u_char ** str,
          * A hex string submitted. How long? 
          */
         readfrom += 2;
-        cptr1 = skip_not_white((char *) readfrom);
+        cptr1 = skip_not_white_const(readfrom);
         if (cptr1)
             ilen = (cptr1 - readfrom);
         else
@@ -1718,8 +1755,8 @@ read_config_read_octet_string(const char *readfrom, u_char ** str,
                          (unsigned long)*len, (unsigned long)ilen);
                 DEBUGMSGTL(("read_config_read_octet_string",
                             "buffer too small (%lu < %lu)", (unsigned long)*len, (unsigned long)ilen));
-                cptr1 = skip_not_white((char *) readfrom);
-                return skip_white(cptr1);
+                cptr1 = skip_not_white_const(readfrom);
+                return skip_white_const(cptr1);
             }
             cptr = *str;
         }
@@ -1746,7 +1783,7 @@ read_config_read_octet_string(const char *readfrom, u_char ** str,
             ilen = *len-1;
             *cptr++ = '\0';
         }
-        readfrom = skip_white((char *) readfrom);
+        readfrom = skip_white_const(readfrom);
     } else {
         /*
          * Normal string 
@@ -1757,7 +1794,7 @@ read_config_read_octet_string(const char *readfrom, u_char ** str,
          */
         if (*str == NULL) {
             char            buf[SNMP_MAXBUF];
-            readfrom = copy_nword((char *) readfrom, buf, sizeof(buf));
+            readfrom = copy_nword_const(readfrom, buf, sizeof(buf));
 
             *len = strlen(buf);
             if ((cptr = (u_char *) malloc(*len + 1)) == NULL)
@@ -1767,13 +1804,13 @@ read_config_read_octet_string(const char *readfrom, u_char ** str,
                 memcpy(cptr, buf, *len + 1);
             }
         } else {
-            readfrom = copy_nword((char *) readfrom, (char *) *str, *len);
+            readfrom = copy_nword_const(readfrom, (char *) *str, *len);
             if (*len)
                 *len = strlen((char *) *str);
         }
     }
 
-    return (char *) readfrom;
+    return readfrom;
 }
 
 /**
@@ -1790,9 +1827,10 @@ read_config_read_octet_string(const char *readfrom, u_char ** str,
  *   character is not included in the count *len.
  *
  * @return A pointer to the next character in the input to be parsed if
- *   parsing succeeded; NULL if an error occurred.
+ *   parsing succeeded; NULL when the end of the input string has been reached
+ *   or if an error occurred.
  */
-char           *
+const char     *
 read_config_read_ascii_string(const char *readfrom, u_char ** str,
                               size_t * len)
 {
@@ -2224,7 +2262,7 @@ struct read_config_testcase {
     /*
      * inputs 
      */
-    char           *(*pf) (const char *readfrom, u_char ** str,
+    const char     *(*pf) (const char * readfrom, u_char ** str,
                            size_t * len);
     const char     *readfrom;
     size_t          obuf_len;
@@ -2243,17 +2281,17 @@ static const u_char obuf3[] = { 1, 3, 2 };
 static const u_char zbuf[] = { 0, 0, 0 };
 
 static const struct read_config_testcase test_input[] = {
-    {&read_config_read_octet_string, "0x010002", 1, -1, NULL, 1},
-    {&read_config_read_octet_string, "0x010002", 2, -1, NULL, 2},
-    {&read_config_read_octet_string, "0x010002", 3, -1, obuf1, 3},
-    {&read_config_read_octet_string, "0x010002", 4, -1, obuf1, 3},
-    {&read_config_read_octet_string, "0x010002", 0, -1, obuf1, 3},
+    {&read_config_read_octet_string_const, "0x010002", 1, -1, NULL, 1},
+    {&read_config_read_octet_string_const, "0x010002", 2, -1, NULL, 2},
+    {&read_config_read_octet_string_const, "0x010002", 3, -1, obuf1, 3},
+    {&read_config_read_octet_string_const, "0x010002", 4, -1, obuf1, 3},
+    {&read_config_read_octet_string_const, "0x010002", 0, -1, obuf1, 3},
 
-    {&read_config_read_octet_string, "abc", 1, -1, zbuf, 0},
-    {&read_config_read_octet_string, "abc", 2, -1, obuf2, 1},
-    {&read_config_read_octet_string, "abc", 3, -1, obuf2, 2},
-    {&read_config_read_octet_string, "abc", 4, -1, obuf2, 3},
-    {&read_config_read_octet_string, "abc", 0, -1, obuf2, 3},
+    {&read_config_read_octet_string_const, "abc", 1, -1, zbuf, 0},
+    {&read_config_read_octet_string_const, "abc", 2, -1, obuf2, 1},
+    {&read_config_read_octet_string_const, "abc", 3, -1, obuf2, 2},
+    {&read_config_read_octet_string_const, "abc", 4, -1, obuf2, 3},
+    {&read_config_read_octet_string_const, "abc", 0, -1, obuf2, 3},
 
     {&read_config_read_ascii_string, "0x010302", 1, -1, NULL, 0},
     {&read_config_read_ascii_string, "0x010302", 2, -1, NULL, 1},
@@ -2280,7 +2318,7 @@ main(int argc, char **argv)
         const struct read_config_testcase *const p = &test_input[i];
         size_t          len = p->obuf_len;
         u_char         *str = len > 0 ? malloc(len) : NULL;
-        char           *result;
+        const char     *result;
         size_t          offset;
 
         printf("Test %d ...\n", i);
