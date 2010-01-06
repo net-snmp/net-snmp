@@ -162,7 +162,7 @@ schedTable_handler(netsnmp_mib_handler *handler,
                  * Convert 'schedLastFailed' timestamp
                  *   into DateAndTime string
                  */
-                cp = date_n_time( &entry->schedLastFailed, &len );
+                cp = (char *) date_n_time( &entry->schedLastFailed, &len );
                 snmp_set_var_typed_value(request->requestvb, ASN_OCTET_STR,
                                          cp, len);
                 break;

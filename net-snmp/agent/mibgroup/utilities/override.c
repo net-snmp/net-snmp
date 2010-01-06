@@ -203,7 +203,7 @@ netsnmp_parse_override(const char *token, char *line)
              * hex 
              */
             thedata->value_len =
-                hex_to_binary2(buf + 2, strlen(buf) - 2,
+                hex_to_binary2((u_char *)(buf + 2), strlen(buf) - 2,
                                (char **) &thedata->value);
         } else {
             thedata->value = strdup(buf);
