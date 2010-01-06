@@ -592,12 +592,12 @@ netsnmp_unix_parse_security(const char *token, char *param)
 
     param = copy_nword(param, secName, VACMSTRINGLEN);
     if (strcmp(secName, "-Cn") == 0) {
-        if (!secName) {
+        param = copy_nword( param, contextName, sizeof(contextName));
+        param = copy_nword( param, secName, sizeof(secName));
+        if (contextName[0] == '\0') {
             config_perror("missing CONTEXT_NAME parameter");
             return;
         }
-        param = copy_nword( param, contextName, sizeof(contextName));
-        param = copy_nword( param, secName, sizeof(secName));
     } else {
         contextName[0] = '\0';
     }
