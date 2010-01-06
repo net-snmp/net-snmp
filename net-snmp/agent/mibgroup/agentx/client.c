@@ -191,7 +191,7 @@ agentx_register(netsnmp_session * ss, oid start[], size_t startlen,
     pdu->range_subid = range_subid;
     if (contextName) {
         pdu->flags |= AGENTX_MSG_FLAG_NON_DEFAULT_CONTEXT;
-        pdu->community = strdup(contextName);
+        pdu->community = (u_char *) strdup(contextName);
         pdu->community_len = strlen(contextName);
     }
 
@@ -248,7 +248,7 @@ agentx_unregister(netsnmp_session * ss, oid start[], size_t startlen,
     pdu->range_subid = range_subid;
     if (contextName) {
         pdu->flags |= AGENTX_MSG_FLAG_NON_DEFAULT_CONTEXT;
-        pdu->community = strdup(contextName);
+        pdu->community = (u_char *) strdup(contextName);
         pdu->community_len = strlen(contextName);
     }
 

@@ -459,7 +459,7 @@ handle_agentx_packet(int operation, netsnmp_session * session, int reqid,
      */
 
     internal_pdu = snmp_clone_pdu(pdu);
-    internal_pdu->contextName = internal_pdu->community;
+    internal_pdu->contextName = (char *) internal_pdu->community;
     internal_pdu->contextNameLen = internal_pdu->community_len;
     internal_pdu->community = NULL;
     internal_pdu->community_len = 0;
