@@ -9,6 +9,8 @@ listing of all changes made to the code.
       - [BUG 2027834]: Extend string print buffer by the minimum necessary
       - [BUG 2217367]: Fix a memory leak (backport of Patch 1616912)
       - [BUG 2838243]: Correct the output of unsigned values
+      - [BUG 2919320]: Avoid accessing freed memory
+      - [BUG 2922390]: Fix test for missing contextName parameter
       - [PATCH 2003450]: Fix a couple of 64-bit problems
       - [PATCH 2043018]: Fix recvfrom hangs
       - [PATCH 2258229]: Remove misleading comment
@@ -18,6 +20,7 @@ listing of all changes made to the code.
       - [PATCH 2689362]: Fix handling of IPv6 hostnames
       - [PATCH 2713841]: Fix runtime errors triggered by high-ASCII chars
       - Change the parsing of ranges to accept all valid values
+      - Ensure O_CREATE mask is always specified
       - Make -LN stop dumping core.
       - Make bad debug levels report the offending symbol
 
@@ -25,6 +28,10 @@ listing of all changes made to the code.
       - [BUG 1693039]: Be silent when insert fails
       - [BUG 2003144]: Increase size of AgentX packet build buffer
       - [BUG 2023803]: Remove irrelevant configure dependency (HP-UX 11)
+      - [BUG 2822360]: Fix memory leak when building table OIDs
+      - [BUG 2841008]: Protect against crash following failed AgentX response
+      - [BUG 2894059]: Handle errors when counting interfaces
+      - [BUG 2914410]: Fix crash on empty command lines
       - [PATCH 1550730]: Report errors from iterator-based handlers
       - [PATCH 1944581]: Don't core dump on long string index values
       - [PATCH 1977439]: Fix pass/_persist bug with SET oid value
@@ -34,11 +41,17 @@ listing of all changes made to the code.
       - [PATCH 2124288]: Fix setting of usmUserPrivProtocol at creation
       - [PATCH 2384779]: Fix handling of GetBulk with N>0,M==0
       - [PATCH 2693670]: Don't open AgentX sockets if other transports fail
+      - [PATCH 2877518]: Fix handling of scoped AgentX variables
+      - [PATCH 2883155]: Fix memory leak in proxy handling.
+      - [PATCH 2887816]: Protect against division-by-zero crash
+      - [PATCH 2912584]: Fix null OID handling in Agentx on 64bit
+      - Ensure O_CREATE mask is always specified
       - Fix CVE-2008-4309 (GETBULK issue reported by Oscar Mira-Sanchez)
       - Fix memory leak when multiple interfaces have the same IPv6 address
       - Fix possible crash when 64-bit counters exceed 2^32
       - Fix two bugs with smux password support.
       - Improve parsing of -LS command line argument
+      - Support large HW addresses (>6bytes)
 
     snmptrapd:
       - Remove glibc-specific printf-formatting tokens
@@ -47,6 +60,9 @@ listing of all changes made to the code.
       - [BUG 1964136]: Drop NULL type from snmpset usage
       - [BUG 2811577]: Fix bug in GetBulk handling
       - Improve parsing of -LS command line argument
+
+    snmptable:
+      - [BUG 2837998]: Handle missing instance subidentifiers in results
 
     build:
       - Limit the use of _KERNEL definitions in configure
@@ -62,12 +78,14 @@ listing of all changes made to the code.
 
     mib2c:
       - [BUG 2827269]: Suppress non-ordered TODO comments
+      - [BUG 2888569]: Fix generation of table columns array
       - [PATCH 2316127]: Fix bug in iterate_access generated code
 
     perl:
       - [BUG 1554817]: Fix class assigment so getRootOID works properly
       - [PATCH 2021444]: Support SNMPv2c in gettable
       - [PATCH 2022948]: Fix for Counter64 in perl subagent
+      - [PATCH 2890931]: Better handling of Counter64 values
 
     AIX:
       - [BUG 2712670]: Agent crashes on AIX with hrStorage
