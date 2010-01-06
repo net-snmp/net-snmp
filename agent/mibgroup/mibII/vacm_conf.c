@@ -69,14 +69,17 @@ init_vacm_config_tokens(void) {
                                   "name context model level prefix viewname viewval");
     snmpd_register_config_handler("view", vacm_parse_view, vacm_free_view,
                                   "name type subtree [mask]");
-    snmpd_register_config_handler("vacmView", vacm_parse_config_view, NULL,
-                                  NULL);
-    snmpd_register_config_handler("vacmGroup", vacm_parse_config_group,
-                                  NULL, NULL);
-    snmpd_register_config_handler("vacmAccess", vacm_parse_config_access,
-                                  NULL, NULL);
-    snmpd_register_config_handler("vacmAuthAccess", vacm_parse_config_auth_access,
-                                  NULL, NULL);
+    snmpd_register_const_config_handler("vacmView",
+                                        vacm_parse_config_view, NULL, NULL);
+    snmpd_register_const_config_handler("vacmGroup",
+                                        vacm_parse_config_group,
+                                        NULL, NULL);
+    snmpd_register_const_config_handler("vacmAccess",
+                                        vacm_parse_config_access,
+                                        NULL, NULL);
+    snmpd_register_const_config_handler("vacmAuthAccess",
+                                        vacm_parse_config_auth_access,
+                                        NULL, NULL);
 
     /* easy community auth handler */
     snmpd_register_config_handler("authcommunity",

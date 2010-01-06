@@ -250,7 +250,7 @@ netsnmp_access_interface_entry_get_by_name(netsnmp_container *container,
         return NULL;
     }
 
-    tmp.name = (char *)name;
+    tmp.name = NETSNMP_REMOVE_CONST(char *, name);
     return CONTAINER_FIND(container->next, &tmp);
 }
 
@@ -783,7 +783,7 @@ _free_interface_config(void)
     netsnmp_conf_if_list   *if_ptr = conf_list, *if_next;
     while (if_ptr) {
         if_next = if_ptr->next;
-        free(if_ptr->name);
+        free(NETSNMP_REMOVE_CONST(char *, if_ptr->name));
         free(if_ptr);
         if_ptr = if_next;
     }
