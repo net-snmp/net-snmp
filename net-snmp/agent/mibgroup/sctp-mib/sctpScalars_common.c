@@ -8,7 +8,6 @@ netsnmp_sctp_stats sctp_stats;
 static netsnmp_sctp_stats prev_sctp_stats;
 
 netsnmp_sctp_params sctp_params;
-static netsnmp_sctp_params prev_sctp_params;
 
 static int      need_wrap_check = 1;
 
