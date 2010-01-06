@@ -1152,7 +1152,7 @@ netsnmp_table_get_or_create_row_stash(netsnmp_agent_request_info *reqinfo,
 {
     netsnmp_oid_stash_node **stashp = NULL;
     stashp = (netsnmp_oid_stash_node **)
-        netsnmp_agent_get_list_data(reqinfo, storage_name);
+        netsnmp_agent_get_list_data(reqinfo, (const char *) storage_name);
 
     if (!stashp) {
         /*
@@ -1164,7 +1164,7 @@ netsnmp_table_get_or_create_row_stash(netsnmp_agent_request_info *reqinfo,
             return NULL;        /* ack. out of mem */
 
         netsnmp_agent_add_list_data(reqinfo,
-                                    netsnmp_create_data_list(storage_name,
+                                    netsnmp_create_data_list((const char *) storage_name,
                                                              stashp,
                                                              _row_stash_data_list_free));
     }
