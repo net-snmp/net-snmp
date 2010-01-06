@@ -192,8 +192,8 @@ void
 init_tunnel(void)
 {
     REGISTER_SYSOR_ENTRY(sysORTable_reg,
-                        "RFC 2667 TUNNEL-MIB implementation for "
-                        "Linux 2.2.x kernels.");
+                         strdup("RFC 2667 TUNNEL-MIB implementation for "
+                                "Linux 2.2.x kernels."));
 
     /*
      * register ourselves with the agent to handle our mib tree 
