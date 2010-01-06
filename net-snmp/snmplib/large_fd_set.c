@@ -115,7 +115,7 @@ void
 netsnmp_large_fd_set_init(netsnmp_large_fd_set * fdset, int setsize)
 {
     fdset->lfs_setsize = 0;
-    fdset->lfs_setptr  = 0;
+    fdset->lfs_setptr  = NULL;
     netsnmp_large_fd_set_resize(fdset, setsize);
 }
 
@@ -161,7 +161,7 @@ netsnmp_large_fd_set_cleanup(netsnmp_large_fd_set * fdset)
 {
     netsnmp_large_fd_set_resize(fdset, 0);
     fdset->lfs_setsize = 0;
-    fdset->lfs_setptr  = 0;
+    fdset->lfs_setptr  = NULL;
 }
 
 void

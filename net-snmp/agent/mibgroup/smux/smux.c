@@ -1985,7 +1985,7 @@ smux_trap_process(u_char * rsp, size_t * len)
             /*
              * XXX 
              */
-            if (len == 0)
+            if (len == NULL)
                 return NULL;
             var_val_len = SMUXMAXSTRLEN;
             asn_parse_string(var_val, &maxlen, &vartype,
@@ -2009,7 +2009,7 @@ smux_trap_process(u_char * rsp, size_t * len)
             /*
              * XXX 
              */
-            if (len == 0)
+            if (len == NULL)
                 return NULL;
             var_val_len = SMUXMAXSTRLEN;
             asn_parse_bitstring(var_val, &maxlen, &vartype,

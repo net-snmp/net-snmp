@@ -359,7 +359,7 @@ var_dlmod(struct variable * vp,
 
     if (header_dlmod(vp, name, length, exact,
                      var_len, write_method) == MATCH_FAILED)
-        return 0;
+        return NULL;
 
     /*
      * this is where we do the value assignments for the mib results. 
@@ -372,7 +372,7 @@ var_dlmod(struct variable * vp,
         DEBUGMSGTL(("dlmod", "unknown sub-id %d in var_dlmod\n",
                     vp->magic));
     }
-    return 0;
+    return NULL;
 }
 
 
@@ -398,7 +398,7 @@ header_dlmodEntry(struct variable *vp,
 #define DLMODENTRY_NAME_LENGTH 12
     oid             newname[MAX_OID_LEN];
     int             result;
-    struct dlmod   *dlm = 0;
+    struct dlmod   *dlm = NULL;
     int             dlmod_index;
 
     memcpy((char *) newname, (char *) vp->name,
@@ -453,7 +453,7 @@ var_dlmodEntry(struct variable * vp,
     dlm =
         header_dlmodEntry(vp, name, length, exact, var_len, write_method);
     if (dlm == NULL)
-        return 0;
+        return NULL;
 
     /*
      * this is where we do the value assignments for the mib results. 
@@ -478,7 +478,7 @@ var_dlmodEntry(struct variable * vp,
         DEBUGMSGTL(("dlmod", "unknown sub-id %d in var_dlmodEntry\n",
                     vp->magic));
     }
-    return 0;
+    return NULL;
 }
 
 int

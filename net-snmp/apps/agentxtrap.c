@@ -580,7 +580,7 @@ main(int argc, char *argv[])
 
         FD_ZERO(&fdset);
         snmp_sess_select_info(sessp, &numfds, &fdset, &timeout, &block);
-        count = select(numfds, &fdset, NULL, NULL, !block ? &timeout : 0);
+        count = select(numfds, &fdset, NULL, NULL, !block ? &timeout : NULL);
         if (count > 0)
             snmp_sess_read(sessp, &fdset);
         else if (count == 0)

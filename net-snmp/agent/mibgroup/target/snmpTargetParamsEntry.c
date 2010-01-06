@@ -98,7 +98,7 @@ snmpTargetParamTable_addToList(struct targetParamTable_struct *newEntry,
     /*
      * if the list is empty, add the new entry to the top 
      */
-    if ((prev_struct = curr_struct = *listPtr) == 0) {
+    if ((prev_struct = curr_struct = *listPtr) == NULL) {
         *listPtr = newEntry;
         return;
     } else {

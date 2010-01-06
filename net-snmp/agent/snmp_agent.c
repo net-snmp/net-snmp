@@ -3658,7 +3658,7 @@ netsnmp_set_agent_starttime(marker_t s)
     if (s)
         starttime = *(struct timeval*)s;
     else
-        gettimeofday(&starttime, 0);
+        gettimeofday(&starttime, NULL);
 }
 
 
