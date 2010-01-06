@@ -300,6 +300,17 @@ snmpd_register_config_handler(const char *token,
 }
 
 void
+snmpd_register_const_config_handler(const char *token,
+                                    void (*parser) (const char *, const char *),
+                                    void (*releaser) (void), const char *help)
+{
+    DEBUGMSGTL(("snmpd_register_app_config_handler",
+                "registering .conf token for \"%s\"\n", token));
+    register_app_config_handler(token, (void(*)(const char *, char *))parser,
+                                releaser, help);
+}
+
+void
 snmpd_unregister_config_handler(const char *token)
 {
     unregister_app_config_handler(token);
