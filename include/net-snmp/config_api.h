@@ -17,6 +17,12 @@ extern          "C" {
                                                 void (*parser) (const char *, char *),
                                                 void (*releaser) (void),
                                                 const char *usageLine);
+    struct config_line *
+    register_const_config_handler(const char *filePrefix,
+                                  const char *token,
+                                  void (*parser) (const char *, const char *),
+                                  void (*releaser) (void),
+                                  const char *usageLine);
     struct config_line *register_app_config_handler(
                                                 const char *token,
                                                 void (*parser) (const char *, char *),

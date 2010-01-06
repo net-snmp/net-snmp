@@ -291,6 +291,18 @@ register_config_handler(const char *type,
 }
 
 struct config_line *
+register_const_config_handler(const char *type,
+                              const char *token,
+                              void (*parser) (const char *, const char *),
+                              void (*releaser) (void), const char *help)
+{
+    return internal_register_config_handler(type, token,
+                                            (void(*)(const char *, char *))
+                                            parser, releaser,
+					    help, NORMAL_CONFIG);
+}
+
+struct config_line *
 register_app_config_handler(const char *token,
                             void (*parser) (const char *, char *),
                             void (*releaser) (void), const char *help)
