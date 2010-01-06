@@ -542,7 +542,7 @@ init_icmp(void)
 #ifdef USING_MIBII_IP_MODULE
     if (++ip_module_count == 2)
         REGISTER_SYSOR_TABLE(ip_module_oid, ip_module_oid_len,
-                             "The MIB module for managing IP and ICMP implementations");
+                             strdup("The MIB module for managing IP and ICMP implementations"));
 #endif
 
 #if !defined(_USE_PERFSTAT_PROTOCOL)

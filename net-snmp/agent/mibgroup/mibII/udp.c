@@ -112,7 +112,7 @@ init_udp(void)
 #endif
 
     REGISTER_SYSOR_ENTRY(udp_module_oid,
-                         "The MIB module for managing UDP implementations");
+                         strdup("The MIB module for managing UDP implementations"));
 
 #if !defined(_USE_PERFSTAT_PROTOCOL)
 #ifdef UDPSTAT_SYMBOL

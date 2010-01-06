@@ -42,8 +42,8 @@ init_usmStats(void)
 {
     static oid      reg[] = { 1, 3, 6, 1, 6, 3, 15, 2, 1, 1 };
     REGISTER_SYSOR_ENTRY(reg,
-                         "The management information definitions for the "
-                         "SNMP User-based Security Model.");
+                         strdup("The management information definitions for the "
+                                "SNMP User-based Security Model."));
     REGISTER_MIB("snmpv3/usmStats", usmStats_variables, variable2,
                  usmStats_variables_oid);
 }

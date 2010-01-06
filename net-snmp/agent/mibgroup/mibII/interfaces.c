@@ -282,7 +282,7 @@ init_interfaces(void)
     REGISTER_MIB("mibII/interfaces", interfaces_variables, variable3,
                  interfaces_variables_oid);
     REGISTER_SYSOR_ENTRY(interfaces_module_oid,
-                         "The MIB module to describe generic objects for network interface sub-layers");
+                         strdup("The MIB module to describe generic objects for network interface sub-layers"));
 
 #ifndef USE_SYSCTL_IFLIST
 #if HAVE_NET_IF_MIB_H
