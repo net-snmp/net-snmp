@@ -15,7 +15,11 @@ OTHERUNINSTALL=manuninstall
 #
 
 MAN1  = snmpinform.1
-MAN1G = agentxtrap.1 snmpbulkget.1 snmpcmd.1 snmpget.1 snmpset.1 snmpwalk.1 \
+
+@NETSNMP_HAVE_AGENTX_LIBS_TRUE@AGENTXTRAP = agentxtrap.1
+@NETSNMP_HAVE_AGENTX_LIBS_FALSE@AGENTXTRAP =
+
+MAN1G = $(AGENTXTRAP) snmpbulkget.1 snmpcmd.1 snmpget.1 snmpset.1 snmpwalk.1 \
 	snmpbulkwalk.1 snmpgetnext.1 snmptest.1 snmptranslate.1 snmptrap.1 \
 	snmpusm.1 snmpvacm.1 snmptable.1 snmpstatus.1 snmpconf.1 mib2c.1 \
 	snmpnetstat.1 snmpdelta.1 snmpdf.1 encode_keychange.1 fixproc.1 \
