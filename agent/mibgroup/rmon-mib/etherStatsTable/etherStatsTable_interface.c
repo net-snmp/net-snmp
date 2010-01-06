@@ -2032,7 +2032,7 @@ _mfd_etherStatsTable_irreversible_commit(netsnmp_mib_handler *handler,
             CONTAINER_REMOVE(etherStatsTable_if_ctx.container, rowreq_ctx);
     } else {
         if (rowreq_ctx->column_set_flags) {
-            DEBUGMSGTL(("internal:etherStatsTable:_mfd_irreversible_commit", "updating exists (%p) w/set (%p) = %p\n", rowreq_ctx->column_exists_flags, rowreq_ctx->column_set_flags, (rowreq_ctx->column_exists_flags | rowreq_ctx->column_set_flags)));
+            DEBUGMSGTL(("internal:etherStatsTable:_mfd_irreversible_commit", "updating exists (%#x) w/set (%#x) = %#x\n", rowreq_ctx->column_exists_flags, rowreq_ctx->column_set_flags, (rowreq_ctx->column_exists_flags | rowreq_ctx->column_set_flags)));
             rowreq_ctx->column_exists_flags |=
                 rowreq_ctx->column_set_flags;
             rowreq_ctx->column_set_flags = 0;
