@@ -507,7 +507,7 @@ netsnmp_table_data_set_helper_handler(netsnmp_mib_handler *handler,
                 continue;
             }
             stashp = (netsnmp_oid_stash_node **)
-                netsnmp_table_get_or_create_row_stash(reqinfo, buf);
+		netsnmp_table_get_or_create_row_stash(reqinfo, (u_char *) buf);
 
             newrowstash
                 = netsnmp_oid_stash_get_data(*stashp, suffix, suffix_len);
