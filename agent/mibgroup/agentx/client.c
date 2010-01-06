@@ -61,7 +61,6 @@ agentx_synch_input(int op,
                    int reqid, netsnmp_pdu *pdu, void *magic)
 {
     struct synch_state *state = (struct synch_state *) magic;
-    marker_t starttime;
 
     if (!state || reqid != state->reqid) {
         return handle_agentx_packet(op, session, reqid, pdu, magic);
