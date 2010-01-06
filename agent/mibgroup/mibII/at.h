@@ -31,13 +31,17 @@ config_arch_require(solaris2, kernel_sunos5)
 # define ATF_COM	0x02
 #endif                          /*  ATF_COM */
 
+/* InfiniBand uses HW addr > 6 */
+#define MAX_MAC_ADDR_LEN 32 
+
 #if defined(linux) || defined(irix6)
 /*
  * arp struct to pass flags, hw-addr and ip-addr in bsd manner:
  */
      struct arptab {
          int             at_flags;
-         char            at_enaddr[6];
+         char            at_enaddr[MAX_MAC_ADDR_LEN];
+         int             at_enaddr_len;
          struct in_addr  at_iaddr;
          int             if_index;
      };
