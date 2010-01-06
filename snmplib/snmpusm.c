@@ -3528,7 +3528,7 @@ usm_save_user(struct usmUser *user, const char *token, const char *type)
  * and returns a pointer to a newly created struct usmUser. 
  */
 struct usmUser *
-usm_read_user(char *line)
+usm_read_user(const char *line)
 {
     struct usmUser *user;
     size_t          len;
@@ -3539,11 +3539,11 @@ usm_read_user(char *line)
         return NULL;
 
     user->userStatus = atoi(line);
-    line = skip_token(line);
+    line = skip_token_const(line);
     user->userStorageType = atoi(line);
-    line = skip_token(line);
-    line = read_config_read_octet_string(line, &user->engineID,
-                                         &user->engineIDLen);
+    line = skip_token_const(line);
+    line = read_config_read_octet_string_const(line, &user->engineID,
+                                               &user->engineIDLen);
 
     /*
      * set the lcd entry for this engineID to the minimum boots/time
@@ -3560,22 +3560,21 @@ usm_read_user(char *line)
     SNMP_FREE(user->cloneFrom);
     user->cloneFromLen = 0;
 
-    line =
-        read_config_read_objid(line, &user->cloneFrom,
-                               &user->cloneFromLen);
+    line = read_config_read_objid_const(line, &user->cloneFrom,
+                                        &user->cloneFromLen);
 
     SNMP_FREE(user->authProtocol);
     user->authProtocolLen = 0;
 
-    line = read_config_read_objid(line, &user->authProtocol,
-                                  &user->authProtocolLen);
-    line = read_config_read_octet_string(line, &user->authKey,
-                                         &user->authKeyLen);
+    line = read_config_read_objid_const(line, &user->authProtocol,
+                                        &user->authProtocolLen);
+    line = read_config_read_octet_string_const(line, &user->authKey,
+                                               &user->authKeyLen);
     SNMP_FREE(user->privProtocol);
     user->privProtocolLen = 0;
 
-    line = read_config_read_objid(line, &user->privProtocol,
-                                  &user->privProtocolLen);
+    line = read_config_read_objid_const(line, &user->privProtocol,
+                                        &user->privProtocolLen);
     line = read_config_read_octet_string(line, &user->privKey,
                                          &user->privKeyLen);
 #ifndef NETSNMP_DISABLE_DES
