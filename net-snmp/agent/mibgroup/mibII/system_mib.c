@@ -393,7 +393,7 @@ init_system_mib(void)
     }
     if (++system_module_count == 3)
         REGISTER_SYSOR_ENTRY(system_module_oid,
-                             strdup("The MIB module for SNMPv2 entities"));
+                             "The MIB module for SNMPv2 entities");
 
     sysContactSet = sysLocationSet = sysNameSet = 0;
 

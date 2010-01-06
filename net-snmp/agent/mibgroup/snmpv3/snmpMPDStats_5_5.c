@@ -30,7 +30,7 @@ init_snmpMPDStats_5_5(void)
     if (s &&
 	NETSNMP_REGISTER_STATISTIC_HANDLER(s, 1, MPD) == MIB_REGISTERED_OK) {
         REGISTER_SYSOR_ENTRY(snmpMPDCompliance,
-                             strdup("The MIB for Message Processing and Dispatching."));
+                             "The MIB for Message Processing and Dispatching.");
         snmpMPDStats_reg = s;
     }
 }

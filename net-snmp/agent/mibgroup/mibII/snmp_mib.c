@@ -119,7 +119,7 @@ init_snmp_mib(void)
 #ifdef USING_MIBII_SYSTEM_MIB_MODULE
     if (++system_module_count == 3)
         REGISTER_SYSOR_TABLE(system_module_oid, system_module_oid_len,
-                             strdup("The MIB module for SNMPv2 entities"));
+                             "The MIB module for SNMPv2 entities");
 #endif
     snmp_register_callback(SNMP_CALLBACK_LIBRARY, SNMP_CALLBACK_STORE_DATA,
                            snmp_enableauthentraps_store, NULL);
