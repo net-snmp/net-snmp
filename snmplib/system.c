@@ -1059,7 +1059,7 @@ setenv(const char *name, const char *value, int overwrite)
 
 /* returns centiseconds */
 int
-calculate_time_diff(struct timeval *now, struct timeval *then)
+calculate_time_diff(const struct timeval *now, const struct timeval *then)
 {
     struct timeval  tmp, diff;
     memcpy(&tmp, now, sizeof(struct timeval));
@@ -1076,7 +1076,7 @@ calculate_time_diff(struct timeval *now, struct timeval *then)
 
 /* returns diff in rounded seconds */
 u_int
-calculate_sectime_diff(struct timeval *now, struct timeval *then)
+calculate_sectime_diff(const struct timeval *now, const struct timeval *then)
 {
     struct timeval  tmp, diff;
     memcpy(&tmp, now, sizeof(struct timeval));
