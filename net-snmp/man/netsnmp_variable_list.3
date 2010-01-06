@@ -1,4 +1,4 @@
-.TH "variable_list" 3 "29 Oct 2009" "Version 5.4.3.pre1" "net-snmp" \" -*- nroff -*-
+.TH "variable_list" 3 "6 Jan 2010" "Version 5.4.3.pre1" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -41,7 +41,7 @@ The netsnmp \fBvariable\fP list binding structure, it's typedef'd to netsnmp_var
 .ti -1c
 .RI "oid \fBname_loc\fP [MAX_OID_LEN]"
 .br
-.RI "\fI90 percentile < 24. \fP"
+.RI "\fIbuffer to hold the OID \fP"
 .ti -1c
 .RI "u_char \fBbuf\fP [40]"
 .br
@@ -95,7 +95,7 @@ number of subid's in name
 Definition at line 528 of file snmp_api.h.
 .SS "oid \fBvariable_list::name_loc\fP[MAX_OID_LEN]"
 .PP
-90 percentile < 24. 
+buffer to hold the OID 
 .PP
 Definition at line 536 of file snmp_api.h.
 .SS "struct \fBvariable_list\fP* \fBvariable_list::next_variable\fP\fC [read]\fP"
