@@ -25,12 +25,18 @@ init_mteTriggerConf(void)
      * Register config handler for user-level (fixed) triggers ...
      */
     snmpd_register_config_handler("monitor",
-                                   parse_mteMonitor,  NULL,
+				  (void(*)(const char*, char*))
+				  parse_mteMonitor,
+				  NULL,
                                   "triggername [-I] [-i OID | -o OID]* [-e event] expression ");
     snmpd_register_config_handler("defaultMonitors",
-                                   parse_default_mteMonitors, NULL, "yes|no");
+                                  (void(*)(const char*, char*))
+				  parse_default_mteMonitors,
+				  NULL, "yes|no");
     snmpd_register_config_handler("linkUpDownNotifications",
-                                   parse_linkUpDown_traps,    NULL, "yes|no");
+				  (void(*)(const char*, char*))
+				  parse_linkUpDown_traps,
+				  NULL, "yes|no");
 
     /*
      * ... for persistent storage of various event table entries ...
@@ -140,7 +146,7 @@ _mteTrigger_callback_enable( int   majorID,    int   minorID,
 
 
 void
-parse_mteMonitor(const char *token, char *line)
+parse_mteMonitor(const char *token, const char *line)
 {
     char   buf[  SPRINT_MAX_LEN];
     char   tname[MTE_STR1_LEN+1];
@@ -729,7 +735,7 @@ parse_mteMonitor(const char *token, char *line)
 }
 
 void
-parse_linkUpDown_traps(const char *token, char *line)
+parse_linkUpDown_traps(const char *token, const char *line)
 {
     /*
      * XXX - This isn't strictly correct according to the
@@ -748,7 +754,7 @@ parse_linkUpDown_traps(const char *token, char *line)
 
 
 void
-parse_default_mteMonitors(const char *token, char *line)
+parse_default_mteMonitors(const char *token, const char *line)
 {
     if (strncmp( line, "yes", 3) == 0) {
         DEBUGMSGTL(("disman:event:conf", "Registering default monitors\n"));
