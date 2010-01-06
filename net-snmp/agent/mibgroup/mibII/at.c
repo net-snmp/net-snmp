@@ -126,9 +126,9 @@
 #ifndef solaris2
 static void     ARP_Scan_Init(void);
 #ifdef ARP_SCAN_FOUR_ARGUMENTS
-static int      ARP_Scan_Next(u_long *, char *, u_long *, u_short *);
+static int      ARP_Scan_Next(u_long *, char *, int *, u_long *, u_short *);
 #else
-static int      ARP_Scan_Next(u_long *, char *, u_long *);
+static int      ARP_Scan_Next(u_long *, char *, int *, u_long *);
 #endif
 #endif
 #endif
@@ -203,7 +203,8 @@ var_atEntry(struct variable *vp,
     oid            *op;
     oid             lowest[16];
     oid             current[16];
-    static char     PhysAddr[6], LowPhysAddr[6];
+    static char     PhysAddr[MAX_MAC_ADDR_LEN], LowPhysAddr[MAX_MAC_ADDR_LEN];
+    static int      PhysAddrLen, LowPhysAddrLen;
     u_long          Addr, LowAddr, foundone;
 #ifdef ARP_SCAN_FOUR_ARGUMENTS
     u_short         ifIndex, lowIfIndex = 0;
@@ -229,7 +230,7 @@ var_atEntry(struct variable *vp,
     ARP_Scan_Init();
     for (;;) {
 #ifdef ARP_SCAN_FOUR_ARGUMENTS
-        if (ARP_Scan_Next(&Addr, PhysAddr, &ifType, &ifIndex) == 0)
+        if (ARP_Scan_Next(&Addr, PhysAddr, &PhysAddrLen, &ifType, &ifIndex) == 0)
             break;
         current[10] = ifIndex;
 
@@ -240,7 +241,7 @@ var_atEntry(struct variable *vp,
             op = current + 11;
         }
 #else                           /* ARP_SCAN_FOUR_ARGUMENTS */
-        if (ARP_Scan_Next(&Addr, PhysAddr, &ifType) == 0)
+        if (ARP_Scan_Next(&Addr, PhysAddr, &PhysAddrLen, &ifType) == 0)
             break;
         current[10] = 1;
 
@@ -267,6 +268,7 @@ var_atEntry(struct variable *vp,
                 lowIfIndex = ifIndex;
 #endif                          /*  ARP_SCAN_FOUR_ARGUMENTS */
                 memcpy(LowPhysAddr, PhysAddr, sizeof(PhysAddr));
+                LowPhysAddrLen = PhysAddrLen;
                 lowIfType = ifType;
                 break;          /* no need to search further */
             }
@@ -288,6 +290,7 @@ var_atEntry(struct variable *vp,
                 lowIfIndex = ifIndex;
 #endif                          /*  ARP_SCAN_FOUR_ARGUMENTS */
                 memcpy(LowPhysAddr, PhysAddr, sizeof(PhysAddr));
+                LowPhysAddrLen = PhysAddrLen;
                 lowIfType = ifType;
             }
         }
@@ -311,7 +314,7 @@ var_atEntry(struct variable *vp,
 #endif                          /* ARP_SCAN_FOUR_ARGUMENTS */
         return (u_char *) & long_return;
     case IPMEDIAPHYSADDRESS:   /* also ATPHYSADDRESS */
-        *var_len = sizeof(LowPhysAddr);
+        *var_len = LowPhysAddrLen;
         return (u_char *) LowPhysAddr;
     case IPMEDIANETADDRESS:    /* also ATNETADDRESS */
 	*var_len = sizeof(uint32_t);
@@ -572,10 +575,12 @@ ARP_Scan_Init(void)
 
     static time_t   tm = 0;     /* Time of last scan */
     FILE           *in;
-    int             i;
+    int             i, j;
     char            line[128];
-    int             za, zb, zc, zd, ze, zf, zg, zh, zi, zj;
+    int             za, zb, zc, zd;
     char            ifname[21];
+    char            mac[3*MAX_MAC_ADDR_LEN+1];
+    char           *tok;
 
     arptab_current = 0;         /* Anytime this is called we need to reset 'current' */
 
@@ -614,11 +619,10 @@ ARP_Scan_Init(void)
                 at = newtab;
             }
         }
-        if (12 !=
+        if (7 !=
             sscanf(line,
-                   "%d.%d.%d.%d 0x%*x 0x%x %x:%x:%x:%x:%x:%x %*[^ ] %20s\n",
-                   &za, &zb, &zc, &zd, &tmp_flags, &ze, &zf, &zg, &zh, &zi,
-                   &zj, ifname)) {
+                   "%d.%d.%d.%d 0x%*x 0x%x %s %*[^ ] %20s\n",
+                   &za, &zb, &zc, &zd, &tmp_flags, mac, ifname)) {
             snmp_log(LOG_ERR, "Bad line in /proc/net/arp: %s", line);
             continue;
         }
@@ -631,16 +635,15 @@ ARP_Scan_Init(void)
         }
         ifname[sizeof(ifname)-1] = 0; /* make sure name is null terminated */
         at[i].at_flags = tmp_flags;
-        at[i].at_enaddr[0] = ze;
-        at[i].at_enaddr[1] = zf;
-        at[i].at_enaddr[2] = zg;
-        at[i].at_enaddr[3] = zh;
-        at[i].at_enaddr[4] = zi;
-        at[i].at_enaddr[5] = zj;
         tmp_a = ((u_long) za << 24) |
             ((u_long) zb << 16) | ((u_long) zc << 8) | ((u_long) zd);
         at[i].at_iaddr.s_addr = htonl(tmp_a);
         at[i].if_index = netsnmp_access_interface_index_find(ifname);
+        
+        for (j=0,tok=strtok(mac, ":"); tok != NULL; tok=strtok(NULL, ":"),j++) {
+        	at[i].at_enaddr[j] = strtol(tok, NULL, 16);
+        }
+        at[i].at_enaddr_len = j;
         i++;
     }
     arptab_size = i;
@@ -684,11 +687,12 @@ ARP_Scan_Init(void)
 
 #ifdef ARP_SCAN_FOUR_ARGUMENTS
 static int
-ARP_Scan_Next(u_long * IPAddr, char *PhysAddr, u_long * ifType,
-              u_short * ifIndex)
+ARP_Scan_Next(u_long * IPAddr, char *PhysAddr, int *PhysAddrLen,
+              u_long * ifType, u_short * ifIndex)
 #else
 static int
-ARP_Scan_Next(u_long * IPAddr, char *PhysAddr, u_long * ifType)
+ARP_Scan_Next(u_long * IPAddr, char *PhysAddr, int *PhysAddrLen,
+              u_long * ifType)
 #endif
 {
 #ifndef CAN_USE_SYSCTL
@@ -704,6 +708,7 @@ ARP_Scan_Next(u_long * IPAddr, char *PhysAddr, u_long * ifType)
         *ifIndex = at[arptab_current].if_index;
         memcpy(PhysAddr, &at[arptab_current].at_enaddr,
                sizeof(at[arptab_current].at_enaddr));
+        *PhysAddrLen = at[arptab_current].at_enaddr_len;
 
         /*
          * increment to point next entry 
@@ -724,6 +729,7 @@ ARP_Scan_Next(u_long * IPAddr, char *PhysAddr, u_long * ifType)
                at[arptab_current].PhysAddr.o_length);
         *ifType = at[arptab_current].Type;
         *ifIndex = at[arptab_current].IfIndex;
+        *PhysAddrLen = at[arptab_current].PhysAddr.o_length;
         /*
          * increment to point next entry 
          */
@@ -769,10 +775,12 @@ ARP_Scan_Next(u_long * IPAddr, char *PhysAddr, u_long * ifType)
 #if defined (sunV3) || defined(sparc) || defined(hpux)
         memcpy(PhysAddr, (char *) &atab->at_enaddr,
                sizeof(atab->at_enaddr));
+        *PhysAddrLen = sizeof(atab->at_enaddr);
 #endif
 #if defined(mips) || defined(ibm032)
         memcpy(PhysAddr, (char *) atab->at_enaddr,
                sizeof(atab->at_enaddr));
+        *PhysAddrLen = sizeof(atab->at_enaddr);
 #endif
         return (1);
     }
@@ -793,6 +801,7 @@ ARP_Scan_Next(u_long * IPAddr, char *PhysAddr, u_long * ifType)
         if (sdl->sdl_alen) {
             *IPAddr = sin->sin_addr.s_addr;
             memcpy(PhysAddr, (char *) LLADDR(sdl), sdl->sdl_alen);
+            *PhysAddrLen = sdl->sdl_alen;
             *ifIndex = sdl->sdl_index;
             *ifType = 1;        /* XXX */
             return (1);
