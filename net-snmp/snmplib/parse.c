@@ -4110,9 +4110,9 @@ unload_all_mibs(void)
         if (mcp == module_map)
             break;
         module_map_head = mcp->next;
-        if (mcp->tag) free((char *) mcp->tag);
-        free((char *) mcp->old_module);
-        free((char *) mcp->new_module);
+        if (mcp->tag) free(NETSNMP_REMOVE_CONST(char *, mcp->tag));
+        free(NETSNMP_REMOVE_CONST(char *, mcp->old_module));
+        free(NETSNMP_REMOVE_CONST(char *, mcp->new_module));
         free(mcp);
     }
 
