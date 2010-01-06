@@ -19,6 +19,9 @@ top_builddir=..
 
 SSHINSTALLBINPROGS = @SSHINSTALLBINPROGS@
 
+@NETSNMP_HAVE_AGENTX_LIBS_TRUE@AGENTXTRAP = agentxtrap$(EXEEXT)
+@NETSNMP_HAVE_AGENTX_LIBS_FALSE@AGENTXTRAP =
+
 INSTALLBINPROGS	= snmpget$(EXEEXT) 			\
 		snmpgetnext$(EXEEXT) 			\
 		snmpset$(EXEEXT) 			\
@@ -34,7 +37,7 @@ INSTALLBINPROGS	= snmpget$(EXEEXT) 			\
 		snmptest$(EXEEXT)			\
 		encode_keychange$(EXEEXT) 		\
 		snmpdf$(EXEEXT) 			\
-		agentxtrap$(EXEEXT)			\
+		$(AGENTXTRAP)				\
 		snmpvacm$(EXEEXT)                       \
                 $(SSHINSTALLBINPROGS)
 

@@ -777,3 +777,20 @@ AC_SUBST(ENV_SEPARATOR)
 AC_DEFINE_UNQUOTED(NETSNMP_DEFAULT_MIBS,"$NETSNMP_DEFAULT_MIBS")
 AC_SUBST(NETSNMP_DEFAULT_MIBS)
 AC_MSG_RESULT($NETSNMP_DEFAULT_MIBS)
+
+#-------------------
+# Define symbols for conditional compilation in makefiles
+#
+
+if echo " $agent_module_list " | \
+   fgrep ' agentx/agentx_config ' | \
+   fgrep ' agentx/client ' | \
+   fgrep ' agentx/protocol ' > /dev/null ; then
+   NETSNMP_HAVE_AGENTX_LIBS_TRUE=''
+   NETSNMP_HAVE_AGENTX_LIBS_FALSE='#'
+else
+   NETSNMP_HAVE_AGENTX_LIBS_TRUE='#'
+   NETSNMP_HAVE_AGENTX_LIBS_FALSE=''
+fi
+AC_SUBST([NETSNMP_HAVE_AGENTX_LIBS_TRUE])
+AC_SUBST([NETSNMP_HAVE_AGENTX_LIBS_FALSE])
