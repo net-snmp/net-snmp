@@ -248,7 +248,7 @@ getType(int index)
 
 
 
-static char    *
+static const char *
 getName(int index)
 {
 #ifndef USING_IF_MIB_IFTABLE_IFTABLE_MODULE
@@ -410,7 +410,7 @@ updateTunnels(void)
     static int      max_index = 1;
     static struct tunnel *last_tunnel = NULL;
     struct tunnel  *tunnel;
-    char           *ifname;
+    const char     *ifname;
     int             type;
 
     /*
