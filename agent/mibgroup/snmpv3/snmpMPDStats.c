@@ -36,7 +36,7 @@ init_snmpMPDStats(void)
 {
     static oid      reg[] = { 1, 3, 6, 1, 6, 3, 11, 3, 1, 1 };
     REGISTER_SYSOR_ENTRY(reg,
-                         "The MIB for Message Processing and Dispatching.");
+                         strdup("The MIB for Message Processing and Dispatching."));
     REGISTER_MIB("snmpv3/snmpMPDStats", snmpMPDStats_variables, variable2,
                  snmpMPDStats_variables_oid);
 }

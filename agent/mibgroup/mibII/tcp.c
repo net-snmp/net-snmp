@@ -128,7 +128,7 @@ init_tcp(void)
 #endif
 
     REGISTER_SYSOR_ENTRY(tcp_module_oid,
-                         "The MIB module for managing TCP implementations");
+                         strdup("The MIB module for managing TCP implementations"));
 
 #if !defined(_USE_FIRST_PROTOCOL)
 #ifdef TCPSTAT_SYMBOL

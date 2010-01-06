@@ -137,7 +137,7 @@ init_vacm_vars(void)
                  vacm_access_oid);
     REGISTER_MIB("mibII/vacm:view", vacm_view, variable3, vacm_view_oid);
 
-    REGISTER_SYSOR_ENTRY(reg, "View-based Access Control Model for SNMP.");
+    REGISTER_SYSOR_ENTRY(reg, strdup("View-based Access Control Model for SNMP."));
 }
 
 

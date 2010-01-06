@@ -179,7 +179,7 @@ init_ip(void)
                        variable1, ipmedia_variables_oid);
     if (++ip_module_count == 2)
         REGISTER_SYSOR_ENTRY(ip_module_oid,
-                             "The MIB module for managing IP and ICMP implementations");
+                             strdup("The MIB module for managing IP and ICMP implementations"));
 
 
     /*

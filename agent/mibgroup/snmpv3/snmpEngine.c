@@ -63,7 +63,7 @@ void
 init_snmpEngine(void)
 {
     oid      reg[] = { 1, 3, 6, 1, 6, 3, 10, 3, 1, 1 };
-    REGISTER_SYSOR_ENTRY(reg, "The SNMP Management Architecture MIB.");
+    REGISTER_SYSOR_ENTRY(reg, strdup("The SNMP Management Architecture MIB."));
     register_snmpEngine_scalars();
 }
 
