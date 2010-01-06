@@ -131,7 +131,7 @@ netsnmp_session *netsnmp_iquery_pdu_session(netsnmp_pdu* pdu) {
                            pdu->securityEngineID,
                            pdu->securityEngineIDLen);
     else
-        return netsnmp_iquery_session( pdu->community, 
+        return netsnmp_iquery_session((char *) pdu->community, 
                            pdu->version,
                            pdu->version+1,
                            SNMP_SEC_LEVEL_NOAUTH,

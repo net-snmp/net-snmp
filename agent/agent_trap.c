@@ -904,7 +904,6 @@ send_trap_to_sess(netsnmp_session * sess, netsnmp_pdu *template_pdu)
 {
     netsnmp_pdu    *pdu;
     int            result;
-    char           tmp[SPRINT_MAX_LEN];
     int            len;
 
 
@@ -938,6 +937,8 @@ send_trap_to_sess(netsnmp_session * sess, netsnmp_pdu *template_pdu)
         if ((sess->version == SNMP_VERSION_3) &&
                 (pdu->command == SNMP_MSG_TRAP2) &&
                 (pdu->securityEngineIDLen == 0)) {
+            u_char          tmp[SPRINT_MAX_LEN];
+
             len = snmpv3_get_engineID(tmp, sizeof(tmp));
             memdup(&pdu->securityEngineID, tmp, len);
             pdu->securityEngineIDLen = len;
@@ -1209,7 +1210,7 @@ trapOptProc(int argc, char *const *argv, int opt)
 void
 snmpd_parse_config_trapsess(const char *word, char *cptr)
 {
-    char           *argv[MAX_ARGS], *cp = cptr, tmp[SPRINT_MAX_LEN];
+    char           *argv[MAX_ARGS], *cp = cptr;
     int             argn, arg;
     netsnmp_session session, *ss;
     size_t          len;
@@ -1224,6 +1225,8 @@ snmpd_parse_config_trapsess(const char *word, char *cptr)
      */
     argv[0] = strdup("snmpd-trapsess"); /* bogus entry for getopt() */
     for (argn = 1; cp && argn < MAX_ARGS; argn++) {
+        char            tmp[SPRINT_MAX_LEN];
+
         cp = copy_nword(cp, tmp, SPRINT_MAX_LEN);
         argv[argn] = strdup(tmp);
     }
@@ -1251,6 +1254,8 @@ snmpd_parse_config_trapsess(const char *word, char *cptr)
     if (ss->version == SNMP_VERSION_3 &&
         traptype != SNMP_MSG_INFORM   &&
         ss->securityEngineIDLen == 0) {
+            u_char          tmp[SPRINT_MAX_LEN];
+
             len = snmpv3_get_engineID( tmp, sizeof(tmp));
             memdup(&ss->securityEngineID, tmp, len);
             ss->securityEngineIDLen = len;

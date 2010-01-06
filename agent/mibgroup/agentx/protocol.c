@@ -704,7 +704,7 @@ _agentx_realloc_build(u_char ** buf, size_t * buf_len, size_t * out_len,
 	 * pdu->community and pdu->community_len fields, respectively. */
 	if (pdu->contextName != NULL && pdu->community == NULL)
 	{	
-		pdu->community     = strdup(pdu->contextName);
+		pdu->community     = (u_char *) strdup(pdu->contextName);
 		pdu->community_len = pdu->contextNameLen;
 		pdu->flags |= AGENTX_MSG_FLAG_NON_DEFAULT_CONTEXT;
 	}
@@ -1613,7 +1613,7 @@ agentx_parse(netsnmp_session * session, netsnmp_pdu *pdu, u_char * data,
 		 * need to copy the context into the PDU's context fields.  */
 		if (pdu->community_len > 0 && pdu->contextName == NULL)
 		{
-			pdu->contextName    = strdup(pdu->community);
+			pdu->contextName    = strdup((char *) pdu->community);
 			pdu->contextNameLen = pdu->community_len;
 		}
 
