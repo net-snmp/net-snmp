@@ -72,6 +72,14 @@ extern          "C" {
 #define SNMP_ZERO(s,l)	do { if (s) memset(s, 0, l); } while(0)
 
 
+/**
+ * Cast away constness without that gcc -Wcast-qual prints a compiler warning.
+ * @param[in] type A pointer type.
+ * @param[in] e    An expression that evaluates to a pointer.
+ */
+#define NETSNMP_REMOVE_CONST(type, e) ((type)(uintptr_t)(e))
+
+
 #define TOUPPER(c)	(c >= 'a' && c <= 'z' ? c - ('a' - 'A') : c)
 #define TOLOWER(c)	(c >= 'A' && c <= 'Z' ? c + ('a' - 'A') : c)
 
