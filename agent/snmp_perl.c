@@ -53,7 +53,7 @@ maybe_source_perl_startup(void)
         goto bail_out;
 
     perl_construct(my_perl);
-    if (perl_parse(my_perl, xs_init, 2, (char **) embedargs, NULL))
+    if (perl_parse(my_perl, xs_init, 2, NETSNMP_REMOVE_CONST(char **, embedargs), NULL))
         goto bail_out;
 
     if (perl_run(my_perl))
