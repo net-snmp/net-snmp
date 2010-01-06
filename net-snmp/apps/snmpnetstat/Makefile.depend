@@ -6,8 +6,9 @@
 ./if.lo: ../../include/net-snmp/system/generic.h
 ./if.lo: ../../include/net-snmp/machine/generic.h
 ./if.lo: ../../include/net-snmp/net-snmp-includes.h 
-./if.lo: ../../include/net-snmp/definitions.h ../../include/net-snmp/types.h
-./if.lo:  ../../include/net-snmp/library/snmp_api.h
+./if.lo:  ../../include/net-snmp/definitions.h
+./if.lo: ../../include/net-snmp/types.h 
+./if.lo: ../../include/net-snmp/library/snmp_api.h
 ./if.lo: ../../include/net-snmp/library/asn1.h
 ./if.lo: ../../include/net-snmp/library/snmp_impl.h
 ./if.lo: ../../include/net-snmp/library/snmp.h
@@ -64,14 +65,15 @@
 ./if.lo: ../../include/net-snmp/library/snmp_secmod.h
 ./if.lo: ../../include/net-snmp/library/snmpv3-security-includes.h
 ./if.lo: ../../include/net-snmp/library/snmpusm.h 
-./if.lo:  main.h netstat.h
+./if.lo:   main.h
+./if.lo: netstat.h
 ./inet6.lo: ../../include/net-snmp/net-snmp-config.h
 ./inet6.lo: ../../include/net-snmp/system/linux.h
 ./inet6.lo: ../../include/net-snmp/system/sysv.h
 ./inet6.lo: ../../include/net-snmp/system/generic.h
 ./inet6.lo: ../../include/net-snmp/machine/generic.h 
 ./inet6.lo: ../../include/net-snmp/net-snmp-includes.h 
-./inet6.lo:  ../../include/net-snmp/definitions.h
+./inet6.lo: ../../include/net-snmp/definitions.h
 ./inet6.lo: ../../include/net-snmp/types.h 
 ./inet6.lo: ../../include/net-snmp/library/snmp_api.h
 ./inet6.lo: ../../include/net-snmp/library/asn1.h
@@ -136,7 +138,7 @@
 ./inet.lo: ../../include/net-snmp/system/generic.h
 ./inet.lo: ../../include/net-snmp/machine/generic.h 
 ./inet.lo: ../../include/net-snmp/net-snmp-includes.h 
-./inet.lo:  ../../include/net-snmp/definitions.h
+./inet.lo: ../../include/net-snmp/definitions.h
 ./inet.lo: ../../include/net-snmp/types.h 
 ./inet.lo: ../../include/net-snmp/library/snmp_api.h
 ./inet.lo: ../../include/net-snmp/library/asn1.h
@@ -201,7 +203,7 @@
 ./main.lo: ../../include/net-snmp/system/generic.h
 ./main.lo: ../../include/net-snmp/machine/generic.h
 ./main.lo: ../../include/net-snmp/net-snmp-includes.h 
-./main.lo: ../../include/net-snmp/definitions.h
+./main.lo:  ../../include/net-snmp/definitions.h
 ./main.lo: ../../include/net-snmp/types.h 
 ./main.lo: ../../include/net-snmp/library/snmp_api.h
 ./main.lo: ../../include/net-snmp/library/asn1.h
@@ -268,7 +270,7 @@
 ./route.lo: ../../include/net-snmp/system/generic.h
 ./route.lo: ../../include/net-snmp/machine/generic.h 
 ./route.lo: ../../include/net-snmp/net-snmp-includes.h 
-./route.lo:  ../../include/net-snmp/definitions.h
+./route.lo: ../../include/net-snmp/definitions.h
 ./route.lo: ../../include/net-snmp/types.h 
 ./route.lo: ../../include/net-snmp/library/snmp_api.h
 ./route.lo: ../../include/net-snmp/library/asn1.h
@@ -335,7 +337,7 @@
 ./winstub.lo: ../../include/net-snmp/system/generic.h
 ./winstub.lo: ../../include/net-snmp/machine/generic.h
 ./winstub.lo: ../../include/net-snmp/net-snmp-includes.h 
-./winstub.lo: ../../include/net-snmp/definitions.h
+./winstub.lo:  ../../include/net-snmp/definitions.h
 ./winstub.lo: ../../include/net-snmp/types.h 
 ./winstub.lo: ../../include/net-snmp/library/snmp_api.h
 ./winstub.lo: ../../include/net-snmp/library/asn1.h
