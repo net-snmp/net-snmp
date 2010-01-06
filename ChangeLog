@@ -1,13 +1,489 @@
 -------------------------------------------------------------------------------
 
-Changes: V5.4.2 -> V5.4.3.pre1
+2010-01-06 17:06  dts12
+
+   *  agent/Makefile.depend, agent/helpers/Makefile.depend,   
+      agent/mibgroup/Makefile.depend, apps/Makefile.depend,   
+      apps/snmpnetstat/Makefile.depend, snmplib/Makefile.depend:
+
+   make depend
+
+2010-01-06 16:55  dts12
+
+   *  man/netsnmp_agent.3, man/netsnmp_agent_registry.3,   
+      man/netsnmp_agent_trap.3, man/netsnmp_asn1_packet_parse.3,   
+      man/netsnmp_baby_steps.3, man/netsnmp_bulk_to_next.3,   
+      man/netsnmp_cache_handler.3, man/netsnmp_callback.3,   
+      man/netsnmp_container.3, man/netsnmp_data_list.3,   
+      man/netsnmp_debug.3, man/netsnmp_default_store.3,   
+      man/netsnmp_handler.3, man/netsnmp_instance.3,   
+      man/netsnmp_iterator_info_s.3, man/netsnmp_leaf.3,   
+      man/netsnmp_library.3, man/netsnmp_mib_maintenance.3,   
+      man/netsnmp_mib_utilities.3, man/netsnmp_mode_end_call.3,   
+      man/netsnmp_multiplexer.3,   
+      man/netsnmp_netsnmp_agent_request_info_s.3,   
+      man/netsnmp_netsnmp_column_info_t.3,   
+      man/netsnmp_netsnmp_data_list_s.3,   
+      man/netsnmp_netsnmp_handler_registration_s.3,   
+      man/netsnmp_netsnmp_iterator_info_s.3,   
+      man/netsnmp_netsnmp_mib_handler_access_methods.3,   
+      man/netsnmp_netsnmp_mib_handler_methods.3,   
+      man/netsnmp_netsnmp_mib_handler_s.3,   
+      man/netsnmp_netsnmp_request_info_s.3,   
+      man/netsnmp_netsnmp_table_registration_info_s.3,   
+      man/netsnmp_netsnmp_table_request_info_s.3,   
+      man/netsnmp_oid_stash.3, man/netsnmp_old_api.3,   
+      man/netsnmp_read_config.3, man/netsnmp_read_only.3,   
+      man/netsnmp_row_merge.3, man/netsnmp_scalar.3,   
+      man/netsnmp_scalar_group_group.3, man/netsnmp_serialize.3,   
+      man/netsnmp_snmp_agent.3, man/netsnmp_snmp_alarm.3,   
+      man/netsnmp_snmp_client.3, man/netsnmp_snmp_logging.3,   
+      man/netsnmp_snmp_pdu.3, man/netsnmp_snmp_session.3,   
+      man/netsnmp_stash_cache.3, man/netsnmp_stash_to_next.3,   
+      man/netsnmp_table.3, man/netsnmp_table_array.3,   
+      man/netsnmp_table_container.3, man/netsnmp_table_data.3,   
+      man/netsnmp_table_dataset.3, man/netsnmp_table_generic.3,   
+      man/netsnmp_table_indexes.3, man/netsnmp_table_iterator.3,   
+      man/netsnmp_table_iterator.h.3, man/netsnmp_table_maintenance.3,  
+       man/netsnmp_table_rows.3, man/netsnmp_tdata.3,   
+      man/netsnmp_util.3, man/netsnmp_utilities.3,   
+      man/netsnmp_variable_list.3, man/netsnmp_watcher.3:
+
+   documentation update
+
+2010-01-06 16:43  dts12
+
+   *  FAQ, README, configure, configure.in, dist/net-snmp.spec,   
+      snmplib/snmp_version.c:
+
+   Version number update
+
+2010-01-06 13:33  jsafranek
+
+   * agent/mibgroup/mibII/at.c, agent/mibgroup/mibII/at.h:
+
+   Add support of network interfaces with HW address bigger than 6
+   bytes to atTable. Some HW, like InfiniBand, uses HW addresses
+   with 9 and more bytes.
+
+2010-01-06 12:45  dts12
+
+   * agent/mibgroup/hardware/cpu/cpu_kstat.c:
+
+   CHANGES: snmpd: BUGS: 2924140: Fix termination of CPU/FPU types
+
+2010-01-06 12:33  dts12
+
+   * snmplib/snmpUnixDomain.c:
+
+   CHANGES: snmplib: BUGS: 2922390: Fix test for missing contextName parameter
+
+2010-01-05 22:33  dts12
+
+   * python/netsnmp/client_intf.c:
+
+   CHANGES: python: BUGS: 2919379: Initialise SNMP sessions properly
+   Provided by Diego Billi
+
+2010-01-05 22:20  dts12
+
+   * snmplib/snmpCallbackDomain.c:
+
+   CHANGES: snmplib: BUGS: 2919320: Avoid accessing freed memory
+   Reported by Tomasz Lis
+
+2010-01-05 18:58  dts12
+
+   * agent/mibgroup/ucd-snmp/proc.c:
+
+   CHANGES: snmpd: BUGS: 2914410: Fix crash on empty command lines
+
+2010-01-05 15:31  dts12
+
+   * agent/mibgroup/agentx/protocol.c:
+
+   CHANGES: snmpd: PATCH: 2912584: Fix null OID handling in Agentx on 64bit
+   Patch supplied by Lutz Jaenicke
+
+2009-12-22 07:59  bvassche
+
+   * snmplib/read_config.c:
+
+   Reverted r17926, which made the string returned by
+   read_config_read_octet_string() zero-terminated. A new patch will
+   follow
+   that fixes the callers of read_config_read_octet_string() that
+   were
+   assuming that read_config_read_octet_string() zero-terminates the
+   string
+   read by this function.
+
+2009-12-21 13:52  bvassche
+
+   * snmplib/read_config.c:
+
+   Follow-up for r17928: while r17928 fixed a dangling pointer
+   dereference
+   detected by running the Net-SNMP software on Windows, that patch
+   introduced
+   a dangling pointer dereference about which only Valgrind on Linux
+   complained.
+   This follow-up patch fixes both dangling pointer dereferences
+   triggered by
+   parsing the persistentDir keyword.
+
+2009-12-21 12:23  bvassche
+
+   * snmplib/read_config.c:
+
+   Applied a slightly modified version of patch #2912055: make sure
+   that
+   parsing the "persistentDir" keyword in snmp.conf does not trigger
+   a
+   dangling pointer. To my surprise BoundsChecker complained about
+   this
+   (on Windows), but Valgrind did not report this issue (on Linux).
+
+2009-12-21 12:08  bvassche
+
+   * agent/mibgroup/notification-log-mib/notification_log.c:
+
+   Follow-up for r17925 (fix memory leak during startup): while
+   r17925 fixed
+   only the leak triggered from inside the for-loop, this patch does
+   now also
+   fix the leak triggered by the netsnmp_table_dataset_add_row()
+   call near
+   the end of log_notification().
+
+2009-12-21 12:01  bvassche
+
+   * snmplib/read_config.c:
+
+   Applied patch #2912062: make sure that the string returned by
+   read_config_read_octet_string() is properly terminated, such that
+   the
+   callers of this function do not trigger past-end-of-buffer reads.
+   Found
+   this issue via BoundsChecker.
+
+2009-12-21 11:06  bvassche
+
+   * agent/mibgroup/notification-log-mib/notification_log.c:
+
+   Applied patch #2912068, which fixes a memory leak during startup.
+   The function log_notification() adds a row to the table
+   nlmLogVarTable, but
+   this function can be called before that table has been
+   initialized. If
+   that happens, memory is allocated for a row but that memory is
+   never
+   added to the cached table data. The BoundsChecker tool reported
+   this as
+   a "memory leak leaving scope".
+
+2009-12-21 10:54  bvassche
+
+   * README.win32:
+
+   Added the following text to the "Limitations" section of
+   README.win32:
+   "When using winExtDLL, there is an offset of up to one second
+   between the
+   value of the sysUpTime varbind included in the traps generated by
+   SNMP
+   extension DLLs (e.g. linkUp and linkDown) and the value of the
+   sysUpTime
+   varbind included in traps generated by Net-SNMP itself (e.g.
+   coldStart)."
+
+2009-12-21 10:50  bvassche
+
+   * README.win32:
+
+   Backported r17901 (spelling fixes and hrSystemUptime documentation).
+
+2009-12-17 10:03  dts12
+
+   * man/snmptest.1.def:
+
+   Fix typo.
+
+2009-12-11 14:06  bvassche
+
+   * README.win32, agent/mibgroup/winExtDLL.c:
+
+   winExtDLL bugs fixed:
+   - sysUpTime.0 does now report the correct value.
+   - a linkUp or linkDown trap is now sent after the status of a
+   network interface
+   has changed.
+   - the value of the sysUpTime.0 varbind in linkUp and linkDown
+   traps is now
+   correct.
+
+2009-12-10 15:43  dts12
+
+   *  agent/mibgroup/disman/mteTriggerTable.c,   
+      agent/mibgroup/utilities/iquery.c:
+
+   CHANGES: snmpd: PATCHES: 2911323: Fix agent lockup when monitoring AgentX-delegated information
+
+2009-12-10 12:54  bvassche
+
+   * agent/mibgroup/winExtDLL.c:
+
+   Fixed the following winExtDLL bugs:
+   - Fixed bug in trap forwarding: linkDown traps were sent as
+   warmStart traps
+   and linkUp traps were sent as linkDown traps.
+   - Fixed a memory leak triggered by extension DLL loading.
+   - A debug trace statement is now invoked whenever a serious error
+   has been
+   detected.
+
+2009-12-09 14:37  jsafranek
+
+   *  agent/mibgroup/ip-mib/data_access/arp_linux.c,   
+      include/net-snmp/data_access/arp.h:
+
+   CHANGES: snmpd: Add support of network interfaces with HW address bigger than 6 bytes to ipNetToMediaTable and ipNetToPhysicalTable.
+   Some HW, like InfiniBand, uses HW addresses with 9 and more
+   bytes. Snmpd on Linux was not able to parse /proc/net/arp then
+   and produced ugly 'ioctl 35123 returned -1' to log.
+
+2009-12-08 21:54  magfr
+
+   * agent/mibgroup/util_funcs.c, snmplib/system.c:
+
+   CHANGES: snmplib, snmpd: Make sure that a mask is given to open when O_CREAT is specified
+
+2009-12-07 10:46  dts12
+
+   * apps/snmptable.c:
+
+   Tweak missing subidentifier processing to be more type-aware.
+   (An issue with AIX, at least)
+
+2009-12-05 17:42  tanders
+
+   * perl/SNMP/SNMP.xs:
+
+   call netsnmp_read_module instead of read_module to make it
+   compile with NETSNMP_CLEAN_NAMESPACE
+
+2009-12-05 17:19  tanders
+
+   * agent/mibgroup/disman/schedule/schedCore.c:
+
+   apply r17854 build fix to all affected branches
+
+2009-12-02 15:39  jsafranek
+
+   *  agent/mibgroup/tcp-mib/tcpConnectionTable/tcpConnectionTable.c,   
+      agent/mibgroup/tcp-mib/tcpConnectionTable/tcpConnectionTable_data_access.c,
+         agent/mibgroup/tcp-mib/tcpListenerTable/tcpListenerTable.c,   
+      agent/mibgroup/tcp-mib/tcpListenerTable/tcpListenerTable_data_access.c:
+
+   CHANGES: snmpd: Fixed invalid access to memory in TCP-MIB
+   This partly reverts patch 17719 - the entries *are* used after
+   raw_data container is freed. These entries should be freed when
+   associated rowreq_ctx is freed.
+
+2009-12-02 08:30  jsafranek
+
+   * agent/mibgroup/mibII/udpTable.c:
+
+   CHANGES: snmpd: Fixed udpTable indexes on big-endian 64bit Linux.
+   The index was always '0.0.0.0' instead of real local IP address.
+
+2009-12-01 12:36  dts12
+
+   * include/net-snmp/library/snmp_api.h:
+
+   Update a redundant (and probably inaccurate) comment.
+
+2009-12-01 12:31  dts12
+
+   * agent/helpers/table.c:
+
+   CHANGES: agent: BUGS: 2822360: Fix memory leak when building table OIDs
+
+2009-12-01 12:08  dts12
+
+   * apps/snmptable.c:
+
+   CHANGES: snmptable: BUGS: 2837998: Handle missing instance subidentifiers in results
+
+2009-12-01 11:56  dts12
+
+   * agent/mibgroup/agentx/client.c:
+
+   CHANGES: agent: BUGS: 2841008: Protect against crash following failed AgentX response
+
+2009-11-30 16:55  dts12
+
+   * agent/mibgroup/disman/schedule/schedCore.c:
+
+   CHANGES: agent: BUGS: 2873858: Fix handling of schedOwner index.
+   Patch provided by Max Schubert.
+
+2009-11-30 16:46  dts12
+
+   * local/mib2c.old-api.conf:
+
+   CHANGES: mib2c: BUGS: 2888569: Fix generation of table columns array
+
+2009-11-30 16:30  dts12
+
+   * agent/mibgroup/ip-mib/data_access/ipaddress_ioctl.c:
+
+   CHANGES: agent: BUGS: 2894059: Handle errors when counting interfaces
+
+2009-11-30 16:07  dts12
+
+   * agent/mibgroup/ucd-snmp/vmstat.c:
+
+   CHANGES: agent: BUG: 2897000: Suppress 32-bit counter truncation warnings.
+
+2009-11-30 15:19  dts12
+
+   * agent/mibgroup/ucd-snmp/pass_persist.c:
+
+   CHANGES: agent: PATCH: 2901029: Fix compiler warning on CloseHandle()
+   Endian problems already addressed by patch #2835576
+
+2009-11-30 15:13  dts12
+
+   * perl/agent/agent.xs:
+
+   CHANGES: perl: PATCH: 2890931: Better handling of Counter64 values.
+   Patch provided by Max Romanov.
+
+2009-11-30 15:07  dts12
+
+   * agent/mibgroup/ucd-snmp/vmstat_solaris2.c:
+
+   CHANGES: agent: PATCH: 2887816: Protect against division-by-zero crash
+
+2009-11-30 14:49  dts12
+
+   * agent/mibgroup/ucd-snmp/proxy.c:
+
+   CHANGES: agent: PATCH: 2883155: Fix memory leak in proxy handling.
+   Patch supplied by Gowtham Thommandra.
+
+2009-11-30 14:12  dts12
+
+   * agent/mibgroup/agentx/subagent.c:
+
+   CHANGES: agent: PATCH: 2877518: Fix handling of scoped AgentX variables
+
+2009-11-27 08:54  jsafranek
+
+   * agent/helpers/table_row.c:
+
+   Remove executable attribute from source files.
+
+2009-11-13 12:59  jsafranek
+
+   * agent/mibgroup/mibII/ip.c, agent/mibgroup/mibII/tcp.c:
+
+   CHANGES: snmpd: Fixed logging of 'truncating integer value > 32 bits' in IP-MIB and TCP-MIB
+   The counters, which grow fast are now cut to 32bits.
+
+2009-11-11 09:00  dts12
+
+   * local/mib2c.iterate.conf, local/mib2c.table_data.conf:
+
+   Fix cache free routine to match header declaration.
+   Return success/failure values from cache load routine.
+   Problem identified by Xuan.
+
+2009-10-29 16:05  dts12
+
+   *  FAQ, README, configure, configure.in, dist/net-snmp.spec,   
+      perl/ASN/ASN.pm, perl/AnyData_SNMP/Storage.pm, perl/OID/OID.pm,   
+      perl/SNMP/SNMP.pm, perl/TrapReceiver/TrapReceiver.pm,   
+      perl/agent/Support/Support.pm, perl/agent/agent.pm,   
+      perl/agent/default_store/default_store.pm,   
+      perl/default_store/default_store.pm, sedscript.in,   
+      snmplib/snmp_version.c:
+
+   - version tag ( 5.4.3.pre1 )
+
+2009-10-29 14:24  dts12
+
+   * CHANGES, NEWS:
+
+   version update
+
+2009-10-29 11:46  dts12
+
+   * ChangeLog:
+
+   version update
+
+2009-10-29 10:30  dts12
+
+   *  man/netsnmp_agent.3, man/netsnmp_agent_registry.3,   
+      man/netsnmp_agent_trap.3, man/netsnmp_asn1_packet_parse.3,   
+      man/netsnmp_baby_steps.3, man/netsnmp_bulk_to_next.3,   
+      man/netsnmp_cache_handler.3, man/netsnmp_callback.3,   
+      man/netsnmp_container.3, man/netsnmp_data_list.3,   
+      man/netsnmp_debug.3, man/netsnmp_default_store.3,   
+      man/netsnmp_handler.3, man/netsnmp_instance.3,   
+      man/netsnmp_iterator_info_s.3, man/netsnmp_leaf.3,   
+      man/netsnmp_library.3, man/netsnmp_mib_maintenance.3,   
+      man/netsnmp_mib_utilities.3, man/netsnmp_mode_end_call.3,   
+      man/netsnmp_multiplexer.3,   
+      man/netsnmp_netsnmp_agent_request_info_s.3,   
+      man/netsnmp_netsnmp_column_info_t.3,   
+      man/netsnmp_netsnmp_data_list_s.3,   
+      man/netsnmp_netsnmp_handler_registration_s.3,   
+      man/netsnmp_netsnmp_iterator_info_s.3,   
+      man/netsnmp_netsnmp_mib_handler_access_methods.3,   
+      man/netsnmp_netsnmp_mib_handler_methods.3,   
+      man/netsnmp_netsnmp_mib_handler_s.3,   
+      man/netsnmp_netsnmp_request_info_s.3,   
+      man/netsnmp_netsnmp_table_registration_info_s.3,   
+      man/netsnmp_netsnmp_table_request_info_s.3,   
+      man/netsnmp_oid_stash.3, man/netsnmp_old_api.3,   
+      man/netsnmp_read_config.3, man/netsnmp_read_only.3,   
+      man/netsnmp_row_merge.3, man/netsnmp_scalar.3,   
+      man/netsnmp_scalar_group_group.3, man/netsnmp_serialize.3,   
+      man/netsnmp_snmp_agent.3, man/netsnmp_snmp_alarm.3,   
+      man/netsnmp_snmp_client.3, man/netsnmp_snmp_logging.3,   
+      man/netsnmp_snmp_pdu.3, man/netsnmp_snmp_session.3,   
+      man/netsnmp_stash_cache.3, man/netsnmp_stash_to_next.3,   
+      man/netsnmp_table.3, man/netsnmp_table_array.3,   
+      man/netsnmp_table_container.3, man/netsnmp_table_data.3,   
+      man/netsnmp_table_dataset.3, man/netsnmp_table_generic.3,   
+      man/netsnmp_table_indexes.3, man/netsnmp_table_iterator.3,   
+      man/netsnmp_table_iterator.h.3, man/netsnmp_table_maintenance.3,  
+       man/netsnmp_table_rows.3, man/netsnmp_tdata.3,   
+      man/netsnmp_util.3, man/netsnmp_utilities.3,   
+      man/netsnmp_variable_list.3, man/netsnmp_watcher.3:
+
+   documentation update
+
+2009-10-29 10:28  dts12
+
+   * doxygen.conf:
+
+   - version tag ( 5.4.3.pre1 )
+
+2009-10-29 09:55  dts12
+
+   * Makefile.top:
+
+   version update
 
 2009-10-09 12:38  jsafranek
 
    * snmplib/snmp_client.c:
 
-   CHANGES: snmplib: PATCH:2871747: plug memory leak in OID
-   processing.
+   CHANGES: snmplib: PATCH: 2871747: plug memory leak in OID processing.
    The memory leaked when small OID, which could fit pre-allocated
    vp->name_loc, was placed in different (allocated) one.
 
