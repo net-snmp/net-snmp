@@ -2071,7 +2071,8 @@ _ifXTable_container_col_save(ifXTable_rowreq_ctx * rowreq_ctx,
         break;
 
     case COLUMN_IFALIAS:   /** DisplayString = ASN_OCTET_STR */
-        buf = read_config_save_octet_string(buf, rowreq_ctx->data.ifAlias,
+        buf = read_config_save_octet_string(buf,
+                                            (u_char *) rowreq_ctx->data.ifAlias,
                                             rowreq_ctx->data.ifAlias_len);
         break;
 

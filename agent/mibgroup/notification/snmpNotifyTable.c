@@ -760,7 +760,7 @@ write_snmpNotifyTag(int action,
         if (var_val_len < 0 || var_val_len > 255) {
             return SNMP_ERR_WRONGLENGTH;
         }
-        if (!snmpTagValid(var_val, var_val_len)) {
+        if (!snmpTagValid((char *) var_val, var_val_len)) {
             return SNMP_ERR_WRONGVALUE;
         }
         break;

@@ -226,7 +226,7 @@ register_agentx_list(netsnmp_session * session, netsnmp_pdu *pdu)
     reg->handler->myvoid = session;
     reg->global_cacheid = cacheid;
     if (NULL != pdu->community)
-        reg->contextName = strdup(pdu->community);
+        reg->contextName = strdup((char *)pdu->community);
 
     /*
      * register mib. Note that for failure cases, the registration info
