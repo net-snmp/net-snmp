@@ -62,6 +62,7 @@
 #include <net-snmp/config_api.h>
 
 #include <net-snmp/library/snmp_api.h>
+#include <net-snmp/library/tools.h>
 #include <net-snmp/library/vacm.h>
 
 static struct vacm_viewEntry *viewList = NULL, *viewScanPtr = NULL;
@@ -166,7 +167,7 @@ vacm_save_view(struct vacm_viewEntry *view, const char *token,
 }
 
 void
-vacm_parse_config_view(const char *token, char *line)
+vacm_parse_config_view(const char *token, const char *line)
 {
     struct vacm_viewEntry view;
     struct vacm_viewEntry *vptr;
@@ -176,17 +177,17 @@ vacm_parse_config_view(const char *token, char *line)
     size_t          len;
 
     view.viewStatus = atoi(line);
-    line = skip_token(line);
+    line = skip_token_const(line);
     view.viewStorageType = atoi(line);
-    line = skip_token(line);
+    line = skip_token_const(line);
     view.viewType = atoi(line);
-    line = skip_token(line);
+    line = skip_token_const(line);
     len = sizeof(view.viewName);
     line =
         read_config_read_ascii_string(line, (u_char **) & viewName, &len);
     view.viewSubtreeLen = MAX_OID_LEN;
     line =
-        read_config_read_objid(line, (oid **) & viewSubtree,
+        read_config_read_objid_const(line, (oid **) & viewSubtree,
                                &view.viewSubtreeLen);
 
     vptr =
@@ -284,7 +285,8 @@ vacm_save_auth_access(struct vacm_accessEntry *access_entry,
 }
 
 char *
-_vacm_parse_config_access_common(struct vacm_accessEntry **aptr, char *line)
+_vacm_parse_config_access_common(struct vacm_accessEntry **aptr,
+                                 const char *line)
 {
     struct vacm_accessEntry access;
     char           *cPrefix = (char *) &access.contextPrefix;
@@ -292,15 +294,15 @@ _vacm_parse_config_access_common(struct vacm_accessEntry **aptr, char *line)
     size_t          len;
 
     access.status = atoi(line);
-    line = skip_token(line);
+    line = skip_token_const(line);
     access.storageType = atoi(line);
-    line = skip_token(line);
+    line = skip_token_const(line);
     access.securityModel = atoi(line);
-    line = skip_token(line);
+    line = skip_token_const(line);
     access.securityLevel = atoi(line);
-    line = skip_token(line);
+    line = skip_token_const(line);
     access.contextMatch = atoi(line);
-    line = skip_token(line);
+    line = skip_token_const(line);
     len  = sizeof(access.groupName);
     line = read_config_read_ascii_string(line, (u_char **) &gName,   &len);
     len  = sizeof(access.contextPrefix);
@@ -323,11 +325,11 @@ _vacm_parse_config_access_common(struct vacm_accessEntry **aptr, char *line)
     (*aptr)->securityModel = access.securityModel;
     (*aptr)->securityLevel = access.securityLevel;
     (*aptr)->contextMatch  = access.contextMatch;
-    return line;
+    return NETSNMP_REMOVE_CONST(char *, line);
 }
 
 void
-vacm_parse_config_access(const char *token, char *line)
+vacm_parse_config_access(const char *token, const char *line)
 {
     struct vacm_accessEntry *aptr;
     char           *readView, *writeView, *notifyView;
@@ -353,7 +355,7 @@ vacm_parse_config_access(const char *token, char *line)
 }
 
 void
-vacm_parse_config_auth_access(const char *token, char *line)
+vacm_parse_config_auth_access(const char *token, const char *line)
 {
     struct vacm_accessEntry *aptr;
     int             authtype;
@@ -365,7 +367,7 @@ vacm_parse_config_auth_access(const char *token, char *line)
         return;
 
     authtype = atoi(line);
-    line = skip_token(line);
+    line = skip_token_const(line);
 
     view = (char *) aptr->views[authtype];
     len  = sizeof(aptr->views[authtype]);
@@ -401,7 +403,7 @@ vacm_save_group(struct vacm_groupEntry *group_entry, const char *token,
 }
 
 void
-vacm_parse_config_group(const char *token, char *line)
+vacm_parse_config_group(const char *token, const char *line)
 {
     struct vacm_groupEntry group;
     struct vacm_groupEntry *gptr;
@@ -410,11 +412,11 @@ vacm_parse_config_group(const char *token, char *line)
     size_t          len;
 
     group.status = atoi(line);
-    line = skip_token(line);
+    line = skip_token_const(line);
     group.storageType = atoi(line);
-    line = skip_token(line);
+    line = skip_token_const(line);
     group.securityModel = atoi(line);
-    line = skip_token(line);
+    line = skip_token_const(line);
     len = sizeof(group.securityName);
     line =
         read_config_read_ascii_string(line, (u_char **) & securityName,
