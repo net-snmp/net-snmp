@@ -128,7 +128,7 @@ snmpTargetAddrTable_addToList(struct targetAddrTable_struct *newEntry,
     /*
      * if the list is empty, add the new entry to the top 
      */
-    if ((prev_struct = curr_struct = *listPtr) == 0) {
+    if ((prev_struct = curr_struct = *listPtr) == NULL) {
         *listPtr = newEntry;
         return;
     } else {
@@ -143,7 +143,7 @@ snmpTargetAddrTable_addToList(struct targetAddrTable_struct *newEntry,
         /*
          * search through the list for an equal or greater OID value 
          */
-        while (curr_struct != 0) {
+        while (curr_struct != NULL) {
             currOIDLen = strlen(curr_struct->name);
             for (i = 0; i < (int) currOIDLen; i++) {
                 currOID[i] = curr_struct->name[i];

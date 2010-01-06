@@ -1527,7 +1527,7 @@ _sess_open(netsnmp_session * in_session)
     }
 
 #if defined(SO_BROADCAST) && defined(SOL_SOCKET)
-    if ( transport != 0 && (in_session->flags & SNMP_FLAGS_UDP_BROADCAST) ) {
+    if ( transport != NULL && (in_session->flags & SNMP_FLAGS_UDP_BROADCAST) ) {
         int   b = 1;
         int   rc;
 

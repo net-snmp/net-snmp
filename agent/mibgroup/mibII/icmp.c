@@ -442,7 +442,7 @@ icmp_msg_stats_first_entry(void **loop_context,
                            netsnmp_variable_list *index,
                            netsnmp_iterator_info *data)
 {
-    *loop_context = 0;
+    *loop_context = NULL;
     *data_context = NULL;
     return icmp_msg_stats_next_entry(loop_context, data_context, index, data);
 }
