@@ -259,7 +259,7 @@ init_sysORTable(void)
 #ifdef USING_MIBII_SYSTEM_MIB_MODULE
     if (++system_module_count == 3)
         REGISTER_SYSOR_TABLE(system_module_oid, system_module_oid_len,
-                             strdup("The MIB module for SNMPv2 entities"));
+                             "The MIB module for SNMPv2 entities");
 #endif
 }
 
