@@ -73,11 +73,18 @@ extern          "C" {
 
 
 /**
- * Cast away constness without that gcc -Wcast-qual prints a compiler warning.
- * @param[in] type A pointer type.
- * @param[in] e    An expression that evaluates to a pointer.
+ * Cast away constness without that gcc -Wcast-qual prints a compiler warning,
+ * similar to const_cast<> in C++.
+ *
+ * @param[in] t A pointer type.
+ * @param[in] e An expression of a type that can be assigned to the type (const t).
  */
-#define NETSNMP_REMOVE_CONST(type, e) ((type)(uintptr_t)(e))
+#if defined(__GNUC__)
+#define NETSNMP_REMOVE_CONST(t, e) \
+    ({ const t tmp = (e); (t)(uintptr_t)tmp; })
+#else
+#define NETSNMP_REMOVE_CONST(t, e) ((t)(uintptr_t)(e))
+#endif
 
 
 #define TOUPPER(c)	(c >= 'a' && c <= 'z' ? c - ('a' - 'A') : c)
