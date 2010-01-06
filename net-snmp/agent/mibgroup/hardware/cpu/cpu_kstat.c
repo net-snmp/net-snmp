@@ -54,10 +54,10 @@ void init_cpu_kstat( void ) {
                     state_begin = ks_data->value.i32;
                 } else if ( strcmp( ks_data->name, "cpu_type" ) == 0 ) {
                     strncpy( ctype, ks_data->value.c, sizeof(ctype));
-                    state[sizeof(ctype)-1] = '\0';
+                    ctype[sizeof(ctype)-1] = '\0';
                 } else if ( strcmp( ks_data->name, "fpu_type" ) == 0 ) {
                     strncpy( ftype, ks_data->value.c, sizeof(ftype));
-                    state[sizeof(ftype)-1] = '\0';
+                    ftype[sizeof(ftype)-1] = '\0';
                 } else if ( strcmp( ks_data->name, "clock_MHz" ) == 0 ) {
                     clock = ks_data->value.i32;
                 }
