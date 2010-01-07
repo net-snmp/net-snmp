@@ -1788,31 +1788,38 @@ read_config_read_octet_string_const(const char *readfrom, u_char ** str,
             }
             readfrom += 2;
         }
+        /*
+         * only null terminate if we have the space
+         */
+        if (ilen > *len) {
+            ilen = *len-1;
+            *cptr++ = '\0';
+        }
         readfrom = skip_white_const(readfrom);
     } else {
         /*
          * Normal string 
          */
 
-        char            buf[SNMP_MAXBUF];
-        size_t          buf_len;
-
-        readfrom = copy_nword_const(readfrom, buf, sizeof(buf));
-        buf_len = strlen(buf);
-
         /*
-         * malloc string space if needed (including space for a NULL terminator) 
+         * malloc string space if needed (including NULL terminator) 
          */
         if (*str == NULL) {
-            *len = buf_len;
-            if ((*str = (u_char *) malloc(*len + 1)) == NULL)
-                return NULL;
+            char            buf[SNMP_MAXBUF];
+            readfrom = copy_nword_const(readfrom, buf, sizeof(buf));
 
+            *len = strlen(buf);
+            if ((cptr = (u_char *) malloc(*len + 1)) == NULL)
+                return NULL;
+            *str = cptr;
+            if (cptr) {
+                memcpy(cptr, buf, *len + 1);
+            }
         } else {
-            if (buf_len < *len)
-                *len = buf_len;
+            readfrom = copy_nword_const(readfrom, (char *) *str, *len);
+            if (*len)
+                *len = strlen((char *) *str);
         }
-        memcpy(*str, buf, *len);
     }
 
     return readfrom;
@@ -2309,10 +2316,10 @@ static const struct read_config_testcase test_input[] = {
     { &read_config_read_octet_string_const, "0x010002 0", 4,  9, obuf1, 3 },
     { &read_config_read_octet_string_const, "0x010002",   0, -1, obuf1, 3 },
 
-    { &read_config_read_octet_string_const, "abc",        1, -1, NULL,  1 },
-    { &read_config_read_octet_string_const, "abc z",      1,  4, NULL,  1 },
-    { &read_config_read_octet_string_const, "abc",        2, -1, NULL,  2 },
-    { &read_config_read_octet_string_const, "abc",        3, -1, obuf2, 3 },
+    { &read_config_read_octet_string_const, "abc",        1, -1, NULL,  0 },
+    { &read_config_read_octet_string_const, "abc z",      1,  4, NULL,  0 },
+    { &read_config_read_octet_string_const, "abc",        2, -1, NULL,  1 },
+    { &read_config_read_octet_string_const, "abc",        3, -1, obuf2, 2 },
     { &read_config_read_octet_string_const, "abc",        4, -1, obuf2, 3 },
     { &read_config_read_octet_string_const, "abc z",      4,  4, obuf2, 3 },
     { &read_config_read_octet_string_const, "abc",        0, -1, obuf2, 3 },
@@ -2324,9 +2331,9 @@ static const struct read_config_testcase test_input[] = {
     { &read_config_read_ascii_string, "0x010302",   0, -1, obuf3, 3 },
 
     { &read_config_read_ascii_string, "abc",        1, -1, obuf2, 0 },
-    { &read_config_read_ascii_string, "abc",        2, -1, obuf2, 1 },
-    { &read_config_read_ascii_string, "abc",        3, -1, obuf2, 2 },
-    { &read_config_read_ascii_string, "abc",        4, -1, obuf2, 3 },
+    { &read_config_read_ascii_string, "abc",        2, -1, obuf2, 0 },
+    { &read_config_read_ascii_string, "abc",        3, -1, obuf2, 1 },
+    { &read_config_read_ascii_string, "abc",        4, -1, obuf2, 2 },
     { &read_config_read_ascii_string, "abc",        5, -1, obuf2, 3 },
     { &read_config_read_ascii_string, "abc",        0, -1, obuf2, 3 },
 };
