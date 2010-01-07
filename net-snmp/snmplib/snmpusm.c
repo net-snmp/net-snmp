@@ -2656,8 +2656,7 @@ usm_process_in_msg(int msgProcModel,    /* (UNUSED) */
      *
      * FIX  Correct? 
      */
-    *maxSizeResponse = maxMsgSize - (int)
-        ((u_long) end_of_overhead - (u_long) wholeMsg);
+    *maxSizeResponse = maxMsgSize - (end_of_overhead - wholeMsg);
 
 
     DEBUGMSGTL(("usm", "USM processing completed.\n"));
