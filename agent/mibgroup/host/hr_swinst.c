@@ -478,7 +478,7 @@ var_hrswinst(struct variable * vp,
     case HRSWINST_DATE:
         {
 #ifdef HAVE_LIBRPM
-            int_32         *rpm_data;
+            int         *rpm_data;
             if ( headerGetEntry(swi->swi_h, RPMTAG_INSTALLTIME, NULL, (void **) &rpm_data, NULL) ) {
                 time_t          installTime = *rpm_data;
                 ret = date_n_time(&installTime, var_len);
