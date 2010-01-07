@@ -3494,11 +3494,11 @@ usm_save_user(struct usmUser *user, const char *token, const char *type)
     *cptr++ = ' ';
     cptr = read_config_save_octet_string(cptr, (u_char *) user->name,
                                          (user->name == NULL) ? 0 :
-                                         strlen(user->name) + 1);
+                                         strlen(user->name));
     *cptr++ = ' ';
     cptr = read_config_save_octet_string(cptr, (u_char *) user->secName,
                                          (user->secName == NULL) ? 0 :
-                                         strlen(user->secName) + 1);
+                                         strlen(user->secName));
     *cptr++ = ' ';
     cptr =
         read_config_save_objid(cptr, user->cloneFrom, user->cloneFromLen);
