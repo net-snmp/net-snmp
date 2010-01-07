@@ -25,7 +25,7 @@ struct register_sysOR_parameters {
 #define REGISTER_SYSOR_TABLE(theoid, len, descr)           \
   do {                                                     \
     struct sysORTable t;                                   \
-    t.OR_descr = descr;                                    \
+    t.OR_descr = NETSNMP_REMOVE_CONST(char *, descr);      \
     t.OR_oid = theoid;                                     \
     t.OR_oidlen = len;                                     \
     t.OR_sess = NULL;                                      \
