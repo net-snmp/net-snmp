@@ -1788,38 +1788,31 @@ read_config_read_octet_string_const(const char *readfrom, u_char ** str,
             }
             readfrom += 2;
         }
-        /*
-         * only null terminate if we have the space
-         */
-        if (ilen > *len) {
-            ilen = *len-1;
-            *cptr++ = '\0';
-        }
         readfrom = skip_white_const(readfrom);
     } else {
         /*
          * Normal string 
          */
 
+        char            buf[SNMP_MAXBUF];
+        size_t          buf_len;
+
+        readfrom = copy_nword_const(readfrom, buf, sizeof(buf));
+        buf_len = strlen(buf);
+
         /*
-         * malloc string space if needed (including NULL terminator) 
+         * malloc string space if needed (including space for a NULL terminator) 
          */
         if (*str == NULL) {
-            char            buf[SNMP_MAXBUF];
-            readfrom = copy_nword_const(readfrom, buf, sizeof(buf));
-
-            *len = strlen(buf);
-            if ((cptr = (u_char *) malloc(*len + 1)) == NULL)
+            *len = buf_len;
+            if ((*str = (u_char *) malloc(*len + 1)) == NULL)
                 return NULL;
-            *str = cptr;
-            if (cptr) {
-                memcpy(cptr, buf, *len + 1);
-            }
+
         } else {
-            readfrom = copy_nword_const(readfrom, (char *) *str, *len);
-            if (*len)
-                *len = strlen((char *) *str);
+            if (buf_len < *len)
+                *len = buf_len;
         }
+        memcpy(*str, buf, *len);
     }
 
     return readfrom;
@@ -1848,19 +1841,23 @@ read_config_read_ascii_string(const char *readfrom, u_char ** str,
 {
     char           *result = NULL;
 
-    /*
-     * If the caller has allocated a buffer (*str != NULL), reserve the last
-     * character of that buffer for storing a '\0' character.
-     */
-    if (str && *str && len && *len)
+    if (str && *str && len && *len > 0) {
+        /*
+         * The caller provided a buffer: reserve one byte for termination.
+         */
         (*len)--;
-    result = read_config_read_octet_string(readfrom, str, len);
-    /*
-     * Terminate the string that has been read. It is assumed that if
-     * read_config_read_octet_string() allocated a buffer, that it also
-     * allocated space for the terminating '\0' character.
-     */
-    (*str)[*len] = 0;
+        result = read_config_read_octet_string(readfrom, str, len);
+        (*str)[*len] = 0;
+    } else if (str && !*str && len) {
+        /*
+         * The caller did not provide a buffer: let
+         * read_config_read_octet_string() allocate one, and if allocation
+         * succeeded, terminate the output string.
+         */
+        result = read_config_read_octet_string(readfrom, str, len);
+        if (*str)
+            (*str)[*len] = 0;
+    }
     return result;
 }
 
@@ -2293,38 +2290,45 @@ struct read_config_testcase {
     size_t          expected_offset;
     const u_char   *expected_output;
     size_t          expected_len;
+    int             expect_null_terminated;
 };
 
 static const u_char obuf1[] = { 1, 0, 2 };
 static const u_char obuf2[] = { 'a', 'b', 'c', 0 };
 static const u_char obuf3[] = { 1, 3, 2 };
-static const u_char zbuf[] = { 0, 0, 0 };
 
 static const struct read_config_testcase test_input[] = {
-    {&read_config_read_octet_string_const, "0x010002", 1, -1, NULL, 1},
-    {&read_config_read_octet_string_const, "0x010002", 2, -1, NULL, 2},
-    {&read_config_read_octet_string_const, "0x010002", 3, -1, obuf1, 3},
-    {&read_config_read_octet_string_const, "0x010002", 4, -1, obuf1, 3},
-    {&read_config_read_octet_string_const, "0x010002", 0, -1, obuf1, 3},
+    { &read_config_read_octet_string_const, "",           1, -1, NULL,  0 },
+    { &read_config_read_octet_string_const, "0x0",        1, -1, NULL,  1 },
+    { &read_config_read_octet_string_const, "0x0 0",      1, -1, NULL,  1 },
 
-    {&read_config_read_octet_string_const, "abc", 1, -1, zbuf, 0},
-    {&read_config_read_octet_string_const, "abc", 2, -1, obuf2, 1},
-    {&read_config_read_octet_string_const, "abc", 3, -1, obuf2, 2},
-    {&read_config_read_octet_string_const, "abc", 4, -1, obuf2, 3},
-    {&read_config_read_octet_string_const, "abc", 0, -1, obuf2, 3},
+    { &read_config_read_octet_string_const, "0x010002",   1, -1, NULL,  1 },
+    { &read_config_read_octet_string_const, "0x010002",   2, -1, NULL,  2 },
+    { &read_config_read_octet_string_const, "0x010002",   3, -1, obuf1, 3 },
+    { &read_config_read_octet_string_const, "0x010002",   4, -1, obuf1, 3 },
+    { &read_config_read_octet_string_const, "0x010002 0", 4,  9, obuf1, 3 },
+    { &read_config_read_octet_string_const, "0x010002",   0, -1, obuf1, 3 },
 
-    {&read_config_read_ascii_string, "0x010302", 1, -1, NULL, 0},
-    {&read_config_read_ascii_string, "0x010302", 2, -1, NULL, 1},
-    {&read_config_read_ascii_string, "0x010302", 3, -1, NULL, 2},
-    {&read_config_read_ascii_string, "0x010302", 4, -1, obuf3, 3},
-    {&read_config_read_ascii_string, "0x010302", 0, -1, obuf3, 3},
+    { &read_config_read_octet_string_const, "abc",        1, -1, NULL,  1 },
+    { &read_config_read_octet_string_const, "abc z",      1,  4, NULL,  1 },
+    { &read_config_read_octet_string_const, "abc",        2, -1, NULL,  2 },
+    { &read_config_read_octet_string_const, "abc",        3, -1, obuf2, 3 },
+    { &read_config_read_octet_string_const, "abc",        4, -1, obuf2, 3 },
+    { &read_config_read_octet_string_const, "abc z",      4,  4, obuf2, 3 },
+    { &read_config_read_octet_string_const, "abc",        0, -1, obuf2, 3 },
 
-    {&read_config_read_ascii_string, "abc", 1, -1, obuf2, 0},
-    {&read_config_read_ascii_string, "abc", 2, -1, obuf2, 0},
-    {&read_config_read_ascii_string, "abc", 3, -1, obuf2, 1},
-    {&read_config_read_ascii_string, "abc", 4, -1, obuf2, 2},
-    {&read_config_read_ascii_string, "abc", 5, -1, obuf2, 3},
-    {&read_config_read_ascii_string, "abc", 0, -1, obuf2, 3},
+    { &read_config_read_ascii_string, "0x010302",   1, -1, NULL,  0 },
+    { &read_config_read_ascii_string, "0x010302",   2, -1, NULL,  1 },
+    { &read_config_read_ascii_string, "0x010302",   3, -1, NULL,  2 },
+    { &read_config_read_ascii_string, "0x010302",   4, -1, obuf3, 3 },
+    { &read_config_read_ascii_string, "0x010302",   0, -1, obuf3, 3 },
+
+    { &read_config_read_ascii_string, "abc",        1, -1, obuf2, 0 },
+    { &read_config_read_ascii_string, "abc",        2, -1, obuf2, 1 },
+    { &read_config_read_ascii_string, "abc",        3, -1, obuf2, 2 },
+    { &read_config_read_ascii_string, "abc",        4, -1, obuf2, 3 },
+    { &read_config_read_ascii_string, "abc",        5, -1, obuf2, 3 },
+    { &read_config_read_ascii_string, "abc",        0, -1, obuf2, 3 },
 };
 
 int
@@ -2354,7 +2358,9 @@ main(int argc, char **argv)
             printf("test %d: expected length %d, got length %d\n",
                    i, p->expected_len, len);
         } else if (len >= 0 && p->expected_output
-                   && memcmp(str, p->expected_output, len) != 0) {
+                   && memcmp(str, p->expected_output, len) != 0
+                   && (!p->expect_null_terminated
+                       || p->expected_output[len] == 0)) {
             failure_count++;
             printf("test %d: output buffer mismatch\n", i);
             printf("Expected: ");
@@ -2379,6 +2385,6 @@ main(int argc, char **argv)
  * Local variables:
  * c-basic-offset: 4
  * indent-tabs-mode: nil
- * compile-command: "gcc -Wall -Werror -DREAD_CONFIG_UNIT_TEST=1 -I../include -g -o read_config-unit-test read_config.c && ./read_config-unit-test"
+ * compile-command: "gcc -Wall -Werror -DREAD_CONFIG_UNIT_TEST=1 -I../include -g -o read_config-unit-test read_config.c && ./read_config-unit-test && valgrind --leak-check=full ./read_config-unit-test"
  * End:
  */
