@@ -1697,13 +1697,14 @@ read_config_save_octet_string(char *saveto, u_char * str, size_t len)
  * read_config_save_octet_string() function.
  *
  * @param[in]     readfrom Pointer to the input data to be parsed.
- * @param[in,out] str      Pointer to the output buffer pointer. If *str == NULL,
- *   an output buffer will be allocated that is one byte larger than the data
- *   stored.
+ * @param[in,out] str      Pointer to the output buffer pointer. The data
+ *   written to the output buffer will be '\0'-terminated. If *str == NULL,
+ *   an output buffer will be allocated that is one byte larger than the
+ *   data stored.
  * @param[in,out] len      If str != NULL, *len is the size of the buffer *str
  *   points at. If str == NULL, the value passed via *len is ignored.
  *   Before this function returns the number of bytes read will be stored
- *   in *len.
+ *   in *len. If a buffer overflow occurs, *len will be set to 0.
  *
  * @return A pointer to the next character in the input to be parsed if
  *   parsing succeeded; NULL when the end of the input string has been reached
@@ -1721,13 +1722,13 @@ const char     *
 read_config_read_octet_string_const(const char *readfrom, u_char ** str,
                                     size_t * len)
 {
-    u_char         *cptr = NULL;
+    u_char         *cptr;
     const char     *cptr1;
     u_int           tmp;
     int             i;
     size_t          ilen;
 
-    if (readfrom == NULL || str == NULL)
+    if (readfrom == NULL || str == NULL || len == NULL)
         return NULL;
 
     if (strncasecmp(readfrom, "0x", 2) == 0) {
@@ -1753,31 +1754,29 @@ read_config_read_octet_string_const(const char *readfrom, u_char ** str,
          * malloc data space if needed (+1 for good measure) 
          */
         if (*str == NULL) {
-            if ((cptr = (u_char *) malloc(ilen + 1)) == NULL) {
+            *str = (u_char *) malloc(ilen + 1);
+            if (!*str)
                 return NULL;
-            }
-            *str = cptr;
         } else {
             /*
-             * don't require caller to have +1 for good measure, and 
-             * bail if not enough space.
+             * require caller to have +1, and bail if not enough space.
              */
-            if (ilen > *len) {
+            if (ilen >= *len) {
                 snmp_log(LOG_WARNING,"buffer too small to read octet string (%lu < %lu)\n",
                          (unsigned long)*len, (unsigned long)ilen);
                 DEBUGMSGTL(("read_config_read_octet_string",
                             "buffer too small (%lu < %lu)", (unsigned long)*len, (unsigned long)ilen));
+                *len = 0;
                 cptr1 = skip_not_white_const(readfrom);
                 return skip_white_const(cptr1);
             }
-            cptr = *str;
         }
-        *len = ilen;
 
         /*
          * copy validated data 
          */
-        for (i = 0; i < (int) *len; i++) {
+        cptr = *str;
+        for (i = 0; i < ilen; i++) {
             if (1 == sscanf(readfrom, "%2x", &tmp))
                 *cptr++ = (u_char) tmp;
             else {
@@ -1789,12 +1788,10 @@ read_config_read_octet_string_const(const char *readfrom, u_char ** str,
             readfrom += 2;
         }
         /*
-         * only null terminate if we have the space
+         * Terminate the output buffer.
          */
-        if (ilen > *len) {
-            ilen = *len-1;
-            *cptr++ = '\0';
-        }
+        *cptr++ = '\0';
+        *len = ilen;
         readfrom = skip_white_const(readfrom);
     } else {
         /*
@@ -1809,12 +1806,10 @@ read_config_read_octet_string_const(const char *readfrom, u_char ** str,
             readfrom = copy_nword_const(readfrom, buf, sizeof(buf));
 
             *len = strlen(buf);
-            if ((cptr = (u_char *) malloc(*len + 1)) == NULL)
+            *str = (u_char *) malloc(*len + 1);
+            if (*str == NULL)
                 return NULL;
-            *str = cptr;
-            if (cptr) {
-                memcpy(cptr, buf, *len + 1);
-            }
+            memcpy(*str, buf, *len + 1);
         } else {
             readfrom = copy_nword_const(readfrom, (char *) *str, *len);
             if (*len)
@@ -1823,49 +1818,6 @@ read_config_read_octet_string_const(const char *readfrom, u_char ** str,
     }
 
     return readfrom;
-}
-
-/**
- * Reads an ASCII string that was saved by the
- * read_config_save_octet_string() function.
- *
- * @param[in]     readfrom Input data to be parsed.
- * @param[in,out] str      Pointer to the output buffer pointer. If NULL, an
- *   output buffer will be allocated that is one byte larger than the data
- *   stored.
- * @param[in,out] len      If str != NULL, *len is the size of the buffer *str
- *   points at. If str == NULL, the number of bytes read will be stored in
- *   *len. The output buffer will be terminated with a '\0' character. This
- *   character is not included in the count *len.
- *
- * @return A pointer to the next character in the input to be parsed if
- *   parsing succeeded; NULL when the end of the input string has been reached
- *   or if an error occurred.
- */
-const char     *
-read_config_read_ascii_string(const char *readfrom, u_char ** str,
-                              size_t * len)
-{
-    char           *result = NULL;
-
-    if (str && *str && len && *len > 0) {
-        /*
-         * The caller provided a buffer: reserve one byte for termination.
-         */
-        (*len)--;
-        result = read_config_read_octet_string(readfrom, str, len);
-        (*str)[*len] = 0;
-    } else if (str && !*str && len) {
-        /*
-         * The caller did not provide a buffer: let
-         * read_config_read_octet_string() allocate one, and if allocation
-         * succeeded, terminate the output string.
-         */
-        result = read_config_read_octet_string(readfrom, str, len);
-        if (*str)
-            (*str)[*len] = 0;
-    }
-    return result;
 }
 
 /*
@@ -2297,7 +2249,6 @@ struct read_config_testcase {
     size_t          expected_offset;
     const u_char   *expected_output;
     size_t          expected_len;
-    int             expect_null_terminated;
 };
 
 static const u_char obuf1[] = { 1, 0, 2 };
@@ -2309,9 +2260,9 @@ static const struct read_config_testcase test_input[] = {
     { &read_config_read_octet_string_const, "0x0",        1, -1, NULL,  1 },
     { &read_config_read_octet_string_const, "0x0 0",      1, -1, NULL,  1 },
 
-    { &read_config_read_octet_string_const, "0x010002",   1, -1, NULL,  1 },
-    { &read_config_read_octet_string_const, "0x010002",   2, -1, NULL,  2 },
-    { &read_config_read_octet_string_const, "0x010002",   3, -1, obuf1, 3 },
+    { &read_config_read_octet_string_const, "0x010002",   1, -1, NULL,  0 },
+    { &read_config_read_octet_string_const, "0x010002",   2, -1, NULL,  0 },
+    { &read_config_read_octet_string_const, "0x010002",   3, -1, obuf1, 0 },
     { &read_config_read_octet_string_const, "0x010002",   4, -1, obuf1, 3 },
     { &read_config_read_octet_string_const, "0x010002 0", 4,  9, obuf1, 3 },
     { &read_config_read_octet_string_const, "0x010002",   0, -1, obuf1, 3 },
@@ -2323,19 +2274,6 @@ static const struct read_config_testcase test_input[] = {
     { &read_config_read_octet_string_const, "abc",        4, -1, obuf2, 3 },
     { &read_config_read_octet_string_const, "abc z",      4,  4, obuf2, 3 },
     { &read_config_read_octet_string_const, "abc",        0, -1, obuf2, 3 },
-
-    { &read_config_read_ascii_string, "0x010302",   1, -1, NULL,  0 },
-    { &read_config_read_ascii_string, "0x010302",   2, -1, NULL,  1 },
-    { &read_config_read_ascii_string, "0x010302",   3, -1, NULL,  2 },
-    { &read_config_read_ascii_string, "0x010302",   4, -1, obuf3, 3 },
-    { &read_config_read_ascii_string, "0x010302",   0, -1, obuf3, 3 },
-
-    { &read_config_read_ascii_string, "abc",        1, -1, obuf2, 0 },
-    { &read_config_read_ascii_string, "abc",        2, -1, obuf2, 0 },
-    { &read_config_read_ascii_string, "abc",        3, -1, obuf2, 1 },
-    { &read_config_read_ascii_string, "abc",        4, -1, obuf2, 2 },
-    { &read_config_read_ascii_string, "abc",        5, -1, obuf2, 3 },
-    { &read_config_read_ascii_string, "abc",        0, -1, obuf2, 3 },
 };
 
 int
@@ -2366,8 +2304,7 @@ main(int argc, char **argv)
                    i, p->expected_len, len);
         } else if (len >= 0 && p->expected_output
                    && memcmp(str, p->expected_output, len) != 0
-                   && (!p->expect_null_terminated
-                       || p->expected_output[len] == 0)) {
+                   && p->expected_output[len] == 0) {
             failure_count++;
             printf("test %d: output buffer mismatch\n", i);
             printf("Expected: ");
@@ -2392,6 +2329,6 @@ main(int argc, char **argv)
  * Local variables:
  * c-basic-offset: 4
  * indent-tabs-mode: nil
- * compile-command: "gcc -Wall -Werror -DREAD_CONFIG_UNIT_TEST=1 -I../include -g -o read_config-unit-test read_config.c && ./read_config-unit-test && valgrind --leak-check=full ./read_config-unit-test"
+ * compile-command: "gcc -Wall -Werror -DREAD_CONFIG_UNIT_TEST=1 -O1 -I../include -g -o read_config-unit-test read_config.c && ./read_config-unit-test && valgrind --leak-check=full ./read_config-unit-test"
  * End:
  */
