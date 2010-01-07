@@ -184,7 +184,7 @@ vacm_parse_config_view(const char *token, const char *line)
     line = skip_token_const(line);
     len = sizeof(view.viewName);
     line =
-        read_config_read_ascii_string(line, (u_char **) & viewName, &len);
+        read_config_read_octet_string(line, (u_char **) & viewName, &len);
     view.viewSubtreeLen = MAX_OID_LEN;
     line =
         read_config_read_objid_const(line, (oid **) & viewSubtree,
@@ -304,9 +304,9 @@ _vacm_parse_config_access_common(struct vacm_accessEntry **aptr,
     access.contextMatch = atoi(line);
     line = skip_token_const(line);
     len  = sizeof(access.groupName);
-    line = read_config_read_ascii_string(line, (u_char **) &gName,   &len);
+    line = read_config_read_octet_string(line, (u_char **) &gName,   &len);
     len  = sizeof(access.contextPrefix);
-    line = read_config_read_ascii_string(line, (u_char **) &cPrefix, &len);
+    line = read_config_read_octet_string(line, (u_char **) &cPrefix, &len);
 
     *aptr = vacm_getAccessEntry(access.groupName,
                                   access.contextPrefix,
@@ -342,15 +342,15 @@ vacm_parse_config_access(const char *token, const char *line)
     readView = (char *) aptr->views[VACM_VIEW_READ];
     len = sizeof(aptr->views[VACM_VIEW_READ]);
     line =
-        read_config_read_ascii_string(line, (u_char **) & readView, &len);
+        read_config_read_octet_string(line, (u_char **) & readView, &len);
     writeView = (char *) aptr->views[VACM_VIEW_WRITE];
     len = sizeof(aptr->views[VACM_VIEW_WRITE]);
     line =
-        read_config_read_ascii_string(line, (u_char **) & writeView, &len);
+        read_config_read_octet_string(line, (u_char **) & writeView, &len);
     notifyView = (char *) aptr->views[VACM_VIEW_NOTIFY];
     len = sizeof(aptr->views[VACM_VIEW_NOTIFY]);
     line =
-        read_config_read_ascii_string(line, (u_char **) & notifyView,
+        read_config_read_octet_string(line, (u_char **) & notifyView,
                                       &len);
 }
 
@@ -371,7 +371,7 @@ vacm_parse_config_auth_access(const char *token, const char *line)
 
     view = (char *) aptr->views[authtype];
     len  = sizeof(aptr->views[authtype]);
-    line = read_config_read_ascii_string(line, (u_char **) & view, &len);
+    line = read_config_read_octet_string(line, (u_char **) & view, &len);
 }
 
 /*
@@ -419,7 +419,7 @@ vacm_parse_config_group(const char *token, const char *line)
     line = skip_token_const(line);
     len = sizeof(group.securityName);
     line =
-        read_config_read_ascii_string(line, (u_char **) & securityName,
+        read_config_read_octet_string(line, (u_char **) & securityName,
                                       &len);
 
     gptr = vacm_createGroupEntry(group.securityModel, group.securityName);
@@ -431,7 +431,7 @@ vacm_parse_config_group(const char *token, const char *line)
     groupName = (char *) gptr->groupName;
     len = sizeof(group.groupName);
     line =
-        read_config_read_ascii_string(line, (u_char **) & groupName, &len);
+        read_config_read_octet_string(line, (u_char **) & groupName, &len);
 }
 
 struct vacm_viewEntry *

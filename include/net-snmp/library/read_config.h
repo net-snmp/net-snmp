@@ -78,9 +78,6 @@ extern          "C" {
     const char     *read_config_read_octet_string_const(const char *readfrom,
                                                         u_char ** str,
                                                         size_t * len);
-    const char     *read_config_read_ascii_string(const char *readfrom,
-                                                  u_char ** str,
-                                                  size_t * len);
     char           *read_config_read_objid(char *readfrom, oid ** objid,
                                            size_t * len);
     const char     *read_config_read_objid_const(const char *readfrom,
