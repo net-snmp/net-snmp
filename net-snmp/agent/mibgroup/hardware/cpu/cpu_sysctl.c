@@ -196,6 +196,7 @@ int netsnmp_cpu_arch_load( netsnmp_cache *cache, void *magic ) {
         cpu = netsnmp_cpu_get_byIdx( i, 0 );
         /* XXX - per-CPU statistics - mcpu_mib[i].??? */
     }
+    free(mcpu_stats);
 #else
         /* Copy "overall" figures to cpu0 entry */
     _cpu_copy_stats( cpu );
