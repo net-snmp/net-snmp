@@ -144,7 +144,7 @@ snmpvacm$(EXEEXT):    snmpvacm.$(OSUFFIX) $(USELIBS)
 	$(LINK) ${CFLAGS} -o $@ snmpvacm.$(OSUFFIX) $(LOCAL_LIBS) ${LDFLAGS} ${LIBS} 
 
 agentxtrap$(EXEEXT):    agentxtrap.$(OSUFFIX) $(USEAGENTLIBS)
-	$(LINK) ${CFLAGS} -o $@ agentxtrap.$(OSUFFIX) $(LOCAL_LIBS) ${LDFLAGS} $(USEAGENTLIBS) ${LIBS}
+	$(LINK) ${CFLAGS} -o $@ agentxtrap.$(OSUFFIX) $(LOCAL_LIBS) ${LDFLAGS} $(USEAGENTLIBS) $(PERLLDOPTS_FOR_APPS) ${LIBS}
 
 snmpgetnext$(EXEEXT):    snmpgetnext.$(OSUFFIX) $(USELIBS)
 	$(LINK) ${CFLAGS} -o $@ snmpgetnext.$(OSUFFIX) $(LOCAL_LIBS) ${LDFLAGS} ${LIBS} 
