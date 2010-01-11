@@ -12,7 +12,7 @@ SKIPIFNOT USING_EXAMPLES_EXAMPLE_MODULE
 
 # standard V1 configuration: testcommunity
 . ./Sv3config
-CONFIGAGENT trap2sink localhost public $SNMP_SNMPTRAPD_PORT
+CONFIGAGENT trap2sink localhost:${SNMP_SNMPTRAPD_PORT} public
 CONFIGTRAPD authcommunity log public
 CONFIGTRAPD agentxsocket /dev/null
 
