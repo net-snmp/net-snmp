@@ -279,7 +279,7 @@ fi
 # installed tables (on linux in particular)
 #
 if test "x$with_rpm" != "xno" && \
-        echo " $module_list " | $GREP " host/hr_swinst " > /dev/null; then
+        echo " $module_list " | $EGREP " host/(hr_swinst|data_access/swinst_rpm) " > /dev/null; then
   # ARG.  RPM is a real pain.
   # FWIW librpm.la, librpmio.la, and libpopt.la have correct dependencies.
   _rpmlibs=""
