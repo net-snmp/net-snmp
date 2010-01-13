@@ -1058,7 +1058,7 @@ void *netsnmp_prefix_listen(void *formal)
               if(!(new = net_snmp_create_prefix_info (onlink, autonomous, in6pAddr)))
                  DEBUGMSGTL(("access:interface:prefix", "Unable to create prefix info\n"));
               else {
-                    iret = net_snmp_update_prefix_info (listen_info->list_head, new, listen_info->lockinfo);
+                    iret = net_snmp_search_update_prefix_info (listen_info->list_head, new, 0, listen_info->lockinfo);
                     if(iret < 0) {
                        DEBUGMSGTL(("access:interface:prefix", "Unable to add/update prefix info\n"));
                        free(new);
