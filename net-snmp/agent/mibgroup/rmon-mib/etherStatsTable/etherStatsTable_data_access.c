@@ -310,7 +310,13 @@ etherStatsTable_container_load(netsnmp_container * container)
         /*
          * insert into table container
          */
-        CONTAINER_INSERT(container, rowreq_ctx);
+        rc = CONTAINER_INSERT(container, rowreq_ctx);
+        if (rc < 0) {
+            DEBUGMSGTL(("access:etherStatsTable", "error inserting |%s| ", p->name));
+            etherStatsTable_release_rowreq_ctx(rowreq_ctx);
+            continue;
+        }
+
         ++count;
     }
 
