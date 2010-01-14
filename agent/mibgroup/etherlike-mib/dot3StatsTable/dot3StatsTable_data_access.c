@@ -317,7 +317,7 @@ dot3StatsTable_container_load(netsnmp_container * container)
             dot3StatsTable_release_rowreq_ctx(rowreq_ctx);
             continue;
         }
-        
+
         rc = interface_ioctl_dot3stats_duplex_get(rowreq_ctx, fd, p->name);
         if (rc < 0) {
             DEBUGMSGTL(("access:dot3StatsTable", "error getting the duplex status for |%s| "
@@ -329,7 +329,13 @@ dot3StatsTable_container_load(netsnmp_container * container)
         /*
          * insert into table container
          */
-        CONTAINER_INSERT(container, rowreq_ctx);
+        rc = CONTAINER_INSERT(container, rowreq_ctx);
+        if (rc < 0) {
+            DEBUGMSGTL(("access:dot3StatsTable", "error inserting |%s|", p->name));
+            dot3StatsTable_release_rowreq_ctx(rowreq_ctx);
+            continue;
+        }
+
         ++count;
     }
 
