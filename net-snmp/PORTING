@@ -25,7 +25,7 @@ architectures is much easier than before.  However, new people porting
 the package to new architectures rarely take advantage of this setup
 and send me patches with lots of '#ifdef ARCH' type C code in it.  Let
 me say up front, I *hate* this type of coding now (even though I used
-to use it a lot).  What is better is to check for the necissary
+to use it a lot).  What is better is to check for the necessary
 functionality using the configure script and then use the results of
 those tests.
 
