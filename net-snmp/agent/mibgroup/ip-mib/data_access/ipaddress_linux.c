@@ -219,7 +219,7 @@ _load_v6(netsnmp_container *container, int idx_offset)
          * F: flags (see include/linux/rtnetlink.h, net/ipv6/addrconf.c)
          * I: interface
          */
-        rc = sscanf(line, "%32s %04x %02x %02x %02x %8s\n",
+        rc = sscanf(line, "%32s %08x %08x %04x %02x %8s\n",
                     addr, &if_index, &pfx_len, &scope, &flags, if_name);
         if( 6 != rc ) {
             snmp_log(LOG_ERR, PROCFILE " data format error (%d!=6), line ==|%s|\n",
