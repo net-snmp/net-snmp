@@ -662,9 +662,6 @@ _init_snmp(void)
     /*
      * get pseudo-random values for request ID and message ID 
      */
-    /*
-     * don't allow zero value to repeat init 
-     */
 #ifdef SVR4
     srand48(tv.tv_sec ^ tv.tv_usec);
     tmpReqid = lrand48();
@@ -675,6 +672,9 @@ _init_snmp(void)
     tmpMsgid = random();
 #endif
 
+    /*
+     * don't allow zero value to repeat init 
+     */
     if (tmpReqid == 0)
         tmpReqid = 1;
     if (tmpMsgid == 0)
