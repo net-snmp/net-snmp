@@ -369,7 +369,60 @@ tsm_process_in_msg(struct snmp_secmod_incoming_params *parms)
                                NETSNMP_DS_LIB_TSM_USE_PREFIX)) {
         /* Section 5.2, step 3a */
         const char *prefix;
-        prefix = "ssh:"; /* XXX */
+        /*
+          possibilities:
+           |--------------------+-------|
+           | snmpTLSTCPDomain   | tls:  |
+           | snmpDTLSUDPDomain  | dudp: |
+           | snmpDTLSSCTPDomain | dsct: |
+           | snmpSSHDomain      | ssh:  |
+           |--------------------+-------|
+        */
+        
+        if (tmStateRef->transportDomain == NULL) {
+            /* XXX: snmpTsmInvalidCaches++ ??? */
+            return SNMPERR_GENERR;
+        }
+
+        /* XXX: cache in session! */
+#ifdef NETSNMP_TRANSPORT_SSH_DOMAIN
+        if (netsnmp_oid_equals(netsnmp_snmpSSHDomain,
+                               OID_LENGTH(netsnmp_snmpSSHDomain),
+                               tmStateRef->transportDomain,
+                               tmStateRef->transportDomainLen) == 0) {
+            prefix = "ssh";
+        }
+#endif /*  NETSNMP_TRANSPORT_SSH_DOMAIN */
+
+#ifdef NETSNMP_TRANSPORT_DTLSUDP_DOMAIN
+        if (netsnmp_oid_equals(netsnmpDTLSUDPDomain,
+                               OID_LENGTH(netsnmpDTLSUDPDomain),
+                               tmStateRef->transportDomain,
+                               tmStateRef->transportDomainLen) == 0) {
+            
+            prefix = "dudp";
+        }
+#endif /* NETSNMP_TRANSPORT_DTLSUDP_DOMAIN */
+
+#ifdef NETSNMP_TRANSPORT_DTLSSCTP_DOMAIN
+        if (netsnmp_oid_equals(netsnmpDTLSSCTPDomain,
+                               OID_LENGTH(netsnmpDTLSSCTPDomain),
+                               tmStateRef->transportDomain,
+                               tmStateRef->transportDomainLen) == 0) {
+            
+            prefix = "dscp";
+        }
+#endif /* NETSNMP_TRANSPORT_DTLSSCTP_DOMAIN */
+
+#ifdef NETSNMP_TRANSPORT_TLSTCP_DOMAIN
+        if (netsnmp_oid_equals(netsnmpTLSTCPDomain,
+                               OID_LENGTH(netsnmpTLSTCPDomain),
+                               tmStateRef->transportDomain,
+                               tmStateRef->transportDomainLen) == 0) {
+            
+            prefix = "tls";
+        }
+#endif /* NETSNMP_TRANSPORT_TLSTCP_DOMAIN */
 
         if (prefix == NULL) {
             /* XXX: snmpTsmUnknownPrefixes++ */
