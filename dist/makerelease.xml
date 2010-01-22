@@ -499,7 +499,7 @@
 	  <text>This will copy the results to the SF uploads directory
 	    in your account on frs.sourceforge.net.  Do something like:</text>
 	  <commands>
-	    <command>echo rsync -v net-snmp-{VERSION}.tar.gz net-snmp-{VERSION}.tar.gz.asc net-snmp-{VERSION}.zip net-snmp-{VERSION}.zip.asc hardaker,net-snmp@frs.sourceforge.net:/home/frs/project/n/ne/net-snmp/5.5' pre-releases'/</command>
+	    <command>echo rsync -v net-snmp-{VERSION}.tar.gz net-snmp-{VERSION}.tar.gz.asc net-snmp-{VERSION}.zip net-snmp-{VERSION}.zip.asc hardaker,net-snmp@frs.sourceforge.net:/home/frs/project/n/ne/net-snmp/net-snmp/'{VERSION} pre-releases'/</command>
 	  </commands>
 	</step>
 	<step type="system" stepname="publish:editrelease"
