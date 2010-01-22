@@ -14,12 +14,13 @@ use strict;
 our %opts =
 (
  'd' => $ENV{'HOME'} . "/src/snmp/patme/",
- 'b' => 'main,5.4,5.3,5.2',
+ 'b' => 'main,5.5,5.4,5.3,5.2',
  'p' => '-p0',
 );
 
 # sets the order shown
 our @codetrees = ('main',
+		  '5.5',
 		  '5.4',
 		  '5.3',
 		  '5.2',
@@ -32,6 +33,7 @@ our %codetrees = ('5.0' => 'V5-0-patches',
 		  '5.2' => 'V5-2-patches',
 		  '5.3' => 'V5-3-patches',
 		  '5.4' => 'V5-4-patches',
+		  '5.5' => 'V5-5-patches',
 		  'main' => 'net-snmp',
 		  'UCD' => 'V4-2-patches');
 
