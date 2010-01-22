@@ -11,6 +11,25 @@
 
 netsnmp_tdata *schedule_table;
 
+
+#ifndef HAVE_LOCALTIME_R
+/*
+ * localtime_r() replacement for MinGW.
+ * Note: this implementation is not thread-safe, while it should.
+ */
+struct tm      *
+localtime_r(const time_t * timer, struct tm *result)
+{
+    struct tm      *result_p;
+
+    result_p = localtime(timer);
+    if (result && result_p)
+        *result = *result_p;
+    return result_p;
+}
+#endif
+
+
     /*
      * Initialize the container for the schedule table,
      * regardless of which initialisation routine is called first.

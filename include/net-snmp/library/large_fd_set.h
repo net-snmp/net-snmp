@@ -16,7 +16,7 @@
 #include <sys/select.h>
 #endif
 
-#if defined(HAVE_WINSOCK_H) && ! defined(_WINSOCKAPI_)
+#if defined(HAVE_WINSOCK_H) && ! defined(_WINSOCKAPI_) && ! defined(_WINSOCK_H)
 #error <winsock.h> or <winsock2.h> must have been included before this file.
 #endif
 

@@ -58,11 +58,85 @@ fi
 #   libsocket
 #       Needed for 'socket(2)'                          (Solaris)
 #       Possibly also for 'gethostname(3)'              (non-Solaris)
-#           (alternatively in libnsl)                   (Solaris)
+#           (alternatively in libnsl                    (Solaris)
+#            or in libws2_32)                           (MinGW)
 #
-AC_SEARCH_LIBS(socket, socket,,AC_MSG_ERROR([socket(2) not found.]))
-AC_SEARCH_LIBS(gethostbyname, [nsl socket])
-AC_CHECK_FUNCS(gethostbyname)
+case $target_os in
+mingw*)
+  saved_LIBS="$LIBS"
+  LIBS="$LIBS -lws2_32"
+  AC_LINK_IFELSE([AC_LANG_PROGRAM([
+    #include <winsock2.h>
+  ], [
+    socket(0, 0, 0);
+    gethostbyname(0);
+  ])], [
+    # Keep LIBS.
+    true
+  ], [
+    # Restore LIBS and complain.
+    LIBS="$saved_LIBS"
+    AC_MSG_ERROR([socket(2) not found.])
+  ])
+  ;;
+*)
+  AC_SEARCH_LIBS(socket, socket,,AC_MSG_ERROR([socket(2) not found.]))
+  AC_SEARCH_LIBS(gethostbyname, [nsl socket])
+  AC_CHECK_FUNCS(gethostbyname)
+  ;;
+esac
+
+
+#   libiphlpapi                                            (MinGW)
+#
+saved_LIBS="$LIBS"
+LIBS="$LIBS -liphlpapi"
+AC_LINK_IFELSE([AC_LANG_PROGRAM([
+  #include <iphlpapi.h>
+], [
+  IpRenewAddress(0);
+])], [
+  # Keep LIBS.
+  true
+], [
+  # Restore LIBS.
+  LIBS="$saved_LIBS"
+])
+
+
+#   libregex                                            (MinGW)
+#
+saved_LIBS="$LIBS"
+LIBS="$LIBS -lregex"
+AC_LINK_IFELSE([AC_LANG_PROGRAM([
+  #include <sys/types.h>
+  #include <regex.h>
+], [
+  regcomp(0, 0, 0);
+])], [
+  # Keep LIBS.
+  true
+], [
+  # Restore LIBS.
+  LIBS="$saved_LIBS"
+])
+
+
+#   libsnmpapi                                          (MinGW)
+#
+saved_LIBS="$LIBS"
+LIBS="$LIBS -lsnmpapi"
+AC_LINK_IFELSE([AC_LANG_PROGRAM([
+  #include <snmp.h>
+], [
+  SnmpUtilMemAlloc(0);
+])], [
+  # Keep LIBS.
+  true
+], [
+  # Restore LIBS.
+  LIBS="$saved_LIBS"
+])
 
 
 #   kstat library                                       (Solaris)

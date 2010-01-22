@@ -13,10 +13,6 @@
 #include <stdlib.h>
 #endif
 
-#ifdef HAVE_WINSOCK_H
-#include <winsock.h>
-#endif
-
 #include <net-snmp/library/snmp_assert.h>
 #include <net-snmp/library/large_fd_set.h>
 

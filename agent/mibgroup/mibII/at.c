@@ -89,9 +89,6 @@
 #ifdef solaris2
 #include "kernel_sunos5.h"
 #endif
-#if HAVE_WINSOCK_H
-#include <winsock.h>
-#endif
 
 #ifdef hpux11
 #include <sys/mib.h>

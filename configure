@@ -18565,7 +18565,7 @@ if test "x$enable_ipv6" = "xyes"; then
 
 	{ $as_echo "$as_me:$LINENO: checking ipv6 stack type" >&5
 $as_echo_n "checking ipv6 stack type... " >&6; }
-	for i in v6d toshiba kame inria zeta linux-glibc linux-inet6 generic; do
+	for i in v6d toshiba kame inria zeta linux-glibc linux-inet6 mingw generic; do
 		case $i in
 		v6d)
 			cat >conftest.$ac_ext <<_ACEOF
@@ -18712,6 +18712,30 @@ rm -f conftest*
 				v6libdir=/usr/inet6/lib
 				CFLAGS="-DNETSNMP_ENABLE_IPV6 $CFLAGS"
 			fi
+			;;
+		mingw)
+			cat >conftest.$ac_ext <<_ACEOF
+/* confdefs.h.  */
+_ACEOF
+cat confdefs.h >>conftest.$ac_ext
+cat >>conftest.$ac_ext <<_ACEOF
+/* end confdefs.h.  */
+
+#include <ws2tcpip.h>
+#if defined(_WS2TCPIP_H)
+yes
+#endif
+_ACEOF
+if (eval "$ac_cpp conftest.$ac_ext") 2>&5 |
+  $EGREP "yes" >/dev/null 2>&1; then
+  v6type=$i;
+				v6lib=dummy;
+				v6libdir=none
+				v6trylibc=yes;
+				CFLAGS="-DNETSNMP_ENABLE_IPV6 $CFLAGS"
+fi
+rm -f conftest*
+
 			;;
 		generic)
                         { $as_echo "$as_me:$LINENO: result: postponed" >&5
@@ -21307,9 +21331,77 @@ fi
 #   libsocket
 #       Needed for 'socket(2)'                          (Solaris)
 #       Possibly also for 'gethostname(3)'              (non-Solaris)
-#           (alternatively in libnsl)                   (Solaris)
+#           (alternatively in libnsl                    (Solaris)
+#            or in libws2_32)                           (MinGW)
 #
-{ $as_echo "$as_me:$LINENO: checking for library containing socket" >&5
+case $target_os in
+mingw*)
+  saved_LIBS="$LIBS"
+  LIBS="$LIBS -lws2_32"
+  cat >conftest.$ac_ext <<_ACEOF
+/* confdefs.h.  */
+_ACEOF
+cat confdefs.h >>conftest.$ac_ext
+cat >>conftest.$ac_ext <<_ACEOF
+/* end confdefs.h.  */
+
+    #include <winsock2.h>
+
+int
+main ()
+{
+
+    socket(0, 0, 0);
+    gethostbyname(0);
+
+  ;
+  return 0;
+}
+_ACEOF
+rm -f conftest.$ac_objext conftest$ac_exeext
+if { (ac_try="$ac_link"
+case "(($ac_try" in
+  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
+  *) ac_try_echo=$ac_try;;
+esac
+eval ac_try_echo="\"\$as_me:$LINENO: $ac_try_echo\""
+$as_echo "$ac_try_echo") >&5
+  (eval "$ac_link") 2>conftest.er1
+  ac_status=$?
+  grep -v '^ *+' conftest.er1 >conftest.err
+  rm -f conftest.er1
+  cat conftest.err >&5
+  $as_echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } && {
+	 test -z "$ac_c_werror_flag" ||
+	 test ! -s conftest.err
+       } && test -s conftest$ac_exeext && {
+	 test "$cross_compiling" = yes ||
+	 $as_test_x conftest$ac_exeext
+       }; then
+
+    # Keep LIBS.
+    true
+
+else
+  $as_echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
+
+
+    # Restore LIBS and complain.
+    LIBS="$saved_LIBS"
+    { { $as_echo "$as_me:$LINENO: error: socket(2) not found." >&5
+$as_echo "$as_me: error: socket(2) not found." >&2;}
+   { (exit 1); exit 1; }; }
+
+fi
+
+rm -rf conftest.dSYM
+rm -f core conftest.err conftest.$ac_objext conftest_ipa8_conftest.oo \
+      conftest$ac_exeext conftest.$ac_ext
+  ;;
+*)
+  { $as_echo "$as_me:$LINENO: checking for library containing socket" >&5
 $as_echo_n "checking for library containing socket... " >&6; }
 if test "${ac_cv_search_socket+set}" = set; then
   $as_echo_n "(cached) " >&6
@@ -21400,7 +21492,7 @@ $as_echo "$as_me: error: socket(2) not found." >&2;}
    { (exit 1); exit 1; }; }
 fi
 
-{ $as_echo "$as_me:$LINENO: checking for library containing gethostbyname" >&5
+  { $as_echo "$as_me:$LINENO: checking for library containing gethostbyname" >&5
 $as_echo_n "checking for library containing gethostbyname... " >&6; }
 if test "${ac_cv_search_gethostbyname+set}" = set; then
   $as_echo_n "(cached) " >&6
@@ -21588,6 +21680,198 @@ _ACEOF
 fi
 done
 
+  ;;
+esac
+
+
+#   libiphlpapi                                            (MinGW)
+#
+saved_LIBS="$LIBS"
+LIBS="$LIBS -liphlpapi"
+cat >conftest.$ac_ext <<_ACEOF
+/* confdefs.h.  */
+_ACEOF
+cat confdefs.h >>conftest.$ac_ext
+cat >>conftest.$ac_ext <<_ACEOF
+/* end confdefs.h.  */
+
+  #include <iphlpapi.h>
+
+int
+main ()
+{
+
+  IpRenewAddress(0);
+
+  ;
+  return 0;
+}
+_ACEOF
+rm -f conftest.$ac_objext conftest$ac_exeext
+if { (ac_try="$ac_link"
+case "(($ac_try" in
+  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
+  *) ac_try_echo=$ac_try;;
+esac
+eval ac_try_echo="\"\$as_me:$LINENO: $ac_try_echo\""
+$as_echo "$ac_try_echo") >&5
+  (eval "$ac_link") 2>conftest.er1
+  ac_status=$?
+  grep -v '^ *+' conftest.er1 >conftest.err
+  rm -f conftest.er1
+  cat conftest.err >&5
+  $as_echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } && {
+	 test -z "$ac_c_werror_flag" ||
+	 test ! -s conftest.err
+       } && test -s conftest$ac_exeext && {
+	 test "$cross_compiling" = yes ||
+	 $as_test_x conftest$ac_exeext
+       }; then
+
+  # Keep LIBS.
+  true
+
+else
+  $as_echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
+
+
+  # Restore LIBS.
+  LIBS="$saved_LIBS"
+
+fi
+
+rm -rf conftest.dSYM
+rm -f core conftest.err conftest.$ac_objext conftest_ipa8_conftest.oo \
+      conftest$ac_exeext conftest.$ac_ext
+
+
+#   libregex                                            (MinGW)
+#
+saved_LIBS="$LIBS"
+LIBS="$LIBS -lregex"
+cat >conftest.$ac_ext <<_ACEOF
+/* confdefs.h.  */
+_ACEOF
+cat confdefs.h >>conftest.$ac_ext
+cat >>conftest.$ac_ext <<_ACEOF
+/* end confdefs.h.  */
+
+  #include <sys/types.h>
+  #include <regex.h>
+
+int
+main ()
+{
+
+  regcomp(0, 0, 0);
+
+  ;
+  return 0;
+}
+_ACEOF
+rm -f conftest.$ac_objext conftest$ac_exeext
+if { (ac_try="$ac_link"
+case "(($ac_try" in
+  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
+  *) ac_try_echo=$ac_try;;
+esac
+eval ac_try_echo="\"\$as_me:$LINENO: $ac_try_echo\""
+$as_echo "$ac_try_echo") >&5
+  (eval "$ac_link") 2>conftest.er1
+  ac_status=$?
+  grep -v '^ *+' conftest.er1 >conftest.err
+  rm -f conftest.er1
+  cat conftest.err >&5
+  $as_echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } && {
+	 test -z "$ac_c_werror_flag" ||
+	 test ! -s conftest.err
+       } && test -s conftest$ac_exeext && {
+	 test "$cross_compiling" = yes ||
+	 $as_test_x conftest$ac_exeext
+       }; then
+
+  # Keep LIBS.
+  true
+
+else
+  $as_echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
+
+
+  # Restore LIBS.
+  LIBS="$saved_LIBS"
+
+fi
+
+rm -rf conftest.dSYM
+rm -f core conftest.err conftest.$ac_objext conftest_ipa8_conftest.oo \
+      conftest$ac_exeext conftest.$ac_ext
+
+
+#   libsnmpapi                                          (MinGW)
+#
+saved_LIBS="$LIBS"
+LIBS="$LIBS -lsnmpapi"
+cat >conftest.$ac_ext <<_ACEOF
+/* confdefs.h.  */
+_ACEOF
+cat confdefs.h >>conftest.$ac_ext
+cat >>conftest.$ac_ext <<_ACEOF
+/* end confdefs.h.  */
+
+  #include <snmp.h>
+
+int
+main ()
+{
+
+  SnmpUtilMemAlloc(0);
+
+  ;
+  return 0;
+}
+_ACEOF
+rm -f conftest.$ac_objext conftest$ac_exeext
+if { (ac_try="$ac_link"
+case "(($ac_try" in
+  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
+  *) ac_try_echo=$ac_try;;
+esac
+eval ac_try_echo="\"\$as_me:$LINENO: $ac_try_echo\""
+$as_echo "$ac_try_echo") >&5
+  (eval "$ac_link") 2>conftest.er1
+  ac_status=$?
+  grep -v '^ *+' conftest.er1 >conftest.err
+  rm -f conftest.er1
+  cat conftest.err >&5
+  $as_echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } && {
+	 test -z "$ac_c_werror_flag" ||
+	 test ! -s conftest.err
+       } && test -s conftest$ac_exeext && {
+	 test "$cross_compiling" = yes ||
+	 $as_test_x conftest$ac_exeext
+       }; then
+
+  # Keep LIBS.
+  true
+
+else
+  $as_echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
+
+
+  # Restore LIBS.
+  LIBS="$saved_LIBS"
+
+fi
+
+rm -rf conftest.dSYM
+rm -f core conftest.err conftest.$ac_objext conftest_ipa8_conftest.oo \
+      conftest$ac_exeext conftest.$ac_ext
 
 
 #   kstat library                                       (Solaris)
@@ -32477,7 +32761,9 @@ esac
 #  Core:
 #
 
-for ac_header in winsock.h
+
+
+for ac_header in winsock.h winsock2.h ws2tcpip.h
 do
 as_ac_Header=`$as_echo "ac_cv_header_$ac_header" | $as_tr_sh`
 if { as_var=$as_ac_Header; eval "test \"\${$as_var+set}\" = set"; }; then
@@ -32622,18 +32908,6 @@ as_val=`eval 'as_val=${'$as_ac_Header'}
   cat >>confdefs.h <<_ACEOF
 #define `$as_echo "HAVE_$ac_header" | $as_tr_cpp` 1
 _ACEOF
-
-        AGENTLIBS="${AGENTLIBS} -liphlpapi"
-        case $target_os in
-                mingw*)
-                        #   MinGW32 must link winsock explicitly
-                        #
-                        LIBS="${LIBS} -lregex -lws2_32"
-                        AGENTLIBS="${AGENTLIBS} -lregex -lws2_32"
-                        ;;
-                *)
-                        ;;
-        esac
 
 fi
 
@@ -34909,7 +35183,9 @@ done
 
 
 
-for ac_func in cgetnext        execv         gai_strerror                     getfsstat       getgrnam      gethostname                                      getloadavg                                     getpid          getpwnam      getvfsstat                       hasmntopt       initgroups                                     if_nameindex    if_nametoindex                                 mkstemp         mktime                                         poll            regcomp                                        setgid          setgroups                                      setmntent       setuid                                         sigaction       sigblock      sighold                          statfs          statvfs       stime                            strncasecmp     system                                         uname           usleep
+
+
+for ac_func in cgetnext        chown          execv                           gai_strerror    getfsstat      getgrnam                        gethostname     getloadavg                                     getpid          getpwnam      getvfsstat                       hasmntopt       initgroups                                     if_nameindex    if_nametoindex localtime_r                     mkstemp         mktime                                         poll            regcomp                                        setgid          setgroups                                      setmntent       setuid                                         sigaction       sigblock      sighold                          statfs          statvfs       stime                            strncasecmp     system                                         uname           usleep
 do
 as_ac_var=`$as_echo "ac_cv_func_$ac_func" | $as_tr_sh`
 { $as_echo "$as_me:$LINENO: checking for $ac_func" >&5
@@ -38833,6 +39109,9 @@ cat >>conftest.$ac_ext <<_ACEOF
 #endif
 #ifdef HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
+#elif defined(HAVE_WINSOCK2_H)
+#include <winsock2.h>
+#include <ws2tcpip.h>
 #endif
 
 
@@ -38883,6 +39162,9 @@ cat >>conftest.$ac_ext <<_ACEOF
 #endif
 #ifdef HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
+#elif defined(HAVE_WINSOCK2_H)
+#include <winsock2.h>
+#include <ws2tcpip.h>
 #endif
 
 
@@ -38956,6 +39238,9 @@ cat >>conftest.$ac_ext <<_ACEOF
 #endif
 #ifdef HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
+#elif defined(HAVE_WINSOCK2_H)
+#include <winsock2.h>
+#include <ws2tcpip.h>
 #endif
 
 
@@ -39006,6 +39291,9 @@ cat >>conftest.$ac_ext <<_ACEOF
 #endif
 #ifdef HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
+#elif defined(HAVE_WINSOCK2_H)
+#include <winsock2.h>
+#include <ws2tcpip.h>
 #endif
 
 
@@ -39079,6 +39367,9 @@ cat >>conftest.$ac_ext <<_ACEOF
 #endif
 #ifdef HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
+#elif defined(HAVE_WINSOCK2_H)
+#include <winsock2.h>
+#include <ws2tcpip.h>
 #endif
 
 
@@ -39129,6 +39420,9 @@ cat >>conftest.$ac_ext <<_ACEOF
 #endif
 #ifdef HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
+#elif defined(HAVE_WINSOCK2_H)
+#include <winsock2.h>
+#include <ws2tcpip.h>
 #endif
 
 
@@ -39202,6 +39496,9 @@ cat >>conftest.$ac_ext <<_ACEOF
 #endif
 #ifdef HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
+#elif defined(HAVE_WINSOCK2_H)
+#include <winsock2.h>
+#include <ws2tcpip.h>
 #endif
 
 
@@ -39252,6 +39549,9 @@ cat >>conftest.$ac_ext <<_ACEOF
 #endif
 #ifdef HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
+#elif defined(HAVE_WINSOCK2_H)
+#include <winsock2.h>
+#include <ws2tcpip.h>
 #endif
 
 

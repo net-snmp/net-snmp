@@ -70,10 +70,6 @@ SOFTWARE.
 #include <dmalloc.h>
 #endif
 
-#if HAVE_WINSOCK_H
-#include <winsock.h>
-#endif
-
 #ifdef vms
 #include <in.h>
 #endif

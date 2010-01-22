@@ -46,10 +46,6 @@
 #include <arpa/inet.h>
 #endif
 
-#if HAVE_WINSOCK_H
-#include <winsock.h>
-#endif
-
 #include <net-snmp/net-snmp-includes.h>
 
 #include "agentx/protocol.h"

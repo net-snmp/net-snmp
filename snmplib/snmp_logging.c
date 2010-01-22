@@ -65,10 +65,6 @@
 #include <dmalloc.h>
 #endif
 
-#if HAVE_WINSOCK_H
-#include <winsock.h>
-#endif
-
 #if HAVE_WINDOWS_H
 #include <windows.h>
 #endif

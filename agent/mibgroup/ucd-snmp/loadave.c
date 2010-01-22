@@ -110,9 +110,6 @@
 #  include <time.h>
 # endif
 #endif
-#if HAVE_WINSOCK_H
-#include <winsock.h>
-#endif
 #ifdef dynix
 #include <sys/mc_vmparam.h>
 #endif

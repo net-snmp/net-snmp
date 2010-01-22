@@ -89,10 +89,6 @@ SOFTWARE.
 #include <dmalloc.h>
 #endif
 
-#if HAVE_WINSOCK_H
-#include <winsock.h>
-#endif
-
 #include <net-snmp/types.h>
 
 #include <net-snmp/agent/ds_agent.h>

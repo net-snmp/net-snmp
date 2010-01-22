@@ -33,7 +33,10 @@
 #include <inttypes.h>
 #endif
 #include <sys/types.h>
-#ifdef HAVE_WINSOCK_H
+#if defined(mingw32)
+#include <winsock2.h>
+#include <ws2tcpip.h>         /* For struct sockaddr_in6 on MinGW */
+#elif defined(HAVE_WINSOCK_H)
 #include <winsock.h>
 #endif
 

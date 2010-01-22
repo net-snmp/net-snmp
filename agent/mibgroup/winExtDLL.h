@@ -17,9 +17,8 @@ extern "C" {
      *  and writeable object methods ('WriteMethod').
      */
      void     init_winExtDLL(void);
-
-     Netsnmp_Node_Handler var_winExtDLL;
-     
+     void     shutdown_winExtDLL(void);
+   
 #ifdef __cplusplus
 }
 #endif

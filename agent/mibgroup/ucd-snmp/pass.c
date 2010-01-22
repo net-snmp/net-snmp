@@ -23,9 +23,6 @@
 #ifdef HAVE_LIMITS_H
 #include <limits.h>
 #endif
-#if HAVE_WINSOCK_H
-#include <winsock.h>
-#endif
 #ifdef WIN32
 #include <limits.h>
 #endif

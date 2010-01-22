@@ -55,9 +55,6 @@
 #else
 #include <strings.h>
 #endif
-#if HAVE_WINSOCK_H
-#include <winsock.h>
-#endif
 
 #if HAVE_STDLIB_H
 #include <stdlib.h>

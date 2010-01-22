@@ -27,9 +27,6 @@
 #include <strings.h>
 #endif
 #include <sys/types.h>
-#if HAVE_WINSOCK_H
-#include <winsock.h>
-#endif
 
 #if HAVE_UTSNAME_H
 #include <utsname.h>
