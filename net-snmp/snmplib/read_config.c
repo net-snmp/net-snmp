@@ -1503,8 +1503,7 @@ config_pwarn(const char *str)
 char           *
 skip_white(char *ptr)
 {
-    return NETSNMP_REMOVE_CONST(char *,
-               skip_white_const(NETSNMP_REMOVE_CONST(char *, ptr)));
+    return NETSNMP_REMOVE_CONST(char *, skip_white_const(ptr));
 }
 
 const char     *
@@ -1522,8 +1521,7 @@ skip_white_const(const char *ptr)
 char           *
 skip_not_white(char *ptr)
 {
-    return NETSNMP_REMOVE_CONST(char *,
-               skip_not_white_const(NETSNMP_REMOVE_CONST(char *, ptr)));
+    return NETSNMP_REMOVE_CONST(char *, skip_not_white_const(ptr));
 }
 
 const char     *
@@ -1541,8 +1539,7 @@ skip_not_white_const(const char *ptr)
 char           *
 skip_token(char *ptr)
 {
-    return NETSNMP_REMOVE_CONST(char *,
-               skip_token_const(NETSNMP_REMOVE_CONST(char *, ptr)));
+    return NETSNMP_REMOVE_CONST(char *, skip_token_const(ptr));
 }
 
 const char     *
@@ -1571,8 +1568,7 @@ skip_token_const(const char *ptr)
 char           *
 copy_nword(char *from, char *to, int len)
 {
-    return NETSNMP_REMOVE_CONST(char *,
-               copy_nword_const(NETSNMP_REMOVE_CONST(char *, from), to, len));
+    return NETSNMP_REMOVE_CONST(char *, copy_nword_const(from, to, len));
 }
 
 const char           *
@@ -1851,8 +1847,7 @@ char           *
 read_config_read_objid(char *readfrom, oid ** objid, size_t * len)
 {
     return NETSNMP_REMOVE_CONST(char *,
-             read_config_read_objid_const(NETSNMP_REMOVE_CONST(char*, readfrom),
-                                          objid, len));
+             read_config_read_objid_const(readfrom, objid, len));
 }
 
 const char     *
