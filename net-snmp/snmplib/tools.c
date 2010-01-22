@@ -43,14 +43,6 @@
 #ifdef HAVE_ARPA_INET_H
 #include <arpa/inet.h>
 #endif
-#ifdef HAVE_CRTDBG_H
-/*
- * Define _CRTDBG_MAP_ALLOC such that in debug builds (when _DEBUG has been
- * defined) e.g. malloc() is rerouted to _malloc_dbg().
- */
-#define _CRTDBG_MAP_ALLOC 1
-#include <crtdbg.h>
-#endif
 #ifdef cygwin
 #include <windows.h>
 #endif
@@ -67,6 +59,15 @@
 #include <net-snmp/library/snmp_api.h>
 #include <net-snmp/library/mib.h>
 #include <net-snmp/library/scapi.h>
+
+#ifdef HAVE_CRTDBG_H
+/*
+ * Define _CRTDBG_MAP_ALLOC such that in debug builds (when _DEBUG has been
+ * defined) e.g. malloc() is rerouted to _malloc_dbg().
+ */
+#define _CRTDBG_MAP_ALLOC 1
+#include <crtdbg.h>
+#endif
 
 #ifdef WIN32
 /**
