@@ -98,7 +98,7 @@
  */
 #include <windows.h>
 #include "../../win32/Snmp-winExtDLL.h"
-#include <mgmtapi.h>
+#include "../../win32/MgmtApi-winExtDLL.h"
 
 
 #define MAX_VALUE_NAME          16383
