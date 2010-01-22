@@ -18,9 +18,6 @@
 #include <sys/types.h>
 #include <stdio.h>
 #include <fcntl.h>
-#if HAVE_WINSOCK_H
-#include <winsock.h>
-#endif
 #if TIME_WITH_SYS_TIME
 # ifdef WIN32
 #  include <sys/timeb.h>

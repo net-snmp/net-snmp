@@ -145,6 +145,9 @@ AC_CHECK_MEMBERS([struct sockaddr.sa_len,
 #endif
 #ifdef HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
+#elif defined(HAVE_WINSOCK2_H)
+#include <winsock2.h>
+#include <ws2tcpip.h>
 #endif
     ]])
 

@@ -86,9 +86,6 @@ PERFORMANCE OF THIS SOFTWARE.
 #  include <time.h>
 # endif
 #endif
-#if HAVE_WINSOCK_H
-# include <winsock.h>
-#endif
 #if HAVE_SYS_SOCKET_H
 # include <sys/socket.h>
 #endif

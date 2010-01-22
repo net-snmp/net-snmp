@@ -79,8 +79,6 @@
 #endif
 #if HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
-#elif HAVE_WINSOCK_H
-#include <winsock.h>
 #endif
 #if HAVE_NET_IF_H
 #include <net/if.h>
@@ -973,8 +971,10 @@ main(int argc, char *argv[])
     gid = netsnmp_ds_get_int(NETSNMP_DS_APPLICATION_ID, 
 			     NETSNMP_DS_AGENT_GROUPID);
     
+#ifdef HAVE_CHOWN
     if ( uid != 0 || gid != 0 )
         chown( persistent_dir, uid, gid );
+#endif
 
 #ifdef HAVE_SETGID
     if ((gid = netsnmp_ds_get_int(NETSNMP_DS_APPLICATION_ID, 

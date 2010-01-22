@@ -87,6 +87,7 @@
  * Net-SNMP header files. 
  */
 #include <net-snmp/net-snmp-config.h>
+#include <net-snmp/agent/mib_module_config.h>
 #ifdef USING_WINEXTDLL_MODULE
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
@@ -96,13 +97,59 @@
  * Windows header files. 
  */
 #include <windows.h>
-#include <Snmp-winExtDLL.h>
+#include "../../win32/Snmp-winExtDLL.h"
 #include <mgmtapi.h>
-#include <winsock.h>
 
 
 #define MAX_VALUE_NAME          16383
+#define MS_ASN_UINTEGER32 MS_ASN_UNSIGNED32
 
+
+typedef         BOOL(WINAPI *
+                     PFNSNMPEXTENSIONINIT) (DWORD dwUpTimeReference,
+                                            HANDLE * phSubagentTrapEvent,
+                                            AsnObjectIdentifier *
+                                            pFirstSupportedRegion);
+
+typedef         BOOL(WINAPI *
+                     PFNSNMPEXTENSIONINITEX) (AsnObjectIdentifier *
+                                              pNextSupportedRegion);
+
+typedef         BOOL(WINAPI *
+                     PFNSNMPEXTENSIONMONITOR) (LPVOID pAgentMgmtData);
+
+typedef         BOOL(WINAPI * PFNSNMPEXTENSIONQUERY) (BYTE bPduType,
+                                                      SnmpVarBindList *
+                                                      pVarBindList,
+                                                      AsnInteger32 *
+                                                      pErrorStatus,
+                                                      AsnInteger32 *
+                                                      pErrorIndex);
+
+typedef         BOOL(WINAPI * PFNSNMPEXTENSIONQUERYEX) (UINT nRequestType,
+                                                        UINT
+                                                        nTransactionId,
+                                                        SnmpVarBindList *
+                                                        pVarBindList,
+                                                        AsnOctetString *
+                                                        pContextInfo,
+                                                        AsnInteger32 *
+                                                        pErrorStatus,
+                                                        AsnInteger32 *
+                                                        pErrorIndex);
+
+typedef         BOOL(WINAPI * PFNSNMPEXTENSIONTRAP) (AsnObjectIdentifier *
+                                                     pEnterpriseOid,
+                                                     AsnInteger32 *
+                                                     pGenericTrapId,
+                                                     AsnInteger32 *
+                                                     pSpecificTrapId,
+                                                     AsnTimeticks *
+                                                     pTimeStamp,
+                                                     SnmpVarBindList *
+                                                     pVarBindList);
+
+typedef         VOID(WINAPI * PFNSNMPEXTENSIONCLOSE) (void);
 
 /**
  * Extensible array, a data structure similar to the C++ STL class
@@ -149,7 +196,7 @@ typedef struct {
 /*
  * External functions declarations. 
  */
-void __declspec(dllimport) SNMP_FUNC_TYPE SnmpSvcInitUptime(void);
+void __declspec(dllimport) WINAPI SnmpSvcInitUptime(void);
 
 
 /*
@@ -193,10 +240,14 @@ static void     send_trap(const AsnObjectIdentifier * const,
                           const SnmpVarBindList * const);
 static u_char  *winsnmp_memdup(const void *src, const size_t len);
 static char    *snprint_oid(const oid * const name, const size_t name_len);
+#if 0
 static void     xarray_init(xarray * a, size_t elem_size);
+#endif
 static void     xarray_destroy(xarray * a);
-static void    *xarray_push_back(xarray * a, void *elem);
+static void    *xarray_push_back(xarray * a, const void *elem);
+#if 0
 static void     xarray_erase(xarray * a, void *const elem);
+#endif
 static void    *xarray_reserve(xarray * a, int reserved);
 
 
@@ -810,9 +861,7 @@ char           *
 read_extension_dlls_from_registry2(const TCHAR * keyName)
 {
     HKEY            hKey;
-    unsigned char  *key_value = NULL;
     DWORD           key_value_type = 0;
-    DWORD           valueSize = MAX_VALUE_NAME;
     TCHAR           valueName[MAX_VALUE_NAME];
     DWORD           key_value_size = MAX_VALUE_NAME;
     TCHAR           valueNameExpanded[MAX_VALUE_NAME];
@@ -972,7 +1021,7 @@ send_trap(const AsnObjectIdentifier * const pEnterprise,
     snmp_varlist_add_variable(&notification_vars,
                               sysuptime_oid, sysuptime_oid_len,
                               ASN_TIMETICKS,
-                              (u_char *) & TimeStamp, sizeof(TimeStamp));
+                              (const u_char *) & TimeStamp, sizeof(TimeStamp));
 
     if (GenericTrap == SNMP_GENERICTRAP_ENTERSPECIFIC) {
         /*
@@ -1048,7 +1097,7 @@ append_windows_varbind(netsnmp_variable_list ** const net_snmp_varbinds,
         snmp_varlist_add_variable(net_snmp_varbinds, win_varbind->name.ids,
                                   win_varbind->name.idLength,
                                   ASN_INTEGER,
-                                  (u_char *) & win_varbind->value.asnValue.
+                                  (const u_char *) & win_varbind->value.asnValue.
                                   number,
                                   sizeof(win_varbind->value.asnValue.
                                          number));
@@ -1110,7 +1159,7 @@ append_windows_varbind(netsnmp_variable_list ** const net_snmp_varbinds,
         snmp_varlist_add_variable(net_snmp_varbinds, win_varbind->name.ids,
                                   win_varbind->name.idLength,
                                   ASN_COUNTER,
-                                  (u_char *) & win_varbind->value.asnValue.
+                                  (const u_char *) & win_varbind->value.asnValue.
                                   counter,
                                   sizeof(win_varbind->value.asnValue.
                                          counter));
@@ -1119,7 +1168,7 @@ append_windows_varbind(netsnmp_variable_list ** const net_snmp_varbinds,
         snmp_varlist_add_variable(net_snmp_varbinds, win_varbind->name.ids,
                                   win_varbind->name.idLength,
                                   ASN_GAUGE,
-                                  (u_char *) & win_varbind->value.asnValue.
+                                  (const u_char *) & win_varbind->value.asnValue.
                                   gauge,
                                   sizeof(win_varbind->value.asnValue.
                                          gauge));
@@ -1128,7 +1177,7 @@ append_windows_varbind(netsnmp_variable_list ** const net_snmp_varbinds,
         snmp_varlist_add_variable(net_snmp_varbinds, win_varbind->name.ids,
                                   win_varbind->name.idLength,
                                   ASN_TIMETICKS,
-                                  (u_char *) & win_varbind->value.asnValue.
+                                  (const u_char *) & win_varbind->value.asnValue.
                                   ticks,
                                   sizeof(win_varbind->value.asnValue.
                                          ticks));
@@ -1146,7 +1195,7 @@ append_windows_varbind(netsnmp_variable_list ** const net_snmp_varbinds,
         snmp_varlist_add_variable(net_snmp_varbinds, win_varbind->name.ids,
                                   win_varbind->name.idLength,
                                   ASN_COUNTER64,
-                                  (u_char *) & win_varbind->value.asnValue.
+                                  (const u_char *) & win_varbind->value.asnValue.
                                   counter64,
                                   sizeof(win_varbind->value.asnValue.
                                          counter64));
@@ -1155,7 +1204,7 @@ append_windows_varbind(netsnmp_variable_list ** const net_snmp_varbinds,
         snmp_varlist_add_variable(net_snmp_varbinds, win_varbind->name.ids,
                                   win_varbind->name.idLength,
                                   ASN_UNSIGNED,
-                                  (u_char *) & win_varbind->value.asnValue.
+                                  (const u_char *) & win_varbind->value.asnValue.
                                   unsigned32,
                                   sizeof(win_varbind->value.asnValue.
                                          unsigned32));
@@ -1168,7 +1217,7 @@ append_windows_varbind(netsnmp_variable_list ** const net_snmp_varbinds,
         snmp_varlist_add_variable(net_snmp_varbinds, win_varbind->name.ids,
                                   win_varbind->name.idLength,
                                   ASN_INTEGER,
-                                  (u_char *) & win_varbind->value.asnValue.
+                                  (const u_char *) & win_varbind->value.asnValue.
                                   number,
                                   sizeof(win_varbind->value.asnValue.
                                          number));
@@ -1476,13 +1525,14 @@ snprint_oid(const oid * const name, const size_t name_len)
     buf_len = 0;
     buf = NULL;
     buf_overflow = 0;
-    netsnmp_sprint_realloc_objid_tree(&buf, &buf_len, &out_len, 1,
+    netsnmp_sprint_realloc_objid_tree((u_char **) &buf, &buf_len, &out_len, 1,
                                       &buf_overflow, name, name_len);
     assert(buf);
     assert(!buf_overflow);
     return buf;
 }
 
+#if 0
 /** Initialize array 'a'. */
 static void
 xarray_init(xarray * a, size_t elem_size)
@@ -1492,6 +1542,7 @@ xarray_init(xarray * a, size_t elem_size)
     memset(a, 0, sizeof(*a));
     a->elem_size = elem_size;
 }
+#endif
 
 /** Deallocate any memory that was dynamically allocated for 'a'. */
 static void
@@ -1511,7 +1562,7 @@ xarray_destroy(xarray * a)
  *         or NULL upon failure.
  */
 static void    *
-xarray_push_back(xarray * a, void *elem)
+xarray_push_back(xarray * a, const void *elem)
 {
     assert(a);
     assert(elem);
@@ -1527,6 +1578,7 @@ xarray_push_back(xarray * a, void *elem)
     return NULL;
 }
 
+#if 0
 /** Erase [ elem, elem + a->elem_size [ from a. */
 static void
 xarray_erase(xarray * a, void *const elem)
@@ -1543,6 +1595,7 @@ xarray_erase(xarray * a, void *const elem)
             a->size - ((const char *) elem -
                        (char *) a->p) / a->elem_size);
 }
+#endif
 
 /**
  * Change the number of allocated elements to 'reserved'.

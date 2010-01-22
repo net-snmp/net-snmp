@@ -47,8 +47,6 @@
 #include <sys/stat.h>
 #if HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
-#elif HAVE_WINSOCK_H
-#include <winsock.h>
 #endif
 #if HAVE_SYS_FILIO_H
 #include <sys/filio.h>

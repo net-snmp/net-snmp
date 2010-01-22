@@ -40,9 +40,7 @@ SOFTWARE.
 #if HAVE_SYS_WAIT_H
 #include <sys/wait.h>
 #endif
-#if HAVE_WINSOCK_H
-#include <winsock.h>
-#else
+#if HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
 #endif
 #if HAVE_SYS_SOCKIO_H

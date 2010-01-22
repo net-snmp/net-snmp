@@ -100,9 +100,6 @@
 #include <string.h>
 #endif
 #include <ctype.h>
-#if HAVE_WINSOCK_H
-#include <winsock.h>
-#endif
 #ifndef HAVE_STRNCASECMP
 int             strncasecmp(const char *s1, const char *s2, size_t n);
 #endif

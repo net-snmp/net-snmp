@@ -51,9 +51,6 @@ SOFTWARE.
 #ifdef HAVE_SYS_SELECT_H
 #include <sys/select.h>
 #endif
-#if HAVE_WINSOCK_H
-#include <winsock.h>
-#endif
 #ifndef NULL
 #define NULL 0
 #endif

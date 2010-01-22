@@ -235,8 +235,6 @@ Net-SNMP instead of SNMP by modifying the registry.  See Microsoft article
 Compiling Net-SNMP with the winExtDLL extension (MSVC)
 ------------------------------------------------------
 
-Microsoft PSDK required.
-
 Configure / nmake:
 
 -add --with-winextdll to the Configure command line.
@@ -246,12 +244,6 @@ Workspace:
 -in file win32\net-snmp\net-snmp-config.h modify
  /* #undef USING_WINEXTDLL_MODULE */ into the following:
  #define USING_WINEXTDLL_MODULE 1
-
--This extension requires the PSDK including the Snmp.h header file.
- Including Snmp.h will conflict with existing Net-SNMP defines for
- ASN_OCTETSTRING etc.  To resolve this, copy Snmp.h from the PSDK
- include/ folder to win32/Snmp-winExtDLL.h in the Net-SNMP project
- and change all occurrences of ASN_ to MS_ASN_
 
 
 ***************************************************************************
@@ -1310,17 +1302,16 @@ Currently the tools and agent will compile on win32 platforms using the
 MinGW tools with the MSyS environment. MinGW, MSyS and the associated
 documentation can be downloaded from: http://www.mingw.org.
 
-Compiling net-snmp with MinGW requires GNU regex. A GNU regex package that
-builds under MinGW with MSyS is available at: 
+Compiling net-snmp with MinGW requires GNU regex and libintl. Binaries and
+developer header files for these libraries are available at: 
 
-        http://www.boedog.com/net-snmp/gnu_regex/regex-0-12-mingw-r2.tar.gz
+        http://gnuwin32.sourceforge.net/packages/regex.htm
+        http://gnuwin32.sourceforge.net/packages/libintl.htm
 
-Note:  The source code should *not* be in a folder that contains a space.  For
-       example, compiling in your 'My Documents' or your Desktop (usually
-       c:\Documents and Settings\xxxx\Desktop) is not supported.
-       
-1.  Build and install GNU regex following the instructions in the 
-    regex-0-12-mingw-r2 README.
+Proceed as follows to build Net-SNMP:
+
+1.  Install GNU regex and GNU libintl binaries and developer files in the
+    MinGW tree.
 
 2.  If SNMPv3 encryption capabilities or SHA authentication is required,
     install the OpenSSL DLL and library file as described in the section 
@@ -1347,11 +1338,12 @@ Note:  The source code should *not* be in a folder that contains a space.  For
 
 	./configure --prefix="$BASEDIR" \
 		--with-mibdirs="$BASEDIR/share/snmp/mibs" \
-	--with-mib-modules="agentx disman/event-mib examples/example" \
+	--with-mib-modules="agentx disman/event-mib winExtDLL examples/example"\
         --disable-embedded-perl --without-perl-modules \
 
-    [Sorry. the host resources MIB is not supported by MinGW]
-
+    Note: while the Net-SNMP implementation of the host resources MIB is not
+    supported when using MinGW, winExtDLL is supported. Via winExtDLL you can
+    use Microsoft's implementation of the host resources MIB.
 
 4.1. If you want to use IPv6 transports, add:
 	--enable-ipv6 --with-transports="TCPIPv6 UDPIPv6" \

@@ -47,9 +47,6 @@
 #  include <time.h>
 # endif
 #endif
-#if HAVE_WINSOCK_H
-#include <winsock.h>
-#endif
 
 #if HAVE_DMALLOC_H
 #include <dmalloc.h>

@@ -149,10 +149,6 @@
 #endif
 #endif
 
-#if HAVE_WINSOCK_H
-#include <winsock.h>
-#endif
-
 #if HAVE_NLIST_H
 #include <nlist.h>
 #endif

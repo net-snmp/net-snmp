@@ -4,11 +4,13 @@
  */
 #include <net-snmp/net-snmp-config.h>
 
-#if HAVE_WINSOCK_H
-#include <winsock.h>
-#else
+#if HAVE_SYS_TYPES_H
 #include <sys/types.h>
+#endif
+#if HAVE_NETINET_IN_H
 #include <netinet/in.h>
+#endif
+#if HAVE_NETDB_H
 #include <netdb.h>
 #endif
 

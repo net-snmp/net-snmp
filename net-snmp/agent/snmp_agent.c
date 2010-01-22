@@ -79,9 +79,6 @@ SOFTWARE.
 #include <netinet/in.h>
 #endif
 #include <errno.h>
-#if HAVE_WINSOCK_H
-#include <winsock.h>
-#endif
 
 #define SNMP_NEED_REQUEST_LIST
 #include <net-snmp/net-snmp-includes.h>

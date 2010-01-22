@@ -15,9 +15,6 @@
 #else
 #include <strings.h>
 #endif
-#if HAVE_WINSOCK_H
-#include <winsock.h>
-#endif
 
 #include <net-snmp/types.h>
 #include <net-snmp/library/int64.h>

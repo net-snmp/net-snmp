@@ -19,7 +19,7 @@ struct extensible {
     oid             miboid[MIBMAX];
     size_t          miblen;
     int             pid;
-#if defined(WIN32) && !defined (mingw32)
+#if defined(WIN32)
     int             tid;                /* WIN32 thread */
 #endif
 };

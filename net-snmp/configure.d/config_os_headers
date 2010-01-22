@@ -455,16 +455,4 @@ esac
 #       for MIB-2 info                                  (Win32)
 #  Core:
 #
-AC_CHECK_HEADERS(winsock.h,[
-        AGENTLIBS="${AGENTLIBS} -liphlpapi"
-        case $target_os in
-                mingw*)
-                        #   MinGW32 must link winsock explicitly
-                        #
-                        LIBS="${LIBS} -lregex -lws2_32"
-                        AGENTLIBS="${AGENTLIBS} -lregex -lws2_32"
-                        ;;
-                *)
-                        ;;
-        esac
-])
+AC_CHECK_HEADERS([winsock.h winsock2.h ws2tcpip.h])

@@ -51,11 +51,6 @@ SOFTWARE.
 #include <stdio.h>
 #include <ctype.h>
 #include <net-snmp/utilities.h>
-
-#if HAVE_WINSOCK_H
-#include <winsock.h>
-#endif
-
 #include <net-snmp/config_api.h>
 #include <net-snmp/output_api.h>
 #include <net-snmp/mib_api.h>

@@ -37,9 +37,6 @@
 #include <sys/param.h>
 #endif
 #include <sys/types.h>
-#if HAVE_WINSOCK_H
-#include <winsock.h>
-#endif
 #if defined(NETSNMP_IFNET_NEEDS_KERNEL) && !defined(_KERNEL) && defined(NETSNMP_IFNET_NEEDS_KERNEL_LATE)
 #define _KERNEL 1
 #define _I_DEFINED_KERNEL

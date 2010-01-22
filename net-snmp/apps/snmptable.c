@@ -60,9 +60,6 @@ SOFTWARE.
 #include <sys/select.h>
 #endif
 #include <stdio.h>
-#if HAVE_WINSOCK_H
-#include <winsock.h>
-#endif
 #if HAVE_NETDB_H
 #include <netdb.h>
 #endif

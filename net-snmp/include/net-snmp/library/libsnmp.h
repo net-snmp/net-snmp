@@ -71,9 +71,7 @@ extern          "C" {
 #endif
 #include <stdio.h>
 #include <ctype.h>
-#if HAVE_WINSOCK_H
-#include <winsock.h>
-#else
+#if HAVE_NETDB_H
 #include <netdb.h>
 #endif
 #if HAVE_ARPA_INET_H

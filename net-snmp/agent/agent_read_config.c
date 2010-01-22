@@ -57,8 +57,6 @@
 #include <sys/param.h>
 #endif
 #endif
-#elif HAVE_WINSOCK_H
-#include <winsock.h>
 #endif
 #if HAVE_SYS_STREAM_H
 #   ifdef sysv5UnixWare7

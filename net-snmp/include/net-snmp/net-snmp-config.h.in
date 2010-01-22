@@ -92,6 +92,9 @@
 /* Define to 1 if you have the `cgetnext' function. */
 #undef HAVE_CGETNEXT
 
+/* Define to 1 if you have the `chown' function. */
+#undef HAVE_CHOWN
+
 /* Define to 1 if the system has the type `Counter64'. */
 #undef HAVE_COUNTER64
 
@@ -308,6 +311,9 @@
 
 /* Define to 1 if you have the <locale.h> header file. */
 #undef HAVE_LOCALE_H
+
+/* Define to 1 if you have the `localtime_r' function. */
+#undef HAVE_LOCALTIME_R
 
 /* Define to 1 if the system has the type `long long int'. */
 #undef HAVE_LONG_LONG_INT
@@ -1122,8 +1128,14 @@
 /* Define to 1 if you have the `vsnprintf' function. */
 #undef HAVE_VSNPRINTF
 
+/* Define to 1 if you have the <winsock2.h> header file. */
+#undef HAVE_WINSOCK2_H
+
 /* Define to 1 if you have the <winsock.h> header file. */
 #undef HAVE_WINSOCK_H
+
+/* Define to 1 if you have the <ws2tcpip.h> header file. */
+#undef HAVE_WS2TCPIP_H
 
 /* Define to 1 if you have the <xti.h> header file. */
 #undef HAVE_XTI_H
