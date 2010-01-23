@@ -33,11 +33,17 @@
 #include <inttypes.h>
 #endif
 #include <sys/types.h>
-#if defined(mingw32)
-#include <winsock2.h>
-#include <ws2tcpip.h>         /* For struct sockaddr_in6 on MinGW */
-#elif defined(HAVE_WINSOCK_H)
-#include <winsock.h>
+#if ! defined(_WINSOCKAPI_) && ! defined(_WINSOCK_H)
+/*
+ * If neither the Microsoft winsock header file nor the MinGW winsock header
+ * file has already been included, do this now.
+ */
+# if defined(HAVE_WINSOCK2_H) && defined(HAVE_WS2TCPIP_H)
+#  include <winsock2.h>
+#  include <ws2tcpip.h>
+# elif defined(HAVE_WINSOCK_H)
+#  include <winsock.h>
+# endif
 #endif
 
 #if HAVE_NETINET_IN_H

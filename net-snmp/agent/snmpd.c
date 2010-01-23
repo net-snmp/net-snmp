@@ -36,6 +36,7 @@
  * distributed with the Net-SNMP package.
  */
 #include <net-snmp/net-snmp-config.h>
+#include <net-snmp/types.h>
 
 #if HAVE_IO_H
 #include <io.h>

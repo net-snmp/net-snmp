@@ -455,4 +455,4 @@ esac
 #       for MIB-2 info                                  (Win32)
 #  Core:
 #
-AC_CHECK_HEADERS([winsock.h winsock2.h ws2tcpip.h])
+AC_CHECK_HEADERS([iphlpapi.h winsock.h winsock2.h ws2tcpip.h])

@@ -46,8 +46,6 @@ static const char *rcsid = "$OpenBSD: inet.c,v 1.92 2005/02/10 14:25:08 itojun E
 #include <unistd.h>
 #endif
 #if HAVE_WINSOCK_H
-#include <winsock2.h>
-#include <ws2tcpip.h>
 #include "winstub.h"
 #endif
 #if HAVE_SYS_SOCKET_H

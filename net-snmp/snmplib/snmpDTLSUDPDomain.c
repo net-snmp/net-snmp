@@ -111,11 +111,6 @@
 #include <sys/uio.h>
 #endif
 
-#if HAVE_WINSOCK_H
-#include <winsock2.h>
-#include <ws2tcpip.h>
-#endif
-
 #if HAVE_DMALLOC_H
 #include <dmalloc.h>
 #endif

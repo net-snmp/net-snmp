@@ -53,7 +53,7 @@ struct netsnmp_udpEntry_s {
 #define	UDPTABLE_IS_LINKED_LIST
 #else
 
-#if defined (WIN32) || defined (cygwin)
+#ifdef HAVE_IPHLPAPI_H
 #include <iphlpapi.h>
 #define	UDPTABLE_ENTRY_TYPE	MIB_UDPROW		/* ??? */
 #define	UDPTABLE_LOCALADDRESS	dwLocalAddr

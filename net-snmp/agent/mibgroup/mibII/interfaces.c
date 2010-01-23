@@ -2582,7 +2582,7 @@ var_ifEntry(struct variable * vp,
 #endif                          /* HAVE_NET_IF_MIB_H */
 #endif                          /* !USE_SYSCTL_IFLIST */
 
-#else                           /* WIN32 cygwin */
+#elif defined(HAVE_IPHLPAPI_H)  /* WIN32 cygwin */
 #include <iphlpapi.h>
 
 WriteMethod     writeIfEntry;

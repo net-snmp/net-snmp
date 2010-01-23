@@ -577,7 +577,7 @@ init_icmp(void)
 #define USES_SNMP_DESIGNED_ICMPSTAT
 #endif
 
-#if defined (WIN32) || defined (cygwin)
+#ifdef HAVE_IPHLPAPI_H
 #include <iphlpapi.h>
 #define ICMP_STAT_STRUCTURE MIB_ICMP
 #endif

@@ -234,6 +234,9 @@
 /* Define to 1 if you have the <io.h> header file. */
 #undef HAVE_IO_H
 
+/* Define to 1 if you have the <iphlpapi.h> header file. */
+#undef HAVE_IPHLPAPI_H
+
 /* Define to 1 if you have the `knlist' function. */
 #undef HAVE_KNLIST
 

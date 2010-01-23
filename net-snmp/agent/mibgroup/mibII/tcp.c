@@ -167,7 +167,7 @@ init_tcp(void)
 #define USES_SNMP_DESIGNED_TCPSTAT
 #endif
 
-#if defined (WIN32) || defined (cygwin)
+#ifdef HAVE_IPHLPAPI_H
 #include <iphlpapi.h>
 #define TCP_STAT_STRUCTURE     MIB_TCPSTATS
 #endif
