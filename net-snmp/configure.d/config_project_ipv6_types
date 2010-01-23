@@ -60,7 +60,7 @@ if test "x$enable_ipv6" = "xyes"; then
 	v6trylibc=no
 
 	AC_MSG_CHECKING([[ipv6 stack type]])
-	for i in v6d toshiba kame inria zeta linux-glibc linux-inet6 mingw generic; do
+	for i in v6d toshiba kame inria zeta linux-glibc linux-inet6 winsock2 generic; do
 		case $i in
 		v6d)
 			AC_EGREP_CPP(yes, [
@@ -136,7 +136,7 @@ yes
 				CFLAGS="-DNETSNMP_ENABLE_IPV6 $CFLAGS"
 			fi
 			;;
-		mingw)
+		winsock2)
 			AC_EGREP_CPP(yes, [
 #include <ws2tcpip.h>
 #if defined(_WS2TCPIP_H)
