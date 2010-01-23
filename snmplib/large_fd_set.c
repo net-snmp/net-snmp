@@ -8,6 +8,7 @@
 #include <net-snmp/net-snmp-config.h>
 
 #include <stdio.h>
+#include <string.h> /* memset(), which is invoked by FD_ZERO() */
 
 #ifdef HAVE_STDLIB_H
 #include <stdlib.h>
