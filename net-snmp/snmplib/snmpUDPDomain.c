@@ -11,6 +11,7 @@
 
 #include <net-snmp/net-snmp-config.h>
 
+#include <stddef.h>
 #include <stdio.h>
 #include <sys/types.h>
 #include <ctype.h>
@@ -942,19 +943,19 @@ netsnmp_sockaddr_in(struct sockaddr_in *addr,
 #if !defined(NETSNMP_DISABLE_SNMPV1) || !defined(NETSNMP_DISABLE_SNMPV2C)
 /*
  * The following functions provide the "com2sec" configuration token
- * functionality for compatibility.  
+ * functionality for compatibility.
  */
 
 #define EXAMPLE_NETWORK		"NETWORK"
 #define EXAMPLE_COMMUNITY	"COMMUNITY"
 
-typedef struct _com2SecEntry {
-    char            community[COMMUNITY_MAX_LEN];
-    unsigned long   network;
-    unsigned long   mask;
-    char            secName[VACMSTRINGLEN];
-    char            contextName[VACMSTRINGLEN];
-    struct _com2SecEntry *next;
+typedef struct com2SecEntry_s {
+    const char *secName;
+    const char *contextName;
+    struct com2SecEntry_s *next;
+    in_addr_t   network;
+    in_addr_t   mask;
+    const char  community[1];
 } com2SecEntry;
 
 static com2SecEntry   *com2SecList = NULL, *com2SecListLast = NULL;
@@ -962,176 +963,183 @@ static com2SecEntry   *com2SecList = NULL, *com2SecListLast = NULL;
 void
 netsnmp_udp_parse_security(const char *token, char *param)
 {
-    char            secName[VACMSTRINGLEN];
-    char            contextName[VACMSTRINGLEN];
-    char            community[COMMUNITY_MAX_LEN];
-    char            source[SNMP_MAXBUF_SMALL];
-    char           *cp = NULL;
-    const char     *strmask = NULL;
-    com2SecEntry   *e = NULL;
-    in_addr_t   network = 0, mask = 0;
+    char            secName[VACMSTRINGLEN + 1];
+    size_t          secNameLen;
+    char            contextName[VACMSTRINGLEN + 1];
+    size_t          contextNameLen;
+    char            community[COMMUNITY_MAX_LEN + 1];
+    size_t          communityLen;
+    char            source[270]; /* dns-name(253)+/(1)+mask(15)+\0(1) */
+    struct in_addr  network, mask;
 
     /*
-     * Get security, source address/netmask and community strings.  
+     * Get security, source address/netmask and community strings.
      */
 
-    cp = copy_nword( param, secName, sizeof(secName));
+    param = copy_nword( param, secName, sizeof(secName));
     if (strcmp(secName, "-Cn") == 0) {
-        if (!cp) {
+        if (!param) {
             config_perror("missing CONTEXT_NAME parameter");
             return;
         }
-        cp = copy_nword( cp, contextName, sizeof(contextName));
-        cp = copy_nword( cp, secName, sizeof(secName));
+        param = copy_nword( param, contextName, sizeof(contextName));
+        contextNameLen = strlen(contextName) + 1;
+        if (contextNameLen > VACMSTRINGLEN) {
+            config_perror("context name too long");
+            return;
+        }
+        if (!param) {
+            config_perror("missing NAME parameter");
+            return;
+        }
+        param = copy_nword( param, secName, sizeof(secName));
     } else {
-        contextName[0] = '\0';
+        contextNameLen = 0;
     }
-    if (secName[0] == '\0') {
-        config_perror("missing NAME parameter");
+
+    secNameLen = strlen(secName) + 1;
+    if (secNameLen == 1) {
+        config_perror("empty NAME parameter");
         return;
-    } else if (strlen(secName) > (VACMSTRINGLEN - 1)) {
+    } else if (secNameLen > VACMSTRINGLEN) {
         config_perror("security name too long");
         return;
     }
-    cp = copy_nword( cp, source, sizeof(source));
-    if (source[0] == '\0') {
+
+    if (!param) {
         config_perror("missing SOURCE parameter");
         return;
-    } else if (strncmp(source, EXAMPLE_NETWORK, strlen(EXAMPLE_NETWORK)) ==
-               0) {
+    }
+    param = copy_nword( param, source, sizeof(source));
+    if (source[0] == '\0') {
+        config_perror("empty SOURCE parameter");
+        return;
+    }
+    if (strncmp(source, EXAMPLE_NETWORK, strlen(EXAMPLE_NETWORK)) == 0) {
         config_perror("example config NETWORK not properly configured");
         return;
     }
-    cp = copy_nword( cp, community, sizeof(community));
+
+    if (!param) {
+        config_perror("missing COMMUNITY parameter");
+        return;
+    }
+    param = copy_nword( param, community, sizeof(community));
     if (community[0] == '\0') {
-        config_perror("missing COMMUNITY parameter\n");
+        config_perror("empty COMMUNITY parameter");
         return;
-    } else
-        if (strncmp
-            (community, EXAMPLE_COMMUNITY, strlen(EXAMPLE_COMMUNITY))
-            == 0) {
-        config_perror("example config COMMUNITY not properly configured");
-        return;
-    } else if (strlen(community) > (COMMUNITY_MAX_LEN - 1)) {
+    }
+    communityLen = strlen(community) + 1;
+    if (communityLen >= COMMUNITY_MAX_LEN) {
         config_perror("community name too long");
         return;
     }
-
-    /*
-     * Process the source address/netmask string.  
-     */
-
-    cp = strchr(source, '/');
-    if (cp != NULL) {
-        /*
-         * Mask given.  
-         */
-        *cp = '\0';
-        strmask = cp + 1;
+    if (communityLen == sizeof(EXAMPLE_COMMUNITY) &&
+        memcmp(community, EXAMPLE_COMMUNITY, sizeof(EXAMPLE_COMMUNITY)) == 0) {
+        config_perror("example config COMMUNITY not properly configured");
+        return;
     }
 
-    /*
-     * Deal with the network part first.  
-     */
-
-    if ((strcmp(source, "default") == 0)
-        || (strcmp(source, "0.0.0.0") == 0)) {
-        network = 0;
-        strmask = "0.0.0.0";
+    /* Deal with the "default" case first. */
+    if (strcmp(source, "default") == 0) {
+        network.s_addr = 0;
+        mask.s_addr = 0;
     } else {
-        /*
-         * Try interpreting as a dotted quad.  
-         */
-        network = inet_addr(source);
+        /* Split the source/netmask parts */
+        char *strmask = strchr(source, '/');
+        if (strmask != NULL)
+            /* Mask given. */
+            *strmask++ = '\0';
 
-        if (network == (in_addr_t) -1) {
-            /*
-             * Nope, wasn't a dotted quad.  Must be a hostname.  
-             */
-            int ret = netsnmp_gethostbyname_v4(source, &network);
+        /* Try interpreting as a dotted quad. */
+        if (inet_aton(source, &network) == 0) {
+            /* Nope, wasn't a dotted quad.  Must be a hostname. */
+            int ret = netsnmp_gethostbyname_v4(source, &network.s_addr);
             if (ret < 0) {
                 config_perror("cannot resolve source hostname");
                 return;
             }
         }
-    }
 
-    /*
-     * Now work out the mask.  
-     */
-
-    if (strmask == NULL || *strmask == '\0') {
-        /*
-         * No mask was given.  Use 255.255.255.255.  
-         */
-        mask = 0xffffffffL;
-    } else {
-        if (strchr(strmask, '.')) {
-            /*
-             * Try to interpret mask as a dotted quad.  
-             */
-            mask = inet_addr(strmask);
-            if (mask == (in_addr_t) -1 &&
-                strncmp(strmask, "255.255.255.255", 15) != 0) {
+        /* Now work out the mask. */
+        if (strmask == NULL || *strmask == '\0') {
+            /* No mask was given. Assume /32 */
+            mask.s_addr = (in_addr_t)(~0UL);
+        } else {
+            /* Try to interpret mask as a "number of 1 bits". */
+            char* cp;
+            long maskLen = strtol(strmask, &cp, 10);
+            if (*cp == '\0') {
+                if (0 < maskLen && maskLen <= 32)
+                    mask.s_addr = htonl((in_addr_t)(~0UL << (32 - maskLen)));
+                else {
+                    config_perror("bad mask length");
+                    return;
+                }
+            }
+            /* Try to interpret mask as a dotted quad. */
+            else if (inet_aton(strmask, &mask) == 0) {
                 config_perror("bad mask");
                 return;
             }
-        } else {
-            /*
-             * Try to interpret mask as a "number of 1 bits".  
-             */
-            int             maskLen = atoi(strmask), maskBit = 0x80000000L;
-            if (maskLen <= 0 || maskLen > 32) {
-                config_perror("bad mask length");
+
+            /* Check that the network and mask are consistent. */
+            if (network.s_addr & ~mask.s_addr) {
+                config_perror("source/mask mismatch");
                 return;
             }
-            while (maskLen--) {
-                mask |= maskBit;
-                maskBit >>= 1;
-            }
-            mask = htonl(mask);
         }
     }
 
-    /*
-     * Check that the network and mask are consistent.  
-     */
+    {
+        void* v = malloc(offsetof(com2SecEntry, community) + communityLen +
+                         secNameLen + contextNameLen);
 
-    if (network & ~mask) {
-        config_perror("source/mask mismatch");
-        return;
-    }
+        com2SecEntry* e = (com2SecEntry*)v;
+        char* last = ((char*)v) + offsetof(com2SecEntry, community);
 
-    e = (com2SecEntry *) malloc(sizeof(com2SecEntry));
-    if (e == NULL) {
-        config_perror("memory error");
-        return;
-    }
+        if (v == NULL) {
+            config_perror("memory error");
+            return;
+        }
 
-    /*
-     * Everything is okay.  Copy the parameters to the structure allocated
-     * above and add it to END of the list.  
-     */
+        /*
+         * Everything is okay.  Copy the parameters to the structure allocated
+         * above and add it to END of the list.
+         */
 
-    DEBUGMSGTL(("netsnmp_udp_parse_security",
-                "<\"%s\", 0x%08x/0x%08x> => \"%s\"\n", community, network,
-                mask, secName));
+        {
+          char buf1[INET_ADDRSTRLEN];
+          char buf2[INET_ADDRSTRLEN];
+          DEBUGMSGTL(("netsnmp_udp_parse_security",
+                      "<\"%s\", %s/%s> => \"%s\"\n", community,
+                      inet_ntop(AF_INET, &network, buf1, sizeof(buf1)),
+                      inet_ntop(AF_INET, &mask, buf2, sizeof(buf2)),
+                      secName));
+        }
 
-    strcpy(e->contextName, contextName);
-    strcpy(e->secName, secName);
-    strcpy(e->community, community);
-    e->network = network;
-    e->mask = mask;
-    e->next = NULL;
+        memcpy(last, community, communityLen);
+        last += communityLen;
+        memcpy(last, secName, secNameLen);
+        e->secName = last;
+        last += secNameLen;
+        if (contextNameLen) {
+            memcpy(last, contextName, contextNameLen);
+            e->contextName = last;
+        } else
+            e->contextName = last - 1;
+        e->network = network.s_addr;
+        e->mask = mask.s_addr;
+        e->next = NULL;
 
-    if (com2SecListLast != NULL) {
-        com2SecListLast->next = e;
-        com2SecListLast = e;
-    } else {
-        com2SecListLast = com2SecList = e;
+        if (com2SecListLast != NULL) {
+            com2SecListLast->next = e;
+            com2SecListLast = e;
+        } else {
+            com2SecListLast = com2SecList = e;
+        }
     }
 }
-
 
 void
 netsnmp_udp_com2SecList_free(void)
@@ -1159,10 +1167,10 @@ netsnmp_udp_agent_config_tokens_register(void)
 
 
 /*
- * Return 0 if there are no com2sec entries, or return 1 if there ARE com2sec 
+ * Return 0 if there are no com2sec entries, or return 1 if there ARE com2sec
  * entries.  On return, if a com2sec entry matched the passed parameters,
  * then *secName points at the appropriate security name, or is NULL if the
- * parameters did not match any com2sec entry.  
+ * parameters did not match any com2sec entry.
  */
 
 #if !defined(NETSNMP_DISABLE_SNMPV1) || !defined(NETSNMP_DISABLE_SNMPV2C)
@@ -1183,7 +1191,7 @@ netsnmp_udp_getSecName(void *opaque, int olength,
 
     /*
      * Special case if there are NO entries (as opposed to no MATCHING
-     * entries).  
+     * entries).
      */
 
     if (com2SecList == NULL) {
@@ -1193,7 +1201,7 @@ netsnmp_udp_getSecName(void *opaque, int olength,
 
     /*
      * If there is no IPv4 source address, then there can be no valid security
-     * name.  
+     * name.
      */
 
    DEBUGMSGTL(("netsnmp_udp_getSecName", "opaque = %p (len = %d), sizeof = %d, family = %d (%d)\n",
@@ -1218,8 +1226,14 @@ netsnmp_udp_getSecName(void *opaque, int olength,
     }
 
     for (c = com2SecList; c != NULL; c = c->next) {
-        DEBUGMSGTL(("netsnmp_udp_getSecName","compare <\"%s\", 0x%08lx/0x%08lx>",
-		    c->community, c->network, c->mask));
+        {
+            char buf1[INET_ADDRSTRLEN];
+            char buf2[INET_ADDRSTRLEN];
+            DEBUGMSGTL(("netsnmp_udp_getSecName","compare <\"%s\", %s/%s>",
+                        c->community,
+                        inet_ntop(AF_INET, &c->network, buf1, sizeof(buf1)),
+                        inet_ntop(AF_INET, &c->mask, buf2, sizeof(buf2))));
+        }
         if ((community_len == strlen(c->community)) &&
 	    (memcmp(community, c->community, community_len) == 0) &&
             ((from->sin_addr.s_addr & c->mask) == c->network)) {
