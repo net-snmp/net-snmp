@@ -1,5 +1,6 @@
 #include <net-snmp/net-snmp-config.h>
 
+#include <stddef.h>
 #include <stdio.h>
 #include <sys/types.h>
 #include <ctype.h>
@@ -498,13 +499,13 @@ netsnmp_unix_ctor(void)
 /* support for SNMPv1 and SNMPv2c on unix domain*/
 
 #define EXAMPLE_COMMUNITY "COMMUNITY"
-typedef struct _com2SecUnixEntry {
-    char            community[COMMUNITY_MAX_LEN];
-    char            sockpath[sizeof(struct sockaddr_un)];
-    unsigned long   pathlen;
-    char            secName[VACMSTRINGLEN];
-    char            contextName[VACMSTRINGLEN];
-    struct _com2SecUnixEntry *next;
+typedef struct com2SecUnixEntry_s {
+    const char*     sockpath;
+    const char*     secName;
+    const char*     contextName;
+    struct com2SecUnixEntry_s *next;
+    unsigned short  pathlen;
+    const char      community[1];
 } com2SecUnixEntry;
 
 static com2SecUnixEntry   *com2SecUnixList = NULL, *com2SecUnixListLast = NULL;
@@ -584,79 +585,131 @@ netsnmp_unix_getSecName(void *opaque, int olength,
 void
 netsnmp_unix_parse_security(const char *token, char *param)
 {
-    char              secName[VACMSTRINGLEN + 1], community[COMMUNITY_MAX_LEN + 1];
-    char              contextName[VACMSTRINGLEN + 1];
-    char              sockpath[sizeof(struct sockaddr_un) + 1];
-    com2SecUnixEntry *e = NULL;
+    char   secName[VACMSTRINGLEN + 1];
+    size_t secNameLen;
+    char   contextName[VACMSTRINGLEN + 1];
+    size_t contextNameLen;
+    char   community[COMMUNITY_MAX_LEN + 1];
+    size_t communityLen;
+    char   sockpath[sizeof(((struct sockaddr_un*)0)->sun_path) + 1];
+    size_t sockpathLen;
 
-
-    param = copy_nword(param, secName, VACMSTRINGLEN);
+    param = copy_nword( param, secName, sizeof(secName));
     if (strcmp(secName, "-Cn") == 0) {
-        param = copy_nword( param, contextName, sizeof(contextName));
-        param = copy_nword( param, secName, sizeof(secName));
-        if (contextName[0] == '\0') {
+        if (!param) {
             config_perror("missing CONTEXT_NAME parameter");
             return;
         }
+        param = copy_nword( param, contextName, sizeof(contextName));
+        contextNameLen = strlen(contextName) + 1;
+        if (contextNameLen > VACMSTRINGLEN) {
+            config_perror("context name too long");
+            return;
+        }
+        if (!param) {
+            config_perror("missing NAME parameter");
+            return;
+        }
+        param = copy_nword( param, secName, sizeof(secName));
     } else {
-        contextName[0] = '\0';
+        contextNameLen = 0;
     }
-    if (secName[0] == '\0') {
-        config_perror("missing NAME parameter");
+
+    secNameLen = strlen(secName) + 1;
+    if (secNameLen == 1) {
+        config_perror("empty NAME parameter");
         return;
-    } else if (strlen(secName) > (VACMSTRINGLEN - 1)) {
+    } else if (secNameLen > VACMSTRINGLEN) {
         config_perror("security name too long");
         return;
     }
 
-        param = copy_nword(param, sockpath, sizeof(struct sockaddr_un) - 1);
-    if (sockpath[0] == '\0') {
+    if (!param) {
         config_perror("missing SOCKPATH parameter");
         return;
-    } else if (strlen(sockpath) > (sizeof(struct sockaddr_un) - 1)) {
+    }
+    param = copy_nword( param, sockpath, sizeof(sockpath));
+    if (sockpath[0] == '\0') {
+        config_perror("empty SOCKPATH parameter");
+        return;
+    }
+    sockpathLen = strlen(sockpath) + 1;
+    if (sockpathLen > sizeof(((struct sockaddr_un*)0)->sun_path)) {
         config_perror("sockpath too long");
         return;
     }
-    /* if sockpath == "default", set pathlen=0*/
-    if(strcmp(sockpath, "default") == 0){
-        sockpath[0] = 0;
-    }
 
-    param = copy_nword(param, community, COMMUNITY_MAX_LEN);
+    if (!param) {
+        config_perror("missing COMMUNITY parameter");
+        return;
+    }
+    param = copy_nword( param, community, sizeof(community));
     if (community[0] == '\0') {
-        config_perror("missing COMMUNITY parameter\n");
+        config_perror("empty COMMUNITY parameter");
         return;
-    } else if (strncmp
-               (community, EXAMPLE_COMMUNITY, strlen(EXAMPLE_COMMUNITY))
-               == 0) {
-        config_perror("example config COMMUNITY not properly configured");
-        return;
-    } else if (strlen(community) > (COMMUNITY_MAX_LEN - 1)) {
+    }
+    communityLen = strlen(community) + 1;
+    if (communityLen >= COMMUNITY_MAX_LEN) {
         config_perror("community name too long");
         return;
     }
-
-    e = (com2SecUnixEntry *) malloc(sizeof(com2SecUnixEntry));
-    if (e == NULL) {
-        config_perror("memory error");
+    if (communityLen == sizeof(EXAMPLE_COMMUNITY) &&
+        memcmp(community, EXAMPLE_COMMUNITY, sizeof(EXAMPLE_COMMUNITY)) == 0) {
+        config_perror("example config COMMUNITY not properly configured");
         return;
     }
 
-    DEBUGMSGTL(("netsnmp_unix_parse_security",
-                "<\"%s\"> => \"%s\"\n", community, secName));
+    /* Deal with the "default" case */
+    if(strcmp(sockpath, "default") == 0) {
+        sockpathLen = 0;
+    }
 
-    strcpy(e->secName, secName);
-    strcpy(e->contextName, contextName);
-    strcpy(e->community, community);
-    strcpy(e->sockpath, sockpath);
-    e->pathlen = strlen(sockpath);
-    e->next = NULL;
+    {
+        void* v = malloc(offsetof(com2SecUnixEntry, community) + communityLen +
+                         sockpathLen + secNameLen + contextNameLen);
+        com2SecUnixEntry* e = (com2SecUnixEntry*)v;
+        char* last = ((char*)v) + offsetof(com2SecUnixEntry, community);
+        if (e == NULL) {
+            config_perror("memory error");
+            return;
+        }
 
-    if (com2SecUnixListLast != NULL) {
-        com2SecUnixListLast->next = e;
-        com2SecUnixListLast = e;
-    } else {
-        com2SecUnixListLast = com2SecUnixList = e;
+        DEBUGMSGTL(("netsnmp_unix_parse_security",
+                    "<\"%s\", \"%.*s\"> => \"%s\"\n",
+                    community, (int)sockpathLen, sockpath, secName));
+
+        memcpy(last, community, communityLen);
+        last += communityLen;
+
+        if (sockpathLen) {
+            e->sockpath = last;
+            memcpy(last, sockpath, sockpathLen);
+            last += sockpathLen;
+            e->pathlen = sockpathLen - 1;
+        } else {
+            e->sockpath = last - 1;
+            e->pathlen = 0;
+        }
+
+        e->secName = last;
+        memcpy(last, secName, secNameLen);
+        last += secNameLen;
+
+        if (contextNameLen) {
+            e->contextName = last;
+            memcpy(last, contextName, contextNameLen);
+            last += contextNameLen;
+        } else
+            e->contextName = last - 1;
+
+        e->next = NULL;
+
+        if (com2SecUnixListLast != NULL) {
+            com2SecUnixListLast->next = e;
+            com2SecUnixListLast = e;
+        } else {
+            com2SecUnixListLast = com2SecUnixList = e;
+        }
     }
 }
 
