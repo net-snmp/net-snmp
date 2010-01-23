@@ -2,7 +2,7 @@
 
 . ../eval_tools.sh
 
-HEADER com2sec directive
+HEADER com2sec6 directive
 
 SKIPIFNOT NETSNMP_TRANSPORT_UDP_DOMAIN
 
