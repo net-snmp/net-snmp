@@ -1446,7 +1446,7 @@ qsort_compare(const void *v1, const void *v2)
 
 #endif                          /* solaris2 */
 
-#else                           /* WIN32 cygwin */
+#elif defined(HAVE_IPHLPAPI_H)  /* WIN32 cygwin */
 #include <iphlpapi.h>
 #ifndef MIB_IPPROTO_NETMGMT
 #define MIB_IPPROTO_NETMGMT 3

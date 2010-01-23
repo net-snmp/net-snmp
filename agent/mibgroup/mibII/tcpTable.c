@@ -67,7 +67,7 @@ struct netsnmp_tcpConnEntry_s {
 #define	TCPTABLE_IS_LINKED_LIST
 #else
 
-#if defined (WIN32) || defined (cygwin)
+#ifdef HAVE_IPHLPAPI_H
 #include <iphlpapi.h>
 #define	TCPTABLE_ENTRY_TYPE	MIB_TCPROW
 #define	TCPTABLE_STATE		dwState 

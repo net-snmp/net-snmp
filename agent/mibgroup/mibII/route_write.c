@@ -517,7 +517,7 @@ write_rte(int action,
     return SNMP_ERR_NOERROR;
 }
 
-#else                           /* WIN32 cygwin */
+#elif defined(HAVE_IPHLPAPI_H)  /* WIN32 cygwin */
 #include <iphlpapi.h>
 
 extern PMIB_IPFORWARDROW route_row;

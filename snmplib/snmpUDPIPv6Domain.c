@@ -38,11 +38,6 @@
 #endif
 
 #if defined(HAVE_WINSOCK_H) || defined(cygwin)
-    /*
-     *  Windows IPv6 support is part of WinSock2 only
-     */
-#include <winsock2.h>
-#include <ws2tcpip.h>
 #undef  HAVE_IF_NAMETOINDEX
 
 #ifndef HAVE_INET_PTON

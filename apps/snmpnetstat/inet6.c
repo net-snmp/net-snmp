@@ -46,8 +46,6 @@ static char sccsid[] = "@(#)inet.c	8.4 (Berkeley) 4/20/94";
 #include <unistd.h>
 #endif
 #if HAVE_WINSOCK_H
-#include <winsock2.h>
-#include <ws2tcpip.h>
 #include "winstub.h"
 #endif
 #if HAVE_SYS_SOCKET_H

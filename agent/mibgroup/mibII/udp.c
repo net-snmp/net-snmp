@@ -149,7 +149,7 @@ init_udp(void)
 #define USES_SNMP_DESIGNED_UDPSTAT
 #endif
 
-#ifdef WIN32
+#ifdef HAVE_IPHLPAPI_H
 #include <iphlpapi.h>
 #define UDP_STAT_STRUCTURE MIB_UDPSTATS
 #endif

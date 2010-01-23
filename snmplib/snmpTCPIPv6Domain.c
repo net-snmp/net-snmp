@@ -37,11 +37,6 @@
 #endif
 
 #if defined(HAVE_WINSOCK_H) || defined(cygwin)
-    /*
-     * Windows IPv6 support is part of WinSock2 only
-     */
-#include <winsock2.h>
-#include <ws2tcpip.h>
 
 #ifndef HAVE_INET_NTOP
 extern const char *inet_ntop(int, const void*, char*, size_t);

@@ -25,15 +25,10 @@
 #include <arpa/nameser.h>
 #endif
 
-  /*
-   * Net-SNMP Win32 additions
-   */
-#if defined(HAVE_WINSOCK_H) || defined(cygwin)
-#include <winsock2.h>
-#include <ws2tcpip.h>
 #include <errno.h>
 #include <stdio.h>
-#endif
+
+#include <net-snmp/types.h>
 
 #ifndef EAFNOSUPPORT
 #define EAFNOSUPPORT            WSAEAFNOSUPPORT

@@ -27,10 +27,9 @@
  * Microsoft Visual Studio MSVC 6.0 and the Platform SDK (PSDK)
  * Microsoft Visual Studio.Net 2002
  * Microsoft Visual Studio.Net 2003
- * Cygwin
- * MinGW 
+ * Note: since considerable time MSVC 6 without PSDK is no longer supported.
  */
-/* #undef HAVE_WIN32_PLATFORM_SDK */
+#define HAVE_WIN32_PLATFORM_SDK 1
 
 /* Define NETSNMP_ENABLE_IPV6 to enable IPv6.  IPv6 is only available on
  * Windows XP and higher.  */
@@ -320,6 +319,11 @@
 
 /* Define to 1 if you have the <inet/mib2.h> header file. */
 /* #undef HAVE_INET_MIB2_H */
+
+#ifdef HAVE_WIN32_PLATFORM_SDK
+/* Define to 1 if you have the <iphlpapi.h> header file. */
+#define HAVE_IPHLPAPI_H
+#endif
 
 /* Define to 1 if the system has the type `int32_t'. */
 #define HAVE_INT32_T 1
@@ -920,6 +924,12 @@
 /* Define to 1 if you have the <winsock.h> header file. */
 #define HAVE_WINSOCK_H 1
 
+/* Define to 1 if you have the <winsock2.h> header file. */
+#define HAVE_WINSOCK2_H 1
+
+/* Define to 1 if you have the <ws2tcpip.h> header file. */
+#define HAVE_WS2TCPIP_H 1
+
 /* Define to 1 if you have the <xti.h> header file. */
 /* #undef HAVE_XTI_H */
 
@@ -1446,7 +1456,7 @@
 #define config_add_mib(x)
 #define config_belongs_in(x)
 
-#if defined (WIN32) || defined (mingw32) || defined (cygwin)
+#if defined (WIN32)
 #define ENV_SEPARATOR ";"
 #define ENV_SEPARATOR_CHAR ';'
 #else

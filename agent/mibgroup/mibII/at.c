@@ -852,7 +852,7 @@ ARP_Scan_Next(in_addr_t * IPAddr, char *PhysAddr, int *PhysAddrLen,
 }
 #endif                          /* solaris2 */
 
-#else                           /* WIN32 cygwin */
+#elif defined(HAVE_IPHLPAPI_H)  /* WIN32 cygwin */
 #include <iphlpapi.h>
 
 extern WriteMethod write_arp;

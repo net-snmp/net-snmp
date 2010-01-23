@@ -225,7 +225,7 @@ init_ip(void)
 #define	USES_SNMP_DESIGNED_IPSTAT
 #endif
 
-#if defined (WIN32) || defined (cygwin)
+#ifdef HAVE_IPHLPAPI_H
 #include <iphlpapi.h>
 #define IP_STAT_STRUCTURE MIB_IPSTATS
 long            ipForwarding;
