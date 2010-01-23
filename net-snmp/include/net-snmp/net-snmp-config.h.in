@@ -859,6 +859,9 @@
 /* Define to 1 if `tcp_rcvmemdrop' is member of `struct tcpstat'. */
 #undef HAVE_STRUCT_TCPSTAT_TCP_RCVMEMDROP
 
+/* Define to 1 if `tz_dsttime' is member of `struct timezone'. */
+#undef HAVE_STRUCT_TIMEZONE_TZ_DSTTIME
+
 /* Define to 1 if `tm_gmtoff' is member of `struct tm'. */
 #undef HAVE_STRUCT_TM_TM_GMTOFF
 
@@ -1016,6 +1019,9 @@
 
 /* Define to 1 if you have the <sys/tcpipstats.h> header file. */
 #undef HAVE_SYS_TCPIPSTATS_H
+
+/* Define to 1 if you have the <sys/timeb.h> header file. */
+#undef HAVE_SYS_TIMEB_H
 
 /* Define to 1 if you have the <sys/timeout.h> header file. */
 #undef HAVE_SYS_TIMEOUT_H

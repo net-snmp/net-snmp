@@ -81,13 +81,9 @@
 #define	F_SETFL		4
 #define	O_NONBLOCK	0x4000  /* non blocking I/O (POSIX style) */
 
-#if 0
+#ifndef HAVE_STRUCT_TIMEZONE_TZ_DSTTIME
 /*
- * I dunno why. It's just not there. Define struct timezone.
- * If other systems need this it could be moved to system.h
- * and the proper checking done at config time. Right now I have
- * just put it here to keep the MinGW out of the main tree as much
- * as possible.
+ * Older MinGW versions do not have struct timezone, so define it here.
  */
 struct timezone {
 	int tz_minuteswest;
