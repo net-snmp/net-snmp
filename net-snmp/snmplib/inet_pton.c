@@ -21,6 +21,8 @@
 
 #ifndef HAVE_INET_PTON
 
+#include <ctype.h>
+
 #if HAVE_ARPA_NAMESER_H
 #include <arpa/nameser.h>
 #endif
