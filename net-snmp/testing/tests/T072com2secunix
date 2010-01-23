@@ -1,0 +1,99 @@
+#!/bin/sh
+
+. ../eval_tools.sh
+
+HEADER com2sec directive
+
+SKIPIFNOT NETSNMP_TRANSPORT_UDP_DOMAIN
+
+#
+# Begin test
+#
+
+# u01a Test missing CONTEXT
+CONFIGAGENT 'com2secunix -Cn'
+# u01a Test empty CONTEXT
+CONFIGAGENT 'com2secunix -Cn ""'
+# u01c Test overlong CONTEXT (34 chars)
+CONFIGAGENT 'com2secunix -Cn 1234567890123456789012345678901234'
+
+# u02a Test missing secName
+CONFIGAGENT 'com2secunix'
+# u02b Test empty secName
+CONFIGAGENT 'com2secunix ""'
+# u02c Test overlong secName (34 chars)
+CONFIGAGENT 'com2secunix 1234567890123456789012345678901234'
+# u02d Test valid context and missing secName
+CONFIGAGENT 'com2secunix -Cn 123456789012345678901234567890123'
+# u02e Test valid context and empty secName
+CONFIGAGENT 'com2secunix -Cn 123456789012345678901234567890123 ""'
+
+# u03a Test missing sockpath
+CONFIGAGENT 'com2secunix tu03a'
+# u03b Test empty sockpath
+CONFIGAGENT 'com2secunix tu03b ""'
+# u03c Test overlong sockpath (108 chars)
+CONFIGAGENT 'com2secunix tu03c a23456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678'
+# u03d Test valid sockpath (107 chars)
+CONFIGAGENT 'com2secunix tu03d a2345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567'
+
+# u04a Test missing community
+CONFIGAGENT 'com2secunix tu04a default'
+# u04b Test empty community
+CONFIGAGENT 'com2secunix tu04b default ""'
+# u04c Test forbidden value (now why it is forbidden...)
+CONFIGAGENT 'com2secunix tu04c default COMMUNITY'
+# u04d Test overlong community (255 chars)
+CONFIGAGENT 'com2secunix tu04d default 123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345'
+# u04e Test valid community
+CONFIGAGENT 'com2secunix tu04e default 12345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234'
+
+# u05a Test 'default' configuration
+CONFIGAGENT 'com2secunix tu05a default cu05a'
+
+# u07a Test non existant sockpath
+CONFIGAGENT 'com2secunix tu07a /dev/null/no/such cu07a'
+
+# Default agent setup
+CONFIGAGENT "[snmp] persistentdir $SNMP_TMP_PERSISTENTDIR"
+# Dummy config to prevent the basic_setup warning
+CONFIGAGENT 'rocommunity public 127.0.0.0/8'
+
+AGENT_FLAGS='-Dnetsnmp_udp_parse_security,netsnmp_udp6_parse_security,netsnmp_unix_parse_security'
+
+STARTAGENT
+
+SAVECHECKAGENT() {
+    CHECKAGENT "$@"
+    if [ "x$return_value" != "x0" ] ; then
+        FINISHED
+    fi
+}
+
+# u01
+SAVECHECKAGENT 'line 1: Error: missing CONTEXT_NAME parameter'
+SAVECHECKAGENT 'line 2: Error: missing NAME parameter'
+SAVECHECKAGENT 'line 3: Error: context name too long'
+# u02
+CHECKAGENT 'line 4: Error: Blank line following com2secunix token.'
+SAVECHECKAGENT 'line 5: Error: empty NAME parameter'
+SAVECHECKAGENT 'line 6: Error: security name too long'
+SAVECHECKAGENT 'line 7: Error: missing NAME parameter'
+SAVECHECKAGENT 'line 8: Error: empty NAME parameter'
+# u03
+SAVECHECKAGENT 'line 9: Error: missing SOCKPATH parameter'
+SAVECHECKAGENT 'line 10: Error: empty SOCKPATH parameter'
+SAVECHECKAGENT 'line 11: Error: sockpath too long'
+SAVECHECKAGENT 'line 12: Error: missing COMMUNITY parameter'
+# u04
+SAVECHECKAGENT 'line 13: Error: missing COMMUNITY parameter'
+SAVECHECKAGENT 'line 14: Error: empty COMMUNITY parameter'
+SAVECHECKAGENT 'line 15: Error: example config COMMUNITY not properly configured'
+SAVECHECKAGENT 'line 16: Error: community name too long'
+SAVECHECKAGENT '<"12345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234", ""> => "tu04e"'
+# u05
+SAVECHECKAGENT '<"cu05a", ""> => "tu05a"'
+# u07
+SAVECHECKAGENT '<"cu07a", "/dev/null/no/such"> => "tu07a"'
+
+FINISHED
