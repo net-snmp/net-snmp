@@ -1,4 +1,5 @@
 #include <net-snmp/net-snmp-config.h>
+#include <net-snmp/types.h>
 
 #ifdef NETSNMP_TRANSPORT_UDPIPV6_DOMAIN
 

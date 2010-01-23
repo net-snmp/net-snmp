@@ -1,6 +1,8 @@
 #ifndef _SNMPUDPIPV6DOMAIN_H
 #define _SNMPUDPIPV6DOMAIN_H
 
+#include <net-snmp/types.h>
+
 #ifdef __cplusplus
 extern          "C" {
 #endif
