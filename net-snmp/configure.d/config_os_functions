@@ -25,7 +25,8 @@ AC_CHECK_FUNCS([lrand48         rand          random    ] dnl
 AC_CHECK_FUNCS([fork            gai_strerror                   ] dnl
                [getaddrinfo     gethostname   gethostbyname    ] dnl
                [getipnodebyname               gettimeofday     ] dnl
-               [if_nametoindex  mkstemp       regcomp          ] dnl
+               [if_nametoindex  inet_ntop     inet_pton        ] dnl
+               [mkstemp         regcomp                        ] dnl
                [setenv          setitimer     setlocale        ] dnl
                [setsid          snprintf      strcasestr       ] dnl
                [strdup          strerror      strncasecmp      ] dnl
