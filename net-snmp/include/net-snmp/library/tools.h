@@ -80,8 +80,8 @@ extern          "C" {
  * @param[in] e An expression of a type that can be assigned to the type (const t).
  */
 #if defined(__GNUC__)
-#define NETSNMP_REMOVE_CONST(t, e) \
-    ({ const t tmp = (e); (t)(uintptr_t)tmp; })
+#define NETSNMP_REMOVE_CONST(t, e)                                      \
+    (__extension__ ({ const t tmp = e; (t)(unsigned long)tmp; }))
 #else
 #define NETSNMP_REMOVE_CONST(t, e) ((t)(uintptr_t)(e))
 #endif
