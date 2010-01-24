@@ -48,7 +48,7 @@ struct register_parameters {
 };
 
 typedef struct subtree_context_cache_s {
-    char				*context_name;
+    const char				*context_name;
     struct netsnmp_subtree_s		*first_subtree;
     struct subtree_context_cache_s	*next;
 } subtree_context_cache;
