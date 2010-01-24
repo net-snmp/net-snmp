@@ -57,6 +57,9 @@
 #include <net-snmp/library/system.h>
 #include <net-snmp/library/tools.h>
 
+#include "inet_ntop.h"
+#include "inet_pton.h"
+
 #ifndef INADDR_NONE
 #define INADDR_NONE	-1
 #endif
