@@ -61,10 +61,6 @@
 #include <dmalloc.h>
 #endif
 
-#if HAVE_WINDOWS_H
-#include <windows.h>
-#endif
-
 #include <net-snmp/types.h>
 #include <net-snmp/output_api.h>
 #include <net-snmp/library/snmp_logging.h>      /* For this file's "internal" definitions */
