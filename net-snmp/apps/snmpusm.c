@@ -191,7 +191,6 @@ get_USM_DH_key(netsnmp_variable_list *vars, netsnmp_variable_list *dhvar,
     BIGNUM *other_pub;
     u_char *key;
     size_t key_len;
-    unsigned char *cp;
             
     dhkeychange = (u_char *) malloc(2 * vars->val_len * sizeof(char));
     if (!dhkeychange)
@@ -199,9 +198,10 @@ get_USM_DH_key(netsnmp_variable_list *vars, netsnmp_variable_list *dhvar,
     
     memcpy(dhkeychange, vars->val.string, vars->val_len);
 
-    cp = dhvar->val.string;
-    dh = d2i_DHparams(NULL, (const unsigned char **) &cp,
-                      dhvar->val_len);
+    {
+        const unsigned char *cp = dhvar->val.string;
+        dh = d2i_DHparams(NULL, &cp, dhvar->val_len);
+    }
 
     if (!dh || !dh->g || !dh->p) {
         SNMP_FREE(dhkeychange);
