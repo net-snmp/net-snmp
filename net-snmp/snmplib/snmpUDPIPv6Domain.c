@@ -913,8 +913,8 @@ netsnmp_udp6_parse_security(const char *token, char *param)
                     config_perror(gai_strerror(gai_error));
                     return;
                 }
-            }
 #endif
+            }
             if (res == NULL) {
                 hints.ai_addrlen = sizeof(pton_addr);
                 hints.ai_addr = (struct sockaddr*)&pton_addr;
