@@ -806,7 +806,7 @@ read_extension_dlls_from_registry()
           valueSize = sizeof(valueName);
           dataSize = sizeof(data);
           retCode = RegEnumValue(hKey, i, valueName, &valueSize, NULL,
-                                 &dataType, data, &dataSize);
+                                 &dataType, (BYTE*)data, &dataSize);
   
           if (retCode != ERROR_SUCCESS)
               break;
@@ -834,7 +834,7 @@ read_extension_dlls_from_registry()
           valueSize = sizeof(valueName);
           dataSize = sizeof(data);
           retCode = RegEnumValue(hKey, i, valueName, &valueSize, NULL,
-                                 &dataType, data, &dataSize);
+                                 &dataType, (BYTE*)data, &dataSize);
   
           if (retCode != ERROR_SUCCESS)
               break;
@@ -878,7 +878,7 @@ read_extension_dlls_from_registry2(const TCHAR * keyName)
                                "Pathname",
                                NULL,
                                &key_value_type,
-                               valueName, &key_value_size);
+                               (BYTE*)valueName, &key_value_size);
 
     if (retCode != ERROR_SUCCESS) {
         RegCloseKey(hKey);
