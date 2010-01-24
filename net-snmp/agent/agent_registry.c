@@ -1714,7 +1714,7 @@ clear_context(void) {
 	    clear_subtree(ptr->first_subtree);
 	}
 
-	SNMP_FREE(ptr->context_name);
+        free(NETSNMP_REMOVE_CONST(char*, ptr->context_name));
         SNMP_FREE(ptr);
 
 	ptr = next;
