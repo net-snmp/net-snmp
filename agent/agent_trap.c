@@ -85,11 +85,6 @@ const int       trap_version_id_len = OID_LENGTH(trap_version_id);
 #define SNMPV2_TRAPS_PREFIX	SNMP_OID_SNMPMODULES,1,1,5
 const oid       trap_prefix[]    = { SNMPV2_TRAPS_PREFIX };
 const oid       cold_start_oid[] = { SNMPV2_TRAPS_PREFIX, 1 };  /* SNMPv2-MIB */
-const oid       warm_start_oid[] = { SNMPV2_TRAPS_PREFIX, 2 };  /* SNMPv2-MIB */
-const oid       link_down_oid[]  = { SNMPV2_TRAPS_PREFIX, 3 };  /* IF-MIB */
-const oid       link_up_oid[]    = { SNMPV2_TRAPS_PREFIX, 4 };  /* IF-MIB */
-const oid       auth_fail_oid[]  = { SNMPV2_TRAPS_PREFIX, 5 };  /* SNMPv2-MIB */
-const oid       egp_xxx_oid[]    = { SNMPV2_TRAPS_PREFIX, 99 }; /* ??? */
 
 #define SNMPV2_TRAP_OBJS_PREFIX	SNMP_OID_SNMPMODULES,1,1,4
 const oid       snmptrap_oid[] = { SNMPV2_TRAP_OBJS_PREFIX, 1, 0 };
