@@ -136,18 +136,18 @@ nsModuleTable_get_first_data_point(void **my_loop_context,
     *my_data_context = ctree->tree;
 
     vptr = put_index_data;
-    snmp_set_var_value(vptr, (u_char *) ctree->context_ptr->context_name,
+    snmp_set_var_value(vptr, ctree->context_ptr->context_name,
                        strlen(ctree->context_ptr->context_name));
 
     vptr = vptr->next_variable;
     snmp_set_var_value(vptr,
-                       (u_char *)ctree->context_ptr->first_subtree->name_a,
+                       ctree->context_ptr->first_subtree->name_a,
                        ctree->context_ptr->first_subtree->namelen *
                        sizeof(oid));
 
     ultmp = ctree->context_ptr->first_subtree->priority;
     vptr = vptr->next_variable;
-    snmp_set_var_value(vptr, (u_char *) & ultmp, sizeof(ultmp));
+    snmp_set_var_value(vptr, & ultmp, sizeof(ultmp));
 
     return put_index_data;
 }
@@ -184,16 +184,16 @@ nsModuleTable_get_next_data_point(void **my_loop_context,
     *my_data_context = ctree->tree;
 
     vptr = put_index_data;
-    snmp_set_var_value(vptr, (u_char *) ctree->context_ptr->context_name,
+    snmp_set_var_value(vptr, ctree->context_ptr->context_name,
                        strlen(ctree->context_ptr->context_name));
 
     vptr = vptr->next_variable;
-    snmp_set_var_value(vptr, (u_char *) ctree->tree->name_a,
+    snmp_set_var_value(vptr, ctree->tree->name_a,
                        ctree->tree->namelen * sizeof(oid));
 
     ultmp = ctree->tree->priority;
     vptr = vptr->next_variable;
-    snmp_set_var_value(vptr, (u_char *) & ultmp, sizeof(ultmp));
+    snmp_set_var_value(vptr, & ultmp, sizeof(ultmp));
 
     return put_index_data;
 }
