@@ -90,6 +90,18 @@ static INT (*ServiceEntryPoint) (INT Argc, LPTSTR Argv[]) = 0L;
      */
 static VOID (*StopFunction) (VOID) = 0L;
 
+
+    /*
+     * To update windows service status to SCM 
+     */
+static BOOL UpdateServiceStatus (DWORD dwStatus, DWORD dwErrorCode,
+				 DWORD dwWaitHint);
+
+    /*
+     * To Report current service status to SCM 
+     */
+static BOOL ReportCurrentServiceStatus (VOID);
+
 VOID
 ProcessError (WORD eventLogType, LPCTSTR pszMessage, int useGetLastError, int quiet);
 
