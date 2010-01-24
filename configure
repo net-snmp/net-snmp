@@ -14365,6 +14365,17 @@ EOF
 
 
 
+#
+#   Socket library: either 'default' (non-MinGW) or 'winsock2' (MinGW).
+#
+case x$target_os in
+  xmingw*)
+    with_socklib=winsock2;;
+  *)
+    with_socklib=default;;
+esac
+
+
 #   Check system define behaviour
 #       Does "-Ux -Dx=x" work as expected?
 #
@@ -19278,6 +19289,7 @@ esac
 #       for MIB-2 info                                  (Win32)
 #  Core:
 #
+if test x$with_socklib = xwinsock2; then
 
 
 
@@ -19348,6 +19360,7 @@ fi
 
 done
 
+fi
 
 # -*- autoconf -*-
 #########################################
@@ -25922,8 +25935,10 @@ fi
 #           (alternatively in libnsl                    (Solaris)
 #            or in libws2_32)                           (MinGW)
 #
-case $target_os in
-mingw*)
+case x$with_socklib in
+xwinsock2)
+  #   libws2_w32                                           (Winsock2)
+  #
   saved_LIBS="$LIBS"
   LIBS="$LIBS -lws2_32"
   cat >conftest.$ac_ext <<_ACEOF
@@ -25978,8 +25993,73 @@ sed 's/^/| /' conftest.$ac_ext >&5
 
     # Restore LIBS and complain.
     LIBS="$saved_LIBS"
-    { { $as_echo "$as_me:$LINENO: error: socket(2) not found." >&5
-$as_echo "$as_me: error: socket(2) not found." >&2;}
+    { { $as_echo "$as_me:$LINENO: error: libws2_32 not found." >&5
+$as_echo "$as_me: error: libws2_32 not found." >&2;}
+   { (exit 1); exit 1; }; }
+
+fi
+
+rm -rf conftest.dSYM
+rm -f core conftest.err conftest.$ac_objext conftest_ipa8_conftest.oo \
+      conftest$ac_exeext conftest.$ac_ext
+  #   libiphlpapi                                          (Winsock2)
+  #
+  saved_LIBS="$LIBS"
+  LIBS="$LIBS -liphlpapi"
+  cat >conftest.$ac_ext <<_ACEOF
+/* confdefs.h.  */
+_ACEOF
+cat confdefs.h >>conftest.$ac_ext
+cat >>conftest.$ac_ext <<_ACEOF
+/* end confdefs.h.  */
+
+    #include <winsock2.h>
+    #include <iphlpapi.h>
+
+int
+main ()
+{
+
+    IpRenewAddress(0);
+
+  ;
+  return 0;
+}
+_ACEOF
+rm -f conftest.$ac_objext conftest$ac_exeext
+if { (ac_try="$ac_link"
+case "(($ac_try" in
+  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
+  *) ac_try_echo=$ac_try;;
+esac
+eval ac_try_echo="\"\$as_me:$LINENO: $ac_try_echo\""
+$as_echo "$ac_try_echo") >&5
+  (eval "$ac_link") 2>conftest.er1
+  ac_status=$?
+  grep -v '^ *+' conftest.er1 >conftest.err
+  rm -f conftest.er1
+  cat conftest.err >&5
+  $as_echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } && {
+	 test -z "$ac_c_werror_flag" ||
+	 test ! -s conftest.err
+       } && test -s conftest$ac_exeext && {
+	 test "$cross_compiling" = yes ||
+	 $as_test_x conftest$ac_exeext
+       }; then
+
+    # Keep LIBS.
+    true
+
+else
+  $as_echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
+
+
+    # Restore LIBS and complain.
+    LIBS="$saved_LIBS"
+    { { $as_echo "$as_me:$LINENO: error: libiphlpapi not found." >&5
+$as_echo "$as_me: error: libiphlpapi not found." >&2;}
    { (exit 1); exit 1; }; }
 
 fi
@@ -26270,70 +26350,6 @@ done
 
   ;;
 esac
-
-
-#   libiphlpapi                                            (MinGW)
-#
-saved_LIBS="$LIBS"
-LIBS="$LIBS -liphlpapi"
-cat >conftest.$ac_ext <<_ACEOF
-/* confdefs.h.  */
-_ACEOF
-cat confdefs.h >>conftest.$ac_ext
-cat >>conftest.$ac_ext <<_ACEOF
-/* end confdefs.h.  */
-
-  #include <winsock2.h>
-  #include <iphlpapi.h>
-
-int
-main ()
-{
-
-  IpRenewAddress(0);
-
-  ;
-  return 0;
-}
-_ACEOF
-rm -f conftest.$ac_objext conftest$ac_exeext
-if { (ac_try="$ac_link"
-case "(($ac_try" in
-  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
-  *) ac_try_echo=$ac_try;;
-esac
-eval ac_try_echo="\"\$as_me:$LINENO: $ac_try_echo\""
-$as_echo "$ac_try_echo") >&5
-  (eval "$ac_link") 2>conftest.er1
-  ac_status=$?
-  grep -v '^ *+' conftest.er1 >conftest.err
-  rm -f conftest.er1
-  cat conftest.err >&5
-  $as_echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); } && {
-	 test -z "$ac_c_werror_flag" ||
-	 test ! -s conftest.err
-       } && test -s conftest$ac_exeext && {
-	 test "$cross_compiling" = yes ||
-	 $as_test_x conftest$ac_exeext
-       }; then
-
-  # Keep LIBS.
-  true
-
-else
-  $as_echo "$as_me: failed program was:" >&5
-sed 's/^/| /' conftest.$ac_ext >&5
-
-
-  # Restore LIBS.
-  LIBS="$saved_LIBS"
-
-fi
-
-rm -rf conftest.dSYM
-rm -f core conftest.err conftest.$ac_objext conftest_ipa8_conftest.oo \
-      conftest$ac_exeext conftest.$ac_ext
 
 
 #   libregex                                            (MinGW)
@@ -34830,7 +34846,7 @@ done
 
 #  Library:
 
-for ac_func in fork            gai_strerror                                   getaddrinfo     gethostname   gethostbyname                    getipnodebyname               gettimeofday      	       if_nametoindex  inet_ntop     inet_pton                        mkstemp         regcomp                                        setenv          setitimer     setlocale                        setsid          snprintf      strcasestr                       strdup          strerror      strncasecmp                      sysconf         times         vsnprintf
+for ac_func in fork            gai_strerror                                   getaddrinfo     gethostname   gethostbyname                    getipnodebyname               gettimeofday                     if_nametoindex  inet_ntop     inet_pton                        mkstemp         regcomp                                        setenv          setitimer     setlocale                        setsid          snprintf      strcasestr                       strdup          strerror      strncasecmp                      sysconf         times         vsnprintf
 do
 as_ac_var=`$as_echo "ac_cv_func_$ac_func" | $as_tr_sh`
 { $as_echo "$as_me:$LINENO: checking for $ac_func" >&5
