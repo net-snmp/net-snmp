@@ -41,13 +41,6 @@
 
 #if defined(HAVE_WINSOCK_H) || defined(cygwin)
 #undef  HAVE_IF_NAMETOINDEX
-
-#ifndef HAVE_INET_PTON
-extern int         inet_pton(int, const char*, void*);
-#endif
-#ifndef HAVE_INET_NTOP
-extern const char *inet_ntop(int, const void*, char*, size_t);
-#endif
 const struct in6_addr in6addr_any = IN6ADDR_ANY_INIT;
 #endif
 
@@ -80,6 +73,9 @@ const struct in6_addr in6addr_any = IN6ADDR_ANY_INIT;
 
 #include <net-snmp/library/snmp_transport.h>
 #include <net-snmp/library/snmpUDPIPv6Domain.h>
+
+#include "inet_ntop.h"
+#include "inet_pton.h"
 
 oid netsnmp_UDPIPv6Domain[] = { TRANSPORT_DOMAIN_UDP_IPV6 };
 static netsnmp_tdomain udp6Domain;

@@ -1052,7 +1052,7 @@ netsnmp_udp_parse_security(const char *token, char *param)
             *strmask++ = '\0';
 
         /* Try interpreting as a dotted quad. */
-        if (inet_aton(source, &network) == 0) {
+        if (inet_pton(AF_INET, source, &network) == 0) {
             /* Nope, wasn't a dotted quad.  Must be a hostname. */
             int ret = netsnmp_gethostbyname_v4(source, &network.s_addr);
             if (ret < 0) {
@@ -1078,7 +1078,7 @@ netsnmp_udp_parse_security(const char *token, char *param)
                 }
             }
             /* Try to interpret mask as a dotted quad. */
-            else if (inet_aton(strmask, &mask) == 0) {
+            else if (inet_pton(AF_INET, strmask, &mask) == 0) {
                 config_perror("bad mask");
                 return;
             }

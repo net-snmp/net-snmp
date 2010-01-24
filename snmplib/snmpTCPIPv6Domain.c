@@ -35,15 +35,6 @@
 #if HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
 #endif
-
-#if defined(HAVE_WINSOCK_H) || defined(cygwin)
-
-#ifndef HAVE_INET_NTOP
-extern const char *inet_ntop(int, const void*, char*, size_t);
-#endif
-
-#endif
-
 #if HAVE_NETINET_IN_H
 #include <netinet/in.h>
 #endif
@@ -69,6 +60,8 @@ extern const char *inet_ntop(int, const void*, char*, size_t);
 #include <net-snmp/library/snmpUDPDomain.h>
 #include <net-snmp/library/snmpUDPIPv6Domain.h>
 #include <net-snmp/library/snmpTCPIPv6Domain.h>
+
+#include "inet_ntop.h"
 
 oid netsnmp_TCPIPv6Domain[] = { TRANSPORT_DOMAIN_TCP_IPV6 };
 static netsnmp_tdomain tcp6Domain;
