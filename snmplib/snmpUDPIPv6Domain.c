@@ -688,16 +688,6 @@ create_com2Sec6Entry(const struct addrinfo* const run,
         (const struct sockaddr_in6*)run->ai_addr;
     int i;
 
-    {
-        char buf1[INET6_ADDRSTRLEN];
-        char buf2[INET6_ADDRSTRLEN];
-        DEBUGMSGTL(("netsnmp_udp6_parse_security",
-                    "checking %s/%s\n",
-                    inet_ntop(AF_INET6, &run_addr->sin6_addr,
-                              buf1, sizeof(buf1)),
-                    inet_ntop(AF_INET6, mask, buf2, sizeof(buf2))));
-    }
-
     /* Check that the network and mask are consistent. */
     for (i = 0; i < 16; ++i) {
         if (run_addr->sin6_addr.s6_addr[i] & ~mask->s6_addr[i]) {
@@ -907,9 +897,6 @@ netsnmp_udp6_parse_security(const char *token, char *param)
                 hints.ai_socktype = SOCK_DGRAM;
                 gai_error = getaddrinfo(source, NULL, &hints, &res);
                 if (gai_error != 0) {
-                    DEBUGMSGTL(("netsnmp_udp6_parse_security",
-                                "failed to look up %s - %s\n",
-                                source, gai_strerror(gai_error)));
                     config_perror(gai_strerror(gai_error));
                     return;
                 }
