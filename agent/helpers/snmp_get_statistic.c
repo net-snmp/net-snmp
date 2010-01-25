@@ -13,7 +13,11 @@ netsnmp_get_statistic_helper_handler(netsnmp_mib_handler *handler,
     if (reqinfo->mode == MODE_GET) {
         const oid idx = requests->requestvb->name[reginfo->rootoid_len - 2] +
             (((char*)handler->myvoid) - ((char*)0));
-        const uint32_t value = snmp_get_statistic(idx);
+        const uint32_t value;
+
+        if (idx > NETSNMP_STAT_MAX_STATS)
+            return SNMP_ERR_GENERR;
+        value = snmp_get_statistic(idx);
         snmp_set_var_typed_value(requests->requestvb, ASN_COUNTER,
                                  (const u_char*)&value, sizeof(value));
         return SNMP_ERR_NOERROR;
