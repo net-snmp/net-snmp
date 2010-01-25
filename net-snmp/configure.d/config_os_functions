@@ -25,8 +25,7 @@ AC_CHECK_FUNCS([lrand48         rand          random    ] dnl
 AC_CHECK_FUNCS([fork            gai_strerror                   ] dnl
                [getaddrinfo     gethostname   gethostbyname    ] dnl
                [getipnodebyname               gettimeofday     ] dnl
-               [if_nametoindex  inet_ntop     inet_pton        ] dnl
-               [mkstemp         regcomp                        ] dnl
+               [if_nametoindex  mkstemp       regcomp          ] dnl
                [setenv          setitimer     setlocale        ] dnl
                [setsid          snprintf      strcasestr       ] dnl
                [strdup          strerror      strncasecmp      ] dnl
@@ -34,8 +33,9 @@ AC_CHECK_FUNCS([fork            gai_strerror                   ] dnl
 
 AC_CONFIG_LIBOBJ_DIR([snmplib])
 
-AC_REPLACE_FUNCS([getopt        strlcpy        strtok_r        ] dnl
-                 [strtol        strtoul       strtoull         ] )
+AC_REPLACE_FUNCS([getopt        inet_ntop     inet_pton        ] dnl
+                 [strlcpy       strtok_r      strtol           ] dnl
+                 [strtoul       strtoull                       ] )
 
 #  Agent:
 AC_CHECK_FUNCS([cgetnext        chown          execv           ] dnl

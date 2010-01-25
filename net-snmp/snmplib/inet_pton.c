@@ -19,8 +19,6 @@
 
 #include <net-snmp/net-snmp-config.h>
 
-#ifndef HAVE_INET_PTON
-
 #include <ctype.h>
 
 #if HAVE_ARPA_NAMESER_H
@@ -309,5 +307,3 @@ inet_pton6(const char *src, u_char *dst)
 	return (1);
 }
 #endif
-
-#endif /* HAVE_INET_PTON */

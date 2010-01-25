@@ -19,8 +19,6 @@
 
 #include <net-snmp/net-snmp-config.h>
 
-#ifndef HAVE_INET_NTOP
-
 #if HAVE_ARPA_NAMESER_H
 #include <arpa/nameser.h>
 #endif
@@ -208,5 +206,3 @@ inet_ntop6(const u_char *src, char *dst, size_t size)
 	return (dst);
 }
 #endif
-
-#endif /* HAVE_INET_NTOP */
