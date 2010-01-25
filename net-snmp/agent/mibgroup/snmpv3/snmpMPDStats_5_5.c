@@ -10,7 +10,7 @@
 
 #include "snmpMPDStats_5_5.h"
 
-#include <utilities/snmp_get_statistic.h>
+#include <net-snmp/agent/snmp_get_statistic.h>
 
 #define snmpMPDMIBObjects 1, 3, 6, 1, 6, 3, 11, 2
 #define snmpMPDMIBCompliances snmpMPDMIBObjects, 3, 1
