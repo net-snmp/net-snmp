@@ -70,7 +70,7 @@ header_simple_table(struct variable *vp, oid * name, size_t * length,
     } else if (((int) *length) > (int) vp->namelen + 1) {       /* exact case checked earlier */
         *length = vp->namelen + 1;
         memmove(newname, name, (*length) * sizeof(oid));
-        if (name[*length - 1] < ULONG_MAX) {
+        if (name[*length - 1] < MAX_SUBID) {
             newname[*length - 1] = name[*length - 1] + 1;
         } else {
             /*
@@ -82,7 +82,7 @@ header_simple_table(struct variable *vp, oid * name, size_t * length,
         *length = vp->namelen + 1;
         memmove(newname, name, (*length) * sizeof(oid));
         if (!exact) {
-            if (name[*length - 1] < ULONG_MAX) {
+            if (name[*length - 1] < MAX_SUBID) {
                 newname[*length - 1] = name[*length - 1] + 1;
             } else {
                 /*
