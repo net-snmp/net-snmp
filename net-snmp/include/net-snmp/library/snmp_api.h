@@ -595,7 +595,19 @@ struct netsnmp_transport_s;
 #define  STAT_TARGET_STATS_START             STAT_SNMPUNAVAILABLECONTEXTS
 #define  STAT_TARGET_STATS_END               STAT_SNMPUNKNOWNCONTEXTS
 
-#define  MAX_STATS                           43
+    /*
+     * TSM counters
+     */
+#define  STAT_TSM_SNMPTSMINVALIDCACHES             43
+#define  STAT_TSM_SNMPTSMINADEQUATESECURITYLEVELS  44
+#define  STAT_TSM_SNMPTSMUNKNOWNPREFIXES           45
+#define  STAT_TSM_SNMPTSMINVALIDPREFIXES           46
+#define  STAT_TARGET_STATS_START                 STAT_TSM_SNMPTSMINVALIDCACHES
+#define  STAT_TARGET_STATS_END                   STAT_TSM_SNMPTSMINVALIDPREFIXES
+
+    /* this previously was end+1; don't know why the +1 is needed;
+       XXX: check the code */
+#define  MAX_STATS                           (STAT_TARGET_STATS_END+1)
 
 #ifdef __cplusplus
 }
