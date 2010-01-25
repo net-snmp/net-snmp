@@ -27,6 +27,7 @@
 
 #include <errno.h>
 #include <stdio.h>
+#include <string.h>
 
 #include <net-snmp/types.h>
 #include "inet_pton.h"
