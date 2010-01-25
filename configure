@@ -23320,7 +23320,7 @@ if test "x$enable_ipv6" = "xyes"; then
 
 	{ $as_echo "$as_me:$LINENO: checking ipv6 stack type" >&5
 $as_echo_n "checking ipv6 stack type... " >&6; }
-	for i in v6d toshiba kame inria zeta linux-glibc linux-inet6 winsock2 generic; do
+	for i in v6d toshiba kame inria zeta linux-glibc linux-inet6 cygwin winsock2 generic; do
 		case $i in
 		v6d)
 			cat >conftest.$ac_ext <<_ACEOF
@@ -23468,6 +23468,30 @@ rm -f conftest*
 				CFLAGS="-DNETSNMP_ENABLE_IPV6 $CFLAGS"
 			fi
 			;;
+		cygwin)
+			cat >conftest.$ac_ext <<_ACEOF
+/* confdefs.h.  */
+_ACEOF
+cat confdefs.h >>conftest.$ac_ext
+cat >>conftest.$ac_ext <<_ACEOF
+/* end confdefs.h.  */
+
+#include <netinet/in.h>
+#ifdef _CYGWIN_IN6_H
+yes
+#endif
+_ACEOF
+if (eval "$ac_cpp conftest.$ac_ext") 2>&5 |
+  $EGREP "yes" >/dev/null 2>&1; then
+  v6type=$i;
+				v6lib=dummy;
+				v6libdir=none
+				v6trylibc=yes;
+				CFLAGS="-DNETSNMP_ENABLE_IPV6 $CFLAGS"
+fi
+rm -f conftest*
+
+                       ;;
 		winsock2)
 			cat >conftest.$ac_ext <<_ACEOF
 /* confdefs.h.  */
