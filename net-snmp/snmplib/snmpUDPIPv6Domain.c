@@ -3,21 +3,6 @@
 
 #ifdef NETSNMP_TRANSPORT_UDPIPV6_DOMAIN
 
-/*
- * hack-o-matic for Cygwin to use winsock2
-*/
-#if defined(cygwin)
-#undef HAVE_UNISTD_H
-#undef HAVE_NETINET_IN_H
-#undef HAVE_ARPA_INET_H
-#undef HAVE_NET_IF_H
-#undef HAVE_NETDB_H
-#undef HAVE_SYS_PARAM_H
-#undef HAVE_SYS_SELECT_H
-#undef HAVE_SYS_SOCKET_H
-#undef HAVE_IN_ADDR_T
-#endif
-
 #include <stdio.h>
 #include <sys/types.h>
 #include <ctype.h>
@@ -39,7 +24,7 @@
 #include <sys/socket.h>
 #endif
 
-#if defined(HAVE_WINSOCK_H) || defined(cygwin)
+#if defined(HAVE_WINSOCK_H)
 #undef  HAVE_IF_NAMETOINDEX
 const struct in6_addr in6addr_any = IN6ADDR_ANY_INIT;
 #endif
