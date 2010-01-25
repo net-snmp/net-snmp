@@ -104,7 +104,11 @@ AC_LINK_IFELSE([AC_LANG_PROGRAM([
 ], [
   # Restore LIBS and complain.
   LIBS="$saved_LIBS"
-  AC_MSG_ERROR([libiphlpapi not found.])
+  case x$with_socklib in
+  xwinsock2)
+    AC_MSG_ERROR([libiphlpapi not found.])
+    ;;
+  esac
 ])
 
 

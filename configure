@@ -26521,9 +26521,13 @@ sed 's/^/| /' conftest.$ac_ext >&5
 
   # Restore LIBS and complain.
   LIBS="$saved_LIBS"
-  { { $as_echo "$as_me:$LINENO: error: libiphlpapi not found." >&5
+  case x$with_socklib in
+  xwinsock2)
+    { { $as_echo "$as_me:$LINENO: error: libiphlpapi not found." >&5
 $as_echo "$as_me: error: libiphlpapi not found." >&2;}
    { (exit 1); exit 1; }; }
+    ;;
+  esac
 
 fi
 
