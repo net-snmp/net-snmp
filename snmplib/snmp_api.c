@@ -5894,7 +5894,7 @@ _sess_read(void *sessp, netsnmp_large_fd_set * fdset)
             DEBUGMSGTL(("sess_read", "  loop packet_len %lu, PDU length %lu\n",
                         (unsigned long)isp->packet_len, (unsigned long)pdulen));
              
-            if ((pdulen > MAX_PACKET_LENGTH) || (pdulen < 0)) {
+            if (pdulen > MAX_PACKET_LENGTH) {
                 /*
                  * Illegal length, drop the connection.  
                  */

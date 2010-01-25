@@ -754,7 +754,7 @@ write_snmpNotifyTag(int action,
         if (var_val_type != ASN_OCTET_STR) {
             return SNMP_ERR_WRONGTYPE;
         }
-        if (var_val_len < 0 || var_val_len > 255) {
+        if (var_val_len > 255) {
             return SNMP_ERR_WRONGLENGTH;
         }
         if (!snmpTagValid((char *) var_val, var_val_len)) {

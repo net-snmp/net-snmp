@@ -880,11 +880,8 @@ tryAgain:
         return ((u_char *) (&long_ret));
 
     case DISKPERCENTNODE:
-        if (entry.dskPercentInode >= 0) {
-            long_ret = entry.dskPercentInode;
-            return ((u_char *) (&long_ret));
-        } else
-            return NULL;
+        long_ret = entry.dskPercentInode;
+        return ((u_char *) (&long_ret));
 
     case ERRORFLAG:
         long_ret = entry.dskErrorFlag;

@@ -1117,7 +1117,7 @@ write_snmpTargetParamsSecName(int action,
                         "write to snmpTargetParamsSecName: not ASN_OCTET_STR\n"));
             return SNMP_ERR_WRONGTYPE;
         }
-        if (var_val_len > 255 || var_val_len < 0) {
+        if (var_val_len > 255) {
             DEBUGMSGTL(("snmpTargetParamsEntry",
                         "write to snmpTargetParamsSecName: bad length\n"));
             return SNMP_ERR_WRONGLENGTH;

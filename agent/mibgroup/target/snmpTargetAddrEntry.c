@@ -478,17 +478,16 @@ snmpTargetAddr_addRetryCount(struct targetAddrTable_struct *entry,
 int
 snmpTargetAddr_addTagList(struct targetAddrTable_struct *entry, char *cptr)
 {
-    size_t          len;
     if (cptr == NULL) {
         DEBUGMSGTL(("snmpTargetAddrEntry",
                     "ERROR snmpTargetAddrEntry: no tag list in config string\n"));
         return (0);
     } else {
-        len = strlen(cptr);
+        size_t len = strlen(cptr);
         /*
          * spec check for string 0-255 
          */
-        if (len < 0 || len > 255) {
+        if (len > 255) {
             DEBUGMSGTL(("snmpTargetAddrEntry",
                         "ERROR snmpTargetAddrEntry: tag list out of range in config string\n"));
             return (0);
