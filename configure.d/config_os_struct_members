@@ -147,6 +147,8 @@ AC_CHECK_MEMBERS([struct sockaddr.sa_len,
 #include <sys/socket.h>
 #elif defined(HAVE_WINSOCK2_H)
 #include <winsock2.h>
+#endif
+#ifdef HAVE_WS2TCPIP_H
 #include <ws2tcpip.h>
 #endif
     ]])
@@ -165,6 +167,12 @@ AC_CHECK_MEMBERS([struct sockaddr_in6.sin6_scope_id],,,[
 #endif
 #ifdef HAVE_NETINET_IN_H
 #include <netinet/in.h>
+#endif
+#ifdef HAVE_WINSOCK2_H
+#include <winsock2.h>
+#endif
+#ifdef HAVE_WS2TCPIP_H
+#include <ws2tcpip.h>
 #endif
     ]])
 
