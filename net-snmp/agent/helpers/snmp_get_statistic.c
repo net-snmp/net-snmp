@@ -2,7 +2,7 @@
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 
-#include "snmp_get_statistic.h"
+#include <net-snmp/agent/snmp_get_statistic.h>
 
 static int
 netsnmp_get_statistic_helper_handler(netsnmp_mib_handler *handler,
@@ -12,8 +12,8 @@ netsnmp_get_statistic_helper_handler(netsnmp_mib_handler *handler,
 {
     if (reqinfo->mode == MODE_GET) {
         const oid idx = requests->requestvb->name[reginfo->rootoid_len - 2] +
-            (((char*)handler->myvoid) - ((char*)0));
-        const uint32_t value;
+            (oid)handler->myvoid;
+        uint32_t value;
 
         if (idx > NETSNMP_STAT_MAX_STATS)
             return SNMP_ERR_GENERR;
@@ -33,7 +33,7 @@ netsnmp_get_statistic_handler(int offset)
                                netsnmp_get_statistic_helper_handler);
     if (ret) {
         ret->flags |= MIB_HANDLER_AUTO_NEXT;
-        ret->myvoid = ((char*)0) + offset;
+        ret->myvoid = (void*)offset;
     }
     return ret;
 }
