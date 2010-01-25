@@ -1,7 +1,6 @@
 #ifndef _MIBGROUP_USMSTATS_H
 #define _MIBGROUP_USMSTATS_H
 
-config_require(utilities/snmp_get_statistic)
 config_exclude(snmpv3/usmStats)
 config_add_mib(SNMP-USER-BASED-SM-MIB)
 

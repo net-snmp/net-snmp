@@ -1,7 +1,6 @@
 #ifndef _MIBGROUP_SNMPMPDSTATS_H
 #define _MIBGROUP_SNMPMPDSTATS_H
 
-config_require(utilities/snmp_get_statistic)
 config_exclude(snmpv3/snmpMPDStats)
 config_add_mib(SNMP-MPD-MIB)
 

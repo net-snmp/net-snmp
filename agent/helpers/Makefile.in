@@ -29,6 +29,7 @@ HEADERS=all_helpers.h \
 	scalar.h \
 	scalar_group.h \
         serialize.h \
+	snmp_get_statistic.h \
 	stash_cache.h \
 	stash_to_next.h \
 	table_array.h \
@@ -71,6 +72,7 @@ SRCS =  all_helpers.c \
 	scalar.c \
 	scalar_group.c \
 	serialize.c \
+	snmp_get_statistic.c \
 	stash_cache.c \
 	stash_to_next.c \
 	table.c \
@@ -98,6 +100,7 @@ OBJS =  all_helpers.o \
 	scalar.o \
 	scalar_group.o \
 	serialize.o \
+	snmp_get_statistic.o \
 	stash_cache.o \
 	stash_to_next.o \
 	table.o \
@@ -125,6 +128,7 @@ LOBJS = all_helpers.lo \
 	scalar.lo \
 	scalar_group.lo \
 	serialize.lo \
+	snmp_get_statistic.lo \
 	stash_cache.lo \
 	stash_to_next.lo \
 	table.lo \

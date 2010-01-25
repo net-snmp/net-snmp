@@ -11,7 +11,7 @@
 
 #include "target_counters_5_5.h"
 
-#include <utilities/snmp_get_statistic.h>
+#include <net-snmp/agent/snmp_get_statistic.h>
 
 void
 init_target_counters_5_5(void)

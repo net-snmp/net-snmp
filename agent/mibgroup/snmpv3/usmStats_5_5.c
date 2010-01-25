@@ -10,7 +10,7 @@
 
 #include "usmStats_5_5.h"
 
-#include <utilities/snmp_get_statistic.h>
+#include <net-snmp/agent/snmp_get_statistic.h>
 
 #define snmpUsmMIB 1, 3, 6, 1, 6, 3, 15
 #define usmMIBCompliances snmpUsmMIB, 2, 1
