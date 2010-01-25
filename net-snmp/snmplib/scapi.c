@@ -408,8 +408,8 @@ sc_hash(const oid * hashtype, size_t hashtypelen, u_char * buf,
 
     DEBUGTRACE;
 
-    if (hashtype == NULL || hashtypelen < 0 || buf == NULL ||
-        buf_len <= 0 || MAC == NULL || MAC_len == NULL )
+    if (hashtype == NULL || buf == NULL || buf_len <= 0 ||
+        MAC == NULL || MAC_len == NULL )
         return (SNMPERR_GENERR);
     ret = sc_get_properlength(hashtype, hashtypelen);
     if (( ret < 0 ) || (*MAC_len < ret ))
