@@ -623,7 +623,9 @@ struct netsnmp_transport_s;
 
     /* this previously was end+1; don't know why the +1 is needed;
        XXX: check the code */
-#define  MAX_STATS                           (STAT_TLSTM_STATS_END+1)
+#define  NETSNMP_STAT_MAX_STATS              (STAT_TLSTM_STATS_END+1)
+/** backwards compatability */
+#define MAX_STATS NETSNMP_STAT_MAX_STATS
 
 #ifdef __cplusplus
 }
