@@ -3,6 +3,9 @@
 #include <errno.h>
 #include <signal.h>
 #include <string.h>
+#ifdef HAVE_UNISTD_H
+#include <unistd.h> /* optind, optarg and optopt */
+#endif
 
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
@@ -421,9 +424,6 @@ main(int argc, char *argv[])
     int             arg;
     char           *prognam;
     char           *cp = NULL;
-
-    extern char    *optarg;
-    extern int      optind, optopt;
 
     const char*     sysUpTime = NULL;
 
