@@ -602,12 +602,25 @@ struct netsnmp_transport_s;
 #define  STAT_TSM_SNMPTSMINADEQUATESECURITYLEVELS  44
 #define  STAT_TSM_SNMPTSMUNKNOWNPREFIXES           45
 #define  STAT_TSM_SNMPTSMINVALIDPREFIXES           46
-#define  STAT_TARGET_STATS_START                 STAT_TSM_SNMPTSMINVALIDCACHES
-#define  STAT_TARGET_STATS_END                   STAT_TSM_SNMPTSMINVALIDPREFIXES
+#define  STAT_TSM_STATS_START                 STAT_TSM_SNMPTSMINVALIDCACHES
+#define  STAT_TSM_STATS_END                   STAT_TSM_SNMPTSMINVALIDPREFIXES
+
+    /*
+     * TLSTM counters
+     */
+#define  STAT_TLSTM_TLSTMSESSIONOPENS                        47
+#define  STAT_TLSTM_TLSTMSESSIONCLOSES                       48
+#define  STAT_TLSTM_TLSTMSESSIONOPENERRORS                   49
+#define  STAT_TLSTM_TLSTMSESSIONNOAVAILABLESESSIONS          50
+#define  STAT_TLSTM_TLSTMSESSIONINVALIDCLIENTCERTIFICATES    51
+#define  STAT_TLSTM_TLSTMSESSIONINVALIDSERVERCERTIFICATES    52
+#define  STAT_TLSTM_TLSTMTLSPROTECTIONERRORS                 53    
+#define  STAT_TLSTM_STATS_START                 STAT_TLSTM_TLSTMSESSIONOPENS
+#define  STAT_TLSTM_STATS_END               STAT_TLSTM_TLSTMTLSPROTECTIONERRORS
 
     /* this previously was end+1; don't know why the +1 is needed;
        XXX: check the code */
-#define  MAX_STATS                           (STAT_TARGET_STATS_END+1)
+#define  MAX_STATS                           (STAT_TLSTM_STATS_END+1)
 
 #ifdef __cplusplus
 }
