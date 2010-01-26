@@ -64,6 +64,10 @@
 #define INADDR_NONE	-1
 #endif
 
+#ifndef INET_ADDRSTRLEN
+#define INET_ADDRSTRLEN 16
+#endif
+
 #ifdef  MSG_DONTWAIT
 #define NETSNMP_DONTWAIT MSG_DONTWAIT
 #else
