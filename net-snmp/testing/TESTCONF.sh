@@ -86,6 +86,7 @@ if [ "x$SNMP_SAVE_TMPDIR" = "x" ]; then
     export SNMP_SAVE_TMPDIR
 fi
 
+SNMP_ENV_SEPARATOR="`$SNMP_UPDIR/net-snmp-config --env-separator`"
 SNMP_PERLPROG="`$SNMP_UPDIR/net-snmp-config --perlprog`"
 SNMP_TESTDIR="$SNMP_BASEDIR/tests"
 SNMP_CONFIG_FILE="$SNMP_TMPDIR/snmpd.conf"
@@ -98,7 +99,7 @@ SNMP_SNMPD_PID_FILE="$SNMP_TMPDIR/snmpd.pid"
 SNMP_SNMPD_LOG_FILE="$SNMP_TMPDIR/snmpd.log"
 SNMP_AGENTX_PID_FILE="$SNMP_TMPDIR/agentx.pid"
 SNMP_AGENTX_LOG_FILE="$SNMP_TMPDIR/agentx.log"
-SNMPCONFPATH=${SNMP_TMPDIR}:${SNMP_TMP_PERSISTENTDIR}
+SNMPCONFPATH="${SNMP_TMPDIR}${SNMP_ENV_SEPARATOR}${SNMP_TMP_PERSISTENTDIR}"
 export SNMPCONFPATH
 SNMP_PERSISTENT_DIR=$SNMP_TMP_PERSISTENTDIR
 export SNMP_PERSISTENT_DIR
@@ -119,6 +120,9 @@ elif test -x /usr/sbin/netstat ; then
 elif test -x /usr/etc/netstat ; then
     # e.g. IRIX
     NETSTAT=/usr/etc/netstat
+elif test -x "/cygdrive/c/windows/system32/netstat" ; then
+    # Cygwin
+    NETSTAT="/cygdrive/c/windows/system32/netstat"
 else
     NETSTAT=""
 fi
