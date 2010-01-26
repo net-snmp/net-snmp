@@ -120,9 +120,12 @@ elif test -x /usr/sbin/netstat ; then
 elif test -x /usr/etc/netstat ; then
     # e.g. IRIX
     NETSTAT=/usr/etc/netstat
-elif test -x "/cygdrive/c/windows/system32/netstat" ; then
+elif test -x /cygdrive/c/windows/system32/netstat ; then
     # Cygwin
-    NETSTAT="/cygdrive/c/windows/system32/netstat"
+    NETSTAT=/cygdrive/c/windows/system32/netstat
+elif test -x /c/Windows/System32/netstat ; then
+    # MinGW + MSYS
+    NETSTAT=/c/Windows/System32/netstat
 else
     NETSTAT=""
 fi
