@@ -29,6 +29,7 @@
 #ifdef NETSNMP_USE_ASSERT
 /*   void netsnmp_assert( int );*/
 #   define netsnmp_assert(x)  assert( x )
+#   define netsnmp_assert_or_return(x, y)  assert( x )
 #else
 /*
  *  if asserts weren't requested, just log, unless NETSNMP_NO_DEBUGGING specified
@@ -43,6 +44,16 @@
                              __STRING(x),__FILE__,__LINE__, \
                              NETSNMP_FUNCTION); \
               }while(0)
+#         define netsnmp_assert_or_return(x, y)  do {        \
+                 if ( x ) \
+                    ; \
+                 else { \
+                    snmp_log(LOG_ERR,"netsnmp_assert %s failed %s:%d %s()\n", \
+                             __STRING(x),__FILE__,__LINE__, \
+                             NETSNMP_FUNCTION); \
+                    return y; \
+                 } \
+              }while(0)
 #      else
 #         define netsnmp_assert(x)  do { \
                  if( x )\
@@ -51,9 +62,19 @@
                     snmp_log(LOG_ERR,"netsnmp_assert %s failed %s:%d\n", \
                              __STRING(x),__FILE__,__LINE__); \
               }while(0)
+#         define netsnmp_assert_or_return(x, y)  do {        \
+                 if ( x ) \
+                    ; \
+                 else { \
+                    snmp_log(LOG_ERR,"netsnmp_assert %s failed %s:%d\n", \
+                             __STRING(x),__FILE__,__LINE__); \
+                    return y; \
+                 } \
+              }while(0)
 #      endif
 #   else /* NO DEBUGGING */
 #      define netsnmp_assert(x)
+#      define netsnmp_assert_or_return(x)
 #   endif /* NO DEBUGGING */
 #endif /* not NETSNMP_USE_ASSERT */
 
