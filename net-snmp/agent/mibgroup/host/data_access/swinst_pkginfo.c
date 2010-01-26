@@ -52,11 +52,11 @@ netsnmp_swinst_arch_init(void)
 {
 #if defined(PKGLOC)
     snprintf( pkg_directory, SNMP_MAXPATH, "%s", PKGLOC );
-#elsif defined(hpux9)
+#elif defined(hpux9)
     snprintf( pkg_directory, SNMP_MAXPATH, "/system" );
-#elsif defined(hpux10) ||  defined(hpux11) 
+#elif defined(hpux10) ||  defined(hpux11) 
     snprintf( pkg_directory, SNMP_MAXPATH, "/var/adm/sw/products" );
-#elsif defined(freebsd2)
+#elif defined(freebsd2)
     snprintf( pkg_directory, SNMP_MAXPATH, "/var/db/pkg" );
 #else
     pkg_directory[0] = '\0';
