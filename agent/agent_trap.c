@@ -613,7 +613,7 @@ int
 netsnmp_send_traps(int trap, int specific,
                           const oid * enterprise, int enterprise_length,
                           netsnmp_variable_list * vars,
-                          char * context, int flags)
+                          const char * context, int flags)
 {
     netsnmp_pdu           *template_v1pdu;
     netsnmp_pdu           *template_v2pdu;
@@ -958,7 +958,7 @@ send_trap_vars(int trap, int specific, netsnmp_variable_list * vars)
 
 /* Send a trap under a context */
 void send_trap_vars_with_context(int trap, int specific, 
-              netsnmp_variable_list *vars, char *context)
+              netsnmp_variable_list *vars, const char *context)
 {
     if (trap == SNMP_TRAP_ENTERPRISESPECIFIC)
         netsnmp_send_traps(trap, specific, objid_enterprisetrap,
@@ -1041,11 +1041,11 @@ send_v2trap(netsnmp_variable_list * vars)
  *
  * @see send_v2trap
  */
-void send_v3trap(netsnmp_variable_list *vars, char *context)
+void send_v3trap(netsnmp_variable_list *vars, const char *context)
 {
     netsnmp_send_traps(-1, -1, 
-					trap_version_id, OID_LENGTH(trap_version_id),
-                    vars, context, 0);
+                       trap_version_id, OID_LENGTH(trap_version_id),
+                       vars, context, 0);
 }
 
 void
