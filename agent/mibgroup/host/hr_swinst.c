@@ -136,7 +136,7 @@ extern struct timeval starttime;
 extern void     Init_HR_SWInst(void);
 extern int      Get_Next_HR_SWInst(void);
 extern void     End_HR_SWInst(void);
-extern void     Save_HR_SW_info(int ix);
+extern int      Save_HR_SW_info(int ix);
 
 #ifdef HAVE_LIBRPM
 static void     Mark_HRSW_token(void);
@@ -288,6 +288,7 @@ header_hrswInstEntry(struct variable *vp,
     oid             newname[MAX_OID_LEN];
     int             swinst_idx, LowIndex = -1;
     int             result;
+    int             err = 0, errcount = 0;
 
     DEBUGMSGTL(("host/hr_swinst", "var_hrswinstEntry: "));
     DEBUGMSGOID(("host/hr_swinst", name, *length));
@@ -298,29 +299,38 @@ header_hrswInstEntry(struct variable *vp,
      * Find "next" installed software entry 
      */
 
-    Init_HR_SWInst();
-    while ((swinst_idx = Get_Next_HR_SWInst()) != -1) {
-        DEBUGMSG(("host/hr_swinst", "(index %d ....", swinst_idx));
+    do {
+        Init_HR_SWInst();
+        while ((swinst_idx = Get_Next_HR_SWInst()) != -1) {
+            DEBUGMSG(("host/hr_swinst", "(index %d ....", swinst_idx));
 
-        newname[HRSWINST_ENTRY_NAME_LENGTH] = swinst_idx;
-        DEBUGMSGOID(("host/hr_swinst", newname, *length));
-        DEBUGMSG(("host/hr_swinst", "\n"));
-        result = snmp_oid_compare(name, *length, newname, vp->namelen + 1);
-        if (exact && (result == 0)) {
-            LowIndex = swinst_idx;
-            Save_HR_SW_info(LowIndex);
-            break;
-        }
-        if ((!exact && (result < 0)) &&
-            (LowIndex == -1 || swinst_idx < LowIndex)) {
-            LowIndex = swinst_idx;
-            Save_HR_SW_info(LowIndex);
+            newname[HRSWINST_ENTRY_NAME_LENGTH] = swinst_idx;
+            DEBUGMSGOID(("host/hr_swinst", newname, *length));
+            DEBUGMSG(("host/hr_swinst", "\n"));
+            result = snmp_oid_compare(name, *length, newname, vp->namelen + 1);
+            if (exact && (result == 0)) {
+                LowIndex = swinst_idx;
+                err = Save_HR_SW_info(LowIndex);
+                break;
+            }
+            if ((!exact && (result < 0)) &&
+                (LowIndex == -1 || swinst_idx < LowIndex)) {
+                LowIndex = swinst_idx;
+                err = Save_HR_SW_info(LowIndex);
 #ifdef HRSWINST_MONOTONICALLY_INCREASING
-            break;
+                break;
 #endif
+            }
         }
+        if (err != 0 )
+            errcount++;
+    /* restart until Save_HR_SW_info() succeeds,max. 3 times */
+    } while (err != 0 && errcount < 3); 
+    if (err != 0) {
+        DEBUGMSGTL(("host/hr_swinst", "restart did not help, bailing out\n"));
+        return (MATCH_FAILED);
     }
-
+	    
     Mark_HRSW_token();
     End_HR_SWInst();
 
@@ -635,7 +645,7 @@ Get_Next_HR_SWInst(void)
     return -1;
 }
 
-void
+int
 Save_HR_SW_info(int ix)
 {
     SWI_t          *swi = &_myswi;      /* XXX static for now */
@@ -664,8 +674,13 @@ Save_HR_SW_info(int ix)
         h = rpmdbGetRecord(swi->swi_rpmdb, offset);
 #endif
 
-        if (h == NULL)
-            return;
+        if (h == NULL) {
+            DEBUGMSGTL(("host/hr_swinst",
+                    "RPM cache has probably expired when reading entry %d, "
+                    "reloading...\n", ix));
+            swi->swi_timestamp = 0;
+            return -1;
+        }
         if (swi->swi_h != NULL)
             headerFree(swi->swi_h);
         swi->swi_h = h;
@@ -683,6 +698,7 @@ Save_HR_SW_info(int ix)
     snprintf(swi->swi_name, sizeof(swi->swi_name), swi->swi_dep->d_name);
     swi->swi_name[ sizeof(swi->swi_name)-1 ] = 0;
 #endif
+    return 0;
 }
 
 #ifdef	HAVE_LIBRPM
