@@ -109,6 +109,9 @@ else
     --default-mibdirs|--mibdirs|--MIBDIRS)
       echo @NETSNMP_DEFAULT_MIBDIRS@
       ;;
+    --env-separator)
+      echo "@ENV_SEPARATOR@"
+      ;;
     --snmpconfpath|--SNMPCONFPATH)
       echo "@SNMPCONFPATH@@ENV_SEPARATOR@@SNMPSHAREPATH@@ENV_SEPARATOR@@SNMPLIBPATH@@ENV_SEPARATOR@$HOME/.snmp@ENV_SEPARATOR@@PERSISTENT_DIRECTORY@"
       ;;
