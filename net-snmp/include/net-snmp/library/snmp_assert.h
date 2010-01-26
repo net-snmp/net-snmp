@@ -30,6 +30,7 @@
 /*   void netsnmp_assert( int );*/
 #   define netsnmp_assert(x)  assert( x )
 #   define netsnmp_assert_or_return(x, y)  assert( x )
+#   define netsnmp_assert_or_msgreturn(x, y, z)  assert( x )
 #else
 /*
  *  if asserts weren't requested, just log, unless NETSNMP_NO_DEBUGGING specified
@@ -54,6 +55,17 @@
                     return y; \
                  } \
               }while(0)
+#         define netsnmp_assert_or_msgreturn(x, y, z)  do {       \
+                 if ( x ) \
+                    ; \
+                 else { \
+                    snmp_log(LOG_ERR,"netsnmp_assert %s failed %s:%d %s()\n", \
+                             __STRING(x),__FILE__,__LINE__, \
+                             NETSNMP_FUNCTION); \
+                    snmp_log(LOG_ERR, y); \
+                    return z; \
+                 } \
+              }while(0)
 #      else
 #         define netsnmp_assert(x)  do { \
                  if( x )\
@@ -71,10 +83,21 @@
                     return y; \
                  } \
               }while(0)
+#         define netsnmp_assert_or_msgreturn(x, y, z)  do {       \
+                 if ( x ) \
+                    ; \
+                 else { \
+                    snmp_log(LOG_ERR,"netsnmp_assert %s failed %s:%d\n", \
+                             __STRING(x),__FILE__,__LINE__); \
+                    snmp_log(LOG_ERR, y); \
+                    return z; \
+                 } \
+              }while(0)
 #      endif
 #   else /* NO DEBUGGING */
 #      define netsnmp_assert(x)
 #      define netsnmp_assert_or_return(x)
+#      define netsnmp_assert_or_msgreturn(x)
 #   endif /* NO DEBUGGING */
 #endif /* not NETSNMP_USE_ASSERT */
 
