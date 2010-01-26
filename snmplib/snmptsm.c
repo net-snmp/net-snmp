@@ -1,8 +1,10 @@
 /*
- * snmptsmsm.c
+ * snmptsmsm.c -- Implements RFC #5591
  *
  * This code implements a security model that assumes the local user
- * that executed the agent is the user who's attributes called
+ * that executed the agent is the user who's attributes are passed up
+ * by the transport underneath.  The RFC describing this security
+ * model is RFC5591.
  */
 
 #include <net-snmp/net-snmp-config.h>
