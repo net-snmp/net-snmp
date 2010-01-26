@@ -178,14 +178,7 @@ tsm_rgenerate_out_msg(struct snmp_secmod_outgoing_params *parms)
     
     if (tsmSecRef) {
         /* section 4.2, step 1 */
-        if (tsmSecRef->tmStateRef)
-            tmStateRef = tsmSecRef->tmStateRef;
-        else
-            tmStateRef = SNMP_MALLOC_TYPEDEF(netsnmp_tmStateReference);
-        if (NULL == tmStateRef) {
-            snmp_log(LOG_ERR, "failed to allocate a tmStateReference\n");
-            return SNMPERR_GENERR;
-        }
+        netsnmp_assert_or_return(NULL != tsmSecRef->tmStateRef, SNMPERR_GENERR);
         tmStateRef->sameSecurity = NETSNMP_TM_USE_SAME_SECURITY;
         tmStateRef->requestedSecurityLevel = tsmSecRef->securityLevel;
 
@@ -194,9 +187,7 @@ tsm_rgenerate_out_msg(struct snmp_secmod_outgoing_params *parms)
     } else {
         /* section 4.2, step 2 */
         tmStateRef = SNMP_MALLOC_TYPEDEF(netsnmp_tmStateReference);
-        if (tmStateRef == NULL) {
-            return SNMPERR_GENERR;
-        }
+        netsnmp_assert_or_return(NULL != tmStateRef, SNMPERR_GENERR);
         
         tmStateRef->requestedSecurityLevel = parms->secLevel;
         tmStateRef->sameSecurity = NETSNMP_TM_SAME_SECURITY_NOT_REQUIRED;
