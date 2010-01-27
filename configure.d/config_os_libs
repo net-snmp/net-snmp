@@ -256,13 +256,29 @@ if test "x$tryopenssl" != "xno"; then
             AC_CHECK_LIB(RSAglue, RSA_PKCS1_RSAref)
         fi
 
-        AC_CHECK_LIB(crypto, EVP_md5,
+        AC_MSG_CHECKING([for -leay32])
+        saved_LIBS="$LIBS"
+        LIBS="-leay32"
+        AC_LINK_IFELSE([AC_LANG_PROGRAM([
+                #include <openssl/evp.h>],
+                [return EVP_md5();])],
+            [AC_MSG_RESULT(yes); CRYPTO="eay32"],
+            [AC_MSG_RESULT(no)]
+        )
+        LIBS="$saved_LIBS"
+
+        if test x$CRYPTO = x; then
+            AC_CHECK_LIB([crypto], [EVP_md5], [CRYPTO="crypto"])
+        fi
+
+        if test x$CRYPTO != x; then
             AC_DEFINE(HAVE_LIBCRYPTO, 1,
-                [Define to 1 if you have the `crypto' library (-lcrypto).])
-            LIBCRYPTO="-lcrypto")
-        AC_CHECK_LIB(crypto, AES_cfb128_encrypt, 
-            AC_DEFINE(HAVE_AES_CFB128_ENCRYPT, 1,
-                [Define to 1 if you have the `AES_cfb128_encrypt' function.]))
+                [Define to 1 if you have the OpenSSL library (-lcrypto or -leay32).])
+            LIBCRYPTO="-l${CRYPTO}"
+            AC_CHECK_LIB(${CRYPTO}, AES_cfb128_encrypt, 
+                AC_DEFINE(HAVE_AES_CFB128_ENCRYPT, 1,
+                    [Define to 1 if you have the `AES_cfb128_encrypt' function.]))
+        fi
         if echo " $transport_result_list " | $GREP " DTLS" > /dev/null; then
 	    AC_CHECK_LIB(ssl, SSL_library_init,
                 AC_DEFINE(HAVE_LIBSSL, 1,

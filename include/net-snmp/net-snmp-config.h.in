@@ -261,7 +261,7 @@
 /* Define to 1 if you have the `kvm_openfiles' function. */
 #undef HAVE_KVM_OPENFILES
 
-/* Define to 1 if you have the `crypto' library (-lcrypto). */
+/* Define to 1 if you have the OpenSSL library (-lcrypto or -leay32). */
 #undef HAVE_LIBCRYPTO
 
 /* Define to 1 if you have the `elf' library (-lelf). */
