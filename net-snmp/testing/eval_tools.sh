@@ -401,9 +401,9 @@ STARTPROG() {
     fi
     echo $COMMAND >> $SNMP_TMPDIR/invoked
     if [ "x$OSTYPE" = "xmsys" ]; then
-      ## $COMMAND > $LOG_FILE.stdout 2>&1 &
-      COMMAND="cmd.exe //c start //min $COMMAND"
-      start $COMMAND > $LOG_FILE.stdout 2>&1
+      $COMMAND > $LOG_FILE.stdout 2>&1 &
+      ## COMMAND="cmd.exe //c start //min $COMMAND"
+      ## start $COMMAND > $LOG_FILE.stdout 2>&1
     else
       $COMMAND > $LOG_FILE.stdout 2>&1
     fi
@@ -541,9 +541,11 @@ FINISHED() {
             continue
         fi
 	pid=`cat $pfile`
-	ps -e 2>/dev/null | egrep "^[	 ]*$pid[	 ]+" > /dev/null 2>&1
-	if [ $? = 0 ] ; then
-	    SNMP_SAVE_TMPDIR=yes
+        # When not running on MinGW, check whether snmpd is still running.
+        if [ "x$OSTYPE" = "xmsys" ] || { ps -e 2>/dev/null | egrep "^[	 ]*$pid[	 ]+" > /dev/null 2>&1; }; then
+            if [ "x$OSTYPE" != "xmsys" ]; then
+                SNMP_SAVE_TMPDIR=yes
+            fi
             if [ "x$OSTYPE" = "xmsys" ]; then
               COMMAND="kill.exe $pid"
             else
