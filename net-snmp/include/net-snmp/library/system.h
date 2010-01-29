@@ -53,9 +53,8 @@ SOFTWARE.
      * Definitions for the system dependent library file
      */
 #ifndef MSVC_PERL
-#ifdef WIN32
 
-#ifndef HAVE_DIRENT_H /* MingGW has dirent.h but also defines WIN32 */
+#ifndef HAVE_READDIR
     /*
      * structure of a directory entry 
      */
@@ -79,7 +78,7 @@ SOFTWARE.
     DIR            *opendir(const char *filename);
     struct direct  *readdir(DIR * dirp);
     int             closedir(DIR * dirp);
-#endif /* HAVE_DIRENT_H */
+#endif /* HAVE_READDIR */
 
 #ifndef HAVE_GETTIMEOFDAY
     int             gettimeofday(struct timeval *, struct timezone *tz);
@@ -94,15 +93,14 @@ SOFTWARE.
     char           *winsock_startup(void);
     void            winsock_cleanup(void);
 
+#ifdef WIN32
 #define SOCK_STARTUP winsock_startup()
 #define SOCK_CLEANUP winsock_cleanup()
-
 #else                           /* !WIN32 */
-
 #define SOCK_STARTUP
 #define SOCK_CLEANUP
-
 #endif                          /* WIN32 */
+
 #endif				/* MSVC_PERL */
 
 #include <net-snmp/types.h>     /* For definition of in_addr_t */

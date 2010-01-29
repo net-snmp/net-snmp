@@ -95,6 +95,9 @@
 /* Define to 1 if you have the `chown' function. */
 #undef HAVE_CHOWN
 
+/* Define to 1 if you have the `closedir' function. */
+#undef HAVE_CLOSEDIR
+
 /* Define to 1 if the system has the type `Counter64'. */
 #undef HAVE_COUNTER64
 
@@ -495,6 +498,9 @@
 /* Define to 1 if the system has the type `off64_t'. */
 #undef HAVE_OFF64_T
 
+/* Define to 1 if you have the `opendir' function. */
+#undef HAVE_OPENDIR
+
 /* Define to 1 if you have the <openssl/aes.h> header file. */
 #undef HAVE_OPENSSL_AES_H
 
@@ -557,6 +563,9 @@
 
 /* Define to 1 if you have the `random' function. */
 #undef HAVE_RANDOM
+
+/* Define to 1 if you have the `readdir' function. */
+#undef HAVE_READDIR
 
 /* Define to 1 if you have the `regcomp' function. */
 #undef HAVE_REGCOMP
