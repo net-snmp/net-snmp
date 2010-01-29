@@ -26117,7 +26117,7 @@ case x$with_socklib in
 xwinsock2)
   #   libws2_w32                                        (MinGW)
   #
-  saved_LIBS="$LIBS"
+  netsnmp_save_LIBS="$LIBS"
   LIBS="$LIBS -lws2_32"
   cat >conftest.$ac_ext <<_ACEOF
 /* confdefs.h.  */
@@ -26170,7 +26170,7 @@ sed 's/^/| /' conftest.$ac_ext >&5
 
 
     # Restore LIBS and complain.
-    LIBS="$saved_LIBS"
+    LIBS="$netsnmp_save_LIBS"
     { { $as_echo "$as_me:$LINENO: error: libws2_32 not found." >&5
 $as_echo "$as_me: error: libws2_32 not found." >&2;}
    { (exit 1); exit 1; }; }
@@ -26467,7 +26467,7 @@ esac
 
 #   libiphlpapi                                         (Cygwin and MinGW)
 #
-saved_LIBS="$LIBS"
+netsnmp_save_LIBS="$LIBS"
 LIBS="$LIBS -liphlpapi"
 cat >conftest.$ac_ext <<_ACEOF
 /* confdefs.h.  */
@@ -26520,7 +26520,7 @@ sed 's/^/| /' conftest.$ac_ext >&5
 
 
   # Restore LIBS and complain.
-  LIBS="$saved_LIBS"
+  LIBS="$netsnmp_save_LIBS"
   case x$with_socklib in
   xwinsock2)
     { { $as_echo "$as_me:$LINENO: error: libiphlpapi not found." >&5
@@ -26538,7 +26538,7 @@ rm -f core conftest.err conftest.$ac_objext conftest_ipa8_conftest.oo \
 
 #   libregex                                            (MinGW)
 #
-saved_LIBS="$LIBS"
+netsnmp_save_LIBS="$LIBS"
 LIBS="$LIBS -lregex"
 cat >conftest.$ac_ext <<_ACEOF
 /* confdefs.h.  */
@@ -26591,7 +26591,7 @@ sed 's/^/| /' conftest.$ac_ext >&5
 
 
   # Restore LIBS.
-  LIBS="$saved_LIBS"
+  LIBS="$netsnmp_save_LIBS"
 
 fi
 
@@ -26602,7 +26602,7 @@ rm -f core conftest.err conftest.$ac_objext conftest_ipa8_conftest.oo \
 
 #   libsnmpapi                                          (MinGW)
 #
-saved_LIBS="$LIBS"
+netsnmp_save_LIBS="$LIBS"
 LIBS="$LIBS -lsnmpapi"
 cat >conftest.$ac_ext <<_ACEOF
 /* confdefs.h.  */
@@ -26654,7 +26654,7 @@ sed 's/^/| /' conftest.$ac_ext >&5
 
 
   # Restore LIBS.
-  LIBS="$saved_LIBS"
+  LIBS="$netsnmp_save_LIBS"
 
 fi
 
@@ -29114,7 +29114,7 @@ fi
 
         { $as_echo "$as_me:$LINENO: checking for -leay32" >&5
 $as_echo_n "checking for -leay32... " >&6; }
-        saved_LIBS="$LIBS"
+        netsnmp_save_LIBS="$LIBS"
         LIBS="-leay32"
         cat >conftest.$ac_ext <<_ACEOF
 /* confdefs.h.  */
@@ -29167,7 +29167,7 @@ fi
 rm -rf conftest.dSYM
 rm -f core conftest.err conftest.$ac_objext conftest_ipa8_conftest.oo \
       conftest$ac_exeext conftest.$ac_ext
-        LIBS="$saved_LIBS"
+        LIBS="$netsnmp_save_LIBS"
 
         if test x$CRYPTO = x; then
             { $as_echo "$as_me:$LINENO: checking for EVP_md5 in -lcrypto" >&5
