@@ -6,6 +6,12 @@ HEADER com2secunix directive
 
 SKIPIFNOT NETSNMP_TRANSPORT_UNIX_DOMAIN
 SKIPIF NETSNMP_NO_DEBUGGING
+SKIPIFNOT SIZEOF_SOCKADDR_UN_SUN_PATH
+
+#
+# Prepare test
+#
+sun_path_sized=`awk '/^#define SIZEOF_SOCKADDR_UN_SUN_PATH/ { res = "a"; for(n = 2; n < $3; ++n) { res = res substr("1234567890", n % 10, 1); } print res; }' $SNMP_UPDIR/include/net-snmp/net-snmp-config.h`
 
 #
 # Begin test
@@ -33,10 +39,10 @@ CONFIGAGENT 'com2secunix -Cn 123456789012345678901234567890123 ""'
 CONFIGAGENT 'com2secunix tu03a'
 # u03b Test empty sockpath
 CONFIGAGENT 'com2secunix tu03b ""'
-# u03c Test overlong sockpath (108 chars)
-CONFIGAGENT 'com2secunix tu03c a23456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678'
-# u03d Test valid sockpath (107 chars)
-CONFIGAGENT 'com2secunix tu03d a2345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567'
+# u03c Test overlong sockpath (sizeof(sockaddr_un.sun_path) chars)
+CONFIGAGENT "com2secunix tu03c ${sun_path_sized}x"
+# u03d Test valid sockpath (sizeof(sockaddr_un.sun_path) - 1 chars)
+CONFIGAGENT "com2secunix tu03d ${sun_path_sized}"
 
 # u04a Test missing community
 CONFIGAGENT 'com2secunix tu04a default'
