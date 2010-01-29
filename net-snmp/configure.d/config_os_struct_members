@@ -176,6 +176,19 @@ AC_CHECK_MEMBERS([struct sockaddr_in6.sin6_scope_id],,,[
 #endif
     ]])
 
+#       struct sockaddr_un
+#   Library:
+#
+AC_CHECK_SIZEOF([sockaddr_un.sun_path],,[
+    AC_INCLUDES_DEFAULT
+    [
+#if HAVE_SYS_UN_H
+#include <sys/un.h>
+#endif
+struct sockaddr_un sockaddr_un;
+    ]])
+
+
 #       struct statfs
 #   Agent:
 #
