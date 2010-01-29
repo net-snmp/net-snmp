@@ -97,6 +97,10 @@ SOURCE=..\..\snmplib\check_varbind.c
 # End Source File
 # Begin Source File
 
+SOURCE=..\..\snmplib\closedir.c
+# End Source File
+# Begin Source File
+
 SOURCE=..\..\snmplib\cmu_compat.c
 # End Source File
 # Begin Source File
@@ -130,6 +134,10 @@ SOURCE=..\..\snmplib\default_store.c
 # Begin Source File
 
 SOURCE=..\..\snmplib\getopt.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\snmplib\gettimeofday.c
 # End Source File
 # Begin Source File
 
@@ -169,11 +177,19 @@ SOURCE=..\..\snmplib\oid_stash.c
 # End Source File
 # Begin Source File
 
+SOURCE=..\..\snmplib\opendir.c
+# End Source File
+# Begin Source File
+
 SOURCE=..\..\snmplib\parse.c
 # End Source File
 # Begin Source File
 
 SOURCE=..\..\snmplib\read_config.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\snmplib\readdir.c
 # End Source File
 # Begin Source File
 
