@@ -41,7 +41,7 @@ MAN3  = snmp_close.3 snmp_free_pdu.3 snmp_open.3 snmp_read.3 \
 	netsnmp_table_data.3 netsnmp_table_dataset.3		       \
 	netsnmp_table_iterator.3 netsnmp_scalar.3       \
 	netsnmp_watcher.3 netsnmp_mode_end_call.3 netsnmp_library.3    \
-	netsnmp_mib_utilities.3 netsnmp_Container_iterator.3	       \
+	netsnmp_mib_utilities.3					       \
 	netsnmp_baby_steps.3 netsnmp_cache_handler.3		       \
 	netsnmp_container.3 netsnmp_iterator_info_s.3 netsnmp_leaf.3   \
 	netsnmp_row_merge.3		       \
