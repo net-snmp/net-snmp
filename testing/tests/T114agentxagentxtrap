@@ -17,7 +17,7 @@ STARTTRAPD
 # standard V3 configuration for initial user
 . ./Sv3config
 # configure the trap receiver.
-CONFIGAGENT trap2sink localhost:${SNMP_SNMPTRAPD_PORT} public
+CONFIGAGENT trap2sink ${SNMP_TRANSPORT_SPEC}:${SNMP_TEST_DEST}${SNMP_SNMPTRAPD_PORT} public
 
 # Start the agent
 if [ "x$SNMP_TRANSPORT_SPEC" = "xunix" ];then
