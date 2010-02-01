@@ -1020,26 +1020,9 @@ Building from source:
 	ftp://ftp.openssl.org/source/
 
 
- 3. Once the OpenSSL libraries are built, you must copy them to the the MSVC 
-    directory:
+ 3. Once the OpenSSL libraries are built, copy the folder inc32\openssl to
+    C:\OpenSSL\Include\openssl and the folder out32dll to C:\OpenSSL\Lib\VC.
 
-    a.  Copy folder inc32\openssl to the include folder of MSVC++
-
-        Example: "C:\Program Files\Microsoft Visual Studio .NET 2003\
-                  Vc7\include\openssl\*.h"
-        Example: "C:\Program Files\Microsoft Visual Studio\
-                  VC98\include\openssl\*.h"
-
-    b.  Copy file out32dll\libeay32.lib to the lib folder of MSVC++
-
-        Example: "C:\Program Files\Microsoft Visual Studio .NET 2003\
-                  Vc7\lib\libeay32.lib"
-        Example: "C:\Program Files\Microsoft Visual Studio\
-                  VC98\lib\libeay32.lib"
-
-    c.  Copy file out32dll\libeay32.dll to your %windir%\system32 folder
-
-        Example: "C:\winnt\system32\libeay32.dll"
 
 Using a pre-compiled version
 ============================
@@ -1050,23 +1033,6 @@ Using a pre-compiled version
 
  2. Install the package to c:\OpenSSL.
 
- 3. Copy the header and library files to the the MSVC directory:
-
-    a.  Copy folder c:\OpenSSL\include\openssl to the include folder of 
-        MSVC++.
-
-        Example: "C:\Program Files\Microsoft Visual Studio .NET 2003\
-                  Vc7\include\openssl\*.h"
-        Example: "C:\Program Files\Microsoft Visual Studio\
-                  VC98\include\openssl\*.h"
-
-    b.  Copy file c:\OpenSSL\lib\VC\libeay32.lib to the lib folder of MSVC++.
-
-        Example: "C:\Program Files\Microsoft Visual Studio .NET 2003\
-                  Vc7\lib\libeay32.lib"
-        Example: "C:\Program Files\Microsoft Visual Studio\
-                  VC98\lib\libeay32.lib"
-
 
 Project changes
 ===============
@@ -1075,38 +1041,10 @@ Project changes
 
 	#define NETSNMP_USE_OPENSSL 1
 
- 2. Open Visual Studio, add the link line to the Project Settings
-    for all the applications, and especially for the libsnmp_dll project,
-    for as you know, a .DLL is an application.
-    You MUST do this for libsdll.dsw, and either win32.dsw or win32sdk.dsw,
-    whichever you use.
-
-   MS VC++ 6.0:
-   ------------
-   a.  Click Project->Settings.  
-   b.  Highlight the names of all projects except libsnmp, libagent, libhelpers,
-       libnetsnmptrapd, netsnmpmibs, netsnmpmibssdk.
-   c.  Select the Link section.
-   d.  Add the next line to the 'Object/Library Modules' list for Debug and 
-       Release versions:
-
-         libeay32.lib 
-
-   MS VC++ 7.0+:
-   -------------
-   a.  For each project (except libsnmp, libagent, libhelpers, libnetsnmptrapd,
-       netsnmpmibs, netsnmpmibssdk), click Project->Properties. 
-   b.  For Configuration, select 'Release'
-   c.  Click Linker and then Input
-   d.  Add to the 'Additional Dependencies' section:
-
-         libeay32.lib 
-
-   e.  For Configuration, select 'Debug'
-   f.  Click Linker and then Input
-   g.  Add to the 'Additional Dependencies' section:
-
-         libeay32.lib 
+ 2. Open Visual Studio, open the Tools menu and select Options. Go to
+    Projects and Solutions and select VC++ Directories. Add
+    C:\OpenSSL\Include to the list of include directories and
+    C:\OpenSSL\Lib\VC to the list of library directories.
 
  3. Continue with the section 'Microsoft Visual C++ - Building"
 
