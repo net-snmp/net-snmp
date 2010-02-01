@@ -60,6 +60,7 @@
 #include <stdlib.h>
 #endif
 
+#include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/utilities.h>
 #include <net-snmp/library/md5.h>
 

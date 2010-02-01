@@ -20,6 +20,7 @@
 #include <dmalloc.h>
 #endif
 
+#include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/types.h>
 #include <net-snmp/output_api.h>
 #include <net-snmp/utilities.h>
@@ -32,6 +33,15 @@ static netsnmp_tdomain aliasDomain;
 
 /* simple storage mechanism */
 static netsnmp_data_list *alias_memory = NULL;
+
+#ifdef HAVE_DMALLOC_H
+static void free_wrapper(void * p)
+{
+    free(p);
+}
+#else
+#define free_wrapper free
+#endif
 
 /* An alias parser */
 void
@@ -47,7 +57,7 @@ parse_alias_config(const char *token, char *line) {
     netsnmp_data_list_add_node(&alias_memory,
                                netsnmp_create_data_list(aliasname,
                                                         strdup(transportdef),
-                                                        &free));
+                                                        &free_wrapper));
 }
 
 void

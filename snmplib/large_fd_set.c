@@ -14,6 +14,7 @@
 #include <stdlib.h>
 #endif
 
+#include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/library/snmp_assert.h>
 #include <net-snmp/library/large_fd_set.h>
 

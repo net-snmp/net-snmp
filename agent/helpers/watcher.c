@@ -10,6 +10,15 @@
 
 #include <string.h>
 
+#ifdef HAVE_DMALLOC_H
+static void free_wrapper(void * p)
+{
+    free(p);
+}
+#else
+#define free_wrapper free
+#endif
+
 /** @defgroup watcher watcher
  *  Watch a specified variable and process it as an instance or scalar object
  *  @ingroup leaf
@@ -220,7 +229,7 @@ netsnmp_watcher_helper_handler(netsnmp_mib_handler *handler,
         } else
             netsnmp_request_add_list_data(requests,
                                           netsnmp_create_data_list
-                                          ("watcher", old_data, free));
+                                          ("watcher", old_data, &free_wrapper));
         break;
 
     case MODE_SET_FREE:

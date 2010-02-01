@@ -10,16 +10,16 @@
  */
 #include <net-snmp/net-snmp-config.h>
 
-#include <net-snmp/net-snmp-includes.h>
-#include <net-snmp/agent/net-snmp-agent-includes.h>
-
-#include <net-snmp/agent/cache_handler.h>
-
 #if HAVE_STRING_H
 #include <string.h>
 #else
 #include <strings.h>
 #endif
+
+#include <net-snmp/net-snmp-includes.h>
+#include <net-snmp/agent/net-snmp-agent-includes.h>
+
+#include <net-snmp/agent/cache_handler.h>
 
 static netsnmp_cache  *cache_head = NULL;
 static int             cache_outstanding_valid = 0;
