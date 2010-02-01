@@ -83,10 +83,17 @@ SOFTWARE.
 #ifndef HAVE_GETTIMEOFDAY
     int             gettimeofday(struct timeval *, struct timezone *tz);
 #endif
-#ifndef HAVE_STRCASECMP
+/*
+ * Note: when compiling Net-SNMP with dmalloc enabled on a system without
+ * strcasecmp() or strncasecmp(), the macros HAVE_STRCASECMP and HAVE_STRNCASECMP
+ * are not defined but strcasecmp() and strncasecmp() are defined as macros in
+ * <dmalloc.h>. In order to prevent a compilation error, do not declare
+ * strcasecmp() or strncasecmp() when the <dmalloc.h> header has been included.
+ */
+#if !defined(HAVE_STRCASECMP) && !defined(strcasecmp)
     int             strcasecmp(const char *s1, const char *s2);
 #endif
-#ifndef HAVE_STRNCASECMP
+#if !defined(HAVE_STRNCASECMP) && !defined(strncasecmp)
     int             strncasecmp(const char *s1, const char *s2, size_t n);
 #endif
 
