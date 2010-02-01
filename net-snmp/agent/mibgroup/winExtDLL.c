@@ -75,30 +75,24 @@
  * - 2006/09/09, Alex Burger, creation of this file.
  */
 
-/*
- * ANSI C header files. 
- */
+#include <net-snmp/net-snmp-config.h>
+#include <net-snmp/agent/mib_module_config.h>
+
+#ifdef USING_WINEXTDLL_MODULE
+
 #include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
-/*
- * Net-SNMP header files. 
- */
-#include <net-snmp/net-snmp-config.h>
-#include <net-snmp/agent/mib_module_config.h>
-#ifdef USING_WINEXTDLL_MODULE
+#include <windows.h>
+#include "../../win32/Snmp-winExtDLL.h"
+#include "../../win32/MgmtApi-winExtDLL.h"
+
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 #include "util_funcs.h"
 #include "winExtDLL.h"
-/*
- * Windows header files. 
- */
-#include <windows.h>
-#include "../../win32/Snmp-winExtDLL.h"
-#include "../../win32/MgmtApi-winExtDLL.h"
 
 
 #define MAX_VALUE_NAME          16383
@@ -1618,4 +1612,5 @@ xarray_reserve(xarray * a, int reserved)
         a->reserved = 0;
     return a->p;
 }
+
 #endif /* USING_WINEXTDLL_MODULE */

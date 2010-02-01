@@ -22,6 +22,7 @@
 #include <strings.h>
 #endif
 
+#include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/serialize.h>
 #include <net-snmp/agent/read_only.h>
 
@@ -484,6 +485,15 @@ netsnmp_register_int_instance(const char *name,
 
 #ifndef NETSNMP_NO_DEPRECATED_FUNCTIONS
 
+#ifdef HAVE_DMALLOC_H
+static void free_wrapper(void * p)
+{
+    free(p);
+}
+#else
+#define free_wrapper free
+#endif
+
 /**
  * \deprecated This function is unused and scheduled for removal in Net-SNMP 5.6
  */
@@ -531,7 +541,7 @@ netsnmp_instance_ulong_handler(netsnmp_mib_handler *handler,
         netsnmp_request_add_list_data(requests,
                                       netsnmp_create_data_list
                                       (INSTANCE_HANDLER_NAME, it_save,
-                                       free));
+                                       &free_wrapper));
         break;
 
     case MODE_SET_ACTION:
@@ -650,7 +660,7 @@ netsnmp_instance_long_handler(netsnmp_mib_handler *handler,
         netsnmp_request_add_list_data(requests,
                                       netsnmp_create_data_list
                                       (INSTANCE_HANDLER_NAME, it_save,
-                                       free));
+                                       &free_wrapper));
         break;
 
     case MODE_SET_ACTION:
@@ -733,7 +743,7 @@ netsnmp_instance_int_handler(netsnmp_mib_handler *handler,
         netsnmp_request_add_list_data(requests,
                                       netsnmp_create_data_list
                                       (INSTANCE_HANDLER_NAME, it_save,
-                                       free));
+                                       &free_wrapper));
         break;
 
     case MODE_SET_ACTION:
@@ -849,7 +859,7 @@ netsnmp_instance_num_file_handler(netsnmp_mib_handler *handler,
         netsnmp_request_add_list_data(requests,
                                       netsnmp_create_data_list
                                       (INSTANCE_HANDLER_NAME, it_save,
-                                       free));
+                                       &free_wrapper));
         break;
 
     case MODE_SET_ACTION:
@@ -949,7 +959,7 @@ netsnmp_instance_uint_handler(netsnmp_mib_handler *handler,
         netsnmp_request_add_list_data(requests,
                                       netsnmp_create_data_list
                                       (INSTANCE_HANDLER_NAME, it_save,
-                                       free));
+                                       &free_wrapper));
         break;
 
     case MODE_SET_ACTION:

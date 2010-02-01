@@ -15,6 +15,15 @@
 
 #define MIB_CLIENTS_ARE_EVIL 1
 
+#ifdef HAVE_DMALLOC_H
+static void free_wrapper(void * p)
+{
+    free(p);
+}
+#else
+#define free_wrapper free
+#endif
+
 /*
  * don't use these! 
  */
@@ -348,7 +357,8 @@ netsnmp_old_api_helper(netsnmp_mib_handler *handler,
             write_method = NULL;
             netsnmp_request_add_list_data(requests,
                                           netsnmp_create_data_list
-                                          (OLD_API_NAME, cacheptr, free));
+                                          (OLD_API_NAME, cacheptr,
+                                           &free_wrapper));
             /*
              * BBB: fall through for everything that is a set (see AAA) 
              */
