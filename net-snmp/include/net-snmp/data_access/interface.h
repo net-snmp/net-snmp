@@ -67,6 +67,9 @@ extern          "C" {
 
 #endif                          /* ifOperStatus_ENUMS */
 
+/* nominal speed of network interface - used when the real speed is unknown */
+#define NOMINAL_LINK_SPEED 10000000
+
 /**---------------------------------------------------------------------*/
 /*
  * structure definitions
