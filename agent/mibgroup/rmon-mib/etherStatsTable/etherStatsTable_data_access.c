@@ -249,6 +249,7 @@ etherStatsTable_container_load(netsnmp_container * container)
     if (!list_head) {
         snmp_log (LOG_ERR, "access:etherStatsTable, error getting the interface names present in the system\n");
         DEBUGMSGTL(("access:etherStatsTable", "error getting the interface names present in the system"));
+        close(fd);
         return MFD_ERROR;
     }
 
@@ -277,6 +278,7 @@ etherStatsTable_container_load(netsnmp_container * container)
         rowreq_ctx = etherStatsTable_allocate_rowreq_ctx(NULL);
         if (NULL == rowreq_ctx) {
             snmp_log(LOG_ERR, "memory allocation failed\n");
+            close(fd);
             return MFD_RESOURCE_UNAVAILABLE;
         }
 
@@ -319,6 +321,8 @@ etherStatsTable_container_load(netsnmp_container * container)
 
         ++count;
     }
+
+    close(fd);
 
     /*
      * free the interface names list 

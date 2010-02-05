@@ -260,6 +260,7 @@ dot3StatsTable_container_load(netsnmp_container * container)
     if (!list_head) {
         snmp_log (LOG_ERR, "access:dot3StatsTable, error getting the interface names present in the system\n");
         DEBUGMSGTL(("access:dot3StatsTable", "error getting the interface names present in the system"));
+        close(fd);
         return MFD_ERROR;
     }
     
@@ -288,6 +289,7 @@ dot3StatsTable_container_load(netsnmp_container * container)
         rowreq_ctx = dot3StatsTable_allocate_rowreq_ctx(NULL);
         if (NULL == rowreq_ctx) {
             snmp_log(LOG_ERR, "memory allocation for dot3StatsTable failed\n");
+            close(fd);
             return MFD_RESOURCE_UNAVAILABLE;
         }
         
@@ -338,6 +340,8 @@ dot3StatsTable_container_load(netsnmp_container * container)
 
         ++count;
     }
+
+    close(fd);
 
     /*
      * free the interface names list 
