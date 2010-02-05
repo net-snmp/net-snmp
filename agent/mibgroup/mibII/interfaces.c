@@ -1362,16 +1362,17 @@ static int      saveIndex = 0;
 * Determines network interface speed. It is system specific. Only linux
 * realization is made. 
 */
-unsigned int getIfSpeed(int fd, struct ifreq ifr)
+unsigned int getIfSpeed(int fd, struct ifreq ifr, unsigned int defaultspeed)
 {
 #ifdef linux
     /** temporary expose internal until this module can be re-written */
     extern unsigned int
-        netsnmp_linux_interface_get_if_speed(int fd, const char *name);
+        netsnmp_linux_interface_get_if_speed(int fd, const char *name,
+                unsigned long long defaultspeed);
 
-    return netsnmp_linux_interface_get_if_speed(fd, ifr.ifr_name);
+    return netsnmp_linux_interface_get_if_speed(fd, ifr.ifr_name, defaultspeed);
 #else /*!linux*/			   
-    return 10000000;
+    return defaultspeed;
 #endif 
 }
 
@@ -1692,11 +1693,30 @@ Interface_Scan_Init(void)
              * do only guess if_type from name, if we could not read
              * * it before from SIOCGIFHWADDR 
              */
+            unsigned int defaultspeed = NOMINAL_LINK_SPEED;
+                if (!(nnew->if_flags & IFF_RUNNING)) {
+                    /* 
+                     * use speed 0 if the if speed cannot be determined *and* the
+                     * interface is down
+                     */
+                    defaultspeed = 0;
+                }
+
             if (!nnew->if_type)
                 nnew->if_type = if_type_from_name(nnew->if_name);
-            nnew->if_speed = nnew->if_type == 6 ? getIfSpeed(fd, ifrq) :
-                nnew->if_type == 24 ? 10000000 :
-                nnew->if_type == 9 ? 4000000 : 0;
+            switch(nnew->if_type) {
+            case 6:
+                nnew->if_speed = getIfSpeed(fd, ifrq, defaultspeed);
+                break;
+            case 24:
+                nnew->if_speed = 10000000;
+                break;
+            case 9:
+                nnew->if_speed = 4000000;
+                break;
+            default:
+                nnew->if_speed = 0;
+            }
             /*Zero speed means link problem*/
             if(nnew->if_speed == 0 && nnew->if_flags & IFF_UP){
                 nnew->if_flags &= ~IFF_RUNNING;
