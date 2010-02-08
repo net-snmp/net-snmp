@@ -50,7 +50,7 @@ extern          "C" {
     void               *netsnmp_table_data_delete_row(netsnmp_table_row  *row);
     int                 netsnmp_table_data_add_row(   netsnmp_table_data *table,
                                                       netsnmp_table_row  *row);
-    NETSNMP_INLINE void
+    void
        netsnmp_table_data_replace_row(netsnmp_table_data *table,
                                       netsnmp_table_row *origrow,
                                       netsnmp_table_row *newrow);

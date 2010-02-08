@@ -214,14 +214,13 @@ typedef int (Netsnmp_Node_Handler) (netsnmp_mib_handler *handler,
                                         handler_access_method, oid *reg_oid,
                                         size_t reg_oid_len, int modes);
 
-    NETSNMP_INLINE netsnmp_delegated_cache
+    netsnmp_delegated_cache
         *netsnmp_create_delegated_cache(netsnmp_mib_handler *,
                                         netsnmp_handler_registration *,
                                         netsnmp_agent_request_info *,
                                         netsnmp_request_info *, void *);
-    NETSNMP_INLINE void netsnmp_free_delegated_cache(netsnmp_delegated_cache
-                                                 *dcache);
-    NETSNMP_INLINE netsnmp_delegated_cache
+    void netsnmp_free_delegated_cache(netsnmp_delegated_cache *dcache);
+    netsnmp_delegated_cache
         *netsnmp_handler_check_cache(netsnmp_delegated_cache *dcache);
     void            netsnmp_register_handler_by_name(const char *,
                                                      netsnmp_mib_handler
@@ -229,22 +228,22 @@ typedef int (Netsnmp_Node_Handler) (netsnmp_mib_handler *handler,
 
     void            netsnmp_clear_handler_list(void);
 
-    NETSNMP_INLINE void
+    void
         netsnmp_request_add_list_data(netsnmp_request_info *request,
                                       netsnmp_data_list *node);
 
-    NETSNMP_INLINE int
+    int
         netsnmp_request_remove_list_data(netsnmp_request_info *request,
                                          const char *name);
 
-    NETSNMP_INLINE void    *netsnmp_request_get_list_data(netsnmp_request_info
+    void    *netsnmp_request_get_list_data(netsnmp_request_info
                                                   *request,
                                                   const char *name);
 
-    NETSNMP_INLINE void
+    void
               netsnmp_free_request_data_set(netsnmp_request_info *request);
 
-    NETSNMP_INLINE void
+    void
              netsnmp_free_request_data_sets(netsnmp_request_info *request);
 
     void            netsnmp_handler_free(netsnmp_mib_handler *);
