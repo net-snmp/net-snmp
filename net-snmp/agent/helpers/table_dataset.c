@@ -1277,7 +1277,7 @@ netsnmp_set_row_column(netsnmp_table_row *row, unsigned int column,
  * ================================== */
 
 /** adds an index to the table.  Call this repeatly for each index. */
-NETSNMP_INLINE void
+void
 netsnmp_table_dataset_add_index(netsnmp_table_data_set *table, u_char type)
 {
     if (!table)
@@ -1308,13 +1308,12 @@ netsnmp_table_set_add_indexes(va_alist)
     tset = va_arg(debugargs, netsnmp_table_data_set *);
 #endif
 
-    while ((type = va_arg(debugargs, int)) != 0) {
-        netsnmp_table_dataset_add_index(tset, (u_char)type);
-    }
+    if (tset)
+        while ((type = va_arg(debugargs, int)) != 0)
+            netsnmp_table_data_add_index(tset->table, type);
 
     va_end(debugargs);
 }
 
 /** @} 
  */
-
