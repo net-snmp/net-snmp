@@ -604,9 +604,6 @@ tsm_process_in_msg(struct snmp_secmod_incoming_params *parms)
      */
     *parms->maxSizeResponse = parms->maxMsgSize; /* XXX */
 
-    /* XXX: not in rfc? */
-    tsmSecRef->securityLevel = parms->secLevel;
-
     /* Section 5.2, Step 8:
        The statusInformation is set to success and a return is made to
        the calling module passing back the OUT parameters as specified

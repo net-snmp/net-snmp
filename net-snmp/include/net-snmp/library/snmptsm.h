@@ -21,7 +21,6 @@ extern          "C" {
     /* basically we store almost nothing else but a tm ref */
     typedef struct netsnmp_tsmSecurityReference_s {
        netsnmp_tmStateReference *tmStateRef;
-       int securityLevel;
     } netsnmp_tsmSecurityReference;
 
 #ifdef __cplusplus
