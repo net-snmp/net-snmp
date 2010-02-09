@@ -7,6 +7,10 @@
 extern          "C" {
 #endif
 
+#if defined(cygwin) || defined(mingw32) || defined(mingw32msvc)
+    config_error(Unix domain protocol support unavailable for this platform)
+#endif
+
 #if HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
 #endif
