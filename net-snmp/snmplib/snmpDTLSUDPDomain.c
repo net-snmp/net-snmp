@@ -540,7 +540,7 @@ netsnmp_dtlsudp_recv(netsnmp_transport *t, void *buf, int size,
 {
     int             rc = -1;
     socklen_t       fromlen = sizeof(struct sockaddr);
-    netsnmp_addr_pair *addr_pair = NULL;
+    netsnmp_indexed_addr_pair *addr_pair = NULL;
     struct sockaddr *from;
     netsnmp_tmStateReference *tmStateRef = NULL;
     X509            *peer;
@@ -652,7 +652,7 @@ netsnmp_dtlsudp_recv(netsnmp_transport *t, void *buf, int size,
             }
 
             {
-                char *str = netsnmp_udp_fmtaddr(NULL, addr_pair, sizeof(netsnmp_addr_pair));
+                char *str = netsnmp_udp_fmtaddr(NULL, addr_pair, sizeof(netsnmp_indexed_addr_pair));
                 DEBUGMSGTL(("dtlsudp",
                             "recvfrom fd %d got %d bytes (from %s)\n",
                             t->sock, rc, str));
@@ -708,7 +708,7 @@ netsnmp_dtlsudp_send(netsnmp_transport *t, void *buf, int size,
 		 void **opaque, int *olength)
 {
     int rc = -1;
-    netsnmp_addr_pair *addr_pair = NULL;
+    netsnmp_indexed_addr_pair *addr_pair = NULL;
     struct sockaddr *to = NULL;
     bio_cache *cachep = NULL;
     netsnmp_tmStateReference *tmStateRef = NULL;
@@ -721,11 +721,11 @@ netsnmp_dtlsudp_send(netsnmp_transport *t, void *buf, int size,
         if (tmStateRef->have_addresses)
             addr_pair = &(tmStateRef->addresses);
         else if (t != NULL && t->data != NULL &&
-                 t->data_length == sizeof(netsnmp_addr_pair))
-            addr_pair = (netsnmp_addr_pair *) (t->data);
+                 t->data_length == sizeof(netsnmp_indexed_addr_pair))
+            addr_pair = (netsnmp_indexed_addr_pair *) (t->data);
     } else if (t != NULL && t->data != NULL &&
-               t->data_length == sizeof(netsnmp_addr_pair)) {
-        addr_pair = (netsnmp_addr_pair *) (t->data);
+               t->data_length == sizeof(netsnmp_indexed_addr_pair)) {
+        addr_pair = (netsnmp_indexed_addr_pair *) (t->data);
     }
 
     if (NULL == addr_pair) {
@@ -752,7 +752,7 @@ netsnmp_dtlsudp_send(netsnmp_transport *t, void *buf, int size,
         
     {
         char *str = netsnmp_udp_fmtaddr(NULL, (void *) addr_pair,
-                                        sizeof(netsnmp_addr_pair));
+                                        sizeof(netsnmp_indexed_addr_pair));
         DEBUGMSGTL(("dtlsudp", "send %d bytes from %p to %s on fd %d\n",
                     size, buf, str, t->sock));
         free(str);
@@ -811,13 +811,13 @@ netsnmp_dtlsudp_transport(struct sockaddr_in *addr, int local)
     int             rc = 0;
     char           *str = NULL;
     char           *client_socket = NULL;
-    netsnmp_addr_pair addr_pair;
+    netsnmp_indexed_addr_pair addr_pair;
 
     if (addr == NULL || addr->sin_family != AF_INET) {
         return NULL;
     }
 
-    memset(&addr_pair, 0, sizeof(netsnmp_addr_pair));
+    memset(&addr_pair, 0, sizeof(netsnmp_indexed_addr_pair));
     memcpy(&(addr_pair.remote_addr), addr, sizeof(struct sockaddr_in));
 
     t = SNMP_MALLOC_TYPEDEF(netsnmp_transport);
@@ -826,7 +826,7 @@ netsnmp_dtlsudp_transport(struct sockaddr_in *addr, int local)
     }
 
     str = netsnmp_udp_fmtaddr(NULL, (void *)&addr_pair,
-                                 sizeof(netsnmp_addr_pair));
+                                 sizeof(netsnmp_indexed_addr_pair));
     DEBUGMSGTL(("dtlsudp", "open %s %s\n", local ? "local" : "remote",
                 str));
     free(str);
@@ -910,7 +910,7 @@ netsnmp_dtlsudp_transport(struct sockaddr_in *addr, int local)
         }
 
         str = netsnmp_udp_fmtaddr(NULL, (void *)&addr_pair,
-                 sizeof(netsnmp_addr_pair));
+                 sizeof(netsnmp_indexed_addr_pair));
         DEBUGMSGTL(("dtlsudp", "client open %s\n", str));
         free(str);
 
@@ -919,7 +919,7 @@ netsnmp_dtlsudp_transport(struct sockaddr_in *addr, int local)
          * transport-specific data pointer for later use by netsnmp_dtlsudp_send.
          */
 
-        t->data = SNMP_MALLOC_TYPEDEF(netsnmp_addr_pair);
+        t->data = SNMP_MALLOC_TYPEDEF(netsnmp_indexed_addr_pair);
         t->remote = (u_char *)malloc(6);
         if (t->data == NULL || t->remote == NULL) {
             netsnmp_transport_free(t);
@@ -929,8 +929,8 @@ netsnmp_dtlsudp_transport(struct sockaddr_in *addr, int local)
         t->remote[4] = (htons(addr->sin_port) & 0xff00) >> 8;
         t->remote[5] = (htons(addr->sin_port) & 0x00ff) >> 0;
         t->remote_length = 6;
-        memcpy(t->data, &addr_pair, sizeof(netsnmp_addr_pair));
-        t->data_length = sizeof(netsnmp_addr_pair);
+        memcpy(t->data, &addr_pair, sizeof(netsnmp_indexed_addr_pair));
+        t->data_length = sizeof(netsnmp_indexed_addr_pair);
 
         /* dtls needs to bind the socket for SSL_write to work */
         if (connect(t->sock, (struct sockaddr *) addr, sizeof(*addr)) == -1)

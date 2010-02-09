@@ -19,11 +19,7 @@ typedef netsnmp_handler_registration *NetSNMP__agent__netsnmp_handler_registrati
  * needs to be in sync with the definitions in snmplib/snmpUDPDomain.c
  * and snmplib/snmpTCPDomain.c
  */
-typedef struct netsnmp_udp_addr_pair_s {
-	struct sockaddr_in remote_addr;
-	struct in_addr local_addr;
-        int if_index;
-} netsnmp_udp_addr_pair;
+typedef netsnmp_indexed_addr_pair netsnmp_udp_addr_pair;
 
 typedef struct handler_cb_data_s {
    SV *perl_cb;
@@ -1079,7 +1075,7 @@ narqi_getSourceIp(me)
         SV *me;
     PREINIT:
         netsnmp_agent_request_info *reqinfo;
-	struct netsnmp_udp_addr_pair_s *addr_pair;
+	netsnmp_udp_addr_pair *addr_pair;
 	struct sockaddr_in *from;
         SV *rarg;
 
@@ -1087,7 +1083,7 @@ narqi_getSourceIp(me)
         reqinfo = (netsnmp_agent_request_info *) SvIV(SvRV(me));
 
         /* XXX: transport-specific: UDP/IPv4 only! */
-	addr_pair = (struct netsnmp_udp_addr_pair_s *) (reqinfo->asp->pdu->transport_data);
+	addr_pair = (netsnmp_udp_addr_pair *) (reqinfo->asp->pdu->transport_data);
 	from = (struct sockaddr_in *) &(addr_pair->remote_addr);
         rarg = newSVpv((const char *)(&from->sin_addr.s_addr), sizeof(from->sin_addr.s_addr));
         RETVAL = rarg;
@@ -1100,7 +1096,7 @@ narqi_getDestIp(me)
         SV *me;
     PREINIT:
         netsnmp_agent_request_info *reqinfo;
-	struct netsnmp_udp_addr_pair_s *addr_pair;
+	netsnmp_udp_addr_pair *addr_pair;
 	struct in_addr *to;
         SV *rarg;
 
@@ -1108,7 +1104,7 @@ narqi_getDestIp(me)
         reqinfo = (netsnmp_agent_request_info *) SvIV(SvRV(me));
 
         /* XXX: transport-specific: UDP/IPv4 only! */
-	addr_pair = (struct netsnmp_udp_addr_pair_s *) (reqinfo->asp->pdu->transport_data);
+	addr_pair = (netsnmp_udp_addr_pair *) (reqinfo->asp->pdu->transport_data);
 	to = (struct in_addr *) &(addr_pair->local_addr);
         rarg = newSVpv((const char *)(&to->s_addr), sizeof(to->s_addr));
         RETVAL = rarg;

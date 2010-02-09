@@ -50,6 +50,12 @@ typedef struct netsnmp_addr_pair_s {
    struct in_addr local_addr;
 } netsnmp_addr_pair;
 
+typedef struct netsnmp_indexed_addr_pair_s {
+   struct sockaddr_in remote_addr;
+   struct in_addr local_addr;
+    int if_index;
+} netsnmp_indexed_addr_pair;
+
 typedef struct netsnmp_tmStateReference_s {
    oid    transportDomain[MAX_OID_LEN];
    size_t transportDomainLen;
