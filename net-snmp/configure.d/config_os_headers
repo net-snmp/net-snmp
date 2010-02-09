@@ -13,6 +13,9 @@ AC_HEADER_DIRENT        #  <dirent.h>, <sys/ndir.h>, <sys/dir.h> & <ndir.h>
 #  Apps:
 AC_HEADER_SYS_WAIT      #  <sys/wait.h>
 
+# allow for quick module/library/etc processing checks
+if test "x$NETSNMP_QUICK_CHECK" = "x" ; then
+
 ##
 #   Stand-alone headers:
 ##
@@ -468,3 +471,5 @@ AC_CHECK_HEADERS([windows.h iphlpapi.h], [], [], [
 if test x$with_socklib = xwinsock2; then
   AC_CHECK_HEADERS([winsock.h winsock2.h ws2tcpip.h])
 fi
+
+fi # NETSNMP_QUICK_CHECK
