@@ -8,6 +8,7 @@ extern          "C" {
 #include <net-snmp/library/snmp_transport.h>
 #include <net-snmp/library/asn1.h>
 #include <net-snmp/library/snmpUDPIPv4BaseDomain.h>
+#include <net-snmp/library/snmpUDPBaseDomain.h>
 
 #if HAVE_SYS_SOCKET_H
 #include <sys/socket.h>

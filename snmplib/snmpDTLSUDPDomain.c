@@ -779,7 +779,6 @@ netsnmp_dtlsudp_send(netsnmp_transport *t, void *buf, int size,
 static int
 netsnmp_dtlsudp_close(netsnmp_transport *t)
 {
-    int rc = -1;
     /* XXX: issue a proper dtls closure notification(s) */
 
     return netsnmp_udpbase_close(t);
@@ -795,10 +794,6 @@ netsnmp_transport *
 netsnmp_dtlsudp_transport(struct sockaddr_in *addr, int local)
 {
     netsnmp_transport *t = NULL;
-    int             rc = 0;
-    char           *str = NULL;
-    char           *client_socket = NULL;
-    netsnmp_indexed_addr_pair addr_pair;
     
     t = netsnmp_udpbase_transport(addr, local);
     if (NULL == t) {
