@@ -99,34 +99,7 @@ netsnmp_sockaddr_in2(struct sockaddr_in *addr,
 char *
 netsnmp_udp_fmtaddr(netsnmp_transport *t, void *data, int len)
 {
-    netsnmp_udp_addr_pair *addr_pair = NULL;
-    struct hostent *host;
-
-    if (data != NULL && len == sizeof(netsnmp_udp_addr_pair)) {
-	addr_pair = (netsnmp_udp_addr_pair *) data;
-    } else if (t != NULL && t->data != NULL) {
-	addr_pair = (netsnmp_udp_addr_pair *) t->data;
-    }
-
-    if (addr_pair == NULL) {
-        return strdup("UDP: unknown");
-    } else {
-        struct sockaddr_in *to = NULL;
-	char tmp[64];
-        to = (struct sockaddr_in *) &(addr_pair->remote_addr);
-        if (to == NULL) {
-            sprintf(tmp, "UDP: unknown->[%s]",
-                    inet_ntoa(addr_pair->local_addr));
-        } else if ( t && t->flags & NETSNMP_TRANSPORT_FLAG_HOSTNAME ) {
-            host = gethostbyaddr((char *)&to->sin_addr, 4, AF_INET);
-            return (host ? strdup(host->h_name) : NULL); 
-        } else {
-            sprintf(tmp, "UDP: [%s]:%hu->",
-                    inet_ntoa(to->sin_addr), ntohs(to->sin_port));
-            sprintf(tmp + strlen(tmp), "[%s]", inet_ntoa(addr_pair->local_addr));
-        }
-        return strdup(tmp);
-    }
+    return netsnmp_ipv4_fmtaddr("UDP", t, data, len);
 }
 
 

@@ -20,6 +20,13 @@ config_require(IPBase);
 #include <netinet/in.h>
 #endif
 
+/*
+ * Prototypes
+ */
+
+    char *netsnmp_ipv4_fmtaddr(const char *prefix, netsnmp_transport *t,
+                               void *data, int len);
+
 #ifdef __cplusplus
 }
 #endif
