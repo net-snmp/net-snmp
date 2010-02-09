@@ -67,7 +67,7 @@ typedef struct netsnmp_tmStateReference_s {
    int    sessionID;
    
    char   have_addresses;
-   netsnmp_addr_pair addresses;
+   netsnmp_indexed_addr_pair addresses;
 
    void *otherTransportOpaque; /* XXX: May have mem leak issues */
 } netsnmp_tmStateReference;
