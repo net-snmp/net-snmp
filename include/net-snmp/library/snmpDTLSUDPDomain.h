@@ -7,6 +7,7 @@ extern          "C" {
 
 #include <net-snmp/library/snmp_transport.h>
 #include <net-snmp/library/asn1.h>
+#include <net-snmp/library/snmpUDPIPv4BaseDomain.h>
 
 #if HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
@@ -16,7 +17,6 @@ extern          "C" {
 #endif
 
 config_require(UDPIPv4Base)
-#include <net-snmp/library/snmpUDPIPv4BaseDomain.h>
 
 #define TRANSPORT_DOMAIN_DTLS_UDP_IP	1,3,6,1,4,1,8072,3,3,8
 NETSNMP_IMPORT oid netsnmpDTLSUDPDomain[10];
