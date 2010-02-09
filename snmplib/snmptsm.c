@@ -384,14 +384,22 @@ tsm_process_in_msg(struct snmp_secmod_incoming_params *parms)
     u_char          ourEngineID[SNMP_MAX_ENG_SIZE];
     static size_t   ourEngineID_len = sizeof(ourEngineID);
     
-    /* Section 5.2, step 1 */
+    /* Section 5.2, step 1: Set the securityEngineID to the local
+       snmpEngineID. */
     ourEngineID_len =
-        snmpv3_get_engineID((u_char*)ourEngineID, ourEngineID_len);
-    if (ourEngineID_len == 0 || ourEngineID_len > *parms->secEngineIDLen)
-        return SNMPERR_GENERR;
+        snmpv3_get_engineID((u_char*) ourEngineID, ourEngineID_len);
+    netsnmp_assert_or_return(ourEngineID_len == 0 ||
+                             ourEngineID_len > *parms->secEngineIDLen,
+                             SNMPERR_GENERR);
     memcpy(parms->secEngineID, ourEngineID, *parms->secEngineIDLen);
 
-    /* Section 5.2, step 2 */
+    /* Section 5.2, step 2: If tmStateReference does not refer to a
+       cache containing values for tmTransportDomain,
+       tmTransportAddress, tmSecurityName, and
+       tmTransportSecurityLevel, then the snmpTsmInvalidCaches counter
+       is incremented, an error indication is returned to the calling
+       module, and Security Model processing stops for this
+       message. */
     if (!parms->pdu->transport_data ||
         sizeof(netsnmp_tmStateReference) !=
         parms->pdu->transport_data_length) {
@@ -406,16 +414,18 @@ tsm_process_in_msg(struct snmp_secmod_incoming_params *parms)
         /* not needed: tmStateRef->transportDomain == NULL || */
         /* not needed: tmStateRef->transportAddress == NULL || */
         tmStateRef->securityName[0] == '\0'
-        /* || seclevel is not valid */
         ) {
-        /* XXX: snmpTsmInvalidCaches++ */
+        snmp_increment_statistic(STAT_TSM_SNMPTSMINVALIDCACHES);
         return SNMPERR_GENERR;
     }
 
-    /* Section 5.2, step 3 */
+    /* Section 5.2, step 3: Copy the tmSecurityName to securityName. */
     if (netsnmp_ds_get_boolean(NETSNMP_DS_APPLICATION_ID,
                                NETSNMP_DS_LIB_TSM_USE_PREFIX)) {
-        /* Section 5.2, step 3a */
+        /* Section 5.2, step 3:
+          If the snmpTsmConfigurationUsePrefix object is set to true, then
+          use the tmTransportDomain to look up the corresponding prefix.
+        */
         const char *prefix;
         /*
           possibilities:
@@ -472,40 +482,80 @@ tsm_process_in_msg(struct snmp_secmod_incoming_params *parms)
         }
 #endif /* NETSNMP_TRANSPORT_TLSTCP_DOMAIN */
 
+        /* Section 5.2, step 3:
+          If the prefix lookup fails for any reason, then the
+          snmpTsmUnknownPrefixes counter is incremented, an error
+          indication is returned to the calling module, and message
+          processing stops.
+        */
         if (prefix == NULL) {
-            /* XXX: snmpTsmUnknownPrefixes++ */
+            snmp_increment_statistic(STAT_TSM_SNMPTSMUNKNOWNPREFIXES);
             return SNMPERR_GENERR;
         }
 
+        /* Section 5.2, step 3:
+          If the lookup succeeds but the prefix length is less than 1 or
+          greater than 4 octets, then the snmpTsmInvalidPrefixes counter
+          is incremented, an error indication is returned to the calling
+          module, and message processing stops.
+        */
+#ifdef NOT_USING_HARDCODED_PREFIXES
+        /* the above code actually ensures this will never happen as
+           we don't support a dynamic prefix database where this might
+           happen. */
         if (strlen(prefix) < 1 || strlen(prefix) > 4) {
             /* XXX: snmpTsmInvalidPrefixes++ */
             return SNMPERR_GENERR;
         }
+#endif
         
+        /* Section 5.2, step 3:
+          Set the securityName to be the concatenation of the prefix, a
+          ':' character (US-ASCII 0x3a), and the tmSecurityName.
+        */
         snprintf(parms->secName, *parms->secNameLen,
                  "%s:%s", prefix, tmStateRef->securityName);
     } else {
+        /* if the use prefix flag wasn't set, do a straight copy */
         strncpy(parms->secName, tmStateRef->securityName, *parms->secNameLen);
     }
+
+    /* set the length of the security name */
     *parms->secNameLen = strlen(parms->secName);
     DEBUGMSGTL(("tsm", "user: %s/%d\n", parms->secName, *parms->secNameLen));
 
-    /* Section 5.2 Step 4 */
+    /* Section 5.2 Step 4:
+       Compare the value of tmTransportSecurityLevel in the
+       tmStateReference cache to the value of the securityLevel
+       parameter passed in the processIncomingMsg ASI.  If securityLevel
+       specifies privacy (Priv) and tmTransportSecurityLevel specifies
+       no privacy (noPriv), or if securityLevel specifies authentication
+       (auth) and tmTransportSecurityLevel specifies no authentication
+       (noAuth) was provided by the Transport Model, then the
+       snmpTsmInadequateSecurityLevels counter is incremented, an error
+       indication (unsupportedSecurityLevel) together with the OID and
+       value of the incremented counter is returned to the calling
+       module, and Transport Security Model processing stops for this
+       message.*/
     if (parms->secLevel > tmStateRef->transportSecurityLevel) {
-        /* XXX: snmpTsmInadequateSecurityLevels++ */
+        snmp_increment_statistic(STAT_TSM_SNMPTSMINADEQUATESECURITYLEVELS);
+        /* net-snmp returns error codes not OIDs, which are dealt with later */
         return SNMPERR_UNSUPPORTED_SEC_LEVEL;
     }
 
-    /* Section 5.2 Step 5 */
-
+    /* Section 5.2 Step 5
+       The tmStateReference is cached as cachedSecurityData so that a
+       possible response to this message will use the same security
+       parameters.  Then securityStateReference is set for subsequent
+       references to this cached data.
+    */
     if (NULL == *parms->secStateRef) {
         tsmSecRef = SNMP_MALLOC_TYPEDEF(netsnmp_tsmSecurityReference);
     } else {
         tsmSecRef = *parms->secStateRef;
     }
 
-    if (!tsmSecRef)
-        return SNMPERR_GENERR;
+    netsnmp_assert_or_return(NULL == tsmSecRef, SNMPERR_GENERR);
 
     *parms->secStateRef = tsmSecRef;
     tsmSecRef->tmStateRef = tmStateRef;
@@ -528,7 +578,8 @@ tsm_process_in_msg(struct snmp_secmod_incoming_params *parms)
         DEBUGMSGTL(("tsm","  tunneled\n"));
     }
 
-    /* Section 5.2, Step 6 */
+    /* Section 5.2, Step 6:
+       The scopedPDU component is extracted from the wholeMsg. */
     /*
      * Eat the first octet header.
      */
@@ -537,20 +588,29 @@ tsm_process_in_msg(struct snmp_secmod_incoming_params *parms)
                                         &type_value,
                                         (ASN_UNIVERSAL | ASN_PRIMITIVE |
                                          ASN_OCTET_STR),
-                                        "usm first octet")) == NULL) {
+                                        "tsm first octet")) == NULL) {
         /*
          * RETURN parse error 
          */
-        return SNMPERR_GENERR;
+        return SNMPERR_ASN_PARSE_ERR;
     }
     
     *parms->scopedPdu = data_ptr;
     *parms->scopedPduLen = parms->wholeMsgLen - (data_ptr - parms->wholeMsg);
 
-    /* Section 5.2, Step 7 */
+    /* Section 5.2, Step 7:
+       The maxSizeResponseScopedPDU is calculated.  This is the maximum
+       size allowed for a scopedPDU for a possible Response message.
+     */
     *parms->maxSizeResponse = parms->maxMsgSize; /* XXX */
 
+    /* XXX: not in rfc? */
     tsmSecRef->securityLevel = parms->secLevel;
 
+    /* Section 5.2, Step 8:
+       The statusInformation is set to success and a return is made to
+       the calling module passing back the OUT parameters as specified
+       in the processIncomingMsg ASI.
+    */
     return SNMPERR_SUCCESS;
 }
