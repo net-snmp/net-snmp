@@ -103,27 +103,6 @@ while test "x$new_transport_list" != "x"; do
       fi
       continue
     else
-      if test "x$i" = "xAAL5PVC"; then
-        if test "x$PARTIALTARGETOS" != "xlinux"; then
-          echo
-          AC_MSG_ERROR(AAL5 PVC support unavailable for this platform (Linux only))
-        fi
-      fi
-      if test "x$i" = "xIPX"; then
-        if test "x$PARTIALTARGETOS" != "xlinux"; then
-          echo
-          AC_MSG_ERROR(IPX support unavailable for this platform (Linux only))
-        fi
-      fi
-      if test "x$i" = "xUnix"; then
-        if test "x$PARTIALTARGETOS" = "xcygwin"; then
-          echo
-          AC_MSG_ERROR(Unix domain protocol support unavailable for this platform)
-        elif test "x$PARTIALTARGETOS" = "xmingw32" -o "x$PARTIALTARGETOS" = "xmingw32msvc"; then
-          echo
-          AC_MSG_ERROR(Unix domain protocol support unavailable for this platform)
-        fi
-      fi
       if test ! "x$enable_ipv6" = "xyes"; then
           if test "x$i" = "xUDPIPv6" -o "x$i" = "xTCPIPv6"; then
               echo
@@ -152,7 +131,7 @@ while test "x$new_transport_list" != "x"; do
       # system symbols:
       AC_LANG_CONFTEST(AC_LANG_SOURCE([[
 #include NETSNMP_SYSTEM_INCLUDE_FILE
-#include <net-snmp/net-snmp-config.h>
+#define NET_SNMP_CONFIG_H
 #undef config_require
 #define config_require(foo) config_checkit_require(foo)
 #undef config_error
