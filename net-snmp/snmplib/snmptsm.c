@@ -13,12 +13,25 @@
 
 #include <net-snmp/library/snmptsm.h>
 
+#ifdef NETSNMP_TRANSPORT_SSH_DOMAIN
+#include <net-snmp/library/snmpSSHDomain.h>
+#endif
+#ifdef NETSNMP_TRANSPORT_DTLSUDP_DOMAIN
+#include <net-snmp/library/snmpDTLSUDPDomain.h>
+#endif
+#ifdef NETSNMP_TRANSPORT_TLSTCP_DOMAIN
+#include <net-snmp/library/snmpTLSTCPDomain.h>
+#endif
+#ifdef NETSNMP_TRANSPORT_DTLSSCTP_DOMAIN
+#include <net-snmp/library/snmpDTLSSCTPDomain.h>
+#endif
+
 #include <unistd.h>
 
 static int      tsm_session_init(netsnmp_session *);
 static void     tsm_free_state_ref(void *);
 static int      tsm_clone_pdu(netsnmp_pdu *, netsnmp_pdu *);
-static void     tsm_free_pdu(netsnmp_pdu *pdu);
+static int      tsm_free_pdu(netsnmp_pdu *pdu);
 
 u_int next_sess_id = 1;
 
@@ -93,7 +106,7 @@ tsm_free_state_ref(void *ptr)
     /* SNMP_FREE(tsmRef);  ? */
 }
 
-static void
+static int
 tsm_free_pdu(netsnmp_pdu *pdu)
 {
     /* free the security reference */
@@ -101,6 +114,7 @@ tsm_free_pdu(netsnmp_pdu *pdu)
         tsm_free_state_ref(pdu->securityStateRef);
         pdu->securityStateRef = NULL;
     }
+    return 0;
 }
 
 /** This is called when a PDU is cloned (to increase reference counts) */
@@ -127,7 +141,7 @@ tsm_clone_pdu(netsnmp_pdu *pdu, netsnmp_pdu *pdu2)
        which was already copied by snmp_clone_pdu before handing it to
        us. */
 
-    memdup(&newref->tmStateRef, oldref->tmStateRef,
+    memdup((u_char **) &newref->tmStateRef, oldref->tmStateRef,
            sizeof(*oldref->tmStateRef));
     return SNMPERR_SUCCESS;
 }
@@ -172,76 +186,115 @@ tsm_rgenerate_out_msg(struct snmp_secmod_outgoing_params *parms)
     
     DEBUGMSGTL(("tsm", "Starting TSM processing\n"));
 
-    /* if we have this, this message is in response to something that
-       came in earlier */
+    /* if we have this, then this message to be sent is in response to
+       something that came in earlier and the tsmSecRef was created by
+       the tsm_process_in_msg. */
     tsmSecRef = parms->secStateRef;
     
     if (tsmSecRef) {
-        /* section 4.2, step 1 */
-        netsnmp_assert_or_return(NULL != tsmSecRef->tmStateRef, SNMPERR_GENERR);
-        tmStateRef->sameSecurity = NETSNMP_TM_USE_SAME_SECURITY;
-        tmStateRef->requestedSecurityLevel = tsmSecRef->securityLevel;
+        /* 4.2, step 1: If there is a securityStateReference (Response
+           or Report message), then this Security Model uses the
+           cached information rather than the information provided by
+           the ASI. */
 
-        /* XXX: this may be freed automatically later by the library? */
+        /* 4.2, step 1: Extract the tmStateReference from the
+           securityStateReference cache. */
+        netsnmp_assert_or_return(NULL != tsmSecRef->tmStateRef, SNMPERR_GENERR);
+        tmStateRef = tsmSecRef->tmStateRef;
+
+        /* 4.2 step 1: Set the tmRequestedSecurityLevel to the value
+           of the extracted tmTransportSecurityLevel. */
+        tmStateRef->requestedSecurityLevel = tmStateRef->transportSecurityLevel;
+
+        /* 4.2 step 1: Set the tmSameSecurity parameter in the
+           tmStateReference cache to true. */
+        tmStateRef->sameSecurity = NETSNMP_TM_USE_SAME_SECURITY;
+
+        /* 4.2 step 1: The cachedSecurityData for this message can
+           now be discarded. */
         SNMP_FREE(parms->secStateRef);
     } else {
-        /* section 4.2, step 2 */
+        /* 4.2, step 2: If there is no securityStateReference (e.g., a
+           Request-type or Notification message), then create a
+           tmStateReference cache. */
         tmStateRef = SNMP_MALLOC_TYPEDEF(netsnmp_tmStateReference);
         netsnmp_assert_or_return(NULL != tmStateRef, SNMPERR_GENERR);
         
+        /* XXX: we don't actually use this really in our implementation */
+        /* 4.2, step 2: Set tmTransportDomain to the value of
+           transportDomain, tmTransportAddress to the value of
+           transportAddress */
+
+        /* 4.2, step 2: and tmRequestedSecurityLevel to the value of
+           securityLevel. */
         tmStateRef->requestedSecurityLevel = parms->secLevel;
+
+        /* 4.2, step 2: Set the transaction-specific tmSameSecurity
+           parameter to false. */
         tmStateRef->sameSecurity = NETSNMP_TM_SAME_SECURITY_NOT_REQUIRED;
 
         if (netsnmp_ds_get_boolean(NETSNMP_DS_APPLICATION_ID,
                                    NETSNMP_DS_LIB_TSM_USE_PREFIX)) {
             /* XXX: probably shouldn't be a hard-coded list of
                supported transports */
+            /* 4.2, step 2: If the snmpTsmConfigurationUsePrefix
+               object is set to true, then use the transportDomain to
+               look up the corresponding prefix. */
             const char *prefix;
             if (strncmp("ssh:",parms->session->peername,4) == 0)
                 prefix = "ssh:";
             else if (strncmp("dtls:",parms->session->peername,4) == 0)
                 prefix = "dtls:";
-            else
-                return SNMPERR_GENERR;
-
-            /* a: - lookup the prefix */
-            /*    - if DNE, snmpTsmUnknownPrefixes++ and bail */
-            if (!prefix) {
-                /* snmpTsmUnknownPrefixes++ */
+            else {
+                /* 4.2, step 2: If the prefix lookup fails for any
+                   reason, then the snmpTsmUnknownPrefixes counter is
+                   incremented, an error indication is returned to the
+                   calling module, and message processing stops. */
+                snmp_increment_statistic(STAT_TSM_SNMPTSMUNKNOWNPREFIXES);
                 return SNMPERR_GENERR;
             }
 
-            /*    - If secName doesn't have the prefix (or any):
-                  snmpTsmInvalidPrefixes++ and bail */
+            /* 4.2, step 2: If the lookup succeeds, but there is no
+               prefix in the securityName, or the prefix returned does
+               not match the prefix in the securityName, or the length
+               of the prefix is less than 1 or greater than 4 US-ASCII
+               alpha-numeric characters, then the
+               snmpTsmInvalidPrefixes counter is incremented, an error
+               indication is returned to the calling module, and
+               message processing stops. */
             if (strchr(parms->secName, ':') == 0 ||
                 strlen(prefix)+1 >= parms->secNameLen ||
                 strncmp(parms->secName, prefix, strlen(prefix)) != 0 ||
                 parms->secName[strlen(prefix)] != ':') {
-
-                /* snmpTsmInvalidPrefixes++ */
+                /* Note: since we're assiging the prefixes above the
+                   prefix lengths always meet the 1-4 criteria */
+                snmp_increment_statistic(STAT_TSM_SNMPTSMINVALIDPREFIXES);
                 return SNMPERR_GENERR;
             }
 
-            /*    - Strip the prefix and trailing : */
-            /* set tmSecurityName to securityName minus stripped part */
+            /* 4.2, step 2: Strip the transport-specific prefix and
+               trailing ':' character (US-ASCII 0x3a) from the
+               securityName.  Set tmSecurityName to the value of
+               securityName. */
             memcpy(tmStateRef->securityName,
                    parms->secName + strlen(prefix) + 1,
                    parms->secNameLen - strlen(prefix) - 1);
             tmStateRef->securityNameLen = parms->secNameLen - strlen(prefix) -1;
         } else {
-            /* set tmSecurityName to securityName */
+            /* 4.2, step 2: If the snmpTsmConfigurationUsePrefix object is
+               set to false, then set tmSecurityName to the value
+               of securityName. */
             memcpy(tmStateRef->securityName, parms->secName,
                    parms->secNameLen);
             tmStateRef->securityNameLen = parms->secNameLen;
         }
     }
+
+    /* truncate the security name with a '\0' for safety */
     tmStateRef->securityName[tmStateRef->securityNameLen] = '\0';
 
-    /* Section 4.2, Step 3:
-     * - Set securityParameters to a zero-length OCTET STRING ('0400')
-     * 
-     * We define here what the security message section will look like:
-     * 04 00 -- null string
+    /* 4.2, step 3: Set securityParameters to a zero-length OCTET
+     *  STRING ('0400').
      */
     DEBUGDUMPHEADER("send", "tsm security parameters");
     rc = asn_realloc_rbuild_header(wholeMsg, wholeMsgLen, offset, 1,
@@ -253,12 +306,8 @@ tsm_rgenerate_out_msg(struct snmp_secmod_outgoing_params *parms)
         return SNMPERR_TOO_LONG;
     }
     
-    /* Section 4.2, Step 4:
-     * Combine the message parts into a wholeMsg and calculate wholeMsgLen
-     */
-
-    /*
-     * Copy in the msgGlobalData and msgVersion.  
+    /* 4.2, step 4: Combine the message parts into a wholeMsg and
+       calculate wholeMsgLength.
      */
     while ((*wholeMsgLen - *offset) < parms->globalDataLen) {
         if (!asn_realloc(wholeMsg, wholeMsgLen)) {
@@ -271,6 +320,13 @@ tsm_rgenerate_out_msg(struct snmp_secmod_outgoing_params *parms)
     memcpy(*wholeMsg + *wholeMsgLen - *offset,
            parms->globalData, parms->globalDataLen);
 
+    /* 4.2, step 5: The wholeMsg, wholeMsgLength, securityParameters,
+       and tmStateReference are returned to the calling Message
+       Processing Model with the statusInformation set to success. */
+
+    /* For the Net-SNMP implemantion that actually means we start
+       encoding the full packet sequence from here before returning it */
+
     /*
      * Total packet sequence.  
      */
@@ -282,8 +338,6 @@ tsm_rgenerate_out_msg(struct snmp_secmod_outgoing_params *parms)
         return SNMPERR_TOO_LONG;
     }
 
-    /* Section 4.2 Step 5:  return everything */
-
     if (parms->pdu->transport_data &&
         parms->pdu->transport_data != tmStateRef) {
         snmp_log(LOG_ERR, "tsm: needed to free transport data\n");
@@ -292,7 +346,8 @@ tsm_rgenerate_out_msg(struct snmp_secmod_outgoing_params *parms)
 
     /* put the transport state reference into the PDU for the transport */
     if (SNMPERR_SUCCESS !=
-        memdup(&parms->pdu->transport_data, tmStateRef, sizeof(*tmStateRef))) {
+        memdup((u_char **) &parms->pdu->transport_data,
+               tmStateRef, sizeof(*tmStateRef))) {
         snmp_log(LOG_ERR, "tsm: malloc failure\n");
     }
     parms->pdu->transport_data_length = sizeof(*tmStateRef);
@@ -380,7 +435,7 @@ tsm_process_in_msg(struct snmp_secmod_incoming_params *parms)
         /* XXX: cache in session! */
 #ifdef NETSNMP_TRANSPORT_SSH_DOMAIN
         if (netsnmp_oid_equals(netsnmp_snmpSSHDomain,
-                               OID_LENGTH(netsnmp_snmpSSHDomain),
+                               netsnmp_snmpSSHDomain_len,
                                tmStateRef->transportDomain,
                                tmStateRef->transportDomainLen) == 0) {
             prefix = "ssh";
@@ -389,7 +444,7 @@ tsm_process_in_msg(struct snmp_secmod_incoming_params *parms)
 
 #ifdef NETSNMP_TRANSPORT_DTLSUDP_DOMAIN
         if (netsnmp_oid_equals(netsnmpDTLSUDPDomain,
-                               OID_LENGTH(netsnmpDTLSUDPDomain),
+                               netsnmpDTLSUDPDomain_len,
                                tmStateRef->transportDomain,
                                tmStateRef->transportDomainLen) == 0) {
             
@@ -399,7 +454,7 @@ tsm_process_in_msg(struct snmp_secmod_incoming_params *parms)
 
 #ifdef NETSNMP_TRANSPORT_DTLSSCTP_DOMAIN
         if (netsnmp_oid_equals(netsnmpDTLSSCTPDomain,
-                               OID_LENGTH(netsnmpDTLSSCTPDomain),
+                               netsnmpDTLSSCTPDomain_len,
                                tmStateRef->transportDomain,
                                tmStateRef->transportDomainLen) == 0) {
             
@@ -409,7 +464,7 @@ tsm_process_in_msg(struct snmp_secmod_incoming_params *parms)
 
 #ifdef NETSNMP_TRANSPORT_TLSTCP_DOMAIN
         if (netsnmp_oid_equals(netsnmpTLSTCPDomain,
-                               OID_LENGTH(netsnmpTLSTCPDomain),
+                               netsnmpTLSTCPDomain_len,
                                tmStateRef->transportDomain,
                                tmStateRef->transportDomainLen) == 0) {
             
