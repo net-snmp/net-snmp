@@ -158,7 +158,9 @@ while test "x$new_transport_list" != "x"; do
 #include "$rel_transport_hdr"]]))
       mv conftest.$ac_ext module_tmp_header.h
 
+      #
       # check for dependencies using config_require() macro
+      #
       sub_list="$new_list `$MODULECPP module_tmp_header.h | $GREP config_checkit_require | $SED 's/.*config_checkit_require(\(.*\)).*/\1/'`"
       echo "here: $rel_transport_hdr $sub_list"
       if test "x$sub_list" != "x" ; then
