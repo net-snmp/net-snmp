@@ -31,6 +31,7 @@
 
 #include <net-snmp/types.h>
 #include <net-snmp/library/snmpUDPIPv4BaseDomain.h>
+#include <net-snmp/library/snmp_debug.h>
 
 #if defined(linux) && defined(IP_PKTINFO)
 

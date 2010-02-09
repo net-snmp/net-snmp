@@ -720,55 +720,6 @@ netsnmp_udp_transport(struct sockaddr_in *addr, int local)
     return t;
 }
 
-
-void
-_netsnmp_udp_sockopt_set(int fd, int local)
-{
-#ifdef  SO_BSDCOMPAT
-    /*
-     * Patch for Linux.  Without this, UDP packets that fail get an ICMP
-     * response.  Linux turns the failed ICMP response into an error message
-     * and return value, unlike all other OS's.  
-     */
-    if (0 == netsnmp_os_prematch("Linux","2.4"))
-    {
-        int             one = 1;
-        DEBUGMSGTL(("socket:option", "setting socket option SO_BSDCOMPAT\n"));
-        setsockopt(fd, SOL_SOCKET, SO_BSDCOMPAT, (void *) &one,
-                   sizeof(one));
-    }
-#endif                          /*SO_BSDCOMPAT */
-    /*
-     * SO_REUSEADDR will allow multiple apps to open the same port at
-     * the same time. Only the last one to open the socket will get
-     * data. Obviously, for an agent, this is a bad thing. There should
-     * only be one listener.
-     */
-#ifdef ALLOW_PORT_HIJACKING
-#ifdef  SO_REUSEADDR
-    /*
-     * Allow the same port to be specified multiple times without failing.
-     *    (useful for a listener)
-     */
-    {
-        int             one = 1;
-        DEBUGMSGTL(("socket:option", "setting socket option SO_REUSEADDR\n"));
-        setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, (void *) &one,
-                   sizeof(one));
-    }
-#endif                          /*SO_REUSEADDR */
-#endif
-
-    /*
-     * Try to set the send and receive buffers to a reasonably large value, so
-     * that we can send and receive big PDUs (defaults to 8192 bytes (!) on
-     * Solaris, for instance).  Don't worry too much about errors -- just
-     * plough on regardless.  
-     */
-    netsnmp_sock_buffer_set(fd, SO_SNDBUF, local, 0);
-    netsnmp_sock_buffer_set(fd, SO_RCVBUF, local, 0);
-}
-
 #if !defined(NETSNMP_DISABLE_SNMPV1) || !defined(NETSNMP_DISABLE_SNMPV2C)
 /*
  * The following functions provide the "com2sec" configuration token

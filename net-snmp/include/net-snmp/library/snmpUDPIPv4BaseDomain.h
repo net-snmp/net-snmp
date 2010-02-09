@@ -10,8 +10,9 @@ extern          "C" {
 #include <net-snmp/library/snmp_transport.h>
 #include <net-snmp/library/asn1.h>
 #include <net-snmp/library/snmpIPBaseDomain.h>
-#include <net-snmp/library/snmp_debug.h>
+#include <net-snmp/library/snmpUDPBaseDomain.h>
 
+config_require(UDPBase);
 config_require(IPv4Base);
 
 #if HAVE_SYS_SOCKET_H
