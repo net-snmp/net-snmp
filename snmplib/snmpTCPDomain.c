@@ -75,42 +75,11 @@ netsnmp_tcp_fmtaddr(netsnmp_transport *t, void *data, int len)
  * remember where a PDU came from, so that you can send a reply there...  
  */
 
-static int
+int
 netsnmp_tcp_recv(netsnmp_transport *t, void *buf, int size,
 		 void **opaque, int *olength)
 {
-    int rc = -1;
-
-    if (t != NULL && t->sock >= 0) {
-	while (rc < 0) {
-	    rc = recvfrom(t->sock, buf, size, 0, NULL, NULL);
-	    if (rc < 0 && errno != EINTR) {
-		DEBUGMSGTL(("netsnmp_tcp", "recv fd %d err %d (\"%s\")\n",
-			    t->sock, errno, strerror(errno)));
-		break;
-	    }
-	    DEBUGMSGTL(("netsnmp_tcp", "recv fd %d got %d bytes\n",
-			t->sock, rc));
-	}
-    } else {
-        return -1;
-    }
-
-    if (opaque != NULL && olength != NULL) {
-        if (t->data_length > 0) {
-            if ((*opaque = malloc(t->data_length)) != NULL) {
-                memcpy(*opaque, t->data, t->data_length);
-                *olength = t->data_length;
-            } else {
-                *olength = 0;
-            }
-        } else {
-            *opaque = NULL;
-            *olength = 0;
-        }
-    }
-
-    return rc;
+    return netsnmp_tcpbase_recv(t, buf, size, opaque, olength);
 }
 
 
@@ -119,17 +88,7 @@ static int
 netsnmp_tcp_send(netsnmp_transport *t, void *buf, int size,
 		 void **opaque, int *olength)
 {
-    int rc = -1;
-
-    if (t != NULL && t->sock >= 0) {
-	while (rc < 0) {
-	    rc = sendto(t->sock, buf, size, 0, NULL, 0);
-	    if (rc < 0 && errno != EINTR) {
-		break;
-	    }
-	}
-    }
-    return rc;
+    return netsnmp_tcpbase_send(t, buf, size, opaque, olength);
 }
 
 
