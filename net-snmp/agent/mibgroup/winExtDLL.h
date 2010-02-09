@@ -9,13 +9,6 @@ extern "C" {
 #endif
 
     /*
-     * We use 'header_generic' from the util_funcs module,
-     *  so make sure this module is included in the agent.
-     */
-config_require(util_funcs)
-
-
-    /*
      * Declare our publically-visible functions.
      * Typically, these will include the initialization and shutdown functions,
      *  the main request callback routine and any writeable object methods.
@@ -24,9 +17,8 @@ config_require(util_funcs)
      *  and writeable object methods ('WriteMethod').
      */
      void     init_winExtDLL(void);
-
-     Netsnmp_Node_Handler var_winExtDLL;
-     
+     void     shutdown_winExtDLL(void);
+   
 #ifdef __cplusplus
 }
 #endif
