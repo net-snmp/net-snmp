@@ -15,19 +15,10 @@ extern          "C" {
 #include <netinet/in.h>
 #endif
 
-/* config_require(IPV4Base) */
+config_require(IPV4Base);
+#include <net-snmp/library/snmpIPV4BaseDomain.h>
 
 netsnmp_transport *netsnmp_udp_transport(struct sockaddr_in *addr, int local);
-
-
-/*
- * Convert a "traditional" peername into a sockaddr_in structure which is
- * written to *addr.  Returns 1 if the conversion was successful, or 0 if it
- * failed.  
- */
-
-int             netsnmp_sockaddr_in(struct sockaddr_in *addr,
-                                    const char *peername, int remote_port);
 
 
 /*
