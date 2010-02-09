@@ -16,7 +16,8 @@ extern          "C" {
 #endif
 
 #define TRANSPORT_DOMAIN_DTLS_UDP_IP	1,3,6,1,4,1,8072,3,3,8
-NETSNMP_IMPORT oid netsnmpDTLSUDPDomain[];
+NETSNMP_IMPORT oid netsnmpDTLSUDPDomain[10];
+NETSNMP_IMPORT size_t netsnmpDTLSUDPDomain_len;
 
 netsnmp_transport *netsnmp_dtlsudp_transport(struct sockaddr_in *addr,
                                              int local);
