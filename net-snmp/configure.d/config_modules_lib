@@ -70,6 +70,9 @@ transport_add_list=""
 new_with_transport_list=`echo $with_transports | $SED 's/,/ /g;'`
 new_with_out_transport_list=`echo $with_out_transports | $SED 's/,/ /g;'`
 
+# set up the CPP command
+MODULECPP="$CPP $PARTIALTARGETFLAGS -I${srcdir}/include"
+
 #
 # Add the default transports to the list
 #
@@ -90,59 +93,81 @@ for i in $transport_default_list; do
 done
 new_transport_list="$transport_add_list $new_with_transport_list"
 
-for i in $new_transport_list; do
-  if echo " $new_with_out_transport_list " | $GREP " $i " >/dev/null; then
-    if test "x$i" = "xUDP"; then
-      echo
-      AC_MSG_ERROR(It is not possible to compile without UDP/IP support.)
-    fi
-    continue
-  else
-    if test "x$i" = "xAAL5PVC"; then
-      if test "x$PARTIALTARGETOS" != "xlinux"; then
+while test "x$new_transport_list" != "x"; do
+  future_new_transport_list=""
+  for i in $new_transport_list; do
+    if echo " $new_with_out_transport_list " | $GREP " $i " >/dev/null; then
+      if test "x$i" = "xUDP"; then
         echo
-        AC_MSG_ERROR(AAL5 PVC support unavailable for this platform (Linux only))
+        AC_MSG_ERROR(It is not possible to compile without UDP/IP support.)
       fi
-    fi
-    if test "x$i" = "xIPX"; then
-      if test "x$PARTIALTARGETOS" != "xlinux"; then
-        echo
-        AC_MSG_ERROR(IPX support unavailable for this platform (Linux only))
-      fi
-    fi
-    if test "x$i" = "xUnix"; then
-      if test "x$PARTIALTARGETOS" = "xcygwin"; then
-        echo
-        AC_MSG_ERROR(Unix domain protocol support unavailable for this platform)
-      elif test "x$PARTIALTARGETOS" = "xmingw32" -o "x$PARTIALTARGETOS" = "xmingw32msvc"; then
-        echo
-        AC_MSG_ERROR(Unix domain protocol support unavailable for this platform)
-      fi
-    fi
-    if test ! "x$enable_ipv6" = "xyes"; then
-        if test "x$i" = "xUDPIPv6" -o "x$i" = "xTCPIPv6"; then
-            echo
-            AC_MSG_ERROR(IPv6 transports not available if IPv6 support is not enabled)
-        fi
-    fi
-    transport_src="snmp"$i"Domain.c"
-    transport_hdr="snmp"$i"Domain.h"
-    rel_transport_src="snmplib/"$transport_src
-    rel_transport_hdr="include/net-snmp/library/"$transport_hdr
-    if test -f "$srcdir/$rel_transport_src"; then
-      transport_result_list="$transport_result_list $i"
-      transport_src_list="$transport_src $transport_src_list"
-      if test -f "$srcdir/$rel_transport_hdr"; then
-        transport_hdr_list="$transport_hdr $transport_hdr_list"
-      fi
-      transport_def=`echo $i | $SED 'y/abcdefghijklmnopqrstuvwxyz/ABCDEFGHIJKLMNOPQRSTUVWXYZ/'`
-      transport_def_list="NETSNMP_TRANSPORT_"$transport_def"_DOMAIN $transport_def_list"
+      continue
     else
-      echo
-      AC_MSG_ERROR(Cannot find file $srcdir/$rel_transport_src to support SNMP transport domain $i.)
+      if test "x$i" = "xAAL5PVC"; then
+        if test "x$PARTIALTARGETOS" != "xlinux"; then
+          echo
+          AC_MSG_ERROR(AAL5 PVC support unavailable for this platform (Linux only))
+        fi
+      fi
+      if test "x$i" = "xIPX"; then
+        if test "x$PARTIALTARGETOS" != "xlinux"; then
+          echo
+          AC_MSG_ERROR(IPX support unavailable for this platform (Linux only))
+        fi
+      fi
+      if test "x$i" = "xUnix"; then
+        if test "x$PARTIALTARGETOS" = "xcygwin"; then
+          echo
+          AC_MSG_ERROR(Unix domain protocol support unavailable for this platform)
+        elif test "x$PARTIALTARGETOS" = "xmingw32" -o "x$PARTIALTARGETOS" = "xmingw32msvc"; then
+          echo
+          AC_MSG_ERROR(Unix domain protocol support unavailable for this platform)
+        fi
+      fi
+      if test ! "x$enable_ipv6" = "xyes"; then
+          if test "x$i" = "xUDPIPv6" -o "x$i" = "xTCPIPv6"; then
+              echo
+              AC_MSG_ERROR(IPv6 transports not available if IPv6 support is not enabled)
+          fi
+      fi
+      transport_src="snmp"$i"Domain.c"
+      transport_hdr="snmp"$i"Domain.h"
+      rel_transport_src="snmplib/"$transport_src
+      rel_transport_hdr="include/net-snmp/library/"$transport_hdr
+      if test -f "$srcdir/$rel_transport_src"; then
+        transport_result_list="$transport_result_list $i"
+        transport_src_list="$transport_src $transport_src_list"
+        if test -f "$srcdir/$rel_transport_hdr"; then
+          transport_hdr_list="$transport_hdr $transport_hdr_list"
+        fi
+        transport_def=`echo $i | $SED 'y/abcdefghijklmnopqrstuvwxyz/ABCDEFGHIJKLMNOPQRSTUVWXYZ/'`
+        transport_def_list="NETSNMP_TRANSPORT_"$transport_def"_DOMAIN $transport_def_list"
+      else
+        echo
+        AC_MSG_ERROR(Cannot find file $srcdir/$rel_transport_src to support SNMP transport domain $i.)
+      fi
+
+      #---------------------
+      # build a pseudo include header that includes current config and
+      # system symbols:
+      AC_LANG_CONFTEST(AC_LANG_SOURCE([[
+#include NETSNMP_SYSTEM_INCLUDE_FILE
+#include <net-snmp/net-snmp-config.h>
+#undef config_require
+#define config_require(foo) config_checkit_require(foo)
+#include "$rel_transport_hdr"]]))
+      mv conftest.$ac_ext module_tmp_header.h
+
+      # check for dependencies using config_require() macro
+      sub_list="$new_list `$MODULECPP module_tmp_header.h | $GREP config_checkit_require | $SED 's/.*config_checkit_require(\(.*\)).*/\1/'`"
+      echo "here: $rel_transport_hdr $sub_list"
+      if test "x$sub_list" != "x" ; then
+        future_new_transport_list="$future_new_transport_list $sub_list"
+      fi
     fi
-  fi
-done
+  done # for each new transport
+  new_transport_list="$future_new_transport_list"
+done # while new transports exist
 transport_obj_list=`echo " $transport_src_list " | $SED 's/\.c/\.o/g'` 	 
 transport_lobj_list=`echo " $transport_src_list " | $SED 's/\.c/\.lo/g'`
 
@@ -163,6 +188,9 @@ for i in $transport_def_list; do
 done
 AC_MSG_RESULT($transport_result_list.)
 AC_MSG_CACHE_ADD(Network transport support: $transport_result_list)
+
+# cleanup
+rm -f module_tmp_header.h
 
 #
 # Security modules to use
