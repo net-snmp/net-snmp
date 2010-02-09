@@ -79,26 +79,7 @@ extern void _netsnmp_udp_sockopt_set(int fd, int server);
 static char *
 netsnmp_udp6_fmtaddr(netsnmp_transport *t, void *data, int len)
 {
-    struct sockaddr_in6 *to = NULL;
-
-    DEBUGMSGTL(("netsnmp_udp6", "fmtaddr: t = %p, data = %p, len = %d\n", t,
-                data, len));
-    if (data != NULL && len == sizeof(struct sockaddr_in6)) {
-        to = (struct sockaddr_in6 *) data;
-    } else if (t != NULL && t->data != NULL) {
-        to = (struct sockaddr_in6 *) t->data;
-    }
-    if (to == NULL) {
-        return strdup("UDP/IPv6: unknown");
-    } else {
-        char addr[INET6_ADDRSTRLEN];
-        char tmp[INET6_ADDRSTRLEN + 18];
-
-        sprintf(tmp, "UDP/IPv6: [%s]:%hu",
-                inet_ntop(AF_INET6, (void *) &(to->sin6_addr), addr,
-                          INET6_ADDRSTRLEN), ntohs(to->sin6_port));
-        return strdup(tmp);
-    }
+    return netsnmp_ipv6_fmtaddr("UDP/IPv6", t, data, len);
 }
 
 

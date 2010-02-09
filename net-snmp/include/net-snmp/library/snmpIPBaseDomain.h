@@ -23,9 +23,10 @@ extern          "C" {
  * failed_  
  */
 
-int             netsnmp_sockaddr_in(struct sockaddr_in *addr,
-                                    const char *peername, int remote_port);
-
+    int netsnmp_sockaddr_in(struct sockaddr_in *addr, const char *peername,
+                            int remote_port);
+    int netsnmp_sockaddr_in2(struct sockaddr_in *addr, const char *inpeername,
+                             const char *default_target);
 
 #ifdef __cplusplus
 }

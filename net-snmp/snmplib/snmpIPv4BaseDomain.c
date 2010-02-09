@@ -68,3 +68,4 @@ netsnmp_ipv4_fmtaddr(const char *prefix, netsnmp_transport *t,
     tmp[sizeof(tmp)-1] = '\0';
     return strdup(tmp);
 }
+

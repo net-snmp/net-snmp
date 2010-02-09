@@ -135,12 +135,6 @@
 #define INADDR_NONE	-1
 #endif
 
-#ifdef  MSG_DONTWAIT
-#define NETSNMP_DONTWAIT MSG_DONTWAIT
-#else
-#define NETSNMP_DONTWAIT 0
-#endif
-
 #define WE_ARE_SERVER 0
 #define WE_ARE_CLIENT 1
 
