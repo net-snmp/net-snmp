@@ -934,15 +934,6 @@ netsnmp_sockaddr_in2(struct sockaddr_in *addr,
 }
 
 
-int
-netsnmp_sockaddr_in(struct sockaddr_in *addr,
-                    const char *inpeername, int remote_port)
-{
-    char buf[sizeof(int) * 3 + 2];
-    sprintf(buf, ":%u", remote_port);
-    return netsnmp_sockaddr_in2(addr, inpeername, remote_port ? buf : NULL);
-}
-
 #if !defined(NETSNMP_DISABLE_SNMPV1) || !defined(NETSNMP_DISABLE_SNMPV2C)
 /*
  * The following functions provide the "com2sec" configuration token
