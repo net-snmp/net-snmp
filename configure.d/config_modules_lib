@@ -144,7 +144,13 @@ while test "x$new_transport_list" != "x"; do
       #
       sub_list=`$MODULECPP module_tmp_header.h | $GREP config_checkit_require | $SED 's/.*config_checkit_require(\(.*\)).*/\1/'`
       if test "x$sub_list" != "x" ; then
-        future_new_transport_list="$future_new_transport_list $sub_list"
+        for j in $sub_list ; do
+	  if echo " $future_new_transport_list $new_transport_list " | $GREP " $j " > /dev/null ; then
+	    :
+	  else
+            future_new_transport_list="$future_new_transport_list $j"
+	  fi
+        done
       fi
 
       #
