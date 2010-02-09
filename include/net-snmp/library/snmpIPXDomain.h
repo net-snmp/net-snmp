@@ -11,6 +11,9 @@ extern          "C" {
 #include <netipx/ipx.h>
 #endif
 
+#ifndef linux
+    config_error(IPX support unavailable for this platform -Linux only-);
+#endif
 
 netsnmp_transport *netsnmp_ipx_transport(struct sockaddr_ipx *addr, int local);
 
