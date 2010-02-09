@@ -5,6 +5,7 @@
 extern          "C" {
 #endif
 
+#include <stdio.h>
 #if HAVE_SYSLOG_H
 #include <syslog.h>
 #endif
