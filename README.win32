@@ -246,25 +246,6 @@ Workspace:
 -modify win32\net-snmp\net-snmp-config.h and add:
  #define USING_WINEXTDLL_MODULE 1
 
--modify win32\netsnmpmibssdk\netsnmpmibssdk.dsp:
- uncomment winExtDLL lines
-
- add to lines that contain # ADD LIB32 (line that contains iphlpapi.lib): 
-  MgmtAPI.lib snmpapi.lib 
- 
- add near the bottom of the file:
-
-  # Begin Source File
-
-  SOURCE=..\..\agent\mibgroup\winExtDLL.c
-  # End Source File
-
-
--This extension requires the PSDK including the Snmp.h header file.
- Including Snmp.h will conflict with existing Net-SNMP defines for
- ASN_OCTETSTRING etc.  To resolve this, create a copy of Snmp.h in
- the PSDK include/ folder called Snmp-winExtDLL.h and change all
- occurances of ASN_ to MS_ASN_
 
 
 ***************************************************************************
