@@ -1,7 +1,7 @@
 /* IP base transport support functions
  */
-#ifndef SNMPIPBASE_H
-#define SNMPIPBASE_H
+#ifndef SNMPIPBASEDOMAIN_H
+#define SNMPIPBASEDOMAIN_H
 
 #ifdef __cplusplus
 extern          "C" {
@@ -31,4 +31,4 @@ extern          "C" {
 #ifdef __cplusplus
 }
 #endif
-#endif /* SNMPIPBASE_H */
+#endif /* SNMPIPBASEDOMAIN_H */
