@@ -1,4 +1,4 @@
-/* IPV4 base transport support functions
+/* IPV6 base transport support functions
  */
 
 #include <net-snmp/net-snmp-config.h>
@@ -26,5 +26,5 @@
 #endif
 
 #include <net-snmp/types.h>
-#include <net-snmp/library/snmpIPV4BaseDomain.h>
+#include <net-snmp/library/snmpIPV6BaseDomain.h>
 
