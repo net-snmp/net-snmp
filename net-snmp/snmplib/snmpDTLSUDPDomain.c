@@ -781,15 +781,8 @@ netsnmp_dtlsudp_close(netsnmp_transport *t)
 {
     int rc = -1;
     /* XXX: issue a proper dtls closure notification(s) */
-    if (t->sock >= 0) {
-#ifndef HAVE_CLOSESOCKET
-        rc = close(t->sock);
-#else
-        rc = closesocket(t->sock);
-#endif
-        t->sock = -1;
-    }
-    return rc;
+
+    return netsnmp_udpbase_close(t);
 }
 
 /*
