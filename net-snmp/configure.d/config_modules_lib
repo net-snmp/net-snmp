@@ -155,16 +155,26 @@ while test "x$new_transport_list" != "x"; do
 #include <net-snmp/net-snmp-config.h>
 #undef config_require
 #define config_require(foo) config_checkit_require(foo)
+#undef config_error
+#define config_error(foo) config_checkit_error(foo)
 #include "$rel_transport_hdr"]]))
       mv conftest.$ac_ext module_tmp_header.h
 
       #
       # check for dependencies using config_require() macro
       #
-      sub_list="$new_list `$MODULECPP module_tmp_header.h | $GREP config_checkit_require | $SED 's/.*config_checkit_require(\(.*\)).*/\1/'`"
-      echo "here: $rel_transport_hdr $sub_list"
+      sub_list=`$MODULECPP module_tmp_header.h | $GREP config_checkit_require | $SED 's/.*config_checkit_require(\(.*\)).*/\1/'`
       if test "x$sub_list" != "x" ; then
         future_new_transport_list="$future_new_transport_list $sub_list"
+      fi
+
+      #
+      # check for errors using config_error() macro
+      #
+      error_list=`$MODULECPP module_tmp_header.h | $GREP config_checkit_error | $SED 's/.*config_checkit_error(\(.*\)).*/\1/'`
+      if test "x$error_list" != "x" ; then
+        echo ""
+        AC_MSG_ERROR($error_list)
       fi
     fi
   done # for each new transport
