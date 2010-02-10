@@ -569,12 +569,8 @@ netsnmp_transport *
 netsnmp_udp_transport(struct sockaddr_in *addr, int local)
 {
     netsnmp_transport *t = NULL;
-    int             rc = 0;
-    char           *str = NULL;
-    char           *client_socket = NULL;
-    netsnmp_udp_addr_pair addr_pair;
 
-    t = netsnmp_udpbase_transport(addr, local);
+    t = netsnmp_udpipv4base_transport(addr, local);
     if (NULL == t) {
         return NULL;
     }

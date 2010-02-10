@@ -42,6 +42,9 @@ config_require(IPv4Base);
                                  int *if_index);
     int netsnmp_udpipv4_sendto(int fd, struct in_addr *srcip, int if_index,
                                struct sockaddr *remote, void *data, int len);
+    netsnmp_transport *netsnmp_udpipv4base_transport(struct sockaddr_in *addr,
+                                                     int local);
+
 #endif
 
 
