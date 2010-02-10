@@ -842,7 +842,7 @@ netsnmp_dtlsudp_agent_config_tokens_register(void)
 
 netsnmp_transport *
 netsnmp_dtlsudp_create_tstring(const char *str, int local,
-			   const char *default_target)
+                               const char *default_target)
 {
     struct sockaddr_in addr;
 
