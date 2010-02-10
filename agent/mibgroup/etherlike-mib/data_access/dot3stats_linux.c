@@ -331,6 +331,80 @@ interface_ioctl_dot3stats_duplex_get(dot3StatsTable_rowreq_ctx *rowreq_ctx, int 
 #endif
 }
 
+/*
+ * NAME: getulongfromsysclassnetstatistics
+ * PURPOSE: To get a single statistics value from /sys/class/net/<ifname>/statistics/<ctrname>
+ * ARGUMENTS: ifname: interface name
+ *	ctrname: counter name
+ *	valuep: where to store value
+ * RETURNS: 0 if value not available
+ *	non-0 if value available
+ */
+static int
+getulongfromsysclassnetstatistics(const char *ifname, char *ctrname, u_long *valuep)
+{
+    char path[256];
+    FILE *fp;
+    int rv;
+
+    if (ifname == NULL || ctrname == NULL || valuep == NULL)
+	return 0;
+
+    snprintf(path, sizeof(path), "/sys/class/net/%s/statistics/%s", ifname, ctrname);
+    fp = fopen(path, "rt");
+    if (fp == NULL)
+	return 0;
+
+    rv = 1;
+    if (fscanf(fp, "%lu", valuep) != 1)
+	rv = 0;
+
+    fclose(fp);
+
+    return rv;
+}
+
+/*
+ * NAME: interface_sysclassnet_dot3stats_get
+ * PURPOSE: To get ethernet statistics from /sys/class/net/...
+ * ARGUMENTS: rowreq_ctx: where to store the value(s)
+ *	name: interface name
+ * RETURNS: nothing. fields not set if data not available
+ */
+void
+interface_sysclassnet_dot3stats_get (dot3StatsTable_rowreq_ctx *rowreq_ctx, const char *name)
+{
+    u_long value;
+    dot3StatsTable_data *data = &rowreq_ctx->data;
+
+    if (getulongfromsysclassnetstatistics(name, "rx_errors", &value)) {
+	data->dot3StatsFCSErrors = value;
+	rowreq_ctx->column_exists_flags |= COLUMN_DOT3STATSFCSERRORS_FLAG;
+    }
+    if (getulongfromsysclassnetstatistics(name, "tx_dropped", &value)) {
+	data->dot3StatsDeferredTransmissions = value;
+	rowreq_ctx->column_exists_flags |= COLUMN_DOT3STATSDEFERREDTRANSMISSIONS_FLAG;
+    }
+    if (getulongfromsysclassnetstatistics(name, "tx_fifo_errors", &value)) {
+	data->dot3StatsInternalMacTransmitErrors = value;
+	rowreq_ctx->column_exists_flags |= COLUMN_DOT3STATSINTERNALMACTRANSMITERRORS_FLAG;
+    }
+    if (getulongfromsysclassnetstatistics(name, "tx_carrier_errors", &value)) {
+	data->dot3StatsCarrierSenseErrors = value;
+	rowreq_ctx->column_exists_flags |= COLUMN_DOT3STATSCARRIERSENSEERRORS_FLAG;
+    }
+    if (getulongfromsysclassnetstatistics(name, "rx_frame_errors", &value)) {
+	data->dot3StatsFrameTooLongs = value;
+	rowreq_ctx->column_exists_flags |= COLUMN_DOT3STATSFRAMETOOLONGS_FLAG;
+    }
+    if (getulongfromsysclassnetstatistics(name, "rx_fifo_errors", &value)) {
+	data->dot3StatsInternalMacReceiveErrors = value;
+	rowreq_ctx->column_exists_flags |= COLUMN_DOT3STATSINTERNALMACRECEIVEERRORS_FLAG;
+    }
+
+    return;
+}
+
 
 
 /* ioctl wrapper
