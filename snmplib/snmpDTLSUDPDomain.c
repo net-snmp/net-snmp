@@ -781,7 +781,7 @@ netsnmp_dtlsudp_close(netsnmp_transport *t)
 {
     /* XXX: issue a proper dtls closure notification(s) */
 
-    return netsnmp_udpbase_close(t);
+    return netsnmp_socketbase_close(t);
 }
 
 /*

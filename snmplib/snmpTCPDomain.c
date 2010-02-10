@@ -96,17 +96,7 @@ netsnmp_tcp_send(netsnmp_transport *t, void *buf, int size,
 static int
 netsnmp_tcp_close(netsnmp_transport *t)
 {
-    int rc = -1;
-    if (t != NULL && t->sock >= 0) {
-        DEBUGMSGTL(("netsnmp_tcp", "close fd %d\n", t->sock));
-#ifndef HAVE_CLOSESOCKET
-        rc = close(t->sock);
-#else
-        rc = closesocket(t->sock);
-#endif
-        t->sock = -1;
-    }
-    return rc;
+    return netsnmp_socketbase_close(t);
 }
 
 

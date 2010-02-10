@@ -151,7 +151,7 @@ netsnmp_udpbase_transport(struct sockaddr_in *addr, int local)
         rc = bind(t->sock, (struct sockaddr *) addr,
                   sizeof(struct sockaddr));
         if (rc != 0) {
-            netsnmp_udpbase_close(t);
+            netsnmp_socketbase_close(t);
             netsnmp_transport_free(t);
             return NULL;
         }
@@ -176,7 +176,7 @@ netsnmp_udpbase_transport(struct sockaddr_in *addr, int local)
             if ( rc != 0 ) {
                 DEBUGMSGTL(("netsnmp_udpbase", "failed to bind for clientaddr: %d %s\n",
                             errno, strerror(errno)));
-                netsnmp_udpbase_close(t);
+                netsnmp_socketbase_close(t);
                 netsnmp_transport_free(t);
                 return NULL;
             }
@@ -209,15 +209,3 @@ netsnmp_udpbase_transport(struct sockaddr_in *addr, int local)
     return t;
 }
 
-int netsnmp_udpbase_close(netsnmp_transport *t) {
-    int rc = -1;
-    if (t->sock >= 0) {
-#ifndef HAVE_CLOSESOCKET
-        rc = close(t->sock);
-#else
-        rc = closesocket(t->sock);
-#endif
-        t->sock = -1;
-    }
-    return rc;
-}

@@ -285,7 +285,7 @@ netsnmp_udp_send(netsnmp_transport *t, void *buf, int size,
 static int
 netsnmp_udp_close(netsnmp_transport *t)
 {
-    return netsnmp_udpbase_close(t);
+    return netsnmp_socketbase_close(t);
 }
 
 /*
