@@ -1107,20 +1107,22 @@ py_netsnmp_construct_varbind(void)
   return PyObject_CallFunction(callable, "");
 }
 
-static char *
-py_netsnmp_attr_string(PyObject *obj, char * attr_name)
+static int
+py_netsnmp_attr_string(PyObject *obj, char * attr_name, char **val,
+    Py_ssize_t *len)
 {
-  char *val = NULL;
-
+  *val = NULL;
   if (obj && attr_name && PyObject_HasAttrString(obj, attr_name)) {
     PyObject *attr = PyObject_GetAttrString(obj, attr_name);
     if (attr) {
-      val = PyString_AsString(attr);
+      int retval;
+      retval = PyString_AsStringAndSize(attr, val, len);
       Py_DECREF(attr);
+      return retval;
     }
   }
 
-  return val;
+  return -1;
 }
 
 static long long
@@ -1422,6 +1424,8 @@ netsnmp_get(PyObject *self, PyObject *args)
   int err_ind;
   int err_num;
   char err_str[STR_BUF_SIZE];
+  char *tmpstr;
+  Py_ssize_t tmplen;
 	   
   oid_arr = calloc(MAX_OID_LEN, sizeof(oid));
 
@@ -1433,7 +1437,10 @@ netsnmp_get(PyObject *self, PyObject *args)
 
     ss = (SnmpSession *)py_netsnmp_attr_long(session, "sess_ptr");
 
-    strcpy(err_str, py_netsnmp_attr_string(session, "ErrorStr"));
+    if (py_netsnmp_attr_string(session, "ErrorStr", &tmpstr, &tmplen) < 0) {
+      goto done;
+    }
+    memcpy(&err_str, tmpstr, tmplen);
     err_num = py_netsnmp_attr_long(session, "ErrorNum");
     err_ind = py_netsnmp_attr_long(session, "ErrorInd");
 
@@ -1454,12 +1461,13 @@ netsnmp_get(PyObject *self, PyObject *args)
       PyObject *varlist_iter = PyObject_GetIter(varlist);
 
       while (varlist_iter && (varbind = PyIter_Next(varlist_iter))) {
-	tag = py_netsnmp_attr_string(varbind, "tag");
-	iid = py_netsnmp_attr_string(varbind, "iid");
-
-
-	tp = __tag2oid(tag, iid, oid_arr, &oid_arr_len, 
-		       NULL, best_guess);
+	if (py_netsnmp_attr_string(varbind, "tag", &tag, NULL) < 0 ||
+	    py_netsnmp_attr_string(varbind, "iid", &iid, NULL) < 0)
+	{
+	  oid_arr_len = 0;
+	} else {
+	  tp = __tag2oid(tag, iid, oid_arr, &oid_arr_len, NULL, best_guess);
+	}
 
 	if (oid_arr_len) {
 	  snmp_add_null_var(pdu, oid_arr, oid_arr_len);
@@ -1627,6 +1635,8 @@ netsnmp_getnext(PyObject *self, PyObject *args)
   int err_ind;
   int err_num;
   char err_str[STR_BUF_SIZE];
+  char *tmpstr;
+  Py_ssize_t tmplen;
 	   
   oid_arr = calloc(MAX_OID_LEN, sizeof(oid));
 
@@ -1638,7 +1648,10 @@ netsnmp_getnext(PyObject *self, PyObject *args)
 
     ss = (SnmpSession *)py_netsnmp_attr_long(session, "sess_ptr");
 
-    strcpy(err_str, py_netsnmp_attr_string(session, "ErrorStr"));
+    if (py_netsnmp_attr_string(session, "ErrorStr", &tmpstr, &tmplen) < 0) {
+      goto done;
+    }
+    memcpy(&err_str, tmpstr, tmplen);
     err_num = py_netsnmp_attr_long(session, "ErrorNum");
     err_ind = py_netsnmp_attr_long(session, "ErrorInd");
 
@@ -1659,11 +1672,13 @@ netsnmp_getnext(PyObject *self, PyObject *args)
       PyObject *varlist_iter = PyObject_GetIter(varlist);
 
       while (varlist_iter && (varbind = PyIter_Next(varlist_iter))) {
-	tag = py_netsnmp_attr_string(varbind, "tag");
-	iid = py_netsnmp_attr_string(varbind, "iid");
-
-	tp = __tag2oid(tag, iid, oid_arr, &oid_arr_len, 
-		       NULL, best_guess);
+	if (py_netsnmp_attr_string(varbind, "tag", &tag, NULL) < 0 ||
+	    py_netsnmp_attr_string(varbind, "iid", &iid, NULL) < 0)
+	{
+	  oid_arr_len = 0;
+	} else {
+	  tp = __tag2oid(tag, iid, oid_arr, &oid_arr_len, NULL, best_guess);
+	}
 
 	if (_debug_level) 
 	  printf("netsnmp_getnext: filling request: %s:%s:%d:%d\n", 
@@ -1836,6 +1851,8 @@ netsnmp_walk(PyObject *self, PyObject *args)
   char err_str[STR_BUF_SIZE];
   int notdone = 1;
   int result_count = 0;
+  char *tmpstr;
+  Py_ssize_t tmplen;
 	   
   oid_arr = calloc(MAX_OID_LEN, sizeof(oid));
 
@@ -1854,7 +1871,10 @@ netsnmp_walk(PyObject *self, PyObject *args)
     }
     ss = (SnmpSession *)py_netsnmp_attr_long(session, "sess_ptr");
 
-    strcpy(err_str, py_netsnmp_attr_string(session, "ErrorStr"));
+    if (py_netsnmp_attr_string(session, "ErrorStr", &tmpstr, &tmplen) < 0) {
+      goto done;
+    }
+    memcpy(&err_str, tmpstr, tmplen);
     err_num = py_netsnmp_attr_long(session, "ErrorNum");
     err_ind = py_netsnmp_attr_long(session, "ErrorInd");
 
@@ -1875,11 +1895,13 @@ netsnmp_walk(PyObject *self, PyObject *args)
     
     /* get the initial starting oids*/
     while (varlist_iter && (varbind = PyIter_Next(varlist_iter))) {
-      tag = py_netsnmp_attr_string(varbind, "tag");
-      iid = py_netsnmp_attr_string(varbind, "iid");
-
-      tp = __tag2oid(tag, iid, oid_arr, &oid_arr_len, 
-      	       NULL, best_guess);
+      if (py_netsnmp_attr_string(varbind, "tag", &tag, NULL) < 0 ||
+         py_netsnmp_attr_string(varbind, "iid", &iid, NULL) < 0)
+      {
+        oid_arr_len = 0;
+      } else {
+        tp = __tag2oid(tag, iid, oid_arr, &oid_arr_len, NULL, best_guess);
+      }
 
       if (_debug_level) 
 	printf("netsnmp_walk: filling request: %s:%s:%d:%d\n", 
@@ -2107,6 +2129,8 @@ netsnmp_getbulk(PyObject *self, PyObject *args)
   int err_ind;
   int err_num;
   char err_str[STR_BUF_SIZE];
+  char *tmpstr;
+  Py_ssize_t tmplen;
 	   
   oid_arr = calloc(MAX_OID_LEN, sizeof(oid));
 
@@ -2121,7 +2145,10 @@ netsnmp_getbulk(PyObject *self, PyObject *args)
       
       ss = (SnmpSession *)py_netsnmp_attr_long(session, "sess_ptr");
 
-      strcpy(err_str, py_netsnmp_attr_string(session, "ErrorStr"));
+      if (py_netsnmp_attr_string(session, "ErrorStr", &tmpstr, &tmplen) < 0) {
+        goto done;
+      }
+      memcpy(&err_str, tmpstr, tmplen);
       err_num = py_netsnmp_attr_long(session, "ErrorNum");
       err_ind = py_netsnmp_attr_long(session, "ErrorInd");
 
@@ -2144,11 +2171,13 @@ netsnmp_getbulk(PyObject *self, PyObject *args)
       varbinds_iter = PyObject_GetIter(varbinds);
 
       while (varbinds_iter && (varbind = PyIter_Next(varbinds_iter))) {
-	tag = py_netsnmp_attr_string(varbind, "tag");
-	iid = py_netsnmp_attr_string(varbind, "iid");
-
-	tp = __tag2oid(tag, iid, oid_arr, &oid_arr_len, 
-		       NULL, best_guess);
+        if (py_netsnmp_attr_string(varbind, "tag", &tag, NULL) < 0 ||
+          py_netsnmp_attr_string(varbind, "iid", &iid, NULL) < 0)
+        {
+          oid_arr_len = 0;
+        } else {
+          tp = __tag2oid(tag, iid, oid_arr, &oid_arr_len, NULL, best_guess);
+        }
 
 	if (oid_arr_len) {
 	  snmp_add_null_var(pdu, oid_arr, oid_arr_len);
@@ -2331,6 +2360,8 @@ netsnmp_set(PyObject *self, PyObject *args)
   int err_ind;
   int err_num;
   char err_str[STR_BUF_SIZE];
+  char *tmpstr;
+  Py_ssize_t tmplen;
 	   
   oid_arr = calloc(MAX_OID_LEN, sizeof(oid));
 
@@ -2343,7 +2374,10 @@ netsnmp_set(PyObject *self, PyObject *args)
     ss = (SnmpSession *)py_netsnmp_attr_long(session, "sess_ptr");
 
     /* PyObject_SetAttrString(); */
-    strcpy(err_str, py_netsnmp_attr_string(session, "ErrorStr"));
+    if (py_netsnmp_attr_string(session, "ErrorStr", &tmpstr, &tmplen) < 0) {
+      goto done;
+    }
+    memcpy(&err_str, tmpstr, tmplen);
     err_num = py_netsnmp_attr_long(session, "ErrorNum");
     err_ind = py_netsnmp_attr_long(session, "ErrorInd");
 
@@ -2357,11 +2391,13 @@ netsnmp_set(PyObject *self, PyObject *args)
       PyObject *varlist_iter = PyObject_GetIter(varlist);
 
       while (varlist_iter && (varbind = PyIter_Next(varlist_iter))) {
-	tag = py_netsnmp_attr_string(varbind, "tag");
-	iid = py_netsnmp_attr_string(varbind, "iid");
-
-	tp = __tag2oid(tag, iid, oid_arr, &oid_arr_len, 
-		       &type, best_guess);
+        if (py_netsnmp_attr_string(varbind, "tag", &tag, NULL) < 0 ||
+          py_netsnmp_attr_string(varbind, "iid", &iid, NULL) < 0)
+        {
+          oid_arr_len = 0;
+        } else {
+          tp = __tag2oid(tag, iid, oid_arr, &oid_arr_len, &type, best_guess);
+        }
 
 	if (oid_arr_len==0) {
 	  if (verbose)
@@ -2372,7 +2408,10 @@ netsnmp_set(PyObject *self, PyObject *args)
 	}
 
 	if (type == TYPE_UNKNOWN) {
-	  type_str = py_netsnmp_attr_string(varbind, "type");
+	  if (py_netsnmp_attr_string(varbind, "type", &type_str, NULL) < 0) {
+	    snmp_free_pdu(pdu);
+	    goto done;
+	  }
 	  type = __translate_appl_type(type_str);
 	  if (type == TYPE_UNKNOWN) {
 	    if (verbose)
@@ -2382,8 +2421,11 @@ netsnmp_set(PyObject *self, PyObject *args)
 	  }
 	}
 
-	val = py_netsnmp_attr_string(varbind, "val");
-	strcpy(tmp_val_str, val);
+	if (py_netsnmp_attr_string(varbind, "val", &val, &tmplen) < 0) {
+	  snmp_free_pdu(pdu);
+	  goto done;
+	}
+	memcpy(tmp_val_str, val, tmplen);
 	if (type==TYPE_INTEGER && use_enums && tp && tp->enums) {
 	  for(ep = tp->enums; ep; ep = ep->next) {
 	    if (val && !strcmp(ep->label, val)) {
@@ -2392,7 +2434,7 @@ netsnmp_set(PyObject *self, PyObject *args)
 	    }
 	  }
 	}
-	len = STRLEN(tmp_val_str);
+	len = (int)tmplen;
 	status = __add_var_val_str(pdu, oid_arr, oid_arr_len,
 				tmp_val_str, len, type);
 
