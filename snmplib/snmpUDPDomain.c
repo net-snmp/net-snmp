@@ -183,105 +183,6 @@ int netsnmp_udp_sendto(int fd, struct in_addr *srcip, int if_index, struct socka
 #endif /* linux && IP_PKTINFO */
 
 /*
- * You can write something into opaque that will subsequently get passed back 
- * to your send function if you like.  For instance, you might want to
- * remember where a PDU came from, so that you can send a reply there...  
- */
-
-static int
-netsnmp_udp_recv(netsnmp_transport *t, void *buf, int size,
-		 void **opaque, int *olength)
-{
-    int             rc = -1;
-    socklen_t       fromlen = sizeof(struct sockaddr);
-    netsnmp_udp_addr_pair *addr_pair = NULL;
-    struct sockaddr *from;
-
-    if (t != NULL && t->sock >= 0) {
-        addr_pair = (netsnmp_udp_addr_pair *) malloc(sizeof(netsnmp_udp_addr_pair));
-        if (addr_pair == NULL) {
-            *opaque = NULL;
-            *olength = 0;
-            return -1;
-        } else {
-            memset(addr_pair, 0, sizeof(netsnmp_udp_addr_pair));
-            from = (struct sockaddr *) &(addr_pair->remote_addr);
-        }
-
-	while (rc < 0) {
-#if defined(linux) && defined(IP_PKTINFO)
-            rc = netsnmp_udp_recvfrom(t->sock, buf, size, from, &fromlen,
-                    &(addr_pair->local_addr), &(addr_pair->if_index));
-#else
-            rc = recvfrom(t->sock, buf, size, NETSNMP_DONTWAIT, from, &fromlen);
-#endif /* linux && IP_PKTINFO */
-	    if (rc < 0 && errno != EINTR) {
-		break;
-	    }
-	}
-
-        if (rc >= 0) {
-            char *str = netsnmp_udp_fmtaddr(NULL, addr_pair, sizeof(netsnmp_udp_addr_pair));
-            DEBUGMSGTL(("netsnmp_udp",
-			"recvfrom fd %d got %d bytes (from %s)\n",
-			t->sock, rc, str));
-            free(str);
-        } else {
-            DEBUGMSGTL(("netsnmp_udp", "recvfrom fd %d err %d (\"%s\")\n",
-                        t->sock, errno, strerror(errno)));
-        }
-        *opaque = (void *)addr_pair;
-        *olength = sizeof(netsnmp_udp_addr_pair);
-    }
-    return rc;
-}
-
-
-
-static int
-netsnmp_udp_send(netsnmp_transport *t, void *buf, int size,
-		 void **opaque, int *olength)
-{
-    int rc = -1;
-    netsnmp_udp_addr_pair *addr_pair = NULL;
-    struct sockaddr *to = NULL;
-
-    if (opaque != NULL && *opaque != NULL &&
-        *olength == sizeof(netsnmp_udp_addr_pair)) {
-        addr_pair = (netsnmp_udp_addr_pair *) (*opaque);
-    } else if (t != NULL && t->data != NULL &&
-                t->data_length == sizeof(netsnmp_udp_addr_pair)) {
-        addr_pair = (netsnmp_udp_addr_pair *) (t->data);
-    }
-
-    to = (struct sockaddr *) &(addr_pair->remote_addr);
-
-    if (to != NULL && t != NULL && t->sock >= 0) {
-        char *str = netsnmp_udp_fmtaddr(NULL, (void *) addr_pair,
-                                        sizeof(netsnmp_udp_addr_pair));
-        DEBUGMSGTL(("netsnmp_udp", "send %d bytes from %p to %s on fd %d\n",
-                    size, buf, str, t->sock));
-        free(str);
-	while (rc < 0) {
-#if defined(linux) && defined(IP_PKTINFO)
-            rc = netsnmp_udp_sendto(t->sock,
-                    addr_pair ? &(addr_pair->local_addr) : NULL,
-                    addr_pair ? addr_pair->if_index : 0, to, buf, size);
-#else
-            rc = sendto(t->sock, buf, size, 0, to, sizeof(struct sockaddr));
-#endif /* linux && IP_PKTINFO */
-	    if (rc < 0 && errno != EINTR) {
-                DEBUGMSGTL(("netsnmp_udp", "sendto error, rc %d (errno %d)\n",
-                            rc, errno));
-		break;
-	    }
-	}
-    }
-    return rc;
-}
-
-
-/*
  * Open a UDP-based transport for SNMP.  Local is TRUE if addr is the local
  * address to bind to (i.e. this is a server-type session); otherwise addr is 
  * the remote address to send things to.  
@@ -309,8 +210,8 @@ netsnmp_udp_transport(struct sockaddr_in *addr, int local)
      */
 
     t->msgMaxSize = 0xffff - 8 - 20;
-    t->f_recv     = netsnmp_udp_recv;
-    t->f_send     = netsnmp_udp_send;
+    t->f_recv     = netsnmp_udpbase_recv;
+    t->f_send     = netsnmp_udpbase_send;
     t->f_close    = netsnmp_socketbase_close;
     t->f_accept   = NULL;
     t->f_fmtaddr  = netsnmp_udp_fmtaddr;
