@@ -190,6 +190,7 @@ static bio_cache *
 start_new_cached_connection(int sock, struct sockaddr_in *remote_addr,
                             int we_are_client) {
     bio_cache *cachep = NULL;
+    BIO *keybio = NULL;
 
     if (!sock)
         DIEHERE("no socket passed in to start_new_cached_connection\n");

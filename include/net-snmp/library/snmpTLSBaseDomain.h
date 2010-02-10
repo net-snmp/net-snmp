@@ -8,6 +8,11 @@ extern          "C" {
 #include <net-snmp/library/snmp_transport.h>
 #include <net-snmp/library/asn1.h>
 
+/* OpenSSL Includes */
+#include "openssl/bio.h"
+#include "openssl/ssl.h"
+#include "openssl/err.h"
+
 /*
  * Prototypes
  */
@@ -19,6 +24,18 @@ extern          "C" {
     /* will likely go away */
     SSL_CTX *get_client_ctx(void);
     SSL_CTX *get_server_ctx(void);
+
+    SSL_CTX *sslctx_client_setup(SSL_METHOD *);
+    SSL_CTX *sslctx_server_setup(SSL_METHOD *);
+
+    /*
+     * _Internal_ structures
+     */
+    typedef struct _netsnmpTLSBaseData_s {
+       char     isclient;
+       SSL_CTX *ssl_context;
+       SSL     *ssl;
+    } _netsnmpTLSBaseData;
 
 #ifdef __cplusplus
 }
