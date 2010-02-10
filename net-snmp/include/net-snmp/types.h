@@ -14,9 +14,6 @@
                         /*
                          * For 'timeval' 
                          */
-#ifdef HAVE_SYS_TIMEB_H
-# include <sys/timeb.h>
-#endif
 #if TIME_WITH_SYS_TIME
 # include <sys/time.h>
 # include <time.h>
@@ -26,6 +23,9 @@
 # else
 #  include <time.h>
 # endif
+#endif
+#ifdef HAVE_SYS_TIMEB_H
+# include <sys/timeb.h>
 #endif
 
 #ifdef HAVE_INTTYPES_H
