@@ -165,25 +165,6 @@ netsnmp_udp6_send(netsnmp_transport *t, void *buf, int size,
 }
 
 
-
-static int
-netsnmp_udp6_close(netsnmp_transport *t)
-{
-    int rc = -1;
-    if (t != NULL && t->sock >= 0) {
-        DEBUGMSGTL(("netsnmp_udp6", "close fd %d\n", t->sock));
-#ifndef HAVE_CLOSESOCKET
-        rc = close(t->sock);
-#else
-        rc = closesocket(t->sock);
-#endif
-        t->sock = -1;
-    }
-    return rc;
-}
-
-
-
 /*
  * Open a UDP/IPv6-based transport for SNMP.  Local is TRUE if addr is the
  * local address to bind to (i.e. this is a server-type session); otherwise
@@ -246,13 +227,13 @@ netsnmp_udp6_transport(struct sockaddr_in6 *addr, int local)
         rc = bind(t->sock, (struct sockaddr *) addr,
 		  sizeof(struct sockaddr_in6));
         if (rc != 0) {
-            netsnmp_udp6_close(t);
+            netsnmp_socketbase_close(t);
             netsnmp_transport_free(t);
             return NULL;
         }
         t->local = (unsigned char*)malloc(18);
         if (t->local == NULL) {
-            netsnmp_udp6_close(t);
+            netsnmp_socketbase_close(t);
             netsnmp_transport_free(t);
             return NULL;
         }
@@ -270,7 +251,7 @@ netsnmp_udp6_transport(struct sockaddr_in6 *addr, int local)
 
         t->data = malloc(sizeof(struct sockaddr_in6));
         if (t->data == NULL) {
-            netsnmp_udp6_close(t);
+            netsnmp_socketbase_close(t);
             netsnmp_transport_free(t);
             return NULL;
         }
@@ -278,7 +259,7 @@ netsnmp_udp6_transport(struct sockaddr_in6 *addr, int local)
         t->data_length = sizeof(struct sockaddr_in6);
         t->remote = (unsigned char*)malloc(18);
         if (t->remote == NULL) {
-            netsnmp_udp6_close(t);
+            netsnmp_socketbase_close(t);
             netsnmp_transport_free(t);
             return NULL;
         }
@@ -295,7 +276,7 @@ netsnmp_udp6_transport(struct sockaddr_in6 *addr, int local)
     t->msgMaxSize = 0xffff - 8 - 40;
     t->f_recv     = netsnmp_udp6_recv;
     t->f_send     = netsnmp_udp6_send;
-    t->f_close    = netsnmp_udp6_close;
+    t->f_close    = netsnmp_socketbase_close;
     t->f_accept   = NULL;
     t->f_fmtaddr  = netsnmp_udp6_fmtaddr;
 

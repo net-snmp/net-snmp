@@ -67,40 +67,6 @@ netsnmp_tcp_fmtaddr(netsnmp_transport *t, void *data, int len)
     return netsnmp_ipv4_fmtaddr("TCP", t, data, len);
 }
 
-
-
-/*
- * You can write something into opaque that will subsequently get passed back 
- * to your send function if you like.  For instance, you might want to
- * remember where a PDU came from, so that you can send a reply there...  
- */
-
-int
-netsnmp_tcp_recv(netsnmp_transport *t, void *buf, int size,
-		 void **opaque, int *olength)
-{
-    return netsnmp_tcpbase_recv(t, buf, size, opaque, olength);
-}
-
-
-
-static int
-netsnmp_tcp_send(netsnmp_transport *t, void *buf, int size,
-		 void **opaque, int *olength)
-{
-    return netsnmp_tcpbase_send(t, buf, size, opaque, olength);
-}
-
-
-
-static int
-netsnmp_tcp_close(netsnmp_transport *t)
-{
-    return netsnmp_socketbase_close(t);
-}
-
-
-
 static int
 netsnmp_tcp_accept(netsnmp_transport *t)
 {
@@ -229,7 +195,7 @@ netsnmp_tcp_transport(struct sockaddr_in *addr, int local)
         t->flags |= NETSNMP_TRANSPORT_FLAG_LISTEN;
         t->local = (u_char *)malloc(6);
         if (t->local == NULL) {
-            netsnmp_tcp_close(t);
+            netsnmp_socketbase_close(t);
             netsnmp_transport_free(t);
             return NULL;
         }
@@ -247,7 +213,7 @@ netsnmp_tcp_transport(struct sockaddr_in *addr, int local)
 
         rc = bind(t->sock, (struct sockaddr *)addr, sizeof(struct sockaddr));
         if (rc != 0) {
-            netsnmp_tcp_close(t);
+            netsnmp_socketbase_close(t);
             netsnmp_transport_free(t);
             return NULL;
         }
@@ -274,7 +240,7 @@ netsnmp_tcp_transport(struct sockaddr_in *addr, int local)
 
         rc = listen(t->sock, NETSNMP_STREAM_QUEUE_LEN);
         if (rc != 0) {
-            netsnmp_tcp_close(t);
+            netsnmp_socketbase_close(t);
             netsnmp_transport_free(t);
             return NULL;
         }
@@ -286,7 +252,7 @@ netsnmp_tcp_transport(struct sockaddr_in *addr, int local)
     } else {
       t->remote = (u_char *)malloc(6);
         if (t->remote == NULL) {
-            netsnmp_tcp_close(t);
+            netsnmp_socketbase_close(t);
             netsnmp_transport_free(t);
             return NULL;
         }
@@ -306,7 +272,7 @@ netsnmp_tcp_transport(struct sockaddr_in *addr, int local)
 		     sizeof(struct sockaddr));
 
         if (rc < 0) {
-            netsnmp_tcp_close(t);
+            netsnmp_socketbase_close(t);
             netsnmp_transport_free(t);
             return NULL;
         }
@@ -326,9 +292,9 @@ netsnmp_tcp_transport(struct sockaddr_in *addr, int local)
      */
 
     t->msgMaxSize = 0x7fffffff;
-    t->f_recv     = netsnmp_tcp_recv;
-    t->f_send     = netsnmp_tcp_send;
-    t->f_close    = netsnmp_tcp_close;
+    t->f_recv     = netsnmp_tcpbase_recv;
+    t->f_send     = netsnmp_tcpbase_send;
+    t->f_close    = netsnmp_socketbase_close;
     t->f_accept   = netsnmp_tcp_accept;
     t->f_fmtaddr  = netsnmp_tcp_fmtaddr;
 
