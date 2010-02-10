@@ -62,42 +62,6 @@ netsnmp_tcp6_fmtaddr(netsnmp_transport *t, void *data, int len)
     return netsnmp_ipv6_fmtaddr("TCP/IPv6", t, data, len);
 }
 
-/*
- * You can write something into opaque that will subsequently get passed back 
- * to your send function if you like.  For instance, you might want to
- * remember where a PDU came from, so that you can send a reply there...  
- */
-
-static int
-netsnmp_tcp6_recv(netsnmp_transport *t, void *buf, int size,
-		  void **opaque, int *olength)
-{
-    return netsnmp_tcpbase_recv(t, buf, size, opaque, olength);
-}
-
-static int
-netsnmp_tcp6_send(netsnmp_transport *t, void *buf, int size,
-		  void **opaque, int *olength)
-{
-    return netsnmp_tcpbase_send(t, buf, size, opaque, olength);
-}
-
-static int
-netsnmp_tcp6_close(netsnmp_transport *t)
-{
-    int rc = -1;
-    if (t != NULL && t->sock >= 0) {
-        DEBUGMSGTL(("netsnmp_tcp6", "close fd %d\n", t->sock));
-#ifndef HAVE_CLOSESOCKET
-        rc = close(t->sock);
-#else
-        rc = closesocket(t->sock);
-#endif
-        t->sock = -1;
-    }
-    return rc;
-}
-
 static int
 netsnmp_tcp6_accept(netsnmp_transport *t)
 {
@@ -240,7 +204,7 @@ netsnmp_tcp6_transport(struct sockaddr_in6 *addr, int local)
         t->flags |= NETSNMP_TRANSPORT_FLAG_LISTEN;
         t->local = (unsigned char*)malloc(18);
         if (t->local == NULL) {
-            netsnmp_tcp6_close(t);
+            netsnmp_socketbase_close(t);
             netsnmp_transport_free(t);
             return NULL;
         }
@@ -258,7 +222,7 @@ netsnmp_tcp6_transport(struct sockaddr_in6 *addr, int local)
         rc = bind(t->sock, (struct sockaddr *) addr,
 		  sizeof(struct sockaddr_in6));
         if (rc != 0) {
-            netsnmp_tcp6_close(t);
+            netsnmp_socketbase_close(t);
             netsnmp_transport_free(t);
             return NULL;
         }
@@ -285,7 +249,7 @@ netsnmp_tcp6_transport(struct sockaddr_in6 *addr, int local)
 
         rc = listen(t->sock, NETSNMP_STREAM_QUEUE_LEN);
         if (rc != 0) {
-            netsnmp_tcp6_close(t);
+            netsnmp_socketbase_close(t);
             netsnmp_transport_free(t);
             return NULL;
         }
@@ -297,7 +261,7 @@ netsnmp_tcp6_transport(struct sockaddr_in6 *addr, int local)
     } else {
         t->remote = (unsigned char*)malloc(18);
         if (t->remote == NULL) {
-            netsnmp_tcp6_close(t);
+            netsnmp_socketbase_close(t);
             netsnmp_transport_free(t);
             return NULL;
         }
@@ -319,7 +283,7 @@ netsnmp_tcp6_transport(struct sockaddr_in6 *addr, int local)
         DEBUGMSGTL(("netsnmp_tcp6", "connect returns %d\n", rc));
 
         if (rc < 0) {
-            netsnmp_tcp6_close(t);
+            netsnmp_socketbase_close(t);
             netsnmp_transport_free(t);
             return NULL;
         }
@@ -339,9 +303,9 @@ netsnmp_tcp6_transport(struct sockaddr_in6 *addr, int local)
      */
 
     t->msgMaxSize = 0x7fffffff;
-    t->f_recv     = netsnmp_tcp6_recv;
-    t->f_send     = netsnmp_tcp6_send;
-    t->f_close    = netsnmp_tcp6_close;
+    t->f_recv     = netsnmp_tcpbase_recv;
+    t->f_send     = netsnmp_tcpbase_send;
+    t->f_close    = netsnmp_socketbase_close;
     t->f_accept   = netsnmp_tcp6_accept;
     t->f_fmtaddr  = netsnmp_tcp6_fmtaddr;
 

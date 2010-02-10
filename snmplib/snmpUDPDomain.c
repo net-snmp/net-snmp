@@ -281,13 +281,6 @@ netsnmp_udp_send(netsnmp_transport *t, void *buf, int size,
 }
 
 
-
-static int
-netsnmp_udp_close(netsnmp_transport *t)
-{
-    return netsnmp_socketbase_close(t);
-}
-
 /*
  * find largest possible buffer between current size and specified size.
  *
@@ -600,7 +593,7 @@ netsnmp_udp_transport(struct sockaddr_in *addr, int local)
     t->msgMaxSize = 0xffff - 8 - 20;
     t->f_recv     = netsnmp_udp_recv;
     t->f_send     = netsnmp_udp_send;
-    t->f_close    = netsnmp_udp_close;
+    t->f_close    = netsnmp_socketbase_close;
     t->f_accept   = NULL;
     t->f_fmtaddr  = netsnmp_udp_fmtaddr;
 
