@@ -14,6 +14,7 @@ extern          "C" {
 
     void netsnmp_init_tlsbase(void);
     const char * _x509_get_error(int x509failvalue, const char *location);
+    void _openssl_log_error(int rc, SSL *con, const char *location);
 
     /* will likely go away */
     SSL_CTX *get_client_ctx(void);
