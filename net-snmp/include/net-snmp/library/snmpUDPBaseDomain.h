@@ -9,5 +9,9 @@ extern          "C" {
  * Prototypes
  */
     void _netsnmp_udp_sockopt_set(int fd, int local);
+    int netsnmp_udpbase_recv(netsnmp_transport *t, void *buf, int size,
+                             void **opaque, int *olength);
+    int netsnmp_udpbase_send(netsnmp_transport *t, void *buf, int size,
+                             void **opaque, int *olength);
 
 #endif /* SNMPUDPBASEDOMAIN_H */
