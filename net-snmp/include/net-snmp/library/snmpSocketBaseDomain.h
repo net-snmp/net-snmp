@@ -9,5 +9,6 @@ extern          "C" {
  * Prototypes
  */
     int netsnmp_socketbase_close(netsnmp_transport *t);
+    int netsnmp_sock_buffer_set(int s, int optname, int local, int size);
 
 #endif /* SNMPSOCKETBASEDOMAIN_H */
