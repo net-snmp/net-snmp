@@ -35,6 +35,9 @@ config_require(IPv4Base);
  * Prototypes
  */
 
+    netsnmp_transport *netsnmp_udpipv4base_transport(struct sockaddr_in *addr,
+                                                     int local);
+
 #if defined(linux) && defined(IP_PKTINFO)
     int netsnmp_udpipv4_recvfrom(int s, void *buf, int len,
                                  struct sockaddr *from, socklen_t *fromlen,
@@ -42,9 +45,6 @@ config_require(IPv4Base);
                                  int *if_index);
     int netsnmp_udpipv4_sendto(int fd, struct in_addr *srcip, int if_index,
                                struct sockaddr *remote, void *data, int len);
-    netsnmp_transport *netsnmp_udpipv4base_transport(struct sockaddr_in *addr,
-                                                     int local);
-
 #endif
 
 
