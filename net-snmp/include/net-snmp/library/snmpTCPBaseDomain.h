@@ -5,6 +5,9 @@
 extern          "C" {
 #endif
 
+config_require(SocketBase);
+#include <net-snmp/library/snmpSocketBaseDomain.h>
+
 /*
  * Prototypes
  */

@@ -16,7 +16,9 @@ extern          "C" {
 #endif
 
 config_require(UDPIPv4Base);
+config_require(SocketBase);
 #include <net-snmp/library/snmpUDPIPv4BaseDomain.h>
+#include <net-snmp/library/snmpSocketBaseDomain.h>
 
 netsnmp_transport *netsnmp_udp_transport(struct sockaddr_in *addr, int local);
 
