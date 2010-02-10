@@ -421,3 +421,56 @@ const char * _x509_get_error(int x509failvalue, const char *location) {
     return reason;
 }
 
+void _openssl_log_error(int rc, SSL *con, const char *location) {
+    const char *reason;
+
+    if (rc == -1) {
+        int sslnum = SSL_get_error(con, rc);
+
+        switch(sslnum) {
+        case SSL_ERROR_NONE:
+            reason = "SSL_ERROR_NONE";
+            break;
+
+        case SSL_ERROR_SSL:
+            reason = "SSL_ERROR_SSL";
+            break;
+
+        case SSL_ERROR_WANT_READ:
+            reason = "SSL_ERROR_WANT_READ";
+            break;
+
+        case SSL_ERROR_WANT_WRITE:
+            reason = "SSL_ERROR_WANT_WRITE";
+            break;
+
+        case SSL_ERROR_WANT_X509_LOOKUP:
+            reason = "SSL_ERROR_WANT_X509_LOOKUP";
+            break;
+
+        case SSL_ERROR_SYSCALL:
+            reason = "SSL_ERROR_SYSCALL";
+            snmp_log(LOG_ERR, "DTLS error: %s: rc=%d, sslerror = %d (%s): system_error=%d (%s)\n",
+                     location, rc, sslnum, reason, errno, strerror(errno));
+            return;
+
+        case SSL_ERROR_ZERO_RETURN:
+            reason = "SSL_ERROR_ZERO_RETURN";
+            break;
+
+        case SSL_ERROR_WANT_CONNECT:
+            reason = "SSL_ERROR_WANT_CONNECT";
+            break;
+
+        case SSL_ERROR_WANT_ACCEPT:
+            reason = "SSL_ERROR_WANT_ACCEPT";
+            break;
+            
+        default:
+            reason = "unknown";
+        }
+
+        snmp_log(LOG_ERR, "DTLS error: %s: rc=%d, sslerror = %d (%s)\n",
+                 location, rc, sslnum, reason);
+    }
+}
