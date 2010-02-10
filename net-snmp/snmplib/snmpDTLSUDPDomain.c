@@ -795,7 +795,7 @@ netsnmp_dtlsudp_transport(struct sockaddr_in *addr, int local)
 {
     netsnmp_transport *t = NULL;
     
-    t = netsnmp_udpbase_transport(addr, local);
+    t = netsnmp_udpipv4base_transport(addr, local);
     if (NULL == t) {
         return NULL;
     }
