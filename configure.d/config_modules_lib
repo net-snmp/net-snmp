@@ -142,7 +142,7 @@ while test "x$new_transport_list" != "x"; do
       #
       # check for dependencies using config_require() macro
       #
-      sub_list=`$MODULECPP module_tmp_header.h | $GREP config_checkit_require | $SED 's/.*config_checkit_require(\(.*\)).*/\1/g'`
+      sub_list=`$MODULECPP module_tmp_header.h | $GREP config_checkit_require | $SED 's/.*config_checkit_require *( *\(.*\) *).*/\1/'`
       if test "x$sub_list" != "x" ; then
         for j in $sub_list ; do
 	  if echo " $future_new_transport_list $new_transport_list " | $GREP " $j " > /dev/null ; then
