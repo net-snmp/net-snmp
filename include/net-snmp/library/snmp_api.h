@@ -618,7 +618,7 @@ struct netsnmp_transport_s;
 #define  STAT_TLSTM_SNMPTLSTMSESSIONINVALIDCACHES              54
 #define  STAT_TLSTM_SNMPTLSTMTLSPROTECTIONERRORS               55
 
-#define  STAT_TLSTM_STATS_START                 STAT_TLSTM_TLSTMSESSIONOPENS
+#define  STAT_TLSTM_STATS_START                 STAT_TLSTM_SNMPTLSTMSESSIONOPENS
 #define  STAT_TLSTM_STATS_END          STAT_TLSTM_SNMPTLSTMTLSPROTECTIONERRORS
 
     /* this previously was end+1; don't know why the +1 is needed;
