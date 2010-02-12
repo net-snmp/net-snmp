@@ -290,9 +290,11 @@ sub oidlength {
 #   $var.creatable     -- 1 if a column object can be created as part of a new row, 0 if not
 #   $var.noaccess      -- 1 if not-accessible, 0 if not
 #   $var.accessible    -- 1 if accessible, 0 if not
+#   $var.storagetype   -- 1 if an object is a StorageType object, 0 if not
 #   $var.rowstatus     -- 1 if an object is a RowStatus object, 0 if not
-#     'settable', 'creatable' and 'rowstatus' can also be used with table variables
-#     to indicate whether it contains writable, creatable or RowStatus column objects
+#     'settable', 'creatable', 'lastchange', 'storagetype' and 'rowstatus' can
+#     also be used with table variables to indicate whether it contains
+#     writable, creatable, LastChange, StorageType or RowStatus column objects
 #
 #   $var.hasdefval     -- returns 1 if var has a DEFVAL clause
 #   $var.defval        -- node's DEFVAL
@@ -347,6 +349,7 @@ sub process_vars {
     $it =~ s/\$(\w+)\.(enums)/(%{$SNMP::MIB{$vars{$1}}{'enums'}} == 0) ? 0 : 1/eg;
     $it =~ s/\$(\w+)\.(enumrange)/%{$SNMP::MIB{$vars{$1}}{'enums'}}/eg;
     $it =~ s/\$(\w+)\.(rowstatus)/(($SNMP::MIB{$vars{$1}}{syntax} =~ \/(RowStatus)\/)?1:0)/eg;
+    $it =~ s/\$(\w+)\.(storagetype)/(($SNMP::MIB{$vars{$1}}{syntax} =~ \/(StorageType)\/)?1:0)/eg;
     if ( $it =~ /\$(\w+)\.(\w+)/ ) {
       warn "Possible unknown variable attribute \$$1.$2 at $currentfile:$currentline\n";
     }
