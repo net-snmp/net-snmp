@@ -5,7 +5,7 @@
 extern          "C" {
 #endif
 
-config_require(SocketBase);
+config_require(SocketBase)
 #include <net-snmp/library/snmpSocketBaseDomain.h>
 
 /*
@@ -14,7 +14,7 @@ config_require(SocketBase);
     int netsnmp_tcpbase_recv(netsnmp_transport *t, void *buf, int size,
                              void **opaque, int *olength);
     int netsnmp_tcpbase_send(netsnmp_transport *t, void *buf, int size,
-                             void **opaque, int *olength)
+                             void **opaque, int *olength);
         
 #ifdef __cplusplus
 }

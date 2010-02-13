@@ -1,8 +1,8 @@
 #ifndef _SNMPTCPIPV6DOMAIN_H
 #define _SNMPTCPIPV6DOMAIN_H
 
-config_require(TCPBase);
-config_require(IPv6Base);
+config_require(TCPBase)
+config_require(IPv6Base)
 
 #include <net-snmp/types.h>
 

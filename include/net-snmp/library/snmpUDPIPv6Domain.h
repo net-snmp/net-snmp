@@ -10,7 +10,7 @@ extern          "C" {
 #include <net-snmp/library/snmp_transport.h>
 #include <net-snmp/library/asn1.h>
 
-config_require(IPv6Base);
+config_require(IPv6Base)
 #include <net-snmp/library/snmpIPv6BaseDomain.h>
 
 /*

@@ -1,8 +1,8 @@
 #ifndef _SNMPTCPDOMAIN_H
 #define _SNMPTCPDOMAIN_H
 
-config_require(TCPBase);
-config_require(IPv4Base);
+config_require(TCPBase)
+config_require(IPv4Base)
 
 #ifdef NETSNMP_TRANSPORT_TCP_DOMAIN
 
