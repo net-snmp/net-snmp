@@ -15,8 +15,8 @@ extern          "C" {
 #include <netinet/in.h>
 #endif
 
-config_require(UDPIPv4Base);
-config_require(SocketBase);
+config_require(UDPIPv4Base)
+config_require(SocketBase)
 #include <net-snmp/library/snmpUDPIPv4BaseDomain.h>
 #include <net-snmp/library/snmpSocketBaseDomain.h>
 
