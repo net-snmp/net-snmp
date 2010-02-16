@@ -24,9 +24,6 @@
 #  include <time.h>
 # endif
 #endif
-#ifdef HAVE_SYS_TIMEB_H
-# include <sys/timeb.h>
-#endif
 
 #ifdef HAVE_INTTYPES_H
 #include <inttypes.h>
