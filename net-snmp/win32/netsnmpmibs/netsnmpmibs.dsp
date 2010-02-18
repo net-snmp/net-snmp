@@ -281,23 +281,23 @@ SOURCE=..\..\agent\mibgroup\snmpv3\usmUser.c
 # PROP Default_Filter ""
 # Begin Source File
 
+SOURCE="..\..\agent\mibgroup\notification-log-mib\notification_log.c"
+# End Source File
+# Begin Source File
+
 SOURCE=..\..\agent\mibgroup\notification\snmpNotifyFilterProfileTable.c
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\agent\mibgroup\notification-log-mib\notification_log.c
+SOURCE="..\..\agent\mibgroup\snmp-notification-mib\snmpNotifyFilterTable\snmpNotifyFilterTable.c"
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\agent\mibgroup\snmp-notification-mib\snmpNotifyFilterTable\snmpNotifyFilterTable.c
+SOURCE="..\..\agent\mibgroup\snmp-notification-mib\snmpNotifyFilterTable\snmpNotifyFilterTable_data_access.c"
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\agent\mibgroup\snmp-notification-mib\snmpNotifyFilterTable\snmpNotifyFilterTable_data_access.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\agent\mibgroup\snmp-notification-mib\snmpNotifyFilterTable\snmpNotifyFilterTable_interface.c
+SOURCE="..\..\agent\mibgroup\snmp-notification-mib\snmpNotifyFilterTable\snmpNotifyFilterTable_interface.c"
 # End Source File
 # Begin Source File
 
@@ -389,7 +389,7 @@ SOURCE=..\..\agent\mibgroup\utilities\execute.c
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\agent\mibgroup\utilities\iquery.c
+SOURCE=..\..\agent\mibgroup\header_complex.c
 # End Source File
 # Begin Source File
 
@@ -401,7 +401,7 @@ SOURCE=..\..\agent\mibgroup\util_funcs\header_simple_table.c
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\agent\mibgroup\header_complex.c
+SOURCE=..\..\agent\mibgroup\utilities\iquery.c
 # End Source File
 # Begin Source File
 
