@@ -257,6 +257,30 @@ SOURCE=..\..\snmplib\snmpCallbackDomain.c
 # End Source File
 # Begin Source File
 
+SOURCE=..\..\snmplib\snmpAliasDomain.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\snmplib\snmpIPBaseDomain.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\snmplib\snmpIPv4BaseDomain.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\snmplib\snmpIPv6BaseDomain.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\snmplib\snmpSocketBaseDomain.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\snmplib\snmpTCPBaseDomain.c
+# End Source File
+# Begin Source File
+
 SOURCE=..\..\snmplib\snmpTCPDomain.c
 # End Source File
 # Begin Source File
@@ -265,7 +289,19 @@ SOURCE=..\..\snmplib\snmpTCPIPv6Domain.c
 # End Source File
 # Begin Source File
 
+SOURCE=..\..\snmplib\snmpTLSBaseDomain.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\snmplib\snmpUDPBaseDomain.c
+# End Source File
+# Begin Source File
+
 SOURCE=..\..\snmplib\snmpUDPDomain.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\snmplib\snmpUDPIPv4BaseDomain.c
 # End Source File
 # Begin Source File
 

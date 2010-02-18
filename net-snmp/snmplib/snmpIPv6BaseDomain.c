@@ -31,11 +31,6 @@
 #include <net/if.h>
 #endif
 
-#if defined(HAVE_WINSOCK_H)
-#undef  HAVE_IF_NAMETOINDEX
-const struct in6_addr in6addr_any = IN6ADDR_ANY_INIT;
-#endif
-
 #if HAVE_DMALLOC_H
 #include <dmalloc.h>
 #endif
@@ -45,6 +40,16 @@ const struct in6_addr in6addr_any = IN6ADDR_ANY_INIT;
 #include <net-snmp/library/snmp_debug.h>
 #include <net-snmp/library/default_store.h>
 #include <net-snmp/library/snmp_logging.h>
+
+#include "inet_ntop.h"
+#include "inet_pton.h"
+
+
+#if defined(HAVE_WINSOCK_H)
+#undef  HAVE_IF_NAMETOINDEX
+const struct in6_addr in6addr_any = IN6ADDR_ANY_INIT;
+#endif
+
 
 char *
 netsnmp_ipv6_fmtaddr(const char *prefix, netsnmp_transport *t,
@@ -132,7 +137,7 @@ netsnmp_sockaddr_in6_2(struct sockaddr_in6 *addr,
              */
             DEBUGMSGTL(("netsnmp_sockaddr_in6", "totally numeric: %d\n",
                         portno));
-            addr->sin6_port = htons(portno);
+            addr->sin6_port = htons((u_short)portno);
             goto resolved;
         }
 
@@ -171,7 +176,7 @@ netsnmp_sockaddr_in6_2(struct sockaddr_in6 *addr,
                                     "IPv6 address with port suffix :%d\n",
                                     portno));
                         if (portno > 0 && portno < 0xffff) {
-                            addr->sin6_port = htons(portno);
+                            addr->sin6_port = htons((u_short)portno);
                         } else {
                             DEBUGMSGTL(("netsnmp_sockaddr_in6", "invalid port number: %d", portno));
                             return 0;
@@ -192,7 +197,7 @@ netsnmp_sockaddr_in6_2(struct sockaddr_in6 *addr,
 				                    NETSNMP_DS_LIB_DEFAULT_PORT);
                         if (portno <= 0)
                             portno = SNMP_PORT;
-                        addr->sin6_port = htons(portno);
+                        addr->sin6_port = htons((u_short)portno);
 #if defined(HAVE_IF_NAMETOINDEX) && defined(HAVE_STRUCT_SOCKADDR_IN6_SIN6_SCOPE_ID)
                         addr->sin6_scope_id = if_index;
 #endif
@@ -228,7 +233,7 @@ netsnmp_sockaddr_in6_2(struct sockaddr_in6 *addr,
                             "IPv6 address with port suffix :%d\n",
                             atoi(cp + 1)));
                 if (portno > 0 && portno < 0xffff) {
-                    addr->sin6_port = htons(portno);
+                    addr->sin6_port = htons((u_short)portno);
                 } else {
                     DEBUGMSGTL(("netsnmp_sockaddr_in6", "invalid port number: %d", portno));
                     return 0;
@@ -267,7 +272,7 @@ netsnmp_sockaddr_in6_2(struct sockaddr_in6 *addr,
                             "hostname(?) with port suffix :%d\n",
                             portno));
                 if (portno > 0 && portno < 0xffff) {
-                    addr->sin6_port = htons(portno);
+                    addr->sin6_port = htons((u_short)portno);
                 } else {
                     DEBUGMSGTL(("netsnmp_sockaddr_in6", "invalid port number: %d", portno));
                     return 0;

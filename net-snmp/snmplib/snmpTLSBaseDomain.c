@@ -22,6 +22,7 @@
 #include "openssl/ssl.h"
 #include "openssl/err.h"
 
+#include <net-snmp/types.h>
 #include <net-snmp/library/snmpTLSBaseDomain.h>
 #include <net-snmp/library/snmp_openssl.h>
 #include <net-snmp/library/default_store.h>
