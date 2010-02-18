@@ -85,6 +85,30 @@ LIB32=link.exe -lib
 # PROP Default_Filter ""
 # Begin Source File
 
+SOURCE=..\..\agent\mibgroup\mibII\at.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\agent\mibgroup\mibII\icmp.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\agent\mibgroup\mibII\interfaces.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\agent\mibgroup\mibII\ip.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\agent\mibgroup\mibII\ipAddr.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\agent\mibgroup\mibII\route_write.c
+# End Source File
+# Begin Source File
+
 SOURCE=..\..\agent\mibgroup\mibII\setSerialNo.c
 # End Source File
 # Begin Source File
@@ -101,11 +125,23 @@ SOURCE=..\..\agent\mibgroup\mibII\system_mib.c
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\agent\mibgroup\mibII\updates.c
+SOURCE=..\..\agent\mibgroup\mibII\tcp.c
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\agent\mibgroup\mibII\vacm_context.c
+SOURCE=..\..\agent\mibgroup\mibII\tcpTable.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\agent\mibgroup\mibII\udp.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\agent\mibgroup\mibII\udpTable.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\agent\mibgroup\mibII\updates.c
 # End Source File
 # Begin Source File
 
@@ -113,7 +149,15 @@ SOURCE=..\..\agent\mibgroup\mibII\vacm_conf.c
 # End Source File
 # Begin Source File
 
+SOURCE=..\..\agent\mibgroup\mibII\vacm_context.c
+# End Source File
+# Begin Source File
+
 SOURCE=..\..\agent\mibgroup\mibII\vacm_vars.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\agent\mibgroup\mibII\var_route.c
 # End Source File
 # End Group
 # Begin Group "disman"
@@ -372,9 +416,25 @@ SOURCE=..\..\agent\mibgroup\utilities\override.c
 SOURCE=..\..\agent\mibgroup\util_funcs.c
 # End Source File
 # End Group
+# Begin Group "winExtDLL"
+
+# PROP Default_Filter ""
+# Begin Source File
+
+SOURCE=..\..\agent\mibgroup\winExtDLL.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\agent\mibgroup\winExtDLL.h
+# End Source File
+# End Group
+# Begin Group "smux"
+
+# PROP Default_Filter ""
 # Begin Source File
 
 SOURCE=..\..\agent\mibgroup\smux\smux.c
 # End Source File
+# End Group
 # End Target
 # End Project

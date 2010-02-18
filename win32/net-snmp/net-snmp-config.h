@@ -27,7 +27,6 @@
  * Microsoft Visual Studio MSVC 6.0 and the Platform SDK (PSDK)
  * Microsoft Visual Studio.Net 2002
  * Microsoft Visual Studio.Net 2003
- * Note: since considerable time MSVC 6 without PSDK is no longer supported.
  */
 #define HAVE_WIN32_PLATFORM_SDK 1
 
