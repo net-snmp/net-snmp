@@ -169,15 +169,15 @@ SOURCE=..\..\agent\helpers\table_data.c
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\agent\helpers\table_tdata.c
-# End Source File
-# Begin Source File
-
 SOURCE=..\..\agent\helpers\table_dataset.c
 # End Source File
 # Begin Source File
 
 SOURCE=..\..\agent\helpers\table_iterator.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\agent\helpers\table_tdata.c
 # End Source File
 # Begin Source File
 
@@ -237,15 +237,15 @@ SOURCE="..\..\include\net-snmp\agent\table_data.h"
 # End Source File
 # Begin Source File
 
-SOURCE="..\..\include\net-snmp\agent\table_tdata.h"
-# End Source File
-# Begin Source File
-
 SOURCE="..\..\include\net-snmp\agent\table_dataset.h"
 # End Source File
 # Begin Source File
 
 SOURCE="..\..\include\net-snmp\agent\table_iterator.h"
+# End Source File
+# Begin Source File
+
+SOURCE="..\..\include\net-snmp\agent\table_tdata.h"
 # End Source File
 # End Group
 # End Target

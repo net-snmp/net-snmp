@@ -133,6 +133,10 @@ SOURCE=..\..\snmplib\default_store.c
 # End Source File
 # Begin Source File
 
+SOURCE=..\..\snmplib\fd_event_manager.c
+# End Source File
+# Begin Source File
+
 SOURCE=..\..\snmplib\getopt.c
 # End Source File
 # Begin Source File
@@ -154,6 +158,10 @@ SOURCE=..\..\snmplib\int64.c
 # Begin Source File
 
 SOURCE=..\..\snmplib\keytools.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\snmplib\large_fd_set.c
 # End Source File
 # Begin Source File
 
@@ -241,6 +249,10 @@ SOURCE=..\..\snmplib\snmp_secmod.c
 # End Source File
 # Begin Source File
 
+SOURCE=..\..\snmplib\snmp_service.c
+# End Source File
+# Begin Source File
+
 SOURCE=..\..\snmplib\snmp_transport.c
 # End Source File
 # Begin Source File
@@ -249,15 +261,11 @@ SOURCE=..\..\snmplib\snmp_version.c
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\snmplib\snmp_service.c
+SOURCE=..\..\snmplib\snmpAliasDomain.c
 # End Source File
 # Begin Source File
 
 SOURCE=..\..\snmplib\snmpCallbackDomain.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\snmplib\snmpAliasDomain.c
 # End Source File
 # Begin Source File
 
@@ -321,19 +329,19 @@ SOURCE=..\..\snmplib\strlcpy.c
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\snmplib\system.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\snmplib\tools.c
-# End Source File
-# Begin Source File
-
 SOURCE=..\..\snmplib\strtok_r.c
 # End Source File
 # Begin Source File
 
 SOURCE=..\..\snmplib\strtoull.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\snmplib\system.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\snmplib\tools.c
 # End Source File
 # Begin Source File
 
@@ -346,14 +354,6 @@ SOURCE=..\..\snmplib\vacm.c
 # Begin Source File
 
 SOURCE=..\..\snmplib\winpipe.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\snmplib\fd_event_manager.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\snmplib\large_fd_set.c
 # End Source File
 # End Group
 # Begin Group "Header Files"
@@ -389,6 +389,10 @@ SOURCE="..\..\include\net-snmp\library\default_store.h"
 # End Source File
 # Begin Source File
 
+SOURCE="..\..\include\net-snmp\library\fd_event_manager.h"
+# End Source File
+# Begin Source File
+
 SOURCE="..\..\include\net-snmp\library\getopt.h"
 # End Source File
 # Begin Source File
@@ -398,6 +402,10 @@ SOURCE="..\..\include\net-snmp\library\int64.h"
 # Begin Source File
 
 SOURCE="..\..\include\net-snmp\library\keytools.h"
+# End Source File
+# Begin Source File
+
+SOURCE="..\..\include\net-snmp\library\large_fd_set.h"
 # End Source File
 # Begin Source File
 
@@ -493,6 +501,10 @@ SOURCE="..\..\include\net-snmp\library\snmpv3.h"
 # End Source File
 # Begin Source File
 
+SOURCE="..\..\include\net-snmp\library\strtok_r.h"
+# End Source File
+# Begin Source File
+
 SOURCE="..\..\include\net-snmp\library\system.h"
 # End Source File
 # Begin Source File
@@ -501,23 +513,11 @@ SOURCE="..\..\include\net-snmp\library\tools.h"
 # End Source File
 # Begin Source File
 
-SOURCE="..\..\include\net-snmp\library\strtok_r.h"
-# End Source File
-# Begin Source File
-
 SOURCE="..\..\include\net-snmp\library\ucd_compat.h"
 # End Source File
 # Begin Source File
 
 SOURCE="..\..\include\net-snmp\library\vacm.h"
-# End Source File
-# Begin Source File
-
-SOURCE="..\..\include\net-snmp\library\fd_event_manager.h"
-# End Source File
-# Begin Source File
-
-SOURCE="..\..\include\net-snmp\library\large_fd_set.h"
 # End Source File
 # End Group
 # End Target
