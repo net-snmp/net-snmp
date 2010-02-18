@@ -46,15 +46,13 @@ Acknowledgements
 All applications build with Microsoft Visual C++ 6.0, Microsoft Development
 Environment 2003 (MSVC 7.0/7.1), gcc under Cygwin, and gcc under MinGW.  
 
-  -  All of the applications work
-     (snmpwalk, snmpget, snmpset, snmptrap, etc...).
-  -  The system, snmp, ip, tcp, udp, icmp mibgroups function
-         (when agent is built using the snmpdsdk project).
+  -  All of the applications work (snmpwalk, snmpget, snmpset, snmptrap, ...).
+  -  The system, snmp, ip, tcp, udp and icmp MIB-groups work (requires the
+     Platform SDK).
   -  The Net-SNMP agent runs as an AgentX master agent or as subagent.
   -  smux is working.
   -  The target, notification, disman/mte groups compile but are not tested.
   -  The TCP/IPv6 and UDP/IPv6 transports compile but are not tested.
-         
   -  Extending the agent to support enterprise-specific MIBs works.
   -  Running the agent on a non-standard UDP or TCP port works.
   -  Snmpd can be registered as a Windows NT/2000/XP service.
@@ -78,8 +76,8 @@ The next subsection relates to items that are built using Visual Studio
   -  All Debug and Release targets linked with libsnmp project targets
      build without errors, and are fully functional.
 
-  -  Both the Workspace graphical environment and command line nmake is 
-     supported for building under MSVC.
+  -  Both building via the interactive development environment and via the
+     command line (nmake) is supported.
 
 
 ***************************************************************************
@@ -403,33 +401,22 @@ See the snmpd.conf man page for more information on configuring security.
 *
 ***************************************************************************
 
-If you are compiling using Microsoft Visual C++ 6.0, it is recommended that
-you install the Core Platform SDK (PSDK).  Without the PSDK, some functionality
-will be disabled such as the core elements of the mibII group of the agent 
-which use the "IP Helper API" (IPHLPAPI).
+If you are using Microsoft Visual Studio 6.0, you will have to install the
+Platform SDK (PSDK) first.
 
-To determine what code is disabled when the PSDK is not used, search the
-source code for HAVE_WIN32_PLATFORM_SDK.
+The Windows Server 2003 Platform SDK can be downloaded via the following URL
+(this is the most recent version of the PSDK that is still compatible with
+MSVC 6.0): http://www.microsoft.com/downloads/details.aspx?FamilyId=A55B6B43-E24F-4EA3-A93E-40C0EC4F68E5&displaylang=en
 
-The PSDK can be downloaded from the MSDN site.  Go to http://msdn.microsoft.com 
-and do a search for 'psdk download' (without the quotes).  You should find both
-a web install and a full install.  
+Once the PSDK has been installed, select the following action from the Start
+Menu: Programs / Microsoft Windows SDK / Visual Studio Registration / Windows
+SDK Configuration Tool.
 
-When installing the SDK, all that is required is the 'Core'.
-
-Once this package has installed, from the Start Menu run 
-  "Programs ->Microsoft Platform SDK... -> 
-   Visual Studio Registration ->
-   Register PSDK Directories with Visual Studio"
-
-If you are compiling using any of the following systems, the PSDK download
-is not necessary, as the required parts of the PSDK are included with the 
-installation of the compiler:
-
-    - Microsoft Development Environment 2002 (MSVC 7.0)
-    - Microsoft Development Environment 2003 (MSVC 7.1)
-    - Cygwin (gcc)
-    - MinGW (gcc)
+If you are using any of the following environments, the PSDK download is not
+necessary as the required parts of the PSDK are included:
+    - Microsoft Visual Studio 2002 or later.
+    - Cygwin.
+    - MinGW.
 
 In order for the process part of the host resources MIB to work under Windows
 NT you will need to obtain PSAPI.DLL. This is available under the download 
@@ -449,12 +436,13 @@ Otherwise, see the Building section below.
 
 There are two ways to build Net-SNMP using Microsoft Visual C++.  The first
 and easiest method is using Configure and nmake on the command line, and the 
-second is using the Workspace files with the graphical interface.
+second is using the Workspace files inside the interactive development
+environment.
 
 To use nmake on the command line, the Configure script is run first to create
-the various make files.  Once they are created, nmake is used to build the 
-applications.  Perl is required to use this method, as the Configure script
-is written in Perl.  ActiveState ActivePerl is available at:
+the various makefiles.  Once these have been created, nmake is used to build
+the applications.  Perl is required to use this method, as the Configure
+script is written in Perl.  ActiveState ActivePerl is available at:
 
         http://www.activestate.com/Products/ActivePerl/
 
@@ -463,35 +451,26 @@ projects contained in the Workspace files which are described below.  It is
 recommended that you read and understand how the workspaces are configured
 even if you will only be using the command line Configure / nmake system.
 
-For the graphical interface, there are two main Win32 workspaces 
-('win32.dsw' and 'win32sdk.dsw'), containing more or less the same set 
-of projects, plus 'libdll.dsw' which contains a minimal set of projects 
-for use with the Perl module only.  
-
-Win32.dsw is for developers who have not installed the Platform SDK from 
-Microsoft's MSDN SDK Update site when using Microsoft Visual Studio 6.0.
-Win32sdk.dsw is for those who have or who are using the Microsoft Development 
-Environment 2002/2003 (MSVC 7.0/7.1), Cygwin (gcc) or MinGW (gcc).
-
-Libdll.dsw compiles a DLL version of snmplib (netsnmp.dll).
+For building via the interactive development environment, there are the Win32
+workspaces win32.dsw and libdll.dsw. The last workspace allows to build a DLL
+version of snmplib (netsnmp.dll).
 
 There is one core development library ('libsnmp'), together with a number 
 of utility projects for the individual executable commands ('snmpget', 
 'snmpwalk', etc...).  All of these projects require the .lib created by 
 the libsnmp project.
 
-The agent requires the core library plus the other three library projects 
-('libagent', libhelpers' and either 'netsnmpmibs' or 'netsnmpmibssdk' 
-depending on which workspace is being used) together with the main agent 
-project (either 'snmpd' or 'snmpdsdk').
+The agent requires the core library plus the other three library projects
+('libagent', libhelpers' and 'netsnmpmibs') together with the main agent
+project ('snmpd').
 
 The final application project is the trap handler 'snmptrapd'.  This also
 requires the agent libraries ('libagent', 'libhelpers' and 'netsnmpmibs')
 as well as the core development library.
 
-There is a Debug version and Release version for each subproject.
-This is so the Debug and Release versions of an application can be built and 
-tested separately.
+There is a Debug version and Release version for each subproject.  This is so
+the Debug and Release versions of an application can be built and tested
+separately.
 
 Both VC++ 6.0 and 7.1 have been tested.  Building with earlier Microsoft
 compiler versions is no longer supported.
@@ -506,9 +485,9 @@ or SHA authentication.
 
 Since the MSVC build environment does not natively use "configure" nor "make"
 to generate the various pathnames that the programs require, the header files 
-need to be manually modified when using the graphical build system, and an 
-install script is provided.  When using the Perl Configure / nmake system, 
-the header files are automatically modified and require no manual editing.
+need to be manually modified when using the IDE, and an install script is
+provided.  When using the Perl Configure / nmake system, the header files are
+automatically modified and require no manual editing.
 
 The projects are arranged so that ALL of the usable products, the .exe files,
 are written to the win32\bin directory.  The win32\lib directory is used only 
@@ -713,12 +692,9 @@ Note:  The Configure option --linktype=static (or not specifying a linktype)
 *
 ***************************************************************************
 
-The win32sdk.dsw workspace will build the agent that provides mib-II objects
-for network interface layers, and the IP, ICMP, TCP and UDP tables.  This
-workspace requires the Platform SDK to be installed.  Use the win32.dsw 
-workspace if you don't have or don't need these features.  Note:  Other 
-features may be disabled if the Platform SDK is not used.  See the section
-'Installing Platform SDK' for more information.
+The win32.dsw workspace allows to build the agent that provides mib-II objects
+for network interface layers, and the IP, ICMP, TCP and UDP tables. Proceed as
+follows:
 
 1. Update the version stamp in win32\net-snmp\net-snmp-config.h.  The current
    version can be found in the Unix configure script (top level folder) by 
@@ -741,23 +717,14 @@ features may be disabled if the Platform SDK is not used.  See the section
 
      For example: #define INSTALL_BASE "c:/usr".  
 
-4. If you are using win32sdk, the Platform SDK must be enabled.  Edit the 
-   the win32\net-snmp\net-snmp-config.h file and *change*:
-
-        /* #undef HAVE_WIN32_PLATFORM_SDK */
-
-   to:
-
-        #define HAVE_WIN32_PLATFORM_SDK 1
-
-5. Build the applications
+4. Build the applications
 
    Static build (does not use NetSNMP.DLL)
    =======================================
 
    MS VC++ 6.0:
    ------------
-   a. Open win32.dsw or win32sdk.dsw.
+   a. Open win32.dsw.
    b. Click "Build->Batch Build..."  
    c. Set Release and/or Debug in 'Project configurations' to suit.
    d. Click "ReBuild All".
@@ -767,7 +734,7 @@ features may be disabled if the Platform SDK is not used.  See the section
 
    MS VC++ 7.0+:
    -------------
-   a.  Open win32.dsw or win32sdk.dsw.
+   a.  Open win32.dsw.
    b.  Click "Yes to All" to convert the workspace
    c.  Click "Build->Configuration Manager" and select either Release or Debug for 
        'Active Solution Configuration' and click "Close"
@@ -786,7 +753,7 @@ features may be disabled if the Platform SDK is not used.  See the section
 
    MS VC++ 6.0:
    ------------
-   a. Open win32.dsw or win32sdk.dsw.
+   a. Open win32.dsw.
    b. Click "Build->Batch Build..."  
    c. Click "Rebuild All".
    d. When building is done, View the Output window, clip and
@@ -795,7 +762,7 @@ features may be disabled if the Platform SDK is not used.  See the section
 
    MS VC++ 7.0+:
    -------------
-   a. Open win32.dsw or win32sdk.dsw.
+   a. Open win32.dsw.
    b. Click "Yes to All" to convert the workspace
    c. Click "Build->Configuration Manager" and select either Release or Debug for 
       'Active Solution Configuration' and click "Close"
