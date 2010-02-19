@@ -56,22 +56,6 @@
 #include <net-snmp/library/transform_oids.h>
 
 
-#if defined(NETSNMP_USE_OPENSSL) && defined(WIN32) && !defined(mingw32)
-# ifdef NETSNMP_USE_DLL
-#  ifdef _DEBUG
-#   pragma comment (lib, "libeay32MDd.lib")
-#  else
-#   pragma comment (lib, "libeay32MD.lib")
-#  endif
-# else
-#  ifdef _DEBUG
-#   pragma comment (lib, "libeay32MTd.lib")
-#  else
-#   pragma comment (lib, "libeay32MT.lib")
-#  endif
-# endif
-#endif
-
 
 /*******************************************************************-o-******
  * generate_Ku

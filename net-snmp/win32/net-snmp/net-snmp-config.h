@@ -1572,6 +1572,25 @@ typedef unsigned int   uintptr_t;
   #endif   /* NETSNMP_DLL */
 #endif     /* NETSNMP_USE_DLL */
 
+/* MSVC OpenSSL linker settings. */
+#if defined(WIN32) && !defined(mingw32)
+#  if defined(NETSNMP_USE_OPENSSL)
+#    ifdef NETSNMP_USE_DLL
+#      ifdef _DEBUG
+#        pragma comment(lib, "libeay32MDd.lib")
+#      else
+#        pragma comment(lib, "libeay32MD.lib")
+#      endif
+#    else
+#      ifdef _DEBUG
+#        pragma comment(lib, "libeay32MTd.lib")
+#      else
+#        pragma comment(lib, "libeay32MT.lib")
+#      endif
+#    endif
+#  endif
+#endif
+
 /*
  * DLL decoration, if used at all, must be consistent.
  * This is why NETSNMP_IMPORT is really an export decoration
