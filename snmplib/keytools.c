@@ -56,8 +56,8 @@
 #include <net-snmp/library/transform_oids.h>
 
 
-#if defined(NETSNMP_USE_OPENSSL) && defined(_MSC_VER)
-# ifdef _DLL
+#if defined(NETSNMP_USE_OPENSSL) && defined(WIN32) && !defined(mingw32)
+# ifdef NETSNMP_USE_DLL
 #  ifdef _DEBUG
 #   pragma comment (lib, "libeay32MDd.lib")
 #  else
