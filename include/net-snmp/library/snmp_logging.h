@@ -80,6 +80,7 @@ extern          "C" {
 #define NETSNMP_LOGHANDLER_CALLBACK	5
 #define NETSNMP_LOGHANDLER_NONE		6
 
+    void netsnmp_set_line_buffering(FILE *stream);
     int snmp_log_options(char *optarg, int argc, char *const *argv);
     void snmp_log_options_usage(const char *lead, FILE *outf);
     char *snmp_log_syslogname(const char *syslogname);

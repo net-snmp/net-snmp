@@ -170,6 +170,26 @@ shutdown_snmp_logging(void)
 #define LOG_USER	0
 #endif
 
+/* Set line buffering mode for a stream. */
+void
+netsnmp_set_line_buffering(FILE *stream)
+{
+#if defined(WIN32)
+    /*
+     * According to MSDN, the Microsoft Visual Studio C runtime library does
+     * not support line buffering, so turn off buffering completely.
+     * See also http://msdn.microsoft.com/en-us/library/86cebhfs(VS.71).aspx.
+     */
+    setvbuf(stream, NULL, _IONBF, BUFSIZ);
+#elif defined(HAVE_SETLINEBUF)
+    /* setlinefunction() is a function from the BSD Unix API. */
+    setlinebuf(stream);
+#else
+    /* See also the C89 or C99 standard for more information about setvbuf(). */
+    setvbuf(stream, NULL, _IOLBF, BUFSIZ);
+#endif
+}
+
 /*
  * Decodes log priority.
  * @param optarg - IN - priority to decode, "0" or "0-7"
@@ -343,6 +363,7 @@ snmp_log_options(char *optarg, int argc, char *const *argv)
     case 'e':
         logh = netsnmp_register_loghandler(NETSNMP_LOGHANDLER_STDERR, priority);
         if (logh) {
+            netsnmp_set_line_buffering(stderr);
             logh->pri_max = pri_max;
             logh->token   = strdup("stderr");
 	}
@@ -360,6 +381,7 @@ snmp_log_options(char *optarg, int argc, char *const *argv)
     case 'o':
         logh = netsnmp_register_loghandler(NETSNMP_LOGHANDLER_STDERR, priority);
         if (logh) {
+            netsnmp_set_line_buffering(stdout);
             logh->pri_max = pri_max;
             logh->token   = strdup("stdout");
             logh->imagic  = 1;	    /* stdout, not stderr */
@@ -720,16 +742,7 @@ netsnmp_enable_filelog(netsnmp_log_handler *logh, int dont_zero_log)
         if (!logfile)
             return;
         logh->magic = (void*)logfile;
-#ifdef WIN32
-        /*
-         * Apparently, "line buffering" under Windows is
-         *  actually implemented as "full buffering".
-         *  Let's try turning off buffering completely.
-         */
-        setvbuf(logfile, NULL, _IONBF, BUFSIZ);
-#else
-        setvbuf(logfile, NULL, _IOLBF, BUFSIZ);
-#endif
+        netsnmp_set_line_buffering(logfile);
     }
     logh->enabled = 1;
 }

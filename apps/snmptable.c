@@ -255,7 +255,8 @@ main(int argc, char *argv[])
     netsnmp_session session, *ss;
     int            total_entries = 0;
 
-    setvbuf(stdout, NULL, _IOLBF, 1024);
+    netsnmp_enable_line_buffering(stdout);
+
     netsnmp_ds_set_boolean(NETSNMP_DS_LIBRARY_ID, 
                            NETSNMP_DS_LIB_QUICK_PRINT, 1);
 
