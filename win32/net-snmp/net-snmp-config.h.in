@@ -25,7 +25,7 @@
  * Cygwin
  * MinGW 
  */
-/* #undef HAVE_WIN32_PLATFORM_SDK */
+#define HAVE_WIN32_PLATFORM_SDK
 
 /* Define NETSNMP_ENABLE_IPV6 to enable IPv6.  IPv6 is only available on
  * Windows XP and higher.  */
@@ -235,7 +235,7 @@
 /* #undef HAVE_CGETNEXT */
 
 /* Define to 1 if you have the <direct.h> header file. */
-/* #undef HAVE_DIRECT_H */
+#define HAVE_DIRECT_H 1
 
 /* Define to 1 if you have the <dirent.h> header file, and it defines `DIR'.
    */
@@ -1604,6 +1604,25 @@ typedef unsigned int   uintptr_t;
     #endif
   #endif   /* NETSNMP_DLL */
 #endif     /* NETSNMP_USE_DLL */
+
+/* MSVC OpenSSL linker settings. */
+#if defined(WIN32) && !defined(mingw32)
+#  if defined(NETSNMP_USE_OPENSSL)
+#    ifdef NETSNMP_USE_DLL
+#      ifdef _DEBUG
+#        pragma comment(lib, "libeay32MDd.lib")
+#      else
+#        pragma comment(lib, "libeay32MD.lib")
+#      endif
+#    else
+#      ifdef _DEBUG
+#        pragma comment(lib, "libeay32MTd.lib")
+#      else
+#        pragma comment(lib, "libeay32MT.lib")
+#      endif
+#    endif
+#  endif
+#endif
 
 /*
  * DLL decoration, if used at all, must be consistent.
