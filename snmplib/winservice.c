@@ -9,6 +9,8 @@
 #include <windows.h>
 #include <tchar.h>
 
+#include <net-snmp/net-snmp-config.h>
+
 #include <stdio.h>		/* sprintf */
 #include <process.h>		/* beginthreadex  */
 
@@ -35,6 +37,15 @@ labelFIN: \
 #define CountOf(arr) ( sizeof(arr) / sizeof(arr[0]) )
 
 
+#if defined(WIN32) && !defined(mingw32)
+#pragma comment(lib, "iphlpapi.lib")
+#ifdef USING_WINEXTDLL_MODULE
+#pragma comment(lib, "snmpapi.lib")
+#pragma comment(lib, "mgmtapi.lib")
+#endif
+#endif
+
+ 
     /*
      * External global variables used here
      */
