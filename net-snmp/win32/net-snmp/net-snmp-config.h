@@ -1603,14 +1603,15 @@ typedef unsigned int   uintptr_t;
  */
 
 
+  #include <malloc.h>
   #include <stdlib.h> /* malloc(), calloc(), realloc() and free() */
   #include <string.h> /* strdup() */
 
   #ifdef NETSNMP_USE_DLL
     #ifndef NETSNMP_TOOLS_C
 
-  /* wrap alloc functions to use DLL's memory heap */
-  /* This is not done in tools.c, where these wrappers are defined */
+      /* wrap alloc functions to use DLL's memory heap */
+      /* This is not done in tools.c, where these wrappers are defined */
 
       #define strdup    netsnmp_strdup
       #define calloc    netsnmp_calloc
