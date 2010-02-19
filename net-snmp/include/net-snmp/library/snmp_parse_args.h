@@ -34,7 +34,7 @@ extern "C" {
  *  The proc function is called with argc, argv and the currently processed
  *  option as arguments
  */
-int
+NETSNMP_IMPORT int
 netsnmp_parse_args(int argc, char **argv, netsnmp_session *session,
                    const char *localOpts, void (*proc)(int, char *const *, int),
                    int flags);
