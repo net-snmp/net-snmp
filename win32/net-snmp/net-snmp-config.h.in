@@ -27,7 +27,6 @@
  * Microsoft Visual Studio MSVC 6.0 and the Platform SDK (PSDK)
  * Microsoft Visual Studio.Net 2002
  * Microsoft Visual Studio.Net 2003
- * Note: since considerable time MSVC 6 without PSDK is no longer supported.
  */
 #define HAVE_WIN32_PLATFORM_SDK 1
 
@@ -1573,6 +1572,25 @@ typedef unsigned int   uintptr_t;
   #endif   /* NETSNMP_DLL */
 #endif     /* NETSNMP_USE_DLL */
 
+/* MSVC OpenSSL linker settings. */
+#if defined(WIN32) && !defined(mingw32)
+#  if defined(NETSNMP_USE_OPENSSL)
+#    ifdef NETSNMP_USE_DLL
+#      ifdef _DEBUG
+#        pragma comment(lib, "libeay32MDd.lib")
+#      else
+#        pragma comment(lib, "libeay32MD.lib")
+#      endif
+#    else
+#      ifdef _DEBUG
+#        pragma comment(lib, "libeay32MTd.lib")
+#      else
+#        pragma comment(lib, "libeay32MT.lib")
+#      endif
+#    endif
+#  endif
+#endif
+
 /*
  * DLL decoration, if used at all, must be consistent.
  * This is why NETSNMP_IMPORT is really an export decoration
@@ -1585,14 +1603,15 @@ typedef unsigned int   uintptr_t;
  */
 
 
+  #include <malloc.h>
   #include <stdlib.h> /* malloc(), calloc(), realloc() and free() */
   #include <string.h> /* strdup() */
 
   #ifdef NETSNMP_USE_DLL
     #ifndef NETSNMP_TOOLS_C
 
-  /* wrap alloc functions to use DLL's memory heap */
-  /* This is not done in tools.c, where these wrappers are defined */
+      /* wrap alloc functions to use DLL's memory heap */
+      /* This is not done in tools.c, where these wrappers are defined */
 
       #define strdup    netsnmp_strdup
       #define calloc    netsnmp_calloc
