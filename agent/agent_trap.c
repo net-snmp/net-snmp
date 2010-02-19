@@ -1220,7 +1220,9 @@ snmpd_parse_config_trapsess(const char *word, char *cptr)
         argv[argn] = strdup(tmp);
     }
 
-    arg = snmp_parse_args(argn, argv, &session, "C:", trapOptProc);
+    arg = netsnmp_parse_args(argn, argv, &session, "C:", trapOptProc,
+                             NETSNMP_PARSE_ARGS_NOLOGGING |
+                             NETSNMP_PARSE_ARGS_NOZERO);
 
     ss = snmp_add(&session,
 		  netsnmp_transport_open_client("snmptrap", session.peername),

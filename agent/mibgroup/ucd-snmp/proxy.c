@@ -102,7 +102,9 @@ proxy_parse_config(const char *token, char *line)
 
     DEBUGMSGTL(("proxy_config", "parsing args: %d\n", argn));
     /* Call special parse_args that allows for no specified community string */
-    arg = snmp_parse_args(argn, argv, &session, "C:", proxyOptProc);
+    arg = netsnmp_parse_args(argn, argv, &session, "C:", proxyOptProc,
+                             NETSNMP_PARSE_ARGS_NOLOGGING |
+                             NETSNMP_PARSE_ARGS_NOZERO);
 
     /* reset this in case we modified it */
     netsnmp_ds_set_boolean(NETSNMP_DS_LIBRARY_ID,
