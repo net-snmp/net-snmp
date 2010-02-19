@@ -142,7 +142,7 @@ SOFTWARE.
     unsigned long   strtoul(const char *, char **, int);
 #endif
 #ifndef HAVE_STRTOULL
-    uint64_t        strtoull(const char *, char **, int);
+    NETSNMP_IMPORT uint64_t strtoull(const char *, char **, int);
 #endif
 #ifndef HAVE_STRTOK_R
     char           *strtok_r(char *, const char *, char **);
