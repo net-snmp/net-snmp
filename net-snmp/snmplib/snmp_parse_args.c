@@ -186,25 +186,22 @@ extern int      snmpv3_options(char *optarg, netsnmp_session * session,
                                char **Apsz, char **Xpsz, int argc,
                                char *const *argv);
 
-/*
- * This method does the real work for snmp_parse_args.  It takes an
- * extra argument, proxy, and uses this to decide how to handle the lack of
- * of a community string.
- */
 int
-snmp_parse_args(int argc,
-                char **argv,
-                netsnmp_session * session, const char *localOpts,
-                void (*proc) (int, char *const *, int))
+netsnmp_parse_args(int argc,
+                   char **argv,
+                   netsnmp_session * session, const char *localOpts,
+                   void (*proc) (int, char *const *, int),
+                   int flags)
 {
     static char	   *sensitive[4] = { NULL, NULL, NULL, NULL };
-    int             arg, sp = 0, zero_sensitive = 1, testcase = 0;
+    int             arg, sp = 0, testcase = 0;
     char           *cp;
     char           *Apsz = NULL;
     char           *Xpsz = NULL;
     char           *Cpsz = NULL;
     char            Opts[BUF_SIZE];
-    int             logopt = 0;
+    int             logopt = flags & NETSNMP_PARSE_ARGS_NOLOGGING;
+    int             zero_sensitive = !( flags & NETSNMP_PARSE_ARGS_NOZERO );
 
     /*
      * initialize session to default values 
@@ -213,14 +210,6 @@ snmp_parse_args(int argc,
     strcpy(Opts, "Y:VhHm:M:O:I:P:D:dv:r:t:c:Z:e:E:n:u:l:x:X:a:A:p:T:-:3:s:S:L:");
     if (localOpts)
         strcat(Opts, localOpts);
-
-    if (strcmp(argv[0], "snmpd-trapsess") == 0 ||
-	strcmp(argv[0], "snmpd-proxy")    == 0) {
-	/*  Don't worry about zeroing sensitive parameters as they are not
-	    on the command line anyway (called from internal config-line
-	    handler).  */
-	zero_sensitive = 0;
-    }
 
     /*
      * get the options 
@@ -787,4 +776,13 @@ snmp_parse_args(int argc,
 #endif /* support for community based SNMP */
 
     return optind;
+}
+
+int
+snmp_parse_args(int argc,
+                char **argv,
+                netsnmp_session * session, const char *localOpts,
+                void (*proc) (int, char *const *, int))
+{
+    return netsnmp_parse_args(argc, argv, session, localOpts, proc, 0);
 }
