@@ -31,6 +31,10 @@
 #include <net-snmp/library/default_store.h>
 #include <net-snmp/library/system.h>
 
+#ifndef INADDR_NONE
+#define INADDR_NONE     -1
+#endif
+
 int
 netsnmp_sockaddr_in(struct sockaddr_in *addr,
                     const char *inpeername, int remote_port)
