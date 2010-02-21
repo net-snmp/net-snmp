@@ -234,6 +234,9 @@
 /* Define to 1 if you have the `cgetnext' function. */
 /* #undef HAVE_CGETNEXT */
 
+/* Define to 1 if you have the <crtdbg.h> header file. */
+#define HAVE_CRTDBG_H 1
+
 /* Define to 1 if you have the <direct.h> header file. */
 #define HAVE_DIRECT_H 1
 
@@ -1644,17 +1647,28 @@ typedef unsigned int   uintptr_t;
  */
 
 
+  #include <malloc.h>
+  #include <stdlib.h> /* malloc(), calloc(), realloc() and free() */
+  #include <string.h> /* strdup() */
+
   #ifdef NETSNMP_USE_DLL
     #ifndef NETSNMP_TOOLS_C
 
-  /* wrap alloc functions to use DLL's memory heap */
-  /* This is not done in tools.c, where these wrappers are defined */
+      /* wrap alloc functions to use DLL's memory heap */
+      /* This is not done in tools.c, where these wrappers are defined */
 
       #define strdup    netsnmp_strdup
       #define calloc    netsnmp_calloc
       #define malloc    netsnmp_malloc
       #define realloc   netsnmp_realloc
       #define free      netsnmp_free
+
+      char * netsnmp_strdup( const char * ptr);
+      void * netsnmp_calloc(size_t nmemb, size_t size);
+      void * netsnmp_malloc(size_t size);
+      void * netsnmp_realloc( void * ptr, size_t size);
+      void netsnmp_free( void * ptr);
+
     #endif
   #endif
 
