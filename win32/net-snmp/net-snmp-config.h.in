@@ -1519,6 +1519,10 @@
 #ifdef WIN32
 
 typedef unsigned short mode_t;
+typedef unsigned char uint8_t;
+typedef char int8_t;
+typedef unsigned short uint16_t;
+typedef short int16_t;
 typedef unsigned __int32 uint32_t;
 typedef long int32_t;
 typedef unsigned __int64 uint64_t;
@@ -1662,7 +1666,7 @@ typedef unsigned int   uintptr_t;
 #undef HAVE_INET_PTON
 
 /* IPv6 transports */
-#if NETSNMP_ENABLE_IPV6
+#ifdef NETSNMP_ENABLE_IPV6
   #ifndef IPPROTO_IPV6
     /* Only defined in Windows XP or higher, so we need it here */
     #define IPPROTO_IPV6 41
@@ -1673,6 +1677,13 @@ typedef unsigned int   uintptr_t;
   #undef NETSNMP_TRANSPORT_TCPIPV6_DOMAIN
   #undef NETSNMP_TRANSPORT_UDPIPV6_DOMAIN
 #endif
+
+/*
+ * Although if_nametoindex() is available on Windows Vista, Windows Server
+ * 2008 and later in iphlpapi.dll, do not link with if_nametoindex() such
+ * that the Net-SNMP executable can be started on earlier Windows versions.
+ */
+#undef HAVE_IF_NAMETOINDEX
 
 #ifndef NI_MAXHOST
 #define NI_MAXHOST	1025

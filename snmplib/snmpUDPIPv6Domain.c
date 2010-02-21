@@ -25,8 +25,7 @@
 #endif
 
 #if defined(HAVE_WINSOCK_H)
-#undef  HAVE_IF_NAMETOINDEX
-const struct in6_addr in6addr_any = IN6ADDR_ANY_INIT;
+static const struct in6_addr in6addr_any = IN6ADDR_ANY_INIT;
 #endif
 
 #if HAVE_NETINET_IN_H
