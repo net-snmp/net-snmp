@@ -523,5 +523,9 @@ SOURCE="..\..\include\net-snmp\library\ucd_compat.h"
 SOURCE="..\..\include\net-snmp\library\vacm.h"
 # End Source File
 # End Group
+# Begin Source File
+
+SOURCE=.\libsnmp.def
+# End Source File
 # End Target
 # End Project
