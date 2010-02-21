@@ -891,7 +891,7 @@ follows:
 
    MS VC++ 7.0+:
    -------------
-   a. Open libsdll.dsw.
+   a. Open win32dll.dsw.
    b. Click "Yes to All" to convert the workspace
    c. Click "Build->Batch Build..." 
    d. Set Release and/or Debug in 'Project configurations' to suit.
