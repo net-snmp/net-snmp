@@ -813,11 +813,11 @@ follows:
     Copy win32\net-snmp\net-snmp-config.h to 
     win32\net-snmp\dll-config.h.
 
-6. Build the DLL
+6. Build the DLL and the applications
 
    MS VC++ 6.0:
    ------------
-   a. Open libsdll.dsw.
+   a. Open win32dll.dsw.
    b. Click "Build->Batch Build..."  
    c. Set Release and/or Debug in 'Project configurations' to suit.
    d. Click "Clean".  ** Do NOT skip this step. **
@@ -829,7 +829,7 @@ follows:
 
    MS VC++ 7.0+:
    -------------
-   a. Open libsdll.dsw.
+   a. Open win32dll.dsw.
    b. Click "Yes to All" to convert the workspace
    c. Click "Build->Batch Build..." 
    d. Set Release and/or Debug in 'Project configurations' to suit.

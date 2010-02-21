@@ -1564,6 +1564,10 @@ typedef unsigned int   uintptr_t;
 /* Define NETSNMP_USE_DLL when building or using netsnmp.DLL */
 /* #undef NETSNMP_USE_DLL */
 
+#if defined(NETSNMP_DLL) && !defined(NETSNMP_USE_DLL)
+#error NETSNMP_USE_DLL must be defined when building libsnmp as a DLL.
+#endif
+
 #ifdef NETSNMP_USE_DLL
   #ifdef NETSNMP_DLL
     #if defined(_MSC_VER)
