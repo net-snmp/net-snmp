@@ -475,5 +475,9 @@ SOURCE="..\..\include\net-snmp\library\fd_event_manager.h"
 SOURCE="..\..\include\net-snmp\library\large_fd_set.h"
 # End Source File
 # End Group
+# Begin Source File
+
+SOURCE=.\libsnmp.def
+# End Source File
 # End Target
 # End Project
