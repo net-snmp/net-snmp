@@ -472,6 +472,7 @@ EXPORTS
         snmp_select_info2
         sprint_realloc_hexstring
         netsnmp_parse_args
+        netsnmp_set_line_buffering
 ;IPv6        netsnmp_udp6_parse_security
 ;IPv6        netsnmp_udp6_getSecName
 ;IPv6        netsnmp_TCPIPv6Domain
