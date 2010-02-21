@@ -43,7 +43,6 @@
      */
 #include <winsock2.h>
 #include <ws2tcpip.h>
-#undef  HAVE_IF_NAMETOINDEX
 
 #ifndef HAVE_INET_PTON
 extern int         inet_pton(int, const char*, void*);
@@ -51,7 +50,7 @@ extern int         inet_pton(int, const char*, void*);
 #ifndef HAVE_INET_NTOP
 extern const char *inet_ntop(int, const void*, char*, size_t);
 #endif
-const struct in6_addr in6addr_any = IN6ADDR_ANY_INIT;
+static const struct in6_addr in6addr_any = IN6ADDR_ANY_INIT;
 #endif
 
 #if HAVE_NETINET_IN_H
