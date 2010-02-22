@@ -80,6 +80,8 @@
 
 #ifdef USING_WINEXTDLL_MODULE
 
+#include <net-snmp/types.h>
+
 #include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
