@@ -703,7 +703,7 @@ for i in module_list_o module_list_c module_list_lo mib_module_list_o mib_module
 	# hpux make (at least) doesn't like a trailing \ on the last
 	# line even when the next line contains nothing but
 	# whitespace.
-	lasttoken=`tail -1 mk/$i.mk | awk '{print $1}'`
+	lasttoken=`awk '{lasttoken=$1}END{print lasttoken}' mk/$i.mk`
 	$SED "s#$lasttoken \\\\#$lasttoken#" < mk/$i.mk > mk/$i.mk.tmp
 	mv mk/$i.mk.tmp mk/$i.mk
 
