@@ -327,7 +327,7 @@ netsnmp_remove_subtree(netsnmp_subtree *tree)
                 break;
         netsnmp_assert(ptr);
         if (ptr)
-            ptr->first_subtree = NULL;
+            ptr->first_subtree = tree->next;
     } else
         tree->prev->next = tree->next;
 
