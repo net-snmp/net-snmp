@@ -262,7 +262,7 @@ if test "x$tryopenssl" != "xno"; then
         AC_LINK_IFELSE([AC_LANG_PROGRAM([
                 #include <openssl/evp.h>],
                 [return EVP_md5();])],
-            [AC_MSG_RESULT(yes); CRYPTO="eay32"],
+            [AC_MSG_RESULT(yes); ac_cv_lib_eay32_EVP_md5=yes; CRYPTO="eay32"],
             [AC_MSG_RESULT(no)]
         )
         LIBS="$netsnmp_save_LIBS"
