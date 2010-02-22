@@ -45,6 +45,7 @@
 #endif
 
 #include <net-snmp/net-snmp-includes.h>
+#include <net-snmp/library/snmp_assert.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 #include <net-snmp/agent/agent_callbacks.h>
 
@@ -313,6 +314,25 @@ add_subtree(netsnmp_subtree *new_tree, const char *context_name)
     context_subtrees = ptr;
 
     return ptr->first_subtree;
+}
+
+void
+netsnmp_remove_subtree(netsnmp_subtree *tree)
+{
+    subtree_context_cache *ptr;
+
+    if (!tree->prev) {
+        for (ptr = context_subtrees; ptr; ptr = ptr->next)
+            if (ptr->first_subtree == tree)
+                break;
+        netsnmp_assert(ptr);
+        if (ptr)
+            ptr->first_subtree = NULL;
+    } else
+        tree->prev->next = tree->next;
+
+    if (tree->next)
+        tree->next->prev = tree->prev;
 }
 
 netsnmp_subtree *
@@ -685,6 +705,7 @@ netsnmp_subtree_load(netsnmp_subtree *new_sub, const char *context_name)
 	    new2 = netsnmp_subtree_split(new_sub, tree1->end_a,tree1->end_len);
 	    res = netsnmp_subtree_load(new_sub, context_name);
 	    if (res != MIB_REGISTERED_OK) {
+                netsnmp_remove_subtree(new2);
 		netsnmp_subtree_free(new2);
 		return res;
 	    }
@@ -822,6 +843,7 @@ netsnmp_register_mib(const char *moduleName,
             if (res != MIB_REGISTERED_OK) {
                 unregister_mib_context(mibloc, mibloclen, priority,
                                        range_subid, range_ubound, context);
+                netsnmp_remove_subtree(sub2);
 		netsnmp_subtree_free(sub2);
                 netsnmp_set_lookup_cache_size(old_lookup_cache_val);
                 invalidate_lookup_cache(context);
