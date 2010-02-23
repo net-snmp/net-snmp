@@ -95,6 +95,7 @@ sslctx_client_setup(SSL_METHOD *method) {
      */
     the_ctx = SSL_CTX_new(method);
     if (!the_ctx) {
+        snmp_log(LOG_ERR, "ack: %x\n", the_ctx);
         LOGANDDIE("can't create a new context");
     }
     SSL_CTX_set_read_ahead (the_ctx, 1); /* Required for DTLS */
@@ -163,6 +164,8 @@ sslctx_client_setup(SSL_METHOD *method) {
     if (!SSL_CTX_set_default_verify_paths(the_ctx)) {
         LOGANDDIE ("failed to set default verify path");
     }
+
+    return the_ctx;
 }
 
 SSL_CTX *
@@ -581,8 +584,10 @@ void _openssl_log_error(int rc, SSL *con, const char *location) {
 
         case SSL_ERROR_SYSCALL:
             reason = "SSL_ERROR_SYSCALL";
-            snmp_log(LOG_ERR, "DTLS error: %s: rc=%d, sslerror = %d (%s): system_error=%d (%s)\n",
+            snmp_log(LOG_ERR, "TLS error: %s: rc=%d, sslerror = %d (%s): system_error=%d (%s)\n",
                      location, rc, sslnum, reason, errno, strerror(errno));
+            snmp_log(LOG_ERR, "TLS Error: %s\n",
+                     ERR_reason_error_string(ERR_get_error()));
             return;
 
         case SSL_ERROR_ZERO_RETURN:
@@ -601,7 +606,10 @@ void _openssl_log_error(int rc, SSL *con, const char *location) {
             reason = "unknown";
         }
 
-        snmp_log(LOG_ERR, "DTLS error: %s: rc=%d, sslerror = %d (%s)\n",
+        snmp_log(LOG_ERR, "TLS error: %s: rc=%d, sslerror = %d (%s)\n",
                  location, rc, sslnum, reason);
+
+        snmp_log(LOG_ERR, "TLS Error: %s\n",
+                 ERR_reason_error_string(ERR_get_error()));
     }
 }
