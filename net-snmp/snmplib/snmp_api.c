@@ -6215,9 +6215,11 @@ snmp_sess_select_info2(void *sessp,
     }
     DEBUGMSG(("sess_select", "\n"));
 
-    next_alarm = get_next_alarm_delay_time(&delta);
-    DEBUGMSGT(("sess_select","next alarm %d.%06d sec\n",
-              (int)delta.tv_sec, (int)delta.tv_usec));
+    if (netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_ALARM_DONT_USE_SIG)) {
+        next_alarm = get_next_alarm_delay_time(&delta);
+        DEBUGMSGT(("sess_select","next alarm %d.%06d sec\n",
+                   (int)delta.tv_sec, (int)delta.tv_usec));
+    }
     if (next_alarm == 0 && requests == 0) {
         /*
          * If none are active, skip arithmetic.  
