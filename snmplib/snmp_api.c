@@ -5096,8 +5096,8 @@ _sess_async_send(void *sessp,
      * Send the message.  
      */
 
-    DEBUGMSGTL(("sess_process_packet", "sending message id#%ld reqid#%ld len %zu\n",
-                pdu->msgid, pdu->reqid, length));
+    DEBUGMSGTL(("sess_process_packet", "sending message id#%ld reqid#%ld len %"
+                NETSNMP_PRIz "u\n", pdu->msgid, pdu->reqid, length));
     result = netsnmp_transport_send(transport, packet, length,
                                     &(pdu->transport_data),
                                     &(pdu->transport_data_length));
@@ -5328,7 +5328,7 @@ _sess_process_packet(void *sessp, netsnmp_session * sp,
   netsnmp_pdu    *pdu;
   netsnmp_request_list *rp, *orp = NULL;
   struct snmp_secmod_def *sptr;
-  int             ret = 0, handled = 0, debugLength, dumpPacket;
+  int             ret = 0, handled = 0;
 
   DEBUGMSGTL(("sess_process_packet",
 	      "session %p fd %d pkt %p length %d\n", sessp,
@@ -5382,8 +5382,8 @@ _sess_process_packet(void *sessp, netsnmp_session * sp,
     ret = snmp_parse(sessp, sp, pdu, packetptr, length);
   }
 
-  DEBUGMSGTL(("sess_process_packet", "received message id#%ld reqid#%ld len %zu\n",
-              pdu->msgid, pdu->reqid, length));
+  DEBUGMSGTL(("sess_process_packet", "received message id#%ld reqid#%ld len "
+              "%" NETSNMP_PRIz "u\n", pdu->msgid, pdu->reqid, length));
 
   if (ret != SNMP_ERR_NOERROR) {
     DEBUGMSGTL(("sess_process_packet", "parse fail\n"));
@@ -6386,7 +6386,8 @@ snmp_resend_request(struct session_list *slp, netsnmp_request_list *rp,
         return -1;
     }
 
-    DEBUGMSGTL(("sess_process_packet", "resending message id#%ld reqid#%ld rp_reqid#%ld rp_msgid#%ld len %zu\n",
+    DEBUGMSGTL(("sess_process_packet", "resending message id#%ld reqid#%ld "
+                "rp_reqid#%ld rp_msgid#%ld len %" NETSNMP_PRIz "u\n",
                 rp->pdu->msgid, rp->pdu->reqid, rp->request_id, rp->message_id, length));
     result = netsnmp_transport_send(transport, packet, length,
                                     &(rp->pdu->transport_data),
