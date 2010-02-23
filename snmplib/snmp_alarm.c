@@ -58,18 +58,22 @@
 #include <net-snmp/library/snmp_alarm.h>
 
 static struct snmp_alarm *thealarms = NULL;
+static int      start_alarms = 0;
 static unsigned int regnum = 1;
 
 int
 init_alarm_post_config(int majorid, int minorid, void *serverarg,
                        void *clientarg)
 {
+    start_alarms = 1;
+    set_an_alarm();
     return SNMPERR_SUCCESS;
 }
 
 void
 init_snmp_alarm(void)
 {
+    start_alarms = 0;
     snmp_register_callback(SNMP_CALLBACK_LIBRARY,
                            SNMP_CALLBACK_POST_READ_CONFIG,
                            init_alarm_post_config, NULL);
@@ -457,6 +461,10 @@ snmp_alarm_register_hr(struct timeval t, unsigned int flags,
                 "registered alarm %d, t = %ld.%03ld, flags=0x%02x\n",
                 (*s)->clientreg, (*s)->t.tv_sec, ((*s)->t.tv_usec / 1000),
                 (*s)->flags));
+
+    if (start_alarms) {
+        set_an_alarm();
+    }
 
     return (*s)->clientreg;
 }
