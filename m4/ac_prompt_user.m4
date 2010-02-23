@@ -34,7 +34,8 @@ dnl @author Wes Hardaker <hardaker@users.sourceforge.net>
 dnl
 AC_DEFUN([AC_PROMPT_USER],
 [
-MSG_CHECK=`echo "$2" | tail -1`
+MSG_CHECK="patsubst([$2], [.*
+], [])"
 AC_CACHE_CHECK($MSG_CHECK, ac_cv_user_prompt_$1,
 [echo "" >&AS_MESSAGE_FD
 AC_PROMPT_USER_NO_DEFINE($1,[$2],$3)
