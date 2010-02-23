@@ -32,6 +32,10 @@
 #include <sys/uio.h>
 #endif
 
+#if HAVE_ARPA_INET_H
+#include <arpa/inet.h>
+#endif
+
 #if HAVE_DMALLOC_H
 #include <dmalloc.h>
 #endif
@@ -85,7 +89,6 @@ netsnmp_tlstcp_recv(netsnmp_transport *t, void *buf, int size,
                     void **opaque, int *olength)
 {
     int             rc = -1;
-    socklen_t       fromlen = sizeof(struct sockaddr);
     netsnmp_indexed_addr_pair *addr_pair = NULL;
     struct sockaddr *from;
     netsnmp_tmStateReference *tmStateRef = NULL;
@@ -335,6 +338,8 @@ netsnmp_tlstcp_transport(struct sockaddr_in *addr, int isserver)
     SSL_CTX *ctx;
     SSL *ssl;
     _netsnmpTLSBaseData *tlsdata;
+    char tmpbuf[128];
+    int portbuf, rc;
     
     if (addr == NULL || addr->sin_family != AF_INET) {
         return NULL;
@@ -376,11 +381,13 @@ netsnmp_tlstcp_transport(struct sockaddr_in *addr, int isserver)
         /* this is done by creating an accept bio and then chaining
            the secure one on top of it */
 
-        tlsdata->accept_bio = BIO_new_accept("4422");
+        snprintf(tmpbuf, sizeof(tmpbuf), "%d", ntohs(addr->sin_port));
+        DEBUGMSGTL(("tlstcp", "listening on tlstcp port %s\n", tmpbuf));
+        tlsdata->accept_bio = BIO_new_accept(tmpbuf);
         if (NULL == tlsdata->accept_bio) {
             SNMP_FREE(t);
             SNMP_FREE(tlsdata);
-            snmp_log(LOG_ERR, "TLSTCP: Falied to create a accept BIO using address: %s\n", addr);
+            snmp_log(LOG_ERR, "TLSTCP: Falied to create a accept BIO\n");
             return NULL;
         }
         BIO_set_accept_bios(tlsdata->accept_bio, tlsdata->sslbio);
@@ -396,20 +403,28 @@ netsnmp_tlstcp_transport(struct sockaddr_in *addr, int isserver)
     } else {
         /* Is the client */
         tlsdata->isclient = 1;
-        tlsdata->sslbio = bio = BIO_new_ssl_connect(ctx);
-        BIO_get_ssl(bio, &ssl);
-        SSL_set_mode(ssl, SSL_MODE_AUTO_RETRY);
 
         /* set up the needed SSL context */
         tlsdata->ssl_context = ctx =
             sslctx_client_setup(TLSv1_client_method());
 
-        BIO_set_conn_hostname(bio, addr);
+        tlsdata->sslbio = bio = BIO_new_ssl_connect(ctx);
+        BIO_get_ssl(bio, &ssl);
+        SSL_set_mode(ssl, SSL_MODE_AUTO_RETRY);
 
-        if (BIO_do_connect(bio) <= 0) {
+
+        snprintf(tmpbuf, sizeof(tmpbuf), "%s:%d", inet_ntoa(addr->sin_addr),
+                 ntohs(addr->sin_port));
+        BIO_set_conn_hostname(bio, tmpbuf);
+        DEBUGMSGTL(("tlstcp", "connecting to tlstcp %s\n",
+                    tmpbuf));
+
+        if (rc = BIO_do_connect(bio) <= 0) {
             SNMP_FREE(tlsdata);
             SNMP_FREE(t);
             snmp_log(LOG_ERR, "failed to open connection to TLS server\n");
+            snmp_log(LOG_ERR, "openssl error: %s\n",
+                     _x509_get_error(rc, "foo"));
             return NULL;
         }
 
@@ -437,7 +452,7 @@ netsnmp_tlstcp_transport(struct sockaddr_in *addr, int isserver)
     t->f_recv     = netsnmp_tlstcp_recv;
     t->f_send     = netsnmp_tlstcp_send;
     t->f_close    = netsnmp_tlstcp_close;
-    t->f_accept   = NULL;
+    t->f_accept   = netsnmp_tlstcp_accept;
     t->f_fmtaddr  = netsnmp_udp_fmtaddr;
     t->flags = NETSNMP_TRANSPORT_FLAG_TUNNELED;
 
