@@ -159,6 +159,13 @@ typedef struct netsnmp_tdomain_s {
 
 /*  Some utility functions.  */
 
+char *netsnmp_transport_peer_string(netsnmp_transport *t, void *data, int len);
+
+int netsnmp_transport_send(netsnmp_transport *t, void *data, int len,
+                           void **opaque, int *olength);
+int netsnmp_transport_recv(netsnmp_transport *t, void *data, int len,
+                           void **opaque, int *olength);
+
 int netsnmp_transport_add_to_list(netsnmp_transport_list **transport_list,
 				  netsnmp_transport *transport);
 int netsnmp_transport_remove_from_list(netsnmp_transport_list **transport_list,
