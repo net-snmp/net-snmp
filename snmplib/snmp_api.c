@@ -3652,8 +3652,10 @@ snmp_parse_version(u_char * data, size_t length)
     data = asn_parse_sequence(data, &length, &type,
                               (ASN_SEQUENCE | ASN_CONSTRUCTOR), "version");
     if (data) {
+        DEBUGDUMPHEADER("recv", "SNMP Version");
         data =
             asn_parse_int(data, &length, &type, &version, sizeof(version));
+        DEBUGINDENTLESS();
         if (!data || type != ASN_INTEGER) {
             return SNMPERR_BAD_VERSION;
         }
@@ -5090,32 +5092,15 @@ _sess_async_send(void *sessp,
         return 0;
     }
 
-    if (netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_DUMP_PACKET)) {
-        if (transport->f_fmtaddr != NULL) {
-            char           *dest_txt =
-                transport->f_fmtaddr(transport, pdu->transport_data,
-                                     pdu->transport_data_length);
-            if (dest_txt != NULL) {
-                snmp_log(LOG_DEBUG, "\nSending %lu bytes to %s\n", (unsigned long)length,
-                         dest_txt);
-                SNMP_FREE(dest_txt);
-            } else {
-                snmp_log(LOG_DEBUG, "\nSending %lu bytes to <UNKNOWN>\n",
-                         (unsigned long)length);
-            }
-        }
-        xdump(packet, length, "");
-    }
-
     /*
      * Send the message.  
      */
 
-    DEBUGMSGTL(("sess_process_packet", "sending message id#%ld reqid#%ld\n",
-                pdu->msgid, pdu->reqid));
-    result = transport->f_send(transport, packet, length,
-                               &(pdu->transport_data),
-                               &(pdu->transport_data_length));
+    DEBUGMSGTL(("sess_process_packet", "sending message id#%ld reqid#%ld len %zu\n",
+                pdu->msgid, pdu->reqid, length));
+    result = netsnmp_transport_send(transport, packet, length,
+                                    &(pdu->transport_data),
+                                    &(pdu->transport_data_length));
 
     SNMP_FREE(pktbuf);
 
@@ -5343,26 +5328,18 @@ _sess_process_packet(void *sessp, netsnmp_session * sp,
   netsnmp_pdu    *pdu;
   netsnmp_request_list *rp, *orp = NULL;
   struct snmp_secmod_def *sptr;
-  int             ret = 0, handled = 0;
+  int             ret = 0, handled = 0, debugLength, dumpPacket;
 
   DEBUGMSGTL(("sess_process_packet",
 	      "session %p fd %d pkt %p length %d\n", sessp,
 	      transport->sock, packetptr, length));
 
-  if (netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID, 
-			     NETSNMP_DS_LIB_DUMP_PACKET)) {
-    if (transport->f_fmtaddr != NULL) {
-      char *addrtxt = transport->f_fmtaddr(transport, opaque, olength);
-      if (addrtxt != NULL) {
-	snmp_log(LOG_DEBUG, "\nReceived %d bytes from %s\n",
-		 length, addrtxt);
-	SNMP_FREE(addrtxt);
-      } else {
-	snmp_log(LOG_DEBUG, "\nReceived %d bytes from <UNKNOWN>\n",
-		 length);
-      }
-    }
-    xdump(packetptr, length, "");
+  if (netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID,NETSNMP_DS_LIB_DUMP_PACKET)) {
+      char *addrtxt = netsnmp_transport_peer_string(transport, opaque, olength);
+      snmp_log(LOG_DEBUG, "\nReceived %d byte packet from %s\n",
+               length, addrtxt);
+      SNMP_FREE(addrtxt);
+      xdump(packetptr, length, "");
   }
 
   /*
@@ -5405,8 +5382,8 @@ _sess_process_packet(void *sessp, netsnmp_session * sp,
     ret = snmp_parse(sessp, sp, pdu, packetptr, length);
   }
 
-  DEBUGMSGTL(("sess_process_packet", "received message id#%ld reqid#%ld\n",
-              pdu->msgid, pdu->reqid));
+  DEBUGMSGTL(("sess_process_packet", "received message id#%ld reqid#%ld len %zu\n",
+              pdu->msgid, pdu->reqid, length));
 
   if (ret != SNMP_ERR_NOERROR) {
     DEBUGMSGTL(("sess_process_packet", "parse fail\n"));
@@ -5824,7 +5801,8 @@ _sess_read(void *sessp, netsnmp_large_fd_set * fdset)
         }
     }
 
-    length = transport->f_recv(transport, rxbuf, rxbuf_len, &opaque, &olength);
+    length = netsnmp_transport_recv(transport, rxbuf, rxbuf_len, &opaque,
+                                    &olength);
 
     if (length == -1 && !(transport->flags & NETSNMP_TRANSPORT_FLAG_STREAM)) {
         sp->s_snmp_errno = SNMPERR_BAD_RECVFROM;
@@ -6406,28 +6384,11 @@ snmp_resend_request(struct session_list *slp, netsnmp_request_list *rp,
         return -1;
     }
 
-    if (netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_DUMP_PACKET)) {
-        if (transport->f_fmtaddr != NULL) {
-            char           *str = NULL;
-            str = transport->f_fmtaddr(transport, rp->pdu->transport_data,
-                                       rp->pdu->transport_data_length);
-            if (str != NULL) {
-                snmp_log(LOG_DEBUG, "\nResending %lu bytes to %s\n", 
-                         (unsigned long)length, str);
-                SNMP_FREE(str);
-            } else {
-                snmp_log(LOG_DEBUG, "\nResending %lu bytes to <UNKNOWN>\n",
-                         (unsigned long)length);
-            }
-        }
-        xdump(packet, length, "");
-    }
-
-    DEBUGMSGTL(("sess_process_packet", "resending message id#%ld reqid#%ld rp_reqid#%ld rp_msgid#%ld\n",
-                rp->pdu->msgid, rp->pdu->reqid, rp->request_id, rp->message_id));
-    result = transport->f_send(transport, packet, length,
-                               &(rp->pdu->transport_data),
-                               &(rp->pdu->transport_data_length));
+    DEBUGMSGTL(("sess_process_packet", "resending message id#%ld reqid#%ld rp_reqid#%ld rp_msgid#%ld len %zu\n",
+                rp->pdu->msgid, rp->pdu->reqid, rp->request_id, rp->message_id, length));
+    result = netsnmp_transport_send(transport, packet, length,
+                                    &(rp->pdu->transport_data),
+                                    &(rp->pdu->transport_data_length));
 
     /*
      * We are finished with the local packet buffer, if we allocated one (due
