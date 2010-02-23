@@ -46483,7 +46483,8 @@ fi
 ME=`$WHOAMI`
 if test -f /etc/resolv.conf; then
   LOC=`awk '/^domain/{loc=$NF}END{print loc}' /etc/resolv.conf`
-else
+fi
+if test "x$LOC" = x; then
   LOC="@no.where"
 fi
 
