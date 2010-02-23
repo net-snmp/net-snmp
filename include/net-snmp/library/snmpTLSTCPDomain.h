@@ -7,8 +7,8 @@ extern          "C" {
 
 #include <net-snmp/library/snmp_transport.h>
 #include <net-snmp/library/asn1.h>
-#include <net-snmp/library/snmpTCPIPv4BaseDomain.h>
 #include <net-snmp/library/snmpTCPBaseDomain.h>
+#include <net-snmp/library/snmpTLSBaseDomain.h>
 
 #if HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
@@ -17,7 +17,6 @@ extern          "C" {
 #include <netinet/in.h>
 #endif
 
-config_require(TCPIPv4Base)
 config_require(TLSBase)
 
 #define TRANSPORT_DOMAIN_TLS_TCP_IP	1,3,6,1,4,1,8072,3,3,10
