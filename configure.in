@@ -2860,8 +2860,15 @@ if test "x$with_rpm" != "xno" && \
       CFLAGS="$CFLAGS -I/usr/include/rpm"
     ],,-lrpm $_rpmlibs)
   ])
+
+  # rpm 4.6 has incompatible API, turn on the legacy one
+  AC_CHECK_DECL([headerGetEntry],
+    : ,
+    AC_DEFINE([_RPM_4_4_COMPAT], [], [Define if you have RPM 4.6 or newer to turn on legacy API]),
+    [[#include <rpm/rpmlib.h>]]
+  )
 fi
-  
+
 # libkvm
 AC_CHECK_LIB(kvm, kvm_read, [_libkvm="-lkvm"])
 AC_CHECK_FUNC(kvm_openfiles, AC_DEFINE(HAVE_KVM_OPENFILES, 1, [Define to 1 if you have the `kvm_openfiles' function.]),
