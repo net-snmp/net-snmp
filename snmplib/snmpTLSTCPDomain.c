@@ -115,10 +115,14 @@ netsnmp_tlstcp_recv(netsnmp_transport *t, void *buf, int size,
         while (rc <= 0) {
             if (rc == 0) {
                 /* XXX closed connection */
+                DEBUGMSGTL(("tlstcp", "remote side closed connection\n"));
+                SNMP_FREE(tmStateRef);
                 return -1;
             }
             if (!BIO_should_retry(tlsdata->sslbio)) {
-                /* XXX: error */
+                _openssl_log_error(rc, tlsdata->ssl, "BIO_read");
+                DEBUGMSGTL(("tlstcp", "should retry\n"));
+                SNMP_FREE(tmStateRef);
                 return -1;
             }
             rc = BIO_read(tlsdata->sslbio, buf, size);
@@ -311,7 +315,7 @@ netsnmp_tlstcp_accept(netsnmp_transport *t)
         /* XXX: I think the sslbio is safe to read/write from */
         tlsdata->accept_bio = accepted_bio;
 
-        DEBUGMSGTL(("netsnmp_tcp", "accept succeeded (from %s)\n", str));
+        DEBUGMSGTL(("tlstcp", "accept succeeded (from %s)\n", str));
         free(str);
 
         /* extract the socket */
@@ -407,6 +411,10 @@ netsnmp_tlstcp_transport(struct sockaddr_in *addr, int isserver)
         /* set up the needed SSL context */
         tlsdata->ssl_context = ctx =
             sslctx_client_setup(TLSv1_client_method());
+        if (!ctx) {
+            snmp_log(LOG_ERR, "failed to create TLS context\n");
+            return NULL;
+        }
 
         tlsdata->sslbio = bio = BIO_new_ssl_connect(ctx);
         BIO_get_ssl(bio, &ssl);
@@ -419,7 +427,7 @@ netsnmp_tlstcp_transport(struct sockaddr_in *addr, int isserver)
         DEBUGMSGTL(("tlstcp", "connecting to tlstcp %s\n",
                     tmpbuf));
 
-        if (rc = BIO_do_connect(bio) <= 0) {
+        if ((rc = BIO_do_connect(bio)) <= 0) {
             SNMP_FREE(tlsdata);
             SNMP_FREE(t);
             snmp_log(LOG_ERR, "failed to open connection to TLS server\n");
