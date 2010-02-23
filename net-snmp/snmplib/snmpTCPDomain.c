@@ -220,7 +220,7 @@ netsnmp_tcp_transport(struct sockaddr_in *addr, int local)
 
         /*
          * Since we are going to be letting select() tell us when connections
-         * are ready to be accept()ed, we need to make the socket n0n-blocking
+         * are ready to be accept()ed, we need to make the socket non-blocking
          * to avoid the race condition described in W. R. Stevens, ``Unix
          * Network Programming Volume I Second Edition'', pp. 422--4, which
          * could otherwise wedge the agent.
