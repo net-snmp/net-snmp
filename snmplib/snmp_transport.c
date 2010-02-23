@@ -19,6 +19,8 @@
 #include <net-snmp/output_api.h>
 #include <net-snmp/utilities.h>
 
+#include <net-snmp/library/default_store.h>
+
 #include <net-snmp/library/snmp_transport.h>
 #include <net-snmp/library/snmpUDPDomain.h>
 #ifdef NETSNMP_TRANSPORT_TLS_DOMAIN
@@ -178,6 +180,95 @@ netsnmp_transport_free(netsnmp_transport *t)
         SNMP_FREE(t->data);
     }
     SNMP_FREE(t);
+}
+
+/*
+ * netsnmp_transport_peer_string
+ *
+ * returns string representation of peer address.
+ *
+ * caller is responsible for freeing the allocated string.
+ */
+char *
+netsnmp_transport_peer_string(netsnmp_transport *t, void *data, int len)
+{
+    char           *str;
+
+    if (NULL == t)
+        return NULL;
+
+    if (t->f_fmtaddr != NULL)
+        str = t->f_fmtaddr(t, data, len);
+    else
+        str = strdup("<UNKNOWN>");
+
+    return str;
+}
+    
+int
+netsnmp_transport_send(netsnmp_transport *t, void *packet, int length,
+                       void **opaque, int *olength)
+{
+    int dumpPacket, debugLength;
+
+    if ((NULL == t) || (NULL == t->f_send)) {
+        DEBUGMSGTL(("transport:pkt:send", "NULL transport or send function\n"));
+        return SNMPERR_GENERR;
+    }
+
+    dumpPacket = netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID,
+                                        NETSNMP_DS_LIB_DUMP_PACKET);
+    debugLength = (SNMPERR_SUCCESS ==
+                   debug_is_token_registered("transport:send"));
+
+    if (dumpPacket | debugLength) {
+        char *str = netsnmp_transport_peer_string(t,
+                                                  opaque ? *opaque : NULL,
+                                                  olength ? *olength : 0);
+        if (debugLength)
+            DEBUGMSGT_NC(("transport:send","%lu bytes to %s\n",
+                          (unsigned long)length, str));
+        if (dumpPacket)
+            snmp_log(LOG_DEBUG, "\nSending %lu bytes to %s\n", 
+                     (unsigned long)length, str);
+        SNMP_FREE(str);
+    }
+    if (dumpPacket)
+        xdump(packet, length, "");
+
+    return t->f_send(t, packet, length, opaque, olength);
+}
+
+int
+netsnmp_transport_recv(netsnmp_transport *t, void *packet, int length,
+                       void **opaque, int *olength)
+{
+    int debugLength;
+
+    if ((NULL == t) || (NULL == t->f_recv)) {
+        DEBUGMSGTL(("transport:recv", "NULL transport or recv function\n"));
+        return SNMPERR_GENERR;
+    }
+
+    length = t->f_recv(t, packet, length, opaque, olength);
+
+    if (length <=0)
+        return; /* don't log timeouts/socket closed */
+
+    debugLength = (SNMPERR_SUCCESS ==
+                   debug_is_token_registered("transport:recv"));
+
+    if (debugLength) {
+        char *str = netsnmp_transport_peer_string(t,
+                                                  opaque ? *opaque : NULL,
+                                                  olength ? *olength : 0);
+        if (debugLength)
+            DEBUGMSGT_NC(("transport:recv","%lu bytes from %s\n",
+                          (unsigned long)length, str));
+        SNMP_FREE(str);
+    }
+
+    return length;
 }
 
 
