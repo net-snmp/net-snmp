@@ -47987,27 +47987,7 @@ else
 fi
 
 
-MSG_CHECK=`echo "
-
-*** Default SNMP Version:
-
-	Starting with Net-SNMP 5.0, you can choose the default version of
-the SNMP protocol to use when no version is given explicitly on the
-command line, or via an 'snmp.conf' file.  In the past this was set to
-SNMPv1, but you can use this to switch to SNMPv3 if desired.  SNMPv3
-will provide a more secure management environment (and thus you're
-encouraged to switch to SNMPv3), but may break existing scripts that
-rely on the old behaviour.  (Though such scripts will probably need to
-be changed to use the '-c' community flag anyway, as the SNMPv1
-command line usage has changed as well.).
-   At this prompt you can select \"1\", \"2\" (for SNMPv2c), or \"3\" as
-the default version for the command tools (snmpget, ...) to use.  This
-can always be overridden at runtime using the -v flag to the tools, or
-by using the \"defVersion\" token in your snmp.conf file.
-   Providing the --with-default-snmp-version=\"x\" parameter to ./configure
-will avoid this prompt.
-
-Default version of SNMP to use" | tail -1`
+MSG_CHECK="Default version of SNMP to use"
 { $as_echo "$as_me:$LINENO: checking $MSG_CHECK" >&5
 $as_echo_n "checking $MSG_CHECK... " >&6; }
 if test "${ac_cv_user_prompt_NETSNMP_DEFAULT_SNMP_VERSION+set}" = set; then
@@ -48080,18 +48060,7 @@ $as_echo "$as_me: error: Illegal version number.  Only 1, 2 (for SNMPv2c) and 3 
 esac
 
 
-MSG_CHECK=`echo "
-
-*** System Contact Information:
-
-	Describes who should be contacted about the host the agent is
-running on.  This information is available in the MIB-II tree.  This
-can also be over-ridden using the \"syscontact\" syntax in the agent's
-configuration files.
-  Providing the --with-sys-contact=\"contact\" parameter to ./configure
-will avoid this prompt.
-
-System Contact Information" | tail -1`
+MSG_CHECK="System Contact Information"
 { $as_echo "$as_me:$LINENO: checking $MSG_CHECK" >&5
 $as_echo_n "checking $MSG_CHECK... " >&6; }
 if test "${ac_cv_user_prompt_NETSNMP_SYS_CONTACT+set}" = set; then
@@ -48144,17 +48113,7 @@ fi
 
 
 
-MSG_CHECK=`echo "
-
-*** System Location:
-
-	Describes the location of the system.  This information is
-available in the MIB-II tree.  this can also be over-ridden using the
-\"syslocation\" syntax in the agent's configuration files.
-  Providing the --with-sys-location=\"location\" parameter to ./configure
-will avoid this prompt.
-
-System Location" | tail -1`
+MSG_CHECK="System Location"
 { $as_echo "$as_me:$LINENO: checking $MSG_CHECK" >&5
 $as_echo_n "checking $MSG_CHECK... " >&6; }
 if test "${ac_cv_user_prompt_NETSNMP_SYS_LOC+set}" = set; then
@@ -48212,18 +48171,7 @@ else
 fi
 
 
-MSG_CHECK=`echo "
-
-*** Logfile location:
-
-	Enter the default location for the snmpd agent to dump
-information & errors to.  If not defined (enter the keyword \"none\"
-at the prompt below) the agent will use stdout and stderr instead.
-(Note: This value can be over-ridden using command line options.)
-  Providing the --with-logfile=\"path\" parameter to ./configure
-will avoid this prompt.
-
-Location to write logfile" | tail -1`
+MSG_CHECK="Location to write logfile"
 { $as_echo "$as_me:$LINENO: checking $MSG_CHECK" >&5
 $as_echo_n "checking $MSG_CHECK... " >&6; }
 if test "${ac_cv_user_prompt_NETSNMP_LOGFILE+set}" = set; then
@@ -48284,22 +48232,7 @@ else
 fi
 
 
-MSG_CHECK=`echo "
-
-*** snmpd persistent storage location:
-
-	Enter a directory for the SNMP library to store persistent
-data in the form of a configuration file.  This default location is
-different than the old default location (which was for ucd-snmp).  If
-you stay with the new path, I'll ask you in a second if you wish to
-copy your files over to the new location (once only).  If you pick
-some other path than the default, you'll have to copy them yourself.
-There is nothing wrong with picking the old path ($ucddefaultstore) if
-you'd rather.
-  Providing the --with-persistent-directory=\"path\" parameter to
-./configure will avoid this prompt.
-
-Location to write persistent information" | tail -1`
+MSG_CHECK="Location to write persistent information"
 { $as_echo "$as_me:$LINENO: checking $MSG_CHECK" >&5
 $as_echo_n "checking $MSG_CHECK... " >&6; }
 if test "${ac_cv_user_prompt_NETSNMP_PERSISTENT_DIRECTORY+set}" = set; then
