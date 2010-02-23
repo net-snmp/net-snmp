@@ -624,7 +624,7 @@ netsnmp_send_traps(int trap, int specific,
     u_long                 uptime;
     struct trap_sink *sink;
     const char            *v1trapaddress;
-    int                    res;
+    int                    res = 0;
 
     DEBUGMSGTL(( "trap", "send_trap %d %d ", trap, specific));
     DEBUGMSGOID(("trap", enterprise, enterprise_length));
@@ -779,7 +779,7 @@ netsnmp_send_traps(int trap, int specific,
      */
        pdu_in_addr_t = (in_addr_t *) template_v1pdu->agent_addr;
        v1trapaddress = netsnmp_ds_get_string(NETSNMP_DS_APPLICATION_ID,
-                                      NETSNMP_DS_AGENT_TRAP_ADDR);
+                                             NETSNMP_DS_AGENT_TRAP_ADDR);
        if (v1trapaddress != NULL) {
            /* "v1trapaddress" was specified in config, try to resolve it */
            res = netsnmp_gethostbyname_v4(v1trapaddress, pdu_in_addr_t);
