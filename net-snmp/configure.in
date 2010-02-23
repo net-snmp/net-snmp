@@ -2478,6 +2478,13 @@ if test "x$with_rpm" != "xno" && \
       CFLAGS="$CFLAGS -I/usr/include/rpm"
     ],,-lrpm $_rpmlibs)
   ])
+
+  # rpm 4.6 has incompatible API, turn on the legacy one
+  AC_CHECK_DECL([headerGetEntry],
+    : ,
+    AC_DEFINE([_RPM_4_4_COMPAT], [], [Define if you have RPM 4.6 or newer to turn on legacy API]),
+    [[#include <rpm/rpmlib.h>]]
+  )
 fi
   
 # Replace `main' with a function in -lkvm:
