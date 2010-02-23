@@ -35,6 +35,9 @@ extern          "C" {
        char     isclient;
        SSL_CTX *ssl_context;
        SSL     *ssl;
+       BIO     *sslbio;
+       BIO     *accept_bio;
+       char    *securityName;
     } _netsnmpTLSBaseData;
 
 #ifdef __cplusplus
