@@ -127,8 +127,9 @@ typedef struct netsnmp_transport_s {
 
     /*  Optional callback to format a transport address.  */
 
-    char           *(*f_fmtaddr)(struct netsnmp_transport_s *, void *,
-				 int);
+    char           *(*f_fmtaddr)(struct netsnmp_transport_s *, void *, int);
+
+    u_char         *identifier; /* udp:localhost:161 -> "localhost" */
 } netsnmp_transport;
 
 typedef struct netsnmp_transport_list_s {
