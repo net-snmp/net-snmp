@@ -38,7 +38,7 @@
 #include <string.h>
 
 /*
- * thread-save version of strtok
+ * thread-safe version of strtok
  */
 char *
 strtok_r(char *s, const char *delim, char **lasts)
