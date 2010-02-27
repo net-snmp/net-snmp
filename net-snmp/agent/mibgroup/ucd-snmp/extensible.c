@@ -96,14 +96,12 @@
 #include <string.h>
 #endif
 #include <ctype.h>
-#ifndef HAVE_STRNCASECMP
-int             strncasecmp(const char *s1, const char *s2, size_t n);
-#endif
 
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 #include <net-snmp/agent/auto_nlist.h>
 #include <net-snmp/agent/agent_callbacks.h>
+#include <net-snmp/library/system.h>
 
 #include "struct.h"
 #include "extensible.h"
