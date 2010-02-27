@@ -354,7 +354,9 @@ static int      snmp_resend_request(struct session_list *slp,
 static void     register_default_handlers(void);
 static struct session_list *snmp_sess_copy(netsnmp_session * pss);
 int             snmp_get_errno(void);
+NETSNMP_IMPORT
 void            snmp_synch_reset(netsnmp_session * notused);
+NETSNMP_IMPORT
 void            snmp_synch_setup(netsnmp_session * notused);
 
 #ifndef HAVE_STRERROR

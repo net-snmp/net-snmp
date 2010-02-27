@@ -143,9 +143,10 @@ static int      _add_strings_to_oid(void *, char *,
 #endif /* NETSNMP_DISABLE_MIB_LOADING */
 
 #ifndef NETSNMP_DISABLE_MIB_LOADING
-extern struct tree *tree_head;
+NETSNMP_IMPORT struct tree *tree_head;
 static struct tree *tree_top;
 
+NETSNMP_IMPORT struct tree *Mib;
 struct tree    *Mib;            /* Backwards compatibility */
 #endif /* NETSNMP_DISABLE_MIB_LOADING */
 

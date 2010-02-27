@@ -47,6 +47,7 @@ SOFTWARE.
      * Returns: -1 : fork failed
      *           0 : No errors
      */
+    NETSNMP_IMPORT
     int netsnmp_daemonize(int quit_immediately, int stderr_log);
 
     /*
@@ -75,12 +76,16 @@ SOFTWARE.
         struct direct   dirstr; /* Directory structure to return */
     } DIR;
 
+    NETSNMP_IMPORT
     DIR            *opendir(const char *filename);
+    NETSNMP_IMPORT
     struct direct  *readdir(DIR * dirp);
+    NETSNMP_IMPORT
     int             closedir(DIR * dirp);
 #endif /* HAVE_READDIR */
 
 #ifndef HAVE_GETTIMEOFDAY
+    NETSNMP_IMPORT
     int             gettimeofday(struct timeval *, struct timezone *tz);
 #endif
 /*
@@ -91,13 +96,17 @@ SOFTWARE.
  * strcasecmp() or strncasecmp() when the <dmalloc.h> header has been included.
  */
 #if !defined(HAVE_STRCASECMP) && !defined(strcasecmp)
+    NETSNMP_IMPORT
     int             strcasecmp(const char *s1, const char *s2);
 #endif
 #if !defined(HAVE_STRNCASECMP) && !defined(strncasecmp)
+    NETSNMP_IMPORT
     int             strncasecmp(const char *s1, const char *s2, size_t n);
 #endif
 
+    NETSNMP_IMPORT
     char           *winsock_startup(void);
+    NETSNMP_IMPORT
     void            winsock_cleanup(void);
 
 #ifdef WIN32
@@ -114,21 +123,27 @@ SOFTWARE.
 
     /* Simply resolve a hostname and return first IPv4 address.
      * Returns -1 on error */
+    NETSNMP_IMPORT
     int             netsnmp_gethostbyname_v4(const char* name,
                                              in_addr_t *addr_out);
 
+    NETSNMP_IMPORT
     in_addr_t       get_myaddr(void);
+    NETSNMP_IMPORT
     long            get_uptime(void);
 
 #ifndef HAVE_STRDUP
     char           *strdup(const char *);
 #endif
 #ifndef HAVE_SETENV
+    NETSNMP_IMPORT
     int             setenv(const char *, const char *, int);
 #endif
 
+    NETSNMP_IMPORT
     int             calculate_time_diff(const struct timeval *,
                                         const struct timeval *);
+    NETSNMP_IMPORT
     u_int           calculate_sectime_diff(const struct timeval *now,
                                            const struct timeval *then);
 
@@ -145,16 +160,20 @@ SOFTWARE.
     NETSNMP_IMPORT uint64_t strtoull(const char *, char **, int);
 #endif
 #ifndef HAVE_STRTOK_R
+    NETSNMP_IMPORT
     char           *strtok_r(char *, const char *, char **);
 #endif
 #ifndef HAVE_SNPRINTF
     int             snprintf(char *, size_t, const char *, ...);
 #endif
 
+    NETSNMP_IMPORT
     int             mkdirhier(const char *pathname, mode_t mode,
                               int skiplast);
+    NETSNMP_IMPORT
     const char     *netsnmp_mktemp(void);
 #ifndef HAVE_STRLCPY
+    NETSNMP_IMPORT
     size_t            strlcpy(char *, const char *, size_t);
 #endif
 
@@ -162,7 +181,9 @@ SOFTWARE.
                                         const char *ospmrelprefix);
     int             netsnmp_os_kernel_width(void);
 
+    NETSNMP_IMPORT
     int             netsnmp_str_to_uid(const char *useroruid);
+    NETSNMP_IMPORT
     int             netsnmp_str_to_gid(const char *grouporgid);
 
 #ifdef __cplusplus

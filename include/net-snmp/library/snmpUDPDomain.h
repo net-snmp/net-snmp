@@ -27,10 +27,13 @@ netsnmp_transport *netsnmp_udp_transport(struct sockaddr_in *addr, int local);
  * Register any configuration tokens specific to the agent.  
  */
 
+NETSNMP_IMPORT
 void            netsnmp_udp_agent_config_tokens_register(void);
 
+NETSNMP_IMPORT
 void            netsnmp_udp_parse_security(const char *token, char *param);
 
+NETSNMP_IMPORT
 int             netsnmp_udp_getSecName(void *opaque, int olength,
                                        const char *community,
                                        size_t community_len,

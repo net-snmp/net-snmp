@@ -9,6 +9,7 @@
 #include <net-snmp/session_api.h>
 #include <net-snmp/config_api.h>
 #include <net-snmp/library/mib.h>	/* for OID O/P format enums */
+#include <net-snmp/library/ucd_compat.h>
 
 /*
  * use <netsnmp_session *)->s_snmp_errno instead 
@@ -22,10 +23,12 @@ snmp_get_errno(void)
 /*
  * synch_reset and synch_setup are no longer used. 
  */
+NETSNMP_IMPORT void snmp_synch_reset(netsnmp_session * notused);
 void
 snmp_synch_reset(netsnmp_session * notused)
 {
 }
+NETSNMP_IMPORT void snmp_synch_setup(netsnmp_session * notused);
 void
 snmp_synch_setup(netsnmp_session * notused)
 {

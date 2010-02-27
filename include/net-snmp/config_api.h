@@ -12,6 +12,7 @@
 extern          "C" {
 #endif
 
+    NETSNMP_IMPORT
     struct config_line *register_config_handler(const char *filePrefix,
                                                 const char *token,
                                                 void (*parser) (const char *, char *),
@@ -23,6 +24,7 @@ extern          "C" {
                                   void (*parser) (const char *, const char *),
                                   void (*releaser) (void),
                                   const char *usageLine);
+    NETSNMP_IMPORT
     struct config_line *register_app_config_handler(
                                                 const char *token,
                                                 void (*parser) (const char *, char *),
@@ -41,16 +43,23 @@ extern          "C" {
                                                 void (*releaser) (void),
                                                 const char *usageLine);
                                                             
+    NETSNMP_IMPORT
     void            unregister_config_handler(const char *filePrefix, const char *token);
+    NETSNMP_IMPORT
     void            unregister_app_config_handler(                    const char *token);
     void            unregister_all_config_handlers(void);
 
 /*?*/ void register_mib_handlers(void);
+    NETSNMP_IMPORT
     void            read_configs(void);
+    NETSNMP_IMPORT
     void            read_premib_configs(void);
 
+    NETSNMP_IMPORT
     void            read_config_print_usage(const char *lead);
+    NETSNMP_IMPORT
     void            config_perror(const char *);
+    NETSNMP_IMPORT
     void            config_pwarn(const char *);
 
 #ifdef __cplusplus

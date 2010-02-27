@@ -20,14 +20,18 @@ extern          "C" {
      * the macros below. 
      */
 #if !defined(__GNUC__) || __GNUC__ < 2 || (__GNUC__ == 2 && __GNUC_MINOR__ < 8)
+    NETSNMP_IMPORT
     void            debugmsg(const char *token, const char *format, ...);
+    NETSNMP_IMPORT
     void            debugmsgtoken(const char *token, const char *format,
                                   ...);
     void            debug_combo_nc(const char *token, const char *format,
                                    ...);
 #else
+    NETSNMP_IMPORT
     void            debugmsg(const char *token, const char *format, ...)
                         __attribute__ ((__format__ (__printf__, 2, 3)));
+    NETSNMP_IMPORT
     void            debugmsgtoken(const char *token, const char *format,
                                   ...)
                         __attribute__ ((__format__ (__printf__, 2, 3)));
@@ -35,26 +39,34 @@ extern          "C" {
                                    ...)
                         __attribute__ ((__format__ (__printf__, 2, 3)));
 #endif
+    NETSNMP_IMPORT
     void            debugmsg_oid(const char *token, const oid * theoid,
                                  size_t len);
     void            debugmsg_suboid(const char *token, const oid * theoid,
                                     size_t len);
+    NETSNMP_IMPORT
     void            debugmsg_var(const char *token,
                                  netsnmp_variable_list * var);
+    NETSNMP_IMPORT
     void            debugmsg_oidrange(const char *token,
                                       const oid * theoid, size_t len,
                                       size_t var_subid, oid range_ubound);
+    NETSNMP_IMPORT
     void            debugmsg_hex(const char *token, u_char * thedata,
                                  size_t len);
+    NETSNMP_IMPORT
     void            debugmsg_hextli(const char *token, u_char * thedata,
                                     size_t len);
+    NETSNMP_IMPORT
     void            debug_indent_add(int amount);
+    NETSNMP_IMPORT
     int             debug_indent_get(void);
     /*
      * What is said above is true for this function as well. Further this
      * function is deprecated and only provided for backwards compatibility.
      * Please use "%*s", debug_indent_get(), "" if you used this one before.
      */
+    NETSNMP_IMPORT
     const char     *debug_indent(void);
 
     /*
@@ -262,10 +274,14 @@ extern          "C" {
      * not (and debugging output is "on").
      * snmp_debug_init(void):             registers .conf handlers.
      */
+    NETSNMP_IMPORT
     void            debug_register_tokens(char *tokens);
+    NETSNMP_IMPORT
     int             debug_is_token_registered(const char *token);
     void            snmp_debug_init(void);
+    NETSNMP_IMPORT
     void            snmp_set_do_debugging(int);
+    NETSNMP_IMPORT
     int             snmp_get_do_debugging(void);
 
 /*

@@ -20,6 +20,7 @@ extern          "C" {
 
 #define	DEFAULT_NIC "eth0"
 
+    NETSNMP_IMPORT
     int             setup_engineID(u_char ** eidp, const char *text);
     void            engineID_conf(const char *word, char *cptr);
     void            engineBoots_conf(const char *, char *);
@@ -27,8 +28,10 @@ extern          "C" {
     void            engineIDNic_conf(const char *, char *);
     void            snmpv3_authtype_conf(const char *word, char *cptr);
     void            snmpv3_privtype_conf(const char *word, char *cptr);
+    NETSNMP_IMPORT
     void            usm_parse_create_usmUser(const char *token,
                                              char *line);
+    NETSNMP_IMPORT
     void            init_snmpv3(const char *);
     int             init_snmpv3_post_config(int majorid, int minorid,
                                             void *serverarg,
@@ -40,18 +43,25 @@ extern          "C" {
     void            shutdown_snmpv3(const char *type);
     int             snmpv3_store(int majorID, int minorID, void *serverarg,
                                  void *clientarg);
+    NETSNMP_IMPORT
     u_long          snmpv3_local_snmpEngineBoots(void);
     int             snmpv3_clone_engineID(u_char **, size_t *, u_char *,
                                           size_t);
+    NETSNMP_IMPORT
     size_t          snmpv3_get_engineID(u_char * buf, size_t buflen);
+    NETSNMP_IMPORT
     u_char         *snmpv3_generate_engineID(size_t *);
+    NETSNMP_IMPORT
     u_long          snmpv3_local_snmpEngineTime(void);
     int             get_default_secLevel(void);
+    NETSNMP_IMPORT
     const oid      *get_default_authtype(size_t *);
+    NETSNMP_IMPORT
     const oid      *get_default_privtype(size_t *);
     void            snmpv3_set_engineBootsAndTime(int boots, int ttime);
     int             free_engineID(int majorid, int minorid, void *serverarg,
 				  void *clientarg);
+    NETSNMP_IMPORT
     int             parse_secLevel_conf(const char* word, char *cptr);
 
 #ifdef __cplusplus

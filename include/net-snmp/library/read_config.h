@@ -43,60 +43,82 @@ extern          "C" {
     };
 
 
+    NETSNMP_IMPORT
     int             netsnmp_config(char *);     /* parse a simple line: token=values */
+    NETSNMP_IMPORT
     void            netsnmp_config_remember(char *);    /* process later, during snmp_init() */
     void            netsnmp_config_process_memories(void);      /* run all memories through parser */
     void            read_config(const char *, struct config_line *, int);
     void            read_config_files(int);
+    NETSNMP_IMPORT
     void            free_config(void);
 #if !defined(__GNUC__) || __GNUC__ < 2 || (__GNUC__ == 2&& __GNUC_MINOR__ < 8)
+    NETSNMP_IMPORT
     void            netsnmp_config_error(const char *, ...);
     void            netsnmp_config_warn(const char *, ...);
 #else
+    NETSNMP_IMPORT
     void            netsnmp_config_error(const char *, ...)
 	__attribute__((__format__(__printf__, 1, 2)));
     void            netsnmp_config_warn(const char *, ...)
 	__attribute__((__format__(__printf__, 1, 2)));
 #endif
 
+    NETSNMP_IMPORT
     char           *skip_white(char *);
     const char     *skip_white_const(const char *);
+    NETSNMP_IMPORT
     char           *skip_not_white(char *);
     const char     *skip_not_white_const(const char *);
+    NETSNMP_IMPORT
     char           *skip_token(char *);
     const char     *skip_token_const(const char *);
+    NETSNMP_IMPORT
     char           *copy_nword(char *, char *, int);
     const char     *copy_nword_const(const char *, char *, int);
+    NETSNMP_IMPORT
     char           *copy_word(char *, char *);  /* do not use */
+    NETSNMP_IMPORT
     void            read_config_with_type(const char *, const char *);
+    NETSNMP_IMPORT
     char           *read_config_save_octet_string(char *saveto,
                                                   u_char * str,
                                                   size_t len);
+    NETSNMP_IMPORT
     char           *read_config_read_octet_string(const char *readfrom,
                                                   u_char ** str,
                                                   size_t * len);
     const char     *read_config_read_octet_string_const(const char *readfrom,
                                                         u_char ** str,
                                                         size_t * len);
+    NETSNMP_IMPORT
     char           *read_config_read_objid(char *readfrom, oid ** objid,
                                            size_t * len);
     const char     *read_config_read_objid_const(const char *readfrom,
                                                  oid ** objid,
                                                  size_t * len);
+    NETSNMP_IMPORT
     char           *read_config_save_objid(char *saveto, oid * objid,
                                            size_t len);
+    NETSNMP_IMPORT
     char           *read_config_read_data(int type, char *readfrom,
                                           void *dataptr, size_t * len);
+    NETSNMP_IMPORT
     char           *read_config_read_memory(int type, char *readfrom,
                                             char *dataptr, size_t * len);
+    NETSNMP_IMPORT
     char           *read_config_store_data(int type, char *storeto,
                                            void *dataptr, size_t * len);
     char           *read_config_store_data_prefix(char prefix, int type,
                                                   char *storeto,
                                                   void *dataptr, size_t len);
+    NETSNMP_IMPORT
     void            read_config_store(const char *type, const char *line);
+    NETSNMP_IMPORT
     void            read_app_config_store(const char *line);
+    NETSNMP_IMPORT
     void            snmp_save_persistent(const char *type);
+    NETSNMP_IMPORT
     void            snmp_clean_persistent(const char *type);
     struct config_line *read_config_get_handlers(const char *type);
 
@@ -118,7 +140,9 @@ extern          "C" {
     void            set_persistent_directory(const char *dir);
     const char     *get_persistent_directory(void);
     void            set_temp_file_pattern(const char *pattern);
+    NETSNMP_IMPORT
     const char     *get_temp_file_pattern(void);
+    NETSNMP_IMPORT
     void            handle_long_opt(const char *myoptarg);
 
 #ifdef __cplusplus

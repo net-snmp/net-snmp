@@ -28,7 +28,7 @@ extern          "C" {
      * ** Input: MD -- an MDptr
      * ** Initialize the MDstruct prepatory to doing a message digest computation.
      */
-    extern void     MDbegin(MDptr);
+    NETSNMP_IMPORT void MDbegin(MDptr);
 
     /*
      * MDupdate(MD,X,count)
@@ -43,7 +43,7 @@ extern          "C" {
      * ** every MD computation should end with one call to MDupdate with a
      * ** count less than 512.  Zero is OK for a count.
      */
-    extern int      MDupdate(MDptr, unsigned char *, unsigned int);
+    NETSNMP_IMPORT int MDupdate(MDptr, unsigned char *, unsigned int);
 
     /*
      * MDprint(MD)

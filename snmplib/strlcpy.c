@@ -13,6 +13,8 @@
 
 #include <sys/types.h>
 
+#include <net-snmp/library/system.h>
+
 /* 
  * Copies src to the dest buffer. The copy will never overflow the dest buffer
  * and dest will always be null terminated, len is the size of the dest buffer.

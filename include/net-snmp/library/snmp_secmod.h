@@ -153,6 +153,7 @@ int             register_sec_mod(int, const char *,
 /*
  * find a security service definition 
  */
+NETSNMP_IMPORT
 struct snmp_secmod_def *find_sec_mod(int);
 /*
  * register a security service 
@@ -163,6 +164,7 @@ void            init_secmod(void);
 /*
  * clears the sec_mod list
  */
+NETSNMP_IMPORT
 void            clear_sec_mod(void);
 
 #ifdef __cplusplus

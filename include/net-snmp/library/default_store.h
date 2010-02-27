@@ -24,6 +24,8 @@
 #ifndef DEFAULT_STORE_H
 #define DEFAULT_STORE_H
 
+#include <net-snmp/net-snmp-config.h>
+
 #ifdef __cplusplus
 extern          "C" {
 #endif
@@ -163,23 +165,36 @@ extern          "C" {
      * end storage definitions 
      */
 
+    NETSNMP_IMPORT
     int             netsnmp_ds_set_boolean(int storeid, int which, int value);
+    NETSNMP_IMPORT
     int             netsnmp_ds_get_boolean(int storeid, int which);
+    NETSNMP_IMPORT
     int             netsnmp_ds_toggle_boolean(int storeid, int which);
+    NETSNMP_IMPORT
     int             netsnmp_ds_set_int(int storeid, int which, int value);
+    NETSNMP_IMPORT
     int             netsnmp_ds_get_int(int storeid, int which);
+    NETSNMP_IMPORT
     int             netsnmp_ds_set_string(int storeid, int which,
                                   const char *value);
+    NETSNMP_IMPORT
     char           *netsnmp_ds_get_string(int storeid, int which);
+    NETSNMP_IMPORT
     int             netsnmp_ds_set_void(int storeid, int which, void *value);
+    NETSNMP_IMPORT
     void           *netsnmp_ds_get_void(int storeid, int which);
+    NETSNMP_IMPORT
     int             netsnmp_ds_register_config(u_char type, const char *ftype,
                                        const char *token, int storeid,
                                        int which);
+    NETSNMP_IMPORT
     int             netsnmp_ds_register_premib(u_char type, const char *ftype,
                                        const char *token, int storeid,
                                        int which);
+    NETSNMP_IMPORT
     int             netsnmp_ds_parse_boolean(char *line);
+    NETSNMP_IMPORT
     void            netsnmp_ds_shutdown(void);
 
 #ifdef __cplusplus

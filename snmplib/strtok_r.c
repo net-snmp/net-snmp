@@ -37,6 +37,8 @@
 
 #include <string.h>
 
+#include <net-snmp/library/system.h>
+
 /*
  * thread-safe version of strtok
  */

@@ -27,8 +27,10 @@ extern          "C" {
     /*
      * the ones you should need 
      */
+    NETSNMP_IMPORT
     void            snmp_alarm_unregister(unsigned int clientreg);
     void	    snmp_alarm_unregister_all(void);
+    NETSNMP_IMPORT
     unsigned int    snmp_alarm_register(unsigned int when,
                                         unsigned int flags,
                                         SNMPAlarmCallback * thecallback,
@@ -43,16 +45,17 @@ extern          "C" {
     /*
      * the ones you shouldn't 
      */
-    void            init_snmp_alarm(void);
+    NETSNMP_IMPORT void init_snmp_alarm(void);
     int             init_alarm_post_config(int majorid, int minorid,
                                            void *serverarg,
                                            void *clientarg);
     void            sa_update_entry(struct snmp_alarm *alrm);
     struct snmp_alarm *sa_find_next(void);
-    void            run_alarms(void);
+    NETSNMP_IMPORT void run_alarms(void);
     RETSIGTYPE      alarm_handler(int a);
     void            set_an_alarm(void);
     int             get_next_alarm_delay_time(struct timeval *delta);
+
 
 #ifdef __cplusplus
 }

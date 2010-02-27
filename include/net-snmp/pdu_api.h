@@ -11,9 +11,13 @@
 extern          "C" {
 #endif
 
+NETSNMP_IMPORT
 netsnmp_pdu    *snmp_pdu_create(int type);
+NETSNMP_IMPORT
 netsnmp_pdu    *snmp_clone_pdu(netsnmp_pdu *pdu);
+NETSNMP_IMPORT
 netsnmp_pdu    *snmp_fix_pdu(  netsnmp_pdu *pdu, int idx);
+NETSNMP_IMPORT
 void            snmp_free_pdu( netsnmp_pdu *pdu);
 
 #ifdef __cplusplus

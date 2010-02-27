@@ -88,8 +88,10 @@ int             unregister_exceptfd(int);
  *
  * Side Effects: None
  */
+NETSNMP_IMPORT
 void netsnmp_external_event_info(int *numfds, fd_set *readfds, fd_set *writefds, fd_set *exceptfds);
 
+NETSNMP_IMPORT
 void netsnmp_external_event_info2(int *numfds,
                                   netsnmp_large_fd_set *readfds,
                                   netsnmp_large_fd_set *writefds,
@@ -119,7 +121,9 @@ void netsnmp_external_event_info2(int *numfds,
  *
  * Side Effects: None
  */
+NETSNMP_IMPORT
 void netsnmp_dispatch_external_events(int *count, fd_set *readfds, fd_set *writefds, fd_set *exceptfds);
+NETSNMP_IMPORT
 void netsnmp_dispatch_external_events2(int *count,
                                        netsnmp_large_fd_set *readfds,
                                        netsnmp_large_fd_set *writefds,

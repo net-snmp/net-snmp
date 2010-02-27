@@ -541,6 +541,7 @@ static struct tree *tbuckets[NHASHSIZE];
 static struct module *module_head = NULL;
 
 static struct node *orphan_nodes = NULL;
+NETSNMP_IMPORT struct tree *tree_head;
 struct tree        *tree_head = NULL;
 
 #define	NUMBER_OF_ROOT_NODES	3
