@@ -27,6 +27,8 @@
 #include <inttypes.h>
 #endif
 
+#include <net-snmp/library/system.h>
+
 /*
  * UINT64_C: C99 macro for the suffix for uint64_t constants. 
  */

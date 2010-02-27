@@ -95,6 +95,7 @@ SOFTWARE.
 #include <net-snmp/library/mib.h>
 #include <net-snmp/library/snmp_logging.h>
 #include <net-snmp/library/snmp_assert.h>
+#include <net-snmp/pdu_api.h>
 
 
 #ifndef BSD4_3

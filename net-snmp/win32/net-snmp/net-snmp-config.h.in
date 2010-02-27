@@ -1627,10 +1627,15 @@ typedef unsigned int   uintptr_t;
       #define realloc   netsnmp_realloc
       #define free      netsnmp_free
 
+      NETSNMP_IMPORT
       char * netsnmp_strdup( const char * ptr);
+      NETSNMP_IMPORT
       void * netsnmp_calloc(size_t nmemb, size_t size);
+      NETSNMP_IMPORT
       void * netsnmp_malloc(size_t size);
+      NETSNMP_IMPORT
       void * netsnmp_realloc( void * ptr, size_t size);
+      NETSNMP_IMPORT
       void netsnmp_free( void * ptr);
 
     #endif

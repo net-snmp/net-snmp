@@ -35,6 +35,7 @@
 #include <net-snmp/net-snmp-config.h>
 #include <net-snmp/types.h>
 #include <net-snmp/library/snmp_assert.h>
+#include <net-snmp/library/winpipe.h>
 #include <io.h>
 
 static int InitUPDSocket(SOCKET *sock, struct sockaddr_in *socketaddress)

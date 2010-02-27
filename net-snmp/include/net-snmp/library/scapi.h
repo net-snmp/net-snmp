@@ -35,6 +35,7 @@ extern          "C" {
     int             sc_get_proper_priv_length(const oid * privtype,
                                               u_int privtype_len);
 
+    NETSNMP_IMPORT
     int             sc_init(void);
     int             sc_shutdown(int majorID, int minorID, void *serverarg,
                                 void *clientarg);

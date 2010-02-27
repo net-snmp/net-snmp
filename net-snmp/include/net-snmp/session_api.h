@@ -12,6 +12,7 @@
 extern          "C" {
 #endif
 
+    NETSNMP_IMPORT
     void            snmp_sess_init(netsnmp_session *);
 
     /*
@@ -24,6 +25,7 @@ extern          "C" {
      * the pointer passed to snmp_open()).  On any error, NULL is returned
      * and snmp_errno is set to the appropriate error code.
      */
+    NETSNMP_IMPORT
     netsnmp_session *snmp_open(netsnmp_session *);
 
     /*
@@ -36,6 +38,7 @@ extern          "C" {
      *
      * snmp_close_sessions() does the same thing for all open sessions
      */
+    NETSNMP_IMPORT
     int             snmp_close(netsnmp_session *);
     int             snmp_close_sessions(void);
 
@@ -53,6 +56,7 @@ extern          "C" {
      * On any error, 0 is returned.
      * The pdu is freed by snmp_send() unless a failure occured.
      */
+    NETSNMP_IMPORT
     int             snmp_send(netsnmp_session *, netsnmp_pdu *);
 
     /*
@@ -71,6 +75,7 @@ extern          "C" {
      * On any error, 0 is returned.
      * The pdu is freed by snmp_send() unless a failure occured.
      */
+    NETSNMP_IMPORT
     int             snmp_async_send(netsnmp_session *, netsnmp_pdu *,
                                     netsnmp_callback, void *);
 
@@ -85,6 +90,7 @@ extern          "C" {
      * is passed to the callback routine for that session.  If the callback
      * routine returns successfully, the pdu and it's request are deleted.
      */
+    NETSNMP_IMPORT
     void            snmp_read(fd_set *);
 
     /*
@@ -92,9 +98,11 @@ extern          "C" {
      * large file descriptor set instead of a pointer to a regular file
      * descriptor set.
      */
+    NETSNMP_IMPORT
     void            snmp_read2(netsnmp_large_fd_set *);
 
 
+    NETSNMP_IMPORT
     int             snmp_synch_response(netsnmp_session *, netsnmp_pdu *,
                                         netsnmp_pdu **);
 
@@ -125,6 +133,7 @@ extern          "C" {
      * snmp_select_info returns the number of open sockets.  (i.e. The number
      * of sessions open)
      */
+    NETSNMP_IMPORT
     int             snmp_select_info(int *, fd_set *, struct timeval *,
                                      int *);
 
@@ -133,6 +142,7 @@ extern          "C" {
      * pointer to a large file descriptor set instead of a pointer to a
      * regular file descriptor set.
      */
+    NETSNMP_IMPORT
     int             snmp_select_info2(int *, netsnmp_large_fd_set *,
                                       struct timeval *, int *);
 
@@ -149,6 +159,7 @@ extern          "C" {
      * callback for the session is used to alert the user of the timeout.
      */
 
+    NETSNMP_IMPORT
     void            snmp_timeout(void);
 
     /*
@@ -156,6 +167,7 @@ extern          "C" {
      * Inputs :  address of errno, address of snmp_errno, address of string
      * Caller must free the string returned after use.
      */
+    NETSNMP_IMPORT
     void            snmp_error(netsnmp_session *, int *, int *, char **);
 
     /*
@@ -196,8 +208,11 @@ extern          "C" {
      *  4. Replace snmp_send(ss,pdu) with snmp_sess_send(sessp,pdu)
      */
 
+    NETSNMP_IMPORT
     void           *snmp_sess_open(netsnmp_session *);
+    NETSNMP_IMPORT
     void           *snmp_sess_pointer(netsnmp_session *);
+    NETSNMP_IMPORT
     netsnmp_session *snmp_sess_session(void *);
 
 
@@ -205,9 +220,12 @@ extern          "C" {
      * use return value from snmp_sess_open as void * parameter 
      */
 
+    NETSNMP_IMPORT
     int             snmp_sess_send(void *, netsnmp_pdu *);
+    NETSNMP_IMPORT
     int             snmp_sess_async_send(void *, netsnmp_pdu *,
                                          netsnmp_callback, void *);
+    NETSNMP_IMPORT
     int             snmp_sess_select_info(void *, int *, fd_set *,
                                           struct timeval *, int *);
     int             snmp_sess_select_info2(void *, int *,
@@ -216,6 +234,7 @@ extern          "C" {
     /*
      * Returns 0 if success, -1 if fail.
      */
+    NETSNMP_IMPORT
     int             snmp_sess_read(void *, fd_set *);
     /*
      * Similar to snmp_sess_read(), but accepts a pointer to a large file
@@ -223,9 +242,12 @@ extern          "C" {
      */
     int             snmp_sess_read2(void *,
                                     netsnmp_large_fd_set *);
+    NETSNMP_IMPORT
     void            snmp_sess_timeout(void *);
+    NETSNMP_IMPORT
     int             snmp_sess_close(void *);
 
+    NETSNMP_IMPORT
     int             snmp_sess_synch_response(void *, netsnmp_pdu *,
                                              netsnmp_pdu **);
 

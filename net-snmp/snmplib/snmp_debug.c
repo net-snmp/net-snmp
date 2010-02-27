@@ -71,11 +71,17 @@ debug_indent_add(int amount)
 	debugindent += amount;
 }
 
+NETSNMP_IMPORT void
+debug_config_register_tokens(const char *configtoken, char *tokens);
+
 void
 debug_config_register_tokens(const char *configtoken, char *tokens)
 {
     debug_register_tokens(tokens);
 }
+
+NETSNMP_IMPORT void
+debug_config_turn_on_debugging(const char *configtoken, char *line);
 
 void
 debug_config_turn_on_debugging(const char *configtoken, char *line)

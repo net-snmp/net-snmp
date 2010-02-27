@@ -59,8 +59,11 @@ extern "C" {
     do { (fdset)->lfs_setptr->fd_count = 0; } while(0)
 
 
+NETSNMP_IMPORT
 void   netsnmp_large_fd_setfd( SOCKET fd, netsnmp_large_fd_set *fdset);
+NETSNMP_IMPORT
 void   netsnmp_large_fd_clr(   SOCKET fd, netsnmp_large_fd_set *fdset);
+NETSNMP_IMPORT
 int    netsnmp_large_fd_is_set(SOCKET fd, netsnmp_large_fd_set *fdset);
 
 #else
@@ -109,6 +112,7 @@ int    netsnmp_large_fd_is_set(int fd, netsnmp_large_fd_set *fdset);
  * The file descriptor set must be initialized separately, e.g. via
  * NETSNMP_LARGE_FD_CLR().
  */
+NETSNMP_IMPORT
 void   netsnmp_large_fd_set_init(   netsnmp_large_fd_set *fdset, int setsize);
 
 /**
@@ -118,6 +122,7 @@ void   netsnmp_large_fd_set_init(   netsnmp_large_fd_set *fdset, int setsize);
 void   netsnmp_large_fd_set_resize( netsnmp_large_fd_set *fdset, int setsize);
 
 /** Deallocate the memory allocated by netsnmp_large_fd_set_init. */
+NETSNMP_IMPORT
 void   netsnmp_large_fd_set_cleanup(netsnmp_large_fd_set *fdset);
 
 /**

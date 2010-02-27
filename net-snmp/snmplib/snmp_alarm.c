@@ -204,6 +204,7 @@ sa_find_next(void)
     return lowest;
 }
 
+NETSNMP_IMPORT struct snmp_alarm *sa_find_specific(unsigned int clientreg);
 struct snmp_alarm *
 sa_find_specific(unsigned int clientreg)
 {

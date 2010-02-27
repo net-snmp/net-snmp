@@ -51,21 +51,28 @@ extern          "C" {
     /*
      * function prototypes 
      */
+    NETSNMP_IMPORT
     void            init_callbacks(void);
 
     int             netsnmp_register_callback(int major, int minor,
                                               SNMPCallback * new_callback,
                                               void *arg, int priority);
+    NETSNMP_IMPORT
     int             snmp_register_callback(int major, int minor,
                                            SNMPCallback * new_callback,
                                            void *arg);
+    NETSNMP_IMPORT
     int             snmp_call_callbacks(int major, int minor,
                                         void *caller_arg);
+    NETSNMP_IMPORT
     int             snmp_callback_available(int major, int minor);      /* is >1 available */
+    NETSNMP_IMPORT
     int             snmp_count_callbacks(int major, int minor); /* ret the number registered */
+    NETSNMP_IMPORT
     int             snmp_unregister_callback(int major, int minor,
                                              SNMPCallback * new_callback,
                                              void *arg, int matchargs);
+    NETSNMP_IMPORT
     void            clear_callback (void);
     int             netsnmp_callback_clear_client_arg(void *, int i, int j);
 

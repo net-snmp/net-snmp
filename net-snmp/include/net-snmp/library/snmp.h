@@ -319,11 +319,15 @@ SOFTWARE.
 #define SNMPADMINLENGTH 255
 
 
+    NETSNMP_IMPORT
     char           *uptime_string(u_long, char *);
     char           *uptime_string_n(u_long, char *, size_t);
+    NETSNMP_IMPORT
     void            xdump(const u_char *, size_t, const char *);
+    NETSNMP_IMPORT
     u_char         *snmp_parse_var_op(u_char *, oid *, size_t *, u_char *,
                                       size_t *, u_char **, size_t *);
+    NETSNMP_IMPORT
     u_char         *snmp_build_var_op(u_char *, oid *, size_t *, u_char,
                                       size_t, u_char *, size_t *);
 

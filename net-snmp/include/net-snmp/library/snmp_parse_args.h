@@ -43,13 +43,16 @@ netsnmp_parse_args(int argc, char **argv, netsnmp_session *session,
  *  Calls \link netsnmp_parse_args()
  *  netsnmp_parse_args(argc, argv, session, localOpts, proc, 0)\endlink
  */
+NETSNMP_IMPORT
 int
 snmp_parse_args(int argc, char **argv, netsnmp_session *session,
 		const char *localOpts, void (*proc)(int, char *const *, int));
 
+NETSNMP_IMPORT
 void
 snmp_parse_args_descriptions(FILE *);
 
+NETSNMP_IMPORT
 void
 snmp_parse_args_usage(FILE *);
 

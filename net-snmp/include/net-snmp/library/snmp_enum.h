@@ -58,11 +58,14 @@ extern          "C" {
      * find a list, and then operate on that list
      *   ( direct methods further below if you already have the list pointer)
      */
+    NETSNMP_IMPORT
     char           *se_find_label_in_slist(const char *listname,
                                            int value);
+    NETSNMP_IMPORT
     int             se_find_value_in_slist(const char *listname,
                                            const char *label);
     int             se_find_free_value_in_slist(const char *listname);
+    NETSNMP_IMPORT
     int             se_add_pair_to_slist(const char *listname, char *label,
                                          int value);
 
@@ -87,6 +90,7 @@ extern          "C" {
     int             se_store_slist_callback(int majorID, int minorID,
                                            void *serverargs, void *clientargs);
     void            se_read_conf(const char *word, char *cptr);
+    NETSNMP_IMPORT
     void            clear_snmp_enum(void);
 
 #ifdef __cplusplus

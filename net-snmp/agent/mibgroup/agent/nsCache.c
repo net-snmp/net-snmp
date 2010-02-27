@@ -42,7 +42,7 @@ extern netsnmp_cache *netsnmp_cache_get_head(void);
 #define NSCACHE_STATUS_ACTIVE   4
 #define NSCACHE_STATUS_EXPIRED  5
 
-extern struct snmp_alarm *
+NETSNMP_IMPORT struct snmp_alarm *
 sa_find_specific(unsigned int clientreg);
 
 

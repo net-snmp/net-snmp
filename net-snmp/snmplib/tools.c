@@ -72,6 +72,7 @@
  * @note The strdup() implementation calls _malloc_dbg() when linking with
  * MSVCRT??D.dll and malloc() when linking with MSVCRT??.dll
  */
+NETSNMP_IMPORT char * netsnmp_strdup( const char * ptr);
 char * netsnmp_strdup( const char * ptr)
 {
     return strdup(ptr);
@@ -79,6 +80,7 @@ char * netsnmp_strdup( const char * ptr)
 /**
  * This function is a wrapper for the calloc function.
  */
+NETSNMP_IMPORT void * netsnmp_calloc(size_t nmemb, size_t size);
 void * netsnmp_calloc(size_t nmemb, size_t size)
 {
     return calloc(nmemb, size);
@@ -87,6 +89,7 @@ void * netsnmp_calloc(size_t nmemb, size_t size)
 /**
  * This function is a wrapper for the malloc function.
  */
+NETSNMP_IMPORT void * netsnmp_malloc(size_t size);
 void * netsnmp_malloc(size_t size)
 {
     return malloc(size);
@@ -95,6 +98,7 @@ void * netsnmp_malloc(size_t size)
 /**
  * This function is a wrapper for the realloc function.
  */
+NETSNMP_IMPORT void * netsnmp_realloc( void * ptr, size_t size);
 void * netsnmp_realloc( void * ptr, size_t size)
 {
     return realloc(ptr, size);
@@ -104,6 +108,7 @@ void * netsnmp_realloc( void * ptr, size_t size)
  * This function is a wrapper for the free function.
  * It calls free only if the calling parameter has a non-zero value.
  */
+NETSNMP_IMPORT void netsnmp_free( void * ptr);
 void netsnmp_free( void * ptr)
 {
     if (ptr)

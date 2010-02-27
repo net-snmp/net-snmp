@@ -53,17 +53,22 @@ extern          "C" {
         netsnmp_pdu    *pdu;
     };
 
+    NETSNMP_IMPORT
     void            snmp_replace_var_types(netsnmp_variable_list * vbl,
                                            u_char old_type,
                                            u_char new_type);
+    NETSNMP_IMPORT
     void            snmp_reset_var_buffers(netsnmp_variable_list * var);
     void            snmp_reset_var_types(netsnmp_variable_list * vbl,
                                          u_char new_type);
+    NETSNMP_IMPORT
     int             count_varbinds(netsnmp_variable_list * var_ptr);
+    NETSNMP_IMPORT
     int             count_varbinds_of_type(netsnmp_variable_list * var_ptr,
                                            u_char type);
     netsnmp_variable_list *find_varbind_of_type(netsnmp_variable_list *
                                                 var_ptr, u_char type);
+    NETSNMP_IMPORT
     netsnmp_variable_list *find_varbind_in_list(netsnmp_variable_list *vblist,
                                                 const oid *name, size_t len);
 
@@ -71,20 +76,30 @@ extern          "C" {
                                    int copyCount);
 
     unsigned long   snmp_varbind_len(netsnmp_pdu *pdu);
+    NETSNMP_IMPORT
     int             snmp_clone_var(netsnmp_variable_list *,
                                    netsnmp_variable_list *);
+    NETSNMP_IMPORT
     const char     *snmp_errstring(int);
+    NETSNMP_IMPORT
     int             snmp_synch_response_cb(netsnmp_session *,
                                            netsnmp_pdu *, netsnmp_pdu **,
                                            snmp_callback);
+    NETSNMP_IMPORT
     int             snmp_clone_mem(void **, const void *, unsigned);
 
 
+NETSNMP_IMPORT
 void              netsnmp_query_set_default_session(netsnmp_session *);
+NETSNMP_IMPORT
 netsnmp_session * netsnmp_query_get_default_session_unchecked( void );
+NETSNMP_IMPORT
 netsnmp_session * netsnmp_query_get_default_session( void );
+NETSNMP_IMPORT
 int netsnmp_query_get(     netsnmp_variable_list *, netsnmp_session *);
+NETSNMP_IMPORT
 int netsnmp_query_getnext( netsnmp_variable_list *, netsnmp_session *);
+NETSNMP_IMPORT
 int netsnmp_query_walk(    netsnmp_variable_list *, netsnmp_session *);
 int netsnmp_query_set(     netsnmp_variable_list *, netsnmp_session *);
 

@@ -193,28 +193,43 @@ SOFTWARE.
     void            unload_all_mibs(void);
     int             add_mibfile(const char*, const char*, FILE *);
     int             which_module(const char *);
+    NETSNMP_IMPORT
     char           *module_name(int, char *);
+    NETSNMP_IMPORT
     void            print_subtree(FILE *, struct tree *, int);
+    NETSNMP_IMPORT
     void            print_ascii_dump_tree(FILE *, struct tree *, int);
+    NETSNMP_IMPORT
     struct tree    *find_tree_node(const char *, int);
+    NETSNMP_IMPORT
     const char     *get_tc_descriptor(int);
+    NETSNMP_IMPORT
     const char     *get_tc_description(int);
+    NETSNMP_IMPORT
     struct tree    *find_best_tree_node(const char *, struct tree *,
                                         u_int *);
     /*
      * backwards compatability 
      */
+    NETSNMP_IMPORT
     struct tree    *find_node(const char *, struct tree *);
     struct tree    *find_node2(const char *, const char *); 
+    NETSNMP_IMPORT
     struct module  *find_module(int);
     void            adopt_orphans(void);
+    NETSNMP_IMPORT
     char           *snmp_mib_toggle_options(char *options);
+    NETSNMP_IMPORT
     void            snmp_mib_toggle_options_usage(const char *lead,
                                                   FILE * outf);
+    NETSNMP_IMPORT
     void            print_mib(FILE *);
+    NETSNMP_IMPORT
     void            print_mib_tree(FILE *, struct tree *, int);
     int             get_mib_parse_error_count(void);
+    NETSNMP_IMPORT
     int             snmp_get_token(FILE * fp, char *token, int maxtlen);
+    NETSNMP_IMPORT
     struct tree    *find_best_tree_node(const char *name,
                                         struct tree *tree_top,
                                         u_int * match);

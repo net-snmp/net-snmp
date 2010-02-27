@@ -19,6 +19,8 @@
 # endif
 #endif
 
+#include <net-snmp/library/system.h>
+
 int
 gettimeofday(struct timeval *tv, struct timezone *tz)
 {

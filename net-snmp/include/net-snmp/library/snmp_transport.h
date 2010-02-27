@@ -183,6 +183,7 @@ netsnmp_transport *netsnmp_transport_copy(netsnmp_transport *t);
 
 /*  Free an netsnmp_transport.  */
 
+NETSNMP_IMPORT
 void            netsnmp_transport_free(netsnmp_transport *t);
 
 
@@ -194,6 +195,7 @@ void            netsnmp_transport_free(netsnmp_transport *t);
  * *out_len.
  */
 
+NETSNMP_IMPORT
 int             netsnmp_tdomain_support(const oid *in_oid, size_t in_len,
 					const oid **out_oid, size_t *out_len);
 
@@ -201,29 +203,35 @@ int             netsnmp_tdomain_register(netsnmp_tdomain *domain);
     
 int             netsnmp_tdomain_unregister(netsnmp_tdomain *domain);
 
+NETSNMP_IMPORT
 void            netsnmp_clear_tdomain_list(void);
 
 void            netsnmp_tdomain_init(void);
 
+NETSNMP_IMPORT
 netsnmp_transport *netsnmp_tdomain_transport(const char *str,
 					     int local,
 					     const char *default_domain);
 
+NETSNMP_IMPORT
 netsnmp_transport *netsnmp_tdomain_transport_full(const char *application,
 						  const char *str,
 						  int local,
 						  const char *default_domain,
 						  const char *default_target);
 
+NETSNMP_IMPORT
 netsnmp_transport *netsnmp_tdomain_transport_oid(const oid * dom,
 						 size_t dom_len,
 						 const u_char * o,
 						 size_t o_len,
 						 int local);
 
+NETSNMP_IMPORT
 netsnmp_transport*
 netsnmp_transport_open_client(const char* application, const char* str);
 
+NETSNMP_IMPORT
 netsnmp_transport*
 netsnmp_transport_open_server(const char* application, const char* str);
 

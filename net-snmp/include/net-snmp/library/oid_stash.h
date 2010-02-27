@@ -38,6 +38,7 @@ extern          "C" {
        NetSNMPStashDump *dumpfn;
     } netsnmp_oid_stash_save_info;
 
+    NETSNMP_IMPORT
     int             netsnmp_oid_stash_add_data(netsnmp_oid_stash_node **root,
 					       const oid * lookup,
                                                size_t lookup_len,
@@ -48,9 +49,11 @@ extern          "C" {
     netsnmp_oid_stash_node
         *netsnmp_oid_stash_get_node(netsnmp_oid_stash_node *root,
                                     const oid * lookup, size_t lookup_len);
+    NETSNMP_IMPORT
     void           *netsnmp_oid_stash_get_data(netsnmp_oid_stash_node *root,
 					       const oid * lookup,
                                                size_t lookup_len);
+    NETSNMP_IMPORT
     netsnmp_oid_stash_node *
     netsnmp_oid_stash_getnext_node(netsnmp_oid_stash_node *root,
                                    oid * lookup, size_t lookup_len);
@@ -65,6 +68,7 @@ extern          "C" {
                                  oid *curoid, size_t curoid_len);
 
     /* frees all data in the stash and cleans it out.  Sets root = NULL */
+    NETSNMP_IMPORT
     void netsnmp_oid_stash_free(netsnmp_oid_stash_node **root,
                                 NetSNMPStashFreeNode *freefn);
                                 

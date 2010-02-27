@@ -244,7 +244,9 @@ extern "C" {
      * initialize/free a container of container factories. used by
      * netsnmp_container_find* functions.
      */
+    NETSNMP_IMPORT
     void netsnmp_container_init_list(void);
+    NETSNMP_IMPORT
     void netsnmp_container_free_list(void);
 
     /*
@@ -259,12 +261,14 @@ extern "C" {
      * search for and create a container from a list of types or a
      * specific type.
      */
+    NETSNMP_IMPORT
     netsnmp_container * netsnmp_container_find(const char *type_list);
     netsnmp_container * netsnmp_container_get(const char *type);
 
     /*
      * utility routines
      */
+    NETSNMP_IMPORT
     void netsnmp_container_add_index(netsnmp_container *primary,
                                      netsnmp_container *new_index);
 
@@ -275,7 +279,9 @@ extern "C" {
      * common comparison routines
      */
     /** first data element is a 'netsnmp_index' */
+    NETSNMP_IMPORT
     int netsnmp_compare_netsnmp_index(const void *lhs, const void *rhs);
+    NETSNMP_IMPORT
     int netsnmp_ncompare_netsnmp_index(const void *lhs, const void *rhs);
 
     /** first data element is a 'char *' */
@@ -290,6 +296,7 @@ extern "C" {
     int netsnmp_compare_direct_cstring(const void * lhs, const void * rhs);
 
     /** for_each callback to call free on data item */
+    NETSNMP_IMPORT
     void  netsnmp_container_simple_free(void *data, void *context);
 
 /*

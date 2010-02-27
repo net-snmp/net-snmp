@@ -35,10 +35,13 @@ int             netsnmp_sockaddr_in6(struct sockaddr_in6 *addr,
                                      const char *peername,
                                      int remote_port);
 
+NETSNMP_IMPORT
 void            netsnmp_udp6_agent_config_tokens_register(void);
+NETSNMP_IMPORT
 void            netsnmp_udp6_parse_security(const char *token,
                                             char *param);
 
+NETSNMP_IMPORT
 int             netsnmp_udp6_getSecName(void *opaque, int olength,
                                         const char *community,
                                         int community_len,
