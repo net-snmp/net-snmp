@@ -253,7 +253,7 @@ netsnmp_transport_recv(netsnmp_transport *t, void *packet, int length,
     length = t->f_recv(t, packet, length, opaque, olength);
 
     if (length <=0)
-        return; /* don't log timeouts/socket closed */
+        return length; /* don't log timeouts/socket closed */
 
     debugLength = (SNMPERR_SUCCESS ==
                    debug_is_token_registered("transport:recv"));
