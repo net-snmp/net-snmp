@@ -41,7 +41,7 @@ CLEAN :
     if not exist "$(INTDIR)/$(NULL)" mkdir "$(INTDIR)"
 
 CPP=cl.exe
-CPP_PROJ=/nologo /MD /W3 /GX /O2 /I "." /I ".." /I "..\..\snmplib" /I "..\.." /I "..\..\include" /I "..\..\agent\mibgroup" /D "WIN32" /D "NDEBUG" /D "_CONSOLE" /D "_MBCS" /Fp"$(INTDIR)\$(PROGNAME).pch" /YX /Fo"$(INTDIR)\\" /Fd"$(INTDIR)\\" /FD /c 
+CPP_PROJ=/nologo /MD /W3 /EHsc /O2 /I "." /I ".." /I "..\..\snmplib" /I "..\.." /I "..\..\include" /I "..\..\agent\mibgroup" /D "WIN32" /D "NDEBUG" /D "_CONSOLE" /D "_CRT_SECURE_NO_WARNINGS" /D "_CRT_NONSTDC_NO_WARNINGS" /D "_MBCS" /Fo"$(INTDIR)\\" /Fd"$(INTDIR)\\" /FD /c 
 
 !IF "$(LINKTYPE)" == "dynamic"
 CPP_PROJ=$(CPP_PROJ) /D "NMAKE_NETSNMP_USE_DLL"
@@ -129,7 +129,7 @@ CLEAN :
     if not exist "$(INTDIR)/$(NULL)" mkdir "$(INTDIR)"
 
 CPP=cl.exe
-CPP_PROJ=/nologo /MDd /W3 /Gm /GX /Zi /Od /I "." /I ".." /I "..\..\snmplib" /I "..\.." /I "..\..\include" /I "..\..\agent\mibgroup" /D "WIN32" /D "_DEBUG" /D "_CONSOLE" /D "_MBCS" /FR"$(INTDIR)\\" /Fp"$(INTDIR)\$(PROGNAME).pch" /YX /Fo"$(INTDIR)\\" /Fd"$(INTDIR)\\" /FD /c 
+CPP_PROJ=/nologo /MDd /W3 /Gm /EHsc /Zi /Od /I "." /I ".." /I "..\..\snmplib" /I "..\.." /I "..\..\include" /I "..\..\agent\mibgroup" /D "WIN32" /D "_DEBUG" /D "_CONSOLE" /D "_CRT_SECURE_NO_WARNINGS" /D "_CRT_NONSTDC_NO_WARNINGS" /D "_MBCS" /FR"$(INTDIR)\\" /Fo"$(INTDIR)\\" /Fd"$(INTDIR)\\" /FD /c 
 
 !IF "$(LINKTYPE)" == "dynamic"
 CPP_PROJ=$(CPP_PROJ) /D "NMAKE_NETSNMP_USE_DLL"
