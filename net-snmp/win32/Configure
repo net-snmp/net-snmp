@@ -243,12 +243,7 @@ libhelpers
 libnetsnmptrapd
 /;
 
-if ($sdk == 1) {
-  push (@programs, "netsnmpmibssdk");
-}
-else {
-  push (@programs, "netsnmpmibs");
-}
+push (@programs, "netsnmpmibs");
 
 if ($linktype eq "dynamic") {
   push (@programs, "libsnmp_dll");
@@ -297,12 +292,7 @@ my @programs = qw
 /snmptrapd
 /;
 
-if ($sdk == 1) {
-  push (@programs, "snmpdsdk");
-}
-else {
-  push (@programs, "snmpd");
-}
+push (@programs, "snmpd");
 
 foreach my $progName (@programs) {
   
