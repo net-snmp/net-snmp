@@ -6,10 +6,10 @@
 
 #ifdef WIN32
 
+#include <net-snmp/net-snmp-config.h>
+
 #include <windows.h>
 #include <tchar.h>
-
-#include <net-snmp/net-snmp-config.h>
 
 #include <stdio.h>		/* sprintf */
 #include <process.h>		/* beginthreadex  */
