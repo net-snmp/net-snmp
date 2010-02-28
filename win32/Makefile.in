@@ -10,17 +10,10 @@ all : libs apps snmptrapd snmpd local
 
 clean : apps_clean libs_clean snmptrapd_clean snmpd_clean local_clean
 
-!IF "$(SDK)" == "true"
-snmpd : snmpdsdk_
-snmpd_clean : snmpdsdk_clean_
-netsnmpmibs : netsnmpmibssdk_
-netsnmpmibs_clean : netsnmpmibssdk_clean_
-!ELSE
 snmpd : snmpd_
 snmpd_clean : snmpd_clean_
 netsnmpmibs : netsnmpmibs_	
 netsnmpmibs_clean : netsnmpmibs_clean_
-!ENDIF
 
 !IF "$(LINKTYPE)" == "static"
 libsnmp : libsnmp_
@@ -138,11 +131,6 @@ netsnmpmibs_ ::
 	$(NMAKE) all
 	cd ..
 
-netsnmpmibssdk_ ::
-	cd netsnmpmibssdk
-	$(NMAKE) all
-	cd ..
-
 snmpdf ::
 	cd snmpdf
 	$(NMAKE) all
@@ -238,11 +226,6 @@ snmpd_ ::
 	$(NMAKE) all
 	cd ..
 
-snmpdsdk_ ::
-	cd snmpdsdk
-	$(NMAKE) all
-	cd ..
-
 snmpconf ::
 	cd local
 	$(NMAKE) snmpconf
@@ -289,11 +272,6 @@ libnetsnmptrapd_clean ::
 
 netsnmpmibs_clean_ ::
 	cd netsnmpmibs
-	$(NMAKE) clean
-	cd ..
-
-netsnmpmibssdk_clean_ ::
-	cd netsnmpmibssdk
 	$(NMAKE) clean
 	cd ..
 
@@ -389,11 +367,6 @@ snmptrapd_clean ::
 
 snmpd_clean_ ::
 	cd snmpd
-	$(NMAKE) clean
-	cd ..
-
-snmpdsdk_clean_ ::
-	cd snmpdsdk
 	$(NMAKE) clean
 	cd ..
 
