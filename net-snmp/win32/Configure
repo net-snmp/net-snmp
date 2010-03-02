@@ -241,9 +241,8 @@ my @programs = qw
 /libagent
 libhelpers
 libnetsnmptrapd
+netsnmpmibs
 /;
-
-push (@programs, "netsnmpmibs");
 
 if ($linktype eq "dynamic") {
   push (@programs, "libsnmp_dll");
@@ -269,6 +268,13 @@ foreach my $progName (@programs) {
   {
     chomp;
     
+    if ($sdk == 1) {
+      s/^SDK=/SDK=true/;
+    }
+    else {
+      s/^SDK=/SDK=false/;
+    }
+
     s/^PROGNAME=/PROGNAME=$progName/;
     s/^CFG=/CFG=$config/;
     s/^OUTDIR=/OUTDIR=.\\$outdir/;
@@ -289,10 +295,9 @@ foreach my $progName (@programs) {
 #
 ###############################################
 my @programs = qw 
-/snmptrapd
+/snmpd
+snmptrapd
 /;
-
-push (@programs, "snmpd");
 
 foreach my $progName (@programs) {
   
@@ -311,6 +316,13 @@ foreach my $progName (@programs) {
   {
     chomp;
     
+    if ($sdk == 1) {
+      s/^SDK=/SDK=true/;
+    }
+    else {
+      s/^SDK=/SDK=false/;
+    }
+
     s/^LINKTYPE=/LINKTYPE=$linktype/;
     s/^PROGNAME=/PROGNAME=$progName/;
     s/^CFG=/CFG=$config/;
