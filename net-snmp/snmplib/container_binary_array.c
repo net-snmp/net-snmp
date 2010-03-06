@@ -542,6 +542,11 @@ _ba_get_subset(netsnmp_container *container, void *data)
     return va;
 }
 
+static int _ba_options(netsnmp_container *c, int set, u_int flags)
+{
+	return netsnmp_binary_array_options_set(c, set, flags);
+}
+
 netsnmp_container *
 netsnmp_container_get_binary_array(void)
 {
@@ -555,18 +560,15 @@ netsnmp_container_get_binary_array(void)
     }
 
     c->container_data = netsnmp_binary_array_initialize();
-        
-    c->get_size = _ba_size;
-    c->init = NULL;
-    c->cfree = _ba_free;
-    c->insert = _ba_insert;
-    c->remove = _ba_remove;
-    c->find = _ba_find;
+
+    netsnmp_init_container(c, NULL, _ba_free, _ba_size, NULL, _ba_insert,
+                           _ba_remove, _ba_find);
     c->find_next = _ba_find_next;
     c->get_subset = _ba_get_subset;
     c->get_iterator = _ba_iterator_get;
     c->for_each = _ba_for_each;
     c->clear = _ba_clear;
+    c->options = _ba_options;
         
     return c;
 }

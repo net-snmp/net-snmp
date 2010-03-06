@@ -398,6 +398,16 @@ void CONTAINER_CLEAR(netsnmp_container *x, netsnmp_container_obj_func *f,
     x->clear(x, f, c);
 }
 
+/*
+ * clear all containers. When clearing the *first* container, and
+ * *only* the first container, call the free_item function for each item.
+ * After calling this function, all containers should be empty.
+ */
+void CONTAINER_FREE_ALL(netsnmp_container *x, void *c)
+{
+    CONTAINER_CLEAR(x, x->free_item, c);
+}
+
 /*------------------------------------------------------------------
  * These functions should EXACTLY match the function version in
  * container.c. If you change one, change them both.
@@ -446,6 +456,7 @@ netsnmp_init_container(netsnmp_container         *c,
     c->insert = ins;
     c->remove = rem;
     c->find = fnd;
+    c->free_item = netsnmp_container_simple_free;
 }
 
 /*------------------------------------------------------------------

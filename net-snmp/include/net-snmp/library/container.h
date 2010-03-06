@@ -145,17 +145,15 @@ extern "C" {
        /*
         * release memory for an entry from the container
         */
-       netsnmp_container_op    *release;
-
-       /*
-        * Note: do not change the key!  If you need to
-        * change a key, remove the entry, change the key,
-        * and the re-add the entry.
-        */
+       netsnmp_container_op    *release; /* NOTE: deprecated. Use free_item */
+       netsnmp_container_obj_func *free_item;
 
        /*
         * find the entry in the container with the same key
         *
+        * Note: do not change the key!  If you need to
+        * change a key, remove the entry, change the key,
+        * and the re-add the entry.
         */
        netsnmp_container_rtn   *find;
 
@@ -361,6 +359,14 @@ extern "C" {
      */
     void CONTAINER_CLEAR(netsnmp_container *x, netsnmp_container_obj_func *f,
                         void *c);
+
+    /*
+     * clear all containers. When clearing the *first* container, and
+     * *only* the first container, call the free_item function for each item.
+     * After calling this function, all containers should be empty.
+     */
+    void CONTAINER_FREE_ALL(netsnmp_container *x, void *c);
+
     /*
      * free all containers
      */
@@ -480,6 +486,17 @@ extern "C" {
             x = x->prev;
         }
         x->clear(x, f, c);
+    }
+
+    /*
+     * clear all containers. When clearing the *first* container, and
+     * *only* the first container, call the free_item function for each item.
+     * After calling this function, all containers should be empty.
+     */
+    NETSNMP_STATIC_INLINE /* gcc docs recommend static w/inline */
+    void CONTAINER_FREE_ALL(netsnmp_container *x, void *c)
+    {
+        CONTAINER_CLEAR(x, x->free_item, c);
     }
 
     /*------------------------------------------------------------------
