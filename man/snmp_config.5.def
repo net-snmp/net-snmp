@@ -143,6 +143,21 @@ rocommunity mypublic
 .PP
 Any lines beginning with the character '#' in the configuration files
 are treated as a comment and are not parsed.
+.SH "INCLUDING OTHER CONFIGURATION FILES"
+It is possible to include other configuration files for processing
+during normal configuration file processing.:
+.PP
+.RS
+.nf
+# include site specific config
+include site.conf
+.RE
+.PP
+This will search every directory in the configuration path for files
+named site.conf, and will process those files before returning to the
+processing of the original file. Note that if '.conf' is omitted,
+it will be appended. That is, all configuration files must end
+in '.conf'.
 .SH "API INTERFACE"
 .PP
 Information about writing C code that makes use of this system in
