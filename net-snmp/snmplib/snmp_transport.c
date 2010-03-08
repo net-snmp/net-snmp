@@ -326,7 +326,7 @@ netsnmp_tdomain_init(void)
 #ifdef NETSNMP_TRANSPORT_DTLSUDP_DOMAIN
     netsnmp_dtlsudp_ctor();
 #endif
-#ifdef NETSNMP_TRANSPORT_DTLSUDP_DOMAIN
+#ifdef NETSNMP_TRANSPORT_DTLSTCP_DOMAIN
     netsnmp_tlstcp_ctor();
 #endif
 #ifdef NETSNMP_TRANSPORT_SSH_DOMAIN
