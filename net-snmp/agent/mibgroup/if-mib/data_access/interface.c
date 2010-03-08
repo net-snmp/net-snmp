@@ -468,12 +468,8 @@ _access_interface_entry_save_name(const char *name, oid index)
     }
     else
         if (index != tmp) {
-            static int logged = 0;
-            if (!logged) {
-                snmp_log(LOG_ERR, "IfIndex of an interface changed. Such " \
-                         "interfaces will appear multiple times in IF-MIB.\n");
-                logged = 1;
-            }
+            NETSNMP_LOGONCE((LOG_ERR, "IfIndex of an interface changed. Such " \
+                         "interfaces will appear multiple times in IF-MIB.\n"));
             DEBUGMSGTL(("access:interface:ifIndex",
                         "index %" NETSNMP_PRIo "u != tmp for %s\n",
                         index, name));

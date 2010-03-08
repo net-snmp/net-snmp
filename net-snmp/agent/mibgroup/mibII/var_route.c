@@ -1316,7 +1316,7 @@ Route_Scan_Reload(void)
     rtsize = 0;
 
     if (!(in = fopen("/proc/net/route", "r"))) {
-        snmp_log(LOG_ERR, "cannot open /proc/net/route - burps\n");
+        NETSNMP_LOGONCE((LOG_ERR, "cannot open /proc/net/route - burps\n"));
         return;
     }
 

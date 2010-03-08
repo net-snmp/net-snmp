@@ -494,7 +494,7 @@ netsnmp_arch_interface_container_load(netsnmp_container* container,
     if (!(devin = fopen("/proc/net/dev", "r"))) {
         DEBUGMSGTL(("access:interface",
                     "Failed to load Interface Table (linux1)\n"));
-        snmp_log(LOG_ERR, "cannot open /proc/net/dev ...\n");
+        NETSNMP_LOGONCE((LOG_ERR, "cannot open /proc/net/dev ...\n"));
         return -2;
     }
 

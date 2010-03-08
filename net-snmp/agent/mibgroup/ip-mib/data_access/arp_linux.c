@@ -257,6 +257,7 @@ _load_v6(netsnmp_container *container, int idx_offset)
          }
          entry->ns_arp_index = ++idx_offset;
          if(fillup_entry_info (entry, nlmp) < 0) {
+            NETSNMP_LOGONCE((LOG_ERR, "filling entry info failed\n"));
             DEBUGMSGTL(("access:arp:load_v6", "filling entry info failed\n"));
             netsnmp_access_arp_entry_free(entry);
             status -= NLMSG_ALIGN(len);

@@ -243,7 +243,7 @@ try_getloadavg(double *r_ave, size_t s_ave)
     {
         FILE           *in = fopen("/proc/loadavg", "r");
         if (!in) {
-            snmp_log(LOG_ERR, "snmpd: cannot open /proc/loadavg\n");
+            NETSNMP_LOGONCE((LOG_ERR, "snmpd: cannot open /proc/loadavg\n"));
             return (-1);
         }
         fscanf(in, "%lf %lf %lf", pave, (pave + 1), (pave + 2));
