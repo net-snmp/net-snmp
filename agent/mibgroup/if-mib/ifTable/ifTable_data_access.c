@@ -328,12 +328,8 @@ _check_interface_entry_for_updates(ifTable_rowreq_ctx * rowreq_ctx,
             int rc = strcmp(rowreq_ctx->data.ifName,
                             ifentry->name);
             if (rc != 0) {
-                static int logged = 0;
-                if (!logged) {
-                    snmp_log(LOG_ERR, "Name of an interface changed. Such " \
-                        "interfaces will keep its old name in IF-MIB.\n");
-                    logged = 1;
-                }
+                NETSNMP_LOGONCE((LOG_ERR, "Name of an interface changed. Such " \
+                        "interfaces will keep its old name in IF-MIB.\n"));
                 DEBUGMSGTL(("ifTable:access", "interface %s changed name to %s, ignoring\n",
                     rowreq_ctx->data.ifName, ifentry->name));
             }

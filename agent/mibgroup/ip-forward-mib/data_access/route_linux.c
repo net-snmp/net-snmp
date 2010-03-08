@@ -53,7 +53,7 @@ _load_ipv4(netsnmp_container* container, u_long *index )
      * fetch routes from the proc file-system:
      */
     if (!(in = fopen("/proc/net/route", "r"))) {
-        snmp_log(LOG_ERR, "cannot open /proc/net/route\n");
+        NETSNMP_LOGONCE((LOG_ERR, "cannot open /proc/net/route\n"));
         return -2;
     }
 
@@ -217,7 +217,7 @@ _load_ipv6(netsnmp_container* container, u_long *index )
      */
     if (!(in = fopen("/proc/net/ipv6_route", "r"))) {
         if (1 == log_open_err) {
-            snmp_log(LOG_ERR, "cannot open /proc/net/ipv6_route\n");
+            NETSNMP_LOGONCE((LOG_ERR, "cannot open /proc/net/ipv6_route\n"));
             log_open_err = 0;
         }
         return -2;

@@ -1539,7 +1539,7 @@ Interface_Scan_Init(void)
      */
     if (!(devin = fopen("/proc/net/dev", "r"))) {
         close(fd);
-        snmp_log(LOG_ERR, "cannot open /proc/net/dev - continuing...\n");
+        NETSNMP_LOGONCE((LOG_ERR, "cannot open /proc/net/dev.\n"));
         return; /** exit (1); **/
     }
 

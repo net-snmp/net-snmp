@@ -31,6 +31,14 @@ extern          "C" {
 #define DEFAULT_LOG_ID "net-snmp"
 #endif
 
+#define NETSNMP_LOGONCE(x) do { \
+        static char logged = 0; \
+        if (!logged) {          \
+            logged = 1;         \
+            snmp_log x ;        \
+        }                       \
+    } while(0)
+
     void            init_snmp_logging(void);
     void            shutdown_snmp_logging(void);
     NETSNMP_IMPORT
@@ -70,14 +78,8 @@ extern          "C" {
                               va_list ap);
     /*
      * 0 - successful message formatting 
-     */
-    /*
      * -1 - Could not format log-string 
-     */
-    /*
      * -2 - Could not allocate memory for log-message 
-     */
-    /*
      * -3 - Log-message too long! 
      */
 

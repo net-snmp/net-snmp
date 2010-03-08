@@ -116,7 +116,7 @@ _systemstats_v4(netsnmp_container* container, u_int load_flags)
     if (!(devin = fopen("/proc/net/snmp", "r"))) {
         DEBUGMSGTL(("access:systemstats",
                     "Failed to load Systemstats Table (linux1)\n"));
-        snmp_log(LOG_ERR, "cannot open /proc/net/snmp ...\n");
+        NETSNMP_LOGONCE((LOG_ERR, "cannot open /proc/net/snmp ...\n"));
         return -2;
     }
 
@@ -275,6 +275,7 @@ _additional_systemstats_v4(netsnmp_systemstats_entry* entry,
     if (!(devin = fopen("/proc/net/netstat", "r"))) {
         DEBUGMSGTL(("access:systemstats",
                     "cannot open /proc/net/netstat\n"));
+        NETSNMP_LOGONCE((LOG_ERR,"cannot open /proc/net/netstat\n"));
         return -2;
     }
 
@@ -530,7 +531,6 @@ _systemstats_v6_load_systemstats(netsnmp_container* container, u_int load_flags)
     FILE *devin;
     netsnmp_systemstats_entry *entry = NULL;
     const char     *filename = "/proc/net/snmp6";
-    static int      warned_open = 0;
     int rc = 0;
     
     entry = netsnmp_access_systemstats_entry_create(2, 0);
@@ -544,10 +544,7 @@ _systemstats_v6_load_systemstats(netsnmp_container* container, u_int load_flags)
     if (!(devin = fopen(filename, "r"))) {
         DEBUGMSGTL(("access:systemstats",
                     "Failed to load Systemstats Table (linux1)\n"));
-        if(!warned_open) {
-            ++warned_open;
-            snmp_log(LOG_ERR, "cannot open %s ...\n", filename);
-        }
+        NETSNMP_LOGONCE((LOG_ERR, "cannot open %s ...\n", filename));
         free(entry);
         return 0;
     }

@@ -671,7 +671,7 @@ tcpTable_load(netsnmp_cache *cache, void *vmagic)
 
     if (!(in = fopen("/proc/net/tcp", "r"))) {
         DEBUGMSGTL(("mibII/tcpTable", "Failed to load TCP Table (linux1)\n"));
-        snmp_log(LOG_ERR, "snmpd: cannot open /proc/net/tcp ...\n");
+        NETSNMP_LOGONCE((LOG_ERR, "snmpd: cannot open /proc/net/tcp ...\n"));
         return -1;
     }
 

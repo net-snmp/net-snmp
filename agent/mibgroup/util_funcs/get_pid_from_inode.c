@@ -34,7 +34,7 @@ netsnmp_get_pid_from_inode(ino64_t inode)
     ino64_t         temp_inode;
 
     if (!(procdirs = opendir(PROC_PATH))) {
-        snmp_log(LOG_ERR, "snmpd: cannot open /proc\n");
+        NETSNMP_LOGONCE((LOG_ERR, "snmpd: cannot open /proc\n"));
         return 0;
     }
 

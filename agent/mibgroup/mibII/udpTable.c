@@ -471,7 +471,7 @@ udpTable_load(netsnmp_cache *cache, void *vmagic)
 
     if (!(in = fopen("/proc/net/udp", "r"))) {
         DEBUGMSGTL(("mibII/udpTable", "Failed to load UDP Table (linux)\n"));
-        snmp_log(LOG_ERR, "snmpd: cannot open /proc/net/udp ...\n");
+        NETSNMP_LOGONCE((LOG_ERR, "snmpd: cannot open /proc/net/udp ...\n"));
         return -1;
     }
 
