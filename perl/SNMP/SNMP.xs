@@ -8,11 +8,11 @@
      modify it under the same terms as Perl itself.
 */
 #define WIN32SCK_IS_STDSCK
+#include <net-snmp/net-snmp-config.h>
 #include "EXTERN.h"
 #include "perl.h"
 #include "XSUB.h"
 
-#include <net-snmp/net-snmp-config.h>
 #include <net-snmp/net-snmp-includes.h>
 #include <sys/types.h>
 #include <arpa/inet.h>
