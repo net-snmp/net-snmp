@@ -47,19 +47,30 @@
 #include <net-snmp/library/container_binary_array.h>
 #include <net-snmp/library/dir_utils.h>
 
+/*
+ * read file names in a directory, with an optional filter
+ */
 netsnmp_container *
-netsnmp_directory_container_read(netsnmp_container *user_container,
-                                 const char *dirname, u_int flags)
+netsnmp_directory_container_read_some(netsnmp_container *user_container,
+                                      const char *dirname,
+                                      netsnmp_filename_filter *filter,
+                                      u_int flags)
 {
     DIR               *dir;
     netsnmp_container *container = user_container, *tmp_c;
     struct dirent     *file;
-    char               path[PATH_MAX];
+    char               path[SNMP_MAXPATH];
     u_char             dirname_len;
     int                rc;
 #if !(defined(HAVE_STRUCT_DIRENT_D_TYPE) && defined(DT_DIR)) && defined(S_ISDIR)
     struct stat        statbuf;
 #endif
+
+    if ((flags & NETSNMP_DIR_RELATIVE_PATH) && (flags & NETSNMP_DIR_RECURSE)) {
+        DEBUGMSGTL(("directory:container",
+                    "no support for relative path with recursion\n"));
+        return NULL;
+    }
 
     DEBUGMSGTL(("directory:container", "reading %s\n", dirname));
 
@@ -70,26 +81,37 @@ netsnmp_directory_container_read(netsnmp_container *user_container,
         container = netsnmp_container_find("directory_container:cstring");
         if (NULL == container)
             return NULL;
-        container->container_name = strdup("directory container");
-        netsnmp_binary_array_options_set(container, 1, CONTAINER_KEY_UNSORTED);
+        container->container_name = strdup(dirname);
+        /** default to unsorted */
+        if (! (flags & NETSNMP_DIR_SORTED))
+            netsnmp_binary_array_options_set(container, 1,
+                                             CONTAINER_KEY_UNSORTED);
     }
 
     dir = opendir(dirname);
     if (NULL == dir) {
         DEBUGMSGTL(("directory:container", "  not a dir\n"));
+        if (container != user_container)
+            netsnmp_directory_container_free(container);
         return NULL;
     }
 
     /** copy dirname into path */
-    dirname_len = strlen(dirname);
-    strncpy(path, dirname, sizeof(path));
-    if ((dirname_len + 2) > sizeof(path)) {
-        /** not enough room for files */
-        closedir(dir);
-        return NULL;
+    if (flags & NETSNMP_DIR_RELATIVE_PATH)
+        dirname_len = 0;
+    else {
+        dirname_len = strlen(dirname);
+        strncpy(path, dirname, sizeof(path));
+        if ((dirname_len + 2) > sizeof(path)) {
+            /** not enough room for files */
+            closedir(dir);
+            if (container != user_container)
+                netsnmp_directory_container_free(container);
+            return NULL;
+        }
+        path[dirname_len] = '/';
+        path[++dirname_len] = 0;
     }
-    path[dirname_len] = '/';
-    path[++dirname_len] = 0;
 
     /** iterate over dir */
     while ((file = readdir(dir))) {
@@ -103,8 +125,13 @@ netsnmp_directory_container_read(netsnmp_container *user_container,
              ((file->d_name[1] == '.') && ((file->d_name[2] == 0)))))
             continue;
 
+        if ((NULL != filter) && (0 == (*filter)(file->d_name))) {
+            DEBUGMSGTL(("directory:container:filtered", "%s\n", file->d_name));
+            continue;
+        }
+
         strncpy(&path[dirname_len], file->d_name, sizeof(path) - dirname_len);
-        DEBUGMSGTL(("9:directory:container", "  found %s\n", path));
+        DEBUGMSGTL(("directory:container:found", "%s\n", path));
 #if defined(HAVE_STRUCT_DIRENT_D_TYPE) && defined(DT_DIR)
         if ((file->d_type == DT_DIR) && (flags & NETSNMP_DIR_RECURSE)) {
 #elif defined(S_ISDIR)
@@ -118,7 +145,8 @@ netsnmp_directory_container_read(netsnmp_container *user_container,
         else {
             char *dup = strdup(path);
             if (NULL == dup) {
-               snmp_log(LOG_ERR, "strdup failed\n");
+               snmp_log(LOG_ERR,
+                        "strdup failed while building directory container\n");
                break;
             }
             rc = CONTAINER_INSERT(container, dup);
@@ -131,8 +159,12 @@ netsnmp_directory_container_read(netsnmp_container *user_container,
 
     closedir(dir);
 
-    DEBUGMSGTL(("directory:container", "  container now has %d items\n",
-                (int)CONTAINER_SIZE(container)));
+    rc = CONTAINER_SIZE(container);
+    DEBUGMSGTL(("directory:container", "  container now has %d items\n", rc));
+    if ((0 == rc) && !(flags & NETSNMP_DIR_EMPTY_OK)) {
+        netsnmp_directory_container_free(container);
+        return NULL;
+    }
     
     return container;
 }
