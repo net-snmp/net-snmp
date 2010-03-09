@@ -803,13 +803,11 @@ read_config(const char *filename,
             } else if ((token[0] == 'i') && (strcmp(token,"include")==0)) {
                 struct config_files ctmp = { cptr, line_handler, NULL };
                 int len = strlen(cptr);
-                DEBUGMSGTL(("read_config:include", "before %s\n", cptr));
                 if ((len > 5) && (strcmp(&cptr[len-5],".conf") == 0))
                    cptr[len-5] = 0; /* chop off .conf */
                 read_config_files_of_type(when,&ctmp);
                 if ((len > 5) && (cptr[len-5] == 0))
                    cptr[len-5] = '.'; /* restore .conf */
-                DEBUGMSGTL(("read_config:include", "after %s\n", cptr));
                 continue;
             } else {
                 lptr = line_handler;
