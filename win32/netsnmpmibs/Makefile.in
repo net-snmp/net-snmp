@@ -524,12 +524,6 @@ SOURCE=..\..\agent\mib_modules.c
 	$(CPP) $(CPP_PROJ) $(SOURCE)
 
 
-SOURCE=..\..\agent\mibgroup\utilities\override.c
-
-"$(INTDIR)\override.obj" : $(SOURCE) "$(INTDIR)"
-	$(CPP) $(CPP_PROJ) $(SOURCE)
-
-
 SOURCE=..\..\agent\mibgroup\util_funcs.c
 
 "$(INTDIR)\util_funcs.obj" : $(SOURCE) "$(INTDIR)"
@@ -539,56 +533,6 @@ SOURCE=..\..\agent\mibgroup\util_funcs.c
 SOURCE=..\..\agent\mibgroup\smux\smux.c
 
 "$(INTDIR)\smux.obj" : $(SOURCE) "$(INTDIR)"
-	$(CPP) $(CPP_PROJ) $(SOURCE)
-
-
-SOURCE=..\..\agent\mibgroup\ucd-snmp\dlmod.c
-"$(INTDIR)\dlmod.obj" : $(SOURCE) "$(INTDIR)"
-	$(CPP) $(CPP_PROJ) $(SOURCE)
-
-
-SOURCE=..\..\agent\mibgroup\ucd-snmp\errormib.c
-"$(INTDIR)\errormib.obj" : $(SOURCE) "$(INTDIR)"
-	$(CPP) $(CPP_PROJ) $(SOURCE)
-
-
-SOURCE=..\..\agent\mibgroup\ucd-snmp\extensible.c
-"$(INTDIR)\extensible.obj" : $(SOURCE) "$(INTDIR)"
-	$(CPP) $(CPP_PROJ) $(SOURCE)
-
-
-SOURCE=..\..\agent\mibgroup\ucd-snmp\file.c
-"$(INTDIR)\file.obj" : $(SOURCE) "$(INTDIR)"
-	$(CPP) $(CPP_PROJ) $(SOURCE)
-
-
-SOURCE=..\..\agent\mibgroup\ucd-snmp\loadave.c
-"$(INTDIR)\loadave.obj" : $(SOURCE) "$(INTDIR)"
-	$(CPP) $(CPP_PROJ) $(SOURCE)
-
-
-SOURCE=..\..\agent\mibgroup\ucd-snmp\pass.c
-"$(INTDIR)\pass.obj" : $(SOURCE) "$(INTDIR)"
-	$(CPP) $(CPP_PROJ) $(SOURCE)
-
-
-SOURCE=..\..\agent\mibgroup\ucd-snmp\pass_persist.c
-"$(INTDIR)\pass_persist.obj" : $(SOURCE) "$(INTDIR)"
-	$(CPP) $(CPP_PROJ) $(SOURCE)
-
-
-SOURCE=..\..\agent\mibgroup\ucd-snmp\proc.c
-"$(INTDIR)\proc.obj" : $(SOURCE) "$(INTDIR)"
-	$(CPP) $(CPP_PROJ) $(SOURCE)
-
-
-SOURCE=..\..\agent\mibgroup\ucd-snmp\proxy.c
-"$(INTDIR)\proxy.obj" : $(SOURCE) "$(INTDIR)"
-	$(CPP) $(CPP_PROJ) $(SOURCE)
-
-
-SOURCE=..\..\agent\mibgroup\ucd-snmp\versioninfo.c
-"$(INTDIR)\versioninfo.obj" : $(SOURCE) "$(INTDIR)"
 	$(CPP) $(CPP_PROJ) $(SOURCE)
 
 
