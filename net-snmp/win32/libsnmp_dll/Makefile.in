@@ -16,69 +16,67 @@ OPENSSL=libeay32.lib gdi32.lib
 OPENSSL=""
 !ENDIF
 
-!IF  "$(CFG)" == "release"
-
 ALL : "..\bin\$(OUTDIR)\netsnmp.dll"
 
+LINK32_OBJS= \
+	"$(INTDIR)\asn1.obj" \
+	"$(INTDIR)\callback.obj" \
+	"$(INTDIR)\check_varbind.obj" \
+	"$(INTDIR)\cmu_compat.obj" \
+	"$(INTDIR)\container.obj" \
+	"$(INTDIR)\container_binary_array.obj" \
+	"$(INTDIR)\container_iterator.obj" \
+	"$(INTDIR)\container_list_ssll.obj" \
+	"$(INTDIR)\container_null.obj" \
+	"$(INTDIR)\data_list.obj" \
+	"$(INTDIR)\default_store.obj" \
+	"$(INTDIR)\getopt.obj" \
+	"$(INTDIR)\int64.obj" \
+	"$(INTDIR)\inet_ntop.obj" \
+	"$(INTDIR)\inet_pton.obj" \
+	"$(INTDIR)\keytools.obj" \
+	"$(INTDIR)\lcd_time.obj" \
+	"$(INTDIR)\md5.obj" \
+	"$(INTDIR)\mib.obj" \
+	"$(INTDIR)\mt_support.obj" \
+	"$(INTDIR)\oid_stash.obj" \
+	"$(INTDIR)\parse.obj" \
+	"$(INTDIR)\read_config.obj" \
+	"$(INTDIR)\scapi.obj" \
+	"$(INTDIR)\snmp-tc.obj" \
+	"$(INTDIR)\snmp.obj" \
+	"$(INTDIR)\snmp_alarm.obj" \
+	"$(INTDIR)\snmp_api.obj" \
+	"$(INTDIR)\snmp_auth.obj" \
+	"$(INTDIR)\snmp_client.obj" \
+	"$(INTDIR)\snmp_debug.obj" \
+	"$(INTDIR)\snmp_enum.obj" \
+	"$(INTDIR)\snmp_logging.obj" \
+	"$(INTDIR)\snmp_parse_args.obj" \
+	"$(INTDIR)\snmp_secmod.obj" \
+	"$(INTDIR)\snmp_transport.obj" \
+	"$(INTDIR)\snmp_version.obj" \
+	"$(INTDIR)\snmp_service.obj" \
+	"$(INTDIR)\snmpCallbackDomain.obj" \
+	"$(INTDIR)\snmpTCPDomain.obj" \
+	"$(INTDIR)\snmpTCPIPv6Domain.obj" \
+	"$(INTDIR)\snmpUDPDomain.obj" \
+	"$(INTDIR)\snmpUDPIPv6Domain.obj" \
+	"$(INTDIR)\snmpusm.obj" \
+	"$(INTDIR)\snmpv3.obj" \
+	"$(INTDIR)\strlcpy.obj" \
+	"$(INTDIR)\system.obj" \
+	"$(INTDIR)\tools.obj" \
+	"$(INTDIR)\strtok_r.obj" \
+	"$(INTDIR)\strtoull.obj" \
+	"$(INTDIR)\ucd_compat.obj" \
+	"$(INTDIR)\vacm.obj" \
+	"$(INTDIR)\winpipe.obj" \
+	"$(INTDIR)\fd_event_manager.obj" \
+	"$(INTDIR)\large_fd_set.obj"
 
 CLEAN :
-	-@erase "$(INTDIR)\asn1.obj"
-	-@erase "$(INTDIR)\callback.obj"
-	-@erase "$(INTDIR)\check_varbind.obj"
-	-@erase "$(INTDIR)\cmu_compat.obj"
-	-@erase "$(INTDIR)\container.obj"
-	-@erase "$(INTDIR)\container_binary_array.obj"
-	-@erase "$(INTDIR)\container_iterator.obj"
-	-@erase "$(INTDIR)\container_list_ssll.obj"
-	-@erase "$(INTDIR)\container_null.obj"
-	-@erase "$(INTDIR)\data_list.obj"
-	-@erase "$(INTDIR)\default_store.obj"
-	-@erase "$(INTDIR)\getopt.obj"
-	-@erase "$(INTDIR)\int64.obj"
-	-@erase "$(INTDIR)\inet_ntop.obj"
-	-@erase "$(INTDIR)\inet_pton.obj"
-	-@erase "$(INTDIR)\keytools.obj"
-	-@erase "$(INTDIR)\lcd_time.obj"
-	-@erase "$(INTDIR)\md5.obj"
-	-@erase "$(INTDIR)\mib.obj"
-	-@erase "$(INTDIR)\mt_support.obj"
-	-@erase "$(INTDIR)\oid_stash.obj"
-	-@erase "$(INTDIR)\parse.obj"
-	-@erase "$(INTDIR)\read_config.obj"
-	-@erase "$(INTDIR)\scapi.obj"
-	-@erase "$(INTDIR)\snmp-tc.obj"
-	-@erase "$(INTDIR)\snmp.obj"
-	-@erase "$(INTDIR)\snmp_alarm.obj"
-	-@erase "$(INTDIR)\snmp_api.obj"
-	-@erase "$(INTDIR)\snmp_auth.obj"
-	-@erase "$(INTDIR)\snmp_client.obj"
-	-@erase "$(INTDIR)\snmp_debug.obj"
-	-@erase "$(INTDIR)\snmp_enum.obj"
-	-@erase "$(INTDIR)\snmp_logging.obj"
-	-@erase "$(INTDIR)\snmp_parse_args.obj"
-	-@erase "$(INTDIR)\snmp_secmod.obj"
-	-@erase "$(INTDIR)\snmp_transport.obj"
-	-@erase "$(INTDIR)\snmp_version.obj"
-	-@erase "$(INTDIR)\snmp_service.obj"
-	-@erase "$(INTDIR)\snmpCallbackDomain.obj"
-	-@erase "$(INTDIR)\snmpTCPDomain.obj"
-	-@erase "$(INTDIR)\snmpTCPIPv6Domain.obj"
-	-@erase "$(INTDIR)\snmpUDPDomain.obj"
-	-@erase "$(INTDIR)\snmpUDPIPv6Domain.obj"
-	-@erase "$(INTDIR)\snmpusm.obj"
-	-@erase "$(INTDIR)\snmpv3.obj"
-	-@erase "$(INTDIR)\strlcpy.obj"
-	-@erase "$(INTDIR)\system.obj"
-	-@erase "$(INTDIR)\tools.obj"
-	-@erase "$(INTDIR)\strtok_r.obj"
-	-@erase "$(INTDIR)\strtoull.obj"
-	-@erase "$(INTDIR)\ucd_compat.obj"
-	-@erase "$(INTDIR)\vacm.obj"
-	-@erase "$(INTDIR)\vc??.idb"
-	-@erase "$(INTDIR)\winpipe.obj"
-	-@erase "$(INTDIR)\fd_event_manager.obj"
-	-@erase "$(INTDIR)\large_fd_set.obj"
-	-@erase "$(INTDIR)\$(PROGNAME).pch"
+	-@for %f in ($(LINK32_OBJS)) do erase %%f
 	-@erase "..\lib\$(OUTDIR)\netsnmp.exp"
 	-@erase "..\lib\$(OUTDIR)\netsnmp.lib"
 	-@erase "..\bin\$(OUTDIR)\netsnmp.dll"
@@ -94,7 +92,11 @@ CLEAN :
     if not exist "$(INTDIR)/$(NULL)" mkdir "$(INTDIR)"
 
 CPP=cl.exe
+!IF  "$(CFG)" == "release"
 CPP_PROJ=/nologo /MD /W3 /EHsc /O2 /I "." /I ".." /I "..\..\snmplib" /I "..\.." /I "..\..\include" /D "WIN32" /D "NDEBUG" /D "_CONSOLE" /D "_CRT_SECURE_NO_WARNINGS" /D "_CRT_NONSTDC_NO_WARNINGS" /D "_MBCS" /D "NETSNMP_DLL" /Fo"$(INTDIR)\\" /Fd"$(INTDIR)\\" /FD /c 
+!ELSE
+CPP_PROJ=/nologo /MDd /W3 /Gm /EHsc /Zi /Od /I "." /I ".." /I "..\..\snmplib" /I "..\.." /I "..\..\include" /D "WIN32" /D "_DEBUG" /D "_CONSOLE" /D "_CRT_SECURE_NO_WARNINGS" /D "_CRT_NONSTDC_NO_WARNINGS" /D "_MBCS" /D "NETSNMP_DLL" /Fo"$(INTDIR)\\" /Fd"$(INTDIR)\\" /FD /c 
+!ENDIF
 
 .c{$(INTDIR)}.obj::
    $(CPP) @<<
@@ -107,21 +109,6 @@ CPP_PROJ=/nologo /MD /W3 /EHsc /O2 /I "." /I ".." /I "..\..\snmplib" /I "..\.." 
 <<
 
 .cxx{$(INTDIR)}.obj::
-   $(CPP) @<<
-   $(CPP_PROJ) $< 
-<<
-
-.c{$(INTDIR)}.sbr::
-   $(CPP) @<<
-   $(CPP_PROJ) $< 
-<<
-
-.cpp{$(INTDIR)}.sbr::
-   $(CPP) @<<
-   $(CPP_PROJ) $< 
-<<
-
-.cxx{$(INTDIR)}.sbr::
    $(CPP) @<<
    $(CPP_PROJ) $< 
 <<
@@ -129,253 +116,12 @@ CPP_PROJ=/nologo /MD /W3 /EHsc /O2 /I "." /I ".." /I "..\..\snmplib" /I "..\.." 
 MTL=midl.exe
 MTL_PROJ=/nologo /D "NDEBUG" /mktyplib203 /o "NUL" /win32 
 RSC=rc.exe
-BSC32=bscmake.exe
-BSC32_FLAGS=/nologo /o"$(INTDIR)\libsnmp_dll.bsc" 
-BSC32_SBRS= \
-	
 LINK32=link.exe
+!IF  "$(CFG)" == "release"
 LINK32_FLAGS=$(OPENSSL) advapi32.lib ws2_32.lib kernel32.lib user32.lib /nologo /subsystem:console /dll /pdb:none /def:".\libsnmp.def" /out:"../bin/$(OUTDIR)/netsnmp.dll" /implib:"../lib/$(OUTDIR)\netsnmp.lib" 
-LINK32_OBJS= \
-	"$(INTDIR)\asn1.obj" \
-	"$(INTDIR)\callback.obj" \
-	"$(INTDIR)\check_varbind.obj" \
-	"$(INTDIR)\cmu_compat.obj" \
-	"$(INTDIR)\container.obj" \
-	"$(INTDIR)\container_binary_array.obj" \
-	"$(INTDIR)\container_iterator.obj" \
-	"$(INTDIR)\container_list_ssll.obj" \
-	"$(INTDIR)\container_null.obj" \
-	"$(INTDIR)\data_list.obj" \
-	"$(INTDIR)\default_store.obj" \
-	"$(INTDIR)\getopt.obj" \
-	"$(INTDIR)\int64.obj" \
-	"$(INTDIR)\inet_ntop.obj" \
-	"$(INTDIR)\inet_pton.obj" \
-	"$(INTDIR)\keytools.obj" \
-	"$(INTDIR)\lcd_time.obj" \
-	"$(INTDIR)\md5.obj" \
-	"$(INTDIR)\mib.obj" \
-	"$(INTDIR)\mt_support.obj" \
-	"$(INTDIR)\oid_stash.obj" \
-	"$(INTDIR)\parse.obj" \
-	"$(INTDIR)\read_config.obj" \
-	"$(INTDIR)\scapi.obj" \
-	"$(INTDIR)\snmp-tc.obj" \
-	"$(INTDIR)\snmp.obj" \
-	"$(INTDIR)\snmp_alarm.obj" \
-	"$(INTDIR)\snmp_api.obj" \
-	"$(INTDIR)\snmp_auth.obj" \
-	"$(INTDIR)\snmp_client.obj" \
-	"$(INTDIR)\snmp_debug.obj" \
-	"$(INTDIR)\snmp_enum.obj" \
-	"$(INTDIR)\snmp_logging.obj" \
-	"$(INTDIR)\snmp_parse_args.obj" \
-	"$(INTDIR)\snmp_secmod.obj" \
-	"$(INTDIR)\snmp_transport.obj" \
-	"$(INTDIR)\snmp_version.obj" \
-	"$(INTDIR)\snmp_service.obj" \
-	"$(INTDIR)\snmpCallbackDomain.obj" \
-	"$(INTDIR)\snmpTCPDomain.obj" \
-	"$(INTDIR)\snmpTCPIPv6Domain.obj" \
-	"$(INTDIR)\snmpUDPDomain.obj" \
-	"$(INTDIR)\snmpUDPIPv6Domain.obj" \
-	"$(INTDIR)\snmpusm.obj" \
-	"$(INTDIR)\snmpv3.obj" \
-	"$(INTDIR)\strlcpy.obj" \
-	"$(INTDIR)\system.obj" \
-	"$(INTDIR)\tools.obj" \
-	"$(INTDIR)\strtok_r.obj" \
-	"$(INTDIR)\strtoull.obj" \
-	"$(INTDIR)\ucd_compat.obj" \
-	"$(INTDIR)\vacm.obj" \
-	"$(INTDIR)\winpipe.obj" \
-	"$(INTDIR)\fd_event_manager.obj" \
-	"$(INTDIR)\large_fd_set.obj"
-
-"..\bin\$(OUTDIR)\netsnmp.dll" : "..\bin\$(OUTDIR)" "..\lib\$(OUTDIR)" $(DEF_FILE) $(LINK32_OBJS)
-    $(LINK32) @<<
-  $(LINK32_FLAGS) $(LINK32_OBJS)
-<<
- if exist "../bin/$(OUTDIR)/netsnmp.dll.manifest" \
-	    mt.exe -manifest "../bin/$(OUTDIR)/netsnmp.dll.manifest" -outputresource:"../bin/$(OUTDIR)/netsnmp.dll";2
-		
-!ELSEIF  "$(CFG)" == "debug"
-
-ALL : "..\bin\$(OUTDIR)\netsnmp.dll"
-
-
-CLEAN :
-	-@erase "$(INTDIR)\asn1.obj"
-	-@erase "$(INTDIR)\callback.obj"
-	-@erase "$(INTDIR)\check_varbind.obj"
-	-@erase "$(INTDIR)\cmu_compat.obj"
-	-@erase "$(INTDIR)\container.obj"
-	-@erase "$(INTDIR)\container_binary_array.obj"
-	-@erase "$(INTDIR)\container_iterator.obj"
-	-@erase "$(INTDIR)\container_list_ssll.obj"
-	-@erase "$(INTDIR)\container_null.obj"
-	-@erase "$(INTDIR)\data_list.obj"
-	-@erase "$(INTDIR)\default_store.obj"
-	-@erase "$(INTDIR)\getopt.obj"
-	-@erase "$(INTDIR)\int64.obj"
-	-@erase "$(INTDIR)\inet_ntop.obj"
-	-@erase "$(INTDIR)\inet_pton.obj"
-	-@erase "$(INTDIR)\keytools.obj"
-	-@erase "$(INTDIR)\lcd_time.obj"
-	-@erase "$(INTDIR)\md5.obj"
-	-@erase "$(INTDIR)\mib.obj"
-	-@erase "$(INTDIR)\mt_support.obj"
-	-@erase "$(INTDIR)\oid_stash.obj"
-	-@erase "$(INTDIR)\parse.obj"
-	-@erase "$(INTDIR)\read_config.obj"
-	-@erase "$(INTDIR)\scapi.obj"
-	-@erase "$(INTDIR)\snmp-tc.obj"
-	-@erase "$(INTDIR)\snmp.obj"
-	-@erase "$(INTDIR)\snmp_alarm.obj"
-	-@erase "$(INTDIR)\snmp_api.obj"
-	-@erase "$(INTDIR)\snmp_auth.obj"
-	-@erase "$(INTDIR)\snmp_client.obj"
-	-@erase "$(INTDIR)\snmp_debug.obj"
-	-@erase "$(INTDIR)\snmp_enum.obj"
-	-@erase "$(INTDIR)\snmp_logging.obj"
-	-@erase "$(INTDIR)\snmp_parse_args.obj"
-	-@erase "$(INTDIR)\snmp_secmod.obj"
-	-@erase "$(INTDIR)\snmp_transport.obj"
-	-@erase "$(INTDIR)\snmp_version.obj"
-	-@erase "$(INTDIR)\snmp_service.obj"
-	-@erase "$(INTDIR)\snmpCallbackDomain.obj"
-	-@erase "$(INTDIR)\snmpTCPDomain.obj"
-	-@erase "$(INTDIR)\snmpTCPIPv6Domain.obj"
-	-@erase "$(INTDIR)\snmpUDPDomain.obj"
-	-@erase "$(INTDIR)\snmpUDPIPv6Domain.obj"
-	-@erase "$(INTDIR)\snmpusm.obj"
-	-@erase "$(INTDIR)\snmpv3.obj"
-	-@erase "$(INTDIR)\strlcpy.obj"
-	-@erase "$(INTDIR)\system.obj"
-	-@erase "$(INTDIR)\tools.obj"
-	-@erase "$(INTDIR)\strtok_r.obj"
-	-@erase "$(INTDIR)\strtoull.obj"
-	-@erase "$(INTDIR)\ucd_compat.obj"
-	-@erase "$(INTDIR)\vacm.obj"
-	-@erase "$(INTDIR)\vc??.idb"
-	-@erase "$(INTDIR)\vc??.pdb"
-	-@erase "$(INTDIR)\winpipe.obj"
-	-@erase "$(INTDIR)\fd_event_manager.obj"
-	-@erase "$(INTDIR)\large_fd_set.obj"
-	-@erase "$(INTDIR)\$(PROGNAME).pch"
-	-@erase "..\lib\$(OUTDIR)\netsnmp.exp"
-	-@erase "..\lib\$(OUTDIR)\netsnmp.lib"
-	-@erase "$(INTDIR)\netsnmp.pdb"
-	-@erase "..\bin\$(OUTDIR)\netsnmp.dll"
-	-@erase "..\bin\$(OUTDIR)\netsnmp.dll.manifest"
-
-"..\lib\$(OUTDIR)" :
-    if not exist "..\lib\$(OUTDIR)/$(NULL)" mkdir "..\lib\$(OUTDIR)"
-
-"..\bin\$(OUTDIR)" :
-    if not exist "..\bin\$(OUTDIR)/$(NULL)" mkdir "..\bin\$(OUTDIR)"
-
-"$(INTDIR)" :
-    if not exist "$(INTDIR)/$(NULL)" mkdir "$(INTDIR)"
-
-CPP=cl.exe
-CPP_PROJ=/nologo /MDd /W3 /Gm /EHsc /Zi /Od /I "." /I ".." /I "..\..\snmplib" /I "..\.." /I "..\..\include" /D "WIN32" /D "_DEBUG" /D "_CONSOLE" /D "_CRT_SECURE_NO_WARNINGS" /D "_CRT_NONSTDC_NO_WARNINGS" /D "_MBCS" /D "NETSNMP_DLL" /Fo"$(INTDIR)\\" /Fd"$(INTDIR)\\" /FD /c 
-
-.c{$(INTDIR)}.obj::
-   $(CPP) @<<
-   $(CPP_PROJ) $< 
-<<
-
-.cpp{$(INTDIR)}.obj::
-   $(CPP) @<<
-   $(CPP_PROJ) $< 
-<<
-
-.cxx{$(INTDIR)}.obj::
-   $(CPP) @<<
-   $(CPP_PROJ) $< 
-<<
-
-.c{$(INTDIR)}.sbr::
-   $(CPP) @<<
-   $(CPP_PROJ) $< 
-<<
-
-.cpp{$(INTDIR)}.sbr::
-   $(CPP) @<<
-   $(CPP_PROJ) $< 
-<<
-
-.cxx{$(INTDIR)}.sbr::
-   $(CPP) @<<
-   $(CPP_PROJ) $< 
-<<
-
-MTL=midl.exe
-MTL_PROJ=/nologo /D "_DEBUG" /mktyplib203 /o "NUL" /win32 
-RSC=rc.exe
-BSC32=bscmake.exe
-BSC32_FLAGS=/nologo /o"$(INTDIR)\libsnmp_dll.bsc" 
-BSC32_SBRS= \
-	
-LINK32=link.exe
+!ELSE
 LINK32_FLAGS=$(OPENSSL) advapi32.lib ws2_32.lib kernel32.lib user32.lib /nologo /subsystem:console /dll /incremental:no /pdb:"$(INTDIR)\netsnmp.pdb" /debug /def:".\libsnmp.def" /out:"../bin/$(OUTDIR)/netsnmp.dll" /implib:"../lib/$(OUTDIR)\netsnmp.lib" 
-LINK32_OBJS= \
-	"$(INTDIR)\asn1.obj" \
-	"$(INTDIR)\callback.obj" \
-	"$(INTDIR)\check_varbind.obj" \
-	"$(INTDIR)\cmu_compat.obj" \
-	"$(INTDIR)\container.obj" \
-	"$(INTDIR)\container_binary_array.obj" \
-	"$(INTDIR)\container_iterator.obj" \
-	"$(INTDIR)\container_list_ssll.obj" \
-	"$(INTDIR)\container_null.obj" \
-	"$(INTDIR)\data_list.obj" \
-	"$(INTDIR)\default_store.obj" \
-	"$(INTDIR)\getopt.obj" \
-	"$(INTDIR)\int64.obj" \
-	"$(INTDIR)\inet_ntop.obj" \
-	"$(INTDIR)\inet_pton.obj" \
-	"$(INTDIR)\keytools.obj" \
-	"$(INTDIR)\lcd_time.obj" \
-	"$(INTDIR)\md5.obj" \
-	"$(INTDIR)\mib.obj" \
-	"$(INTDIR)\mt_support.obj" \
-	"$(INTDIR)\oid_stash.obj" \
-	"$(INTDIR)\parse.obj" \
-	"$(INTDIR)\read_config.obj" \
-	"$(INTDIR)\scapi.obj" \
-	"$(INTDIR)\snmp-tc.obj" \
-	"$(INTDIR)\snmp.obj" \
-	"$(INTDIR)\snmp_alarm.obj" \
-	"$(INTDIR)\snmp_api.obj" \
-	"$(INTDIR)\snmp_auth.obj" \
-	"$(INTDIR)\snmp_client.obj" \
-	"$(INTDIR)\snmp_debug.obj" \
-	"$(INTDIR)\snmp_enum.obj" \
-	"$(INTDIR)\snmp_logging.obj" \
-	"$(INTDIR)\snmp_parse_args.obj" \
-	"$(INTDIR)\snmp_secmod.obj" \
-	"$(INTDIR)\snmp_transport.obj" \
-	"$(INTDIR)\snmp_version.obj" \
-	"$(INTDIR)\snmp_service.obj" \
-	"$(INTDIR)\snmpCallbackDomain.obj" \
-	"$(INTDIR)\snmpTCPDomain.obj" \
-	"$(INTDIR)\snmpTCPIPv6Domain.obj" \
-	"$(INTDIR)\snmpUDPDomain.obj" \
-	"$(INTDIR)\snmpUDPIPv6Domain.obj" \
-	"$(INTDIR)\snmpusm.obj" \
-	"$(INTDIR)\snmpv3.obj" \
-	"$(INTDIR)\strlcpy.obj" \
-	"$(INTDIR)\system.obj" \
-	"$(INTDIR)\tools.obj" \
-	"$(INTDIR)\strtok_r.obj" \
-	"$(INTDIR)\strtoull.obj" \
-	"$(INTDIR)\ucd_compat.obj" \
-	"$(INTDIR)\vacm.obj" \
-	"$(INTDIR)\winpipe.obj" \
-	"$(INTDIR)\fd_event_manager.obj" \
-	"$(INTDIR)\large_fd_set.obj"
+!ENDIF
 
 "..\bin\$(OUTDIR)\netsnmp.dll" : "..\bin\$(OUTDIR)" "..\lib\$(OUTDIR)" $(DEF_FILE) $(LINK32_OBJS)
     $(LINK32) @<<
@@ -383,7 +129,7 @@ LINK32_OBJS= \
 <<
  if exist "../bin/$(OUTDIR)/netsnmp.dll.manifest" \
 	    mt.exe -manifest "../bin/$(OUTDIR)/netsnmp.dll.manifest" -outputresource:"../bin/$(OUTDIR)/netsnmp.dll";2
-!ENDIF 
+LINK32=link.exe
 
 
 !IF "$(NO_EXTERNAL_DEPS)" != "1"
@@ -395,7 +141,6 @@ LINK32_OBJS= \
 !ENDIF 
 
 
-!IF "$(CFG)" == "release" || "$(CFG)" == "debug"
 SOURCE=..\..\snmplib\asn1.c
 
 "$(INTDIR)\asn1.obj" : $(SOURCE) "$(INTDIR)"
@@ -724,8 +469,5 @@ SOURCE=..\..\snmplib\large_fd_set.c
 
 "$(INTDIR)\large_fd_set.obj" : $(SOURCE) "$(INTDIR)"
 	$(CPP) $(CPP_PROJ) $(SOURCE)
-
-
-!ENDIF 
 
 
