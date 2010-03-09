@@ -34,7 +34,7 @@ sub InitMakeParams {
     my ($snmp_lib, $snmp_llib, $sep);
     if (($Config{'osname'} eq 'MSWin32' && $ENV{'OSTYPE'} ne 'msys')) {
       $opts = NetSNMPGetOpts();	
-      $Params{'DEFINE'} = "-DMSVC_PERL";
+      $Params{'DEFINE'} = "-DMSVC_PERL -D_CRT_SECURE_NO_WARNINGS -D_CRT_NONSTDC_NO_WARNINGS";
       $sep = '\\';
       $snmp_lib_file = 'netsnmp.lib';
       $snmp_link_lib = 'netsnmp';
