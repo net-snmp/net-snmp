@@ -21,6 +21,7 @@ extern          "C" {
 
      /* Reading and Parsing MIBs */
     int             add_mibdir(const char *);
+    NETSNMP_IMPORT
     struct tree    *netsnmp_read_module(const char *);
 #ifndef NETSNMP_NO_LEGACY_DEFINITIONS
     struct tree    *read_module(const char *);
