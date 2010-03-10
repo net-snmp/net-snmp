@@ -45,18 +45,23 @@ m4_include([configure.d/config_project_with_enable])
 m4_include([configure.d/config_os_progs])
 m4_include([configure.d/config_project_paths])
 m4_include([configure.d/config_os_headers])
+AC_CACHE_SAVE
 m4_include([configure.d/config_project_ipv6_types])
 m4_include([configure.d/config_modules_lib])
+AC_CACHE_SAVE
 m4_include([configure.d/config_modules_agent])
 m4_include([configure.d/config_os_misc1])
 m4_include([configure.d/config_os_libs])
+AC_CACHE_SAVE
 m4_include([configure.d/config_project_perl_python])
 m4_include([configure.d/config_os_misc2])
 m4_include([configure.d/config_project_types])
 m4_include([configure.d/config_os_misc3])
+AC_CACHE_SAVE
 m4_include([configure.d/config_os_functions])
 m4_include([configure.d/config_os_struct_members])
 m4_include([configure.d/config_os_misc4])
+AC_CACHE_SAVE
 
 #
 # define the agent libraries variables
