@@ -360,17 +360,17 @@ int CONTAINER_FREE(netsnmp_container *x)
         x = x->next;
     while(x) {
         netsnmp_container *tmp;
-        const char *name;
+        char *name;
         tmp = x->prev;
         name = x->container_name;
-        if (NULL != x->container_name)
-            SNMP_FREE(x->container_name);
+        x->container_name = NULL;
         rc2 = x->cfree(x);
         if (rc2) {
             snmp_log(LOG_ERR,"error on subcontainer '%s' cfree (%d)\n",
                      name ? name : "", rc2);
             rc = rc2;
         }
+        SNMP_FREE(name);
         x = tmp;
     }
     return rc;
@@ -552,6 +552,78 @@ netsnmp_compare_mem(const char * lhs, size_t lhs_len,
     }
 
     return rc;
+}
+
+typedef struct dummy_long_s {
+    long                      index;
+} dummy_long;
+
+int
+netsnmp_compare_long(const void * lhs, const void * rhs)
+{
+    const dummy_long *lhd = (const dummy_long*)lhs;
+    const dummy_long *rhd = (const dummy_long*)rhs;
+
+    if (lhd->index < rhd->index)
+        return -1;
+    else if (lhd->index > rhd->index)
+        return 1;
+
+    return 0;
+}
+
+typedef struct dummy_ulong_s {
+    ulong                      index;
+} dummy_ulong;
+
+int
+netsnmp_compare_ulong(const void * lhs, const void * rhs)
+{
+    const dummy_ulong *lhd = (const dummy_ulong*)lhs;
+    const dummy_ulong *rhd = (const dummy_ulong*)rhs;
+
+    if (lhd->index < rhd->index)
+        return -1;
+    else if (lhd->index > rhd->index)
+        return 1;
+
+    return 0;
+}
+
+typedef struct dummy_int32_s {
+    int32_t                    index;
+} dummy_int32;
+
+int
+netsnmp_compare_int32(const void * lhs, const void * rhs)
+{
+    const dummy_int32 *lhd = (const dummy_int32*)lhs;
+    const dummy_int32 *rhd = (const dummy_int32*)rhs;
+
+    if (lhd->index < rhd->index)
+        return -1;
+    else if (lhd->index > rhd->index)
+        return 1;
+
+    return 0;
+}
+
+typedef struct dummy_uint32_s {
+    u_int32_t                   index;
+} dummy_uint32;
+
+int
+netsnmp_compare_uint32(const void * lhs, const void * rhs)
+{
+    const dummy_uint32 *lhd = (const dummy_uint32*)lhs;
+    const dummy_uint32 *rhd = (const dummy_uint32*)rhs;
+
+    if (lhd->index < rhd->index)
+        return -1;
+    else if (lhd->index > rhd->index)
+        return 1;
+
+    return 0;
 }
 
 /*------------------------------------------------------------------

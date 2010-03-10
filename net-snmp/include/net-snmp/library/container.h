@@ -293,6 +293,11 @@ extern "C" {
     /** no structure, just 'char *' pointers */
     int netsnmp_compare_direct_cstring(const void * lhs, const void * rhs);
 
+    int netsnmp_compare_long(const void * lhs, const void * rhs);
+    int netsnmp_compare_ulong(const void * lhs, const void * rhs);
+    int netsnmp_compare_int32(const void * lhs, const void * rhs);
+    int netsnmp_compare_uint32(const void * lhs, const void * rhs);
+
     /** for_each callback to call free on data item */
     NETSNMP_IMPORT
     void  netsnmp_container_simple_free(void *data, void *context);
@@ -449,17 +454,17 @@ extern "C" {
             x = x->next;
         while(x) {
             netsnmp_container *tmp;
-            const char *name;
+            char *name;
             tmp = x->prev;
             name = x->container_name;
-            if (NULL != x->container_name)
-                SNMP_FREE(x->container_name);
+            x->container_name = NULL;
             rc2 = x->cfree(x);
             if (rc2) {
                 snmp_log(LOG_ERR,"error on subcontainer '%s' cfree (%d)\n",
                          name ? name : "", rc2);
                 rc = rc2;
             }
+            SNMP_FREE(name);
             x = tmp;
         }
         return rc;
