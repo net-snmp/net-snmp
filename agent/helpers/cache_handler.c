@@ -200,12 +200,46 @@ netsnmp_cache_free(netsnmp_cache *cache)
         }
     }
 
+    if(0 != cache->timer_id)
+        netsnmp_cache_timer_stop(cache);
+
+    if (cache->valid)
+        _cache_free(cache);
+
     if (cache->rootoid)
         free(cache->rootoid);
 
     free(cache);
 
     return SNMPERR_SUCCESS;
+}
+
+/** removes a cache
+ */
+int
+netsnmp_cache_remove(netsnmp_cache *cache)
+{
+    netsnmp_cache  *cur,*prev;
+
+    if (NULL == cache)
+        return -1;
+
+    if (cache == cache_head) {
+        cache_head = cache_head->next;
+        cache_head->prev = NULL;
+        return 0;
+    }
+
+    prev = cache_head;
+    cur = cache_head->next;
+    for (; cur; prev = cur, cur = cur->next) {
+        if (cache == cur) {
+            prev->next = cur->next;
+            cur->next->prev = cur->prev;
+            return 0;
+        }
+    }
+    return -1;
 }
 
 /** callback function to call cache load function */
