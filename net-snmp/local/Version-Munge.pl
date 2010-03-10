@@ -71,7 +71,7 @@ my @exprs = (
 	     { type => 'configure',
 	       expr => 'AC_INIT\\(\\[Net-SNMP\\], \\[([^\\]]+)\\]',
 	       repl => 'AC_INIT([Net-SNMP], [$VERSION]',
-	       files => [qw(configure.in)],
+	       files => [qw(configure.ac)],
 	       exec => 'autoconf',
 	       exfiles => [qw(configure)],
 	     },
