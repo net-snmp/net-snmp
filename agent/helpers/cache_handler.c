@@ -113,6 +113,9 @@ void            release_cached_resources(unsigned int regNo,
  *  @{
  */
 
+static void
+_cache_free( netsnmp_cache *cache );
+
 /** get cache head
  * @internal
  * unadvertised function to get cache head. You really should not
