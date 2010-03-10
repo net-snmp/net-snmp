@@ -573,7 +573,7 @@ netsnmp_compare_long(const void * lhs, const void * rhs)
 }
 
 typedef struct dummy_ulong_s {
-    ulong                      index;
+    u_long                      index;
 } dummy_ulong;
 
 int
@@ -609,7 +609,7 @@ netsnmp_compare_int32(const void * lhs, const void * rhs)
 }
 
 typedef struct dummy_uint32_s {
-    u_int32_t                   index;
+    uint32_t                   index;
 } dummy_uint32;
 
 int
