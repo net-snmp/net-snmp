@@ -1108,13 +1108,14 @@ agentx_parse_oid(u_char * data, size_t * length, int *inc,
 {
     u_int           n_subid;
     u_int           prefix;
+    u_int           tmp_oid_len;
     int             i;
     int             int_offset;
     u_int          *int_ptr = (u_int *)oid_buf;
     u_char         *buf_ptr = data;
 
     if (*length < 4) {
-        DEBUGMSGTL(("agentx", "Incomplete Object ID"));
+        DEBUGMSGTL(("agentx", "Incomplete Object ID\n"));
         return NULL;
     }
 
@@ -1155,6 +1156,14 @@ agentx_parse_oid(u_char * data, size_t * length, int *inc,
         return buf_ptr;
     }
 
+    /*
+     * Check that the expanded OID will fit in the buffer provided
+     */
+    tmp_oid_len = (prefix ? n_subid + 5 : n_subid);
+    if (*oid_len < tmp_oid_len) {
+        DEBUGMSGTL(("agentx", "Oversized Object ID\n"));
+        return NULL;
+    }
 
 #ifdef WORDS_BIGENDIAN
 # define endianoff 1
@@ -1162,7 +1171,7 @@ agentx_parse_oid(u_char * data, size_t * length, int *inc,
 # define endianoff 0
 #endif
     if (*length < 4 * n_subid) {
-        DEBUGMSGTL(("agentx", "Incomplete Object ID"));
+        DEBUGMSGTL(("agentx", "Incomplete Object ID\n"));
         return NULL;
     }
 
@@ -1199,7 +1208,7 @@ agentx_parse_oid(u_char * data, size_t * length, int *inc,
         *length -= 4;
     }
 
-    *oid_len = (prefix ? n_subid + 5 : n_subid);
+    *oid_len = tmp_oid_len;
 
     DEBUGINDENTLESS();
     DEBUGPRINTINDENT("dumpv_recv");
@@ -1220,19 +1229,19 @@ agentx_parse_string(u_char * data, size_t * length,
     u_int           len;
 
     if (*length < 4) {
-        DEBUGMSGTL(("agentx", "Incomplete string (too short: %d)",
+        DEBUGMSGTL(("agentx", "Incomplete string (too short: %d)\n",
                     (int)*length));
         return NULL;
     }
 
     len = agentx_parse_int(data, network_byte_order);
     if (*length < len + 4) {
-        DEBUGMSGTL(("agentx", "Incomplete string (still too short: %d)",
+        DEBUGMSGTL(("agentx", "Incomplete string (still too short: %d)\n",
                     (int)*length));
         return NULL;
     }
     if (len > *str_len) {
-        DEBUGMSGTL(("agentx", "String too long (too long)"));
+        DEBUGMSGTL(("agentx", "String too long (too long)\n"));
         return NULL;
     }
     memmove(string, data + 4, len);
@@ -1913,7 +1922,7 @@ testit(netsnmp_pdu *pdu1)
      */
     len1 = BUFSIZ;
     if (agentx_build(&sess, pdu1, packet1, &len1) < 0) {
-        DEBUGMSGTL(("agentx", "First build failed"));
+        DEBUGMSGTL(("agentx", "First build failed\n"));
         exit(1);
     }
 
