@@ -1260,7 +1260,7 @@ ifHighSpeed_get(ifXTable_rowreq_ctx * rowreq_ctx,
      * copy (* ifHighSpeed_val_ptr ) from rowreq_ctx->data
      */
     if (0 == rowreq_ctx->data.ifHighSpeed)
-        (*ifHighSpeed_val_ptr) = rowreq_ctx->data.ifSpeed / 100000;
+        (*ifHighSpeed_val_ptr) = rowreq_ctx->data.ifSpeed / 1000000;
     else
         (*ifHighSpeed_val_ptr) = rowreq_ctx->data.ifHighSpeed;
 
