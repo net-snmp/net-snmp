@@ -1,11 +1,11 @@
 /* -*- C -*- */
+#include <net-snmp/net-snmp-config.h>
 #include "EXTERN.h"
 #include "perl.h"
 #include "XSUB.h"
 #include <netdb.h>
 #include <sys/socket.h>
 
-#include <net-snmp/net-snmp-config.h>
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 
@@ -1036,8 +1036,6 @@ nari_setError(me, rinfo, ecode)
         SV *rinfo;
         int ecode;
     PREINIT:
-	oid myoid[MAX_OID_LEN];
-	size_t myoid_len = MAX_OID_LEN;
         netsnmp_request_info *request;
         netsnmp_agent_request_info *reqinfo;
     CODE:

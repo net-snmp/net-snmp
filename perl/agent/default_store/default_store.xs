@@ -1,3 +1,4 @@
+#include <net-snmp/net-snmp-config.h>
 #include "EXTERN.h"
 #include "perl.h"
 #include "XSUB.h"
