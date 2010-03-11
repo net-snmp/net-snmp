@@ -64,6 +64,7 @@ if [ "x$SNMP_TMPDIR" = "x" -a "x$SNMP_HEADERONLY" != "xyes" ]; then
 	exit 1;
     fi
     mkdir $SNMP_TMPDIR
+    chmod 0700 $SNMP_TMPDIR
 fi
 
 if [ "x$SNMP_SAVE_TMPDIR" = "x" ]; then
