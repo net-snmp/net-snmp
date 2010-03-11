@@ -123,7 +123,9 @@ init_cert_util(void)
         return;
     }
 
+#ifdef NETSNMP_TRANSPORT_TLS_DOMAIN
     netsnmp_init_tlsbase(); /* will init openssl */
+#endif
 
     _certs = netsnmp_container_find("certs:binary_array");
     if (NULL == _certs) {
