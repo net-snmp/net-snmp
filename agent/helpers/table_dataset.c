@@ -38,9 +38,6 @@ typedef struct newrow_stash_s {
  *  Helps you implement a table with automatted storage.
  *  @ingroup table_data
  *
- *  This helper is obsolete.  If you are writing a new module, please
- *  consider using the table_dataset2 helper instead.
- *
  *  This handler helps you implement a table where all the data is
  *  expected to be stored within the agent itself and not in some
  *  external storage location.  It handles all MIB requests including
