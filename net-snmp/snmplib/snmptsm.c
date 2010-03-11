@@ -233,7 +233,7 @@ tsm_rgenerate_out_msg(struct snmp_secmod_outgoing_params *parms)
            parameter to false. */
         tmStateRef->sameSecurity = NETSNMP_TM_SAME_SECURITY_NOT_REQUIRED;
 
-        if (netsnmp_ds_get_boolean(NETSNMP_DS_APPLICATION_ID,
+        if (netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID,
                                    NETSNMP_DS_LIB_TSM_USE_PREFIX)) {
             /* XXX: probably shouldn't be a hard-coded list of
                supported transports */
@@ -424,7 +424,7 @@ tsm_process_in_msg(struct snmp_secmod_incoming_params *parms)
     }
 
     /* Section 5.2, step 3: Copy the tmSecurityName to securityName. */
-    if (netsnmp_ds_get_boolean(NETSNMP_DS_APPLICATION_ID,
+    if (netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID,
                                NETSNMP_DS_LIB_TSM_USE_PREFIX)) {
         /* Section 5.2, step 3:
           If the snmpTsmConfigurationUsePrefix object is set to true, then
