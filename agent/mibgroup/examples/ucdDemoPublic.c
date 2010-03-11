@@ -214,8 +214,13 @@ write_ucdDemoPublicString(int action,
     }
     if (action == COMMIT) {
         if (var_val_len != 0) {
-            strcpy(publicString, var_val);
-            publicString[var_val_len] = '\0';
+            strncpy(publicString, var_val, sizeof(publicString)-1);
+            /* some sanity checks */
+            if (strlen(var_val) > sizeof(publicString)-1 ||
+                    strlen(var_val) != var_val_len)
+                publicString[sizeof(publicString)-1] = '\0';
+            else
+                publicString[var_val_len] = '\0';
         } else
             publicString[0] = '\0';
     }
