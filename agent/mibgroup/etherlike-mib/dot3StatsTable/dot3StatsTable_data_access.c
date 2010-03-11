@@ -330,6 +330,8 @@ dot3StatsTable_container_load(netsnmp_container * container)
 
 	interface_sysclassnet_dot3stats_get(rowreq_ctx, p->name);
 
+	interface_dot3stats_get_errorcounters(rowreq_ctx, p->name);
+
         /*
          * insert into table container
          */
