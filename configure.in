@@ -3709,11 +3709,11 @@ fi
 
 #
 # In FreeBSD 4.x, the TCP timer constants aren't.  They are defined
-# in terms of `hz', the kernel clock tick.  In this case,
-# we need to have a local variable `hz' in scope and set to a useful
+# in terms of 'hz', the kernel clock tick.  In this case,
+# we need to have a local variable 'hz' in scope and set to a useful
 # value whenever we use one of these constants.
 #
-AC_CACHE_CHECK(whether TCP timers depend on \`hz',ac_cv_TCPTV_NEEDS_HZ,
+AC_CACHE_CHECK(whether TCP timers depend on 'hz',ac_cv_TCPTV_NEEDS_HZ,
 [AC_EGREP_CPP(hz,
 [#include <netinet/tcp_timer.h>
 TCPTV_SRTTDFLT

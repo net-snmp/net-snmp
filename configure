@@ -34053,12 +34053,12 @@ fi
 
 #
 # In FreeBSD 4.x, the TCP timer constants aren't.  They are defined
-# in terms of `hz', the kernel clock tick.  In this case,
-# we need to have a local variable `hz' in scope and set to a useful
+# in terms of 'hz', the kernel clock tick.  In this case,
+# we need to have a local variable 'hz' in scope and set to a useful
 # value whenever we use one of these constants.
 #
-echo "$as_me:$LINENO: checking whether TCP timers depend on \`hz'" >&5
-echo $ECHO_N "checking whether TCP timers depend on \`hz'... $ECHO_C" >&6
+echo "$as_me:$LINENO: checking whether TCP timers depend on 'hz'" >&5
+echo $ECHO_N "checking whether TCP timers depend on 'hz'... $ECHO_C" >&6
 if test "${ac_cv_TCPTV_NEEDS_HZ+set}" = set; then
   echo $ECHO_N "(cached) $ECHO_C" >&6
 else
