@@ -107,6 +107,7 @@ static int
 _sensor_load( void )
 {
     netsnmp_sensor_arch_load( NULL, NULL );
+    return 0;
 }
 
 /*
