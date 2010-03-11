@@ -96,11 +96,13 @@ for extremely verbose output.
 .TP
 .BI -e " engineID"
 Set the authoritative (security) engineID used for SNMPv3 REQUEST
-messages.  It is typically not necessary to specify this, as it will
+messages, given as a hexadecimal string (optionally prefixed by "0x").
+It is typically not necessary to specify this engine ID, as it will
 usually be discovered automatically.
 .TP
 .BI -E " engineID"
-Set the context engineID used for SNMPv3 REQUEST messages scopedPdu.
+Set the context engineID used for SNMPv3 REQUEST messages scopedPdu,
+given as a hexadecimal string.
 If not specified, this will default to the authoritative engineID.
 .TP
 .B -h, --help
