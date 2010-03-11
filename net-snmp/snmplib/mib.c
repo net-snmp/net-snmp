@@ -1527,7 +1527,7 @@ sprint_realloc_gauge(u_char ** buf, size_t * buf_len, size_t * out_len,
             return 0;
         }
     } else {
-        sprintf(tmp, "%lu", *var->val.integer);
+        sprintf(tmp, "%u", (unsigned int)(*var->val.integer & 0xffffffff));
         if (!snmp_strcat
             (buf, buf_len, out_len, allow_realloc, (const u_char *) tmp)) {
             return 0;
@@ -1591,7 +1591,7 @@ sprint_realloc_counter(u_char ** buf, size_t * buf_len, size_t * out_len,
             return 0;
         }
     }
-    sprintf(tmp, "%lu", *var->val.integer);
+    sprintf(tmp, "%u", (unsigned int)(*var->val.integer & 0xffffffff));
     if (!snmp_strcat
         (buf, buf_len, out_len, allow_realloc, (const u_char *) tmp)) {
         return 0;
