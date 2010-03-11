@@ -508,7 +508,7 @@ setPass(int action,
                 buf[ sizeof(buf)-1 ] = 0;
                 break;
             }
-            strncat(passthru->command, buf, sizeof(passthru->command)-1);
+            strncat(passthru->command, buf, sizeof(passthru->command)-strlen(passthru->command)-1);
             passthru->command[ sizeof(passthru->command)-1 ] = 0;
             DEBUGMSGTL(("ucd-snmp/pass", "pass-running:  %s",
                         passthru->command));
