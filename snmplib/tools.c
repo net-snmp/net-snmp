@@ -707,7 +707,7 @@ dump_snmpEngineID(const u_char * estring, size_t * estring_len)
         /*
          * s += snprintf(s, remaining_len+3, "\"%s\"", esp); 
          */
-        s += sprintf(s, "\"%s\"", esp);
+        s += sprintf(s, "\"%.*s\"", sizeof(buf)-strlen(buf)-3, esp);
         goto dump_snmpEngineID_quit;
         break;
      /*NOTREACHED*/ case 5:    /* Octets. */

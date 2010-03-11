@@ -456,6 +456,7 @@ input_variable(netsnmp_variable_list * vp)
                     goto getValue;
                 }
                 memcpy(vp->val.string, buf, strlen(buf) - 1);
+                vp->val.string[sizeof(vp->val.string)-1] = 0;
                 vp->val_len = strlen(buf) - 1;
             } else if (ch == 'x') {
                 size_t          buf_len = 256;

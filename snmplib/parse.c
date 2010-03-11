@@ -4259,7 +4259,7 @@ parse(FILE * fp, struct node *root)
     extern void     xmalloc_stats(FILE *);
 #endif
     char            token[MAXTOKEN];
-    char            name[MAXTOKEN];
+    char            name[MAXTOKEN+1];
     int             type = LABEL;
     int             lasttype = LABEL;
 
@@ -4351,7 +4351,8 @@ parse(FILE * fp, struct node *root)
         case ENDOFFILE:
             continue;
         default:
-            strcpy(name, token);
+            strncpy(name, token, sizeof(name));
+            name[sizeof(name)-1] = '\0';
             type = get_token(fp, token, MAXTOKEN);
             nnp = NULL;
             if (type == MACRO) {
@@ -4368,7 +4369,8 @@ parse(FILE * fp, struct node *root)
                 print_error(name, "is a reserved word", lasttype);
             continue;           /* see if we can parse the rest of the file */
         }
-        strcpy(name, token);
+        strncpy(name, token, sizeof(name));
+        name[sizeof(name)-1] = '\0';
         type = get_token(fp, token, MAXTOKEN);
         nnp = NULL;
 
