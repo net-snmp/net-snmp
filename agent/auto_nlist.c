@@ -64,6 +64,7 @@ auto_nlist_value(const char *string)
         it->nl[0].n_name = (char *) malloc(strlen(string) + 2);
 #ifdef aix4
         strcpy(it->nl[0].n_name, string);
+        it->nl[0].n_name[strlen(string)+1] = '\0';
 #else
         sprintf(it->nl[0].n_name, "_%s", string);
 #endif
@@ -72,6 +73,7 @@ auto_nlist_value(const char *string)
 #ifndef aix4
         if (it->nl[0].n_type == 0) {
             strcpy(it->nl[0].n_name, string);
+            it->nl[0].n_name[strlen(string)+1] = '\0';
             init_nlist(it->nl);
         }
 #endif
