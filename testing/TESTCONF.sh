@@ -79,6 +79,7 @@ if [ "x$SNMP_TMPDIR" = "x" -a "x$SNMP_HEADERONLY" != "xyes" ]; then
     export SNMP_TMP_PERSISTENTDIR
     mkdir $SNMP_TMPDIR
     mkdir $SNMP_TMP_PERSISTENTDIR
+    chmod 0700 $SNMP_TMPDIR $SNMP_TMP_PERSISTENTDIR
 fi
 
 if [ "x$SNMP_SAVE_TMPDIR" = "x" ]; then

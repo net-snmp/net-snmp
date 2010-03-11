@@ -79,7 +79,12 @@ exit 0
 PROGRAM=
 ARGUMENTS="$*"
 
-TMPFILE=/tmp/eval_suite.sh$$
+umask 0077 # just to be on the safe side
+TMPDIR=/tmp/net-snmpd-eval-dir.$$
+rm -rf $TMPDIR
+mkdir $TMPDIR || exit -1
+chmod 0700 $TMPDIR
+TMPFILE=$TMPDIR/eval_suite.sh$$
 
 TESTLISTFILE=eval_testlist
 
@@ -205,6 +210,7 @@ done  # endwhile
 # Cleanup, exit.
 #
 rm -f $TMPFILE
+rm -rf $TMPDIR
 
 exit $TESTFAILURE
 
