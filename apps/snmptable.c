@@ -391,7 +391,7 @@ print_table(void)
             printf("\nSNMP table %s, part %d\n\n", table_name, part);
         first_field = last_field;
         dp = data;
-        if (show_index && !no_headers && !column_width) {
+        if (show_index && !no_headers && !column_width && first_pass) {
             width = index_width;
             printf(index_fmt, "index");
         } else
