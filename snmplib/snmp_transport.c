@@ -155,10 +155,16 @@ netsnmp_transport_copy(netsnmp_transport *t)
     n->f_recv = t->f_recv;
     n->f_send = t->f_send;
     n->f_close = t->f_close;
+    n->f_copy = t->f_copy;
+    n->f_config = t->f_config;
     n->f_fmtaddr = t->f_fmtaddr;
     n->sock = t->sock;
     n->flags = t->flags;
 
+    /* give the transport a chance to do "special things" */
+    if (t->f_copy)
+        t->f_copy(t, n);
+                
     return n;
 }
 
