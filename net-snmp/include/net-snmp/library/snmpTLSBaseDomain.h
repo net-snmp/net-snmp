@@ -37,6 +37,7 @@ extern          "C" {
        SSL     *ssl;
        BIO     *sslbio;
        BIO     *accept_bio;
+       BIO     *accepted_bio;
        char    *securityName;
     } _netsnmpTLSBaseData;
 
