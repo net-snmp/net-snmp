@@ -85,6 +85,17 @@ netsnmp_tlstcp_fmtaddr(netsnmp_transport *t, void *data, int len)
  */
 
 static int
+netsnmp_tlstcp_copy(netsnmp_transport *oldt, netsnmp_transport *newt)
+{
+    _netsnmpTLSBaseData *oldtlsdata = (_netsnmpTLSBaseData *) oldt->data;
+    _netsnmpTLSBaseData *newtlsdata = (_netsnmpTLSBaseData *) newt->data;
+    oldtlsdata->accepted_bio = NULL;
+    oldtlsdata->ssl = NULL;
+    newtlsdata->ssl_context = NULL;
+    return 0;
+}
+
+static int
 netsnmp_tlstcp_recv(netsnmp_transport *t, void *buf, int size,
                     void **opaque, int *olength)
 {
@@ -111,60 +122,28 @@ netsnmp_tlstcp_recv(netsnmp_transport *t, void *buf, int size,
 
         /* read from the BIO */
         tlsdata = t->data;
-        rc = BIO_read(tlsdata->sslbio, buf, size);
+        rc = SSL_read(tlsdata->ssl, buf, size);
         while (rc <= 0) {
             if (rc == 0) {
                 /* XXX closed connection */
                 DEBUGMSGTL(("tlstcp", "remote side closed connection\n"));
+                /* XXX: openssl cleanup */
                 SNMP_FREE(tmStateRef);
                 return -1;
             }
-            if (!BIO_should_retry(tlsdata->sslbio)) {
-                _openssl_log_error(rc, tlsdata->ssl, "BIO_read");
-                DEBUGMSGTL(("tlstcp", "should retry\n"));
+/* XXX: doesn't take the ssl pointer
+            if (!BIO_should_retry(tlsdata->ssl)) {
+                DEBUGMSGTL(("tlstcp", "SSL_read failed\n"));
+                _openssl_log_error(rc, tlsdata->ssl, "SSL_read");
                 SNMP_FREE(tmStateRef);
+                sleep(5);
                 return -1;
             }
-            rc = BIO_read(tlsdata->sslbio, buf, size);
+*/
+            rc = SSL_read(tlsdata->ssl, buf, size);
         }
 
         DEBUGMSGTL(("tlstcp", "received %d decoded bytes from tls\n", rc));
-
-#ifdef DONT_KNOW
-        if (BIO_ctrl_pending(cachep->write_bio) > 0) {
-            /* we have outgoing data to send; probably TLS negotation */
-
-            u_char outbuf[65535];
-            int outsize;
-            int rc2;
-                
-            /* for memory bios, we now read from openssl's write
-               buffer (ie, the packet to go out) and send it out
-               the tcp port manually */
-            outsize = BIO_read(cachep->write_bio, outbuf, sizeof(outbuf));
-            if (outsize > 0) {
-                /* should always be true. */
-#if defined(XXXFIXME) && defined(linux) && defined(IP_PKTINFO)
-                /* XXX: before this can work, we need to remember address we
-                   received it from (addr_pair) */
-                rc2 = netsnmp_tcp_sendto(cachep->sock, addr_pair->local_addr,
-                                         addr_pair->if_index, addr_pair->remote_addr,
-                                         outbuf, outsize);
-#else
-                rc2 = sendto(t->sock, outbuf, outsize, 0, &cachep->sockaddr, sizeof(struct sockaddr));
-#endif /* linux && IP_PKTINFO */
-
-                if (rc2 == -1) {
-                    snmp_log(LOG_ERR, "failed to send a TLS specific packet\n");
-                }
-            }
-        }
-
-        if (SSL_pending(cachep->con)) {
-            fprintf(stderr, "ack: got here...  pending\n");
-            exit(1);
-        }
-#endif /* don't know */
 
         if (rc == -1) {
             _openssl_log_error(rc, tlsdata->ssl, "SSL_read");
@@ -220,6 +199,8 @@ netsnmp_tlstcp_recv(netsnmp_transport *t, void *buf, int size,
     } else {
         DEBUGMSGTL(("tlstcp", "recvfrom fd %d err %d (\"%s\")\n",
                     t->sock, errno, strerror(errno)));
+        DEBUGMSGTL(("tlstcp", "  tdata = %x\n",
+                    t->data));
     }
     return rc;
 }
@@ -231,12 +212,10 @@ netsnmp_tlstcp_send(netsnmp_transport *t, void *buf, int size,
 		 void **opaque, int *olength)
 {
     int rc = -1;
-    netsnmp_indexed_addr_pair *addr_pair = NULL;
-    struct sockaddr *to = NULL;
     netsnmp_tmStateReference *tmStateRef = NULL;
-    u_char outbuf[65535];
     _netsnmpTLSBaseData *tlsdata;
     
+    DEBUGMSGTL(("tlstcp", "sending data\n"));
     if (opaque != NULL && *opaque != NULL &&
         *olength == sizeof(netsnmp_tmStateReference)) {
         tmStateRef = (netsnmp_tmStateReference *) *opaque;
@@ -250,21 +229,13 @@ netsnmp_tlstcp_send(netsnmp_transport *t, void *buf, int size,
     tlsdata = t->data;
     
     /* if the first packet and we have no secname, then copy the data */
-#ifdef NO_ADDR_PAIR_YET
-    if (!tlsdata->securityName && tmStateRef && tmStateRef->securityNameLen > 0)
+    if (tlsdata->isclient &&
+        !tlsdata->securityName && tmStateRef && tmStateRef->securityNameLen > 0)
         tlsdata->securityName = strdup(tmStateRef->securityName);
         
         
-    {
-        char *str = netsnmp_tlstcp_fmtaddr(NULL, (void *) addr_pair,
-                                        sizeof(netsnmp_indexed_addr_pair));
-        DEBUGMSGTL(("tlstcp", "send %d bytes from %p to %s on fd %d\n",
-                    size, buf, str, t->sock));
-        free(str);
-    }
-#endif
-
-    rc = BIO_write(tlsdata->sslbio, buf, size);
+    rc = SSL_write(tlsdata->ssl, buf, size);
+    DEBUGMSGTL(("tlstcp", "wrote %d bytes\n", size));
     if (rc < 0) {
         _openssl_log_error(rc, tlsdata->ssl, "SSL_write");
     }
@@ -285,43 +256,61 @@ netsnmp_tlstcp_close(netsnmp_transport *t)
 static int
 netsnmp_tlstcp_accept(netsnmp_transport *t)
 {
-    struct sockaddr *farend = NULL;
-    netsnmp_indexed_addr_pair *addr_pair = NULL;
-    int             newsock = -1, sockflags = 0;
-    socklen_t       farendlen = sizeof(struct sockaddr_in);
     char           *str = NULL;
     BIO            *accepted_bio;
+    int             rc;
+    SSL_CTX *ctx;
+    SSL     *ssl;
     
+    DEBUGMSGTL(("tlstcp", "netsnmp_tlstcp_accept called\n"));
     if (t != NULL && t->sock >= 0) {
         _netsnmpTLSBaseData *tlsdata = (_netsnmpTLSBaseData *) t->data;
 
-        accepted_bio = BIO_pop(tlsdata->accept_bio);
+        rc = BIO_do_accept(tlsdata->accept_bio);
+
+        if (rc <= 0) {
+            snmp_log(LOG_ERR, "BIO_do_accept failed\n");
+            _openssl_log_error(rc, NULL, "BIO_do_accept");
+            /* XXX: need to close the listening connection here? */
+            return -1;
+        }
+
+        tlsdata->accepted_bio = accepted_bio = BIO_pop(tlsdata->accept_bio);
         if (!accepted_bio) {
             snmp_log(LOG_ERR, "Failed to pop an accepted bio off the bio staack\n");
+            /* XXX: need to close the listening connection here? */
             return -1;
         }
 
-        if (BIO_do_handshake(tlsdata->accept_bio) <= 0) {
-            snmp_log(LOG_ERR, "Failed initial handshake\n");
+        /* create the OpenSSL TLS context */
+        ctx = tlsdata->ssl_context;
+
+        /* create the server's main SSL bio */
+        ssl = tlsdata->ssl = SSL_new(ctx);
+        if (!tlsdata->ssl) {
+            snmp_log(LOG_ERR, "TLSTCP: Falied to create a SSL BIO\n");
             return -1;
         }
+        
+        SSL_set_bio(ssl, accepted_bio, accepted_bio);
+        
+        if ((rc = SSL_accept(ssl)) <= 0) {
+            snmp_log(LOG_ERR, "TLSTCP: Falied SSL_accept\n");
+            return -1;
+        }   
 
-        /* the old data was copied from the initial transport, which
-           is fine.  We shouldn't use any of the pointers as is any
-           longer but we need to store the new one */
-        tlsdata->ssl_context = NULL;
-        tlsdata->ssl = NULL;
+#ifdef not_needed_question_mark
+        SSL_set_accept_state(tlsdata->ssl);
+#endif
 
-        /* XXX: I think the sslbio is safe to read/write from */
-        tlsdata->accept_bio = accepted_bio;
+        /* XXX: check acceptance criteria here */
 
-        DEBUGMSGTL(("tlstcp", "accept succeeded (from %s)\n", str));
+        DEBUGMSGTL(("tlstcp", "accept succeeded (from %s) on sock %d\n",
+                    str, t->sock));
         free(str);
 
-        /* extract the socket */
-
         /* XXX: check that it returns something so we can free stuff? */
-        return BIO_get_fd(tlsdata->accept_bio, NULL);
+        return BIO_get_fd(tlsdata->accepted_bio, NULL);
     } else {
         return -1;
     }
@@ -343,7 +332,7 @@ netsnmp_tlstcp_transport(struct sockaddr_in *addr, int isserver)
     SSL *ssl;
     _netsnmpTLSBaseData *tlsdata;
     char tmpbuf[128];
-    int portbuf, rc;
+    int rc;
     
     if (addr == NULL || addr->sin_family != AF_INET) {
         return NULL;
@@ -363,28 +352,13 @@ netsnmp_tlstcp_transport(struct sockaddr_in *addr, int isserver)
         return NULL;
     }
     t->data = tlsdata;
+    t->data_length = sizeof(_netsnmpTLSBaseData);
 
     if (isserver) {
         /* Is the server */
         tlsdata->isclient = 0;
         
-        tlsdata->ssl_context = ctx =
-            sslctx_server_setup(TLSv1_server_method());
-
-        /* create the server's main SSL bio */
-        tlsdata->sslbio = BIO_new_ssl(ctx, 0);
-        if (NULL == tlsdata->sslbio) {
-            SNMP_FREE(t);
-            SNMP_FREE(tlsdata);
-            snmp_log(LOG_ERR, "TLSTCP: Falied to create a SSL BIO\n");
-            return NULL;
-        }
-
-        /* bind */
-        /* & listen */
-        /* this is done by creating an accept bio and then chaining
-           the secure one on top of it */
-
+        /* Create the socket bio */
         snprintf(tmpbuf, sizeof(tmpbuf), "%d", ntohs(addr->sin_port));
         DEBUGMSGTL(("tlstcp", "listening on tlstcp port %s\n", tmpbuf));
         tlsdata->accept_bio = BIO_new_accept(tmpbuf);
@@ -394,55 +368,67 @@ netsnmp_tlstcp_transport(struct sockaddr_in *addr, int isserver)
             snmp_log(LOG_ERR, "TLSTCP: Falied to create a accept BIO\n");
             return NULL;
         }
-        BIO_set_accept_bios(tlsdata->accept_bio, tlsdata->sslbio);
 
-        /* openssl requires an initial accept */
+        /* openssl requires an initial accept to bind() the socket */
         if (BIO_do_accept(tlsdata->accept_bio) <= 0) {
             SNMP_FREE(t);
             SNMP_FREE(tlsdata);
             snmp_log(LOG_ERR, "TLSTCP: Falied to do first accept on the TLS accept BIO\n");
             return NULL;
         }
+
+        /* create the OpenSSL TLS context */
+        tlsdata->ssl_context =
+            sslctx_server_setup(SSLv23_method());
+
         t->sock = BIO_get_fd(tlsdata->accept_bio, NULL);
+        t->flags = NETSNMP_TRANSPORT_FLAG_LISTEN;
     } else {
         /* Is the client */
         tlsdata->isclient = 1;
 
         /* set up the needed SSL context */
         tlsdata->ssl_context = ctx =
-            sslctx_client_setup(TLSv1_client_method());
+            sslctx_client_setup(SSLv23_method());
         if (!ctx) {
             snmp_log(LOG_ERR, "failed to create TLS context\n");
             return NULL;
         }
 
-        tlsdata->sslbio = bio = BIO_new_ssl_connect(ctx);
-        BIO_get_ssl(bio, &ssl);
-        SSL_set_mode(ssl, SSL_MODE_AUTO_RETRY);
-
-
+        /* create the openssl ok connection string */
         snprintf(tmpbuf, sizeof(tmpbuf), "%s:%d", inet_ntoa(addr->sin_addr),
                  ntohs(addr->sin_port));
-        BIO_set_conn_hostname(bio, tmpbuf);
-        DEBUGMSGTL(("tlstcp", "connecting to tlstcp %s\n",
-                    tmpbuf));
+        DEBUGMSGTL(("tlstcp", "connecting to tlstcp %s\n", tmpbuf));
+        bio = BIO_new_connect(tmpbuf);
 
+        /* actually do the connection */
         if ((rc = BIO_do_connect(bio)) <= 0) {
+            snmp_log(LOG_ERR, "tlstcp: failed to connect to %s\n", tmpbuf);
+            _openssl_log_error(rc, NULL, "BIO_do_connect");
+            /* XXX: free the bio, etc */
             SNMP_FREE(tlsdata);
             SNMP_FREE(t);
-            snmp_log(LOG_ERR, "failed to open connection to TLS server\n");
-            snmp_log(LOG_ERR, "openssl error: %s\n",
-                     _x509_get_error(rc, "foo"));
+            return NULL;
+        }
+        ssl = tlsdata->ssl = SSL_new(ctx);
+        
+        SSL_set_bio(ssl, bio, bio);
+        SSL_set_mode(ssl, SSL_MODE_AUTO_RETRY);
+        if ((rc = SSL_connect(ssl)) <= 0) {
+            snmp_log(LOG_ERR, "tlstcp: failed to ssl_connect\n");
             return NULL;
         }
 
+#ifdef nexttime
         if(SSL_get_verify_result(ssl) != X509_V_OK) {
             SNMP_FREE(tlsdata);
             SNMP_FREE(t);
             snmp_log(LOG_ERR, "failed to verify TLS server credentials\n");
             return NULL;
         }
-
+#endif
+        
+        t->sock = BIO_get_fd(bio, NULL);
         /* XXX: save state */
     }
         
@@ -461,8 +447,9 @@ netsnmp_tlstcp_transport(struct sockaddr_in *addr, int isserver)
     t->f_send     = netsnmp_tlstcp_send;
     t->f_close    = netsnmp_tlstcp_close;
     t->f_accept   = netsnmp_tlstcp_accept;
-    t->f_fmtaddr  = netsnmp_udp_fmtaddr;
-    t->flags = NETSNMP_TRANSPORT_FLAG_TUNNELED;
+    t->f_copy     = netsnmp_tlstcp_copy;
+    t->f_fmtaddr  = netsnmp_tlstcp_fmtaddr;
+    t->flags |= NETSNMP_TRANSPORT_FLAG_TUNNELED | NETSNMP_TRANSPORT_FLAG_STREAM;
 
     return t;
 }
