@@ -137,7 +137,7 @@ typedef struct netsnmp_transport_s {
     /*  Optional callback that is called after the first transport is
         cloned to the second */
     int            (*f_copy)(struct netsnmp_transport_s *,
-                             struct netsnmp_transport_s *)
+                             struct netsnmp_transport_s *);
    
     /* allocated host name identifier; used by configuration system
        to load localhost.conf for host-specific configuration */
