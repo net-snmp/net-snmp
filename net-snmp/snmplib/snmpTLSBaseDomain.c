@@ -556,9 +556,16 @@ const char * _x509_get_error(int x509failvalue, const char *location) {
 }
 
 void _openssl_log_error(int rc, SSL *con, const char *location) {
-    const char *reason;
+    const char     *reason;
+    unsigned long   numerical_reason;
+    char           *file, *data;
+    int             flags, line;
 
-    if (rc == -1) {
+    snmp_log(LOG_ERR, "OpenSSL Related Erorrs:\n");
+
+    /* SSL specific errors */
+    if (con) {
+
         int sslnum = SSL_get_error(con, rc);
 
         switch(sslnum) {
@@ -606,10 +613,26 @@ void _openssl_log_error(int rc, SSL *con, const char *location) {
             reason = "unknown";
         }
 
-        snmp_log(LOG_ERR, "TLS error: %s: rc=%d, sslerror = %d (%s)\n",
+        snmp_log(LOG_ERR, " TLS error: %s: rc=%d, sslerror = %d (%s)\n",
                  location, rc, sslnum, reason);
 
-        snmp_log(LOG_ERR, "TLS Error: %s\n",
+        snmp_log(LOG_ERR, " TLS Error: %s\n",
                  ERR_reason_error_string(ERR_get_error()));
+
     }
+
+    /* other errors */
+    while ((numerical_reason =
+            ERR_get_error_line_data(&file, &line, &data, &flags)) != 0) {
+        snmp_log(LOG_ERR, " error: #%lu (file %s, line %d)\n",
+                 numerical_reason, file, line);
+
+        /* if we have a text translation: */
+        if (data && (flags & ERR_TXT_STRING)) {
+            snmp_log(LOG_ERR, "  Textual Error: %s\n", data);
+        }
+        /* XXX: how are these strings freed? or is it not thread safe? */
+    }
+    
+    snmp_log(LOG_ERR, "---- End of OpenSSL Errors ----\n");
 }
