@@ -131,8 +131,8 @@ typedef struct netsnmp_transport_s {
 
     /*  Optional callback to support extra configuration token/value pairs */
     /*  return non-zero on error */
-    int            *(*f_config)(struct netsnmp_transport_s *, const char *,
-                                const char *);
+    int            (*f_config)(struct netsnmp_transport_s *, const char *,
+                               const char *);
 
     /* allocated host name identifier; used by configuration system
        to load localhost.conf for host-specific configuration */
