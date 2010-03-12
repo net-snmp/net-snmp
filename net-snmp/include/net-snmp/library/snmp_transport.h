@@ -134,6 +134,11 @@ typedef struct netsnmp_transport_s {
     int            (*f_config)(struct netsnmp_transport_s *, const char *,
                                const char *);
 
+    /*  Optional callback that is called after the first transport is
+        cloned to the second */
+    int            (*f_copy)(struct netsnmp_transport_s *,
+                             struct netsnmp_transport_s *)
+   
     /* allocated host name identifier; used by configuration system
        to load localhost.conf for host-specific configuration */
     u_char         *identifier; /* udp:localhost:161 -> "localhost" */
