@@ -60,11 +60,11 @@ int verify_callback(int ok, X509_STORE_CTX *ctx) {
     /* things to do: */
 
     X509_NAME_oneline(X509_get_subject_name(thecert), buf, sizeof(buf));
-    DEBUGMSGTL(("dtlsudp_x509",
+    DEBUGMSGTL(("tls_x509",
                 "Cert: %s\n", buf));
 
 
-    DEBUGMSGTL(("dtlsudp_x509",
+    DEBUGMSGTL(("tls_x509",
                 " verify value: %d, depth=%d, error code=%d, error string=%s\n",
                 ok, depth, err, _x509_get_error(err, "verify callback")));
 
@@ -73,12 +73,12 @@ int verify_callback(int ok, X509_STORE_CTX *ctx) {
                                NETSNMP_DS_LIB_ALLOW_SELF_SIGNED) &&
         (X509_V_ERR_DEPTH_ZERO_SELF_SIGNED_CERT == err ||
          X509_V_ERR_SELF_SIGNED_CERT_IN_CHAIN == err)) {
-        DEBUGMSGTL(("dtlsudp_x509", "  accepting a self-signed certificate\n"));
+        DEBUGMSGTL(("tls_x509", "  accepting a self-signed certificate\n"));
         return 1;
     }
     
     
-    DEBUGMSGTL(("dtlsudp_x509", "  returing the passed in value of %d\n", ok));
+    DEBUGMSGTL(("tls_x509", "  returing the passed in value of %d\n", ok));
     return(ok);
 }
 
@@ -251,7 +251,7 @@ tls_bootstrap(int majorid, int minorid, void *serverarg, void *clientarg) {
     certfile = netsnmp_ds_get_string(NETSNMP_DS_LIBRARY_ID,
                                      NETSNMP_DS_LIB_X509_CLIENT_PUB);
 
-    DEBUGMSGTL(("dtlsudp", "using public key: %s\n", certfile));
+    DEBUGMSGTL(("tls", "using public key: %s\n", certfile));
     if (BIO_read_filename(keybio, certfile) <=0)
         LOGANDDIE ("error reading public key");
 
@@ -268,7 +268,7 @@ tls_bootstrap(int majorid, int minorid, void *serverarg, void *clientarg) {
     if (!keybio)
         LOGANDDIE ("error creating bio for reading private key");
 
-    DEBUGMSGTL(("dtlsudp", "using private key: %s\n", certfile));
+    DEBUGMSGTL(("tls", "using private key: %s\n", certfile));
     if (!keybio ||
         BIO_read_filename(keybio, certfile) <= 0)
         LOGANDDIE ("error reading private key");
