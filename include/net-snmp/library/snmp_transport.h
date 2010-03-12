@@ -129,6 +129,13 @@ typedef struct netsnmp_transport_s {
 
     char           *(*f_fmtaddr)(struct netsnmp_transport_s *, void *, int);
 
+    /*  Optional callback to support extra configuration token/value pairs */
+    /*  return non-zero on error */
+    int            *(*f_config)(struct netsnmp_transport_s *, const char *,
+                                const char *);
+
+    /* allocated host name identifier; used by configuration system
+       to load localhost.conf for host-specific configuration */
     u_char         *identifier; /* udp:localhost:161 -> "localhost" */
 } netsnmp_transport;
 
