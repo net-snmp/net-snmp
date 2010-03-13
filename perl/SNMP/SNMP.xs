@@ -128,7 +128,6 @@ static int __get_label_iid _((char *, char **, char **, int));
 static int __oid_cmp _((oid *, size_t, oid *, size_t));
 static int __tp_sprint_num_objid _((char*,SnmpMibNode *));
 static SnmpMibNode * __get_next_mib_node _((SnmpMibNode *));
-static struct tree * __oid2tp _((oid*, int, struct tree *, int*));
 static struct tree * __tag2oid _((char *, char *, oid  *, size_t *, int *, int));
 static int __concat_oid_str _((oid *, size_t *, char *));
 static int __add_var_val_str _((netsnmp_pdu *, oid *, size_t, char *,
@@ -564,7 +563,7 @@ int len;
    int i;
    buf[0] = '\0';
    for (i=0; i < len; i++) {
-	sprintf(buf,".%lu",*objid++);
+	sprintf(buf,".%" NETSNMP_PRIo "u",*objid++);
 	buf += strlen(buf);
    }
    return SUCCESS;
@@ -597,7 +596,7 @@ size_t *len;
    cp = buf;
    while (*buf) {
       if (*buf++ == '.') {
-         sscanf(cp, "%lu", objid++);
+         sscanf(cp, "%" NETSNMP_PRIo "u", objid++);
          /* *objid++ = atoi(cp); */
          (*len)++;
          cp = buf;
@@ -607,7 +606,7 @@ size_t *len;
          }
       }
    }
-   sscanf(cp, "%lu", objid++);
+   sscanf(cp, "%" NETSNMP_PRIo "u", objid++);
    /* *objid++ = atoi(cp); */
    (*len)++;
    return SUCCESS;
@@ -922,40 +921,6 @@ int    best_guess;
    if (iid && *iid && oid_arr_len) __concat_oid_str(oid_arr, oid_arr_len, iid);
    return(rtp);
 }
-/* searches down the mib tree for the given oid
-   returns the last found tp and its index in lastind
- */
-static struct tree *
-__oid2tp (oidp, len, subtree, lastind)
-oid* oidp;
-int len;
-struct tree * subtree;
-int* lastind;
-{
-    struct tree    *return_tree = NULL;
-
-
-    for (; subtree; subtree = subtree->next_peer) {
-	if (*oidp == subtree->subid){
-	    goto found;
-	}
-    }
-    *lastind=0;
-    return NULL;
-
-found:
-    if (len > 1){
-       return_tree =
-          __oid2tp(oidp + 1, len - 1, subtree->child_list, lastind);
-       (*lastind)++;
-    } else {
-       *lastind=1;
-    }
-    if (return_tree)
-	return return_tree;
-    else
-	return subtree;
-}
 
 /* function: __concat_oid_str
  *
@@ -980,7 +945,7 @@ char * soid_str;
    strcpy(soid_buf, soid_str);
    cp = strtok_r(soid_buf,".",&st);
    while (cp) {
-     sscanf(cp, "%lu", &(doid_arr[(*doid_arr_len)++]));
+     sscanf(cp, "%" NETSNMP_PRIo "u", &(doid_arr[(*doid_arr_len)++]));
      /* doid_arr[(*doid_arr_len)++] =  atoi(cp); */
      cp = strtok_r(NULL,".",&st);
    }
@@ -2630,7 +2595,7 @@ void snmp_return_err( struct snmp_session *ss, SV *err_str, SV *err_num, SV *err
 */
 int snmp_api_mode( int mode )
 {
-	if(mode == NULL)
+	if (mode == 0)
 		return api_mode;
 	api_mode = mode;
 	return api_mode;
@@ -2661,7 +2626,7 @@ init_snmp(appname)
 # the current api_mode values
 #----------------------------------------------------------------------
 int 
-snmp_api_mode(mode=(int)NULL)
+snmp_api_mode(mode=0)
 	int mode
 
 SnmpSession *
@@ -4190,7 +4155,7 @@ snmp_bulkwalk(sess_ref, nonrepeaters, maxrepetitions, varlist_ref,perl_callback)
 	      }
 
 	      /* Sent okay...  Return the request ID in 'pdu' as an SvIV. */
-	      DBPRT(1,(DBOUT "Okay, request id is %d\n", (intptr_t) pdu));
+	      DBPRT(1,(DBOUT "Okay, request id is %p\n", pdu));
 /*	      XSRETURN_IV((intptr_t)pdu); */
 	      XPUSHs(sv_2mortal(newSViv((IV)pdu)));
 	      XSRETURN(1);
@@ -5349,8 +5314,8 @@ snmp_mib_node_FETCH(tp_ref, key)
                  ranges_av = newAV();
                  for(rp=tp->ranges; rp ; rp = rp->next) {
 		   range_hv = newHV();
-                   hv_store(range_hv, "low", strlen("low"), newSViv(rp->low), 0);
-                   hv_store(range_hv, "high", strlen("high"), newSViv(rp->high), 0);
+                   (void)hv_store(range_hv, "low", strlen("low"), newSViv(rp->low), 0);
+                   (void)hv_store(range_hv, "high", strlen("high"), newSViv(rp->high), 0);
 		   av_push(ranges_av, newRV((SV*)range_hv));
                  }
                  sv_setsv(ret, newRV((SV*)ranges_av));
@@ -5416,7 +5381,7 @@ snmp_mib_node_FETCH(tp_ref, key)
                  if (strncmp("enums", key, strlen(key))) break;
                  enum_hv = newHV();
                  for(ep=tp->enums; ep != NULL; ep = ep->next) {
-                   hv_store(enum_hv, ep->label, strlen(ep->label),
+		    (void)hv_store(enum_hv, ep->label, strlen(ep->label),
                                 newSViv(ep->value), 0);
                  }
                  sv_setsv(ret, newRV((SV*)enum_hv));
