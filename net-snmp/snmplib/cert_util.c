@@ -281,7 +281,7 @@ static int
 _cert_cert_filter(const char *filename)
 {
     int  len = strlen(filename);
-    char *pos;
+    const char *pos;
 
     if (len < 5) /* shortest name: x.YYY */
         return 0;
@@ -494,7 +494,7 @@ _xcertfile_read(const char *file)
         return NULL;
     }
 
-    if (BIO_read_filename(certbio, file) <=0) {
+    if (BIO_read_filename(certbio, NETSNMP_REMOVE_CONST(char *, file)) <=0) {
         snmp_log(LOG_ERR, "error reading certificate %s into BIO\n", file);
         BIO_vfree(certbio);
         return NULL;
@@ -505,7 +505,7 @@ _xcertfile_read(const char *file)
     else if (CERT_DER == type)
         cert = d2i_X509_bio(certbio,NULL); /* DER/ASN1 */
     else if (CERT_PKCS12 == type) {
-        BIO_reset(certbio);
+        (void)BIO_reset(certbio);
         PKCS12 *p12 = d2i_PKCS12_bio(certbio, NULL);
         if ( (NULL != p12) && (PKCS12_verify_mac(p12, "", 0) ||
                                PKCS12_verify_mac(p12, NULL, 0)))
@@ -529,7 +529,8 @@ _add_certfile(const char* dirname, const char* filename, FILE *index)
 {
     X509         *xcert;
     netsnmp_cert *cert;
-    char          certfile[SNMP_MAXPATH], *thefile;
+    char          certfile[SNMP_MAXPATH];
+    const char   *thefile;
 
     if ((const void*)NULL == dirname)
         thefile = filename;
@@ -703,7 +704,8 @@ _add_certdir(const char *dirname, struct stat *dirstat)
 static void
 _cert_indexes_load(void)
 {
-    char           *confpath, *dir, *st = NULL;
+    const char     *confpath;
+    char           *confpath_copy, *dir, *st = NULL;
     char            certdir[SNMP_MAXPATH];
     struct stat     statbuf;
 
@@ -721,8 +723,8 @@ _cert_indexes_load(void)
     if (NULL == confpath)
         confpath = get_configuration_directory();
 
-    confpath = strdup(confpath);
-    for ( dir = strtok_r(confpath, ENV_SEPARATOR, &st);
+    confpath_copy = strdup(confpath);
+    for ( dir = strtok_r(confpath_copy, ENV_SEPARATOR, &st);
           dir; dir = strtok_r(NULL, ENV_SEPARATOR, &st)) {
 
         /** xxx-rks: add cert dir suffixes */
@@ -746,7 +748,7 @@ _cert_indexes_load(void)
         _add_certdir(certdir, &statbuf);
 
     }
-    SNMP_FREE(confpath);
+    SNMP_FREE(confpath_copy);
 }
 
 #ifdef CERT_MAIN

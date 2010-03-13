@@ -5385,7 +5385,7 @@ _sess_process_packet(void *sessp, netsnmp_session * sp,
   }
 
   DEBUGMSGTL(("sess_process_packet", "received message id#%ld reqid#%ld len "
-              "%" NETSNMP_PRIz "u\n", pdu->msgid, pdu->reqid, length));
+              "%u\n", pdu->msgid, pdu->reqid, length));
 
   if (ret != SNMP_ERR_NOERROR) {
     DEBUGMSGTL(("sess_process_packet", "parse fail\n"));
