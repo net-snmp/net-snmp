@@ -396,6 +396,10 @@
     available.   */
 #undef NETSNMP_TRANSPORT_DTLSUDP_DOMAIN
 
+/*  This is defined if support for the DTLS/UDP transport domain is
+    available.   */
+#undef NETSNMP_TRANSPORT_TLSTCP_DOMAIN
+
 /*  This is defined if support for stdin/out transport domain is available.   */
 #undef NETSNMP_TRANSPORT_STD_DOMAIN
 
