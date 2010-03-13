@@ -161,7 +161,6 @@ handler_wrapper(netsnmp_mib_handler          *handler,
                 netsnmp_agent_request_info   *reqinfo,
                 netsnmp_request_info         *requests) 
 {
-    u_long intret = 5;
     handler_cb_data *cb_data = (handler_cb_data *) handler->myvoid;
     SV *cb;
 
@@ -473,7 +472,7 @@ nari_getValue(me)
         request = (netsnmp_request_info *) SvIV(SvRV(me));
 	sprint_realloc_by_type(&oidbuf, &ob_len, &oo_len, 0,
                                request->requestvb, 0, 0, 0);
-        RETVAL = oidbuf; /* mem leak */
+        RETVAL = (char *) oidbuf; /* mem leak */
     OUTPUT:
         RETVAL
 
@@ -567,8 +566,6 @@ nari_setValue(me, type, value)
         int type;
         SV *value;
     PREINIT:
-        u_char *oidbuf = NULL;
-        size_t ob_len = 0, oo_len = 0;
         netsnmp_request_info *request;
         u_long utmp;
         long ltmp;

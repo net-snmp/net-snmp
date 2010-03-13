@@ -152,21 +152,6 @@ int len;
    return SNMPERR_SUCCESS;
 }
 
-static int
-__tp_sprint_num_objid (buf, tp)
-char *buf;
-struct tree *tp;
-{
-   oid newname[MAX_OID_LEN], *op;
-   /* code taken from get_node in snmp_client.c */
-   for (op = newname + MAX_OID_LEN - 1; op >= newname; op--) {
-      *op = tp->subid;
-      tp = tp->parent;
-      if (tp == NULL) break;
-   }
-   return __sprint_num_objid(buf, op, newname + MAX_OID_LEN - op);
-}
-
 MODULE = NetSNMP::OID		PACKAGE = NetSNMP::OID		PREFIX=nso_
 
 netsnmp_oid *
@@ -287,6 +272,7 @@ nsop_get_indexes(oid1)
                 return;
             }
 
+            tpe = NULL;
             nodecount = 0;
             for(tpnode = tp; tpnode; tpnode = tpnode->parent) {
                 nodecount++;
@@ -300,6 +286,11 @@ nsop_get_indexes(oid1)
                     RETVAL = NULL;
                     return;
                 }
+            }
+
+            if (!tpe) {
+                RETVAL = NULL;
+                return;
             }
 
             if (tpe->augments && strlen(tpe->augments) > 0) {
@@ -374,7 +365,7 @@ nsop_get_indexes(oid1)
                                      1, name, name_len, &vbdata);
 */
 
-                av_push(myret, newSVpv(buf, out_len));
+                av_push(myret, newSVpv((char *)buf, out_len));
             }
             RETVAL = newRV((SV *)myret);
         }

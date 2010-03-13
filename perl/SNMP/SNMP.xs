@@ -127,7 +127,6 @@ static int __get_label_iid _((char *, char **, char **, int));
 static int __oid_cmp _((oid *, size_t, oid *, size_t));
 static int __tp_sprint_num_objid _((char*,SnmpMibNode *));
 static SnmpMibNode * __get_next_mib_node _((SnmpMibNode *));
-static struct tree * __oid2tp _((oid*, int, struct tree *, int*));
 static struct tree * __tag2oid _((char *, char *, oid  *, size_t *, int *, int));
 static int __concat_oid_str _((oid *, size_t *, char *));
 static int __add_var_val_str _((netsnmp_pdu *, oid *, size_t, char *,
@@ -941,40 +940,6 @@ int    best_guess;
  done:
    if (iid && *iid && oid_arr_len) __concat_oid_str(oid_arr, oid_arr_len, iid);
    return(rtp);
-}
-/* searches down the mib tree for the given oid
-   returns the last found tp and its index in lastind
- */
-static struct tree *
-__oid2tp (oidp, len, subtree, lastind)
-oid* oidp;
-int len;
-struct tree * subtree;
-int* lastind;
-{
-    struct tree    *return_tree = NULL;
-
-
-    for (; subtree; subtree = subtree->next_peer) {
-	if (*oidp == subtree->subid){
-	    goto found;
-	}
-    }
-    *lastind=0;
-    return NULL;
-
-found:
-    if (len > 1){
-       return_tree =
-          __oid2tp(oidp + 1, len - 1, subtree->child_list, lastind);
-       (*lastind)++;
-    } else {
-       *lastind=1;
-    }
-    if (return_tree)
-	return return_tree;
-    else
-	return subtree;
 }
 
 /* function: __concat_oid_str
@@ -4064,7 +4029,7 @@ snmp_bulkwalk(sess_ref, nonrepeaters, maxrepetitions, varlist_ref,perl_callback)
 	      }
 
 	      /* Sent okay...  Return the request ID in 'pdu' as an SvIV. */
-	      DBPRT(1,(DBOUT "Okay, request id is %d\n", (intptr_t) pdu));
+	      DBPRT(1,(DBOUT "Okay, request id is %p\n", pdu));
 /*	      XSRETURN_IV((intptr_t)pdu); */
 	      XPUSHs(sv_2mortal(newSViv((IV)pdu)));
 	      XSRETURN(1);
@@ -5186,8 +5151,8 @@ snmp_mib_node_FETCH(tp_ref, key)
                  ranges_av = newAV();
                  for(rp=tp->ranges; rp ; rp = rp->next) {
 		   range_hv = newHV();
-                   hv_store(range_hv, "low", strlen("low"), newSViv(rp->low), 0);
-                   hv_store(range_hv, "high", strlen("high"), newSViv(rp->high), 0);
+                   (void)hv_store(range_hv, "low", strlen("low"), newSViv(rp->low), 0);
+                   (void)hv_store(range_hv, "high", strlen("high"), newSViv(rp->high), 0);
 		   av_push(ranges_av, newRV((SV*)range_hv));
                  }
                  sv_setsv(ret, newRV((SV*)ranges_av));
@@ -5253,7 +5218,7 @@ snmp_mib_node_FETCH(tp_ref, key)
                  if (strncmp("enums", key, strlen(key))) break;
                  enum_hv = newHV();
                  for(ep=tp->enums; ep != NULL; ep = ep->next) {
-                   hv_store(enum_hv, ep->label, strlen(ep->label),
+		    (void)hv_store(enum_hv, ep->label, strlen(ep->label),
                                 newSViv(ep->value), 0);
                  }
                  sv_setsv(ret, newRV((SV*)enum_hv));
