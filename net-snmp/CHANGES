@@ -19,6 +19,8 @@ listing of all changes made to the code.
       - [PATCH 2538169]: Prevent infinite retries for invalid error-index
       - [PATCH 2689362]: Fix handling of IPv6 hostnames
       - [PATCH 2713841]: Fix runtime errors triggered by high-ASCII chars
+      - [PATCH 2952034]: Return of the Great SuSE 'sprintf' Hunt
+      - [PATCH 2952140]: Fix overflow counter32/gauge32 on 64-bit systems
       - Change the parsing of ranges to accept all valid values
       - Ensure O_CREATE mask is always specified
       - Make -LN stop dumping core.
@@ -45,6 +47,10 @@ listing of all changes made to the code.
       - [PATCH 2883155]: Fix memory leak in proxy handling.
       - [PATCH 2887816]: Protect against division-by-zero crash
       - [PATCH 2912584]: Fix null OID handling in Agentx on 64bit
+      - [PATCH 2950845]: Fix ifHighSpeed calculation
+      - [PATCH 2952034]: Return of the Great SuSE 'sprintf' Hunt
+      - [PATCH 2956657]: Handle over-length AgentX OIDs
+      - [PATCH 2968642]: Catch overflow of pass-through command buffer
       - Ensure O_CREATE mask is always specified
       - Fix CVE-2008-4309 (GETBULK issue reported by Oscar Mira-Sanchez)
       - Fix memory leak when multiple interfaces have the same IPv6 address
@@ -59,19 +65,23 @@ listing of all changes made to the code.
     apps:
       - [BUG 1964136]: Drop NULL type from snmpset usage
       - [BUG 2811577]: Fix bug in GetBulk handling
+      - [PATCH 2937996]: Add Date: header to email send by traptoemail
       - Improve parsing of -LS command line argument
 
     snmptable:
       - [BUG 2837998]: Handle missing instance subidentifiers in results
+      - [PATCH 2850067]: Suppress extraneous "index" header token
 
     build:
-      - Limit the use of _KERNEL definitions in configure
       - [BUG 2023803]: Compilation problems on HP-UX 11.31
       - [BUG 2782700]: build failure when using --with-pkcs on Solaris
       - [PATCH 1681035]: improve net-snmp-config /bin/sh compatibility
       - [PATCH 1899762]: Tweak embedded_perl configure checks
       - [PATCH 2184039]: Misc fixes for freeing memory
+      - [PATCH 2952020]: Set permission on testing directories
       - add --with-temp-file-pattern configure option
+      - Fix 'make test TESTOPTS="-P tcp"'
+      - Limit the use of _KERNEL definitions in configure
 
     documentation:
       - [BUG 2027129]: fix typo in snmpcmd.1
@@ -95,6 +105,11 @@ listing of all changes made to the code.
 
     HP:
       - UX: BUG: 2779472: Filesystems missing in hrStorage
+
+    Linux:
+      - [PATCH 2926374]: Fix /proc/net/if_inet6 reading of ipAddressTable
+      - fix rare race condition when reading RPM database
+      - Fix build on modern distributions (using rpm-4.6)
 
     Solaris:
       - [PATCH 2012404]: deal with more than 10 interfaces
