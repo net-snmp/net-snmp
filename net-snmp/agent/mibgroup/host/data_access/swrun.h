@@ -46,6 +46,9 @@ config_exclude(host/hr_swrun)
     config_require(host/data_access/swrun_null)
 #endif
 
+void init_swrun(void);
+void shutdown_swrun(void);
+
 netsnmp_cache     *netsnmp_swrun_cache(void);
 netsnmp_container *netsnmp_swrun_container(void);
 
