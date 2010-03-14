@@ -353,6 +353,8 @@ netsnmp_init_tlsbase(void) {
     /* bootstrap ssl since we'll need it */
     netsnmp_init_openssl();
 
+    netsnmp_certs_init();
+
     /* only do this once */
     if (have_inited)
         return;
