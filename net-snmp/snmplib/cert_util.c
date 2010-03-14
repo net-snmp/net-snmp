@@ -61,9 +61,6 @@
 
 #include <net-snmp/library/snmp_assert.h>
 #include <net-snmp/library/snmp_transport.h>
-#include <net-snmp/library/snmpTLSBaseDomain.h>
-#include <net-snmp/library/snmpDTLSUDPDomain.h>
-#include <net-snmp/library/snmpUDPDomain.h>
 #include <net-snmp/library/system.h>
 #include <net-snmp/library/tools.h>
 #include <net-snmp/library/snmp_openssl.h>
@@ -123,9 +120,7 @@ init_cert_util(void)
         return;
     }
 
-#ifdef NETSNMP_TRANSPORT_TLS_DOMAIN
-    netsnmp_init_tlsbase(); /* will init openssl */
-#endif
+    netsnmp_init_openssl();
 
     _certs = netsnmp_container_find("certs:binary_array");
     if (NULL == _certs) {
