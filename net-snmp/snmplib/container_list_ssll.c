@@ -310,8 +310,9 @@ netsnmp_container_get_ssll(void)
         return NULL;
     }
 
-    netsnmp_init_container(sl, NULL, _ssll_free, _ssll_size, NULL,
-                           _ssll_insert, _ssll_remove, _ssll_find);
+    netsnmp_init_container((netsnmp_container *)sl, NULL, _ssll_free,
+                           _ssll_size, NULL, _ssll_insert, _ssll_remove,
+                           _ssll_find);
     sl->c.find_next = _ssll_find_next;
     sl->c.get_subset = NULL;
     sl->c.get_iterator =_ssll_iterator_get;

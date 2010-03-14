@@ -531,6 +531,16 @@ extern "C" {
     }
 
 #endif
+
+    /** utility routine for container implementations */
+    void netsnmp_init_container(netsnmp_container         *c,
+                                netsnmp_container_rc      *init,
+                                netsnmp_container_rc      *cfree,
+                                netsnmp_container_size    *size,
+                                netsnmp_container_compare *cmp,
+                                netsnmp_container_op      *ins,
+                                netsnmp_container_op      *rem,
+                                netsnmp_container_rtn     *fnd);
     
     /*************************************************************************
      *
