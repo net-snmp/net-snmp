@@ -1,4 +1,4 @@
-.TH "Net-SNMP Agent handler and extensibility API" 3 "6 Jan 2010" "Version 5.4.3.pre1" "net-snmp" \" -*- nroff -*-
+.TH "Net-SNMP Agent handler and extensibility API" 3 "14 Mar 2010" "Version 5.4.3.pre1" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -236,7 +236,7 @@ The basic theory goes something like this: In the past, with the original mib \f
 .br
 .RI "\fIremove data from a request \fP"
 .ti -1c
-.RI "NETSNMP_INLINE void * \fBnetsnmp_request_get_list_data\fP (\fBnetsnmp_request_info\fP *request, const char *name)"
+.RI "void * \fBnetsnmp_request_get_list_data\fP (\fBnetsnmp_request_info\fP *request, const char *name)"
 .br
 .RI "\fIextract data from a request that was added previously by a parent \fBmodule\fP \fP"
 .ti -1c
@@ -314,7 +314,7 @@ calls the next handler in the chain after the current one with with appropriate 
 .SS "void netsnmp_clear_handler_list (void)"
 .PP
 clears the entire handler-registration list 
-.SS "NETSNMP_INLINE \fBnetsnmp_delegated_cache\fP * netsnmp_create_delegated_cache (\fBnetsnmp_mib_handler\fP * handler, \fBnetsnmp_handler_registration\fP * reginfo, \fBnetsnmp_agent_request_info\fP * reqinfo, \fBnetsnmp_request_info\fP * requests, void * localinfo)"
+.SS "\fBnetsnmp_delegated_cache\fP * netsnmp_create_delegated_cache (\fBnetsnmp_mib_handler\fP * handler, \fBnetsnmp_handler_registration\fP * reginfo, \fBnetsnmp_agent_request_info\fP * reqinfo, \fBnetsnmp_request_info\fP * requests, void * localinfo)"
 .PP
 creates a cache of information which can be saved for future reference. Use \fBnetsnmp_handler_check_cache()\fP later to make sure it's still valid before referencing it in the future. 
 .PP
@@ -351,20 +351,20 @@ Returns a handler from a chain based on the name.
 .SS "void * netsnmp_find_handler_data_by_name (\fBnetsnmp_handler_registration\fP * reginfo, const char * name)"
 .PP
 Returns a handler's void * pointer from a chain based on the name. This probably shouldn't be used by the general public as the void * data may change as a handler evolves. Handlers should really advertise some function for you to use instead. 
-.SS "NETSNMP_INLINE void netsnmp_free_delegated_cache (\fBnetsnmp_delegated_cache\fP * dcache)"
+.SS "void netsnmp_free_delegated_cache (\fBnetsnmp_delegated_cache\fP * dcache)"
 .PP
 frees a cache once you're finished using it 
 .PP
 \fBExamples: \fP
 .in +1c
 \fBdelayed_instance.c\fP.
-.SS "NETSNMP_INLINE void netsnmp_free_request_data_set (\fBnetsnmp_request_info\fP * request)"
+.SS "void netsnmp_free_request_data_set (\fBnetsnmp_request_info\fP * request)"
 .PP
 Free the extra data stored in a request. 
-.SS "NETSNMP_INLINE void netsnmp_free_request_data_sets (\fBnetsnmp_request_info\fP * request)"
+.SS "void netsnmp_free_request_data_sets (\fBnetsnmp_request_info\fP * request)"
 .PP
 Free the extra data stored in a bunch of requests (all data in the chain). 
-.SS "NETSNMP_INLINE \fBnetsnmp_delegated_cache\fP * netsnmp_handler_check_cache (\fBnetsnmp_delegated_cache\fP * dcache)"
+.SS "\fBnetsnmp_delegated_cache\fP * netsnmp_handler_check_cache (\fBnetsnmp_delegated_cache\fP * dcache)"
 .PP
 check's a given cache and returns it if it is still valid (ie, the agent still considers it to be an outstanding request. Returns NULL if it's no longer valid. 
 .PP
@@ -456,7 +456,7 @@ registers a given handler by name so that it can be found easily later.
 .SS "int netsnmp_register_handler_nocallback (\fBnetsnmp_handler_registration\fP * reginfo)"
 .PP
 register a handler, as defined by the netsnmp_handler_registration pointer. 
-.SS "NETSNMP_INLINE void netsnmp_request_add_list_data (\fBnetsnmp_request_info\fP * request, \fBnetsnmp_data_list\fP * node)"
+.SS "void netsnmp_request_add_list_data (\fBnetsnmp_request_info\fP * request, \fBnetsnmp_data_list\fP * node)"
 .PP
 add data to a request that can be extracted later by submodules \fBParameters:\fP
 .RS 4
@@ -475,7 +475,7 @@ void
 \fBExamples: \fP
 .in +1c
 \fBdelayed_instance.c\fP.
-.SS "NETSNMP_INLINE void * netsnmp_request_get_list_data (\fBnetsnmp_request_info\fP * request, const char * name)"
+.SS "void * netsnmp_request_get_list_data (\fBnetsnmp_request_info\fP * request, const char * name)"
 .PP
 extract data from a request that was added previously by a parent \fBmodule\fP \fBParameters:\fP
 .RS 4
@@ -494,7 +494,7 @@ a void pointer(request->parent_data->data), otherwise NULL is returned if reques
 \fBExamples: \fP
 .in +1c
 \fBdelayed_instance.c\fP.
-.SS "NETSNMP_INLINE int netsnmp_request_remove_list_data (\fBnetsnmp_request_info\fP * request, const char * name)"
+.SS "int netsnmp_request_remove_list_data (\fBnetsnmp_request_info\fP * request, const char * name)"
 .PP
 remove data from a request \fBParameters:\fP
 .RS 4
