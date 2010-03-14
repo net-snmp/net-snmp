@@ -96,8 +96,20 @@
 #      endif
 #   else /* NO DEBUGGING */
 #      define netsnmp_assert(x)
-#      define netsnmp_assert_or_return(x)
-#      define netsnmp_assert_or_msgreturn(x)
+#      define netsnmp_assert_or_return(x, y)  do {        \
+                 if ( x ) \
+                    ; \
+                 else { \
+                    return y; \
+                 } \
+              }while(0)
+#      define netsnmp_assert_or_msgreturn(x, y, z)  do {       \
+                 if ( x ) \
+                    ; \
+                 else { \
+                    return z; \
+                 } \
+              }while(0)
 #   endif /* NO DEBUGGING */
 #endif /* not NETSNMP_USE_ASSERT */
 
