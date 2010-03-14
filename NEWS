@@ -8,6 +8,8 @@ listing of all changes made to the code.
     snmpd:
       - Fix CVE-2008-4309 (GETBULK issue reported by Oscar Mira-Sanchez)
 
+    Linux:
+      - Fix build on modern distributions (using rpm-4.6)
 
 *5.2.5*
 
