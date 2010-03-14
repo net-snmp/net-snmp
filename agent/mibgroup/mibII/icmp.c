@@ -372,7 +372,7 @@ icmp_stats_next_entry( void **loop_context,
                      netsnmp_variable_list *index,
                      netsnmp_iterator_info *data)
 {
-	int i = (int)(*loop_context);
+	int i = (int)(intptr_t)(*loop_context);
 	netsnmp_variable_list *idx = index;
 
 	if(i > 1)
@@ -388,7 +388,7 @@ icmp_stats_next_entry( void **loop_context,
 
 	*data_context = &icmp_stats_table[i];
 
-	*loop_context = (void *)(++i);
+	*loop_context = (void *)(intptr_t)(++i);
 	
 	return index;
 }
@@ -412,7 +412,7 @@ icmp_msg_stats_next_entry(void **loop_context,
                           netsnmp_variable_list *index,
                           netsnmp_iterator_info *data)
 {
-    int i = (int)(*loop_context);
+    int i = (int)(intptr_t)(*loop_context);
     netsnmp_variable_list *idx = index;
 
     if(i >= ICMP_MSG_STATS_IPV4_COUNT + ICMP_MSG_STATS_IPV6_COUNT)
@@ -430,7 +430,7 @@ icmp_msg_stats_next_entry(void **loop_context,
             sizeof(uint32_t));
 
     *data_context = &icmp_msg_stats_table[i];
-    *loop_context = (void *)(++i);
+    *loop_context = (void *)(intptr_t)(++i);
 
     return index;
 }

@@ -12,7 +12,7 @@ netsnmp_get_statistic_helper_handler(netsnmp_mib_handler *handler,
 {
     if (reqinfo->mode == MODE_GET) {
         const oid idx = requests->requestvb->name[reginfo->rootoid_len - 2] +
-            (oid)handler->myvoid;
+            (oid)(uintptr_t)handler->myvoid;
         uint32_t value;
 
         if (idx > NETSNMP_STAT_MAX_STATS)
@@ -33,7 +33,7 @@ netsnmp_get_statistic_handler(int offset)
                                netsnmp_get_statistic_helper_handler);
     if (ret) {
         ret->flags |= MIB_HANDLER_AUTO_NEXT;
-        ret->myvoid = (void*)offset;
+        ret->myvoid = (void*)(uintptr_t)offset;
     }
     return ret;
 }
