@@ -18,6 +18,7 @@
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 #include <net-snmp/data_access/swrun.h>
 #include "hrSWRunPerfTable.h"
+#include "data_access/swrun.h"
 
 #define MYTABLE "hrSWRunPerfTable"
 

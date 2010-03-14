@@ -186,7 +186,7 @@ netsnmp_arch_swrun_container_load( netsnmp_container *container, u_int flags)
     }
     closedir( procdir );
 
-    DEBUGMSGTL(("swrun:load:arch"," loaded %d entries\n",
+    DEBUGMSGTL(("swrun:load:arch"," loaded %" NETSNMP_PRIz "d entries\n",
                 CONTAINER_SIZE(container)));
 
     return 0;
