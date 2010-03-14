@@ -1,5 +1,7 @@
 #include <net-snmp/net-snmp-config.h>
 
+#if defined(NETSNMP_USE_OPENSSL) && defined(HAVE_LIBSSL)
+
 #include <stdio.h>
 #include <sys/types.h>
 #include <ctype.h>
@@ -111,7 +113,7 @@ static int _certindex_add( const char *dirname, int i );
  *
  */
 void
-init_cert_util(void)
+netsnmp_certs_init(void)
 {
     DEBUGMSGT(("cert:util:init","init\n"));
 
@@ -135,7 +137,7 @@ init_cert_util(void)
 }
 
 void
-shutdown_certs(void)
+netsnmp_certs_shutdown(void)
 {
     DEBUGMSGT(("cert:util:shutdown","shutdown\n"));
     CONTAINER_FREE_ALL(_certs, NULL);
@@ -776,3 +778,5 @@ main(int argc, char** argv)
 }
 
 #endif /* CERT_MAIN */
+
+#endif /* defined(NETSNMP_USE_OPENSSL) && defined(HAVE_LIBSSL) */

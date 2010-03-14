@@ -12,8 +12,8 @@ extern "C" {
      *
      *************************************************************************/
 
-void init_cert_util(void);
-void shutdown_certs(void);
+void netsnmp_certs_init(void);
+void netsnmp_certs_shutdown(void);
 
 
 #ifdef __cplusplus
