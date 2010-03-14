@@ -31,4 +31,7 @@ config_exclude(host/hr_swinst)
     config_require(host/data_access/swinst_null)
 #endif
 
+void init_swinst( void );
+void shutdown_swinst( void );
+
 #endif /* NETSNMP_ACCESS_SWINST_CONFIG_H */
