@@ -96,7 +96,7 @@ swrun_count_processes_by_name( char *name )
         return 0;    /* or -1 */
 
     it = CONTAINER_ITERATOR( swrun_container );
-    while ( entry = ITERATOR_NEXT( it )) {
+    while ((entry = ITERATOR_NEXT( it )) != NULL) {
         if (0 == strcmp( entry->hrSWRunName, name ))
             i++;
     }
@@ -155,8 +155,6 @@ netsnmp_swrun_cache(void)
 netsnmp_container *
 netsnmp_swrun_container(void)
 {
-    netsnmp_container *container;
-
     DEBUGMSGTL(("swrun:container", "init\n"));
 
     /*
