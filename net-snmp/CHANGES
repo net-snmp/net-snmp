@@ -21,11 +21,14 @@ listing of all changes made to the code.
       - [PATCH 2780411]: Fix compiler warnings
       - [PATCH 2797251]: Fix memory leaks
       - [PATCH 2871747]: Fix memory leak in OID processing
+      - [PATCH 2952140]: Overflow counter32 and gauge32
+      - [PATCH 2952034]: Return of the Great SuSE 'sprintf' Hunt
       - Change the parsing of ranges to accept all valid values
       - Ensure O_CREATE mask is always specified
       - Fix extern "C" wrapping
       - Make -LN stop dumping core.
       - Make bad debug levels report the offending symbol
+      - Remove inline declarations for non-inline defined functions
 
     snmpd:
       - [BUG 1693039]: Be silent when insert fails.
@@ -55,6 +58,10 @@ listing of all changes made to the code.
       - [PATCH 2901029]: Fix compiler warning on CloseHandle()
       - [PATCH 2911323]: Fix agent lockup when monitoring AgentX-delegated information
       - [PATCH 2912584]: Fix null OID handling in Agentx on 64bit
+      - [PATCH 2950845]: Fix ifHighSpeed calculation
+      - [PATCH 2952034]: Return of the Great SuSE 'sprintf' Hunt
+      - [PATCH 2956657]: Handle over-length AgentX OIDs
+      - [PATCH 2968642]: Catch overflow of pass-through command buffer
       - Allow "monitor" to handle negative threshold values
       - Clean up notification
       - Ensure O_CREATE mask is always specified
@@ -68,6 +75,8 @@ listing of all changes made to the code.
       - Fix udpTable indexes on big-endian 64bit Linux.
       - Improve parsing of -LS command line argument
       - Register CPU/memory hardware modules with nsCacheTable
+      - Remove inline declarations for non-inline defined functions
+      - Report ifSpeed of down network interfaces
       - Support large HW addresses (>6bytes)
 
     snmptrapd:
@@ -76,15 +85,19 @@ listing of all changes made to the code.
 
     snmptable:
       - [BUG 2837998]: Handle missing instance subidentifiers in results
+      - [PATCH 2850067]: Suppress extraneous "index" header token
 
     apps:
       - [BUG 2811577]: Fix bug in GetBulk handling
+      - [PATCH 2937996]: Add Date: header to email send by traptoemail
       - Improve parsing of -LS command line argument
 
     build:
       - [BUG 2095983]: Fix errors in find-requires helper script
       - [BUG 2782700]: Build failure when using --with-pkcs on Solaris
       - [PATCH 2184039]: Misc fixes for freeing memory
+      - [PATCH 2952020]: Set permission on testing directories
+      - 'make test TESTOPTS="-P tcp"' works fine now
 
     docs:
       - [PATCH 2788072]: Document 'logmatch' functionality.
@@ -111,6 +124,8 @@ listing of all changes made to the code.
       - [PATCH 2260828]: Fix python snmpwalk memory leak
       - [PATCH 2580979]: Fix python session pointers on 64-bit systems
       - [PATCH 2667415]: Support "UseNumeric" option
+      - Support null-bytes in octet strings
+
 
     AIX:
       - [BUG 2712670]: Agent crashes on AIX with hrStorage
@@ -125,6 +140,9 @@ listing of all changes made to the code.
 
     Linux:
       - [BUG 2822355]: Fix memory leaks on udpEndpointTable
+      - [PATCH 2926374]: Fix /proc/net/if_inet6 reading of ipAddressTable
+      - Fix build on modern distributions (using rpm-4.6)
+      - fix rare race condition when reading RPM database
 
     Solaris:
       - [PATCH 2012404]: Deal with more than 10 interfaces
@@ -139,6 +157,10 @@ listing of all changes made to the code.
       - [PATCH 2688342]: Fix various VS2005 compiler warnings
       - [PATCH 2691876]: Applied patch by rdiez to allow
       - [PATCH 2693746]: improved socket startup support
+      - Fix MSVC6 build (include <stdio.h> in snmp_logging.h)
+      - Fix winExtDLL build on Windows Vista, Windows 7
+      - Fix WinExtDLL build with MinGW
+      - Simplify building Net-SNMP + winExtDLL with MSVC
 
 
 * 5.4.2 *
