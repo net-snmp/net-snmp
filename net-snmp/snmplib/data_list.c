@@ -79,12 +79,13 @@ netsnmp_data_list_add_node(netsnmp_data_list **head, netsnmp_data_list *node)
     netsnmp_assert(NULL != node);
     netsnmp_assert(NULL != node->name);
 
+    DEBUGMSGTL(("data_list","adding key '%s'\n", node->name));
+
     if (!*head) {
         *head = node;
         return;
     }
 
-    DEBUGMSGTL(("data_list","adding key '%s'\n", node->name));
     if (0 == strcmp(node->name, (*head)->name)) {
         netsnmp_assert(!"list key == is unique"); /* always fail */
         snmp_log(LOG_WARNING,
