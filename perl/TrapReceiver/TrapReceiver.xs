@@ -208,7 +208,7 @@ int   perl_trapd_handler( netsnmp_pdu           *pdu,
 	SV *rv = POPs;
 
 	if (SvTYPE(rv) != SVt_IV) {
-	  snmp_log(LOG_WARNING, " perl callback function %p returned a scalar of type %d instead of an integer, assuming %d (NETSNMPTRAPD_HANDLER_OK)\n", pcallback, SvTYPE(rv), NETSNMPTRAPD_HANDLER_OK);
+	  snmp_log(LOG_WARNING, " perl callback function %p returned a scalar of type %lu instead of an integer, assuming %d (NETSNMPTRAPD_HANDLER_OK)\n", pcallback, (unsigned long)SvTYPE(rv), NETSNMPTRAPD_HANDLER_OK);
 	}
 	else {
 	  int rvi = (IV)SvIVx(rv);
