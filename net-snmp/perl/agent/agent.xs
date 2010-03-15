@@ -838,8 +838,8 @@ nari_setValue(me, type, value)
 		  break;
 	      }
 	      else {
-		snmp_log(LOG_ERR, "Non-integer value passed to setValue with ASN_INTEGER: type was %d\n",
-			SvTYPE(value));
+		snmp_log(LOG_ERR, "Non-integer value passed to setValue with ASN_INTEGER: type was %lu\n",
+			(unsigned long)SvTYPE(value));
 		RETVAL = 0;
 		break;
 	      }
@@ -874,8 +874,8 @@ nari_setValue(me, type, value)
 		  break;
 	      }
 	      else {
-		snmp_log(LOG_ERR, "Non-unsigned-integer value passed to setValue with ASN_UNSIGNED/ASN_COUNTER/ASN_TIMETICKS: type was %d\n",
-			SvTYPE(value));
+		snmp_log(LOG_ERR, "Non-unsigned-integer value passed to setValue with ASN_UNSIGNED/ASN_COUNTER/ASN_TIMETICKS: type was %lu\n",
+			(unsigned long)SvTYPE(value));
 		RETVAL = 0;
 		break;
 	      }
@@ -919,8 +919,8 @@ nari_setValue(me, type, value)
 		  break;
 	      }
 	      else {
-		snmp_log(LOG_ERR, "Non-unsigned-integer value passed to setValue with ASN_COUNTER64: type was %d\n",
-			SvTYPE(value));
+		snmp_log(LOG_ERR, "Non-unsigned-integer value passed to setValue with ASN_COUNTER64: type was %lu\n",
+			(unsigned long)SvTYPE(value));
 		RETVAL = 0;
 		break;
 	      }
@@ -930,8 +930,8 @@ nari_setValue(me, type, value)
           case ASN_OPAQUE:
 	      /* Check that we have been passed something with a string value (or a blessed scalar) */
 	      if (!SvPOKp(value) && (SvTYPE(value) != SVt_PVMG)) {
-		snmp_log(LOG_ERR, "Non-string value passed to setValue with ASN_OCTET_STR/ASN_BIT_STR: type was %d\n",
-			SvTYPE(value));
+		snmp_log(LOG_ERR, "Non-string value passed to setValue with ASN_OCTET_STR/ASN_BIT_STR: type was %lu\n",
+			(unsigned long)SvTYPE(value));
 		RETVAL = 0;
 		break;
 	      }
@@ -957,8 +957,8 @@ nari_setValue(me, type, value)
 
 	      /* Check that we have been passed something with a string value (or a blessed scalar) */
 	      if (!SvPOKp(value) && (SvTYPE(value) != SVt_PVMG)) {
-		snmp_log(LOG_ERR, "Non-string value passed to setValue with ASN_IPADDRESS: type was %d\n",
-			SvTYPE(value));
+		snmp_log(LOG_ERR, "Non-string value passed to setValue with ASN_IPADDRESS: type was %lu\n",
+			(unsigned long)SvTYPE(value));
 		RETVAL = 0;
 		break;
 	      }
@@ -984,8 +984,8 @@ nari_setValue(me, type, value)
           case ASN_OBJECT_ID:
 	      /* Check that we have been passed something with a string value (or a blessed scalar) */
 	      if (!SvPOKp(value) && (SvTYPE(value) != SVt_PVMG)) {
-		snmp_log(LOG_ERR, "Non-string value passed to setValue with ASN_OBJECT_ID: type was %d\n",
-			SvTYPE(value));
+		snmp_log(LOG_ERR, "Non-string value passed to setValue with ASN_OBJECT_ID: type was %lu\n",
+			(unsigned long)SvTYPE(value));
 		RETVAL = 0;
 		break;
 	      }
