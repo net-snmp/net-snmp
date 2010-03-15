@@ -103,8 +103,8 @@ listing of all changes made to the code.
     *BSD:
       - Fix a make test
 
-    HP:
-      - UX: BUG: 2779472: Filesystems missing in hrStorage
+    HP-UX:
+      - [BUG 2779472]: Filesystems missing in hrStorage
 
     Linux:
       - [PATCH 2926374]: Fix /proc/net/if_inet6 reading of ipAddressTable
