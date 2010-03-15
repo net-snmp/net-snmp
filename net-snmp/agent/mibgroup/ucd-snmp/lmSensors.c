@@ -1023,7 +1023,7 @@ else{
                 } /* end if array->current */
                 strncpy(array->sensor[array->n].name, label, MAX_NAME);
                 array->sensor[array->n].value = (int) (val * mul);
-                DEBUGMSGTL(("sensors","sensor %d, value %d\n",
+                DEBUGMSGTL(("sensors","sensor %s, value %d\n",
                             array->sensor[array->n].name,
                             array->sensor[array->n].value));
                 array->n++;
