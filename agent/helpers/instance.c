@@ -483,8 +483,6 @@ netsnmp_register_int_instance(const char *name,
                    (void *)it, sizeof(int), ASN_INTEGER, WATCHER_FIXED_SIZE));
 }
 
-#ifndef NETSNMP_NO_DEPRECATED_FUNCTIONS
-
 #ifdef HAVE_DMALLOC_H
 static void free_wrapper(void * p)
 {
@@ -493,6 +491,8 @@ static void free_wrapper(void * p)
 #else
 #define free_wrapper free
 #endif
+
+#ifndef NETSNMP_NO_DEPRECATED_FUNCTIONS
 
 /**
  * \deprecated This function is unused and scheduled for removal in Net-SNMP 5.6
