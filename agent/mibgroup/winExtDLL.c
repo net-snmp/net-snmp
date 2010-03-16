@@ -726,9 +726,8 @@ var_winExtDLL(netsnmp_mib_handler *handler,
                 /*
                  * Compare the OID passed to the Windows SNMP extension DLL
                  * with the OID returned by the same DLL. If the DLL returned
-                 * a lexicographically earlier OID (bug in the DLL), replace
-                 * it by an OID that comes lexicographically after the
-                 * original OID. This is necessary for at least divasnmpx.dll.
+                 * a lexicographically earlier OID, this means that there is
+                 * no next OID in this MIB.
                  *
                  * Note: for some GetNext requests BoundsChecker will report
                  * that the code below accesses a dangling pointer. This is
@@ -747,12 +746,6 @@ var_winExtDLL(netsnmp_mib_handler *handler,
                     snmp_set_var_objid(varbind,
                                        win_varbind->name.ids,
                                        win_varbind->name.idLength);
-                } else {
-                    /*
-                     * Increment the OID in the Net-SNMP varbind. 
-                     */
-                    if (varbind->name && varbind->name_length >= 1)
-                        varbind->name[varbind->name_length - 1]++;
                 }
 
                 get_result = 0;
