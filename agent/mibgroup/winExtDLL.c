@@ -235,6 +235,7 @@ static void     send_trap(const AsnObjectIdentifier * const,
                           const AsnTimeticks,
                           const SnmpVarBindList * const);
 static u_char  *winsnmp_memdup(const void *src, const size_t len);
+static char    *snprint_oid_tree(const oid * const name, const size_t name_len);
 static char    *snprint_oid(const oid * const name, const size_t name_len);
 #if 0
 static void     xarray_init(xarray * a, size_t elem_size);
@@ -411,12 +412,15 @@ shutdown_winExtDLL(void)
         winextdll_view *const v = &WINEXTDLL_VIEW(i);
         if (v && v->my_handler) {
             DEBUGIF("winExtDLL") {
-                char           *oid_name =
-                    snprint_oid(v->name, v->name_length);
+                char           *oid_tree_name, *oid_name;
+                
+                oid_tree_name = snprint_oid_tree(v->name, v->name_length);
+                oid_name = snprint_oid(v->name, v->name_length);
                 DEBUGMSG(("winExtDLL",
-                          "unregistering handler for DLL %s and OID prefix %s.\n",
-                          v->winextdll_info->dll_name, oid_name));
+                          "unregistering handler for DLL %s and OID prefix %s (%s).\n",
+                          v->winextdll_info->dll_name, oid_tree_name, oid_name));
                 free(oid_name);
+                free(oid_tree_name);
             }
             netsnmp_unregister_handler(v->my_handler);
         }
@@ -485,9 +489,9 @@ register_netsnmp_handler(winextdll_view * const ext_dll_view_info)
                              ext_dll_view_info->name_length);
 
     if (previously_registered_view) {
-        char           *oid_name = snprint_oid(ext_dll_view_info->name,
-                                               ext_dll_view_info->
-                                               name_length);
+        char           *oid_name = snprint_oid_tree(ext_dll_view_info->name,
+                                                    ext_dll_view_info->
+                                                    name_length);
         snmp_log(LOG_INFO, "OID range %s: replacing handler %s by %s.\n",
                  oid_name,
                  previously_registered_view->winextdll_info->dll_name,
@@ -513,13 +517,17 @@ register_netsnmp_handler(winextdll_view * const ext_dll_view_info)
             if (netsnmp_register_handler(ext_dll_view_info->my_handler)
                 == MIB_REGISTERED_OK) {
                 DEBUGIF("winExtDLL") {
-                    char           *oid_name =
-                        snprint_oid(ext_dll_view_info->name,
-                                    ext_dll_view_info->name_length);
+                    char           *oid_tree_name, *oid_name;
+                    
+                    oid_tree_name = snprint_oid_tree(ext_dll_view_info->name,
+                                                     ext_dll_view_info->name_length);
+                    oid_name = snprint_oid(ext_dll_view_info->name,
+                                           ext_dll_view_info->name_length);
                     DEBUGMSG(("winExtDLL",
-                              "registering handler for DLL %s and OID prefix %s.\n",
-                              ext_dll_info->dll_name, oid_name));
+                              "registering handler for DLL %s and OID prefix %s (%s).\n",
+                              ext_dll_info->dll_name, oid_tree_name, oid_name));
                     free(oid_name);
+                    free(oid_tree_name);
                 }
                 return 1;
             } else {
@@ -638,7 +646,7 @@ var_winExtDLL(netsnmp_mib_handler *handler,
                                                           &ErrorStatus,
                                                           &ErrorIndex);
         } else if (ext_dll_info->pfSnmpExtensionQuery) {
-            result = ext_dll_info->pfSnmpExtensionQuery(nRequestType,
+            result = ext_dll_info->pfSnmpExtensionQuery((BYTE)nRequestType,
                                                         &win_varbinds,
                                                         &ErrorStatus,
                                                         &ErrorIndex);
@@ -692,6 +700,29 @@ var_winExtDLL(netsnmp_mib_handler *handler,
                 assert(0 <= i && i < win_varbinds.len);
                 win_varbind = &win_varbinds.list[i];
 
+                DEBUGIF("winExtDLL") {
+                    char           *oid_name, *oid_tree_name;
+                    
+                    DEBUGMSG(("winExtDLL",
+                        "GetNextRequest (DLL %s):\n", ext_dll_info->dll_name));
+                    oid_tree_name = snprint_oid_tree(varbind->name,
+                        varbind->name_length);
+                    oid_name = snprint_oid(varbind->name,
+                        varbind->name_length);
+                    DEBUGMSG(("winExtDLL", "original OID: %s (%s).\n",
+                        oid_tree_name, oid_name));
+                    free(oid_tree_name);
+                    free(oid_name);
+                    oid_tree_name = snprint_oid_tree(win_varbind->name.ids,
+                        win_varbind->name.idLength);
+                    oid_name = snprint_oid(win_varbind->name.ids,
+                        win_varbind->name.idLength);
+                    DEBUGMSG(("winExtDLL", "returned OID: %s (%s).\n",
+                        oid_tree_name, oid_name));
+                    free(oid_tree_name);
+                    free(oid_name);
+                }
+
                 /*
                  * Compare the OID passed to the Windows SNMP extension DLL
                  * with the OID returned by the same DLL. If the DLL returned
@@ -720,23 +751,6 @@ var_winExtDLL(netsnmp_mib_handler *handler,
                     /*
                      * Increment the OID in the Net-SNMP varbind. 
                      */
-                    DEBUGIF("winExtDLL") {
-                        char           *oid_name;
-
-                        DEBUGMSG(("winExtDLL",
-                                  "GetNextRequest: DLL %s returned out-of-order OID.\n",
-                                  ext_dll_info->dll_name));
-                        oid_name = snprint_oid(varbind->name,
-                                               varbind->name_length);
-                        DEBUGMSG(("winExtDLL", "original OID: %s.\n",
-                                  oid_name));
-                        free(oid_name);
-                        oid_name = snprint_oid(win_varbind->name.ids,
-                                               win_varbind->name.idLength);
-                        DEBUGMSG(("winExtDLL", "returned OID: %s.\n",
-                                  oid_name));
-                        free(oid_name);
-                    }
                     if (varbind->name && varbind->name_length >= 1)
                         varbind->name[varbind->name_length - 1]++;
                 }
@@ -1504,7 +1518,34 @@ winsnmp_memdup(const void *src, const size_t len)
 }
 
 /**
- * Convert OID 'name' a printable and null-terminated representation.
+ * Convert OID 'name' to a printable and null-terminated representation
+ * using the symbolic names from the loaded MIBs.
+ *
+ * The caller must free the allocated memory by calling free() on the
+ * returned pointer.
+ */
+static char    *
+snprint_oid_tree(const oid * const name, const size_t name_len)
+{
+    size_t          out_len;
+    size_t          buf_len;
+    char           *buf;
+    int             buf_overflow;
+
+    out_len = 0;
+    buf_len = 0;
+    buf = NULL;
+    buf_overflow = 0;
+    netsnmp_sprint_realloc_objid_tree((u_char **) &buf, &buf_len, &out_len, 1,
+                                      &buf_overflow, name, name_len);
+    assert(buf);
+    assert(!buf_overflow);
+    return buf;
+}
+
+/**
+ * Convert OID 'name' to a printable and null-terminated numeric
+ * representation.
  *
  * The caller must free the allocated memory by calling free() on the
  * returned pointer.
@@ -1521,8 +1562,8 @@ snprint_oid(const oid * const name, const size_t name_len)
     buf_len = 0;
     buf = NULL;
     buf_overflow = 0;
-    netsnmp_sprint_realloc_objid_tree((u_char **) &buf, &buf_len, &out_len, 1,
-                                      &buf_overflow, name, name_len);
+    netsnmp_sprint_realloc_objid((u_char **) &buf, &buf_len, &out_len, 1,
+                                 &buf_overflow, name, name_len);
     assert(buf);
     assert(!buf_overflow);
     return buf;
