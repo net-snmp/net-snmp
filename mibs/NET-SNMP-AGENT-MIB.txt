@@ -72,7 +72,7 @@ nsCacheDefaultTimeout         OBJECT-TYPE
     DESCRIPTION
       "Default cache timeout value (unless overridden
        for a particular cache entry)."
-    DEFVAL { 5 --seconds-- }
+    DEFVAL { 5 } --seconds-- 
     ::= { nsCache 1 }
 
 nsCacheEnabled                OBJECT-TYPE
