@@ -14,4 +14,8 @@ extern          "C" {
     int netsnmp_udpbase_send(netsnmp_transport *t, void *buf, int size,
                              void **opaque, int *olength);
 
+#ifdef __cplusplus
+}
+#endif
+
 #endif /* SNMPUDPBASEDOMAIN_H */
