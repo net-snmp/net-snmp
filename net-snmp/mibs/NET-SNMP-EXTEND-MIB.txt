@@ -211,8 +211,8 @@ nsExtendOutput1Entry     OBJECT-TYPE
 NsExtendOutput1Entry ::= SEQUENCE {
     nsExtendOutput1Line DisplayString,
     nsExtendOutputFull  DisplayString,
-    nsExtendOutNumLines INTEGER,
-    nsExtendResult      INTEGER
+    nsExtendOutNumLines Integer32,
+    nsExtendResult      Integer32
 }
 
 nsExtendOutput1Line OBJECT-TYPE
