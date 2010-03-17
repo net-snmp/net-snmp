@@ -428,6 +428,19 @@ SCTP-MIB
  sctpLookupRemPrimIPAddrTable L         5.5     C sctp-mib/=
  sctpLookupRemIPAddrTable     L         5.5     C sctp-mib/=
 
+------------------------------------------------------------------------------
+SNMP-TSM-MIB
+ snmpTsmStats                 A         5.6     D tsm-mib/snmpTsmStats/=
+ snmpConfiguration            A         5.6     W tsm-mib/=
+
+------------------------------------------------------------------------------
+TLSTM-MIB
+ snmpTlstmSession             A         5.6     W tlstm-mib/=/*
+ tlstmCertificateMapping.*    A         5.6     w tlstm-mib/=
+ tlstmCertToTSNTable          A         5.6     D tlstm-mib/=/*
+ tlstmParamsTable             A         5.6     D tlstm-mib/=/*
+ tlstmAddrTable               A         5.6     D tlstm-mib/=/*
+
 ==============================================================================
 
 Misc notes
@@ -445,3 +458,5 @@ Other feature info
  proper context support                   5.2
  DISMAN-EVENT-MIB implementation rewrite  5.3
  AgentX, host, disman/event by default    5.3
+ SSH Transport module                     5.5
+ (D)TLS Transport module                  5.6
