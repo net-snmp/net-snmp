@@ -598,44 +598,31 @@ var_winExtDLL(netsnmp_mib_handler *handler,
     }
 
     for (request = requests; request; request = request->next) {
-        netsnmp_variable_list *netsnmp_varbinds;
         netsnmp_variable_list *varbind;
         SnmpVarBindList win_varbinds;
         BOOL            result;
         AsnInteger32    ErrorStatus;
         AsnInteger32    ErrorIndex;
 
+        if (request->processed)
+            continue;
+
         assert(request->status == 0);
-        netsnmp_varbinds = request->requestvb;
-        assert(netsnmp_varbinds);
+        varbind = request->requestvb;
+        assert(varbind);
 
         /*
-         * For a GetNext PDU, if the varbind OID comes lexicographically
-         * before the root OID of this handler, replace it by the root OID.
+         * Convert the Net-SNMP varbind to a Windows SNMP varbind.
          */
-        if (reqinfo->mode == MODE_GETNEXT) {
-            for (varbind = netsnmp_varbinds; varbind;
-                 varbind = varbind->next_variable) {
-                if (snmp_oid_compare(varbind->name, varbind->name_length,
-                                     reginfo->rootoid,
-                                     reginfo->rootoid_len) < 0) {
-                    snmp_set_var_objid(varbind, reginfo->rootoid,
-                                       reginfo->rootoid_len);
-                }
-            }
-        }
-
-        /*
-         * Convert the Net-SNMP varbind list to a Windows SNMP varbind list. 
-         */
-        request->status = convert_to_windows_varbind_list(&win_varbinds,
-                                                          netsnmp_varbinds);
+        request->status = convert_to_windows_varbind_list(&win_varbinds, varbind);
         if (request->status != SNMP_ERR_NOERROR) {
             DEBUGMSG(("winExtDLL",
                       "converting varbind list to Windows format failed with"
                       " error code %d.\n", request->status));
             continue;
         }
+
+        assert(win_varbinds.len == 1);
 
         if (ext_dll_info->pfSnmpExtensionQueryEx) {
             result = ext_dll_info->pfSnmpExtensionQueryEx(nRequestType,
@@ -669,111 +656,104 @@ var_winExtDLL(netsnmp_mib_handler *handler,
         request->status = convert_win_snmp_err(ErrorStatus);
 
         if (reqinfo->mode == MODE_GET) {
-            int             i;
-            for (varbind = netsnmp_varbinds, i = 0;
-                 varbind; varbind = varbind->next_variable, i++) {
-                netsnmp_variable_list *get_result = 0;
-
-                assert(0 <= i && i < win_varbinds.len);
-
-                append_windows_varbind(&get_result, &win_varbinds.list[i]);
-                if (get_result) {
-                    snmp_set_var_typed_value(varbind,
-                                             get_result->type,
-                                             get_result->val.string,
-                                             get_result->val_len);
-                    snmp_free_varbind(get_result);
-                } else {
-                    snmp_log(LOG_ERR,
-                             "GetRequest: a conversion from a WinSNMP varbind"
-                             " to a Net-SNMP varbind failed.\n");
-                    assert(0);
-                }
+            netsnmp_variable_list *get_result = NULL;
+            
+            append_windows_varbind(&get_result, &win_varbinds.list[0]);
+            if (get_result) {
+                snmp_set_var_typed_value(varbind,
+                                         get_result->type,
+                                         get_result->val.string,
+                                         get_result->val_len);
+                snmp_free_varbind(get_result);
+            } else {
+                snmp_log(LOG_ERR,
+                         "GetRequest: a conversion from a WinSNMP varbind"
+                         " to a Net-SNMP varbind failed.\n");
+                assert(0);
             }
         } else if (reqinfo->mode == MODE_GETNEXT) {
-            int             i;
-            for (varbind = netsnmp_varbinds, i = 0;
-                 varbind; varbind = varbind->next_variable, i++) {
-                const SnmpVarBind *win_varbind;
-                netsnmp_variable_list *get_result;
-
-                assert(0 <= i && i < win_varbinds.len);
-                win_varbind = &win_varbinds.list[i];
-
-                DEBUGIF("winExtDLL") {
-                    const char     *comment;
-                    char           *oid_name, *oid_tree_name;
-                    
-                    if (snmp_oid_compare(varbind->name, varbind->name_length,
-                                         reginfo->rootoid, reginfo->rootoid_len) < 0)
-                        comment = " (before start of MIB)";
-                    else if (snmp_oid_compare(varbind->name, varbind->name_length,
-                                              win_varbind->name.ids,
-                                              win_varbind->name.idLength) < 0)
-                        comment = "";
-                    else
-                        comment = " (past end of MIB)";
-                    DEBUGMSG(("winExtDLL",
-                        "GetNextRequest (DLL %s):\n", ext_dll_info->dll_name));
-                    oid_tree_name = snprint_oid_tree(varbind->name,
-                        varbind->name_length);
-                    oid_name = snprint_oid(varbind->name,
-                        varbind->name_length);
-                    DEBUGMSG(("winExtDLL", "original OID%s: %s (%s).\n",
-                        comment, oid_tree_name, oid_name));
-                    free(oid_tree_name);
-                    free(oid_name);
-                }
-
-                /*
-                 * Compare the OID passed to the Windows SNMP extension DLL
-                 * with the OID returned by the same DLL. If the DLL returned
-                 * a lexicographically earlier OID, this means that there is
-                 * no next OID in this MIB.
-                 *
-                 * Note: for some GetNext requests BoundsChecker will report
-                 * that the code below accesses a dangling pointer. This is
-                 * a limitation of BoundsChecker: apparently BoundsChecker is
-                 * not able to cope with reallocation of memory for
-                 * win_varbind by an SNMP extension DLL that has not been
-                 * instrumented by BoundsChecker.
-                 */
+            const SnmpVarBind *win_varbind;
+            netsnmp_variable_list *get_result;
+            
+            win_varbind = &win_varbinds.list[0];
+            
+            DEBUGIF("winExtDLL") {
+                const char     *comment;
+                char           *reg_oid_name, *oid_name, *oid_tree_name;
+                
                 if (snmp_oid_compare(varbind->name, varbind->name_length,
-                                     win_varbind->name.ids,
-                                     win_varbind->name.idLength) < 0) {
-                    /*
-                     * Copy the OID returned by the extension DLL to the
-                     * Net-SNMP varbind.
-                     */
-                    snmp_set_var_objid(varbind,
-                                       win_varbind->name.ids,
-                                       win_varbind->name.idLength);
-                }
-
-                DEBUGIF("winExtDLL") {
-                    char           *oid_name, *oid_tree_name;
-
-                    oid_tree_name = snprint_oid_tree(varbind->name, varbind->name_length);
-                    oid_name = snprint_oid(varbind->name, varbind->name_length);
-                    DEBUGMSG(("winExtDLL", "returned OID: %s (%s).\n",
-                              oid_tree_name, oid_name));
-                    free(oid_tree_name);
-                    free(oid_name);
-                }
-                get_result = 0;
-                append_windows_varbind(&get_result, win_varbind);
-                if (get_result) {
-                    snmp_set_var_typed_value(varbind,
-                                             get_result->type,
-                                             get_result->val.string,
-                                             get_result->val_len);
-                    snmp_free_varbind(get_result);
-                } else {
-                    snmp_log(LOG_ERR,
-                             "GetNextRequest: a conversion from a WinSNMP varbind"
-                             " to a Net-SNMP varbind failed.\n");
-                    assert(0);
-                }
+                    reginfo->rootoid, reginfo->rootoid_len) < 0)
+                    comment = " (before start of MIB)";
+                else if (snmp_oid_compare(varbind->name, varbind->name_length,
+                    win_varbind->name.ids,
+                    win_varbind->name.idLength) < 0)
+                    comment = "";
+                else
+                    comment = " (past end of MIB)";
+                reg_oid_name = snprint_oid(reginfo->rootoid,
+                    reginfo->rootoid_len);
+                DEBUGMSG(("winExtDLL",
+                    "GetNextRequest (DLL %s, OID %s):\n",
+                    ext_dll_info->dll_name, reg_oid_name));
+                free(reg_oid_name);
+                oid_tree_name = snprint_oid_tree(varbind->name,
+                    varbind->name_length);
+                oid_name = snprint_oid(varbind->name,
+                    varbind->name_length);
+                DEBUGMSG(("winExtDLL", "original OID%s: %s (%s).\n",
+                    comment, oid_tree_name, oid_name));
+                free(oid_tree_name);
+                free(oid_name);
+            }
+            
+            /*
+             * Compare the OID passed to the Windows SNMP extension DLL
+             * with the OID returned by the same DLL. If the DLL returned
+             * a lexicographically earlier OID, this means that there is
+             * no next OID in this MIB.
+             *
+             * Note: for some GetNext requests BoundsChecker will report
+             * that the code below accesses a dangling pointer. This is
+             * a limitation of BoundsChecker: apparently BoundsChecker is
+             * not able to cope with reallocation of memory for
+             * win_varbind by an SNMP extension DLL that has not been
+             * instrumented by BoundsChecker.
+             */
+            if (snmp_oid_compare(varbind->name, varbind->name_length,
+                win_varbind->name.ids,
+                win_varbind->name.idLength) < 0) {
+                /*
+                 * Copy the OID returned by the extension DLL to the
+                 * Net-SNMP varbind.
+                 */
+                snmp_set_var_objid(varbind,
+                    win_varbind->name.ids,
+                    win_varbind->name.idLength);
+            }
+            
+            DEBUGIF("winExtDLL") {
+                char           *oid_name, *oid_tree_name;
+                
+                oid_tree_name = snprint_oid_tree(varbind->name, varbind->name_length);
+                oid_name = snprint_oid(varbind->name, varbind->name_length);
+                DEBUGMSG(("winExtDLL", "returned OID: %s (%s).\n",
+                    oid_tree_name, oid_name));
+                free(oid_tree_name);
+                free(oid_name);
+            }
+            get_result = 0;
+            append_windows_varbind(&get_result, win_varbind);
+            if (get_result) {
+                snmp_set_var_typed_value(varbind,
+                    get_result->type,
+                    get_result->val.string,
+                    get_result->val_len);
+                snmp_free_varbind(get_result);
+            } else {
+                snmp_log(LOG_ERR,
+                    "GetNextRequest: a conversion from a WinSNMP varbind"
+                    " to a Net-SNMP varbind failed.\n");
+                assert(0);
             }
         }
 
@@ -1246,23 +1226,22 @@ append_windows_varbind(netsnmp_variable_list ** const net_snmp_varbinds,
 }
 
 /**
- * Convert a Net-SNMP varbind list to a WinSNMP varbind list.
+ * Convert a Net-SNMP varbind to a WinSNMP varbind list.
  *
  * @param[out] pVarBindList WinSNMP varbind list, initialized by this
  *               function.
- * @param[in]  netsnmp_varbinds Net-SNMP varbind list.
+ * @param[in]  varbind Net-SNMP varbind.
  */
 int
 convert_to_windows_varbind_list(SnmpVarBindList * pVarBindList,
-                                netsnmp_variable_list * netsnmp_varbinds)
+                                netsnmp_variable_list * varbind)
 {
-    int             i;
-    const netsnmp_variable_list *varbind;
+    SnmpVarBind    *win_varbind;
 
     assert(pVarBindList);
-    assert(netsnmp_varbinds);
+    assert(varbind);
 
-    pVarBindList->len = count_varbinds(netsnmp_varbinds);
+    pVarBindList->len = 1;
     pVarBindList->list
         = (SnmpVarBind *) SnmpUtilMemAlloc(pVarBindList->len
                                            *
@@ -1272,114 +1251,108 @@ convert_to_windows_varbind_list(SnmpVarBindList * pVarBindList,
 
     memset(&pVarBindList->list[0], 0, sizeof(pVarBindList->list[0]));
 
-    for (varbind = netsnmp_varbinds, i = 0;
-         varbind; varbind = varbind->next_variable, i++) {
-        SnmpVarBind    *win_varbind;
+    win_varbind = &pVarBindList->list[0];
 
-        assert(i < pVarBindList->len);
-        win_varbind = &pVarBindList->list[i];
+    if (varbind->name
+        && !copy_oid_to_new_windows_oid(&win_varbind->name,
+                                        varbind->name,
+                                        varbind->name_length))
+        goto generr;
 
-        if (varbind->name
-            && !copy_oid_to_new_windows_oid(&win_varbind->name,
-                                            varbind->name,
-                                            varbind->name_length))
-            goto generr;
-
-        switch (varbind->type) {
+    switch (varbind->type) {
         case ASN_BOOLEAN:
-            // There is no equivalent type in Microsoft's <snmp.h>.
-            assert(0);
-            win_varbind->value.asnType = MS_ASN_INTEGER;
-            win_varbind->value.asnValue.number = *(varbind->val.integer);
-            break;
-        case ASN_INTEGER:
-            win_varbind->value.asnType = MS_ASN_INTEGER;
-            win_varbind->value.asnValue.number = *(varbind->val.integer);
-            break;
-        case ASN_BIT_STR:
-            win_varbind->value.asnType = MS_ASN_BITS;
-            win_varbind->value.asnValue.string.stream
-                = winsnmp_memdup(varbind->val.string, varbind->val_len);
-            win_varbind->value.asnValue.string.length =
-                (UINT) (varbind->val_len);
-            win_varbind->value.asnValue.string.dynamic = TRUE;
-            break;
-        case ASN_OCTET_STR:
-            win_varbind->value.asnType = MS_ASN_OCTETSTRING;
-            win_varbind->value.asnValue.string.stream
-                = winsnmp_memdup(varbind->val.string, varbind->val_len);
-            win_varbind->value.asnValue.string.length =
-                (UINT) (varbind->val_len);
-            win_varbind->value.asnValue.string.dynamic = TRUE;
-            break;
-        case ASN_NULL:
-            win_varbind->value.asnType = MS_ASN_NULL;
-            memset(&win_varbind->value, 0, sizeof(win_varbind->value));
-            break;
-        case ASN_OBJECT_ID:
-            win_varbind->value.asnType = MS_ASN_OBJECTIDENTIFIER;
-            if (!copy_oid_to_new_windows_oid
-                (&win_varbind->value.asnValue.object, varbind->val.objid,
-                 varbind->val_len / sizeof(varbind->val.objid[0])))
-                return SNMP_ERR_GENERR;
-            break;
-        case ASN_SEQUENCE:
-            win_varbind->value.asnType = MS_ASN_SEQUENCE;
-            win_varbind->value.asnValue.string.stream
-                = winsnmp_memdup(varbind->val.string, varbind->val_len);
-            win_varbind->value.asnValue.string.length =
-                (UINT) (varbind->val_len);
-            win_varbind->value.asnValue.string.dynamic = TRUE;
-            break;
-        case ASN_SET:
-            // There is no equivalent type in Microsoft's <snmp.h>.
-            assert(0);
-            win_varbind->value.asnType = MS_ASN_INTEGER;
-            win_varbind->value.asnValue.number = *(varbind->val.integer);
-            break;
-        case ASN_IPADDRESS:
-            win_varbind->value.asnType = MS_ASN_IPADDRESS;
-            win_varbind->value.asnValue.string.stream
-                = winsnmp_memdup(varbind->val.string, varbind->val_len);
-            win_varbind->value.asnValue.string.length =
-                (UINT) (varbind->val_len);
-            win_varbind->value.asnValue.string.dynamic = TRUE;
-            break;
-        case ASN_COUNTER:
-            win_varbind->value.asnType = MS_ASN_COUNTER32;
-            win_varbind->value.asnValue.counter = *(varbind->val.integer);
-            break;
-            /*
-             * ASN_GAUGE == ASN_UNSIGNED 
-             */
-        case ASN_UNSIGNED:
-            win_varbind->value.asnType = MS_ASN_UNSIGNED32;
-            win_varbind->value.asnValue.unsigned32 =
-                *(varbind->val.integer);
-            break;
-        case ASN_TIMETICKS:
-            win_varbind->value.asnType = MS_ASN_TIMETICKS;
-            win_varbind->value.asnValue.ticks = *(varbind->val.integer);
-            break;
-        case ASN_OPAQUE:
-            win_varbind->value.asnType = MS_ASN_OPAQUE;
-            win_varbind->value.asnValue.string.stream
-                = winsnmp_memdup(varbind->val.string, varbind->val_len);
-            win_varbind->value.asnValue.string.length =
-                (UINT) (varbind->val_len);
-            win_varbind->value.asnValue.string.dynamic = TRUE;
-            break;
-        case ASN_COUNTER64:
-            win_varbind->value.asnType = MS_ASN_COUNTER64;
-            win_varbind->value.asnValue.counter64.HighPart
-                = varbind->val.counter64->high;
-            win_varbind->value.asnValue.counter64.LowPart
-                = varbind->val.counter64->low;
-            break;
-        default:
-            assert(0);
-            goto generr;
-        }
+        // There is no equivalent type in Microsoft's <snmp.h>.
+        assert(0);
+        win_varbind->value.asnType = MS_ASN_INTEGER;
+        win_varbind->value.asnValue.number = *(varbind->val.integer);
+        break;
+    case ASN_INTEGER:
+        win_varbind->value.asnType = MS_ASN_INTEGER;
+        win_varbind->value.asnValue.number = *(varbind->val.integer);
+        break;
+    case ASN_BIT_STR:
+        win_varbind->value.asnType = MS_ASN_BITS;
+        win_varbind->value.asnValue.string.stream
+            = winsnmp_memdup(varbind->val.string, varbind->val_len);
+        win_varbind->value.asnValue.string.length =
+            (UINT) (varbind->val_len);
+        win_varbind->value.asnValue.string.dynamic = TRUE;
+        break;
+    case ASN_OCTET_STR:
+        win_varbind->value.asnType = MS_ASN_OCTETSTRING;
+        win_varbind->value.asnValue.string.stream
+            = winsnmp_memdup(varbind->val.string, varbind->val_len);
+        win_varbind->value.asnValue.string.length =
+            (UINT) (varbind->val_len);
+        win_varbind->value.asnValue.string.dynamic = TRUE;
+        break;
+    case ASN_NULL:
+        win_varbind->value.asnType = MS_ASN_NULL;
+        memset(&win_varbind->value, 0, sizeof(win_varbind->value));
+        break;
+    case ASN_OBJECT_ID:
+        win_varbind->value.asnType = MS_ASN_OBJECTIDENTIFIER;
+        if (!copy_oid_to_new_windows_oid
+            (&win_varbind->value.asnValue.object, varbind->val.objid,
+             varbind->val_len / sizeof(varbind->val.objid[0])))
+            return SNMP_ERR_GENERR;
+        break;
+    case ASN_SEQUENCE:
+        win_varbind->value.asnType = MS_ASN_SEQUENCE;
+        win_varbind->value.asnValue.string.stream
+            = winsnmp_memdup(varbind->val.string, varbind->val_len);
+        win_varbind->value.asnValue.string.length =
+            (UINT) (varbind->val_len);
+        win_varbind->value.asnValue.string.dynamic = TRUE;
+        break;
+    case ASN_SET:
+        // There is no equivalent type in Microsoft's <snmp.h>.
+        assert(0);
+        win_varbind->value.asnType = MS_ASN_INTEGER;
+        win_varbind->value.asnValue.number = *(varbind->val.integer);
+        break;
+    case ASN_IPADDRESS:
+        win_varbind->value.asnType = MS_ASN_IPADDRESS;
+        win_varbind->value.asnValue.string.stream
+            = winsnmp_memdup(varbind->val.string, varbind->val_len);
+        win_varbind->value.asnValue.string.length =
+            (UINT) (varbind->val_len);
+        win_varbind->value.asnValue.string.dynamic = TRUE;
+        break;
+    case ASN_COUNTER:
+        win_varbind->value.asnType = MS_ASN_COUNTER32;
+        win_varbind->value.asnValue.counter = *(varbind->val.integer);
+        break;
+        /*
+        * ASN_GAUGE == ASN_UNSIGNED 
+        */
+    case ASN_UNSIGNED:
+        win_varbind->value.asnType = MS_ASN_UNSIGNED32;
+        win_varbind->value.asnValue.unsigned32 =
+            *(varbind->val.integer);
+        break;
+    case ASN_TIMETICKS:
+        win_varbind->value.asnType = MS_ASN_TIMETICKS;
+        win_varbind->value.asnValue.ticks = *(varbind->val.integer);
+        break;
+    case ASN_OPAQUE:
+        win_varbind->value.asnType = MS_ASN_OPAQUE;
+        win_varbind->value.asnValue.string.stream
+            = winsnmp_memdup(varbind->val.string, varbind->val_len);
+        win_varbind->value.asnValue.string.length =
+            (UINT) (varbind->val_len);
+        win_varbind->value.asnValue.string.dynamic = TRUE;
+        break;
+    case ASN_COUNTER64:
+        win_varbind->value.asnType = MS_ASN_COUNTER64;
+        win_varbind->value.asnValue.counter64.HighPart
+            = varbind->val.counter64->high;
+        win_varbind->value.asnValue.counter64.LowPart
+            = varbind->val.counter64->low;
+        break;
+    default:
+        assert(0);
+        goto generr;
     }
 
     return SNMP_ERR_NOERROR;
