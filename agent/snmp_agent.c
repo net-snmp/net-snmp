@@ -1302,6 +1302,7 @@ init_master_agent(void)
 			"NSAP\n", cptr));
         }
     } while(st && *st != '\0');
+    SNMP_FREE(buf);
 
 #ifdef USING_AGENTX_MASTER_MODULE
     if (netsnmp_ds_get_boolean(NETSNMP_DS_APPLICATION_ID, 
