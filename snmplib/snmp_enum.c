@@ -27,19 +27,21 @@ struct snmp_enum_list_str {
     struct snmp_enum_list_str *next;
 };
 
-static struct snmp_enum_list ***snmp_enum_lists;
+static struct snmp_enum_list ***snmp_enum_lists = NULL;
 unsigned int    current_maj_num;
 unsigned int    current_min_num;
-struct snmp_enum_list_str *sliststorage;
+struct snmp_enum_list_str *sliststorage = NULL;
 
 int
 init_snmp_enum(const char *type)
 {
     int             i;
 
-    if (!snmp_enum_lists)
-        snmp_enum_lists = (struct snmp_enum_list ***)
-            calloc(1, sizeof(struct snmp_enum_list **) * SE_MAX_IDS);
+    if (NULL != sliststorage)
+        return SE_OK;
+
+    snmp_enum_lists = (struct snmp_enum_list ***)
+        calloc(1, sizeof(struct snmp_enum_list **) * SE_MAX_IDS);
     if (!snmp_enum_lists)
         return SE_NOMEM;
     current_maj_num = SE_MAX_IDS;
@@ -52,9 +54,6 @@ init_snmp_enum(const char *type)
             return SE_NOMEM;
     }
     current_min_num = SE_MAX_SUBIDS;
-
-    if (!sliststorage)
-        sliststorage = NULL;
 
     register_config_handler(type, "enum", se_read_conf, NULL, NULL);
     return SE_OK;
