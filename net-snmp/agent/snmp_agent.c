@@ -1198,7 +1198,7 @@ init_master_agent(void)
         /*
          * No, so just specify the default port.  
          */
-        buf = "";
+        buf = strdup("");
     }
 
     DEBUGMSGTL(("snmp_agent", "final port spec: \"%s\"\n", buf));
@@ -1249,6 +1249,7 @@ init_master_agent(void)
 			"NSAP\n", cptr));
         }
     } while(st && *st != '\0');
+    SNMP_FREE(buf);
 
 #ifdef USING_AGENTX_MASTER_MODULE
     if (netsnmp_ds_get_boolean(NETSNMP_DS_APPLICATION_ID, 
