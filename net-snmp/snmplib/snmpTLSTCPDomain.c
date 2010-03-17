@@ -168,16 +168,8 @@ netsnmp_tlstcp_recv(netsnmp_transport *t, void *buf, int size,
         /* use x509 cert to do lookup to secname if DNE in cachep yet */
         if (!tlsdata->securityName) {
             if (NULL != (peer = SSL_get_peer_certificate(tlsdata->ssl))) {
-                X509_NAME *subname;
-                char namebuf[1024];
-                
-                /* we have one */
-                subname = X509_get_subject_name(peer);
-                X509_NAME_get_text_by_NID(subname, NID_commonName,
-                                          namebuf, sizeof(namebuf));
-                DEBUGMSGTL(("tlstcp", "got commonname: %s\n",
-                            namebuf));
-                tlsdata->securityName = strdup(namebuf);
+                tlsdata->securityName =
+                    netsnmp_openssl_cert_get_commonName(peer, NULL, NULL, 0);
                 DEBUGMSGTL(("tlstcp", "set SecName to: %s\n",
                             tlsdata->securityName));
             } else {
