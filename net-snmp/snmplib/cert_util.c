@@ -90,6 +90,7 @@ typedef struct netsnmp_cert_s {
 } netsnmp_cert;
 
 static netsnmp_container *_certs = NULL;
+static struct snmp_enum_list *_certindexes = NULL;
 
 static void _cert_indexes_load(void);
 static void _cert_free(netsnmp_cert *cert, void *context);
@@ -97,13 +98,6 @@ static int  _cert_compare(netsnmp_cert *lhs, netsnmp_cert *rhs);
 static X509 *_xcertfile_read(const char *file);
 
 void netsnmp_cert_free(netsnmp_cert *cert);
-
-/*
- * Handle CERT indexes centrally
- */
-static int _certindex     = 0;   /* Last index in use */
-static int _certindex_max = 0;   /* Size of index array */
-static char **_certindexes   = NULL;
 
 static int _certindex_add( const char *dirname, int i );
 
@@ -320,36 +314,25 @@ _cert_cert_filter(const char *filename)
 static int
 _certindex_add( const char *dirname, int i )
 {
-    char **cpp;
+    int rc;
+    char *dirname_copy = strdup(dirname);
 
-    if ( i == -1 )
-        i = _certindex++;
-
-    /*
-     * If the index array is full (or non-existent) then expand (or create) it
-     */
-    if ( i >= _certindex_max ) {
-        DEBUGMSGT(("cert:index:add", "expanding indexes size to %d\n",
-                   i + 10 ));
-        cpp = (char **)realloc( _certindexes, (10+i) * sizeof(char*));
-        if (NULL == cpp) {
-            snmp_log(LOG_ERR, "cert index realloc failed; %d (%s) not added\n",
-                     i, dirname);
-            return -1;
-        }
-        _certindexes   = cpp;
-        _certindex_max = i+10;
+    if ( i == -1 ) {
+        int max = se_find_free_value_in_list(_certindexes);
+        if (SE_DNE == max)
+            i = 0;
+        else
+            i = max;
     }
-    DEBUGMSGT(("cert:index:add","%d/%d/%d\n", i, _certindex, _certindex_max ));
 
-    _certindexes[ i ] = strdup( dirname );
-    if (NULL == _certindexes[i]) {
-        snmp_log(LOG_ERR, "strdup of certindex dirname failed; "
+    DEBUGMSGT(("cert:index:add","dir %s at index %d\n", dirname, i ));
+    rc = se_add_pair_to_list(&_certindexes, dirname_copy, i);
+    if (SE_OK != rc) {
+        snmp_log(LOG_ERR, "adding certindex dirname failed; "
                  "%d (%s) not added\n", i, dirname);
+        free(dirname_copy);
         return -1;
     }
-    if ( i >= _certindex )
-        _certindex = ++i;
 
     return i;
 }
@@ -422,20 +405,19 @@ static char *
 _certindex_lookup( const char *dirname )
 {
     int i;
-    static char filename[SNMP_MAXPATH];
+    char filename[SNMP_MAXPATH];
 
-    for (i=0; i<_certindex; i++) {
-        if ( ! _certindexes[i] || strcmp( _certindexes[i], dirname ) != 0)
-            continue;
-
-        snprintf(filename, sizeof(filename), "%s/cert_indexes/%d",
-                 get_persistent_directory(), i);
-        filename[sizeof(filename)-1] = 0;
-        DEBUGMSGT(("cert:index:lookup", "%s (%d) %s\n", dirname, i, filename ));
-        return filename;
+    i = se_find_value_in_list(_certindexes, dirname);
+    if (SE_DNE == i) {
+        DEBUGMSGT(("cert:index:lookup","%s : (none)\n", dirname));
+        return NULL;
     }
-    DEBUGMSGT(("cert:index:lookup","%s : (none)\n", dirname));
-    return NULL;
+
+    snprintf(filename, sizeof(filename), "%s/cert_indexes/%d",
+             get_persistent_directory(), i);
+    filename[sizeof(filename)-1] = 0;
+    DEBUGMSGT(("cert:index:lookup", "%s (%d) %s\n", dirname, i, filename ));
+    return strdup(filename);
 }
 
 static FILE *
@@ -448,6 +430,8 @@ _certindex_new( const char *dirname )
     cp = _certindex_lookup( dirname );
     if (!cp) {
         i  = _certindex_add( dirname, -1 );
+        if (-1 == i)
+            return NULL; /* msg already logged */
         snprintf( filename, sizeof(filename), "%s/cert_indexes/%d",
                   get_persistent_directory(), i );
         filename[sizeof(filename)-1] = 0;
@@ -459,6 +443,9 @@ _certindex_new( const char *dirname )
         fprintf( fp, "DIR %s\n", dirname );
     else
         snmp_log(LOG_ERR, "error opening new index file %s\n", dirname);
+
+    if (cp != filename)
+        free(cp);
 
     return fp;
 }
@@ -579,11 +566,13 @@ _cert_read_index(const char *dirname, struct stat *dirstat)
 
     if (stat(idxname, &idx_stat) != 0) {
         DEBUGMSGT(("cert:index:parse", "error getting index file stats\n"));
+        SNMP_FREE(idxname);
         return -1;
     }
 
     if (dirstat->st_mtime >= idx_stat.st_mtime) {
         DEBUGMSGT(("cert:index:parse", "Index outdated\n"));
+        SNMP_FREE(idxname);
         return -1;
     }
 
@@ -593,6 +582,7 @@ _cert_read_index(const char *dirname, struct stat *dirstat)
     if (NULL == index) {
         snmp_log(LOG_ERR, "cert:index:parse can't open index for %s\n",
             dirname);
+        SNMP_FREE(idxname);
         return -1;
     }
 
@@ -617,6 +607,7 @@ _cert_read_index(const char *dirname, struct stat *dirstat)
                        filename));
     }
     fclose(index);
+    SNMP_FREE(idxname);
 
     DEBUGMSGT(("cert:index:parse","added %d certs from index\n", count));
 
