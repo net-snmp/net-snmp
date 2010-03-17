@@ -120,16 +120,18 @@
 #include <net-snmp/config_api.h>
 
 #include <net-snmp/library/snmp_transport.h>
-#include <net-snmp/library/snmpDTLSUDPDomain.h>
 #include <net-snmp/library/snmpUDPDomain.h>
 #include <net-snmp/library/system.h>
 #include <net-snmp/library/tools.h>
-#include <net-snmp/library/snmp_openssl.h>
 #include <net-snmp/library/callback.h>
 
 #include "openssl/bio.h"
 #include "openssl/ssl.h"
 #include "openssl/err.h"
+
+#include <net-snmp/library/snmpTLSBaseDomain.h>
+#include <net-snmp/library/snmpDTLSUDPDomain.h>
+#include <net-snmp/library/snmp_openssl.h>
 
 #ifndef INADDR_NONE
 #define INADDR_NONE	-1
@@ -190,7 +192,6 @@ static bio_cache *
 start_new_cached_connection(int sock, struct sockaddr_in *remote_addr,
                             int we_are_client) {
     bio_cache *cachep = NULL;
-    BIO *keybio = NULL;
 
     if (!sock)
         DIEHERE("no socket passed in to start_new_cached_connection\n");
@@ -418,16 +419,8 @@ netsnmp_dtlsudp_recv(netsnmp_transport *t, void *buf, int size,
             /* use x509 cert to do lookup to secname if DNE in cachep yet */
             if (!cachep->securityName) {
                 if (NULL != (peer = SSL_get_peer_certificate(cachep->con))) {
-                    X509_NAME *subname;
-                    char namebuf[1024];
-                
-                    /* we have one */
-                    subname = X509_get_subject_name(peer);
-                    X509_NAME_get_text_by_NID(subname, NID_commonName,
-                                              namebuf, sizeof(namebuf));
-                    DEBUGMSGTL(("dtlsudp", "got commonname: %s\n",
-                                namebuf));
-                    cachep->securityName = strdup(namebuf);
+                    cachep->securityName =
+                        netsnmp_openssl_cert_get_commonName(peer, NULL, NULL);
                     DEBUGMSGTL(("dtlsudp", "set SecName to: %s\n",
                                 cachep->securityName));
                 } else {
