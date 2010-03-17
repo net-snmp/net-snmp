@@ -65,7 +65,6 @@
 #include <net-snmp/library/snmp_transport.h>
 #include <net-snmp/library/system.h>
 #include <net-snmp/library/tools.h>
-#include <net-snmp/library/snmp_openssl.h>
 #include <net-snmp/library/callback.h>
 #include <net-snmp/library/container.h>
 #include <net-snmp/library/dir_utils.h>
@@ -74,6 +73,7 @@
 #include <openssl/ssl.h>
 #include <openssl/err.h>
 #include <openssl/pkcs12.h>
+#include <net-snmp/library/snmp_openssl.h>
 
 typedef struct netsnmp_cert_s {
     X509 *xcert;
