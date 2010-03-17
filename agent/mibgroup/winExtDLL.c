@@ -701,24 +701,26 @@ var_winExtDLL(netsnmp_mib_handler *handler,
                 win_varbind = &win_varbinds.list[i];
 
                 DEBUGIF("winExtDLL") {
+                    const char     *comment;
                     char           *oid_name, *oid_tree_name;
                     
+                    if (snmp_oid_compare(varbind->name, varbind->name_length,
+                                         reginfo->rootoid, reginfo->rootoid_len) < 0)
+                        comment = " (before start of MIB)";
+                    else if (snmp_oid_compare(varbind->name, varbind->name_length,
+                                              win_varbind->name.ids,
+                                              win_varbind->name.idLength) < 0)
+                        comment = "";
+                    else
+                        comment = " (past end of MIB)";
                     DEBUGMSG(("winExtDLL",
                         "GetNextRequest (DLL %s):\n", ext_dll_info->dll_name));
                     oid_tree_name = snprint_oid_tree(varbind->name,
                         varbind->name_length);
                     oid_name = snprint_oid(varbind->name,
                         varbind->name_length);
-                    DEBUGMSG(("winExtDLL", "original OID: %s (%s).\n",
-                        oid_tree_name, oid_name));
-                    free(oid_tree_name);
-                    free(oid_name);
-                    oid_tree_name = snprint_oid_tree(win_varbind->name.ids,
-                        win_varbind->name.idLength);
-                    oid_name = snprint_oid(win_varbind->name.ids,
-                        win_varbind->name.idLength);
-                    DEBUGMSG(("winExtDLL", "returned OID: %s (%s).\n",
-                        oid_tree_name, oid_name));
+                    DEBUGMSG(("winExtDLL", "original OID%s: %s (%s).\n",
+                        comment, oid_tree_name, oid_name));
                     free(oid_tree_name);
                     free(oid_name);
                 }
@@ -748,6 +750,16 @@ var_winExtDLL(netsnmp_mib_handler *handler,
                                        win_varbind->name.idLength);
                 }
 
+                DEBUGIF("winExtDLL") {
+                    char           *oid_name, *oid_tree_name;
+
+                    oid_tree_name = snprint_oid_tree(varbind->name, varbind->name_length);
+                    oid_name = snprint_oid(varbind->name, varbind->name_length);
+                    DEBUGMSG(("winExtDLL", "returned OID: %s (%s).\n",
+                              oid_tree_name, oid_name));
+                    free(oid_tree_name);
+                    free(oid_name);
+                }
                 get_result = 0;
                 append_windows_varbind(&get_result, win_varbind);
                 if (get_result) {
