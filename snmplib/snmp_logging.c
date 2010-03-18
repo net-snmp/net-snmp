@@ -102,10 +102,22 @@ int             vsnprintf(char *str, size_t count, const char *fmt,
 #endif
 
 void
+parse_config_logOption(const char *token, char *cptr)
+{
+  int my_argc = 0 ;
+  char **my_argv = NULL;
+
+  snmp_log_options( cptr, my_argc, my_argv );
+}
+
+void
 init_snmp_logging(void)
 {
     netsnmp_ds_register_premib(ASN_BOOLEAN, "snmp", "logTimestamp", 
 			 NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_LOG_TIMESTAMP);
+    register_prenetsnmp_mib_handler("snmp", "logOption",
+                                    parse_config_logOption, NULL, "string");
+
 }
 
 void
@@ -304,6 +316,8 @@ snmp_log_options(char *optarg, int argc, char *const *argv)
     int             inc_optind = 0;
     netsnmp_log_handler *logh;
 
+    DEBUGMSGT(("logging:options", "optarg: '%s', argc %d, argv '%s'\n",
+               optarg, argc, argv ? argv[0] : "NULL"));
     optarg++;
     if (!*cp)
         cp = &missing_opt;
@@ -335,6 +349,7 @@ snmp_log_options(char *optarg, int argc, char *const *argv)
         inc_optind = 1;
     }
 
+    DEBUGMSGT(("logging:options", "*cp: '%c'\n", *cp));
     switch (*cp) {
 
     /*
@@ -883,6 +898,9 @@ netsnmp_register_loghandler( int type, int priority )
     if (!logh)
         return NULL;
 
+    DEBUGMSGT(("logging:register", "registering log type %d with pri %d\n",
+               type, priority));
+
     logh->type     = type;
     switch ( type ) {
     case NETSNMP_LOGHANDLER_STDOUT:
@@ -1150,6 +1168,11 @@ log_handler_null(    netsnmp_log_handler* logh, int pri, const char *str)
 void
 snmp_log_string(int priority, const char *str)
 {
+    static netsnmp_log_handler *old_head = NULL;
+    static int stderr_enabled = 0;
+    static netsnmp_log_handler lh = { 1, 0, 0, 0, "stderr",
+                                      log_handler_stdouterr, 0, NULL,  NULL,
+                                      NULL };
     netsnmp_log_handler *logh;
 
     /*
@@ -1157,10 +1180,22 @@ snmp_log_string(int priority, const char *str)
      * If you don't want stderr logging, then enable something else.
      */
     if (!logh_head) {
-        snmp_enable_stderrlog();
-        snmp_log_string(LOG_WARNING,
-                        "No log handling enabled - turning on stderr logging\n");
+        if (!stderr_enabled) {
+            ++stderr_enabled;
+            netsnmp_set_line_buffering(stderr);
+            log_handler_stdouterr( &lh, LOG_WARNING,
+                                   "No log handling enabled - using stderr logging\n");
+        }
+        log_handler_stdouterr( &lh, priority, str );
+
+        return;
     }
+    else if (!old_head && stderr_enabled) {
+        old_head = logh_head;
+        log_handler_stdouterr( &lh, LOG_WARNING,
+                               "Log handling defined - disabling stderr\n" );
+    }
+        
 
     /*
      * Start at the given priority, and work "upwards"....

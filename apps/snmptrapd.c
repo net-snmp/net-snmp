@@ -523,15 +523,6 @@ parse_config_agentgroup(const char *token, char *cptr)
 #endif
 
 void
-parse_config_logOption(const char *token, char *cptr)
-{
-  int my_argc = 0 ;
-  char **my_argv = NULL;
-
-  snmp_log_options( cptr, my_argc, my_argv );
-}
-
-void
 parse_config_doNotFork(const char *token, char *cptr)
 {
   if (netsnmp_ds_parse_boolean(cptr) == 1)
@@ -647,9 +638,6 @@ main(int argc, char *argv[])
                             parse_config_agentgroup, NULL, "groupid");
 #endif
     
-    register_config_handler("snmptrapd", "logOption",
-                            parse_config_logOption, NULL, "string");
-
     register_config_handler("snmptrapd", "doNotFork",
                             parse_config_doNotFork, NULL, "(1|yes|true|0|no|false)");
 
