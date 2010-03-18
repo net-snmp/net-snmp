@@ -830,7 +830,9 @@ init_snmp(const char *type)
 #endif /* NETSNMP_DISABLE_MIB_LOADING */
 
     read_configs();
+#if defined(NETSNMP_USE_OPENSSL) && defined(HAVE_LIBSSL)
     netsnmp_certs_init();
+#endif
 
 }                               /* end init_snmp() */
 

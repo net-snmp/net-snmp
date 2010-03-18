@@ -1,5 +1,7 @@
 #ifndef NETSNMP_CERT_UTIL_H
 
+#if defined(NETSNMP_USE_OPENSSL) && defined(HAVE_LIBSSL)
+
 #include <net-snmp/types.h>
 
 #ifdef  __cplusplus
@@ -19,6 +21,8 @@ void netsnmp_certs_shutdown(void);
 #ifdef __cplusplus
 }
 #endif
+
+#endif /* defined(NETSNMP_USE_OPENSSL) && defined(HAVE_LIBSSL) */
 
 #endif /* NETSNMP_CERT_UTIL_H */
 
