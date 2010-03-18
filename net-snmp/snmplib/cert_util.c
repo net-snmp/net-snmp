@@ -759,7 +759,6 @@ main(int argc, char** argv)
             default:
                 fprintf(stderr,"unknown option %c\n", ch);
         }
-    snmp_enable_stderrlog();
 
     init_snmp("main-full");
 
