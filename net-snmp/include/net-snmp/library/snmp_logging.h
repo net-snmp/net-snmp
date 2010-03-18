@@ -137,6 +137,10 @@ int netsnmp_remove_loghandler( netsnmp_log_handler *logh );
 int netsnmp_enable_loghandler( const char *token );
 int netsnmp_disable_loghandler( const char *token );
 NETSNMP_IMPORT
+void netsnmp_enable_this_loghandler( netsnmp_log_handler *logh );
+NETSNMP_IMPORT
+void netsnmp_disable_this_loghandler( netsnmp_log_handler *logh );
+NETSNMP_IMPORT
 void netsnmp_logging_restart(void);
 #ifdef __cplusplus
 }
