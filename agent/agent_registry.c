@@ -662,8 +662,23 @@ netsnmp_subtree_load(netsnmp_subtree *new_sub, const char *context_name)
 	
 	    if (next && (next->namelen  == new_sub->namelen) &&
 		(next->priority == new_sub->priority)) {
-                if (new_sub->namelen != 1) /* ignore root OID dups */
-                    snmp_log(LOG_ERR, "duplicate registration (%s, %s)", next->label_a, new_sub->label_a);
+                if (new_sub->namelen != 1) {    /* ignore root OID dups */
+                    size_t          out_len = 0;
+                    size_t          buf_len = 0;
+                    char           *buf = NULL;
+                    int             buf_overflow = 0;
+
+                    netsnmp_sprint_realloc_objid(&buf, &buf_len, &out_len,
+                                                 1, &buf_overflow,
+                                                 new_sub->start_a,
+                                                 new_sub->start_len);
+                    snmp_log(LOG_ERR,
+                             "duplicate registration: MIB modules %s and %s (oid %s%s).\n",
+                             next->label_a, new_sub->label_a,
+                             buf ? buf : "",
+                             buf_overflow ? " [TRUNCATED]" : "");
+                    free(buf);
+                }
 		return MIB_DUPLICATE_REGISTRATION;
 	    }
 
