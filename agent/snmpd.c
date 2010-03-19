@@ -269,6 +269,7 @@ usage(char *prog)
            "  -A\t\t\tappend to the logfile rather than truncating it\n"
            "  -c FILE[,...]\t\tread FILE(s) as configuration file(s)\n"
            "  -C\t\t\tdo not read the default configuration files\n"
+           "\t\t\t  (config search path: %s)\n"
            "  -d\t\t\tdump sent and received SNMP packets\n"
            "  -DTOKEN[,...]\tturn on debugging output for the given TOKEN(s)\n"
 	   "\t\t\t  (try ALL for extremely verbose output)\n"
@@ -283,11 +284,12 @@ usage(char *prog)
            "  -I [-]INITLIST\tlist of mib modules to initialize (or not)\n"
            "\t\t\t  (run snmpd with -Dmib_init for a list)\n"
            "  -L <LOGOPTS>\t\ttoggle options controlling where to log to\n",
-           netsnmp_get_version());
+           netsnmp_get_version(),
+           get_configuration_directory());
     snmp_log_options_usage("\t", stdout);
     printf("  -m MIBLIST\t\tuse MIBLIST instead of the default MIB list\n"
-           "  -M DIRLIST\t\tuse DIRLIST as the list of locations\n"
-           "\t\t\t  to look for MIBs\n"
+           "  -M DIRLIST\t\tuse DIRLIST as the list of locations to look for MIBs\n"
+           "\t\t\t  (default %s)\n"
            "  -p FILE\t\tstore process id in FILE\n"
            "  -q\t\t\tprint information in a more parsable format\n"
            "  -r\t\t\tdo not exit if files only accessible to root\n"
@@ -322,7 +324,7 @@ usage(char *prog)
            "  -s\t\t\tuse -Lsd instead\n"
            "  -S d|i|0-7\t\tuse -Ls <facility> instead\n"
 
-           "\n");
+           "\n", netsnmp_get_mib_directory());
     exit(1);
 }
 
