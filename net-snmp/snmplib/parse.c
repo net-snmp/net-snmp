@@ -549,6 +549,7 @@ static struct module_import root_imports[NUMBER_OF_ROOT_NODES];
 
 static int      current_module = 0;
 static int      max_module = 0;
+static int      first_err_module = 1;
 static char    *last_err_module = NULL; /* no repeats on "Cannot find module..." */
 
 static void     tree_from_node(struct tree *tp, struct node *np);
@@ -795,6 +796,11 @@ print_error(const char *str, const char *token, int type)
 static void
 print_module_not_found(const char *cp)
 {
+    if (first_err_module) {
+        snmp_log(LOG_ERR, "MIB search path: %s\n",
+                           netsnmp_get_mib_directory());
+        first_err_module = 0;
+    }
     if (!last_err_module || strcmp(cp, last_err_module))
         print_error("Cannot find module", cp, CONTINUE);
     if (last_err_module)
