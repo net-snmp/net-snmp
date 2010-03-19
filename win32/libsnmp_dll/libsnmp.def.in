@@ -448,6 +448,7 @@ EXPORTS
         netsnmp_query_getnext
         netsnmp_query_get
 	netsnmp_mktemp
+        debugmsg_suboid
 ;IPv6        netsnmp_udp6_parse_security
 ;IPv6        netsnmp_udp6_getSecName
 ;IPv6        netsnmp_TCPIPv6Domain
