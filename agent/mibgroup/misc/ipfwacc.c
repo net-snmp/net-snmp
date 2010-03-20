@@ -74,16 +74,16 @@ readrule(unsigned int number)
     /*
      * get rid of "IP accounting rules" line
      */
-    if (!fgets(rule, sizeof(rule), f)) {
+    if (!fgets((char *) rule, sizeof(rule), f)) {
         fclose(f);
         return 0;
     }
     for (i = 1; i != number; i++)
-        if (!fgets(rule, sizeof(rule), f)) {
+        if (!fgets((char *) rule, sizeof(rule), f)) {
             fclose(f);
             return (number ? 0 : (i - 1));
         }
-    if (!fgets(rule, sizeof(rule), f)) {
+    if (!fgets((char *) rule, sizeof(rule), f)) {
         fclose(f);
         return 0;
     }

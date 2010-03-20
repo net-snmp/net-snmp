@@ -695,7 +695,7 @@ netsnmp_table_data_set_helper_handler(netsnmp_mib_handler *handler,
              * modify row and set new value 
              */
             SNMP_FREE(data->data.string);
-            data->data.string =
+            data->data.string = (u_char *)
                 netsnmp_strdup_and_null(request->requestvb->val.string,
                                         request->requestvb->val_len);
             if (!data->data.string) {
@@ -1247,7 +1247,7 @@ netsnmp_mark_row_column_writable(netsnmp_table_row *row, int column,
  */
 int
 netsnmp_set_row_column(netsnmp_table_row *row, unsigned int column,
-                       int type, const char *value, size_t value_len)
+                       int type, const void *value, size_t value_len)
 {
     netsnmp_table_data_set_storage *data;
 

@@ -612,7 +612,7 @@ log_notification(netsnmp_pdu *pdu, netsnmp_transport *transport)
     gettimeofday(&now, NULL);
     tmpl = netsnmp_timeval_uptime(&now);
     netsnmp_set_row_column(row, COLUMN_NLMLOGTIME, ASN_TIMETICKS,
-                           (u_char *) & tmpl, sizeof(tmpl));
+                           &tmpl, sizeof(tmpl));
     time(&timetnow);
     logdate = date_n_time(&timetnow, &logdate_size);
     netsnmp_set_row_column(row, COLUMN_NLMLOGDATEANDTIME, ASN_OCTET_STR,
@@ -642,9 +642,9 @@ log_notification(netsnmp_pdu *pdu, netsnmp_transport *transport)
     }
     if (transport)
         netsnmp_set_row_column(row, COLUMN_NLMLOGENGINETDOMAIN,
-                                     ASN_OBJECT_ID,
-                                     (const u_char *) transport->domain,
-                                     sizeof(oid) * transport->domain_length);
+                               ASN_OBJECT_ID,
+                               transport->domain,
+                               sizeof(oid) * transport->domain_length);
     netsnmp_set_row_column(row, COLUMN_NLMLOGCONTEXTENGINEID,
                            ASN_OCTET_STR, pdu->contextEngineID,
                            pdu->contextEngineIDLen);
@@ -677,7 +677,7 @@ log_notification(netsnmp_pdu *pdu, netsnmp_transport *transport)
              * OID 
              */
             netsnmp_set_row_column(myrow, COLUMN_NLMLOGVARIABLEID,
-                                   ASN_OBJECT_ID, (u_char *) vptr->name,
+                                   ASN_OBJECT_ID, vptr->name,
                                    vptr->name_length * sizeof(oid));
 
             /*
@@ -739,7 +739,7 @@ log_notification(netsnmp_pdu *pdu, netsnmp_transport *transport)
                 continue;
             }
             netsnmp_set_row_column(myrow, COLUMN_NLMLOGVARIABLEVALUETYPE,
-                                   ASN_INTEGER, (u_char *) & tmpul,
+                                   ASN_INTEGER, & tmpul,
                                    sizeof(tmpul));
             netsnmp_set_row_column(myrow, col, vptr->type,
                                    vptr->val.string, vptr->val_len);

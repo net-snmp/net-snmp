@@ -426,7 +426,7 @@ handle_nsDebugTable(netsnmp_mib_handler *handler,
 		 * Create the entry, and set the enabled field appropriately
 		 */
                 table_info = netsnmp_extract_table_info(request);
-                debug_register_tokens(table_info->indexes->val.string);
+                debug_register_tokens((char *) table_info->indexes->val.string);
 #ifdef UMMMMM
                 if (*request->requestvb->val.integer == RS_CREATEANDWAIT) {
 		    /* XXX - how to locate the entry ??  */

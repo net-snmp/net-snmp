@@ -681,7 +681,7 @@ netsnmp_subtree_load(netsnmp_subtree *new_sub, const char *context_name)
                     char           *buf = NULL;
                     int             buf_overflow = 0;
 
-                    netsnmp_sprint_realloc_objid(&buf, &buf_len, &out_len,
+                    netsnmp_sprint_realloc_objid((u_char **) &buf, &buf_len, &out_len,
                                                  1, &buf_overflow,
                                                  new_sub->start_a,
                                                  new_sub->start_len);

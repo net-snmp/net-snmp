@@ -789,7 +789,7 @@ handle_nsExtendConfigTable(netsnmp_mib_handler          *handler,
                 case RS_CREATEANDWAIT:
                     eptr = _find_extension_block( request->requestvb->name,
                                                   request->requestvb->name_length );
-                    extension = _new_extension( table_info->indexes->val.string,
+                    extension = _new_extension( (char *) table_info->indexes->val.string,
                                                 0, eptr );
                     if (!extension) {  /* failed */
                         netsnmp_set_request_error(reqinfo, request,
@@ -1115,7 +1115,7 @@ _extend_find_entry( netsnmp_request_info       *request,
                       table_info->indexes->val.string,
                      *table_info->indexes->next_variable->val.integer));
         for ( eptr = ereg->ehead; eptr; eptr = eptr->next ) {
-            if ( !strcmp( eptr->token, table_info->indexes->val.string ))
+            if ( !strcmp( eptr->token, (char *) table_info->indexes->val.string ))
                 break;
         }
 
@@ -1154,7 +1154,7 @@ _extend_find_entry( netsnmp_request_info       *request,
                 }
             }
         } else {
-            token     =  table_info->indexes->val.string;
+            token     =  (char *) table_info->indexes->val.string;
             token_len =  table_info->indexes->val_len;
             line_idx  = *table_info->indexes->next_variable->val.integer;
             DEBUGMSGTL(( "nsExtendTable:output2", "GETNEXT: %s / %d\n ",

@@ -432,9 +432,9 @@ netsnmp_udp_getSecName(void *opaque, int olength,
 	    ztcommunity[community_len] = '\0';
 	}
 
-	DEBUGMSGTL(("netsnmp_udp_getSecName", "resolve <\"%s\", 0x%08x>\n",
+	DEBUGMSGTL(("netsnmp_udp_getSecName", "resolve <\"%s\", 0x%08lx>\n",
 		    ztcommunity ? ztcommunity : "<malloc error>",
-		    from->sin_addr.s_addr));
+		    (unsigned long)(from->sin_addr.s_addr)));
     }
 
     for (c = com2SecList; c != NULL; c = c->next) {

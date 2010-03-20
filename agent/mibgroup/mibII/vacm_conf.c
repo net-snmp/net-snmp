@@ -1275,7 +1275,7 @@ vacm_check_view_contents(netsnmp_pdu *pdu, oid * name, size_t namelen,
 #endif
 #endif
     {
-        pdu_community = pdu->community;
+        pdu_community = (const char *) pdu->community;
         if (!pdu_community)
             pdu_community = "";
         if (snmp_get_do_debugging()) {

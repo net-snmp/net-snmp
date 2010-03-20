@@ -209,7 +209,12 @@ loadave_free_config(void)
 int
 try_getloadavg(double *r_ave, size_t s_ave)
 {
+#if defined(HAVE_GETLOADAVG) || defined(linux) || defined(ultrix) \
+    || defined(sun) || defined(__alpha) || defined(dynix)
+    || !defined(cygwin) && defined(NETSNMP_CAN_USE_NLIST) \
+       && defined(LOADAVE_SYMBOL)
     double         *pave = r_ave;
+#endif
 #ifndef HAVE_GETLOADAVG
 #ifdef HAVE_SYS_FIXPOINT_H
     fix             favenrun[3];

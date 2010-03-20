@@ -249,7 +249,7 @@ get_exec_output(struct extensible *ex)
 #if HAVE_EXECV
     char            cachefile[STRMAX];
     char            cache[NETSNMP_MAXCACHESIZE];
-    ssize_t         cachebytes;
+    int             cachebytes;
     int             cfd;
 #ifdef NETSNMP_EXCACHETIME
     long            curtime;
@@ -318,7 +318,7 @@ get_exec_output(struct extensible *ex)
     
     /* Child temporary output pipe with Inheritance on (sa.bInheritHandle is true) */    
     if (!CreatePipe(&hOutputReadTmp,&hOutputWrite,&sa,0)) {
-      DEBUGMSGTL(("util_funcs", "get_exec_pipes CreatePipe ChildOut: %d\n",
+      DEBUGMSGTL(("util_funcs", "get_exec_pipes CreatePipe ChildOut: %lu\n",
             GetLastError()));
       return -1;
     }
@@ -327,7 +327,7 @@ get_exec_output(struct extensible *ex)
      * its stdout handles. */
     if (!DuplicateHandle(GetCurrentProcess(),hOutputWrite, GetCurrentProcess(),
           &hErrorWrite,0, TRUE,DUPLICATE_SAME_ACCESS)) {
-      DEBUGMSGTL(("util_funcs", "get_exec_output DuplicateHandle: %d\n", GetLastError()));
+      DEBUGMSGTL(("util_funcs", "get_exec_output DuplicateHandle: %lu\n", GetLastError()));
       return -1;
     }
 
@@ -336,14 +336,14 @@ get_exec_output(struct extensible *ex)
      * be closed.  */
     if (!DuplicateHandle(GetCurrentProcess(), hOutputReadTmp, GetCurrentProcess(),
           &hOutputRead, 0, FALSE, DUPLICATE_SAME_ACCESS)) {
-      DEBUGMSGTL(("util_funcs", "get_exec_output DupliateHandle ChildOut: %d\n", GetLastError()));
+      DEBUGMSGTL(("util_funcs", "get_exec_output DupliateHandle ChildOut: %lu\n", GetLastError()));
       CloseHandle(hErrorWrite);
       return -1;
     }   
 
     /* Close the temporary output and input handles */
     if (!CloseHandle(hOutputReadTmp)) {
-      DEBUGMSGTL(("util_funcs", "get_exec_output CloseHandle (hOutputReadTmp): %d\n", GetLastError()));
+      DEBUGMSGTL(("util_funcs", "get_exec_output CloseHandle (hOutputReadTmp): %lu\n", GetLastError()));
       CloseHandle(hErrorWrite);
       CloseHandle(hOutputRead);
       return -1;
@@ -365,7 +365,7 @@ get_exec_output(struct extensible *ex)
      * pass_persist    .1.3.6.1.4.1.2021.255  c:/perl/bin/perl c:/temp/pass_persisttest
     */
     if (!CreateProcess(NULL, ex->command, NULL, NULL, TRUE, CREATE_NEW_CONSOLE, NULL, NULL, &si, &pi)) {
-      DEBUGMSGTL(("util_funcs","get_exec_output CreateProcess:'%s' %d\n",ex->command, GetLastError()));
+      DEBUGMSGTL(("util_funcs","get_exec_output CreateProcess:'%s' %lu\n",ex->command, GetLastError()));
       CloseHandle(hErrorWrite);
       CloseHandle(hOutputRead);
       return -1;
@@ -382,11 +382,13 @@ get_exec_output(struct extensible *ex)
      */
 
     if (!CloseHandle(hOutputWrite)){
-      DEBUGMSGTL(("util_funcs","get_exec_output CloseHandle hOutputWrite: %d\n",ex->command, GetLastError()));
+      DEBUGMSGTL(("util_funcs","get_exec_output CloseHandle hOutputWrite: %lu\n",
+                  GetLastError()));
       return -1;
     }
     if (!CloseHandle(hErrorWrite)) {
-      DEBUGMSGTL(("util_funcs","get_exec_output CloseHandle hErrorWrite: %d\n",ex->command, GetLastError()));
+      DEBUGMSGTL(("util_funcs","get_exec_output CloseHandle hErrorWrite: %lu\n",
+                  GetLastError()));
       return -1;
     }
     return fd;
@@ -695,10 +697,21 @@ restart_doit(int a)
      *  Otherwise SIGALARM will be ignored in the next incarnation
      *  of snmpd, because the signal is blocked. And thus, the 
      *  restart doesn't work anymore. 
+     *
+     *  A quote from the sigprocmask() man page:
+     *  The use of sigprocmask() is unspecified in a multithreaded process; see
+     *  pthread_sigmask(3). 
      */ 
-#if HAVE_SIGBLOCK 
+#if HAVE_SIGPROCMASK
+    {
+        sigset_t empty_set;
+      
+        sigemptyset(&empty_set);
+        sigprocmask(SIG_SETMASK, &empty_set, NULL);
+    }
+#elif HAVE_SIGBLOCK
     sigsetmask(0);
-#endif 
+#endif
 
     /*
      * do the exec 

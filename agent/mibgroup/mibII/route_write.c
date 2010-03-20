@@ -722,7 +722,7 @@ write_rte(int action,
                     if ((status =
                          CreateIpForwardEntry(route_row)) != NO_ERROR) {
                         snmp_log(LOG_ERR,
-                                 "Inside COMMIT: CreateIpNetEntry failed, status %d\n",
+                                 "Inside COMMIT: CreateIpNetEntry failed, status %lu\n",
                                  status);
                         retval = SNMP_ERR_COMMITFAILED;
                     }

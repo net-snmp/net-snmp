@@ -206,7 +206,7 @@ int Facility = LOG_DAEMON;
 #define SNMPTRAPD_STOPPED 0
 int             trapd_status = SNMPTRAPD_STOPPED;
 /* app_name_long used for SCM, registry etc */
-LPTSTR          app_name_long = _T("Net-SNMP Trap Handler");     /* Application Name */
+LPCTSTR         app_name_long = _T("Net-SNMP Trap Handler");     /* Application Name */
 #endif
 
 const char     *app_name = "snmptrapd";

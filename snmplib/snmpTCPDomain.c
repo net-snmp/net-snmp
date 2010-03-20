@@ -72,7 +72,12 @@ netsnmp_tcp_accept(netsnmp_transport *t)
 {
     struct sockaddr *farend = NULL;
     netsnmp_udp_addr_pair *addr_pair = NULL;
-    int             newsock = -1, sockflags = 0;
+    int             newsock = -1;
+#ifdef WIN32
+    u_long          ioctlsocket_opt;
+#else
+    int             sockflags;
+#endif
     socklen_t       farendlen = sizeof(struct sockaddr_in);
     char           *str = NULL;
 
@@ -112,7 +117,8 @@ netsnmp_tcp_accept(netsnmp_transport *t)
          */
 
 #ifdef WIN32
-        ioctlsocket(newsock, FIONBIO, &sockflags);
+        ioctlsocket_opt = 0;
+        ioctlsocket(newsock, FIONBIO, &ioctlsocket_opt);
 #else
         if ((sockflags = fcntl(newsock, F_GETFL, 0)) >= 0) {
             fcntl(newsock, F_SETFL, (sockflags & ~O_NONBLOCK));
@@ -184,7 +190,12 @@ netsnmp_tcp_transport(struct sockaddr_in *addr, int local)
     t->flags = NETSNMP_TRANSPORT_FLAG_STREAM;
 
     if (local) {
-        int sockflags = 0, opt = 1;
+#ifdef WIN32
+        u_long ioctlsocket_opt = 1;
+#else
+        int sockflags = 0;
+#endif
+        int opt = 1;
 
         /*
          * This session is inteneded as a server, so we must bind to the given 
@@ -227,8 +238,8 @@ netsnmp_tcp_transport(struct sockaddr_in *addr, int local)
          */
 
 #ifdef WIN32
-        opt = 1;
-        ioctlsocket(t->sock, FIONBIO, &opt);
+        ioctlsocket_opt = 1;
+        ioctlsocket(t->sock, FIONBIO, &ioctlsocket_opt);
 #else
         sockflags = fcntl(t->sock, F_GETFL, 0);
         fcntl(t->sock, F_SETFL, sockflags | O_NONBLOCK);

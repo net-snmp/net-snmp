@@ -147,6 +147,7 @@
 static void       disk_free_config(void);
 static void       disk_parse_config(const char *, char *);
 static void       disk_parse_config_all(const char *, char *);
+#if HAVE_FSTAB_H || HAVE_GETMNTENT || HAVE_STATFS
 static void       find_and_add_allDisks(int minpercent);
 static void       add_device(char *path, char *device,
 	                     int minspace, int minpercent, int override);
@@ -154,6 +155,7 @@ static void       modify_disk_parameters(int index, int minspace,
 	                                 int minpercent);
 static int        disk_exists(char *path);
 static char      *find_device(char *path);
+#endif
 
 struct diskpart {
     char            device[STRMAX];
@@ -363,6 +365,7 @@ disk_parse_config_all(const char *token, char *cptr)
 }
 
 
+#if HAVE_FSTAB_H || HAVE_GETMNTENT || HAVE_STATFS
 static void
 add_device(char *path, char *device, int minspace, int minpercent, int override) 
 {
@@ -455,7 +458,9 @@ find_and_add_allDisks(int minpercent)
   int             i;
 #endif
 
+#if defined(HAVE_GETMNTENT) || defined(HAVE_FSTAB_H)
   int dummy = 0;
+#endif
 
   /* 
    * find the device for the path and copy the device into the
@@ -633,6 +638,7 @@ find_device(char *path)
 #endif                   /* HAVE_FSTAB_H || HAVE_GETMNTENT || HAVE_STATFS */  
   return device;
 }
+#endif
 
 /*
  * Part of UCD-SNMP-MIB::dskEntry, which is so hard to fill 
@@ -655,8 +661,10 @@ struct dsk_entry {
 static int
 fill_dsk_entry(int disknum, struct dsk_entry *entry)
 {
+#if defined(HAVE_STATVFS) || defined(HAVE_STATFS)
     float           multiplier;
-#if !defined(HAVE_SYS_STATVFS_H) && !defined(HAVE_STATFS)
+#endif
+#if defined(HAVE_FSTAB_H) && !defined(HAVE_SYS_STATVFS_H) && !defined(HAVE_STATFS)
     double          totalblks, free, used, avail, availblks;
 #endif
 

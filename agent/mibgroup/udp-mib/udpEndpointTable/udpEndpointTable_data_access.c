@@ -258,11 +258,11 @@ udpEndpointTable_container_load(netsnmp_container *container)
         if (MFD_SUCCESS !=
             udpEndpointTable_indexes_set(rowreq_ctx,
                                          udpEndpointLocalAddressType,
-                                         ep->loc_addr,
+                                         (char *) ep->loc_addr,
                                          ep->loc_addr_len,
                                          ep->loc_port,
                                          udpEndpointRemoteAddressType,
-                                         ep->rmt_addr,
+                                         (char *) ep->rmt_addr,
                                          ep->rmt_addr_len,
                                          ep->rmt_port,
                                          ep->instance,
