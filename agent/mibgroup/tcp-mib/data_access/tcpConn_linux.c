@@ -136,7 +136,7 @@ _load4(netsnmp_container *container, u_int load_flags)
         netsnmp_tcpconn_entry *entry;
         int             state, rc, local_port, remote_port, tmp_state;
         size_t          buf_len, offset;
-        u_char          local_addr[10], remote_addr[10];
+        char            local_addr[10], remote_addr[10];
         u_char         *tmp_ptr;
 
         if (5 != (rc = sscanf(line, "%*d: %8[0-9A-Z]:%x %8[0-9A-Z]:%x %x",
@@ -287,7 +287,7 @@ _load6(netsnmp_container *container, u_int load_flags)
         netsnmp_tcpconn_entry *entry;
         int             state, rc, local_port, remote_port, tmp_state;
         size_t          buf_len, offset;
-        u_char          local_addr[48], remote_addr[48];
+        char            local_addr[48], remote_addr[48];
         u_char         *tmp_ptr;
 
         if (5 != (rc = sscanf(line, "%*d: %47[0-9A-Z]:%x %47[0-9A-Z]:%x %x",
@@ -333,7 +333,7 @@ _load6(netsnmp_container *container, u_int load_flags)
         entry->tcpConnState = state;
 
         /** the addr string may need work */
-        buf_len = strlen((char*)local_addr);
+        buf_len = strlen(local_addr);
         if ((32 != buf_len) ||
             (-1 == netsnmp_addrstr_hton(local_addr, 32))) {
             DEBUGMSGT(("verbose:access:tcpconn:container",

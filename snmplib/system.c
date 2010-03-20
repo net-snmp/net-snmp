@@ -987,7 +987,7 @@ strcasestr(const char *haystack, const char *needle)
                     /*
                      * printf("\nfound '%s' in '%s'\n", needle, cx); 
                      */
-                    return (char *) cx;
+                    return NETSNMP_REMOVE_CONST(char *, cx);
                 }
                 if (!*cp1)
                     break;
@@ -1010,7 +1010,7 @@ strcasestr(const char *haystack, const char *needle)
      * printf("\n"); 
      */
     if (cp1 && *cp1)
-        return (char *) cp1;
+        return NETSNMP_REMOVE_CONST(char *, cp1);
 
     return NULL;
 }

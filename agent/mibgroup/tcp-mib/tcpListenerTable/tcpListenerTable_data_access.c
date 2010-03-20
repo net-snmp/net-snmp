@@ -181,7 +181,7 @@ _add_connection(netsnmp_tcpconn_entry *entry, netsnmp_container *container)
     if ((NULL != rowreq_ctx) &&
         (MFD_SUCCESS == tcpListenerTable_indexes_set(rowreq_ctx,
                                                      entry->loc_addr_len,
-                                                     entry->loc_addr,
+                                                     (char *) entry->loc_addr,
                                                      entry->loc_addr_len,
                                                      entry->loc_port))) {
         CONTAINER_INSERT(container, rowreq_ctx);

@@ -999,7 +999,7 @@ write_snmpTargetAddrTAddress(int action,
                 return SNMP_ERR_INCONSISTENTVALUE;
             }
 
-            old_addr = target->tAddress;
+            old_addr = (char *) target->tAddress;
             old_len = target->tAddressLen;
             target->tAddress = (u_char *) malloc(var_val_len);
             if (target->tAddress == NULL) {
@@ -1032,7 +1032,7 @@ write_snmpTargetAddrTAddress(int action,
             if (target->storageType != SNMP_STORAGE_READONLY
                 && target->rowStatus != SNMP_ROW_ACTIVE) {
                 SNMP_FREE(target->tAddress);
-                target->tAddress = old_addr;
+                target->tAddress = (u_char *) old_addr;
                 target->tAddressLen = old_len;
                 if (target->rowStatus == SNMP_ROW_NOTINSERVICE &&
                     snmpTargetAddr_rowStatusCheck(target) == 0) {
@@ -1228,7 +1228,7 @@ write_snmpTargetAddrTagList(int action,
                         "write to snmpTargetAddrTagList: bad length\n"));
             return SNMP_ERR_WRONGLENGTH;
         }
-        if (!snmpTagListValid(var_val, var_val_len)) {
+        if (!snmpTagListValid((char *) var_val, var_val_len)) {
             return SNMP_ERR_WRONGVALUE;
         }
     } else if (action == RESERVE2) {
@@ -1317,7 +1317,7 @@ write_snmpTargetAddrParams(int action,
             }
 
             old_params = target->params;
-            target->params = (u_char *) malloc(var_val_len + 1);
+            target->params = malloc(var_val_len + 1);
             if (target->params == NULL) {
                 return SNMP_ERR_RESOURCEUNAVAILABLE;
             }

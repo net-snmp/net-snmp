@@ -2594,7 +2594,6 @@ header_ifEntry(struct variable *vp,
     register int    ifIndex;
     int             result, count;
     DWORD           status = NO_ERROR;
-    DWORD           statusRetry = NO_ERROR;
     DWORD           dwActualSize = 0;
     PMIB_IFTABLE    pIfTable = NULL;
 
@@ -2660,7 +2659,8 @@ var_interfaces(struct variable * vp,
 
     switch (vp->magic) {
     case IFNUMBER:
-        GetNumberOfInterfaces(&long_return);
+        netsnmp_assert(sizeof(DWORD) == sizeof(long_return));
+        GetNumberOfInterfaces((DWORD *) &long_return);
         return (u_char *) & long_return;
     default:
         DEBUGMSGTL(("snmpd", "unknown sub-id %d in var_interfaces\n",
@@ -2838,7 +2838,7 @@ writeIfEntry(int action,
          */
         if (SetIfEntry(&ifEntryRow) != NO_ERROR) {
             snmp_log(LOG_ERR,
-                     "Error in writeIfEntry case COMMIT with index: %d & adminStatus %d\n",
+                     "Error in writeIfEntry case COMMIT with index: %lu & adminStatus %lu\n",
                      ifEntryRow.dwIndex, ifEntryRow.dwAdminStatus);
             return SNMP_ERR_COMMITFAILED;
         }
