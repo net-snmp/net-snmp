@@ -250,8 +250,6 @@ static void     send_trap(const AsnObjectIdentifier * const,
                           const AsnTimeticks,
                           const SnmpVarBindList * const);
 static u_char  *winsnmp_memdup(const void *src, const size_t len);
-static char    *snprint_oid_tree(const oid * const name, const size_t name_len);
-static char    *snprint_oid(const oid * const name, const size_t name_len);
 #if 0
 static void     xarray_init(xarray * a, size_t elem_size);
 #endif
@@ -530,15 +528,15 @@ register_netsnmp_handler(winextdll_view * const ext_dll_view_info)
 
     if (previously_registered_view) {
         size_t          oid_namelen, outlen;
-        u_char         *oid_name;
+        char           *oid_name;
         int             buffer_large_enough;
 
         oid_namelen = 0;
         outlen = 0;
         oid_name = NULL;
         buffer_large_enough =
-            sprint_realloc_objid(&oid_name, &oid_namelen, &outlen, 1,
-                                 ext_dll_view_info->name,
+            sprint_realloc_objid((u_char **) &oid_name, &oid_namelen, &outlen,
+                                 1, ext_dll_view_info->name,
                                  ext_dll_view_info->name_length);
         snmp_log(LOG_INFO, "OID range %s%s: replacing handler %s by %s.\n",
                  oid_name ? oid_name : "",
@@ -798,7 +796,7 @@ var_winExtDLL(netsnmp_mib_handler *handler,
         rc = convert_win_snmp_err(ErrorStatus);
         if (rc != SNMP_ERR_NOERROR) {
             DEBUGMSG(("winExtDLL",
-                      "extension DLL %s: SNMP query function returned error code %d (Windows) / %d (Net-SNMP).\n",
+                      "extension DLL %s: SNMP query function returned error code %lu (Windows) / %d (Net-SNMP).\n",
                       ext_dll_info->dll_name, ErrorStatus, rc));
             assert(ErrorIndex == 1);
             netsnmp_request_set_error(requests, rc);
