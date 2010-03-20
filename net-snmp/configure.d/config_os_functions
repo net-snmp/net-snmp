@@ -50,6 +50,7 @@ AC_CHECK_FUNCS([cgetnext        chown          execv           ] dnl
                [setgid          setgroups                      ] dnl
                [setmntent       setuid                         ] dnl
                [sigaction       sigblock      sighold          ] dnl
+               [sigprocmask                                    ] dnl
                [statfs          statvfs       stime            ] dnl
                [strncasecmp     system                         ] dnl
                [uname           usleep                         ] )
