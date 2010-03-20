@@ -343,7 +343,7 @@ routename(in_addr_t in)
 	if (cp) {
 		strlcpy(line, cp, sizeof(line));
 	} else {
-#define C(x)	((x) & 0xff)
+#define C(x)	(unsigned)((x) & 0xff)
 		in = ntohl(in);
 		snprintf(line, sizeof line, "%u.%u.%u.%u",
 		    C(in >> 24), C(in >> 16), C(in >> 8), C(in));

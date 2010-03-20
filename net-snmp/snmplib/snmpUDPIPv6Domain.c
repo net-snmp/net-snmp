@@ -24,7 +24,7 @@
 #include <sys/socket.h>
 #endif
 
-#if defined(HAVE_WINSOCK_H)
+#if defined(HAVE_WINSOCK_H) && !defined(mingw32)
 static const struct in6_addr in6addr_any = IN6ADDR_ANY_INIT;
 #endif
 

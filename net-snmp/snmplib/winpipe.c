@@ -84,7 +84,6 @@ static int ConnectUDPSocket(SOCKET *sock, struct sockaddr_in *socketaddress, SOC
 static int TestUDPSend(SOCKET *sock, struct sockaddr_in *socketaddress)
 {
 	unsigned short port = socketaddress->sin_port;
-	int size = sizeof(struct sockaddr);
 
 	int bytessent = sendto(*sock, (char *) &port, sizeof(port), 0, NULL, 0);
 	if(bytessent != sizeof(port))
@@ -112,8 +111,6 @@ static int TestUDPReceive(SOCKET *sock, SOCKET *remotesocket, struct sockaddr_in
 
 static void CloseUDPSocketPair(SOCKET *socketpair)
 {
-	int i = WSAGetLastError();
-
 	if(socketpair[0] != INVALID_SOCKET)
 	{
 		closesocket(socketpair[0]);

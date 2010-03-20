@@ -259,7 +259,7 @@ _add_new_entry(netsnmp_ipaddress_entry *ipaddress_entry,
         (MFD_SUCCESS ==
          ipAddressTable_indexes_set(rowreq_ctx,
                                     ipaddress_entry->ia_address_len,
-                                    ipaddress_entry->ia_address,
+                                    (char *) ipaddress_entry->ia_address,
                                     ipaddress_entry->ia_address_len))) {
         if (CONTAINER_INSERT(container, rowreq_ctx) < 0) {
             DEBUGMSGTL (("ipAddressTable:access","container insert failed for new entry\n"));

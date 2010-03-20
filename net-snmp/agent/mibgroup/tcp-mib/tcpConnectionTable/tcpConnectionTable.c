@@ -308,14 +308,14 @@ tcpConnectionTable_indexes_set_tbl_idx(tcpConnectionTable_mib_index *
                                        tbl_idx,
                                        u_long
                                        tcpConnectionLocalAddressType_val,
-                                       char
+                                       const void
                                        *tcpConnectionLocalAddress_val_ptr,
                                        size_t
                                        tcpConnectionLocalAddress_val_ptr_len,
                                        u_long tcpConnectionLocalPort_val,
                                        u_long
                                        tcpConnectionRemAddressType_val,
-                                       char
+                                       const void
                                        *tcpConnectionRemAddress_val_ptr,
                                        size_t
                                        tcpConnectionRemAddress_val_ptr_len,
@@ -418,12 +418,12 @@ tcpConnectionTable_indexes_set_tbl_idx(tcpConnectionTable_mib_index *
 int
 tcpConnectionTable_indexes_set(tcpConnectionTable_rowreq_ctx * rowreq_ctx,
                                u_long tcpConnectionLocalAddressType_val,
-                               char *tcpConnectionLocalAddress_val_ptr,
+                               const void *tcpConnectionLocalAddress_val_ptr,
                                size_t
                                tcpConnectionLocalAddress_val_ptr_len,
                                u_long tcpConnectionLocalPort_val,
                                u_long tcpConnectionRemAddressType_val,
-                               char *tcpConnectionRemAddress_val_ptr,
+                               const void *tcpConnectionRemAddress_val_ptr,
                                size_t tcpConnectionRemAddress_val_ptr_len,
                                u_long tcpConnectionRemPort_val)
 {

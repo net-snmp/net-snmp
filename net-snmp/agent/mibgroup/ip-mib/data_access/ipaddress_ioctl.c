@@ -481,7 +481,7 @@ _netsnmp_ioctl_ipaddress_set_v4(netsnmp_ipaddress_entry * entry)
                  name, alias_idx);
     }
     else
-        strncpy(ifrq.ifr_name, extras->name, sizeof(ifrq.ifr_name));
+        strncpy(ifrq.ifr_name, (char *) extras->name, sizeof(ifrq.ifr_name));
 
     ifrq.ifr_name[ sizeof(ifrq.ifr_name)-1 ] = 0;
 
@@ -531,7 +531,7 @@ _netsnmp_ioctl_ipaddress_delete_v4(netsnmp_ipaddress_entry * entry)
 
     memset(&ifrq, 0, sizeof(ifrq));
 
-    strncpy(ifrq.ifr_name, extras->name, sizeof(ifrq.ifr_name));
+    strncpy(ifrq.ifr_name, (char *) extras->name, sizeof(ifrq.ifr_name));
     ifrq.ifr_name[ sizeof(ifrq.ifr_name)-1 ] = 0;
 
     ifrq.ifr_flags = 0;

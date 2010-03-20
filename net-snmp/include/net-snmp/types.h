@@ -57,7 +57,11 @@ typedef u_int socklen_t;
 #endif
 
 #ifndef HAVE_IN_ADDR_T
-typedef u_int in_addr_t;
+  /*
+   * The type in_addr_t must match the type of sockaddr_in::sin_addr.
+   * For MSVC and MinGW32, this is u_long.
+   */
+typedef u_long in_addr_t;
 #endif
 
 #ifndef HAVE_SSIZE_T

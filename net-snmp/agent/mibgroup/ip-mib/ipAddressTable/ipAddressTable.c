@@ -645,7 +645,7 @@ ipAddressPrefix_get(ipAddressTable_rowreq_ctx * rowreq_ctx,
     *(dst++) = rowreq_ctx->tbl_idx.ipAddressAddrType;
     *(dst++) = rowreq_ctx->data->ia_address_len;
     netsnmp_ipaddress_prefix_copy(tmp_buf,
-                                  rowreq_ctx->tbl_idx.ipAddressAddr,
+                                  (u_char *) rowreq_ctx->tbl_idx.ipAddressAddr,
                                   rowreq_ctx->data->ia_address_len,
                                   rowreq_ctx->data->ia_prefix_len);
     for (len = 0; len < rowreq_ctx->data->ia_address_len; ++len)

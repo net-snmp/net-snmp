@@ -183,7 +183,7 @@ int             Facility = LOG_DAEMON;
 #define AGENT_STOPPED 0
 int             agent_status = AGENT_STOPPED;
 /* app_name_long used for Event Log (syslog), SCM, registry etc */
-LPTSTR          app_name_long = _T("Net-SNMP Agent");     /* Application Name */
+LPCTSTR         app_name_long = _T("Net-SNMP Agent");     /* Application Name */
 #endif
 
 const char     *app_name = "snmpd";

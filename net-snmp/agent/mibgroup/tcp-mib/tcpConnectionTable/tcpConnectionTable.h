@@ -362,7 +362,7 @@ config_require(tcp-mib/tcpConnectionTable/tcpConnectionTable_data_access)
                                                * tbl_idx,
                                                u_long
                                                tcpConnectionLocalAddressType_val,
-                                               char
+                                               const void
                                                *tcpConnectionLocalAddress_val_ptr,
                                                size_t
                                                tcpConnectionLocalAddress_val_ptr_len,
@@ -370,7 +370,7 @@ config_require(tcp-mib/tcpConnectionTable/tcpConnectionTable_data_access)
                                                tcpConnectionLocalPort_val,
                                                u_long
                                                tcpConnectionRemAddressType_val,
-                                               char
+                                               const void
                                                *tcpConnectionRemAddress_val_ptr,
                                                size_t
                                                tcpConnectionRemAddress_val_ptr_len,
@@ -396,14 +396,14 @@ config_require(tcp-mib/tcpConnectionTable/tcpConnectionTable_data_access)
                                        rowreq_ctx,
                                        u_long
                                        tcpConnectionLocalAddressType_val,
-                                       char
+                                       const void
                                        *tcpConnectionLocalAddress_val_ptr,
                                        size_t
                                        tcpConnectionLocalAddress_val_ptr_len,
                                        u_long tcpConnectionLocalPort_val,
                                        u_long
                                        tcpConnectionRemAddressType_val,
-                                       char
+                                       const void
                                        *tcpConnectionRemAddress_val_ptr,
                                        size_t
                                        tcpConnectionRemAddress_val_ptr_len,

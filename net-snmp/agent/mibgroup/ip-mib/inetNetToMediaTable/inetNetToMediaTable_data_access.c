@@ -190,7 +190,7 @@ _add_or_update_arp_entry(netsnmp_arp_entry *arp_entry,
     if ((NULL != rowreq_ctx) &&
         (MFD_SUCCESS == inetNetToMediaTable_indexes_set
          (rowreq_ctx, rowreq_ctx->data->if_index, inetAddressType,
-          rowreq_ctx->data->arp_ipaddress,
+          (char *) rowreq_ctx->data->arp_ipaddress,
           rowreq_ctx->data->arp_ipaddress_len))) {
 
         /* try to find old entry */

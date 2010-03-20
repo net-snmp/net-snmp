@@ -969,7 +969,7 @@ char *netsnmp_getenv(const char *name)
         /* Allocate memory needed +1 to allow RegQueryValueExA to NULL terminate the
          * string data in registry is missing one (which is unlikely).
          */
-        key_value = (char *) malloc((sizeof(char) * key_value_size)+sizeof(char));
+        key_value = malloc((sizeof(char) * key_value_size)+sizeof(char));
         
         if (RegQueryValueExA(
               hKey, 
@@ -979,7 +979,7 @@ char *netsnmp_getenv(const char *name)
               key_value, 
               &key_value_size) == ERROR_SUCCESS) {
         }
-        temp = key_value;
+        temp = (char *) key_value;
       }
       RegCloseKey(hKey);
       if (temp)
@@ -1011,7 +1011,7 @@ char *netsnmp_getenv(const char *name)
         /* Allocate memory needed +1 to allow RegQueryValueExA to NULL terminate the
          * string data in registry is missing one (which is unlikely).
          */
-        key_value = (char *) malloc((sizeof(char) * key_value_size)+sizeof(char));
+        key_value = malloc((sizeof(char) * key_value_size)+sizeof(char));
         
         if (RegQueryValueExA(
               hKey, 
@@ -1021,7 +1021,7 @@ char *netsnmp_getenv(const char *name)
               key_value, 
               &key_value_size) == ERROR_SUCCESS) {
         }
-        temp = key_value;
+        temp = (char *) key_value;
 
       }
       RegCloseKey(hKey);
