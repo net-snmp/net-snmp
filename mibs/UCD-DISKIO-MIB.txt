@@ -75,7 +75,7 @@ DiskIOEntry ::= SEQUENCE {
     diskIOWrites        Counter32,
     diskIOLA1           Integer32,
     diskIOLA5           Integer32,
-    diskIOLA15          Integer32
+    diskIOLA15          Integer32,
     diskIONReadX        Counter64,
     diskIONWrittenX     Counter64
 }
