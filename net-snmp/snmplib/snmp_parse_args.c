@@ -133,6 +133,8 @@ snmp_parse_args_descriptions(FILE * outf)
             "  -M DIR[:...]\t\tlook in given list of directories for MIBs\n");
 #ifndef NETSNMP_DISABLE_MIB_LOADING
     fprintf(outf,
+            "    (default: %s)\n", netsnmp_get_mib_directory());
+    fprintf(outf,
             "  -P MIBOPTS\t\tToggle various defaults controlling MIB parsing:\n");
     snmp_mib_toggle_options_usage("\t\t\t  ", outf);
 #endif
