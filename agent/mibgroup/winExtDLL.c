@@ -535,8 +535,8 @@ register_netsnmp_handler(winextdll_view * const ext_dll_view_info)
         outlen = 0;
         oid_name = NULL;
         buffer_large_enough =
-            sprint_realloc_objid((u_char **) &oid_name, &oid_namelen, &outlen,
-                                 1, ext_dll_view_info->name,
+            sprint_realloc_objid((u_char **) & oid_name, &oid_namelen,
+                                 &outlen, 1, ext_dll_view_info->name,
                                  ext_dll_view_info->name_length);
         snmp_log(LOG_INFO, "OID range %s%s: replacing handler %s by %s.\n",
                  oid_name ? oid_name : "",
@@ -736,9 +736,10 @@ var_winExtDLL(netsnmp_mib_handler *handler,
     for (request = requests; request; request = request->next) {
         netsnmp_variable_list *varbind;
         SnmpVarBindList win_varbinds;
-        BOOL            result;
         AsnInteger32    ErrorStatus;
         AsnInteger32    ErrorIndex;
+        BOOL            result;
+        BOOL            copy_value;
 
         memset(&win_varbinds, 0, sizeof(win_varbinds));
 
@@ -764,6 +765,20 @@ var_winExtDLL(netsnmp_mib_handler *handler,
         }
 
         assert(win_varbinds.len == 1);
+
+        /*
+         * For a GetNext PDU, if the varbind OID comes lexicographically
+         * before the root OID of this handler, replace it by the root OID.
+         */
+        if (reqinfo->mode == MODE_GETNEXT
+            && snmp_oid_compare(win_varbinds.list[0].name.ids,
+                                win_varbinds.list[0].name.idLength,
+                                reginfo->rootoid,
+                                reginfo->rootoid_len) < 0) {
+            AsnObjectIdentifier Root =
+                { reginfo->rootoid_len, reginfo->rootoid };
+            SnmpUtilOidCpy(&win_varbinds.list[0].name, &Root);
+        }
 
         if (ext_dll_info->pfSnmpExtensionQueryEx) {
             result = ext_dll_info->pfSnmpExtensionQueryEx(nRequestType,
@@ -806,16 +821,21 @@ var_winExtDLL(netsnmp_mib_handler *handler,
             goto free_win_varbinds;
         }
 
-        if (reqinfo->mode == MODE_GETNEXT) {
+        copy_value = FALSE;
+        if (reqinfo->mode == MODE_GET)
+            copy_value = TRUE;
+        else if (reqinfo->mode == MODE_GETNEXT) {
             const SnmpVarBind *win_varbind;
 
             win_varbind = &win_varbinds.list[0];
 
             /*
-             * Compare the OID passed to the Windows SNMP extension DLL
-             * with the OID returned by the same DLL. If the DLL returned
-             * a lexicographically earlier OID, this means that there is
-             * no next OID in this MIB.
+             * Verify whether the OID returned by the extension DLL fits
+             * inside the OID range this handler has been registered
+             * with. Also compare the OID passed to the extension DLL with
+             * the OID returned by the same DLL. If the DLL returned a
+             * lexicographically earlier OID, this means that there is no
+             * next OID in the MIB implemented by the DLL.
              *
              * Note: for some GetNext requests BoundsChecker will report
              * that the code below accesses a dangling pointer. This is
@@ -824,9 +844,13 @@ var_winExtDLL(netsnmp_mib_handler *handler,
              * win_varbind by an SNMP extension DLL that has not been
              * instrumented by BoundsChecker.
              */
-            if (snmp_oid_compare(varbind->name, varbind->name_length,
-                                 win_varbind->name.ids,
-                                 win_varbind->name.idLength) < 0) {
+            if (netsnmp_oid_is_subtree(ext_dll_view_info->name,
+                                       ext_dll_view_info->name_length,
+                                       win_varbind->name.ids,
+                                       win_varbind->name.idLength) == 0
+                && snmp_oid_compare(varbind->name, varbind->name_length,
+                                    win_varbind->name.ids,
+                                    win_varbind->name.idLength) < 0) {
                 /*
                  * Copy the OID returned by the extension DLL to the
                  * Net-SNMP varbind.
@@ -834,9 +858,10 @@ var_winExtDLL(netsnmp_mib_handler *handler,
                 snmp_set_var_objid(varbind,
                                    win_varbind->name.ids,
                                    win_varbind->name.idLength);
+                copy_value = TRUE;
             }
         }
-        if (MODE_IS_GET(reqinfo->mode)) {
+        if (copy_value) {
             netsnmp_variable_list *result_vb;
 
             /*
@@ -1295,24 +1320,6 @@ append_windows_varbind(netsnmp_variable_list ** const net_snmp_varbinds,
                                   sizeof(win_varbind->value.asnValue.
                                          unsigned32));
         break;
-        /*
-         * Apparently some extension DLLs return an invalid ASN type for
-         * some OIDs. This only occurs for non-existing objects.
-         */
-    case 0:
-        DEBUGMSG(("winExtDLL", "OID "));
-        DEBUGMSGOID(("winExtDLL", win_varbind->name.ids, win_varbind->name.idLength));
-        DEBUGMSG(("winExtDLL", " ("));
-        DEBUGMSGSUBOID(("winExtDLL", win_varbind->name.ids, win_varbind->name.idLength));
-        DEBUGMSG(("winExtDLL", "): received invalid ASN type 0.\n"));
-        snmp_varlist_add_variable(net_snmp_varbinds, win_varbind->name.ids,
-                                  win_varbind->name.idLength,
-                                  ASN_INTEGER,
-                                  (const u_char *) &win_varbind->value.
-                                  asnValue.number,
-                                  sizeof(win_varbind->value.asnValue.
-                                         number));
-        break;
     default:
         return SNMP_ERR_GENERR;
     }
@@ -1522,15 +1529,15 @@ lookup_view_by_oid(oid * const name, const size_t name_len)
     int             i;
 
     for (i = 0; i < s_winextdll_view.size; i++) {
-        if (snmp_oid_compare(WINEXTDLL_VIEW(i).name,
-                             WINEXTDLL_VIEW(i).name_length,
-                             name, name_len) == 0
+        if (netsnmp_oid_equals(WINEXTDLL_VIEW(i).name,
+                               WINEXTDLL_VIEW(i).name_length,
+                               name, name_len) == 0
             && WINEXTDLL_VIEW(i).my_handler) {
             return &WINEXTDLL_VIEW(i);
         }
     }
 
-    return 0;
+    return NULL;
 }
 
 /**
