@@ -324,7 +324,13 @@ usage(char *prog)
            "  -s\t\t\tuse -Lsd instead\n"
            "  -S d|i|0-7\t\tuse -Ls <facility> instead\n"
 
-           "\n", netsnmp_get_mib_directory());
+           "\n",
+#ifndef NETSNMP_DISABLE_MIB_LOADING
+           netsnmp_get_mib_directory()
+#else
+           "MIBs not loaded"
+#endif
+           );
     exit(1);
 }
 
