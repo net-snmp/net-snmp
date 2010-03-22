@@ -737,6 +737,7 @@ struct variable_list {
                                        size_t);
     int             netsnmp_oid_tree_equals(const oid *, size_t, const oid *,
                                             size_t);
+    NETSNMP_IMPORT
     int             netsnmp_oid_is_subtree(const oid *, size_t, const oid *,
                                            size_t);
     int             netsnmp_oid_find_prefix(const oid * in_name1, size_t len1,
