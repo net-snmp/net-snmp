@@ -216,7 +216,8 @@ static int      basename_equals(const char *path, const char *basename);
 static int      register_netsnmp_handler(winextdll_view *
                                          const ext_dll_view_info);
 static void     read_extension_dlls_from_registry(void);
-static char    *read_extension_dlls_from_registry2(const TCHAR *);
+static void     read_extension_dlls_from_registry_at(const char *const subkey);
+static char    *read_extension_dll_path_from_registry(const TCHAR *);
 static void     subagentTrapCheck(unsigned int clientreg, void *clientarg);
 static int      var_winExtDLL(netsnmp_mib_handler *handler,
                               netsnmp_handler_registration *reginfo,
@@ -534,8 +535,8 @@ register_netsnmp_handler(winextdll_view * const ext_dll_view_info)
         outlen = 0;
         oid_name = NULL;
         buffer_large_enough =
-            sprint_realloc_objid((u_char **) &oid_name, &oid_namelen, &outlen,
-                                 1, ext_dll_view_info->name,
+            sprint_realloc_objid((u_char **) & oid_name, &oid_namelen,
+                                 &outlen, 1, ext_dll_view_info->name,
                                  ext_dll_view_info->name_length);
         snmp_log(LOG_INFO, "OID range %s%s: replacing handler %s by %s.\n",
                  oid_name ? oid_name : "",
@@ -735,9 +736,10 @@ var_winExtDLL(netsnmp_mib_handler *handler,
     for (request = requests; request; request = request->next) {
         netsnmp_variable_list *varbind;
         SnmpVarBindList win_varbinds;
-        BOOL            result;
         AsnInteger32    ErrorStatus;
         AsnInteger32    ErrorIndex;
+        BOOL            result;
+        BOOL            copy_value;
 
         memset(&win_varbinds, 0, sizeof(win_varbinds));
 
@@ -763,6 +765,20 @@ var_winExtDLL(netsnmp_mib_handler *handler,
         }
 
         assert(win_varbinds.len == 1);
+
+        /*
+         * For a GetNext PDU, if the varbind OID comes lexicographically
+         * before the root OID of this handler, replace it by the root OID.
+         */
+        if (reqinfo->mode == MODE_GETNEXT
+            && snmp_oid_compare(win_varbinds.list[0].name.ids,
+                                win_varbinds.list[0].name.idLength,
+                                reginfo->rootoid,
+                                reginfo->rootoid_len) < 0) {
+            AsnObjectIdentifier Root =
+                { reginfo->rootoid_len, reginfo->rootoid };
+            SnmpUtilOidCpy(&win_varbinds.list[0].name, &Root);
+        }
 
         if (ext_dll_info->pfSnmpExtensionQueryEx) {
             result = ext_dll_info->pfSnmpExtensionQueryEx(nRequestType,
@@ -805,16 +821,21 @@ var_winExtDLL(netsnmp_mib_handler *handler,
             goto free_win_varbinds;
         }
 
-        if (reqinfo->mode == MODE_GETNEXT) {
+        copy_value = FALSE;
+        if (reqinfo->mode == MODE_GET)
+            copy_value = TRUE;
+        else if (reqinfo->mode == MODE_GETNEXT) {
             const SnmpVarBind *win_varbind;
 
             win_varbind = &win_varbinds.list[0];
 
             /*
-             * Compare the OID passed to the Windows SNMP extension DLL
-             * with the OID returned by the same DLL. If the DLL returned
-             * a lexicographically earlier OID, this means that there is
-             * no next OID in this MIB.
+             * Verify whether the OID returned by the extension DLL fits
+             * inside the OID range this handler has been registered
+             * with. Also compare the OID passed to the extension DLL with
+             * the OID returned by the same DLL. If the DLL returned a
+             * lexicographically earlier OID, this means that there is no
+             * next OID in the MIB implemented by the DLL.
              *
              * Note: for some GetNext requests BoundsChecker will report
              * that the code below accesses a dangling pointer. This is
@@ -823,9 +844,13 @@ var_winExtDLL(netsnmp_mib_handler *handler,
              * win_varbind by an SNMP extension DLL that has not been
              * instrumented by BoundsChecker.
              */
-            if (snmp_oid_compare(varbind->name, varbind->name_length,
-                                 win_varbind->name.ids,
-                                 win_varbind->name.idLength) < 0) {
+            if (netsnmp_oid_is_subtree(ext_dll_view_info->name,
+                                       ext_dll_view_info->name_length,
+                                       win_varbind->name.ids,
+                                       win_varbind->name.idLength) == 0
+                && snmp_oid_compare(varbind->name, varbind->name_length,
+                                    win_varbind->name.ids,
+                                    win_varbind->name.idLength) < 0) {
                 /*
                  * Copy the OID returned by the extension DLL to the
                  * Net-SNMP varbind.
@@ -833,9 +858,10 @@ var_winExtDLL(netsnmp_mib_handler *handler,
                 snmp_set_var_objid(varbind,
                                    win_varbind->name.ids,
                                    win_varbind->name.idLength);
+                copy_value = TRUE;
             }
         }
-        if (MODE_IS_GET(reqinfo->mode)) {
+        if (copy_value) {
             netsnmp_variable_list *result_vb;
 
             /*
@@ -872,9 +898,29 @@ free_win_varbinds:
 /**
  * Iterate over the SNMP extension DLL information in the registry and store
  * the retrieved information in s_winextdll[].
+ *
+ * At the time an SNMP extension DLL is installed, some information about the
+ * DLL is written to the registry at one of the two following locations:
+ * HKLM\SYSTEM\CurrentControlSet\Control\SNMP\Parameters\ExtensionAgents for
+ * Windows Vista, Windows 7 and Windows 2008 or
+ * HKLM\SYSTEM\CurrentControlSet\Services\SNMP\Parameters\ExtensionAgents for
+ * earlier Windows versions. Under this key zero or more REG_SZ values are
+ * stored with the names of registry keys containing the DLL path.
  */
 void
 read_extension_dlls_from_registry()
+{
+    DEBUGMSGTL(("winExtDLL",
+                "read_extension_dlls_from_registry called\n"));
+
+    read_extension_dlls_from_registry_at
+        ("SYSTEM\\CurrentControlSet\\Services\\SNMP\\Parameters\\ExtensionAgents");
+    read_extension_dlls_from_registry_at
+        ("SYSTEM\\CurrentControlSet\\Control\\SNMP\\Parameters\\ExtensionAgents");
+}
+
+void
+read_extension_dlls_from_registry_at(const char *const subkey)
 {
     DWORD           retCode;
     HKEY            hKey;
@@ -885,21 +931,7 @@ read_extension_dlls_from_registry()
     TCHAR           data[MAX_VALUE_NAME];
     DWORD           dataSize;
 
-    DEBUGMSGTL(("winExtDLL",
-                "read_extension_dlls_from_registry called\n"));
-
-    /*
-     * At the time an SNMP extension DLL is installed, some information about
-     * the DLL is written to the registry at the following location:
-     * HKLM\SYSTEM\CurrentControlSet\Services\SNMP\Parameters\ExtensionAgents or
-     * HKLM\SYSTEM\CurrentControlSet\Control\SNMP\Parameters\ExtensionAgents for
-     * Vista, Windows 7 and 2008.
-     * Under this key zero or more REG_SZ values are stored with the names of
-     * registry keys containing the DLL path.
-     */
-
-    retCode = RegOpenKeyExA(HKEY_LOCAL_MACHINE,
-                            "SYSTEM\\CurrentControlSet\\Services\\SNMP\\Parameters\\ExtensionAgents",
+    retCode = RegOpenKeyExA(HKEY_LOCAL_MACHINE, subkey,
                             0, KEY_QUERY_VALUE, &hKey);
 
     if (retCode == ERROR_SUCCESS) {
@@ -915,36 +947,9 @@ read_extension_dlls_from_registry()
                 winextdll       ext_dll_info;
 
                 memset(&ext_dll_info, 0, sizeof(ext_dll_info));
-                if ((ext_dll_info.dll_name =
-                     read_extension_dlls_from_registry2(data))) {
-                    xarray_push_back(&s_winextdll, &ext_dll_info);
-                    DEBUGMSG(("winExtDLL", "registry key %s: DLL %s.\n",
-                              data, ext_dll_info.dll_name));
-                }
-            }
-        }
-        RegCloseKey(hKey);
-    }
-
-    retCode = RegOpenKeyExA(HKEY_LOCAL_MACHINE,
-                            "SYSTEM\\CurrentControlSet\\Control\\SNMP\\Parameters\\ExtensionAgents",
-                            0, KEY_QUERY_VALUE, &hKey);
-
-    if (retCode == ERROR_SUCCESS) {
-        for (i = 0; ; i++) {
-            valueSize = sizeof(valueName);
-            dataSize = sizeof(data);
-            retCode = RegEnumValue(hKey, i, valueName, &valueSize, NULL,
-                                   &dataType, (BYTE *) data, &dataSize);
-
-            if (retCode != ERROR_SUCCESS)
-                break;
-            if (dataType == REG_SZ) {
-                winextdll       ext_dll_info;
-
-                memset(&ext_dll_info, 0, sizeof(ext_dll_info));
-                if ((ext_dll_info.dll_name =
-                     read_extension_dlls_from_registry2(data))) {
+                ext_dll_info.dll_name =
+                    read_extension_dll_path_from_registry(data);
+                if (ext_dll_info.dll_name) {
                     xarray_push_back(&s_winextdll, &ext_dll_info);
                     DEBUGMSG(("winExtDLL", "registry key %s: DLL %s.\n",
                               data, ext_dll_info.dll_name));
@@ -955,9 +960,9 @@ read_extension_dlls_from_registry()
     }
 }
 
-/** Store the DLL name in dynamically allocated memory. */
+/** Store the DLL path in dynamically allocated memory. */
 char           *
-read_extension_dlls_from_registry2(const TCHAR * keyName)
+read_extension_dll_path_from_registry(const TCHAR * keyName)
 {
     HKEY            hKey;
     DWORD           key_value_type = 0;
@@ -1315,24 +1320,6 @@ append_windows_varbind(netsnmp_variable_list ** const net_snmp_varbinds,
                                   sizeof(win_varbind->value.asnValue.
                                          unsigned32));
         break;
-        /*
-         * Apparently some extension DLLs return an invalid ASN type for
-         * some OIDs. This only occurs for non-existing objects.
-         */
-    case 0:
-        DEBUGMSG(("winExtDLL", "OID "));
-        DEBUGMSGOID(("winExtDLL", win_varbind->name.ids, win_varbind->name.idLength));
-        DEBUGMSG(("winExtDLL", " ("));
-        DEBUGMSGSUBOID(("winExtDLL", win_varbind->name.ids, win_varbind->name.idLength));
-        DEBUGMSG(("winExtDLL", "): received invalid ASN type 0.\n"));
-        snmp_varlist_add_variable(net_snmp_varbinds, win_varbind->name.ids,
-                                  win_varbind->name.idLength,
-                                  ASN_INTEGER,
-                                  (const u_char *) &win_varbind->value.
-                                  asnValue.number,
-                                  sizeof(win_varbind->value.asnValue.
-                                         number));
-        break;
     default:
         return SNMP_ERR_GENERR;
     }
@@ -1542,15 +1529,15 @@ lookup_view_by_oid(oid * const name, const size_t name_len)
     int             i;
 
     for (i = 0; i < s_winextdll_view.size; i++) {
-        if (snmp_oid_compare(WINEXTDLL_VIEW(i).name,
-                             WINEXTDLL_VIEW(i).name_length,
-                             name, name_len) == 0
+        if (netsnmp_oid_equals(WINEXTDLL_VIEW(i).name,
+                               WINEXTDLL_VIEW(i).name_length,
+                               name, name_len) == 0
             && WINEXTDLL_VIEW(i).my_handler) {
             return &WINEXTDLL_VIEW(i);
         }
     }
 
-    return 0;
+    return NULL;
 }
 
 /**
