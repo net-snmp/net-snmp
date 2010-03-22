@@ -1,3 +1,4 @@
+
 #
 # Makefile.in (at the root of net-snmp)
 #
@@ -368,7 +369,7 @@ tarclean:
 	fi
 
 checks:
-	$(MAKE) -k makefilecheck commentcheck warningcheck dependcheck
+	$(MAKE) -k makefilecheck commentcheck warningcheck dependcheck assertcheck
 
 dependcheck:
 	@echo "Checking for full paths in dependency files..."
@@ -376,7 +377,11 @@ dependcheck:
 
 warningcheck:
 	@echo "Checking for cpp warnings..."
-	@grep -n -E "#warning" `$(FIND) $(top_srcdir) -name \*.\[ch\]` && exit 1
+	@grep -n "#warning" `$(FIND) $(top_srcdir) -name \*.\[ch\]` && exit 1
+
+assertcheck:
+	@echo "Checking for non-snmp asserts..."
+	@grep -n -w "assert" `$(FIND) $(top_srcdir) -name \*.\[ch\] | grep -v snmp_assert.h` && exit 1
 
 commentcheck:
 	@echo "Checking for C++ style comments..."

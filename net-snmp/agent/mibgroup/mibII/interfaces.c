@@ -21,8 +21,6 @@
 #define _I_DEFINED_KERNEL
 #endif
 
-#include <assert.h>
-
 #if HAVE_STRING_H
 #include <string.h>
 #else
@@ -2694,7 +2692,7 @@ var_interfaces(struct variable * vp,
 
     switch (vp->magic) {
     case NETSNMP_IFNUMBER:
-        assert(sizeof(DWORD) == sizeof(long_return));
+        netsnmp_assert(sizeof(DWORD) == sizeof(long_return));
         GetNumberOfInterfaces((DWORD *) &long_return);
         return (u_char *) & long_return;
     default:

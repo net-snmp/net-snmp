@@ -109,7 +109,7 @@ static int _lock;
 #endif
 
 NETSNMP_STATIC_INLINE int
-_callback_lock(int major, int minor, const char* warn, int assert)
+_callback_lock(int major, int minor, const char* warn, int do_assert)
 {
     int lock_holded=0;
     struct timeval lock_time = { 0, 1000 };
@@ -133,7 +133,7 @@ _callback_lock(int major, int minor, const char* warn, int assert)
         if (NULL != warn)
             snmp_log(LOG_WARNING,
                      "lock in _callback_lock sleeps more than 100 milliseconds in %s\n", warn);
-        if (assert)
+        if (do_assert)
             netsnmp_assert(lock_holded < 100);
         
         return 1;

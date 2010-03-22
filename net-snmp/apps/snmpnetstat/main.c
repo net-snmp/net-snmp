@@ -515,7 +515,7 @@ name2protox(const char *name)
 
 	setprotoent(1);			/* make protocol lookup cheaper */
 	while ((p = getprotoent())) {
-		/* assert: name not same as p->name */
+		/* netsnmp_assert: name not same as p->name */
 		for (alias = p->p_aliases; *alias; alias++)
 			if (strcmp(name, *alias) == 0) {
 				endprotoent();

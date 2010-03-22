@@ -2165,12 +2165,13 @@ read_config_store_data_prefix(char prefix, int type, char *storeto,
 
 #ifdef READ_CONFIG_UNIT_TEST
 
-#include <assert.h>
+#define NETSNMP_USE_ASSERT 1
+#include <net-snmp/libary/snmp_assert.h>
 
 int
 read64(U64 * i64, const char *str)
 {
-    assert(0);
+    netsnmp_assert(0);
 }
 
 int
@@ -2182,19 +2183,19 @@ snmp_get_do_debugging(void)
 int
 debug_is_token_registered(const char *token)
 {
-    assert(0);
+    netsnmp_assert(0);
 }
 
 void
 debugmsg(const char *token, const char *format, ...)
 {
-    assert(0);
+    netsnmp_assert(0);
 }
 
 void
 debugmsgtoken(const char *token, const char *format, ...)
 {
-    assert(0);
+    netsnmp_assert(0);
 }
 
 int
@@ -2213,61 +2214,61 @@ snmp_log(int priority, const char *format, ...)
 void
 snmp_log_perror(const char *s)
 {
-    assert(0);
+    netsnmp_assert(0);
 }
 
 int
 snmp_vlog(int priority, const char *format, va_list ap)
 {
-    assert(0);
+    netsnmp_assert(0);
 }
 
 int
 netsnmp_ds_set_boolean(int storeid, int which, int value)
 {
-    assert(0);
+    netsnmp_assert(0);
 }
 
 int
 netsnmp_ds_get_boolean(int storeid, int which)
 {
-    assert(0);
+    netsnmp_assert(0);
 }
 
 int
 netsnmp_ds_set_string(int storeid, int which, const char *value)
 {
-    assert(0);
+    netsnmp_assert(0);
 }
 
 char           *
 netsnmp_ds_get_string(int storeid, int which)
 {
-    assert(0);
+    netsnmp_assert(0);
 }
 
 char           *
 netsnmp_getenv(const char *name)
 {
-    assert(0);
+    netsnmp_assert(0);
 }
 
 int
 snmp_call_callbacks(int major, int minor, void *caller_arg)
 {
-    assert(0);
+    netsnmp_assert(0);
 }
 
 int
 mkdirhier(const char *pathname, mode_t mode, int skiplast)
 {
-    assert(0);
+    netsnmp_assert(0);
 }
 
 int
 read_objid(const char *input, oid * output, size_t * out_len)
 {
-    assert(0);
+    netsnmp_assert(0);
 }
 
 struct read_config_testcase {
