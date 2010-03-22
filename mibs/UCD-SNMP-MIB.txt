@@ -30,14 +30,14 @@ UCD-SNMP-MIB DEFINITIONS ::= BEGIN
 
 IMPORTS
     OBJECT-TYPE, NOTIFICATION-TYPE, MODULE-IDENTITY,
-    Integer32, Opaque, enterprises, Counter32
+    Integer32, Opaque, enterprises, Counter32, Unsigned32
         FROM SNMPv2-SMI
 
     TEXTUAL-CONVENTION, DisplayString, TruthValue
 	FROM SNMPv2-TC;
 
 ucdavis MODULE-IDENTITY
-    LAST-UPDATED "200611220000Z"
+    LAST-UPDATED "200901190000Z"
     ORGANIZATION "University of California, Davis"
     CONTACT-INFO    
 	"This mib is no longer being maintained by the University of
@@ -53,21 +53,34 @@ ucdavis MODULE-IDENTITY
          email:    net-snmp-coders@lists.sourceforge.net
         "
     DESCRIPTION
+	"This file defines the private UCD SNMP MIB extensions."
+
+    REVISION	 "200901190000Z"
+    DESCRIPTION
+	"New 64-bit objects for monitoring large disk usage"
+
+    REVISION	 "200611220000Z"
+    DESCRIPTION
 	"Clarify behaviour of objects in the memory & systemStats groups
          (including updated versions of malnamed mem*Text objects).
          Define suitable TCs to describe error reporting/fix behaviour."
-    REVISION	 "200611220000Z"
-    DESCRIPTION
-	"Added ssCpuRawSoftIRQ for Linux (2.6) and forgotten raw swap counters."
+
     REVISION	 "200404070000Z"
     DESCRIPTION
-	"Deprecate the non-raw objects."
+	"Added ssCpuRawSoftIRQ for Linux (2.6) and forgotten raw swap counters."
+
     REVISION	 "200209050000Z"
     DESCRIPTION
-	"This file defines the private UCD SNMP MIB extensions."
+	"Deprecate the non-raw objects."
+
+    REVISION	 "200109200000Z"
+    DESCRIPTION
+	"Group to monitor log files"
+
     REVISION	 "200101170000Z"
     DESCRIPTION
 	"Added raw CPU and IO counters."
+
     REVISION	 "9912090000Z"
     DESCRIPTION
 	"SMIv2 version converted from older MIB definitions."
