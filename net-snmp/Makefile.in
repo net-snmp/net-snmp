@@ -373,25 +373,23 @@ checks:
 
 dependcheck:
 	@echo "Checking for full paths in dependency files..."
-	@grep -n -E "^/" `$(FIND) $(top_srcdir) -name Makefile.depend` && exit 1
+	@if grep -n -E "^/" `$(FIND) $(top_srcdir) -name Makefile.depend`; then false; fi
 
 warningcheck:
 	@echo "Checking for cpp warnings..."
-	@grep -n "#warning" `$(FIND) $(top_srcdir) -name \*.\[ch\]` && exit 1
+	@if grep -n "#warning" `$(FIND) $(top_srcdir) -name \*.\[ch\]`; then false; fi
 
 assertcheck:
 	@echo "Checking for non-snmp asserts..."
-	@grep -n -w "assert" `$(FIND) $(top_srcdir) -name \*.\[ch\] | grep -v snmp_assert.h` && exit 1
+	@if grep -n -w "assert" `$(FIND) $(top_srcdir) -name \*.\[ch\] | grep -v snmp_assert.h`; then false; fi
 
 commentcheck:
 	@echo "Checking for C++ style comments..."
-	@grep -n -E "([^:)n]|^)//" `$(FIND) $(top_srcdir) -path './win32' -prune -o -name \*.\[ch\] | grep -v agent/mibgroup/winExtDLL.c` && exit 1
+	@if grep -n -E "([^:)n]|^)//" `$(FIND) $(top_srcdir) -path './win32' -prune -o -name \*.\[ch\] | grep -v agent/mibgroup/winExtDLL.c`; then false; fi
 
-# always exit 1, since I can't figure out how to invert grep rc
 makefilecheck:
 	@echo "Checking for non-portable Makefile constructs..."
-	@grep -n "\.c=" `$(FIND) $(top_srcdir) -name "Makefile.*"`
-	@exit 1
+	@if grep -n "\.c=" `$(FIND) $(top_srcdir) -name .svn -prune -o -path ./Makefile.in -prune -o -name "Makefile.*" -print`; then false; fi
 
 dist: tar
 
