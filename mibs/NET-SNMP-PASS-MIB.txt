@@ -49,7 +49,7 @@ netSnmpPassIpAddress OBJECT-TYPE
     MAX-ACCESS  read-write
     STATUS      current
     DESCRIPTION "Example IP Address object."
-    DEFVAL { c'7f000001'H }  -- 127.0.0.1
+    DEFVAL { '7f000001'H }  -- 127.0.0.1
     ::= { netSnmpPassExamples 4 }
 
 netSnmpPassCounter OBJECT-TYPE
