@@ -375,7 +375,7 @@ get_set_cache(netsnmp_agent_session *asp)
                 /*
                  * I don't think this case should ever happen. Please email
                  * the net-snmp-coders@lists.sourceforge.net if you have
-                 * a test case that hits this assert. -- rstory
+                 * a test case that hits this condition. -- rstory
                  */
 		int i;
                 netsnmp_assert(NULL == asp->requests); /* see note above */
@@ -398,7 +398,7 @@ get_set_cache(netsnmp_agent_session *asp)
 	    } else {
                 /*
                  * when would we not have saved variables? someone
-                 * let me know if they hit this assert. -- rstory
+                 * let me know if they hit this condition. -- rstory
                  */
                 netsnmp_assert(NULL != ptr->saved_vars);
             }

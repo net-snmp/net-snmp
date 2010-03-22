@@ -50,8 +50,8 @@ strtok_r(char *s, const char *delim, char **lasts)
 	char *tok;
 
 	/* s may be NULL */
-	/*assert(delim != NULL);*/
-	/*assert(lasts != NULL);*/
+	/*netsnmp_assert(delim != NULL);*/
+	/*netsnmp_assert(lasts != NULL);*/
 
 	if (s == NULL && (s = *lasts) == NULL)
 		return (NULL);
