@@ -633,7 +633,7 @@ netsnmp_parse_args(int argc,
 
             default:
                 snmp_log(LOG_ERR, "Can't determine a valid SNMP version for the session\n");
-                return(-2);
+                return(-3);
             }
         } else {
 #ifndef NETSNMP_DISABLE_SNMPV1
@@ -681,7 +681,7 @@ netsnmp_parse_args(int argc,
             snmp_perror(argv[0]);
             fprintf(stderr,
                     "Error generating a key (Ku) from the supplied authentication pass phrase. \n");
-            return (-2);
+            return (-3);
         }
     }
     if (Xpsz) {
@@ -720,7 +720,7 @@ netsnmp_parse_args(int argc,
             snmp_perror(argv[0]);
             fprintf(stderr,
                     "Error generating a key (Ku) from the supplied privacy pass phrase. \n");
-            return (-2);
+            return (-3);
         }
     }
     /*
