@@ -276,7 +276,7 @@ OpeningEntry(UNUSED tState self)
         act->transid = 0;
         act->reqid = ++packetid;
         act->time = 0;
-        snmp_pdu_add_variable(act, NULL, 0, TYPE_OCTETSTR, NULL, 0);
+        snmp_pdu_add_variable(act, NULL, 0, ASN_OCTET_STR, NULL, 0);
         if(snmp_sess_send(sessp, act) == 0)
             snmp_free_pdu(act);
     }
