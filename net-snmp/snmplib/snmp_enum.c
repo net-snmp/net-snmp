@@ -20,6 +20,7 @@
 
 #include <net-snmp/library/snmp_enum.h>
 #include <net-snmp/library/tools.h>
+#include <net-snmp/library/snmp_assert.h>
 
 struct snmp_enum_list_str {
     char           *name;
@@ -30,14 +31,14 @@ struct snmp_enum_list_str {
 static struct snmp_enum_list ***snmp_enum_lists = NULL;
 unsigned int    current_maj_num;
 unsigned int    current_min_num;
-struct snmp_enum_list_str *sliststorage = NULL;
+static struct snmp_enum_list_str *sliststorage = NULL;
 
 int
 init_snmp_enum(const char *type)
 {
     int             i;
 
-    if (NULL != sliststorage)
+    if (NULL != snmp_enum_lists)
         return SE_OK;
 
     snmp_enum_lists = (struct snmp_enum_list ***)
@@ -71,7 +72,7 @@ se_store_in_list(struct snmp_enum_list *new_list,
          */
         return SE_NOMEM;
     }
-
+    netsnmp_assert(NULL != snmp_enum_lists);
 
     if (snmp_enum_lists[major][minor] != NULL)
         ret = SE_ALREADY_THERE;
@@ -194,6 +195,7 @@ se_find_list(unsigned int major, unsigned int minor)
 {
     if (major > current_maj_num || minor > current_min_num)
         return NULL;
+    netsnmp_assert(NULL != snmp_enum_lists);
 
     return snmp_enum_lists[major][minor];
 }
@@ -260,16 +262,17 @@ se_find_label(unsigned int major, unsigned int minor, int value)
 int
 se_add_pair_to_list(struct snmp_enum_list **list, char *label, int value)
 {
-    struct snmp_enum_list *lastnode = NULL;
+    struct snmp_enum_list *lastnode = NULL, *tmp;
 
     if (!list)
         return SE_DNE;
 
-    while (*list) {
-        if ((*list)->value == value)
+    tmp = *list;
+    while (tmp) {
+        if (tmp->value == value)
             return (SE_ALREADY_THERE);
-        lastnode = (*list);
-        (*list) = (*list)->next;
+        lastnode = tmp;
+        tmp = tmp->next;
     }
 
     if (lastnode) {
