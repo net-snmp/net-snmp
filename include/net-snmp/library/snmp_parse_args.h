@@ -29,7 +29,10 @@ extern "C" {
  *  @param proc function pointer used to process any unhandled arguments
  *  @param flags flags directing how to handle the string
  *
- *  @return 0 on success, -1 on failure
+ *  @return 0 on success, -1 on failure (usage should be printed), -2 on success
+ *  when the application termination is expected (like using -V parameter) and
+ *  -3 on failure, when netsnmp_parse_args already printed enough information
+ *  and no usage should be printed.
  *
  *  The proc function is called with argc, argv and the currently processed
  *  option as arguments

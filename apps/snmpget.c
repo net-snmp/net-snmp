@@ -124,6 +124,8 @@ main(int argc, char *argv[])
      * get the common command line arguments 
      */
     switch (arg = snmp_parse_args(argc, argv, &session, "C:", optProc)) {
+    case -3:
+        exit(1);
     case -2:
         exit(0);
     case -1:

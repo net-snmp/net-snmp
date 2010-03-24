@@ -145,6 +145,8 @@ main(int argc, char *argv[])
     if (strcmp(prognam, "snmpinform") == 0)
         inform = 1;
     switch (arg = snmp_parse_args(argc, argv, &session, "C:", optProc)) {
+    case -3:
+        exit(1);
     case -2:
         exit(0);
     case -1:
