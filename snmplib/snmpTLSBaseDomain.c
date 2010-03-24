@@ -18,9 +18,9 @@
 #include <errno.h>
 
 /* OpenSSL Includes */
-#include "openssl/bio.h"
-#include "openssl/ssl.h"
-#include "openssl/err.h"
+#include <openssl/bio.h>
+#include <openssl/ssl.h>
+#include <openssl/err.h>
 
 #include <net-snmp/types.h>
 #include <net-snmp/library/snmpTLSBaseDomain.h>
@@ -29,6 +29,7 @@
 #include <net-snmp/library/callback.h>
 #include <net-snmp/library/snmp_logging.h>
 #include <net-snmp/library/snmp_api.h>
+#include <net-snmp/library/tools.h>
 #include <net-snmp/library/snmp_debug.h>
 
 #define LOGANDDIE(msg) { snmp_log(LOG_ERR, "%s\n", msg); return 0; }
@@ -95,7 +96,7 @@ sslctx_client_setup(SSL_METHOD *method) {
      */
     the_ctx = SSL_CTX_new(method);
     if (!the_ctx) {
-        snmp_log(LOG_ERR, "ack: %x\n", the_ctx);
+        snmp_log(LOG_ERR, "ack: %x\n", (uintptr_t)the_ctx);
         LOGANDDIE("can't create a new context");
     }
     SSL_CTX_set_read_ahead (the_ctx, 1); /* Required for DTLS */
@@ -114,7 +115,7 @@ sslctx_client_setup(SSL_METHOD *method) {
                                      NETSNMP_DS_LIB_X509_CLIENT_PUB);
 
     DEBUGMSGTL(("sslctx_client", "using public key: %s\n", certfile));
-    if (BIO_read_filename(keybio, certfile) <=0)
+    if (BIO_read_filename(keybio, NETSNMP_REMOVE_CONST(char*,certfile)) <=0)
         LOGANDDIE ("error reading public key");
 
     cert = PEM_read_bio_X509_AUX(keybio, NULL, NULL, NULL);
@@ -132,7 +133,7 @@ sslctx_client_setup(SSL_METHOD *method) {
 
     DEBUGMSGTL(("sslctx_client", "using private key: %s\n", certfile));
     if (!keybio ||
-        BIO_read_filename(keybio, certfile) <= 0)
+        BIO_read_filename(keybio, NETSNMP_REMOVE_CONST(char*,certfile)) <= 0)
         LOGANDDIE ("error reading private key");
 
     key = PEM_read_bio_PrivateKey(keybio, NULL, NULL, NULL);
@@ -188,10 +189,12 @@ sslctx_server_setup(SSL_METHOD *method) {
                                      SSL_FILETYPE_PEM) < 1) {
         LOGANDDIE("faild to load cert");
     }
-    
+
+    DEBUGMSGTL(("sslctx_server", "using public key: %s\n", certfile));
     certfile = netsnmp_ds_get_string(NETSNMP_DS_LIBRARY_ID,
                                      NETSNMP_DS_LIB_X509_SERVER_PRIV);
 
+    DEBUGMSGTL(("sslctx_server", "using private key: %s\n", certfile));
     if (SSL_CTX_use_PrivateKey_file(the_ctx, certfile, SSL_FILETYPE_PEM) < 1) {
         LOGANDDIE("faild to load key");
     }
@@ -252,7 +255,7 @@ tls_bootstrap(int majorid, int minorid, void *serverarg, void *clientarg) {
                                      NETSNMP_DS_LIB_X509_CLIENT_PUB);
 
     DEBUGMSGTL(("tls", "using public key: %s\n", certfile));
-    if (BIO_read_filename(keybio, certfile) <=0)
+    if (BIO_read_filename(keybio, NETSNMP_REMOVE_CONST(char*,certfile)) <=0)
         LOGANDDIE ("error reading public key");
 
     cert = PEM_read_bio_X509_AUX(keybio, NULL, NULL, NULL);
@@ -270,7 +273,7 @@ tls_bootstrap(int majorid, int minorid, void *serverarg, void *clientarg) {
 
     DEBUGMSGTL(("tls", "using private key: %s\n", certfile));
     if (!keybio ||
-        BIO_read_filename(keybio, certfile) <= 0)
+        BIO_read_filename(keybio, NETSNMP_REMOVE_CONST(char*,certfile)) <= 0)
         LOGANDDIE ("error reading private key");
 
     key = PEM_read_bio_PrivateKey(keybio, NULL, NULL, NULL);
@@ -556,9 +559,8 @@ const char * _x509_get_error(int x509failvalue, const char *location) {
 }
 
 void _openssl_log_error(int rc, SSL *con, const char *location) {
-    const char     *reason;
+    const char     *reason, *file, *data;
     unsigned long   numerical_reason;
-    char           *file, *data;
     int             flags, line;
 
     snmp_log(LOG_ERR, "OpenSSL Related Erorrs:\n");
@@ -630,8 +632,16 @@ void _openssl_log_error(int rc, SSL *con, const char *location) {
         /* if we have a text translation: */
         if (data && (flags & ERR_TXT_STRING)) {
             snmp_log(LOG_ERR, "  Textual Error: %s\n", data);
-        }
-        /* XXX: how are these strings freed? or is it not thread safe? */
+            /*
+             * per openssl man page: If it has been allocated by
+             * OPENSSL_malloc(), *flags&ERR_TXT_MALLOCED is true.
+             *
+             * arggh... stupid openssl prototype for ERR_get_error_line_data
+             * wants a const char **, but returns something that we might
+             * need to free??
+             */
+            if (flags & ERR_TXT_MALLOCED)
+                OPENSSL_free(NETSNMP_REMOVE_CONST(void *, data));        }
     }
     
     snmp_log(LOG_ERR, "---- End of OpenSSL Errors ----\n");
