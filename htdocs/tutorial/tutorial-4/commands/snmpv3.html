@@ -26,16 +26,16 @@
       authentication and the authorization into two pieces:
     <ul>
 
-      <li> The USM is the default
-      <i>Security Module</i> (and the only one we currently support).
+      <li> The USM is the default <i>Security Module</i> for SNMPv3.
       The <i>U</i> stands for <i>User-based</i>, as it is contains a
       list of users and their attributes.  The USM is described by <a
       href="ftp://ftp.ietf.org/rfc/rfc2574.txt">RFC 2574</a>.
 
-      <li>The VACM is the <i>Version-based Access Control Module</i>
-      and controls which users (and SNMPv1/v2c communities as well)
-      are allowed to access and how they can access sections of the
-      MIB tree.  The VACM is described by <a
+      <li>The VACM is the default default <i>Access Control Module</i>
+      and determines which users (and SNMPv1/v2c communities)
+      are allowed to access MIB information.  The <i>I</i> stands for
+      <i>View-based</i>, and allows different levels of access for
+      different sections of the MIB tree.  The VACM is described by <a
       href="ftp://ftp.ietf.org/rfc/rfc2575.txt">RFC 2575</a>.
 
     </ul>
