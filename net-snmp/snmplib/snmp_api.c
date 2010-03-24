@@ -132,7 +132,6 @@ SOFTWARE.
 #include <net-snmp/library/snmp_alarm.h>
 #include <net-snmp/library/snmp_transport.h>
 #include <net-snmp/library/snmp_service.h>
-#include <net-snmp/library/cert_util.h>
 #include <net-snmp/library/vacm.h>
 
 static void     _init_snmp(void);
@@ -830,9 +829,6 @@ init_snmp(const char *type)
 #endif /* NETSNMP_DISABLE_MIB_LOADING */
 
     read_configs();
-#if defined(NETSNMP_USE_OPENSSL) && defined(HAVE_LIBSSL)
-    netsnmp_certs_init();
-#endif
 
 }                               /* end init_snmp() */
 
