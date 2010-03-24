@@ -31,6 +31,7 @@
 #include <net-snmp/library/snmp_api.h>
 #include <net-snmp/library/tools.h>
 #include <net-snmp/library/snmp_debug.h>
+#include <net-snmp/library/cert_util.h>
 
 #define LOGANDDIE(msg) { snmp_log(LOG_ERR, "%s\n", msg); return 0; }
 
@@ -231,6 +232,10 @@ tls_bootstrap(int majorid, int minorid, void *serverarg, void *clientarg) {
     if (have_done_bootstrap)
         return 0;
     have_done_bootstrap = 1;
+
+    netsnmp_certs_init();
+
+    DEBUGMSGT(("tls:bootstrap", "setting up client/server contexts\n"));
 
     /***********************************************************************
      * Set up the client context
