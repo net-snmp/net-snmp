@@ -404,33 +404,6 @@ while (<MAKE_IN>)
   }
 }
 
-###############################################
-#
-# Create libsnmp.def file for libsnmp_dll
-#
-###############################################
-if ($linktype eq "dynamic")
-{
-  my $file_out = "libsnmp_dll\\libsnmp.def";
-  my $file_in = "libsnmp_dll\\libsnmp.def.in";
-
-  open (FILE_OUT, ">$file_out") || die "Can't Open $file_out\n";
-  open (FILE_IN, "<$file_in") || die "Can't Open $file_in\n";
-  
-  print "creating $file_out\n";
-
-  while (<FILE_IN>)
-  {
-    chomp;
-
-    if ($b_ipv6 == "1") {
-      s/^;ipv6//i;
-    }
-
-    print FILE_OUT $_ . "\n";
-  }
-}
-
 
 print qq/
 ---------------------------------------------------------
