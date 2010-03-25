@@ -27,7 +27,7 @@ netsnmp_oid *
 nso_newarrayptr(oid *name, size_t name_len) 
 {
     netsnmp_oid *RETVAL;
-    RETVAL = SNMP_MALLOC_TYPEDEF(netsnmp_oid);
+    RETVAL = malloc(sizeof(netsnmp_oid));
     RETVAL->name = RETVAL->namebuf;
     RETVAL->len = name_len;
     memcpy(RETVAL->name, name, name_len * sizeof(oid));
@@ -159,7 +159,7 @@ nso_newptr(initstring)
     CODE:
         if (get_tree_head() == NULL)
             netsnmp_init_mib();
-        RETVAL = SNMP_MALLOC_TYPEDEF(netsnmp_oid);
+        RETVAL = malloc(sizeof(netsnmp_oid));
         RETVAL->name = RETVAL->namebuf;
         RETVAL->len = sizeof(RETVAL->namebuf)/sizeof(RETVAL->namebuf[0]);
         if (!snmp_parse_oid(initstring, (oid *) RETVAL->name, &RETVAL->len)) {
@@ -262,11 +262,12 @@ nsop_get_indexes(oid1)
                 return;
             }
                 
-            if ((buf = (u_char *) calloc(buf_len, 1)) == NULL) {
+            if ((buf = (u_char *) malloc(buf_len)) == NULL) {
                 RETVAL = NULL;
                 return;
             }
 
+            memset(buf, 0, buf_len);
             tpe = NULL;
             nodecount = 0;
             for(tpnode = tp; tpnode; tpnode = tpnode->parent) {
