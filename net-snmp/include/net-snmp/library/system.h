@@ -52,6 +52,10 @@ SOFTWARE.
 
     /*
      * Definitions for the system dependent library file
+     *
+     * Do not define 'struct direct' when MSVC_PERL is defined because a
+     * structure with that name is also defined in the Perl header
+     * lib\CORE\dirent.h. Do not declare gettimeofday() either.
      */
 #ifndef MSVC_PERL
 
@@ -88,6 +92,9 @@ SOFTWARE.
     NETSNMP_IMPORT
     int             gettimeofday(struct timeval *, struct timezone *tz);
 #endif
+
+#endif                         /* MSVC_PERL */
+
 /*
  * Note: when compiling Net-SNMP with dmalloc enabled on a system without
  * strcasecmp() or strncasecmp(), the macros HAVE_STRCASECMP and HAVE_STRNCASECMP
@@ -104,20 +111,17 @@ SOFTWARE.
     int             strncasecmp(const char *s1, const char *s2, size_t n);
 #endif
 
+#ifdef WIN32
     NETSNMP_IMPORT
     char           *winsock_startup(void);
     NETSNMP_IMPORT
     void            winsock_cleanup(void);
-
-#ifdef WIN32
 #define SOCK_STARTUP winsock_startup()
 #define SOCK_CLEANUP winsock_cleanup()
 #else                           /* !WIN32 */
 #define SOCK_STARTUP
 #define SOCK_CLEANUP
 #endif                          /* WIN32 */
-
-#endif				/* MSVC_PERL */
 
 #include <net-snmp/types.h>     /* For definition of in_addr_t */
 
