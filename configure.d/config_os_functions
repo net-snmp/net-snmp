@@ -26,6 +26,7 @@ AC_CHECK_FUNCS([fork            gai_strerror                   ] dnl
                [getaddrinfo     gethostname   gethostbyname    ] dnl
                [getipnodebyname               gettimeofday     ] dnl
                [if_nametoindex  mkstemp       regcomp          ] dnl
+               [readdir                                        ] dnl
                [setenv          setitimer     setlocale        ] dnl
                [setsid          snprintf                       ] dnl
                [strcasestr                    strdup           ] dnl

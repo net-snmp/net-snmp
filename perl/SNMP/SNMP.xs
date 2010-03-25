@@ -55,16 +55,6 @@
 #define G_VOID G_DISCARD
 #endif
 
-#ifdef WIN32
-#define SOCK_STARTUP winsock_startup()
-#define SOCK_CLEANUP winsock_cleanup()
-#define strcasecmp _stricmp
-#define strncasecmp _strnicmp
-#else
-#define SOCK_STARTUP
-#define SOCK_CLEANUP
-#endif
-
 #include "perlsnmp.h"
 
 #define SUCCESS 1

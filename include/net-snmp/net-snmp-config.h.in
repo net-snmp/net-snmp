@@ -540,6 +540,9 @@
 /* Define to 1 if you have the `random' function. */
 #undef HAVE_RANDOM
 
+/* Define to 1 if you have the `readdir' function. */
+#undef HAVE_READDIR
+
 /* Define to 1 if you have the `regcomp' function. */
 #undef HAVE_REGCOMP
 

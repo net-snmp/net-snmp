@@ -464,6 +464,11 @@ init_mib()
 int
 init_agent(name)
         const char *name;
+    CODE:
+        SOCK_STARTUP;
+        RETVAL = init_agent(name);
+    OUTPUT:
+        RETVAL
 
 void
 init_snmp(name)
