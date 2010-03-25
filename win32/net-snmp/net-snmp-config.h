@@ -1604,6 +1604,17 @@ typedef unsigned int   uintptr_t;
 #error NETSNMP_USE_DLL must be defined when building libsnmp as a DLL.
 #endif
 
+/*
+ * DLL decoration, if used at all, must be consistent.
+ * This is why NETSNMP_IMPORT is really an export decoration
+ * when it is encountered in a header file that is included
+ * during the compilation of a library source file.
+ * NETSNMP_DLL is set by the MSVC libsnmp_dll project
+ *  in order to signal that the library sources are being compiled.
+ * Not defining NETSNMP_USE_DLL ignores the preceding, and renders
+ *  the NETSNMP_IMPORT definitions harmless.
+ */
+
 #ifdef NETSNMP_USE_DLL
   #ifdef NETSNMP_DLL
     #if defined(_MSC_VER)
@@ -1635,24 +1646,11 @@ typedef unsigned int   uintptr_t;
 #  endif
 #endif
 
-/*
- * DLL decoration, if used at all, must be consistent.
- * This is why NETSNMP_IMPORT is really an export decoration
- * when it is encountered in a header file that is included
- * during the compilation of a library source file.
- * NETSNMP_DLL is set by the MSVC libsnmp_dll project
- *  in order to signal that the library sources are being compiled.
- * Not defining NETSNMP_USE_DLL ignores the preceding, and renders
- *  the NETSNMP_IMPORT definitions harmless.
- */
-
+#if defined(NETSNMP_USE_DLL) && !defined(NETSNMP_TOOLS_C) && !defined(MSVC_PERL)
 
   #include <malloc.h>
   #include <stdlib.h> /* malloc(), calloc(), realloc() and free() */
   #include <string.h> /* strdup() */
-
-  #ifdef NETSNMP_USE_DLL
-    #ifndef NETSNMP_TOOLS_C
 
       /* wrap alloc functions to use DLL's memory heap */
       /* This is not done in tools.c, where these wrappers are defined */
@@ -1669,8 +1667,7 @@ typedef unsigned int   uintptr_t;
       void * netsnmp_realloc( void * ptr, size_t size);
       void netsnmp_free( void * ptr);
 
-    #endif
-  #endif
+#endif /* defined(NETSNMP_USE_DLL) && !defined(NETSNMP_TOOLS_C) && !defined(MSVC_PERL) */
 
 #endif       /* WIN32 */
 
