@@ -107,7 +107,7 @@ int   perl_trapd_handler( netsnmp_pdu           *pdu,
     for(vb = pdu->variables; vb; vb = vb->next_variable) {
 
         /* get the oid */
-        o = SNMP_MALLOC_TYPEDEF(netsnmp_oid);
+        o = malloc(sizeof(netsnmp_oid));
         o->name = o->namebuf;
         o->len = vb->name_length;
         memcpy(o->name, vb->name, vb->name_length * sizeof(oid));
@@ -290,7 +290,7 @@ trapd_register(regoid, perlcallback)
             }
         
             if (handler) {
-                cb_data = SNMP_MALLOC_TYPEDEF(trapd_cb_data);
+                cb_data = malloc(sizeof(trapd_cb_data));
                 cb_data->perl_cb = newSVsv(perlcallback);
                 handler->handler_data = cb_data;
                 handler->authtypes = (1 << VACM_VIEW_EXECUTE);
