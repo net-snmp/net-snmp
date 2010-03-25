@@ -120,11 +120,11 @@ main(int argc, char *argv[])
      * get the common command line arguments 
      */
     switch (arg = snmp_parse_args(argc, argv, &session, "C:", &optProc)) {
-    case -3:
+    case NETSNMP_PARSE_ARGS_ERROR:
         exit(1);
-    case -2:
+    case NETSNMP_PARSE_ARGS_SUCCESS_EXIT:
         exit(0);
-    case -1:
+    case NETSNMP_PARSE_ARGS_ERROR_USAGE:
         usage();
         exit(1);
     default:
