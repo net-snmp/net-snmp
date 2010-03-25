@@ -577,7 +577,7 @@ nsahr_getRootOID(me)
         PUSHMARK(SP);
         reginfo = (netsnmp_handler_registration *) SvIV(SvRV(me));
 
-        o = SNMP_MALLOC_TYPEDEF(netsnmp_oid);
+        o = malloc(sizeof(netsnmp_oid));
         o->name = o->namebuf;
         o->len = reginfo->rootoid_len;
         memcpy(o->name, reginfo->rootoid,
@@ -616,7 +616,7 @@ getOID(me)
         PUSHMARK(SP);
         request = (netsnmp_request_info *) SvIV(SvRV(me));
 
-        o = SNMP_MALLOC_TYPEDEF(netsnmp_oid);
+        o = malloc(sizeof(netsnmp_oid));
         o->name = o->namebuf;
         o->len = request->requestvb->name_length;
         memcpy(o->name, request->requestvb->name,
@@ -646,7 +646,7 @@ nari_getOIDptr(me)
         netsnmp_request_info *request;
         CODE:
         request = (netsnmp_request_info *) SvIV(SvRV(me));
-        RETVAL = SNMP_MALLOC_TYPEDEF(netsnmp_oid);
+        RETVAL = malloc(sizeof(netsnmp_oid));
         RETVAL->name = RETVAL->namebuf;
         RETVAL->len = request->requestvb->name_length;
         memcpy(RETVAL->name, request->requestvb->name,
