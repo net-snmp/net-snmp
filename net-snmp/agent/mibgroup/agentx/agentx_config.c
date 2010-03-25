@@ -203,7 +203,8 @@ agentx_config_init(void)
     netsnmp_register_default_domain("agentx", "unix tcp");
     netsnmp_register_default_target("agentx", "unix", NETSNMP_AGENTX_SOCKET);
 #define val(x) __STRING(x)
-    netsnmp_register_default_target("agentx", "tcp", ":" val(AGENTX_PORT));
+    netsnmp_register_default_target("agentx", "tcp",
+                                    "localhost:" val(AGENTX_PORT));
 #undef val
     agentx_register_config_handler("agentxsocket",
                                   agentx_parse_agentx_socket, NULL,
