@@ -242,7 +242,7 @@ snmpv3_options(char *optarg, netsnmp_session * session, char **Apsz,
     /*
      * and '.... "-3x value" ....'  (*with* the quotes)
      */
-    while (*optarg && isspace(*optarg)) {
+    while (*optarg && isspace((unsigned char)(*optarg))) {
         optarg++;
     }
     /*

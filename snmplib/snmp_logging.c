@@ -351,7 +351,7 @@ snmp_log_options(char *optarg, int argc, char *const *argv)
     /*
      * and '.... "-Lx value" ....'  (*with* the quotes)
      */
-    while (*optarg && isspace(*optarg)) {
+    while (*optarg && isspace((unsigned char)(*optarg))) {
         optarg++;
     }
     /*

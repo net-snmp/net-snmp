@@ -349,7 +349,7 @@ netsnmp_parse_args(int argc,
 
         case 'r':
             session->retries = atoi(optarg);
-            if (session->retries < 0 || !isdigit(optarg[0])) {
+            if (session->retries < 0 || !isdigit((unsigned char)(optarg[0]))) {
                 fprintf(stderr, "Invalid number of retries after -r flag.\n");
                 return (NETSNMP_PARSE_ARGS_ERROR_USAGE);
             }

@@ -187,7 +187,7 @@ xx_tokenize_exec_command( char *command, int *argc )
             cptr1 && *cptr1;
             cptr1++, cptr2++) {
         *cptr2 = *cptr1;
-	if (isspace(*cptr1)) {
+	if (isspace((unsigned char)(*cptr1))) {
             /*
              * We've reached the end of a token, so increase
              * the count, and mark this in the command copy.

@@ -802,15 +802,15 @@ find_field(char *ptr, int field)
         /*
          * rewind a field length 
          */
-        while (*ptr != 0 && isspace(*ptr) && init <= ptr)
+        while (*ptr != 0 && isspace((unsigned char)(*ptr)) && init <= ptr)
             ptr--;
-        while (*ptr != 0 && !isspace(*ptr) && init <= ptr)
+        while (*ptr != 0 && !isspace((unsigned char)(*ptr)) && init <= ptr)
             ptr--;
-        if (isspace(*ptr))
+        if (isspace((unsigned char)(*ptr)))
             ptr++;              /* past space */
         if (ptr < init)
             ptr = init;
-        if (!isspace(*ptr) && *ptr != 0)
+        if (!isspace((unsigned char)(*ptr)) && *ptr != 0)
             return (ptr);
     } else {
         if ((ptr = skip_white(ptr)) == NULL)
@@ -837,9 +837,9 @@ parse_miboid(const char *buf, oid * oidout)
         return 0;
     if (*buf == '.')
         buf++;
-    for (i = 0; isdigit(*buf); i++) {
+    for (i = 0; isdigit((unsigned char)(*buf)); i++) {
         oidout[i] = atoi(buf);
-        while (isdigit(*buf++));
+        while (isdigit((unsigned char)(*buf++)));
         if (*buf == '.')
             buf++;
     }

@@ -287,7 +287,7 @@ parse_mteMonitor(const char *token, const char *line)
              * Otherwise it'll be the operation field of a
              *   boolean test (the third form)
              */
-            if ( isdigit(buf[0]) || buf[0] == '-' )
+            if ( isdigit((unsigned char)(buf[0])) || buf[0] == '-' )
                 test = MTE_TRIGGER_THRESHOLD;
             else
                 test = MTE_TRIGGER_BOOLEAN;
