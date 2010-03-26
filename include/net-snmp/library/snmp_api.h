@@ -255,6 +255,20 @@ typedef struct request_list {
 
 
     /*
+     * General purpose memory allocation functions. Use these functions to
+     * allocate memory that may be reallocated or freed by the Net-SNMP
+     * library or to reallocate or free memory that has been allocated by the
+     * Net-SNMP library.
+     */
+#ifndef WIN32
+#define netsnmp_strdup  strdup
+#define netsnmp_calloc  calloc
+#define netsnmp_malloc  malloc
+#define netsnmp_realloc realloc
+#define netsnmp_free	free
+#endif
+
+    /*
      * void
      * snmp_free_pdu(pdu)
      *     netsnmp_pdu *pdu;

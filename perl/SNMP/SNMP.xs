@@ -959,27 +959,25 @@ __add_var_val_str(pdu, name, name_length, val, len, type)
     int ret = SUCCESS;
 
     if (pdu->variables == NULL){
-	pdu->variables = vars =
-           (netsnmp_variable_list *)malloc(sizeof(netsnmp_variable_list));
+	pdu->variables = vars = netsnmp_malloc(sizeof(netsnmp_variable_list));
     } else {
 	for(vars = pdu->variables;
             vars->next_variable;
             vars = vars->next_variable)
 	    /*EXIT*/;
-	vars->next_variable =
-           (netsnmp_variable_list *)malloc(sizeof(netsnmp_variable_list));
+	vars->next_variable = netsnmp_malloc(sizeof(netsnmp_variable_list));
 	vars = vars->next_variable;
     }
 
     vars->next_variable = NULL;
-    vars->name = (oid *)malloc(name_length * sizeof(oid));
+    vars->name = netsnmp_malloc(name_length * sizeof(oid));
     memcpy((char *)vars->name, (char *)name, name_length * sizeof(oid));
     vars->name_length = name_length;
     switch (type) {
       case TYPE_INTEGER:
       case TYPE_INTEGER32:
         vars->type = ASN_INTEGER;
-        vars->val.integer = (long *)malloc(sizeof(long));
+        vars->val.integer = netsnmp_malloc(sizeof(long));
         if (val)
             *(vars->val.integer) = strtol(val,NULL,0);
         else {
@@ -1002,7 +1000,7 @@ __add_var_val_str(pdu, name, name_length, val, len, type)
       case TYPE_UINTEGER:
         vars->type = ASN_UINTEGER;
 UINT:
-        vars->val.integer = (long *)malloc(sizeof(long));
+        vars->val.integer = netsnmp_malloc(sizeof(long));
         if (val)
             sscanf(val,"%lu",vars->val.integer);
         else {
@@ -1023,20 +1021,20 @@ UINT:
       case TYPE_OPAQUE:
         vars->type = ASN_OCTET_STR;
 OCT:
-        vars->val.string = (u_char *)malloc(len);
+        vars->val.string = netsnmp_malloc(len);
         vars->val_len = len;
         if (val && len)
             memcpy((char *)vars->val.string, val, len);
         else {
             ret = FAILURE;
-            vars->val.string = (u_char*)strdup("");
+            vars->val.string = netsnmp_strdup("");
             vars->val_len = 0;
         }
         break;
 
       case TYPE_IPADDR:
         vars->type = ASN_IPADDRESS;
-        vars->val.integer = (long *)malloc(sizeof(in_addr_t));
+        vars->val.integer = netsnmp_malloc(sizeof(in_addr_t));
         if (val)
             *(vars->val.integer) = inet_addr(val);
         else {
@@ -1056,7 +1054,7 @@ OCT:
 	    ret = FAILURE;
         } else {
             vars->val_len *= sizeof(oid);
-            vars->val.objid = (oid *)malloc(vars->val_len);
+            vars->val.objid = netsnmp_malloc(vars->val_len);
             memcpy((char *)vars->val.objid, (char *)oidbuf, vars->val_len);
         }
         break;
@@ -1242,7 +1240,7 @@ void *cb_data;
 	cp = transport->f_fmtaddr(transport, pdu->transport_data,
 				  pdu->transport_data_length);
 	av_push(traplist, newSVpv(cp, strlen(cp)));
-	free(cp);
+	netsnmp_free(cp);
       } else {
 	/*  This shouldn't ever happen; every session has a transport.  */
 	av_push(traplist, newSVpv("", 0));
@@ -2720,7 +2718,7 @@ snmp_new_v3_session(version, peer, retries, timeout, sec_name, sec_level, sec_en
                 goto end;
 	   }
 
-	   session.peername = strdup(peer);
+	   session.peername = netsnmp_strdup(peer);
            session.retries = retries; /* 5 */
            session.timeout = timeout; /* 1000000L */
            session.authenticator = NULL;
@@ -2844,7 +2842,7 @@ snmp_new_v3_session(version, peer, retries, timeout, sec_name, sec_level, sec_en
            }
         end:
            RETVAL = ss;
-	   free (session.contextEngineID);
+	   netsnmp_free(session.contextEngineID);
 	}
         OUTPUT:
         RETVAL
@@ -2891,8 +2889,8 @@ snmp_update_session(sess_ref, version, community, peer, lport, retries, timeout)
 	   }
            /* WARNING LEAKAGE but I cant free lib memory under win32 */
            ss->community_len = strlen((char *)community);
-           ss->community = (u_char *)strdup(community);
-	   ss->peername = strdup(peer);
+           ss->community = (u_char *)netsnmp_strdup(community);
+	   ss->peername = netsnmp_strdup(peer);
 	   ss->local_port = lport;
            ss->retries = retries; /* 5 */
            ss->timeout = timeout; /* 1000000L */
@@ -4324,7 +4322,7 @@ snmp_trapV1(sess_ref,enterprise,agent,generic,specific,uptime,varlist_ref)
               } /* for all the vars */
               }
 
-	      pdu->enterprise = (oid *)malloc( MAX_OID_LEN * sizeof(oid));
+	      pdu->enterprise = (oid *)netsnmp_malloc(MAX_OID_LEN * sizeof(oid));
               tp = __tag2oid(enterprise,NULL, pdu->enterprise,
                              &pdu->enterprise_length, NULL, best_guess);
   	      if (pdu->enterprise_length == 0) {
