@@ -27,6 +27,7 @@
 #include <inttypes.h>
 #endif
 
+#include <net-snmp/types.h>
 #include <net-snmp/library/system.h>
 
 /*
