@@ -15,6 +15,9 @@
 #else
 #include <strings.h>
 #endif
+#if HAVE_FCNTL_H
+#include <fcntl.h>
+#endif
 #if HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
 #endif
@@ -173,4 +176,24 @@ netsnmp_sockaddr_in2(struct sockaddr_in *addr,
     DEBUGMSGTL(("netsnmp_sockaddr_in", "return { AF_INET, %s:%hu }\n",
                 inet_ntoa(addr->sin_addr), ntohs(addr->sin_port)));
     return 1;
+}
+
+int
+netsnmp_set_non_blocking_mode(int sock, int non_blocking_mode)
+{
+#ifdef WIN32
+    u_long          arg;
+
+    arg = non_blocking_mode;
+    return ioctlsocket(sock, FIONBIO, &arg);
+#else
+    int             sockflags;
+
+    if ((sockflags = fcntl(sock, F_GETFL, 0)) >= 0) {
+        return fcntl(sock, F_SETFL,
+                     non_blocking_mode ? sockflags | O_NONBLOCK
+                     : sockflags & ~O_NONBLOCK);
+    } else
+        return -1;
+#endif
 }

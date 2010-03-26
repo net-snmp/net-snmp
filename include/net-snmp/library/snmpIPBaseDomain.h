@@ -28,6 +28,18 @@ extern          "C" {
     int netsnmp_sockaddr_in2(struct sockaddr_in *addr, const char *inpeername,
                              const char *default_target);
 
+    /**
+     * Sets the mode of a socket for all subsequent I/O operations.
+     *
+     * @param[in] sock Socket descriptor (Unix) or socket handle (Windows).
+     * @param[in] non_blocking_mode I/O mode: non-zero selects non-blocking mode;
+     *   zero selects blocking mode.
+     *
+     * @return zero upon success and a negative value upon error.
+     */
+    int             netsnmp_set_non_blocking_mode(int sock,
+                                                  int non_blocking_mode);
+
 #ifdef __cplusplus
 }
 #endif
