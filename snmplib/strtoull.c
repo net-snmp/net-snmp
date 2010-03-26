@@ -163,7 +163,6 @@ strtoull(const char *nptr, char **endptr, int base)
 
 #if defined(STRTOULL_UNIT_TEST)
 
-#include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
 
