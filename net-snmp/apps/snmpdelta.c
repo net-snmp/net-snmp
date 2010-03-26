@@ -249,7 +249,7 @@ sprint_descriptor(char *buffer, struct varInfo *vip)
 
     for (cp = buf; *cp; cp++);
     while (cp >= buf) {
-        if (isalpha(*cp))
+        if (isalpha((unsigned char)(*cp)))
             break;
         cp--;
     }
@@ -289,7 +289,7 @@ processFileArgs(char *fileName)
             continue;
         blank = TRUE;
         for (cp = buf; *cp; cp++)
-            if (!isspace(*cp)) {
+            if (!isspace((unsigned char)(*cp))) {
                 blank = FALSE;
                 break;
             }

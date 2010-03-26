@@ -113,7 +113,7 @@ optProc(int argc, char *const *argv, int opt)
                     exit(1);
                 } else {
                     optarg = endptr;
-                    if (isspace(*optarg)) {
+                    if (isspace((unsigned char)(*optarg))) {
                         return;
                     }
                 }

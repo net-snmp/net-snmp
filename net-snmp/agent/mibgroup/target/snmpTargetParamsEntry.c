@@ -328,7 +328,7 @@ snmpTargetParams_addMPModel(struct targetParamTable_struct *entry,
         DEBUGMSGTL(("snmpTargetParamsEntry",
                     "ERROR snmpTargetParamsEntry: no mp model in config string\n"));
         return (0);
-    } else if (!(isdigit(*cptr))) {
+    } else if (!(isdigit((unsigned char)(*cptr)))) {
         DEBUGMSGTL(("snmpTargetParamsEntry",
                     "ERROR snmpTargeParamsEntry: mp model is not digit in config string\n"));
         return (0);
@@ -353,7 +353,7 @@ snmpTargetParams_addSecModel(struct targetParamTable_struct *entry,
         DEBUGMSGTL(("snmpTargetParamsEntry",
                     "ERROR snmpTargetParamsEntry: no sec model in config string\n"));
         return (0);
-    } else if (!(isdigit(*cptr))) {
+    } else if (!(isdigit((unsigned char)(*cptr)))) {
         DEBUGMSGTL(("snmpTargetParamsEntry",
                     "ERROR snmpTargeParamsEntry: security model is not digit in config string\n"));
         return (0);
@@ -398,7 +398,7 @@ snmpTargetParams_addSecLevel(struct targetParamTable_struct *entry,
         DEBUGMSGTL(("snmpTargetParamsEntry",
                     "ERROR snmpTargetParamsEntry: no security level in config string\n"));
         return (0);
-    } else if (!(isdigit(*cptr))) {
+    } else if (!(isdigit((unsigned char)(*cptr)))) {
         DEBUGMSGTL(("snmpTargetParamsEntry",
                     "ERROR snmpTargeParamsEntry: security level is not digit in config string\n"));
         return (0);
@@ -424,7 +424,7 @@ snmpTargetParams_addStorageType(struct targetParamTable_struct *entry,
         DEBUGMSGTL(("snmpTargetParamsEntry",
                     "ERROR snmpTargetParamsEntry: no storage type in config string\n"));
         return (0);
-    } else if (!(isdigit(*cptr))) {
+    } else if (!(isdigit((unsigned char)(*cptr)))) {
         DEBUGMSGTL(("snmpTargetParamsEntry",
                     "ERROR snmpTargeParamsEntry: storage type is not digit in config string\n"));
         return (0);
@@ -462,7 +462,7 @@ snmpTargetParams_addRowStatus(struct targetParamTable_struct *entry,
         DEBUGMSGTL(("snmpTargetParamsEntry",
                     "ERROR snmpTargetParamsEntry: no row status in config string\n"));
         return (0);
-    } else if (!(isdigit(*cptr))) {
+    } else if (!(isdigit((unsigned char)(*cptr)))) {
         DEBUGMSGTL(("snmpTargetParamsEntry",
                     "ERROR snmpTargeParamsEntry: row status is not digit in config string\n"));
         return (0);

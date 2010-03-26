@@ -74,11 +74,11 @@ parse_sched_periodic( const char *token, char *line )
     /*
      * Skip over optional assignment in "var = value"
      */
-    while (line && isspace(*line))
+    while (line && isspace((unsigned char)(*line)))
         line++;
     if (line && *line == '=' ) {
         line++;
-        while (line && isspace(*line)) {
+        while (line && isspace((unsigned char)(*line))) {
             line++;
         }
     }
@@ -219,11 +219,11 @@ parse_sched_timed( const char *token, char *line )
     /*
      * Skip over optional assignment in "var = value"
      */
-    while (line && isspace(*line))
+    while (line && isspace((unsigned char)(*line)))
         line++;
     if ( *line == '=' ) {
         line++;
-        while (line && isspace(*line)) {
+        while (line && isspace((unsigned char)(*line))) {
             line++;
         }
     }

@@ -430,7 +430,7 @@ snmpTargetAddr_addTimeout(struct targetAddrTable_struct *entry, char *cptr)
         DEBUGMSGTL(("snmpTargetAddrEntry",
                     "ERROR snmpTargetParamsEntry: no Timeout in config string\n"));
         return (0);
-    } else if (!(isdigit(*cptr))) {
+    } else if (!(isdigit((unsigned char)(*cptr)))) {
         DEBUGMSGTL(("snmpTargetAddrEntry",
                     "ERROR snmpTargeParamsEntry: Timeout is not a digit in config string\n"));
         return (0);
@@ -455,7 +455,7 @@ snmpTargetAddr_addRetryCount(struct targetAddrTable_struct *entry,
         DEBUGMSGTL(("snmpTargetAddrEntry",
                     "ERROR snmpTargetParamsEntry: no Retry Count in config string\n"));
         return (0);
-    } else if (!(isdigit(*cptr))) {
+    } else if (!(isdigit((unsigned char)(*cptr)))) {
         DEBUGMSGTL(("snmpTargetAddrEntry",
                     "ERROR snmpTargeParamsEntry: Retry Count is not a digit in config string\n"));
         return (0);
@@ -536,7 +536,7 @@ snmpTargetAddr_addStorageType(struct targetAddrTable_struct *entry,
                     "ERROR snmpTargetAddrEntry: no storage type in config "
                     "string\n"));
         return (0);
-    } else if (!(isdigit(*cptr))) {
+    } else if (!(isdigit((unsigned char)(*cptr)))) {
         DEBUGMSGTL(("snmpTargetAddrEntry",
                     "ERROR snmpTargetAddrEntry: storage type is not a digit "
                     "in config string\n"));
@@ -573,7 +573,7 @@ snmpTargetAddr_addRowStatus(struct targetAddrTable_struct *entry,
                     "ERROR snmpTargetAddrEntry: no Row Status in config "
                     "string\n"));
         return (0);
-    } else if (!(isdigit(*cptr))) {
+    } else if (!(isdigit((unsigned char)(*cptr)))) {
         DEBUGMSGTL(("snmpTargetAddrEntry",
                     "ERROR snmpTargetAddrEntry: Row Status is not a digit in "
                     "config string\n"));

@@ -101,7 +101,7 @@ pass_persist_parse_config(const char *token, char *cptr)
 	/* change priority level */
 	cptr++;
 	cptr = skip_white(cptr);
-	if (! isdigit(*cptr)) {
+	if (! isdigit((unsigned char)(*cptr))) {
 	  config_perror("priority must be an integer");
 	  return;
 	}
@@ -124,7 +124,7 @@ pass_persist_parse_config(const char *token, char *cptr)
      */
     if (*cptr == '.')
         cptr++;
-    if (!isdigit(*cptr)) {
+    if (!isdigit((unsigned char)(*cptr))) {
         config_perror("second token is not a OID");
         return;
     }
@@ -138,7 +138,7 @@ pass_persist_parse_config(const char *token, char *cptr)
     (*ppass)->type = PASSTHRU_PERSIST;
 
     (*ppass)->miblen = parse_miboid(cptr, (*ppass)->miboid);
-    while (isdigit(*cptr) || *cptr == '.')
+    while (isdigit((unsigned char)(*cptr)) || *cptr == '.')
         cptr++;
     /*
      * path

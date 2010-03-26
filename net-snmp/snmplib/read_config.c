@@ -512,7 +512,7 @@ run_config_handler(struct config_line *lptr,
              * Stomp on any trailing whitespace
              */
             cp = &(cptr[strlen(cptr)-1]);
-            while ((cp > cptr) && isspace(*cp)) {
+            while ((cp > cptr) && isspace((unsigned char)(*cp))) {
                 *(cp--) = '\0';
             }
             (*(lptr->parse_line)) (token, cptr);
@@ -1643,7 +1643,7 @@ copy_nword_const(const char *from, char *to, int len)
         } else
             from++;
     } else {
-        while (*from != 0 && !isspace(*from)) {
+        while (*from != 0 && !isspace((unsigned char)(*from))) {
             if ((*from == '\\') && (*(from + 1) != 0)) {
                 if (len > 0) {  /* don't copy beyond len bytes */
                     *to++ = *(from + 1);

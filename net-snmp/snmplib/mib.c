@@ -2760,7 +2760,7 @@ netsnmp_mibindex_load( void )
      * Create a list of which directory each file refers to
      */
     while ((file = readdir( dir ))) {
-        if ( !isdigit(file->d_name[0]))
+        if ( !isdigit((unsigned char)(file->d_name[0])))
             continue;
         i = atoi( file->d_name );
 
@@ -5272,7 +5272,7 @@ _add_strings_to_oid(void *tp, char *cp,
         /*
          * Search for the appropriate child 
          */
-        if (isdigit(*cp)) {
+        if (isdigit((unsigned char)(*cp))) {
             subid = strtoul(cp, &ecp, 0);
             if (*ecp)
                 goto bad_id;
@@ -5329,7 +5329,7 @@ _add_strings_to_oid(void *tp, char *cp,
             cp2 = strchr(cp, '.');
             if (cp2)
                 *cp2++ = '\0';
-            if (isdigit(*cp)) {
+            if (isdigit((unsigned char)(*cp))) {
                 subid = strtoul(cp, &ecp, 0);
                 if (*ecp)
                     goto bad_id;
@@ -6215,7 +6215,7 @@ const char *parse_octet_hint(const char *hint, const char *value, unsigned char 
 	    if ('*' == *h) {
 		ph.repeat = 1;
 		state = HINT_2_3;
-	    } else if (isdigit(*h)) {
+	    } else if (isdigit((unsigned char)(*h))) {
 		parse_hints_length_add_digit(&ph, *h);
 		state = HINT_2_3;
 	    } else {
@@ -6224,7 +6224,7 @@ const char *parse_octet_hint(const char *hint, const char *value, unsigned char 
 	    break;
 
 	case HINT_2_3:
-	    if (isdigit(*h)) {
+	    if (isdigit((unsigned char)(*h))) {
 		parse_hints_length_add_digit(&ph, *h);
 		/* state = HINT_2_3 */
 	    } else if ('x' == *h || 'd' == *h || 'o' == *h || 'a' == *h) {
@@ -6242,7 +6242,7 @@ const char *parse_octet_hint(const char *hint, const char *value, unsigned char 
 		
 		ph.repeat = 1;
 		state = HINT_2_3;
-	    } else if (isdigit(*h)) {
+	    } else if (isdigit((unsigned char)(*h))) {
 		retval = parse_hints_parse(&ph, &v);
 		parse_hints_reset(&ph);
 		
@@ -6261,7 +6261,7 @@ const char *parse_octet_hint(const char *hint, const char *value, unsigned char 
 		
 		ph.repeat = 1;
 		state = HINT_2_3;
-	    } else if (isdigit(*h)) {
+	    } else if (isdigit((unsigned char)(*h))) {
 		retval = parse_hints_parse(&ph, &v);
 		parse_hints_reset(&ph);
 		

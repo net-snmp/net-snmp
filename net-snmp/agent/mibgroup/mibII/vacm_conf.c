@@ -993,7 +993,7 @@ vacm_create_simple(const char *token, char *confline,
              */
             snprintf(grpname, sizeof(grpname), "grp%.28s", secname);
             for (tmp=grpname; *tmp; tmp++)
-                if (!isalnum(*tmp))
+                if (!isalnum((unsigned char)(*tmp)))
                     *tmp = '_';
             snprintf(line, sizeof(line),
                      "%s %s \"%s\"", grpname, model, secname);
@@ -1004,7 +1004,7 @@ vacm_create_simple(const char *token, char *confline,
     } else {
         snprintf(grpname, sizeof(grpname), "grp%.28s", secname);
         for (tmp=grpname; *tmp; tmp++)
-            if (!isalnum(*tmp))
+            if (!isalnum((unsigned char)(*tmp)))
                 *tmp = '_';
     }
 

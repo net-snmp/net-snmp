@@ -1164,7 +1164,7 @@ realloc_handle_wrap_fmt(u_char ** buf, size_t * buf_len, size_t * out_len,
         }
 
         for (i = 0; i < pdu->securityNameLen; i++) {
-            if (isprint(pdu->securityName[i])) {
+            if (isprint((unsigned char)(pdu->securityName[i]))) {
                 *(*buf + *out_len) = pdu->securityName[i];
             } else {
                 *(*buf + *out_len) = '.';
@@ -1186,7 +1186,7 @@ realloc_handle_wrap_fmt(u_char ** buf, size_t * buf_len, size_t * out_len,
         }
 
         for (i = 0; i < pdu->contextNameLen; i++) {
-            if (isprint(pdu->contextName[i])) {
+            if (isprint((unsigned char)(pdu->contextName[i]))) {
                 *(*buf + *out_len) = pdu->contextName[i];
             } else {
                 *(*buf + *out_len) = '.';
@@ -1722,7 +1722,7 @@ realloc_format_trap(u_char ** buf, size_t * buf_len, size_t * out_len,
              * Parsing a width field.  
              */
             reset_options = TRUE;
-            if (isdigit(next_chr)) {
+            if (isdigit((unsigned char)(next_chr))) {
                 options.width *= 10;
                 options.width +=
                     (unsigned long) next_chr - (unsigned long) '0';
@@ -1753,7 +1753,7 @@ realloc_format_trap(u_char ** buf, size_t * buf_len, size_t * out_len,
              * Parsing a precision field.  
              */
             reset_options = TRUE;
-            if (isdigit(next_chr)) {
+            if (isdigit((unsigned char)(next_chr))) {
                 if (options.precision == UNDEF_PRECISION) {
                     options.precision =
                         (unsigned long) next_chr - (unsigned long) '0';

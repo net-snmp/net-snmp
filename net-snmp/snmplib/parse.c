@@ -699,7 +699,7 @@ name_hash(const char *name)
     if (!name)
         return 0;
     for (cp = name; *cp; cp++)
-        hash += tolower(*cp);
+        hash += tolower((unsigned char)(*cp));
     return (hash);
 }
 
@@ -4744,9 +4744,9 @@ get_token(FILE * fp, char *token, int maxtlen)
                 goto more;
             }
         }
-        if (token[0] == '-' || isdigit(token[0])) {
+        if (token[0] == '-' || isdigit((unsigned char)(token[0]))) {
             for (cp = token + 1; *cp; cp++)
-                if (!isdigit(*cp))
+                if (!isdigit((unsigned char)(*cp)))
                     return LABEL;
             return NUMBER;
         }

@@ -483,7 +483,7 @@ _process_line_tvi(netsnmp_line_info *line_info, void *mem,
             break;
 
         case PMLP_TYPE_BOOLEAN:
-            if (isdigit(*ptr))
+            if (isdigit((unsigned char)(*ptr)))
                 tvi->value.ul = strtoul(ptr, NULL, 0);
             else if (strcasecmp(ptr,"true") == 0)
                 tvi->value.ul = 1;

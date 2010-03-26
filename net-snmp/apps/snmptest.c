@@ -298,7 +298,7 @@ input_variable(netsnmp_variable_list * vp)
     if (buf[val_len - 1] == '\n')
         buf[--val_len] = 0;
     if (*buf == '$') {
-        switch (toupper(buf[1])) {
+        switch (toupper((unsigned char)(buf[1]))) {
         case 'G':
             command = SNMP_MSG_GET;
             printf("Request type is Get Request\n");
@@ -338,7 +338,7 @@ input_variable(netsnmp_variable_list * vp)
             }
             break;
         case 'Q':
-            switch ((toupper(buf[2]))) {
+            switch ((toupper((unsigned char)(buf[2])))) {
             case '\n':
             case 0:
                 printf("Quitting,  Goodbye\n");

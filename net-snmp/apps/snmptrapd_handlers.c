@@ -213,7 +213,7 @@ parse_format(const char *token, char *line)
      * which tells us which style of format this is
      */
     cp = line;
-    while (*cp && !isspace(*cp))
+    while (*cp && !isspace((unsigned char)(*cp)))
         cp++;
     if (!(*cp)) {
         /*
@@ -226,7 +226,7 @@ parse_format(const char *token, char *line)
 
     sep = cp;
     *(cp++) = '\0';
-    while (*cp && isspace(*cp))
+    while (*cp && isspace((unsigned char)(*cp)))
         cp++;
 
     /*
