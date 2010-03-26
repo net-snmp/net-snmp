@@ -283,12 +283,11 @@ nsop_get_indexes(oid1)
                 return;
             }
                 
-            if ((buf = (u_char *) malloc(buf_len)) == NULL) {
+            if ((buf = netsnmp_malloc(buf_len)) == NULL) {
                 RETVAL = NULL;
                 return;
             }
 
-            memset(buf, 0, buf_len);
             nodecount = 0;
             for(tpnode = tp; tpnode; tpnode = tpnode->parent) {
                 nodecount++;

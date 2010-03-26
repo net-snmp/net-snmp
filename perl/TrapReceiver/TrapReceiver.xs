@@ -94,7 +94,7 @@ int   perl_trapd_handler( netsnmp_pdu           *pdu,
         char *tstr = transport->f_fmtaddr(transport, pdu->transport_data,
                                           pdu->transport_data_length);
         STOREPDUs("receivedfrom", tstr);
-        free(tstr);
+        netsnmp_free(tstr);
     }
 
 
@@ -169,7 +169,7 @@ int   perl_trapd_handler( netsnmp_pdu           *pdu,
 
         av_push(vba,tmparray[i]);
         av_push(vba,newSVpvn(outbuf, oo_len));
-        free(outbuf);
+        netsnmp_free(outbuf);
         av_push(vba,newSViv(vb->type));
         av_push(varbinds, (SV *) newRV_noinc((SV *) vba));
     }
