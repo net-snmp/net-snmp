@@ -31,16 +31,6 @@ typedef struct netsnmp_oid_s {
     oid                  namebuf[ MAX_OID_LEN ];
 } netsnmp_oid;
 
-static int have_done_agent = 0;
-static int have_done_lib = 0;
-
-static int
-not_here(char *s)
-{
-    croak("%s not implemented on this architecture", s);
-    return -1;
-}
-
 static double
 constant_MODE_G(char *name, int len, int arg)
 {
@@ -77,7 +67,9 @@ constant_MODE_G(char *name, int len, int arg)
     errno = EINVAL;
     return 0;
 
+#if !defined(MODE_GET) || !defined(MODE_GETBULK) || !defined(MODE_GETNEXT)
 not_there:
+#endif
     errno = ENOENT;
     return 0;
 }
@@ -110,7 +102,9 @@ constant_MODE_SET_R(char *name, int len, int arg)
     errno = EINVAL;
     return 0;
 
+#if !defined(MODE_SET_RESERVE1) || !defined(MODE_SET_RESERVE2)
 not_there:
+#endif
     errno = ENOENT;
     return 0;
 }
@@ -287,7 +281,26 @@ constant_SNMP_ERR(char *name, int len, int arg)
 #endif
 	}
     }
+#if !defined(SNMP_ERR_AUTHORIZATIONERROR) \
+ || !defined(SNMP_ERR_BADVALUE) \
+ || !defined(SNMP_ERR_COMMITFAILED) \
+ || !defined(SNMP_ERR_GENERR) \
+ || !defined(SNMP_ERR_INCONSISTENTVALUE) \
+ || !defined(SNMP_ERR_NOACCESS) \
+ || !defined(SNMP_ERR_NOCREATION) \
+ || !defined(SNMP_ERR_NOERROR) \
+ || !defined(SNMP_ERR_NOSUCHNAME) \
+ || !defined(SNMP_ERR_NOTWRITABLE) \
+ || !defined(SNMP_ERR_READONLY) \
+ || !defined(SNMP_ERR_RESOURCEUNAVAILABLE) \
+ || !defined(SNMP_ERR_TOOBIG) \
+ || !defined(SNMP_ERR_UNDOFAILED) \
+ || !defined(SNMP_ERR_WRONGENCODING) \
+ || !defined(SNMP_ERR_WRONGLENGTH) \
+ || !defined(SNMP_ERR_WRONGTYPE) \
+ || !defined(SNMP_ERR_WRONGVALUE)
 not_there:
+#endif
     errno = ENOENT;
     return 0;
 }
@@ -348,7 +361,9 @@ constant_MODE_S(char *name, int len, int arg)
     errno = EINVAL;
     return 0;
 
+#if !defined(MODE_SET_ACTION) || !defined(MODE_SET_BEGIN) || !defined(MODE_SET_COMMIT) || !defined(MODE_SET_FREE) || !defined(MODE_SET_UNDO)
 not_there:
+#endif
     errno = ENOENT;
     return 0;
 }
@@ -377,10 +392,6 @@ constant(char *name, int len, int arg)
     }
     errno = EINVAL;
     return 0;
-
-not_there:
-    errno = ENOENT;
-    return 0;
 }
 
 int
@@ -389,7 +400,6 @@ handler_wrapper(netsnmp_mib_handler          *handler,
                 netsnmp_agent_request_info   *reqinfo,
                 netsnmp_request_info         *requests) 
 {
-    u_long intret = 5;
     handler_cb_data *cb_data = (handler_cb_data *) handler->myvoid;
     SV *cb;
 
@@ -688,7 +698,7 @@ nari_getValue(me)
         request = (netsnmp_request_info *) SvIV(SvRV(me));
 	sprint_realloc_by_type(&oidbuf, &ob_len, &oo_len, 0,
                                request->requestvb, 0, 0, 0);
-        RETVAL = oidbuf; /* mem leak */
+        RETVAL = (char *) oidbuf; /* mem leak */
     OUTPUT:
         RETVAL
 
@@ -782,8 +792,6 @@ nari_setValue(me, type, value)
         int type;
         SV *value;
     PREINIT:
-        u_char *oidbuf = NULL;
-        size_t ob_len = 0, oo_len = 0;
         netsnmp_request_info *request;
         u_long utmp;
         long ltmp;
@@ -835,8 +843,8 @@ nari_setValue(me, type, value)
 		  break;
 	      }
 	      else {
-		snmp_log(LOG_ERR, "Non-integer value passed to setValue with ASN_INTEGER: type was %d\n",
-			SvTYPE(value));
+		snmp_log(LOG_ERR, "Non-integer value passed to setValue with ASN_INTEGER: type was %lu\n",
+			(unsigned long)SvTYPE(value));
 		RETVAL = 0;
 		break;
 	      }
@@ -871,8 +879,8 @@ nari_setValue(me, type, value)
 		  break;
 	      }
 	      else {
-		snmp_log(LOG_ERR, "Non-unsigned-integer value passed to setValue with ASN_UNSIGNED/ASN_COUNTER/ASN_TIMETICKS: type was %d\n",
-			SvTYPE(value));
+		snmp_log(LOG_ERR, "Non-unsigned-integer value passed to setValue with ASN_UNSIGNED/ASN_COUNTER/ASN_TIMETICKS: type was %lu\n",
+			(unsigned long)SvTYPE(value));
 		RETVAL = 0;
 		break;
 	      }
@@ -916,8 +924,8 @@ nari_setValue(me, type, value)
 		  break;
 	      }
 	      else {
-		snmp_log(LOG_ERR, "Non-unsigned-integer value passed to setValue with ASN_COUNTER64: type was %d\n",
-			SvTYPE(value));
+		snmp_log(LOG_ERR, "Non-unsigned-integer value passed to setValue with ASN_COUNTER64: type was %lu\n",
+			(unsigned long)SvTYPE(value));
 		RETVAL = 0;
 		break;
 	      }
@@ -927,8 +935,8 @@ nari_setValue(me, type, value)
           case ASN_OPAQUE:
 	      /* Check that we have been passed something with a string value (or a blessed scalar) */
 	      if (!SvPOKp(value) && (SvTYPE(value) != SVt_PVMG)) {
-		snmp_log(LOG_ERR, "Non-string value passed to setValue with ASN_OCTET_STR/ASN_BIT_STR: type was %d\n",
-			SvTYPE(value));
+		snmp_log(LOG_ERR, "Non-string value passed to setValue with ASN_OCTET_STR/ASN_BIT_STR: type was %lu\n",
+			(unsigned long)SvTYPE(value));
 		RETVAL = 0;
 		break;
 	      }
@@ -954,8 +962,8 @@ nari_setValue(me, type, value)
 
 	      /* Check that we have been passed something with a string value (or a blessed scalar) */
 	      if (!SvPOKp(value) && (SvTYPE(value) != SVt_PVMG)) {
-		snmp_log(LOG_ERR, "Non-string value passed to setValue with ASN_IPADDRESS: type was %d\n",
-			SvTYPE(value));
+		snmp_log(LOG_ERR, "Non-string value passed to setValue with ASN_IPADDRESS: type was %lu\n",
+			(unsigned long)SvTYPE(value));
 		RETVAL = 0;
 		break;
 	      }
@@ -968,7 +976,7 @@ nari_setValue(me, type, value)
 
 	      # Sanity check on address length
 	      if ((stringlen != 4) && (stringlen != 16)) {
-	      		snmp_log(LOG_ERR, "IP address of %d bytes passed to setValue with ASN_IPADDRESS\n", stringlen);
+	      		snmp_log(LOG_ERR, "IP address of %" NETSNMP_PRIz "d bytes passed to setValue with ASN_IPADDRESS\n", stringlen);
 			RETVAL = 0;
 			break;
 	      }
@@ -981,8 +989,8 @@ nari_setValue(me, type, value)
           case ASN_OBJECT_ID:
 	      /* Check that we have been passed something with a string value (or a blessed scalar) */
 	      if (!SvPOKp(value) && (SvTYPE(value) != SVt_PVMG)) {
-		snmp_log(LOG_ERR, "Non-string value passed to setValue with ASN_OBJECT_ID: type was %d\n",
-			SvTYPE(value));
+		snmp_log(LOG_ERR, "Non-string value passed to setValue with ASN_OBJECT_ID: type was %lu\n",
+			(unsigned long)SvTYPE(value));
 		RETVAL = 0;
 		break;
 	      }

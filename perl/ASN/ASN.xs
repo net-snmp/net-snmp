@@ -7,13 +7,6 @@
 #include <net-snmp/library/asn1.h>
 #include <net-snmp/library/snmp_impl.h>
 
-static int
-not_here(char *s)
-{
-    croak("%s not implemented on this architecture", s);
-    return -1;
-}
-
 static double
 constant_ASN_O(char *name, int len, int arg)
 {
@@ -46,7 +39,9 @@ constant_ASN_O(char *name, int len, int arg)
     errno = EINVAL;
     return 0;
 
+#if !defined(ASN_OBJECT_ID) || !defined(ASN_OCTET_STR) ||  !defined(ASN_OPAQUE)
 not_there:
+#endif
     errno = ENOENT;
     return 0;
 }
@@ -75,7 +70,9 @@ constant_ASN_B(char *name, int len, int arg)
     errno = EINVAL;
     return 0;
 
+#if !defined(ASN_BIT_STR) || !defined(ASN_BOOLEAN)
 not_there:
+#endif
     errno = ENOENT;
     return 0;
 }
@@ -108,7 +105,9 @@ constant_ASN_S(char *name, int len, int arg)
     errno = EINVAL;
     return 0;
 
+#if !defined(ASN_SEQUENCE) || !defined(ASN_SET)
 not_there:
+#endif
     errno = ENOENT;
     return 0;
 }
@@ -141,7 +140,9 @@ constant_ASN_C(char *name, int len, int arg)
     errno = EINVAL;
     return 0;
 
+#if !defined(ASN_COUNTER) || !defined(ASN_COUNTER64)
 not_there:
+#endif
     errno = ENOENT;
     return 0;
 }
@@ -174,7 +175,9 @@ constant_ASN_U(char *name, int len, int arg)
     errno = EINVAL;
     return 0;
 
+#if !defined(ASN_UNSIGNED) || !defined(ASN_UNSIGNED64)
 not_there:
+#endif
     errno = ENOENT;
     return 0;
 }
@@ -207,7 +210,9 @@ constant_ASN_IN(char *name, int len, int arg)
     errno = EINVAL;
     return 0;
 
+#if !defined(ASN_INTEGER) || !defined(ASN_INTEGER64)
 not_there:
+#endif
     errno = ENOENT;
     return 0;
 }
@@ -230,7 +235,9 @@ constant_ASN_I(char *name, int len, int arg)
     errno = EINVAL;
     return 0;
 
+#if !defined(ASN_IPADDRESS)
 not_there:
+#endif
     errno = ENOENT;
     return 0;
 }
@@ -320,7 +327,9 @@ constant(char *name, int len, int arg)
     errno = EINVAL;
     return 0;
 
+#if !defined(ASN_APPLICATION) || !defined(ASN_DOUBLE) || !defined(ASN_FLOAT) || !defined(ASN_GAUGE) || !defined(ASN_NULL) || !defined(ASN_TIMETICKS)
 not_there:
+#endif
     errno = ENOENT;
     return 0;
 }
