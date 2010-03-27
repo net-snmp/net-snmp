@@ -145,7 +145,7 @@ int len;
    int i;
    buf[0] = '\0';
    for (i=0; i < len; i++) {
-	sprintf(buf,".%" NETSNMP_PRIo "u",*objid++);
+	sprintf(buf, ".%lu", *objid++);
 	buf += strlen(buf);
    }
    return SNMPERR_SUCCESS;

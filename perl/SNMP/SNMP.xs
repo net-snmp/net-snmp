@@ -553,7 +553,7 @@ int len;
    int i;
    buf[0] = '\0';
    for (i=0; i < len; i++) {
-	sprintf(buf,".%" NETSNMP_PRIo "u",*objid++);
+	sprintf(buf, ".%lu", *objid++);
 	buf += strlen(buf);
    }
    return SUCCESS;
@@ -586,7 +586,7 @@ size_t *len;
    cp = buf;
    while (*buf) {
       if (*buf++ == '.') {
-         sscanf(cp, "%" NETSNMP_PRIo "u", objid++);
+         sscanf(cp, "%lu", objid++);
          /* *objid++ = atoi(cp); */
          (*len)++;
          cp = buf;
@@ -596,7 +596,7 @@ size_t *len;
          }
       }
    }
-   sscanf(cp, "%" NETSNMP_PRIo "u", objid++);
+   sscanf(cp, "%lu", objid++);
    /* *objid++ = atoi(cp); */
    (*len)++;
    return SUCCESS;
@@ -935,7 +935,7 @@ char * soid_str;
    strcpy(soid_buf, soid_str);
    cp = strtok_r(soid_buf,".",&st);
    while (cp) {
-     sscanf(cp, "%" NETSNMP_PRIo "u", &(doid_arr[(*doid_arr_len)++]));
+     sscanf(cp, "%lu", &(doid_arr[(*doid_arr_len)++]));
      /* doid_arr[(*doid_arr_len)++] =  atoi(cp); */
      cp = strtok_r(NULL,".",&st);
    }
