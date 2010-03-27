@@ -369,7 +369,8 @@ tarclean:
 	fi
 
 checks:
-	$(MAKE) -k makefilecheck commentcheck warningcheck dependcheck assertcheck
+	$(MAKE) -k makefilecheck commentcheck warningcheck dependcheck \
+	assertcheck perlcalloccheck
 
 dependcheck:
 	@echo "Checking for full paths in dependency files..."
@@ -390,6 +391,13 @@ commentcheck:
 makefilecheck:
 	@echo "Checking for non-portable Makefile constructs..."
 	@if grep -n "\.c=" `$(FIND) $(top_srcdir) -name .svn -prune -o -path ./Makefile.in -prune -o -name "Makefile.*" -print`; then false; fi
+
+# Invoking calloc() directly or indirectly from a Perl XSUB and freeing that
+# memory by calling free() from the XSUB is a sure way to trigger "Free to
+# wrong pool" errors on Windows.
+perlcalloccheck:
+	@echo "Checking for calloc() in Perl's external subroutines ..."
+	@if grep -nwE 'calloc|SNMP_MALLOC_STRUCT|SNMP_MALLOC_TYPEDEF' `$(FIND) $(top_srcdir) -name '*.xs'`; then false; fi
 
 dist: tar
 
