@@ -1646,6 +1646,24 @@ typedef unsigned int   uintptr_t;
 #  endif
 #endif
 
+#if defined(NETSNMP_USE_DLL) && !defined(NETSNMP_TOOLS_C) && !defined(MSVC_PERL)
+
+#include <malloc.h>
+#include <stdlib.h> /* malloc(), calloc(), realloc() and free() */
+#include <string.h> /* strdup() */
+#include <ws2tcpip.h> /* socklen_t */
+#include <wspiapi.h> /* has inline function definitions referencing calloc(). */
+
+/* wrap alloc functions to use DLL's memory heap */
+
+#define strdup    netsnmp_strdup
+#define calloc    netsnmp_calloc
+#define malloc    netsnmp_malloc
+#define realloc   netsnmp_realloc
+#define free      netsnmp_free
+
+#endif /* defined(NETSNMP_USE_DLL) && !defined(NETSNMP_TOOLS_C) && !defined(MSVC_PERL) */
+
 #endif       /* WIN32 */
 
 #ifndef NETSNMP_IMPORT
