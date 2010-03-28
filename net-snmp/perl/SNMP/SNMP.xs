@@ -1027,7 +1027,7 @@ OCT:
             memcpy((char *)vars->val.string, val, len);
         else {
             ret = FAILURE;
-            vars->val.string = netsnmp_strdup("");
+            vars->val.string = (u_char *) netsnmp_strdup("");
             vars->val_len = 0;
         }
         break;
