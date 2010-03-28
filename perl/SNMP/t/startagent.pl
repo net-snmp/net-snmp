@@ -39,43 +39,62 @@ if ($^O =~ /win32/i) {
   require Win32::Process;
 }
 
-sub snmptest_cleanup {
-    sleep 1; # strangely we need to wait for pid files to appear ??
-    if ((-e "t/snmpd.pid") && (-r "t/snmpd.pid")) {
-        #warn "\nStopping agents for test script $0\n";
-        # Making sure that any running agents are killed.
-	# warn "killing snmpd:", `cat t/snmpd.pid`, "\n";
-        if ($^O !~ /win32/i) {
-          system "kill `cat t/snmpd.pid` > /dev/null 2>&1";
-        }
-        else {
-          open(H, "<t/snmpd.pid");
-          my $pid = (<H>);
-          close (H);
-          if ($pid > 0) {
-            Win32::Process::KillProcess($pid, 0)
-          }
-        }
-	unlink "t/snmpd.pid";
+# run_async() has been written such that it works both on Windows and on Unix
+# systems. While Windows does not have a fork() system call, Perl on Windows()
+# emulates fork() by creating a new thread. Since it is not possible to
+# terminate a Windows thread in a reliable way from inside a Perl program, if
+# the started shell command has to be stopped, kill the spawned process
+# instead of trying to kill the thread created by fork().
+sub run_async {
+  my ($pidfile, $cmd, @args) = @_;
+  if (-r "$cmd" and -x "$cmd") {
+    my $pid = fork();
+    if ($pid == 0) {
+      my $redirect = "";
+      if ($^O !~ /win32/i) {
+        $redirect = ">/dev/null 2>&1";
+      }
+      exec "$cmd @args" . "$redirect";
+      die "Couldn't exec $cmd";
+    } elsif ($pid != -1) {
+      # Wait at most three seconds for the pid file to appear.
+      for ($i = 0; ($i < 3) && ! (-r "$pidfile"); ++$i) {
+        sleep 1;
+      }
+    } else {
+      die "fork() failed.\n";
     }
-    if ((-e "t/snmptrapd.pid") && (-r "t/snmptrapd.pid")) {
-        # Making sure that any running agents are killed.
-	# warn "killing snmptrap:", `cat t/snmptrapd.pid`, "\n";
-        if ($^O !~ /win32/i) {
-          system "kill `cat t/snmptrapd.pid` > /dev/null 2>&1";
-        }
-        else {
-          open(H, "<t/snmptrapd.pid");
-          my $pid = (<H>);
-          close (H);
-          if ($pid > 0) {
-            Win32::Process::KillProcess($pid, 0)
-          }
-        }
-          
-	unlink "t/snmptrapd.pid";
-    }
+  } else {
+    warn "Couldn't run $cmd\n";
+  }
 }
+
+sub snmptest_cleanup {
+  kill_by_pid_file("t/snmpd.pid");
+  unlink("t/snmpd.pid");
+  kill_by_pid_file("t/snmptrapd.pid");
+  unlink("t/snmptrapd.pid");
+}
+
+sub kill_by_pid_file {
+  if ((-e "$_[0]") && (-r "$_[0]")) {
+    if ($^O !~ /win32/i) {
+      # Unix or Windows + Cygwin.
+      system "kill `cat $_[0]` > /dev/null 2>&1";
+    } else {
+      # Windows + MSVC or Windows + MinGW.
+      open(H, "<$_[0]");
+      my $pid = (<H>);
+      close (H);
+      if ($pid > 0) {
+        Win32::Process::KillProcess($pid, 0)
+      }
+    }
+  }
+}
+
+
+# Stop any processes started during a previous test.
 snmptest_cleanup();
 
 #Open the snmptest.cmd file and get the info
@@ -98,48 +117,21 @@ if (open(CMD, "<t/snmptest.cmd")) {
   die ("Could not start agent. Couldn't find snmptest.cmd file\n");
 }
 
+# Start snmpd and snmptrapd.
+
 #warn "\nStarting agents for test script $0\n";
 
-if ($^O !~ /win32/i) {
-  # Unix
-  if ($snmpd_cmd) {
-    if (-r $snmpd_cmd and -x $snmpd_cmd) {
-      $basedir = `pwd`;
-      chomp $basedir;
-      system "$snmpd_cmd -r -Lf t/snmptest.log -M+$mibdir -C -c $basedir/t/snmptest.conf -p $basedir/t/snmpd.pid ${agent_host}:${agent_port} > /dev/null 2>&1";
-    } else {
-      warn("Couldn't run snmpd\n");
-    }
-  }
-  if ($snmptrapd_cmd) {
-    if (-r $snmptrapd_cmd and -x $snmptrapd_cmd) {
-      system "$snmptrapd_cmd -p t/snmptrapd.pid -M+$mibdir -C -c t/snmptest.conf -C ${agent_host}:${trap_port} > /dev/null 2>&1";
-    } else {
-      warn("Couldn't run snmptrapd\n");
-    }
-  }
+my $scriptname = "snmptest";
+if ($0 =~ /^t[\/\\](.*)\.t$/) {
+  $scriptname = $1;
 }
-else {
-  # Windows
-  if ($snmpd_cmd) {
-      if (-r $snmpd_cmd) {
-        #print STDERR "start \"SNMPD\" /min \"$snmpd_cmd\" -r -Lf t/snmptest.log -C -c t/snmptest.conf -p t/snmpd.pid $agent_port > nul\n";
-      system "start \"SNMPD\" /min \"$snmpd_cmd\" -r -Lf t/snmptest.log -C -c t/snmptest.conf -p t/snmpd.pid $agent_port > nul";
-    } else {
-      warn("Couldn't run snmpd\n");
-    }
-  }
-  if ($snmptrapd_cmd) {
-    if (-r $snmptrapd_cmd) {
-      #print STDERR "start /min \"SNMPTRAPD\" \"$snmptrapd_cmd\" -Lf t/snmptrapdtest.log -p t/snmptrapd.pid -C -c t/snmptest.conf $trap_port > nul\n";
-      system "start /min \"SNMPTRAPD\" \"$snmptrapd_cmd\" -Lf t/snmptrapdtest.log -p t/snmptrapd.pid -C -c t/snmptest.conf $trap_port > nul";
-    } else {
-      warn("Couldn't run snmptrapd\n");
-    }
-  }
-  sleep 2; # Give programs time to start
 
-} 
+if ($snmpd_cmd) {
+  run_async("t/snmpd.pid", "$snmpd_cmd", "-f -r -d -Lf t/snmpd-$scriptname.log -M+$mibdir -C -c t/snmptest.conf -p t/snmpd.pid ${agent_host}:${agent_port}");
+}
+if ($snmptrapd_cmd) {
+  run_async("t/snmptrapd.pid", "$snmptrapd_cmd", "-f -d -Lf t/snmptrapd-$scriptname.log -p t/snmptrapd.pid -M+$mibdir -C -c t/snmptest.conf -C ${agent_host}:${trap_port}");
+}
 
 1;
 
