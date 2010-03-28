@@ -68,7 +68,6 @@
 #include <net-snmp/library/mib.h>
 #include <net-snmp/library/scapi.h>
 
-#ifdef WIN32
 /**
  * This function is a wrapper for the strdup function.
  *
@@ -112,7 +111,6 @@ void netsnmp_free( void * ptr)
     if (ptr)
         free(ptr);
 }
-#endif /* WIN32 */
 
 /**
  * This function increase the size of the buffer pointed at by *buf, which is
