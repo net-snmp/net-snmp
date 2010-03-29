@@ -43,7 +43,8 @@ sub run_async {
   my ($pidfile, $cmd, @args) = @_;
   if (-r "$cmd" and -x "$cmd") {
     if ($^O =~ /win32/i) {
-      system "start \"$cmd\" /min \"$cmd\" @args";
+      $cmd =~ s/\//\\/g;
+      system "start \"$cmd\" /min cmd /c \"$cmd @args 2>&1\"";
     } else {
       system "$cmd @args 2>&1";
     }
