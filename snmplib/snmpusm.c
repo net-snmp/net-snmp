@@ -2597,6 +2597,17 @@ usm_process_in_msg(int msgProcModel,    /* (UNUSED) */
 
             end_of_overhead = value_ptr;
 
+            if ( !user->privKey ) {
+                DEBUGMSGTL(("usm", "No privacy pass phrase for %s\n", user->secName));
+                if (snmp_increment_statistic(STAT_USMSTATSDECRYPTIONERRORS) ==
+                    0) {
+                    DEBUGMSGTL(("usm", "%s\n", "Failed increment statistic."));
+                }
+                usm_free_usmStateReference(*secStateRef);
+                *secStateRef = NULL;
+                return SNMPERR_USM_DECRYPTIONERROR;
+            }
+
             /*
              * XOR the salt with the last (iv_length) bytes
              * of the priv_key to obtain the IV.
