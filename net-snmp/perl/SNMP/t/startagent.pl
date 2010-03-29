@@ -52,7 +52,7 @@ sub run_async {
     if ($pid == 0) {
       my $redirect = "";
       if ($^O !~ /win32/i) {
-        $redirect = ">/dev/null 2>&1";
+        $redirect = " 2>&1";
       }
       exec "$cmd @args" . "$redirect";
       die "Couldn't exec $cmd";
@@ -127,10 +127,10 @@ if ($0 =~ /^t[\/\\](.*)\.t$/) {
 }
 
 if ($snmpd_cmd) {
-  run_async("t/snmpd.pid", "$snmpd_cmd", "-f -r -d -Lf t/snmpd-$scriptname.log -M+$mibdir -C -c t/snmptest.conf -p t/snmpd.pid ${agent_host}:${agent_port}");
+  run_async("t/snmpd.pid", "$snmpd_cmd", "-f -r -d -Lf t/snmpd-$scriptname.log -M+$mibdir -C -c t/snmptest.conf -p t/snmpd.pid ${agent_host}:${agent_port} >t/snmpd-$scriptname.stderr");
 }
 if ($snmptrapd_cmd) {
-  run_async("t/snmptrapd.pid", "$snmptrapd_cmd", "-f -d -Lf t/snmptrapd-$scriptname.log -p t/snmptrapd.pid -M+$mibdir -C -c t/snmptest.conf -C ${agent_host}:${trap_port}");
+  run_async("t/snmptrapd.pid", "$snmptrapd_cmd", "-f -d -Lf t/snmptrapd-$scriptname.log -p t/snmptrapd.pid -M+$mibdir -C -c t/snmptest.conf -C ${agent_host}:${trap_port} >t/snmptrapd-$scriptname.stderr");
 }
 
 1;
