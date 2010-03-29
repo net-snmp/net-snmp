@@ -102,7 +102,7 @@ if test "x$developer" = "xyes" -a "x$GCC" = "xyes"; then
 
     #       WWWXXX - strict type checking
     #
-    DEVFLAGS="-Wall -Winline -Wstrict-prototypes -Wwrite-strings -Wcast-qual -Wno-char-subscripts"
+    DEVFLAGS="-Wall -Wstrict-prototypes -Wwrite-strings -Wcast-qual"
 else
     DEVFLAGS=""
 fi
