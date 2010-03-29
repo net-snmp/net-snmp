@@ -278,7 +278,7 @@ typedef struct request_list {
      * Frees the pdu and any malloc'd data associated with it.
      */
 
-    void            snmp_free_var_internals(netsnmp_variable_list *);     /* frees contents only */
+    NETSNMP_IMPORT void snmp_free_var_internals(netsnmp_variable_list *);     /* frees contents only */
 
 
     /*

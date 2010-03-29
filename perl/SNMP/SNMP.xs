@@ -747,11 +747,13 @@ int flag;
            icp = lcp;
         }
       }
-      if (!found_label && isalpha((int)*lcp)) found_label = 1;
+      if (!found_label && isalpha((unsigned char)*lcp)) found_label = 1;
       lcp--;
    }
 
-   if (!found_label || (!isdigit((int)*(icp+1)) && (flag & FAIL_ON_NULL_IID)))
+   if (!found_label
+       || ((icp + 1 >= name + len || !isdigit((unsigned char)*(icp+1)))
+           && (flag & FAIL_ON_NULL_IID)))
       return(FAILURE);
 
    if (flag & NON_LEAF_NAME) { /* dont know where to start instance id */
@@ -959,13 +961,14 @@ __add_var_val_str(pdu, name, name_length, val, len, type)
     int ret = SUCCESS;
 
     if (pdu->variables == NULL){
-	pdu->variables = vars = netsnmp_malloc(sizeof(netsnmp_variable_list));
+	pdu->variables = vars
+            = netsnmp_calloc(1, sizeof(netsnmp_variable_list));
     } else {
 	for(vars = pdu->variables;
             vars->next_variable;
             vars = vars->next_variable)
 	    /*EXIT*/;
-	vars->next_variable = netsnmp_malloc(sizeof(netsnmp_variable_list));
+	vars->next_variable = netsnmp_calloc(1, sizeof(netsnmp_variable_list));
 	vars = vars->next_variable;
     }
 
@@ -2567,6 +2570,7 @@ void snmp_return_err( struct snmp_session *ss, SV *err_str, SV *err_num, SV *err
 	sv_catpv(err_str, errstr);
 	sv_setiv(err_num, liberr);
 	sv_setiv(err_ind, err);
+	netsnmp_free(errstr);
 }
 
 
@@ -2718,7 +2722,7 @@ snmp_new_v3_session(version, peer, retries, timeout, sec_name, sec_level, sec_en
                 goto end;
 	   }
 
-	   session.peername = netsnmp_strdup(peer);
+	   session.peername = peer;
            session.retries = retries; /* 5 */
            session.timeout = timeout; /* 1000000L */
            session.authenticator = NULL;
@@ -2842,7 +2846,12 @@ snmp_new_v3_session(version, peer, retries, timeout, sec_name, sec_level, sec_en
            }
         end:
            RETVAL = ss;
+	   netsnmp_free(session.securityPrivLocalKey);
+	   netsnmp_free(session.securityPrivProto);
+	   netsnmp_free(session.securityAuthLocalKey);
+	   netsnmp_free(session.securityAuthProto);
 	   netsnmp_free(session.contextEngineID);
+	   netsnmp_free(session.securityEngineID);
 	}
         OUTPUT:
         RETVAL
