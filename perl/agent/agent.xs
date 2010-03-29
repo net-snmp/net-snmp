@@ -693,19 +693,19 @@ nari_setType(me, newvalue)
         request = (netsnmp_request_info *) SvIV(SvRV(me));
         request->requestvb->type=newvalue;
 
-char *
+SV *
 nari_getValue(me)
         SV *me;
     PREINIT:
-        u_char buf[1024] ;
-        u_char *oidbuf = buf ;
-        size_t ob_len = 1024, oo_len = 0;
+        char *outbuf = NULL;
+        size_t ob_len = 0, oo_len = 0;
         netsnmp_request_info *request;
     CODE:
         request = (netsnmp_request_info *) SvIV(SvRV(me));
-	sprint_realloc_by_type(&oidbuf, &ob_len, &oo_len, 0,
+	sprint_realloc_by_type((u_char **) &outbuf, &ob_len, &oo_len, 1,
                                request->requestvb, 0, 0, 0);
-        RETVAL = (char *) oidbuf; /* mem leak */
+        RETVAL = newSVpv(outbuf, 0);
+	netsnmp_free(outbuf);
     OUTPUT:
         RETVAL
 
@@ -897,45 +897,32 @@ nari_setValue(me, type, value)
 	      if ((SvTYPE(value) == SVt_IV) || (SvTYPE(value) == SVt_PVMG)) {
 		  /* Good - got a real one (or a blessed scalar which we have to hope will turn out OK) */
 		  ulltmp = SvIV(value);
-#ifndef WIN32
-		  c64.high = (ulltmp & 0xffffffff00000000ULL) >> 32;
-		  c64.low  = (ulltmp & 0xffffffffULL);
-#else
-		  c64.high = (ulltmp & 0xffffffff00000000ui64) >> 32;
-		  c64.low  = (ulltmp & 0xffffffffui64);
-#endif
-                  snmp_set_var_typed_value(request->requestvb, (u_char)type,
-                                       (u_char *) &c64, sizeof(struct counter64));
 		  RETVAL = 1;
-		  break;
 	      }
 	      else if (SvPOKp(value)) {
 	          /* Might be OK - got a string, so try to convert it, allowing base 10, octal, and hex forms */
 	          stringptr = SvPV(value, stringlen);
+	          errno = 0;
 		  ulltmp = strtoull( stringptr, NULL, 0 );
-		  if (errno == EINVAL) {
-		  	snmp_log(LOG_ERR, "Could not convert string to number in setValue: '%s'", stringptr);
-			RETVAL = 0;
-			break;
-		  }
-#ifndef WIN32
-		  c64.high = (ulltmp & 0xffffffff00000000ULL) >> 32;
-		  c64.low  = (ulltmp & 0xffffffffULL);
-#else
-		  c64.high = (ulltmp & 0xffffffff00000000ui64) >> 32;
-		  c64.low  = (ulltmp & 0xffffffffui64);
-#endif
-                  snmp_set_var_typed_value(request->requestvb, (u_char)type,
-                                       (u_char *) &c64, sizeof(struct counter64));
-		  RETVAL = 1;
-		  break;
+		  if (errno != 0) {
+		      snmp_log(LOG_ERR, "Could not convert string to number in setValue: '%s'", stringptr);
+		      RETVAL = 0;
+		  } else
+
+		      RETVAL = 1;
 	      }
 	      else {
 		snmp_log(LOG_ERR, "Non-unsigned-integer value passed to setValue with ASN_COUNTER64: type was %lu\n",
 			(unsigned long)SvTYPE(value));
 		RETVAL = 0;
-		break;
 	      }
+	      if (RETVAL) {
+		  c64.high = (uint32_t)(ulltmp >> 32);
+		  c64.low  = (uint32_t)(ulltmp >> 0);
+		  snmp_set_var_typed_value(request->requestvb, (u_char)type,
+				     (u_char *) &c64, sizeof(struct counter64));
+	      }
+	      break;
 
           case ASN_OCTET_STR:
           case ASN_BIT_STR:
