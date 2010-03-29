@@ -165,6 +165,7 @@ nso_newptr(initstring)
         if (!snmp_parse_oid(initstring, (oid *) RETVAL->name, &RETVAL->len)) {
             snmp_log(LOG_ERR, "Can't parse: %s\n", initstring);
             RETVAL->len = 0;
+            free(RETVAL);
             RETVAL = NULL;
         }
     OUTPUT:
@@ -278,12 +279,14 @@ nsop_get_indexes(oid1)
                      strcmp(tpnode->label + strlen(tpnode->label) - 5,
                             "Table"))) {
                     /* we're not within a table.  bad logic, little choice */
+                    netsnmp_free(buf);
                     RETVAL = NULL;
                     return;
                 }
             }
 
             if (!tpe) {
+                netsnmp_free(buf);
                 RETVAL = NULL;
                 return;
             }
@@ -294,6 +297,7 @@ nsop_get_indexes(oid1)
                     (NULL ==
                      (tpe = get_tree(name, name_len,
                                      get_tree_head())))) {
+                    netsnmp_free(buf);
                     RETVAL = NULL;
                     return; /* XXX: better error recovery needed? */
                 }
@@ -316,12 +320,14 @@ nsop_get_indexes(oid1)
                     (NULL ==
                      (indexnode = get_tree(name, name_len,
                                            get_tree_head())))) {
+                    netsnmp_free(buf);
                     RETVAL = NULL;
                     return;             /* xxx mem leak */
                 }
                 vbdata.type = mib_to_asn_type(indexnode->type);
 
                 if (vbdata.type == (u_char) -1) {
+                    netsnmp_free(buf);
                     RETVAL = NULL;
                     return; /* XXX: not good.  half populated stack? */
                 }
@@ -343,9 +349,9 @@ nsop_get_indexes(oid1)
                     }
                 }
 
-                /* possible memory leak: vbdata.data should be freed later */
                 if (parse_one_oid_index(&oidp, &oidp_len, &vbdata, 0)
                     != SNMPERR_SUCCESS) {
+                    netsnmp_free(buf);
                     RETVAL = NULL;
                     return;
                 }
@@ -359,9 +365,10 @@ nsop_get_indexes(oid1)
                 sprint_realloc_value(&buf, &buf_len, &out_len,
                                      1, name, name_len, &vbdata);
 */
-
+                snmp_free_var_internals(&vbdata);
                 av_push(myret, newSVpv((char *)buf, out_len));
             }
+            netsnmp_free(buf);
             RETVAL = newRV((SV *)myret);
         }
     OUTPUT:

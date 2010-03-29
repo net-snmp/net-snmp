@@ -551,6 +551,13 @@ void
 nsahr_DESTROY(reginfo)
 	netsnmp_handler_registration *reginfo
     CODE:
+        handler_cb_data *cb_data;
+
+        if (reginfo && reginfo->handler && reginfo->handler->myvoid) {
+	    cb_data = (handler_cb_data *) (reginfo->handler->myvoid);
+	    SvREFCNT_dec(cb_data->perl_cb);
+	    free(cb_data);
+        }
 	netsnmp_handler_registration_free(reginfo);
 
 int
