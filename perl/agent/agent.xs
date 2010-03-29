@@ -550,9 +550,9 @@ nsahr_new(name, regoid, perlcallback)
 void
 nsahr_DESTROY(reginfo)
 	netsnmp_handler_registration *reginfo
-    CODE:
+    PREINIT:
         handler_cb_data *cb_data;
-
+    CODE:
         if (reginfo && reginfo->handler && reginfo->handler->myvoid) {
 	    cb_data = (handler_cb_data *) (reginfo->handler->myvoid);
 	    SvREFCNT_dec(cb_data->perl_cb);
