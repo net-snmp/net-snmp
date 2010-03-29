@@ -1090,10 +1090,12 @@ vacm_warn_if_not_configured(int majorID, int minorID, void *serverarg,
          */
         if ((MASTER_AGENT == agent_mode) && (strcmp(name, "snmptrapd") != 0)) {
             snmp_log(LOG_WARNING,
-                 "Warning: no access control information configured.\n  It's "
-                 "unlikely this agent can serve any useful purpose in this "
-                 "state.\n  Run \"snmpconf -g basic_setup\" to help you "
-                 "configure the %s.conf file for this agent.\n", name );
+                 "Warning: no access control information configured.\n"
+                 "  (Config search path: %s)\n"
+                 "  It's unlikely this agent can serve any useful purpose in this state.\n"
+                 "  Run \"snmpconf -g basic_setup\" to help you "
+                 "configure the %s.conf file for this agent.\n",
+                 get_configuration_directory(), name);
         }
 
         /*
@@ -1113,7 +1115,9 @@ vacm_warn_if_not_configured(int majorID, int minorID, void *serverarg,
                                     NETSNMP_DS_APP_NO_AUTHORIZATION)) {
             snmp_log(LOG_WARNING,
                  "Warning: no access control information configured.\n"
-                 "This receiver will *NOT* accept any incoming notifications.\n");
+                 "  (Config search path: %s)\n"
+                 "This receiver will *NOT* accept any incoming notifications.\n",
+                 get_configuration_directory());
         }
     }
     return SNMP_ERR_NOERROR;
