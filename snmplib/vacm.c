@@ -801,11 +801,50 @@ vacm_destroyAllGroupEntries(void)
 }
 
 struct vacm_accessEntry *
+_vacm_choose_best( struct vacm_accessEntry *current,
+                   struct vacm_accessEntry *candidate)
+{
+    /*
+     * RFC 3415: vacmAccessTable:
+     *    2) if this set has [more than] one member, ...
+     *       it comes down to deciding how to weight the
+     *       preferences between ContextPrefixes,
+     *       SecurityModels, and SecurityLevels
+     */
+    if (( !current ) ||
+        /* a) if the subset of entries with securityModel
+         *    matching the securityModel in the message is
+         *    not empty, then discard the rest
+         */
+        (  current->securityModel == SNMP_SEC_MODEL_ANY &&
+         candidate->securityModel != SNMP_SEC_MODEL_ANY ) ||
+        /* b) if the subset of entries with vacmAccessContextPrefix
+         *    matching the contextName in the message is
+         *    not empty, then discard the rest
+         */
+        (  current->contextMatch  == CONTEXT_MATCH_PREFIX &&
+         candidate->contextMatch  == CONTEXT_MATCH_EXACT ) ||
+        /* c) discard all entries with ContextPrefixes shorter
+         *    than the longest one remaining in the set
+         */
+        (  current->contextMatch  == CONTEXT_MATCH_PREFIX &&
+           current->contextPrefix[0] < candidate->contextPrefix[0] ) ||
+        /* d) select the entry with the highest securityLevel
+         */
+        (  current->securityLevel < candidate->securityLevel )) {
+
+        return candidate;
+    }
+
+    return current;
+}
+
+struct vacm_accessEntry *
 vacm_getAccessEntry(const char *groupName,
                     const char *contextPrefix,
                     int securityModel, int securityLevel)
 {
-    struct vacm_accessEntry *vp;
+    struct vacm_accessEntry *vp, *best=NULL;
     char            group[VACMSTRINGLEN];
     char            context[VACMSTRINGLEN];
     int             glen, clen;
@@ -834,9 +873,9 @@ vacm_getAccessEntry(const char *groupName,
                  && clen >= vp->contextPrefix[0]
                  && (memcmp(vp->contextPrefix + 1, context + 1,
                             vp->contextPrefix[0]) == 0))))
-            return vp;
+            best = _vacm_choose_best( best, vp );
     }
-    return NULL;
+    return best;
 }
 
 void
