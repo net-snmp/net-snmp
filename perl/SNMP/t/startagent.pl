@@ -39,30 +39,17 @@ if ($^O =~ /win32/i) {
   require Win32::Process;
 }
 
-# run_async() has been written such that it works both on Windows and on Unix
-# systems. While Windows does not have a fork() system call, Perl on Windows()
-# emulates fork() by creating a new thread. Since it is not possible to
-# terminate a Windows thread in a reliable way from inside a Perl program, if
-# the started shell command has to be stopped, kill the spawned process
-# instead of trying to kill the thread created by fork().
 sub run_async {
   my ($pidfile, $cmd, @args) = @_;
   if (-r "$cmd" and -x "$cmd") {
-    my $pid = fork();
-    if ($pid == 0) {
-      my $redirect = "";
-      if ($^O !~ /win32/i) {
-        $redirect = " 2>&1";
-      }
-      exec "$cmd @args" . "$redirect";
-      die "Couldn't exec $cmd";
-    } elsif ($pid != -1) {
-      # Wait at most three seconds for the pid file to appear.
-      for ($i = 0; ($i < 3) && ! (-r "$pidfile"); ++$i) {
-        sleep 1;
-      }
+    if ($^O =~ /win32/i) {
+      system "start \"$cmd\" /min \"$cmd\" @args";
     } else {
-      die "fork() failed.\n";
+      system "$cmd @args 2>&1";
+    }
+    # Wait at most three seconds for the pid file to appear.
+    for ($i = 0; ($i < 3) && ! (-r "$pidfile"); ++$i) {
+      sleep 1;
     }
   } else {
     warn "Couldn't run $cmd\n";
@@ -127,10 +114,10 @@ if ($0 =~ /^t[\/\\](.*)\.t$/) {
 }
 
 if ($snmpd_cmd) {
-  run_async("t/snmpd.pid", "$snmpd_cmd", "-f -r -d -Lf t/snmpd-$scriptname.log -M+$mibdir -C -c t/snmptest.conf -p t/snmpd.pid ${agent_host}:${agent_port} >t/snmpd-$scriptname.stderr");
+  run_async("t/snmpd.pid", "$snmpd_cmd", "-r -d -Lf t/snmpd-$scriptname.log -M+$mibdir -C -c t/snmptest.conf -p t/snmpd.pid ${agent_host}:${agent_port} >t/snmpd-$scriptname.stderr");
 }
 if ($snmptrapd_cmd) {
-  run_async("t/snmptrapd.pid", "$snmptrapd_cmd", "-f -d -Lf t/snmptrapd-$scriptname.log -p t/snmptrapd.pid -M+$mibdir -C -c t/snmptest.conf -C ${agent_host}:${trap_port} >t/snmptrapd-$scriptname.stderr");
+  run_async("t/snmptrapd.pid", "$snmptrapd_cmd", "-d -Lf t/snmptrapd-$scriptname.log -p t/snmptrapd.pid -M+$mibdir -C -c t/snmptest.conf -C ${agent_host}:${trap_port} >t/snmptrapd-$scriptname.stderr");
 }
 
 1;
