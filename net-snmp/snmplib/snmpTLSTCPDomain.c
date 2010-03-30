@@ -131,26 +131,18 @@ netsnmp_tlstcp_recv(netsnmp_transport *t, void *buf, int size,
                 SNMP_FREE(tmStateRef);
                 return -1;
             }
-/* XXX: doesn't take the ssl pointer
-            if (!BIO_should_retry(tlsdata->ssl)) {
-                DEBUGMSGTL(("tlstcp", "SSL_read failed\n"));
-                _openssl_log_error(rc, tlsdata->ssl, "SSL_read");
-                SNMP_FREE(tmStateRef);
-                sleep(5);
-                return -1;
-            }
-*/
             rc = SSL_read(tlsdata->ssl, buf, size);
         }
 
         DEBUGMSGTL(("tlstcp", "received %d decoded bytes from tls\n", rc));
 
         if (rc == -1) {
+            if (SSL_get_error(tlsdata->ssl, rc) == SSL_ERROR_WANT_READ)
+                return -1; /* XXX: it's ok, but what's the right return? */
+
             _openssl_log_error(rc, tlsdata->ssl, "SSL_read");
             SNMP_FREE(tmStateRef);
 
-            if (SSL_get_error(tlsdata->ssl, rc) == SSL_ERROR_WANT_READ)
-                return -1; /* XXX: it's ok, but what's the right return? */
             return rc;
         }
 
