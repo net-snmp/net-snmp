@@ -147,8 +147,11 @@ extern          "C" {
 #ifdef  NETSNMP_FUNCTION
 #define __DBGTRACE       __DBGMSGT(("trace","%s(): %s, %d:\n",\
 				NETSNMP_FUNCTION,__FILE__,__LINE__))
+#define __DBGTRACETOK(x) __DBGMSGT((x,"%s(): %s, %d:\n",       \
+                                    NETSNMP_FUNCTION,__FILE__,__LINE__))
 #else
 #define __DBGTRACE       __DBGMSGT(("trace"," %s, %d:\n", __FILE__,__LINE__))
+#define __DBGTRACETOK(x) __DBGMSGT((tok," %s, %d:\n", __FILE__,__LINE__))
 #endif
 
 #define __DBGMSGL(x)     __DBGTRACE, debugmsg x
@@ -203,6 +206,7 @@ extern          "C" {
 #define DEBUGMSG(x)        do {if (_DBG_IF_) {debugmsg x;} }while(0)
 #define DEBUGMSGT(x)       do {if (_DBG_IF_) {__DBGMSGT(x);} }while(0)
 #define DEBUGTRACE         do {if (_DBG_IF_) {__DBGTRACE;} }while(0)
+#define DEBUGTRACETOK(x)   do {if (_DBG_IF_) {__DBGTRACETOK(x);} }while(0)
 #define DEBUGMSGL(x)       do {if (_DBG_IF_) {__DBGMSGL(x);} }while(0)
 #define DEBUGMSGTL(x)      do {if (_DBG_IF_) {__DBGMSGTL(x);} }while(0)
 #define DEBUGMSGOID(x)     do {if (_DBG_IF_) {__DBGMSGOID(x);} }while(0)
@@ -235,6 +239,7 @@ extern          "C" {
 #define DEBUGMSG(x)
 #define DEBUGMSGT(x)
 #define DEBUGTRACE
+#define DEBUGTRACETOK(x)
 #define DEBUGMSGL(x)
 #define DEBUGMSGTL(x)
 #define DEBUGMSGOID(x)
