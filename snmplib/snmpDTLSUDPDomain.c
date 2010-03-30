@@ -160,6 +160,8 @@ typedef struct bio_cache_s {
    int msgnum;
    int sock;
    char *securityName;
+   char *write_cache;
+   size_t write_cache_len;
 } bio_cache;
 
 bio_cache *biocache = NULL;
@@ -314,6 +316,42 @@ _netsnmp_bio_read_and_send(bio_cache *cachep) {
     return outsize;
 }
 
+/* returns SNMPERR_SUCCESS if we succeeded in getting the data out */
+/* returns SNMPERR_GENERR if we still need more time */
+static int
+_netsnmp_bio_try_and_write_buffered(bio_cache *cachep) {
+    int rc;
+    
+    /* make sure we have something to write */
+    if (!cachep->write_cache || cachep->write_cache_len == 0)
+        return SNMPERR_SUCCESS;
+
+    /* try and write out the cached data */
+    rc = SSL_write(cachep->con, cachep->write_cache, cachep->write_cache_len);
+
+    while (rc == -1) {
+        int errnum = SSL_get_error(cachep->con, rc);
+        int bytesout;
+        DEBUGMSGTL(("dtlsudp", "ssl_write error\n")); 
+        _openssl_log_error(rc, cachep->con, "SSL_write");
+        if (errnum != SSL_ERROR_WANT_READ &&
+            errnum != SSL_ERROR_WANT_WRITE)
+            return SNMPERR_GENERR;
+        bytesout = _netsnmp_bio_read_and_send(cachep);
+        if ((errnum == SSL_ERROR_WANT_READ ||
+             errnum == SSL_ERROR_WANT_WRITE) &&
+            bytesout <= 0) {
+            /* we've failed; must need to wait longer */
+            return SNMPERR_GENERR;
+        }
+        DEBUGMSGTL(("dtlsudp", "recalling ssl_write\n")); 
+        rc = SSL_write(cachep->con, cachep->write_cache,
+                       cachep->write_cache_len);
+    }
+    SNMP_FREE(cachep->write_cache);
+    cachep->write_cache_len = 0;
+    return SNMPERR_SUCCESS;
+}
 
 /*
  * You can write something into opaque that will subsequently get passed back 
@@ -523,6 +561,14 @@ netsnmp_dtlsudp_send(netsnmp_transport *t, void *buf, int size,
         cachep->securityName = strdup(tmStateRef->securityName);
         
         
+    if (cachep->write_cache) {
+        if (SNMPERR_GENERR == _netsnmp_bio_try_and_write_buffered(cachep)) {
+            /* we still have data that can't get out in the buffer */
+            /* XXX: add in the new buffer too */
+            return -1;
+        }
+    }
+
     {
         char *str = netsnmp_udp_fmtaddr(NULL, (void *) addr_pair,
                                         sizeof(netsnmp_indexed_addr_pair));
@@ -531,6 +577,7 @@ netsnmp_dtlsudp_send(netsnmp_transport *t, void *buf, int size,
         free(str);
     }
     rc = SSL_write(cachep->con, buf, size);
+
     while (rc == -1) {
         int errnum = SSL_get_error(cachep->con, rc);
         int bytesout;
@@ -539,11 +586,42 @@ netsnmp_dtlsudp_send(netsnmp_transport *t, void *buf, int size,
         if (errnum != SSL_ERROR_WANT_READ &&
             errnum != SSL_ERROR_WANT_WRITE)
             break;
-        _netsnmp_bio_read_and_send(cachep);
+        bytesout = _netsnmp_bio_read_and_send(cachep);
         if ((errnum == SSL_ERROR_WANT_READ ||
              errnum == SSL_ERROR_WANT_WRITE) &&
-            bytesout <= 0)
+            bytesout <= 0) {
+            /* We need more data written to or read from the socket
+               but we're failing to do so and need to wait till the
+               socket is ready again; unfortunately this means we need
+               to buffer the SNMP data temporarily in the mean time */
+
+            /* remember the packet */
+            if (cachep->write_cache && cachep->write_cache_len > 0) {
+                size_t newsize = cachep->write_cache_len + size;
+                char *newbuf = realloc(&cachep->write_cache, newsize);
+                if (NULL == newbuf) {
+                    /* ack! malloc failure */
+                    /* XXX: free and close */
+                    return -1;
+                }
+                /* write the new packet to the end */
+                memcpy(cachep->write_cache + cachep->write_cache_len,
+                       buf, size);
+                cachep->write_cache_len = newsize;
+            } else {
+                if (SNMPERR_SUCCESS !=
+                    memdup((u_char **) &cachep->write_cache, buf, size)) {
+                    /* ack! malloc failure */
+                    /* XXX: free and close */
+                    return -1;
+                }
+                cachep->write_cache_len = size;
+            }
+
+            /* exit out of the loop until we get caled again from
+               socket data */ 
             break;
+        }
         DEBUGMSGTL(("dtlsudp", "recalling ssl_write\n")); 
         rc = SSL_write(cachep->con, buf, size);
     }
