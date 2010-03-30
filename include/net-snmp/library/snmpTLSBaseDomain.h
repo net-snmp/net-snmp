@@ -39,8 +39,14 @@ extern          "C" {
        BIO     *accept_bio;
        BIO     *accepted_bio;
        char    *securityName;
+       struct sockaddr_in from_addr;
     } _netsnmpTLSBaseData;
 
+    _netsnmpTLSBaseData *netsnmp_tlsbase_allocate_tlsdata(netsnmp_transport *t,
+                                                          int isserver);
+    int netsnmp_tlsbase_wrapup_recv(netsnmp_tmStateReference *tmStateRef,
+                                    _netsnmpTLSBaseData *tlsdata,
+                                    void **opaque, int *olength);
 #ifdef __cplusplus
 }
 #endif

@@ -154,14 +154,11 @@ typedef struct bio_cache_s {
    struct sockaddr_in sockaddr;
    uint32_t ipv4addr;
    u_short portnum;
-   SSL *con;
-   SSL_CTX *ctx;
    struct bio_cache_s *next;
    int msgnum;
-   int sock;
-   char *securityName;
    char *write_cache;
    size_t write_cache_len;
+    _netsnmpTLSBaseData *tlsdata;
 } bio_cache;
 
 bio_cache *biocache = NULL;
@@ -191,13 +188,15 @@ static bio_cache *find_bio_cache(struct sockaddr_in *from_addr) {
 #define DIEHERE(msg) { snmp_log(LOG_ERR, "%s\n", msg); return NULL; }
 
 static bio_cache *
-start_new_cached_connection(int sock, struct sockaddr_in *remote_addr,
+start_new_cached_connection(netsnmp_transport *t,
+                            struct sockaddr_in *remote_addr,
                             int we_are_client) {
     bio_cache *cachep = NULL;
+    _netsnmpTLSBaseData *tlsdata;
 
     DEBUGTRACETOK("dtlsudp");
 
-    if (!sock)
+    if (!t->sock)
         DIEHERE("no socket passed in to start_new_cached_connection\n");
     if (!remote_addr)
         DIEHERE("no remote_addr passed in to start_new_cached_connection\n");
@@ -206,13 +205,17 @@ start_new_cached_connection(int sock, struct sockaddr_in *remote_addr,
     if (!cachep)
         return NULL;
     
+    /* allocate our TLS specific data */
+    if (NULL == (tlsdata = netsnmp_tlsbase_allocate_tlsdata(t, !we_are_client)))
+        return NULL;
+    cachep->tlsdata = tlsdata;
+    
     DEBUGMSGTL(("dtlsudp", "starting a new connection\n"));
     cachep->next = biocache;
     biocache = cachep;
 
     cachep->ipv4addr = remote_addr->sin_addr.s_addr;
     cachep->portnum = remote_addr->sin_port;
-    cachep->sock = sock;
     memcpy(&cachep->sockaddr, remote_addr, sizeof(*remote_addr));
 
     /* create caching memory bios for OpenSSL to read and write to */
@@ -234,19 +237,19 @@ start_new_cached_connection(int sock, struct sockaddr_in *remote_addr,
         /* we're the client */
         DEBUGMSGTL(("dtlsudp",
                     "starting a new connection as a client to sock: %d\n",
-                    sock));
-        cachep->con = SSL_new(get_client_ctx());
+                    t->sock));
+        tlsdata->ssl = SSL_new(get_client_ctx());
 
         /* XXX: session setting 735 */
     } else {
         /* we're the server */
 
-        cachep->con = SSL_new(get_server_ctx());
+        tlsdata->ssl = SSL_new(get_server_ctx());
     }
 
-    SSL_set_mode(cachep->con, SSL_MODE_AUTO_RETRY);
+    SSL_set_mode(tlsdata->ssl, SSL_MODE_AUTO_RETRY);
 
-    if (!cachep->con) {
+    if (!tlsdata->ssl) {
         BIO_free(cachep->read_bio);
         BIO_free(cachep->write_bio);
         DIEHERE("failed to create the write bio");
@@ -254,28 +257,28 @@ start_new_cached_connection(int sock, struct sockaddr_in *remote_addr,
         
     /* turn on cookie exchange */
     /* XXX: we need to only create cache entries when cookies succeed */
-    SSL_set_options(cachep->con, SSL_OP_COOKIE_EXCHANGE);
+    SSL_set_options(tlsdata->ssl, SSL_OP_COOKIE_EXCHANGE);
 
     /* set the bios that openssl should read from and write to */
     /* (and we'll do the opposite) */
-    SSL_set_bio(cachep->con, cachep->read_bio, cachep->write_bio);
+    SSL_set_bio(tlsdata->ssl, cachep->read_bio, cachep->write_bio);
 
     /* set the SSL notion of we_are_client/server */
     if (we_are_client)
-        SSL_set_connect_state(cachep->con);
+        SSL_set_connect_state(tlsdata->ssl);
     else
-        SSL_set_accept_state(cachep->con);
+        SSL_set_accept_state(tlsdata->ssl);
 
     return cachep;
 }
 
 static bio_cache *
-find_or_create_bio_cache(int sock, struct sockaddr_in *from_addr,
+find_or_create_bio_cache(netsnmp_transport *t, struct sockaddr_in *from_addr,
                          int we_are_client) {
     bio_cache *cachep = find_bio_cache(from_addr);
     if (NULL == cachep) {
         /* none found; need to start a new context */
-        cachep = start_new_cached_connection(sock, from_addr, we_are_client);
+        cachep = start_new_cached_connection(t, from_addr, we_are_client);
         if (NULL == cachep) {
             snmp_log(LOG_ERR, "failed to open a new dtls connection\n");
         }
@@ -288,7 +291,7 @@ find_or_create_bio_cache(int sock, struct sockaddr_in *from_addr,
  * queued packets out the UDP port
  */
 static int
-_netsnmp_send_queued_dtls_pkts(bio_cache *cachep) {
+_netsnmp_send_queued_dtls_pkts(netsnmp_transport *t, bio_cache *cachep) {
     int outsize, rc2;
     u_char outbuf[65535];
     
@@ -305,11 +308,11 @@ _netsnmp_send_queued_dtls_pkts(bio_cache *cachep) {
 #if defined(XXXFIXME) && defined(linux) && defined(IP_PKTINFO)
         /* XXX: before this can work, we need to remember address we
            received it from (addr_pair) */
-        rc2 = netsnmp_udp_sendto(cachep->sock, addr_pair->local_addr,
+        rc2 = netsnmp_udp_sendto(t->sock, addr_pair->local_addr,
                                  addr_pair->if_index, addr_pair->remote_addr,
                                  outbuf, outsize);
 #else
-        rc2 = sendto(cachep->sock, outbuf, outsize, 0,
+        rc2 = sendto(t->sock, outbuf, outsize, 0,
                      &cachep->sockaddr, sizeof(struct sockaddr));
 #endif /* linux && IP_PKTINFO */
 
@@ -330,8 +333,11 @@ _netsnmp_send_queued_dtls_pkts(bio_cache *cachep) {
 static int
 _netsnmp_bio_try_and_write_buffered(netsnmp_transport *t, bio_cache *cachep) {
     int rc;
+    _netsnmpTLSBaseData *tlsdata;
     
     DEBUGTRACETOK("dtlsudp");
+
+    tlsdata = cachep->tlsdata;
 
     /* make sure we have something to write */
     if (!cachep->write_cache || cachep->write_cache_len == 0)
@@ -341,23 +347,23 @@ _netsnmp_bio_try_and_write_buffered(netsnmp_transport *t, bio_cache *cachep) {
                 cachep->write_cache_len));
 
     /* try and write out the cached data */
-    rc = SSL_write(cachep->con, cachep->write_cache, cachep->write_cache_len);
+    rc = SSL_write(tlsdata->ssl, cachep->write_cache, cachep->write_cache_len);
 
     while (rc == -1) {
-        int errnum = SSL_get_error(cachep->con, rc);
+        int errnum = SSL_get_error(tlsdata->ssl, rc);
         int bytesout;
 
         /* don't treat want_read/write errors as real errors */
         if (errnum != SSL_ERROR_WANT_READ &&
             errnum != SSL_ERROR_WANT_WRITE) {
             DEBUGMSGTL(("dtlsudp", "ssl_write error (of buffered data)\n")); 
-            _openssl_log_error(rc, cachep->con, "SSL_write");
+            _openssl_log_error(rc, tlsdata->ssl, "SSL_write");
             return SNMPERR_GENERR;
         }
 
         /* check to see if we have outgoing DTLS packets to send */
         /* (SSL_write could have created DTLS control packets) */ 
-        bytesout = _netsnmp_send_queued_dtls_pkts(cachep);
+        bytesout = _netsnmp_send_queued_dtls_pkts(t, cachep);
 
         /* If want_read/write but failed to actually send anything
            then we need to wait for the other side, so quit */
@@ -370,11 +376,11 @@ _netsnmp_bio_try_and_write_buffered(netsnmp_transport *t, bio_cache *cachep) {
 
         /* retry writing */
         DEBUGMSGTL(("dtlsudp", "recalling ssl_write\n")); 
-        rc = SSL_write(cachep->con, cachep->write_cache,
+        rc = SSL_write(tlsdata->ssl, cachep->write_cache,
                        cachep->write_cache_len);
     }
 
-    if (_netsnmp_send_queued_dtls_pkts(cachep) > 0) {
+    if (_netsnmp_send_queued_dtls_pkts(t, cachep) > 0) {
         SNMP_FREE(cachep->write_cache);
         cachep->write_cache_len = 0;
         DEBUGMSGTL(("dtlsudp", "  Write was successful\n"));
@@ -410,12 +416,6 @@ _netsnmp_add_buffered_data(bio_cache *cachep, char *buf, size_t size) {
     return SNMPERR_SUCCESS;
 }
 
-/*
- * You can write something into opaque that will subsequently get passed back 
- * to your send function if you like.  For instance, you might want to
- * remember where a PDU came from, so that you can send a reply there...  
- */
-
 static int
 netsnmp_dtlsudp_recv(netsnmp_transport *t, void *buf, int size,
                      void **opaque, int *olength)
@@ -425,7 +425,7 @@ netsnmp_dtlsudp_recv(netsnmp_transport *t, void *buf, int size,
     netsnmp_indexed_addr_pair *addr_pair = NULL;
     struct sockaddr *from;
     netsnmp_tmStateReference *tmStateRef = NULL;
-    X509            *peer;
+    _netsnmpTLSBaseData *tlsdata;
 
     DEBUGTRACETOK("dtlsudp");
 
@@ -475,12 +475,12 @@ netsnmp_dtlsudp_recv(netsnmp_transport *t, void *buf, int size,
        side */
     /* XXX: allow for a SNMP client to never accept new conns? */
     bio_cache *cachep =
-        find_or_create_bio_cache(t->sock, &addr_pair->remote_addr,
-                                 WE_ARE_SERVER);
+        find_or_create_bio_cache(t, &addr_pair->remote_addr, WE_ARE_SERVER);
     if (NULL == cachep) {
         SNMP_FREE(tmStateRef);
         return -1;
     }
+    tlsdata = cachep->tlsdata;
 
     /* write the received buffer to the memory-based input bio */
     BIO_write(cachep->read_bio, buf, rc);
@@ -490,22 +490,22 @@ netsnmp_dtlsudp_recv(netsnmp_transport *t, void *buf, int size,
        that buffered stuff in openssl won't be caught by the
        net-snmp select loop because it's already been pulled
        out; need to deal with this) */
-    rc = SSL_read(cachep->con, buf, size);
+    rc = SSL_read(tlsdata->ssl, buf, size);
             
     while (rc == -1) {
-        int errnum = SSL_get_error(cachep->con, rc);
+        int errnum = SSL_get_error(tlsdata->ssl, rc);
         int bytesout;
 
         /* don't treat want_read/write errors as real errors */
         if (errnum != SSL_ERROR_WANT_READ &&
             errnum != SSL_ERROR_WANT_WRITE) {
-            _openssl_log_error(rc, cachep->con, "SSL_read");
+            _openssl_log_error(rc, tlsdata->ssl, "SSL_read");
             break;
         }
 
         /* check to see if we have outgoing DTLS packets to send */
         /* (SSL_read could have created DTLS control packets) */ 
-        bytesout = _netsnmp_send_queued_dtls_pkts(cachep);
+        bytesout = _netsnmp_send_queued_dtls_pkts(t, cachep);
 
         /* If want_read/write but failed to actually send
            anything then we need to wait for the other side,
@@ -517,17 +517,17 @@ netsnmp_dtlsudp_recv(netsnmp_transport *t, void *buf, int size,
 
         /* retry reading */
         DEBUGMSGTL(("dtlsudp", "recalling ssl_read\n")); 
-        rc = SSL_read(cachep->con, buf, size);
+        rc = SSL_read(tlsdata->ssl, buf, size);
     }
 
     DEBUGMSGTL(("dtlsudp",
                 "received %d decoded bytes from dtls\n", rc));
 
     if (BIO_ctrl_pending(cachep->write_bio) > 0) {
-        _netsnmp_send_queued_dtls_pkts(cachep);
+        _netsnmp_send_queued_dtls_pkts(t, cachep);
     }
 
-    if (SSL_pending(cachep->con)) {
+    if (SSL_pending(tlsdata->ssl)) {
         fprintf(stderr, "ack: got here...  pending\n");
         exit(1);
     }
@@ -535,7 +535,7 @@ netsnmp_dtlsudp_recv(netsnmp_transport *t, void *buf, int size,
     if (rc == -1) {
         SNMP_FREE(tmStateRef);
 
-        if (SSL_get_error(cachep->con, rc) == SSL_ERROR_WANT_READ) {
+        if (SSL_get_error(tlsdata->ssl, rc) == SSL_ERROR_WANT_READ) {
             DEBUGMSGTL(("dtlsudp","here: want read!\n"));
 
             /* see if we have buffered write date to send out first */
@@ -547,7 +547,7 @@ netsnmp_dtlsudp_recv(netsnmp_transport *t, void *buf, int size,
 
             return -1; /* XXX: it's ok, but what's the right return? */
         }
-        _openssl_log_error(rc, cachep->con, "SSL_read");
+        _openssl_log_error(rc, tlsdata->ssl, "SSL_read");
         return rc;
     }
 
@@ -568,31 +568,7 @@ netsnmp_dtlsudp_recv(netsnmp_transport *t, void *buf, int size,
         }
     }
 
-    /* XXX: disallow NULL auth/encr algs in our implementations */
-    tmStateRef->transportSecurityLevel = SNMP_SEC_LEVEL_AUTHPRIV;
-
-    /* use x509 cert to do lookup to secname if DNE in cachep yet */
-    if (!cachep->securityName) {
-        if (NULL != (peer = SSL_get_peer_certificate(cachep->con))) {
-            cachep->securityName =
-                netsnmp_openssl_cert_get_commonName(peer, NULL, NULL);
-            DEBUGMSGTL(("dtlsudp", "set SecName to: %s\n",
-                        cachep->securityName));
-        } else {
-            SNMP_FREE(tmStateRef);
-            return -1;
-        }
-    }
-
-    /* XXX: detect and throw out overflow secname sizes rather
-       than truncating. */
-    strncpy(tmStateRef->securityName, cachep->securityName,
-            sizeof(tmStateRef->securityName)-1);
-    tmStateRef->securityName[sizeof(tmStateRef->securityName)-1] = '\0';
-    tmStateRef->securityNameLen = strlen(tmStateRef->securityName);
-
-    *opaque = tmStateRef;
-    *olength = sizeof(netsnmp_tmStateReference);
+    netsnmp_tlsbase_wrapup_recv(tmStateRef, tlsdata, opaque, olength);
 
     return rc;
 }
@@ -609,9 +585,11 @@ netsnmp_dtlsudp_send(netsnmp_transport *t, void *buf, int size,
     bio_cache *cachep = NULL;
     netsnmp_tmStateReference *tmStateRef = NULL;
     u_char outbuf[65535];
+    _netsnmpTLSBaseData *tlsdata;
     
     DEBUGTRACETOK("dtlsudp");
 
+    /* determine remote addresses */
     if (opaque != NULL && *opaque != NULL &&
         *olength == sizeof(netsnmp_tmStateReference)) {
         tmStateRef = (netsnmp_tmStateReference *) *opaque;
@@ -640,14 +618,15 @@ netsnmp_dtlsudp_send(netsnmp_transport *t, void *buf, int size,
 
     /* we're always a client if we're sending to something unknown yet */
     if (NULL ==
-        (cachep = find_or_create_bio_cache(t->sock, &addr_pair->remote_addr,
+        (cachep = find_or_create_bio_cache(t, &addr_pair->remote_addr,
                                            WE_ARE_CLIENT)))
         return -1;
 
-    if (!cachep->securityName && tmStateRef && tmStateRef->securityNameLen > 0)
-        cachep->securityName = strdup(tmStateRef->securityName);
+    tlsdata = cachep->tlsdata;
         
-        
+    if (!tlsdata->securityName && tmStateRef && tmStateRef->securityNameLen > 0)
+        tlsdata->securityName = strdup(tmStateRef->securityName);
+
     /* see if we have previous outgoing data to send */
     if (cachep->write_cache) {
         if (SNMPERR_GENERR == _netsnmp_bio_try_and_write_buffered(t, cachep)) {
@@ -670,23 +649,23 @@ netsnmp_dtlsudp_send(netsnmp_transport *t, void *buf, int size,
         free(str);
     }
 
-    rc = SSL_write(cachep->con, buf, size);
+    rc = SSL_write(tlsdata->ssl, buf, size);
 
     while (rc == -1) {
         int bytesout;
-        int errnum = SSL_get_error(cachep->con, rc);
+        int errnum = SSL_get_error(tlsdata->ssl, rc);
 
         /* don't treat want_read/write errors as real errors */
         if (errnum != SSL_ERROR_WANT_READ &&
             errnum != SSL_ERROR_WANT_WRITE) {
             DEBUGMSGTL(("dtlsudp", "ssl_write error\n")); 
-            _openssl_log_error(rc, cachep->con, "SSL_write");
+            _openssl_log_error(rc, tlsdata->ssl, "SSL_write");
             break;
         }
 
         /* check to see if we have outgoing DTLS packets to send */
         /* (SSL_read could have created DTLS control packets) */ 
-        bytesout = _netsnmp_send_queued_dtls_pkts(cachep);
+        bytesout = _netsnmp_send_queued_dtls_pkts(t, cachep);
 
         /* If want_read/write but failed to actually send
            anything then we need to wait for the other side,
@@ -712,7 +691,7 @@ netsnmp_dtlsudp_send(netsnmp_transport *t, void *buf, int size,
             break;
         }
         DEBUGMSGTL(("dtlsudp", "recalling ssl_write\n")); 
-        rc = SSL_write(cachep->con, buf, size);
+        rc = SSL_write(tlsdata->ssl, buf, size);
     }
 
     /* for memory bios, we now read from openssl's write buffer (ie,
@@ -725,7 +704,7 @@ netsnmp_dtlsudp_send(netsnmp_transport *t, void *buf, int size,
 #if defined(FIXME) && defined(linux) && defined(IP_PKTINFO)
     /* XXX: before this can work, we need to remember address we
        received it from (addr_pair) */
-    rc = netsnmp_udpbase_sendto(cachep->sock, &cachep->sockaddr  remote  addr_pair ? &(addr_pair->local_addr) : NULL, to, outbuf, rc);
+    rc = netsnmp_udpbase_sendto(t->sock, &cachep->sockaddr  remote  addr_pair ? &(addr_pair->local_addr) : NULL, to, outbuf, rc);
 #else
     rc = sendto(t->sock, outbuf, rc, 0, &cachep->sockaddr,
                 sizeof(struct sockaddr));
@@ -756,13 +735,13 @@ netsnmp_transport *
 netsnmp_dtlsudp_transport(struct sockaddr_in *addr, int local)
 {
     netsnmp_transport *t = NULL;
-    
+    netsnmp_indexed_addr_pair *remoteaddr;
+
     DEBUGTRACETOK("dtlsudp");
 
     t = netsnmp_udpipv4base_transport(addr, local);
-    if (NULL == t) {
+    if (NULL == t)
         return NULL;
-    }
 
     if (!local) {
         /* dtls needs to bind the socket for SSL_write to work */
@@ -772,7 +751,6 @@ netsnmp_dtlsudp_transport(struct sockaddr_in *addr, int local)
 
     /* XXX: Potentially set sock opts here (SO_SNDBUF/SO_RCV_BUF) */      
     /* XXX: and buf size */        
-
 
     /*
      * Set Domain

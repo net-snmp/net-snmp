@@ -154,32 +154,7 @@ netsnmp_tlstcp_recv(netsnmp_transport *t, void *buf, int size,
             free(str);
         }
 
-        /* XXX: disallow NULL auth/encr algs in our implementations */
-        tmStateRef->transportSecurityLevel = SNMP_SEC_LEVEL_AUTHPRIV;
-
-        /* use x509 cert to do lookup to secname if DNE in cachep yet */
-        if (!tlsdata->securityName) {
-            if (NULL != (peer = SSL_get_peer_certificate(tlsdata->ssl))) {
-                tlsdata->securityName =
-                    netsnmp_openssl_cert_get_commonName(peer, NULL, 0);
-                DEBUGMSGTL(("tlstcp", "set SecName to: %s\n",
-                            tlsdata->securityName));
-            } else {
-                SNMP_FREE(tmStateRef);
-                return -1;
-            }
-        }
-
-        /* XXX: detect and throw out overflow secname sizes rather
-           than truncating. */
-        strncpy(tmStateRef->securityName, tlsdata->securityName,
-                sizeof(tmStateRef->securityName)-1);
-        tmStateRef->securityName[sizeof(tmStateRef->securityName)-1] = '\0';
-        tmStateRef->securityNameLen = strlen(tmStateRef->securityName);
-
-        *opaque = tmStateRef;
-        *olength = sizeof(netsnmp_tmStateReference);
-
+        netsnmp_tlsbase_wrapup_recv(tmStateRef, tlsdata, opaque, olength);
     } else {
         DEBUGMSGTL(("tlstcp", "recvfrom fd %d err %d (\"%s\")\n",
                     t->sock, errno, strerror(errno)));
@@ -330,17 +305,14 @@ netsnmp_tlstcp_transport(struct sockaddr_in *addr, int isserver)
     memset(t, 0, sizeof(netsnmp_transport));
 
     /* allocate our TLS specific data */
-    tlsdata = SNMP_MALLOC_TYPEDEF(_netsnmpTLSBaseData);
-    if (NULL == tlsdata) {
-        SNMP_FREE(t);
+    if (NULL == (tlsdata = netsnmp_tlsbase_allocate_tlsdata(t, isserver)))
         return NULL;
-    }
+
     t->data = tlsdata;
     t->data_length = sizeof(_netsnmpTLSBaseData);
 
     if (isserver) {
         /* Is the server */
-        tlsdata->isclient = 0;
         
         /* Create the socket bio */
         snprintf(tmpbuf, sizeof(tmpbuf), "%d", ntohs(addr->sin_port));
@@ -369,7 +341,6 @@ netsnmp_tlstcp_transport(struct sockaddr_in *addr, int isserver)
         t->flags = NETSNMP_TRANSPORT_FLAG_LISTEN;
     } else {
         /* Is the client */
-        tlsdata->isclient = 1;
 
         /* set up the needed SSL context */
         tlsdata->ssl_context = ctx =

@@ -416,6 +416,57 @@ netsnmp_init_tlsbase(void) {
 
 }
 
+_netsnmpTLSBaseData *
+netsnmp_tlsbase_allocate_tlsdata(netsnmp_transport *t, int isserver) {
+
+    if (NULL == t)
+        return NULL;
+
+    /* allocate our TLS specific data */
+    _netsnmpTLSBaseData *tlsdata = SNMP_MALLOC_TYPEDEF(_netsnmpTLSBaseData);
+    if (NULL == tlsdata) {
+        SNMP_FREE(t);
+        return NULL;
+    }
+
+    tlsdata->isclient = !isserver;
+
+    return tlsdata;
+}
+
+
+int netsnmp_tlsbase_wrapup_recv(netsnmp_tmStateReference *tmStateRef,
+                                _netsnmpTLSBaseData *tlsdata,
+                                void **opaque, int *olength) {
+    X509            *peer;
+
+    /* XXX: disallow NULL auth/encr algs in our implementations */
+    tmStateRef->transportSecurityLevel = SNMP_SEC_LEVEL_AUTHPRIV;
+
+    /* use x509 cert to do lookup to secname if DNE in cachep yet */
+    if (!tlsdata->securityName) {
+        if (NULL != (peer = SSL_get_peer_certificate(tlsdata->ssl))) {
+            tlsdata->securityName =
+                netsnmp_openssl_cert_get_commonName(peer, NULL, 0);
+            DEBUGMSGTL(("tlstcp", "set SecName to: %s\n",
+                        tlsdata->securityName));
+        } else {
+            SNMP_FREE(tmStateRef);
+            return -1;
+        }
+    }
+
+    /* XXX: detect and throw out overflow secname sizes rather
+       than truncating. */
+    strncpy(tmStateRef->securityName, tlsdata->securityName,
+            sizeof(tmStateRef->securityName)-1);
+    tmStateRef->securityName[sizeof(tmStateRef->securityName)-1] = '\0';
+    tmStateRef->securityNameLen = strlen(tmStateRef->securityName);
+
+    *opaque = tmStateRef;
+    *olength = sizeof(netsnmp_tmStateReference);
+}    
+
 const char * _x509_get_error(int x509failvalue, const char *location) {
     static const char *reason = NULL;
     
