@@ -293,7 +293,7 @@ find_or_create_bio_cache(int sock, struct sockaddr_in *from_addr,
  * queued packets out the UDP port
  */
 static int
-_netsnmp_bio_read_and_send(bio_cache *cachep) {
+_netsnmp_send_queued_dtls_pkts(bio_cache *cachep) {
     int outsize, rc2;
     u_char outbuf[65535];
     
@@ -356,7 +356,7 @@ _netsnmp_bio_try_and_write_buffered(netsnmp_transport *t, bio_cache *cachep) {
         if (errnum != SSL_ERROR_WANT_READ &&
             errnum != SSL_ERROR_WANT_WRITE)
             return SNMPERR_GENERR;
-        bytesout = _netsnmp_bio_read_and_send(cachep);
+        bytesout = _netsnmp_send_queued_dtls_pkts(cachep);
         if ((errnum == SSL_ERROR_WANT_READ ||
              errnum == SSL_ERROR_WANT_WRITE) &&
             bytesout <= 0) {
@@ -368,7 +368,7 @@ _netsnmp_bio_try_and_write_buffered(netsnmp_transport *t, bio_cache *cachep) {
                        cachep->write_cache_len);
     }
 
-    if (_netsnmp_bio_read_and_send(cachep) > 0) {
+    if (_netsnmp_send_queued_dtls_pkts(cachep) > 0) {
         SNMP_FREE(cachep->write_cache);
         cachep->write_cache_len = 0;
         DEBUGMSGTL(("dtlsudp", "  Write was successful\n"));
@@ -414,7 +414,8 @@ netsnmp_dtlsudp_recv(netsnmp_transport *t, void *buf, int size,
 	while (rc < 0) {
 #if defined(linux) && defined(IP_PKTINFO)
             rc = netsnmp_udp_recvfrom(t->sock, buf, size, from, &fromlen,
-                            &(addr_pair->local_addr), &(addr_pair->if_index));
+                                      &(addr_pair->local_addr),
+                                      &(addr_pair->if_index));
 #else
             rc = recvfrom(t->sock, buf, size, NETSNMP_DONTWAIT, from, &fromlen);
 #endif /* linux && IP_PKTINFO */
@@ -461,8 +462,6 @@ netsnmp_dtlsudp_recv(netsnmp_transport *t, void *buf, int size,
             while (rc == -1) {
                 int errnum = SSL_get_error(cachep->con, rc);
                 int bytesout;
-                DEBUGMSGTL(("dtlsudp", "ssl_read error\n")); 
-                bytesout = _netsnmp_bio_read_and_send(cachep);
 
                 /* don't treat want_read/write errors as real errors */
                 if (errnum != SSL_ERROR_WANT_READ &&
@@ -470,6 +469,10 @@ netsnmp_dtlsudp_recv(netsnmp_transport *t, void *buf, int size,
                     _openssl_log_error(rc, cachep->con, "SSL_read");
                     break;
                 }
+
+                /* check to see if we have outgoing DTLS packets to send */
+                /* (SSL_read could have created DTLS control packets) */ 
+                bytesout = _netsnmp_send_queued_dtls_pkts(cachep);
 
                 /* If want_read/write but failed to actually send
                    anything then we need to wait for the other side,
@@ -487,7 +490,7 @@ netsnmp_dtlsudp_recv(netsnmp_transport *t, void *buf, int size,
             DEBUGMSGTL(("dtlsudp", "received %d decoded bytes from dtls\n", rc));
 
             if (BIO_ctrl_pending(cachep->write_bio) > 0) {
-                _netsnmp_bio_read_and_send(cachep);
+                _netsnmp_send_queued_dtls_pkts(cachep);
             }
 
             if (SSL_pending(cachep->con)) {
@@ -501,6 +504,14 @@ netsnmp_dtlsudp_recv(netsnmp_transport *t, void *buf, int size,
 
                 if (SSL_get_error(cachep->con, rc) == SSL_ERROR_WANT_READ) {
                     DEBUGMSGTL(("dtlsudp","here: want read!\n"));
+
+                    /* see if we have buffered write date to send out first */
+                    if (cachep->write_cache) {
+                        _netsnmp_bio_try_and_write_buffered(t, cachep);
+                        /* XXX: check error or not here? */
+                        /* (what would we do differently?) */
+                    }
+
                     return -1; /* XXX: it's ok, but what's the right return? */
                 }
                 return rc;
@@ -613,6 +624,7 @@ netsnmp_dtlsudp_send(netsnmp_transport *t, void *buf, int size,
         if (SNMPERR_GENERR == _netsnmp_bio_try_and_write_buffered(t, cachep)) {
             /* we still have data that can't get out in the buffer */
             /* XXX: add in the new buffer too */
+            DEBUGMSGTL(("dtlsudp", "HEREREERERERERER\n"));
             return -1;
         }
     }
@@ -624,6 +636,7 @@ netsnmp_dtlsudp_send(netsnmp_transport *t, void *buf, int size,
                     size, buf, str, t->sock));
         free(str);
     }
+
     rc = SSL_write(cachep->con, buf, size);
 
     while (rc == -1) {
@@ -634,7 +647,7 @@ netsnmp_dtlsudp_send(netsnmp_transport *t, void *buf, int size,
         if (errnum != SSL_ERROR_WANT_READ &&
             errnum != SSL_ERROR_WANT_WRITE)
             break;
-        bytesout = _netsnmp_bio_read_and_send(cachep);
+        bytesout = _netsnmp_send_queued_dtls_pkts(cachep);
         if ((errnum == SSL_ERROR_WANT_READ ||
              errnum == SSL_ERROR_WANT_WRITE) &&
             bytesout <= 0) {
