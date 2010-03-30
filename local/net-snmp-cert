@@ -1,0 +1,700 @@
+#!/usr/bin/perl
+
+use strict;
+use 5.10.0;
+
+use File::Basename;
+
+package NetSNMP::Cert;
+
+our $VERSION = '0.1.0a';
+
+our $ERR = -1;
+
+our $debug;
+
+our $QUIET     = 1;
+
+our $PROG = ::basename($0);
+
+our $OPENSSL         = $ENV{NET_SNMP_CRT_OPENSSL} || 'openssl';
+our $CFGTOOL         = $ENV{NET_SNMP_CRT_CFGTOOL} || 'net-snmp-config';
+
+our $CFGDIR          = $ENV{NET_SNMP_CRT_CFGDIR}  || '~/.snmp';
+our $TOPDIR          = $ENV{NET_SNMP_CRT_TOPDIR}  || "$CFGDIR/tls";
+our $CRTDIR          = $ENV{NET_SNMP_CRT_CRTDIR}  || "$TOPDIR/certs";
+our $CADIR           = $ENV{NET_SNMP_CRT_CADIR}   || "$TOPDIR/ca-certs";
+our $PRIVDIR         = $ENV{NET_SNMP_CRT_PRIVDIR} || "$TOPDIR/private";
+our $CFGPATH         = $ENV{NET_SNMP_CRT_CFGPATH} || cfg_path();
+
+sub dprint {
+  my $str = shift;
+  my $opts = shift;
+  my $dlevel = shift || 1;
+  my $flag = (defined $opts ? int($opts->{debug} >= $dlevel) : 1);
+  my $app = ::basename($0);
+  my ($pkg, $file, $line, $sub) = caller(1);
+  print("$app:$sub:$line: $str") if $flag;
+}
+
+sub dwarn {
+  my $str = shift;
+  my $opts = shift;
+  my $dlevel = shift || 1;
+  my $flag = (defined $opts ? $opts->{debug} >= $dlevel : 1);
+  my $app = ::basename($0);
+  my ($pkg, $file, $line, $sub) = caller(1);
+  warn("$app:$sub:$line: $str\n") if $flag;
+}
+
+sub vprint {
+  my $str = shift;
+  my $opts = shift;
+  my $flag = (defined $opts ? $opts->{verbose} : 1);
+  my $debug = (defined $opts ? $opts->{debug} : 1);
+  my $app = ::basename($0);
+  my ($pkg, $file, $line, $sub) = caller(1);
+  $str = ($debug ? "$sub:$line: $str" : "$app: $str");
+  print("$str") if $flag;
+}
+
+sub vwarn {
+  my $str = shift;
+  my $opts = shift;
+  my $flag = (defined $opts ? $opts->{verbose} : 1);
+  my $app = ::basename($0);
+  my ($pkg, $file, $line, $sub) = caller(1);
+  warn("$app:$sub:$line: $str\n") if $flag;
+}
+
+sub rsystem {
+  my $cmd = shift;
+  my $flag = shift;
+
+  # if not running as root try to use sudo
+  if ($>) {
+    $cmd = "sudo $flag $cmd";
+  } else {
+    if ($flag =~ /-b/) {
+      $cmd = "$cmd \&";
+    }
+  }
+  system("$cmd");
+}
+
+sub home_dir {
+  my $cdir = `pwd`;
+  chomp $cdir;
+
+  chdir("~");
+  my $dir = `pwd`;
+  chomp $dir;
+
+  chdir($cdir);
+
+  return $dir;
+}
+
+sub find_bin_dir {
+  # This code finds the path to the currently invoked program and
+  my $dir;
+
+  $0 =~ m%^(([^/]*)(.*)/)([^/]+)$%;
+  if ($1) {
+    if ($2) {
+      # Invoked using a relative path.  CD there and use pwd.
+      $dir = `cd $1 && pwd`;
+      chomp $dir;
+    } else {
+      # Invoked using an absolute path; that's it!
+      $dir = $3;
+    }
+  } else {
+    # No path.  Look in PATH for the first instance.
+    foreach my $p (split /:/, $ENV{PATH}) {
+      $p ||= '.';
+      -x "$p/$4" or next;
+      $dir = $p;
+    }
+  }
+  $dir or die "Cannot locate program '$0'!";
+}
+
+sub fq_rel_path {
+  my $opts = shift;
+  my $key = shift;
+  my $path = $opts->{$key};
+
+  # get fully qualified path
+  if ($path !~ m|^/|) {
+    my $pwd = `pwd`; chomp $pwd;
+    $path = "$pwd/$path";
+  }
+
+  NetSNMP::Cert::dwarn("path($path) does not exist", $opts) unless -e $path;
+  return $path;
+}
+
+sub dir_empty
+{
+    my $path = shift;
+    opendir(DIR, $path);
+    foreach (readdir(DIR)) {
+        next if /^\.\.?$/;
+        closedir(DIR);
+        return 0;
+    }
+    closedir(DIR);
+    return 1;
+}
+
+sub make_dirs {
+  my $opts = shift;
+  my $dir = shift;
+  my $tmpfs = shift;
+  my $mode = shift;
+  my @dirs = @_;
+
+  my $wd = `pwd`; chomp $wd;
+
+  NetSNMP::Cert::dprint("make dirs [$dir:@dirs] from $wd\n", $opts);
+  NetSNMP::Cert::dprint("using 'tmpfs' ram-disk\n", $opts) if $tmpfs;
+
+  mkdir($dir, $mode) or die("error - can't make $dir")
+    if defined $dir and not -d $dir;
+
+  foreach my $subdir (@dirs) {
+    my $d = "$subdir";
+    $d = "$dir/$d" if defined $dir;
+    NetSNMP::Cert::dprint("making directory: $d\n", $opts) unless -d $d;
+    mkdir($d, $mode) or die("error - can't make $d") unless -d $d;
+  }
+}
+
+sub in_set {
+  my $elem = shift;
+  my $set = shift;
+  for my $e (eval($set)) {
+    return 1 if $e == $elem;
+  }
+  return 0;
+}
+
+sub version {
+  my $ret = (@_ ? shift : 1);
+  print "$NetSNMP::Cert::PROG: $NetSNMP::Cert::VERSION\n";
+  exit($ret);
+}
+
+sub prev_cfg {
+  my $opts = shift;
+  my $cfgfile;
+  $cfgfile = "$opts->{tmpdir}/.config" if -r "$opts->{tmpdir}/.config";
+  return $cfgfile;
+}
+
+sub usage {
+  my $ret = (@_ ? shift : 1);
+  print "\nNet SNMP Certificate Management Tool: ";
+  print "$NetSNMP::Cert::PROG: [$NetSNMP::Cert::VERSION]\n";
+
+  print "net-snmp-cert [-V] [-d] [-Q] [-I] [-f <cfgfile>] [-a <app-tag>] <command> [<cmd-args>]\n";
+  print "\ncommands:\n";
+  print "\tgencrt        -- generate an X.509 certificate\n";
+  print "\tgencsr        -- generate an X.509 certificate signing request\n";
+  print "\tgenca         -- generate an X.509 certificate authority certificate\n\n";
+
+  print "\nflags:\n";
+  print "\t-V            -- show version string and exit\n";
+  print "\t-d            -- raise debug level (-d -d for higher level)\n";
+  print "\t-f <cfgfile>  -- config file (default conf/net-snmp-cert.conf)\n";
+
+  print "\t-I            -- non-interactive run (default interactive)\n";
+  print "\t-Q            -- non-verbose output (default verbose)\n";
+
+  print "\t-a            -- application tag (default 'snmp')\n";
+
+  print "\t--<cfg-param> -- additional config params (--flag or --val <val>)\n";
+
+  print "\nexamples: \n";
+  print "\tnet-snmp-cert crt-gen\n";
+  print "\tnet-snmp-cert csr-gen \n";
+  print "\tnet-snmp-cert -f .snmp/net-snmp-crt.conf -I ca-gen\n";
+  exit $ret;
+}
+
+sub cfg_path {
+
+}
+
+sub check_reqs {
+  die("$NetSNMP::Cert::OPENSSL does not exist or is not executable")
+    if system("$NetSNMP::Cert::OPENSSL version > /dev/null 2>&1");
+
+  my $ossl_ver = `$NetSNMP::Cert::OPENSSL version`; chomp $ossl_ver;
+  $ossl_ver =~ s/^OpenSSL\s+([\d\.]+).*$/$1/;
+  my $ossl_min_ver = $NetSNMP::Cert::OPENSSL_MIN_VER;
+
+  die("$NetSNMP::Cert::OPENSSL: $ossl_ver must be $ossl_min_ver or later")
+    if ($ossl_ver cmp $ossl_min_ver) < 0;
+
+  die("$NetSNMP::Cert::CONFIG not found: ensure net-snmp-devel is installed")
+    if system("$NetSNMP::Cert::CFGTOOL > /dev/null 2>&1");
+}
+
+package NetSNMP::Cert::Obj;
+
+sub new {
+  my $class = shift;
+  my $cfield = shift;
+  my $parent = shift;
+  my $ind = shift;
+  my $this = {};
+  bless($this, $class);
+
+  # initialize hash of keys which are dynamically created or internal
+  $this->{AUTOKEYS}{AUTOKEYS}++;
+
+  # store a reference to ourselves so our children can find us
+  $this->autoSet('CFIELD', $cfield);
+  $this->autoSet($cfield , $this);
+  $this->autoSet('CHILDREN', []);
+  $this->autoSet('INDEX', $ind) if defined $ind;
+
+  if (defined $parent) {
+    # cache 'app' in all objs for easy reference
+    $this->autoSet('app', $parent->inherit('app'));
+    my $app = $this->{app};
+
+    die("net-snmp-cert: error: no NetSNMP::Cert::App context provided")
+      if not defined $app or not ref $app eq 'NetSNMP::Cert::App';
+    # save children for list traversal
+    push(@{$parent->{CHILDREN}}, $this) unless $parent eq $this;
+  } else {
+    # we are the top of the list
+    $parent = $this;
+  }
+  $this->autoSet('PARENT' , $parent);
+
+  return $this;
+}
+
+sub autoSet {
+  my $this = shift;
+  my $key = shift;
+  if (@_) {
+    my $val = shift;
+    $this->{AUTOKEYS}{$key}++;
+    $this->{$key} = $val;
+  }
+  return exists $this->{AUTOKEYS}{$key};
+}
+
+sub inherit {
+  my $this = shift;
+  my $field = shift;
+  # return our field if we have it
+  return $this->{$field} if defined $this->{$field};
+  # return undef if not found and this is the end of the line
+  return undef if not defined $this->{PARENT} or $this->{PARENT} eq $this;
+  # recurse to parent
+  $this->{PARENT}->inherit($field);
+}
+
+sub resolve {
+  my $this = shift;
+  my $opts = $this->inherit('OPTS');
+  my $val = shift;
+
+  NetSNMP::Cert::dprint("resolving: $val\n", $opts);
+
+  $val =~ s/(\$(\w+))/$this->inherit($2) or die("unresolved reference in config: $1")/ge;
+  $val =~ s/(\&\{(.*?)\})/$2/gee;
+
+  NetSNMP::Cert::dprint("resolved: $val\n", $opts);
+
+  return $val
+}
+
+sub delete {
+  my $this = shift;
+  my $opts = $this->inherit('OPTS');
+
+  NetSNMP::Cert::dprint("Obj::delete: ($this) [$this->{CFIELD}]\n", $opts);
+
+  my $parent = $this->{PARENT};
+  my @children = @{$this->{CHILDREN}};
+
+  foreach my $child (@children) {
+    $child->delete();
+  }
+
+  NetSNMP::Cert::dwarn("Obj: children not freed\n", $opts) if @{$this->{CHILDREN}};
+
+  # delete all our self-references
+  delete($this->{$this->{CFIELD}}) if exists $this->{CFIELD};
+  delete($this->{PARENT});
+  delete($this->{CHILDREN});
+
+  $parent->disown($this) if defined $parent and ref($parent) =~ /NetSNMP::Cert/;
+}
+
+sub disown {
+  my $this = shift;
+  my $thechild = shift;
+  my $opts = $this->inherit('OPTS');
+  my $ind = 0;
+
+  NetSNMP::Cert::dprint("Obj::disown: ($this) [$this->{CFIELD}] disowning ($thechild) [$thechild->{CFIELD}]\n", $opts);
+
+  foreach my $child (@{$this->{CHILDREN}}) {
+    last if $child eq $thechild;
+    $ind++;
+  }
+  if ($ind < @{$this->{CHILDREN}}) {
+    splice(@{$this->{CHILDREN}}, $ind, 1);
+  } else {
+    NetSNMP::Cert::dwarn("Child ($thechild) not found in object ($this)\n", $opts);
+  }
+}
+
+sub disabled {
+  my $this = shift;
+  return (exists $this->{disable} ? $this->{disable} : 0);
+}
+
+my %cfg = (
+	   'name' => 1,
+	   'type' => 2,
+	   'id' => 6,
+	  );
+
+sub cfgsort {
+  my $self = shift;
+  my $a = shift;
+  my $b = shift;
+  return -1 if exists $cfg{$a} and not exists $cfg{$b};
+  return 1 if exists $cfg{$b} and not exists $cfg{$a};
+  return $cfg{$a} <=> $cfg{$b} if exists $cfg{$a} and exists $cfg{$b};
+  return -1 if !ref($self->{$a}) and ref($self->{$b});
+  return 1 if !ref($self->{$b}) and ref($self->{$a});
+  return -1 if ref($self->{$a}) =~ /NetSNMP::Cert/ and ref($self->{$b}) !~ /NetSNMP::Cert/;
+  return 1 if ref($self->{$b}) =~ /NetSNMP::Cert/ and ref($self->{$a}) !~ /NetSNMP::Cert/;
+  return 0;
+}
+
+sub dump {
+  my $self = shift;
+  my $indent = shift;
+  my $self_str = $self->{CFIELD};
+  my @data_keys =  grep {!$self->autoSet($_)} keys %$self;
+  my @lines;
+
+  push(@lines, "\n" . ' ' x $indent . "$self_str = {\n") if defined $indent;
+
+  {
+    my $indent = (defined $indent ? $indent + 3 : 0);
+    foreach my $key (sort {cfgsort($self, $NetSNMP::Cert::Obj::a,$NetSNMP::Cert::Obj::b)}
+		     (sort @data_keys)) {
+      if (ref($self->{$key}) =~ /NetSNMP::Cert/) {
+	push(@lines, $self->{$key}->dump($indent));
+      } elsif (ref($self->{$key}) =~ /ARRAY/) {
+	push(@lines, "\n") if ref(${$self->{$key}}[0]) !~ /NetSNMP::Cert/;
+	foreach my $elem (@{$self->{$key}}) {
+	  if (ref($elem) =~ /NetSNMP::Cert/) {
+	    push(@lines, $elem->dump($indent));
+	  } else {
+	    push(@lines, ' ' x $indent . "$key = $elem\n");
+	  }
+	}
+      } else {
+	my $str = $key . (defined $self->{$key} ? " = $self->{$key}\n" : "\n");
+	push(@lines, ' ' x $indent . $str);
+      }
+    }
+  }
+
+  push(@lines, ' ' x $indent . "}; # end $self_str\n") if defined $indent;
+  return @lines;
+}
+
+sub DESTROY {
+  my $this = shift;
+
+  print("Obj::DESTROY  $this [", ref $this, "]\n") if $NetSNMP::Cert::debug >= 3;
+}
+
+package NetSNMP::Cert::App;
+use vars qw(@ISA);
+use Getopt::Long qw(:config gnu_getopt pass_through);
+
+@ISA = qw(NetSNMP::Cert::Obj);
+
+sub new {
+  my $class = shift;
+  my @args = @_;   # ARGV can be supplied now, or call parseArgs later
+
+  # the app is god, it is its own parent
+  my $this = $class->SUPER::new('app');
+
+  bless($this, $class);
+
+  $this->initOpts();
+
+  # parse command line
+  $this->parseArgs(@args);
+
+  # make a new empty config and init, but parsing is postponed
+  $this->{config} = new NetSNMP::Cert::Config($this);
+
+  return $this;
+}
+
+sub initOpts {
+  my $app = shift;
+  my $opts = {};
+  $app->autoSet('OPTS', $opts);
+
+  # Define directories we need.
+  $opts->{bindir} = NetSNMP::Cert::find_bin_dir();
+
+  $opts->{out} = ">&/dev/null";
+  $opts->{err} = "2>/dev/null";
+  $opts->{interactive} = 1;
+  $opts->{verbose} = 1;
+
+  # set up paths for app install and runtime env
+  $ENV{PATH} = "/sbin:/usr/sbin:$ENV{PATH}";
+  $ENV{PATH} = "$opts->{bindir}:$ENV{PATH}";
+
+  # default all privs to -rwxrwxrwx
+  umask(000);
+}
+
+sub parseArgs {
+  my $app = shift;
+  my $opts = $app->{OPTS};
+  my @args = @_;
+  local *ARGV;
+  @ARGV = @args;
+
+  GetOptions($opts, 'apptag|a=s', 'cfgfile|f=s', 'interactive!', 'I', 'debug|d+', 'verbose!', 'Q', 'help|?', 'version|V');
+
+  NetSNMP::Cert::usage(0) if $opts->{help};
+  NetSNMP::Cert::version(0) if $opts->{version};
+
+  # Check debug option first
+  $NetSNMP::Cert::debug = $opts->{debug};
+  $opts->{err} = $opts->{out} = "" if $opts->{debug};
+  $opts->{interactive} = not $opts->{I} if defined $opts->{I};
+  $opts->{verbose} = not $opts->{Q} if defined $opts->{Q};
+
+  $opts->{topdir}  ||= $NetSNMP::Cert::TOPDIR || ::dirname($opts->{bindir});
+
+  $opts->{cfgfile} ||= "$opts->{topdir}/$NetSNMP::Cert::CFG";
+
+  # get fully qualified paths
+  $opts->{topdir}   = NetSNMP::Cert::fq_rel_path($opts, 'topdir');
+  $opts->{cfgfile}  = NetSNMP::Cert::fq_rel_path($opts, 'cfgfile');
+
+  NetSNMP::Cert::dprint("Using top directory: $opts->{topdir}\n", $opts);
+  NetSNMP::Cert::dprint("Using config file: $opts->{cfgfile}\n", $opts);
+
+  NetSNMP::Cert::dprint("Using PATH: $ENV{PATH}\n", $opts);
+
+  $app->parseCmdTarget(@ARGV) or NetSNMP::Cert::usage();
+
+  die("Not Implemented Yet...");
+}
+
+sub parseCmdTarget {
+  # takes ([cmd, [target args]])
+  my $app = shift;
+  my $opts = $app->{OPTS};
+  my $cmd = shift || $app->{cmd};
+
+  NetSNMP::Cert::dprint("parseCmdTarget: parsing $cmd [@_]\n", $opts);
+
+  $app->{cmd} = $cmd;
+
+  my @cmdargs = @_;
+  $app->{cmdargs} = \@cmdargs;
+
+  return ($cmd);
+}
+
+sub run {
+  my $app = shift;
+  my $opts = $app->{OPTS};
+
+  # be sure we have tools to run the app
+  NetSNMP::Cert::check_reqs();
+
+  # lazy config parsing postponed until here, will not reparse
+  $app->{config}->parse();
+
+  my $cmd = $app->{cmd};
+
+  NetSNMP::Cert::dprint("running command: $cmd @{$opts->{cmdargs}}\n", $opts);
+
+  if ($cmd =~ /^gencrt/) {
+    $app->gen_crt();
+  } elsif ($cmd =~ /^gencsr/) {
+    $app->{config}->gen_csr();
+  } elsif ($cmd =~ /^genca/) {
+    $app->gen_ca();
+  } else {
+    NetSNMP::Cert::usage();
+  }
+}
+
+package NetSNMP::Cert::Config;
+use vars qw(@ISA);
+@ISA = qw(NetSNMP::Cert::Obj);
+
+sub new {
+  my $class = shift;
+  my $parent = shift;
+  my $this = $class->SUPER::new('config', $parent);
+
+  bless($this, $class);
+}
+
+sub parse {
+  my $config = shift;
+  my $app = $config->{app};
+  my $opts = $app->{OPTS};
+  my $cfgfile = shift;
+
+  return '0 but true' if $config->{PARSED};
+
+  $cfgfile ||= $opts->{cfgfile};
+
+  open( CONFIG, "<$cfgfile" )
+    or die "error - could not open configuration file: $cfgfile";
+
+  while (<CONFIG>) {
+    next if /^\s*#/ or /^\s*$/;
+
+    if (/^\s*(\w+)(?:\(([\)\(\d\,\.]+)\))?\s*=\s*{/) {
+      my $obj = $1;
+      my $indices = $2 || 1;
+
+      $indices = "1..$indices" if $indices =~ /^\d+$/;
+      NetSNMP::Cert::dprint("object: $obj ($indices) = {\n", $opts);
+
+      # Found an object.
+      if ( $obj eq 'identity' ) {
+	my $pos = tell(CONFIG);
+	for my $index (eval($indices)) {
+	  # must reset cfg file pos each loop
+	  seek(CONFIG,$pos,0);
+	  push( @{$config->{$obj}}, NetSNMP::Cert::Identity::parse(*CONFIG, $config, $index) );
+	}
+      } else {
+        die "error - unrecognized object ($1) at scope (config)";
+      }
+    } elsif (/^\s*(\w+)\s*=?\s*(.*?)\s*$/) {
+      my $key = $1;
+      my $val = $2;
+
+      $val = $config->resolve($val) if $val =~ /\$\w+|\&\{.*?\}/;
+      # Found a symbol.
+      NetSNMP::Cert::dprint("  $key = $val\n", $opts);
+
+      if ( defined $config->{$key} ) {
+        die "error - duplicate symbol $key";
+      } else {
+        $config->{$key} = (defined $val ? $val : 1 );
+      }
+    } elsif (/^\s*env\s*(\w+=\S+)\s*$/) {
+      # Found an environment variable.
+      NetSNMP::Cert::dprint("$&\n", $opts);
+      push(@{$config->{env}}, $1);
+    } else {
+      die("error in config file [$cfgfile:line $.]");
+    }
+  }
+
+  NetSNMP::Cert::dprint("end parse config\n", $opts);
+  close(CONFIG);
+
+  # augment with any config directives supplied in opts
+  foreach my $cfg (@{$opts->{config}}) {
+    NetSNMP::Cert::dprint("augmenting config: $cfg\n", $opts);
+
+    $config->autoSet($1, (defined($2) ? $2 : 1 ))
+      if $cfg =~ /^\s*(\w+)\s*=?\s*(.*?)\s*$/;
+  }
+  $config->autoSet('PARSED', 1);
+  return $config->{PARSED};
+}
+
+package NetSNMP::Cert::Identity;
+use vars qw(@ISA);
+@ISA = qw(NetSNMP::Cert::Obj);
+
+sub new {
+  my $class = shift;
+  my $this = shift || $class->SUPER::new('identity', @_);
+  my $ind = $this->{INDEX} || 1;
+
+  $this->autoSet('name', "$this->{type}.$ind") unless exists $this->{name};
+
+  $this->autoSet('LOG','') unless exists $this->{LOG};
+  $this->autoSet('TTY_LOG','') unless exists $this->{TTY_LOG};
+
+  bless($this, $class);
+}
+
+
+sub parse {
+  my $FILE = shift;
+  my $parent = shift;
+  my $ind = shift || 1;
+  my $opts = $parent->inherit('OPTS');
+  my $identity = new NetSNMP::Cert::Obj('identity', $parent, $ind);
+
+  NetSNMP::Cert::dprint("parse identity\n", $opts);
+
+  while (<$FILE>) {
+    next if /^\s*#/ or /^\s*$/;
+
+    if (/^\s*(\w+)\s*=\s*{/) {
+      # Found an object.
+      if ( $1 eq 'role' ) {
+	push( @{$identity->{$1}}, NetSNMP::Cert::Role::parse($FILE, $identity));
+      } else {
+	die "error - can't have nested $1";
+      }
+    } elsif (/^\s*(\w+)\s*=?\s*(.*?)\s*$/) {
+      my $key = $1;
+      my $val = $2;
+
+      # Found a symbol.
+      NetSNMP::Cert::dprint("  $key = $val\n", $opts);
+
+      $val = $identity->resolve($val) if $val =~ /\$\w+|\&\{.*?\}/;
+
+      if ( defined $identity->{$key} ) {
+        die "error - duplicate symbol $key";
+      } else {
+        $identity->{$key} = $val;
+      }
+    } elsif (/\s*\}\s*\;/) {
+      # End of definition.
+      NetSNMP::Cert::dprint("end parse identity\n", $opts);
+      return new NetSNMP::Cert::Identity($identity);
+    } else {
+      die("error in config file [$opts->{cfgfile}:line $.]");
+    }
+  }
+  die "error - unexpected end of conf file";
+}
+
+package main;
+
+my $app = new NetSNMP::Cert::App;
+
+$app->run();
+
