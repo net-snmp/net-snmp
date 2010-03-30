@@ -334,7 +334,6 @@ _netsnmp_send_queued_dtls_pkts(bio_cache *cachep) {
 static int
 _netsnmp_bio_try_and_write_buffered(netsnmp_transport *t, bio_cache *cachep) {
     int rc;
-    u_char outbuf[65535];
     
     DEBUGTRACETOK("dtlsudp");
 
@@ -387,6 +386,32 @@ _netsnmp_bio_try_and_write_buffered(netsnmp_transport *t, bio_cache *cachep) {
     }
     DEBUGMSGTL(("dtlsudp", "  failed to send over UDP socket\n"));
     return SNMPERR_GENERR;
+}
+
+static int
+_netsnmp_add_buffered_data(bio_cache *cachep, char *buf, size_t size) {
+    if (cachep->write_cache && cachep->write_cache_len > 0) {
+        size_t newsize = cachep->write_cache_len + size;
+        char *newbuf = realloc(&cachep->write_cache, newsize);
+        if (NULL == newbuf) {
+            /* ack! malloc failure */
+            /* XXX: free and close */
+            return SNMPERR_GENERR;
+        }
+        /* write the new packet to the end */
+        memcpy(cachep->write_cache + cachep->write_cache_len,
+               buf, size);
+        cachep->write_cache_len = newsize;
+    } else {
+        if (SNMPERR_SUCCESS !=
+            memdup((u_char **) &cachep->write_cache, buf, size)) {
+            /* ack! malloc failure */
+            /* XXX: free and close */
+            return SNMPERR_GENERR;
+        }
+        cachep->write_cache_len = size;
+    }
+    return SNMPERR_SUCCESS;
 }
 
 /*
@@ -634,8 +659,12 @@ netsnmp_dtlsudp_send(netsnmp_transport *t, void *buf, int size,
     if (cachep->write_cache) {
         if (SNMPERR_GENERR == _netsnmp_bio_try_and_write_buffered(t, cachep)) {
             /* we still have data that can't get out in the buffer */
-            /* XXX: add in the new buffer too */
-            DEBUGMSGTL(("dtlsudp", "HEREREERERERERER\n"));
+
+            /* add the new data to the end of the existing cache */
+            if (_netsnmp_add_buffered_data(cachep, buf, size) !=
+                SNMPERR_SUCCESS) {
+                /* XXX: free and close */
+            }
             return -1;
         }
     }
@@ -678,26 +707,11 @@ netsnmp_dtlsudp_send(netsnmp_transport *t, void *buf, int size,
                to buffer the SNMP data temporarily in the mean time */
 
             /* remember the packet */
-            if (cachep->write_cache && cachep->write_cache_len > 0) {
-                size_t newsize = cachep->write_cache_len + size;
-                char *newbuf = realloc(&cachep->write_cache, newsize);
-                if (NULL == newbuf) {
-                    /* ack! malloc failure */
-                    /* XXX: free and close */
-                    return -1;
-                }
-                /* write the new packet to the end */
-                memcpy(cachep->write_cache + cachep->write_cache_len,
-                       buf, size);
-                cachep->write_cache_len = newsize;
-            } else {
-                if (SNMPERR_SUCCESS !=
-                    memdup((u_char **) &cachep->write_cache, buf, size)) {
-                    /* ack! malloc failure */
-                    /* XXX: free and close */
-                    return -1;
-                }
-                cachep->write_cache_len = size;
+            if (_netsnmp_add_buffered_data(cachep, buf, size) !=
+                SNMPERR_SUCCESS) {
+
+                /* XXX: free and close */
+                return -1;
             }
 
             /* exit out of the loop until we get caled again from
