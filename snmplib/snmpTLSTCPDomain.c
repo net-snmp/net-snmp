@@ -169,7 +169,7 @@ netsnmp_tlstcp_recv(netsnmp_transport *t, void *buf, int size,
         if (!tlsdata->securityName) {
             if (NULL != (peer = SSL_get_peer_certificate(tlsdata->ssl))) {
                 tlsdata->securityName =
-                    netsnmp_openssl_cert_get_commonName(peer, NULL, NULL, 0);
+                    netsnmp_openssl_cert_get_commonName(peer, NULL, 0);
                 DEBUGMSGTL(("tlstcp", "set SecName to: %s\n",
                             tlsdata->securityName));
             } else {
