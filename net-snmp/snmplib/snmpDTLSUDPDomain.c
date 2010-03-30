@@ -429,175 +429,171 @@ netsnmp_dtlsudp_recv(netsnmp_transport *t, void *buf, int size,
 
     DEBUGTRACETOK("dtlsudp");
 
-    if (t != NULL && t->sock >= 0) {
-        /* create a tmStateRef cache for slow fill-in */
-        tmStateRef = SNMP_MALLOC_TYPEDEF(netsnmp_tmStateReference);
+    if (NULL == t || t->sock == 0)
+        return -1;
 
-        if (tmStateRef == NULL) {
-            *opaque = NULL;
-            *olength = 0;
-            return -1;
-        }
+    /* create a tmStateRef cache for slow fill-in */
+    tmStateRef = SNMP_MALLOC_TYPEDEF(netsnmp_tmStateReference);
 
-        addr_pair = &tmStateRef->addresses;
-        tmStateRef->have_addresses = 1;
-        from = (struct sockaddr *) &(addr_pair->remote_addr);
+    if (tmStateRef == NULL) {
+        *opaque = NULL;
+        *olength = 0;
+        return -1;
+    }
 
-	while (rc < 0) {
+    addr_pair = &tmStateRef->addresses;
+    tmStateRef->have_addresses = 1;
+    from = (struct sockaddr *) &(addr_pair->remote_addr);
+
+    while (rc < 0) {
 #if defined(linux) && defined(IP_PKTINFO)
-            rc = netsnmp_udp_recvfrom(t->sock, buf, size, from, &fromlen,
-                                      &(addr_pair->local_addr),
-                                      &(addr_pair->if_index));
+        rc = netsnmp_udp_recvfrom(t->sock, buf, size, from, &fromlen,
+                                  &(addr_pair->local_addr),
+                                  &(addr_pair->if_index));
 #else
-            rc = recvfrom(t->sock, buf, size, NETSNMP_DONTWAIT, from, &fromlen);
+        rc = recvfrom(t->sock, buf, size, NETSNMP_DONTWAIT, from, &fromlen);
 #endif /* linux && IP_PKTINFO */
-	    if (rc < 0 && errno != EINTR) {
-		break;
-	    }
-	}
+        if (rc < 0 && errno != EINTR) {
+            break;
+        }
+    }
 
-        DEBUGMSGTL(("dtlsudp", "received %d raw bytes on way to dtls\n", rc));
-        if (rc < 0) {
-            DEBUGMSGTL(("dtlsudp", "recvfrom fd %d err %d (\"%s\")\n",
-                        t->sock, errno, strerror(errno)));
-            SNMP_FREE(tmStateRef);
-            return -1;
+    DEBUGMSGTL(("dtlsudp", "received %d raw bytes on way to dtls\n", rc));
+    if (rc < 0) {
+        DEBUGMSGTL(("dtlsudp", "recvfrom fd %d err %d (\"%s\")\n",
+                    t->sock, errno, strerror(errno)));
+        SNMP_FREE(tmStateRef);
+        return -1;
+    }
+
+    /* now that we have the from address filled in, we can look up
+       the openssl context and have openssl read and process
+       appropriately */
+
+    /* if we don't have a cachep for this connection then
+       we're receiving something new and are the server
+       side */
+    /* XXX: allow for a SNMP client to never accept new conns? */
+    bio_cache *cachep =
+        find_or_create_bio_cache(t->sock, &addr_pair->remote_addr,
+                                 WE_ARE_SERVER);
+    if (NULL == cachep) {
+        SNMP_FREE(tmStateRef);
+        return -1;
+    }
+
+    /* write the received buffer to the memory-based input bio */
+    BIO_write(cachep->read_bio, buf, rc);
+
+    /* XXX: in Wes' other example we do a SSL_pending() call
+       too to ensure we're ready to read...  it's possible
+       that buffered stuff in openssl won't be caught by the
+       net-snmp select loop because it's already been pulled
+       out; need to deal with this) */
+    rc = SSL_read(cachep->con, buf, size);
+            
+    while (rc == -1) {
+        int errnum = SSL_get_error(cachep->con, rc);
+        int bytesout;
+
+        /* don't treat want_read/write errors as real errors */
+        if (errnum != SSL_ERROR_WANT_READ &&
+            errnum != SSL_ERROR_WANT_WRITE) {
+            _openssl_log_error(rc, cachep->con, "SSL_read");
+            break;
         }
 
-        if (rc >= 0) {
-            /* now that we have the from address filled in, we can look up
-               the openssl context and have openssl read and process
-               appropriately */
+        /* check to see if we have outgoing DTLS packets to send */
+        /* (SSL_read could have created DTLS control packets) */ 
+        bytesout = _netsnmp_send_queued_dtls_pkts(cachep);
 
-            /* if we don't have a cachep for this connection then
-               we're receiving something new and are the server
-               side */
-            /* XXX: allow for a SNMP client to never accept new conns? */
-            bio_cache *cachep =
-                find_or_create_bio_cache(t->sock, &addr_pair->remote_addr,
-                                         WE_ARE_SERVER);
-            if (NULL == cachep) {
-                SNMP_FREE(tmStateRef);
-                return -1;
-            }
+        /* If want_read/write but failed to actually send
+           anything then we need to wait for the other side,
+           so quit */
+        if ((errnum == SSL_ERROR_WANT_READ ||
+             errnum == SSL_ERROR_WANT_WRITE) &&
+            bytesout <= 0)
+            break;
 
-            /* write the received buffer to the memory-based input bio */
-            BIO_write(cachep->read_bio, buf, rc);
+        /* retry reading */
+        DEBUGMSGTL(("dtlsudp", "recalling ssl_read\n")); 
+        rc = SSL_read(cachep->con, buf, size);
+    }
 
-            /* XXX: in Wes' other example we do a SSL_pending() call
-               too to ensure we're ready to read...  it's possible
-               that buffered stuff in openssl won't be caught by the
-               net-snmp select loop because it's already been pulled
-               out; need to deal with this) */
-            rc = SSL_read(cachep->con, buf, size);
-            
-            while (rc == -1) {
-                int errnum = SSL_get_error(cachep->con, rc);
-                int bytesout;
+    DEBUGMSGTL(("dtlsudp",
+                "received %d decoded bytes from dtls\n", rc));
 
-                /* don't treat want_read/write errors as real errors */
-                if (errnum != SSL_ERROR_WANT_READ &&
-                    errnum != SSL_ERROR_WANT_WRITE) {
-                    _openssl_log_error(rc, cachep->con, "SSL_read");
-                    break;
-                }
+    if (BIO_ctrl_pending(cachep->write_bio) > 0) {
+        _netsnmp_send_queued_dtls_pkts(cachep);
+    }
 
-                /* check to see if we have outgoing DTLS packets to send */
-                /* (SSL_read could have created DTLS control packets) */ 
-                bytesout = _netsnmp_send_queued_dtls_pkts(cachep);
+    if (SSL_pending(cachep->con)) {
+        fprintf(stderr, "ack: got here...  pending\n");
+        exit(1);
+    }
 
-                /* If want_read/write but failed to actually send
-                   anything then we need to wait for the other side,
-                   so quit */
-                if ((errnum == SSL_ERROR_WANT_READ ||
-                     errnum == SSL_ERROR_WANT_WRITE) &&
-                    bytesout <= 0)
-                    break;
+    if (rc == -1) {
+        SNMP_FREE(tmStateRef);
 
-                /* retry reading */
-                DEBUGMSGTL(("dtlsudp", "recalling ssl_read\n")); 
-                rc = SSL_read(cachep->con, buf, size);
-            }
-
-            DEBUGMSGTL(("dtlsudp",
-                        "received %d decoded bytes from dtls\n", rc));
-
-            if (BIO_ctrl_pending(cachep->write_bio) > 0) {
-                _netsnmp_send_queued_dtls_pkts(cachep);
-            }
-
-            if (SSL_pending(cachep->con)) {
-                fprintf(stderr, "ack: got here...  pending\n");
-                exit(1);
-            }
-
-            if (rc == -1) {
-                SNMP_FREE(tmStateRef);
-
-                if (SSL_get_error(cachep->con, rc) == SSL_ERROR_WANT_READ) {
-                    DEBUGMSGTL(("dtlsudp","here: want read!\n"));
-
-                    /* see if we have buffered write date to send out first */
-                    if (cachep->write_cache) {
-                        _netsnmp_bio_try_and_write_buffered(t, cachep);
-                        /* XXX: check error or not here? */
-                        /* (what would we do differently?) */
-                    }
-
-                    return -1; /* XXX: it's ok, but what's the right return? */
-                }
-                _openssl_log_error(rc, cachep->con, "SSL_read");
-                return rc;
-            }
-
-            {
-                char *str = netsnmp_udp_fmtaddr(NULL, addr_pair, sizeof(netsnmp_indexed_addr_pair));
-                DEBUGMSGTL(("dtlsudp",
-                            "recvfrom fd %d got %d bytes (from %s)\n",
-                            t->sock, rc, str));
-                free(str);
-            }
+        if (SSL_get_error(cachep->con, rc) == SSL_ERROR_WANT_READ) {
+            DEBUGMSGTL(("dtlsudp","here: want read!\n"));
 
             /* see if we have buffered write date to send out first */
             if (cachep->write_cache) {
-                if (SNMPERR_GENERR ==
-                    _netsnmp_bio_try_and_write_buffered(t, cachep)) {
-                    /* we still have data that can't get out in the buffer */
-                    /* XXX: nothing to do here? */
-                }
+                _netsnmp_bio_try_and_write_buffered(t, cachep);
+                /* XXX: check error or not here? */
+                /* (what would we do differently?) */
             }
 
-            /* XXX: disallow NULL auth/encr algs in our implementations */
-            tmStateRef->transportSecurityLevel = SNMP_SEC_LEVEL_AUTHPRIV;
+            return -1; /* XXX: it's ok, but what's the right return? */
+        }
+        _openssl_log_error(rc, cachep->con, "SSL_read");
+        return rc;
+    }
 
-            /* use x509 cert to do lookup to secname if DNE in cachep yet */
-            if (!cachep->securityName) {
-                if (NULL != (peer = SSL_get_peer_certificate(cachep->con))) {
-                    cachep->securityName =
-                        netsnmp_openssl_cert_get_commonName(peer, NULL, NULL);
-                    DEBUGMSGTL(("dtlsudp", "set SecName to: %s\n",
-                                cachep->securityName));
-                } else {
-                    SNMP_FREE(tmStateRef);
-                    return -1;
-                }
-            }
+    {
+        char *str = netsnmp_udp_fmtaddr(NULL, addr_pair, sizeof(netsnmp_indexed_addr_pair));
+        DEBUGMSGTL(("dtlsudp",
+                    "recvfrom fd %d got %d bytes (from %s)\n",
+                    t->sock, rc, str));
+        free(str);
+    }
 
-            /* XXX: detect and throw out overflow secname sizes rather
-               than truncating. */
-            strncpy(tmStateRef->securityName, cachep->securityName,
-                    sizeof(tmStateRef->securityName)-1);
-            tmStateRef->securityName[sizeof(tmStateRef->securityName)-1] = '\0';
-            tmStateRef->securityNameLen = strlen(tmStateRef->securityName);
-
-            *opaque = tmStateRef;
-            *olength = sizeof(netsnmp_tmStateReference);
-
-        } else {
-            DEBUGMSGTL(("dtlsudp", "recvfrom fd %d err %d (\"%s\")\n",
-                        t->sock, errno, strerror(errno)));
+    /* see if we have buffered write date to send out first */
+    if (cachep->write_cache) {
+        if (SNMPERR_GENERR ==
+            _netsnmp_bio_try_and_write_buffered(t, cachep)) {
+            /* we still have data that can't get out in the buffer */
+            /* XXX: nothing to do here? */
         }
     }
+
+    /* XXX: disallow NULL auth/encr algs in our implementations */
+    tmStateRef->transportSecurityLevel = SNMP_SEC_LEVEL_AUTHPRIV;
+
+    /* use x509 cert to do lookup to secname if DNE in cachep yet */
+    if (!cachep->securityName) {
+        if (NULL != (peer = SSL_get_peer_certificate(cachep->con))) {
+            cachep->securityName =
+                netsnmp_openssl_cert_get_commonName(peer, NULL, NULL);
+            DEBUGMSGTL(("dtlsudp", "set SecName to: %s\n",
+                        cachep->securityName));
+        } else {
+            SNMP_FREE(tmStateRef);
+            return -1;
+        }
+    }
+
+    /* XXX: detect and throw out overflow secname sizes rather
+       than truncating. */
+    strncpy(tmStateRef->securityName, cachep->securityName,
+            sizeof(tmStateRef->securityName)-1);
+    tmStateRef->securityName[sizeof(tmStateRef->securityName)-1] = '\0';
+    tmStateRef->securityNameLen = strlen(tmStateRef->securityName);
+
+    *opaque = tmStateRef;
+    *olength = sizeof(netsnmp_tmStateReference);
+
     return rc;
 }
 
