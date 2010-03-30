@@ -215,63 +215,56 @@ start_new_cached_connection(int sock, struct sockaddr_in *remote_addr,
     cachep->sock = sock;
     memcpy(&cachep->sockaddr, remote_addr, sizeof(*remote_addr));
 
+    /* create caching memory bios for OpenSSL to read and write to */
+
+    cachep->read_bio = BIO_new(BIO_s_mem()); /* openssl reads from */
+    if (!cachep->read_bio)
+        DIEHERE("failed to create the openssl read_bio");
+
+    cachep->write_bio = BIO_new(BIO_s_mem()); /* openssl writes to */
+    if (!cachep->write_bio) {
+        DIEHERE("failed to create the openssl write_bio");
+        BIO_free(cachep->read_bio);
+    }
+
+    BIO_set_mem_eof_return(cachep->read_bio, -1);
+    BIO_set_mem_eof_return(cachep->write_bio, -1);
+
     if (we_are_client) {
+        /* we're the client */
         DEBUGMSGTL(("dtlsudp",
                     "starting a new connection as a client to sock: %d\n",
                     sock));
         cachep->con = SSL_new(get_client_ctx());
-        SSL_set_mode(cachep->con, SSL_MODE_AUTO_RETRY);
 
         /* XXX: session setting 735 */
-
-        /* create a bio */
-
-        cachep->read_bio = BIO_new(BIO_s_mem()); /* openssl reads from */
-        cachep->write_bio = BIO_new(BIO_s_mem()); /* openssl writes to */
-
-        BIO_set_mem_eof_return(cachep->read_bio, -1);
-        BIO_set_mem_eof_return(cachep->write_bio, -1);
-
-        SSL_set_bio(cachep->con, cachep->read_bio, cachep->write_bio);
-        SSL_set_connect_state(cachep->con);
-        
     } else {
         /* we're the server */
 
-        cachep->read_bio = BIO_new(BIO_s_mem()); /* openssl reads from */
-
-        if (!cachep->read_bio)
-            DIEHERE("failed to create the read bio");
-
-        cachep->write_bio = BIO_new(BIO_s_mem()); /* openssl writes to */
-
-        if (!cachep->write_bio) {
-            DIEHERE("failed to create the write bio");
-            BIO_free(cachep->read_bio);
-        }
-
-        BIO_set_mem_eof_return(cachep->read_bio, -1);
-        BIO_set_mem_eof_return(cachep->write_bio, -1);
-
         cachep->con = SSL_new(get_server_ctx());
-        SSL_set_mode(cachep->con, SSL_MODE_AUTO_RETRY);
-
-        if (!cachep->con) {
-            BIO_free(cachep->read_bio);
-            BIO_free(cachep->write_bio);
-            DIEHERE("failed to create the write bio");
-        }
-        
-        /* turn on cookie exchange */
-        /* XXX: we need to only create cache entries when cookies succeed */
-        SSL_set_options(cachep->con, SSL_OP_COOKIE_EXCHANGE);
-
-        /* set the bios that openssl should read from and write to */
-        /* (and we'll do the opposite) */
-        SSL_set_bio(cachep->con, cachep->read_bio, cachep->write_bio);
-        SSL_set_accept_state(cachep->con);
-
     }
+
+    SSL_set_mode(cachep->con, SSL_MODE_AUTO_RETRY);
+
+    if (!cachep->con) {
+        BIO_free(cachep->read_bio);
+        BIO_free(cachep->write_bio);
+        DIEHERE("failed to create the write bio");
+    }
+        
+    /* turn on cookie exchange */
+    /* XXX: we need to only create cache entries when cookies succeed */
+    SSL_set_options(cachep->con, SSL_OP_COOKIE_EXCHANGE);
+
+    /* set the bios that openssl should read from and write to */
+    /* (and we'll do the opposite) */
+    SSL_set_bio(cachep->con, cachep->read_bio, cachep->write_bio);
+
+    /* set the SSL notion of we_are_client/server */
+    if (we_are_client)
+        SSL_set_connect_state(cachep->con);
+    else
+        SSL_set_accept_state(cachep->con);
 
     return cachep;
 }
