@@ -149,8 +149,8 @@ static netsnmp_tdomain dtlsudpDomain;
    can't do it for us at the moment; hopefully future versions will
    change */
 typedef struct bio_cache_s {
-   BIO *bio;
-   BIO *write_bio;
+   BIO *read_bio;  /* OpenSSL will read its incoming SSL packets from here */
+   BIO *write_bio; /* OpenSSL will write its outgoing SSL packets to here */
    struct sockaddr_in sockaddr;
    uint32_t ipv4addr;
    u_short portnum;
@@ -216,7 +216,9 @@ start_new_cached_connection(int sock, struct sockaddr_in *remote_addr,
     memcpy(&cachep->sockaddr, remote_addr, sizeof(*remote_addr));
 
     if (we_are_client) {
-        DEBUGMSGTL(("dtlsudp", "starting a new connection as a client to sock: %d\n", sock));
+        DEBUGMSGTL(("dtlsudp",
+                    "starting a new connection as a client to sock: %d\n",
+                    sock));
         cachep->con = SSL_new(get_client_ctx());
         SSL_set_mode(cachep->con, SSL_MODE_AUTO_RETRY);
 
@@ -224,38 +226,38 @@ start_new_cached_connection(int sock, struct sockaddr_in *remote_addr,
 
         /* create a bio */
 
-        cachep->bio = BIO_new(BIO_s_mem()); /* The one openssl reads from */
+        cachep->read_bio = BIO_new(BIO_s_mem()); /* openssl reads from */
         cachep->write_bio = BIO_new(BIO_s_mem()); /* openssl writes to */
 
-        BIO_set_mem_eof_return(cachep->bio, -1);
+        BIO_set_mem_eof_return(cachep->read_bio, -1);
         BIO_set_mem_eof_return(cachep->write_bio, -1);
 
-        SSL_set_bio(cachep->con, cachep->bio, cachep->write_bio);
+        SSL_set_bio(cachep->con, cachep->read_bio, cachep->write_bio);
         SSL_set_connect_state(cachep->con);
         
     } else {
         /* we're the server */
 
-        cachep->bio = BIO_new(BIO_s_mem()); /* The one openssl reads from */
+        cachep->read_bio = BIO_new(BIO_s_mem()); /* openssl reads from */
 
-        if (!cachep->bio)
+        if (!cachep->read_bio)
             DIEHERE("failed to create the read bio");
 
         cachep->write_bio = BIO_new(BIO_s_mem()); /* openssl writes to */
 
         if (!cachep->write_bio) {
             DIEHERE("failed to create the write bio");
-            BIO_free(cachep->bio);
+            BIO_free(cachep->read_bio);
         }
 
-        BIO_set_mem_eof_return(cachep->bio, -1);
+        BIO_set_mem_eof_return(cachep->read_bio, -1);
         BIO_set_mem_eof_return(cachep->write_bio, -1);
 
         cachep->con = SSL_new(get_server_ctx());
         SSL_set_mode(cachep->con, SSL_MODE_AUTO_RETRY);
 
         if (!cachep->con) {
-            BIO_free(cachep->bio);
+            BIO_free(cachep->read_bio);
             BIO_free(cachep->write_bio);
             DIEHERE("failed to create the write bio");
         }
@@ -266,7 +268,7 @@ start_new_cached_connection(int sock, struct sockaddr_in *remote_addr,
 
         /* set the bios that openssl should read from and write to */
         /* (and we'll do the opposite) */
-        SSL_set_bio(cachep->con, cachep->bio, cachep->write_bio);
+        SSL_set_bio(cachep->con, cachep->read_bio, cachep->write_bio);
         SSL_set_accept_state(cachep->con);
 
     }
@@ -314,7 +316,8 @@ _netsnmp_send_queued_dtls_pkts(bio_cache *cachep) {
                                  addr_pair->if_index, addr_pair->remote_addr,
                                  outbuf, outsize);
 #else
-        rc2 = sendto(cachep->sock, outbuf, outsize, 0, &cachep->sockaddr, sizeof(struct sockaddr));
+        rc2 = sendto(cachep->sock, outbuf, outsize, 0,
+                     &cachep->sockaddr, sizeof(struct sockaddr));
 #endif /* linux && IP_PKTINFO */
 
         if (rc2 == -1) {
@@ -486,7 +489,7 @@ netsnmp_dtlsudp_recv(netsnmp_transport *t, void *buf, int size,
             }
 
             /* write the received buffer to the memory-based input bio */
-            BIO_write(cachep->bio, buf, rc);
+            BIO_write(cachep->read_bio, buf, rc);
 
             /* XXX: in Wes' other example we do a SSL_pending() call
                too to ensure we're ready to read...  it's possible
@@ -523,7 +526,8 @@ netsnmp_dtlsudp_recv(netsnmp_transport *t, void *buf, int size,
                 rc = SSL_read(cachep->con, buf, size);
             }
 
-            DEBUGMSGTL(("dtlsudp", "received %d decoded bytes from dtls\n", rc));
+            DEBUGMSGTL(("dtlsudp",
+                        "received %d decoded bytes from dtls\n", rc));
 
             if (BIO_ctrl_pending(cachep->write_bio) > 0) {
                 _netsnmp_send_queued_dtls_pkts(cachep);
@@ -734,7 +738,8 @@ netsnmp_dtlsudp_send(netsnmp_transport *t, void *buf, int size,
        received it from (addr_pair) */
     rc = netsnmp_udpbase_sendto(cachep->sock, &cachep->sockaddr  remote  addr_pair ? &(addr_pair->local_addr) : NULL, to, outbuf, rc);
 #else
-    rc = sendto(t->sock, outbuf, rc, 0, &cachep->sockaddr, sizeof(struct sockaddr));
+    rc = sendto(t->sock, outbuf, rc, 0, &cachep->sockaddr,
+                sizeof(struct sockaddr));
 #endif /* linux && IP_PKTINFO */
 
     return rc;
