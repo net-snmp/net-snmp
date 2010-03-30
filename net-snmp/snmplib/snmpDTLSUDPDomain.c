@@ -351,18 +351,29 @@ _netsnmp_bio_try_and_write_buffered(netsnmp_transport *t, bio_cache *cachep) {
     while (rc == -1) {
         int errnum = SSL_get_error(cachep->con, rc);
         int bytesout;
-        DEBUGMSGTL(("dtlsudp", "ssl_write error (of buffered data)\n")); 
-        _openssl_log_error(rc, cachep->con, "SSL_write");
+
+        /* don't treat want_read/write errors as real errors */
         if (errnum != SSL_ERROR_WANT_READ &&
-            errnum != SSL_ERROR_WANT_WRITE)
+            errnum != SSL_ERROR_WANT_WRITE) {
+            DEBUGMSGTL(("dtlsudp", "ssl_write error (of buffered data)\n")); 
+            _openssl_log_error(rc, cachep->con, "SSL_write");
             return SNMPERR_GENERR;
+        }
+
+        /* check to see if we have outgoing DTLS packets to send */
+        /* (SSL_write could have created DTLS control packets) */ 
         bytesout = _netsnmp_send_queued_dtls_pkts(cachep);
+
+        /* If want_read/write but failed to actually send anything
+           then we need to wait for the other side, so quit */
         if ((errnum == SSL_ERROR_WANT_READ ||
              errnum == SSL_ERROR_WANT_WRITE) &&
             bytesout <= 0) {
             /* we've failed; must need to wait longer */
             return SNMPERR_GENERR;
         }
+
+        /* retry writing */
         DEBUGMSGTL(("dtlsudp", "recalling ssl_write\n")); 
         rc = SSL_write(cachep->con, cachep->write_cache,
                        cachep->write_cache_len);
@@ -499,7 +510,6 @@ netsnmp_dtlsudp_recv(netsnmp_transport *t, void *buf, int size,
             }
 
             if (rc == -1) {
-                _openssl_log_error(rc, cachep->con, "SSL_read");
                 SNMP_FREE(tmStateRef);
 
                 if (SSL_get_error(cachep->con, rc) == SSL_ERROR_WANT_READ) {
@@ -514,6 +524,7 @@ netsnmp_dtlsudp_recv(netsnmp_transport *t, void *buf, int size,
 
                     return -1; /* XXX: it's ok, but what's the right return? */
                 }
+                _openssl_log_error(rc, cachep->con, "SSL_read");
                 return rc;
             }
 
@@ -640,14 +651,24 @@ netsnmp_dtlsudp_send(netsnmp_transport *t, void *buf, int size,
     rc = SSL_write(cachep->con, buf, size);
 
     while (rc == -1) {
-        int errnum = SSL_get_error(cachep->con, rc);
         int bytesout;
-        DEBUGMSGTL(("dtlsudp", "ssl_write error\n")); 
-        _openssl_log_error(rc, cachep->con, "SSL_write");
+        int errnum = SSL_get_error(cachep->con, rc);
+
+        /* don't treat want_read/write errors as real errors */
         if (errnum != SSL_ERROR_WANT_READ &&
-            errnum != SSL_ERROR_WANT_WRITE)
+            errnum != SSL_ERROR_WANT_WRITE) {
+            DEBUGMSGTL(("dtlsudp", "ssl_write error\n")); 
+            _openssl_log_error(rc, cachep->con, "SSL_write");
             break;
+        }
+
+        /* check to see if we have outgoing DTLS packets to send */
+        /* (SSL_read could have created DTLS control packets) */ 
         bytesout = _netsnmp_send_queued_dtls_pkts(cachep);
+
+        /* If want_read/write but failed to actually send
+           anything then we need to wait for the other side,
+           so quit */
         if ((errnum == SSL_ERROR_WANT_READ ||
              errnum == SSL_ERROR_WANT_WRITE) &&
             bytesout <= 0) {
@@ -686,9 +707,6 @@ netsnmp_dtlsudp_send(netsnmp_transport *t, void *buf, int size,
         DEBUGMSGTL(("dtlsudp", "recalling ssl_write\n")); 
         rc = SSL_write(cachep->con, buf, size);
     }
-
-    if (rc == -1)
-        _openssl_log_error(rc, cachep->con, "SSL_write");
 
     /* for memory bios, we now read from openssl's write buffer (ie,
        the packet to go out) and send it out the udp port manually */
