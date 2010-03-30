@@ -568,7 +568,7 @@ void _openssl_log_error(int rc, SSL *con, const char *location) {
     unsigned long   numerical_reason;
     int             flags, line;
 
-    snmp_log(LOG_ERR, "OpenSSL Related Erorrs:\n");
+    snmp_log(LOG_ERR, "---- OpenSSL Related Erorrs: ----\n");
 
     /* SSL specific errors */
     if (con) {
