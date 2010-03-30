@@ -286,6 +286,10 @@ find_or_create_bio_cache(int sock, struct sockaddr_in *from_addr,
     return cachep;
 }
 
+/*
+ * Reads data from our internal openssl outgoing BIO and sends any
+ * queued packets out the UDP port
+ */
 static int
 _netsnmp_bio_read_and_send(bio_cache *cachep) {
     int outsize, rc2;
@@ -316,15 +320,24 @@ _netsnmp_bio_read_and_send(bio_cache *cachep) {
     return outsize;
 }
 
+/*
+ * If we have any outgoing SNMP data queued that OpenSSL/DTLS couldn't send
+ * (likely due to DTLS control packets needing to go out first)
+ * then this function attempts to send them.
+ */
 /* returns SNMPERR_SUCCESS if we succeeded in getting the data out */
 /* returns SNMPERR_GENERR if we still need more time */
 static int
-_netsnmp_bio_try_and_write_buffered(bio_cache *cachep) {
+_netsnmp_bio_try_and_write_buffered(netsnmp_transport *t, bio_cache *cachep) {
     int rc;
+    u_char outbuf[65535];
     
     /* make sure we have something to write */
     if (!cachep->write_cache || cachep->write_cache_len == 0)
         return SNMPERR_SUCCESS;
+
+    DEBUGMSGTL(("dtlsudp", "Trying to write %d of buffered data\n",
+                cachep->write_cache_len));
 
     /* try and write out the cached data */
     rc = SSL_write(cachep->con, cachep->write_cache, cachep->write_cache_len);
@@ -332,7 +345,7 @@ _netsnmp_bio_try_and_write_buffered(bio_cache *cachep) {
     while (rc == -1) {
         int errnum = SSL_get_error(cachep->con, rc);
         int bytesout;
-        DEBUGMSGTL(("dtlsudp", "ssl_write error\n")); 
+        DEBUGMSGTL(("dtlsudp", "ssl_write error (of buffered data)\n")); 
         _openssl_log_error(rc, cachep->con, "SSL_write");
         if (errnum != SSL_ERROR_WANT_READ &&
             errnum != SSL_ERROR_WANT_WRITE)
@@ -348,9 +361,15 @@ _netsnmp_bio_try_and_write_buffered(bio_cache *cachep) {
         rc = SSL_write(cachep->con, cachep->write_cache,
                        cachep->write_cache_len);
     }
-    SNMP_FREE(cachep->write_cache);
-    cachep->write_cache_len = 0;
-    return SNMPERR_SUCCESS;
+
+    if (_netsnmp_bio_read_and_send(cachep) > 0) {
+        SNMP_FREE(cachep->write_cache);
+        cachep->write_cache_len = 0;
+        DEBUGMSGTL(("dtlsudp", "  Write was successful\n"));
+        return SNMPERR_SUCCESS;
+    }
+    DEBUGMSGTL(("dtlsudp", "  failed to send over UDP socket\n"));
+    return SNMPERR_GENERR;
 }
 
 /*
@@ -361,7 +380,7 @@ _netsnmp_bio_try_and_write_buffered(bio_cache *cachep) {
 
 static int
 netsnmp_dtlsudp_recv(netsnmp_transport *t, void *buf, int size,
-		 void **opaque, int *olength)
+                     void **opaque, int *olength)
 {
     int             rc = -1;
     socklen_t       fromlen = sizeof(struct sockaddr);
@@ -435,15 +454,24 @@ netsnmp_dtlsudp_recv(netsnmp_transport *t, void *buf, int size,
                 int errnum = SSL_get_error(cachep->con, rc);
                 int bytesout;
                 DEBUGMSGTL(("dtlsudp", "ssl_read error\n")); 
-                _openssl_log_error(rc, cachep->con, "SSL_read");
                 bytesout = _netsnmp_bio_read_and_send(cachep);
+
+                /* don't treat want_read/write errors as real errors */
                 if (errnum != SSL_ERROR_WANT_READ &&
-                    errnum != SSL_ERROR_WANT_WRITE)
+                    errnum != SSL_ERROR_WANT_WRITE) {
+                    _openssl_log_error(rc, cachep->con, "SSL_read");
                     break;
+                }
+
+                /* If want_read/write but failed to actually send
+                   anything then we need to wait for the other side,
+                   so quit */
                 if ((errnum == SSL_ERROR_WANT_READ ||
                      errnum == SSL_ERROR_WANT_WRITE) &&
                     bytesout <= 0)
                     break;
+
+                /* retry reading */
                 DEBUGMSGTL(("dtlsudp", "recalling ssl_read\n")); 
                 rc = SSL_read(cachep->con, buf, size);
             }
@@ -476,6 +504,15 @@ netsnmp_dtlsudp_recv(netsnmp_transport *t, void *buf, int size,
                             "recvfrom fd %d got %d bytes (from %s)\n",
                             t->sock, rc, str));
                 free(str);
+            }
+
+            /* see if we have buffered write date to send out first */
+            if (cachep->write_cache) {
+                if (SNMPERR_GENERR ==
+                    _netsnmp_bio_try_and_write_buffered(t, cachep)) {
+                    /* we still have data that can't get out in the buffer */
+                    /* XXX: nothing to do here? */
+                }
             }
 
             /* XXX: disallow NULL auth/encr algs in our implementations */
@@ -561,8 +598,9 @@ netsnmp_dtlsudp_send(netsnmp_transport *t, void *buf, int size,
         cachep->securityName = strdup(tmStateRef->securityName);
         
         
+    /* see if we have previous outgoing data to send */
     if (cachep->write_cache) {
-        if (SNMPERR_GENERR == _netsnmp_bio_try_and_write_buffered(cachep)) {
+        if (SNMPERR_GENERR == _netsnmp_bio_try_and_write_buffered(t, cachep)) {
             /* we still have data that can't get out in the buffer */
             /* XXX: add in the new buffer too */
             return -1;
