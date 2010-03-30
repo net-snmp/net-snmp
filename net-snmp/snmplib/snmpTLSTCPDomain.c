@@ -335,7 +335,7 @@ netsnmp_tlstcp_transport(struct sockaddr_in *addr, int isserver)
 
         /* create the OpenSSL TLS context */
         tlsdata->ssl_context =
-            sslctx_server_setup(SSLv23_method());
+            sslctx_server_setup(TLSv1_method());
 
         t->sock = BIO_get_fd(tlsdata->accept_bio, NULL);
         t->flags = NETSNMP_TRANSPORT_FLAG_LISTEN;
@@ -344,7 +344,7 @@ netsnmp_tlstcp_transport(struct sockaddr_in *addr, int isserver)
 
         /* set up the needed SSL context */
         tlsdata->ssl_context = ctx =
-            sslctx_client_setup(SSLv23_method());
+            sslctx_client_setup(TLSv1_method());
         if (!ctx) {
             snmp_log(LOG_ERR, "failed to create TLS context\n");
             return NULL;
