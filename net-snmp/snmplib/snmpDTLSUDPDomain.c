@@ -195,6 +195,8 @@ start_new_cached_connection(int sock, struct sockaddr_in *remote_addr,
                             int we_are_client) {
     bio_cache *cachep = NULL;
 
+    DEBUGTRACETOK("dtlsudp");
+
     if (!sock)
         DIEHERE("no socket passed in to start_new_cached_connection\n");
     if (!remote_addr)
@@ -295,6 +297,8 @@ _netsnmp_bio_read_and_send(bio_cache *cachep) {
     int outsize, rc2;
     u_char outbuf[65535];
     
+    DEBUGTRACETOK("dtlsudp");
+
     /* for memory bios, we now read from openssl's write
        buffer (ie, the packet to go out) and send it out
        the udp port manually */
@@ -332,6 +336,8 @@ _netsnmp_bio_try_and_write_buffered(netsnmp_transport *t, bio_cache *cachep) {
     int rc;
     u_char outbuf[65535];
     
+    DEBUGTRACETOK("dtlsudp");
+
     /* make sure we have something to write */
     if (!cachep->write_cache || cachep->write_cache_len == 0)
         return SNMPERR_SUCCESS;
@@ -388,6 +394,8 @@ netsnmp_dtlsudp_recv(netsnmp_transport *t, void *buf, int size,
     struct sockaddr *from;
     netsnmp_tmStateReference *tmStateRef = NULL;
     X509            *peer;
+
+    DEBUGTRACETOK("dtlsudp");
 
     if (t != NULL && t->sock >= 0) {
         /* create a tmStateRef cache for slow fill-in */
@@ -562,6 +570,8 @@ netsnmp_dtlsudp_send(netsnmp_transport *t, void *buf, int size,
     netsnmp_tmStateReference *tmStateRef = NULL;
     u_char outbuf[65535];
     
+    DEBUGTRACETOK("dtlsudp");
+
     if (opaque != NULL && *opaque != NULL &&
         *olength == sizeof(netsnmp_tmStateReference)) {
         tmStateRef = (netsnmp_tmStateReference *) *opaque;
@@ -692,6 +702,8 @@ netsnmp_dtlsudp_close(netsnmp_transport *t)
 {
     /* XXX: issue a proper dtls closure notification(s) */
 
+    DEBUGTRACETOK("dtlsudp");
+
     return netsnmp_socketbase_close(t);
 }
 
@@ -706,6 +718,8 @@ netsnmp_dtlsudp_transport(struct sockaddr_in *addr, int local)
 {
     netsnmp_transport *t = NULL;
     
+    DEBUGTRACETOK("dtlsudp");
+
     t = netsnmp_udpipv4base_transport(addr, local);
     if (NULL == t) {
         return NULL;
