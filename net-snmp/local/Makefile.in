@@ -16,10 +16,10 @@ OTHERUNINSTALL=localuninstall
 #
 SNMPCONFPATH=@SNMPCONFPATH@
 PERSISTENT_DIRECTORY=@PERSISTENT_DIRECTORY@
-PERLSCRIPTS=snmpcheck tkmib mib2c fixproc ipf-mod.pl snmpconf traptoemail
+PERLSCRIPTS=snmpcheck tkmib mib2c fixproc ipf-mod.pl snmpconf traptoemail snmp-bridge-mib
 SHELLSCRIPTS=mib2c-update
 SCRIPTSMADEFORPERL=snmpcheck.made tkmib.made mib2c.made fixproc.made \
-	ipf-mod.pl.made snmpconf.made traptoemail.made
+	ipf-mod.pl.made snmpconf.made traptoemail.made snmp-bridge-mib.made
 DATASRCS=mib2c.conf mib2c.iterate.conf mib2c.iterate_access.conf \
 	mib2c.create-dataset.conf mib2c.mfd.conf \
 	mib2c.array-user.conf mib2c.column_enums.conf \
@@ -133,6 +133,13 @@ traptoemail.made: $(srcdir)/traptoemail
 	  $(PERL) -p -e 's%^#!.*/perl.*%#!$(PERL)%; s#/usr/local/share#$(datadir)#g; s#/usr/local/etc/snmp#$(TRAPTOEMAILPATH)#g' ${srcdir}/traptoemail > traptoemail.made; \
 	else \
 	  touch traptoemail.made; \
+        fi
+
+snmp-bridge-mib.made: $(srcdir)/snmp-bridge-mib
+	if test "x$(PERL)" != "x" ; then \
+	  $(PERL) -p -e 's%^#!.*/perl.*%#!$(PERL)%' ${srcdir}/snmp-bridge-mib > snmp-bridge-mib.made; \
+	else \
+	  touch snmp-bridge-mib.made; \
         fi
 
 localinstall: $(SCRIPTSMADEFORPERL)
