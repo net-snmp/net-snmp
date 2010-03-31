@@ -725,6 +725,12 @@ netsnmp_dtlsudp_close(netsnmp_transport *t)
     return netsnmp_socketbase_close(t);
 }
 
+char *
+netsnmp_dtlsudp_fmtaddr(netsnmp_transport *t, void *data, int len)
+{
+    return netsnmp_ipv4_fmtaddr("DTLSUDP", t, data, len);
+}
+
 /*
  * Open a DTLS-based transport for SNMP.  Local is TRUE if addr is the local
  * address to bind to (i.e. this is a server-type session); otherwise addr is 
@@ -767,7 +773,7 @@ netsnmp_dtlsudp_transport(struct sockaddr_in *addr, int local)
     t->f_send     = netsnmp_dtlsudp_send;
     t->f_close    = netsnmp_dtlsudp_close;
     t->f_accept   = NULL;
-    t->f_fmtaddr  = netsnmp_udp_fmtaddr;
+    t->f_fmtaddr  = netsnmp_dtlsudp_fmtaddr;
     t->flags = NETSNMP_TRANSPORT_FLAG_TUNNELED;
 
     return t;
