@@ -238,13 +238,13 @@ start_new_cached_connection(netsnmp_transport *t,
         DEBUGMSGTL(("dtlsudp",
                     "starting a new connection as a client to sock: %d\n",
                     t->sock));
-        tlsdata->ssl = SSL_new(get_client_ctx());
+        tlsdata->ssl = SSL_new(sslctx_client_setup(DTLSv1_method()));
 
         /* XXX: session setting 735 */
     } else {
         /* we're the server */
-
-        tlsdata->ssl = SSL_new(get_server_ctx());
+        
+        tlsdata->ssl = SSL_new(sslctx_server_setup(DTLSv1_method()));
     }
 
     SSL_set_mode(tlsdata->ssl, SSL_MODE_AUTO_RETRY);

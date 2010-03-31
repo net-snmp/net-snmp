@@ -35,21 +35,6 @@
 
 #define LOGANDDIE(msg) { snmp_log(LOG_ERR, "%s\n", msg); return 0; }
 
-/*
- * cached SSL context information
- * (in theory we may want more than one per client/server but it's
- * unlikely and a CPU and memory waste unless we do need more than one)
- */
-SSL_CTX *client_ctx, *server_ctx;
-
-SSL_CTX *get_client_ctx(void) {
-    return client_ctx;
-}
-
-SSL_CTX *get_server_ctx(void) {
-    return server_ctx;
-}
-
 int verify_callback(int ok, X509_STORE_CTX *ctx) {
     int err, depth;
     char buf[1024];
@@ -223,11 +208,6 @@ static int have_done_bootstrap = 0;
 
 static int
 tls_bootstrap(int majorid, int minorid, void *serverarg, void *clientarg) {
-    const char *certfile;
-    EVP_PKEY *key = NULL;
-    X509 *cert = NULL;
-    BIO *keybio = NULL;
-
     /* don't do this more than once */
     if (have_done_bootstrap)
         return 0;
@@ -236,120 +216,6 @@ tls_bootstrap(int majorid, int minorid, void *serverarg, void *clientarg) {
     netsnmp_certs_init();
 
     DEBUGMSGT(("tls:bootstrap", "setting up client/server contexts\n"));
-
-    /***********************************************************************
-     * Set up the client context
-     */
-    client_ctx = SSL_CTX_new(DTLSv1_client_method());
-    if (!client_ctx) {
-        LOGANDDIE("can't create a new context");
-    }
-    SSL_CTX_set_read_ahead (client_ctx, 1); /* Required for DTLS */
-        
-    SSL_CTX_set_verify(client_ctx,
-                       SSL_VERIFY_PEER|
-                       SSL_VERIFY_FAIL_IF_NO_PEER_CERT|
-                       SSL_VERIFY_CLIENT_ONCE,
-                       &verify_callback);
-
-    keybio = BIO_new(BIO_s_file());
-    if (!keybio)
-        LOGANDDIE ("error creating bio for reading public key");
-
-    certfile = netsnmp_ds_get_string(NETSNMP_DS_LIBRARY_ID,
-                                     NETSNMP_DS_LIB_X509_CLIENT_PUB);
-
-    DEBUGMSGTL(("tls", "using public key: %s\n", certfile));
-    if (BIO_read_filename(keybio, NETSNMP_REMOVE_CONST(char*,certfile)) <=0)
-        LOGANDDIE ("error reading public key");
-
-    cert = PEM_read_bio_X509_AUX(keybio, NULL, NULL, NULL);
-    if (!cert)
-        LOGANDDIE("failed to load public key");
-
-    /* XXX: mem leak on previous keybio? */
-
-    certfile = netsnmp_ds_get_string(NETSNMP_DS_LIBRARY_ID,
-                                     NETSNMP_DS_LIB_X509_CLIENT_PRIV);
-
-    keybio = BIO_new(BIO_s_file());
-    if (!keybio)
-        LOGANDDIE ("error creating bio for reading private key");
-
-    DEBUGMSGTL(("tls", "using private key: %s\n", certfile));
-    if (!keybio ||
-        BIO_read_filename(keybio, NETSNMP_REMOVE_CONST(char*,certfile)) <= 0)
-        LOGANDDIE ("error reading private key");
-
-    key = PEM_read_bio_PrivateKey(keybio, NULL, NULL, NULL);
-    
-    if (!key)
-        LOGANDDIE("failed to load private key");
-
-
-    if (SSL_CTX_use_certificate(client_ctx, cert) <= 0)
-        LOGANDDIE("failed to set the certificate to use");
-
-    if (SSL_CTX_use_PrivateKey(client_ctx, key) <= 0)
-        LOGANDDIE("failed to set the private key to use");
-
-    if (!SSL_CTX_check_private_key(client_ctx))
-        LOGANDDIE("public and private keys incompatible");
-    
-
-    certfile = netsnmp_ds_get_string(NETSNMP_DS_LIBRARY_ID,
-                                     NETSNMP_DS_LIB_X509_SERVER_CERTS);
-
-    /* XXX: also need to match individual cert to indiv. host */
-
-    if(! SSL_CTX_load_verify_locations(client_ctx, certfile, NULL)) {
-        LOGANDDIE("failed to load truststore");
-        /* Handle failed load here */
-    }
-
-    if (!SSL_CTX_set_default_verify_paths(client_ctx)) {
-        LOGANDDIE ("failed to set default verify path");
-    }
-
-    /***********************************************************************
-     * Set up the server context
-     */
-    /* setting up for ssl */
-    server_ctx = SSL_CTX_new(DTLSv1_server_method());
-    if (!server_ctx) {
-        LOGANDDIE("can't create a new context");
-    }
-
-    certfile = netsnmp_ds_get_string(NETSNMP_DS_LIBRARY_ID,
-                                     NETSNMP_DS_LIB_X509_SERVER_PUB);
-
-    if (SSL_CTX_use_certificate_file(server_ctx, certfile,
-                                     SSL_FILETYPE_PEM) < 1) {
-        LOGANDDIE("faild to load cert");
-    }
-    
-    certfile = netsnmp_ds_get_string(NETSNMP_DS_LIBRARY_ID,
-                                     NETSNMP_DS_LIB_X509_SERVER_PRIV);
-
-    if (SSL_CTX_use_PrivateKey_file(server_ctx, certfile, SSL_FILETYPE_PEM) < 1) {
-        LOGANDDIE("faild to load key");
-    }
-
-    SSL_CTX_set_read_ahead(server_ctx, 1);
-
-
-    certfile = netsnmp_ds_get_string(NETSNMP_DS_LIBRARY_ID,
-                                     NETSNMP_DS_LIB_X509_CLIENT_CERTS);
-    if(! SSL_CTX_load_verify_locations(server_ctx, certfile, NULL)) {
-        LOGANDDIE("failed to load truststore");
-        /* Handle failed load here */
-    }
-
-    SSL_CTX_set_verify(server_ctx,
-                       SSL_VERIFY_PEER|
-                       SSL_VERIFY_FAIL_IF_NO_PEER_CERT|
-                       SSL_VERIFY_CLIENT_ONCE,
-                       &verify_callback);
 
     return 0;
 }
