@@ -37,8 +37,9 @@
 
 int verify_callback(int ok, X509_STORE_CTX *ctx) {
     int err, depth;
-    char buf[1024];
+    char buf[1024], *fingerprint;;
     X509 *thecert;
+    netsnmp_cert *cert;
 
     thecert = X509_STORE_CTX_get_current_cert(ctx);
     err = X509_STORE_CTX_get_error(ctx);
@@ -47,35 +48,42 @@ int verify_callback(int ok, X509_STORE_CTX *ctx) {
     /* things to do: */
 
     X509_NAME_oneline(X509_get_subject_name(thecert), buf, sizeof(buf));
-    DEBUGMSGTL(("tls_x509",
-                "Cert: %s\n", buf));
+    fingerprint = netsnmp_openssl_cert_get_fingerprint(thecert, NS_HASH_SHA1);
+    DEBUGMSGTL(("tls_x509:verify", "Cert: %s\n", buf));
+    DEBUGMSGTL(("tls_x509:verify", "  fp: %s\n", fingerprint ?
+                fingerprint : "unknown"));
+    cert = netsnmp_cert_find(NS_CERT_REMOTE_PEER, NS_CERTKEY_FINGERPRINT,
+                             (void*)fingerprint);
+    if (cert)
+        DEBUGMSGTL(("tls_x509:verify", "  matching fp found in %s\n",
+                    cert->info.filename));
+    else
+        DEBUGMSGTL(("tls_x509:verify", "  no matching fp found\n"));
 
-
-    DEBUGMSGTL(("tls_x509",
-                " verify value: %d, depth=%d, error code=%d, error string=%s\n",
+    DEBUGMSGTL(("tls_x509:verify",
+                " value: %d, depth=%d, error code=%d, error string=%s\n",
                 ok, depth, err, _x509_get_error(err, "verify callback")));
 
     /* check if we allow self-signed certs */
-    if (netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID,
-                               NETSNMP_DS_LIB_ALLOW_SELF_SIGNED) &&
-        (X509_V_ERR_DEPTH_ZERO_SELF_SIGNED_CERT == err ||
-         X509_V_ERR_SELF_SIGNED_CERT_IN_CHAIN == err)) {
-        DEBUGMSGTL(("tls_x509", "  accepting a self-signed certificate\n"));
+    if ((X509_V_ERR_DEPTH_ZERO_SELF_SIGNED_CERT == err ||
+         X509_V_ERR_SELF_SIGNED_CERT_IN_CHAIN == err) &&
+        netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID,
+                               NETSNMP_DS_LIB_ALLOW_SELF_SIGNED)) {
+        DEBUGMSGTL(("tls_x509:verify",
+                    "  accepting a self-signed certificate\n"));
         return 1;
     }
     
-    
-    DEBUGMSGTL(("tls_x509", "  returing the passed in value of %d\n", ok));
+    DEBUGMSGTL(("tls_x509:verify", "  returning the passed in value of %d\n",
+                ok));
     return(ok);
 }
 
 SSL_CTX *
 sslctx_client_setup(SSL_METHOD *method) {
-    BIO *keybio = NULL;
-    X509 *cert = NULL;
-    const char *certfile;
-    EVP_PKEY *key = NULL;
-    SSL_CTX *the_ctx;
+    netsnmp_cert *id_cert, *peer_cert;
+    SSL_CTX      *the_ctx;
+    X509_STORE   *cert_store = NULL;
 
     /***********************************************************************
      * Set up the client context
@@ -93,54 +101,42 @@ sslctx_client_setup(SSL_METHOD *method) {
                        SSL_VERIFY_CLIENT_ONCE,
                        &verify_callback);
 
-    keybio = BIO_new(BIO_s_file());
-    if (!keybio)
-        LOGANDDIE ("error creating bio for reading public key");
+    id_cert = netsnmp_cert_find(NS_CERT_IDENTITY, NS_CERTKEY_DEFAULT, NULL);
+    if (!id_cert)
+        LOGANDDIE ("error finding client identity keys");
 
-    certfile = netsnmp_ds_get_string(NETSNMP_DS_LIBRARY_ID,
-                                     NETSNMP_DS_LIB_X509_CLIENT_PUB);
-
-    DEBUGMSGTL(("sslctx_client", "using public key: %s\n", certfile));
-    if (BIO_read_filename(keybio, NETSNMP_REMOVE_CONST(char*,certfile)) <=0)
-        LOGANDDIE ("error reading public key");
-
-    cert = PEM_read_bio_X509_AUX(keybio, NULL, NULL, NULL);
-    if (!cert)
-        LOGANDDIE("failed to load public key");
-
-    /* XXX: mem leak on previous keybio? */
-
-    certfile = netsnmp_ds_get_string(NETSNMP_DS_LIBRARY_ID,
-                                     NETSNMP_DS_LIB_X509_CLIENT_PRIV);
-
-    keybio = BIO_new(BIO_s_file());
-    if (!keybio)
-        LOGANDDIE ("error creating bio for reading private key");
-
-    DEBUGMSGTL(("sslctx_client", "using private key: %s\n", certfile));
-    if (!keybio ||
-        BIO_read_filename(keybio, NETSNMP_REMOVE_CONST(char*,certfile)) <= 0)
-        LOGANDDIE ("error reading private key");
-
-    key = PEM_read_bio_PrivateKey(keybio, NULL, NULL, NULL);
-    
-    if (!key)
+    if (!id_cert->key || !id_cert->key->okey)
         LOGANDDIE("failed to load private key");
 
+    DEBUGMSGTL(("sslctx_client", "using public key: %s\n",
+                id_cert->info.filename));
+    DEBUGMSGTL(("sslctx_client", "using private key: %s\n",
+                id_cert->key->info.filename));
 
-    if (SSL_CTX_use_certificate(the_ctx, cert) <= 0)
+    if (SSL_CTX_use_certificate(the_ctx, id_cert->ocert) <= 0)
         LOGANDDIE("failed to set the certificate to use");
 
-    if (SSL_CTX_use_PrivateKey(the_ctx, key) <= 0)
+    if (SSL_CTX_use_PrivateKey(the_ctx, id_cert->key->okey) <= 0)
         LOGANDDIE("failed to set the private key to use");
 
     if (!SSL_CTX_check_private_key(the_ctx))
         LOGANDDIE("public and private keys incompatible");
-    
 
-    certfile = netsnmp_ds_get_string(NETSNMP_DS_LIBRARY_ID,
-                                     NETSNMP_DS_LIB_X509_SERVER_CERTS);
+    peer_cert = netsnmp_cert_find(NS_CERT_REMOTE_PEER, NS_CERTKEY_DEFAULT,
+                                  NULL);
+    if (!peer_cert)
+        LOGANDDIE ("error finding client remote keys");
 
+    cert_store = SSL_CTX_get_cert_store(the_ctx);
+    if (!cert_store)
+        LOGANDDIE("failed to find certificate store");
+
+    if (0 == X509_STORE_add_cert(cert_store, peer_cert->ocert)) {
+        netsnmp_openssl_err_log("adding peer to cert store");
+        LOGANDDIE("failed to add peer to certificate store");
+    }
+
+#if 0 /** XXX CAs? */
     /* XXX: also need to match individual cert to indiv. host */
 
     if(! SSL_CTX_load_verify_locations(the_ctx, certfile, NULL)) {
@@ -151,13 +147,14 @@ sslctx_client_setup(SSL_METHOD *method) {
     if (!SSL_CTX_set_default_verify_paths(the_ctx)) {
         LOGANDDIE ("failed to set default verify path");
     }
+#endif
 
     return the_ctx;
 }
 
 SSL_CTX *
 sslctx_server_setup(SSL_METHOD *method) {
-    const char *certfile;
+    netsnmp_cert *id_cert;
 
     /***********************************************************************
      * Set up the server context
@@ -168,32 +165,37 @@ sslctx_server_setup(SSL_METHOD *method) {
         LOGANDDIE("can't create a new context");
     }
 
-    certfile = netsnmp_ds_get_string(NETSNMP_DS_LIBRARY_ID,
-                                     NETSNMP_DS_LIB_X509_SERVER_PUB);
+    id_cert = netsnmp_cert_find(NS_CERT_IDENTITY, NS_CERTKEY_DEFAULT, (void*)1);
+    if (!id_cert)
+        LOGANDDIE ("error finding server identity keys");
 
-    if (SSL_CTX_use_certificate_file(the_ctx, certfile,
-                                     SSL_FILETYPE_PEM) < 1) {
-        LOGANDDIE("faild to load cert");
-    }
+    if (!id_cert->key || !id_cert->key->okey)
+        LOGANDDIE("failed to load private key");
 
-    DEBUGMSGTL(("sslctx_server", "using public key: %s\n", certfile));
-    certfile = netsnmp_ds_get_string(NETSNMP_DS_LIBRARY_ID,
-                                     NETSNMP_DS_LIB_X509_SERVER_PRIV);
+    DEBUGMSGTL(("sslctx_server", "using public key: %s\n",
+                id_cert->info.filename));
+    DEBUGMSGTL(("sslctx_server", "using private key: %s\n",
+                id_cert->key->info.filename));
 
-    DEBUGMSGTL(("sslctx_server", "using private key: %s\n", certfile));
-    if (SSL_CTX_use_PrivateKey_file(the_ctx, certfile, SSL_FILETYPE_PEM) < 1) {
-        LOGANDDIE("faild to load key");
-    }
+    if (SSL_CTX_use_certificate(the_ctx, id_cert->ocert) <= 0)
+        LOGANDDIE("failed to set the certificate to use");
+
+    if (SSL_CTX_use_PrivateKey(the_ctx, id_cert->key->okey) <= 0)
+        LOGANDDIE("failed to set the private key to use");
+
+    if (!SSL_CTX_check_private_key(the_ctx))
+        LOGANDDIE("public and private keys incompatible");
 
     SSL_CTX_set_read_ahead(the_ctx, 1); /* XXX: DTLS only? */
 
-
+#if 0
     certfile = netsnmp_ds_get_string(NETSNMP_DS_LIBRARY_ID,
                                      NETSNMP_DS_LIB_X509_CLIENT_CERTS);
     if(! SSL_CTX_load_verify_locations(the_ctx, certfile, NULL)) {
         LOGANDDIE("failed to load truststore");
         /* Handle failed load here */
     }
+#endif
 
     SSL_CTX_set_verify(the_ctx,
                        SSL_VERIFY_PEER|
