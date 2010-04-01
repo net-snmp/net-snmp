@@ -232,6 +232,11 @@ netsnmp_init_tlsbase(void) {
         return;
     have_inited = 1;
 
+    /* the private client cert to authenticate with */
+    netsnmp_ds_register_config(ASN_OCTET_STR, "snmp", "extraX509SubDir",
+                               NETSNMP_DS_LIBRARY_ID,
+                               NETSNMP_DS_LIB_CERT_EXTRA_SUBDIR);
+
     /*
      * for the client
      */
