@@ -151,7 +151,7 @@ extern          "C" {
                                     NETSNMP_FUNCTION,__FILE__,__LINE__))
 #else
 #define __DBGTRACE       __DBGMSGT(("trace"," %s, %d:\n", __FILE__,__LINE__))
-#define __DBGTRACETOK(x) __DBGMSGT((tok," %s, %d:\n", __FILE__,__LINE__))
+#define __DBGTRACETOK(x) __DBGMSGT((x," %s, %d:\n", __FILE__,__LINE__))
 #endif
 
 #define __DBGMSGL(x)     __DBGTRACE, debugmsg x
