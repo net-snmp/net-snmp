@@ -18,7 +18,10 @@ extern "C" {
     /*
      * filter function; return 1 to include file, 0 to exclude
      */
-    typedef int (netsnmp_filename_filter)(const char *text);
+#define NETSNMP_DIR_EXCLUDE 0
+#define NETSNMP_DIR_INCLUDE 1
+    typedef int (netsnmp_directory_filter)(const void *text, void *ctx);
+
 
     /*------------------------------------------------------------------
      *
@@ -27,11 +30,11 @@ extern "C" {
     netsnmp_container *
     netsnmp_directory_container_read_some(netsnmp_container *user_container,
                                           const char *dirname,
-                                          netsnmp_filename_filter *filter,
-                                          u_int flags);
+                                          netsnmp_directory_filter *filter,
+                                          void *filter_ctx, u_int flags);
 
 #define netsnmp_directory_container_read(c,d,f) \
-    netsnmp_directory_container_read_some(c,d,NULL,f);
+    netsnmp_directory_container_read_some(c,d,NULL,NULL,f);
 
     void netsnmp_directory_container_free(netsnmp_container *c);
 
@@ -44,7 +47,12 @@ extern "C" {
 #define NETSNMP_DIR_RECURSE                           0x0001
 #define NETSNMP_DIR_RELATIVE_PATH                     0x0002
 #define NETSNMP_DIR_SORTED                            0x0004
+/** don't return null if dir empty */
 #define NETSNMP_DIR_EMPTY_OK                          0x0008
+/** store netsnmp_file instead of filenames */
+#define NETSNMP_DIR_NSFILE                            0x0010
+/** load stats in netsnmp_file */
+#define NETSNMP_DIR_NSFILE_STATS                      0x0020
 
     
         

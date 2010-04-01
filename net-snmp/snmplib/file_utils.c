@@ -77,6 +77,31 @@ netsnmp_file_create(void)
 }
 
 /**
+ * open file and get stats
+ */
+netsnmp_file *
+netsnmp_file_new(const char *name, int fs_flags, mode_t mode, u_int ns_flags)
+{
+    netsnmp_file *filei = netsnmp_file_fill(NULL, name, fs_flags, mode, 0);
+    if (NULL == filei)
+        return NULL;
+
+    if (ns_flags & NETSNMP_FILE_STATS) {
+        filei->stats = calloc(1, sizeof(*(filei->stats)));
+        if (NULL == filei->stats)
+            DEBUGMSGT(("nsfile:new", "no memory for stats\n"));
+        else if (stat(name, filei->stats) != 0)
+            DEBUGMSGT(("nsfile:new", "error getting stats\n"));
+    }
+
+    if (ns_flags & NETSNMP_FILE_AUTO_OPEN)
+        netsnmp_file_open(filei);
+
+    return filei;
+}
+
+        
+/**
  * fill core members in a netsnmp_file structure
  *
  * @param filei      structure to fill; if NULL, a new one will be allocated
@@ -98,7 +123,14 @@ netsnmp_file_fill(netsnmp_file * filei, const char* name,
     if (NULL != name)
         filei->name = strdup(name);
 
-    filei->fs_flags = fs_flags;
+    /** defaul to rdonly */
+    if (0 == filei->fs_flags) {
+        DEBUGMSGT(("nsfile:fill", "defaulting to O_RDONLY for %s\n",
+                   filei->name));
+        filei->fs_flags = O_RDONLY;
+    }
+    else
+        filei->fs_flags = fs_flags;
     filei->ns_flags = ns_flags;
 
     return filei;
@@ -126,6 +158,9 @@ netsnmp_file_release(netsnmp_file * filei)
     if (NULL != filei->extras)
         netsnmp_free_all_list_data(filei->extras);
 
+    if (NULL != filei->stats)
+        free(filei->stats);
+
     SNMP_FREE(filei);
 
     return rc;
@@ -151,6 +186,11 @@ netsnmp_file_open(netsnmp_file * filei)
      */
     if (-1 != filei->fd)
         return filei->fd;
+
+    if (0 == filei->fs_flags) {
+        DEBUGMSGT(("nsfile:open", "invalid flags for %s\n", filei->name));
+        return -1;
+    }
 
     /*
      * try to open the file, loging an error if we failed
@@ -208,3 +248,17 @@ netsnmp_file_close(netsnmp_file * filei)
     return rc;
 }
 
+void
+netsnmp_file_container_free(netsnmp_file *file, void *context)
+{
+    netsnmp_file_release(file);
+}
+
+int
+netsnmp_file_compare_name(netsnmp_file *lhs, netsnmp_file *rhs)
+{
+    netsnmp_assert((NULL != lhs) && (NULL != rhs));
+    netsnmp_assert((NULL != lhs->name) && (NULL != rhs->name));
+
+    return strcmp(lhs->name, rhs->name);
+}
