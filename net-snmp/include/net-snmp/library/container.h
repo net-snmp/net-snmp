@@ -376,6 +376,9 @@ extern "C" {
      * free all containers
      */
     int CONTAINER_FREE(netsnmp_container *x);
+
+    netsnmp_container *SUBCONTAINER_FIND(netsnmp_container *x,
+                                         const char* name);
 #else
     /*------------------------------------------------------------------
      * These functions should EXACTLY match the function version in

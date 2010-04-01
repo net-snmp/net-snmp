@@ -432,7 +432,12 @@ netsnmp_binary_array_get_subset(netsnmp_container *c, void *key, int *len)
     /*
      * if there is no data, return NULL;
      */
-    if (!t->count || !key)
+    if (!c || !key)
+        return NULL;
+
+    t = (binary_array_table*)c->container_data;
+    netsnmp_assert(c->ncompare);
+    if (!t->count | !c->ncompare)
         return NULL;
 
     /*
