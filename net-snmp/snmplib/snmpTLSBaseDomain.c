@@ -285,11 +285,13 @@ netsnmp_init_tlsbase(void) {
 _netsnmpTLSBaseData *
 netsnmp_tlsbase_allocate_tlsdata(netsnmp_transport *t, int isserver) {
 
+    _netsnmpTLSBaseData *tlsdata;
+
     if (NULL == t)
         return NULL;
 
     /* allocate our TLS specific data */
-    _netsnmpTLSBaseData *tlsdata = SNMP_MALLOC_TYPEDEF(_netsnmpTLSBaseData);
+    tlsdata = SNMP_MALLOC_TYPEDEF(_netsnmpTLSBaseData);
     if (NULL == tlsdata) {
         SNMP_FREE(t);
         return NULL;
