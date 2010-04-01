@@ -11,12 +11,12 @@ extern          "C" {
 
     void            init_agent_read_config(const char *);
     void            update_config(void);
-    void            snmpd_register_config_handler(const char *,
+    void            snmpd_register_config_handler(const char *token,
                                                   void (*parser) (const
                                                                   char *,
                                                                   char *),
                                                   void (*releaser) (void),
-                                                  const char *);
+                                                  const char *help);
     void            snmpd_register_const_config_handler(
                                  const char *,
                                  void (*parser) (const char *, const char *),
