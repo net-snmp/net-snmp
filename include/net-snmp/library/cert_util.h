@@ -2,15 +2,13 @@
 
 #if defined(NETSNMP_USE_OPENSSL) && defined(HAVE_LIBSSL)
 
-#include <net-snmp/types.h>
+#ifndef HEADER_X509_H
+#error "must include <openssl/x509.h> before cert_util.h"
+#endif
 
 #ifdef  __cplusplus
 extern "C" {
 #endif
-
-    /** forward declaration so we don't need openssl header */
-    typedef struct x509_st X509;
-    typedef struct evp_pkey_st EVP_PKEY;
 
     typedef struct netsnmp_cert_common_s {
         char           *dir;
