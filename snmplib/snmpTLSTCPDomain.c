@@ -158,8 +158,7 @@ netsnmp_tlstcp_recv(netsnmp_transport *t, void *buf, int size,
     } else {
         DEBUGMSGTL(("tlstcp", "recvfrom fd %d err %d (\"%s\")\n",
                     t->sock, errno, strerror(errno)));
-        DEBUGMSGTL(("tlstcp", "  tdata = %x\n",
-                    t->data));
+        DEBUGMSGTL(("tlstcp", "  tdata = %x\n", (uintptr_t)t->data));
     }
     return rc;
 }
