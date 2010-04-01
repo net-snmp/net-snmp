@@ -217,8 +217,6 @@ tls_bootstrap(int majorid, int minorid, void *serverarg, void *clientarg) {
 
     netsnmp_certs_init();
 
-    DEBUGMSGT(("tls:bootstrap", "setting up client/server contexts\n"));
-
     return 0;
 }
 
