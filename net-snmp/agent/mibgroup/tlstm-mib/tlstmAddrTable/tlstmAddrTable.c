@@ -6,21 +6,15 @@
 #include <net-snmp/net-snmp-config.h>
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
+#include <net-snmp/library/cert_util.h>
 #include "tlstmAddrTable.h"
+#include "tlstmAddrTable_internal.h"
+
+void _tlstmAddr_container_init_persistence(netsnmp_tdata *table_data);
 
 /** Initializes the tlstmAddrTable module */
 void
 init_tlstmAddrTable(void)
-{
-    /*
-     * here we initialize all the tables we're planning on supporting 
-     */
-    initialize_table_tlstmAddrTable();
-}
-
-/** Initialize the tlstmAddrTable table by defining its contents and how it's structured */
-void
-initialize_table_tlstmAddrTable(void)
 {
     static oid      tlstmAddrTable_oid[] =
         { 1, 3, 6, 1, 6, 3, 42, 2, 2, 1, 9 };
@@ -38,8 +32,19 @@ initialize_table_tlstmAddrTable(void)
                                             HANDLER_CAN_RWRITE);
 
     table_data = netsnmp_tdata_create_table("tlstmAddrTable", 0);
+    if (NULL == table_data) {
+        snmp_log(LOG_ERR,"error creating tdata table for tlsmAddrTable\n");
+        return;
+    }
+
     table_info = SNMP_MALLOC_TYPEDEF(netsnmp_table_registration_info);
-    netsnmp_table_helper_add_indexes(table_info, ASN_OCTET_STR, /* index: snmpTargetAddrName */
+    if (NULL == table_info) {
+        snmp_log(LOG_ERR,"error creating table info for tlstmAddrInfo\n");
+        return;
+    }
+
+    netsnmp_table_helper_add_indexes(table_info,
+                                     ASN_PRIV_IMPLIED_OCTET_STR, /* snmpTargetAddrName */
                                      0);
 
     table_info->min_column = COLUMN_TLSTMADDRSERVERFINGERPRINT;
@@ -50,6 +55,8 @@ initialize_table_tlstmAddrTable(void)
     /*
      * Initialise the contents of the table here 
      */
+
+    _tlstmAddr_container_init_persistence(table_data);
 }
 
 /*
@@ -60,10 +67,10 @@ tlstmAddrTable_createEntry(netsnmp_tdata * table_data,
                            char *snmpTargetAddrName,
                            size_t snmpTargetAddrName_len)
 {
-    struct tlstmAddrTable_entry *entry;
+    tlstmAddrTable_entry *entry;
     netsnmp_tdata_row *row;
 
-    entry = SNMP_MALLOC_TYPEDEF(struct tlstmAddrTable_entry);
+    entry = SNMP_MALLOC_TYPEDEF(tlstmAddrTable_entry);
     if (!entry)
         return NULL;
 
@@ -74,7 +81,7 @@ tlstmAddrTable_createEntry(netsnmp_tdata * table_data,
     }
     row->data = entry;
 
-    DEBUGMSGTL(("tlstmAddrTable", "adding row 0x%x\n", row));
+    DEBUGMSGTL(("tlstmAddrTable:row:create", "row 0x%x\n", (uintptr_t)row));
 
     /*
      * populate index
@@ -82,7 +89,7 @@ tlstmAddrTable_createEntry(netsnmp_tdata * table_data,
     memcpy(entry->snmpTargetAddrName, snmpTargetAddrName,
            snmpTargetAddrName_len);
     entry->snmpTargetAddrName_len = snmpTargetAddrName_len;
-    netsnmp_tdata_row_add_index(row, ASN_OCTET_STR,
+    netsnmp_tdata_row_add_index(row, ASN_PRIV_IMPLIED_OCTET_STR,
                                 entry->snmpTargetAddrName,
                                 snmpTargetAddrName_len);
     /*
@@ -90,15 +97,18 @@ tlstmAddrTable_createEntry(netsnmp_tdata * table_data,
      */
     entry->tlstmAddrServerFingerprint[0] = '\0';
     entry->tlstmAddrServerFingerprint_len = 0;
-    entry->tlstmAddrServerIdentity[0] = '*';
-    entry->tlstmAddrServerIdentity_len = 1;
+    entry->tlstmAddrServerIdentity[0] = '\0';
+    entry->tlstmAddrServerIdentity_len = 0;
     entry->tlstmAddrStorageType = ST_NONVOLATILE;
     entry->tlstmAddrRowStatus = RS_NOTREADY;
 
     /*
      * add row to table
      */
+    if (table_data) {
+        DEBUGMSGTL(("tlstmAddrTable:row:insert", "row 0x%x\n", (uintptr_t)row));
     netsnmp_tdata_add_row(table_data, row);
+    }
     return row;
 }
 
@@ -109,15 +119,20 @@ void
 tlstmAddrTable_removeEntry(netsnmp_tdata * table_data,
                            netsnmp_tdata_row * row)
 {
-    struct tlstmAddrTable_entry *entry;
+    tlstmAddrTable_entry *entry;
 
     if (!row)
         return;                 /* Nothing to remove */
-    DEBUGMSGTL(("tlstmAddrTable", "removing row 0x%x\n", row));
-    entry = (struct tlstmAddrTable_entry *)
-        netsnmp_tdata_remove_and_delete_row(table_data, row);
-    if (entry)
-        SNMP_FREE(entry);       /* XXX - release any other internal resources */
+
+    DEBUGMSGTL(("tlstmAddrTable:row:remove", "row 0x%x\n", (uintptr_t)row));
+
+    entry = (tlstmAddrTable_entry *)row->data;
+    SNMP_FREE(entry);
+
+    if (table_data)
+        netsnmp_tdata_remove_row(table_data, row);
+    else
+        netsnmp_tdata_delete_row(row);
 }
 
 
@@ -133,7 +148,7 @@ tlstmAddrTable_handler(netsnmp_mib_handler *handler,
     netsnmp_table_request_info *table_info;
     netsnmp_tdata  *table_data;
     netsnmp_tdata_row *table_row;
-    struct tlstmAddrTable_entry *table_entry;
+    tlstmAddrTable_entry *table_entry;
     int             ret;
 
     DEBUGMSGTL(("9:tlstmAddrTable", "handler mode %d\n", reqinfo->mode));
@@ -144,7 +159,7 @@ tlstmAddrTable_handler(netsnmp_mib_handler *handler,
          */
     case MODE_GET:
         for (request = requests; request; request = request->next) {
-            table_entry = (struct tlstmAddrTable_entry *)
+            table_entry = (tlstmAddrTable_entry *)
                 netsnmp_tdata_extract_entry(request);
             table_info = netsnmp_extract_table_info(request);
 
@@ -206,7 +221,7 @@ tlstmAddrTable_handler(netsnmp_mib_handler *handler,
          */
     case MODE_SET_RESERVE1:
         for (request = requests; request; request = request->next) {
-            table_entry = (struct tlstmAddrTable_entry *)
+            table_entry = (tlstmAddrTable_entry *)
                 netsnmp_tdata_extract_entry(request);
             table_info = netsnmp_extract_table_info(request);
 
@@ -288,7 +303,7 @@ tlstmAddrTable_handler(netsnmp_mib_handler *handler,
 
     case MODE_SET_FREE:
         for (request = requests; request; request = request->next) {
-            table_entry = (struct tlstmAddrTable_entry *)
+            table_entry = (tlstmAddrTable_entry *)
                 netsnmp_tdata_extract_entry(request);
             table_row = netsnmp_tdata_extract_row(request);
             table_data = netsnmp_tdata_extract_table(request);
@@ -309,7 +324,7 @@ tlstmAddrTable_handler(netsnmp_mib_handler *handler,
 
     case MODE_SET_ACTION:
         for (request = requests; request; request = request->next) {
-            table_entry = (struct tlstmAddrTable_entry *)
+            table_entry = (tlstmAddrTable_entry *)
                 netsnmp_tdata_extract_entry(request);
             table_info = netsnmp_extract_table_info(request);
 
@@ -354,7 +369,7 @@ tlstmAddrTable_handler(netsnmp_mib_handler *handler,
          * Check the internal consistency of an active row 
          */
         for (request = requests; request; request = request->next) {
-            table_entry = (struct tlstmAddrTable_entry *)
+            table_entry = (tlstmAddrTable_entry *)
                 netsnmp_tdata_extract_entry(request);
             table_info = netsnmp_extract_table_info(request);
 
@@ -382,7 +397,7 @@ tlstmAddrTable_handler(netsnmp_mib_handler *handler,
 
     case MODE_SET_UNDO:
         for (request = requests; request; request = request->next) {
-            table_entry = (struct tlstmAddrTable_entry *)
+            table_entry = (tlstmAddrTable_entry *)
                 netsnmp_tdata_extract_entry(request);
             table_row = netsnmp_tdata_extract_row(request);
             table_data = netsnmp_tdata_extract_table(request);
@@ -427,7 +442,7 @@ tlstmAddrTable_handler(netsnmp_mib_handler *handler,
 
     case MODE_SET_COMMIT:
         for (request = requests; request; request = request->next) {
-            table_entry = (struct tlstmAddrTable_entry *)
+            table_entry = (tlstmAddrTable_entry *)
                 netsnmp_tdata_extract_entry(request);
             table_row = netsnmp_tdata_extract_row(request);
             table_data = netsnmp_tdata_extract_table(request);
