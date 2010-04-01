@@ -14,9 +14,11 @@
 
 #include <openssl/evp.h>
 #include <openssl/ssl.h>
+#include <openssl/err.h>
 
 #include <net-snmp/library/snmp_debug.h>
 #include <net-snmp/library/snmp_openssl.h>
+#include <net-snmp/library/cert_util.h>
 
 static u_char have_started_already = 0;
 
@@ -165,6 +167,73 @@ netsnmp_openssl_cert_dump_names(X509 *ocert)
                    oname_entry->value->type));
         DEBUGMSGT(("openssl:dump_names", "%s/%s: '%s'\n", prefix_long,
                    prefix_short, ASN1_STRING_data(oname_entry->value)));
+    }
+}
+
+/**
+ * returns allocated pointer caller must free.
+ */
+char *
+netsnmp_openssl_cert_get_fingerprint(X509 *ocert, int alg)
+{
+    u_char           fingerprint[EVP_MAX_MD_SIZE];
+    u_int            fingerprint_len;
+    const EVP_MD    *digest;
+    char            *result = NULL;
+
+    switch (alg) {
+        case NS_HASH_MD5:
+            snmp_log(LOG_ERR, "hash type md5 not yet supported\n");
+            return NULL;
+            break;
+        
+        case NS_HASH_NONE:
+            snmp_log(LOG_ERR, "hash type none not supported. using SHA1\n");
+            /** fall through */
+
+        case NS_HASH_SHA1:
+            digest = EVP_sha1();
+            break;
+
+        case NS_HASH_SHA224:
+            digest = EVP_sha224();
+            break;
+
+        case NS_HASH_SHA256:
+            digest = EVP_sha256();
+            break;
+
+        case NS_HASH_SHA384:
+            digest = EVP_sha384();
+            break;
+
+        case NS_HASH_SHA512:
+            digest = EVP_sha512();
+            break;
+
+        default:
+            snmp_log(LOG_ERR, "unknown hash algorithm %d\n", alg);
+            return NULL;
+    }
+
+    if (X509_digest(ocert,digest,fingerprint,&fingerprint_len)) {
+        binary_to_hex(fingerprint, fingerprint_len, &result);
+        DEBUGMSGT(("openssl:fingerprint", "fingerprint %s\n", result));
+    }
+    else
+        snmp_log(LOG_ERR,"failed to compute fingerprint\n");
+
+    return result;
+}
+
+void
+netsnmp_openssl_err_log(const char *prefix)
+{
+    unsigned long err;
+    for (err = ERR_get_error(); err; err = ERR_get_error()) {
+        snmp_log(LOG_ERR,"%s: %ld\n", prefix ? prefix: "openssl error", err);
+        snmp_log(LOG_ERR, "library=%d, function=%d, reason=%d\n",
+                 ERR_GET_LIB(err), ERR_GET_FUNC(err), ERR_GET_REASON(err));
     }
 }
 

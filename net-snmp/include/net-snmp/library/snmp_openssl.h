@@ -17,6 +17,9 @@ extern          "C" {
                                               int *len);
     char *netsnmp_openssl_cert_get_subjectName(X509 *xcert, char **buf,
                                                int *len);
+    char *netsnmp_openssl_cert_get_fingerprint(X509 *ocert, int alg);
+
+    void netsnmp_openssl_err_log(const char *prefix);
 
 #ifdef __cplusplus
 }
