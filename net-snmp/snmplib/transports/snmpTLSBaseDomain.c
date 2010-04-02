@@ -222,15 +222,10 @@ tls_bootstrap(int majorid, int minorid, void *serverarg, void *clientarg) {
 
 static int have_inited = 0;
 void
-netsnmp_init_tlsbase(void) {
+netsnmp_tlsbase_ctor(void) {
 
     /* bootstrap ssl since we'll need it */
     netsnmp_init_openssl();
-
-    /* only do this once */
-    if (have_inited)
-        return;
-    have_inited = 1;
 
     /* the private client cert to authenticate with */
     netsnmp_ds_register_config(ASN_OCTET_STR, "snmp", "extraX509SubDir",
