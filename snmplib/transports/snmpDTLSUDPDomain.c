@@ -824,8 +824,6 @@ netsnmp_dtlsudp_ctor(void)
 
     /* config settings */
 
-    netsnmp_init_tlsbase();
-
     dtlsudpDomain.name = netsnmpDTLSUDPDomain;
     dtlsudpDomain.name_length = netsnmpDTLSUDPDomain_len;
     dtlsudpDomain.prefix = (const char**)calloc(2, sizeof(char *));

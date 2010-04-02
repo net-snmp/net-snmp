@@ -444,8 +444,6 @@ netsnmp_tlstcp_ctor(void)
 
     /* config settings */
 
-    netsnmp_init_tlsbase();
-
     tlstcpDomain.name = netsnmpTLSTCPDomain;
     tlstcpDomain.name_length = netsnmpTLSTCPDomain_len;
     tlstcpDomain.prefix = (const char**)calloc(2, sizeof(char *));
