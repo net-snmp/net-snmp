@@ -109,7 +109,7 @@ while test "x$new_transport_list" != "x"; do
               AC_MSG_ERROR(IPv6 transports not available if IPv6 support is not enabled)
           fi
       fi
-      transport_src="snmp"$i"Domain.c"
+      transport_src="transports/snmp"$i"Domain.c"
       transport_hdr="snmp"$i"Domain.h"
       rel_transport_src="snmplib/"$transport_src
       rel_transport_hdr="include/net-snmp/library/"$transport_hdr
