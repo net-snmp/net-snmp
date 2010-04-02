@@ -733,7 +733,7 @@ netsnmp_udp6_create_ostring(const u_char * o, size_t o_len, int local)
 
 
 void
-netsnmp_udp6_ctor(void)
+netsnmp_udpipv6_ctor(void)
 {
     udp6Domain.name = netsnmp_UDPIPv6Domain;
     udp6Domain.name_length = sizeof(netsnmp_UDPIPv6Domain) / sizeof(oid);

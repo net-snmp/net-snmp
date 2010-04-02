@@ -304,40 +304,10 @@ void
 netsnmp_tdomain_init(void)
 {
     DEBUGMSGTL(("tdomain", "netsnmp_tdomain_init() called\n"));
-    netsnmp_udp_ctor();
-#ifdef NETSNMP_TRANSPORT_STD_DOMAIN
-    netsnmp_std_ctor();
-#endif
-#ifdef NETSNMP_TRANSPORT_TCP_DOMAIN
-    netsnmp_tcp_ctor();
-#endif
-#ifdef NETSNMP_TRANSPORT_ALIAS_DOMAIN
-    netsnmp_alias_ctor();
-#endif
-#ifdef NETSNMP_TRANSPORT_IPX_DOMAIN
-    netsnmp_ipx_ctor();
-#endif
-#ifdef NETSNMP_TRANSPORT_UNIX_DOMAIN
-    netsnmp_unix_ctor();
-#endif
-#ifdef NETSNMP_TRANSPORT_AAL5PVC_DOMAIN
-    netsnmp_aal5pvc_ctor();
-#endif
-#ifdef NETSNMP_TRANSPORT_UDPIPV6_DOMAIN
-    netsnmp_udp6_ctor();
-#endif
-#ifdef NETSNMP_TRANSPORT_TCPIPV6_DOMAIN
-    netsnmp_tcp6_ctor();
-#endif
-#ifdef NETSNMP_TRANSPORT_DTLSUDP_DOMAIN
-    netsnmp_dtlsudp_ctor();
-#endif
-#ifdef NETSNMP_TRANSPORT_TLSTCP_DOMAIN
-    netsnmp_tlstcp_ctor();
-#endif
-#ifdef NETSNMP_TRANSPORT_SSH_DOMAIN
-    netsnmp_ssh_ctor();
-#endif
+
+/* include the configure generated list of constructor calls */
+#include "transports/snmp_transport_inits.h"
+
     netsnmp_tdomain_dump();
 }
 
