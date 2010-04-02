@@ -23953,7 +23953,7 @@ $as_echo "$as_me: error: $error_list" >&2;}
       if grep $ctor_fn $srcdir/$rel_transport_src > /dev/null ; then
 	# we add them down below instead of here to make sure
 	# config_require dependency constructors get called first.
-	tr_init_list="$tr_init_list $ctor_fn"
+	tr_init_list="$ctor_fn $tr_init_list"
       fi
     fi
   done # for each new transport
