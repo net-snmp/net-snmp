@@ -255,7 +255,8 @@ configclean: makefileclean
 	rm -f include/net-snmp/agent/mib_module_config.h		\
 		include/net-snmp/agent/agent_module_config.h		\
 		include/net-snmp/library/snmpv3-security-includes.h \
-		snmplib/snmpsm_init.h                   \
+		snmplib/snmpsm_init.h                               \
+                snmplib/transports/snmp_transport_inits.h           \
 		agent/mibgroup/agent_module_includes.h 	\
 		agent/mibgroup/agent_module_inits.h 	\
 		agent/mibgroup/agent_module_shutdown.h 	\

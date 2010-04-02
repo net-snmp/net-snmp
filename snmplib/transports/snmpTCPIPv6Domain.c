@@ -345,7 +345,7 @@ netsnmp_tcp6_create_ostring(const u_char * o, size_t o_len, int local)
 
 
 void
-netsnmp_tcp6_ctor(void)
+netsnmp_tcpipv6_ctor(void)
 {
     tcp6Domain.name = netsnmp_TCPIPv6Domain;
     tcp6Domain.name_length = sizeof(netsnmp_TCPIPv6Domain) / sizeof(oid);
