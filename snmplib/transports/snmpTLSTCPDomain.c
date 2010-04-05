@@ -115,6 +115,63 @@ netsnmp_tlstcp_recv(netsnmp_transport *t, void *buf, int size,
         return -1;
     }
         
+    /* RFCXXXX Section 5.1.2 step 1:
+    1) Determine the tlstmSessionID for the incoming message. The
+       tlstmSessionID MUST be a unique session identifier for this
+       (D)TLS connection.  The contents and format of this identifier
+       are implementation-dependent as long as it is unique to the
+       session.  A session identifier MUST NOT be reused until all
+       references to it are no longer in use.  The tmSessionID is
+       equal to the tlstmSessionID discussed in Section 5.1.1.
+       tmSessionID refers to the session identifier when stored in the
+       tmStateReference and tlstmSessionID refers to the session
+       identifier when stored in the LCD.  They MUST always be equal
+       when processing a given session's traffic.
+     */
+    /* For this implementation we use the t->data memory pointer as
+       the sessionID.  As it's a pointer to session specific data tied
+       with the transport object we know it'll never be realloated
+       (ie, duplicated) until release by this transport object and is
+       safe to use as a unique session identifier. */
+
+    tlsdata = t->data;
+
+    /* RFCXXXX Section 5.1.2 step 1, part2:
+     * This part (incrementing the counter) is done in the
+       netsnmp_tlstcp_accept function.
+     */
+
+
+    /* RFCXXXX Section 5.1.2 step 2:
+     * Create a tmStateReference cache for the subsequent reference and
+       assign the following values within it:
+
+       tmTransportDomain  = snmpTLSTCPDomain or snmpDTLSUDPDomain as
+                            appropriate.
+
+       tmTransportAddress = The address the message originated from.
+
+       tmSecurityLevel    = The derived tmSecurityLevel for the session,
+                            as discussed in Section 3.1.2 and Section 5.3.
+
+       tmSecurityName     = The fderived tmSecurityName for the session as
+                            discussed in Section 5.3.  This value MUST
+                            be constant during the lifetime of the
+                            session.
+
+       tmSessionID        = The tlstmSessionID described in step 1 above.
+     */
+
+    /* Implementation notes:
+     * - The tmTransportDomain is represented by the transport object
+     * - The tmpSessionID is represented by the tlsdata pointer (as
+         discussed above)
+     * - The following items are handled later in netsnmp_tlsbase_wrapup_recv:
+         - tmSecurityLevel
+         - tmSecurityName
+         - tmSessionID
+    */
+
     /* create a tmStateRef cache for slow fill-in */
     tmStateRef = SNMP_MALLOC_TYPEDEF(netsnmp_tmStateReference);
 
@@ -124,12 +181,28 @@ netsnmp_tlstcp_recv(netsnmp_transport *t, void *buf, int size,
         return -1;
     }
 
+    /* Set the transportDomain */
+    memcpy(tmStateRef->transportDomain,
+           netsnmpTLSTCPDomain, sizeof(netsnmpTLSTCPDomain[0]) *
+           netsnmpTLSTCPDomain_len);
+    tmStateRef->transportDomainLen = netsnmpTLSTCPDomain_len;
+
+    /* Set the tmTransportAddress */
     addr_pair = &tmStateRef->addresses;
     tmStateRef->have_addresses = 1;
     from = (struct sockaddr *) &(addr_pair->remote_addr);
 
-    /* read from the BIO */
-    tlsdata = t->data;
+    /* RFCXXXX Section 5.1.2 step 1:
+     * 3)  The incomingMessage and incomingMessageLength are assigned values
+       from the (D)TLS processing.
+     */
+
+    /* Implementation notes:
+       - incomingMessage       = buf pointer
+       - incomingMessageLength = rc
+    */
+
+    /* read the packet from openssl */
     rc = SSL_read(tlsdata->ssl, buf, size);
     while (rc <= 0) {
         if (rc == 0) {
@@ -144,6 +217,7 @@ netsnmp_tlstcp_recv(netsnmp_transport *t, void *buf, int size,
 
     DEBUGMSGTL(("tlstcp", "received %d decoded bytes from tls\n", rc));
 
+    /* Check for errors */
     if (rc == -1) {
         if (SSL_get_error(tlsdata->ssl, rc) == SSL_ERROR_WANT_READ)
             return -1; /* XXX: it's ok, but what's the right return? */
@@ -154,6 +228,7 @@ netsnmp_tlstcp_recv(netsnmp_transport *t, void *buf, int size,
         return rc;
     }
 
+    /* log the packet */
     {
         char *str = netsnmp_tlstcp_fmtaddr(NULL, addr_pair, sizeof(netsnmp_indexed_addr_pair));
         DEBUGMSGTL(("tlstcp",
@@ -162,8 +237,16 @@ netsnmp_tlstcp_recv(netsnmp_transport *t, void *buf, int size,
         free(str);
     }
 
+    /* Other wrap-up things common to TLS and DTLS */
     netsnmp_tlsbase_wrapup_recv(tmStateRef, tlsdata, opaque, olength);
 
+    /* RFCXXXX Section 5.1.2 step 1:
+     * 4)  The TLS Transport Model passes the transportDomain,
+       transportAddress, incomingMessage, and incomingMessageLength to
+       the Dispatcher using the receiveMessage ASI:
+    */
+
+    /* In our implementation, this is done simply by returning */
     return rc;
 }
 
@@ -191,7 +274,7 @@ netsnmp_tlstcp_send(netsnmp_transport *t, void *buf, int size,
     tlsdata = t->data;
     
     /* if the first packet and we have no secname, then copy the data */
-    if (tlsdata->isclient &&
+    if ((tlsdata->flags | NETSNMP_TLSBASE_IS_CLIENT) &&
         !tlsdata->securityName && tmStateRef && tmStateRef->securityNameLen > 0)
         tlsdata->securityName = strdup(tmStateRef->securityName);
         
@@ -270,6 +353,22 @@ netsnmp_tlstcp_accept(netsnmp_transport *t)
         DEBUGMSGTL(("tlstcp", "accept succeeded (from %s) on sock %d\n",
                     str, t->sock));
         free(str);
+
+        /* RFCXXXX Section 5.1.2 step 1, part2::
+         * If this is the first message received through this session and
+           the session does not have an assigned tlstmSessionID yet then the
+           snmpTlstmSessionAccepts counter is incremented and a
+           tlstmSessionID for the session is created.  This will only happen
+           on the server side of a connection because a client would have
+           already assigned a tlstmSessionID during the openSession()
+           invocation.  Implementations may have performed the procedures
+           described in Section 5.3.2 prior to this point or they may
+           perform them now, but the procedures described in Section 5.3.2
+           MUST be performed before continuing beyond this point.
+        */
+        /* We're taking option 2 and incrementing the session accepts here
+           rather than upon receiving the first packet */
+        snmp_increment_statistic(STAT_TLSTM_SNMPTLSTMSESSIONACCEPTS);
 
         /* XXX: check that it returns something so we can free stuff? */
         return BIO_get_fd(tlsdata->accepted_bio, NULL);

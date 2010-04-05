@@ -28,11 +28,13 @@ extern          "C" {
     SSL_CTX *sslctx_client_setup(SSL_METHOD *);
     SSL_CTX *sslctx_server_setup(SSL_METHOD *);
 
+#define NETSNMP_TLSBASE_IS_CLIENT 0x01
+
     /*
      * _Internal_ structures
      */
     typedef struct _netsnmpTLSBaseData_s {
-       char     isclient;
+       int     flags;
        SSL_CTX *ssl_context;
        SSL     *ssl;
        BIO     *sslbio;
