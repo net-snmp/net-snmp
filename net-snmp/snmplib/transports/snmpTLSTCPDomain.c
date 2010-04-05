@@ -106,60 +106,64 @@ netsnmp_tlstcp_recv(netsnmp_transport *t, void *buf, int size,
     X509            *peer;
     _netsnmpTLSBaseData *tlsdata;
 
-    if (NULL != t && t->sock >= 0 && NULL != t->data) {
-        /* create a tmStateRef cache for slow fill-in */
-        tmStateRef = SNMP_MALLOC_TYPEDEF(netsnmp_tmStateReference);
-
-        if (tmStateRef == NULL) {
-            *opaque = NULL;
-            *olength = 0;
-            return -1;
-        }
-
-        addr_pair = &tmStateRef->addresses;
-        tmStateRef->have_addresses = 1;
-        from = (struct sockaddr *) &(addr_pair->remote_addr);
-
-        /* read from the BIO */
-        tlsdata = t->data;
-        rc = SSL_read(tlsdata->ssl, buf, size);
-        while (rc <= 0) {
-            if (rc == 0) {
-                /* XXX closed connection */
-                DEBUGMSGTL(("tlstcp", "remote side closed connection\n"));
-                /* XXX: openssl cleanup */
-                SNMP_FREE(tmStateRef);
-                return -1;
-            }
-            rc = SSL_read(tlsdata->ssl, buf, size);
-        }
-
-        DEBUGMSGTL(("tlstcp", "received %d decoded bytes from tls\n", rc));
-
-        if (rc == -1) {
-            if (SSL_get_error(tlsdata->ssl, rc) == SSL_ERROR_WANT_READ)
-                return -1; /* XXX: it's ok, but what's the right return? */
-
-            _openssl_log_error(rc, tlsdata->ssl, "SSL_read");
-            SNMP_FREE(tmStateRef);
-
-            return rc;
-        }
-
-        {
-            char *str = netsnmp_tlstcp_fmtaddr(NULL, addr_pair, sizeof(netsnmp_indexed_addr_pair));
-            DEBUGMSGTL(("tlstcp",
-                        "recvfrom fd %d got %d bytes (from %s)\n",
-                        t->sock, rc, str));
-            free(str);
-        }
-
-        netsnmp_tlsbase_wrapup_recv(tmStateRef, tlsdata, opaque, olength);
-    } else {
+    if (NULL == t || t->sock < 0 || NULL == t->data) {
+        snmp_log(LOG_ERR,
+                 "tlstcp received an invalid invocation with missing data\n");
         DEBUGMSGTL(("tlstcp", "recvfrom fd %d err %d (\"%s\")\n",
                     t->sock, errno, strerror(errno)));
         DEBUGMSGTL(("tlstcp", "  tdata = %x\n", (uintptr_t)t->data));
+        return -1;
     }
+        
+    /* create a tmStateRef cache for slow fill-in */
+    tmStateRef = SNMP_MALLOC_TYPEDEF(netsnmp_tmStateReference);
+
+    if (tmStateRef == NULL) {
+        *opaque = NULL;
+        *olength = 0;
+        return -1;
+    }
+
+    addr_pair = &tmStateRef->addresses;
+    tmStateRef->have_addresses = 1;
+    from = (struct sockaddr *) &(addr_pair->remote_addr);
+
+    /* read from the BIO */
+    tlsdata = t->data;
+    rc = SSL_read(tlsdata->ssl, buf, size);
+    while (rc <= 0) {
+        if (rc == 0) {
+            /* XXX closed connection */
+            DEBUGMSGTL(("tlstcp", "remote side closed connection\n"));
+            /* XXX: openssl cleanup */
+            SNMP_FREE(tmStateRef);
+            return -1;
+        }
+        rc = SSL_read(tlsdata->ssl, buf, size);
+    }
+
+    DEBUGMSGTL(("tlstcp", "received %d decoded bytes from tls\n", rc));
+
+    if (rc == -1) {
+        if (SSL_get_error(tlsdata->ssl, rc) == SSL_ERROR_WANT_READ)
+            return -1; /* XXX: it's ok, but what's the right return? */
+
+        _openssl_log_error(rc, tlsdata->ssl, "SSL_read");
+        SNMP_FREE(tmStateRef);
+
+        return rc;
+    }
+
+    {
+        char *str = netsnmp_tlstcp_fmtaddr(NULL, addr_pair, sizeof(netsnmp_indexed_addr_pair));
+        DEBUGMSGTL(("tlstcp",
+                    "recvfrom fd %d got %d bytes (from %s)\n",
+                    t->sock, rc, str));
+        free(str);
+    }
+
+    netsnmp_tlsbase_wrapup_recv(tmStateRef, tlsdata, opaque, olength);
+
     return rc;
 }
 
