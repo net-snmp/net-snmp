@@ -1331,8 +1331,17 @@ netsnmp_cert_find(int what, int where, void *hint)
 
     /** make sure result found can be used for specified type */
     if (!(result->info.allowed_uses & what)) {
-        DEBUGMSGT(("cert:find:err", "cert %s not allowed for %d (%d)\n",
-                   result->info.filename, what, result->info.allowed_uses));
+        char whatmodes[][256] =
+            {
+                "none", "identity", "remote_peer",
+                "identity+remote_peer", "reserved1",
+                "reserved1+identity", "reserved1+remote_peer",
+                "reserved1+identity+remote_peer", "reserved2"
+            };
+        DEBUGMSGT(("cert:find:err", "cert %s not allowed for %s(%d) (uses=%s (%d))\n",
+                   result->info.filename, whatmodes[what],
+                   what , whatmodes[result->info.allowed_uses],
+                   result->info.allowed_uses));
         return NULL;
     }
     
