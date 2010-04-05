@@ -1277,9 +1277,16 @@ netsnmp_cert_find(int what, int where, void *hint)
     netsnmp_cert *result = NULL;
     int           tmp;
     char         *fp;
+    const char whatmodes[][256] =
+        {
+            "none", "identity", "remote_peer",
+            "identity+remote_peer", "reserved1",
+            "reserved1+identity", "reserved1+remote_peer",
+            "reserved1+identity+remote_peer", "reserved2"
+        };
 
-    DEBUGMSGT(("cert:find:params", "looking for %d in %d, hint %lu\n",
-               what, where, (u_long)hint));
+    DEBUGMSGT(("cert:find:params", "looking for %s(%d) in 0x%x, hint %lu\n",
+               whatmodes[what], what, where, (u_long)hint));
 
     if (NS_CERTKEY_DEFAULT == where) {
             
@@ -1331,13 +1338,6 @@ netsnmp_cert_find(int what, int where, void *hint)
 
     /** make sure result found can be used for specified type */
     if (!(result->info.allowed_uses & what)) {
-        char whatmodes[][256] =
-            {
-                "none", "identity", "remote_peer",
-                "identity+remote_peer", "reserved1",
-                "reserved1+identity", "reserved1+remote_peer",
-                "reserved1+identity+remote_peer", "reserved2"
-            };
         DEBUGMSGT(("cert:find:err", "cert %s not allowed for %s(%d) (uses=%s (%d))\n",
                    result->info.filename, whatmodes[what],
                    what , whatmodes[result->info.allowed_uses],
