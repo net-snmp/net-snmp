@@ -64,7 +64,7 @@ typedef struct netsnmp_tmStateReference_s {
    int    requestedSecurityLevel;
    int    transportSecurityLevel;
    char   sameSecurity;
-   int    sessionID;
+   char   sessionID[8];
    
    char   have_addresses;
    netsnmp_indexed_addr_pair addresses;

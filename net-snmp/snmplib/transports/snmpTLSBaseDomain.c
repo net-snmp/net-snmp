@@ -165,7 +165,8 @@ sslctx_server_setup(SSL_METHOD *method) {
         LOGANDDIE("can't create a new context");
     }
 
-    id_cert = netsnmp_cert_find(NS_CERT_IDENTITY, NS_CERTKEY_DEFAULT, (void*)1);
+    id_cert = netsnmp_cert_find(NS_CERT_IDENTITY, NS_CERTKEY_DEFAULT,
+                                (void*)1);
     if (!id_cert)
         LOGANDDIE ("error finding server identity keys");
 
@@ -297,7 +298,8 @@ netsnmp_tlsbase_allocate_tlsdata(netsnmp_transport *t, int isserver) {
         return NULL;
     }
 
-    tlsdata->isclient = !isserver;
+    if (!isserver)
+        tlsdata->flags |= NETSNMP_TLSBASE_IS_CLIENT;
 
     return tlsdata;
 }
@@ -308,6 +310,7 @@ int netsnmp_tlsbase_wrapup_recv(netsnmp_tmStateReference *tmStateRef,
                                 void **opaque, int *olength) {
     X509            *peer;
 
+    /* RFCXXXX Section 5.1.2 step 2: tmSecurityLevel */
     /* XXX: disallow NULL auth/encr algs in our implementations */
     tmStateRef->transportSecurityLevel = SNMP_SEC_LEVEL_AUTHPRIV;
 
@@ -324,6 +327,7 @@ int netsnmp_tlsbase_wrapup_recv(netsnmp_tmStateReference *tmStateRef,
         }
     }
 
+    /* RFCXXXX Section 5.1.2 step 2: tmSecurityName */
     /* XXX: detect and throw out overflow secname sizes rather
        than truncating. */
     strncpy(tmStateRef->securityName, tlsdata->securityName,
@@ -331,6 +335,11 @@ int netsnmp_tlsbase_wrapup_recv(netsnmp_tmStateReference *tmStateRef,
     tmStateRef->securityName[sizeof(tmStateRef->securityName)-1] = '\0';
     tmStateRef->securityNameLen = strlen(tmStateRef->securityName);
 
+    /* RFCXXXX Section 5.1.2 step 2: tmSessionID */
+    /* use our TLSData pointer as the session ID */
+    memcpy(tmStateRef->sessionID, &tlsdata, sizeof(netsnmp_tmStateReference *));
+
+    /* save the tmStateRef in our special pointer */
     *opaque = tmStateRef;
     *olength = sizeof(netsnmp_tmStateReference);
 }    
