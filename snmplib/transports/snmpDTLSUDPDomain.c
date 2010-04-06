@@ -568,7 +568,9 @@ netsnmp_dtlsudp_recv(netsnmp_transport *t, void *buf, int size,
         }
     }
 
-    netsnmp_tlsbase_wrapup_recv(tmStateRef, tlsdata, opaque, olength);
+    if (netsnmp_tlsbase_wrapup_recv(tmStateRef, tlsdata, opaque, olength) !=
+        SNMPERR_SUCCESS)
+        return SNMPERR_GENERR;
 
     return rc;
 }

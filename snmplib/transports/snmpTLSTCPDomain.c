@@ -238,7 +238,9 @@ netsnmp_tlstcp_recv(netsnmp_transport *t, void *buf, int size,
     }
 
     /* Other wrap-up things common to TLS and DTLS */
-    netsnmp_tlsbase_wrapup_recv(tmStateRef, tlsdata, opaque, olength);
+    if (netsnmp_tlsbase_wrapup_recv(tmStateRef, tlsdata, opaque, olength) !=
+        SNMPERR_SUCCESS)
+        return SNMPERR_GENERR;
 
     /* RFCXXXX Section 5.1.2 step 1:
      * 4)  The TLS Transport Model passes the transportDomain,
