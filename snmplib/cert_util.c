@@ -93,6 +93,8 @@ static int  _cert_fn_ncompare(netsnmp_cert_common *lhs,
                               netsnmp_cert_common *rhs);
 static void _find_partner(netsnmp_cert *cert, netsnmp_key *key);
 static netsnmp_cert *_cert_find_fp(const char *fingerprint);
+static const char *_mode_str(u_char mode);
+static const char *_where_str(u_int what);
 
 void netsnmp_cert_free(netsnmp_cert *cert);
 void netsnmp_key_free(netsnmp_key *key);
@@ -100,6 +102,15 @@ void netsnmp_key_free(netsnmp_key *key);
 static int _certindex_add( const char *dirname, int i );
 
 static int _time_filter(netsnmp_file *f, struct stat *idx);
+
+/** mode descriptions should match up with header */
+static const char _modes[][256] =
+        {
+            "none", "identity", "remote_peer",
+            "identity+remote_peer", "reserved1",
+            "reserved1+identity", "reserved1+remote_peer",
+            "reserved1+identity+remote_peer", "reserved2"
+        };
 
 /* #####################################################################
  *
@@ -224,7 +235,8 @@ _new_cert(const char *dirname, const char *filename, int type,
         return NULL;
     }
 
-    DEBUGMSGT(("cert:struct:new","new cert 0x%#lx\n", (u_long)cert));
+    DEBUGMSGT(("cert:struct:new","new cert 0x%#lx for %s\n", (u_long)cert,
+                  filename));
 
     cert->info.dir = strdup(dirname);
     cert->info.filename = strdup(filename);
@@ -255,7 +267,8 @@ _new_key(const char *dirname, const char *filename)
         return NULL;
     }
 
-    DEBUGMSGT(("key:struct:new","new key 0x%#lx\n", (u_long)key));
+    DEBUGMSGT(("cert:key:struct:new","new key 0x%#lx for %s\n", (u_long)key,
+                  filename));
 
     key->info.dir = strdup(dirname);
     key->info.filename = strdup(filename);
@@ -858,7 +871,7 @@ _add_certfile(const char* dirname, const char* filename, FILE *index)
         }
         key->okey = okey;
         if (-1 == CONTAINER_INSERT(_keys, key)) {
-            DEBUGMSGT(("key:file:add:err",
+            DEBUGMSGT(("cert:key:file:add:err",
                        "error inserting key into container\n"));
             netsnmp_key_free(key);
             key = NULL;
@@ -1166,10 +1179,9 @@ _cert_print(netsnmp_cert *c, void *context)
         return;
 
     snmp_log(LOG_INFO, "found in %s %s\n", c->info.dir, c->info.filename);
-    snmp_log(LOG_INFO, " type %d flags 0x%x (ID: %c; PEER: %c)\n",
+    snmp_log(LOG_INFO, " type %d flags 0x%x (%s)\n",
              c->info.type, c->info.allowed_uses,
-             (c->info.allowed_uses & NS_CERT_IDENTITY) ? 'Y' : 'N',
-             (c->info.allowed_uses & NS_CERT_REMOTE_PEER) ? 'Y' : 'N');
+             _mode_str(c->info.allowed_uses));
     if (NS_CERT_TYPE_KEY == c->info.type) {
     }
     else {
@@ -1196,10 +1208,8 @@ _key_print(netsnmp_key *k, void *context)
         return;
 
     snmp_log(LOG_INFO, "found in %s %s\n", k->info.dir, k->info.filename);
-    snmp_log(LOG_INFO, " type %d flags 0x%x (ID: %c; PEER: %c)\n",
-             k->info.type, k->info.allowed_uses,
-             (k->info.allowed_uses & NS_CERT_IDENTITY) ? 'Y' : 'N',
-             (k->info.allowed_uses & NS_CERT_REMOTE_PEER) ? 'Y' : 'N');
+    snmp_log(LOG_INFO, " type %d flags 0x%x (%sc)\n", k->info.type,
+             k->info.allowed_uses, _mode_str(k->info.allowed_uses));
 }
 
 void
@@ -1277,16 +1287,9 @@ netsnmp_cert_find(int what, int where, void *hint)
     netsnmp_cert *result = NULL;
     int           tmp;
     char         *fp;
-    const char whatmodes[][256] =
-        {
-            "none", "identity", "remote_peer",
-            "identity+remote_peer", "reserved1",
-            "reserved1+identity", "reserved1+remote_peer",
-            "reserved1+identity+remote_peer", "reserved2"
-        };
 
-    DEBUGMSGT(("cert:find:params", "looking for %s(%d) in 0x%x, hint %lu\n",
-               whatmodes[what], what, where, (u_long)hint));
+    DEBUGMSGT(("cert:find:params", "looking for %s(%d) in %s(0x%x), hint %lu\n",
+               _mode_str(what), what, _where_str(where), where, (u_long)hint));
 
     if (NS_CERTKEY_DEFAULT == where) {
             
@@ -1339,8 +1342,8 @@ netsnmp_cert_find(int what, int where, void *hint)
     /** make sure result found can be used for specified type */
     if (!(result->info.allowed_uses & what)) {
         DEBUGMSGT(("cert:find:err", "cert %s not allowed for %s(%d) (uses=%s (%d))\n",
-                   result->info.filename, whatmodes[what],
-                   what , whatmodes[result->info.allowed_uses],
+                   result->info.filename, _mode_str(what),
+                   what , _mode_str(result->info.allowed_uses),
                    result->info.allowed_uses));
         return NULL;
     }
@@ -1377,6 +1380,29 @@ int
 netsnmp_cert_validate(int who, int how, X509 *cert)
 {
     return -1;
+}
+
+static const char *_mode_str(u_char mode)
+{
+    return _modes[mode];
+}
+
+static const char *_where_str(u_int what)
+{
+    switch (what) {
+        case NS_CERTKEY_DEFAULT: return "DEFAULT";
+        case NS_CERTKEY_FILE: return "FILE";
+        case NS_CERTKEY_FINGERPRINT: return "FINGERPRINT";
+        case NS_CERTKEY_CA: return "CA";
+        case NS_CERTKEY_SAN_RFC822: return "SAN_RFC822";
+        case NS_CERTKEY_SAN_DNS: return "SAN_DNS";
+        case NS_CERTKEY_SAN_IPADDR: return "SAN_IPADDR";
+        case NS_CERTKEY_COMMON_NAME: return "COMMON_NAME";
+        case NS_CERTKEY_TARGET_PARAM: return "TARGET_PARAM";
+        case NS_CERTKEY_TARGET_ADDR: return "TARGET_ADDR";
+    }
+
+    return "UNKNOWN";
 }
 
 static netsnmp_cert *
