@@ -743,7 +743,6 @@ netsnmp_transport *
 netsnmp_dtlsudp_transport(struct sockaddr_in *addr, int local)
 {
     netsnmp_transport *t = NULL;
-    netsnmp_indexed_addr_pair *remoteaddr;
 
     DEBUGTRACETOK("dtlsudp");
 
