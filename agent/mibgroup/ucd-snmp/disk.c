@@ -163,6 +163,11 @@ struct diskpart {
     int             minpercent;
 };
 
+#ifndef  INT32_MAX
+#define  INT32_MAX  0x7fffffff
+#endif
+
+
 int             numdisks;
 int             allDisksIncluded = 0;
 int             maxdisks = 0;
@@ -751,7 +756,7 @@ tryAgain:
 #endif
     avail = (long)(vfs.f_bavail * multiplier);
     iserror = (disks[disknum].minimumspace >= 0 ?
-               avail < disks[disknum].minimumspace :
+               vfs.f_bavail < (disks[disknum].minimumspace/multiplier) :
                100 - percent <= disks[disknum].minpercent) ? 1 : 0;
 #if defined(STRUCT_STATVFS_HAS_F_FILES) || defined STRUCT_STATFS_HAS_F_FAVAIL
     percent_inode = vfs.f_favail <= 0 ? 100 :
@@ -767,12 +772,22 @@ tryAgain:
 #endif /* defined(STRUCT_STATVFS_HAS_F_FILES) */ 
     switch (vp->magic) {
     case DISKTOTAL:
-        long_ret = (long)(vfs.f_blocks * multiplier);
+        if ( vfs.f_blocks > ( INT32_MAX / multiplier ))
+            long_ret = INT32_MAX;
+        else
+            long_ret = (long)(vfs.f_blocks * multiplier);
         return ((u_char *) (&long_ret));
     case DISKAVAIL:
-        return ((u_char *) (&avail));
+        if ( vfs.f_bavail > ( INT32_MAX / multiplier ))
+            long_ret = INT32_MAX;
+        else
+            long_ret = (long)(vfs.f_bavail * multiplier);
+        return ((u_char *) (&long_ret));
     case DISKUSED:
-        long_ret = (long)((vfs.f_blocks - vfs.f_bfree) * multiplier);
+        if ( (vfs.f_blocks - vfs.f_bfree) > ( INT32_MAX / multiplier ))
+            long_ret = INT32_MAX;
+        else
+            long_ret = (long)((vfs.f_blocks - vfs.f_bfree) * multiplier);
         return ((u_char *) (&long_ret));
     case DISKPERCENT:
         long_ret = percent;
@@ -844,13 +859,22 @@ tryAgain:
             : 100 - percent <= disks[disknum].minpercent) ? 1 : 0;
     switch (vp->magic) {
     case DISKTOTAL:
-        long_ret = (long)(totalblks * multiplier);
+        if ( totalblks > ( INT32_MAX / multiplier ))
+            long_ret = INT32_MAX;
+        else
+            long_ret = (long)(totalblks * multiplier);
         return ((u_char *) (&long_ret));
     case DISKAVAIL:
-        long_ret = (long)(avail * multiplier);
+        if ( avail > ( INT32_MAX / multiplier ))
+            long_ret = INT32_MAX;
+        else
+            long_ret = (long)(avail * multiplier);
         return ((u_char *) (&long_ret));
     case DISKUSED:
-        long_ret = (long)(used * multiplier);
+        if ( used > (  INT32_MAX / multiplier ))
+            long_ret = INT32_MAX;
+        else
+            long_ret = (long)(used * multiplier);
         return ((u_char *) (&long_ret));
     case DISKPERCENT:
         long_ret = percent;
