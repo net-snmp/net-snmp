@@ -323,7 +323,7 @@ int netsnmp_tlsbase_wrapup_recv(netsnmp_tmStateReference *tmStateRef,
                         tlsdata->securityName));
         } else {
             SNMP_FREE(tmStateRef);
-            return -1;
+            return SNMPERR_GENERR;
         }
     }
 
@@ -342,7 +342,9 @@ int netsnmp_tlsbase_wrapup_recv(netsnmp_tmStateReference *tmStateRef,
     /* save the tmStateRef in our special pointer */
     *opaque = tmStateRef;
     *olength = sizeof(netsnmp_tmStateReference);
-}    
+
+    return SNMPERR_SUCCESS;
+}
 
 const char * _x509_get_error(int x509failvalue, const char *location) {
     static const char *reason = NULL;
