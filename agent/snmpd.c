@@ -1001,15 +1001,11 @@ main(int argc, char *argv[])
 #ifdef HAVE_SETUID
     if ((uid = netsnmp_ds_get_int(NETSNMP_DS_APPLICATION_ID, 
 				  NETSNMP_DS_AGENT_USERID)) != 0) {
-        DEBUGMSGTL(("snmpd/main", "Changing uid to %d.\n", uid));
-        if (setuid(uid) == -1) {
-            snmp_log_perror("setuid failed");
-            if (!netsnmp_ds_get_boolean(NETSNMP_DS_APPLICATION_ID, 
-					NETSNMP_DS_AGENT_NO_ROOT_ACCESS)) {
-                exit(1);
-            }
-        }
 #if HAVE_GETPWNAM && HAVE_PWD_H && HAVE_INITGROUPS
+        /*
+         * Set supplementary groups before changing UID
+         *   (which probably involves giving up privileges)
+         */
         info = getpwuid(uid);
         if (info) {
             DEBUGMSGTL(("snmpd/main", "Supplementary groups for %s.\n", info->pw_name));
@@ -1022,6 +1018,14 @@ main(int argc, char *argv[])
             }
         }
 #endif
+        DEBUGMSGTL(("snmpd/main", "Changing uid to %d.\n", uid));
+        if (setuid(uid) == -1) {
+            snmp_log_perror("setuid failed");
+            if (!netsnmp_ds_get_boolean(NETSNMP_DS_APPLICATION_ID, 
+					NETSNMP_DS_AGENT_NO_ROOT_ACCESS)) {
+                exit(1);
+            }
+        }
     }
 #endif
 #endif
