@@ -54,15 +54,19 @@ int verify_callback(int ok, X509_STORE_CTX *ctx) {
                 fingerprint : "unknown"));
     cert = netsnmp_cert_find(NS_CERT_REMOTE_PEER, NS_CERTKEY_FINGERPRINT,
                              (void*)fingerprint);
-    if (cert)
-        DEBUGMSGTL(("tls_x509:verify", "  matching fp found in %s\n",
-                    cert->info.filename));
-    else
-        DEBUGMSGTL(("tls_x509:verify", "  no matching fp found\n"));
-
     DEBUGMSGTL(("tls_x509:verify",
                 " value: %d, depth=%d, error code=%d, error string=%s\n",
                 ok, depth, err, _x509_get_error(err, "verify callback")));
+
+    if (cert) {
+        // XXXWJH: should really only accept here *IF* in the agent's
+        // configuration to accept from the given table; this accepts
+        // anything found here with no other configuration.
+        DEBUGMSGTL(("tls_x509:verify", "  matching fp found in %s; accepting\n",
+                    cert->info.filename));
+        return 1;
+    } else
+        DEBUGMSGTL(("tls_x509:verify", "  no matching fp found\n"));
 
     /* check if we allow self-signed certs */
     if ((X509_V_ERR_DEPTH_ZERO_SELF_SIGNED_CERT == err ||
