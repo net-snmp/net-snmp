@@ -247,14 +247,14 @@ start_new_cached_connection(netsnmp_transport *t,
         tlsdata->ssl = SSL_new(sslctx_server_setup(DTLSv1_method()));
     }
 
-    SSL_set_mode(tlsdata->ssl, SSL_MODE_AUTO_RETRY);
-
     if (!tlsdata->ssl) {
         BIO_free(cachep->read_bio);
         BIO_free(cachep->write_bio);
         DIEHERE("failed to create the write bio");
     }
         
+    SSL_set_mode(tlsdata->ssl, SSL_MODE_AUTO_RETRY);
+
     /* turn on cookie exchange */
     /* XXX: we need to only create cache entries when cookies succeed */
     SSL_set_options(tlsdata->ssl, SSL_OP_COOKIE_EXCHANGE);
