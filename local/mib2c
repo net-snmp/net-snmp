@@ -51,6 +51,7 @@ $debug=0;
 $quiet=0;
 $strict_unk_token = 0;
 $noindent = 0;
+$nosed = 0;
 $currentline = 0;
 $currentlevel = -1;
 %assignments;
@@ -73,6 +74,7 @@ sub usage {
     print "  -d\t\tdebugging output (don't do it.  trust me.)\n\n";
     print "  -S VAR=VAL\tSet \$VAR variable to \$VAL\n\n";
     print "  -i\t\tDon't run indent on the resulting code\n\n";
+    print "  -s\t\tDon't look for mibNode.sed and run sed on the resulting code\n\n";
     print "  mibNode\tThe name of the top level mib node you want to\n\t\tgenerate code for.  By default, the code will be stored in\n\t\tmibNode.c and mibNode.h (use the -f flag to change this)\n\n";
     1;
 }	
@@ -99,6 +101,8 @@ while($#ARGV >= 0) {
         $quiet = 1;
       } elsif (/^-i/) {
         $noindent = 1;
+      } elsif (/^-s/) {
+        $nosed = 1;
       } elsif (/^-h/) {
         usage && exit(1);
       } elsif (/^-f/) {
@@ -230,6 +234,15 @@ $configfile = find_conf($configfile,0);
 $fh = open_conf($configfile);
 process("-balanced");
 $fh->close;
+
+if (-f "$outputName.sed" && !$nosed) {
+  foreach $i (keys(%written)) {
+    next if ($i eq "-");
+    next if (!($i =~ /\.[ch]$/));
+    print STDERR "running sed --in-place=.orig --file=$outputName.sed $i\n" if (!$quiet);
+    system("sed --in-place=.orig --file=$outputName.sed $i");
+  }
+}
 
 if (!$noindent) {
   foreach $i (keys(%written)) {
