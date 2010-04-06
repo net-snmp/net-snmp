@@ -59,9 +59,10 @@ int verify_callback(int ok, X509_STORE_CTX *ctx) {
                 ok, depth, err, _x509_get_error(err, "verify callback")));
 
     if (cert) {
-        // XXXWJH: should really only accept here *IF* in the agent's
-        // configuration to accept from the given table; this accepts
-        // anything found here with no other configuration.
+        /* XXXWJH: should really only accept here *IF* in the agent's
+         * configuration to accept from the given table; this accepts
+         * anything found here with no other configuration.
+         */
         DEBUGMSGTL(("tls_x509:verify", "  matching fp found in %s; accepting\n",
                     cert->info.filename));
         return 1;
