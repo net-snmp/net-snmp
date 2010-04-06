@@ -221,7 +221,6 @@ tls_bootstrap(int majorid, int minorid, void *serverarg, void *clientarg) {
     return 0;
 }
 
-static int have_inited = 0;
 void
 netsnmp_tlsbase_ctor(void) {
 
