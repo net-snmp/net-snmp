@@ -56,6 +56,8 @@ extern          "C" {
     NETSNMP_IMPORT
     char            check_rowstatus_transition(int old_val, int new_val);
     NETSNMP_IMPORT
+    char            check_rowstatus_with_storagetype_transition(int old_val, int new_val, int old_storage);
+    NETSNMP_IMPORT
     char            check_storage_transition(int old_val, int new_val);
 
 #ifdef __cplusplus
