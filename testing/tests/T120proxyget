@@ -18,7 +18,7 @@ SKIPIF NETSNMP_DISABLE_SNMPV2C
 # standard V3 configuration for initial user
 . ./Sv3config
 # config the proxy
-CONFIGAGENT proxy -t 2 -r 1 -v 2c -c testcommunity $SNMP_TRANSPORT_SPEC:${SNMP_TEST_DEST}${SNMP_AGENTX_PORT} system
+CONFIGAGENT proxy -t 2 -r 1 -v 2c -c testcommunity $SNMP_TRANSPORT_SPEC:${SNMP_TEST_DEST}${SNMP_AGENTX_PORT} .1.3.6.1.2.1.1
 
 # Start the agent without initializing the system mib.
 ORIG_AGENT_FLAGS="$AGENT_FLAGS"
