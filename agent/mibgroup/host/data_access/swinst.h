@@ -22,7 +22,7 @@ config_exclude(host/hr_swinst)
  */
 #if   defined( darwin )
     config_require(host/data_access/swinst_darwin)
-#elif defined( HAVE_LIBRPM ) || defined( linux )
+#elif defined( HAVE_LIBRPM ) && defined( linux )
     config_require(host/data_access/swinst_rpm)
 #elif defined( HAVE_PKGLOCS_H ) || defined( hpux9 ) || defined( hpux10 ) || defined( hpux11 ) || defined( freebsd2 )
     config_require(host/data_access/swinst_pkginfo)
