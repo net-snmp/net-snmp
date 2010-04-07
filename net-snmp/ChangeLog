@@ -1,5 +1,222 @@
 -------------------------------------------------------------------------------
-Changes: V5.4.2 -> V5.4.3.rc1
+Changes: V5.4.2 -> V5.4.3.rc2
+
+2010-04-07 14:22  dts12
+
+   * agent/Makefile.depend, agent/mibgroup/Makefile.depend:
+
+   make depend
+
+2010-04-07 14:12  dts12
+
+   *  man/netsnmp_agent.3, man/netsnmp_agent_registry.3,   
+      man/netsnmp_agent_trap.3, man/netsnmp_asn1_packet_parse.3,   
+      man/netsnmp_baby_steps.3, man/netsnmp_bulk_to_next.3,   
+      man/netsnmp_cache_handler.3, man/netsnmp_callback.3,   
+      man/netsnmp_container.3, man/netsnmp_data_list.3,   
+      man/netsnmp_debug.3, man/netsnmp_default_store.3,   
+      man/netsnmp_handler.3, man/netsnmp_instance.3,   
+      man/netsnmp_iterator_info_s.3, man/netsnmp_leaf.3,   
+      man/netsnmp_library.3, man/netsnmp_mib_maintenance.3,   
+      man/netsnmp_mib_utilities.3, man/netsnmp_mode_end_call.3,   
+      man/netsnmp_multiplexer.3,   
+      man/netsnmp_netsnmp_agent_request_info_s.3,   
+      man/netsnmp_netsnmp_column_info_t.3,   
+      man/netsnmp_netsnmp_data_list_s.3,   
+      man/netsnmp_netsnmp_handler_registration_s.3,   
+      man/netsnmp_netsnmp_iterator_info_s.3,   
+      man/netsnmp_netsnmp_mib_handler_access_methods.3,   
+      man/netsnmp_netsnmp_mib_handler_methods.3,   
+      man/netsnmp_netsnmp_mib_handler_s.3,   
+      man/netsnmp_netsnmp_request_info_s.3,   
+      man/netsnmp_netsnmp_table_registration_info_s.3,   
+      man/netsnmp_netsnmp_table_request_info_s.3,   
+      man/netsnmp_oid_stash.3, man/netsnmp_old_api.3,   
+      man/netsnmp_read_config.3, man/netsnmp_read_only.3,   
+      man/netsnmp_row_merge.3, man/netsnmp_scalar.3,   
+      man/netsnmp_scalar_group_group.3, man/netsnmp_serialize.3,   
+      man/netsnmp_snmp_agent.3, man/netsnmp_snmp_alarm.3,   
+      man/netsnmp_snmp_client.3, man/netsnmp_snmp_logging.3,   
+      man/netsnmp_snmp_pdu.3, man/netsnmp_snmp_session.3,   
+      man/netsnmp_stash_cache.3, man/netsnmp_stash_to_next.3,   
+      man/netsnmp_table.3, man/netsnmp_table_array.3,   
+      man/netsnmp_table_container.3, man/netsnmp_table_data.3,   
+      man/netsnmp_table_dataset.3, man/netsnmp_table_generic.3,   
+      man/netsnmp_table_indexes.3, man/netsnmp_table_iterator.3,   
+      man/netsnmp_table_iterator.h.3, man/netsnmp_table_maintenance.3,  
+       man/netsnmp_table_rows.3, man/netsnmp_tdata.3,   
+      man/netsnmp_util.3, man/netsnmp_utilities.3,   
+      man/netsnmp_variable_list.3, man/netsnmp_watcher.3:
+
+   documentation update
+
+2010-04-07 14:08  dts12
+
+   *  FAQ, README, configure, configure.in, dist/net-snmp.spec,   
+      snmplib/snmp_version.c:
+
+   Version number update
+
+2010-04-07 14:05  dts12
+
+   * local/mib2c.table_data.conf:
+
+   Insert the cache helper correctly.
+
+2010-04-06 11:03  dts12
+
+   * FAQ:
+
+   Python is apparently client-side only.
+
+2010-04-06 08:56  dts12
+
+   * agent/mibgroup/ucd-snmp/disk.c, mibs/UCD-SNMP-MIB.txt:
+
+   NEWS: snmpd: Latch large-disk statistics at 2Tb (rather than
+   wrapping.
+
+2010-03-29 15:26  dts12
+
+   * agent/mibgroup/mibII/vacm_conf.c, snmplib/parse.c:
+
+   Include MIB directory search path in reports of missing MIB
+   files.
+   Include config file search path in reports of missing access
+   control settings.
+
+2010-03-29 15:20  dts12
+
+   * snmplib/vacm.c:
+
+   NEWS: snmpd: Fix handling of multiple matching VACM entries.
+   (Use the "best" match, rather than the first one).
+   Reported by Adam Lewis.
+   Note that this could potentially affect the behaviour of
+   existing access control configurations.
+
+2010-03-29 15:15  dts12
+
+   * snmplib/snmpusm.c:
+
+   CHANGES: snmplib: Fix agent crash when sending encrypted SNMPv3
+   traps.
+   Reported by Srikapilan Gandhi
+
+2010-03-25 20:07  bvassche
+
+   * agent/mibgroup/agentx/agentx_config.c:
+
+   CHANGES: agentx: changed default TCP target from 0.0.0.0:705 to
+   localhost:705. This is not only a more secure choice but it also
+   makes it possible on Windows systems to let an AgentX subagent
+   connect to an AgentX master agent running on the same system
+   without having to set the variable NETSNMP_DS_AGENT_X_SOCKET.
+
+2010-03-22 16:10  dts12
+
+   * mibs/NET-SNMP-PASS-MIB.txt:
+
+   Fix typo in default IpAddress value
+   (See Bug #2972141)
+
+2010-03-22 15:24  bvassche
+
+   * mibs/UCD-DISKIO-MIB.txt:
+
+   Follow-up for r18349: added missing comma such that it is again
+   possible to compile UCD-DISKIO-MIB.
+
+2010-03-22 13:49  dts12
+
+   *  mibs/UCD-DISKIO-MIB.txt, mibs/UCD-DLMOD-MIB.txt,   
+      mibs/UCD-IPFILTER-MIB.txt, mibs/UCD-SNMP-MIB.txt:
+
+   CHANGES: mibs: BUG: 2973890: Fix imports, DiskIOEntry list and
+   revision histories
+
+2010-03-22 11:55  bvassche
+
+   * agent/mibgroup/winExtDLL.c, include/net-snmp/library/snmp_api.h:
+
+   Win32, winExtDLL: solved the mystery of "ASN type zero". The
+   winExtDLL code does now no longer trigger conversions of Windows
+   ASN varbinds with ASN type zero. Note: this code change does not
+   change the agent behavior.
+
+2010-03-20 19:16  bvassche
+
+   * agent/mibgroup/winExtDLL.c:
+
+   Fixed the compiler warnings reported by gcc (MinGW).
+
+2010-03-19 12:40  bvassche
+
+   *  agent/mibgroup/winExtDLL.c, win32/libsnmp_dll/libsnmp.def,   
+      win32/libsnmp_dll/libsnmp.def.in:
+
+   CHANGES: Win32: winExtDLL: multiple varbind set requests are now
+   processed correctly.
+   CHANGES: Win32: winExtDLL: made error codes in SNMP response PDUs
+   as RFC-compliant as possible.
+   CHANGES: Win32: winExtDLL: if loading an extension DLL fails, the
+   reason why loading failed is now logged.
+   CHANGES: Win32: winExtDLL: fixed a memory leak that occurred when
+   SnmpExtensionQuery(Ex) failed. This memory leak has been found
+   via source reading. Note: it is not clear whether it was possible
+   to trigger this memory leak. This leak is certainly not triggered
+   by every request for which a response with non-zero error status
+   is sent back.
+
+2010-03-19 11:41  bvassche
+
+   * agent/snmp_agent.c:
+
+   Reverted r18324 since the 5.4 branch is in RC stage and a
+   leak-at-exit is not a showstopper.
+
+2010-03-17 13:41  bvassche
+
+   * mibs/NET-SNMP-AGENT-MIB.txt, mibs/NET-SNMP-EXTEND-MIB.txt:
+
+   Minor MIB fixes (backported r18320, r18321 and r18325).
+
+2010-03-17 13:29  bvassche
+
+   * agent/snmp_agent.c:
+
+   CHANGES: snmpd: fixed one leak-at-exit.
+
+2010-03-17 12:44  bvassche
+
+   * agent/mibgroup/winExtDLL.c:
+
+   CHANGES: BUG: 2971257: Fixed winExtDLL handling of multi-varbind
+   getNext requests with OIDs in reverse lexicographical order.
+
+2010-03-14 22:56  dts12
+
+   * CHANGES, NEWS:
+
+   version update
+
+2010-03-14 22:31  dts12
+
+   * ChangeLog:
+
+   version update
+
+2010-03-14 22:28  dts12
+
+   * agent/Makefile.depend, agent/mibgroup/Makefile.depend:
+
+   make depend
+
+2010-03-14 22:19  dts12
+
+   * agent/Makefile.depend, agent/mibgroup/Makefile.depend:
+
+   make depend
 
 2010-03-14 22:19  dts12
 
