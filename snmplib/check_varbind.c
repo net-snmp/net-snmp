@@ -214,6 +214,23 @@ netsnmp_check_vb_rowstatus(const netsnmp_variable_list *var, int old_value)
 }
 
 int
+netsnmp_check_vb_rowstatus_with_storagetype(const netsnmp_variable_list *var,
+                                            int old_value, int old_storage)
+{
+    register int rc = SNMP_ERR_NOERROR;
+
+    if (NULL == var)
+        return SNMP_ERR_GENERR;
+
+    if ((rc = netsnmp_check_vb_rowstatus_value(var)))
+        return rc;
+
+    return check_rowstatus_with_storagetype_transition(old_value,
+                                                       *var->val.integer,
+                                                       old_storage);
+}
+
+int
 netsnmp_check_vb_storagetype(const netsnmp_variable_list *var, int old_value)
 {
     int rc = SNMP_ERR_NOERROR;

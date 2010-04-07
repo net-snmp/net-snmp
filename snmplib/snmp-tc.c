@@ -366,16 +366,13 @@ check_rowstatus_transition(int oldValue, int newValue)
     switch (newValue) {
         /*
          * these two end up being equivelent as far as checking the 
-         */
-        /*
          * status goes, although the final states are based on the 
-         */
-        /*
          * newValue. 
          */
     case RS_ACTIVE:
     case RS_NOTINSERVICE:
-        if (oldValue == RS_NOTINSERVICE || oldValue == RS_ACTIVE);
+        if (oldValue == RS_NOTINSERVICE || oldValue == RS_ACTIVE)
+            ;
         else
             return SNMP_ERR_INCONSISTENTVALUE;
         break;
@@ -388,13 +385,6 @@ check_rowstatus_transition(int oldValue, int newValue)
         break;
 
     case RS_CREATEANDGO:
-        if (oldValue != RS_NONEXISTENT)
-            /*
-             * impossible, we already exist. 
-             */
-            return SNMP_ERR_INCONSISTENTVALUE;
-        break;
-
     case RS_CREATEANDWAIT:
         if (oldValue != RS_NONEXISTENT)
             /*
@@ -412,6 +402,21 @@ check_rowstatus_transition(int oldValue, int newValue)
     }
 
     return SNMP_ERR_NOERROR;
+}
+
+char
+check_rowstatus_with_storagetype_transition(int oldValue, int newValue,
+                                            int oldStorage)
+{
+    /*
+     * can not destroy permanent or readonly rows
+     */
+    if ((RS_DESTROY == newValue) &&
+        ((SNMP_STORAGE_PERMANENT == oldStorage) ||
+         (SNMP_STORAGE_READONLY == oldStorage)))
+        return SNMP_ERR_WRONGVALUE;
+
+    return check_rowstatus_transition(oldValue, newValue);
 }
 
 char

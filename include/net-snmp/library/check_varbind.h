@@ -37,6 +37,7 @@ extern          "C" {
     NETSNMP_IMPORT
     int netsnmp_check_vb_rowstatus_value(const netsnmp_variable_list *var);
     int netsnmp_check_vb_rowstatus(const netsnmp_variable_list *var, int old_val);
+    int netsnmp_check_vb_rowstatus_with_storagetype(const netsnmp_variable_list *var, int old_val, int old_storage);
 
     int netsnmp_check_vb_storagetype(const netsnmp_variable_list *var, int old_val);
 
