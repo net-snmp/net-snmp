@@ -89,6 +89,8 @@ extern          "C" {
 
     void netsnmp_container_table_row_insert(netsnmp_request_info *request,
                                             netsnmp_index *row);
+    void netsnmp_container_table_row_remove(netsnmp_request_info *request,
+                                            netsnmp_index        *row);
 
 /* ===================================
  * Container Table API: Row operations
