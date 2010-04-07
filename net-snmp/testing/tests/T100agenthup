@@ -27,7 +27,7 @@ kill -HUP `cat $SNMP_SNMPD_PID_FILE` > /dev/null 2>&1
 DELAY
 
 # And see if it has the new value.
-CAPTURE "snmpget -On $SNMP_FLAGS -c testcommunity -v 1 $SNMP_TRANSPORT_SPEC:$SNMP_TEST_DEST$SNMP_SNMPD_PORT system.sysLocation.0"
+CAPTURE "snmpget -On $SNMP_FLAGS -c testcommunity -v 1 $SNMP_TRANSPORT_SPEC:$SNMP_TEST_DEST$SNMP_SNMPD_PORT .1.3.6.1.2.1.1.6.0"
 
 STOPAGENT
 

@@ -18,7 +18,7 @@ SKIPIF NETSNMP_DISABLE_SNMPV2C
 # standard V3 configuration for initial user
 . ./Sv3config
 # config the proxy
-CONFIGAGENT proxy -t 2 -r 1 -v 2c -c testcommunity $SNMP_TRANSPORT_SPEC:${SNMP_TEST_DEST}${SNMP_AGENTX_PORT} system
+CONFIGAGENT proxy -t 2 -r 1 -v 2c -c testcommunity $SNMP_TRANSPORT_SPEC:${SNMP_TEST_DEST}${SNMP_AGENTX_PORT} .1.3.6.1.2.1.1
 
 # Start the agent without initializing the system mib.
 ORIG_AGENT_FLAGS="$AGENT_FLAGS"
@@ -47,7 +47,7 @@ STARTAGENT
   SNMP_SNMPD_PORT=$ORIG_SNMP_SNMPD_PORT
 
   # test to see that the agent now supports the system mib
-  CAPTURE "snmpget -On $SNMP_FLAGS -t 5 $AUTHTESTARGS $SNMP_TRANSPORT_SPEC:$SNMP_TEST_DEST$SNMP_SNMPD_PORT sysContact.0"
+  CAPTURE "snmpget -On $SNMP_FLAGS -t 5 $AUTHTESTARGS $SNMP_TRANSPORT_SPEC:$SNMP_TEST_DEST$SNMP_SNMPD_PORT .1.3.6.1.2.1.1.4.0"
 
   
   # we don't know the real value, unfortunately, so we test for what
@@ -57,7 +57,7 @@ STARTAGENT
   if test "$snmp_last_test_result" = 0; then
 
     # test to see that the agent now supports the system mib
-    CAPTURE "snmpset -On -Ir $SNMP_FLAGS -t 5 $AUTHTESTARGS $SNMP_TRANSPORT_SPEC:$SNMP_TEST_DEST$SNMP_SNMPD_PORT sysContact.0 i 42"
+    CAPTURE "snmpset -On -Ir $SNMP_FLAGS -t 5 $AUTHTESTARGS $SNMP_TRANSPORT_SPEC:$SNMP_TEST_DEST$SNMP_SNMPD_PORT .1.3.6.1.2.1.1.4.0 i 42"
 
     # 5.0.x snmpset shows error on single line
     #CHECK ".1.3.6.1.2.1.1.4.0 = Wrong Type"
