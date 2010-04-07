@@ -101,7 +101,7 @@ SAVECHECKAGENT 'line 1: Error: missing CONTEXT_NAME parameter'
 SAVECHECKAGENT 'line 2: Error: missing NAME parameter'
 SAVECHECKAGENT 'line 3: Error: context name too long'
 # 602
-CHECKAGENT 'line 4: Error: Blank line following com2sec token.'
+CHECKAGENT 'line 4: Error: Blank line following com2sec6 token.'
 SAVECHECKAGENT 'line 5: Error: empty NAME parameter'
 SAVECHECKAGENT 'line 6: Error: security name too long'
 SAVECHECKAGENT 'line 7: Error: missing NAME parameter'
