@@ -47,12 +47,12 @@ usage(const char* progname)
             "TOKENs\n"
             "\t\t\t   (ALL gives extremely verbose debugging output)\n"
             "  -d\t\t\tdump all traffic\n");
-#ifndef DISABLE_MIB_LOADING
+#ifndef NETSNMP_DISABLE_MIB_LOADING
     fprintf(stderr,
             "  -P MIBOPTS\t\tToggle various defaults controlling mib "
             "parsing:\n");
     snmp_mib_toggle_options_usage("\t\t\t  ", stderr);
-#endif /* DISABLE_MIB_LOADING */
+#endif /* NETSNMP_DISABLE_MIB_LOADING */
     fprintf(stderr,
             "  -L LOGOPTS\t\tToggle various defaults controlling logging:\n");
     snmp_log_options_usage("\t\t\t  ", stderr);
