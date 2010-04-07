@@ -411,6 +411,14 @@ netsnmp_insert_tdata_row(netsnmp_request_info *request,
     netsnmp_container_table_row_insert(request, (netsnmp_index *)row);
 }
 
+/** inserts a newly created tdata row into a request */
+NETSNMP_INLINE void
+netsnmp_remove_tdata_row(netsnmp_request_info *request,
+                         netsnmp_tdata_row *row)
+{
+    netsnmp_container_table_row_remove(request, (netsnmp_index *)row);
+}
+
 
 /* ==================================
  *
