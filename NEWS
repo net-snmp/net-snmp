@@ -6,10 +6,17 @@ listing of all changes made to the code.
 *5.4.3*
 
     snmpd:
+      - Change default AgentX target from 0.0.0.0:705 to localhost:705
       - Fix CVE-2008-4309 (GETBULK issue reported by Oscar Mira-Sanchez)
+      - Fix handling of multiple matching VACM entries
+        (Use the "best" match, rather than the first one).
+            Note that this could potentially affect the behaviour of
+            existing access control configurations.
+      - Latch large-disk statistics at 2Tb (rather than wrapping)
 
     Linux:
       - Fix build on modern distributions (using rpm-4.6)
+
 
 *5.4.2*
 
