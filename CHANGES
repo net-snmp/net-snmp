@@ -23,6 +23,7 @@ listing of all changes made to the code.
       - [PATCH 2952140]: Fix overflow counter32/gauge32 on 64-bit systems
       - Change the parsing of ranges to accept all valid values
       - Ensure O_CREATE mask is always specified
+      - Fix agent crash when sending encrypted SNMPv3 traps
       - Make -LN stop dumping core.
       - Make bad debug levels report the offending symbol
 
@@ -53,10 +54,12 @@ listing of all changes made to the code.
       - [PATCH 2968642]: Catch overflow of pass-through command buffer
       - Ensure O_CREATE mask is always specified
       - Fix CVE-2008-4309 (GETBULK issue reported by Oscar Mira-Sanchez)
+      - Fix handling of multiple matching VACM entries.
       - Fix memory leak when multiple interfaces have the same IPv6 address
       - Fix possible crash when 64-bit counters exceed 2^32
       - Fix two bugs with smux password support.
       - Improve parsing of -LS command line argument
+      - Latch large-disk statistics at 2Tb (rather than wrapping)
       - Support large HW addresses (>6bytes)
 
     snmptrapd:
@@ -90,6 +93,9 @@ listing of all changes made to the code.
       - [BUG 2827269]: Suppress non-ordered TODO comments
       - [BUG 2888569]: Fix generation of table columns array
       - [PATCH 2316127]: Fix bug in iterate_access generated code
+
+    mibs:
+      - [BUG 2973890]: Fix imports, DiskIOEntry list and revision histories
 
     perl:
       - [BUG 1554817]: Fix class assigment so getRootOID works properly
