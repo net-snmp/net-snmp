@@ -160,8 +160,10 @@ icmp_msg_stats_load(netsnmp_cache *cache, void *vmagic)
 {
     struct icmp_mib v4icmp;
     struct icmp4_msg_mib v4icmpmsg;
+#ifdef NETSNMP_ENABLE_IPV6
     struct icmp6_mib v6icmp;
     struct icmp6_msg_mib v6icmpmsg;
+#endif
     int i, j, k, flag, inc;
 
     memset(&icmp_msg_stats_table, 0, sizeof(icmp_msg_stats_table));
