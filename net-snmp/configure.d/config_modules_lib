@@ -142,7 +142,7 @@ while test "x$new_transport_list" != "x"; do
       transport_hdr="snmp"$i"Domain.h"
       rel_transport_src="snmplib/"$transport_src
       rel_transport_hdr="include/net-snmp/library/"$transport_hdr
-      lc_i=`echo $i | tr A-Z a-z`
+      lc_i=`echo $i | tr 'ABCDEFGHIJKLMNOPQRSTUVWXYZ' 'abcdefghijklmnopqrstuvwxyz'`
       ctor_fn="netsnmp_"$lc_i"_ctor"
       if test -f "$srcdir/$rel_transport_src"; then
         transport_result_list="$transport_result_list $i"
