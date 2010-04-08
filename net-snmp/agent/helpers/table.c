@@ -169,7 +169,7 @@ table_helper_handler(netsnmp_mib_handler *handler,
     unsigned int    oid_column_pos;
     unsigned int    tmp_idx;
     size_t	    tmp_len;
-    int             incomplete, out_of_range, cleaned_up = 0;
+    int             incomplete, out_of_range;
     int             status = SNMP_ERR_NOERROR, need_processing = 0;
     oid            *tmp_name;
     netsnmp_table_request_info *tbl_req_info;
@@ -195,8 +195,9 @@ table_helper_handler(netsnmp_mib_handler *handler,
 
     DEBUGIF("helper:table:req") {
         DEBUGMSGTL(("helper:table:req",
-                    "Got request for handler %s: base oid:",
-                    handler->handler_name));
+                    "Got %s (%d) mode request for handler %s: base oid:",
+                    se_find_label_in_slist("agent_mode", reqinfo->mode),
+                    reqinfo->mode, handler->handler_name));
         DEBUGMSGOID(("helper:table:req", reginfo->rootoid,
                      reginfo->rootoid_len));
         DEBUGMSG(("helper:table:req", "\n"));
@@ -229,15 +230,15 @@ table_helper_handler(netsnmp_mib_handler *handler,
          * a valid table info pointer).
          */
         if(NULL == netsnmp_extract_table_info(requests)) {
-            DEBUGMSGTL(("table:helper","no table info for set - skipping\n"));
+            DEBUGMSGTL(("helper:table","no table info for set - skipping\n"));
         }
         else
             need_processing = 1;
     }
     else {
         /*
-         * for RESERVE1 and GETS, only continue if we have at least
-         * one valid request.
+         * for GETS, only continue if we have at least one valid request.
+         * for RESERVE1, only continue if we have indexes for all requests.
          */
            
     /*
@@ -539,11 +540,6 @@ table_helper_handler(netsnmp_mib_handler *handler,
                  *
                  * Reject requests of the form 'myObject'   (no instance)
                  */
-                if (reqinfo->mode != MODE_GETNEXT) {
-                    table_helper_cleanup(reqinfo, requests,
-                                         SNMP_NOSUCHINSTANCE);
-                    cleaned_up = 1;
-                }
                 tmp_len = 0;
                 tmp_name = (oid *) & tmp_len;
                 break;
@@ -574,12 +570,11 @@ table_helper_handler(netsnmp_mib_handler *handler,
         }                       /** for loop */
 
         DEBUGIF("helper:table:results") {
-            DEBUGMSGTL(("helper:table:results", "  found %d indexes\n",
-                        tbl_req_info->number_indexes));
-            if (!cleaned_up) {
                 unsigned int    count;
                 u_char         *buf = NULL;
                 size_t          buf_len = 0, out_len = 0;
+                DEBUGMSGTL(("helper:table:results", "  found %d indexes\n",
+                            tbl_req_info->number_indexes));
                 DEBUGMSGTL(("helper:table:results",
                             "  column: %d, indexes: %d",
                             tbl_req_info->colnum,
@@ -609,7 +604,6 @@ table_helper_handler(netsnmp_mib_handler *handler,
                     free(buf);
                 }
                 DEBUGMSG(("helper:table:results", "\n"));
-            }
         }
 
 
@@ -620,8 +614,22 @@ table_helper_handler(netsnmp_mib_handler *handler,
         if ((reqinfo->mode != MODE_GETNEXT) &&
             ((tbl_req_info->number_indexes != tbl_info->number_indexes) ||
              (tmp_len != -1))) {
+
             DEBUGMSGTL(("helper:table",
                         "invalid index(es) for table - skipping\n"));
+
+            if ( MODE_IS_SET(reqinfo->mode) ) {
+                /*
+                 * no point in continuing without indexes for set.
+                 */
+                netsnmp_assert(reqinfo->mode == MODE_SET_RESERVE1);
+                /** clear first request so we wont try to run FREE mode */
+                netsnmp_free_request_data_sets(requests);
+                /** set actual error */
+                table_helper_cleanup(reqinfo, request, SNMP_ERR_NOCREATION);
+                need_processing = 0; /* don't call next handler */
+                break;
+            }
             table_helper_cleanup(reqinfo, request, SNMP_NOSUCHINSTANCE);
             continue;
         }
