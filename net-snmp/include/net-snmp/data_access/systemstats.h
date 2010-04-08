@@ -36,6 +36,11 @@ typedef struct netsnmp_systemstats_s {
     */
    netsnmp_ipstats stats;
 
+   /*
+    * for logging
+    */
+   const char* tableName;
+   
    /** old_stats is used in netsnmp_access_interface_entry_update_stats */
    netsnmp_ipstats *old_stats;
 
@@ -79,7 +84,8 @@ void netsnmp_access_systemstats_container_free(netsnmp_container *container,
  * create/free an entry
  */
 netsnmp_systemstats_entry *
-netsnmp_access_systemstats_entry_create(int version, int if_index);
+netsnmp_access_systemstats_entry_create(int version, int if_index,
+            const char* tableName);
 
 void netsnmp_access_systemstats_entry_free(netsnmp_systemstats_entry * entry);
 

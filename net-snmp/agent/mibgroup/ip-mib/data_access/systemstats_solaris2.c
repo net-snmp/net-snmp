@@ -129,7 +129,8 @@ _insert_entry(netsnmp_container *container, mib2_ipIfStatsEntry_t *ipe)
     int i;
     
     netsnmp_systemstats_entry *ep =
-        netsnmp_access_systemstats_entry_create(ipe->ipIfStatsIPVersion, 0); 
+        netsnmp_access_systemstats_entry_create(ipe->ipIfStatsIPVersion, 0,
+                "ipSystemStatsTable"); 
 
     DEBUGMSGTL(("access:systemstats:arch", "insert entry for v%d\n",
                 ipe->ipIfStatsIPVersion)); 

@@ -515,39 +515,62 @@ netsnmp_access_interface_entry_update_stats(netsnmp_interface_entry * prev_vals,
         memcpy(prev_vals->old_stats, &prev_vals->stats, sizeof(new_vals->stats));
     }
 
-        netsnmp_c64_check32_and_update(&prev_vals->stats.ibytes,
+        if (0 != netsnmp_c64_check32_and_update(&prev_vals->stats.ibytes,
                                        &new_vals->stats.ibytes,
                                        &prev_vals->old_stats->ibytes,
-                                       &need_wrap_check);
-        netsnmp_c64_check32_and_update(&prev_vals->stats.iucast,
+                                       &need_wrap_check))
+            NETSNMP_LOGONCE((LOG_ERR,
+                    "Error expanding ifHCInOctets to 64bits\n"));
+
+        if (0 != netsnmp_c64_check32_and_update(&prev_vals->stats.iucast,
                                        &new_vals->stats.iucast,
                                        &prev_vals->old_stats->iucast,
-                                       &need_wrap_check);
-        netsnmp_c64_check32_and_update(&prev_vals->stats.imcast,
+                                       &need_wrap_check))
+            NETSNMP_LOGONCE((LOG_ERR,
+                    "Error expanding ifHCInUcastPkts to 64bits\n"));
+
+        if (0 != netsnmp_c64_check32_and_update(&prev_vals->stats.imcast,
                                        &new_vals->stats.imcast,
                                        &prev_vals->old_stats->imcast,
-                                       &need_wrap_check);
-        netsnmp_c64_check32_and_update(&prev_vals->stats.ibcast,
+                                       &need_wrap_check))
+            NETSNMP_LOGONCE((LOG_ERR,
+                    "Error expanding ifHCInMulticastPkts to 64bits\n"));
+
+        if (0 != netsnmp_c64_check32_and_update(&prev_vals->stats.ibcast,
                                        &new_vals->stats.ibcast,
                                        &prev_vals->old_stats->ibcast,
-                                       &need_wrap_check);
-        netsnmp_c64_check32_and_update(&prev_vals->stats.obytes,
+                                       &need_wrap_check))
+            NETSNMP_LOGONCE((LOG_ERR,
+                    "Error expanding ifHCInBroadcastPkts to 64bits\n"));
+
+        if (0 != netsnmp_c64_check32_and_update(&prev_vals->stats.obytes,
                                        &new_vals->stats.obytes,
                                        &prev_vals->old_stats->obytes,
-                                       &need_wrap_check);
-        netsnmp_c64_check32_and_update(&prev_vals->stats.oucast,
+                                       &need_wrap_check))
+            NETSNMP_LOGONCE((LOG_ERR,
+                    "Error expanding ifHCOutOctets to 64bits\n"));
+
+        if (0 != netsnmp_c64_check32_and_update(&prev_vals->stats.oucast,
                                        &new_vals->stats.oucast,
                                        &prev_vals->old_stats->oucast,
-                                       &need_wrap_check);
-        netsnmp_c64_check32_and_update(&prev_vals->stats.omcast,
+                                       &need_wrap_check))
+            NETSNMP_LOGONCE((LOG_ERR,
+                    "Error expanding ifHCOutUcastPkts to 64bits\n"));
+
+        if (0 != netsnmp_c64_check32_and_update(&prev_vals->stats.omcast,
                                        &new_vals->stats.omcast,
                                        &prev_vals->old_stats->omcast,
-                                       &need_wrap_check);
-        netsnmp_c64_check32_and_update(&prev_vals->stats.obcast,
+                                       &need_wrap_check))
+            NETSNMP_LOGONCE((LOG_ERR,
+                    "Error expanding ifHCOutMulticastPkts to 64bits\n"));
+
+        if (0 != netsnmp_c64_check32_and_update(&prev_vals->stats.obcast,
                                        &new_vals->stats.obcast,
                                        &prev_vals->old_stats->obcast,
-                                       &need_wrap_check);
-    
+                                       &need_wrap_check))
+            NETSNMP_LOGONCE((LOG_ERR,
+                    "Error expanding ifHCOutBroadcastPkts to 64bits\n"));
+
     /*
      * Copy 32 bit counters
      */

@@ -54,46 +54,75 @@ netsnmp_access_sctp_stats_load(netsnmp_cache * cache, void *magic)
     /*
      * Update 64 bit counters
      */
-    netsnmp_c64_check32_and_update(&sctp_stats.out_ctrl_chunks,
+    if (0 != netsnmp_c64_check32_and_update(&sctp_stats.out_ctrl_chunks,
                                    &new_stats.out_ctrl_chunks,
                                    &prev_sctp_stats.out_ctrl_chunks,
-                                   &need_wrap_check);
-    netsnmp_c64_check32_and_update(&sctp_stats.out_order_chunks,
+                                   &need_wrap_check))
+        NETSNMP_LOGONCE((LOG_ERR,
+                "SCTP: Error expanding sctpOutCtrlChunks to 64bits\n"));
+
+    if (0 != netsnmp_c64_check32_and_update(&sctp_stats.out_order_chunks,
                                    &new_stats.out_order_chunks,
                                    &prev_sctp_stats.out_order_chunks,
-                                   &need_wrap_check);
-    netsnmp_c64_check32_and_update(&sctp_stats.out_unorder_chunks,
+                                   &need_wrap_check))
+        NETSNMP_LOGONCE((LOG_ERR,
+                "SCTP: Error expanding sctpOutOrderChunks to 64bits\n"));
+
+    if (0 != netsnmp_c64_check32_and_update(&sctp_stats.out_unorder_chunks,
                                    &new_stats.out_unorder_chunks,
                                    &prev_sctp_stats.out_unorder_chunks,
-                                   &need_wrap_check);
-    netsnmp_c64_check32_and_update(&sctp_stats.in_ctrl_chunks,
+                                   &need_wrap_check))
+        NETSNMP_LOGONCE((LOG_ERR,
+                "SCTP: Error expanding sctpOutUnorderChunks to 64bits\n"));
+
+    if (0 != netsnmp_c64_check32_and_update(&sctp_stats.in_ctrl_chunks,
                                    &new_stats.in_ctrl_chunks,
                                    &prev_sctp_stats.in_ctrl_chunks,
-                                   &need_wrap_check);
-    netsnmp_c64_check32_and_update(&sctp_stats.in_order_chunks,
+                                   &need_wrap_check))
+        NETSNMP_LOGONCE((LOG_ERR,
+                "SCTP: Error expanding sctpInCtrlChunks to 64bits\n"));
+
+    if (0 != netsnmp_c64_check32_and_update(&sctp_stats.in_order_chunks,
                                    &new_stats.in_order_chunks,
                                    &prev_sctp_stats.in_order_chunks,
-                                   &need_wrap_check);
-    netsnmp_c64_check32_and_update(&sctp_stats.in_unorder_chunks,
+                                   &need_wrap_check))
+        NETSNMP_LOGONCE((LOG_ERR,
+                "SCTP: Error expanding sctpInOrderChunks to 64bits\n"));
+
+    if (0 != netsnmp_c64_check32_and_update(&sctp_stats.in_unorder_chunks,
                                    &new_stats.in_unorder_chunks,
                                    &prev_sctp_stats.in_unorder_chunks,
-                                   &need_wrap_check);
-    netsnmp_c64_check32_and_update(&sctp_stats.frag_usr_msgs,
+                                   &need_wrap_check))
+        NETSNMP_LOGONCE((LOG_ERR,
+                "SCTP: Error expanding sctpInUnorderChunks to 64bits\n"));
+
+    if (0 != netsnmp_c64_check32_and_update(&sctp_stats.frag_usr_msgs,
                                    &new_stats.frag_usr_msgs,
                                    &prev_sctp_stats.frag_usr_msgs,
-                                   &need_wrap_check);
-    netsnmp_c64_check32_and_update(&sctp_stats.reasm_usr_msgs,
+                                   &need_wrap_check))
+        NETSNMP_LOGONCE((LOG_ERR,
+                "SCTP: Error expanding sctpFragUsrMsgs to 64bits\n"));
+
+    if (0 != netsnmp_c64_check32_and_update(&sctp_stats.reasm_usr_msgs,
                                    &new_stats.reasm_usr_msgs,
                                    &prev_sctp_stats.reasm_usr_msgs,
-                                   &need_wrap_check);
-    netsnmp_c64_check32_and_update(&sctp_stats.out_sctp_packs,
+                                   &need_wrap_check))
+        NETSNMP_LOGONCE((LOG_ERR,
+                "SCTP: Error expanding sctpReasmUsrMsgs to 64bits\n"));
+
+    if (0 != netsnmp_c64_check32_and_update(&sctp_stats.out_sctp_packs,
                                    &new_stats.out_sctp_packs,
                                    &prev_sctp_stats.out_sctp_packs,
-                                   &need_wrap_check);
-    netsnmp_c64_check32_and_update(&sctp_stats.in_sctp_packs,
+                                   &need_wrap_check))
+        NETSNMP_LOGONCE((LOG_ERR,
+                "SCTP: Error expanding sctpOutSCTPPacks to 64bits\n"));
+
+    if (0 != netsnmp_c64_check32_and_update(&sctp_stats.in_sctp_packs,
                                    &new_stats.in_sctp_packs,
                                    &prev_sctp_stats.in_sctp_packs,
-                                   &need_wrap_check);
+                                   &need_wrap_check))
+        NETSNMP_LOGONCE((LOG_ERR,
+                "SCTP: Error expanding sctpInSCTPPacks to 64bits\n"));
 
     /*
      * Update prev_stats for next computation.
