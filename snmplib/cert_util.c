@@ -1382,6 +1382,30 @@ netsnmp_cert_validate(int who, int how, X509 *cert)
     return -1;
 }
 
+int
+netsnmp_cert_check_vb_fingerprint(const netsnmp_variable_list *var)
+{
+    if (!var)
+        return SNMP_ERR_GENERR;
+
+    if (0 == var->val_len) /* empty allowed in some cases */
+        return SNMP_ERR_NOERROR;
+
+    if (! (0x01 & var->val_len)) { /* odd len */
+        DEBUGMSGT(("cert:varbind:fingerprint",
+                   "expecting odd length for fingerprint\n"));
+        return SNMP_ERR_WRONGLENGTH;
+    }
+
+    if (var->val.string[0] > NS_HASH_MAX) {
+        DEBUGMSGT(("cert:varbind:fingerprint", "hashtype %d > max %d\n",
+                   var->val.string[0], NS_HASH_MAX));
+        return SNMP_ERR_WRONGVALUE;
+    }
+
+    return SNMP_ERR_NOERROR;
+}
+
 static const char *_mode_str(u_char mode)
 {
     return _modes[mode];
