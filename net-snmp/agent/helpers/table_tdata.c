@@ -320,9 +320,13 @@ _netsnmp_tdata_helper_handler(netsnmp_mib_handler *handler,
     netsnmp_request_info       *request;
     netsnmp_table_request_info *table_info;
     netsnmp_tdata_row          *row;
+    int                         need_processing = 1;
 
     switch ( reqinfo->mode ) {
     case MODE_GET:
+        need_processing = 0; /* only need processing if some vars found */
+        /** Fall through */
+
     case MODE_SET_RESERVE1:
 
         for (request = requests; request; request = request->next) {
@@ -330,10 +334,18 @@ _netsnmp_tdata_helper_handler(netsnmp_mib_handler *handler,
                 continue;
     
             table_info = netsnmp_extract_table_info(request);
-            if (!table_info)
-                continue;           /* ack */
+            if (!table_info) {
+                netsnmp_assert(table_info); /* yes, this will always hit */
+                netsnmp_set_request_error(reqinfo, request, SNMP_ERR_GENERR);
+                continue;           /* eek */
+            }
             row = netsnmp_container_table_row_extract( request );
-
+            if (!row && (reqinfo->mode == MODE_GET)) {
+                netsnmp_assert(row); /* yes, this will always hit */
+                netsnmp_set_request_error(reqinfo, request, SNMP_ERR_GENERR);
+                continue;           /* eek */
+            }
+            ++need_processing;
             netsnmp_request_add_list_data(request,
                                       netsnmp_create_data_list(
                                           TABLE_TDATA_TABLE, table, NULL));
@@ -341,6 +353,9 @@ _netsnmp_tdata_helper_handler(netsnmp_mib_handler *handler,
                                       netsnmp_create_data_list(
                                           TABLE_TDATA_ROW,   row,   NULL));
         }
+        /** skip next handler if processing not needed */
+        if (!need_processing)
+            handler->flags |= MIB_HANDLER_AUTO_NEXT_OVERRIDE_ONCE;
     }
 
     /* next handler called automatically - 'AUTO_NEXT' */
