@@ -3504,6 +3504,10 @@ _request_set_error(netsnmp_request_info *request, int mode, int error_value)
             return SNMPERR_VALUE;
              */
 
+        case SNMP_MSG_INTERNAL_SET_RESERVE1:
+            request->status = SNMP_ERR_NOCREATION;
+            break;
+
         default:
             request->status = SNMP_ERR_NOSUCHNAME;      /* WWW: correct? */
             break;
