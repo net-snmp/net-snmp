@@ -160,7 +160,8 @@ _systemstats_v4(netsnmp_container* container, u_int load_flags)
         while (*stats == ' ') /* skip spaces before stats */
             stats++;
 
-        entry = netsnmp_access_systemstats_entry_create(1, 0);
+        entry = netsnmp_access_systemstats_entry_create(1, 0,
+                    "ipSystemStatsTable.ipv4");
         if(NULL == entry) {
             netsnmp_access_systemstats_container_free(container,
                                                       NETSNMP_ACCESS_SYSTEMSTATS_FREE_NOFLAGS);
@@ -533,7 +534,8 @@ _systemstats_v6_load_systemstats(netsnmp_container* container, u_int load_flags)
     const char     *filename = "/proc/net/snmp6";
     int rc = 0;
     
-    entry = netsnmp_access_systemstats_entry_create(2, 0);
+    entry = netsnmp_access_systemstats_entry_create(2, 0,
+            "ipSystemStatsTable.ipv6");
     if(NULL == entry)
         return -3;
     
@@ -641,7 +643,8 @@ _systemstats_v6_load_ifstats(netsnmp_container* container, u_int load_flags)
             scan_val = strtoull(scan_str, NULL, 0);
         }
         
-        entry = netsnmp_access_systemstats_entry_create(2, scan_val);
+        entry = netsnmp_access_systemstats_entry_create(2, scan_val,
+                "ipIfStatsTable.ipv6");
         if(NULL == entry) {
             fclose(devin);
             closedir(dev_snmp6_dir);
