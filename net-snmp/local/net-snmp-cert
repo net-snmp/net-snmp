@@ -4,28 +4,38 @@ use strict;
 use 5.10.0;
 
 use File::Basename;
+use Sys::Hostname;
+use Cwd qw(getcwd realpath);
 
 package NetSNMP::Cert;
 
-our $VERSION = '0.1.0a';
+our $VERSION = '0.1.5a';
 
-our $ERR = -1;
-
-our $debug;
-
-our $QUIET     = 1;
+our $ERR          = -1;
+our $debug        = 0;
+our $QUIET        = 1;
 
 our $PROG = ::basename($0);
 
-our $OPENSSL         = $ENV{NET_SNMP_CRT_OPENSSL} || 'openssl';
-our $CFGTOOL         = $ENV{NET_SNMP_CRT_CFGTOOL} || 'net-snmp-config';
+# executables
+our $OPENSSL     = $ENV{NET_SNMP_CRT_OPENSSL}  || 'openssl';
+our $CFGTOOL     = $ENV{NET_SNMP_CRT_CFGTOOL}  || 'net-snmp-config';
 
-our $CFGDIR          = $ENV{NET_SNMP_CRT_CFGDIR}  || '~/.snmp';
-our $TOPDIR          = $ENV{NET_SNMP_CRT_TOPDIR}  || "$CFGDIR/tls";
-our $CRTDIR          = $ENV{NET_SNMP_CRT_CRTDIR}  || "$TOPDIR/certs";
-our $CADIR           = $ENV{NET_SNMP_CRT_CADIR}   || "$TOPDIR/ca-certs";
-our $PRIVDIR         = $ENV{NET_SNMP_CRT_PRIVDIR} || "$TOPDIR/private";
-our $CFGPATH         = $ENV{NET_SNMP_CRT_CFGPATH} || cfg_path();
+our $CFGFILE     = $ENV{NET_SNMP_CRT_CFGFILE}  || 'net-snmp-cert.conf';
+our $TLSDIR      = $ENV{NET_SNMP_CRT_TLSDIR}   || 'tls';
+our $SSLCFG      = $ENV{NET_SNMP_CRT_SSLCFG}   || 'openssl.conf';
+
+our $CRTDIR      = $ENV{NET_SNMP_CRT_CRTDIR}   || 'certs';
+our $NEWCRTDIR   = $ENV{NET_SNMP_CRT_NEWCRTDIR}|| 'newcerts';
+our $CADIR       = $ENV{NET_SNMP_CRT_CADIR}    || 'ca-certs';
+our $PRIVDIR     = $ENV{NET_SNMP_CRT_PRIVDIR}  || 'private';
+
+our $SERIAL      = $ENV{NET_SNMP_CRT_SERIAL}   || '.serial';
+our $INDEX       = $ENV{NET_SNMP_CRT_INDEX}    || '.index';
+
+our @TLSDIRS     = ($CRTDIR, $NEWCRTDIR, $CADIR, $PRIVDIR);
+
+our @CRTSUFFIXES = ('.pem', '.csr', '.der', '.crt');
 
 sub dprint {
   my $str = shift;
@@ -121,44 +131,39 @@ sub find_bin_dir {
 }
 
 sub fq_rel_path {
-  my $opts = shift;
-  my $key = shift;
-  my $path = $opts->{$key};
+  my $path = shift;
+  my $cwd = ::getcwd();
+  my $rdir = shift || $cwd;
+  
+  chdir($rdir) or die("can't change directory: $rdir");
+  $path = ::realpath($path);
+  chdir($cwd) or die("can't change directory: $cwd");
 
-  # get fully qualified path
-  if ($path !~ m|^/|) {
-    my $pwd = `pwd`; chomp $pwd;
-    $path = "$pwd/$path";
-  }
-
-  NetSNMP::Cert::dwarn("path($path) does not exist", $opts) unless -e $path;
   return $path;
 }
 
 sub dir_empty
-{
+  {
     my $path = shift;
     opendir(DIR, $path);
     foreach (readdir(DIR)) {
-        next if /^\.\.?$/;
-        closedir(DIR);
-        return 0;
+      next if /^\.\.?$/;
+      closedir(DIR);
+      return 0;
     }
     closedir(DIR);
     return 1;
-}
+  }
 
 sub make_dirs {
   my $opts = shift;
   my $dir = shift;
-  my $tmpfs = shift;
   my $mode = shift;
   my @dirs = @_;
 
   my $wd = `pwd`; chomp $wd;
 
   NetSNMP::Cert::dprint("make dirs [$dir:@dirs] from $wd\n", $opts);
-  NetSNMP::Cert::dprint("using 'tmpfs' ram-disk\n", $opts) if $tmpfs;
 
   mkdir($dir, $mode) or die("error - can't make $dir")
     if defined $dir and not -d $dir;
@@ -186,60 +191,314 @@ sub version {
   exit($ret);
 }
 
-sub prev_cfg {
-  my $opts = shift;
-  my $cfgfile;
-  $cfgfile = "$opts->{tmpdir}/.config" if -r "$opts->{tmpdir}/.config";
-  return $cfgfile;
-}
-
 sub usage {
   my $ret = (@_ ? shift : 1);
   print "\nNet SNMP Certificate Management Tool: ";
-  print "$NetSNMP::Cert::PROG: [$NetSNMP::Cert::VERSION]\n";
+  print "$NetSNMP::Cert::PROG: [$NetSNMP::Cert::VERSION]\n\n";
 
-  print "net-snmp-cert [-V] [-d] [-Q] [-I] [-f <cfgfile>] [-a <app-tag>] <command> [<cmd-args>]\n";
-  print "\ncommands:\n";
-  print "\tgencrt        -- generate an X.509 certificate\n";
-  print "\tgencsr        -- generate an X.509 certificate signing request\n";
-  print "\tgenca         -- generate an X.509 certificate authority certificate\n\n";
+  print "\n   synopsis:\n";
+  print "      net-snmp-cert [--version|-V]\n";
+  print "      net-snmp-cert [--help|-?]\n";
+  print "      net-snmp-cert show [(<file>|<dir> <searchtag>) [<outfmt>]]\n";
+  print "      net-snmp-cert <command> [--[no]verbose|-Q] [--[no]interactive|-I]\\\n\t[--debug|-d] [(--cfgfile|-f) <cfgfile>] [(--cfgdir|-C) <cfgdir>]\\\n\t[(--tlsdir|-T) <tlsdir>] [(--apptag|-t) <apptag>] [ cmd-opts ]\n";
+  print "\n   commands:\n";
+  print "\tgencrt        -- generate a certificate\n";
+  print "\tgencsr        -- generate a certificate signing request\n";
+  print "\tgenca         -- generate a certificate authority certificate\n";
 
-  print "\nflags:\n";
+  print "\n   flags:\n";
   print "\t-V            -- show version string and exit\n";
   print "\t-d            -- raise debug level (-d -d for higher level)\n";
-  print "\t-f <cfgfile>  -- config file (default conf/net-snmp-cert.conf)\n";
-
   print "\t-I            -- non-interactive run (default interactive)\n";
   print "\t-Q            -- non-verbose output (default verbose)\n";
+  print "\t-f <cfgfile>  -- config file (default net-snmp-cert.conf on path)\n";
+  print "\t-C <cfgdir>   -- config dir (default location of config file)\n";
+  print "\n   command options:\n";
+  print "\t-t <tag>      -- application tag (default 'snmp')\n";
+  print "\t-i <id>       -- identity to use from config\n";
+  print "\t-a <ca-cert>  -- CA certificate used to sign request\n";
+  print "\t-r <csr-cert> -- certificate signing request\n";
+  print "\t--<cfg-param> -- additional config params (--flag[ <val>])\n";
 
-  print "\t-a            -- application tag (default 'snmp')\n";
-
-  print "\t--<cfg-param> -- additional config params (--flag or --val <val>)\n";
-
-  print "\nexamples: \n";
-  print "\tnet-snmp-cert crt-gen\n";
-  print "\tnet-snmp-cert csr-gen \n";
-  print "\tnet-snmp-cert -f .snmp/net-snmp-crt.conf -I ca-gen\n";
+  print "\n   examples: \n";
+  print "\tnet-snmp-cert genca -f .snmp/net-snmp-crt.conf -i nocadm -I\n";
+  print "\tnet-snmp-cert gencrt -t snmpd -c ca-host.net-snmp.org\n";
+  print "\tnet-snmp-cert gencsr -t snmpapp\n";
+  print "\tnet-snmp-cert signcsr --ca ca-host.net-snmp.org --csr snmpapp.csr\n\n";
   exit $ret;
 }
 
 sub cfg_path {
+  my $path;
 
+  $path = `$NetSNMP::Cert::CFGTOOL --snmpconfpath`;
+  chomp $path;
+  return (wantarray?split(':',$path):$path);
 }
 
-sub check_reqs {
-  die("$NetSNMP::Cert::OPENSSL does not exist or is not executable")
-    if system("$NetSNMP::Cert::OPENSSL version > /dev/null 2>&1");
+sub find_cfgfile {
+  my $file = shift;
 
-  my $ossl_ver = `$NetSNMP::Cert::OPENSSL version`; chomp $ossl_ver;
-  $ossl_ver =~ s/^OpenSSL\s+([\d\.]+).*$/$1/;
-  my $ossl_min_ver = $NetSNMP::Cert::OPENSSL_MIN_VER;
+  if (defined $file) {
+    if (-r $file) {
+      $file = fq_rel_path($file);
+    } else {
+      return $file;	    # perhaps should die here - unreadable cfg
+    }
+  }
 
-  die("$NetSNMP::Cert::OPENSSL: $ossl_ver must be $ossl_min_ver or later")
-    if ($ossl_ver cmp $ossl_min_ver) < 0;
+  my @path = cfg_path();
 
-  die("$NetSNMP::Cert::CONFIG not found: ensure net-snmp-devel is installed")
-    if system("$NetSNMP::Cert::CFGTOOL > /dev/null 2>&1");
+  while (@path) {
+    my $p = pop(@path);
+    next if $p eq '/var/lib/snmp';
+    if (-r "$p/$NetSNMP::Cert::CFGFILE") {
+      return fq_rel_path("$p/$NetSNMP::Cert::CFGFILE");
+    }
+  }
+
+  return $file;
+}
+
+sub find_cfgdir {
+  my $file = shift;
+  my $dir;
+
+  if (defined $file) {
+    $dir = ::dirname($file);
+  } else {
+    my @path = cfg_path();
+    while (@path) {
+      $dir = ($> ? pop(@path): shift(@path));
+      next if $dir eq '/var/lib/snmp';
+      return $dir if -w $dir;
+    }
+  }
+  return undef;
+}
+
+sub find_crts {
+  my $crt = shift || 'certs';
+  my $tag = shift || '';
+
+  return (wantarray ? ($crt) : $crt) if -f $crt;
+
+  my @crts;
+  if (-d $crt) {
+    while (<$crt/*>) {
+      next unless m!^$crt/$tag.*(\.crt|\.pem)$! or m!^$crt/$tag$!;
+      push(@crts, $_);
+    }
+  } else {
+    warn("unknown certificate or type: $crt: $tag");
+  }
+
+  return (wantarray ? @crts : $crts[0]);
+}
+
+sub is_server {
+  my $tag = shift;
+  return 1 if $tag eq 'snmpd' or $tag eq 'snmptrapd';
+  return 0;
+}
+
+sub opensslEnv {
+  my $app = shift;
+  my $config = $app->{config};
+  my $opts = $app->{OPTS};
+
+  my $apptag = shift;
+  my $cn = shift;
+
+  my $name = $config->inherit("name");
+  my $host = $config->inherit("host");
+  my $email = $config->inherit("email");
+  my $country = $config->inherit("country");
+  my $state = $config->inherit("state");
+  my $locality = $config->inherit("locality");
+  my $org = $config->inherit("org");
+  my $org_unit = $config->inherit("orgUnit");
+  my $md = $config->inherit("msgDigest");
+  my $ksize = $config->inherit("keySize");
+
+  my $env;
+
+  $env .= " KSIZE=$ksize" if defined $ksize;
+  $env .= " MD=$md" if defined $md;
+  $env .= " COUNTRY=$country" if defined $country;
+  $env .= " STATE=$state" if defined $state;
+  $env .= " LOCALITY=$locality" if defined $locality;
+  $env .= " ORG=$org" if defined $org;
+  $env .= " ORG_UNIT=$org_unit" if defined $org_unit;
+  $env .= " EMAIL=$email" if defined $email;
+
+  return $env;
+}
+
+sub make_openssl_conf {
+  my $file = shift;
+  return if -r $file;
+
+  open(F, ">$file") or die("could not open $file");
+
+  print F <<'END';
+#
+# Net-SNMP (D)TLS OpenSSL configuration file.
+#
+
+# This definition stops the following lines choking if HOME isn't
+# defined.
+HOME		= .
+dir		= .
+RANDFILE	= $dir/.rand
+MD		= sha1
+KSIZE		= 2048
+CN		= net-snmp.org
+EMAIL		= admin@net-snmp.org
+COUNTRY		= US
+STATE		= California
+LOCALITY	= Davis
+ORG		= Net-SNMP Developers
+ORG_UNIT	= SNMP/DTLS
+
+
+unique_subject	= yes			# Set to 'no' to allow creation of
+					# certificates with same subject.
+database	= $dir/.index		# database index file.
+serial		= $dir/.serial 		# The current serial number
+certs		= $dir/certs		# identity certs
+new_certs_dir	= $dir/newcerts		# default place for new certs.
+ca_certs_dir	= $dir/ca-certs		# default place for new certs.
+key_dir		= $dir/private
+# private_key	= $key_dir/$ENV::TAG.key # The private key
+ca_dir		= $dir/ca-certs		# default place for new certs.
+
+crl_dir		= $dir/crl		# crl's
+crlnumber	= $dir/.crlnumber	# the current crl number
+					# must be commented out to leave V1 CRL
+crl		= $crl_dir/crl.pem	# The current CRL
+
+default_days	= 365			# how long to certify for
+default_crl_days= 30			# how long before next CRL
+default_md	= sha1			# which md to use.
+preserve	= no			# keep passed DN ordering
+
+# Extra OBJECT IDENTIFIER info:
+oid_section		= new_oids
+
+[ new_oids ]
+
+# Add new OIDs in here for use by 'ca' and 'req'.
+# Add a simple OID like this:
+# testoid1=1.2.3.4
+# Use config file substitution like this:
+# testoid2=${testoid1}.5.6
+
+####################################################################
+[ ca ]
+default_ca	= CA_default		# The default ca section
+
+####################################################################
+[ CA_default ]
+# certificate	= $ca_certs_dir/$ENV::TAG.crt 	# CA certificate so sign with
+name_opt 	= ca_default		# Subject Name options
+cert_opt 	= ca_default		# Certificate field options
+
+policy		= policy_match
+
+# For the CA policy
+[ policy_match ]
+countryName		= match
+stateOrProvinceName	= match
+organizationName	= match
+organizationalUnitName	= optional
+commonName		= supplied
+emailAddress		= optional
+
+# For the 'anything' policy
+# At this point in time, you must list all acceptable 'object'
+# types.
+[ policy_anything ]
+countryName		= optional
+stateOrProvinceName	= optional
+localityName		= optional
+organizationName	= optional
+organizationalUnitName	= optional
+commonName		= supplied
+emailAddress		= optional
+
+####################################################################
+[ req ]
+default_bits		= $ENV::KSIZE
+default_md		= $ENV::MD
+#default_keyfile 	= $key_dir/$ENV::TAG.key
+distinguished_name	= req_distinguished_name
+string_mask 		= MASK:0x2002
+extensions		= v3_req
+x509_extensions		= v3_ca	# extentions used for self signed cert
+
+[ req_distinguished_name ]
+countryName			= Country Name (2 letter code)
+countryName_default		= $ENV::COUNTRY
+countryName_min			= 2
+countryName_max			= 2
+
+stateOrProvinceName		= State or Province Name (full name)
+stateOrProvinceName_default	= $ENV::STATE
+
+localityName			= Locality Name (eg, city)
+localityName_default		= $ENV::LOCALITY
+
+0.organizationName		= Organization Name (eg, company)
+0.organizationName_default	= $ENV::ORG
+
+organizationalUnitName		= Organizational Unit Name (eg, section)
+organizationalUnitName_default	= $ENV::ORG_UNIT
+
+commonName			= Common Name (eg, your name or your server\'s hostname)
+commonName_max			= 64
+commonName_default              = $ENV::CN
+
+emailAddress			= Email Address
+emailAddress_max		= 64
+emailAddress_default            = $ENV::EMAIL
+
+[ v3_req ]
+# Extensions to add to a certificate request
+basicConstraints = CA:FALSE
+keyUsage = nonRepudiation, digitalSignature, keyEncipherment
+
+[ v3_ca ]
+# Extensions to add to a CA certificate
+basicConstraints = CA:TRUE
+# This will be displayed in Netscape's comment listbox.
+nsComment = "OpenSSL Generated Certificate (net-snmp)"
+
+# PKIX recommendation.
+subjectKeyIdentifier = hash
+authorityKeyIdentifier = keyid:always,issuer:always
+
+[ v3_ca_sign ]
+# Extensions to add when 'ca' signs a request.
+basicConstraints = CA:FALSE
+# This will be displayed in Netscape's comment listbox.
+nsComment = "OpenSSL Generated Certificate(net-snmp)"
+
+# PKIX recommendations harmless if included in all certificates.
+subjectKeyIdentifier = hash
+authorityKeyIdentifier = keyid,issuer
+
+# This stuff is for subjectAltName and issuerAltname.
+# Import the email address.
+# subjectAltName=email:copy
+# An alternative to produce certificates that aren't
+# deprecated according to PKIX.
+# subjectAltName=email:move
+
+# Copy subject details
+# issuerAltName=issuer:copy
+END
+ 
 }
 
 package NetSNMP::Cert::Obj;
@@ -426,7 +685,7 @@ sub DESTROY {
 
 package NetSNMP::Cert::App;
 use vars qw(@ISA);
-use Getopt::Long qw(:config gnu_getopt pass_through);
+use Getopt::Long qw(:config gnu_getopt no_ignore_case pass_through);
 
 @ISA = qw(NetSNMP::Cert::Obj);
 
@@ -450,6 +709,23 @@ sub new {
   return $this;
 }
 
+sub checkReqs {
+  my $app = shift;
+
+  die("$NetSNMP::Cert::OPENSSL does not exist or is not executable")
+    if system("$NetSNMP::Cert::OPENSSL version > /dev/null 2>&1");
+
+  my $ossl_ver = `$NetSNMP::Cert::OPENSSL version`; chomp $ossl_ver;
+  $ossl_ver =~ s/^OpenSSL\s+([\d\.]+).*$/$1/;
+  my $ossl_min_ver = $NetSNMP::Cert::OPENSSL_MIN_VER;
+
+  die("$NetSNMP::Cert::OPENSSL: $ossl_ver must be $ossl_min_ver or later")
+    if ($ossl_ver cmp $ossl_min_ver) < 0;
+
+  die("$NetSNMP::Cert::CONFIG not found: ensure net-snmp-devel is installed")
+    if system("$NetSNMP::Cert::CFGTOOL > /dev/null 2>&1");
+}
+
 sub initOpts {
   my $app = shift;
   my $opts = {};
@@ -458,8 +734,8 @@ sub initOpts {
   # Define directories we need.
   $opts->{bindir} = NetSNMP::Cert::find_bin_dir();
 
-  $opts->{out} = ">&/dev/null";
-  $opts->{err} = "2>/dev/null";
+  $opts->{out} = "> /dev/null";
+  $opts->{err} = "2> /dev/null";
   $opts->{interactive} = 1;
   $opts->{verbose} = 1;
 
@@ -475,13 +751,19 @@ sub parseArgs {
   my $app = shift;
   my $opts = $app->{OPTS};
   my @args = @_;
+
+  $opts->{cmd} = shift(@args) if $args[0] !~ /^\s*-/;
+
   local *ARGV;
   @ARGV = @args;
 
-  GetOptions($opts, 'apptag|a=s', 'cfgfile|f=s', 'interactive!', 'I', 'debug|d+', 'verbose!', 'Q', 'help|?', 'version|V');
+  GetOptions($opts, 'apptag|t=s', 'ca|a=s', 'csr|r=s', 'identity|i=s', 'cfgfile|f=s', 'cfgdir|C=s', 'tlsdir|T=s', 'interactive!', 'I', 'debug|d+', 'verbose!', 'Q', 'help|?', 'version|V');
+
+  @{$opts->{cmdargs}} = @ARGV; # save extra args
 
   NetSNMP::Cert::usage(0) if $opts->{help};
   NetSNMP::Cert::version(0) if $opts->{version};
+  NetSNMP::Cert::usage(1) unless $opts->{cmd};
 
   # Check debug option first
   $NetSNMP::Cert::debug = $opts->{debug};
@@ -489,60 +771,240 @@ sub parseArgs {
   $opts->{interactive} = not $opts->{I} if defined $opts->{I};
   $opts->{verbose} = not $opts->{Q} if defined $opts->{Q};
 
-  $opts->{topdir}  ||= $NetSNMP::Cert::TOPDIR || ::dirname($opts->{bindir});
-
-  $opts->{cfgfile} ||= "$opts->{topdir}/$NetSNMP::Cert::CFG";
-
-  # get fully qualified paths
-  $opts->{topdir}   = NetSNMP::Cert::fq_rel_path($opts, 'topdir');
-  $opts->{cfgfile}  = NetSNMP::Cert::fq_rel_path($opts, 'cfgfile');
-
-  NetSNMP::Cert::dprint("Using top directory: $opts->{topdir}\n", $opts);
-  NetSNMP::Cert::dprint("Using config file: $opts->{cfgfile}\n", $opts);
-
-  NetSNMP::Cert::dprint("Using PATH: $ENV{PATH}\n", $opts);
-
-  $app->parseCmdTarget(@ARGV) or NetSNMP::Cert::usage();
-
-  die("Not Implemented Yet...");
+  # search conf path for cfgfile
+  $opts->{cfgfile} = NetSNMP::Cert::find_cfgfile($opts->{cfgfile});
+  $opts->{cfgdir} = NetSNMP::Cert::find_cfgdir($opts->{cfgfile});
 }
 
-sub parseCmdTarget {
-  # takes ([cmd, [target args]])
+sub handleTlsDir {
   my $app = shift;
   my $opts = $app->{OPTS};
-  my $cmd = shift || $app->{cmd};
+  my $config = $app->{config};
+  my $dir = $opts->{tlsdir};
 
-  NetSNMP::Cert::dprint("parseCmdTarget: parsing $cmd [@_]\n", $opts);
+  $dir ||= $config->inherit('tlsDir');
+  
+  if (not defined $dir) {
+    if (defined $opts->{cfgdir}) {
+      $dir = "$opts->{cfgdir}/$NetSNMP::Cert::TLSDIR";
+    } else {
+      NetSNMP::Cert::dwarn("undefined cfgdir");
+    }
+  }
 
-  $app->{cmd} = $cmd;
+  die("unable to determine tlsDir: $opts->{cfgdir}") unless defined $dir;
 
-  my @cmdargs = @_;
-  $app->{cmdargs} = \@cmdargs;
+  $dir = NetSNMP::Cert::fq_rel_path($dir);
+  NetSNMP::Cert::dprint("tlsDir is: $dir\n", $opts);
 
-  return ($cmd);
+  NetSNMP::Cert::dprint("tlsDir not found, creating\n", $opts) unless -d $dir;
+  NetSNMP::Cert::make_dirs($opts, $dir, 0700, @NetSNMP::Cert::TLSDIRS);
+  NetSNMP::Cert::dprint("echo '01' > $dir/$NetSNMP::Cert::SERIAL\n", $opts);
+  system("echo '01' > $dir/$NetSNMP::Cert::SERIAL") 
+    unless -f "$dir/$NetSNMP::Cert::SERIAL";
+  NetSNMP::Cert::dprint("touch $dir/$NetSNMP::Cert::INDEX\n", $opts);
+  system("touch $dir/$NetSNMP::Cert::INDEX") 
+    unless -f "$dir/$NetSNMP::Cert::INDEX"; 
+  NetSNMP::Cert::make_openssl_conf("$dir/$NetSNMP::Cert::SSLCFG") 
+      unless -f "$dir/$NetSNMP::Cert::SSLCFG";
+  NetSNMP::Cert::dprint("handleTlsDir: done\n", $opts);
+  return $dir;
+}
+
+sub opensslEnv {
+  my $app = shift;
+  my $config = $app->{config};
+  my $opts = $app->{OPTS};
+
+  my $apptag = shift;
+  my $cn = shift;
+
+  my $name = $config->inherit("name");
+  my $host = $config->inherit("host");
+  my $email = $config->inherit("email");
+  my $country = $config->inherit("country");
+  my $state = $config->inherit("state");
+  my $locality = $config->inherit("locality");
+  my $org = $config->inherit("org");
+  my $org_unit = $config->inherit("orgUnit");
+  my $md = $config->inherit("msgDigest");
+  my $ksize = $config->inherit("keySize");
+
+  my $env;
+
+  $env .= " KSIZE=$ksize" if defined $ksize;
+  $env .= " MD=$md" if defined $md;
+  $env .= " COUNTRY=$country" if defined $country;
+  $env .= " STATE=$state" if defined $state;
+  $env .= " LOCALITY=$locality" if defined $locality;
+  $env .= " ORG=$org" if defined $org;
+  $env .= " ORG_UNIT=$org_unit" if defined $org_unit;
+  $env .= " EMAIL=$email" if defined $email;
+
+  NetSNMP::Cert::dprint("opensslEnv: $env\n", $opts);
+
+  return $env;
+}
+
+sub genCa {
+  my $app = shift;
+  my $config = $app->{config};
+  my $opts = $app->{OPTS};
+  my $host = $config->inherit("host") || ::hostname();
+  my $days = $config->inherit("caDays");
+  $days = ($days ? "-days $days" : '');
+
+  my $cn = "ca-$host";
+  my $env = $app->opensslEnv($cn);
+
+  my $cmd = "$env openssl req -new -x509 -extensions v3_ca -nodes $days -batch -keyout $NetSNMP::Cert::PRIVDIR/$cn.key -out $NetSNMP::Cert::CADIR/$cn.crt -config $NetSNMP::Cert::SSLCFG";
+
+  NetSNMP::Cert::dprint("genCa: $cmd\n", $opts);
+
+  system("$cmd $opts->{out} $opts->{err}");
+}
+
+sub genCrt {
+  my $app = shift;
+  my $config = $app->{config};
+  my $opts = $app->{OPTS};
+  my $host = $config->inherit("host") || ::hostname();
+  my $email = $config->inherit("email") || getlogin() . "\@$host";
+  my $days = $config->inherit("crtDays");
+  $days = ($days ? "-days $days" : '');
+
+  my $apptag = $opts->{apptag} || $email;
+
+  my $cn = (NetSNMP::Cert::is_server($apptag)?$host:$email);
+
+  my $env = $app->opensslEnv($cn);
+  
+  my $cmd = "$env openssl req -new -x509 -nodes $days -batch -keyout $NetSNMP::Cert::PRIVDIR/$apptag.key -out $NetSNMP::Cert::CRTDIR/$apptag.crt -config $NetSNMP::Cert::SSLCFG";
+
+  NetSNMP::Cert::dprint("genCa: $cmd\n", $opts);
+
+  system("$cmd $opts->{out} $opts->{err}");
+}
+
+sub genCsr {
+  my $app = shift;
+  my $config = $app->{config};
+  my $opts = $app->{OPTS};
+  my $host = $config->inherit("host") || ::hostname();
+  my $email = $config->inherit("email") || getlogin() . "\@$host";
+  my $days = $config->inherit("crtDays");
+  $days = ($days ? "-days $days" : '');
+
+  my $apptag = $opts->{apptag} || $email;
+
+  my $cn = (NetSNMP::Cert::is_server($apptag) ? $host : $email);
+
+  my $env = $app->opensslEnv($apptag, $cn);
+  
+  my $cmd = "$env openssl req -new -nodes $days -batch -keyout $NetSNMP::Cert::PRIVDIR/$apptag.key -out $NetSNMP::Cert::CRTDIR/$apptag.csr -config $NetSNMP::Cert::SSLCFG";
+
+  NetSNMP::Cert::dprint("genCa: $cmd\n", $opts);
+
+  system("$cmd $opts->{out} $opts->{err}");
+}
+
+sub signCsr {
+  my $app = shift;
+  my $config = $app->{config};
+  my $opts = $app->{OPTS};
+  my $host = $config->inherit("host") || ::hostname();
+  my $email = $config->inherit("email") || getlogin() . "\@$host";
+
+  my $apptag = $opts->{apptag} || $email;
+  my $cn = (NetSNMP::Cert::is_server($apptag) ? $host : $email);
+
+  my $env = $app->opensslEnv($cn);
+
+  # XXX use find_crts
+  my $ca = $opts->{ca};
+  NetSNMP::Cert::dprint("ca: $ca\n", $opts);
+  my $ca_base = ::basename($ca, @NetSNMP::Cert::CRTSUFFIXES);
+  NetSNMP::Cert::dprint("ca_base: $ca_base\n", $opts);
+  my $csr = $opts->{csr};
+  NetSNMP::Cert::dprint("csr: $csr\n", $opts);
+  my $csr_base = ::basename($csr, @NetSNMP::Cert::CRTSUFFIXES);
+  NetSNMP::Cert::dprint("csr_base: $csr_base\n", $opts);
+  
+  my $cmd = "$env openssl ca -batch -cert $NetSNMP::Cert::CADIR/${ca_base}.crt -keyfile $NetSNMP::Cert::PRIVDIR/$ca_base.key -in $NetSNMP::Cert::CRTDIR/${csr_base}.csr -out $NetSNMP::Cert::NEWCRTDIR/$csr_base.crt -config $NetSNMP::Cert::SSLCFG";
+
+  NetSNMP::Cert::dprint("genCa: $cmd\n", $opts);
+
+  system("$cmd $opts->{out} $opts->{err}");
+}
+
+sub show {
+  my $app = shift;
+  my $config = $app->{config};
+  my $opts = $app->{OPTS};
+  my $cmd;
+  my $arg1 = shift(@{$opts->{cmdargs}});
+  my $stag;
+  my $outfmt;
+  
+  # see if arg1 could be file or dir - annoying hack to calc orig. rel. path
+  my $arg = NetSNMP::Cert::fq_rel_path($arg1, $opts->{rdir});
+  
+  NetSNMP::Cert::dprint("potential file or dir: $arg\n", $opts);
+
+  if (-f $arg) {
+    $arg1 = $arg if -f $arg or -d $arg;
+  } elsif (-d $arg) {
+    $arg1 = $arg if -f $arg or -d $arg;
+    $stag = shift(@{$opts->{cmdargs}});
+  } else {
+    $stag = shift(@{$opts->{cmdargs}});
+  }
+  $outfmt  = shift(@{$opts->{cmdargs}}) || 'text';
+
+  foreach my $c (NetSNMP::Cert::find_crts($arg1, $stag)) {
+    print "\n$c\n";
+    $cmd = "openssl x509 -in $c -noout -$outfmt";
+    NetSNMP::Cert::dprint("genCa: $cmd\n", $opts);
+    system("$cmd");
+    print "\n";
+  }
 }
 
 sub run {
   my $app = shift;
   my $opts = $app->{OPTS};
+  my $cmd = $opts->{cmd};
 
   # be sure we have tools to run the app
-  NetSNMP::Cert::check_reqs();
+  $app->checkReqs();
 
   # lazy config parsing postponed until here, will not reparse
   $app->{config}->parse();
 
-  my $cmd = $app->{cmd};
+  # find tls dir or make it
+  $opts->{tlsdir} = $app->handleTlsDir();
+  #  change dir tls dir - the cwd for all commands - save cwd first
+  $opts->{rdir} = ::getcwd();
+  chdir($opts->{tlsdir}) or die("could not change directory: $opts->{tlsdir}");
 
-  NetSNMP::Cert::dprint("running command: $cmd @{$opts->{cmdargs}}\n", $opts);
+  # display context
+  NetSNMP::Cert::dprint("Using PATH: $ENV{PATH}\n\n", $opts);
+  NetSNMP::Cert::dprint("Using config file:   $opts->{cfgfile}\n", $opts);
+  NetSNMP::Cert::dprint("Using config dir:    $opts->{cfgdir}\n", $opts);
+  NetSNMP::Cert::dprint("Using tls directory: $opts->{tlsdir}\n", $opts);
+  my $cmdargs = join(' ', @{$opts->{cmdargs}});
+  NetSNMP::Cert::dprint("Running command:     $cmd $cmdargs\n", $opts);
 
-  if ($cmd =~ /^gencrt/) {
-    $app->gen_crt();
-  } elsif ($cmd =~ /^gencsr/) {
-    $app->{config}->gen_csr();
-  } elsif ($cmd =~ /^genca/) {
-    $app->gen_ca();
+  if ($cmd =~ /^genca$/) {
+    $app->genCa();
+  } elsif ($cmd =~ /^gencrt$/) {
+    $app->genCrt();
+  } elsif ($cmd =~ /^gencsr$/) {
+    $app->genCsr();
+  } elsif ($cmd =~ /^signcsr$/) {
+    $app->signCsr();
+  } elsif ($cmd =~ /^show$/) {
+    $app->show();
   } else {
     NetSNMP::Cert::usage();
   }
@@ -565,10 +1027,10 @@ sub parse {
   my $app = $config->{app};
   my $opts = $app->{OPTS};
   my $cfgfile = shift;
+  $cfgfile ||= $opts->{cfgfile};
 
   return '0 but true' if $config->{PARSED};
-
-  $cfgfile ||= $opts->{cfgfile};
+  return '0 but true' unless defined $cfgfile;
 
   open( CONFIG, "<$cfgfile" )
     or die "error - could not open configuration file: $cfgfile";
@@ -694,7 +1156,7 @@ sub parse {
 
 package main;
 
-my $app = new NetSNMP::Cert::App;
+my $app = new NetSNMP::Cert::App(@ARGV);
 
 $app->run();
 
