@@ -5,11 +5,10 @@
 #ifndef TLSTMADDRTABLE_H
 #define TLSTMADDRTABLE_H
 
-    /*
+/*
  * function declarations 
  */
 void            init_tlstmAddrTable(void);
-void            initialize_table_tlstmAddrTable(void);
 Netsnmp_Node_Handler tlstmAddrTable_handler;
 
 #endif                          /* TLSTMADDRTABLE_H */

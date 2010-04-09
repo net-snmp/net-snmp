@@ -5,6 +5,44 @@
 #ifndef TLSTMADDRTABLE_INTERNAL_H
 #define TLSTMADDRTABLE_INTERNAL_H
 
+/*
+ * index definitions for table tlstmAddrTable 
+ */
+#define SNMPTARGETADDRNAME_MAX_SIZE  255
+
+/*
+ * column number definitions for table tlstmAddrTable 
+ */
+#define COLUMN_TLSTMADDRSERVERFINGERPRINT       1
+#define COLUMN_TLSTMADDRSERVERIDENTITY          2
+#define COLUMN_TLSTMADDRSTORAGETYPE             3
+#define COLUMN_TLSTMADDRROWSTATUS               4
+
+#define TLSTMADDRTABLE_MIN_COLUMN            COLUMN_TLSTMADDRSERVERFINGERPRINT
+#define TLSTMADDRTABLE_MAX_COLUMN            COLUMN_TLSTMADDRROWSTATUS
+
+#define TLSTMADDRSERVERFINGERPRINT_MAX_SIZE      255
+#define TLSTMADDRSERVERIDENTITY_MAX_SIZE         255
+
+    /*
+     * structure for undo storage and other vars for set processing 
+     */
+typedef struct tlstmAddrTable_undo_s {
+    char            fate;
+    char            copied;
+    char            is_consistent;
+    netsnmp_request_info *req[TLSTMADDRTABLE_MAX_COLUMN + 1];
+    /*
+     * undo Column space 
+     */
+    char       tlstmAddrServerFingerprint[TLSTMADDRSERVERFINGERPRINT_MAX_SIZE];
+    size_t          tlstmAddrServerFingerprint_len;
+    char            tlstmAddrServerIdentity[TLSTMADDRSERVERIDENTITY_MAX_SIZE];
+    size_t          tlstmAddrServerIdentity_len;
+    long            tlstmAddrStorageType;
+    long            tlstmAddrRowStatus;
+} tlstmAddrTable_undo;
+
     /*
      * Typical data structure for a row entry 
      */
@@ -12,27 +50,23 @@ typedef struct tlstmAddrTable_entry_s {
     /*
      * Index values 
      */
-    char            snmpTargetAddrName[255];
+    char            snmpTargetAddrName[SNMPTARGETADDRNAME_MAX_SIZE];
     size_t          snmpTargetAddrName_len;
 
     /*
      * Column values 
      */
-    char            tlstmAddrServerFingerprint[255];
+    char        tlstmAddrServerFingerprint[TLSTMADDRSERVERFINGERPRINT_MAX_SIZE];
     size_t          tlstmAddrServerFingerprint_len;
-    char            old_tlstmAddrServerFingerprint[255];
-    size_t          old_tlstmAddrServerFingerprint_len;
-
-    char            tlstmAddrServerIdentity[255];
+    char            tlstmAddrServerIdentity[TLSTMADDRSERVERIDENTITY_MAX_SIZE];
     size_t          tlstmAddrServerIdentity_len;
-    char            old_tlstmAddrServerIdentity[255];
-    size_t          old_tlstmAddrServerIdentity_len;
-
     long            tlstmAddrStorageType;
-    long            old_tlstmAddrStorageType;
     long            tlstmAddrRowStatus;
 
-    int             valid;
+    /*
+     * used during set processing 
+     */
+    tlstmAddrTable_undo *undo;
 
     /*
      * user data
@@ -48,15 +82,6 @@ void tlstmAddrTable_removeEntry(netsnmp_tdata * table_data,
                                 netsnmp_tdata_row * row);
 
 
-/*
- * column number definitions for table tlstmAddrTable 
- */
-#define COLUMN_TLSTMADDRSERVERFINGERPRINT		1
-#define COLUMN_TLSTMADDRSERVERIDENTITY		2
-#define COLUMN_TLSTMADDRSTORAGETYPE		3
-#define COLUMN_TLSTMADDRROWSTATUS		4
-#define TLSTMADDRTABLE_MIN_COL               COLUMN_TLSTMADDRSERVERFINGERPRINT
-#define TLSTMADDRTABLE_MAX_COL               COLUMN_TLSTMADDRROWSTATUS
 /*
  * column flags
  */
