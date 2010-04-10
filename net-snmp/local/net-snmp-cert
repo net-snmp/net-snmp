@@ -282,11 +282,14 @@ sub find_crts {
   my $tag = shift || '';
 
   return (wantarray ? ($crt) : $crt) if -f $crt;
+#  NetSNMP::Cert::dprint("crt: $crt $tag\n");
 
   my @crts;
   if (-d $crt) {
     while (<$crt/*>) {
-      next unless m!^$crt/$tag.*(\.crt|\.pem)$! or m!^$crt/$tag$!;
+#  NetSNMP::Cert::dprint("checking: $_\n");
+      next unless /^$crt\/$tag.*(\.crt|\.pem)$/ or /^$crt\/$tag$/;
+#  NetSNMP::Cert::dprint("pushing: $_\n");
       push(@crts, $_);
     }
   } else {
