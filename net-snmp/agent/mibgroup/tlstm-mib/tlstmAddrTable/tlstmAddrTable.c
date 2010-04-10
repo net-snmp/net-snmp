@@ -268,6 +268,9 @@ tlstmAddrTable_handler(netsnmp_mib_handler *handler,
                 ret = netsnmp_check_vb_type_and_max_size
                     (request->requestvb, ASN_OCTET_STR,
                      sizeof(table_entry->tlstmAddrServerFingerprint));
+                /** check len/algorithm MIB requirements */
+                if (ret == SNMP_ERR_NOERROR)
+                    ret = netsnmp_cert_check_vb_fingerprint(request->requestvb);
                 break;          /* case COLUMN_TLSTMADDRSERVERFINGERPRINT */
             case COLUMN_TLSTMADDRSERVERIDENTITY:
                 ret = netsnmp_check_vb_type_and_max_size
