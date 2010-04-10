@@ -70,6 +70,7 @@ extern "C" {
 #define NS_HASH_SHA256      4
 #define NS_HASH_SHA384      5
 #define NS_HASH_SHA512      6
+#define NS_HASH_MAX         NS_HASH_SHA512
 
     /*************************************************************************
      *
