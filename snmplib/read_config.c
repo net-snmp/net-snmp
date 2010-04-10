@@ -801,8 +801,11 @@ read_config(const char *filename,
                     cptr = copy_nword(cptr, token, sizeof(token));
                 }
             } else if ((token[0] == 'i') && (strcmp(token,"include")==0)) {
-                struct config_files ctmp = { cptr, line_handler, NULL };
+                struct config_files ctmp;
                 int len = strlen(cptr);
+                ctmp.fileHeader = cptr;
+                ctmp.start = line_handler;
+                ctmp.next = NULL;
                 if ((len > 5) && (strcmp(&cptr[len-5],".conf") == 0))
                    cptr[len-5] = 0; /* chop off .conf */
                 read_config_files_of_type(when,&ctmp);
