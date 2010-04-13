@@ -35,7 +35,10 @@ our $INDEX       = $ENV{NET_SNMP_CRT_INDEX}    || '.index';
 
 our @TLSDIRS     = ($CRTDIR, $NEWCRTDIR, $CADIR, $PRIVDIR);
 
-our @CRTSUFFIXES = ('.pem', '.csr', '.der', '.crt');
+our @CRTSUFFIXES = qw(.pem .csr .der .crt);
+
+our @SSLOUTFMTS  = qw(text modulus serial subject_hash issuer_hash hash subject
+		      issuer email startdate enddate dates fingerprint C);
 
 sub dprint {
   my $str = shift;
@@ -93,13 +96,10 @@ sub rsystem {
 }
 
 sub home_dir {
-  my $cdir = `pwd`;
-  chomp $cdir;
+  my $cdir = ::getcwd();
 
   chdir("~");
-  my $dir = `pwd`;
-  chomp $dir;
-
+  my $dir = ::getcwd();
   chdir($cdir);
 
   return $dir;
@@ -134,9 +134,9 @@ sub fq_rel_path {
   my $path = shift;
   my $cwd = ::getcwd();
   my $rdir = shift || $cwd;
-  
+
   chdir($rdir) or die("can't change directory: $rdir");
-  $path = ::realpath($path);
+  $path = ::realpath($path) if defined $path;
   chdir($cwd) or die("can't change directory: $cwd");
 
   return $path;
@@ -161,7 +161,7 @@ sub make_dirs {
   my $mode = shift;
   my @dirs = @_;
 
-  my $wd = `pwd`; chomp $wd;
+  my $wd = ::getcwd();
 
   NetSNMP::Cert::dprint("make dirs [$dir:@dirs] from $wd\n", $opts);
 
@@ -185,6 +185,15 @@ sub in_set {
   return 0;
 }
 
+sub in_arr {
+  my $elem = shift;
+  my $arr = shift;
+  for my $e (@{$arr}) {
+    return 1 if $e eq $elem;
+  }
+  return 0;
+}
+
 sub version {
   my $ret = (@_ ? shift : 1);
   print "$NetSNMP::Cert::PROG: $NetSNMP::Cert::VERSION\n";
@@ -199,12 +208,16 @@ sub usage {
   print "\n   synopsis:\n";
   print "      net-snmp-cert [--version|-V]\n";
   print "      net-snmp-cert [--help|-?]\n";
-  print "      net-snmp-cert show [(<file>|<dir> <searchtag>) [<outfmt>]]\n";
+  print "      net-snmp-cert showcert[s] [(<file>|<search-tag>) [<outfmt>]]\n";
+  print "      net-snmp-cert showca[s] [(<file>|<search-tag>) [<outfmt>]]\n";
   print "      net-snmp-cert <command> [--[no]verbose|-Q] [--[no]interactive|-I]\\\n\t[--debug|-d] [(--cfgfile|-f) <cfgfile>] [(--cfgdir|-C) <cfgdir>]\\\n\t[(--tlsdir|-T) <tlsdir>] [(--apptag|-t) <apptag>] [ cmd-opts ]\n";
   print "\n   commands:\n";
   print "\tgencrt        -- generate a certificate\n";
   print "\tgencsr        -- generate a certificate signing request\n";
   print "\tgenca         -- generate a certificate authority certificate\n";
+  print "\tsigncsr       -- sign a certificate signing request\n";
+  print "\tshowcerts     -- show a certificate (see 'man x509' for <outfmt>)\n";
+  print "\tshowcas       -- show a certificate authority certificate\n";
 
   print "\n   flags:\n";
   print "\t-V            -- show version string and exit\n";
@@ -218,13 +231,16 @@ sub usage {
   print "\t-i <id>       -- identity to use from config\n";
   print "\t-a <ca-cert>  -- CA certificate used to sign request\n";
   print "\t-r <csr-cert> -- certificate signing request\n";
-  print "\t--<cfg-param> -- additional config params (--flag[ <val>])\n";
+  print "\t--<cfg-param> -- additional config params (--<cfg-param>[ <val>])\n";
 
   print "\n   examples: \n";
   print "\tnet-snmp-cert genca -f .snmp/net-snmp-crt.conf -i nocadm -I\n";
-  print "\tnet-snmp-cert gencrt -t snmpd -c ca-host.net-snmp.org\n";
+  print "\tnet-snmp-cert gencrt -t snmpd -c host.net-snmp.org\n";
   print "\tnet-snmp-cert gencsr -t snmpapp\n";
-  print "\tnet-snmp-cert signcsr --ca ca-host.net-snmp.org --csr snmpapp.csr\n\n";
+  print "\tnet-snmp-cert signcsr --ca ca-net-snmp.org --csr snmpapp\n";
+  print "\tnet-snmp-cert showcerts snmpapp issuer\n";
+  print "\tnet-snmp-cert showcas ca-net-snmp.org subject\n\n";
+
   exit $ret;
 }
 
@@ -233,7 +249,7 @@ sub cfg_path {
 
   $path = `$NetSNMP::Cert::CFGTOOL --snmpconfpath`;
   chomp $path;
-  return (wantarray?split(':',$path):$path);
+  return (wantarray ? split(':', $path) : $path);
 }
 
 sub find_cfgfile {
@@ -277,26 +293,42 @@ sub find_cfgdir {
   return undef;
 }
 
-sub find_crts {
-  my $crt = shift || 'certs';
-  my $tag = shift || '';
+sub find_certs {
+  my $opts = shift;
+  my $dir = shift || 'certs';
+  my $targ = shift;
+  my $suffix_regex;
 
-  return (wantarray ? ($crt) : $crt) if -f $crt;
-#  NetSNMP::Cert::dprint("crt: $crt $tag\n");
-
-  my @crts;
-  if (-d $crt) {
-    while (<$crt/*>) {
-#  NetSNMP::Cert::dprint("checking: $_\n");
-      next unless /^$crt\/$tag.*(\.crt|\.pem)$/ or /^$crt\/$tag$/;
-#  NetSNMP::Cert::dprint("pushing: $_\n");
-      push(@crts, $_);
-    }
+  if ($dir eq 'csrs') {
+    $dir = 'certs';
+    $suffix_regex = '\.csr|\.pem';
   } else {
-    warn("unknown certificate or type: $crt: $tag");
+    $suffix_regex = '\.crt|\.pem';
   }
 
-  return (wantarray ? @crts : $crts[0]);
+  NetSNMP::Cert::dprint("find_certs(1): $dir $targ\n", $opts);
+  # see if targ could be file - calc orig. rel. path
+  my $arg = NetSNMP::Cert::fq_rel_path($targ, $opts->{rdir});
+  # targ is a file name - use it
+  return (wantarray ? ($arg) : $arg) if -f $arg;
+  # mark as dir
+  $targ = "$arg" if -d $arg;
+  $targ =~ s/\/*$/\// if -d $targ;
+  
+  # find certs in targ if a dir (in tlsdir, or relative)
+  $dir = $1 if $targ =~ s/^(\S+)\/([^\/\s]*)$/$2/ and -d $1;
+
+  NetSNMP::Cert::dprint("find_certs(2): $dir $targ\n", $opts);
+
+  my @certs;
+  while (<$dir/$targ*>) {
+    NetSNMP::Cert::dprint("checkin($dir:$targ): $_\n", $opts);
+    next unless /^$dir\/$targ.*($suffix_regex)$/ or /^$dir\/$targ$/;
+    NetSNMP::Cert::dprint("pushing: $_\n", $opts);
+    push(@certs, $_);
+  }
+
+  return (wantarray ? @certs : $certs[0]);
 }
 
 sub is_server {
@@ -555,10 +587,17 @@ sub autoSet {
 sub inherit {
   my $this = shift;
   my $field = shift;
+  
   # return our field if we have it
   return $this->{$field} if defined $this->{$field};
-  # return undef if not found and this is the end of the line
-  return undef if not defined $this->{PARENT} or $this->{PARENT} eq $this;
+
+  if (not defined $this->{PARENT} or $this->{PARENT} eq $this) {
+    my $opts = $this->{OPTS};
+    # check opts if it was set on the command line, else return undef
+    return (defined $opts && defined $opts->{$field} ? 
+	    $opts->{$field}  : undef);
+  }
+
   # recurse to parent
   $this->{PARENT}->inherit($field);
 }
@@ -762,7 +801,20 @@ sub parseArgs {
 
   GetOptions($opts, 'apptag|t=s', 'ca|a=s', 'csr|r=s', 'identity|i=s', 'cfgfile|f=s', 'cfgdir|C=s', 'tlsdir|T=s', 'interactive!', 'I', 'debug|d+', 'verbose!', 'Q', 'help|?', 'version|V');
 
-  @{$opts->{cmdargs}} = @ARGV; # save extra args
+  # process config args and extra args
+  $opts->{cmdargs} = []; # initialize extra arg array
+  while (@ARGV) {
+    my $arg = shift(@ARGV);
+    if ($arg =~ s/^-+(\w+)/$1/) {
+      if (exist $opts->{$arg}) {
+	NetSNMP::Cert::vwarn("option name collision: $arg already set", $opts);
+      } else {
+	$opts->{$arg} = ($ARGV[$#ARGV] =~ /^-+/ ? 'true' : shift(@ARGV));
+      }
+    } else {
+      push(@{$opts->{cmdargs}}, $arg); # save bareword args
+    }
+  }
 
   NetSNMP::Cert::usage(0) if $opts->{help};
   NetSNMP::Cert::version(0) if $opts->{version};
@@ -860,6 +912,7 @@ sub genCa {
   my $cn = "ca-$host";
   my $env = $app->opensslEnv($cn);
 
+  # XXX - must handle output name collision
   my $cmd = "$env openssl req -new -x509 -extensions v3_ca -nodes $days -batch -keyout $NetSNMP::Cert::PRIVDIR/$cn.key -out $NetSNMP::Cert::CADIR/$cn.crt -config $NetSNMP::Cert::SSLCFG";
 
   NetSNMP::Cert::dprint("genCa: $cmd\n", $opts);
@@ -882,6 +935,7 @@ sub genCrt {
 
   my $env = $app->opensslEnv($cn);
   
+  # XXX - must handle output name collision
   my $cmd = "$env openssl req -new -x509 -nodes $days -batch -keyout $NetSNMP::Cert::PRIVDIR/$apptag.key -out $NetSNMP::Cert::CRTDIR/$apptag.crt -config $NetSNMP::Cert::SSLCFG";
 
   NetSNMP::Cert::dprint("genCa: $cmd\n", $opts);
@@ -904,6 +958,7 @@ sub genCsr {
 
   my $env = $app->opensslEnv($apptag, $cn);
   
+  # XXX - must handle output name collision
   my $cmd = "$env openssl req -new -nodes $days -batch -keyout $NetSNMP::Cert::PRIVDIR/$apptag.key -out $NetSNMP::Cert::CRTDIR/$apptag.csr -config $NetSNMP::Cert::SSLCFG";
 
   NetSNMP::Cert::dprint("genCa: $cmd\n", $opts);
@@ -923,7 +978,6 @@ sub signCsr {
 
   my $env = $app->opensslEnv($cn);
 
-  # XXX use find_crts
   my $ca = $opts->{ca};
   NetSNMP::Cert::dprint("ca: $ca\n", $opts);
   my $ca_base = ::basename($ca, @NetSNMP::Cert::CRTSUFFIXES);
@@ -932,8 +986,9 @@ sub signCsr {
   NetSNMP::Cert::dprint("csr: $csr\n", $opts);
   my $csr_base = ::basename($csr, @NetSNMP::Cert::CRTSUFFIXES);
   NetSNMP::Cert::dprint("csr_base: $csr_base\n", $opts);
-  
-  my $cmd = "$env openssl ca -batch -cert $NetSNMP::Cert::CADIR/${ca_base}.crt -keyfile $NetSNMP::Cert::PRIVDIR/$ca_base.key -in $NetSNMP::Cert::CRTDIR/${csr_base}.csr -out $NetSNMP::Cert::NEWCRTDIR/$csr_base.crt -config $NetSNMP::Cert::SSLCFG";
+
+  # XXX - must handle keyfile search??
+  my $cmd = "$env openssl ca -batch -cert $ca -keyfile $NetSNMP::Cert::PRIVDIR/$ca_base.key -in $csr -out $NetSNMP::Cert::NEWCRTDIR/$csr_base.crt -config $NetSNMP::Cert::SSLCFG";
 
   NetSNMP::Cert::dprint("genCa: $cmd\n", $opts);
 
@@ -942,29 +997,19 @@ sub signCsr {
 
 sub show {
   my $app = shift;
+  my $type = shift || 'certs';
   my $config = $app->{config};
   my $opts = $app->{OPTS};
+  my $stag = shift(@{$opts->{cmdargs}});
+  my $outfmt = shift(@{$opts->{cmdargs}}) || 'text';
   my $cmd;
-  my $arg1 = shift(@{$opts->{cmdargs}});
-  my $stag;
-  my $outfmt;
-  
-  # see if arg1 could be file or dir - annoying hack to calc orig. rel. path
-  my $arg = NetSNMP::Cert::fq_rel_path($arg1, $opts->{rdir});
-  
-  NetSNMP::Cert::dprint("potential file or dir: $arg\n", $opts);
 
-  if (-f $arg) {
-    $arg1 = $arg if -f $arg or -d $arg;
-  } elsif (-d $arg) {
-    $arg1 = $arg if -f $arg or -d $arg;
-    $stag = shift(@{$opts->{cmdargs}});
-  } else {
-    $stag = shift(@{$opts->{cmdargs}});
+  if (NetSNMP::Cert::in_arr($stag, \@NetSNMP::Cert::SSLOUTFMTS)) {
+    $outfmt = $stag;
+    undef $stag;
   }
-  $outfmt  = shift(@{$opts->{cmdargs}}) || 'text';
-
-  foreach my $c (NetSNMP::Cert::find_crts($arg1, $stag)) {
+  
+  foreach my $c (NetSNMP::Cert::find_certs($opts, $type, $stag)) {
     print "\n$c\n";
     $cmd = "openssl x509 -in $c -noout -$outfmt";
     NetSNMP::Cert::dprint("genCa: $cmd\n", $opts);
@@ -984,19 +1029,29 @@ sub run {
   # lazy config parsing postponed until here, will not reparse
   $app->{config}->parse();
 
-  # find tls dir or make it
+  # find tlsdir/subdirs or make it
   $opts->{tlsdir} = $app->handleTlsDir();
+
   #  change dir tls dir - the cwd for all commands - save cwd first
   $opts->{rdir} = ::getcwd();
   chdir($opts->{tlsdir}) or die("could not change directory: $opts->{tlsdir}");
 
+  # convert ca and/or csr args if present
+  if (defined $opts->{ca}) {
+    $opts->{ca} = NetSNMP::Cert::find_certs($opts, 'ca-certs', $opts->{ca});
+  }
+  if (defined $opts->{csr}) {
+    $opts->{csr} = NetSNMP::Cert::find_certs($opts, 'csrs', $opts->{csr});
+  }
+
   # display context
-  NetSNMP::Cert::dprint("Using PATH: $ENV{PATH}\n\n", $opts);
-  NetSNMP::Cert::dprint("Using config file:   $opts->{cfgfile}\n", $opts);
-  NetSNMP::Cert::dprint("Using config dir:    $opts->{cfgdir}\n", $opts);
-  NetSNMP::Cert::dprint("Using tls directory: $opts->{tlsdir}\n", $opts);
-  my $cmdargs = join(' ', @{$opts->{cmdargs}});
-  NetSNMP::Cert::dprint("Running command:     $cmd $cmdargs\n", $opts);
+  NetSNMP::Cert::dprint("PATH: $ENV{PATH}\n\n", $opts);
+  NetSNMP::Cert::dprint("config file: $opts->{cfgfile}\n", $opts);
+  NetSNMP::Cert::dprint("config dir:  $opts->{cfgdir}\n", $opts);
+  NetSNMP::Cert::dprint("tls dir:     $opts->{tlsdir}\n", $opts);
+
+  my $cmdstr = join(' ', $cmd, @{$opts->{cmdargs}});
+  NetSNMP::Cert::dprint("command:     $cmdstr\n", $opts);
 
   if ($cmd =~ /^genca$/) {
     $app->genCa();
@@ -1006,8 +1061,10 @@ sub run {
     $app->genCsr();
   } elsif ($cmd =~ /^signcsr$/) {
     $app->signCsr();
-  } elsif ($cmd =~ /^show$/) {
-    $app->show();
+  } elsif ($cmd =~ /^show(certs?)?$/) {
+    $app->show('certs');
+  } elsif ($cmd =~ /^showcas?$/) {
+    $app->show('ca-certs');
   } else {
     NetSNMP::Cert::usage();
   }
