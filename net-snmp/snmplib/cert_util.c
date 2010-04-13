@@ -625,6 +625,7 @@ netsnmp_ocert_get(netsnmp_cert *cert)
 {
     BIO            *certbio;
     X509           *ocert = NULL;
+    EVP_PKEY       *okey = NULL;
     char            file[SNMP_MAXPATH];
 
     if (NULL == cert)
@@ -655,8 +656,34 @@ netsnmp_ocert_get(netsnmp_cert *cert)
         netsnmp_assert(cert->info.type != NS_CERT_TYPE_UNKNOWN);
     }
 
-    if (NS_CERT_TYPE_PEM == cert->info.type)
+    if (NS_CERT_TYPE_PEM == cert->info.type) {
         ocert = PEM_read_bio_X509_AUX(certbio, NULL, NULL, NULL); /* PEM */
+        /** check for private key too */
+        if (NULL == cert->key) {
+            BIO_reset(certbio);
+            okey =  PEM_read_bio_PrivateKey(certbio, NULL, NULL, NULL);
+            if (NULL != okey) {
+                netsnmp_key  *key;
+                DEBUGMSGT(("cert:read:key", "found key with cert in %s\n",
+                           cert->info.filename));
+                key = _new_key(cert->info.dir, cert->info.filename);
+                if (NULL != key) {
+                    key->okey = okey;
+                    if (-1 == CONTAINER_INSERT(_keys, key)) {
+                        DEBUGMSGT(("cert:read:key:add",
+                                   "error inserting key into container\n"));
+                        netsnmp_key_free(key);
+                        key = NULL;
+                    }
+                    else {
+                        DEBUGMSGT(("cert:read:partner", "matched partner!\n"));
+                        key->cert = cert;
+                        cert->key = key;
+                    }
+                }
+            } /* null return from read */
+        } /* null key */
+    } /* type PEM */
     else if (NS_CERT_TYPE_DER == cert->info.type)
         ocert = d2i_X509_bio(certbio,NULL); /* DER/ASN1 */
 #ifdef CERT_PKCS12_SUPPORT_MAYBE_LATER
@@ -668,11 +695,10 @@ netsnmp_ocert_get(netsnmp_cert *cert)
             PKCS12_parse(p12, "", NULL, &cert, NULL);
     }
 #endif
-
     else
         snmp_log(LOG_ERR, "unknown certificate type %d for %s\n",
                  cert->info.type, cert->info.filename);
- 
+
     BIO_vfree(certbio);
 
     if (NULL == ocert) {
@@ -767,14 +793,17 @@ _find_partner(netsnmp_cert *cert, netsnmp_key *key)
     }
 
     if(key) {
-        fn_container = SUBCONTAINER_FIND(_certs, "certs_fn");
-        netsnmp_assert(fn_container);
         if (key->cert) {
             DEBUGMSGT(("cert:partner", "key already has partner\n"));
             return;
         }
         DEBUGMSGT(("cert:partner", "looking for key partner for %s\n",
                    key->info.filename));
+
+        /** find subcontainer with filename as key */
+        fn_container = SUBCONTAINER_FIND(_certs, "certs_fn");
+        netsnmp_assert(fn_container);
+
         len = snprintf(filename, sizeof(filename), "%s", key->info.filename);
         if ('.' != filename[len-4])
             return;
@@ -829,10 +858,8 @@ _find_partner(netsnmp_cert *cert, netsnmp_key *key)
     if (matching) {
         free(matching->array);
         free(matching);
+    }
 }
-}
-
-        
 
 static int
 _add_certfile(const char* dirname, const char* filename, FILE *index)
@@ -1306,8 +1333,8 @@ netsnmp_cert_find(int what, int where, void *hint)
                                            NETSNMP_DS_LIB_X509_SERVER_PUB);
                 break;
             default:
-                DEBUGMSGT(("cert:find:err", "unhandled type %d for %d\n", what,
-                           where));
+                DEBUGMSGT(("cert:find:err", "unhandled type %d for %s(%d)\n",
+                           what, _where_str(where), where));
                 return NULL;
         }
         _fp_lowercase_and_strip_colon(fp);
@@ -1448,8 +1475,6 @@ _cert_find_fp(const char *fingerprint)
 static netsnmp_cert *
 _key_find_fn(const char *filename)
 {
-    char tmp[NAME_MAX];
-
     netsnmp_cert key, *result = NULL;
 
     if (NULL == filename)
