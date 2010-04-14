@@ -61,7 +61,7 @@ config_require(mibII/var_route)
 #define IFNUMBER        0
 #define IFINDEX         1
 #define IFDESCR         2
-#define IFTYPE          3
+#define NETSNMP_IFTYPE          3
 #define IFMTU           4
 #define IFSPEED         5
 #define IFPHYSADDRESS   6
