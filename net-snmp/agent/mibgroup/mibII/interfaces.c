@@ -216,7 +216,7 @@ struct variable3 interfaces_variables[] = {
     {IFNUMBER, ASN_INTEGER, RONLY, var_interfaces, 1, {1}},
     {IFINDEX, ASN_INTEGER, RONLY, var_ifEntry, 3, {2, 1, 1}},
     {IFDESCR, ASN_OCTET_STR, RONLY, var_ifEntry, 3, {2, 1, 2}},
-    {IFTYPE, ASN_INTEGER, RONLY, var_ifEntry, 3, {2, 1, 3}},
+    {NETSNMP_IFTYPE, ASN_INTEGER, RONLY, var_ifEntry, 3, {2, 1, 3}},
     {IFMTU, ASN_INTEGER, RONLY, var_ifEntry, 3, {2, 1, 4}},
     {IFSPEED, ASN_GAUGE, RONLY, var_ifEntry, 3, {2, 1, 5}},
     {IFPHYSADDRESS, ASN_OCTET_STR, RONLY, var_ifEntry, 3, {2, 1, 6}},
@@ -581,7 +581,7 @@ var_ifEntry(struct variable *vp,
         cp = if_name;
         *var_len = strlen(if_name);
         return (u_char *) cp;
-    case IFTYPE:
+    case NETSNMP_IFTYPE:
         if (if_ptr)
             long_return = if_ptr->type;
         else
@@ -756,7 +756,7 @@ var_ifEntry(struct variable *vp,
         cp = Name;
         *var_len = strlen(cp);
         return (u_char *) cp;
-    case IFTYPE:
+    case NETSNMP_IFTYPE:
         if (if_ptr)
             long_return = if_ptr->type;
         else {
@@ -1021,7 +1021,7 @@ var_ifEntry(struct variable *vp,
 #endif
         *var_len = strlen(cp);
         return (u_char *) cp;
-    case IFTYPE:
+    case NETSNMP_IFTYPE:
         if (if_ptr)
             long_return = if_ptr->type;
         else {
@@ -1262,7 +1262,7 @@ var_ifEntry(struct variable * vp,
         *var_len = ifstat.ifDescr.o_length;
         (void) memcpy(return_buf, ifstat.ifDescr.o_bytes, *var_len);
         return (u_char *) return_buf;
-    case IFTYPE:
+    case NETSNMP_IFTYPE:
         if (if_ptr)
             long_return = if_ptr->type;
         else
@@ -2466,7 +2466,7 @@ var_ifEntry(struct variable * vp,
         cp = ifmd.ifmd_name;
         *var_len = strlen(cp);
         return (u_char *) cp;
-    case IFTYPE:
+    case NETSNMP_IFTYPE:
         if (if_ptr)
             long_return = if_ptr->type;
         else
@@ -2697,7 +2697,7 @@ var_ifEntry(struct variable * vp,
     case IFDESCR:
         *var_len = ifRow.dwDescrLen;
         return (u_char *) ifRow.bDescr;
-    case IFTYPE:
+    case NETSNMP_IFTYPE:
         if (if_ptr)
             long_return = if_ptr->type;
         else
