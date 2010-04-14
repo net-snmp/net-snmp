@@ -18,6 +18,8 @@ CONFIGAGENT com2sec testcommunitysec1  default testcommunity1
 CONFIGAGENT com2sec testcommunitysec2  default testcommunity2
 
 if [ "$SNMP_TRANSPORT_SPEC" = "udp6" -o "$SNMP_TRANSPORT_SPEC" = "tcp6" ];then 
+CONFIGAGENT rocommunity6 testrocommunity ::1 .1.3.6.1.2.1.1.5.0
+CONFIGAGENT rwcommunity6 testrwcommunity ::1 .1.3.6.1.2.1.1.5.0
 CONFIGAGENT com2sec6 testcommunitysec1  default testcommunity1
 CONFIGAGENT com2sec6 testcommunitysec2  default testcommunity2
 fi
