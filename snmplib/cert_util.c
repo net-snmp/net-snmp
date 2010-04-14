@@ -179,6 +179,13 @@ netsnmp_certs_init(void)
     _keys->free_item = (netsnmp_container_obj_func*)_key_free;
     _keys->compare = (netsnmp_container_compare*)_cert_fn_compare;
 
+    se_add_pair_to_slist("cert_types", strdup("pem"), NS_CERT_TYPE_PEM);
+    se_add_pair_to_slist("cert_types", strdup("crt"), NS_CERT_TYPE_DER);
+    se_add_pair_to_slist("cert_types", strdup("cer"), NS_CERT_TYPE_DER);
+    se_add_pair_to_slist("cert_types", strdup("cert"), NS_CERT_TYPE_DER);
+    se_add_pair_to_slist("cert_types", strdup("der"), NS_CERT_TYPE_DER);
+    se_add_pair_to_slist("cert_types", strdup("key"), NS_CERT_TYPE_KEY);
+    se_add_pair_to_slist("cert_types", strdup("private"), NS_CERT_TYPE_KEY);
 
     /** scan config dirs for certs */
     _cert_indexes_load();
@@ -254,22 +261,38 @@ static netsnmp_key *
 _new_key(const char *dirname, const char *filename)
 {
     netsnmp_key    *key;
+    struct stat     fstat;
+    char            fn[SNMP_MAXPATH];
 
     if ((NULL == dirname) || (NULL == filename)) {
         snmp_log(LOG_ERR, "bad parameters to _new_key\n");
         return NULL;
     }
 
+    /** check file permissions */
+    snprintf(fn, sizeof(fn), "%s/%s", dirname, filename);
+    if (stat(fn, &fstat) != 0) {
+        snmp_log(LOG_ERR, "could  not stat %s\n", fn);
+        return NULL;
+    }
+
+    if ((fstat.st_mode & S_IROTH) || (fstat.st_mode & S_IROTH)) {
+        snmp_log(LOG_ERR,
+                 "refusing to read world readable or writable key %s\n", fn);
+        return NULL;
+    }
+
     key = SNMP_MALLOC_TYPEDEF(netsnmp_key);
     if (NULL == key) {
-        snmp_log(LOG_ERR,"could not allocate memory for keyificate at %s/%s\n",
+        snmp_log(LOG_ERR, "could not allocate memory for key at %s/%s\n",
                  dirname, filename);
         return NULL;
     }
 
     DEBUGMSGT(("cert:key:struct:new","new key 0x%#lx for %s\n", (u_long)key,
-                  filename));
+               filename));
 
+    key->info.type = NS_CERT_TYPE_KEY;
     key->info.dir = strdup(dirname);
     key->info.filename = strdup(filename);
     key->info.allowed_uses = NS_CERT_IDENTITY;
@@ -408,36 +431,18 @@ _cert_fn_ncompare(netsnmp_cert_common *lhs, netsnmp_cert_common *rhs)
     return strncmp(lhs->filename, rhs->filename, strlen(rhs->filename));
 }
 
+static int
+_cert_ext_type(const char *ext)
+{
+    int rc = se_find_value_in_slist("cert_types", ext);
+    if (SE_DNE == rc)
+        return NS_CERT_TYPE_UNKNOWN;
+    return rc;
+}
 
 /*
  * filter functions; return 1 to include file, 0 to exclude
  */
-
-static int
-_cert_ext_type(const char *ext)
-{
-    if ('p' == *ext) {
-        if (strcmp(ext,"pem") == 0)
-            return NS_CERT_TYPE_PEM;
-        if (strcmp(ext,"p12") == 0)
-            return NS_CERT_TYPE_PKCS12;
-    }
-    else if (('d' == *ext) && (strcmp(ext,"der") == 0))
-        return NS_CERT_TYPE_DER;
-    else if ('c' == *ext) {
-        if (strcmp(ext,"crt") == 0)
-            return NS_CERT_TYPE_DER;
-        if (strcmp(ext,"cer") == 0)
-            return NS_CERT_TYPE_DER;
-    }
-    else if ('k' == *ext) {
-        if (strcmp(ext,"key") == 0)
-            return NS_CERT_TYPE_KEY;
-    }
-
-    return NS_CERT_TYPE_UNKNOWN;
-}
-
 static int
 _cert_cert_filter(const char *filename)
 {
@@ -447,11 +452,11 @@ _cert_cert_filter(const char *filename)
     if (len < 5) /* shortest name: x.YYY */
         return 0;
 
-    pos = &filename[len-4];
-    if (*pos++ != '.')
+    pos = strrchr(filename, '.');
+    if (NULL == pos)
         return 0;
 
-    if (_cert_ext_type(pos) != NS_CERT_TYPE_UNKNOWN)
+    if (_cert_ext_type(++pos) != NS_CERT_TYPE_UNKNOWN)
         return 1;
 
     return 0;
@@ -650,54 +655,70 @@ netsnmp_ocert_get(netsnmp_cert *cert)
     }
 
     if (NS_CERT_TYPE_UNKNOWN == cert->info.type) {
-        int len = strlen(cert->info.filename);
-        netsnmp_assert(cert->info.filename[len-4] == '.');
-        cert->info.type = _cert_ext_type(&cert->info.filename[len-3]);
+        char *pos = strrchr(cert->info.filename, '.');
+        if (NULL == pos)
+            return NULL;
+        cert->info.type = _cert_ext_type(++pos);
         netsnmp_assert(cert->info.type != NS_CERT_TYPE_UNKNOWN);
     }
 
-    if (NS_CERT_TYPE_PEM == cert->info.type) {
-        ocert = PEM_read_bio_X509_AUX(certbio, NULL, NULL, NULL); /* PEM */
-        /** check for private key too */
-        if (NULL == cert->key) {
+    switch (cert->info.type) {
+
+        case NS_CERT_TYPE_DER:
+            ocert = d2i_X509_bio(certbio,NULL); /* DER/ASN1 */
+            if (NULL != ocert)
+                break;
             BIO_reset(certbio);
-            okey =  PEM_read_bio_PrivateKey(certbio, NULL, NULL, NULL);
-            if (NULL != okey) {
-                netsnmp_key  *key;
-                DEBUGMSGT(("cert:read:key", "found key with cert in %s\n",
-                           cert->info.filename));
-                key = _new_key(cert->info.dir, cert->info.filename);
-                if (NULL != key) {
-                    key->okey = okey;
-                    if (-1 == CONTAINER_INSERT(_keys, key)) {
-                        DEBUGMSGT(("cert:read:key:add",
-                                   "error inserting key into container\n"));
-                        netsnmp_key_free(key);
-                        key = NULL;
+            /** FALLTHROUGH: check for PEM if DER didn't work */
+
+        case NS_CERT_TYPE_PEM:
+            ocert = PEM_read_bio_X509_AUX(certbio, NULL, NULL, NULL);
+            if (NULL == ocert)
+                break;
+            if (NS_CERT_TYPE_DER == cert->info.type) {
+                DEBUGMSGT(("cert:read", "Changing type from DER to PEM\n"));
+                cert->info.type = NS_CERT_TYPE_PEM;
+            }
+            /** check for private key too */
+            if (NULL == cert->key) {
+                BIO_reset(certbio);
+                okey =  PEM_read_bio_PrivateKey(certbio, NULL, NULL, NULL);
+                if (NULL != okey) {
+                    netsnmp_key  *key;
+                    DEBUGMSGT(("cert:read:key", "found key with cert in %s\n",
+                               cert->info.filename));
+                    key = _new_key(cert->info.dir, cert->info.filename);
+                    if (NULL != key) {
+                        key->okey = okey;
+                        if (-1 == CONTAINER_INSERT(_keys, key)) {
+                            DEBUGMSGT(("cert:read:key:add",
+                                       "error inserting key into container\n"));
+                            netsnmp_key_free(key);
+                            key = NULL;
+                        }
+                        else {
+                            DEBUGMSGT(("cert:read:partner",
+                                       "matched partner!\n"));
+                            key->cert = cert;
+                            cert->key = key;
+                        }
                     }
-                    else {
-                        DEBUGMSGT(("cert:read:partner", "matched partner!\n"));
-                        key->cert = cert;
-                        cert->key = key;
-                    }
-                }
-            } /* null return from read */
-        } /* null key */
-    } /* type PEM */
-    else if (NS_CERT_TYPE_DER == cert->info.type)
-        ocert = d2i_X509_bio(certbio,NULL); /* DER/ASN1 */
+                } /* null return from read */
+            } /* null key */
+            break;
 #ifdef CERT_PKCS12_SUPPORT_MAYBE_LATER
-    else if (NS_CERT_TYPE_PKCS12 == cert->info.type) {
-        (void)BIO_reset(certbio);
-        PKCS12 *p12 = d2i_PKCS12_bio(certbio, NULL);
-        if ( (NULL != p12) && (PKCS12_verify_mac(p12, "", 0) ||
-                               PKCS12_verify_mac(p12, NULL, 0)))
-            PKCS12_parse(p12, "", NULL, &cert, NULL);
-    }
+        case NS_CERT_TYPE_PKCS12:
+            (void)BIO_reset(certbio);
+            PKCS12 *p12 = d2i_PKCS12_bio(certbio, NULL);
+            if ( (NULL != p12) && (PKCS12_verify_mac(p12, "", 0) ||
+                                   PKCS12_verify_mac(p12, NULL, 0)))
+                PKCS12_parse(p12, "", NULL, &cert, NULL);
+            break;
 #endif
-    else
-        snmp_log(LOG_ERR, "unknown certificate type %d for %s\n",
-                 cert->info.type, cert->info.filename);
+        default:
+            snmp_log(LOG_ERR, "unknown certificate type %d for %s\n",
+                     cert->info.type, cert->info.filename);
+    }
 
     BIO_vfree(certbio);
 
@@ -780,17 +801,21 @@ static void
 _find_partner(netsnmp_cert *cert, netsnmp_key *key)
 {
     netsnmp_container  *fn_container;
-;
     netsnmp_void_array *matching;
     netsnmp_cert_common search;
-    char                filename[NAME_MAX];
-    int                 len;
-
+    char                filename[NAME_MAX], *pos;
 
     if ((cert && key) || (!cert && ! key)) {
         DEBUGMSGT(("cert:partner", "bad parameters searching for partner\n"));
         return;
     }
+
+    snprintf(filename, sizeof(filename), "%s", key->info.filename);
+    pos = strrchr(filename, '.');
+    if (NULL == pos)
+        return;
+    *pos = 0;
+    search.filename = filename;
 
     if(key) {
         if (key->cert) {
@@ -804,11 +829,6 @@ _find_partner(netsnmp_cert *cert, netsnmp_key *key)
         fn_container = SUBCONTAINER_FIND(_certs, "certs_fn");
         netsnmp_assert(fn_container);
 
-        len = snprintf(filename, sizeof(filename), "%s", key->info.filename);
-        if ('.' != filename[len-4])
-            return;
-        filename[len-3] = 0;
-        search.filename = filename;
         matching = CONTAINER_GET_SUBSET(fn_container, &search);
         if (!matching)
             return;
@@ -833,11 +853,7 @@ _find_partner(netsnmp_cert *cert, netsnmp_key *key)
         }
         DEBUGMSGT(("cert:partner", "looking for cert partner for %s\n",
                    cert->info.filename));
-        len = snprintf(filename, sizeof(filename), "%s", cert->info.filename);
-        if ('.' != filename[len-4])
-            return;
-        filename[len-3] = 0;
-        search.filename = filename;
+
         matching = CONTAINER_GET_SUBSET(_keys, &search);
         if (!matching)
             return;
@@ -868,21 +884,19 @@ _add_certfile(const char* dirname, const char* filename, FILE *index)
     EVP_PKEY     *okey;
     netsnmp_cert *cert = NULL;
     netsnmp_key  *key = NULL;
-    char          certfile[SNMP_MAXPATH];
-    int           len, type;
+    char          certfile[SNMP_MAXPATH], *pos;
+    int           type;
 
     if (((const void*)NULL == dirname) || (NULL == filename))
         return -1;
 
-    len = strlen(filename);
-    if (len < 5 ) /* x.ext */
+    pos = strrchr(filename, '.');
+    if (NULL == pos)
         return -1;
-
-        snprintf(certfile, sizeof(certfile),"%s/%s", dirname, filename);
-
-    netsnmp_assert(filename[len-4] == '.'); /* should be enforced by filter */
-    type = _cert_ext_type(&filename[len-3]);
+    type = _cert_ext_type(++pos);
     netsnmp_assert(type != NS_CERT_TYPE_UNKNOWN);
+
+    snprintf(certfile, sizeof(certfile),"%s/%s", dirname, filename);
 
     DEBUGMSGT(("cert:file:add", "Checking file: %s (type %d)\n", filename,
                type));
@@ -931,8 +945,8 @@ _add_certfile(const char* dirname, const char* filename, FILE *index)
         /** fingerprint = 60 */
         /** common name / CN  = 64 */
         if (cert)
-            fprintf(index, "c:%s %s '%s'\n", filename, cert->fingerprint,
-                    cert->common_name);
+            fprintf(index, "c:%s %d %s '%s'\n", filename, cert->info.type,
+                    cert->fingerprint, cert->common_name);
         else if (key)
             fprintf(index, "k:%s\n", filename);
     }
@@ -943,24 +957,16 @@ _add_certfile(const char* dirname, const char* filename, FILE *index)
 static int
 _cert_read_index(const char *dirname, struct stat *dirstat)
 {
-#if (defined(WIN32) || defined(cygwin))
-    /* For Win32 platforms, the directory does not maintain a last modification
-     * date that we can compare with the modification date of the .index file.
-     * Therefore there is no way to know whether any .index file is valid.
-     */
-    return -1;
-#else
     FILE           *index;
     char           *idxname, *pos;
     struct stat     idx_stat;
     char            tmpstr[SNMP_MAXPATH + 5], filename[NAME_MAX];
-    char            fingerprint[60+1], common_name[64+1];
-    int             count = 0;
+    char            fingerprint[60+1], common_name[64+1], type_str[15];
+    int             count = 0, type;
     netsnmp_cert    *cert;
     netsnmp_key     *key;
     netsnmp_container *newer; 
 
-    netsnmp_assert(NULL != dirstat);
     netsnmp_assert(NULL != dirname);
 
     idxname = _certindex_lookup( dirname );
@@ -978,11 +984,17 @@ _cert_read_index(const char *dirname, struct stat *dirstat)
         return -1;
     }
 
+#if (defined(WIN32) || defined(cygwin))
+    /* For Win32 platforms, the directory does not maintain a last modification
+     * date that we can compare with the modification date of the .index file.
+     */
+#else
     if (dirstat->st_mtime >= idx_stat.st_mtime) {
         DEBUGMSGT(("cert:index:parse", "Index outdated; dir modified\n"));
         SNMP_FREE(idxname);
         return -1;
     }
+#endif
 
     /*
      * dir mtime doesn't change when files are touched, so we need to check
@@ -1020,13 +1032,15 @@ _cert_read_index(const char *dirname, struct stat *dirstat)
         if ('c' == tmpstr[0]) {
             pos = &tmpstr[2];
             if ((NULL == (pos = copy_nword(pos, filename, sizeof(filename)))) ||
+                (NULL == (pos = copy_nword(pos, type_str, sizeof(type_str)))) ||
                 (NULL == (pos = copy_nword(pos, fingerprint, sizeof(fingerprint)))) ||
                 (NULL != copy_nword(pos, common_name, sizeof(common_name)))) {
                 snmp_log(LOG_ERR, "_cert_read_index: error parsing line: %s\n",
                          tmpstr);
                 continue;
             }
-            cert = (void*)_new_cert(dirname, filename, 0, fingerprint,
+            type = atoi(type_str);
+            cert = (void*)_new_cert(dirname, filename, type, fingerprint,
                                     common_name);
             if (cert && 0 == CONTAINER_INSERT(_certs, cert))
             ++count;
@@ -1063,7 +1077,6 @@ _cert_read_index(const char *dirname, struct stat *dirstat)
     DEBUGMSGT(("cert:index:parse","added %d certs from index\n", count));
 
     return count;
-#endif /* ! windows */
 }
 
 static int
@@ -1079,6 +1092,7 @@ _add_certdir(const char *dirname)
     netsnmp_assert(NULL != dirname);
 
     DEBUGMSGT(("9:cert:dir:add", " config dir: %s\n", dirname ));
+
     if (stat(dirname, &statbuf) != 0) {
         DEBUGMSGT(("9:cert:dir:add", " dir not present: %s\n",
                    dirname ));
@@ -1159,8 +1173,10 @@ static void
 _cert_indexes_load(void)
 {
     const char     *confpath;
-    char           *confpath_copy, *dir, *subdir, *st = NULL;
+    char           *confpath_copy, *dir, *st = NULL;
     char            certdir[SNMP_MAXPATH];
+    const char     *subdirs[] = { NULL, "ca-certs", "certs", "private", NULL };
+    int             i = 0;
 
     /*
      * load indexes from persistent dir
@@ -1176,26 +1192,19 @@ _cert_indexes_load(void)
     if (NULL == confpath)
         confpath = get_configuration_directory();
 
+    subdirs[0] = netsnmp_ds_get_string(NETSNMP_DS_LIBRARY_ID,
+                                       NETSNMP_DS_LIB_CERT_EXTRA_SUBDIR);
     confpath_copy = strdup(confpath);
     for ( dir = strtok_r(confpath_copy, ENV_SEPARATOR, &st);
           dir; dir = strtok_r(NULL, ENV_SEPARATOR, &st)) {
 
-        /** check for default certs subdir */
-        snprintf(certdir, sizeof(certdir), "%s/%s", dir, "certs");
-        _add_certdir(certdir);
-
-        /** check for configured extra subdir */
-        subdir = netsnmp_ds_get_string(NETSNMP_DS_LIBRARY_ID,
-                                       NETSNMP_DS_LIB_CERT_EXTRA_SUBDIR);
-        if (NULL != subdir) {
-            snprintf(certdir, sizeof(certdir), "%s/%s", dir, subdir);
+        i = (NULL == subdirs[0]) ? 1 : 0;
+        for ( ; subdirs[i] ; ++i ) {
+            /** check tls subdir */
+            snprintf(certdir, sizeof(certdir), "%s/tls/%s", dir, subdirs[i]);
             _add_certdir(certdir);
-        }
-
-        /** xxx-rks: read base dirs too? or only read them if configured? */
-        /** _add_certdir(dir); */
-
-    }
+        } /* for subdirs */
+    } /* for conf path dirs */
     SNMP_FREE(confpath_copy);
 }
 
@@ -1205,23 +1214,23 @@ _cert_print(netsnmp_cert *c, void *context)
     if (NULL == c)
         return;
 
-    snmp_log(LOG_INFO, "found in %s %s\n", c->info.dir, c->info.filename);
-    snmp_log(LOG_INFO, " type %d flags 0x%x (%s)\n",
+    snmp_log(LOG_INFO, "cert found in %s %s\n", c->info.dir, c->info.filename);
+    snmp_log(LOG_INFO, "-type %d flags 0x%x (%s)\n",
              c->info.type, c->info.allowed_uses,
              _mode_str(c->info.allowed_uses));
     if (NS_CERT_TYPE_KEY == c->info.type) {
     }
     else {
         if(c->fingerprint)
-            snmp_log(LOG_INFO, "Cert fingerprint: %s\n", c->fingerprint);
+            snmp_log(LOG_INFO, "-cert fingerprint: %s\n", c->fingerprint);
         if (c->common_name)
-            snmp_log(LOG_INFO, " common_name %s\n", c->common_name);
+            snmp_log(LOG_INFO, "-common_name %s\n", c->common_name);
         if (c->san_rfc822)
-            snmp_log(LOG_INFO, " san_rfc822 %s\n", c->san_rfc822);
+            snmp_log(LOG_INFO, "-san_rfc822 %s\n", c->san_rfc822);
         if (c->san_ipaddr)
-            snmp_log(LOG_INFO, " san_ipaddr %s\n", c->san_ipaddr);
+            snmp_log(LOG_INFO, "-san_ipaddr %s\n", c->san_ipaddr);
         if (c->san_dnsname)
-            snmp_log(LOG_INFO, " san_dnsname %s\n", c->san_dnsname);
+            snmp_log(LOG_INFO, "-san_dnsname %s\n", c->san_dnsname);
     }
 
     /** netsnmp_openssl_cert_dump_names(c->ocert); */
@@ -1234,8 +1243,8 @@ _key_print(netsnmp_key *k, void *context)
     if (NULL == k)
         return;
 
-    snmp_log(LOG_INFO, "found in %s %s\n", k->info.dir, k->info.filename);
-    snmp_log(LOG_INFO, " type %d flags 0x%x (%sc)\n", k->info.type,
+    snmp_log(LOG_INFO, "key found in %s %s\n", k->info.dir, k->info.filename);
+    snmp_log(LOG_INFO, "-type %d flags 0x%x (%s)\n", k->info.type,
              k->info.allowed_uses, _mode_str(k->info.allowed_uses));
 }
 
