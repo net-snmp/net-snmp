@@ -792,8 +792,8 @@ sub initOpts {
   $ENV{PATH} = "/sbin:/usr/sbin:$ENV{PATH}";
   $ENV{PATH} = "$opts->{bindir}:$ENV{PATH}";
 
-  # default all privs to -rwxrwxrwx
-  umask(000);
+  # default all privs to -rw-------
+  umask(077);
 }
 
 sub parseArgs {
