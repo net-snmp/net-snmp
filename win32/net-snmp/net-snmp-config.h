@@ -4,6 +4,14 @@
 #ifndef NET_SNMP_CONFIG_H
 #define NET_SNMP_CONFIG_H
 
+/* _MSC_VER values
+   1500 = 9.0 (2008)
+   1400 = 8.0 (2005)
+   1310 = 7.1 (2003)
+   1300 = 7.0 (2002)
+   1200 = 6.0
+*/
+
 /* Define HAVE_WIN32_PLATFORM_SDK if you have:
  * Microsoft Visual Studio MSVC 6.0 and the Platform SDK (PSDK)
  * Microsoft Visual Studio.Net 2002
@@ -1241,11 +1249,11 @@
 /* this is the location of the net-snmp mib tree.  It shouldn't be
    changed, as the places it is used are expected to be constant
    values or are directly tied to the UCD-SNMP-MIB. */
-#define NETSNMP_OID		8072
-#define NETSNMP_MIB		1,3,6,1,4,1,8072
-#define NETSNMP_DOT_MIB		1.3.6.1.4.1.8072
-#define NETSNMP_DOT_MIB_LENGTH	7
-      
+#define NETSNMP_OID             8072
+#define NETSNMP_MIB             1,3,6,1,4,1,8072
+#define NETSNMP_DOT_MIB         1.3.6.1.4.1.8072
+#define NETSNMP_DOT_MIB_LENGTH  7
+
 /* how long to wait (seconds) for error querys before reseting the error trap.*/
 #define ERRORTIMELENGTH 600
 
@@ -1554,7 +1562,10 @@ typedef __int64 int64_t;
 /* define to 1 if you do not want to set global snmp_errno */
 #define DONT_SHARE_ERROR_WITH_OTHER_THREADS 1
 
+/* Not needed for MSVC 2008 */
+#if _MSC_VER < 1500
 #define vsnprintf _vsnprintf
+#endif
 #define snprintf  _snprintf
 
 #define EADDRINUSE	WSAEADDRINUSE
