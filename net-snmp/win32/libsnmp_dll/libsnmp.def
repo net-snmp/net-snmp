@@ -252,6 +252,7 @@ EXPORTS
 	calculate_time_diff
 	calculate_sectime_diff
 	vacm_is_configured
+	get_configuration_directory
 	vacm_createGroupEntry
 	vacm_destroyGroupEntry
 	vacm_destroyAllGroupEntries
