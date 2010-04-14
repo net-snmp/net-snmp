@@ -1,9 +1,5 @@
 /*
- * snmptsmsm.c
- *
- * This code merely does openssl initialization so that multilpe
- * modules are safe to call netsnmp_init_openssl() for bootstrapping
- * without worrying about other callers that may have already done so.
+ * snmp_openssl.c
  */
 
 #include <net-snmp/net-snmp-config.h>
@@ -22,6 +18,11 @@
 
 static u_char have_started_already = 0;
 
+/*
+ * This code merely does openssl initialization so that multilpe
+ * modules are safe to call netsnmp_init_openssl() for bootstrapping
+ * without worrying about other callers that may have already done so.
+ */
 void netsnmp_init_openssl(void) {
 
     /* avoid duplicate calls */
