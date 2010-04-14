@@ -4,6 +4,14 @@
 #ifndef NET_SNMP_CONFIG_H
 #define NET_SNMP_CONFIG_H
 
+/* _MSC_VER values
+   1500 = 9.0 (2008)
+   1400 = 8.0 (2005)
+   1310 = 7.1 (2003)
+   1300 = 7.0 (2002)
+   1200 = 6.0
+*/
+
 /* Define HAVE_WIN32_PLATFORM_SDK if you have:
  * Microsoft Visual Studio MSVC 6.0 and the Platform SDK (PSDK)
  * Microsoft Visual Studio.Net 2002
@@ -1556,7 +1564,11 @@ typedef unsigned short   uint16_t;
 /* define to 1 if you do not want to set global snmp_errno */
 #define DONT_SHARE_ERROR_WITH_OTHER_THREADS 1
 
+/* Not needed for MSVC 2008 */
+#if _MSC_VER < 1500
 #define vsnprintf _vsnprintf
+#endif
+#define snprintf  _CRT_SECURE_NO_WARNINGS
 #define snprintf  _snprintf
 
 #define EADDRINUSE	WSAEADDRINUSE
