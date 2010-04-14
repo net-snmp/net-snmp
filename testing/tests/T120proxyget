@@ -39,6 +39,9 @@ STARTAGENT
   SNMP_SNMPD_LOG_FILE=$SNMP_SNMPD_LOG_FILE.num2
   SNMP_CONFIG_FILE="$SNMP_TMPDIR/proxy.conf"
   echo "rwcommunity testcommunity" >> $SNMP_CONFIG_FILE
+  if [ "$SNMP_TRANSPORT_SPEC" = "udp6" -o "$SNMP_TRANSPORT_SPEC" = "tcp6" ];then
+    echo "rwcommunity6 testcommunity" >> $SNMP_CONFIG_FILE
+  fi
   AGENT_FLAGS=$ORIG_AGENT_FLAGS
   ORIG_SNMP_SNMPD_PORT=$SNMP_SNMPD_PORT
   SNMP_SNMPD_PORT="${SNMP_AGENTX_PORT}"
