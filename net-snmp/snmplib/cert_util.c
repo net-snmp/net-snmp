@@ -864,11 +864,11 @@ _find_partner(netsnmp_cert *cert, netsnmp_key *key)
                 key->cert = cert;
                 cert->key = key;
             }
-            else if (cert->key != key)
+            else if (key->cert != cert)
                 snmp_log(LOG_ERR, "cert's matching key already has partner\n");
         }
         else
-            DEBUGMSGT(("cert:partner", "key matches multiple certs\n"));
+            DEBUGMSGT(("cert:partner", "cert matches multiple keys\n"));
     }
     
     if (matching) {
