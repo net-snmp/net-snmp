@@ -32,17 +32,18 @@ extern          "C" {
      * _Internal_ structures
      */
     typedef struct _netsnmpTLSBaseData_s {
-       int                 flags;
-       SSL_CTX            *ssl_context;
-       SSL                *ssl;
-       BIO                *sslbio;
-       BIO                *accept_bio;
-       BIO                *accepted_bio;
-       char               *securityName;
-       struct sockaddr_in  addr;
-       char               *my_fingerprint;
-       char               *their_fingerprint;
-       netsnmp_container  *config;
+       int                        flags;
+       SSL_CTX                   *ssl_context;
+       SSL                       *ssl;
+       BIO                       *sslbio;
+       BIO                       *accept_bio;
+       BIO                       *accepted_bio;
+       char                      *securityName;
+       struct sockaddr_in         addr;
+       char                      *my_fingerprint;
+       char                      *their_fingerprint;
+       netsnmp_container         *config;
+       netsnmp_indexed_addr_pair *remote_addr;
     } _netsnmpTLSBaseData;
 
     SSL_CTX *sslctx_client_setup(SSL_METHOD *, _netsnmpTLSBaseData *tlsbase);
@@ -53,7 +54,7 @@ extern          "C" {
     int netsnmp_tlsbase_wrapup_recv(netsnmp_tmStateReference *tmStateRef,
                                     _netsnmpTLSBaseData *tlsdata,
                                     void **opaque, int *olength);
-
+    int netsnmp_tlsbase_config(netsnmp_transport *t, char *token, char *value);
 #ifdef __cplusplus
 }
 #endif
