@@ -1540,6 +1540,7 @@ _sess_open(netsnmp_session * in_session)
         } else {
             in_session->s_snmp_errno = SNMPERR_TRANSPORT_NO_CONFIG;
             in_session->s_errno = errno;
+            return NULL;
         }
     }
 
