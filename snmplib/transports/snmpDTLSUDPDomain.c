@@ -587,7 +587,7 @@ netsnmp_dtlsudp_send(netsnmp_transport *t, void *buf, int size,
     bio_cache *cachep = NULL;
     netsnmp_tmStateReference *tmStateRef = NULL;
     u_char outbuf[65535];
-    _netsnmpTLSBaseData *tlsdata;
+    _netsnmpTLSBaseData *tlsdata = NULL;
     
     DEBUGTRACETOK("dtlsudp");
 
@@ -601,6 +601,11 @@ netsnmp_dtlsudp_send(netsnmp_transport *t, void *buf, int size,
         else if (t != NULL && t->data != NULL &&
                  t->data_length == sizeof(netsnmp_indexed_addr_pair))
             addr_pair = (netsnmp_indexed_addr_pair *) (t->data);
+        else if (t != NULL && t->data != NULL &&
+                 t->data_length == sizeof(_netsnmpTLSBaseData)) {
+            tlsdata = (_netsnmpTLSBaseData *) t->data;
+            addr_pair = (netsnmp_indexed_addr_pair *) (tlsdata->remote_addr);
+        }
     } else if (t != NULL && t->data != NULL &&
                t->data_length == sizeof(netsnmp_indexed_addr_pair)) {
         addr_pair = (netsnmp_indexed_addr_pair *) (t->data);
@@ -760,6 +765,7 @@ netsnmp_dtlsudp_transport(struct sockaddr_in *addr, int local)
             netsnmp_tlsbase_allocate_tlsdata(t, local);
         tlsdata->remote_addr = t->data;
         t->data = tlsdata;
+        t->data_length = sizeof(_netsnmpTLSBaseData);
     }
 
     if (!local) {
