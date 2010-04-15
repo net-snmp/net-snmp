@@ -1513,6 +1513,7 @@ netsnmp_sess_config_transport(netsnmp_container *transport_configuration,
             return SNMPERR_TRANSPORT_NO_CONFIG;
         }
     }
+    return SNMPERR_SUCCESS;
 }
 
 /*******************************************************************-o-******
