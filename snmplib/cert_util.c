@@ -697,10 +697,11 @@ netsnmp_ocert_get(netsnmp_cert *cert)
                             key = NULL;
                         }
                         else {
-                            DEBUGMSGT(("cert:read:partner",
-                                       "matched partner!\n"));
+                            DEBUGMSGT(("cert:read:partner", "%s match found!\n",
+                                       cert->info.filename));
                             key->cert = cert;
                             cert->key = key;
+                            cert->info.allowed_uses |= NS_CERT_IDENTITY;
                         }
                     }
                 } /* null return from read */
@@ -822,7 +823,7 @@ _find_partner(netsnmp_cert *cert, netsnmp_key *key)
             DEBUGMSGT(("cert:partner", "key already has partner\n"));
             return;
         }
-        DEBUGMSGT(("cert:partner", "looking for key partner for %s\n",
+        DEBUGMSGT(("9:cert:partner", "%s looking for partner\n",
                    key->info.filename));
 
         /** find subcontainer with filename as key */
@@ -835,23 +836,26 @@ _find_partner(netsnmp_cert *cert, netsnmp_key *key)
         if (1 == matching->size) {
             cert = (netsnmp_cert*)matching->array[0];
             if (NULL == cert->key) {
-                DEBUGMSGT(("cert:partner", "matched partner!\n"));
+                DEBUGMSGT(("cert:partner", "%s match found!\n",
+                           cert->info.filename));
                 key->cert = cert;
                 cert->key = key;
                 cert->info.allowed_uses |= NS_CERT_IDENTITY;
             }
             else if (cert->key != key)
-                snmp_log(LOG_ERR, "key's matching cert already has partner\n");
+                snmp_log(LOG_ERR, "%s matching cert already has partner\n",
+                         cert->info.filename);
         }
         else
-            DEBUGMSGT(("cert:partner", "key matches multiple certs\n"));
+            DEBUGMSGT(("cert:partner", "%s matches multiple certs\n",
+                          key->info.filename));
     }
     else if(cert) {
         if (cert->key) {
             DEBUGMSGT(("cert:partner", "cert already has partner\n"));
             return;
         }
-        DEBUGMSGT(("cert:partner", "looking for cert partner for %s\n",
+        DEBUGMSGT(("9:cert:partner", "%s looking for partner\n",
                    cert->info.filename));
 
         matching = CONTAINER_GET_SUBSET(_keys, &search);
@@ -860,15 +864,17 @@ _find_partner(netsnmp_cert *cert, netsnmp_key *key)
         if (1 == matching->size) {
             key = (netsnmp_key*)matching->array[0];
             if (NULL == key->cert) {
-                DEBUGMSGT(("cert:partner", "matched partner!\n"));
+                DEBUGMSGT(("cert:partner", "%s found!\n", cert->info.filename));
                 key->cert = cert;
                 cert->key = key;
             }
             else if (key->cert != cert)
-                snmp_log(LOG_ERR, "cert's matching key already has partner\n");
+                snmp_log(LOG_ERR, "%s matching key already has partner\n",
+                         cert->info.filename);
         }
         else
-            DEBUGMSGT(("cert:partner", "cert matches multiple keys\n"));
+            DEBUGMSGT(("cert:partner", "%s matches multiple keys\n",
+                       cert->info.filename));
     }
     
     if (matching) {
@@ -1503,7 +1509,10 @@ _key_find_fn(const char *filename)
 static int
 _time_filter(netsnmp_file *f, struct stat *idx)
 {
-    if (f && idx && f->stats && (f->stats->st_mtime >= idx->st_mtime))
+    /** include if mtime or ctime newer than index mtime */
+    if (f && idx && f->stats &&
+        ((f->stats->st_mtime >= idx->st_mtime) ||
+         (f->stats->st_ctime >= idx->st_mtime)))
         return NETSNMP_DIR_INCLUDE;
 
     return NETSNMP_DIR_EXCLUDE;
