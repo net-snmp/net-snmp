@@ -262,12 +262,100 @@ netsnmp_tlstcp_send(netsnmp_transport *t, void *buf, int size,
     netsnmp_tmStateReference *tmStateRef = NULL;
     _netsnmpTLSBaseData *tlsdata;
     
-    DEBUGMSGTL(("tlstcp", "sending data\n"));
+    DEBUGTRACETOK("tlstcp");
+
+    /* RFCXXXX section 5.2: 
+      1)  If tmStateReference does not refer to a cache containing values
+      for tmTransportDomain, tmTransportAddress, tmSecurityName,
+      tmRequestedSecurityLevel, and tmSameSecurity, then increment the
+      snmpTlstmSessionInvalidCaches counter, discard the message, and
+      return the error indication in the statusInformation.  Processing
+      of this message stops.
+    */
+    /* Implementation Notes: the tmStateReference is stored in the opaque ptr */
     if (opaque != NULL && *opaque != NULL &&
         *olength == sizeof(netsnmp_tmStateReference)) {
         tmStateRef = (netsnmp_tmStateReference *) *opaque;
+    } else {
+        snmp_increment_statistic(STAT_TLSTM_SNMPTLSTMSESSIONINVALIDCACHES);
+        return SNMPERR_GENERR;
     }
 
+
+    /* RFCXXXX section 5.2: 
+       2)  Extract the tmSessionID, tmTransportDomain, tmTransportAddress,
+       tmSecurityName, tmRequestedSecurityLevel, and tmSameSecurity
+       values from the tmStateReference.  Note: The tmSessionID value
+       may be undefined if no session exists yet over which the message
+       can be sent.
+    */
+    /* Implementation Notes:
+       - Our session will always exist by now as it's created when the
+         transport object is created. Auto-session creation is handled
+         higher in the stack.
+       - We don't "extract" per say since we just leave the data in
+         the structure.
+       - The sessionID is stored in the t->data memory pointer.
+    */
+
+    /* RFCXXXX section 5.2: 
+       3)  If tmSameSecurity is true and either tmSessionID is undefined or
+           refers to a session that is no longer open then increment the
+           snmpTlstmSessionNoSessions counter, discard the message and
+           return the error indication in the statusInformation.  Processing
+           of this message stops.
+    */
+    /* Implementation Notes:
+       - We would never get here if the sessionID was either undefined
+         or different.  We tie packets directly to the transport
+         object and it could never be sent back over a different
+         transport, which is what the above text is trying to prevent.
+     */
+
+    /* RFCXXXX section 5.2: 
+       4)  If tmSameSecurity is false and tmSessionID refers to a session
+           that is no longer available then an implementation SHOULD open a
+           new session using the openSession() ASI (described in greater
+           detail in step 5b).  Instead of opening a new session an
+           implementation MAY return a snmpTlstmSessionNoSessions error to
+           the calling module and stop processing of the message.
+    */
+    /* Implementation Notes:
+       - We would never get here if the sessionID was either undefined
+         or different.  We tie packets directly to the transport
+         object and it could never be sent back over a different
+         transport, which is what the above text is trying to prevent.
+       - Auto-connections are handled higher in the Net-SNMP library stack
+     */
+    
+    /* RFCXXXX section 5.2: 
+       5)  If tmSessionID is undefined, then use tmTransportDomain,
+           tmTransportAddress, tmSecurityName and tmRequestedSecurityLevel
+           to see if there is a corresponding entry in the LCD suitable to
+           send the message over.
+
+           5a)  If there is a corresponding LCD entry, then this session
+                will be used to send the message.
+
+           5b)  If there is not a corresponding LCD entry, then open a
+                session using the openSession() ASI (discussed further in
+                Section 5.3.1).  Implementations MAY wish to offer message
+                buffering to prevent redundant openSession() calls for the
+                same cache entry.  If an error is returned from
+                openSession(), then discard the message, discard the
+                tmStateReference, increment the snmpTlstmSessionOpenErrors,
+                return an error indication to the calling module and stop
+                processing of the message.
+    */
+    /* Implementation Notes:
+       - We would never get here if the sessionID was either undefined
+         or different.  We tie packets directly to the transport
+         object and it could never be sent back over a different
+         transport, which is what the above text is trying to prevent.
+       - Auto-connections are handled higher in the Net-SNMP library stack
+     */
+
+    /* our session pointer is functionally t->data */
     if (NULL == t->data) {
         snmp_log(LOG_ERR, "netsnmp_tlstcp_send received no incoming data\n");
         return -1;
@@ -275,12 +363,20 @@ netsnmp_tlstcp_send(netsnmp_transport *t, void *buf, int size,
 
     tlsdata = t->data;
     
-    /* if the first packet and we have no secname, then copy the data */
+    /* If the first packet and we have no secname, then copy the
+       important securityName data into the longer-lived session
+       reference information. */
     if ((tlsdata->flags | NETSNMP_TLSBASE_IS_CLIENT) &&
         !tlsdata->securityName && tmStateRef && tmStateRef->securityNameLen > 0)
         tlsdata->securityName = strdup(tmStateRef->securityName);
         
         
+    /* RFCXXXX section 5.2: 
+       6)  Using either the session indicated by the tmSessionID if there
+           was one or the session resulting from a previous step (4 or 5),
+           pass the outgoingMessage to (D)TLS for encapsulation and
+           transmission.
+    */
     rc = SSL_write(tlsdata->ssl, buf, size);
     DEBUGMSGTL(("tlstcp", "wrote %d bytes\n", size));
     if (rc < 0) {
