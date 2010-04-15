@@ -7,6 +7,7 @@ extern          "C" {
 
 #include <net-snmp/library/snmp_transport.h>
 #include <net-snmp/library/asn1.h>
+#include <net-snmp/library/container.h>
 
 /* OpenSSL Includes */
 #include "openssl/bio.h"
@@ -34,16 +35,17 @@ extern          "C" {
      * _Internal_ structures
      */
     typedef struct _netsnmpTLSBaseData_s {
-       int     flags;
-       SSL_CTX *ssl_context;
-       SSL     *ssl;
-       BIO     *sslbio;
-       BIO     *accept_bio;
-       BIO     *accepted_bio;
-       char    *securityName;
-       struct sockaddr_in addr;
-       char    *my_fingerprint;
-       char    *their_fingerprint;
+       int                 flags;
+       SSL_CTX            *ssl_context;
+       SSL                *ssl;
+       BIO                *sslbio;
+       BIO                *accept_bio;
+       BIO                *accepted_bio;
+       char               *securityName;
+       struct sockaddr_in  addr;
+       char               *my_fingerprint;
+       char               *their_fingerprint;
+       netsnmp_container  *config;
     } _netsnmpTLSBaseData;
 
     _netsnmpTLSBaseData *netsnmp_tlsbase_allocate_tlsdata(netsnmp_transport *t,

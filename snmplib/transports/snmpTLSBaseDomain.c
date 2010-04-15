@@ -31,7 +31,9 @@
 #include <net-snmp/library/snmp_api.h>
 #include <net-snmp/library/tools.h>
 #include <net-snmp/library/snmp_debug.h>
+#include <net-snmp/library/snmp_assert.h>
 #include <net-snmp/library/cert_util.h>
+#include <net-snmp/library/snmp_transport.h>
 
 #define LOGANDDIE(msg) { snmp_log(LOG_ERR, "%s\n", msg); return 0; }
 
@@ -220,6 +222,36 @@ sslctx_server_setup(SSL_METHOD *method) {
                        &verify_callback);
 
     return the_ctx;
+}
+
+int
+netsnmp_tlsbase_config(netsnmp_transport *t, char *token, char *value) {
+    _netsnmpTLSBaseData *tlsdata;
+
+    netsnmp_assert_or_return(t != NULL, -1);
+    netsnmp_assert_or_return(t->data != NULL, -1);
+
+    tlsdata = t->data;
+
+    if (NULL == tlsdata->config) {
+        tlsdata->config = netsnmp_container_find("tlsbase_config:fifo");
+        netsnmp_assert_or_return(tlsdata->config != NULL, -1);
+        tlsdata->config->compare =
+            (netsnmp_container_compare *) netsnmp_transport_config_compare;
+    }
+
+    CONTAINER_INSERT(tlsdata->config,
+                     netsnmp_transport_create_config(token, value));
+
+    if (strcmp(token, "my_fingerprint") == 0) {
+        SNMP_FREE(tlsdata->my_fingerprint);
+        tlsdata->my_fingerprint = strdup(value);
+    }
+
+    if (strcmp(token, "their_fingerprint") == 0) {
+        SNMP_FREE(tlsdata->their_fingerprint);
+        tlsdata->their_fingerprint = strdup(value);
+    }
 }
 
 static int have_done_bootstrap = 0;
