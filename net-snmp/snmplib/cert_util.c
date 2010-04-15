@@ -1346,7 +1346,6 @@ netsnmp_cert_find(int what, int where, void *hint)
                            what, _where_str(where), where));
                 return NULL;
         }
-        _fp_lowercase_and_strip_colon(fp);
         result = _cert_find_fp(fp);
 
     } /* where = ds store */
@@ -1469,14 +1468,19 @@ static netsnmp_cert *
 _cert_find_fp(const char *fingerprint)
 {
     netsnmp_cert cert, *result = NULL;
+    char         fp[EVP_MAX_MD_SIZE];
 
     if (NULL == fingerprint)
         return NULL;
 
+    strncpy(fp, fingerprint, sizeof(fp));
+    _fp_lowercase_and_strip_colon(fp);
+
     /** clear search key */
     memset(&cert, 0x00, sizeof(cert));
-    cert.info.type = NS_CERT_TYPE_UNKNOWN; /* don't really know type */
-    cert.fingerprint = NETSNMP_REMOVE_CONST(char*,fingerprint);
+
+    cert.fingerprint = fp;
+
     result = CONTAINER_FIND(_certs,&cert);
     return result;
 }
