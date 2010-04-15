@@ -1586,8 +1586,15 @@ _sess_open(netsnmp_session * in_session)
     }
 
     if (transport->f_open)
-        transport->f_open(transport);
+        transport = transport->f_open(transport);
 
+    if (transport == NULL) {
+        DEBUGMSGTL(("_sess_open", "couldn't interpret peername\n"));
+        in_session->s_snmp_errno = SNMPERR_BAD_ADDRESS;
+        in_session->s_errno = errno;
+        snmp_set_detail(in_session->peername);
+        return NULL;
+    }
 
 #if defined(SO_BROADCAST) && defined(SOL_SOCKET)
     if ( in_session->flags & SNMP_FLAGS_UDP_BROADCAST) {

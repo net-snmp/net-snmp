@@ -522,6 +522,10 @@ netsnmp_tlstcp_open(netsnmp_transport *t)
             return NULL;
         }
         ssl = tlsdata->ssl = SSL_new(ctx);
+        if (NULL == ssl) {
+            snmp_log(LOG_ERR, "tlstcp: failed to create a SSL connection\n");
+            return NULL;
+        }
         
         SSL_set_bio(ssl, bio, bio);
         SSL_set_mode(ssl, SSL_MODE_AUTO_RETRY);
