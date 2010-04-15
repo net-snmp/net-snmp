@@ -255,6 +255,9 @@ typedef int        (*snmp_callback) (int, netsnmp_session *, int,
                                           netsnmp_pdu *, void *);
 typedef int     (*netsnmp_callback) (int, netsnmp_session *, int,
                                           netsnmp_pdu *, void *);
+
+struct netsnmp_container_s;
+
 /** @struct snmp_session
  * The snmp session structure.
  */
@@ -372,6 +375,11 @@ struct snmp_session {
      * security module specific 
      */
     void           *securityInfo;
+
+    /**
+     * transport specific configuration 
+     */
+   struct netsnmp_container_s *transport_configuration;
 
     /**
      * use as you want data 

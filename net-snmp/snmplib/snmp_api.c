@@ -294,6 +294,9 @@ static const char *api_errors[-SNMPERR_MAX + 1] = {
     "Kerberos related error",   /* SNMPERR_KRB5 */
     "Protocol error",		/* SNMPERR_PROTOCOL */
     "OID not increasing",       /* SNMPERR_OID_NONINCREASING */
+    "Context probe",            /* SNMPERR_JUST_A_CONTEXT_PROBE */
+    "Configuration data found but the transport can't be configured", /* SNMPERR_TRANSPORT_NO_CONFIG */
+    "Transport configuration failed", /* SNMPERR_TRANSPORT_CONFIG_ERROR */
 };
 
 static const char *secLevelName[] = {
@@ -1520,6 +1523,21 @@ _sess_open(netsnmp_session * in_session)
             netsnmp_ds_set_string(NETSNMP_DS_LIBRARY_ID,
                                   NETSNMP_DS_LIB_CLIENT_ADDR, clientaddr_save);
     }
+
+    /* Optional supplimental transport configuration information and
+       final call to actually open the transport */
+    if (in_session->transport_configuration) {
+        if (transport->f_config) {
+            
+        } else {
+            in_session->s_snmp_errno = SNMPERR_TRANSPORT_NO_CONFIG;
+            in_session->s_errno = errno;
+        }
+    }
+
+    if (transport->f_open)
+        transport->f_open(transport);
+
 
 #if defined(SO_BROADCAST) && defined(SOL_SOCKET)
     if ( transport != NULL && (in_session->flags & SNMP_FLAGS_UDP_BROADCAST) ) {
