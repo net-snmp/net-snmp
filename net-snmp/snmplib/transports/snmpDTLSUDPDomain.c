@@ -209,6 +209,15 @@ start_new_cached_connection(netsnmp_transport *t,
     if (NULL == (tlsdata = netsnmp_tlsbase_allocate_tlsdata(t, !we_are_client)))
         return NULL;
     cachep->tlsdata = tlsdata;
+
+    /* see if we have base configuration to copy in to this new one */
+    if (NULL != t->data && t->data_length == sizeof(_netsnmpTLSBaseData)) {
+        _netsnmpTLSBaseData *parentdata = t->data;
+        if (parentdata->my_fingerprint)
+            tlsdata->my_fingerprint = strdup(parentdata->my_fingerprint);
+        if (parentdata->their_fingerprint)
+            tlsdata->their_fingerprint = strdup(parentdata->their_fingerprint);
+    }
     
     DEBUGMSGTL(("dtlsudp", "starting a new connection\n"));
     cachep->next = biocache;
