@@ -42,7 +42,6 @@ extern          "C" {
        struct sockaddr_in         addr;
        char                      *my_fingerprint;
        char                      *their_fingerprint;
-       netsnmp_container         *config;
        netsnmp_indexed_addr_pair *remote_addr;
     } _netsnmpTLSBaseData;
 
