@@ -499,9 +499,7 @@ netsnmp_tlstcp_open(netsnmp_transport *t)
 
         /* set up the needed SSL context */
         tlsdata->ssl_context = ctx =
-            sslctx_client_setup(TLSv1_method(),
-                                tlsdata->my_fingerprint,
-                                tlsdata->their_fingerprint);
+            sslctx_client_setup(TLSv1_method(), tlsdata);
         if (!ctx) {
             snmp_log(LOG_ERR, "failed to create TLS context\n");
             return NULL;
