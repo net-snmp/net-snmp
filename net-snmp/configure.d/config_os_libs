@@ -279,7 +279,7 @@ if test "x$tryopenssl" != "xno"; then
                 AC_DEFINE(HAVE_AES_CFB128_ENCRYPT, 1,
                     [Define to 1 if you have the `AES_cfb128_encrypt' function.]))
         fi
-        if echo " $transport_result_list " | $GREP " DTLS" > /dev/null; then
+        if echo " $transport_result_list " | $GREP "TLS" > /dev/null; then
 	    AC_CHECK_LIB(ssl, SSL_library_init,
                 AC_DEFINE(HAVE_LIBSSL, 1,
                     [Define to 1 if you have the `ssl' library (-lssl).])
