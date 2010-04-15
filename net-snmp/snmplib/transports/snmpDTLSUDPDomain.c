@@ -238,9 +238,7 @@ start_new_cached_connection(netsnmp_transport *t,
         DEBUGMSGTL(("dtlsudp",
                     "starting a new connection as a client to sock: %d\n",
                     t->sock));
-        tlsdata->ssl = SSL_new(sslctx_client_setup(DTLSv1_method(),
-                                                   tlsdata->my_fingerprint,
-                                                   tlsdata->their_fingerprint));
+        tlsdata->ssl = SSL_new(sslctx_client_setup(DTLSv1_method(), tlsdata));
 
         /* XXX: session setting 735 */
     } else {
@@ -606,6 +604,10 @@ netsnmp_dtlsudp_send(netsnmp_transport *t, void *buf, int size,
     } else if (t != NULL && t->data != NULL &&
                t->data_length == sizeof(netsnmp_indexed_addr_pair)) {
         addr_pair = (netsnmp_indexed_addr_pair *) (t->data);
+    } else if (t != NULL && t->data != NULL &&
+               t->data_length == sizeof(_netsnmpTLSBaseData)) {
+        tlsdata = (_netsnmpTLSBaseData *) t->data;
+        addr_pair = (netsnmp_indexed_addr_pair *) (tlsdata->remote_addr);
     }
 
     if (NULL == addr_pair) {
@@ -752,6 +754,14 @@ netsnmp_dtlsudp_transport(struct sockaddr_in *addr, int local)
     if (NULL == t)
         return NULL;
 
+    if (NULL != t->data &&
+        t->data_length == sizeof(netsnmp_indexed_addr_pair)) {
+        _netsnmpTLSBaseData *tlsdata =
+            netsnmp_tlsbase_allocate_tlsdata(t, local);
+        tlsdata->remote_addr = t->data;
+        t->data = tlsdata;
+    }
+
     if (!local) {
         /* dtls needs to bind the socket for SSL_write to work */
         if (connect(t->sock, (struct sockaddr *) addr, sizeof(*addr)) == -1)
@@ -775,6 +785,7 @@ netsnmp_dtlsudp_transport(struct sockaddr_in *addr, int local)
     t->f_recv     = netsnmp_dtlsudp_recv;
     t->f_send     = netsnmp_dtlsudp_send;
     t->f_close    = netsnmp_dtlsudp_close;
+    t->f_config   = netsnmp_tlsbase_config;
     t->f_accept   = NULL;
     t->f_fmtaddr  = netsnmp_dtlsudp_fmtaddr;
     t->flags = NETSNMP_TRANSPORT_FLAG_TUNNELED;
