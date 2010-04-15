@@ -26,9 +26,6 @@ extern          "C" {
     SSL_CTX *get_client_ctx(void);
     SSL_CTX *get_server_ctx(void);
 
-    SSL_CTX *sslctx_client_setup(SSL_METHOD *, char *my_fp, char *their_fp);
-    SSL_CTX *sslctx_server_setup(SSL_METHOD *);
-
 #define NETSNMP_TLSBASE_IS_CLIENT 0x01
 
     /*
@@ -48,11 +45,15 @@ extern          "C" {
        netsnmp_container  *config;
     } _netsnmpTLSBaseData;
 
+    SSL_CTX *sslctx_client_setup(SSL_METHOD *, _netsnmpTLSBaseData *tlsbase);
+    SSL_CTX *sslctx_server_setup(SSL_METHOD *);
+
     _netsnmpTLSBaseData *netsnmp_tlsbase_allocate_tlsdata(netsnmp_transport *t,
                                                           int isserver);
     int netsnmp_tlsbase_wrapup_recv(netsnmp_tmStateReference *tmStateRef,
                                     _netsnmpTLSBaseData *tlsdata,
                                     void **opaque, int *olength);
+
 #ifdef __cplusplus
 }
 #endif

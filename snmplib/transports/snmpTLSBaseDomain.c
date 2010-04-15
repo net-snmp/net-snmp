@@ -87,8 +87,7 @@ int verify_callback(int ok, X509_STORE_CTX *ctx) {
 }
 
 SSL_CTX *
-sslctx_client_setup(SSL_METHOD *method,
-                    char *my_fingerprint, char *their_fingerprint) {
+sslctx_client_setup(SSL_METHOD *method, _netsnmpTLSBaseData *tlsbase) {
     netsnmp_cert *id_cert, *peer_cert;
     SSL_CTX      *the_ctx;
     X509_STORE   *cert_store = NULL;
@@ -109,9 +108,9 @@ sslctx_client_setup(SSL_METHOD *method,
                        SSL_VERIFY_CLIENT_ONCE,
                        &verify_callback);
 
-    if (my_fingerprint)
+    if (tlsbase->my_fingerprint)
         id_cert = netsnmp_cert_find(NS_CERT_IDENTITY, NS_CERTKEY_FINGERPRINT,
-                                    my_fingerprint);
+                                    tlsbase->my_fingerprint);
     else
         id_cert = netsnmp_cert_find(NS_CERT_IDENTITY, NS_CERTKEY_DEFAULT, NULL);
 
@@ -135,9 +134,9 @@ sslctx_client_setup(SSL_METHOD *method,
     if (!SSL_CTX_check_private_key(the_ctx))
         LOGANDDIE("public and private keys incompatible");
 
-    if (their_fingerprint)
+    if (tlsbase->their_fingerprint)
         peer_cert = netsnmp_cert_find(NS_CERT_IDENTITY, NS_CERTKEY_FINGERPRINT,
-                                      their_fingerprint);
+                                      tlsbase->their_fingerprint);
     else
         peer_cert = netsnmp_cert_find(NS_CERT_REMOTE_PEER, NS_CERTKEY_DEFAULT,
                                       NULL);
