@@ -253,6 +253,16 @@ netsnmp_transport_open_server(const char* application, const char* str);
 netsnmp_transport*
 netsnmp_transport_open(const char* application, const char* str, int local);
 
+typedef struct netsnmp_transport_config_s {
+   char *key;
+   char *value;
+} netsnmp_transport_config;
+    
+int netsnmp_transport_config_compare(netsnmp_transport_config *left,
+                                     netsnmp_transport_config *right);
+netsnmp_transport_config *
+netsnmp_transport_create_config(char *key, char *value);
+
 #ifdef __cplusplus
 }
 #endif

@@ -624,3 +624,18 @@ netsnmp_transport_remove_from_list(netsnmp_transport_list **transport_list,
 
     return 0;
 }
+
+int
+netsnmp_transport_config_compare(netsnmp_transport_config *left,
+                                 netsnmp_transport_config *right) {
+    return strcmp(left->key, right->key);
+}
+
+netsnmp_transport_config *
+netsnmp_transport_create_config(char *key, char *value) {
+    netsnmp_transport_config *entry =
+        SNMP_MALLOC_TYPEDEF(netsnmp_transport_config);
+    entry->key = strdup(key);
+    entry->value = strdup(value);
+    return entry;
+}

@@ -334,11 +334,42 @@ netsnmp_parse_args(int argc,
             break;
 
         case 'T':
-            fprintf(stderr, "Warning: -T option is no longer used - ");
-            fprintf(stderr, "specify the remote host as TRANSPORT:HOST\n");
-            return (NETSNMP_PARSE_ARGS_ERROR_USAGE);
-            break;
+        {
+            char leftside[SNMP_MAXBUF_MEDIUM], rightside[SNMP_MAXBUF_MEDIUM];
+            char *tmpcp;
+            
+            /* ensure we have a proper argument */
+            tmpcp = strchr(optarg, '=');
+            if (!tmpcp) {
+                fprintf(stderr, "-T expects a NAME=VALUE pair.\n");
+                return (NETSNMP_PARSE_ARGS_ERROR_USAGE);
+            }
 
+            /* create the transport config container if this is the first */
+            if (!session->transport_configuration) {
+                netsnmp_container_init_list();
+                session->transport_configuration =
+                    netsnmp_container_find("transport_configuration:fifo");
+                if (!session->transport_configuration) {
+                    fprintf(stderr, "failed to initialize the transport configuration container\n");
+                    return (NETSNMP_PARSE_ARGS_ERROR);
+                }
+
+                session->transport_configuration->compare =
+                    (netsnmp_container_compare*)
+                    netsnmp_transport_config_compare;
+            }
+
+            /* set the config */
+            strncpy(leftside, optarg, tmpcp - optarg);
+            strcpy(rightside, tmpcp+1);
+
+            CONTAINER_INSERT(session->transport_configuration,
+                             netsnmp_transport_create_config(leftside,
+                                                             rightside));
+        }
+        break;
+            
         case 't':
             session->timeout = (long)(atof(optarg) * 1000000L);
             if (session->timeout <= 0) {
