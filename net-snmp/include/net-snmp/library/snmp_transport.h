@@ -74,6 +74,7 @@ typedef struct netsnmp_tmStateReference_s {
 
 /*  Structure which defines the transport-independent API.  */
 
+struct netsnmp_transport_s;
 typedef struct netsnmp_transport_s {
     /*  The transport domain object identifier.  */
 
@@ -122,7 +123,7 @@ typedef struct netsnmp_transport_s {
     int             (*f_close)  (struct netsnmp_transport_s *);
 
     /* Optional: opening can occur during creation if more appropriate */
-    netsnmp_transport * (*f_open)   (struct netsnmp_transport_s *);
+   struct netsnmp_transport_s * (*f_open)   (struct netsnmp_transport_s *);
 
     /*  This callback is only necessary for stream-oriented transports.  */
 
