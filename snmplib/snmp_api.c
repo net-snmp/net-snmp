@@ -1524,6 +1524,14 @@ _sess_open(netsnmp_session * in_session)
                                   NETSNMP_DS_LIB_CLIENT_ADDR, clientaddr_save);
     }
 
+    if (transport == NULL) {
+        DEBUGMSGTL(("_sess_open", "couldn't interpret peername\n"));
+        in_session->s_snmp_errno = SNMPERR_BAD_ADDRESS;
+        in_session->s_errno = errno;
+        snmp_set_detail(in_session->peername);
+        return NULL;
+    }
+
     /* Optional supplimental transport configuration information and
        final call to actually open the transport */
     if (in_session->transport_configuration) {
@@ -1540,7 +1548,7 @@ _sess_open(netsnmp_session * in_session)
 
 
 #if defined(SO_BROADCAST) && defined(SOL_SOCKET)
-    if ( transport != NULL && (in_session->flags & SNMP_FLAGS_UDP_BROADCAST) ) {
+    if ( in_session->flags & SNMP_FLAGS_UDP_BROADCAST) {
         int   b = 1;
         int   rc;
 
@@ -1556,14 +1564,6 @@ _sess_open(netsnmp_session * in_session)
         }
     }
 #endif
-
-    if (transport == NULL) {
-        DEBUGMSGTL(("_sess_open", "couldn't interpret peername\n"));
-        in_session->s_snmp_errno = SNMPERR_BAD_ADDRESS;
-        in_session->s_errno = errno;
-        snmp_set_detail(in_session->peername);
-        return NULL;
-    }
 
     return snmp_sess_add(in_session, transport, NULL, NULL);
 }
