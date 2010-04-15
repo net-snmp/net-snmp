@@ -1536,7 +1536,27 @@ _sess_open(netsnmp_session * in_session)
        final call to actually open the transport */
     if (in_session->transport_configuration) {
         if (transport->f_config) {
-            
+            netsnmp_iterator *iter;
+            netsnmp_transport_config *config_data;
+            int ret;
+
+            iter = CONTAINER_ITERATOR(in_session->transport_configuration);
+            if (NULL == iter) {
+                in_session->s_snmp_errno = SNMPERR_GENERR;
+                in_session->s_errno = errno;
+                return NULL;
+            }
+
+            for(config_data = ITERATOR_FIRST(iter); config_data;
+                config_data = ITERATOR_FIRST(iter)) {
+                ret = transport->f_config(transport, config_data->key,
+                                          config_data->value);
+                if (ret) {
+                    in_session->s_snmp_errno = SNMPERR_TRANSPORT_CONFIG_ERROR;
+                    in_session->s_errno = errno;
+                    return NULL;
+                }
+            }
         } else {
             in_session->s_snmp_errno = SNMPERR_TRANSPORT_NO_CONFIG;
             in_session->s_errno = errno;
