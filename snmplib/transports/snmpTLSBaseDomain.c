@@ -239,6 +239,10 @@ netsnmp_tlsbase_config(netsnmp_transport *t, char *token, char *value) {
             (netsnmp_container_compare *) netsnmp_transport_config_compare;
     }
 
+    if (NULL == tlsdata->config) {
+        return SNMPERR_GENERR;
+    }
+
     CONTAINER_INSERT(tlsdata->config,
                      netsnmp_transport_create_config(token, value));
 
@@ -251,6 +255,7 @@ netsnmp_tlsbase_config(netsnmp_transport *t, char *token, char *value) {
         SNMP_FREE(tlsdata->their_fingerprint);
         tlsdata->their_fingerprint = strdup(value);
     }
+    return SNMPERR_SUCCESS;
 }
 
 static int have_done_bootstrap = 0;
