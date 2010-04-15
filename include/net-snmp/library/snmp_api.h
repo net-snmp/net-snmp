@@ -250,8 +250,10 @@ typedef struct request_list {
 #define SNMPERR_PROTOCOL		(-64)
 #define SNMPERR_OID_NONINCREASING       (-65)
 #define SNMPERR_JUST_A_CONTEXT_PROBE    (-66)
+#define SNMPERR_TRANSPORT_NO_CONFIG     (-67)
+#define SNMPERR_TRANSPORT_CONFIG_ERROR  (-68)
 
-#define SNMPERR_MAX			(-66)
+#define SNMPERR_MAX			(-68)
 
 
     /*

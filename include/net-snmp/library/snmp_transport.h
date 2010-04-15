@@ -121,6 +121,9 @@ typedef struct netsnmp_transport_s {
 				 int, void **, int *);
     int             (*f_close)  (struct netsnmp_transport_s *);
 
+    /* Optional: opening can occur during creation if more appropriate */
+    int             (*f_open)   (struct netsnmp_transport_s *);
+
     /*  This callback is only necessary for stream-oriented transports.  */
 
     int             (*f_accept) (struct netsnmp_transport_s *);
