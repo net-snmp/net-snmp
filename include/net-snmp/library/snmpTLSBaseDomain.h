@@ -41,6 +41,7 @@ extern          "C" {
        BIO     *accept_bio;
        BIO     *accepted_bio;
        char    *securityName;
+       struct sockaddr_in addr;
     } _netsnmpTLSBaseData;
 
     _netsnmpTLSBaseData *netsnmp_tlsbase_allocate_tlsdata(netsnmp_transport *t,

@@ -1471,7 +1471,49 @@ snmpv3_engineID_probe(struct session_list *slp,
     return 1;
 }
 
+/*******************************************************************-o-******
+ * netsnmp_sess_config_transport
+ *
+ * Parameters:
+ *	*in_session
+ *	*in_transport
+ *
+ * Returns:
+ *      SNMPERR_SUCCESS                     - Yay
+ *      SNMPERR_GENERR                      - Generic Error
+ *      SNMPERR_TRANSPORT_CONFIG_ERROR      - Transport rejected config
+ *      SNMPERR_TRANSPORT_NO_CONFIG         - Transport can't config
+ */
+int
+netsnmp_sess_config_transport(netsnmp_container *transport_configuration,
+                              netsnmp_transport *transport)
+{
+    /* Optional supplimental transport configuration information and
+       final call to actually open the transport */
+    if (transport_configuration) {
+        if (transport->f_config) {
+            netsnmp_iterator *iter;
+            netsnmp_transport_config *config_data;
+            int ret;
 
+            iter = CONTAINER_ITERATOR(transport_configuration);
+            if (NULL == iter) {
+                return SNMPERR_GENERR;
+            }
+
+            for(config_data = ITERATOR_FIRST(iter); config_data;
+                config_data = ITERATOR_FIRST(iter)) {
+                ret = transport->f_config(transport, config_data->key,
+                                          config_data->value);
+                if (ret) {
+                    return SNMPERR_TRANSPORT_CONFIG_ERROR;
+                }
+            }
+        } else {
+            return SNMPERR_TRANSPORT_NO_CONFIG;
+        }
+    }
+}
 
 /*******************************************************************-o-******
  * snmp_sess_open
@@ -1489,6 +1531,7 @@ static void    *
 _sess_open(netsnmp_session * in_session)
 {
     netsnmp_transport *transport = NULL;
+    int rc;
 
     in_session->s_snmp_errno = 0;
     in_session->s_errno = 0;
@@ -1534,34 +1577,11 @@ _sess_open(netsnmp_session * in_session)
 
     /* Optional supplimental transport configuration information and
        final call to actually open the transport */
-    if (in_session->transport_configuration) {
-        if (transport->f_config) {
-            netsnmp_iterator *iter;
-            netsnmp_transport_config *config_data;
-            int ret;
-
-            iter = CONTAINER_ITERATOR(in_session->transport_configuration);
-            if (NULL == iter) {
-                in_session->s_snmp_errno = SNMPERR_GENERR;
-                in_session->s_errno = errno;
-                return NULL;
-            }
-
-            for(config_data = ITERATOR_FIRST(iter); config_data;
-                config_data = ITERATOR_FIRST(iter)) {
-                ret = transport->f_config(transport, config_data->key,
-                                          config_data->value);
-                if (ret) {
-                    in_session->s_snmp_errno = SNMPERR_TRANSPORT_CONFIG_ERROR;
-                    in_session->s_errno = errno;
-                    return NULL;
-                }
-            }
-        } else {
-            in_session->s_snmp_errno = SNMPERR_TRANSPORT_NO_CONFIG;
-            in_session->s_errno = errno;
-            return NULL;
-        }
+    if ((rc = netsnmp_sess_config_transport(in_session->transport_configuration,
+                                            transport)) != SNMPERR_SUCCESS) {
+        in_session->s_snmp_errno = rc;
+        in_session->s_errno = 0;
+        return NULL;
     }
 
     if (transport->f_open)

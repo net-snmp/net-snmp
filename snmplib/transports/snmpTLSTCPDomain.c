@@ -43,6 +43,7 @@
 #include <net-snmp/types.h>
 #include <net-snmp/output_api.h>
 #include <net-snmp/config_api.h>
+#include <net-snmp/library/snmp_assert.h>
 
 #include <net-snmp/library/snmp_transport.h>
 #include <net-snmp/library/snmpTLSTCPDomain.h>
@@ -476,70 +477,24 @@ netsnmp_tlstcp_accept(netsnmp_transport *t)
 }
 
 
-/*
- * Open a TLS-based transport for SNMP.  Local is TRUE if addr is the local
- * address to bind to (i.e. this is a server-type session); otherwise addr is 
- * the remote address to send things to.  
- */
-
 netsnmp_transport *
-netsnmp_tlstcp_transport(struct sockaddr_in *addr, int isserver)
+netsnmp_tlstcp_open(netsnmp_transport *t)
 {
-    netsnmp_transport *t = NULL;
+    _netsnmpTLSBaseData *tlsdata;
     BIO *bio;
     SSL_CTX *ctx;
     SSL *ssl;
-    _netsnmpTLSBaseData *tlsdata;
     char tmpbuf[128];
     int rc;
+
+    netsnmp_assert_or_return(t != NULL, NULL);
+    netsnmp_assert_or_return(t->data != NULL, NULL);
+    netsnmp_assert_or_return(sizeof(_netsnmpTLSBaseData) == t->data_length,
+                             NULL);
+
+    tlsdata = t->data;
     
-    if (addr == NULL || addr->sin_family != AF_INET) {
-        return NULL;
-    }
-
-    /* allocate our transport structure */
-    t = SNMP_MALLOC_TYPEDEF(netsnmp_transport);
-    if (NULL == t) {
-        return NULL;
-    }
-    memset(t, 0, sizeof(netsnmp_transport));
-
-    /* allocate our TLS specific data */
-    if (NULL == (tlsdata = netsnmp_tlsbase_allocate_tlsdata(t, isserver)))
-        return NULL;
-
-    t->data = tlsdata;
-    t->data_length = sizeof(_netsnmpTLSBaseData);
-
-    if (isserver) {
-        /* Is the server */
-        
-        /* Create the socket bio */
-        snprintf(tmpbuf, sizeof(tmpbuf), "%d", ntohs(addr->sin_port));
-        DEBUGMSGTL(("tlstcp", "listening on tlstcp port %s\n", tmpbuf));
-        tlsdata->accept_bio = BIO_new_accept(tmpbuf);
-        if (NULL == tlsdata->accept_bio) {
-            SNMP_FREE(t);
-            SNMP_FREE(tlsdata);
-            snmp_log(LOG_ERR, "TLSTCP: Falied to create a accept BIO\n");
-            return NULL;
-        }
-
-        /* openssl requires an initial accept to bind() the socket */
-        if (BIO_do_accept(tlsdata->accept_bio) <= 0) {
-            SNMP_FREE(t);
-            SNMP_FREE(tlsdata);
-            snmp_log(LOG_ERR, "TLSTCP: Falied to do first accept on the TLS accept BIO\n");
-            return NULL;
-        }
-
-        /* create the OpenSSL TLS context */
-        tlsdata->ssl_context =
-            sslctx_server_setup(TLSv1_method());
-
-        t->sock = BIO_get_fd(tlsdata->accept_bio, NULL);
-        t->flags = NETSNMP_TRANSPORT_FLAG_LISTEN;
-    } else {
+    if (tlsdata->flags & NETSNMP_TLSBASE_IS_CLIENT) {
         /* Is the client */
 
         /* set up the needed SSL context */
@@ -551,8 +506,9 @@ netsnmp_tlstcp_transport(struct sockaddr_in *addr, int isserver)
         }
 
         /* create the openssl ok connection string */
-        snprintf(tmpbuf, sizeof(tmpbuf), "%s:%d", inet_ntoa(addr->sin_addr),
-                 ntohs(addr->sin_port));
+        snprintf(tmpbuf, sizeof(tmpbuf), "%s:%d",
+                 inet_ntoa(tlsdata->addr.sin_addr),
+                 ntohs(tlsdata->addr.sin_port));
         DEBUGMSGTL(("tlstcp", "connecting to tlstcp %s\n", tmpbuf));
         bio = BIO_new_connect(tmpbuf);
 
@@ -585,8 +541,71 @@ netsnmp_tlstcp_transport(struct sockaddr_in *addr, int isserver)
         
         t->sock = BIO_get_fd(bio, NULL);
         /* XXX: save state */
-    }
+    } else {
+        /* Is the server */
         
+        /* Create the socket bio */
+        snprintf(tmpbuf, sizeof(tmpbuf), "%d", ntohs(tlsdata->addr.sin_port));
+        DEBUGMSGTL(("tlstcp", "listening on tlstcp port %s\n", tmpbuf));
+        tlsdata->accept_bio = BIO_new_accept(tmpbuf);
+        if (NULL == tlsdata->accept_bio) {
+            SNMP_FREE(t);
+            SNMP_FREE(tlsdata);
+            snmp_log(LOG_ERR, "TLSTCP: Falied to create a accept BIO\n");
+            return NULL;
+        }
+
+        /* openssl requires an initial accept to bind() the socket */
+        if (BIO_do_accept(tlsdata->accept_bio) <= 0) {
+            SNMP_FREE(t);
+            SNMP_FREE(tlsdata);
+            snmp_log(LOG_ERR, "TLSTCP: Falied to do first accept on the TLS accept BIO\n");
+            return NULL;
+        }
+
+        /* create the OpenSSL TLS context */
+        tlsdata->ssl_context =
+            sslctx_server_setup(TLSv1_method());
+
+        t->sock = BIO_get_fd(tlsdata->accept_bio, NULL);
+        t->flags |= NETSNMP_TRANSPORT_FLAG_LISTEN;
+    }
+}
+
+/*
+ * Create a TLS-based transport for SNMP.  Local is TRUE if addr is the local
+ * address to bind to (i.e. this is a server-type session); otherwise addr is 
+ * the remote address to send things to.  
+ */
+
+netsnmp_transport *
+netsnmp_tlstcp_transport(struct sockaddr_in *addr, int isserver)
+{
+    netsnmp_transport *t = NULL;
+    _netsnmpTLSBaseData *tlsdata;
+    
+    if (addr == NULL || addr->sin_family != AF_INET) {
+        return NULL;
+    }
+
+    /* allocate our transport structure */
+    t = SNMP_MALLOC_TYPEDEF(netsnmp_transport);
+    if (NULL == t) {
+        return NULL;
+    }
+    memset(t, 0, sizeof(netsnmp_transport));
+
+    /* allocate our TLS specific data */
+    if (NULL == (tlsdata = netsnmp_tlsbase_allocate_tlsdata(t, isserver)))
+        return NULL;
+
+    if (!isserver)
+        t->flags |= NETSNMP_TLSBASE_IS_CLIENT;
+    memcpy(&tlsdata->addr, addr, sizeof(tlsdata->addr));
+
+    t->data = tlsdata;
+    t->data_length = sizeof(_netsnmpTLSBaseData);
+
     /*
      * Set Domain
      */
@@ -600,6 +619,7 @@ netsnmp_tlstcp_transport(struct sockaddr_in *addr, int isserver)
     t->msgMaxSize = 0xffff - 8 - 20;
     t->f_recv     = netsnmp_tlstcp_recv;
     t->f_send     = netsnmp_tlstcp_send;
+    t->f_open     = netsnmp_tlstcp_open;
     t->f_close    = netsnmp_tlstcp_close;
     t->f_accept   = netsnmp_tlstcp_accept;
     t->f_copy     = netsnmp_tlstcp_copy;
