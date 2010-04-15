@@ -25,7 +25,7 @@ extern          "C" {
     SSL_CTX *get_client_ctx(void);
     SSL_CTX *get_server_ctx(void);
 
-    SSL_CTX *sslctx_client_setup(SSL_METHOD *);
+    SSL_CTX *sslctx_client_setup(SSL_METHOD *, char *my_fp, char *their_fp);
     SSL_CTX *sslctx_server_setup(SSL_METHOD *);
 
 #define NETSNMP_TLSBASE_IS_CLIENT 0x01
@@ -42,6 +42,8 @@ extern          "C" {
        BIO     *accepted_bio;
        char    *securityName;
        struct sockaddr_in addr;
+       char    *my_fingerprint;
+       char    *their_fingerprint;
     } _netsnmpTLSBaseData;
 
     _netsnmpTLSBaseData *netsnmp_tlsbase_allocate_tlsdata(netsnmp_transport *t,

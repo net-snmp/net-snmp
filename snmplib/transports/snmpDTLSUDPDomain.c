@@ -238,7 +238,9 @@ start_new_cached_connection(netsnmp_transport *t,
         DEBUGMSGTL(("dtlsudp",
                     "starting a new connection as a client to sock: %d\n",
                     t->sock));
-        tlsdata->ssl = SSL_new(sslctx_client_setup(DTLSv1_method()));
+        tlsdata->ssl = SSL_new(sslctx_client_setup(DTLSv1_method(),
+                                                   tlsdata->my_fingerprint,
+                                                   tlsdata->their_fingerprint));
 
         /* XXX: session setting 735 */
     } else {
