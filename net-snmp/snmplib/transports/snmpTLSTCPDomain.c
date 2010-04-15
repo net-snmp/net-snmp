@@ -574,6 +574,7 @@ netsnmp_tlstcp_open(netsnmp_transport *t)
         t->sock = BIO_get_fd(tlsdata->accept_bio, NULL);
         t->flags |= NETSNMP_TRANSPORT_FLAG_LISTEN;
     }
+    return t;
 }
 
 /*
@@ -627,6 +628,7 @@ netsnmp_tlstcp_transport(struct sockaddr_in *addr, int isserver)
     t->f_close    = netsnmp_tlstcp_close;
     t->f_accept   = netsnmp_tlstcp_accept;
     t->f_copy     = netsnmp_tlstcp_copy;
+    t->f_config   = netsnmp_tlsbase_config;
     t->f_fmtaddr  = netsnmp_tlstcp_fmtaddr;
     t->flags |= NETSNMP_TRANSPORT_FLAG_TUNNELED | NETSNMP_TRANSPORT_FLAG_STREAM;
 

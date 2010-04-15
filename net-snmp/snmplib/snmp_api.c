@@ -1502,7 +1502,7 @@ netsnmp_sess_config_transport(netsnmp_container *transport_configuration,
             }
 
             for(config_data = ITERATOR_FIRST(iter); config_data;
-                config_data = ITERATOR_FIRST(iter)) {
+                config_data = ITERATOR_NEXT(iter)) {
                 ret = transport->f_config(transport, config_data->key,
                                           config_data->value);
                 if (ret) {
