@@ -232,20 +232,6 @@ netsnmp_tlsbase_config(netsnmp_transport *t, char *token, char *value) {
 
     tlsdata = t->data;
 
-    if (NULL == tlsdata->config) {
-        tlsdata->config = netsnmp_container_find("tlsbase_config:fifo");
-        netsnmp_assert_or_return(tlsdata->config != NULL, -1);
-        tlsdata->config->compare =
-            (netsnmp_container_compare *) netsnmp_transport_config_compare;
-    }
-
-    if (NULL == tlsdata->config) {
-        return SNMPERR_GENERR;
-    }
-
-    CONTAINER_INSERT(tlsdata->config,
-                     netsnmp_transport_create_config(token, value));
-
     if (strcmp(token, "my_fingerprint") == 0) {
         SNMP_FREE(tlsdata->my_fingerprint);
         tlsdata->my_fingerprint = strdup(value);
