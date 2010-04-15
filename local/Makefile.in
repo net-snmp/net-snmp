@@ -16,7 +16,7 @@ OTHERUNINSTALL=localuninstall
 #
 SNMPCONFPATH=@SNMPCONFPATH@
 PERSISTENT_DIRECTORY=@PERSISTENT_DIRECTORY@
-PERLSCRIPTS=snmpcheck tkmib mib2c fixproc ipf-mod.pl snmpconf traptoemail snmp-bridge-mib
+PERLSCRIPTS=snmpcheck tkmib mib2c fixproc ipf-mod.pl snmpconf traptoemail snmp-bridge-mib net-snmp-cert
 SHELLSCRIPTS=mib2c-update
 SCRIPTSMADEFORPERL=snmpcheck.made tkmib.made mib2c.made fixproc.made \
 	ipf-mod.pl.made snmpconf.made traptoemail.made snmp-bridge-mib.made
