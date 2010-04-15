@@ -1070,6 +1070,7 @@ netsnmp_register_agent_nsap(netsnmp_transport *t)
     agent_nsap     *a = NULL, *n = NULL, **prevNext = &agent_nsap_list;
     int             handle = 0;
     void           *isp = NULL;
+    int             rc;
 
     if (t == NULL) {
         return -1;
@@ -1099,6 +1100,19 @@ netsnmp_register_agent_nsap(netsnmp_transport *t)
     s->flags = netsnmp_ds_get_int(NETSNMP_DS_APPLICATION_ID, 
 				  NETSNMP_DS_AGENT_FLAGS);
     s->isAuthoritative = SNMP_SESS_AUTHORITATIVE;
+
+    /* Optional supplimental transport configuration information and
+       final call to actually open the transport */
+    if ((rc = netsnmp_sess_config_transport(s->transport_configuration, t))
+        != SNMPERR_SUCCESS) {
+        SNMP_FREE(s);
+        SNMP_FREE(n);
+        return -1;
+    }
+
+
+    if (t->f_open)
+        t->f_open(t);
 
     sp = snmp_add(s, t, netsnmp_agent_check_packet,
                   netsnmp_agent_check_parse);
