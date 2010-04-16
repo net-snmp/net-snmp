@@ -74,7 +74,6 @@ typedef struct netsnmp_tmStateReference_s {
 
 /*  Structure which defines the transport-independent API.  */
 
-struct netsnmp_transport_s;
 typedef struct netsnmp_transport_s {
     /*  The transport domain object identifier.  */
 
