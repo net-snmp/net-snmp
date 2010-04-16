@@ -49,6 +49,7 @@ extern          "C" {
     SSL_CTX *sslctx_server_setup(SSL_METHOD *);
 
     int netsnmp_tlsbase_verify_server_cert(SSL *ssl);
+    int netsnmp_tlsbase_extract_security_name(SSL *ssl, _netsnmpTLSBaseData *tlsdata);
     _netsnmpTLSBaseData *netsnmp_tlsbase_allocate_tlsdata(netsnmp_transport *t,
                                                           int isserver);
     int netsnmp_tlsbase_wrapup_recv(netsnmp_tmStateReference *tmStateRef,

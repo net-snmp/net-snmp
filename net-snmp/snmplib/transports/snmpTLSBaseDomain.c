@@ -95,6 +95,40 @@ netsnmp_tlsbase_verify_server_cert(SSL *ssl) {
     return SNMPERR_SUCCESS;
 }
 
+/* this is called after the connection on the server side by us to
+   check other aspects about the connection and obtain the
+   securityName from the remote certificate. */
+int
+netsnmp_tlsbase_extract_security_name(SSL *ssl, _netsnmpTLSBaseData *tlsdata) {
+    X509            *remote_cert;
+    X509_EXTENSION  *extension;
+    char            *extension_name;
+    int              num_extensions;
+    int              i;
+    
+    netsnmp_assert_or_return(ssl != NULL, SNMPERR_GENERR);
+    netsnmp_assert_or_return(tlsdata != NULL, SNMPERR_GENERR);
+
+    if (NULL == (remote_cert = SSL_get_peer_certificate(ssl))) {
+        /* no peer cert */
+        return SNMPERR_GENERR;
+    }
+
+    num_extensions = X509_get_ext_count(remote_cert);
+    for(i = 0; i < num_extensions; i++) {
+        extension = X509_get_ext(remote_cert, i);
+        extension_name =
+            OBJ_nid2sn(OBJ_obj2nid(X509_EXTENSION_get_object(extension)));
+        if (0 == strcmp(extension_name, "subjectAltName")) {
+            /* foo */
+        }
+    }
+
+        
+    /* XXX */
+    return SNMPERR_SUCCESS;
+}
+
 SSL_CTX *
 sslctx_client_setup(SSL_METHOD *method, _netsnmpTLSBaseData *tlsbase) {
     netsnmp_cert *id_cert, *peer_cert;
