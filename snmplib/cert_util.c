@@ -92,6 +92,8 @@ static int  _cert_fn_compare(netsnmp_cert_common *lhs,
 static int  _cert_fn_ncompare(netsnmp_cert_common *lhs,
                               netsnmp_cert_common *rhs);
 static void _find_partner(netsnmp_cert *cert, netsnmp_key *key);
+static netsnmp_void_array *_cert_find_subset_fn(const char *filename);
+static netsnmp_void_array *_key_find_subset(const char *filename);
 static netsnmp_cert *_cert_find_fp(const char *fingerprint);
 static const char *_mode_str(u_char mode);
 static const char *_where_str(u_int what);
@@ -195,7 +197,6 @@ netsnmp_certs_init(void)
     if (NULL == itr) {
         snmp_log(LOG_ERR, "could not get iterator for keys\n");
         CONTAINER_FREE_ALL(_certs, NULL);
-        CONTAINER_FREE_ALL(_keys, NULL);
         CONTAINER_FREE(_certs);
         CONTAINER_FREE_ALL(_keys, NULL);
         CONTAINER_FREE(_keys);
@@ -255,7 +256,7 @@ _new_cert(const char *dirname, const char *filename, int type,
         cert->common_name = strdup(common_name);
 
     return cert;
-    }
+}
 
 static netsnmp_key *
 _new_key(const char *dirname, const char *filename)
@@ -318,7 +319,8 @@ netsnmp_cert_free(netsnmp_cert *cert)
     SNMP_FREE(cert->san_rfc822);
     SNMP_FREE(cert->san_ipaddr);
     SNMP_FREE(cert->san_dnsname);
-    X509_free(cert->ocert);
+    if (cert->ocert)
+        X509_free(cert->ocert);
     if (cert->key && cert->key->cert == cert)
         cert->key->cert = NULL;
 
@@ -438,6 +440,23 @@ _cert_ext_type(const char *ext)
     if (SE_DNE == rc)
         return NS_CERT_TYPE_UNKNOWN;
     return rc;
+}
+
+static int
+_type_from_filename(const char *filename)
+{
+    char     *pos;
+    int       type;
+
+    if (NULL == filename)
+        return NS_CERT_TYPE_UNKNOWN;
+
+    pos = strrchr(filename, '.');
+    if (NULL == pos)
+        return NS_CERT_TYPE_UNKNOWN;
+
+    type = _cert_ext_type(++pos);
+    return type;
 }
 
 /*
@@ -639,7 +658,15 @@ netsnmp_ocert_get(netsnmp_cert *cert)
     if (cert->ocert)
         return cert->ocert;
 
-    snprintf(file, sizeof(file),"%s/%s", cert->info.dir, cert->info.filename);
+    if (NS_CERT_TYPE_UNKNOWN == cert->info.type) {
+        cert->info.type = _type_from_filename(cert->info.filename);
+        if (NS_CERT_TYPE_UNKNOWN == cert->info.type) {
+            snmp_log(LOG_ERR, "unknown certificate type %d for %s\n",
+                     cert->info.type, cert->info.filename);
+            return NULL;
+        }
+    }
+
     DEBUGMSGT(("cert:read", "Checking file %s\n", cert->info.filename));
 
     certbio = BIO_new(BIO_s_file());
@@ -648,6 +675,7 @@ netsnmp_ocert_get(netsnmp_cert *cert)
         return NULL;
     }
 
+    snprintf(file, sizeof(file),"%s/%s", cert->info.dir, cert->info.filename);
     if (BIO_read_filename(certbio, file) <=0) {
         snmp_log(LOG_ERR, "error reading certificate %s into BIO\n", file);
         BIO_vfree(certbio);
@@ -801,9 +829,7 @@ netsnmp_okey_get(netsnmp_key  *key)
 static void
 _find_partner(netsnmp_cert *cert, netsnmp_key *key)
 {
-    netsnmp_container  *fn_container;
     netsnmp_void_array *matching;
-    netsnmp_cert_common search;
     char                filename[NAME_MAX], *pos;
 
     if ((cert && key) || (!cert && ! key)) {
@@ -816,7 +842,6 @@ _find_partner(netsnmp_cert *cert, netsnmp_key *key)
     if (NULL == pos)
         return;
     *pos = 0;
-    search.filename = filename;
 
     if(key) {
         if (key->cert) {
@@ -826,11 +851,7 @@ _find_partner(netsnmp_cert *cert, netsnmp_key *key)
         DEBUGMSGT(("9:cert:partner", "%s looking for partner\n",
                    key->info.filename));
 
-        /** find subcontainer with filename as key */
-        fn_container = SUBCONTAINER_FIND(_certs, "certs_fn");
-        netsnmp_assert(fn_container);
-
-        matching = CONTAINER_GET_SUBSET(fn_container, &search);
+        matching = _cert_find_subset_fn( filename );
         if (!matching)
             return;
         if (1 == matching->size) {
@@ -858,7 +879,7 @@ _find_partner(netsnmp_cert *cert, netsnmp_key *key)
         DEBUGMSGT(("9:cert:partner", "%s looking for partner\n",
                    cert->info.filename));
 
-        matching = CONTAINER_GET_SUBSET(_keys, &search);
+        matching = _key_find_subset(filename);
         if (!matching)
             return;
         if (1 == matching->size) {
@@ -890,16 +911,13 @@ _add_certfile(const char* dirname, const char* filename, FILE *index)
     EVP_PKEY     *okey;
     netsnmp_cert *cert = NULL;
     netsnmp_key  *key = NULL;
-    char          certfile[SNMP_MAXPATH], *pos;
+    char          certfile[SNMP_MAXPATH];
     int           type;
 
     if (((const void*)NULL == dirname) || (NULL == filename))
         return -1;
 
-    pos = strrchr(filename, '.');
-    if (NULL == pos)
-        return -1;
-    type = _cert_ext_type(++pos);
+    type = _type_from_filename(filename);
     netsnmp_assert(type != NS_CERT_TYPE_UNKNOWN);
 
     snprintf(certfile, sizeof(certfile),"%s/%s", dirname, filename);
@@ -1491,20 +1509,113 @@ _cert_find_fp(const char *fingerprint)
     return result;
 }
 
-static netsnmp_cert *
+/*
+ * reduce subset by eliminating any filenames that are longer than
+ * the specified file name. e.g. 'snmp' would match 'snmp.key' and
+ * 'snmpd.key'. We only want 'snmp.X', where X is a valid extension.
+ */
+static void
+_reduce_subset(netsnmp_void_array *matching, const char *filename)
+{
+    netsnmp_cert_common *cc;
+    int i = 0, j, newsize, pos;
+
+    if ((NULL == matching) || (NULL == filename))
+        return;
+
+    pos = strlen(filename);
+    newsize = matching->size;
+
+    for( ; i < matching->size; ) {
+        /*
+         * if we've shifted matches down we'll hit a NULL entry before
+         * we hit the end of the array.
+         */
+        if (NULL == matching->array[i])
+            break;
+        /*
+         * skip over valid matches. Note that we do not want to use
+         * _type_from_filename.
+         */
+        cc = (netsnmp_cert_common*)matching->array[i];
+        if (('.' == cc->filename[pos]) &&
+            (NS_CERT_TYPE_UNKNOWN != _cert_ext_type(&cc->filename[pos+1]))) {
+            ++i;
+            continue;
+        }
+        /*
+         * shrink array by shifting everything down a spot. Might not be
+         * the most efficient soloution, but this is just happening at
+         * startup and hopefully most certs won't have common prefixes.
+         */
+        --newsize;
+        for ( j=i; j < newsize; ++j )
+            matching->array[j] = matching->array[j+1];
+        matching->array[j] = NULL;
+        /** no ++i; just shifted down, need to look at same position again */
+    }
+    /*
+     * if we shifted, set the new size
+     */
+    if (newsize != matching->size) {
+        DEBUGMSGT(("9:cert:subset:reduce", "shrank from %d to %d\n",
+                   matching->size, newsize));
+        matching->size = newsize;
+    }
+}
+
+static netsnmp_void_array *
+_cert_find_subset_common(const char *filename, netsnmp_container *container)
+{
+    netsnmp_cert_common   search;
+    netsnmp_void_array   *matching;
+
+    netsnmp_assert(filename && container);
+
+    memset(&search, 0x00, sizeof(search));    /* clear search key */
+
+    search.filename = NETSNMP_REMOVE_CONST(char*,filename);
+
+    matching = CONTAINER_GET_SUBSET(container, &search);
+    DEBUGMSGT(("9:cert:subset:found", "%d matches\n", matching ?
+               matching->size : 0));
+    if (matching && matching->size > 1)
+        _reduce_subset(matching, filename);
+    return matching;
+}
+
+static netsnmp_void_array *
+_cert_find_subset_fn(const char *filename)
+{
+    netsnmp_container    *fn_container;
+
+    /** find subcontainer with filename as key */
+    fn_container = SUBCONTAINER_FIND(_certs, "certs_fn");
+    netsnmp_assert(fn_container);
+
+    return _cert_find_subset_common(filename, fn_container);
+}
+
+static netsnmp_void_array *
+_key_find_subset(const char *filename)
+{
+    return _cert_find_subset_common(filename, _keys);
+}
+
+#if 0  /* not used yet */
+static netsnmp_key *
 _key_find_fn(const char *filename)
 {
-    netsnmp_cert key, *result = NULL;
+    netsnmp_key key, *result = NULL;
 
-    if (NULL == filename)
-        return NULL;
+    netsnmp_assert(NULL != filename);
 
-    /** clear search key */
-    memset(&key, 0x00, sizeof(key));
+    memset(&key, 0x00, sizeof(key));    /* clear search key */
     key.info.filename = NETSNMP_REMOVE_CONST(char*,filename);
     result = CONTAINER_FIND(_keys,&key);
     return result;
 }
+#endif
 
 static int
 _time_filter(netsnmp_file *f, struct stat *idx)
