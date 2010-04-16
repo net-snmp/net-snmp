@@ -443,10 +443,6 @@ netsnmp_tlstcp_accept(netsnmp_transport *t)
             return -1;
         }   
 
-#ifdef not_needed_question_mark
-        SSL_set_accept_state(tlsdata->ssl);
-#endif
-
         /* XXX: check acceptance criteria here */
 
         DEBUGMSGTL(("tlstcp", "accept succeeded (from %s) on sock %d\n",
