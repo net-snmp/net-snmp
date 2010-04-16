@@ -37,6 +37,7 @@
 
 #define LOGANDDIE(msg) { snmp_log(LOG_ERR, "%s\n", msg); return 0; }
 
+/* this is called during negotiationn */
 int verify_callback(int ok, X509_STORE_CTX *ctx) {
     int err, depth;
     char buf[1024], *fingerprint;;
@@ -84,6 +85,14 @@ int verify_callback(int ok, X509_STORE_CTX *ctx) {
     DEBUGMSGTL(("tls_x509:verify", "  returning the passed in value of %d\n",
                 ok));
     return(ok);
+}
+
+/* this is called after the connection on the client side by us to check
+   other aspects about the connection */
+int
+netsnmp_tlsbase_verify_server_cert(SSL *ssl) {
+    /* XXX */
+    return SNMPERR_SUCCESS;
 }
 
 SSL_CTX *
