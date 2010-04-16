@@ -497,6 +497,46 @@ netsnmp_tlstcp_open(netsnmp_transport *t)
     if (tlsdata->flags & NETSNMP_TLSBASE_IS_CLIENT) {
         /* Is the client */
 
+        /* RFCXXXX Section 5.3.1:  Establishing a Session as a Client
+         *    1)  The snmpTlstmSessionOpens counter is incremented.
+         */
+        snmp_increment_statistic(STAT_TLSTM_SNMPTLSTMSESSIONOPENS);
+
+        /* RFCXXXX Section 5.3.1:  Establishing a Session as a Client
+          2)  The client selects the appropriate certificate and cipher_suites
+              for the key agreement based on the tmSecurityName and the
+              tmRequestedSecurityLevel for the session.  For sessions being
+              established as a result of a SNMP-TARGET-MIB based operation, the
+              certificate will potentially have been identified via the
+              snmpTlstmParamsTable mapping and the cipher_suites will have to
+              be taken from system-wide or implementation-specific
+              configuration.  If no row in the snmpTlstmParamsTable exists then
+              implementations MAY choose to establish the connection using a
+              default client certificate available to the application.
+              Otherwise, the certificate and appropriate cipher_suites will
+              need to be passed to the openSession() ASI as supplemental
+              information or configured through an implementation-dependent
+              mechanism.  It is also implementation-dependent and possibly
+              policy-dependent how tmRequestedSecurityLevel will be used to
+              influence the security capabilities provided by the (D)TLS
+              connection.  However this is done, the security capabilities
+              provided by (D)TLS MUST be at least as high as the level of
+              security indicated by the tmRequestedSecurityLevel parameter.
+              The actual security level of the session is reported in the
+              tmStateReference cache as tmSecurityLevel.  For (D)TLS to provide
+              strong authentication, each principal acting as a command
+              generator SHOULD have its own certificate.
+        */
+        /*
+          Implementation notes: we do most of this in the
+          sslctx_client_setup The transport should have been
+          f_config()ed with the proper fingerprints to use (which is
+          stored in tlsdata), or we'll use the default identity
+          fingerprint if that can be found.
+        */
+
+        /* XXX: check securityLevel and ensure no NULL fingerprints are used */
+
         /* set up the needed SSL context */
         tlsdata->ssl_context = ctx =
             sslctx_client_setup(TLSv1_method(), tlsdata);
@@ -505,32 +545,98 @@ netsnmp_tlstcp_open(netsnmp_transport *t)
             return NULL;
         }
 
-        /* create the openssl ok connection string */
+        /* RFCXXXX Section 5.3.1:  Establishing a Session as a Client
+           3)  Using the destTransportDomain and destTransportAddress values,
+               the client will initiate the (D)TLS handshake protocol to
+               establish session keys for message integrity and encryption.
+        */
+        /* Implementation note:
+           The transport domain and address are pre-processed by this point
+        */
+
+        /* create the openssl connection string host:port */
         snprintf(tmpbuf, sizeof(tmpbuf), "%s:%d",
                  inet_ntoa(tlsdata->addr.sin_addr),
                  ntohs(tlsdata->addr.sin_port));
+
+        /* Create a BIO connection for it */
         DEBUGMSGTL(("tlstcp", "connecting to tlstcp %s\n", tmpbuf));
         bio = BIO_new_connect(tmpbuf);
 
-        /* actually do the connection */
-        if ((rc = BIO_do_connect(bio)) <= 0) {
-            snmp_log(LOG_ERR, "tlstcp: failed to connect to %s\n", tmpbuf);
-            _openssl_log_error(rc, NULL, "BIO_do_connect");
-            /* XXX: free the bio, etc */
+        /* RFCXXXX Section 5.3.1:  Establishing a Session as a Client
+           3) continued:
+              If the attempt to establish a session is unsuccessful, then
+              snmpTlstmSessionOpenErrors is incremented, an error indication is
+              returned, and processing stops.
+        */
+
+        if (NULL == bio) {
+            snmp_increment_statistic(STAT_TLSTM_SNMPTLSTMSESSIONOPENERRORS);
+            snmp_log(LOG_ERR, "tlstcp: failed to create bio\n");
+            _openssl_log_error(rc, NULL, "BIO creation");
             SNMP_FREE(tlsdata);
             SNMP_FREE(t);
             return NULL;
         }
+            
+
+        /* Tell the BIO to actually do the connection */
+        if ((rc = BIO_do_connect(bio)) <= 0) {
+            snmp_increment_statistic(STAT_TLSTM_SNMPTLSTMSESSIONOPENERRORS);
+            snmp_log(LOG_ERR, "tlstcp: failed to connect to %s\n", tmpbuf);
+            _openssl_log_error(rc, NULL, "BIO_do_connect");
+            BIO_free(bio);
+            SNMP_FREE(tlsdata);
+            SNMP_FREE(t);
+            return NULL;
+        }
+
+        /* Create the SSL layer on top of the socket bio */
         ssl = tlsdata->ssl = SSL_new(ctx);
         if (NULL == ssl) {
+            snmp_increment_statistic(STAT_TLSTM_SNMPTLSTMSESSIONOPENERRORS);
             snmp_log(LOG_ERR, "tlstcp: failed to create a SSL connection\n");
+            BIO_free(bio);
+            SNMP_FREE(tlsdata);
+            SNMP_FREE(t);
             return NULL;
         }
         
+        /* Bind the SSL layer to the BIO */ 
         SSL_set_bio(ssl, bio, bio);
         SSL_set_mode(ssl, SSL_MODE_AUTO_RETRY);
+
+        /* Then have SSL do it's connection over the BIO */
         if ((rc = SSL_connect(ssl)) <= 0) {
+            snmp_increment_statistic(STAT_TLSTM_SNMPTLSTMSESSIONOPENERRORS);
             snmp_log(LOG_ERR, "tlstcp: failed to ssl_connect\n");
+            BIO_free(bio);
+            SNMP_FREE(tlsdata);
+            SNMP_FREE(t);
+            return NULL;
+        }
+
+        /* RFCXXXX Section 5.3.1: Establishing a Session as a Client
+           3) continued:
+              If the session failed to open because the presented
+              server certificate was unknown or invalid then the
+              snmpTlstmSessionUnknownServerCertificate or
+              snmpTlstmSessionInvalidServerCertificates MUST be
+              incremented and a snmpTlstmServerCertificateUnknown or
+              snmpTlstmServerInvalidCertificate notification SHOULD be
+              sent as appropriate.  Reasons for server certificate
+              invalidation includes, but is not limited to,
+              cryptographic validation failures and an unexpected
+              presented certificate identity.
+        */
+        if (netsnmp_tlsbase_verify_server_cert(ssl) != SNMPERR_SUCCESS) {
+            /* XXX: unknown vs invalid; two counters */
+            snmp_increment_statistic(STAT_TLSTM_SNMPTLSTMSESSIONUNKNOWNSERVERCERTIFICATE);
+            snmp_log(LOG_ERR, "tlstcp: failed to verify ssl certificate\n");
+            SSL_shutdown(ssl);
+            BIO_free(bio);
+            SNMP_FREE(tlsdata);
+            SNMP_FREE(t);
             return NULL;
         }
 
