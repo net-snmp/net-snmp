@@ -220,6 +220,7 @@ if ($logging eq "enabled") {
 
   # Delete net-snmp-config.h from main include folder just in case it was created by a Cygwin or MinGW build
   system("del ..\\include\\net-snmp\\net-snmp-config.h > NUL: 2>&1");
+  unlink "../snmplib/transports/snmp_transport_inits.h";
   
   print "Running Configure...\n";
   system("perl Configure $configOpts --linktype=$linktype --prefix=\"$install_base\" > configure.out 2>&1") == 0 || die "Build error (see configure.out)";

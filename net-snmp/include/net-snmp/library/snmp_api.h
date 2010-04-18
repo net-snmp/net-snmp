@@ -473,6 +473,10 @@ struct netsnmp_transport_s;
     void            snmp_sess_transport_set(void *,
 					    struct netsnmp_transport_s *);
 
+    NETSNMP_IMPORT int
+    netsnmp_sess_config_transport(struct netsnmp_container_s *transport_configuration,
+                                  struct netsnmp_transport_s *transport);
+
     /*
      * EXPERIMENTAL API EXTENSIONS ------------------------------------------ 
      * 

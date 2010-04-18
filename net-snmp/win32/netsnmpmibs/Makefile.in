@@ -58,7 +58,7 @@ CPP_PROJ=/nologo /MDd /W3 /Gm /EHsc /Zi /Od /I "." /I ".." /I "..\..\snmplib" /I
 RSC=rc.exe
 LIB32=link.exe -lib
 LIB32_FLAGS=/nologo /out:"..\lib\$(OUTDIR)\$(PROGNAME).lib" 
-LIB32_OBJS= \
+LIB32_OBJS1= \
 	"$(INTDIR)\setSerialNo.obj" \
 	"$(INTDIR)\snmp_mib.obj" \
 	"$(INTDIR)\sysORTable.obj" \
@@ -123,7 +123,7 @@ LIB32_OBJS= \
 	"$(INTDIR)\util_funcs.obj" \
 	"$(INTDIR)\smux.obj"
 !IF "$(SDK)" == "true"
-LIB32_OBJS= $(LIB32_OBJS) \
+LIB32_OBJS2= \
 	"$(INTDIR)\at.obj" \
 	"$(INTDIR)\icmp.obj" \
 	"$(INTDIR)\interfaces.obj" \
@@ -137,9 +137,11 @@ LIB32_OBJS= $(LIB32_OBJS) \
 	"$(INTDIR)\var_route.obj" \
 	"$(INTDIR)\winExtDLL.obj"
 !ENDIF
+LIB32_OBJS=$(LIB32_OBJS1) $(LIB32_OBJS2)
 
 CLEAN :
-	-@for %f in ($(LIB32_OBJS)) do erase %%f
+	-@for %f in ($(LIB32_OBJS1)) do erase %%f
+	-@for %f in ($(LIB32_OBJS2)) do erase %%f
 	-@erase "..\lib\$(OUTDIR)\$(PROGNAME).lib"
 
 "..\lib\$(OUTDIR)\$(PROGNAME).lib" : "..\lib\$(OUTDIR)" $(DEF_FILE) $(LIB32_OBJS)
