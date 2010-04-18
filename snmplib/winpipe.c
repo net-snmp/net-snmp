@@ -32,6 +32,7 @@
 
 #ifdef WIN32
 
+#include <net-snmp/net-snmp-config.h>
 #include <net-snmp/library/snmp_assert.h>
 #include <io.h>
 #include <winsock.h>
