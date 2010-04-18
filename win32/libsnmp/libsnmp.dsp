@@ -261,59 +261,55 @@ SOURCE=..\..\snmplib\snmp_version.c
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\snmplib\snmpAliasDomain.c
+SOURCE=..\..\snmplib\transports\snmpAliasDomain.c
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\snmplib\snmpCallbackDomain.c
+SOURCE=..\..\snmplib\transports\snmpCallbackDomain.c
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\snmplib\snmpIPBaseDomain.c
+SOURCE=..\..\snmplib\transports\snmpIPBaseDomain.c
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\snmplib\snmpIPv4BaseDomain.c
+SOURCE=..\..\snmplib\transports\snmpIPv4BaseDomain.c
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\snmplib\snmpIPv6BaseDomain.c
+SOURCE=..\..\snmplib\transports\snmpIPv6BaseDomain.c
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\snmplib\snmpSocketBaseDomain.c
+SOURCE=..\..\snmplib\transports\snmpSocketBaseDomain.c
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\snmplib\snmpTCPBaseDomain.c
+SOURCE=..\..\snmplib\transports\snmpTCPBaseDomain.c
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\snmplib\snmpTCPDomain.c
+SOURCE=..\..\snmplib\transports\snmpTCPDomain.c
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\snmplib\snmpTCPIPv6Domain.c
+SOURCE=..\..\snmplib\transports\snmpTCPIPv6Domain.c
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\snmplib\snmpTLSBaseDomain.c
+SOURCE=..\..\snmplib\transports\snmpUDPBaseDomain.c
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\snmplib\snmpUDPBaseDomain.c
+SOURCE=..\..\snmplib\transports\snmpUDPDomain.c
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\snmplib\snmpUDPDomain.c
+SOURCE=..\..\snmplib\transports\snmpUDPIPv4BaseDomain.c
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\snmplib\snmpUDPIPv4BaseDomain.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\snmplib\snmpUDPIPv6Domain.c
+SOURCE=..\..\snmplib\transports\snmpUDPIPv6Domain.c
 # End Source File
 # Begin Source File
 

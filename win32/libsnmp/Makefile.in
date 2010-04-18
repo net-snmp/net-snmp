@@ -322,73 +322,73 @@ SOURCE=..\..\snmplib\snmp.c
 	$(CPP) $(CPP_PROJ) $(SOURCE)
 
 
-SOURCE=..\..\snmplib\snmpCallbackDomain.c
+SOURCE=..\..\snmplib\transports\snmpCallbackDomain.c
 
 "$(INTDIR)\snmpCallbackDomain.obj" : $(SOURCE) "$(INTDIR)"
 	$(CPP) $(CPP_PROJ) $(SOURCE)
 
 
-SOURCE=..\..\snmplib\snmpIPBaseDomain.c
+SOURCE=..\..\snmplib\transports\snmpIPBaseDomain.c
 
 "$(INTDIR)\snmpIPBaseDomain.obj" : $(SOURCE) "$(INTDIR)"
 	$(CPP) $(CPP_PROJ) $(SOURCE)
 
 
-SOURCE=..\..\snmplib\snmpIPv4BaseDomain.c
+SOURCE=..\..\snmplib\transports\snmpIPv4BaseDomain.c
 
 "$(INTDIR)\snmpIPv4BaseDomain.obj" : $(SOURCE) "$(INTDIR)"
 	$(CPP) $(CPP_PROJ) $(SOURCE)
 
 
-SOURCE=..\..\snmplib\snmpIPv6BaseDomain.c
+SOURCE=..\..\snmplib\transports\snmpIPv6BaseDomain.c
 
 "$(INTDIR)\snmpIPv6BaseDomain.obj" : $(SOURCE) "$(INTDIR)"
 	$(CPP) $(CPP_PROJ) $(SOURCE)
 
 
-SOURCE=..\..\snmplib\snmpSocketBaseDomain.c
+SOURCE=..\..\snmplib\transports\snmpSocketBaseDomain.c
 
 "$(INTDIR)\snmpSocketBaseDomain.obj" : $(SOURCE) "$(INTDIR)"
 	$(CPP) $(CPP_PROJ) $(SOURCE)
 
 
-SOURCE=..\..\snmplib\snmpTCPBaseDomain.c
+SOURCE=..\..\snmplib\transports\snmpTCPBaseDomain.c
 
 "$(INTDIR)\snmpTCPBaseDomain.obj" : $(SOURCE) "$(INTDIR)"
 	$(CPP) $(CPP_PROJ) $(SOURCE)
 
 
-SOURCE=..\..\snmplib\snmpTCPDomain.c
+SOURCE=..\..\snmplib\transports\snmpTCPDomain.c
 
 "$(INTDIR)\snmpTCPDomain.obj" : $(SOURCE) "$(INTDIR)"
 	$(CPP) $(CPP_PROJ) $(SOURCE)
 
 
-SOURCE=..\..\snmplib\snmpTCPIPv6Domain.c
+SOURCE=..\..\snmplib\transports\snmpTCPIPv6Domain.c
 
 "$(INTDIR)\snmpTCPIPv6Domain.obj" : $(SOURCE) "$(INTDIR)"
 	$(CPP) $(CPP_PROJ) $(SOURCE)
 
 
-SOURCE=..\..\snmplib\snmpUDPBaseDomain.c
+SOURCE=..\..\snmplib\transports\snmpUDPBaseDomain.c
 
 "$(INTDIR)\snmpUDPBaseDomain.obj" : $(SOURCE) "$(INTDIR)"
 	$(CPP) $(CPP_PROJ) $(SOURCE)
 
 
-SOURCE=..\..\snmplib\snmpUDPDomain.c
+SOURCE=..\..\snmplib\transports\snmpUDPDomain.c
 
 "$(INTDIR)\snmpUDPDomain.obj" : $(SOURCE) "$(INTDIR)"
 	$(CPP) $(CPP_PROJ) $(SOURCE)
 
 
-SOURCE=..\..\snmplib\snmpUDPIPv4BaseDomain.c
+SOURCE=..\..\snmplib\transports\snmpUDPIPv4BaseDomain.c
 
 "$(INTDIR)\snmpUDPIPv4BaseDomain.obj" : $(SOURCE) "$(INTDIR)"
 	$(CPP) $(CPP_PROJ) $(SOURCE)
 
 
-SOURCE=..\..\snmplib\snmpUDPIPv6Domain.c
+SOURCE=..\..\snmplib\transports\snmpUDPIPv6Domain.c
 
 "$(INTDIR)\snmpUDPIPv6Domain.obj" : $(SOURCE) "$(INTDIR)"
 	$(CPP) $(CPP_PROJ) $(SOURCE)
