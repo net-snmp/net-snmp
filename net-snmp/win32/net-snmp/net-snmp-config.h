@@ -1568,7 +1568,6 @@ typedef unsigned short   uint16_t;
 #if _MSC_VER < 1500
 #define vsnprintf _vsnprintf
 #endif
-#define snprintf  _CRT_SECURE_NO_WARNINGS
 #define snprintf  _snprintf
 
 #define EADDRINUSE	WSAEADDRINUSE
