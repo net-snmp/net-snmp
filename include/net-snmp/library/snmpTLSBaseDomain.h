@@ -50,6 +50,8 @@ extern          "C" {
 
     int netsnmp_tlsbase_verify_server_cert(SSL *ssl,
                                            _netsnmpTLSBaseData *tlsdata);
+    int netsnmp_tlsbase_verify_client_cert(SSL *ssl,
+                                           _netsnmpTLSBaseData *tlsdata);
     int netsnmp_tlsbase_extract_security_name(SSL *ssl, _netsnmpTLSBaseData *tlsdata);
     _netsnmpTLSBaseData *netsnmp_tlsbase_allocate_tlsdata(netsnmp_transport *t,
                                                           int isserver);
