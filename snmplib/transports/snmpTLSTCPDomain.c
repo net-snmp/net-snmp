@@ -277,6 +277,7 @@ netsnmp_tlstcp_send(netsnmp_transport *t, void *buf, int size,
         *olength == sizeof(netsnmp_tmStateReference)) {
         tmStateRef = (netsnmp_tmStateReference *) *opaque;
     } else {
+        snmp_log(LOG_ERR, "TLSTCP was called with an invalid state; possibly the wrong security model is in use.  It should be 'tsm'.\n");
         snmp_increment_statistic(STAT_TLSTM_SNMPTLSTMSESSIONINVALIDCACHES);
         return SNMPERR_GENERR;
     }
@@ -445,7 +446,6 @@ netsnmp_tlstcp_close(netsnmp_transport *t)
     /* don't free the accept_bio since it's the parent bio */
     SNMP_FREE(tlsdata);
     t->data = NULL;
-    SNMP_FREE(t);
     return netsnmp_socketbase_close(t);
 }
 
