@@ -48,14 +48,16 @@ extern          "C" {
     SSL_CTX *sslctx_client_setup(SSL_METHOD *, _netsnmpTLSBaseData *tlsbase);
     SSL_CTX *sslctx_server_setup(SSL_METHOD *);
 
-    int netsnmp_tlsbase_verify_server_cert(SSL *ssl);
+    int netsnmp_tlsbase_verify_server_cert(SSL *ssl,
+                                           _netsnmpTLSBaseData *tlsdata);
     int netsnmp_tlsbase_extract_security_name(SSL *ssl, _netsnmpTLSBaseData *tlsdata);
     _netsnmpTLSBaseData *netsnmp_tlsbase_allocate_tlsdata(netsnmp_transport *t,
                                                           int isserver);
     int netsnmp_tlsbase_wrapup_recv(netsnmp_tmStateReference *tmStateRef,
                                     _netsnmpTLSBaseData *tlsdata,
                                     void **opaque, int *olength);
-    int netsnmp_tlsbase_config(netsnmp_transport *t, char *token, char *value);
+    int netsnmp_tlsbase_config(struct netsnmp_transport_s *t,
+                               char *token, char *value);
 #ifdef __cplusplus
 }
 #endif

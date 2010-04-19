@@ -90,7 +90,7 @@ int verify_callback(int ok, X509_STORE_CTX *ctx) {
 /* this is called after the connection on the client side by us to check
    other aspects about the connection */
 int
-netsnmp_tlsbase_verify_server_cert(SSL *ssl) {
+netsnmp_tlsbase_verify_server_cert(SSL *ssl, _netsnmpTLSBaseData *tlsdata) {
     /* XXX */
     return SNMPERR_SUCCESS;
 }
@@ -267,7 +267,7 @@ sslctx_server_setup(SSL_METHOD *method) {
 }
 
 int
-netsnmp_tlsbase_config(netsnmp_transport *t, char *token, char *value) {
+netsnmp_tlsbase_config(struct netsnmp_transport_s *t, char *token, char *value) {
     _netsnmpTLSBaseData *tlsdata;
 
     netsnmp_assert_or_return(t != NULL, -1);

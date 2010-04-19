@@ -104,7 +104,6 @@ netsnmp_tlstcp_recv(netsnmp_transport *t, void *buf, int size,
     netsnmp_indexed_addr_pair *addr_pair = NULL;
     struct sockaddr *from;
     netsnmp_tmStateReference *tmStateRef = NULL;
-    X509            *peer;
     _netsnmpTLSBaseData *tlsdata;
 
     if (NULL == t || t->sock < 0 || NULL == t->data) {
@@ -481,7 +480,7 @@ netsnmp_tlstcp_open(netsnmp_transport *t)
     SSL_CTX *ctx;
     SSL *ssl;
     char tmpbuf[128];
-    int rc;
+    int rc = 0;
 
     netsnmp_assert_or_return(t != NULL, NULL);
     netsnmp_assert_or_return(t->data != NULL, NULL);
@@ -625,7 +624,39 @@ netsnmp_tlstcp_open(netsnmp_transport *t)
               cryptographic validation failures and an unexpected
               presented certificate identity.
         */
-        if (netsnmp_tlsbase_verify_server_cert(ssl) != SNMPERR_SUCCESS) {
+
+        /* RFCXXXX Section 5.3.1: Establishing a Session as a Client
+           4)  The (D)TLS client MUST then verify that the (D)TLS server's
+               presented certificate is the expected certificate.  The (D)TLS
+               client MUST NOT transmit SNMP messages until the server
+               certificate has been authenticated, the client certificate has
+               been transmitted and the TLS connection has been fully
+               established.
+
+               If the connection is being established from configuration based
+               on SNMP-TARGET-MIB configuration, then the snmpTlstmAddrTable
+               DESCRIPTION clause describes how the verification is done (using
+               either a certificate fingerprint, or an identity authenticated
+               via certification path validation).
+
+               If the connection is being established for reasons other than
+               configuration found in the SNMP-TARGET-MIB then configuration and
+               procedures outside the scope of this document should be followed.
+               Configuration mechanisms SHOULD be similar in nature to those
+               defined in the snmpTlstmAddrTable to ensure consistency across
+               management configuration systems.  For example, a command-line
+               tool for generating SNMP GETs might support specifying either the
+               server's certificate fingerprint or the expected host name as a
+               command line argument.
+        */
+
+        /* Implementation notes:
+           - All remote certificate fingerprints are expected to be
+             stored in the transport's config information.  This is
+             true both for CLI clients and TARGET-MIB sessions.
+           - netsnmp_tlsbase_verify_server_cert implements these checks
+        */
+        if (netsnmp_tlsbase_verify_server_cert(ssl, tlsdata) != SNMPERR_SUCCESS) {
             /* XXX: unknown vs invalid; two counters */
             snmp_increment_statistic(STAT_TLSTM_SNMPTLSTMSESSIONUNKNOWNSERVERCERTIFICATE);
             snmp_log(LOG_ERR, "tlstcp: failed to verify ssl certificate\n");
@@ -636,15 +667,37 @@ netsnmp_tlstcp_open(netsnmp_transport *t)
             return NULL;
         }
 
-#ifdef nexttime
-        if(SSL_get_verify_result(ssl) != X509_V_OK) {
-            SNMP_FREE(tlsdata);
-            SNMP_FREE(t);
-            snmp_log(LOG_ERR, "failed to verify TLS server credentials\n");
-            return NULL;
-        }
-#endif
-        
+        /* RFCXXXX Section 5.3.1: Establishing a Session as a Client
+           5)  (D)TLS provides assurance that the authenticated identity has
+               been signed by a trusted configured certification authority.  If
+               verification of the server's certificate fails in any way (for
+               example because of failures in cryptographic verification or the
+               presented identity did not match the expected named entity) then
+               the session establishment MUST fail, the
+               snmpTlstmSessionInvalidServerCertificates object is incremented.
+               If the session can not be opened for any reason at all, including
+               cryptographic verification failures, then the
+               snmpTlstmSessionOpenErrors counter is incremented and processing
+               stops.
+
+        */
+        /* XXX: add snmpTlstmSessionInvalidServerCertificates on
+           crypto failure */
+
+        /* RFCXXXX Section 5.3.1: Establishing a Session as a Client
+           6)  The TLSTM-specific session identifier (tlstmSessionID) is set in
+           the tmSessionID of the tmStateReference passed to the TLS
+           Transport Model to indicate that the session has been established
+           successfully and to point to a specific (D)TLS connection for
+           future use.  The tlstmSessionID is also stored in the LCD for
+           later lookup during processing of incoming messages
+           (Section 5.1.2).
+        */
+        /* Implementation notes:
+           - the tlsdata pointer is used as our session identifier, as
+             noted in the netsnmp_tlstcp_recv() function comments.
+        */
+
         t->sock = BIO_get_fd(bio, NULL);
         /* XXX: save state */
     } else {
