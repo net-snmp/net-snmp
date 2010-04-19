@@ -6191,7 +6191,7 @@ snmp_sess_select_info(void *sessp,
   if (netsnmp_copy_large_fd_set_to_fd_set(fdset, &lfdset) < 0) {
       snmp_log(LOG_ERR,
 	     "Use snmp_sess_select_info2() for processing"
-	     " large file descriptors");
+	     " large file descriptors\n");
   }
   netsnmp_large_fd_set_cleanup(&lfdset);
   return rc;

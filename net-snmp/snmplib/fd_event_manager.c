@@ -182,7 +182,7 @@ void netsnmp_external_event_info(int *numfds, fd_set *readfds, fd_set *writefds,
   {
     snmp_log(LOG_ERR,
 	     "Use netsnmp_external_event_info2() for processing"
-	     " large file descriptors");
+	     " large file descriptors\n");
   }
 
   netsnmp_large_fd_set_cleanup(&lreadfds);
@@ -241,7 +241,7 @@ void netsnmp_dispatch_external_events(int *count, fd_set *readfds, fd_set *write
   {
     snmp_log(LOG_ERR,
 	     "Use netsnmp_dispatch_external_events2() for processing"
-	     " large file descriptors");
+	     " large file descriptors\n");
   }
 
   netsnmp_large_fd_set_cleanup(&lreadfds);

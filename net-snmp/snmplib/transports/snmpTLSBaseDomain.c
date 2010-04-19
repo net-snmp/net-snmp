@@ -92,6 +92,16 @@ int verify_callback(int ok, X509_STORE_CTX *ctx) {
 int
 netsnmp_tlsbase_verify_server_cert(SSL *ssl, _netsnmpTLSBaseData *tlsdata) {
     /* XXX */
+    X509            *remote_cert;
+
+    netsnmp_assert_or_return(ssl != NULL, SNMPERR_GENERR);
+    netsnmp_assert_or_return(tlsdata != NULL, SNMPERR_GENERR);
+    
+    if (NULL == (remote_cert = SSL_get_peer_certificate(ssl))) {
+        /* no peer cert */
+        return SNMPERR_GENERR;
+    }
+
     return SNMPERR_SUCCESS;
 }
 
