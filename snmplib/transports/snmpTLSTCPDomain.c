@@ -404,71 +404,69 @@ netsnmp_tlstcp_accept(netsnmp_transport *t)
     int             rc;
     SSL_CTX *ctx;
     SSL     *ssl;
+    _netsnmpTLSBaseData *tlsdata = NULL;
     
     DEBUGMSGTL(("tlstcp", "netsnmp_tlstcp_accept called\n"));
-    if (t != NULL && t->sock >= 0) {
-        _netsnmpTLSBaseData *tlsdata = (_netsnmpTLSBaseData *) t->data;
 
-        rc = BIO_do_accept(tlsdata->accept_bio);
+    tlsdata = (_netsnmpTLSBaseData *) t->data;
 
-        if (rc <= 0) {
-            snmp_log(LOG_ERR, "BIO_do_accept failed\n");
-            _openssl_log_error(rc, NULL, "BIO_do_accept");
-            /* XXX: need to close the listening connection here? */
-            return -1;
-        }
+    rc = BIO_do_accept(tlsdata->accept_bio);
 
-        tlsdata->accepted_bio = accepted_bio = BIO_pop(tlsdata->accept_bio);
-        if (!accepted_bio) {
-            snmp_log(LOG_ERR, "Failed to pop an accepted bio off the bio staack\n");
-            /* XXX: need to close the listening connection here? */
-            return -1;
-        }
-
-        /* create the OpenSSL TLS context */
-        ctx = tlsdata->ssl_context;
-
-        /* create the server's main SSL bio */
-        ssl = tlsdata->ssl = SSL_new(ctx);
-        if (!tlsdata->ssl) {
-            snmp_log(LOG_ERR, "TLSTCP: Falied to create a SSL BIO\n");
-            return -1;
-        }
-        
-        SSL_set_bio(ssl, accepted_bio, accepted_bio);
-        
-        if ((rc = SSL_accept(ssl)) <= 0) {
-            snmp_log(LOG_ERR, "TLSTCP: Falied SSL_accept\n");
-            return -1;
-        }   
-
-        /* XXX: check acceptance criteria here */
-
-        DEBUGMSGTL(("tlstcp", "accept succeeded (from %s) on sock %d\n",
-                    str, t->sock));
-        free(str);
-
-        /* RFCXXXX Section 5.1.2 step 1, part2::
-         * If this is the first message received through this session and
-           the session does not have an assigned tlstmSessionID yet then the
-           snmpTlstmSessionAccepts counter is incremented and a
-           tlstmSessionID for the session is created.  This will only happen
-           on the server side of a connection because a client would have
-           already assigned a tlstmSessionID during the openSession()
-           invocation.  Implementations may have performed the procedures
-           described in Section 5.3.2 prior to this point or they may
-           perform them now, but the procedures described in Section 5.3.2
-           MUST be performed before continuing beyond this point.
-        */
-        /* We're taking option 2 and incrementing the session accepts here
-           rather than upon receiving the first packet */
-        snmp_increment_statistic(STAT_TLSTM_SNMPTLSTMSESSIONACCEPTS);
-
-        /* XXX: check that it returns something so we can free stuff? */
-        return BIO_get_fd(tlsdata->accepted_bio, NULL);
-    } else {
+    if (rc <= 0) {
+        snmp_log(LOG_ERR, "BIO_do_accept failed\n");
+        _openssl_log_error(rc, NULL, "BIO_do_accept");
+        /* XXX: need to close the listening connection here? */
         return -1;
     }
+
+    tlsdata->accepted_bio = accepted_bio = BIO_pop(tlsdata->accept_bio);
+    if (!accepted_bio) {
+        snmp_log(LOG_ERR, "Failed to pop an accepted bio off the bio staack\n");
+        /* XXX: need to close the listening connection here? */
+        return -1;
+    }
+
+    /* create the OpenSSL TLS context */
+    ctx = tlsdata->ssl_context;
+
+    /* create the server's main SSL bio */
+    ssl = tlsdata->ssl = SSL_new(ctx);
+    if (!tlsdata->ssl) {
+        snmp_log(LOG_ERR, "TLSTCP: Falied to create a SSL BIO\n");
+        return -1;
+    }
+        
+    SSL_set_bio(ssl, accepted_bio, accepted_bio);
+        
+    if ((rc = SSL_accept(ssl)) <= 0) {
+        snmp_log(LOG_ERR, "TLSTCP: Falied SSL_accept\n");
+        return -1;
+    }   
+
+    /* XXX: check acceptance criteria here */
+
+    DEBUGMSGTL(("tlstcp", "accept succeeded (from %s) on sock %d\n",
+                str, t->sock));
+    free(str);
+
+    /* RFCXXXX Section 5.1.2 step 1, part2::
+     * If this is the first message received through this session and
+     the session does not have an assigned tlstmSessionID yet then the
+     snmpTlstmSessionAccepts counter is incremented and a
+     tlstmSessionID for the session is created.  This will only happen
+     on the server side of a connection because a client would have
+     already assigned a tlstmSessionID during the openSession()
+     invocation.  Implementations may have performed the procedures
+     described in Section 5.3.2 prior to this point or they may
+     perform them now, but the procedures described in Section 5.3.2
+     MUST be performed before continuing beyond this point.
+    */
+    /* We're taking option 2 and incrementing the session accepts here
+       rather than upon receiving the first packet */
+    snmp_increment_statistic(STAT_TLSTM_SNMPTLSTMSESSIONACCEPTS);
+
+    /* XXX: check that it returns something so we can free stuff? */
+    return BIO_get_fd(tlsdata->accepted_bio, NULL);
 }
 
 
