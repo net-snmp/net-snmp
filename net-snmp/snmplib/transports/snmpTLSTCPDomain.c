@@ -391,8 +391,61 @@ netsnmp_tlstcp_send(netsnmp_transport *t, void *buf, int size,
 static int
 netsnmp_tlstcp_close(netsnmp_transport *t)
 {
-    /* XXX: issue a proper tls closure notification(s) */
+    _netsnmpTLSBaseData *tlsdata;
 
+    if (NULL == t || NULL == t->data)
+        return -1;
+
+    /* RFCXXXX Section 5.4.  Closing a Session
+
+       1)  Increment either the snmpTlstmSessionClientCloses or the
+           snmpTlstmSessionServerCloses counter as appropriate.
+    */
+    if (t->flags & NETSNMP_TLSBASE_IS_CLIENT)
+        snmp_increment_statistic(STAT_TLSTM_SNMPTLSTMSESSIONCLIENTCLOSES);
+    else 
+        snmp_increment_statistic(STAT_TLSTM_SNMPTLSTMSESSIONSERVERCLOSES);
+
+    /* RFCXXXX Section 5.4.  Closing a Session
+       2)  Look up the session using the tmSessionID.
+    */
+    tlsdata = (_netsnmpTLSBaseData *) t->data;
+
+    /* RFCXXXX Section 5.4.  Closing a Session
+       3)  If there is no open session associated with the tmSessionID, then
+           closeSession processing is completed.
+    */
+    /* Implementation notes: if we have a non-zero tlsdata then it's
+       always true */
+
+    /* RFCXXXX Section 5.3.1: Establishing a Session as a Client
+       4)  Have (D)TLS close the specified connection.  This SHOULD include
+           sending a close_notify TLS Alert to inform the other side that
+           session cleanup may be performed.
+    */
+    if (tlsdata->ssl) {
+        SSL_shutdown(tlsdata->ssl);
+        tlsdata->ssl = NULL;
+    }
+
+    if (tlsdata->sslbio) {
+        BIO_free(tlsdata->sslbio);
+        tlsdata->sslbio = NULL;
+    }
+
+    if (tlsdata->accepted_bio) {
+        BIO_free(tlsdata->accepted_bio);
+        tlsdata->accepted_bio = NULL;
+    }
+
+    SNMP_FREE(tlsdata->securityName);
+    SNMP_FREE(tlsdata->my_fingerprint);
+    SNMP_FREE(tlsdata->their_fingerprint);
+
+    /* don't free the accept_bio since it's the parent bio */
+    SNMP_FREE(tlsdata);
+    t->data = NULL;
+    SNMP_FREE(t);
     return netsnmp_socketbase_close(t);
 }
 
@@ -442,6 +495,54 @@ netsnmp_tlstcp_accept(netsnmp_transport *t)
         snmp_log(LOG_ERR, "TLSTCP: Falied SSL_accept\n");
         return -1;
     }   
+
+    /* RFCXXXX Section 5.3.2: Accepting a Session as a Server
+       A (D)TLS server should accept new session connections from any client
+       that it is able to verify the client's credentials for.  This is done
+       by authenticating the client's presented certificate through a
+       certificate path validation process (e.g.  [RFC5280]) or through
+       certificate fingerprint verification using fingerprints configured in
+       the snmpTlstmCertToTSNTable.  Afterward the server will determine the
+       identity of the remote entity using the following procedures.
+
+       The (D)TLS server identifies the authenticated identity from the
+       (D)TLS client's principal certificate using configuration information
+       from the snmpTlstmCertToTSNTable mapping table.  The (D)TLS server
+       MUST request and expect a certificate from the client and MUST NOT
+       accept SNMP messages over the (D)TLS connection until the client has
+       sent a certificate and it has been authenticated.  The resulting
+       derived tmSecurityName is recorded in the tmStateReference cache as
+       tmSecurityName.  The details of the lookup process are fully
+       described in the DESCRIPTION clause of the snmpTlstmCertToTSNTable
+       MIB object.  If any verification fails in any way (for example
+       because of failures in cryptographic verification or because of the
+       lack of an appropriate row in the snmpTlstmCertToTSNTable) then the
+       session establishment MUST fail, and the
+       snmpTlstmSessionInvalidClientCertificates object is incremented.  If
+       the session can not be opened for any reason at all, including
+       cryptographic verification failures, then the
+       snmpTlstmSessionOpenErrors counter is incremented and processing
+       stops.
+
+       Servers that wish to support multiple principals at a particular port
+       SHOULD make use of a (D)TLS extension that allows server-side
+       principal selection like the Server Name Indication extension defined
+       in Section 3.1 of [RFC4366].  Supporting this will allow, for
+       example, sending notifications to a specific principal at a given TCP
+       or UDP port.
+    */
+    /* Implementation notes:
+       - we expect fingerprints to be stored in the transport config
+       - we do not currently support mulitple principals and only offer one
+    */
+    if ((rc = netsnmp_tlsbase_verify_client_cert(ssl, tlsdata))
+        != SNMPERR_SUCCESS) {
+        /* XXX: free needed memory */
+        snmp_log(LOG_ERR, "TLSTCP: Falied checking client certificate\n");
+        snmp_increment_statistic(STAT_TLSTM_SNMPTLSTMSESSIONINVALIDCLIENTCERTIFICATES);
+        return -1;
+    }
+
 
     /* XXX: check acceptance criteria here */
 

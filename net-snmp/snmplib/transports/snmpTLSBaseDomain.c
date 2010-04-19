@@ -95,6 +95,14 @@ netsnmp_tlsbase_verify_server_cert(SSL *ssl, _netsnmpTLSBaseData *tlsdata) {
     return SNMPERR_SUCCESS;
 }
 
+/* this is called after the connection on the server side by us to check
+   the validity of the client's certificate */
+int
+netsnmp_tlsbase_verify_client_cert(SSL *ssl, _netsnmpTLSBaseData *tlsdata) {
+    /* XXX */
+    return SNMPERR_SUCCESS;
+}
+
 /* this is called after the connection on the server side by us to
    check other aspects about the connection and obtain the
    securityName from the remote certificate. */
