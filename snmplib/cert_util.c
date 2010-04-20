@@ -1312,8 +1312,8 @@ main(int argc, char** argv)
 
 static netsnmp_cert *_cert_find_fp(const char *fingerprint);
 
-static void
-_fp_lowercase_and_strip_colon(char *fp)
+void
+netsnmp_fp_lowercase_and_strip_colon(char *fp)
 {
     char *pos, *dest=NULL;
     
@@ -1498,7 +1498,7 @@ _cert_find_fp(const char *fingerprint)
         return NULL;
 
     strncpy(fp, fingerprint, sizeof(fp));
-    _fp_lowercase_and_strip_colon(fp);
+    netsnmp_fp_lowercase_and_strip_colon(fp);
 
     /** clear search key */
     memset(&cert, 0x00, sizeof(cert));
