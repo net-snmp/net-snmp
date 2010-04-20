@@ -85,6 +85,8 @@ void netsnmp_certs_shutdown(void);
 
     int netsnmp_cert_check_vb_fingerprint(const netsnmp_variable_list *var);
 
+    void netsnmp_fp_lowercase_and_strip_colon(char *fp);
+    
 #ifdef __cplusplus
 }
 #endif

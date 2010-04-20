@@ -93,15 +93,36 @@ int
 netsnmp_tlsbase_verify_server_cert(SSL *ssl, _netsnmpTLSBaseData *tlsdata) {
     /* XXX */
     X509            *remote_cert;
+    char            *fingerprint;
 
     netsnmp_assert_or_return(ssl != NULL, SNMPERR_GENERR);
     netsnmp_assert_or_return(tlsdata != NULL, SNMPERR_GENERR);
     
     if (NULL == (remote_cert = SSL_get_peer_certificate(ssl))) {
         /* no peer cert */
+        snmp_log(LOG_ERR, "remote connection provided no certificate\n");
         return SNMPERR_GENERR;
     }
 
+    
+    fingerprint =
+        netsnmp_openssl_cert_get_fingerprint(remote_cert, NS_HASH_SHA1);
+    if (!fingerprint) {
+        /* no peer cert */
+        snmp_log(LOG_ERR, "failed to get fingerprint of remote certificate\n");
+        return SNMPERR_GENERR;
+    }
+
+    netsnmp_fp_lowercase_and_strip_colon(tlsdata->their_fingerprint);
+    if (tlsdata->their_fingerprint &&
+        0 != strcmp(tlsdata->their_fingerprint, fingerprint)) {
+        snmp_log(LOG_ERR, "The fingerprint from the remote side's certificate didn't match the expected\n");
+        snmp_log(LOG_ERR, "  %s != %s\n",
+                 fingerprint, tlsdata->their_fingerprint);
+        return SNMPERR_GENERR;
+    }
+
+    free(fingerprint);
     return SNMPERR_SUCCESS;
 }
 
