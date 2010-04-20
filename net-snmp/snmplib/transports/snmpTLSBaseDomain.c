@@ -87,24 +87,12 @@ int verify_callback(int ok, X509_STORE_CTX *ctx) {
     return(ok);
 }
 
-/* this is called after the connection on the client side by us to check
-   other aspects about the connection */
-int
-netsnmp_tlsbase_verify_server_cert(SSL *ssl, _netsnmpTLSBaseData *tlsdata) {
-    /* XXX */
-    X509            *remote_cert;
+static int
+_netsnmp_tlsbase_verify_remote_fingerprint(X509 *remote_cert,
+                                           _netsnmpTLSBaseData *tlsdata) {
+
     char            *fingerprint;
 
-    netsnmp_assert_or_return(ssl != NULL, SNMPERR_GENERR);
-    netsnmp_assert_or_return(tlsdata != NULL, SNMPERR_GENERR);
-    
-    if (NULL == (remote_cert = SSL_get_peer_certificate(ssl))) {
-        /* no peer cert */
-        snmp_log(LOG_ERR, "remote connection provided no certificate\n");
-        return SNMPERR_GENERR;
-    }
-
-    
     fingerprint =
         netsnmp_openssl_cert_get_fingerprint(remote_cert, NS_HASH_SHA1);
     if (!fingerprint) {
@@ -119,10 +107,34 @@ netsnmp_tlsbase_verify_server_cert(SSL *ssl, _netsnmpTLSBaseData *tlsdata) {
         snmp_log(LOG_ERR, "The fingerprint from the remote side's certificate didn't match the expected\n");
         snmp_log(LOG_ERR, "  %s != %s\n",
                  fingerprint, tlsdata->their_fingerprint);
+        free(fingerprint);
         return SNMPERR_GENERR;
     }
 
     free(fingerprint);
+    return SNMPERR_SUCCESS;
+}
+
+/* this is called after the connection on the client side by us to check
+   other aspects about the connection */
+int
+netsnmp_tlsbase_verify_server_cert(SSL *ssl, _netsnmpTLSBaseData *tlsdata) {
+    /* XXX */
+    X509            *remote_cert;
+
+    netsnmp_assert_or_return(ssl != NULL, SNMPERR_GENERR);
+    netsnmp_assert_or_return(tlsdata != NULL, SNMPERR_GENERR);
+    
+    if (NULL == (remote_cert = SSL_get_peer_certificate(ssl))) {
+        /* no peer cert */
+        snmp_log(LOG_ERR, "remote connection provided no certificate\n");
+        return SNMPERR_GENERR;
+    }
+
+    if (_netsnmp_tlsbase_verify_remote_fingerprint(remote_cert, tlsdata) !=
+        SNMPERR_SUCCESS)
+        return SNMPERR_GENERR;
+
     return SNMPERR_SUCCESS;
 }
 
@@ -131,6 +143,18 @@ netsnmp_tlsbase_verify_server_cert(SSL *ssl, _netsnmpTLSBaseData *tlsdata) {
 int
 netsnmp_tlsbase_verify_client_cert(SSL *ssl, _netsnmpTLSBaseData *tlsdata) {
     /* XXX */
+    X509            *remote_cert;
+
+    if (NULL == (remote_cert = SSL_get_peer_certificate(ssl))) {
+        /* no peer cert */
+        snmp_log(LOG_ERR, "remote connection provided no certificate\n");
+        return SNMPERR_GENERR;
+    }
+    
+    if (_netsnmp_tlsbase_verify_remote_fingerprint(remote_cert, tlsdata) !=
+        SNMPERR_SUCCESS)
+        return SNMPERR_GENERR;
+
     return SNMPERR_SUCCESS;
 }
 
