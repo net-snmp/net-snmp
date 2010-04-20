@@ -250,6 +250,24 @@ _asn_size_err(const char *str, size_t wrongsize, size_t rightsize)
 }
 
 /**
+ * @internal
+ * output an error for a wrong type
+ * 
+ * @param str        error string
+ * @param wrongtype  wrong type
+ */
+static
+    void
+_asn_type_err(const char *str, int wrongtype)
+{
+    char            ebuf[128];
+
+    snprintf(ebuf, sizeof(ebuf), "%s type %d", str, wrongtype);
+    ebuf[ sizeof(ebuf)-1 ] = 0;
+    ERROR_MSG(ebuf);
+}
+
+/**
  * @internal 
  * output an error for a wrong length
  * 
@@ -481,6 +499,11 @@ asn_parse_int(u_char * data,
         return NULL;
     }
     *type = *bufp++;
+    if (*type != ASN_INTEGER) {
+        _asn_type_err(errpre, *type);
+        return NULL;
+    }
+
     bufp = asn_parse_length(bufp, &asn_length);
     if (_asn_parse_length_check
         (errpre, bufp, data, asn_length, *datalength))
@@ -548,6 +571,11 @@ asn_parse_unsigned_int(u_char * data,
         return NULL;
     }
     *type = *bufp++;
+    if (*type != ASN_COUNTER && *type != ASN_GAUGE && *type != ASN_TIMETICKS
+            && *type != ASN_UINTEGER) {
+        _asn_type_err(errpre, *type);
+        return NULL;
+    }
     bufp = asn_parse_length(bufp, &asn_length);
     if (_asn_parse_length_check
         (errpre, bufp, data, asn_length, *datalength))
@@ -787,6 +815,12 @@ asn_parse_string(u_char * data,
     u_long          asn_length;
 
     *type = *bufp++;
+    if (*type != ASN_OCTET_STR && *type != ASN_IPADDRESS && *type != ASN_OPAQUE
+            && *type != ASN_NSAP) {
+        _asn_type_err(errpre, *type);
+        return NULL;
+    }
+
     bufp = asn_parse_length(bufp, &asn_length);
     if (_asn_parse_length_check
         (errpre, bufp, data, asn_length, *datalength)) {
@@ -1285,6 +1319,7 @@ asn_parse_objid(u_char * data,
                 size_t * datalength,
                 u_char * type, oid * objid, size_t * objidlength)
 {
+    static const char *errpre = "parse objid";
     /*
      * ASN.1 objid ::= 0x06 asnlength subidentifier {subidentifier}*
      * subidentifier ::= {leadingbyte}* lastbyte
@@ -1299,6 +1334,10 @@ asn_parse_objid(u_char * data,
     size_t          original_length = *objidlength;
 
     *type = *bufp++;
+    if (*type != ASN_OBJECT_ID) {
+        _asn_type_err(errpre, *type);
+        return NULL;
+    }
     bufp = asn_parse_length(bufp, &asn_length);
     if (_asn_parse_length_check("parse objid", bufp, data,
                                 asn_length, *datalength))
@@ -1673,6 +1712,10 @@ asn_parse_bitstring(u_char * data,
     u_long          asn_length;
 
     *type = *bufp++;
+    if (*type != ASN_BIT_STR) {
+        _asn_type_err(errpre, *type);
+        return NULL;
+    }
     bufp = asn_parse_length(bufp, &asn_length);
     if (_asn_parse_length_check(errpre, bufp, data,
                                 asn_length, *datalength))
@@ -1793,6 +1836,14 @@ asn_parse_unsigned_int64(u_char * data,
         return NULL;
     }
     *type = *bufp++;
+    if (*type != ASN_COUNTER64
+#ifdef NETSNMP_WITH_OPAQUE_SPECIAL_TYPES
+            && *type != ASN_OPAQUE_COUNTER64 && *type != ASN_OPAQUE_U64
+#endif
+            ) {
+        _asn_type_err(errpre, *type);
+        return NULL;
+    }
     bufp = asn_parse_length(bufp, &asn_length);
     if (_asn_parse_length_check
         (errpre, bufp, data, asn_length, *datalength))
@@ -2247,6 +2298,7 @@ asn_parse_float(u_char * data,
                 size_t * datalength,
                 u_char * type, float *floatp, size_t floatsize)
 {
+    static const char *errpre = "parse float";
     register u_char *bufp = data;
     u_long          asn_length;
     union {
@@ -2285,6 +2337,11 @@ asn_parse_float(u_char * data,
          * change type to Float 
          */
         *type = ASN_OPAQUE_FLOAT;
+    }
+
+    if (*type != ASN_OPAQUE_FLOAT) {
+        _asn_type_err(errpre, *type);
+        return NULL;
     }
 
     if (asn_length != sizeof(float)) {
@@ -2412,6 +2469,7 @@ asn_parse_double(u_char * data,
                  size_t * datalength,
                  u_char * type, double *doublep, size_t doublesize)
 {
+    static const char *errpre = "parse double";
     register u_char *bufp = data;
     u_long          asn_length;
     long            tmp;
@@ -2452,6 +2510,11 @@ asn_parse_double(u_char * data,
          * change type to Double 
          */
         *type = ASN_OPAQUE_DOUBLE;
+    }
+
+    if (*type != ASN_OPAQUE_DOUBLE) {
+        _asn_type_err(errpre, *type);
+        return NULL;
     }
 
     if (asn_length != sizeof(double)) {
