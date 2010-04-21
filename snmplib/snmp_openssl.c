@@ -10,6 +10,8 @@
 
 #include <openssl/evp.h>
 #include <openssl/ssl.h>
+#include <openssl/x509.h>
+#include <openssl/x509v3.h>
 #include <openssl/err.h>
 
 #include <net-snmp/library/snmp_debug.h>
@@ -171,6 +173,31 @@ netsnmp_openssl_cert_dump_names(X509 *ocert)
     }
 }
 
+void
+netsnmp_openssl_cert_dump_extensions(X509 *ocert)
+{
+    X509_EXTENSION  *extension;
+    const char      *extension_name;
+    int              i, num_extensions;
+
+    if (NULL == ocert)
+        return;
+
+    num_extensions = X509_get_ext_count(ocert);
+    DEBUGMSGT(("openssl:dump:extension", "%02d extensions\n", num_extensions));
+    for(i = 0; i < num_extensions; i++) {
+        extension = X509_get_ext(ocert, i);
+        extension_name =
+            OBJ_nid2sn(OBJ_obj2nid(X509_EXTENSION_get_object(extension)));
+        DEBUGMSGT(("openssl:dump:extension",
+                   "    %2d: %s\n", i, extension_name));
+        if (0 == strcmp(extension_name, "subjectAltName")) {
+            /* foo */
+        }
+    }
+   
+}
+
 /**
  * returns allocated pointer caller must free.
  */
@@ -226,6 +253,13 @@ netsnmp_openssl_cert_get_fingerprint(X509 *ocert, int alg)
 
     return result;
 }
+
+int
+netsnmp_openssl_cert_issued_by(X509 *issuer, X509 *cert)
+{
+    return (X509_check_issued(issuer, cert) == X509_V_OK);
+}
+
 
 void
 netsnmp_openssl_err_log(const char *prefix)

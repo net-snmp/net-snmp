@@ -10,6 +10,15 @@
 extern "C" {
 #endif
 
+    /*************************************************************************
+     *
+     * netsnmp_cert structures, defines and function definitions
+     *
+     *************************************************************************/
+
+void netsnmp_certs_init(void);
+void netsnmp_certs_shutdown(void);
+
     typedef struct netsnmp_cert_common_s {
         char           *dir;
         char           *filename;
@@ -31,6 +40,10 @@ extern "C" {
 
         X509           *ocert;
         netsnmp_key    *key;
+        struct netsnmp_cert_s *issuer_cert;
+
+        char           *issuer;
+        char           *subject;
         char           *fingerprint;
         char           *common_name;
         char           *san_rfc822;
@@ -49,7 +62,7 @@ extern "C" {
 #define NS_CERT_IDENTITY       0x0001
 #define NS_CERT_REMOTE_PEER    0x0002
 #define NS_CERT_RESERVED1      0x0004
-#define NS_CERT_RESERVED2      0x0008
+#define NS_CERT_CA             0x0008
 
 #define NS_CERTKEY_DEFAULT       0x000 /* get default from DS store */
 #define NS_CERTKEY_FILE          0x001 /* filename/full path */

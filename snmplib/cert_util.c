@@ -74,6 +74,7 @@
 #include <openssl/bio.h>
 #include <openssl/ssl.h>
 #include <openssl/err.h>
+#include <openssl/x509v3.h>
 #include <openssl/pkcs12.h>
 #include <net-snmp/library/snmp_openssl.h>
 #include <net-snmp/library/cert_util.h>
@@ -82,10 +83,14 @@ static netsnmp_container *_certs = NULL;
 static netsnmp_container *_keys = NULL;
 static struct snmp_enum_list *_certindexes = NULL;
 
+static void _setup_containers(void);
+
 static void _cert_indexes_load(void);
 static void _cert_free(netsnmp_cert *cert, void *context);
 static void _key_free(netsnmp_key *key, void *context);
 static int  _cert_compare(netsnmp_cert *lhs, netsnmp_cert *rhs);
+static int  _cert_sn_compare(netsnmp_cert *lhs, netsnmp_cert *rhs);
+static int  _cert_sn_ncompare(netsnmp_cert *lhs, netsnmp_cert *rhs);
 static int  _cert_cn_compare(netsnmp_cert *lhs, netsnmp_cert *rhs);
 static int  _cert_fn_compare(netsnmp_cert_common *lhs,
                              netsnmp_cert_common *rhs);
@@ -93,10 +98,12 @@ static int  _cert_fn_ncompare(netsnmp_cert_common *lhs,
                               netsnmp_cert_common *rhs);
 static void _find_partner(netsnmp_cert *cert, netsnmp_key *key);
 static netsnmp_void_array *_cert_find_subset_fn(const char *filename);
+static netsnmp_void_array *_cert_find_subset_sn(const char *subject);
 static netsnmp_void_array *_key_find_subset(const char *filename);
 static netsnmp_cert *_cert_find_fp(const char *fingerprint);
 static const char *_mode_str(u_char mode);
 static const char *_where_str(u_int what);
+void netsnmp_cert_dump_all(void);
 
 void netsnmp_cert_free(netsnmp_cert *cert);
 void netsnmp_key_free(netsnmp_key *key);
@@ -108,10 +115,22 @@ static int _time_filter(netsnmp_file *f, struct stat *idx);
 /** mode descriptions should match up with header */
 static const char _modes[][256] =
         {
-            "none", "identity", "remote_peer",
-            "identity+remote_peer", "reserved1",
-            "reserved1+identity", "reserved1+remote_peer",
-            "reserved1+identity+remote_peer", "reserved2"
+            "none",
+            "identity",
+            "remote_peer",
+            "identity+remote_peer",
+            "reserved1",
+            "reserved1+identity",
+            "reserved1+remote_peer",
+            "reserved1+identity+remote_peer",
+            "CA",
+            "CA+identity",
+            "CA+remote_peer",
+            "CA+identity+remote_peer",
+            "CA+reserved1",
+            "CA+reserved1+identity",
+            "CA+reserved1+remote_peer",
+            "CA+reserved1+identity+remote_peer",
         };
 
 /* #####################################################################
@@ -122,7 +141,6 @@ static const char _modes[][256] =
 void
 netsnmp_certs_init(void)
 {
-    netsnmp_container *additional_keys;
     netsnmp_iterator  *itr;
     netsnmp_key        *key;
 
@@ -135,52 +153,11 @@ netsnmp_certs_init(void)
 
     netsnmp_init_openssl();
 
-    _certs = netsnmp_container_find("certs:binary_array");
-    if (NULL == _certs) {
-        snmp_log(LOG_ERR, "could not create container for certificates\n");
-        return;
-    }
-    _certs->container_name = strdup("netsnmp certificates");
-    _certs->free_item = (netsnmp_container_obj_func*)_cert_free;
-    _certs->compare = (netsnmp_container_compare*)_cert_compare;
+    _setup_containers();
+    if (NULL == _certs)
+        return; /* error already logged */
 
-    /** additional keys: common name */
-    additional_keys = netsnmp_container_find("certs_cn:binary_array");
-    if (NULL == additional_keys) {
-        snmp_log(LOG_ERR, "could not create CN container for certificates\n");
-        netsnmp_certs_shutdown();
-        CONTAINER_FREE_ALL(_certs, NULL);
-        return;
-    }
-    additional_keys->container_name = strdup("certs_cn");
-    additional_keys->free_item = NULL;
-    additional_keys->compare = (netsnmp_container_compare*)_cert_cn_compare;
-    netsnmp_container_add_index(_certs, additional_keys);
-
-    /** additional keys: file name */
-    additional_keys = netsnmp_container_find("certs_fn:binary_array");
-    if (NULL == additional_keys) {
-        snmp_log(LOG_ERR, "could not create FN container for certificates\n");
-        netsnmp_certs_shutdown();
-        CONTAINER_FREE_ALL(_certs, NULL);
-        return;
-    }
-    additional_keys->container_name = strdup("certs_fn");
-    additional_keys->free_item = NULL;
-    additional_keys->compare = (netsnmp_container_compare*)_cert_fn_compare;
-    additional_keys->ncompare = (netsnmp_container_compare*)_cert_fn_ncompare;
-    netsnmp_container_add_index(_certs, additional_keys);
-
-    _keys = netsnmp_container_find("cert_keys:binary_array");
-    if (NULL == _keys) {
-        snmp_log(LOG_ERR, "could not create container for certificate keys\n");
-        CONTAINER_FREE_ALL(_certs, NULL);
-        return;
-    }
-    _keys->container_name = strdup("netsnmp certificate keys");
-    _keys->free_item = (netsnmp_container_obj_func*)_key_free;
-    _keys->compare = (netsnmp_container_compare*)_cert_fn_compare;
-
+    /** add certificate type mapping */
     se_add_pair_to_slist("cert_types", strdup("pem"), NS_CERT_TYPE_PEM);
     se_add_pair_to_slist("cert_types", strdup("crt"), NS_CERT_TYPE_DER);
     se_add_pair_to_slist("cert_types", strdup("cer"), NS_CERT_TYPE_DER);
@@ -196,28 +173,53 @@ netsnmp_certs_init(void)
     itr = CONTAINER_ITERATOR(_keys);
     if (NULL == itr) {
         snmp_log(LOG_ERR, "could not get iterator for keys\n");
-        CONTAINER_FREE_ALL(_certs, NULL);
-        CONTAINER_FREE(_certs);
-        CONTAINER_FREE_ALL(_keys, NULL);
-        CONTAINER_FREE(_keys);
-        _certs = _keys = NULL;
+        netsnmp_certs_shutdown();
         return;
     }
     key = ITERATOR_FIRST(itr);
     for( ; key; key = ITERATOR_NEXT(itr))
         _find_partner(NULL, key);
     ITERATOR_RELEASE(itr);
+
+#if 0
+    netsnmp_cert       *cert;
+
+    /** match up certs w/issuers */
+    itr = CONTAINER_ITERATOR(_certs);
+    if (NULL == itr) {
+        snmp_log(LOG_ERR, "could not get iterator for certs\n");
+        netsnmp_certs_shutdown();
+        return;
+    }
+    cert = ITERATOR_FIRST(itr);
+    for( ; cert; cert = ITERATOR_NEXT(itr))
+        if (cert->issuer)
+            _find_issuer(cert);
+    ITERATOR_RELEASE(itr);
+#endif
+    DEBUGIF("cert:dump") {
+        DEBUGMSGT(("cert:dump",
+                   "-------------------- Certificates -----------------\n"));
+        netsnmp_cert_dump_all();
+        DEBUGMSGT(("cert:dump",
+                   "------------------------ End ----------------------\n"));
+    }
 }
 
 void
 netsnmp_certs_shutdown(void)
 {
     DEBUGMSGT(("cert:util:shutdown","shutdown\n"));
-    CONTAINER_FREE_ALL(_certs, NULL);
-    CONTAINER_FREE(_certs);
-    CONTAINER_FREE_ALL(_keys, NULL);
-    CONTAINER_FREE(_keys);
-    _certs = _keys = NULL;
+    if (NULL != _certs) {
+        CONTAINER_FREE_ALL(_certs, NULL);
+        CONTAINER_FREE(_certs);
+        _certs = NULL;
+    }
+    if (NULL != _keys) {
+        CONTAINER_FREE_ALL(_keys, NULL);
+        CONTAINER_FREE(_keys);
+        _keys = NULL;
+    }
 }
 
 /* #####################################################################
@@ -225,9 +227,98 @@ netsnmp_certs_shutdown(void)
  * cert container functions
  */
 
+static netsnmp_container *
+_get_cert_container(const char *use)
+{
+    netsnmp_container *c;
+
+    c = netsnmp_container_find("certs:binary_array");
+    if (NULL == c) {
+        snmp_log(LOG_ERR, "could not create container for %s\n", use);
+        return NULL;
+    }
+    c->container_name = strdup(use);
+    c->free_item = (netsnmp_container_obj_func*)_cert_free;
+    c->compare = (netsnmp_container_compare*)_cert_compare;
+
+    return c;
+}
+
+static void
+_setup_containers(void)
+{
+    netsnmp_container *additional_keys;
+
+    _certs = _get_cert_container("netsnmp certificates");
+    if (NULL == _certs)
+        return;
+
+    /** additional keys: common name */
+    additional_keys = netsnmp_container_find("certs_cn:binary_array");
+    if (NULL == additional_keys) {
+        snmp_log(LOG_ERR, "could not create CN container for certificates\n");
+        netsnmp_certs_shutdown();
+        return;
+    }
+    additional_keys->container_name = strdup("certs_cn");
+    additional_keys->free_item = NULL;
+    additional_keys->compare = (netsnmp_container_compare*)_cert_cn_compare;
+    netsnmp_container_add_index(_certs, additional_keys);
+
+    /** additional keys: subject name */
+    additional_keys = netsnmp_container_find("certs_sn:binary_array");
+    if (NULL == additional_keys) {
+        snmp_log(LOG_ERR, "could not create SN container for certificates\n");
+        netsnmp_certs_shutdown();
+        return;
+    }
+    additional_keys->container_name = strdup("certs_sn");
+    additional_keys->free_item = NULL;
+    additional_keys->compare = (netsnmp_container_compare*)_cert_sn_compare;
+    additional_keys->ncompare = (netsnmp_container_compare*)_cert_sn_ncompare;
+    netsnmp_container_add_index(_certs, additional_keys);
+
+#if 0
+    /** additional keys: issuer name */
+    additional_keys = netismp_container_find("certs_is:binary_array");
+    if (NULL == additional_keys) {
+        ismp_log(LOG_ERR, "could not create IS container for certificates\n");
+        netismp_certs_shutdown();
+        return;
+    }
+    additional_keys->container_name = strdup("certs_is");
+    additional_keys->free_item = NULL;
+    additional_keys->compare = (netismp_container_compare*)_cert_is_compare;
+    netismp_container_add_index(_certs, additional_keys);
+#endif
+
+    /** additional keys: file name */
+    additional_keys = netsnmp_container_find("certs_fn:binary_array");
+    if (NULL == additional_keys) {
+        snmp_log(LOG_ERR, "could not create FN container for certificates\n");
+        netsnmp_certs_shutdown();
+        return;
+    }
+    additional_keys->container_name = strdup("certs_fn");
+    additional_keys->free_item = NULL;
+    additional_keys->compare = (netsnmp_container_compare*)_cert_fn_compare;
+    additional_keys->ncompare = (netsnmp_container_compare*)_cert_fn_ncompare;
+    netsnmp_container_add_index(_certs, additional_keys);
+
+    _keys = netsnmp_container_find("cert_keys:binary_array");
+    if (NULL == _keys) {
+        snmp_log(LOG_ERR, "could not create container for certificate keys\n");
+        netsnmp_certs_shutdown();
+        return;
+    }
+    _keys->container_name = strdup("netsnmp certificate keys");
+    _keys->free_item = (netsnmp_container_obj_func*)_key_free;
+    _keys->compare = (netsnmp_container_compare*)_cert_fn_compare;
+}
+
 static netsnmp_cert *
 _new_cert(const char *dirname, const char *filename, int type,
-          const char *fingerprint, const char *common_name)
+          const char *fingerprint, const char *common_name, const char *subject)
 {
     netsnmp_cert    *cert;
 
@@ -254,6 +345,8 @@ _new_cert(const char *dirname, const char *filename, int type,
         cert->fingerprint = strdup(fingerprint);
     if (common_name)
         cert->common_name = strdup(common_name);
+    if (subject)
+        cert->subject = strdup(subject);
 
     return cert;
 }
@@ -314,6 +407,8 @@ netsnmp_cert_free(netsnmp_cert *cert)
 
     SNMP_FREE(cert->info.dir);
     SNMP_FREE(cert->info.filename);
+    SNMP_FREE(cert->subject);
+    SNMP_FREE(cert->issuer);
     SNMP_FREE(cert->fingerprint);
     SNMP_FREE(cert->common_name);
     SNMP_FREE(cert->san_rfc822);
@@ -410,6 +505,32 @@ _cert_cn_compare(netsnmp_cert *lhs, netsnmp_cert *rhs)
 }
 
 static int
+_cert_sn_compare(netsnmp_cert *lhs, netsnmp_cert *rhs)
+{
+    int rc;
+    const char *lhsn, *rhsn;
+
+    netsnmp_assert((lhs != NULL) && (rhs != NULL));
+
+    if (NULL == lhs->subject)
+        lhsn = "";
+    else
+        lhsn = lhs->subject;
+    if (NULL == rhs->subject)
+        rhsn = "";
+    else
+        rhsn = rhs->subject;
+
+    rc = strcmp(lhsn, rhsn);
+    if (rc)
+        return rc;
+
+    /** in case of equal common names, sub-sort by path */
+    return _cert_path_compare((netsnmp_cert_common*)lhs,
+                              (netsnmp_cert_common*)rhs);
+}
+
+static int
 _cert_fn_compare(netsnmp_cert_common *lhs, netsnmp_cert_common *rhs)
 {
     int rc;
@@ -431,6 +552,15 @@ _cert_fn_ncompare(netsnmp_cert_common *lhs, netsnmp_cert_common *rhs)
     netsnmp_assert((lhs->filename != NULL) && (rhs->filename != NULL));
 
     return strncmp(lhs->filename, rhs->filename, strlen(rhs->filename));
+}
+
+static int
+_cert_sn_ncompare(netsnmp_cert *lhs, netsnmp_cert *rhs)
+{
+    netsnmp_assert((lhs != NULL) && (rhs != NULL));
+    netsnmp_assert((lhs->subject != NULL) && (rhs->subject != NULL));
+
+    return strncmp(lhs->subject, rhs->subject, strlen(rhs->subject));
 }
 
 static int
@@ -651,6 +781,7 @@ netsnmp_ocert_get(netsnmp_cert *cert)
     X509           *ocert = NULL;
     EVP_PKEY       *okey = NULL;
     char            file[SNMP_MAXPATH];
+    int             is_ca;
 
     if (NULL == cert)
         return NULL;
@@ -758,7 +889,34 @@ netsnmp_ocert_get(netsnmp_cert *cert)
     }
 
     cert->ocert = ocert;
+    /*
+     * X509_check_ca return codes:
+     * 0 not a CA
+     * 1 is a CA
+     * 2 basicConstraints absent so "maybe" a CA
+     * 3 basicConstraints absent but self signed V1.
+     * 4 basicConstraints absent but keyUsage present and keyCertSign asserted.
+     * 5 outdated Netscape Certificate Type CA extension.
+     */
+    is_ca = X509_check_ca(ocert);
+    if (1 == is_ca)
+        cert->info.allowed_uses |= NS_CERT_CA;
 
+    if (NULL == cert->subject) {
+        cert->subject = X509_NAME_oneline(X509_get_subject_name(ocert), NULL,
+                                          0);
+        DEBUGMSGT(("cert:add:subject", "subject name: %s\n", cert->subject));
+    }
+
+    if (NULL == cert->issuer) {
+        cert->issuer = X509_NAME_oneline(X509_get_issuer_name(ocert), NULL, 0);
+        if (strcmp(cert->subject, cert->issuer) == 0) {
+            free(cert->issuer);
+            cert->issuer = strdup("self-signed");
+        }
+        DEBUGMSGT(("cert:add:issuer", "CA issuer: %s\n", cert->issuer));
+    }
+    
     if (NULL == cert->fingerprint) {
         cert->fingerprint = netsnmp_openssl_cert_get_fingerprint(ocert,
                                                                  NS_HASH_SHA1);
@@ -770,7 +928,6 @@ netsnmp_ocert_get(netsnmp_cert *cert)
                                                                NULL);
         DEBUGMSGT(("cert:add:name","%s\n", cert->common_name));
     }
-    /* X509_NAME_oneline(X509_get_subject_name(x),buf,sizeof buf); */
 /*
   STACK *emlst;
   if (email == i)
@@ -824,6 +981,93 @@ netsnmp_okey_get(netsnmp_key  *key)
     BIO_vfree(keybio);
 
     return okey;
+}
+
+static netsnmp_cert *
+_find_issuer(netsnmp_cert *cert)
+{
+    netsnmp_void_array *matching;
+    netsnmp_cert       *candidate, *issuer = NULL;
+    int                 i;
+
+    if ((NULL == cert) || (NULL == cert->issuer))
+        return NULL;
+
+    /** find matching subject names */
+
+    matching = _cert_find_subset_sn(cert->issuer);
+    if (NULL == matching)
+        return NULL;
+
+    /** check each to see if it's the issuer */
+    for ( i=0; (NULL == issuer) && (i < matching->size); ++i) {
+        /** make sure we have ocert */
+        candidate = (netsnmp_cert*)matching->array[i];
+        if ((NULL == candidate->ocert) &&
+            (netsnmp_ocert_get(candidate) == NULL))
+            continue;
+
+        /** compare **/
+        if (netsnmp_openssl_cert_issued_by(candidate->ocert, cert->ocert))
+            issuer = candidate;
+    } /** candidate loop */
+
+    free(matching->array);
+    free(matching);
+
+    return issuer;
+}
+
+
+int
+netsnmp_cert_load_x509(netsnmp_cert *cert)
+{
+    int rc = 0;
+
+    /** load ocert */
+    if ((NULL == cert->ocert) && (netsnmp_ocert_get(cert) == NULL)) {
+        DEBUGMSGT(("cert:load:err", "couldn't load cert for %s\n",
+                   cert->info.filename));
+        rc = -1;
+    }
+
+    /** load key */
+    if ((NULL != cert->key) && (NULL == cert->key->okey) &&
+        (netsnmp_okey_get(cert->key) == NULL)) {
+        DEBUGMSGT(("cert:load:err", "couldn't load key for cert %s\n",
+                   cert->info.filename));
+        rc = -1;
+    }
+
+    /** make sure we have cert chain */
+    for (; cert && cert->issuer; cert = cert->issuer_cert) {
+        /** skip self signed */
+        if (strcmp(cert->issuer, "self-signed") == 0) {
+            netsnmp_assert(cert->issuer_cert == NULL);
+            break;
+        }
+        /** get issuer cert */
+        if (NULL == cert->issuer_cert) {
+            cert->issuer_cert =  _find_issuer(cert);
+            if (NULL == cert->issuer_cert) {
+                DEBUGMSGT(("cert:load:err",
+                           "couldn't load CA chain for cert %s\n",
+                           cert->info.filename));
+                rc = -1;
+                break;
+            }
+        }
+        /** get issuer ocert */
+        if ((NULL == cert->issuer_cert->ocert) &&
+            (netsnmp_ocert_get(cert->issuer_cert) == NULL)) {
+            DEBUGMSGT(("cert:load:err", "couldn't load cert chain for %s\n",
+                       cert->info.filename));
+            rc = -1;
+            break;
+        }
+    } /* cert CA for loop */
+
+    return rc;
 }
 
 static void
@@ -943,7 +1187,7 @@ _add_certfile(const char* dirname, const char* filename, FILE *index)
         }
     }
     else {
-        cert = _new_cert(dirname, filename, type, NULL, NULL);
+        cert = _new_cert(dirname, filename, type, NULL, NULL, NULL);
         if (NULL == cert)
             return -1;
         ocert = netsnmp_ocert_get(cert);
@@ -969,8 +1213,8 @@ _add_certfile(const char* dirname, const char* filename, FILE *index)
         /** fingerprint = 60 */
         /** common name / CN  = 64 */
         if (cert)
-            fprintf(index, "c:%s %d %s '%s'\n", filename, cert->info.type,
-                    cert->fingerprint, cert->common_name);
+            fprintf(index, "c:%s %d %s '%s' '%s'\n", filename, cert->info.type,
+                    cert->fingerprint, cert->common_name, cert->subject);
         else if (key)
             fprintf(index, "k:%s\n", filename);
     }
@@ -986,10 +1230,11 @@ _cert_read_index(const char *dirname, struct stat *dirstat)
     struct stat     idx_stat;
     char            tmpstr[SNMP_MAXPATH + 5], filename[NAME_MAX];
     char            fingerprint[60+1], common_name[64+1], type_str[15];
+    char            subject[SNMP_MAXBUF_SMALL];
     int             count = 0, type;
     netsnmp_cert    *cert;
     netsnmp_key     *key;
-    netsnmp_container *newer; 
+    netsnmp_container *newer, *found;
 
     netsnmp_assert(NULL != dirname);
 
@@ -1048,6 +1293,8 @@ _cert_read_index(const char *dirname, struct stat *dirstat)
         return -1;
     }
 
+    found = _get_cert_container(idxname);
+
     fgets(tmpstr, sizeof(tmpstr), index); /* Skip dir line */
     while (1) {
         if (NULL == fgets(tmpstr, sizeof(tmpstr), index))
@@ -1057,17 +1304,21 @@ _cert_read_index(const char *dirname, struct stat *dirstat)
             pos = &tmpstr[2];
             if ((NULL == (pos = copy_nword(pos, filename, sizeof(filename)))) ||
                 (NULL == (pos = copy_nword(pos, type_str, sizeof(type_str)))) ||
-                (NULL == (pos = copy_nword(pos, fingerprint, sizeof(fingerprint)))) ||
-                (NULL != copy_nword(pos, common_name, sizeof(common_name)))) {
+                (NULL == (pos = copy_nword(pos, fingerprint,
+                                           sizeof(fingerprint)))) ||
+                (NULL == (pos = copy_nword(pos, common_name,
+                                           sizeof(common_name)))) ||
+                (NULL != copy_nword(pos, subject, sizeof(subject)))) {
                 snmp_log(LOG_ERR, "_cert_read_index: error parsing line: %s\n",
                          tmpstr);
-                continue;
+                count = -1;
+                break;
             }
             type = atoi(type_str);
             cert = (void*)_new_cert(dirname, filename, type, fingerprint,
-                                    common_name);
-            if (cert && 0 == CONTAINER_INSERT(_certs, cert))
-            ++count;
+                                    common_name, subject);
+            if (cert && 0 == CONTAINER_INSERT(found, cert))
+                ++count;
             else {
                 DEBUGMSGT(("cert:index:add",
                            "error inserting cert into container\n"));
@@ -1098,7 +1349,24 @@ _cert_read_index(const char *dirname, struct stat *dirstat)
     fclose(index);
     SNMP_FREE(idxname);
 
-    DEBUGMSGT(("cert:index:parse","added %d certs from index\n", count));
+    if (count > 0) {
+        netsnmp_iterator  *itr = CONTAINER_ITERATOR(found);
+        if (NULL == itr) {
+            snmp_log(LOG_ERR, "could not get iterator for found certs\n");
+            count = -1;
+        }
+        else {
+            cert = ITERATOR_FIRST(itr);
+            for( ; cert; cert = ITERATOR_NEXT(itr))
+                CONTAINER_INSERT(_certs, cert);
+            ITERATOR_RELEASE(itr);
+            DEBUGMSGT(("cert:index:parse","added %d certs from index\n",
+                       count));
+        }
+    }
+    if (count < 0)
+        CONTAINER_FREE_ALL(found, NULL);
+    CONTAINER_FREE(found);
 
     return count;
 }
@@ -1238,26 +1506,36 @@ _cert_print(netsnmp_cert *c, void *context)
     if (NULL == c)
         return;
 
-    snmp_log(LOG_INFO, "cert found in %s %s\n", c->info.dir, c->info.filename);
-    snmp_log(LOG_INFO, "-type %d flags 0x%x (%s)\n",
+    snmp_log(LOG_INFO, "cert %s in %s\n", c->info.filename, c->info.dir);
+    snmp_log(LOG_INFO, "   type %d flags 0x%x (%s)\n",
              c->info.type, c->info.allowed_uses,
              _mode_str(c->info.allowed_uses));
     if (NS_CERT_TYPE_KEY == c->info.type) {
     }
     else {
+
+        if(c->subject) {
+            if (c->info.allowed_uses & NS_CERT_CA)
+                snmp_log(LOG_INFO, "   CA: %s\n", c->subject);
+            else
+                snmp_log(LOG_INFO, "   subject: %s\n", c->subject);
+        }
+        if(c->issuer)
+            snmp_log(LOG_INFO, "   issuer: %s\n", c->issuer);
         if(c->fingerprint)
-            snmp_log(LOG_INFO, "-cert fingerprint: %s\n", c->fingerprint);
-        if (c->common_name)
-            snmp_log(LOG_INFO, "-common_name %s\n", c->common_name);
+            snmp_log(LOG_INFO, "   fingerprint: %s\n", c->fingerprint);
+        /** CN found in subject, above
+         * if (c->common_name)
+         *   snmp_log(LOG_INFO, "   common_name %s\n", c->common_name); */
         if (c->san_rfc822)
-            snmp_log(LOG_INFO, "-san_rfc822 %s\n", c->san_rfc822);
+            snmp_log(LOG_INFO, "   san_rfc822 %s\n", c->san_rfc822);
         if (c->san_ipaddr)
-            snmp_log(LOG_INFO, "-san_ipaddr %s\n", c->san_ipaddr);
+            snmp_log(LOG_INFO, "   san_ipaddr %s\n", c->san_ipaddr);
         if (c->san_dnsname)
-            snmp_log(LOG_INFO, "-san_dnsname %s\n", c->san_dnsname);
+            snmp_log(LOG_INFO, "   san_dnsname %s\n", c->san_dnsname);
     }
 
-    /** netsnmp_openssl_cert_dump_names(c->ocert); */
+    netsnmp_openssl_cert_dump_names(c->ocert);
 
 }
 
@@ -1268,7 +1546,7 @@ _key_print(netsnmp_key *k, void *context)
         return;
 
     snmp_log(LOG_INFO, "key found in %s %s\n", k->info.dir, k->info.filename);
-    snmp_log(LOG_INFO, "-type %d flags 0x%x (%s)\n", k->info.type,
+    snmp_log(LOG_INFO, "   type %d flags 0x%x (%s)\n", k->info.type,
              k->info.allowed_uses, _mode_str(k->info.allowed_uses));
 }
 
@@ -1408,29 +1686,8 @@ netsnmp_cert_find(int what, int where, void *hint)
     }
     
     /** make sure we have the cert data */
-    if (NULL == result->ocert) {
-        netsnmp_ocert_get(result);
-        if (NULL == result->ocert) {
-            DEBUGMSGT(("result:find:err", "couldn't load cert for %s\n",
-                       result->info.filename));
-            return NULL;
-        }
-    }
-
-    /** load cert and key if needed */
-    if (NS_CERT_IDENTITY == what) {
-        netsnmp_assert(result->key);
-
-        /** make sure we have the key data */
-        if (NULL == result->key->okey) {
-            netsnmp_okey_get(result->key);
-            if (NULL == result->key->okey) {
-                DEBUGMSGT(("result:find:err", "couldn't load key for cert %s\n",
-                           result->info.filename));
-                return NULL;
-            }
-        }
-    }
+    if (netsnmp_cert_load_x509(result) < 0)
+        return NULL;
             
     return result;
 }
@@ -1594,6 +1851,27 @@ _cert_find_subset_fn(const char *filename)
     netsnmp_assert(fn_container);
 
     return _cert_find_subset_common(filename, fn_container);
+}
+
+static netsnmp_void_array *
+_cert_find_subset_sn(const char *subject)
+{
+    netsnmp_cert          search;
+    netsnmp_void_array   *matching;
+    netsnmp_container    *sn_container;
+
+    /** find subcontainer with subject as key */
+    sn_container = SUBCONTAINER_FIND(_certs, "certs_sn");
+    netsnmp_assert(sn_container);
+
+    memset(&search, 0x00, sizeof(search));    /* clear search key */
+
+    search.subject = NETSNMP_REMOVE_CONST(char*,subject);
+
+    matching = CONTAINER_GET_SUBSET(sn_container, &search);
+    DEBUGMSGT(("9:cert:subset:found", "%d matches\n", matching ?
+               matching->size : 0));
+    return matching;
 }
 
 static netsnmp_void_array *
