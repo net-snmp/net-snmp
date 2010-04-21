@@ -258,14 +258,20 @@ sslctx_client_setup(SSL_METHOD *method, _netsnmpTLSBaseData *tlsbase) {
         LOGANDDIE("failed to add peer to certificate store");
     }
 
-#if 0 /** XXX CAs? */
-    /* XXX: also need to match individual cert to indiv. host */
-
-    if(! SSL_CTX_load_verify_locations(the_ctx, certfile, NULL)) {
-        LOGANDDIE("failed to load truststore");
-        /* Handle failed load here */
+    /** add all the certs in the clients chain */
+    id_cert = id_cert->issuer_cert;
+    for (; id_cert; id_cert = id_cert->issuer_cert) {
+        if (NULL == id_cert->ocert) {
+            DEBUGMSGT(("sslctx_client", "issuer missing x509 cert!\n"));
+            continue;
+        }
+        if(! SSL_CTX_add_extra_chain_cert(the_ctx, id_cert->ocert)) {
+            LOGANDDIE("failed to load truststore");
+            /* Handle failed load here */
+        }
     }
 
+#if 0 /** XXX CAs? */
     if (!SSL_CTX_set_default_verify_paths(the_ctx)) {
         LOGANDDIE ("failed to set default verify path");
     }
