@@ -128,9 +128,6 @@
 #include <net-snmp/library/snmp_api.h>
 #include <net-snmp/library/callback.h>
 
-static void read_config_files_of_type(int when, struct config_files *ctmp);
-
-
 static int      config_errors;
 
 struct config_files *config_files = NULL;
@@ -1193,7 +1190,7 @@ read_config_files_in_path(const char *path, struct config_files *ctmp,
  *
  * EXITs if any 'config_errors' are logged while parsing config file lines.
  */
-static void
+void
 read_config_files_of_type(int when, struct config_files *ctmp)
 {
     const char     *confpath, *persfile, *envconfpath;
