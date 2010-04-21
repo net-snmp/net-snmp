@@ -34,6 +34,11 @@ generic files.
 .PP
 To avoid loading any host-specific config files set
 "dontLoadHostConfig true" in your snmp.conf file.
+.SH COMMAND-LINE OPTIONS
+All of the tokens described in this file can be used on the command
+line of Net-SNMP applications as well by prefixing them with "--".
+EG, specifying \fI--dontLoadHostConfig=true\fR on the command line will
+turn of loading of the host specific configuration files.
 .SH IMPORTANT NOTE
 Several of these directives may contain sensitive information
 (such as pass phrases).  Configuration files that include such
