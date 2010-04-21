@@ -1,3 +1,4 @@
+.\" -*- nroff -*-
 .\" Portions of this file are subject to the following copyright.  See
 .\" the Net-SNMP COPYING file for more details and other copyrights
 .\" that may apply:
@@ -45,7 +46,20 @@ with an SNMP capable network entity, an agent.  Individual
 applications typically (but not necessarily) take additional
 parameters that are given after the agent specification.  These
 parameters are documented in the manual pages for each application.
-
+.SH COMMAND-LINE CONFIG OPTIONS
+In addition to the options described in this manual page, all of the
+tokens described in the \fIsnmp.conf\fR and other .conf manual pages
+can be used on the command line of Net-SNMP applications as well by
+prefixing them with "--".  EG, specifying
+\fI--dontLoadHostConfig=true\fR on the command line will turn of
+loading of the host specific configuration files.
+.PP
+The snmp.conf file settings and the double-dash arguments over-ride
+the single-dash arguments.  So it's important to note that if
+single-dash arguments aren't working because you have settings in the
+\fIsnmp.conf\fR file that conflict with them then you'll need to use
+the longer-form double-dash arguments to successfully trump the
+\fIsnmp.conf\fR file settings.
 .SH OPTIONS
 .TP
 .BI "-3[MmKk]  0xHEXKEY"
