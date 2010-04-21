@@ -26,6 +26,14 @@ defVersion 2c
 Any connections set to connect to the hostname \fINAME\fR will use
 SNMPv2c.  Also see the \fItransport\fR token below for additional
 host-specific examples.
+.PP
+Host-specific configuration files are loaded at the time the
+connection is opened.  Thus they're generally loaded after all other
+configuration files and can be used to override settings from the
+generic files.
+.PP
+To avoid loading any host-specific config files set
+"dontLoadHostConfig true" in your snmp.conf file.
 .SH IMPORTANT NOTE
 Several of these directives may contain sensitive information
 (such as pass phrases).  Configuration files that include such
@@ -154,6 +162,10 @@ It should not normally be necessary to change this setting, as
 the encoding is basically the same in either case - but working
 backwards typically produces a slightly more efficient encoding,
 and hence a smaller network datagram.
+.IP "dontLoadHostConfig (1|yes|true|0|no|false)"
+Specifies whether or not the host-specific configuration files are
+loaded.  Set to "true" to turn off the loading of the host specific
+configuration files.
 .\"
 .\" XXX - It is probably about time to remove this choice!
 .\"
