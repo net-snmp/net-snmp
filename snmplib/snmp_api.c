@@ -821,6 +821,7 @@ init_snmp(const char *type)
     snmp_init_statistics();
     register_mib_handlers();
     register_default_handlers();
+    init_snmp_transport();
     init_snmpv3(type);
     init_snmp_alarm();
     init_snmp_enum(type);

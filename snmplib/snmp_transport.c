@@ -12,6 +12,8 @@
 #include <stdlib.h>
 #endif
 
+#include <ctype.h>
+
 #if HAVE_DMALLOC_H
 #include <dmalloc.h>
 #endif
@@ -58,6 +60,7 @@
 #endif
 #include <net-snmp/library/snmp_api.h>
 #include <net-snmp/library/snmp_service.h>
+#include <net-snmp/library/read_config.h>
 
 
 /*
@@ -91,6 +94,15 @@ static void     netsnmp_tdomain_dump(void);
 /*
  * Make a deep copy of an netsnmp_transport.  
  */
+
+void
+init_snmp_transport(void)
+{
+    netsnmp_ds_register_config(ASN_BOOLEAN,
+                               "snmp", "dontLoadHostConfig",
+                               NETSNMP_DS_LIBRARY_ID,
+                               NETSNMP_DS_LIB_DONT_LOAD_HOST_FILES);
+}
 
 netsnmp_transport *
 netsnmp_transport_copy(netsnmp_transport *t)
@@ -415,6 +427,19 @@ find_tdomain(const char* spec)
     return NULL;
 }
 
+int
+netsnmp_is_fqdn(const char *thename) {
+    netsnmp_assert_or_return(NULL != thename, 0);
+    while(*thename) {
+        if (*thename != '.' && !isupper(*thename) && !islower(*thename) &&
+            !isdigit(*thename)) {
+            return 0;
+        }
+        thename++;
+    }
+    return 1;
+}
+
 /*
  * Locate the appropriate transport domain and call the create function for
  * it.
@@ -429,12 +454,61 @@ netsnmp_tdomain_transport_full(const char *application,
     const char         *addr = NULL;
     const char * const *spec = NULL;
     int                 any_found = 0;
+    char buf[SNMP_MAXPATH];
 
     DEBUGMSGTL(("tdomain",
                 "tdomain_transport_full(\"%s\", \"%s\", %d, \"%s\", \"%s\")\n",
                 application, str ? str : "[NIL]", local,
                 default_domain ? default_domain : "[NIL]",
                 default_target ? default_target : "[NIL]"));
+
+    /* see if we can load a host-name specific set of conf files */
+    if (!netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID,
+                                NETSNMP_DS_LIB_DONT_LOAD_HOST_FILES) &&
+        netsnmp_is_fqdn(str)) {
+        static int have_added_handler = 0;
+        char *newhost;
+        struct config_line *config_handlers;
+        struct config_files file_names;
+        char *prev_hostname;
+
+        /* register a "transport" specifier */
+        if (!have_added_handler) {
+            netsnmp_ds_register_config(ASN_OCTET_STR,
+                                       "snmp", "transport",
+                                       NETSNMP_DS_LIBRARY_ID,
+                                       NETSNMP_DS_LIB_HOSTNAME);
+        }
+
+        /* we save on specific setting that we don't allow to change
+           from one transport creation to the next; ie, we don't want
+           the "transport" specifier to be a default.  It should be a
+           single invocation use only */
+        prev_hostname = netsnmp_ds_get_string(NETSNMP_DS_LIBRARY_ID,
+                                              NETSNMP_DS_LIB_HOSTNAME);
+        if (prev_hostname)
+            prev_hostname = strdup(prev_hostname);
+
+        /* read in the hosts/STRING.conf files */
+        config_handlers = read_config_get_handlers("snmp");
+        snprintf(buf, sizeof(buf)-1, "hosts/%s", str);
+        file_names.fileHeader = buf;
+        file_names.start = config_handlers;
+        file_names.next = NULL;
+        read_config_files_of_type(EITHER_CONFIG, &file_names);
+
+        if (NULL !=
+            (newhost = netsnmp_ds_get_string(NETSNMP_DS_LIBRARY_ID,
+                                             NETSNMP_DS_LIB_HOSTNAME))) {
+            strncpy(buf, newhost, sizeof(buf)-1);
+            str = buf;
+        }
+
+        netsnmp_ds_set_string(NETSNMP_DS_LIBRARY_ID,
+                              NETSNMP_DS_LIB_HOSTNAME,
+                              prev_hostname);
+        SNMP_FREE(prev_hostname);
+    }
 
     /* First try - assume that there is a domain in str (domain:target) */
 

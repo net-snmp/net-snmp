@@ -112,6 +112,7 @@ extern          "C" {
     char           *read_config_store_data_prefix(char prefix, int type,
                                                   char *storeto,
                                                   void *dataptr, size_t len);
+    void read_config_files_of_type(int when, struct config_files *ctmp);
     NETSNMP_IMPORT
     void            read_config_store(const char *type, const char *line);
     NETSNMP_IMPORT
@@ -145,6 +146,7 @@ extern          "C" {
     const char     *get_temp_file_pattern(void);
     NETSNMP_IMPORT
     void            handle_long_opt(const char *myoptarg);
+
 
 #ifdef __cplusplus
 }

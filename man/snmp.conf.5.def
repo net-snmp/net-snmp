@@ -13,6 +13,19 @@ In particular, \fCSYSCONFDIR/snmp/snmp.conf\fR is a common file,
 containing the settings shared by all users of the system.
 \fC~/.snmp/snmp.conf\fR is a personal file, with the settings
 specific to a particular user.
+.SH HOST-SPECIFIC FILES
+Host-specific files may also be loaded and will be searched for if a
+transport name is specified that matches a \fIPATH/hosts/HOST.conf\fR
+file.  For example, if you wanted a particular host to use SNMPv2c by
+default you could create a ~/.snmp/hosts/NAME.conf file and in it put:
+.RS
+.PP
+defVersion 2c
+.RE
+.PP
+Any connections set to connect to the hostname \fINAME\fR will use
+SNMPv2c.  Also see the \fItransport\fR token below for additional
+host-specific examples.
 .SH IMPORTANT NOTE
 Several of these directives may contain sensitive information
 (such as pass phrases).  Configuration files that include such
@@ -39,6 +52,22 @@ including a port number in the \fIAGENT\fR specification.
 See the \fIsnmpcmd(1)\fR manual page for more details.
 .IP
 If not specified, the default value for this token is 161.
+.IP "transport HOSTSPECIFIER"
+This special token should go into a hostname-specific configuration
+file in a \fIhosts\fR sub-directory.  For example if the file
+\fIhosts/foo.conf\fR exists in the search path it will be loaded if a
+transport name of \fIfoo\fR was used.  Within the foo.conf file you may
+put both general snmp.conf settings as well as a special
+\fItransport\fR string to specify the destination to connect to.  For
+example, putting:
+.RS
+.IP
+transport tcp:foo.example.com:9876
+.RE
+.IP
+in the \fIhosts/foo.conf\fR file will make applications referencing
+the \fIfoo\fR hostname (e.g. \fIsnmpget\fR) to actually connect via
+TCP to \fIfoo.exmaple.com\fR on port 9876.
 .IP "defVersion (1|2c|3)"
 defines the default version of SNMP to use.
 This can be overridden using the \fB-v\fR option.
@@ -339,10 +368,19 @@ Disables the use of DISPLAY-HINT information when parsing indices and
 values to set. Equivalent to
 .BR -Ih .
 .SH FILES
-SYSCONFDIR/snmp/snmp.conf,
-SYSCONFDIR/snmp/snmp.local.conf - common configuration settings
+.IP "System-wide configuration files:"
+SYSCONFDIR/snmp/snmp.conf
 .br
-~/.snmp/snmp.conf - user-specific configuration settings
+SYSCONFDIR/snmp/snmp.local.conf
+.IP "User-specific configuration settings:"
+$HOME/.snmp/snmp.conf
+.br
+$HOME/.snmp/snmp.local.conf
+.IP "Destination host specific files:
+SYSCONFDIR/snmp/hosts/HOSTNAME.conf
+.br
+$HOME/.snmp/hosts/HOSTNAME.conf
+
 .SH "SEE ALSO"
 snmp_config(5), read_config(3), snmpcmd(1).
 .\" Local Variables:
