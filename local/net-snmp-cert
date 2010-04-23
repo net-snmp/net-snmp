@@ -9,7 +9,7 @@ use Cwd qw(getcwd realpath);
 
 package NetSNMP::Cert;
 
-our $VERSION = '0.1.7b';
+our $VERSION = '0.1.9b';
 
 our $ERR          = -1;
 our $debug        = 0;
@@ -41,7 +41,7 @@ our @TLSDIRS     = ($CRTDIR, $NEWCRTDIR, $CADIR, $PRIVDIR);
 our @CRTSUFFIXES = qw(.pem .csr .der .crt);
 
 our @X509FMTS  = qw(text modulus serial subject_hash issuer_hash hash subject
-		      issuer startdate enddate dates fingerprint C);
+		    purpose issuer startdate enddate dates fingerprint C);
 
 sub dprint {
   my $str = shift;
@@ -205,68 +205,81 @@ sub version {
 
 sub usage {
   my $ret = (@_ ? shift : 1);
-  print "\nNet SNMP Certificate Management Tool: ";
-  print "$NetSNMP::Cert::PROG: [$NetSNMP::Cert::VERSION]\n\n";
-
-  print "\n   synopsis:\n";
-  print "      net-snmp-cert [--help|-?]\n";
-  print "      net-snmp-cert [--version|-V]\n";
-  print "      net-snmp-cert genca     [<flags>] [<dn-opts>]\n";
-  print "      net-snmp-cert gencert   [<flags>] [<dn-opts>] [<cert-opts>]\n";
-  print "      net-snmp-cert gencsr    [<flags>] [<dn-opts>]\n";
-  print "      net-snmp-cert signcsr   [<flags>] [<cert-opts>]\n";
-  print "      net-snmp-cert showcerts [<flags>] [<format-opts>] [<file>|<search-tag>]\n";
-  print "      net-snmp-cert showcas   [<flags>] [<format-opts>] [<file>|<search-tag>]\n";
-  print "\n   commands:\n";
-  print "\tgenca         -- generate a certificate authority certificate\n";
-  print "\tgencert       -- generate a certificate\n";
-  print "\tgencsr        -- generate a certificate signing request\n";
-  print "\tsigncsr       -- sign a certificate signing request\n";
-  print "\tshowcert      -- show a certificate\n";
-  print "\tshowca        -- show a certificate authority certificate\n";
-  print "\n   flags:\n";
-  print "\t-V, --version -- show version string and exit\n";
-  print "\t-D, --debug   -- raise debug level (-D -D for higher level)\n";
-  print "\t-I            -- non-interactive run (default interactive)\n";
-  print "\t-Q            -- non-verbose output (default verbose)\n";
-  print "\t-f, --cfgfile <file> -- config file (default net-snmp-cert.conf on path)\n";
-  print "\t-C, --cfgdir  <dir>  -- config dir (default location of config file)\n";
-  print "\t-T, --tlsdir  <dir>  -- tls dir (default location of certs, CA's, etc.)\n";
-  print "\t-t, --tag     <tag>  -- application tag (default 'snmp')\n";
-  print "\t-i, --identity <id>  -- identity to use from config\n";
-  print "\t--<cfg-param>[=<val>] -- additional config params\n";  
-  print "\n   certificate options (<cert-opts>):\n";
-  print "\t-a, --ca <ca>   -- CA certificate used to sign request\n";
-  print "\t-r, --csr <csr> -- certificate signing request\n";
-  print "\n   distinguished name options (<dn-opts>):\n";
-  print "\t-n, --cn <cn>             -- common name (CN)\n";
-  print "\t-e, --email <email>       -- email name\n";
-  print "\t-h, --host <host>         -- DNS host name, or IP address\n";
-  print "\t-o, --org <org>           -- organiztion name\n";
-  print "\t-c, --country <country>   -- country code (e.g., US)\n";
-  print "\t-s, --state <state>       -- state or province name\n";
-  print "\t-l, --locality <locality> -- locality name (e.g, town)\n";
-  print "\t-d, --days <days>         -- number of days certificate is valid\n";
-  print "\n   format options (<format-opts>): \n";
-  print "\t--text         -- full text description\n";
-  print "\t--subject      -- subject description\n";
-  print "\t--subject_hash -- hash of subject for indexing\n";
-  print "\t--issuer       -- issuer description\n";
-  print "\t--issuer_hash  -- hash of issuer for indexing\n";
-  print "\t--fingerprint  -- SHA1 digest of DER\n";
-  print "\t--serial       -- serial number\n";
-  print "\t--modulus      -- modulus of the public key\n";
-  print "\t--dates        -- start and end dates\n";
-  print "\t--purpose      -- displays allowed uses\n";
-  print "\t--C            -- C code description\n";
-  print "\n   examples: \n";
-  print "\tnet-snmp-cert genca --cn ca-net-snmp.org --days 1000\n";
-  print "\tnet-snmp-cert gencert -t snmpd --cn host.net-snmp.org\n";
-  print "\tnet-snmp-cert gencsr -t snmpapp\n";
-  print "\tnet-snmp-cert signcsr --ca ca-net-snmp.org --csr snmpapp\n";
-  print "\tnet-snmp-cert showcerts --subject --issuer --dates snmpapp\n";
-  print "\tnet-snmp-cert showcas --fingerprint --dates ca-net-snmp.org\n";
-  print "\tnet-snmp-cert genca -f .snmp/net-snmp-crt.conf -i nocadm -I\n\n";
+  print "\n   NAME:\n";
+  print "     $NetSNMP::Cert::PROG: [$NetSNMP::Cert::VERSION] - ";
+  print "Net-SNMP Certificate Management Tool\n";
+  print "\n   DESCRIPTION:\n";
+  print "     net-snmp-cert creates, signs, installs and displays X.509\n";
+  print "     certificates used in the operation of Net-SNMP/(D)TLS.\n";
+  print "\n   SYNOPSIS:\n";
+  print "     net-snmp-cert [--help|-?]\n";
+  print "     net-snmp-cert [--version|-V]\n";
+  print "     net-snmp-cert showca   [<flags>] [<format-opts>] [<file>|<search-tag>]\n";
+  print "     net-snmp-cert showcert [<flags>] [<format-opts>] [<file>|<search-tag>]\n";
+  print "     net-snmp-cert genca    [<flags>] [<dn-opts>]\n";
+  print "     net-snmp-cert gencert  [<flags>] [<dn-opts>] [<cert-opts>]\n";
+  print "     net-snmp-cert gencsr   [<flags>] [<dn-opts>]\n";
+  print "     net-snmp-cert signcsr  [<flags>] [<cert-opts>]\n";
+  print "\n   COMMANDS:\n";
+  print "     showca,\n";
+  print "     showcert -- show CA or identity certificate(s). may pass fully qualified\n";
+  print "                 file or directory name, or a search-tag which prefix matches\n";
+  print "                 installed CA or identity certificate file name(s)\n";
+  print "                 see FORMAT OPTIONS to specify output format\n\n";
+  print "     genca    -- generate a self-signed CA certificate suitable for signing\n";
+  print "                 other certificates\n\n";
+  print "     gencert  -- generate a self-signed certificate, or signed with a CA\n";
+  print "                 specified with --ca <ca>\n\n";
+  print "     gencsr   -- generate a certificate signing request\n\n";
+  print "     signcsr  -- sign a certificate signing request specified by --csr <csr>,\n";
+  print "                 signed with the CA certificate specified by --ca <ca>\n";
+  print "\n   FLAGS:\n";
+  print "     -?, --help            -- show this text and exit\n";
+  print "     -V, --version         -- show version string and exit\n";
+  print "     -D, --debug           -- raise debug level (-D -D for higher level)\n";
+  print "     -I, --nointeractive   -- non-interactive run (default interactive)\n";
+  print "     -Q, --noverbose       -- non-verbose output (default verbose)\n";
+  print "     -C, --cfgdir   <dir>  -- configuration dir (see man(5) snmp_config)\n";
+  print "     -T, --tlsdir   <dir>  -- root for cert storage (default <cfgdir>/tls)\n";
+  print "     -f, --cfgfile  <file> -- config (default <cfgdir>/net-snmp-cert.conf)\n";
+  print "     -i, --identity <id>   -- identity to use from config\n";
+  print "     -t, --tag      <tag>  -- application tag (default 'snmp')\n";
+  print "     --<cfg-param>[=<val>] -- additional config params\n";  
+  print "\n   CERTIFICATE OPTIONS (<cert-opts>):\n";
+  print "     -a, --ca <ca>         -- CA certificate used to sign request\n";
+  print "     -r, --csr <csr>       -- certificate signing request\n";
+  print "\n   DISTINGUISHED NAME OPTIONS (<dn-opts>):\n";
+  print "     -e, --email <email>       -- email name\n";
+  print "     -h, --host <host>         -- DNS host name, or IP address\n";
+  print "     -n, --cn <cn>             -- common name (CN)\n";
+  print "     -o, --org <org>           -- organiztion name\n";
+  print "     -u, --unit <unit>         -- organiztion unit name\n";
+  print "     -c, --country <country>   -- country code (e.g., US)\n";
+  print "     -p, --province <province> -- province name (synomynous w/ state)\n";
+  print "     -p, --state <state>       -- state name (synomynous w/ province)\n";
+  print "     -l, --locality <locality> -- locality name (e.g, town)\n";
+  print "     -s, --san <san>           -- subjectAltName (e.g., DNS:net-snmp.org)\n";
+  print "     -d, --days <days>         -- number of days certificate is valid\n";
+  print "\n   FORMAT OPTIONS (<format-opts>): \n";
+  print "     --text         -- full text description\n";
+  print "     --subject      -- subject description\n";
+  print "     --subject_hash -- hash of subject for indexing\n";
+  print "     --issuer       -- issuer description\n";
+  print "     --issuer_hash  -- hash of issuer for indexing\n";
+  print "     --fingerprint  -- SHA1 digest of DER\n";
+  print "     --serial       -- serial number\n";
+  print "     --modulus      -- modulus of the public key\n";
+  print "     --dates        -- start and end dates\n";
+  print "     --purpose      -- displays allowed uses\n";
+  print "     --C            -- C code description\n";
+  print "\n   EXAMPLES: \n";
+  print "     net-snmp-cert genca --cn ca-net-snmp.org --days 1000\n";
+  print "     net-snmp-cert gencert -t snmpd --cn host.net-snmp.org\n";
+  print "     net-snmp-cert gencsr -t snmpapp\n";
+  print "     net-snmp-cert signcsr --ca ca-net-snmp.org --csr snmpapp\n";
+  print "     net-snmp-cert showcerts --subject --issuer --dates snmpapp\n";
+  print "     net-snmp-cert showcas --fingerprint --dates ca-net-snmp.org\n";
+  print "     net-snmp-cert genca -f .snmp/net-snmp-cert.conf -i nocadm -I\n\n";
 
   exit $ret;
 }
@@ -385,39 +398,6 @@ sub x509_format {
   return $fmt;
 }
 
-sub opensslEnv {
-  my $app = shift;
-  my $config = $app->{config};
-  my $opts = $app->{OPTS};
-
-  my $cn = shift;
-  my $days = shift;
-
-  my $name = $config->inherit("name");
-  my $host = $config->inherit("host");
-  my $email = $config->inherit("email");
-  my $country = $config->inherit("country");
-  my $state = $config->inherit("state");
-  my $locality = $config->inherit("locality");
-  my $org = $config->inherit("org");
-  my $org_unit = $config->inherit("orgUnit");
-  my $md = $config->inherit("msgDigest");
-  my $ksize = $config->inherit("keySize");
-
-  my $env;
-
-  $env .= " KSIZE=$ksize" if defined $ksize;
-  $env .= " MD=$md" if defined $md;
-  $env .= " COUNTRY=$country" if defined $country;
-  $env .= " STATE=$state" if defined $state;
-  $env .= " LOCALITY=$locality" if defined $locality;
-  $env .= " ORG=$org" if defined $org;
-  $env .= " ORG_UNIT=$org_unit" if defined $org_unit;
-  $env .= " EMAIL=$email" if defined $email;
-
-  return $env;
-}
-
 sub make_openssl_conf {
   my $file = shift;
   return if -r $file;
@@ -443,7 +423,7 @@ STATE		= California
 LOCALITY	= Davis
 ORG		= Net-SNMP Developers
 ORG_UNIT	= SNMP-TLS
-
+SAN             = email:copy
 DAYS            = 365
 CRLDAYS         = 30
 
@@ -489,8 +469,8 @@ default_ca	= CA_default		# The default ca section
 # certificate	= $ca_certs_dir/$ENV::TAG.crt 	# CA certificate so sign with
 name_opt 	= ca_default		# Subject Name options
 cert_opt 	= ca_default		# Certificate field options
-
 policy		= policy_match
+copy_extensions = copy                  # copy v3 extensions (subjectAltName)
 
 # For the CA policy
 [ policy_match ]
@@ -517,11 +497,9 @@ emailAddress		= optional
 [ req ]
 default_bits		= $ENV::KSIZE
 default_md		= $ENV::MD
-#default_keyfile 	= $key_dir/$ENV::TAG.key
 distinguished_name	= req_distinguished_name
 string_mask 		= MASK:0x2002
-extensions		= v3_req
-x509_extensions		= v3_ca	# extentions used for self signed cert
+req_extensions		= v3_req
 
 [ req_distinguished_name ]
 countryName			= Country Name (2 letter code)
@@ -554,6 +532,9 @@ emailAddress_default            = $ENV::EMAIL
 basicConstraints = CA:FALSE
 keyUsage = nonRepudiation, digitalSignature, keyEncipherment
 
+# Import the email address and/or specified SANs.
+subjectAltName = $ENV::SAN
+
 [ v3_ca ]
 # Extensions to add to a CA certificate
 basicConstraints = CA:TRUE
@@ -573,13 +554,6 @@ nsComment = "OpenSSL Generated Certificate(net-snmp)"
 # PKIX recommendations harmless if included in all certificates.
 subjectKeyIdentifier = hash
 authorityKeyIdentifier = keyid,issuer
-
-# This stuff is for subjectAltName and issuerAltname.
-# Import the email address.
-# subjectAltName=email:copy
-# An alternative to produce certificates that aren't
-# deprecated according to PKIX.
-# subjectAltName=email:move
 
 # Copy subject details
 # issuerAltName=issuer:copy
@@ -849,7 +823,7 @@ sub parseArgs {
 
   $opts->{cmd} = shift(@args) if $args[0] !~ /^\s*-/;
 
-  GetOptionsFromArray(\@args, $opts, 'help|?', 'version|V', 'debug|d+',
+  GetOptionsFromArray(\@args, $opts, 'help|?', 'version|V', 'debug|D+',
 		      'interactive!', 'I', 'verbose!', 'Q',
 		      'cfgfile|f=s', 'cfgdir|C=s', 'tlsdir|tlsDir|T=s', 
 		      'apptag|t=s', 'identity|i=s');
@@ -936,9 +910,13 @@ sub opensslEnv {
   my $state = $config->inherit("state");
   my $locality = $config->inherit("locality");
   my $org = $config->inherit("org");
-  my $org_unit = $config->inherit("orgUnit");
+  my $org_unit = $config->inherit("unit") || $config->inherit("orgUnit");
+  my $san;
   my $md = $config->inherit("msgDigest");
   my $ksize = $config->inherit("keySize");
+
+  $san = join(', ',@{$config->inherit("subjectAltName")}) if ref $config->inherit("subjectAltName");
+  $san = join(', ',@{$config->inherit("san")}) if ref $config->inherit("san");
 
   my $env;
 
@@ -951,6 +929,7 @@ sub opensslEnv {
   $env .= " ORG=$org" if defined $org;
   $env .= " ORG_UNIT=$org_unit" if defined $org_unit;
   $env .= " EMAIL=$email" if defined $email;
+  $env .= " SAN=$san" if defined $san;
   $env .= " DAYS=$days" if defined $days;
 
   NetSNMP::Cert::dprint("opensslEnv: $env\n", $opts);
@@ -997,7 +976,7 @@ sub genCert {
   my $env = $app->opensslEnv($cn, $days);
   
   # XXX - must handle output name collision
-  my $cmd = "$env openssl req -new -x509 -nodes -days $days -batch -keyout $NetSNMP::Cert::PRIVDIR/$apptag.key -out $NetSNMP::Cert::CRTDIR/$apptag.crt -config $NetSNMP::Cert::SSLCFG";
+  my $cmd = "$env openssl req -new -x509 -extensions v3_req -nodes -days $days -batch -keyout $NetSNMP::Cert::PRIVDIR/$apptag.key -out $NetSNMP::Cert::CRTDIR/$apptag.crt -config $NetSNMP::Cert::SSLCFG";
 
   NetSNMP::Cert::dprint("genCert: $cmd\n", $opts);
 
@@ -1032,7 +1011,7 @@ sub genCsr {
   my $ret = system("$cmd $opts->{out} $opts->{err}");
 
   NetSNMP::Cert::vprint("Certificate Signing Request Generated:\n", $opts);
-  NetSNMP::Cert::vprint("  $NetSNMP::Cert::CRTDIR/$apptag.crt\n", $opts);
+  NetSNMP::Cert::vprint("  $NetSNMP::Cert::CRTDIR/$apptag.csr\n", $opts);
   NetSNMP::Cert::vprint("  $NetSNMP::Cert::PRIVDIR/$apptag.key\n", $opts);
 
   return $ret;
@@ -1128,8 +1107,8 @@ sub run {
   NetSNMP::Cert::dprint("command:     $cmdstr\n", $opts);
   
   GetOptionsFromArray(\@{$opts->{cmdargs}}, $opts, 'ca|a=s', 'csr|r=s',
-		      'cn|n=s', 'email|e=s', 'host|h=s', 'org|o=s',
-		      'country|c=s', 'state|s=s', 'locality|l=s', 'days|d=s',
+		      'cn|n=s', 'email|e=s', 'host|h=s', 'san|s=s@', 'org|o=s', 'unit|u=s',
+		      'country|c=s', 'state|province|p=s', 'locality|l=s', 'days|d=s',
 		     @NetSNMP::Cert::X509FMTS);
 
   # convert ca and/or csr args if present
