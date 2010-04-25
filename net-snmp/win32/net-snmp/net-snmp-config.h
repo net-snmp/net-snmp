@@ -1420,15 +1420,17 @@
     available.  */
 /* #undef NETSNMP_TRANSPORT_IPX_DOMAIN */
 
-/* XXX do not modify. change the NETSNMP_ENABLE_IPV6 define instead */
 /*  This is defined if support for the UDP/IPv6 transport domain is
     available.  */
-/* #undef NETSNMP_TRANSPORT_UDPIPV6_DOMAIN */
+#ifdef NETSNMP_ENABLE_IPV6
+#define NETSNMP_TRANSPORT_UDPIPV6_DOMAIN 1
+#endif
 
-/* XXX do not modify. change the NETSNMP_ENABLE_IPV6 define instead */
 /*  This is defined if support for the TCP/IPv6 transport domain is
     available.  */
-/* #undef NETSNMP_TRANSPORT_TCPIPV6_DOMAIN */
+#ifdef NETSNMP_ENABLE_IPV6
+#define NETSNMP_TRANSPORT_TCPIPV6_DOMAIN 1
+#endif
 
 /* define this if the USM security module is available */
 #define NETSNMP_SECMOD_USM 1

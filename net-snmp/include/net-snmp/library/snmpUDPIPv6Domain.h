@@ -52,7 +52,7 @@ int             netsnmp_udp6_getSecName(void *opaque, int olength,
  * "Constructor" for transport domain object.  
  */
 
-void            netsnmp_udp6_ctor(void);
+NETSNMP_IMPORT void netsnmp_udpipv6_ctor(void);
 
 #ifdef __cplusplus
 }

@@ -28,7 +28,7 @@ netsnmp_transport *netsnmp_tcp6_transport(struct sockaddr_in6 *addr,
  * "Constructor" for transport domain object.  
  */
 
-void            netsnmp_tcp6_ctor(void);
+NETSNMP_IMPORT void     netsnmp_tcpipv6_ctor(void);
 
 #ifdef __cplusplus
 }
