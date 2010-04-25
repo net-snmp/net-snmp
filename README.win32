@@ -233,6 +233,8 @@ Net-SNMP instead of SNMP by modifying the registry.  See Microsoft article
 Compiling Net-SNMP with the winExtDLL extension (MSVC)
 ------------------------------------------------------
 
+When building with MSVC 6, the Microsoft Platform SDK is required.
+
 Configure / nmake:
 
 -add --with-winextdll to the Configure command line.
