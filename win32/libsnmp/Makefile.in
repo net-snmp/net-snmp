@@ -2,6 +2,7 @@ PROGNAME=
 CFG=
 OUTDIR=
 INTDIR=
+SDK=
 
 !IF "$(OS)" == "Windows_NT"
 NULL=
@@ -47,15 +48,12 @@ LIB32_OBJS= \
 	"$(INTDIR)\snmpCallbackDomain.obj" \
 	"$(INTDIR)\snmpIPBaseDomain.obj" \
 	"$(INTDIR)\snmpIPv4BaseDomain.obj" \
-	"$(INTDIR)\snmpIPv6BaseDomain.obj" \
 	"$(INTDIR)\snmpSocketBaseDomain.obj" \
 	"$(INTDIR)\snmpTCPBaseDomain.obj" \
 	"$(INTDIR)\snmpTCPDomain.obj" \
-	"$(INTDIR)\snmpTCPIPv6Domain.obj" \
 	"$(INTDIR)\snmpUDPBaseDomain.obj" \
 	"$(INTDIR)\snmpUDPDomain.obj" \
 	"$(INTDIR)\snmpUDPIPv4BaseDomain.obj" \
-	"$(INTDIR)\snmpUDPIPv6Domain.obj" \
 	"$(INTDIR)\snmp_alarm.obj" \
 	"$(INTDIR)\snmp_api.obj" \
 	"$(INTDIR)\snmp_auth.obj" \
@@ -78,6 +76,12 @@ LIB32_OBJS= \
 	"$(INTDIR)\ucd_compat.obj" \
 	"$(INTDIR)\vacm.obj" \
 	"$(INTDIR)\winpipe.obj"
+!IF "$(SDK)" == "true"
+LIB32_OBJS=$(LIB32_OBJS)\
+	"$(INTDIR)\snmpIPv6BaseDomain.obj" \
+	"$(INTDIR)\snmpTCPIPv6Domain.obj" \
+	"$(INTDIR)\snmpUDPIPv6Domain.obj"
+!ENDIF
 
 CLEAN :
 	-@for %f in $(LIB32_OBJS) do erase %%f
