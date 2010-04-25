@@ -129,6 +129,7 @@ LIB32_OBJS= $(LIB32_OBJS) \
 	"$(INTDIR)\interfaces.obj" \
 	"$(INTDIR)\ip.obj" \
 	"$(INTDIR)\ipAddr.obj" \
+	"$(INTDIR)\notification_log.obj" \
 	"$(INTDIR)\route_write.obj" \
 	"$(INTDIR)\tcp.obj" \
 	"$(INTDIR)\tcpTable.obj" \
@@ -359,6 +360,12 @@ SOURCE=..\..\agent\mibgroup\snmpv3\usmUser.c
 SOURCE=..\..\agent\mibgroup\notification\snmpNotifyFilterProfileTable.c
 
 "$(INTDIR)\snmpNotifyFilterProfileTable.obj" : $(SOURCE) "$(INTDIR)"
+	$(CPP) $(CPP_PROJ) $(SOURCE)
+
+
+SOURCE="..\..\agent\mibgroup\notification-log-mib\notification_log.c"
+
+"$(INTDIR)\notification_log.obj" : $(SOURCE) "$(INTDIR)"
 	$(CPP) $(CPP_PROJ) $(SOURCE)
 
 
