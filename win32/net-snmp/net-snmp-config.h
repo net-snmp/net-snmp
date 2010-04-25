@@ -32,10 +32,15 @@
 /* #undef NETSNMP_ENABLE_IPV6 */
 
 /* Only use Windows API functions available on Windows 2000 SP4 or later.  
- * We need at least SP1 for some IPv6 defines in ws2ipdef.h
+ * We need at least SP1 for some IPv6 defines in ws2ipdef.h.
+ * Only define _WIN32_WINNT when not being compiled with MSVC 6 without PSDK
+ * because there is a bug in the MSVC 6 header <winsock.h> that causes
+ * inclusion of <winsock2.h>.
  */
+#if defined(HAVE_WIN32_PLATFORM_SDK) || !defined(_MSC_VER) || _MSC_VER > 1200
 #define _WIN32_WINNT 0x500 /*_WIN32_WINNT_WIN2K*/
 #define NTDDI_VERSION 0x05000400 /* NTDDI_WIN2KSP4 */
+#endif
 
 #define INSTALL_BASE "c:/usr"
 
