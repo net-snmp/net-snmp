@@ -2,7 +2,6 @@
  * readdir() replacement for MSVC.
  */
 
-#define WIN32_LEAN_AND_MEAN
 #define WIN32IO_IS_STDIO
 
 #include <net-snmp/net-snmp-config.h>
