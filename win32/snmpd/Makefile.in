@@ -72,9 +72,6 @@ LINK32_OBJS= \
 	"$(INTDIR)\snmpd.obj" \
 	"$(INTDIR)\winservice.obj" \
 	"$(INTDIR)\winservice.res"
-!IF "$(SDK)" == "true"
-LINK32_OBJS= $(LINK32_OBJS) "$(INTDIR)\notification_log.obj"
-!ENDIF
 
 CLEAN :
 	-@for %f in ($(LINK32_OBJS)) do erase %%f
@@ -131,9 +128,3 @@ SOURCE=..\..\snmplib\winservice.rc
 
 "$(INTDIR)\winservice.res" : $(SOURCE) "$(INTDIR)"
 	$(RSC) $(RSC_PROJ) /i "..\..\snmplib" $(SOURCE)
-
-
-SOURCE="..\..\agent\mibgroup\notification-log-mib\notification_log.c"
-
-"$(INTDIR)\notification_log.obj" : $(SOURCE) "$(INTDIR)"
-	$(CPP) $(CPP_PROJ) $(SOURCE)

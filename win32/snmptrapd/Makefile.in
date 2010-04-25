@@ -210,25 +210,6 @@ LINK32_OBJS= \
 !ENDIF 
 
 
-!IF "$(CFG)" == "release" || "$(CFG)" == "debug"
-SOURCE=..\..\agent\mibgroup\notification-log-mib\notification_log.c
-
-!IF  "$(CFG)" == "release"
-
-
-"$(INTDIR)\notification_log.obj" : $(SOURCE) "$(INTDIR)"
-	$(CPP) $(CPP_PROJ) $(SOURCE)
-
-
-!ELSEIF  "$(CFG)" == "debug"
-
-
-"$(INTDIR)\notification_log.obj"	"$(INTDIR)\notification_log.sbr" : $(SOURCE) "$(INTDIR)"
-	$(CPP) $(CPP_PROJ) $(SOURCE)
-
-
-!ENDIF 
-
 SOURCE=..\..\apps\$(PROGNAME).c
 
 !IF  "$(CFG)" == "release"
@@ -318,7 +299,3 @@ SOURCE=..\..\snmplib\winservice.rc
 
 
 !ENDIF 
-
-
-!ENDIF 
-
