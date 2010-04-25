@@ -25,7 +25,7 @@
  * Cygwin
  * MinGW 
  */
-#define HAVE_WIN32_PLATFORM_SDK
+/* #undef HAVE_WIN32_PLATFORM_SDK */
 
 /* Define NETSNMP_ENABLE_IPV6 to enable IPv6.  IPv6 is only available on
  * Windows XP and higher.  */
