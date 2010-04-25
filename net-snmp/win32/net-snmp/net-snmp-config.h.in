@@ -28,7 +28,7 @@
  * Microsoft Visual Studio.Net 2002
  * Microsoft Visual Studio.Net 2003
  */
-#define HAVE_WIN32_PLATFORM_SDK 1
+/* #undef HAVE_WIN32_PLATFORM_SDK */
 
 /* Define NETSNMP_ENABLE_IPV6 to enable IPv6.  IPv6 is only available on
  * Windows XP and higher.  */
