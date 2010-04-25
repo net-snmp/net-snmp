@@ -187,7 +187,7 @@ To see what Windows modules are being loaded, you can shut down the
 service and then run snmpd.exe from the command line with winExtDLL 
 debugging enabled using (all on one line):
 
- snmpd.exe -I-udp,udpTable,tcp,tcpTable,icmp,ip,interfaces,system_mib,
+ snmpd.exe -Lo -I-udp,udpTable,tcp,tcpTable,icmp,ip,interfaces,system_mib,
  sysORTable -DwinExtDLL
 
 The Windows DLL snmpmib.dll (SNMPMIB) contains SNMP traffic statistics
@@ -233,7 +233,7 @@ Net-SNMP instead of SNMP by modifying the registry.  See Microsoft article
 Compiling Net-SNMP with the winExtDLL extension (MSVC)
 ------------------------------------------------------
 
-Microsoft PSDK required.
+When building with MSVC 6, the Microsoft Platform SDK is required.
 
 Configure / nmake:
 
@@ -241,21 +241,9 @@ Configure / nmake:
 
 Workspace:
 
--modify win32\net-snmp\net-snmp-config.h and add:
+-in file win32\net-snmp\net-snmp-config.h modify
+ /* #undef USING_WINEXTDLL_MODULE */ into the following:
  #define USING_WINEXTDLL_MODULE 1
-
--modify win32\netsnmpmibssdk\netsnmpmibssdk.dsp:
- uncomment winExtDLL lines
-
- add to lines that contain # ADD LIB32 (line that contains iphlpapi.lib): 
-  MgmtAPI.lib snmpapi.lib 
- 
- add near the bottom of the file:
-
-  # Begin Source File
-
-  SOURCE=..\..\agent\mibgroup\winExtDLL.c
-  # End Source File
 
 
 ***************************************************************************
@@ -549,17 +537,9 @@ steps to build using build.bat:
 2.  Initialize the Visual Studio build environment by running VCVARS32.bat
     which can be found in the bin folder of your Visual Studio install folder.
 
-3. If you are using MS VC++ 6.0, edit the win32\libsnmp_dll\libsnmp.def file.  Change:
+3.  Run win32\build.bat
 
-   ;        strtoull
-
-    to:
-
-           strtoull
-
-4.  Run win32\build.bat
-
-5.  The following screen will appear:
+4.  The following screen will appear:
 
     Net-SNMP build and install options
     ==================================
@@ -588,7 +568,7 @@ steps to build using build.bat:
 
     Select option to set / toggle:  
 
-6.  Toggle the options on and off as desired by typing the line number 
+5.  Toggle the options on and off as desired by typing the line number 
     followed by <enter>.  
 
     To compile with OpenSSL, the OpenSSL library and header files must 
@@ -608,7 +588,7 @@ steps to build using build.bat:
 
     When you are ready to build, type f <enter>
 
-7.  Building will begin.  Following is a sample screen shot of a quiet build:
+6.  Building will begin.  Following is a sample screen shot of a quiet build:
 
     Building...
     
@@ -630,7 +610,7 @@ steps to build using build.bat:
     
     Done!
 
-8.  If the folder that Net-SNMP was installed to is ever changed, modify the 
+7.  If the folder that Net-SNMP was installed to is ever changed, modify the 
     system environment variables or registry keys as explained in the 
     'Configuration_Overview.html' file located in win32/dist/htmlhelp.
 
@@ -655,20 +635,12 @@ first by the Configure script.  Following are sample steps to:
 2.  Initialize the Visual Studio build environment by running VCVARS32.bat
     which can be found in the bin folder of your Visual Studio install folder.
 
-3. If you are using MS VC++ 6.0, edit the win32\libsnmp_dll\libsnmp.def file.  Change:
-
-   ;        strtoull
-
-    to:
-
-           strtoull
-
-4.  Type (all on one line):
+3.  Type (all on one line):
 
       perl Configure --with-sdk --with-ssl --config=debug
            --prefix="c:/usr"
 
-5.  The make files will be generated, and a configuration summary will appear:
+4.  The make files will be generated, and a configuration summary will appear:
 
     ---------------------------------------------------------
                 Net-SNMP configuration summary:
@@ -680,7 +652,7 @@ first by the Configure script.  Following are sample steps to:
       Prefix / Destdir:           c:/usr
       OpenSSL:                    enabled
 
-6.  Type:
+5.  Type:
 
       nmake clean
       nmake
@@ -861,21 +833,13 @@ follows:
 
         #define NETSNMP_USE_DLL 1
 
-5. If you are using MS VC++ 6.0, edit the win32\libsnmp_dll\libsnmp.def file.  Change:
-
-   ;        strtoull
-
-    to:
-
-           strtoull
-
-6.  Optional: Make a backup of the new net-snmp-config.h which contains 
+5.  Optional: Make a backup of the new net-snmp-config.h which contains 
     settings for a DLL build of Net-SNMP:
 
     Copy win32\net-snmp\net-snmp-config.h to 
     win32\net-snmp\dll-config.h.
 
-7. Build the DLL
+6. Build the DLL and the applications
 
    MS VC++ 6.0:
    ------------
@@ -1331,17 +1295,16 @@ Currently the tools and agent will compile on win32 platforms using the
 MinGW tools with the MSyS environment. MinGW, MSyS and the associated
 documentation can be downloaded from: http://www.mingw.org.
 
-Compiling net-snmp with MinGW requires GNU regex. A GNU regex package that
-builds under MinGW with MSyS is available at: 
+Compiling net-snmp with MinGW requires GNU regex and libintl. Binaries and
+developer header files for these libraries are available at: 
 
-        http://www.boedog.com/net-snmp/gnu_regex/regex-0-12-mingw-r2.tar.gz
+        http://gnuwin32.sourceforge.net/packages/regex.htm
+        http://gnuwin32.sourceforge.net/packages/libintl.htm
 
-Note:  The source code should *not* be in a folder that contains a space.  For
-       example, compiling in your 'My Documents' or your Desktop (usually
-       c:\Documents and Settings\xxxx\Desktop) is not supported.
-       
-1.  Build and install GNU regex following the instructions in the 
-    regex-0-12-mingw-r2 README.
+Proceed as follows to build Net-SNMP:
+
+1.  Install GNU regex and GNU libintl binaries and developer files in the
+    MinGW tree.
 
 2.  If SNMPv3 encryption capabilities or SHA authentication is required,
     install the OpenSSL DLL and library file as described in the section 
@@ -1368,11 +1331,12 @@ Note:  The source code should *not* be in a folder that contains a space.  For
 
 	./configure --prefix="$BASEDIR" \
 		--with-mibdirs="$BASEDIR/share/snmp/mibs" \
-	--with-mib-modules="agentx disman/event-mib examples/example" \
+	--with-mib-modules="agentx disman/event-mib winExtDLL examples/example"\
         --disable-embedded-perl --without-perl-modules \
 
-    [Sorry. the host resources MIB is not supported by MinGW]
-
+    Note: while the Net-SNMP implementation of the host resources MIB is not
+    supported when using MinGW, winExtDLL is supported. Via winExtDLL you can
+    use Microsoft's implementation of the host resources MIB.
 
 4.1. If you want to use IPv6 transports, add:
 	--enable-ipv6 --with-transports="TCPIPv6 UDPIPv6" \
