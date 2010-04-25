@@ -413,7 +413,6 @@ EXPORTS
 	netsnmp_malloc
 	netsnmp_realloc
 	netsnmp_free
-	netsnmp_udp6_agent_config_tokens_register
 	init_usm_conf
 	strtok_r
 	strtoull
