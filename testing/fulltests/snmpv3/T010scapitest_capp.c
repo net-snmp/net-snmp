@@ -82,7 +82,7 @@ int             doalltests = 0, docrypt = 0, dokeyedhash = 0, dorandom = 0;
 	} else {                                                        \
                 fprintf(stdout, "ok: %d - %s\n", ++testcount, f);	\
         }                                                               \
-    fflush(stdout); \    
+    fflush(stdout); \
 }
 
 #define DETAILINT(s, i) \

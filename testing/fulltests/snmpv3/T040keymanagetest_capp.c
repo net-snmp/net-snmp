@@ -74,7 +74,7 @@ int             doalltests = 0, dogenKu = 0, dogenkul = 0, dokeychange = 0;
 	} else {                                                        \
                 fprintf(stdout, "ok: %d - %s\n", ++testcount, f);	\
         }                                                               \
-    fflush(stdout); \    
+    fflush(stdout); \
 }
 
 #define DETAILINT(s, i) \
