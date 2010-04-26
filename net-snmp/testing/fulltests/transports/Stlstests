@@ -17,6 +17,10 @@ CAPTURE "snmpget -l ap -u bogus -T my_fingerprint=$INVALIDUSERFP --defSecurityMo
 
 CHECK "authorizationError"
 
+CAPTURE "snmpget -l ap -u bogus -T my_fingerprint=$OTHERUSERFP -T their_fingerprint=$OTHERUSERFP --defSecurityModel=tsm -On $SNMP_FLAGS $NOAUTHTESTARGS $SNMP_TRANSPORT_SPEC:$SNMP_TEST_DEST$SNMP_SNMPD_PORT .1.3.6.1.2.1.1.3.0"
+
+CHECK "failed to verify ssl certificate"
+
 STOPAGENT
 
 FINISHED
