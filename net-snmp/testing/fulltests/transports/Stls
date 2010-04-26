@@ -1,0 +1,39 @@
+#!/bin/sh
+
+NSCERT="perl $SNMP_UPDIR/local/net-snmp-cert"
+NSCERTARGS="-C $SNMP_TMPDIR"
+
+# produce the certificates to use
+
+# snmpd
+$NSCERT gencert -t snmpd   --cn `hostname` $NSCERTARGS > /dev/null 2>&1
+SERVERFP=`$NSCERT showcerts --fingerprint snmpd  $NSCERTARGS | grep Finger | sed 's/.*=//'`
+
+# user
+$NSCERT gencert -t snmpapp --cn 'testuser'  $NSCERTARGS > /dev/null 2>&1
+TESTUSERFP=`$NSCERT showcerts --fingerprint snmpapp $NSCERTARGS | grep Finger | sed 's/.*=//'`
+
+# user 2
+$NSCERT gencert -t otheruser --cn 'otheruser'  $NSCERTARGS > /dev/null 2>&1
+OTHERUSERFP=`$NSCERT showcerts --fingerprint otheruser $NSCERTARGS | grep Finger | sed 's/.*=//'`
+
+# user 3
+$NSCERT gencert -t invaliduser --cn 'invaliduser'  $NSCERTARGS > /dev/null 2>&1
+INVALIDUSERFP=`$NSCERT showcerts --fingerprint invaliduser $NSCERTARGS | grep Finger | sed 's/.*=//'`
+
+SNMP_TRANSPORT_SPEC=dtlsudp
+export SNMP_TRANSPORT_SPEC
+
+CONFIGAGENT '[snmp]' debugTokens tsm
+CONFIGAGENT '[snmp]' doDebugging 1
+CONFIGAGENT '[snmp]' defX509ServerPub $SERVERFP
+
+$NSCERT showcerts --fingerprint snmpapp $NSCERTARGS | grep Finger | sed 's/.*=//'
+CONFIGAPP   defX509ClientPub  	  $TESTUSERFP
+CONFIGAPP   defX509ServerPub  	  $SERVERFP
+CONFIGAPP   defSecurityModel      tsm
+
+# CONFIGAPP   AllowSelfSignedX509 1
+
+CONFIGAGENT  rwuser -s tsm testuser authpriv
+CONFIGAGENT  rwuser -s tsm otheruser authpriv
