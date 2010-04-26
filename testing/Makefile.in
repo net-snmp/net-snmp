@@ -25,6 +25,9 @@ all: $(TARG)
 test:
 	$(srcdir)/RUNFULLTESTS $(TESTOPTS)
 
+testall:
+	$(srcdir)/RUNFULLTESTS -g all $(TESTOPTS)
+
 test-mibs:
 	cd $(srcdir)/rfc1213 ; ./run
 
