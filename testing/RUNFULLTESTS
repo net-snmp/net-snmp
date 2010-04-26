@@ -20,6 +20,9 @@ my %args = (
 	    errors => ($opts{'q'} ? 0 : 1),
 	   );
 
+# list of support infrastructure components
+my %support;
+
 # create the testing harness infrastructure
 use TAP::Harness;
 my $harness = TAP::Harness->new(\%args);
@@ -28,7 +31,7 @@ my $harness = TAP::Harness->new(\%args);
 # gather the tests
 
 DEBUG("Gathering and building tests:\n"); 
-find_builders();
+find_support();
 my @tests = gather_tests($opts{'g'});
 
 ########################################
@@ -47,10 +50,28 @@ $harness->runtests(@tests);
 # decides how we should execute a test
 #
 sub decide_exec {
-    my ( $harness, $test_file ) = @_;
-    if ($test_file =~ /\.exe$/) {
-	return [$test_file];
+    my ( $harness, $testfile ) = @_;
+
+    # 1) if it's a known executable type, just run it.
+    if ($testfile =~ /\.exe$/) {
+	return [$testfile];
     }
+
+    # see if we have a registered runner script
+    my ($dirname, $basename, $app_extension, $file_extension) = 
+      ($testfile =~ /([^\/]*)\/([^\/]+)_([^_]+)\.([^\.]+)$/);
+
+    # 2) we have a BUILD_TYPE file in the same directory
+    if (exists($support{'run'}{$app_extension}{$dirname})) {
+	return [$support{'run'}{$app_extension}{$dirname}, $testfile];
+    }
+
+    # 3) return a generic build script
+    if (exists($support{'run'}{$app_extension}{'generic'})) {
+	return [$support{'run'}{$app_extension}{$dirname}, 'generic'];
+    }
+
+    # 4) give up and let the test harness decide itself
     return undef;
 }
 
@@ -136,9 +157,19 @@ sub build_tests {
 #
 # Finds scripts that are used to build and run actual commands
 #
-my %builders;
 sub find_builders {
-    find_scripts('build', \%builders);
+    $support{'build'} = {};
+    find_scripts('build', $support{'build'});
+}
+
+sub find_runners {
+    $support{'run'} = {};
+    find_scripts('run', $support{'run'});
+}
+
+sub find_support {
+    find_builders();
+    find_runners();
 }
 
 sub find_scripts {
@@ -149,7 +180,7 @@ sub find_scripts {
 	next if ($builder =~ /~$/);
 	next if ($builder =~ /.(bak|orig|rej|old)$/);
 
-	my ($group, $type) = ($builder =~ /([^\/]+)\/build_(.*)/);
+	my ($group, $type) = ($builder =~ /([^\/]+)\/${buildname}_(.*)/);
 	# save this as a certain group builder
 	$hashref->{$type}{$group} = $builder;
 
@@ -183,14 +214,15 @@ sub build_test {
     # XXX
 
     # 2) we have a BUILD_TYPE file in the same directory
-    if (exists($builders{$app_extension}{$dirname})) {
+    if (exists($support{'build'}{$app_extension}{$dirname})) {
 	return
-	  call_build_script($builders{$app_extension}{$dirname}, $testfile);
+	  call_build_script($support{'build'}{$app_extension}{$dirname}, $testfile);
     }
 
     # 3) return a generic build script
-    if (exists($builders{$app_extension}{'generic'})) {
-	call_build_script($builders{$app_extension}{'generic'}, $testfile);
+    if (exists($support{'build'}{$app_extension}{'generic'})) {
+	return
+	  call_build_script($support{'build'}{$app_extension}{'generic'}, $testfile);
     }
 
     # 4) we assume it's fine as is
