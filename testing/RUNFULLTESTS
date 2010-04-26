@@ -44,7 +44,19 @@ my @tests = gather_tests($opts{'g'});
 DEBUG("Running tests:\n"); 
 DEBUG("-" x 78, "\n");
 
-$harness->runtests(@tests);
+my $results = $harness->runtests(@tests);
+
+if (!$opts{'q'}) {
+    my @failed = $results->failed();
+    print "\nWe failed these ", (1 + $#failed), " tests:\n";
+    print "  ", join("\n  ",@failed), "\n";
+}
+
+exit($results->all_passed() ? 0 : 1);
+
+######################################################################
+# Infrastructure
+#
 
 ########################################
 # decides how we should execute a test
@@ -242,6 +254,7 @@ sub call_build_script {
     while (<B>) {
 	$lastline = $_;
     }
+    chomp($lastline);
 
     DEBUG("  result: $lastline\n");
     return undef if ($lastline eq 'fail');
