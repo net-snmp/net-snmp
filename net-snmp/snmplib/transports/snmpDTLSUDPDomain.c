@@ -403,12 +403,15 @@ static int
 _netsnmp_add_buffered_data(bio_cache *cachep, char *buf, size_t size) {
     if (cachep->write_cache && cachep->write_cache_len > 0) {
         size_t newsize = cachep->write_cache_len + size;
-        char *newbuf = realloc(&cachep->write_cache, newsize);
+
+        char *newbuf = realloc(cachep->write_cache, newsize);
         if (NULL == newbuf) {
             /* ack! malloc failure */
             /* XXX: free and close */
             return SNMPERR_GENERR;
         }
+        cachep->write_cache = newbuf;
+
         /* write the new packet to the end */
         memcpy(cachep->write_cache + cachep->write_cache_len,
                buf, size);
