@@ -47,14 +47,17 @@ sub gather_tests {
     my ( $groups ) = @_;
     my @groups;
 
+    # figure out the list of groups we need to search through
     if ($groups eq 'all') {
 	# find every group we can
 	# we exclude:
 	#  - things not a directory
 	#  - anything with "template" in the name
 	@groups =
-	  grep { !/template/ && -d $_ && s/$opts{'d'}.// } glob("$opts{'d'}/*");
+	  grep { !/(template|support)/ &&
+		   -d $_ && s/$opts{'d'}.// } glob("$opts{'d'}/*");
     } else {
+	# they specified a comma separated list
 	@groups = split(/,\s*/, $groups);
     }
     DEBUG("Checking groups: ", join(", ", @groups), "\n");
@@ -64,6 +67,11 @@ sub gather_tests {
 	my @files;
 
 	DEBUG("checking group $group\n");
+
+	if (! -d "$opts{'d'}/$group") {
+	    ERROR("group '$group' is not a directory under '$opts{'d'}'; ignoring\n");
+	    next;
+	}
 
 	# push on all files that start with T[NUM]*
 	push_or_skip(\@tests, glob("$opts{'d'}/$group/T[0-9]*"));
@@ -84,6 +92,9 @@ sub push_or_skip {
     }
 }
 
+sub build_test {
+    my ($testfile) = @_;
+}
 
 # usage output
 sub usage {
@@ -100,4 +111,8 @@ sub usage {
 sub DEBUG {
     return if (!$opts{'debug'});
     print @_;
+}
+
+sub ERROR {
+    print STDERR "Error:", @_;
 }
