@@ -29,7 +29,9 @@ if [ "x$EVAL_TOOLS_SH_EVALED" != "xyes" ]; then
 failcount=0
 testnum=0
 errnum=0
-junkoutputfile="$SNMP_TMPDIR/output-`basename $0`$$"
+junkoutputfilebase="$SNMP_TMPDIR/output-`basename $0`$$"
+junkoutputfile=$junkoutputfilebase
+outputcount=0
 seperator="-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-="
 if [ -z "$OK_TO_SAVE_RESULT" ] ; then
 OK_TO_SAVE_RESULT=1
@@ -142,10 +144,15 @@ VERIFY() {	# <path_to_file(s)>
 	[ "$missingfiles" = true ] && exit 1000
 }
 
+NEWOUTPUTFILE() {
+        outputcount=`expr $outputcount + 1`
+        junkoutputfile="${junkoutputfilebase}-$outputcount"
+}
 
 #------------------------------------ -o-
 #
-STARTTEST() {	
+STARTTEST() {
+        NEWOUTPUTFILE
 	[ ! -e "$junkoutputfile" ] && {
 		touch $junkoutputfile
 		return
@@ -183,7 +190,9 @@ EXECUTING: $*
 KNORG
 
 	fi
-	( $* 2>&1 ) > $junkoutputfile 2>&1
+	NEWOUTPUTFILE
+	echo "RUNNING: $*" > $junkoutputfile
+	( $* 2>&1 ) >> $junkoutputfile 2>&1
 	RC=$?
 
 	if [ $SNMP_VERBOSE -gt 1 ]; then
@@ -222,29 +231,46 @@ EXPECTRESULT() {
   fi
 }
 
+CHECKCOUNT() {
+   CHECKCOUNTFILE "$junkoutputfile" $@
+}
+
 #------------------------------------ -o-
 # Returns: Count of matched lines.
 #
-CHECKCOUNT() {	# <pattern_to_match>
-    count=$1
+CHECKCOUNTFILE() {	# <pattern_to_match>
+    ckffile=$1
+    shift
+    ckfcount=$1
     shift
     if [ $SNMP_VERBOSE -gt 0 ]; then
 	echo -n "checking output for \"$*\"..."
     fi
 
-    rval=`grep -c "$*" "$junkoutputfile" 2>/dev/null`
+    rval=`grep -c "$*" "$ckffile" 2>/dev/null`
 
     if [ $SNMP_VERBOSE -gt 0 ]; then
 	echo "$rval matches found"
     fi
 
     snmp_last_test_result=$rval
-    EXPECTRESULT 1  # default
-    if [ "$rval" -eq "$count" ]; then
-       GOOD "found $count copies of '$*' in output"
-    else
-       BAD "found $rval copies of '$*' in output; expected $count"
-       COMMENT "Outputfile: $junkoutputfile"
+    EXPECTRESULT $ckfcount  # default
+    if [ "$ckfcount" != "noerror" ]; then
+      if [ "$ckfcount" = "atleastone" ]; then
+        if [ "$rval" -ne "0" ]; then
+            GOOD "found $ckfcount copies of '$*' in output; needed one"
+        else
+            BAD "found $rval copies of '$*' in output; expected 1"
+            COMMENT "Outputfile: $ckffile"
+        fi
+      else
+        if [ "$rval" -eq "$ckfcount" ]; then
+           GOOD "found $ckfcount copies of '$*' in output"
+        else
+           BAD "found $rval copies of '$*' in output; expected $ckfcount"
+           COMMENT "Outputfile: $ckffile"
+        fi
+      fi
     fi
     return $rval
 }
@@ -277,6 +303,12 @@ CHECKAGENT() {
     CHECKFILE $SNMP_SNMPD_LOG_FILE $@
 }
 
+CHECKAGENTCOUNT() {
+    count=$1
+    shift
+    CHECKCOUNTFILE $count $SNMP_SNMPD_LOG_FILE $@
+}
+
 WAITFORAGENT() {
     WAITFOR "$@" $SNMP_SNMPD_LOG_FILE
 }
@@ -304,9 +336,9 @@ WAITFOR() {
 	fi
         while [ $sleeptime -gt 0 ] ; do
 	  if [ "$2" = "" ] ; then
-            CHECK "$@"
+            CHECKCOUNT atleastone "$@"
           else
-	    CHECKFILE "$2" "$1"
+	    CHECKCOUNTFILE "$2" atleastone "$1"
 	  fi
           if [ "$snmp_last_test_result" != "" ] ; then
               if [ "$snmp_last_test_result" -gt 0 ] ; then
@@ -337,6 +369,7 @@ BAD() {
     testnum=`expr $testnum + 1`
     errnum=`expr $errnum + 1`
     echo "not ok $testnum - $1"
+    exit
 }
 
 COMMENT() {
@@ -594,7 +627,6 @@ FINISHED() {
     echo "1..$testnum"
 
     if [ "x$errnum" != "x0" ]; then
-        BAD "error count $errnum > 0"
 	if [ -s core ] ; then
 	    # XX hope that only one prog cores !
 	    cp core $SNMP_TMPDIR/core.$$
