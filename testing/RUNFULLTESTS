@@ -23,6 +23,10 @@ my %args = (
 # list of support infrastructure components
 my %support;
 
+########################################
+# Protection measures
+$ENV{'SNMPCONFPATH'} = "/dev/null";
+
 # create the testing harness infrastructure
 use TAP::Harness;
 my $harness = TAP::Harness->new(\%args);
@@ -67,6 +71,11 @@ sub decide_exec {
     # 1) if it's a known executable type, just run it.
     if ($testfile =~ /\.exe$/) {
 	return [$testfile];
+    }
+
+    # 1) if it's a known executable built by libtool, call libtool to run it.
+    if ($testfile =~ /\.exe\.lt$/) {
+	return ["../libtool", "--mode=execute", $testfile];
     }
 
     # see if we have a registered runner script

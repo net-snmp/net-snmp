@@ -111,7 +111,7 @@ GRONIK
 #
 SKIP() {
 	REMOVETESTDATA
-	echo "1..0 # SKIP: $1"
+	echo "1..0 # SKIP: $*"
 	exit 0
 }
 
