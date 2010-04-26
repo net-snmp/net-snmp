@@ -9,7 +9,7 @@ use strict;
 
 my %opts = ('g' => 'default',
 	    'd' => 'fulltests');
-GetOptions(\%opts, "v", "h", "q", "g=s", "debug") || usage();
+GetOptions(\%opts, "v", "h", "q", "g=s", "r=s", "debug") || usage();
 usage() if ($opts{'h'});
 
 # Build the harness object
@@ -32,7 +32,7 @@ my $harness = TAP::Harness->new(\%args);
 
 DEBUG("Gathering and building tests:\n"); 
 find_support();
-my @tests = gather_tests($opts{'g'});
+my @tests = gather_tests($opts{'g'}, $opts{'r'});
 
 ########################################
 # rename them to remove parent dirs
@@ -88,7 +88,7 @@ sub decide_exec {
 }
 
 sub gather_tests {
-    my ( $groups ) = @_;
+    my ( $groups, $regexp ) = @_;
     my @groups;
 
     # figure out the list of groups we need to search through
@@ -118,17 +118,18 @@ sub gather_tests {
 	}
 
 	# push on all files that start with T[NUM]*
-	push_or_skip(\@tests, glob("$opts{'d'}/$group/T[0-9]*"));
+	push_or_skip(\@tests, $regexp, glob("$opts{'d'}/$group/T[0-9]*"));
     }
 
     return @tests;
 }
 
 sub push_or_skip {
-    my ($array, @files) = @_;
+    my ($array, $regexp, @files) = @_;
     foreach my $file (@files) {
 	next if ($file =~ /.(bak|old|orig|rej)$/);
 	next if ($file =~ /~$/);
+	next if (defined($regexp) && $file !~ /$regexp/);
 	DEBUG("  Adding file $file\n");
 	push @$array, build_test($file);
     }
@@ -270,6 +271,7 @@ sub usage {
     print "  -q\t\tRuns in quieter mode; dumps less test output\n";
     print "  -g GROUP\tRuns the group of specified tests (default = 'default')\n";
     print "\t\t(use 'all' to run all tests)\n";
+    print "  -r\t\tOnly run test files matching this regexp\n";
     print "  -h\t\tThis help output\n";
     print "  --debug\t\tDebugging output\n";
     exit;
