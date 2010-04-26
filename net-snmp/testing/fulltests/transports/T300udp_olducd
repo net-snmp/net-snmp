@@ -1,0 +1,15 @@
+#!/bin/sh
+
+. ../support/olducd_eval_tools.sh
+
+HEADER UDP Transport
+
+SKIPIFNOT USING_MIBII_SYSTEM_MIB_MODULE
+
+#
+# Begin test
+#
+
+SNMP_TRANSPORT_SPEC=udp
+
+. ./Stransport
