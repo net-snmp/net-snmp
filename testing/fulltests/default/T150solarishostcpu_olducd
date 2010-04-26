@@ -5,7 +5,7 @@
 HEADER 1st CPU on Solaris using HOST-RESOURCES
 
 if test "x`uname -s`" != "xSunOS" ; then
-    SKIP
+    SKIP "not running solaris"
 fi
 
 SKIPIF NETSNMP_DISABLE_SNMPV1

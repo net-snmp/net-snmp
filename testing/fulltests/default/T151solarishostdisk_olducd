@@ -6,7 +6,7 @@ HEADER initial load device on Solaris using HOST-RESOURCES
 
 if test `uname -s` != "SunOS" ; then
     # a bogus skip for !suns
-    SKIPIFNOT XXXYYYZZZ
+    SKIP  "not running solaris"
 fi
 
 SKIPIFNOT USING_HOST_HR_SYSTEM_MODULE
