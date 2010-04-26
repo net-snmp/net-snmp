@@ -23,7 +23,7 @@ CC		= @CC@ $(CPPFLAGS)
 all: $(TARG)
 
 test:
-	$(srcdir)/RUNFULLTESTS -a -D `pwd`/.. $(TESTOPTS)
+	$(srcdir)/RUNFULLTESTS $(TESTOPTS)
 
 test-mibs:
 	cd $(srcdir)/rfc1213 ; ./run
