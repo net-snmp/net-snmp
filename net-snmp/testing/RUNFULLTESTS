@@ -133,23 +133,31 @@ sub build_tests {
     return @newtests;
 }
 
+#
+# Finds scripts that are used to build and run actual commands
+#
 my %builders;
 sub find_builders {
+    find_scripts('build', \%builders);
+}
+
+sub find_scripts {
+    my ($buildname, $hashref) = @_;
     my $count;
-    DEBUG("looking for build scripts\n");
-    foreach my $builder (glob("$opts{'d'}/*/build_*")) {
+    DEBUG("looking for $buildname scripts\n");
+    foreach my $builder (glob("$opts{'d'}/*/${buildname}_*")) {
 	next if ($builder =~ /~$/);
 	next if ($builder =~ /.(bak|orig|rej|old)$/);
 
 	my ($group, $type) = ($builder =~ /([^\/]+)\/build_(.*)/);
 	# save this as a certain group builder
-	$builders{$type}{$group} = $builder;
+	$hashref->{$type}{$group} = $builder;
 
 	# save this as a generic builder if there isn't a better
 	# generic one, such as one that exists in the support
 	# directory.
-	if (!exists($builders{$type}{'generic'}) || $group eq 'support') {
-	    $builders{$type}{'generic'} = $builder;
+	if (!exists($hashref->{$type}{'generic'}) || $group eq 'support') {
+	    $hashref->{$type}{'generic'} = $builder;
 	}
 	$count++;
     }
