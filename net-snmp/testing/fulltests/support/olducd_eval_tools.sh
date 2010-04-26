@@ -232,22 +232,28 @@ EXPECTRESULT() {
 }
 
 CHECKCOUNT() {
-   CHECKCOUNTFILE "$junkoutputfile" $@
+   CHECKFILECOUNT "$junkoutputfile" $@
 }
 
 #------------------------------------ -o-
 # Returns: Count of matched lines.
 #
-CHECKCOUNTFILE() {	# <pattern_to_match>
-    ckffile=$1
+CHECKFILECOUNT() {	# <pattern_to_match>
+    chkfile=$1
+    ckfcount=$2
     shift
-    ckfcount=$1
     shift
     if [ $SNMP_VERBOSE -gt 0 ]; then
 	echo -n "checking output for \"$*\"..."
     fi
 
-    rval=`grep -c "$*" "$ckffile" 2>/dev/null`
+    echo "# file: $chkfile"
+    if [ -f $chkfile ]; then
+	rval=`grep -c "$*" "$chkfile" 2>/dev/null`
+    else
+        COMMENT "Note: file $chkfile does not exist and we were asked to check it"
+	rval=0
+    fi
 
     if [ $SNMP_VERBOSE -gt 0 ]; then
 	echo "$rval matches found"
@@ -261,14 +267,14 @@ CHECKCOUNTFILE() {	# <pattern_to_match>
             GOOD "found $ckfcount copies of '$*' in output; needed one"
         else
             BAD "found $rval copies of '$*' in output; expected 1"
-            COMMENT "Outputfile: $ckffile"
+            COMMENT "Outputfile: $chkfile"
         fi
       else
-        if [ "$rval" -eq "$ckfcount" ]; then
+        if [ "$rval" = "$ckfcount" ]; then
            GOOD "found $ckfcount copies of '$*' in output"
         else
            BAD "found $rval copies of '$*' in output; expected $ckfcount"
-           COMMENT "Outputfile: $ckffile"
+           COMMENT "Outputfile: $chkfile"
         fi
       fi
     fi
@@ -281,14 +287,8 @@ CHECK() {
 
 CHECKFILE() {
     file=$1
-    if [ "x$file" = "x" ] ; then
-        file=$junkoutputfile
-    fi
     shift
-    myoldjunkoutputfile="$junkoutputfile"
-    junkoutputfile="$file"
-    CHECK $*
-    junkoutputfile="$myoldjunkoutputfile"
+    CHECKFILECOUNT $file 1 $@
 }
 
 CHECKTRAPD() {
@@ -298,7 +298,7 @@ CHECKTRAPD() {
 CHECKTRAPDCOUNT() {
     count=$1
     shift
-    CHECKCOUNTFILE $SNMP_SNMPTRAPD_LOG_FILE $count $@
+    CHECKFILECOUNT $SNMP_SNMPTRAPD_LOG_FILE $count $@
 }
 
 CHECKTRAPDORDIE() {
@@ -312,7 +312,7 @@ CHECKAGENT() {
 CHECKAGENTCOUNT() {
     count=$1
     shift
-    CHECKCOUNTFILE $count $SNMP_SNMPD_LOG_FILE $@
+    CHECKFILECOUNT $SNMP_SNMPD_LOG_FILE $count $@
 }
 
 WAITFORAGENT() {
@@ -344,7 +344,7 @@ WAITFOR() {
 	  if [ "$2" = "" ] ; then
             CHECKCOUNT atleastone "$@"
           else
-	    CHECKCOUNTFILE "$2" atleastone "$1"
+	    CHECKFILECOUNT "$2" atleastone "$1"
 	  fi
           if [ "$snmp_last_test_result" != "" ] ; then
               if [ "$snmp_last_test_result" -gt 0 ] ; then
@@ -375,11 +375,10 @@ BAD() {
     testnum=`expr $testnum + 1`
     errnum=`expr $errnum + 1`
     echo "not ok $testnum - $1"
-    exit
 }
 
 COMMENT() {
-    echo "# $@" 1>&2
+    echo "# $@"
 }
 
 # WAITFORORDIE "grep string" ["file"]
@@ -394,23 +393,20 @@ WAITFORORDIE() {
 
 # CHECKORDIE "grep string" ["file"] .. FAIL if "grep string" is *not* found
 CHECKORDIE() {
-    CHECKFILE "$2" "$1"
-    if [ "$snmp_last_test_result" = 0 ] ; then
-        BAD "failed to find '$1' in output"
-        FINISHED
+    if [ "x$2" = "x" ]; then
+      CHECKFILE "$junkoutputfile" "$1"
+    else
+      CHECKFILECOUNT "$2" 1 "$1"
     fi
-    GOOD "found string '$1' in output"
 }
 
 # CHECKANDDIE "grep string" ["file"] .. FAIL if "grep string" *is* found
 CHECKANDDIE() {
-    CHECKFILE "$2" "$1"
-    EXPECTRESULT 0 # make sure return_value gets set correctly
-    if [ "$snmp_last_test_result" != 0 ] ; then
-        BAD "found string '$1' in output"
-        FINISHED
+    if [ "x$2" = "x" ]; then
+      CHECKFILECOUNT "$junkoutputfile" 0 "$1"
+    else
+      CHECKFILECOUNT "$2" 0 "$1"
     fi
-    GOOD "didn't find string '$1' in output"
 }
 
 #------------------------------------ -o-
