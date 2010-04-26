@@ -855,8 +855,10 @@ sub parseArgs {
   $opts->{verbose} = not $opts->{Q} if defined $opts->{Q};
 
   # search conf path for cfgfile
-  $opts->{cfgfile} = NetSNMP::Cert::find_cfgfile($opts->{cfgfile});
-  $opts->{cfgdir} = NetSNMP::Cert::find_cfgdir($opts->{cfgfile});
+  $opts->{cfgfile} = NetSNMP::Cert::find_cfgfile($opts->{cfgfile})
+	if (!defined($opts->{cfgfile}));
+  $opts->{cfgdir} = NetSNMP::Cert::find_cfgdir($opts->{cfgfile})
+	if (!defined($opts->{cfgdir}));
 }
 
 sub handleTlsDir {
