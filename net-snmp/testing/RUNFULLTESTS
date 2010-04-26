@@ -1,8 +1,9 @@
 #!/usr/bin/perl
 
 use Getopt::Long;
+use strict;
 
-my %opts;
+my %opts = ('g' => 'default');
 GetOptions(\%opts, 
 	   "v",
 	   "h",
@@ -22,10 +23,7 @@ use TAP::Harness;
 my $harness = TAP::Harness->new(\%args);
 
 # gather the tests
-@tests = (["fulltests/test/foo",  "perl test"],
-	  ["fulltests/test/foo2", "sh test"],
-	  ["fulltests/test/fooc", "C test"],
-	 );
+my @tests = gather_tests($opts{'g'});
 
 # run the actual tests
 $harness->runtests(@tests);
@@ -40,6 +38,33 @@ sub decide_exec {
     }
     return undef;
 }
+
+sub gather_tests {
+    my ( $groups ) = @_;
+
+    my @tests;
+
+    foreach my $group (split(/,\s*/, $groups)) {
+	my @files;
+
+	print "checking group $group\n";
+
+	# push on all files that start with T[NUM]*
+	push_or_skip(\@tests, glob("fulltests/$group/T[0-9]*"));
+    }
+
+    return @tests;
+}
+
+sub push_or_skip {
+    my ($array, @files) = @_;
+    foreach my $file (@files) {
+	next if ($file =~ /.(bak|old|orig|rej)$/);
+	next if ($file =~ /~$/);
+	push @$array, $file;
+    }
+}
+
 
 # usage output
 sub usage {
