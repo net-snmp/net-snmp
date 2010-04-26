@@ -70,17 +70,17 @@ sub decide_exec {
     }
 
     # see if we have a registered runner script
-    my ($dirname, $basename, $app_extension, $file_extension) = 
-      ($testfile =~ /([^\/]*)\/([^\/]+)_([^_]+)\.([^\.]+)$/);
+    my ($dirname, $groupname, $basename, $app_extension, $file_extension) = 
+      ($testfile =~ /([^\/]+)\/([^\/]+)\/([^\/]+)_([^_]+)\.*([^\.]*)$/);
 
     # 2) we have a BUILD_TYPE file in the same directory
-    if (exists($support{'run'}{$app_extension}{$dirname})) {
-	return [$support{'run'}{$app_extension}{$dirname}, $testfile];
+    if (exists($support{'run'}{$app_extension}{$groupname})) {
+	return [$support{'run'}{$app_extension}{$groupname}, $testfile];
     }
 
     # 3) return a generic build script
     if (exists($support{'run'}{$app_extension}{'generic'})) {
-	return [$support{'run'}{$app_extension}{$dirname}, 'generic'];
+	return [$support{'run'}{$app_extension}{'generic'}, $testfile];
     }
 
     # 4) give up and let the test harness decide itself
@@ -212,8 +212,8 @@ sub find_scripts {
 sub build_test {
     my ($testfile) = @_;
 
-    my ($dirname, $basename, $app_extension, $file_extension) = 
-      ($testfile =~ /([^\/]*)\/([^\/]+)_([^_]+)\.([^\.]+)$/);
+    my ($dirname, $groupname, $basename, $app_extension, $file_extension) = 
+      ($testfile =~ /([^\/]+)\/([^\/]+)\/([^\/]+)_([^_]+)\.([^\.]+)$/);
 
     # is this even a buildable type recipe?
     if (!$dirname || !$basename || !$app_extension || !$file_extension) {
