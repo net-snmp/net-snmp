@@ -247,7 +247,6 @@ CHECKFILECOUNT() {	# <pattern_to_match>
 	echo -n "checking output for \"$*\"..."
     fi
 
-    echo "# file: $chkfile"
     if [ -f $chkfile ]; then
 	rval=`grep -c "$*" "$chkfile" 2>/dev/null`
     else
