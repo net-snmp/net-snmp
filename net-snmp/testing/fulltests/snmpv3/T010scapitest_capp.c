@@ -31,13 +31,13 @@ static char    *rcsid = "$Id$";    /* */
 #include <netinet/in.h>
 #endif
 
-#include "asn1.h"
-#include "snmp_api.h"
-#include "keytools.h"
-#include "tools.h"
-#include "scapi.h"
-#include "transform_oids.h"
-#include "callback.h"
+#include <net-snmp/library/asn1.h>
+#include <net-snmp/library/snmp_api.h>
+#include <net-snmp/library/keytools.h>
+#include <net-snmp/library/tools.h>
+#include <net-snmp/library/scapi.h>
+#include <net-snmp/library/transform_oids.h>
+#include <net-snmp/library/callback.h>
 
 #include <stdlib.h>
 
@@ -52,6 +52,8 @@ extern int      optind, optopt, opterr;
  * Globals, &c...
  */
 char           *local_progname;
+int             testcount=0;
+int             failcount=0;
 
 #define USAGE	"Usage: %s [-h][-acHr]"
 #define OPTIONLIST	"achHr"
@@ -65,21 +67,26 @@ int             doalltests = 0, docrypt = 0, dokeyedhash = 0, dorandom = 0;
 #define LOCAL_MAXBUF	(1024 * 8)
 #define NL		"\n"
 
-#define OUTPUT(o)	fprintf(stdout, "\n\n%s\n\n", o);
+#define OUTPUT(o)	fprintf(stdout, "# %s\n", o);
 
 #define SUCCESS(s)					\
 {							\
-	if (!failcount)					\
-		fprintf(stdout, "\nSUCCESS: %s\n", s);	\
+    fprintf(stdout, "# Done with %s\n", s);             \
 }
 
-#define FAILED(e, f)					\
-{							\
-	if (e != SNMPERR_SUCCESS) {			\
-		fprintf(stdout, "\nFAILED: %s\n", f);	\
-		failcount += 1;				\
-	}						\
+#define FAILED(e, f)                                                    \
+{                                                                       \
+    if (e != SNMPERR_SUCCESS) {                                         \
+                fprintf(stdout, "not ok: %d - %s\n", ++testcount, f);	\
+		failcount += 1;                                         \
+	} else {                                                        \
+                fprintf(stdout, "ok: %d - %s\n", ++testcount, f);	\
+        }                                                               \
+    fflush(stdout); \    
 }
+
+#define DETAILINT(s, i) \
+    fprintf(stdout, "# %s: %d\n", s, i);
 
 
 #define BIGSTRING							\
@@ -122,7 +129,7 @@ int             test_dorandom(void);
 int
 main(int argc, char **argv)
 {
-    int             rval = SNMPERR_SUCCESS, failcount = 0;
+    int             rval = SNMPERR_SUCCESS;
     char            ch;
 
     local_progname = argv[0];
@@ -161,8 +168,7 @@ main(int argc, char **argv)
         exit(1000);
 
     } else if (ALLOPTIONS != 1) {
-        usage(stdout);
-        exit(1000);
+        doalltests = 1;
     }
 
 
@@ -170,29 +176,21 @@ main(int argc, char **argv)
      * Test stuff.
      */
     rval = sc_init();
-    FAILED(rval, "sc_init().");
+    FAILED(rval, "sc_init() return code");
 
 
     if (docrypt || doalltests) {
-        failcount += test_docrypt();
+        test_docrypt();
     }
     if (dokeyedhash || doalltests) {
-        failcount += test_dokeyedhash();
+        test_dokeyedhash();
     }
     if (dorandom || doalltests) {
-        failcount += test_dorandom();
+        test_dorandom();
     }
 
-
-    /*
-     * Cleanup.
-     */
-    rval = sc_shutdown(SNMP_CALLBACK_LIBRARY, SNMP_CALLBACK_SHUTDOWN,
-                       NULL, NULL);
-    FAILED(rval, "sc_shutdown().");
-
-    return failcount;
-
+    fprintf(stdout, "1..%d\n", testcount);
+    return 0;
 }                               /* end main() */
 
 
@@ -232,7 +230,7 @@ usage(FILE * ofp)
 int
 test_dosomething(void)
 {
-    int             rval = SNMPERR_SUCCESS, failcount = 0;
+    int             rval = SNMPERR_SUCCESS;
 
     EM0(1, "UNIMPLEMENTED");    /* EM(1); /* */
 
@@ -260,7 +258,6 @@ int
 test_dorandom(void)
 {
     int             rval = SNMPERR_SUCCESS,
-        failcount = 0,
         origrequest = (1024 * 2),
         origrequest_short = 19, nbytes = origrequest, shortcount = 7, i;
     char            buf[LOCAL_MAXBUF];
@@ -268,7 +265,7 @@ test_dorandom(void)
     OUTPUT("Random test -- large request:");
 
     rval = sc_random(buf, &nbytes);
-    FAILED(rval, "sc_random().");
+    FAILED(rval, "sc_random() return code");
 
     if (nbytes != origrequest) {
         FAILED(SNMPERR_GENERR,
@@ -286,7 +283,7 @@ test_dorandom(void)
     for (i = 0; i < shortcount; i++) {
         nbytes = origrequest_short;
         rval = sc_random(buf, &nbytes);
-        FAILED(rval, "sc_random().");
+        FAILED(rval, "sc_random() return code");
 
         if (nbytes != origrequest_short) {
             FAILED(SNMPERR_GENERR,
@@ -323,7 +320,7 @@ test_dorandom(void)
 int
 test_dokeyedhash(void)
 {
-    int             rval = SNMPERR_SUCCESS, failcount = 0, bigstring_len = strlen(BIGSTRING), secret_len = strlen(BIGSECRET), properlength, mlcount = 0,        /* MAC Length count.   */
+    int             rval = SNMPERR_SUCCESS, bigstring_len = strlen(BIGSTRING), secret_len = strlen(BIGSECRET), properlength, mlcount = 0,        /* MAC Length count.   */
                     hblen;      /* Hash Buffer length. */
 
     u_int           hashbuf_len[MLCOUNT_MAX] = {
@@ -340,7 +337,7 @@ test_dokeyedhash(void)
 
   test_dokeyedhash_again:
 
-    OUTPUT("Keyed hash test using MD5 --");
+    OUTPUT("Starting Keyed hash test using MD5 --");
 
     memset(hashbuf, 0, LOCAL_MAXBUF);
     hblen = hashbuf_len[mlcount];
@@ -351,7 +348,7 @@ test_dokeyedhash(void)
                                USM_LENGTH_OID_TRANSFORM, BIGSECRET,
                                secret_len, BIGSTRING, bigstring_len,
                                hashbuf, &hblen);
-    FAILED(rval, "sc_generate_keyed_hash().");
+    FAILED(rval, "sc_generate_keyed_hash() return code");
 
     if (hashbuf_len[mlcount] > properlength) {
         if (hblen != properlength) {
@@ -367,18 +364,16 @@ test_dokeyedhash(void)
                             USM_LENGTH_OID_TRANSFORM, BIGSECRET,
                             secret_len, BIGSTRING, bigstring_len, hashbuf,
                             hblen);
-    FAILED(rval, "sc_check_keyed_hash().");
+    FAILED(rval, "sc_check_keyed_hash() return code");
 
     binary_to_hex(hashbuf, hblen, &s);
-    fprintf(stdout, "hash buffer (len=%d, request=%d):   %s\n",
+    fprintf(stdout, "# hash buffer (len=%d, request=%d):   %s\n",
             hblen, hashbuf_len[mlcount], s);
     SNMP_FREE(s);
 
-    SUCCESS("Keyed hash test using MD5.");
 
 
-
-    OUTPUT("Keyed hash test using SHA1 --");
+    OUTPUT("Starting Keyed hash test using SHA1 --");
 
     memset(hashbuf, 0, LOCAL_MAXBUF);
     hblen = hashbuf_len[mlcount];
@@ -389,7 +384,7 @@ test_dokeyedhash(void)
                                USM_LENGTH_OID_TRANSFORM, BIGSECRET,
                                secret_len, BIGSTRING, bigstring_len,
                                hashbuf, &hblen);
-    FAILED(rval, "sc_generate_keyed_hash().");
+    FAILED(rval, "sc_generate_keyed_hash() return code");
 
     if (hashbuf_len[mlcount] > properlength) {
         if (hblen != properlength) {
@@ -406,16 +401,14 @@ test_dokeyedhash(void)
                             USM_LENGTH_OID_TRANSFORM, BIGSECRET,
                             secret_len, BIGSTRING, bigstring_len, hashbuf,
                             hblen);
-    FAILED(rval, "sc_check_keyed_hash().");
+    FAILED(rval, "sc_check_keyed_hash() return code");
 
     binary_to_hex(hashbuf, hblen, &s);
-    fprintf(stdout, "hash buffer (len=%d, request=%d):   %s\n",
+    fprintf(stdout, "# hash buffer (len=%d, request=%d):   %s\n",
             hblen, hashbuf_len[mlcount], s);
     SNMP_FREE(s);
 
     SUCCESS("Keyed hash test using SHA1.");
-
-
 
     /*
      * Run the basic hash tests but vary the size MAC requests.
@@ -442,9 +435,7 @@ test_dokeyedhash(void)
 int
 test_docrypt(void)
 {
-    int             rval = SNMPERR_SUCCESS,
-        failcount = 0,
-        bigstring_len = strlen(BIGSTRING),
+    int             rval = SNMPERR_SUCCESS, bigstring_len = strlen(BIGSTRING),
         secret_len = BYTESIZE(SNMP_TRANS_PRIVLEN_1DES),
         iv_len = BYTESIZE(SNMP_TRANS_PRIVLEN_1DES_IV);
 
@@ -453,7 +444,7 @@ test_docrypt(void)
     char            buf[LOCAL_MAXBUF],
         cryptbuf[LOCAL_MAXBUF], secret[LOCAL_MAXBUF], iv[LOCAL_MAXBUF];
 
-    OUTPUT("Test 1DES-CBC --");
+    OUTPUT("Starting Test 1DES-CBC --");
 
 
     memset(buf, 0, LOCAL_MAXBUF);
@@ -461,29 +452,25 @@ test_docrypt(void)
     memcpy(secret, BIGSECRET, secret_len);
     memcpy(iv, BKWDSECRET, iv_len);
 
-
     rval = sc_encrypt(usmDESPrivProtocol, USM_LENGTH_OID_TRANSFORM,
                       secret, secret_len,
                       iv, iv_len,
                       BIGSTRING, bigstring_len, cryptbuf, &cryptbuf_len);
-    FAILED(rval, "sc_encrypt().");
+    FAILED(rval, "sc_encrypt() return code.");
 
     rval = sc_decrypt(usmDESPrivProtocol, USM_LENGTH_OID_TRANSFORM,
                       secret, secret_len,
                       iv, iv_len, cryptbuf, cryptbuf_len, buf, &buf_len);
-    FAILED(rval, "sc_decrypt().");
+    FAILED(rval, "sc_decrypt() return code.");
 
-    if (buf_len != bigstring_len) {
-        FAILED(SNMPERR_GENERR, "Decrypted buffer is the wrong length.");
-    }
-    if (memcmp(buf, BIGSTRING, bigstring_len)) {
-        FAILED(SNMPERR_GENERR,
-               "Decrypted buffer is not equal to original plaintext.");
-    }
+    /* ignore the pad */
+    buf_len -= buf[buf_len-1];
 
+    FAILED(buf_len != bigstring_len, "Decrypted buffer is the right length.");
+    DETAILINT("original length:", bigstring_len);
+    DETAILINT("output   length:", buf_len);
 
-    SUCCESS("Test 1DES-CBC --");
-
+    FAILED(memcmp(buf, BIGSTRING, bigstring_len) != 0,
+           "Decrypted buffer is the same as the original plaintext.");
     return failcount;
-
 }                               /* end test_docrypt() */

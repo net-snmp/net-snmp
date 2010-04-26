@@ -27,20 +27,20 @@ static char    *rcsid = "$Id$";        /* */
 #include <netinet/in.h>
 #endif
 
-#include "asn1.h"
-#include "snmp_api.h"
-#include "keytools.h"
-#include "tools.h"
-#include "scapi.h"
-#include "transform_oids.h"
-#include "callback.h"
+#include <net-snmp/library/asn1.h>
+#include <net-snmp/library/snmp_api.h>
+#include <net-snmp/library/keytools.h>
+#include <net-snmp/library/tools.h>
+#include <net-snmp/library/scapi.h>
+#include <net-snmp/library/transform_oids.h>
+#include <net-snmp/library/callback.h>
 
 #include <stdlib.h>
 
 extern char    *optarg;
 extern int      optind, optopt, opterr;
 
-
+int testcount = 0;
 
 /*
  * Globals, &c...
@@ -58,24 +58,27 @@ int             doalltests = 0, dogenKu = 0, dogenkul = 0, dokeychange = 0;
 #define LOCAL_MAXBUF	(1024 * 8)
 #define NL		"\n"
 
-#define OUTPUTALWAYS(o)	fprintf(stdout, "\n\n%s\n\n", o);
+#define OUTPUTALWAYS(o)	fprintf(stdout, "# %s\n", o);
 #define OUTPUT(o)	if (!bequiet) { OUTPUTALWAYS(o); }
 
 #define SUCCESS(s)					\
 {							\
-	if (!failcount && !bequiet)					\
-		fprintf(stdout, "\nSUCCESS: %s\n", s);	\
+    fprintf(stdout, "# Done with %s\n", s);             \
 }
 
-#define FAILED(e, f)					\
-{							\
-	if (e != SNMPERR_SUCCESS && !bequiet) {			\
-		fprintf(stdout, "\nFAILED: %s\n", f);	\
-		failcount += 1;				\
-	}						\
+#define FAILED(e, f)                                                    \
+{                                                                       \
+    if (e != SNMPERR_SUCCESS) {                                         \
+                fprintf(stdout, "not ok: %d - %s\n", ++testcount, f);	\
+		failcount += 1;                                         \
+	} else {                                                        \
+                fprintf(stdout, "ok: %d - %s\n", ++testcount, f);	\
+        }                                                               \
+    fflush(stdout); \    
 }
 
-
+#define DETAILINT(s, i) \
+    fprintf(stdout, "# %s: %d\n", s, i);
 
 /*
  * Test specific globals.
@@ -169,8 +172,7 @@ main(int argc, char **argv)
         exit(1000);
 
     } else if (ALLOPTIONS != 1) {
-        usage(stdout);
-        exit(1000);
+        doalltests = 1;
     }
 
 
@@ -190,14 +192,7 @@ main(int argc, char **argv)
         failcount += test_keychange();
     }
 
-
-    /*
-     * Cleanup.
-     */
-    rval = sc_shutdown(SNMP_CALLBACK_LIBRARY, SNMP_CALLBACK_SHUTDOWN,
-                       NULL, NULL);
-    FAILED(rval, "sc_shutdown().");
-
+    fprintf(stdout, "1..%d\n", testcount);
     return failcount;
 
 }                               /* end main() */
@@ -291,7 +286,7 @@ test_genKu(void)
         passphrase = PASSPHRASE_DEFAULT;
     }
     if (!bequiet)
-        fprintf(stdout, "Passphrase%s:\n\t%s\n\n",
+        fprintf(stdout, "Passphrase%s: %s\n",
                 (passphrase == PASSPHRASE_DEFAULT) ? " (default)" : "",
                 passphrase);
 
@@ -304,18 +299,14 @@ test_genKu(void)
                        passphrase, strlen(passphrase), Ku, &kulen);
     FAILED(rval, "generate_Ku().");
 
-    if (kulen != properlength) {
-        FAILED(SNMPERR_GENERR, "Ku length is wrong for this hashtype.");
-    }
+    FAILED(kulen != properlength, "Ku length is the right length for this hashtype.");
 
     binary_to_hex(Ku, kulen, &s);
     if (!bequiet)
-        fprintf(stdout, "Ku (len=%d):  %s\n", kulen, s);
+        fprintf(stdout, "# Ku (len=%d):  %s\n", kulen, s);
     free_zero(s, kulen);
 
-    SUCCESS(hashname);
-    if (!bequiet)
-        fprintf(stdout, "\n");
+    OUTPUT(hashname);
 
     if (hashtype == usmHMACMD5AuthProtocol) {
         hashtype = usmHMACSHA1AuthProtocol;
@@ -364,7 +355,6 @@ test_genkul(void)
 
     OUTPUT("Test of generate_kul --");
 
-
     /*
      * Set passphrase and engineID.
      *
@@ -375,7 +365,7 @@ test_genkul(void)
         passphrase = PASSPHRASE_DEFAULT;
     }
     if (!bequiet)
-        fprintf(stdout, "Passphrase%s:\n\t%s\n\n",
+        fprintf(stdout, "# Passphrase%s: %s\n",
                 (passphrase == PASSPHRASE_DEFAULT) ? " (default)" : "",
                 passphrase);
 
@@ -388,16 +378,14 @@ test_genkul(void)
 
     if (tolower(*(engineID + 1)) == 'x') {
         engineID_len = hex_to_binary2(engineID + 2, engineID_len - 2, &s);
-        if (engineID_len < 0) {
-            FAILED((rval = SNMPERR_GENERR),
-                   "Could not resolve hex engineID.");
-        }
+        FAILED(engineID_len < 0,
+               "Could not resolve hex engineID.");
         engineID = s;
         binary_to_hex(engineID, engineID_len, &s);
     }
 
     if (!bequiet)
-        fprintf(stdout, "engineID%s (len=%d):  %s\n\n",
+        fprintf(stdout, "# engineID%s (len=%d):  %s\n",
                 (isdefault) ? " (default)" : "",
                 engineID_len, (s) ? s : engineID);
     if (s) {
@@ -425,7 +413,7 @@ test_genkul(void)
     binary_to_hex(Ku, kulen, &s);
     if (!bequiet)
         fprintf(stdout,
-                "\n\nMaster Ku using \"%s\":\n\t%s\n\n", hashname_Ku, s);
+                "# Master Ku using \"%s\": \t%s\n", hashname_Ku, s);
     free_zero(s, kulen);
 
 
@@ -438,22 +426,17 @@ test_genkul(void)
 
     if ((hashtype_Ku == usmHMACMD5AuthProtocol)
         && (hashtype_kul == usmHMACSHA1AuthProtocol)) {
-        if (rval == SNMPERR_SUCCESS) {
-            FAILED(SNMPERR_GENERR,
-                   "generate_kul SHOULD fail when Ku length is "
-                   "less than hash transform length.");
-        }
-
+        FAILED(rval == SNMPERR_SUCCESS,
+               "generate_kul SHOULD fail when Ku length is "
+               "less than hash transform length.");
     } else {
         FAILED(rval, "generate_kul().");
 
-        if (kul_len != properlength) {
-            FAILED(SNMPERR_GENERR,
-                   "kul length is wrong for the given hashtype.");
-        }
+        FAILED(kul_len != properlength,
+               "checking if kul length is right for the given hashtype.");
 
         binary_to_hex(kul, kul_len, &s);
-        fprintf(stdout, "kul (%s) (len=%d):  %s\n",
+        fprintf(stdout, "# kul (%s) (len=%d):  %s\n",
                 ((hashtype_Ku == usmHMACMD5AuthProtocol) ? "MD5" : "SHA"),
                 kul_len, s);
         free_zero(s, kul_len);
@@ -535,10 +518,8 @@ test_keychange(void)
 
     if (tolower(*(newkey + 1)) == 'x') {
         newkey_len = hex_to_binary2(newkey + 2, newkey_len - 2, &s);
-        if (newkey_len < 0) {
-            FAILED((rval = SNMPERR_GENERR),
-                   "Could not resolve hex newkey.");
-        }
+        FAILED(newkey_len < 0,
+               "Could not resolve hex newkey.");
         newkey = s;
         binary_to_hex(newkey, newkey_len, &s);
     }
@@ -551,10 +532,8 @@ test_keychange(void)
 
     if (tolower(*(oldkey + 1)) == 'x') {
         oldkey_len = hex_to_binary2(oldkey + 2, oldkey_len - 2, &s);
-        if (oldkey_len < 0) {
-            FAILED((rval = SNMPERR_GENERR),
-                   "Could not resolve hex oldkey.");
-        }
+        FAILED(oldkey_len < 0,
+               "Could not resolve hex oldkey.");
         oldkey = s;
         binary_to_hex(oldkey, oldkey_len, &s);
     }
@@ -573,12 +552,12 @@ test_keychange(void)
 
 
     binary_to_hex(oldkey_buf, properlength, &s);
-    fprintf(stdout, "\noldkey%s (len=%d):  %s\n",
+    fprintf(stdout, "# oldkey%s (len=%d):  %s\n",
             (isdefault_old) ? " (default)" : "", properlength, s);
     SNMP_FREE(s);
 
     binary_to_hex(newkey_buf, properlength, &s);
-    fprintf(stdout, "newkey%s (len=%d):  %s\n\n",
+    fprintf(stdout, "# newkey%s (len=%d):  %s\n",
             (isdefault_new) ? " (default)" : "", properlength, s);
     SNMP_FREE(s);
 
@@ -589,14 +568,12 @@ test_keychange(void)
                             keychange_buf, &keychange_len);
     FAILED(rval, "encode_keychange().");
 
-    if (keychange_len != (properlength * 2)) {
-        FAILED(SNMPERR_GENERR,
-               "KeyChange string (encoded) is not proper length "
-               "for this hash transform.");
-    }
+    FAILED(keychange_len != (properlength * 2),
+           "KeyChange string (encoded) is not proper length "
+           "for this hash transform.");
 
     binary_to_hex(keychange_buf, keychange_len, &s);
-    fprintf(stdout, "(%s) KeyChange string:  %s\n\n",
+    fprintf(stdout, "# (%s) KeyChange string:  %s\n",
             ((hashtype == usmHMACMD5AuthProtocol) ? "MD5" : "SHA"), s);
     SNMP_FREE(s);
 
@@ -607,24 +584,20 @@ test_keychange(void)
                             temp_buf, &temp_len);
     FAILED(rval, "decode_keychange().");
 
-    if (temp_len != properlength) {
-        FAILED(SNMPERR_GENERR,
-               "decoded newkey is not proper length for "
-               "this hash transform.");
-    }
+    FAILED(temp_len != properlength,
+           "decoded newkey is not proper length for "
+           "this hash transform.");
 
     binary_to_hex(temp_buf, temp_len, &s);
-    fprintf(stdout, "decoded newkey:  %s\n\n", s);
+    fprintf(stdout, "# decoded newkey:  %s\n", s);
     SNMP_FREE(s);
 
 
-    if (memcmp(newkey_buf, temp_buf, temp_len)) {
-        FAILED(SNMPERR_GENERR, "newkey did not decode properly.");
-    }
+    FAILED(memcmp(newkey_buf, temp_buf, temp_len),
+           "newkey did not decode properly.");
 
 
     SUCCESS(hashname);
-    fprintf(stdout, "\n");
 
 
     /*

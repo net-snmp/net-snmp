@@ -26,12 +26,12 @@ static char    *rcsid = "$Id$";    /* */
 #include <netinet/in.h>
 #endif
 
-#include "asn1.h"
-#include "snmp_api.h"
-#include "tools.h"
-#include "lcd_time.h"
-#include "snmp_debug.h"
-#include "callback.h"
+#include <net-snmp/library/asn1.h>
+#include <net-snmp/library/snmp_api.h>
+#include <net-snmp/library/tools.h>
+#include <net-snmp/library/lcd_time.h>
+#include <net-snmp/library/snmp_debug.h>
+#include <net-snmp/library/callback.h>
 
 static u_int    dummy_etime, dummy_eboot;       /* For ISENGINEKNOWN(). */
 
@@ -41,7 +41,7 @@ static u_int    dummy_etime, dummy_eboot;       /* For ISENGINEKNOWN(). */
 extern char    *optarg;
 extern int      optind, optopt, opterr;
 
-
+int             testcount=0;
 
 /*
  * Globals, &c...
@@ -60,28 +60,31 @@ int             doalltests = 0, dohashindex = 0, doetimetest = 0;
 #define LOCAL_MAXBUF	(1024 * 8)
 #define NL		"\n"
 
-#define OUTPUT(o)	fprintf(stdout, "\n\n%s\n\n", o);
+#define OUTPUT(o)	fprintf(stdout, "# %s\n", o);
 
 #define SUCCESS(s)					\
 {							\
-	if (!failcount)					\
-		fprintf(stdout, "\nSUCCESS: %s\n", s);	\
+    fprintf(stdout, "# Done with %s\n", s);             \
 }
 
-#define FAILED(e, f)					\
-{							\
-	if (e != SNMPERR_SUCCESS) {			\
-		fprintf(stdout, "\nFAILED: %s\n", f);	\
-		failcount += 1;				\
-	}						\
+#define FAILED(e, f)                                                    \
+{                                                                       \
+    if (e != SNMPERR_SUCCESS) {                                         \
+                fprintf(stdout, "not ok: %d - %s\n", ++testcount, f);	\
+		failcount += 1;                                         \
+	} else {                                                        \
+                fprintf(stdout, "ok: %d - %s\n", ++testcount, f);	\
+        }                                                               \
+    fflush(stdout); \    
 }
 
-
+#define DETAILINT(s, i) \
+    fprintf(stdout, "# %s: %d\n", s, i);
 
 /*
  * Global variables.
  */
-int             sleeptime = 7;
+int             sleeptime = 2;
 
 #define BLAT "alk;djf;an riu;alicenmrul;aiknglksajhe1 adcfalcenrco2"
 
@@ -151,13 +154,13 @@ main(int argc, char **argv)
         exit(1000);
 
     } else if (ALLOPTIONS != 1) {
-        usage(stdout);
-        exit(1000);
+        doalltests = 1;
     }
 
+    init_snmp("testing");
 
     /*
-     * Test stuff.
+     * test stuff.
      */
     rval = sc_init();
     FAILED(rval, "sc_init()");
@@ -171,15 +174,8 @@ main(int argc, char **argv)
     }
 
 
-    /*
-     * Cleanup.
-     */
-    rval = sc_shutdown(SNMP_CALLBACK_LIBRARY, SNMP_CALLBACK_SHUTDOWN,
-                       NULL, NULL);
-    FAILED(rval, "sc_shutdown()");
-
-    return failcount;
-
+    fprintf(stdout, "1..%d\n", testcount);
+    return 0;
 }                               /* end main() */
 
 
@@ -252,22 +248,22 @@ test_hashindex(void)
            "(Success or failure not noted.)");
 
     s = "A";
-    fprintf(stdout, "%s = %d\n", s, hash_engineID(s, strlen(s)));
+    fprintf(stdout, "# %s = %d\n", s, hash_engineID(s, strlen(s)));
 
     s = "BB";
-    fprintf(stdout, "%s = %d\n", s, hash_engineID(s, strlen(s)));
+    fprintf(stdout, "# %s = %d\n", s, hash_engineID(s, strlen(s)));
 
     s = "CCC";
-    fprintf(stdout, "%s = %d\n", s, hash_engineID(s, strlen(s)));
+    fprintf(stdout, "# %s = %d\n", s, hash_engineID(s, strlen(s)));
 
     s = "DDDD";
-    fprintf(stdout, "%s = %d\n", s, hash_engineID(s, strlen(s)));
+    fprintf(stdout, "# %s = %d\n", s, hash_engineID(s, strlen(s)));
 
     s = "EEEEE";
-    fprintf(stdout, "%s = %d\n", s, hash_engineID(s, strlen(s)));
+    fprintf(stdout, "# %s = %d\n", s, hash_engineID(s, strlen(s)));
 
     s = BLAT;
-    fprintf(stdout, "%s = %d\n", s, hash_engineID(s, strlen(s)));
+    fprintf(stdout, "# %s = %d\n", s, hash_engineID(s, strlen(s)));
 
 
     OUTPUT("Visual spot check -- DONE.");
@@ -354,13 +350,10 @@ test_etime(void)
     dump_etimelist();
 #endif
 
-    fprintf(stdout, "\nSleeping for %d second%s... ",
+    fprintf(stdout, "# Sleeping for %d second%s... ",
             sleeptime, (sleeptime == 1) ? "" : "s");
-    fflush(stdout);
 
     sleep(sleeptime);
-    fprintf(stdout, "\n");
-
 
 
     /*
@@ -374,7 +367,7 @@ test_etime(void)
     rval = get_enginetime("BB", 2, &eboot, &etime, TRUE);
     FAILED(rval, "get_enginetime().");
 
-    fprintf(stdout, "BB = <%d,%d>\n", eboot, etime);
+    fprintf(stdout, "# BB = <%d,%d>\n", eboot, etime);
     if ((etime < 20) || (eboot < 2)) {
         FAILED(SNMPERR_GENERR,
                "get_enginetime() returned bad values.  (1)");
@@ -383,7 +376,7 @@ test_etime(void)
     rval = get_enginetime("DDDD", 4, &eboot, &etime, FALSE);
     FAILED(rval, "get_enginetime().");
 
-    fprintf(stdout, "DDDD = <%d,%d>\n", eboot, etime);
+    fprintf(stdout, "# DDDD = <%d,%d>\n", eboot, etime);
     if ((etime < sleeptime) || (eboot != 0)) {
         FAILED(SNMPERR_GENERR,
                "get_enginetime() returned bad values.  (2)");
@@ -407,12 +400,10 @@ test_etime(void)
      */
     OUTPUT("Sleep again, then dump the list one last time.");
 
-    fprintf(stdout, "Sleeping for %d second%s... ",
+    fprintf(stdout, "# Sleeping for %d second%s... ",
             sleeptime, (sleeptime == 1) ? "" : "s");
-    fflush(stdout);
 
     sleep(sleeptime);
-    fprintf(stdout, "\n");
 
 #ifdef NETSNMP_ENABLE_TESTING_CODE
     dump_etimelist();
