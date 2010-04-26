@@ -3,12 +3,14 @@
 use Getopt::Long;
 use strict;
 
-my %opts = ('g' => 'default');
+my %opts = ('g' => 'default',
+	    'd' => 'fulltests');
 GetOptions(\%opts, 
 	   "v",
 	   "h",
 	   "q",
-	   "g=s") || usage();
+	   "g=s",
+	   "debug") || usage();
 usage() if ($opts{'h'});
 
 my %args = (
@@ -26,6 +28,8 @@ my $harness = TAP::Harness->new(\%args);
 my @tests = gather_tests($opts{'g'});
 
 # run the actual tests
+DEBUG("Running tests:\n"); 
+DEBUG("-" x 78, "\n");
 $harness->runtests(@tests);
 
 ########################################
@@ -41,16 +45,28 @@ sub decide_exec {
 
 sub gather_tests {
     my ( $groups ) = @_;
+    my @groups;
+
+    if ($groups eq 'all') {
+	# find every group we can
+	# we exclude:
+	#  - things not a directory
+	#  - anything with "template" in the name
+	@groups =
+	  grep { !/template/ && -d $_ && s/$opts{'d'}.// } glob("$opts{'d'}/*");
+    } else {
+	@groups = split(/,\s*/, $groups);
+    }
+    DEBUG("Checking groups: ", join(", ", @groups), "\n");
 
     my @tests;
-
-    foreach my $group (split(/,\s*/, $groups)) {
+    foreach my $group (@groups) {
 	my @files;
 
-	print "checking group $group\n";
+	DEBUG("checking group $group\n");
 
 	# push on all files that start with T[NUM]*
-	push_or_skip(\@tests, glob("fulltests/$group/T[0-9]*"));
+	push_or_skip(\@tests, glob("$opts{'d'}/$group/T[0-9]*"));
     }
 
     return @tests;
@@ -61,7 +77,10 @@ sub push_or_skip {
     foreach my $file (@files) {
 	next if ($file =~ /.(bak|old|orig|rej)$/);
 	next if ($file =~ /~$/);
-	push @$array, $file;
+	DEBUG("  Adding file $file\n");
+	my $title = "$file";
+	$title =~ s/$opts{'d'}.//;
+	push @$array, [$file, $title];
     }
 }
 
@@ -74,5 +93,11 @@ sub usage {
     print "  -g GROUP\tRuns the group of specified tests (default = 'default')\n";
     print "\t\t(use 'all' to run all tests)\n";
     print "  -h\t\tThis help output\n";
+    print "  --debug\t\tDebugging output\n";
     exit;
+}
+
+sub DEBUG {
+    return if (!$opts{'debug'});
+    print @_;
 }
