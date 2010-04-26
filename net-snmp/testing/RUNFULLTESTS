@@ -1,18 +1,18 @@
 #!/usr/bin/perl
 
 use Getopt::Long;
+use Data::Dumper;
 use strict;
+
+########################################
+# Globals and Command Line options
 
 my %opts = ('g' => 'default',
 	    'd' => 'fulltests');
-GetOptions(\%opts, 
-	   "v",
-	   "h",
-	   "q",
-	   "g=s",
-	   "debug") || usage();
+GetOptions(\%opts, "v", "h", "q", "g=s", "debug") || usage();
 usage() if ($opts{'h'});
 
+# Build the harness object
 my %args = (
 	    verbosity => ($opts{'v'} ? 1 : 0),
 	    exec => \&decide_exec,
@@ -24,12 +24,25 @@ my %args = (
 use TAP::Harness;
 my $harness = TAP::Harness->new(\%args);
 
+########################################
 # gather the tests
+
 my @tests = gather_tests($opts{'g'});
 
-# run the actual tests
+########################################
+# build any needed tests
+
+DEBUG("Building tests:\n"); 
+
+@tests = build_tests(@tests);
+@tests = rename_tests(@tests);
+
+########################################
+# run the tests
+
 DEBUG("Running tests:\n"); 
 DEBUG("-" x 78, "\n");
+
 $harness->runtests(@tests);
 
 ########################################
@@ -86,14 +99,59 @@ sub push_or_skip {
 	next if ($file =~ /.(bak|old|orig|rej)$/);
 	next if ($file =~ /~$/);
 	DEBUG("  Adding file $file\n");
-	my $title = "$file";
-	$title =~ s/$opts{'d'}.//;
-	push @$array, [$file, $title];
+	push @$array, $file;
     }
 }
 
+# rename all the tests to remove the top subdir to help readability
+sub rename_tests {
+    my (@tests) = @_;
+    my @newtests;
+
+    # yes, I could have used map.  But I didn't.
+    foreach my $file (@tests) {
+	my $title = "$file";
+	$title =~ s/$opts{'d'}.//;
+	push @newtests, [$file, $title];
+    }
+    return @newtests;
+}
+
+# called to possibly manipluate the list of tests to run by building some
+sub build_tests {
+    my (@tests) = @_;
+    my @newtests;
+
+    foreach my $test (@tests) {
+	my $title;
+	
+	my $built = build_test($test);
+	if (ref($built) eq 'ARRAY') {
+	    push @newtests, @$built;
+	} else {
+	    push @newtests, $built;
+	}
+    }
+    return @newtests;
+}
+
+# called to build a test from a registerd builder
 sub build_test {
     my ($testfile) = @_;
+
+    # choices:
+    # 1) we have a registered subroutine to build an extension from
+    # 2) we have a BUILD_TYPE file in the same directory
+    # 3) we have a BUILD_TYPE file in some other directory (first wins)
+    # 4) we assume it's fine as is
+
+    # 1) we have a registered subroutine to build an extension from
+    # 2) we have a BUILD_TYPE file in the same directory
+    # 3) we have a BUILD_TYPE file in some other directory (first wins)
+    # XXX
+
+    # 4) we assume it's fine as is
+    return $testfile;
 }
 
 # usage output
