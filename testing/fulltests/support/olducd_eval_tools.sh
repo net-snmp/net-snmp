@@ -27,6 +27,8 @@ if [ "x$EVAL_TOOLS_SH_EVALED" != "xyes" ]; then
 # Variables used in global environment of calling script.
 #
 failcount=0
+testnum=0
+errnum=0
 junkoutputfile="$SNMP_TMPDIR/output-`basename $0`$$"
 seperator="-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-="
 if [ -z "$OK_TO_SAVE_RESULT" ] ; then
@@ -43,8 +45,9 @@ HEADER() {
         echo test $*
 	exit 0;
     else
-	ECHO "testing $*...  "
-	headerStr="testing $*"
+        :
+	#ECHO "testing $*...  "
+	#headerStr="testing $*"
     fi
 }
 
@@ -106,21 +109,21 @@ GRONIK
 #
 SKIP() {
 	REMOVETESTDATA
-	echo "SKIPPED"
+	echo "1..0 # SKIP: $1"
 	exit 0
 }
 
 SKIPIFNOT() {
 	grep "^#define $1" $SNMP_UPDIR/include/net-snmp/net-snmp-config.h $SNMP_UPDIR/include/net-snmp/agent/mib_module_config.h $SNMP_UPDIR/include/net-snmp/agent/agent_module_config.h > /dev/null
 	if [ $? != 0 ]; then
-	    SKIP
+	    SKIP "$1 is not defined"
 	fi
 }
 
 SKIPIF() {
 	grep "^#define $1 " $SNMP_UPDIR/include/net-snmp/net-snmp-config.h $SNMP_UPDIR/include/net-snmp/agent/mib_module_config.h $SNMP_UPDIR/include/net-snmp/agent/agent_module_config.h > /dev/null
 	if [ $? = 0 ]; then
-	    SKIP
+	    SKIP "$1 is not defined"
 	fi
 }
 	
@@ -222,7 +225,9 @@ EXPECTRESULT() {
 #------------------------------------ -o-
 # Returns: Count of matched lines.
 #
-CHECK() {	# <pattern_to_match>
+CHECKCOUNT() {	# <pattern_to_match>
+    count=$1
+    shift
     if [ $SNMP_VERBOSE -gt 0 ]; then
 	echo -n "checking output for \"$*\"..."
     fi
@@ -235,7 +240,17 @@ CHECK() {	# <pattern_to_match>
 
     snmp_last_test_result=$rval
     EXPECTRESULT 1  # default
+    if [ "$rval" -eq "$count" ]; then
+       GOOD "found $count copies of '$*' in output"
+    else
+       BAD "found $rval copies of '$*' in output; expected $count"
+       COMMENT "Outputfile: $junkoutputfile"
+    fi
     return $rval
+}
+
+CHECK() {
+    CHECKCOUNT 1 $@
 }
 
 CHECKFILE() {
@@ -311,24 +326,41 @@ WAITFOR() {
   ## restore the previous save state and test result
     OK_TO_SAVE_RESULT=$save_state
     snmp_last_test_result=$save_test
-}    
+}
+
+GOOD() {
+    testnum=`expr $testnum + 1`
+    echo "ok $testnum - $1"
+}
+
+BAD() {
+    testnum=`expr $testnum + 1`
+    errnum=`expr $errnum + 1`
+    echo "not ok $testnum - $1"
+}
+
+COMMENT() {
+    echo "# $@" 1>&2
+}
 
 # WAITFORORDIE "grep string" ["file"]
 WAITFORORDIE() {
     WAITFOR "$1" "$2"
     if [ "$snmp_last_test_result" != 0 ] ; then
+        BAD
         FINISHED
     fi
-    ECHO "."
+    GOOD
 }
 
 # CHECKORDIE "grep string" ["file"] .. FAIL if "grep string" is *not* found
 CHECKORDIE() {
     CHECKFILE "$2" "$1"
     if [ "$snmp_last_test_result" = 0 ] ; then
+        BAD "failed to find '$1' in output"
         FINISHED
     fi
-    ECHO "."
+    GOOD "found string '$1' in output"
 }
 
 # CHECKANDDIE "grep string" ["file"] .. FAIL if "grep string" *is* found
@@ -336,9 +368,10 @@ CHECKANDDIE() {
     CHECKFILE "$2" "$1"
     EXPECTRESULT 0 # make sure return_value gets set correctly
     if [ "$snmp_last_test_result" != 0 ] ; then
+        BAD "found string '$1' in output"
         FINISHED
     fi
-    ECHO "."
+    GOOD "didn't find string '$1' in output"
 }
 
 #------------------------------------ -o-
@@ -532,11 +565,11 @@ FINISHED() {
     fi
     for pfile in $SNMP_TMPDIR/*pid* ; do
         if [ "x$pfile" = "x$SNMP_TMPDIR/*pid*" ]; then
-            ECHO "(no pid file(s) found) "
+            BAD "(no pid file(s) found) "
             break
         fi
         if [ ! -f $pfile ]; then
-            ECHO "('$pfile' disappeared) "
+            BAD "('$pfile' disappeared) "
             continue
         fi
 	pid=`cat $pfile`
@@ -555,24 +588,28 @@ FINISHED() {
 	    return_value=1
 	fi
     done
-    if [ "x$real_return_value" != "x0" ]; then
+
+    # retuport the number of tests done
+    GOOD "got to FINISHED"
+    echo "1..$testnum"
+
+    if [ "x$errnum" != "x0" ]; then
+        BAD "error count $errnum > 0"
 	if [ -s core ] ; then
 	    # XX hope that only one prog cores !
 	    cp core $SNMP_TMPDIR/core.$$
 	    rm -f core
 	fi
-	echo "FAIL"
 	echo "$headerStr...FAIL" >> $SNMP_TMPDIR/invoked
-	exit $real_return_value
+	exit 1
     fi
 
-    echo "ok"
     echo "$headerStr...ok" >> $SNMP_TMPDIR/invoked
 
     if [ "x$SNMP_SAVE_TMPDIR" != "xyes" ]; then
 	REMOVETESTDATA
     fi
-    exit $real_return_value
+    exit 0
 }
 
 #------------------------------------ -o-
