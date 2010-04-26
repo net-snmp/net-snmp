@@ -1,0 +1,53 @@
+#!/usr/bin/perl
+
+use Getopt::Long;
+
+my %opts;
+GetOptions(\%opts, 
+	   "v",
+	   "h",
+	   "q",
+	   "g=s") || usage();
+usage() if ($opts{'h'});
+
+my %args = (
+	    verbosity => ($opts{'v'} ? 1 : 0),
+	    exec => \&decide_exec,
+	    failures => ($opts{'q'} ? 0 : 1),
+	    errors => ($opts{'q'} ? 0 : 1),
+	   );
+
+# create the testing harness infrastructure
+use TAP::Harness;
+my $harness = TAP::Harness->new(\%args);
+
+# gather the tests
+@tests = (["fulltests/test/foo",  "perl test"],
+	  ["fulltests/test/foo2", "sh test"],
+	  ["fulltests/test/fooc", "C test"],
+	 );
+
+# run the actual tests
+$harness->runtests(@tests);
+
+########################################
+# decides how we should execute a test
+#
+sub decide_exec {
+    my ( $harness, $test_file ) = @_;
+    if ($test_file =~ /c$/) {
+	return [$test_file];
+    }
+    return undef;
+}
+
+# usage output
+sub usage {
+    print "$0 [-v] [-q] [-g GROUP]\n";
+    print "  -v\t\tRuns in verbose mode; dumping all test output\n";
+    print "  -q\t\tRuns in quieter mode; dumps less test output\n";
+    print "  -g GROUP\tRuns the group of specified tests (default = 'default')\n";
+    print "\t\t(use 'all' to run all tests)\n";
+    print "  -h\t\tThis help output\n";
+    exit;
+}
