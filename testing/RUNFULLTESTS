@@ -27,14 +27,12 @@ my $harness = TAP::Harness->new(\%args);
 ########################################
 # gather the tests
 
+DEBUG("Gathering and building tests:\n"); 
+find_builders();
 my @tests = gather_tests($opts{'g'});
 
 ########################################
-# build any needed tests
-
-DEBUG("Building tests:\n"); 
-
-@tests = build_tests(@tests);
+# rename them to remove parent dirs
 @tests = rename_tests(@tests);
 
 ########################################
@@ -50,7 +48,7 @@ $harness->runtests(@tests);
 #
 sub decide_exec {
     my ( $harness, $test_file ) = @_;
-    if ($test_file =~ /c$/) {
+    if ($test_file =~ /\.exe$/) {
 	return [$test_file];
     }
     return undef;
@@ -99,7 +97,7 @@ sub push_or_skip {
 	next if ($file =~ /.(bak|old|orig|rej)$/);
 	next if ($file =~ /~$/);
 	DEBUG("  Adding file $file\n");
-	push @$array, $file;
+	push @$array, build_test($file);
     }
 }
 
@@ -128,30 +126,88 @@ sub build_tests {
 	my $built = build_test($test);
 	if (ref($built) eq 'ARRAY') {
 	    push @newtests, @$built;
-	} else {
+	} elsif ($built ne "") {
 	    push @newtests, $built;
 	}
     }
     return @newtests;
 }
 
+my %builders;
+sub find_builders {
+    my $count;
+    DEBUG("looking for build scripts\n");
+    foreach my $builder (glob("$opts{'d'}/*/build_*")) {
+	next if ($builder =~ /~$/);
+	next if ($builder =~ /.(bak|orig|rej|old)$/);
+
+	my ($group, $type) = ($builder =~ /([^\/]+)\/build_(.*)/);
+	# save this as a certain group builder
+	$builders{$type}{$group} = $builder;
+
+	# save this as a generic builder if there isn't a better
+	# generic one, such as one that exists in the support
+	# directory.
+	if (!exists($builders{$type}{'generic'}) || $group eq 'support') {
+	    $builders{$type}{'generic'} = $builder;
+	}
+	$count++;
+    }
+    DEBUG("  found $count\n");
+}
+
 # called to build a test from a registerd builder
 sub build_test {
     my ($testfile) = @_;
 
+    my ($dirname, $basename, $app_extension, $file_extension) = 
+      ($testfile =~ /([^\/]*)\/([^\/]+)_([^_]+)\.([^\.]+)$/);
+
+    # is this even a buildable type recipe?
+    if (!$dirname || !$basename || !$app_extension || !$file_extension) {
+	return $testfile;
+    }
+
+    DEBUG("found: $testfile => $dirname, $basename, $app_extension, $file_extension\n");
+
     # choices:
     # 1) we have a registered subroutine to build an extension from
-    # 2) we have a BUILD_TYPE file in the same directory
-    # 3) we have a BUILD_TYPE file in some other directory (first wins)
-    # 4) we assume it's fine as is
-
-    # 1) we have a registered subroutine to build an extension from
-    # 2) we have a BUILD_TYPE file in the same directory
-    # 3) we have a BUILD_TYPE file in some other directory (first wins)
     # XXX
+
+    # 2) we have a BUILD_TYPE file in the same directory
+    if (exists($builders{$app_extension}{$dirname})) {
+	return
+	  call_build_script($builders{$app_extension}{$dirname}, $testfile);
+    }
+
+    # 3) return a generic build script
+    if (exists($builders{$app_extension}{'generic'})) {
+	call_build_script($builders{$app_extension}{'generic'}, $testfile);
+    }
 
     # 4) we assume it's fine as is
     return $testfile;
+}
+
+sub call_build_script {
+    my ($scriptname, $filename) = @_;
+
+    my $maybenewfile = $filename;
+    $maybenewfile =~ s/.[^\.]+$/.exe/;   # add .exe suffix
+    $maybenewfile =~ s/T([^\/]+)$/B$1/;  # change prefix to B for 'Built'
+
+    my $lastline;
+    DEBUG("BUILDING: $scriptname $filename $maybenewfile\n");
+    open(B,"$scriptname $filename $maybenewfile|");
+    while (<B>) {
+	$lastline = $_;
+    }
+
+    DEBUG("  result: $lastline\n");
+    return undef if ($lastline eq 'fail');
+    return undef if ($lastline eq 'skip');
+    return $filename if ($lastline eq '');
+    return $lastline;
 }
 
 # usage output
