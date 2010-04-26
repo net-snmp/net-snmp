@@ -22,7 +22,6 @@
 #
 if [ "x$EVAL_TOOLS_SH_EVALED" != "xyes" ]; then
     EVAL_TOOLS_SH_EVALED=yes
-    . TESTCONF.sh
 
 #
 # Variables used in global environment of calling script.
