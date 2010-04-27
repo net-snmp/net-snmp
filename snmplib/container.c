@@ -348,6 +348,20 @@ int CONTAINER_REMOVE(netsnmp_container *x, const void *k)
 }
 
 /*------------------------------------------------------------------
+ * These functions should EXACTLY match the function version in
+ * container.c. If you change one, change them both.
+ */
+netsnmp_container *CONTAINER_DUP(netsnmp_container *x, void *ctx, u_int flags)
+{
+    if (NULL == x->duplicate) {
+        snmp_log(LOG_ERR, "container '%s' does not support duplicate\n",
+                 x->container_name ? x->container_name : "");
+        return NULL;
+    }
+    return x->duplicate(x, ctx, flags);
+}
+
+/*------------------------------------------------------------------
  * These functions should EXACTLY match the inline version in
  * container.h. If you change one, change them both.
  */
@@ -457,6 +471,25 @@ netsnmp_init_container(netsnmp_container         *c,
     c->remove = rem;
     c->find = fnd;
     c->free_item = netsnmp_container_simple_free;
+}
+
+int
+netsnmp_container_data_dup(netsnmp_container *dup, netsnmp_container *c)
+{
+    if (!dup || !c)
+        return -1;
+
+    if (c->container_name)
+        dup->container_name = strdup(c->container_name);
+    dup->compare = c->compare;
+    dup->ncompare = c->ncompare;
+    dup->release = c->release;
+    dup->insert_filter = c->insert_filter;
+    dup->free_item = c->free_item;
+    dup->sync = c->sync;
+    dup->flags = c->flags;
+
+    return 0;
 }
 
 /*------------------------------------------------------------------

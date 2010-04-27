@@ -36,7 +36,6 @@
 typedef struct binary_array_table_s {
     size_t                     max_size;   /* Size of the current data table */
     size_t                     count;      /* Index of the next free entry */
-    u_int                      flags;      /* flags */
     int                        dirty;
     int                        data_size;  /* Size of an individual entry */
     void                     **data;       /* The table itself */
@@ -99,7 +98,7 @@ Sort_Array(netsnmp_container *c)
     netsnmp_assert(t!=NULL);
     netsnmp_assert(c->compare!=NULL);
 
-    if (t->flags & CONTAINER_KEY_UNSORTED)
+    if (c->flags & CONTAINER_KEY_UNSORTED)
         return 0;
 
     if (t->dirty) {
@@ -204,11 +203,16 @@ netsnmp_binary_array_release(netsnmp_container *c)
 int
 netsnmp_binary_array_options_set(netsnmp_container *c, int set, u_int flags)
 {
-    binary_array_table *t = (binary_array_table*)c->container_data;
-    if (set)
-        t->flags = flags;
+#define BA_FLAGS (CONTAINER_KEY_ALLOW_DUPLICATES|CONTAINER_KEY_UNSORTED)
+
+    if (set) {
+        if ((flags & BA_FLAGS) == flags)
+            c->flags = flags;
+        else
+            flags = (u_int)-1; /* unsupported flag */
+    }
     else
-        return ((t->flags & flags) == flags);
+        return ((c->flags & flags) == flags);
     return flags;
 }
 
@@ -342,7 +346,7 @@ netsnmp_binary_array_insert(netsnmp_container *c, const void *entry)
     /*
      * check for duplicates
      */
-    if (! (t->flags & CONTAINER_KEY_ALLOW_DUPLICATES)) {
+    if (! (c->flags & CONTAINER_KEY_ALLOW_DUPLICATES)) {
         new_data = netsnmp_binary_array_get(c, entry, 1);
         if (NULL != new_data) {
             DEBUGMSGTL(("container","not inserting duplicate key\n"));
@@ -549,7 +553,57 @@ _ba_get_subset(netsnmp_container *container, void *data)
 
 static int _ba_options(netsnmp_container *c, int set, u_int flags)
 {
-	return netsnmp_binary_array_options_set(c, set, flags);
+    return netsnmp_binary_array_options_set(c, set, flags);
+}
+
+static netsnmp_container *
+_ba_duplicate(netsnmp_container *c, void *ctx, u_int flags)
+{
+    netsnmp_container *dup;
+    binary_array_table *dupt, *t;
+
+    if (flags) {
+        snmp_log(LOG_ERR, "binary arry duplicate does not supprt flags yet\n");
+        return NULL;
+    }
+
+    dup = netsnmp_container_get_binary_array();
+    if (NULL == dup) {
+        snmp_log(LOG_ERR," no memory for binary array duplicate\n");
+        return NULL;
+    }
+    /*
+     * deal with container stuff
+     */
+    if (netsnmp_container_data_dup(dup, c) != 0) {
+        netsnmp_binary_array_release(dup);
+        return NULL;
+    }
+
+    /*
+     * deal with data
+     */
+    dupt = (binary_array_table*)dup->container_data;
+    t = (binary_array_table*)c->container_data;
+
+    dupt->max_size = t->max_size;
+    dupt->count = t->count;
+    dupt->dirty = t->dirty;
+    dupt->data_size = t->data_size;
+
+    /*
+     * shallow copy
+     */
+    dupt->data = (void**) calloc(dupt->max_size, dupt->data_size);
+    if (NULL == dupt->data) {
+        snmp_log(LOG_ERR, "no memory for binary array duplicate\n");
+        netsnmp_binary_array_release(dup);
+        return NULL;
+    }
+
+    memcpy(dupt->data, t->data, dupt->max_size * dupt->data_size);
+    
+    return dup;
 }
 
 netsnmp_container *
@@ -566,6 +620,9 @@ netsnmp_container_get_binary_array(void)
 
     c->container_data = netsnmp_binary_array_initialize();
 
+    /*
+     * NOTE: CHANGES HERE MUST BE DUPLICATED IN duplicate AS WELL!!
+     */
     netsnmp_init_container(c, NULL, _ba_free, _ba_size, NULL, _ba_insert,
                            _ba_remove, _ba_find);
     c->find_next = _ba_find_next;
@@ -574,6 +631,7 @@ netsnmp_container_get_binary_array(void)
     c->for_each = _ba_for_each;
     c->clear = _ba_clear;
     c->options = _ba_options;
+    c->duplicate = _ba_duplicate;
         
     return c;
 }
