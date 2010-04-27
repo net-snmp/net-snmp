@@ -16,7 +16,11 @@
 #define USING_NOTIFICATION_MODULE 1
  
 /* Define if compiling with the notification-log-mib module files. */
+#ifdef HAVE_WIN32_PLATFORM_SDK
+#define USING_NOTIFICATION_LOG_MIB_NOTIFICATION_LOG_MODULE 1
+#else
 /* #undef USING_NOTIFICATION_LOG_MIB_NOTIFICATION_LOG_MODULE */
+#endif
 
 /* Define if compiling with the target module files.  */
 #define USING_TARGET_MODULE 1
