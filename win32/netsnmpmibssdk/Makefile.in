@@ -61,6 +61,7 @@ CLEAN :
 	-@erase "$(INTDIR)\snmpEngine.obj"
 	-@erase "$(INTDIR)\snmpMPDStats.obj"
 	-@erase "$(INTDIR)\snmpNotifyFilterProfileTable.obj"
+	-@erase "$(INTDIR)\notification_log.obj"
 	-@erase "$(INTDIR)\snmpNotifyFilterTable.obj"
 	-@erase "$(INTDIR)\snmpNotifyFilterTable_data_access.obj"
 	-@erase "$(INTDIR)\snmpNotifyFilterTable_interface.obj"
@@ -160,6 +161,7 @@ LIB32_OBJS= \
 	"$(INTDIR)\usmStats.obj" \
 	"$(INTDIR)\usmUser.obj" \
 	"$(INTDIR)\snmpNotifyFilterProfileTable.obj" \
+	"$(INTDIR)\notification_log.obj" \
 	"$(INTDIR)\snmpNotifyFilterTable.obj" \
 	"$(INTDIR)\snmpNotifyFilterTable_data_access.obj" \
 	"$(INTDIR)\snmpNotifyFilterTable_interface.obj" \
@@ -266,6 +268,7 @@ CLEAN :
 	-@erase "$(INTDIR)\snmpEngine.obj"
 	-@erase "$(INTDIR)\snmpMPDStats.obj"
 	-@erase "$(INTDIR)\snmpNotifyFilterProfileTable.obj"
+	-@erase "$(INTDIR)\notification_log.obj"
 	-@erase "$(INTDIR)\snmpNotifyFilterTable.obj"
 	-@erase "$(INTDIR)\snmpNotifyFilterTable_data_access.obj"
 	-@erase "$(INTDIR)\snmpNotifyFilterTable_interface.obj"
@@ -366,6 +369,7 @@ LIB32_OBJS= \
 	"$(INTDIR)\usmStats.obj" \
 	"$(INTDIR)\usmUser.obj" \
 	"$(INTDIR)\snmpNotifyFilterProfileTable.obj" \
+	"$(INTDIR)\notification_log.obj" \
 	"$(INTDIR)\snmpNotifyFilterTable.obj" \
 	"$(INTDIR)\snmpNotifyFilterTable_data_access.obj" \
 	"$(INTDIR)\snmpNotifyFilterTable_interface.obj" \
@@ -568,6 +572,12 @@ SOURCE=..\..\agent\mibgroup\snmpv3\usmUser.c
 SOURCE=..\..\agent\mibgroup\notification\snmpNotifyFilterProfileTable.c
 
 "$(INTDIR)\snmpNotifyFilterProfileTable.obj" : $(SOURCE) "$(INTDIR)"
+	$(CPP) $(CPP_PROJ) $(SOURCE)
+
+
+SOURCE=..\..\agent\mibgroup\notification-log-mib\notification_log.c
+
+"$(INTDIR)\notification_log.obj" : $(SOURCE) "$(INTDIR)"
 	$(CPP) $(CPP_PROJ) $(SOURCE)
 
 
