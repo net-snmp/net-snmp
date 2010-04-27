@@ -2084,6 +2084,7 @@ _parse_map(const char *token, char *line)
     len = sizeof(buf);
     tmp = buf;
     line = read_config_read_octet_string(line, (u_char **)&tmp, &len);
+    netsnmp_fp_lowercase_and_strip_colon(buf);
     map->fingerprint = strdup(buf);
     if (NULL == line) {
         netsnmp_config_error(CONFIG_TOKEN  ":must specify map type");
