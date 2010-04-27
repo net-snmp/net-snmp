@@ -25,8 +25,9 @@ int
 netsnmp_access_scopezone_container_arch_load(netsnmp_container* container,
                                              u_int load_flags)
 {
-    int rc1 = 0, idx_offset = 0;
+    int rc1 = 0;
 #if defined (NETSNMP_ENABLE_IPV6)
+    int idx_offset = 0;
 
     if (NULL == container) {
         snmp_log(LOG_ERR, "no container specified/found for access_scopezone_\n");
