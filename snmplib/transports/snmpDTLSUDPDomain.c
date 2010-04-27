@@ -131,6 +131,7 @@
 
 #include <net-snmp/library/snmpTLSBaseDomain.h>
 #include <net-snmp/library/snmpDTLSUDPDomain.h>
+#include <net-snmp/library/cert_util.h>
 #include <net-snmp/library/snmp_openssl.h>
 
 #ifndef INADDR_NONE

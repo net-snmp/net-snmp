@@ -86,20 +86,53 @@ void netsnmp_certs_shutdown(void);
 #define NS_HASH_MAX         NS_HASH_SHA512
 
     /*************************************************************************
-     *
-     * function definitions
-     *
+     * netsnmp_cert function definitions
      *************************************************************************/
-
-void netsnmp_certs_init(void);
-void netsnmp_certs_shutdown(void);
 
     netsnmp_cert *netsnmp_cert_find(int what, int where, void *hint);
 
     int netsnmp_cert_check_vb_fingerprint(const netsnmp_variable_list *var);
 
     void netsnmp_fp_lowercase_and_strip_colon(char *fp);
-    
+
+
+    /*************************************************************************
+     *
+     *  certificate to Transport Security Name mapping (netsnmp_cert_map)
+     *
+     *************************************************************************/
+
+#define TSNM_tlstmCertSpecified                 1
+#define TSNM_tlstmCertSANRFC822Name             2
+#define TSNM_tlstmCertSANDNSName                3
+#define TSNM_tlstmCertSANIpAddress              4
+#define TSNM_tlstmCertSANAny                    5
+#define TSNM_tlstmCertCommonName                6
+#define TSNM_tlstmCert_MAX                      TSNM_tlstmCertCommonName
+
+    typedef struct netsnmp_cert_map_s {
+        int             priority;
+        char           *fingerprint;
+        int             mapType;
+        char           *data;
+
+        char            flags;
+        char            _pad[3]; /* rsvd for future use */
+
+        X509           *ocert;
+    } netsnmp_cert_map;
+
+
+    netsnmp_cert_map *netsnmp_cert_map_alloc(char *fp, X509 *ocert);
+    void netsnmp_cert_map_free(netsnmp_cert_map *cert_map);
+
+    void netsnmp_cert_map_container_free(netsnmp_container *c);
+    netsnmp_container *netsnmp_cert_map_container_create(int with_fp);
+    netsnmp_container *netsnmp_cert_map_container(void);
+
+    int netsnmp_cert_get_secname_maps(netsnmp_container *cm);
+
+
 #ifdef __cplusplus
 }
 #endif

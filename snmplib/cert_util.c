@@ -2,37 +2,6 @@
 
 #if defined(NETSNMP_USE_OPENSSL) && defined(HAVE_LIBSSL)
 
-#include <stdio.h>
-#include <sys/types.h>
-#include <ctype.h>
-#include <errno.h>
-
-#if HAVE_STRING_H
-#include <string.h>
-#else
-#include <strings.h>
-#endif
-#if HAVE_STDLIB_H
-#include <stdlib.h>
-#endif
-#if HAVE_UNISTD_H
-#include <unistd.h>
-#endif
-#if HAVE_SYS_SOCKET_H
-#include <sys/socket.h>
-#endif
-#if HAVE_NETINET_IN_H
-#include <netinet/in.h>
-#endif
-#if HAVE_ARPA_INET_H
-#include <arpa/inet.h>
-#endif
-#if HAVE_NETDB_H
-#include <netdb.h>
-#endif
-#if HAVE_SYS_UIO_H
-#include <sys/uio.h>
-#endif
 #if HAVE_SYS_STAT_H
 #   include <sys/stat.h>
 #endif
@@ -65,22 +34,20 @@
 #include <net-snmp/library/snmp_transport.h>
 #include <net-snmp/library/system.h>
 #include <net-snmp/library/tools.h>
-#include <net-snmp/library/callback.h>
 #include <net-snmp/library/container.h>
 #include <net-snmp/library/data_list.h>
 #include <net-snmp/library/file_utils.h>
 #include <net-snmp/library/dir_utils.h>
 
-#include <openssl/bio.h>
 #include <openssl/ssl.h>
 #include <openssl/err.h>
 #include <openssl/x509v3.h>
-#include <openssl/pkcs12.h>
-#include <net-snmp/library/snmp_openssl.h>
 #include <net-snmp/library/cert_util.h>
+#include <net-snmp/library/snmp_openssl.h>
 
 static netsnmp_container *_certs = NULL;
 static netsnmp_container *_keys = NULL;
+static netsnmp_container *_maps = NULL;
 static struct snmp_enum_list *_certindexes = NULL;
 
 static void _setup_containers(void);
@@ -97,6 +64,7 @@ static int  _cert_fn_compare(netsnmp_cert_common *lhs,
 static int  _cert_fn_ncompare(netsnmp_cert_common *lhs,
                               netsnmp_cert_common *rhs);
 static void _find_partner(netsnmp_cert *cert, netsnmp_key *key);
+static netsnmp_cert *_find_issuer(netsnmp_cert *cert);
 static netsnmp_void_array *_cert_find_subset_fn(const char *filename);
 static netsnmp_void_array *_cert_find_subset_sn(const char *subject);
 static netsnmp_void_array *_key_find_subset(const char *filename);
@@ -104,6 +72,8 @@ static netsnmp_cert *_cert_find_fp(const char *fingerprint);
 static const char *_mode_str(u_char mode);
 static const char *_where_str(u_int what);
 void netsnmp_cert_dump_all(void);
+
+int netsnmp_cert_load_x509(netsnmp_cert *cert);
 
 void netsnmp_cert_free(netsnmp_cert *cert);
 void netsnmp_key_free(netsnmp_key *key);
@@ -143,6 +113,7 @@ netsnmp_certs_init(void)
 {
     netsnmp_iterator  *itr;
     netsnmp_key        *key;
+    netsnmp_cert       *cert;
 
     DEBUGMSGT(("cert:util:init","init\n"));
 
@@ -181,23 +152,18 @@ netsnmp_certs_init(void)
         _find_partner(NULL, key);
     ITERATOR_RELEASE(itr);
 
-#if 0
-    netsnmp_cert       *cert;
-
-    /** match up certs w/issuers */
-    itr = CONTAINER_ITERATOR(_certs);
-    if (NULL == itr) {
-        snmp_log(LOG_ERR, "could not get iterator for certs\n");
-        netsnmp_certs_shutdown();
-        return;
-    }
-    cert = ITERATOR_FIRST(itr);
-    for( ; cert; cert = ITERATOR_NEXT(itr))
-        if (cert->issuer)
-            _find_issuer(cert);
-    ITERATOR_RELEASE(itr);
-#endif
     DEBUGIF("cert:dump") {
+        itr = CONTAINER_ITERATOR(_certs);
+        if (NULL == itr) {
+            snmp_log(LOG_ERR, "could not get iterator for certs\n");
+            netsnmp_certs_shutdown();
+            return;
+        }
+        cert = ITERATOR_FIRST(itr);
+        for( ; cert; cert = ITERATOR_NEXT(itr)) {
+            netsnmp_cert_load_x509(cert);
+        }
+        ITERATOR_RELEASE(itr);
         DEBUGMSGT(("cert:dump",
                    "-------------------- Certificates -----------------\n"));
         netsnmp_cert_dump_all();
@@ -278,20 +244,6 @@ _setup_containers(void)
     additional_keys->ncompare = (netsnmp_container_compare*)_cert_sn_ncompare;
     netsnmp_container_add_index(_certs, additional_keys);
 
-#if 0
-    /** additional keys: issuer name */
-    additional_keys = netismp_container_find("certs_is:binary_array");
-    if (NULL == additional_keys) {
-        ismp_log(LOG_ERR, "could not create IS container for certificates\n");
-        netismp_certs_shutdown();
-        return;
-    }
-    additional_keys->container_name = strdup("certs_is");
-    additional_keys->free_item = NULL;
-    additional_keys->compare = (netismp_container_compare*)_cert_is_compare;
-    netismp_container_add_index(_certs, additional_keys);
-#endif
-
     /** additional keys: file name */
     additional_keys = netsnmp_container_find("certs_fn:binary_array");
     if (NULL == additional_keys) {
@@ -314,6 +266,17 @@ _setup_containers(void)
     _keys->container_name = strdup("netsnmp certificate keys");
     _keys->free_item = (netsnmp_container_obj_func*)_key_free;
     _keys->compare = (netsnmp_container_compare*)_cert_fn_compare;
+
+    /*
+     * container for cert to fingerprint mapping
+     */
+    _maps = netsnmp_cert_map_container_create(1); /* with fingerprint key too */
+}
+
+netsnmp_container *
+netsnmp_cert_map_container(void)
+{
+    return _maps;
 }
 
 static netsnmp_cert *
@@ -1018,7 +981,6 @@ _find_issuer(netsnmp_cert *cert)
     return issuer;
 }
 
-
 int
 netsnmp_cert_load_x509(netsnmp_cert *cert)
 {
@@ -1536,7 +1498,7 @@ _cert_print(netsnmp_cert *c, void *context)
     }
 
     netsnmp_openssl_cert_dump_names(c->ocert);
-
+    netsnmp_openssl_cert_dump_extensions(c->ocert);
 }
 
 static void
@@ -1722,6 +1684,11 @@ netsnmp_cert_check_vb_fingerprint(const netsnmp_variable_list *var)
     return SNMP_ERR_NOERROR;
 }
 
+/* ***************************************************************************
+ *
+ * mode text functions
+ *
+ */
 static const char *_mode_str(u_char mode)
 {
     return _modes[mode];
@@ -1745,6 +1712,11 @@ static const char *_where_str(u_int what)
     return "UNKNOWN";
 }
 
+/* ***************************************************************************
+ *
+ * find functions
+ *
+ */
 static netsnmp_cert *
 _cert_find_fp(const char *fingerprint)
 {
@@ -1907,5 +1879,296 @@ _time_filter(netsnmp_file *f, struct stat *idx)
     return NETSNMP_DIR_EXCLUDE;
 }
 
+/* ***************************************************************************
+ * ***************************************************************************
+ *
+ *
+ * cert map functions
+ *
+ *
+ * ***************************************************************************
+ * ***************************************************************************/
+static void _map_free(netsnmp_cert_map* entry, void *ctx);
+
+netsnmp_cert_map *
+netsnmp_cert_map_alloc(char *fingerprint, X509 *ocert)
+{
+    netsnmp_cert_map *cert_map = SNMP_MALLOC_TYPEDEF(netsnmp_cert_map);
+    if (NULL == cert_map) {
+        snmp_log(LOG_ERR, "could not allocate netsnmp_cert_map\n");
+        return NULL;
+    }
+    
+    if (fingerprint) {
+        /** MIB limits to 255 bytes; 2x since we've got ascii */
+        if (strlen(fingerprint) > (SNMPADMINLENGTH * 2)) {
+            snmp_log(LOG_ERR, "fingerprint %s exceeds max length %d\n",
+                     fingerprint, (SNMPADMINLENGTH * 2));
+            free(cert_map);
+            return NULL;
+        }
+        cert_map->fingerprint = strdup(fingerprint);
+    }
+    if (ocert)
+        cert_map->ocert = ocert;
+
+    return cert_map;
+}
+
+void
+netsnmp_cert_map_free(netsnmp_cert_map *cert_map)
+{
+    if (NULL == cert_map)
+        return;
+
+    SNMP_FREE(cert_map->fingerprint);
+    SNMP_FREE(cert_map->data);
+    /** x509 cert isn't ours */
+    free(cert_map); /* SNMP_FREE wasted on param */
+}
+
+static void
+_map_free(netsnmp_cert_map *map, void *context)
+{
+    netsnmp_cert_map_free(map);
+}
+
+static int
+_map_compare(netsnmp_cert_map *lhs, netsnmp_cert_map *rhs)
+{
+    netsnmp_assert((lhs != NULL) && (rhs != NULL));
+
+    if (lhs->priority < rhs->priority)
+        return -1;
+    else if (lhs->priority > rhs->priority)
+        return 1;
+
+    return strcmp(lhs->fingerprint, rhs->fingerprint);
+}
+
+static int
+_map_fp_compare(netsnmp_cert_map *lhs, netsnmp_cert_map *rhs)
+{
+    int rc;
+    netsnmp_assert((lhs != NULL) && (rhs != NULL));
+
+    if ((rc = strcmp(lhs->fingerprint, rhs->fingerprint)) != 0)
+        return rc;
+
+    if (lhs->priority < rhs->priority)
+        return -1;
+    else if (lhs->priority > rhs->priority)
+        return 1;
+
+    return 0;
+}
+
+static int
+_map_fp_ncompare(netsnmp_cert_map *lhs, netsnmp_cert_map *rhs)
+{
+    netsnmp_assert((lhs != NULL) && (rhs != NULL));
+
+    return strncmp(lhs->fingerprint, rhs->fingerprint,
+                   strlen(rhs->fingerprint));
+}
+
+netsnmp_container *
+netsnmp_cert_map_container_create(int with_fp)
+{
+    netsnmp_container *chain_map = netsnmp_container_find("stack:binary_array");
+    netsnmp_container *fp;
+    int                rc;
+
+    if (NULL == chain_map) {
+        snmp_log(LOG_ERR, "could not allocate container for cert_map\n");
+        return NULL;
+    }
+
+    CONTAINER_SET_OPTIONS(chain_map, CONTAINER_KEY_UNSORTED, rc);
+    if (-1 == rc) {
+        snmp_log(LOG_ERR, "could not set container unsorted\n");
+        CONTAINER_FREE(chain_map);
+        return NULL;
+    }
+
+    chain_map->free_item = (netsnmp_container_obj_func*)_map_free;
+    chain_map->compare = (netsnmp_container_compare*)_map_compare;
+
+    if (!with_fp)
+        return chain_map;
+
+    /*
+     * add a secondary index to the table container
+     */
+    fp = netsnmp_container_find("cert2sn_fp:binary_array");
+    if (NULL == fp) {
+        snmp_log(LOG_ERR,
+                 "error creating sub-containter for tlstmCertToTSNTable\n");
+        CONTAINER_FREE(chain_map);
+        return NULL;
+    }
+    fp->container_name = strdup("cert2sn_fp");
+    fp->compare = (netsnmp_container_compare*)_map_fp_compare;
+    fp->ncompare = (netsnmp_container_compare*)_map_fp_ncompare;
+    netsnmp_container_add_index(chain_map, fp);
+
+    return chain_map;
+}
+
+void
+netsnmp_cert_map_container_free(netsnmp_container *c)
+{
+    if (NULL == c)
+        return;
+
+    CONTAINER_FREE_ALL(c, NULL);
+    CONTAINER_FREE(c);
+}
+
+/* ***************************************************************************
+ *
+ * xxx
+ *
+ */
+/** find all entries matching given fingerprint */
+static netsnmp_void_array *
+_find_subset_fp(netsnmp_container *certs, const char *fp)
+{
+    netsnmp_cert_map    entry;
+    netsnmp_container  *fp_container;
+    netsnmp_void_array *va;
+
+    if ((NULL == certs) || (NULL == fp))
+        return NULL;
+
+    fp_container = SUBCONTAINER_FIND(certs, "cert2sn_fp");
+    netsnmp_assert_or_msgreturn(fp_container, "cert2sn_fp container missing",
+                                NULL);
+
+    memset(&entry, 0x0, sizeof(entry));
+
+    entry.fingerprint = NETSNMP_REMOVE_CONST(char*,fp);
+
+    va = CONTAINER_GET_SUBSET(fp_container, &entry);
+    return va;
+}
+
+static int
+_fill_cert_map(netsnmp_cert_map *cert_map, netsnmp_cert_map *entry)
+{
+    DEBUGMSGT(("cert:map:secname", "map: pri %d type %d data %s\n",
+               entry->priority, entry->mapType, entry->data));
+    cert_map->priority = entry->priority;
+    cert_map->mapType = entry->mapType;
+    if (entry->data) {
+        cert_map->data = strdup(entry->data);
+        if (NULL == cert_map->data ) {
+            snmp_log(LOG_ERR, "secname map data dup failed\n");
+            return -1;
+        }
+    }
+
+    return 0;
+}
+
+/*
+ * get secname map(s) for fingerprints
+ */
+int
+netsnmp_cert_get_secname_maps(netsnmp_container *cert_maps)
+{
+    netsnmp_iterator   *itr;
+    netsnmp_cert_map   *cert_map, *new_cert_map, *entry;
+    netsnmp_container  *new_maps = NULL;
+    netsnmp_void_array *results;
+    int                 j;
+
+    if ((NULL == cert_maps) || (CONTAINER_SIZE(cert_maps) == 0))
+        return -1;
+
+    DEBUGMSGT(("cert:map:secname", "looking for matches for %d fingerprints\n",
+               CONTAINER_SIZE(cert_maps)));
+    
+    /*
+     * duplicate cert_maps and then iterate over it. That way we can
+     * add/remove to cert_maps without distrubing the iterator.
+     */
+    new_maps = CONTAINER_DUP(cert_maps, NULL, 0);
+    if (NULL == new_maps) {
+        snmp_log(LOG_ERR, "could not duplicate maps for secname mapping\n");
+        return -1;
+    }
+
+    itr = CONTAINER_ITERATOR(new_maps);
+    if (NULL == itr) {
+        snmp_log(LOG_ERR, "could not get iterator for secname mappings\n");
+        CONTAINER_FREE(new_maps);
+        return -1;
+    }
+    cert_map = ITERATOR_FIRST(itr);
+    for( ; cert_map; cert_map = ITERATOR_NEXT(itr)) {
+
+        results = _find_subset_fp( netsnmp_cert_map_container(),
+                                   cert_map->fingerprint );
+        if (NULL == results) {
+            DEBUGMSGT(("cert:map:secname", "no match for %s\n",
+                       cert_map->fingerprint));
+            if (CONTAINER_REMOVE(cert_maps, cert_map) != 0)
+                goto fail;
+            continue;
+        }
+        DEBUGMSGT(("cert:map:secname", "%d matches for %s\n",
+                   results->size, cert_map->fingerprint));
+        /*
+         * first entry is a freebie
+         */
+        entry = (netsnmp_cert_map*)results->array[0];
+        if (_fill_cert_map(cert_map, entry) != 0)
+            goto fail;
+
+        /*
+         * additional entries must be allocated/inserted
+         */
+        if (results->size > 1) {
+            for(j=1; j < results->size; ++j) {
+                entry = (netsnmp_cert_map*)results->array[j];
+                new_cert_map = netsnmp_cert_map_alloc(entry->fingerprint,
+                                                      entry->ocert);
+                if (NULL == new_cert_map) {
+                    snmp_log(LOG_ERR,
+                             "could not allocate new cert map entry\n");
+                    goto fail;
+                }
+                if (_fill_cert_map(new_cert_map, entry) != 0) {
+                    netsnmp_cert_map_free(new_cert_map);
+                    goto fail;
+                }
+                if (CONTAINER_INSERT(cert_maps,new_cert_map) != 0) {
+                    netsnmp_cert_map_free(new_cert_map);
+                    goto fail;
+                }
+            } /* for results */
+        } /* results size > 1 */
+
+        free(results->array);
+        SNMP_FREE(results);
+    }
+    ITERATOR_RELEASE(itr);
+
+    DEBUGMSGT(("cert:map:secname", "found %d matches for fingerprints\n",
+               CONTAINER_SIZE(cert_maps)));
+    return 0;
+
+  fail:
+    if (results) {
+        free(results->array);
+        free(results);
+    }
+    ITERATOR_RELEASE(itr);
+    CONTAINER_FREE(new_maps);
+    CONTAINER_FREE_ALL(cert_maps, NULL);
+    CONTAINER_FREE(cert_maps);
+    return -1;
+}
 
 #endif /* defined(NETSNMP_USE_OPENSSL) && defined(HAVE_LIBSSL) */

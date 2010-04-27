@@ -50,6 +50,7 @@
 #include <net-snmp/library/snmpTCPDomain.h>
 #include <net-snmp/library/system.h>
 #include <net-snmp/library/tools.h>
+#include <net-snmp/library/cert_util.h>
 #include <net-snmp/library/snmp_openssl.h>
 #include <net-snmp/library/callback.h>
 
@@ -135,6 +136,11 @@ netsnmp_tlstcp_recv(netsnmp_transport *t, void *buf, int size,
        safe to use as a unique session identifier. */
 
     tlsdata = t->data;
+    if (NULL == tlsdata->ssl) {
+        snmp_log(LOG_ERR,
+                 "tlstcp received an invalid invocation without ssl data\n");
+        return -1;
+    }
 
     /* RFCXXXX Section 5.1.2 step 1, part2:
      * This part (incrementing the counter) is done in the

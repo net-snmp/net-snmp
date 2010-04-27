@@ -24,6 +24,7 @@
 
 #include <net-snmp/types.h>
 #include <net-snmp/library/snmpTLSBaseDomain.h>
+#include <net-snmp/library/cert_util.h>
 #include <net-snmp/library/snmp_openssl.h>
 #include <net-snmp/library/default_store.h>
 #include <net-snmp/library/callback.h>
@@ -32,7 +33,6 @@
 #include <net-snmp/library/tools.h>
 #include <net-snmp/library/snmp_debug.h>
 #include <net-snmp/library/snmp_assert.h>
-#include <net-snmp/library/cert_util.h>
 #include <net-snmp/library/snmp_transport.h>
 
 #define LOGANDDIE(msg) { snmp_log(LOG_ERR, "%s\n", msg); return 0; }
@@ -163,33 +163,42 @@ netsnmp_tlsbase_verify_client_cert(SSL *ssl, _netsnmpTLSBaseData *tlsdata) {
    securityName from the remote certificate. */
 int
 netsnmp_tlsbase_extract_security_name(SSL *ssl, _netsnmpTLSBaseData *tlsdata) {
-    X509            *remote_cert;
-    X509_EXTENSION  *extension;
-    char            *extension_name;
-    int              num_extensions;
-    int              i;
-    
+    netsnmp_container  *chain_maps;
+    netsnmp_cert_map   *cert_map, *peer_cert;
+    netsnmp_iterator  *itr;
+    int                 rc;
+
     netsnmp_assert_or_return(ssl != NULL, SNMPERR_GENERR);
     netsnmp_assert_or_return(tlsdata != NULL, SNMPERR_GENERR);
 
-    if (NULL == (remote_cert = SSL_get_peer_certificate(ssl))) {
-        /* no peer cert */
+    if (NULL == (chain_maps = netsnmp_openssl_get_cert_chain(ssl)))
+        return SNMPERR_GENERR;
+    /*
+     * map fingerprints to mapping entries
+     */
+    netsnmp_cert_get_secname_maps(chain_maps);
+    if (CONTAINER_SIZE(chain_maps) == 0)
+        return SNMPERR_GENERR;
+    /*
+     * change container to sorted, then iterate over it til we find
+     * a map that returns a secname
+     */
+    CONTAINER_SET_OPTIONS(chain_maps, 0, rc);
+    itr = CONTAINER_ITERATOR(chain_maps);
+    if (NULL == itr) {
+        snmp_log(LOG_ERR, "could not get iterator for secname fingerprints\n");
+        netsnmp_cert_map_container_free(chain_maps);
         return SNMPERR_GENERR;
     }
+    peer_cert = cert_map = ITERATOR_FIRST(itr);
+    for( ; !tlsdata->securityName && cert_map; cert_map = ITERATOR_NEXT(itr))
+        tlsdata->securityName =
+            netsnmp_openssl_extract_secname(cert_map, peer_cert);
+    ITERATOR_RELEASE(itr);
 
-    num_extensions = X509_get_ext_count(remote_cert);
-    for(i = 0; i < num_extensions; i++) {
-        extension = X509_get_ext(remote_cert, i);
-        extension_name =
-            OBJ_nid2sn(OBJ_obj2nid(X509_EXTENSION_get_object(extension)));
-        if (0 == strcmp(extension_name, "subjectAltName")) {
-            /* foo */
-        }
-    }
-
-        
-    /* XXX */
-    return SNMPERR_SUCCESS;
+    netsnmp_cert_map_container_free(chain_maps);
+       
+    return (tlsdata->securityName ? SNMPERR_SUCCESS : SNMPERR_GENERR);
 }
 
 SSL_CTX *
@@ -456,17 +465,14 @@ netsnmp_tlsbase_allocate_tlsdata(netsnmp_transport *t, int isserver) {
 int netsnmp_tlsbase_wrapup_recv(netsnmp_tmStateReference *tmStateRef,
                                 _netsnmpTLSBaseData *tlsdata,
                                 void **opaque, int *olength) {
-    X509            *peer;
-
     /* RFCXXXX Section 5.1.2 step 2: tmSecurityLevel */
     /* XXX: disallow NULL auth/encr algs in our implementations */
     tmStateRef->transportSecurityLevel = SNMP_SEC_LEVEL_AUTHPRIV;
 
     /* use x509 cert to do lookup to secname if DNE in cachep yet */
     if (!tlsdata->securityName) {
-        if (NULL != (peer = SSL_get_peer_certificate(tlsdata->ssl))) {
-            tlsdata->securityName =
-                netsnmp_openssl_cert_get_commonName(peer, NULL, 0);
+        netsnmp_tlsbase_extract_security_name(tlsdata->ssl, tlsdata);
+        if (NULL != tlsdata->securityName) {
             DEBUGMSGTL(("tlstcp", "set SecName to: %s\n",
                         tlsdata->securityName));
         } else {
