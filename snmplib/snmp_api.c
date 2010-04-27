@@ -134,6 +134,10 @@ SOFTWARE.
 #include <net-snmp/library/snmp_service.h>
 #include <net-snmp/library/vacm.h>
 
+#if defined(NETSNMP_USE_OPENSSL) && defined(HAVE_LIBSSL)
+extern void netsnmp_certs_init(void);
+#endif
+
 static void     _init_snmp(void);
 
 #include "../agent/mibgroup/agentx/protocol.h"
