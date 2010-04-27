@@ -826,6 +826,9 @@ init_snmp(const char *type)
     init_snmp_alarm();
     init_snmp_enum(type);
     init_vacm();
+#if defined(NETSNMP_USE_OPENSSL) && defined(HAVE_LIBSSL)
+    netsnmp_certs_init();
+#endif
 
     read_premib_configs();
 #ifndef NETSNMP_DISABLE_MIB_LOADING

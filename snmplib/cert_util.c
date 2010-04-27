@@ -38,6 +38,7 @@
 #include <net-snmp/library/data_list.h>
 #include <net-snmp/library/file_utils.h>
 #include <net-snmp/library/dir_utils.h>
+#include <net-snmp/library/read_config.h>
 
 #include <openssl/ssl.h>
 #include <openssl/err.h>
@@ -82,6 +83,10 @@ static int _certindex_add( const char *dirname, int i );
 
 static int _time_filter(netsnmp_file *f, struct stat *idx);
 
+static void _parse_map(const char *token, char *line);
+static int _save_maps(int majorID, int minorID, void *server, void *client);
+static int _save_map(netsnmp_cert_map *map, void *type);
+
 /** mode descriptions should match up with header */
 static const char _modes[][256] =
         {
@@ -111,6 +116,33 @@ static const char _modes[][256] =
 void
 netsnmp_certs_init(void)
 {
+    register_config_handler(NULL, "certSecName", _parse_map, NULL, NULL);
+    if (snmp_register_callback(SNMP_CALLBACK_LIBRARY, SNMP_CALLBACK_STORE_DATA,
+                               _save_maps, _maps) != SNMP_ERR_NOERROR)
+        snmp_log(LOG_ERR, "error registering for STORE_DATA callback "
+                 "in netsnmp_certs_init\n");
+    _setup_containers();
+}
+
+void
+netsnmp_certs_shutdown(void)
+{
+    DEBUGMSGT(("cert:util:shutdown","shutdown\n"));
+    if (NULL != _certs) {
+        CONTAINER_FREE_ALL(_certs, NULL);
+        CONTAINER_FREE(_certs);
+        _certs = NULL;
+    }
+    if (NULL != _keys) {
+        CONTAINER_FREE_ALL(_keys, NULL);
+        CONTAINER_FREE(_keys);
+        _keys = NULL;
+    }
+}
+
+void
+netsnmp_certs_load(void)
+{
     netsnmp_iterator  *itr;
     netsnmp_key        *key;
     netsnmp_cert       *cert;
@@ -124,9 +156,10 @@ netsnmp_certs_init(void)
 
     netsnmp_init_openssl();
 
-    _setup_containers();
-    if (NULL == _certs)
-        return; /* error already logged */
+    if (NULL == _certs) {
+        snmp_log(LOG_ERR, "cant load certs without container\n");
+        return;
+    }
 
     /** add certificate type mapping */
     se_add_pair_to_slist("cert_types", strdup("pem"), NS_CERT_TYPE_PEM);
@@ -169,22 +202,6 @@ netsnmp_certs_init(void)
         netsnmp_cert_dump_all();
         DEBUGMSGT(("cert:dump",
                    "------------------------ End ----------------------\n"));
-    }
-}
-
-void
-netsnmp_certs_shutdown(void)
-{
-    DEBUGMSGT(("cert:util:shutdown","shutdown\n"));
-    if (NULL != _certs) {
-        CONTAINER_FREE_ALL(_certs, NULL);
-        CONTAINER_FREE(_certs);
-        _certs = NULL;
-    }
-    if (NULL != _keys) {
-        CONTAINER_FREE_ALL(_keys, NULL);
-        CONTAINER_FREE(_keys);
-        _keys = NULL;
     }
 }
 
@@ -2024,6 +2041,135 @@ netsnmp_cert_map_container_free(netsnmp_container *c)
     CONTAINER_FREE_ALL(c, NULL);
     CONTAINER_FREE(c);
 }
+
+/*
+  certSecName PRIORITY FINGERPRINT <--sn SECNAME | --rfc822 | --dns | --ip | --cn | --any>
+
+  certSecName  100  ff:..11 --sn Wes
+  certSecName  200  ee:..:22 --sn JohnDoe
+  certSecName  300  ee:..:22 --rfc822
+*/
+#define CONFIG_TOKEN "certSecName"
+static void
+_parse_map(const char *token, char *line)
+{
+    netsnmp_cert_map *map;
+    char             *tmp, buf[SNMP_MAXBUF_SMALL];
+    size_t            len;
+
+    /** need somewhere to save rows */
+    if (NULL == _maps) {
+        NETSNMP_LOGONCE((LOG_ERR, "no container for certificate mappings\n"));
+        return;
+    }
+
+    DEBUGMSGT(("cert:util:config", "parsing %s\n", line));
+
+    len = sizeof(buf);
+    tmp = buf;
+    line = read_config_read_octet_string(line, (u_char **)&tmp, &len);
+    if (!isdigit(tmp[0])) {
+        netsnmp_config_error(CONFIG_TOKEN ": could not parse priority");
+        return;
+    }
+    map = netsnmp_cert_map_alloc(NULL, NULL);
+    if (NULL == map) {
+        netsnmp_config_error(CONFIG_TOKEN
+                             ": could not allocate cert map struct");
+        return;
+    }
+    map->flags |= NSCM_FROM_CONFIG;
+    map->priority = atoi(buf);
+
+    len = sizeof(buf);
+    tmp = buf;
+    line = read_config_read_octet_string(line, (u_char **)&tmp, &len);
+    map->fingerprint = strdup(buf);
+    if (NULL == line) {
+        netsnmp_config_error(CONFIG_TOKEN  ":must specify map type");
+        goto end;
+    }
+
+    len = sizeof(buf);
+    tmp = buf;
+    line = read_config_read_octet_string(line, (u_char **)&tmp, &len);
+    if ((buf[0] != '-') || (buf[1] != '-')) {
+        netsnmp_config_error(CONFIG_TOKEN ": unexpected fromat: %s\n", line);
+        goto end;
+    }
+    if (strcmp(&buf[2], "sn") == 0) {
+        if (NULL == line) {
+            netsnmp_config_error(CONFIG_TOKEN
+                                 ": must specify secName for --sn");
+            goto end;
+        }
+        len = sizeof(buf);
+        tmp = buf;
+        line = read_config_read_octet_string(line, (u_char **)&tmp, &len);
+        map->data = strdup(buf);
+        if (map->data)
+            map->mapType = TSNM_tlstmCertSpecified;
+    }
+    else if (strcmp(&buf[2], "cn") == 0)
+        map->mapType = TSNM_tlstmCertCommonName;
+    else if (strcmp(&buf[2], "ip") == 0)
+        map->mapType = TSNM_tlstmCertSANIpAddress;
+    else if (strcmp(&buf[2], "rfc8220") == 0)
+        map->mapType = TSNM_tlstmCertSANRFC822Name;
+    else if (strcmp(&buf[2], "dns") == 0)
+        map->mapType = TSNM_tlstmCertSANDNSName;
+    else if (strcmp(&buf[2], "any") == 0)
+        map->mapType = TSNM_tlstmCertSANAny;
+    else
+        netsnmp_config_error(CONFIG_TOKEN ": unknown argument %s\n", buf);
+    
+  end:
+    if (0 == map->mapType)
+        netsnmp_cert_map_free(map);
+    else {
+        DEBUGMSGT(("cert:util:config", "inserting type %d map, pri %d fp %s\n",
+                   map->mapType, map->priority, map->fingerprint));
+        if (CONTAINER_INSERT(_maps, map) != 0) 
+            netsnmp_config_error(CONFIG_TOKEN
+                                 ": duplicate priority for certificate map");
+    }
+}
+
+static int
+_save_map(netsnmp_cert_map *map, void *type)
+{
+    /** xxx-rks */
+    return SNMP_ERR_NOERROR;
+}
+
+static int
+_save_maps(int majorID, int minorID, void *serverarg, void *clientarg)
+{
+    char            sep[] =
+        "##############################################################";
+    char            buf[] =
+        "#\n" "# certificate secName mapping persistent data\n" "#";
+    char           *type = netsnmp_ds_get_string(NETSNMP_DS_LIBRARY_ID,
+                                                 NETSNMP_DS_LIB_APPTYPE);
+
+    read_config_store((char *) type, sep);
+    read_config_store((char *) type, buf);
+
+    /*
+     * save all rows
+     */
+    CONTAINER_FOR_EACH((netsnmp_container *) _maps,
+                       (netsnmp_container_obj_func *)_save_map, type);
+
+    read_config_store((char *) type, sep);
+    read_config_store((char *) type, "\n");
+
+    /*
+     * never fails 
+     */
+    return SNMPERR_SUCCESS;
+}
+
 
 /* ***************************************************************************
  *
