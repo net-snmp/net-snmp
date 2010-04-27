@@ -149,17 +149,17 @@ netsnmp_certs_load(void)
 
     DEBUGMSGT(("cert:util:init","init\n"));
 
-    if (NULL != _certs) {
+    if (NULL == _certs) {
+        snmp_log(LOG_ERR, "cant load certs without container\n");
+        return;
+    }
+
+    if (CONTAINER_SIZE(_certs) != 0) {
         DEBUGMSGT(("cert:util:init", "ignoring duplicate init\n"));
         return;
     }
 
     netsnmp_init_openssl();
-
-    if (NULL == _certs) {
-        snmp_log(LOG_ERR, "cant load certs without container\n");
-        return;
-    }
 
     /** add certificate type mapping */
     se_add_pair_to_slist("cert_types", strdup("pem"), NS_CERT_TYPE_PEM);
