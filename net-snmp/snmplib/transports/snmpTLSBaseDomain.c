@@ -374,7 +374,7 @@ tls_bootstrap(int majorid, int minorid, void *serverarg, void *clientarg) {
         return 0;
     have_done_bootstrap = 1;
 
-    netsnmp_certs_init();
+    netsnmp_certs_load();
 
     return 0;
 }

@@ -199,19 +199,16 @@ the certificates of the client users to be allowed to connect to the
 agent.  The access control will need to be set up as well to allow
 access through the
 .I tsm
-security model.  The CommonName of the Subject from the X.509
-certificate will be passed to snmpd as the SNMPv3 username to use.
+security model.  The certSecName token will specify how to map a certificate
+field from the peer's X.509 certificate to a SNMPv3 username to use.
 See the http://www.net-snmp.org/wiki/index.php/Using_DTLS web page for
 more detailed instructions for setting up DTLS.
-.IP "defX509ServerPub FILE"
-.IP "defX509ServerPriv FILE"
-These two directives specify the public and private key files for the
-certificate that
+.IP "certSecName PRIORITY FINGERPRINT OPTIONS"
+OPTIONS can be one of <--sn SECNAME | --rfc822 | --dns | --ip | --cn | --any>.
+.IP "defX509ServerPub FINGERPRINT"
+This directive specify the fingerprint for the certificate that
 .B snmpd
 should present to incoming connections.
-.IP "defX509ClientCerts FILE"
-This directive specifies a file containing all of the public keys (or
-CAs of public keys) for clients to connect the server with.
 .SH ACCESS CONTROL
 .B snmpd
 supports the View-Based Access Control Model (VACM) as defined in RFC

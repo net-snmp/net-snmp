@@ -110,6 +110,8 @@ void netsnmp_certs_shutdown(void);
 #define TSNM_tlstmCertCommonName                6
 #define TSNM_tlstmCert_MAX                      TSNM_tlstmCertCommonName
 
+#define NSCM_FROM_CONFIG                        0x0001
+
     typedef struct netsnmp_cert_map_s {
         int             priority;
         char           *fingerprint;
