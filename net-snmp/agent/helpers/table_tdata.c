@@ -58,12 +58,15 @@ netsnmp_tdata_create_table(const char *name, long flags)
     if ( !table )
         return NULL;
 
-    if (name) {
+    table->flags = flags;
+    if (name)
         table->name = strdup(name);
+
+    if (!(table->flags & TDATA_FLAG_NO_CONTAINER)) {
         table->container = netsnmp_container_find( name );
+        if (!table->container)
+            table->container = netsnmp_container_find( "table_container" );
     }
-    if (!table->container)
-        table->container = netsnmp_container_find( "table_container" );
     return table;
 }
 

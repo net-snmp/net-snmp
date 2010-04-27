@@ -21,6 +21,7 @@ extern          "C" {
 #define TABLE_TDATA_TABLE "table_tdata_table"
 
 #define TDATA_FLAG_NO_STORE_INDEXES   0x01
+#define TDATA_FLAG_NO_CONTAINER       0x02 /* user will provide container */
 
     /*
      * The (table-independent) per-row data structure
