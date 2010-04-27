@@ -21,6 +21,17 @@
  */
 /* #undef HAVE_WIN32_PLATFORM_SDK */
 
+/* Only use Windows API functions available on Windows 2000 SP4 or later.
+ * We need at least SP1 for some IPv6 defines in ws2ipdef.h.
+ * Only define _WIN32_WINNT when not being compiled with MSVC 6 without PSDK
+ * because there is a bug in the MSVC 6 header <winsock.h> that causes
+ * inclusion of <winsock2.h>.
+ */
+#if defined(HAVE_WIN32_PLATFORM_SDK) || !defined(_MSC_VER) || _MSC_VER > 1200
+#define _WIN32_WINNT 0x500 /*_WIN32_WINNT_WIN2K*/
+#define NTDDI_VERSION 0x05000400 /* NTDDI_WIN2KSP4 */
+#endif
+
 #define INSTALL_BASE "c:/usr"
 
 /* config.h:  a general config file */
@@ -1642,21 +1653,21 @@ typedef unsigned short   uint16_t;
 #define EXTENSIBLEMIB NETSNMP_UCDAVIS_MIB
 #endif
 
-#if defined(_MSC_VER)
-/* this bit of magic enables or disables IPv6 transports */
-  #if NETSNMP_ENABLE_IPV6
-    /* "dont have" implies "compile here" for snmplib/inet_?to?.c */
-    #undef HAVE_INET_NTOP
-    #undef HAVE_INET_PTON
-    #define NETSNMP_TRANSPORT_TCPIPV6_DOMAIN 1
-    #define NETSNMP_TRANSPORT_UDPIPV6_DOMAIN 1
-  #else
-    /* "have" implies "dont compile here" for snmplib/inet_?to?.c */
-    #define HAVE_INET_NTOP 1
-    #define HAVE_INET_PTON 1
-    #undef NETSNMP_TRANSPORT_TCPIPV6_DOMAIN
-    #undef NETSNMP_TRANSPORT_UDPIPV6_DOMAIN
+/* Windows Vista and higher have inet_ntop but older Windows does not.
+ * We'll use the Net-SNMP version instead. */
+#undef HAVE_INET_NTOP
+#undef HAVE_INET_PTON
+
+#if NETSNMP_ENABLE_IPV6
+  #ifndef IPPROTO_IPV6
+    /* Only defined in Windows XP or higher, so we need it here */
+    #define IPPROTO_IPV6 41
   #endif
+  #define NETSNMP_TRANSPORT_TCPIPV6_DOMAIN 1
+  #define NETSNMP_TRANSPORT_UDPIPV6_DOMAIN 1
+#else
+  #undef NETSNMP_TRANSPORT_TCPIPV6_DOMAIN
+  #undef NETSNMP_TRANSPORT_UDPIPV6_DOMAIN
 #endif
 
 #ifndef NI_MAXHOST
