@@ -42,7 +42,14 @@ extern "C" {
     struct netsnmp_container_s; /** forward declare */
 
     /*
-     * function returning an int for an operation on a container
+     * function for performing an operation on a container which
+     * returns (maybe the same) container.
+     */
+    typedef struct netsnmp_container_s* (netsnmp_container_mod_op)
+        (struct netsnmp_container_s *, void *context, u_int flags);
+
+    /*
+     * function for setting an option on a container
      */
     typedef int (netsnmp_container_option)(struct netsnmp_container_s *,
                                            int set, u_int flags);
@@ -200,6 +207,14 @@ extern "C" {
         */
        netsnmp_container_op    *insert_filter;
 
+        /*
+         * OPTIONAL function to duplicate a container. Defaults to a shallow
+         * copy. Only the specified container is copied (i.e. sub-containers
+         * not included).
+         */
+        netsnmp_container_mod_op *duplicate;
+
+
        /*
         * function to compare two object stored in the container.
         *
@@ -228,9 +243,14 @@ extern "C" {
 
        /*
         * sort count, for iterators to track (insert/delete
-        * bumps coutner, invalidates iterator
+        * bumps counter, invalidates iterator)
         */
        u_long                          sync;
+
+       /*
+        * flags
+        */
+       u_int                           flags;
 
        /*
         * containers can contain other containers (additional indexes)
@@ -312,15 +332,15 @@ extern "C" {
 #define CONTAINER_SET_OPTIONS(x,o,rc)  do {                             \
         if (NULL==(x)->options)                                         \
             rc = -1;                                                    \
-        else                                                            \
+        else {                                                          \
             rc = (x)->options(x, 1, o);                                 \
+            if (rc != -1 )                                              \
+                (x)->flags |= o;                                        \
+        }                                                               \
     } while(0)
 
 #define CONTAINER_CHECK_OPTION(x,o,rc)    do {                          \
-        if (NULL==(x)->options)                                         \
-            rc = -1;                                                    \
-        else                                                            \
-            rc = (x)->options(x,0, o);                                  \
+        rc = x->flags & 0;                                              \
     } while(0)
 
 
@@ -357,6 +377,12 @@ extern "C" {
      * remove k from all containers
      */
     int CONTAINER_REMOVE(netsnmp_container *x, const void *k);
+
+    /*
+     * duplicate container
+     */
+    netsnmp_container *CONTAINER_DUP(netsnmp_container *x, void *ctx,
+                                     u_int flags);
 
     /*
      * clear all containers. When clearing the *first* container, and
@@ -449,6 +475,22 @@ extern "C" {
      * container.c. If you change one, change them both.
      */
     NETSNMP_STATIC_INLINE /* gcc docs recommend static w/inline */
+    netsnmp_container *CONTAINER_DUP(netsnmp_container *x, void *ctx,
+                                     u_int flags)
+    {
+        if (NULL == x->duplicate) {
+            snmp_log(LOG_ERR, "container '%s' does not support duplicate\n",
+                     x->container_name ? x->container_name : "");
+            return NULL;
+        }
+        return x->duplicate(x, ctx, flags);
+    }
+
+    /*------------------------------------------------------------------
+     * These functions should EXACTLY match the function version in
+     * container.c. If you change one, change them both.
+     */
+    NETSNMP_STATIC_INLINE /* gcc docs recommend static w/inline */
     int CONTAINER_FREE(netsnmp_container *x)
     {
 	int  rc2, rc = 0;
@@ -536,7 +578,9 @@ extern "C" {
 
 #endif
 
-    /** utility routine for container implementations */
+    /*
+     * INTERNAL utility routines for container implementations
+     */
     void netsnmp_init_container(netsnmp_container         *c,
                                 netsnmp_container_rc      *init,
                                 netsnmp_container_rc      *cfree,
@@ -545,6 +589,10 @@ extern "C" {
                                 netsnmp_container_op      *ins,
                                 netsnmp_container_op      *rem,
                                 netsnmp_container_rtn     *fnd);
+    /** Duplicate container meta-data. */
+    int netsnmp_container_data_dup(netsnmp_container *dup,
+                                   netsnmp_container *c);
+
     
     /*************************************************************************
      *
