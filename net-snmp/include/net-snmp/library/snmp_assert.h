@@ -37,63 +37,45 @@
  */
 #   ifndef NETSNMP_NO_DEBUGGING
 #      ifdef  NETSNMP_FUNCTION
-#         define netsnmp_assert(x)  do { \
-                 if ( x ) \
-                    ; \
-                 else \
-                    snmp_log(LOG_ERR,"netsnmp_assert %s failed %s:%d %s()\n", \
-                             __STRING(x),__FILE__,__LINE__, \
-                             NETSNMP_FUNCTION); \
-              }while(0)
-#         define netsnmp_assert_or_return(x, y)  do {        \
-                 if ( x ) \
-                    ; \
-                 else { \
-                    snmp_log(LOG_ERR,"netsnmp_assert %s failed %s:%d %s()\n", \
-                             __STRING(x),__FILE__,__LINE__, \
-                             NETSNMP_FUNCTION); \
-                    return y; \
-                 } \
-              }while(0)
-#         define netsnmp_assert_or_msgreturn(x, y, z)  do {       \
-                 if ( x ) \
-                    ; \
-                 else { \
-                    snmp_log(LOG_ERR,"netsnmp_assert %s failed %s:%d %s()\n", \
-                             __STRING(x),__FILE__,__LINE__, \
-                             NETSNMP_FUNCTION); \
-                    snmp_log(LOG_ERR, y); \
-                    return z; \
-                 } \
-              }while(0)
+#          define NETSNMP_FUNC_FMT " %s()\n"
+#          define NETSNMP_FUNC_PARAM NETSNMP_FUNCTION
 #      else
-#         define netsnmp_assert(x)  do { \
-                 if( x )\
-                    ; \
-                 else \
-                    snmp_log(LOG_ERR,"netsnmp_assert %s failed %s:%d\n", \
-                             __STRING(x),__FILE__,__LINE__); \
-              }while(0)
-#         define netsnmp_assert_or_return(x, y)  do {        \
-                 if ( x ) \
-                    ; \
-                 else { \
-                    snmp_log(LOG_ERR,"netsnmp_assert %s failed %s:%d\n", \
-                             __STRING(x),__FILE__,__LINE__); \
-                    return y; \
-                 } \
-              }while(0)
-#         define netsnmp_assert_or_msgreturn(x, y, z)  do {       \
-                 if ( x ) \
-                    ; \
-                 else { \
-                    snmp_log(LOG_ERR,"netsnmp_assert %s failed %s:%d\n", \
-                             __STRING(x),__FILE__,__LINE__); \
-                    snmp_log(LOG_ERR, y); \
-                    return z; \
-                 } \
-              }while(0)
+#          define NETSNMP_FUNC_FMT "%c"
+#          define NETSNMP_FUNC_PARAM '\n'
 #      endif
+#
+#      define netsnmp_assert(x)  do { \
+              if ( x ) \
+                 ; \
+              else \
+                 snmp_log(LOG_ERR, \
+                          "netsnmp_assert %s failed %s:%d" NETSNMP_FUNC_FMT, \
+                          __STRING(x),__FILE__,__LINE__, \
+                          NETSNMP_FUNC_PARAM); \
+           }while(0)
+#      define netsnmp_assert_or_return(x, y)  do {        \
+              if ( x ) \
+                 ; \
+              else { \
+                 snmp_log(LOG_ERR, \
+                          "netsnmp_assert %s failed %s:%d" NETSNMP_FUNC_FMT, \
+                          __STRING(x),__FILE__,__LINE__, \
+                          NETSNMP_FUNC_PARAM); \
+                 return y; \
+              } \
+           }while(0)
+#      define netsnmp_assert_or_msgreturn(x, y, z)  do {       \
+              if ( x ) \
+                 ; \
+              else { \
+                 snmp_log(LOG_ERR, \
+                          "netsnmp_assert %s failed %s:%d" NETSNMP_FUNC_FMT, \
+                          __STRING(x),__FILE__,__LINE__, \
+                          NETSNMP_FUNC_PARAM); \
+                 snmp_log(LOG_ERR, y); \
+                 return z; \
+              } \
+           }while(0)
 #   else /* NO DEBUGGING */
 #      define netsnmp_assert(x)
 #      define netsnmp_assert_or_return(x, y)  do {        \
