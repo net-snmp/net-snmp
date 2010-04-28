@@ -21,12 +21,14 @@ OTHERUSERFP=`$NSCERT showcerts --fingerprint otheruser $NSCERTARGS | grep Finger
 $NSCERT gencert -t invaliduser --cn 'invaliduser'  $NSCERTARGS > /dev/null 2>&1
 INVALIDUSERFP=`$NSCERT showcerts --fingerprint invaliduser $NSCERTARGS | grep Finger | sed 's/.*=//'`
 
-SNMP_TRANSPORT_SPEC=dtlsudp
-export SNMP_TRANSPORT_SPEC
+# user 4
+$NSCERT gencert -t invaliduser --cn 'mappeduser'  $NSCERTARGS > /dev/null 2>&1
+MAPPEDUSERFP=`$NSCERT showcerts --fingerprint mappeduser $NSCERTARGS | grep Finger | sed 's/.*=//'`
 
 CONFIGAGENT '[snmp]' debugTokens tsm
 CONFIGAGENT '[snmp]' doDebugging 1
 CONFIGAGENT '[snmp]' defX509ServerPub $SERVERFP
+CONFIGAGENT certSecName 10 $MAPPEDUSERFP --sn aftermapping
 
 $NSCERT showcerts --fingerprint snmpapp $NSCERTARGS | grep Finger | sed 's/.*=//'
 CONFIGAPP   defX509ClientPub  	  $TESTUSERFP
@@ -37,3 +39,4 @@ CONFIGAPP   defSecurityModel      tsm
 
 CONFIGAGENT  rwuser -s tsm testuser authpriv
 CONFIGAGENT  rwuser -s tsm otheruser authpriv
+CONFIGAGENT  rwuser -s tsm aftermapping authpriv
