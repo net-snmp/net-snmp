@@ -38,6 +38,8 @@ static char    *rcsid = "$Id$";    /* */
 #include <net-snmp/library/scapi.h>
 #include <net-snmp/library/transform_oids.h>
 #include <net-snmp/library/callback.h>
+#include <net-snmp/net-snmp-includes.h>
+#include <net-snmp/library/snmpusm.h>
 
 #include <stdlib.h>
 
@@ -325,9 +327,9 @@ test_dokeyedhash(void)
 
     u_int           hashbuf_len[MLCOUNT_MAX] = {
         LOCAL_MAXBUF,
-        BYTESIZE(SNMP_TRANS_AUTHLEN_HMACSHA1),
-        BYTESIZE(SNMP_TRANS_AUTHLEN_HMACMD5),
-        BYTESIZE(SNMP_TRANS_AUTHLEN_HMAC96),
+        USM_MD5_AND_SHA_AUTH_LEN,
+        USM_MD5_AND_SHA_AUTH_LEN,
+        USM_MD5_AND_SHA_AUTH_LEN,
         7,
         0,
     };
