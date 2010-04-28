@@ -2,14 +2,16 @@
 
 use Getopt::Long;
 use Data::Dumper;
+use File::Path qw(make_path);
 use strict;
 
 ########################################
 # Globals and Command Line options
 
 my %opts = ('g' => 'default',
-	    'd' => 'fulltests');
-GetOptions(\%opts, "v", "h", "q", "g=s", "r=s", "debug") || usage();
+	    'd' => 'fulltests',
+	    'D' => '.');
+GetOptions(\%opts, "v", "h", "q", "g=s", "r=s", "D=s", "debug") || usage();
 usage() if ($opts{'h'});
 
 # Build the harness object
@@ -22,6 +24,13 @@ my %args = (
 
 # list of support infrastructure components
 my %support;
+
+# if the -d option was specified, pass on the source root directory to all apps
+if (exists($opts{'d'})) {
+    $ENV{'NETSNMPSRCDIR'} = $opts{'d'};
+} else {
+    $ENV{'NETSNMPSRCDIR'} = '.';
+}
 
 ########################################
 # Protection measures
@@ -108,7 +117,7 @@ sub gather_tests {
 	#  - anything with "template" in the name
 	@groups =
 	  grep { !/(template|support)/ &&
-		   -d $_ && s/$opts{'d'}.// } glob("$opts{'d'}/*");
+		   -d $_ && s/$opts{'D'}\/$opts{'d'}.// } glob("$opts{'D'}/$opts{'d'}/*");
     } else {
 	# they specified a comma separated list
 	@groups = split(/,\s*/, $groups);
@@ -121,13 +130,13 @@ sub gather_tests {
 
 	DEBUG("checking group $group\n");
 
-	if (! -d "$opts{'d'}/$group") {
-	    ERROR("group '$group' is not a directory under '$opts{'d'}'; ignoring\n");
+	if (! -d "$opts{'D'}/$opts{'d'}/$group") {
+	    ERROR("group '$group' is not a directory under '$opts{'D'}/$opts{'d'}'; ignoring\n");
 	    next;
 	}
 
 	# push on all files that start with T[NUM]*
-	push_or_skip(\@tests, $regexp, glob("$opts{'d'}/$group/T[0-9]*"));
+	push_or_skip(\@tests, $regexp, glob("$opts{'D'}/$opts{'d'}/$group/T[0-9]*"));
     }
 
     return @tests;
@@ -153,6 +162,7 @@ sub rename_tests {
     foreach my $file (@tests) {
 	my $title = "$file";
 	$title =~ s/$opts{'d'}.//;
+	$title =~ s/^$opts{'D'}.//;
 	push @newtests, [$file, $title];
     }
     return @newtests;
@@ -198,7 +208,7 @@ sub find_scripts {
     my ($buildname, $hashref) = @_;
     my $count;
     DEBUG("looking for $buildname scripts\n");
-    foreach my $builder (glob("$opts{'d'}/*/${buildname}_*")) {
+    foreach my $builder (glob("$opts{'D'}/$opts{'d'}/*/${buildname}_*")) {
 	next if ($builder =~ /~$/);
 	next if ($builder =~ /.(bak|orig|rej|old)$/);
 
@@ -257,6 +267,15 @@ sub call_build_script {
     my $maybenewfile = $filename;
     $maybenewfile =~ s/.[^\.]+$/.exe/;   # add .exe suffix
     $maybenewfile =~ s/T([^\/]+)$/B$1/;  # change prefix to B for 'Built'
+    $maybenewfile =~ s/^$opts{'D'}\///;
+
+    my $newpath = $maybenewfile;
+    $newpath =~ s/\/[^\/]*$//;
+
+    if (! -d $newpath) {
+	DEBUG("making directory $newpath\n");
+	make_path($newpath);
+    }
 
     my $lastline;
     DEBUG("BUILDING: $scriptname $filename $maybenewfile\n");
