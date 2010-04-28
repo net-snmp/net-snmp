@@ -22,13 +22,26 @@ $NSCERT gencert -t invaliduser --cn 'invaliduser'  $NSCERTARGS > /dev/null 2>&1
 INVALIDUSERFP=`$NSCERT showcerts --fingerprint invaliduser $NSCERTARGS | grep Finger | sed 's/.*=//'`
 
 # user 4
-$NSCERT gencert -t invaliduser --cn 'mappeduser'  $NSCERTARGS > /dev/null 2>&1
+$NSCERT gencert -t unmapped --cn 'unmapped'  $NSCERTARGS > /dev/null 2>&1
+UNMAPPEDFP=`$NSCERT showcerts --fingerprint unmapped $NSCERTARGS | grep Finger | sed 's/.*=//'`
+
+# user 5
+$NSCERT gencert -t mappeduser --cn 'mappeduser'  $NSCERTARGS > /dev/null 2>&1
 MAPPEDUSERFP=`$NSCERT showcerts --fingerprint mappeduser $NSCERTARGS | grep Finger | sed 's/.*=//'`
 
 CONFIGAGENT '[snmp]' debugTokens tsm
 CONFIGAGENT '[snmp]' doDebugging 1
 CONFIGAGENT '[snmp]' defX509ServerPub $SERVERFP
-CONFIGAGENT certSecName 10 $MAPPEDUSERFP --sn aftermapping
+
+# common name mappings
+CONFIGAGENT certSecName 10 $TESTUSERFP     --cn
+CONFIGAGENT certSecName 11 $OTHERUSERFP    --cn
+CONFIGAGENT certSecName 12 $INVALIDUSERFP  --cn
+
+CONFIGAGENT certSecName 20 $MAPPEDUSERFP --sn aftermapping
+
+# *** INTENTIONALLY NOT MAPPING AT ALL: ***
+# CONFIGAGENT certSecName 12 $UNMAPPEDFP ....
 
 $NSCERT showcerts --fingerprint snmpapp $NSCERTARGS | grep Finger | sed 's/.*=//'
 CONFIGAPP   defX509ClientPub  	  $TESTUSERFP
