@@ -23,7 +23,7 @@ CC		= @CC@ $(CPPFLAGS)
 all: $(TARG)
 
 test:
-	$(srcdir)/RUNFULLTESTS -D $(TESTOPTS)
+	$(srcdir)/RUNFULLTESTS -D $(srcdir) $(TESTOPTS)
 
 testall:
 	$(srcdir)/RUNFULLTESTS -D $(srcdir) -g all $(TESTOPTS)
