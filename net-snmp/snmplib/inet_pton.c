@@ -21,19 +21,21 @@
 
 #ifndef HAVE_INET_PTON
 
+#include <ctype.h>
+
 #if HAVE_ARPA_NAMESER_H
 #include <arpa/nameser.h>
 #endif
 
-  /*
-   * Net-SNMP Win32 additions
-   */
-#if defined(HAVE_WINSOCK_H) || defined(cygwin)
+#if defined(HAVE_WINSOCK_H)
 #include <winsock2.h>
 #include <ws2tcpip.h>
+#endif
 #include <errno.h>
 #include <stdio.h>
-#endif
+#include <string.h>
+
+#include <net-snmp/types.h>
 
 #ifndef EAFNOSUPPORT
 #define EAFNOSUPPORT            WSAEAFNOSUPPORT
