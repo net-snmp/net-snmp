@@ -1,6 +1,6 @@
 #!/bin/sh
 
-NSCERT="perl $SNMP_UPDIR/local/net-snmp-cert"
+NSCERT="perl $SNMP_BASEDIR/../../../local/net-snmp-cert"
 NSCERTARGS="-C $SNMP_TMPDIR"
 
 # produce the certificates to use
