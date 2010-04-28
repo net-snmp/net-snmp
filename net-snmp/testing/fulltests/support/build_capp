@@ -1,4 +1,4 @@
 #!/bin/sh
 
-../libtool --mode=link cc -I../include -o $2.lt $1 ../snmplib/libnetsnmp.la
+../libtool --mode=link cc -g -I../include -o $2.lt $1 ../snmplib/libnetsnmp.la
 echo $2.lt;
