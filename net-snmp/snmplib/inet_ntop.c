@@ -34,9 +34,6 @@
 #ifndef EAFNOSUPPORT
 #define EAFNOSUPPORT            WSAEAFNOSUPPORT
 #endif
-  /*
-   * End of Net-SNMP Win32 additions
-   */
 
 #ifndef IN6ADDRSZ
 #define	IN6ADDRSZ	16
