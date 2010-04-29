@@ -109,6 +109,9 @@ Sort_Array(netsnmp_container *c)
             array_qsort(t->data, 0, t->count - 1, c->compare);
         t->dirty = 0;
 
+        /*
+         * no way to know if it actually changed... just assume so.
+         */
         ++c->sync;
     }
 
@@ -260,6 +263,7 @@ netsnmp_binary_array_remove(netsnmp_container *c, const void *key, void **save)
 {
     binary_array_table *t = (binary_array_table*)c->container_data;
     size_t             index = 0;
+    int                was_dirty = 0;
 
     if (save)
         *save = NULL;
@@ -273,8 +277,10 @@ netsnmp_binary_array_remove(netsnmp_container *c, const void *key, void **save)
     /*
      * if the table is dirty, sort it.
      */
-    if (t->dirty)
+    if (t->dirty) {
+        was_dirty = 1;
         Sort_Array(c);
+    }
 
     /*
      * search
@@ -296,7 +302,15 @@ netsnmp_binary_array_remove(netsnmp_container *c, const void *key, void **save)
         /*
          * otherwise, shift array down
          */
-        memmove(&t->data[index], &t->data[index+1], t->data_size * (t->count - index));
+        memmove(&t->data[index], &t->data[index+1],
+                t->data_size * (t->count - index));
+
+        /*
+         * if array was dirty, sync already incremented in SortArray. if not,
+         * do it now.
+         */
+        if (!was_dirty)
+            ++c->sync;
     }
 
     return 0;
@@ -340,13 +354,14 @@ NETSNMP_STATIC_INLINE int
 netsnmp_binary_array_insert(netsnmp_container *c, const void *entry)
 {
     binary_array_table *t = (binary_array_table*)c->container_data;
-    int             new_max;
+    int             new_max, was_dirty = 0;
     void           *new_data;   /* Used for * a) extending the data table
                                  * * b) the next entry to use */
     /*
      * check for duplicates
      */
     if (! (c->flags & CONTAINER_KEY_ALLOW_DUPLICATES)) {
+        was_dirty = t->dirty;
         new_data = netsnmp_binary_array_get(c, entry, 1);
         if (NULL != new_data) {
             DEBUGMSGTL(("container","not inserting duplicate key\n"));
@@ -382,6 +397,15 @@ netsnmp_binary_array_insert(netsnmp_container *c, const void *entry)
      */
     t->data[t->count++] = NETSNMP_REMOVE_CONST(void *, entry);
     t->dirty = 1;
+
+    /*
+     * if array was dirty before we called get, sync was incremented when
+     * get called SortArray. If we didn't call get or the array wasn't dirty,
+     * bump sync now.
+     */
+    if (!was_dirty)
+        ++c->sync;
+
     return 0;
 }
 
