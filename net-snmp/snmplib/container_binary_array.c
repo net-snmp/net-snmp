@@ -259,11 +259,9 @@ netsnmp_binary_array_get(netsnmp_container *c, const void *key, int exact)
 }
 
 int
-netsnmp_binary_array_remove(netsnmp_container *c, const void *key, void **save)
+netsnmp_binary_array_remove_at(netsnmp_container *c, size_t index, void **save)
 {
     binary_array_table *t = (binary_array_table*)c->container_data;
-    size_t             index = 0;
-    int                was_dirty = 0;
 
     if (save)
         *save = NULL;
@@ -273,20 +271,6 @@ netsnmp_binary_array_remove(netsnmp_container *c, const void *key, void **save)
      */
     if (!t->count)
         return 0;
-
-    /*
-     * if the table is dirty, sort it.
-     */
-    if (t->dirty) {
-        was_dirty = 1;
-        Sort_Array(c);
-    }
-
-    /*
-     * search
-     */
-    if ((index = binary_search(key, c, 1)) == -1)
-        return -1;
 
     /*
      * find old data and save it, if ptr provided
@@ -305,15 +289,39 @@ netsnmp_binary_array_remove(netsnmp_container *c, const void *key, void **save)
         memmove(&t->data[index], &t->data[index+1],
                 t->data_size * (t->count - index));
 
-        /*
-         * if array was dirty, sync already incremented in SortArray. if not,
-         * do it now.
-         */
-        if (!was_dirty)
-            ++c->sync;
+        ++c->sync;
     }
 
     return 0;
+}
+int
+netsnmp_binary_array_remove(netsnmp_container *c, const void *key, void **save)
+{
+    binary_array_table *t = (binary_array_table*)c->container_data;
+    size_t             index = 0;
+
+    if (save)
+        *save = NULL;
+    
+    /*
+     * if there is no data, return NULL;
+     */
+    if (!t->count)
+        return 0;
+
+    /*
+     * if the table is dirty, sort it.
+     */
+    if (t->dirty)
+        Sort_Array(c);
+
+    /*
+     * search
+     */
+    if ((index = binary_search(key, c, 1)) == -1)
+        return -1;
+
+    return netsnmp_binary_array_remove_at(c, index, save);
 }
 
 NETSNMP_STATIC_INLINE void
@@ -768,6 +776,25 @@ _ba_iterator_last(binary_array_iterator *it)
 }
 
 static int
+_ba_iterator_remove(binary_array_iterator *it)
+{
+    binary_array_table* t = _ba_it2cont(it);
+    if(NULL == t) {
+        netsnmp_assert(NULL != t);
+        return -1;
+    }
+
+    /*
+     * since this iterator was used for the remove, keep it in sync with
+     * the container. Also, back up one so that next will be the position
+     * that was just removed.
+     */
+    ++it->base.sync;
+    return netsnmp_binary_array_remove_at(it->base.container, it->pos--, NULL);
+
+}
+
+static int
 _ba_iterator_reset(binary_array_iterator *it)
 {
     binary_array_table* t = _ba_it2cont(it);
@@ -816,6 +843,7 @@ _ba_iterator_get(netsnmp_container *c)
     it->base.next = (netsnmp_iterator_rtn*)_ba_iterator_next;
     it->base.curr = (netsnmp_iterator_rtn*)_ba_iterator_curr;
     it->base.last = (netsnmp_iterator_rtn*)_ba_iterator_last;
+    it->base.remove = (netsnmp_iterator_rc*)_ba_iterator_remove;
     it->base.reset = (netsnmp_iterator_rc*)_ba_iterator_reset;
     it->base.release = (netsnmp_iterator_rc*)_ba_iterator_release;
 

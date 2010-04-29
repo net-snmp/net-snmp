@@ -642,12 +642,20 @@ extern "C" {
 
        netsnmp_iterator_rtn          *next;
 
+        /*
+         * remove will remove the item at the current position, then back up
+         * the iterator to the previous item. That way next will move to the
+         * item (the one that replaced the removed item.
+         */
+       netsnmp_iterator_rc           *remove;
+
     } netsnmp_iterator;
 
 
 #define ITERATOR_FIRST(x)  x->first(x)
 #define ITERATOR_NEXT(x)   x->next(x)
 #define ITERATOR_LAST(x)   x->last(x)
+#define ITERATOR_REMOVE(x) x->remove(x)
 #define ITERATOR_RELEASE(x) do { x->release(x); x = NULL; } while(0)
     
 #ifdef  __cplusplus
