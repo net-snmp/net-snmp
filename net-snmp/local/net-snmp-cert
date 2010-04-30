@@ -580,6 +580,7 @@ default_md		= $ENV::MD
 distinguished_name	= req_distinguished_name
 string_mask 		= MASK:0x2002
 req_extensions          = v3_req
+x509_extensions         = v3_user
 
 [ req_distinguished_name ]
 countryName			= Country Name (2 letter code)
@@ -615,6 +616,19 @@ keyUsage = nonRepudiation, digitalSignature, keyEncipherment
 
 # Import the email address and/or specified SANs.
 subjectAltName = $ENV::SAN
+
+[ v3_user ]
+
+# Extensions to add to a certificate request
+basicConstraints = CA:FALSE
+keyUsage = nonRepudiation, digitalSignature, keyEncipherment
+
+# Import the email address and/or specified SANs.
+subjectAltName = $ENV::SAN
+
+# PKIX recommendation.
+subjectKeyIdentifier = hash
+authorityKeyIdentifier = keyid:always,issuer:always
 
 [ v3_ca_create ]
 # Extensions to add to a CA certificate
@@ -1042,6 +1056,7 @@ sub genCa {
   my $days = $config->inherit('caDays') || $config->inherit('days') || $NetSNMP::Cert::DEFCADAYS;
   my $cn = $config->inherit('cn') || $config->inherit('commonName') || "ca-$host";
   my $ca = $config->inherit('ca');
+  my $cmd;
 
   my $env = $app->opensslEnv($cn, $days);
 
@@ -1051,24 +1066,25 @@ sub genCa {
   NetSNMP::Cert::check_output_file($opts, $outCrt, $config->inherit('interactive'));
   NetSNMP::Cert::check_output_file($opts, $outKey, $config->inherit('interactive'));
 
-  my $cmd = "$env openssl req -new -nodes -days $days -batch -keyout $outKey -out $outCrt -config $NetSNMP::Cert::SSLCFG";
+  $cmd = "$env openssl req -extensions v3_ca_create -new -days $days -batch -config $NetSNMP::Cert::SSLCFG -keyout $outKey";
+  $cmd .= " -nodes";
 
   if (defined $ca) {
     # we have to gen a csr and then sign it, must preserve CA:TRUE
     my $outCsr = "$NetSNMP::Cert::NEWCRTDIR/$cn.csr";
     NetSNMP::Cert::check_output_file($opts, $outCsr, $config->inherit('interactive'));
-    $cmd = "$env openssl req -new -nodes -days $days -batch -keyout $outKey -out $outCsr -config $NetSNMP::Cert::SSLCFG -extensions v3_ca_create";
+    $cmd .= " -out $outCsr";
     NetSNMP::Cert::dprint("genCa (gencsr): $cmd\n", $opts);
     NetSNMP::Cert::usystem("$cmd $opts->{out} $opts->{err}");
 
     my $ca_base = ::basename($ca, @NetSNMP::Cert::CRTSUFFIXES);
     NetSNMP::Cert::dprint("ca_base: $ca_base\n", $opts);
-    $cmd = "$env openssl ca -batch -days $days -cert $ca -keyfile $NetSNMP::Cert::PRIVDIR/$ca_base.key -in $outCsr -out $outCrt -config $NetSNMP::Cert::SSLCFG -extensions v3_ca_sign_ca";
+    $cmd = "$env openssl ca -extensions v3_ca_sign_ca -days $days -cert $ca -keyfile $NetSNMP::Cert::PRIVDIR/$ca_base.key -in $outCsr -batch -config $NetSNMP::Cert::SSLCFG -out $outCrt";
 
     NetSNMP::Cert::dprint("genCa (signcsr): $cmd\n", $opts);
     NetSNMP::Cert::usystem("$cmd $opts->{out} $opts->{err}");
   } else {
-    $cmd = "$cmd -x509 -extensions v3_ca_create";
+    $cmd .= " -x509 -out $outCrt";
     NetSNMP::Cert::dprint("genCa: $cmd\n", $opts);
     NetSNMP::Cert::usystem("$cmd $opts->{out} $opts->{err}");
   }
@@ -1087,6 +1103,7 @@ sub genCert {
   my $days = $config->inherit('crtDays') || $config->inherit('days') || $NetSNMP::Cert::DEFCRTDAYS;
   my $cn = $config->inherit('cn') || $config->inherit('commonName');
   my $ca = $config->inherit('ca');
+  my $cmd;
 
   my $tag = $opts->{tag} || 'snmp';
   $cn ||= (NetSNMP::Cert::is_server($tag) ? $host : $email);
@@ -1099,11 +1116,29 @@ sub genCert {
   NetSNMP::Cert::check_output_file($opts, $outCrt, $config->inherit('interactive'));
   NetSNMP::Cert::check_output_file($opts, $outKey, $config->inherit('interactive'));
 
-  my $cmd = "$env openssl req -new -x509 -extensions v3_req -nodes -days $days -batch -keyout $outKey -out $outCrt -config $NetSNMP::Cert::SSLCFG";
+  $cmd = "$env openssl req -new -days $days -keyout $outKey -batch -config $NetSNMP::Cert::SSLCFG";
+  $cmd .= " -nodes";
 
-  NetSNMP::Cert::dprint("genCert: $cmd\n", $opts);
+  if (defined $ca) {
+    my $outCsr = "$NetSNMP::Cert::NEWCRTDIR/$tag.csr";
+    NetSNMP::Cert::check_output_file($opts, $outCsr, $config->inherit('interactive'));
+    $cmd .= " -out $outCsr";
+    NetSNMP::Cert::dprint("genCert (gencsr): $cmd\n", $opts);
+    NetSNMP::Cert::usystem("$cmd $opts->{out} $opts->{err}");
+    # XXX cleanup this temp CSR
+    my $ca_base = ::basename($ca, @NetSNMP::Cert::CRTSUFFIXES);
+    NetSNMP::Cert::dprint("ca_base: $ca_base\n", $opts);
+    $cmd = "$env openssl ca -extensions v3_ca_sign -days $days -cert $ca -keyfile $NetSNMP::Cert::PRIVDIR/$ca_base.key -in $outCsr -batch -config $NetSNMP::Cert::SSLCFG -out $outCrt";
 
-  NetSNMP::Cert::usystem("$cmd $opts->{out} $opts->{err}");
+    NetSNMP::Cert::dprint("gencert (signcsr): $cmd\n", $opts);
+    NetSNMP::Cert::usystem("$cmd $opts->{out} $opts->{err}");
+  } else {
+    $cmd .= " -x509 -out $outCrt";
+    NetSNMP::Cert::dprint("genCert: $cmd\n", $opts);
+
+    NetSNMP::Cert::usystem("$cmd $opts->{out} $opts->{err}");
+  }
+
 
   NetSNMP::Cert::vprint("Certificate Generated:\n", $opts);
   NetSNMP::Cert::vprint("  $NetSNMP::Cert::CRTDIR/$tag.crt\n", $opts);
@@ -1131,7 +1166,7 @@ sub genCsr {
   NetSNMP::Cert::check_output_file($opts, $outCrt, $config->inherit('interactive'));
   NetSNMP::Cert::check_output_file($opts, $outKey, $config->inherit('interactive'));
 
-  my $cmd = "$env openssl req -new -nodes -extensions v3_req -days $days -batch -keyout $outKey -out $outCrt -config $NetSNMP::Cert::SSLCFG";
+  my $cmd = "$env openssl req -new -nodes -days $days -batch -keyout $outKey -out $outCrt -config $NetSNMP::Cert::SSLCFG";
   $cmd .= " -extensions v3_ca_create" if $isCa;
 
   NetSNMP::Cert::dprint("genCsr: $cmd\n", $opts);
@@ -1177,7 +1212,7 @@ sub signCsr {
   # XXX - handle keyfile search??
   my $cmd = "$env openssl ca -batch -days $days -extensions v3_ca_sign -cert $ca -keyfile $NetSNMP::Cert::PRIVDIR/$ca_base.key -in $csr -out $outCrt -config $NetSNMP::Cert::SSLCFG";
 
-  $cmd .= ($isCa ? " -extensions v3_ca_sign_ca" : " -extensions v3_ca_sign");
+  # $cmd .= ($isCa ? " -extensions v3_ca_sign_ca" : " -extensions v3_ca_sign");
 
   NetSNMP::Cert::dprint("signCsr: $cmd\n", $opts);
 
