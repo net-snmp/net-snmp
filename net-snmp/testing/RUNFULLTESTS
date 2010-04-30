@@ -2,7 +2,6 @@
 
 use Getopt::Long;
 use Data::Dumper;
-use File::Path qw(make_path);
 use strict;
 
 ########################################
@@ -274,7 +273,7 @@ sub call_build_script {
 
     if (! -d $newpath) {
 	DEBUG("making directory $newpath\n");
-	make_path($newpath);
+	system("$ENV{NETSNMPSRCDIR}/../mkinstalldirs $newpath");
     }
 
     my $lastline;
