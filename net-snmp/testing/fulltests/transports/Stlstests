@@ -1,40 +1,60 @@
 #!/bin/sh
 
+FLAGS="-l ap -u bogus --defSecurityModel=tsm -On $SNMP_FLAGS $NOAUTHTESTARGS $SNMP_TRANSPORT_SPEC:$SNMP_TEST_DEST$SNMP_SNMPD_PORT"
+
 # tests common to tls and dtls usages
 
 STARTAGENT
 
 # using user 1 - a common name mapped certificate
-CAPTURE "snmpget -l ap -u bogus --defSecurityModel=tsm -On $SNMP_FLAGS $NOAUTHTESTARGS $SNMP_TRANSPORT_SPEC:$SNMP_TEST_DEST$SNMP_SNMPD_PORT .1.3.6.1.2.1.1.3.0"
+CAPTURE "snmpget $FLAGS .1.3.6.1.2.1.1.3.0"
 
 CHECK       ".1.3.6.1.2.1.1.3.0 = Timeticks:"
 
 # using user 2 - a common name mapped certificate with a direct -T FP request
-CAPTURE "snmpget -l ap -u bogus -T my_fingerprint=$OTHERUSERFP --defSecurityModel=tsm -On $SNMP_FLAGS $NOAUTHTESTARGS $SNMP_TRANSPORT_SPEC:$SNMP_TEST_DEST$SNMP_SNMPD_PORT .1.3.6.1.2.1.1.4.0"
+CAPTURE "snmpget -T my_fingerprint=$OTHERUSERFP $FLAGS .1.3.6.1.2.1.1.4.0"
 
-CHECK              ".1.3.6.1.2.1.1.4.0 = "
+CHECK              ".1.3.6.1.2.1.1.4.0 = STRING:"
 CHECKAGENTCOUNT 2  "otheruser"
 
 # using user 3 - an invalid certificate (mapped but not authorized)
-CAPTURE "snmpget -l ap -u bogus -T my_fingerprint=$INVALIDUSERFP --defSecurityModel=tsm -On $SNMP_FLAGS $NOAUTHTESTARGS $SNMP_TRANSPORT_SPEC:$SNMP_TEST_DEST$SNMP_SNMPD_PORT .1.3.6.1.2.1.1.3.0"
+CAPTURE "snmpget  -T my_fingerprint=$INVALIDUSERFP $FLAGS .1.3.6.1.2.1.1.3.0"
 
 CHECK "authorizationError"
 
 # using user 4 - an unmapped certificate
-CAPTURE "snmpget -l ap -u bogus -T my_fingerprint=$UNMAPPEDFP --defSecurityModel=tsm -On $SNMP_FLAGS $NOAUTHTESTARGS $SNMP_TRANSPORT_SPEC:$SNMP_TEST_DEST$SNMP_SNMPD_PORT .1.3.6.1.2.1.1.3.0"
+CAPTURE "snmpget -T my_fingerprint=$UNMAPPEDFP $FLAGS .1.3.6.1.2.1.1.3.0"
 
 CHECK "failed rfc5343"
 
 # Check *their* certificate with a different one than expected; should fail
-CAPTURE "snmpget -l ap -u bogus -T my_fingerprint=$OTHERUSERFP -T their_fingerprint=$OTHERUSERFP --defSecurityModel=tsm -On $SNMP_FLAGS $NOAUTHTESTARGS $SNMP_TRANSPORT_SPEC:$SNMP_TEST_DEST$SNMP_SNMPD_PORT .1.3.6.1.2.1.1.3.0"
+CAPTURE "snmpget -T my_fingerprint=$OTHERUSERFP -T their_fingerprint=$OTHERUSERFP $FLAGS .1.3.6.1.2.1.1.3.0"
 
 CHECK "failed to verify ssl certificate"
 
 # using user 5 - a completely remapped certificate (direct specified secname)
-CAPTURE "snmpget -l ap -u bogus -T my_fingerprint=$MAPPEDUSERFP --defSecurityModel=tsm -On $SNMP_FLAGS $NOAUTHTESTARGS $SNMP_TRANSPORT_SPEC:$SNMP_TEST_DEST$SNMP_SNMPD_PORT .1.3.6.1.2.1.1.5.0"
+CAPTURE "snmpget -T my_fingerprint=$MAPPEDUSERFP $FLAGS .1.3.6.1.2.1.1.5.0"
 
-CHECK              ".1.3.6.1.2.1.1.5.0 = "
-CHECKAGENTCOUNT 2  "aftermapping"
+CHECK              ".1.3.6.1.2.1.1.5.0 = STRING:"
+CHECKAGENTCOUNT 3  "aftermapping"
+
+# using user 7 - a subjectAltName=dns certificate mapping
+CAPTURE "snmpget -T my_fingerprint=$DNSUSERFP $FLAGS .1.3.6.1.2.1.1.3.0"
+
+CHECK              ".1.3.6.1.2.1.1.3.0 = Timeticks"
+CHECKAGENTCOUNT 2 foobar.example.com
+
+# using user 8 - a subjectAltName=ipv4 certificate mapping
+CAPTURE "snmpget -T my_fingerprint=$IPUSERFP $FLAGS .1.3.6.1.2.1.1.4.0"
+
+CHECK              ".1.3.6.1.2.1.1.4.0 = "
+CHECKAGENTCOUNT 1 127.0.0.1
+
+# using user 6 - a subjectAltName=email certificate mapping
+CAPTURE "snmpget -T my_fingerprint=$EMAILUSERFP $FLAGS .1.3.6.1.2.1.1.6.0"
+
+CHECK              ".1.3.6.1.2.1.1.6.0 = "
+CHECKAGENTCOUNT 1 foobaruser@example.com
 
 STOPAGENT
 
