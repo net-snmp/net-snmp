@@ -38452,7 +38452,7 @@ _ACEOF
 
 # Checks for byte order
 if test $cross_compiling = yes; then
-  if test $with_endianness = "big"; then
+  if test x$with_endianness = xbig; then
     cat >>confdefs.h <<\_ACEOF
 #define WORDS_BIGENDIAN 1
 _ACEOF
