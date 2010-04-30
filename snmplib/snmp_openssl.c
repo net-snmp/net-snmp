@@ -203,7 +203,7 @@ _cert_get_extension(X509_EXTENSION  *oext, char **buf, int *len, int flags)
             buf_ptr = *buf;
     }
     else
-        buf_ptr = calloc(1,space);
+        buf_ptr = calloc(1,space + 1);
     
     if (!buf_ptr) {
         snmp_log(LOG_ERR,
