@@ -116,7 +116,10 @@ static const char _modes[][256] =
 void
 netsnmp_certs_init(void)
 {
-    register_config_handler(NULL, "certSecName", _parse_map, NULL, NULL);
+    char *certSecName_help = "certSecName PRIORITY FINGERPRINT "
+        "<--sn SECNAME | --rfc822 | --dns | --ip | --cn | --any>";
+    register_config_handler(NULL, "certSecName", _parse_map, NULL,
+                            certSecName_help);
     if (snmp_register_callback(SNMP_CALLBACK_LIBRARY, SNMP_CALLBACK_STORE_DATA,
                                _save_maps, _maps) != SNMP_ERR_NOERROR)
         snmp_log(LOG_ERR, "error registering for STORE_DATA callback "
@@ -1389,7 +1392,7 @@ _add_certdir(const char *dirname)
     if (NULL == index) {
         DEBUGMSGT(("cert:index:dir",
                     "error opening index for cert directory\n"));
-        return -1;
+        NETSNMP_LOGONCE((LOG_ERR, "could not open certificate index file\n"));
     }
 
     /*
@@ -1435,7 +1438,8 @@ _add_certdir(const char *dirname)
     netsnmp_directory_container_free(cert_container);
 
   err_index:
-    fclose(index);
+    if (index)
+        fclose(index);
 
     return count;
 }
@@ -2301,6 +2305,7 @@ netsnmp_cert_get_secname_maps(netsnmp_container *cert_maps)
         SNMP_FREE(results);
     }
     ITERATOR_RELEASE(itr);
+    CONTAINER_FREE(new_maps);
 
     DEBUGMSGT(("cert:map:secname", "found %d matches for fingerprints\n",
                CONTAINER_SIZE(cert_maps)));
