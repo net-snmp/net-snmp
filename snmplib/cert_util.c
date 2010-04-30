@@ -2115,7 +2115,7 @@ _parse_map(const char *token, char *line)
         map->mapType = TSNM_tlstmCertCommonName;
     else if (strcmp(&buf[2], "ip") == 0)
         map->mapType = TSNM_tlstmCertSANIpAddress;
-    else if (strcmp(&buf[2], "rfc8220") == 0)
+    else if (strcmp(&buf[2], "rfc822") == 0)
         map->mapType = TSNM_tlstmCertSANRFC822Name;
     else if (strcmp(&buf[2], "dns") == 0)
         map->mapType = TSNM_tlstmCertSANDNSName;
