@@ -9,7 +9,9 @@ export SNMP_PREFER_NEAR_MIBS
 SNMP_TEST_PREFIX=${SNMP_TEST_PREFIX:=T}
 export SNMP_TEST_PREFIX
 
-ORIGDIR=`pwd`		        ## this script may be invoked with relative path
+SNMP_ORIGDIR=`pwd`	        ## this script may be invoked with relative path
+export SNMP_ORIGDIR
+
 SNMP_UPDIR=../	                ## building from the source tree
 SNMP_SLEEP=${SNMP_SLEEP:=1} 	## default seconds to sleep
 export SNMP_SLEEP
@@ -46,7 +48,7 @@ fi
 unset bf
 
 # Run from the test scripts directory.
-cd $ORIGDIR ; cd ${SNMP_BASEDIR}
+cd $SNMP_ORIGDIR ; cd ${SNMP_BASEDIR}
 SNMP_BASEDIR=`pwd`
 export SNMP_BASEDIR
 

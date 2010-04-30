@@ -87,8 +87,8 @@ if [ "x$SNMP_SAVE_TMPDIR" = "x" ]; then
     export SNMP_SAVE_TMPDIR
 fi
 
-SNMP_ENV_SEPARATOR="`$SNMP_UPDIR/net-snmp-config --env-separator`"
-SNMP_PERLPROG="`$SNMP_UPDIR/net-snmp-config --perlprog`"
+SNMP_ENV_SEPARATOR="`$SNMP_ORIGDIR/../net-snmp-config --env-separator`"
+SNMP_PERLPROG="`$SNMP_ORIGDIR/../net-snmp-config --perlprog`"
 SNMP_TESTDIR="$SNMP_BASEDIR/tests"
 SNMP_CONFIG_FILE="$SNMP_TMPDIR/snmpd.conf"
 SNMPTRAPD_CONFIG_FILE="$SNMP_TMPDIR/snmptrapd.conf"
