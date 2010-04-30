@@ -277,6 +277,7 @@ sub usage {
   print "\n   DISTINGUISHED NAME OPTIONS (<dn-opts>):\n";
   print "     -e, --email <email>       -- email name\n";
   print "     -h, --host <host>         -- DNS host name, or IP address\n";
+  print "     -d, --days <days>         -- number of days certificate is valid\n";
   print "     -n, --cn <cn>             -- common name (CN)\n";
   print "     -o, --org <org>           -- organiztion name\n";
   print "     -u, --unit <unit>         -- organiztion unit name\n";
@@ -284,8 +285,12 @@ sub usage {
   print "     -p, --province <province> -- province name (synomynous w/ state)\n";
   print "     -p, --state <state>       -- state name (synomynous w/ province)\n";
   print "     -l, --locality <locality> -- locality name (e.g, town)\n";
-  print "     -s, --san <san>           -- subjectAltName (e.g., DNS:net-snmp.org)\n";
-  print "     -d, --days <days>         -- number of days certificate is valid\n";
+  print "     -s, --san <san>           -- subjectAltName, repeat for each <san>\n";
+  print "                               -- <san> value format (<FMT>:<VAL>):\n";
+  print "                               --   DNS:net-snmp.org\n";
+  print "                               --   IP:192.168.1.1\n";
+  print "                               --   EMAIL:admin\@net-snmp.org\n";
+  print "                               --   URI:http://net-snmp.org\n";
   print "\n   FORMAT OPTIONS (<format-opts>): \n";
   print "     --text         -- full text description\n";
   print "     --subject      -- subject description\n";
@@ -574,6 +579,7 @@ default_bits		= $ENV::KSIZE
 default_md		= $ENV::MD
 distinguished_name	= req_distinguished_name
 string_mask 		= MASK:0x2002
+req_extensions          = v3_req
 
 [ req_distinguished_name ]
 countryName			= Country Name (2 letter code)
@@ -602,16 +608,13 @@ emailAddress_max		= 64
 emailAddress_default            = $ENV::EMAIL
 
 [ v3_req ]
+
 # Extensions to add to a certificate request
 basicConstraints = CA:FALSE
 keyUsage = nonRepudiation, digitalSignature, keyEncipherment
 
 # Import the email address and/or specified SANs.
 subjectAltName = $ENV::SAN
-
-# PKIX recommendation.
-subjectKeyIdentifier = hash
-authorityKeyIdentifier = keyid:always,issuer:always
 
 [ v3_ca_create ]
 # Extensions to add to a CA certificate
@@ -1083,8 +1086,9 @@ sub genCert {
   my $email = $config->inherit("email") || getlogin() . "\@$host";
   my $days = $config->inherit('crtDays') || $config->inherit('days') || $NetSNMP::Cert::DEFCRTDAYS;
   my $cn = $config->inherit('cn') || $config->inherit('commonName');
-  my $tag = $opts->{tag} || 'snmp';
+  my $ca = $config->inherit('ca');
 
+  my $tag = $opts->{tag} || 'snmp';
   $cn ||= (NetSNMP::Cert::is_server($tag) ? $host : $email);
 
   my $env = $app->opensslEnv($cn, $days);
@@ -1127,7 +1131,7 @@ sub genCsr {
   NetSNMP::Cert::check_output_file($opts, $outCrt, $config->inherit('interactive'));
   NetSNMP::Cert::check_output_file($opts, $outKey, $config->inherit('interactive'));
 
-  my $cmd = "$env openssl req -new -nodes -days $days -batch -keyout $outKey -out $outCrt -config $NetSNMP::Cert::SSLCFG";
+  my $cmd = "$env openssl req -new -nodes -extensions v3_req -days $days -batch -keyout $outKey -out $outCrt -config $NetSNMP::Cert::SSLCFG";
   $cmd .= " -extensions v3_ca_create" if $isCa;
 
   NetSNMP::Cert::dprint("genCsr: $cmd\n", $opts);
