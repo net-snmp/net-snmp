@@ -407,8 +407,7 @@ sub find_certs {
   if ($targ =~ /\.?\//) {
     # see if targ could be file - calc orig. rel. path
     my $arg = NetSNMP::Cert::fq_rel_path($targ, $opts->{rdir});
-    $cwd = ::getcwd();
-    NetSNMP::Cert::dprint("find_certs(2:$cwd):$dir:$arg\n", $opts);
+    NetSNMP::Cert::dprint("find_certs(2):$dir:$targ:$arg\n", $opts);
     # targ is a file name - use it
     return (wantarray ? ($arg) : $arg) if -f $arg;
     # else mark as dir if it is
@@ -416,13 +415,13 @@ sub find_certs {
   }
   
   $targ =~ s/\/*$/\// if -d $targ;
+
   NetSNMP::Cert::dprint("find_certs(3):$dir:$targ\n", $opts);
   
   # find certs in targ if a dir (in tlsdir, or relative)
   $dir = $1 if $targ =~ s/^(\S+)\/([^\/\s]*)$/$2/ and -d $1;
 
-  my $d = join(":", <$dir/$targ*>);
-  NetSNMP::Cert::dprint("find_certs(4):${dir}:$targ:$cwd:$d\n", $opts);
+  NetSNMP::Cert::dprint("find_certs(4):${dir}:$targ:$cwd\n", $opts);
 
   my @certs;
   foreach (<$dir/$targ*>) {
@@ -580,7 +579,7 @@ default_md		= $ENV::MD
 distinguished_name	= req_distinguished_name
 string_mask 		= MASK:0x2002
 req_extensions          = v3_req
-x509_extensions         = v3_user
+x509_extensions         = v3_user_create
 
 [ req_distinguished_name ]
 countryName			= Country Name (2 letter code)
@@ -612,23 +611,22 @@ emailAddress_default            = $ENV::EMAIL
 
 # Extensions to add to a certificate request
 basicConstraints = CA:FALSE
-keyUsage = nonRepudiation, digitalSignature, keyEncipherment
 
 # Import the email address and/or specified SANs.
 subjectAltName = $ENV::SAN
 
-[ v3_user ]
+[ v3_user_create ]
 
 # Extensions to add to a certificate request
 basicConstraints = CA:FALSE
 keyUsage = nonRepudiation, digitalSignature, keyEncipherment
 
-# Import the email address and/or specified SANs.
-subjectAltName = $ENV::SAN
-
 # PKIX recommendation.
 subjectKeyIdentifier = hash
 authorityKeyIdentifier = keyid:always,issuer:always
+
+# Import the email address and/or specified SANs.
+subjectAltName = $ENV::SAN
 
 [ v3_ca_create ]
 # Extensions to add to a CA certificate
@@ -648,6 +646,8 @@ subjectAltName = $ENV::SAN
 basicConstraints = CA:FALSE
 # This will be displayed in Netscape's comment listbox.
 nsComment = "OpenSSL Generated Certificate (net-snmp)"
+
+keyUsage = nonRepudiation, digitalSignature, keyEncipherment
 
 # PKIX recommendations harmless if included in all certificates.
 subjectKeyIdentifier = hash
@@ -1116,7 +1116,7 @@ sub genCert {
   NetSNMP::Cert::check_output_file($opts, $outCrt, $config->inherit('interactive'));
   NetSNMP::Cert::check_output_file($opts, $outKey, $config->inherit('interactive'));
 
-  $cmd = "$env openssl req -new -days $days -keyout $outKey -batch -config $NetSNMP::Cert::SSLCFG";
+  $cmd = "$env openssl req -extensions v3_user_create -new -days $days -keyout $outKey -batch -config $NetSNMP::Cert::SSLCFG";
   $cmd .= " -nodes";
 
   if (defined $ca) {
@@ -1167,7 +1167,7 @@ sub genCsr {
   NetSNMP::Cert::check_output_file($opts, $outKey, $config->inherit('interactive'));
 
   my $cmd = "$env openssl req -new -nodes -days $days -batch -keyout $outKey -out $outCrt -config $NetSNMP::Cert::SSLCFG";
-  $cmd .= " -extensions v3_ca_create" if $isCa;
+  $cmd .= ($isCa ? " -extensions v3_ca_create" : " -extensions v3_user_create");
 
   NetSNMP::Cert::dprint("genCsr: $cmd\n", $opts);
 
