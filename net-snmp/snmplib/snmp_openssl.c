@@ -497,6 +497,10 @@ _san_reduce(char *san, int mapType)
     char *pos = san, *data, *lower;
     size_t segment_len;
 
+    if (NULL == san)
+        return -1;
+
+    DEBUGMSGT(("openssl:secname:extract", "san %s\n", san));
     while(pos && *pos) {
         data = strchr(pos, ':');
         if (NULL == data) {
@@ -522,7 +526,7 @@ _san_reduce(char *san, int mapType)
                 (TSNM_tlstmCertSANAny == mapType))
                 break;
         }
-        else if (strncmp(pos,"email:",4) == 0) {
+        else if (strncmp(pos,"email:",6) == 0) {
             if ((TSNM_tlstmCertSANRFC822Name == mapType) ||
                 (TSNM_tlstmCertSANAny == mapType)) {
                 lower = strchr(data, '@');
@@ -561,14 +565,19 @@ char *
 netsnmp_openssl_extract_secname(netsnmp_cert_map *cert_map,
                                 netsnmp_cert_map *peer_cert)
 {
-    char       *san;
+    char       *rtn = NULL;
 
     if (NULL == cert_map)
         return NULL;
 
+    DEBUGMSGT(("openssl:secname:extract",
+               "checking san of type %d for %s\n",
+               cert_map->mapType, peer_cert->fingerprint));
+
     switch(cert_map->mapType) {
         case TSNM_tlstmCertSpecified:
-            return strdup(cert_map->data);
+            rtn = strdup(cert_map->data);
+            break;
 
         case TSNM_tlstmCertSANRFC822Name:
         case TSNM_tlstmCertSANDNSName:
@@ -577,35 +586,38 @@ netsnmp_openssl_extract_secname(netsnmp_cert_map *cert_map,
             if (NULL == peer_cert) {
                 DEBUGMSGT(("openssl:secname:extract", "no peer cert for %s\n",
                            cert_map->fingerprint));
-                return NULL;
+                break;
             }
-            san = netsnmp_openssl_cert_get_subjectAltName(peer_cert->ocert,
+            rtn = netsnmp_openssl_cert_get_subjectAltName(peer_cert->ocert,
                                                           NULL, 0);
-            if (NULL == san) {
+            if (NULL == rtn) {
                 DEBUGMSGT(("openssl:secname:extract", "no san for %s\n",
                            peer_cert->fingerprint));
-                return NULL;
             }
-            if (_san_reduce(san, cert_map->mapType)) {
-                free(san);
-                DEBUGMSGT(("openssl:secname:extract",
-                           "no san of type %d for %s\n",
-                           cert_map->mapType, peer_cert->fingerprint));
-                return NULL;
+            else if (_san_reduce(rtn, cert_map->mapType)) {
+                SNMP_FREE(rtn);
             }
-            return san;
             break;
 
         case TSNM_tlstmCertCommonName:
-            return netsnmp_openssl_cert_get_commonName(cert_map->ocert, NULL,
+            rtn = netsnmp_openssl_cert_get_commonName(cert_map->ocert, NULL,
                                                        NULL);
+            break;
         default:
             snmp_log(LOG_ERR, "cant extract secname for unknown map type %d\n",
                      cert_map->mapType);
             break;
     } /* switch mapType */
 
-    return NULL;
+   if (rtn)
+        DEBUGMSGT(("openssl:secname:extract",
+                   "found san of type %d for %s: %s\n",
+                   cert_map->mapType, peer_cert->fingerprint, rtn));
+   else
+        DEBUGMSGT(("openssl:secname:extract",
+                   "no san of type %d for %s\n",
+                   cert_map->mapType, peer_cert->fingerprint));
+    return rtn;
 }
 
 int
