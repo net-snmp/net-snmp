@@ -781,6 +781,10 @@ int   command_handler( netsnmp_pdu           *pdu,
                        netsnmp_transport     *transport,
                        netsnmp_trapd_handler *handler)
 {
+#ifndef USING_UCD_SNMP_EXTENSIBLE_MODULE
+    NETSNMP_LOGONCE((LOG_WARNING,"support for run_exec_command not available\n"));
+    return NETSNMPTRAPD_HANDLER_FAIL;
+#else
     u_char         *rbuf = NULL;
     size_t          r_len = 64, o_len = 0;
     int             oldquick;
@@ -839,6 +843,7 @@ int   command_handler( netsnmp_pdu           *pdu,
         free(rbuf);
     }
     return NETSNMPTRAPD_HANDLER_OK;
+#endif /* !def USING_UCD_SNMP_EXTENSIBLE_MODULE */
 }
 
 

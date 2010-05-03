@@ -231,6 +231,10 @@ void init_extend( void )
 int
 extend_load_cache(netsnmp_cache *cache, void *magic)
 {
+#ifndef USING_UCD_SNMP_EXTENSIBLE_MODULE
+    NETSNMP_LOGONCE((LOG_WARNING,"support for run_exec_command not available\n"));
+    return -1;
+#else
     int  out_len = 1024*100;
     char out_buf[ 1024*100 ];
     int  cmd_len = 255*2 + 2;	/* 2 * DisplayStrings */
@@ -279,6 +283,7 @@ extend_load_cache(netsnmp_cache *cache, void *magic)
     }
     extension->result = ret;
     return ret;
+#endif
 }
 
 void
