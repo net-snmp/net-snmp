@@ -84,6 +84,7 @@
 #endif
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
+#include <net-snmp/library/snmp_logging.h>
 
 #include "struct.h"
 #include "util_funcs.h"
@@ -246,6 +247,10 @@ wait_on_exec(struct extensible *ex)
 int
 get_exec_output(struct extensible *ex)
 {
+#ifndef USING_UCD_SNMP_EXTENSIBLE_MODULE
+    ex->result = -1;
+    NETSNMP_LOGONCE((LOG_WARNING, "support for run_exec_command not available\n"));
+#else
 #if HAVE_EXECV
     char            cachefile[STRMAX];
     char            cache[NETSNMP_MAXCACHESIZE];
@@ -395,6 +400,7 @@ get_exec_output(struct extensible *ex)
 #endif                          /* WIN32 */
     return -1;
 #endif
+#endif /* ! USING_UCD_SNMP_EXTENSIBLE_MODULE */
 }
 int
 get_exec_pipes(char *cmd, int *fdIn, int *fdOut, int *pid)
