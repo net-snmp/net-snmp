@@ -2294,6 +2294,7 @@ netsnmp_cert_get_secname_maps(netsnmp_container *cert_maps)
                     netsnmp_cert_map_free(new_cert_map);
                     goto fail;
                 }
+                new_cert_map->ocert = cert_map->ocert;
                 if (CONTAINER_INSERT(cert_maps,new_cert_map) != 0) {
                     netsnmp_cert_map_free(new_cert_map);
                     goto fail;
