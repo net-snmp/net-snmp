@@ -3,14 +3,15 @@
 use strict;
 use 5.8.0;
 
+use Getopt::Long qw(GetOptionsFromArray :config gnu_getopt no_ignore_case pass_through);
+use Cwd qw(getcwd realpath);
 use File::Basename;
 use File::Path;
 use Sys::Hostname;
-use Cwd qw(getcwd realpath);
 
 package NetSNMP::Cert;
 
-our $VERSION      = '0.2.0b';
+our $VERSION      = '0.2.1b';
 
 our $PROG         = ::basename($0);
 our $DEBUG        = 0;
@@ -217,6 +218,15 @@ sub version {
   my $ret = (@_ ? shift : 1);
   print "$NetSNMP::Cert::PROG: $NetSNMP::Cert::VERSION\n";
   exit($ret);
+}
+
+sub GetOptsFromArray {
+  my $args = shift;
+  local *ARGV;
+  @ARGV = @$args;
+  my $ret = ::GetOptions(@_);
+  @$args = @ARGV; # GetOptions strips out the ones it handles and leaves others
+  return $ret;
 }
 
 sub usage {
@@ -861,7 +871,6 @@ sub DESTROY {
 
 package NetSNMP::Cert::App;
 use vars qw(@ISA);
-use Getopt::Long qw(GetOptionsFromArray :config gnu_getopt no_ignore_case pass_through);
 
 @ISA = qw(NetSNMP::Cert::Obj);
 
@@ -930,7 +939,7 @@ sub parseArgs {
 
   $opts->{cmd} = shift(@args) if $args[0] !~ /^\s*-/;
 
-  GetOptionsFromArray(\@args, $opts, 'help|?', 'version|V', 'debug|D+',
+  NetSNMP::Cert::GetOptsFromArray(\@args, $opts, 'help|?', 'version|V', 'debug|D+',
 		      'interactive!', 'I', 'verbose!', 'Q', 'force|F',
 		      'cfgfile|f=s', 'cfgdir|C=s', 'tlsdir|tlsDir|T=s', 
 		      'tag|t=s', 'identity|i=s');
@@ -1074,6 +1083,7 @@ sub genCa {
     my $outCsr = "$NetSNMP::Cert::NEWCRTDIR/$cn.csr";
     NetSNMP::Cert::check_output_file($opts, $outCsr, $config->inherit('interactive'));
     $cmd .= " -out $outCsr";
+
     NetSNMP::Cert::dprint("genCa (gencsr): $cmd\n", $opts);
     NetSNMP::Cert::usystem("$cmd $opts->{out} $opts->{err}");
 
@@ -1085,6 +1095,7 @@ sub genCa {
     NetSNMP::Cert::usystem("$cmd $opts->{out} $opts->{err}");
   } else {
     $cmd .= " -x509 -out $outCrt";
+
     NetSNMP::Cert::dprint("genCa: $cmd\n", $opts);
     NetSNMP::Cert::usystem("$cmd $opts->{out} $opts->{err}");
   }
@@ -1123,8 +1134,10 @@ sub genCert {
     my $outCsr = "$NetSNMP::Cert::NEWCRTDIR/$tag.csr";
     NetSNMP::Cert::check_output_file($opts, $outCsr, $config->inherit('interactive'));
     $cmd .= " -out $outCsr";
+
     NetSNMP::Cert::dprint("genCert (gencsr): $cmd\n", $opts);
     NetSNMP::Cert::usystem("$cmd $opts->{out} $opts->{err}");
+
     # XXX cleanup this temp CSR
     my $ca_base = ::basename($ca, @NetSNMP::Cert::CRTSUFFIXES);
     NetSNMP::Cert::dprint("ca_base: $ca_base\n", $opts);
@@ -1134,11 +1147,10 @@ sub genCert {
     NetSNMP::Cert::usystem("$cmd $opts->{out} $opts->{err}");
   } else {
     $cmd .= " -x509 -out $outCrt";
-    NetSNMP::Cert::dprint("genCert: $cmd\n", $opts);
 
+    NetSNMP::Cert::dprint("genCert: $cmd\n", $opts);
     NetSNMP::Cert::usystem("$cmd $opts->{out} $opts->{err}");
   }
-
 
   NetSNMP::Cert::vprint("Certificate Generated:\n", $opts);
   NetSNMP::Cert::vprint("  $NetSNMP::Cert::CRTDIR/$tag.crt\n", $opts);
@@ -1276,7 +1288,7 @@ sub run {
   my $cmdstr = join(' ', $cmd, @{$opts->{cmdargs}});
   NetSNMP::Cert::dprint("command:     $cmdstr\n", $opts);
   
-  GetOptionsFromArray(\@{$opts->{cmdargs}}, $opts, 'ca|a=s', 'csr|r=s', 'crt|x=s',
+  NetSNMP::Cert::GetOptsFromArray(\@{$opts->{cmdargs}}, $opts,'ca|a=s','csr|r=s','crt|x=s',
 		      'cn|n=s', 'email|e=s', 'host|h=s', 'san|s=s@', 'org|o=s', 'unit|u=s',
 		      'country|c=s', 'state|province|p=s', 'locality|l=s', 'days|d=s',
 		      @NetSNMP::Cert::X509FMTS);
