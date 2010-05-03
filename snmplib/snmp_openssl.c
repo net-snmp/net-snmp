@@ -413,7 +413,7 @@ netsnmp_openssl_get_cert_chain(SSL *ssl)
 
     /** check for a chain to a CA */
     ochain = SSL_get_peer_cert_chain(ssl);
-    if ((NULL == ochain) || (0 == ochain->num)) {
+    if ((NULL == ochain) || (0 == sk_num((const struct _STACK *)ochain))) {
         DEBUGMSGT(("ssl:cert:chain", "peer has no cert chain\n"));
     }
     else {
@@ -421,8 +421,8 @@ netsnmp_openssl_get_cert_chain(SSL *ssl)
          * loop over chain, adding fingerprint / cert for each
          */
         DEBUGMSGT(("ssl:cert:chain", "examining cert chain\n"));
-        for(i = 0; i < ochain->num; ++i) {
-            ocert_tmp = (X509*)ochain->data[i];
+        for(i = 0; i < sk_num((const struct _STACK *)ochain); ++i) {
+            ocert_tmp = (X509*)sk_value((const struct _STACK *)ochain,i);
             fingerprint = netsnmp_openssl_cert_get_fingerprint(ocert_tmp,
                                                                NS_HASH_SHA1);
             if (NULL == fingerprint)
@@ -438,7 +438,7 @@ netsnmp_openssl_get_cert_chain(SSL *ssl)
         /*
          * if we broke out of loop before finishing, clean up
          */
-        if (i < ochain->num) 
+        if (i < sk_num((const struct _STACK *)ochain)) 
             CONTAINER_FREE_ALL(chain_map, NULL);
     } /* got peer chain */
 
