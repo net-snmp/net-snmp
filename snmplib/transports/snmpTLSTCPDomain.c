@@ -491,14 +491,14 @@ netsnmp_tlstcp_accept(netsnmp_transport *t)
     /* create the server's main SSL bio */
     ssl = tlsdata->ssl = SSL_new(ctx);
     if (!tlsdata->ssl) {
-        snmp_log(LOG_ERR, "TLSTCP: Falied to create a SSL BIO\n");
+        snmp_log(LOG_ERR, "TLSTCP: Failed to create a SSL BIO\n");
         return -1;
     }
         
     SSL_set_bio(ssl, accepted_bio, accepted_bio);
         
     if ((rc = SSL_accept(ssl)) <= 0) {
-        snmp_log(LOG_ERR, "TLSTCP: Falied SSL_accept\n");
+        snmp_log(LOG_ERR, "TLSTCP: Failed SSL_accept\n");
         return -1;
     }   
 
