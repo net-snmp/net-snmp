@@ -33,7 +33,11 @@
 #endif
 #include <errno.h>
 #include <stdio.h>
+#if HAVE_STRING_H
 #include <string.h>
+#else
+#include <strings.h>
+#endif
 
 #include <net-snmp/types.h>
 
@@ -48,9 +52,6 @@
 #ifndef INT16SZ
 #define	INT16SZ		2
 #endif
-  /*
-   * End of Net-SNMP Win32 additions
-   */
 
 #ifndef INADDRSZ
 #define	INADDRSZ	4
