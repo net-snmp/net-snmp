@@ -38,7 +38,7 @@
 #if HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
 #endif
-#if HAVE_SYS_TIME_H
+#if !defined(mingw32) && defined(HAVE_SYS_TIME_H)
 #include <sys/time.h>
 #endif
 
