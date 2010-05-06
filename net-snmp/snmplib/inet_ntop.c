@@ -31,7 +31,11 @@
 #endif
 #include <errno.h>
 #include <stdio.h>
+#if HAVE_STRING_H
 #include <string.h>
+#else
+#include <strings.h>
+#endif
 
 #include <net-snmp/types.h>
 
