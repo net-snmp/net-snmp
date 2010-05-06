@@ -2852,7 +2852,7 @@ AC_DEFINE_UNQUOTED(PSCMD, "$PSPROG $ac_cv_ps_flags")
 
 # Checks for byte order
 if test $cross_compiling = yes; then
-  if test $with_endianness = "big"; then
+  if test x$with_endianness = xbig; then
     AC_DEFINE(WORDS_BIGENDIAN)
   elif test -z $with_endianness; then
     AC_MSG_ERROR([You are cross-compiling, but you have not specified the target's endianness])
