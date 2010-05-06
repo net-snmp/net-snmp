@@ -52,7 +52,7 @@ SOFTWARE.
 #include <netinet/in.h>
 #endif
 #include <stdio.h>
-#if HAVE_SYS_TIME_H
+#if !defined(mingw32) && defined(HAVE_SYS_TIME_H)
 # include <sys/time.h>
 # if TIME_WITH_SYS_TIME
 #  include <time.h>
