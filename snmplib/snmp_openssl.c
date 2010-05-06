@@ -226,8 +226,32 @@ _cert_get_extension(X509_EXTENSION  *oext, char **buf, int *len, int flags)
  */
 /** instead of exposing this function, make helper functions for each
  * field, like netsnmp_openssl_cert_get_subjectAltName, below */
-static char *
+X509_EXTENSION  *
 _cert_get_extension_at(X509 *ocert, int pos, char **buf, int *len, int flags)
+{
+    X509_EXTENSION  *oext;
+
+    if ((NULL == ocert) || ((buf && !len) || (len && !buf)))
+        return NULL;
+
+    oext = X509_get_ext(ocert,pos);
+    if (NULL == oext) {
+        snmp_log(LOG_ERR, "extension number %d not found!\n", pos);
+        netsnmp_openssl_cert_dump_extensions(ocert);
+        return NULL;
+    }
+
+    return oext;
+}
+
+/** netsnmp_openssl_cert_get_extension: get extension field from cert
+ * @internal
+ */
+/** instead of exposing this function, make helper functions for each
+ * field, like netsnmp_openssl_cert_get_subjectAltName, below */
+static char *
+_cert_get_extension_str_at(X509 *ocert, int pos, char **buf, int *len,
+                           int flags)
 {
     X509_EXTENSION  *oext;
 
@@ -244,12 +268,12 @@ _cert_get_extension_at(X509 *ocert, int pos, char **buf, int *len, int flags)
     return _cert_get_extension(oext, buf, len, flags);
 }
 
-/** netsnmp_openssl_cert_get_extension: get extension field from cert
+/** _cert_get_extension_id: get extension field from cert
  * @internal
  */
 /** instead of exposing this function, make helper functions for each
  * field, like netsnmp_openssl_cert_get_subjectAltName, below */
-static char *
+X509_EXTENSION *
 _cert_get_extension_id(X509 *ocert, int which, char **buf, int *len, int flags)
 {
     int pos;
@@ -266,15 +290,119 @@ _cert_get_extension_id(X509 *ocert, int which, char **buf, int *len, int flags)
     return _cert_get_extension_at(ocert, pos, buf, len, flags);
 }
 
+/** _cert_get_extension_id_str: get extension field from cert
+ * @internal
+ */
+/** instead of exposing this function, make helper functions for each
+ * field, like netsnmp_openssl_cert_get_subjectAltName, below */
+static char *
+_cert_get_extension_id_str(X509 *ocert, int which, char **buf, int *len,
+                           int flags)
+{
+    int pos;
+
+    if ((NULL == ocert) || ((buf && !len) || (len && !buf)))
+        return NULL;
+
+    pos = X509_get_ext_by_NID(ocert,which,-1);
+    if (pos < 0) {
+        DEBUGMSGT(("openssl:cert:name", "no extension %d\n", which));
+        return NULL;
+    }
+
+    return _cert_get_extension_str_at(ocert, pos, buf, len, flags);
+}
+
+static char *
+_extract_oname(const GENERAL_NAME *oname)
+{
+    char  ipbuf[60], *buf = NULL, *rtn = NULL;
+
+    if (NULL == oname)
+        return NULL;
+
+    switch ( oname->type ) {
+        case GEN_EMAIL:
+        case GEN_DNS:
+            /*case GEN_URI:*/
+            ASN1_STRING_to_UTF8((unsigned char**)&buf, oname->d.ia5);
+            if (buf)
+                rtn = strdup(buf);
+            break;
+
+        case GEN_IPADD:
+            if (oname->d.iPAddress->length == 4) {
+                sprintf(ipbuf, "%d.%d.%d.%d", oname->d.iPAddress->data[0],
+                        oname->d.iPAddress->data[1],
+                        oname->d.iPAddress->data[2],
+                        oname->d.iPAddress->data[3]);
+                rtn = strdup(ipbuf);
+            }
+            else if ((oname->d.iPAddress->length == 16) ||
+                     (oname->d.iPAddress->length == 20)) {
+                char *pos = ipbuf;
+                int   j;
+                for(j = 0; j < oname->d.iPAddress->length; ++j) {
+                    *pos++ = VAL2HEX(oname->d.iPAddress->data[j]);
+                    *pos++ = ':';
+                }
+                *pos = '\0';
+                rtn = strdup(ipbuf);
+            }
+            else
+                NETSNMP_LOGONCE((LOG_WARNING, "unexpected ip addr length %d\n",
+                       oname->d.iPAddress->length));
+
+            break;
+        default:
+            DEBUGMSGT(("openssl:cert:san", "unknown/unsupported type %d\n",
+                       oname->type));
+            break;
+    }
+    DEBUGMSGT(("9:openssl:cert:san", "san=%s\n", buf));
+    if (buf)
+        OPENSSL_free(buf);
+
+    return rtn;
+}
+
+/**
+ */
+/**
+ */
+void
+netsnmp_openssl_cert_dump_san(X509 *ocert /*X509_EXTENSION *oext*/)
+{
+    GENERAL_NAMES      *onames;
+    const GENERAL_NAME *oname;
+    char               *buf;
+    int                 count, i;
+ 
+    onames = (GENERAL_NAMES *)X509_get_ext_d2i(ocert, NID_subject_alt_name,
+                                               NULL, NULL );
+    if (NULL == onames)
+        return;
+
+    count = sk_GENERAL_NAME_num(onames);
+
+    for (i=0 ; i <count; ++i)  {
+        oname = sk_GENERAL_NAME_value(onames, i);
+        buf = _extract_oname( oname );
+        DEBUGMSGT(("openssl:cert:extension:san", "#%d type %d: %s\n", i,
+                   oname->type, buf ? buf : "NULL"));
+        free(buf);
+    }
+}
+
 /** netsnmp_openssl_cert_get_subjectAltName: get subjectAltName for cert.
  * if a pointer to a buffer and its length are specified, they will be
  * used. otherwise, a new buffer will be allocated, which the caller will
  * be responsbile for releasing.
  */
 char *
-netsnmp_openssl_cert_get_subjectAltName(X509 *ocert, char **buf, int *len)
+netsnmp_openssl_cert_get_subjectAltNames(X509 *ocert, char **buf, int *len)
 {
-    return _cert_get_extension_id(ocert, NID_subject_alt_name, buf, len, 0);
+    return _cert_get_extension_id_str(ocert, NID_subject_alt_name, buf, len, 0);
 }
 
 void
@@ -283,21 +411,24 @@ netsnmp_openssl_cert_dump_extensions(X509 *ocert)
     X509_EXTENSION  *extension;
     const char      *extension_name;
     char             buf[SNMP_MAXBUF_SMALL], *buf_ptr = buf, *str;
-    int              i, num_extensions, buf_len;
+    int              i, num_extensions, buf_len, nid;
 
     if (NULL == ocert)
         return;
 
     num_extensions = X509_get_ext_count(ocert);
-    DEBUGMSGT(("openssl:dump:extension", "%02d extensions\n", num_extensions));
+    DEBUGMSGT(("9:cert:dump:extension", "%02d extensions\n", num_extensions));
     for(i = 0; i < num_extensions; i++) {
         extension = X509_get_ext(ocert, i);
-        extension_name =
-            OBJ_nid2sn(OBJ_obj2nid(X509_EXTENSION_get_object(extension)));
+        nid = OBJ_obj2nid(X509_EXTENSION_get_object(extension));
+        extension_name = OBJ_nid2sn(nid);
         buf_len = sizeof(buf);
-        str = _cert_get_extension_at(ocert, i, &buf_ptr, &buf_len, 0);
-        DEBUGMSGT(("openssl:dump:extension",
-                   "    %2d: %s = %s\n", i, extension_name, str));
+        str = _cert_get_extension_str_at(ocert, i, &buf_ptr, &buf_len, 0);
+        DEBUGMSGT(("cert:dump:extension", "    %2d: %s = %s\n", i,
+                   extension_name, str));
+        if (NID_subject_alt_name == nid)
+            DEBUGIF("9:cert:dump:extension")
+                netsnmp_openssl_cert_dump_san(ocert);
     }
 }
 
@@ -413,7 +544,7 @@ netsnmp_openssl_get_cert_chain(SSL *ssl)
 
     /** check for a chain to a CA */
     ochain = SSL_get_peer_cert_chain(ssl);
-    if ((NULL == ochain) || (0 == sk_num((const struct _STACK *)ochain))) {
+    if ((NULL == ochain) || (0 == sk_num(ochain))) {
         DEBUGMSGT(("ssl:cert:chain", "peer has no cert chain\n"));
     }
     else {
@@ -421,8 +552,8 @@ netsnmp_openssl_get_cert_chain(SSL *ssl)
          * loop over chain, adding fingerprint / cert for each
          */
         DEBUGMSGT(("ssl:cert:chain", "examining cert chain\n"));
-        for(i = 0; i < sk_num((const struct _STACK *)ochain); ++i) {
-            ocert_tmp = (X509*)sk_value((const struct _STACK *)ochain,i);
+        for(i = 0; i < sk_num(ochain); ++i) {
+            ocert_tmp = (X509*)sk_value(ochain,i);
             fingerprint = netsnmp_openssl_cert_get_fingerprint(ocert_tmp,
                                                                NS_HASH_SHA1);
             if (NULL == fingerprint)
@@ -438,7 +569,7 @@ netsnmp_openssl_get_cert_chain(SSL *ssl)
         /*
          * if we broke out of loop before finishing, clean up
          */
-        if (i < sk_num((const struct _STACK *)ochain)) 
+        if (i < sk_num(ochain)) 
             CONTAINER_FREE_ALL(chain_map, NULL);
     } /* got peer chain */
 
@@ -491,74 +622,63 @@ tlstmCertSANAny "Maps any of the following fields using the
                   certificate of the above types MUST be used when
                   deriving the tmSecurityName."
 */
-static int
-_san_reduce(char *san, int mapType)
+char *
+_cert_get_san_type(X509 *ocert, int mapType)
 {
-    char *pos = san, *data, *lower;
-    size_t segment_len;
+    GENERAL_NAMES      *onames;
+    const GENERAL_NAME *oname;
+    char               *buf = NULL, *lower = NULL;
+    int                 count, i;
+ 
+    onames = (GENERAL_NAMES *)X509_get_ext_d2i(ocert, NID_subject_alt_name,
+                                               NULL, NULL );
+    if (NULL == onames)
+        return NULL;
 
-    if (NULL == san)
-        return -1;
+    count = sk_GENERAL_NAME_num(onames);
 
-    DEBUGMSGT(("openssl:secname:extract", "san %s\n", san));
-    while(pos && *pos) {
-        data = strchr(pos, ':');
-        if (NULL == data) {
-            snmp_log(LOG_ERR,"cant find ':' in SAN '%s'\n", pos);
-            return -1;
-        }
-        ++data;
-        segment_len = strcspn(data, ", ");
-        if (segment_len)
-            data[segment_len] = '\0';
-        lower = NULL;
+    for (i=0 ; i <count; ++i)  {
+        oname = sk_GENERAL_NAME_value(onames, i);
 
-        if (strncmp(pos,"DNS:",4) == 0) {
+        if (GEN_DNS == oname->type) {
             if ((TSNM_tlstmCertSANDNSName == mapType) ||
                 (TSNM_tlstmCertSANAny == mapType)) {
-                lower = data;
+                lower = buf = _extract_oname( oname );;
                 break;
             }
         }
-        else if ((strncmp(pos,"IP:",3) == 0) ||
-                 (strncmp(pos,"IP Address:",11) == 0)) {
+        else if (GEN_IPADD == oname->type) {
             if ((TSNM_tlstmCertSANIpAddress == mapType) ||
                 (TSNM_tlstmCertSANAny == mapType))
+                buf = _extract_oname(oname);
                 break;
         }
-        else if (strncmp(pos,"email:",6) == 0) {
+        else if (GEN_EMAIL == oname->type) {
             if ((TSNM_tlstmCertSANRFC822Name == mapType) ||
                 (TSNM_tlstmCertSANAny == mapType)) {
-                lower = strchr(data, '@');
+                buf = _extract_oname(oname);
+                lower = strchr(buf, '@');
                 if (NULL == lower) {
                     DEBUGMSGT(("openssl:secname:extract",
-                               "host name %s has no '@'!\n", data));
+                               "email %s has no '@'!\n", buf));
                 }
                 else {
                     ++lower;
                     break;
                 }
             }
+            
         }
-        else
-            DEBUGMSGT(("openssl:secname:extract", "unknown SAN\n"));
-        pos = data + segment_len + 1;
-        while( *pos && ((' ' == *pos) || (',' == *pos)))
-            ++pos;
-    }
+    } /* for loop */
 
-    if (*pos) {
-        if (lower)
-            for ( ; *lower; ++lower )
-                if (isascii(*lower))
-                    *lower = tolower(*lower);
-        memmove(san, data, segment_len);
-        san[segment_len] = 0;
+    if (lower)
+        for ( ; *lower; ++lower )
+            if (isascii(*lower))
+                *lower = tolower(*lower);
+    DEBUGMSGT(("openssl:cert:extension:san", "#%d type %d: %s\n", i,
+               oname->type, buf ? buf : "NULL"));
 
-        return 0;
-    }
-
-    return -1;
+    return buf;
 }
 
 char *
@@ -588,14 +708,10 @@ netsnmp_openssl_extract_secname(netsnmp_cert_map *cert_map,
                            cert_map->fingerprint));
                 break;
             }
-            rtn = netsnmp_openssl_cert_get_subjectAltName(peer_cert->ocert,
-                                                          NULL, 0);
+            rtn = _cert_get_san_type(peer_cert->ocert, cert_map->mapType);
             if (NULL == rtn) {
                 DEBUGMSGT(("openssl:secname:extract", "no san for %s\n",
                            peer_cert->fingerprint));
-            }
-            else if (_san_reduce(rtn, cert_map->mapType)) {
-                SNMP_FREE(rtn);
             }
             break;
 
