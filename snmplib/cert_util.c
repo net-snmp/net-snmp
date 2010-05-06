@@ -116,7 +116,7 @@ static const char _modes[][256] =
 void
 netsnmp_certs_init(void)
 {
-    char *certSecName_help = "certSecName PRIORITY FINGERPRINT "
+    const char *certSecName_help = "certSecName PRIORITY FINGERPRINT "
         "<--sn SECNAME | --rfc822 | --dns | --ip | --cn | --any>";
     register_config_handler(NULL, "certSecName", _parse_map, NULL,
                             certSecName_help);
@@ -317,7 +317,7 @@ _new_cert(const char *dirname, const char *filename, int type,
         return NULL;
     }
 
-    DEBUGMSGT(("cert:struct:new","new cert 0x%#lx for %s\n", (u_long)cert,
+    DEBUGMSGT(("9:cert:struct:new","new cert 0x%#lx for %s\n", (u_long)cert,
                   filename));
 
     cert->info.dir = strdup(dirname);
@@ -383,7 +383,7 @@ netsnmp_cert_free(netsnmp_cert *cert)
     if (NULL == cert)
         return;
 
-    DEBUGMSGT(("cert:struct:free","freeing cert 0x%#lx, %s (fp %s; CN %s)\n",
+    DEBUGMSGT(("9:cert:struct:free","freeing cert 0x%#lx, %s (fp %s; CN %s)\n",
                (u_long)cert, cert->info.filename ? cert->info.filename : "UNK",
                cert->fingerprint ? cert->fingerprint : "UNK",
                cert->common_name ? cert->common_name : "UNK"));
@@ -688,7 +688,7 @@ _certindexes_load( void )
         cp = fgets( line, sizeof(line), fp );
         if ( cp ) {
             line[strlen(line)-1] = 0;
-            DEBUGMSGT(("cert:index:load","adding (%d) %s\n", i, line));
+            DEBUGMSGT(("9:cert:index:load","adding (%d) %s\n", i, line));
             (void)_certindex_add( line+4, i );  /* Skip 'DIR ' */
         } else {
             DEBUGMSGT(("cert:index:load", "Empty index (%d)\n", i));
@@ -711,7 +711,7 @@ _certindex_lookup( const char *dirname )
 
     i = se_find_value_in_list(_certindexes, dirname);
     if (SE_DNE == i) {
-        DEBUGMSGT(("cert:index:lookup","%s : (none)\n", dirname));
+        DEBUGMSGT(("9:cert:index:lookup","%s : (none)\n", dirname));
         return NULL;
     }
 
@@ -739,7 +739,7 @@ _certindex_new( const char *dirname )
         filename[sizeof(filename)-1] = 0;
         cp = filename;
     }
-    DEBUGMSGT(("cert:index:new", "%s (%s)\n", dirname, cp ));
+    DEBUGMSGT(("9:cert:index:new", "%s (%s)\n", dirname, cp ));
     fp = fopen( cp, "w" );
     if (fp)
         fprintf( fp, "DIR %s\n", dirname );
@@ -781,7 +781,7 @@ netsnmp_ocert_get(netsnmp_cert *cert)
         }
     }
 
-    DEBUGMSGT(("cert:read", "Checking file %s\n", cert->info.filename));
+    DEBUGMSGT(("9:cert:read", "Checking file %s\n", cert->info.filename));
 
     certbio = BIO_new(BIO_s_file());
     if (NULL == certbio) {
@@ -818,7 +818,7 @@ netsnmp_ocert_get(netsnmp_cert *cert)
             if (NULL == ocert)
                 break;
             if (NS_CERT_TYPE_DER == cert->info.type) {
-                DEBUGMSGT(("cert:read", "Changing type from DER to PEM\n"));
+                DEBUGMSGT(("9:cert:read", "Changing type from DER to PEM\n"));
                 cert->info.type = NS_CERT_TYPE_PEM;
             }
             /** check for private key too */
@@ -888,7 +888,7 @@ netsnmp_ocert_get(netsnmp_cert *cert)
     if (NULL == cert->subject) {
         cert->subject = X509_NAME_oneline(X509_get_subject_name(ocert), NULL,
                                           0);
-        DEBUGMSGT(("cert:add:subject", "subject name: %s\n", cert->subject));
+        DEBUGMSGT(("9:cert:add:subject", "subject name: %s\n", cert->subject));
     }
 
     if (NULL == cert->issuer) {
@@ -897,7 +897,7 @@ netsnmp_ocert_get(netsnmp_cert *cert)
             free(cert->issuer);
             cert->issuer = strdup("self-signed");
         }
-        DEBUGMSGT(("cert:add:issuer", "CA issuer: %s\n", cert->issuer));
+        DEBUGMSGT(("9:cert:add:issuer", "CA issuer: %s\n", cert->issuer));
     }
     
     if (NULL == cert->fingerprint) {
@@ -909,7 +909,7 @@ netsnmp_ocert_get(netsnmp_cert *cert)
     if (NULL == cert->common_name) {
         cert->common_name =netsnmp_openssl_cert_get_commonName(ocert, NULL,
                                                                NULL);
-        DEBUGMSGT(("cert:add:name","%s\n", cert->common_name));
+        DEBUGMSGT(("9:cert:add:name","%s\n", cert->common_name));
     }
 /*
   STACK *emlst;
@@ -1148,7 +1148,7 @@ _add_certfile(const char* dirname, const char* filename, FILE *index)
 
     snprintf(certfile, sizeof(certfile),"%s/%s", dirname, filename);
 
-    DEBUGMSGT(("cert:file:add", "Checking file: %s (type %d)\n", filename,
+    DEBUGMSGT(("9:cert:file:add", "Checking file: %s (type %d)\n", filename,
                type));
 
     if (NS_CERT_TYPE_KEY == type) {
@@ -1390,7 +1390,7 @@ _add_certdir(const char *dirname)
 
     index = _certindex_new( dirname );
     if (NULL == index) {
-        DEBUGMSGT(("cert:index:dir",
+        DEBUGMSGT(("9:cert:index:dir",
                     "error opening index for cert directory\n"));
         NETSNMP_LOGONCE((LOG_ERR, "could not open certificate index file\n"));
     }
@@ -1489,37 +1489,40 @@ _cert_print(netsnmp_cert *c, void *context)
     if (NULL == c)
         return;
 
-    snmp_log(LOG_INFO, "cert %s in %s\n", c->info.filename, c->info.dir);
-    snmp_log(LOG_INFO, "   type %d flags 0x%x (%s)\n",
+    DEBUGMSGT(("cert:dump", "cert %s in %s\n", c->info.filename, c->info.dir));
+    DEBUGMSGT(("cert:dump", "   type %d flags 0x%x (%s)\n",
              c->info.type, c->info.allowed_uses,
-             _mode_str(c->info.allowed_uses));
+              _mode_str(c->info.allowed_uses)));
     if (NS_CERT_TYPE_KEY == c->info.type) {
     }
     else {
 
         if(c->subject) {
             if (c->info.allowed_uses & NS_CERT_CA)
-                snmp_log(LOG_INFO, "   CA: %s\n", c->subject);
+                DEBUGMSGT(("cert:dump", "   CA: %s\n", c->subject));
             else
-                snmp_log(LOG_INFO, "   subject: %s\n", c->subject);
+                DEBUGMSGT(("cert:dump", "   subject: %s\n", c->subject));
         }
         if(c->issuer)
-            snmp_log(LOG_INFO, "   issuer: %s\n", c->issuer);
+            DEBUGMSGT(("cert:dump", "   issuer: %s\n", c->issuer));
         if(c->fingerprint)
-            snmp_log(LOG_INFO, "   fingerprint: %s\n", c->fingerprint);
+            DEBUGMSGT(("cert:dump", "   fingerprint: %s\n", c->fingerprint));
         /** CN found in subject, above
          * if (c->common_name)
-         *   snmp_log(LOG_INFO, "   common_name %s\n", c->common_name); */
+         *   DEBUGMSGT(("cert:dump", "   common_name %s\n", c->common_name)); */
         if (c->san_rfc822)
-            snmp_log(LOG_INFO, "   san_rfc822 %s\n", c->san_rfc822);
+            DEBUGMSGT(("cert:dump", "   san_rfc822 %s\n", c->san_rfc822));
         if (c->san_ipaddr)
-            snmp_log(LOG_INFO, "   san_ipaddr %s\n", c->san_ipaddr);
+            DEBUGMSGT(("cert:dump", "   san_ipaddr %s\n", c->san_ipaddr));
         if (c->san_dnsname)
-            snmp_log(LOG_INFO, "   san_dnsname %s\n", c->san_dnsname);
+            DEBUGMSGT(("cert:dump", "   san_dnsname %s\n", c->san_dnsname));
     }
 
-    netsnmp_openssl_cert_dump_names(c->ocert);
+    DEBUGIF("9:cert:dump")
+        netsnmp_openssl_cert_dump_names(c->ocert);
+
     netsnmp_openssl_cert_dump_extensions(c->ocert);
+    
 }
 
 static void
@@ -1528,9 +1531,9 @@ _key_print(netsnmp_key *k, void *context)
     if (NULL == k)
         return;
 
-    snmp_log(LOG_INFO, "key found in %s %s\n", k->info.dir, k->info.filename);
-    snmp_log(LOG_INFO, "   type %d flags 0x%x (%s)\n", k->info.type,
-             k->info.allowed_uses, _mode_str(k->info.allowed_uses));
+    DEBUGMSGT(("cert:dump", "key found in %s %s\n", k->info.dir, k->info.filename));
+    DEBUGMSGT(("cert:dump", "   type %d flags 0x%x (%s)\n", k->info.type,
+              k->info.allowed_uses, _mode_str(k->info.allowed_uses)));
 }
 
 void
