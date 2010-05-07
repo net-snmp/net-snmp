@@ -51,7 +51,7 @@ int verify_callback(int ok, X509_STORE_CTX *ctx) {
     /* things to do: */
 
     X509_NAME_oneline(X509_get_subject_name(thecert), buf, sizeof(buf));
-    fingerprint = netsnmp_openssl_cert_get_fingerprint(thecert, NS_HASH_SHA1);
+    fingerprint = netsnmp_openssl_cert_get_fingerprint(thecert, -1);
     DEBUGMSGTL(("tls_x509:verify", "Cert: %s\n", buf));
     DEBUGMSGTL(("tls_x509:verify", "  fp: %s\n", fingerprint ?
                 fingerprint : "unknown"));
@@ -94,7 +94,7 @@ _netsnmp_tlsbase_verify_remote_fingerprint(X509 *remote_cert,
     char            *fingerprint;
 
     fingerprint =
-        netsnmp_openssl_cert_get_fingerprint(remote_cert, NS_HASH_SHA1);
+        netsnmp_openssl_cert_get_fingerprint(remote_cert, -1);
     if (!fingerprint) {
         /* no peer cert */
         snmp_log(LOG_ERR, "failed to get fingerprint of remote certificate\n");
