@@ -42,6 +42,7 @@ AC_SUBST(CONFIGURE_OPTIONS)
 #     checks for system services
 
 m4_include([configure.d/config_project_with_enable])
+m4_include([configure.d/config_project_manual])
 m4_include([configure.d/config_os_progs])
 m4_include([configure.d/config_project_paths])
 m4_include([configure.d/config_os_headers])
@@ -70,8 +71,6 @@ AC_SUBST(LMIBLIBS)
 AC_SUBST(AGENTLIBS)
 AC_SUBST(OTHERAGENTLIBOBJS)
 AC_SUBST(OTHERAGENTLIBLOBJS)
-
-m4_include([configure.d/config_project_manual])
 
 AC_SUBST(DLLIBS)
 
