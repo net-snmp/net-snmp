@@ -20,6 +20,7 @@ extern          "C" {
     char *netsnmp_openssl_cert_get_commonName(X509 *, char **buf, int *len);
     char *netsnmp_openssl_cert_get_subjectName(X509 *, char **buf, int *len);
     char *netsnmp_openssl_cert_get_fingerprint(X509 *ocert, int alg);
+    int netsnmp_openssl_cert_get_hash_type(X509 *ocert);
 
     int netsnmp_openssl_cert_issued_by(X509 *issuer, X509 *cert);
 
