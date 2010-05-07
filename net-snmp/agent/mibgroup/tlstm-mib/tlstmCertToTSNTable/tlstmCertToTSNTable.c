@@ -110,8 +110,9 @@ typedef struct certToTSN_undo_s {
     int             mapType;
     char            data[CERTTOTSN_DATA_MAX_SIZE];
     size_t          data_len;
-    long            storageType;
-    long            rowStatus;
+    char            hashType;
+    char            storageType;
+    char            rowStatus;
 } certToTSN_undo;
 
     /*
@@ -131,8 +132,9 @@ typedef struct certToTSN_entry_s {
     int             mapType;
     char            data[CERTTOTSN_DATA_MAX_SIZE];
     size_t          data_len;
-    long            storageType;
-    long            rowStatus;
+    char            storageType;
+    char            rowStatus;
+    char            hashType;
 
     /*
      * used during set processing 
@@ -284,9 +286,21 @@ tlstmCertToTSNTable_handler(netsnmp_mib_handler *handler,
 
             switch (info->colnum) {
             case COL_CERTTOTSN_FINGERPRINT:
-                snmp_set_var_typed_value(request->requestvb, ASN_OCTET_STR,
-                                         entry->fingerprint,
-                                         entry->fingerprint_len);
+            {
+                u_char bin[42], *ptr = bin;
+                size_t len = sizeof(bin), offset = 1;
+                int    rc;
+                bin[0] = entry->hashType;
+                netsnmp_assert(entry->hashType != 0);
+                rc = netsnmp_hex_to_binary(&ptr, &len, &offset, 0,
+                                           entry->fingerprint, NULL);
+                if (1 != rc)
+                    netsnmp_set_request_error(reqinfo, request,
+                                              SNMPERR_GENERR);
+                else
+                    snmp_set_var_typed_value(request->requestvb, ASN_OCTET_STR,
+                                             bin, offset);
+            }
                 break;          /* case COL_CERTTOTSN_FINGERPRINT */
             case COL_CERTTOTSN_MAPTYPE:
                 tsnm[tsnm_pos] = entry->mapType;
@@ -358,6 +372,15 @@ tlstmCertToTSNTable_handler(netsnmp_mib_handler *handler,
             case COL_CERTTOTSN_DATA:
                 ret = netsnmp_check_vb_type_and_max_size
                     (request->requestvb, ASN_OCTET_STR, sizeof(entry->data));
+                /** check len/algorithm MIB requirements */
+                if (ret == SNMP_ERR_NOERROR) {
+                    if (request->requestvb->val_len !=
+                        strlen((const char*)request->requestvb->val.string)) {
+                        DEBUGMSGT(("tlstmCertToSN:reserve1", 
+                                   "data strlen != val_len\n"));
+                        ret = SNMP_ERR_WRONGVALUE;
+                    }
+                }
                 break;          /* case COL_CERTTOTSN_DATA */
             case COL_CERTTOTSN_STORAGETYPE:
                 ret = netsnmp_check_vb_storagetype
@@ -520,10 +543,14 @@ tlstmCertToTSNTable_handler(netsnmp_mib_handler *handler,
                 memcpy(entry->undo->fingerprint,
                        entry->fingerprint, sizeof(entry->fingerprint));
                 entry->undo->fingerprint_len = entry->fingerprint_len;
+                entry->undo->hashType = entry->hashType;
                 memset(entry->fingerprint, 0, sizeof(entry->fingerprint));
-                memcpy(entry->fingerprint, request->requestvb->val.string,
-                       request->requestvb->val_len);
-                entry->fingerprint_len = request->requestvb->val_len;
+
+                entry->hashType = request->requestvb->val.string[0];
+                binary_to_hex(&request->requestvb->val.string[1],
+                              request->requestvb->val_len - 1,
+                              (char**)&entry->fingerprint);
+                entry->fingerprint_len = strlen(entry->fingerprint);
                 break;          /* case COL_CERTTOTSN_FINGERPRINT */
             case COL_CERTTOTSN_MAPTYPE:
                 entry->undo->mapType = entry->mapType;
@@ -659,6 +686,7 @@ tlstmCertToTSNTable_handler(netsnmp_mib_handler *handler,
                 memcpy(entry->fingerprint, entry->undo->fingerprint,
                        sizeof(entry->fingerprint));
                 entry->fingerprint_len = entry->undo->fingerprint_len;
+                entry->hashType = entry->undo->hashType;
                 break;          /* case COL_CERTTOTSN_FINGERPRINT */
             case COL_CERTTOTSN_MAPTYPE:
                 entry->mapType = entry->undo->mapType;
@@ -781,7 +809,6 @@ _cache_load(netsnmp_cache *cache, netsnmp_tdata *table)
     if (NULL == maps)
         return 0;
 
-    /** insert rows for active maps into tbl container */
     map_itr = CONTAINER_ITERATOR(maps);
     if (NULL == map_itr) {
         DEBUGMSGTL(("tlstmCertToTSNTable:cache:load",
@@ -789,6 +816,9 @@ _cache_load(netsnmp_cache *cache, netsnmp_tdata *table)
         return -1;
     }
 
+    /*
+     * insert rows for active maps into tbl container
+     */
     map = ITERATOR_FIRST(map_itr);
     for( ; map; map = ITERATOR_NEXT(map_itr)) {
         row = tlstmCertToTSNTable_createEntry(NULL, map->priority);
@@ -811,6 +841,7 @@ _cache_load(netsnmp_cache *cache, netsnmp_tdata *table)
             entry->fingerprint_len = sizeof(entry->fingerprint) - 1;
         memcpy(entry->fingerprint, map->fingerprint, entry->fingerprint_len);
         entry->fingerprint[sizeof(entry->fingerprint) - 1] = 0;
+        entry->hashType = map->hashType;
 
         if (map->data) {
             entry->data_len = strlen(map->data);
@@ -862,7 +893,10 @@ _cache_free(netsnmp_cache *cache, netsnmp_tdata *table)
     for( ; row; row = ITERATOR_NEXT(tbl_itr)) {
         entry = row->data;
 
-        /** remove all active rows (they are in the maps container) */
+        /*
+         * remove all active rows (they are in the maps container kept
+         * by the library). Keep inactive ones for next time.
+         */
         if (entry->rowStatus == RS_ACTIVE) {
             tlstmCertToTSNTable_removeEntry(NULL, row);
             ITERATOR_REMOVE(tbl_itr);
