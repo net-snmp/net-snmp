@@ -432,6 +432,42 @@ netsnmp_openssl_cert_dump_extensions(X509 *ocert)
     }
 }
 
+static int _htmap[NS_HASH_MAX + 1] = {
+    0, NID_md5WithRSAEncryption, NID_sha1WithRSAEncryption,
+    NID_sha224WithRSAEncryption, NID_sha256WithRSAEncryption,
+    NID_sha384WithRSAEncryption, NID_sha512WithRSAEncryption };
+
+int
+_nid2ht(int nid)
+{
+    int i;
+    for (i=1; i<= NS_HASH_MAX; ++i) {
+        if (nid == _htmap[i])
+            return i;
+    }
+    return 0;
+}
+
+int
+_ht2nid(int ht)
+{
+    if ((ht < 0) || (ht > NS_HASH_MAX))
+        return 0;
+    return _htmap[ht];
+}
+
+/**
+ * returns allocated pointer caller must free.
+ */
+int
+netsnmp_openssl_cert_get_hash_type(X509 *ocert)
+{
+    if (NULL == ocert)
+        return 0;
+
+    return _nid2ht(OBJ_obj2nid(ocert->sig_alg->algorithm));
+}
+
 /**
  * returns allocated pointer caller must free.
  */
@@ -439,9 +475,14 @@ char *
 netsnmp_openssl_cert_get_fingerprint(X509 *ocert, int alg)
 {
     u_char           fingerprint[EVP_MAX_MD_SIZE];
-    u_int            fingerprint_len;
+    u_int            fingerprint_len, nid;
     const EVP_MD    *digest;
     char            *result = NULL;
+
+    nid = OBJ_obj2nid(ocert->sig_alg->algorithm);
+        
+    if ((-1 == alg) && nid)
+        alg = _ht2nid(nid);
 
     switch (alg) {
         case NS_HASH_MD5:
@@ -478,6 +519,11 @@ netsnmp_openssl_cert_get_fingerprint(X509 *ocert, int alg)
             return NULL;
     }
 
+    if (_ht2nid(nid) != alg) {
+        DEBUGMSGT(("openssl:fingerprint",
+                   "WARNING: alg %d does not match cert alg %d\n",
+                   alg, _ht2nid(nid)));
+    }
     if (X509_digest(ocert,digest,fingerprint,&fingerprint_len)) {
         binary_to_hex(fingerprint, fingerprint_len, &result);
         if (NULL == result)
@@ -519,7 +565,7 @@ netsnmp_openssl_get_cert_chain(SSL *ssl)
     /*
      * get fingerprint and save it
      */
-    fingerprint = netsnmp_openssl_cert_get_fingerprint(ocert, NS_HASH_SHA1);
+    fingerprint = netsnmp_openssl_cert_get_fingerprint(ocert, -1);
     if (NULL == fingerprint)
         return NULL;
 
@@ -533,6 +579,7 @@ netsnmp_openssl_get_cert_chain(SSL *ssl)
         return NULL;
     }
     cert_map->fingerprint = fingerprint;
+    cert_map->hashType = netsnmp_openssl_cert_get_hash_type(ocert);
 
     chain_map = netsnmp_cert_map_container_create(0); /* no fp subcontainer */
     if (NULL == chain_map) {
@@ -564,6 +611,8 @@ netsnmp_openssl_get_cert_chain(SSL *ssl)
                 break;
             }
             cert_map->fingerprint = fingerprint;
+            cert_map->hashType = netsnmp_openssl_cert_get_hash_type(ocert_tmp);
+
             CONTAINER_INSERT(chain_map, cert_map);
         } /* chain loop */
         /*
@@ -727,11 +776,11 @@ netsnmp_openssl_extract_secname(netsnmp_cert_map *cert_map,
 
    if (rtn)
         DEBUGMSGT(("openssl:secname:extract",
-                   "found san of type %d for %s: %s\n",
+                   "found map of type %d for %s: %s\n",
                    cert_map->mapType, peer_cert->fingerprint, rtn));
    else
         DEBUGMSGT(("openssl:secname:extract",
-                   "no san of type %d for %s\n",
+                   "no map of type %d for %s\n",
                    cert_map->mapType, peer_cert->fingerprint));
     return rtn;
 }

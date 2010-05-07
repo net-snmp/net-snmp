@@ -46,9 +46,6 @@ void netsnmp_certs_shutdown(void);
         char           *subject;
         char           *fingerprint;
         char           *common_name;
-        char           *san_rfc822;
-        char           *san_ipaddr;
-        char           *san_dnsname;
 
         u_char          hash_type;
         u_char          _pad[3]; /* for future use */
@@ -118,8 +115,9 @@ void netsnmp_certs_shutdown(void);
         int             mapType;
         char           *data;
 
+        char            hashType;
         char            flags;
-        char            _pad[3]; /* rsvd for future use */
+        char            _pad[2]; /* rsvd for future use */
 
         X509           *ocert;
     } netsnmp_cert_map;
