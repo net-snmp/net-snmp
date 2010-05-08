@@ -11,7 +11,7 @@ use strict;
 
 my %opts = ('groups' => 'default',
             'd' => 'fulltests',
-	    'srcdir' => dirname(dirname("$0")),
+	    'srcdir' => dirname("$0") . "/..",
             'builddir' => '..');
 
 GetOptions(\%opts,
