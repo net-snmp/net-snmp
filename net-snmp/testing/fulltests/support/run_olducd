@@ -12,7 +12,7 @@ export SNMP_TEST_PREFIX
 SNMP_ORIGDIR=`pwd`	        ## this script may be invoked with relative path
 export SNMP_ORIGDIR
 
-SNMP_UPDIR=../	                ## building from the source tree
+SNMP_UPDIR=${builddir}          ## building from the source tree
 SNMP_SLEEP=${SNMP_SLEEP:=1} 	## default seconds to sleep
 export SNMP_SLEEP
 
@@ -67,7 +67,7 @@ export SNMP_UPDIR
 
 . olducd_eval_tools.sh
 
-cd ../../`dirname $1`
+cd `dirname $1`
 PATH=`pwd`:$PATH
 export PATH
 

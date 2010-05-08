@@ -115,20 +115,24 @@ SKIP() {
 	exit 0
 }
 
+ISDEFINED() {
+	grep "^#define $1" ${builddir}/include/net-snmp/net-snmp-config.h ${builddir}/include/net-snmp/agent/mib_module_config.h ${builddir}/include/net-snmp/agent/agent_module_config.h > /dev/null
+}
+
 SKIPIFNOT() {
-	grep "^#define $1" $SNMP_UPDIR/include/net-snmp/net-snmp-config.h $SNMP_UPDIR/include/net-snmp/agent/mib_module_config.h $SNMP_UPDIR/include/net-snmp/agent/agent_module_config.h > /dev/null
-	if [ $? != 0 ]; then
+	if ISDEFINED "$1" ; then
+            true
+        else
 	    SKIP "$1 is not defined"
 	fi
 }
 
 SKIPIF() {
-	grep "^#define $1 " $SNMP_UPDIR/include/net-snmp/net-snmp-config.h $SNMP_UPDIR/include/net-snmp/agent/mib_module_config.h $SNMP_UPDIR/include/net-snmp/agent/agent_module_config.h > /dev/null
-	if [ $? = 0 ]; then
+        ISDEFINED "$1"
+	if ISDEFINED "$1" ; then
 	    SKIP "$1 is defined"
 	fi
 }
-	
 
 #------------------------------------ -o-
 #

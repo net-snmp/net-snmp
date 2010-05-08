@@ -50,24 +50,23 @@ fi
 
 if [ "x$MIBDIRS" = "x" ]; then
   if [ "x$SNMP_PREFER_NEAR_MIBS" = "x1" ]; then
-    MIBDIRS=${SNMP_BASEDIR}/../mibs
+    MIBDIRS=${srcdir}/mibs
     export MIBDIRS
   fi
 fi
 
 # Set up the path to the programs we want to use.
 if [ "x$SNMP_PATH" = "x" ]; then
-    PATH=../agent:../apps:../../agent:../../apps:$PATH
+    PATH=${builddir}/agent:${builddir}/apps:$PATH
     export PATH
     SNMP_PATH=yes
     export SNMP_PATH
 fi
-    
 
 # Set up temporary directory
 if [ "x$SNMP_TMPDIR" = "x" -a "x$SNMP_HEADERONLY" != "xyes" ]; then
     if [ "x$testnum" = "x" ] ; then
-        testnum=1
+        testnum=0
     fi
     SNMP_TMPDIR="/tmp/snmp-test-$testnum-$$"
     export SNMP_TMPDIR
@@ -87,8 +86,8 @@ if [ "x$SNMP_SAVE_TMPDIR" = "x" ]; then
     export SNMP_SAVE_TMPDIR
 fi
 
-SNMP_ENV_SEPARATOR="`$SNMP_ORIGDIR/../net-snmp-config --env-separator`"
-SNMP_PERLPROG="`$SNMP_ORIGDIR/../net-snmp-config --perlprog`"
+SNMP_ENV_SEPARATOR="`${builddir}/net-snmp-config --env-separator`"
+SNMP_PERLPROG="`${builddir}/net-snmp-config --perlprog`"
 SNMP_TESTDIR="$SNMP_BASEDIR/tests"
 SNMP_CONFIG_FILE="$SNMP_TMPDIR/snmpd.conf"
 SNMPTRAPD_CONFIG_FILE="$SNMP_TMPDIR/snmptrapd.conf"
