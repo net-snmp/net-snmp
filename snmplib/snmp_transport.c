@@ -427,9 +427,11 @@ find_tdomain(const char* spec)
     return NULL;
 }
 
-int
-netsnmp_is_fqdn(const char *thename) {
-    netsnmp_assert_or_return(NULL != thename, 0);
+static int
+netsnmp_is_fqdn(const char *thename)
+{
+    if (!thename)
+        return 0;
     while(*thename) {
         if (*thename != '.' && !isupper(*thename) && !islower(*thename) &&
             !isdigit(*thename)) {
