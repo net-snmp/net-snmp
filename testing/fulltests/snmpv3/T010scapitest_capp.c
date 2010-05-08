@@ -261,7 +261,8 @@ test_dorandom(void)
 {
     int             rval = SNMPERR_SUCCESS,
         origrequest = (1024 * 2),
-        origrequest_short = 19, nbytes = origrequest, shortcount = 7, i;
+        origrequest_short = 19, shortcount = 7, i;
+    size_t          nbytes = origrequest;
     char            buf[LOCAL_MAXBUF];
 
     OUTPUT("Random test -- large request:");
@@ -322,8 +323,8 @@ test_dorandom(void)
 int
 test_dokeyedhash(void)
 {
-    int             rval = SNMPERR_SUCCESS, bigstring_len = strlen(BIGSTRING), secret_len = strlen(BIGSECRET), properlength, mlcount = 0,        /* MAC Length count.   */
-                    hblen;      /* Hash Buffer length. */
+    int             rval = SNMPERR_SUCCESS, bigstring_len = strlen(BIGSTRING), secret_len = strlen(BIGSECRET), properlength, mlcount = 0;        /* MAC Length count.   */
+    size_t          hblen;      /* Hash Buffer length. */
 
     u_int           hashbuf_len[MLCOUNT_MAX] = {
         LOCAL_MAXBUF,
@@ -441,7 +442,8 @@ test_docrypt(void)
         secret_len = BYTESIZE(SNMP_TRANS_PRIVLEN_1DES),
         iv_len = BYTESIZE(SNMP_TRANS_PRIVLEN_1DES_IV);
 
-    u_int           buf_len = LOCAL_MAXBUF, cryptbuf_len = LOCAL_MAXBUF;
+    size_t          buf_len = LOCAL_MAXBUF;
+    size_t          cryptbuf_len = LOCAL_MAXBUF;
 
     char            buf[LOCAL_MAXBUF],
         cryptbuf[LOCAL_MAXBUF], secret[LOCAL_MAXBUF], iv[LOCAL_MAXBUF];
