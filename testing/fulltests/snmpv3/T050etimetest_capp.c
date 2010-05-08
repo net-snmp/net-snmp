@@ -400,7 +400,7 @@ test_etime(void)
      */
     OUTPUT("Sleep again, then dump the list one last time.");
 
-    fprintf(stdout, "# Sleeping for %d second%s... ",
+    fprintf(stdout, "# Sleeping for %d second%s...\n",
             sleeptime, (sleeptime == 1) ? "" : "s");
 
     sleep(sleeptime);
