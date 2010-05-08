@@ -2,16 +2,33 @@
 
 use Getopt::Long;
 use Data::Dumper;
+use File::Basename;
+use Cwd qw(abs_path);
 use strict;
 
 ########################################
 # Globals and Command Line options
 
-my %opts = ('g' => 'default',
-	    'd' => 'fulltests',
-	    'D' => '.');
-GetOptions(\%opts, "v", "h", "q", "g=s", "r=s", "D=s", "debug") || usage();
-usage() if ($opts{'h'});
+my %opts = ('groups' => 'default',
+            'd' => 'fulltests',
+	    'srcdir' => dirname(dirname("$0")),
+            'builddir' => '..');
+
+GetOptions(\%opts,
+           "verbose",
+           "help|?",
+           "quiet",
+           "groups|g=s",
+           "r=s",
+           "debug",
+           "srcdir|D=s",
+           "builddir=s") || ++$opts{'help'};
+
+# Change srcdir and builddir to absolute paths
+$opts{'srcdir'} = abs_path($opts{'srcdir'});
+$opts{'builddir'} = abs_path($opts{'builddir'});
+
+usage() if ($opts{'help'});
 
 # Build the harness object
 my %args = (
@@ -31,6 +48,10 @@ if (exists($opts{'d'})) {
     $ENV{'NETSNMPSRCDIR'} = '.';
 }
 
+# pass srcdir and builddir to all apps
+$ENV{'srcdir'} = $opts{'srcdir'};
+$ENV{'builddir'} = $opts{'builddir'};
+
 ########################################
 # Protection measures
 $ENV{'SNMPCONFPATH'} = "/dev/null";
@@ -42,9 +63,9 @@ my $harness = TAP::Harness->new(\%args);
 ########################################
 # gather the tests
 
-DEBUG("Gathering and building tests:\n"); 
+DEBUG("Gathering and building tests:\n");
 find_support();
-my @tests = gather_tests($opts{'g'}, $opts{'r'});
+my @tests = gather_tests(@opts{'groups'}, $opts{'r'});
 
 ########################################
 # rename them to remove parent dirs
@@ -83,7 +104,7 @@ sub decide_exec {
 
     # 1) if it's a known executable built by libtool, call libtool to run it.
     if ($testfile =~ /\.exe\.lt$/) {
-	return ["../libtool", "--mode=execute", $testfile];
+	return ["$opts{'builddir'}/libtool", "--mode=execute", $testfile];
     }
 
     # see if we have a registered runner script
@@ -116,7 +137,7 @@ sub gather_tests {
 	#  - anything with "template" in the name
 	@groups =
 	  grep { !/(template|support)/ &&
-		   -d $_ && s/$opts{'D'}\/$opts{'d'}.// } glob("$opts{'D'}/$opts{'d'}/*");
+		   -d $_ && s/$opts{'srcdir'}\/testing\/$opts{'d'}.// } glob("$opts{'srcdir'}/testing/$opts{'d'}/*");
     } else {
 	# they specified a comma separated list
 	@groups = split(/,\s*/, $groups);
@@ -129,13 +150,13 @@ sub gather_tests {
 
 	DEBUG("checking group $group\n");
 
-	if (! -d "$opts{'D'}/$opts{'d'}/$group") {
-	    ERROR("group '$group' is not a directory under '$opts{'D'}/$opts{'d'}'; ignoring\n");
+	if (! -d "$opts{'srcdir'}/testing/$opts{'d'}/$group") {
+	    ERROR("group '$group' is not a directory under '$opts{'srcdir'}/testing/$opts{'d'}'; ignoring\n");
 	    next;
 	}
 
 	# push on all files that start with T[NUM]*
-	push_or_skip(\@tests, $regexp, glob("$opts{'D'}/$opts{'d'}/$group/T[0-9]*"));
+	push_or_skip(\@tests, $regexp, glob("$opts{'srcdir'}/testing/$opts{'d'}/$group/T[0-9]*"));
     }
 
     return @tests;
@@ -161,7 +182,7 @@ sub rename_tests {
     foreach my $file (@tests) {
 	my $title = "$file";
 	$title =~ s/$opts{'d'}.//;
-	$title =~ s/^$opts{'D'}.//;
+	$title =~ s/^$opts{'srcdir'}.//;
 	push @newtests, [$file, $title];
     }
     return @newtests;
@@ -207,7 +228,7 @@ sub find_scripts {
     my ($buildname, $hashref) = @_;
     my $count;
     DEBUG("looking for $buildname scripts\n");
-    foreach my $builder (glob("$opts{'D'}/$opts{'d'}/*/${buildname}_*")) {
+    foreach my $builder (glob("$opts{'srcdir'}/testing/$opts{'d'}/*/${buildname}_*")) {
 	next if ($builder =~ /~$/);
 	next if ($builder =~ /.(bak|orig|rej|old)$/);
 
@@ -266,14 +287,14 @@ sub call_build_script {
     my $maybenewfile = $filename;
     $maybenewfile =~ s/.[^\.]+$/.exe/;   # add .exe suffix
     $maybenewfile =~ s/T([^\/]+)$/B$1/;  # change prefix to B for 'Built'
-    $maybenewfile =~ s/^$opts{'D'}\///;
+    $maybenewfile =~ s/^$opts{'srcdir'}\///;
 
     my $newpath = $maybenewfile;
     $newpath =~ s/\/[^\/]*$//;
 
     if (! -d $newpath) {
 	DEBUG("making directory $newpath\n");
-	system("$ENV{NETSNMPSRCDIR}/../mkinstalldirs $newpath");
+	system("$opts{'srcdir'}/mkinstalldirs $newpath");
     }
 
     my $lastline;
@@ -294,13 +315,16 @@ sub call_build_script {
 # usage output
 sub usage {
     print "$0 [-v] [-q] [-g GROUP]\n";
-    print "  -v\t\tRuns in verbose mode; dumping all test output\n";
-    print "  -q\t\tRuns in quieter mode; dumps less test output\n";
-    print "  -g GROUP\tRuns the group of specified tests (default = 'default')\n";
+    print "  -verbose\tRuns in verbose mode; dumping all test output\n";
+    print "  -quiet\tRuns in quieter mode; dumps less test output\n";
+    print "  -group GROUP\tRuns the group of specified tests (default = '$opts{'groups'}')\n";
     print "\t\t(use 'all' to run all tests)\n";
     print "  -r\t\tOnly run test files matching this regexp\n";
-    print "  -h\t\tThis help output\n";
-    print "  --debug\t\tDebugging output\n";
+    print "  -help\t\tThis help output\n";
+    print "  -debug\tDebugging output\n";
+
+    print "  -srcdir PATH\tSource directory (currently '$opts{'srcdir'}')\n";
+    print "  -builddir PATH Build directory to be tested (currently '$opts{'builddir'}')\n";
     exit;
 }
 
