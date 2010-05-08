@@ -272,7 +272,8 @@ test_genKu(void)
 {
     int             rval = SNMPERR_SUCCESS,
         failcount = 0,
-        properlength = BYTESIZE(SNMP_TRANS_AUTHLEN_HMACMD5), kulen;
+        properlength = BYTESIZE(SNMP_TRANS_AUTHLEN_HMACMD5);
+    size_t          kulen;
     char           *hashname = "usmHMACMD5AuthProtocol.", *s;
     u_char          Ku[LOCAL_MAXBUF];
     oid            *hashtype = usmHMACMD5AuthProtocol;
@@ -343,8 +344,9 @@ test_genkul(void)
 {
     int             rval = SNMPERR_SUCCESS,
         failcount = 0,
-        properlength, kulen, kul_len, engineID_len, isdefault = FALSE;
+        properlength, engineID_len, isdefault = FALSE;
 
+    size_t          kulen, kul_len;
     char           *s = NULL,
         *testname = "Using HMACMD5 to create master key.",
         *hashname_Ku = "usmHMACMD5AuthProtocol", *hashname_kul;
@@ -493,8 +495,8 @@ test_keychange(void)
         properlength = BYTESIZE(SNMP_TRANS_AUTHLEN_HMACMD5),
         oldkey_len,
         newkey_len,
-        keychange_len,
-        temp_len, isdefault_new = FALSE, isdefault_old = FALSE;
+        isdefault_new = FALSE, isdefault_old = FALSE;
+    size_t          keychange_len, temp_len;
 
     char           *hashname = "usmHMACMD5AuthProtocol.", *s;
 
