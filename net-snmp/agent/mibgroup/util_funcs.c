@@ -106,13 +106,6 @@ static long     cachetime;
 
 extern int      numprocs, numextens;
 
-void
-Exit(int var)
-{
-    snmp_log(LOG_ERR, "Server Exiting with code %d\n", var);
-    exit(var);
-}
-
 /** deprecated, use netsnmp_mktemp instead */
 const char *
 make_tempfile(void)
@@ -684,70 +677,6 @@ clear_cache(int action,
 #ifdef NETSNMP_EXCACHETIME
         cachetime = 0;          /* reset the cache next read */
 #endif
-    }
-    return SNMP_ERR_NOERROR;
-}
-
-char          **argvrestartp, *argvrestartname, *argvrestart;
-
-RETSIGTYPE
-restart_doit(int a)
-{
-    char * name = netsnmp_ds_get_string(NETSNMP_DS_LIBRARY_ID, 
-                                        NETSNMP_DS_LIB_APPTYPE);
-    snmp_shutdown(name);
-
-    /*  This signal handler may run with SIGALARM blocked.
-     *  Since the signal mask is preserved accross execv(), we must 
-     *  make sure that SIGALARM is unblocked prior of execv'ing.
-     *  Otherwise SIGALARM will be ignored in the next incarnation
-     *  of snmpd, because the signal is blocked. And thus, the 
-     *  restart doesn't work anymore. 
-     *
-     *  A quote from the sigprocmask() man page:
-     *  The use of sigprocmask() is unspecified in a multithreaded process; see
-     *  pthread_sigmask(3). 
-     */ 
-#if HAVE_SIGPROCMASK
-    {
-        sigset_t empty_set;
-      
-        sigemptyset(&empty_set);
-        sigprocmask(SIG_SETMASK, &empty_set, NULL);
-    }
-#elif HAVE_SIGBLOCK
-    sigsetmask(0);
-#endif
-
-    /*
-     * do the exec 
-     */
-#if HAVE_EXECV
-    execv(argvrestartname, argvrestartp);
-    setPerrorstatus(argvrestartname);
-#endif
-}
-
-int
-restart_hook(int action,
-             u_char * var_val,
-             u_char var_val_type,
-             size_t var_val_len,
-             u_char * statP, oid * name, size_t name_len)
-{
-
-    long            tmp = 0;
-
-    if (var_val_type != ASN_INTEGER) {
-        snmp_log(LOG_NOTICE, "Wrong type != int\n");
-        return SNMP_ERR_WRONGTYPE;
-    }
-    tmp = *((long *) var_val);
-    if (tmp == 1 && action == COMMIT) {
-#ifdef SIGALRM
-        signal(SIGALRM, restart_doit);
-#endif
-        alarm(NETSNMP_RESTARTSLEEP);
     }
     return SNMP_ERR_NOERROR;
 }
