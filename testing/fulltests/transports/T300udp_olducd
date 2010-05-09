@@ -4,6 +4,8 @@
 
 HEADER UDP Transport
 
+SKIPIFNOT NETSNMP_TRANSPORT_UDP_DOMAIN
+
 #
 # Begin test
 #
