@@ -20,25 +20,25 @@ extern          "C" {
      * the macros below. 
      */
 #if !defined(__GNUC__) || __GNUC__ < 2 || (__GNUC__ == 2 && __GNUC_MINOR__ < 8)
-    NETSNMP_IMPORT
-    void            debugmsg(const char *token, const char *format, ...);
-    NETSNMP_IMPORT
-    void            debugmsgtoken(const char *token, const char *format,
-                                  ...);
-    void            debug_combo_nc(const char *token, const char *format,
-                                   ...);
+#define NETSNMP_ATTRIBUTE_FORMAT(type, formatArg, firstArg) \
+  __attribute__((__format__( __ ## type ## __, formatArg, firstArg )))
 #else
+#define NETSNMP_ATTRIBUTE_FORMAT(type, formatArg, firstArg)
+#endif
+
     NETSNMP_IMPORT
     void            debugmsg(const char *token, const char *format, ...)
-                        __attribute__ ((__format__ (__printf__, 2, 3)));
+                        NETSNMP_ATTRIBUTE_FORMAT(printf, 2, 3);
     NETSNMP_IMPORT
     void            debugmsgtoken(const char *token, const char *format,
                                   ...)
-                        __attribute__ ((__format__ (__printf__, 2, 3)));
+                        NETSNMP_ATTRIBUTE_FORMAT(printf, 2, 3);
     void            debug_combo_nc(const char *token, const char *format,
                                    ...)
-                        __attribute__ ((__format__ (__printf__, 2, 3)));
-#endif
+                        NETSNMP_ATTRIBUTE_FORMAT(printf, 2, 3);
+
+#undef NETSNMP_ATTRIBUTE_FORMAT
+
     NETSNMP_IMPORT
     void            debugmsg_oid(const char *token, const oid * theoid,
                                  size_t len);
@@ -289,6 +289,8 @@ extern          "C" {
     NETSNMP_IMPORT
     int             snmp_get_do_debugging(void);
 
+#ifndef NETSNMP_NO_DEBUGGING
+
 /*
  * internal:
  * You probably shouldn't be using this information unless the word
@@ -301,7 +303,9 @@ typedef struct netsnmp_token_descr_s {
 
 NETSNMP_IMPORT int                 debug_num_tokens;
 NETSNMP_IMPORT netsnmp_token_descr dbg_tokens[MAX_DEBUG_TOKENS];
-    
+
+#endif /* NETSNMP_NO_DEBUGGING */
+
 #ifdef __cplusplus
 }
 #endif
