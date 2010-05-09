@@ -165,61 +165,6 @@ tokenize_exec_command( char *command, int *argc )
     return argv;
 }
 
-char **
-xx_tokenize_exec_command( char *command, int *argc )
-{
-    char ctmp[STRMAX];
-    char *cptr1, *cptr2;
-    char **argv;
-    int  count, i;
-
-    if (!command)
-        return NULL;
-
-    memset( ctmp, 0, STRMAX );
-    /*
-     * Make a copy of the command into the 'ctmp' buffer,
-     *    splitting it into separate tokens
-     *    (but still all in the one buffer).
-     */
-    count = 1;
-    for (cptr1 = command, cptr2 = ctmp;
-            cptr1 && *cptr1;
-            cptr1++, cptr2++) {
-        *cptr2 = *cptr1;
-	if (isspace((unsigned char)(*cptr1))) {
-            /*
-             * We've reached the end of a token, so increase
-             * the count, and mark this in the command copy.
-             * Then get ready for the next word.
-             */
-            count++;
-            *cptr2 = 0;    /* End of token */
-	    cptr1 = skip_white(cptr1);
-	    if (!cptr1)
-	        break;
-	    cptr1--;	/* Back up one, ready for the next loop */
-	}
-    }
-
-    /*
-     * Now set up the 'argv' array,
-     *   copying tokens out of the 'cptr' buffer
-     */
-    argv = (char **) calloc((count + 2), sizeof(char *));
-    if (argv == NULL)
-        return NULL;
-    cptr2 = ctmp;
-    for (i = 0; i < count; i++) {
-        argv[i] = strdup( cptr2 );
-        cptr2  += strlen( cptr2 )+1;
-    }
-    argv[count] = NULL;
-    *argc       = count;
-        
-    return argv;
-}
-
 
 int
 run_exec_command( char *command, char *input,
