@@ -160,6 +160,7 @@ while test "x$new_transport_list" != "x"; do
       #---------------------
       # build a pseudo include header that includes current config and
       # system symbols:
+      rm -f conftest.$ac_ext module_tmp_header.h
       AC_LANG_CONFTEST(AC_LANG_SOURCE([[
 #include NETSNMP_SYSTEM_INCLUDE_FILE
 #define NET_SNMP_CONFIG_H
