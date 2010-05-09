@@ -398,9 +398,9 @@ get_exec_output(struct extensible *ex)
     }
     return fd;
 #endif                          /* WIN32 */
-    return -1;
 #endif
 #endif /* ! USING_UCD_SNMP_EXTENSIBLE_MODULE */
+    return -1;
 }
 int
 get_exec_pipes(char *cmd, int *fdIn, int *fdOut, int *pid)
