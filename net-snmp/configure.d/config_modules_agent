@@ -173,6 +173,7 @@ while test "x$new_module_list" != "x"; do
     #---------------------
     # build a pseudo include header that includes current config and
     # system symbols:
+    rm -f conftest.$ac_ext module_tmp_header.h
     AC_LANG_CONFTEST(AC_LANG_SOURCE([[
 #include NETSNMP_SYSTEM_INCLUDE_FILE
 #include "$srcdir/$mibdir/$i.h"]]))
@@ -670,7 +671,7 @@ EOFOCFIN
 done
 
 # cleanup
-rm -f module_tmp_header.h
+rm -f conftest.$ac_ext module_tmp_header.h
 
 #-------------------
 # build module lists for Makefiles
