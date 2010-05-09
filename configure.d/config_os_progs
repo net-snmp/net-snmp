@@ -160,6 +160,17 @@ changequote([, ])
 AC_MSG_CACHE_ADD(Building for:               $PARTIALTARGETOS)
 
 
+#
+#   Socket library: either 'default' (non-MinGW) or 'winsock2' (MinGW).
+#
+case x$target_os in
+  xmingw*)
+    with_socklib=winsock2;;
+  *)
+    with_socklib=default;;
+esac
+
+
 #   Check system define behaviour
 #       Does "-Ux -Dx=x" work as expected?
 #

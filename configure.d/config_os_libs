@@ -58,11 +58,93 @@ fi
 #   libsocket
 #       Needed for 'socket(2)'                          (Solaris)
 #       Possibly also for 'gethostname(3)'              (non-Solaris)
-#           (alternatively in libnsl)                   (Solaris)
+#           (alternatively in libnsl                    (Solaris)
+#            or in libws2_32)                           (MinGW)
 #
-AC_SEARCH_LIBS(socket, socket,,AC_MSG_ERROR([socket(2) not found.]))
-AC_SEARCH_LIBS(gethostbyname, [nsl socket])
-AC_CHECK_FUNCS(gethostbyname)
+case x$with_socklib in
+xwinsock2)
+  #   libws2_w32                                        (MinGW)
+  #
+  netsnmp_save_LIBS="$LIBS"
+  LIBS="$LIBS -lws2_32"
+  AC_LINK_IFELSE([AC_LANG_PROGRAM([
+    #include <winsock2.h>
+  ], [
+    socket(0, 0, 0);
+    gethostbyname(0);
+  ])], [
+    # Keep LIBS.
+    true
+  ], [
+    # Restore LIBS and complain.
+    LIBS="$netsnmp_save_LIBS"
+    AC_MSG_ERROR([libws2_32 not found.])
+  ])
+  ;;
+*)
+  AC_SEARCH_LIBS(socket, socket,,AC_MSG_ERROR([socket(2) not found.]))
+  AC_SEARCH_LIBS(gethostbyname, [nsl socket])
+  AC_CHECK_FUNCS(gethostbyname)
+  ;;
+esac
+
+
+#   libiphlpapi                                         (Cygwin and MinGW)
+#
+netsnmp_save_LIBS="$LIBS"
+LIBS="$LIBS -liphlpapi"
+AC_LINK_IFELSE([AC_LANG_PROGRAM([
+  #include <winsock2.h>
+  #include <iphlpapi.h>
+], [
+  IpRenewAddress(0);
+])], [
+  # Keep LIBS.
+  true
+], [
+  # Restore LIBS and complain.
+  LIBS="$netsnmp_save_LIBS"
+  case x$with_socklib in
+  xwinsock2)
+    AC_MSG_ERROR([libiphlpapi not found.])
+    ;;
+  esac
+])
+
+
+#   libregex                                            (MinGW)
+#
+netsnmp_save_LIBS="$LIBS"
+LIBS="$LIBS -lregex"
+AC_LINK_IFELSE([AC_LANG_PROGRAM([
+  #include <sys/types.h>
+  #include <regex.h>
+], [
+  regcomp(0, 0, 0);
+])], [
+  # Keep LIBS.
+  true
+], [
+  # Restore LIBS.
+  LIBS="$netsnmp_save_LIBS"
+])
+
+
+#   libsnmpapi                                          (MinGW)
+#
+netsnmp_save_LIBS="$LIBS"
+LIBS="$LIBS -lsnmpapi"
+AC_LINK_IFELSE([AC_LANG_PROGRAM([
+  #include <snmp.h>
+], [
+  SnmpUtilMemAlloc(0);
+])], [
+  # Keep LIBS.
+  true
+], [
+  # Restore LIBS.
+  LIBS="$netsnmp_save_LIBS"
+])
 
 
 #   kstat library                                       (Solaris)
@@ -174,14 +256,30 @@ if test "x$tryopenssl" != "xno"; then
             AC_CHECK_LIB(RSAglue, RSA_PKCS1_RSAref)
         fi
 
-        AC_CHECK_LIB(crypto, EVP_md5,
+        AC_MSG_CHECKING([for -leay32])
+        netsnmp_save_LIBS="$LIBS"
+        LIBS="-leay32"
+        AC_LINK_IFELSE([AC_LANG_PROGRAM([
+                #include <openssl/evp.h>],
+                [return EVP_md5();])],
+            [AC_MSG_RESULT(yes); ac_cv_lib_eay32_EVP_md5=yes; CRYPTO="eay32"],
+            [AC_MSG_RESULT(no)]
+        )
+        LIBS="$netsnmp_save_LIBS"
+
+        if test x$CRYPTO = x; then
+            AC_CHECK_LIB([crypto], [EVP_md5], [CRYPTO="crypto"])
+        fi
+
+        if test x$CRYPTO != x; then
             AC_DEFINE(HAVE_LIBCRYPTO, 1,
-                [Define to 1 if you have the `crypto' library (-lcrypto).])
-            LIBCRYPTO="-lcrypto")
-        AC_CHECK_LIB(crypto, AES_cfb128_encrypt, 
-            AC_DEFINE(HAVE_AES_CFB128_ENCRYPT, 1,
-                [Define to 1 if you have the `AES_cfb128_encrypt' function.]))
-        if echo " $transport_result_list " | $GREP " DTLS" > /dev/null; then
+                [Define to 1 if you have the OpenSSL library (-lcrypto or -leay32).])
+            LIBCRYPTO="-l${CRYPTO}"
+            AC_CHECK_LIB(${CRYPTO}, AES_cfb128_encrypt, 
+                AC_DEFINE(HAVE_AES_CFB128_ENCRYPT, 1,
+                    [Define to 1 if you have the `AES_cfb128_encrypt' function.]))
+        fi
+        if echo " $transport_result_list " | $GREP "TLS" > /dev/null; then
 	    AC_CHECK_LIB(ssl, SSL_library_init,
                 AC_DEFINE(HAVE_LIBSSL, 1,
                     [Define to 1 if you have the `ssl' library (-lssl).])

@@ -228,6 +228,9 @@
 /* Define to 1 if you have the <io.h> header file. */
 #undef HAVE_IO_H
 
+/* Define to 1 if you have the <iphlpapi.h> header file. */
+#undef HAVE_IPHLPAPI_H
+
 /* Define to 1 if you have the `knlist' function. */
 #undef HAVE_KNLIST
 
@@ -246,7 +249,7 @@
 /* Define to 1 if you have the `kvm_openfiles' function. */
 #undef HAVE_KVM_OPENFILES
 
-/* Define to 1 if you have the `crypto' library (-lcrypto). */
+/* Define to 1 if you have the OpenSSL library (-lcrypto or -leay32). */
 #undef HAVE_LIBCRYPTO
 
 /* Define to 1 if you have the `elf' library (-lelf). */
@@ -1122,8 +1125,17 @@
 /* Define to 1 if you have the `vsnprintf' function. */
 #undef HAVE_VSNPRINTF
 
+/* Define to 1 if you have the <windows.h> header file. */
+#undef HAVE_WINDOWS_H
+
+/* Define to 1 if you have the <winsock2.h> header file. */
+#undef HAVE_WINSOCK2_H
+
 /* Define to 1 if you have the <winsock.h> header file. */
 #undef HAVE_WINSOCK_H
+
+/* Define to 1 if you have the <ws2tcpip.h> header file. */
+#undef HAVE_WS2TCPIP_H
 
 /* Define to 1 if you have the <xti.h> header file. */
 #undef HAVE_XTI_H
@@ -1323,7 +1335,7 @@
 #undef SYS_IOCTL_H_HAS_SIOCGIFADDR
 
 /* Define if the TCP timer constants in <netinet/tcp_timer.h> depend on the
-   integer variable `hz'. [FreeBSD 4.x] */
+   integer variable 'hz'. [FreeBSD 4.x] */
 #undef TCPTV_NEEDS_HZ
 
 /* Define to 1 if you can safely include both <sys/time.h> and <time.h>. */
