@@ -781,8 +781,9 @@ int   command_handler( netsnmp_pdu           *pdu,
                        netsnmp_transport     *transport,
                        netsnmp_trapd_handler *handler)
 {
-#ifndef USING_UCD_SNMP_EXTENSIBLE_MODULE
-    NETSNMP_LOGONCE((LOG_WARNING,"support for run_exec_command not available\n"));
+#ifndef USING_UTILITIES_EXECUTE_MODULE
+    NETSNMP_LOGONCE((LOG_WARNING,
+                     "support for run_shell_command not available\n"));
     return NETSNMPTRAPD_HANDLER_FAIL;
 #else
     u_char         *rbuf = NULL;
