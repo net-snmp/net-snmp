@@ -4,11 +4,15 @@
 #ifndef _MIBGROUP_UTIL_FUNCS_H
 #define _MIBGROUP_UTIL_FUNCS_H
 
+config_require(util_funcs/Exit)
 config_require(util_funcs/header_generic)
 config_require(util_funcs/header_simple_table)
+config_require(util_funcs/restart)
 
+#include "util_funcs/Exit.h"
 #include "util_funcs/header_generic.h"
 #include "util_funcs/header_simple_table.h"
+#include "util_funcs/restart.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -33,15 +37,12 @@ typedef struct
  pthread_mutex_t *lockinfo;  
 }netsnmp_prefix_listen_info;
 #endif
-void            Exit(int);
 int             shell_command(struct extensible *);
 int             exec_command(struct extensible *);
 struct extensible *get_exten_instance(struct extensible *, size_t);
 int             get_exec_output(struct extensible *);
 int             get_exec_pipes(char *cmd, int *fdIn, int *fdOut, int *pid);
 WriteMethod     clear_cache;
-RETSIGTYPE      restart_doit(int);
-WriteMethod     restart_hook;
 void            print_mib_oid(oid *, size_t);
 void            sprint_mib_oid(char *, oid *, size_t);
 int             checkmib(struct variable *, oid *, size_t *, int, size_t *,
