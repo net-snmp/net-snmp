@@ -76,7 +76,7 @@ typedef struct netsnmp_ssh_addr_pair_s {
     char socket_path[MAXPATHLEN];
 } netsnmp_ssh_addr_pair;
 
-oid netsnmp_snmpSSHDomain[] = { TRANSPORT_DOMAIN_SSH_IP };
+const oid netsnmp_snmpSSHDomain[] = { TRANSPORT_DOMAIN_SSH_IP };
 static netsnmp_tdomain sshDomain;
 
 const char *keyfile1="/home/hardaker/.ssh/id_rsa.pub";
@@ -597,9 +597,7 @@ netsnmp_ssh_transport(struct sockaddr_in *addr, int local)
     memset(t, 0, sizeof(netsnmp_transport));
 
     t->domain = netsnmp_snmpSSHDomain;
-    t->domain_length =
-        sizeof(netsnmp_snmpSSHDomain) / sizeof(netsnmp_snmpSSHDomain[0]);
-
+    t->domain_length = netsnmp_snmpSSHDomain_len;
     t->flags = NETSNMP_TRANSPORT_FLAG_STREAM | NETSNMP_TRANSPORT_FLAG_TUNNELED;
 
     addr_pair = SNMP_MALLOC_TYPEDEF(netsnmp_ssh_addr_pair);
@@ -942,7 +940,7 @@ void
 netsnmp_ssh_ctor(void)    
 {
     sshDomain.name = netsnmp_snmpSSHDomain;
-    sshDomain.name_length = sizeof(netsnmp_snmpSSHDomain) / sizeof(oid);
+    sshDomain.name_length = netsnmp_snmpSSHDomain_len;
     sshDomain.prefix = (const char **)calloc(2, sizeof(char *));
     sshDomain.prefix[0] = "ssh";
 

@@ -23,12 +23,13 @@ extern          "C" {
  */
 
 #define TRANSPORT_DOMAIN_SSH_IP		1,3,6,1,2,1,100,1,100
-NETSNMP_IMPORT oid netsnmp_snmpSSHDomain[];
+NETSNMP_IMPORT const oid netsnmp_snmpSSHDomain[];
+enum { netsnmp_snmpSSHDomain_len = 9 };
 
 netsnmp_transport *netsnmp_ssh_transport(struct sockaddr_in *addr, int local);
 
 /*
- * "Constructor" for transport domain object.  
+ * "Constructor" for transport domain object.
  */
 
 void            netsnmp_ssh_ctor(void);
