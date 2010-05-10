@@ -19002,7 +19002,7 @@ if test "x$PARTIALTARGETOS" = "xmingw32" -o "x$PARTIALTARGETOS" = "xmingw32msvc"
 fi
 
 # Win32 pipes
-if test "x$PARTIALTARGETOS" = "xmingw32" -o "x$PARTIALTARGETOS" = "xmingw32msvc" -o "x$PARTIALTARGETOS" = "xcygwin"; then
+if test "x$PARTIALTARGETOS" = "xmingw32" -o "x$PARTIALTARGETOS" = "xmingw32msvc"; then
   other_src_list="$other_src_list winpipe.c"
   other_objs_list="$other_objs_list winpipe.o"
   other_lobjs_list="$other_lobjs_list winpipe.lo"
@@ -19036,7 +19036,7 @@ new_with_out_transport_list=`echo $with_out_transports | $SED 's/,/ /g;'`
 #
 # Add the default transports to the list
 #
-if test "x$PARTIALTARGETOS" = "xcygwin" -o "x$PARTIALTARGETOS" = "xmingw32" -o "x$PARTIALTARGETOS" = "xmingw32msvc"; then
+if test "x$PARTIALTARGETOS" = "xmingw32" -o "x$PARTIALTARGETOS" = "xmingw32msvc"; then
   transport_default_list="UDP TCP Alias Callback"
 else
   transport_default_list="UDP TCP Alias Unix Callback"
@@ -19080,12 +19080,7 @@ $as_echo "$as_me: error: IPX support unavailable for this platform (Linux only)"
       fi
     fi
     if test "x$i" = "xUnix"; then
-      if test "x$PARTIALTARGETOS" = "xcygwin"; then
-        echo
-        { { $as_echo "$as_me:$LINENO: error: Unix domain protocol support unavailable for this platform" >&5
-$as_echo "$as_me: error: Unix domain protocol support unavailable for this platform" >&2;}
-   { (exit 1); exit 1; }; }
-      elif test "x$PARTIALTARGETOS" = "xmingw32" -o "x$PARTIALTARGETOS" = "xmingw32msvc"; then
+      if test "x$PARTIALTARGETOS" = "xmingw32" -o "x$PARTIALTARGETOS" = "xmingw32msvc"; then
         echo
         { { $as_echo "$as_me:$LINENO: error: Unix domain protocol support unavailable for this platform" >&5
 $as_echo "$as_me: error: Unix domain protocol support unavailable for this platform" >&2;}
