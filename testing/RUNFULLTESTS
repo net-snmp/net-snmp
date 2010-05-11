@@ -36,6 +36,7 @@ my %args = (
 	    exec => \&decide_exec,
 	    failures => ($opts{'q'} ? 0 : 1),
 	    errors => ($opts{'q'} ? 0 : 1),
+	    color => 1,
 	   );
 
 # list of support infrastructure components
@@ -59,7 +60,7 @@ $ENV{'SNMPCONFPATH'} = "/dev/null";
 # create the testing harness infrastructure
 
 my $harness;
-if (eval { require TAP::xHarness; } ) {
+if (eval { require TAP::Harness; } ) {
     import TAP::Harness;
     $harness = TAP::Harness->new(\%args);
 } else {
@@ -361,7 +362,6 @@ sub run_older_perl_tests {
 
     $results = runtests(@tempfiles);
 
-    print "unlinking: ", join(", ", @tempfiles),"\n";
     unlink(@tempfiles) || die("$@ $!");
     exit;
 }
