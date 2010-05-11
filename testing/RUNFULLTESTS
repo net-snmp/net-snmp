@@ -12,8 +12,11 @@ use strict;
 my %opts = ('groups' => 'default',
             'd' => 'fulltests',
 	    'srcdir' => dirname("$0") . "/..",
-            'builddir' => '..');
+            'builddir' => '..',
+	    'failed-file' => 'failed_tests',
+	   );
 
+Getopt::Long::Configure(qw(no_ignore_case));
 GetOptions(\%opts,
            "verbose",
            "help|?",
@@ -22,7 +25,11 @@ GetOptions(\%opts,
            "r=s",
            "debug",
            "srcdir|D=s",
-           "builddir=s") || ++$opts{'help'};
+           "builddir=s",
+	   "f",
+	   "F",
+	   "failed-file=s",
+	  ) || ++$opts{'help'};
 
 # Change srcdir and builddir to absolute paths
 $opts{'srcdir'} = abs_path($opts{'srcdir'});
@@ -82,10 +89,25 @@ Either:
 
 ########################################
 # gather the tests
+my @tests;
 
 DEBUG("Gathering and building tests:\n");
 find_support();
 my @tests = gather_tests(@opts{'groups'}, $opts{'r'});
+if ($opts{'f'}) {
+    DIE("The -f and -g options can not be both specified\n")
+      if ($opts{'groups'} ne 'default');
+    DIE("The -f and -r options can not be both specified\n") if ($opts{'r'});
+    DIE("No $opts{'failed-file'} file was found to read failed state from\n")
+      if (! -f $opts{'failed-file'});
+    open(F, $opts{'failed-file'});
+    while (<F>) {
+	chomp;
+	push @tests, build_test($_);
+    }
+} else {
+    @tests = gather_tests($opts{'groups'}, $opts{'r'});
+}
 
 ########################################
 # rename them to remove parent dirs
@@ -105,10 +127,19 @@ if ($harness) {
     run_older_perl_tests(@tests);
 }
 
+my @failed = $results->failed();
 if (!$opts{'q'}) {
-    my @failed = $results->failed();
     print "\nWe failed these ", (1 + $#failed), " tests:\n";
     print "  ", join("\n  ",@failed), "\n";
+}
+
+if (!$opts{'F'}) {
+    open(F,">$opts{'failed-file'}");
+    if ($#failed > -1) {
+	print F "$opts{'D'}/$opts{'d'}/" .
+	  join("\n$opts{'D'}/$opts{'d'}/",@failed) . "\n";
+    }
+    close(F);
 }
 
 exit($results->all_passed() ? 0 : 1);
@@ -367,17 +398,29 @@ sub run_older_perl_tests {
 
 # usage output
 sub usage {
-    print "$0 [-v] [-q] [-g GROUP]\n";
-    print "  -verbose\tRuns in verbose mode; dumping all test output\n";
-    print "  -quiet\tRuns in quieter mode; dumps less test output\n";
-    print "  -group GROUP\tRuns the group of specified tests (default = '$opts{'groups'}')\n";
-    print "\t\t(use 'all' to run all tests)\n";
-    print "  -r\t\tOnly run test files matching this regexp\n";
-    print "  -help\t\tThis help output\n";
-    print "  -debug\tDebugging output\n";
+    print "$0 [OPTIONS]\n";
 
-    print "  -srcdir PATH\tSource directory (currently '$opts{'srcdir'}')\n";
-    print "  -builddir PATH Build directory to be tested (currently '$opts{'builddir'}')\n";
+    print "\nOPTIONS:\n";
+    print "  -v\t\t\tRuns in verbose mode; dumping all test output\n";
+    print "    --verbose\n";
+    print "  -q\t\t\tRuns in quieter mode; dumps less test output\n";
+    print "    --quiet\n";
+    print "  -g GROUP\t\tRuns the group of specified tests (default = 'default')\n";
+    print "    --group GROUP\n";
+    print "\t\t\t(use 'all' to run all tests)\n";
+    print "  -r\t\t\tOnly run test files matching this regexp\n";
+    print "  -f\t\t\tRun only the failed tests from the last run\n";
+    print "  -F\t\t\tDon't create the failed_tests file\n";
+    print "  --failed-file FILE\tThe location of the failed state file\n";
+    print "  -D PATH\t\tSource directory\n";
+    print "    --srcdir PATH\n";
+    print "    (currently '$opts{'srcdir'}')\n";
+    print "  -d PATH\t\tBuild directory to be tested\n";
+    print "    --builddir PATH\n";
+    print "    (currently '$opts{'builddir'}')\n";
+    print "  -h\t\t\tThis help output\n";
+    print "    --help\n";
+    print "  --debug\t\tDebugging output\n";
     exit;
 }
 
@@ -388,4 +431,9 @@ sub DEBUG {
 
 sub ERROR {
     print STDERR "Error:", @_;
+}
+
+sub DIE {
+    ERROR(@_);
+    exit 1;
 }

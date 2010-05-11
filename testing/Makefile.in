@@ -10,8 +10,6 @@
 # fallback to regular VPATH for non-gnu...
 @NON_GNU_VPATH@ $(srcdir)
 
-#TARG		= etest ktest misctest stest
-
 USELIBS		= ../snmplib/libsnmp.$(LIB_EXTENSION)$(LIB_VERSION)
 LIBS		= -L../snmplib $(CC_RUNTIME_ARG) -lsnmp @LIBS@
 
@@ -20,13 +18,24 @@ PARSEOBJS	=
 CPPFLAGS	= $(SNMPLIB_INCLUDES) @CPPFLAGS@
 CC		= @CC@ $(CPPFLAGS)
 
-all: $(TARG)
+all:
+	@echo "Select one of the following targets to run:"
+	@echo ""
+	@echo "  make test        -- default test suites"
+	@echo "  make testall     -- Run all available tests"
+	@echo "  make testfailed  -- Run only the tests that failed last time."
+	@echo ""
+	@echo "Also see the RUNFULLTESTS script for details"
 
 test:
 	$(srcdir)/RUNFULLTESTS $(TESTOPTS)
 
 testall:
 	$(srcdir)/RUNFULLTESTS -g all $(TESTOPTS)
+
+testfailed:
+	$(srcdir)/RUNFULLTESTS -f $(TESTOPTS)
+
 
 test-mibs:
 	cd $(srcdir)/rfc1213 ; ./run
