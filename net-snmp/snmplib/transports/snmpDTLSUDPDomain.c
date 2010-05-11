@@ -800,13 +800,15 @@ netsnmp_dtlsudp_transport(struct sockaddr_in *addr, int local)
      * 16-bit length field, 8 byte DTLS header, 20 byte IPv4 header  
      */
 
-    t->msgMaxSize = 0xffff - 8 - 20;
-    t->f_recv     = netsnmp_dtlsudp_recv;
-    t->f_send     = netsnmp_dtlsudp_send;
-    t->f_close    = netsnmp_dtlsudp_close;
-    t->f_config   = netsnmp_tlsbase_config;
-    t->f_accept   = NULL;
-    t->f_fmtaddr  = netsnmp_dtlsudp_fmtaddr;
+    t->msgMaxSize      = 0xffff - 8 - 20;
+    t->f_recv          = netsnmp_dtlsudp_recv;
+    t->f_send          = netsnmp_dtlsudp_send;
+    t->f_close         = netsnmp_dtlsudp_close;
+    t->f_config        = netsnmp_tlsbase_config;
+    t->f_setup_session = netsnmp_tlsbase_session_init;
+    t->f_accept        = NULL;
+    t->f_fmtaddr       = netsnmp_dtlsudp_fmtaddr;
+
     t->flags = NETSNMP_TRANSPORT_FLAG_TUNNELED;
 
     return t;

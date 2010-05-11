@@ -60,6 +60,9 @@ extern          "C" {
                                     void **opaque, int *olength);
     int netsnmp_tlsbase_config(struct netsnmp_transport_s *t,
                                char *token, char *value);
+
+    int netsnmp_tlsbase_session_init(struct netsnmp_transport_s *,
+                                     struct snmp_session *sess);
 #ifdef __cplusplus
 }
 #endif

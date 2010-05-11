@@ -34,6 +34,7 @@
 #include <net-snmp/library/snmp_debug.h>
 #include <net-snmp/library/snmp_assert.h>
 #include <net-snmp/library/snmp_transport.h>
+#include <net-snmp/library/snmp_secmod.h>
 
 #define LOGANDDIE(msg) { snmp_log(LOG_ERR, "%s\n", msg); return 0; }
 
@@ -362,6 +363,32 @@ netsnmp_tlsbase_config(struct netsnmp_transport_s *t, char *token, char *value) 
     if (strcmp(token, "their_fingerprint") == 0) {
         SNMP_FREE(tlsdata->their_fingerprint);
         tlsdata->their_fingerprint = strdup(value);
+    }
+    return SNMPERR_SUCCESS;
+}
+
+int
+netsnmp_tlsbase_session_init(struct netsnmp_transport_s *transport,
+                             struct snmp_session *sess) {
+    /* the default security model here should be TSM; most other
+       things won't work with TLS because we'll throw out the packet
+       if it doesn't have a proper tmStateRef (and onyl TSM generates
+       this at the moment */
+    if (sess->securityModel == SNMP_DEFAULT_SECMODEL) {
+        if (!(transport->flags & NETSNMP_TRANSPORT_FLAG_LISTEN)) {
+            sess->securityModel = NETSNMP_TSM_SECURITY_MODEL;
+        }
+    } else {
+        snmp_log(LOG_ERR, "A security model other than TSM is being used with (D)TLS; this likely won't work\n");
+    }
+
+    if (NULL == sess->securityName &&
+        !(transport->flags & NETSNMP_TRANSPORT_FLAG_LISTEN)) {
+        /* client side doesn't need a real securityName */
+        /* XXX: call-home issues require them to set one for VACM; but
+           we don't do callhome yet */
+        sess->securityName = strdup("__BOGUS__");
+        sess->securityNameLen = strlen(sess->securityName);
     }
     return SNMPERR_SUCCESS;
 }

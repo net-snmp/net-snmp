@@ -74,6 +74,8 @@ typedef struct netsnmp_tmStateReference_s {
 
 /*  Structure which defines the transport-independent API.  */
 
+struct snmp_session;
+
 typedef struct netsnmp_transport_s {
     /*  The transport domain object identifier.  */
 
@@ -141,7 +143,11 @@ typedef struct netsnmp_transport_s {
         cloned to the second */
     int            (*f_copy)(struct netsnmp_transport_s *,
                              struct netsnmp_transport_s *);
-   
+
+    /*  Setup initial session config if special things are needed */
+   int             (*f_setup_session)(struct netsnmp_transport_s *,
+                                      struct snmp_session *);
+  
     /* allocated host name identifier; used by configuration system
        to load localhost.conf for host-specific configuration */
     u_char         *identifier; /* udp:localhost:161 -> "localhost" */
