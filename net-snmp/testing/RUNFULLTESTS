@@ -57,8 +57,28 @@ $ENV{'builddir'} = $opts{'builddir'};
 $ENV{'SNMPCONFPATH'} = "/dev/null";
 
 # create the testing harness infrastructure
-use TAP::Harness;
-my $harness = TAP::Harness->new(\%args);
+
+my $harness;
+if (eval { require TAP::xHarness; } ) {
+    import TAP::Harness;
+    $harness = TAP::Harness->new(\%args);
+} else {
+    require Test::Harness;
+    import Test::Harness;
+    if ($opts{'g'} ne 'default') {
+	print STDERR "
+ERROR: I can not find the perl TAP::Harness module.  We support the
+more common Test::Harness module but only for the default test group.
+
+Either:
+  1) run only the default tests (i.e., just \"make test\")
+  2) install the TAP::Harness perl module
+
+";
+	exit 1;
+    }
+}
+
 
 ########################################
 # gather the tests
@@ -77,7 +97,13 @@ my @tests = gather_tests(@opts{'groups'}, $opts{'r'});
 DEBUG("Running tests:\n"); 
 DEBUG("-" x 78, "\n");
 
-my $results = $harness->runtests(@tests);
+my $results;
+if ($harness) {
+    $results = $harness->runtests(@tests);
+} else {
+    # minimal backwards compat with Test::Harness
+    run_older_perl_tests(@tests);
+}
 
 if (!$opts{'q'}) {
     my @failed = $results->failed();
@@ -310,6 +336,34 @@ sub call_build_script {
     return undef if ($lastline eq 'skip');
     return $filename if ($lastline eq '');
     return $lastline;
+}
+
+sub run_older_perl_tests {
+    #
+    # Older versions of perl used a different test suite called Test::Harness
+    # It is much more limited than TAP::Harness;
+    #
+    # Here we massage our older tests into something that will work under
+    # Test::Harness too.
+    #
+    my @tests = @_;
+
+    # create the temporary files
+    my @tempfiles;
+    foreach my $test (@tests) {
+	my $tempfile = "$opts{'d'}/$test->[1].t";
+	open(T, ">$tempfile") || die("$@ $!");
+	print T "# functionally perl\n\nsystem(\"$opts{'D'}/fulltests/support/run_olducd $opts{'d'}/$test->[1]\");\n";
+	close(T);
+	chmod(0755, $tempfile);
+	push @tempfiles, $tempfile;
+    }
+
+    $results = runtests(@tempfiles);
+
+    print "unlinking: ", join(", ", @tempfiles),"\n";
+    unlink(@tempfiles) || die("$@ $!");
+    exit;
 }
 
 # usage output
