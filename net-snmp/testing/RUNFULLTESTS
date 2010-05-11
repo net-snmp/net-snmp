@@ -420,7 +420,7 @@ sub usage {
     print "    (currently '$opts{'builddir'}')\n";
     print "  -h\t\t\tThis help output\n";
     print "    --help\n";
-    print "  --debug\t\tDebugging output\n";
+    print "  --debug\t\tDebugging output\n\n";
     exit;
 }
 
