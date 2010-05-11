@@ -434,7 +434,7 @@ netsnmp_is_fqdn(const char *thename)
         return 0;
     while(*thename) {
         if (*thename != '.' && !isupper(*thename) && !islower(*thename) &&
-            !isdigit(*thename)) {
+            !isdigit(*thename) && *thename != '-') {
             return 0;
         }
         thename++;
@@ -497,6 +497,8 @@ netsnmp_tdomain_transport_full(const char *application,
         file_names.fileHeader = buf;
         file_names.start = config_handlers;
         file_names.next = NULL;
+        DEBUGMSGTL(("tdomain", "checking for host specific config %s\n",
+                    buf));
         read_config_files_of_type(EITHER_CONFIG, &file_names);
 
         if (NULL !=
