@@ -72,7 +72,7 @@ if (eval { require TAP::Harness; } ) {
 } else {
     require Test::Harness;
     import Test::Harness;
-    if ($opts{'g'} ne 'default') {
+    if ($opts{'groups'} ne 'default') {
 	print STDERR "
 ERROR: I can not find the perl TAP::Harness module.  We support the
 more common Test::Harness module but only for the default test group.
@@ -382,7 +382,7 @@ sub run_older_perl_tests {
     my @tempfiles;
     foreach my $test (@tests) {
 	my $tempfile = "$opts{'d'}/$test->[1].t";
-	open(T, ">$tempfile") || die("$@ $!");
+	open(T, ">$tempfile") || die("$tempfile: $!");
 	print T "# functionally perl\n\nsystem(\"$opts{'D'}/fulltests/support/run_olducd $opts{'d'}/$test->[1]\");\n";
 	close(T);
 	chmod(0755, $tempfile);
