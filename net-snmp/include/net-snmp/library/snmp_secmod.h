@@ -93,6 +93,8 @@ typedef void    (SecmodHandleReport) (void *sessp,
 typedef int     (SecmodDiscoveryMethod) (void *slp,
                                          netsnmp_session *session);
 
+typedef int     (SecmodSessionSetup) (netsnmp_session *in_session,
+                                      netsnmp_session *out_session);
 /*
  * definition of a security module
  */
@@ -107,6 +109,7 @@ struct snmp_secmod_def {
      */
     SecmodSessionCallback *session_open;        /* called in snmp_sess_open()  */
     SecmodSessionCallback *session_close;       /* called in snmp_sess_close() */
+    SecmodSessionSetup    *session_setup;
 
     /*
      * pdu manipulation routines 

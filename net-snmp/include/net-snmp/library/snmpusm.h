@@ -175,6 +175,7 @@ extern          "C" {
                                                     u_int time_uint,
                                                     int *error);
 
+    SecmodSessionCallback usm_open_session;
     SecmodOutMsg    usm_secmod_generate_out_msg;
     SecmodOutMsg    usm_secmod_generate_out_msg;
     SecmodInMsg     usm_secmod_process_in_msg;
