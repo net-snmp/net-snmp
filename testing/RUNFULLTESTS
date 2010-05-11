@@ -93,7 +93,6 @@ my @tests;
 
 DEBUG("Gathering and building tests:\n");
 find_support();
-my @tests = gather_tests(@opts{'groups'}, $opts{'r'});
 if ($opts{'f'}) {
     DIE("The -f and -g options can not be both specified\n")
       if ($opts{'groups'} ne 'default');
@@ -136,8 +135,8 @@ if (!$opts{'q'}) {
 if (!$opts{'F'}) {
     open(F,">$opts{'failed-file'}");
     if ($#failed > -1) {
-	print F "$opts{'D'}/$opts{'d'}/" .
-	  join("\n$opts{'D'}/$opts{'d'}/",@failed) . "\n";
+	print F "$opts{'srcdir'}/testing/$opts{'d'}/" .
+	  join("\n$opts{'srcdir'}/testing/$opts{'d'}/",@failed) . "\n";
     }
     close(F);
 }
