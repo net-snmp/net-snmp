@@ -1652,7 +1652,17 @@ snmp_sess_add_ex(netsnmp_session * in_session,
         return NULL;
     }
 
+    if (transport->f_setup_session) {
+        if (SNMPERR_SUCCESS !=
+            transport->f_setup_session(transport, in_session)) {
+            netsnmp_transport_free(transport);
+            return NULL;
+        }
+    }
+        
+            
     DEBUGMSGTL(("snmp_sess_add", "fd %d\n", transport->sock));
+
 
     if ((slp = snmp_sess_copy(in_session)) == NULL) {
         transport->f_close(transport);
