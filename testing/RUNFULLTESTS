@@ -36,7 +36,6 @@ my %args = (
 	    exec => \&decide_exec,
 	    failures => ($opts{'q'} ? 0 : 1),
 	    errors => ($opts{'q'} ? 0 : 1),
-	    color => 1,
 	   );
 
 # list of support infrastructure components
