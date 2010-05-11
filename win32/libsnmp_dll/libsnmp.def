@@ -52,6 +52,7 @@ EXPORTS
 	clear_tree_flags
 	get_tree
 	read_module
+	netsnmp_read_module
 	read_mib
 	read_all_mibs
 	add_mibdir
