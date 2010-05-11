@@ -250,7 +250,8 @@ sslctx_client_setup(SSL_METHOD *method, _netsnmpTLSBaseData *tlsbase) {
         LOGANDDIE("public and private keys incompatible");
 
     if (tlsbase->their_fingerprint)
-        peer_cert = netsnmp_cert_find(NS_CERT_IDENTITY, NS_CERTKEY_FINGERPRINT,
+        peer_cert = netsnmp_cert_find(NS_CERT_REMOTE_PEER,
+                                      NS_CERTKEY_FINGERPRINT,
                                       tlsbase->their_fingerprint);
     else
         peer_cert = netsnmp_cert_find(NS_CERT_REMOTE_PEER, NS_CERTKEY_DEFAULT,
