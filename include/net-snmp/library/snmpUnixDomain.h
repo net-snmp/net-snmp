@@ -21,6 +21,8 @@ extern          "C" {
 #include <net-snmp/library/snmp_transport.h>
 #include <net-snmp/library/asn1.h>
 
+config_require(SocketBase)
+
 /*
  * The SNMP over local socket transport domain is identified by
  * transportDomainLocal as defined in RFC 3419.
