@@ -336,14 +336,16 @@ netsnmp_parse_args(int argc,
         case 'T':
         {
             char leftside[SNMP_MAXBUF_MEDIUM], rightside[SNMP_MAXBUF_MEDIUM];
-            char *tmpcp;
+            char *tmpcp, *tmpopt;
             
             /* ensure we have a proper argument */
-            tmpcp = strchr(optarg, '=');
+            tmpopt = strdup(optarg);
+            tmpcp = strchr(tmpopt, '=');
             if (!tmpcp) {
                 fprintf(stderr, "-T expects a NAME=VALUE pair.\n");
                 return (NETSNMP_PARSE_ARGS_ERROR_USAGE);
             }
+            *tmpcp++ = '\0';
 
             /* create the transport config container if this is the first */
             if (!session->transport_configuration) {
@@ -352,6 +354,7 @@ netsnmp_parse_args(int argc,
                     netsnmp_container_find("transport_configuration:fifo");
                 if (!session->transport_configuration) {
                     fprintf(stderr, "failed to initialize the transport configuration container\n");
+                    free(tmpopt);
                     return (NETSNMP_PARSE_ARGS_ERROR);
                 }
 
@@ -361,12 +364,15 @@ netsnmp_parse_args(int argc,
             }
 
             /* set the config */
-            strncpy(leftside, optarg, tmpcp - optarg);
-            strcpy(rightside, tmpcp+1);
+            strncpy(leftside, tmpopt, sizeof(leftside));
+            leftside[sizeof(leftside)-1] = '0';
+            strncpy(rightside, tmpcp, sizeof(rightside));
+            rightside[sizeof(rightside)-1] = '0';
 
             CONTAINER_INSERT(session->transport_configuration,
                              netsnmp_transport_create_config(leftside,
                                                              rightside));
+            free(tmpopt);
         }
         break;
             
