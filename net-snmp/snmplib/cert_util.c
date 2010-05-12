@@ -46,6 +46,12 @@
 #include <net-snmp/library/cert_util.h>
 #include <net-snmp/library/snmp_openssl.h>
 
+/*
+ * bump this value whenever cert index format changes, so indexes
+ * will be reginerated with new format.
+ */
+#define CERT_INDEX_FORMAT  1
+
 static netsnmp_container *_certs = NULL;
 static netsnmp_container *_keys = NULL;
 static netsnmp_container *_maps = NULL;
@@ -671,10 +677,9 @@ _certindexes_load( void )
     DIR *dir;
     struct dirent *file;
     FILE *fp;
-    char filename[SNMP_MAXPATH];
-    char line[300];
+    char filename[SNMP_MAXPATH], line[300];
     int  i;
-    char *cp;
+    char *cp, *pos;
 
     /*
      * Open the CERT index directory, or create it (empty)
@@ -684,7 +689,8 @@ _certindexes_load( void )
     filename[sizeof(filename)-1] = 0;
     dir = opendir( filename );
     if ( dir == NULL ) {
-        DEBUGMSGT(("cert:index:load", "creating new cert_indexes directory\n"));
+        DEBUGMSGT(("cert:index:load",
+                   "creating new cert_indexes directory\n"));
         mkdirhier( filename, NETSNMP_AGENT_DIRECTORY_MODE, 0);
         return;
     }
@@ -709,6 +715,9 @@ _certindexes_load( void )
         cp = fgets( line, sizeof(line), fp );
         if ( cp ) {
             line[strlen(line)-1] = 0;
+            pos = strrchr(line, ' ');
+            if (pos)
+                *pos = '\0';
             DEBUGMSGT(("9:cert:index:load","adding (%d) %s\n", i, line));
             (void)_certindex_add( line+4, i );  /* Skip 'DIR ' */
         } else {
@@ -729,6 +738,7 @@ _certindex_lookup( const char *dirname )
 {
     int i;
     char filename[SNMP_MAXPATH];
+
 
     i = se_find_value_in_list(_certindexes, dirname);
     if (SE_DNE == i) {
@@ -763,7 +773,7 @@ _certindex_new( const char *dirname )
     DEBUGMSGT(("9:cert:index:new", "%s (%s)\n", dirname, cp ));
     fp = fopen( cp, "w" );
     if (fp)
-        fprintf( fp, "DIR %s\n", dirname );
+        fprintf( fp, "DIR %s %d\n", dirname, CERT_INDEX_FORMAT );
     else
         snmp_log(LOG_ERR, "error opening new index file %s\n", dirname);
 
@@ -1206,11 +1216,9 @@ _add_certfile(const char* dirname, const char* filename, FILE *index)
         /** fingerprint = 60 */
         /** common name / CN  = 64 */
         if (cert)
-            fprintf(index, "c:%s %d %s(%d):%s '%s' '%s'\n", filename,
-                    cert->info.type,
-                    se_find_label_in_slist("cert_hash_alg", cert->hash_type),
-                    cert->hash_type, cert->fingerprint, cert->common_name,
-                    cert->subject);
+            fprintf(index, "c:%s %d %d %s '%s' '%s'\n", filename,
+                    cert->info.type, cert->hash_type, cert->fingerprint,
+                    cert->common_name, cert->subject);
         else if (key)
             fprintf(index, "k:%s\n", filename);
     }
@@ -1227,7 +1235,7 @@ _cert_read_index(const char *dirname, struct stat *dirstat)
     char            tmpstr[SNMP_MAXPATH + 5], filename[NAME_MAX];
     char            fingerprint[60+1], common_name[64+1], type_str[15];
     char            subject[SNMP_MAXBUF_SMALL], hash_str[15];
-    int             count = 0, type, hash;
+    int             count = 0, type, hash, version;
     netsnmp_cert    *cert;
     netsnmp_key     *key;
     netsnmp_container *newer, *found;
@@ -1291,7 +1299,21 @@ _cert_read_index(const char *dirname, struct stat *dirstat)
 
     found = _get_cert_container(idxname);
 
-    fgets(tmpstr, sizeof(tmpstr), index); /* Skip dir line */
+    /*
+     * check index format version
+     */
+    fgets(tmpstr, sizeof(tmpstr), index);
+    pos = strrchr(tmpstr, ' ');
+    if (pos) {
+        ++pos;
+        version = atoi(pos);
+    }
+    if ((NULL == pos) || (version != CERT_INDEX_FORMAT)) {
+        DEBUGMSGT(("cert:index:add", "missing or wrong index format!\n"));
+        fclose(index);
+        SNMP_FREE(idxname);
+        return -1;
+    }
     while (1) {
         if (NULL == fgets(tmpstr, sizeof(tmpstr), index))
             break;
