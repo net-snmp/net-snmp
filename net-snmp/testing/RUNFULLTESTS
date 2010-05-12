@@ -237,8 +237,8 @@ sub rename_tests {
     # yes, I could have used map.  But I didn't.
     foreach my $file (@tests) {
 	my $title = "$file";
+	$title =~ s/^$opts{'srcdir'}\/testing\///;
 	$title =~ s/$opts{'d'}.//;
-	$title =~ s/^$opts{'srcdir'}.//;
 	push @newtests, [$file, $title];
     }
     return @newtests;
