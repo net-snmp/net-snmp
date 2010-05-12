@@ -480,9 +480,11 @@ netsnmp_openssl_cert_get_fingerprint(X509 *ocert, int alg)
     char            *result = NULL;
 
     nid = OBJ_obj2nid(ocert->sig_alg->algorithm);
+    DEBUGMSGT(("9:openssl:fingerprint", "alg %d, cert nid %d (%d)\n", alg, nid,
+               _nid2ht(nid)));
         
     if ((-1 == alg) && nid)
-        alg = _ht2nid(nid);
+        alg = _nid2ht(nid);
 
     switch (alg) {
         case NS_HASH_MD5:
@@ -519,17 +521,17 @@ netsnmp_openssl_cert_get_fingerprint(X509 *ocert, int alg)
             return NULL;
     }
 
-    if (_ht2nid(nid) != alg) {
+    if (_nid2ht(nid) != alg) {
         DEBUGMSGT(("openssl:fingerprint",
                    "WARNING: alg %d does not match cert alg %d\n",
-                   alg, _ht2nid(nid)));
+                   alg, _nid2ht(nid)));
     }
     if (X509_digest(ocert,digest,fingerprint,&fingerprint_len)) {
         binary_to_hex(fingerprint, fingerprint_len, &result);
         if (NULL == result)
             snmp_log(LOG_ERR, "failed to hexify fingerprint\n");
         else
-            DEBUGMSGT(("openssl:fingerprint", "fingerprint %s\n", result));
+            DEBUGMSGT(("9:openssl:fingerprint", "fingerprint %s\n", result));
     }
     else
         snmp_log(LOG_ERR,"failed to compute fingerprint\n");
