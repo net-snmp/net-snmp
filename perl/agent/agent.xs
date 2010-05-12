@@ -903,11 +903,7 @@ nari_setValue(me, type, value)
 	          /* Might be OK - got a string, so try to convert it, allowing base 10, octal, and hex forms */
 	          stringptr = SvPV(value, stringlen);
 	          errno = 0;
-#if defined(WIN32)
-		  ulltmp = strtoul(  stringptr, NULL, 0 );
-#else
 		  ulltmp = strtoull( stringptr, NULL, 0 );
-#endif
 		  if (errno != 0) {
 		      snmp_log(LOG_ERR, "Could not convert string to number in setValue: '%s'", stringptr);
 		      RETVAL = 0;
