@@ -75,6 +75,8 @@ netsnmp_sensor_arch_load(netsnmp_cache *cache, void *vp) {
                 if (!(label = sensors_get_label(chip, data)) ||
                      (sensors_get_value(chip, data2->number, &val) < 0)) {
                     DEBUGMSGTL(("sensors:arch:detail", "  Can't get name/value (%s, %f)\n", label, val));
+                    free(label);
+                    label = NULL;
                     continue;
                 }
                 DEBUGMSGTL(("sensors:arch:detail", "%s = %f\n", label, val));
