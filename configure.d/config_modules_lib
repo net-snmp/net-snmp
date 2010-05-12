@@ -385,3 +385,13 @@ do
 done
 
 new_with_security=$rebuilt_new_with_security
+
+#
+# Detect lm_sensors version
+#
+if test "x$ac_cv_header_sensors_sensors_h" = "xyes"; then
+    AC_CHECK_DECLS([sensors_get_all_subfeatures],
+        [AC_DEFINE(NETSNMP_USE_SENSORS_V3, 1,
+            [Define this if you have lim_sensors v3 or later])],,
+        [[#include <sensors/sensors.h>]])
+fi
