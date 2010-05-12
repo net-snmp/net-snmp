@@ -7,7 +7,11 @@ config_require(hardware/sensors/picld_sensors)
 config_require(hardware/sensors/kstat_sensors)
 # endif
 #else
+#  if defined(NETSNMP_USE_SENSORS_V3)
+config_require(hardware/sensors/lmsensors_v3)
+#  else
 config_require(hardware/sensors/lmsensors_v2)
+#  endif
 #endif
 
 /* config_require(hardware/sensors/dummy_sensors) */
