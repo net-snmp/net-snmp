@@ -1,6 +1,8 @@
 #ifndef SNMPUDPBASEDOMAIN_H
 #define SNMPUDPBASEDOMAIN_H
 
+config_require(SocketBase)
+
 #ifdef __cplusplus
 extern          "C" {
 #endif
