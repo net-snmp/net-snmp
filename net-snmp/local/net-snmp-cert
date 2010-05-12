@@ -308,6 +308,7 @@ sub usage {
   print "     --issuer       -- issuer description\n";
   print "     --issuer_hash  -- hash of issuer for indexing\n";
   print "     --fingerprint  -- SHA1 digest of DER\n";
+  print "     --short        -- short/minimized output\n";
   print "     --serial       -- serial number\n";
   print "     --modulus      -- modulus of the public key\n";
   print "     --dates        -- start and end dates\n";
@@ -1247,17 +1248,23 @@ sub show {
   my $stag = shift(@{$opts->{cmdargs}});
   my $fmt = NetSNMP::Cert::x509_format($opts) || '-subject';
   my $cmd;
+  my $short = ($opts->{'short'} ? 1 : 0);
+
+  my $sed = "";
+  if ($short) {
+      $sed = "| sed 's/[^=]*= *//'";
+  }
 
   my $cwd = ::getcwd();
   NetSNMP::Cert::dprint("show ($cwd):$type:$stag:$fmt\n", $opts);
   NetSNMP::Cert::vprint("$opts->{tlsdir}:\n", $opts);
   
   foreach my $c (NetSNMP::Cert::find_certs($opts, $type, $stag)) {
-    print "\n$c:\n";
-    $cmd = "openssl x509 -in $c -noout $fmt";
+    print "\n$c:\n" if (!$short);
+    $cmd = "openssl x509 -in $c -noout $fmt $sed";
     NetSNMP::Cert::dprint("show: $cmd\n", $opts);
     NetSNMP::Cert::usystem("$cmd");
-    print "\n";
+    print "\n" if (!$short);
   }
 }
 
@@ -1290,7 +1297,7 @@ sub run {
   
   NetSNMP::Cert::GetOptsFromArray(\@{$opts->{cmdargs}}, $opts,'ca|a=s','csr|r=s','crt|x=s',
 		      'cn|n=s', 'email|e=s', 'host|h=s', 'san|s=s@', 'org|o=s', 'unit|u=s',
-		      'country|c=s', 'state|province|p=s', 'locality|l=s', 'days|d=s',
+		      'country|c=s', 'state|province|p=s', 'locality|l=s', 'days|d=s', 'short',
 		      @NetSNMP::Cert::X509FMTS);
 
   # find ca, crt, csr args if present and return fully qualified path
