@@ -638,7 +638,7 @@ authorityKeyIdentifier = keyid:always,issuer:always
 # Import the email address and/or specified SANs.
 subjectAltName = $ENV::SAN
 
-[ v3_ca ]
+[ v3_ca_create ]
 # Extensions to add to a CA certificate
 basicConstraints = CA:TRUE
 # This will be displayed in Netscape's comment listbox.
@@ -1075,7 +1075,7 @@ sub genCa {
   NetSNMP::Cert::check_output_file($opts, $outCrt, $config->inherit('interactive'));
   NetSNMP::Cert::check_output_file($opts, $outKey, $config->inherit('interactive'));
 
-  $cmd = "$env openssl req -extensions v3_ca -new -days $days -batch -config $NetSNMP::Cert::SSLCFG -keyout $outKey";
+  $cmd = "$env openssl req -extensions v3_ca_create -new -days $days -batch -config $NetSNMP::Cert::SSLCFG -keyout $outKey";
   $cmd .= " -nodes";
 
   if (defined $ca) {
@@ -1179,7 +1179,7 @@ sub genCsr {
   NetSNMP::Cert::check_output_file($opts, $outKey, $config->inherit('interactive'));
 
   my $cmd = "$env openssl req -new -nodes -days $days -batch -keyout $outKey -out $outCrt -config $NetSNMP::Cert::SSLCFG";
-  $cmd .= ($isCa ? " -extensions v3_ca" : " -extensions v3_user_create");
+  $cmd .= ($isCa ? " -extensions v3_ca_create" : " -extensions v3_user_create");
 
   NetSNMP::Cert::dprint("genCsr: $cmd\n", $opts);
 
