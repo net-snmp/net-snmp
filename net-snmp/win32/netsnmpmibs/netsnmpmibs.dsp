@@ -389,6 +389,10 @@ SOURCE=..\..\agent\mibgroup\utilities\execute.c
 # End Source File
 # Begin Source File
 
+SOURCE=..\..\agent\mibgroup\util_funcs\Exit.c
+# End Source File
+# Begin Source File
+
 SOURCE=..\..\agent\mibgroup\header_complex.c
 # End Source File
 # Begin Source File
@@ -410,6 +414,10 @@ SOURCE=..\..\agent\mib_modules.c
 # Begin Source File
 
 SOURCE=..\..\agent\mibgroup\utilities\override.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\agent\mibgroup\util_funcs\restart.c
 # End Source File
 # Begin Source File
 

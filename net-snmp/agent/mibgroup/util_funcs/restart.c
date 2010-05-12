@@ -15,6 +15,10 @@
 #endif
 #include <signal.h>
 
+#if HAVE_RAISE
+#define alarm raise
+#endif
+
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/library/snmp_logging.h>
 

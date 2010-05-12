@@ -121,6 +121,8 @@ LIB32_OBJS1= \
 	"$(INTDIR)\header_complex.obj" \
 	"$(INTDIR)\mib_modules.obj" \
 	"$(INTDIR)\util_funcs.obj" \
+	"$(INTDIR)\Exit.obj" \
+	"$(INTDIR)\restart.obj" \
 	"$(INTDIR)\smux.obj"
 !IF "$(SDK)" == "true"
 LIB32_OBJS2= \
@@ -536,6 +538,18 @@ SOURCE=..\..\agent\mib_modules.c
 SOURCE=..\..\agent\mibgroup\util_funcs.c
 
 "$(INTDIR)\util_funcs.obj" : $(SOURCE) "$(INTDIR)"
+	$(CPP) $(CPP_PROJ) $(SOURCE)
+
+
+SOURCE=..\..\agent\mibgroup\util_funcs\Exit.c
+
+"$(INTDIR)\Exit.obj" : $(SOURCE) "$(INTDIR)"
+	$(CPP) $(CPP_PROJ) $(SOURCE)
+
+
+SOURCE=..\..\agent\mibgroup\util_funcs\restart.c
+
+"$(INTDIR)\restart.obj" : $(SOURCE) "$(INTDIR)"
 	$(CPP) $(CPP_PROJ) $(SOURCE)
 
 
