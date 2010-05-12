@@ -472,4 +472,9 @@ if test x$with_socklib = xwinsock2; then
   AC_CHECK_HEADERS([winsock.h winsock2.h ws2tcpip.h])
 fi
 
+#
+# for ucd-snmp/lmsensorsMib
+#
+AC_CHECK_HEADERS([sensors/sensors.h])
+
 fi # NETSNMP_QUICK_CHECK
