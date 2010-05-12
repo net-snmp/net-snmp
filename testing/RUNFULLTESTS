@@ -383,7 +383,7 @@ sub run_older_perl_tests {
     foreach my $test (@tests) {
 	my $tempfile = "$opts{'d'}/$test->[1].t";
 	open(T, ">$tempfile") || die("$tempfile: $!");
-	print T "# functionally perl\n\nsystem(\"$opts{'D'}/fulltests/support/run_olducd $opts{'d'}/$test->[1]\");\n";
+	print T "# functionally perl\n\nsystem(\"$opts{'srcdir'}/testing/fulltests/support/run_olducd $opts{'srcdir'}/testing/$opts{'d'}/$test->[1]\");\n";
 	close(T);
 	chmod(0755, $tempfile);
 	push @tempfiles, $tempfile;
