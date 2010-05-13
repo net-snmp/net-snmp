@@ -31,6 +31,14 @@ extern          "C" {
 #define DEFAULT_LOG_ID "net-snmp"
 #endif
 
+#define NETSNMP_LOGONCE(x) do { \
+        static char logged = 0; \
+        if (!logged) {          \
+            logged = 1;         \
+            snmp_log x ;        \
+        }                       \
+    } while(0)
+
     void            init_snmp_logging(void);
     void            shutdown_snmp_logging(void);
     int             snmp_get_do_logging(void);
