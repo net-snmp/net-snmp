@@ -101,6 +101,10 @@
 /* Define to 1 if the system has the type `Counter64'. */
 #undef HAVE_COUNTER64
 
+/* Define to 1 if you have the declaration of `sensors_get_all_subfeatures',
+   and to 0 if you don't. */
+#undef HAVE_DECL_SENSORS_GET_ALL_SUBFEATURES
+
 /* define to 1 if you have IRE_CACHE defined in <inet/ip.h> header file. */
 #undef HAVE_DEFINED_IRE_CACHE
 
@@ -596,6 +600,9 @@
 
 /* Define to 1 if you have the `select' function. */
 #undef HAVE_SELECT
+
+/* Define to 1 if you have the <sensors/sensors.h> header file. */
+#undef HAVE_SENSORS_SENSORS_H
 
 /* Define to 1 if you have the `setenv' function. */
 #undef HAVE_SETENV
@@ -1291,6 +1298,9 @@
 
 /* Define if you are using the codeS11 library ... */
 #undef NETSNMP_USE_PKCS11
+
+/* Define this if you have lim_sensors v3 or later */
+#undef NETSNMP_USE_SENSORS_V3
 
 /* Should we compile to use special opaque types: float, double, counter64,
    i64, ui64, union? */
