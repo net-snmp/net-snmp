@@ -1,5 +1,22 @@
 #!/bin/sh
 
+if [ "x$builddir" = "x" ]; then
+    cd ..
+    builddir=`pwd`
+    cd testing
+fi
+
+if [ "x$srcdir" = "x" ]; then
+    cd ..
+    srcdir=`pwd`
+    cd testing
+fi
+
+testscript=$1
+if [ `echo $testscript | cut -c 1-1` != '/' ]; then
+    testscript="`pwd`/$1"
+fi
+
 SNMP_BASEDIR=`dirname $0`
 
 ## prefer MIB files found in source hierarchy
@@ -67,10 +84,10 @@ export SNMP_UPDIR
 
 . olducd_eval_tools.sh
 
-cd `dirname $1`
+cd `dirname $testscript`
 PATH=`pwd`:$PATH
 export PATH
 
-. `basename $1`
+. `basename $testscript`
 
 FINISHED
