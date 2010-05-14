@@ -13,9 +13,13 @@ listing of all changes made to the code.
             existing access control configurations.
       - Latch large-disk statistics at 2Tb (rather than wrapping)
 
-
     Linux:
       - Fix build on modern distributions (using rpm-4.6)
+
+    Win32:
+      - Fix batch build using recent versions of Visual Studio.
+      - Fix build under MinGW
+
 
 *5.2.5*
 

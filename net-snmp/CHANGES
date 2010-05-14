@@ -124,6 +124,10 @@ listing of all changes made to the code.
 
     Win32:
       - [PATCH 2688342]: Fix various VS2005 compiler warnings
+      - [BUG 2997492]: byte order of udpLocalPort is now correct.
+      - Detect free UDP ports correctly for use in Cygwin test infrastructure.
+      - Fix batch build using recent versions of Visual Studio.
+      - Fix build under MinGW
 
 
 *5.2.5*
