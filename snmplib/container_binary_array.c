@@ -119,6 +119,32 @@ Sort_Array(netsnmp_container *c)
 }
 
 static int
+linear_search(const void *val, netsnmp_container *c)
+{
+    binary_array_table *t = (binary_array_table*)c->container_data;
+    size_t             pos = 0;
+
+    if (!t->count)
+        return -1;
+
+    if (! (c->flags & CONTAINER_KEY_UNSORTED)) {
+        snmp_log(LOG_ERR, "linear search on sorted container %s?!?\n",
+                 c->container_name);
+        return -1;
+    }
+
+    for (; pos < t->count; ++pos) {
+        if (c->compare(t->data[pos], val) == 0)
+            break;
+    }
+
+    if (pos >= t->count)
+        return -1;
+
+    return pos;
+}
+
+static int
 binary_search(const void *val, netsnmp_container *c, int exact)
 {
     binary_array_table *t = (binary_array_table*)c->container_data;
@@ -130,6 +156,15 @@ binary_search(const void *val, netsnmp_container *c, int exact)
 
     if (!len)
         return -1;
+
+    if (c->flags & CONTAINER_KEY_UNSORTED) {
+        if (!exact) {
+            snmp_log(LOG_ERR, "non-exact search on unsorted container %s?!?\n",
+                     c->container_name);
+            return -1;
+        }
+        return linear_search(val, c);
+    }
 
     if (t->dirty)
         Sort_Array(c);
