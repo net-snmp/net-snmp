@@ -20,8 +20,8 @@ extern          "C" {
 config_require(UDPIPv4Base)
 config_require(TLSBase)
 
-#define TRANSPORT_DOMAIN_DTLS_UDP_IP	1,3,6,1,4,1,8072,3,3,8
-NETSNMP_IMPORT oid netsnmpDTLSUDPDomain[10];
+#define TRANSPORT_DOMAIN_DTLS_UDP_IP	1,3,6,1,6,1,9
+NETSNMP_IMPORT oid netsnmpDTLSUDPDomain[7];
 NETSNMP_IMPORT size_t netsnmpDTLSUDPDomain_len;
 
 netsnmp_transport *netsnmp_dtlsudp_transport(struct sockaddr_in *addr,
