@@ -177,12 +177,15 @@ netsnmp_tlsbase_extract_security_name(SSL *ssl, _netsnmpTLSBaseData *tlsdata) {
     /*
      * map fingerprints to mapping entries
      */
-    netsnmp_cert_get_secname_maps(chain_maps);
-    if (CONTAINER_SIZE(chain_maps) == 0)
+    rc = netsnmp_cert_get_secname_maps(chain_maps);
+    if ((-1 == rc) || (CONTAINER_SIZE(chain_maps) == 0)) {
+        netsnmp_cert_map_container_free(chain_maps);
         return SNMPERR_GENERR;
+    }
+
     /*
-     * change container to sorted, then iterate over it til we find
-     * a map that returns a secname
+     * change container to sorted (by clearing unsorted option), then
+     * iterate over it until we find a map that returns a secname.
      */
     CONTAINER_SET_OPTIONS(chain_maps, 0, rc);
     itr = CONTAINER_ITERATOR(chain_maps);
