@@ -243,10 +243,8 @@ tsm_rgenerate_out_msg(struct snmp_secmod_outgoing_params *parms)
             const char *prefix;
             if (strncmp("ssh:",parms->session->peername,4) == 0)
                 prefix = "ssh:";
-            else if (strncmp("dudp:",parms->session->peername,5) == 0)
-                prefix = "dudp:";
-            else if (strncmp("dsct:",parms->session->peername,5) == 0)
-                prefix = "dsct:";
+            else if (strncmp("dtls:",parms->session->peername,5) == 0)
+                prefix = "dtls:";
             else if (strncmp("tls:",parms->session->peername,4) == 0)
                 prefix = "tls:";
             else {
