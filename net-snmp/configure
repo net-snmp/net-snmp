@@ -901,6 +901,7 @@ AUTOHEADER
 AUTOCONF
 WHOAMI
 FIND
+FILE
 SED
 SET_MAKE
 LN_S
@@ -5404,6 +5405,59 @@ $as_echo "$ac_cv_path_SED" >&6; }
   rm -f conftest.sed
 
 
+for ac_prog in file
+do
+  # Extract the first word of "$ac_prog", so it can be a program name with args.
+set dummy $ac_prog; ac_word=$2
+{ $as_echo "$as_me:$LINENO: checking for $ac_word" >&5
+$as_echo_n "checking for $ac_word... " >&6; }
+if test "${ac_cv_prog_FILE+set}" = set; then
+  $as_echo_n "(cached) " >&6
+else
+  if test -n "$FILE"; then
+  ac_cv_prog_FILE="$FILE" # Let the user override the test.
+else
+as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
+for as_dir in $PATH
+do
+  IFS=$as_save_IFS
+  test -z "$as_dir" && as_dir=.
+  for ac_exec_ext in '' $ac_executable_extensions; do
+  if { test -f "$as_dir/$ac_word$ac_exec_ext" && $as_test_x "$as_dir/$ac_word$ac_exec_ext"; }; then
+    ac_cv_prog_FILE="$ac_prog"
+    $as_echo "$as_me:$LINENO: found $as_dir/$ac_word$ac_exec_ext" >&5
+    break 2
+  fi
+done
+done
+IFS=$as_save_IFS
+
+fi
+fi
+FILE=$ac_cv_prog_FILE
+if test -n "$FILE"; then
+  { $as_echo "$as_me:$LINENO: result: $FILE" >&5
+$as_echo "$FILE" >&6; }
+else
+  { $as_echo "$as_me:$LINENO: result: no" >&5
+$as_echo "no" >&6; }
+fi
+
+
+  test -n "$FILE" && break
+done
+
+if test x$ac_cv_prog_FILE = x; then
+  # The file program is not included in the default Cygwin setup, although
+  # this program is essential for libtool to work properly. It is nontrivial
+  # to deduce from the message printed by libtool that the 'file' tool is
+  # missing and libtool does not abort when the file program is not found. So
+  # stop now if the file program has not been found.
+  { { $as_echo "$as_me:$LINENO: error: file program not found although it is needed by libtool." >&5
+$as_echo "$as_me: error: file program not found although it is needed by libtool." >&2;}
+   { (exit 1); exit 1; }; }
+fi
+
 for ac_prog in find
 do
   # Extract the first word of "$ac_prog", so it can be a program name with args.
@@ -8169,13 +8223,13 @@ if test "${lt_cv_nm_interface+set}" = set; then
 else
   lt_cv_nm_interface="BSD nm"
   echo "int some_variable = 0;" > conftest.$ac_ext
-  (eval echo "\"\$as_me:8172: $ac_compile\"" >&5)
+  (eval echo "\"\$as_me:8226: $ac_compile\"" >&5)
   (eval "$ac_compile" 2>conftest.err)
   cat conftest.err >&5
-  (eval echo "\"\$as_me:8175: $NM \\\"conftest.$ac_objext\\\"\"" >&5)
+  (eval echo "\"\$as_me:8229: $NM \\\"conftest.$ac_objext\\\"\"" >&5)
   (eval "$NM \"conftest.$ac_objext\"" 2>conftest.err > conftest.out)
   cat conftest.err >&5
-  (eval echo "\"\$as_me:8178: output\"" >&5)
+  (eval echo "\"\$as_me:8232: output\"" >&5)
   cat conftest.out >&5
   if $GREP 'External.*some_variable' conftest.out > /dev/null; then
     lt_cv_nm_interface="MS dumpbin"
@@ -9366,7 +9420,7 @@ ia64-*-hpux*)
   ;;
 *-*-irix6*)
   # Find out which ABI we are using.
-  echo '#line 9369 "configure"' > conftest.$ac_ext
+  echo '#line 9423 "configure"' > conftest.$ac_ext
   if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
   (eval $ac_compile) 2>&5
   ac_status=$?
@@ -11033,11 +11087,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:11036: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:11090: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:11040: \$? = $ac_status" >&5
+   echo "$as_me:11094: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -11372,11 +11426,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:11375: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:11429: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:11379: \$? = $ac_status" >&5
+   echo "$as_me:11433: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -11477,11 +11531,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:11480: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:11534: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:11484: \$? = $ac_status" >&5
+   echo "$as_me:11538: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -11532,11 +11586,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:11535: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:11589: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:11539: \$? = $ac_status" >&5
+   echo "$as_me:11593: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -14332,7 +14386,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 14335 "configure"
+#line 14389 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -14428,7 +14482,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 14431 "configure"
+#line 14485 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -24373,7 +24427,7 @@ if test "x$PARTIALTARGETOS" = "xmingw32" -o "x$PARTIALTARGETOS" = "xmingw32msvc"
 fi
 
 # Win32 pipes
-if test "x$PARTIALTARGETOS" = "xmingw32" -o "x$PARTIALTARGETOS" = "xmingw32msvc" -o "x$PARTIALTARGETOS" = "xcygwin"; then
+if test "x$PARTIALTARGETOS" = "xmingw32" -o "x$PARTIALTARGETOS" = "xmingw32msvc"; then
   other_src_list="$other_src_list winpipe.c"
   other_objs_list="$other_objs_list winpipe.o"
   other_lobjs_list="$other_lobjs_list winpipe.lo"
