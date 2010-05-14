@@ -1252,15 +1252,16 @@ Cygwin allows you to compile almost the complete agent and applications.
 The following configure options creates a working set of programs:
 
 ./configure \
+	--disable-shared \
 	--with-mib-modules="host agentx disman/event-mib examples/example" \
-	--with-out-mib-modules=host/hr_network --with-libs="-lws2_32" \
+	--with-out-mib-modules=host/hr_network \
         --disable-embedded-perl --without-perl-modules \
 
-If you want to use SNMPv3 auth and privacy features, add:
-	--with-openssl="/usr" \
+If you want to disable SNMPv3 auth and privacy features, add:
+	--without-openssl \
 
 If you want to use IPv6 transports, add:
-	--enable-ipv6 --with-transports="TCPIPv6 UDPIPv6"
+	--enable-ipv6
 
 Note:  The source code should *not* be in a folder that contains a space.  For
        example, compiling in your 'My Documents' or your Desktop (usually
