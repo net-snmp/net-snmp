@@ -144,5 +144,5 @@ LOBJS = all_helpers.lo \
 all: standardall
 
 libnetsnmphelpers.$(LIB_EXTENSION)$(LIB_VERSION):    $(LOBJS)
-	$(LIB_LD_CMD) $@ $(LOBJS) $(AGENTLIB) $(NETSNMPLIB) $(LDFLAGS) $(LIB_LD_LIBS)
+	$(LIB_LD_CMD) $@ $(LOBJS) $(AGENTLIB) $(NETSNMPLIB) -no-undefined $(LDFLAGS) $(LIB_LD_LIBS)
 	$(RANLIB) $@
