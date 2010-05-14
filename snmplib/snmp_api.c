@@ -1061,9 +1061,6 @@ _sess_copy(netsnmp_session * in_session)
             netsnmp_ds_get_int(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_SECLEVEL);
     }
 
-    if (session->securityLevel == 0)
-        session->securityLevel = SNMP_SEC_LEVEL_NOAUTH;
-
     if (in_session->securityEngineIDLen > 0) {
         ucp = (u_char *) malloc(in_session->securityEngineIDLen);
         if (ucp == NULL) {
@@ -1172,6 +1169,11 @@ _sess_copy(netsnmp_session * in_session)
             }
         }
     }
+
+    /* Anything below this point should only be done if the transport
+       had no say in the matter */
+    if (session->securityLevel == 0)
+        session->securityLevel = SNMP_SEC_LEVEL_NOAUTH;
 
     return (slp);
 }

@@ -377,23 +377,33 @@ netsnmp_tlsbase_session_init(struct netsnmp_transport_s *transport,
        things won't work with TLS because we'll throw out the packet
        if it doesn't have a proper tmStateRef (and onyl TSM generates
        this at the moment */
-    if (sess->securityModel == SNMP_DEFAULT_SECMODEL) {
-        if (!(transport->flags & NETSNMP_TRANSPORT_FLAG_LISTEN)) {
+    if (!(transport->flags & NETSNMP_TRANSPORT_FLAG_LISTEN)) {
+        if (sess->securityModel == SNMP_DEFAULT_SECMODEL) {
             sess->securityModel = NETSNMP_TSM_SECURITY_MODEL;
+        } else {
+            snmp_log(LOG_ERR, "A security model other than TSM is being used with (D)TLS; this likely won't work\n");
         }
-    } else {
-        snmp_log(LOG_ERR, "A security model other than TSM is being used with (D)TLS; this likely won't work\n");
-    }
 
-    if (NULL == sess->securityName &&
-        !(transport->flags & NETSNMP_TRANSPORT_FLAG_LISTEN)) {
-        /* client side doesn't need a real securityName */
-        /* XXX: call-home issues require them to set one for VACM; but
-           we don't do callhome yet */
-        sess->securityName = strdup("__BOGUS__");
-        sess->securityNameLen = strlen(sess->securityName);
+        if (NULL == sess->securityName) {
+            /* client side doesn't need a real securityName */
+            /* XXX: call-home issues require them to set one for VACM; but
+               we don't do callhome yet */
+            sess->securityName = strdup("__BOGUS__");
+            sess->securityNameLen = strlen(sess->securityName);
+        }
+
+        if (SNMP_DEFAULT_VERSION == sess->version) {
+            sess->version = SNMP_VERSION_3;
+        } else if (sess->version != SNMP_VERSION_3) {
+            snmp_log(LOG_ERR, "A SNMP version other than 3 was requested with (D)TLS; this likely won't work\n");
+        }
+
+        if (sess->securityLevel <= 0) {
+            sess->securityLevel = SNMP_SEC_LEVEL_AUTHPRIV;
+        }
+
+        return SNMPERR_SUCCESS;
     }
-    return SNMPERR_SUCCESS;
 }
 
 static int have_done_bootstrap = 0;
