@@ -2109,19 +2109,12 @@ _map_fp_ncompare(netsnmp_cert_map *lhs, netsnmp_cert_map *rhs)
 netsnmp_container *
 netsnmp_cert_map_container_create(int with_fp)
 {
-    netsnmp_container *chain_map = netsnmp_container_find("stack:binary_array");
+    netsnmp_container *chain_map =
+        netsnmp_container_find("stack:binary_array");
     netsnmp_container *fp;
-    int                rc;
 
     if (NULL == chain_map) {
         snmp_log(LOG_ERR, "could not allocate container for cert_map\n");
-        return NULL;
-    }
-
-    CONTAINER_SET_OPTIONS(chain_map, CONTAINER_KEY_UNSORTED, rc);
-    if (-1 == rc) {
-        snmp_log(LOG_ERR, "could not set container unsorted\n");
-        CONTAINER_FREE(chain_map);
         return NULL;
     }
 
@@ -2455,8 +2448,6 @@ netsnmp_cert_get_secname_maps(netsnmp_container *cert_maps)
     }
     ITERATOR_RELEASE(itr);
     CONTAINER_FREE(new_maps);
-    CONTAINER_FREE_ALL(cert_maps, NULL);
-    CONTAINER_FREE(cert_maps);
     return -1;
 }
 
