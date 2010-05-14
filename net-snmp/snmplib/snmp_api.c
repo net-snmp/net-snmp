@@ -960,7 +960,6 @@ _sess_copy(netsnmp_session * in_session)
     struct snmp_secmod_def *sptr;
     char           *cp;
     u_char         *ucp;
-    size_t          i;
 
     in_session->s_snmp_errno = 0;
     in_session->s_errno = 0;

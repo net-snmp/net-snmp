@@ -44,7 +44,7 @@ int
 netsnmp_swinst_arch_load( netsnmp_container *container, u_int flags)
 {
     /* Nothing to do */
-    DEBUGMSGTL(("swinst:load:arch"," loaded %d entries\n",
+    DEBUGMSGTL(("swinst:load:arch"," loaded %" NETSNMP_PRIz "d entries\n",
                 CONTAINER_SIZE(container)));
 
     return 0;

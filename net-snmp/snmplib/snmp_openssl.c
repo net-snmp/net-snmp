@@ -8,6 +8,8 @@
 
 #if defined(NETSNMP_USE_OPENSSL) && defined(HAVE_LIBSSL)
 
+#include <ctype.h>
+
 #include <openssl/evp.h>
 #include <openssl/ssl.h>
 #include <openssl/x509.h>
