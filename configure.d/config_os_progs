@@ -40,6 +40,16 @@ AC_PROG_LN_S
 AC_PROG_MAKE_SET
 AC_PROG_SED
 
+AC_CHECK_PROGS([FILE], [file])
+if test x$ac_cv_prog_FILE = x; then
+  # The file program is not included in the default Cygwin setup, although
+  # this program is essential for libtool to work properly. It is nontrivial
+  # to deduce from the message printed by libtool that the 'file' tool is
+  # missing and libtool does not abort when the file program is not found. So
+  # stop now if the file program has not been found.
+  AC_MSG_ERROR([file program not found although it is needed by libtool.], [1])
+fi
+
 AC_CHECK_PROGS(FIND,   find)
 AC_CHECK_PROGS(WHOAMI, whoami logname, whoami)
 

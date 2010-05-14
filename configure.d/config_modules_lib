@@ -42,7 +42,7 @@ if test "x$PARTIALTARGETOS" = "xmingw32" -o "x$PARTIALTARGETOS" = "xmingw32msvc"
 fi
   
 # Win32 pipes
-if test "x$PARTIALTARGETOS" = "xmingw32" -o "x$PARTIALTARGETOS" = "xmingw32msvc" -o "x$PARTIALTARGETOS" = "xcygwin"; then
+if test "x$PARTIALTARGETOS" = "xmingw32" -o "x$PARTIALTARGETOS" = "xmingw32msvc"; then
   other_src_list="$other_src_list winpipe.c"
   other_objs_list="$other_objs_list winpipe.o"
   other_lobjs_list="$other_lobjs_list winpipe.lo"
