@@ -158,16 +158,20 @@ listing of all changes made to the code.
 	of zero) can be reported on Solaris 10U4+
       - Protect against missing package version
 
-    Win32:
+    Windows:
+      - [BUG 2997492]: byte order of udpLocalPort is now correct
       - [BUG 2971257]: Fixed winExtDLL handling of multi-varbind getNext requests.
       - [BUG 2779541]: Fixed handle leak in pass_persist
       - [PATCH 2686248]: Applied patch by Bart Van Assche
       - [PATCH 2688342]: Fix various VS2005 compiler warnings
       - [PATCH 2691876]: Applied patch by rdiez to allow
       - [PATCH 2693746]: improved socket startup support
-      - Fix MSVC6 build (include <stdio.h> in snmp_logging.h)
+      - Detect free UDP ports correctly for use in test infrastructure.
+      - Fix batch build using recent versions of Visual Studio.
+      - Fix builds with IPv6 support enabled
+      - Fix build under MinGW
       - Fix winExtDLL build on Windows Vista, Windows 7
-      - Fix WinExtDLL build with MinGW
+      - Fix winExtDLL build with MinGW
       - Simplify building Net-SNMP + winExtDLL with MSVC
       - winExtDLL: Fixed a memory leak when SnmpExtensionQuery(Ex) fails
       - winExtDLL: Log errors when loading an extension DLL fails

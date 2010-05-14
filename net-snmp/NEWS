@@ -17,6 +17,9 @@ listing of all changes made to the code.
     Linux:
       - Fix build on modern distributions (using rpm-4.6)
 
+    Windows:
+      - Fix various builds (recent MSVC, MinGW, IPv6, winExtDLL)
+
 
 *5.4.2*
 
