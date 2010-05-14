@@ -21,8 +21,8 @@ config_require(SocketBase)
 config_require(IPBase)
 config_require(TLSBase)
 
-#define TRANSPORT_DOMAIN_TLS_TCP_IP	1,3,6,1,4,1,8072,3,3,10
-NETSNMP_IMPORT oid netsnmpTLSTCPDomain[10];
+#define TRANSPORT_DOMAIN_TLS_TCP_IP	1,3,6,1,6,1,8
+NETSNMP_IMPORT oid netsnmpTLSTCPDomain[7];
 NETSNMP_IMPORT size_t netsnmpTLSTCPDomain_len;
 
 netsnmp_transport *netsnmp_tlstcp_transport(struct sockaddr_in *addr,
