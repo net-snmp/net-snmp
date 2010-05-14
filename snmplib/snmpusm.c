@@ -2726,7 +2726,7 @@ int
 usm_session_init(netsnmp_session *in_session, netsnmp_session *session)
 {
     char *cp;
-    int i;
+    size_t i;
     
     if (in_session->securityAuthProtoLen > 0) {
         session->securityAuthProto =

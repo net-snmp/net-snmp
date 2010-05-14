@@ -2,6 +2,10 @@
 
 #if defined(NETSNMP_USE_OPENSSL) && defined(HAVE_LIBSSL)
 
+#include <ctype.h>
+#if HAVE_MALLOC_H
+# include <malloc.h>
+#endif
 #if HAVE_SYS_STAT_H
 #   include <sys/stat.h>
 #endif
@@ -841,7 +845,7 @@ netsnmp_ocert_get(netsnmp_cert *cert)
             ocert = d2i_X509_bio(certbio,NULL); /* DER/ASN1 */
             if (NULL != ocert)
                 break;
-            BIO_reset(certbio);
+            (void)BIO_reset(certbio);
             /** FALLTHROUGH: check for PEM if DER didn't work */
 
         case NS_CERT_TYPE_PEM:
@@ -854,7 +858,7 @@ netsnmp_ocert_get(netsnmp_cert *cert)
             }
             /** check for private key too */
             if (NULL == cert->key) {
-                BIO_reset(certbio);
+                (void)BIO_reset(certbio);
                 okey =  PEM_read_bio_PrivateKey(certbio, NULL, NULL, NULL);
                 if (NULL != okey) {
                     netsnmp_key  *key;
@@ -1651,7 +1655,7 @@ netsnmp_cert_find(int what, int where, void *hint)
             
         switch (what) {
             case NS_CERT_IDENTITY: /* want my ID */
-                tmp = (int)hint;
+                tmp = (ptrdiff_t)hint;
                 fp =
                     netsnmp_ds_get_string(NETSNMP_DS_LIBRARY_ID,
                                           tmp ? NETSNMP_DS_LIB_X509_SERVER_PUB :
@@ -1844,7 +1848,7 @@ _reduce_subset(netsnmp_void_array *matching, const char *filename)
      * if we shifted, set the new size
      */
     if (newsize != matching->size) {
-        DEBUGMSGT(("9:cert:subset:reduce", "shrank from %d to %d\n",
+        DEBUGMSGT(("9:cert:subset:reduce", "shrank from %" NETSNMP_PRIz "d to %d\n",
                    matching->size, newsize));
         matching->size = newsize;
     }
@@ -1912,7 +1916,7 @@ _reduce_subset_dir(netsnmp_void_array *matching, const char *directory)
      * if we shifted, set the new size
      */
     if (newsize != matching->size) {
-        DEBUGMSGT(("9:cert:subset:dir", "shrank from %d to %d\n",
+        DEBUGMSGT(("9:cert:subset:dir", "shrank from %" NETSNMP_PRIz "d to %d\n",
                    matching->size, newsize));
         matching->size = newsize;
     }
@@ -1931,7 +1935,7 @@ _cert_find_subset_common(const char *filename, netsnmp_container *container)
     search.filename = NETSNMP_REMOVE_CONST(char*,filename);
 
     matching = CONTAINER_GET_SUBSET(container, &search);
-    DEBUGMSGT(("9:cert:subset:found", "%d matches\n", matching ?
+    DEBUGMSGT(("9:cert:subset:found", "%" NETSNMP_PRIz "d matches\n", matching ?
                matching->size : 0));
     if (matching && matching->size > 1)
         _reduce_subset(matching, filename);
@@ -1970,7 +1974,7 @@ _cert_find_subset_sn(const char *subject)
     search.subject = NETSNMP_REMOVE_CONST(char*,subject);
 
     matching = CONTAINER_GET_SUBSET(sn_container, &search);
-    DEBUGMSGT(("9:cert:subset:found", "%d matches\n", matching ?
+    DEBUGMSGT(("9:cert:subset:found", "%" NETSNMP_PRIz "d matches\n", matching ?
                matching->size : 0));
     return matching;
 }
@@ -2369,7 +2373,7 @@ netsnmp_cert_get_secname_maps(netsnmp_container *cert_maps)
     if ((NULL == cert_maps) || (CONTAINER_SIZE(cert_maps) == 0))
         return -1;
 
-    DEBUGMSGT(("cert:map:secname", "looking for matches for %d fingerprints\n",
+    DEBUGMSGT(("cert:map:secname", "looking for matches for %" NETSNMP_PRIz "d fingerprints\n",
                CONTAINER_SIZE(cert_maps)));
     
     /*
@@ -2400,7 +2404,7 @@ netsnmp_cert_get_secname_maps(netsnmp_container *cert_maps)
                 goto fail;
             continue;
         }
-        DEBUGMSGT(("cert:map:secname", "%d matches for %s\n",
+        DEBUGMSGT(("cert:map:secname", "%" NETSNMP_PRIz "d matches for %s\n",
                    results->size, cert_map->fingerprint));
         /*
          * first entry is a freebie
@@ -2440,7 +2444,7 @@ netsnmp_cert_get_secname_maps(netsnmp_container *cert_maps)
     ITERATOR_RELEASE(itr);
     CONTAINER_FREE(new_maps);
 
-    DEBUGMSGT(("cert:map:secname", "found %d matches for fingerprints\n",
+    DEBUGMSGT(("cert:map:secname", "found %" NETSNMP_PRIz "d matches for fingerprints\n",
                CONTAINER_SIZE(cert_maps)));
     return 0;
 

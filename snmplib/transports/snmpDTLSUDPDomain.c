@@ -353,7 +353,7 @@ _netsnmp_bio_try_and_write_buffered(netsnmp_transport *t, bio_cache *cachep) {
     if (!cachep->write_cache || cachep->write_cache_len == 0)
         return SNMPERR_SUCCESS;
 
-    DEBUGMSGTL(("dtlsudp", "Trying to write %d of buffered data\n",
+    DEBUGMSGTL(("dtlsudp", "Trying to write %" NETSNMP_PRIz "d of buffered data\n",
                 cachep->write_cache_len));
 
     /* try and write out the cached data */

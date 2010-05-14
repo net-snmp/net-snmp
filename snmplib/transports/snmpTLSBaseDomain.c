@@ -213,7 +213,7 @@ sslctx_client_setup(SSL_METHOD *method, _netsnmpTLSBaseData *tlsbase) {
      */
     the_ctx = SSL_CTX_new(method);
     if (!the_ctx) {
-        snmp_log(LOG_ERR, "ack: %x\n", (uintptr_t)the_ctx);
+        snmp_log(LOG_ERR, "ack: %p\n", the_ctx);
         LOGANDDIE("can't create a new context");
     }
     SSL_CTX_set_read_ahead (the_ctx, 1); /* Required for DTLS */
@@ -347,7 +347,7 @@ sslctx_server_setup(SSL_METHOD *method) {
 }
 
 int
-netsnmp_tlsbase_config(struct netsnmp_transport_s *t, char *token, char *value) {
+netsnmp_tlsbase_config(struct netsnmp_transport_s *t, const char *token, const char *value) {
     _netsnmpTLSBaseData *tlsdata;
 
     netsnmp_assert_or_return(t != NULL, -1);
