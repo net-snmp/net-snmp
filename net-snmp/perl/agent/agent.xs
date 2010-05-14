@@ -867,8 +867,8 @@ nari_setValue(me, type, value)
 	      if ((SvTYPE(value) == SVt_IV) || (SvTYPE(value) == SVt_PVMG)) {
 		  /* Good - got a real one (or a blessed scalar which we have to hope will turn out OK) */
 		  ulltmp = SvIV(value);
-		  c64.high = (ulltmp & 0xffffffff00000000ULL) >> 32;
-		  c64.low  = (ulltmp & 0xffffffffULL);
+		  c64.high = (ulltmp >> 32);
+		  c64.low  = (ulltmp & 0xffffffff);
                   snmp_set_var_typed_value(request->requestvb, (u_char)type,
                                        (u_char *) &c64, sizeof(struct counter64));
 		  RETVAL = 1;
@@ -888,8 +888,8 @@ nari_setValue(me, type, value)
 			break;
 		  }
 
-		  c64.high = (ulltmp & 0xffffffff00000000ULL) >> 32;
-		  c64.low  = (ulltmp & 0xffffffffULL);
+		  c64.high = (ulltmp >> 32);
+		  c64.low  = (ulltmp & 0xffffffff);
                   snmp_set_var_typed_value(request->requestvb, (u_char)type,
                                        (u_char *) &c64, sizeof(struct counter64));
 		  RETVAL = 1;
