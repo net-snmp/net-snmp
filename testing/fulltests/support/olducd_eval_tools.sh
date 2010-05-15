@@ -183,7 +183,13 @@ REMOVETESTDATA() {
 
 #------------------------------------ -o-
 # Captures output from command, and returns the command's exit code.
+loggedvars=0
 CAPTURE() {	# <command_with_arguments_to_execute>
+    if [ $loggedvars = 0 ]; then
+	echo "SNMPCONFPATH=$SNMPCONFPATH" >> $SNMP_TMPDIR/invoked
+	echo "SNMP_PERSISTENT_DIR=$SNMP_PERSISTENT_DIR" >> $SNMP_TMPDIR/invoked
+	loggedvars=1
+    fi
     echo $* >> $SNMP_TMPDIR/invoked
 
 	if [ $SNMP_VERBOSE -gt 0 ]; then
