@@ -380,6 +380,9 @@ sub run_older_perl_tests {
 
     # create the temporary files
     my @tempfiles;
+    if (! -d "$opts{'d'}") {
+	mkdir("$opts{'d'}");
+    }
     if (! -d "$opts{'d'}/temptests") {
 	mkdir("$opts{'d'}/temptests");
     }
