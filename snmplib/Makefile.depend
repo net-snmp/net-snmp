@@ -2601,6 +2601,7 @@
 ./snmp_transport.lo: ../include/net-snmp/library/snmp_parse_args.h
 ./snmp_transport.lo: ../include/net-snmp/library/snmp_enum.h
 ./snmp_transport.lo: ../include/net-snmp/library/vacm.h
+./snmp_transport.lo: transports/snmp_transport_inits.h
 ./snmp_version.lo: ../include/net-snmp/net-snmp-config.h
 ./snmp_version.lo: ../include/net-snmp/version.h
 ./snmpksm.lo: ../include/net-snmp/net-snmp-config.h 
