@@ -679,7 +679,7 @@ char *
 _cert_get_san_type(X509 *ocert, int mapType)
 {
     GENERAL_NAMES      *onames;
-    const GENERAL_NAME *oname;
+    const GENERAL_NAME *oname = NULL;
     char               *buf = NULL, *lower = NULL;
     int                 count, i;
  
@@ -729,7 +729,7 @@ _cert_get_san_type(X509 *ocert, int mapType)
             if (isascii(*lower))
                 *lower = tolower(*lower);
     DEBUGMSGT(("openssl:cert:extension:san", "#%d type %d: %s\n", i,
-               oname->type, buf ? buf : "NULL"));
+               oname ? oname->type : -1, buf ? buf : "NULL"));
 
     return buf;
 }

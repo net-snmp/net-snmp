@@ -18,6 +18,7 @@ extern "C" {
 
 void netsnmp_certs_init(void);
 void netsnmp_certs_shutdown(void);
+void netsnmp_certs_load(void);
 
     typedef struct netsnmp_cert_common_s {
         char           *dir;
