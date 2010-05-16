@@ -351,9 +351,9 @@ WAITFOR() {
 	fi
         while [ $sleeptime -gt 0 ] ; do
 	  if [ "$2" = "" ] ; then
-            CHECKCOUNT atleastone "$@"
+            CHECKCOUNT noerror "$@"
           else
-	    CHECKFILECOUNT "$2" atleastone "$1"
+	    CHECKFILECOUNT "$2" noerror "$1"
 	  fi
           if [ "$snmp_last_test_result" != "" ] ; then
               if [ "$snmp_last_test_result" -gt 0 ] ; then
@@ -363,6 +363,14 @@ WAITFOR() {
           DELAY
           sleeptime=`expr $sleeptime - 1`
         done
+
+	# the above multi-check/sleep doesn't report errors out of TAP
+        # this final check will report only 1 
+	if [ "$2" = "" ] ; then
+          CHECKCOUNT atleastone "$@"
+        else
+	  CHECKFILECOUNT "$2" atleastone "$1"
+	fi
         SNMP_SLEEP=$oldsleeptime
     else
         if [ $SNMP_SLEEP -ne 0 ] ; then
