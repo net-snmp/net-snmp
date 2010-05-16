@@ -1014,6 +1014,9 @@ subagentTrapCheck(unsigned int clientreg, void *clientarg)
         int             j;
         const winextdll *ext_dll_info;
 
+        if (s_trapevent.size == 0)
+            return;
+
         dwWaitResult = WaitForMultipleObjects(s_trapevent.size,
                                               &TRAPEVENT(0), FALSE, 0);
 
