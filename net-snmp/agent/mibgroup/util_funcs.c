@@ -240,7 +240,7 @@ wait_on_exec(struct extensible *ex)
 int
 get_exec_output(struct extensible *ex)
 {
-#ifndef USING_UCD_SNMP_EXTENSIBLE_MODULE
+#ifndef USING_UTILITIES_EXECUTE_MODULE
     ex->result = -1;
     NETSNMP_LOGONCE((LOG_WARNING, "support for run_exec_command not available\n"));
 #else
@@ -392,7 +392,7 @@ get_exec_output(struct extensible *ex)
     return fd;
 #endif                          /* WIN32 */
 #endif
-#endif /* ! USING_UCD_SNMP_EXTENSIBLE_MODULE */
+#endif /* !defined(USING_UTILITIES_EXECUTE_MODULE) */
     return -1;
 }
 int
