@@ -844,7 +844,7 @@ int   command_handler( netsnmp_pdu           *pdu,
         free(rbuf);
     }
     return NETSNMPTRAPD_HANDLER_OK;
-#endif /* !def USING_UCD_SNMP_EXTENSIBLE_MODULE */
+#endif /* !def USING_UTILITIES_EXECUTE_MODULE */
 }
 
 
