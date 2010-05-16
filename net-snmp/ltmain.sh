@@ -4576,7 +4576,7 @@ func_mode_link ()
 	continue
 	;;
 
-      -mt|-mthreads|-kthread|-Kthread|-pthread|-pthreads|--thread-safe|-threads|-f*)
+      -mt|-mthreads|-kthread|-Kthread|-pthread|-pthreads|--thread-safe|-threads|-fstack-protector*)
 	compiler_flags="$compiler_flags $arg"
 	func_append compile_command " $arg"
 	func_append finalize_command " $arg"
