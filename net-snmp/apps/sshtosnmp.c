@@ -68,7 +68,6 @@ main(int argc, char **argv) {
     struct sockaddr_un addr;
     u_char buf[4096];
     size_t buf_len = sizeof(buf);
-    u_short name_len;
     int rc = 0, pktsize = 0;
 
     fd_set read_set;

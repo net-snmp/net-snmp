@@ -294,7 +294,7 @@ _etherStats_ioctl_get(int fd, int which, struct ifreq *ifrq, const char* name)
         fd = ourfd = socket(AF_INET, SOCK_DGRAM, 0);
         if(ourfd < 0) {
             DEBUGMSGTL(("access:etherStatsTable:ioctl",
-                        "_etherStats_ioctl_get couldn't create a socket\n", name));
+                        "_etherStats_ioctl_get couldn't create a socket\n"));
             snmp_log (LOG_ERR, "access:etherStatsTable:ioctl, _etherStats_ioctl_get error on inerface '%s'\n", name);
 
             return -2;
