@@ -336,7 +336,7 @@ etherStatsTable_container_load(netsnmp_container * container)
 #endif
     
     DEBUGMSGT(("verbose:etherStatsTable:etherStatsTable_container_load",
-               "inserted %d records\n", count));
+               "inserted %" NETSNMP_PRIz "d records\n", count));
 
     return MFD_SUCCESS;
 }

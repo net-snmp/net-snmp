@@ -359,7 +359,7 @@ dot3StatsTable_container_load(netsnmp_container * container)
 #endif
 
     DEBUGMSGT(("verbose:dot3StatsTable:dot3StatsTable_container_load",
-               "inserted %d records\n", count));
+               "inserted %" NETSNMP_PRIz "d records\n", count));
 
     return MFD_SUCCESS;
 }                               /* dot3StatsTable_container_load */

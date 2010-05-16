@@ -491,7 +491,7 @@ _dot3Stats_netlink_get_errorcntrs(dot3StatsTable_rowreq_ctx *rowreq_ctx, const c
  *      non-0 if value available
  */
 static int
-getulongfromsysclassnetstatistics(const char *ifname, char *ctrname, u_long *valuep)
+getulongfromsysclassnetstatistics(const char *ifname, const char *ctrname, u_long *valuep)
 {
     char path[256];
     FILE *fp;
@@ -909,7 +909,7 @@ _dot3Stats_ioctl_get(int fd, int which, struct ifreq *ifrq, const char* name)
         fd = ourfd = socket(AF_INET, SOCK_DGRAM, 0);
         if(ourfd < 0) {
             DEBUGMSGTL(("access:dot3StatsTable:ioctl",
-                        "dot3Stats_ioctl_get couldn't create a socket\n", name));
+                        "dot3Stats_ioctl_get couldn't create a socket\n"));
             snmp_log (LOG_ERR, "access:dot3StatsTable:ioctl, _dot3Stats_ioctl_get error on interface '%s'\n", name);
 
             return -2;

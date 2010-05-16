@@ -45,10 +45,10 @@ initialize_table_hrSWInstalledTable(void)
     size_t          hrSWInstalledTable_oid_len =
         OID_LENGTH(hrSWInstalledTable_oid);
     netsnmp_handler_registration *reg;
-    netsnmp_mib_handler *handler;
-    netsnmp_container *container;
-    netsnmp_cache *cache;
-    netsnmp_table_registration_info *table_info;
+    netsnmp_mib_handler *handler = NULL;
+    netsnmp_container *container = NULL;
+    netsnmp_cache *cache = NULL;
+    netsnmp_table_registration_info *table_info = NULL;
 
     DEBUGMSGTL(("hrSWInstalled", "initialize\n"));
 
