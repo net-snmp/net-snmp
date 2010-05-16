@@ -24,25 +24,25 @@ snmp_version=v2c
 TESTCOMMUNITY=testcommunity
 
 # Make the paths of arguments $0 and $1 absolute.
-NETSNMPDIR=`pwd`
-NETSNMPDIR=`dirname ${NETSNMPDIR}`
-NETSNMPDIR=`dirname ${NETSNMPDIR}`
-if [ "${0#/}" = "$0" ]; then
-  traphandle_program=${NETSNMPDIR}/$0
+NETSNMPDIR="`pwd`"
+NETSNMPDIR="`dirname ${NETSNMPDIR}`"
+NETSNMPDIR="`dirname ${NETSNMPDIR}`"
+if [ "`echo $0|cut -c1`" = "/" ]; then
+  traphandle_program="$0"
 else
-  traphandle_program=$0
+  traphandle_program="${NETSNMPDIR}/$0"
 fi
-if [ "${1#/}" = "$1" ]; then
-  traphandle_arg=${NETSNMPDIR}/$1
+if [ "`echo $1|cut -c1`" = "/" ]; then
+  traphandle_arg="$1"
 else
-  traphandle_arg=$1
+  traphandle_arg="${NETSNMPDIR}/$1"
 fi
 
 CONFIGTRAPD [snmp] persistentDir $SNMP_TMP_PERSISTENTDIR
 CONFIGTRAPD [snmp] tempFilePattern /tmp/snmpd-tmp-XXXXXX
 CONFIGTRAPD authcommunity execute $TESTCOMMUNITY
 CONFIGTRAPD doNotLogTraps true
-CONFIGTRAPD traphandle default $traphandle_program $traphandle_arg traphandle
+CONFIGTRAPD traphandle default "$traphandle_program" "$traphandle_arg" traphandle
 CONFIGTRAPD agentxsocket /dev/null
 
 STARTTRAPD
