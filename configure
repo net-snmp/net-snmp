@@ -19118,8 +19118,8 @@ done
 transport_obj_list=`echo " $transport_src_list " | $SED 's/\.c/\.o/g'`
 transport_lobj_list=`echo " $transport_src_list " | $SED 's/\.c/\.lo/g'`
 
-## win32 platforms require inet_ntop etc.
-if test "x$PARTIALTARGETOS" = "xmingw32" -o "x$PARTIALTARGETOS" = "xmingw32msvc" -o "x$PARTIALTARGETOS" = "xcygwin"; then
+## MinGW requires inet_ntop() and inet_pton().
+if test "x$PARTIALTARGETOS" = "xmingw32" -o "x$PARTIALTARGETOS" = "xmingw32msvc"; then
   if echo "$transport_def_list" | $GREP "IPV6" >/dev/null; then
     transport_obj_list="$transport_obj_list inet_ntop.o inet_pton.o"
     transport_lobj_list="$transport_lobj_list inet_ntop.lo inet_pton.lo"
