@@ -401,9 +401,8 @@ netsnmp_tlsbase_session_init(struct netsnmp_transport_s *transport,
         if (sess->securityLevel <= 0) {
             sess->securityLevel = SNMP_SEC_LEVEL_AUTHPRIV;
         }
-
-        return SNMPERR_SUCCESS;
     }
+    return SNMPERR_SUCCESS;
 }
 
 static int have_done_bootstrap = 0;
