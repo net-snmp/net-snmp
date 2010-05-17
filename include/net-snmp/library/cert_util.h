@@ -109,6 +109,7 @@ void netsnmp_certs_load(void);
 #define TSNM_tlstmCert_MAX                      TSNM_tlstmCertCommonName
 
 #define NSCM_FROM_CONFIG                        0x0001
+#define NSCM_FROM_MIB                           0x0002
 
     typedef struct netsnmp_cert_map_s {
         int             priority;

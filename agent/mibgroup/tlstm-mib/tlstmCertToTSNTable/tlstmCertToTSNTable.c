@@ -15,10 +15,63 @@
 #define FATE_NO_CHANGE        0
 #define FATE_DELETE_ME        -1
 
+    /*
+     * structure for undo storage and other vars for set processing 
+     */
+typedef struct certToTSN_undo_s {
+    char            fate;
+    char            copied;
+    char            is_consistent;
+    netsnmp_request_info *req[CERTTOTSN_TABLE_MAX_COL+1];
+
+    /*
+     * undo Column space 
+     */
+    char            fingerprint[CERTTOTSN_FINGERPRINT_MAX_SIZE];
+    size_t          fingerprint_len;
+    int             mapType;
+    char            data[CERTTOTSN_DATA_MAX_SIZE];
+    size_t          data_len;
+    char            hashType;
+    char            storageType;
+    char            rowStatus;
+} certToTSN_undo;
+
+    /*
+     * Typical data structure for a row entry 
+     */
+typedef struct certToTSN_entry_s {
+    /*
+     * Index values 
+     */
+    u_long          tlstmCertToTSNID;
+
+    /*
+     * Column values 
+     */
+    char            fingerprint[CERTTOTSN_FINGERPRINT_MAX_SIZE];
+    size_t          fingerprint_len;
+    int             mapType;
+    char            data[CERTTOTSN_DATA_MAX_SIZE];
+    size_t          data_len;
+    char            storageType;
+    char            rowStatus;
+    char            hashType;
+    char            map_flags;
+
+    /*
+     * used during set processing 
+     */
+    certToTSN_undo *undo;
+} certToTSN_entry;
+
+
 static oid _oid2type(oid *val, int val_len);
 /** static int _type2oid(int type, oid *val, int *val_len); */
 static int _cache_load(netsnmp_cache *cache, netsnmp_tdata *table);
 static void _cache_free(netsnmp_cache *cache, netsnmp_tdata *table);
+static void _cert_map_add(certToTSN_entry *entry);
+static void _cert_map_remove(certToTSN_entry *entry);
 
 
 /** Initializes the tlstmCertToTSNTable module */
@@ -92,55 +145,6 @@ init_tlstmCertToTSNTable(void)
      * Initialise the contents of the table here 
      */
 }
-
-    /*
-     * structure for undo storage and other vars for set processing 
-     */
-typedef struct certToTSN_undo_s {
-    char            fate;
-    char            copied;
-    char            is_consistent;
-    netsnmp_request_info *req[CERTTOTSN_TABLE_MAX_COL+1];
-
-    /*
-     * undo Column space 
-     */
-    char            fingerprint[CERTTOTSN_FINGERPRINT_MAX_SIZE];
-    size_t          fingerprint_len;
-    int             mapType;
-    char            data[CERTTOTSN_DATA_MAX_SIZE];
-    size_t          data_len;
-    char            hashType;
-    char            storageType;
-    char            rowStatus;
-} certToTSN_undo;
-
-    /*
-     * Typical data structure for a row entry 
-     */
-typedef struct certToTSN_entry_s {
-    /*
-     * Index values 
-     */
-    u_long          tlstmCertToTSNID;
-
-    /*
-     * Column values 
-     */
-    char            fingerprint[CERTTOTSN_FINGERPRINT_MAX_SIZE];
-    size_t          fingerprint_len;
-    int             mapType;
-    char            data[CERTTOTSN_DATA_MAX_SIZE];
-    size_t          data_len;
-    char            storageType;
-    char            rowStatus;
-    char            hashType;
-
-    /*
-     * used during set processing 
-     */
-    certToTSN_undo *undo;
-} certToTSN_entry;
 
 /*
  * create a new row in the table 
@@ -296,7 +300,7 @@ tlstmCertToTSNTable_handler(netsnmp_mib_handler *handler,
                                            entry->fingerprint, NULL);
                 if (1 != rc)
                     netsnmp_set_request_error(reqinfo, request,
-                                              SNMPERR_GENERR);
+                                              SNMP_ERR_GENERR);
                 else
                     snmp_set_var_typed_value(request->requestvb, ASN_OCTET_STR,
                                              bin, offset);
@@ -540,6 +544,8 @@ tlstmCertToTSNTable_handler(netsnmp_mib_handler *handler,
              */
             switch (info->colnum) {
             case COL_CERTTOTSN_FINGERPRINT:
+            {
+                u_char *tmp = (u_char*)entry->fingerprint;
                 memcpy(entry->undo->fingerprint,
                        entry->fingerprint, sizeof(entry->fingerprint));
                 entry->undo->fingerprint_len = entry->fingerprint_len;
@@ -547,10 +553,14 @@ tlstmCertToTSNTable_handler(netsnmp_mib_handler *handler,
                 memset(entry->fingerprint, 0, sizeof(entry->fingerprint));
 
                 entry->hashType = request->requestvb->val.string[0];
-                binary_to_hex(&request->requestvb->val.string[1],
-                              request->requestvb->val_len - 1,
-                              (char**)&entry->fingerprint);
-                entry->fingerprint_len = strlen(entry->fingerprint);
+                entry->fingerprint_len = sizeof(entry->fingerprint);
+                entry->fingerprint_len = 
+                    netsnmp_binary_to_hex(&tmp, &entry->fingerprint_len, 0,
+                                          &request->requestvb->val.string[1],
+                                          request->requestvb->val_len - 1);
+                if (0 == entry->fingerprint_len)
+                    ret = SNMP_ERR_GENERR;
+            }
                 break;          /* case COL_CERTTOTSN_FINGERPRINT */
             case COL_CERTTOTSN_MAPTYPE:
                 entry->undo->mapType = entry->mapType;
@@ -741,8 +751,14 @@ tlstmCertToTSNTable_handler(netsnmp_mib_handler *handler,
             entry = (certToTSN_entry *) netsnmp_tdata_extract_entry(request);
 
             /** release undo data for requests with no rowstatus */
-            if (entry->undo && !entry->undo->req[COL_CERTTOTSN_ROWSTATUS])
+            if (entry->undo && !entry->undo->req[COL_CERTTOTSN_ROWSTATUS]) {
                 _freeUndo(entry);
+                if ((0 == entry->map_flags) && (entry->rowStatus == RS_ACTIVE))
+                    _cert_map_add(entry);
+                else if ((0 != entry->map_flags) &&
+                         (entry->rowStatus == RS_DESTROY))
+                    _cert_map_remove(entry);
+            }
 
             switch (info->colnum) {
             case COL_CERTTOTSN_ROWSTATUS:
@@ -752,6 +768,8 @@ tlstmCertToTSNTable_handler(netsnmp_mib_handler *handler,
                 case RS_ACTIVE:
                     netsnmp_assert(entry->undo->is_consistent);
                     entry->rowStatus = RS_ACTIVE;
+                    if (0 == entry->map_flags)
+                        _cert_map_add(entry);
                     break;
 
                 case RS_CREATEANDWAIT:
@@ -762,9 +780,14 @@ tlstmCertToTSNTable_handler(netsnmp_mib_handler *handler,
                         entry->rowStatus = RS_NOTINSERVICE;
                     else
                         entry->rowStatus = RS_NOTREADY;
+                    if (0 != entry->map_flags)
+                        _cert_map_remove(entry);
                     break;
 
                 case RS_DESTROY:
+                    /** remove from cert map */
+                    if (0 != entry->map_flags)
+                        _cert_map_remove(entry);
                     /** disassociate row with requests */
                     netsnmp_remove_tdata_row(request, row);
                     tlstmCertToTSNTable_removeEntry(table, row);
@@ -789,6 +812,68 @@ tlstmCertToTSNTable_handler(netsnmp_mib_handler *handler,
         netsnmp_set_request_error(reqinfo, request, ret);
 
     return SNMP_ERR_NOERROR;
+}
+
+static void
+_cert_map_add(certToTSN_entry *entry)
+{
+    netsnmp_container *maps;
+    netsnmp_cert_map *map;
+
+    if (NULL == entry)
+        return;
+
+    DEBUGMSGTL(("tlstmCertToTSNTable:map:add", "pri %ld, fp %s\n",
+                entry->tlstmCertToTSNID, entry->fingerprint));
+
+    /** get current active maps */
+    maps = netsnmp_cert_map_container();
+    if (NULL == maps)
+        return;
+
+    map = netsnmp_cert_map_alloc(entry->fingerprint, NULL);
+    if (NULL == map)
+        return;
+
+    map->priority = entry->tlstmCertToTSNID;
+    map->mapType = entry->mapType;
+    if (entry->data)
+        map->data = strdup(entry->data);
+    map->hashType = entry->hashType;
+
+    map->flags = NSCM_FROM_MIB;
+
+    if (CONTAINER_INSERT(maps, map) != 0) {
+        netsnmp_cert_map_free(map);
+        snmp_log(LOG_ERR, "could not insert new certificate map");
+    }
+}
+
+static void
+_cert_map_remove(certToTSN_entry *entry)
+{
+    netsnmp_container *maps;
+    netsnmp_cert_map map;
+
+    if (NULL == entry)
+        return;
+
+    DEBUGMSGTL(("tlstmCertToTSNTable:map:remove", "pri %ld, fp %s\n",
+                entry->tlstmCertToTSNID, entry->fingerprint));
+
+    /** get current active maps */
+    maps = netsnmp_cert_map_container();
+    if (NULL == maps)
+        return;
+
+    map.priority = entry->tlstmCertToTSNID;
+    map.fingerprint = entry->fingerprint;
+
+    map.flags &= ~NSCM_FROM_MIB;
+
+    if (CONTAINER_REMOVE(maps, &map) != 0) {
+        snmp_log(LOG_ERR, "could not remove certificate map");
+    }
 }
 
 static int
@@ -833,6 +918,7 @@ _cache_load(netsnmp_cache *cache, netsnmp_tdata *table)
             entry->storageType = ST_PERMANENT;
         else
             entry->storageType = ST_NONVOLATILE;
+        entry->map_flags = map->flags;
 
         entry->rowStatus = RS_ACTIVE;
 
