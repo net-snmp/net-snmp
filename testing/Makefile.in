@@ -28,7 +28,12 @@ all:
 	@echo "Also see the RUNFULLTESTS script for details"
 
 test:
-	$(srcdir)/RUNFULLTESTS $(TESTOPTS)
+	@if test "x$(PERL)" = "x" ; then \
+		$(srcdir)/RUNTESTS ; \
+	else \
+		echo $(srcdir)/RUNFULLTESTS $(TESTOPTS) ; \
+		$(srcdir)/RUNFULLTESTS $(TESTOPTS) ; \
+	fi
 
 testall:
 	$(srcdir)/RUNFULLTESTS -g all $(TESTOPTS)

@@ -1,0 +1,6 @@
+#!/bin/sh
+
+for i in fulltests/default/T* ; do
+    echo "RUNNING $i"
+    fulltests/support/run_olducd $i
+done
