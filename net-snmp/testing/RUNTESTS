@@ -1,6 +1,7 @@
 #!/bin/sh
 
-for i in fulltests/default/T* ; do
+srcdir=`dirname $0`
+for i in ${srcdir}/fulltests/default/T* ; do
     echo "RUNNING $i"
-    fulltests/support/run_olducd $i
+    ${srcdir}/fulltests/support/run_olducd $i
 done
