@@ -279,6 +279,58 @@ netsnmp_strdup_and_null(const u_char * from, size_t from_len)
 
 /** converts binary to hexidecimal
  *
+ *     @param *input            Binary data.
+ *     @param len               Length of binary data.
+ *     @param **dest            NULL terminated string equivalent in hex.
+ *     @param *dest_len         size of destination buffer
+ *     @param allow_realloc     flag indicating if buffer can be realloc'd
+ *      
+ * @return olen	Length of output string not including NULL terminator.
+ */
+u_int
+netsnmp_binary_to_hex(u_char ** dest, size_t *dest_len, int allow_realloc, 
+                      const u_char * input, size_t len)
+{
+    u_int           olen = (len * 2) + 1;
+    u_char         *s, *op;
+    const u_char   *ip = input;
+
+    if (dest == NULL || dest_len == NULL || input == NULL)
+        return 0;
+
+    if (NULL == *dest) {
+        s = (char *) calloc(1, olen);
+        *dest_len = olen;
+    }
+    else
+        s = *dest;
+
+    if (*dest_len < olen) {
+        if (!allow_realloc)
+            return 0;
+        *dest_len = olen;
+        if (snmp_realloc(dest, dest_len))
+            return 0;
+    }
+
+    op = s;
+    while (ip - input < (int) len) {
+        *op++ = VAL2HEX((*ip >> 4) & 0xf);
+        *op++ = VAL2HEX(*ip & 0xf);
+        ip++;
+    }
+    *op = '\0';
+
+    if (s != *dest)
+        *dest = s;
+    *dest_len = olen;
+
+    return olen;
+
+}                               /* end netsnmp_binary_to_hex() */
+
+/** converts binary to hexidecimal
+ *
  *	@param *input		Binary data.
  *	@param len		Length of binary data.
  *	@param **output	NULL terminated string equivalent in hex.
@@ -292,21 +344,11 @@ netsnmp_strdup_and_null(const u_char * from, size_t from_len)
 u_int
 binary_to_hex(const u_char * input, size_t len, char **output)
 {
-    u_int           olen = (len * 2) + 1;
-    char           *s = (char *) calloc(1, olen), *op = s;
-    const u_char   *ip = input;
+    size_t out_len = 0;
 
+    *output = NULL; /* will alloc new buffer */
 
-    while (ip - input < (int) len) {
-        *op++ = VAL2HEX((*ip >> 4) & 0xf);
-        *op++ = VAL2HEX(*ip & 0xf);
-        ip++;
-    }
-    *op = '\0';
-
-    *output = s;
-    return olen;
-
+    return netsnmp_binary_to_hex((u_char**)output, &out_len, 1, input, len);
 }                               /* end binary_to_hex() */
 
 
