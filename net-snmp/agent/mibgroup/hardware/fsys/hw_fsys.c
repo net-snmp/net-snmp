@@ -106,6 +106,7 @@ static int
 _fsys_load( void )
 {
     netsnmp_fsys_arch_load();
+    return 0;
 }
 
 /*
