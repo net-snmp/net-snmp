@@ -67,10 +67,18 @@ LIB32_OBJS1= \
 	"$(INTDIR)\vacm_context.obj" \
 	"$(INTDIR)\vacm_conf.obj" \
 	"$(INTDIR)\vacm_vars.obj" \
+	"$(INTDIR)\mteEvent.obj" \
+	"$(INTDIR)\mteEventConf.obj" \
 	"$(INTDIR)\mteEventNotificationTable.obj" \
+	"$(INTDIR)\mteEventSetTable.obj" \
 	"$(INTDIR)\mteEventTable.obj" \
+	"$(INTDIR)\mteObjects.obj" \
+	"$(INTDIR)\mteObjectsConf.obj" \
 	"$(INTDIR)\mteObjectsTable.obj" \
+	"$(INTDIR)\mteScalars.obj" \
 	"$(INTDIR)\mteTriggerBooleanTable.obj" \
+	"$(INTDIR)\mteTrigger.obj" \
+	"$(INTDIR)\mteTriggerConf.obj" \
 	"$(INTDIR)\mteTriggerDeltaTable.obj" \
 	"$(INTDIR)\mteTriggerExistenceTable.obj" \
 	"$(INTDIR)\mteTriggerTable.obj" \
@@ -211,49 +219,82 @@ SOURCE=..\..\agent\mibgroup\mibII\vacm_vars.c
 	$(CPP) $(CPP_PROJ) $(SOURCE)
 
 
-SOURCE=..\..\agent\mibgroup\disman\mteEventNotificationTable.c
+SOURCE=..\..\agent\mibgroup\disman\event\mteEvent.c
+
+"$(INTDIR)\mteEvent.obj" : $(SOURCE) "$(INTDIR)"
+	$(CPP) $(CPP_PROJ) $(SOURCE)
+
+SOURCE=..\..\agent\mibgroup\disman\event\mteEventConf.c
+
+"$(INTDIR)\mteEventConf.obj" : $(SOURCE) "$(INTDIR)"
+	$(CPP) $(CPP_PROJ) $(SOURCE)
+
+SOURCE=..\..\agent\mibgroup\disman\event\mteEventNotificationTable.c
 
 "$(INTDIR)\mteEventNotificationTable.obj" : $(SOURCE) "$(INTDIR)"
 	$(CPP) $(CPP_PROJ) $(SOURCE)
 
+SOURCE=..\..\agent\mibgroup\disman\event\mteEventSetTable.c
 
-SOURCE=..\..\agent\mibgroup\disman\mteEventTable.c
+"$(INTDIR)\mteEventSetTable.obj" : $(SOURCE) "$(INTDIR)"
+	$(CPP) $(CPP_PROJ) $(SOURCE)
+
+SOURCE=..\..\agent\mibgroup\disman\event\mteEventTable.c
 
 "$(INTDIR)\mteEventTable.obj" : $(SOURCE) "$(INTDIR)"
 	$(CPP) $(CPP_PROJ) $(SOURCE)
 
+SOURCE=..\..\agent\mibgroup\disman\event\mteObjects.c
 
-SOURCE=..\..\agent\mibgroup\disman\mteObjectsTable.c
+"$(INTDIR)\mteObjects.obj" : $(SOURCE) "$(INTDIR)"
+	$(CPP) $(CPP_PROJ) $(SOURCE)
+
+SOURCE=..\..\agent\mibgroup\disman\event\mteObjectsConf.c
+
+"$(INTDIR)\mteObjectsConf.obj" : $(SOURCE) "$(INTDIR)"
+	$(CPP) $(CPP_PROJ) $(SOURCE)
+
+SOURCE=..\..\agent\mibgroup\disman\event\mteObjectsTable.c
 
 "$(INTDIR)\mteObjectsTable.obj" : $(SOURCE) "$(INTDIR)"
 	$(CPP) $(CPP_PROJ) $(SOURCE)
 
+SOURCE=..\..\agent\mibgroup\disman\event\mteScalars.c
 
-SOURCE=..\..\agent\mibgroup\disman\mteTriggerBooleanTable.c
+"$(INTDIR)\mteScalars.obj" : $(SOURCE) "$(INTDIR)"
+	$(CPP) $(CPP_PROJ) $(SOURCE)
+
+SOURCE=..\..\agent\mibgroup\disman\event\mteTriggerBooleanTable.c
 
 "$(INTDIR)\mteTriggerBooleanTable.obj" : $(SOURCE) "$(INTDIR)"
 	$(CPP) $(CPP_PROJ) $(SOURCE)
 
+SOURCE=..\..\agent\mibgroup\disman\event\mteTrigger.c
 
-SOURCE=..\..\agent\mibgroup\disman\mteTriggerDeltaTable.c
+"$(INTDIR)\mteTrigger.obj" : $(SOURCE) "$(INTDIR)"
+	$(CPP) $(CPP_PROJ) $(SOURCE)
+
+SOURCE=..\..\agent\mibgroup\disman\event\mteTriggerConf.c
+
+"$(INTDIR)\mteTriggerConf.obj" : $(SOURCE) "$(INTDIR)"
+	$(CPP) $(CPP_PROJ) $(SOURCE)
+
+SOURCE=..\..\agent\mibgroup\disman\event\mteTriggerDeltaTable.c
 
 "$(INTDIR)\mteTriggerDeltaTable.obj" : $(SOURCE) "$(INTDIR)"
 	$(CPP) $(CPP_PROJ) $(SOURCE)
 
-
-SOURCE=..\..\agent\mibgroup\disman\mteTriggerExistenceTable.c
+SOURCE=..\..\agent\mibgroup\disman\event\mteTriggerExistenceTable.c
 
 "$(INTDIR)\mteTriggerExistenceTable.obj" : $(SOURCE) "$(INTDIR)"
 	$(CPP) $(CPP_PROJ) $(SOURCE)
 
-
-SOURCE=..\..\agent\mibgroup\disman\mteTriggerTable.c
+SOURCE=..\..\agent\mibgroup\disman\event\mteTriggerTable.c
 
 "$(INTDIR)\mteTriggerTable.obj" : $(SOURCE) "$(INTDIR)"
 	$(CPP) $(CPP_PROJ) $(SOURCE)
 
-
-SOURCE=..\..\agent\mibgroup\disman\mteTriggerThresholdTable.c
+SOURCE=..\..\agent\mibgroup\disman\event\mteTriggerThresholdTable.c
 
 "$(INTDIR)\mteTriggerThresholdTable.obj" : $(SOURCE) "$(INTDIR)"
 	$(CPP) $(CPP_PROJ) $(SOURCE)

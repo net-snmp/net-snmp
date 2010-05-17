@@ -165,35 +165,67 @@ SOURCE=..\..\agent\mibgroup\mibII\var_route.c
 # PROP Default_Filter ""
 # Begin Source File
 
-SOURCE=..\..\agent\mibgroup\disman\mteEventNotificationTable.c
+SOURCE=..\..\agent\mibgroup\disman\event\mteEvent.c
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\agent\mibgroup\disman\mteEventTable.c
+SOURCE=..\..\agent\mibgroup\disman\event\mteEventConf.c
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\agent\mibgroup\disman\mteObjectsTable.c
+SOURCE=..\..\agent\mibgroup\disman\event\mteEventNotificationTable.c
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\agent\mibgroup\disman\mteTriggerBooleanTable.c
+SOURCE=..\..\agent\mibgroup\disman\event\mteEventSetTable.c
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\agent\mibgroup\disman\mteTriggerDeltaTable.c
+SOURCE=..\..\agent\mibgroup\disman\event\mteEventTable.c
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\agent\mibgroup\disman\mteTriggerExistenceTable.c
+SOURCE=..\..\agent\mibgroup\disman\event\mteObjects.c
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\agent\mibgroup\disman\mteTriggerTable.c
+SOURCE=..\..\agent\mibgroup\disman\event\mteObjectsConf.c
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\agent\mibgroup\disman\mteTriggerThresholdTable.c
+SOURCE=..\..\agent\mibgroup\disman\event\mteObjectsTable.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\agent\mibgroup\disman\event\mteScalars.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\agent\mibgroup\disman\event\mteTriggerBooleanTable.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\agent\mibgroup\disman\event\mteTrigger.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\agent\mibgroup\disman\event\mteTriggerConf.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\agent\mibgroup\disman\event\mteTriggerDeltaTable.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\agent\mibgroup\disman\event\mteTriggerExistenceTable.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\agent\mibgroup\disman\event\mteTriggerTable.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\agent\mibgroup\disman\event\mteTriggerThresholdTable.c
 # End Source File
 # End Group
 # Begin Group "examples"
