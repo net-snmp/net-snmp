@@ -128,8 +128,8 @@ tsm_clone_pdu(netsnmp_pdu *pdu, netsnmp_pdu *pdu2)
         return SNMPERR_SUCCESS;
 
     newref = SNMP_MALLOC_TYPEDEF(netsnmp_tsmSecurityReference);
-    fprintf(stderr, "cloned as pdu=%p, ref=%p (oldref=%p)\n",
-            pdu2, newref, pdu2->securityStateRef);
+    DEBUGMSGTL(("tsm", "cloned as pdu=%p, ref=%p (oldref=%p)\n",
+            pdu2, newref, pdu2->securityStateRef));
     if (!newref)
         return SNMPERR_GENERR;
     
