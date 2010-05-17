@@ -223,6 +223,11 @@ extern          "C" {
     int             memdup(u_char ** to, const void * from, size_t size);
 
     NETSNMP_IMPORT
+    u_int           netsnmp_binary_to_hex(u_char ** dest, size_t *dest_len,
+                                          int allow_realloc,
+                                          const u_char * input, size_t len);
+
+    NETSNMP_IMPORT
     u_int           binary_to_hex(const u_char * input, size_t len,
                                   char **output);
                     /* preferred */
