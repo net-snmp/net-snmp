@@ -2041,10 +2041,11 @@ netsnmp_cert_map_alloc(char *fingerprint, X509 *ocert)
             return NULL;
         }
         cert_map->fingerprint = strdup(fingerprint);
-        cert_map->hashType = netsnmp_openssl_cert_get_hash_type(ocert);
     }
-    if (ocert)
+    if (ocert) {
+        cert_map->hashType = netsnmp_openssl_cert_get_hash_type(ocert);
         cert_map->ocert = ocert;
+    }
 
     return cert_map;
 }
@@ -2262,9 +2263,11 @@ _parse_map(const char *token, char *line)
     else {
         DEBUGMSGT(("cert:util:config", "inserting type %d map, pri %d fp %s\n",
                    map->mapType, map->priority, map->fingerprint));
-        if (CONTAINER_INSERT(_maps, map) != 0) 
+        if (CONTAINER_INSERT(_maps, map) != 0) {
+            netsnmp_cert_map_free(map);
             netsnmp_config_error(CONFIG_TOKEN
                                  ": duplicate priority for certificate map");
+        }
     }
 }
 
