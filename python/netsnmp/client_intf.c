@@ -2406,6 +2406,10 @@ netsnmp_set(PyObject *self, PyObject *args)
 	  snmp_free_pdu(pdu);
 	  goto done;
 	}
+	memset(tmp_val_str, 0, sizeof(tmp_val_str));
+        if ( tmplen >= sizeof(tmp_val_str)) {
+            tmplen = sizeof(tmp_val_str)-1;
+        }
 	memcpy(tmp_val_str, val, tmplen);
 	if (type==TYPE_INTEGER && use_enums && tp && tp->enums) {
 	  for(ep = tp->enums; ep; ep = ep->next) {
