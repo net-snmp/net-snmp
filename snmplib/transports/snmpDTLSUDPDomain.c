@@ -460,9 +460,10 @@ netsnmp_dtlsudp_recv(netsnmp_transport *t, void *buf, int size,
 
     while (rc < 0) {
 #if defined(linux) && defined(IP_PKTINFO)
+        socklen_t local_addr_len = sizeof(addr_pair->local_addr);
         rc = netsnmp_udp_recvfrom(t->sock, buf, size, from, &fromlen,
-                                  &(addr_pair->local_addr),
-                                  &(addr_pair->if_index));
+                                  (struct sockaddr*)&(addr_pair->local_addr),
+                                  &local_addr_len, &(addr_pair->if_index));
 #else
         rc = recvfrom(t->sock, buf, size, NETSNMP_DONTWAIT, from, &fromlen);
 #endif /* linux && IP_PKTINFO */

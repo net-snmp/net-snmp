@@ -47,12 +47,12 @@ NETSNMP_IMPORT size_t   netsnmpIPXDomain_len;
 
 typedef struct netsnmp_addr_pair_s {
    struct sockaddr_in remote_addr;
-   struct in_addr local_addr;
+   struct sockaddr_in local_addr;
 } netsnmp_addr_pair;
 
 typedef struct netsnmp_indexed_addr_pair_s {
    struct sockaddr_in remote_addr;
-   struct in_addr local_addr;
+   struct sockaddr_in local_addr;
     int if_index;
 } netsnmp_indexed_addr_pair;
 

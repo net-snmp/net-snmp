@@ -39,10 +39,11 @@
 #if defined(linux) && defined(IP_PKTINFO)
 
 int netsnmp_udpipv4_recvfrom(int s, void *buf, int len, struct sockaddr *from,
-                             socklen_t *fromlen, struct in_addr *dstip,
-                             int *if_index)
+                             socklen_t *fromlen, struct sockaddr *dstip,
+                             socklen_t *dstlen, int *if_index)
 {
-    return netsnmp_udpbase_recvfrom(s, buf, len, from, fromlen, dstip, if_index);
+    return netsnmp_udpbase_recvfrom(s, buf, len, from, fromlen, dstip, dstlen,
+                                    if_index);
 }
 
 int netsnmp_udpipv4_sendto(int fd, struct in_addr *srcip, int if_index,
@@ -56,10 +57,11 @@ netsnmp_transport *
 netsnmp_udpipv4base_transport(struct sockaddr_in *addr, int local)
 {
     netsnmp_transport *t = NULL;
-    int             rc = 0;
+    int             rc = 0, rc2;
     char           *str = NULL;
     char           *client_socket = NULL;
     netsnmp_indexed_addr_pair addr_pair;
+    socklen_t       local_addr_len;
 
     if (addr == NULL || addr->sin_family != AF_INET) {
         return NULL;
@@ -135,7 +137,6 @@ netsnmp_udpipv4base_transport(struct sockaddr_in *addr, int local)
         if (client_socket) {
             struct sockaddr_in client_addr;
             netsnmp_sockaddr_in2(&client_addr, client_socket, NULL);
-            addr_pair.local_addr = client_addr.sin_addr;
             client_addr.sin_port = 0;
             DEBUGMSGTL(("netsnmp_udpbase", "binding socket: %d\n", t->sock));
             rc = bind(t->sock, (struct sockaddr *)&client_addr,
@@ -147,6 +148,9 @@ netsnmp_udpipv4base_transport(struct sockaddr_in *addr, int local)
                 netsnmp_transport_free(t);
                 return NULL;
             }
+            local_addr_len = sizeof(addr_pair.local_addr);
+            rc2 = getsockname(t->sock, &addr_pair.local_addr, &local_addr_len);
+            netsnmp_assert(rc2 == 0);
         }
 
         str = netsnmp_udp_fmtaddr(NULL, (void *)&addr_pair,

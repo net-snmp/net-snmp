@@ -51,8 +51,9 @@ netsnmp_ipv4_fmtaddr(const char *prefix, netsnmp_transport *t,
         struct sockaddr_in *to = NULL;
         to = (struct sockaddr_in *) &(addr_pair->remote_addr);
         if (to == NULL) {
-            snprintf(tmp, sizeof(tmp), "%s: unknown->[%s]", prefix,
-                    inet_ntoa(addr_pair->local_addr));
+            snprintf(tmp, sizeof(tmp), "%s: unknown->[%s]:%hu", prefix,
+                     inet_ntoa(addr_pair->local_addr.sin_addr),
+                     ntohs(addr_pair->local_addr.sin_port));
         } else if ( t && t->flags & NETSNMP_TRANSPORT_FLAG_HOSTNAME ) {
             /* XXX: hmm...  why isn't this prefixed */
             /* assuming intentional */
@@ -61,8 +62,9 @@ netsnmp_ipv4_fmtaddr(const char *prefix, netsnmp_transport *t,
         } else {
             snprintf(tmp, sizeof(tmp), "%s: [%s]:%hu->", prefix,
                      inet_ntoa(to->sin_addr), ntohs(to->sin_port));
-            snprintf(tmp + strlen(tmp), sizeof(tmp)-strlen(tmp), "[%s]",
-                     inet_ntoa(addr_pair->local_addr));
+            snprintf(tmp + strlen(tmp), sizeof(tmp)-strlen(tmp), "[%s]:%hu",
+                     inet_ntoa(addr_pair->local_addr.sin_addr),
+                     ntohs(addr_pair->local_addr.sin_port));
         }
     }
     tmp[sizeof(tmp)-1] = '\0';
