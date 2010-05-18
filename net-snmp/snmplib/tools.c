@@ -299,7 +299,7 @@ netsnmp_binary_to_hex(u_char ** dest, size_t *dest_len, int allow_realloc,
         return 0;
 
     if (NULL == *dest) {
-        s = (char *) calloc(1, olen);
+        s = (unsigned char *) calloc(1, olen);
         *dest_len = olen;
     }
     else
