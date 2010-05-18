@@ -56,6 +56,9 @@ void
 _tlstmAddr_container_init_persistence(netsnmp_tdata *table_data)
 {
     int             rc;
+    const char     *user_help = 
+        "tlstmAddrEntry targetName fingerPrintLen hashType:fingerPrint "
+        "serverIdentityLen serverIdentity";
 
     /** save table for use during row restore */
     _table_data = table_data;
@@ -65,7 +68,7 @@ _tlstmAddr_container_init_persistence(netsnmp_tdata *table_data)
                             NULL);
     register_config_handler(NULL, user_token,
                             _tlstmAddrTable_container_row_restore_user, NULL,
-                            NULL);
+                            user_help);
     rc = snmp_register_callback(SNMP_CALLBACK_LIBRARY,
                                 SNMP_CALLBACK_STORE_DATA,
                                 _tlstmAddrTable_container_save_rows,
@@ -152,7 +155,7 @@ _tlstmAddrTable_container_row_save(netsnmp_tdata_row * row, void *type)
                                       entry->tlstmAddrServerIdentity_len);
     *pos++ = ' ';
 
-    snprintf(pos, sizeof(buf), "%ld %ld ", entry->tlstmAddrStorageType,
+    snprintf(pos, sizeof(buf), "%d %d ", entry->tlstmAddrStorageType,
              entry->tlstmAddrRowStatus);
     buf[sizeof(buf)-1] = 0;
     pos = &buf[strlen(buf)];
@@ -206,11 +209,14 @@ _tlstmAddrTable_container_row_restore_common(char *buf)
 
     new_entry->tlstmAddrStorageType = entry.tlstmAddrStorageType;
     new_entry->tlstmAddrRowStatus = entry.tlstmAddrRowStatus;
+    entry.tlstmAddrServerFingerprint[1] = '\0';
+    new_entry->hashType = atoi(entry.tlstmAddrServerFingerprint);
+    netsnmp_fp_lowercase_and_strip_colon(&entry.tlstmAddrServerFingerprint[2]);
     memcpy(new_entry->tlstmAddrServerFingerprint,
-           entry.tlstmAddrServerFingerprint,
+           &entry.tlstmAddrServerFingerprint[2],
            entry.tlstmAddrServerFingerprint_len);
     new_entry->tlstmAddrServerFingerprint_len =
-        entry.tlstmAddrServerFingerprint_len;
+        strlen(new_entry->tlstmAddrServerFingerprint);
     memcpy(new_entry->tlstmAddrServerIdentity,
            entry.tlstmAddrServerIdentity,
            entry.tlstmAddrServerIdentity_len);
