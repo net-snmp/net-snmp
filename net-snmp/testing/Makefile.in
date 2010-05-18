@@ -32,7 +32,7 @@ test:
 		$(srcdir)/RUNTESTS ; \
 	else \
 		echo $(srcdir)/RUNFULLTESTS $(TESTOPTS) ; \
-		$(srcdir)/RUNFULLTESTS $(TESTOPTS) ; \
+		$(PERL) $(srcdir)/RUNFULLTESTS $(TESTOPTS) ; \
 	fi
 
 testall:
