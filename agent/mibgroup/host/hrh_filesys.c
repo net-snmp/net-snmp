@@ -20,7 +20,7 @@
 #include <net-snmp/agent/hardware/fsys.h>
 #include "host_res.h"
 #include "hrh_filesys.h"
-#include "hr_storage.h"
+#include "hrh_storage.h"
 #include "hr_disk.h"
 #include <net-snmp/utilities.h>
 
@@ -243,7 +243,9 @@ var_hrhfilesys(struct variable *vp,
         return (u_char *) string;
 
     case HRFSYS_TYPE:
-        fsys_type_id[fsys_type_len - 1] = HRFS_entry->type;
+        fsys_type_id[fsys_type_len - 1] = 
+            (HRFS_entry->type > _NETSNMP_FS_TYPE_LOCAL ?
+                                 NETSNMP_FS_TYPE_OTHER : HRFS_entry->type);
         *var_len = sizeof(fsys_type_id);
         return (u_char *) fsys_type_id;
 

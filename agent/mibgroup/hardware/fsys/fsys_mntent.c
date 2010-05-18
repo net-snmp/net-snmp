@@ -66,8 +66,10 @@ _fsys_type( char *typename )
        return NETSNMP_FS_TYPE_AFS;
     else if ( !strcmp(typename, MNTTYPE_EXT2) ||
               !strcmp(typename, MNTTYPE_EXT3) ||
+              !strcmp(typename, MNTTYPE_EXT4) ||
               !strcmp(typename, MNTTYPE_EXT2FS) ||
-              !strcmp(typename, MNTTYPE_EXT3FS) )
+              !strcmp(typename, MNTTYPE_EXT3FS) ||
+              !strcmp(typename, MNTTYPE_EXT4FS) )
        return NETSNMP_FS_TYPE_EXT2;
     else if ( !strcmp(typename, MNTTYPE_FAT32) ||
               !strcmp(typename, MNTTYPE_VFAT) )
@@ -79,7 +81,9 @@ _fsys_type( char *typename )
      *  An alternative approach would be to map them all
      *    into the single type N_FS_TYPE_IGNORE
      */
-    else if ( !strcmp(typename, MNTTYPE_IGNORE) )
+    else if ( !strcmp(typename, MNTTYPE_IGNORE) ||
+              !strcmp(typename, MNTTYPE_BINFMT) ||
+              !strcmp(typename, MNTTYPE_RPCPIPE))
        return NETSNMP_FS_TYPE_IGNORE;
     else if ( !strcmp(typename, MNTTYPE_PROC) )
        return NETSNMP_FS_TYPE_PROC;
@@ -152,6 +156,9 @@ netsnmp_fsys_arch_load( void )
             (entry->path[1] == '\0'))
             entry->flags |= NETSNMP_FS_FLAG_BOOTABLE;
 
+        /*
+         *  XXX - identify removeable disks
+         */
 
         /*
          *  Optionally skip retrieving statistics for remote mounts
