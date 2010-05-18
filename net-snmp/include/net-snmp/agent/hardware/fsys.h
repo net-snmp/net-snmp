@@ -37,8 +37,8 @@ typedef struct netsnmp_fsys_info_s netsnmp_fsys_info;
 
 #define NETSNMP_FS_TYPE_PROC	   2 | _NETSNMP_FS_TYPE_LOCAL | _NETSNMP_FS_TYPE_SKIP_BIT
 
-#define NETSNMP_FS_TYPE_DEVPTS	   3 | _NETSNMP_FS_TYPE_LOCAL
-#define NETSNMP_FS_TYPE_SYSFS	   4 | _NETSNMP_FS_TYPE_LOCAL
+#define NETSNMP_FS_TYPE_DEVPTS	   3 | _NETSNMP_FS_TYPE_LOCAL | _NETSNMP_FS_TYPE_SKIP_BIT
+#define NETSNMP_FS_TYPE_SYSFS	   4 | _NETSNMP_FS_TYPE_LOCAL | _NETSNMP_FS_TYPE_SKIP_BIT
 #define NETSNMP_FS_TYPE_TMPFS	   5 | _NETSNMP_FS_TYPE_LOCAL
 #define NETSNMP_FS_TYPE_USBFS	   6 | _NETSNMP_FS_TYPE_LOCAL
 
@@ -46,6 +46,7 @@ typedef struct netsnmp_fsys_info_s netsnmp_fsys_info;
 #define NETSNMP_FS_FLAG_REMOTE   0x02
 #define NETSNMP_FS_FLAG_RONLY    0x04
 #define NETSNMP_FS_FLAG_BOOTABLE 0x08
+#define NETSNMP_FS_FLAG_REMOVE   0x10
 
 #define NETSNMP_FS_FIND_CREATE     1   /* or use one of the type values */
 #define NETSNMP_FS_FIND_EXIST      0
@@ -54,8 +55,8 @@ struct netsnmp_fsys_info_s {
      netsnmp_index  idx;
   /* int  idx; */
  
-     char *path;
-     char *device;
+     char path[  SNMP_MAXPATH+1];
+     char device[SNMP_MAXPATH+1];
      int  type;
 
      long size;

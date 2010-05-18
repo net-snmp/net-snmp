@@ -14,7 +14,6 @@
  */
 
 	config_require(host/hr_system)
-	config_require(host/hr_storage)
 	config_require(host/hr_device)
 	config_require(host/hr_other)
 	config_require(host/hr_proc)
@@ -22,24 +21,12 @@
 	config_require(host/hr_print)
 	config_require(host/hr_disk)
 	config_require(host/hr_partition)
-	config_require(host/hr_filesys)
 
-#if     1  /*   XXX_USING_ENABLE_NEW_FEATURES_MECHANISM_INSTEAD */
+	config_version_require((host/hr_storage, 5.7, host/hrh_storage))
+	config_version_require((host/hr_filesys, 5.7, host/hrh_filesys))
+
 	config_version_require((host/hr_swinst,  5.6, host/hrSWInstalledTable))
 	config_version_require((host/hr_swrun,   5.6, host/hrSWRunTable))
-#else
-#ifndef NETSNMP_INCLUDE_HRSWINST_REWRITES
-	config_require(host/hr_swinst)
-#else
-	config_require(host/hrSWInstalledTable)
-#endif
-#ifndef NETSNMP_INCLUDE_HRSWRUN_REWRITES
-	config_require(host/hr_swrun)
-#else
-	config_require(host/hrSWRunTable)
-	config_require(host/hrSWRunPerfTable)
-#endif
-#endif
 
 /* add the host resources mib to the default mibs to load */
 config_add_mib(HOST-RESOURCES-MIB)
