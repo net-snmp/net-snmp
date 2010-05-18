@@ -1,5 +1,5 @@
 /*
- *  Host Resources MIB - file system device group interface - hr_filesys.h
+ *  Host Resources MIB - file system device group interface (HAL rewrite) - hrh_filesys.h
  *
  */
 #ifndef _MIBGROUP_HRFSYS_H

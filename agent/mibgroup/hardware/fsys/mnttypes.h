@@ -39,11 +39,17 @@
 #ifndef MNTTYPE_EXT3
 #define MNTTYPE_EXT3     "ext3"
 #endif
+#ifndef MNTTYPE_EXT4
+#define MNTTYPE_EXT4     "ext4"
+#endif
 #ifndef MNTTYPE_EXT2FS
 #define MNTTYPE_EXT2FS   "ext2fs"
 #endif
 #ifndef MNTTYPE_EXT3FS
 #define MNTTYPE_EXT3FS   "ext3fs"
+#endif
+#ifndef MNTTYPE_EXT4FS
+#define MNTTYPE_EXT4FS   "ext4fs"
 #endif
 #ifndef MNTTYPE_FAT32
 #define MNTTYPE_FAT32    "fat32"
@@ -117,6 +123,12 @@
 #endif
 #ifndef MNTTYPE_USBFS
 #define MNTTYPE_USBFS    "usbfs"
+#endif
+#ifndef MNTTYPE_BINFMT
+#define MNTTYPE_BINFMT   "binfmt_misc"
+#endif
+#ifndef MNTTYPE_RPCPIPE
+#define MNTTYPE_RPCPIPE  "rpc_pipefs"
 #endif
 
 #endif /* _NETSNMP_FSYS_MNTTYPES_H */
