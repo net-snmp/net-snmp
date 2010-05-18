@@ -39,8 +39,9 @@ typedef struct tlstmAddrTable_undo_s {
     size_t          tlstmAddrServerFingerprint_len;
     char            tlstmAddrServerIdentity[TLSTMADDRSERVERIDENTITY_MAX_SIZE];
     size_t          tlstmAddrServerIdentity_len;
-    long            tlstmAddrStorageType;
-    long            tlstmAddrRowStatus;
+    char            tlstmAddrStorageType;
+    char            tlstmAddrRowStatus;
+    char            hashType;
 } tlstmAddrTable_undo;
 
     /*
@@ -60,8 +61,9 @@ typedef struct tlstmAddrTable_entry_s {
     size_t          tlstmAddrServerFingerprint_len;
     char            tlstmAddrServerIdentity[TLSTMADDRSERVERIDENTITY_MAX_SIZE];
     size_t          tlstmAddrServerIdentity_len;
-    long            tlstmAddrStorageType;
-    long            tlstmAddrRowStatus;
+    char            tlstmAddrStorageType;
+    char            tlstmAddrRowStatus;
+    char            hashType;
 
     /*
      * used during set processing 

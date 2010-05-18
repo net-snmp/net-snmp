@@ -78,7 +78,7 @@ static int _count_handler(netsnmp_mib_handler *handler,
                           netsnmp_agent_request_info *reqinfo,
                           netsnmp_request_info *requests);
 
-static time_t _last_changed = 0;
+static uint32_t _last_changed = 0;
 
 
 /** Initializes the tlstmCertToTSNTable module */

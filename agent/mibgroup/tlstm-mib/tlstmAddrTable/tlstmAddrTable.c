@@ -17,19 +17,24 @@
 #define FATE_NO_CHANGE        0
 #define FATE_DELETE_ME        -1
 
+static uint32_t _last_changed = 0;
+static int _count_handler(netsnmp_mib_handler *handler,
+                          netsnmp_handler_registration *reginfo,
+                          netsnmp_agent_request_info *reqinfo,
+                          netsnmp_request_info *requests);
+
 void _tlstmAddr_container_init_persistence(netsnmp_tdata *table_data);
 
 /** Initializes the tlstmAddrTable module */
 void
 init_tlstmAddrTable(void)
 {
-    const oid       tlstmAddrTable_oid[] =
-        { SNMP_TLS_TM_BASE, 2, 2, 1, 9 };
-    const size_t    tlstmAddrTable_oid_len =
-        OID_LENGTH(tlstmAddrTable_oid);
+    oid             reg_oid[] = { SNMP_TLS_TM_BASE, 2, 2, 1, 9 };
+    const size_t    reg_oid_len = OID_LENGTH(reg_oid);
     netsnmp_handler_registration *reg;
     netsnmp_tdata  *table_data;
     netsnmp_table_registration_info *table_info;
+    netsnmp_watcher_info            *watcher;
 
     DEBUGMSGTL(("tlstmAddrTable:init",
                 "initializing table tlstmAddrTable\n"));
@@ -37,8 +42,7 @@ init_tlstmAddrTable(void)
     reg =
         netsnmp_create_handler_registration("tlstmAddrTable",
                                             tlstmAddrTable_handler,
-                                            tlstmAddrTable_oid,
-                                            tlstmAddrTable_oid_len,
+                                            reg_oid, reg_oid_len,
                                             HANDLER_CAN_RWRITE);
 
     table_data = netsnmp_tdata_create_table("tlstmAddrTable", 0);
@@ -64,6 +68,34 @@ init_tlstmAddrTable(void)
     table_info->max_column = TLSTMADDRTABLE_MAX_COLUMN;
 
     netsnmp_tdata_register(reg, table_data, table_info);
+
+    /*
+     * register scalars
+     */
+    reg_oid[10] = 7;
+    reg = netsnmp_create_handler_registration("snmpTlstmAddrCount",
+                                              _count_handler, reg_oid,
+                                              OID_LENGTH(reg_oid),
+                                              HANDLER_CAN_RONLY);
+    if (NULL == reg)
+        snmp_log(LOG_ERR,
+                 "could not create handler for snmpTlstmAddrCount\n");
+    else
+        netsnmp_register_scalar(reg);
+    
+    reg_oid[10] = 8;
+    reg = netsnmp_create_handler_registration(
+        "snmpTlstmAddrTableLastChanged", NULL, reg_oid,
+        OID_LENGTH(reg_oid), HANDLER_CAN_RONLY);
+    watcher = netsnmp_create_watcher_info((void*)&_last_changed,
+                                          sizeof(_last_changed),
+                                          ASN_TIMETICKS,
+                                          WATCHER_FIXED_SIZE);
+    if ((NULL == reg) || (NULL == watcher))
+        snmp_log(LOG_ERR,
+                 "could not create handler for snmpTlstmAddrTableLastChanged\n");
+    else
+        netsnmp_register_watched_scalar(reg, watcher);
 
     /*
      * Initialise the contents of the table here 
@@ -110,6 +142,7 @@ tlstmAddrTable_createEntry(netsnmp_tdata * table_data,
      */
     entry->tlstmAddrServerFingerprint[0] = '\0';
     entry->tlstmAddrServerFingerprint_len = 0;
+    entry->hashType = 0;
     entry->tlstmAddrServerIdentity[0] = '\0';
     entry->tlstmAddrServerIdentity_len = 0;
     entry->tlstmAddrStorageType = ST_NONVOLATILE;
@@ -215,10 +248,22 @@ tlstmAddrTable_handler(netsnmp_mib_handler *handler,
             table_info = netsnmp_extract_table_info(request);
             switch (table_info->colnum) {
             case COLUMN_TLSTMADDRSERVERFINGERPRINT:
-                snmp_set_var_typed_value
-                    (request->requestvb, ASN_OCTET_STR,
-                     (u_char *) table_entry->tlstmAddrServerFingerprint,
-                     table_entry->tlstmAddrServerFingerprint_len);
+            {
+                u_char bin[42], *ptr = bin;
+                size_t len = sizeof(bin), offset = 1;
+                int    rc;
+                bin[0] = table_entry->hashType;
+                netsnmp_assert(table_entry->hashType != 0);
+                rc = netsnmp_hex_to_binary(
+                    &ptr, &len, &offset, 0,
+                    table_entry->tlstmAddrServerFingerprint, NULL);
+                if (1 != rc)
+                    netsnmp_set_request_error(reqinfo, request,
+                                              SNMP_ERR_GENERR);
+                else
+                    snmp_set_var_typed_value(request->requestvb, ASN_OCTET_STR,
+                                             bin, offset);
+            }
                 break;          /* case COLUMN_TLSTMADDRSERVERFINGERPRINT */
             case COLUMN_TLSTMADDRSERVERIDENTITY:
                 snmp_set_var_typed_value
@@ -431,18 +476,28 @@ tlstmAddrTable_handler(netsnmp_mib_handler *handler,
 
             switch (table_info->colnum) {
             case COLUMN_TLSTMADDRSERVERFINGERPRINT:
+            {
+                u_char *tmp = (u_char*)table_entry->tlstmAddrServerFingerprint;
+
                 memcpy(table_entry->undo->tlstmAddrServerFingerprint,
                        table_entry->tlstmAddrServerFingerprint,
                        sizeof(table_entry->tlstmAddrServerFingerprint));
                 table_entry->undo->tlstmAddrServerFingerprint_len =
                     table_entry->tlstmAddrServerFingerprint_len;
+                table_entry->undo->hashType = table_entry->hashType;
+
+                table_entry->hashType = request->requestvb->val.string[0];
+                table_entry->tlstmAddrServerFingerprint_len =
+                    sizeof(table_entry->tlstmAddrServerFingerprint);
                 memset(table_entry->tlstmAddrServerFingerprint, 0,
                        sizeof(table_entry->tlstmAddrServerFingerprint));
-                memcpy(table_entry->tlstmAddrServerFingerprint,
-                       request->requestvb->val.string,
-                       request->requestvb->val_len);
                 table_entry->tlstmAddrServerFingerprint_len =
-                    request->requestvb->val_len;
+                    netsnmp_binary_to_hex(&tmp, &table_entry->tlstmAddrServerFingerprint_len,
+                                          0, &request->requestvb->val.string[1],
+                                          request->requestvb->val_len - 1);
+                if (0 == table_entry->tlstmAddrServerFingerprint_len)
+                    ret = SNMP_ERR_GENERR;
+            }
                 break;          /* case COLUMN_TLSTMADDRSERVERFINGERPRINT */
             case COLUMN_TLSTMADDRSERVERIDENTITY:
                 memcpy(table_entry->undo->tlstmAddrServerIdentity,
@@ -575,6 +630,7 @@ tlstmAddrTable_handler(netsnmp_mib_handler *handler,
                        sizeof(table_entry->tlstmAddrServerFingerprint));
                 table_entry->tlstmAddrServerFingerprint_len =
                     table_entry->undo->tlstmAddrServerFingerprint_len;
+                table_entry->hashType = table_entry->undo->hashType;
                 break;          /* case COLUMN_TLSTMADDRSERVERFINGERPRINT */
             case COLUMN_TLSTMADDRSERVERIDENTITY:
                 /*
@@ -685,6 +741,9 @@ tlstmAddrTable_handler(netsnmp_mib_handler *handler,
                     break;
                 }               /* switch colnum */
         }                       /* for requests */
+
+        /** update last changed */
+        _last_changed = netsnmp_get_agent_uptime();
         break;                  /* case MODE_SET_COMMIT */
     }                           /* switch (reqinfo->mode) */
 
@@ -693,3 +752,34 @@ tlstmAddrTable_handler(netsnmp_mib_handler *handler,
 
     return SNMP_ERR_NOERROR;
 }
+
+
+static int
+_count_handler(netsnmp_mib_handler *handler,
+               netsnmp_handler_registration *reginfo,
+               netsnmp_agent_request_info *reqinfo,
+               netsnmp_request_info *requests)
+{
+    netsnmp_container *maps;
+    int                val;
+
+    if (MODE_GET != reqinfo->mode) {
+        snmp_log(LOG_ERR, "bad mode in RO handler");
+        return SNMP_ERR_GENERR;
+    }
+
+    maps = netsnmp_cert_map_container();
+    if (NULL == maps)
+        val = 0;
+    else
+        val = CONTAINER_SIZE(maps);
+    snmp_set_var_typed_value(requests->requestvb, ASN_GAUGE,
+                             (u_char *) &val, sizeof(val));
+   
+    if (handler->next && handler->next->access_method)
+        return netsnmp_call_next_handler(handler, reginfo, reqinfo,
+                                         requests);
+    
+    return SNMP_ERR_NOERROR;
+}
+
