@@ -8,6 +8,7 @@
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 #include <openssl/x509.h>
 #include <net-snmp/library/cert_util.h>
+#include "tlstm-mib.h"
 #include "tlstmCertToTSNTable.h"
 
 /** XXX - move these to table_data header? */
@@ -72,27 +73,32 @@ static int _cache_load(netsnmp_cache *cache, netsnmp_tdata *table);
 static void _cache_free(netsnmp_cache *cache, netsnmp_tdata *table);
 static void _cert_map_add(certToTSN_entry *entry);
 static void _cert_map_remove(certToTSN_entry *entry);
+static int _count_handler(netsnmp_mib_handler *handler,
+                          netsnmp_handler_registration *reginfo,
+                          netsnmp_agent_request_info *reqinfo,
+                          netsnmp_request_info *requests);
+
+static time_t _last_changed = 0;
 
 
 /** Initializes the tlstmCertToTSNTable module */
 void
 init_tlstmCertToTSNTable(void)
 {
-    const oid       tlstmCertToTSNTable_oid[] =
-        { 1, 3, 6, 1, 6, 3, 42, 2, 2, 1, 3 };
-    const size_t    tlstmCertToTSNTable_oid_len =
-        OID_LENGTH(tlstmCertToTSNTable_oid);
-    netsnmp_handler_registration *reg;
-    netsnmp_tdata  *table;
+    oid             reg_oid[]   =  { SNMP_TLS_TM_BASE, 2, 2, 1, 3 };
+    const size_t    reg_oid_len =  OID_LENGTH(reg_oid);
+    netsnmp_handler_registration    *reg;
+    netsnmp_tdata                   *table;
     netsnmp_table_registration_info *info;
     netsnmp_cache                   *cache;
+    netsnmp_watcher_info            *watcher;
 
     DEBUGMSGTL(("tlstmCertToSN:init",
                 "initializing table tlstmCertToTSNTable\n"));
 
     reg = netsnmp_create_handler_registration
         ("tlstmCertToTSNTable", tlstmCertToTSNTable_handler,
-         tlstmCertToTSNTable_oid, tlstmCertToTSNTable_oid_len,
+         reg_oid, reg_oid_len,
          HANDLER_CAN_RWRITE);
     if (NULL == reg) {
         snmp_log(LOG_ERR,
@@ -125,8 +131,8 @@ init_tlstmCertToTSNTable(void)
      */
     cache = netsnmp_cache_create(30, (NetsnmpCacheLoad*)_cache_load,
                                  (NetsnmpCacheFree*)_cache_free,
-                                 tlstmCertToTSNTable_oid,
-                                 tlstmCertToTSNTable_oid_len);
+                                 reg_oid,
+                                 reg_oid_len);
     if (NULL == cache) {
         snmp_log(LOG_ERR,"error creating cache for tlstmCertToTSNTable\n");
         netsnmp_tdata_delete_table(table);
@@ -142,8 +148,32 @@ init_tlstmCertToTSNTable(void)
                                        "table_container");
 
     /*
-     * Initialise the contents of the table here 
+     * register scalars
      */
+    reg_oid[10] = 1;
+    reg = netsnmp_create_handler_registration("snmpTlstmCertToTSNCount",
+                                              _count_handler, reg_oid,
+                                              OID_LENGTH(reg_oid),
+                                              HANDLER_CAN_RONLY);
+    if (NULL == reg)
+        snmp_log(LOG_ERR,
+                 "could not create handler for snmpTlstmCertToTSNCount\n");
+    else
+        netsnmp_register_scalar(reg);
+    
+    reg_oid[10] = 2;
+    reg = netsnmp_create_handler_registration(
+        "snmpTlstmCertToTSNTableLastChanged", NULL, reg_oid,
+        OID_LENGTH(reg_oid), HANDLER_CAN_RONLY);
+    watcher = netsnmp_create_watcher_info((void*)&_last_changed,
+                                          sizeof(_last_changed),
+                                          ASN_TIMETICKS,
+                                          WATCHER_FIXED_SIZE);
+    if ((NULL == reg) || (NULL == watcher))
+        snmp_log(LOG_ERR,
+                 "could not create handler for snmpTlstmCertToTSNCount\n");
+    else
+        netsnmp_register_watched_scalar(reg, watcher);
 }
 
 /*
@@ -261,7 +291,7 @@ tlstmCertToTSNTable_handler(netsnmp_mib_handler *handler,
                             netsnmp_agent_request_info *reqinfo,
                             netsnmp_request_info *requests)
 {
-    oid tsnm[] = { 1, 3, 6, 1, 6, 3, 42, 1, 1, 0 };
+    oid tsnm[] = { SNMP_TLS_TM_BASE, 1, 1, 0 };
     static const int tsnm_pos = OID_LENGTH(tsnm) - 1;
     netsnmp_request_info *request;
     netsnmp_table_request_info *info;
@@ -805,12 +835,44 @@ tlstmCertToTSNTable_handler(netsnmp_mib_handler *handler,
             }                   /* switch colnum */
 
         }                       /* for requests */
+
+        /** update last changed */
+        _last_changed = netsnmp_get_agent_uptime();
         break;                  /* case MODE_SET_COMMIT */
     }                           /* switch (reqinfo->mode) */
 
     if (ret != SNMP_ERR_NOERROR)
         netsnmp_set_request_error(reqinfo, request, ret);
 
+    return SNMP_ERR_NOERROR;
+}
+
+static int
+_count_handler(netsnmp_mib_handler *handler,
+               netsnmp_handler_registration *reginfo,
+               netsnmp_agent_request_info *reqinfo,
+               netsnmp_request_info *requests)
+{
+    netsnmp_container *maps;
+    int                val;
+
+    if (MODE_GET != reqinfo->mode) {
+        snmp_log(LOG_ERR, "bad mode in RO handler");
+        return SNMP_ERR_GENERR;
+    }
+
+    maps = netsnmp_cert_map_container();
+    if (NULL == maps)
+        val = 0;
+    else
+        val = CONTAINER_SIZE(maps);
+    snmp_set_var_typed_value(requests->requestvb, ASN_GAUGE,
+                             (u_char *) &val, sizeof(val));
+   
+    if (handler->next && handler->next->access_method)
+        return netsnmp_call_next_handler(handler, reginfo, reqinfo,
+                                         requests);
+    
     return SNMP_ERR_NOERROR;
 }
 
@@ -995,7 +1057,7 @@ _cache_free(netsnmp_cache *cache, netsnmp_tdata *table)
                 CONTAINER_SIZE(table->container)));
 }
 
-static const oid _tsnm_base[] = { 1, 3, 6, 1, 6, 3, 42, 1, 1 };
+static const oid _tsnm_base[] = { SNMP_TLS_TM_BASE, 1, 1 };
 static const int _tsnm_base_len = sizeof(_tsnm_base);
 
 static oid
