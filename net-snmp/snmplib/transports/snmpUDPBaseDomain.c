@@ -113,8 +113,10 @@ netsnmp_udpbase_recv(netsnmp_transport *t, void *buf, int size,
 
 	while (rc < 0) {
 #if defined(linux) && defined(IP_PKTINFO)
+            socklen_t local_addr_len = sizeof(addr_pair->local_addr);
             rc = netsnmp_udp_recvfrom(t->sock, buf, size, from, &fromlen,
-                    &(addr_pair->local_addr), &(addr_pair->if_index));
+                                      (struct sockaddr*)&(addr_pair->local_addr),
+                                      &local_addr_len, &(addr_pair->if_index));
 #else
             rc = recvfrom(t->sock, buf, size, NETSNMP_DONTWAIT, from, &fromlen);
 #endif /* linux && IP_PKTINFO */
@@ -168,7 +170,7 @@ netsnmp_udpbase_send(netsnmp_transport *t, void *buf, int size,
 	while (rc < 0) {
 #if defined(linux) && defined(IP_PKTINFO)
             rc = netsnmp_udp_sendto(t->sock,
-                    addr_pair ? &(addr_pair->local_addr) : NULL,
+                    addr_pair ? &(addr_pair->local_addr.sin_addr) : NULL,
                     addr_pair ? addr_pair->if_index : 0, to, buf, size);
 #else
             rc = sendto(t->sock, buf, size, 0, to, sizeof(struct sockaddr));
@@ -189,10 +191,10 @@ netsnmp_udpbase_send(netsnmp_transport *t, void *buf, int size,
 
 int
 netsnmp_udpbase_recvfrom(int s, void *buf, int len, struct sockaddr *from,
-                         socklen_t *fromlen, struct in_addr *dstip,
-                         int *if_index)
+                         socklen_t *fromlen, struct sockaddr *dstip,
+                         socklen_t *dstlen, int *if_index)
 {
-    int r;
+    int r, r2;
     struct iovec iov[1];
     char cmsg[CMSG_SPACE(sizeof(struct in_pktinfo))];
     struct cmsghdr *cmsgptr;
@@ -215,17 +217,22 @@ netsnmp_udpbase_recvfrom(int s, void *buf, int len, struct sockaddr *from,
         return -1;
     }
 
+    r2 = getsockname(s, dstip, dstlen);
+    netsnmp_assert(r2 == 0);
+
     DEBUGMSGTL(("udpbase:recv", "got source addr: %s\n",
                 inet_ntoa(((struct sockaddr_in *)from)->sin_addr)));
     for (cmsgptr = CMSG_FIRSTHDR(&msg); cmsgptr != NULL; cmsgptr = CMSG_NXTHDR(&msg, cmsgptr)) {
         if (cmsgptr->cmsg_level != SOL_IP || cmsgptr->cmsg_type != IP_PKTINFO)
             continue;
 
-        memcpy((void *)dstip, netsnmp_dstaddr(cmsgptr), sizeof(struct in_addr));
+        netsnmp_assert(dstip->sa_family == AF_INET);
+        ((struct sockaddr_in*)dstip)->sin_addr = *netsnmp_dstaddr(cmsgptr);
         *if_index = (((struct in_pktinfo *)(CMSG_DATA(cmsgptr)))->ipi_ifindex);
         DEBUGMSGTL(("udpbase:recv",
                     "got destination (local) addr %s, iface %d\n",
-                    inet_ntoa(*dstip), *if_index));
+                    inet_ntoa(((struct sockaddr_in*)dstip)->sin_addr),
+                    *if_index));
     }
     return r;
 }

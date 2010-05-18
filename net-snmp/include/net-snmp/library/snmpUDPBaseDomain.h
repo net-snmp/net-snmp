@@ -19,7 +19,7 @@ extern          "C" {
 #if defined(linux) && defined(IP_PKTINFO)
     int netsnmp_udpbase_recvfrom(int s, void *buf, int len,
                                  struct sockaddr *from, socklen_t *fromlen,
-                                 struct in_addr *dstip,
+                                 struct sockaddr *dstip, socklen_t *dstlen,
                                  int *if_index);
     int netsnmp_udpbase_sendto(int fd, struct in_addr *srcip, int if_index,
                                struct sockaddr *remote, void *data, int len);

@@ -100,10 +100,10 @@ netsnmp_udp_fmtaddr(netsnmp_transport *t, void *data, int len)
 
 #if defined(linux) && defined(IP_PKTINFO)
 
-int netsnmp_udp_recvfrom(int s, void *buf, int len, struct sockaddr *from, socklen_t *fromlen, struct in_addr *dstip, int *if_index)
+int netsnmp_udp_recvfrom(int s, void *buf, int len, struct sockaddr *from, socklen_t *fromlen, struct sockaddr *dstip, socklen_t *dstlen, int *if_index)
 {
     /** udpiv4 just calls udpbase. should we skip directly to there? */
-    return netsnmp_udpipv4_recvfrom(s, buf, len, from, fromlen, dstip,
+    return netsnmp_udpipv4_recvfrom(s, buf, len, from, fromlen, dstip, dstlen,
                                     if_index);
 }
 
