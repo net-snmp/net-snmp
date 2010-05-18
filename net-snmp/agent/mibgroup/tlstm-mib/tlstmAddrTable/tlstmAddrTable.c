@@ -8,6 +8,7 @@
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 #include <openssl/x509.h>
 #include <net-snmp/library/cert_util.h>
+#include "tlstm-mib.h"
 #include "tlstmAddrTable.h"
 #include "tlstmAddrTable_internal.h"
 
@@ -23,7 +24,7 @@ void
 init_tlstmAddrTable(void)
 {
     const oid       tlstmAddrTable_oid[] =
-        { 1, 3, 6, 1, 6, 3, 42, 2, 2, 1, 9 };
+        { SNMP_TLS_TM_BASE, 2, 2, 1, 9 };
     const size_t    tlstmAddrTable_oid_len =
         OID_LENGTH(tlstmAddrTable_oid);
     netsnmp_handler_registration *reg;
