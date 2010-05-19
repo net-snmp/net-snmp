@@ -28,7 +28,7 @@ sub InitMakeParams {
                   
     my ($snmp_lib, $snmp_llib, $sep);
 
-    if (($Config{'osname'} eq 'MSWin32' && $ENV{'OSTYPE'} ne 'msys')) {
+    if (($Config{'osname'} eq 'MSWin32' && $ENV{'OSTYPE'} eq '')) {
       $opts = NetSNMPGetOpts();	
       $Params{'DEFINE'} = "-DMSVC_PERL -D_CRT_SECURE_NO_WARNINGS -D_CRT_NONSTDC_NO_WARNINGS";
       $sep = '\\';
@@ -101,7 +101,7 @@ sub NetSNMPGetOpts {
     $rootpath = "../" if (!$rootpath);
     $rootpath .= '/' if ($rootpath !~ /\/$/);
     
-    if (($Config{'osname'} eq 'MSWin32' && $ENV{'OSTYPE'} ne 'msys')) {
+    if (($Config{'osname'} eq 'MSWin32' && $ENV{'OSTYPE'} eq '')) {
 
       # Grab command line options first.  Only used if environment variables are not set
       GetOptions("NET-SNMP-IN-SOURCE=s" => \$ret{'insource'},
@@ -184,7 +184,7 @@ sub find_files {
 
 
 sub Check_Version {
-  if (($Config{'osname'} ne 'MSWin32' || $ENV{'OSTYPE'} eq 'msys')) {
+  if (($Config{'osname'} ne 'MSWin32' || $ENV{'OSTYPE'} ne '')) {
     my $foundversion = 0;
     return if ($ENV{'NETSNMP_DONT_CHECK_VERSION'});
     open(I,"<Makefile");
