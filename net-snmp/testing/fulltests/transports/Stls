@@ -42,6 +42,16 @@ $NSCERT gencert -t ipaddr --san IP:127.0.0.1  $NSCERTARGS > /dev/null 2>&1
 IPUSERFP=`$NSCERT showcerts --fingerprint ipaddr $NSCERTARGS | grep Finger | sed 's/.*=//'`
 
 
+# CA certificate
+$NSCERT genca --cn ca-net-snmp.org  $NSCERTARGS > /dev/null 2>&1
+CAFP=`$NSCERT showcas --fingerprint ca-net-snmp.org $NSCERTARGS | grep Finger | sed 's/.*=//'`
+
+# user 9: CA signed cert
+$NSCERT gencert -t causer --ca ca-net-snmp.org --san email:user8@test.net-snmp.org  $NSCERTARGS > /dev/null 2>&1
+CAUSERFP=`$NSCERT showcerts --fingerprint causer $NSCERTARGS | grep Finger | sed 's/.*=//'`
+
+
+
 CONFIGAGENT '[snmp]' debugTokens tsm
 CONFIGAGENT '[snmp]' doDebugging 1
 CONFIGAGENT '[snmp]' defX509ServerPub $SERVERFP
@@ -56,10 +66,11 @@ CONFIGAGENT certSecName 21 $EMAILUSERFP  --rfc822
 CONFIGAGENT certSecName 22 $DNSUSERFP    --dns
 CONFIGAGENT certSecName 23 $IPUSERFP     --ip
 
+CONFIGAGENT certSecName 100 $CAFP        --rfc822
+
 # *** INTENTIONALLY NOT MAPPING AT ALL: ***
 # CONFIGAGENT certSecName 1000 $UNMAPPEDFP ....
 
-$NSCERT showcerts --fingerprint snmpapp $NSCERTARGS | grep Finger | sed 's/.*=//'
 CONFIGAPP   defX509ClientPub  	  $TESTUSERFP
 CONFIGAPP   defX509ServerPub  	  $SERVERFP
 CONFIGAPP   defSecurityModel      tsm
@@ -73,3 +84,4 @@ CONFIGAGENT  rwuser -s tsm aftermapping authpriv
 CONFIGAGENT  rwuser -s tsm foobaruser@example.com authpriv
 CONFIGAGENT  rwuser -s tsm foobar.example.com authpriv
 CONFIGAGENT  rwuser -s tsm 127.0.0.1 authpriv
+CONFIGAGENT  rwuser -s tsm user8@test.net-snmp.org authpriv
