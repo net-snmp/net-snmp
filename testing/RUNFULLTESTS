@@ -138,8 +138,7 @@ if (!$opts{'q'} && $#failed > -1) {
 if (!$opts{'F'}) {
     open(F,">$opts{'failed-file'}");
     if ($#failed > -1) {
-	print F "$opts{'srcdir'}/testing/$opts{'d'}/" .
-	  join("\n$opts{'srcdir'}/testing/$opts{'d'}/",@failed) . "\n";
+	print F join("\n", get_sources(@failed)) . "\n";
     }
     close(F);
 }
@@ -388,6 +387,12 @@ sub call_build_script {
     return $filename if ($lastline eq '');
     $sources{$lastline} = $filename;        # remember where we came from
     return $lastline;
+}
+
+sub get_sources {
+    my (@names) = @_;
+    map { if (exists($sources{$_})) { $_ = $sources{$_} } } @names;
+    return @names;
 }
 
 sub run_older_perl_tests {
