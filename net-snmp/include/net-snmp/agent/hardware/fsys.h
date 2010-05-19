@@ -81,6 +81,13 @@ netsnmp_fsys_info *netsnmp_fsys_get_next( netsnmp_fsys_info* );
 netsnmp_fsys_info *netsnmp_fsys_get_byIdx(  int,   int );
 netsnmp_fsys_info *netsnmp_fsys_get_next_byIdx(int,int );
 
+netsnmp_fsys_info *netsnmp_fsys_by_device(  char*, int );
+netsnmp_fsys_info *netsnmp_fsys_by_path(    char*, int );
+
 netsnmp_cache *netsnmp_fsys_get_cache( void );
 int  netsnmp_fsys_load( netsnmp_cache *cache, void *data );
 void netsnmp_fsys_free( netsnmp_cache *cache, void *data );
+
+unsigned int netsnmp_fsys_size( netsnmp_fsys_info* );
+unsigned int netsnmp_fsys_used( netsnmp_fsys_info* );
+unsigned int netsnmp_fsys_avail(netsnmp_fsys_info* );

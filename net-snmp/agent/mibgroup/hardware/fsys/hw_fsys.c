@@ -62,12 +62,12 @@ void shutdown_hw_fsys( void ) {
 /*
  *  Return the main fsys container
  */
-netsnmp_container *get_fsys_container( void ) { return _fsys_container; }
+netsnmp_container *netsnmp_fsys_get_container( void ) { return _fsys_container; }
 
 /*
  *  Return the main fsys cache control structure (if defined)
  */
-netsnmp_cache *get_fsys_cache( void ) { return _fsys_cache; }
+netsnmp_cache *netsnmp_fsys_get_cache( void ) { return _fsys_cache; }
 
 
 /*

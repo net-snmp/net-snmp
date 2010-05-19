@@ -280,7 +280,7 @@ static int      HRFS_index;
 void
 Init_HR_FileSys(void)
 {
-    netsnmp_cache *c = get_fsys_cache();
+    netsnmp_cache *c = netsnmp_fsys_get_cache();
     netsnmp_cache_check_and_reload( c );
 
     HRFS_entry = NULL;
