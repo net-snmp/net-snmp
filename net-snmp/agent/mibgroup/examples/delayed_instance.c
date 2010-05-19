@@ -224,7 +224,7 @@ return_delayed_response(unsigned int clientreg, void *clientarg)
          * update current value 
          */
         delay_time = *(requests->requestvb->val.integer);
-        DEBUGMSGTL(("testhandler", "updated delay_time -> %d\n",
+        DEBUGMSGTL(("testhandler", "updated delay_time -> %ld\n",
                     delay_time));
         break;
 
