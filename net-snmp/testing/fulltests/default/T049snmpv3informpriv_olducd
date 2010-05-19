@@ -4,7 +4,7 @@
 
 DEFSECURITYLEVEL=authPriv
 
-HEADER "SNMPv3 informs ($DEFSECURITYLEVEL) received and sent by tools"
+HEADER "SNMPv3 informs (authPriv) received and sent by tools"
 
 SKIPIFNOT NETSNMP_USE_OPENSSL
 SKIPIFNOT NETSNMP_ENABLE_SCAPI_AUTHPRIV
