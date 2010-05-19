@@ -245,6 +245,7 @@ sub rename_tests {
 	while (<SRC>) {
 	    if (/(HEADER|TITLE)\s+['"]*(.*)/) {
 		$title = $2;
+		$title =~ s/\s*\*\/.*//;
 		$title =~ s/['"]$//;
 		$foundheader = 1;
 		last;
