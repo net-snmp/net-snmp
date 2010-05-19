@@ -1,15 +1,26 @@
 #!/bin/sh
 
+if [ $# = 0 ]; then
+    echo "Usage: $0 <testscript> [<args>]"
+    exit 1
+fi
+
 if [ "x$builddir" = "x" ]; then
     cd ..
     builddir=`pwd`
-    cd testing
+    if ! cd testing; then
+       echo "Error: $0 must be started from inside the testing directory."
+       exit 1
+    fi
 fi
 
 if [ "x$srcdir" = "x" ]; then
     cd ..
     srcdir=`pwd`
-    cd testing
+    if ! cd testing; then
+       echo "Error: $0 must be started from inside the testing directory."
+       exit 1
+    fi
 fi
 
 testscript=$1
