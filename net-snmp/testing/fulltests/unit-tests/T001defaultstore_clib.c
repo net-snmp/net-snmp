@@ -1,3 +1,4 @@
+/* HEADER Testing the default_store API */
 int i, j;
 char buf[1024];
 

@@ -1,3 +1,4 @@
+/* HEADER Testing the container API */
 netsnmp_container *container;
 int i;
 
