@@ -47,6 +47,7 @@ my %args = (
 
 # list of support infrastructure components
 my %support;
+my %sources;
 
 # if the -d option was specified, pass on the source root directory to all apps
 if (exists($opts{'d'})) {
@@ -237,8 +238,24 @@ sub rename_tests {
     # yes, I could have used map.  But I didn't.
     foreach my $file (@tests) {
 	my $title = "$file";
-	$title =~ s/^$opts{'srcdir'}\/testing\///;
-	$title =~ s/$opts{'d'}.//;
+	my $foundheader = 0;
+	$title = "$file" if (exists($sources{$file}));
+
+	open(SRC, $file);
+	while (<SRC>) {
+	    if (/(HEADER|TITLE)\s+['"]*(.*)/) {
+		$title = $2;
+		$title =~ s/['"]$//;
+		$foundheader = 1;
+		last;
+	    }
+	}
+	close(SRC);
+
+	if (! $foundheader) {
+	    $title =~ s/^$opts{'srcdir'}\/testing\///;
+	    $title =~ s/$opts{'d'}.//;
+	}
 	push @newtests, [$file, $title];
     }
     return @newtests;

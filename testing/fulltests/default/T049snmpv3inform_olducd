@@ -4,7 +4,7 @@
 
 DEFSECURITYLEVEL=noAuthNoPriv
 
-HEADER "SNMPv3 informs ($DEFSECURITYLEVEL) received and sent by tools"
+HEADER "SNMPv3 informs (noAuthNoPriv) received and sent by tools"
 
 #
 # Begin test
