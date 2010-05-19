@@ -58,7 +58,9 @@ _fsys_type( char *typename )
        return NETSNMP_FS_TYPE_ROCKRIDGE;
     else if ( !strcmp(typename, MNTTYPE_NFS)  ||
               !strcmp(typename, MNTTYPE_NFS3) ||
-              !strcmp(typename, MNTTYPE_SMBFS) /* ?? */ )
+              !strcmp(typename, MNTTYPE_NFS4) ||
+              !strcmp(typename, MNTTYPE_CIFS) ||  /* i.e. SMB - ?? */
+              !strcmp(typename, MNTTYPE_SMBFS)    /* ?? */ )
        return NETSNMP_FS_TYPE_NFS;
     else if ( !strcmp(typename, MNTTYPE_NCPFS) )
        return NETSNMP_FS_TYPE_NETWARE;
@@ -76,28 +78,24 @@ _fsys_type( char *typename )
        return NETSNMP_FS_TYPE_FAT32;
 
     /*
-     *  The following code maps these filesystems into
-     *    distinct types - all of which are then skipped.
-     *  An alternative approach would be to map them all
-     *    into the single type N_FS_TYPE_IGNORE
-     */
-    else if ( !strcmp(typename, MNTTYPE_IGNORE) ||
-              !strcmp(typename, MNTTYPE_BINFMT) ||
-              !strcmp(typename, MNTTYPE_RPCPIPE))
-       return NETSNMP_FS_TYPE_IGNORE;
-    else if ( !strcmp(typename, MNTTYPE_PROC) )
-       return NETSNMP_FS_TYPE_PROC;
-    else if ( !strcmp(typename, MNTTYPE_DEVPTS) )
-       return NETSNMP_FS_TYPE_DEVPTS;
-    else if ( !strcmp(typename, MNTTYPE_SYSFS) )
-       return NETSNMP_FS_TYPE_SYSFS;
-    else if ( !strcmp(typename, MNTTYPE_TMPFS) )
-       return NETSNMP_FS_TYPE_TMPFS;
-    else if ( !strcmp(typename, MNTTYPE_USBFS) )
-       return NETSNMP_FS_TYPE_USBFS;
-
-    else
+     *  The following code covers selected filesystems
+     *    which are not covered by the HR-TYPES enumerations,
+     *    but should still be monitored.
+     *  These are all mapped into type "other"
+     *
+     *    (The systems listed are not fixed in stone,
+     *     but are simply here to illustrate the principle!)
+     */    
+    else if ( !strcmp(typename, MNTTYPE_MVFS) ||
+              !strcmp(typename, MNTTYPE_TMPFS) ||
+              !strcmp(typename, MNTTYPE_LOFS))
        return NETSNMP_FS_TYPE_OTHER;
+
+    /*    
+     *  All other types are silently skipped
+     */
+    else
+       return NETSNMP_FS_TYPE_IGNORE;
 }
 
 void
