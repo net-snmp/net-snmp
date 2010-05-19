@@ -2,7 +2,7 @@
 
 . ../support/olducd_eval_tools.sh
 
-HEADER DTLS-UDP Transport
+HEADER TLS-TCP Transport
 
 SKIPIFNOT NETSNMP_TRANSPORT_DTLSUDP_DOMAIN
 

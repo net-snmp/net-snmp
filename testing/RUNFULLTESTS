@@ -130,7 +130,9 @@ if ($harness) {
 my @failed = $results->failed();
 if (!$opts{'q'} && $#failed > -1) {
     print "\nWe failed these ", (1 + $#failed), " tests:\n";
-    print "  ", join("\n  ",@failed), "\n";
+    my @lines = @failed;
+    map { if (exists($sources{$_})) { $_ = "$_ ( $sources{$_} )"} } @lines;
+    print "  ", join("\n  ",@lines), "\n";
 }
 
 if (!$opts{'F'}) {
@@ -257,6 +259,7 @@ sub rename_tests {
 	    $title =~ s/^$opts{'srcdir'}\/testing\///;
 	    $title =~ s/$opts{'d'}.//;
 	}
+	$sources{$title} = $sources{$file} || $file;
 	push @newtests, [$file, $title];
     }
     return @newtests;
