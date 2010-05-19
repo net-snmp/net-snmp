@@ -128,7 +128,7 @@ if ($harness) {
 }
 
 my @failed = $results->failed();
-if (!$opts{'q'}) {
+if (!$opts{'q'} && $#failed > -1) {
     print "\nWe failed these ", (1 + $#failed), " tests:\n";
     print "  ", join("\n  ",@failed), "\n";
 }
