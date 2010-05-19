@@ -1,6 +1,8 @@
 /*
  * etimetest.c
  *
+ * HEADER Testing engineID hashing and timing
+ *
  * Expected SUCCESSes for all tests:    3
  *
  * Returns:

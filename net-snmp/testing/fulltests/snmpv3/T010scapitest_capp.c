@@ -1,6 +1,8 @@
 /*
  * scapitest.c
  *
+ * HEADER Testing SCAPI API
+ *
  * Expected SUCCESSes:  2 + 10 + 1 for all tests.
  *
  * Returns:

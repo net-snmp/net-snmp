@@ -1,6 +1,8 @@
 /*
  * keymanagetest.c
  *
+ * HEADER Testing key management API functionality
+ *
  * Expected SUCCESSes:  2 + 2 + 3 for all tests.
  *
  * Returns:
