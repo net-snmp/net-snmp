@@ -7,11 +7,54 @@
 #if HAVE_MNTENT_H
 #include <mntent.h>
 #endif
+#if HAVE_SYS_MNTTAB_H
+#include <sys/mnttab.h>
+#endif
 #if HAVE_SYS_VFS_H
 #include <sys/vfs.h>
 #endif
+#if HAVE_SYS_PARAM_H
+#include <sys/param.h>
+#endif
+#if HAVE_SYS_MOUNT_H
+#include <sys/mount.h>
+#endif
 #if HAVE_SYS_STATFS_H
 #include <sys/statfs.h>
+#endif
+#if HAVE_SYS_STATVFS_H
+#include <sys/statvfs.h>
+#endif
+
+#ifdef solaris2
+#define _NETSNMP_GETMNTENT_TWO_ARGS 1
+#else
+#undef  _NETSNMP_GETMNTENT_TWO_ARGS 
+#endif
+
+    /*
+     * Handle naming differences between getmntent() APIs
+     */
+#ifdef _NETSNMP_GETMNTENT_TWO_ARGS
+    /* Two-argument form (Solaris) */
+#define NSFS_MNTENT   struct mnttab
+#define NSFS_PATH     mnt_mountp
+#define NSFS_DEV      mnt_special
+#define NSFS_TYPE     mnt_fstype
+
+#define NSFS_STATFS   statvfs
+#define NSFS_SIZE     f_frsize
+
+#else
+    /* One-argument form (everything else?) */
+#define NSFS_MNTENT   struct mntent
+#define NSFS_PATH     mnt_dir
+#define NSFS_DEV      mnt_fsname
+#define NSFS_TYPE     mnt_type
+
+#define NSFS_STATFS   statfs
+#define NSFS_SIZE     f_bsize
+
 #endif
 
 int
@@ -108,8 +151,13 @@ void
 netsnmp_fsys_arch_load( void )
 {
     FILE              *fp=NULL;
+#ifdef _NETSNMP_GETMNTENT_TWO_ARGS
+    struct mnttab      mtmp;
+    struct mnttab     *m = &mtmp;
+#else
     struct mntent     *m;
-    struct statfs      stat_buf;
+#endif
+    struct NSFS_STATFS stat_buf;
     netsnmp_fsys_info *entry;
     char               tmpbuf[1024];
 
@@ -126,15 +174,21 @@ netsnmp_fsys_arch_load( void )
     /*
      * ... and insert this into the filesystem container.
      */
-    while ((m = getmntent(fp)) != NULL ) {
-        entry = netsnmp_fsys_by_path( m->mnt_dir, NETSNMP_FS_FIND_CREATE );
+    while 
+#ifdef _NETSNMP_GETMNTENT_TWO_ARGS
+          ((getmntent(fp, m)) == 0 )
+#else
+          ((m = getmntent(fp)) != NULL )
+#endif
+    {
+        entry = netsnmp_fsys_by_path( m->NSFS_PATH, NETSNMP_FS_FIND_CREATE );
         if (!entry) {
             continue;
         }
 
-        strncpy( entry->path,   m->mnt_dir,    sizeof( entry->path   ));
-        strncpy( entry->device, m->mnt_fsname, sizeof( entry->device ));
-        entry->type   = _fsys_type(  m->mnt_type );
+        strncpy( entry->path,   m->NSFS_PATH,    sizeof( entry->path   ));
+        strncpy( entry->device, m->NSFS_DEV,     sizeof( entry->device ));
+        entry->type   = _fsys_type(  m->NSFS_TYPE );
         if (!(entry->type & _NETSNMP_FS_TYPE_SKIP_BIT))
             entry->flags |= NETSNMP_FS_FLAG_ACTIVE;
 
@@ -166,12 +220,12 @@ netsnmp_fsys_arch_load( void )
                                    NETSNMP_DS_AGENT_SKIPNFSINHOSTRESOURCES))
             continue;
 
-        if ( statfs( entry->path, &stat_buf ) < 0 ) {
+        if ( NSFS_STATFS( entry->path, &stat_buf ) < 0 ) {
             snprintf( tmpbuf, sizeof(tmpbuf), "Cannot statfs %s\n", entry->path );
             snmp_log_perror( tmpbuf );
             continue;
         }
-        entry->units =  stat_buf.f_bsize;
+        entry->units =  stat_buf.NSFS_SIZE;
         entry->size  =  stat_buf.f_blocks;
         entry->used  = (stat_buf.f_blocks - stat_buf.f_bfree);
         entry->avail =  stat_buf.f_bavail;
