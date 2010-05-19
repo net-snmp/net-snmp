@@ -239,9 +239,9 @@ sub rename_tests {
     foreach my $file (@tests) {
 	my $title = "$file";
 	my $foundheader = 0;
-	$title = "$file" if (exists($sources{$file}));
-
-	open(SRC, $file);
+	$title = $sources{$file} if (exists($sources{$file}));
+	
+	open(SRC, $title);
 	while (<SRC>) {
 	    if (/(HEADER|TITLE)\s+['"]*(.*)/) {
 		$title = $2;
@@ -382,6 +382,7 @@ sub call_build_script {
     return undef if ($lastline eq 'fail');
     return undef if ($lastline eq 'skip');
     return $filename if ($lastline eq '');
+    $sources{$lastline} = $filename;        # remember where we came from
     return $lastline;
 }
 
