@@ -284,11 +284,11 @@ sub find_scripts {
     my ($buildname, $hashref) = @_;
     my $count;
     DEBUG("looking for $buildname scripts\n");
-    foreach my $builder (glob("$opts{'srcdir'}/testing/$opts{'d'}/*/${buildname}_*")) {
+    foreach my $builder (glob("$opts{'srcdir'}/testing/$opts{'d'}/*/*_${buildname}")) {
 	next if ($builder =~ /~$/);
 	next if ($builder =~ /.(bak|orig|rej|old)$/);
 
-	my ($group, $type) = ($builder =~ /([^\/]+)\/${buildname}_(.*)/);
+	my ($group, $type) = ($builder =~ /([^\/]+)\/([^\/]*)_${buildname}/);
 	# save this as a certain group builder
 	$hashref->{$type}{$group} = $builder;
 
