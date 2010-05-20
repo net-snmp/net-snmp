@@ -56,7 +56,7 @@ NSC_EXEC_PREFIX=$exec_prefix
 NSC_SRCDIR=@srcdir@
 NSC_INCDIR=${NSC_PREFIX}/include
 NSC_BASE_SUBAGENT_LIBS="-lnetsnmpagent -lnetsnmphelpers -lnetsnmp"
-NSC_BASE_AGENT_LIBS="-lnetsnmpagent -lnetsnmphelpers -lnetsnmpmibs -lnetsnmp"
+NSC_BASE_AGENT_LIBS="-lnetsnmpagent -lnetsnmpmibs -lnetsnmphelpers -lnetsnmp"
 NSC_SRC_LIBDIRS="agent/.libs snmplib/.libs agent/helpers/.libs"
 NSC_SRC_LIBDEPS="agent/.libs/libnetsnmpmibs.a agent/.libs/libnetsnmpagent.a agent/helpers/.libs/libnetsnmphelpers.a snmplib/.libs/libnetsnmp.a"
 
