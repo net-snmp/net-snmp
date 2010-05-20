@@ -149,7 +149,8 @@ netsnmp_udpipv4base_transport(struct sockaddr_in *addr, int local)
                 return NULL;
             }
             local_addr_len = sizeof(addr_pair.local_addr);
-            rc2 = getsockname(t->sock, &addr_pair.local_addr, &local_addr_len);
+            rc2 = getsockname(t->sock, (struct sockaddr*)&addr_pair.local_addr,
+                              &local_addr_len);
             netsnmp_assert(rc2 == 0);
         }
 

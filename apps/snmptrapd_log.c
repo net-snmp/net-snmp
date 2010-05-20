@@ -659,7 +659,7 @@ realloc_handle_ip_fmt(u_char ** buf, size_t * buf_len, size_t * out_len,
         }
         if (host != NULL) {
             if (!snmp_strcat(&temp_buf, &temp_buf_len, &temp_out_len, 1,
-                             (u_char *)host->h_name)) {
+                             (const u_char *)host->h_name)) {
                 if (temp_buf != NULL) {
                     free(temp_buf);
                 }
