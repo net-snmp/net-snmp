@@ -43,5 +43,5 @@ cat >> $2.c << EOF2
 EOF2
 
 # now compile the whole mess
-${builddir}/libtool --mode=link cc -g -I${builddir}/include -I${srcdir}/include -o $2.lt $2.c ${builddir}/snmplib/libnetsnmp.la
+${builddir}/libtool --mode=link `${builddir}/net-snmp-config --build-command` -I$builddir/include -I$srcdir/include -o $2.lt $2.c ${builddir}/snmplib/libnetsnmp.la
 echo $2.lt;
