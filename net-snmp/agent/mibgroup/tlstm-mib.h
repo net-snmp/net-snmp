@@ -2,8 +2,8 @@
  * module to include the modules
  */
 config_require(tlstm-mib/snmpTlstmSession)
-config_require(tlstm-mib/tlstmAddrTable)
-config_require(tlstm-mib/tlstmCertToTSNTable)
+config_require(tlstm-mib/snmpTlstmAddrTable)
+config_require(tlstm-mib/snmpTlstmCertToTSNTable)
 config_add_mib(SNMP-TLS-TM-MIB)
 config_add_mib(SNMP-TSM-MIB)
 

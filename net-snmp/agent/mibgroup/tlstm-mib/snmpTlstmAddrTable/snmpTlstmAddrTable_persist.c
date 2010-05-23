@@ -8,7 +8,7 @@
 /*
  * include our parent header 
  */
-#include "tlstmAddrTable.h"
+#include "snmpTlstmAddrTable.h"
 
 #include <net-snmp/agent/table_container.h>
 #include <net-snmp/library/container.h>
