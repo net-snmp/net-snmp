@@ -167,6 +167,9 @@ else
       fi
       echo $result
       ;;
+    --build-command)
+      echo "@CC@ @CFLAGS@ @DEVFLAGS@"
+      ;;
     #################################################### client lib
     --libs)
       # use this one == --netsnmp-libs + --external-libs
@@ -656,6 +659,7 @@ if test "x$usage" = "xyes"; then
   echo "    --build-includes      include path to build/source includes"
   echo "    --build-lib-dirs      link path to libraries"
   echo "    --build-lib-deps      path to libraries for dependency target"
+  echo "    --build-command       command to compile \$3... to \$2"
   echo ""
   echo "  Automatted subagent building (produces an OUTPUTNAME binary file):"
   echo "  [this feature has not been tested very well yet.  use at your risk.]"
