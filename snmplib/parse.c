@@ -2971,6 +2971,7 @@ parse_trapDefinition(FILE * fp, char *name)
     strcpy(np->parent, np->next->parent);
     strcat(np->parent, "#");
     np->next->label = strdup(np->parent);
+    np->type = TRAPTYPE;
     return np;
 }
 
