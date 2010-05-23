@@ -9,7 +9,7 @@
 #include <openssl/x509.h>
 #include <net-snmp/library/cert_util.h>
 #include "tlstm-mib.h"
-#include "tlstmCertToTSNTable.h"
+#include "snmpTlstmCertToTSNTable.h"
 
 /** XXX - move these to table_data header? */
 #define FATE_NEWLY_CREATED    1
@@ -66,7 +66,7 @@ typedef struct certToTSN_entry_s {
     certToTSN_undo *undo;
 } certToTSN_entry;
 
-
+static Netsnmp_Node_Handler tlstmCertToTSNTable_handler;
 static oid _oid2type(oid *val, int val_len);
 /** static int _type2oid(int type, oid *val, int *val_len); */
 static int _cache_load(netsnmp_cache *cache, netsnmp_tdata *table);
@@ -285,7 +285,7 @@ tlstmCertToTSNTable_removeEntry(netsnmp_tdata * table,
 
 
 /** handles requests for the tlstmCertToTSNTable table */
-int
+static int
 tlstmCertToTSNTable_handler(netsnmp_mib_handler *handler,
                             netsnmp_handler_registration *reginfo,
                             netsnmp_agent_request_info *reqinfo,

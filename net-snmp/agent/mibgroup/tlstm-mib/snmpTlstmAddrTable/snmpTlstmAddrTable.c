@@ -9,14 +9,15 @@
 #include <openssl/x509.h>
 #include <net-snmp/library/cert_util.h>
 #include "tlstm-mib.h"
-#include "tlstmAddrTable.h"
-#include "tlstmAddrTable_internal.h"
+#include "snmpTlstmAddrTable.h"
+#include "snmpTlstmAddrTable_internal.h"
 
 /** XXX - move these to table_data header? */
 #define FATE_NEWLY_CREATED    1
 #define FATE_NO_CHANGE        0
 #define FATE_DELETE_ME        -1
 
+static Netsnmp_Node_Handler tlstmAddrTable_handler;
 static uint32_t _last_changed = 0;
 static int _count_handler(netsnmp_mib_handler *handler,
                           netsnmp_handler_registration *reginfo,
@@ -27,7 +28,7 @@ void _tlstmAddr_container_init_persistence(netsnmp_tdata *table_data);
 
 /** Initializes the tlstmAddrTable module */
 void
-init_tlstmAddrTable(void)
+init_snmpTlstmAddrTable(void)
 {
     oid             reg_oid[] = { SNMP_TLS_TM_BASE, 2, 2, 1, 9 };
     const size_t    reg_oid_len = OID_LENGTH(reg_oid);
@@ -215,7 +216,7 @@ tlstmAddrTable_removeEntry(netsnmp_tdata * table_data,
 
 
 /** handles requests for the tlstmAddrTable table */
-int
+static int
 tlstmAddrTable_handler(netsnmp_mib_handler *handler,
                        netsnmp_handler_registration *reginfo,
                        netsnmp_agent_request_info *reqinfo,

@@ -8,8 +8,7 @@
 /*
  * function declarations 
  */
-void            init_tlstmCertToTSNTable(void);
-Netsnmp_Node_Handler tlstmCertToTSNTable_handler;
+void            init_snmpTlstmCertToTSNTable(void);
 
 /*
  * index definitions for table tlstmCertToTSNTable 
