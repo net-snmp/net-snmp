@@ -1,6 +1,6 @@
-#ifndef TLSTMCERTTOTSNTABLE_H
-#define TLSTMCERTTOTSNTABLE_H
+#ifndef SNMPTLSTMCERTTOTSNTABLE_H
+#define SNMPTLSTMCERTTOTSNTABLE_H
 
-config_require(tlstm-mib/tlstmCertToTSNTable/tlstmCertToTSNTable)
+config_require(tlstm-mib/snmpTlstmCertToTSNTable/snmpTlstmCertToTSNTable)
 
-#endif                          /* TLSTMCERTTOTSNTABLE_H */
+#endif                          /* SNMPTLSTMCERTTOTSNTABLE_H */

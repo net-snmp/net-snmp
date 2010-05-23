@@ -1,7 +1,7 @@
-#ifndef TLSTMADDRTABLE_H
-#define TLSTMADDRTABLE_H
+#ifndef SNMPTLSTMADDRTABLE_H
+#define SNMPTLSTMADDRTABLE_H
 
-config_require(tlstm-mib/tlstmAddrTable/tlstmAddrTable)
-config_require(tlstm-mib/tlstmAddrTable/tlstmAddrTable_persist)
+config_require(tlstm-mib/snmpTlstmAddrTablesnmpT/lstmAddrTable)
+config_require(tlstm-mib/snmpTlstmAddrTable/snmpTlstmAddrTable_persist)
 
-#endif                          /* TLSTMADDRTABLE_H */
+#endif                          /* SNMPTLSTMADDRTABLE_H */

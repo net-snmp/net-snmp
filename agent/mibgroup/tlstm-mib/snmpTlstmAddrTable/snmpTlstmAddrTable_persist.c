@@ -14,7 +14,7 @@
 #include <net-snmp/library/container.h>
 #include <ctype.h>
 
-#include "tlstmAddrTable_internal.h"
+#include "snmpTlstmAddrTable_internal.h"
 
 /**********************************************************************
  **********************************************************************
