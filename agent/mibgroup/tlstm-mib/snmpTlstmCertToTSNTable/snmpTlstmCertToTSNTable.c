@@ -83,7 +83,7 @@ static uint32_t _last_changed = 0;
 
 /** Initializes the tlstmCertToTSNTable module */
 void
-init_tlstmCertToTSNTable(void)
+init_snmpTlstmCertToTSNTable(void)
 {
     oid             reg_oid[]   =  { SNMP_TLS_TM_BASE, 2, 2, 1, 3 };
     const size_t    reg_oid_len =  OID_LENGTH(reg_oid);

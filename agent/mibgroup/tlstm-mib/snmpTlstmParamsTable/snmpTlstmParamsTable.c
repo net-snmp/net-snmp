@@ -18,7 +18,8 @@ static int _count_handler(netsnmp_mib_handler *handler,
                           netsnmp_agent_request_info *reqinfo,
                           netsnmp_request_info *requests);
 
-static Netsnmp_Node_Handler tlstmParamsTable_handler;
+static Netsnmp_Node_Handler snmpTlstmParamsTable_handler;
+static uint32_t             _last_changed = 0;
 
 
 /*
@@ -28,7 +29,7 @@ static Netsnmp_Node_Handler tlstmParamsTable_handler;
 void
 init_snmpTlstmParamsTable(void)
 {
-    const oid                     reg_oid[] = { SNMP_TLS_TM_BASE, 2, 2, 1, 6 };
+    oid                           reg_oid[] = { SNMP_TLS_TM_BASE, 2, 2, 1, 6 };
     netsnmp_table_data_set       *table_set;
     netsnmp_handler_registration *reg;
     uint32_t                      nv = ST_VOLATILE;
@@ -62,7 +63,7 @@ init_snmpTlstmParamsTable(void)
         table_set,
         COLUMN_SNMPTLSTMPARAMSCLIENTFINGERPRINT, ASN_OCTET_STR, 1, NULL, 0,
         /** defval nonVolatile */
-        COLUMN_SNMPTLSTMPARAMSSTORAGETYPE, ASN_INTEGER, 1, &nv, sizeof(vn),
+        COLUMN_SNMPTLSTMPARAMSSTORAGETYPE, ASN_INTEGER, 1, &nv, sizeof(nv),
         COLUMN_SNMPTLSTMPARAMSROWSTATUS, ASN_INTEGER, 1, NULL, 0, 0);
 
     /*
@@ -128,7 +129,7 @@ snmpTlstmParamsTable_handler(netsnmp_mib_handler *handler,
     suffix_len =
         requests->requestvb->name_length - (reginfo->rootoid_len + 2);
 
-    if ((NULL == hander) || (NULL == reginfo) ||
+    if ((NULL == handler) || (NULL == reginfo) ||
         (NULL == requests) || (NULL == requests->requestvb))
         return SNMPERR_GENERR;
 
@@ -161,12 +162,17 @@ snmpTlstmParamsTable_handler(netsnmp_mib_handler *handler,
             case COLUMN_SNMPTLSTMPARAMSCLIENTFINGERPRINT:
                 /** check len/algorithm MIB requirements */
                 ret = netsnmp_cert_check_vb_fingerprint(request->requestvb);
-                break;          /* case COLUMN_SNMPTLSTMPARAMSCLIENTFINGERPRINT */
-            }                   /* switch */
-            break;              /* switch column */
-        }                       /* for */
+                break;       /* case COLUMN_SNMPTLSTMPARAMSCLIENTFINGERPRINT */
+            } /* switch colnum */
+        } /* for */
+        break; /* RESERVE1 */
+
+    case MODE_SET_COMMIT:
+        /** update last changed */
+        _last_changed = netsnmp_get_agent_uptime();
+        break;                  /* case MODE_SET_COMMIT */
+
     }                           /* switch mode */
-#endif
 
     if (ret != SNMP_ERR_NOERROR)
         netsnmp_set_request_error(reqinfo, request, ret);
