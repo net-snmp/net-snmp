@@ -5,6 +5,8 @@
 #include <net-snmp/net-snmp-config.h>
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
+
+#include "tlstm-mib.h"
 #include "snmpTlstmSession.h"
 
 static netsnmp_handler_registration* _myreg = NULL;
@@ -13,10 +15,10 @@ static netsnmp_handler_registration* _myreg = NULL;
 void
 init_snmpTlstmSession(void)
 {
-    static oid      myoid[] = { 1, 3, 6, 1, 6, 3, 42, 2, 1 };
+    static oid      myoid[] = { SNMP_TLS_TM_BASE, 2, 1 };
     int             rc;
 
-    DEBUGMSGTL(("snmpTlstmSession", "Initializing\n"));
+    DEBUGMSGTL(("tlstmSession", "Initializing\n"));
 
     _myreg = netsnmp_create_handler_registration("snmpTlstmSession", NULL,
                                                  myoid, OID_LENGTH(myoid),
