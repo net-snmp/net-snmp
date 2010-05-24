@@ -150,8 +150,10 @@ netsnmp_fsys_arch_load( void )
         if (!entry)
             continue;
 
-        memcpy( entry->path,   stats[i].f_mntonname,   NSFS_NAMELEN );
-        memcpy( entry->device, stats[i].f_mntfromname, NSFS_NAMELEN );
+        memcpy( entry->path,   stats[i].f_mntonname,   sizeof(entry->path)  );
+        entry->path[sizeof(entry->path)-1] = '\0';
+        memcpy( entry->device, stats[i].f_mntfromname, sizeof(entry->device));
+        entry->device[sizeof(entry->device)-1] = '\0';
         entry->units = stats[i].f_bsize;    /* or f_frsize */
         entry->size  = stats[i].f_blocks;
         entry->used  = stats[i].f_bfree;
