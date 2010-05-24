@@ -39,8 +39,8 @@ static void _tlstmAddrTable_container_row_restore_user(const char *token,
 static int  _tlstmAddrTable_container_row_save(netsnmp_tdata_row * row,
                                                void *type);
 
-static const char system_token[] = "tlstmAddrTable";
-static const char user_token[] = "tlstmAddrEntry";
+static const char system_token[] = "snmpTlstmAddrTable";
+static const char user_token[] = "snmpTlstmAddrEntry";
 static netsnmp_tdata  *_table_data = NULL;
 
 /************************************************************
@@ -57,7 +57,7 @@ _tlstmAddr_container_init_persistence(netsnmp_tdata *table_data)
 {
     int             rc;
     const char     *user_help = 
-        "tlstmAddrEntry targetName fingerPrintLen hashType:fingerPrint "
+        "snmpTlstmAddrEntry targetName fingerPrintLen hashType:fingerPrint "
         "serverIdentityLen serverIdentity";
 
     /** save table for use during row restore */
