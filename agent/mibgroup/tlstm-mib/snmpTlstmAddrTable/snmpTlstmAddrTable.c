@@ -248,7 +248,7 @@ tlstmAddrTable_handler(netsnmp_mib_handler *handler,
                 netsnmp_tdata_extract_entry(request);
             table_info = netsnmp_extract_table_info(request);
             switch (table_info->colnum) {
-            case COLUMN_TLSTMADDRSERVERFINGERPRINT:
+            case COLUMN_SNMPTLSTMADDRSERVERFINGERPRINT:
             {
                 u_char bin[42], *ptr = bin;
                 size_t len = sizeof(bin), offset = 1;
@@ -265,21 +265,21 @@ tlstmAddrTable_handler(netsnmp_mib_handler *handler,
                     snmp_set_var_typed_value(request->requestvb, ASN_OCTET_STR,
                                              bin, offset);
             }
-                break;          /* case COLUMN_TLSTMADDRSERVERFINGERPRINT */
-            case COLUMN_TLSTMADDRSERVERIDENTITY:
+                break;          /* case COLUMN_SNMPTLSTMADDRSERVERFINGERPRINT */
+            case COLUMN_SNMPTLSTMADDRSERVERIDENTITY:
                 snmp_set_var_typed_value
                     (request->requestvb, ASN_OCTET_STR,
                      (u_char *) table_entry->tlstmAddrServerIdentity,
                      table_entry->tlstmAddrServerIdentity_len);
-                break;          /* case COLUMN_TLSTMADDRSERVERIDENTITY */
-            case COLUMN_TLSTMADDRSTORAGETYPE:
+                break;          /* case COLUMN_SNMPTLSTMADDRSERVERIDENTITY */
+            case COLUMN_SNMPTLSTMADDRSTORAGETYPE:
                 snmp_set_var_typed_integer(request->requestvb, ASN_INTEGER,
                                            table_entry->tlstmAddrStorageType);
-                break;          /* case COLUMN_TLSTMADDRSTORAGETYPE */
-            case COLUMN_TLSTMADDRROWSTATUS:
+                break;          /* case COLUMN_SNMPTLSTMADDRSTORAGETYPE */
+            case COLUMN_SNMPTLSTMADDRROWSTATUS:
                 snmp_set_var_typed_integer(request->requestvb, ASN_INTEGER,
                                            table_entry->tlstmAddrRowStatus);
-                break;          /* case COLUMN_TLSTMADDRROWSTATUS */
+                break;          /* case COLUMN_SNMPTLSTMADDRROWSTATUS */
             default:
                 netsnmp_set_request_error(reqinfo, request, SNMP_NOSUCHOBJECT);
                 break;
@@ -311,33 +311,33 @@ tlstmAddrTable_handler(netsnmp_mib_handler *handler,
             }
 
             switch (table_info->colnum) {
-            case COLUMN_TLSTMADDRSERVERFINGERPRINT:
+            case COLUMN_SNMPTLSTMADDRSERVERFINGERPRINT:
                 ret = netsnmp_check_vb_type_and_max_size
                     (request->requestvb, ASN_OCTET_STR,
                      sizeof(table_entry->tlstmAddrServerFingerprint));
                 /** check len/algorithm MIB requirements */
                 if (ret == SNMP_ERR_NOERROR)
                     ret = netsnmp_cert_check_vb_fingerprint(request->requestvb);
-                break;          /* case COLUMN_TLSTMADDRSERVERFINGERPRINT */
-            case COLUMN_TLSTMADDRSERVERIDENTITY:
+                break;          /* case COLUMN_SNMPTLSTMADDRSERVERFINGERPRINT */
+            case COLUMN_SNMPTLSTMADDRSERVERIDENTITY:
                 ret = netsnmp_check_vb_type_and_max_size
                     (request->requestvb, ASN_OCTET_STR,
                      sizeof(table_entry->tlstmAddrServerIdentity));
-                break;          /* case COLUMN_TLSTMADDRSERVERIDENTITY */
-            case COLUMN_TLSTMADDRSTORAGETYPE:
+                break;          /* case COLUMN_SNMPTLSTMADDRSERVERIDENTITY */
+            case COLUMN_SNMPTLSTMADDRSTORAGETYPE:
                 ret = netsnmp_check_vb_storagetype
                     (request->requestvb,
                      (table_entry ?
                       table_entry->tlstmAddrStorageType : ST_NONE));
-                break;          /* case COLUMN_TLSTMADDRSTORAGETYPE */
-            case COLUMN_TLSTMADDRROWSTATUS:
+                break;          /* case COLUMN_SNMPTLSTMADDRSTORAGETYPE */
+            case COLUMN_SNMPTLSTMADDRROWSTATUS:
                 ret = netsnmp_check_vb_rowstatus_with_storagetype
                     (request->requestvb,
                      (table_entry ?
                       table_entry->tlstmAddrRowStatus : RS_NONEXISTENT),
                      (table_entry ?
                       table_entry->tlstmAddrStorageType : ST_NONE));
-                break;          /* case COLUMN_TLSTMADDRROWSTATUS */
+                break;          /* case COLUMN_SNMPTLSTMADDRROWSTATUS */
             default:
                 ret = SNMP_ERR_NOTWRITABLE;
             }                   /* switch colnum */
@@ -419,7 +419,7 @@ tlstmAddrTable_handler(netsnmp_mib_handler *handler,
                 table_entry = (tlstmAddrTable_entry *)
                     netsnmp_tdata_extract_entry(request);
                 if ((table_entry->undo->fate != FATE_NEWLY_CREATED) ||
-                    (table_entry->undo->req[COLUMN_TLSTMADDRROWSTATUS]))
+                    (table_entry->undo->req[COLUMN_SNMPTLSTMADDRROWSTATUS]))
                     continue;
                 ret = SNMP_ERR_INCONSISTENTNAME;
                 break;
@@ -476,7 +476,7 @@ tlstmAddrTable_handler(netsnmp_mib_handler *handler,
             table_info = netsnmp_extract_table_info(request);
 
             switch (table_info->colnum) {
-            case COLUMN_TLSTMADDRSERVERFINGERPRINT:
+            case COLUMN_SNMPTLSTMADDRSERVERFINGERPRINT:
             {
                 u_char *tmp = (u_char*)table_entry->tlstmAddrServerFingerprint;
 
@@ -499,8 +499,8 @@ tlstmAddrTable_handler(netsnmp_mib_handler *handler,
                 if (0 == table_entry->tlstmAddrServerFingerprint_len)
                     ret = SNMP_ERR_GENERR;
             }
-                break;          /* case COLUMN_TLSTMADDRSERVERFINGERPRINT */
-            case COLUMN_TLSTMADDRSERVERIDENTITY:
+                break;          /* case COLUMN_SNMPTLSTMADDRSERVERFINGERPRINT */
+            case COLUMN_SNMPTLSTMADDRSERVERIDENTITY:
                 memcpy(table_entry->undo->tlstmAddrServerIdentity,
                        table_entry->tlstmAddrServerIdentity,
                        sizeof(table_entry->tlstmAddrServerIdentity));
@@ -513,19 +513,19 @@ tlstmAddrTable_handler(netsnmp_mib_handler *handler,
                        request->requestvb->val_len);
                 table_entry->tlstmAddrServerIdentity_len =
                     request->requestvb->val_len;
-                break;          /* case COLUMN_TLSTMADDRSERVERIDENTITY */
-            case COLUMN_TLSTMADDRSTORAGETYPE:
+                break;          /* case COLUMN_SNMPTLSTMADDRSERVERIDENTITY */
+            case COLUMN_SNMPTLSTMADDRSTORAGETYPE:
                 table_entry->undo->tlstmAddrStorageType =
                     table_entry->tlstmAddrStorageType;
                 table_entry->tlstmAddrStorageType =
                     *request->requestvb->val.integer;
-                break;          /* case COLUMN_TLSTMADDRSTORAGETYPE */
-            case COLUMN_TLSTMADDRROWSTATUS:
+                break;          /* case COLUMN_SNMPTLSTMADDRSTORAGETYPE */
+            case COLUMN_SNMPTLSTMADDRROWSTATUS:
                 table_entry->undo->tlstmAddrRowStatus =
                     table_entry->tlstmAddrRowStatus;
                 table_entry->tlstmAddrRowStatus =
                     *request->requestvb->val.integer;
-                break;          /* case COLUMN_TLSTMADDRROWSTATUS */
+                break;          /* case COLUMN_SNMPTLSTMADDRROWSTATUS */
             }                   /* switch colnum */
             if (ret != SNMP_ERR_NOERROR)
                 break;
@@ -560,22 +560,22 @@ tlstmAddrTable_handler(netsnmp_mib_handler *handler,
                 }
                 
                 if ((RS_IS_ACTIVE(table_entry->tlstmAddrRowStatus)) &&
-                    ((!table_entry->undo->req[COLUMN_TLSTMADDRROWSTATUS]) ||
+                    ((!table_entry->undo->req[COLUMN_SNMPTLSTMADDRROWSTATUS]) ||
                      (RS_IS_ACTIVE(table_entry->undo->tlstmAddrRowStatus)))) {
                     /*
                      * check mib restrictions on active rows.
                      */
-                    if (table_entry->undo->req[COLUMN_TLSTMADDRSERVERFINGERPRINT]) {
+                    if (table_entry->undo->req[COLUMN_SNMPTLSTMADDRSERVERFINGERPRINT]) {
                         table_entry->undo->is_consistent = 0;
-                        request = table_entry->undo->req[COLUMN_TLSTMADDRSERVERFINGERPRINT];
+                        request = table_entry->undo->req[COLUMN_SNMPTLSTMADDRSERVERFINGERPRINT];
                     }
-                    else if (table_entry->undo->req[COLUMN_TLSTMADDRSERVERIDENTITY]) {
+                    else if (table_entry->undo->req[COLUMN_SNMPTLSTMADDRSERVERIDENTITY]) {
                         table_entry->undo->is_consistent = 0;
-                        request = table_entry->undo->req[COLUMN_TLSTMADDRSERVERIDENTITY];
+                        request = table_entry->undo->req[COLUMN_SNMPTLSTMADDRSERVERIDENTITY];
                     }
-                    else if (table_entry->undo->req[COLUMN_TLSTMADDRSTORAGETYPE]) {
+                    else if (table_entry->undo->req[COLUMN_SNMPTLSTMADDRSTORAGETYPE]) {
                         table_entry->undo->is_consistent = 0;
-                        request = table_entry->undo->req[COLUMN_TLSTMADDRSTORAGETYPE];
+                        request = table_entry->undo->req[COLUMN_SNMPTLSTMADDRSTORAGETYPE];
                     }
                     
                     if (!table_entry->undo->is_consistent)
@@ -589,14 +589,14 @@ tlstmAddrTable_handler(netsnmp_mib_handler *handler,
                             ret = SNMP_ERR_INCONSISTENTNAME;
                         else
                             ret = SNMP_ERR_INCONSISTENTVALUE;
-                        request = table_entry->undo->req[COLUMN_TLSTMADDRROWSTATUS];
+                        request = table_entry->undo->req[COLUMN_SNMPTLSTMADDRROWSTATUS];
                     }
                 } /* going active */
                 else if (RS_DESTROY == table_entry->tlstmAddrRowStatus) {
                     /** can't delete active row */
                     if (RS_IS_ACTIVE(table_entry->undo->tlstmAddrRowStatus)) {
                         ret = SNMP_ERR_INCONSISTENTVALUE;
-                        request = table_entry->undo->req[COLUMN_TLSTMADDRROWSTATUS];
+                        request = table_entry->undo->req[COLUMN_SNMPTLSTMADDRROWSTATUS];
                     }
                 }               /* destroy */
                 if (ret != SNMP_ERR_NOERROR)
@@ -622,7 +622,7 @@ tlstmAddrTable_handler(netsnmp_mib_handler *handler,
             table_info = netsnmp_extract_table_info(request);
 
             switch (table_info->colnum) {
-            case COLUMN_TLSTMADDRSERVERFINGERPRINT:
+            case COLUMN_SNMPTLSTMADDRSERVERFINGERPRINT:
                 /*
                  * restore tlstmAddrServerFingerprint value 
                  */
@@ -632,8 +632,8 @@ tlstmAddrTable_handler(netsnmp_mib_handler *handler,
                 table_entry->tlstmAddrServerFingerprint_len =
                     table_entry->undo->tlstmAddrServerFingerprint_len;
                 table_entry->hashType = table_entry->undo->hashType;
-                break;          /* case COLUMN_TLSTMADDRSERVERFINGERPRINT */
-            case COLUMN_TLSTMADDRSERVERIDENTITY:
+                break;          /* case COLUMN_SNMPTLSTMADDRSERVERFINGERPRINT */
+            case COLUMN_SNMPTLSTMADDRSERVERIDENTITY:
                 /*
                  * restore tlstmAddrServerIdentity value 
                  */
@@ -642,21 +642,21 @@ tlstmAddrTable_handler(netsnmp_mib_handler *handler,
                        sizeof(table_entry->tlstmAddrServerIdentity));
                 table_entry->tlstmAddrServerIdentity_len =
                     table_entry->undo->tlstmAddrServerIdentity_len;
-                break;          /* case COLUMN_TLSTMADDRSERVERIDENTITY */
-            case COLUMN_TLSTMADDRSTORAGETYPE:
+                break;          /* case COLUMN_SNMPTLSTMADDRSERVERIDENTITY */
+            case COLUMN_SNMPTLSTMADDRSTORAGETYPE:
                 /*
                  * restore tlstmAddrStorageType value 
                  */
                 table_entry->tlstmAddrStorageType =
                     table_entry->undo->tlstmAddrStorageType;
-                break;          /* case COLUMN_TLSTMADDRSTORAGETYPE */
-            case COLUMN_TLSTMADDRROWSTATUS:
+                break;          /* case COLUMN_SNMPTLSTMADDRSTORAGETYPE */
+            case COLUMN_SNMPTLSTMADDRROWSTATUS:
                 /*
                  * restore tlstmAddrRowStatus value 
                  */
                 table_entry->tlstmAddrRowStatus =
                     table_entry->undo->tlstmAddrRowStatus;
-                break;          /* case COLUMN_TLSTMADDRROWSTATUS */
+                break;          /* case COLUMN_SNMPTLSTMADDRROWSTATUS */
             }                   /* switch colnum */
         }                       /* for requests */
 
@@ -703,11 +703,11 @@ tlstmAddrTable_handler(netsnmp_mib_handler *handler,
 
             /** release undo data for requests with no rowstatus */
             if (table_entry->undo &&
-                !table_entry->undo->req[COLUMN_TLSTMADDRROWSTATUS] != 0)
+                !table_entry->undo->req[COLUMN_SNMPTLSTMADDRROWSTATUS] != 0)
                 _freeUndo(table_entry);
 
                     switch (table_info->colnum) {
-                case COLUMN_TLSTMADDRROWSTATUS:
+                case COLUMN_SNMPTLSTMADDRROWSTATUS:
                     switch (table_entry->tlstmAddrRowStatus) {
                     case RS_CREATEANDGO:
                     /** Fall-through */
@@ -735,10 +735,10 @@ tlstmAddrTable_handler(netsnmp_mib_handler *handler,
                     }
                 /** release undo data */
                     _freeUndo(table_entry);
-                    break;      /* case COLUMN_TLSTMADDRROWSTATUS */
-                case COLUMN_TLSTMADDRSERVERFINGERPRINT:
-                case COLUMN_TLSTMADDRSERVERIDENTITY:
-                case COLUMN_TLSTMADDRSTORAGETYPE:
+                    break;      /* case COLUMN_SNMPTLSTMADDRROWSTATUS */
+                case COLUMN_SNMPTLSTMADDRSERVERFINGERPRINT:
+                case COLUMN_SNMPTLSTMADDRSERVERIDENTITY:
+                case COLUMN_SNMPTLSTMADDRSTORAGETYPE:
                     break;
                 }               /* switch colnum */
         }                       /* for requests */

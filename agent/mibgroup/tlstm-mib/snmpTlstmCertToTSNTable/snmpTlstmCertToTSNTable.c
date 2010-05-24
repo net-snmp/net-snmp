@@ -23,15 +23,15 @@ typedef struct certToTSN_undo_s {
     char            fate;
     char            copied;
     char            is_consistent;
-    netsnmp_request_info *req[CERTTOTSN_TABLE_MAX_COL+1];
+    netsnmp_request_info *req[SNMPTLSTMCERTTOTSN_TABLE_MAX_COL+1];
 
     /*
      * undo Column space 
      */
-    char            fingerprint[CERTTOTSN_FINGERPRINT_MAX_SIZE];
+    char            fingerprint[SNMPTLSTMCERTTOTSN_FINGERPRINT_MAX_SIZE];
     size_t          fingerprint_len;
     int             mapType;
-    char            data[CERTTOTSN_DATA_MAX_SIZE];
+    char            data[SNMPTLSTMCERTTOTSN_DATA_MAX_SIZE];
     size_t          data_len;
     char            hashType;
     char            storageType;
@@ -50,10 +50,10 @@ typedef struct certToTSN_entry_s {
     /*
      * Column values 
      */
-    char            fingerprint[CERTTOTSN_FINGERPRINT_MAX_SIZE];
+    char            fingerprint[SNMPTLSTMCERTTOTSN_FINGERPRINT_MAX_SIZE];
     size_t          fingerprint_len;
     int             mapType;
-    char            data[CERTTOTSN_DATA_MAX_SIZE];
+    char            data[SNMPTLSTMCERTTOTSN_DATA_MAX_SIZE];
     size_t          data_len;
     char            storageType;
     char            rowStatus;
@@ -123,8 +123,8 @@ init_tlstmCertToTSNTable(void)
                                      /* index: tlstmCertToTSNID */
                                      ASN_UNSIGNED,  0);
 
-    info->min_column = CERTTOTSN_TABLE_MIN_COL;
-    info->max_column = CERTTOTSN_TABLE_MAX_COL;
+    info->min_column = SNMPTLSTMCERTTOTSN_TABLE_MIN_COL;
+    info->max_column = SNMPTLSTMCERTTOTSN_TABLE_MAX_COL;
 
     /*
      * cache init
@@ -319,7 +319,7 @@ tlstmCertToTSNTable_handler(netsnmp_mib_handler *handler,
             netsnmp_assert(entry && info);
 
             switch (info->colnum) {
-            case COL_CERTTOTSN_FINGERPRINT:
+            case COL_SNMPTLSTMCERTTOTSN_FINGERPRINT:
             {
                 u_char bin[42], *ptr = bin;
                 size_t len = sizeof(bin), offset = 1;
@@ -335,24 +335,24 @@ tlstmCertToTSNTable_handler(netsnmp_mib_handler *handler,
                     snmp_set_var_typed_value(request->requestvb, ASN_OCTET_STR,
                                              bin, offset);
             }
-                break;          /* case COL_CERTTOTSN_FINGERPRINT */
-            case COL_CERTTOTSN_MAPTYPE:
+                break;          /* case COL_SNMPTLSTMCERTTOTSN_FINGERPRINT */
+            case COL_SNMPTLSTMCERTTOTSN_MAPTYPE:
                 tsnm[tsnm_pos] = entry->mapType;
                 snmp_set_var_typed_value(request->requestvb, ASN_OBJECT_ID,
                                          tsnm, sizeof(tsnm));
-                break;          /* case COL_CERTTOTSN_MAPTYPE */
-            case COL_CERTTOTSN_DATA:
+                break;          /* case COL_SNMPTLSTMCERTTOTSN_MAPTYPE */
+            case COL_SNMPTLSTMCERTTOTSN_DATA:
                 snmp_set_var_typed_value(request->requestvb, ASN_OCTET_STR,
                                          entry->data, entry->data_len);
-                break;          /* case COL_CERTTOTSN_DATA */
-            case COL_CERTTOTSN_STORAGETYPE:
+                break;          /* case COL_SNMPTLSTMCERTTOTSN_DATA */
+            case COL_SNMPTLSTMCERTTOTSN_STORAGETYPE:
                 snmp_set_var_typed_integer(request->requestvb, ASN_INTEGER,
                                            entry->storageType);
-                break;          /* case COL_CERTTOTSN_STORAGETYPE */
-            case COL_CERTTOTSN_ROWSTATUS:
+                break;          /* case COL_SNMPTLSTMCERTTOTSN_STORAGETYPE */
+            case COL_SNMPTLSTMCERTTOTSN_ROWSTATUS:
                 snmp_set_var_typed_integer(request->requestvb, ASN_INTEGER,
                                            entry->rowStatus);
-                break;          /* case COL_CERTTOTSN_ROWSTATUS */
+                break;          /* case COL_SNMPTLSTMCERTTOTSN_ROWSTATUS */
             default:
                 netsnmp_set_request_error(reqinfo, request, SNMP_NOSUCHOBJECT);
                 break;
@@ -384,26 +384,26 @@ tlstmCertToTSNTable_handler(netsnmp_mib_handler *handler,
             }
 
             switch (info->colnum) {
-            case COL_CERTTOTSN_FINGERPRINT:
+            case COL_SNMPTLSTMCERTTOTSN_FINGERPRINT:
                 ret = netsnmp_check_vb_type_and_max_size
                     (request->requestvb, ASN_OCTET_STR,
                      sizeof(entry->fingerprint));
                 /** check len/algorithm MIB requirements */
                 if (ret == SNMP_ERR_NOERROR)
                     ret = netsnmp_cert_check_vb_fingerprint(request->requestvb);
-                break;          /* case COL_CERTTOTSN_FINGERPRINT */
-            case COL_CERTTOTSN_MAPTYPE:
+                break;          /* case COL_SNMPTLSTMCERTTOTSN_FINGERPRINT */
+            case COL_SNMPTLSTMCERTTOTSN_MAPTYPE:
                 ret = netsnmp_check_vb_type_and_max_size
                     (request->requestvb, ASN_OBJECT_ID,
-                     CERTTOTSN_MAPTYPE_MAX_SIZE);
+                     SNMPTLSTMCERTTOTSN_MAPTYPE_MAX_SIZE);
                 if (ret == SNMP_ERR_NOERROR) {
                     if (_oid2type(request->requestvb->val.objid,
                                   request->requestvb->val_len) >
                         TSNM_tlstmCert_MAX)
                         ret = SNMP_ERR_WRONGVALUE;
                 }
-                break;          /* case COL_CERTTOTSN_MAPTYPE */
-            case COL_CERTTOTSN_DATA:
+                break;          /* case COL_SNMPTLSTMCERTTOTSN_MAPTYPE */
+            case COL_SNMPTLSTMCERTTOTSN_DATA:
                 ret = netsnmp_check_vb_type_and_max_size
                     (request->requestvb, ASN_OCTET_STR, sizeof(entry->data));
                 /** check len/algorithm MIB requirements */
@@ -415,17 +415,17 @@ tlstmCertToTSNTable_handler(netsnmp_mib_handler *handler,
                         ret = SNMP_ERR_WRONGVALUE;
                     }
                 }
-                break;          /* case COL_CERTTOTSN_DATA */
-            case COL_CERTTOTSN_STORAGETYPE:
+                break;          /* case COL_SNMPTLSTMCERTTOTSN_DATA */
+            case COL_SNMPTLSTMCERTTOTSN_STORAGETYPE:
                 ret = netsnmp_check_vb_storagetype
                     (request->requestvb,(entry ? entry->storageType : ST_NONE));
-                break;          /* case COL_CERTTOTSN_STORAGETYPE */
-            case COL_CERTTOTSN_ROWSTATUS:
+                break;          /* case COL_SNMPTLSTMCERTTOTSN_STORAGETYPE */
+            case COL_SNMPTLSTMCERTTOTSN_ROWSTATUS:
                 ret = netsnmp_check_vb_rowstatus_with_storagetype
                     (request->requestvb,
                      (entry ? entry->rowStatus :RS_NONEXISTENT),
                      (entry ? entry->storageType :ST_NONE));
-                break;          /* case COL_CERTTOTSN_ROWSTATUS */
+                break;          /* case COL_SNMPTLSTMCERTTOTSN_ROWSTATUS */
             default:
                 ret = SNMP_ERR_NOTWRITABLE;
             }                   /* switch colnum */
@@ -512,7 +512,7 @@ tlstmCertToTSNTable_handler(netsnmp_mib_handler *handler,
                 entry = (certToTSN_entry *)
                     netsnmp_tdata_extract_entry(request);
                 if ((entry->undo->fate != FATE_NEWLY_CREATED) ||
-                    (entry->undo->req[COL_CERTTOTSN_ROWSTATUS]))
+                    (entry->undo->req[COL_SNMPTLSTMCERTTOTSN_ROWSTATUS]))
                     continue;
                 ret = SNMP_ERR_INCONSISTENTNAME;
                 break;
@@ -573,7 +573,7 @@ tlstmCertToTSNTable_handler(netsnmp_mib_handler *handler,
              * for each col, save old value and the set new value
              */
             switch (info->colnum) {
-            case COL_CERTTOTSN_FINGERPRINT:
+            case COL_SNMPTLSTMCERTTOTSN_FINGERPRINT:
             {
                 u_char *tmp = (u_char*)entry->fingerprint;
                 memcpy(entry->undo->fingerprint,
@@ -591,28 +591,28 @@ tlstmCertToTSNTable_handler(netsnmp_mib_handler *handler,
                 if (0 == entry->fingerprint_len)
                     ret = SNMP_ERR_GENERR;
             }
-                break;          /* case COL_CERTTOTSN_FINGERPRINT */
-            case COL_CERTTOTSN_MAPTYPE:
+                break;          /* case COL_SNMPTLSTMCERTTOTSN_FINGERPRINT */
+            case COL_SNMPTLSTMCERTTOTSN_MAPTYPE:
                 entry->undo->mapType = entry->mapType;
                 entry->mapType = _oid2type(request->requestvb->val.objid,
                                            request->requestvb->val_len);
-                break;          /* case COL_CERTTOTSN_MAPTYPE */
-            case COL_CERTTOTSN_DATA:
+                break;          /* case COL_SNMPTLSTMCERTTOTSN_MAPTYPE */
+            case COL_SNMPTLSTMCERTTOTSN_DATA:
                 memcpy(entry->undo->data, entry->data, sizeof(entry->data));
                 entry->undo->data_len = entry->data_len;
                 memset(entry->data, 0, sizeof(entry->data));
                 memcpy(entry->data, request->requestvb->val.string,
                        request->requestvb->val_len);
                 entry->data_len = request->requestvb->val_len;
-                break;          /* case COL_CERTTOTSN_DATA */
-            case COL_CERTTOTSN_STORAGETYPE:
+                break;          /* case COL_SNMPTLSTMCERTTOTSN_DATA */
+            case COL_SNMPTLSTMCERTTOTSN_STORAGETYPE:
                 entry->undo->storageType = entry->storageType;
                 entry->storageType = *request->requestvb->val.integer;
-                break;          /* case COL_CERTTOTSN_STORAGETYPE */
-            case COL_CERTTOTSN_ROWSTATUS:
+                break;          /* case COL_SNMPTLSTMCERTTOTSN_STORAGETYPE */
+            case COL_SNMPTLSTMCERTTOTSN_ROWSTATUS:
                 entry->undo->rowStatus = entry->rowStatus;
                 entry->rowStatus = *request->requestvb->val.integer;
-                break;          /* case COL_CERTTOTSN_ROWSTATUS */
+                break;          /* case COL_SNMPTLSTMCERTTOTSN_ROWSTATUS */
             }                   /* switch colnum */
         }                       /* set values for requests */
 
@@ -650,13 +650,13 @@ tlstmCertToTSNTable_handler(netsnmp_mib_handler *handler,
             }
 
             if ((RS_IS_ACTIVE(entry->rowStatus)) &&
-                ((!entry->undo->req[COL_CERTTOTSN_ROWSTATUS]) ||
+                ((!entry->undo->req[COL_SNMPTLSTMCERTTOTSN_ROWSTATUS]) ||
                  (RS_IS_ACTIVE(entry->undo->rowStatus)))) {
                 /*
                  * per mib, can't modify these while row active
                  */
-                char _cols[3] = { COL_CERTTOTSN_FINGERPRINT,
-                                  COL_CERTTOTSN_MAPTYPE, COL_CERTTOTSN_DATA };
+                char _cols[3] = { COL_SNMPTLSTMCERTTOTSN_FINGERPRINT,
+                                  COL_SNMPTLSTMCERTTOTSN_MAPTYPE, COL_SNMPTLSTMCERTTOTSN_DATA };
                 int i;
                 for (i=0; i < 3; ++i ) {
                     if (!entry->undo->req[i])
@@ -674,12 +674,12 @@ tlstmCertToTSNTable_handler(netsnmp_mib_handler *handler,
                  * if going active, inconsistency is fatal
                  */
                 if (!entry->undo->is_consistent) {
-                    netsnmp_assert(entry->undo->req[COL_CERTTOTSN_ROWSTATUS]);
+                    netsnmp_assert(entry->undo->req[COL_SNMPTLSTMCERTTOTSN_ROWSTATUS]);
                     if (FATE_NEWLY_CREATED == entry->undo->fate)
                         ret = SNMP_ERR_INCONSISTENTNAME;
                     else
                         ret = SNMP_ERR_INCONSISTENTVALUE;
-                    request = entry->undo->req[COL_CERTTOTSN_ROWSTATUS];
+                    request = entry->undo->req[COL_SNMPTLSTMCERTTOTSN_ROWSTATUS];
                 }
             } else if (RS_DESTROY == entry->rowStatus) {
                 /*
@@ -688,9 +688,9 @@ tlstmCertToTSNTable_handler(netsnmp_mib_handler *handler,
                 if (RS_IS_ACTIVE(entry->undo->rowStatus)) {
                     DEBUGMSGTL(("tlstmCertToTSNTable:inconsistent",
                                 "can't destroy active row\n"));
-                    netsnmp_assert(entry->undo->req[COL_CERTTOTSN_ROWSTATUS]);
+                    netsnmp_assert(entry->undo->req[COL_SNMPTLSTMCERTTOTSN_ROWSTATUS]);
                     ret = SNMP_ERR_INCONSISTENTVALUE;
-                    request = entry->undo->req[COL_CERTTOTSN_ROWSTATUS];
+                    request = entry->undo->req[COL_SNMPTLSTMCERTTOTSN_ROWSTATUS];
                 }
             }
             if (ret != SNMP_ERR_NOERROR)
@@ -722,25 +722,25 @@ tlstmCertToTSNTable_handler(netsnmp_mib_handler *handler,
              * restore values
              */
             switch (info->colnum) {
-            case COL_CERTTOTSN_FINGERPRINT:
+            case COL_SNMPTLSTMCERTTOTSN_FINGERPRINT:
                 memcpy(entry->fingerprint, entry->undo->fingerprint,
                        sizeof(entry->fingerprint));
                 entry->fingerprint_len = entry->undo->fingerprint_len;
                 entry->hashType = entry->undo->hashType;
-                break;          /* case COL_CERTTOTSN_FINGERPRINT */
-            case COL_CERTTOTSN_MAPTYPE:
+                break;          /* case COL_SNMPTLSTMCERTTOTSN_FINGERPRINT */
+            case COL_SNMPTLSTMCERTTOTSN_MAPTYPE:
                 entry->mapType = entry->undo->mapType;
-                break;          /* case COL_CERTTOTSN_MAPTYPE */
-            case COL_CERTTOTSN_DATA:
+                break;          /* case COL_SNMPTLSTMCERTTOTSN_MAPTYPE */
+            case COL_SNMPTLSTMCERTTOTSN_DATA:
                 memcpy(entry->data, entry->undo->data, sizeof(entry->data));
                 entry->data_len = entry->undo->data_len;
-                break;          /* case COL_CERTTOTSN_DATA */
-            case COL_CERTTOTSN_STORAGETYPE:
+                break;          /* case COL_SNMPTLSTMCERTTOTSN_DATA */
+            case COL_SNMPTLSTMCERTTOTSN_STORAGETYPE:
                 entry->storageType = entry->undo->storageType;
-                break;          /* case COL_CERTTOTSN_STORAGETYPE */
-            case COL_CERTTOTSN_ROWSTATUS:
+                break;          /* case COL_SNMPTLSTMCERTTOTSN_STORAGETYPE */
+            case COL_SNMPTLSTMCERTTOTSN_ROWSTATUS:
                 entry->rowStatus = entry->undo->rowStatus;
-                break;          /* case COL_CERTTOTSN_ROWSTATUS */
+                break;          /* case COL_SNMPTLSTMCERTTOTSN_ROWSTATUS */
             }                   /* switch colnum */
         }                       /* for requests */
 
@@ -781,7 +781,7 @@ tlstmCertToTSNTable_handler(netsnmp_mib_handler *handler,
             entry = (certToTSN_entry *) netsnmp_tdata_extract_entry(request);
 
             /** release undo data for requests with no rowstatus */
-            if (entry->undo && !entry->undo->req[COL_CERTTOTSN_ROWSTATUS]) {
+            if (entry->undo && !entry->undo->req[COL_SNMPTLSTMCERTTOTSN_ROWSTATUS]) {
                 _freeUndo(entry);
                 if ((0 == entry->map_flags) && (entry->rowStatus == RS_ACTIVE))
                     _cert_map_add(entry);
@@ -791,7 +791,7 @@ tlstmCertToTSNTable_handler(netsnmp_mib_handler *handler,
             }
 
             switch (info->colnum) {
-            case COL_CERTTOTSN_ROWSTATUS:
+            case COL_SNMPTLSTMCERTTOTSN_ROWSTATUS:
                 switch (entry->rowStatus) {
                 case RS_CREATEANDGO:
                     /** Fall-through */
@@ -826,11 +826,11 @@ tlstmCertToTSNTable_handler(netsnmp_mib_handler *handler,
                 }
                 /** release undo data */
                 _freeUndo(entry);
-                break;          /* case COL_CERTTOTSN_ROWSTATUS */
-            case COL_CERTTOTSN_FINGERPRINT:
-            case COL_CERTTOTSN_MAPTYPE:
-            case COL_CERTTOTSN_DATA:
-            case COL_CERTTOTSN_STORAGETYPE:
+                break;          /* case COL_SNMPTLSTMCERTTOTSN_ROWSTATUS */
+            case COL_SNMPTLSTMCERTTOTSN_FINGERPRINT:
+            case COL_SNMPTLSTMCERTTOTSN_MAPTYPE:
+            case COL_SNMPTLSTMCERTTOTSN_DATA:
+            case COL_SNMPTLSTMCERTTOTSN_STORAGETYPE:
                 break;
             }                   /* switch colnum */
 
