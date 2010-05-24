@@ -1,4 +1,4 @@
 #!/bin/sh
 
-${builddir}/libtool --mode=link `${builddir}/net-snmp-config --build-command` -I$builddir/include -I$srcdir/include -o $2.lt $1 ${builddir}/snmplib/libnetsnmp.la
+${builddir}/libtool --mode=link `${builddir}/net-snmp-config --build-command` -I$builddir/include -I$srcdir/include -o $2.lt $1 ${builddir}/snmplib/libnetsnmp.la `${builddir}/net-snmp-config --external-libs`
 echo $2.lt;
