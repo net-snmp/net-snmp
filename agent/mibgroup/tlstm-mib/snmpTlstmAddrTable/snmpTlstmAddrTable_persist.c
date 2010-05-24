@@ -14,6 +14,9 @@
 #include <net-snmp/library/container.h>
 #include <ctype.h>
 
+#include <openssl/x509.h>
+#include <net-snmp/library/cert_util.h>
+
 #include "snmpTlstmAddrTable_internal.h"
 
 /**********************************************************************

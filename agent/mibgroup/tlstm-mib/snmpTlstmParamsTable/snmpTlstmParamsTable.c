@@ -33,6 +33,7 @@ init_snmpTlstmParamsTable(void)
     netsnmp_table_data_set       *table_set;
     netsnmp_handler_registration *reg;
     uint32_t                      nv = ST_VOLATILE;
+    netsnmp_watcher_info         *watcher;
 
     /*
      * create the table structure itself 
@@ -87,7 +88,6 @@ init_snmpTlstmParamsTable(void)
     else
         netsnmp_register_scalar(reg);
 
-#if 0
     reg_oid[10] = 5;
     reg = netsnmp_create_handler_registration(
         "tlstmParamsTableLastChanged", NULL, reg_oid,
@@ -101,7 +101,6 @@ init_snmpTlstmParamsTable(void)
                  "could not create handler for snmpTlstmParamsTableLastChanged\n");
     else
         netsnmp_register_watched_scalar(reg, watcher);
-#endif
 }
 
 /** handles requests for the snmpTlstmParamsTable table, if anything else needs to be done */
