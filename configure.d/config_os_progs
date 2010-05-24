@@ -171,6 +171,28 @@ AC_MSG_CACHE_ADD(Building for:               $PARTIALTARGETOS)
 
 
 #
+#    Whether or not Cygwin's ld recognizes the flag -no-undefined. 
+#
+
+case x$target_os in
+xcygwin*)
+  saved_LDFLAGS=$LDFLAGS
+
+  AC_MSG_CHECKING([whether the linker supports -no-undefined])
+  LDFLAGS="$saved_LDFLAGS -Wl,-no-undefined"
+  AC_LINK_IFELSE([AC_LANG_PROGRAM([],[])],
+                 [AC_MSG_RESULT([yes]); dnl
+                  LD_NO_UNDEFINED=-no-undefined],
+                 [AC_MSG_RESULT([no])])
+  
+  LDFLAGS="$saved_LDFLAGS"
+  ;;
+esac
+
+AC_SUBST(LD_NO_UNDEFINED)
+
+
+#
 #   Socket library: either 'default' (non-MinGW) or 'winsock2' (MinGW).
 #
 case x$target_os in
