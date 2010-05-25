@@ -1,6 +1,5 @@
 /* HEADER Testing the container API */
 netsnmp_container *container;
-int i;
 
 init_snmp("container-test");
 container = netsnmp_container_find("fifo");

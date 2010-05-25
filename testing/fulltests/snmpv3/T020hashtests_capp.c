@@ -11,9 +11,6 @@ main() {
     char buf[] = "wes hardaker";
     u_char MAC[20];
     size_t MAC_LEN = 20;
-    size_t msg_len = 1024, out_len;
-    u_char *msg = malloc(msg_len);
-    int i;
     u_char sha1key[20] = "55555555555555555555";
     u_char md5key[16] = "5555555555555555";
 
