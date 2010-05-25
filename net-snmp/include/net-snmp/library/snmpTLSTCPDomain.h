@@ -18,7 +18,7 @@ extern          "C" {
 #endif
 
 config_require(SocketBase)
-config_require(IPBase)
+config_require(IPv4Base)
 config_require(TLSBase)
 
 #define TRANSPORT_DOMAIN_TLS_TCP_IP	1,3,6,1,6,1,8

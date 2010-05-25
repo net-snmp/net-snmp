@@ -18,6 +18,9 @@
 #else
 #include <strings.h>
 #endif
+#if HAVE_FCNTL_H
+#include <fcntl.h>
+#endif
 #if HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
 #endif
@@ -332,3 +335,32 @@ netsnmp_sock_buffer_set(int s, int optname, int local, int size)
 #endif
 }
 
+
+/**
+ * Sets the mode of a socket for all subsequent I/O operations.
+ *
+ * @param[in] sock Socket descriptor (Unix) or socket handle (Windows).
+ * @param[in] non_blocking_mode I/O mode: non-zero selects non-blocking mode;
+ *   zero selects blocking mode.
+ *
+ * @return zero upon success and a negative value upon error.
+ */
+int
+netsnmp_set_non_blocking_mode(int sock, int non_blocking_mode)
+{
+#ifdef WIN32
+    u_long          arg;
+
+    arg = non_blocking_mode;
+    return ioctlsocket(sock, FIONBIO, &arg);
+#else
+    int             sockflags;
+
+    if ((sockflags = fcntl(sock, F_GETFL, 0)) >= 0) {
+        return fcntl(sock, F_SETFL,
+                     non_blocking_mode ? sockflags | O_NONBLOCK
+                     : sockflags & ~O_NONBLOCK);
+    } else
+        return -1;
+#endif
+}

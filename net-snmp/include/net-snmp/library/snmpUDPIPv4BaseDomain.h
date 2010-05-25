@@ -9,7 +9,6 @@ extern          "C" {
 
 #include <net-snmp/library/snmp_transport.h>
 #include <net-snmp/library/asn1.h>
-#include <net-snmp/library/snmpIPBaseDomain.h>
 #include <net-snmp/library/snmpUDPBaseDomain.h>
 
 config_require(UDPBase)

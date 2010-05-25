@@ -3,21 +3,16 @@
 #ifndef SNMPIPV4BASE_H
 #define SNMPIPV4BASE_H
 
-#ifdef __cplusplus
-extern          "C" {
-#endif
-
-#include <net-snmp/library/snmp_transport.h>
-#include <net-snmp/library/asn1.h>
-#include <net-snmp/library/snmpIPBaseDomain.h>
-
-config_require(IPBase)
-
-#if HAVE_SYS_SOCKET_H
-#include <sys/socket.h>
-#endif
 #if HAVE_NETINET_IN_H
 #include <netinet/in.h>
+#endif
+
+config_require(SocketBase)
+
+#include <net-snmp/library/snmpSocketBaseDomain.h>
+
+#ifdef __cplusplus
+extern          "C" {
 #endif
 
 /*
@@ -26,6 +21,17 @@ config_require(IPBase)
 
     char *netsnmp_ipv4_fmtaddr(const char *prefix, netsnmp_transport *t,
                                void *data, int len);
+
+/*
+ * Convert a "traditional" peername into a sockaddr_in structure which is
+ * written to *addr_  Returns 1 if the conversion was successful, or 0 if it
+ * failed
+ */
+
+    int netsnmp_sockaddr_in(struct sockaddr_in *addr, const char *peername,
+                            int remote_port);
+    int netsnmp_sockaddr_in2(struct sockaddr_in *addr, const char *inpeername,
+                             const char *default_target);
 
 #ifdef __cplusplus
 }
