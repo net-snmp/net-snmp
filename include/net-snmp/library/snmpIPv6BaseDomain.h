@@ -9,9 +9,6 @@ extern          "C" {
 
 #include <net-snmp/library/snmp_transport.h>
 #include <net-snmp/library/asn1.h>
-#include <net-snmp/library/snmpIPBaseDomain.h>
-
-config_require(IPBase)
 
 #if HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
