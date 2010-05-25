@@ -2,7 +2,6 @@
 
 # build the C-test file head
 cat > $2.c << EOF1
-
 /* net-snmp standard headers */
 #include <net-snmp/net-snmp-config.h>
 #include <net-snmp/net-snmp-includes.h>
@@ -23,15 +22,9 @@ cat > $2.c << EOF1
 #endif
 
 int
-main(int argc, char *argv) {
+main(int argc, char *argv[]) {
 
-EOF1
-
-# add in the actual library tests
-cat $1 >> $2.c
-
-# build the C-test file tail
-cat >> $2.c << EOF2
+#include "$1"
 
    if (__did_plan == 0) {
        PLAN(__test_counter);
@@ -40,7 +33,7 @@ cat >> $2.c << EOF2
    return(0);
 }
 
-EOF2
+EOF1
 
 # now compile the whole mess
 ${builddir}/libtool --mode=link `${builddir}/net-snmp-config --build-command` -I$builddir/include -I$srcdir/include -o $2.lt $2.c ${builddir}/snmplib/libnetsnmp.la `${builddir}/net-snmp-config --external-libs`
