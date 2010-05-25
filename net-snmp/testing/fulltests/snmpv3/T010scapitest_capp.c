@@ -23,9 +23,6 @@
  * Test of sc_encrypt and sc_decrypt.                           SUCCESSes: 1.
  */
 
-static char    *rcsid = "$Id$";    /* */
-
-
 #include <net-snmp/net-snmp-config.h>
 
 #include <stdio.h>
@@ -218,32 +215,6 @@ usage(FILE * ofp)
             NL "" NL, local_progname);
 
 }                               /* end usage() */
-
-
-
-
-#ifdef EXAMPLE
-/*******************************************************************-o-******
- * test_dosomething
- *
- * Test template.
- *
- * Returns:
- *	Number of failures.
- */
-int
-test_dosomething(void)
-{
-    int             rval = SNMPERR_SUCCESS;
-
-    EM0(1, "UNIMPLEMENTED");    /* EM(1); /* */
-
-  test_dosomething_quit:
-    return failcount;
-
-}                               /* end test_dosomething() */
-#endif                          /* EXAMPLE */
-
 
 
 

@@ -14,9 +14,6 @@
  * FIX  Devise a test for {set,get}_enginetime(..., FALSE).
  */
 
-static char    *rcsid = "$Id$";    /* */
-
-
 #include <net-snmp/net-snmp-config.h>
 
 #include <stdio.h>
