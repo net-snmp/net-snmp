@@ -1,5 +1,6 @@
 #!/bin/sh
 
+export NET_SNMP_CRT_CFGTOOL="${builddir}/net-snmp-config"
 NSCERT="perl $SNMP_BASEDIR/../../../local/net-snmp-cert"
 NSCERTARGS="-C $SNMP_TMPDIR"
 
