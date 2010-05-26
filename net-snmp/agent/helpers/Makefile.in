@@ -16,11 +16,14 @@ INSTALLLIBS=libnetsnmphelpers.$(LIB_EXTENSION)$(LIB_VERSION)
 INCLUDESUBDIR=agent
 HEADERS=all_helpers.h \
 	baby_steps.h \
+	bulk_to_next.h \
 	cache_handler.h \
         debug_handler.h \
 	instance.h \
 	mode_end_call.h \
         multiplexer.h \
+        null.h \
+        old_api.h \
         read_only.h \
         row_merge.h \
 	scalar.h \
@@ -56,11 +59,14 @@ CPPFLAGS= $(TOP_INCLUDES) -I. $(AGENT_INCLUDES) $(MIBGROUP_INCLUDES) \
 
 SRCS =  all_helpers.c \
 	baby_steps.c \
+	bulk_to_next.c \
 	cache_handler.c \
 	debug_handler.c \
 	instance.c \
 	mode_end_call.c \
 	multiplexer.c \
+	null.c \
+	old_api.c \
 	read_only.c \
 	row_merge.c \
 	scalar.c \
@@ -81,11 +87,14 @@ SRCS =  all_helpers.c \
 
 OBJS =  all_helpers.o \
 	baby_steps.o \
+	bulk_to_next.o \
 	cache_handler.o \
 	debug_handler.o \
 	instance.o \
 	mode_end_call.o \
 	multiplexer.o \
+	null.o \
+	old_api.o \
 	read_only.o \
 	row_merge.o \
 	scalar.o \
@@ -106,11 +115,14 @@ OBJS =  all_helpers.o \
 
 LOBJS = all_helpers.lo \
 	baby_steps.lo \
+	bulk_to_next.lo \
 	cache_handler.lo \
 	debug_handler.lo \
 	instance.lo \
 	mode_end_call.lo \
 	multiplexer.lo \
+	null.lo \
+	old_api.lo \
 	read_only.lo \
 	row_merge.lo \
 	scalar.lo \
