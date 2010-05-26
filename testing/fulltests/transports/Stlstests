@@ -28,7 +28,7 @@ CAPTURE "snmpget -T my_fingerprint=$UNMAPPEDFP $FLAGS .1.3.6.1.2.1.1.3.0"
 CHECK "failed rfc5343"
 
 # Check *their* certificate with a different one than expected; should fail
-CAPTURE "snmpget -T my_fingerprint=$OTHERUSERFP -T their_fingerprint=$OTHERUSERFP $FLAGS .1.3.6.1.2.1.1.3.0"
+CAPTURE "snmpget -r 0 -T my_fingerprint=$OTHERUSERFP -T their_fingerprint=$OTHERUSERFP $FLAGS .1.3.6.1.2.1.1.3.0"
 
 CHECK "failed to verify ssl certificate"
 
