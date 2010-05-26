@@ -128,14 +128,17 @@ netsnmp_tlsbase_verify_server_cert(SSL *ssl, _netsnmpTLSBaseData *tlsdata) {
     
     if (NULL == (remote_cert = SSL_get_peer_certificate(ssl))) {
         /* no peer cert */
-        snmp_log(LOG_ERR, "remote connection provided no certificate\n");
-        return SNMPERR_GENERR;
+        DEBUGMSGTL(("tls_x509:verify",
+                    "remote connection provided no certificate (yet)\n"));
+        return SNMPERR_TLS_NO_CERTIFICATE;
     }
 
     if (_netsnmp_tlsbase_verify_remote_fingerprint(remote_cert, tlsdata) !=
         SNMPERR_SUCCESS)
         return SNMPERR_GENERR;
 
+    DEBUGMSGTL(("tls_x509:verify", "Verified server fingerprint\n"));
+    tlsdata->flags |= NETSNMP_TLSBASE_CERT_FP_VERIFIED;
     return SNMPERR_SUCCESS;
 }
 
@@ -148,14 +151,17 @@ netsnmp_tlsbase_verify_client_cert(SSL *ssl, _netsnmpTLSBaseData *tlsdata) {
 
     if (NULL == (remote_cert = SSL_get_peer_certificate(ssl))) {
         /* no peer cert */
-        snmp_log(LOG_ERR, "remote connection provided no certificate\n");
-        return SNMPERR_GENERR;
+        DEBUGMSGTL(("tls_x509:verify",
+                    "remote connection provided no certificate (yet)\n"));
+        return SNMPERR_TLS_NO_CERTIFICATE;
     }
     
     if (_netsnmp_tlsbase_verify_remote_fingerprint(remote_cert, tlsdata) !=
         SNMPERR_SUCCESS)
         return SNMPERR_GENERR;
 
+    DEBUGMSGTL(("tls_x509:verify", "Verified client fingerprint\n"));
+    tlsdata->flags |= NETSNMP_TLSBASE_CERT_FP_VERIFIED;
     return SNMPERR_SUCCESS;
 }
 

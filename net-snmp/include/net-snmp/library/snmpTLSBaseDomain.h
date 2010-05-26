@@ -27,7 +27,8 @@ extern          "C" {
     SSL_CTX *get_client_ctx(void);
     SSL_CTX *get_server_ctx(void);
 
-#define NETSNMP_TLSBASE_IS_CLIENT 0x01
+#define NETSNMP_TLSBASE_IS_CLIENT     0x01
+#define NETSNMP_TLSBASE_CERT_FP_VERIFIED 0x02
 
     /*
      * _Internal_ structures

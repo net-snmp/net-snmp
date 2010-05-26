@@ -252,8 +252,9 @@ typedef struct request_list {
 #define SNMPERR_JUST_A_CONTEXT_PROBE    (-66)
 #define SNMPERR_TRANSPORT_NO_CONFIG     (-67)
 #define SNMPERR_TRANSPORT_CONFIG_ERROR  (-68)
+#define SNMPERR_TLS_NO_CERTIFICATE      (-69)
 
-#define SNMPERR_MAX			(-68)
+#define SNMPERR_MAX			(-69)
 
 
     /*

@@ -390,6 +390,9 @@ _netsnmp_bio_try_and_write_buffered(netsnmp_transport *t, bio_cache *cachep) {
                        cachep->write_cache_len);
     }
 
+    if (rc > 0)
+        cachep->msgnum++;
+    
     if (_netsnmp_send_queued_dtls_pkts(t, cachep) > 0) {
         SNMP_FREE(cachep->write_cache);
         cachep->write_cache_len = 0;
@@ -537,15 +540,6 @@ netsnmp_dtlsudp_recv(netsnmp_transport *t, void *buf, int size,
     DEBUGMSGTL(("dtlsudp",
                 "received %d decoded bytes from dtls\n", rc));
 
-    if (BIO_ctrl_pending(cachep->write_bio) > 0) {
-        _netsnmp_send_queued_dtls_pkts(t, cachep);
-    }
-
-    if (SSL_pending(tlsdata->ssl)) {
-        fprintf(stderr, "ack: got here...  pending\n");
-        exit(1);
-    }
-
     if (rc == -1) {
         SNMP_FREE(tmStateRef);
 
@@ -563,6 +557,62 @@ netsnmp_dtlsudp_recv(netsnmp_transport *t, void *buf, int size,
         }
         _openssl_log_error(rc, tlsdata->ssl, "SSL_read");
         return rc;
+    }
+
+    if (0 == (tlsdata->flags & NETSNMP_TLSBASE_CERT_FP_VERIFIED)) {
+        int verifyresult;
+
+        if (tlsdata->flags & NETSNMP_TLSBASE_IS_CLIENT) {
+
+            /* verify that the server's certificate is the correct one */
+
+            if ((verifyresult = netsnmp_tlsbase_verify_server_cert(tlsdata->ssl, tlsdata))
+                != SNMPERR_SUCCESS) {
+                if (verifyresult == SNMPERR_TLS_NO_CERTIFICATE) {
+                    /* assume we simply haven't received it yet and there
+                       is more data to wait-for or send */
+                    /* XXX: probably need to check for whether we should
+                       send stuff from our end to continue the transaction
+                    */
+                    return -1;
+                } else {
+                    /* XXX: free needed memory */
+                    snmp_log(LOG_ERR,
+                             "DTLSUDP: failed to verify ssl certificate (of the server)\n");
+                    snmp_increment_statistic(STAT_TLSTM_SNMPTLSTMSESSIONINVALIDCLIENTCERTIFICATES);
+                    return -1;
+                }
+                DEBUGMSGTL(("dtlsudp", "Verified the server's certificate\n"));
+            }
+        } else {
+            /* verify that the client's certificate is the correct one */
+        
+            if ((verifyresult = netsnmp_tlsbase_verify_client_cert(tlsdata->ssl, tlsdata))
+                != SNMPERR_SUCCESS) {
+                if (verifyresult == SNMPERR_TLS_NO_CERTIFICATE) {
+                    /* assume we simply haven't received it yet and there
+                       is more data to wait-for or send */
+                    /* XXX: probably need to check for whether we should
+                       send stuff from our end to continue the transaction
+                    */
+                    return -1;
+                } else {
+                    /* XXX: free needed memory */
+                    snmp_log(LOG_ERR,
+                             "DTLSUDP: failed to verify ssl certificate (of the client)\n");
+                    snmp_increment_statistic(STAT_TLSTM_SNMPTLSTMSESSIONINVALIDCLIENTCERTIFICATES);
+                    return -1;
+                }
+                DEBUGMSGTL(("dtlsudp", "Verified the client's certificate\n"));
+            }
+        }
+    }
+
+    if (rc > 0)
+        cachep->msgnum++;
+
+    if (BIO_ctrl_pending(cachep->write_bio) > 0) {
+        _netsnmp_send_queued_dtls_pkts(t, cachep);
     }
 
     {
@@ -718,6 +768,9 @@ netsnmp_dtlsudp_send(netsnmp_transport *t, void *buf, int size,
         DEBUGMSGTL(("dtlsudp", "recalling ssl_write\n")); 
         rc = SSL_write(tlsdata->ssl, buf, size);
     }
+
+    if (rc > 0)
+        cachep->msgnum++;
 
     /* for memory bios, we now read from openssl's write buffer (ie,
        the packet to go out) and send it out the udp port manually */
