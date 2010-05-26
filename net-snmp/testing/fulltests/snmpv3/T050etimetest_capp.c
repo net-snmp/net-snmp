@@ -299,7 +299,7 @@ test_etime(void)
     OUTPUT("Query of empty list, two set actions.");
 
 
-    rval = ISENGINEKNOWN("A", 1);
+    rval = ISENGINEKNOWN((u_char *) "A", 1);
     if (rval == TRUE) {
         FAILED(SNMPERR_GENERR, "Query of empty list returned TRUE.")
     }
@@ -323,11 +323,11 @@ test_etime(void)
     OUTPUT("Add entries using macros, test for existence with macros.");
 
 
-    rval = ENSURE_ENGINE_RECORD("DDDD", 4);
+    rval = ENSURE_ENGINE_RECORD((const u_char *) "DDDD", 4);
     FAILED(rval, "ENSURE_ENGINE_RECORD()");
 
 
-    rval = MAKENEW_ENGINE_RECORD("EEEEE", 5);
+    rval = MAKENEW_ENGINE_RECORD((const u_char *) "EEEEE", 5);
     if (rval == SNMPERR_SUCCESS) {
         FAILED(rval,
                "MAKENEW_ENGINE_RECORD returned success for "
@@ -335,7 +335,7 @@ test_etime(void)
     }
 
 
-    rval = MAKENEW_ENGINE_RECORD("BB", 2);
+    rval = MAKENEW_ENGINE_RECORD((const u_char *) "BB", 2);
     FAILED(rval, "MAKENEW_ENGINE_RECORD().");
 
 

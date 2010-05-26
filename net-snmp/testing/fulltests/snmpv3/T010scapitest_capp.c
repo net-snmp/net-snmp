@@ -91,6 +91,7 @@ int             doalltests = 0, docrypt = 0, dokeyedhash = 0, dorandom = 0;
 
 
 #define BIGSTRING							\
+    (const u_char *)                                                    \
     "   A port may be a pleasant retreat for any mind grown weary of"	\
     "the struggle for existence.  The vast expanse of sky, the"		\
     "mobile architecture of the clouds, the chameleon coloration"	\
@@ -108,8 +109,12 @@ int             doalltests = 0, docrypt = 0, dokeyedhash = 0, dorandom = 0;
     "	-- Baudelaire"							\
     "	   From _The_Poems_in_Prose_, \"The Port\" (XLI)."
 
-#define BIGSECRET	"Shhhh... Don't tell *anyone* about this.  Not a soul."
-#define BKWDSECRET	".luos a toN  .siht tuoba *enoyna* llet t'noD ...hhhhS"
+#define BIGSECRET                                               \
+    (const u_char *)                                            \
+    "Shhhh... Don't tell *anyone* about this.  Not a soul."
+#define BKWDSECRET                                              \
+    (const u_char *)                                            \
+    ".luos a toN  .siht tuoba *enoyna* llet t'noD ...hhhhS"
 
 #define MLCOUNT_MAX	6       /* MAC Length Count Maximum. */
 
@@ -236,7 +241,7 @@ test_dorandom(void)
         origrequest = (1024 * 2),
         origrequest_short = 19, shortcount = 7, i;
     size_t          nbytes = origrequest;
-    char            buf[LOCAL_MAXBUF];
+    u_char          buf[LOCAL_MAXBUF];
 
     OUTPUT("Random test -- large request:");
 
@@ -296,7 +301,11 @@ test_dorandom(void)
 int
 test_dokeyedhash(void)
 {
-    int             rval = SNMPERR_SUCCESS, bigstring_len = strlen(BIGSTRING), secret_len = strlen(BIGSECRET), properlength, mlcount = 0;        /* MAC Length count.   */
+    int rval = SNMPERR_SUCCESS,
+        bigstring_len = strlen((const char *) BIGSTRING),
+        secret_len = strlen((const char *) BIGSECRET),
+        properlength,
+        mlcount = 0;        /* MAC Length count.   */
     size_t          hblen;      /* Hash Buffer length. */
 
     u_int           hashbuf_len[MLCOUNT_MAX] = {
@@ -322,7 +331,8 @@ test_dokeyedhash(void)
     rval =
         sc_generate_keyed_hash(usmHMACMD5AuthProtocol,
                                USM_LENGTH_OID_TRANSFORM, BIGSECRET,
-                               secret_len, BIGSTRING, bigstring_len,
+                               secret_len, BIGSTRING,
+                               bigstring_len,
                                hashbuf, &hblen);
     FAILED(rval, "sc_generate_keyed_hash() return code");
 
@@ -411,14 +421,15 @@ test_dokeyedhash(void)
 int
 test_docrypt(void)
 {
-    int             rval = SNMPERR_SUCCESS, bigstring_len = strlen(BIGSTRING),
+    int             rval = SNMPERR_SUCCESS,
+        bigstring_len = strlen((const char *) BIGSTRING),
         secret_len = BYTESIZE(SNMP_TRANS_PRIVLEN_1DES),
         iv_len = BYTESIZE(SNMP_TRANS_PRIVLEN_1DES_IV);
 
     size_t          buf_len = LOCAL_MAXBUF;
     size_t          cryptbuf_len = LOCAL_MAXBUF;
 
-    char            buf[LOCAL_MAXBUF],
+    u_char            buf[LOCAL_MAXBUF],
         cryptbuf[LOCAL_MAXBUF], secret[LOCAL_MAXBUF], iv[LOCAL_MAXBUF];
 
     OUTPUT("Starting Test 1DES-CBC --");
@@ -443,11 +454,11 @@ test_docrypt(void)
     /* ignore the pad */
     buf_len -= buf[buf_len-1];
 
-    FAILED(buf_len != bigstring_len, "Decrypted buffer is the right length.");
+    FAILED((buf_len != bigstring_len), "Decrypted buffer is the right length.");
     DETAILINT("original length:", bigstring_len);
     DETAILINT("output   length:", buf_len);
 
-    FAILED(memcmp(buf, BIGSTRING, bigstring_len) != 0,
+    FAILED((memcmp(buf, BIGSTRING, bigstring_len) != 0),
            "Decrypted buffer is the same as the original plaintext.");
     return failcount;
 }                               /* end test_docrypt() */
