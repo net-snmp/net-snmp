@@ -255,8 +255,8 @@ _SCAPI_NOT_CONFIGURED
  */
 int
 sc_generate_keyed_hash(const oid * authtype, size_t authtypelen,
-                       u_char * key, u_int keylen,
-                       u_char * message, u_int msglen,
+                       const u_char * key, u_int keylen,
+                       const u_char * message, u_int msglen,
                        u_char * MAC, size_t * maclen)
 #if  defined(NETSNMP_USE_INTERNAL_MD5) || defined(NETSNMP_USE_OPENSSL) || defined(NETSNMP_USE_PKCS11)
 {
@@ -524,9 +524,9 @@ _SCAPI_NOT_CONFIGURED
  */
 int
 sc_check_keyed_hash(const oid * authtype, size_t authtypelen,
-                    u_char * key, u_int keylen,
-                    u_char * message, u_int msglen,
-                    u_char * MAC, u_int maclen)
+                    const u_char * key, u_int keylen,
+                    const u_char * message, u_int msglen,
+                    const u_char * MAC, u_int maclen)
 #if defined(NETSNMP_USE_INTERNAL_MD5) || defined(NETSNMP_USE_OPENSSL) || defined(NETSNMP_USE_PKCS11)
 {
     int             rval = SNMPERR_SUCCESS;
@@ -617,7 +617,7 @@ int
 sc_encrypt(const oid * privtype, size_t privtypelen,
            u_char * key, u_int keylen,
            u_char * iv, u_int ivlen,
-           u_char * plaintext, u_int ptlen,
+           const u_char * plaintext, u_int ptlen,
            u_char * ciphertext, size_t * ctlen)
 #if defined(NETSNMP_USE_OPENSSL)
 {

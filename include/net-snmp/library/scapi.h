@@ -44,20 +44,20 @@ extern          "C" {
 
     int             sc_generate_keyed_hash(const oid * authtype,
                                            size_t authtypelen,
-                                           u_char * key, u_int keylen,
-                                           u_char * message, u_int msglen,
+                                           const u_char * key, u_int keylen,
+                                           const u_char * message, u_int msglen,
                                            u_char * MAC, size_t * maclen);
 
     int             sc_check_keyed_hash(const oid * authtype,
-                                        size_t authtypelen, u_char * key,
-                                        u_int keylen, u_char * message,
-                                        u_int msglen, u_char * MAC,
+                                        size_t authtypelen, const u_char * key,
+                                        u_int keylen, const u_char * message,
+                                        u_int msglen, const u_char * MAC,
                                         u_int maclen);
 
     int             sc_encrypt(const oid * privtype, size_t privtypelen,
                                u_char * key, u_int keylen,
                                u_char * iv, u_int ivlen,
-                               u_char * plaintext, u_int ptlen,
+                               const u_char * plaintext, u_int ptlen,
                                u_char * ciphertext, size_t * ctlen);
 
     int             sc_decrypt(const oid * privtype, size_t privtypelen,
