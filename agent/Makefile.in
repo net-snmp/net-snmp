@@ -108,11 +108,9 @@ MIBOBJS		= $(mibgroup_list_o) mib_modules.o auto_nlist.o
 # libnetsnmpagent objects
 LIBAGENTOBJS=snmp_agent.o snmp_vars.o agent_read_config.o \
 	agent_registry.o agent_index.o agent_sysORTable.o agent_trap.o \
-	bulk_to_next.o null.o old_api.o \
 	kernel.o agent_handler.o $(agentgroup_list_o) @OTHERAGENTLIBOBJS@
 LLIBAGENTOBJS=snmp_agent.lo snmp_vars.lo agent_read_config.lo \
 	agent_registry.lo agent_index.lo agent_sysORTable.lo agent_trap.lo \
-	bulk_to_next.lo null.lo old_api.lo \
 	kernel.lo agent_handler.lo $(agentgroup_list_lo) @OTHERAGENTLIBLOBJS@
 
 # The agent objects.
