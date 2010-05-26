@@ -85,7 +85,7 @@ static Enginetime etimelist[ETIMELIST_SIZE];
  *            this is another matter.
  */
 int
-get_enginetime(u_char * engineID,
+get_enginetime(const u_char * engineID,
                u_int engineID_len,
                u_int * engineboot,
                u_int * engine_time, u_int authenticated)

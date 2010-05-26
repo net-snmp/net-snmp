@@ -99,7 +99,7 @@ extern          "C" {
     /*
      * Prototypes.
      */
-    int             get_enginetime(u_char * engineID, u_int engineID_len,
+    int             get_enginetime(const u_char * engineID, u_int engineID_len,
                                    u_int * engine_boot,
                                    u_int * engine_time,
                                    u_int authenticated);
