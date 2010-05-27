@@ -32,6 +32,7 @@
 #include <net-snmp/library/snmp_debug.h>
 #include <net-snmp/library/default_store.h>
 #include <net-snmp/library/snmpIPv4BaseDomain.h>
+#include <net-snmp/library/system.h>
 
 
 #ifndef INADDR_NONE

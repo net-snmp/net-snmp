@@ -104,6 +104,7 @@
 	}
 #endif
 
+#ifdef NETSNMP_USE_INTERNAL_CRYPTO
 static
 int SHA1_hmac(u_char * data, size_t len, u_char * mac, size_t maclen,
               u_char * secret, size_t secretlen);
@@ -111,6 +112,7 @@ int SHA1_hmac(u_char * data, size_t len, u_char * mac, size_t maclen,
 static
 int MD5_hmac(u_char * data, size_t len, u_char * mac, size_t maclen,
              u_char * secret, size_t secretlen);
+#endif
 
 /*
  * sc_get_properlength(oid *hashtype, u_int hashtype_len):
@@ -422,7 +424,7 @@ sc_generate_keyed_hash(const oid * authtype, size_t authtypelen,
  * SNMP_SC_GENERAL_FAILURE      Any error.
  */
 int
-sc_hash(const oid * hashtype, size_t hashtypelen, u_char * buf,
+sc_hash(const oid * hashtype, size_t hashtypelen, const u_char * buf,
         size_t buf_len, u_char * MAC, size_t * MAC_len)
 #if defined(NETSNMP_USE_INTERNAL_MD5) || defined(NETSNMP_USE_OPENSSL) || defined(NETSNMP_USE_PKCS11) || defined(NETSNMP_USE_INTERNAL_CRYPTO)
 {

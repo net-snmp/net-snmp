@@ -413,7 +413,7 @@ set_enginetime(const u_char * engineID,
  * ASSUMES that no engineID will have more than one record in the list.
  */
 Enginetime
-search_enginetime_list(u_char * engineID, u_int engineID_len)
+search_enginetime_list(const u_char * engineID, u_int engineID_len)
 {
     int             rval = SNMPERR_SUCCESS;
     Enginetime      e = NULL;

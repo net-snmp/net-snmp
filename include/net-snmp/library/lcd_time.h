@@ -122,7 +122,7 @@ extern          "C" {
          
          
         Enginetime
-        search_enginetime_list(u_char * engineID, u_int engineID_len);
+        search_enginetime_list(const u_char * engineID, u_int engineID_len);
 
     int             hash_engineID(const u_char * engineID, u_int engineID_len);
 

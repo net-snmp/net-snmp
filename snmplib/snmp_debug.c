@@ -361,7 +361,7 @@ debugmsg_oidrange(const char *token, const oid * theoid, size_t len,
 }
 
 void
-debugmsg_hex(const char *token, u_char * thedata, size_t len)
+debugmsg_hex(const char *token, const u_char * thedata, size_t len)
 {
     u_char         *buf = NULL;
     size_t          buf_len = 0, out_len = 0;
@@ -383,7 +383,7 @@ debugmsg_hex(const char *token, u_char * thedata, size_t len)
 }
 
 void
-debugmsg_hextli(const char *token, u_char * thedata, size_t len)
+debugmsg_hextli(const char *token, const u_char * thedata, size_t len)
 {
     char            buf[SPRINT_MAX_LEN], token2[SPRINT_MAX_LEN];
     u_char         *b3 = NULL;
