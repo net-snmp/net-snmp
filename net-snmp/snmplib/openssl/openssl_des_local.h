@@ -59,8 +59,6 @@
 #ifndef HEADER_DES_LOCL_H
 #define HEADER_DES_LOCL_H
 
-#include <openssl/e_os2.h>
-
 #if defined(OPENSSL_SYS_WIN32)
 #ifndef OPENSSL_SYS_MSDOS
 #define OPENSSL_SYS_MSDOS
@@ -80,7 +78,8 @@
 #include <math.h>
 #endif
 #endif
-#include <openssl/des.h>
+
+#include <net-snmp/library/openssl_des.h>
 
 #ifdef OPENSSL_SYS_MSDOS		/* Visual C++ 2.1 (Windows NT/95) */
 #include <stdlib.h>

@@ -49,8 +49,8 @@
  *
  */
 
-#include <openssl/aes.h>
-#include <openssl/modes.h>
+#include <net-snmp/library/openssl_aes.h>
+#include "openssl/openssl_modes.h"
 
 /* The input and output encrypted as though 128bit cfb mode is being
  * used.  The extra state information to record how much of the

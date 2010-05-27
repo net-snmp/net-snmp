@@ -52,8 +52,6 @@
 #ifndef HEADER_AES_LOCL_H
 #define HEADER_AES_LOCL_H
 
-#include <openssl/e_os2.h>
-
 #ifdef OPENSSL_NO_AES
 #error AES is disabled.
 #endif
