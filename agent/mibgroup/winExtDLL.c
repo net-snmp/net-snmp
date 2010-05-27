@@ -88,7 +88,6 @@
 
 #include <net-snmp/types.h>
 
-#include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -98,6 +97,7 @@
 #include "../../win32/MgmtApi-winExtDLL.h"
 
 #include <net-snmp/net-snmp-includes.h>
+#include <net-snmp/library/snmp_assert.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 #include "util_funcs.h"
 #include "winExtDLL.h"
@@ -306,7 +306,7 @@ init_winExtDLL(void)
         AsnObjectIdentifier view;
         winextdll_view  ext_dll_view_info;
 
-        assert(ext_dll_info);
+        netsnmp_assert(ext_dll_info);
         if (!ext_dll_info->dll_name)
             continue;
 
@@ -500,9 +500,9 @@ basename_equals(const char *path, const char *basename)
     const size_t    path_len = strlen(path);
     const size_t    basename_len = strlen(basename);
 
-    assert(strchr(path, '/') == 0);
-    assert(strchr(basename, '/') == 0);
-    assert(strchr(basename, '\\') == 0);
+    netsnmp_assert(strchr(path, '/') == 0);
+    netsnmp_assert(strchr(basename, '/') == 0);
+    netsnmp_assert(strchr(basename, '\\') == 0);
 
     return path_len >= basename_len + 1
         && path[path_len - basename_len - 1] == '\\'
@@ -608,7 +608,7 @@ alloc_context_info(const int index)
 
     for (p = context_info_head; p; p = p->next) {
         if (p->index == index) {
-            assert(FALSE);
+            netsnmp_assert(FALSE);
             return NULL;
         }
     }
@@ -660,7 +660,7 @@ get_context_info(const int index)
         if (p->index == index)
             return &p->context_info;
 
-    assert(FALSE);
+    netsnmp_assert(FALSE);
     return NULL;
 }
 
@@ -677,17 +677,17 @@ var_winExtDLL(netsnmp_mib_handler *handler,
     const char     *mode_name;
     int             rc;
 
-    assert(ext_dll_view_info);
+    netsnmp_assert(ext_dll_view_info);
     ext_dll_info = ext_dll_view_info->winextdll_info;
 #if ! defined(NDEBUG)
-    assert(ext_dll_view_info ==
+    netsnmp_assert(ext_dll_view_info ==
            lookup_view_by_oid(reginfo->rootoid, reginfo->rootoid_len));
 #endif
 
     if (ext_dll_info == 0) {
         DEBUGMSG(("winExtDLL",
                   "internal error: no matching extension DLL found.\n"));
-        assert(0);
+        netsnmp_assert(0);
         return SNMP_ERR_GENERR;
     }
 
@@ -695,12 +695,12 @@ var_winExtDLL(netsnmp_mib_handler *handler,
     case MODE_GET:
         mode_name = "GET";
         nRequestType = SNMP_EXTENSION_GET;
-        assert(!context_info_head);
+        netsnmp_assert(!context_info_head);
         break;
     case MODE_GETNEXT:
         mode_name = "GETNEXT";
         nRequestType = SNMP_EXTENSION_GET_NEXT;
-        assert(!context_info_head);
+        netsnmp_assert(!context_info_head);
         break;
     case MODE_SET_RESERVE1:
         mode_name = "SET_RESERVE1";
@@ -727,7 +727,7 @@ var_winExtDLL(netsnmp_mib_handler *handler,
     default:
         DEBUGMSG(("winExtDLL",
                   "internal error: invalid mode %d.\n", reqinfo->mode));
-        assert(0);
+        netsnmp_assert(0);
         return SNMP_ERR_NOERROR;
     }
 
@@ -750,7 +750,7 @@ var_winExtDLL(netsnmp_mib_handler *handler,
             alloc_context_info(request->index);
 
         varbind = request->requestvb;
-        assert(varbind);
+        netsnmp_assert(varbind);
 
         /*
          * Convert the Net-SNMP varbind to a Windows SNMP varbind list.
@@ -764,7 +764,7 @@ var_winExtDLL(netsnmp_mib_handler *handler,
             goto free_win_varbinds;
         }
 
-        assert(win_varbinds.len == 1);
+        netsnmp_assert(win_varbinds.len == 1);
 
         /*
          * For a GetNext PDU, if the varbind OID comes lexicographically
@@ -813,7 +813,7 @@ var_winExtDLL(netsnmp_mib_handler *handler,
             DEBUGMSG(("winExtDLL",
                       "extension DLL %s: SNMP query function returned error code %lu (Windows) / %d (Net-SNMP).\n",
                       ext_dll_info->dll_name, ErrorStatus, rc));
-            assert(ErrorIndex == 1);
+            netsnmp_assert(ErrorIndex == 1);
             netsnmp_request_set_error(requests, rc);
             if (rc == SNMP_NOSUCHOBJECT || rc == SNMP_NOSUCHINSTANCE
                 || rc == SNMP_ERR_NOSUCHNAME)
@@ -870,7 +870,7 @@ var_winExtDLL(netsnmp_mib_handler *handler,
              */
             result_vb = NULL;
             rc = append_windows_varbind(&result_vb, &win_varbinds.list[0]);
-            assert(result_vb || rc != SNMP_ERR_NOERROR);
+            netsnmp_assert(result_vb || rc != SNMP_ERR_NOERROR);
             if (result_vb) {
                 snmp_set_var_typed_value(varbind,
                                          result_vb->type,
@@ -1014,18 +1014,21 @@ subagentTrapCheck(unsigned int clientreg, void *clientarg)
         int             j;
         const winextdll *ext_dll_info;
 
+        if (s_trapevent.size == 0)
+            return;
+
         dwWaitResult = WaitForMultipleObjects(s_trapevent.size,
                                               &TRAPEVENT(0), FALSE, 0);
 
         i = dwWaitResult - WAIT_OBJECT_0;
         if (i < 0 || i >= s_trapevent.size) {
-            assert(dwWaitResult == WAIT_TIMEOUT);
+            netsnmp_assert(dwWaitResult == WAIT_TIMEOUT);
             return;
         }
 
-        assert(s_trapevent.size == s_trapevent_to_dllinfo.size);
+        netsnmp_assert(s_trapevent.size == s_trapevent_to_dllinfo.size);
         ext_dll_info = TRAPEVENT_TO_DLLINFO(i);
-        assert(ext_dll_info->subagentTrapEvent == TRAPEVENT(i));
+        netsnmp_assert(ext_dll_info->subagentTrapEvent == TRAPEVENT(i));
 
         /*
          * Reset the signalled event just in case the extension DLL erroneously
@@ -1340,8 +1343,8 @@ convert_to_windows_varbind_list(SnmpVarBindList * pVarBindList,
 {
     SnmpVarBind    *win_varbind;
 
-    assert(pVarBindList);
-    assert(varbind);
+    netsnmp_assert(pVarBindList);
+    netsnmp_assert(varbind);
 
     pVarBindList->len = 1;
     pVarBindList->list
@@ -1364,7 +1367,7 @@ convert_to_windows_varbind_list(SnmpVarBindList * pVarBindList,
     switch (varbind->type) {
     case ASN_BOOLEAN:
         // There is no equivalent type in Microsoft's <snmp.h>.
-        assert(0);
+        netsnmp_assert(0);
         win_varbind->value.asnType = MS_ASN_INTEGER;
         win_varbind->value.asnValue.number = *(varbind->val.integer);
         break;
@@ -1409,7 +1412,7 @@ convert_to_windows_varbind_list(SnmpVarBindList * pVarBindList,
         break;
     case ASN_SET:
         // There is no equivalent type in Microsoft's <snmp.h>.
-        assert(0);
+        netsnmp_assert(0);
         win_varbind->value.asnType = MS_ASN_INTEGER;
         win_varbind->value.asnValue.number = *(varbind->val.integer);
         break;
@@ -1452,7 +1455,7 @@ convert_to_windows_varbind_list(SnmpVarBindList * pVarBindList,
             = varbind->val.counter64->low;
         break;
     default:
-        assert(0);
+        netsnmp_assert(0);
         goto generr;
     }
 
@@ -1516,7 +1519,7 @@ convert_win_snmp_err(const int win_snmp_err)
     case SNMP_ERRORSTATUS_INCONSISTENTNAME:
         return SNMP_ERR_INCONSISTENTNAME;
     }
-    assert(0);
+    netsnmp_assert(0);
     return SNMP_ERR_GENERR;
 }
 
@@ -1555,9 +1558,9 @@ copy_oid(oid * const to_name, size_t * const to_name_len,
 {
     int             j;
 
-    assert(to_name);
-    assert(to_name_len);
-    assert(from_name);
+    netsnmp_assert(to_name);
+    netsnmp_assert(to_name_len);
+    netsnmp_assert(from_name);
 
     for (j = 0; j < from_name_len && j < MAX_OID_LEN; j++)
         to_name[j] = from_name[j];
@@ -1578,10 +1581,10 @@ static UINT    *
 copy_oid_to_new_windows_oid(AsnObjectIdentifier * const windows_oid,
                             const oid * const name, const size_t name_len)
 {
-    assert(windows_oid);
-    assert(windows_oid->ids == 0);
-    assert(windows_oid->idLength == 0);
-    assert(name);
+    netsnmp_assert(windows_oid);
+    netsnmp_assert(windows_oid->ids == 0);
+    netsnmp_assert(windows_oid->idLength == 0);
+    netsnmp_assert(name);
 
     windows_oid->ids
         =
@@ -1596,7 +1599,7 @@ winsnmp_memdup(const void *src, const size_t len)
 {
     u_char         *p;
 
-    assert(len == (UINT) len);
+    netsnmp_assert(len == (UINT) len);
 
     p = SnmpUtilMemAlloc((UINT) len);
     if (p)
@@ -1609,7 +1612,7 @@ winsnmp_memdup(const void *src, const size_t len)
 static void
 xarray_init(xarray * a, size_t elem_size)
 {
-    assert(a);
+    netsnmp_assert(a);
 
     memset(a, 0, sizeof(*a));
     a->elem_size = elem_size;
@@ -1620,7 +1623,7 @@ xarray_init(xarray * a, size_t elem_size)
 static void
 xarray_destroy(xarray * a)
 {
-    assert(a);
+    netsnmp_assert(a);
 
     xarray_reserve(a, 0);
 }
@@ -1636,14 +1639,14 @@ xarray_destroy(xarray * a)
 static void    *
 xarray_push_back(xarray * a, const void *elem)
 {
-    assert(a);
-    assert(elem);
-    assert(a->size <= a->reserved);
+    netsnmp_assert(a);
+    netsnmp_assert(elem);
+    netsnmp_assert(a->size <= a->reserved);
 
     if (a->size == a->reserved)
         xarray_reserve(a, a->reserved == 0 ? 16 : 2 * a->reserved);
     if (a->size < a->reserved) {
-        assert(a->size < a->reserved);
+        netsnmp_assert(a->size < a->reserved);
         return memcpy((char *) (a->p) + a->elem_size * a->size++, elem,
                       a->elem_size);
     }
@@ -1655,12 +1658,12 @@ xarray_push_back(xarray * a, const void *elem)
 static void
 xarray_erase(xarray * a, void *const elem)
 {
-    assert(a);
-    assert(a->size >= 1);
-    assert(a->p <= elem);
-    assert((const char *) elem + a->elem_size <=
+    netsnmp_assert(a);
+    netsnmp_assert(a->size >= 1);
+    netsnmp_assert(a->p <= elem);
+    netsnmp_assert((const char *) elem + a->elem_size <=
            (char *) a->p + a->size * a->elem_size);
-    assert(((const char *) elem - (char *) a->p) % a->elem_size == 0);
+    netsnmp_assert(((const char *) elem - (char *) a->p) % a->elem_size == 0);
 
     a->size--;
     memmove((char *) elem, (char *) elem + a->elem_size,
@@ -1681,8 +1684,8 @@ xarray_erase(xarray * a, void *const elem)
 static void    *
 xarray_reserve(xarray * a, int reserved)
 {
-    assert(a);
-    assert(a->size <= a->reserved);
+    netsnmp_assert(a);
+    netsnmp_assert(a->size <= a->reserved);
 
     if ((a->p = realloc(a->p, a->elem_size * reserved)))
         a->reserved = reserved;
