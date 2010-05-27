@@ -43,7 +43,16 @@ fi
 
 #       Available authentication/encryption modes
 #
-if test "x$useopenssl" != "xno" ; then
+if test "x$CRYPTO" = "xinternal" ; then
+    authmodes="MD5 SHA1"
+    if test "x$enable_privacy" != "xno" ; then
+        encrmodes="DES AES"
+    else
+        encrmodes="[disabled]"
+    fi
+    AC_DEFINE(NETSNMP_USE_INTERNAL_CRYPTO, 1, "Define if internal cryptography code should be used")
+    AC_MSG_RESULT(Internal Crypto Support)
+elif test "x$useopenssl" != "xno" ; then
     authmodes="MD5 SHA1"
     if test "x$enable_privacy" != "xno" ; then
         if test "x$ac_cv_header_openssl_aes_h" = "xyes" ; then
@@ -80,6 +89,7 @@ fi
 AC_SUBST(LNETSNMPLIBS)
 AC_SUBST(LAGENTLIBS)
 
+AC_MSG_CACHE_ADD(Crypto support from:        $CRYPTO)
 AC_MSG_CACHE_ADD(Authentication support:     $authmodes)
 AC_MSG_CACHE_ADD(Encryption support:         $encrmodes)
 

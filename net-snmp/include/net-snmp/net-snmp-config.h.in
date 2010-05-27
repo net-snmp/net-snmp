@@ -1284,6 +1284,9 @@
 /* Pattern of temporary files */
 #undef NETSNMP_TEMP_FILE_PATTERN
 
+/* "Define if internal cryptography code should be used" */
+#undef NETSNMP_USE_INTERNAL_CRYPTO
+
 /* define if you are using the MD5 code ... */
 #undef NETSNMP_USE_INTERNAL_MD5
 
