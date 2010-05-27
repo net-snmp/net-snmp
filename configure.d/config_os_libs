@@ -251,12 +251,13 @@ fi
 #
 NONAGENTLIBS=$LIBS	 # save old libraries
 SSHINSTALLBINPROGS=""
-if test "x$tryopenssl" != "xno"; then
+if test "x$tryopenssl" != "xno" -a "x$tryopenssl" != "xinternal"; then
+    # check for libpkcs11 if asked
     if test "x$askedopenssl" != "xyes" -a "x$askedpkcs" = "xyes"; then
         AC_CHECK_LIB(pkcs11, C_Initialize,
             AC_DEFINE(HAVE_LIBPKCS11, 1,
                 [Define to 1 if you have the `pkcs11' library (-lpkcs11).])
-            LIBPKCS11="-lpkcs11")
+		LIBPKCS11="-lpkcs11")
     else 
         if test "x$tryrsaref" != "xno"; then
             AC_CHECK_LIB(rsaref, RSAPrivateDecrypt)
@@ -310,6 +311,14 @@ fi
 LIBS=$NONAGENTLIBS	 # restore old libraries
 AC_SUBST(SSHINSTALLBINPROGS)
 
+if test "x$tryopenssl" != "xno" -a "x$CRYPTO" = "x"; then
+   # If we:
+   #   1) couldn't find needed openssl support
+   #   2) OR were asked to use internal support
+   #   3) AND we have the needed files
+   # then use it
+   CRYPTO="internal"
+fi
 
 #   TCP wrapper support
 #

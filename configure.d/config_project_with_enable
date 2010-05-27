@@ -85,6 +85,9 @@ NETSNMP_ARG_WITH(openssl,
     if test "x$withval" = "xyes"; then
       tryopenssl=yes
       askedopenssl=yes
+    elif test "x$withval" = "xinternal"; then
+      tryopenssl=internal
+      askedopenssl=internal
     elif test "x$withval" = "xno"; then
       tryopenssl=no
     elif test -d "$withval"; then
