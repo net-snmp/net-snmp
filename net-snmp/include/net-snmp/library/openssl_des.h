@@ -56,11 +56,11 @@
  * [including the GNU Public Licence.]
  */
 
+/* Copied roughly from opensslconf.h which it's a little more complex */
+#define DES_LONG unsigned long
+
 #ifndef HEADER_NEW_DES_H
 #define HEADER_NEW_DES_H
-
-#include <openssl/e_os2.h>	/* OPENSSL_EXTERN, OPENSSL_NO_DES,
-				   DES_LONG (via openssl/opensslconf.h */
 
 #ifdef OPENSSL_NO_DES
 #error DES is disabled.
