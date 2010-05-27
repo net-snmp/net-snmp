@@ -430,16 +430,15 @@ _parse_stats(netsnmp_interface_entry *entry, char *stats, int expected)
      * subtract out multicast packets from rec_pkt before
      * we store it as unicast counter.
      */
-    rec_pkt -= rec_mcast;
-
+    entry->ns_flags |= NETSNMP_INTERFACE_FLAGS_CALCULATE_UCAST;
     entry->stats.ibytes.low = rec_oct & 0xffffffff;
-    entry->stats.iucast.low = rec_pkt & 0xffffffff;
+    entry->stats.iall.low = rec_pkt & 0xffffffff;
     entry->stats.imcast.low = rec_mcast & 0xffffffff;
     entry->stats.obytes.low = snd_oct & 0xffffffff;
     entry->stats.oucast.low = snd_pkt & 0xffffffff;
 #ifdef SCNuMAX   /* XXX - should be flag for 64-bit variables */
     entry->stats.ibytes.high = rec_oct >> 32;
-    entry->stats.iucast.high = rec_pkt >> 32;
+    entry->stats.iall.high = rec_pkt >> 32;
     entry->stats.imcast.high = rec_mcast >> 32;
     entry->stats.obytes.high = snd_oct >> 32;
     entry->stats.oucast.high = snd_pkt >> 32;
