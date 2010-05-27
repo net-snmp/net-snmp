@@ -28,6 +28,8 @@
 ## auto-probe best auth type
 if grep '^#define NETSNMP_USE_OPENSSL 1' $SNMP_UPDIR/include/net-snmp/net-snmp-config.h $SNMP_UPDIR/include/net-snmp/agent/mib_module_config.h > /dev/null ; then
   MAXAUTHTYPE=SHA
+elif grep '^#define NETSNMP_USE_INTERNAL_CRYPTO 1' $SNMP_UPDIR/include/net-snmp/net-snmp-config.h $SNMP_UPDIR/include/net-snmp/agent/mib_module_config.h > /dev/null ; then
+  MAXAUTHTYPE=SHA
 else
   # MD5 is always available internally
   MAXAUTHTYPE=MD5
@@ -42,6 +44,8 @@ if grep '^#define NETSNMP_USE_OPENSSL 1' $SNMP_UPDIR/include/net-snmp/net-snmp-c
   else
     MAXPRIVTYPE=DES
   fi
+elif grep '^#define NETSNMP_USE_INTERNAL_CRYPTO 1' $SNMP_UPDIR/include/net-snmp/net-snmp-config.h $SNMP_UPDIR/include/net-snmp/agent/mib_module_config.h > /dev/null; then
+    MAXPRIVTYPE=AES
 else
     MAXPRIVTYPE=""
 fi
