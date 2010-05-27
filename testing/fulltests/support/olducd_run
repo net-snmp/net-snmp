@@ -30,6 +30,10 @@ fi
 
 SNMP_BASEDIR=`dirname $0`
 
+## prefer MIB files found in source hierarchy
+SNMP_PREFER_NEAR_MIBS=1
+
+export SNMP_PREFER_NEAR_MIBS
 SNMP_TEST_PREFIX=${SNMP_TEST_PREFIX:=T}
 export SNMP_TEST_PREFIX
 
