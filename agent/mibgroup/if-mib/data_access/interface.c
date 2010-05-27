@@ -522,6 +522,22 @@ netsnmp_access_interface_entry_update_stats(netsnmp_interface_entry * prev_vals,
             NETSNMP_LOGONCE((LOG_ERR,
                     "Error expanding ifHCInOctets to 64bits\n"));
 
+        if (new_vals->ns_flags & NETSNMP_INTERFACE_FLAGS_CALCULATE_UCAST) {
+            if (0 != netsnmp_c64_check32_and_update(&prev_vals->stats.iall,
+                                           &new_vals->stats.iall,
+                                           &prev_vals->old_stats->iall,
+                                           &need_wrap_check))
+                NETSNMP_LOGONCE((LOG_ERR,
+                        "Error expanding packet count to 64bits\n"));
+        } else {
+            if (0 != netsnmp_c64_check32_and_update(&prev_vals->stats.iucast,
+                                           &new_vals->stats.iucast,
+                                           &prev_vals->old_stats->iucast,
+                                           &need_wrap_check))
+                NETSNMP_LOGONCE((LOG_ERR,
+                        "Error expanding ifHCInUcastPkts to 64bits\n"));
+        }
+
         if (0 != netsnmp_c64_check32_and_update(&prev_vals->stats.iucast,
                                        &new_vals->stats.iucast,
                                        &prev_vals->old_stats->iucast,
@@ -602,6 +618,23 @@ netsnmp_access_interface_entry_update_stats(netsnmp_interface_entry * prev_vals,
 }
 
 /**
+ * Calculate stats
+ *
+ * @retval  0 : success
+ * @retval -1 : error
+ */
+int
+netsnmp_access_interface_entry_calculate_stats(netsnmp_interface_entry *entry)
+{
+    DEBUGMSGTL(("access:interface", "calculate_stats\n"));
+    if (entry->ns_flags & NETSNMP_INTERFACE_FLAGS_CALCULATE_UCAST) {
+        u64Subtract(&entry->stats.iall, &entry->stats.imcast,
+                &entry->stats.iucast);
+    }
+    return 0;
+}
+
+/**
  * copy interface entry data (after checking for counter wraps)
  *
  * @retval -2 : malloc failed
@@ -623,6 +656,7 @@ netsnmp_access_interface_entry_copy(netsnmp_interface_entry * lhs,
      * update stats
      */
     netsnmp_access_interface_entry_update_stats(lhs, rhs);
+    netsnmp_access_interface_entry_calculate_stats(lhs);
 
     /*
      * update data
