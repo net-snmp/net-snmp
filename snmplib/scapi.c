@@ -62,7 +62,6 @@
 #ifdef NETSNMP_USE_INTERNAL_CRYPTO
 #include <net-snmp/library/openssl_md5.h>
 #include <net-snmp/library/openssl_sha.h>
-#include "openssl_sha.h"
 #endif
 #ifdef NETSNMP_USE_OPENSSL
 #include <openssl/hmac.h>
@@ -86,6 +85,10 @@
 #endif
 
 #endif /* HAVE_OPENSSL */
+
+#ifdef NETSNMP_USE_INTERNAL_CRYPTO
+#include <net-snmp/library/openssl_des.h>
+#endif
 
 #ifdef NETSNMP_USE_PKCS11
 #include <security/cryptoki.h>
@@ -673,7 +676,7 @@ sc_encrypt(const oid * privtype, size_t privtypelen,
            u_char * iv, u_int ivlen,
            const u_char * plaintext, u_int ptlen,
            u_char * ciphertext, size_t * ctlen)
-#if defined(NETSNMP_USE_OPENSSL)
+#if defined(NETSNMP_USE_OPENSSL) || defined(NETSNMP_USE_INTERNAL_CRYPTO)
 {
     int             rval = SNMPERR_SUCCESS;
     u_int           properlength = 0, properlength_iv = 0;
@@ -946,7 +949,7 @@ sc_decrypt(const oid * privtype, size_t privtypelen,
            u_char * iv, u_int ivlen,
            u_char * ciphertext, u_int ctlen,
            u_char * plaintext, size_t * ptlen)
-#ifdef NETSNMP_USE_OPENSSL
+#if defined(NETSNMP_USE_OPENSSL) || defined(NETSNMP_USE_INTERNAL_CRYPTO)
 {
 
     int             rval = SNMPERR_SUCCESS;
