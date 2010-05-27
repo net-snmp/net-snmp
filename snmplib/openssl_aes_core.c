@@ -36,8 +36,8 @@
 #include <assert.h>
 
 #include <stdlib.h>
-#include <openssl/aes.h>
-#include "aes_locl.h"
+#include <net-snmp/library/openssl_aes.h>
+#include "openssl_aes_local.h"
 
 #ifndef AES_ASM
 /*
