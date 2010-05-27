@@ -64,7 +64,6 @@
 #include <net-snmp/library/openssl_sha.h>
 #include <net-snmp/library/openssl_des.h>
 #include <net-snmp/library/openssl_aes.h>
-#define HAVE_AES
 #endif
 #ifdef NETSNMP_USE_OPENSSL
 #include <openssl/hmac.h>
