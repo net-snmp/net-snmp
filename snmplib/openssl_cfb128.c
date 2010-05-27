@@ -48,7 +48,7 @@
  *
  */
 
-#include "modes.h"
+#include "openssl_modes.h"
 #include <string.h>
 
 #ifndef MODES_DEBUG
