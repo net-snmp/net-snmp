@@ -61,5 +61,5 @@
 
 /* The implementation is in ../md32_common.h */
 
-#include "openssl_sha_local.h"
+#include "openssl/openssl_sha_local.h"
 

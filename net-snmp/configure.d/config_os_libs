@@ -324,9 +324,9 @@ if test "x$tryopenssl" != "xno" -a "x$CRYPTO" = "x"; then
    #   3) AND we have the needed files
    # then use it
    CRYPTO="internal"
-   crypto_files_c="openssl_sha1.c openssl_md5.c openssl_set_key.c openssl_des_enc.c openssl_cbc_enc.c openssl_aes_cfb.c openssl_aes_core.c openssl_cfb128.c"
-   crypto_files_o="openssl_sha1.o openssl_md5.o openssl_set_key.o openssl_des_enc.o openssl_cbc_enc.o openssl_aes_cfb.o openssl_aes_core.oo openssl_cfb128.o"
-   crypto_files_lo="openssl_sha1.lo openssl_md5.lo openssl_set_key.lo openssl_des_enc.lo openssl_cbc_enc.lo openssl_aes_cfb.lo openssl_aes_core.lo openssl_cfb128.lo"
+   crypto_files_c="openssl/openssl_sha1.c openssl/openssl_md5.c openssl/openssl_set_key.c openssl/openssl_des_enc.c openssl/openssl_cbc_enc.c openssl/openssl_aes_cfb.c openssl/openssl_aes_core.c openssl/openssl_cfb128.c"
+   crypto_files_o="openssl/openssl_sha1.o openssl/openssl_md5.o openssl/openssl_set_key.o openssl/openssl_des_enc.o openssl/openssl_cbc_enc.o openssl/openssl_aes_cfb.o openssl/openssl_aes_core.oo openssl/openssl_cfb128.o"
+   crypto_files_lo="openssl/openssl_sha1.lo openssl/openssl_md5.lo openssl/openssl_set_key.lo openssl/openssl_des_enc.lo openssl/openssl_cbc_enc.lo openssl/openssl_aes_cfb.lo openssl/openssl_aes_core.lo openssl/openssl_cfb128.lo"
    AC_DEFINE(HAVE_AES_CFB128_ENCRYPT)
 fi
 AC_SUBST(crypto_files_c)
