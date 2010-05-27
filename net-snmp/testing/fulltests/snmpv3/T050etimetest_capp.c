@@ -29,8 +29,11 @@
 #include <netinet/in.h>
 #endif
 
+#include <unistd.h>
+
 #include <net-snmp/library/asn1.h>
 #include <net-snmp/library/snmp_api.h>
+#include <net-snmp/library/scapi.h>
 #include <net-snmp/library/tools.h>
 #include <net-snmp/library/lcd_time.h>
 #include <net-snmp/library/snmp_debug.h>
@@ -245,28 +248,28 @@ test_hashindex(void)
 {
     int                         /* rval = SNMPERR_SUCCESS,  */
                     failcount = 0;
-    char           *s;
+    const u_char     *s;
 
     OUTPUT("Visual spot check of hash index outputs.  "
            "(Success or failure not noted.)");
 
-    s = "A";
-    fprintf(stdout, "# %s = %d\n", s, hash_engineID(s, strlen(s)));
+    s = (const u_char *) " A";
+    fprintf(stdout, "# %s = %d\n", s, hash_engineID(s, strlen((const char *) s)));
 
-    s = "BB";
-    fprintf(stdout, "# %s = %d\n", s, hash_engineID(s, strlen(s)));
+    s = (const u_char *) " BB";
+    fprintf(stdout, "# %s = %d\n", s, hash_engineID(s, strlen((const char *) s)));
 
-    s = "CCC";
-    fprintf(stdout, "# %s = %d\n", s, hash_engineID(s, strlen(s)));
+    s = (const u_char *) " CCC";
+    fprintf(stdout, "# %s = %d\n", s, hash_engineID(s, strlen((const char *) s)));
 
-    s = "DDDD";
-    fprintf(stdout, "# %s = %d\n", s, hash_engineID(s, strlen(s)));
+    s = (const u_char *) " DDDD";
+    fprintf(stdout, "# %s = %d\n", s, hash_engineID(s, strlen((const char *) s)));
 
-    s = "EEEEE";
-    fprintf(stdout, "# %s = %d\n", s, hash_engineID(s, strlen(s)));
+    s = (const u_char *) " EEEEE";
+    fprintf(stdout, "# %s = %d\n", s, hash_engineID(s, strlen((const char *) s)));
 
-    s = BLAT;
-    fprintf(stdout, "# %s = %d\n", s, hash_engineID(s, strlen(s)));
+    s = (const u_char *) BLAT;
+    fprintf(stdout, "# %s = %d\n", s, hash_engineID(s, strlen((const char *) s)));
 
 
     OUTPUT("Visual spot check -- DONE.");
@@ -299,17 +302,17 @@ test_etime(void)
     OUTPUT("Query of empty list, two set actions.");
 
 
-    rval = ISENGINEKNOWN((u_char *) "A", 1);
+    rval = ISENGINEKNOWN((const u_char *) "A", 1);
     if (rval == TRUE) {
         FAILED(SNMPERR_GENERR, "Query of empty list returned TRUE.")
     }
 
 
-    rval = set_enginetime("BB", 2, 2, 20, TRUE);
+    rval = set_enginetime((const u_char *) "BB", 2, 2, 20, TRUE);
     FAILED(rval, "set_enginetime()");
 
 
-    rval = set_enginetime("CCC", 3, 31, 90127, TRUE);
+    rval = set_enginetime((const u_char *) "CCC", 3, 31, 90127, TRUE);
     FAILED(rval, "set_enginetime()");
 
 
@@ -367,7 +370,7 @@ test_etime(void)
 
 
 
-    rval = get_enginetime("BB", 2, &eboot, &etime, TRUE);
+    rval = get_enginetime((const u_char *) "BB", 2, &eboot, &etime, TRUE);
     FAILED(rval, "get_enginetime().");
 
     fprintf(stdout, "# BB = <%d,%d>\n", eboot, etime);
@@ -376,7 +379,7 @@ test_etime(void)
                "get_enginetime() returned bad values.  (1)");
     }
 
-    rval = get_enginetime("DDDD", 4, &eboot, &etime, FALSE);
+    rval = get_enginetime((const u_char *) "DDDD", 4, &eboot, &etime, FALSE);
     FAILED(rval, "get_enginetime().");
 
     fprintf(stdout, "# DDDD = <%d,%d>\n", eboot, etime);
@@ -386,11 +389,11 @@ test_etime(void)
     }
 
 
-    rval = set_enginetime("CCC", 3, 234, 10000, TRUE);
+    rval = set_enginetime((const u_char *) "CCC", 3, 234, 10000, TRUE);
     FAILED(rval, "set_enginetime().");
 
 
-    rval = set_enginetime("EEEEE", 5, 9876, 55555, TRUE);
+    rval = set_enginetime((const u_char *) "EEEEE", 5, 9876, 55555, TRUE);
     FAILED(rval, "set_enginetime().");
 
 

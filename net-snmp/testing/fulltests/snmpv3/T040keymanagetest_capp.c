@@ -20,8 +20,6 @@
  * Test of {encode,decode}_keychange().         SUCCESSes: 3
  */
 
-static char    *rcsid = "$Id$";        /* */
-
 #include <net-snmp/net-snmp-config.h>
 
 #include <stdio.h>
@@ -32,6 +30,9 @@ static char    *rcsid = "$Id$";        /* */
 #ifdef HAVE_NETINET_IN_H
 #include <netinet/in.h>
 #endif
+
+#include <unistd.h>
+#include <ctype.h>
 
 #include <net-snmp/library/asn1.h>
 #include <net-snmp/library/snmp_api.h>
@@ -74,7 +75,7 @@ int             doalltests = 0, dogenKu = 0, dogenkul = 0, dokeychange = 0;
 
 #define FAILED(e, f)                                                    \
 {                                                                       \
-    if (e != SNMPERR_SUCCESS) {                                         \
+    if ((e) != SNMPERR_SUCCESS) {                                       \
                 fprintf(stdout, "not ok: %d - %s\n", ++testcount, f);	\
 		failcount += 1;                                         \
 	} else {                                                        \
@@ -95,10 +96,10 @@ int             doalltests = 0, dogenKu = 0, dogenkul = 0, dokeychange = 0;
 #define OLDKEY_DEFAULT		"This is a very old key."
 #define NEWKEY_DEFAULT		"This key, on the other hand, is very new."
 
-char           *engineID = NULL;
+u_char         *engineID = NULL;
 char           *passphrase = NULL;
-char           *oldkey = NULL;
-char           *newkey = NULL;
+const u_char   *oldkey = NULL;
+const u_char   *newkey = NULL;
 int             bequiet = 0;
 
 
@@ -132,7 +133,7 @@ main(int argc, char **argv)
             doalltests = 1;
             break;
         case 'E':
-            engineID = optarg;
+            engineID = (u_char *) optarg;
             break;
         case 'k':
             dokeychange = 1;
@@ -141,10 +142,10 @@ main(int argc, char **argv)
             dogenkul = 1;
             break;
         case 'N':
-            newkey = optarg;
+            newkey = (u_char *) optarg;
             break;
         case 'O':
-            oldkey = optarg;
+            oldkey = (u_char *) optarg;
             break;
         case 'P':
             passphrase = optarg;
@@ -252,7 +253,7 @@ test_dosomething(void)
 {
     int             rval = SNMPERR_SUCCESS, failcount = 0;
 
-    EM0(1, "UNIMPLEMENTED");    /* EM(1); /* */
+    EM0(1, "UNIMPLEMENTED");    /* EM(1); */
 
   test_dosomething_quit:
     return failcount;
@@ -280,7 +281,8 @@ test_genKu(void)
         failcount = 0,
         properlength = BYTESIZE(SNMP_TRANS_AUTHLEN_HMACMD5);
     size_t          kulen;
-    char           *hashname = "usmHMACMD5AuthProtocol.", *s;
+    const char     *hashname = "usmHMACMD5AuthProtocol.";
+    char           *s;
     u_char          Ku[LOCAL_MAXBUF];
     oid            *hashtype = usmHMACMD5AuthProtocol;
 
@@ -290,11 +292,11 @@ test_genKu(void)
      * Set passphrase.
      */
     if (!passphrase) {
-        passphrase = PASSPHRASE_DEFAULT;
+        passphrase = strdup(PASSPHRASE_DEFAULT);
     }
     if (!bequiet)
         fprintf(stdout, "Passphrase%s: %s\n",
-                (passphrase == PASSPHRASE_DEFAULT) ? " (default)" : "",
+                (strcmp(passphrase, PASSPHRASE_DEFAULT) == 0) ? " (default)" : "",
                 passphrase);
 
 
@@ -303,10 +305,12 @@ test_genKu(void)
     kulen = LOCAL_MAXBUF;
 
     rval = generate_Ku(hashtype, USM_LENGTH_OID_TRANSFORM,
-                       passphrase, strlen(passphrase), Ku, &kulen);
+                       (const u_char *) passphrase, strlen(passphrase),
+                       Ku, &kulen);
     FAILED(rval, "generate_Ku().");
 
-    FAILED(kulen != properlength, "Ku length is the right length for this hashtype.");
+    FAILED((kulen != properlength),
+           "Ku length is the right length for this hashtype.");
 
     binary_to_hex(Ku, kulen, &s);
     if (!bequiet)
@@ -353,9 +357,10 @@ test_genkul(void)
         properlength, engineID_len, isdefault = FALSE;
 
     size_t          kulen, kul_len;
-    char           *s = NULL,
-        *testname = "Using HMACMD5 to create master key.",
-        *hashname_Ku = "usmHMACMD5AuthProtocol", *hashname_kul;
+    char           *s = NULL;
+    const char *testname = "Using HMACMD5 to create master key.";
+    const char *hashname_Ku = "usmHMACMD5AuthProtocol";
+    const char *hashname_kul = NULL;
 
     u_char          Ku[LOCAL_MAXBUF], kul[LOCAL_MAXBUF];
 
@@ -370,32 +375,33 @@ test_genkul(void)
      * hex and convert it to binary data.
      */
     if (!passphrase) {
-        passphrase = PASSPHRASE_DEFAULT;
+        passphrase = strdup(PASSPHRASE_DEFAULT);
     }
     if (!bequiet)
         fprintf(stdout, "# Passphrase%s: %s\n",
-                (passphrase == PASSPHRASE_DEFAULT) ? " (default)" : "",
+                (strcmp(passphrase, PASSPHRASE_DEFAULT) == 0) ? " (default)" : "",
                 passphrase);
 
     if (!engineID) {
-        engineID = ENGINEID_DEFAULT;
+        engineID = (u_char *) strdup(ENGINEID_DEFAULT);
         isdefault = TRUE;
     }
 
-    engineID_len = strlen(engineID);
+    engineID_len = strlen((char *) engineID);
 
     if (tolower(*(engineID + 1)) == 'x') {
-        engineID_len = hex_to_binary2(engineID + 2, engineID_len - 2, &s);
-        FAILED(engineID_len < 0,
+        engineID_len =
+            hex_to_binary2(engineID + 2, engineID_len - 2, &s);
+        FAILED((engineID_len < 0),
                "Could not resolve hex engineID.");
-        engineID = s;
+        engineID = (u_char *) s;
         binary_to_hex(engineID, engineID_len, &s);
     }
 
     if (!bequiet)
         fprintf(stdout, "# engineID%s (len=%d):  %s\n",
                 (isdefault) ? " (default)" : "",
-                engineID_len, (s) ? s : engineID);
+                engineID_len, ((s != 0) ? ((u_char *) s) : engineID));
     if (s) {
         SNMP_FREE(s);
     }
@@ -415,7 +421,7 @@ test_genkul(void)
 
 
     rval = generate_Ku(hashtype_Ku, USM_LENGTH_OID_TRANSFORM,
-                       passphrase, strlen(passphrase), Ku, &kulen);
+                       (u_char *) passphrase, strlen(passphrase), Ku, &kulen);
     FAILED(rval, "generate_Ku().");
 
     binary_to_hex(Ku, kulen, &s);
@@ -434,7 +440,7 @@ test_genkul(void)
 
     if ((hashtype_Ku == usmHMACMD5AuthProtocol)
         && (hashtype_kul == usmHMACSHA1AuthProtocol)) {
-        FAILED(rval == SNMPERR_SUCCESS,
+        FAILED((rval == SNMPERR_SUCCESS),
                "generate_kul SHOULD fail when Ku length is "
                "less than hash transform length.");
     } else {
@@ -504,7 +510,8 @@ test_keychange(void)
         isdefault_new = FALSE, isdefault_old = FALSE;
     size_t          keychange_len, temp_len;
 
-    char           *hashname = "usmHMACMD5AuthProtocol.", *s;
+    const char     *hashname = "usmHMACMD5AuthProtocol.";
+    char           *s;
 
     u_char          oldkey_buf[LOCAL_MAXBUF],
         newkey_buf[LOCAL_MAXBUF],
@@ -519,30 +526,32 @@ test_keychange(void)
      * Set newkey and oldkey.
      */
     if (!newkey) {              /* newkey */
-        newkey = NEWKEY_DEFAULT;
+        newkey = (const u_char *) NEWKEY_DEFAULT;
         isdefault_new = TRUE;
     }
-    newkey_len = strlen(newkey);
+    newkey_len = strlen((const char *) newkey);
 
     if (tolower(*(newkey + 1)) == 'x') {
-        newkey_len = hex_to_binary2(newkey + 2, newkey_len - 2, &s);
+        newkey_len = hex_to_binary2((const u_char *) newkey + 2,
+                                    newkey_len - 2, &s);
         FAILED(newkey_len < 0,
                "Could not resolve hex newkey.");
-        newkey = s;
-        binary_to_hex(newkey, newkey_len, &s);
+        newkey = (const u_char *) s;
+        binary_to_hex((const u_char *) newkey, newkey_len, &s);
     }
 
     if (!oldkey) {              /* oldkey */
-        oldkey = OLDKEY_DEFAULT;
+        oldkey = (const u_char *) OLDKEY_DEFAULT;
         isdefault_old = TRUE;
     }
-    oldkey_len = strlen(oldkey);
+    oldkey_len = strlen((const char *) oldkey);
 
     if (tolower(*(oldkey + 1)) == 'x') {
-        oldkey_len = hex_to_binary2(oldkey + 2, oldkey_len - 2, &s);
+        oldkey_len = hex_to_binary2((const u_char *) oldkey + 2,
+                                    oldkey_len - 2, &s);
         FAILED(oldkey_len < 0,
                "Could not resolve hex oldkey.");
-        oldkey = s;
+        oldkey = (const u_char *) s;
         binary_to_hex(oldkey, oldkey_len, &s);
     }
 
