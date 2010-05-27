@@ -419,10 +419,10 @@ sub run_older_perl_tests {
 	mkdir("$opts{'d'}/temptests");
     }
     foreach my $test (@tests) {
-	my $tempfile = "$opts{'d'}/$test->[1].t";
+	my $tempfile = "$test->[0].t";
 	$tempfile =~ s#$opts{'d'}/default/#$opts{'d'}/temptests/#;
 	open(T, ">$tempfile") || die("$tempfile: $!");
-	print T "# functionally perl\n\nsystem(\"$opts{'srcdir'}/testing/fulltests/support/run_olducd $opts{'srcdir'}/testing/$opts{'d'}/$test->[1]\");\n";
+	print T "# functionally perl\n\nsystem(\"$opts{'srcdir'}/testing/fulltests/support/olducd_run $test->[0]\");\n";
 	close(T);
 	chmod(0755, $tempfile);
 	push @tempfiles, $tempfile;
