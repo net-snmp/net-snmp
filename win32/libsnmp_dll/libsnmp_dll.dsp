@@ -276,10 +276,6 @@ SOURCE=..\..\snmplib\transports\snmpCallbackDomain.c
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\snmplib\transports\snmpIPBaseDomain.c
-# End Source File
-# Begin Source File
-
 SOURCE=..\..\snmplib\transports\snmpIPv4BaseDomain.c
 # End Source File
 # Begin Source File

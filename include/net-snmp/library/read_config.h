@@ -72,9 +72,11 @@ extern          "C" {
     const char     *skip_not_white_const(const char *);
     NETSNMP_IMPORT
     char           *skip_token(char *);
+    NETSNMP_IMPORT
     const char     *skip_token_const(const char *);
     NETSNMP_IMPORT
     char           *copy_nword(char *, char *, int);
+    NETSNMP_IMPORT
     const char     *copy_nword_const(const char *, char *, int);
     NETSNMP_IMPORT
     char           *copy_word(char *, char *);  /* do not use */
