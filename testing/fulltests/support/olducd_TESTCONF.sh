@@ -48,13 +48,6 @@ if [ "x$SNMP_VERBOSE" = "x" ]; then
     export SNMP_VERBOSE
 fi
 
-if [ "x$MIBDIRS" = "x" ]; then
-  if [ "x$SNMP_PREFER_NEAR_MIBS" = "x1" ]; then
-    MIBDIRS=${srcdir}/mibs
-    export MIBDIRS
-  fi
-fi
-
 # Set up the path to the programs we want to use.
 if [ "x$SNMP_PATH" = "x" ]; then
     PATH=${builddir}/agent:${builddir}/apps:$PATH

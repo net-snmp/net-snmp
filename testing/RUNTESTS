@@ -3,6 +3,12 @@
 srcdir=`dirname $0`/..
 srcdir=`cd $srcdir ; pwd`
 
+# set up MIBDIRS to refer to the src directory
+if [ "x$MIBDIRS" = "x" ]; then
+    MIBDIRS=${srcdir}/mibs
+    export MIBDIRS
+fi
+
 for i in ${srcdir}/testing/fulltests/default/T* ; do
     echo "RUNNING $i"
     ${srcdir}/testing/fulltests/support/olducd_run $i
