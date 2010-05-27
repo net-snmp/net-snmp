@@ -59,8 +59,8 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include <openssl/opensslconf.h>
-#include <openssl/sha.h>
+//#include <openssl/opensslconf.h>
+#include <openssl_sha.h>
 
 #define DATA_ORDER_IS_BIG_ENDIAN
 
