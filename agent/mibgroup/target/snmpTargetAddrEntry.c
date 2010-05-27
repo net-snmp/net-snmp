@@ -1497,7 +1497,7 @@ write_snmpTargetAddrRowStatus(int action,
                         "write to snmpTargetAddrRowStatus not ASN_INTEGER\n"));
             return SNMP_ERR_WRONGTYPE;
         }
-        if (var_val_len != sizeof(int)) {
+        if (var_val_len != sizeof(long)) {
             DEBUGMSGTL(("snmpTargetAddrEntry",
                         "write to snmpTargetAddrRowStatus: bad length\n"));
             return SNMP_ERR_WRONGLENGTH;
