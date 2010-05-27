@@ -332,7 +332,7 @@ void free_etimelist(void)
  * XXX	"Current time within the local engine" == time(NULL)...
  */
 int
-set_enginetime(u_char * engineID,
+set_enginetime(const u_char * engineID,
                u_int engineID_len,
                u_int engineboot, u_int engine_time, u_int authenticated)
 {
@@ -471,7 +471,7 @@ search_enginetime_list(u_char * engineID, u_int engineID_len)
  *
  */
 int
-hash_engineID(u_char * engineID, u_int engineID_len)
+hash_engineID(const u_char * engineID, u_int engineID_len)
 {
     int             rval = SNMPERR_GENERR;
     size_t          buf_len = SNMP_MAXBUF;
