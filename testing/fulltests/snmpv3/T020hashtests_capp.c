@@ -4,11 +4,12 @@
 
 #include <stdio.h>
 
-void print_hash(u_char *label, u_char *MAC, size_t MAC_LEN);
+void print_hash(const char *label, u_char *MAC, size_t MAC_LEN);
 
 
-main() {
-    char buf[] = "wes hardaker";
+int
+main(int argc, char **argv) {
+    u_char buf[] = "wes hardaker";
     u_char MAC[20];
     size_t MAC_LEN = 20;
     u_char sha1key[20] = "55555555555555555555";
@@ -106,7 +107,7 @@ main() {
 }
 
 void
-print_hash(u_char *label, u_char *MAC, size_t MAC_LEN) {
+print_hash(const char *label, u_char *MAC, size_t MAC_LEN) {
     int i;
     printf("# %-10s %d:\n", label, MAC_LEN);
     for(i=0; i < MAC_LEN; i++) {
