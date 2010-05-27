@@ -114,7 +114,7 @@ void sha1_block_data_order (SHA_CTX *c, const void *p,size_t num);
 # error "Either SHA_0 or SHA_1 must be defined."
 #endif
 
-#include "md32_common.h"
+#include "openssl_md32_common.h"
 
 #define INIT_DATA_h0 0x67452301UL
 #define INIT_DATA_h1 0xefcdab89UL
