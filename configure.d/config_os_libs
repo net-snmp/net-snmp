@@ -311,6 +311,9 @@ fi
 LIBS=$NONAGENTLIBS	 # restore old libraries
 AC_SUBST(SSHINSTALLBINPROGS)
 
+crypto_files_c=""
+crypto_files_o=""
+crypto_files_lo=""
 if test "x$tryopenssl" != "xno" -a "x$CRYPTO" = "x"; then
    # If we:
    #   1) couldn't find needed openssl support
@@ -318,7 +321,13 @@ if test "x$tryopenssl" != "xno" -a "x$CRYPTO" = "x"; then
    #   3) AND we have the needed files
    # then use it
    CRYPTO="internal"
+   crypto_files_c="openssl_sha1.c openssl_md5.c"
+   crypto_files_o="openssl_sha1.o openssl_md5.o"
+   crypto_files_lo="openssl_sha1.lo openssl_md5.lo"
 fi
+AC_SUBST(crypto_files_c)
+AC_SUBST(crypto_files_o)
+AC_SUBST(crypto_files_lo)
 
 #   TCP wrapper support
 #
