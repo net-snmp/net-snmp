@@ -56,8 +56,8 @@
  * [including the GNU Public Licence.]
  */
 
-#include "des_locl.h"
-#include "spr.h"
+#include "openssl_des_local.h"
+#include "openssl_spr.h"
 
 void DES_encrypt1(DES_LONG *data, DES_key_schedule *ks, int enc)
 	{
@@ -283,7 +283,7 @@ void DES_decrypt3(DES_LONG *data, DES_key_schedule *ks1,
 #ifndef DES_DEFAULT_OPTIONS
 
 #undef CBC_ENC_C__DONT_UPDATE_IV
-#include "ncbc_enc.c" /* DES_ncbc_encrypt */
+#include "openssl_ncbc_enc.c" /* DES_ncbc_encrypt */
 
 void DES_ede3_cbc_encrypt(const unsigned char *input, unsigned char *output,
 			  long length, DES_key_schedule *ks1,
