@@ -53,7 +53,6 @@ LINK32_OBJS= \
 	"$(INTDIR)\snmp-tc.obj" \
 	"$(INTDIR)\snmp.obj" \
 	"$(INTDIR)\snmpCallbackDomain.obj" \
-	"$(INTDIR)\snmpIPBaseDomain.obj" \
 	"$(INTDIR)\snmpIPv4BaseDomain.obj" \
 	"$(INTDIR)\snmpSocketBaseDomain.obj" \
 	"$(INTDIR)\snmpTCPBaseDomain.obj" \
@@ -351,12 +350,6 @@ SOURCE=..\..\snmplib\snmp.c
 SOURCE=..\..\snmplib\transports\snmpCallbackDomain.c
 
 "$(INTDIR)\snmpCallbackDomain.obj" : $(SOURCE) "$(INTDIR)"
-	$(CPP) $(CPP_PROJ) $(SOURCE)
-
-
-SOURCE=..\..\snmplib\transports\snmpIPBaseDomain.c
-
-"$(INTDIR)\snmpIPBaseDomain.obj" : $(SOURCE) "$(INTDIR)"
 	$(CPP) $(CPP_PROJ) $(SOURCE)
 
 

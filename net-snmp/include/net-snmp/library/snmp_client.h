@@ -101,6 +101,7 @@ NETSNMP_IMPORT
 int netsnmp_query_getnext( netsnmp_variable_list *, netsnmp_session *);
 NETSNMP_IMPORT
 int netsnmp_query_walk(    netsnmp_variable_list *, netsnmp_session *);
+NETSNMP_IMPORT
 int netsnmp_query_set(     netsnmp_variable_list *, netsnmp_session *);
 
 #ifdef __cplusplus
