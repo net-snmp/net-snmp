@@ -81,7 +81,9 @@ NETSNMP_ARG_WITH(rsaref,
 tryopenssl=defaultyes
 askedopenssl=no
 NETSNMP_ARG_WITH(openssl,
-[  --with-openssl=PATH             Look for openssl in PATH/lib.],
+[  --with-openssl=PATH             Look for openssl in PATH/lib,
+                                  or PATH may be "internal" to build with
+                                  minimal copied OpenSSL code for USM only.],
     if test "x$withval" = "xyes"; then
       tryopenssl=yes
       askedopenssl=yes
