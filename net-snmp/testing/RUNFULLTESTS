@@ -60,6 +60,11 @@ if (exists($opts{'d'})) {
 $ENV{'srcdir'} = $opts{'srcdir'};
 $ENV{'builddir'} = $opts{'builddir'};
 
+# set up MIBDIRS to refer to the src directory
+if (!$ENV{'MIBDIRS'}) {
+    $ENV{'MIBDIRS'} = "$opts{srcdir}/mibs";
+}
+
 ########################################
 # Protection measures
 $ENV{'SNMPCONFPATH'} = "/dev/null";
