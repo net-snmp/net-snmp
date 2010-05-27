@@ -59,6 +59,11 @@
 #include <net-snmp/library/mib.h>
 #include <net-snmp/library/transform_oids.h>
 
+#ifdef NETSNMP_USE_INTERNAL_CRYPTO
+#include <net-snmp/library/openssl_md5.h>
+#include <net-snmp/library/openssl_sha.h>
+#include "openssl_sha.h"
+#endif
 #ifdef NETSNMP_USE_OPENSSL
 #include <openssl/hmac.h>
 #include <openssl/evp.h>
@@ -95,6 +100,13 @@
 	}
 #endif
 
+static
+int SHA1_hmac(u_char * data, size_t len, u_char * mac, size_t maclen,
+              u_char * secret, size_t secretlen);
+
+static
+int MD5_hmac(u_char * data, size_t len, u_char * mac, size_t maclen,
+             u_char * secret, size_t secretlen);
 
 /*
  * sc_get_properlength(oid *hashtype, u_int hashtype_len):
@@ -151,8 +163,8 @@ sc_init(void)
 {
     int             rval = SNMPERR_SUCCESS;
 
-#ifndef NETSNMP_USE_OPENSSL
-#ifdef NETSNMP_USE_INTERNAL_MD5
+#if !defined(NETSNMP_USE_OPENSSL)
+#if defined(NETSNMP_USE_INTERNAL_MD5) || defined(NETSNMP_USE_INTERNAL_CRYPTO)
     struct timeval  tv;
 
     DEBUGTRACE;
@@ -186,10 +198,10 @@ sc_init(void)
  */
 int
 sc_random(u_char * buf, size_t * buflen)
-#if defined(NETSNMP_USE_INTERNAL_MD5) || defined(NETSNMP_USE_OPENSSL) || defined(NETSNMP_USE_PKCS11)
+#if defined(NETSNMP_USE_INTERNAL_MD5) || defined(NETSNMP_USE_OPENSSL) || defined(NETSNMP_USE_PKCS11) || defined(NETSNMP_USE_INTERNAL_CRYPTO)
 {
     int             rval = SNMPERR_SUCCESS;
-#ifdef NETSNMP_USE_INTERNAL_MD5
+#if defined(NETSNMP_USE_INTERNAL_MD5) || defined(NETSNMP_USE_INTERNAL_CRYPTO)
     int             i;
     int             rndval;
     u_char         *ucp = buf;
@@ -202,6 +214,7 @@ sc_random(u_char * buf, size_t * buflen)
 #elif NETSNMP_USE_PKCS11			/* NETSNMP_USE_PKCS11 */
     pkcs_random(buf, *buflen);
 #else                           /* NETSNMP_USE_INTERNAL_MD5 */
+    /* WJHXXX: includes internal crypto, which could be better? */
     /*
      * fill the buffer with random integers.  Note that random()
      * is defined in config.h and may not be truly the random()
@@ -258,7 +271,7 @@ sc_generate_keyed_hash(const oid * authtype, size_t authtypelen,
                        const u_char * key, u_int keylen,
                        const u_char * message, u_int msglen,
                        u_char * MAC, size_t * maclen)
-#if  defined(NETSNMP_USE_INTERNAL_MD5) || defined(NETSNMP_USE_OPENSSL) || defined(NETSNMP_USE_PKCS11)
+#if  defined(NETSNMP_USE_INTERNAL_MD5) || defined(NETSNMP_USE_OPENSSL) || defined(NETSNMP_USE_PKCS11) || defined(NETSNMP_USE_INTERNAL_CRYPTO)
 {
     int             rval = SNMPERR_SUCCESS;
     int             properlength;
@@ -344,6 +357,20 @@ sc_generate_keyed_hash(const oid * authtype, size_t authtypelen,
         *maclen = buf_len;
     memcpy(MAC, buf, *maclen);
 
+#elif NETSNMP_USE_INTERNAL_CRYPTO
+    if ((int) *maclen > properlength)
+        *maclen = properlength;
+    if (ISTRANSFORM(authtype, HMACMD5Auth))
+        rval = MD5_hmac(message, msglen, MAC, *maclen, key, keylen);
+    else if (ISTRANSFORM(authtype, HMACSHA1Auth))
+        rval = SHA1_hmac(message, msglen, MAC, *maclen, key, keylen);
+    else {
+        QUITFUN(SNMPERR_GENERR, sc_generate_keyed_hash_quit);
+    }
+    if (rval != 0) {
+        rval = SNMPERR_GENERR;
+        goto sc_generate_keyed_hash_quit;
+    }    
 #else                            /* NETSNMP_USE_INTERNAL_MD5 */
     if ((int) *maclen > properlength)
         *maclen = properlength;
@@ -393,9 +420,9 @@ sc_generate_keyed_hash(const oid * authtype, size_t authtypelen,
 int
 sc_hash(const oid * hashtype, size_t hashtypelen, u_char * buf,
         size_t buf_len, u_char * MAC, size_t * MAC_len)
-#if defined(NETSNMP_USE_INTERNAL_MD5) || defined(NETSNMP_USE_OPENSSL) || defined(NETSNMP_USE_PKCS11)
+#if defined(NETSNMP_USE_INTERNAL_MD5) || defined(NETSNMP_USE_OPENSSL) || defined(NETSNMP_USE_PKCS11) || defined(NETSNMP_USE_INTERNAL_CRYPTO)
 {
-#if defined(NETSNMP_USE_OPENSSL) || defined(NETSNMP_USE_PKCS11)
+#if defined(NETSNMP_USE_OPENSSL) || defined(NETSNMP_USE_PKCS11) || defined(NETSNMP_USE_INTERNAL_CRYPTO)
     int            rval = SNMPERR_SUCCESS;
     unsigned int   tmp_len;
 #endif
@@ -405,7 +432,10 @@ sc_hash(const oid * hashtype, size_t hashtypelen, u_char * buf,
     const EVP_MD   *hashfn;
     EVP_MD_CTX     ctx, *cptr;
 #endif
-
+#ifdef NETSNMP_USE_INTERNAL_CRYPTO
+    MD5_CTX        cmd5;
+    SHA_CTX        csha1;
+#endif
     DEBUGTRACE;
 
     if (hashtype == NULL || buf == NULL || buf_len <= 0 ||
@@ -468,6 +498,30 @@ sc_hash(const oid * hashtype, size_t hashtypelen, u_char * buf,
     }
 #endif                          /* OLD_DES */
     return (rval);
+
+#elif NETSNMP_USE_INTERNAL_CRYPTO
+#ifndef NETSNMP_DISABLE_MD5
+    if (ISTRANSFORM(hashtype, HMACMD5Auth)) {
+        if (*MAC_len < MD5_DIGEST_LENGTH)
+            return (SNMPERR_GENERR);      /* the buffer isn't big enough */
+	MD5_Init(&cmd5);
+        MD5_Update(&cmd5, buf, buf_len);
+        MD5_Final(MAC, &cmd5);
+        *MAC_len = MD5_DIGEST_LENGTH;
+    } else 
+#endif
+    if (ISTRANSFORM(hashtype, HMACSHA1Auth)) {
+        if (*MAC_len < SHA_DIGEST_LENGTH)
+            return (SNMPERR_GENERR);      /* the buffer isn't big enough */
+	SHA1_Init(&csha1);
+        SHA1_Update(&csha1, buf, buf_len);
+        SHA1_Final(MAC, &csha1);
+        *MAC_len = SHA_DIGEST_LENGTH;
+            
+    } else {
+        return (SNMPERR_GENERR);
+    }
+    return (rval);
 #elif NETSNMP_USE_PKCS11                  /* NETSNMP_USE_PKCS11 */
 
 #ifndef NETSNMP_DISABLE_MD5
@@ -527,7 +581,7 @@ sc_check_keyed_hash(const oid * authtype, size_t authtypelen,
                     const u_char * key, u_int keylen,
                     const u_char * message, u_int msglen,
                     const u_char * MAC, u_int maclen)
-#if defined(NETSNMP_USE_INTERNAL_MD5) || defined(NETSNMP_USE_OPENSSL) || defined(NETSNMP_USE_PKCS11)
+#if defined(NETSNMP_USE_INTERNAL_MD5) || defined(NETSNMP_USE_OPENSSL) || defined(NETSNMP_USE_PKCS11) || defined(NETSNMP_USE_INTERNAL_CRYPTO)
 {
     int             rval = SNMPERR_SUCCESS;
     size_t          buf_len = SNMP_MAXBUF_SMALL;
@@ -1072,3 +1126,217 @@ sc_decrypt(const oid * privtype, size_t privtypelen,
 #endif                          /*  */
 }
 #endif                          /* NETSNMP_USE_OPENSSL */
+
+#ifdef NETSNMP_USE_INTERNAL_CRYPTO
+
+/* These functions are basically copies of the MDSign() routine in
+   md5.c modified to be used with the OpenSSL hashing functions.  The
+   copyright below is from the md5.c file that these functions were
+   taken from: */
+
+/*
+ * ** **************************************************************************
+ * ** md5.c -- Implementation of MD5 Message Digest Algorithm                 **
+ * ** Updated: 2/16/90 by Ronald L. Rivest                                    **
+ * ** (C) 1990 RSA Data Security, Inc.                                        **
+ * ** **************************************************************************
+ */
+
+/*
+ * MD5_hmac(data, len, MD5): do a checksum on an arbirtrary amount
+ * of data, and prepended with a secret in the standard fashion 
+ */
+static int
+MD5_hmac(u_char * data, size_t len, u_char * mac, size_t maclen,
+         u_char * secret, size_t secretlen)
+{
+#define MD5_HASHKEYLEN 64
+#define MD5_SECRETKEYLEN 16
+
+    MD5_CTX         cmd5;
+    u_char          K1[MD5_HASHKEYLEN];
+    u_char          K2[MD5_HASHKEYLEN];
+    u_char          extendedAuthKey[MD5_HASHKEYLEN];
+    u_char          buf[MD5_HASHKEYLEN];
+    size_t          i;
+    u_char         *cp, *newdata = NULL;
+    int             rc = 0;
+
+    /*
+     * memset(K1,0,MD5_HASHKEYLEN);
+     * memset(K2,0,MD5_HASHKEYLEN);
+     * memset(buf,0,MD5_HASHKEYLEN);
+     * memset(extendedAuthKey,0,MD5_HASHKEYLEN);
+     */
+
+    if (secretlen != MD5_SECRETKEYLEN || secret == NULL ||
+        mac == NULL || data == NULL ||
+        len <= 0 || maclen <= 0) {
+        /*
+         * DEBUGMSGTL(("md5","MD5 signing not properly initialized")); 
+         */
+        return -1;
+    }
+
+    memset(extendedAuthKey, 0, MD5_HASHKEYLEN);
+    memcpy(extendedAuthKey, secret, secretlen);
+    for (i = 0; i < MD5_HASHKEYLEN; i++) {
+        K1[i] = extendedAuthKey[i] ^ 0x36;
+        K2[i] = extendedAuthKey[i] ^ 0x5c;
+    }
+
+    MD5_Init(&cmd5);
+    rc = !MD5_Update(&cmd5, K1, MD5_HASHKEYLEN);
+    if (rc)
+        goto update_end;
+
+    i = len;
+    if (((uintptr_t) data) % sizeof(long) != 0) {
+        /*
+         * this relies on the ability to use integer math and thus we
+         * must rely on data that aligns on 32-bit-word-boundries 
+         */
+        memdup(&newdata, data, len);
+        cp = newdata;
+    } else {
+        cp = data;
+    }
+
+    while (i >= 64) {
+        rc = !MD5_Update(&cmd5, cp, 64);
+        if (rc)
+            goto update_end;
+        cp += 64;
+        i -= 64;
+    }
+
+    rc = !MD5_Update(&cmd5, cp, i);
+    if (rc)
+        goto update_end;
+
+    memset(buf, 0, MD5_HASHKEYLEN);
+    MD5_Final(buf, &cmd5);
+
+    MD5_Init(&cmd5);
+    rc = !MD5_Update(&cmd5, K2, MD5_HASHKEYLEN);
+    if (rc)
+        goto update_end;
+    rc = !MD5_Update(&cmd5, buf, MD5_SECRETKEYLEN);
+    if (rc)
+        goto update_end;
+
+    /*
+     * copy the sign checksum to the outgoing pointer 
+     */
+    MD5_Final(buf, &cmd5);
+    memcpy(mac, buf, maclen);
+
+  update_end:
+    memset(buf, 0, MD5_HASHKEYLEN);
+    memset(K1, 0, MD5_HASHKEYLEN);
+    memset(K2, 0, MD5_HASHKEYLEN);
+    memset(extendedAuthKey, 0, MD5_HASHKEYLEN);
+    memset(&cmd5, 0, sizeof(cmd5));
+
+    if (newdata)
+        free(newdata);
+    return rc;
+}
+
+static int
+SHA1_hmac(u_char * data, size_t len, u_char * mac, size_t maclen,
+         u_char * secret, size_t secretlen)
+{
+#define SHA1_HASHKEYLEN   64
+#define SHA1_SECRETKEYLEN 20
+
+    SHA_CTX         csha1;
+    u_char          K1[SHA1_HASHKEYLEN];
+    u_char          K2[SHA1_HASHKEYLEN];
+    u_char          extendedAuthKey[SHA1_HASHKEYLEN];
+    u_char          buf[SHA1_HASHKEYLEN];
+    size_t          i;
+    u_char         *cp, *newdata = NULL;
+    int             rc = 0;
+
+    /*
+     * memset(K1,0,SHA1_HASHKEYLEN);
+     * memset(K2,0,SHA1_HASHKEYLEN);
+     * memset(buf,0,SHA1_HASHKEYLEN);
+     * memset(extendedAuthKey,0,SHA1_HASHKEYLEN);
+     */
+
+    if (secretlen != SHA1_SECRETKEYLEN || secret == NULL ||
+        mac == NULL || data == NULL ||
+        len <= 0 || maclen <= 0) {
+        /*
+         * DEBUGMSGTL(("sha1","SHA1 signing not properly initialized")); 
+         */
+        return -1;
+    }
+
+    memset(extendedAuthKey, 0, SHA1_HASHKEYLEN);
+    memcpy(extendedAuthKey, secret, secretlen);
+    for (i = 0; i < SHA1_HASHKEYLEN; i++) {
+        K1[i] = extendedAuthKey[i] ^ 0x36;
+        K2[i] = extendedAuthKey[i] ^ 0x5c;
+    }
+
+    SHA1_Init(&csha1);
+    rc = !SHA1_Update(&csha1, K1, SHA1_HASHKEYLEN);
+    if (rc)
+        goto update_end;
+
+    i = len;
+    if (((uintptr_t) data) % sizeof(long) != 0) {
+        /*
+         * this relies on the ability to use integer math and thus we
+         * must rely on data that aligns on 32-bit-word-boundries 
+         */
+        memdup(&newdata, data, len);
+        cp = newdata;
+    } else {
+        cp = data;
+    }
+
+    while (i >= 64) {
+        rc = !SHA1_Update(&csha1, cp, 64);
+        if (rc)
+            goto update_end;
+        cp += 64;
+        i -= 64;
+    }
+
+    rc = !SHA1_Update(&csha1, cp, i);
+    if (rc)
+        goto update_end;
+
+    memset(buf, 0, SHA1_HASHKEYLEN);
+    SHA1_Final(buf, &csha1);
+
+    SHA1_Init(&csha1);
+    rc = !SHA1_Update(&csha1, K2, SHA1_HASHKEYLEN);
+    if (rc)
+        goto update_end;
+    rc = !SHA1_Update(&csha1, buf, SHA1_SECRETKEYLEN);
+    if (rc)
+        goto update_end;
+
+    /*
+     * copy the sign checksum to the outgoing pointer 
+     */
+    SHA1_Final(buf, &csha1);
+    memcpy(mac, buf, maclen);
+
+  update_end:
+    memset(buf, 0, SHA1_HASHKEYLEN);
+    memset(K1, 0, SHA1_HASHKEYLEN);
+    memset(K2, 0, SHA1_HASHKEYLEN);
+    memset(extendedAuthKey, 0, SHA1_HASHKEYLEN);
+    memset(&csha1, 0, sizeof(csha1));
+
+    if (newdata)
+        free(newdata);
+    return rc;
+}
+#endif /* NETSNMP_USE_INTERNAL_CRYPTO */
