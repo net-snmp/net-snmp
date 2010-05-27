@@ -2746,7 +2746,7 @@ var_ifEntry(struct variable * vp,
         return (u_char *) & long_return;
     case NETSNMP_IFSPEED:
         if (if_ptr)
-            long_return = if_ptr->speed;
+            long_return = (long) if_ptr->speed;
         else
         long_return = (long) ifRow.dwSpeed;
         return (u_char *) & long_return;

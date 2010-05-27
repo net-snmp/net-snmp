@@ -52,10 +52,10 @@ extern          "C" {
                                       const oid * theoid, size_t len,
                                       size_t var_subid, oid range_ubound);
     NETSNMP_IMPORT
-    void            debugmsg_hex(const char *token, u_char * thedata,
+    void            debugmsg_hex(const char *token, const u_char * thedata,
                                  size_t len);
     NETSNMP_IMPORT
-    void            debugmsg_hextli(const char *token, u_char * thedata,
+    void            debugmsg_hextli(const char *token, const u_char * thedata,
                                     size_t len);
     NETSNMP_IMPORT
     void            debug_indent_add(int amount);

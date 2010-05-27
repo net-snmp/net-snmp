@@ -67,7 +67,7 @@ extern          "C" {
                                u_char * plaintext, size_t * ptlen);
 
     int             sc_hash(const oid * hashtype, size_t hashtypelen,
-                            u_char * buf, size_t buf_len,
+                            const u_char * buf, size_t buf_len,
                             u_char * MAC, size_t * MAC_len);
 
     int             sc_get_transform_type(oid * hashtype,
