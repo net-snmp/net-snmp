@@ -172,9 +172,12 @@ generate_Ku(const oid * hashtype, u_int hashtype_len,
         EVP_DigestUpdate(ctx, buf, USM_LENGTH_KU_HASHBLOCK);
 #elif NETSNMP_USE_INTERNAL_CRYPTO
         if (TYPE_SHA1 == cryptotype) {
-            SHA1_Update(&csha1, buf, USM_LENGTH_KU_HASHBLOCK);
+            rval = !SHA1_Update(&csha1, buf, USM_LENGTH_KU_HASHBLOCK);
         } else {
-            MD5_Update(&cmd5, buf, USM_LENGTH_KU_HASHBLOCK);
+            rval = !MD5_Update(&cmd5, buf, USM_LENGTH_KU_HASHBLOCK);
+        }
+        if (rval != 0) {
+            return SNMPERR_USM_ENCRYPTIONERROR;
         }
 #elif NETSNMP_USE_INTERNAL_MD5
         if (MDupdate(&MD, buf, USM_LENGTH_KU_HASHBLOCK * 8)) {
@@ -182,7 +185,6 @@ generate_Ku(const oid * hashtype, u_int hashtype_len,
             goto md5_fin;
         }
 #endif                          /* NETSNMP_USE_OPENSSL */
-
         nbytes -= USM_LENGTH_KU_HASHBLOCK;
     }
 
@@ -196,11 +198,11 @@ generate_Ku(const oid * hashtype, u_int hashtype_len,
 #elif NETSNMP_USE_INTERNAL_CRYPTO
     tmp_len = *kulen;
     if (TYPE_SHA1 == cryptotype) {
-        SHA1_Final(buf, &csha1);
+        SHA1_Final(Ku, &csha1);
     } else {
-        MD5_Final(buf, &csha1);
+        MD5_Final(Ku, &cmd5);
     }
-    *kulen = tmp_len;
+    *kulen = sc_get_properlength(hashtype, hashtype_len);
 #elif NETSNMP_USE_INTERNAL_MD5
     if (MDupdate(&MD, buf, 0)) {
         rval = SNMPERR_USM_ENCRYPTIONERROR;
