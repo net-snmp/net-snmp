@@ -11,5 +11,5 @@ fi
 
 for i in ${srcdir}/testing/fulltests/default/T* ; do
     echo "RUNNING $i"
-    ${srcdir}/testing/fulltests/support/olducd_run $i
+    ${srcdir}/testing/fulltests/support/simple_run $i
 done
