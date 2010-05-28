@@ -91,9 +91,9 @@ export SNMP_UPDIR
 # Source the testing configuration file
 #
 
-. olducd_TESTCONF.sh
+. simple_TESTCONF.sh
 
-. olducd_eval_tools.sh
+. simple_eval_tools.sh
 
 cd `dirname $testscript`
 PATH=`pwd`:$PATH
