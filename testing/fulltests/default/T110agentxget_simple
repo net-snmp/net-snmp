@@ -1,6 +1,6 @@
 #!/bin/sh
 
-. ../support/olducd_eval_tools.sh
+. ../support/simple_eval_tools.sh
 
 HEADER AgentX GET support
 

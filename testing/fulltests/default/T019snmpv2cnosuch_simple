@@ -1,6 +1,6 @@
 #!/bin/sh
 
-. ../support/olducd_eval_tools.sh
+. ../support/simple_eval_tools.sh
 
 HEADER SNMPv2c get of system.sysUpTime.1
 
