@@ -1688,6 +1688,24 @@ netsnmp_cert_find(int what, int where, void *hint)
                 return NULL;
         }
     } /* where = target mib */
+    else if (NS_CERTKEY_FILE == where) {
+        /** hint == filename */
+        char               *filename = (char*)hint;
+        netsnmp_void_array *matching;
+
+        matching = _cert_find_subset_fn( filename, NULL );
+        if (!matching)
+            return NULL;
+        if (1 == matching->size)
+            result = (netsnmp_cert*)matching->array[0];
+        else {
+            DEBUGMSGT(("cert:find:err", "%s matches multiple certs\n",
+                       filename));
+            result = NULL;
+        }
+        free(matching->array);
+        free(matching);
+    } /* where = NS_CERTKEY_FILE */
     else { /* unknown location */
         
         DEBUGMSGT(("cert:find:err", "unhandled location %d for %d\n", where,
