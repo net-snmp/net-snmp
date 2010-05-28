@@ -1812,8 +1812,8 @@ netsnmp_walk(PyObject *self, PyObject *args)
   int len;
   oid *oid_arr;
   int oid_arr_len = MAX_OID_LEN;
-  oid *oid_arr_broken_check;
-  int oid_arr_broken_check_len = MAX_OID_LEN;
+  oid **oid_arr_broken_check;
+  int *oid_arr_broken_check_len;
   int type;
   char type_str[MAX_TYPE_NAME_LEN];
   int status;
@@ -1838,7 +1838,6 @@ netsnmp_walk(PyObject *self, PyObject *args)
   Py_ssize_t tmplen;
 	   
   oid_arr = calloc(MAX_OID_LEN, sizeof(oid));
-  oid_arr_broken_check = calloc(MAX_OID_LEN, sizeof(oid));
 
   if (oid_arr && args) {
 
@@ -1967,8 +1966,19 @@ netsnmp_walk(PyObject *self, PyObject *args)
     }
 
     /* save the starting OID */
-    oid_arr_broken_check_len = oid_arr_len;
-    memcpy(oid_arr_broken_check, oid_arr, sizeof(oid)*oid_arr_len);
+    
+    oid_arr_broken_check_len = calloc(varlist_len, sizeof(int));
+    oid_arr_broken_check = calloc(varlist_len, sizeof(oid *));
+    for(vars = pdu->variables, varlist_ind = 0;
+        vars != NULL;
+        vars = vars->next_variable, varlist_ind++) {
+
+        oid_arr_broken_check[varlist_ind] = calloc(MAX_OID_LEN, sizeof(oid));
+
+        oid_arr_broken_check_len[varlist_ind] = vars->name_length;
+        memcpy(oid_arr_broken_check[varlist_ind],
+               vars->name, vars->name_length * sizeof(oid));
+    }
 
     while(notdone) {
 
@@ -1998,8 +2008,8 @@ netsnmp_walk(PyObject *self, PyObject *args)
               }
 
               if (snmp_oid_compare(vars->name, vars->name_length,
-                                   oid_arr_broken_check,
-                                   oid_arr_broken_check_len) <= 0) {
+                                   oid_arr_broken_check[varlist_ind],
+                                   oid_arr_broken_check_len[varlist_ind]) <= 0) {
                   /* The agent responded with an illegal response
                      as the returning OID was lexogragically less
                      then or equal to the requested OID...
@@ -2070,9 +2080,9 @@ netsnmp_walk(PyObject *self, PyObject *args)
               }	
               Py_XDECREF(varbind);
 
-              memcpy(oid_arr_broken_check, vars->name,
+              memcpy(oid_arr_broken_check[varlist_ind], vars->name,
                      sizeof(oid) * vars->name_length);
-              oid_arr_broken_check_len = vars->name_length;
+              oid_arr_broken_check_len[varlist_ind] = vars->name_length;
           }
         /* reuse the response as the next pdu to send */
         pdu = snmp_pdu_create(SNMP_MSG_GETNEXT);
@@ -2082,6 +2092,12 @@ netsnmp_walk(PyObject *self, PyObject *args)
       if (response)
 	snmp_free_pdu(response);
     }
+
+    free(oid_arr_broken_check_len);
+    for(varlist_ind = 0; varlist_ind < varlist_len; varlist_ind ++) {
+        free(oid_arr_broken_check[varlist_ind]);
+    }
+    free(oid_arr_broken_check);
 
     /* Reset the library's behavior for numeric/symbolic OID's. */
     netsnmp_ds_set_int(NETSNMP_DS_LIBRARY_ID,
