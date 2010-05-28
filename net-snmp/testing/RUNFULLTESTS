@@ -20,7 +20,7 @@ Getopt::Long::Configure(qw(no_ignore_case));
 GetOptions(\%opts,
            "verbose",
            "help|?",
-           "quiet",
+           "quiet|q",
            "groups|g=s",
            "r=s",
            "debug",
@@ -40,9 +40,10 @@ usage() if ($opts{'help'});
 
 # Build the harness object
 my %args = (
-	    verbosity => ($opts{'verbose'} ? 1 : 0),
+	    verbosity => ($opts{'verbose'} ? 1 : ($opts{'quiet'} ? -1 : 0)),
 	    exec => \&decide_exec,
-	    failures => ($opts{'quiet'} ? 0 : 1),
+	    # this option is *really* wierd in how it works
+	    failures => ($opts{'quiet'} ? 0 : ($opts{'verbose'} ? 0 : 1)),
 	    errors => ($opts{'quiet'} ? 0 : 1),
 	   );
 
