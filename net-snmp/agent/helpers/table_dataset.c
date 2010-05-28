@@ -472,10 +472,6 @@ netsnmp_table_data_set_helper_handler(netsnmp_mib_handler *handler,
 
         if (MODE_IS_SET(reqinfo->mode)) {
 
-            char buf[256]; /* is this reasonable size?? */
-            int  rc;
-            size_t len;
-
             /*
              * use a cached copy of the row for modification 
              */
@@ -484,27 +480,13 @@ netsnmp_table_data_set_helper_handler(netsnmp_mib_handler *handler,
              * cache location: may have been created already by other
              * SET requests in the same master request. 
              */
-            rc = snprintf(buf, sizeof(buf), "dataset_row_stash:%s:",
-                          datatable->table->name);
-            if ((-1 == rc) || (rc >= sizeof(buf))) {
-                snmp_log(LOG_ERR,"%s handler name too long\n",
-                         datatable->table->name);
-                netsnmp_set_request_error(reqinfo, request,
-                                          SNMP_ERR_GENERR);
+            stashp = netsnmp_table_dataset_get_or_create_stash(reqinfo,
+                                                               datatable,
+                                                               table_info);
+            if (NULL == stashp) {
+                netsnmp_set_request_error(reqinfo, request, SNMP_ERR_GENERR);
                 continue;
             }
-            len = sizeof(buf) - rc;
-            rc = snprint_objid(&buf[rc], len, table_info->index_oid,
-                               table_info->index_oid_len);
-            if (-1 == rc) {
-                snmp_log(LOG_ERR,"%s oid or name too long\n",
-                         datatable->table->name);
-                netsnmp_set_request_error(reqinfo, request,
-                                          SNMP_ERR_GENERR);
-                continue;
-            }
-            stashp = (netsnmp_oid_stash_node **)
-		netsnmp_table_get_or_create_row_stash(reqinfo, (u_char *) buf);
 
             newrowstash
                 = netsnmp_oid_stash_get_data(*stashp, suffix, suffix_len);
@@ -782,9 +764,9 @@ netsnmp_table_data_set_helper_handler(netsnmp_mib_handler *handler,
     		    for (req = requests; req; req=req->next) {
         
 		    	/*
-         			* For requests that have the old row values,
-         			* so add the newly-created row information.
-         	    	*/
+                         * For requests that have the old row values,
+                         * so add the newly-created row information.
+                         */
         	    	if ((netsnmp_table_row *) netsnmp_extract_table_row(req) == row) {
 	    			netsnmp_request_remove_list_data(req, TABLE_DATA_ROW);
             			netsnmp_request_add_list_data(req,
@@ -997,7 +979,7 @@ netsnmp_config_parse_table_set(const char *token, char *line)
         struct tree    *tp2;
     
         if (!snmp_parse_oid(tp->augments, name, &name_length)) {
-            config_pwarn("I can't parse the augment tabel name");
+            config_pwarn("I can't parse the augment table name");
             snmp_log(LOG_WARNING, "  can't parse %s\n", tp->augments);
             SNMP_FREE (table_set);
             return;
@@ -1083,7 +1065,7 @@ netsnmp_config_parse_add_row(const char *token, char *line)
     netsnmp_table_row *row;
     netsnmp_table_data_set_storage *dr;
 
-    line = copy_nword(line, tname, SNMP_MAXBUF_MEDIUM);
+    line = copy_nword(line, tname, sizeof(tname));
 
     tables = (data_set_tables *) netsnmp_get_list_data(auto_tables, tname);
     if (!tables) {
@@ -1106,7 +1088,7 @@ netsnmp_config_parse_add_row(const char *token, char *line)
 
         DEBUGMSGTL(("table_set_add_row", "adding index of type %d\n",
                     vb->type));
-        buf_size = SNMP_MAXBUF_MEDIUM;
+        buf_size = sizeof(buf);
         line = read_config_read_memory(vb->type, line, buf, &buf_size);
         netsnmp_table_row_add_index(row, vb->type, buf, buf_size);
     }
@@ -1124,7 +1106,7 @@ netsnmp_config_parse_add_row(const char *token, char *line)
             return;
         }
 
-        buf_size = SNMP_MAXBUF_MEDIUM;
+        buf_size = sizeof(buf);
         line = read_config_read_memory(dr->type, line, buf, &buf_size);
         DEBUGMSGTL(("table_set_add_row",
                     "adding data at column %d of type %d\n", dr->column,
@@ -1143,6 +1125,60 @@ netsnmp_config_parse_add_row(const char *token, char *line)
     }
 }
 
+
+netsnmp_oid_stash_node **
+netsnmp_table_dataset_get_or_create_stash(netsnmp_agent_request_info *reqinfo,
+                                          netsnmp_table_data_set *datatable,
+                                          netsnmp_table_request_info *table_info)
+{
+    netsnmp_oid_stash_node **stashp = NULL;
+    char                     buf[256]; /* is this reasonable size?? */
+    size_t                   len;
+    int                      rc;
+
+    rc = snprintf(buf, sizeof(buf), "dataset_row_stash:%s:",
+                  datatable->table->name);
+    if ((-1 == rc) || (rc >= sizeof(buf))) {
+        snmp_log(LOG_ERR,"%s handler name too long\n", datatable->table->name);
+        return NULL;
+    }
+
+    len = sizeof(buf) - rc;
+    rc = snprint_objid(&buf[rc], len, table_info->index_oid,
+                       table_info->index_oid_len);
+    if (-1 == rc) {
+        snmp_log(LOG_ERR,"%s oid or name too long\n", datatable->table->name);
+        return NULL;
+    }
+
+    stashp = (netsnmp_oid_stash_node **)
+        netsnmp_table_get_or_create_row_stash(reqinfo, (u_char *) buf);
+    return stashp;
+}
+
+netsnmp_table_row *
+netsnmp_table_dataset_get_newrow(netsnmp_request_info *request,
+                                 netsnmp_agent_request_info *reqinfo,
+                                 int rootoid_len,
+                                 netsnmp_table_data_set *datatable,
+                                 netsnmp_table_request_info *table_info)
+{
+    oid * const suffix = request->requestvb->name + rootoid_len + 2;
+    size_t suffix_len = request->requestvb->name_length - (rootoid_len + 2);
+    netsnmp_oid_stash_node **stashp;
+    newrow_stash   *newrowstash;
+
+    stashp = netsnmp_table_dataset_get_or_create_stash(reqinfo, datatable,
+                                                       table_info);
+    if (NULL == stashp)
+        return NULL;
+
+    newrowstash = netsnmp_oid_stash_get_data(*stashp, suffix, suffix_len);
+    if (NULL == newrowstash)
+        return NULL;
+
+    return newrowstash->newrow;
+}
 
 /* ==================================
  *
