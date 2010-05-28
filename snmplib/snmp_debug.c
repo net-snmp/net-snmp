@@ -534,12 +534,12 @@ debugmsg_oidrange(const char *token UNUSED, const oid * theoid UNUSED,
 { }
 
 void
-debugmsg_hex(const char *token UNUSED, u_char * thedata UNUSED,
+debugmsg_hex(const char *token UNUSED, const u_char * thedata UNUSED,
              size_t len UNUSED)
 { }
 
 void
-debugmsg_hextli(const char *token UNUSED, u_char * thedata UNUSED,
+debugmsg_hextli(const char *token UNUSED, const u_char * thedata UNUSED,
                 size_t len UNUSED)
 { }
 
