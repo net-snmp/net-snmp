@@ -1991,7 +1991,7 @@ netsnmp_walk(PyObject *self, PyObject *args)
     }
 
     /* save the starting OID */
-    
+
     for(vars = pdu->variables, varlist_ind = 0;
         vars != NULL;
         vars = vars->next_variable, varlist_ind++) {
@@ -2081,7 +2081,7 @@ netsnmp_walk(PyObject *self, PyObject *args)
 
                   __get_type_str(type, type_str);
 
-                  py_netsnmp_attr_set_string(varbind, "type", type_str, 
+                  py_netsnmp_attr_set_string(varbind, "type", type_str,
                                              STRLEN(type_str));
 
                   len = __snprint_value(str_buf,sizeof(str_buf),
@@ -2106,7 +2106,7 @@ netsnmp_walk(PyObject *self, PyObject *args)
                   _PyTuple_Resize(&val_tuple, result_count+1);
                   PyTuple_SetItem(val_tuple, result_count++, Py_BuildValue(""));
                   printf("netsnmp_walk: bad varbind (%d)\n", varlist_ind);
-              }	
+              }
               Py_XDECREF(varbind);
 
               memcpy(oid_arr_broken_check[varlist_ind], vars->name,
@@ -2138,7 +2138,6 @@ netsnmp_walk(PyObject *self, PyObject *args)
 
  done:
   Py_XDECREF(varbinds);
-/*
   SAFE_FREE(oid_arr_len);
   SAFE_FREE(oid_arr_broken_check_len);
   for(varlist_ind = 0; varlist_ind < varlist_len; varlist_ind ++) {
@@ -2147,7 +2146,6 @@ netsnmp_walk(PyObject *self, PyObject *args)
   }
   SAFE_FREE(oid_arr);
   SAFE_FREE(oid_arr_broken_check);
-*/
   return (val_tuple ? val_tuple : Py_BuildValue(""));
 }
 
