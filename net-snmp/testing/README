@@ -6,6 +6,11 @@ By default RUNFULLTESTS only executes the tests in fulltests/default.
 Use the -g flag to test other subdirectories, or use '-g all' to test
 everything it can find.
 
-TBD: document how to write tests
-TBD: document how to write build_ scripts
-TBD: document how to write run_ scripts
+See the documentation contained in the RUNFULLTESTS script for details
+on:
+
+  - how to run particular sets of tests
+  - how to write tests
+  - how to write _build scripts
+  - how to write _run scripts
+

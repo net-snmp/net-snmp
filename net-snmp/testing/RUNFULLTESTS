@@ -446,7 +446,7 @@ sub usage {
     print "  -g GROUP\t\tRuns the group of specified tests (default = 'default')\n";
     print "    --group GROUP\n";
     print "\t\t\t(use 'all' to run all tests)\n";
-    print "  -r\t\t\tOnly run test files matching this regexp\n";
+    print "  -r REGEXP\t\tOnly run test files matching this regexp\n";
     print "  -f\t\t\tRun only the failed tests from the last run\n";
     print "  -F\t\t\tDon't create the failed_tests file\n";
     print "  --failed-file FILE\tThe location of the failed state file\n";
@@ -475,3 +475,329 @@ sub DIE {
     ERROR(@_);
     exit 1;
 }
+
+=pod
+
+=head1 NAME
+
+runfulltests - the Net-SNMP test suite coordinator
+
+=head1 SYNOPSIS
+
+runfulltests [OPTIONS]
+
+# ./RUNFULLTESTS
+
+# ./RUNFULLTESTS -g all
+
+=head1 DESCRIPTION
+
+B<RUNFULLTESTS> is a TAP (see below) output aggregator and test suite
+management program.  It runs groups of tests that it can find in the
+I<fulltests> sub-directory.  It defaults to running a basic set of
+high-level Net-SNMP tests found in the fulltests/default directory.
+To run a different set of tests see the -g flag.
+
+It is able to keep state and remember which tests failed so that
+during development you can simply re-run only the "last failed tests"
+using the -f switch.
+
+=head2 Perl Requirements
+
+Ideally it should be run under a fairly modern version of perl (eg,
+5.10) but minmial support is provided for older versions of perl as
+well.
+
+If no perl is available on the system, there is also a fall-back
+"RUNTESTS" suite which merely executes the default scripts for testing
+compliance of the high-level applications.
+
+=head2 Important Notes About Writing New Tests
+
+When designing new tests it is strongly encouraged that some
+conventions are followed:
+
+  - Design the test files so they can be build/run without them
+    needing to be build/run within a testing harness like this one
+    (B<RUNFULLTESTS>).  IE, you should be able to run them directly by
+    hand for debugging purposes without requiring them to be invoked
+    within this or any other testing harness.
+  - Name them beginning with TNNN where NNN is a 3 digit number
+
+The rational behind these rules follows in the sections below
+
+=head1 OPTIONS
+
+=over
+
+=item -g GROUP
+
+=item --group GROUP
+
+By default the "default" group of tests is run.  Which is really just
+everything that B<RUNFULLTESTS> can find from the I<fulltests/default>
+sub-directory.  The -g switch can be used to specify other
+sub-directories of tests to run.  The argument is a comma-separated
+list of subdirectories to use.
+
+The special keyword I<all> can be used to run every test in every
+subdirectory of the I<fulltests> directory.
+
+=item -r REGEXP
+
+Only run test files that match the I<REGEXP> regular expression.
+
+To run only tests of a certain file name you might combine this with
+'-g all'.  E.G., -g all -r snmpv3 will run all snmpv3 (named) tests
+that B<RUNFULLTESTS> can find.
+
+=item -f
+
+Only run the tests that failed from the last run.
+
+=item --failed-file FILE
+
+Where to store the state of which tests have failed.
+
+=item -F
+
+Don't save state to the failed-file.
+
+=item -D PATH
+
+=item --srcdir PATH
+
+If RUNFULLTESTS is being executed from a build directory other than
+where the source files are located, this flag can be used to specify
+where the Net-SNMP root source directory is found.
+
+=item -d PATH
+
+=item --builddir PATH
+
+Specifies the root of the build directory.
+
+=item -v
+
+=item --verbose
+
+Turns on verbose output mode.
+
+=item -q
+
+=item --quiet
+
+Turns on quiet output mode.
+
+=item --debug
+
+Turns on debugging output (which primarily shows how B<RUNFULLTESTS>
+is collecting tests to run, etc).
+
+=item -h
+
+=item --help
+
+Command line usage help output.
+
+=back
+
+=head1 TEST ARCHITECTURE
+
+=head2 TAP output
+
+TAP stands for "Test Anything Protocol".  TAP was originally
+perl-specific but has been turning out to be a generic protocol for
+testing just about anything.  It's heavily documented at:
+
+  http://testanything.org/wiki/index.php/Main_Page
+
+We're using TAP because it's highly flexible and separates the
+invidual tests from the "collect and report" aspect.  RUNFULLTESTS is
+simply a perl-based implementation for collecting and summarizing the
+test results.  Other collection agents could be used instead of this
+one, and any sort of test or language could be used for the individual
+tests as well (in fact the default suite has some that are SH-based,
+C-based, ...).
+
+It may be that eventually the TAP protocol actually makes it into the
+IETF (http://testanything.org/wiki/index.php/TAP_at_IETF:_Draft_Standard).
+
+The syntax of TAP is very simple.  See the above web page for a
+complete description, but this will provide you a minimal "getting
+started" example and shows the output of 5 sub-tests run from a single
+test application.
+
+  1..5
+  ok 1 - Yay
+  ok 2 - Second part succeeded
+  not ok 3 - Oh no...  A problem occurred.
+  not ok 4 - The computer thought 2+2 was 5
+  ok 5 - All is well that ends well
+
+That's it.  Output from a test tool like that is auto-summarized by
+this application in success/fail reports.
+
+=head2 Testing Phases
+
+The testing process goes through the following phases:
+
+ - Test and Infrastructure Collection
+ - Test Execution
+   - Build if needed
+   - Run
+
+=head2 Test Collection
+
+B<RUNFULLTESTS> will search all the requested groups for files that
+begin with the letter 'T'.  They are executed in alphabetical order
+within their group.  Convention is to number test files with a three
+digit (zero-padded) number after the 'T' letter to ensure ordering is
+as expected.
+
+Files to be collected by B<RUNFULLTESTS> are made up of a number of
+components to support a flexible build and execution system (discussed
+in detail in the following sections).  They are structured as follows:
+
+  T<NNN><NAME>_<TYPE>.<SUFFIX>
+
+Where:
+
+  NNN:      Is the 3 digit number mentioned above.
+  NAME:     The filename of the test describing what it's about
+  TYPE:     The internal "type" of the test, which is used later in building
+            and execution (see below).
+  .SUFFIX:  An optional file-type suffix
+
+Examples:
+
+  fulltests/default/T001snmpv1get_olducd
+  fulltests/snmpv3/T040keymanagetest_capp.c
+
+Any other files are ignored in terms of tests and may be supplimental
+to the above build systems.  (Supporting files, by convention, begin
+with a capital 'S').
+
+=head3 Full Title
+
+Within the file there may be a line containing "HEADER ..." that will
+be examined for a better title of the test.  Anything before "HEADER"
+will be ignored, and the special "*/" will be replaced as well.  For
+example, these are valid header source lines:
+
+  # HEADER A cool test
+  /* HEADER A cool test from my C-based source file */
+
+=head2 Infrastructure Collection
+
+In addition to test files, I<infrastructure> files are searched for
+and remembered for later use (again, see below).  These files will be
+of the form:
+
+  <TYPE>_<USEAGE>
+
+WHere:
+
+  TYPE:      The type name matching the file to support.
+
+  USAGE:     How this file should be used.  Currently should be either
+            I<build> or I<run> as described below.
+
+Example files
+
+  fulltests/support/clib_build
+  fulltests/support/olducd_run
+
+Infrastructer files may exist in the source directory of where they're
+expected to be run (ie, parallel to the test files) or they may exist
+in the special "support" directory if they're expected to be
+generically used across multilpe test group types.
+
+=head2 Test Execution
+
+Tests are run in two phases using the following psudo-algorithm:
+
+  + for each test file
+    + if an appropriate TYPE_build file exists for a test {
+      + run "TYPE_build TESTFILE"
+      + record the last line as the new TESTFILE to run
+    }
+
+    + if an apporpriate TYPE_run file exists for a test {
+      + run "TYPE_run TESTFILE"
+      + collect it's output as the TAP output
+    } else {
+      + run "TESTFILE"
+      + collect it's output as the TAP output
+    }
+
+For example, if the following files existed:
+
+  fulltests/examplres/T001testing_examp
+  fulltests/examplres/examp_build
+  fulltests/examplres/examp_run
+
+Then the following would be the rough execution:
+
+  newfile = `fulltests/examplres/examp_build \
+             fulltests/examplres/T001testing_examp | tail -1`
+  fulltests/examplres/examp_run $newfile
+
+=head1 TEST TYPES
+
+Net-SNMP testing comes with a number of test suite "builders" and
+"runners" that are useful for developing new tests.  These are
+documented here:
+
+=over
+
+=item olducd
+
+I<olducd> test files are simple sh-shell-script files used to test
+high-level functionality of Net-SNMP tools.  They're easy to write and
+should generally contain the following sort of structure:
+
+  . ../support/olducd_eval_tools.sh
+  HEADER my name
+  STARTAGENT
+  CAPTURE "snmpget..."
+  CHECK "for this string"
+  STOPAGENT
+  FINISHED
+
+Example file: fulltests/default/T001snmpv1get_olducd
+
+=item capp
+
+I<capp> files are fundamentally full C-source-code applications that
+are built and linked against the libnetsnmp library.  Thus, a file
+named I<T001mytest_capp.c> is compiled using the same compiler used to
+compile Net-SNMP and linked against the required libraries for a basic
+Net-SNMP application.  It should, of course, produce TAP output after
+it's compiled and run.
+
+Example file: fulltests/snmpv3/T010scapitest_capp.c
+
+=item clib
+
+I<clib> files are simple C-source-code files that are wrapped into a
+main() application with appropriate #include files, etc.  I<clib>
+files are designed primarly to write quick unit-tests for the Net-SNMP
+core library.
+
+Example file: fulltests/unit-tests/T001defaultstore_clib.c
+
+=item Write your own!
+
+This test system is designed to be flexible and expandable if the
+basic architecture is followed.  The goal is to make it easy to create
+very simple test suites or complex unit-tests or anything in between.
+
+=back
+
+=head1 Author
+
+Original architecture: Wes Hardaker <hardaker@users.sourceforge.net>
+
+=cut
+
