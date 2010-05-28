@@ -62,6 +62,7 @@ void netsnmp_certs_load(void);
 #define NS_CERT_RESERVED1      0x0004
 #define NS_CERT_CA             0x0008
 
+/** source */
 #define NS_CERTKEY_DEFAULT       0x000 /* get default from DS store */
 #define NS_CERTKEY_FILE          0x001 /* filename/full path */
 #define NS_CERTKEY_FINGERPRINT   0x002 /* public key fingerprint */
