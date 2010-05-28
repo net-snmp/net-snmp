@@ -4,7 +4,7 @@
 # test snmpv2c get support by reading a variable
 #
 
-. ../support/olducd_eval_tools.sh
+. ../support/simple_eval_tools.sh
 
 HEADER for failure of SNMPv2c get against SNMPv1 agent
 

@@ -1,6 +1,6 @@
 #!/bin/sh
 
-. ../support/olducd_eval_tools.sh
+. ../support/simple_eval_tools.sh
 
 HEADER SNMPv3 get using SHA/AES of .1.3.6.1.2.1.1.3.0
 
