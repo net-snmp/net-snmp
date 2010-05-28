@@ -1807,11 +1807,12 @@ netsnmp_walk(PyObject *self, PyObject *args)
   int varlist_ind;
   netsnmp_session *ss;
   netsnmp_pdu *pdu, *response;
+  netsnmp_pdu *newpdu;
   netsnmp_variable_list *vars, *oldvars;
   struct tree *tp;
   int len;
-  oid *oid_arr;
-  int oid_arr_len = MAX_OID_LEN;
+  oid **oid_arr;
+  int *oid_arr_len;
   oid **oid_arr_broken_check;
   int *oid_arr_broken_check_len;
   int type;
@@ -1837,9 +1838,7 @@ netsnmp_walk(PyObject *self, PyObject *args)
   char *tmpstr;
   Py_ssize_t tmplen;
 	   
-  oid_arr = calloc(MAX_OID_LEN, sizeof(oid));
-
-  if (oid_arr && args) {
+  if (args) {
 
     if (!PyArg_ParseTuple(args, "OO", &session, &varlist)) {
       goto done;
@@ -1872,27 +1871,52 @@ netsnmp_walk(PyObject *self, PyObject *args)
     best_guess = py_netsnmp_attr_long(session, "BestGuess");
     retry_nosuch = py_netsnmp_attr_long(session, "RetryNoSuch");
         
-    varlist_iter = PyObject_GetIter(varlist);
-
     pdu = snmp_pdu_create(SNMP_MSG_GETNEXT);
     
-    /* get the initial starting oids*/
+    /* we need an initial count for memory allocation */
+    varlist_iter = PyObject_GetIter(varlist);
+    varlist_len = 0;
     while (varlist_iter && (varbind = PyIter_Next(varlist_iter))) {
+        varlist_len++;
+    }
+    Py_DECREF(varlist_iter);
+
+    oid_arr_len              = calloc(varlist_len, sizeof(int));
+    oid_arr_broken_check_len = calloc(varlist_len, sizeof(int));
+
+    oid_arr                  = calloc(varlist_len, sizeof(oid *));
+    oid_arr_broken_check     = calloc(varlist_len, sizeof(oid *));
+
+    for(varlist_ind = 0; varlist_ind < varlist_len; varlist_ind++) {
+
+        oid_arr[varlist_ind] = calloc(MAX_OID_LEN, sizeof(oid));
+        oid_arr_broken_check[varlist_ind] = calloc(MAX_OID_LEN, sizeof(oid));
+
+        oid_arr_len[varlist_ind]              = MAX_OID_LEN;
+        oid_arr_broken_check_len[varlist_ind] = MAX_OID_LEN;
+    }
+
+    /* get the initial starting oids*/
+    varlist_iter = PyObject_GetIter(varlist);
+    varlist_ind = 0;
+    while (varlist_iter && (varbind = PyIter_Next(varlist_iter))) {
+
       if (py_netsnmp_attr_string(varbind, "tag", &tag, NULL) < 0 ||
          py_netsnmp_attr_string(varbind, "iid", &iid, NULL) < 0)
       {
-        oid_arr_len = 0;
+        oid_arr_len[varlist_ind] = 0;
       } else {
-        tp = __tag2oid(tag, iid, oid_arr, &oid_arr_len, NULL, best_guess);
+        tp = __tag2oid(tag, iid,
+                       oid_arr[varlist_ind], &oid_arr_len[varlist_ind],
+                       NULL, best_guess);
       }
 
       if (_debug_level) 
 	printf("netsnmp_walk: filling request: %s:%s:%d:%d\n", 
-	       tag, iid, oid_arr_len,best_guess);
+	       tag, iid, oid_arr_len[varlist_ind],best_guess);
 
-      if (oid_arr_len) {
-        snmp_add_null_var(pdu, oid_arr, oid_arr_len);
-        varlist_len++;
+      if (oid_arr_len[varlist_ind]) {
+        snmp_add_null_var(pdu, oid_arr[varlist_ind], oid_arr_len[varlist_ind]);
       } else {
         if (verbose)
           printf("error: walk: unknown object ID (%s)",
@@ -1902,6 +1926,7 @@ netsnmp_walk(PyObject *self, PyObject *args)
       }
       /* release reference when done */
       Py_DECREF(varbind);
+      varlist_ind++;
     }
 
     Py_DECREF(varlist_iter);
@@ -1967,8 +1992,6 @@ netsnmp_walk(PyObject *self, PyObject *args)
 
     /* save the starting OID */
     
-    oid_arr_broken_check_len = calloc(varlist_len, sizeof(int));
-    oid_arr_broken_check = calloc(varlist_len, sizeof(oid *));
     for(vars = pdu->variables, varlist_ind = 0;
         vars != NULL;
         vars = vars->next_variable, varlist_ind++) {
@@ -1986,20 +2009,26 @@ netsnmp_walk(PyObject *self, PyObject *args)
                                err_str, &err_num, &err_ind);
       
       if (!response || !response->variables ||
-          (response->variables->name_length < oid_arr_len) ||
-          (memcmp(oid_arr, response->variables->name,
-                  oid_arr_len * sizeof(oid))) ||
           status != STAT_SUCCESS ||
           response->errstat != SNMP_ERR_NOERROR) {
           notdone = 0;
       } else {
+          newpdu = snmp_pdu_create(SNMP_MSG_GETNEXT);
+
           for(vars = (response ? response->variables : NULL),
                   varlist_ind = 0,
                   oldvars = (pdu ? pdu->variables : NULL);
               vars && (varlist_ind < varlist_len);
               vars = vars->next_variable, varlist_ind++,
                   oldvars = (oldvars ? oldvars->next_variable : NULL)) {
-              int xx;
+
+              if ((vars->name_length < oid_arr_len[varlist_ind]) ||
+                  (memcmp(oid_arr[varlist_ind], vars->name,
+                          oid_arr_len[varlist_ind] * sizeof(oid)) != 0)) {
+                  notdone = 0;
+                  break;
+              }
+
               if ((vars->type == SNMP_ENDOFMIBVIEW) ||
                   (vars->type == SNMP_NOSUCHOBJECT) ||
                   (vars->type == SNMP_NOSUCHINSTANCE)) {
@@ -2083,21 +2112,15 @@ netsnmp_walk(PyObject *self, PyObject *args)
               memcpy(oid_arr_broken_check[varlist_ind], vars->name,
                      sizeof(oid) * vars->name_length);
               oid_arr_broken_check_len[varlist_ind] = vars->name_length;
+
+              snmp_add_null_var(newpdu, vars->name,
+                                vars->name_length);
           }
-        /* reuse the response as the next pdu to send */
-        pdu = snmp_pdu_create(SNMP_MSG_GETNEXT);
-        snmp_add_null_var(pdu, response->variables->name,
-                          response->variables->name_length);
+          pdu = newpdu;
       }
       if (response)
 	snmp_free_pdu(response);
     }
-
-    free(oid_arr_broken_check_len);
-    for(varlist_ind = 0; varlist_ind < varlist_len; varlist_ind ++) {
-        free(oid_arr_broken_check[varlist_ind]);
-    }
-    free(oid_arr_broken_check);
 
     /* Reset the library's behavior for numeric/symbolic OID's. */
     netsnmp_ds_set_int(NETSNMP_DS_LIBRARY_ID,
@@ -2115,7 +2138,16 @@ netsnmp_walk(PyObject *self, PyObject *args)
 
  done:
   Py_XDECREF(varbinds);
+/*
+  SAFE_FREE(oid_arr_len);
+  SAFE_FREE(oid_arr_broken_check_len);
+  for(varlist_ind = 0; varlist_ind < varlist_len; varlist_ind ++) {
+      SAFE_FREE(oid_arr[varlist_ind]);
+      SAFE_FREE(oid_arr_broken_check[varlist_ind]);
+  }
   SAFE_FREE(oid_arr);
+  SAFE_FREE(oid_arr_broken_check);
+*/
   return (val_tuple ? val_tuple : Py_BuildValue(""));
 }
 
