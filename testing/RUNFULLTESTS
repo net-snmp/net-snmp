@@ -10,7 +10,7 @@ use strict;
 # Globals and Command Line options
 
 my %opts = ('groups' => 'default',
-            'd' => 'fulltests',
+            'master-directory' => 'fulltests',
 	    'srcdir' => dirname("$0") . "/..",
             'builddir' => '..',
 	    'failed-file' => 'failed_tests',
@@ -29,6 +29,7 @@ GetOptions(\%opts,
 	   "f",
 	   "F",
 	   "failed-file=s",
+	   "master-directory|d=s",
 	  ) || ++$opts{'help'};
 
 # Change srcdir and builddir to absolute paths
@@ -39,10 +40,10 @@ usage() if ($opts{'help'});
 
 # Build the harness object
 my %args = (
-	    verbosity => ($opts{'v'} ? 1 : 0),
+	    verbosity => ($opts{'verbose'} ? 1 : 0),
 	    exec => \&decide_exec,
-	    failures => ($opts{'q'} ? 0 : 1),
-	    errors => ($opts{'q'} ? 0 : 1),
+	    failures => ($opts{'quiet'} ? 0 : 1),
+	    errors => ($opts{'quiet'} ? 0 : 1),
 	   );
 
 # list of support infrastructure components
@@ -50,8 +51,8 @@ my %support;
 my %sources;
 
 # if the -d option was specified, pass on the source root directory to all apps
-if (exists($opts{'d'})) {
-    $ENV{'NETSNMPSRCDIR'} = $opts{'d'};
+if (exists($opts{'master-directory'})) {
+    $ENV{'NETSNMPSRCDIR'} = $opts{'master-directory'};
 } else {
     $ENV{'NETSNMPSRCDIR'} = '.';
 }
@@ -200,7 +201,7 @@ sub gather_tests {
 	#  - anything with "template" in the name
 	@groups =
 	  grep { !/(template|support)/ &&
-		   -d $_ && s/$opts{'srcdir'}\/testing\/$opts{'d'}.// } glob("$opts{'srcdir'}/testing/$opts{'d'}/*");
+		   -d $_ && s/$opts{'srcdir'}\/testing\/$opts{'master-directory'}.// } glob("$opts{'srcdir'}/testing/$opts{'master-directory'}/*");
     } else {
 	# they specified a comma separated list
 	@groups = split(/,\s*/, $groups);
@@ -213,13 +214,13 @@ sub gather_tests {
 
 	DEBUG("checking group $group\n");
 
-	if (! -d "$opts{'srcdir'}/testing/$opts{'d'}/$group") {
-	    ERROR("group '$group' is not a directory under '$opts{'srcdir'}/testing/$opts{'d'}'; ignoring\n");
+	if (! -d "$opts{'srcdir'}/testing/$opts{'master-directory'}/$group") {
+	    ERROR("group '$group' is not a directory under '$opts{'srcdir'}/testing/$opts{'master-directory'}'; ignoring\n");
 	    next;
 	}
 
 	# push on all files that start with T[NUM]*
-	push_or_skip(\@tests, $regexp, glob("$opts{'srcdir'}/testing/$opts{'d'}/$group/T[0-9]*"));
+	push_or_skip(\@tests, $regexp, glob("$opts{'srcdir'}/testing/$opts{'master-directory'}/$group/T[0-9]*"));
     }
 
     return @tests;
@@ -261,7 +262,7 @@ sub rename_tests {
 
 	if (! $foundheader) {
 	    $title =~ s/^$opts{'srcdir'}\/testing\///;
-	    $title =~ s/$opts{'d'}.//;
+	    $title =~ s/$opts{'master-directory'}.//;
 	}
 	$sources{$title} = $sources{$file} || $file;
 	push @newtests, [$file, $title];
@@ -309,7 +310,7 @@ sub find_scripts {
     my ($buildname, $hashref) = @_;
     my $count;
     DEBUG("looking for $buildname scripts\n");
-    foreach my $builder (glob("$opts{'srcdir'}/testing/$opts{'d'}/*/*_${buildname}")) {
+    foreach my $builder (glob("$opts{'srcdir'}/testing/$opts{'master-directory'}/*/*_${buildname}")) {
 	next if ($builder =~ /~$/);
 	next if ($builder =~ /.(bak|orig|rej|old)$/);
 
@@ -412,15 +413,15 @@ sub run_older_perl_tests {
 
     # create the temporary files
     my @tempfiles;
-    if (! -d "$opts{'d'}") {
-	mkdir("$opts{'d'}");
+    if (! -d "$opts{'master-directory'}") {
+	mkdir("$opts{'master-directory'}");
     }
-    if (! -d "$opts{'d'}/temptests") {
-	mkdir("$opts{'d'}/temptests");
+    if (! -d "$opts{'master-directory'}/temptests") {
+	mkdir("$opts{'master-directory'}/temptests");
     }
     foreach my $test (@tests) {
 	my $tempfile = "$test->[0].t";
-	$tempfile =~ s#$opts{'d'}/default/#$opts{'d'}/temptests/#;
+	$tempfile =~ s#$opts{'master-directory'}/default/#$opts{'master-directory'}/temptests/#;
 	open(T, ">$tempfile") || die("$tempfile: $!");
 	print T "# functionally perl\n\nsystem(\"$opts{'srcdir'}/testing/fulltests/support/olducd_run $test->[0]\");\n";
 	close(T);
@@ -576,6 +577,10 @@ where the Net-SNMP root source directory is found.
 =item --builddir PATH
 
 Specifies the root of the build directory.
+
+=item --master-directory DIRNAME
+
+Specifies an alternate master directory.  The default is "fulltests"
 
 =item -v
 
@@ -794,6 +799,14 @@ basic architecture is followed.  The goal is to make it easy to create
 very simple test suites or complex unit-tests or anything in between.
 
 =back
+
+=head1 DEBUGGING BROKEN TESTS
+
+If the individual tests are designed well, you should be able to
+re-run individual tests outside of the B<RUNFULLTESTS> aggregartion
+environment using the appropriate _build and _run scripts as needed.
+Test writers are encouraged to output comments in their TAP output to
+help users debug the results.
 
 =head1 Author
 
