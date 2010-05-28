@@ -131,6 +131,16 @@ extern          "C" {
     netsnmp_table_data_set_storage
         *netsnmp_extract_table_data_set_column(netsnmp_request_info *,
                                                unsigned int);
+    netsnmp_oid_stash_node **
+    netsnmp_table_dataset_get_or_create_stash(netsnmp_agent_request_info *ari,
+                                              netsnmp_table_data_set *tds,
+                                              netsnmp_table_request_info *tri);
+    netsnmp_table_row *
+    netsnmp_table_dataset_get_newrow(netsnmp_request_info *request,
+                                     netsnmp_agent_request_info *reqinfo,
+                                     int rootoid_len,
+                                     netsnmp_table_data_set *datatable,
+                                     netsnmp_table_request_info *table_info);
 
 
 /* ============================
