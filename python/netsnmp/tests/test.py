@@ -179,7 +179,7 @@ class BasicTests(unittest.TestCase):
         print "v2 sess.set result: ", res, "\n"
 
         print "----------------------------------------\n"
-        vars = netsnmp.VarList(netsnmp.Varbind('system'))
+        vars = netsnmp.VarList(netsnmp.Varbind('sysORTable'))
                 
         vals = sess.walk(vars)
         print "v2 sess.walk result: ", vals, "\n"
@@ -187,6 +187,11 @@ class BasicTests(unittest.TestCase):
         for var in vars:
             print "  ",var.tag, var.iid, "=", var.val, '(',var.type,')'
             
+        print "----------------------------------------\n"
+        vars = netsnmp.VarList(netsnmp.Varbind('.1.3.6.1.4.1.8072.9999.9999.7375'), netsnmp.Varbind('sysORTable'))
+        vals = sess.walk(vars)
+        print "v2 loop sess.walk result: ", vals, "\n"
+        
         print "----------------------------------------\n"
         sess = netsnmp.Session(Version=3,
                                DestHost='localhost',
@@ -246,6 +251,7 @@ class BasicTests(unittest.TestCase):
         for var in vars:
             print "  ",var.tag, var.iid, "=", var.val, '(',var.type,')'
             
+
 
 class SetTests(unittest.TestCase):
     def testFuncs(self):        
