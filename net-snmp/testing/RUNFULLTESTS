@@ -424,7 +424,7 @@ sub run_older_perl_tests {
 	my $tempfile = "$test->[0].t";
 	$tempfile =~ s#$opts{'master-directory'}/default/#$opts{'master-directory'}/temptests/#;
 	open(T, ">$tempfile") || die("$tempfile: $!");
-	print T "# functionally perl\n\nsystem(\"$opts{'srcdir'}/testing/fulltests/support/olducd_run $test->[0]\");\n";
+	print T "# functionally perl\n\nsystem(\"$opts{'srcdir'}/testing/fulltests/support/simple_run $test->[0]\");\n";
 	close(T);
 	chmod(0755, $tempfile);
 	push @tempfiles, $tempfile;
@@ -712,7 +712,7 @@ WHere:
 Example files
 
   fulltests/support/clib_build
-  fulltests/support/olducd_run
+  fulltests/support/simple_run
 
 Infrastructer files may exist in the source directory of where they're
 expected to be run (ie, parallel to the test files) or they may exist
