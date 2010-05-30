@@ -53,16 +53,15 @@ SUBDIRS		= snmpnetstat
 
 # USELIBS/USEAGENTLIBS are for dependencies
 USELIBS		= ../snmplib/libnetsnmp.$(LIB_EXTENSION)$(LIB_VERSION) 
-HELPERLIB       = ../agent/helpers/libnetsnmphelpers.$(LIB_EXTENSION)$(LIB_VERSION)
 AGENTLIB        = ../agent/libnetsnmpagent.$(LIB_EXTENSION)$(LIB_VERSION)
 MIBLIB          = ../agent/libnetsnmpmibs.$(LIB_EXTENSION)$(LIB_VERSION)
-USEAGENTLIBS	= $(MIBLIB) $(AGENTLIB) $(HELPERLIB) $(USELIBS)
+USEAGENTLIBS	= $(MIBLIB) $(AGENTLIB) $(USELIBS)
 MYSQL_LIBS	= @MYSQL_LIBS@
 MYSQL_INCLUDES	= @MYSQL_INCLUDES@
 
 #
 # link path in src dir
-LOCAL_LIBS	= -L../snmplib/.libs -L../snmplib -L../agent/.libs -L../agent -L../agent/helpers/.libs -L../agent/helpers
+LOCAL_LIBS	= -L../snmplib/.libs -L../snmplib -L../agent/.libs -L../agent
 LIBS		= $(USELIBS) @LIBS@
 PERLLDOPTS_FOR_APPS = @PERLLDOPTS_FOR_APPS@
 PERLLDOPTS_FOR_LIBS = @PERLLDOPTS_FOR_LIBS@

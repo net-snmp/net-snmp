@@ -108,17 +108,16 @@ INSTALLUCDHEADERS= \
 # how to build it info
 #
 USELIBS		= ../snmplib/libnetsnmp.$(LIB_EXTENSION)$(LIB_VERSION)
-HELPERLIB	= helpers/libnetsnmphelpers.$(LIB_EXTENSION)$(LIB_VERSION)
 AGENTLIB	= libnetsnmpagent.$(LIB_EXTENSION)$(LIB_VERSION)
 MIBLIB		= libnetsnmpmibs.$(LIB_EXTENSION)$(LIB_VERSION)
 
-LOCAL_LIBS	= -L../snmplib/.libs -L../snmplib -L./.libs -L./helpers/.libs -L./helpers
+LOCAL_LIBS	= -L../snmplib/.libs -L../snmplib -L./.libs
 LAGENTLIBS	= @LAGENTLIBS@
 LMIBLIBS	= @LMIBLIBS@
 PERLLDOPTS_FOR_APPS = @PERLLDOPTS_FOR_APPS@
 PERLLDOPTS_FOR_LIBS = @PERLLDOPTS_FOR_LIBS@
 LIBS		= $(USELIBS) @AGENTLIBS@ $(PERLLDOPTS_FOR_APPS)
-OUR_AGENT_LIBS	= $(AGENTLIB) $(HELPERLIB) $(MIBLIB) $(LIBS) @DLLIBS@
+OUR_AGENT_LIBS	= $(AGENTLIB) $(MIBLIB) $(LIBS) @DLLIBS@
 CPPFLAGS	= $(TOP_INCLUDES) -I. $(AGENT_INCLUDES) $(MIBGROUP_INCLUDES) \
 		  $(SNMPLIB_INCLUDES) @CPPFLAGS@ 
 
@@ -244,7 +243,7 @@ getmibstat: getmibstat.o
 getmibstat.o: mibgroup/kernel_sunos5.c
 	$(CC) $(CFLAGS) -o $@ -D_GETMIBSTAT_TEST -DDODEBUG -c $? 
 
-snmpd$(EXEEXT):	${LAGENTOBJS} $(USELIBS) $(AGENTLIB) $(HELPERLIB) $(MIBLIB) $(LIBTARG) 
+snmpd$(EXEEXT):	${LAGENTOBJS} $(USELIBS) $(AGENTLIB) $(MIBLIB) $(LIBTARG) 
 	$(LINK) $(CFLAGS) -o $@ ${LAGENTOBJS} $(LOCAL_LIBS) ${LDFLAGS} ${OUR_AGENT_LIBS}
 
 
@@ -252,8 +251,8 @@ libnetsnmpagent.$(LIB_EXTENSION)$(LIB_VERSION):    ${LLIBAGENTOBJS} $(USELIBS)
 	$(LIB_LD_CMD) $(AGENTLIB) ${LLIBAGENTOBJS} $(USELIBS) ${LAGENTLIBS} @LD_NO_UNDEFINED@ $(LDFLAGS) $(PERLLDOPTS_FOR_LIBS) $(LIB_LD_LIBS) @AGENTLIBS@
 	$(RANLIB) $(AGENTLIB)
 
-libnetsnmpmibs.$(LIB_EXTENSION)$(LIB_VERSION): ${LMIBOBJS} $(HELPERLIB) $(AGENTLIB) $(USELIBS)
-	$(LIB_LD_CMD) $(MIBLIB) ${LMIBOBJS} $(HELPERLIB) $(AGENTLIB) $(USELIBS) @LD_NO_UNDEFINED@ $(LDFLAGS) ${LMIBLIBS} $(LIB_LD_LIBS) @AGENTLIBS@
+libnetsnmpmibs.$(LIB_EXTENSION)$(LIB_VERSION): ${LMIBOBJS} $(AGENTLIB) $(USELIBS)
+	$(LIB_LD_CMD) $(MIBLIB) ${LMIBOBJS} $(AGENTLIB) $(USELIBS) @LD_NO_UNDEFINED@ $(LDFLAGS) ${LMIBLIBS} $(LIB_LD_LIBS) @AGENTLIBS@
 	$(RANLIB) $(MIBLIB)
 
 agentlib: $(AGENTLIB)
@@ -290,10 +289,6 @@ mib_modules.lo: mibgroup/mib_module_inits.h
 #
 # dependency for snmplib object. it's here because the headers listed
 # are relative to the agent directory.
-
-$(HELPERLIB): subdirs
-# the above is needed when building with '-j' argument - everything what needs 
-# helper lib must wait until 'subdirs' target is finished
 
 subdirs: agentlib
 # wait for agentlib before building 'subdirs' target
