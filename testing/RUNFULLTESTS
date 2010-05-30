@@ -677,7 +677,7 @@ Where:
 
 Examples:
 
-  fulltests/default/T001snmpv1get_olducd
+  fulltests/default/T001snmpv1get_simple
   fulltests/snmpv3/T040keymanagetest_capp.c
 
 Any other files are ignored in terms of tests and may be supplimental
@@ -702,7 +702,7 @@ of the form:
 
   <TYPE>_<USEAGE>
 
-WHere:
+Where:
 
   TYPE:      The type name matching the file to support.
 
@@ -714,14 +714,14 @@ Example files
   fulltests/support/clib_build
   fulltests/support/simple_run
 
-Infrastructer files may exist in the source directory of where they're
+Infrastructure files may exist in the source directory of where they're
 expected to be run (ie, parallel to the test files) or they may exist
 in the special "support" directory if they're expected to be
 generically used across multilpe test group types.
 
 =head2 Test Execution
 
-Tests are run in two phases using the following psudo-algorithm:
+Tests are run in two phases using the following pseudo-algorithm:
 
   + for each test file
     + if an appropriate TYPE_build file exists for a test {
@@ -757,13 +757,13 @@ documented here:
 
 =over
 
-=item olducd
+=item simple
 
-I<olducd> test files are simple sh-shell-script files used to test
+I<simple> test files are simple sh-shell-script files used to test
 high-level functionality of Net-SNMP tools.  They're easy to write and
 should generally contain the following sort of structure:
 
-  . ../support/olducd_eval_tools.sh
+  . ../support/simple_eval_tools.sh
   HEADER my name
   STARTAGENT
   CAPTURE "snmpget..."
@@ -771,7 +771,7 @@ should generally contain the following sort of structure:
   STOPAGENT
   FINISHED
 
-Example file: fulltests/default/T001snmpv1get_olducd
+Example file: fulltests/default/T001snmpv1get_simple
 
 =item capp
 
@@ -804,7 +804,7 @@ very simple test suites or complex unit-tests or anything in between.
 =head1 DEBUGGING BROKEN TESTS
 
 If the individual tests are designed well, you should be able to
-re-run individual tests outside of the B<RUNFULLTESTS> aggregartion
+re-run individual tests outside of the B<RUNFULLTESTS> aggregation
 environment using the appropriate _build and _run scripts as needed.
 Test writers are encouraged to output comments in their TAP output to
 help users debug the results.
