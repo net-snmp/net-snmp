@@ -37,7 +37,6 @@ sub InitMakeParams {
       $snmp_lib_file = 'netsnmp.lib';
       $snmp_link_lib = 'netsnmp';
       $agent_link_lib = 'netsnmpagent';
-      $helpers_link_lib = 'netsnmphelpers';
       $mibs_link_lib = 'netsnmpmibs';
 
       if (lc($opts->{'debug'}) eq "true") {
@@ -48,7 +47,7 @@ sub InitMakeParams {
       }
     
       if (lc($opts->{'insource'}) eq "true") {
-	$Params{'LIBS'} = "-L$basedir\\win32\\$lib_dir\\ -l$snmp_link_lib -l$agent_link_lib -l$helpers_link_lib " .
+	$Params{'LIBS'} = "-L$basedir\\win32\\$lib_dir\\ -l$snmp_link_lib -l$agent_link_lib " .
                 "-l$mibs_link_lib";
       }
       else {
@@ -72,7 +71,7 @@ sub InitMakeParams {
 	    $LibDirs[0] =~ s/\\$//;
 	  }
 	}
-	$Params{LIBS} = "-L$LibDir -l$snmp_link_lib -l$agent_link_lib -l$helpers_link_lib -l$mibs_link_lib";
+	$Params{LIBS} = "-L$LibDir -l$snmp_link_lib -l$agent_link_lib -l$mibs_link_lib";
       }
 
       $Params{'INC'} = "-I$basedir\\include\\ -I$basedir\\include\\net-snmp\\ -I$basedir\\win32\\ ";
@@ -87,7 +86,7 @@ sub InitMakeParams {
 	$Params{'CCFLAGS'} .= " " . $Config{'ccflags'};
         $lib_version = `$opts->{'nsconfig'} --version`;
 	if (lc($opts->{'insource'}) eq "true") {
-	    $Params{'LIBS'} = "-L../../snmplib/.libs -L../../snmplib/ -L../../agent/.libs -L../../agent/ -L../../agent/helpers/.libs -L../../agent/helpers/ " . $Params{'LIBS'};
+	    $Params{'LIBS'} = "-L../../snmplib/.libs -L../../snmplib/ -L../../agent/.libs -L../../agent/ " . $Params{'LIBS'};
 	    $Params{'CCFLAGS'} = "-I../../include " . $Params{'CCFLAGS'};
 #	} else {
 	    $Params{'LIBS'} = `$opts->{'nsconfig'} --libdir` . $Params{'LIBS'};
