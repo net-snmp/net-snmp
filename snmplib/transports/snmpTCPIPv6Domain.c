@@ -2,6 +2,8 @@
 
 #ifdef NETSNMP_TRANSPORT_TCPIPV6_DOMAIN
 
+#include <net-snmp/library/snmpTCPIPv6Domain.h>
+
 #include <stdio.h>
 #include <sys/types.h>
 #include <errno.h>
@@ -42,9 +44,8 @@
 #include <net-snmp/config_api.h>
 
 #include <net-snmp/library/snmp_transport.h>
-#include <net-snmp/library/snmpUDPDomain.h>
-#include <net-snmp/library/snmpUDPIPv6Domain.h>
-#include <net-snmp/library/snmpTCPIPv6Domain.h>
+#include <net-snmp/library/snmpSocketBaseDomain.h>
+#include <net-snmp/library/snmpTCPBaseDomain.h>
 
 #include "inet_ntop.h"
 

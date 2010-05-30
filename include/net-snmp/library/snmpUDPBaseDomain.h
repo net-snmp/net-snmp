@@ -3,6 +3,8 @@
 
 config_require(SocketBase)
 
+#include <net-snmp/library/snmp_transport.h>
+
 #ifdef __cplusplus
 extern          "C" {
 #endif

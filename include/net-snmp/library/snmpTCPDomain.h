@@ -1,25 +1,20 @@
 #ifndef _SNMPTCPDOMAIN_H
 #define _SNMPTCPDOMAIN_H
 
-config_require(TCPBase)
+#if HAVE_NETINET_IN_H
+#include <netinet/in.h>
+#endif
+
 config_require(IPv4Base)
+config_require(SocketBase)
+config_require(TCPBase)
 
 #ifdef NETSNMP_TRANSPORT_TCP_DOMAIN
 
-#ifdef __cplusplus
-extern          "C" {
-#endif
-
-#include <net-snmp/library/snmp_transport.h>
-#include <net-snmp/library/asn1.h>
-#include <net-snmp/library/snmpTCPBaseDomain.h>
 #include <net-snmp/library/snmpIPv4BaseDomain.h>
 
-#if HAVE_SYS_SOCKET_H
-#include <sys/socket.h>
-#endif
-#if HAVE_NETINET_IN_H
-#include <netinet/in.h>
+#ifdef __cplusplus
+extern          "C" {
 #endif
 
 /*

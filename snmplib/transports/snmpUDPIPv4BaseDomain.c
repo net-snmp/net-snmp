@@ -3,6 +3,8 @@
 
 #include <net-snmp/net-snmp-config.h>
 
+#include <net-snmp/library/snmpUDPIPv4BaseDomain.h>
+
 #include <stddef.h>
 #include <stdio.h>
 #include <sys/types.h>
@@ -30,11 +32,12 @@
 #include <errno.h>
 
 #include <net-snmp/types.h>
-#include <net-snmp/library/snmpUDPIPv4BaseDomain.h>
 #include <net-snmp/library/snmp_debug.h>
 #include <net-snmp/library/tools.h>
 #include <net-snmp/library/snmp_assert.h>
 #include <net-snmp/library/default_store.h>
+
+#include <net-snmp/library/snmpSocketBaseDomain.h>
 
 #if defined(linux) && defined(IP_PKTINFO)
 

@@ -1,7 +1,12 @@
 #ifndef _SNMP_TRANSPORT_H
 #define _SNMP_TRANSPORT_H
 
+#ifdef HAVE_NETINET_IN_H
+#include <netinet/in.h>
+#endif
+
 #include <sys/types.h>
+
 #include <net-snmp/library/asn1.h>
 
 #ifdef __cplusplus

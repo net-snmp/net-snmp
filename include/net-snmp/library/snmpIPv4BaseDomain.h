@@ -7,9 +7,7 @@
 #include <netinet/in.h>
 #endif
 
-config_require(SocketBase)
-
-#include <net-snmp/library/snmpSocketBaseDomain.h>
+#include <net-snmp/library/snmp_transport.h>
 
 #ifdef __cplusplus
 extern          "C" {

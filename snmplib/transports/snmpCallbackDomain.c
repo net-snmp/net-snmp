@@ -1,5 +1,7 @@
 #include <net-snmp/net-snmp-config.h>
 
+#include <net-snmp/library/snmpCallbackDomain.h>
+
 #include <stdio.h>
 #include <sys/types.h>
 #include <ctype.h>
@@ -42,10 +44,8 @@
 #include <net-snmp/utilities.h>
 
 #include <net-snmp/library/snmp_transport.h>
-#include <net-snmp/library/snmpUnixDomain.h>
 #include <net-snmp/library/snmp_api.h>
 #include <net-snmp/library/snmp_client.h>
-#include <net-snmp/library/snmpCallbackDomain.h>
 
 #ifndef NETSNMP_STREAM_QUEUE_LEN
 #define NETSNMP_STREAM_QUEUE_LEN  5

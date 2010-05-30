@@ -3,18 +3,14 @@
 #ifndef SNMPIPV6BASE_H
 #define SNMPIPV6BASE_H
 
-#ifdef __cplusplus
-extern          "C" {
+#if HAVE_NETINET_IN_H
+#include <netinet/in.h>
 #endif
 
 #include <net-snmp/library/snmp_transport.h>
-#include <net-snmp/library/asn1.h>
 
-#if HAVE_SYS_SOCKET_H
-#include <sys/socket.h>
-#endif
-#if HAVE_NETINET_IN_H
-#include <netinet/in.h>
+#ifdef __cplusplus
+extern          "C" {
 #endif
 
 /*

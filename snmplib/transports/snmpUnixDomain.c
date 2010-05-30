@@ -1,5 +1,7 @@
 #include <net-snmp/net-snmp-config.h>
 
+#include <net-snmp/library/snmpUnixDomain.h>
+
 #include <stddef.h>
 #include <stdio.h>
 #include <sys/types.h>
@@ -20,9 +22,6 @@
 #if HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
 #endif
-#if HAVE_SYS_UN_H
-#include <sys/un.h>
-#endif
 
 #if HAVE_DMALLOC_H
 #include <dmalloc.h>
@@ -33,8 +32,7 @@
 #include <net-snmp/config_api.h>
 
 #include <net-snmp/library/snmp_transport.h>
-#include <net-snmp/library/snmpUDPDomain.h>
-#include <net-snmp/library/snmpUnixDomain.h>
+#include <net-snmp/library/snmpSocketBaseDomain.h>
 #include <net-snmp/library/system.h> /* mkdirhier */
 
 

@@ -1,5 +1,7 @@
 #include <net-snmp/net-snmp-config.h>
 
+#include <net-snmp/library/snmpTLSTCPDomain.h>
+
 #include <stdio.h>
 #include <sys/types.h>
 #include <ctype.h>
@@ -44,10 +46,9 @@
 #include <net-snmp/output_api.h>
 #include <net-snmp/config_api.h>
 #include <net-snmp/library/snmp_assert.h>
-
-#include <net-snmp/library/snmp_transport.h>
-#include <net-snmp/library/snmpTLSTCPDomain.h>
-#include <net-snmp/library/snmpTCPDomain.h>
+#include <net-snmp/library/snmpIPv4BaseDomain.h>
+#include <net-snmp/library/snmpSocketBaseDomain.h>
+#include <net-snmp/library/snmpTLSBaseDomain.h>
 #include <net-snmp/library/system.h>
 #include <net-snmp/library/tools.h>
 #include <net-snmp/library/cert_util.h>

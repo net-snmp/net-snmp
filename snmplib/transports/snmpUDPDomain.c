@@ -11,6 +11,8 @@
 
 #include <net-snmp/net-snmp-config.h>
 
+#include <net-snmp/library/snmpUDPDomain.h>
+
 #include <stddef.h>
 #include <stdio.h>
 #include <sys/types.h>
@@ -53,7 +55,7 @@
 #include <net-snmp/config_api.h>
 
 #include <net-snmp/library/snmp_transport.h>
-#include <net-snmp/library/snmpUDPDomain.h>
+#include <net-snmp/library/snmpSocketBaseDomain.h>
 #include <net-snmp/library/system.h>
 #include <net-snmp/library/tools.h>
 

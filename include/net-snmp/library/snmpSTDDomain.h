@@ -3,12 +3,11 @@
 
 #ifdef NETSNMP_TRANSPORT_STD_DOMAIN
 
+#include <net-snmp/library/snmp_transport.h>
+
 #ifdef __cplusplus
 extern          "C" {
 #endif
-
-#include <net-snmp/library/snmp_transport.h>
-#include <net-snmp/library/asn1.h>
 
 /*
  * The SNMP over STD over IPv4 transport domain is identified by

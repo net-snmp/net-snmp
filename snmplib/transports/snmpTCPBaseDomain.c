@@ -1,9 +1,10 @@
 #include <net-snmp/net-snmp-config.h>
 
+#include <net-snmp/library/snmpTCPBaseDomain.h>
+
 #include <stdio.h>
 #include <sys/types.h>
 #include <errno.h>
-
 
 #if HAVE_STRING_H
 #include <string.h>
@@ -37,7 +38,6 @@
 #include <net-snmp/output_api.h>
 
 #include <net-snmp/library/snmp_transport.h>
-#include <net-snmp/library/snmpTCPBaseDomain.h>
 
 /*
  * You can write something into opaque that will subsequently get passed back 

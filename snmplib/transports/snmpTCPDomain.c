@@ -1,5 +1,7 @@
 #include <net-snmp/net-snmp-config.h>
 
+#include <net-snmp/library/snmpTCPDomain.h>
+
 #include <stdio.h>
 #include <sys/types.h>
 #include <errno.h>
@@ -35,9 +37,9 @@
 #include <net-snmp/types.h>
 #include <net-snmp/output_api.h>
 
-#include <net-snmp/library/snmp_transport.h>
-#include <net-snmp/library/snmpUDPDomain.h>
-#include <net-snmp/library/snmpTCPDomain.h>
+#include <net-snmp/library/snmpIPv4BaseDomain.h>
+#include <net-snmp/library/snmpSocketBaseDomain.h>
+#include <net-snmp/library/snmpTCPBaseDomain.h>
 
 /*
  * needs to be in sync with the definitions in snmplib/snmpUDPDomain.c

@@ -8,10 +8,10 @@ extern          "C" {
 #endif
 
 #include <net-snmp/library/snmp_transport.h>
-#include <net-snmp/library/asn1.h>
 
-config_require(SocketBase)
 config_require(IPv6Base)
+config_require(UDPBase)
+
 #include <net-snmp/library/snmpIPv6BaseDomain.h>
 
 /*
@@ -29,7 +29,7 @@ netsnmp_transport *snmp_udp6_transport(struct sockaddr_in6 *addr,
 /*
  * Convert a "traditional" peername into a sockaddr_in6 structure which is
  * written to *addr.  Returns 1 if the conversion was successful, or 0 if it
- * failed.  
+ * failed.
  */
 
 int             netsnmp_sockaddr_in6(struct sockaddr_in6 *addr,
@@ -50,7 +50,7 @@ int             netsnmp_udp6_getSecName(void *opaque, int olength,
                                         const char **contextName);
 
 /*
- * "Constructor" for transport domain object.  
+ * "Constructor" for transport domain object.
  */
 
 NETSNMP_IMPORT void netsnmp_udpipv6_ctor(void);
