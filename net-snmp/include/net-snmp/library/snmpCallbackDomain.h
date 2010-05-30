@@ -11,6 +11,7 @@ extern          "C" {
 
 #ifdef NETSNMP_TRANSPORT_CALLBACK_DOMAIN
 
+#include <net-snmp/types.h>
 #include <net-snmp/library/snmp_transport.h>
 
 typedef struct netsnmp_callback_pass_s {

@@ -1,4 +1,7 @@
 #include <net-snmp/net-snmp-config.h>
+
+#include <net-snmp/library/snmpUDPIPv6Domain.h>
+
 #include <net-snmp/types.h>
 
 #ifdef NETSNMP_TRANSPORT_UDPIPV6_DOMAIN
@@ -56,7 +59,7 @@ static const struct in6_addr in6addr_any = IN6ADDR_ANY_INIT;
 #include <net-snmp/config_api.h>
 
 #include <net-snmp/library/snmp_transport.h>
-#include <net-snmp/library/snmpUDPIPv6Domain.h>
+#include <net-snmp/library/snmpSocketBaseDomain.h>
 
 #include "inet_ntop.h"
 #include "inet_pton.h"

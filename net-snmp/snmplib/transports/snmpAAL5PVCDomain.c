@@ -1,5 +1,7 @@
 #include <net-snmp/net-snmp-config.h>
 
+#include <net-snmp/library/snmpAAL5PVCDomain.h>
+
 #include <stdio.h>
 #include <sys/types.h>
 #include <ctype.h>
@@ -30,7 +32,6 @@
 #include <net-snmp/config_api.h>
 
 #include <net-snmp/library/snmp_transport.h>
-#include <net-snmp/library/snmpAAL5PVCDomain.h>
 
 
 oid netsnmp_AAL5PVCDomain[10] = { NETSNMP_ENTERPRISE_MIB, 3, 3, 3 };

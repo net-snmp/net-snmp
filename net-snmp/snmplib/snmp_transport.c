@@ -1,5 +1,7 @@
 #include <net-snmp/net-snmp-config.h>
 
+#include <net-snmp/library/snmp_transport.h>
+
 #include <stdio.h>
 #if HAVE_STRING_H
 #include <string.h>
@@ -23,7 +25,6 @@
 
 #include <net-snmp/library/default_store.h>
 
-#include <net-snmp/library/snmp_transport.h>
 #include <net-snmp/library/snmpUDPDomain.h>
 #ifdef NETSNMP_TRANSPORT_TLS_DOMAIN
 #include <net-snmp/library/snmpTLSDomain.h>

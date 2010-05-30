@@ -1,5 +1,7 @@
 #include <net-snmp/net-snmp-config.h>
 
+#include <net-snmp/library/snmpTLSBaseDomain.h>
+
 #if HAVE_DMALLOC_H
 #include <dmalloc.h>
 #endif
@@ -23,7 +25,6 @@
 #include <openssl/err.h>
 
 #include <net-snmp/types.h>
-#include <net-snmp/library/snmpTLSBaseDomain.h>
 #include <net-snmp/library/cert_util.h>
 #include <net-snmp/library/snmp_openssl.h>
 #include <net-snmp/library/default_store.h>

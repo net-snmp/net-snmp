@@ -1,12 +1,11 @@
 #ifndef SNMPTCPBASEDOMAIN_H
 #define SNMPTCPBASEDOMAIN_H
 
+#include <net-snmp/library/snmp_transport.h>
+
 #ifdef __cplusplus
 extern          "C" {
 #endif
-
-config_require(SocketBase)
-#include <net-snmp/library/snmpSocketBaseDomain.h>
 
 /*
  * Prototypes

@@ -1,5 +1,7 @@
 #include <net-snmp/net-snmp-config.h>
 
+#include <net-snmp/library/snmpAliasDomain.h>
+
 #include <stdio.h>
 #include <sys/types.h>
 #include <errno.h>
@@ -25,8 +27,6 @@
 #include <net-snmp/output_api.h>
 #include <net-snmp/utilities.h>
 #include <net-snmp/config_api.h>
-
-#include <net-snmp/library/snmp_transport.h>
 
 oid netsnmp_snmpALIASDomain[] = { 1,3,6,1,4,1,8072,3,3,7 };
 static netsnmp_tdomain aliasDomain;

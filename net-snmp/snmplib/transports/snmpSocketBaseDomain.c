@@ -3,6 +3,8 @@
 
 #include <net-snmp/net-snmp-config.h>
 
+#include <net-snmp/library/snmpSocketBaseDomain.h>
+
 #include <stddef.h>
 #include <stdio.h>
 #if HAVE_UNISTD_H
@@ -24,19 +26,9 @@
 #if HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
 #endif
-#if HAVE_NETINET_IN_H
-#include <netinet/in.h>
-#endif
-#if HAVE_ARPA_INET_H
-#include <arpa/inet.h>
-#endif
-#if HAVE_NETDB_H
-#include <netdb.h>
-#endif
 #include <errno.h>
 
 #include <net-snmp/types.h>
-#include <net-snmp/library/snmpUDPBaseDomain.h>
 #include <net-snmp/library/snmp_debug.h>
 #include <net-snmp/library/tools.h>
 #include <net-snmp/library/default_store.h>

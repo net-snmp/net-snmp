@@ -79,6 +79,8 @@
 
 #include <net-snmp/net-snmp-config.h>
 
+#include <net-snmp/library/snmpDTLSUDPDomain.h>
+
 #include <stdio.h>
 #include <sys/types.h>
 #include <ctype.h>
@@ -120,7 +122,6 @@
 #include <net-snmp/config_api.h>
 
 #include <net-snmp/library/snmp_transport.h>
-#include <net-snmp/library/snmpUDPDomain.h>
 #include <net-snmp/library/system.h>
 #include <net-snmp/library/tools.h>
 #include <net-snmp/library/callback.h>
@@ -129,8 +130,9 @@
 #include "openssl/ssl.h"
 #include "openssl/err.h"
 
+#include <net-snmp/library/snmpSocketBaseDomain.h>
 #include <net-snmp/library/snmpTLSBaseDomain.h>
-#include <net-snmp/library/snmpDTLSUDPDomain.h>
+#include <net-snmp/library/snmpUDPDomain.h>
 #include <net-snmp/library/cert_util.h>
 #include <net-snmp/library/snmp_openssl.h>
 

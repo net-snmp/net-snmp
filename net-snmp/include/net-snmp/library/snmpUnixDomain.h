@@ -3,10 +3,6 @@
 
 #ifdef NETSNMP_TRANSPORT_UNIX_DOMAIN
 
-#ifdef __cplusplus
-extern          "C" {
-#endif
-
 #if defined(cygwin) || defined(mingw32) || defined(mingw32msvc)
     config_error(Unix domain protocol support unavailable for this platform)
 #endif
@@ -19,9 +15,12 @@ extern          "C" {
 #endif
 
 #include <net-snmp/library/snmp_transport.h>
-#include <net-snmp/library/asn1.h>
 
 config_require(SocketBase)
+
+#ifdef __cplusplus
+extern          "C" {
+#endif
 
 /*
  * The SNMP over local socket transport domain is identified by

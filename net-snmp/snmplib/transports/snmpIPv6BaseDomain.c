@@ -3,6 +3,8 @@
 
 #include <net-snmp/net-snmp-config.h>
 
+#include <net-snmp/library/snmpIPv6BaseDomain.h>
+
 #include <stddef.h>
 #include <stdio.h>
 #include <sys/types.h>
@@ -36,7 +38,6 @@
 #endif
 
 #include <net-snmp/types.h>
-#include <net-snmp/library/snmpIPv6BaseDomain.h>
 #include <net-snmp/library/snmp_debug.h>
 #include <net-snmp/library/default_store.h>
 #include <net-snmp/library/snmp_logging.h>

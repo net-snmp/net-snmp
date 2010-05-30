@@ -1,5 +1,7 @@
 #include <net-snmp/net-snmp-config.h>
 
+#include <net-snmp/library/snmpSTDDomain.h>
+
 #include <stdio.h>
 #include <sys/types.h>
 #include <signal.h>
@@ -25,7 +27,6 @@
 #include <net-snmp/output_api.h>
 
 #include <net-snmp/library/snmp_transport.h>
-#include <net-snmp/library/snmpSTDDomain.h>
 #include <net-snmp/library/tools.h>
 
 oid netsnmp_snmpSTDDomain[] = { TRANSPORT_DOMAIN_STD_IP };

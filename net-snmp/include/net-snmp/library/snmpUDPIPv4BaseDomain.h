@@ -3,22 +3,21 @@
 #ifndef SNMPUDPIPV4BASE_H
 #define SNMPUDPIPV4BASE_H
 
-#ifdef __cplusplus
-extern          "C" {
-#endif
-
-#include <net-snmp/library/snmp_transport.h>
-#include <net-snmp/library/asn1.h>
-#include <net-snmp/library/snmpUDPBaseDomain.h>
-
-config_require(UDPBase)
-config_require(IPv4Base)
-
 #if HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
 #endif
 #if HAVE_NETINET_IN_H
 #include <netinet/in.h>
+#endif
+
+config_require(UDPBase)
+config_require(IPv4Base)
+
+#include <net-snmp/library/snmpIPv4BaseDomain.h>
+#include <net-snmp/library/snmpUDPBaseDomain.h>
+
+#ifdef __cplusplus
+extern          "C" {
 #endif
 
 /*
