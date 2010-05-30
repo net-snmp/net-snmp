@@ -403,6 +403,9 @@
 /*  This is defined if support for stdin/out transport domain is available.   */
 #undef NETSNMP_TRANSPORT_STD_DOMAIN
 
+/*  This is defined if support for the IPv4Base transport domain is available.   */
+#undef NETSNMP_TRANSPORT_IPV4BASE_DOMAIN
+
 /* define this if the USM security module is available */
 #undef NETSNMP_SECMOD_USM
 

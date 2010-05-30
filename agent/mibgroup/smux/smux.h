@@ -2,6 +2,11 @@
  * Smux module authored by Rohit Dube.
  * Rewritten by Nick Amato <naamato@merit.net>.
  */
+
+#ifndef NETSNMP_TRANSPORT_IPV4BASE_DOMAIN
+config_error(smux/smux depends on the IPv4Base transport domain)
+#endif
+
 config_belongs_in(agent_module)
 
 #define SMUXPORT 199
