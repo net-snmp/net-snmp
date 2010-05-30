@@ -943,6 +943,7 @@ vacm_create_simple(const char *token, char *confline,
     commcount++;
 
 #if !defined(NETSNMP_DISABLE_SNMPV1) || !defined(NETSNMP_DISABLE_SNMPV2C)
+#ifdef NETSNMP_TRANSPORT_UDP_DOMAIN
     if (parsetype == VACM_CREATE_SIMPLE_COMIPV4 ||
         parsetype == VACM_CREATE_SIMPLE_COM) {
         vacm_gen_com2sec(commcount, community, addressname,
@@ -950,7 +951,8 @@ vacm_create_simple(const char *token, char *confline,
                          secname, sizeof(secname),
                          view_ptr, sizeof(viewname), commversion);
     }
-    
+#endif
+
 #ifdef NETSNMP_TRANSPORT_UNIX_DOMAIN
     if (parsetype == VACM_CREATE_SIMPLE_COMUNIX ||
         parsetype == VACM_CREATE_SIMPLE_COM) {
@@ -1301,7 +1303,9 @@ vacm_check_view_contents(netsnmp_pdu *pdu, oid * name, size_t namelen,
          * community string to a security name for us.  
          */
 
-        if (pdu->tDomain == netsnmpUDPDomain
+        if (0) {
+#ifdef NETSNMP_TRANSPORT_UDP_DOMAIN
+        } else if (pdu->tDomain == netsnmpUDPDomain
 #ifdef NETSNMP_TRANSPORT_TCP_DOMAIN
             || pdu->tDomain == netsnmp_snmpTCPDomain
 #endif
@@ -1320,6 +1324,7 @@ vacm_check_view_contents(netsnmp_pdu *pdu, oid * name, size_t namelen,
             SNMP_FREE(pdu->contextName);
             pdu->contextName = strdup(contextName);
             pdu->contextNameLen = strlen(contextName);
+#endif
 #ifdef NETSNMP_TRANSPORT_UDPIPV6_DOMAIN
         } else if (pdu->tDomain == netsnmp_UDPIPv6Domain
 #ifdef NETSNMP_TRANSPORT_TCPIPV6_DOMAIN
