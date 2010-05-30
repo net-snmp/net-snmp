@@ -30,9 +30,9 @@ MIBLIB          = ../libnetsnmpmibs.$(LIB_EXTENSION)$(LIB_VERSION)
 CPPFLAGS= $(TOP_INCLUDES) -I. $(AGENT_INCLUDES) $(MIBGROUP_INCLUDES) \
 	$(SNMPLIB_INCLUDES) @CPPFLAGS@
 
-OBJS =
+OBJS = dummy.o
 
-LOBJS = 
+LOBJS = dummy.lo
 
 all: standardall
 
