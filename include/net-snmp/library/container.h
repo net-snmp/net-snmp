@@ -24,6 +24,7 @@
 #error "Please include <net-snmp/net-snmp-config.h> before this file"
 #endif
 
+#include <stdlib.h> /* free() */
 #include <net-snmp/types.h>
 #include <net-snmp/library/factory.h>
 #include <net-snmp/library/snmp_logging.h>
