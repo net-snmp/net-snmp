@@ -1,7 +1,7 @@
 #!/usr/bin/env perl
 
 use Getopt::Long;
-use Data::Dumper;
+#use Data::Dumper;
 use File::Basename;
 use Cwd qw(abs_path);
 use strict;
@@ -415,10 +415,10 @@ sub run_older_perl_tests {
     # create the temporary files
     my @tempfiles;
     if (! -d "$opts{'master-directory'}") {
-	mkdir("$opts{'master-directory'}");
+	mkdir("$opts{'master-directory'}", 0777);
     }
     if (! -d "$opts{'master-directory'}/temptests") {
-	mkdir("$opts{'master-directory'}/temptests");
+	mkdir("$opts{'master-directory'}/temptests", 0777);
     }
     foreach my $test (@tests) {
 	my $tempfile = "$test->[0].t";
