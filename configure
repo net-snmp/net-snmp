@@ -24567,7 +24567,7 @@ MODULECPP="$CPP $PARTIALTARGETFLAGS -I${srcdir} -I${srcdir}/include"
 #
 # Add the default transports to the list
 #
-if test "x$PARTIALTARGETOS" = "xcygwin" -o "x$PARTIALTARGETOS" = "xmingw32" -o "x$PARTIALTARGETOS" = "xmingw32msvc"; then
+if test "x$PARTIALTARGETOS" = "xmingw32" -o "x$PARTIALTARGETOS" = "xmingw32msvc"; then
   transport_default_list="UDP TCP Alias Callback"
 else
   transport_default_list="UDP TCP Alias Unix Callback"
