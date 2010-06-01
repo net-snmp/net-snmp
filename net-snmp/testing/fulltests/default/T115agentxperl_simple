@@ -96,7 +96,9 @@ STARTAGENT
 
 # make sure that we can fulfill all library dependencies
 _ld_lib_path="${SNMP_UPDIR}/snmplib/.libs:${SNMP_UPDIR}/agent/.libs:${SNMP_UPDIR}/agent/helpers/.libs"
-if [ "x$LD_LIBRARY_PATH" != "x" ]; then
+if [ x$OSTYPE = xcygwin ]; then
+  PATH="${_ld_lib_path}:$PATH"
+elif [ "x$LD_LIBRARY_PATH" != "x" ]; then
   LD_LIBRARY_PATH="${_ld_lib_path}:${LD_LIBRARY_PATH}"
 else
   LD_LIBRARY_PATH="${_ld_lib_path}"
@@ -111,7 +113,7 @@ if [ "x$SHLIB_PATH" != "x" ]; then
 else
   SHLIB_PATH="${_ld_lib_path}"
 fi
-export LD_LIBRARY_PATH DYLD_LIBRARY_PATH SHLIB_PATH
+export PATH LD_LIBRARY_PATH DYLD_LIBRARY_PATH SHLIB_PATH
 
 # start perl subagent
 /usr/bin/env SNMPCONFPATH="${SNMP_TMPDIR}${SNMP_ENV_SEPARATOR}${SNMP_TMP_PERSISTENTDIR}" $SNMP_PERLPROG $PERL_SUBAGENT $SNMP_AGENTX_PID_FILE >$SNMP_AGENTX_LOG_FILE 2>&1
