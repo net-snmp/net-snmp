@@ -612,7 +612,7 @@ table_helper_handler(netsnmp_mib_handler *handler,
 
 
         /*
-         * do we have sufficent index info to continue?
+         * do we have sufficient index info to continue?
          */
 
         if ((reqinfo->mode != MODE_GETNEXT) &&
