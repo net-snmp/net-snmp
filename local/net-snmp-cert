@@ -6,12 +6,408 @@ use 5.8.0;
 use Getopt::Long qw(:config gnu_getopt no_ignore_case pass_through);
 use Cwd qw(getcwd realpath);
 use File::Basename;
+use File::Copy;
 use File::Path;
 use Sys::Hostname;
 
+our @CC = (
+["AF","AFGHANISTAN"],
+["AX","ÅLAND ISLANDS"],
+["AL","ALBANIA"],
+["DZ","ALGERIA"],
+["AS","AMERICAN SAMOA"],
+["AD","ANDORRA"],
+["AO","ANGOLA"],
+["AI","ANGUILLA"],
+["AQ","ANTARCTICA"],
+["AG","ANTIGUA AND BARBUDA"],
+["AR","ARGENTINA"],
+["AM","ARMENIA"],
+["AW","ARUBA"],
+["AU","AUSTRALIA"],
+["AT","AUSTRIA"],
+["AZ","AZERBAIJAN"],
+["BS","BAHAMAS"],
+["BH","BAHRAIN"],
+["BD","BANGLADESH"],
+["BB","BARBADOS"],
+["BY","BELARUS"],
+["BE","BELGIUM"],
+["BZ","BELIZE"],
+["BJ","BENIN"],
+["BM","BERMUDA"],
+["BT","BHUTAN"],
+["BO","BOLIVIA, PLURINATIONAL STATE OF"],
+["BA","BOSNIA AND HERZEGOVINA"],
+["BW","BOTSWANA"],
+["BV","BOUVET ISLAND"],
+["BR","BRAZIL"],
+["IO","BRITISH INDIAN OCEAN TERRITORY"],
+["BN","BRUNEI DARUSSALAM"],
+["BG","BULGARIA"],
+["BF","BURKINA FASO"],
+["BI","BURUNDI"],
+["KH","CAMBODIA"],
+["CM","CAMEROON"],
+["CA","CANADA"],
+["CV","CAPE VERDE"],
+["KY","CAYMAN ISLANDS"],
+["CF","CENTRAL AFRICAN REPUBLIC"],
+["TD","CHAD"],
+["CL","CHILE"],
+["CN","CHINA"],
+["CX","CHRISTMAS ISLAND"],
+["CC","COCOS (KEELING) ISLANDS"],
+["CO","COLOMBIA"],
+["KM","COMOROS"],
+["CG","CONGO"],
+["CD","CONGO, THE DEMOCRATIC REPUBLIC OF THE"],
+["CK","COOK ISLANDS"],
+["CR","COSTA RICA"],
+["CI","CÔTE D'IVOIRE"],
+["HR","CROATIA"],
+["CU","CUBA"],
+["CY","CYPRUS"],
+["CZ","CZECH REPUBLIC"],
+["DK","DENMARK"],
+["DJ","DJIBOUTI"],
+["DM","DOMINICA"],
+["DO","DOMINICAN REPUBLIC"],
+["EC","ECUADOR"],
+["EG","EGYPT"],
+["SV","EL SALVADOR"],
+["GQ","EQUATORIAL GUINEA"],
+["ER","ERITREA"],
+["EE","ESTONIA"],
+["ET","ETHIOPIA"],
+["FK","FALKLAND ISLANDS (MALVINAS)"],
+["FO","FAROE ISLANDS"],
+["FJ","FIJI"],
+["FI","FINLAND"],
+["FR","FRANCE"],
+["GF","FRENCH GUIANA"],
+["PF","FRENCH POLYNESIA"],
+["TF","FRENCH SOUTHERN TERRITORIES"],
+["GA","GABON"],
+["GM","GAMBIA"],
+["GE","GEORGIA"],
+["DE","GERMANY"],
+["GH","GHANA"],
+["GI","GIBRALTAR"],
+["GR","GREECE"],
+["GL","GREENLAND"],
+["GD","GRENADA"],
+["GP","GUADELOUPE"],
+["GU","GUAM"],
+["GT","GUATEMALA"],
+["GG","GUERNSEY"],
+["GN","GUINEA"],
+["GW","GUINEA-BISSAU"],
+["GY","GUYANA"],
+["HT","HAITI"],
+["HM","HEARD ISLAND AND MCDONALD ISLANDS"],
+["VA","HOLY SEE (VATICAN CITY STATE)"],
+["HN","HONDURAS"],
+["HK","HONG KONG"],
+["HU","HUNGARY"],
+["IS","ICELAND"],
+["IN","INDIA"],
+["ID","INDONESIA"],
+["IR","IRAN, ISLAMIC REPUBLIC OF"],
+["IQ","IRAQ"],
+["IE","IRELAND"],
+["IM","ISLE OF MAN"],
+["IL","ISRAEL"],
+["IT","ITALY"],
+["JM","JAMAICA"],
+["JP","JAPAN"],
+["JE","JERSEY"],
+["JO","JORDAN"],
+["KZ","KAZAKHSTAN"],
+["KE","KENYA"],
+["KI","KIRIBATI"],
+["KP","KOREA, DEMOCRATIC PEOPLE'S REPUBLIC OF"],
+["KR","KOREA, REPUBLIC OF"],
+["KW","KUWAIT"],
+["KG","KYRGYZSTAN"],
+["LA","LAO PEOPLE'S DEMOCRATIC REPUBLIC"],
+["LV","LATVIA"],
+["LB","LEBANON"],
+["LS","LESOTHO"],
+["LR","LIBERIA"],
+["LY","LIBYAN ARAB JAMAHIRIYA"],
+["LI","LIECHTENSTEIN"],
+["LT","LITHUANIA"],
+["LU","LUXEMBOURG"],
+["MO","MACAO"],
+["MK","MACEDONIA, THE FORMER YUGOSLAV REPUBLIC OF"],
+["MG","MADAGASCAR"],
+["MW","MALAWI"],
+["MY","MALAYSIA"],
+["MV","MALDIVES"],
+["ML","MALI"],
+["MT","MALTA"],
+["MH","MARSHALL ISLANDS"],
+["MQ","MARTINIQUE"],
+["MR","MAURITANIA"],
+["MU","MAURITIUS"],
+["YT","MAYOTTE"],
+["MX","MEXICO"],
+["FM","MICRONESIA, FEDERATED STATES OF"],
+["MD","MOLDOVA, REPUBLIC OF"],
+["MC","MONACO"],
+["MN","MONGOLIA"],
+["ME","MONTENEGRO"],
+["MS","MONTSERRAT"],
+["MA","MOROCCO"],
+["MZ","MOZAMBIQUE"],
+["MM","MYANMAR"],
+["NA","NAMIBIA"],
+["NR","NAURU"],
+["NP","NEPAL"],
+["NL","NETHERLANDS"],
+["AN","NETHERLANDS ANTILLES"],
+["NC","NEW CALEDONIA"],
+["NZ","NEW ZEALAND"],
+["NI","NICARAGUA"],
+["NE","NIGER"],
+["NG","NIGERIA"],
+["NU","NIUE"],
+["NF","NORFOLK ISLAND"],
+["MP","NORTHERN MARIANA ISLANDS"],
+["NO","NORWAY"],
+["OM","OMAN"],
+["PK","PAKISTAN"],
+["PW","PALAU"],
+["PS","PALESTINIAN TERRITORY, OCCUPIED"],
+["PA","PANAMA"],
+["PG","PAPUA NEW GUINEA"],
+["PY","PARAGUAY"],
+["PE","PERU"],
+["PH","PHILIPPINES"],
+["PN","PITCAIRN"],
+["PL","POLAND"],
+["PT","PORTUGAL"],
+["PR","PUERTO RICO"],
+["QA","QATAR"],
+["RE","RÉUNION"],
+["RO","ROMANIA"],
+["RU","RUSSIAN FEDERATION"],
+["RW","RWANDA"],
+["BL","SAINT BARTHÉLEMY"],
+["SH","SAINT HELENA, ASCENSION AND TRISTAN DA CUNHA"],
+["KN","SAINT KITTS AND NEVIS"],
+["LC","SAINT LUCIA"],
+["MF","SAINT MARTIN"],
+["PM","SAINT PIERRE AND MIQUELON"],
+["VC","SAINT VINCENT AND THE GRENADINES"],
+["WS","SAMOA"],
+["SM","SAN MARINO"],
+["ST","SAO TOME AND PRINCIPE"],
+["SA","SAUDI ARABIA"],
+["SN","SENEGAL"],
+["RS","SERBIA"],
+["SC","SEYCHELLES"],
+["SL","SIERRA LEONE"],
+["SG","SINGAPORE"],
+["SK","SLOVAKIA"],
+["SI","SLOVENIA"],
+["SB","SOLOMON ISLANDS"],
+["SO","SOMALIA"],
+["ZA","SOUTH AFRICA"],
+["GS","SOUTH GEORGIA AND THE SOUTH SANDWICH ISLANDS"],
+["ES","SPAIN"],
+["LK","SRI LANKA"],
+["SD","SUDAN"],
+["SR","SURINAME"],
+["SJ","SVALBARD AND JAN MAYEN"],
+["SZ","SWAZILAND"],
+["SE","SWEDEN"],
+["CH","SWITZERLAND"],
+["SY","SYRIAN ARAB REPUBLIC"],
+["TW","TAIWAN, PROVINCE OF CHINA"],
+["TJ","TAJIKISTAN"],
+["TZ","TANZANIA, UNITED REPUBLIC OF"],
+["TH","THAILAND"],
+["TL","TIMOR-LESTE"],
+["TG","TOGO"],
+["TK","TOKELAU"],
+["TO","TONGA"],
+["TT","TRINIDAD AND TOBAGO"],
+["TN","TUNISIA"],
+["TR","TURKEY"],
+["TM","TURKMENISTAN"],
+["TC","TURKS AND CAICOS ISLANDS"],
+["TV","TUVALU"],
+["UG","UGANDA"],
+["UA","UKRAINE"],
+["AE","UNITED ARAB EMIRATES"],
+["GB","UNITED KINGDOM"],
+["US","UNITED STATES"],
+["UM","UNITED STATES MINOR OUTLYING ISLANDS"],
+["UY","URUGUAY"],
+["UZ","UZBEKISTAN"],
+["VU","VANUATU"],
+["VE","VENEZUELA, BOLIVARIAN REPUBLIC OF"],
+["VN","VIET NAM"],
+["VG","VIRGIN ISLANDS, BRITISH"],
+["VI","VIRGIN ISLANDS, U.S."],
+["WF","WALLIS AND FUTUNA"],
+["EH","WESTERN SAHARA"],
+["YE","YEMEN"],
+["ZM","ZAMBIA"],
+["ZW","ZIMBABWE"],
+);
+
+package NetSNMP::Term;
+# gratefully taken from Wayne Thompson's Term::Complete
+# if newer modules could be used this could be removed
+our($complete, $exit, $kill, $erase1, $erase2, $tty_raw_noecho, $tty_restore, $stty, $tty_safe_restore);
+our($tty_saved_state) = '';
+CONFIG: {
+  $exit = "\003";
+  $complete = "\004";
+  $kill     = "\025";
+  $erase1 =   "\177";
+  $erase2 =   "\010";
+  foreach my $s (qw(/bin/stty /usr/bin/stty)) {
+    if (-x $s) {
+      $tty_raw_noecho = "$s raw -echo";
+      $tty_restore    = "$s -raw echo";
+      $tty_safe_restore = $tty_restore;
+      $stty = $s;
+      last;
+    }
+  }
+}
+
+sub Complete {
+  my($prompt, $dflt, @cmp_lst, $cmp, $test, $l, @match);
+  my ($return, $r) = ("", 0);
+  my $tab;
+
+  $return = "";
+  $r      = 0;
+
+  $prompt = shift;
+  $dflt = shift;
+  if (ref $_[0] || $_[0] =~ /^\*/) {
+    @cmp_lst = @{$_[0]};
+  } else {
+    @cmp_lst = @_;
+  }
+
+  # Attempt to save the current stty state, to be restored later
+  if (defined $stty && defined $tty_saved_state && $tty_saved_state eq '') {
+    $tty_saved_state = qx($stty -g 2>/dev/null);
+    if ($?) {
+      # stty -g not supported
+      $tty_saved_state = undef;
+    } else {
+      $tty_saved_state =~ s/\s+$//g;
+      $tty_restore = qq($stty "$tty_saved_state" 2>/dev/null);
+    }
+  }
+  system $tty_raw_noecho if defined $tty_raw_noecho;
+ LOOP: {
+    local $_;
+    print($prompt, $return);
+    while (($_ = getc(STDIN)) ne "\r") {
+    CASE: {
+	# (TAB) attempt completion
+	$_ eq "\t" && do {
+	  if ($tab) {
+	    print(join("\r\n", '', grep(/^\Q$return/, @cmp_lst)), "\r\n");
+	    $tab--;
+	    redo LOOP;
+	  }
+	  @match = grep(/^\Q$return/, @cmp_lst);
+	  unless ($#match < 0) {
+	    $l = length($test = shift(@match));
+	    foreach $cmp (@match) {
+	      until (substr($cmp, 0, $l) eq substr($test, 0, $l)) {
+		$l--;
+	      }
+	    }
+	    print("\a");
+	    print($test = substr($test, $r, $l - $r));
+	    $r = length($return .= $test);
+	  }
+	  $tab++;
+	  last CASE;
+	};
+
+	# (^C) exit
+	$_ eq $exit && do {
+	 undef $return;
+	 last LOOP;
+	};
+
+	# (^D) completion list
+	($_ eq $complete or $_ eq '?') && do {
+	  print(join("\r\n", '', grep(/^\Q$return/, @cmp_lst)), "\r\n");
+	  redo LOOP;
+	};
+
+	# (^U) kill
+	$_ eq $kill && do {
+	  if ($r) {
+	    $r	= 0;
+	    $return	= "";
+	    print("\r\n");
+	    redo LOOP;
+	  }
+	  last CASE;
+	};
+
+	# (DEL) || (BS) erase
+	($_ eq $erase1 || $_ eq $erase2) && do {
+	  if ($r) {
+	    print("\b \b");
+	    chop($return);
+	    $r--;
+	  }
+	  last CASE;
+	};
+
+	# printable char
+	ord >= 32 && do {
+	  $return .= $_;
+	  $r++;
+	  print;
+	  last CASE;
+	};
+      }
+    }
+    if (defined $return and length $return == 0) {
+      $return = $dflt;
+    } elsif (@cmp_lst and scalar(grep {/^$return$/} @cmp_lst) != 1) {
+print "Return: $return\r\n";
+      if ($r) {
+	$r	= 0;
+	$return	= "";
+	print("\r\n");
+	redo LOOP;
+      }
+    }
+  }
+
+ DONE:
+  # system $tty_restore if defined $tty_restore;
+  if (defined $tty_saved_state && defined $tty_restore && defined $tty_safe_restore) {
+    system $tty_restore;
+    if ($?) {
+      # tty_restore caused error
+      system $tty_safe_restore;
+    }
+  }
+  print("\n");
+  return $return;
+}
+
 package NetSNMP::Cert;
 
-our $VERSION      = '0.2.1b';
+our $VERSION      = '0.2.5b';
 
 our $PROG         = ::basename($0);
 our $DEBUG        = 0;
@@ -21,9 +417,13 @@ our $ERR          = -1;
 our $OPENSSL     = $ENV{NET_SNMP_CRT_OPENSSL}  || 'openssl';
 our $CFGTOOL     = $ENV{NET_SNMP_CRT_CFGTOOL}  || 'net-snmp-config';
 
-# default config files
+# default app config file
 our $CFGFILE     = $ENV{NET_SNMP_CRT_CFGFILE}  || 'net-snmp-cert.conf';
-our $SSLCFG      = $ENV{NET_SNMP_CRT_SSLCFG}   || 'openssl.conf';
+
+# default OpenSSL config files
+our $SSLCFGIN    = $ENV{NET_SNMP_CRT_SSLCFGIN} || 'openssl.in';
+our $SSLCFGOUT   = $ENV{NET_SNMP_CRT_SSLCFGIN} || '.openssl.conf';
+our $SSLCFG      = $ENV{NET_SNMP_CRT_SSLCFG};
 
 # default cmd logs
 our $OUTLOG      = $ENV{NET_SNMP_CRT_OUTLOG}   || '.cmd.out.log';
@@ -53,7 +453,7 @@ sub dprint {
   my $str = shift;
   my $opts = shift;
   my $dlevel = shift || 1;
-  my $flag = (defined $opts ? int($opts->{debug} >= $dlevel) : 1);
+  my $flag = (defined $opts ? int($opts->{'debug'} >= $dlevel) : 1);
   my ($pkg, $file, $line, $sub) = caller(1);
   my ($pkg0, $file0, $line0) = caller(0);
   print("${sub}():$line0: $str") if $flag;
@@ -63,7 +463,7 @@ sub dwarn {
   my $str = shift;
   my $opts = shift;
   my $dlevel = shift || 1;
-  my $flag = (defined $opts ? $opts->{debug} >= $dlevel : 1);
+  my $flag = (defined $opts ? $opts->{'debug'} >= $dlevel : 1);
   my ($pkg, $file, $line, $sub) = caller(1);
   my ($pkg0, $file0, $line0) = caller(0);
   warn("${sub}():$line0: $str") if $flag;
@@ -72,8 +472,8 @@ sub dwarn {
 sub vprint {
   my $str = shift;
   my $opts = shift;
-  my $flag = (defined $opts ? $opts->{verbose} : 1);
-  my $debug = (defined $opts ? $opts->{debug} : 1);
+  my $flag = (defined $opts ? $opts->{'verbose'} : 1);
+  my $debug = (defined $opts ? $opts->{'debug'} : 1);
   my ($pkg, $file, $line, $sub) = caller(1);
   my ($pkg0, $file0, $line0) = caller(0);
   $str = ($debug ? "${sub}():$line0: $str" : "$str");
@@ -83,7 +483,7 @@ sub vprint {
 sub vwarn {
   my $str = shift;
   my $opts = shift;
-  my $flag = (defined $opts ? $opts->{verbose} : 1);
+  my $flag = (defined $opts ? $opts->{'verbose'} : 1);
   my ($pkg, $file, $line, $sub) = caller(1);
   my ($pkg0, $file0, $line0) = caller(0);
   warn("${sub}():$line0: $str") if $flag;
@@ -185,7 +585,7 @@ sub make_dirs {
 
   NetSNMP::Cert::dprint("make dirs [$dir:@dirs] from $wd\n", $opts);
 
-  ::mkpath($dir, $opts->{verbose}, $mode) or die("error - can't make $dir")
+  ::mkpath($dir, $opts->{'debug'}, $mode) or die("error - can't make $dir")
     if defined $dir and not -d $dir;
 
   foreach my $subdir (@dirs) {
@@ -234,6 +634,7 @@ sub usage {
   my $arg = shift;
 
   print "Command not implmeneted yet: $arg\n" if $ret == 2;
+  print "Unknown: $arg\n" if $ret == 3;
   print "\n   NAME:\n";
   print "     $NetSNMP::Cert::PROG: [$NetSNMP::Cert::VERSION] - ";
   print "Net-SNMP Certificate Management Tool\n";
@@ -243,23 +644,23 @@ sub usage {
   print "\n   SYNOPSIS:\n";
   print "     net-snmp-cert [--help|-?]\n";
   print "     net-snmp-cert [--version|-V]\n";
-  print "     net-snmp-cert genca    [<flags>] [<dn-opts>] [--ca <ca>]\n";
-  print "     net-snmp-cert gencert  [<flags>] [<dn-opts>] [--ca <ca>]\n";
-  print "     net-snmp-cert gencsr   [<flags>] [<dn-opts>] [--crt <crt>]\n";
-  print "     net-snmp-cert signcsr  [<flags>] [--install] --csr <csr> --ca <ca>\n";
+  print "     net-snmp-cert genca    [<flags>] [<dn-opts>] [--with-ca <ca>]\n";
+  print "     net-snmp-cert gencert  [<flags>] [<dn-opts>] [--with-ca <ca>]\n";
+  print "     net-snmp-cert gencsr   [<flags>] [<dn-opts>] [--from-crt <crt>]\n";
+  print "     net-snmp-cert signcsr  [<flags>] [--install] --csr <csr> --with-ca <ca>\n";
   print "     net-snmp-cert showca   [<flags>] [<format-opts>] [<file>|<search-tag>]\n";
   print "     net-snmp-cert showcert [<flags>] [<format-opts>] [<file>|<search-tag>]\n";
-  print "     net-snmp-cert import   <file>\n";
+  print "     net-snmp-cert import   [<flags>] <file> [<key>]\n";
   print "\n   COMMANDS:\n";
   print "     genca    -- generate a signed CA certificate suitable for signing other\n";
   print "                 certificates. default: self-signed unless --ca <ca> supplied\n\n";
   print "     gencert  -- generate a signed certificate suitable for identification, or\n";
   print "                 validation. default: self-signed unless --ca <ca> supplied\n\n";
   print "     gencsr   -- generate a certificate signing request. will create a new\n";
-  print "                 key and certificate unless --crt <crt> supplied\n\n";
+  print "                 key and certificate unless --from-crt <crt> supplied\n\n";
   print "     signcsr  -- sign a certificate signing request specified by --csr <csr>\n";
-  print "                 with the CA certificate specified by --ca <ca>\n";
-  print "     import   -- import an identity or CA certificate\n";
+  print "                 with the CA certificate specified by --with-ca <ca>\n";
+  print "     import   -- import an identity or CA certificate, optionally import <key>\n";
   print "     showca,\n";
   print "     showcert -- show CA or identity certificate(s). may pass fully qualified\n";
   print "                 file or directory name, or a search-tag which prefix matches\n";
@@ -279,11 +680,12 @@ sub usage {
   print "     -t, --tag      <tag>  -- application tag (default 'snmp')\n";
   print "     --<cfg-param>[=<val>] -- additional config params\n";  
   print "\n   CERTIFICATE OPTIONS (<cert-opts>):\n";
-  print "     -a, --ca <ca>         -- CA certificate used to sign request\n";
+  print "     -a, --with-ca <ca>    -- CA certificate used to sign request\n";
+  print "     -A, --ca <ca>         -- explicit output CA certificate\n";
   print "     -r, --csr <csr>       -- certificate signing request\n";
-  print "     -x, --crt <crt>       -- certificate\n";
+  print "     -x, --from-crt <crt>  -- input certificate for current operation\n";
+  print "     -X, --crt <crt>       -- explicit output certificate\n";
   print "     -y, --install         -- install result in local repository\n";
-  print "     -z, --self-sign       -- self-sign (default)\n";
   print "\n   DISTINGUISHED NAME OPTIONS (<dn-opts>):\n";
   print "     -e, --email <email>       -- email name\n";
   print "     -h, --host <host>         -- DNS host name, or IP address\n";
@@ -302,13 +704,13 @@ sub usage {
   print "                               --   EMAIL:admin\@net-snmp.org\n";
   print "                               --   URI:http://net-snmp.org\n";
   print "\n   FORMAT OPTIONS (<format-opts>): \n";
+  print "     --brief        -- minimized output (values only where applicable)\n";
   print "     --text         -- full text description\n";
   print "     --subject      -- subject description\n";
   print "     --subject_hash -- hash of subject for indexing\n";
   print "     --issuer       -- issuer description\n";
   print "     --issuer_hash  -- hash of issuer for indexing\n";
   print "     --fingerprint  -- SHA1 digest of DER\n";
-  print "     --short        -- short/minimized output\n";
   print "     --serial       -- serial number\n";
   print "     --modulus      -- modulus of the public key\n";
   print "     --dates        -- start and end dates\n";
@@ -316,14 +718,28 @@ sub usage {
   print "     --C            -- C code description\n";
   print "\n   EXAMPLES: \n";
   print "     net-snmp-cert genca --cn ca-net-snmp.org --days 1000\n";
+  print "     net-snmp-cert genca -f .snmp/net-snmp-cert.conf -i nocadm -I\n\n";
   print "     net-snmp-cert gencert -t snmpd --cn host.net-snmp.org\n";
   print "     net-snmp-cert gencsr -t snmpapp\n";
-  print "     net-snmp-cert signcsr --ca ca-net-snmp.org --csr snmpapp\n";
+  print "     net-snmp-cert signcsr  --csr snmpapp --with-ca ca-net-snmp.org\n";
   print "     net-snmp-cert showcerts --subject --issuer --dates snmpapp\n";
   print "     net-snmp-cert showcas --fingerprint --dates ca-net-snmp.org\n";
-  print "     net-snmp-cert genca -f .snmp/net-snmp-cert.conf -i nocadm -I\n\n";
+  print "     net-snmp-cert import ca-third-party.crt\n\n";
+  print "     net-snmp-cert import signed-request.crt signed-request.key\n\n";
 
   exit $ret;
+}
+
+sub set_default {
+  my $opts = shift;
+  my $config = shift;
+  my $field = shift;
+  my $val = shift;
+
+  if (not defined $opts->{$field}) {
+    my $cval = $config->inherit($field);
+    $opts->{$field} = (defined $cval ? $cval : $val);
+  }
 }
 
 sub cfg_path {
@@ -417,7 +833,7 @@ sub find_certs {
 
   if ($targ =~ /\.?\//) {
     # see if targ could be file - calc orig. rel. path
-    my $arg = NetSNMP::Cert::fq_rel_path($targ, $opts->{rdir});
+    my $arg = NetSNMP::Cert::fq_rel_path($targ, $opts->{'rdir'});
     NetSNMP::Cert::dprint("find_certs(2):$dir:$targ:$arg\n", $opts);
     # targ is a file name - use it
     return (wantarray ? ($arg) : $arg) if -f $arg;
@@ -459,7 +875,7 @@ sub check_output_file {
       $continue = <STDIN>; chomp $continue;
       $continue = 0 if $continue =~ /^\s*$|^no?\s*$/i;
     } else {
-      if ($opts->{force}) {
+      if ($opts->{'force'}) {
 	NetSNMP::Cert::vprint("Output file ($file) exists; overwriting...\n", $opts);
       } else {
 	NetSNMP::Cert::vprint("Output file ($file) exists; exiting...\n", $opts);
@@ -477,6 +893,12 @@ sub is_server {
   my $tag = shift;
   return 1 if $tag eq 'snmpd' or $tag eq 'snmptrapd';
   return 0;
+}
+
+sub is_ca_cert {
+  my $crt = shift;
+  my $output = `openssl x509 -in $crt -text -noout`;
+  return ($output =~ /^\s*CA:TRUE\s*$/m ? 1 : 0);
 }
 
 sub x509_format {
@@ -501,10 +923,8 @@ sub make_openssl_conf {
 # Net-SNMP (D)TLS OpenSSL configuration file.
 #
 
-# This definition stops the following lines choking if HOME isn't
-# defined.
-HOME		= .
-dir		= .
+rdir            = .
+dir		= $ENV::DIR
 RANDFILE	= $dir/.rand
 MD		= sha1
 KSIZE		= 2048
@@ -525,10 +945,10 @@ default_md	= $ENV::MD		# which md to use.
 
 database	= $dir/.index		# database index file.
 serial		= $dir/.serial 		# The current serial number
-certs		= $dir/certs		# identity certs
-new_certs_dir	= $dir/newcerts		# default place for new certs.
-ca_certs_dir	= $dir/ca-certs		# default place for new certs.
-key_dir		= $dir/private
+certs		= $rdir/certs		# identity certs
+new_certs_dir	= $rdir/newcerts		# default place for new certs.
+ca_certs_dir	= $rdir/ca-certs		# default place for new certs.
+key_dir		= $rdir/private
 
 crl_dir		= $dir/crl		# crl's
 crlnumber	= $dir/.crlnumber	# the current crl number
@@ -624,7 +1044,7 @@ emailAddress_default            = $ENV::EMAIL
 basicConstraints = CA:FALSE
 
 # Import the email address and/or specified SANs.
-subjectAltName = $ENV::SAN
+%[subjectAltName = $ENV::SAN]
 
 [ v3_user_create ]
 
@@ -637,7 +1057,7 @@ subjectKeyIdentifier = hash
 authorityKeyIdentifier = keyid:always,issuer:always
 
 # Import the email address and/or specified SANs.
-subjectAltName = $ENV::SAN
+%[subjectAltName = $ENV::SAN]
 
 [ v3_ca_create ]
 # Extensions to add to a CA certificate
@@ -650,7 +1070,7 @@ subjectKeyIdentifier = hash
 authorityKeyIdentifier = keyid:always,issuer:always
 
 # Import the email address and/or specified SANs.
-subjectAltName = $ENV::SAN
+%[subjectAltName = $ENV::SAN]
 
 [ v3_ca_sign ]
 # Extensions to add when 'ca' signs a request.
@@ -679,6 +1099,7 @@ END
  
 }
 
+
 package NetSNMP::Cert::Obj;
 
 sub new {
@@ -690,7 +1111,7 @@ sub new {
   bless($this, $class);
 
   # initialize hash of keys which are dynamically created or internal
-  $this->{AUTOKEYS}{AUTOKEYS}++;
+  $this->{'AUTOKEYS'}{'AUTOKEYS'}++;
 
   # store a reference to ourselves so our children can find us
   $this->autoSet('CFIELD', $cfield);
@@ -699,14 +1120,14 @@ sub new {
   $this->autoSet('INDEX', $ind) if defined $ind;
 
   if (defined $parent) {
-    # cache 'app' in all objs for easy reference
-    $this->autoSet('app', $parent->inherit('app'));
-    my $app = $this->{app};
+    # cache 'APP' in all objs for easy reference
+    $this->autoSet('APP', $parent->inherit('APP'));
+    my $app = $this->{'APP'};
 
     die("net-snmp-cert: error: no NetSNMP::Cert::App context provided")
       if not defined $app or not ref $app eq 'NetSNMP::Cert::App';
     # save children for list traversal
-    push(@{$parent->{CHILDREN}}, $this) unless $parent eq $this;
+    push(@{$parent->{'CHILDREN'}}, $this) unless $parent eq $this;
   } else {
     # we are the top of the list
     $parent = $this;
@@ -721,10 +1142,10 @@ sub autoSet {
   my $key = shift;
   if (@_) {
     my $val = shift;
-    $this->{AUTOKEYS}{$key}++;
+    $this->{'AUTOKEYS'}{$key}++;
     $this->{$key} = $val;
   }
-  return exists $this->{AUTOKEYS}{$key};
+  return exists $this->{'AUTOKEYS'}{$key};
 }
 
 sub inherit {
@@ -732,8 +1153,8 @@ sub inherit {
   my $field = shift;
 
   # cmd opts override config settings
-  if (exists $this->{app} and exists $this->{app}->{OPTS}) {
-    my $opts = $this->{app}->{OPTS};
+  if (exists $this->{'APP'} and exists $this->{'APP'}->{'OPTS'}) {
+    my $opts = $this->{'APP'}->{'OPTS'};
     return $opts->{$field} if defined $opts->{$field};
   }
 
@@ -741,10 +1162,10 @@ sub inherit {
   return $this->{$field} if defined $this->{$field};
 
   # terminate recursion at top and return undef if not found
-  return undef if not defined $this->{PARENT} or $this->{PARENT} eq $this;
+  return undef if not defined $this->{'PARENT'} or $this->{'PARENT'} eq $this;
 
   # recurse to parent
-  $this->{PARENT}->inherit($field);
+  $this->{'PARENT'}->inherit($field);
 }
 
 sub resolve {
@@ -768,19 +1189,19 @@ sub delete {
 
   NetSNMP::Cert::dprint("Obj::delete: ($this) [$this->{CFIELD}]\n", $opts);
 
-  my $parent = $this->{PARENT};
-  my @children = @{$this->{CHILDREN}};
+  my $parent = $this->{'PARENT'};
+  my @children = @{$this->{'CHILDREN'}};
 
   foreach my $child (@children) {
     $child->delete();
   }
 
-  NetSNMP::Cert::dwarn("Obj: children not freed\n", $opts) if @{$this->{CHILDREN}};
+  NetSNMP::Cert::dwarn("Obj: children not freed\n", $opts) if @{$this->{'CHILDREN'}};
 
   # delete all our self-references
-  delete($this->{$this->{CFIELD}}) if exists $this->{CFIELD};
-  delete($this->{PARENT});
-  delete($this->{CHILDREN});
+  delete($this->{$this->{'CFIELD'}}) if exists $this->{'CFIELD'};
+  delete($this->{'PARENT'});
+  delete($this->{'CHILDREN'});
 
   $parent->disown($this) if defined $parent and ref($parent) =~ /NetSNMP::Cert/;
 }
@@ -793,12 +1214,12 @@ sub disown {
 
   NetSNMP::Cert::dprint("Obj::disown: ($this) [$this->{CFIELD}] disowning ($thechild) [$thechild->{CFIELD}]\n", $opts);
 
-  foreach my $child (@{$this->{CHILDREN}}) {
+  foreach my $child (@{$this->{'CHILDREN'}}) {
     last if $child eq $thechild;
     $ind++;
   }
-  if ($ind < @{$this->{CHILDREN}}) {
-    splice(@{$this->{CHILDREN}}, $ind, 1);
+  if ($ind < @{$this->{'CHILDREN'}}) {
+    splice(@{$this->{'CHILDREN'}}, $ind, 1);
   } else {
     NetSNMP::Cert::dwarn("Child ($thechild) not found in object ($this)\n", $opts);
   }
@@ -806,7 +1227,7 @@ sub disown {
 
 sub disabled {
   my $this = shift;
-  return (exists $this->{disable} ? $this->{disable} : 0);
+  return (exists $this->{'disable'} ? $this->{'disable'} : 0);
 }
 
 my %cfg = (
@@ -832,7 +1253,7 @@ sub cfgsort {
 sub dump {
   my $self = shift;
   my $indent = shift;
-  my $self_str = $self->{CFIELD};
+  my $self_str = $self->{'CFIELD'};
   my @data_keys =  grep {!$self->autoSet($_)} keys %$self;
   my @lines;
 
@@ -877,20 +1298,20 @@ use vars qw(@ISA);
 
 sub new {
   my $class = shift;
-  my @args = @_;   # ARGV can be supplied now, or call parseArgs later
 
   # the app is god, it is its own parent
-  my $this = $class->SUPER::new('app');
+  my $this = $class->SUPER::new('APP');
 
   bless($this, $class);
 
+  # verify required tools or die
+  $this->checkReqs();
+
+  # internal intitialization
   $this->initOpts();
 
-  # parse command line
-  $this->parseArgs(@args);
-
-  # make a new empty config and init, but parsing is postponed
-  $this->{config} = new NetSNMP::Cert::Config($this);
+  # make a new empty config and init (not parsed)
+  $this->{'config'} = new NetSNMP::Cert::Config($this);
 
   return $this;
 }
@@ -918,65 +1339,83 @@ sub initOpts {
   $app->autoSet('OPTS', $opts);
 
   # Define directories we need.
-  $opts->{bindir} = NetSNMP::Cert::find_bin_dir();
+  $opts->{'bindir'} = NetSNMP::Cert::find_bin_dir();
 
-  $opts->{out} = "> $NetSNMP::Cert::OUTLOG";
-  $opts->{err} = "2> $NetSNMP::Cert::ERRLOG";
-  $opts->{interactive} = 0; # disabled for now, will be default
-  $opts->{verbose} = 1;
+  $opts->{'out'} = "> $NetSNMP::Cert::OUTLOG";
+  $opts->{'err'} = "2> $NetSNMP::Cert::ERRLOG";
 
   # set up paths for app install and runtime env
   $ENV{PATH} = "/sbin:/usr/sbin:$ENV{PATH}";
-  $ENV{PATH} = "$opts->{bindir}:$ENV{PATH}";
+  $ENV{PATH} = "$opts->{'bindir'}:$ENV{PATH}";
 
   # default all privs to -rw-------
   umask(077);
 }
 
+sub init {
+  my $app = shift;
+  my $opts = $app->{'OPTS'};
+  my $config = $app->{'config'};
+  my @args = @_;   # pass external args (typically ARGV)
+
+  # parse command line
+  $app->parseArgs(@args);
+
+  # lazy config parsing postponed until here, will not reparse
+  $config->parse();
+
+  # set defaults here if not already set in cmdline or config
+  NetSNMP::Cert::set_default($opts, $config, 'interactive', 1); # guided interactive mode by default
+  NetSNMP::Cert::set_default($opts, $config, 'verbose', 1); # verbose output
+
+  # find tlsdir/subdirs or make it
+  $opts->{'tlsdir'} = $app->handleTlsDir();
+}
+
 sub parseArgs {
   my $app = shift;
-  my $opts = $app->{OPTS};
+  my $opts = $app->{'OPTS'};
   my @args = @_;
-
-  $opts->{cmd} = shift(@args) if $args[0] !~ /^\s*-/;
 
   NetSNMP::Cert::GetOptsFromArray(\@args, $opts, 'help|?', 'version|V', 'debug|D+',
 		      'interactive!', 'I', 'verbose!', 'Q', 'force|F',
 		      'cfgfile|f=s', 'cfgdir|C=s', 'tlsdir|tlsDir|T=s', 
 		      'tag|t=s', 'identity|i=s');
+  
+  NetSNMP::Cert::version(0) if $opts->{'version'};
+
+  NetSNMP::Cert::usage(0) if $opts->{'help'};
+  NetSNMP::Cert::usage(2, '--identity') if $opts->{'identity'};
+
+  # get the cmd if defined - getOpts should leave it untouched for us
+  $opts->{'cmd'} = shift(@args) if $args[0] !~ /^\s*-/;
 
   # save extra args for command specific processing
-  $opts->{cmdargs} = [@args]; 
-
-  NetSNMP::Cert::usage(0) if $opts->{help};
-  NetSNMP::Cert::version(0) if $opts->{version};
-  NetSNMP::Cert::usage(1) unless $opts->{cmd};
-  NetSNMP::Cert::usage(2, '--identity') if $opts->{identity};
-  NetSNMP::Cert::usage(2, '--interactive') if $opts->{interactive};
+  $opts->{'cmdargs'} = [@args]; 
 
   # Check debug option first
-  $NetSNMP::Cert::DEBUG = $opts->{debug};
-  $opts->{err} = $opts->{out} = "" if $opts->{debug};
-  $opts->{interactive} = not $opts->{I} if defined $opts->{I};
-  $opts->{verbose} = not $opts->{Q} if defined $opts->{Q};
+  $NetSNMP::Cert::DEBUG = $opts->{'debug'};
+  $opts->{'err'} = $opts->{'out'} = "" if $opts->{'debug'};
+  $opts->{'interactive'} = not $opts->{'I'} if defined $opts->{'I'};
+  $opts->{'verbose'} = not $opts->{'Q'} if defined $opts->{'Q'};
 
   # search for cfgdir and cfgfile based on opts and confpath
-  $opts->{cfgdir} = NetSNMP::Cert::find_cfgdir($opts->{cfgdir},$opts->{cfgfile});
-  $opts->{cfgfile} = NetSNMP::Cert::find_cfgfile($opts->{cfgdir},$opts->{cfgfile});
+  $opts->{'cfgdir'} = NetSNMP::Cert::find_cfgdir($opts->{'cfgdir'},$opts->{'cfgfile'});
+  $opts->{'cfgfile'} = NetSNMP::Cert::find_cfgfile($opts->{'cfgdir'},$opts->{'cfgfile'});
 }
 
 sub handleTlsDir {
   my $app = shift;
-  my $opts = $app->{OPTS};
-  my $config = $app->{config};
-  my $dir = $opts->{tlsdir};
+  my $opts = $app->{'OPTS'};
+  my $config = $app->{'config'};
+  my $dir = $opts->{'tlsdir'};
   my $file;
   my $cmd;
 
   $dir ||= $config->inherit('tlsDir');
   
   if (not defined $dir) {
-    my $cfgdir = $opts->{cfgdir};
+    my $cfgdir = $opts->{'cfgdir'};
     die("undefined cfgdir: unable to creat tlsdir: exiting...\n") unless defined $cfgdir;
     $dir = "$cfgdir/$NetSNMP::Cert::TLSDIR";
   }
@@ -987,6 +1426,363 @@ sub handleTlsDir {
 
   NetSNMP::Cert::dprint("tlsDir not found, creating\n", $opts) unless -d $dir;
   NetSNMP::Cert::make_dirs($opts, $dir, 0700, @NetSNMP::Cert::TLSDIRS);
+
+  my $ssl_cfg_in = NetSNMP::Cert::fq_rel_path($NetSNMP::Cert::SSLCFGIN,$dir);
+
+  # XXX - temporary measure - future releases will preserve user edits
+  if (-f $ssl_cfg_in) {
+    NetSNMP::Cert::dwarn("OpenSSL template exists: removing: edits will be lost", $opts);
+    unlink($ssl_cfg_in);
+  }
+
+  if (not -f $ssl_cfg_in) {
+    NetSNMP::Cert::dprint("make_openssl_conf($ssl_cfg_in)", $opts);
+    NetSNMP::Cert::make_openssl_conf($ssl_cfg_in);
+    chmod(0600, $ssl_cfg_in);
+  }
+
+  NetSNMP::Cert::dprint("handleTlsDir: done\n", $opts);
+  return $dir;
+}
+
+my @interactive_ops = (['gencert', "Generate a signed certificate"], 
+	   ['genca', "Generate a CA certificate"],
+	   ['gencsr', "Generate a Certificate Signing Request"],
+	   ['signcsr', "Sign a Certificate Signing Request"],
+	  );
+
+sub run {
+  my $app = shift;
+  my $opts = $app->{'OPTS'};
+  my $cmd = $opts->{'cmd'};
+
+  # must have a command in non-Interactive mode
+  NetSNMP::Cert::usage(3) if !$opts->{'interactive'} and !$opts->{'cmd'};
+
+  #  change dir tls dir - the cwd for all commands - save cwd first
+  $opts->{'rdir'} = ::getcwd();
+  chdir($opts->{'tlsdir'}) or die("could not change directory: $opts->{tlsdir}");
+  # display context
+  NetSNMP::Cert::dprint("PATH: $ENV{PATH}\n\n", $opts);
+  NetSNMP::Cert::dprint("config file: $opts->{cfgfile}\n", $opts);
+  NetSNMP::Cert::dprint("config dir:  $opts->{cfgdir}\n", $opts);
+  NetSNMP::Cert::dprint("tls dir:     $opts->{tlsdir}\n", $opts);
+
+  my $cmdstr = join(' ', $cmd, @{$opts->{'cmdargs'}});
+  NetSNMP::Cert::dprint("command:     $cmdstr\n", $opts);
+  
+  NetSNMP::Cert::GetOptsFromArray(\@{$opts->{'cmdargs'}}, $opts,'with-ca|a=s', 'ca|A=s',
+				  'csr|r=s', 'from-crt|x=s', 'crt|X=s', 'days|d=s',
+				  'cn|n=s', 'email|e=s', 'host|h=s', 'san|s=s@', 'org|o=s', 
+				  'unit|u=s', 'country|c=s', 'state|province|p=s', 
+				  'locality|l=s', 'brief|b', @NetSNMP::Cert::X509FMTS);
+
+  # process extra args; --<cfg-name>[=<val>]
+  $app->processExtraArgs();
+
+  # If in interactive mode - fill missing info by interviewing user
+  if (not defined $cmd or grep {/$cmd/} @interactive_ops) {
+    $app->userInput() if $opts->{interactive};
+    $cmd = $opts->{'cmd'}; # may have changed
+  }
+
+  # resolve input args to filenames
+  $app->resolveCrtArgs();
+
+  # use env. or merge template for OpenSSL config 
+  $NetSNMP::Cert::SSLCFG ||= $app->opensslCfg();
+
+  if ($cmd =~ /^genca$/) {
+    NetSNMP::Cert::usage(1) if defined $opts->{'from-crt'} or defined $opts->{'csr'};
+    $app->genCa($opts->{'with-ca'});
+  } elsif ($cmd =~ /^gence?rt$/) {
+    NetSNMP::Cert::usage(1) if defined $opts->{'from-crt'} or defined $opts->{'csr'};
+    $app->genCert($opts->{'with-ca'});
+  } elsif ($cmd =~ /^gencsr$/) {
+    NetSNMP::Cert::usage(1) if defined $opts->{'with-ca'} or defined $opts->{'crt'};
+    $app->genCsr();
+  } elsif ($cmd =~ /^signcsr$/) {
+    NetSNMP::Cert::usage(1) unless defined $opts->{'with-ca'} and defined $opts->{'csr'};
+    $app->signCsr();
+  } elsif ($cmd =~ /^show(ce?rts?)?$/) {
+    $app->show('certs');
+  } elsif ($cmd =~ /^showcas?$/) {
+    $app->show('ca-certs');
+  } elsif ($cmd =~ /^import$/) {
+    $app->import();
+  } else {
+    NetSNMP::Cert::usage();
+  }
+}
+
+sub processExtraArgs {
+  my $app = shift;
+  my $opts = $app->{'OPTS'};
+  my @args;
+
+  NetSNMP::Cert::dprint("processing extra args...\n", $opts);
+
+  while (@{$opts->{'cmdargs'}}) {
+    my $arg = shift(@{$opts->{'cmdargs'}});
+    NetSNMP::Cert::dprint("found: arg --> $arg\n", $opts);
+    if ($arg =~ /^-+(\w+)(?:=(.*?))?\s*$/) {
+      NetSNMP::Cert::dprint("found: arg($1) val($2)\n", $opts);
+      if (exists $opts->{$1}) {
+   	NetSNMP::Cert::vwarn("option ($1) already set: overwriting\n", $opts);
+      } 
+      $opts->{$1} = (defined $2 ? $2 : 1);
+    } else {
+      push(@args, $arg);
+    }
+  }
+  @{$opts->{'cmdargs'}} = @args;
+}
+
+sub resolveCrtArgs {
+  my $app = shift;
+  my $opts = $app->{'OPTS'};
+
+  # find ca, crt, csr args if present and return fully qualified path
+  if (defined $opts->{'with-ca'}) {
+    my $ca;
+    $ca = NetSNMP::Cert::find_certs($opts, 'ca-certs', $opts->{'with-ca'});
+    die("unable to locate CA certificate ($opts->{'with-ca'})\n") unless -e $ca;
+    die("unable read CA certificate ($opts->{'with-ca'})\n") unless -r $ca;
+    $opts->{'with-ca'} = $ca;
+  }
+
+  if (defined $opts->{'from-crt'}) {
+    my $crt;
+    $crt = NetSNMP::Cert::find_certs($opts, 'certs', $opts->{'from-crt'});
+    die("unable to locate certificate ($opts->{'from-crt'})\n") unless -e $crt;
+    die("unable read certificate ($opts->{'from-crt'})\n") unless -r $crt;
+    $opts->{'from-crt'} = $crt;
+  }
+
+  if (defined $opts->{'csr'}) {
+    my $csr;
+    $csr = NetSNMP::Cert::find_certs($opts, 'csrs', $opts->{'csr'});
+    die("unable to locate CSR certificate ($opts->{csr})\n") unless -e $csr;
+    die("unable read CSR certificate ($opts->{csr})\n") unless -r $csr;
+    $opts->{'csr'} = $csr;
+  }
+}
+
+sub opensslCfg {
+  my $app = shift;
+  my $config = $app->{'config'};
+  my $opts = $app->{'OPTS'};
+  my $san = $config->inherit('san') || $config->inherit('subjectAltName');
+  my $ssl_cfg_in = NetSNMP::Cert::fq_rel_path($NetSNMP::Cert::SSLCFGIN);
+  my $ssl_cfg_out = NetSNMP::Cert::fq_rel_path($NetSNMP::Cert::SSLCFGOUT);
+
+  if (not -f $ssl_cfg_in) {
+    NetSNMP::Cert::vwarn("OpenSSL template not found: $ssl_cfg_in\n", $opts);
+    die("no OpenSSL template");
+  }
+
+  open(IN, $ssl_cfg_in) or die("unable to open OpenSSL template: $ssl_cfg_in\n");
+  open(OUT, ">$ssl_cfg_out") or die("unable to open OpenSSL config: $ssl_cfg_out\n");
+
+  print OUT "#######################################################\n";
+  print OUT "#####    Warning: Do Not Edit - Generated File    #####\n";
+  print OUT "#######################################################\n";
+  while (<IN>) {
+    if ($san) {
+      s/\%\[([^\]]*?)\]/$1/;
+    } else {
+      s/\%\[([^\]]*?)\]//;
+    }
+    print OUT $_;
+  }
+  close(IN);
+  close(OUT);
+
+  return $ssl_cfg_out;
+}
+
+sub opensslEnv {
+  my $app = shift;
+  my $config = $app->{'config'};
+  my $opts = $app->{'OPTS'};
+
+  my $cn = shift;
+  my $days = shift;
+  my $dir = shift || ".";
+  # XXX - need to handle config'd identity here
+  my $name = $config->inherit("name");
+  my $host = $config->inherit("host");
+  my $email = $config->inherit("email");
+  my $country = $config->inherit("country");
+  my $state = $config->inherit("state");
+  my $locality = $config->inherit("locality");
+  my $org = $config->inherit("org");
+  my $org_unit = $config->inherit("unit") || $config->inherit("orgUnit");
+  my $san;
+  my $md = $config->inherit("msgDigest");
+  my $ksize = $config->inherit("keySize");
+
+  my $env;
+
+  $env .= " KSIZE=$ksize" if defined $ksize;
+  $env .= " DAYS=$days" if defined $days;
+  $env .= " MD=$md" if defined $md;
+  
+  $env .= " DIR=$dir" if defined $dir;
+
+  $env .= " EMAIL=$email" if defined $email;
+  $env .= " CN=$cn" if defined $cn;
+  $env .= " ORG=$org" if defined $org;
+  $env .= " ORG_UNIT=$org_unit" if defined $org_unit;
+  $env .= " COUNTRY=$country" if defined $country;
+  $env .= " STATE=$state" if defined $state;
+  $env .= " LOCALITY=$locality" if defined $locality;
+
+  $san = join('\,\ ',@{$config->inherit("subjectAltName")}) if ref $config->inherit("subjectAltName");
+  $san = join('\,\ ',@{$config->inherit("san")}) if ref $config->inherit("san");
+  $san =~ s/EMAIL:/email:/g;
+  $env .= " SAN=$san" if defined $san;
+
+  NetSNMP::Cert::dprint("opensslEnv: $env\n", $opts);
+
+  return $env;
+}
+
+sub userInputDN {
+  my $app = shift;
+  my $config = $app->{'config'};
+  my $opts = $app->{'OPTS'};
+  my $prompt;
+  my $ret;
+  # get EMAIL
+  $prompt = "Enter Email";
+  $ret = $config->inherit('email') || 'admin@net-snmp.org';
+  $prompt .= (defined $ret ? " [$ret]: " : ": ");
+  $ret = NetSNMP::Term::Complete($prompt, $ret);
+  $opts->{'email'} = $ret if defined $ret;
+  # get CN
+  $prompt = "Enter Common Name";
+  $ret = $config->inherit('cn') || $config->inherit('commonName') || 'Net-SNMP';
+  $prompt .= (defined $ret ? " [$ret]: " : ": ");
+  $ret = NetSNMP::Term::Complete($prompt, $ret);
+  $opts->{'cn'} = $ret if defined $ret;
+  # get ORG
+  $prompt = "Enter Organization";
+  $ret = $config->inherit('org') || 'Net-SNMP';
+  $prompt .= (defined $ret ? " [$ret]: " : ": ");
+  $ret = NetSNMP::Term::Complete($prompt, $ret);
+  $opts->{'org'} = $ret if defined $ret;
+  # get ORG_UNIT
+  $prompt = "Enter Organizational Unit";
+  $ret = $config->inherit('unit') || 'Development';
+  $prompt .= (defined $ret ? " [$ret]: " : ": ");
+  $ret = NetSNMP::Term::Complete($prompt, $ret);
+  $opts->{'unit'} = $ret if defined $ret;
+  # get COUNTRY
+  $prompt = "Enter Country Code";
+  $ret = $config->inherit('country') || 'US';
+  $prompt .= (defined $ret ? " [$ret]: " : ": ");
+  $ret = NetSNMP::Term::Complete($prompt, $ret, map {$_->[0]} @CC);
+  $opts->{'country'} = $ret if defined $ret;
+  # get STATE(Province)
+  $prompt = "Enter State or Province";
+  $ret = $config->inherit('state') || 'CA';
+  $prompt .= (defined $ret ? " [$ret]: " : ": ");
+  $ret = NetSNMP::Term::Complete($prompt, $ret);
+  $opts->{'state'} = $ret if defined $ret;
+  # get LOCALITY
+  $prompt = "Enter Locality";
+  $ret = $config->inherit('locality') || 'Davis';
+  $prompt .= (defined $ret ? " [$ret]: " : ": ");
+  $ret = NetSNMP::Term::Complete($prompt, $ret);
+  $opts->{'locality'} = $ret if defined $ret;
+  # get SAN (loop)
+  $prompt = "Enter Subject Alt Name (if any)";
+  $ret = $config->inherit('san') || $config->inherit('subjectAltName') ||'done';
+  $prompt .= " [$ret]: ";
+  do {
+    $ret = NetSNMP::Term::Complete($prompt, $ret);
+    push(@{$opts->{'san'}}, $ret) if defined $ret and $ret ne 'done';
+  } while ($ret ne 'done');
+}
+
+sub userInputTag {
+  my $app = shift;
+  my $config = $app->{'config'};
+  my $opts = $app->{'OPTS'};
+  my $ret;
+  my $prompt;
+
+  $prompt = "Enter Application Tag";
+  $ret = $config->inherit('tag') || 'snmp';
+  $prompt .= (defined $ret ? " [$ret]: " : ": ");
+  $ret = NetSNMP::Term::Complete($prompt, $ret);
+  $opts->{'tag'} = $ret if defined $ret;
+}
+
+sub userInput {
+  my $app = shift;
+  my $config = $app->{'config'};
+  my $opts = $app->{'OPTS'};
+  my $prompt;
+  my $ret;
+
+  print "Choose an operation:\n";
+  foreach my $op (@interactive_ops) {
+    print "    $op->[0]\t-  $op->[1]\n";
+  }
+
+  $prompt = "Operation";
+  $ret = $config->inherit('cmd') || $interactive_ops[0][0];
+  $prompt .= (defined $ret ? " [$ret]: " : ": ");
+  $ret = NetSNMP::Term::Complete($prompt, $ret, map {$_->[0]} @interactive_ops);
+
+  print "ret:$ret:\n";
+  print "defined\n" if defined $ret;
+  $opts->{'cmd'} = $ret;
+
+  if ($ret =~ /^gencert$/) {
+    # get tag
+    $app->userInputTag();
+    # get DN
+    $app->userInputDN();
+    # self-signed/CA-signed(ca-cert)
+  } elsif ($ret =~ /^genca$/) {
+    # get DN
+    $app->userInputDN();
+  } elsif ($ret =~ /^gencsr$/) {
+    # get tag
+    $app->userInputTag();
+    # get DN
+    $app->userInputDN();
+  } elsif ($ret =~ /^signcsr$/) {
+    # get csr
+    $prompt = "Choose Certificate Signing Request";
+    $ret = $config->inherit('csr');
+    $prompt .= (defined $ret ? " [$ret]: " : ": ");
+    $ret = NetSNMP::Term::Complete($prompt, $ret);
+    $opts->{'csr'} = $ret if defined $ret;
+    # get ca
+    $prompt = "Choose CA Certificate";
+    $ret = $config->inherit('with-ca');
+    $prompt .= (defined $ret ? " [$ret]: " : ": ");
+    $ret = NetSNMP::Term::Complete($prompt, $ret);
+    $opts->{'with-ca'} = $ret if defined $ret;
+  } else {
+    NetSNMP::Cert::vwarn("aborting operation: exiting...\n", $opts);
+    exit(1);
+  }
+}
+
+sub handleCaDir {
+  my $app = shift;
+  my $dir = shift;
+  my $config = $app->{'config'};
+  my $opts = $app->{'OPTS'};
+  my $file;
+  my $cmd;
+
+  NetSNMP::Cert::make_dirs($opts, $dir, 0700);
 
   $file = "$dir/$NetSNMP::Cert::SERIAL";
   if (not -f $file) {
@@ -1003,85 +1799,39 @@ sub handleTlsDir {
     NetSNMP::Cert::usystem($cmd);
     chmod(0600, $file);
   }
-
-  $file = "$dir/$NetSNMP::Cert::SSLCFG";
-  if (not -f $file) {
-    NetSNMP::Cert::dprint("make_openssl_conf($file)", $opts);
-    NetSNMP::Cert::make_openssl_conf($file);
-    chmod(0600, $file);
-  }
-
-  NetSNMP::Cert::dprint("handleTlsDir: done\n", $opts);
-  return $dir;
-}
-
-sub opensslEnv {
-  my $app = shift;
-  my $config = $app->{config};
-  my $opts = $app->{OPTS};
-
-  my $cn = shift;
-  my $days = shift;
-
-  # XXX - need to handle config'd identity here
-  my $name = $config->inherit("name");
-  my $host = $config->inherit("host");
-  my $email = $config->inherit("email");
-  my $country = $config->inherit("country");
-  my $state = $config->inherit("state");
-  my $locality = $config->inherit("locality");
-  my $org = $config->inherit("org");
-  my $org_unit = $config->inherit("unit") || $config->inherit("orgUnit");
-  my $san;
-  my $md = $config->inherit("msgDigest");
-  my $ksize = $config->inherit("keySize");
-
-  $san = join('\,\ ',@{$config->inherit("subjectAltName")}) if ref $config->inherit("subjectAltName");
-  $san = join('\,\ ',@{$config->inherit("san")}) if ref $config->inherit("san");
-  $san =~ s/EMAIL:/email:/g;
-  my $env;
-
-  $env .= " CN=$cn" if defined $cn;
-  $env .= " KSIZE=$ksize" if defined $ksize;
-  $env .= " MD=$md" if defined $md;
-  $env .= " COUNTRY=$country" if defined $country;
-  $env .= " STATE=$state" if defined $state;
-  $env .= " LOCALITY=$locality" if defined $locality;
-  $env .= " ORG=$org" if defined $org;
-  $env .= " ORG_UNIT=$org_unit" if defined $org_unit;
-  $env .= " EMAIL=$email" if defined $email;
-  $env .= " SAN=$san" if defined $san;
-  $env .= " DAYS=$days" if defined $days;
-
-  NetSNMP::Cert::dprint("opensslEnv: $env\n", $opts);
-
-  return $env;
 }
 
 sub genCa {
   my $app = shift;
-  my $config = $app->{config};
-  my $opts = $app->{OPTS};
+  my $config = $app->{'config'};
+  my $opts = $app->{'OPTS'};
   my $host = $config->inherit('host') || ::hostname();
-  my $days = $config->inherit('caDays') || $config->inherit('days') || $NetSNMP::Cert::DEFCADAYS;
-  my $cn = $config->inherit('cn') || $config->inherit('commonName') || "ca-$host";
+  my $days = $config->inherit('days') || $config->inherit('caDays') || 
+             $NetSNMP::Cert::DEFCADAYS;
+  my $cn = $config->inherit('cn') || $config->inherit('commonName') ||
+           "ca-$host";
   my $ca = $config->inherit('ca');
-  my $cmd;
+  my $tag = $config->inherit('tag') || $cn;
 
-  my $env = $app->opensslEnv($cn, $days);
+  # create CA dir
+  my $dir = ".ca/$tag";
+  $app->handleCaDir($dir);
 
-  my $outCrt = "$NetSNMP::Cert::CADIR/$cn.crt";
-  my $outKey = "$NetSNMP::Cert::PRIVDIR/$cn.key";
+  # set command env
+  my $env = $app->opensslEnv($cn, $days, $dir);
+
+  my $outCrt = "$NetSNMP::Cert::CADIR/$tag.crt";
+  my $outKey = "$NetSNMP::Cert::PRIVDIR/$tag.key";
   
   NetSNMP::Cert::check_output_file($opts, $outCrt, $config->inherit('interactive'));
   NetSNMP::Cert::check_output_file($opts, $outKey, $config->inherit('interactive'));
 
-  $cmd = "$env openssl req -extensions v3_ca_create -new -days $days -batch -config $NetSNMP::Cert::SSLCFG -keyout $outKey";
+  my $cmd = "$env openssl req -extensions v3_ca_create -new -days $days -batch -config $NetSNMP::Cert::SSLCFG -keyout $outKey";
   $cmd .= " -nodes";
 
   if (defined $ca) {
     # we have to gen a csr and then sign it, must preserve CA:TRUE
-    my $outCsr = "$NetSNMP::Cert::NEWCRTDIR/$cn.csr";
+    my $outCsr = "$NetSNMP::Cert::NEWCRTDIR/$tag.csr";
     NetSNMP::Cert::check_output_file($opts, $outCsr, $config->inherit('interactive'));
     $cmd .= " -out $outCsr";
 
@@ -1108,16 +1858,16 @@ sub genCa {
 
 sub genCert {
   my $app = shift;
-  my $config = $app->{config};
-  my $opts = $app->{OPTS};
+  my $config = $app->{'config'};
+  my $opts = $app->{'OPTS'};
   my $host = $config->inherit("host") || ::hostname();
   my $email = $config->inherit("email") || getlogin() . "\@$host";
-  my $days = $config->inherit('crtDays') || $config->inherit('days') || $NetSNMP::Cert::DEFCRTDAYS;
+  my $days = $config->inherit('days') || $config->inherit('crtDays') || $NetSNMP::Cert::DEFCRTDAYS;
   my $cn = $config->inherit('cn') || $config->inherit('commonName');
   my $ca = $config->inherit('ca');
   my $cmd;
 
-  my $tag = $opts->{tag} || 'snmp';
+  my $tag = $opts->{'tag'} || 'snmp';
   $cn ||= (NetSNMP::Cert::is_server($tag) ? $host : $email);
 
   my $env = $app->opensslEnv($cn, $days);
@@ -1160,26 +1910,41 @@ sub genCert {
 
 sub genCsr {
   my $app = shift;
-  my $isCa = shift;
-  my $config = $app->{config};
-  my $opts = $app->{OPTS};
+  my $isCa = shift; # XXX - not implemented yet
+  my $config = $app->{'config'};
+  my $opts = $app->{'OPTS'};
   my $host = $config->inherit("host") || ::hostname();
   my $email = $config->inherit("email") || getlogin() . "\@$host";
-  my $days = $config->inherit('crtDays') || $config->inherit('days') || $NetSNMP::Cert::DEFCRTDAYS;
+  my $days = $config->inherit('days') || $config->inherit('crtDays') || $NetSNMP::Cert::DEFCRTDAYS;
   my $cn = $config->inherit('cn') || $config->inherit('commonName');
-  my $tag = $opts->{tag} || 'snmp';
+  my $tag = $opts->{'tag'};
+  my $inCrt = $opts->{'from-crt'};
+  my $outCsr;
+  my $csrKey;
 
+  if (defined $inCrt) {
+    $inCrt = NetSNMP::Cert::find_certs($opts, 'certs', $inCrt);
+    my $crt = ::basename($inCrt, @NetSNMP::Cert::CRTSUFFIXES);
+    $csrKey = "$NetSNMP::Cert::PRIVDIR/$crt.key";
+    $tag ||= $crt;
+  } else {
+    $tag ||= 'snmp';
+    $csrKey ||= "$NetSNMP::Cert::PRIVDIR/$tag.key";
+  }
+  
+  $outCsr = "$NetSNMP::Cert::NEWCRTDIR/$tag.csr";
+  
   $cn ||= (NetSNMP::Cert::is_server($tag) ? $host : $email);
 
   my $env = $app->opensslEnv($cn, $days);
-  
-  my $outCrt = "$NetSNMP::Cert::NEWCRTDIR/$tag.csr";
-  my $outKey = "$NetSNMP::Cert::PRIVDIR/$tag.key";
-  
-  NetSNMP::Cert::check_output_file($opts, $outCrt, $config->inherit('interactive'));
-  NetSNMP::Cert::check_output_file($opts, $outKey, $config->inherit('interactive'));
 
-  my $cmd = "$env openssl req -new -nodes -days $days -batch -keyout $outKey -out $outCrt -config $NetSNMP::Cert::SSLCFG";
+  NetSNMP::Cert::check_output_file($opts, $outCsr, $config->inherit('interactive'));
+  NetSNMP::Cert::check_output_file($opts, $csrKey, $config->inherit('interactive'));
+
+  my $cmd = (defined $inCrt ?
+  "$env openssl x509 -x509toreq -in $inCrt -out $outCsr -signkey $csrKey -nodes -days $days -batch -config $NetSNMP::Cert::SSLCFG" :
+  "$env openssl req -new -nodes -days $days -batch -keyout $csrKey -out $outCsr -config $NetSNMP::Cert::SSLCFG");
+
   $cmd .= ($isCa ? " -extensions v3_ca_create" : " -extensions v3_user_create");
 
   NetSNMP::Cert::dprint("genCsr: $cmd\n", $opts);
@@ -1187,35 +1952,35 @@ sub genCsr {
   NetSNMP::Cert::usystem("$cmd $opts->{out} $opts->{err}");
 
   NetSNMP::Cert::vprint("Certificate Signing Request Generated:\n", $opts);
-  NetSNMP::Cert::vprint("  $NetSNMP::Cert::NEWCRTDIR/$tag.csr\n", $opts);
-  NetSNMP::Cert::vprint("  $NetSNMP::Cert::PRIVDIR/$tag.key\n", $opts);
+  NetSNMP::Cert::vprint("  $outCsr\n", $opts);
+  NetSNMP::Cert::vprint("  $csrKey\n", $opts);
 }
 
 sub signCsr {
   my $app = shift;
   my $isCa = shift;
-  my $config = $app->{config};
-  my $opts = $app->{OPTS};
+  my $config = $app->{'config'};
+  my $opts = $app->{'OPTS'};
   my $host = $config->inherit("host") || ::hostname();
   my $email = $config->inherit("email") || getlogin() . "\@$host";
-  my $days = $config->inherit('crtDays') || $config->inherit('days') || $NetSNMP::Cert::DEFCRTDAYS;
+  my $days = $config->inherit('days') || $config->inherit('crtDays') || $NetSNMP::Cert::DEFCRTDAYS;
   my $cn = $config->inherit('cn') || $config->inherit('commonName');
-  my $tag = $config->inherit('tag') || 'DOES_THIS_MATTER';
+  my $tag = $config->inherit('tag') || 'snmp';
   my $install = $config->inherit('install');
 
   $cn = (NetSNMP::Cert::is_server($tag) ? $host : $email);
 
-  my $env = $app->opensslEnv($cn, $days);
-  
-  my $ca = $opts->{ca};
+  my $ca = $opts->{'with-ca'};
   NetSNMP::Cert::dprint("ca: $ca\n", $opts);
   my $ca_base = ::basename($ca, @NetSNMP::Cert::CRTSUFFIXES);
   NetSNMP::Cert::dprint("ca_base: $ca_base\n", $opts);
-  my $csr = $opts->{csr};
+  my $csr = $opts->{'csr'};
   NetSNMP::Cert::dprint("csr: $csr\n", $opts);
   my $csr_base = ::basename($csr, @NetSNMP::Cert::CRTSUFFIXES);
   NetSNMP::Cert::dprint("csr_base: $csr_base\n", $opts);
 
+  my $env = $app->opensslEnv($cn, $days, ".ca/$ca_base");
+  
   my $outdir = ($install ? $NetSNMP::Cert::CRTDIR : $NetSNMP::Cert::NEWCRTDIR);
 
   my $outCrt = "$outdir/$csr_base.crt";
@@ -1243,126 +2008,61 @@ sub signCsr {
 sub show {
   my $app = shift;
   my $type = shift || 'certs';
-  my $config = $app->{config};
-  my $opts = $app->{OPTS};
-  my $stag = shift(@{$opts->{cmdargs}});
+  my $config = $app->{'config'};
+  my $opts = $app->{'OPTS'};
+  my $stag = shift(@{$opts->{'cmdargs'}});
   my $fmt = NetSNMP::Cert::x509_format($opts) || '-subject';
+  my $brief = $opts->{'brief'};
+  my $output;
   my $cmd;
-  my $short = ($opts->{'short'} ? 1 : 0);
-
-  my $sed = "";
-  if ($short) {
-      $sed = "| sed 's/[^=]*= *//'";
-  }
 
   my $cwd = ::getcwd();
   NetSNMP::Cert::dprint("show ($cwd):$type:$stag:$fmt\n", $opts);
-  NetSNMP::Cert::vprint("$opts->{tlsdir}:\n", $opts);
+  NetSNMP::Cert::vprint("$opts->{'tlsdir'}:\n", $opts) unless $brief;
   
   foreach my $c (NetSNMP::Cert::find_certs($opts, $type, $stag)) {
-    print "\n$c:\n" if (!$short);
-    $cmd = "openssl x509 -in $c -noout $fmt $sed";
+    print "\n$c:\n" unless $brief;
+    $cmd = "openssl x509 -in $c -noout $fmt";
     NetSNMP::Cert::dprint("show: $cmd\n", $opts);
-    NetSNMP::Cert::usystem("$cmd");
-    print "\n" if (!$short);
+
+    $output = `$cmd`; chomp $output;
+    NetSNMP::Cert::vwarn("show-$type failed ($?): $output\n", $opts) if $?;
+
+    $output =~ s/^[^\n=]+=// if $brief;
+
+    print "$output\n";
+    print "\n" unless $brief;
   }
 }
 
-sub run {
+sub import {
   my $app = shift;
-  my $opts = $app->{OPTS};
-  my $cmd = $opts->{cmd};
-
-  # be sure we have tools to run the app
-  $app->checkReqs();
-
-  # lazy config parsing postponed until here, will not reparse
-  $app->{config}->parse();
-
-  # find tlsdir/subdirs or make it
-  $opts->{tlsdir} = $app->handleTlsDir();
-
-  #  change dir tls dir - the cwd for all commands - save cwd first
-  $opts->{rdir} = ::getcwd();
-  chdir($opts->{tlsdir}) or die("could not change directory: $opts->{tlsdir}");
-
-  # display context
-  NetSNMP::Cert::dprint("PATH: $ENV{PATH}\n\n", $opts);
-  NetSNMP::Cert::dprint("config file: $opts->{cfgfile}\n", $opts);
-  NetSNMP::Cert::dprint("config dir:  $opts->{cfgdir}\n", $opts);
-  NetSNMP::Cert::dprint("tls dir:     $opts->{tlsdir}\n", $opts);
-
-  my $cmdstr = join(' ', $cmd, @{$opts->{cmdargs}});
-  NetSNMP::Cert::dprint("command:     $cmdstr\n", $opts);
+  my $config = $app->{'config'};
+  my $opts = $app->{'OPTS'};
+  my $carg = shift(@{$opts->{'cmdargs'}});
+  my $karg = shift(@{$opts->{'cmdargs'}});
+  my $targ;
   
-  NetSNMP::Cert::GetOptsFromArray(\@{$opts->{cmdargs}}, $opts,'ca|a=s','csr|r=s','crt|x=s',
-		      'cn|n=s', 'email|e=s', 'host|h=s', 'san|s=s@', 'org|o=s', 'unit|u=s',
-		      'country|c=s', 'state|province|p=s', 'locality|l=s', 'days|d=s', 'short',
-		      @NetSNMP::Cert::X509FMTS);
-
-  # find ca, crt, csr args if present and return fully qualified path
-  # XXX - should refactor cut paste code
-  if (defined $opts->{ca}) {
-    my $ca;
-    $ca = NetSNMP::Cert::find_certs($opts, 'ca-certs', $opts->{ca});
-    die("unable to locate CA certificate ($opts->{ca})\n") unless -e $ca;
-    die("unable read CA certificate ($opts->{ca})\n") unless -r $ca;
-    $opts->{ca} = $ca;
-  }
-  if (defined $opts->{crt}) {
-    my $crt;
-    $crt = NetSNMP::Cert::find_certs($opts, 'certs', $opts->{crt});
-    die("unable to locate certificate ($opts->{crt})\n") unless -e $crt;
-    die("unable read certificate ($opts->{crt})\n") unless -r $crt;
-    $opts->{crt} = $crt;
-  }
-  if (defined $opts->{csr}) {
-    my $csr;
-    $csr = NetSNMP::Cert::find_certs($opts, 'csrs', $opts->{csr});
-    die("unable to locate CSR certificate ($opts->{csr})\n") unless -e $csr;
-    die("unable read CSR certificate ($opts->{csr})\n") unless -r $csr;
-    $opts->{csr} = $csr;
+  if (not defined $carg) {
+    NetSNMP::Cert::vwarn("import: no certificate supplied\n", $opts);
+    NetSNMP::Cert::usage(1);
   }
 
-  NetSNMP::Cert::dprint("processing extra args...\n", $opts);
-  my @args;
-  while (@{$opts->{cmdargs}}) {
-    my $arg = shift(@{$opts->{cmdargs}});
-    NetSNMP::Cert::dprint("found: arg --> $arg\n", $opts);
-    if ($arg =~ /^-+(\w+)(?:=(.*?))?\s*$/) {
-      NetSNMP::Cert::dprint("found: arg($1) val($2)\n", $opts);
-      if (exists $opts->{$1}) {
-   	NetSNMP::Cert::vwarn("option ($1) already set: overwriting", $opts);
-      } 
-      $opts->{$1} = (defined $2 ? $2 : 1);
-    } else {
-      push(@args, $arg);
-    }
-  }
-  @{$opts->{cmdargs}} = @args;
+  $carg = NetSNMP::Cert::fq_rel_path($carg, $opts->{'rdir'});
+  die("certificate unreadable: $carg\n") unless -r $carg;
 
-  if ($cmd =~ /^genca$/) {
-    NetSNMP::Cert::usage(1) if defined $opts->{crt} or defined $opts->{csr};
-    $app->genCa($opts->{ca});
-  } elsif ($cmd =~ /^gence?rt$/) {
-    NetSNMP::Cert::usage(1) if defined $opts->{crt} or defined $opts->{csr};
-    $app->genCert($opts->{ca});
-  } elsif ($cmd =~ /^gencsr$/) {
-    NetSNMP::Cert::usage(1) if defined $opts->{ca} or defined $opts->{csr};
-    $app->genCsr($opts->{crt});
-  } elsif ($cmd =~ /^signcsr$/) {
-    NetSNMP::Cert::usage(1) unless defined $opts->{ca} and defined $opts->{csr};
-    $app->signCsr();
-  } elsif ($cmd =~ /^show(ce?rts?)?$/) {
-    $app->show('certs');
-  } elsif ($cmd =~ /^showcas?$/) {
-    $app->show('ca-certs');
-  } elsif ($cmd =~ /^import(ca|cert)?$/) {
-    $app->import($1);
-  } else {
-    NetSNMP::Cert::usage();
-  }
+  $targ = (is_ca_cert($carg) ? $NetSNMP::Cert::CADIR : $NetSNMP::Cert::CRTDIR);
+
+  ::copy($carg, $targ);
+
+  return unless defined $karg;
+
+  $karg = NetSNMP::Cert::fq_rel_path($karg, $opts->{'rdir'});
+  die("key unreadable: $karg\n") unless -r $karg;
+  
+  ::copy($karg, 'private');
 }
+
 
 package NetSNMP::Cert::Config;
 use vars qw(@ISA);
@@ -1378,12 +2078,12 @@ sub new {
 
 sub parse {
   my $config = shift;
-  my $app = $config->{app};
-  my $opts = $app->{OPTS};
+  my $app = $config->{'APP'};
+  my $opts = $app->{'OPTS'};
   my $cfgfile = shift;
-  $cfgfile ||= $opts->{cfgfile};
+  $cfgfile ||= $opts->{'cfgfile'};
 
-  return '0 but true' if $config->{PARSED};
+  return '0 but true' if $config->{'PARSED'};
   return '0 but true' unless defined $cfgfile;
 
   open( CONFIG, "<$cfgfile" )
@@ -1426,7 +2126,7 @@ sub parse {
     } elsif (/^\s*env\s*(\w+=\S+)\s*$/) {
       # Found an environment variable.
       NetSNMP::Cert::dprint("$&\n", $opts);
-      push(@{$config->{env}}, $1);
+      push(@{$config->{'env'}}, $1);
     } else {
       die("error in config file [$cfgfile:line $.]");
     }
@@ -1436,14 +2136,14 @@ sub parse {
   close(CONFIG);
 
   # augment with any config directives supplied in opts
-  foreach my $cfg (@{$opts->{config}}) {
+  foreach my $cfg (@{$opts->{'config'}}) {
     NetSNMP::Cert::dprint("augmenting config: $cfg\n", $opts);
 
     $config->autoSet($1, (defined($2) ? $2 : 1 ))
       if $cfg =~ /^\s*(\w+)\s*=?\s*(.*?)\s*$/;
   }
   $config->autoSet('PARSED', 1);
-  return $config->{PARSED};
+  return $config->{'PARSED'};
 }
 
 package NetSNMP::Cert::Identity;
@@ -1453,11 +2153,11 @@ use vars qw(@ISA);
 sub new {
   my $class = shift;
   my $this = shift || $class->SUPER::new('identity', @_);
-  my $ind = $this->{INDEX} || 1;
+  my $ind = $this->{'INDEX'} || 1;
 
-  $this->autoSet('name', "$this->{type}.$ind") unless exists $this->{name};
+  $this->autoSet('name', "$this->{type}.$ind") unless exists $this->{'name'};
 
-  $this->autoSet('LOG','') unless exists $this->{LOG};
+  $this->autoSet('LOG','') unless exists $this->{'LOG'};
   $this->autoSet('TTY_LOG','') unless exists $this->{TTY_LOG};
 
   bless($this, $class);
@@ -1510,7 +2210,7 @@ sub parse {
 
 package main;
 
-my $app = new NetSNMP::Cert::App(@ARGV);
-
+my $app = new NetSNMP::Cert::App();
+$app->init(@ARGV);
 $app->run();
 
