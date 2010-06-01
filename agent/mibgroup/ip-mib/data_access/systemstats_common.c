@@ -320,7 +320,7 @@ netsnmp_access_systemstats_entry_update_stats(netsnmp_systemstats_entry * prev_v
         prev_vals->stats.InAddrErrors = new_vals->stats.InAddrErrors;
         prev_vals->stats.InUnknownProtos = new_vals->stats.InUnknownProtos;
         prev_vals->stats.InTruncatedPkts = new_vals->stats.InTruncatedPkts;
-        prev_vals->stats.ReasmReqds = new_vals->stats.InTruncatedPkts;
+        prev_vals->stats.ReasmReqds = new_vals->stats.ReasmReqds;
         prev_vals->stats.ReasmOKs = new_vals->stats.ReasmOKs;
         prev_vals->stats.ReasmFails = new_vals->stats.ReasmFails;
         prev_vals->stats.InDiscards = new_vals->stats.InDiscards;
