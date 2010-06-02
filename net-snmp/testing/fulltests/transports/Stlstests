@@ -14,7 +14,7 @@ STARTAGENT
 
 # this user's fingerprint should not be recognized 
 CAPTURE $NSCERT gencert -t unknownuser --san email:unknownuser@example.com  $NSCERTARGS
-UNKNOWNUSER=`$NSCERT showcerts --fingerprint unknownuser $NSCERTARGS | grep Finger | sed 's/.*=//'`
+UNKNOWNUSER=`$NSCERT showcerts --fingerprint --brief unknownuser $NSCERTARGS`
 CHECKVALUEISNT "$UNMAPPEDFP" "" "generated fingerprint for unknownuser certificate"
 
 # this user's fingerprint should not be directly recognized, but it's
@@ -22,7 +22,7 @@ CHECKVALUEISNT "$UNMAPPEDFP" "" "generated fingerprint for unknownuser certifica
 
 # user 9: CA signed cert
 CAPTURE $NSCERT gencert -D -t unknowncauser --cn unknowncauser@net-snmp.org --email unknowncauser@net-snmp.org  --ca ca-net-snmp.org --san email:user8@test.net-snmp.org $NSCERTARGS
-UNKNOWNCAUSERFP=`$NSCERT showcerts --fingerprint unknowncauser $NSCERTARGS | grep Finger | sed 's/.*=//'`
+UNKNOWNCAUSERFP=`$NSCERT showcerts --fingerprint --brief unknowncauser $NSCERTARGS`
 CHECKVALUEISNT "$UNKNOWNCAUSERFP" "" "generated fingerprint for unknowncauser certificate"
 
 ######################################################################
