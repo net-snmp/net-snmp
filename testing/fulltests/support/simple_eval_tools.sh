@@ -245,6 +245,26 @@ CHECKCOUNT() {
    CHECKFILECOUNT "$junkoutputfile" $@
 }
 
+CHECKVALUEIS() {
+    value1=$1
+    value2=$2
+    if [ "x$value1" = "x$value2" ]; then
+      GOOD "$3"
+    else
+      BAD "$3"
+    fi
+}
+
+CHECKVALUEISNT() {
+    value1=$1
+    value2=$2
+    if [ "x$value1" = "x$value2" ]; then
+      BAD "$3"
+    else
+      GOOD "$3"
+    fi
+}
+
 #------------------------------------ -o-
 # Returns: Count of matched lines.
 #
