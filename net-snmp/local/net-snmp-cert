@@ -925,7 +925,7 @@ sub make_openssl_conf {
 
 rdir            = .
 dir		= $ENV::DIR
-RANDFILE	= $dir/.rand
+RANDFILE	= $rdir/.rand
 MD		= sha1
 KSIZE		= 2048
 CN		= net-snmp.org
@@ -946,8 +946,8 @@ default_md	= $ENV::MD		# which md to use.
 database	= $dir/.index		# database index file.
 serial		= $dir/.serial 		# The current serial number
 certs		= $rdir/certs		# identity certs
-new_certs_dir	= $rdir/newcerts		# default place for new certs.
-ca_certs_dir	= $rdir/ca-certs		# default place for new certs.
+new_certs_dir	= $dir/newcerts	# default place for new certs.
+ca_certs_dir	= $rdir/ca-certs	# default place for new certs.
 key_dir		= $rdir/private
 
 crl_dir		= $dir/crl		# crl's
@@ -1096,7 +1096,7 @@ subjectKeyIdentifier = hash
 authorityKeyIdentifier = keyid:always,issuer:always
 
 END
- 
+
 }
 
 
@@ -1369,7 +1369,7 @@ sub init {
   NetSNMP::Cert::set_default($opts, $config, 'verbose', 1); # verbose output
 
   # find tlsdir/subdirs or make it
-  $opts->{'tlsdir'} = $app->handleTlsDir();
+  $opts->{'tlsdir'} = $app->createTlsDir();
 }
 
 sub parseArgs {
@@ -1404,7 +1404,7 @@ sub parseArgs {
   $opts->{'cfgfile'} = NetSNMP::Cert::find_cfgfile($opts->{'cfgdir'},$opts->{'cfgfile'});
 }
 
-sub handleTlsDir {
+sub createTlsDir {
   my $app = shift;
   my $opts = $app->{'OPTS'};
   my $config = $app->{'config'};
@@ -1441,7 +1441,7 @@ sub handleTlsDir {
     chmod(0600, $ssl_cfg_in);
   }
 
-  NetSNMP::Cert::dprint("handleTlsDir: done\n", $opts);
+  NetSNMP::Cert::dprint("createTlsDir: done\n", $opts);
   return $dir;
 }
 
@@ -1774,7 +1774,7 @@ sub userInput {
   }
 }
 
-sub handleCaDir {
+sub createCaDir {
   my $app = shift;
   my $dir = shift;
   my $config = $app->{'config'};
@@ -1782,7 +1782,7 @@ sub handleCaDir {
   my $file;
   my $cmd;
 
-  NetSNMP::Cert::make_dirs($opts, $dir, 0700);
+  NetSNMP::Cert::make_dirs($opts, $dir, 0700,'newcerts','private');
 
   $file = "$dir/$NetSNMP::Cert::SERIAL";
   if (not -f $file) {
@@ -1810,19 +1810,19 @@ sub genCa {
              $NetSNMP::Cert::DEFCADAYS;
   my $cn = $config->inherit('cn') || $config->inherit('commonName') ||
            "ca-$host";
-  my $ca = $config->inherit('ca');
+  my $ca = $config->inherit('with-ca');
   my $tag = $config->inherit('tag') || $cn;
 
   # create CA dir
   my $dir = ".ca/$tag";
-  $app->handleCaDir($dir);
-
-  # set command env
-  my $env = $app->opensslEnv($cn, $days, $dir);
+  $app->createCaDir($dir);
 
   my $outCrt = "$NetSNMP::Cert::CADIR/$tag.crt";
   my $outKey = "$NetSNMP::Cert::PRIVDIR/$tag.key";
   
+  # set command env
+  my $env = $app->opensslEnv($cn, $days);
+
   NetSNMP::Cert::check_output_file($opts, $outCrt, $config->inherit('interactive'));
   NetSNMP::Cert::check_output_file($opts, $outKey, $config->inherit('interactive'));
 
@@ -1840,7 +1840,11 @@ sub genCa {
 
     my $ca_base = ::basename($ca, @NetSNMP::Cert::CRTSUFFIXES);
     NetSNMP::Cert::dprint("ca_base: $ca_base\n", $opts);
-    $cmd = "$env openssl ca -extensions v3_ca_sign_ca -days $days -cert $NetSNMP::Cert::CADIR/$ca.crt -keyfile $NetSNMP::Cert::PRIVDIR/$ca_base.key -in $outCsr -batch -config $NetSNMP::Cert::SSLCFG -out $outCrt";
+
+    # set command env
+    $env = $app->opensslEnv($cn, $days, ".ca/$ca_base");
+
+    $cmd = "$env openssl ca -extensions v3_ca_sign_ca -days $days -cert $ca -keyfile $NetSNMP::Cert::PRIVDIR/$ca_base.key -in $outCsr -batch -config $NetSNMP::Cert::SSLCFG -out $outCrt";
 
     NetSNMP::Cert::dprint("genCa (signcsr): $cmd\n", $opts);
     NetSNMP::Cert::usystem("$cmd $opts->{out} $opts->{err}");
@@ -1864,7 +1868,7 @@ sub genCert {
   my $email = $config->inherit("email") || getlogin() . "\@$host";
   my $days = $config->inherit('days') || $config->inherit('crtDays') || $NetSNMP::Cert::DEFCRTDAYS;
   my $cn = $config->inherit('cn') || $config->inherit('commonName');
-  my $ca = $config->inherit('ca');
+  my $ca = $config->inherit('with-ca');
   my $cmd;
 
   my $tag = $opts->{'tag'} || 'snmp';
@@ -1892,7 +1896,11 @@ sub genCert {
     # XXX cleanup this temp CSR
     my $ca_base = ::basename($ca, @NetSNMP::Cert::CRTSUFFIXES);
     NetSNMP::Cert::dprint("ca_base: $ca_base\n", $opts);
-    $cmd = "$env openssl ca -extensions v3_ca_sign -days $days -cert $NetSNMP::Cert::CADIR/$ca.crt -keyfile $NetSNMP::Cert::PRIVDIR/$ca_base.key -in $outCsr -batch -config $NetSNMP::Cert::SSLCFG -out $outCrt";
+
+    # set command env
+    $env = $app->opensslEnv($cn, $days, ".ca/$ca_base");
+
+    $cmd = "$env openssl ca -extensions v3_ca_sign -days $days -cert $ca -keyfile $NetSNMP::Cert::PRIVDIR/$ca_base.key -in $outCsr -batch -config $NetSNMP::Cert::SSLCFG -out $outCrt";
 
     NetSNMP::Cert::dprint("gencert (signcsr): $cmd\n", $opts);
     NetSNMP::Cert::usystem("$cmd $opts->{out} $opts->{err}");
@@ -1988,7 +1996,7 @@ sub signCsr {
   NetSNMP::Cert::check_output_file($opts, $outCrt, $config->inherit('interactive'));
 
   # XXX - handle keyfile search??
-  my $cmd = "$env openssl ca -batch -days $days -extensions v3_ca_sign -cert $NetSNMP::Cert::CADIR/$ca.crt -keyfile $NetSNMP::Cert::PRIVDIR/$ca_base.key -in $csr -out $outCrt -config $NetSNMP::Cert::SSLCFG";
+  my $cmd = "$env openssl ca -batch -days $days -extensions v3_ca_sign -cert $ca -keyfile $NetSNMP::Cert::PRIVDIR/$ca_base.key -in $csr -out $outCrt -config $NetSNMP::Cert::SSLCFG";
 
   # $cmd .= ($isCa ? " -extensions v3_ca_sign_ca" : " -extensions v3_ca_sign");
 
