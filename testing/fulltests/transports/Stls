@@ -9,48 +9,58 @@ NSCERTARGS="-C $SNMP_TMPDIR"
 # snmpd
 $NSCERT gencert -t snmpd   --cn `hostname` $NSCERTARGS > /dev/null 2>&1
 SERVERFP=`$NSCERT showcerts --fingerprint snmpd  $NSCERTARGS | grep Finger | sed 's/.*=//'`
+CHECKVALUEISNT "$SERVERFP" "" "generated fingerprint for snmpd certificate"
 
 # user
 $NSCERT gencert -t snmpapp --cn 'testuser'  $NSCERTARGS > /dev/null 2>&1
 TESTUSERFP=`$NSCERT showcerts --fingerprint snmpapp $NSCERTARGS | grep Finger | sed 's/.*=//'`
+CHECKVALUEISNT "$TESTUSERFP" "" "generated fingerprint for testuser certificate"
 
 # user 2
 $NSCERT gencert -t otheruser --cn 'otheruser'  $NSCERTARGS > /dev/null 2>&1
 OTHERUSERFP=`$NSCERT showcerts --fingerprint otheruser $NSCERTARGS | grep Finger | sed 's/.*=//'`
+CHECKVALUEISNT "$OTHERUSERFP" "" "generated fingerprint for otheruser certificate"
 
 # user 3
 $NSCERT gencert -t invaliduser --cn 'invaliduser'  $NSCERTARGS > /dev/null 2>&1
 INVALIDUSERFP=`$NSCERT showcerts --fingerprint invaliduser $NSCERTARGS | grep Finger | sed 's/.*=//'`
+CHECKVALUEISNT "$INVALIDUSERFP" "" "generated fingerprint for otheruser certificate"
 
 # user 4
 $NSCERT gencert -t unmapped --cn 'unmapped'  $NSCERTARGS > /dev/null 2>&1
 UNMAPPEDFP=`$NSCERT showcerts --fingerprint unmapped $NSCERTARGS | grep Finger | sed 's/.*=//'`
+CHECKVALUEISNT "$UNMAPPEDFP" "" "generated fingerprint for unmapped certificate"
 
 # user 5
 $NSCERT gencert -t mappeduser --cn 'mappeduser'  $NSCERTARGS > /dev/null 2>&1
 MAPPEDUSERFP=`$NSCERT showcerts --fingerprint mappeduser $NSCERTARGS | grep Finger | sed 's/.*=//'`
+CHECKVALUEISNT "$MAPPEDUSERFP" "" "generated fingerprint for mappeduser certificate"
 
 # user 6: SAN email
 $NSCERT gencert -t email --san email:foobaruser@example.com  $NSCERTARGS > /dev/null 2>&1
 EMAILUSERFP=`$NSCERT showcerts --fingerprint email $NSCERTARGS | grep Finger | sed 's/.*=//'`
+CHECKVALUEISNT "$EMAILUSERFP" "" "generated fingerprint for email certificate"
 
 # user 7: SAN dns
 $NSCERT gencert -t dns --san DNS:foobar.example.com  $NSCERTARGS > /dev/null 2>&1
 DNSUSERFP=`$NSCERT showcerts --fingerprint dns $NSCERTARGS | grep Finger | sed 's/.*=//'`
+CHECKVALUEISNT "$DNSUSERFP" "" "generated fingerprint for dns certificate"
 
 # user 8: SAN IPv4
 $NSCERT gencert -t ipaddr --san IP:127.0.0.1  $NSCERTARGS > /dev/null 2>&1
 IPUSERFP=`$NSCERT showcerts --fingerprint ipaddr $NSCERTARGS | grep Finger | sed 's/.*=//'`
+CHECKVALUEISNT "$IPUSERFP" "" "generated fingerprint for ipaddr certificate"
 
 
 # CA certificate
 $NSCERT genca --cn ca-net-snmp.org  $NSCERTARGS > /dev/null 2>&1
 CAFP=`$NSCERT showcas --fingerprint ca-net-snmp.org $NSCERTARGS | grep Finger | sed 's/.*=//'`
+CHECKVALUEISNT "$CAFP" "" "generated fingerprint for ca-net-snmp.org certificate"
 
 # user 9: CA signed cert
 $NSCERT gencert -t causer --ca ca-net-snmp.org --san email:user8@test.net-snmp.org  $NSCERTARGS > /dev/null 2>&1
 CAUSERFP=`$NSCERT showcerts --fingerprint causer $NSCERTARGS | grep Finger | sed 's/.*=//'`
-
+CHECKVALUEISNT "$CAUSERFP" "" "generated fingerprint for causer certificate"
 
 
 CONFIGAGENT '[snmp]' debugTokens tsm
