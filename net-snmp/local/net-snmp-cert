@@ -1840,7 +1840,7 @@ sub genCa {
 
     my $ca_base = ::basename($ca, @NetSNMP::Cert::CRTSUFFIXES);
     NetSNMP::Cert::dprint("ca_base: $ca_base\n", $opts);
-    $cmd = "$env openssl ca -extensions v3_ca_sign_ca -days $days -cert $ca -keyfile $NetSNMP::Cert::PRIVDIR/$ca_base.key -in $outCsr -batch -config $NetSNMP::Cert::SSLCFG -out $outCrt";
+    $cmd = "$env openssl ca -extensions v3_ca_sign_ca -days $days -cert $NetSNMP::Cert::CADIR/$ca.crt -keyfile $NetSNMP::Cert::PRIVDIR/$ca_base.key -in $outCsr -batch -config $NetSNMP::Cert::SSLCFG -out $outCrt";
 
     NetSNMP::Cert::dprint("genCa (signcsr): $cmd\n", $opts);
     NetSNMP::Cert::usystem("$cmd $opts->{out} $opts->{err}");
@@ -1892,7 +1892,7 @@ sub genCert {
     # XXX cleanup this temp CSR
     my $ca_base = ::basename($ca, @NetSNMP::Cert::CRTSUFFIXES);
     NetSNMP::Cert::dprint("ca_base: $ca_base\n", $opts);
-    $cmd = "$env openssl ca -extensions v3_ca_sign -days $days -cert $ca -keyfile $NetSNMP::Cert::PRIVDIR/$ca_base.key -in $outCsr -batch -config $NetSNMP::Cert::SSLCFG -out $outCrt";
+    $cmd = "$env openssl ca -extensions v3_ca_sign -days $days -cert $NetSNMP::Cert::CADIR/$ca.crt -keyfile $NetSNMP::Cert::PRIVDIR/$ca_base.key -in $outCsr -batch -config $NetSNMP::Cert::SSLCFG -out $outCrt";
 
     NetSNMP::Cert::dprint("gencert (signcsr): $cmd\n", $opts);
     NetSNMP::Cert::usystem("$cmd $opts->{out} $opts->{err}");
@@ -1988,7 +1988,7 @@ sub signCsr {
   NetSNMP::Cert::check_output_file($opts, $outCrt, $config->inherit('interactive'));
 
   # XXX - handle keyfile search??
-  my $cmd = "$env openssl ca -batch -days $days -extensions v3_ca_sign -cert $ca -keyfile $NetSNMP::Cert::PRIVDIR/$ca_base.key -in $csr -out $outCrt -config $NetSNMP::Cert::SSLCFG";
+  my $cmd = "$env openssl ca -batch -days $days -extensions v3_ca_sign -cert $NetSNMP::Cert::CADIR/$ca.crt -keyfile $NetSNMP::Cert::PRIVDIR/$ca_base.key -in $csr -out $outCrt -config $NetSNMP::Cert::SSLCFG";
 
   # $cmd .= ($isCa ? " -extensions v3_ca_sign_ca" : " -extensions v3_ca_sign");
 
