@@ -216,10 +216,10 @@ start_new_cached_connection(netsnmp_transport *t,
     /* see if we have base configuration to copy in to this new one */
     if (NULL != t->data && t->data_length == sizeof(_netsnmpTLSBaseData)) {
         _netsnmpTLSBaseData *parentdata = t->data;
-        if (parentdata->my_fingerprint)
-            tlsdata->my_fingerprint = strdup(parentdata->my_fingerprint);
-        if (parentdata->their_fingerprint)
-            tlsdata->their_fingerprint = strdup(parentdata->their_fingerprint);
+        if (parentdata->our_identity)
+            tlsdata->our_identity = strdup(parentdata->our_identity);
+        if (parentdata->their_identity)
+            tlsdata->their_identity = strdup(parentdata->their_identity);
     }
     
     DEBUGMSGTL(("dtlsudp", "starting a new connection\n"));

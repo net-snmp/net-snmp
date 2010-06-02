@@ -1673,6 +1673,17 @@ netsnmp_cert_find(int what, int where, void *hint)
         result = _cert_find_fp(fp);
 
     } /* where = ds store */
+    else if (NS_CERTKEY_MULTIPLE == where) {
+        /* tries multiple sources of certificates based on ascii lookup keys */
+
+        /* Try a fingerprint match first, which should always be done first */
+        /* (to avoid people naming filenames with conflicting FPs) */
+        result = netsnmp_cert_find(what, NS_CERTKEY_FINGERPRINT, hint);
+        if (!result) {
+            /* Then try a file name lookup */
+            result = netsnmp_cert_find(what, NS_CERTKEY_FILE, hint);
+        }
+    }
     else if (NS_CERTKEY_FINGERPRINT == where) {
         result = _cert_find_fp((char *)hint);
     }
