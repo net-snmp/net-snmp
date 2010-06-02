@@ -21,7 +21,7 @@ CHECKVALUEISNT "$UNMAPPEDFP" "" "generated fingerprint for unknownuser certifica
 # CA should.
 
 # user 9: CA signed cert
-CAPTURE $NSCERT gencert -D -t unknowncauser --cn unknowncauser@net-snmp.org --email unknowncauser@net-snmp.org  --ca ca-net-snmp.org --san email:user8@test.net-snmp.org $NSCERTARGS
+CAPTURE $NSCERT gencert -D -t unknowncauser --cn unknowncauser@net-snmp.org --email unknowncauser@net-snmp.org  --with-ca ca-net-snmp.org --san email:user8@test.net-snmp.org $NSCERTARGS
 UNKNOWNCAUSERFP=`$NSCERT showcerts --fingerprint --brief unknowncauser $NSCERTARGS`
 CHECKVALUEISNT "$UNKNOWNCAUSERFP" "" "generated fingerprint for unknowncauser certificate"
 
