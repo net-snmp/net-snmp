@@ -112,7 +112,7 @@ netsnmp_parse_override(const char *token, char *line)
     char            buf[SNMP_MAXBUF], namebuf[SNMP_MAXBUF];
     int             readwrite = 0;
     oid             oidbuf[MAX_OID_LEN];
-    size_t          oidbuf_len = sizeof(oidbuf);
+    size_t          oidbuf_len = MAX_OID_LEN;
     int             type;
     override_data  *thedata;
     netsnmp_handler_registration *the_reg;
