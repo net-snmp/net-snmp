@@ -91,8 +91,7 @@ extern          "C" {
 #define NETSNMP_DS_LIB_APPEND_LOGFILES     37 /* append, don't overwrite, log files */
 #define NETSNMP_DS_LIB_NO_DISCOVERY        38 /* don't support RFC5343 contextEngineID discovery */
 #define NETSNMP_DS_LIB_TSM_USE_PREFIX      39 /* TSM's simple security name mapping */
-#define NETSNMP_DS_LIB_ALLOW_SELF_SIGNED   40 /* Certs for DTLS */
-#define NETSNMP_DS_LIB_DONT_LOAD_HOST_FILES 41 /* don't read host.conf files */
+#define NETSNMP_DS_LIB_DONT_LOAD_HOST_FILES 40 /* don't read host.conf files */
 
     /*
      * library integers 
