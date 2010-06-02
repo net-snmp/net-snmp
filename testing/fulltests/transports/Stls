@@ -76,8 +76,6 @@ CONFIGAPP   defX509ClientPub  	  $TESTUSERFP
 CONFIGAPP   defX509ServerPub  	  $SERVERFP
 CONFIGAPP   defSecurityModel      tsm
 
-# CONFIGAPP   AllowSelfSignedX509 1
-
 CONFIGAGENT  rwuser -s tsm testuser authpriv
 CONFIGAGENT  rwuser -s tsm otheruser authpriv
 CONFIGAGENT  rwuser -s tsm aftermapping authpriv

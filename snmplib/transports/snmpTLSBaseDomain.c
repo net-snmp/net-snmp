@@ -469,10 +469,6 @@ netsnmp_tlsbase_ctor(void) {
                                NETSNMP_DS_LIBRARY_ID,
                                NETSNMP_DS_LIB_X509_SERVER_PRIV);
 
-    netsnmp_ds_register_config(ASN_BOOLEAN, "snmp", "AllowSelfSignedX509",
-                               NETSNMP_DS_LIBRARY_ID,
-                               NETSNMP_DS_LIB_ALLOW_SELF_SIGNED);
-
     /*
      * register our boot-strapping needs
      */
