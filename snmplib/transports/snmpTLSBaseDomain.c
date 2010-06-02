@@ -74,16 +74,6 @@ int verify_callback(int ok, X509_STORE_CTX *ctx) {
     } else
         DEBUGMSGTL(("tls_x509:verify", "  no matching fp found\n"));
 
-    /* check if we allow self-signed certs */
-    if ((X509_V_ERR_DEPTH_ZERO_SELF_SIGNED_CERT == err ||
-         X509_V_ERR_SELF_SIGNED_CERT_IN_CHAIN == err) &&
-        netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID,
-                               NETSNMP_DS_LIB_ALLOW_SELF_SIGNED)) {
-        DEBUGMSGTL(("tls_x509:verify",
-                    "  accepting a self-signed certificate\n"));
-        return 1;
-    }
-    
     DEBUGMSGTL(("tls_x509:verify", "  returning the passed in value of %d\n",
                 ok));
     return(ok);
@@ -103,12 +93,12 @@ _netsnmp_tlsbase_verify_remote_fingerprint(X509 *remote_cert,
         return SNMPERR_GENERR;
     }
 
-    netsnmp_fp_lowercase_and_strip_colon(tlsdata->their_fingerprint);
-    if (tlsdata->their_fingerprint &&
-        0 != strcmp(tlsdata->their_fingerprint, fingerprint)) {
+    netsnmp_fp_lowercase_and_strip_colon(tlsdata->their_identity);
+    if (tlsdata->their_identity &&
+        0 != strcmp(tlsdata->their_identity, fingerprint)) {
         snmp_log(LOG_ERR, "The fingerprint from the remote side's certificate didn't match the expected\n");
         snmp_log(LOG_ERR, "  %s != %s\n",
-                 fingerprint, tlsdata->their_fingerprint);
+                 fingerprint, tlsdata->their_identity);
         free(fingerprint);
         return SNMPERR_GENERR;
     }
@@ -234,11 +224,12 @@ sslctx_client_setup(SSL_METHOD *method, _netsnmpTLSBaseData *tlsbase) {
                        SSL_VERIFY_CLIENT_ONCE,
                        &verify_callback);
 
-    if (tlsbase->my_fingerprint)
-        id_cert = netsnmp_cert_find(NS_CERT_IDENTITY, NS_CERTKEY_FINGERPRINT,
-                                    tlsbase->my_fingerprint);
-    else
+    if (tlsbase->our_identity) {
+        id_cert = netsnmp_cert_find(NS_CERT_IDENTITY, NS_CERTKEY_MULTIPLE,
+                                    tlsbase->our_identity);
+    } else {
         id_cert = netsnmp_cert_find(NS_CERT_IDENTITY, NS_CERTKEY_DEFAULT, NULL);
+    }
 
     if (!id_cert)
         LOGANDDIE ("error finding client identity keys");
@@ -260,10 +251,10 @@ sslctx_client_setup(SSL_METHOD *method, _netsnmpTLSBaseData *tlsbase) {
     if (!SSL_CTX_check_private_key(the_ctx))
         LOGANDDIE("public and private keys incompatible");
 
-    if (tlsbase->their_fingerprint)
+    if (tlsbase->their_identity)
         peer_cert = netsnmp_cert_find(NS_CERT_REMOTE_PEER,
-                                      NS_CERTKEY_FINGERPRINT,
-                                      tlsbase->their_fingerprint);
+                                      NS_CERTKEY_MULTIPLE,
+                                      tlsbase->their_identity);
     else
         peer_cert = netsnmp_cert_find(NS_CERT_REMOTE_PEER, NS_CERTKEY_DEFAULT,
                                       NULL);
@@ -365,14 +356,18 @@ netsnmp_tlsbase_config(struct netsnmp_transport_s *t, const char *token, const c
 
     tlsdata = t->data;
 
-    if (strcmp(token, "my_fingerprint") == 0) {
-        SNMP_FREE(tlsdata->my_fingerprint);
-        tlsdata->my_fingerprint = strdup(value);
+    if (strcmp(token, "our_identity") == 0 ||
+        /* XXX: remove this option after a few weeks */
+        strcmp(token, "my_fingerprint") == 0) {
+        SNMP_FREE(tlsdata->our_identity);
+        tlsdata->our_identity = strdup(value);
     }
 
-    if (strcmp(token, "their_fingerprint") == 0) {
-        SNMP_FREE(tlsdata->their_fingerprint);
-        tlsdata->their_fingerprint = strdup(value);
+    if (strcmp(token, "their_identity") == 0 ||
+        /* XXX: remove this option after a few weeks */
+        strcmp(token, "their_fingerprint") == 0) {
+        SNMP_FREE(tlsdata->their_identity);
+        tlsdata->their_identity = strdup(value);
     }
     return SNMPERR_SUCCESS;
 }

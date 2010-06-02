@@ -18,55 +18,61 @@ CAPTURE "snmpget $FLAGS .1.3.6.1.2.1.1.3.0"
 CHECK       ".1.3.6.1.2.1.1.3.0 = Timeticks:"
 
 # using user 2 - a common name mapped certificate with a direct -T FP request
-CAPTURE "snmpget -T my_fingerprint=$OTHERUSERFP $FLAGS .1.3.6.1.2.1.1.4.0"
+CAPTURE "snmpget -T our_identity=$OTHERUSERFP $FLAGS .1.3.6.1.2.1.1.4.0"
 
 CHECK              ".1.3.6.1.2.1.1.4.0 = STRING:"
 CHECKAGENTCOUNT 2  "otheruser"
 
+# using user 2, specifying the file name instead of the fingerprint
+CAPTURE "snmpget -T our_identity=otheruser $FLAGS .1.3.6.1.2.1.1.4.0"
+
+CHECK              ".1.3.6.1.2.1.1.4.0 = STRING:"
+CHECKAGENTCOUNT 4  "otheruser"
+
 # using user 3 - an invalid certificate (mapped but not authorized)
-CAPTURE "snmpget  -T my_fingerprint=$INVALIDUSERFP $FLAGS .1.3.6.1.2.1.1.3.0"
+CAPTURE "snmpget  -T our_identity=$INVALIDUSERFP $FLAGS .1.3.6.1.2.1.1.3.0"
 
 CHECK "authorizationError"
 
 # using user 4 - an unmapped certificate
-CAPTURE "snmpget -T my_fingerprint=$UNMAPPEDFP $FLAGS .1.3.6.1.2.1.1.3.0"
+CAPTURE "snmpget -T our_identity=$UNMAPPEDFP $FLAGS .1.3.6.1.2.1.1.3.0"
 
 CHECK "failed rfc5343"
 
 # Check *their* certificate with a different one than expected; should fail
-CAPTURE "snmpget -r 0 -T my_fingerprint=$OTHERUSERFP -T their_fingerprint=$OTHERUSERFP $FLAGS .1.3.6.1.2.1.1.3.0"
+CAPTURE "snmpget -r 0 -T our_identity=$OTHERUSERFP -T their_identity=$OTHERUSERFP $FLAGS .1.3.6.1.2.1.1.3.0"
 
 CHECK "failed to verify ssl certificate"
 
 # using user 5 - a completely remapped certificate (direct specified secname)
-CAPTURE "snmpget -T my_fingerprint=$MAPPEDUSERFP $FLAGS .1.3.6.1.2.1.1.5.0"
+CAPTURE "snmpget -T our_identity=$MAPPEDUSERFP $FLAGS .1.3.6.1.2.1.1.5.0"
 
 CHECK              ".1.3.6.1.2.1.1.5.0 = STRING:"
 CHECKAGENTCOUNT 2  "aftermapping"
 
 # using user 6 - a subjectAltName=email certificate mapping
-CAPTURE "snmpget -T my_fingerprint=$EMAILUSERFP $FLAGS .1.3.6.1.2.1.1.6.0"
+CAPTURE "snmpget -T our_identity=$EMAILUSERFP $FLAGS .1.3.6.1.2.1.1.6.0"
 
 CHECK              ".1.3.6.1.2.1.1.6.0 = "
 CHECKAGENTCOUNT 2 foobaruser@example.com
 
 # using user 7 - a subjectAltName=dns certificate mapping
-CAPTURE "snmpget -T my_fingerprint=$DNSUSERFP $FLAGS .1.3.6.1.2.1.1.3.0"
+CAPTURE "snmpget -T our_identity=$DNSUSERFP $FLAGS .1.3.6.1.2.1.1.3.0"
 
 CHECK              ".1.3.6.1.2.1.1.3.0 = Timeticks"
 CHECKAGENTCOUNT 2 foobar.example.com
 
 # using user 8 - a subjectAltName=ipv4 certificate mapping
-CAPTURE "snmpget -T my_fingerprint=$IPUSERFP $FLAGS .1.3.6.1.2.1.1.4.0"
+CAPTURE "snmpget -T our_identity=$IPUSERFP $FLAGS .1.3.6.1.2.1.1.4.0"
 
 CHECK              ".1.3.6.1.2.1.1.4.0 = "
 CHECKAGENTCOUNT 2 127.0.0.1
 
 # using user 9 - a CA signed certificate
-CAPTURE "snmpget -T my_fingerprint=$CAUSERFP $FLAGS .1.3.6.1.2.1.1.5.0"
+CAPTURE "snmpget -T our_identity=$CAUSERFP $FLAGS .1.3.6.1.2.1.1.5.0"
 
 # using user unknown - the server will not have seen this fingerprint at all
-CAPTURE "snmpget -T my_fingerprint=$UNKNOWNUSER $FLAGS .1.3.6.1.2.1.1.6.0"
+CAPTURE "snmpget -T our_identity=$UNKNOWNUSER $FLAGS .1.3.6.1.2.1.1.6.0"
 
 # different types of failure messaages for tls/dtls...
 if [ $SNMP_TRANSPORT_SPEC = dtlsudp ]; then

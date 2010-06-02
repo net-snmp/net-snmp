@@ -42,8 +42,8 @@ extern          "C" {
        BIO                       *accepted_bio;
        char                      *securityName;
        struct sockaddr_in         addr;
-       char                      *my_fingerprint;
-       char                      *their_fingerprint;
+       char                      *our_identity;
+       char                      *their_identity;
        netsnmp_indexed_addr_pair *remote_addr;
     } _netsnmpTLSBaseData;
 

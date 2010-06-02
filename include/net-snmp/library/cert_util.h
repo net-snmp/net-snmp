@@ -73,6 +73,7 @@ void netsnmp_certs_load(void);
 #define NS_CERTKEY_COMMON_NAME   0x040 /* common name */
 #define NS_CERTKEY_TARGET_PARAM  0x080 /* tlstmParamsTable */
 #define NS_CERTKEY_TARGET_ADDR   0x100 /* tlstmAddrTable */
+#define NS_CERTKEY_MULTIPLE      0x200 /* try multiple sources */
 
 /** RFC 5246 hash algorithms (Section 7.4.1.4.1) */
 #define NS_HASH_NONE        0
