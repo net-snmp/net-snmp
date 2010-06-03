@@ -13,7 +13,7 @@
 	information.
       </text>
       <steps>
-	<step type="system" title="Setup Checck">
+	<step type="system" title="Setup Check">
 	  <text>
 	    This should show the last version number published in this
 	    branch by looking at the time line in the README file:
@@ -114,11 +114,10 @@
 	    <step type="informational" pause="true"
 	      stepname="version:manualedit" title="version:libtoolmanualedit">
 	      <text>
-		You (may) need to edit Makefile.top to update the library
-		version numbering (usually just for the first pre-release
-		of a given version).  See the comments in
-		RELEASE-INSTRUCTIONS about LIBCURRENT, LIBAGE and
-		LIBREVISION.
+		You may need to edit Makefile.top to update the library
+		version numbering - see the comments there about LIBCURRENT,
+		LIBAGE and LIBREVISION for details.  This is usually only
+		needed for the first pre-release of a given version.
 
 		This script will commit the file for you after you're done.
 	      </text>
@@ -321,12 +320,18 @@
       </steps>
     </step>
     <step type="section" title="Release File Steps">
-      <text>Certain files in the distribution and built on a
+      <text>Certain files in the distribution are built on a
 	per-release basis.  These steps will help set up these files.</text>
       <steps>
 	<step type="system" stepname="code:makedepend" title="code:makedepend">
           <text>This step creates Makefile dependencies using the
-          "distdepend" rule in the top level Makefile.</text>
+          "distdepend" rule in the top level Makefile.
+
+          Note that if you have any additional MIB module code files in the
+          source tree, these will be included in the Makefile dependency list.
+          You may wish to remove these and re-run "make distdepend" before
+          committing the changes.
+          </text>
 	  <commands>
 	    <command>make distdepend</command>
 	  </commands>
@@ -504,9 +509,27 @@
 	</step>
 	<step type="system" stepname="publish:editrelease"
 	title="Update the SF release web page">
+      <text>
+        Update the project download web page (http://www.net-snmp.org/download.html) to mention this new release
+      </text>
+<!-- Doesn't work
 	  <commands>
 	    <command>firefox 'http://sourceforge.net/project/admin/editpackages.php?group_id=12694'</command>
 	  </commands>
+  -->
+	</step>
+	<step type="system" stepname="publish:editpatches"
+	title="Update the SF Official Patch tracker">
+      <text>
+        If this the final version of this release, then:
+	Any official patches for the previous release should be re-prioritised to level 5.
+	Any official patches for the earlier releases should be re-prioritised to level 1 and closed.
+      </text>
+<!-- Doesn't work
+	  <commands>
+	    <command>firefox 'http://sourceforge.net/project/admin/editpackages.php?group_id=12694'</command>
+	  </commands>
+  -->
 	</step>
       </steps>
     </step>
@@ -522,19 +545,22 @@
 
 	    http://sourceforge.net/news/submit.php?group_id=12694
 	  </text>
+<!-- Doesn't work
 	  <commands>
 	    <command>firefox 'http://sourceforge.net/news/submit.php?group_id=12694'</command>
 	  </commands>
+  -->
 	</step>
 	<step type="informational" pause="1">
 	  <text>Send an announcement message to one of the following
-	  mailing lists based on it's type:
+	  mailing lists based on its type:
 
           pre:    net-snmp-coders@lists.sourceforge.net
 
           rc:     net-snmp-users@lists.sourceforge.net
 
           final:  net-snmp-announce@lists.sourceforge.net
+                       (one week after the source tarball is made available)
 	  </text>
 	</step>
 	<step type="informational" pause="1">
@@ -547,9 +573,11 @@
 
 	    http://freshmeat.net/projects/net-snmp/
 	  </text>
+<!-- Doesn't work
 	  <commands>
 	    <command>firefox http://freshmeat.net/projects/net-snmp/</command>
 	  </commands>
+  -->
 	</step>
       </steps>
     </step>
