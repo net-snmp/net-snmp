@@ -30,6 +30,13 @@ CHECKVALUEISNT "$UNKNOWNCAUSERFP" "" "generated fingerprint for unknowncauser ce
 #
 
 # using user 1 - a common name mapped certificate
+# (using the default "snmpapp" certificate because we don't specify another0
+CAPTURE "snmpget $FLAGS .1.3.6.1.2.1.1.3.0"
+
+CHECK       ".1.3.6.1.2.1.1.3.0 = Timeticks:"
+
+# now rerun the test after specifying our default using the (same) fingerprint
+CONFIGAPP   defX509ClientPub  	  $TESTUSERFP
 CAPTURE "snmpget $FLAGS .1.3.6.1.2.1.1.3.0"
 
 CHECK       ".1.3.6.1.2.1.1.3.0 = Timeticks:"
