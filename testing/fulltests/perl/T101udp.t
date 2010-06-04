@@ -1,6 +1,6 @@
 #!/usr/bin/perl
 
-# HEADER Perl UDP Test
+# HEADER Perl UDP IPv4 Test
 
 BEGIN {
     if (exists($ENV{'srcdir'})) {
