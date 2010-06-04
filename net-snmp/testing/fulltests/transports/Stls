@@ -86,7 +86,6 @@ CONFIGAGENT certSecName 100 $CAFP        --rfc822
 # *** INTENTIONALLY NOT MAPPING AT ALL: ***
 # CONFIGAGENT certSecName 1000 $UNMAPPEDFP ....
 
-CONFIGAPP   defX509ClientPub  	  $TESTUSERFP
 CONFIGAPP   defX509ServerPub  	  $SERVERFP
 CONFIGAPP   defSecurityModel      tsm
 
