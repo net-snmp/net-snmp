@@ -7,7 +7,7 @@ NSCERTARGS="-C $SNMP_TMPDIR"
 # produce the certificates to use
 
 # snmpd
-CAPTURE $NSCERT gencert -t snmpd   --cn`hostname` $NSCERTARGS
+CAPTURE $NSCERT gencert -t snmpd   --cn `hostname` $NSCERTARGS
 SERVERFP=`$NSCERT showcerts --fingerprint --brief snmpd  $NSCERTARGS`
 CHECKVALUEISNT "$SERVERFP" "" "generated fingerprint for snmpd certificate"
 
@@ -15,6 +15,11 @@ CHECKVALUEISNT "$SERVERFP" "" "generated fingerprint for snmpd certificate"
 CAPTURE $NSCERT gencert -t snmpapp --cn 'testuser'  $NSCERTARGS
 TESTUSERFP=`$NSCERT showcerts --fingerprint --brief snmpapp $NSCERTARGS`
 CHECKVALUEISNT "$TESTUSERFP" "" "generated fingerprint for testuser certificate"
+
+# user 1.5
+CAPTURE $NSCERT gencert -t snmpapp2 --cn 'testuser2'  $NSCERTARGS
+TESTUSER2FP=`$NSCERT showcerts --fingerprint --brief snmpapp2 $NSCERTARGS`
+CHECKVALUEISNT "$TESTUSER2FP" "" "generated fingerprint for testuser certificate"
 
 # user 2
 CAPTURE $NSCERT gencert -t otheruser --cn 'otheruser'  $NSCERTARGS
@@ -72,7 +77,8 @@ CONFIGAGENT '[snmp]' doDebugging 1
 CONFIGAGENT '[snmp]' defX509ServerPub $SERVERFP
 
 # common name mappings
-CONFIGAGENT certSecName 10 $TESTUSERFP     --cn
+CONFIGAGENT certSecName 9  $TESTUSERFP     --cn
+CONFIGAGENT certSecName 10 $TESTUSER2FP    --cn
 CONFIGAGENT certSecName 11 $OTHERUSERFP    --cn
 CONFIGAGENT certSecName 12 $INVALIDUSERFP  --cn
 
@@ -90,6 +96,7 @@ CONFIGAPP   defX509ServerPub  	  $SERVERFP
 CONFIGAPP   defSecurityModel      tsm
 
 CONFIGAGENT  rwuser -s tsm testuser authpriv
+CONFIGAGENT  rwuser -s tsm testuser2 authpriv
 CONFIGAGENT  rwuser -s tsm otheruser authpriv
 CONFIGAGENT  rwuser -s tsm aftermapping authpriv
 
