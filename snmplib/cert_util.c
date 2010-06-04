@@ -1660,6 +1660,12 @@ netsnmp_cert_find(int what, int where, void *hint)
                     netsnmp_ds_get_string(NETSNMP_DS_LIBRARY_ID,
                                           tmp ? NETSNMP_DS_LIB_X509_SERVER_PUB :
                                           NETSNMP_DS_LIB_X509_CLIENT_PUB );
+                if (!fp) {
+                    /* As a special case, use the application type to
+                       determine a file name to pull the default identity
+                       from. */
+                    return netsnmp_cert_find(what, NS_CERTKEY_FILE, netsnmp_ds_get_string(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_APPTYPE));
+                }
                 break;
             case NS_CERT_REMOTE_PEER:
                 fp = netsnmp_ds_get_string(NETSNMP_DS_LIBRARY_ID,
@@ -1671,7 +1677,6 @@ netsnmp_cert_find(int what, int where, void *hint)
                 return NULL;
         }
         result = _cert_find_fp(fp);
-
     } /* where = ds store */
     else if (NS_CERTKEY_MULTIPLE == where) {
         /* tries multiple sources of certificates based on ascii lookup keys */
