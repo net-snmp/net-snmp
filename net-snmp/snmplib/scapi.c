@@ -220,7 +220,6 @@ sc_random(u_char * buf, size_t * buflen)
 #elif NETSNMP_USE_PKCS11			/* NETSNMP_USE_PKCS11 */
     pkcs_random(buf, *buflen);
 #else                           /* NETSNMP_USE_INTERNAL_MD5 */
-    /* WJHXXX: includes internal crypto, which could be better? */
     /*
      * fill the buffer with random integers.  Note that random()
      * is defined in config.h and may not be truly the random()
