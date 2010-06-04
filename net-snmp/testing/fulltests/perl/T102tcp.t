@@ -1,6 +1,6 @@
 #!/usr/bin/perl
 
-# HEADER Perl TCP Test
+# HEADER Perl TCP IPv4 Test
 
 BEGIN {
     if (exists($ENV{'srcdir'})) {
