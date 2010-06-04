@@ -293,16 +293,16 @@ CHECKFILECOUNT() {	# <pattern_to_match>
     if [ "$ckfcount" != "noerror" ]; then
       if [ "$ckfcount" = "atleastone" ]; then
         if [ "$rval" -ne "0" ]; then
-            GOOD "found $ckfcount copies of '$*' in output; needed one"
+            GOOD "found $ckfcount copies of '$*' in output ($chkfile); needed one"
         else
-            BAD "found $rval copies of '$*' in output; expected 1"
+            BAD "found $rval copies of '$*' in output ($chkfile); expected 1"
             COMMENT "Outputfile: $chkfile"
         fi
       else
         if [ "$rval" = "$ckfcount" ]; then
-           GOOD "found $ckfcount copies of '$*' in output"
+           GOOD "found $ckfcount copies of '$*' in output ($chkfile)"
         else
-           BAD "found $rval copies of '$*' in output; expected $ckfcount"
+           BAD "found $rval copies of '$*' in output ($chkfile); expected $ckfcount"
            COMMENT "Outputfile: $chkfile"
         fi
       fi
