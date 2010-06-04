@@ -148,18 +148,23 @@ use NetSNMPTest;
 use Test;
 use SNMP;
 
-my $destination = "udp:localhost:NNNN";
+my $destination = "udp:localhost:9876";
 
 my $test = new NetSNMPTest(agentaddress => $destination);
+
+$test->require_feature("SOME_IFDEF_FROM_NET_SNMP_CONFIG_H");
+
 $test->config_agent("rocommunity public");
-die "failed to start the agent" if (!$test->start_agent());
+$test->config_agent("syscontact testvalue");
+$test->DIE("failed to start the agent") if (!$test->start_agent());
 
 my $session = new SNMP::Session(DestHost => $destination,
                                 Version => '2c',
                                 Community => 'public');
 
 my $value = $session->get('sysContact.0');
-ok($value, 'expected');
+plan(tests => 1);
+ok($value, 'testvalue');
 
 $test->stop_agent();
 
