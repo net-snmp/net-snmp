@@ -79,32 +79,66 @@ int verify_callback(int ok, X509_STORE_CTX *ctx) {
     return(ok);
 }
 
+#define VERIFIED_FINGERPRINT      0
+#define NO_FINGERPNINT_AVAILABLE  1
+#define FAILED_FINGERPRINT_VERIFY 2
+
 static int
 _netsnmp_tlsbase_verify_remote_fingerprint(X509 *remote_cert,
-                                           _netsnmpTLSBaseData *tlsdata) {
+                                           _netsnmpTLSBaseData *tlsdata,
+                                           int try_default) {
 
     char            *fingerprint;
 
     fingerprint =
         netsnmp_openssl_cert_get_fingerprint(remote_cert, -1);
+
     if (!fingerprint) {
         /* no peer cert */
         snmp_log(LOG_ERR, "failed to get fingerprint of remote certificate\n");
-        return SNMPERR_GENERR;
+        return FAILED_FINGERPRINT_VERIFY;
     }
 
-    netsnmp_fp_lowercase_and_strip_colon(tlsdata->their_identity);
-    if (tlsdata->their_identity &&
-        0 != strcmp(tlsdata->their_identity, fingerprint)) {
-        snmp_log(LOG_ERR, "The fingerprint from the remote side's certificate didn't match the expected\n");
-        snmp_log(LOG_ERR, "  %s != %s\n",
-                 fingerprint, tlsdata->their_identity);
-        free(fingerprint);
-        return SNMPERR_GENERR;
+    if (!tlsdata->their_fingerprint && tlsdata->their_identity) {
+        /* we have an identity; try and find it's fingerprint */
+        netsnmp_cert *their_cert;
+        their_cert =
+            netsnmp_cert_find(NS_CERT_REMOTE_PEER, NS_CERTKEY_MULTIPLE,
+                              tlsdata->their_identity);
+
+        if (their_cert)
+            tlsdata->their_fingerprint =
+                netsnmp_openssl_cert_get_fingerprint(their_cert->ocert, -1);
+    }
+
+    if (!tlsdata->their_fingerprint && try_default) {
+        /* try for the default instead */
+        netsnmp_cert *their_cert;
+        their_cert =
+            netsnmp_cert_find(NS_CERT_REMOTE_PEER, NS_CERTKEY_DEFAULT,
+                              NULL);
+
+        if (their_cert)
+            tlsdata->their_fingerprint =
+                netsnmp_openssl_cert_get_fingerprint(their_cert->ocert, -1);
+    }
+    
+    if (tlsdata->their_fingerprint) {
+        netsnmp_fp_lowercase_and_strip_colon(tlsdata->their_fingerprint);
+        if (0 != strcmp(tlsdata->their_fingerprint, fingerprint)) {
+            snmp_log(LOG_ERR, "The fingerprint from the remote side's certificate didn't match the expected\n");
+            snmp_log(LOG_ERR, "  %s != %s\n",
+                     fingerprint, tlsdata->their_fingerprint);
+            free(fingerprint);
+            return FAILED_FINGERPRINT_VERIFY;
+        }
+    } else {
+        DEBUGMSGTL(("tls_x509:verify", "No fingerprint for the remote entity available to verify\n"));
+        return NO_FINGERPNINT_AVAILABLE;
     }
 
     free(fingerprint);
-    return SNMPERR_SUCCESS;
+    return VERIFIED_FINGERPRINT;
 }
 
 /* this is called after the connection on the client side by us to check
@@ -113,7 +147,8 @@ int
 netsnmp_tlsbase_verify_server_cert(SSL *ssl, _netsnmpTLSBaseData *tlsdata) {
     /* XXX */
     X509            *remote_cert;
-
+    int ret;
+    
     netsnmp_assert_or_return(ssl != NULL, SNMPERR_GENERR);
     netsnmp_assert_or_return(tlsdata != NULL, SNMPERR_GENERR);
     
@@ -124,13 +159,22 @@ netsnmp_tlsbase_verify_server_cert(SSL *ssl, _netsnmpTLSBaseData *tlsdata) {
         return SNMPERR_TLS_NO_CERTIFICATE;
     }
 
-    if (_netsnmp_tlsbase_verify_remote_fingerprint(remote_cert, tlsdata) !=
-        SNMPERR_SUCCESS)
+    /* make sure that the fingerprint matches */
+    ret = _netsnmp_tlsbase_verify_remote_fingerprint(remote_cert, tlsdata, 1);
+    switch(ret) {
+    case VERIFIED_FINGERPRINT:
+        return SNMPERR_SUCCESS;
+
+    case FAILED_FINGERPRINT_VERIFY:
         return SNMPERR_GENERR;
 
-    DEBUGMSGTL(("tls_x509:verify", "Verified server fingerprint\n"));
-    tlsdata->flags |= NETSNMP_TLSBASE_CERT_FP_VERIFIED;
-    return SNMPERR_SUCCESS;
+    case NO_FINGERPNINT_AVAILABLE:
+        /* XXX: check for hostname match instead */
+        snmp_log(LOG_ERR, "Can not verify a remote server identity without configuration\n");
+        return SNMPERR_GENERR;
+    }
+    DEBUGMSGTL(("tls_x509:verify", "shouldn't get here\n"));
+    return SNMPERR_GENERR;
 }
 
 /* this is called after the connection on the server side by us to check
@@ -139,6 +183,7 @@ int
 netsnmp_tlsbase_verify_client_cert(SSL *ssl, _netsnmpTLSBaseData *tlsdata) {
     /* XXX */
     X509            *remote_cert;
+    int ret;
 
     if (NULL == (remote_cert = SSL_get_peer_certificate(ssl))) {
         /* no peer cert */
@@ -146,14 +191,27 @@ netsnmp_tlsbase_verify_client_cert(SSL *ssl, _netsnmpTLSBaseData *tlsdata) {
                     "remote connection provided no certificate (yet)\n"));
         return SNMPERR_TLS_NO_CERTIFICATE;
     }
-    
-    if (_netsnmp_tlsbase_verify_remote_fingerprint(remote_cert, tlsdata) !=
-        SNMPERR_SUCCESS)
+
+    /* we don't force a known remote fingerprint for a client since we
+       will accept any certificate we know about (and later derive the
+       securityName from it and apply access control) */
+    ret = _netsnmp_tlsbase_verify_remote_fingerprint(remote_cert, tlsdata, 0);
+    switch(ret) {
+    case FAILED_FINGERPRINT_VERIFY:
+        DEBUGMSGTL(("tls_x509:verify", "failed to verify a client fingerprint\n"));
         return SNMPERR_GENERR;
 
-    DEBUGMSGTL(("tls_x509:verify", "Verified client fingerprint\n"));
-    tlsdata->flags |= NETSNMP_TLSBASE_CERT_FP_VERIFIED;
-    return SNMPERR_SUCCESS;
+    case NO_FINGERPNINT_AVAILABLE:
+        return SNMPERR_SUCCESS;
+
+    case VERIFIED_FINGERPRINT:
+        DEBUGMSGTL(("tls_x509:verify", "Verified client fingerprint\n"));
+        tlsdata->flags |= NETSNMP_TLSBASE_CERT_FP_VERIFIED;
+        return SNMPERR_SUCCESS;
+    }
+
+    DEBUGMSGTL(("tls_x509:verify", "shouldn't get here\n"));
+    return SNMPERR_GENERR;
 }
 
 /* this is called after the connection on the server side by us to
