@@ -49,6 +49,20 @@ sub config_app {
     $self->config_file($self->{'snmp.conf'}, $string);
 }
 
+sub require_feature {
+    my ($self, $feature) = @_;
+    my $srcdir = $ENV{'srcdir'} || "..";
+    my $fh = new IO::File("$srcdir/include/net-snmp/net-snmp-config.h");
+    while (<$fh>) {
+	if (/#define $feature 1/) {
+	    $fh->close();
+	    return 1;
+	}
+    }
+    print "1..0 # SKIP missing $feature\n";
+    exit;
+}
+
 sub start_agent {
     my ($self, $flags) = @_;
 
