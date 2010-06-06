@@ -31,20 +31,20 @@ fi
 
 #   Exec prefix
 #
-if test "x$exec_prefix" = "xNONE"; then
-    exec_prefix=$prefix
-fi
-
 #       Prefix must be an absolute path
 #           i.e. begin with "/"                         (Unix)
 #                or "[A-Z]:"                            (Windows)
 #
-firstchar=`echo $exec_prefix | $SED 's/\(.\).*/\1/'`
-if test "x$firstchar" != "x/" ; then
-   secondchar=`echo $exec_prefix | $SED 's/.\(.\).*/\1/'`
-   if test "x$secondchar" != "x:" ; then
-      exec_prefix=`pwd`/$exec_prefix
-      echo "adjusting exec_prefix to $exec_prefix"
+if test "x$exec_prefix" = "xNONE"; then
+   exec_prefix='${prefix}'
+else
+   firstchar=`echo $exec_prefix | $SED 's/\(.\).*/\1/'`
+   if test "x$firstchar" != "x/" ; then
+      secondchar=`echo $exec_prefix | $SED 's/.\(.\).*/\1/'`
+      if test "x$secondchar" != "x:" ; then
+         exec_prefix=`pwd`/$exec_prefix
+         echo "adjusting exec_prefix to $exec_prefix"
+      fi
    fi
 fi
 
