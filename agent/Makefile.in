@@ -37,32 +37,32 @@ HEADERS=\
 	mib_modules.h \
 	agent_callbacks.h \
 	sysORTable.h \
-	helpers/all_helpers.h \
-	helpers/baby_steps.h \
-	helpers/bulk_to_next.h \
-	helpers/cache_handler.h \
-	helpers/debug_handler.h \
-	helpers/instance.h \
-	helpers/mode_end_call.h \
-	helpers/multiplexer.h \
-	helpers/null.h \
-	helpers/old_api.h \
-	helpers/read_only.h \
-	helpers/row_merge.h \
-	helpers/scalar.h \
-	helpers/scalar_group.h \
-	helpers/serialize.h \
-	helpers/snmp_get_statistic.h \
-	helpers/stash_cache.h \
-	helpers/stash_to_next.h \
-	helpers/table_array.h \
-	helpers/table_container.h \
-	helpers/table.h \
-	helpers/table_data.h \
-	helpers/table_dataset.h \
-	helpers/table_tdata.h \
-	helpers/table_iterator.h \
-	helpers/watcher.h
+	all_helpers.h \
+	baby_steps.h \
+	bulk_to_next.h \
+	cache_handler.h \
+	debug_handler.h \
+	instance.h \
+	mode_end_call.h \
+	multiplexer.h \
+	null.h \
+	old_api.h \
+	read_only.h \
+	row_merge.h \
+	scalar.h \
+	scalar_group.h \
+	serialize.h \
+	snmp_get_statistic.h \
+	stash_cache.h \
+	stash_to_next.h \
+	table_array.h \
+	table_container.h \
+	table.h \
+	table_data.h \
+	table_dataset.h \
+	table_tdata.h \
+	table_iterator.h \
+	watcher.h
 
 HEADERSONLY=mfd.h set_helper.h
 
