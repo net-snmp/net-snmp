@@ -23,6 +23,7 @@ INSTALLPOSTLIBS	= libnetsnmpmibs.$(LIB_EXTENSION)$(LIB_VERSION)
 
 INCLUDESUBDIR=agent
 HEADERS=\
+	agent_read_config.h \
 	agent_registry.h \
 	agent_index.h \
 	agent_sysORTable.h \
