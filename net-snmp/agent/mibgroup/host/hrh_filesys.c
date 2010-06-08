@@ -284,6 +284,7 @@ Init_HR_FileSys(void)
     netsnmp_cache_check_and_reload( c );
 
     HRFS_entry = NULL;
+    HRFS_index = 0;
 }
 
 int
@@ -298,7 +299,8 @@ Get_Next_HR_FileSys(void)
     while ( HRFS_entry && !(HRFS_entry->flags & NETSNMP_FS_FLAG_ACTIVE))
         HRFS_entry = netsnmp_fsys_get_next( HRFS_entry );
 
-    return (HRFS_entry ? HRFS_entry->idx.oids[0] : -1 );
+    HRFS_index = (HRFS_entry ? HRFS_entry->idx.oids[0] : -1 );
+    return HRFS_index;
 }
 
 

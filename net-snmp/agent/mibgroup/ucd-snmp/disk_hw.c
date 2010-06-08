@@ -290,7 +290,7 @@ var_extensible_disk(struct variable *vp,
                     int exact,
                     size_t * var_len, WriteMethod ** write_method)
 {
-    int             ret, disknum = 0;
+    int             disknum = 0;
   netsnmp_fsys_info *entry;
     unsigned long long val;
     static long     long_ret;
