@@ -47,6 +47,7 @@ typedef struct netsnmp_fsys_info_s netsnmp_fsys_info;
 #define NETSNMP_FS_FLAG_RONLY    0x04
 #define NETSNMP_FS_FLAG_BOOTABLE 0x08
 #define NETSNMP_FS_FLAG_REMOVE   0x10
+#define NETSNMP_FS_FLAG_UCD      0x20
 
 #define NETSNMP_FS_FIND_CREATE     1   /* or use one of the type values */
 #define NETSNMP_FS_FIND_EXIST      0
@@ -66,6 +67,9 @@ struct netsnmp_fsys_info_s {
 
      long inums_total;
      long inums_avail;
+
+     int  minspace;
+     int  minpercent;
 
      long flags;
 
@@ -88,6 +92,10 @@ netsnmp_cache *netsnmp_fsys_get_cache( void );
 int  netsnmp_fsys_load( netsnmp_cache *cache, void *data );
 void netsnmp_fsys_free( netsnmp_cache *cache, void *data );
 
-unsigned int netsnmp_fsys_size( netsnmp_fsys_info* );
-unsigned int netsnmp_fsys_used( netsnmp_fsys_info* );
-unsigned int netsnmp_fsys_avail(netsnmp_fsys_info* );
+int netsnmp_fsys_size( netsnmp_fsys_info* );
+int netsnmp_fsys_used( netsnmp_fsys_info* );
+int netsnmp_fsys_avail(netsnmp_fsys_info* );
+
+unsigned long long netsnmp_fsys_size_ull( netsnmp_fsys_info* );
+unsigned long long netsnmp_fsys_used_ull( netsnmp_fsys_info* );
+unsigned long long netsnmp_fsys_avail_ull(netsnmp_fsys_info* );
