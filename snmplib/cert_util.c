@@ -1779,6 +1779,62 @@ netsnmp_cert_check_vb_fingerprint(const netsnmp_variable_list *var)
     return SNMP_ERR_NOERROR;
 }
 
+/**
+ * Trusts a given certificate for use in TLS translations.
+ *
+ * @param ctx The SSL context to trust the certificate in
+ * @param thiscert The netsnmp_cert certificate to trust
+ *
+ * @return SNMPERR_SUCCESS : on success
+ * @return SNMPERR_GENERR  : on failure
+ */
+int
+netsnmp_cert_trust(SSL_CTX *ctx, netsnmp_cert *thiscert)
+{
+    char            filename[SNMP_MAXPATH+1];
+
+    /* ensure all needed pieces are present */
+    netsnmp_assert_or_msgreturn(NULL != thiscert, "NULL certificate passed in",
+                                SNMPERR_GENERR);
+    netsnmp_assert_or_msgreturn(NULL != thiscert->info.dir,
+                                "NULL certificate directory name passed in",
+                                SNMPERR_GENERR);
+    netsnmp_assert_or_msgreturn(NULL != thiscert->info.filename,
+                                "NULL certificate filename name passed in",
+                                SNMPERR_GENERR);
+
+    snprintf(filename, SNMP_MAXPATH, "%s/%s", thiscert->info.dir,
+             thiscert->info.filename);
+    if (!SSL_CTX_load_verify_locations(ctx, filename, NULL)) {
+        snmp_log(LOG_ERR, "failed to trust certificate from %s\n", filename);
+        return SNMPERR_GENERR;
+    }
+    return SNMPERR_SUCCESS;
+}
+
+/**
+ * Trusts a given certificate's root CA for use in TLS translations.
+ * If no issuer is found the existing certificate will be trusted instead.
+ *
+ * @param ctx The SSL context to trust the certificate in
+ * @param thiscert The netsnmp_cert certificate 
+ *
+ * @return SNMPERR_SUCCESS : on success
+ * @return SNMPERR_GENERR  : on failure
+ */
+int
+netsnmp_cert_trust_ca(SSL_CTX *ctx, netsnmp_cert *thiscert)
+{
+    netsnmp_assert_or_msgreturn(NULL != thiscert, "NULL certificate passed in",
+                                SNMPERR_GENERR);
+
+    /* find the root CA certificate in the chain */
+    while (thiscert->issuer_cert)
+        thiscert = thiscert->issuer_cert;
+
+    return netsnmp_cert_trust(ctx, thiscert);
+}
+
 /* ***************************************************************************
  *
  * mode text functions

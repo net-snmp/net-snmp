@@ -95,6 +95,8 @@ void netsnmp_certs_load(void);
 
     void netsnmp_fp_lowercase_and_strip_colon(char *fp);
 
+    int netsnmp_cert_trust(SSL_CTX *ctx, netsnmp_cert *thiscert);
+    int netsnmp_cert_trust_ca(SSL_CTX *ctx, netsnmp_cert *thiscertsrootca);
 
     /*************************************************************************
      *
