@@ -50,6 +50,9 @@ int verify_callback(int ok, X509_STORE_CTX *ctx) {
     err = X509_STORE_CTX_get_error(ctx);
     depth = X509_STORE_CTX_get_error_depth(ctx);
     
+    /* log where we are and why called */
+    DEBUGMSGTL(("tls_x509:verify", "verify_callback called with: ok=%d ctx=%p depth=%d err=%i:%s\n", ok, ctx, depth, err, X509_verify_cert_error_string(err)));
+
     /* things to do: */
 
     X509_NAME_oneline(X509_get_subject_name(thecert), buf, sizeof(buf));
@@ -57,22 +60,30 @@ int verify_callback(int ok, X509_STORE_CTX *ctx) {
     DEBUGMSGTL(("tls_x509:verify", "Cert: %s\n", buf));
     DEBUGMSGTL(("tls_x509:verify", "  fp: %s\n", fingerprint ?
                 fingerprint : "unknown"));
-    cert = netsnmp_cert_find(NS_CERT_REMOTE_PEER, NS_CERTKEY_FINGERPRINT,
-                             (void*)fingerprint);
-    DEBUGMSGTL(("tls_x509:verify",
-                " value: %d, depth=%d, error code=%d, error string=%s\n",
-                ok, depth, err, _x509_get_error(err, "verify callback")));
 
-    if (cert) {
-        /* XXXWJH: should really only accept here *IF* in the agent's
-         * configuration to accept from the given table; this accepts
-         * anything found here with no other configuration.
-         */
-        DEBUGMSGTL(("tls_x509:verify", "  matching fp found in %s; accepting\n",
-                    cert->info.filename));
-        return 1;
-    } else
-        DEBUGMSGTL(("tls_x509:verify", "  no matching fp found\n"));
+    /* this ensures for self-signed certificates we have a valid
+       locally known fingerprint and then accept it */
+    if (!ok &&
+        (X509_V_ERR_DEPTH_ZERO_SELF_SIGNED_CERT == err ||
+         X509_V_ERR_SELF_SIGNED_CERT_IN_CHAIN == err ||
+         X509_V_ERR_DEPTH_ZERO_SELF_SIGNED_CERT == err)) {
+
+        cert = netsnmp_cert_find(NS_CERT_REMOTE_PEER, NS_CERTKEY_FINGERPRINT,
+                                 (void*)fingerprint);
+        if (cert)
+            DEBUGMSGTL(("tls_x509:verify", " Found locally: %s/%s\n",
+                        cert->info.dir, cert->info.filename));
+
+
+        if (cert) {
+            DEBUGMSGTL(("tls_x509:verify", "  accepting matching fp of self-signed certificate found in: %s\n",
+                        cert->info.filename));
+            return 1;
+        } else {
+            DEBUGMSGTL(("tls_x509:verify", "  no matching fp found\n"));
+            return 0;
+        }
+    }
 
     DEBUGMSGTL(("tls_x509:verify", "  returning the passed in value of %d\n",
                 ok));
@@ -341,11 +352,13 @@ sslctx_client_setup(SSL_METHOD *method, _netsnmpTLSBaseData *tlsbase) {
         }
     }
 
-#if 0 /** XXX CAs? */
+    snmp_log(LOG_ERR, "loading TA's into context %p:\n", the_ctx);
+    if (netsnmp_cert_trust_ca(the_ctx, peer_cert) != SNMPERR_SUCCESS)
+        LOGANDDIE ("failed to set verify paths");
+
     if (!SSL_CTX_set_default_verify_paths(the_ctx)) {
-        LOGANDDIE ("failed to set default verify path");
+        LOGANDDIE ("");
     }
-#endif
 
     return the_ctx;
 }
