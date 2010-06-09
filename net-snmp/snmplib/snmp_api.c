@@ -691,11 +691,16 @@ _init_snmp(void)
     netsnmp_register_default_target("snmp", "tcp", ":161");
     netsnmp_register_default_target("snmp", "udp6", ":161");
     netsnmp_register_default_target("snmp", "tcp6", ":161");
+    netsnmp_register_default_target("snmp", "dtlsudp", ":10161");
+    netsnmp_register_default_target("snmp", "tlstcp", ":10161");
     netsnmp_register_default_target("snmp", "ipx", "/36879");
+
     netsnmp_register_default_target("snmptrap", "udp", ":162");
     netsnmp_register_default_target("snmptrap", "tcp", ":162");
     netsnmp_register_default_target("snmptrap", "udp6", ":162");
     netsnmp_register_default_target("snmptrap", "tcp6", ":162");
+    netsnmp_register_default_target("snmptrap", "dtlsudp", ":10162");
+    netsnmp_register_default_target("snmptrap", "tlstcp", ":10162");
     netsnmp_register_default_target("snmptrap", "ipx", "/36880");
 
     netsnmp_ds_set_int(NETSNMP_DS_LIBRARY_ID, 
