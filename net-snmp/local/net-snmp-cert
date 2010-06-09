@@ -1050,7 +1050,7 @@ basicConstraints = CA:FALSE
 
 # Extensions to add to a certificate request
 basicConstraints = CA:FALSE
-keyUsage = nonRepudiation, digitalSignature, keyEncipherment
+#keyUsage = nonRepudiation, digitalSignature, keyEncipherment
 
 # PKIX recommendation.
 subjectKeyIdentifier = hash
