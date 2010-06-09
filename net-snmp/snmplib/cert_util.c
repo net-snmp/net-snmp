@@ -1791,8 +1791,9 @@ netsnmp_cert_check_vb_fingerprint(const netsnmp_variable_list *var)
 int
 netsnmp_cert_trust(SSL_CTX *ctx, netsnmp_cert *thiscert)
 {
-    char            filename[SNMP_MAXPATH+1];
-
+    X509_STORE     *certstore;
+    X509           *cert;
+    
     /* ensure all needed pieces are present */
     netsnmp_assert_or_msgreturn(NULL != thiscert, "NULL certificate passed in",
                                 SNMPERR_GENERR);
@@ -1803,12 +1804,23 @@ netsnmp_cert_trust(SSL_CTX *ctx, netsnmp_cert *thiscert)
                                 "NULL certificate filename name passed in",
                                 SNMPERR_GENERR);
 
-    snprintf(filename, SNMP_MAXPATH, "%s/%s", thiscert->info.dir,
-             thiscert->info.filename);
-    if (!SSL_CTX_load_verify_locations(ctx, filename, NULL)) {
-        snmp_log(LOG_ERR, "failed to trust certificate from %s\n", filename);
-        return SNMPERR_GENERR;
-    }
+    /* get the trusted certificate store and the certificate to load into it */
+    certstore = SSL_CTX_get_cert_store(ctx);
+    netsnmp_assert_or_msgreturn(NULL != certstore,
+                                "failed to get certificate trust store",
+                                SNMPERR_GENERR);
+    cert = netsnmp_ocert_get(thiscert);
+    netsnmp_assert_or_msgreturn(NULL != cert,
+                                "failed to get certificate from netsnmp_cert",
+                                SNMPERR_GENERR);
+
+    /* Put the certificate into the store */
+    DEBUGMSGTL(("cert:trust",
+                "putting trusted cert %p = %s in certstore %p\n", cert,
+                netsnmp_openssl_cert_get_fingerprint(cert, -1),
+                certstore));
+    X509_STORE_add_cert(certstore, cert);
+
     return SNMPERR_SUCCESS;
 }
 
@@ -1829,8 +1841,11 @@ netsnmp_cert_trust_ca(SSL_CTX *ctx, netsnmp_cert *thiscert)
                                 SNMPERR_GENERR);
 
     /* find the root CA certificate in the chain */
-    while (thiscert->issuer_cert)
+    DEBUGMSGTL(("cert:trust_ca", "checking roots for %p \n", thiscert));
+    while (thiscert->issuer_cert) {
         thiscert = thiscert->issuer_cert;
+        DEBUGMSGTL(("cert:trust_ca", "  up one to %p\n", thiscert));
+    }
 
     return netsnmp_cert_trust(ctx, thiscert);
 }
