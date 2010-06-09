@@ -500,6 +500,7 @@ netsnmp_tlstcp_accept(netsnmp_transport *t)
         
     if ((rc = SSL_accept(ssl)) <= 0) {
         snmp_log(LOG_ERR, "TLSTCP: Failed SSL_accept\n");
+        _openssl_log_error(rc, ssl, "SSL_accept");
         return -1;
     }   
 
