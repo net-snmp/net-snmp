@@ -917,8 +917,9 @@ netsnmp_dtlsudp_ctor(void)
 
     dtlsudpDomain.name = netsnmpDTLSUDPDomain;
     dtlsudpDomain.name_length = netsnmpDTLSUDPDomain_len;
-    dtlsudpDomain.prefix = (const char**)calloc(2, sizeof(char *));
+    dtlsudpDomain.prefix = (const char**)calloc(3, sizeof(char *));
     dtlsudpDomain.prefix[0] = "dtlsudp";
+    dtlsudpDomain.prefix[1] = "dtls";
 
     dtlsudpDomain.f_create_from_tstring_new = netsnmp_dtlsudp_create_tstring;
     dtlsudpDomain.f_create_from_ostring = netsnmp_dtlsudp_create_ostring;
