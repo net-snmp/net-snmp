@@ -60,6 +60,7 @@ static netsnmp_container *_certs = NULL;
 static netsnmp_container *_keys = NULL;
 static netsnmp_container *_maps = NULL;
 static netsnmp_container *_tlstmParams = NULL;
+static netsnmp_container *_tlstmAddr = NULL;
 static struct snmp_enum_list *_certindexes = NULL;
 
 static void _setup_containers(void);
@@ -82,6 +83,8 @@ static netsnmp_void_array *_cert_find_subset_fn(const char *filename,
 static netsnmp_void_array *_cert_find_subset_sn(const char *subject);
 static netsnmp_void_array *_key_find_subset(const char *filename);
 static netsnmp_cert *_cert_find_fp(const char *fingerprint);
+static char *_find_tlstmParams_fingerprint(const char *param);
+static char *_find_tlstmAddr_fingerprint(const char *name);
 static const char *_mode_str(u_char mode);
 static const char *_where_str(u_int what);
 void netsnmp_cert_dump_all(void);
@@ -98,7 +101,8 @@ static int _time_filter(netsnmp_file *f, struct stat *idx);
 #define MAP_CONFIG_TOKEN "certSecName"
 static void _parse_map(const char *token, char *line);
 
-static void _init_params(void);
+static void _init_tlstmParams(void);
+static void _init_tlstmAddr(void);
 
 /** mode descriptions should match up with header */
 static const char _modes[][256] =
@@ -143,7 +147,8 @@ netsnmp_certs_init(void)
         /** maps */
         register_config_handler(NULL, MAP_CONFIG_TOKEN, _parse_map, NULL,
                                 certSecName_help);
-        _init_params();
+        _init_tlstmParams();
+        _init_tlstmAddr();
     }
     _setup_containers();
 }
@@ -333,16 +338,6 @@ _setup_containers(void)
      * container for cert to fingerprint mapping, with fingerprint key
      */
     _maps = netsnmp_cert_map_container_create(1);
-
-    /*
-     * container for snmpTlstmParamsTable data
-     */
-    _tlstmParams = netsnmp_container_find("tlstmParams:string");
-    if (NULL == _tlstmParams)
-        snmp_log(LOG_ERR,
-                 "error creating sub-containter for tlstmParamsTable\n");
-    else
-        _tlstmParams->container_name = strdup("tlstmParams");
 
 }
 
@@ -1669,7 +1664,7 @@ netsnmp_cert_find(int what, int where, void *hint)
 {
     netsnmp_cert *result = NULL;
     int           tmp;
-    char         *fp;
+    char         *fp, *hint_str;
 
     DEBUGMSGT(("cert:find:params", "looking for %s(%d) in %s(0x%x), hint %lu\n",
                _mode_str(what), what, _where_str(where), where, (u_long)hint));
@@ -1715,18 +1710,32 @@ netsnmp_cert_find(int what, int where, void *hint)
     else if (NS_CERTKEY_FINGERPRINT == where) {
         result = _cert_find_fp((char *)hint);
     }
+    else if (NS_CERTKEY_TARGET_PARAM == where) {
+        if (what != NS_CERT_IDENTITY) {
+            snmp_log(LOG_ERR, "only identity is valid for target params\n");
+            return NULL;
+        }
+        /** hint == target mib data */
+        hint_str = (char *)hint;
+        fp = _find_tlstmParams_fingerprint(hint_str);
+        if (NULL != fp)
+            result = _cert_find_fp(fp);
+
+    }
     else if (NS_CERTKEY_TARGET_ADDR == where) {
         
         /** hint == target mib data */
-        switch (what) {
-            case NS_CERT_IDENTITY:
-            case NS_CERT_REMOTE_PEER:
-            default:
-                DEBUGMSGT(("cert:find:err", "unhandled type %d for %d\n", what,
-                           where));
-                return NULL;
+        if (what != NS_CERT_REMOTE_PEER) {
+            snmp_log(LOG_ERR, "only peer is valid for target addr\n");
+            return NULL;
         }
-    } /* where = target mib */
+        /** hint == target mib data */
+        hint_str = (char *)hint;
+        fp = _find_tlstmAddr_fingerprint(hint_str);
+        if (NULL != fp)
+            result = _cert_find_fp(fp);
+
+    }
     else if (NS_CERTKEY_FILE == where) {
         /** hint == filename */
         char               *filename = (char*)hint;
@@ -2564,17 +2573,27 @@ netsnmp_cert_get_secname_maps(netsnmp_container *cert_maps)
 static void _parse_params(const char *token, char *line);
 
 static void
-_init_params(void)
+_init_tlstmParams(void)
 {
     const char *params_help = 
         PARAMS_CONFIG_TOKEN " targetParamsName hashType:fingerPrint";
     
+    /*
+     * container for snmpTlstmParamsTable data
+     */
+    _tlstmParams = netsnmp_container_find("tlstmParams:string");
+    if (NULL == _tlstmParams)
+        snmp_log(LOG_ERR,
+                 "error creating sub-containter for tlstmParamsTable\n");
+    else
+        _tlstmParams->container_name = strdup("tlstmParams");
+
     register_config_handler(NULL, PARAMS_CONFIG_TOKEN, _parse_params, NULL,
                                 params_help);
 }
 
 netsnmp_container *
-netsnmp_tlstm_container(void)
+netsnmp_tlstmParams_container(void)
 {
     return _tlstmParams;
 }
@@ -2694,6 +2713,227 @@ _parse_params(const char *token, char *line)
                 stp->tag));
 }
 
+static char *
+_find_tlstmParams_fingerprint(const char *tag)
+{
+    snmpTlstmParams lookup_key, *result;
+    char             fingerprint[(EVP_MAX_MD_SIZE * 2) + 1], *fp;
+    u_int            fingerprint_len;
+
+    if (NULL == tag)
+        return NULL;
+
+    lookup_key.tag = NETSNMP_REMOVE_CONST(char*, tag);
+
+    result = CONTAINER_FIND(_tlstmParams, &lookup_key);
+    if ((NULL == result) || (NULL == result->fingerprint))
+        return NULL;
+
+    /*
+     * convert binary fingerprint to hex string
+     */
+    fingerprint_len = sizeof(fingerprint);
+    fp = fingerprint;
+    fingerprint_len = 
+        netsnmp_binary_to_hex((u_char **)&fp, &fingerprint_len, 0,
+                              &result->fingerprint[1],
+                              result->fingerprint_len - 1);
+    if (fingerprint_len <= 0)
+        return NULL;
+
+    return strdup(fingerprint);
+}
+/*
+ * END snmpTlstmParmsTable data
+ * ***************************************************************************/
+
+/* ***************************************************************************
+ * ***************************************************************************
+ *
+ *
+ * snmpTlstmParmsTable data
+ *
+ *
+ * ***************************************************************************
+ * ***************************************************************************/
+#define ADDR_CONFIG_TOKEN "snmpTlstmAddr"
+static void _parse_addr(const char *token, char *line);
+
+static void
+_init_tlstmAddr(void)
+{
+    const char *addr_help = 
+        ADDR_CONFIG_TOKEN " targetAddrName hashType:fingerprint serverIdentity";
+    
+    /*
+     * container for snmpTlstmAddrTable data
+     */
+    _tlstmAddr = netsnmp_container_find("tlstmAddr:string");
+    if (NULL == _tlstmAddr)
+        snmp_log(LOG_ERR,
+                 "error creating sub-containter for tlstmAddrTable\n");
+    else
+        _tlstmAddr->container_name = strdup("tlstmAddr");
+
+    register_config_handler(NULL, ADDR_CONFIG_TOKEN, _parse_addr, NULL,
+                            addr_help);
+}
+
+netsnmp_container *
+netsnmp_tlstmAddr_container(void)
+{
+    return _tlstmAddr;
+}
+
+/*
+ * create a new row in the table 
+ */
+snmpTlstmAddr *
+netsnmp_tlstmAddr_create(char *targetAddrName)
+{
+    snmpTlstmAddr *entry;
+
+    if (NULL == targetAddrName)
+        return NULL;
+
+    entry = SNMP_MALLOC_TYPEDEF(snmpTlstmAddr);
+    if (!entry)
+        return NULL;
+
+    DEBUGMSGT(("tlstmAddr:entry:create", "entry 0x%x %s\n", (uintptr_t) entry,
+               targetAddrName ? targetAddrName : "NULL"));
+
+    entry->name = strdup(targetAddrName);
+
+    return entry;
+}
+
+void
+netsnmp_tlstmAddr_free(snmpTlstmAddr *entry)
+{
+    if (!entry)
+        return;
+
+    SNMP_FREE(entry->name);
+    SNMP_FREE(entry->fingerprint);
+    SNMP_FREE(entry->identity);
+    free(entry);
+}
+
+int
+netsnmp_tlstmAddr_restore_common(char **line, char *name, size_t *name_len,
+                                 char *id, size_t *id_len, char *fp,
+                                 size_t *fp_len, u_char *ht)
+{
+    u_char hashType;
+    char  *pos;
+
+    *line = read_config_read_octet_string(*line, (u_char **)&name, name_len);
+    if (NULL == *line) {
+        config_perror("incomplete line");
+        return -1;
+    }
+
+    *line = read_config_read_octet_string(*line, (u_char **)&fp, fp_len);
+    if (NULL == *line) {
+        config_perror("incomplete line");
+        return -1;
+    }
+    
+    *line = read_config_read_octet_string(*line, (u_char **)&id, id_len);
+
+    if (*fp_len) {
+        pos = strchr(fp, ':');
+        if (NULL == pos) {
+            config_perror("expect <algorigthm>:<fingerprint> for fingerprints");
+            return -1;
+        }
+        
+        *pos = '\0';
+        if (pos == &fp[1])
+            hashType = atoi(fp);
+        else
+            hashType = _parse_ht_str(fp);
+        if (hashType <= NS_HASH_NONE || hashType > NS_HASH_MAX) {
+            config_perror("invalid algorithm for fingerprint");
+            return -1;
+        }
+        *ht = hashType;
+
+        ++pos; /* now at start of fingerprint */
+        *fp_len = strlen(pos);
+        netsnmp_fp_lowercase_and_strip_colon(pos);
+        memmove(fp, pos, *fp_len + 1);
+    }
+    else if (0 == *id_len || (*id_len == 1 && id[0] == '*')) {
+        /*
+         * empty fingerprint not allowed with '*' identity
+         */
+        config_perror("must specify fingerprint for '*' identity");
+        return -1;
+    }
+
+    return 0;
+}
+
+static void
+_parse_addr(const char *token, char *line)
+{
+    snmpTlstmAddr *entry;
+    char           name[SNMPADMINLENGTH  + 1], id[SNMPADMINLENGTH  + 1],
+                   fingerprint[SNMPTLSFINGERPRINT_MAX_LEN + 1];
+    u_int          name_len = sizeof(name), id_len = sizeof(id),
+                   fp_len = sizeof(fingerprint);
+    u_char         hashType;
+    int            rc;
+
+    rc = netsnmp_tlstmAddr_restore_common(&line, name, &name_len, id, &id_len,
+                                          fingerprint, &fp_len, &hashType);
+    if (rc < 0)
+        return;
+
+    if (NULL != line)
+        config_pwarn("ignore extra tokens on line");
+
+    entry = netsnmp_tlstmAddr_create(name);
+    if (NULL == entry)
+        return;
+
+    entry->flags |= TLSTM_ADDR_FROM_CONFIG;
+    entry->hashType = hashType;
+    if (fp_len)
+        entry->fingerprint = strdup(fingerprint);
+    if (id_len)
+        entry->identity = strdup(id);
+
+    if (CONTAINER_INSERT(_tlstmAddr, entry) != 0) {
+        netsnmp_tlstmAddr_free(entry);
+        netsnmp_config_error(PARAMS_CONFIG_TOKEN
+                             ": error inserting new tlstmAddr entry");
+    }
+    else
+        DEBUGMSGTL(("tlstmAddr:restore", "adding entry 0x%lx %s %s\n",
+                    (u_long)entry, entry->name, entry->fingerprint));
+
+    return;
+}
+
+static char *
+_find_tlstmAddr_fingerprint(const char *name)
+{
+    snmpTlstmAddr    lookup_key, *result;
+
+    if (NULL == name)
+        return NULL;
+
+    lookup_key.name = NETSNMP_REMOVE_CONST(char*, name);
+
+    result = CONTAINER_FIND(_tlstmAddr, &lookup_key);
+    if (NULL == result)
+        return NULL;
+
+    return result->fingerprint;
+}
 /*
  * END snmpTlstmParmsTable data
  * ***************************************************************************/
