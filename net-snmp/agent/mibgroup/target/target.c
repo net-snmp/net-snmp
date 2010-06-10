@@ -9,6 +9,17 @@
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 
+#if defined(NETSNMP_TRANSPORT_TLS_DOMAIN) || defined(NETSNMP_TRANSPORT_DTLSUDP_DOMAIN)
+#include <openssl/x509v3.h>
+#include <net-snmp/library/cert_util.h>
+#endif
+#ifdef NETSNMP_TRANSPORT_TLSTCP_DOMAIN
+#include <net-snmp/library/snmpTLSTCPDomain.h>
+#endif
+#ifdef NETSNMP_TRANSPORT_DTLSUDP_DOMAIN
+#include <net-snmp/library/snmpDTLSUDPDomain.h>
+#endif
+
 #include "snmpTargetAddrEntry.h"
 #include "snmpTargetParamsEntry.h"
 #include "target.h"
@@ -23,7 +34,7 @@ get_target_sessions(char *taglist, TargetFilterFunction * filterfunct,
     struct targetAddrTable_struct *targaddrs;
     char            buf[SPRINT_MAX_LEN];
     char            tags[MAX_TAGS][SPRINT_MAX_LEN], *cp;
-    int             numtags = 0, i;
+    int             numtags = 0, i, tls = 0;
     static struct targetParamTable_struct *param;
 
     DEBUGMSGTL(("target_sessions", "looking for: %s\n", taglist));
@@ -156,6 +167,56 @@ get_target_sessions(char *taglist, TargetFilterFunction * filterfunct,
                                     free(dst_str);
                                 }
                             }
+                            /*
+                             * if tDomain is tls related, check for tls config
+                             */
+#ifdef NETSNMP_TRANSPORT_DTLSUDP_DOMAIN
+                            tls = snmp_oid_compare(targaddrs->tDomain,
+                                                   targaddrs->tDomainLen,
+                                                   netsnmpDTLSUDPDomain,
+                                                   netsnmpDTLSUDPDomain_len);
+
+#endif
+#ifdef NETSNMP_TRANSPORT_TLSTCP_DOMAIN
+                            if (tls)
+                                tls = snmp_oid_compare(targaddrs->tDomain,
+                                                       targaddrs->tDomainLen,
+                                                       netsnmpTLSTCPDomain,
+                                                       netsnmpTLSTCPDomain_len);
+#endif
+#if defined(NETSNMP_TRANSPORT_DTLSUDP_DOMAIN) || defined(NETSNMP_TRANSPORT_TLSTCP_DOMAIN)
+                            if (!tls) {
+                                DEBUGMSGTL(("target_sessions",
+                                            "  looking up our id: %s\n",
+                                            targaddrs->params));
+                                netsnmp_cert *cert =
+                                    netsnmp_cert_find(NS_CERT_IDENTITY,
+                                                      NS_CERTKEY_TARGET_PARAM,
+                                                      targaddrs->params);
+                                netsnmp_assert(t->f_config);
+                                if (cert) {
+                                    DEBUGMSGTL(("target_sessions",
+                                            "  found fingerprint: %s\n", 
+                                                cert->fingerprint));
+                                    t->f_config(t, "our_identity",
+                                                cert->fingerprint);
+                                }
+                                DEBUGMSGTL(("target_sessions",
+                                            "  looking up their id: %s\n",
+                                            targaddrs->name));
+                                cert =
+                                    netsnmp_cert_find(NS_CERT_REMOTE_PEER,
+                                                      NS_CERTKEY_TARGET_ADDR,
+                                                      targaddrs->name);
+                                if (cert) {
+                                    DEBUGMSGTL(("target_sessions",
+                                            "  found fingerprint: %s\n", 
+                                                cert->fingerprint));
+                                    t->f_config(t, "their_identity",
+                                                cert->fingerprint);
+                                }
+                            }
+#endif
                             memset(&thissess, 0, sizeof(thissess));
                             thissess.timeout = (targaddrs->timeout) * 1000;
                             thissess.retries = targaddrs->retryCount;
@@ -165,9 +226,11 @@ get_target_sessions(char *taglist, TargetFilterFunction * filterfunct,
                                         thissess.timeout));
 
                             if (param->mpModel == SNMP_VERSION_3 &&
-                                param->secModel != 3) {
+                                param->secModel != SNMP_SEC_MODEL_USM &&
+                                param->secModel != SNMP_SEC_MODEL_TSM) {
                                 snmp_log(LOG_ERR,
-                                         "unsupported model/secmodel combo for target %s\n",
+                                         "unsupported mpModel/secModel combo %d/%d for target %s\n",
+                                         param->mpModel, param->secModel,
                                          targaddrs->name);
                                 /*
                                  * XXX: memleak 
