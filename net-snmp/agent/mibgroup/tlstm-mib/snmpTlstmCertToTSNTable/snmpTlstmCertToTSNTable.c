@@ -16,6 +16,11 @@
 #define FATE_NO_CHANGE        0
 #define FATE_DELETE_ME        -1
 
+#define MAP_MIB_CONFIG_TOKEN "snmpTlstmCertToTSN"
+
+extern netsnmp_cert_map *netsnmp_certToTSN_parse_common(char **line);
+
+
     /*
      * structure for undo storage and other vars for set processing 
      */
@@ -77,7 +82,12 @@ static int _count_handler(netsnmp_mib_handler *handler,
                           netsnmp_handler_registration *reginfo,
                           netsnmp_agent_request_info *reqinfo,
                           netsnmp_request_info *requests);
+static void _parse_mib_maps(const char *token, char *line);
+static int _save_maps(int majorID, int minorID, void *server, void *client);
+static int _save_map(netsnmp_cert_map *map, int row_status, void *type);
+static void _cert_map_tweak_storage(certToTSN_entry *entry);
 
+static netsnmp_tdata *_table = NULL;
 static uint32_t _last_changed = 0;
 
 
@@ -88,10 +98,11 @@ init_snmpTlstmCertToTSNTable(void)
     oid             reg_oid[]   =  { SNMP_TLS_TM_BASE, 2, 2, 1, 3 };
     const size_t    reg_oid_len =  OID_LENGTH(reg_oid);
     netsnmp_handler_registration    *reg;
-    netsnmp_tdata                   *table;
     netsnmp_table_registration_info *info;
     netsnmp_cache                   *cache;
     netsnmp_watcher_info            *watcher;
+    const char *mib_map_help = 
+        MAP_MIB_CONFIG_TOKEN " table persistence (internal use)";
 
     DEBUGMSGTL(("tlstmCertToSN:init",
                 "initializing table tlstmCertToTSNTable\n"));
@@ -106,8 +117,8 @@ init_snmpTlstmCertToTSNTable(void)
         return;
     }
 
-    table = netsnmp_tdata_create_table("tlstmCertToTSNTable", 0);
-    if (NULL == table) {
+    _table = netsnmp_tdata_create_table("tlstmCertToTSNTable", 0);
+    if (NULL == _table) {
         snmp_log(LOG_ERR,
                  "error creating tdata table for tlstmCertToTSNTable\n");
         return;
@@ -116,7 +127,8 @@ init_snmpTlstmCertToTSNTable(void)
     if (NULL == info) {
         snmp_log(LOG_ERR,
                  "error creating table info for tlstmCertToTSNTable\n");
-        netsnmp_tdata_delete_table(table);
+        netsnmp_tdata_delete_table(_table);
+        _table = NULL;
         return;
     }
     netsnmp_table_helper_add_indexes(info, 
@@ -135,13 +147,14 @@ init_snmpTlstmCertToTSNTable(void)
                                  reg_oid_len);
     if (NULL == cache) {
         snmp_log(LOG_ERR,"error creating cache for tlstmCertToTSNTable\n");
-        netsnmp_tdata_delete_table(table);
+        netsnmp_tdata_delete_table(_table);
+        _table = NULL;
         return;
     }
-    cache->magic = (void *)table;
+    cache->magic = (void *)_table;
     cache->flags = NETSNMP_CACHE_DONT_INVALIDATE_ON_SET;
 
-    netsnmp_tdata_register(reg, table, info);
+    netsnmp_tdata_register(reg, _table, info);
 
     if (cache) 
         netsnmp_inject_handler_before( reg, netsnmp_cache_handler_get(cache),
@@ -174,6 +187,17 @@ init_snmpTlstmCertToTSNTable(void)
                  "could not create handler for snmpTlstmCertToTSNCount\n");
     else
         netsnmp_register_watched_scalar(reg, watcher);
+
+    /*
+     * persistence
+     */
+    register_config_handler(NULL, MAP_MIB_CONFIG_TOKEN, _parse_mib_maps, NULL,
+                            mib_map_help);
+    if (snmp_register_callback(SNMP_CALLBACK_LIBRARY, SNMP_CALLBACK_STORE_DATA,
+                               _save_maps, NULL) != SNMP_ERR_NOERROR)
+        snmp_log(LOG_ERR, "error registering for STORE_DATA callback "
+                 "for certToTSN\n");
+
 }
 
 /*
@@ -827,10 +851,14 @@ tlstmCertToTSNTable_handler(netsnmp_mib_handler *handler,
                 /** release undo data */
                 _freeUndo(entry);
                 break;          /* case COL_SNMPTLSTMCERTTOTSN_ROWSTATUS */
+
+            case COL_SNMPTLSTMCERTTOTSN_STORAGETYPE:
+                _cert_map_tweak_storage(entry);
+                break;          /* case COL_SNMPTLSTMCERTTOTSN_STORAGETYPE */
+
             case COL_SNMPTLSTMCERTTOTSN_FINGERPRINT:
             case COL_SNMPTLSTMCERTTOTSN_MAPTYPE:
             case COL_SNMPTLSTMCERTTOTSN_DATA:
-            case COL_SNMPTLSTMCERTTOTSN_STORAGETYPE:
                 break;
             }                   /* switch colnum */
 
@@ -904,11 +932,43 @@ _cert_map_add(certToTSN_entry *entry)
     map->hashType = entry->hashType;
 
     map->flags = NSCM_FROM_MIB;
+    if (entry->storageType == ST_NONVOLATILE)
+        map->flags |= NSCM_NONVOLATILE;
 
     if (CONTAINER_INSERT(maps, map) != 0) {
         netsnmp_cert_map_free(map);
         snmp_log(LOG_ERR, "could not insert new certificate map");
     }
+}
+
+static void
+_cert_map_tweak_storage(certToTSN_entry *entry)
+{
+    netsnmp_container *maps;
+    netsnmp_cert_map *map, index;
+
+    if (NULL == entry)
+        return;
+
+    DEBUGMSGTL(("tlstmCertToTSNTable:map:tweak", "pri %ld, st %d\n",
+                entry->tlstmCertToTSNID, entry->storageType));
+
+    /** get current active maps */
+    maps = netsnmp_cert_map_container();
+    if (NULL == maps)
+        return;
+
+    index.priority = entry->tlstmCertToTSNID;
+    map = CONTAINER_FIND(maps, &index);
+    if (NULL == map) {
+        DEBUGMSGTL(("tlstmCertToTSNTable:map:tweak", "couldn't find map!\n"));
+        return;
+    }
+
+    if (entry->storageType == ST_NONVOLATILE)
+        map->flags |= NSCM_NONVOLATILE;
+    else
+        map->flags &= ~NSCM_NONVOLATILE;
 }
 
 static void
@@ -936,6 +996,46 @@ _cert_map_remove(certToTSN_entry *entry)
     if (CONTAINER_REMOVE(maps, &map) != 0) {
         snmp_log(LOG_ERR, "could not remove certificate map");
     }
+}
+
+static netsnmp_tdata_row *
+_entry_from_map(netsnmp_cert_map  *map)
+{
+    netsnmp_tdata_row *row;
+    certToTSN_entry   *entry;
+
+    row = tlstmCertToTSNTable_createEntry(NULL, map->priority);
+    if (NULL == row) {
+        snmp_log(LOG_ERR, "can create tlstmCertToTSN row entry\n");
+        return NULL;
+    }
+    entry = row->data;
+
+    if (map->flags & NSCM_FROM_CONFIG)
+        entry->storageType = ST_PERMANENT;
+    else
+        entry->storageType = ST_NONVOLATILE;
+    entry->map_flags = map->flags;
+
+    entry->fingerprint_len = strlen(map->fingerprint);
+    if (entry->fingerprint_len > sizeof(entry->fingerprint))
+        entry->fingerprint_len = sizeof(entry->fingerprint) - 1;
+    memcpy(entry->fingerprint, map->fingerprint, entry->fingerprint_len);
+    entry->fingerprint[sizeof(entry->fingerprint) - 1] = 0;
+    entry->hashType = map->hashType;
+    
+    if (map->data) {
+        entry->data_len = strlen(map->data);
+        if (entry->data_len) {
+            if (entry->data_len > sizeof(entry->data))
+                entry->data_len = sizeof(entry->data) - 1;
+            memcpy(entry->data, map->data, entry->data_len);
+            entry->data[sizeof(entry->data) - 1] = 0;
+        }
+    }
+    entry->mapType = map->mapType;
+
+    return row;
 }
 
 static int
@@ -968,39 +1068,14 @@ _cache_load(netsnmp_cache *cache, netsnmp_tdata *table)
      */
     map = ITERATOR_FIRST(map_itr);
     for( ; map; map = ITERATOR_NEXT(map_itr)) {
-        row = tlstmCertToTSNTable_createEntry(NULL, map->priority);
+
+        row = _entry_from_map(map);
         if (NULL == row) {
-            snmp_log(LOG_ERR, "can create tlstmCertToTSN row entry\n");
-            rc = -1;
+            rc =-1;
             break;
         }
-        entry = row->data;
-
-        if (map->flags & NSCM_FROM_CONFIG)
-            entry->storageType = ST_PERMANENT;
-        else
-            entry->storageType = ST_NONVOLATILE;
-        entry->map_flags = map->flags;
-
+        entry = (certToTSN_entry*)row->data;
         entry->rowStatus = RS_ACTIVE;
-
-        entry->fingerprint_len = strlen(map->fingerprint);
-        if (entry->fingerprint_len > sizeof(entry->fingerprint))
-            entry->fingerprint_len = sizeof(entry->fingerprint) - 1;
-        memcpy(entry->fingerprint, map->fingerprint, entry->fingerprint_len);
-        entry->fingerprint[sizeof(entry->fingerprint) - 1] = 0;
-        entry->hashType = map->hashType;
-
-        if (map->data) {
-            entry->data_len = strlen(map->data);
-            if (entry->data_len) {
-                if (entry->data_len > sizeof(entry->data))
-                    entry->data_len = sizeof(entry->data) - 1;
-                memcpy(entry->data, map->data, entry->data_len);
-                entry->data[sizeof(entry->data) - 1] = 0;
-            }
-        }
-        entry->mapType = map->mapType;
 
         if (netsnmp_tdata_add_row(table, row) != SNMPERR_SUCCESS) {
             tlstmCertToTSNTable_removeEntry(NULL, row);
@@ -1056,6 +1131,173 @@ _cache_free(netsnmp_cache *cache, netsnmp_tdata *table)
     DEBUGMSGTL(("tlstmCertToTSNTable:cache:free", "done, %d rows\n",
                 CONTAINER_SIZE(table->container)));
 }
+
+static void
+_parse_mib_maps(const char *token, char *line)
+{
+    netsnmp_tdata_row *row;
+    certToTSN_entry   *entry;
+    netsnmp_cert_map *map = netsnmp_certToTSN_parse_common(&line);
+
+    if (NULL == line) {
+        netsnmp_config_error("incomplete line");
+        netsnmp_cert_map_free(map);
+        return;
+    }
+
+    map->flags = NSCM_FROM_MIB;
+    row = _entry_from_map(map);
+    netsnmp_cert_map_free(map);
+    if (NULL == row)
+        return;
+    
+    entry = (certToTSN_entry*)row->data;
+    entry->rowStatus = atoi(line);
+    entry->storageType = ST_NONVOLATILE;
+
+    if (netsnmp_tdata_add_row(_table, row) != SNMPERR_SUCCESS)
+        tlstmCertToTSNTable_removeEntry(NULL, row);
+}
+
+static int
+_save_entry(certToTSN_entry *entry, void *app_type)
+{
+    char buf[SNMP_MAXBUF_SMALL], *hashType, *mapType, *data;
+
+    if (NULL == entry)
+        return SNMP_ERR_GENERR;
+
+    hashType = se_find_label_in_slist("cert_hash_alg", entry->hashType);
+    if (NULL == hashType) {
+        snmp_log(LOG_ERR, "skipping entry unknown hash type %d\n",
+                 entry->hashType);
+        return -1;
+    }
+    mapType = se_find_label_in_slist("cert_map_type", entry->mapType);
+    if (TSNM_tlstmCertSpecified == entry->mapType)
+        data = entry->data;
+    else
+        data = "";
+    snprintf(buf, sizeof(buf), "%s %ld --%s %s --%s %s %d",
+             MAP_MIB_CONFIG_TOKEN, entry->tlstmCertToTSNID, hashType,
+             entry->fingerprint, mapType, data, entry->rowStatus);
+
+    DEBUGMSGTL(("tlstmCertToTSNTable:save", "saving '%s'\n", buf));
+    read_config_store(app_type, buf);
+
+    return SNMP_ERR_NOERROR;
+}
+
+static int
+_save_map(netsnmp_cert_map *map, int row_status, void *app_type)
+{
+    char buf[SNMP_MAXBUF_SMALL], *hashType, *mapType, *data;
+
+    if (NULL == map)
+        return SNMP_ERR_GENERR;
+
+    /** don't store values from conf files */
+    if (! (map->flags & NSCM_NONVOLATILE)) {
+        DEBUGMSGT(("tlstmCertToTSNTable:save", 
+                   "skipping RO/permanent/volatile row\n"));
+        return SNMP_ERR_NOERROR;
+    }
+
+    hashType = se_find_label_in_slist("cert_hash_alg", map->hashType);
+    if (NULL == hashType) {
+        snmp_log(LOG_ERR, "skipping entry unknown hash type %d\n",
+                 map->hashType);
+        return -1;
+    }
+    mapType = se_find_label_in_slist("cert_map_type", map->mapType);
+    if (TSNM_tlstmCertSpecified == map->mapType)
+        data = (char*)map->data;
+    else
+        data = "";
+    snprintf(buf, sizeof(buf), "%s %d --%s %s --%s %s %d",
+             MAP_MIB_CONFIG_TOKEN, map->priority, hashType, map->fingerprint,
+             mapType, data, row_status);
+
+    DEBUGMSGTL(("tlstmCertToTSNTable:save", "saving '%s'\n", buf));
+    read_config_store(app_type, buf);
+
+    return SNMP_ERR_NOERROR;
+}
+
+static int
+_save_maps(int majorID, int minorID, void *serverarg, void *clientarg)
+{
+    char            sep[] =
+        "\n##############################################################";
+    char            buf[] =
+        "#\n" "# certificate secName mapping persistent data\n" "#";
+    char           *type = netsnmp_ds_get_string(NETSNMP_DS_LIBRARY_ID,
+                                                 NETSNMP_DS_LIB_APPTYPE);
+    netsnmp_container *maps = netsnmp_cert_map_container();
+    netsnmp_tdata_row *row;
+    netsnmp_iterator  *tbl_itr, *map_itr;
+    netsnmp_cert_map  *map;
+    certToTSN_entry   *entry;
+
+    if ((NULL == maps) || (CONTAINER_SIZE(maps) == 0))
+        return SNMPERR_SUCCESS;
+
+    read_config_store((char *) type, sep);
+    read_config_store((char *) type, buf);
+
+    /*
+     * save active rows from maps
+     */
+    maps = netsnmp_cert_map_container();
+    if (NULL != maps) {
+        map_itr = CONTAINER_ITERATOR(maps);
+        if (NULL == map_itr) {
+            DEBUGMSGTL(("tlstmCertToTSNTable:save",
+                        "cant get map iterator\n"));
+            map = NULL;
+        }
+        else
+            map = ITERATOR_FIRST(map_itr);
+
+        for( ; map; map = ITERATOR_NEXT(map_itr)) {
+            /** don't store config rows */
+            if (map->flags & NSCM_FROM_CONFIG)
+                continue;
+            _save_map(map, RS_ACTIVE, type);
+        }
+    }
+    ITERATOR_RELEASE(map_itr);
+
+    /*
+     * save inactive rows from mib
+     */
+    tbl_itr = CONTAINER_ITERATOR(_table->container);
+    if (NULL == tbl_itr)
+        DEBUGMSGTL(("tlstmCertToTSNTable:save", "cant get map iterator\n"));
+    else {
+        row = ITERATOR_FIRST(tbl_itr);
+        for( ; row; row = ITERATOR_NEXT(tbl_itr)) {
+            entry = row->data;
+
+            /** skip all active and volatile rows */
+            if ((entry->rowStatus == RS_ACTIVE) ||
+                (entry->storageType == ST_NONVOLATILE))
+                continue;
+
+            _save_entry(entry, type);
+        }
+        ITERATOR_RELEASE(tbl_itr);
+    }
+
+    read_config_store((char *) type, sep);
+    read_config_store((char *) type, "\n");
+
+    /*
+     * never fails 
+     */
+    return SNMPERR_SUCCESS;
+}
+
 
 static const oid _tsnm_base[] = { SNMP_TLS_TM_BASE, 1, 1 };
 static const int _tsnm_base_len = sizeof(_tsnm_base);
