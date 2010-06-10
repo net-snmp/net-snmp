@@ -256,11 +256,9 @@ _count_handler(netsnmp_mib_handler *handler,
 
 static int  _tlstmParamsTable_save_rows(int majorID, int minorID,
                                         void *serverarg, void *clientarg);
-static void _tlstmParamsTable_row_restore_system(const char *token, char *buf);
-static void _tlstmParamsTable_row_restore_user(const char *token, char *buf);
+static void _tlstmParamsTable_row_restore_mib(const char *token, char *buf);
 
-static const char system_token[] = "snmpTlstmParamsTable";
-static const char user_token[] = "snmpTlstmParamsEntry";
+static const char mib_token[] = "snmpTlstmParamsTable";
 
 /************************************************************
  * *_init_persistence should be called from the main table
@@ -275,15 +273,10 @@ static void
 _tlstmParams_init_persistence(void)
 {
     int             rc;
-    const char     *user_help = 
-        "snmpTlstmParamsEntry targetParamsName hashType:fingerPrint";
 
-    register_config_handler(NULL, system_token,
-                            _tlstmParamsTable_row_restore_system, NULL,
+    register_config_handler(NULL, mib_token,
+                            _tlstmParamsTable_row_restore_mib, NULL,
                             NULL);
-    register_config_handler(NULL, user_token,
-                            _tlstmParamsTable_row_restore_user, NULL,
-                            user_help);
     rc = snmp_register_callback(SNMP_CALLBACK_LIBRARY, SNMP_CALLBACK_STORE_DATA,
                                 _tlstmParamsTable_save_rows, _table_set);
 
@@ -296,7 +289,7 @@ static int
 _tlstmParamsTable_save_rows(int majorID, int minorID, void *serverarg,
                              void *clientarg)
 {
-    char            buf[SNMP_MAXBUF_SMALL], sep[] =
+    char            buf[SNMP_MAXBUF_SMALL], idx[MAX_OID_LEN], sep[] =
         "##############################################################";
     char            hdr[] = "#\n" "# snmpTlstmParams persistent data\n" "#";
     char           *type = netsnmp_ds_get_string(NETSNMP_DS_LIBRARY_ID,
@@ -327,9 +320,7 @@ _tlstmParamsTable_save_rows(int majorID, int minorID, void *serverarg,
         /** don't store values from conf files */
         st = netsnmp_table_data_set_find_column(
             row->data, COLUMN_SNMPTLSTMPARAMSSTORAGETYPE);
-        if ((ST_PERMANENT == *(st->data.integer)) ||
-            (ST_READONLY == *(st->data.integer)) ||
-            (ST_VOLATILE == *(st->data.integer))) {
+        if (ST_NONVOLATILE != *(st->data.integer)) {
             DEBUGMSGT(("tlstmParamsTable:row:save", 
                        "skipping RO/permanent/volatile row\n"));
             continue;
@@ -337,17 +328,19 @@ _tlstmParamsTable_save_rows(int majorID, int minorID, void *serverarg,
 
         if (0 == row->index_oid_len)
             netsnmp_table_data_generate_index_oid(row);
+        
+        /*
+         * string from oid
+         */
+        for(count = 0; count < row->index_oid_len; ++count)
+            idx[count] = (char)row->index_oid[count];
+        idx[count] = '\0';
 
         /*
          * build the line
          */
-        snprintf(buf, sizeof(buf), "%s ", system_token);
-
-        /** index */
-        buf[sizeof(buf)-1] = 0;
+        snprintf(buf, sizeof(buf), "%s %s", mib_token, idx);
         pos = &buf[strlen(buf)];
-        pos = read_config_save_objid(pos, row->index_oid,
-                                     row->index_oid_len );
         *pos++ = ' ';
 
         /** fingerprint */
@@ -355,11 +348,13 @@ _tlstmParamsTable_save_rows(int majorID, int minorID, void *serverarg,
             row->data, COLUMN_SNMPTLSTMPARAMSCLIENTFINGERPRINT);
         pos = read_config_save_octet_string(pos, fp->data.string, fp->data_len);
 
-        /** storage type & row status */
+        /** storage type is always nonVolatile, no need to save */
+
+        /** row status */
         rs = netsnmp_table_data_set_find_column(
             row->data, COLUMN_SNMPTLSTMPARAMSROWSTATUS);
-        pos += snprintf(pos, sizeof(buf) - (pos - buf), " %ld %ld",
-                        *(st->data.integer), *(rs->data.integer));
+        pos += snprintf(pos, sizeof(buf) - (pos - buf), " %ld",
+                        *(rs->data.integer));
 
         buf[sizeof(buf)-1] = 0; /* just to make sure */
 
@@ -376,70 +371,43 @@ _tlstmParamsTable_save_rows(int majorID, int minorID, void *serverarg,
     return SNMPERR_SUCCESS;
 }
 
-static netsnmp_table_row *
-_tlstmParamsTable_row_restore_common(char **buf)
+static void
+_tlstmParamsTable_row_restore_mib(const char *token, char *buf)
 {
     netsnmp_table_row    *row;
-    char                  tmp[SNMP_MAXBUF_SMALL];
-    char                 *tok;
-    oid                   oid_buf[MAX_OID_LEN], *oid_tok = oid_buf;
-    size_t                tok_size;
+    snmpTlstmParams      *params = netsnmp_tlstmParams_restore_common(&buf);
+    int32_t               value, i;
+    size_t                len;
+    oid                   idx[MAX_OID_LEN], *idx_ptr = idx;
 
-    if ((NULL == buf) || (NULL == *buf))
-        return NULL;
+    if (!params)
+        return;
 
+    if (NULL == buf) {
+        config_perror("incomplete row");
+        netsnmp_tlstmParams_destroy(params);
+        return;
+    }
+    
     /** need somewhere to save rows */
-    netsnmp_assert(_table_set); 
+    netsnmp_assert(_table_set);
 
     row = netsnmp_create_table_data_row();
-    DEBUGMSGTL(("tlstmParamsTable:row:restore", "'%s' in row 0x%lx\n", *buf,
-                (u_long)row));
+    DEBUGMSGTL(("tlstmParamsTable:row:restore", "'%s' in row 0x%lx\n",
+                params->tag, (u_long)row));
 
-    /** index */
-    tok_size = MAX_OID_LEN;
-    *buf = read_config_read_objid(*buf, &oid_tok, &tok_size);
-    row->index_oid = snmp_duplicate_objid(oid_tok, tok_size);
-    row->index_oid_len = tok_size;
+    /** build index from tag string */
+    len = strlen(params->tag);
+    for(i=0; i < len; ++i)
+        idx[i] = params->tag[i];
+    row->index_oid = snmp_duplicate_objid(idx_ptr, len);
+    row->index_oid_len = len;
 
-    /** fingerprint hash type*/
-    if (NULL == *buf) {
-        config_perror("incomplete row");
-        netsnmp_table_dataset_delete_row(row);
-        return NULL;
-    }
-    tok = tmp;
-    tok_size = sizeof(tmp);
-    *buf = read_config_read_octet_string(*buf, (u_char **)&tok, &tok_size);
     netsnmp_set_row_column(row, COLUMN_SNMPTLSTMPARAMSCLIENTFINGERPRINT,
-                           ASN_OCTET_STR, tok, tok_size);
-
-    return row;
-}
-
-static void
-_tlstmParamsTable_row_restore_system(const char *token, char *buf)
-{
-    netsnmp_table_row    *row = _tlstmParamsTable_row_restore_common(&buf);
-    int32_t               value;
-
-    if (!row)
-        return;
-
-    if (NULL == buf) {
-        config_perror("incomplete row");
-        netsnmp_table_dataset_delete_row(row);
-        return;
-    }
-    /** storage type */
-    value = atoi(buf);
-    buf = skip_token(buf);
-    netsnmp_set_row_column(row, COLUMN_SNMPTLSTMPARAMSSTORAGETYPE, ASN_INTEGER,
-                       &value, sizeof(value));
-    if (NULL == buf) {
-        config_perror("incomplete row");
-        netsnmp_table_dataset_delete_row(row);
-        return;
-    }
+                           ASN_OCTET_STR, params->fingerprint,
+                           params->fingerprint_len);
+    netsnmp_tlstmParams_destroy(params);
+    params = NULL;
 
     /** row status */
     value = atoi(buf);
@@ -447,31 +415,9 @@ _tlstmParamsTable_row_restore_system(const char *token, char *buf)
     netsnmp_set_row_column(row, COLUMN_SNMPTLSTMPARAMSROWSTATUS, ASN_INTEGER,
                        &value, sizeof(value));
 
-    netsnmp_table_dataset_add_row(_table_set,row);
-    DEBUGMSGTL(("tlstmParamsTable:row:restore", "adding row 0x%lx to table\n",
-                (u_long)row));
-}
-
-static void
-_tlstmParamsTable_row_restore_user(const char *token, char *buf)
-{
-    netsnmp_table_row    *row = _tlstmParamsTable_row_restore_common(&buf);
-    int32_t               value;
-
-    if (!row)
-        return;
-
-    if (NULL == buf) {
-        config_perror("incomplete row");
-        netsnmp_table_dataset_delete_row(row);
-        return;
-    }
-    value = ST_PERMANENT;
+    /** storage type */
+    value = ST_NONVOLATILE;
     netsnmp_set_row_column(row, COLUMN_SNMPTLSTMPARAMSSTORAGETYPE, ASN_INTEGER,
-                       &value, sizeof(value));
-
-    value = RS_ACTIVE;
-    netsnmp_set_row_column(row, COLUMN_SNMPTLSTMPARAMSROWSTATUS, ASN_INTEGER,
                        &value, sizeof(value));
 
     netsnmp_table_dataset_add_row(_table_set,row);

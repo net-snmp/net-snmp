@@ -114,6 +114,7 @@ void netsnmp_certs_load(void);
 
 #define NSCM_FROM_CONFIG                        0x0001
 #define NSCM_FROM_MIB                           0x0002
+#define NSCM_NONVOLATILE                        0x0004
 
     typedef struct netsnmp_cert_map_s {
         int             priority;
@@ -138,6 +139,28 @@ void netsnmp_certs_load(void);
 
     int netsnmp_cert_get_secname_maps(netsnmp_container *cm);
 
+    /*************************************************************************
+     *
+     *  snmpTlstmParamsTable data
+     *
+     *************************************************************************/
+typedef struct snmpTlstmParams_s {
+    char         *tag;
+    u_char       *fingerprint;
+    char          hashType;
+    u_char        flags;
+    u_char        fingerprint_len;
+    char          _pad[2];
+} snmpTlstmParams;
+
+#define TLSTM_PARAMS_FROM_CONFIG          0x01
+#define TLSTM_PARAMS_FROM_MIB             0x02
+/** ine TLSTM_PARAMS_XXX                  0x04 */
+
+    snmpTlstmParams *netsnmp_tlstmParams_create(const char *tag, int hashType,
+                                                const u_char *fp, int fp_len);
+    void netsnmp_tlstmParams_destroy(snmpTlstmParams *stp);
+    snmpTlstmParams *netsnmp_tlstmParams_restore_common(char **line);
 
 #ifdef __cplusplus
 }
