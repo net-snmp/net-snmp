@@ -1200,8 +1200,9 @@ void
 snmpd_parse_config_trapsess(const char *word, char *cptr)
 {
     char           *argv[MAX_ARGS], *cp = cptr;
-    int             argn, arg;
+    int             argn, arg, rc;
     netsnmp_session session, *ss;
+    netsnmp_transport *transport;
     size_t          len;
 
     /*
@@ -1224,9 +1225,14 @@ snmpd_parse_config_trapsess(const char *word, char *cptr)
                              NETSNMP_PARSE_ARGS_NOLOGGING |
                              NETSNMP_PARSE_ARGS_NOZERO);
 
-    ss = snmp_add(&session,
-		  netsnmp_transport_open_client("snmptrap", session.peername),
-		  NULL, NULL);
+    transport = netsnmp_transport_open_client("snmptrap", session.peername);
+    if ((rc = netsnmp_sess_config_transport(session.transport_configuration,
+                                            transport)) != SNMPERR_SUCCESS) {
+        session.s_snmp_errno = rc;
+        session.s_errno = 0;
+        return;
+    }
+    ss = snmp_add(&session, transport, NULL, NULL);
     for (; argn > 0; argn--) {
         free(argv[argn - 1]);
     }
@@ -1253,15 +1259,10 @@ snmpd_parse_config_trapsess(const char *word, char *cptr)
     }
 
 #ifndef NETSNMP_DISABLE_SNMPV1
-    if (ss->version == SNMP_VERSION_1) {
-        add_trap_session(ss, SNMP_MSG_TRAP, 0, SNMP_VERSION_1);
-    } else {
+    if (ss->version == SNMP_VERSION_1)
+        traptype = SNMP_MSG_TRAP;
 #endif
-        add_trap_session(ss, traptype, (traptype == SNMP_MSG_INFORM),
-                         ss->version);
-#ifndef NETSNMP_DISABLE_SNMPV1
-    }
-#endif
+    add_trap_session(ss, traptype, (traptype == SNMP_MSG_INFORM), ss->version);
 }
 
 #if !defined(NETSNMP_DISABLE_SNMPV1) || !defined(NETSNMP_DISABLE_SNMPV2C)
