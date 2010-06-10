@@ -26,7 +26,7 @@ extern          "C" {
 #define USM_MD5_AND_SHA_AUTH_LEN        12      /* bytes */
 #define USM_MAX_AUTHSIZE                USM_MD5_AND_SHA_AUTH_LEN
 
-#define USM_SEC_MODEL_NUMBER            3
+#define USM_SEC_MODEL_NUMBER            SNMP_SEC_MODEL_USM
 
     /*
      * Structures.

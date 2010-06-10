@@ -452,7 +452,7 @@ netsnmp_tlsbase_session_init(struct netsnmp_transport_s *transport,
        this at the moment */
     if (!(transport->flags & NETSNMP_TRANSPORT_FLAG_LISTEN)) {
         if (sess->securityModel == SNMP_DEFAULT_SECMODEL) {
-            sess->securityModel = NETSNMP_TSM_SECURITY_MODEL;
+            sess->securityModel = SNMP_SEC_MODEL_TSM;
         } else {
             snmp_log(LOG_ERR, "A security model other than TSM is being used with (D)TLS; this likely won't work\n");
         }
@@ -465,10 +465,9 @@ netsnmp_tlsbase_session_init(struct netsnmp_transport_s *transport,
             sess->securityNameLen = strlen(sess->securityName);
         }
 
-        if (SNMP_DEFAULT_VERSION == sess->version) {
+        if (sess->version != SNMP_VERSION_3) {
             sess->version = SNMP_VERSION_3;
-        } else if (sess->version != SNMP_VERSION_3) {
-            snmp_log(LOG_ERR, "A SNMP version other than 3 was requested with (D)TLS; this likely won't work\n");
+            snmp_log(LOG_ERR, "A SNMP version other than 3 was requested with (D)TLS; using 3 anyways\n");
         }
 
         if (sess->securityLevel <= 0) {

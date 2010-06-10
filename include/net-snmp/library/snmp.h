@@ -277,6 +277,7 @@ SOFTWARE.
 #define SNMP_SEC_MODEL_SNMPv1		1
 #define SNMP_SEC_MODEL_SNMPv2c		2
 #define SNMP_SEC_MODEL_USM		3
+#define SNMP_SEC_MODEL_TSM              4
 #define SNMP_SEC_MODEL_SNMPv2p		256
 
 #define SNMP_SEC_LEVEL_NOAUTH		1

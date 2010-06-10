@@ -10,8 +10,9 @@ extern          "C" {
 /* Locally defined security models.
  * (Net-SNMP enterprise number = 8072)*256 + local_num
  */
-#define NETSNMP_KSM_SECURITY_MODEL     2066432
-#define NETSNMP_TSM_SECURITY_MODEL     4
+#define NETSNMP_SEC_MODEL_KSM     2066432
+#define NETSNMP_KSM_SECURITY_MODEL     NETSNMP_SEC_MODEL_KSM
+#define NETSNMP_TSM_SECURITY_MODEL     SNMP_SEC_MODEL_TSM
 
 struct snmp_secmod_def;
 

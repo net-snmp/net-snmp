@@ -59,7 +59,7 @@ init_tsm(void)
     def->probe_engineid = snmpv3_probe_contextEngineID_rfc5343;
 
     DEBUGMSGTL(("tsm","registering ourselves\n"));
-    ret = register_sec_mod(NETSNMP_TSM_SECURITY_MODEL, "tsm", def);
+    ret = register_sec_mod(SNMP_SEC_MODEL_TSM, "tsm", def);
     DEBUGMSGTL(("tsm"," returned %d\n", ret));
 
     netsnmp_ds_register_config(ASN_BOOLEAN, "snmp", "tsmUseTransportPrefix",
