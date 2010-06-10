@@ -85,6 +85,9 @@ void netsnmp_certs_load(void);
 #define NS_HASH_SHA512      6
 #define NS_HASH_MAX         NS_HASH_SHA512
 
+/** SNMP-TLS-TM-MIB */
+#define SNMPTLSFINGERPRINT_MAX_LEN   255
+
     /*************************************************************************
      * netsnmp_cert function definitions
      *************************************************************************/
@@ -124,7 +127,6 @@ void netsnmp_certs_load(void);
 
         char            hashType;
         char            flags;
-        char            _pad[2]; /* rsvd for future use */
 
         X509           *ocert;
     } netsnmp_cert_map;
@@ -144,15 +146,14 @@ void netsnmp_certs_load(void);
      *  snmpTlstmParamsTable data
      *
      *************************************************************************/
-typedef struct snmpTlstmParams_s {
-    char         *tag;
-    u_char       *fingerprint;
-    char          hashType;
-    u_char        flags;
-    u_char        fingerprint_len;
-    char          _pad[2];
-} snmpTlstmParams;
-
+    typedef struct snmpTlstmParams_s {
+        char         *tag;
+        u_char       *fingerprint;
+        char          hashType;
+        u_char        flags;
+        u_char        fingerprint_len;
+    } snmpTlstmParams;
+    
 #define TLSTM_PARAMS_FROM_CONFIG          0x01
 #define TLSTM_PARAMS_FROM_MIB             0x02
 /** ine TLSTM_PARAMS_XXX                  0x04 */
@@ -161,6 +162,30 @@ typedef struct snmpTlstmParams_s {
                                                 const u_char *fp, int fp_len);
     void netsnmp_tlstmParams_destroy(snmpTlstmParams *stp);
     snmpTlstmParams *netsnmp_tlstmParams_restore_common(char **line);
+
+    /*************************************************************************
+     *
+     *  snmpTlstmAddrTable data
+     *
+     *************************************************************************/
+    typedef struct snmpTlstmAddr_s {
+        char         *name;
+        char         *fingerprint;
+        char         *identity;
+        
+        u_char        hashType;
+        u_char        flags;
+        
+    } snmpTlstmAddr;
+
+#define TLSTM_ADDR_FROM_CONFIG          0x01
+#define TLSTM_ADDR_FROM_MIB             0x02
+/** ine TLSTM_ADDR_XXX                  0x04 */
+
+    int netsnmp_tlstmAddr_restore_common(char **line, char *name,
+                                         size_t *name_len, char *id,
+                                         size_t *id_len, char *fp,
+                                         size_t *fp_len, u_char *ht);
 
 #ifdef __cplusplus
 }
