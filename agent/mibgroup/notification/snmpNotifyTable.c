@@ -543,12 +543,14 @@ parse_snmpNotifyTable(const char *token, char *line)
     line =
         read_config_read_data(ASN_INTEGER, line,
                               &StorageTmp->snmpNotifyStorageType, &tmpint);
+    if (!StorageTmp->snmpNotifyStorageType)
+        StorageTmp->snmpNotifyStorageType = ST_READONLY;
 
     line =
         read_config_read_data(ASN_INTEGER, line,
                               &StorageTmp->snmpNotifyRowStatus, &tmpint);
-
-
+    if (!StorageTmp->snmpNotifyRowStatus)
+        StorageTmp->snmpNotifyRowStatus = RS_ACTIVE;
 
 
     snmpNotifyTable_add(StorageTmp);
