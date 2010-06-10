@@ -415,45 +415,45 @@ netsnmp_call_handler(netsnmp_mib_handler *next_handler,
     }
 
     do {
-    nh = next_handler->access_method;
-    if (!nh) {
-        if (next_handler->next) {
-            snmp_log(LOG_ERR, "no access method specified in handler %s.",
-                     next_handler->handler_name);
-            return SNMP_ERR_GENERR;
+        nh = next_handler->access_method;
+        if (!nh) {
+            if (next_handler->next) {
+                snmp_log(LOG_ERR, "no access method specified in handler %s.",
+                         next_handler->handler_name);
+                return SNMP_ERR_GENERR;
+            }
+            /*
+             * The final handler registration in the chain may well not need
+             * to include a handler routine, if the processing of this object
+             * is handled completely by the agent toolkit helpers.
+             */
+            return SNMP_ERR_NOERROR;
         }
+
+        DEBUGMSGTL(("handler:calling", "calling handler %s for mode %s\n",
+                    next_handler->handler_name,
+                    se_find_label_in_slist("agent_mode", reqinfo->mode)));
+
         /*
-         * The final handler registration in the chain may well not need
-         * to include a handler routine, if the processing of this object
-         * is handled completely by the agent toolkit helpers.
+         * XXX: define acceptable return statuses
          */
-        return SNMP_ERR_NOERROR;
-    }
+        ret = (*nh) (next_handler, reginfo, reqinfo, requests);
 
-    DEBUGMSGTL(("handler:calling", "calling handler %s for mode %s\n",
-                next_handler->handler_name,
-                se_find_label_in_slist("agent_mode", reqinfo->mode)));
+        DEBUGMSGTL(("handler:returned", "handler %s returned %d\n",
+                    next_handler->handler_name, ret));
 
-    /*
-     * XXX: define acceptable return statuses 
-     */
-    ret = (*nh) (next_handler, reginfo, reqinfo, requests);
+        if (! (next_handler->flags & MIB_HANDLER_AUTO_NEXT))
+            break;
 
-    DEBUGMSGTL(("handler:returned", "handler %s returned %d\n",
-                next_handler->handler_name, ret));
+        /*
+         * did handler signal that it didn't want auto next this time around?
+         */
+        if(next_handler->flags & MIB_HANDLER_AUTO_NEXT_OVERRIDE_ONCE) {
+            next_handler->flags &= ~MIB_HANDLER_AUTO_NEXT_OVERRIDE_ONCE;
+            break;
+        }
 
-    if (! (next_handler->flags & MIB_HANDLER_AUTO_NEXT))
-        break;
-
-    /*
-     * did handler signal that it didn't want auto next this time around?
-     */
-    if(next_handler->flags & MIB_HANDLER_AUTO_NEXT_OVERRIDE_ONCE) {
-        next_handler->flags &= ~MIB_HANDLER_AUTO_NEXT_OVERRIDE_ONCE;
-        break;
-    }
-
-    next_handler = next_handler->next;
+        next_handler = next_handler->next;
 
     } while(next_handler);
 
