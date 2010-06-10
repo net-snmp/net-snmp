@@ -700,6 +700,11 @@ netsnmp_dtlsudp_send(netsnmp_transport *t, void *buf, int size,
         return -1;
 
     tlsdata = cachep->tlsdata;
+    if (NULL == tlsdata || NULL == tlsdata->ssl) {
+        /** xxx mem lean? free created bio cache? */
+        snmp_log(LOG_ERR, "bad tls data or ssl ptr in netsnmp_dtlsudp_send\n");
+        return -1;
+    }
         
     if (!tlsdata->securityName && tmStateRef && tmStateRef->securityNameLen > 0)
         tlsdata->securityName = strdup(tmStateRef->securityName);
