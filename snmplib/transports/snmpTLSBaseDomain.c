@@ -272,7 +272,7 @@ netsnmp_tlsbase_extract_security_name(SSL *ssl, _netsnmpTLSBaseData *tlsdata) {
 }
 
 SSL_CTX *
-sslctx_client_setup(SSL_METHOD *method, _netsnmpTLSBaseData *tlsbase) {
+sslctx_client_setup(const SSL_METHOD *method, _netsnmpTLSBaseData *tlsbase) {
     netsnmp_cert *id_cert, *peer_cert;
     SSL_CTX      *the_ctx;
     X509_STORE   *cert_store = NULL;
@@ -364,7 +364,7 @@ sslctx_client_setup(SSL_METHOD *method, _netsnmpTLSBaseData *tlsbase) {
 }
 
 SSL_CTX *
-sslctx_server_setup(SSL_METHOD *method) {
+sslctx_server_setup(const SSL_METHOD *method) {
     netsnmp_cert *id_cert;
 
     /***********************************************************************
