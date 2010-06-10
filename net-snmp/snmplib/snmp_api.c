@@ -2311,7 +2311,7 @@ snmpv3_build(u_char ** pkt, size_t * pkt_len, size_t * offset,
         }
     }
     if (pdu->securityNameLen == 0 && pdu->securityName == NULL) {
-        if (session->securityModel != NETSNMP_TSM_SECURITY_MODEL &&
+        if (session->securityModel != SNMP_SEC_MODEL_TSM &&
             session->securityNameLen == 0) {
             session->s_snmp_errno = SNMPERR_BAD_SEC_NAME;
             return -1;
