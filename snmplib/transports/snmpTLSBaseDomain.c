@@ -329,6 +329,8 @@ sslctx_client_setup(const SSL_METHOD *method, _netsnmpTLSBaseData *tlsbase) {
                                       NULL);
     if (!peer_cert)
         LOGANDDIE ("error finding client remote keys");
+    DEBUGMSGTL(("sslctx_client", "their public key: %s\n",
+                peer_cert->info.filename));
 
     cert_store = SSL_CTX_get_cert_store(the_ctx);
     if (!cert_store)
@@ -432,6 +434,7 @@ netsnmp_tlsbase_config(struct netsnmp_transport_s *t, const char *token, const c
         strcmp(token, "my_fingerprint") == 0) {
         SNMP_FREE(tlsdata->our_identity);
         tlsdata->our_identity = strdup(value);
+        DEBUGMSGT(("tls:config","our identity %s\n", value));
     }
 
     if (strcmp(token, "their_identity") == 0 ||
@@ -439,6 +442,7 @@ netsnmp_tlsbase_config(struct netsnmp_transport_s *t, const char *token, const c
         strcmp(token, "their_fingerprint") == 0) {
         SNMP_FREE(tlsdata->their_identity);
         tlsdata->their_identity = strdup(value);
+        DEBUGMSGT(("tls:config","their identity %s\n", value));
     }
     return SNMPERR_SUCCESS;
 }
@@ -453,8 +457,9 @@ netsnmp_tlsbase_session_init(struct netsnmp_transport_s *transport,
     if (!(transport->flags & NETSNMP_TRANSPORT_FLAG_LISTEN)) {
         if (sess->securityModel == SNMP_DEFAULT_SECMODEL) {
             sess->securityModel = SNMP_SEC_MODEL_TSM;
-        } else {
-            snmp_log(LOG_ERR, "A security model other than TSM is being used with (D)TLS; this likely won't work\n");
+        } else if (sess->securityModel != SNMP_SEC_MODEL_TSM) {
+            sess->securityModel = SNMP_SEC_MODEL_TSM;
+            snmp_log(LOG_ERR, "A security model other than TSM is being used with (D)TLS; using TSM anyways\n");
         }
 
         if (NULL == sess->securityName) {
@@ -581,8 +586,7 @@ int netsnmp_tlsbase_wrapup_recv(netsnmp_tmStateReference *tmStateRef,
     if (!tlsdata->securityName) {
         netsnmp_tlsbase_extract_security_name(tlsdata->ssl, tlsdata);
         if (NULL != tlsdata->securityName) {
-            DEBUGMSGTL(("tlstcp", "set SecName to: %s\n",
-                        tlsdata->securityName));
+            DEBUGMSGTL(("tls", "set SecName to: %s\n", tlsdata->securityName));
         } else {
             SNMP_FREE(tmStateRef);
             return SNMPERR_GENERR;
