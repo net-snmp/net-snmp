@@ -771,7 +771,7 @@ write_snmpNotifyTag(int action,
          */
         tmpvar = StorageTmp->snmpNotifyTag;
         tmplen = StorageTmp->snmpNotifyTagLen;
-        StorageTmp->snmpNotifyTag = calloc(1, var_val_len + 1);
+        StorageTmp->snmpNotifyTag = (char*)calloc(1, var_val_len + 1);
         if (NULL == StorageTmp->snmpNotifyTag)
             return SNMP_ERR_RESOURCEUNAVAILABLE;
         break;
@@ -1027,7 +1027,7 @@ write_snmpNotifyRowStatus(int action,
             if (StorageNew == NULL) {
                 return SNMP_ERR_RESOURCEUNAVAILABLE;
             }
-            StorageNew->snmpNotifyName = calloc( 1, vp->val_len + 1 );
+            StorageNew->snmpNotifyName = (char*)calloc( 1, vp->val_len + 1 );
             if (StorageNew->snmpNotifyName == NULL) {
                 return SNMP_ERR_RESOURCEUNAVAILABLE;
             }

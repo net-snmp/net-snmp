@@ -464,7 +464,7 @@ int
 store_mteETable(int majorID, int minorID, void *serverarg, void *clientarg)
 {
     char            line[SNMP_MAXBUF];
-    char           *cptr;
+    char           *cptr, *cp;
     void           *vp;
     size_t          tint;
     netsnmp_tdata_row *row;
@@ -494,12 +494,12 @@ store_mteETable(int majorID, int minorID, void *serverarg, void *clientarg)
         strcat(line, "_mteETable ");
         cptr = line + strlen(line);
 
-        vp   = entry->mteOwner;        tint = strlen( vp );
-        cptr = read_config_store_data( ASN_OCTET_STR, cptr, &vp,  &tint );
-        vp   = entry->mteEName;        tint = strlen( vp );
-        cptr = read_config_store_data( ASN_OCTET_STR, cptr, &vp,  &tint );
-        vp   = entry->mteEventComment; tint = strlen( vp );
-        cptr = read_config_store_data( ASN_OCTET_STR, cptr, &vp,  &tint );
+        cp   = entry->mteOwner;        tint = strlen( cp );
+        cptr = read_config_store_data( ASN_OCTET_STR, cptr, &cp,  &tint );
+        cp   = entry->mteEName;        tint = strlen( cp );
+        cptr = read_config_store_data( ASN_OCTET_STR, cptr, &cp,  &tint );
+        cp   = entry->mteEventComment; tint = strlen( cp );
+        cptr = read_config_store_data( ASN_OCTET_STR, cptr, &cp,  &tint );
         /* ... (but skip the mteEventAction field)... */
         tint = entry->flags & (MTE_EVENT_FLAG_ENABLED|MTE_EVENT_FLAG_ACTIVE); 
         cptr = read_config_store_data( ASN_UNSIGNED,  cptr, &tint, NULL );
@@ -515,17 +515,17 @@ store_mteETable(int majorID, int minorID, void *serverarg, void *clientarg)
             strcat(line, "_mteENotTable ");
             cptr = line + strlen(line);
     
-            vp = entry->mteOwner;         tint = strlen( vp );
-            cptr = read_config_store_data(ASN_OCTET_STR, cptr, &vp, &tint );
-            vp = entry->mteEName;         tint = strlen( vp );
-            cptr = read_config_store_data(ASN_OCTET_STR, cptr, &vp, &tint );
+            cp = entry->mteOwner;         tint = strlen( cp );
+            cptr = read_config_store_data(ASN_OCTET_STR, cptr, &cp, &tint );
+            cp = entry->mteEName;         tint = strlen( cp );
+            cptr = read_config_store_data(ASN_OCTET_STR, cptr, &cp, &tint );
             vp   = entry->mteNotification;
             cptr = read_config_store_data(ASN_OBJECT_ID, cptr, &vp,
                                           &entry->mteNotification_len);
-            vp = entry->mteNotifyOwner;   tint = strlen( vp );
-            cptr = read_config_store_data(ASN_OCTET_STR, cptr, &vp, &tint );
-            vp = entry->mteNotifyObjects; tint = strlen( vp );
-            cptr = read_config_store_data(ASN_OCTET_STR, cptr, &vp, &tint );
+            cp = entry->mteNotifyOwner;   tint = strlen( cp );
+            cptr = read_config_store_data(ASN_OCTET_STR, cptr, &cp, &tint );
+            cp = entry->mteNotifyObjects; tint = strlen( cp );
+            cptr = read_config_store_data(ASN_OCTET_STR, cptr, &cp, &tint );
             snmpd_store_config(line);
         }
 
@@ -534,19 +534,19 @@ store_mteETable(int majorID, int minorID, void *serverarg, void *clientarg)
             strcat(line, "_mteESetTable ");
             cptr = line + strlen(line);
     
-            vp = entry->mteOwner;         tint = strlen( vp );
-            cptr = read_config_store_data(ASN_OCTET_STR, cptr, &vp, &tint );
-            vp = entry->mteEName;         tint = strlen( vp );
-            cptr = read_config_store_data(ASN_OCTET_STR, cptr, &vp, &tint );
+            cp = entry->mteOwner;         tint = strlen( cp );
+            cptr = read_config_store_data(ASN_OCTET_STR, cptr, &cp, &tint );
+            cp = entry->mteEName;         tint = strlen( cp );
+            cptr = read_config_store_data(ASN_OCTET_STR, cptr, &cp, &tint );
             vp   = entry->mteSetOID;
             cptr = read_config_store_data(ASN_OBJECT_ID, cptr, &vp,
                                           &entry->mteSetOID_len);
             tint = entry->mteSetValue;
             cptr = read_config_store_data(ASN_INTEGER,   cptr, &tint, NULL);
-            vp = entry->mteSetTarget;     tint = strlen( vp );
-            cptr = read_config_store_data(ASN_OCTET_STR, cptr, &vp, &tint );
-            vp = entry->mteSetContext;    tint = strlen( vp );
-            cptr = read_config_store_data(ASN_OCTET_STR, cptr, &vp, &tint );
+            cp = entry->mteSetTarget;     tint = strlen( cp );
+            cptr = read_config_store_data(ASN_OCTET_STR, cptr, &cp, &tint );
+            cp = entry->mteSetContext;    tint = strlen( cp );
+            cptr = read_config_store_data(ASN_OCTET_STR, cptr, &cp, &tint );
             tint = entry->flags & (MTE_SET_FLAG_OBJWILD|MTE_SET_FLAG_CTXWILD); 
             cptr = read_config_store_data(ASN_UNSIGNED,  cptr, &tint, NULL);
             snmpd_store_config(line);

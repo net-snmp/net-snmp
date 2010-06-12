@@ -541,7 +541,7 @@ snmpNotifyFilterMask_get(snmpNotifyFilterTable_rowreq_ctx * rowreq_ctx,
         /*
          * allocate space for snmpNotifyFilterMask data
          */
-        (*snmpNotifyFilterMask_val_ptr_ptr) =
+        (*snmpNotifyFilterMask_val_ptr_ptr) = (char*)
             malloc(rowreq_ctx->data.snmpNotifyFilterMask_len *
                    sizeof(rowreq_ctx->data.snmpNotifyFilterMask[0]));
         if (NULL == (*snmpNotifyFilterMask_val_ptr_ptr)) {

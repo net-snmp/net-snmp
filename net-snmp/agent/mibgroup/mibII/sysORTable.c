@@ -52,9 +52,9 @@ register_foreach(const struct sysORTable* data, void* dummy)
 	    else
 		++sysORNextIndex;
 
-	    for (value = it->curr(it);
+	    for (value = (sysORTable_entry*)it->curr(it);
 		 value && value->sysORIndex < cur;
-		 value = ITERATOR_NEXT(it)) {
+		 value = (sysORTable_entry*)ITERATOR_NEXT(it)) {
 	    }
 
 	    if (value && value->sysORIndex == cur) {
@@ -101,7 +101,7 @@ unregister_cb(int major, int minor, void* serv, void* client)
                 "unregister_cb(%d, %d, %p, %p)\n", major, minor, serv, client));
     sysORLastChange = ((struct sysORTable*)(serv))->OR_uptime;
 
-    while ((value = ITERATOR_NEXT(it)) && value->data != serv);
+    while ((value = (sysORTable_entry*)ITERATOR_NEXT(it)) && value->data != serv);
     ITERATOR_RELEASE(it);
     if(value) {
 	CONTAINER_REMOVE(table, value);

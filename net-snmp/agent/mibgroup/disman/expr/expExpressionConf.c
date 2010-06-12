@@ -229,7 +229,7 @@ int
 store_expETable(int majorID, int minorID, void *serverarg, void *clientarg)
 {
     char                  line[SNMP_MAXBUF];
-    char                 *cptr;
+    char                 *cptr, *cp;
     void                 *vp;
     size_t                tint;
     netsnmp_tdata_row    *row;
@@ -259,17 +259,17 @@ store_expETable(int majorID, int minorID, void *serverarg, void *clientarg)
         strcat(line, "_expETable ");
         cptr = line + strlen(line);
 
-        vp   = entry->expOwner;          tint = strlen( vp );
-        cptr = read_config_store_data(   ASN_OCTET_STR, cptr, &vp,  &tint );
-        vp   = entry->expName;           tint = strlen( vp );
-        cptr = read_config_store_data(   ASN_OCTET_STR, cptr, &vp,  &tint );
+        cp   = entry->expOwner;          tint = strlen( cp );
+        cptr = read_config_store_data(   ASN_OCTET_STR, cptr, &cp,  &tint );
+        cp   = entry->expName;           tint = strlen( cp );
+        cptr = read_config_store_data(   ASN_OCTET_STR, cptr, &cp,  &tint );
 
-        vp   = entry->expExpression;     tint = strlen( vp );
-        cptr = read_config_store_data(   ASN_OCTET_STR, cptr, &vp,  &tint );
+        cp   = entry->expExpression;     tint = strlen( cp );
+        cptr = read_config_store_data(   ASN_OCTET_STR, cptr, &cp,  &tint );
         tint = entry->expValueType;
         cptr = read_config_store_data(   ASN_UNSIGNED,  cptr, &tint, NULL );
-        vp   = entry->expComment;        tint = strlen( vp );
-        cptr = read_config_store_data(   ASN_OCTET_STR, cptr, &vp,  &tint );
+        cp   = entry->expComment;        tint = strlen( cp );
+        cptr = read_config_store_data(   ASN_OCTET_STR, cptr, &cp,  &tint );
         tint = entry->expDeltaInterval;
         cptr = read_config_store_data(   ASN_UNSIGNED,  cptr, &tint, NULL );
 

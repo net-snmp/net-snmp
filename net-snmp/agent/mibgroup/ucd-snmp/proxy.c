@@ -282,10 +282,10 @@ proxy_fill_in_session(netsnmp_mib_handler *handler,
             }
 
             *configured = malloc(strlen("-c") + 1);
-            strcpy(*configured, "-c");
+            strcpy((char*)*configured, "-c");
             DEBUGMSGTL(("proxy", "pdu has community string\n"));
             session->community_len = reqinfo->asp->pdu->community_len;
-            session->community = malloc(session->community_len + 1);
+            session->community = (u_char*)malloc(session->community_len + 1);
             strncpy((char *)session->community,
                     (const char *)reqinfo->asp->pdu->community,
                     session->community_len);

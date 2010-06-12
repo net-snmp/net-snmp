@@ -111,7 +111,7 @@ int
 store_mteOTable(int majorID, int minorID, void *serverarg, void *clientarg)
 {
     char            line[SNMP_MAXBUF];
-    char           *cptr;
+    char           *cptr, *cp;
     void           *vp;
     size_t          tint;
     netsnmp_tdata_row *row;
@@ -137,10 +137,10 @@ store_mteOTable(int majorID, int minorID, void *serverarg, void *clientarg)
         strcat(line, "_mteOTable ");
         cptr = line + strlen(line);
 
-        vp = entry->mteOwner; tint = strlen( vp );
-        cptr = read_config_store_data(ASN_OCTET_STR, cptr, &vp, &tint );
-        vp = entry->mteOName; tint = strlen( vp );
-        cptr = read_config_store_data(ASN_OCTET_STR, cptr, &vp, &tint );
+        cp = entry->mteOwner; tint = strlen( cp );
+        cptr = read_config_store_data(ASN_OCTET_STR, cptr, &cp, &tint );
+        cp = entry->mteOName; tint = strlen( cp );
+        cptr = read_config_store_data(ASN_OCTET_STR, cptr, &cp, &tint );
         cptr = read_config_store_data(ASN_UNSIGNED,  cptr,
                                       &entry->mteOIndex, NULL);
         vp   = entry->mteObjectID;

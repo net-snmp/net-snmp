@@ -129,7 +129,7 @@ getSwapInfo(long *total_mem, long *total_free)
     char buf[1024];
 
     num = swapctl(SC_GETNSWP, 0);
-    s = malloc(num * sizeof(swapent_t) + sizeof(struct swaptable));
+    s = (swaptbl_t*)malloc(num * sizeof(swapent_t) + sizeof(struct swaptable));
     if (!s)
         return;
 

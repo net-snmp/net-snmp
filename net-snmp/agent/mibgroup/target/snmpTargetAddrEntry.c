@@ -1322,7 +1322,7 @@ write_snmpTargetAddrParams(int action,
             }
 
             old_params = target->params;
-            target->params = malloc(var_val_len + 1);
+            target->params = (char*)malloc(var_val_len + 1);
             if (target->params == NULL) {
                 return SNMP_ERR_RESOURCEUNAVAILABLE;
             }
