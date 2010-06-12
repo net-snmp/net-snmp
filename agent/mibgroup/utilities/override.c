@@ -32,7 +32,7 @@ override_handler(netsnmp_mib_handler *handler,
                  netsnmp_request_info *requests)
 {
 
-    override_data  *data = handler->myvoid;
+    override_data  *data = (override_data*)handler->myvoid;
     void *tmpptr;
 
     if (!data) {

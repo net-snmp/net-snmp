@@ -112,11 +112,11 @@ int netsnmp_cpu_arch_load( netsnmp_cache *cache, void *magic ) {
     }
     if (bsize == 0) {
         bsize = getpagesize()-1;
-        buff = malloc(bsize+1);
+        buff = (char*)malloc(bsize+1);
     }
     while ((bytes_read = read(statfd, buff, bsize)) == bsize) {
         bsize += BUFSIZ;
-        buff = realloc(buff, bsize+1);
+        buff = (char*)realloc(buff, bsize+1);
         DEBUGMSGTL(("cpu", "/proc/stat buffer increased to %d\n", bsize));
         close(statfd);
         statfd = open(STAT_FILE, O_RDONLY, 0);
@@ -208,11 +208,11 @@ void _cpu_load_swap_etc( char *buff, netsnmp_cpu_info *cpu ) {
     if (has_vmstat && (vmstatfd = open(VMSTAT_FILE, O_RDONLY, 0)) != -1) {
         if (vmbsize == 0) {
 	    vmbsize = getpagesize()-1;
-	    vmbuff = malloc(vmbsize+1);
+	    vmbuff = (char*)malloc(vmbsize+1);
         }
         while ((bytes_read = read(vmstatfd, vmbuff, vmbsize)) == vmbsize) {
 	    vmbsize += BUFSIZ;
-	    vmbuff = realloc(vmbuff, vmbsize+1);
+	    vmbuff = (char*)realloc(vmbuff, vmbsize+1);
 	    close(vmstatfd);
 	    vmstatfd = open(VMSTAT_FILE, O_RDONLY, 0);
         }

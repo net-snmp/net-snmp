@@ -138,7 +138,7 @@ netsnmp_fsys_arch_load( void )
     n = NSFS_GETFSSTAT( NULL, 0, 0 );
     if ( n==0 )
         return;
-    stats = malloc( n * sizeof( struct NSFS_STATFS ));
+    stats = (struct NSFS_STATFS *)malloc( n * sizeof( struct NSFS_STATFS ));
     n = NSFS_GETFSSTAT( stats, n * sizeof( struct NSFS_STATFS ), MNT_NOWAIT );
 
     /*

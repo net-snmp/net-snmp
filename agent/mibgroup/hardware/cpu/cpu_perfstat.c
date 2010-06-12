@@ -27,7 +27,7 @@ void init_cpu_perfstat( void ) {
     strcpy(cpu->name, "Overall CPU statistics");
 
     cpu_num = perfstat_cpu( NULL, NULL, sizeof(perfstat_cpu_t), 0 );
-    cs2 = malloc( cpu_num*sizeof(perfstat_cpu_t));
+    cs2 = (perfstat_cpu_t*)malloc( cpu_num*sizeof(perfstat_cpu_t));
  
     strcpy( name.name, "");
     if (perfstat_cpu(&name, cs2, sizeof(perfstat_cpu_t), cpu_num) > 0) {
@@ -83,7 +83,7 @@ int netsnmp_cpu_arch_load( netsnmp_cache *cache, void *magic ) {
      * Per-CPU statistics
      */
     n   = cs.ncpus;   /* XXX - Compare against cpu_num */
-    cs2 = malloc( n*sizeof(perfstat_cpu_t));
+    cs2 = (perfstat_cpu_t*)malloc( n*sizeof(perfstat_cpu_t));
     strcpy( name.name, "");
     if (perfstat_cpu(&name, cs2, sizeof(perfstat_cpu_t), n) > 0) {
         for ( i = 0; i < n; i++ ) {

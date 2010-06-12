@@ -1389,7 +1389,7 @@ Add_LVM_Disks(void)
     while ((d = readdir(dir)) != NULL) {
         res = regexec(&lvol, d->d_name, 0, NULL, 0);
         if (res == 0) {
-            char           *path = malloc(PATH_MAX + 1);
+            char *path = (char*)malloc(PATH_MAX + 1);
             if (path == NULL) {
                 DEBUGMSGTL(("host/hr_disk",
                             "Add_LVM_Disks: cannot allocate memory for device %s",

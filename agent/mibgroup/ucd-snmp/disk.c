@@ -261,7 +261,7 @@ disk_parse_config(const char *token, char *cptr)
   if (numdisks == maxdisks) {
       if (maxdisks == 0) {
           maxdisks = 50;
-          disks = malloc(maxdisks * sizeof(struct diskpart));
+          disks = (struct diskpart *)malloc(maxdisks * sizeof(struct diskpart));
           if (!disks) {
               config_perror("malloc failed for new disk allocation.");
 	      netsnmp_config_error("\tignoring:  %s", cptr);
@@ -270,7 +270,7 @@ disk_parse_config(const char *token, char *cptr)
           memset(disks, 0, maxdisks * sizeof(struct diskpart));
       } else {
           maxdisks *= 2;
-          disks = realloc(disks, maxdisks * sizeof(struct diskpart));
+          disks = (struct diskpart *)realloc(disks, maxdisks * sizeof(struct diskpart));
           if (!disks) {
               config_perror("malloc failed for new disk allocation.");
 	      netsnmp_config_error("\tignoring:  %s", cptr);
@@ -321,7 +321,7 @@ disk_parse_config_all(const char *token, char *cptr)
   if (numdisks == maxdisks) {
       if (maxdisks == 0) {
           maxdisks = 50;
-          disks = malloc(maxdisks * sizeof(struct diskpart));
+          disks = (struct diskpart *)malloc(maxdisks * sizeof(struct diskpart));
           if (!disks) {
               config_perror("malloc failed for new disk allocation.");
 	      netsnmp_config_error("\tignoring:  %s", cptr);
@@ -330,7 +330,7 @@ disk_parse_config_all(const char *token, char *cptr)
           memset(disks, 0, maxdisks * sizeof(struct diskpart));
       } else {
           maxdisks *= 2;
-          disks = realloc(disks, maxdisks * sizeof(struct diskpart));
+          disks = (struct diskpart *)realloc(disks, maxdisks * sizeof(struct diskpart));
           if (!disks) {
               config_perror("malloc failed for new disk allocation.");
 	      netsnmp_config_error("\tignoring:  %s", cptr);
@@ -378,7 +378,7 @@ add_device(char *path, char *device, int minspace, int minpercent, int override)
   if (numdisks == maxdisks) {
       if (maxdisks == 0) {
           maxdisks = 50;
-          disks = malloc(maxdisks * sizeof(struct diskpart));
+          disks = (struct diskpart *)malloc(maxdisks * sizeof(struct diskpart));
           if (!disks) {
 	      netsnmp_config_error("\tignoring:  %s", device);
               return;
@@ -386,7 +386,7 @@ add_device(char *path, char *device, int minspace, int minpercent, int override)
           memset(disks, 0, maxdisks * sizeof(struct diskpart));
       } else {
           maxdisks *= 2;
-          disks = realloc(disks, maxdisks * sizeof(struct diskpart));
+          disks = (struct diskpart *)realloc(disks, maxdisks * sizeof(struct diskpart));
           if (!disks) {
               config_perror("malloc failed for new disk allocation.");
 	      netsnmp_config_error("\tignoring:  %s", device);
