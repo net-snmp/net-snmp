@@ -81,7 +81,7 @@ netsnmp_row_merge_status_get(netsnmp_handler_registration *reginfo,
         return NULL;
     }
     
-    rm_status = netsnmp_agent_get_list_data(reqinfo, buf);
+    rm_status = (netsnmp_row_merge_status*)netsnmp_agent_get_list_data(reqinfo, buf);
     if ((NULL == rm_status) && create_missing) {
         void *data_list;
         

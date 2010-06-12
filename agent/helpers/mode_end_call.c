@@ -101,7 +101,7 @@ netsnmp_mode_end_call_helper(netsnmp_mib_handler *handler,
                                     requests);
 
     /* then call the callback handlers */
-    for(ptr = handler->myvoid; ptr; ptr = ptr->next) {
+    for (ptr = (netsnmp_mode_handler_list*)handler->myvoid; ptr; ptr = ptr->next) {
         if (ptr->mode == NETSNMP_MODE_END_ALL_MODES ||
             reqinfo->mode == ptr->mode) {
             ret2 = netsnmp_call_handler(ptr->callback_handler, reginfo,

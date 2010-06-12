@@ -983,7 +983,7 @@ parse_injectHandler_conf(const char *token, char *cptr)
         return;
 
     cptr = copy_nword(cptr, handler_to_insert, sizeof(handler_to_insert));
-    handler = netsnmp_get_list_data(handler_reg, handler_to_insert);
+    handler = (netsnmp_mib_handler*)netsnmp_get_list_data(handler_reg, handler_to_insert);
     if (!handler) {
 	netsnmp_config_error("no \"%s\" handler registered.",
 			     handler_to_insert);

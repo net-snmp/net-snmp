@@ -108,7 +108,7 @@ netsnmp_table_dataset_delete_row(netsnmp_table_row *row)
     if (!row)
         return;
 
-    data = netsnmp_table_data_delete_row(row);
+    data = (netsnmp_table_data_set_storage*)netsnmp_table_data_delete_row(row);
     netsnmp_table_dataset_delete_all_data(data);
 }
 
@@ -489,7 +489,7 @@ netsnmp_table_data_set_helper_handler(netsnmp_mib_handler *handler,
             }
 
             newrowstash
-                = netsnmp_oid_stash_get_data(*stashp, suffix, suffix_len);
+                = (newrow_stash*)netsnmp_oid_stash_get_data(*stashp, suffix, suffix_len);
 
             if (!newrowstash) {
                 if (!row) {
@@ -815,7 +815,7 @@ netsnmp_extract_table_data_set_column(netsnmp_request_info *request,
                                      unsigned int column)
 {
     netsnmp_table_data_set_storage *data =
-        netsnmp_extract_table_row_data( request );
+        (netsnmp_table_data_set_storage*)netsnmp_extract_table_row_data( request );
     if (data) {
         data = netsnmp_table_data_set_find_column(data, column);
     }
@@ -1173,7 +1173,7 @@ netsnmp_table_dataset_get_newrow(netsnmp_request_info *request,
     if (NULL == stashp)
         return NULL;
 
-    newrowstash = netsnmp_oid_stash_get_data(*stashp, suffix, suffix_len);
+    newrowstash = (newrow_stash*)netsnmp_oid_stash_get_data(*stashp, suffix, suffix_len);
     if (NULL == newrowstash)
         return NULL;
 
@@ -1253,7 +1253,7 @@ netsnmp_mark_row_column_writable(netsnmp_table_row *row, int column,
         }
         data->column = column;
         data->writable = writable;
-        data->next = row->data;
+        data->next = (struct netsnmp_table_data_set_storage_s*)row->data;
         row->data = data;
     } else {
         data->writable = writable;
@@ -1305,7 +1305,7 @@ netsnmp_set_row_column(netsnmp_table_row *row, unsigned int column,
 
         data->column = column;
         data->type = type;
-        data->next = row->data;
+        data->next = (struct netsnmp_table_data_set_storage_s*)row->data;
         row->data = data;
     }
 

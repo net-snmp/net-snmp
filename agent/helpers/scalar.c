@@ -78,8 +78,8 @@ netsnmp_register_scalar(netsnmp_handler_registration *reginfo)
      * Extend the registered OID with space for the instance subid
      * (but don't extend the length just yet!)
      */
-    reginfo->rootoid = realloc(reginfo->rootoid,
-                              (reginfo->rootoid_len+1) * sizeof(oid) );
+    reginfo->rootoid = (oid*)realloc(reginfo->rootoid,
+                                    (reginfo->rootoid_len+1) * sizeof(oid) );
     reginfo->rootoid[ reginfo->rootoid_len ] = 0;
 
     netsnmp_inject_handler(reginfo, netsnmp_get_instance_handler());
@@ -113,8 +113,8 @@ netsnmp_register_read_only_scalar(netsnmp_handler_registration *reginfo)
      * Extend the registered OID with space for the instance subid
      * (but don't extend the length just yet!)
      */
-    reginfo->rootoid = realloc(reginfo->rootoid,
-                              (reginfo->rootoid_len+1) * sizeof(oid) );
+    reginfo->rootoid = (oid*)realloc(reginfo->rootoid,
+                                    (reginfo->rootoid_len+1) * sizeof(oid) );
     reginfo->rootoid[ reginfo->rootoid_len ] = 0;
 
     netsnmp_inject_handler(reginfo, netsnmp_get_instance_handler());

@@ -627,7 +627,7 @@ realloc_handle_ip_fmt(u_char ** buf, size_t * buf_len, size_t * out_len,
     char           *tstr;
     unsigned int    oflags;
 
-    if ((temp_buf = calloc(temp_buf_len, 1)) == NULL) {
+    if ((temp_buf = (u_char*)calloc(temp_buf_len, 1)) == NULL) {
         return 0;
     }
 
@@ -1002,7 +1002,7 @@ realloc_handle_auth_fmt(u_char ** buf, size_t * buf_len, size_t * out_len,
     size_t          tbuf_len = 64, tout_len = 0;
     int             i;
 
-    if ((temp_buf = calloc(tbuf_len, 1)) == NULL) {
+    if ((temp_buf = (u_char*)calloc(tbuf_len, 1)) == NULL) {
         return 0;
     }
 

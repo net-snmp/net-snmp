@@ -315,7 +315,7 @@ typedef struct ti_cache_info_s {
 
 static void
 netsnmp_free_ti_cache(void *it) {
-    ti_cache_info *beer = it;
+    ti_cache_info *beer = (ti_cache_info*)it;
     if (!it) return;
     if (beer->data_context && beer->free_context) {
             (beer->free_context)(beer->data_context, beer->iinfo);
@@ -341,7 +341,7 @@ netsnmp_iterator_remember(netsnmp_request_info *request,
         return NULL;
 
     /* extract existing cached state */
-    ti_info = netsnmp_request_get_list_data(request, TI_REQUEST_CACHE);
+    ti_info = (ti_cache_info*)netsnmp_request_get_list_data(request, TI_REQUEST_CACHE);
 
     /* no existing cached state.  make a new one. */
     if (!ti_info) {
@@ -476,7 +476,7 @@ netsnmp_table_iterator_helper_handler(netsnmp_mib_handler *handler,
                 request->processed = TABLE_ITERATOR_NOTAGAIN;
             }
 
-            ti_info =
+            ti_info = (ti_cache_info*)
                 netsnmp_request_get_list_data(request, TI_REQUEST_CACHE);
             if (!ti_info) {
                 ti_info = SNMP_MALLOC_TYPEDEF(ti_cache_info);
@@ -588,7 +588,7 @@ netsnmp_table_iterator_helper_handler(netsnmp_mib_handler *handler,
                     }
                     coloid[reginfo->rootoid_len + 1] = table_info->colnum;
 
-                    ti_info =
+                    ti_info = (ti_cache_info*)
                         netsnmp_request_get_list_data(request, TI_REQUEST_CACHE);
 
                     switch(reqinfo->mode) {
@@ -759,7 +759,7 @@ netsnmp_table_iterator_helper_handler(netsnmp_mib_handler *handler,
                 for(request = requests ; request; request = request->next) {
                     if (request->processed)
                         continue;
-                    ti_info =
+                    ti_info = (ti_cache_info*)
                         netsnmp_request_get_list_data(request,
                                                       TI_REQUEST_CACHE);
                     if (!ti_info->results) {
@@ -790,7 +790,7 @@ netsnmp_table_iterator_helper_handler(netsnmp_mib_handler *handler,
         for(request = requests ; request; request = request->next) {
             if (request->processed)
                 continue;
-            ti_info =
+            ti_info = (ti_cache_info*)
                 netsnmp_request_get_list_data(request, TI_REQUEST_CACHE);
             table_info =
                 netsnmp_extract_table_info(request);

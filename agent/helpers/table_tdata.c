@@ -344,7 +344,7 @@ _netsnmp_tdata_helper_handler(netsnmp_mib_handler *handler,
                 netsnmp_set_request_error(reqinfo, request, SNMP_ERR_GENERR);
                 continue;           /* eek */
             }
-            row = netsnmp_container_table_row_extract( request );
+            row = (netsnmp_tdata_row*)netsnmp_container_table_row_extract( request );
             if (!row && (reqinfo->mode == MODE_GET)) {
                 netsnmp_assert(row); /* yes, this will always hit */
                 netsnmp_set_request_error(reqinfo, request, SNMP_ERR_GENERR);
@@ -398,8 +398,8 @@ netsnmp_tdata_extract_table(netsnmp_request_info *request)
 netsnmp_container *
 netsnmp_tdata_extract_container(netsnmp_request_info *request)
 {
-    netsnmp_tdata *tdata = netsnmp_request_get_list_data(request,
-                                                         TABLE_TDATA_TABLE);
+    netsnmp_tdata *tdata = (netsnmp_tdata*)
+        netsnmp_request_get_list_data(request, TABLE_TDATA_TABLE);
     return ( tdata ? tdata->container : NULL );
 }
 
@@ -468,7 +468,7 @@ netsnmp_tdata_row *
 netsnmp_tdata_row_get(  netsnmp_tdata     *table,
                         netsnmp_tdata_row *row)
 {
-    return CONTAINER_FIND( table->container, row );
+    return (netsnmp_tdata_row*)CONTAINER_FIND( table->container, row );
 }
 
 /** returns the next row in the table */
@@ -503,7 +503,7 @@ netsnmp_tdata_row_get_byoid(netsnmp_tdata *table,
 
     index.oids = searchfor;
     index.len  = searchfor_len;
-    return CONTAINER_FIND( table->container, &index );
+    return (netsnmp_tdata_row*)CONTAINER_FIND( table->container, &index );
 }
 
 /** finds the lexically next row in the 'tdata' table
@@ -532,7 +532,7 @@ netsnmp_tdata_row_next_byoid(netsnmp_tdata *table,
 
     index.oids = searchfor;
     index.len  = searchfor_len;
-    return CONTAINER_NEXT( table->container, &index );
+    return (netsnmp_tdata_row*)CONTAINER_NEXT( table->container, &index );
 }
 
 int

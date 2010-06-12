@@ -125,10 +125,10 @@ netsnmp_large_fd_set_resize(netsnmp_large_fd_set * fdset, int setsize)
     if (setsize > FD_SETSIZE) {
         fd_set_bytes = NETSNMP_FD_SET_BYTES(setsize);
         if (fdset->lfs_setsize > FD_SETSIZE)
-            fdset->lfs_setptr = realloc(fdset->lfs_setptr, fd_set_bytes);
+            fdset->lfs_setptr = (struct fd_set *)realloc(fdset->lfs_setptr, fd_set_bytes);
         else {
-            fdset->lfs_setptr = malloc(fd_set_bytes);
-            *fdset->lfs_setptr = fdset->lfs_set;
+            fdset->lfs_setptr = (struct fd_set *)malloc(fd_set_bytes);
+           *fdset->lfs_setptr = fdset->lfs_set;
         }
     } else {
         if (fdset->lfs_setsize > FD_SETSIZE) {

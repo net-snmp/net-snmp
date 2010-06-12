@@ -568,7 +568,7 @@ _data_lookup(netsnmp_handler_registration *reginfo,
          * column, if necessary.
          */
         _set_key( tad, request, tblreq_info, &key, &index );
-        row = _find_next_row(tad->table, tblreq_info, key);
+        row = (netsnmp_index*)_find_next_row(tad->table, tblreq_info, key);
         if (row) {
             /*
              * update indexes in tblreq_info (index & varbind),
@@ -604,7 +604,7 @@ _data_lookup(netsnmp_handler_registration *reginfo,
     else {
 
         _set_key( tad, request, tblreq_info, &key, &index );
-        row = CONTAINER_FIND(tad->table, key);
+        row = (netsnmp_index*)CONTAINER_FIND(tad->table, key);
         if (NULL == row) {
             /*
              * not results found. For a get, that is an error
@@ -807,7 +807,7 @@ netsnmp_index *
 netsnmp_table_index_find_next_row(netsnmp_container *c,
                                   netsnmp_table_request_info *tblreq)
 {
-    return _find_next_row(c, tblreq, NULL );
+    return (netsnmp_index*)_find_next_row(c, tblreq, NULL );
 }
 
 /* ==================================
