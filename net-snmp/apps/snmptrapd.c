@@ -728,7 +728,7 @@ main(int argc, char *argv[])
                         *cp = ' ';
                 } else {
                     /* Old style: implicitly "print=format" */
-                    trap1_fmt_str_remember = malloc(strlen(optarg) + 7);
+                    trap1_fmt_str_remember = (char *)malloc(strlen(optarg) + 7);
                     sprintf( trap1_fmt_str_remember, "print %s", optarg );
                 }
             } else {
@@ -912,7 +912,7 @@ main(int argc, char *argv[])
         for (i = optind; i < argc; i++) {
             char *astring;
             if (listen_ports != NULL) {
-                astring = malloc(strlen(listen_ports) + 2 + strlen(argv[i]));
+                astring = (char *)malloc(strlen(listen_ports) + 2 + strlen(argv[i]));
                 if (astring == NULL) {
                     fprintf(stderr, "malloc failure processing argv[%d]\n", i);
                     exit(1);

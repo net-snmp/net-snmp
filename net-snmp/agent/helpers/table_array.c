@@ -229,7 +229,7 @@ netsnmp_find_table_array_handler(netsnmp_handler_registration *reginfo)
 netsnmp_container      *
 netsnmp_extract_array_context(netsnmp_request_info *request)
 {
-    return netsnmp_request_get_list_data(request, TABLE_ARRAY_NAME);
+    return (netsnmp_container*)netsnmp_request_get_list_data(request, TABLE_ARRAY_NAME);
 }
 
 /** this function is called to validate RowStatus transitions. */
@@ -491,7 +491,7 @@ process_get_requests(netsnmp_handler_registration *reginfo,
             index.oids = tblreq_info->index_oid;
             index.len = tblreq_info->index_oid_len;
 
-            row = CONTAINER_FIND(tad->table, &index);
+            row = (netsnmp_index*)CONTAINER_FIND(tad->table, &index);
             if (!row) {
                 DEBUGMSGTL(("table_array:get", "no row found\n"));
                 netsnmp_set_request_error(agtreq_info, current,
@@ -562,7 +562,7 @@ group_requests(netsnmp_agent_request_info *agtreq_info,
          */
         index.oids = tblreq_info->index_oid;
         index.len = tblreq_info->index_oid_len;
-        tmp = CONTAINER_FIND(request_group, &index);
+        tmp = (netsnmp_index*)CONTAINER_FIND(request_group, &index);
         if (tmp) {
             DEBUGMSGTL(("table_array:group",
                         "    existing group:"));
@@ -600,7 +600,7 @@ group_requests(netsnmp_agent_request_info *agtreq_info,
          * search for row. all changes are made to the original row,
          * later, we'll make a copy in undo_info before we start processing.
          */
-        row = g->existing_row = CONTAINER_FIND(tad->table, &index);
+        row = g->existing_row = (netsnmp_index*)CONTAINER_FIND(tad->table, &index);
         if (!g->existing_row) {
             if (!tad->cb->create_row) {
                 if(MODE_IS_SET(agtreq_info->mode))

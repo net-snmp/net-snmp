@@ -1814,7 +1814,7 @@ dump_registry(void)
                     if (myptr2->label_a && myptr2->label_a[0]) {
                         if (strcmp(myptr2->label_a, "old_api") == 0) {
                             struct variable *vp =
-                                myptr2->reginfo->handler->myvoid;
+                                (struct variable*)myptr2->reginfo->handler->myvoid;
 
                             if (!sprint_realloc_objid(&s, &sl, &sl_o, 1,
                                                  vp->name, vp->namelen)) {

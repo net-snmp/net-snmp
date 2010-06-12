@@ -99,7 +99,7 @@ _baby_steps_helper(netsnmp_mib_handler *handler,
     DEBUGMSGTL(("baby_steps", "Got request, mode %s\n",
                 se_find_label_in_slist("agent_mode",reqinfo->mode)));
 
-    bs_modes = handler->myvoid;
+    bs_modes = (netsnmp_baby_steps_modes*)handler->myvoid;
     netsnmp_assert(NULL != bs_modes);
 
     switch (reqinfo->mode) {

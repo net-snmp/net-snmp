@@ -117,7 +117,7 @@ netsnmp_get_timed_stash_cache_handler(int timeout, oid *rootoid, size_t rootoid_
 netsnmp_oid_stash_node  **
 netsnmp_extract_stash_cache(netsnmp_agent_request_info *reqinfo)
 {
-    return netsnmp_agent_get_list_data(reqinfo, STASH_CACHE_NAME);
+    return (netsnmp_oid_stash_node**)netsnmp_agent_get_list_data(reqinfo, STASH_CACHE_NAME);
 }
 
 
@@ -148,7 +148,7 @@ netsnmp_stash_cache_helper(netsnmp_mib_handler *handler,
     case MODE_GET:
         DEBUGMSGTL(("helper:stash_cache", "Processing GET request\n"));
         for(request = requests; request; request = request->next) {
-            cdata =
+            cdata = (netsnmp_variable_list*)
                 netsnmp_oid_stash_get_data(cinfo->cache,
                                            requests->requestvb->name,
                                            requests->requestvb->name_length);
@@ -170,7 +170,7 @@ netsnmp_stash_cache_helper(netsnmp_mib_handler *handler,
                                                requests->requestvb->name,
                                                requests->requestvb->name_length);
             if (cnode && cnode->thedata) {
-                cdata = cnode->thedata;
+                cdata =  (netsnmp_variable_list*)cnode->thedata;
                 if (cdata->val.string && cdata->name && cdata->name_length) {
                     DEBUGMSGTL(("helper:stash_cache", "Found cached GETNEXT varbind\n"));
                     DEBUGMSGOID(("helper:stash_cache", cdata->name, cdata->name_length));

@@ -393,7 +393,7 @@ netsnmp_register_cache_handler(netsnmp_handler_registration * reginfo,
 NETSNMP_STATIC_INLINE char *
 _build_cache_name(const char *name)
 {
-    char *dup = malloc(strlen(name) + strlen(CACHE_NAME) + 2);
+    char *dup = (char*)malloc(strlen(name) + strlen(CACHE_NAME) + 2);
     if (NULL == dup)
         return NULL;
     sprintf(dup, "%s:%s", CACHE_NAME, name);
@@ -424,7 +424,7 @@ netsnmp_cache_reqinfo_extract(netsnmp_agent_request_info * reqinfo,
 {
     netsnmp_cache  *result;
     char *cache_name = _build_cache_name(name);
-    result = netsnmp_agent_get_list_data(reqinfo, cache_name);
+    result = (netsnmp_cache*)netsnmp_agent_get_list_data(reqinfo, cache_name);
     SNMP_FREE(cache_name);
     return result;
 }

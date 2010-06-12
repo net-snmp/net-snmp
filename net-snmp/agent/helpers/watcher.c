@@ -151,7 +151,7 @@ typedef struct {
 NETSNMP_STATIC_INLINE netsnmp_watcher_cache*
 netsnmp_watcher_cache_create(const void* data, size_t size)
 {
-    netsnmp_watcher_cache *res =
+    netsnmp_watcher_cache *res = (netsnmp_watcher_cache*)
         malloc(sizeof(netsnmp_watcher_cache) + size - 1);
     if (res) {
         res->size = size;
@@ -247,7 +247,7 @@ netsnmp_watcher_helper_handler(netsnmp_mib_handler *handler,
         break;
 
     case MODE_SET_UNDO:
-        old_data = netsnmp_request_get_list_data(requests, "watcher");
+        old_data = (netsnmp_watcher_cache*)netsnmp_request_get_list_data(requests, "watcher");
         set_data(winfo, old_data->data, old_data->size);
         break;
 
