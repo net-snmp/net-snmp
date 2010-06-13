@@ -699,7 +699,7 @@ _mfd_udpEndpointTable_post_request(netsnmp_mib_handler *handler,
                                    netsnmp_agent_request_info *agtreq_info,
                                    netsnmp_request_info *requests)
 {
-    udpEndpointTable_rowreq_ctx *rowreq_ctx =
+    udpEndpointTable_rowreq_ctx *rowreq_ctx = (udpEndpointTable_rowreq_ctx*)
         netsnmp_container_table_row_extract(requests);
     int             rc, packet_rc;
 
@@ -746,7 +746,7 @@ _mfd_udpEndpointTable_object_lookup(netsnmp_mib_handler *handler,
                                     netsnmp_request_info *requests)
 {
     int             rc = SNMP_ERR_NOERROR;
-    udpEndpointTable_rowreq_ctx *rowreq_ctx =
+    udpEndpointTable_rowreq_ctx *rowreq_ctx = (udpEndpointTable_rowreq_ctx*)
         netsnmp_container_table_row_extract(requests);
 
     DEBUGMSGTL(("internal:udpEndpointTable:_mfd_udpEndpointTable_object_lookup", "called\n"));
@@ -817,7 +817,7 @@ _mfd_udpEndpointTable_get_values(netsnmp_mib_handler *handler,
                                  netsnmp_agent_request_info *agtreq_info,
                                  netsnmp_request_info *requests)
 {
-    udpEndpointTable_rowreq_ctx *rowreq_ctx =
+    udpEndpointTable_rowreq_ctx *rowreq_ctx = (udpEndpointTable_rowreq_ctx*)
         netsnmp_container_table_row_extract(requests);
     netsnmp_table_request_info *tri;
     u_char         *old_string;
@@ -1066,7 +1066,7 @@ udpEndpointTable_row_find_by_mib_index(udpEndpointTable_mib_index *
     if (MFD_SUCCESS != rc)
         return NULL;
 
-    rowreq_ctx =
+    rowreq_ctx = (udpEndpointTable_rowreq_ctx*)
         CONTAINER_FIND(udpEndpointTable_if_ctx.container, &oid_idx);
 
     return rowreq_ctx;

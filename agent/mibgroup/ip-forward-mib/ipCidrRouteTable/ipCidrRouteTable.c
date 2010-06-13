@@ -704,7 +704,7 @@ ipCidrRouteInfo_get(ipCidrRouteTable_rowreq_ctx * rowreq_ctx,
      */
     /** nullOidLen is in bytes, so not sizeof(oid) needed */
     if ((*ipCidrRouteInfo_val_ptr_len_ptr) < nullOidLen) {
-        (*ipCidrRouteInfo_val_ptr_ptr) = malloc(nullOidLen);
+        (*ipCidrRouteInfo_val_ptr_ptr) = (oid*)malloc(nullOidLen);
         if (NULL == (*ipCidrRouteInfo_val_ptr_ptr))
             return MFD_ERROR;
     }

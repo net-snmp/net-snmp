@@ -592,7 +592,7 @@ _mfd_ipIfStatsTable_post_request(netsnmp_mib_handler *handler,
                                  netsnmp_agent_request_info *agtreq_info,
                                  netsnmp_request_info *requests)
 {
-    ipIfStatsTable_rowreq_ctx *rowreq_ctx =
+    ipIfStatsTable_rowreq_ctx *rowreq_ctx = (ipIfStatsTable_rowreq_ctx*)
         netsnmp_container_table_row_extract(requests);
     int             rc, packet_rc;
 
@@ -639,7 +639,7 @@ _mfd_ipIfStatsTable_object_lookup(netsnmp_mib_handler *handler,
                                   netsnmp_request_info *requests)
 {
     int             rc = SNMP_ERR_NOERROR;
-    ipIfStatsTable_rowreq_ctx *rowreq_ctx =
+    ipIfStatsTable_rowreq_ctx *rowreq_ctx = (ipIfStatsTable_rowreq_ctx*)
         netsnmp_container_table_row_extract(requests);
 
     DEBUGMSGTL(("internal:ipIfStatsTable:_mfd_ipIfStatsTable_object_lookup", "called\n"));
@@ -1143,7 +1143,7 @@ _mfd_ipIfStatsTable_get_values(netsnmp_mib_handler *handler,
                                netsnmp_agent_request_info *agtreq_info,
                                netsnmp_request_info *requests)
 {
-    ipIfStatsTable_rowreq_ctx *rowreq_ctx =
+    ipIfStatsTable_rowreq_ctx *rowreq_ctx = (ipIfStatsTable_rowreq_ctx*)
         netsnmp_container_table_row_extract(requests);
     netsnmp_table_request_info *tri;
     u_char         *old_string;
@@ -1389,7 +1389,7 @@ ipIfStatsTable_row_find_by_mib_index(ipIfStatsTable_mib_index * mib_idx)
     if (MFD_SUCCESS != rc)
         return NULL;
 
-    rowreq_ctx = CONTAINER_FIND(ipIfStatsTable_if_ctx.container, &oid_idx);
+    rowreq_ctx = (ipIfStatsTable_rowreq_ctx*)CONTAINER_FIND(ipIfStatsTable_if_ctx.container, &oid_idx);
 
     return rowreq_ctx;
 }

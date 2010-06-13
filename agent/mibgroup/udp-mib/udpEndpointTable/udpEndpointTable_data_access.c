@@ -243,7 +243,8 @@ udpEndpointTable_container_load(netsnmp_container *container)
         netsnmp_access_udp_endpoint_container_free(ep_c, 0);
         return MFD_RESOURCE_UNAVAILABLE;
     }
-    for (ep = ITERATOR_FIRST(ep_it); ep; ep = ITERATOR_NEXT(ep_it)) {
+    for (ep = (netsnmp_udp_endpoint_entry*)ITERATOR_FIRST(ep_it); ep;
+         ep = (netsnmp_udp_endpoint_entry*)ITERATOR_NEXT (ep_it)) {
 
         /*
          * TODO:352:M: |   |-> set indexes in new udpEndpointTable rowreq context.

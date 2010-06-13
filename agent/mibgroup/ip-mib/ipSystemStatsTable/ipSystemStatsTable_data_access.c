@@ -155,7 +155,7 @@ _check_for_updates(ipSystemStatsTable_rowreq_ctx * rowreq_ctx,
     /*
      * check for matching entry. works because indexes are the same.
      */
-    netsnmp_systemstats_entry *systemstats_entry =
+    netsnmp_systemstats_entry *systemstats_entry = (netsnmp_systemstats_entry*)
         CONTAINER_FIND(stats, rowreq_ctx->data);
     if (NULL == systemstats_entry) {
         DEBUGMSGTL(("ipSystemStatsTable:access",

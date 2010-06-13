@@ -194,7 +194,7 @@ _add_or_update_arp_entry(netsnmp_arp_entry *arp_entry,
           rowreq_ctx->data->arp_ipaddress_len))) {
 
         /* try to find old entry */
-        old = CONTAINER_FIND(container, rowreq_ctx);
+        old = (inetNetToMediaTable_rowreq_ctx*)CONTAINER_FIND(container, rowreq_ctx);
         if (old != NULL) {
             /* the entry is already there, update it */
             netsnmp_access_arp_entry_update(old->data, arp_entry);
@@ -316,7 +316,7 @@ inetNetToMediaTable_container_load(netsnmp_container *container)
                        (netsnmp_container_obj_func *) _collect_invalid_arp_ctx,
                        to_delete);
     while (CONTAINER_SIZE(to_delete)) {
-        inetNetToMediaTable_rowreq_ctx *ctx = CONTAINER_FIRST(to_delete);
+        inetNetToMediaTable_rowreq_ctx *ctx = (inetNetToMediaTable_rowreq_ctx*)CONTAINER_FIRST(to_delete);
         CONTAINER_REMOVE(container, ctx);
         inetNetToMediaTable_release_rowreq_ctx(ctx);
         CONTAINER_REMOVE(to_delete, NULL);

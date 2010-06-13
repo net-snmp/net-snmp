@@ -417,7 +417,7 @@ ifName_get(ifXTable_rowreq_ctx * rowreq_ctx, char **ifName_val_ptr_ptr,
         /*
          * allocate space for ifName data
          */
-        (*ifName_val_ptr_ptr) = malloc(tmp_len);
+        (*ifName_val_ptr_ptr) = (char*)malloc(tmp_len);
         if (NULL == (*ifName_val_ptr_ptr)) {
             snmp_log(LOG_ERR, "could not allocate memory\n");
             return MFD_ERROR;
@@ -1492,7 +1492,7 @@ ifAlias_get(ifXTable_rowreq_ctx * rowreq_ctx, char **ifAlias_val_ptr_ptr,
         /*
          * allocate space for ifAlias data
          */
-        (*ifAlias_val_ptr_ptr) =
+        (*ifAlias_val_ptr_ptr) = (char*)
             malloc(rowreq_ctx->data.ifAlias_len *
                    sizeof(rowreq_ctx->data.ifAlias[0]));
         if (NULL == (*ifAlias_val_ptr_ptr)) {

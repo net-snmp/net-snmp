@@ -671,7 +671,7 @@ _mfd_inetNetToMediaTable_post_request(netsnmp_mib_handler *handler, netsnmp_hand
                                       *agtreq_info,
                                       netsnmp_request_info *requests)
 {
-    inetNetToMediaTable_rowreq_ctx *rowreq_ctx =
+    inetNetToMediaTable_rowreq_ctx *rowreq_ctx = (inetNetToMediaTable_rowreq_ctx*)
         netsnmp_container_table_row_extract(requests);
     int             rc, packet_rc;
 
@@ -871,7 +871,7 @@ _mfd_inetNetToMediaTable_object_lookup(netsnmp_mib_handler *handler, netsnmp_han
                                        netsnmp_request_info *requests)
 {
     int             rc = SNMP_ERR_NOERROR;
-    inetNetToMediaTable_rowreq_ctx *rowreq_ctx =
+    inetNetToMediaTable_rowreq_ctx *rowreq_ctx = (inetNetToMediaTable_rowreq_ctx*)
         netsnmp_container_table_row_extract(requests);
 
     DEBUGMSGTL(("internal:inetNetToMediaTable:_mfd_inetNetToMediaTable_object_lookup", "called\n"));
@@ -1009,7 +1009,7 @@ _mfd_inetNetToMediaTable_get_values(netsnmp_mib_handler *handler,
                                     *agtreq_info,
                                     netsnmp_request_info *requests)
 {
-    inetNetToMediaTable_rowreq_ctx *rowreq_ctx =
+    inetNetToMediaTable_rowreq_ctx *rowreq_ctx = (inetNetToMediaTable_rowreq_ctx*)
         netsnmp_container_table_row_extract(requests);
     netsnmp_table_request_info *tri;
     u_char         *old_string;
@@ -1237,7 +1237,7 @@ _mfd_inetNetToMediaTable_check_objects(netsnmp_mib_handler *handler, netsnmp_han
                                        *agtreq_info,
                                        netsnmp_request_info *requests)
 {
-    inetNetToMediaTable_rowreq_ctx *rowreq_ctx =
+    inetNetToMediaTable_rowreq_ctx *rowreq_ctx = (inetNetToMediaTable_rowreq_ctx*)
         netsnmp_container_table_row_extract(requests);
     netsnmp_table_request_info *tri;
     int             rc;
@@ -1285,7 +1285,7 @@ _mfd_inetNetToMediaTable_check_dependencies(netsnmp_mib_handler *handler, netsnm
                                             netsnmp_request_info *requests)
 {
     int             rc;
-    inetNetToMediaTable_rowreq_ctx *rowreq_ctx =
+    inetNetToMediaTable_rowreq_ctx *rowreq_ctx = (inetNetToMediaTable_rowreq_ctx*)
         netsnmp_container_table_row_extract(requests);
     DEBUGMSGTL(("internal:inetNetToMediaTable:_mfd_inetNetToMediaTable_check_dependencies", "called\n"));
 
@@ -1371,7 +1371,7 @@ _mfd_inetNetToMediaTable_undo_setup(netsnmp_mib_handler *handler,
                                     netsnmp_request_info *requests)
 {
     int             rc;
-    inetNetToMediaTable_rowreq_ctx *rowreq_ctx =
+    inetNetToMediaTable_rowreq_ctx *rowreq_ctx = (inetNetToMediaTable_rowreq_ctx*)
         netsnmp_container_table_row_extract(requests);
 
     DEBUGMSGTL(("internal:inetNetToMediaTable:_mfd_inetNetToMediaTable_undo_setup", "called\n"));
@@ -1436,7 +1436,7 @@ _mfd_inetNetToMediaTable_undo_cleanup(netsnmp_mib_handler *handler, netsnmp_hand
                                       *agtreq_info,
                                       netsnmp_request_info *requests)
 {
-    inetNetToMediaTable_rowreq_ctx *rowreq_ctx =
+    inetNetToMediaTable_rowreq_ctx *rowreq_ctx = (inetNetToMediaTable_rowreq_ctx*)
         netsnmp_container_table_row_extract(requests);
     int             rc;
 
@@ -1542,7 +1542,7 @@ _mfd_inetNetToMediaTable_set_values(netsnmp_mib_handler *handler,
                                     *agtreq_info,
                                     netsnmp_request_info *requests)
 {
-    inetNetToMediaTable_rowreq_ctx *rowreq_ctx =
+    inetNetToMediaTable_rowreq_ctx *rowreq_ctx = (inetNetToMediaTable_rowreq_ctx*)
         netsnmp_container_table_row_extract(requests);
     netsnmp_table_request_info *tri;
     int             rc = SNMP_ERR_NOERROR;
@@ -1590,7 +1590,7 @@ _mfd_inetNetToMediaTable_commit(netsnmp_mib_handler *handler,
                                 netsnmp_request_info *requests)
 {
     int             rc;
-    inetNetToMediaTable_rowreq_ctx *rowreq_ctx =
+    inetNetToMediaTable_rowreq_ctx *rowreq_ctx = (inetNetToMediaTable_rowreq_ctx*)
         netsnmp_container_table_row_extract(requests);
 
     DEBUGMSGTL(("internal:inetNetToMediaTable:_mfd_inetNetToMediaTable_commit", "called\n"));
@@ -1624,7 +1624,7 @@ _mfd_inetNetToMediaTable_undo_commit(netsnmp_mib_handler *handler,
                                      netsnmp_request_info *requests)
 {
     int             rc;
-    inetNetToMediaTable_rowreq_ctx *rowreq_ctx =
+    inetNetToMediaTable_rowreq_ctx *rowreq_ctx = (inetNetToMediaTable_rowreq_ctx*)
         netsnmp_container_table_row_extract(requests);
 
     DEBUGMSGTL(("internal:inetNetToMediaTable:_mfd_inetNetToMediaTable_undo_commit", "called\n"));
@@ -1718,7 +1718,7 @@ _mfd_inetNetToMediaTable_undo_values(netsnmp_mib_handler *handler,
                                      netsnmp_request_info *requests)
 {
     int             rc;
-    inetNetToMediaTable_rowreq_ctx *rowreq_ctx =
+    inetNetToMediaTable_rowreq_ctx *rowreq_ctx = (inetNetToMediaTable_rowreq_ctx*)
         netsnmp_container_table_row_extract(requests);
     netsnmp_table_request_info *tri;
 
@@ -1773,7 +1773,7 @@ _mfd_inetNetToMediaTable_irreversible_commit(netsnmp_mib_handler *handler, netsn
                                              *agtreq_info, netsnmp_request_info
                                              *requests)
 {
-    inetNetToMediaTable_rowreq_ctx *rowreq_ctx =
+    inetNetToMediaTable_rowreq_ctx *rowreq_ctx = (inetNetToMediaTable_rowreq_ctx*)
         netsnmp_container_table_row_extract(requests);
 
     DEBUGMSGTL(("internal:inetNetToMediaTable:_mfd_inetNetToMediaTable_irreversible:commit", "called\n"));
@@ -1977,7 +1977,7 @@ inetNetToMediaTable_row_find_by_mib_index(inetNetToMediaTable_mib_index *
     if (MFD_SUCCESS != rc)
         return NULL;
 
-    rowreq_ctx =
+    rowreq_ctx = (inetNetToMediaTable_rowreq_ctx*)
         CONTAINER_FIND(inetNetToMediaTable_if_ctx.container, &oid_idx);
 
     return rowreq_ctx;

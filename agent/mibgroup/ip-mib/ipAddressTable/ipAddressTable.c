@@ -655,7 +655,7 @@ ipAddressPrefix_get(ipAddressTable_rowreq_ctx * rowreq_ctx,
 
     len *= sizeof((*ipAddressPrefix_val_ptr_ptr)[0]);
     if ((*ipAddressPrefix_val_ptr_len_ptr) < len) {
-        (*ipAddressPrefix_val_ptr_ptr) = malloc(len);
+        (*ipAddressPrefix_val_ptr_ptr) = (oid*)malloc(len);
         if (NULL == (*ipAddressPrefix_val_ptr_ptr)) {
             snmp_log(LOG_ERR, "could not allocate memory\n");
             return MFD_ERROR;

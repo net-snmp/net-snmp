@@ -35,7 +35,7 @@ netsnmp_ioctl_ipaddress_extras_get(netsnmp_ipaddress_entry *entry)
     if ((NULL == entry) || (NULL == entry->arch_data))
         return NULL;
 
-    return netsnmp_get_list_data(entry->arch_data, LIST_TOKEN);
+    return (_ioctl_extras*)netsnmp_get_list_data(entry->arch_data, LIST_TOKEN);
 }
 
 /**
@@ -383,7 +383,7 @@ _next_alias(const char *if_name)
     netsnmp_assert(NULL != ifc.ifc_buf);
     DEBUGMSGTL(("access:ipaddress:container", "processing %d interfaces\n", interfaces));
 
-    alias_list = malloc(interfaces * sizeof(int));
+    alias_list = (int*)malloc(interfaces * sizeof(int));
     if (NULL == alias_list) {
         close(sd);
         return -2;

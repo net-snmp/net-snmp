@@ -201,13 +201,13 @@ static void
 _check_entry_for_updates(ipAddressTable_rowreq_ctx * rowreq_ctx,
                          void **magic)
 {
-    netsnmp_container *ipaddress_container = magic[0];
-    netsnmp_container *to_delete = (netsnmp_container *) magic[1];
+    netsnmp_container *ipaddress_container = (netsnmp_container*)magic[0];
+    netsnmp_container *to_delete           = (netsnmp_container*)magic[1];
 
     /*
      * check for matching entry using secondary index.
      */
-    netsnmp_ipaddress_entry *ipaddress_entry =
+    netsnmp_ipaddress_entry *ipaddress_entry = (netsnmp_ipaddress_entry*)
         CONTAINER_FIND(ipaddress_container, rowreq_ctx->data);
     if (NULL == ipaddress_entry) {
         DEBUGMSGTL(("ipAddressTable:access", "removing missing entry\n"));
@@ -379,7 +379,7 @@ ipAddressTable_container_load(netsnmp_container *container)
             /*
              * get from delete list
              */
-            tmp_ctx = CONTAINER_FIRST(tmp_container);
+            tmp_ctx = (ipAddressTable_rowreq_ctx*)CONTAINER_FIRST(tmp_container);
 
             /*
              * release context, delete from table container

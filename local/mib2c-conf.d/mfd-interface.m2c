@@ -597,7 +597,7 @@ _mfd_${context}_post_request(netsnmp_mib_handler *handler,
                              netsnmp_agent_request_info *agtreq_info,
                              netsnmp_request_info *requests)
 {
-    ${context}_rowreq_ctx *rowreq_ctx =
+    ${context}_rowreq_ctx *rowreq_ctx = (${context}_rowreq_ctx*)
                   netsnmp_container_table_row_extract(requests);
     int rc, packet_rc;
 
@@ -771,7 +771,7 @@ _mfd_${context}_object_lookup(netsnmp_mib_handler *handler,
                          netsnmp_request_info *requests)
 {
     int                    rc = SNMP_ERR_NOERROR;
-    ${context}_rowreq_ctx *rowreq_ctx =
+    ${context}_rowreq_ctx *rowreq_ctx = (${context}_rowreq_ctx*)
                   netsnmp_container_table_row_extract(requests);
     
     DEBUGMSGTL(("internal:${context}:_mfd_${context}_object_lookup","called\n"));
@@ -936,7 +936,7 @@ _mfd_${context}_get_values(netsnmp_mib_handler *handler,
                          netsnmp_agent_request_info *agtreq_info,
                          netsnmp_request_info *requests)
 {
-    ${context}_rowreq_ctx *rowreq_ctx =
+    ${context}_rowreq_ctx *rowreq_ctx = (${context}_rowreq_ctx*)
                   netsnmp_container_table_row_extract(requests);
     netsnmp_table_request_info * tri;
     u_char                     * old_string;
@@ -1092,7 +1092,7 @@ _mfd_${context}_check_objects(netsnmp_mib_handler *handler,
                          netsnmp_agent_request_info *agtreq_info,
                          netsnmp_request_info *requests)
 {
-    ${context}_rowreq_ctx *rowreq_ctx =
+    ${context}_rowreq_ctx *rowreq_ctx = (${context}_rowreq_ctx*)
                   netsnmp_container_table_row_extract(requests);
     netsnmp_table_request_info * tri;
     int                          rc;
@@ -1139,7 +1139,7 @@ _mfd_${context}_check_dependencies(netsnmp_mib_handler *handler,
                          netsnmp_request_info *requests)
 {
     int                    rc;
-    ${context}_rowreq_ctx *rowreq_ctx =
+    ${context}_rowreq_ctx *rowreq_ctx = (${context}_rowreq_ctx*)
                   netsnmp_container_table_row_extract(requests);
     DEBUGMSGTL(("internal:${context}:_mfd_${context}_check_dependencies","called\n"));
 
@@ -1209,7 +1209,7 @@ _mfd_${context}_undo_setup(netsnmp_mib_handler *handler,
                          netsnmp_request_info *requests)
 {
     int                    rc;
-    ${context}_rowreq_ctx *rowreq_ctx =
+    ${context}_rowreq_ctx *rowreq_ctx = (${context}_rowreq_ctx*)
                   netsnmp_container_table_row_extract(requests);
 
     DEBUGMSGTL(("internal:${context}:_mfd_${context}_undo_setup","called\n"));
@@ -1273,7 +1273,7 @@ _mfd_${context}_undo_cleanup(netsnmp_mib_handler *handler,
                              netsnmp_agent_request_info *agtreq_info,
                              netsnmp_request_info *requests)
 {
-    ${context}_rowreq_ctx *rowreq_ctx =
+    ${context}_rowreq_ctx *rowreq_ctx = (${context}_rowreq_ctx*)
                   netsnmp_container_table_row_extract(requests);
     int rc;
 
@@ -1361,7 +1361,7 @@ _mfd_${context}_set_values(netsnmp_mib_handler *handler,
                          netsnmp_agent_request_info *agtreq_info,
                          netsnmp_request_info *requests)
 {
-    ${context}_rowreq_ctx *rowreq_ctx =
+    ${context}_rowreq_ctx *rowreq_ctx = (${context}_rowreq_ctx*)
                   netsnmp_container_table_row_extract(requests);
     netsnmp_table_request_info * tri;
     int                          rc = SNMP_ERR_NOERROR;
@@ -1407,7 +1407,7 @@ _mfd_${context}_commit(netsnmp_mib_handler *handler,
                          netsnmp_request_info *requests)
 {
     int                    rc;
-    ${context}_rowreq_ctx *rowreq_ctx =
+    ${context}_rowreq_ctx *rowreq_ctx = (${context}_rowreq_ctx*)
                   netsnmp_container_table_row_extract(requests);
 
     DEBUGMSGTL(("internal:${context}:_mfd_${context}_commit","called\n"));
@@ -1440,7 +1440,7 @@ _mfd_${context}_undo_commit(netsnmp_mib_handler *handler,
                          netsnmp_request_info *requests)
 {
     int                    rc;
-    ${context}_rowreq_ctx *rowreq_ctx =
+    ${context}_rowreq_ctx *rowreq_ctx = (${context}_rowreq_ctx*)
                   netsnmp_container_table_row_extract(requests);
 
     DEBUGMSGTL(("internal:${context}:_mfd_${context}_undo_commit","called\n"));
@@ -1521,7 +1521,7 @@ _mfd_${context}_undo_values(netsnmp_mib_handler *handler,
                          netsnmp_request_info *requests)
 {
     int                    rc;
-    ${context}_rowreq_ctx *rowreq_ctx =
+    ${context}_rowreq_ctx *rowreq_ctx = (${context}_rowreq_ctx*)
                   netsnmp_container_table_row_extract(requests);
     netsnmp_table_request_info * tri;
 
@@ -1578,7 +1578,7 @@ _mfd_${context}_irreversible_commit(netsnmp_mib_handler *handler,
 @   if $m2c_irreversible_commit == 1@
     int                    rc;
 @   end@
-    ${context}_rowreq_ctx *rowreq_ctx =
+    ${context}_rowreq_ctx *rowreq_ctx = (${context}_rowreq_ctx*)
                   netsnmp_container_table_row_extract(requests);
     
     DEBUGMSGTL(("internal:${context}:_mfd_${context}_irreversible:commit","called\n"));
@@ -1659,7 +1659,7 @@ ${context}_row_find_by_mib_index(${context}_mib_index *mib_idx)
     if (MFD_SUCCESS != rc)
         return NULL;
 
-    rowreq_ctx = CONTAINER_FIND(${context}_if_ctx.container, &oid_idx);
+    rowreq_ctx = (${context}_rowreq_ctx*)CONTAINER_FIND(${context}_if_ctx.container, &oid_idx);
 
     return rowreq_ctx;
 }

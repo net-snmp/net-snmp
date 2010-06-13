@@ -272,7 +272,7 @@ _check_interface_entry_for_updates(ifTable_rowreq_ctx * rowreq_ctx,
      * both containers use the same index.
      */
     netsnmp_interface_entry *ifentry =
-        CONTAINER_FIND(ifcontainer, rowreq_ctx);
+        (netsnmp_interface_entry*)CONTAINER_FIND(ifcontainer, rowreq_ctx);
 
 #ifdef USING_IP_MIB_IPV4INTERFACETABLE_IPV4INTERFACETABLE_MODULE
     /*
