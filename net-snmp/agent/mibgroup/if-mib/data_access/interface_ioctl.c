@@ -108,7 +108,7 @@ netsnmp_access_interface_ioctl_physaddr_get(int fd,
         SNMP_FREE(ifentry->paddr);
     }
     if(NULL == ifentry->paddr) 
-        ifentry->paddr = malloc(IFHWADDRLEN);
+        ifentry->paddr = (char*)malloc(IFHWADDRLEN);
 
     if(NULL == ifentry->paddr) {
             rc = -4;

@@ -336,7 +336,7 @@ netsnmp_arch_interface_container_load(netsnmp_container* container,
         return -2;
     }
 
-    if_list = malloc(if_list_size);
+    if_list = (u_char*)malloc(if_list_size);
     if (if_list == NULL) {
         snmp_log(LOG_ERR, "could not allocate memory for interface info "
                  "(%lu bytes)\n", if_list_size);
@@ -400,7 +400,7 @@ netsnmp_arch_interface_container_load(netsnmp_container* container,
         /* get physical address */
         if (adl != NULL && adl->sdl_alen > 0) {
             entry->paddr_len = adl->sdl_alen;
-            entry->paddr = malloc(entry->paddr_len);
+            entry->paddr = (char*)malloc(entry->paddr_len);
             memcpy(entry->paddr, adl->sdl_data + adl->sdl_nlen, adl->sdl_alen);
             DEBUGMSGTL(("access:interface:container:sysctl",
                         "%s: paddr_len=%d, entry->paddr=%x:%x:%x:%x:%x:%x\n",
@@ -408,7 +408,7 @@ netsnmp_arch_interface_container_load(netsnmp_container* container,
                         entry->paddr[0], entry->paddr[1], entry->paddr[2],
                         entry->paddr[3], entry->paddr[4], entry->paddr[5]));
         } else {
-            entry->paddr = malloc(6);
+            entry->paddr = (char*)malloc(6);
             entry->paddr_len = 6;
             memset(entry->paddr, 0, 6);
         }

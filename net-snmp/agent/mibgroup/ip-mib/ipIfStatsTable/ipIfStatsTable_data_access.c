@@ -160,7 +160,7 @@ _check_for_updates(ipIfStatsTable_rowreq_ctx * rowreq_ctx,
     /*
      * check for matching entry. works because indexes are the same.
      */
-    ifstats_entry = CONTAINER_FIND(stats, rowreq_ctx->data);
+    ifstats_entry = (netsnmp_systemstats_entry*)CONTAINER_FIND(stats, rowreq_ctx->data);
     if (NULL == ifstats_entry) {
         DEBUGMSGTL(("ipIfStatsTable:access",
                     "updating missing entry\n"));

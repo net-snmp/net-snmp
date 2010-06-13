@@ -623,7 +623,7 @@ _mfd_ipAddressTable_post_request(netsnmp_mib_handler *handler,
                                  netsnmp_agent_request_info *agtreq_info,
                                  netsnmp_request_info *requests)
 {
-    ipAddressTable_rowreq_ctx *rowreq_ctx =
+    ipAddressTable_rowreq_ctx *rowreq_ctx = (ipAddressTable_rowreq_ctx*)
         netsnmp_container_table_row_extract(requests);
     int             rc, packet_rc;
 
@@ -800,7 +800,7 @@ _mfd_ipAddressTable_object_lookup(netsnmp_mib_handler *handler,
                                   netsnmp_request_info *requests)
 {
     int             rc = SNMP_ERR_NOERROR;
-    ipAddressTable_rowreq_ctx *rowreq_ctx =
+    ipAddressTable_rowreq_ctx *rowreq_ctx = (ipAddressTable_rowreq_ctx*)
         netsnmp_container_table_row_extract(requests);
 
     DEBUGMSGTL(("internal:ipAddressTable:_mfd_ipAddressTable_object_lookup", "called\n"));
@@ -975,7 +975,7 @@ _mfd_ipAddressTable_get_values(netsnmp_mib_handler *handler,
                                netsnmp_agent_request_info *agtreq_info,
                                netsnmp_request_info *requests)
 {
-    ipAddressTable_rowreq_ctx *rowreq_ctx =
+    ipAddressTable_rowreq_ctx *rowreq_ctx = (ipAddressTable_rowreq_ctx*)
         netsnmp_container_table_row_extract(requests);
     netsnmp_table_request_info *tri;
     u_char         *old_string;
@@ -1273,7 +1273,7 @@ _mfd_ipAddressTable_check_objects(netsnmp_mib_handler *handler,
                                   netsnmp_agent_request_info *agtreq_info,
                                   netsnmp_request_info *requests)
 {
-    ipAddressTable_rowreq_ctx *rowreq_ctx =
+    ipAddressTable_rowreq_ctx *rowreq_ctx = (ipAddressTable_rowreq_ctx*)
         netsnmp_container_table_row_extract(requests);
     netsnmp_table_request_info *tri;
     int             rc;
@@ -1320,7 +1320,7 @@ _mfd_ipAddressTable_check_dependencies(netsnmp_mib_handler *handler, netsnmp_han
                                        netsnmp_request_info *requests)
 {
     int             rc;
-    ipAddressTable_rowreq_ctx *rowreq_ctx =
+    ipAddressTable_rowreq_ctx *rowreq_ctx = (ipAddressTable_rowreq_ctx*)
         netsnmp_container_table_row_extract(requests);
     DEBUGMSGTL(("internal:ipAddressTable:_mfd_ipAddressTable_check_dependencies", "called\n"));
 
@@ -1419,7 +1419,7 @@ _mfd_ipAddressTable_undo_setup(netsnmp_mib_handler *handler,
                                netsnmp_request_info *requests)
 {
     int             rc;
-    ipAddressTable_rowreq_ctx *rowreq_ctx =
+    ipAddressTable_rowreq_ctx *rowreq_ctx = (ipAddressTable_rowreq_ctx*)
         netsnmp_container_table_row_extract(requests);
 
     DEBUGMSGTL(("internal:ipAddressTable:_mfd_ipAddressTable_undo_setup",
@@ -1484,7 +1484,7 @@ _mfd_ipAddressTable_undo_cleanup(netsnmp_mib_handler *handler,
                                  netsnmp_agent_request_info *agtreq_info,
                                  netsnmp_request_info *requests)
 {
-    ipAddressTable_rowreq_ctx *rowreq_ctx =
+    ipAddressTable_rowreq_ctx *rowreq_ctx = (ipAddressTable_rowreq_ctx*)
         netsnmp_container_table_row_extract(requests);
     int             rc;
 
@@ -1603,7 +1603,7 @@ _mfd_ipAddressTable_set_values(netsnmp_mib_handler *handler,
                                netsnmp_agent_request_info *agtreq_info,
                                netsnmp_request_info *requests)
 {
-    ipAddressTable_rowreq_ctx *rowreq_ctx =
+    ipAddressTable_rowreq_ctx *rowreq_ctx = (ipAddressTable_rowreq_ctx*)
         netsnmp_container_table_row_extract(requests);
     netsnmp_table_request_info *tri;
     int             rc = SNMP_ERR_NOERROR;
@@ -1651,7 +1651,7 @@ _mfd_ipAddressTable_commit(netsnmp_mib_handler *handler,
                            netsnmp_request_info *requests)
 {
     int             rc;
-    ipAddressTable_rowreq_ctx *rowreq_ctx =
+    ipAddressTable_rowreq_ctx *rowreq_ctx = (ipAddressTable_rowreq_ctx*)
         netsnmp_container_table_row_extract(requests);
 
     DEBUGMSGTL(("internal:ipAddressTable:_mfd_ipAddressTable_commit",
@@ -1685,7 +1685,7 @@ _mfd_ipAddressTable_undo_commit(netsnmp_mib_handler *handler,
                                 netsnmp_request_info *requests)
 {
     int             rc;
-    ipAddressTable_rowreq_ctx *rowreq_ctx =
+    ipAddressTable_rowreq_ctx *rowreq_ctx = (ipAddressTable_rowreq_ctx*)
         netsnmp_container_table_row_extract(requests);
 
     DEBUGMSGTL(("internal:ipAddressTable:_mfd_ipAddressTable_undo_commit",
@@ -1793,7 +1793,7 @@ _mfd_ipAddressTable_undo_values(netsnmp_mib_handler *handler,
                                 netsnmp_request_info *requests)
 {
     int             rc;
-    ipAddressTable_rowreq_ctx *rowreq_ctx =
+    ipAddressTable_rowreq_ctx *rowreq_ctx = (ipAddressTable_rowreq_ctx*)
         netsnmp_container_table_row_extract(requests);
     netsnmp_table_request_info *tri;
 
@@ -1848,7 +1848,7 @@ _mfd_ipAddressTable_irreversible_commit(netsnmp_mib_handler *handler, netsnmp_ha
                                         *agtreq_info,
                                         netsnmp_request_info *requests)
 {
-    ipAddressTable_rowreq_ctx *rowreq_ctx =
+    ipAddressTable_rowreq_ctx *rowreq_ctx = (ipAddressTable_rowreq_ctx*)
         netsnmp_container_table_row_extract(requests);
 
     DEBUGMSGTL(("internal:ipAddressTable:_mfd_ipAddressTable_irreversible:commit", "called\n"));
@@ -2043,7 +2043,7 @@ ipAddressTable_row_find_by_mib_index(ipAddressTable_mib_index * mib_idx)
     if (MFD_SUCCESS != rc)
         return NULL;
 
-    rowreq_ctx = CONTAINER_FIND(ipAddressTable_if_ctx.container, &oid_idx);
+    rowreq_ctx = (ipAddressTable_rowreq_ctx*)CONTAINER_FIND(ipAddressTable_if_ctx.container, &oid_idx);
 
     return rowreq_ctx;
 }

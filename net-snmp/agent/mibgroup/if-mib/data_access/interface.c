@@ -251,7 +251,7 @@ netsnmp_access_interface_entry_get_by_name(netsnmp_container *container,
     }
 
     tmp.name = NETSNMP_REMOVE_CONST(char *, name);
-    return CONTAINER_FIND(container->next, &tmp);
+    return (netsnmp_interface_entry*)CONTAINER_FIND(container->next, &tmp);
 }
 
 /**
@@ -372,7 +372,7 @@ Interface_Scan_Init(void)
     }
    
     if (NULL != it)
-        e = ITERATOR_FIRST(it);
+        e = (netsnmp_interface_entry*)ITERATOR_FIRST(it);
 }
 
 int
@@ -391,7 +391,7 @@ Interface_Scan_Next(short *index, char *name, netsnmp_interface_entry **entry,
     if (entry)
         *entry = e;
 
-    e = ITERATOR_NEXT(it);
+    e = (netsnmp_interface_entry*)ITERATOR_NEXT(it);
 
     return 1;
 }
@@ -698,7 +698,7 @@ netsnmp_access_interface_entry_copy(netsnmp_interface_entry * lhs,
         if (NULL != lhs->paddr)
             SNMP_FREE(lhs->paddr);
         if (rhs->paddr) {
-            lhs->paddr = malloc(rhs->paddr_len);
+            lhs->paddr = (char*)malloc(rhs->paddr_len);
             if(NULL == lhs->paddr)
                 return -2;
             memcpy(lhs->paddr,rhs->paddr,rhs->paddr_len);

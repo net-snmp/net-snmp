@@ -647,7 +647,7 @@ _mfd_ifTable_post_request(netsnmp_mib_handler *handler,
                           netsnmp_agent_request_info *agtreq_info,
                           netsnmp_request_info *requests)
 {
-    ifTable_rowreq_ctx *rowreq_ctx =
+    ifTable_rowreq_ctx *rowreq_ctx = (ifTable_rowreq_ctx*)
         netsnmp_container_table_row_extract(requests);
     int             rc, packet_rc;
 
@@ -701,7 +701,7 @@ _mfd_ifTable_object_lookup(netsnmp_mib_handler *handler,
                            netsnmp_request_info *requests)
 {
     int             rc = SNMP_ERR_NOERROR;
-    ifTable_rowreq_ctx *rowreq_ctx =
+    ifTable_rowreq_ctx *rowreq_ctx = (ifTable_rowreq_ctx*)
         netsnmp_container_table_row_extract(requests);
 
     DEBUGMSGTL(("internal:ifTable:_mfd_ifTable_object_lookup",
@@ -961,7 +961,7 @@ _mfd_ifTable_get_values(netsnmp_mib_handler *handler,
                         netsnmp_agent_request_info *agtreq_info,
                         netsnmp_request_info *requests)
 {
-    ifTable_rowreq_ctx *rowreq_ctx =
+    ifTable_rowreq_ctx *rowreq_ctx = (ifTable_rowreq_ctx*)
         netsnmp_container_table_row_extract(requests);
     netsnmp_table_request_info *tri;
     u_char         *old_string;
@@ -1255,7 +1255,7 @@ _mfd_ifTable_check_objects(netsnmp_mib_handler *handler,
                            netsnmp_agent_request_info *agtreq_info,
                            netsnmp_request_info *requests)
 {
-    ifTable_rowreq_ctx *rowreq_ctx =
+    ifTable_rowreq_ctx *rowreq_ctx = (ifTable_rowreq_ctx*)
         netsnmp_container_table_row_extract(requests);
     netsnmp_table_request_info *tri;
     int             rc;
@@ -1302,7 +1302,7 @@ _mfd_ifTable_check_dependencies(netsnmp_mib_handler *handler,
                                 netsnmp_request_info *requests)
 {
     int             rc;
-    ifTable_rowreq_ctx *rowreq_ctx =
+    ifTable_rowreq_ctx *rowreq_ctx = (ifTable_rowreq_ctx*)
         netsnmp_container_table_row_extract(requests);
     DEBUGMSGTL(("internal:ifTable:_mfd_ifTable_check_dependencies",
                 "called\n"));
@@ -1413,7 +1413,7 @@ _mfd_ifTable_undo_setup(netsnmp_mib_handler *handler,
                         netsnmp_request_info *requests)
 {
     int             rc;
-    ifTable_rowreq_ctx *rowreq_ctx =
+    ifTable_rowreq_ctx *rowreq_ctx = (ifTable_rowreq_ctx*)
         netsnmp_container_table_row_extract(requests);
 
     DEBUGMSGTL(("internal:ifTable:_mfd_ifTable_undo_setup", "called\n"));
@@ -1487,7 +1487,7 @@ _mfd_ifTable_undo_cleanup(netsnmp_mib_handler *handler,
                           netsnmp_agent_request_info *agtreq_info,
                           netsnmp_request_info *requests)
 {
-    ifTable_rowreq_ctx *rowreq_ctx =
+    ifTable_rowreq_ctx *rowreq_ctx = (ifTable_rowreq_ctx*)
         netsnmp_container_table_row_extract(requests);
     int             rc;
 
@@ -1566,7 +1566,7 @@ _mfd_ifTable_set_values(netsnmp_mib_handler *handler,
                         netsnmp_agent_request_info *agtreq_info,
                         netsnmp_request_info *requests)
 {
-    ifTable_rowreq_ctx *rowreq_ctx =
+    ifTable_rowreq_ctx *rowreq_ctx = (ifTable_rowreq_ctx*)
         netsnmp_container_table_row_extract(requests);
     netsnmp_table_request_info *tri;
     int             rc = SNMP_ERR_NOERROR;
@@ -1613,7 +1613,7 @@ _mfd_ifTable_commit(netsnmp_mib_handler *handler,
                     netsnmp_request_info *requests)
 {
     int             rc;
-    ifTable_rowreq_ctx *rowreq_ctx =
+    ifTable_rowreq_ctx *rowreq_ctx = (ifTable_rowreq_ctx*)
         netsnmp_container_table_row_extract(requests);
 
     DEBUGMSGTL(("internal:ifTable:_mfd_ifTable_commit", "called\n"));
@@ -1655,7 +1655,7 @@ _mfd_ifTable_undo_commit(netsnmp_mib_handler *handler,
                          netsnmp_request_info *requests)
 {
     int             rc;
-    ifTable_rowreq_ctx *rowreq_ctx =
+    ifTable_rowreq_ctx *rowreq_ctx = (ifTable_rowreq_ctx*)
         netsnmp_container_table_row_extract(requests);
 
     DEBUGMSGTL(("internal:ifTable:_mfd_ifTable_undo_commit", "called\n"));
@@ -1733,7 +1733,7 @@ _mfd_ifTable_undo_values(netsnmp_mib_handler *handler,
                          netsnmp_request_info *requests)
 {
     int             rc;
-    ifTable_rowreq_ctx *rowreq_ctx =
+    ifTable_rowreq_ctx *rowreq_ctx = (ifTable_rowreq_ctx*)
         netsnmp_container_table_row_extract(requests);
     netsnmp_table_request_info *tri;
 
@@ -1786,7 +1786,7 @@ _mfd_ifTable_irreversible_commit(netsnmp_mib_handler *handler,
                                  netsnmp_agent_request_info *agtreq_info,
                                  netsnmp_request_info *requests)
 {
-    ifTable_rowreq_ctx *rowreq_ctx =
+    ifTable_rowreq_ctx *rowreq_ctx = (ifTable_rowreq_ctx*)
         netsnmp_container_table_row_extract(requests);
 
     DEBUGMSGTL(("internal:ifTable:_mfd_ifTable_irreversible:commit",
@@ -1974,7 +1974,7 @@ ifTable_row_find_by_mib_index(ifTable_mib_index * mib_idx)
     if (MFD_SUCCESS != rc)
         return NULL;
 
-    rowreq_ctx = CONTAINER_FIND(ifTable_if_ctx.container, &oid_idx);
+    rowreq_ctx = (ifTable_rowreq_ctx*)CONTAINER_FIND(ifTable_if_ctx.container, &oid_idx);
 
     return rowreq_ctx;
 }

@@ -471,7 +471,7 @@ ifDescr_get(ifTable_rowreq_ctx * rowreq_ctx, char **ifDescr_val_ptr_ptr,
          * allocate space for ifDescr data
          */
         (*ifDescr_val_ptr_ptr) =
-            malloc(tmp_len * sizeof(rowreq_ctx->data.ifDescr[0]));
+            (char*)malloc(tmp_len * sizeof(rowreq_ctx->data.ifDescr[0]));
         if (NULL == (*ifDescr_val_ptr_ptr)) {
             snmp_log(LOG_ERR, "could not allocate memory\n");
             return MFD_ERROR;
@@ -749,7 +749,7 @@ ifPhysAddress_get(ifTable_rowreq_ctx * rowreq_ctx,
          * allocate space for ifPhysAddress data
          */
         (*ifPhysAddress_val_ptr_ptr) =
-            malloc(rowreq_ctx->data.ifPhysAddress_len *
+            (char*)malloc(rowreq_ctx->data.ifPhysAddress_len *
                    sizeof(rowreq_ctx->data.ifPhysAddress[0]));
         if (NULL == (*ifPhysAddress_val_ptr_ptr)) {
             snmp_log(LOG_ERR, "could not allocate memory\n");

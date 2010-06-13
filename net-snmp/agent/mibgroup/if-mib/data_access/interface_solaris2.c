@@ -104,7 +104,7 @@ netsnmp_arch_interface_container_load(netsnmp_container* container,
         /*
          * collect the information needed by IF-MIB
          */
-        entry->paddr = malloc(ife.ifPhysAddress.o_length);
+        entry->paddr = (char*)malloc(ife.ifPhysAddress.o_length);
         if (entry->paddr == NULL) {
             netsnmp_access_interface_entry_free(entry);
             error = 1;
