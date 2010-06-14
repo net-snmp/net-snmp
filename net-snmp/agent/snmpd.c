@@ -262,19 +262,21 @@ usage(char *prog)
     printf("\nUsage:  %s [OPTIONS] [LISTENING ADDRESSES]", prog);
 #endif
     printf("\n"
-           "\n\tVersion:  %s\n"
+           "\n\tVersion:  %s\n%s"
+           "\t\t\t  (config search path: %s)\n%s%s",
+           netsnmp_get_version(),
            "\tWeb:      http://www.net-snmp.org/\n"
            "\tEmail:    net-snmp-coders@lists.sourceforge.net\n"
            "\n  -a\t\t\tlog addresses\n"
            "  -A\t\t\tappend to the logfile rather than truncating it\n"
            "  -c FILE[,...]\t\tread FILE(s) as configuration file(s)\n"
-           "  -C\t\t\tdo not read the default configuration files\n"
-           "\t\t\t  (config search path: %s)\n"
+           "  -C\t\t\tdo not read the default configuration files\n",
+           get_configuration_directory(),
            "  -d\t\t\tdump sent and received SNMP packets\n"
            "  -DTOKEN[,...]\tturn on debugging output for the given TOKEN(s)\n"
 	   "\t\t\t  (try ALL for extremely verbose output)\n"
 	   "\t\t\t  Don't put space(s) between -D and TOKEN(s).\n"
-           "  -f\t\t\tdo not fork from the shell\n"
+           "  -f\t\t\tdo not fork from the shell\n",
 #if HAVE_UNISTD_H
            "  -g GID\t\tchange to this numeric gid after opening\n"
 	   "\t\t\t  transport endpoints\n"
@@ -283,13 +285,16 @@ usage(char *prog)
            "  -H\t\t\tdisplay configuration file directives understood\n"
            "  -I [-]INITLIST\tlist of mib modules to initialize (or not)\n"
            "\t\t\t  (run snmpd with -Dmib_init for a list)\n"
-           "  -L <LOGOPTS>\t\ttoggle options controlling where to log to\n",
-           netsnmp_get_version(),
-           get_configuration_directory());
+           "  -L <LOGOPTS>\t\ttoggle options controlling where to log to\n");
     snmp_log_options_usage("\t", stdout);
     printf("  -m MIBLIST\t\tuse MIBLIST instead of the default MIB list\n"
            "  -M DIRLIST\t\tuse DIRLIST as the list of locations to look for MIBs\n"
-           "\t\t\t  (default %s)\n"
+           "\t\t\t  (default %s)\n%s%s",
+#ifndef NETSNMP_DISABLE_MIB_LOADING
+           netsnmp_get_mib_directory(),
+#else
+           "MIBs not loaded",
+#endif
            "  -p FILE\t\tstore process id in FILE\n"
            "  -q\t\t\tprint information in a more parsable format\n"
            "  -r\t\t\tdo not exit if files only accessible to root\n"
@@ -317,19 +322,13 @@ usage(char *prog)
            "  -X\t\t\trun as an AgentX subagent rather than as an\n"
 	   "\t\t\t  SNMP master agent\n"
 #endif
-
+           ,
            "\nDeprecated options:\n"
            "  -l FILE\t\tuse -Lf <FILE> instead\n"
            "  -P\t\t\tuse -p instead\n"
            "  -s\t\t\tuse -Lsd instead\n"
            "  -S d|i|0-7\t\tuse -Ls <facility> instead\n"
-
-           "\n",
-#ifndef NETSNMP_DISABLE_MIB_LOADING
-           netsnmp_get_mib_directory()
-#else
-           "MIBs not loaded"
-#endif
+           "\n"
            );
     exit(1);
 }
