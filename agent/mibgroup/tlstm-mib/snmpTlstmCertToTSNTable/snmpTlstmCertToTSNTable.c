@@ -853,7 +853,8 @@ tlstmCertToTSNTable_handler(netsnmp_mib_handler *handler,
                 break;          /* case COL_SNMPTLSTMCERTTOTSN_ROWSTATUS */
 
             case COL_SNMPTLSTMCERTTOTSN_STORAGETYPE:
-                _cert_map_tweak_storage(entry);
+                if (RS_ACTIVE == entry->rowStatus)
+                    _cert_map_tweak_storage(entry);
                 break;          /* case COL_SNMPTLSTMCERTTOTSN_STORAGETYPE */
 
             case COL_SNMPTLSTMCERTTOTSN_FINGERPRINT:
@@ -991,11 +992,10 @@ _cert_map_remove(certToTSN_entry *entry)
     map.priority = entry->tlstmCertToTSNID;
     map.fingerprint = entry->fingerprint;
 
-    map.flags &= ~NSCM_FROM_MIB;
-
     if (CONTAINER_REMOVE(maps, &map) != 0) {
         snmp_log(LOG_ERR, "could not remove certificate map");
     }
+    entry->map_flags = 0;
 }
 
 static netsnmp_tdata_row *
@@ -1013,8 +1013,8 @@ _entry_from_map(netsnmp_cert_map  *map)
 
     if (map->flags & NSCM_FROM_CONFIG)
         entry->storageType = ST_PERMANENT;
-    else
-        entry->storageType = ST_NONVOLATILE;
+    else if (! (map->flags & NSCM_NONVOLATILE))
+        entry->storageType = ST_VOLATILE;
     entry->map_flags = map->flags;
 
     entry->fingerprint_len = strlen(map->fingerprint);
@@ -1087,9 +1087,6 @@ _cache_load(netsnmp_cache *cache, netsnmp_tdata *table)
 
     DEBUGMSGTL(("tlstmCertToTSNTable:cache:load", "done, %d rows\n",
                 CONTAINER_SIZE(table->container)));
-
-    if (rc < 0)
-        _cache_free(cache, table);
 
     return rc;
 }
@@ -1280,8 +1277,7 @@ _save_maps(int majorID, int minorID, void *serverarg, void *clientarg)
             entry = row->data;
 
             /** skip all active and volatile rows */
-            if ((entry->rowStatus == RS_ACTIVE) ||
-                (entry->storageType == ST_NONVOLATILE))
+            if (entry->storageType != ST_NONVOLATILE)
                 continue;
 
             _save_entry(entry, type);
