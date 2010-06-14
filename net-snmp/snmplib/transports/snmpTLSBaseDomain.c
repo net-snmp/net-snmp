@@ -354,7 +354,7 @@ sslctx_client_setup(const SSL_METHOD *method, _netsnmpTLSBaseData *tlsbase) {
         }
     }
 
-    snmp_log(LOG_ERR, "loading TA's into context %p:\n", the_ctx);
+    snmp_log(LOG_INFO, "loading TA's into context %p:\n", the_ctx);
     if (netsnmp_cert_trust_ca(the_ctx, peer_cert) != SNMPERR_SUCCESS)
         LOGANDDIE ("failed to set verify paths");
 
