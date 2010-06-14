@@ -103,10 +103,10 @@ _sched_callback( unsigned int reg, void *magic )
      * Internal utility routines to help interpret
      *  calendar-based schedule bit strings
      */
-static char _masks[] = { /* 0xff, */ 0x7f, 0x3f, 0x1f,
-                         0x0f, 0x07, 0x03, 0x01, 0x00 };
-static char _bits[]  = { 0x80, 0x40, 0x20, 0x10,
-                         0x08, 0x04, 0x02, 0x01 };
+static u_char _masks[] = { /* 0xff, */ 0x7f, 0x3f, 0x1f,
+                           0x0f, 0x07, 0x03, 0x01, 0x00 };
+static u_char _bits[]  = { 0x80, 0x40, 0x20, 0x10,
+                           0x08, 0x04, 0x02, 0x01 };
 
 /*
  * Are any of the bits set?
@@ -183,9 +183,9 @@ static int _daysPerMonth[] = { 31, 28, 31, 30,
                                31, 30, 31, 31,
                                30, 31, 30, 31, 29 };
 
-static char _truncate[] = { 0xfe, 0xf0, 0xfe, 0xfc,
-                            0xfe, 0xfc, 0xfe, 0xfe,
-                            0xfc, 0xfe, 0xfc, 0xfe, 0xf8 };
+static u_char _truncate[] = { 0xfe, 0xf0, 0xfe, 0xfc,
+                              0xfe, 0xfc, 0xfe, 0xfe,
+                              0xfc, 0xfe, 0xfc, 0xfe, 0xf8 };
 
 /*
  * What is the next day with a relevant bit set?
