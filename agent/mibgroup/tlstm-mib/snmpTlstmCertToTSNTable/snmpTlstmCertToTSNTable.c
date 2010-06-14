@@ -895,6 +895,9 @@ _count_handler(netsnmp_mib_handler *handler,
         val = 0;
     else
         val = CONTAINER_SIZE(maps);
+
+    val += CONTAINER_SIZE(_table->container);
+
     snmp_set_var_typed_value(requests->requestvb, ASN_GAUGE,
                              (u_char *) &val, sizeof(val));
    

@@ -31,6 +31,8 @@ static void _addrs_add(tlstmAddrTable_entry *entry);
 static void _addrs_remove(tlstmAddrTable_entry *entry);
 static void _addr_tweak_storage(tlstmAddrTable_entry *entry);
 
+static netsnmp_container *_table = NULL;
+
 /** Initializes the tlstmAddrTable module */
 void
 init_snmpTlstmAddrTable(void)
@@ -128,6 +130,8 @@ init_snmpTlstmAddrTable(void)
      * Initialise the contents of the table here 
      */
     _tlstmAddr_container_init_persistence(table_data);
+
+    _table = table_data->container;
 }
 
 /*
@@ -820,7 +824,7 @@ _count_handler(netsnmp_mib_handler *handler,
                netsnmp_agent_request_info *reqinfo,
                netsnmp_request_info *requests)
 {
-    netsnmp_container *maps;
+    netsnmp_container *addrs;
     int                val;
 
     if (MODE_GET != reqinfo->mode) {
@@ -828,11 +832,14 @@ _count_handler(netsnmp_mib_handler *handler,
         return SNMP_ERR_GENERR;
     }
 
-    maps = netsnmp_tlstmAddr_container();
-    if (NULL == maps)
+    addrs = netsnmp_tlstmAddr_container();
+    if (NULL == addrs)
         val = 0;
     else
-        val = CONTAINER_SIZE(maps);
+        val = CONTAINER_SIZE(addrs);
+
+    val += CONTAINER_SIZE(_table);
+
     snmp_set_var_typed_value(requests->requestvb, ASN_GAUGE,
                              (u_char *) &val, sizeof(val));
    
@@ -860,7 +867,7 @@ _addrs_add(tlstmAddrTable_entry *entry)
     DEBUGMSGTL(("tlstmAddrTable:addrs:add", "name %s, fp %s\n",
                 entry->snmpTargetAddrName, entry->tlstmAddrServerFingerprint));
 
-    /** get current active maps */
+    /** get current active addrs */
     addrs = netsnmp_tlstmAddr_container();
     if (NULL == addrs)
         return;
