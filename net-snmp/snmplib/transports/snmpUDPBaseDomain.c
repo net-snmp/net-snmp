@@ -243,7 +243,7 @@ netsnmp_udpbase_recvfrom(int s, void *buf, int len, struct sockaddr *from,
 int netsnmp_udpbase_sendto(int fd, struct in_addr *srcip, int if_index,
                            struct sockaddr *remote, void *data, int len)
 {
-    struct iovec iov = { data, len };
+    struct iovec iov;
     struct {
         struct cmsghdr cm;
         struct in_pktinfo ipi;
@@ -251,6 +251,8 @@ int netsnmp_udpbase_sendto(int fd, struct in_addr *srcip, int if_index,
     struct msghdr m;
     int ret;
 
+    iov.iov_base = data;
+    iov.iov_len  = len;
     memset(&cmsg, 0, sizeof(cmsg));
     cmsg.cm.cmsg_len = sizeof(struct cmsghdr) + sizeof(struct in_pktinfo);
     cmsg.cm.cmsg_level = SOL_IP;
