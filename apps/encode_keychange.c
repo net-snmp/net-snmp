@@ -389,22 +389,22 @@ usage_to_file(FILE * ofp)
 
     usage_synopsis(ofp);
 
-    fprintf(ofp, "\n\
-    Only -t is mandatory.  The transform is used to convert P=>Ku, convert\n\
-    Ku=>Kul, and to hash the old Kul with the random bits.\n\
-\n\
-    Passphrase will be taken from the first successful source as follows:\n\
+    fprintf(ofp, "\n%s\
 	a) Commandline options,\n\
 	b) The file \"%s/%s\",\n\
-	c) stdin  -or-  User input from the terminal.\n\
+	c) stdin  -or-  User input from the terminal.\n\n%s\
+		" NL,
+   "Only -t is mandatory.  The transform is used to convert P=>Ku, convert\n\
+    Ku=>Kul, and to hash the old Kul with the random bits.\n\
 \n\
-    -f will require reading from the stdin/terminal, ignoring a) and b).\n\
+    Passphrase will be taken from the first successful source as follows:\n",
+    (s = getenv("HOME")) ? s : "$HOME", local_passphrase_filename,
+   "-f will require reading from the stdin/terminal, ignoring a) and b).\n\
     -P will prevent prompts for passphrases to stdout from being printed.\n\
 \n\
     <engineID> is interpreted as a hex string when preceeded by \"0x\",\n\
     otherwise it is created to contain \"text\".  If nothing is given,\n\
-    <engineID> is constructed from the first IP address for the local host.\n\
-		" NL, (s = getenv("HOME")) ? s : "$HOME", local_passphrase_filename);
+    <engineID> is constructed from the first IP address for the local host.\n");
 
 
     /*
