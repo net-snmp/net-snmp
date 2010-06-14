@@ -180,12 +180,16 @@ void netsnmp_certs_load(void);
 
 #define TLSTM_ADDR_FROM_CONFIG          0x01
 #define TLSTM_ADDR_FROM_MIB             0x02
-/** ine TLSTM_ADDR_XXX                  0x04 */
+#define TLSTM_ADDR_NONVOLATILE          0x04
+/** ine TLSTM_ADDR_XXX                  0x08 */
 
     int netsnmp_tlstmAddr_restore_common(char **line, char *name,
                                          size_t *name_len, char *id,
                                          size_t *id_len, char *fp,
                                          size_t *fp_len, u_char *ht);
+    netsnmp_container *netsnmp_tlstmAddr_container(void);
+    snmpTlstmAddr *netsnmp_tlstmAddr_create(char *targetAddrName);
+    void netsnmp_tlstmAddr_free(snmpTlstmAddr *entry);
 
 #ifdef __cplusplus
 }

@@ -2279,6 +2279,7 @@ netsnmp_cert_map_container_create(int with_fp)
         return NULL;
     }
 
+    chain_map->container_name = strdup("cert_map");
     chain_map->free_item = (netsnmp_container_obj_func*)_map_free;
     chain_map->compare = (netsnmp_container_compare*)_map_compare;
 
@@ -2861,6 +2862,8 @@ netsnmp_tlstmAddr_restore_common(char **line, char *name, size_t *name_len,
         *ht = hashType;
 
         ++pos; /* now at start of fingerprint */
+        if ('x' == pos[1] && '0' == pos[0])
+            pos += 2;
         *fp_len = strlen(pos);
         netsnmp_fp_lowercase_and_strip_colon(pos);
         memmove(fp, pos, *fp_len + 1);
@@ -2935,7 +2938,7 @@ _find_tlstmAddr_fingerprint(const char *name)
     return result->fingerprint;
 }
 /*
- * END snmpTlstmParmsTable data
+ * END snmpTlstmAddrTable data
  * ***************************************************************************/
 
 #endif /* defined(NETSNMP_USE_OPENSSL) && defined(HAVE_LIBSSL) */
