@@ -35,15 +35,12 @@
 static int  _tlstmAddrTable_container_save_rows(int majorID, int minorID,
                                                 void *serverarg,
                                                 void *clientarg);
-static void _tlstmAddrTable_container_row_restore_system(const char *token,
-                                                         char *buf);
-static void _tlstmAddrTable_container_row_restore_user(const char *token,
+static void _tlstmAddrTable_container_row_restore_mib(const char *token,
                                                        char *buf);
 static int  _tlstmAddrTable_container_row_save(netsnmp_tdata_row * row,
                                                void *type);
 
-static const char system_token[] = "snmpTlstmAddrTable";
-static const char user_token[] = "snmpTlstmAddrEntry";
+static const char mib_token[] = "snmpTlstmAddrEntry";
 static netsnmp_tdata  *_table_data = NULL;
 
 /************************************************************
@@ -59,19 +56,13 @@ void
 _tlstmAddr_container_init_persistence(netsnmp_tdata *table_data)
 {
     int             rc;
-    const char     *user_help = 
-        "snmpTlstmAddrEntry targetName fingerPrintLen hashType:fingerPrint "
-        "serverIdentityLen serverIdentity";
 
     /** save table for use during row restore */
     _table_data = table_data;
 
-    register_config_handler(NULL, system_token,
-                            _tlstmAddrTable_container_row_restore_system, NULL,
+    register_config_handler(NULL, mib_token,
+                            _tlstmAddrTable_container_row_restore_mib, NULL,
                             NULL);
-    register_config_handler(NULL, user_token,
-                            _tlstmAddrTable_container_row_restore_user, NULL,
-                            user_help);
     rc = snmp_register_callback(SNMP_CALLBACK_LIBRARY,
                                 SNMP_CALLBACK_STORE_DATA,
                                 _tlstmAddrTable_container_save_rows,
@@ -91,6 +82,10 @@ _tlstmAddrTable_container_save_rows(int majorID, int minorID, void *serverarg,
     char            buf[] = "#\n" "# tlstmAddr persistent data\n" "#";
     char           *type = netsnmp_ds_get_string(NETSNMP_DS_LIBRARY_ID,
                                                  NETSNMP_DS_LIB_APPTYPE);
+    netsnmp_container *addrs = (netsnmp_container *) clientarg;
+
+    if ((NULL == addrs) || (CONTAINER_SIZE(addrs) == 0))
+        return SNMPERR_SUCCESS;
 
     read_config_store((char *) type, sep);
     read_config_store((char *) type, buf);
@@ -98,10 +93,8 @@ _tlstmAddrTable_container_save_rows(int majorID, int minorID, void *serverarg,
     /*
      * save all rows
      */
-    CONTAINER_FOR_EACH((netsnmp_container *) clientarg,
-                       (netsnmp_container_obj_func *)
-                       _tlstmAddrTable_container_row_save,
-                       type);
+    CONTAINER_FOR_EACH(addrs, (netsnmp_container_obj_func *)
+                       _tlstmAddrTable_container_row_save, type);
 
     read_config_store((char *) type, sep);
     read_config_store((char *) type, "\n");
@@ -121,47 +114,33 @@ static int
 _tlstmAddrTable_container_row_save(netsnmp_tdata_row * row, void *type)
 {
     tlstmAddrTable_entry *entry;
-    char                  buf[sizeof(system_token) + (256 * 4) + (2 * 13) + 10];
-    char                 *pos = buf;
+    char                  buf[sizeof(mib_token) + (256 * 4) + (2 * 13) + 10];
 
     netsnmp_assert(row && row->data);
     entry = (tlstmAddrTable_entry *)row->data;
 
     /** don't store values from conf files */
-    if ((ST_PERMANENT == entry->tlstmAddrStorageType) ||
-        (ST_READONLY == entry->tlstmAddrStorageType) ||
-        (ST_VOLATILE == entry->tlstmAddrStorageType)) {
+    if (ST_NONVOLATILE != entry->tlstmAddrStorageType) {
         DEBUGMSGT(("tlstmAddrTable:row:save", 
-                   "skipping RO/permanent/volatile row\n"));
+                   "skipping RO/permanent/volatile (%d) row\n",
+                   entry->tlstmAddrStorageType));
         return SNMP_ERR_NOERROR;
     }
 
     /*
      * build the line
      */
-    snprintf(buf, sizeof(buf), "%s ", system_token);
-    buf[sizeof(buf)-1] = 0;
-    pos = &buf[strlen(buf)];
-
-    pos =
-        read_config_save_octet_string(pos, (u_char *)entry->snmpTargetAddrName,
-                                      entry->snmpTargetAddrName_len);
-    *pos++ = ' ';
-    pos =
-        read_config_save_octet_string(pos, (u_char *)
-                                      entry->tlstmAddrServerFingerprint,
-                                      entry->tlstmAddrServerFingerprint_len);
-    *pos++ = ' ';
-    pos =
-        read_config_save_octet_string(pos, (u_char *)
-                                      entry->tlstmAddrServerIdentity,
-                                      entry->tlstmAddrServerIdentity_len);
-    *pos++ = ' ';
-
-    snprintf(pos, sizeof(buf), "%d %d ", entry->tlstmAddrStorageType,
+    netsnmp_assert(0 == entry->snmpTargetAddrName[
+                       entry->snmpTargetAddrName_len]);
+    netsnmp_assert(0 == entry->tlstmAddrServerFingerprint[
+                       entry->tlstmAddrServerFingerprint_len]);
+    netsnmp_assert(0 == entry->tlstmAddrServerIdentity[
+                       entry->tlstmAddrServerIdentity_len]);
+    snprintf(buf, sizeof(buf), "%s %s %d:0x%s %s %d", mib_token,
+             entry->snmpTargetAddrName, entry->hashType,
+             entry->tlstmAddrServerFingerprint, entry->tlstmAddrServerIdentity,
              entry->tlstmAddrRowStatus);
     buf[sizeof(buf)-1] = 0;
-    pos = &buf[strlen(buf)];
 
     read_config_store(type, buf);
     DEBUGMSGTL(("tlstmAddrTable:row:save", "saving line '%s'\n", buf));
@@ -170,89 +149,43 @@ _tlstmAddrTable_container_row_save(netsnmp_tdata_row * row, void *type)
 }
 
 
-static tlstmAddrTable_entry *
-_tlstmAddrTable_container_row_restore_common(char *buf)
+static void
+_tlstmAddrTable_container_row_restore_mib(const char *token, char *buf)
 {
-    netsnmp_tdata_row    *row;
-    tlstmAddrTable_entry  entry, *new_entry;
-    char                 *tmp;
+    netsnmp_tdata_row     *row;
+    tlstmAddrTable_entry  *entry;
+    char                   name[SNMPADMINLENGTH + 1], id[SNMPADMINLENGTH + 1],
+                           fingerprint[SNMPTLSFINGERPRINT_MAX_LEN + 1];
+    u_int                  name_len = sizeof(name), id_len = sizeof(id),
+                           fp_len = sizeof(fingerprint);
+    u_char                 hashType, rowStatus;
+    int                    rc;
 
     /** need somewhere to save rows */
     netsnmp_assert(_table_data && _table_data->container); 
 
-    entry.snmpTargetAddrName_len = sizeof(entry.snmpTargetAddrName);
-    tmp = entry.snmpTargetAddrName;
-    buf = read_config_read_octet_string(buf, (u_char **)&tmp,
-                                        &entry.snmpTargetAddrName_len);
+    rc = netsnmp_tlstmAddr_restore_common(&buf, name, &name_len, id, &id_len,
+                                          fingerprint, &fp_len, &hashType);
+    if (rc < 0)
+        return;
 
-    entry.tlstmAddrServerFingerprint_len =
-        sizeof(entry.tlstmAddrServerFingerprint);
-    tmp = entry.tlstmAddrServerFingerprint;
-    buf = read_config_read_octet_string(buf, (u_char **)&tmp,
-                                        &entry.tlstmAddrServerFingerprint_len);
-    if (tmp[1] != ':' || !isdigit(tmp[0])) {
-        /** xxx: could assume some default here instead of bailing */
-        config_perror("fingerprint must include hash type");
-        return NULL;
+    if (NULL == buf) {
+        config_perror("incomplete line");
+        return;
     }
-    
-    entry.tlstmAddrServerIdentity_len =
-        sizeof(entry.tlstmAddrServerIdentity);
-    tmp = entry.tlstmAddrServerIdentity;
-    buf = read_config_read_octet_string(buf, (u_char **)&tmp,
-                                        &entry.tlstmAddrServerIdentity_len);
+    rowStatus = atoi(buf);
 
-    row = tlstmAddrTable_createEntry(_table_data,
-                                     entry.snmpTargetAddrName,
-                                     entry.snmpTargetAddrName_len);
+    row = tlstmAddrTable_createEntry(_table_data, name, name_len);
     if (!row)
-        return NULL;
-
-    new_entry = row->data;
-
-    new_entry->tlstmAddrStorageType = entry.tlstmAddrStorageType;
-    new_entry->tlstmAddrRowStatus = entry.tlstmAddrRowStatus;
-    entry.tlstmAddrServerFingerprint[1] = '\0';
-    new_entry->hashType = atoi(entry.tlstmAddrServerFingerprint);
-    netsnmp_fp_lowercase_and_strip_colon(&entry.tlstmAddrServerFingerprint[2]);
-    memcpy(new_entry->tlstmAddrServerFingerprint,
-           &entry.tlstmAddrServerFingerprint[2],
-           entry.tlstmAddrServerFingerprint_len);
-    new_entry->tlstmAddrServerFingerprint_len =
-        strlen(new_entry->tlstmAddrServerFingerprint);
-    memcpy(new_entry->tlstmAddrServerIdentity,
-           entry.tlstmAddrServerIdentity,
-           entry.tlstmAddrServerIdentity_len);
-    new_entry->tlstmAddrServerIdentity_len = entry.tlstmAddrServerIdentity_len;
-
-    return new_entry;
-}
-
-static void
-_tlstmAddrTable_container_row_restore_system(const char *token, char *buf)
-{
-    tlstmAddrTable_entry  *entry =
-        _tlstmAddrTable_container_row_restore_common(buf);
-
-    if (!entry)
         return;
 
-    entry->tlstmAddrStorageType = atoi(buf);
-    buf = skip_token(buf);
+    entry = row->data;
 
-    entry->tlstmAddrRowStatus = atoi(buf);
-    buf = skip_token(buf);
-}
-
-static void
-_tlstmAddrTable_container_row_restore_user(const char *token, char *buf)
-{
-    tlstmAddrTable_entry  *entry =
-        _tlstmAddrTable_container_row_restore_common(buf);
-
-    if (!entry)
-        return;
-
-    entry->tlstmAddrStorageType = ST_PERMANENT;
-    entry->tlstmAddrRowStatus = RS_ACTIVE;
+    entry->hashType = hashType;
+    memcpy(entry->tlstmAddrServerFingerprint,fingerprint, fp_len);
+    entry->tlstmAddrServerFingerprint_len = fp_len;
+    memcpy(entry->tlstmAddrServerIdentity, id, id_len);
+    entry->tlstmAddrServerIdentity_len = id_len;
+    entry->tlstmAddrStorageType = ST_NONVOLATILE;
+    entry->tlstmAddrRowStatus = rowStatus;
 }

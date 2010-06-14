@@ -18,6 +18,8 @@
 #define FATE_DELETE_ME        -1
 
 static Netsnmp_Node_Handler tlstmAddrTable_handler;
+static int _cache_load(netsnmp_cache *cache, netsnmp_tdata *table);
+static void _cache_free(netsnmp_cache *cache, netsnmp_tdata *table);
 static uint32_t _last_changed = 0;
 static int _count_handler(netsnmp_mib_handler *handler,
                           netsnmp_handler_registration *reginfo,
@@ -25,6 +27,9 @@ static int _count_handler(netsnmp_mib_handler *handler,
                           netsnmp_request_info *requests);
 
 void _tlstmAddr_container_init_persistence(netsnmp_tdata *table_data);
+static void _addrs_add(tlstmAddrTable_entry *entry);
+static void _addrs_remove(tlstmAddrTable_entry *entry);
+static void _addr_tweak_storage(tlstmAddrTable_entry *entry);
 
 /** Initializes the tlstmAddrTable module */
 void
@@ -35,6 +40,7 @@ init_snmpTlstmAddrTable(void)
     netsnmp_handler_registration *reg;
     netsnmp_tdata  *table_data;
     netsnmp_table_registration_info *table_info;
+    netsnmp_cache                   *cache;
     netsnmp_watcher_info            *watcher;
 
     DEBUGMSGTL(("tlstmAddrTable:init",
@@ -57,6 +63,22 @@ init_snmpTlstmAddrTable(void)
         netsnmp_tdata_delete_table(table_data);
         return;
     }
+
+    /*
+     * cache init
+     */
+    cache = netsnmp_cache_create(30, (NetsnmpCacheLoad*)_cache_load,
+                                 (NetsnmpCacheFree*)_cache_free,
+                                 reg_oid, reg_oid_len);
+    if (NULL == cache) {
+        snmp_log(LOG_ERR,"error creating cache for tlstmCertToTSNTable\n");
+        netsnmp_tdata_delete_table(table_data);
+        table_data = NULL;
+        return;
+    }
+    cache->magic = (void *)table_data;
+    cache->flags = NETSNMP_CACHE_DONT_INVALIDATE_ON_SET;
+
     /*
      * populate index types
      */
@@ -69,6 +91,10 @@ init_snmpTlstmAddrTable(void)
     table_info->max_column = TLSTMADDRTABLE_MAX_COLUMN;
 
     netsnmp_tdata_register(reg, table_data, table_info);
+
+    if (cache) 
+        netsnmp_inject_handler_before( reg, netsnmp_cache_handler_get(cache),
+                                       "table_container");
 
     /*
      * register scalars
@@ -115,6 +141,9 @@ tlstmAddrTable_createEntry(netsnmp_tdata * table_data,
     tlstmAddrTable_entry *entry;
     netsnmp_tdata_row *row;
 
+    if (snmpTargetAddrName_len > sizeof(entry->snmpTargetAddrName))
+        return NULL;
+
     entry = SNMP_MALLOC_TYPEDEF(tlstmAddrTable_entry);
     if (!entry)
         return NULL;
@@ -126,8 +155,13 @@ tlstmAddrTable_createEntry(netsnmp_tdata * table_data,
     }
     row->data = entry;
 
-    DEBUGMSGT(("tlstmAddrTable:entry:create", "entry 0x%x / row 0x%x\n",
-               (uintptr_t) entry, (uintptr_t) row));
+    DEBUGIF("tlstmAddrTable:entry:create") {
+        char name[sizeof(entry->snmpTargetAddrName)+1];
+        snprintf(name, sizeof(name), "%s", snmpTargetAddrName);
+        DEBUGMSGT(("tlstmAddrTable:entry:create", "entry %s 0x%x / row 0x%x\n",
+                   name, (uintptr_t) entry, (uintptr_t) row));
+    }
+
     /*
      * populate index
      */
@@ -207,8 +241,12 @@ tlstmAddrTable_removeEntry(netsnmp_tdata * table_data,
     else
         netsnmp_tdata_delete_row(row);
 
-    DEBUGMSGT(("tlstmAddrTable:entry:delete", "entry 0x%x / row 0x%xn",
-               (uintptr_t) entry, (uintptr_t) row));
+    DEBUGIF("tlstmAddrTable:entry:delete") {
+        char name[sizeof(entry->snmpTargetAddrName)+1];
+        snprintf(name, sizeof(name), "%s", entry->snmpTargetAddrName);
+        DEBUGMSGT(("tlstmAddrTable:entry:delete", "entry %s 0x%x / row 0x%x\n",
+                   name, (uintptr_t) entry, (uintptr_t) row));
+    }
     if (entry && entry->undo)
         _freeUndo(entry);
     SNMP_FREE(entry);
@@ -703,42 +741,63 @@ tlstmAddrTable_handler(netsnmp_mib_handler *handler,
 
             /** release undo data for requests with no rowstatus */
             if (table_entry->undo &&
-                !table_entry->undo->req[COLUMN_SNMPTLSTMADDRROWSTATUS] != 0)
+                !table_entry->undo->req[COLUMN_SNMPTLSTMADDRROWSTATUS] != 0) {
+
                 _freeUndo(table_entry);
 
-                    switch (table_info->colnum) {
+                /** update active addrs */
+                if ((0 == table_entry->addr_flags) &&
+                    (table_entry->tlstmAddrRowStatus == RS_ACTIVE))
+                    _addrs_add(table_entry);
+                else if ((0 != table_entry->addr_flags) &&
+                         (table_entry->tlstmAddrRowStatus == RS_DESTROY))
+                    _addrs_remove(table_entry);
+            }
+
+            switch (table_info->colnum) {
                 case COLUMN_SNMPTLSTMADDRROWSTATUS:
                     switch (table_entry->tlstmAddrRowStatus) {
                     case RS_CREATEANDGO:
                     /** Fall-through */
                     case RS_ACTIVE:
                         table_entry->tlstmAddrRowStatus = RS_ACTIVE;
+                        if (0 == table_entry->addr_flags)
+                            _addrs_add(table_entry);
                         break;
 
                     case RS_CREATEANDWAIT:
-                    /** Fall-through */
+                        /** Fall-through */
                     case RS_NOTINSERVICE:
-                    /** simply set status based on consistency */
+                        /** simply set status based on consistency */
                         if (table_entry->undo->is_consistent)
                             table_entry->tlstmAddrRowStatus =
                                 RS_NOTINSERVICE;
                         else
                             table_entry->tlstmAddrRowStatus = RS_NOTREADY;
+                        if (0 != table_entry->addr_flags)
+                            _addrs_remove(table_entry);
                         break;
 
                     case RS_DESTROY:
-                    /** disassociate row with requests */
+                        if (0 != table_entry->addr_flags)
+                            _addrs_remove(table_entry);
+                        /** disassociate row with requests */
                         netsnmp_remove_tdata_row(request, table_row);
                         tlstmAddrTable_removeEntry(table_data, table_row);
                         table_row = NULL;
                         table_entry = NULL;
                     }
-                /** release undo data */
+                    /** release undo data */
                     _freeUndo(table_entry);
                     break;      /* case COLUMN_SNMPTLSTMADDRROWSTATUS */
+
+                case COLUMN_SNMPTLSTMADDRSTORAGETYPE:
+                    if (RS_ACTIVE == table_entry->tlstmAddrRowStatus)
+                        _addr_tweak_storage(table_entry);
+                    break;
+
                 case COLUMN_SNMPTLSTMADDRSERVERFINGERPRINT:
                 case COLUMN_SNMPTLSTMADDRSERVERIDENTITY:
-                case COLUMN_SNMPTLSTMADDRSTORAGETYPE:
                     break;
                 }               /* switch colnum */
         }                       /* for requests */
@@ -769,7 +828,7 @@ _count_handler(netsnmp_mib_handler *handler,
         return SNMP_ERR_GENERR;
     }
 
-    maps = netsnmp_cert_map_container();
+    maps = netsnmp_tlstmAddr_container();
     if (NULL == maps)
         val = 0;
     else
@@ -784,3 +843,237 @@ _count_handler(netsnmp_mib_handler *handler,
     return SNMP_ERR_NOERROR;
 }
 
+/** **************************************************************************
+ *
+ * handle cache / interactions with tlstmAddr container in snmplib
+ *
+ */
+static void
+_addrs_add(tlstmAddrTable_entry *entry)
+{
+    netsnmp_container *addrs;
+    snmpTlstmAddr     *addr;
+
+    if (NULL == entry)
+        return;
+
+    DEBUGMSGTL(("tlstmAddrTable:addrs:add", "name %s, fp %s\n",
+                entry->snmpTargetAddrName, entry->tlstmAddrServerFingerprint));
+
+    /** get current active maps */
+    addrs = netsnmp_tlstmAddr_container();
+    if (NULL == addrs)
+        return;
+
+    addr = netsnmp_tlstmAddr_create(entry->snmpTargetAddrName);
+    if (NULL == addr)
+        return;
+
+    if (entry->tlstmAddrServerFingerprint_len)
+        addr->fingerprint = strndup(entry->tlstmAddrServerFingerprint,
+                                    entry->tlstmAddrServerFingerprint_len);
+    if (entry->tlstmAddrServerIdentity_len)
+        addr->identity = strndup(entry->tlstmAddrServerIdentity,
+                                 entry->tlstmAddrServerIdentity_len);
+    addr->hashType = entry->hashType;
+
+    addr->flags = TLSTM_ADDR_FROM_MIB;
+    if (entry->tlstmAddrStorageType == ST_NONVOLATILE)
+        addr->flags |= TLSTM_ADDR_NONVOLATILE;
+
+    if (CONTAINER_INSERT(addrs, addr) != 0) {
+        netsnmp_tlstmAddr_free(addr);
+        snmp_log(LOG_ERR, "could not insert new tlstm addr");
+    }
+}
+
+static void
+_addrs_remove(tlstmAddrTable_entry *entry)
+{
+    netsnmp_container *addrs;
+    snmpTlstmAddr      addr;
+
+    if (NULL == entry)
+        return;
+
+    DEBUGMSGTL(("tlstmAddrTable:addr:remove", "name %s, fp %s\n",
+                entry->snmpTargetAddrName, entry->tlstmAddrServerFingerprint));
+
+    /** get current active addrs */
+    addrs = netsnmp_tlstmAddr_container();
+    if (NULL == addrs)
+        return;
+
+    addr.name = entry->snmpTargetAddrName;
+    if (CONTAINER_REMOVE(addrs, &addr) != 0) {
+        snmp_log(LOG_ERR, "could not remove tlstm addr");
+    }
+    entry->addr_flags = 0;
+}
+
+static void
+_addr_tweak_storage(tlstmAddrTable_entry *entry)
+{
+    netsnmp_container *addrs;
+    snmpTlstmAddr     *addr, index;
+
+    if (NULL == entry)
+        return;
+
+    DEBUGMSGTL(("tlstmAddrTable:addr:tweak", "name %s, st %d\n",
+                entry->snmpTargetAddrName, entry->tlstmAddrStorageType));
+
+    /** get current active addrs */
+    addrs = netsnmp_tlstmAddr_container();
+    if (NULL == addrs)
+        return;
+
+    index.name = entry->snmpTargetAddrName;
+    addr = CONTAINER_FIND(addrs, &index);
+    if (NULL == addr) {
+        DEBUGMSGTL(("tlstmAddrTable:addr:tweak", "couldn't find addr!\n"));
+        return;
+    }
+
+    if (entry->tlstmAddrStorageType == ST_NONVOLATILE)
+        addr->flags |= TLSTM_ADDR_NONVOLATILE;
+    else
+        addr->flags &= ~TLSTM_ADDR_NONVOLATILE;
+}
+
+static netsnmp_tdata_row *
+_entry_from_addr(snmpTlstmAddr  *addr)
+{
+    netsnmp_tdata_row *row;
+    tlstmAddrTable_entry *entry;
+
+    row = tlstmAddrTable_createEntry(NULL, addr->name, strlen(addr->name));
+    if (NULL == row) {
+        snmp_log(LOG_ERR, "can create tlstmAddr row entry\n");
+        return NULL;
+    }
+    entry = row->data;
+
+    if (addr->flags & TLSTM_ADDR_FROM_CONFIG)
+        entry->tlstmAddrStorageType = ST_PERMANENT;
+    else if (! (addr->flags & TLSTM_ADDR_NONVOLATILE))
+        entry->tlstmAddrStorageType = ST_VOLATILE;
+
+    entry->tlstmAddrRowStatus = RS_ACTIVE;
+
+    if (addr->fingerprint) {
+        entry->tlstmAddrServerFingerprint_len = strlen(addr->fingerprint);
+        if (entry->tlstmAddrServerFingerprint_len >
+            sizeof(entry->tlstmAddrServerFingerprint))
+            entry->tlstmAddrServerFingerprint_len =
+                sizeof(entry->tlstmAddrServerFingerprint) - 1;
+        memcpy(entry->tlstmAddrServerFingerprint, addr->fingerprint,
+               entry->tlstmAddrServerFingerprint_len);
+        entry->tlstmAddrServerFingerprint[sizeof(entry->tlstmAddrServerFingerprint) - 1] = 0;
+    }
+
+    if (addr->identity) {
+        entry->tlstmAddrServerIdentity_len = strlen(addr->identity);
+        if (entry->tlstmAddrServerIdentity_len >
+            sizeof(entry->tlstmAddrServerIdentity))
+            entry->tlstmAddrServerIdentity_len =
+                sizeof(entry->tlstmAddrServerIdentity) - 1;
+        memcpy(entry->tlstmAddrServerIdentity, addr->identity,
+               entry->tlstmAddrServerIdentity_len);
+        entry->tlstmAddrServerIdentity[sizeof(entry->tlstmAddrServerIdentity) - 1] = 0;
+    }
+
+    entry->hashType = addr->hashType;
+    entry->addr_flags = addr->flags;
+
+    return row;
+}
+
+static int
+_cache_load(netsnmp_cache *cache, netsnmp_tdata *table)
+{
+    netsnmp_container *addrs;
+    netsnmp_iterator  *itr;
+    snmpTlstmAddr     *addr;
+    netsnmp_tdata_row *row;
+    int                rc = 0;
+
+    DEBUGMSGTL(("tlstmAddrTable:cache:load", "called, %d rows\n",
+                CONTAINER_SIZE(table->container)));
+
+    /** get current active rows */
+    addrs = netsnmp_tlstmAddr_container();
+    if (NULL == addrs)
+        return 0;
+
+    DEBUGMSGTL(("tlstmAddrTable:cache:load", "tlstmAddr %d rows\n",
+                CONTAINER_SIZE(addrs)));
+    itr = CONTAINER_ITERATOR(addrs);
+    if (NULL == itr) {
+        DEBUGMSGTL(("tlstmAddrTable:cache:load",
+                    "cant get iterator\n"));
+        return -1;
+    }
+
+    /*
+     * insert rows for active addrs into tbl container
+     */
+    addr = ITERATOR_FIRST(itr);
+    for( ; addr; addr = ITERATOR_NEXT(itr)) {
+
+        row = _entry_from_addr(addr);
+        if (NULL == row) {
+            rc =-1;
+            break;
+        }
+
+        if (netsnmp_tdata_add_row(table, row) != SNMPERR_SUCCESS) {
+            tlstmAddrTable_removeEntry(NULL, row);
+            rc = -1;
+            break;
+        }
+    }
+    ITERATOR_RELEASE(itr);
+
+    DEBUGMSGTL(("tlstmAddrTable:cache:load", "done, %d rows\n",
+                CONTAINER_SIZE(table->container)));
+
+    return rc;
+}
+
+static void
+_cache_free(netsnmp_cache *cache, netsnmp_tdata *table)
+{
+    netsnmp_tdata_row *row;
+    netsnmp_iterator   *tbl_itr;
+    tlstmAddrTable_entry   *entry;
+
+    DEBUGMSGTL(("tlstmAddrTable:cache:free", "called, %d rows\n",
+                CONTAINER_SIZE(table->container)));
+
+    tbl_itr = CONTAINER_ITERATOR(table->container);
+    if (NULL == tbl_itr) {
+        DEBUGMSGTL(("tlstmAddrTable:cache:free",
+                    "cant get entry iterator\n"));
+        return;
+    }
+
+    row = ITERATOR_FIRST(tbl_itr);
+    for( ; row; row = ITERATOR_NEXT(tbl_itr)) {
+        entry = row->data;
+
+        /*
+         * remove all active rows (they are in the addrs container kept
+         * by the library). Keep inactive ones for next time.
+         */
+        if (entry->tlstmAddrRowStatus == RS_ACTIVE) {
+            tlstmAddrTable_removeEntry(NULL, row);
+            ITERATOR_REMOVE(tbl_itr);
+            continue;
+        }
+    }
+    ITERATOR_RELEASE(tbl_itr);
+
+    DEBUGMSGTL(("tlstmAddrTable:cache:free", "done, %d rows\n",
+                CONTAINER_SIZE(table->container)));
+}
