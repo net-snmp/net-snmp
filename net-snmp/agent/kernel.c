@@ -199,4 +199,6 @@ klookup(unsigned long off, char *target, int siz)
 
 #endif                          /* HAVE_KVM_H */
 
+#else
+int unused;	/* Suppress "empty translation unit" warning */
 #endif                          /* NETSNMP_CAN_USE_NLIST */
