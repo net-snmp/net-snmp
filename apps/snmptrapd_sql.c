@@ -1106,4 +1106,6 @@ _sql_process_queue(u_int dontcare, void *meeither)
                     NULL);
 }
 
+#else
+int unused;	/* Suppress "empty translation unit" warning */
 #endif /* NETSNMP_USE_MYSQL */

@@ -2941,4 +2941,6 @@ _find_tlstmAddr_fingerprint(const char *name)
  * END snmpTlstmAddrTable data
  * ***************************************************************************/
 
+#else
+int unused;	/* Suppress "empty translation unit" warning */
 #endif /* defined(NETSNMP_USE_OPENSSL) && defined(HAVE_LIBSSL) */
