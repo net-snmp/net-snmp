@@ -14,9 +14,10 @@
 #include <arpa/inet.h>
 #include <linux/types.h>
 #include <asm/types.h>
-#ifdef NETSNMP_ENABLE_IPV6
 #ifdef HAVE_LINUX_RTNETLINK_H
 #include <linux/rtnetlink.h>
+#endif
+#ifdef NETSNMP_ENABLE_IPV6
 #define NIP6(addr) \
         ntohs((addr).s6_addr16[0]), \
         ntohs((addr).s6_addr16[1]), \
@@ -28,10 +29,11 @@
         ntohs((addr).s6_addr16[7])
 #define NIP6_FMT "%04x:%04x:%04x:%04x:%04x:%04x:%04x:%04x"
 #endif
-#endif
 
 int _load_v4(netsnmp_container *container, int idx_offset);
+#ifdef NETSNMP_ENABLE_IPV6
 static int _load_v6(netsnmp_container *container, int idx_offset);
+#endif
 #ifdef HAVE_LINUX_RTNETLINK_H
 int get_translation_table_info (int sd, int *status, 
                                 char *buff, size_t size);
