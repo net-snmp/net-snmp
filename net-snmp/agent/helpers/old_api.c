@@ -80,7 +80,7 @@ netsnmp_register_old_api(const char *moduleName,
         if (reginfo == NULL)
             return SNMP_ERR_GENERR;
 
-        memdup((void *) &vp,
+        memdup((u_char **) &vp,
                (void *) (struct variable *) ((char *) var + varsize * i),
                varsize);
 

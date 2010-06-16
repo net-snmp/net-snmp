@@ -569,7 +569,7 @@ netsnmp_table_data_set_helper_handler(netsnmp_mib_handler *handler,
                                                 row,
                                                 table_info->colnum,
                                                 data->type,
-                                                data->data.voidp,
+                                       (u_char*)data->data.voidp,
                                                 data->data_len);
             }
             break;

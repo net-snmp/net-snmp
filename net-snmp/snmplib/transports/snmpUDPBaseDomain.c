@@ -245,8 +245,8 @@ int netsnmp_udpbase_sendto(int fd, struct in_addr *srcip, int if_index,
 {
     struct iovec iov;
     struct {
-        struct cmsghdr cm;
         struct in_pktinfo ipi;
+        struct cmsghdr cm;
     } cmsg;
     struct msghdr m;
     int ret;
