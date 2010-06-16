@@ -105,7 +105,7 @@ _load_v4(netsnmp_container *container, int idx_offset)
     while (fgets(line, sizeof(line), in)) {
         
         int             za, zb, zc, zd;
-        int             tmp_flags;
+        unsigned int    tmp_flags;
         char            ifname[21];
 
         rc = sscanf(line,

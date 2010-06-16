@@ -71,9 +71,9 @@ _load_ipv4(netsnmp_container* container, u_long *index )
 
     while (fgets(line, sizeof(line), in)) {
         char            rtent_name[32];
-        int             refcnt, flags, rc;
+        int             refcnt, rc;
         uint32_t        dest, nexthop, mask, tmp_mask;
-        unsigned        use;
+        unsigned        flags, use;
 
         entry = netsnmp_access_route_entry_create();
 
@@ -83,7 +83,7 @@ _load_ipv4(netsnmp_container* container, u_long *index )
          * BE eth0  00000000 C0A80101 0003  0      0   0   FFFFFFFF 1500 0   0 
          * LE eth0  00000000 0101A8C0 0003  0      0   0   00FFFFFF    0 0   0  
          */
-        rc = sscanf(line, "%s %x %x %x %u %d %d %x %*d %*d %*d\n",
+        rc = sscanf(line, "%s %x %x %x %d %u %d %x %*d %*d %*d\n",
                     rtent_name, &dest, &nexthop,
                     /*
                      * XXX: fix type of the args 

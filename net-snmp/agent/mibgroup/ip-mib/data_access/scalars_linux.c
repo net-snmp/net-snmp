@@ -28,7 +28,7 @@ netsnmp_arch_ip_scalars_ipForwarding_get(u_long *value)
         return -2;
     }
 
-    rc = fscanf(filep, "%ld", value);
+    rc = fscanf(filep, "%lu", value);
     fclose(filep);
     if (1 != rc) {
         DEBUGMSGTL(("access:ipForwarding", "could not read %s\n",
@@ -96,7 +96,7 @@ netsnmp_arch_ip_scalars_ipv6IpForwarding_get(u_long *value)
         return -2;
     }
 
-    rc = fscanf(filep, "%ld", value);
+    rc = fscanf(filep, "%lu", value);
     fclose(filep);
     if (1 != rc) {
         DEBUGMSGTL(("access:ipv6IpForwarding", "could not read %s\n",

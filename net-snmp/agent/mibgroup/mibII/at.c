@@ -628,7 +628,7 @@ ARP_Scan_Init(void)
     i = 0;
     while (fgets(line, sizeof(line), in)) {
         u_long          tmp_a;
-        int             tmp_flags;
+        unsigned int    tmp_flags;
         if (i >= arptab_curr_max_size) {
             struct arptab  *newtab = (struct arptab *)
                 realloc(at, (sizeof(struct arptab) *
