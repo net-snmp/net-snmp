@@ -562,7 +562,7 @@ netsnmp_openssl_get_cert_chain(SSL *ssl)
         snmp_log(LOG_ERR, "SSL peer has no certificate\n");
         return NULL;
     }
-    DEBUGIF("openss:dump:extensions") {
+    DEBUGIF("openssl:dump:extensions") {
         netsnmp_openssl_cert_dump_extensions(ocert);
     }
 
