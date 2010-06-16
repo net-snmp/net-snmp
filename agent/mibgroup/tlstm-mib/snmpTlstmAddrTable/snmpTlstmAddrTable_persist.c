@@ -152,8 +152,6 @@ _tlstmAddrTable_container_row_save(netsnmp_tdata_row * row, void *type)
 static void
 _tlstmAddrTable_container_row_restore_mib(const char *token, char *buf)
 {
-    netsnmp_tdata_row     *row;
-    tlstmAddrTable_entry  *entry;
     char                   name[SNMPADMINLENGTH + 1], id[SNMPADMINLENGTH + 1],
                            fingerprint[SNMPTLSFINGERPRINT_MAX_LEN + 1];
     u_int                  name_len = sizeof(name), id_len = sizeof(id),
@@ -175,17 +173,44 @@ _tlstmAddrTable_container_row_restore_mib(const char *token, char *buf)
     }
     rowStatus = atoi(buf);
 
-    row = tlstmAddrTable_createEntry(_table_data, name, name_len);
-    if (!row)
-        return;
+    /*
+     * if row is active, add it to the addrs container so it is available
+     * for use. Do not add it to the table, since it will be added
+     * during cache_load.
+     */
+    if (RS_ACTIVE == rowStatus) {
+        snmpTlstmAddr *addr;
 
-    entry = row->data;
+        addr = netsnmp_tlstmAddr_create(name);
+        if (!addr)
+            return;
 
-    entry->hashType = hashType;
-    memcpy(entry->tlstmAddrServerFingerprint,fingerprint, fp_len);
-    entry->tlstmAddrServerFingerprint_len = fp_len;
-    memcpy(entry->tlstmAddrServerIdentity, id, id_len);
-    entry->tlstmAddrServerIdentity_len = id_len;
-    entry->tlstmAddrStorageType = ST_NONVOLATILE;
-    entry->tlstmAddrRowStatus = rowStatus;
+        if (fp_len)
+            addr->fingerprint = strndup(fingerprint, fp_len);
+        if (id_len)
+            addr->identity = strndup(id, id_len);
+        addr->hashType = hashType;
+        addr->flags = TLSTM_ADDR_FROM_MIB | TLSTM_ADDR_NONVOLATILE;
+
+        if (netsnmp_tlstmAddr_add(addr) != 0)
+            netsnmp_tlstmAddr_free(addr);
+    }
+    else {
+        netsnmp_tdata_row     *row;
+        tlstmAddrTable_entry  *entry;
+
+        row = tlstmAddrTable_createEntry(_table_data, name, name_len);
+        if (!row)
+            return;
+
+        entry = row->data;
+        
+        entry->hashType = hashType;
+        memcpy(entry->tlstmAddrServerFingerprint,fingerprint, fp_len);
+        entry->tlstmAddrServerFingerprint_len = fp_len;
+        memcpy(entry->tlstmAddrServerIdentity, id, id_len);
+        entry->tlstmAddrServerIdentity_len = id_len;
+        entry->tlstmAddrStorageType = ST_NONVOLATILE;
+        entry->tlstmAddrRowStatus = rowStatus;
+    }
 }
