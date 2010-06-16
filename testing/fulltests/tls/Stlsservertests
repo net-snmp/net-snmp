@@ -1,0 +1,45 @@
+#!/bin/sh
+
+. Stlsvars
+
+# create a CA
+
+CAPTURE $NSCERT genca --cn ca-net-snmp.org  $NSCERTARGS
+CAFP=`$NSCERT showcas --fingerprint --brief ca-net-snmp.org $NSCERTARGS`
+CHECKVALUEISNT "$CAFP" "" "generated fingerprint for ca-net-snmp.org certificate"
+
+# create a server certificate using the CA certificate
+CAPTURE $NSCERT gencert -t snmpd --with-ca ca-net-snmp.org --cn localhost $NSCERTARGS
+SNMPDFP=`$NSCERT showcert --fingerprint --brief snmpd $NSCERTARGS`
+
+CONFIGAGENT '[snmp]' defX509ServerPub $SNMPDFP
+
+# create a user certificate
+CAPTURE $NSCERT gencert -t snmpapp --cn 'testuser'  $NSCERTARGS
+TESTUSERFP=`$NSCERT showcerts --fingerprint --brief snmpapp $NSCERTARGS`
+CHECKVALUEISNT "$TESTUSERFP" "" "generated fingerprint for testuser certificate"
+
+CONFIGAGENT  certSecName 10  $TESTUSERFP     --cn
+CONFIGAGENT  rwuser -s tsm testuser authpriv
+
+CONFIGAPP   defX509ClientPub  	  $TESTUSERFP
+
+# start the agent up
+FLAGS="-On $SNMP_FLAGS $SNMP_TRANSPORT_SPEC:$SNMP_TEST_DEST$SNMP_SNMPD_PORT"
+
+# start up the agent
+STARTAGENT
+
+# ensure we can access it via a direct FP check
+DOSETTEST fingerprintIdentity "-T their_identity=$SNMPDFP $FLAGS"
+
+# ensure we can access it via a file based identity check
+DOSETTEST filenameIdentity "-T their_identity=snmpd $FLAGS"
+
+# ensure we can access it via trusting their CA certificate and a
+# matching commoname 
+DOSETTEST hostnameIdentity "-T trust_cert=$CAFP -T their_hostname=localhost $FLAGS"
+
+STOPAGENT
+
+FINISHED
