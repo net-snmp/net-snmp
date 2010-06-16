@@ -83,7 +83,7 @@ netsnmp_row_merge_status_get(netsnmp_handler_registration *reginfo,
     
     rm_status = (netsnmp_row_merge_status*)netsnmp_agent_get_list_data(reqinfo, buf);
     if ((NULL == rm_status) && create_missing) {
-        void *data_list;
+        netsnmp_data_list *data_list;
         
         rm_status = SNMP_MALLOC_TYPEDEF(netsnmp_row_merge_status);
         if (NULL == rm_status) {
