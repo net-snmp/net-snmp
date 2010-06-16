@@ -213,6 +213,7 @@ netsnmp_tlsbase_verify_client_cert(SSL *ssl, _netsnmpTLSBaseData *tlsdata) {
         return SNMPERR_GENERR;
 
     case NO_FINGERPNINT_AVAILABLE:
+        DEBUGMSGTL(("tls_x509:verify", "no known fingerprint available (not a failure case)\n"));
         return SNMPERR_SUCCESS;
 
     case VERIFIED_FINGERPRINT:
@@ -444,6 +445,14 @@ netsnmp_tlsbase_config(struct netsnmp_transport_s *t, const char *token, const c
         tlsdata->their_identity = strdup(value);
         DEBUGMSGT(("tls:config","their identity %s\n", value));
     }
+
+    if (strcmp(token, "their_hostname") == 0 ||
+        /* XXX: remove this option after a few weeks */
+        strcmp(token, "their_hostname") == 0) {
+        SNMP_FREE(tlsdata->their_hostname);
+        tlsdata->their_hostname = strdup(value);
+    }
+    
     return SNMPERR_SUCCESS;
 }
 
