@@ -96,8 +96,11 @@ netsnmp_access_systemstats_container_load(netsnmp_container* container, u_int lo
 
     DEBUGMSGTL(("access:systemstats:container", "load\n"));
 
-    if (NULL == container)
+    if (NULL == container) {
         container = netsnmp_access_systemstats_container_init(load_flags);
+        if (NULL != container)
+            container->container_name = strdup("systemstats_autocreate");
+    }
     if (NULL == container) {
         snmp_log(LOG_ERR, "no container specified/found for access_systemstats\n");
         return NULL;

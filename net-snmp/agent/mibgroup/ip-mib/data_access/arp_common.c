@@ -62,8 +62,11 @@ netsnmp_access_arp_container_load(netsnmp_container* container, u_int load_flags
 
     DEBUGMSGTL(("access:arp:container", "load\n"));
 
-    if (NULL == container)
+    if (NULL == container) {
         container = netsnmp_container_find("access:arp:table_container");
+        if (container)
+            container->container_name = strdup("arp");
+    }
     if (NULL == container) {
         snmp_log(LOG_ERR, "no container specified/found for access_arp\n");
         return NULL;

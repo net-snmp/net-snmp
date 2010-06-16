@@ -1259,6 +1259,7 @@ _ipv4InterfaceTable_container_init(ipv4InterfaceTable_interface_ctx *
                  "ipv4InterfaceTable_container_init\n");
         return;
     }
+    if_ctx->container->container_name = strdup("ipv4InterfaceTable");
 
 }                               /* _ipv4InterfaceTable_container_init */
 

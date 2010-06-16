@@ -1341,7 +1341,7 @@ _ipv6InterfaceTable_container_init(ipv6InterfaceTable_interface_ctx *
                  "ipv6InterfaceTable_container_init\n");
         return;
     }
-
+    if_ctx->container->container_name = strdup("ipv6InterfaceTable");
 }                               /* _ipv6InterfaceTable_container_init */
 
 /**

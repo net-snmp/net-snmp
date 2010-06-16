@@ -922,9 +922,12 @@ _tcpListenerTable_container_init(tcpListenerTable_interface_ctx * if_ctx)
     if_ctx->cache->flags = NETSNMP_CACHE_DONT_INVALIDATE_ON_SET;
 
     tcpListenerTable_container_init(&if_ctx->container, if_ctx->cache);
-    if (NULL == if_ctx->container)
+    if (NULL == if_ctx->container) {
         if_ctx->container =
             netsnmp_container_find("tcpListenerTable:table_container");
+        if (if_ctx->container)
+            if_ctx->container->container_name = strdup("tcpListenerTable");
+    }
     if (NULL == if_ctx->container) {
         snmp_log(LOG_ERR, "error creating container in "
                  "tcpListenerTable_container_init\n");
