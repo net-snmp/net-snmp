@@ -193,10 +193,10 @@ DOSETTEST user7SANDNS "-T our_identity=$DNSUSERFP $FLAGS"
 DOSETTEST user8SANIP "-T our_identity=$IPUSERFP $FLAGS"
 
 # using user 9 - a CA signed certificate
-DOSETTEST user9CASignedCert "-T our_identity=$CAUSERFP $FLAGS"
+DOSETTEST user9CASignedCert "-T our_identity=$CAUSERFP -T trust_cert=$CAFP $FLAGS"
 
 # using user unknown - the server will not have seen this fingerprint at all
-CAPTURE "snmpget -T our_identity=$UNKNOWNUSER $FLAGS .1.3.6.1.2.1.1.6.0"
+CAPTURE "snmpget -T our_identity=$UNKNOWNUSER -T trust_cert=$CAFP $FLAGS .1.3.6.1.2.1.1.6.0"
 
 # different types of failure messaages for tls/dtls...
 if [ $SNMP_TRANSPORT_SPEC = dtlsudp ]; then
@@ -208,7 +208,7 @@ else
 fi
 
 # using the user without a known fingerprint but with a known CA
-DOSETTEST userNewFromCA "-T our_identity=$UNKNOWNCAUSERFP $FLAGS"
+DOSETTEST userNewFromCA " -T trust_cert=$CAFP -T our_identity=$UNKNOWNCAUSERFP $FLAGS"
 
 STOPAGENT
 
