@@ -511,7 +511,7 @@ hash_engineID(const u_char * engineID, u_int engineID_len)
     SNMP_FREE(context);
     memset(buf, 0, SNMP_MAXBUF);
 
-    return (rval < 0) ? rval : (additive % ETIMELIST_SIZE);
+    return (rval < 0) ? rval : (int)(additive % ETIMELIST_SIZE);
 
 }                               /* end hash_engineID() */
 
