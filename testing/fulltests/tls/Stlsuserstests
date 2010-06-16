@@ -1,13 +1,16 @@
 #!/bin/sh
 
-export NET_SNMP_CRT_CFGTOOL="${builddir}/net-snmp-config"
-NSCERT="perl $SNMP_BASEDIR/../../../local/net-snmp-cert"
-NSCERTARGS="-C $SNMP_TMPDIR"
+. Stlsvars
+
+#########################################
+# CERTIFICATE SETUP
+#
 
 # produce the certificates to use
 
 # snmpd
-CAPTURE $NSCERT gencert -t snmpd   --cn `hostname` $NSCERTARGS
+HOSTNAME=`hostname`
+CAPTURE $NSCERT gencert -t snmpd   --cn $HOSTNAME $NSCERTARGS
 SERVERFP=`$NSCERT showcerts --fingerprint --brief snmpd  $NSCERTARGS`
 CHECKVALUEISNT "$SERVERFP" "" "generated fingerprint for snmpd certificate"
 
@@ -72,6 +75,10 @@ CAPTURE $NSCERT gencert -t causer --with-ca ca-net-snmp.org --san email:user8@te
 CAUSERFP=`$NSCERT showcerts --fingerprint --brief causer $NSCERTARGS`
 CHECKVALUEISNT "$CAUSERFP" "" "generated fingerprint for causer certificate"
 
+#########################################
+# AGENT CONFIGURATION
+#
+
 CONFIGAGENT '[snmp]' debugTokens tsm
 CONFIGAGENT '[snmp]' doDebugging 1
 CONFIGAGENT '[snmp]' defX509ServerPub $SERVERFP
@@ -104,3 +111,104 @@ CONFIGAGENT  rwuser -s tsm foobaruser@example.com authpriv
 CONFIGAGENT  rwuser -s tsm foobar.example.com authpriv
 CONFIGAGENT  rwuser -s tsm 127.0.0.1 authpriv
 CONFIGAGENT  rwuser -s tsm user8@test.net-snmp.org authpriv
+
+
+# this file contains tests common to both tls and dtls usages
+
+# start the agent up
+FLAGS="-On $SNMP_FLAGS $SNMP_TRANSPORT_SPEC:$SNMP_TEST_DEST$SNMP_SNMPD_PORT"
+
+STARTAGENT
+
+######################################################################
+# EXTENDED CERTIFICATE SETUP
+#
+# Perform more steps of configuration that should occur *after* the
+# agent has started in order to prevent it from having seen these
+# files ahead of time.
+
+# this user's fingerprint should not be recognized 
+CAPTURE $NSCERT gencert -t unknownuser --san email:unknownuser@example.com  $NSCERTARGS
+UNKNOWNUSER=`$NSCERT showcerts --fingerprint --brief unknownuser $NSCERTARGS`
+CHECKVALUEISNT "$UNMAPPEDFP" "" "generated fingerprint for unknownuser certificate"
+
+# this user's fingerprint should not be directly recognized, but it's
+# CA should.
+
+# user 9: CA signed cert
+CAPTURE $NSCERT gencert -D -t unknowncauser --cn unknowncauser@net-snmp.org --email unknowncauser@net-snmp.org  --with-ca ca-net-snmp.org --san email:user8@test.net-snmp.org $NSCERTARGS
+UNKNOWNCAUSERFP=`$NSCERT showcerts --fingerprint --brief unknowncauser $NSCERTARGS`
+CHECKVALUEISNT "$UNKNOWNCAUSERFP" "" "generated fingerprint for unknowncauser certificate"
+
+######################################################################
+# ACTUAL TESTS
+#
+# Run the actual list of tests
+#
+
+# using user 1 - a common name mapped certificate
+# (using the default "snmpapp" certificate because we don't specify another)
+DOSETTEST user1SnmpApp "$FLAGS"
+
+# now rerun the test after specifying our default using the (same) fingerprint
+CONFIGAPP   defX509ClientPub  	  $TESTUSER2FP
+DOSETTEST user1ClientPub "$FLAGS"
+
+# using user 2 - a common name mapped certificate with a direct -T FP request
+DOSETTEST user2DashTFPFlag "-T our_identity=$OTHERUSERFP $FLAGS"
+
+CHECKAGENTCOUNT 4  "otheruser"
+
+# using user 2, specifying the file name instead of the fingerprint
+DOSETTEST user2DashTFileFlag "-T our_identity=otheruser $FLAGS"
+
+CHECKAGENTCOUNT 8  "otheruser"
+
+# using user 3 - an invalid certificate (mapped but not authorized)
+DOFAILSETTEST "invalidUnauthorizedCert" "-T our_identity=$INVALIDUSERFP $FLAGS"
+
+CHECK "authorizationError"
+
+# using user 4 - an unmapped certificate
+DOFAILSETTEST "unmappedCertificate" "-T our_identity=$UNMAPPEDFP $FLAGS"
+
+CHECK "failed rfc5343"
+
+# Check *their* certificate with a different one than expected; should fail
+DOFAILSETTEST "incorectServerCertificate" "-r 0 -T our_identity=$OTHERUSERFP -T their_identity=$OTHERUSERFP $FLAGS"
+
+CHECK "failed to verify ssl certificate"
+
+# using user 5 - a completely remapped certificate (direct specified secname)
+DOSETTEST user5RemappedSecname "-T our_identity=$MAPPEDUSERFP $FLAGS"
+
+# using user 6 - a subjectAltName=email certificate mapping
+DOSETTEST user6SANEmail "-T our_identity=$EMAILUSERFP $FLAGS"
+
+# using user 7 - a subjectAltName=dns certificate mapping
+DOSETTEST user7SANDNS "-T our_identity=$DNSUSERFP $FLAGS"
+
+# using user 8 - a subjectAltName=ipv4 certificate mapping
+DOSETTEST user8SANIP "-T our_identity=$IPUSERFP $FLAGS"
+
+# using user 9 - a CA signed certificate
+DOSETTEST user9CASignedCert "-T our_identity=$CAUSERFP $FLAGS"
+
+# using user unknown - the server will not have seen this fingerprint at all
+CAPTURE "snmpget -T our_identity=$UNKNOWNUSER $FLAGS .1.3.6.1.2.1.1.6.0"
+
+# different types of failure messaages for tls/dtls...
+if [ $SNMP_TRANSPORT_SPEC = dtlsudp ]; then
+    CHECK              "failed rfc5343 contextEngineID probing"
+    CHECKAGENTCOUNT  1 "TLS Error: no certificate returned"
+else
+    CHECK              "failed to ssl_connect"
+    CHECKAGENTCOUNT  1 "Failed SSL_accept"
+fi
+
+# using the user without a known fingerprint but with a known CA
+DOSETTEST userNewFromCA "-T our_identity=$UNKNOWNCAUSERFP $FLAGS"
+
+STOPAGENT
+
+FINISHED

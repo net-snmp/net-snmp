@@ -10,9 +10,6 @@ SKIPIFNOT NETSNMP_TRANSPORT_DTLSUDP_DOMAIN
 # Begin test
 #
 
-# Setup the tls infrastructure
-. ./Stls
-
 SNMP_TRANSPORT_SPEC=tlstcp
 export SNMP_TRANSPORT_SPEC
 export SNMP_SNMPD_PORT

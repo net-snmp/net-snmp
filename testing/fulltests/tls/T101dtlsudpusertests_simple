@@ -2,7 +2,7 @@
 
 . ../support/simple_eval_tools.sh
 
-HEADER DTLS-UDP Transport
+HEADER DTLS-UDP user certificate tests
 
 SKIPIFNOT NETSNMP_TRANSPORT_DTLSUDP_DOMAIN
 
@@ -15,4 +15,4 @@ export SNMP_TRANSPORT_SPEC
 export SNMP_SNMPD_PORT
 export SNMP_TEST_DEST
 
-. ./Stlstests
+. ./Stlsuserstests
