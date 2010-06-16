@@ -102,6 +102,9 @@ SOFTWARE.
 #include "snmptrapd_auth.h"
 #include "notification-log-mib/notification_log.h"
 #include "mibII/vacm_conf.h"
+#ifdef NETSNMP_EMBEDDED_PERL
+#include "snmp_perl.h"
+#endif
 
 /*
  * Include winservice.h to support Windows Service
@@ -585,9 +588,6 @@ main(int argc, char *argv[])
     int             agentx_subagent = 1;
 #endif
     netsnmp_trapd_handler *traph;
-#ifdef NETSNMP_EMBEDDED_PERL
-    extern void init_perl(void);
-#endif
 
 
 #ifndef WIN32
