@@ -27,6 +27,7 @@ extern          "C" {
 #define         NETSNMP_TRANSPORT_FLAG_TMSTATE   0x08  /* indicates opaque is a
                                                           TSM tmStateReference */
 #define		NETSNMP_TRANSPORT_FLAG_EMPTY_PKT 0x10
+#define		NETSNMP_TRANSPORT_FLAG_OPENED	 0x20  /* f_open called */
 #define		NETSNMP_TRANSPORT_FLAG_HOSTNAME	 0x80  /* for fmtaddr hook */
 
 /*  The standard SNMP domains.  */
