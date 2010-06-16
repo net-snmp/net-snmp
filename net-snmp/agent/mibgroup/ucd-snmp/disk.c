@@ -784,8 +784,8 @@ fill_dsk_entry(int disknum, struct dsk_entry *entry)
 
     entry->dskErrorFlag =
         (disks[disknum].minimumspace >= 0
-            ? entry->dskAvail < disks[disknum].minimumspace
-            : 100 - entry->dskPercent <= disks[disknum].minpercent) ? 1 : 0;
+            ? entry->dskAvail < (unsigned long long)disks[disknum].minimumspace
+            : 100 - entry->dskPercent <= (unsigned int)disks[disknum].minpercent) ? 1 : 0;
 
     return 0;
 }

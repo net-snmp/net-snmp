@@ -454,7 +454,7 @@ _access_interface_entry_release(netsnmp_interface_entry * entry, void *context)
 static void
 _access_interface_entry_save_name(const char *name, oid index)
 {
-    oid tmp;
+    int tmp;
 
     if(NULL == name)
         return;
@@ -467,7 +467,7 @@ _access_interface_entry_save_name(const char *name, oid index)
                     index, name));
     }
     else
-        if (index != tmp) {
+        if (index != (oid)tmp) {
             NETSNMP_LOGONCE((LOG_ERR, "IfIndex of an interface changed. Such " \
                          "interfaces will appear multiple times in IF-MIB.\n"));
             DEBUGMSGTL(("access:interface:ifIndex",

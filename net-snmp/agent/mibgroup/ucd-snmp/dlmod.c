@@ -30,7 +30,7 @@
 #include "dlmod.h"
 
 static struct dlmod *dlmods = NULL;
-static int      dlmod_next_index = 1;
+static unsigned int dlmod_next_index = 1;
 static char     dlmod_path[1024];
 
 static void     dlmod_parse_config(const char *, char *);
@@ -109,7 +109,7 @@ dlmod_create_module(void)
     if (dlm == NULL)
         return NULL;
 
-    dlm->index = dlmod_next_index++;
+    dlm->index = (int)dlmod_next_index++;
     dlm->status = DLMOD_UNLOADED;
 
     for (pdlmod = &dlmods; *pdlmod != NULL; pdlmod = &((*pdlmod)->next));
@@ -395,7 +395,7 @@ header_dlmodEntry(struct variable *vp,
     oid             newname[MAX_OID_LEN];
     int             result;
     struct dlmod   *dlm = NULL;
-    int             dlmod_index;
+    unsigned int    dlmod_index;
 
     memcpy((char *) newname, (char *) vp->name,
            (int) vp->namelen * sizeof(oid));

@@ -1100,8 +1100,8 @@ _extend_find_entry( netsnmp_request_info       *request,
     oid oid_buf[MAX_OID_LEN];
     int oid_len;
     int i;
-    char *token;
-    int   token_len;
+    char  *token;
+    size_t token_len;
 
     if (!request || !table_info || !table_info->indexes
                  || !table_info->indexes->next_variable) {

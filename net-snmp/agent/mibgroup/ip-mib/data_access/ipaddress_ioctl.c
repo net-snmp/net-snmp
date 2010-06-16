@@ -637,7 +637,7 @@ _print_flags(short flags)
         { IFF_AUTOMEDIA,   "auto media select active"},
     };
     short unknown = flags;
-    int i;
+    size_t i;
 
     for(i = 0; i < sizeof(map)/sizeof(map[0]); ++i)
         if(flags & map[i].flag) {

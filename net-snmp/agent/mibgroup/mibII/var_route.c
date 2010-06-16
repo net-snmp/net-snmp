@@ -431,7 +431,8 @@ var_ipRouteEntry(struct variable * vp,
      * IPADDR starts at offset 10.
      */
     register int    Save_Valid, result, RtIndex;
-    static int      saveNameLen = 0, saveExact = 0, saveRtIndex = 0;
+    static size_t   saveNameLen = 0;
+    static int      saveExact = 0, saveRtIndex = 0;
     static oid      saveName[MAX_OID_LEN], Current[MAX_OID_LEN];
     u_char         *cp;
     oid            *op;

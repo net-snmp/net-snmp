@@ -2271,8 +2271,8 @@ netsnmp_create_subtree_cache(netsnmp_agent_session *asp)
              * result vector
              */
             if (maxresponses < 0 ||
-                maxresponses > INT_MAX / sizeof(struct varbind_list *))
-                maxresponses = INT_MAX / sizeof(struct varbind_list *);
+                maxresponses > (int)(INT_MAX / sizeof(struct varbind_list *)))
+                maxresponses = (int)(INT_MAX / sizeof(struct varbind_list *));
 
             /* ensure that the maximum number of repetitions will fit in the
              * result vector

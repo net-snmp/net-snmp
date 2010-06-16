@@ -1145,7 +1145,7 @@ unregister_mib_context(oid * name, size_t len, int priority,
 
     netsnmp_set_lookup_cache_size(0);
 
-    if ((range_subid != 0) &&  (range_subid <= len))
+    if ((range_subid > 0) &&  ((size_t)range_subid <= len))
         orig_subid_val = name[range_subid-1];
 
     while(unregistering){

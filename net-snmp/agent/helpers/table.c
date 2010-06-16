@@ -168,7 +168,7 @@ table_helper_handler(netsnmp_mib_handler *handler,
     int             oid_index_pos;
     unsigned int    oid_column_pos;
     unsigned int    tmp_idx;
-    size_t	    tmp_len;
+    int 	    tmp_len;
     int             incomplete, out_of_range;
     int             status = SNMP_ERR_NOERROR, need_processing = 0;
     oid            *tmp_name;
@@ -310,11 +310,11 @@ table_helper_handler(netsnmp_mib_handler *handler,
          * length) 
          */
         if (reginfo->rootoid_len > var->name_length)
-            tmp_len = var->name_length;
+            tmp_len = (int)var->name_length;
         else
-            tmp_len = reginfo->rootoid_len;
+            tmp_len = (int)reginfo->rootoid_len;
         if (snmp_oid_compare(reginfo->rootoid, reginfo->rootoid_len,
-                             var->name, tmp_len) > 0) {
+                             var->name, (size_t)tmp_len) > 0) {
             if (reqinfo->mode == MODE_GETNEXT) {
                 if (var->name != var->name_loc)
                     SNMP_FREE(var->name);
@@ -515,7 +515,7 @@ table_helper_handler(netsnmp_mib_handler *handler,
             incomplete = 1;
             tmp_len = -1;
         } else
-            tmp_len = tbl_req_info->index_oid_len;
+            tmp_len = (int)tbl_req_info->index_oid_len;
 
 
         /*
@@ -547,7 +547,7 @@ table_helper_handler(netsnmp_mib_handler *handler,
             /*
              * try and parse current index 
              */
-            if (parse_one_oid_index(&tmp_name, &tmp_len,
+            if (parse_one_oid_index(&tmp_name, (size_t*)&tmp_len,
                                     vb, 1) != SNMPERR_SUCCESS) {
                 incomplete = 1;
                 tmp_len = -1;   /* is this necessary? Better safe than
