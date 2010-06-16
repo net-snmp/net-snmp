@@ -279,7 +279,8 @@ sc_generate_keyed_hash(const oid * authtype, size_t authtypelen,
 #if  defined(NETSNMP_USE_INTERNAL_MD5) || defined(NETSNMP_USE_OPENSSL) || defined(NETSNMP_USE_PKCS11) || defined(NETSNMP_USE_INTERNAL_CRYPTO)
 {
     int             rval = SNMPERR_SUCCESS;
-    int             properlength;
+    int             iproperlength;
+    size_t          properlength;
 
     u_char          buf[SNMP_MAXBUF_SMALL];
 #if  defined(NETSNMP_USE_OPENSSL) || defined(NETSNMP_USE_PKCS11)
@@ -308,11 +309,11 @@ sc_generate_keyed_hash(const oid * authtype, size_t authtypelen,
         QUITFUN(SNMPERR_GENERR, sc_generate_keyed_hash_quit);
     }
 
-    properlength = sc_get_properlength(authtype, authtypelen);
-    if (properlength == SNMPERR_GENERR)
-        return properlength;
-
-    if (((int) keylen < properlength)) {
+    iproperlength = sc_get_properlength(authtype, authtypelen);
+    if (iproperlength == SNMPERR_GENERR)
+        return SNMPERR_GENERR;
+    properlength = (size_t)iproperlength;
+    if (keylen < properlength) {
         QUITFUN(SNMPERR_GENERR, sc_generate_keyed_hash_quit);
     }
 #ifdef NETSNMP_USE_OPENSSL
@@ -332,7 +333,7 @@ sc_generate_keyed_hash(const oid * authtype, size_t authtypelen,
     if (buf_len != properlength) {
         QUITFUN(rval, sc_generate_keyed_hash_quit);
     }
-    if ((int)*maclen > buf_len)
+    if (*maclen > buf_len)
         *maclen = buf_len;
     memcpy(MAC, buf, *maclen);
 
@@ -363,7 +364,7 @@ sc_generate_keyed_hash(const oid * authtype, size_t authtypelen,
     memcpy(MAC, buf, *maclen);
 
 #elif NETSNMP_USE_INTERNAL_CRYPTO
-    if ((int) *maclen > properlength)
+    if (*maclen > properlength)
         *maclen = properlength;
     if (ISTRANSFORM(authtype, HMACMD5Auth))
         rval = MD5_hmac(message, msglen, MAC, *maclen, key, keylen);
@@ -377,7 +378,7 @@ sc_generate_keyed_hash(const oid * authtype, size_t authtypelen,
         goto sc_generate_keyed_hash_quit;
     }    
 #else                            /* NETSNMP_USE_INTERNAL_MD5 */
-    if ((int) *maclen > properlength)
+    if (*maclen > properlength)
         *maclen = properlength;
     if (MDsign(message, msglen, MAC, *maclen, key, keylen)) {
         rval = SNMPERR_GENERR;
@@ -447,7 +448,7 @@ sc_hash(const oid * hashtype, size_t hashtypelen, const u_char * buf,
         MAC == NULL || MAC_len == NULL )
         return (SNMPERR_GENERR);
     ret = sc_get_properlength(hashtype, hashtypelen);
-    if (( ret < 0 ) || (*MAC_len < ret ))
+    if (( ret < 0 ) || (*MAC_len < (size_t)ret ))
         return (SNMPERR_GENERR);
 
 #ifdef NETSNMP_USE_OPENSSL

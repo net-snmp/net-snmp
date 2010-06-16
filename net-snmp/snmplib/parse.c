@@ -4104,7 +4104,7 @@ unload_all_mibs(void)
     struct module  *mp;
     struct module_compatability *mcp;
     struct tc      *ptc;
-    int             i;
+    unsigned int    i;
 
     for (mcp = module_map_head; mcp; mcp = module_map_head) {
         if (mcp == module_map)
@@ -4119,7 +4119,7 @@ unload_all_mibs(void)
     for (mp = module_head; mp; mp = module_head) {
         struct module_import *mi = mp->imports;
         if (mi) {
-            for (i = 0; i < mp->no_imports; ++i) {
+            for (i = 0; i < (unsigned int)mp->no_imports; ++i) {
                 SNMP_FREE((mi + i)->label);
             }
             mp->no_imports = 0;

@@ -465,13 +465,13 @@ _process_line_tvi(netsnmp_line_info *line_info, void *mem,
 
         case PMLP_TYPE_UNSIGNED:
             tvi->value.ul = strtoul(ptr, NULL, 0);
-            if ((errno == ERANGE) &&(ULONG_MAX == tvi->value.sl))
+            if ((errno == ERANGE) && (ULONG_MAX == tvi->value.ul))
                 snmp_log(LOG_WARNING,"value overflow\n");
             break;
 
 
         case PMLP_TYPE_INTEGER:
-            tvi->value.ul = strtol(ptr, NULL, 0);
+            tvi->value.sl = strtol(ptr, NULL, 0);
             if ((errno == ERANGE) &&
                 ((LONG_MAX == tvi->value.sl) ||
                  (LONG_MIN == tvi->value.sl)))

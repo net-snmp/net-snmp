@@ -64,7 +64,7 @@ netsnmp_directory_container_read_some(netsnmp_container *user_container,
     netsnmp_container *container = user_container, *tmp_c;
     struct dirent     *file;
     char               path[SNMP_MAXPATH];
-    u_char             dirname_len;
+    size_t             dirname_len;
     int                rc;
     struct stat        statbuf;
     netsnmp_file       ns_file_tmp;

@@ -1274,7 +1274,7 @@ snmpv3_probe_contextEngineID_rfc5343(void *slp, netsnmp_session *session) {
             response->variables->val_len;
         
         if (snmp_get_do_debugging()) {
-            int i;
+            size_t i;
             DEBUGMSGTL(("snmp_sess_open",
                         "  probe found engineID:  "));
             for (i = 0; i < session->securityEngineIDLen; i++)

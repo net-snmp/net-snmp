@@ -466,7 +466,7 @@ usm_calc_offsets(size_t globalDataLen,  /* SNMPv3Message + HeaderData */
                     engBtlen,   /*   for fields within                     */
                     engTmlen,   /*   msgSecurityParameters portion of      */
                     namelen,    /*   SNMPv3Message.                        */
-                    authlen, privlen;
+                    authlen, privlen, ret;
 
     /*
      * If doing authentication, msgAuthParmLen = 12 else msgAuthParmLen = 0.
@@ -516,15 +516,17 @@ usm_calc_offsets(size_t globalDataLen,  /* SNMPv3Message + HeaderData */
     *seq_len =
         engIDlen + engBtlen + engTmlen + namelen + authlen + privlen;
 
-    if ((*otstlen = asn_predict_length(ASN_SEQUENCE,
-                                       NULL, *seq_len)) == -1) {
+    if ((ret = asn_predict_length(ASN_SEQUENCE,
+                                      NULL, *seq_len)) == -1) {
         return -1;
     }
+    *otstlen = (size_t)ret;
 
-    if ((*msgSecParmLen = asn_predict_length(ASN_OCTET_STR,
-                                             NULL, *otstlen)) == -1) {
+    if ((ret = asn_predict_length(ASN_OCTET_STR,
+                                      NULL, *otstlen)) == -1) {
         return -1;
     }
+    *msgSecParmLen = (size_t)ret;
 
     *authParamsOffset = globalDataLen + +(*msgSecParmLen - *seq_len)
         + engIDlen + engBtlen + engTmlen + namelen
@@ -549,10 +551,10 @@ usm_calc_offsets(size_t globalDataLen,  /* SNMPv3Message + HeaderData */
     if (secLevel == SNMP_SEC_LEVEL_AUTHPRIV) {
         scopedPduLen = ROUNDUP8(scopedPduLen);
 
-        if ((*datalen =
-             asn_predict_length(ASN_OCTET_STR, NULL, scopedPduLen)) == -1) {
+        if ((ret = asn_predict_length(ASN_OCTET_STR, NULL, scopedPduLen)) == -1) {
             return -1;
         }
+        *datalen = (size_t)ret;
     } else {
         *datalen = scopedPduLen;
     }
@@ -1960,7 +1962,7 @@ usm_parse_security_parameters(u_char * secParams,
     /*
      * FIX -- doesn't this also indicate a buffer overrun?
      */
-    if ((int) origNameLen < *secNameLen + 1) {
+    if (origNameLen < *secNameLen + 1) {
         /*
          * RETURN parse error, but it's really a parameter error 
          */
@@ -2106,7 +2108,7 @@ usm_check_and_update_timeliness(u_char * secEngineID,
     /*
      * This is a local reference.
      */
-    if ((int) secEngineIDLen == myIDLength
+    if (secEngineIDLen == myIDLength
         && memcmp(secEngineID, myID, myIDLength) == 0) {
         u_int           time_difference = myTime > time_uint ?
             myTime - time_uint : time_uint - myTime;
