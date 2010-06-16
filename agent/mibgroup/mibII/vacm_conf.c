@@ -666,7 +666,7 @@ vacm_parse_view(const char *token, char *param)
         return;
     }
     if (mask) {
-        int             val;
+        unsigned int val;
         i = 0;
         for (mask = strtok_r(mask, " .:", &st); mask; mask = strtok_r(NULL, " .:", &st)) {
             if (i >= sizeof(viewMask)) {

@@ -272,7 +272,8 @@ main(int argc, char *argv[])
     int             exitval = 0;
     int             command = 0;
     long            longvar;
-    int             secModel, secLevel, contextMatch, val, i = 0;
+    int             secModel, secLevel, contextMatch;
+    unsigned int    val, i = 0;
     char           *mask, *groupName, *prefix, *authtype;
     u_char          viewMask[VACMSTRINGLEN];
     char           *st;
@@ -383,7 +384,7 @@ main(int argc, char *argv[])
                 i++;
             }
 	} else {
-            for (i=0 ; i < ((int)name_length+7)/8; i++)
+            for (i=0 ; i < (name_length+7)/8; i++)
                 viewMask[i] = (u_char)0xff;
         }
         view_oid(vacmViewTreeFamilyMask, &name_length, argv[arg],

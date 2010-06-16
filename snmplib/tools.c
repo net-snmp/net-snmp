@@ -473,7 +473,7 @@ int
 netsnmp_hex_to_binary(u_char ** buf, size_t * buf_len, size_t * offset,
                       int allow_realloc, const char *hex, const char *delim)
 {
-    int             subid = 0;
+    unsigned int    subid = 0;
     const char     *cp = hex;
 
     if (buf == NULL || buf_len == NULL || offset == NULL || hex == NULL) {
