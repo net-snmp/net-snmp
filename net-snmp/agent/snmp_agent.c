@@ -1114,6 +1114,8 @@ netsnmp_register_agent_nsap(netsnmp_transport *t)
     if (t->f_open)
         t->f_open(t);
 
+    t->flags |= NETSNMP_TRANSPORT_FLAG_OPENED;
+
     sp = snmp_add(s, t, netsnmp_agent_check_packet,
                   netsnmp_agent_check_parse);
     if (sp == NULL) {

@@ -1428,6 +1428,7 @@ netsnmp_sess_config_transport(netsnmp_container *transport_configuration,
     /* Optional supplimental transport configuration information and
        final call to actually open the transport */
     if (transport_configuration) {
+        DEBUGMSGTL(("snmp_sess", "configuring transport\n"));
         if (transport->f_config) {
             netsnmp_iterator *iter;
             netsnmp_transport_config *config_data;
@@ -1450,6 +1451,69 @@ netsnmp_sess_config_transport(netsnmp_container *transport_configuration,
             return SNMPERR_TRANSPORT_NO_CONFIG;
         }
     }
+    return SNMPERR_SUCCESS;
+}
+
+ 
+/**
+ * Copies configuration from the session and calls f_open
+ * This function copies any configuration stored in the session
+ * pointer to the transport if it has a f_config pointer and then
+ * calls the transport's f_open function to actually open the
+ * connection.
+ *
+ * @param in_session A pointer to the session that config information is in.
+ * @param transport A pointer to the transport to config/open.
+ *
+ * @return SNMPERR_SUCCESS : on success
+ */
+
+/*******************************************************************-o-******
+ * netsnmp_sess_config_transport
+ *
+ * Parameters:
+ *	*in_session
+ *	*in_transport
+ *
+ * Returns:
+ *      SNMPERR_SUCCESS                     - Yay
+ *      SNMPERR_GENERR                      - Generic Error
+ *      SNMPERR_TRANSPORT_CONFIG_ERROR      - Transport rejected config
+ *      SNMPERR_TRANSPORT_NO_CONFIG         - Transport can't config
+ */
+int
+netsnmp_sess_config_and_open_transport(netsnmp_session *in_session,
+                                       netsnmp_transport *transport)
+{
+    int rc;
+    
+    DEBUGMSGTL(("snmp_sess", "opening transport: %x\n", transport->flags & NETSNMP_TRANSPORT_FLAG_OPENED));
+
+    /* don't double open */
+    if (transport->flags & NETSNMP_TRANSPORT_FLAG_OPENED)
+        return SNMPERR_SUCCESS;
+
+    if ((rc = netsnmp_sess_config_transport(in_session->transport_configuration,
+                                            transport)) != SNMPERR_SUCCESS) {
+        return rc;
+        in_session->s_snmp_errno = rc;
+        in_session->s_errno = 0;
+        return rc;
+    }
+        
+    if (transport->f_open)
+        transport = transport->f_open(transport);
+
+    if (transport == NULL) {
+        DEBUGMSGTL(("snmp_sess", "couldn't interpret peername\n"));
+        in_session->s_snmp_errno = SNMPERR_BAD_ADDRESS;
+        in_session->s_errno = errno;
+        snmp_set_detail(in_session->peername);
+        return SNMPERR_BAD_ADDRESS;
+    }
+
+    transport->flags |= NETSNMP_TRANSPORT_FLAG_OPENED;
+    DEBUGMSGTL(("snmp_sess", "done opening transport: %x\n", transport->flags & NETSNMP_TRANSPORT_FLAG_OPENED));
     return SNMPERR_SUCCESS;
 }
 
@@ -1515,21 +1579,9 @@ _sess_open(netsnmp_session * in_session)
 
     /* Optional supplimental transport configuration information and
        final call to actually open the transport */
-    if ((rc = netsnmp_sess_config_transport(in_session->transport_configuration,
-                                            transport)) != SNMPERR_SUCCESS) {
-        in_session->s_snmp_errno = rc;
-        in_session->s_errno = 0;
-        return NULL;
-    }
-
-    if (transport->f_open)
-        transport = transport->f_open(transport);
-
-    if (transport == NULL) {
-        DEBUGMSGTL(("_sess_open", "couldn't interpret peername\n"));
-        in_session->s_snmp_errno = SNMPERR_BAD_ADDRESS;
-        in_session->s_errno = errno;
-        snmp_set_detail(in_session->peername);
+    if ((rc = netsnmp_sess_config_and_open_transport(in_session, transport))
+        != SNMPERR_SUCCESS) {
+        transport = NULL;
         return NULL;
     }
 
@@ -1646,7 +1698,8 @@ snmp_sess_add_ex(netsnmp_session * in_session,
                                               size_t))
 {
     struct session_list *slp;
-
+    int rc;
+    
     _init_snmp();
 
     if (transport == NULL)
@@ -1655,6 +1708,12 @@ snmp_sess_add_ex(netsnmp_session * in_session,
     if (in_session == NULL) {
         transport->f_close(transport);
         netsnmp_transport_free(transport);
+        return NULL;
+    }
+
+    /* if the transport hasn't been fully opened yet, open it now */
+    if ((rc = netsnmp_sess_config_and_open_transport(in_session, transport))
+        != SNMPERR_SUCCESS) {
         return NULL;
     }
 

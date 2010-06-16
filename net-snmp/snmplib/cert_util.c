@@ -2519,8 +2519,6 @@ _parse_map(const char *token, char *line)
 static void
 _parse_trustcert(const char *token, char *line)
 {
-    X509 *thecert;
-
     if (!_trusted_certs)
         _setup_trusted_certs();
 
