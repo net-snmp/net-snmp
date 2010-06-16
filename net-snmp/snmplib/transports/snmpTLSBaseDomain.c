@@ -493,7 +493,7 @@ netsnmp_tlsbase_config(struct netsnmp_transport_s *t, const char *token, const c
         DEBUGMSGT(("tls:config","our identity %s\n", value));
     }
 
-    if (strcmp(token, "their_identity") == 0) == 0) {
+    if (strcmp(token, "their_identity") == 0) {
         SNMP_FREE(tlsdata->their_identity);
         tlsdata->their_identity = strdup(value);
         DEBUGMSGT(("tls:config","their identity %s\n", value));

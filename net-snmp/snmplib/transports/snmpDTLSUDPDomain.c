@@ -221,7 +221,7 @@ start_new_cached_connection(netsnmp_transport *t,
         if (parentdata->their_identity)
             tlsdata->their_identity = strdup(parentdata->their_identity);
         if (parentdata->their_fingerprint)
-            tlsdata->their_hostname = strdup(parentdata->their_hostname);
+            tlsdata->their_fingerprint = strdup(parentdata->their_fingerprint);
         if (parentdata->trust_cert)
             tlsdata->trust_cert = strdup(parentdata->trust_cert);
         if (parentdata->their_hostname)
