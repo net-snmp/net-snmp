@@ -369,9 +369,11 @@ sslctx_client_setup(const SSL_METHOD *method, _netsnmpTLSBaseData *tlsbase) {
                        &verify_callback);
 
     if (tlsbase->our_identity) {
+        DEBUGMSGTL(("sslctx_client", "looking for local id: %s\n", tlsbase->our_identity));
         id_cert = netsnmp_cert_find(NS_CERT_IDENTITY, NS_CERTKEY_MULTIPLE,
                                     tlsbase->our_identity);
     } else {
+        DEBUGMSGTL(("sslctx_client", "looking for default local id\n", tlsbase->our_identity));
         id_cert = netsnmp_cert_find(NS_CERT_IDENTITY, NS_CERTKEY_DEFAULT, NULL);
     }
 
