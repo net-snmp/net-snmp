@@ -304,11 +304,54 @@ netsnmp_tlsbase_extract_security_name(SSL *ssl, _netsnmpTLSBaseData *tlsdata) {
     return (tlsdata->securityName ? SNMPERR_SUCCESS : SNMPERR_GENERR);
 }
 
+int
+_trust_this_cert(SSL_CTX *the_ctx, char *certspec) {
+    netsnmp_cert *trustcert;
+
+    DEBUGMSGTL(("sslctx_client", "Trying to load a trusted certificate: %s\n",
+                certspec));
+
+    /* load this identifier into the trust chain */
+    trustcert = netsnmp_cert_find(NS_CERT_CA,
+                                  NS_CERTKEY_MULTIPLE,
+                                  certspec);
+    if (!trustcert)
+        trustcert = netsnmp_cert_find(NS_CERT_REMOTE_PEER,
+                                      NS_CERTKEY_MULTIPLE,
+                                      certspec);
+    if (!trustcert)
+        LOGANDDIE("failed to find requested certificate to trust");
+        
+    if (netsnmp_cert_trust_ca(the_ctx, trustcert) != SNMPERR_SUCCESS)
+        LOGANDDIE("failed to load trust certificate");
+
+    return 1;
+}
+
+void
+_load_trusted_certs(SSL_CTX *the_ctx) {
+    netsnmp_container *trusted_certs = NULL;
+    netsnmp_iterator  *trusted_cert_iterator = NULL;
+    char *fingerprint;
+
+    trusted_certs = netsnmp_cert_get_trustlist();
+    trusted_cert_iterator = CONTAINER_ITERATOR(trusted_certs);
+    if (trusted_cert_iterator) {
+        for (fingerprint = (char *) ITERATOR_FIRST(trusted_cert_iterator);
+             fingerprint; fingerprint = ITERATOR_NEXT(trusted_cert_iterator)) {
+            if (!_trust_this_cert(the_ctx, fingerprint))
+                snmp_log(LOG_ERR, "failed to load trust cert: %s\n",
+                         fingerprint);
+        }
+    }
+}    
+
 SSL_CTX *
 sslctx_client_setup(const SSL_METHOD *method, _netsnmpTLSBaseData *tlsbase) {
     netsnmp_cert *id_cert, *peer_cert;
     SSL_CTX      *the_ctx;
     X509_STORE   *cert_store = NULL;
+    X509 *trustcert;
 
     /***********************************************************************
      * Set up the client context
@@ -375,25 +418,11 @@ sslctx_client_setup(const SSL_METHOD *method, _netsnmpTLSBaseData *tlsbase) {
 
     /* trust a certificate (possibly a CA) aspecifically passed in */
     if (tlsbase->trust_cert) {
-        /* load this identifier into the trust chain */
-        X509 *trustcert;
-        trustcert = netsnmp_cert_find(NS_CERT_CA,
-                                      NS_CERTKEY_MULTIPLE,
-                                      tlsbase->trust_cert);
-        if (!trustcert)
-            trustcert = netsnmp_cert_find(NS_CERT_REMOTE_PEER,
-                                          NS_CERTKEY_MULTIPLE,
-                                          tlsbase->trust_cert);
-        if (!trustcert)
-            LOGANDDIE ("failed to find requested certificate to trust");
-        
-        if (netsnmp_cert_trust_ca(the_ctx, trustcert) != SNMPERR_SUCCESS)
-            LOGANDDIE ("failed to load trust certificate");
-
-        DEBUGMSGTL(("sslctx_client", "loaded a trusted certificate: %s\n",
-                    tlsbase->trust_cert));
-
+        if (!_trust_this_cert(the_ctx, tlsbase->trust_cert))
+            return 0;
     }
+
+    _load_trusted_certs(the_ctx);
 
     if (!SSL_CTX_set_default_verify_paths(the_ctx)) {
         LOGANDDIE ("");
@@ -444,6 +473,8 @@ sslctx_server_setup(const SSL_METHOD *method) {
                        SSL_VERIFY_FAIL_IF_NO_PEER_CERT|
                        SSL_VERIFY_CLIENT_ONCE,
                        &verify_callback);
+
+    _load_trusted_certs(the_ctx);
 
     return the_ctx;
 }
