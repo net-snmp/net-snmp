@@ -63,6 +63,8 @@ static netsnmp_container *_tlstmParams = NULL;
 static netsnmp_container *_tlstmAddr = NULL;
 static struct snmp_enum_list *_certindexes = NULL;
 
+static netsnmp_container *_trusted_certs = NULL;
+
 static void _setup_containers(void);
 
 static void _cert_indexes_load(void);
@@ -99,6 +101,9 @@ static int _certindex_add( const char *dirname, int i );
 static int _time_filter(netsnmp_file *f, struct stat *idx);
 
 static void _init_tlstmCertToTSN(void);
+#define TRUSTCERT_CONFIG_TOKEN "trustCert"
+static void _parse_trustcert(const char *token, char *line);
+
 static void _init_tlstmParams(void);
 static void _init_tlstmAddr(void);
 
@@ -128,12 +133,43 @@ static const char _modes[][256] =
  * init and shutdown functions
  *
  */
+
+void
+_netsnmp_release_trustcerts(void)
+{
+    if (NULL != _trusted_certs) {
+        CONTAINER_FREE_ALL(_trusted_certs, NULL);
+        CONTAINER_FREE(_trusted_certs);
+        _trusted_certs = NULL;
+    }
+}
+
+void
+_setup_trusted_certs(void)
+{
+    _trusted_certs = netsnmp_container_find("trusted_certs:fifo");
+    if (NULL == _keys) {
+        snmp_log(LOG_ERR, "could not create container for trusted keys\n");
+        netsnmp_certs_shutdown();
+        return;
+    }
+    _trusted_certs->container_name = strdup("trusted certificates");
+    _trusted_certs->free_item = (netsnmp_container_obj_func*) free;
+    _trusted_certs->compare = (netsnmp_container_compare*) strcmp;
+}
+
 void
 netsnmp_certs_init(void)
 {
+    const char *trustCert_help = TRUSTCERT_CONFIG_TOKEN
+        " FINGERPRINT|FILENAME";
+
     char *app = netsnmp_ds_get_string(NETSNMP_DS_LIBRARY_ID,
                                       NETSNMP_DS_LIB_APPTYPE);
 
+    register_config_handler("snmp", TRUSTCERT_CONFIG_TOKEN,
+                            _parse_trustcert, _netsnmp_release_trustcerts,
+                            trustCert_help);
     /*
      * secname mapping only makes sense for servers.
      * Is there a better way than apptype to determine that?
@@ -191,6 +227,7 @@ netsnmp_certs_shutdown(void)
         CONTAINER_FREE(_keys);
         _keys = NULL;
     }
+    _netsnmp_release_trustcerts();
 }
 
 void
@@ -327,6 +364,8 @@ _setup_containers(void)
     _keys->container_name = strdup("netsnmp certificate keys");
     _keys->free_item = (netsnmp_container_obj_func*)_key_free;
     _keys->compare = (netsnmp_container_compare*)_cert_fn_compare;
+
+    _setup_trusted_certs();
 }
 
 netsnmp_container *
@@ -2455,6 +2494,14 @@ netsnmp_certToTSN_parse_common(char **line)
     return map;
 }
 
+netsnmp_container *
+netsnmp_cert_get_trustlist(void)
+{
+    if (!_trusted_certs)
+        _setup_trusted_certs();
+    return _trusted_certs;
+}
+
 static void
 _parse_map(const char *token, char *line)
 {
@@ -2467,6 +2514,20 @@ _parse_map(const char *token, char *line)
         netsnmp_config_error(MAP_CONFIG_TOKEN
                              ": duplicate priority for certificate map");
     }
+}
+
+static void
+_parse_trustcert(const char *token, char *line)
+{
+    X509 *thecert;
+
+    if (!_trusted_certs)
+        _setup_trusted_certs();
+
+    if (!_trusted_certs)
+        return;
+
+    CONTAINER_INSERT(_trusted_certs, strdup(line));
 }
 
 static int
