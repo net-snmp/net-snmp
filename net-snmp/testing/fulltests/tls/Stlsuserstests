@@ -62,15 +62,11 @@ CHECKVALUEISNT "$IPUSERFP" "" "generated fingerprint for ipaddr certificate"
 
 # CA certificate
 
-# temp fixes:
-touch $SNMP_TMPDIR/tls/.index
-echo "01" > $SNMP_TMPDIR/tls/.serial
-
 CAPTURE $NSCERT genca --cn ca-net-snmp.org  $NSCERTARGS
 CAFP=`$NSCERT showcas --fingerprint --brief ca-net-snmp.org $NSCERTARGS`
 CHECKVALUEISNT "$CAFP" "" "generated fingerprint for ca-net-snmp.org certificate"
 
-# user 9: CA signed cert
+# user 9: CA signed user cert
 CAPTURE $NSCERT gencert -t causer --with-ca ca-net-snmp.org --san email:user9@test.net-snmp.org --email user9@test.net-snmp.org  $NSCERTARGS
 CAUSERFP=`$NSCERT showcerts --fingerprint --brief causer $NSCERTARGS`
 CHECKVALUEISNT "$CAUSERFP" "" "generated fingerprint for causer certificate"
