@@ -72,7 +72,7 @@ static void timerPause(void);
         char            ip[128], route[128];
         int             mtu;
         int             drops;
-        int             ifindex;
+        unsigned int    ifindex;
                         /*
                          * Save "expandable" fields as string values
                          *  rather than integer statistics
@@ -131,7 +131,7 @@ _set_address( struct _if_info *cur_if )
      */
     for (vp=addr_if_var, vp2=addr_mask_var;  vp;
          vp=vp->next_variable, vp2=vp2->next_variable) {
-        if ( vp->val.integer && *vp->val.integer == cur_if->ifindex )
+        if ( vp->val.integer && *vp->val.integer == (int)cur_if->ifindex )
             break;
     }
     if (vp2) {
@@ -519,7 +519,7 @@ sidewaysintpr(unsigned int interval)
     struct iftot *sum = NULL, *total  = NULL;    /* overall summary    */
     int    line;
     int    first;
-    int    i;
+    size_t i;
 
     var = NULL;
     if ( intrface ) {

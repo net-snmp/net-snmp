@@ -662,7 +662,7 @@ get_table_entries(netsnmp_session * ss)
                     col++;
                     name[rootlen] = column[col].subid;
                     if ((vars->name_length < name_length) ||
-                        ((int) vars->name[rootlen] != column[col].subid) ||
+                        (vars->name[rootlen] != column[col].subid) ||
                         memcmp(name, vars->name,
                                name_length * sizeof(oid)) != 0
                         || vars->type == SNMP_ENDOFMIBVIEW) {

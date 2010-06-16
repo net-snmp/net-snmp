@@ -67,7 +67,7 @@ static const char *rcsid = "$OpenBSD: inet.c,v 1.92 2005/02/10 14:25:08 itojun E
 #include "netstat.h"
 
 struct stat_table {
-    int             entry;      /* entry number in table */
+    unsigned int  entry;      /* entry number in table */
     /*
      * format string to printf(description, value) 
      * warning: the %d must be before the %s 
