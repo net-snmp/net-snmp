@@ -443,12 +443,12 @@ netsnmp_view_get(struct vacm_viewEntry *head, const char *viewName,
     for (vp = head; vp; vp = vp->next) {
         if (!memcmp(view, vp->viewName, glen + 1)
             && viewSubtreeLen >= (vp->viewSubtreeLen - 1)) {
-            int             mask = 0x80, maskpos = 0;
-            int             oidpos;
+            int             mask = 0x80;
+            unsigned int    oidpos, maskpos = 0;
             found = 1;
 
             for (oidpos = 0;
-                 found && oidpos < (int) vp->viewSubtreeLen - 1;
+                 found && oidpos < vp->viewSubtreeLen - 1;
                  oidpos++) {
                 if (mode==VACM_MODE_IGNORE_MASK || (VIEW_MASK(vp, maskpos, mask) != 0)) {
                     if (viewSubtree[oidpos] !=
@@ -532,15 +532,15 @@ netsnmp_view_subtree_check(struct vacm_viewEntry *head, const char *viewName,
              * subtree we are comparing against.
              */
             if (viewSubtreeLen >= (vp->viewSubtreeLen - 1)) {
-                int             mask = 0x80, maskpos = 0;
-                int             oidpos;
+                int             mask = 0x80;
+                unsigned int    oidpos, maskpos = 0;
                 found = 1;
 
                 /*
                  * check the mask
                  */
                 for (oidpos = 0;
-                     found && oidpos < (int) vp->viewSubtreeLen - 1;
+                     found && oidpos < vp->viewSubtreeLen - 1;
                      oidpos++) {
                     if (VIEW_MASK(vp, maskpos, mask) != 0) {
                         if (viewSubtree[oidpos] !=
@@ -580,15 +580,15 @@ netsnmp_view_subtree_check(struct vacm_viewEntry *head, const char *viewName,
              * response.
              */
             else {
-                int             mask = 0x80, maskpos = 0;
-                int             oidpos;
+                int             mask = 0x80;
+                unsigned int    oidpos, maskpos = 0;
                 found = 1;
 
                 /*
                  * check the mask up to the length of the provided subtree
                  */
                 for (oidpos = 0;
-                     found && oidpos < (int) viewSubtreeLen;
+                     found && oidpos < viewSubtreeLen;
                      oidpos++) {
                     if (VIEW_MASK(vp, maskpos, mask) != 0) {
                         if (viewSubtree[oidpos] !=

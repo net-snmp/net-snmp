@@ -598,7 +598,7 @@ snmp_fix_pdu(netsnmp_pdu *pdu, int command)
     if ((pdu->command != SNMP_MSG_RESPONSE)
         || (pdu->errstat == SNMP_ERR_NOERROR)
         || (NULL == pdu->variables)
-        || (pdu->errindex > snmp_varbind_len(pdu))
+        || (pdu->errindex > (int)snmp_varbind_len(pdu))
         || (pdu->errindex <= 0)) {
         return NULL;            /* pre-condition tests fail */
     }

@@ -1499,7 +1499,7 @@ config_vlog(int level, const char *levelmsg, const char *str, va_list args)
     char* buf = tmpbuf;
     int len = snprintf(tmpbuf, sizeof(tmpbuf), "%s: line %d: %s: %s\n",
 		       curfilename, linecount, levelmsg, str);
-    if (len >= sizeof(tmpbuf)) {
+    if (len >= (int)sizeof(tmpbuf)) {
 	buf = (char*)malloc(len + 1);
 	sprintf(buf, "%s: line %d: %s: %s\n",
 		curfilename, linecount, levelmsg, str);
@@ -1765,8 +1765,7 @@ read_config_read_octet_string_const(const char *readfrom, u_char ** str,
     u_char         *cptr;
     const char     *cptr1;
     u_int           tmp;
-    int             i;
-    size_t          ilen;
+    size_t          i, ilen;
 
     if (readfrom == NULL || str == NULL || len == NULL)
         return NULL;

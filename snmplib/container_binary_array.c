@@ -333,7 +333,7 @@ int
 netsnmp_binary_array_remove(netsnmp_container *c, const void *key, void **save)
 {
     binary_array_table *t = (binary_array_table*)c->container_data;
-    size_t             index = 0;
+    int                index = 0;
 
     if (save)
         *save = NULL;
@@ -356,7 +356,7 @@ netsnmp_binary_array_remove(netsnmp_container *c, const void *key, void **save)
     if ((index = binary_search(key, c, 1)) == -1)
         return -1;
 
-    return netsnmp_binary_array_remove_at(c, index, save);
+    return netsnmp_binary_array_remove_at(c, (size_t)index, save);
 }
 
 NETSNMP_STATIC_INLINE void

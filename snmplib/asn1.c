@@ -581,8 +581,8 @@ asn_parse_unsigned_int(u_char * data,
         (errpre, bufp, data, asn_length, *datalength))
         return NULL;
 
-    if (((int) asn_length > (intsize + 1)) ||
-        (((int) asn_length == intsize + 1) && *bufp != 0x00)) {
+    if ((asn_length > (intsize + 1)) ||
+        ((asn_length == intsize + 1) && *bufp != 0x00)) {
         _asn_length_err(errpre, (size_t) asn_length, intsize);
         return NULL;
     }
@@ -827,7 +827,7 @@ asn_parse_string(u_char * data,
         return NULL;
     }
 
-    if ((int) asn_length > *strlength) {
+    if (asn_length > *strlength) {
         _asn_length_err(errpre, (size_t) asn_length, *strlength);
         return NULL;
     }
@@ -835,10 +835,10 @@ asn_parse_string(u_char * data,
     DEBUGDUMPSETUP("recv", data, bufp - data + asn_length);
 
     memmove(str, bufp, asn_length);
-    if (*strlength > (int) asn_length)
+    if (*strlength > asn_length)
         str[asn_length] = 0;
-    *strlength = (int) asn_length;
-    *datalength -= (int) asn_length + (bufp - data);
+    *strlength = asn_length;
+    *datalength -= asn_length + (bufp - data);
 
     DEBUGIF("dumpv_recv") {
         u_char         *buf = (u_char *) malloc(1 + asn_length);
