@@ -289,7 +289,6 @@ netsnmp_tlstcp_send(netsnmp_transport *t, void *buf, int size,
         return SNMPERR_GENERR;
     }
 
-
     /* RFCXXXX section 5.2: 
        2)  Extract the tmSessionID, tmTransportDomain, tmTransportAddress,
        tmSecurityName, tmRequestedSecurityLevel, and tmSameSecurity
@@ -371,6 +370,11 @@ netsnmp_tlstcp_send(netsnmp_transport *t, void *buf, int size,
 
     tlsdata = t->data;
     
+    if (tlsdata->ssl == NULL) {
+        snmp_log(LOG_ERR, "tlstcp_send was called without a SSL connection.\n");
+        return SNMPERR_GENERR;
+    }
+
     /* If the first packet and we have no secname, then copy the
        important securityName data into the longer-lived session
        reference information. */
