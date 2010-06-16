@@ -1925,6 +1925,7 @@ static const char *_where_str(u_int what)
         case NS_CERTKEY_DEFAULT: return "DEFAULT";
         case NS_CERTKEY_FILE: return "FILE";
         case NS_CERTKEY_FINGERPRINT: return "FINGERPRINT";
+        case NS_CERTKEY_MULTIPLE: return "MULTIPLE";
         case NS_CERTKEY_CA: return "CA";
         case NS_CERTKEY_SAN_RFC822: return "SAN_RFC822";
         case NS_CERTKEY_SAN_DNS: return "SAN_DNS";
