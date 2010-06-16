@@ -78,6 +78,10 @@ DOTRAPTEST user1TrapTest "$FLAGS"
 # failing using the CA signed cert without
 DOFAILTRAPTEST user2UnknownUser "-T our_identity=snmptrap $FLAGS"
 
+# using user 1 - sending an INFORM
+# (using the default "snmpapp" certificate because we don't specify another)
+DOTRAPTEST user1InformTest "-Ci $FLAGS"
+
 STOPTRAPD
 
 FINISHED
