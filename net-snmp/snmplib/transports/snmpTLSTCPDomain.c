@@ -592,6 +592,7 @@ netsnmp_tlstcp_open(netsnmp_transport *t)
     SSL *ssl;
     char tmpbuf[128];
     int rc = 0;
+    _netsnmp_verify_info *verify_info;
 
     netsnmp_assert_or_return(t != NULL, NULL);
     netsnmp_assert_or_return(t->data != NULL, NULL);
@@ -711,6 +712,19 @@ netsnmp_tlstcp_open(netsnmp_transport *t)
         /* Bind the SSL layer to the BIO */ 
         SSL_set_bio(ssl, bio, bio);
         SSL_set_mode(ssl, SSL_MODE_AUTO_RETRY);
+
+        verify_info = SNMP_MALLOC_TYPEDEF(_netsnmp_verify_info);
+        if (NULL == verify_info) {
+            snmp_increment_statistic(STAT_TLSTM_SNMPTLSTMSESSIONOPENERRORS);
+            snmp_log(LOG_ERR, "tlstcp: failed to create a SSL connection\n");
+            SSL_shutdown(ssl);
+            BIO_free(bio);
+            SNMP_FREE(tlsdata);
+            SNMP_FREE(t);
+            return NULL;
+        }
+
+        SSL_set_ex_data(ssl, tls_get_verify_info_index(), verify_info);
 
         /* Then have SSL do it's connection over the BIO */
         if ((rc = SSL_connect(ssl)) <= 0) {

@@ -46,8 +46,13 @@ extern          "C" {
        char                      *their_identity;
        char                      *their_fingerprint;
        char                      *their_hostname;
+       char                      *trust_cert;
        netsnmp_indexed_addr_pair *remote_addr;
     } _netsnmpTLSBaseData;
+
+    typedef struct _netsnmp_verify_info_s {
+       int parent_was_ok;
+    } _netsnmp_verify_info;
 
     SSL_CTX *sslctx_client_setup(const SSL_METHOD *,
                                  _netsnmpTLSBaseData *tlsbase);
@@ -68,6 +73,7 @@ extern          "C" {
 
     int netsnmp_tlsbase_session_init(struct netsnmp_transport_s *,
                                      struct snmp_session *sess);
+    int tls_get_verify_info_index(void);
 #ifdef __cplusplus
 }
 #endif

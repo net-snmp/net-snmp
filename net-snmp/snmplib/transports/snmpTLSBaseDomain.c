@@ -39,12 +39,16 @@
 
 #define LOGANDDIE(msg) { snmp_log(LOG_ERR, "%s\n", msg); return 0; }
 
+int openssl_local_index;
+
 /* this is called during negotiationn */
 int verify_callback(int ok, X509_STORE_CTX *ctx) {
     int err, depth;
     char buf[1024], *fingerprint;;
     X509 *thecert;
     netsnmp_cert *cert;
+    _netsnmp_verify_info *verify_info;
+    SSL *ssl;
 
     thecert = X509_STORE_CTX_get_current_cert(ctx);
     err = X509_STORE_CTX_get_error(ctx);
@@ -60,6 +64,14 @@ int verify_callback(int ok, X509_STORE_CTX *ctx) {
     DEBUGMSGTL(("tls_x509:verify", "Cert: %s\n", buf));
     DEBUGMSGTL(("tls_x509:verify", "  fp: %s\n", fingerprint ?
                 fingerprint : "unknown"));
+
+    ssl = X509_STORE_CTX_get_ex_data(ctx, SSL_get_ex_data_X509_STORE_CTX_idx());
+    verify_info = SSL_get_ex_data(ssl, openssl_local_index);
+
+    if (verify_info && ok && depth > 0) {
+        /* remember that a parent certificate has been marked as trusted */
+        verify_info->parent_was_ok = 1;
+    }
 
     /* this ensures for self-signed certificates we have a valid
        locally known fingerprint and then accept it */
@@ -82,6 +94,11 @@ int verify_callback(int ok, X509_STORE_CTX *ctx) {
         } else {
             DEBUGMSGTL(("tls_x509:verify", "  no matching fp found\n"));
             return 0;
+        }
+
+        if (0 == depth && verify_info && verify_info->parent_was_ok) {
+            DEBUGMSGTL(("tls_x509:verify", "  a parent was ok, so returning ok for this child certificate\n"));
+            return 1; /* we'll check the hostname later at this level */
         }
     }
 
@@ -158,7 +175,8 @@ int
 netsnmp_tlsbase_verify_server_cert(SSL *ssl, _netsnmpTLSBaseData *tlsdata) {
     /* XXX */
     X509            *remote_cert;
-    int ret;
+    char            *common_name;
+    int              ret;
     
     netsnmp_assert_or_return(ssl != NULL, SNMPERR_GENERR);
     netsnmp_assert_or_return(tlsdata != NULL, SNMPERR_GENERR);
@@ -180,6 +198,20 @@ netsnmp_tlsbase_verify_server_cert(SSL *ssl, _netsnmpTLSBaseData *tlsdata) {
         return SNMPERR_GENERR;
 
     case NO_FINGERPNINT_AVAILABLE:
+        if (tlsdata->their_hostname) {
+            /* if the hostname we were expecting to talk to matches
+               the cert, then we can accept this connection. */
+
+            /* check the common name for a match */
+            common_name =
+                netsnmp_openssl_cert_get_commonName(remote_cert, NULL, NULL);
+
+            if (tlsdata->their_hostname[0] != '\0' &&
+                strcmp(tlsdata->their_hostname, common_name) == 0) {
+                DEBUGMSGTL(("tls_x509:verify", "Successful match on a common name of %s\n", common_name));
+                return SNMPERR_SUCCESS;
+            }
+        }
         /* XXX: check for hostname match instead */
         snmp_log(LOG_ERR, "Can not verify a remote server identity without configuration\n");
         return SNMPERR_GENERR;
@@ -321,6 +353,10 @@ sslctx_client_setup(const SSL_METHOD *method, _netsnmpTLSBaseData *tlsbase) {
     if (!SSL_CTX_check_private_key(the_ctx))
         LOGANDDIE("public and private keys incompatible");
 
+    cert_store = SSL_CTX_get_cert_store(the_ctx);
+    if (!cert_store)
+        LOGANDDIE("failed to find certificate store");
+
     if (tlsbase->their_identity)
         peer_cert = netsnmp_cert_find(NS_CERT_REMOTE_PEER,
                                       NS_CERTKEY_MULTIPLE,
@@ -328,36 +364,36 @@ sslctx_client_setup(const SSL_METHOD *method, _netsnmpTLSBaseData *tlsbase) {
     else
         peer_cert = netsnmp_cert_find(NS_CERT_REMOTE_PEER, NS_CERTKEY_DEFAULT,
                                       NULL);
-    if (!peer_cert)
-        LOGANDDIE ("error finding client remote keys");
-    DEBUGMSGTL(("sslctx_client", "their public key: %s\n",
-                peer_cert->info.filename));
+    if (peer_cert) {
+        DEBUGMSGTL(("sslctx_client", "server's expected public key: %s\n",
+                    peer_cert ? peer_cert->info.filename : "none"));
 
-    cert_store = SSL_CTX_get_cert_store(the_ctx);
-    if (!cert_store)
-        LOGANDDIE("failed to find certificate store");
-
-    if (0 == X509_STORE_add_cert(cert_store, peer_cert->ocert)) {
-        netsnmp_openssl_err_log("adding peer to cert store");
-        LOGANDDIE("failed to add peer to certificate store");
+        /* Trust the expected certificate */
+        if (netsnmp_cert_trust_ca(the_ctx, peer_cert) != SNMPERR_SUCCESS)
+            LOGANDDIE ("failed to set verify paths");
     }
 
-    /** add all the certs in the clients chain */
-    id_cert = id_cert->issuer_cert;
-    for (; id_cert; id_cert = id_cert->issuer_cert) {
-        if (NULL == id_cert->ocert) {
-            DEBUGMSGT(("sslctx_client", "issuer missing x509 cert!\n"));
-            continue;
-        }
-        if(! SSL_CTX_add_extra_chain_cert(the_ctx, id_cert->ocert)) {
-            LOGANDDIE("failed to load truststore");
-            /* Handle failed load here */
-        }
-    }
+    /* trust a certificate (possibly a CA) aspecifically passed in */
+    if (tlsbase->trust_cert) {
+        /* load this identifier into the trust chain */
+        X509 *trustcert;
+        trustcert = netsnmp_cert_find(NS_CERT_CA,
+                                      NS_CERTKEY_MULTIPLE,
+                                      tlsbase->trust_cert);
+        if (!trustcert)
+            trustcert = netsnmp_cert_find(NS_CERT_REMOTE_PEER,
+                                          NS_CERTKEY_MULTIPLE,
+                                          tlsbase->trust_cert);
+        if (!trustcert)
+            LOGANDDIE ("failed to find requested certificate to trust");
+        
+        if (netsnmp_cert_trust_ca(the_ctx, trustcert) != SNMPERR_SUCCESS)
+            LOGANDDIE ("failed to load trust certificate");
 
-    snmp_log(LOG_INFO, "loading TA's into context %p:\n", the_ctx);
-    if (netsnmp_cert_trust_ca(the_ctx, peer_cert) != SNMPERR_SUCCESS)
-        LOGANDDIE ("failed to set verify paths");
+        DEBUGMSGTL(("sslctx_client", "loaded a trusted certificate: %s\n",
+                    tlsbase->trust_cert));
+
+    }
 
     if (!SSL_CTX_set_default_verify_paths(the_ctx)) {
         LOGANDDIE ("");
@@ -403,15 +439,6 @@ sslctx_server_setup(const SSL_METHOD *method) {
 
     SSL_CTX_set_read_ahead(the_ctx, 1); /* XXX: DTLS only? */
 
-#if 0
-    certfile = netsnmp_ds_get_string(NETSNMP_DS_LIBRARY_ID,
-                                     NETSNMP_DS_LIB_X509_CLIENT_CERTS);
-    if(! SSL_CTX_load_verify_locations(the_ctx, certfile, NULL)) {
-        LOGANDDIE("failed to load truststore");
-        /* Handle failed load here */
-    }
-#endif
-
     SSL_CTX_set_verify(the_ctx,
                        SSL_VERIFY_PEER|
                        SSL_VERIFY_FAIL_IF_NO_PEER_CERT|
@@ -451,6 +478,13 @@ netsnmp_tlsbase_config(struct netsnmp_transport_s *t, const char *token, const c
         strcmp(token, "their_hostname") == 0) {
         SNMP_FREE(tlsdata->their_hostname);
         tlsdata->their_hostname = strdup(value);
+    }
+
+    if (strcmp(token, "trust_cert") == 0 ||
+        /* XXX: remove this option after a few weeks */
+        strcmp(token, "trust_cert") == 0) {
+        SNMP_FREE(tlsdata->trust_cert);
+        tlsdata->trust_cert = strdup(value);
     }
     
     return SNMPERR_SUCCESS;
@@ -502,7 +536,15 @@ tls_bootstrap(int majorid, int minorid, void *serverarg, void *clientarg) {
 
     netsnmp_certs_load();
 
+    openssl_local_index =
+        SSL_get_ex_new_index(0, "_netsnmp_verify_info", NULL, NULL, NULL);
+
     return 0;
+}
+
+int
+tls_get_verify_info_index() {
+    return openssl_local_index;
 }
 
 void
