@@ -104,7 +104,7 @@ SOFTWARE.
 typedef struct {
     char            cmd;        /* the format command itself */
     size_t          width;      /* the field's minimum width */
-    size_t          precision;  /* the field's precision */
+    int             precision;  /* the field's precision */
     int             left_justify;       /* if true, left justify this field */
     int             alt_format; /* if true, display in alternate format */
     int             leading_zeroes;     /* if true, display with leading zeroes */
@@ -368,7 +368,7 @@ realloc_output_temp_bfr(u_char ** buf, size_t * buf_len, size_t * out_len,
     temp_to_write = temp_len;
 
     if (options->precision != UNDEF_PRECISION &&
-        temp_to_write > options->precision) {
+        temp_to_write > (size_t)options->precision) {
         temp_to_write = options->precision;
     }
 
@@ -538,7 +538,7 @@ realloc_handle_time_fmt(u_char ** buf, size_t * buf_len, size_t * out_len,
             sprintf(safe_bfr, "%d", parsed_time->tm_year + 1900);
             if (options->precision != UNDEF_PRECISION) {
                 year_len = (size_t) strlen(safe_bfr);
-                if (year_len > options->precision)
+                if (year_len > (size_t)options->precision)
                     offset = year_len - options->precision;
             }
             break;
@@ -1000,7 +1000,7 @@ realloc_handle_auth_fmt(u_char ** buf, size_t * buf_len, size_t * out_len,
     char            fmt_cmd = options->cmd;     /* what we're outputting */
     u_char         *temp_buf = NULL;
     size_t          tbuf_len = 64, tout_len = 0;
-    int             i;
+    unsigned int    i;
 
     if ((temp_buf = (u_char*)calloc(tbuf_len, 1)) == NULL) {
         return 0;
@@ -1764,8 +1764,9 @@ realloc_format_trap(u_char ** buf, size_t * buf_len, size_t * out_len,
                 }
             } else if (is_fmt_cmd(next_chr)) {
                 options.cmd = next_chr;
-                if (options.width < options.precision) {
-                    options.width = options.precision;
+                if ((options.precision != UNDEF_PRECISION) &&
+                    (options.width < (size_t)options.precision)) {
+                    options.width = (size_t)options.precision;
                 }
                 if (!realloc_dispatch_format_cmd
                     (buf, buf_len, out_len, allow_realloc, &options, pdu,

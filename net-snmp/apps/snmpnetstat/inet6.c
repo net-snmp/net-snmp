@@ -71,7 +71,7 @@ static char sccsid[] = "@(#)inet.c	8.4 (Berkeley) 4/20/94";
 #include "netstat.h"
 
 struct stat_table {
-    int             entry;      /* entry number in table */
+    unsigned int entry;      /* entry number in table */
     /*
      * format string to printf(description, value) 
      * warning: the %d must be before the %s 
@@ -224,7 +224,7 @@ _dump_v6stats( const char *name, oid *oid_buf, size_t buf_len,
     netsnmp_variable_list *var, *vp;
     struct stat_table     *sp;
     oid   *stats, stat;
-    int    max_stat = 0;
+    unsigned int max_stat = 0;
     int    active   = 0;
 
     var = NULL;
@@ -413,7 +413,7 @@ inet6print(unsigned char *in6, int port, const char *proto, int local)
 
 	struct servent *sp = NULL;
 	char line[80], *cp;
-	int width;
+	size_t width;
 	int len = sizeof line;
 
 	width = Aflag ? 12 : 16;

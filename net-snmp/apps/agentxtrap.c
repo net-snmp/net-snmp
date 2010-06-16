@@ -90,9 +90,9 @@ static size_t       contextLen; /**<< Length of eventual context */
 static int          result = 1; /**<< Program return value */
 static netsnmp_pdu *pdu = NULL; /**<< The trap pdu that is to be sent */
 /** The reference number of the next packet */
-static uint32_t     packetid = 0;
+static long         packetid = 0;
 /** The session id of the session to the master */
-static uint32_t     session;
+static long         session;
 static void        *sessp = NULL; /**<< The current communication session */
 
 #define STATE_CALL(method)                                              \
