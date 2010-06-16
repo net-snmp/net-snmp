@@ -215,6 +215,7 @@ init_sysORTable(void)
         CONTAINER_FREE(table);
         return;
     }
+    table->container_name = strdup("sysORTable");
 
     netsnmp_table_helper_add_indexes(sysORTable_table_info,
                                      ASN_INTEGER, /** index: sysORIndex */

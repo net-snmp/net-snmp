@@ -134,6 +134,7 @@ ipAddressTable_container_init(netsnmp_container **container_ptr_ptr,
     *container_ptr_ptr =
         netsnmp_container_find("ipAddressTable:table_container");
     if (NULL != *container_ptr_ptr) {
+        (*container_ptr_ptr)->container_name = strdup("ipAddressTable");
         ipAddressTable_container_load(*container_ptr_ptr);
         CONTAINER_FOR_EACH(*container_ptr_ptr,
                            (netsnmp_container_obj_func *) _clear_times,

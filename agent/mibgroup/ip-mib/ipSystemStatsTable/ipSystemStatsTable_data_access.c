@@ -118,6 +118,8 @@ ipSystemStatsTable_container_init(netsnmp_container **container_ptr_ptr,
 
 
     *container_ptr_ptr = netsnmp_container_find("ipSystemStatsTable:table_container");
+    if (NULL != *container_ptr_ptr)
+        (*container_ptr_ptr)->container_name = strdup("ipSystemStatsTable");
 
     if (NULL == cache) {
         snmp_log(LOG_ERR,

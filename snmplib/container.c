@@ -62,6 +62,7 @@ netsnmp_container_init_list(void)
      */
     containers = netsnmp_container_get_binary_array();
     containers->compare = netsnmp_compare_cstring;
+    containers->container_name = strdup("container list");
 
     /*
      * register containers

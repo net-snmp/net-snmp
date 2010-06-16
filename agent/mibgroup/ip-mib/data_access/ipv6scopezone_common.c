@@ -63,8 +63,11 @@ netsnmp_access_scopezone_container_load(netsnmp_container* container, u_int load
 
     DEBUGMSGTL(("access:scopezone:container", "load\n"));
 
-    if (NULL == container)
+    if (NULL == container) {
         container = netsnmp_access_scopezone_container_init(load_flags);
+        if (container)
+            container->container_name = strdup("scopezone");
+    }
     if (NULL == container) {
         snmp_log(LOG_ERR, "no container specified/found for access_scopezone\n");
         return NULL;
