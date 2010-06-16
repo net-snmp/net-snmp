@@ -98,9 +98,7 @@ static int _certindex_add( const char *dirname, int i );
 
 static int _time_filter(netsnmp_file *f, struct stat *idx);
 
-#define MAP_CONFIG_TOKEN "certSecName"
-static void _parse_map(const char *token, char *line);
-
+static void _init_tlstmCertToTSN(void);
 static void _init_tlstmParams(void);
 static void _init_tlstmAddr(void);
 
@@ -133,9 +131,6 @@ static const char _modes[][256] =
 void
 netsnmp_certs_init(void)
 {
-    const char *certSecName_help = MAP_CONFIG_TOKEN " PRIORITY FINGERPRINT "
-        "[--shaNN|md5] <--sn SECNAME | --rfc822 | --dns | --ip | --cn | --any>";
-
     char *app = netsnmp_ds_get_string(NETSNMP_DS_LIBRARY_ID,
                                       NETSNMP_DS_LIB_APPTYPE);
 
@@ -144,13 +139,42 @@ netsnmp_certs_init(void)
      * Is there a better way than apptype to determine that?
      */
     if ((strcmp(app, "snmpd") == 0) || (strcmp(app, "snmptrapd") == 0)) {
-        /** maps */
-        register_config_handler(NULL, MAP_CONFIG_TOKEN, _parse_map, NULL,
-                                certSecName_help);
+        _init_tlstmCertToTSN();
         _init_tlstmParams();
         _init_tlstmAddr();
     }
     _setup_containers();
+
+    /** add certificate type mapping */
+    se_add_pair_to_slist("cert_types", strdup("pem"), NS_CERT_TYPE_PEM);
+    se_add_pair_to_slist("cert_types", strdup("crt"), NS_CERT_TYPE_DER);
+    se_add_pair_to_slist("cert_types", strdup("cer"), NS_CERT_TYPE_DER);
+    se_add_pair_to_slist("cert_types", strdup("cert"), NS_CERT_TYPE_DER);
+    se_add_pair_to_slist("cert_types", strdup("der"), NS_CERT_TYPE_DER);
+    se_add_pair_to_slist("cert_types", strdup("key"), NS_CERT_TYPE_KEY);
+    se_add_pair_to_slist("cert_types", strdup("private"), NS_CERT_TYPE_KEY);
+
+    /** hash algs */
+    se_add_pair_to_slist("cert_hash_alg", strdup("sha1"), NS_HASH_SHA1);
+    se_add_pair_to_slist("cert_hash_alg", strdup("md5"), NS_HASH_MD5);
+    se_add_pair_to_slist("cert_hash_alg", strdup("sha224"), NS_HASH_SHA224);
+    se_add_pair_to_slist("cert_hash_alg", strdup("sha256"), NS_HASH_SHA256);
+    se_add_pair_to_slist("cert_hash_alg", strdup("sha384"), NS_HASH_SHA384);
+    se_add_pair_to_slist("cert_hash_alg", strdup("sha512"), NS_HASH_SHA512);
+
+    /** map types */
+    se_add_pair_to_slist("cert_map_type", strdup("cn"),
+                         TSNM_tlstmCertCommonName);
+    se_add_pair_to_slist("cert_map_type", strdup("ip"),
+                         TSNM_tlstmCertSANIpAddress);
+    se_add_pair_to_slist("cert_map_type", strdup("rfc822"),
+                         TSNM_tlstmCertSANRFC822Name);
+    se_add_pair_to_slist("cert_map_type", strdup("dns"),
+                         TSNM_tlstmCertSANDNSName);
+    se_add_pair_to_slist("cert_map_type", strdup("any"), TSNM_tlstmCertSANAny);
+    se_add_pair_to_slist("cert_map_type", strdup("sn"),
+                         TSNM_tlstmCertSpecified);
+
 }
 
 void
@@ -189,36 +213,6 @@ netsnmp_certs_load(void)
     }
 
     netsnmp_init_openssl();
-
-    /** add certificate type mapping */
-    se_add_pair_to_slist("cert_types", strdup("pem"), NS_CERT_TYPE_PEM);
-    se_add_pair_to_slist("cert_types", strdup("crt"), NS_CERT_TYPE_DER);
-    se_add_pair_to_slist("cert_types", strdup("cer"), NS_CERT_TYPE_DER);
-    se_add_pair_to_slist("cert_types", strdup("cert"), NS_CERT_TYPE_DER);
-    se_add_pair_to_slist("cert_types", strdup("der"), NS_CERT_TYPE_DER);
-    se_add_pair_to_slist("cert_types", strdup("key"), NS_CERT_TYPE_KEY);
-    se_add_pair_to_slist("cert_types", strdup("private"), NS_CERT_TYPE_KEY);
-
-    /** hash algs */
-    se_add_pair_to_slist("cert_hash_alg", strdup("sha1"), NS_HASH_SHA1);
-    se_add_pair_to_slist("cert_hash_alg", strdup("md5"), NS_HASH_MD5);
-    se_add_pair_to_slist("cert_hash_alg", strdup("sha224"), NS_HASH_SHA224);
-    se_add_pair_to_slist("cert_hash_alg", strdup("sha256"), NS_HASH_SHA256);
-    se_add_pair_to_slist("cert_hash_alg", strdup("sha384"), NS_HASH_SHA384);
-    se_add_pair_to_slist("cert_hash_alg", strdup("sha512"), NS_HASH_SHA512);
-
-    /** map types */
-    se_add_pair_to_slist("cert_map_type", strdup("cn"),
-                         TSNM_tlstmCertCommonName);
-    se_add_pair_to_slist("cert_map_type", strdup("ip"),
-                         TSNM_tlstmCertSANIpAddress);
-    se_add_pair_to_slist("cert_map_type", strdup("rfc822"),
-                         TSNM_tlstmCertSANRFC822Name);
-    se_add_pair_to_slist("cert_map_type", strdup("dns"),
-                         TSNM_tlstmCertSANDNSName);
-    se_add_pair_to_slist("cert_map_type", strdup("any"), TSNM_tlstmCertSANAny);
-    se_add_pair_to_slist("cert_map_type", strdup("sn"),
-                         TSNM_tlstmCertSpecified);
 
     /** scan config dirs for certs */
     _cert_indexes_load();
@@ -333,12 +327,6 @@ _setup_containers(void)
     _keys->container_name = strdup("netsnmp certificate keys");
     _keys->free_item = (netsnmp_container_obj_func*)_key_free;
     _keys->compare = (netsnmp_container_compare*)_cert_fn_compare;
-
-    /*
-     * container for cert to fingerprint mapping, with fingerprint key
-     */
-    _maps = netsnmp_cert_map_container_create(1);
-
 }
 
 netsnmp_container *
@@ -2181,7 +2169,24 @@ _time_filter(netsnmp_file *f, struct stat *idx)
  *
  * ***************************************************************************
  * ***************************************************************************/
+#define MAP_CONFIG_TOKEN "certSecName"
+static void _parse_map(const char *token, char *line);
 static void _map_free(netsnmp_cert_map* entry, void *ctx);
+
+static void
+_init_tlstmCertToTSN(void)
+{
+    const char *certSecName_help = MAP_CONFIG_TOKEN " PRIORITY FINGERPRINT "
+        "[--shaNN|md5] <--sn SECNAME | --rfc822 | --dns | --ip | --cn | --any>";
+
+    /*
+     * container for cert to fingerprint mapping, with fingerprint key
+     */
+    _maps = netsnmp_cert_map_container_create(1);
+
+    register_config_handler(NULL, MAP_CONFIG_TOKEN, _parse_map, NULL,
+                            certSecName_help);
+}
 
 netsnmp_cert_map *
 netsnmp_cert_map_alloc(char *fingerprint, X509 *ocert)
@@ -2220,6 +2225,23 @@ netsnmp_cert_map_free(netsnmp_cert_map *cert_map)
     SNMP_FREE(cert_map->data);
     /** x509 cert isn't ours */
     free(cert_map); /* SNMP_FREE wasted on param */
+}
+
+int
+netsnmp_cert_map_add(netsnmp_cert_map *map)
+{
+    int                rc;
+
+    if (NULL == map)
+        return -1;
+
+    DEBUGMSGTL(("cert:map:add", "pri %d, fp %s\n",
+                map->priority, map->fingerprint));
+
+    if ((rc = CONTAINER_INSERT(_maps, map)) != 0)
+        snmp_log(LOG_ERR, "could not insert new certificate map");
+
+    return rc;
 }
 
 static void
@@ -2352,6 +2374,7 @@ netsnmp_certToTSN_parse_common(char **line)
     len = sizeof(buf);
     tmp = buf;
     *line = read_config_read_octet_string(*line, (u_char **)&tmp, &len);
+    tmp[len] = 0;
     if (!isdigit(tmp[0])) {
         netsnmp_config_error("could not parse priority");
         return NULL;
@@ -2367,13 +2390,19 @@ netsnmp_certToTSN_parse_common(char **line)
     len = sizeof(buf);
     tmp = buf;
     *line = read_config_read_octet_string(*line, (u_char **)&tmp, &len);
+    tmp[len] = 0;
     if ((buf[0] == '-') && (buf[1] == '-')) {
         map->hashType = _parse_ht_str(&buf[2]);
+        if (NS_HASH_NONE == map->hashType) {
+            netsnmp_config_error("invalid hash type");
+            goto end;
+        }
 
         /** set up for fingerprint */
         len = sizeof(buf);
         tmp = buf;
         *line = read_config_read_octet_string(*line, (u_char **)&tmp, &len);
+        tmp[len] = 0;
     }
     else
         map->hashType = NS_HASH_SHA1;
@@ -2387,6 +2416,7 @@ netsnmp_certToTSN_parse_common(char **line)
     len = sizeof(buf);
     tmp = buf;
     *line = read_config_read_octet_string(*line, (u_char **)&tmp, &len);
+    tmp[len] = 0;
     if ((buf[0] != '-') || (buf[1] != '-')) {
         netsnmp_config_error("unexpected fromat: %s\n", *line);
         goto end;
@@ -2432,9 +2462,7 @@ _parse_map(const char *token, char *line)
     if (NULL == map)
         return;
 
-    DEBUGMSGT(("cert:util:config", "inserting type %d map, pri %d fp %s\n",
-               map->mapType, map->priority, map->fingerprint));
-    if (CONTAINER_INSERT(_maps, map) != 0) {
+    if (netsnmp_cert_map_add(map) != 0) {
         netsnmp_cert_map_free(map);
         netsnmp_config_error(MAP_CONFIG_TOKEN
                              ": duplicate priority for certificate map");
@@ -2479,7 +2507,7 @@ netsnmp_cert_get_secname_maps(netsnmp_container *cert_maps)
                CONTAINER_SIZE(cert_maps)));
     
     /*
-     * duplicate cert_maps and then iterate over it. That way we can
+     * duplicate cert_maps and then iterate over the copy. That way we can
      * add/remove to cert_maps without distrubing the iterator.
      */
     new_maps = CONTAINER_DUP(cert_maps, NULL, 0);
@@ -2652,6 +2680,7 @@ netsnmp_tlstmParams_restore_common(char **line)
     len = sizeof(buf);
     tmp = buf;
     *line = read_config_read_octet_string(*line, (u_char **)&tmp, &len);
+    tmp[len] = 0;
     /** xxx-rks: validate snmpadminstring? */
     if (len)
         stp->tag = strdup(buf);
@@ -2660,6 +2689,7 @@ netsnmp_tlstmParams_restore_common(char **line)
     len = sizeof(buf);
     tmp = buf;
     *line = read_config_read_octet_string(*line, (u_char **)&tmp, &len);
+    tmp[len] = 0;
     if ((buf[0] == '-') && (buf[1] == '-')) {
         stp->hashType = _parse_ht_str(&buf[2]);
 
@@ -2667,6 +2697,7 @@ netsnmp_tlstmParams_restore_common(char **line)
         len = sizeof(buf);
         tmp = buf;
         *line = read_config_read_octet_string(*line, (u_char **)&tmp, &len);
+        tmp[len] = 0;
     }
     if (buf[0] < NS_HASH_MAX) { /* already binary */
         stp->hashType = buf[0];
@@ -2694,6 +2725,24 @@ netsnmp_tlstmParams_restore_common(char **line)
     return stp;
 }
 
+int
+netsnmp_tlstmParams_add(snmpTlstmParams *stp)
+{
+    if (NULL == stp)
+        return -1;
+
+    DEBUGMSGTL(("tlstmParams:add", "adding entry 0x%lx %s\n", (u_long)stp,
+                stp->tag));
+
+    if (CONTAINER_INSERT(_tlstmParams, stp) != 0) {
+        netsnmp_tlstmParams_destroy(stp);
+        snmp_log(LOG_ERR, "error inserting tlstmParams %s", stp->tag);
+        return -1;
+    }
+
+    return 0;
+}
+
 static void
 _parse_params(const char *token, char *line)
 {
@@ -2702,16 +2751,9 @@ _parse_params(const char *token, char *line)
     if (!stp)
         return;
 
-    stp->flags |= TLSTM_PARAMS_FROM_CONFIG;
+    stp->flags = TLSTM_PARAMS_FROM_CONFIG | TLSTM_PARAMS_NONVOLATILE;
 
-    if (CONTAINER_INSERT(_tlstmParams, stp) != 0) {
-        netsnmp_tlstmParams_destroy(stp);
-        netsnmp_config_error(PARAMS_CONFIG_TOKEN
-                             ": error inserting new tlstmParams entry");
-    }
-
-    DEBUGMSGTL(("tlstmParams:restore", "adding entry 0x%lx %s\n", (u_long)stp,
-                stp->tag));
+    netsnmp_tlstmParams_add(stp);
 }
 
 static char *
@@ -2752,7 +2794,7 @@ _find_tlstmParams_fingerprint(const char *tag)
  * ***************************************************************************
  *
  *
- * snmpTlstmParmsTable data
+ * snmpTlstmAddrTable data
  *
  *
  * ***************************************************************************
@@ -2834,15 +2876,18 @@ netsnmp_tlstmAddr_restore_common(char **line, char *name, size_t *name_len,
         config_perror("incomplete line");
         return -1;
     }
+    name[*name_len] = 0;
 
     *line = read_config_read_octet_string(*line, (u_char **)&fp, fp_len);
     if (NULL == *line) {
         config_perror("incomplete line");
         return -1;
     }
+    fp[*fp_len] = 0;
     
     *line = read_config_read_octet_string(*line, (u_char **)&id, id_len);
-
+    id[*id_len] = 0;
+    
     if (*fp_len) {
         pos = strchr(fp, ':');
         if (NULL == pos) {
@@ -2866,7 +2911,7 @@ netsnmp_tlstmAddr_restore_common(char **line, char *name, size_t *name_len,
             pos += 2;
         *fp_len = strlen(pos);
         netsnmp_fp_lowercase_and_strip_colon(pos);
-        memmove(fp, pos, *fp_len + 1);
+        memmove(fp, pos, *fp_len + 1); /* +1 to copy null */
     }
     else if (0 == *id_len || (*id_len == 1 && id[0] == '*')) {
         /*
@@ -2878,6 +2923,24 @@ netsnmp_tlstmAddr_restore_common(char **line, char *name, size_t *name_len,
 
     return 0;
 }
+
+int
+netsnmp_tlstmAddr_add(snmpTlstmAddr *entry)
+{
+    if (!entry)
+        return -1;
+
+    DEBUGMSGTL(("tlstmAddr:add", "adding entry 0x%lx %s %s\n",
+                (u_long)entry, entry->name, entry->fingerprint));
+    if (CONTAINER_INSERT(_tlstmAddr, entry) != 0) {
+        netsnmp_tlstmAddr_free(entry);
+        snmp_log(LOG_ERR, "could not insert addr %s", entry->name);
+        return -1;
+    }
+
+    return 0;
+}
+   
 
 static void
 _parse_addr(const char *token, char *line)
@@ -2909,14 +2972,8 @@ _parse_addr(const char *token, char *line)
     if (id_len)
         entry->identity = strdup(id);
 
-    if (CONTAINER_INSERT(_tlstmAddr, entry) != 0) {
+    if (netsnmp_tlstmAddr_add(entry) != 0)
         netsnmp_tlstmAddr_free(entry);
-        netsnmp_config_error(PARAMS_CONFIG_TOKEN
-                             ": error inserting new tlstmAddr entry");
-    }
-    else
-        DEBUGMSGTL(("tlstmAddr:restore", "adding entry 0x%lx %s %s\n",
-                    (u_long)entry, entry->name, entry->fingerprint));
 
     return;
 }
