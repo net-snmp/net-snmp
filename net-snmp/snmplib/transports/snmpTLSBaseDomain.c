@@ -351,7 +351,6 @@ sslctx_client_setup(const SSL_METHOD *method, _netsnmpTLSBaseData *tlsbase) {
     netsnmp_cert *id_cert, *peer_cert;
     SSL_CTX      *the_ctx;
     X509_STORE   *cert_store = NULL;
-    X509 *trustcert;
 
     /***********************************************************************
      * Set up the client context
