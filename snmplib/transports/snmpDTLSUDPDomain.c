@@ -220,6 +220,12 @@ start_new_cached_connection(netsnmp_transport *t,
             tlsdata->our_identity = strdup(parentdata->our_identity);
         if (parentdata->their_identity)
             tlsdata->their_identity = strdup(parentdata->their_identity);
+        if (parentdata->their_fingerprint)
+            tlsdata->their_hostname = strdup(parentdata->their_hostname);
+        if (parentdata->trust_cert)
+            tlsdata->trust_cert = strdup(parentdata->trust_cert);
+        if (parentdata->their_hostname)
+            tlsdata->their_hostname = strdup(parentdata->their_hostname);
     }
     
     DEBUGMSGTL(("dtlsudp", "starting a new connection\n"));
