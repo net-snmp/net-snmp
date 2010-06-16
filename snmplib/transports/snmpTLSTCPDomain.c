@@ -453,6 +453,9 @@ netsnmp_tlstcp_close(netsnmp_transport *t)
     SNMP_FREE(tlsdata->securityName);
     SNMP_FREE(tlsdata->our_identity);
     SNMP_FREE(tlsdata->their_identity);
+    SNMP_FREE(tlsdata->their_hostname);
+    SNMP_FREE(tlsdata->their_fingerprint);
+    SNMP_FREE(tlsdata->trust_cert);
 
     /* don't free the accept_bio since it's the parent bio */
     SNMP_FREE(tlsdata);
