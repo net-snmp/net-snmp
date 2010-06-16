@@ -71,7 +71,7 @@ CAFP=`$NSCERT showcas --fingerprint --brief ca-net-snmp.org $NSCERTARGS`
 CHECKVALUEISNT "$CAFP" "" "generated fingerprint for ca-net-snmp.org certificate"
 
 # user 9: CA signed cert
-CAPTURE $NSCERT gencert -t causer --with-ca ca-net-snmp.org --san email:user8@test.net-snmp.org  $NSCERTARGS
+CAPTURE $NSCERT gencert -t causer --with-ca ca-net-snmp.org --san email:user9@test.net-snmp.org --email user9@test.net-snmp.org  $NSCERTARGS
 CAUSERFP=`$NSCERT showcerts --fingerprint --brief causer $NSCERTARGS`
 CHECKVALUEISNT "$CAUSERFP" "" "generated fingerprint for causer certificate"
 
@@ -80,8 +80,11 @@ CHECKVALUEISNT "$CAUSERFP" "" "generated fingerprint for causer certificate"
 #
 
 CONFIGAGENT '[snmp]' debugTokens tsm
+# ,tls,ssl,cert,tsm
 CONFIGAGENT '[snmp]' doDebugging 1
 CONFIGAGENT '[snmp]' defX509ServerPub $SERVERFP
+
+CONFIGAGENT '[snmp]' trustCert $CAFP
 
 # common name mappings
 CONFIGAGENT certSecName 9  $TESTUSERFP     --cn
@@ -111,12 +114,14 @@ CONFIGAGENT  rwuser -s tsm foobaruser@example.com authpriv
 CONFIGAGENT  rwuser -s tsm foobar.example.com authpriv
 CONFIGAGENT  rwuser -s tsm 127.0.0.1 authpriv
 CONFIGAGENT  rwuser -s tsm user8@test.net-snmp.org authpriv
+CONFIGAGENT  rwuser -s tsm user9@test.net-snmp.org authpriv
+CONFIGAGENT  rwuser -s tsm user10@test.net-snmp.org authpriv
 
 
 # this file contains tests common to both tls and dtls usages
 
 # start the agent up
-FLAGS="-On $SNMP_FLAGS $SNMP_TRANSPORT_SPEC:$SNMP_TEST_DEST$SNMP_SNMPD_PORT"
+FLAGS="-Dtls -On $SNMP_FLAGS $SNMP_TRANSPORT_SPEC:$SNMP_TEST_DEST$SNMP_SNMPD_PORT"
 
 STARTAGENT
 
@@ -135,8 +140,8 @@ CHECKVALUEISNT "$UNMAPPEDFP" "" "generated fingerprint for unknownuser certifica
 # this user's fingerprint should not be directly recognized, but it's
 # CA should.
 
-# user 9: CA signed cert
-CAPTURE $NSCERT gencert -D -t unknowncauser --cn unknowncauser@net-snmp.org --email unknowncauser@net-snmp.org  --with-ca ca-net-snmp.org --san email:user8@test.net-snmp.org $NSCERTARGS
+# user 10: CA signed cert
+CAPTURE $NSCERT gencert -D -t unknowncauser --cn unknowncauser@net-snmp.org --email unknowncauser@net-snmp.org  --with-ca ca-net-snmp.org --san email:user10@test.net-snmp.org $NSCERTARGS
 UNKNOWNCAUSERFP=`$NSCERT showcerts --fingerprint --brief unknowncauser $NSCERTARGS`
 CHECKVALUEISNT "$UNKNOWNCAUSERFP" "" "generated fingerprint for unknowncauser certificate"
 
