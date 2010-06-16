@@ -6,6 +6,7 @@ extern "C" {
 #endif
 
 void init_perl(void);
+void shutdown_perl(void);
 
 #ifdef __cplusplus
 }
