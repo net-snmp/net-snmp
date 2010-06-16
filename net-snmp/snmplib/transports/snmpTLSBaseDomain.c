@@ -487,32 +487,24 @@ netsnmp_tlsbase_config(struct netsnmp_transport_s *t, const char *token, const c
 
     tlsdata = t->data;
 
-    if (strcmp(token, "our_identity") == 0 ||
-        /* XXX: remove this option after a few weeks */
-        strcmp(token, "my_fingerprint") == 0) {
+    if (strcmp(token, "our_identity") == 0) {
         SNMP_FREE(tlsdata->our_identity);
         tlsdata->our_identity = strdup(value);
         DEBUGMSGT(("tls:config","our identity %s\n", value));
     }
 
-    if (strcmp(token, "their_identity") == 0 ||
-        /* XXX: remove this option after a few weeks */
-        strcmp(token, "their_fingerprint") == 0) {
+    if (strcmp(token, "their_identity") == 0) == 0) {
         SNMP_FREE(tlsdata->their_identity);
         tlsdata->their_identity = strdup(value);
         DEBUGMSGT(("tls:config","their identity %s\n", value));
     }
 
-    if (strcmp(token, "their_hostname") == 0 ||
-        /* XXX: remove this option after a few weeks */
-        strcmp(token, "their_hostname") == 0) {
+    if (strcmp(token, "their_hostname") == 0) {
         SNMP_FREE(tlsdata->their_hostname);
         tlsdata->their_hostname = strdup(value);
     }
 
-    if (strcmp(token, "trust_cert") == 0 ||
-        /* XXX: remove this option after a few weeks */
-        strcmp(token, "trust_cert") == 0) {
+    if (strcmp(token, "trust_cert") == 0) {
         SNMP_FREE(tlsdata->trust_cert);
         tlsdata->trust_cert = strdup(value);
     }
