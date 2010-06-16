@@ -1138,7 +1138,7 @@ netsnmp_table_dataset_get_or_create_stash(netsnmp_agent_request_info *reqinfo,
 
     rc = snprintf(buf, sizeof(buf), "dataset_row_stash:%s:",
                   datatable->table->name);
-    if ((-1 == rc) || (rc >= sizeof(buf))) {
+    if ((-1 == rc) || ((size_t)rc >= sizeof(buf))) {
         snmp_log(LOG_ERR,"%s handler name too long\n", datatable->table->name);
         return NULL;
     }

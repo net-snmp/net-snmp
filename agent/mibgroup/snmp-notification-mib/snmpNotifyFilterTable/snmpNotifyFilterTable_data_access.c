@@ -496,7 +496,7 @@ snmpNotifyFilterTable_vacm_view_subtree(const char *profile)
 {
     oid             tmp_oid[MAX_OID_LEN];
     netsnmp_index   tmp_idx;
-    int             i, j;
+    size_t          i, j;
     netsnmp_void_array *s;
     struct vacm_viewEntry *tmp;
     snmpNotifyFilterTable_rowreq_ctx *rowreq;

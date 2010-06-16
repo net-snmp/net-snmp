@@ -392,7 +392,7 @@ int
 ifName_get(ifXTable_rowreq_ctx * rowreq_ctx, char **ifName_val_ptr_ptr,
            size_t * ifName_val_ptr_len_ptr)
 {
-    int             tmp_len;
+    size_t tmp_len;
 
    /** we should have a non-NULL pointer and enough storage */
     netsnmp_assert((NULL != ifName_val_ptr_ptr)

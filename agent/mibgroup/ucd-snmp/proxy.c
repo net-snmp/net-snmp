@@ -418,7 +418,7 @@ proxy_handler(netsnmp_mib_handler *handler,
              */
             DEBUGMSGTL(("proxy", "length=%d, base_len=%d, name_len=%d\n",
                         (int)ourlength, (int)sp->base_len, (int)sp->name_len));
-            if (ourlength > (int) sp->name_len)
+            if (ourlength > sp->name_len)
                 memcpy(&(sp->base[sp->base_len]), &(ourname[sp->name_len]),
                        sizeof(oid) * (ourlength - sp->name_len));
             ourlength = ourlength - sp->name_len + sp->base_len;

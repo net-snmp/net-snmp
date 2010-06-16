@@ -471,8 +471,7 @@ netsnmp_access_interface_ioctl_has_ipv4(int sd, const char *if_name,
             if (NULL != ptr)
                 *ptr = 0;
             
-            if (if_index !=
-                netsnmp_access_interface_ioctl_ifindex_get(sd, ifrp->ifr_name))
+            if (if_index != (int)netsnmp_access_interface_ioctl_ifindex_get(sd, ifrp->ifr_name))
                 continue;
         }
 

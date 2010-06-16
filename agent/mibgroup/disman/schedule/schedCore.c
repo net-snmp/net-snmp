@@ -165,7 +165,7 @@ _bit_next( char *pattern, int current, size_t len ) {
         /*
          * Look for the first bit that's set
          */
-    for ( i=0; i<len; i++ ) {
+    for ( i=0; i<(int)len; i++ ) {
         if ( buf[i] != 0 ) {
             major = i*8;
             for ( j=0; j<8; j++ ) {

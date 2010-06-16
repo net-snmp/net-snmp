@@ -629,7 +629,7 @@ vacm_parse_view(const char *token, char *param)
     size_t          suboid_len = 0;
     size_t          mask_len = 0;
     u_char          viewMask[VACMSTRINGLEN];
-    int             i;
+    size_t          i;
     char            *st;
 
     name = strtok_r(param, " \t\n", &st);

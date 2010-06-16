@@ -301,7 +301,7 @@ handle_ipAddressSpinLock(netsnmp_mib_handler *handler,
                           netsnmp_agent_request_info   *reqinfo,
                           netsnmp_request_info         *requests)
 {
-    u_long   value;
+    long   value;
 
     /* We are never called for a GETNEXT if it's registered as a
        "instance", as it's "magically" handled for us.  */

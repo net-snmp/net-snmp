@@ -624,7 +624,7 @@ ipAddressPrefix_get(ipAddressTable_rowreq_ctx * rowreq_ctx,
     oid            *dst, tmp_oid[MAX_OID_LEN] =
         { 1, 3, 6, 1, 2, 1, 4, 32, 1, 5 };
     u_char          tmp_buf[NETSNMP_ACCESS_IPADDRESS_BUF_SIZE];
-    int             len;
+    size_t          len;
 
    /** we should have a non-NULL pointer and enough storage */
     netsnmp_assert((NULL != ipAddressPrefix_val_ptr_ptr)
@@ -1489,7 +1489,7 @@ ipAddressIfIndex_check_value(ipAddressTable_rowreq_ctx * rowreq_ctx,
     /*
      * if the new value is the same as the old, accept it.
      */
-    if (ipAddressIfIndex_val == rowreq_ctx->data->if_index)
+    if (ipAddressIfIndex_val == (long)rowreq_ctx->data->if_index)
         return MFD_SUCCESS;
 
     /*
@@ -1576,8 +1576,8 @@ ipAddressIfIndex_set(ipAddressTable_rowreq_ctx * rowreq_ctx,
      * TODO:461:M: |-> Set ipAddressIfIndex value.
      * set ipAddressIfIndex value in rowreq_ctx->data
      */
-    if (rowreq_ctx->data->if_index != ipAddressIfIndex_val)
-        rowreq_ctx->data->if_index = ipAddressIfIndex_val;
+    if (rowreq_ctx->data->if_index != (oid)ipAddressIfIndex_val)
+        rowreq_ctx->data->if_index  = (oid)ipAddressIfIndex_val;
     else
         rowreq_ctx->column_set_flags &= ~COLUMN_IPADDRESSIFINDEX_FLAG;
 

@@ -125,14 +125,14 @@ asc2bin(char *p)
 int
 bin2asc(char *p, size_t n)
 {
-    int             i, flag = 0;
+    size_t          i, flag = 0;
     char            buffer[SNMP_MAXBUF];
 
     /* prevent buffer overflow */
-    if ((int)n > (sizeof(buffer) - 1))
+    if (n > (sizeof(buffer) - 1))
         n = sizeof(buffer) - 1;
 
-    for (i = 0; i < (int) n; i++) {
+    for (i = 0; i < n; i++) {
         buffer[i] = p[i];
         if (!isprint((unsigned char)(p[i])))
             flag = 1;
@@ -141,7 +141,7 @@ bin2asc(char *p, size_t n)
         p[n] = 0;
         return n;
     }
-    for (i = 0; i < (int) n; i++) {
+    for (i = 0; i < n; i++) {
         sprintf(p, "%02x ", (unsigned char) (buffer[i] & 0xff));
         p += 3;
     }

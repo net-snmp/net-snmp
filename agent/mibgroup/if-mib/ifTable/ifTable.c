@@ -1770,9 +1770,9 @@ ifSpecific_get(ifTable_rowreq_ctx * rowreq_ctx,
     /*
      * hard coded
      */
-    netsnmp_assert((*ifSpecific_val_ptr_len_ptr) > nullOidLen);
-    (*ifSpecific_val_ptr_len_ptr) = nullOidLen;
-    memcpy(*ifSpecific_val_ptr_ptr, &nullOid, nullOidLen);
+    netsnmp_assert((*ifSpecific_val_ptr_len_ptr) > (size_t)nullOidLen);
+    (*ifSpecific_val_ptr_len_ptr) = (size_t)nullOidLen;
+    memcpy(*ifSpecific_val_ptr_ptr, &nullOid, (size_t)nullOidLen);
 #endif
 
     return MFD_SUCCESS;
