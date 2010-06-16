@@ -34,7 +34,10 @@ get_target_sessions(char *taglist, TargetFilterFunction * filterfunct,
     struct targetAddrTable_struct *targaddrs;
     char            buf[SPRINT_MAX_LEN];
     char            tags[MAX_TAGS][SPRINT_MAX_LEN], *cp;
-    int             numtags = 0, i, tls = 0;
+    int             numtags = 0, i;
+#if defined(NETSNMP_TRANSPORT_DTLSUDP_DOMAIN) || defined(NETSNMP_TRANSPORT_TLSTCP_DOMAIN)
+    int             tls = 0;
+#endif
     static struct targetParamTable_struct *param;
 
     DEBUGMSGTL(("target_sessions", "looking for: %s\n", taglist));
