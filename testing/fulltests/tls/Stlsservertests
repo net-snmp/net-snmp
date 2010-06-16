@@ -30,6 +30,10 @@ FLAGS="-On $SNMP_FLAGS $SNMP_TRANSPORT_SPEC:$SNMP_TEST_DEST$SNMP_SNMPD_PORT"
 # start up the agent
 STARTAGENT
 
+########################################
+# Positive tests
+#    (should work)
+
 # ensure we can access it via a direct FP check
 DOSETTEST fingerprintIdentity "-T their_identity=$SNMPDFP $FLAGS"
 
@@ -39,6 +43,28 @@ DOSETTEST filenameIdentity "-T their_identity=snmpd $FLAGS"
 # ensure we can access it via trusting their CA certificate and a
 # matching commoname 
 DOSETTEST hostnameIdentity "-T trust_cert=$CAFP -T their_hostname=localhost $FLAGS"
+
+########################################
+# Negative tests
+#    (should fail)
+
+# if we don't load the CA certificate we shouldn't connect
+DOFAILSETTEST noTrustCACert  "-T their_hostname=localhost $FLAGS"
+
+# if we specify a different hostname we should fail hostname test
+# ("localhos" without the "t" is intentional here)
+DOFAILSETTEST incorrectNameLocalhos  "-T their_hostname=localhos $FLAGS"
+DOFAILSETTEST incorrectNameLocalhostt  "-T their_hostname=localhostt $FLAGS"
+
+# if we specify the CA cert's but don't specify the hostname, it
+# should fail (this may change in the future if we pull the hostname
+# from the transport specifier)
+DOFAILSETTEST certWithoutHost  "-T trust_cert=$CAFP $FLAGS"
+
+
+########################################
+# DONE
+
 
 STOPAGENT
 
