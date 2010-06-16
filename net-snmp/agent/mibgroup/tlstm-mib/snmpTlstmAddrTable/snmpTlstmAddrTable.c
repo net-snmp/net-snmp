@@ -109,8 +109,13 @@ init_snmpTlstmAddrTable(void)
     if (NULL == reg)
         snmp_log(LOG_ERR,
                  "could not create handler for snmpTlstmAddrCount\n");
-    else
+    else {
         netsnmp_register_scalar(reg);
+        if (cache) 
+            netsnmp_inject_handler_before(reg,
+                                          netsnmp_cache_handler_get(cache),
+                                          "snmpTlstmAddrCount");
+    }
     
     reg_oid[10] = 8;
     reg = netsnmp_create_handler_registration(
@@ -824,7 +829,6 @@ _count_handler(netsnmp_mib_handler *handler,
                netsnmp_agent_request_info *reqinfo,
                netsnmp_request_info *requests)
 {
-    netsnmp_container *addrs;
     int                val;
 
     if (MODE_GET != reqinfo->mode) {
@@ -832,13 +836,10 @@ _count_handler(netsnmp_mib_handler *handler,
         return SNMP_ERR_GENERR;
     }
 
-    addrs = netsnmp_tlstmAddr_container();
-    if (NULL == addrs)
+    if (NULL == _table)
         val = 0;
     else
-        val = CONTAINER_SIZE(addrs);
-
-    val += CONTAINER_SIZE(_table);
+        val = CONTAINER_SIZE(_table);
 
     snmp_set_var_typed_value(requests->requestvb, ASN_GAUGE,
                              (u_char *) &val, sizeof(val));
