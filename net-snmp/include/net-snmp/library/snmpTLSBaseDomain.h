@@ -45,6 +45,7 @@ extern          "C" {
        char                      *our_identity;
        char                      *their_identity;
        char                      *their_fingerprint;
+       char                      *their_hostname;
        netsnmp_indexed_addr_pair *remote_addr;
     } _netsnmpTLSBaseData;
 
