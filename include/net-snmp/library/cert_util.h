@@ -134,6 +134,7 @@ void netsnmp_certs_load(void);
 
     netsnmp_cert_map *netsnmp_cert_map_alloc(char *fp, X509 *ocert);
     void netsnmp_cert_map_free(netsnmp_cert_map *cert_map);
+    int netsnmp_cert_map_add(netsnmp_cert_map *map);
 
     void netsnmp_cert_map_container_free(netsnmp_container *c);
     netsnmp_container *netsnmp_cert_map_container_create(int with_fp);
@@ -156,12 +157,14 @@ void netsnmp_certs_load(void);
     
 #define TLSTM_PARAMS_FROM_CONFIG          0x01
 #define TLSTM_PARAMS_FROM_MIB             0x02
-/** ine TLSTM_PARAMS_XXX                  0x04 */
+#define TLSTM_PARAMS_NONVOLATILE          0x04
+/** ine TLSTM_PARAMS_XXX                  0x08 */
 
     snmpTlstmParams *netsnmp_tlstmParams_create(const char *tag, int hashType,
                                                 const u_char *fp, int fp_len);
     void netsnmp_tlstmParams_destroy(snmpTlstmParams *stp);
     snmpTlstmParams *netsnmp_tlstmParams_restore_common(char **line);
+    int netsnmp_tlstmParams_add(snmpTlstmParams *stp);
 
     /*************************************************************************
      *
@@ -190,6 +193,7 @@ void netsnmp_certs_load(void);
     netsnmp_container *netsnmp_tlstmAddr_container(void);
     snmpTlstmAddr *netsnmp_tlstmAddr_create(char *targetAddrName);
     void netsnmp_tlstmAddr_free(snmpTlstmAddr *entry);
+    int netsnmp_tlstmAddr_add(snmpTlstmAddr *entry);
 
 #ifdef __cplusplus
 }
