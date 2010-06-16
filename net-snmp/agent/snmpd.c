@@ -1008,7 +1008,7 @@ main(int argc, char *argv[])
         info = getpwuid(uid);
         if (info) {
             DEBUGMSGTL(("snmpd/main", "Supplementary groups for %s.\n", info->pw_name));
-            if (initgroups(info->pw_name, (gid != 0 ? gid : info->pw_gid)) == -1) {
+            if (initgroups(info->pw_name, (gid != 0 ? (gid_t)gid : info->pw_gid)) == -1) {
                 snmp_log_perror("initgroups failed");
                 if (!netsnmp_ds_get_boolean(NETSNMP_DS_APPLICATION_ID, 
                                             NETSNMP_DS_AGENT_NO_ROOT_ACCESS)) {

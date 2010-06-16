@@ -455,7 +455,7 @@ encode_keychange(const oid * hashtype, u_int hashtype_len,
         QUITFUN(SNMPERR_GENERR, encode_keychange_quit);
     }
 
-    properlength = SNMP_MIN((int) oldkey_len, properlength);
+    properlength = SNMP_MIN(oldkey_len, properlength);
 
     /*
      * Use the old key and some random bytes to encode the new key
