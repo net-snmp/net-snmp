@@ -247,7 +247,7 @@ var_lmSensorsTable(struct variable *vp,
                    size_t * var_len, WriteMethod ** write_method)
 {
     static long     long_ret;
-    static unsigned char string[SPRINT_MAX_LEN];
+    static char     string[SPRINT_MAX_LEN];
 
     int             s_index;
     int             s_type = -1;
