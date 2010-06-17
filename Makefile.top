@@ -76,8 +76,8 @@ LINKCC	        = @LINKCC@
 # policy: we increment major releases of LIBCURRENT by 5 starting at
 # 5.3 was at 10, 5.4 is at 15, ...  This leaves some room for needed
 # changes for past releases if absolutely necessary.
-# 
-LIBCURRENT  = 20
+#
+LIBCURRENT  = 25
 LIBAGE      = 0
 LIBREVISION = 0
 
