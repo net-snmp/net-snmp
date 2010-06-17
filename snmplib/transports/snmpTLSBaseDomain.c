@@ -623,7 +623,7 @@ netsnmp_tlsbase_ctor(void) {
      * register our boot-strapping needs
      */
     snmp_register_callback(SNMP_CALLBACK_LIBRARY,
-			   SNMP_CALLBACK_POST_READ_CONFIG,
+			   SNMP_CALLBACK_POST_PREMIB_READ_CONFIG,
 			   tls_bootstrap, NULL);
 
 }
