@@ -79,7 +79,16 @@ static netsnmp_tdomain tlstcpDomain;
 static char *
 netsnmp_tlstcp_fmtaddr(netsnmp_transport *t, void *data, int len)
 {
-    return netsnmp_ipv4_fmtaddr("TLSTCP", t, data, len);
+    if (NULL == data || 0 == len || 0 == ((char *) data)[0])
+        return strdup("TLSTCP: unknown");
+    else if (len == sizeof(netsnmp_indexed_addr_pair))
+        return netsnmp_ipv4_fmtaddr("TLSTCP", t, data, len);
+    else {
+        /* an already ascii formatted string */
+        char buf[1024];
+        snprintf(buf, sizeof(buf)-1, "TLSTCP: %s", (char *) data);
+        return strdup(buf);
+    }
 }
 /*
  * You can write something into opaque that will subsequently get passed back 
@@ -237,7 +246,7 @@ netsnmp_tlstcp_recv(netsnmp_transport *t, void *buf, int size,
 
     /* log the packet */
     {
-        char *str = netsnmp_tlstcp_fmtaddr(NULL, addr_pair, sizeof(netsnmp_indexed_addr_pair));
+        char *str = netsnmp_tlstcp_fmtaddr(t, NULL, 0);
         DEBUGMSGTL(("tlstcp",
                     "recvfrom fd %d got %d bytes (from %s)\n",
                     t->sock, rc, str));
@@ -665,12 +674,15 @@ netsnmp_tlstcp_open(netsnmp_transport *t)
         */
 
         /* create the openssl connection string host:port */
-        snprintf(tmpbuf, sizeof(tmpbuf), "%s:%d",
+        snprintf(tmpbuf, sizeof(tmpbuf)-1, "%s:%d",
                  inet_ntoa(tlsdata->addr.sin_addr),
                  ntohs(tlsdata->addr.sin_port));
 
         /* Create a BIO connection for it */
         DEBUGMSGTL(("tlstcp", "connecting to tlstcp %s\n", tmpbuf));
+        t->remote = (void *) strdup(tmpbuf);
+        t->remote_length = strlen(tmpbuf) + 1;
+
         bio = BIO_new_connect(tmpbuf);
 
         /* RFCXXXX Section 5.3.1:  Establishing a Session as a Client
@@ -827,7 +839,7 @@ netsnmp_tlstcp_open(netsnmp_transport *t)
         */
 
         t->sock = BIO_get_fd(bio, NULL);
-        /* XXX: save state */
+
     } else {
         /* Is the server */
         
@@ -835,6 +847,8 @@ netsnmp_tlstcp_open(netsnmp_transport *t)
         snprintf(tmpbuf, sizeof(tmpbuf), "%d", ntohs(tlsdata->addr.sin_port));
         DEBUGMSGTL(("tlstcp", "listening on tlstcp port %s\n", tmpbuf));
         tlsdata->accept_bio = BIO_new_accept(tmpbuf);
+        t->local = (void *) strdup(tmpbuf);
+        t->local_length = strlen(tmpbuf)+1;
         if (NULL == tlsdata->accept_bio) {
             SNMP_FREE(t);
             SNMP_FREE(tlsdata);
@@ -846,6 +860,7 @@ netsnmp_tlstcp_open(netsnmp_transport *t)
         if (BIO_do_accept(tlsdata->accept_bio) <= 0) {
             SNMP_FREE(t);
             SNMP_FREE(tlsdata);
+            t->data = NULL;
             snmp_log(LOG_ERR, "TLSTCP: Falied to do first accept on the TLS accept BIO\n");
             return NULL;
         }
