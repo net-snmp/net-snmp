@@ -48,13 +48,10 @@ CONFIGTRAPD          agentxsocket     /dev/null
 # Begin test
 #
 
-TRAPD_FLAGS="$TRAPD_FLAGS -Dtls,dtls,tsm,send_notification -d"
 STARTTRAPD
 
-DELAY
-
 # initialize only the example mib, and not the notification mib stuff
-AGENT_FLAGS="$AGENT_FLAGS -Dexample,header_generic,read_config,snmp_sess,add_trap,tls,ssl,dtls,trap,snmpv3,snmp_api"
+AGENT_FLAGS="$AGENT_FLAGS -Dexample,header_generic"
 STARTAGENT
 
 #DELAY
