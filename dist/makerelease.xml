@@ -507,7 +507,7 @@
 	    <command>echo rsync -v net-snmp-{VERSION}.tar.gz net-snmp-{VERSION}.tar.gz.asc net-snmp-{VERSION}.zip net-snmp-{VERSION}.zip.asc hardaker,net-snmp@frs.sourceforge.net:/home/frs/project/n/ne/net-snmp/net-snmp/'{VERSION} pre-releases'/</command>
 	  </commands>
 	</step>
-	<step type="system" stepname="publish:editrelease"
+	<step type="informational" stepname="publish:editrelease"
 	title="Update the SF release web page">
       <text>
         Update the project download web page (http://www.net-snmp.org/download.html) to mention this new release
@@ -525,11 +525,9 @@
 	Any official patches for the previous release should be re-prioritised to level 5.
 	Any official patches for the earlier releases should be re-prioritised to level 1 and closed.
       </text>
-<!-- Doesn't work
 	  <commands>
-	    <command>firefox 'http://sourceforge.net/project/admin/editpackages.php?group_id=12694'</command>
+	    <command>firefox 'http://www.net-snmp.org/official_patches/'</command>
 	  </commands>
-  -->
 	</step>
       </steps>
     </step>
@@ -540,16 +538,14 @@
     </step>
     <step type="section" title="Advertise it!">
       <steps>
-	<step type="system" pause="1">
+	<step type="system" pause="1" title="Add note to the news system">
 	  <text>Add a note to the source forge news system:
 
 	    http://sourceforge.net/news/submit.php?group_id=12694
 	  </text>
-<!-- Doesn't work
 	  <commands>
 	    <command>firefox 'http://sourceforge.net/news/submit.php?group_id=12694'</command>
 	  </commands>
-  -->
 	</step>
 	<step type="informational" pause="1">
 	  <text>Send an announcement message to one of the following
@@ -573,11 +569,9 @@
 
 	    http://freshmeat.net/projects/net-snmp/
 	  </text>
-<!-- Doesn't work
 	  <commands>
 	    <command>firefox http://freshmeat.net/projects/net-snmp/</command>
 	  </commands>
-  -->
 	</step>
       </steps>
     </step>
