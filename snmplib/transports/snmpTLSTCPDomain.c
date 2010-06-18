@@ -82,7 +82,7 @@ netsnmp_tlstcp_fmtaddr(netsnmp_transport *t, void *data, int len)
     if (NULL == data || 0 == len || 0 == ((char *) data)[0])
         return strdup("TLSTCP: unknown");
     else if (len == sizeof(netsnmp_indexed_addr_pair) ||
-             len == sizefo(struct sockaddr_in))
+             len == sizeof(struct sockaddr_in))
         return netsnmp_ipv4_fmtaddr("TLSTCP", t, data, len);
     else {
         /* an already ascii formatted string */
