@@ -881,7 +881,7 @@ var_atEntry(struct variable *vp,
     PMIB_IPNETTABLE pIpNetTable = NULL;
     DWORD           status = NO_ERROR;
     DWORD           dwActualSize = 0;
-    UINT            i;
+    int             i;
     u_char          dest_addr[4];
     static in_addr_t	addr_ret;
     
@@ -910,6 +910,8 @@ var_atEntry(struct variable *vp,
 
 
     if (status == NO_ERROR) {
+        UINT            i;
+
         for (i = 0; i < pIpNetTable->dwNumEntries; ++i) {
             current[10] = pIpNetTable->table[i].dwIndex;
 
@@ -952,6 +954,8 @@ var_atEntry(struct variable *vp,
         arp_row = (PMIB_IPNETROW) malloc(sizeof(MIB_IPNETROW));
     }
 
+    i = -1;
+
     if (lowState < 0 || status != NO_ERROR) {
         /*
          * for creation of new row, only ipNetToMediaTable case is considered 
@@ -985,7 +989,8 @@ var_atEntry(struct variable *vp,
     memcpy((char *) name, (char *) lowest, oid_length * sizeof(oid));
     *length = oid_length;
     *write_method = write_arp;
-    *arp_row = pIpNetTable->table[i];
+    if (i >= 0)
+        *arp_row = pIpNetTable->table[i];
 
     switch (vp->magic) {
     case IPMEDIAIFINDEX:       /* also ATIFINDEX */
