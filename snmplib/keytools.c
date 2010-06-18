@@ -115,7 +115,6 @@ generate_Ku(const oid * hashtype, u_int hashtype_len,
     MD5_CTX cmd5;
     char    cryptotype = 0;
     unsigned int    tmp_len;
-    int ret;
 #define TYPE_MD5  1
 #define TYPE_SHA1 2
 #else
