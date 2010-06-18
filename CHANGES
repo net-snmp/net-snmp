@@ -4,6 +4,683 @@ a summary of the major changes, and the ChangeLog file for a comprehensive
 listing of all changes made to the code.
 
 
+*5.6*
+
+    snmplib:
+      - Add const declarations to the disabled versions of the debugging
+	code as well.
+      - Add missing dependencies between transports.
+      - Add missing symbol netsnmp_snmpSSHDomain_len, make
+	netsnmp_snmpSSHDomain const.
+      - Change oid to be a 32-bit type on ILP64 and LP64 platforms.
+      - Change the parsing of ranges to accept all valid values.
+      - Correct dependencies between transports. Remove unnecessary
+	includes.
+      - Correct the spelling of __cplusplus when checking if the file
+	should be wrapped in extern "C".
+      - Do not require that the UDP transport is included.
+      - Fix agent crash when sending encrypted SNMPv3 traps. Reported by
+	Srikapilan Gandhi
+      - Fix responding to broadcast requests. UDP responses are sent with
+	source IP address which was destination of appropriate requests
+	(implemented in SVN rev. 15215). But if the destination of a
+	request is broadcast IP address, the request was sent with the
+	broadcast address as source. sendmsg() on Linux does not support
+	this and returns error -> response is not sent. In order to send
+	responses from the same interface, interface index of the
+	appropriate interface must be used.
+      - Install library/oid.h. Thanks to "Tomasz Lis" who spotted the bug.
+      - Make the context argument of send_v3trap,
+	send_trap_vars_with_context and netsnmp_send_traps refer to a const
+	char*.
+      - Make the name argument to find_varbind_in_list const
+      - Prevent gcc ped-warning for NETSNMP_REMOVE_CONST
+      - Remove declarations of functions that don't exist or are declared
+	elsewhere.
+      - Remove the oid typedef from <net-snmp/library/asn1.h>. It is still
+	present in <net-snmp/types.h>, use that file.
+      - Replace the debugging functions with dummies when debugging is
+	disabled.
+      - Revert 17808, instead factor out the declaration of oid to it's own
+	file and include that file from both types.h and asn1.h
+      - Use a void argument for the data argument of xdump.
+      - [BUG 2919320]: Avoid accessing freed memory Reported by Tomasz Lis
+      - [BUG 2922390]: Fix test for missing contextName parameter
+      - [PATCH 2871747]: plug memory leak in OID processing. The memory
+	leaked when small OID, which could fit pre-allocated vp->name_loc,
+	was placed in different (allocated) one.
+      - [PATCH 2942940]: Add a new function, netsnmp_parse_args, that is
+	like snmp_parse_args but takes an additional bitmask, flags, to
+	affect the behaviour. Also remove the magic handling of some
+	application names.
+      - [PATCH 2971270]: refuse to parse ASN.1 tokens with wrong type
+	field. This may yield to problems with third-party applications
+	which may depend on parsing ugly ASN.1 data - we'll see...
+      - add function to validate RowStatus and StorageType varbinds - also
+	remove some duplicate code and fix comments indent mangled
+      - add functions to remove list/row data from request list
+      - add interface for duplicating a container
+      - add interface for duplicating a container container changes: add
+	flags field to container meta-data; chg binary_array container to
+	use container meta-data flags
+      - add remove function to container iterator; implement it for
+	binary_array
+      - added the functions netsnmp_malloc(), netsnmp_calloc(),
+	netsnmp_realloc(), netsnmp_strdup() and netsnmp_free().
+      - builds again when HAVE_GETADDRINFO is not defined.
+      - conf files can now include other conf files - also tweaked debug
+	tokens here and there
+      - create indexes for certificates in config path
+      - directory container enhancements - fix potential memory leak - add
+	filter callback to filter files returned - add option to return
+	relative and not full paths - add option to sort returned list -
+	add option to return empty container instead of NULL if no files
+	found - change default container name to directory that was scanned
+	- tweak debug/log messages
+      - enhance file utils and dir utils - add optional stats struct to
+	netsnmp_file - generalize dir container filter, add context to
+	callback - add option to store netsnmp_files (w/stats) in container
+	instead of just name
+      - fix potential double free in CONTAINER_FREE - also added several
+	compare routines
+      - netsnmp_container enhancements: - add free_item function; defaults
+	to netsnmp_container_simple_free - add CONTAINER_FREE_ALL
+	macro/function (like CONTAINER_CLEAR but calls container free_item
+	for each item in primary container) - add ability to set options on
+	binary_array containers
+      - new certificate api to support tls/dtls
+      - new snmp token logOption allows specifying log destinations vi conf
+	files - if stderr log enabled because of no log destination, turn
+	it off when a log destination is enabled - don't call
+	netsnmp_enable_stderrlog() from apps anymore
+      - obsoleted NETSNMP_DS_LIB_ALARM_DONT_USE_SIG. From now on using
+	SIGALRM to trigger Net-SNMP alarm handlers is no longer supported.
+	Motivation: as known libnetsnmp supports time-based alarms via the
+	functions snmp_alarm_register(), run_alarms() and other functions.
+	Two different ways to trigger the function run_alarms() are
+	supported inside libnetsnmp: 1. By making sure that the timeout
+	argument of select() is small enough such that select() returns
+	before the next alarm must be handled (when the variable
+	NETSNMP_DS_LIB_ALARM_DONT_USE_SIG is set to one, which is the
+	default). 2. By making sure that the kernel fires SIGALRM at the
+	time when run_alarms() should be called (when the variable
+	NETSNMP_DS_LIB_ALARM_DONT_USE_SIG is set to zero, which has to be
+	configured explicitly). The following issues are associated with
+	the second approach: 1. Alarm functions are used inside Net-SNMP to
+	e.g. refresh cached table contents. As far as I can see there is
+	nothing in the Net-SNMP source code that prevents the following
+	from happening: a table refresh triggered via SIGALRM while a row
+	is being removed from a cached table. This can result in dangling
+	pointer dereferences and even a crash. 2. POSIX restricts signal
+	handlers to calling functions that are either reentrant or
+	non-interruptible
+	(http://www.opengroup.org/onlinepubs/009695399/functions/xsh_chap02
+	_04.html#tag_02_04). Standard I/O functions like printf() and
+	fprintf() are neither reentrant nor non-interruptible. run_alarms()
+	is called from inside a signal handler, which means that this
+	restriction applies to the function run_alarms() itself and all
+	functions called by it (which includes the alarm callback
+	functions). Or: e.g. snmp_log() and its callers must not be called
+	from inside run_alarms() when this function is invoked from inside
+	a signal handler. This is a severe restriction, and one that is
+	hard to work with. 3. Not all software developers know how to make
+	sure that signal delivery works correctly in a multithreaded
+	context. POSIX does not guarantee to which thread a signal like
+	SIGALRM will be delivered, unless that signal has been blocked
+	before thread creation and is unblocked after thread creation (see
+	also
+	http://www.opengroup.org/onlinepubs/009695399/functions/pthread_sig
+	mask.html). This is relevant for the Net-SNMP project not only
+	because a worker thread is created inside
+	agent/mibgroup/if-mib/data_access/interface_linux.c but also
+	because libnetsnmp is often used inside multithreaded software.
+	Currently no attempt is made to make sure that SIGALRM is processed
+	by the Net-SNMP event processing loop thread. If SIGALRM is
+	processed by another thread, this will result in one or more data
+	races. Because all the difficulties associated with processing
+	alarms from inside a signal handler function, and because fixing
+	these would require more effort than it is worth,
+	NETSNMP_DS_LIB_ALARM_DONT_USE_SIG has been deprecated and from now
+	on approach (1) is the only supported approach to trigger alarm
+	handlers.
+      - plit snmpIPBaseDomain and move the IPv4 parts to IPv4Base and the
+	socket generic parts to SocketBase.
+      - when freeing a cache, stop timer and call cache free func - also
+	add netsnmp_cache_remove
+
+    snmplib, snmpd:
+      - Do not check if values of type size_t are less than 0.
+      - Make sure that a mask is given to open when O_CREAT is specified
+
+    snmplib, snmpd, snmpnetstat:
+      - Add correct size prefixes when printing variables of type oid.
+
+    snmpd:
+      - Add support of network interfaces with HW address bigger than 6
+	bytes to ipNetToMediaTable and ipNetToPhysicalTable. Some HW, like
+	InfiniBand, uses HW addresses with 9 and more bytes. Snmpd on Linux
+	was not able to parse /proc/net/arp then and produced ugly 'ioctl
+	35123 returned -1' to log.
+      - Check the range of oid values towards the maximum oid value,
+	notULONG_MAX
+      - Extract the Exit and restart* subroutines from util_func in order
+	to make it possible to build less code for the minimal case.
+      - Fixed creation of views using snmpusm, OIDs with indexes > 255 are
+	allowed now. This reverts SVN commit #7492.
+      - Fixed invalid access to memory in TCP-MIB This partly reverts patch
+	17719 - the entries *are* used after raw_data container is freed.
+	These entries should be freed when associated rowreq_ctx is freed.
+      - Fixed logging of 'truncating integer value > 32 bits' in IP-MIB and
+	TCP-MIB The counters, which grow fast are now cut to 32bits.
+      - Fixed udpTable indexes on big-endian 64bit Linux. The index was
+	always '0.0.0.0' instead of real local IP address.
+      - Made subtree_context_cache::context_name a const char*.
+      - Make all the oids and oid lengths in agent_trap.c const and use
+	them from everywhere.
+      - Make the enterprise argument of netsnmp_send_traps and
+	send_enterprise_trap_vars const
+      - Only enable hostSwInst rpm support on linux hosts with librpm. This
+	makes it possible to build on non-rpm linux distributions.
+      - Removed the unused function xx_tokenize_exec_command from
+	utilities/execute.
+      - [BUG 2822360]: Fix memory leak when building table OIDs
+      - [BUG 2841008]: Protect against crash following failed AgentX
+	response
+      - [BUG 2873858]: Fix handling of schedOwner index. Patch provided by
+	Max Schubert.
+      - [BUG 2894059]: Handle errors when counting interfaces
+      - [BUG 2897000]: Suppress 32-bit counter truncation warnings.
+      - [BUG 2900078]: Add support for OID variables with size in elements
+	instead of bytes, correct sysObjectID to use this.
+      - [PATCH 2835576]: Fix endianness issues in pass/pass_persist
+      - [PATCH 2877518]: Fix handling of scoped AgentX variables
+      - [PATCH 2883092]: Support monitoring processes that should not be
+	running. Patch provided by Christian (cg75). Qn: Should this
+	functionality be back-ported to earlier lines?
+      - [PATCH 2883220]: Fix compilation problems when ifXTable is not
+	included.
+      - [PATCH 2887816]: Protect against division-by-zero crash
+      - [PATCH 2901029]: Fix compiler warning on CloseHandle() Endian
+	problems already addressed by patch #2835576
+      - [PATCH 2903092]: Fix broken handling of broadcast entries.
+      - [PATCH 2911323]: Fix agent lockup when monitoring AgentX-delegated
+	information
+      - [PATCH 2911970]: Properly terminate linked list of registrations.
+	Patch provided by Mirko Deckert.
+      - [PATCH 2956657]: Handle over-length AgentX OIDs. Patch provided by
+	Rob West
+      - [PATCH 2967400]: Retrieve error counters for the EtherLike-MIB
+	Patch supplied by Josef Moellers.
+      - [PATCH 2968642]: Catch overflow of pass-through command buffer.
+	Patch from Andreas Jaeger/Leonardo Chiquitto
+      - agent will no longer call table handlers if a set request for the
+	handler has invalid indexes
+      - agent will no longer call table handlers if a set request for the
+	handler has invalid indexes don't call cleanup on first request on
+	bad indexes. instead, set actual error later, and free request data
+	sets on first request for sets
+      - define and use new NETSNMP_LOGONCE macro
+      - fix crash in IF-MIB and IP-MIB when there are some interfaces with
+	broadcast IP address and some without. Reset the bcastentry in the
+	loop, so it cannot be inserted to the twice. Without this patch,
+	when an interface without broadcast address is processed, the
+	bcastaddress from previous loop is inserted into the container.
+	This obviously fails and the bcastentry is freed, but the container
+	still contains reference to it -> SIGSEGV.
+      - fix memory leak in ipAddressPrefixTable -
+	net_snmp_search_update_prefix_info returns different code, when the
+	entry was not inserted to list and can be freed.
+      - fix rare race condition when reading RPM database. Old rpm versions
+	return NULL instead of Header when another RPM instance holds
+	database locks. I.e. snmpd sometimes crashes when reading hr_swInst
+	and rpm is installing/updating/removing another package. As a
+	solution, whole RPM cache is thrown away and re-read when we got an
+	error from librpm. The whole process is restarted only three times,
+	to prevent endless loop.
+      - fixed a memory leak in TCP-MIB.
+      - fixed filedescriptior leak in Etherlike-MIB and RMON-MIB
+      - fixed memory leak when reading sensors for LM-SENSORS-MIB.
+      - fixed one leak-at-exit.
+      - include local port number in packet dumps. An example: Received 36
+	byte packet from UDP: [127.0.0.1]:53909->[127.0.0.1]:1161 0000: 30
+	22 02 01 01 04 06 70 75 62 6C 69 63 A1 15 02 0".....public... 0016:
+	04 37 F2 D4 9B 02 01 00 02 01 00 30 07 30 05 06 .7.........0.0..
+	0032: 01 01 05 00 .... Received SNMP packet(s) from UDP: GETNEXT
+	message -- ccitt.1 Sending 118 bytes to UDP:
+	[127.0.0.1]:53909->[127.0.0.1]:1161 0000: 30 74 02 01 01 04 06 70
+	75 62 6C 69 63 A2 67 02 0t.....public.g. 0016: 04 37 F2 D4 9B 02 01
+	00 02 01 00 30 59 30 57 06 .7.........0Y0W. 0032: 08 2B 06 01 02 01
+	01 01 00 04 4B 4C 69 6E 75 78 .+........KLinux 0048: 20 61 73 75 73
+	20 32 2E 36 2E 33 33 2E 32 2D 73 asus 2.6.33.2-s 0064: 63 73 74 20
+	23 31 20 53 4D 50 20 50 52 45 45 4D cst #1 SMP PREEM 0080: 50 54 20
+	53 61 74 20 41 70 72 20 33 20 32 31 3A PT Sat Apr 3 21: 0096: 31 30
+	3A 35 38 20 43 45 53 54 20 32 30 31 30 20 10:58 CEST 2010 0112: 78
+	38 36 5F 36 34 x86_64
+      - made sure that handler registration failure does not create
+	dangling pointers in the MIB subtree registry.
+      - report real ifSpeed of network interface even it is down. Some
+	interfaces can report their real speed, even they are down. And if
+	they can't, the fallback to 10Mbps is still there.
+      - table_data/tdata next handler will not be called during get
+	processing if no valid rows are found for the handler
+      - tdata helper now saves flags passed during creation; add tdata flag
+	to NOT create the table container
+      - translate NOSUCH*/ENDOFMIB errors during RESERVE1 to NOCREATION
+      - utilities/execute do not need anything from util_funcs, so stop
+	depending on it.
+
+    snmpdlib:
+      - new functions to make stash ptr and newrow available to
+	table_dataset handlers nonews: fix typo; tabs to spaces; use sizeof
+	instead of constant
+
+    snmpdx:
+      - changed default TCP target from 0.0.0.0:705 to localhost:705. This
+	is not only a more secure choice but it also makes it possible on
+	Windows systems to let an AgentX subagent connect to an AgentX
+	master agent running on the same system without having to set the
+	variable NETSNMP_DS_AGENT_X_SOCKET.
+
+    snmptable:
+      - [BUG 2837998]: Handle missing instance subidentifiers in results
+      - [PATCH 2850067]: Suppress extraneous "index" header token Patch
+	supplied by Dan Nelson
+
+    snmpusm:
+      - Prefer to use a variable of the right type over an ugly cast.
+	Lessen the scope of the variable as well.
+      - patch from Martin Bjorklund to add a -Cw option to use
+	createAndWait for agents that are strict about not allowing a row
+	to be set to active until the authentication password has been
+	changed; plus white-space clean up, manual additions and help
+	output modifications by hardaker
+
+    snmpwalk:
+      - Handle the case when the end oid is longer than the current oid
+	correctly
+
+    apps:
+      - Add command to send AgentX notify requests to a master agent.
+      - Generic host-specific configuration snmp.conf files are now read.
+	See the HOST-SPECIFIC FILES section of the snmp.conf manual page.
+      - Only build agentxtrap if the agentx libraries are built. Add a test
+	case for agentxtrap. The enablement/disablement is inspiered by
+	automake conditionals
+      - T command line flag can be used to configure transports
+
+    apps, snmplib:
+      - [PATCH 2835577]: identified by "Bart Van Assche": Replace SNMP_ZERO
+	of arrays with a memset.
+
+    build:
+      - [PATCH 2952020]: Explicitly set permission on temporary testing
+	output directories. Patch provided by Leonardo Chiquitto.
+      - run rpm configure checks for hr_swinst rewrite (rpm version only)
+
+    building:
+      - 'make test TESTOPTS="-P tcp"' works fine now
+      - 0 In case exec_prefix is unset then set it to '${prefix}' in order
+	to pick up overrides of $prefix in make install.
+      - Building Net-SNMP with dmalloc support enabled is again possible.
+      - Do not link with libnetsnmphelpers any more as it is empty.
+      - Fixed compilation with rpm-4.6. Turn on the legacy API when rpm-4.6
+	is detected.
+      - Introduced the variable 'with_socklib' in the configure script.
+	This variable is set to "winsock2" for MinGW and to "default" for
+	all other systems. Winsock2 tests are only run if this variable is
+	set to "winsock2" (MinGW).
+      - OS header detection check is now run before IPv6 stack detection.
+      - Use AC_REPLACE_FUNCS to handle code that is missing on some
+	platforms.
+      - Use autoconf to decide if inet_ntop.c and inet_pton.c are to be
+	compiled.
+      - Use the same compiler command and flags for building of tests as
+	for building of the code, thus enabling test of e.g. 32-bit code
+	compiled on a 64-bit platform.
+      - abort if the file program could not be found, since this is
+	essential for proper operation of libtool.
+      - added detection of lm_sensors version. I am not Autoconf guru, so I
+	hope I got it right. The goal is to define NETSNMP_USE_SENSORS_V3
+	*before* config_modules_agent processes
+	agent/mibgroup/hardware/sensors.h.
+      - made sure that the configure script does no longer invoke "tail
+	-1", which is not POSIX-compliant.
+      - save configure cache every once in while
+      - update Version-Munge for renamed configure.ac
+      - when generating a default value for the system location and no
+	domain name is found in /etc/resolv.conf, use "@no.where" instead
+	of "".
+
+    building, Win32:
+      - Remove a few unused configure symbols
+
+    hpux:
+      - fix build error on HP-UX 10.20
+
+    libnetsnmp:
+      - upport for a stream-line stripped down version of internal OpenSSL
+	support using --with-openssl=internal
+
+    libnetsnmpagent, libnetsnmphelpers:
+      - moved the functions netsnmp_bulk_to_next_fix_requests(),
+	netsnmp_get_bulk_to_next_handler(), netsnmp_register_null(),
+	netsnmp_register_null_context() and netsnmp_register_old_api() from
+	libnetsnmphelpers to libnetsnmpagent. Notes: - This does not affect
+	backwards compatibility for applications that link with
+	$(net-snmp-config --agent-libs) since this involves linking with
+	both libnetsnmphelpers and libnetsnmpagent. - Functions have been
+	moved between libraries by moving entire source files.
+
+    library:
+      - [PATCH 2952140]: Overflow counter32 and gauge32 on 64bit systems
+	correctly Patch provided by Leonardo Chiquitto
+
+    libsnmp:
+      - changed the type of the fourth argument of netsnmp_set_row_column()
+	from const char* to const void* such that no cast is necessary when
+	passing another datatype then char* or const char*.
+
+    man:
+      - [BUG 2972860]: Update broken references
+
+    mib2c:
+      - Remove unnecessary casts to u_char*
+      - [BUG 2888569]: Fix generation of table columns array
+      - mib2c can now optionally run sed on generated code
+      - table_data template enhancements - add error checks during table
+	init - create cache earlier so we can bail on failure - add option
+	to create/delete row w/out adding/removing from container
+      - update inline documentation; add storagetype test for columns
+
+    mibs:
+      - [BUG 2973890]: Fix imports, DiskIOEntry list and revision histories
+
+    misc:
+      - [PATCH 2836112]: Use the right modifier when printing size_t and
+	ssize_t variables.
+      - [PATCH 2952708]: Osterkamp: Added Perl implementation of BRIDGE-MIB
+
+    perl:
+      - NetSNMP::agent::netsnmp_request_infoPtr::getValue(): don't return a
+	pointer to a buffer on the stack. How can this have worked reliably
+	?? NetSNMP::agent::netsnmp_request_infoPtr::setValue(),
+	ASN_COUNTER64: fixed bug that could cause this method to fail even
+	when a valid number was provided.
+      - [PATCH 2890931]: Better handling of Counter64 values. Patch
+	provided by Max Romanov.
+      - fixed a memory leak triggered by destroying a
+	NetSNMP::agent::netsnmp_handler_registration object.
+      - fixed a memory leak triggered by destroying a
+	NetSNMP::agent::netsnmp_handler_registration object. fixed a memory
+	leak triggered by failure of creating a NetSNMP::OID object.
+      - fixed a memory leak triggered by destroying a
+	NetSNMP::agent::netsnmp_handler_registration object. fixed a memory
+	leak triggered by failure of creating a NetSNMP::OID object. fixed
+	a memory leak triggered by the NetSNMP::OID::gettable() subroutine.
+      - fixed a memory leak triggered by destroying a
+	NetSNMP::agent::netsnmp_handler_registration object. fixed a memory
+	leak triggered by failure of creating a NetSNMP::OID object. fixed
+	a memory leak triggered by the NetSNMP::OID::gettable() subroutine.
+	fixed an out-of-bounds array access triggered by the implementation
+	of NetSNMP::SNMP. fixed a memory leak triggered by a PDU processing
+	error in NetSNMP::SNMP. fixed memory leaks triggered by creating an
+	SNMPv3 session via NetSNMP::SNMP. Also fixed the uninitialized
+	variable accesses triggered by adding a varbind to a PDU via
+	NetSNMP::SNMP introduced a few days ago. The bugs mentioned above
+	have been found by inspecting the output of the following shell
+	command: cd perl && valgrind --trace-children=yes --leak-check=full
+	make test
+
+    python:
+      - [BUG 2919379]: Initialise SNMP sessions properly Provided by Diego
+	Billi
+      - [PATCH 2001656]: Handle null-termination of string values properly.
+	Based on the principles of the patch from Tommy Beadle.
+      - upport null-bytes in octet strings Patch supplied by Tommy Beadle
+
+    testing:
+      - Brand new test suite desigened to eventually test more
+	functionality, provide for support of unit-tests and support of API
+	tests
+      - Change the test suite to work even if mib lookup is disabled.
+      - Check the size of sun_path and use that to generate the maximal
+	size strings for stressing com2secunix.
+      - Make it possible to run the test suite from anywhere. Change the -D
+	option to expect the path of the top source directory. Add an
+	-srcdir option that is an alias for -D. Add an -builddir option to
+	designate the directory where the test object is. Put srcdir and
+	builddir in the environment for the test scripts Factor out the
+	grep part of SKIPIF and SKIPIFNOT to ISDEFINED Use more readable
+	keys in the opts hash in RUNFULLTESTS Adjust everything to use
+	srcdir and builddir
+      - Move the setting of MIBDIRS from the support script to the drivers
+	since it is needed for the C tests as well.
+      - Use olducd_run, not run_olducd. Change srcdir to refer to the top
+	directory and not the testing subdirectory as that is what is
+	expected in the test scripts.
+
+    unspecified:
+      - Change the types of the return values of netsnmp_*_getSecName from
+	char* to const char* since they point into internal structures.
+      - Hide most functions and variables in the logmatch module. Cleaned
+	up the header accordingly. Remove the need for forward declarations
+	by reordering the functions.
+      - Make the lists of com2Sec*Entries static
+      - [BUG 2838243]: Correct the output of unsigned values. Thanks to
+	Jack Huang of Qualcomm who pointed out this bug.
+      - [BUG 2969872]: made sure that SOCK_STARTUP is invoked before
+	init_agent() on Windows.
+      - [BUG 2971257]: Fixed winExtDLL handling of multi-varbind getNext
+	requests with OIDs in reverse lexicographical order.
+      - [PATCH 2926374]: from Ed Swierk: fixed reading of ipAddressTable
+	from /proc/net/if_inet6 on Linux The kernel might provide longer
+	fields, especially on 64-bit systems.
+      - [PATCH 2952034]: Return of the Great SuSE 'sprintf' Hunt... Patch
+	supplied by Leonardo Chiquitto
+      - add functions to get fingerprint from cert and log openssl errs
+      - added a new DEBUGTRACETOK() macro
+      - correctly calculate ifXTable.ifHCInUcastPkts on 32-bit Linux Linux
+	does not provide standalone counter for incoming unicast packets
+	(iucast) - it provides counter of all packets (iall) + separate
+	counter for the multicast ones (imcast). Previous implementation of
+	ifTable read these counters and calculated iucast = iall - imcast
+	*before* these values were expanded into 64bits. This produced
+	errors on 32bit systems when iall overflowed to zero and imcast was
+	nozero -> iucast got negative and 'c64 32 bit check failed' error
+	in snmpd log. Now the agent expands these values to 64bits first
+	and *	  *then* performs    the calculation, using a new flag. 
+	2010-05-27 08:18  magfr
+      - fixed memory leak in RMON-MIB and ETHERLIKE-MIB when there are
+	multiple aliases of an network interface Rationale: the aliased
+	interfaces have the same ifIndex -> CONTAINER_INSERT fails, but the
+	rejected entry was not freed.
+      - generate the transport initialization function list dynamically and
+	use it
+      - moved all functions defined in libnetsnmphelpers to
+	libnetsnmpagent. libnetsnmphelpers is now an empty library.
+      - moved transport code into a separate subdirectory in snmplib
+
+    Cygwin:
+      - IPv6 is only supported under Cygwin 1.7 or later. The old
+	implementation of IPv6 support in Net-SNMP under Cygwin involved a
+	strange mixture of Cygwin and Winsock2 socket calls, which was too
+	hard to maintain.
+      - IPv6 is only supported under Cygwin 1.7 or later. The old
+	implementation of IPv6 support in Net-SNMP under Cygwin involved a
+	strange mixture of Cygwin and Winsock2 socket calls, which was too
+	hard to maintain. builds again with IPv6 support enabled
+	(--enable-ipv6). At least Net-SNMP 5.5 doesn't build under Cygwin
+	with IPv6 support enabled. The configure script reported "checking
+	ipv6 stack type ... result: "unknown, no" ... error: IPv6
+	transports not available if IPv6 support is not enabled".
+      - [BUG 2939168]: byte order of udpLocalPort is now correct.
+      - [BUG 2939168]: fixed test infrastructure ("make test"). This has
+	been fixed by using the proper environment separator character and
+	by adding the path of the netstat executable for Cygwin in
+	testing/TESTCONF.sh.
+      - abort if the file program could not be found, since this is
+	essential for proper operation of libtool. neither compile nor link
+	winpipe.c.
+      - building with another OpenSSL package than the Cygwin-provided
+	packages openssl and openssl-devel is again possible.
+      - builds now also when the source files are located on a Samba
+	filesystem instead of a local filesystem.
+      - enabled Unix transport. (Forward-ported r18687 from the V5.5
+	branch).
+      - libnetsnmp does now build as a DLL when configured with
+	--enable-shared.
+      - libnetsnmp does now build as a DLL when configured with
+	--enable-shared. perl modules do now build (--with-perl-modules).
+	Note: the T060trapdperl_olducd, T061agentperl_olducd and
+	T115agentxperl_olducd tests still fail.
+      - libnetsnmpmibs, libnetsnmphelpers and libnetsnmpagent do now build
+	as a DLL when configured with --enable-shared.
+      - perl: building the Perl modules with the Cygwin Perl package is now
+	possible. (Forward-ported r18688 from the V5.5 branch.)
+      - the message "configure: WARNING: winsock.h: present but cannot be
+	compiled" does no longer appear when running the configure script.
+	Follow-up for r18050: re-enabled libiphlpapi and iphlpapi.h tests
+	for non-MinGW platforms since the Cygwin build needs these.
+
+    Linux:
+      - Improved EtherLike-MIB support Patch supplied by Josef Moellers
+      - builds again with embedded Perl disabled (bug 2985915).
+
+    MinGW:
+      - building with another OpenSSL package than the Cygwin-provided
+	packages openssl and openssl-devel is again possible. building with
+	OpenSSL works again.
+      - running the regression test suite is again possible ('make test').
+      - struct sockaddr_in6.sin6_scope_id configure test does now work.
+      - winExtDLL compiles now under MinGW. building Net-SNMP works again.
+	Detailed overview: * Changes in the configure script:
+
+    Solaris:
+      - OS header detection check is now run before IPv6 stack detection.
+	sockaddr_in6.sin6_addr configure test does now work.
+      - Protect against missing package version information crashing the
+	agent. Problem reported by Inyaven Sakarai.
+
+    Win32:
+      - Fix batch build using recent versions of Visual Studio. Partial
+	back port of SVN revisions 17573 and 17696.
+      - The header file <sys/timeb.h> is no longer included from
+	<net-snmp/types.h>. Or: the header file <sys/timeb.h> will have to
+	be included explicitly in source files that need the declaration of
+	the function ftime(). Note: compared to r18024 and before, this
+	change does not affect BSD systems -- <sys/timeb.h> was only
+	included from <net-snmp/types.h> on BSD systems in revisions
+	r18025..r18152.
+      - added #include <malloc.h> in win32/net-snmp/net-snmp-config.h such
+	that the MSVC compiler doesn't get confused by the malloc
+	redefinition when building libsnmp as a DLL.
+      - added the functions netsnmp_malloc(), netsnmp_calloc(),
+	netsnmp_realloc(), netsnmp_strdup() and netsnmp_free(). snmplib:
+	removed the troublesome #define malloc netsnmp_malloc etc. This
+	means that when calling functions from the Net-SNMP DLL from C or
+	C++ code that is being linked against another version of the MSVC
+	runtime DLL than the Net-SNMP DLL, and when allocating memory that
+	will be freed by the Net-SNMP DLL, you will either have to call the
+	Net-SNMP memory allocation functions explicitly or redefine
+	malloc() etc. yourself.
+      - batch build: replaced the obsolete /GX by the equivalent /EHsc.
+      - batch build: replaced the obsolete /GX by the equivalent /EHsc.
+	batch build: added /D "_CRT_SECURE_NO_WARNINGS" /D
+	"_CRT_NONSTDC_NO_WARNINGS" to make building with MSVC 2008 more
+	silent.
+      - batch build: replaced the obsolete /GX by the equivalent /EHsc.
+	batch build: added /D "_CRT_SECURE_NO_WARNINGS" /D
+	"_CRT_NONSTDC_NO_WARNINGS" to make building with MSVC 2008 more
+	silent. batch build: removed /Fp... and /YX. These options
+	influence how precompiled header files are generated, which are not
+	used inside the Net-SNMP project. /YX is not supported by MSVC
+	2008.
+      - batch build: replaced the obsolete /GX by the equivalent /EHsc.
+	batch build: added /D "_CRT_SECURE_NO_WARNINGS" /D
+	"_CRT_NONSTDC_NO_WARNINGS" to make building with MSVC 2008 more
+	silent. batch build: removed /Fp... and /YX. These options
+	influence how precompiled header files are generated, which are not
+	used inside the Net-SNMP project. /YX is not supported by MSVC
+	2008. batch build: removed a duplicate occurrence of strtoull.obj.
+      - building: Added libsnmp.def to the list of libsnmp_dll.dsp source
+	files such that the DLL is rebuilt when the .def file has been
+	modified.
+      - building: building NetSNMP.pm does no longer trigger compiler
+	warnings about redefining _WIN32_WINNT nor NTDDI_VERSION.
+      - building: converted .dsp/.dsw files to .vcproj/.sln files. This
+	implies that support for MSVC 6.0 has been dropped and the minimum
+	Microsoft Visual Studio version required to build the Net-SNMP
+	source code is Microsoft Visual Studio .NET (2002).
+      - building: made building NetSNMP.pm more silent by adding the MSVC
+	compiler flags -D_CRT_SECURE_NO_WARNINGS
+	-D_CRT_NONSTDC_NO_WARNINGS.
+      - building: made building more silent by not redefining malloc() or
+	free() during compilation of Perl extensions (resulted in warnings
+	about malloc() / free() redefinition in the Perl header
+	CORE/XSUB.h).
+      - building: renamed libsdll.dsw into win32dll.dsw.
+      - building: renamed libsdll.dsw into win32dll.dsw. building:
+	simplified linking the Net-SNMP applications with netsnmp.dll by
+	adding all application projects to the same workspace that is used
+	for building the DLL.
+      - building: renamed libsdll.dsw into win32dll.dsw. building:
+	simplified linking the Net-SNMP applications with netsnmp.dll by
+	adding all application projects to the same workspace that is used
+	for building the DLL. building: made building netsnmp.dll less
+	error prone by letting the compiler print an error message if the
+	preprocessor symbol NETSNMP_USE_DLL has not been defined.
+      - building: simplified the build process by removing the file
+	win32/libsnmp_dll/libsnmp.def.in. Which IPv6 functions are exported
+	from netsnmp.dll is now determined by which of the functions in
+	this DLL have been declared as NETSNMP_IMPORT.
+      - building: simplified the procedure for building with SNMPv3 support
+	enabled (OpenSSL).
+      - changed the type of the fourth argument of netsnmp_set_row_column()
+	from const char* to const void* such that no cast is necessary when
+	passing another datatype then char* or const char*. changed
+	in_addr_t from u_int to u_long such that it matches the datatype of
+	sockaddr_in::sin_addr. Also, fixed several compiler warnings
+	(mostly char * <> u_char * mismatches) and removed some casts.
+      - declared all functions that are exported from the Net-SNMP DLL as
+	NETSNMP_IMPORT. The result is a minor optimization: code that uses
+	the Net-SNMP DLL will now call the DLL-exported functions directly
+	instead of indirectly via the stub in the import library.
+      - exported netsnmp_read_module() from netsnmp.dll such that
+	NetSNMP.pm builds again.
+      - exported netsnmp_set_line_buffering() from netsnmp.dll.
+      - libsnmp builds again as a DLL when IPv6 is enabled.
+      - perl: fixed several "Free to wrong pool" errors. Note: since
+	calloc() is not redefined in <CORE/XSUB.h> using calloc() directly
+	or indirectly leads to "Free to wrong pool" errors, at least on
+	Windows.
+      - winExtDLL: don't trigger a netsnmp_assert() when no extension DLLs
+	have been loaded.
+      - winExtDLL: fixed a bug in getNext handling that could cause the MIB
+	output to be truncated.
+      - winExtDLL: multiple varbind set requests are now processed
+	correctly.
+      - winExtDLL: multiple varbind set requests are now processed
+	correctly. winExtDLL: made error codes in SNMP response PDUs as
+	RFC-compliant as possible.
+      - winExtDLL: multiple varbind set requests are now processed
+	correctly. winExtDLL: made error codes in SNMP response PDUs as
+	RFC-compliant as possible. winExtDLL: if loading an extension DLL
+	fails, the reason why loading failed is now logged.
+      - winExtDLL: multiple varbind set requests are now processed
+	correctly. winExtDLL: made error codes in SNMP response PDUs as
+	RFC-compliant as possible. winExtDLL: if loading an extension DLL
+	fails, the reason why loading failed is now logged. winExtDLL:
+	fixed a memory leak that occurred when SnmpExtensionQuery(Ex)
+	failed. This memory leak has been found via source reading. Note:
+	it is not clear whether it was possible to trigger this memory
+	leak. This leak is certainly not triggered by every request for
+	which a response with non-zero error status is sent back.
+
+    Windows:
+      - Fix build under MinGW back/forward port of revision 18631
+
+
+
 *5.5*
 
     snmplib:
