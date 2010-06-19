@@ -1909,6 +1909,26 @@ netsnmp_cert_trust_ca(SSL_CTX *ctx, netsnmp_cert *thiscert)
     return netsnmp_cert_trust(ctx, thiscert);
 }
 
+netsnmp_container *
+netsnmp_cert_get_trustlist(void)
+{
+    if (!_trusted_certs)
+        _setup_trusted_certs();
+    return _trusted_certs;
+}
+
+static void
+_parse_trustcert(const char *token, char *line)
+{
+    if (!_trusted_certs)
+        _setup_trusted_certs();
+
+    if (!_trusted_certs)
+        return;
+
+    CONTAINER_INSERT(_trusted_certs, strdup(line));
+}
+
 /* ***************************************************************************
  *
  * mode text functions
@@ -2284,6 +2304,32 @@ netsnmp_cert_map_add(netsnmp_cert_map *map)
     return rc;
 }
 
+int
+netsnmp_cert_map_remove(netsnmp_cert_map *map)
+{
+    int                rc;
+
+    if (NULL == map)
+        return -1;
+
+    DEBUGMSGTL(("cert:map:remove", "pri %d, fp %s\n",
+                map->priority, map->fingerprint));
+
+    if ((rc = CONTAINER_REMOVE(_maps, map)) != 0)
+        snmp_log(LOG_ERR, "could not remove certificate map");
+
+    return rc;
+}
+
+netsnmp_cert_map *
+netsnmp_cert_map_find(netsnmp_cert_map *map)
+{
+    if (NULL == map)
+        return NULL;
+
+    return CONTAINER_FIND(_maps, map);
+}
+
 static void
 _map_free(netsnmp_cert_map *map, void *context)
 {
@@ -2495,14 +2541,6 @@ netsnmp_certToTSN_parse_common(char **line)
     return map;
 }
 
-netsnmp_container *
-netsnmp_cert_get_trustlist(void)
-{
-    if (!_trusted_certs)
-        _setup_trusted_certs();
-    return _trusted_certs;
-}
-
 static void
 _parse_map(const char *token, char *line)
 {
@@ -2515,18 +2553,6 @@ _parse_map(const char *token, char *line)
         netsnmp_config_error(MAP_CONFIG_TOKEN
                              ": duplicate priority for certificate map");
     }
-}
-
-static void
-_parse_trustcert(const char *token, char *line)
-{
-    if (!_trusted_certs)
-        _setup_trusted_certs();
-
-    if (!_trusted_certs)
-        return;
-
-    CONTAINER_INSERT(_trusted_certs, strdup(line));
 }
 
 static int
@@ -2688,33 +2714,33 @@ netsnmp_tlstmParams_container(void)
 }
 
 snmpTlstmParams *
-netsnmp_tlstmParams_create(const char *tag, int hashType, const u_char *fp,
+netsnmp_tlstmParams_create(const char *name, int hashType, const char *fp,
                            int fp_len)
 {
     snmpTlstmParams *stp = SNMP_MALLOC_TYPEDEF(snmpTlstmParams);
     if (NULL == stp)
         return NULL;
 
-    if (tag)
-        stp->tag = strdup(tag);
+    if (name)
+        stp->name = strdup(name);
     stp->hashType = hashType;
     if (fp)
-        memdup(&stp->fingerprint, fp, fp_len);
+        stp->fingerprint = strndup(fp, fp_len);
     DEBUGMSGT(("9:tlstmParams:create", "0x%lx: %s\n", (u_long)stp,
-               stp->tag ? stp->tag : "null"));
+               stp->name ? stp->name : "null"));
 
     return stp;
 }
 
 void
-netsnmp_tlstmParams_destroy(snmpTlstmParams *stp)
+netsnmp_tlstmParams_free(snmpTlstmParams *stp)
 {
     if (NULL == stp)
         return;
 
     DEBUGMSGT(("9:tlstmParams:release", "0x%lx %s\n", (u_long)stp,
-               stp->tag ? stp->tag : "null"));
-    SNMP_FREE(stp->tag);
+               stp->name ? stp->name : "null"));
+    SNMP_FREE(stp->name);
     SNMP_FREE(stp->fingerprint);
     free(stp); /* SNMP_FREE pointless on parameter */
 }
@@ -2724,7 +2750,7 @@ netsnmp_tlstmParams_restore_common(char **line)
 {
     snmpTlstmParams  *stp;
     char             *tmp, buf[SNMP_MAXBUF_SMALL];
-    size_t            len, offset = 0;
+    size_t            len;
 
     if ((NULL == line) || (NULL == *line))
         return NULL;
@@ -2736,14 +2762,14 @@ netsnmp_tlstmParams_restore_common(char **line)
     if (NULL == stp)
         return NULL;
 
-    /** tag */
+    /** name */
     len = sizeof(buf);
     tmp = buf;
     *line = read_config_read_octet_string(*line, (u_char **)&tmp, &len);
     tmp[len] = 0;
     /** xxx-rks: validate snmpadminstring? */
     if (len)
-        stp->tag = strdup(buf);
+        stp->name = strdup(buf);
 
     /** fingerprint hash type*/
     len = sizeof(buf);
@@ -2759,28 +2785,14 @@ netsnmp_tlstmParams_restore_common(char **line)
         *line = read_config_read_octet_string(*line, (u_char **)&tmp, &len);
         tmp[len] = 0;
     }
-    if (buf[0] < NS_HASH_MAX) { /* already binary */
-        stp->hashType = buf[0];
-        memdup(&stp->fingerprint, buf, len);
-        stp->fingerprint_len = len;
-    }
-    else {
-        u_char  fp[SNMP_MAXBUF_SMALL], *fp_ptr = fp;
-        int     rc;
-        stp->hashType = NS_HASH_SHA1;
-        netsnmp_fp_lowercase_and_strip_colon(buf);
-        fp[0] = stp->hashType;
-        len = sizeof(fp);
-        rc = netsnmp_hex_to_binary(&fp_ptr, &len, &offset, 0, buf, NULL);
-        if (1 != rc) {
-            config_perror("error in row");
-            netsnmp_tlstmParams_destroy(stp);
-            return NULL;
-        }
-        stp->fingerprint_len = offset + 1;
-    }
+    else
+        stp->hashType =NS_HASH_SHA1;
+    
+    netsnmp_fp_lowercase_and_strip_colon(buf);
+    stp->fingerprint = strdup(buf);
+    stp->fingerprint_len = strlen(buf);
 
-    DEBUGMSGTL(("tlstmParams:restore:common", "tag '%s'\n", stp->tag));
+    DEBUGMSGTL(("tlstmParams:restore:common", "name '%s'\n", stp->name));
 
     return stp;
 }
@@ -2792,15 +2804,44 @@ netsnmp_tlstmParams_add(snmpTlstmParams *stp)
         return -1;
 
     DEBUGMSGTL(("tlstmParams:add", "adding entry 0x%lx %s\n", (u_long)stp,
-                stp->tag));
+                stp->name));
 
     if (CONTAINER_INSERT(_tlstmParams, stp) != 0) {
-        netsnmp_tlstmParams_destroy(stp);
-        snmp_log(LOG_ERR, "error inserting tlstmParams %s", stp->tag);
+        netsnmp_tlstmParams_free(stp);
+        snmp_log(LOG_ERR, "error inserting tlstmParams %s", stp->name);
         return -1;
     }
 
     return 0;
+}
+
+int
+netsnmp_tlstmParams_remove(snmpTlstmParams *stp)
+{
+    if (NULL == stp)
+        return -1;
+
+    DEBUGMSGTL(("tlstmParams:remove", "removing entry 0x%lx %s\n", (u_long)stp,
+                stp->name));
+
+    if (CONTAINER_REMOVE(_tlstmParams, stp) != 0) {
+        snmp_log(LOG_ERR, "error removing tlstmParams %s", stp->name);
+        return -1;
+    }
+
+    return 0;
+}
+
+snmpTlstmParams *
+netsnmp_tlstmParams_find(snmpTlstmParams *stp)
+{
+    snmpTlstmParams *found;
+
+    if (NULL == stp)
+        return NULL;
+
+    found = CONTAINER_FIND(_tlstmParams, stp);
+    return found;
 }
 
 static void
@@ -2817,34 +2858,20 @@ _parse_params(const char *token, char *line)
 }
 
 static char *
-_find_tlstmParams_fingerprint(const char *tag)
+_find_tlstmParams_fingerprint(const char *name)
 {
     snmpTlstmParams lookup_key, *result;
-    char             fingerprint[(EVP_MAX_MD_SIZE * 2) + 1], *fp;
-    u_int            fingerprint_len;
 
-    if (NULL == tag)
+    if (NULL == name)
         return NULL;
 
-    lookup_key.tag = NETSNMP_REMOVE_CONST(char*, tag);
+    lookup_key.name = NETSNMP_REMOVE_CONST(char*, name);
 
     result = CONTAINER_FIND(_tlstmParams, &lookup_key);
     if ((NULL == result) || (NULL == result->fingerprint))
         return NULL;
 
-    /*
-     * convert binary fingerprint to hex string
-     */
-    fingerprint_len = sizeof(fingerprint);
-    fp = fingerprint;
-    fingerprint_len = 
-        netsnmp_binary_to_hex((u_char **)&fp, &fingerprint_len, 0,
-                              &result->fingerprint[1],
-                              result->fingerprint_len - 1);
-    if (fingerprint_len <= 0)
-        return NULL;
-
-    return strdup(fingerprint);
+    return strdup(result->fingerprint);
 }
 /*
  * END snmpTlstmParmsTable data
@@ -2928,8 +2955,7 @@ netsnmp_tlstmAddr_restore_common(char **line, char *name, size_t *name_len,
                                  char *id, size_t *id_len, char *fp,
                                  size_t *fp_len, u_char *ht)
 {
-    u_char hashType;
-    char  *pos;
+    size_t fp_len_save = *fp_len;
 
     *line = read_config_read_octet_string(*line, (u_char **)&name, name_len);
     if (NULL == *line) {
@@ -2944,36 +2970,28 @@ netsnmp_tlstmAddr_restore_common(char **line, char *name, size_t *name_len,
         return -1;
     }
     fp[*fp_len] = 0;
+    if ((fp[0] == '-') && (fp[1] == '-')) {
+        *ht = _parse_ht_str(&fp[2]);
+        
+        /** set up for fingerprint */
+        *fp_len = fp_len_save;
+        *line = read_config_read_octet_string(*line, (u_char **)&fp, fp_len);
+        fp[*fp_len] = 0;
+    }
+    else
+        *ht = NS_HASH_SHA1;
+    netsnmp_fp_lowercase_and_strip_colon(fp);
+    *fp_len = strlen(fp);
     
     *line = read_config_read_octet_string(*line, (u_char **)&id, id_len);
     id[*id_len] = 0;
     
-    if (*fp_len) {
-        pos = strchr(fp, ':');
-        if (NULL == pos) {
-            config_perror("expect <algorigthm>:<fingerprint> for fingerprints");
-            return -1;
-        }
-        
-        *pos = '\0';
-        if (pos == &fp[1])
-            hashType = atoi(fp);
-        else
-            hashType = _parse_ht_str(fp);
-        if (hashType <= NS_HASH_NONE || hashType > NS_HASH_MAX) {
-            config_perror("invalid algorithm for fingerprint");
-            return -1;
-        }
-        *ht = hashType;
-
-        ++pos; /* now at start of fingerprint */
-        if ('x' == pos[1] && '0' == pos[0])
-            pos += 2;
-        *fp_len = strlen(pos);
-        netsnmp_fp_lowercase_and_strip_colon(pos);
-        memmove(fp, pos, *fp_len + 1); /* +1 to copy null */
+    if (*ht <= NS_HASH_NONE || *ht > NS_HASH_MAX) {
+        config_perror("invalid algorithm for fingerprint");
+        return -1;
     }
-    else if (0 == *id_len || (*id_len == 1 && id[0] == '*')) {
+
+    if ((0 == *fp_len) && ((0 == *id_len || (*id_len == 1 && id[0] == '*')))) {
         /*
          * empty fingerprint not allowed with '*' identity
          */
@@ -3000,7 +3018,20 @@ netsnmp_tlstmAddr_add(snmpTlstmAddr *entry)
 
     return 0;
 }
-   
+
+int
+netsnmp_tlstmAddr_remove(snmpTlstmAddr *entry)
+{
+    if (!entry)
+        return -1;
+
+    if (CONTAINER_REMOVE(_tlstmAddr, entry) != 0) {
+        snmp_log(LOG_ERR, "could not remove addr %s", entry->name);
+        return -1;
+    }
+
+    return 0;
+}
 
 static void
 _parse_addr(const char *token, char *line)

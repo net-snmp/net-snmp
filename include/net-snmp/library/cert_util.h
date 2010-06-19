@@ -132,10 +132,11 @@ netsnmp_container *netsnmp_cert_get_trustlist(void);
         X509           *ocert;
     } netsnmp_cert_map;
 
-
     netsnmp_cert_map *netsnmp_cert_map_alloc(char *fp, X509 *ocert);
     void netsnmp_cert_map_free(netsnmp_cert_map *cert_map);
     int netsnmp_cert_map_add(netsnmp_cert_map *map);
+    int netsnmp_cert_map_remove(netsnmp_cert_map *map);
+    netsnmp_cert_map *netsnmp_cert_map_find(netsnmp_cert_map *map);
 
     void netsnmp_cert_map_container_free(netsnmp_container *c);
     netsnmp_container *netsnmp_cert_map_container_create(int with_fp);
@@ -149,8 +150,8 @@ netsnmp_container *netsnmp_cert_get_trustlist(void);
      *
      *************************************************************************/
     typedef struct snmpTlstmParams_s {
-        char         *tag;
-        u_char       *fingerprint;
+        char         *name;
+        char         *fingerprint;
         char          hashType;
         u_char        flags;
         u_char        fingerprint_len;
@@ -162,10 +163,14 @@ netsnmp_container *netsnmp_cert_get_trustlist(void);
 /** ine TLSTM_PARAMS_XXX                  0x08 */
 
     snmpTlstmParams *netsnmp_tlstmParams_create(const char *tag, int hashType,
-                                                const u_char *fp, int fp_len);
-    void netsnmp_tlstmParams_destroy(snmpTlstmParams *stp);
+                                                const char *fp, int fp_len);
+    void netsnmp_tlstmParams_free(snmpTlstmParams *stp);
     snmpTlstmParams *netsnmp_tlstmParams_restore_common(char **line);
+
+    netsnmp_container *netsnmp_tlstmParams_container(void);
     int netsnmp_tlstmParams_add(snmpTlstmParams *stp);
+    int netsnmp_tlstmParams_remove(snmpTlstmParams *stp);
+    snmpTlstmParams *netsnmp_tlstmParams_find(snmpTlstmParams *stp);
 
     /*************************************************************************
      *
@@ -192,9 +197,11 @@ netsnmp_container *netsnmp_cert_get_trustlist(void);
                                          size_t *id_len, char *fp,
                                          size_t *fp_len, u_char *ht);
     netsnmp_container *netsnmp_tlstmAddr_container(void);
+    snmpTlstmAddr *netsnmp_tlstmAddr_find(snmpTlstmAddr *entry);
     snmpTlstmAddr *netsnmp_tlstmAddr_create(char *targetAddrName);
     void netsnmp_tlstmAddr_free(snmpTlstmAddr *entry);
     int netsnmp_tlstmAddr_add(snmpTlstmAddr *entry);
+    int netsnmp_tlstmAddr_remove(snmpTlstmAddr *entry);
 
 #ifdef __cplusplus
 }
