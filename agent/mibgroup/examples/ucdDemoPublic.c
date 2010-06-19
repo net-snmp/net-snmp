@@ -124,7 +124,7 @@ var_ucdDemoPublic(struct variable *vp,
 
     case UCDDEMOPUBLICSTRING:
         *write_method = write_ucdDemoPublicString;
-        *var_len = strlen(publicString);
+        *var_len = strlen((const char*)publicString);
         return (unsigned char *) publicString;
 
     case UCDDEMOUSERLIST:
@@ -214,10 +214,10 @@ write_ucdDemoPublicString(int action,
     }
     if (action == COMMIT) {
         if (var_val_len != 0) {
-            strncpy(publicString, var_val, sizeof(publicString)-1);
+            strncpy((char*)publicString, (const char*)var_val, sizeof(publicString)-1);
             /* some sanity checks */
-            if (strlen(var_val) > sizeof(publicString)-1 ||
-                    strlen(var_val) != var_val_len)
+            if (strlen((const char*)var_val) > sizeof(publicString)-1 ||
+                strlen((const char*)var_val) != var_val_len)
                 publicString[sizeof(publicString)-1] = '\0';
             else
                 publicString[var_val_len] = '\0';
