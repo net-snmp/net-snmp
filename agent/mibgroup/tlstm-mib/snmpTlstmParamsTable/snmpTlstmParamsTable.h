@@ -5,15 +5,22 @@
 #ifndef SNMPTLSTMPARAMSTABLE_H
 #define SNMPTLSTMPARAMSTABLE_H
 
-/*
- * function declarations 
- */
-void            init_snmpTlstmParamsTable(void);
+/* function declarations */
+void init_snmpTlstmParamsTable(void);
+void initialize_table_snmpTlstmParamsTable(void);
+#define SNMPTLSTMPARAMSTABLE_TIMEOUT  60
 
-/*
- * column number definitions for table snmpTlstmParamsTable 
- */
-#define COLUMN_SNMPTLSTMPARAMSCLIENTFINGERPRINT		1
-#define COLUMN_SNMPTLSTMPARAMSSTORAGETYPE		2
-#define COLUMN_SNMPTLSTMPARAMSROWSTATUS		3
-#endif                          /* SNMPTLSTMPARAMSTABLE_H */
+/* index definitions for table snmpTlstmParamsTable */
+#define SNMPTARGETPARAMSNAME_MAX_SIZE  32
+
+/* column number definitions for table snmpTlstmParamsTable */
+#define COLUMN_SNMPTLSTMPARAMSCLIENTFINGERPRINT    1
+#define COLUMN_SNMPTLSTMPARAMSSTORAGETYPE    2
+#define COLUMN_SNMPTLSTMPARAMSROWSTATUS    3
+    
+#define SNMPTLSTMPARAMSCLIENTFINGERPRINT_MAX_SIZE    255
+    
+#define SNMPTLSTMPARAMSTABLE_MIN_COLUMN COLUMN_SNMPTLSTMPARAMSCLIENTFINGERPRINT
+#define SNMPTLSTMPARAMSTABLE_MAX_COLUMN COLUMN_SNMPTLSTMPARAMSROWSTATUS
+
+#endif /* SNMPTLSTMPARAMSTABLE_H */
