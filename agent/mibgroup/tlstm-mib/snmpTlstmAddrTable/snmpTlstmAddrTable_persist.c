@@ -114,7 +114,7 @@ static int
 _tlstmAddrTable_container_row_save(netsnmp_tdata_row * row, void *type)
 {
     tlstmAddrTable_entry *entry;
-    char                  buf[sizeof(mib_token) + (256 * 4) + (2 * 13) + 10];
+    char                  buf[SNMP_MAXBUF_SMALL], *hashType;
 
     netsnmp_assert(row && row->data);
     entry = (tlstmAddrTable_entry *)row->data;
@@ -127,6 +127,13 @@ _tlstmAddrTable_container_row_save(netsnmp_tdata_row * row, void *type)
         return SNMP_ERR_NOERROR;
     }
 
+    hashType = se_find_label_in_slist("cert_hash_alg", entry->hashType);
+    if (NULL == hashType) {
+        snmp_log(LOG_ERR, "skipping entry unknown hash type %d\n",
+                 entry->hashType);
+        return SNMP_ERR_GENERR;
+    }
+
     /*
      * build the line
      */
@@ -136,8 +143,8 @@ _tlstmAddrTable_container_row_save(netsnmp_tdata_row * row, void *type)
                        entry->tlstmAddrServerFingerprint_len]);
     netsnmp_assert(0 == entry->tlstmAddrServerIdentity[
                        entry->tlstmAddrServerIdentity_len]);
-    snprintf(buf, sizeof(buf), "%s %s %d:0x%s %s %d", mib_token,
-             entry->snmpTargetAddrName, entry->hashType,
+    snprintf(buf, sizeof(buf), "%s %s --%s %s %s %d", mib_token,
+             entry->snmpTargetAddrName, hashType,
              entry->tlstmAddrServerFingerprint, entry->tlstmAddrServerIdentity,
              entry->tlstmAddrRowStatus);
     buf[sizeof(buf)-1] = 0;
