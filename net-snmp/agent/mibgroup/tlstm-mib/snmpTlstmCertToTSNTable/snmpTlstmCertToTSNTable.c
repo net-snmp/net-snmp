@@ -1178,7 +1178,7 @@ _save_entry(certToTSN_entry *entry, void *app_type)
     if (NULL == hashType) {
         snmp_log(LOG_ERR, "skipping entry unknown hash type %d\n",
                  entry->hashType);
-        return -1;
+        return SNMP_ERR_GENERR;
     }
     mapType = se_find_label_in_slist("cert_map_type", entry->mapType);
     if (TSNM_tlstmCertSpecified == entry->mapType)
@@ -1212,7 +1212,7 @@ _save_map(netsnmp_cert_map *map, int row_status, void *app_type)
     if (NULL == hashType) {
         snmp_log(LOG_ERR, "skipping entry unknown hash type %d\n",
                  map->hashType);
-        return -1;
+        return SNMP_ERR_GENERR;
     }
     mapType = se_find_label_in_slist("cert_map_type", map->mapType);
     if (TSNM_tlstmCertSpecified == map->mapType)
@@ -1242,7 +1242,8 @@ _save_maps(int majorID, int minorID, void *serverarg, void *clientarg)
     netsnmp_cert_map  *map;
     certToTSN_entry   *entry;
 
-    if ((NULL == maps) || (CONTAINER_SIZE(maps) == 0))
+    if ((NULL == maps) || ((CONTAINER_SIZE(maps) == 0) &&
+                           (CONTAINER_SIZE(_table->container) == 0)))
         return SNMPERR_SUCCESS;
 
     read_config_store((char *) type, sep);
@@ -1251,7 +1252,6 @@ _save_maps(int majorID, int minorID, void *serverarg, void *clientarg)
     /*
      * save active rows from maps
      */
-    maps = netsnmp_cert_map_container();
     if (NULL != maps) {
         map_itr = CONTAINER_ITERATOR(maps);
         if (NULL == map_itr) {
