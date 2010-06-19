@@ -422,6 +422,7 @@ sub run_older_perl_tests {
     }
     foreach my $test (@tests) {
 	my $tempfile = "$test->[0].t";
+	$tempfile =~ s#^$opts{'srcdir'}#$opts{'builddir'}#;
 	$tempfile =~ s#$opts{'master-directory'}/default/#$opts{'master-directory'}/temptests/#;
 	open(T, ">$tempfile") || die("$tempfile: $!");
 	print T "# functionally perl\n\nsystem(\"$opts{'srcdir'}/testing/fulltests/support/simple_run $test->[0]\");\n";
