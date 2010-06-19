@@ -267,7 +267,7 @@ ROWAPI_init_table(TABLE_DEFINTION_T * table_ptr,
 {
     table_ptr->name = name;
     if (!table_ptr->name)
-        table_ptr->name = "Unknown";
+        table_ptr->name = NETSNMP_REMOVE_CONST(char*,"Unknown");
 
     table_ptr->max_number_of_entries = max_number_of_entries;
     table_ptr->ClbkCreate = ClbkCreate;
