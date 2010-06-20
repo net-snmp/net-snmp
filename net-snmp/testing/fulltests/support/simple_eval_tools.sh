@@ -47,9 +47,7 @@ HEADER() {
         echo test $*
 	exit 0;
     else
-        :
-	#ECHO "testing $*...  "
-	#headerStr="testing $*"
+	{ echo "testing $*"; echo ""; } >> $SNMP_TMPDIR/invoked
     fi
 }
 
