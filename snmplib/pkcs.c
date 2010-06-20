@@ -775,5 +775,5 @@ pkcserr_string(CK_RV rv)
     }
 }
 #else
-int unused;	/* Suppress "empty translation unit" warning */
+int pkcs_unused;	/* Suppress "empty translation unit" warning */
 #endif

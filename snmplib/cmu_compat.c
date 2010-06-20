@@ -89,5 +89,5 @@ cmu_snmp_parse(netsnmp_session * session,
 
 
 #else
-int unused;	/* Suppress "empty translation unit" warning */
+int cmu_unused;	/* Suppress "empty translation unit" warning */
 #endif                          /* CMU_COMPATIBLE */

@@ -3090,5 +3090,5 @@ _find_tlstmAddr_fingerprint(const char *name)
  * ***************************************************************************/
 
 #else
-int unused;	/* Suppress "empty translation unit" warning */
+int cert_unused;	/* Suppress "empty translation unit" warning */
 #endif /* defined(NETSNMP_USE_OPENSSL) && defined(HAVE_LIBSSL) */
