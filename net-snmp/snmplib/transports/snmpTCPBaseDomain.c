@@ -1,5 +1,6 @@
 #include <net-snmp/net-snmp-config.h>
 
+#include <net-snmp/types.h>
 #include <net-snmp/library/snmpTCPBaseDomain.h>
 
 #include <stdio.h>
