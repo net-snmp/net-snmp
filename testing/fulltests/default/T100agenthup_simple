@@ -7,6 +7,9 @@ HEADER that the agent responds properly to a kill -HUP
 SKIPIF NETSNMP_DISABLE_SNMPV1
 
 SKIPIFNOT HAVE_SIGNAL
+if [ "x$OSTYPE" = "xmsys" ]; then
+  SKIP "MinGW does not support SIGHUP."
+fi
 
 #
 # Begin test

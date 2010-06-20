@@ -5,6 +5,9 @@
 HEADER snmpv1 traps are sent by snmpd API
 
 SKIPIFNOT USING_EXAMPLES_EXAMPLE_MODULE
+if [ "x$OSTYPE" = "xmsys" ]; then
+  SKIP "MinGW does not support SIGHUP."
+fi
 
 #
 # Begin test
