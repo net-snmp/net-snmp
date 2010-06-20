@@ -1,7 +1,8 @@
 #!/bin/sh
 
-srcdir=`dirname $0`/..
-srcdir=`cd $srcdir ; pwd`
+srcdir=`dirname $0`
+srcdir=`dirname $srcdir`
+srcdir=`cd $srcdir; pwd`
 
 # set up MIBDIRS to refer to the src directory
 if [ "x$MIBDIRS" = "x" ]; then
