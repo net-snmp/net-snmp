@@ -9,6 +9,9 @@ SKIPIFNOT USING_AGENTX_MASTER_MODULE
 SKIPIFNOT USING_AGENTX_SUBAGENT_MODULE
 # make sure the toolkit has been configured --with-perl-modules
 [ -d ${SNMP_UPDIR}/perl/blib/arch/auto/NetSNMP/agent ] || SKIP
+if [ "x$OSTYPE" = "xmsys" ]; then
+  SKIP "MinGW does not support SIGHUP."
+fi
 
 #
 # Begin test

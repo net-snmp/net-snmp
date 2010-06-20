@@ -6,6 +6,9 @@ HEADER 'snmpd embedded perl support (using NetSNMP::agent)'
 
 SKIPIF NETSNMP_DISABLE_SNMPV2C
 SKIPIFNOT NETSNMP_EMBEDDED_PERL
+if [ "x$OSTYPE" = "xmsys" ]; then
+  SKIP "MinGW does not support SIGHUP."
+fi
 
 #
 # Begin test
