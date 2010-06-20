@@ -23,6 +23,11 @@ if [ "x$srcdir" = "x" ]; then
     fi
 fi
 
+if [ "x$OSTYPE" = "xmsys" -a "x`type -p kill.exe`" = "x" ]; then
+    echo "Error: could not find kill.exe."
+    exit 1
+fi
+
 testscript=$1
 if [ `echo $testscript | cut -c 1-1` != '/' ]; then
     testscript="`pwd`/$1"
