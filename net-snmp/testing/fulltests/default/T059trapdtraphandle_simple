@@ -5,7 +5,7 @@
 TRAPHANDLE_LOGFILE=${SNMP_TMPDIR}/traphandle.log
 
 # "inline" trap handler
-echo "here: $1 $2" >> /tmp/runit
+#echo "here: $1 $2" >> /tmp/runit
 if [ "x$2" = "xtraphandle" ]; then
   cat - >>$TRAPHANDLE_LOGFILE
   exit 0
