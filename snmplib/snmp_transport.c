@@ -1,5 +1,6 @@
 #include <net-snmp/net-snmp-config.h>
 
+#include <net-snmp/types.h>
 #include <net-snmp/library/snmp_transport.h>
 
 #include <stdio.h>
