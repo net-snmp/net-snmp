@@ -77,6 +77,24 @@ have_gnu_make=$?
 
 
 ##
+#   The Perl function system() is used for running the Net-SNMP regression
+#   tests. Find out whether that function invokes a POSIX shell, which is
+#   necessary in order to run the regression tests. When using Windows + MSYS
+#   + ActiveState Perl, Perl's system() function does invoke Windows' cmd.exe
+#   which is not a POSIX shell.
+##
+
+AC_MSG_CHECKING([whether the Perl function system() invokes a POSIX shell])
+if test -e "$PERLPROG" -a "x`$PERLPROG -e 'system('"'"'echo $OSTYPE'"'"');'`" != 'x$OSTYPE'; then
+    PERL_SYSTEM_INVOKES_POSIX_SHELL=yes
+else
+    PERL_SYSTEM_INVOKES_POSIX_SHELL=no
+fi
+AC_SUBST([PERL_SYSTEM_INVOKES_POSIX_SHELL])
+AC_MSG_RESULT([yes])
+
+
+##
 #   Compilation-related program checks:
 ##
 
