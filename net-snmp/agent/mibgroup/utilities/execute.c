@@ -39,14 +39,17 @@
 
 #define setPerrorstatus(x) snmp_log_perror(x)
 
+#ifdef _MSC_VER
+#define popen  _popen
+#define pclose _pclose
+#endif
+
+
 int
 run_shell_command( char *command, char *input,
                    char *output,  int *out_len)	/* Or realloc style ? */
 {
 #if HAVE_SYSTEM
-    const char *ifname;    /* Filename for input  redirection */
-    const char *ofname;    /* Filename for output redirection */
-    char        shellline[STRMAX];   /* The full command to run */
     int         result;    /* and the return value of the command */
 
     if (!command)
@@ -55,25 +58,31 @@ run_shell_command( char *command, char *input,
     DEBUGMSGTL(("run_shell_command", "running %s\n", command));
     DEBUGMSGTL(("run:shell", "running '%s'\n", command));
 
+    result = -1;
+
     /*
-     * Set up the command to run....
+     * Set up the command and run it.
      */
     if (input) {
         FILE       *file;
 
-        ifname = netsnmp_mktemp();
-        if(NULL == ifname)
-            return -1;
-        file = fopen(ifname, "w");
-        if(NULL == file) {
-            snmp_log(LOG_ERR,"couldn't open temporary file %s\n", ifname);
-            unlink(ifname);
-            return -1;
-        }
-	fprintf(file, "%s", input);
-        fclose( file );
-
         if (output) {
+            const char *ifname;
+            const char *ofname;    /* Filename for output redirection */
+            char        shellline[STRMAX];   /* The full command to run */
+
+            ifname = netsnmp_mktemp();
+            if(NULL == ifname)
+                return -1;
+            file = fopen(ifname, "w");
+            if(NULL == file) {
+                snmp_log(LOG_ERR,"couldn't open temporary file %s\n", ifname);
+                unlink(ifname);
+                return -1;
+            }
+            fprintf(file, "%s", input);
+            fclose( file );
+
             ofname = netsnmp_mktemp();
             if(NULL == ofname) {
                 if(ifname)
@@ -82,49 +91,46 @@ run_shell_command( char *command, char *input,
             }
             snprintf( shellline, sizeof(shellline), "(%s) < \"%s\" > \"%s\"",
                       command, ifname, ofname );
+            result = system(shellline);
+            /*
+             * If output was requested, then retrieve & return it.
+             * Tidy up, and return the result of the command.
+             */
+            if (out_len && *out_len != 0) {
+                int         fd;        /* For processing any output */
+                int         len = 0;
+                fd = open(ofname, O_RDONLY);
+                if(fd >= 0)
+                    len  = read( fd, output, *out_len-1 );
+                *out_len = len;
+                if (len >= 0) output[len] = 0;
+                else output[0] = 0;
+                if (fd >= 0) close(fd);
+            }
+            unlink(ofname);
+            unlink(ifname);
         } else {
-            ofname = NULL;   /* Just to shut the compiler up! */
-            snprintf( shellline, sizeof(shellline), "(%s) < \"%s\"",
-                      command, ifname );
+            file = popen(command, "w");
+            if (file) {
+                fwrite(input, 1, strlen(input), file);
+                result = pclose(file);
+            }
         }
     } else {
-        ifname = NULL;   /* Just to shut the compiler up! */
         if (output) {
-            ofname = netsnmp_mktemp();
-            if(NULL == ofname)
-                return -1;
-            snprintf( shellline, sizeof(shellline), "(%s) > \"%s\"",
-                      command, ofname );
-        } else {
-            ofname = NULL;   /* Just to shut the compiler up! */
-            snprintf( shellline, sizeof(shellline), "%s",
-                      command );
-        }
-    }
+            FILE* file;
 
-    /*
-     * ... and run it
-     */
-    result = system(shellline);
-
-    /*
-     * If output was requested, then retrieve & return it.
-     * Tidy up, and return the result of the command.
-     */
-    if ( output && out_len && (*out_len != 0) ) {
-        int         fd;        /* For processing any output */
-        int         len = 0;
-        fd = open(ofname, O_RDONLY);
-        if(fd >= 0)
-            len  = read( fd, output, *out_len-1 );
-	*out_len = len;
-	if (len >= 0) output[len] = 0;
-	else output[0] = 0;
-	if (fd >= 0) close(fd);
-        unlink(ofname);
-    }
-    if ( input ) {
-        unlink(ifname);
+            file = popen(command, "r");
+            if (file) {
+                *out_len = fread(output, 1, *out_len - 1, file);
+                if (*out_len >= 0)
+                    output[*out_len] = 0;
+                else
+                    output[0] = 0;
+                result = pclose(file);
+            }
+        } else
+            result = system(command);
     }
 
     return result;
