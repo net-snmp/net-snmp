@@ -41,7 +41,7 @@ PERFORMANCE OF THIS SOFTWARE.
  * (schoenfr@ibr.cs.tu-bs.de) 1994/1995.
  * Linux additions taken from CMU to UCD stack by Jennifer Bray of Origin
  * (jbray@origin-at.co.uk) 1997
- * Support for system({CTL_NET,PF_ROUTE,...) by Simon Leinen
+ * Support for sysctl({CTL_NET,PF_ROUTE,...) by Simon Leinen
  * (simon@switch.ch) 1997
  */
 
