@@ -59,6 +59,11 @@ CAPTURE $NSCERT gencert -t ipaddr --san IP:127.0.0.1  $NSCERTARGS
 IPUSERFP=`$NSCERT showcerts --fingerprint --brief ipaddr $NSCERTARGS`
 CHECKVALUEISNT "$IPUSERFP" "" "generated fingerprint for ipaddr certificate"
 
+# user 8.1:  afile
+CAPTURE $NSCERT gencert -t afile --cn afileuser $NSCERTARGS
+AFILEUSERFP=`$NSCERT showcerts --fingerprint --brief afile $NSCERTARGS`
+CHECKVALUEISNT "$AFILEUSERFP" "" "generated fingerprint for afile certificate"
+
 
 # CA certificate
 
@@ -92,6 +97,7 @@ CONFIGAGENT certSecName 20 $MAPPEDUSERFP --sn aftermapping
 CONFIGAGENT certSecName 21 $EMAILUSERFP  --rfc822
 CONFIGAGENT certSecName 22 $DNSUSERFP    --dns
 CONFIGAGENT certSecName 23 $IPUSERFP     --ip
+CONFIGAGENT certSecName 24 afile         --cn
 
 CONFIGAGENT certSecName 100 $CAFP        --rfc822
 
@@ -112,6 +118,7 @@ CONFIGAGENT  rwuser -s tsm 127.0.0.1 authpriv
 CONFIGAGENT  rwuser -s tsm user8@test.net-snmp.org authpriv
 CONFIGAGENT  rwuser -s tsm user9@test.net-snmp.org authpriv
 CONFIGAGENT  rwuser -s tsm user10@test.net-snmp.org authpriv
+CONFIGAGENT  rwuser -s tsm afileuser authpriv
 
 
 # this file contains tests common to both tls and dtls usages
@@ -191,6 +198,9 @@ DOSETTEST user7SANDNS "-T our_identity=$DNSUSERFP $FLAGS"
 
 # using user 8 - a subjectAltName=ipv4 certificate mapping
 DOSETTEST user8SANIP "-T our_identity=$IPUSERFP $FLAGS"
+
+# using user 8 - test that certmapping works from a local filename
+DOSETTEST afileuser "-T our_identity=afile $FLAGS"
 
 # using user 9 - a CA signed certificate
 DOSETTEST user9CASignedCert "-T our_identity=$CAUSERFP -T trust_cert=$CAFP $FLAGS"

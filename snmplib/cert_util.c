@@ -2445,6 +2445,7 @@ netsnmp_certToTSN_parse_common(char **line)
     netsnmp_cert_map *map;
     char             *tmp, buf[SNMP_MAXBUF_SMALL];
     size_t            len;
+    netsnmp_cert     *tmpcert;
 
     if ((NULL == line) || (NULL == *line))
         return NULL;
@@ -2457,6 +2458,7 @@ netsnmp_certToTSN_parse_common(char **line)
 
     DEBUGMSGT(("cert:util:config", "parsing %s\n", *line));
 
+    /* read the priority */
     len = sizeof(buf);
     tmp = buf;
     *line = read_config_read_octet_string(*line, (u_char **)&tmp, &len);
@@ -2473,6 +2475,7 @@ netsnmp_certToTSN_parse_common(char **line)
     map->flags |= NSCM_FROM_CONFIG;
     map->priority = atoi(buf);
 
+    /* read the flag or the fingerprint */
     len = sizeof(buf);
     tmp = buf;
     *line = read_config_read_octet_string(*line, (u_char **)&tmp, &len);
@@ -2492,13 +2495,24 @@ netsnmp_certToTSN_parse_common(char **line)
     }
     else
         map->hashType = NS_HASH_SHA1;
-    netsnmp_fp_lowercase_and_strip_colon(buf);
-    map->fingerprint = strdup(buf);
+
+    /* look up the fingerprint */
+    tmpcert = netsnmp_cert_find(NS_CERT_REMOTE_PEER, NS_CERTKEY_MULTIPLE, buf);
+    if (NULL == tmpcert) {
+        /* assume it's a raw fingerprint we don't have */
+        netsnmp_fp_lowercase_and_strip_colon(buf);
+        map->fingerprint = strdup(buf);
+    } else {
+        map->fingerprint =
+            netsnmp_openssl_cert_get_fingerprint(tmpcert->ocert, -1);
+    }
+    
     if (NULL == *line) {
         netsnmp_config_error("must specify map type");
         goto end;
     }
 
+    /* read the mapping type */
     len = sizeof(buf);
     tmp = buf;
     *line = read_config_read_octet_string(*line, (u_char **)&tmp, &len);
