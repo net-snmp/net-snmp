@@ -2,10 +2,10 @@
 
 # Testing this script is possible by running e.g. the following commands:
 # srcdir=/z/software/net-snmp/trunk builddir=/z/software/net-snmp/trunk-mingw
+# cd $builddir/testing
 # TRAPD_FLAGS="-Dsnmptrapd -Drun:shell" $srcdir/testing/fulltests/support/simple_run $srcdir/testing/fulltests/default/T059trapdtraphandle_simple
 
 # "inline" trap handler
-#echo "here: $1 $2 $3" >> /tmp/runit
 if [ "x$1" = "xtraphandle" ]; then
   cat - >>"$2"
   exit 0
@@ -42,7 +42,11 @@ CONFIGTRAPD [snmp] persistentDir $SNMP_TMP_PERSISTENTDIR
 CONFIGTRAPD [snmp] tempFilePattern /tmp/snmpd-tmp-XXXXXX
 CONFIGTRAPD authcommunity execute $TESTCOMMUNITY
 CONFIGTRAPD doNotLogTraps true
-CONFIGTRAPD traphandle default "$traphandle_arg" traphandle "$TRAPHANDLE_LOGFILE"
+if [ "x$OSTYPE" = "xmsys" ]; then
+    CONFIGTRAPD traphandle default $MSYS_SH -c "'" $traphandle_arg traphandle $TRAPHANDLE_LOGFILE "'"
+else
+    CONFIGTRAPD traphandle default $traphandle_arg traphandle $TRAPHANDLE_LOGFILE
+fi
 CONFIGTRAPD agentxsocket /dev/null
 
 STARTTRAPD

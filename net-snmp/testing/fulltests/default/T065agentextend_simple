@@ -20,7 +20,11 @@ TESTCOMMUNITY=testcommunity
 # Begin test
 #
 
-CONFIGAGENT extend hello /usr/bin/env echo hello_world
+if [ "x$OSTYPE" = "xmsys" ]; then
+    CONFIGAGENT extend hello $MSYS_SH -c "'" /usr/bin/env echo hello_world '"'
+else
+    CONFIGAGENT extend hello /usr/bin/env echo hello_world
+fi
 
 STARTAGENT
 

@@ -130,6 +130,11 @@ else
     NETSTAT=""
 fi
 
+if [ "x$OSTYPE" = "xmsys" ]; then
+    # To do: make configure find out the path of MSYS' sh.exe.
+    MSYS_SH="c:\\msys\\1.0\\bin\\sh.exe"
+fi
+
 PROBE_FOR_PORT() {
     BASE_PORT=$1
     MAX_RETRIES=10
