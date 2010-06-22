@@ -811,7 +811,59 @@ netsnmp_dtlsudp_close(netsnmp_transport *t)
 {
     /* XXX: issue a proper dtls closure notification(s) */
 
+    bio_cache *cachep = NULL;
+    _netsnmpTLSBaseData *tlsbase;
+
     DEBUGTRACETOK("dtlsudp");
+
+    if (NULL != t->data && t->data_length == sizeof(_netsnmpTLSBaseData)) {
+        tlsbase = (_netsnmpTLSBaseData *) t->data;
+
+        if (tlsbase->remote_addr)
+            cachep = find_bio_cache((struct sockaddr_in *)tlsbase->remote_addr);
+    }
+
+    /* if we have any remaining packtes to send, try to send them */
+    if (NULL != cachep && cachep->write_cache_len > 0) {
+        int i = 0;
+        char buf[8192];
+        int rc;
+        void *opaque = NULL;
+        int opaque_len = 0;
+        fd_set readfs;
+        struct timeval tv;
+
+        /* make configurable:
+           - do this at all?
+           - retries
+           - timeout
+        */
+        while (i < 10 && cachep->write_cache_len != 0) {
+
+            /* first see if we can send out what we have */
+            _netsnmp_bio_try_and_write_buffered(t, cachep);
+
+            if (cachep->write_cache_len != 0) {
+
+                /* if we've failed that, we probably need to wait for packets */
+                FD_ZERO(&readfs);
+                FD_SET(t->sock, &readfs);
+                tv.tv_sec = 1;
+                tv.tv_usec = 0;
+
+                rc = select(1, &readfs, NULL, NULL, &tv);
+                if (1 || rc > 0) {
+                    /* junk recv for catching negotations still in play */
+                    netsnmp_dtlsudp_recv(t, buf, sizeof(buf),
+                                         &opaque, &opaque_len);
+                    if (opaque)
+                        SNMP_FREE(opaque);
+                    opaque_len = 0;
+                }
+            }
+            i++;
+        }
+    }
 
     return netsnmp_socketbase_close(t);
 }
