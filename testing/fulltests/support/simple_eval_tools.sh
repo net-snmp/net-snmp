@@ -47,7 +47,7 @@ HEADER() {
         echo test $*
 	exit 0;
     else
-	{ echo "testing $*"; echo ""; } >> $SNMP_TMPDIR/invoked
+	{ echo "# testing $*"; echo ""; } >> $SNMP_TMPDIR/invoked
     fi
 }
 
@@ -495,11 +495,11 @@ STARTPROG() {
     if test -f $CFG_FILE; then
 	COMMAND="$COMMAND -C -c $CFG_FILE"
     fi
-    if [ $SNMP_VERBOSE -gt 0 ]; then
-	echo "running: $COMMAND"
-    fi
     if [ "x$PORT_SPEC" != "x" ]; then
         COMMAND="$COMMAND $PORT_SPEC"
+    fi
+    if [ $SNMP_VERBOSE -gt 0 ]; then
+	echo "running: $COMMAND"
     fi
     echo $COMMAND >> $SNMP_TMPDIR/invoked
     if [ "x$OSTYPE" = "xmsys" ]; then
