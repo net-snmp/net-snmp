@@ -143,6 +143,22 @@ AC_DEFINE_UNQUOTED(PSCMD, "$PSPROG $ac_cv_ps_flags",
 #   System/Compilation-related
 ##
 
+#       Test for SIGHUP
+#
+
+AC_MSG_CHECKING([for SIGHUP])
+AC_COMPILE_IFELSE(
+    [AC_LANG_PROGRAM([#include <signal.h>], [return SIGHUP])],
+    [netsnmp_have_sighup=yes],
+    [netsnmp_have_sighup=no]
+)
+AC_MSG_RESULT([$netsnmp_have_sighup])
+if test "x$netsnmp_have_sighup" = xyes; then
+    AC_DEFINE([HAVE_SIGHUP], [1],
+              [Define if SIGHUP is defined in <signal.h>.])
+fi
+
+
 #       Check whether sysctl() is usable
 #	    used in library/agent
 #
