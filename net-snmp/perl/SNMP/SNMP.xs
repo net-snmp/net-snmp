@@ -2857,7 +2857,7 @@ snmp_new_v3_session(version, peer, retries, timeout, sec_name, sec_level, sec_en
         RETVAL
 
 SnmpSession *
-snmp_new_tunneled_session(version, peer, retries, timeout, sec_name, sec_level, context_eng_id, context)
+snmp_new_tunneled_session(version, peer, retries, timeout, sec_name, sec_level, context_eng_id, context, our_identity, their_identity, their_hostname, trust_cert)
         int	version
         char *	peer
         int	retries
@@ -2866,6 +2866,10 @@ snmp_new_tunneled_session(version, peer, retries, timeout, sec_name, sec_level, 
         int     sec_level
         char *  context_eng_id
         char *  context
+        char *  our_identity
+        char *  their_identity
+        char *  their_hostname
+        char *  trust_cert
 	CODE:
 	{
 	   SnmpSession session = {0};
@@ -2904,6 +2908,27 @@ snmp_new_tunneled_session(version, peer, retries, timeout, sec_name, sec_level, 
                    (netsnmp_container_compare*)
                    netsnmp_transport_config_compare;
            }
+
+           if (our_identity && our_identity[0] != '\0')
+               CONTAINER_INSERT(session.transport_configuration,
+                                netsnmp_transport_create_config("our_identity",
+                                                                our_identity));
+
+           if (their_identity && their_identity[0] != '\0')
+               CONTAINER_INSERT(session.transport_configuration,
+                                netsnmp_transport_create_config("their_identity",
+                                                                their_identity));
+
+           if (their_hostname && their_hostname[0] != '\0')
+               CONTAINER_INSERT(session.transport_configuration,
+                                netsnmp_transport_create_config("their_hostname",
+                                                                their_hostname));
+
+           if (trust_cert && trust_cert[0] != '\0')
+               CONTAINER_INSERT(session.transport_configuration,
+                                netsnmp_transport_create_config("trust_cert",
+                                                                trust_cert));
+           
 
            ss = snmp_open(&session);
 
