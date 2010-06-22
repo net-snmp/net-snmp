@@ -520,6 +520,13 @@ sub new {
        if ($this->{DestHost} =~ /^(dtls|tls|ssh)/) {
 	   # this is a tunneled protocol
 
+	   $this->{'OurIdentity'} ||= '';
+	   $this->{'TheirIdentity'} ||= '';
+	   $this->{'TheirHostname'} ||= '';
+	   $this->{'TrustCert'} ||= '';
+
+	   $this->{'SecLevel'} = $SNMP::V3_SEC_LEVEL_MAP{'authPriv'};
+
 	   $this->{SessPtr} =
 	     SNMP::_new_tunneled_session($this->{Version},
 					 $this->{DestHost},
@@ -529,6 +536,10 @@ sub new {
 					 $this->{SecLevel},
 					 $this->{ContextEngineId},
 					 $this->{Context},
+					 $this->{'OurIdentity'},
+					 $this->{'TheirIdentity'},
+					 $this->{'TheirHostname'},
+					 $this->{'TrustCert'},
 					);
 
 
