@@ -2856,6 +2856,71 @@ snmp_new_v3_session(version, peer, retries, timeout, sec_name, sec_level, sec_en
         OUTPUT:
         RETVAL
 
+SnmpSession *
+snmp_new_tunneled_session(version, peer, retries, timeout, sec_name, sec_level, context_eng_id, context)
+        int	version
+        char *	peer
+        int	retries
+        int	timeout
+        char *  sec_name
+        int     sec_level
+        char *  context_eng_id
+        char *  context
+	CODE:
+	{
+	   SnmpSession session = {0};
+	   SnmpSession *ss = NULL;
+           int verbose = SvIV(perl_get_sv("SNMP::verbose", 0x01 | 0x04));
+
+           __libraries_init("perl");
+
+           session.version = version;
+
+	   session.peername = peer;
+           session.retries = retries; /* 5 */
+           session.timeout = timeout; /* 1000000L */
+           session.contextNameLen = strlen(context);
+           session.contextName = context;
+           session.securityNameLen = strlen(sec_name);
+           session.securityName = sec_name;
+           session.securityLevel = sec_level;
+           session.securityModel = NETSNMP_TSM_SECURITY_MODEL;
+           session.contextEngineIDLen =
+              hex_to_binary2((u_char*)context_eng_id, strlen(context_eng_id),
+                             (char **) &session.contextEngineID);
+
+           /* create the transport configuration store */
+           if (!session.transport_configuration) {
+               netsnmp_container_init_list();
+               session.transport_configuration =
+                   netsnmp_container_find("transport_configuration:fifo");
+               if (!session.transport_configuration) {
+                   fprintf(stderr, "failed to initialize the transport configuration container\n");
+                   RETVAL = NULL;
+                   return;
+               }
+
+               session.transport_configuration->compare =
+                   (netsnmp_container_compare*)
+                   netsnmp_transport_config_compare;
+           }
+
+           ss = snmp_open(&session);
+
+           if (ss == NULL) {
+	      if (verbose) warn("error:snmp_new_v3_session:Couldn't open SNMP session");
+           }
+        end:
+           RETVAL = ss;
+	   netsnmp_free(session.securityPrivLocalKey);
+	   netsnmp_free(session.securityPrivProto);
+	   netsnmp_free(session.securityAuthLocalKey);
+	   netsnmp_free(session.securityAuthProto);
+	   netsnmp_free(session.contextEngineID);
+	   netsnmp_free(session.securityEngineID);
+	}
+        OUTPUT:
+        RETVAL
 
 SnmpSession *
 snmp_update_session(sess_ref, version, community, peer, lport, retries, timeout)

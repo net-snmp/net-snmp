@@ -484,6 +484,11 @@ sub new {
        $this->{DestHost} = $this->{DestHost} . ":" . $this->{RemotePort};
    }
 
+   if ($this->{DestHost} =~ /^(dtls|tls|ssh)/) {
+       # only works with version 3
+       $this->{Version} = 3;
+   }
+
    if ($this->{Version} eq '1' or $this->{Version} eq '2'
        or $this->{Version} eq '2c') {
        $this->{SessPtr} = SNMP::_new_session($this->{Version},
@@ -511,51 +516,73 @@ sub new {
        $this->{Context} ||= 
 	   NetSNMP::default_store::netsnmp_ds_get_string(NetSNMP::default_store::NETSNMP_DS_LIBRARY_ID(), 
 		         NetSNMP::default_store::NETSNMP_DS_LIB_CONTEXT()) || '';
-       $this->{AuthProto} ||= 'DEFAULT'; # use the library's default
-       $this->{AuthPass} ||=
-       NetSNMP::default_store::netsnmp_ds_get_string(NetSNMP::default_store::NETSNMP_DS_LIBRARY_ID(), 
-		     NetSNMP::default_store::NETSNMP_DS_LIB_AUTHPASSPHRASE()) ||
-       NetSNMP::default_store::netsnmp_ds_get_string(NetSNMP::default_store::NETSNMP_DS_LIBRARY_ID(), 
-		     NetSNMP::default_store::NETSNMP_DS_LIB_PASSPHRASE()) || '';
 
-       $this->{AuthMasterKey} ||= '';
-       $this->{PrivMasterKey} ||= '';
-       $this->{AuthLocalizedKey} ||= '';
-       $this->{PrivLocalizedKey} ||= '';
+       if ($this->{DestHost} =~ /^(dtls|tls|ssh)/) {
+	   # this is a tunneled protocol
 
-       $this->{PrivProto} ||= 'DEFAULT';  # use the library's default
-       $this->{PrivPass} ||=
-       NetSNMP::default_store::netsnmp_ds_get_string(NetSNMP::default_store::NETSNMP_DS_LIBRARY_ID(), 
-		     NetSNMP::default_store::NETSNMP_DS_LIB_PRIVPASSPHRASE()) ||
-       NetSNMP::default_store::netsnmp_ds_get_string(NetSNMP::default_store::NETSNMP_DS_LIBRARY_ID(), 
-		     NetSNMP::default_store::NETSNMP_DS_LIB_PASSPHRASE()) || '';
-       $this->{EngineBoots} = 0 if not defined $this->{EngineBoots};
-       $this->{EngineTime} = 0 if not defined $this->{EngineTime};
+	   $this->{SessPtr} =
+	     SNMP::_new_tunneled_session($this->{Version},
+					 $this->{DestHost},
+					 $this->{Retries},
+					 $this->{Timeout},
+					 $this->{SecName},
+					 $this->{SecLevel},
+					 $this->{ContextEngineId},
+					 $this->{Context},
+					);
 
-       $this->{SessPtr} = SNMP::_new_v3_session($this->{Version},
-						$this->{DestHost},
-						$this->{Retries},
-						$this->{Timeout},
-						$this->{SecName},
-						$this->{SecLevel},
-						$this->{SecEngineId},
-						$this->{ContextEngineId},
-						$this->{Context},
-						$this->{AuthProto},
-						$this->{AuthPass},
-						$this->{PrivProto},
-						$this->{PrivPass},
-						$this->{EngineBoots},
-						$this->{EngineTime},
-						$this->{AuthMasterKey},
-						length($this->{AuthMasterKey}),
-						$this->{PrivMasterKey},
-						length($this->{PrivMasterKey}),
-						$this->{AuthLocalizedKey},
-						length($this->{AuthLocalizedKey}),
-						$this->{PrivLocalizedKey},
-						length($this->{PrivLocalizedKey}),
-					       );
+
+       } else {
+	   # USM or some other internal security protocol
+
+	   # USM specific parameters:
+	   $this->{AuthProto} ||= 'DEFAULT'; # use the library's default
+	   $this->{AuthPass} ||=
+	     NetSNMP::default_store::netsnmp_ds_get_string(NetSNMP::default_store::NETSNMP_DS_LIBRARY_ID(), 
+							   NetSNMP::default_store::NETSNMP_DS_LIB_AUTHPASSPHRASE()) ||
+							       NetSNMP::default_store::netsnmp_ds_get_string(NetSNMP::default_store::NETSNMP_DS_LIBRARY_ID(), 
+													     NetSNMP::default_store::NETSNMP_DS_LIB_PASSPHRASE()) || '';
+
+	   $this->{AuthMasterKey} ||= '';
+	   $this->{PrivMasterKey} ||= '';
+	   $this->{AuthLocalizedKey} ||= '';
+	   $this->{PrivLocalizedKey} ||= '';
+
+	   $this->{PrivProto} ||= 'DEFAULT'; # use the library's default
+	   $this->{PrivPass} ||=
+	     NetSNMP::default_store::netsnmp_ds_get_string(NetSNMP::default_store::NETSNMP_DS_LIBRARY_ID(), 
+							   NetSNMP::default_store::NETSNMP_DS_LIB_PRIVPASSPHRASE()) ||
+							       NetSNMP::default_store::netsnmp_ds_get_string(NetSNMP::default_store::NETSNMP_DS_LIBRARY_ID(), 
+													     NetSNMP::default_store::NETSNMP_DS_LIB_PASSPHRASE()) || '';
+	   $this->{EngineBoots} = 0 if not defined $this->{EngineBoots};
+	   $this->{EngineTime} = 0 if not defined $this->{EngineTime};
+
+	   $this->{SessPtr} =
+	     SNMP::_new_v3_session($this->{Version},
+				   $this->{DestHost},
+				   $this->{Retries},
+				   $this->{Timeout},
+				   $this->{SecName},
+				   $this->{SecLevel},
+				   $this->{SecEngineId},
+				   $this->{ContextEngineId},
+				   $this->{Context},
+				   $this->{AuthProto},
+				   $this->{AuthPass},
+				   $this->{PrivProto},
+				   $this->{PrivPass},
+				   $this->{EngineBoots},
+				   $this->{EngineTime},
+				   $this->{AuthMasterKey},
+				   length($this->{AuthMasterKey}),
+				   $this->{PrivMasterKey},
+				   length($this->{PrivMasterKey}),
+				   $this->{AuthLocalizedKey},
+				   length($this->{AuthLocalizedKey}),
+				   $this->{PrivLocalizedKey},
+				   length($this->{PrivLocalizedKey}),
+				  );
+       }
    }
    unless ($this->{SessPtr}) {
        warn("unable to create session") if $SNMP::verbose;
