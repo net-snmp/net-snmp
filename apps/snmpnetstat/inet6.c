@@ -413,7 +413,7 @@ inet6print(unsigned char *in6, int port, const char *proto, int local)
 
 	struct servent *sp = NULL;
 	char line[80], *cp;
-	size_t width;
+	unsigned width;
 	int len = sizeof line;
 
 	width = Aflag ? 12 : 16;
