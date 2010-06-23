@@ -687,7 +687,7 @@ ipv6InterfaceForwarding_get(ipv6InterfaceTable_rowreq_ctx * rowreq_ctx,
      * copy (* ipv6InterfaceForwarding_val_ptr ) from rowreq_ctx->data
      */
     (*ipv6InterfaceForwarding_val_ptr) =
-        rowreq_ctx->data.ipv6InterfaceForwarding;
+        (rowreq_ctx->data.ipv6InterfaceForwarding) ? 1 : 2;
 
     return MFD_SUCCESS;
 }                               /* ipv6InterfaceForwarding_get */
