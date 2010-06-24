@@ -700,8 +700,8 @@ int netsnmp_tlsbase_wrapup_recv(netsnmp_tmStateReference *tmStateRef,
         if (NULL != tlsdata->securityName) {
             DEBUGMSGTL(("tls", "set SecName to: %s\n", tlsdata->securityName));
         } else {
-	    snmp_stat_increase(STAT_TLSTM_SNMPTLSTMSESSIONINVALIDCLIENTCERTIFICATES);
-	    snmp_stat_increase(STAT_TLSTM_SNMPTLSTMSESSIONOPENERRORS);
+	    snmp_increment_statistic(STAT_TLSTM_SNMPTLSTMSESSIONINVALIDCLIENTCERTIFICATES);
+	    snmp_increment_statistic(STAT_TLSTM_SNMPTLSTMSESSIONOPENERRORS);
             SNMP_FREE(tmStateRef);
             return SNMPERR_GENERR;
         }
