@@ -626,7 +626,7 @@ netsnmp_dtlsudp_recv(netsnmp_transport *t, void *buf, int size,
        - we use the t->data memory pointer as the session ID
        - the transport domain is already the correct type if we got here
        - if we don't have a session yet (eg, no tmSessionID from the
-         specs) then we create one automatically here. */
+         specs) then we create one automatically here.
     */
 
     /* write the received buffer to the memory-based input bio */
@@ -948,7 +948,7 @@ netsnmp_dtlsudp_send(netsnmp_transport *t, void *buf, int size,
        - we use the t->data memory pointer as the session ID
        - the transport domain is already the correct type if we got here
        - if we don't have a session yet (eg, no tmSessionID from the
-         specs) then we create one automatically here. */
+         specs) then we create one automatically here.
     */
 
 
