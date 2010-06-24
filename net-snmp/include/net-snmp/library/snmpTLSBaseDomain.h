@@ -54,7 +54,7 @@ extern          "C" {
        int parent_was_ok;
     } _netsnmp_verify_info;
 
-    SSL_CTX *sslctx_client_setup(const SSL_METHOD *,
+    SSL_CTX *sslctx_client_setup(SSL_METHOD *,
                                  _netsnmpTLSBaseData *tlsbase);
     SSL_CTX *sslctx_server_setup(const SSL_METHOD *);
 
