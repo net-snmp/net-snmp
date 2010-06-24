@@ -688,6 +688,15 @@ netsnmp_dtlsudp_send(netsnmp_transport *t, void *buf, int size,
     }
 
     if (NULL == addr_pair) {
+      /* RFCXXXX: section 5.2, step 1:
+       1)  If tmStateReference does not refer to a cache containing values
+           for tmTransportDomain, tmTransportAddress, tmSecurityName,
+           tmRequestedSecurityLevel, and tmSameSecurity, then increment the
+           snmpTlstmSessionInvalidCaches counter, discard the message, and
+           return the error indication in the statusInformation.  Processing
+           of this message stops.
+      */
+        snmp_increment_statistic(STAT_TLSTM_SNMPTLSTMSESSIONINVALIDCACHES);
         snmp_log(LOG_ERR, "dtlsudp_send: can't get address to send to\n");
         return -1;
     }
@@ -695,25 +704,89 @@ netsnmp_dtlsudp_send(netsnmp_transport *t, void *buf, int size,
     to = (struct sockaddr *) &(addr_pair->remote_addr);
 
     if (NULL == to || NULL == t || t->sock <= 0) {
+        snmp_increment_statistic(STAT_TLSTM_SNMPTLSTMSESSIONINVALIDCACHES);
         snmp_log(LOG_ERR, "invalid netsnmp_dtlsudp_send usage\n");
         return -1;
     }
 
+    /* RFCXXXX: section 5.2, step 2:
+       2)  Extract the tmSessionID, tmTransportDomain, tmTransportAddress,
+           tmSecurityName, tmRequestedSecurityLevel, and tmSameSecurity
+           values from the tmStateReference.  Note: The tmSessionID value
+           may be undefined if no session exists yet over which the message
+           can be sent.
+    */
+    /* Implemenation notes:
+       - we use the t->data memory pointer as the session ID
+       - the transport domain is already the correct type if we got here
+       - if we don't have a session yet (eg, no tmSessionID from the
+         specs) then we create one automatically here. */
+    */
+
+
+    /* RFCXXXX: section 5.2, step 3:
+       3)  If tmSameSecurity is true and either tmSessionID is undefined or
+           refers to a session that is no longer open then increment the
+           snmpTlstmSessionNoSessions counter, discard the message and
+           return the error indication in the statusInformation.  Processing
+           of this message stops.
+    */
+    /* RFCXXXX: section 5.2, step 4:
+       4)  If tmSameSecurity is false and tmSessionID refers to a session
+           that is no longer available then an implementation SHOULD open a
+           new session using the openSession() ASI (described in greater
+           detail in step 5b).  Instead of opening a new session an
+           implementation MAY return a snmpTlstmSessionNoSessions error to
+           the calling module and stop processing of the message.
+    */
+    /* Implementation Notes:
+       - We would never get here if the sessionID was different.  We
+         tie packets directly to the transport object and it could
+         never be sent back over a different transport, which is what
+         the above text is trying to prevent.
+       - Auto-connections are handled higher in the Net-SNMP library stack
+     */
+
+    /* RFCXXXX: section 5.2, step 5:
+       5)  If tmSessionID is undefined, then use tmTransportDomain,
+           tmTransportAddress, tmSecurityName and tmRequestedSecurityLevel
+           to see if there is a corresponding entry in the LCD suitable to
+           send the message over.
+
+           5a)  If there is a corresponding LCD entry, then this session
+                will be used to send the message.
+
+           5b)  If there is no corresponding LCD entry, then open a session
+                using the openSession() ASI (discussed further in
+                Section 5.3.1).  Implementations MAY wish to offer message
+                buffering to prevent redundant openSession() calls for the
+                same cache entry.  If an error is returned from
+                openSession(), then discard the message, discard the
+                tmStateReference, increment the snmpTlstmSessionOpenErrors,
+                return an error indication to the calling module and stop
+                processing of the message.
+    */
+
     /* we're always a client if we're sending to something unknown yet */
     if (NULL ==
         (cachep = find_or_create_bio_cache(t, &addr_pair->remote_addr,
-                                           WE_ARE_CLIENT)))
+                                           WE_ARE_CLIENT))) {
+        snmp_increment_statistic(STAT_TLSTM_SNMPTLSTMSESSIONOPENERRORS);
         return -1;
+    }
 
     tlsdata = cachep->tlsdata;
     if (NULL == tlsdata || NULL == tlsdata->ssl) {
         /** xxx mem lean? free created bio cache? */
+        snmp_increment_statistic(STAT_TLSTM_SNMPTLSTMSESSIONNOSESSIONS);
         snmp_log(LOG_ERR, "bad tls data or ssl ptr in netsnmp_dtlsudp_send\n");
         return -1;
     }
         
-    if (!tlsdata->securityName && tmStateRef && tmStateRef->securityNameLen > 0)
+    if (!tlsdata->securityName && tmStateRef &&
+	tmStateRef->securityNameLen > 0) {
         tlsdata->securityName = strdup(tmStateRef->securityName);
+    }
 
     /* see if we have previous outgoing data to send */
     if (cachep->write_cache) {
@@ -737,6 +810,12 @@ netsnmp_dtlsudp_send(netsnmp_transport *t, void *buf, int size,
         free(str);
     }
 
+    /* RFCXXXX: section 5.2, step 6:
+       6)  Using either the session indicated by the tmSessionID if there
+           was one or the session resulting from a previous step (4 or 5),
+           pass the outgoingMessage to (D)TLS for encapsulation and
+           transmission.
+    */
     rc = SSL_write(tlsdata->ssl, buf, size);
 
     while (rc == -1) {
