@@ -28,6 +28,7 @@
 
 #include <net-snmp/library/snmpUDPDomain.h>
 #ifdef NETSNMP_TRANSPORT_TLS_DOMAIN
+#include <net-snmp/library/snmpTLSBaseDomain.h>
 #include <net-snmp/library/snmpTLSDomain.h>
 #endif
 #ifdef NETSNMP_TRANSPORT_STD_DOMAIN

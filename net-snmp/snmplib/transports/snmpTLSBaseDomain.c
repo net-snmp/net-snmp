@@ -347,7 +347,7 @@ _load_trusted_certs(SSL_CTX *the_ctx) {
 }    
 
 SSL_CTX *
-sslctx_client_setup(const SSL_METHOD *method, _netsnmpTLSBaseData *tlsbase) {
+sslctx_client_setup(SSL_METHOD *method, _netsnmpTLSBaseData *tlsbase) {
     netsnmp_cert *id_cert, *peer_cert;
     SSL_CTX      *the_ctx;
     X509_STORE   *cert_store = NULL;
