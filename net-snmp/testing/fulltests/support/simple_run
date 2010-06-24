@@ -40,7 +40,7 @@ export SNMP_TEST_PREFIX
 SNMP_ORIGDIR=`pwd`	        ## this script may be invoked with relative path
 export SNMP_ORIGDIR
 
-SNMP_UPDIR=${builddir}          ## building from the source tree
+SNMP_UPDIR=${builddir}          ## build directory
 SNMP_SLEEP=${SNMP_SLEEP:=1} 	## default seconds to sleep
 export SNMP_SLEEP
 
