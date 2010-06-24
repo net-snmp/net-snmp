@@ -495,20 +495,80 @@ netsnmp_dtlsudp_recv(netsnmp_transport *t, void *buf, int size,
        the openssl context and have openssl read and process
        appropriately */
 
+    /* RFCXXXX: section 5.1, step 1:
+    1)  Determine the tlstmSessionID for the incoming message.  The
+        tlstmSessionID MUST be a unique session identifier for this
+        (D)TLS connection.  The contents and format of this identifier
+        are implementation-dependent as long as it is unique to the
+        session.  A session identifier MUST NOT be reused until all
+        references to it are no longer in use.  The tmSessionID is equal
+        to the tlstmSessionID discussed in Section 5.1.1. tmSessionID
+        refers to the session identifier when stored in the
+        tmStateReference and tlstmSessionID refers to the session
+        identifier when stored in the LCD.  They MUST always be equal
+        when processing a given session's traffic.
+
+        If this is the first message received through this session and
+        the session does not have an assigned tlstmSessionID yet then the
+        snmpTlstmSessionAccepts counter is incremented and a
+        tlstmSessionID for the session is created.  This will only happen
+        on the server side of a connection because a client would have
+        already assigned a tlstmSessionID during the openSession()
+        invocation.  Implementations may have performed the procedures
+        described in Section 5.3.2 prior to this point or they may
+        perform them now, but the procedures described in Section 5.3.2
+        MUST be performed before continuing beyond this point.
+    */
+
+    /* RFCXXXX: section 5.1, step 2:
+       2)  Create a tmStateReference cache for the subsequent reference and
+           assign the following values within it:
+
+           tmTransportDomain  = snmpTLSTCPDomain or snmpDTLSUDPDomain as
+              appropriate.
+
+           tmTransportAddress  = The address the message originated from.
+
+           tmSecurityLevel  = The derived tmSecurityLevel for the session,
+              as discussed in Section 3.1.2 and Section 5.3.
+
+           tmSecurityName  = The derived tmSecurityName for the session as
+              discussed in Section 5.3.  This value MUST be constant during
+              the lifetime of the session.
+
+           tmSessionID  = The tlstmSessionID described in step 1 above.
+    */
+
     /* if we don't have a cachep for this connection then
        we're receiving something new and are the server
        side */
-    /* XXX: allow for a SNMP client to never accept new conns? */
     bio_cache *cachep =
         find_or_create_bio_cache(t, &addr_pair->remote_addr, WE_ARE_SERVER);
     if (NULL == cachep) {
+        snmp_increment_statistic(STAT_TLSTM_SNMPTLSTMSESSIONACCEPTS);
         SNMP_FREE(tmStateRef);
         return -1;
     }
     tlsdata = cachep->tlsdata;
 
+    /* Implementation notes:
+       - we use the t->data memory pointer as the session ID
+       - the transport domain is already the correct type if we got here
+       - if we don't have a session yet (eg, no tmSessionID from the
+         specs) then we create one automatically here. */
+    */
+
     /* write the received buffer to the memory-based input bio */
     BIO_write(cachep->read_bio, buf, rc);
+
+    /* RFCXXXX: section 5.1, step 3:
+       3)  The incomingMessage and incomingMessageLength are assigned values
+           from the (D)TLS processing.
+     */
+    /* Implementation notes:
+       + rc = incomingMessageLength
+       + buf = IncomingMessage
+    */
 
     /* XXX: in Wes' other example we do a SSL_pending() call
        too to ensure we're ready to read...  it's possible
@@ -644,6 +704,22 @@ netsnmp_dtlsudp_recv(netsnmp_transport *t, void *buf, int size,
         SNMPERR_SUCCESS)
         return SNMPERR_GENERR;
 
+    /* RFCXXXX: section 5.1, step 4:
+       4)  The TLS Transport Model passes the transportDomain,
+           transportAddress, incomingMessage, and incomingMessageLength to
+           the Dispatcher using the receiveMessage ASI:
+
+          statusInformation =
+          receiveMessage(
+          IN   transportDomain     -- snmpTLSTCPDomain or snmpDTLSUDPDomain,
+          IN   transportAddress    -- address for the received message
+          IN   incomingMessage        -- the whole SNMP message from (D)TLS
+          IN   incomingMessageLength  -- the length of the SNMP message
+          IN   tmStateReference    -- transport info
+           )
+    */
+    /* Implementation notes: those pamateres are all passed outward
+       using the functions arguments and the return code below (the length) */
     return rc;
 }
 
@@ -716,7 +792,7 @@ netsnmp_dtlsudp_send(netsnmp_transport *t, void *buf, int size,
            may be undefined if no session exists yet over which the message
            can be sent.
     */
-    /* Implemenation notes:
+    /* Implementation notes:
        - we use the t->data memory pointer as the session ID
        - the transport domain is already the correct type if we got here
        - if we don't have a session yet (eg, no tmSessionID from the
