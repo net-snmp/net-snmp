@@ -2944,7 +2944,7 @@ netsnmp_tlstmAddr_create(char *targetAddrName)
     if (!entry)
         return NULL;
 
-    DEBUGMSGT(("tlstmAddr:entry:create", "entry 0x%x %s\n", (uintptr_t) entry,
+    DEBUGMSGT(("tlstmAddr:entry:create", "entry %p %s\n", (uintptr_t) entry,
                targetAddrName ? targetAddrName : "NULL"));
 
     entry->name = strdup(targetAddrName);
@@ -3053,7 +3053,7 @@ _parse_addr(const char *token, char *line)
     snmpTlstmAddr *entry;
     char           name[SNMPADMINLENGTH  + 1], id[SNMPADMINLENGTH  + 1],
                    fingerprint[SNMPTLSFINGERPRINT_MAX_LEN + 1];
-    u_int          name_len = sizeof(name), id_len = sizeof(id),
+    size_t         name_len = sizeof(name), id_len = sizeof(id),
                    fp_len = sizeof(fingerprint);
     u_char         hashType;
     int            rc;
