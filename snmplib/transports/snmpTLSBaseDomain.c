@@ -228,6 +228,21 @@ netsnmp_tlsbase_verify_client_cert(SSL *ssl, _netsnmpTLSBaseData *tlsdata) {
     X509            *remote_cert;
     int ret;
 
+    /* RFCXXXX: section 5.3.2, paragraph 1:
+       A (D)TLS server should accept new session connections from any client
+       that it is able to verify the client's credentials for.  This is done
+       by authenticating the client's presented certificate through a
+       certificate path validation process (e.g.  [RFC5280]) or through
+       certificate fingerprint verification using fingerprints configured in
+       the snmpTlstmCertToTSNTable.  Afterward the server will determine the
+       identity of the remote entity using the following procedures.
+    */
+    /* Implementation notes:
+       + path validation is taken care of during the openssl verify
+         routines, our part of which is hanlded in verify_callback
+         above.
+       + fingerprint verification happens below.
+    */
     if (NULL == (remote_cert = SSL_get_peer_certificate(ssl))) {
         /* no peer cert */
         DEBUGMSGTL(("tls_x509:verify",
@@ -658,11 +673,35 @@ int netsnmp_tlsbase_wrapup_recv(netsnmp_tmStateReference *tmStateRef,
     tmStateRef->transportSecurityLevel = SNMP_SEC_LEVEL_AUTHPRIV;
 
     /* use x509 cert to do lookup to secname if DNE in cachep yet */
+
+    /* RFCXXXX: section 5.3.2, paragraph 2:
+       The (D)TLS server identifies the authenticated identity from the
+       (D)TLS client's principal certificate using configuration information
+       from the snmpTlstmCertToTSNTable mapping table.  The (D)TLS server
+       MUST request and expect a certificate from the client and MUST NOT
+       accept SNMP messages over the (D)TLS connection until the client has
+       sent a certificate and it has been authenticated.  The resulting
+       derived tmSecurityName is recorded in the tmStateReference cache as
+       tmSecurityName.  The details of the lookup process are fully
+       described in the DESCRIPTION clause of the snmpTlstmCertToTSNTable
+       MIB object.  If any verification fails in any way (for example
+       because of failures in cryptographic verification or because of the
+       lack of an appropriate row in the snmpTlstmCertToTSNTable) then the
+       session establishment MUST fail, and the
+       snmpTlstmSessionInvalidClientCertificates object is incremented.  If
+       the session can not be opened for any reason at all, including
+       cryptographic verification failures, then the
+       snmpTlstmSessionOpenErrors counter is incremented and processing
+       stops.
+    */
+
     if (!tlsdata->securityName) {
         netsnmp_tlsbase_extract_security_name(tlsdata->ssl, tlsdata);
         if (NULL != tlsdata->securityName) {
             DEBUGMSGTL(("tls", "set SecName to: %s\n", tlsdata->securityName));
         } else {
+	    snmp_stat_increase(STAT_TLSTM_SNMPTLSTMSESSIONINVALIDCLIENTCERTIFICATES);
+	    snmp_stat_increase(STAT_TLSTM_SNMPTLSTMSESSIONOPENERRORS);
             SNMP_FREE(tmStateRef);
             return SNMPERR_GENERR;
         }
