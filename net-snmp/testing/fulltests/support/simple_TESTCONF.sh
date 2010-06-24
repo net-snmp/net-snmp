@@ -63,6 +63,39 @@ if [ "x$SNMP_PATH" = "x" ]; then
     export SNMP_PATH
 fi
 
+# make sure that we can fulfill all library dependencies
+_ld_lib_path="${SNMP_UPDIR}/snmplib/.libs:${SNMP_UPDIR}/agent/.libs:${SNMP_UPDIR}/agent/helpers/.libs"
+case `uname` in
+  CYGWIN*)
+    PATH="${_ld_lib_path}:$PATH"
+    export PATH
+    ;;
+  Darwin*)
+    if [ "x$DYLD_LIBRARY_PATH" != "x" ]; then
+      DYLD_LIBRARY_PATH="${_ld_lib_path}:${DYLD_LIBRARY_PATH}"
+    else
+      DYLD_LIBRARY_PATH="${_ld_lib_path}"
+    fi
+    export DYLD_LIBRARY_PATH
+    ;;
+  HP-UX*)
+    if [ "x$SHLIB_PATH" != "x" ]; then
+      SHLIB_PATH="${_ld_lib_path}:${SHLIB_PATH}"
+    else
+      SHLIB_PATH="${_ld_lib_path}"
+    fi
+    export SHLIB_PATH
+    ;;
+  *)
+    if [ "x$LD_LIBRARY_PATH" != "x" ]; then
+      LD_LIBRARY_PATH="${_ld_lib_path}:${LD_LIBRARY_PATH}"
+    else
+      LD_LIBRARY_PATH="${_ld_lib_path}"
+    fi
+    export LD_LIBRARY_PATH
+    ;;
+esac
+
 # Set up temporary directory
 if [ "x$SNMP_TMPDIR" = "x" -a "x$SNMP_HEADERONLY" != "xyes" ]; then
     if [ "x$testnum" = "x" ] ; then
