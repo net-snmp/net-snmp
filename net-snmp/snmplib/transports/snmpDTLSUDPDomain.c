@@ -199,6 +199,12 @@ start_new_cached_connection(netsnmp_transport *t,
 
     DEBUGTRACETOK("dtlsudp");
 
+    /* RFCXXXX: section 5.3.1, step 1:
+       1)  The snmpTlstmSessionOpens counter is incremented.
+    */
+    if (we_are_client)
+        snmp_increment_statistic(STAT_TLSTM_SNMPTLSTMSESSIONOPENS);
+
     if (!t->sock)
         DIEHERE("no socket passed in to start_new_cached_connection\n");
     if (!remote_addr)
@@ -213,6 +219,35 @@ start_new_cached_connection(netsnmp_transport *t,
         return NULL;
     cachep->tlsdata = tlsdata;
 
+    /* RFCXXXX: section 5.3.1, step 1:
+       2)  The client selects the appropriate certificate and cipher_suites
+           for the key agreement based on the tmSecurityName and the
+           tmRequestedSecurityLevel for the session.  For sessions being
+           established as a result of a SNMP-TARGET-MIB based operation, the
+           certificate will potentially have been identified via the
+           snmpTlstmParamsTable mapping and the cipher_suites will have to
+           be taken from system-wide or implementation-specific
+           configuration.  If no row in the snmpTlstmParamsTable exists then
+           implementations MAY choose to establish the connection using a
+           default client certificate available to the application.
+           Otherwise, the certificate and appropriate cipher_suites will
+           need to be passed to the openSession() ASI as supplemental
+           information or configured through an implementation-dependent
+           mechanism.  It is also implementation-dependent and possibly
+           policy-dependent how tmRequestedSecurityLevel will be used to
+           influence the security capabilities provided by the (D)TLS
+           connection.  However this is done, the security capabilities
+           provided by (D)TLS MUST be at least as high as the level of
+           security indicated by the tmRequestedSecurityLevel parameter.
+           The actual security level of the session is reported in the
+           tmStateReference cache as tmSecurityLevel.  For (D)TLS to provide
+           strong authentication, each principal acting as a command
+           generator SHOULD have its own certificate.
+    */
+    /* Implementation notes:
+       + This Information is passed in via the transport and default
+         paremeters
+    */
     /* see if we have base configuration to copy in to this new one */
     if (NULL != t->data && t->data_length == sizeof(_netsnmpTLSBaseData)) {
         _netsnmpTLSBaseData *parentdata = t->data;
@@ -281,12 +316,48 @@ start_new_cached_connection(netsnmp_transport *t,
     /* (and we'll do the opposite) */
     SSL_set_bio(tlsdata->ssl, cachep->read_bio, cachep->write_bio);
 
+    /* RFCXXXX: section 5.3.1, step 1:
+       3)  Using the destTransportDomain and destTransportAddress values,
+           the client will initiate the (D)TLS handshake protocol to
+           establish session keys for message integrity and encryption.
+
+           If the attempt to establish a session is unsuccessful, then
+           snmpTlstmSessionOpenErrors is incremented, an error indication is
+           returned, and processing stops.  If the session failed to open
+           because the presented server certificate was unknown or invalid
+           then the snmpTlstmSessionUnknownServerCertificate or
+           snmpTlstmSessionInvalidServerCertificates MUST be incremented and
+           a snmpTlstmServerCertificateUnknown or
+           snmpTlstmServerInvalidCertificate notification SHOULD be sent as
+           appropriate.  Reasons for server certificate invalidation
+           includes, but is not limited to, cryptographic validation
+           failures and an unexpected presented certificate identity.
+    */
+    /* Implementation notes:
+       + Because we're working asyncronously the real "end" point of
+         opening a connection doesn't occur here as certificate
+         verification and other things needs to happen first in the
+         verify callback, etc.  See the netsnmp_dtlsudp_recv()
+         function for the final processing.
+    */
     /* set the SSL notion of we_are_client/server */
     if (we_are_client)
         SSL_set_connect_state(tlsdata->ssl);
     else
         SSL_set_accept_state(tlsdata->ssl);
 
+    /* RFCXXXX: section 5.3.1, step 1:
+       6)  The TLSTM-specific session identifier (tlstmSessionID) is set in
+           the tmSessionID of the tmStateReference passed to the TLS
+           Transport Model to indicate that the session has been established
+           successfully and to point to a specific (D)TLS connection for
+           future use.  The tlstmSessionID is also stored in the LCD for
+           later lookup during processing of incoming messages
+           (Section 5.1.2).
+    */
+    /* Implementation notes:
+       + our sessionID is stored as the transport's data pointer member
+    */
     return cachep;
 }
 
@@ -627,6 +698,9 @@ netsnmp_dtlsudp_recv(netsnmp_transport *t, void *buf, int size,
         return rc;
     }
 
+    /* Until we've locally assured ourselves that all is well in
+       certificate-verification-land we need to be prepared to stop
+       here and ensure all our required checks have been done. */ 
     if (0 == (tlsdata->flags & NETSNMP_TLSBASE_CERT_FP_VERIFIED)) {
         int verifyresult;
 
@@ -634,6 +708,80 @@ netsnmp_dtlsudp_recv(netsnmp_transport *t, void *buf, int size,
 
             /* verify that the server's certificate is the correct one */
 
+    	    /* RFCXXXX: section 5.3.1, step 1:
+    	       3)  Using the destTransportDomain and
+    	           destTransportAddress values, the client will
+    	           initiate the (D)TLS handshake protocol to establish
+    	           session keys for message integrity and encryption.
+
+    	           If the attempt to establish a session is
+    	           unsuccessful, then snmpTlstmSessionOpenErrors is
+    	           incremented, an error indication is returned, and
+    	           processing stops.  If the session failed to open
+    	           because the presented server certificate was
+    	           unknown or invalid then the
+    	           snmpTlstmSessionUnknownServerCertificate or
+    	           snmpTlstmSessionInvalidServerCertificates MUST be
+    	           incremented and a snmpTlstmServerCertificateUnknown
+    	           or snmpTlstmServerInvalidCertificate notification
+    	           SHOULD be sent as appropriate.  Reasons for server
+    	           certificate invalidation includes, but is not
+    	           limited to, cryptographic validation failures and
+    	           an unexpected presented certificate identity.
+    	    */
+    	    /* RFCXXXX: section 5.3.1, step 1:
+    	       4)  The (D)TLS client MUST then verify that the (D)TLS
+    	           server's presented certificate is the expected
+    	           certificate.  The (D)TLS client MUST NOT transmit
+    	           SNMP messages until the server certificate has been
+    	           authenticated, the client certificate has been
+    	           transmitted and the TLS connection has been fully
+    	           established.
+
+    	           If the connection is being established from
+    	           configuration based on SNMP-TARGET-MIB
+    	           configuration, then the snmpTlstmAddrTable
+    	           DESCRIPTION clause describes how the verification
+    	           is done (using either a certificate fingerprint, or
+    	           an identity authenticated via certification path
+    	           validation).
+
+    	           If the connection is being established for reasons
+    	           other than configuration found in the
+    	           SNMP-TARGET-MIB then configuration and procedures
+    	           outside the scope of this document should be
+    	           followed.  Configuration mechanisms SHOULD be
+    	           similar in nature to those defined in the
+    	           snmpTlstmAddrTable to ensure consistency across
+    	           management configuration systems.  For example, a
+    	           command-line tool for generating SNMP GETs might
+    	           support specifying either the server's certificate
+    	           fingerprint or the expected host name as a command
+    	           line argument.
+    	    */
+    	    /* RFCXXXX: section 5.3.1, step 1:
+    	       5)  (D)TLS provides assurance that the authenticated
+    	           identity has been signed by a trusted configured
+    	           certification authority.  If verification of the
+    	           server's certificate fails in any way (for example
+    	           because of failures in cryptographic verification
+    	           or the presented identity did not match the
+    	           expected named entity) then the session
+    	           establishment MUST fail, the
+    	           snmpTlstmSessionInvalidServerCertificates object is
+    	           incremented.  If the session can not be opened for
+    	           any reason at all, including cryptographic
+    	           verification failures and snmpTlstmCertToTSNTable
+    	           lookup failures, then the
+    	           snmpTlstmSessionOpenErrors counter is incremented
+    	           and processing stops.
+    	    */
+
+	    /* Implementation notes:
+	       + in the following function the server's certificate and
+	         presented commonname or subjectAltName is checked
+	         according to the rules in the snmpTlstmAddrTable.
+	    */ 
             if ((verifyresult = netsnmp_tlsbase_verify_server_cert(tlsdata->ssl, tlsdata))
                 != SNMPERR_SUCCESS) {
                 if (verifyresult == SNMPERR_TLS_NO_CERTIFICATE) {
@@ -647,7 +795,10 @@ netsnmp_dtlsudp_recv(netsnmp_transport *t, void *buf, int size,
                     /* XXX: free needed memory */
                     snmp_log(LOG_ERR,
                              "DTLSUDP: failed to verify ssl certificate (of the server)\n");
-                    snmp_increment_statistic(STAT_TLSTM_SNMPTLSTMSESSIONINVALIDCLIENTCERTIFICATES);
+		    snmp_increment_statistic(STAT_TLSTM_SNMPTLSTMSESSIONUNKNOWNSERVERCERTIFICATE);
+		    /* Step 5 says these are always incremented */
+		    snmp_increment_statistic(STAT_TLSTM_SNMPTLSTMSESSIONINVALIDSERVERCERTIFICATES);
+		    snmp_increment_statistic(STAT_TLSTM_SNMPTLSTMSESSIONOPENERRORS);
                     return -1;
                 }
                 DEBUGMSGTL(("dtlsudp", "Verified the server's certificate\n"));
@@ -720,6 +871,7 @@ netsnmp_dtlsudp_recv(netsnmp_transport *t, void *buf, int size,
     */
     /* Implementation notes: those pamateres are all passed outward
        using the functions arguments and the return code below (the length) */
+
     return rc;
 }
 
