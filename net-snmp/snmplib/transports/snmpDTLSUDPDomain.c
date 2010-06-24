@@ -1123,6 +1123,18 @@ netsnmp_dtlsudp_close(netsnmp_transport *t)
 
     DEBUGTRACETOK("dtlsudp");
 
+    /* RFCXXXX: section 5.4, step 1:
+        1)  Increment either the snmpTlstmSessionClientCloses or the
+            snmpTlstmSessionServerCloses counter as appropriate.
+    */
+    snmp_increment_statistic(STAT_TLSTM_SNMPTLSTMSESSIONCLIENTCLOSES);
+    
+    /* RFCXXXX: section 5.4, step 2:
+        2)  Look up the session using the tmSessionID.
+    */
+    /* Implementation notes:
+       + Our session id is stored as the t->data pointer
+    */
     if (NULL != t->data && t->data_length == sizeof(_netsnmpTLSBaseData)) {
         tlsbase = (_netsnmpTLSBaseData *) t->data;
 
@@ -1130,6 +1142,10 @@ netsnmp_dtlsudp_close(netsnmp_transport *t)
             cachep = find_bio_cache((struct sockaddr_in *)tlsbase->remote_addr);
     }
 
+    /* RFCXXXX: section 5.4, step 3:
+        3)  If there is no open session associated with the tmSessionID, then
+            closeSession processing is completed.
+    */
     /* if we have any remaining packtes to send, try to send them */
     if (NULL != cachep && cachep->write_cache_len > 0) {
         int i = 0;
@@ -1172,6 +1188,11 @@ netsnmp_dtlsudp_close(netsnmp_transport *t)
         }
     }
 
+    /* RFCXXXX: section 5.4, step 4:
+        4)  Have (D)TLS close the specified connection.  This MUST include
+            sending a close_notify TLS Alert to inform the other side that
+            session cleanup may be performed.
+    */
     return netsnmp_socketbase_close(t);
 }
 
