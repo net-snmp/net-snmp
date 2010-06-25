@@ -57,7 +57,7 @@ extern          "C" {
 
     SSL_CTX *sslctx_client_setup(SSL_METHOD *,
                                  _netsnmpTLSBaseData *tlsbase);
-    SSL_CTX *sslctx_server_setup(const SSL_METHOD *);
+    SSL_CTX *sslctx_server_setup(SSL_METHOD *);
 
     int netsnmp_tlsbase_verify_server_cert(SSL *ssl,
                                            _netsnmpTLSBaseData *tlsdata);

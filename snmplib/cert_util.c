@@ -2944,7 +2944,7 @@ netsnmp_tlstmAddr_create(char *targetAddrName)
     if (!entry)
         return NULL;
 
-    DEBUGMSGT(("tlstmAddr:entry:create", "entry %p %s\n", (uintptr_t) entry,
+    DEBUGMSGT(("tlstmAddr:entry:create", "entry %p %s\n", entry,
                targetAddrName ? targetAddrName : "NULL"));
 
     entry->name = strdup(targetAddrName);
