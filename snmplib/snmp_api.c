@@ -6515,11 +6515,8 @@ static int _check_range(struct tree *tp, long ltmp, int *resptr,
     if (check && tp && tp->ranges) {
 	struct range_list *rp = tp->ranges;
 	while (rp) {
-            if (tp->type == ASN_UNSIGNED)
-                if ((unsigned) rp->low <= ltmp && ltmp <= (unsigned) rp->high) break;
-            else
-                if (rp->low <= ltmp && ltmp <= rp->high) break;
-            /* Allow four digits per range value */
+	    if (rp->low <= ltmp && ltmp <= rp->high) break;
+                                  /* Allow four digits per range value */
             temp_len += ((rp->low != rp->high) ? 14 : 8 );
 	    rp = rp->next;
 	}
@@ -6531,17 +6528,10 @@ static int _check_range(struct tree *tp, long ltmp, int *resptr,
                 sprintf( temp, "%s :: {", errmsg );
                 cp = temp+(strlen(temp));
                 for ( rp = tp->ranges; rp; rp=rp->next ) {
-                    if ( tp->type == ASN_UNSIGNED ) {
-                        if ( rp->low != rp->high ) 
-                            sprintf( cp, "(%u..%u), ", rp->low, rp->high );
-                        else
-                            sprintf( cp, "(%u), ", rp->low );
-                    } else {
-                        if ( rp->low != rp->high )
-                            sprintf( cp, "(%d..%d), ", rp->low, rp->high );
-                        else
-                            sprintf( cp, "(%d), ", rp->low );
-                    }
+                    if ( rp->low != rp->high ) 
+                        sprintf( cp, "(%d..%d), ", rp->low, rp->high );
+                    else
+                        sprintf( cp, "(%d), ", rp->low );
                     cp += strlen(cp);
                 }
                 *(cp-2) = '}';   /* Replace the final comma with a '}' */
