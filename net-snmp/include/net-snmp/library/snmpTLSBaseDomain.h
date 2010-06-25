@@ -51,8 +51,9 @@ extern          "C" {
        netsnmp_indexed_addr_pair *remote_addr;
     } _netsnmpTLSBaseData;
 
+#define VRFY_PARENT_WAS_OK 1
     typedef struct _netsnmp_verify_info_s {
-       int parent_was_ok;
+       int flags;
     } _netsnmp_verify_info;
 
     SSL_CTX *sslctx_client_setup(SSL_METHOD *,
