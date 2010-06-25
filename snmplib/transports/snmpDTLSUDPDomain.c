@@ -536,6 +536,12 @@ netsnmp_dtlsudp_recv(netsnmp_transport *t, void *buf, int size,
         return -1;
     }
 
+    /* Set the transportDomain */
+    memcpy(tmStateRef->transportDomain,
+           netsnmpDTLSUDPDomain, sizeof(netsnmpDTLSUDPDomain[0]) *
+           netsnmpDTLSUDPDomain_len);
+    tmStateRef->transportDomainLen = netsnmpDTLSUDPDomain_len;
+
     addr_pair = &tmStateRef->addresses;
     tmStateRef->have_addresses = 1;
     from = (struct sockaddr *) &(addr_pair->remote_addr);

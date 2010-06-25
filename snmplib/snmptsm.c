@@ -428,13 +428,12 @@ tsm_process_in_msg(struct snmp_secmod_incoming_params *parms)
           If the snmpTsmConfigurationUsePrefix object is set to true, then
           use the tmTransportDomain to look up the corresponding prefix.
         */
-        const char *prefix;
+        const char *prefix = NULL;
         /*
           possibilities:
            |--------------------+-------|
            | snmpTLSTCPDomain   | tls:  |
-           | snmpDTLSUDPDomain  | dudp: |
-           | snmpDTLSSCTPDomain | dsct: |
+           | snmpDTLSUDPDomain  | dtls: |
            | snmpSSHDomain      | ssh:  |
            |--------------------+-------|
         */
@@ -460,19 +459,9 @@ tsm_process_in_msg(struct snmp_secmod_incoming_params *parms)
                                tmStateRef->transportDomain,
                                tmStateRef->transportDomainLen) == 0) {
             
-            prefix = "dudp";
+            prefix = "dtls";
         }
 #endif /* NETSNMP_TRANSPORT_DTLSUDP_DOMAIN */
-
-#ifdef NETSNMP_TRANSPORT_DTLSSCTP_DOMAIN
-        if (netsnmp_oid_equals(netsnmpDTLSSCTPDomain,
-                               netsnmpDTLSSCTPDomain_len,
-                               tmStateRef->transportDomain,
-                               tmStateRef->transportDomainLen) == 0) {
-            
-            prefix = "dscp";
-        }
-#endif /* NETSNMP_TRANSPORT_DTLSSCTP_DOMAIN */
 
 #ifdef NETSNMP_TRANSPORT_TLSTCP_DOMAIN
         if (netsnmp_oid_equals(netsnmpTLSTCPDomain,
