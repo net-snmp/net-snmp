@@ -1161,7 +1161,7 @@ netsnmp_dtlsudp_close(netsnmp_transport *t)
            - retries
            - timeout
         */
-        while (i < 10 && cachep->write_cache_len != 0) {
+        while (i < 6 && cachep->write_cache_len != 0) {
 
             /* first see if we can send out what we have */
             _netsnmp_bio_try_and_write_buffered(t, cachep);
@@ -1171,8 +1171,8 @@ netsnmp_dtlsudp_close(netsnmp_transport *t)
                 /* if we've failed that, we probably need to wait for packets */
                 FD_ZERO(&readfs);
                 FD_SET(t->sock, &readfs);
-                tv.tv_sec = 1;
-                tv.tv_usec = 0;
+                tv.tv_sec = 0;
+                tv.tv_usec = 500000;
 
                 rc = select(1, &readfs, NULL, NULL, &tv);
                 if (1 || rc > 0) {
