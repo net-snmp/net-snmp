@@ -448,7 +448,7 @@ sslctx_client_setup(SSL_METHOD *method, _netsnmpTLSBaseData *tlsbase) {
 }
 
 SSL_CTX *
-sslctx_server_setup(const SSL_METHOD *method) {
+sslctx_server_setup(SSL_METHOD *method) {
     netsnmp_cert *id_cert;
 
     /***********************************************************************
@@ -568,6 +568,8 @@ static int have_done_bootstrap = 0;
 
 static int
 tls_bootstrap(int majorid, int minorid, void *serverarg, void *clientarg) {
+    char indexname[] = "_netsnmp_verify_info";
+
     /* don't do this more than once */
     if (have_done_bootstrap)
         return 0;
@@ -576,7 +578,7 @@ tls_bootstrap(int majorid, int minorid, void *serverarg, void *clientarg) {
     netsnmp_certs_load();
 
     openssl_local_index =
-        SSL_get_ex_new_index(0, "_netsnmp_verify_info", NULL, NULL, NULL);
+        SSL_get_ex_new_index(0, indexname, NULL, NULL, NULL);
 
     return 0;
 }

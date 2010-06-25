@@ -1193,7 +1193,7 @@ netsnmp_dtlsudp_close(netsnmp_transport *t)
             sending a close_notify TLS Alert to inform the other side that
             session cleanup may be performed.
     */
-    if (NULL != tlsbase)
+    if (NULL != tlsbase && NULL != tlsbase->ssl)
         SSL_shutdown(tlsbase->ssl);
     return netsnmp_socketbase_close(t);
 }

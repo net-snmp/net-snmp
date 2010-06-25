@@ -879,7 +879,7 @@ netsnmp_tlstcp_open(netsnmp_transport *t)
  */
 
 netsnmp_transport *
-netsnmp_tlstcp_transport(char *addr_string, int isserver)
+netsnmp_tlstcp_transport(const char *addr_string, int isserver)
 {
     netsnmp_transport *t = NULL;
     _netsnmpTLSBaseData *tlsdata;
@@ -933,8 +933,6 @@ netsnmp_transport *
 netsnmp_tlstcp_create_tstring(const char *str, int local,
                                const char *default_target)
 {
-    struct sockaddr_in addr;
-
     return netsnmp_tlstcp_transport(str, local);
 }
 
@@ -942,7 +940,6 @@ netsnmp_tlstcp_create_tstring(const char *str, int local,
 netsnmp_transport *
 netsnmp_tlstcp_create_ostring(const u_char * o, size_t o_len, int local)
 {
-    struct sockaddr_in addr;
     char buf[SPRINT_MAX_LEN];
 
     /* ensure buf is big enough */
