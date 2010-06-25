@@ -41,6 +41,7 @@ extern          "C" {
        BIO                       *accept_bio;
        BIO                       *accepted_bio;
        char                      *securityName;
+       char                      *addr_string;
        struct sockaddr_in         addr;
        char                      *our_identity;
        char                      *their_identity;
