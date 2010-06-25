@@ -54,16 +54,12 @@ CRLARGS="-config $TLSDIR/.openssl.conf -keyfile $TLSDIR/private/ca-net-snmp.org.
 touch $TLSDIR/.index
 echo "01" > $TLSDIR/.crlnumber
 CAPTURE "$CRLCACMD -gencrl $CRLARGS -out $CRLFILE"
-ls -l $CRLFILE
-md5sum $CRLFILE
 
 #
 # put the second client into the CRL and it shouldn't work
 #
 CAPTURE "$CRLCACMD -revoke $TLSDIR/certs/snmpapp2.crt $CRLARGS -out $CRLFILE"
 CAPTURE "$CRLCACMD -gencrl $CRLARGS -out $CRLFILE"
-ls -l $CRLFILE
-md5sum $CRLFILE
 
 
 ######################################################################
@@ -98,6 +94,7 @@ CAPTURE "snmpget -Dssl $FLAGS .1.3.6.1.2.1.1.3.0"
 
 CHECK       "certificate revoked"
 
+# cleanup
 STOPAGENT
 
 FINISHED
