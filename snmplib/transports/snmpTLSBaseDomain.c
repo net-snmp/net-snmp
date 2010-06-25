@@ -23,6 +23,7 @@
 #include <openssl/bio.h>
 #include <openssl/ssl.h>
 #include <openssl/err.h>
+#include <openssl/x509.h>
 
 #include <net-snmp/types.h>
 #include <net-snmp/library/cert_util.h>
@@ -70,7 +71,7 @@ int verify_callback(int ok, X509_STORE_CTX *ctx) {
 
     if (verify_info && ok && depth > 0) {
         /* remember that a parent certificate has been marked as trusted */
-        verify_info->parent_was_ok = 1;
+        verify_info->flags |= VRFY_PARENT_WAS_OK;
     }
 
     /* this ensures for self-signed certificates we have a valid
@@ -96,7 +97,8 @@ int verify_callback(int ok, X509_STORE_CTX *ctx) {
             return 0;
         }
 
-        if (0 == depth && verify_info && verify_info->parent_was_ok) {
+        if (0 == depth && verify_info &&
+            (verify_info->flags & VRFY_PARENT_WAS_OK)) {
             DEBUGMSGTL(("tls_x509:verify", "  a parent was ok, so returning ok for this child certificate\n"));
             return 1; /* we'll check the hostname later at this level */
         }
@@ -337,6 +339,7 @@ _trust_this_cert(SSL_CTX *the_ctx, char *certspec) {
     if (!trustcert)
         LOGANDDIE("failed to find requested certificate to trust");
         
+    /* Add the certificate to the context */
     if (netsnmp_cert_trust_ca(the_ctx, trustcert) != SNMPERR_SUCCESS)
         LOGANDDIE("failed to load trust certificate");
 
@@ -366,6 +369,8 @@ sslctx_client_setup(SSL_METHOD *method, _netsnmpTLSBaseData *tlsbase) {
     netsnmp_cert *id_cert, *peer_cert;
     SSL_CTX      *the_ctx;
     X509_STORE   *cert_store = NULL;
+    char         *crlFile;
+    X509_LOOKUP  *lookup;
 
     /***********************************************************************
      * Set up the client context
@@ -412,10 +417,6 @@ sslctx_client_setup(SSL_METHOD *method, _netsnmpTLSBaseData *tlsbase) {
     if (!SSL_CTX_check_private_key(the_ctx))
         LOGANDDIE("public and private keys incompatible");
 
-    cert_store = SSL_CTX_get_cert_store(the_ctx);
-    if (!cert_store)
-        LOGANDDIE("failed to find certificate store");
-
     if (tlsbase->their_identity)
         peer_cert = netsnmp_cert_find(NS_CERT_REMOTE_PEER,
                                       NS_CERTKEY_MULTIPLE,
@@ -440,6 +441,24 @@ sslctx_client_setup(SSL_METHOD *method, _netsnmpTLSBaseData *tlsbase) {
 
     _load_trusted_certs(the_ctx);
 
+    /* add in the CRLs if available */
+
+    crlFile = netsnmp_ds_get_string(NETSNMP_DS_LIBRARY_ID,
+                                    NETSNMP_DS_LIB_X509_CRL_FILE);
+    if (NULL != crlFile) {
+        cert_store = SSL_CTX_get_cert_store(the_ctx);
+        DEBUGMSGTL(("sslctx_client", "loading CRL: %s\n", crlFile));
+        if (!cert_store)
+            LOGANDDIE("failed to find certificate store");
+        if (!(lookup = X509_STORE_add_lookup(cert_store, X509_LOOKUP_file())))
+            LOGANDDIE("failed to create a lookup function for the CRL file");
+        if (X509_load_crl_file(lookup, crlFile, X509_FILETYPE_PEM) != 1)
+            LOGANDDIE("failed to load the CRL file");
+        /* tell openssl to check CRLs */
+        X509_STORE_set_flags(cert_store,
+                             X509_V_FLAG_CRL_CHECK | X509_V_FLAG_CRL_CHECK_ALL);
+    }
+
     if (!SSL_CTX_set_default_verify_paths(the_ctx)) {
         LOGANDDIE ("");
     }
@@ -450,6 +469,9 @@ sslctx_client_setup(SSL_METHOD *method, _netsnmpTLSBaseData *tlsbase) {
 SSL_CTX *
 sslctx_server_setup(SSL_METHOD *method) {
     netsnmp_cert *id_cert;
+    X509_STORE   *cert_store = NULL;
+    char         *crlFile;
+    X509_LOOKUP  *lookup;
 
     /***********************************************************************
      * Set up the server context
@@ -491,6 +513,24 @@ sslctx_server_setup(SSL_METHOD *method) {
                        &verify_callback);
 
     _load_trusted_certs(the_ctx);
+
+    /* add in the CRLs if available */
+
+    crlFile = netsnmp_ds_get_string(NETSNMP_DS_LIBRARY_ID,
+                                    NETSNMP_DS_LIB_X509_CRL_FILE);
+    if (NULL != crlFile) {
+        cert_store = SSL_CTX_get_cert_store(the_ctx);
+        DEBUGMSGTL(("sslctx_client", "loading CRL: %s\n", crlFile));
+        if (!cert_store)
+            LOGANDDIE("failed to find certificate store");
+        if (!(lookup = X509_STORE_add_lookup(cert_store, X509_LOOKUP_file())))
+            LOGANDDIE("failed to create a lookup function for the CRL file");
+        if (X509_load_crl_file(lookup, crlFile, X509_FILETYPE_PEM) != 1)
+            LOGANDDIE("failed to load the CRL file");
+        /* tell openssl to check CRLs */
+        X509_STORE_set_flags(cert_store,
+                             X509_V_FLAG_CRL_CHECK | X509_V_FLAG_CRL_CHECK_ALL);
+    }
 
     return the_ctx;
 }
@@ -598,6 +638,11 @@ netsnmp_tlsbase_ctor(void) {
     netsnmp_ds_register_config(ASN_OCTET_STR, "snmp", "extraX509SubDir",
                                NETSNMP_DS_LIBRARY_ID,
                                NETSNMP_DS_LIB_CERT_EXTRA_SUBDIR);
+
+    /* Do we have a CRL list? */
+    netsnmp_ds_register_config(ASN_OCTET_STR, "snmp", "x509CRLFile",
+                               NETSNMP_DS_LIBRARY_ID,
+                               NETSNMP_DS_LIB_X509_CRL_FILE);
 
     /*
      * for the client

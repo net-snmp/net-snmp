@@ -162,6 +162,7 @@ extern          "C" {
 #define NETSNMP_DS_LIB_SSHTOSNMP_SOCKET  29
 #define NETSNMP_DS_LIB_CERT_EXTRA_SUBDIR 30
 #define NETSNMP_DS_LIB_HOSTNAME          31
+#define NETSNMP_DS_LIB_X509_CRL_FILE     32
 
     /*
      * end storage definitions 
