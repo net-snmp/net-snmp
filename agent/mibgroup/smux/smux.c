@@ -345,7 +345,8 @@ var_smux_write(int action,
     u_char          buf[SMUXMAXPKTSIZE], *ptr, sout[3], type;
     int             reterr;
     size_t          var_len, datalen, name_length, packet_len;
-    ssize_t         len, tmp_len;
+    size_t          len;
+    ssize_t         tmp_len;
     long            reqid, errsts, erridx;
     u_char          var_type, *dataptr;
 
@@ -565,9 +566,10 @@ smux_accept(int sd)
     u_char          data[SMUXMAXPKTSIZE], *ptr, type;
     struct sockaddr_in in_socket;
     struct timeval  tv;
-    int             fail, fd, alen;
+    int             fail, fd;
+    socklen_t       alen;
     int             length;
-    ssize_t         len;
+    size_t          len;
 
     alen = sizeof(struct sockaddr_in);
     /*
@@ -821,7 +823,7 @@ smux_open_process(int fd, u_char * ptr, size_t * len, int *fail)
         return ((ptr += *len));
     }
     DEBUGMSGTL(("smux",
-                "[smux_open_process] version %d, len %" NETSNMP_PRIz
+                "[smux_open_process] version %ld, len %" NETSNMP_PRIz
                 "u, type %d\n", version, *len, (int) type));
 
     oid_name_len = MAX_OID_LEN;
@@ -975,7 +977,7 @@ smux_close_process(int fd, u_char * ptr, size_t * len)
     }
 
     DEBUGMSGTL(("smux",
-                "[smux_close_process] close from peer on fd %d reason %d\n",
+                "[smux_close_process] close from peer on fd %d reason %ld\n",
                 fd, down));
     smux_peer_cleanup(fd);
 
@@ -1007,7 +1009,7 @@ smux_rreq_process(int sd, u_char * ptr, size_t * len)
         smux_send_rrsp(sd, -1);
         return NULL;
     }
-    DEBUGMSGTL(("smux", "[smux_rreq_process] priority %d\n", priority));
+    DEBUGMSGTL(("smux", "[smux_rreq_process] priority %ld\n", priority));
 
     if ((ptr = asn_parse_int(ptr, len, &type, &operation,
                              sizeof(operation))) == NULL) {
@@ -1016,7 +1018,7 @@ smux_rreq_process(int sd, u_char * ptr, size_t * len)
         smux_send_rrsp(sd, -1);
         return NULL;
     }
-    DEBUGMSGTL(("smux", "[smux_rreq_process] operation %d\n", operation));
+    DEBUGMSGTL(("smux", "[smux_rreq_process] operation %ld\n", operation));
 
     if (operation == SMUX_REGOP_DELETE) {
         /*
@@ -1351,7 +1353,7 @@ smux_snmp_process(int exact,
                   size_t * return_len, u_char * return_type, int sd)
 {
     u_char          packet[SMUXMAXPKTSIZE], *ptr, result[SMUXMAXPKTSIZE];
-    int             length = SMUXMAXPKTSIZE;
+    size_t          length = SMUXMAXPKTSIZE;
     int             tmp_length;
     u_char          type;
     size_t          packet_len;
@@ -1380,7 +1382,7 @@ smux_snmp_process(int exact,
     }
 
     DEBUGMSGTL(("smux",
-                "[smux_snmp_process] Sent %d request to peer; %d bytes\n",
+                "[smux_snmp_process] Sent %d request to peer; %" NETSNMP_PRIz "d bytes\n",
                 (int) type, length));
 
     while (1) {
@@ -1403,7 +1405,7 @@ smux_snmp_process(int exact,
             }
         }
 
-        DEBUGMSGTL(("smux", "[smux_snmp_process] Peeked at %d bytes\n",
+        DEBUGMSGTL(("smux", "[smux_snmp_process] Peeked at %" NETSNMP_PRIz "d bytes\n",
                     length));
         DEBUGDUMPSETUP("smux_snmp_process", result, length);
 
@@ -1438,7 +1440,7 @@ smux_snmp_process(int exact,
            return NULL;
         }
 
-        DEBUGMSGTL(("smux", "[smux_snmp_process] Received %d bytes\n",
+        DEBUGMSGTL(("smux", "[smux_snmp_process] Received %" NETSNMP_PRIz "d bytes\n",
                     length));
 
         if (result[0] == SMUX_TRAP) {
@@ -1511,7 +1513,7 @@ smux_parse(u_char * rsp,
      * XXX How to send something intelligent back in case of an error 
      */
     DEBUGMSGTL(("smux",
-                "[smux_parse] Message type %d, reqid %d, errstat %d, \n\terrindex %d\n",
+                "[smux_parse] Message type %d, reqid %ld, errstat %ld, \n\terrindex %ld\n",
                 (int) type, reqid, errstat, errindex));
     if (ptr == NULL || errstat != SNMP_ERR_NOERROR)
         return NULL;
