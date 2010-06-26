@@ -902,7 +902,7 @@ sub find_cfgfile {
       return $file; # file is not found, complain later
     }
   }
-  
+
   my @path = cfg_path();
   unshift(@path, $dir) if defined $dir;
   while (@path) {
@@ -945,6 +945,8 @@ sub find_cfgdir {
       next if $dir eq '/var/lib/snmp';
       return $dir if -d $dir and -w $dir;
     }
+    my $home = $ENV{HOME} || die "Unable to determine home directory: set \$HOME\n";
+    return ($> ? "$home/.snmp" : "/usr/share/snmp"); # XXX hack - no dirs existed or were writable
   }
   # this should never happen
   return undef;
@@ -986,8 +988,9 @@ sub find_certs {
   NetSNMP::Cert::dprint("find_certs(4):${dir}:$targ:$cwd\n", $opts);
 
   my @certs;
-  foreach (<$dir/$targ*>) {
-    NetSNMP::Cert::dprint("checkin($dir:$targ): $_\n", $opts);
+  my $glob = "$dir/$targ";
+  foreach (<$dir/*>) {
+    NetSNMP::Cert::dprint("checking($dir:$targ): $_\n", $opts);
     next unless /^$dir\/$targ(.*$suffix_regex)?$/;
     # return exact match if not wantarray()
     return $_ if (not wantarray()) and /^$dir\/$targ($suffix_regex)?$/;
@@ -1861,13 +1864,14 @@ sub userInputTag {
   my $ret;
   my $prompt;
 
-  print  "Application Tag:\n\t used to name the certificate for reference from Net-SNMP config\n";
-  print  "\t\tif empty a name will be generated, <tab> for typical options or enter new name\n";
+  print "Application Tag:\n\tused to name the certificate and associate with application\n";
+  print "\tif 'none', a name will be generated from other parameters\n";
+  print "\tenter <tab><tab> for typical options, or enter new name\n";
   $prompt = "Enter Application Tag";
   $ret = $config->inherit('tag') || 'none';
   $prompt .= (defined $ret ? " [$ret]: " : ": ");
   $ret = NetSNMP::Term::Complete($prompt, $ret,
-				 "Application Tag with which to assocaiate the certificate",
+				 "Application Tag to assocaiate with certificate",
 				 not $NetSNMP::Cert::MATCH, @snmp_apps);
   $opts->{'tag'} = $ret if defined $ret and $ret ne 'none';
 }
@@ -1995,7 +1999,7 @@ sub genCa {
     # set command env
     $env = $app->opensslEnv($cn, $days, ".ca/$ca_base");
 
-    $cmd = "$env openssl ca -extensions v3_ca_sign_ca -days $days -cert $ca -keyfile '$NetSNMP::Cert::PRIVDIR/$ca_base.key' -in '$outCsr' -batch -config $NetSNMP::Cert::SSLCFG -out '$outCrt'";
+    $cmd = "$env openssl ca -extensions v3_ca_sign_ca -days $days -cert '$ca' -keyfile '$NetSNMP::Cert::PRIVDIR/$ca_base.key' -in '$outCsr' -batch -config $NetSNMP::Cert::SSLCFG -out '$outCrt'";
 
     NetSNMP::Cert::dprint("genCa (signcsr): $cmd\n", $opts);
     NetSNMP::Cert::usystem("$cmd $opts->{out} $opts->{err}", $opts);
@@ -2147,7 +2151,7 @@ sub signCsr {
   NetSNMP::Cert::check_output_file($opts, $outCrt, $config->inherit('interactive'));
 
   # XXX - handle keyfile search??
-  my $cmd = "$env openssl ca -batch -days $days -extensions v3_ca_sign -cert $ca -keyfile '$NetSNMP::Cert::PRIVDIR/$ca_base.key' -in '$csr' -out '$outCrt' -config $NetSNMP::Cert::SSLCFG";
+  my $cmd = "$env openssl ca -batch -days $days -extensions v3_ca_sign -cert '$ca' -keyfile '$NetSNMP::Cert::PRIVDIR/$ca_base.key' -in '$csr' -out '$outCrt' -config $NetSNMP::Cert::SSLCFG";
 
   # $cmd .= ($isCa ? " -extensions v3_ca_sign_ca" : " -extensions v3_ca_sign");
 
