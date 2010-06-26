@@ -382,7 +382,7 @@
 
 /*  This is defined if support for the TLS transport domain is
     available.   */
-#undef NETSNMP_TRANSPORT_TLS_DOMAIN
+#undef NETSNMP_TRANSPORT_TLSBASE_DOMAIN
 
 /*  This is defined if support for the Alias transport domain is
     available.   */
@@ -396,7 +396,7 @@
     available.   */
 #undef NETSNMP_TRANSPORT_DTLSUDP_DOMAIN
 
-/*  This is defined if support for the DTLS/UDP transport domain is
+/*  This is defined if support for the TLS/TCP transport domain is
     available.   */
 #undef NETSNMP_TRANSPORT_TLSTCP_DOMAIN
 
