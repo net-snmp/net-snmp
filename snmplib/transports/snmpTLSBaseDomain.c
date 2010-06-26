@@ -18,12 +18,14 @@
 #include <netdb.h>
 #endif
 #include <errno.h>
+#include <ctype.h>
 
 /* OpenSSL Includes */
 #include <openssl/bio.h>
 #include <openssl/ssl.h>
 #include <openssl/err.h>
 #include <openssl/x509.h>
+#include <openssl/x509v3.h>
 
 #include <net-snmp/types.h>
 #include <net-snmp/library/cert_util.h>
@@ -177,7 +179,7 @@ int
 netsnmp_tlsbase_verify_server_cert(SSL *ssl, _netsnmpTLSBaseData *tlsdata) {
     /* XXX */
     X509            *remote_cert;
-    char            *common_name;
+    char            *check_name;
     int              ret;
     
     netsnmp_assert_or_return(ssl != NULL, SNMPERR_GENERR);
@@ -200,19 +202,63 @@ netsnmp_tlsbase_verify_server_cert(SSL *ssl, _netsnmpTLSBaseData *tlsdata) {
         return SNMPERR_GENERR;
 
     case NO_FINGERPNINT_AVAILABLE:
-        if (tlsdata->their_hostname) {
+        if (tlsdata->their_hostname && tlsdata->their_hostname[0] != '\0') {
+            GENERAL_NAMES      *onames;
+            const GENERAL_NAME *oname = NULL;
+            int                 i, j;
+            int                 count;
+            char                buf[SPRINT_MAX_LEN];
+
             /* if the hostname we were expecting to talk to matches
                the cert, then we can accept this connection. */
 
+            /* check against the DNS subjectAltName */
+            onames = (GENERAL_NAMES *)X509_get_ext_d2i(remote_cert,
+                                                       NID_subject_alt_name,
+                                                       NULL, NULL );
+            if (NULL != onames) {
+                count = sk_GENERAL_NAME_num(onames);
+
+                for (i=0 ; i <count; ++i)  {
+                    oname = sk_GENERAL_NAME_value(onames, i);
+                    if (GEN_DNS == oname->type) {
+
+                        /* get the value */
+                        ASN1_STRING_to_UTF8((unsigned char**)&check_name,
+                                            oname->d.ia5);
+
+                        /* convert to lowercase for comparisons */
+                        for (j = 0 ;
+                             *check_name && count < sizeof(buf)-1;
+                             ++check_name, ++j ) {
+                            if (isascii(*check_name))
+                                buf[j] = tolower(*check_name);
+                        }
+                        check_name = buf;
+                        
+                        DEBUGMSGTL(("tls_x509:verify", "checking subjectAltname of dns:%s\n", check_name));
+                        if (tlsdata->their_hostname[0] != '\0' &&
+                            strcmp(tlsdata->their_hostname, check_name) == 0) {
+
+                            DEBUGMSGTL(("tls_x509:verify", "Successful match on a subjectAltname of dns:%s\n", check_name));
+                            return SNMPERR_SUCCESS;
+                        }
+                    }
+                }
+            }
+
             /* check the common name for a match */
-            common_name =
+            check_name =
                 netsnmp_openssl_cert_get_commonName(remote_cert, NULL, NULL);
 
-            if (tlsdata->their_hostname[0] != '\0' &&
-                strcmp(tlsdata->their_hostname, common_name) == 0) {
-                DEBUGMSGTL(("tls_x509:verify", "Successful match on a common name of %s\n", common_name));
+            if (strcmp(tlsdata->their_hostname, check_name) == 0) {
+                DEBUGMSGTL(("tls_x509:verify", "Successful match on a common name of %s\n", check_name));
                 return SNMPERR_SUCCESS;
             }
+
+            snmp_log(LOG_ERR, "No matching names in the certificate to match the expected %s\n", tlsdata->their_hostname);
+            return SNMPERR_GENERR;
+
         }
         /* XXX: check for hostname match instead */
         snmp_log(LOG_ERR, "Can not verify a remote server identity without configuration\n");

@@ -807,8 +807,9 @@ netsnmp_dtlsudp_recv(netsnmp_transport *t, void *buf, int size,
 		    snmp_increment_statistic(STAT_TLSTM_SNMPTLSTMSESSIONOPENERRORS);
                     return -1;
                 }
-                DEBUGMSGTL(("dtlsudp", "Verified the server's certificate\n"));
             }
+            tlsdata->flags |= NETSNMP_TLSBASE_CERT_FP_VERIFIED;
+            DEBUGMSGTL(("dtlsudp", "Verified the server's certificate\n"));
         } else {
             /* verify that the client's certificate is the correct one */
         
@@ -828,8 +829,9 @@ netsnmp_dtlsudp_recv(netsnmp_transport *t, void *buf, int size,
                     snmp_increment_statistic(STAT_TLSTM_SNMPTLSTMSESSIONINVALIDCLIENTCERTIFICATES);
                     return -1;
                 }
-                DEBUGMSGTL(("dtlsudp", "Verified the client's certificate\n"));
             }
+            tlsdata->flags |= NETSNMP_TLSBASE_CERT_FP_VERIFIED;
+            DEBUGMSGTL(("dtlsudp", "Verified the client's certificate\n"));
         }
     }
 
