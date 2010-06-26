@@ -6,7 +6,7 @@ export SNMP_SNMPD_PORT
 export SNMP_TEST_DEST
 
 export NET_SNMP_CRT_CFGTOOL="${builddir}/net-snmp-config"
-NSCERT="perl $SNMP_BASEDIR/../../../local/net-snmp-cert"
+NSCERT="perl $SNMP_BASEDIR/../../../local/net-snmp-cert -I"
 NSCERTARGS="-C $SNMP_TMPDIR"
 
 DOSETTEST() {
