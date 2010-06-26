@@ -1127,7 +1127,7 @@ netsnmp_dtlsudp_close(netsnmp_transport *t)
     /* XXX: issue a proper dtls closure notification(s) */
 
     bio_cache *cachep = NULL;
-    _netsnmpTLSBaseData *tlsbase;
+    _netsnmpTLSBaseData *tlsbase = NULL;
 
     DEBUGTRACETOK("dtlsudp");
 

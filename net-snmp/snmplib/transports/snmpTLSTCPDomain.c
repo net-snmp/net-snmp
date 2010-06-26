@@ -123,7 +123,7 @@ netsnmp_tlstcp_recv(netsnmp_transport *t, void *buf, int size,
                  "tlstcp received an invalid invocation with missing data\n");
         DEBUGMSGTL(("tlstcp", "recvfrom fd %d err %d (\"%s\")\n",
                     t->sock, errno, strerror(errno)));
-        DEBUGMSGTL(("tlstcp", "  tdata = %x\n", (uintptr_t)t->data));
+        DEBUGMSGTL(("tlstcp", "  tdata = %p\n", t->data));
         return -1;
     }
         
