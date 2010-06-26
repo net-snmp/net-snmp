@@ -17,11 +17,11 @@ my $test = new NetSNMPTest(agentaddress => $agentaddress);
 
 $test->require_feature($feature);
 
-my $netsnmpcert = "$ENV{'srcdir'}/local/net-snmp-cert -C $test->{'dir'}";
+my $netsnmpcert = "$ENV{'srcdir'}/local/net-snmp-cert -I -C $test->{'dir'}";
 
-system("$netsnmpcert gencert -t snmpd > /dev/null 2>&1");
-system("$netsnmpcert gencert -t snmpapp --cn snmpapp > /dev/null 2>&1");
-system("$netsnmpcert gencert -t perl --cn perl > /dev/null 2>&1");
+system("$netsnmpcert gencert -I -t snmpd > /dev/null 2>&1");
+system("$netsnmpcert gencert -I -t snmpapp --cn snmpapp > /dev/null 2>&1");
+system("$netsnmpcert gencert -I -t perl --cn perl > /dev/null 2>&1");
 
 my $fp = `$netsnmpcert showcerts --fingerprint --brief perl`;
 chomp($fp);
