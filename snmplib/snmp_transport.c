@@ -27,9 +27,11 @@
 #include <net-snmp/library/default_store.h>
 
 #include <net-snmp/library/snmpUDPDomain.h>
-#ifdef NETSNMP_TRANSPORT_TLS_DOMAIN
+#ifdef NETSNMP_TRANSPORT_TLSBASE_DOMAIN
 #include <net-snmp/library/snmpTLSBaseDomain.h>
-#include <net-snmp/library/snmpTLSDomain.h>
+#endif
+#ifdef NETSNMP_TRANSPORT_TLSTCP_DOMAIN
+#include <net-snmp/library/snmpTLSTCPDomain.h>
 #endif
 #ifdef NETSNMP_TRANSPORT_STD_DOMAIN
 #include <net-snmp/library/snmpSTDDomain.h>
