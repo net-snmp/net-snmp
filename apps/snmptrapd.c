@@ -1326,7 +1326,9 @@ void
 trapd_update_config(void)
 {
     free_config();
+#ifdef USING_MIBII_VACM_CONF_MODULE
     vacm_standard_views(0,0,NULL,NULL);
+#endif
     read_configs();
 }
 
