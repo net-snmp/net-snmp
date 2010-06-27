@@ -644,76 +644,6 @@ sub is_url {
   return $url =~ /^(?#Protocol)(?:(?:ht|f)tp(?:s?)\:\/\/|~\/|\/)?(?#Username:Password)(?:\w+:\w+@)?(?#Subdomains)(?:(?:[-\w]+\.)+(?#TopLevel Domains)(?:com|org|net|gov|mil|biz|info|mobi|name|aero|jobs|museum|travel|[a-z]{2}))(?#Port)(?::[\d]{1,5})?(?#Directories)(?:(?:(?:\/(?:[-\w~!$+|.,=]|%[a-f\d]{2})+)+|\/)+|\?|#)?(?#Query)(?:(?:\?(?:[-\w~!$+|.,*:]|%[a-f\d{2}])+=?(?:[-\w~!$+|.,*:=]|%[a-f\d]{2})*)(?:&(?:[-\w~!$+|.,*:]|%[a-f\d{2}])+=?(?:[-\w~!$+|.,*:=]|%[a-f\d]{2})*)*)*(?#Anchor)(?:#(?:[-\w~!$+|.,*:=]|%[a-f\d]{2})*)?$/;
 }
 
-# function gratefully borrowed from  Roderick Schertler's String::ShellQuote
-sub _shell_quote_backend {
-  my @in = @_;
-  my @err = ();
-
-  return \@err, '' unless @in;
-
-  my $ret = '';
-  my $saw_non_equal = 0;
-  foreach (@in) {
-    if (!defined $_ or $_ eq '') {
-      $_ = "''";
-      next;
-    }
-
-    if (s/\x00//g) {
-      push @err, "No way to quote string containing null (\\000) bytes";
-    }
-
-    my $escape = 0;
-
-    # = needs quoting when it's the first element (or part of a
-    # series of such elements), as in command position it's a
-    # program-local environment setting
-
-    if (/=/) {
-      if (!$saw_non_equal) {
-	$escape = 1;
-      }
-    } else {
-      $saw_non_equal = 1;
-    }
-
-    if (m|[^\w!%+,\-./:=@^]|) {
-      $escape = 1;
-    }
-
-    if ($escape || (!$saw_non_equal && /=/)) {
-      # ' -> '\''
-      s/'/'\\''/g;
-
-      # make multiple ' in a row look simpler
-      # '\'''\'''\'' -> '"'''"'
-      s|((?:'\\''){2,})|q{'"} . (q{'} x (length($1) / 4)) . q{"'}|ge;
-
-      $_ = "'$_'";
-      s/^''//;
-      s/''$//;
-    }
-  } continue {
-    $ret .= "$_ ";
-  }
-
-  chop $ret;
-  return \@err, $ret;
-}
-
-sub shell_quote {
-  my ($rerr, $s) = _shell_quote_backend @_;
-
-  if (@$rerr) {
-    my %seen;
-    @$rerr = grep { !$seen{$_}++ } @$rerr;
-    my $s = join '', map { "shell_quote(): $_\n" } @$rerr;
-    chomp $s;
-    croak $s;
-  }
-  return $s;
-}
-
 sub in_set {
   my $elem = shift;
   my $set = shift;
@@ -730,6 +660,14 @@ sub in_arr {
     return 1 if $e eq $elem;
   }
   return 0;
+}
+
+sub map_bool {
+  my $val = shift;
+
+  return 1 if $val =~ /^true$/i;
+  return 0 if $val =~ /^false$/i;
+  return $val;
 }
 
 sub version {
@@ -2294,7 +2232,7 @@ sub parse {
       if ( defined $config->{$key} ) {
         die "error - duplicate symbol $key";
       } else {
-        $config->{$key} = (defined $val ? $val : 1 );
+        $config->{$key} = (defined $val ? NetSNMP::Cert::map_bool($val) : 1 );
       }
     } elsif (/^\s*env\s*(\w+=\S+)\s*$/) {
       # Found an environment variable.
@@ -2368,7 +2306,7 @@ sub parse {
       if ( defined $identity->{$key} ) {
         die "error - duplicate symbol $key";
       } else {
-        $identity->{$key} = $val;
+        $identity->{$key} = (defined $val ? NetSNMP::Cert::map_bool($val) : 1 );
       }
     } elsif (/\s*\}\s*\;/) {
       # End of definition.
