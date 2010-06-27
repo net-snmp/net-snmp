@@ -32,8 +32,10 @@ init_netsnmp_trapd_auth(void)
                                            netsnmp_trapd_auth);
     traph->authtypes = TRAP_AUTH_NONE;
 
+#ifdef USING_MIBII_VACM_CONF_MODULE
     /* register our configuration tokens for VACM configs */
     init_vacm_config_tokens();
+#endif
 
     /* register a config token for turning off the authorization entirely */
     netsnmp_ds_register_config(ASN_BOOLEAN, "snmptrapd", "disableAuthorization",
@@ -105,6 +107,7 @@ netsnmp_trapd_auth(netsnmp_pdu           *pdu,
         return NETSNMPTRAPD_HANDLER_FINISH;
     }
 
+#ifdef USING_MIBII_VACM_CONF_MODULE
     /* check the pdu against each typo of VACM access we may want to
        check up on later.  We cache the results for future lookup on
        each call to netsnmp_trapd_check_auth */
@@ -121,6 +124,7 @@ netsnmp_trapd_auth(netsnmp_pdu           *pdu,
         }
     }
     DEBUGMSGTL(("snmptrapd:auth", "Final bitmask auth: %x\n", ret));
+#endif
 
     if (ret) {
         /* we have policy to at least do "something".  Remember and continue. */
