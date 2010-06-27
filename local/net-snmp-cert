@@ -1793,7 +1793,10 @@ sub userInputDN {
   } while (defined $ret and $ret ne 'done');
 }
 
-our @snmp_apps = ('snmp', 'snmpapp', 'snmpd', 'snmptrapd');
+our @snmp_apps = (['snmp', 'Generic Certificate'],
+		  ['snmpapp','Client Certificate'],
+		  ['snmpd','Agent Certificate'],
+		  ['snmptrapd','Trap-agent Certificate']);
 
 sub userInputTag {
   my $app = shift;
@@ -1810,7 +1813,7 @@ sub userInputTag {
   $prompt .= (defined $ret ? " [$ret]: " : ": ");
   $ret = NetSNMP::Term::Complete($prompt, $ret,
 				 "Application Tag to assocaiate with certificate",
-				 not $NetSNMP::Cert::MATCH, @snmp_apps);
+				 (not $NetSNMP::Cert::MATCH), \@snmp_apps);
   $opts->{'tag'} = $ret if defined $ret and $ret ne 'none';
 }
 
