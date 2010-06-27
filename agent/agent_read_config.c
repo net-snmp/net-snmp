@@ -282,7 +282,9 @@ update_config(void)
     snmp_call_callbacks(SNMP_CALLBACK_APPLICATION,
                         SNMPD_CALLBACK_PRE_UPDATE_CONFIG, NULL);
     free_config();
+#ifdef USING_MIBII_VACM_CONF_MODULE
     vacm_standard_views(0,0,NULL,NULL);
+#endif
     read_configs();
 }
 
