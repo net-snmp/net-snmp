@@ -124,7 +124,8 @@ tab(+);
 lb lb lb
 l  l  l.
 tag + len + load the new module when:
-NULL + 0 + always (the old module is a strict subset of the new)
+NULL + 0 + always (the old module is a strict subset of
+ + + the new)
 name + 0 + for the given tag only
 name + non-0 + for any identifier with this prefix
 .TE
@@ -317,6 +318,6 @@ Default: (none)
 .TP 10
 MIBS
 A colon separated list of MIB modules to load.
-Default: IP-MIB:IF-MIB:TCP-MIB:UDP-MIB:SNMPv2-MIB:RFC1213-MIB:UCD-SNMP-MIB.
+Default: IP-MIB:IF-MIB:TCP-MIB:UDP-MIB:SNMPv2-MIB: RFC1213-MIB:UCD-SNMP-MIB.
 .SH "SEE ALSO"
 .BR snmp_api "(3)"
