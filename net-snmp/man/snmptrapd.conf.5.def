@@ -184,7 +184,7 @@ Typically, the OID token will be the name (or numeric OID) of a
 NOTIFICATION-TYPE object, and the specified program will be invoked for
 notifications that match this OID exactly.  However this token also
 supports a simple form of wildcard suffixing.  By appending the character
-'*' to the OID token, the corresponding program will be invoked for any
+\'*' to the OID token, the corresponding program will be invoked for any
 notification based within subtree rooted at the specified OID.
 For example, an OID token of \fC.1.3.6.1.4.1*\fP would match any enterprise
 specific notification (including the specified OID itself).

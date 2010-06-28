@@ -153,7 +153,8 @@ tab(+);
 lb lb lb
 l  l  l.
 tag + len + load the new module when:
-NULL + 0 + always (the old module is a strict subset of the new)
+NULL + 0 + always (the old module is a strict subset of
+ + + the new)
 name + 0 + for the given tag only
 name + non-0 + for any identifier with this prefix
 .TE
@@ -259,7 +260,7 @@ A colon separated list of MIB modules to load.
 .br
 The default list of modules will depend on how the Net-SNMP software
 was originally compiled, but is typically:
-IP-MIB:IF-MIB:TCP-MIB:UDP-MIB:SNMPv2-MIB:RFC1213-MIB:UCD-SNMP-MIB:HOST-RESOURCES-MIB
+IP-MIB:IF-MIB:TCP-MIB:UDP-MIB:SNMPv2-MIB:RFC1213-MIB: UCD-SNMP-MIB:HOST-RESOURCES-MIB
 .IP
 If the value of the
 .B MIBS
