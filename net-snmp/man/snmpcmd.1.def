@@ -562,7 +562,7 @@ Do not print the UNITS suffix at the end of the value.
 Display the varbind value only, not the OID:
 .RS
 .nf
-\fC    $ snmpget -c public -v 1 \fB-Oe\fP localhost ipForwarding.0
+\fC    $ snmpget -c public -v 1 \fB-Ov\fP localhost ipForwarding.0
     INTEGER: forwarding(1)\fR
 .fi
 .RE
@@ -582,7 +582,7 @@ a traditional array-style index format:
 .nf
 \fC    $ snmpgetnext -c public -v 1 localhost ipv6RouteTable
     IPv6-MIB::ipv6RouteIfIndex.63.254.1.0.255.0.0.0.0.0.0.0.0.0.0.0.64.1 = INTEGER: 2
-    $ snmpgetnext -c public -v 1 \fB-OE\fP localhost ipv6RouteTable
+    $ snmpgetnext -c public -v 1 \fB-OX\fP localhost ipv6RouteTable
     IPv6-MIB::ipv6RouteIfIndex[3ffe:100:ff00:0:0:0:0:0][64][1] = INTEGER: 2
 .fi
 .RE
