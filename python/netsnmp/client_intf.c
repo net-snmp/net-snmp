@@ -1355,6 +1355,96 @@ netsnmp_create_session_v3(PyObject *self, PyObject *args)
 }
 
 static PyObject *
+netsnmp_create_session_tunneled(PyObject *self, PyObject *args)
+{
+  int version;
+  char *peer;
+  int  lport;
+  int  retries;
+  int  timeout;
+  char *  sec_name;
+  int     sec_level;
+  char *  sec_eng_id;
+  char *  context_eng_id;
+  char *  context;
+  char *  our_identity;
+  char *  their_identity;
+  char *  their_hostname;
+  char *  trust_cert;
+  SnmpSession session = {0};
+  SnmpSession *ss = NULL;
+  int verbose = py_netsnmp_verbose();
+
+  if (!PyArg_ParseTuple(args, "isiiisissssss", &version,
+			&peer, &lport, &retries, &timeout,
+			&sec_name, &sec_level,
+			&context_eng_id, &context, 
+			&our_identity, &their_identity, 
+			&their_hostname, &trust_cert))
+    return NULL;
+
+  __libraries_init("python");
+  snmp_sess_init(&session);
+
+  if (version != 3) {
+    session.version = SNMP_VERSION_3;
+    if (verbose)
+        printf("Using version 3 as it's the only version that supports tunneling\n");
+  }
+
+  session.peername = peer;
+  session.retries = retries; /* 5 */
+  session.timeout = timeout; /* 1000000L */
+  session.contextNameLen = STRLEN(context);
+  session.contextName = context;
+  session.securityNameLen = STRLEN(sec_name);
+  session.securityName = sec_name;
+  session.securityLevel = sec_level;
+  session.securityModel = NETSNMP_TSM_SECURITY_MODEL;
+
+  /* create the transport configuration store */
+  if (!session.transport_configuration) {
+      netsnmp_container_init_list();
+      session.transport_configuration =
+          netsnmp_container_find("transport_configuration:fifo");
+      if (!session.transport_configuration) {
+          fprintf(stderr, "failed to initialize the transport configuration container\n");
+          return NULL;
+      }
+
+      session.transport_configuration->compare =
+          (netsnmp_container_compare*)
+          netsnmp_transport_config_compare;
+  }
+
+  if (our_identity && our_identity[0] != '\0')
+      CONTAINER_INSERT(session.transport_configuration,
+                       netsnmp_transport_create_config("our_identity",
+                                                       our_identity));
+
+  if (their_identity && their_identity[0] != '\0')
+      CONTAINER_INSERT(session.transport_configuration,
+                       netsnmp_transport_create_config("their_identity",
+                                                       their_identity));
+
+  if (their_hostname && their_hostname[0] != '\0')
+      CONTAINER_INSERT(session.transport_configuration,
+                       netsnmp_transport_create_config("their_hostname",
+                                                       their_hostname));
+
+  if (trust_cert && trust_cert[0] != '\0')
+      CONTAINER_INSERT(session.transport_configuration,
+                       netsnmp_transport_create_config("trust_cert",
+                                                       trust_cert));
+  
+  ss = snmp_sess_open(&session);
+
+  if (!ss)
+      return NULL;
+  return Py_BuildValue("i", (int)ss);
+}
+
+static PyObject *
 netsnmp_delete_session(PyObject *self, PyObject *args)
 {
   PyObject *session;
@@ -2539,6 +2629,8 @@ static PyMethodDef ClientMethods[] = {
    "create a netsnmp session."},
   {"session_v3",  netsnmp_create_session_v3, METH_VARARGS,
    "create a netsnmp session."},
+  {"session_tunneled",  netsnmp_create_session_tunneled, METH_VARARGS,
+   "create a tunneled netsnmp session over tls, dtls or ssh."},
   {"delete_session",  netsnmp_delete_session, METH_VARARGS,
    "create a netsnmp session."},
   {"get",  netsnmp_get, METH_VARARGS,

@@ -89,7 +89,6 @@ Operational Description:
    netsnmp.Session(<tag>=<value>, ... )
 
     DestHost    - default 'localhost', hostname or ip addr of SNMP agent
-    Community   - default 'public', SNMP community string (used for both R/W)
     Version     - default '3', [1, 2 (equiv to 2c), 3]
     RemotePort  - default '161', allow remote UDP port to be overridden
     Timeout     - default '500000', micro-seconds before retry
@@ -99,18 +98,6 @@ Operational Description:
                   undef will be returned for all NOSUCH varbinds, when set
                   to '0' this feature is disabled and the entire get request
                   will fail on any NOSUCH error (applies to v1 only)
-    SecName     - default 'initial', security name (v3)
-    SecLevel    - default 'noAuthNoPriv', security level [noAuthNoPriv,
-                  authNoPriv, authPriv] (v3)
-    SecEngineId - default <none>, security engineID, will be probed if not
-                  supplied (v3)
-    ContextEngineId - default <SecEngineId>, context engineID, will be
-                      probed if not supplied (v3)
-    Context     - default '', context name (v3)
-    AuthProto   - default 'MD5', authentication protocol [MD5, SHA] (v3)
-    AuthPass    - default <none>, authentication passphrase
-    PrivProto   - default 'DES', privacy protocol [DES] (v3)
-    PrivPass    - default <none>, privacy passphrase (v3)
     UseLongNames - set to non-zero to have <tags> for 'getnext' methods 
                   generated preferring longer Mib name convention (e.g., 
 		  system.sysDescr vs just sysDescr)
@@ -136,8 +123,40 @@ Operational Description:
     ErrorNum    - read-only, holds the snmp_err or status of last request
     ErrorInd    - read-only, holds the snmp_err_index when appropriate
 
+   SNMPv1/SNMPv2c options:
+    Community   - default 'public', SNMP community string (used for both R/W)
+
+   SNMPv3 Options:
+    SecName     - default 'initial', security name (v3)
+    SecLevel    - default 'noAuthNoPriv', security level [noAuthNoPriv,
+                  authNoPriv, authPriv] (v3)
+    ContextEngineId - default <SecEngineId>, context engineID, will be
+                      probed if not supplied (v3)
+    Context     - default '', context name (v3)
+
+   SNMPv3 over TLS or DTLS options:
+    OurIdentity   - The fingerprint or file name for the local X.509
+                    certificate to use for our identity.  Run
+                    net-snmp-cert to create and manage certificates.
+    TheirIdentity - The fingerprint or file name for the local X.509
+                    certificate to use for their identity.  
+    TrustCert     - A trusted certificate to use for validating
+                    certificates.  Typically this would be a CA
+                    certificate.
+    TheirHostname - Their hostname to expect.  Either "TheirIdentity"
+    		    or a trusted certificate plus a hostname is needed
+    		    to validate the server is the proper server.
+    
+   SNMPv3 with USM security Options:
+    SecEngineId - default <none>, security engineID, will be probed if not
+                  supplied (v3)
+    AuthProto   - default 'MD5', authentication protocol [MD5, SHA] (v3)
+    AuthPass    - default <none>, authentication passphrase
+    PrivProto   - default 'DES', privacy protocol [DES] (v3)
+    PrivPass    - default <none>, privacy passphrase (v3)
+
    private:
-    sess_ptr   - internal field used to cache a created session structure
+    sess_ptr    - internal field used to cache a created session structure
 
    methods:
 
