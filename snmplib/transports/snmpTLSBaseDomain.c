@@ -416,6 +416,7 @@ sslctx_client_setup(SSL_METHOD *method, _netsnmpTLSBaseData *tlsbase) {
     SSL_CTX      *the_ctx;
     X509_STORE   *cert_store = NULL;
     char         *crlFile;
+    char         *cipherList;
     X509_LOOKUP  *lookup;
 
     /***********************************************************************
@@ -505,6 +506,12 @@ sslctx_client_setup(SSL_METHOD *method, _netsnmpTLSBaseData *tlsbase) {
                              X509_V_FLAG_CRL_CHECK | X509_V_FLAG_CRL_CHECK_ALL);
     }
 
+    cipherList = netsnmp_ds_get_string(NETSNMP_DS_LIBRARY_ID,
+                                       NETSNMP_DS_LIB_TLS_ALGORITMS);
+    if (NULL != cipherList)
+        if (SSL_CTX_set_cipher_list(the_ctx, cipherList) != 1)
+            LOGANDDIE("failed to set the cipher list to the requested value");
+
     if (!SSL_CTX_set_default_verify_paths(the_ctx)) {
         LOGANDDIE ("");
     }
@@ -517,6 +524,7 @@ sslctx_server_setup(SSL_METHOD *method) {
     netsnmp_cert *id_cert;
     X509_STORE   *cert_store = NULL;
     char         *crlFile;
+    char         *cipherList;
     X509_LOOKUP  *lookup;
 
     /***********************************************************************
@@ -576,6 +584,16 @@ sslctx_server_setup(SSL_METHOD *method) {
         /* tell openssl to check CRLs */
         X509_STORE_set_flags(cert_store,
                              X509_V_FLAG_CRL_CHECK | X509_V_FLAG_CRL_CHECK_ALL);
+    }
+
+    cipherList = netsnmp_ds_get_string(NETSNMP_DS_LIBRARY_ID,
+                                       NETSNMP_DS_LIB_TLS_ALGORITMS);
+    if (NULL != cipherList)
+        if (SSL_CTX_set_cipher_list(the_ctx, cipherList) != 1)
+            LOGANDDIE("failed to set the cipher list to the requested value");
+
+    if (!SSL_CTX_set_default_verify_paths(the_ctx)) {
+        LOGANDDIE ("");
     }
 
     return the_ctx;
@@ -690,42 +708,28 @@ netsnmp_tlsbase_ctor(void) {
                                NETSNMP_DS_LIBRARY_ID,
                                NETSNMP_DS_LIB_X509_CRL_FILE);
 
+    /* What TLS algorithms should be use */
+    netsnmp_ds_register_config(ASN_OCTET_STR, "snmp", "tlsAlgorithms",
+                               NETSNMP_DS_LIBRARY_ID,
+                               NETSNMP_DS_LIB_TLS_ALGORITMS);
+
     /*
      * for the client
      */
-
-    /* pem file of valid server CERT CAs */
-    netsnmp_ds_register_config(ASN_OCTET_STR, "snmp", "defX509ServerCerts",
-                               NETSNMP_DS_LIBRARY_ID,
-                               NETSNMP_DS_LIB_X509_SERVER_CERTS);
 
     /* the public client cert to authenticate with */
     netsnmp_ds_register_config(ASN_OCTET_STR, "snmp", "defX509ClientPub",
                                NETSNMP_DS_LIBRARY_ID,
                                NETSNMP_DS_LIB_X509_CLIENT_PUB);
 
-    /* the private client cert to authenticate with */
-    netsnmp_ds_register_config(ASN_OCTET_STR, "snmp", "defX509ClientPriv",
-                               NETSNMP_DS_LIBRARY_ID,
-                               NETSNMP_DS_LIB_X509_CLIENT_PRIV);
-
     /*
      * for the server
      */
-
-    /* The list of valid client keys to accept (or CAs I think) */
-    netsnmp_ds_register_config(ASN_OCTET_STR, "snmp", "defX509ClientCerts",
-                               NETSNMP_DS_LIBRARY_ID,
-                               NETSNMP_DS_LIB_X509_CLIENT_CERTS);
 
     /* The X509 server key to use */
     netsnmp_ds_register_config(ASN_OCTET_STR, "snmp", "defX509ServerPub",
                                NETSNMP_DS_LIBRARY_ID,
                                NETSNMP_DS_LIB_X509_SERVER_PUB);
-
-    netsnmp_ds_register_config(ASN_OCTET_STR, "snmp", "defX509ServerPriv",
-                               NETSNMP_DS_LIBRARY_ID,
-                               NETSNMP_DS_LIB_X509_SERVER_PRIV);
 
     /*
      * register our boot-strapping needs
