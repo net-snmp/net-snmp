@@ -19,7 +19,7 @@ class BasicTests(unittest.TestCase):
 
         var = netsnmp.Varbind('.1.3.6.1.2.1.1.1','0')
 
-        print "----------------------------------------\n"
+        print "---v1 GET tests -------------------------------------\n"
         res = netsnmp.snmpget(var,
                               Version = 1,
                               DestHost='localhost',
@@ -29,7 +29,7 @@ class BasicTests(unittest.TestCase):
 
         print "v1 get var: ",  var.tag, var.iid, "=", var.val, '(',var.type,')'
         
-        print "----------------------------------------\n"
+        print "---v1 GETNEXT tests-------------------------------------\n"
         res = netsnmp.snmpgetnext(var,
                                   Version = 1,
                                   DestHost='localhost',
@@ -39,7 +39,7 @@ class BasicTests(unittest.TestCase):
                 
         print "v1 getnext var: ",  var.tag, var.iid, "=", var.val, '(',var.type,')'
         
-        print "----------------------------------------\n"
+        print "---v1 SET tests-------------------------------------\n"
         var = netsnmp.Varbind('sysLocation','0', 'my new location')
         res = netsnmp.snmpset(var,
                         Version = 1,
@@ -50,7 +50,7 @@ class BasicTests(unittest.TestCase):
 
         print "v1 set var: ",  var.tag, var.iid, "=", var.val, '(',var.type,')'
         
-        print "----------------------------------------\n"
+        print "---v1 walk tests-------------------------------------\n"
         vars = netsnmp.VarList(netsnmp.Varbind('system'))
 
         print "v1 varlist walk in: "
@@ -67,7 +67,7 @@ class BasicTests(unittest.TestCase):
             print var.tag, var.iid, "=", var.val, '(',var.type,')'
        
         
-        print "----------------------------------------\n"
+        print "---v1 walk 2-------------------------------------\n"
 
         print "v1 varbind walk in: "
         var = netsnmp.Varbind('system')
@@ -79,7 +79,7 @@ class BasicTests(unittest.TestCase):
 
         print var.tag, var.iid, "=", var.val, '(',var.type,')'
         
-        print "----------------------------------------\n"
+        print "---v1 multi-varbind test-------------------------------------\n"
         sess = netsnmp.Session(Version=1,
                                DestHost='localhost',
                                Community='public')
@@ -111,14 +111,14 @@ class BasicTests(unittest.TestCase):
         for var in vars:
             print var.tag, var.iid, "=", var.val, '(',var.type,')'
 
-        print "----------------------------------------\n"
+        print "---v1 set2-------------------------------------\n"
 
         vars = netsnmp.VarList(
             netsnmp.Varbind('sysLocation', '0', 'my newer location'))
         res = sess.set(vars)
         print "v1 sess.set result: ", res, "\n"
 
-        print "----------------------------------------\n"
+        print "---v1 walk3-------------------------------------\n"
         vars = netsnmp.VarList(netsnmp.Varbind('system'))
                 
         vals = sess.walk(vars)
@@ -127,7 +127,7 @@ class BasicTests(unittest.TestCase):
         for var in vars:
             print "  ",var.tag, var.iid, "=", var.val, '(',var.type,')'
             
-        print "----------------------------------------\n"
+        print "---v2c get-------------------------------------\n"
 
         sess = netsnmp.Session(Version=2,
                                DestHost='localhost',
@@ -142,7 +142,7 @@ class BasicTests(unittest.TestCase):
         vals = sess.get(vars)
         print "v2 sess.get result: ", vals, "\n"
 
-        print "----------------------------------------\n"
+        print "---v2c getnext-------------------------------------\n"
 
         for var in vars:
             print var.tag, var.iid, "=", var.val, '(',var.type,')'
@@ -155,7 +155,7 @@ class BasicTests(unittest.TestCase):
             print var.tag, var.iid, "=", var.val, '(',var.type,')'
         print "\n"
        
-        print "----------------------------------------\n"
+        print "---v2c getbulk-------------------------------------\n"
 
         vars = netsnmp.VarList(netsnmp.Varbind('sysUpTime'),
                                netsnmp.Varbind('sysORLastChange'),
@@ -170,7 +170,7 @@ class BasicTests(unittest.TestCase):
             print var.tag, var.iid, "=", var.val, '(',var.type,')'
         print "\n"
 
-        print "----------------------------------------\n"
+        print "---v2c set-------------------------------------\n"
 
         vars = netsnmp.VarList(
             netsnmp.Varbind('sysLocation','0','my even newer location'))
@@ -178,7 +178,7 @@ class BasicTests(unittest.TestCase):
         res = sess.set(vars)
         print "v2 sess.set result: ", res, "\n"
 
-        print "----------------------------------------\n"
+        print "---v2c walk-------------------------------------\n"
         vars = netsnmp.VarList(netsnmp.Varbind('system'))
                 
         vals = sess.walk(vars)
@@ -187,7 +187,7 @@ class BasicTests(unittest.TestCase):
         for var in vars:
             print "  ",var.tag, var.iid, "=", var.val, '(',var.type,')'
             
-        print "----------------------------------------\n"
+        print "---v3 setup-------------------------------------\n"
         sess = netsnmp.Session(Version=3,
                                DestHost='localhost',
                                SecLevel='authPriv',
@@ -200,7 +200,7 @@ class BasicTests(unittest.TestCase):
         vars = netsnmp.VarList(netsnmp.Varbind('sysUpTime', 0),
                                netsnmp.Varbind('sysContact', 0),
                                netsnmp.Varbind('sysLocation', 0))
-        print "----------------------------------------\n"
+        print "---v3 get-------------------------------------\n"
         vals = sess.get(vars)
         print "v3 sess.get result: ", vals, "\n"
         
@@ -208,7 +208,7 @@ class BasicTests(unittest.TestCase):
             print var.tag, var.iid, "=", var.val, '(',var.type,')'
         print "\n"
 
-        print "----------------------------------------\n"
+        print "---v3 getnext-------------------------------------\n"
        
         vals = sess.getnext(vars)
         print "v3 sess.getnext result: ", vals, "\n"
@@ -230,14 +230,14 @@ class BasicTests(unittest.TestCase):
             print var.tag, var.iid, "=", var.val, '(',var.type,')'
         print "\n"
 
-        print "----------------------------------------\n"
+        print "---v3 set-------------------------------------\n"
 
         vars = netsnmp.VarList(
             netsnmp.Varbind('sysLocation','0', 'my final destination'))
         res = sess.set(vars)
         print "v3 sess.set result: ", res, "\n"
         
-        print "----------------------------------------\n"
+        print "---v3 walk-------------------------------------\n"
         vars = netsnmp.VarList(netsnmp.Varbind('system'))
                 
         vals = sess.walk(vars)
@@ -245,7 +245,7 @@ class BasicTests(unittest.TestCase):
         
         for var in vars:
             print "  ",var.tag, var.iid, "=", var.val, '(',var.type,')'
-            
+
 
 class SetTests(unittest.TestCase):
     def testFuncs(self):        
