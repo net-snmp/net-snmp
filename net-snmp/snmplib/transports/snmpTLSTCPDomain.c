@@ -933,6 +933,8 @@ netsnmp_transport *
 netsnmp_tlstcp_create_tstring(const char *str, int local,
                                const char *default_target)
 {
+    if (str == NULL || *str == '\0')
+        str = default_target + 1; /* drop the leading : */
     return netsnmp_tlstcp_transport(str, local);
 }
 
