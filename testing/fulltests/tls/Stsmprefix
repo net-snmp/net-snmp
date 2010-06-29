@@ -6,7 +6,7 @@
 
 export NET_SNMP_CRT_CFGTOOL="${builddir}/net-snmp-config"
 NSCERT="perl $SNMP_BASEDIR/../../../local/net-snmp-cert"
-NSCERTARGS="-C $SNMP_TMPDIR"
+NSCERTARGS="-I -C $SNMP_TMPDIR"
 
 TLSDIR=$SNMP_TMPDIR/tls
 
