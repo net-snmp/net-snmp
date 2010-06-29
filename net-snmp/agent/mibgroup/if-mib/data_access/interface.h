@@ -32,6 +32,7 @@ config_exclude(mibII/interfaces)
 
 #   if defined( linux )
 
+    config_require(util_funcs)
     config_require(if-mib/data_access/interface_linux)
     config_require(if-mib/data_access/interface_ioctl)
 
