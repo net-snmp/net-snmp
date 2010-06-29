@@ -10,6 +10,7 @@
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 
 #if defined(NETSNMP_TRANSPORT_TLS_DOMAIN) || defined(NETSNMP_TRANSPORT_DTLSUDP_DOMAIN)
+#include <openssl/ssl.h>
 #include <openssl/x509v3.h>
 #include <net-snmp/library/cert_util.h>
 #endif
