@@ -60,43 +60,10 @@ single-dash arguments aren't working because you have settings in the
 \fIsnmp.conf\fR file that conflict with them then you'll need to use
 the longer-form double-dash arguments to successfully trump the
 \fIsnmp.conf\fR file settings.
-.SH OPTIONS
-.TP
-.BI "-3[MmKk]  0xHEXKEY"
-Sets the keys to be used for SNMPv3 transactions.  These options allow
-you to set the master authentication and encryption keys (-3m and -3M
-respectively) or set the localized authentication and encryption keys
-(-3k and -3K respectively).  SNMPv3 keys can be either passed in by
-hand using these flags, or by the use of keys generated from passwords
-using the -A and -X flags discussed below.  For further details on
-SNMPv3 and its usage of keying information, see the Net-SNMP tutorial
-web site ( http://www.Net-SNMP.org/tutorial-5/commands/ ). 
-Overrides the defAuthMasterKey (-3m), defPrivMasterKey (-3M), 
-defAuthLocalizedKey (-3k) or defPrivLocalizedKey (-3K) tokens, respectively, 
-in the
-.I snmp.conf
-file, see
-.I snmp.conf(5).
-.TP
-.BI -a " authProtocol"
-Set the authentication protocol (MD5 or SHA) used for authenticated SNMPv3
-messages. Overrides the \fIdefAuthType\fR token in the
-.I snmp.conf
-file.
-.TP
-.BI -A " authPassword"
-Set the authentication pass phrase used for authenticated SNMPv3
-messages.  Overrides the \fIdefAuthPassphrase\fR token in the
-.I snmp.conf
-file. It is insecure to specify pass phrases on the command line,
-see
-.I snmp.conf(5).
-.TP
-.BI -c " community"
-Set the community string for SNMPv1/v2c transactions.
-Overrides the \fIdefCommunity\fR token in the
-.I snmp.conf
-file.
+.SH Generic Options
+Thes options control how the Net-SNMP commands behave regardless of
+what version of SNMP you are using.  See further below for options
+that control specific versions or sub-modules of the SNMP protocol. 
 .TP
 .B -d
 Dump (in hexadecimal) the raw SNMP packets sent and received.
@@ -108,16 +75,6 @@ Try
 .IR ALL
 for extremely verbose output.
 .TP
-.BI -e " engineID"
-Set the authoritative (security) engineID used for SNMPv3 REQUEST
-messages, given as a hexadecimal string (optionally prefixed by "0x").
-It is typically not necessary to specify this engine ID, as it will
-usually be discovered automatically.
-.TP
-.BI -E " engineID"
-Set the context engineID used for SNMPv3 REQUEST messages scopedPdu,
-given as a hexadecimal string.
-If not specified, this will default to the authoritative engineID.
 .TP
 .B -h, --help
 Display a brief usage message and then exit.
@@ -130,14 +87,6 @@ command and then exit.
 Specifies input parsing options. See 
 .B INPUT OPTIONS 
 below.
-.TP
-.BI -l " secLevel"
-Set the securityLevel used for SNMPv3 messages
-(noAuthNoPriv|authNoPriv|authPriv).  Appropriate pass phrase(s) must
-provided when using any level higher than noAuthNoPriv.
-Overrides the \fIdefSecurityLevel\fR token in the
-.I snmp.conf
-file.
 .TP
 .BI -L " [eEfFoOsS]"
 Specifies output logging options. See 
@@ -196,13 +145,12 @@ listed by the -M option (or equivalents).
 The \fImibfile\fR directive takes a full path to the specified MIB
 file, so this does not need to be in the MIB directory search list.
 .TP
-.BI -n " contextName"
-Set the contextName used for SNMPv3 messages.  The default
-contextName is the empty string "".  Overrides the \fIdefContext\fR token
-in the
+.B -v \fI1\fR | \fI2c\fR | \fI3
+Specifies the protocol version to use: 1 (RFCs 1155-1157), 2c (RFCs 1901-1908),
+or 3 (RFCs 2571-2574).  The default is typically version 3.
+Overrides the \fIdefVersion\fR token in the
 .I snmp.conf
-file. 
-.TP
+file.
 .BI -O " [abeEfnqQsStTuUvxX]"
 Specifies output printing options. See 
 .B OUTPUT OPTIONS
@@ -221,21 +169,144 @@ is 5.
 Specifies the timeout in seconds between retries. The default is 1.
 Floating point numbers can be used to specify fractions of seconds.
 .TP
+.B -V, --version
+Display version information for the application and then exit.
+.TP
+.BI -Y "name"="value"
+.TP
+.BI -- "name"="value"
+Allows to specify any token ("name") supported in the
+.I snmp.conf
+file and sets its value to "value". Overrides the corresponding token in the
+.I snmp.conf
+file. See
+.I snmp.conf(5)
+for the full list of tokens.
+
+
+.SH SNMPv3 Options
+The following options are generic to all forms of SNMPv3, regardless
+of whether it's the original SNMPv3 with USM or the newer SNMPv3 over
+(D)TLS support.
+
+.TP
+.BI -l " secLevel"
+Set the securityLevel used for SNMPv3 messages
+(noAuthNoPriv|authNoPriv|authPriv).  Appropriate pass phrase(s) must
+provided when using any level higher than noAuthNoPriv.
+Overrides the \fIdefSecurityLevel\fR token in the
+.I snmp.conf
+file.
+.TP
+.BI -n " contextName"
+Set the contextName used for SNMPv3 messages.  The default
+contextName is the empty string "".  Overrides the \fIdefContext\fR token
+in the
+.I snmp.conf
+file. 
+
+.SH SNMPv3 over TLS Options
+These options pass transport-specific parameters to the TLS layer.  If
+you're using SNMP over TLS or DTLS you'll need to pass a combination
+of these either through these command line options or through
+snmp.conf configuration tokens.
+.PP
+A note about
+.I "<certificate-specifier>s":
+Net-SNMP looks for X.509 certificates in each of the normal SNMP
+configuration directory search paths under a "tls" subdirectory.  IE,
+it will look in ~/.snmp/tls and in /usr/local/share/snmp/tls for
+certificates.  The certificate components (eg, the public and private
+halves) are stored in sub-directories underneath this root set of
+directories.  See the net-snmp-cert tool for help in importing,
+creating and managing Net-SNMP certificates.
+.I "<certificate-specifier>s"
+can reference either a fingerprint of the certificate to use (the
+net-snmp-cert tool can help you figure out the certificates) or the
+filename's prefix can be used.  For example, if you had a "snmp.crt"
+certificate file then you could simply refer to the certificate via
+the "snmpd" specifier.
+.TP
+.BI "-T our_identity=<certificate-specifier>"
+Indicates to the transport which key should be used to initiate (D)TLS
+client connections.  This would typically be a certificate found using
+the application name (eg snmpd, snmptrapd, perl, python) or
+genericized name "snmpapp" if using one of the generic applications
+(snmpget, snmpwalk, etc).  This can also be set using the
+defX509ClientPub specifier in a snmp.conf configuration file.
+.TP
+.BI "-T their_identity=<certificate-specifier>"
+If you expect a particular certificate to be presented by the other
+side then you can use this specifier to indicate the certificate it
+should present.  If it fails to present the expected certificate the
+client will refuse to open the connection (because doing otherwise
+could lead to man-in-the-middle attacks).  This can also be set using
+the defX509ServerPub specifier in a snmp.conf configuration file.
+.TP
+.BI "-T trust_cert=<certificate-specifier>"
+If you have a trusted CA certificate you wish to anchor trust with,
+you can use this flag to load a given certificate as a trust anchor.
+A copy of the certificate must exist within the Net-SNMP certificate
+storage system or this must point to a complete path name.  Also see
+the "trustCert" snmp.conf configuration token.
+.TP
+.BI "-T their_hostname=<name>"
+If the server's presented certificate can be validating using a trust
+anchor then their hostname will be checked to ensure their presented
+hostname matches one that is expected (you don't want to connect to
+goodhost.example.com and accept a certificate presented by
+badhost.example.com do you?).  This token can specify the exact host
+name expected to be presented by the remote side, either in a
+subjectAltName field or in the CommonName field of the server's X.509
+certificate.
+.SH SNMPv3 with USM Options
+These options are specific to using SNMPv3 with the original
+User-based Security Model (USM).
+.TP
+.BI "-3[MmKk]  0xHEXKEY"
+Sets the keys to be used for SNMPv3 transactions.  These options allow
+you to set the master authentication and encryption keys (-3m and -3M
+respectively) or set the localized authentication and encryption keys
+(-3k and -3K respectively).  SNMPv3 keys can be either passed in by
+hand using these flags, or by the use of keys generated from passwords
+using the -A and -X flags discussed below.  For further details on
+SNMPv3 and its usage of keying information, see the Net-SNMP tutorial
+web site ( http://www.Net-SNMP.org/tutorial-5/commands/ ). 
+Overrides the defAuthMasterKey (-3m), defPrivMasterKey (-3M), 
+defAuthLocalizedKey (-3k) or defPrivLocalizedKey (-3K) tokens, respectively, 
+in the
+.I snmp.conf
+file, see
+.I snmp.conf(5).
+.TP
+.BI -a " authProtocol"
+Set the authentication protocol (MD5 or SHA) used for authenticated SNMPv3
+messages. Overrides the \fIdefAuthType\fR token in the
+.I snmp.conf
+file.
+.TP
+.BI -A " authPassword"
+Set the authentication pass phrase used for authenticated SNMPv3
+messages.  Overrides the \fIdefAuthPassphrase\fR token in the
+.I snmp.conf
+file. It is insecure to specify pass phrases on the command line,
+see
+.I snmp.conf(5).
+.BI -e " engineID"
+Set the authoritative (security) engineID used for SNMPv3 REQUEST
+messages, given as a hexadecimal string (optionally prefixed by "0x").
+It is typically not necessary to specify this engine ID, as it will
+usually be discovered automatically.
+.TP
+.BI -E " engineID"
+Set the context engineID used for SNMPv3 REQUEST messages scopedPdu,
+given as a hexadecimal string.
+If not specified, this will default to the authoritative engineID.
 .BI -u " secName"
 Set the securityName used for authenticated SNMPv3 messages.
 Overrides the \fIdefSecurityName\fR token in the
 .I snmp.conf
 file.
-.TP
-.B -v \fI1\fR | \fI2c\fR | \fI3
-Specifies the protocol version to use: 1 (RFCs 1155-1157), 2c (RFCs 1901-1908),
-or 3 (RFCs 2571-2574).  The default is typically version 3.
-Overrides the \fIdefVersion\fR token in the
-.I snmp.conf
-file.
-.TP
-.B -V, --version
-Display version information for the application and then exit.
 .TP
 .BI -x " privProtocol"
 Set the privacy protocol (DES or AES) used for encrypted SNMPv3 messages. 
@@ -258,17 +329,15 @@ messages.  This will initialize the local notion of the agents
 boots/time with an authenticated value stored in the LCD.
 It is typically not necessary to specify this option, as these values
 will usually be discovered automatically.
+
+
+.SH SNMPv1 and SNMPv2c Options 
 .TP
-.BI -Y "name"="value"
-.TP
-.BI -- "name"="value"
-Allows to specify any token ("name") supported in the
+.BI -c " community"
+Set the community string for SNMPv1/v2c transactions.
+Overrides the \fIdefCommunity\fR token in the
 .I snmp.conf
-file and sets its value to "value". Overrides the corresponding token in the
-.I snmp.conf
-file. See
-.I snmp.conf(5)
-for the full list of tokens.
+file.
 
 .SH AGENT SPECIFICATION
 .PP
@@ -343,6 +412,35 @@ connect to
 on port
 .I 1161
 using TCP/IPv4 and perform query over that connection.
+.IR "udp6:hostname:10161"
+perform the query using UDP/IPv6 datagrams to port
+.I 10161
+on
+.I hostname
+(which will be looked up as an AAAA record).
+.TP 24
+.IR "UDP6:[fe80::2d0:b7ff:fe21:c6c0]"
+perform the query using UDP/IPv6 datagrams to port 161 at address
+.IR fe80::2d0:b7ff:fe21:c6c0 .
+.TP 24
+.IR "tcpipv6:[::1]:1611"
+connect to port 1611 on the local host
+.IR "" ( ::1 
+in IPv6 parlance) using TCP/IPv6 and perform query over that connection.
+.TP 24
+.IR "tls:hostname:10161"
+.TP 24
+.IR "dtls:hostname:10161"
+Connects using SNMP over DTLS or TLS as documented by the ISMS working
+group (RFCs not yet published as of this date).  This will require
+(and automatically ensures) that the TSM security model is in use.
+You'll also need to set up trust paths for the certificates presented
+by the server (see above for descriptions of this).
+.TP 24
+.IR "ssh:hostname:22"
+Connects using SNMP over SSH as documented by the ISMS working group
+(RFCs not yet published as of this date).  This will require that the
+TSM security model is in use (--defSecurityModel=tsm).
 .TP 24
 .IR "ipx::00D0B7AAE308"
 perform query using IPX datagrams to node number 
@@ -387,37 +485,6 @@ machine.
 perform the query using AAL5 PDUs sent on the permanent virtual
 circuit with VPI=10 (decimal) and VCI=32 (decimal) on the second ATM
 adapter in the machine.  Note that "PVC" is a synonym for "AAL5PVC".
-.TP 24
-.IR "udp6:hostname:10161"
-perform the query using UDP/IPv6 datagrams to port
-.I 10161
-on
-.I hostname
-(which will be looked up as an AAAA record).
-.TP 24
-.IR "UDP6:[fe80::2d0:b7ff:fe21:c6c0]"
-perform the query using UDP/IPv6 datagrams to port 161 at address
-.IR fe80::2d0:b7ff:fe21:c6c0 .
-.TP 24
-.IR "tcpipv6:[::1]:1611"
-connect to port 1611 on the local host
-.IR "" ( ::1 
-in IPv6 parlance) using TCP/IPv6 and perform query over that connection.
-.TP 24
-.IR "dtlsudp:hostname:9161"
-Connects using SNMP over DTLS/UDP as documented by the ISMS working group
-(RFCs not yet published as of this date).  This will require that the
-TSM security model is in use (--defSecurityModel=tsm) and that the
-.IR defX509ServerCerts,
-.IR defX509ClientPriv,
-and
-.IR defX509ClientPub
-configuration tokens have been set.
-.TP 24
-.IR "ssh:hostname:22"
-Connects using SNMP over SSH as documented by the ISMS working group
-(RFCs not yet published as of this date).  This will require that the
-TSM security model is in use (--defSecurityModel=tsm).
 .PP
 Note that not all the transport domains listed above will always be
 available; for instance, hosts with no IPv6 support will not be able
