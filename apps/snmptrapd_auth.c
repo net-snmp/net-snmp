@@ -16,7 +16,14 @@
 #include "snmptrapd_handlers.h"
 #include "snmptrapd_auth.h"
 #include "snmptrapd_ds.h"
+
+#include <net-snmp/agent/agent_module_config.h>
+#include <net-snmp/agent/mib_module_config.h>
+
+#ifdef USING_MIBII_VACM_CONF_MODULE
 #include "mibII/vacm_conf.h"
+#endif
+
 #include <net-snmp/agent/agent_trap.h>
 
 /**
