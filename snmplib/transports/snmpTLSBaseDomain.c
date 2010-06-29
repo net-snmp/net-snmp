@@ -411,13 +411,45 @@ _load_trusted_certs(SSL_CTX *the_ctx) {
 }    
 
 SSL_CTX *
-sslctx_client_setup(SSL_METHOD *method, _netsnmpTLSBaseData *tlsbase) {
-    netsnmp_cert *id_cert, *peer_cert;
-    SSL_CTX      *the_ctx;
-    X509_STORE   *cert_store = NULL;
+_sslctx_common_setup(SSL_CTX *the_ctx, _netsnmpTLSBaseData *tlsbase) {
     char         *crlFile;
     char         *cipherList;
     X509_LOOKUP  *lookup;
+    X509_STORE   *cert_store = NULL;
+
+    _load_trusted_certs(the_ctx);
+
+    /* add in the CRLs if available */
+
+    crlFile = netsnmp_ds_get_string(NETSNMP_DS_LIBRARY_ID,
+                                    NETSNMP_DS_LIB_X509_CRL_FILE);
+    if (NULL != crlFile) {
+        cert_store = SSL_CTX_get_cert_store(the_ctx);
+        DEBUGMSGTL(("sslctx_client", "loading CRL: %s\n", crlFile));
+        if (!cert_store)
+            LOGANDDIE("failed to find certificate store");
+        if (!(lookup = X509_STORE_add_lookup(cert_store, X509_LOOKUP_file())))
+            LOGANDDIE("failed to create a lookup function for the CRL file");
+        if (X509_load_crl_file(lookup, crlFile, X509_FILETYPE_PEM) != 1)
+            LOGANDDIE("failed to load the CRL file");
+        /* tell openssl to check CRLs */
+        X509_STORE_set_flags(cert_store,
+                             X509_V_FLAG_CRL_CHECK | X509_V_FLAG_CRL_CHECK_ALL);
+    }
+
+    cipherList = netsnmp_ds_get_string(NETSNMP_DS_LIBRARY_ID,
+                                       NETSNMP_DS_LIB_TLS_ALGORITMS);
+    if (NULL != cipherList)
+        if (SSL_CTX_set_cipher_list(the_ctx, cipherList) != 1)
+            LOGANDDIE("failed to set the cipher list to the requested value");
+
+    return the_ctx;
+}
+
+SSL_CTX *
+sslctx_client_setup(SSL_METHOD *method, _netsnmpTLSBaseData *tlsbase) {
+    netsnmp_cert *id_cert, *peer_cert;
+    SSL_CTX      *the_ctx;
 
     /***********************************************************************
      * Set up the client context
@@ -486,46 +518,12 @@ sslctx_client_setup(SSL_METHOD *method, _netsnmpTLSBaseData *tlsbase) {
             return 0;
     }
 
-    _load_trusted_certs(the_ctx);
-
-    /* add in the CRLs if available */
-
-    crlFile = netsnmp_ds_get_string(NETSNMP_DS_LIBRARY_ID,
-                                    NETSNMP_DS_LIB_X509_CRL_FILE);
-    if (NULL != crlFile) {
-        cert_store = SSL_CTX_get_cert_store(the_ctx);
-        DEBUGMSGTL(("sslctx_client", "loading CRL: %s\n", crlFile));
-        if (!cert_store)
-            LOGANDDIE("failed to find certificate store");
-        if (!(lookup = X509_STORE_add_lookup(cert_store, X509_LOOKUP_file())))
-            LOGANDDIE("failed to create a lookup function for the CRL file");
-        if (X509_load_crl_file(lookup, crlFile, X509_FILETYPE_PEM) != 1)
-            LOGANDDIE("failed to load the CRL file");
-        /* tell openssl to check CRLs */
-        X509_STORE_set_flags(cert_store,
-                             X509_V_FLAG_CRL_CHECK | X509_V_FLAG_CRL_CHECK_ALL);
-    }
-
-    cipherList = netsnmp_ds_get_string(NETSNMP_DS_LIBRARY_ID,
-                                       NETSNMP_DS_LIB_TLS_ALGORITMS);
-    if (NULL != cipherList)
-        if (SSL_CTX_set_cipher_list(the_ctx, cipherList) != 1)
-            LOGANDDIE("failed to set the cipher list to the requested value");
-
-    if (!SSL_CTX_set_default_verify_paths(the_ctx)) {
-        LOGANDDIE ("");
-    }
-
-    return the_ctx;
+    return _sslctx_common_setup(the_ctx, tlsbase);
 }
 
 SSL_CTX *
 sslctx_server_setup(SSL_METHOD *method) {
     netsnmp_cert *id_cert;
-    X509_STORE   *cert_store = NULL;
-    char         *crlFile;
-    char         *cipherList;
-    X509_LOOKUP  *lookup;
 
     /***********************************************************************
      * Set up the server context
@@ -566,37 +564,7 @@ sslctx_server_setup(SSL_METHOD *method) {
                        SSL_VERIFY_CLIENT_ONCE,
                        &verify_callback);
 
-    _load_trusted_certs(the_ctx);
-
-    /* add in the CRLs if available */
-
-    crlFile = netsnmp_ds_get_string(NETSNMP_DS_LIBRARY_ID,
-                                    NETSNMP_DS_LIB_X509_CRL_FILE);
-    if (NULL != crlFile) {
-        cert_store = SSL_CTX_get_cert_store(the_ctx);
-        DEBUGMSGTL(("sslctx_client", "loading CRL: %s\n", crlFile));
-        if (!cert_store)
-            LOGANDDIE("failed to find certificate store");
-        if (!(lookup = X509_STORE_add_lookup(cert_store, X509_LOOKUP_file())))
-            LOGANDDIE("failed to create a lookup function for the CRL file");
-        if (X509_load_crl_file(lookup, crlFile, X509_FILETYPE_PEM) != 1)
-            LOGANDDIE("failed to load the CRL file");
-        /* tell openssl to check CRLs */
-        X509_STORE_set_flags(cert_store,
-                             X509_V_FLAG_CRL_CHECK | X509_V_FLAG_CRL_CHECK_ALL);
-    }
-
-    cipherList = netsnmp_ds_get_string(NETSNMP_DS_LIBRARY_ID,
-                                       NETSNMP_DS_LIB_TLS_ALGORITMS);
-    if (NULL != cipherList)
-        if (SSL_CTX_set_cipher_list(the_ctx, cipherList) != 1)
-            LOGANDDIE("failed to set the cipher list to the requested value");
-
-    if (!SSL_CTX_set_default_verify_paths(the_ctx)) {
-        LOGANDDIE ("");
-    }
-
-    return the_ctx;
+    return _sslctx_common_setup(the_ctx, NULL);
 }
 
 int
