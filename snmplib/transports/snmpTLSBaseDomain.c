@@ -57,9 +57,6 @@ int verify_callback(int ok, X509_STORE_CTX *ctx) {
     err = X509_STORE_CTX_get_error(ctx);
     depth = X509_STORE_CTX_get_error_depth(ctx);
     
-    /* log where we are and why called */
-    DEBUGMSGTL(("tls_x509:verify", "verify_callback called with: ok=%d ctx=%p depth=%d err=%i:%s\n", ok, ctx, depth, err, X509_verify_cert_error_string(err)));
-
     /* things to do: */
 
     X509_NAME_oneline(X509_get_subject_name(thecert), buf, sizeof(buf));
@@ -91,21 +88,30 @@ int verify_callback(int ok, X509_STORE_CTX *ctx) {
 
 
         if (cert) {
+            DEBUGMSGTL(("tls_x509:verify", "verify_callback called with: ok=%d ctx=%p depth=%d err=%i:%s\n", ok, ctx, depth, err, X509_verify_cert_error_string(err)));
             DEBUGMSGTL(("tls_x509:verify", "  accepting matching fp of self-signed certificate found in: %s\n",
                         cert->info.filename));
             return 1;
         } else {
             DEBUGMSGTL(("tls_x509:verify", "  no matching fp found\n"));
+            /* log where we are and why called */
+            snmp_log(LOG_ERR, "tls verification failure: ok=%d ctx=%p depth=%d err=%i:%s\n", ok, ctx, depth, err, X509_verify_cert_error_string(err));
+
             return 0;
         }
 
         if (0 == depth && verify_info &&
             (verify_info->flags & VRFY_PARENT_WAS_OK)) {
+            DEBUGMSGTL(("tls_x509:verify", "verify_callback called with: ok=%d ctx=%p depth=%d err=%i:%s\n", ok, ctx, depth, err, X509_verify_cert_error_string(err)));
             DEBUGMSGTL(("tls_x509:verify", "  a parent was ok, so returning ok for this child certificate\n"));
             return 1; /* we'll check the hostname later at this level */
         }
     }
 
+    if (0 == ok)
+        snmp_log(LOG_ERR, "tls verification failure: ok=%d ctx=%p depth=%d err=%i:%s\n", ok, ctx, depth, err, X509_verify_cert_error_string(err));
+    else
+        DEBUGMSGTL(("tls_x509:verify", "verify_callback called with: ok=%d ctx=%p depth=%d err=%i:%s\n", ok, ctx, depth, err, X509_verify_cert_error_string(err)));
     DEBUGMSGTL(("tls_x509:verify", "  returning the passed in value of %d\n",
                 ok));
     return(ok);
