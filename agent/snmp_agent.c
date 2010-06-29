@@ -1112,7 +1112,13 @@ netsnmp_register_agent_nsap(netsnmp_transport *t)
 
 
     if (t->f_open)
-        t->f_open(t);
+        t = t->f_open(t);
+
+    if (NULL == t) {
+        SNMP_FREE(s);
+        SNMP_FREE(n);
+        return -1;
+    }
 
     t->flags |= NETSNMP_TRANSPORT_FLAG_OPENED;
 
