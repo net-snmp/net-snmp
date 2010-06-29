@@ -93,13 +93,42 @@ will be an integer multiple of the number of variables requested times
 the calculated number of repeats allow to fit below this number.
 .IP
 Also not that processing of maxGetbulkRepeats is handled first.
-.SS SNMPv3 Configuration
-SNMPv3 requires an SNMP agent to define a unique "engine ID"
-in order to respond to SNMPv3 requests.
-This ID will normally be determined automatically, using two reasonably
-non-predictable values - a (pseudo-)random number and the current
-time in seconds. This is the recommended approach. However the
-capacity exists to define the engineID in other ways:
+.SS SNMPv3 Configuration - Real Security
+SNMPv3 is added flexible security models to the SNMP packet structure
+so that multiple security solutions could be used.  SNMPv3 was
+original defined with a "User-based Security Model" (USM) [RFC3414]
+that required maintaining a SNMP-specific user database.  This was
+later determined to be troublesome to maintain and had some minor
+security issues.  The IETF has since added additional security models
+to tunnel SNMP over SSH [RFC5592] and DTLS/TLS [RFC-to-be].  Net-SNMP
+contains robust support for SNMPv3/USM, SNMPv3/TLS, and SNMPv3/DTLS.
+It contains partial support for SNMPv3/SSH as well but has not been as
+extensively tested.  It also contains code for support for an
+experimental Kerberos based SNMPv3 that never got standardized.
+.PP
+Hopeful more SNMP software and devices will eventually support SNMP
+over (D)TLS or SSH, but it is likely that devices with original
+support for SNMP will only contain support for SNMP over USM.  If your
+network manager supports SNMP over (D)TLS or SNMP over SSH we suggest
+you use one of these mechanisms instead of using USM, but as always
+with Net-SNMP we give you the options to pick from so you can make the
+choice that is best for you.
+.SS SNMPv3 generic parameters
+These parameters are generic to all the forms of SNMPv3.  The SNMPv3
+protocol defines "engineIDs" that uniquely identify an agent.  The
+string must be consistent through time and should not change or
+conflict with another agent's engineID.  Ever.  Internally, Net-SNMP
+by default creates a unique engineID that is based off of the current system
+time and a random number.  This should be sufficient for most users
+unless you're embedding our agent in a device where these numbers
+won't vary between boxes on the devices initial boot.
+.IP
+EngineIDs are used both as a "context" for selecting information from
+the device and SNMPv3 with USM uses it to create unique entries for
+users in its user table.
+.IP
+The Net-SNMP agent offers the following mechanisms for setting the
+engineID, but again you should only use them if you know what you're doing:
 .IP "engineID STRING"
 specifies that the engineID should be built from the given text STRING.
 .IP "engineIDType 1|2|3"
@@ -115,7 +144,117 @@ The default is to use eth0.
 .\"
 .\" What if this doesn't exist ?
 .\"
-.SH SNMPv3 AUTHENTICATION
+.SS SNMPv3 over TLS
+SNMPv3 may be tunneled over TLS and DTLS.  TLS runs over TCP and DTLS
+is the UDP equivalent.  Wes Hardaker (the founder of Net-SNMP)
+performed a study and presented it at an IETF meeting that showed that
+TCP based protocols are sufficient for stable networks but quickly
+becomes a problem in unstable networks with even moderate levels of
+packet loss (~ 20-30%).  If you are going to use TLS or DTLS, you
+should use the one appropriate for your networking environment.  You
+should potentially turn them both on so your management system can
+access either the UDP or the TCP port as needed.
+.PP
+Many of the configuration tokens described below are prefixed with
+a '[snmp]' tag.  If you place these tokens in your snmpd.conf file,
+this take is required.  See the snmp_config(5) manual page for the
+meaning of this context switch.
+.IP "[snmp] defX509ServerPub <specifier>"
+This token defines the default X.509 public key to use as the server's
+identity.  It should either be a fingerprint or a filename.  To create
+a public key for use, please run the "net-snmp-cert" utility which
+will help you create the required certificate.
+.IP
+The default value for this is the certificate in the "snmpd" named
+certificate file.
+.IP "[snmp] defX509ClientPub <specifier>"
+If outgoing TLS connections are to be opened, for example because
+notifications are to be sent over TLS, then this will select the
+client-side public key to use for those outgoing connections.  It can
+either be specified as a fingerprint or a filename.  See the
+"net-snmp-cert" utility for creating certificates.
+.IP "[snmp] tlsAlgorithms <algorithms>"
+This string will select the algorithms to use when negotiating
+security during (D)TLS session establishment.  See the openssl manual
+page ciphers(1) for details on the format.  Examples strings include:
+.RS
+.nf
+
+DEFAULT
+ALL
+HIGH
+HIGH:!AES128-SHA
+.fi
+.RE
+.IP
+The default value is whatever openssl itself was configured with.
+.IP "[snmp] x059CRLFile"
+If you are using a Certificate Authority (CA) that publishes a
+Certificate Revocation List (CRL) then this token can be used to
+specify the location in the filesystem of a copy of the CRL file.
+Note that Net-SNMP will not pull a CRL over http and this must be a
+file, not a URL.  Additionally, OpenSSL does not reload a CRL file
+when it has changed so modifications or updates to the file will only
+be noticed upon a restart of the snmpd agent.
+
+.IP "certSecName PRIORITY FINGERPRINT OPTIONS"
+OPTIONS can be one of <--sn SECNAME | --rfc822 | --dns | --ip | --cn | --any>.
+.IP
+The certSecName token will specify how to map a certificate field from
+the client's X.509 certificate to a SNMPv3 username.  Use the --sn
+SECNAME flag to directly specify a securityName for a given
+certificate.  The other flags extract a particular component of the
+certificate for use as a snmpv3 securityName.  These fields are one
+of: A SubjectAltName containing an rfc822 value (eg hardaker@net-snmp.org),
+A SubjectAltName containing a dns name value (eg foo.net-snmp.org),
+an IP address (eg 192.0.2.1) or a common name "Wes Hardaker".  The
+--any flag specifies that any of the subjecAltName fields may be
+used.  Make sure once a securityName has been selected that it is
+given authorization via the VACM controls discussed later in this
+manual page.
+.IP
+See the http://www.net-snmp.org/wiki/index.php/Using_DTLS web page for
+more detailed instructions for setting up (D)TLS.
+.IP "trustCert <specifier>"
+For X509 to properly verify a certificate, it should be verifiable up
+until a trust anchor for it.  This trust anchor is typically a CA
+certificate but it could also be a self-signed certificate.  The
+"trustCert" token should be used to load specific trust anchors into the
+verification engine.
+.PP
+SNMP over (D)TLS requires the use of the Transport Security Model
+(TSM), so read the section on the usage of the Transport Security
+Model as well.  Make sure when you configure the VACM to accept
+connections from (D)TLS that you use the "tsm" security model.  E.G.:
+.fi
+
+rwuser -s tsm hardaker@net-snmp.org
+.fi
+.SS SNMPv3 over SSH Support
+To use SSH, you'll need to configure sshd to invoke the sshtosnmp
+program as well as configure the access control settings to allow
+access through the tsm security model using the user name provided to
+snmpd by the ssh transport.
+.SS SNMPv3 with the Transport Security Model (TSM)
+The Transport Security Model [RFC5591] defines a SNMPv3 security
+system for use with "tunneled" security protocols like TLS, DTLS and
+SSH.  It is a very simple security model that simply lets properly
+protected packets to pass through into the snmp application.  The
+transport is required to pass a securityName to use to the TSM and the
+TSM may optionally prefix this with a transport string (see below).
+.IP "tsmUseTransportPrefix (1|yes|true|0|no|false)"
+If set to true, the TSM module will take every securityName passed to
+it from the transports underneath and prefix it with a string that
+specifically identities the transport it came from.  This is useful to
+avoid securityName clashes with transports that generate identical
+security names.  For example, if the ssh security transport delivered
+the security name of "hardaker" for a SSH connection and the TLS
+security transport also delivered the security name of "hardaker" for
+a TLS connection then it would be impossible to separate out these two
+users to provide separate access control rights.  With the
+tsmUseTransportPrefix set to true, however, the securityNames would be
+prefixed appropriately with one of: "tls:", "dtls:" or "ssh:".
+.SS SNMPv3 with the User-based Security Model (USM)
 SNMPv3 was originally defined using the User-Based Security Model
 (USM), which contains a private list of users and keys specific to the
 SNMPv3 protocol.  The operational community, however, declared it a
@@ -186,29 +325,6 @@ expected to be the length needed by the algorithm (128 bits for all
 supported algorithms).  Master encryption keys, though, need to be the
 length required by the authentication algorithm not the length
 required by the encrypting algorithm (MD5: 16 bytes, SHA: 20 bytes).
-.SS SSH Support
-To use SSH, you'll need to configure sshd to invoke sshtosnmp as well
-as configure the access control settings to allow access through the
-tsm security model using the user name provided to snmpd by the ssh
-transport.
-.SS DTLS Support
-For DTLS,
-.B snmpd
-will need to be configured with it's own X.509 certificate as well as
-the certificates of the client users to be allowed to connect to the
-agent.  The access control will need to be set up as well to allow
-access through the
-.I tsm
-security model.  The certSecName token will specify how to map a certificate
-field from the peer's X.509 certificate to a SNMPv3 username to use.
-See the http://www.net-snmp.org/wiki/index.php/Using_DTLS web page for
-more detailed instructions for setting up DTLS.
-.IP "certSecName PRIORITY FINGERPRINT OPTIONS"
-OPTIONS can be one of <--sn SECNAME | --rfc822 | --dns | --ip | --cn | --any>.
-.IP "defX509ServerPub FINGERPRINT"
-This directive specify the fingerprint for the certificate that
-.B snmpd
-should present to incoming connections.
 .SH ACCESS CONTROL
 .B snmpd
 supports the View-Based Access Control Model (VACM) as defined in RFC
@@ -236,7 +352,7 @@ If SECMODEL is specified then it will be the security model required
 for that user (note that identical user names may come in over
 different security models and will be appropriately separated via the
 access control settings).  The default security model is "usm" and the
-other common security models are likely "tsm" when using SSH or DTLS
+other common security models are likely "tsm" when using (D)TLS or SSH
 support and "ksm" if the Kerberos support has been compiled in.
 .IP "rocommunity COMMUNITY [SOURCE [OID | -V VIEW [CONTEXT]]]"
 .IP "rwcommunity COMMUNITY [SOURCE [OID | -V VIEW [CONTEXT]]]"
