@@ -792,12 +792,12 @@ sub usage {
   print "     --C            -- C code description\n";
   print "\n   EXAMPLES: \n";
   print "     net-snmp-cert genca --cn ca-net-snmp.org --days 1000\n";
-  print "     net-snmp-cert genca -f .snmp/net-snmp-cert.conf -i nocadm -I\n\n";
-  print "     net-snmp-cert gencert -t snmpd --cn host.net-snmp.org\n\n";
-  print "     net-snmp-cert gencsr -t snmpapp\n\n";
-  print "     net-snmp-cert signcsr --csr snmpapp --with-ca ca-net-snmp.org\n\n";
+  print "     net-snmp-cert genca -f .snmp/net-snmp-cert.conf -i nocadm -I\n";
+  print "     net-snmp-cert gencert -t snmpd --cn host.net-snmp.org\n";
+  print "     net-snmp-cert gencsr -t snmpapp\n";
+  print "     net-snmp-cert signcsr --csr snmpapp --with-ca ca-net-snmp.org\n";
   print "     net-snmp-cert showcerts --subject --issuer --dates snmpapp\n";
-  print "     net-snmp-cert showcas --fingerprint ca-net-snmp.org --brief\n\n";
+  print "     net-snmp-cert showcas --fingerprint ca-net-snmp.org --brief\n";
   print "     net-snmp-cert import ca-third-party.crt\n";
   print "     net-snmp-cert import signed-request.crt signed-request.key\n\n";
 
@@ -946,7 +946,7 @@ sub check_output_file {
   my $continue = 1;
 
   if (-w $file) {
-    if ($interactive) {
+    if ($interactive and not $opts->{'force'}) {
       print "Output file ($file) exists; will be overwritten\nContinue [y/N]: ";
       $continue = <STDIN>; chomp $continue;
       $continue = 0 if $continue =~ /^\s*$|^no?\s*$/i;
@@ -1006,11 +1006,11 @@ MD		= sha1
 KSIZE		= 2048
 CN		= net-snmp.org
 EMAIL		= admin@net-snmp.org
-COUNTRY	 = US
-STATE		= California
+COUNTRY	        = US
+STATE		= CA
 LOCALITY	= Davis
-ORG		= Net-SNMP Developers
-ORG_UNIT	= SNMP-TLS
+ORG		= Net-SNMP
+ORG_UNIT	= Development
 SAN             = email:copy
 DAYS            = 365
 CRLDAYS         = 30
@@ -1337,8 +1337,8 @@ sub dump {
 
   {
     my $indent = (defined $indent ? $indent + 3 : 0);
-    foreach my $key (sort {cfgsort($self, $NetSNMP::Cert::Obj::a,$NetSNMP::Cert::Obj::b)}
-		     (sort @data_keys)) {
+    foreach my $key (sort {cfgsort($self,$NetSNMP::Cert::Obj::a,
+				   $NetSNMP::Cert::Obj::b)} (sort @data_keys)) {
       if (ref($self->{$key}) =~ /NetSNMP::Cert/) {
 	push(@lines, $self->{$key}->dump($indent));
       } elsif (ref($self->{$key}) =~ /ARRAY/) {
@@ -1364,7 +1364,7 @@ sub dump {
 sub DESTROY {
   my $this = shift;
 
-  print("Obj::DESTROY  $this [", ref $this, "]\n") if $NetSNMP::Cert::DEBUG >= 3;
+  print("Obj::DESTROY $this [", ref $this, "]\n") if $NetSNMP::Cert::DEBUG >= 3;
 }
 
 package NetSNMP::Cert::App;
@@ -1441,8 +1441,10 @@ sub init {
   $config->parse();
 
   # set defaults here if not already set in cmdline or config
-  NetSNMP::Cert::set_default($opts, $config, 'interactive', 1); # guided interactive mode by default
-  NetSNMP::Cert::set_default($opts, $config, 'verbose', 1); # verbose output
+  # guided interactive mode by default
+  NetSNMP::Cert::set_default($opts, $config, 'interactive', 1);
+  # verbose output
+  NetSNMP::Cert::set_default($opts, $config, 'verbose', 1);
 
   # find tlsdir/subdirs or make it
   $opts->{'tlsdir'} = $app->createTlsDir();
@@ -1476,8 +1478,10 @@ sub parseArgs {
   $opts->{'verbose'} = not $opts->{'Q'} if defined $opts->{'Q'};
 
   # search for cfgdir and cfgfile based on opts and confpath
-  $opts->{'cfgdir'} = NetSNMP::Cert::find_cfgdir($opts->{'cfgdir'},$opts->{'cfgfile'});
-  $opts->{'cfgfile'} = NetSNMP::Cert::find_cfgfile($opts->{'cfgdir'},$opts->{'cfgfile'});
+  $opts->{'cfgdir'} = NetSNMP::Cert::find_cfgdir($opts->{'cfgdir'},
+						 $opts->{'cfgfile'});
+  $opts->{'cfgfile'} = NetSNMP::Cert::find_cfgfile($opts->{'cfgdir'},
+						   $opts->{'cfgfile'});
 }
 
 sub createTlsDir {
@@ -1505,10 +1509,9 @@ sub createTlsDir {
 
   my $ssl_cfg_in = NetSNMP::Cert::fq_rel_path($NetSNMP::Cert::SSLCFGIN,$dir);
 
-  # XXX - temporary measure - future releases will preserve user edits
+  # Existing openssl.conf tmpl will be preserved
   if (-f $ssl_cfg_in) {
-    NetSNMP::Cert::dwarn("OpenSSL template exists: removing: edits will be lost", $opts);
-    unlink($ssl_cfg_in);
+    NetSNMP::Cert::dwarn("OpenSSL template exists: preserving...", $opts);
   }
 
   if (not -f $ssl_cfg_in) {
@@ -1537,7 +1540,7 @@ sub run {
 
   #  change dir tls dir - the cwd for all commands - save cwd first
   $opts->{'rdir'} = ::getcwd();
-  chdir($opts->{'tlsdir'}) or die("could not change directory: $opts->{tlsdir}");
+  chdir($opts->{'tlsdir'}) or die("could'nt change directory: $opts->{tlsdir}");
   # display context
   NetSNMP::Cert::dprint("PATH: $ENV{PATH}\n\n", $opts);
   NetSNMP::Cert::dprint("config file: $opts->{cfgfile}\n", $opts);
@@ -1698,6 +1701,7 @@ sub opensslEnv {
   my $org = $config->inherit("org");
   my $org_unit = $config->inherit("unit") || $config->inherit("orgUnit");
   my $san;
+  my $san_arr_ref;
   my $md = $config->inherit("msgDigest");
   my $ksize = $config->inherit("keySize");
 
@@ -1717,8 +1721,10 @@ sub opensslEnv {
   $env .= " STATE=$state" if defined $state;
   $env .= " LOCALITY=$locality" if defined $locality;
 
-  $san = join('\,\ ',@{$config->inherit("subjectAltName")}) if ref $config->inherit("subjectAltName");
-  $san .= join('\,\ ',@{$config->inherit("san")}) if ref $config->inherit("san");
+  $san_arr_ref = $config->inherit('subjectAltName');
+  $san = join('\,\ ', @{$san_arr_ref}) if ref $san_arr_ref;
+  $san_arr_ref = $config->inherit('san');
+  $san .= join('\,\ ', @{$san_arr_ref}) if ref $san_arr_ref;
   $san =~ s/EMAIL:/email:/g;
   $env .= " SAN=$san" if defined $san;
 
@@ -1739,42 +1745,52 @@ sub userInputDN {
   my $opts = $app->{'OPTS'};
   my $prompt;
   my $ret;
-  # get EMAIL
+  my $host = $config->inherit("host") || ::hostname();
+  my $email = $config->inherit('email') || getlogin() . "\@$host";
+
+ # get EMAIL
   $prompt = "Enter Email";
-  $ret = $config->inherit('email') || 'admin@net-snmp.org';
+  $ret = $email;
   $prompt .= (defined $ret ? " [$ret]: " : ": ");
-  $ret = NetSNMP::Term::Complete($prompt, $ret, "\tEmail Address - (e.g., <name>@<domain>)");
-  $opts->{'email'} = $ret if defined $ret;
+  $ret = NetSNMP::Term::Complete($prompt, $ret,
+				 "\tEmail Address - (e.g., <name>@<domain>)");
+  $email = $opts->{'email'} = $ret if defined $ret;
   # get CN
   $prompt = "Enter Common Name";
-  $ret = $config->inherit('cn') || $config->inherit('commonName') || 'Net-SNMP Developers';
+  $ret = ($opts->{'cmd'} eq 'genca' ? "ca-$host" : $email);
+  $ret = $config->inherit('cn') || $config->inherit('commonName') || $ret;
   $prompt .= (defined $ret ? " [$ret]: " : ": ");
-  $ret = NetSNMP::Term::Complete($prompt, $ret, "\tCommon Name - (e.g., Net-SNMP Developers)");
+  $ret = NetSNMP::Term::Complete($prompt, $ret,
+				 "\tCommon Name - (e.g., net-snmp.org)");
   $opts->{'cn'} = $ret if defined $ret;
   # get ORG
   $prompt = "Enter Organization";
   $ret = $config->inherit('org') || 'Net-SNMP';
   $prompt .= (defined $ret ? " [$ret]: " : ": ");
-  $ret = NetSNMP::Term::Complete($prompt, $ret, "\tOrganization - (e.g., Net-SNMP)");
+  $ret = NetSNMP::Term::Complete($prompt, $ret,
+				 "\tOrganization - (e.g., Net-SNMP)");
   $opts->{'org'} = $ret if defined $ret;
   # get ORG_UNIT
   $prompt = "Enter Organizational Unit";
   $ret = $config->inherit('unit') || 'Development';
   $prompt .= (defined $ret ? " [$ret]: " : ": ");
-  $ret = NetSNMP::Term::Complete($prompt, $ret, "\tOrganizational Unit - (e.g., Development)");
+  $ret = NetSNMP::Term::Complete($prompt, $ret,
+				 "\tOrganizational Unit - (e.g., Development)");
   $opts->{'unit'} = $ret if defined $ret;
   # get COUNTRY
   $prompt = "Enter Country Code";
   $ret = $config->inherit('country') || 'US';
   $prompt .= (defined $ret ? " [$ret]: " : ": ");
-  $ret = NetSNMP::Term::Complete($prompt, $ret, "Country Code, 2 letters (<tab> for options)",
+  $ret = NetSNMP::Term::Complete($prompt, $ret,
+				 "Country Code, 2 letters (<tab> for options)",
 				 $NetSNMP::Cert::MATCH, \@CC);
   $opts->{'country'} = $ret if defined $ret;
   # get STATE(Province)
   $prompt = "Enter State or Province";
   $ret = $config->inherit('state') || 'CA';
   $prompt .= (defined $ret ? " [$ret]: " : ": ");
-  $ret = NetSNMP::Term::Complete($prompt, $ret, "\tState or Province - (e.g., CA)");
+  $ret = NetSNMP::Term::Complete($prompt, $ret,
+				 "\tState or Province - (e.g., CA)");
   $opts->{'state'} = $ret if defined $ret;
   # get LOCALITY
   $prompt = "Enter Locality";
@@ -1787,7 +1803,7 @@ sub userInputDN {
     $ret = 'done';
     $prompt = "Enter Subject Alt Name (enter 'done' when finished) [$ret]: ";
     $ret = NetSNMP::Term::Complete ($prompt, $ret,
-			    "\tSubject Alt Name - (e.g., email:admin\@net-snmp.org)",
+			    "\tSubject Alt Name - (<type>:<val>)",
 			     $NetSNMP::Cert::PREMATCH, \@san_prefix);
     push(@{$opts->{'san'}}, $ret) if defined $ret and $ret ne 'done';
   } while (defined $ret and $ret ne 'done');
@@ -1812,7 +1828,7 @@ sub userInputTag {
   $ret = $config->inherit('tag') || 'none';
   $prompt .= (defined $ret ? " [$ret]: " : ": ");
   $ret = NetSNMP::Term::Complete($prompt, $ret,
-				 "Application Tag to assocaiate with certificate",
+				 "Application Tag assocaiated with certificate",
 				 (not $NetSNMP::Cert::MATCH), \@snmp_apps);
   $opts->{'tag'} = $ret if defined $ret and $ret ne 'none';
 }
@@ -1832,7 +1848,8 @@ sub userInput {
   $prompt = "Operation";
   $ret = $config->inherit('cmd') || $interactive_ops[0][0];
   $prompt .= (defined $ret ? " [$ret]: " : ": ");
-  $ret = NetSNMP::Term::Complete($prompt, $ret, "Certifciate Operation to perform",
+  $ret = NetSNMP::Term::Complete($prompt, $ret,
+				 "Certifciate Operation to perform",
 				 $NetSNMP::Cert::MATCH, \@interactive_ops);
 
   $opts->{'cmd'} = $ret;
@@ -1952,8 +1969,8 @@ sub genCa {
   }
 
   NetSNMP::Cert::vprint("CA Generated:\n", $opts);
-  NetSNMP::Cert::vprint("  $NetSNMP::Cert::CADIR/$cn.crt\n", $opts);
-  NetSNMP::Cert::vprint("  $NetSNMP::Cert::PRIVDIR/$cn.key\n", $opts);
+  NetSNMP::Cert::vprint("  $outCrt\n", $opts);
+  NetSNMP::Cert::vprint("  $outKey\n", $opts);
 }
 
 sub genCert {
@@ -2008,8 +2025,8 @@ sub genCert {
   }
 
   NetSNMP::Cert::vprint("Certificate Generated:\n", $opts);
-  NetSNMP::Cert::vprint("  $NetSNMP::Cert::CRTDIR/$tag.crt\n", $opts);
-  NetSNMP::Cert::vprint("  $NetSNMP::Cert::PRIVDIR/$tag.key\n", $opts);
+  NetSNMP::Cert::vprint("  $outCrt\n", $opts);
+  NetSNMP::Cert::vprint("  $outKey\n", $opts);
 }
 
 sub genCsr {
@@ -2078,21 +2095,21 @@ sub signCsr {
   NetSNMP::Cert::dprint("ca: $ca\n", $opts);
   my $ca_base = ::basename($ca, @NetSNMP::Cert::CRTSUFFIXES);
   NetSNMP::Cert::dprint("ca_base: $ca_base\n", $opts);
+  my $ca_key = "$NetSNMP::Cert::PRIVDIR/$ca_base.key"; 
+
   my $csr = $opts->{'csr'};
   NetSNMP::Cert::dprint("csr: $csr\n", $opts);
   my $csr_base = ::basename($csr, @NetSNMP::Cert::CRTSUFFIXES);
   NetSNMP::Cert::dprint("csr_base: $csr_base\n", $opts);
+  my $outdir = ($install ? $NetSNMP::Cert::CRTDIR : $NetSNMP::Cert::NEWCRTDIR);
+  my $outCrt = "$outdir/$csr_base.crt";
 
   my $env = $app->opensslEnv($cn, $days, ".ca/$ca_base");
-
-  my $outdir = ($install ? $NetSNMP::Cert::CRTDIR : $NetSNMP::Cert::NEWCRTDIR);
-
-  my $outCrt = "$outdir/$csr_base.crt";
 
   NetSNMP::Cert::check_output_file($opts, $outCrt, $config->inherit('interactive'));
 
   # XXX - handle keyfile search??
-  my $cmd = "$env openssl ca -batch -days $days -extensions v3_ca_sign -cert '$ca' -keyfile '$NetSNMP::Cert::PRIVDIR/$ca_base.key' -in '$csr' -out '$outCrt' -config $NetSNMP::Cert::SSLCFG";
+  my $cmd = "$env openssl ca -batch -days $days -extensions v3_ca_sign -cert '$ca' -keyfile '$ca_key' -in '$csr' -out '$outCrt' -config $NetSNMP::Cert::SSLCFG";
 
   # $cmd .= ($isCa ? " -extensions v3_ca_sign_ca" : " -extensions v3_ca_sign");
 
@@ -2104,9 +2121,9 @@ sub signCsr {
   NetSNMP::Cert::vprint("  $csr\n", $opts);
   NetSNMP::Cert::vprint("with CA:\n", $opts);
   NetSNMP::Cert::vprint("  $ca\n", $opts);
-  NetSNMP::Cert::vprint("  $NetSNMP::Cert::PRIVDIR/$ca_base.key\n", $opts);
+  NetSNMP::Cert::vprint("  $ca_key\n", $opts);
   NetSNMP::Cert::vprint("Generated Certificate:\n", $opts);
-  NetSNMP::Cert::vprint("  $NetSNMP::Cert::NEWCRTDIR/$csr_base.crt\n", $opts);
+  NetSNMP::Cert::vprint("  $outCrt\n", $opts);
 }
 
 sub show {
@@ -2327,4 +2344,294 @@ package main;
 my $app = new NetSNMP::Cert::App();
 $app->init(@ARGV);
 $app->run();
+
+__END__
+=pod
+
+=head1   NAME
+
+net-snmp-cert - Net-SNMP Certificate Management Tool
+
+=head1   SYNOPSIS
+
+=over
+
+=item $ net-snmp-cert genca -I --cn ca-Net-SNMP
+
+=item $ net-snmp-cert gencert -I -t snmpapp --with-ca ca-Net-SNMP
+
+=item $ net-snmp-cert gencert -I -t snmpd --cn net-snmp.org
+
+=item $ net-snmp-cert showcas
+
+=item $ net-snmp-cert showcerts
+
+=back
+
+=head1   DESCRIPTION
+
+net-snmp-cert creates, signs, installs and displays X.509
+certificates used in the operation of Net-SNMP/(D)TLS.
+
+=head1   SYNTAX
+
+=over
+
+=item net-snmp-cert [--help|-?]
+
+=item net-snmp-cert [--version|-V]
+
+=item net-snmp-cert genca    [<flags>] [<dn-opts>] [--with-ca <ca>]
+
+=item net-snmp-cert gencert  [<flags>] [<dn-opts>] [--with-ca <ca>]
+
+=item net-snmp-cert gencsr   [<flags>] [<dn-opts>] [--from-crt <crt>]
+
+=item net-snmp-cert signcsr  [<flags>] [--install] --csr <csr> --with-ca <ca>
+
+=item net-snmp-cert showca   [<flags>] [<format-opts>] [<file>|<search-tag>]
+
+=item net-snmp-cert showcert [<flags>] [<format-opts>] [<file>|<search-tag>]
+
+=item net-snmp-cert import   [<flags>] <file|url> [<key>]
+
+=back
+
+=head1   COMMANDS
+
+=over
+
+=item genca
+
+generate a signed CA certificate suitable for signing other
+certificates. default: self-signed unless --with-ca <ca> supplied
+
+=item gencert
+
+generate a signed certificate suitable for identification, or
+validation. default: self-signed unless --with-ca <ca> supplied
+
+=item gencsr
+
+generate a certificate signing request. will create a new
+key and certificate unless --from-crt <crt> supplied
+
+=item signcsr
+
+sign a certificate signing request specified by --csr <csr>
+with the CA certificate specified by --with-ca <ca>
+
+=item import
+
+import an identity or CA certificate, optionally import <key>
+if an URL is passed, will attempt to import certificate from site
+
+=item showca, showcert
+
+show CA or identity certificate(s). may pass fully qualified
+file or directory name, or a search-tag which prefix matches
+installed CA or identity certificate file name(s)
+see FORMAT OPTIONS to specify output format
+
+
+=back
+
+=head1   FLAGS
+
+=over
+
+=item -?, --help            -- show this text and exit
+
+=item -V, --version         -- show version string and exit
+
+=item -D, --debug           -- raise debug level (-D -D for higher level)
+
+=item -F, --force           -- force overwrite of existing output files
+
+=item -I, --nointeractive   -- non-interactive run (default interactive)
+
+=item -Q, --noverbose       -- non-verbose output (default verbose)
+
+=item -C, --cfgdir   <dir>  -- configuration dir (see man(5) snmp_config)
+
+=item -T, --tlsdir   <dir>  -- root for cert storage (default <cfgdir>/tls)
+
+=item -f, --cfgfile  <file> -- config (default <cfgdir>/net-snmp-cert.conf)
+
+=item -i, --identity <id>   -- identity to use from config
+
+=item -t, --tag      <tag>  -- application tag (default 'snmp')
+
+=item --<cfg-param>[=<val>] -- additional config params
+
+=back
+
+=head1   CERTIFICATE OPTIONS (<cert-opts>)
+
+=over
+
+=item -a, --with-ca <ca>    -- CA certificate used to sign request
+
+=item -A, --ca <ca>         -- explicit output CA certificate
+
+=item -r, --csr <csr>       -- certificate signing request
+
+=item -x, --from-crt <crt>  -- input certificate for current operation
+
+=item -X, --crt <crt>       -- explicit output certificate
+
+=item -y, --install         -- install result in local repository
+
+=back
+
+=head1   DISTINGUISHED NAME OPTIONS (<dn-opts>)
+
+=over
+
+=item -e, --email <email>       -- email name
+
+=item -h, --host <host>         -- DNS host name, or IP address
+
+=item -d, --days <days>         -- number of days certificate is valid
+
+=item -n, --cn <cn>             -- common name (CN)
+
+=item -o, --org <org>           -- organiztion name
+
+=item -u, --unit <unit>         -- organiztion unit name
+
+=item -c, --country <country>   -- country code (e.g., US)
+
+=item -p, --province <province> -- province name (synomynous w/ state)
+
+=item -p, --state <state>       -- state name (synomynous w/ province)
+
+=item -l, --locality <locality> -- locality name (e.g, town)
+
+=item -s, --san <san>           -- subjectAltName, repeat for each <san>
+
+=over 2
+
+=item    <san> value format (<FMT>:<VAL>):
+
+=over 3
+
+=item       dirName:/usr/share/snmp/tls
+
+=item       DNS:net-snmp.org
+
+=item       email:admin@net-snmp.org
+
+=item       IP:192.168.1.1
+
+=item       RID:1.1.3.6
+
+=item       URI:http://net-snmp.org
+
+=back
+
+=back
+
+=back
+
+=head1   FORMAT OPTIONS (<format-opts>)
+
+=over
+
+=item --brief        -- minimized output (values only where applicable)
+
+=item --text         -- full text description
+
+=item --subject      -- subject description
+
+=item --subject_hash -- hash of subject for indexing
+
+=item --issuer       -- issuer description
+
+=item --issuer_hash  -- hash of issuer for indexing
+
+=item --fingerprint  -- SHA1 digest of DER
+
+=item --serial       -- serial number
+
+=item --modulus      -- modulus of the public key
+
+=item --dates        -- start and end dates
+
+=item --purpose      -- displays allowed uses
+
+=item --C            -- C code description
+
+=back
+
+=head1   OPERATIONAL NOTES
+
+
+=head2   Interactive Mode
+
+The application operates in interactive mode by default. In this mode
+basic operations of offered and required input is queried through the
+command line. 
+
+Typical <tab> completion is provided when possible and field specific
+help may be obtained by entering '?'.
+
+To turn off interactive mode, supply '--nointeractive' or '-I' on the
+initial command line. Equivalantly, 'interactive = false' maybe placed
+in the configuration file (see below).
+
+=head2   Configuration
+
+A configuration file may be supplied on the command line or found in a
+default location (<snmpconfpath>/net-snmp-cert.conf). This file may
+contain configuration parameters equivalent to those supplied on the
+command line and effectively provides default values for these
+values. If a command line parameter is supplied it will override the
+value in the config file. If neither is present then an application
+value will be used.
+
+=head2   Certificate Naming
+
+Filenames of created certificates, as stored in the configuration
+directory, are chosen in the following manner. If and application tag
+is supplied, it will be used as the basename for the certificate and
+key generated. Otherwise, for CA certificates, the basename will be
+derived from the Common Name. For non-CA certificates the application
+tag defaults to 'snmp' which will then be used as the basename of the
+certificate and key.
+
+=head1   EXAMPLES
+
+=over
+
+=item net-snmp-cert genca --cn ca-net-snmp.org --days 1000
+
+=item net-snmp-cert genca -f .snmp/net-snmp-cert.conf -i nocadm
+
+=item net-snmp-cert gencert -t snmpd --cn host.net-snmp.org
+
+=item net-snmp-cert gencsr -t snmpapp
+
+=item net-snmp-cert signcsr --csr snmpapp --with-ca ca-net-snmp.org
+
+=item net-snmp-cert showcerts --subject --issuer --dates snmpapp
+
+=item net-snmp-cert showcas --fingerprint ca-net-snmp.org --brief
+
+=item net-snmp-cert import ca-third-party.crt
+
+=item net-snmp-cert import signed-request.crt signed-request.key
+
+=back
+
+=head1 COPYRIGHT
+
+Copyright (c) 2010 Cobham Analytic Solutions - All rights reserved.
+Copyright (c) 2010 G. S. Marzot -  All rights reserved.
+
+=head1   AUTHOR
+
+G. S. Marzot (marz@users.sourceforge.net)
+
+=cut
 
