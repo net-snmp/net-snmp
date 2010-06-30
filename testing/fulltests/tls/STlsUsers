@@ -83,7 +83,7 @@ CHECKVALUEISNT "$CAUSERFP" "" "generated fingerprint for causer certificate"
 CONFIGAGENT '[snmp]' debugTokens tsm
 # ,tls,ssl,cert,tsm
 CONFIGAGENT '[snmp]' doDebugging 1
-CONFIGAGENT '[snmp]' defX509ServerPub $SERVERFP
+CONFIGAGENT '[snmp]' serverCert $SERVERFP
 
 CONFIGAGENT '[snmp]' trustCert $CAFP
 
@@ -104,7 +104,7 @@ CONFIGAGENT certSecName 100 $CAFP        --rfc822
 # *** INTENTIONALLY NOT MAPPING AT ALL: ***
 # CONFIGAGENT certSecName 1000 $UNMAPPEDFP ....
 
-CONFIGAPP   defX509ServerPub  	  $SERVERFP
+CONFIGAPP   serverCert  	  $SERVERFP
 CONFIGAPP   defSecurityModel      tsm
 
 CONFIGAGENT  rwuser -s tsm testuser authpriv
@@ -159,7 +159,7 @@ CHECKVALUEISNT "$UNKNOWNCAUSERFP" "" "generated fingerprint for unknowncauser ce
 DOSETTEST user1SnmpApp "$FLAGS"
 
 # now rerun the test after specifying our default using the (same) fingerprint
-CONFIGAPP   defX509ClientPub  	  $TESTUSER2FP
+CONFIGAPP   clientCert  	  $TESTUSER2FP
 DOSETTEST user1ClientPub "$FLAGS"
 
 # using user 2 - a common name mapped certificate with a direct -T FP request

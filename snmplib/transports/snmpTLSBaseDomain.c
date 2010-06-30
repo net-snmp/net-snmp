@@ -715,6 +715,10 @@ netsnmp_tlsbase_ctor(void) {
      */
 
     /* the public client cert to authenticate with */
+    netsnmp_ds_register_config(ASN_OCTET_STR, "snmp", "clientCert",
+                               NETSNMP_DS_LIBRARY_ID,
+                               NETSNMP_DS_LIB_X509_CLIENT_PUB);
+    /* XXX: this one needs to go away before 5.6 final */
     netsnmp_ds_register_config(ASN_OCTET_STR, "snmp", "defX509ClientPub",
                                NETSNMP_DS_LIBRARY_ID,
                                NETSNMP_DS_LIB_X509_CLIENT_PUB);
@@ -724,6 +728,10 @@ netsnmp_tlsbase_ctor(void) {
      */
 
     /* The X509 server key to use */
+    netsnmp_ds_register_config(ASN_OCTET_STR, "snmp", "serverCert",
+                               NETSNMP_DS_LIBRARY_ID,
+                               NETSNMP_DS_LIB_X509_SERVER_PUB);
+    /* XXX: this one needs to go away before 5.6 final */
     netsnmp_ds_register_config(ASN_OCTET_STR, "snmp", "defX509ServerPub",
                                NETSNMP_DS_LIBRARY_ID,
                                NETSNMP_DS_LIB_X509_SERVER_PUB);

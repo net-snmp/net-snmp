@@ -240,10 +240,7 @@ Allows connections from the snmp subsystem on the ssh server on port
 .IR "dtlsudp:127.0.0.1:9161"
 Listen for connections over DTLS on UDP port 9161.  The snmp.conf file
 must have the
-.IR defX509ServerPub,
-.IR defX509ServerPriv,
-and
-.IR defX509ClientCerts
+.IR serverCert,
 configuration tokens defined.
 .PP
 Note that not all the transport domains listed above will always be
@@ -308,16 +305,10 @@ server certificates to establish the connection and authenticate both
 sides.  In order to do this, the client will need to configure the
 snmp.conf file
 with the
-.IR defX509ServerCerts,
-.IR defX509ClientPriv,
-and
-.IR defX509ClientPub
+.IR clientCert
 configuration tokens.  The server will need to configure the snmp.conf
 file with the
-.IR defX509ServerPub,
-.IR defX509ServerPriv,
-and
-.IR defX509ClientCerts
+.IR serverCert
 configuration tokens defined.
 .IP
 Access control setup is similar to the ssh transport as the TSM

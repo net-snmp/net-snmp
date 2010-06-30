@@ -31,7 +31,7 @@ CHECKVALUEISNT "$TESTUSER2FP" "" "generated fingerprint for testuser2 certificat
 ########################################
 # Configure the .conf files
 
-CONFIGAPP defX509ServerPub $SERVERFP
+CONFIGAPP serverCert $SERVERFP
 
 # common name mappings
 CONFIGAGENT certSecName 9  $TESTUSERFP     --cn
