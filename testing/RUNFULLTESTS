@@ -232,7 +232,7 @@ sub push_or_skip {
     foreach my $file (@files) {
 	next if ($file =~ /.(bak|old|orig|rej)$/);
 	next if ($file =~ /~$/);
-	next if (defined($regexp) && $file !~ /$regexp/);
+	next if (defined($regexp) && $file !~ /$regexp/i);
 	DEBUG("  Adding file $file\n");
 	push @$array, build_test($file);
     }
