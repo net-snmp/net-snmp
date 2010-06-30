@@ -2163,23 +2163,43 @@ sub show {
   }
 }
 
-sub url_to_file {
-    my ($url, $suffix) = @_;
+sub import_file {
+    my ($file, $suffix, $targ, $rdir, $tag) = @_;
 
-    require File::Temp;
-    import File::Temp qw(tempfile);
+    if (NetSNMP::Cert::is_url($file)) {
+	if ($NetSNMP::Cert::haveUserAgent) {
 
-    my ($fh, $filename) = tempfile(SUFFIX => $suffix);
-    my $ua = LWP::UserAgent->new;
-    my $response = $ua->get($url);
-    if ($response->is_success) {
-	print $fh $response->decoded_content();
-    } else {
-      NetSNMP::Cert::vwarn("failed to download a certificate from $url");
-      return;
+	    require File::Temp;
+	    import File::Temp qw(tempfile);
+
+	    my ($fh, $newfilename) = tempfile(SUFFIX => $suffix);
+	    return if (!$fh || !$newfilename);
+	    my $ua = LWP::UserAgent->new;
+	    my $response = $ua->get($file);
+	    if ($response->is_success) {
+		print $fh $response->decoded_content();
+	    } else {
+		NetSNMP::Cert::vwarn("failed to download a certificate from $file");
+		return;
+	    }
+	    $fh->close;
+	    $file = $newfilename;
+	} else {
+	    NetSNMP::Cert::vwarn("LWP::UserAgent not installed: unable to import certificate");
+	    return;
+	}
     }
-    $fh->close;
-    return $filename;
+
+    $file = NetSNMP::Cert::fq_rel_path($file, $rdir);
+    die("file unreadable: $file\n") unless -r $file;
+
+
+    if (! $targ) {
+	$targ = (NetSNMP::Cert::is_ca_cert($file) ? $NetSNMP::Cert::CADIR : $NetSNMP::Cert::CRTDIR);
+    }
+
+    $targ .= "/" . $tag . ".crt" if ($tag);
+    ::copy($file, $targ);
 }
 
 
@@ -2196,23 +2216,8 @@ sub import {
     NetSNMP::Cert::usage(1);
   }
 
-  if (NetSNMP::Cert::is_url($carg)) {
-    if ($NetSNMP::Cert::haveUserAgent) {
-      $carg = url_to_file($carg, '.crt');
-      return $NetSNMP::Cert::ERR if (!$carg);
-    } else {
-      NetSNMP::Cert::vwarn("LWP::UserAgent not installed: unable to import certificate");
-      return $NetSNMP::Cert::ERR;
-    }
-  }
-
-  $carg = NetSNMP::Cert::fq_rel_path($carg, $opts->{'rdir'});
-  die("certificate unreadable: $carg\n") unless -r $carg;
-
-  $targ = (NetSNMP::Cert::is_ca_cert($carg) ? $NetSNMP::Cert::CADIR : $NetSNMP::Cert::CRTDIR);
-
-  $targ .= "/" . $opts->{'tag'} . ".crt" if ($opts->{'tag'});
-  ::copy($carg, $targ);
+  import_file($carg, '.crt', '',,
+	      $opts->{'rdir'}, $opts->{'tag'});
 
   return unless defined $karg;
 
