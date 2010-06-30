@@ -431,12 +431,6 @@ main(int argc, char **argv)
     u_int                  hash_type;
     char                  *fingerprint, *tmp;
 
-#define RKS
-#ifdef RKS
-    debug_register_tokens("snmp_parse_args");
-    snmp_set_do_debugging(1);
-#endif
-
     /*
      * get the common command line arguments 
      */
