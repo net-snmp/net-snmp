@@ -1,4 +1,4 @@
-.TH "variable_list" 3 "28 Sep 2009" "Version 5.5" "net-snmp" \" -*- nroff -*-
+.TH "variable_list" 3 "30 Jun 2010" "Version 5.6.pre2" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -41,7 +41,7 @@ The netsnmp \fBvariable\fP list binding structure, it's typedef'd to netsnmp_var
 .ti -1c
 .RI "oid \fBname_loc\fP [MAX_OID_LEN]"
 .br
-.RI "\fI90 percentile < 24. \fP"
+.RI "\fIbuffer to hold the OID \fP"
 .ti -1c
 .RI "u_char \fBbuf\fP [40]"
 .br
@@ -67,19 +67,19 @@ The netsnmp \fBvariable\fP list binding structure, it's typedef'd to netsnmp_var
 .PP
 \fBnotification.c\fP.
 .PP
-Definition at line 112 of file types.h.
+Definition at line 125 of file types.h.
 .SH "Field Documentation"
 .PP 
 .SS "u_char \fBvariable_list::buf\fP[40]"
 .PP
 90 percentile < 40. 
 .PP
-Definition at line 128 of file types.h.
+Definition at line 141 of file types.h.
 .SS "void* \fBvariable_list::data\fP"
 .PP
 (Opaque) hook for additional data 
 .PP
-Definition at line 130 of file types.h.
+Definition at line 143 of file types.h.
 .SS "void(* \fBvariable_list::dataFreeHook\fP)(void *)"
 .PP
 callback to free above 
@@ -87,22 +87,22 @@ callback to free above
 .PP
 Object identifier of \fBvariable\fP. 
 .PP
-Definition at line 116 of file types.h.
+Definition at line 129 of file types.h.
 .SS "size_t \fBvariable_list::name_length\fP"
 .PP
 number of subid's in name 
 .PP
-Definition at line 118 of file types.h.
+Definition at line 131 of file types.h.
 .SS "oid \fBvariable_list::name_loc\fP[MAX_OID_LEN]"
 .PP
-90 percentile < 24. 
+buffer to hold the OID 
 .PP
-Definition at line 126 of file types.h.
+Definition at line 139 of file types.h.
 .SS "struct \fBvariable_list\fP* \fBvariable_list::next_variable\fP\fC [read]\fP"
 .PP
 NULL for last \fBvariable\fP. 
 .PP
-Definition at line 114 of file types.h.
+Definition at line 127 of file types.h.
 .SS "u_char \fBvariable_list::type\fP"
 .PP
 ASN type of \fBvariable\fP. 
@@ -111,7 +111,7 @@ ASN type of \fBvariable\fP.
 .in +1c
 \fBdelayed_instance.c\fP.
 .PP
-Definition at line 120 of file types.h.
+Definition at line 133 of file types.h.
 .SS "\fBnetsnmp_vardata\fP \fBvariable_list::val\fP"
 .PP
 value of \fBvariable\fP 
@@ -120,12 +120,12 @@ value of \fBvariable\fP
 .in +1c
 \fBdelayed_instance.c\fP.
 .PP
-Definition at line 122 of file types.h.
+Definition at line 135 of file types.h.
 .SS "size_t \fBvariable_list::val_len\fP"
 .PP
 the length of the value to be copied into buf 
 .PP
-Definition at line 124 of file types.h.
+Definition at line 137 of file types.h.
 
 .SH "Author"
 .PP 

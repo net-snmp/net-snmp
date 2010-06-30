@@ -1,4 +1,4 @@
-.TH "table_container" 3 "28 Sep 2009" "Version 5.5" "net-snmp" \" -*- nroff -*-
+.TH "table_container" 3 "30 Jun 2010" "Version 5.6.pre2" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -42,6 +42,10 @@ Helps you implement a table when data can be found via a netsnmp_container.
 .RI "void \fBnetsnmp_container_table_row_insert\fP (\fBnetsnmp_request_info\fP *request, \fBnetsnmp_index\fP *row)"
 .br
 .RI "\fIinserts a newly created table_container entry into a request list \fP"
+.ti -1c
+.RI "void \fBnetsnmp_container_table_row_remove\fP (\fBnetsnmp_request_info\fP *request, \fBnetsnmp_index\fP *row)"
+.br
+.RI "\fIremoves a table_container entry from a request list \fP"
 .ti -1c
 .RI "\fBnetsnmp_index\fP * \fBnetsnmp_table_index_find_next_row\fP (\fBnetsnmp_container\fP *c, \fBnetsnmp_table_request_info\fP *tblreq)"
 .br
@@ -101,6 +105,11 @@ Definition at line 255 of file table_container.c.
 inserts a newly created table_container entry into a request list 
 .PP
 Definition at line 370 of file table_container.c.
+.SS "void netsnmp_container_table_row_remove (\fBnetsnmp_request_info\fP * request, \fBnetsnmp_index\fP * row)"
+.PP
+removes a table_container entry from a request list 
+.PP
+Definition at line 438 of file table_container.c.
 .SS "\fBnetsnmp_index\fP* netsnmp_table_index_find_next_row (\fBnetsnmp_container\fP * c, \fBnetsnmp_table_request_info\fP * tblreq)"
 .PP
 deprecated, backwards compatability only expected impact to remove: none
@@ -114,7 +123,7 @@ never should have been a public method in the first place
 .PP
 
 .PP
-Definition at line 740 of file table_container.c.
+Definition at line 807 of file table_container.c.
 .SH "Author"
 .PP 
 Generated automatically by Doxygen for net-snmp from the source code.
