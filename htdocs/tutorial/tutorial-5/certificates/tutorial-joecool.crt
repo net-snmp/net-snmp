@@ -1,0 +1,95 @@
+Certificate:
+    Data:
+        Version: 3 (0x2)
+        Serial Number: 2 (0x2)
+        Signature Algorithm: sha1WithRSAEncryption
+        Issuer: C=US, ST=California, L=Davis, O=Net-SNMP Developers, OU=SNMP-TLS, CN=tutorial-CA/emailAddress=tutorial-CA@test.net-snmp.org
+        Validity
+            Not Before: May 12 14:46:40 2010 GMT
+            Not After : May 11 14:46:40 2015 GMT
+        Subject: C=US, ST=California, O=Net-SNMP Developers, OU=SNMP-TLS, CN=Joe Cool/emailAddress=joe.cool@test.net-snmp.org
+        Subject Public Key Info:
+            Public Key Algorithm: rsaEncryption
+            RSA Public Key: (2048 bit)
+                Modulus (2048 bit):
+                    00:a6:4c:57:f3:dc:2d:a5:d0:6a:f8:2b:65:c0:24:
+                    6a:91:32:54:bb:ee:98:e8:8a:0a:5e:3a:8b:13:57:
+                    1c:5c:1b:79:08:71:71:2e:c9:fe:2f:ba:68:43:67:
+                    8d:8c:f8:98:63:7f:31:52:f9:18:19:ac:eb:8a:84:
+                    aa:2c:c4:d3:df:5f:1d:ec:fc:4c:ca:b5:c2:85:c0:
+                    7b:03:6b:6a:79:68:43:fe:b5:fa:c7:7e:37:ab:e9:
+                    ce:0f:5b:7d:3c:07:a9:73:c6:96:59:e6:7e:d3:eb:
+                    76:ba:e0:fc:22:c1:09:cc:10:7e:a6:08:ef:74:cc:
+                    b6:64:b2:e7:b2:81:45:ef:e0:a1:be:50:72:52:a2:
+                    59:d2:22:5c:8d:a2:d7:fa:e7:29:62:04:09:a9:8f:
+                    c2:67:20:2e:fc:dc:62:67:e5:15:48:51:96:50:9f:
+                    5c:f5:b7:c6:5b:16:ac:68:25:37:3b:d3:3b:df:bb:
+                    fb:f9:8e:7c:c8:46:02:4d:e6:33:ce:33:2d:03:04:
+                    9f:0c:f0:f2:16:64:91:6f:17:da:80:c8:5c:2d:3b:
+                    93:8c:e1:bd:c1:25:cc:34:d3:27:06:a7:85:a1:e0:
+                    79:78:05:d5:22:a4:96:e7:ff:40:50:4a:9f:94:cf:
+                    dc:8a:3e:8d:93:f2:02:c3:e5:c9:9a:5a:5b:22:4f:
+                    ae:89
+                Exponent: 65537 (0x10001)
+        X509v3 extensions:
+            X509v3 Basic Constraints: 
+                CA:FALSE
+            Netscape Comment: 
+                OpenSSL Generated Certificate (net-snmp)
+            X509v3 Key Usage: 
+                Digital Signature, Non Repudiation, Key Encipherment
+            X509v3 Subject Key Identifier: 
+                56:91:CC:D8:A6:FE:AE:8A:DE:00:ED:02:62:91:34:2B:6F:86:E7:92
+            X509v3 Authority Key Identifier: 
+                keyid:8B:D7:C3:06:25:A9:B6:7F:F5:74:E2:BF:55:B7:0B:38:6B:C1:57:F3
+                DirName:/C=US/ST=California/L=Davis/O=Net-SNMP Developers/OU=SNMP-TLS/CN=tutorial-CA/emailAddress=tutorial-CA@test.net-snmp.org
+                serial:82:E0:89:B7:0D:FE:C2:28
+
+            X509v3 Subject Alternative Name: 
+                email:joe.cool@test.net-snmp.org
+    Signature Algorithm: sha1WithRSAEncryption
+        ad:81:07:0a:24:29:ec:f5:db:a2:6b:e5:61:c2:7e:d7:d4:b3:
+        32:9a:7f:a3:d8:e2:c0:31:1d:44:01:2a:09:9e:5a:3e:99:21:
+        13:3c:92:1c:83:05:e3:99:9c:45:62:a3:aa:09:ac:ff:d6:6c:
+        09:81:a7:f7:5b:55:f7:62:69:1f:47:e5:dc:fd:cc:12:7a:03:
+        db:16:8a:b4:99:26:14:c3:08:24:4f:79:c3:c6:00:25:b7:3b:
+        a6:1b:61:41:66:3c:65:a6:d2:50:b2:ef:c4:43:dd:24:2b:71:
+        b9:33:ab:21:b1:59:0b:28:3b:b2:4c:7b:75:6d:53:35:7e:e4:
+        3f:af:e8:b7:53:ca:91:d4:34:c3:97:47:89:5c:62:5e:26:d9:
+        58:8e:2a:ad:dc:bd:d3:30:24:3d:b4:f3:49:51:af:8a:92:4e:
+        1c:bc:cf:bc:aa:1f:6c:f3:bd:1a:61:f0:35:b7:f9:44:d7:9c:
+        12:89:7b:35:b9:26:77:38:79:2b:a3:48:b7:0c:f1:b6:4d:04:
+        3e:40:85:fe:8e:2d:c6:10:3c:67:9f:15:d7:7d:c4:3a:e5:a3:
+        61:f1:26:fb:ae:90:a7:6b:05:42:eb:bb:4f:90:67:72:14:18:
+        3b:42:d7:e0:df:c4:72:e8:78:20:80:ce:70:b9:7c:71:cf:7d:
+        27:c0:62:57
+-----BEGIN CERTIFICATE-----
+MIIFMTCCBBmgAwIBAgIBAjANBgkqhkiG9w0BAQUFADCBpzELMAkGA1UEBhMCVVMx
+EzARBgNVBAgTCkNhbGlmb3JuaWExDjAMBgNVBAcTBURhdmlzMRwwGgYDVQQKExNO
+ZXQtU05NUCBEZXZlbG9wZXJzMREwDwYDVQQLEwhTTk1QLVRMUzEUMBIGA1UEAxML
+dHV0b3JpYWwtQ0ExLDAqBgkqhkiG9w0BCQEWHXR1dG9yaWFsLUNBQHRlc3QubmV0
+LXNubXAub3JnMB4XDTEwMDUxMjE0NDY0MFoXDTE1MDUxMTE0NDY0MFowgZExCzAJ
+BgNVBAYTAlVTMRMwEQYDVQQIEwpDYWxpZm9ybmlhMRwwGgYDVQQKExNOZXQtU05N
+UCBEZXZlbG9wZXJzMREwDwYDVQQLEwhTTk1QLVRMUzERMA8GA1UEAxMISm9lIENv
+b2wxKTAnBgkqhkiG9w0BCQEWGmpvZS5jb29sQHRlc3QubmV0LXNubXAub3JnMIIB
+IjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEApkxX89wtpdBq+CtlwCRqkTJU
+u+6Y6IoKXjqLE1ccXBt5CHFxLsn+L7poQ2eNjPiYY38xUvkYGazrioSqLMTT318d
+7PxMyrXChcB7A2tqeWhD/rX6x343q+nOD1t9PAepc8aWWeZ+0+t2uuD8IsEJzBB+
+pgjvdMy2ZLLnsoFF7+ChvlByUqJZ0iJcjaLX+ucpYgQJqY/CZyAu/NxiZ+UVSFGW
+UJ9c9bfGWxasaCU3O9M737v7+Y58yEYCTeYzzjMtAwSfDPDyFmSRbxfagMhcLTuT
+jOG9wSXMNNMnBqeFoeB5eAXVIqSW5/9AUEqflM/cij6Nk/ICw+XJmlpbIk+uiQID
+AQABo4IBejCCAXYwCQYDVR0TBAIwADA3BglghkgBhvhCAQ0EKhYoT3BlblNTTCBH
+ZW5lcmF0ZWQgQ2VydGlmaWNhdGUgKG5ldC1zbm1wKTALBgNVHQ8EBAMCBeAwHQYD
+VR0OBBYEFFaRzNim/q6K3gDtAmKRNCtvhueSMIHcBgNVHSMEgdQwgdGAFIvXwwYl
+qbZ/9XTiv1W3CzhrwVfzoYGtpIGqMIGnMQswCQYDVQQGEwJVUzETMBEGA1UECBMK
+Q2FsaWZvcm5pYTEOMAwGA1UEBxMFRGF2aXMxHDAaBgNVBAoTE05ldC1TTk1QIERl
+dmVsb3BlcnMxETAPBgNVBAsTCFNOTVAtVExTMRQwEgYDVQQDEwt0dXRvcmlhbC1D
+QTEsMCoGCSqGSIb3DQEJARYddHV0b3JpYWwtQ0FAdGVzdC5uZXQtc25tcC5vcmeC
+CQCC4Im3Df7CKDAlBgNVHREEHjAcgRpqb2UuY29vbEB0ZXN0Lm5ldC1zbm1wLm9y
+ZzANBgkqhkiG9w0BAQUFAAOCAQEArYEHCiQp7PXbomvlYcJ+19SzMpp/o9jiwDEd
+RAEqCZ5aPpkhEzySHIMF45mcRWKjqgms/9ZsCYGn91tV92JpH0fl3P3MEnoD2xaK
+tJkmFMMIJE95w8YAJbc7phthQWY8ZabSULLvxEPdJCtxuTOrIbFZCyg7skx7dW1T
+NX7kP6/ot1PKkdQ0w5dHiVxiXibZWI4qrdy90zAkPbTzSVGvipJOHLzPvKofbPO9
+GmHwNbf5RNecEol7Nbkmdzh5K6NItwzxtk0EPkCF/o4txhA8Z58V133EOuWjYfEm
++66Qp2sFQuu7T5BnchQYO0LX4N/Ecuh4IIDOcLl8cc99J8BiVw==
+-----END CERTIFICATE-----
