@@ -214,6 +214,16 @@ netsnmp_tlsbase_verify_server_cert(SSL *ssl, _netsnmpTLSBaseData *tlsdata) {
             int                 i, j;
             int                 count;
             char                buf[SPRINT_MAX_LEN];
+            int                 is_wildcarded = 0;
+            char               *compare_to;
+
+            /* see if the requested hostname has a wildcard prefix */
+            if (strncmp(tlsdata->their_hostname, "*.", 2) == 0) {
+                is_wildcarded = 1;
+                compare_to = tlsdata->their_hostname + 2;
+            } else {
+                compare_to = tlsdata->their_hostname;
+            }
 
             /* if the hostname we were expecting to talk to matches
                the cert, then we can accept this connection. */
@@ -242,9 +252,14 @@ netsnmp_tlsbase_verify_server_cert(SSL *ssl, _netsnmpTLSBaseData *tlsdata) {
                         }
                         check_name = buf;
                         
+                        if (is_wildcarded) {
+                            /* we *only* allow passing till the first '.' */
+                            /* ie *.example.com can't match a.b.example.com */
+                            check_name = strchr(check_name, '.') + 1;
+                        }
+
                         DEBUGMSGTL(("tls_x509:verify", "checking subjectAltname of dns:%s\n", check_name));
-                        if (tlsdata->their_hostname[0] != '\0' &&
-                            strcmp(tlsdata->their_hostname, check_name) == 0) {
+                        if (strcmp(compare_to, check_name) == 0) {
 
                             DEBUGMSGTL(("tls_x509:verify", "Successful match on a subjectAltname of dns:%s\n", check_name));
                             return SNMPERR_SUCCESS;
@@ -257,7 +272,13 @@ netsnmp_tlsbase_verify_server_cert(SSL *ssl, _netsnmpTLSBaseData *tlsdata) {
             check_name =
                 netsnmp_openssl_cert_get_commonName(remote_cert, NULL, NULL);
 
-            if (strcmp(tlsdata->their_hostname, check_name) == 0) {
+            if (is_wildcarded) {
+                /* we *only* allow passing till the first '.' */
+                /* ie *.example.com can't match a.b.example.com */
+                check_name = strchr(check_name, '.') + 1;
+            }
+
+            if (strcmp(compare_to, check_name) == 0) {
                 DEBUGMSGTL(("tls_x509:verify", "Successful match on a common name of %s\n", check_name));
                 return SNMPERR_SUCCESS;
             }
