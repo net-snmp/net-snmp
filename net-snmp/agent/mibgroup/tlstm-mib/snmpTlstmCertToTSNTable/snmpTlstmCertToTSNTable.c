@@ -442,17 +442,6 @@ tlstmCertToTSNTable_handler(netsnmp_mib_handler *handler,
                     (request->requestvb,(entry ? entry->storageType : ST_NONE));
                 break;          /* case COL_SNMPTLSTMCERTTOTSN_STORAGETYPE */
             case COL_SNMPTLSTMCERTTOTSN_ROWSTATUS:
-
-
-
-                if ((*request->requestvb->val.integer == 4) ||
-                    (requests != request) || request->next)
-                    ret = SNMP_ERR_GENERR;
-                else
-
-
-
-
                 ret = netsnmp_check_vb_rowstatus_with_storagetype
                     (request->requestvb,
                      (entry ? entry->rowStatus :RS_NONEXISTENT),
@@ -461,14 +450,6 @@ tlstmCertToTSNTable_handler(netsnmp_mib_handler *handler,
             default:
                 ret = SNMP_ERR_NOTWRITABLE;
             }                   /* switch colnum */
-
-
-
-            if (requests->next)
-                ret = SNMP_ERR_GENERR;
-
-
-
 
             if (ret != SNMP_ERR_NOERROR)
                 break;
