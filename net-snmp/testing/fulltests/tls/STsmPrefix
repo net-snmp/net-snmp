@@ -32,7 +32,7 @@ CAPTURE $NSCERT gencert --with-ca ca-net-snmp.org -t snmpapp2 --cn 'testuser2'  
 TESTUSER2FP=`$NSCERT showcerts --fingerprint --brief snmpapp2 $NSCERTARGS`
 CHECKVALUEISNT "$TESTUSER2FP" "" "generated fingerprint for testuser2 certificate"
 
-CONFIGAPP defX509ServerPub $SERVERFP
+CONFIGAPP serverCert $SERVERFP
 CONFIGAGENT certSecName 9  $TESTUSERFP     --cn
 CONFIGAGENT certSecName 10  $TESTUSER2FP     --cn
 CONFIGAGENT  rwuser -s tsm testuser authpriv

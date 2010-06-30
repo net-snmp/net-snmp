@@ -37,7 +37,7 @@ CHECKVALUEISNT "$CAUSERFP" "" "generated fingerprint for causer certificate"
 CONFIGTRAPD '[snmp]' debugTokens tsm
 # ,tls,ssl,cert,tsm
 CONFIGTRAPD '[snmp]' doDebugging 1
-CONFIGTRAPD '[snmp]' defX509ServerPub $SERVERFP
+CONFIGTRAPD '[snmp]' serverCert $SERVERFP
 
 CONFIGTRAPD '[snmp]' trustCert $CAFP
 
@@ -46,7 +46,7 @@ CONFIGTRAPD certSecName 9  $TESTUSERFP     --cn
 
 CONFIGTRAPD certSecName 100 $CAFP        --rfc822
 
-CONFIGAPP   defX509ServerPub  	  $SERVERFP
+CONFIGAPP   serverCert  	  $SERVERFP
 CONFIGAPP   defSecurityModel      tsm
 
 CONFIGTRAPD  authuser log -s tsm testuser authpriv

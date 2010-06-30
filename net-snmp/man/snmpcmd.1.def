@@ -233,7 +233,7 @@ client connections.  This would typically be a certificate found using
 the application name (eg snmpd, snmptrapd, perl, python) or
 genericized name "snmpapp" if using one of the generic applications
 (snmpget, snmpwalk, etc).  This can also be set using the
-defX509ClientPub specifier in a snmp.conf configuration file.
+clientCert specifier in a snmp.conf configuration file.
 .TP
 .BI "-T their_identity=<certificate-specifier>"
 If you expect a particular certificate to be presented by the other
@@ -241,7 +241,7 @@ side then you can use this specifier to indicate the certificate it
 should present.  If it fails to present the expected certificate the
 client will refuse to open the connection (because doing otherwise
 could lead to man-in-the-middle attacks).  This can also be set using
-the defX509ServerPub specifier in a snmp.conf configuration file.
+the serverCert specifier in a snmp.conf configuration file.
 .TP
 .BI "-T trust_cert=<certificate-specifier>"
 If you have a trusted CA certificate you wish to anchor trust with,
