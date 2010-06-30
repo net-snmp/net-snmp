@@ -673,6 +673,11 @@ agent_check_and_process(int block)
         }                       /* endif -- count>0 */
 
     /*
+     * see if persistent store needs to be saved
+     */
+    snmp_store_if_needed();
+
+    /*
      * Run requested alarms.  
      */
     run_alarms();
