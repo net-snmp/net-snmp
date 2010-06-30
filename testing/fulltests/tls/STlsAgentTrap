@@ -1,6 +1,6 @@
 #!/bin/sh
 
-. Stlsvars
+. STlsVars
 
 SKIPIFNOT USING_EXAMPLES_EXAMPLE_MODULE
 

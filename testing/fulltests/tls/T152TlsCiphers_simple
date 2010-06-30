@@ -2,7 +2,7 @@
 
 . ../support/simple_eval_tools.sh
 
-HEADER TLS-TCP agent trap tests
+HEADER TLS-TCP Cipher Selection
 
 SKIPIFNOT NETSNMP_TRANSPORT_TLSTCP_DOMAIN
 
@@ -11,5 +11,8 @@ SKIPIFNOT NETSNMP_TRANSPORT_TLSTCP_DOMAIN
 #
 
 SNMP_TRANSPORT_SPEC=tlstcp
+export SNMP_TRANSPORT_SPEC
+export SNMP_SNMPD_PORT
+export SNMP_TEST_DEST
 
-. ./Stlsagenttraptests
+. SCipherTests

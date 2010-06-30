@@ -2,7 +2,7 @@
 
 . ../support/simple_eval_tools.sh
 
-HEADER TSM prefixing support for DTLS/UDP
+HEADER DTLS-UDP Cipher Selection
 
 SKIPIFNOT NETSNMP_TRANSPORT_DTLSUDP_DOMAIN
 
@@ -14,6 +14,5 @@ SNMP_TRANSPORT_SPEC=dtlsudp
 export SNMP_TRANSPORT_SPEC
 export SNMP_SNMPD_PORT
 export SNMP_TEST_DEST
-TSM_PREFIX=dtls
 
-. ./Stsmprefix
+. SCipherTests

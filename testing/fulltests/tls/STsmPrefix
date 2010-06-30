@@ -1,8 +1,12 @@
 #!/bin/sh
 
-. Stlsvars
+. STlsVars
 
 # this file contains tests common to both tls and dtls usages
+
+export NET_SNMP_CRT_CFGTOOL="${builddir}/net-snmp-config"
+NSCERT="perl $SNMP_BASEDIR/../../../local/net-snmp-cert"
+NSCERTARGS="-I -C $SNMP_TMPDIR"
 
 TLSDIR=$SNMP_TMPDIR/tls
 
@@ -28,46 +32,22 @@ CAPTURE $NSCERT gencert --with-ca ca-net-snmp.org -t snmpapp2 --cn 'testuser2'  
 TESTUSER2FP=`$NSCERT showcerts --fingerprint --brief snmpapp2 $NSCERTARGS`
 CHECKVALUEISNT "$TESTUSER2FP" "" "generated fingerprint for testuser2 certificate"
 
-########################################
-# Configure the .conf files
-
 CONFIGAPP defX509ServerPub $SERVERFP
-
-# common name mappings
 CONFIGAGENT certSecName 9  $TESTUSERFP     --cn
 CONFIGAGENT certSecName 10  $TESTUSER2FP     --cn
 CONFIGAGENT  rwuser -s tsm testuser authpriv
-CONFIGAGENT  rwuser -s tsm testuser2 authpriv
-
-CRLFILE=$SNMP_TMPDIR/crlfile.pem
-
-# configure the CRL locations
-CONFIGAGENT '[snmp]' x509crlfile $CRLFILE
-CONFIGAPP   '[snmp]' x509crlfile $CRLFILE
-
-CRLCACMD="env DIR=$TLSDIR CN=ca-net-snp.org openssl ca"
-CRLARGS="-config $TLSDIR/.openssl.conf -keyfile $TLSDIR/private/ca-net-snmp.org.key -cert $TLSDIR/ca-certs/ca-net-snmp.org.crt"
-
-# generate the initial CRL
-touch $TLSDIR/.index
-echo "01" > $TLSDIR/.crlnumber
-CAPTURE "$CRLCACMD -gencrl $CRLARGS -out $CRLFILE"
+CONFIGAGENT  rwuser -s tsm $TSM_PREFIX:testuser2 authpriv
+CONFIGAGENT rocommunity public
 
 #
-# put the second client into the CRL and it shouldn't work
+# Start the agent
 #
-CAPTURE "$CRLCACMD -revoke $TLSDIR/certs/snmpapp2.crt $CRLARGS -out $CRLFILE"
-CAPTURE "$CRLCACMD -gencrl $CRLARGS -out $CRLFILE"
-
-
-######################################################################
-# Run the actual list of tests
-#
-
-# start the agent up
-FLAGS="-Dtls -On $SNMP_FLAGS $SNMP_TRANSPORT_SPEC:$SNMP_TEST_DEST$SNMP_SNMPD_PORT"
-AGENT_FLAGS="-Dtls"
+AGENT_FLAGS="-Dtsm udp:9999"
+FLAGS="-On $SNMP_TRANSPORT_SPEC:$SNMP_TEST_DEST$SNMP_SNMPD_PORT"
 STARTAGENT
+
+CAPTURE "snmpget -Dssl $FLAGS .1.3.6.1.2.1.190.1.2.1.0"
+CHECK ".1.3.6.1.2.1.190.1.2.1.0 = INTEGER: false"
 
 # using user 1 - a common name mapped certificate
 # (using the default "snmpapp" certificate because we don't specify another)
@@ -75,22 +55,30 @@ CAPTURE "snmpget -Dssl $FLAGS .1.3.6.1.2.1.1.3.0"
 
 CHECK       ".1.3.6.1.2.1.1.3.0 = Timeticks:"
 
-# using user 2 should now fail
+# using user 2 should now fail because no prefix is applied
 CAPTURE "snmpget -T our_identity=snmpapp2 -Dssl $FLAGS .1.3.6.1.2.1.1.3.0"
 
-CHECKCOUNT  0 ".1.3.6.1.2.1.1.3.0 = Timeticks:"
-CHECKAGENT  "certificate revoked"
+CHECKCOUNT 0 ".1.3.6.1.2.1.1.3.0 = Timeticks:"
+CHECK "authorizationError"
 
-#
-# now put the server's cert into the client crl file
-#
-CAPTURE "$CRLCACMD -revoke $TLSDIR/certs/snmpd.crt $CRLARGS"
-CAPTURE "$CRLCACMD -gencrl $CRLARGS -out $CRLFILE"
+# set the TSM prefix scalar to 1 to turn on prefixing
+CAPTURE "snmpset -Dssl $FLAGS .1.3.6.1.2.1.190.1.2.1.0 i 1"
 
-# user 1 should now fail on the client side
+
+# using user 2 should now work and the prefix should have been added
+# to the securityName, so the agent now accepts it
+CAPTURE "snmpget -T our_identity=snmpapp2 -Dssl $FLAGS .1.3.6.1.2.1.190.1.2.1.0"
+
+CHECK ".1.3.6.1.2.1.190.1.2.1.0 = INTEGER: true"
+
+# using user 1 should now fail because the prefix has added to the
+# securityName, so the agent now accepts it
 CAPTURE "snmpget -Dssl $FLAGS .1.3.6.1.2.1.1.3.0"
 
-CHECK       "certificate revoked"
+CHECKCOUNT 0 ".1.3.6.1.2.1.1.3.0 = Timeticks:"
+CHECK "authorizationError"
+
+CAPTURE "snmpget -v 1 -c public localhost:9999 .1.3.6.1.2.1.190.1.2.1.0"
 
 # cleanup
 STOPAGENT

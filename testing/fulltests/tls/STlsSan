@@ -3,4 +3,4 @@
 checknametype="--san"
 checknameprefix="DNS:"
 
-. Stlsservertests
+. STlsServer

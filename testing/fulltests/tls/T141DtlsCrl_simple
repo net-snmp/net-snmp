@@ -15,4 +15,4 @@ export SNMP_TRANSPORT_SPEC
 export SNMP_SNMPD_PORT
 export SNMP_TEST_DEST
 
-. ./Scrltests
+. ./SCrl
