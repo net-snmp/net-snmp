@@ -96,4 +96,28 @@
 #endif /* not NETSNMP_USE_ASSERT */
 
 
+/*
+ *  EXPERIMENTAL macros. May be removed without warning in future
+ * releases. Use at your own risk
+ *
+ * The series of uppercase letters at or near the end of these macros give
+ * an indication of what they do. The letters used are:
+ *
+ *   L  : log a message
+ *   RN : return NULL
+ *   RE : return a specific hardcoded error appropriate for the condition
+ *   RV : return user specified value
+ *
+ */
+#define netsnmp_malloc_check_LRN(ptr)           \
+    netsnmp_assert_or_return( (ptr) != NULL, NULL)
+#define netsnmp_malloc_check_LRE(ptr)           \
+    netsnmp_assert_or_return( (ptr) != NULL, SNMPERR_MALLOC)
+#define netsnmp_malloc_check_LRV(ptr, val)                          \
+    netsnmp_assert_or_return( (ptr) != NULL, val)
+
+#define netsnmp_require_ptr_LRV( ptr, val ) \
+    netsnmp_assert_or_return( (ptr) != NULL, val)
+
+
 #endif /* SNMP_ASSERT_H */
