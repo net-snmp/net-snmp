@@ -2198,7 +2198,7 @@ sub import_file {
 	$targ = (NetSNMP::Cert::is_ca_cert($file) ? $NetSNMP::Cert::CADIR : $NetSNMP::Cert::CRTDIR);
     }
 
-    $targ .= "/" . $tag . ".crt" if ($tag);
+    $targ .= "/" . $tag . $suffix if ($tag);
     ::copy($file, $targ);
 }
 
@@ -2221,10 +2221,8 @@ sub import {
 
   return unless defined $karg;
 
-  $karg = NetSNMP::Cert::fq_rel_path($karg, $opts->{'rdir'});
-  die("key unreadable: $karg\n") unless -r $karg;
-
-  ::copy($karg, 'private');
+  import_file($karg, '.key', 'private',,
+	      $opts->{'rdir'}, $opts->{'tag'});
 }
 
 
