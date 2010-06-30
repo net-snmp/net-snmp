@@ -1,3 +1,12 @@
+/* Portions of this file are subject to the following copyright(s).  See
+ * the Net-SNMP's COPYING file for more details and other copyrights
+ * that may apply:
+ */
+/* 
+ * See the following web pages for useful documentation on this transport:
+ * http://www.net-snmp.org/wiki/index.php/TUT:Using_TLS
+ * http://www.net-snmp.org/wiki/index.php/Using_DTLS
+ */
 #include <net-snmp/net-snmp-config.h>
 
 #include <net-snmp/library/snmpTLSTCPDomain.h>

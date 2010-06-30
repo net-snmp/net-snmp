@@ -8,73 +8,10 @@
  * Use is subject to license terms specified in the COPYING file
  * distributed with the Net-SNMP package.
  */
-
-/*
- * NOTE: THIS IS AN EXPERIMENTAL IMPLEMENTATION AND NOT YET SUITABLE
- * FOR PRODUCTION USE
- *
- * THERE are KNOWN security ISSUES with THIS code!
- * (if nothing else, you can't tie certificates to certain hosts/users)
- */
-
-/*
- * ---------- Creating Certificates ----------
- *
- * Example pub/priv key creation steps using openssl (replace for-user
- * with the appropriate name, etc (e.g. for a user you might use their
- * first.last name and for a server, use it's hostname or something)
- *
- *   1) create the CSR file first:
- *
- *         openssl req -days 365 -new -out for-user.csr -keyout for-user.priv
- *
- *   2) Optionally remove the passphrase if you hate that sort of thing
- *      (obviously not recommended; useful on servers without password prompts)
- *
- *         openssl rsa -in for-user.priv -out for-user.insecure.priv
- *
- *   3) Create a self-signed key from the CSR:
- *
- *      openssl x509 -set_serial `date +%Y%m%d` -in for-user.csr -out for-user.cert -req -signkey for-user.insecure.priv -days 365
- *
- *
- * These can then be used by the config tokens for both the client and
- * the server:
- *
- * ---------- Creating a CA for issuing certs ----------
- *
- * TBD
- *
- * ---------- Configuration ----------
- *
- * In the snmp.conf file, you should specify the following
- * types of configuration lines:
- *
- * To tell the client which keys *it* should use to authenticate with:
- *
- *   defX509ClientPriv /path/to/for-user.insecure.priv
- *   defX509ClientPub  /path/to/for-user.insecure.cert
- *
- * To tell the client to only a list of servers:
- *
- *   defX509ServerCerts /path/to/server-certs.certs
- *
- *   (server-certs.certs can be created by simply cat'ing multiple
- *    server cert files into ones big file)
- *
- * To tell the server it's certs to offer:
- *
- *   defX509ServerPub  /path/to/server1.insecure.cert
- *   defX509ServerPriv /path/to/server1.insecure.priv
- *
- * To tell the server which keys it should accept from clients:
- *
- *   defX509ClientCerts /path/to/client-certs.certs
- *
- * To authorize for R/W a particular CommonName from those certs:
- *
- *   rwuser "John Doe"
- *
+/* 
+ * See the following web pages for useful documentation on this transport:
+ * http://www.net-snmp.org/wiki/index.php/TUT:Using_TLS
+ * http://www.net-snmp.org/wiki/index.php/Using_DTLS
  */
 
 #include <net-snmp/net-snmp-config.h>
