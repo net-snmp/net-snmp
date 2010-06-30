@@ -950,8 +950,15 @@ netsnmp_transport *
 netsnmp_tlstcp_create_tstring(const char *str, int local,
                                const char *default_target)
 {
+    char buf[SPRINT_MAX_LEN];
+
     if (str == NULL || *str == '\0')
         str = default_target + 1; /* drop the leading : */
+    else if (!strchr(str, ':')) {
+        /* add the default port */
+        snprintf(buf, sizeof(buf)-1, "%s%s", str, default_target);
+        str = buf;
+    }
     return netsnmp_tlstcp_transport(str, local);
 }
 
