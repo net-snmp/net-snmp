@@ -582,6 +582,7 @@ write_expExpression(int action,
          * permanently.  Make sure that anything done here can't fail! 
          */
         SNMP_FREE(tmpvar);
+        snmp_store_needed(NULL);
         break;
     }
     return SNMP_ERR_NOERROR;
@@ -666,6 +667,7 @@ write_expExpressionValueType(int action,
          * Things are working well, so it's now safe to make the change
          * permanently.  Make sure that anything done here can't fail! 
          */
+        snmp_store_needed(NULL);
         break;
     }
     return SNMP_ERR_NOERROR;
@@ -755,6 +757,7 @@ write_expExpressionComment(int action,
          * permanently.  Make sure that anything done here can't fail! 
          */
         SNMP_FREE(tmpvar);
+        snmp_store_needed(NULL);
         break;
     }
     return SNMP_ERR_NOERROR;
@@ -839,6 +842,7 @@ write_expExpressionDeltaInterval(int action,
          * Things are working well, so it's now safe to make the change
          * permanently.  Make sure that anything done here can't fail! 
          */
+        snmp_store_needed(NULL);
         break;
     }
     return SNMP_ERR_NOERROR;
@@ -1163,6 +1167,7 @@ write_expExpressionEntryStatus(int action,
                 StorageTmp->have_copied_auth_info = 1;
             }
         }
+        snmp_store_needed(NULL);
         break;
     }
     return SNMP_ERR_NOERROR;
