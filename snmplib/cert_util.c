@@ -1721,7 +1721,7 @@ netsnmp_cert_find(int what, int where, void *hint)
                            what, _where_str(where), where));
                 return NULL;
         }
-        result = _cert_find_fp(fp);
+        return netsnmp_cert_find(what, NS_CERTKEY_MULTIPLE, fp);
     } /* where = ds store */
     else if (NS_CERTKEY_MULTIPLE == where) {
         /* tries multiple sources of certificates based on ascii lookup keys */
