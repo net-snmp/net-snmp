@@ -831,6 +831,9 @@ tlstmAddrTable_handler(netsnmp_mib_handler *handler,
             if ((RS_NOTREADY == table_entry->tlstmAddrRowStatus) &&
                 table_entry->undo->is_consistent)
                 table_entry->tlstmAddrRowStatus = RS_NOTINSERVICE;
+            else if ((RS_NOTINSERVICE == table_entry->tlstmAddrRowStatus) &&
+                     (0 == table_entry->undo->is_consistent))
+                table_entry->tlstmAddrRowStatus = RS_NOTREADY;
 
             /** release undo data for requests with no rowstatus */
             if (table_entry->undo &&
