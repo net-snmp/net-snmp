@@ -928,6 +928,13 @@ snmpTlstmParamsTable_handler(
             if (!table_entry || !table_entry->undo)
                 continue;
             
+            if ((RS_NOTREADY == table_entry->snmpTlstmParamsRowStatus) &&
+                table_entry->undo->is_consistent)
+                table_entry->snmpTlstmParamsRowStatus = RS_NOTINSERVICE;
+            else if ((RS_NOTINSERVICE == table_entry->snmpTlstmParamsRowStatus) &&
+                     (0 == table_entry->undo->is_consistent))
+                table_entry->snmpTlstmParamsRowStatus = RS_NOTREADY;
+
             /** release undo data for requests with no rowstatus */
             if (table_entry->undo &&
                 !table_entry->undo->req[COLUMN_SNMPTLSTMPARAMSROWSTATUS] != 0) {
@@ -991,6 +998,9 @@ snmpTlstmParamsTable_handler(
 
         /** update last changed */
         _last_changed = netsnmp_get_agent_uptime();
+
+        /** set up to save persistent store */
+        snmp_store_needed(NULL);
 
         break; /* case MODE_SET_COMMIT */
     }  /* switch (reqinfo->mode) */
@@ -1094,9 +1104,8 @@ _tlstmParamsTable_save(int majorID, int minorID, void *serverarg,
     read_config_store((char *) type, buf);
 
     /*
-     * save active rows from maps
+     * save active rows from params container
      */
-    active_params = netsnmp_tlstmParams_container();
     if (NULL != active_params) {
         params_itr = CONTAINER_ITERATOR(active_params);
         if (NULL == params_itr) {

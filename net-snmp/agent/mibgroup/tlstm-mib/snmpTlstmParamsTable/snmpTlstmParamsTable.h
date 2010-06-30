@@ -5,6 +5,10 @@
 #ifndef SNMPTLSTMPARAMSTABLE_H
 #define SNMPTLSTMPARAMSTABLE_H
 
+#define SNMP_TLS_TM_PARAMS_COUNT   SNMP_TLS_TM_BASE, 2, 2, 1, 4
+#define SNMP_TLS_TM_PARAMS_CHANGED SNMP_TLS_TM_BASE, 2, 2, 1, 5
+#define SNMP_TLS_TM_PARAMS_TABLE   SNMP_TLS_TM_BASE, 2, 2, 1, 6
+
 /* function declarations */
 void init_snmpTlstmParamsTable(void);
 void initialize_table_snmpTlstmParamsTable(void);
