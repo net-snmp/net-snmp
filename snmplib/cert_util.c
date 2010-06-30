@@ -824,7 +824,7 @@ _certindex_new( const char *dirname )
     if (fp)
         fprintf( fp, "DIR %s %d\n", dirname, CERT_INDEX_FORMAT );
     else
-        snmp_log(LOG_ERR, "error opening new index file %s\n", dirname);
+        DEBUGMSGTL(("cert:index", "error opening new index file %s\n", dirname));
 
     if (cp != filename)
         free(cp);
@@ -1479,7 +1479,7 @@ _add_certdir(const char *dirname)
     if (NULL == index) {
         DEBUGMSGT(("9:cert:index:dir",
                     "error opening index for cert directory\n"));
-        NETSNMP_LOGONCE((LOG_ERR, "could not open certificate index file\n"));
+        DEBUGMSGTL(("cert:index", "could not open certificate index file\n"));
     }
 
     /*
