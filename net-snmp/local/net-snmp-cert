@@ -2163,6 +2163,26 @@ sub show {
   }
 }
 
+sub url_to_file {
+    my ($url, $suffix) = @_;
+
+    require File::Temp;
+    import File::Temp qw(tempfile);
+
+    my ($fh, $filename) = tempfile(SUFFIX => $suffix);
+    my $ua = LWP::UserAgent->new;
+    my $response = $ua->get($url);
+    if ($response->is_success) {
+	print $fh $response->decoded_content();
+    } else {
+      NetSNMP::Cert::vwarn("failed to download a certificate from $url");
+      return;
+    }
+    $fh->close;
+    return $filename;
+}
+
+
 sub import {
   my $app = shift;
   my $config = $app->{'config'};
@@ -2178,8 +2198,8 @@ sub import {
 
   if (NetSNMP::Cert::is_url($carg)) {
     if ($NetSNMP::Cert::haveUserAgent) {
-      NetSNMP::Cert::vwarn("import http certificate: not implemented yet");
-      return $NetSNMP::Cert::OK;
+      $carg = url_to_file($carg, '.crt');
+      return $NetSNMP::Cert::ERR if (!$carg);
     } else {
       NetSNMP::Cert::vwarn("LWP::UserAgent not installed: unable to import certificate");
       return $NetSNMP::Cert::ERR;
@@ -2189,8 +2209,9 @@ sub import {
   $carg = NetSNMP::Cert::fq_rel_path($carg, $opts->{'rdir'});
   die("certificate unreadable: $carg\n") unless -r $carg;
 
-  $targ = (is_ca_cert($carg) ? $NetSNMP::Cert::CADIR : $NetSNMP::Cert::CRTDIR);
+  $targ = (NetSNMP::Cert::is_ca_cert($carg) ? $NetSNMP::Cert::CADIR : $NetSNMP::Cert::CRTDIR);
 
+  $targ .= "/" . $opts->{'tag'} . ".crt" if ($opts->{'tag'});
   ::copy($carg, $targ);
 
   return unless defined $karg;
