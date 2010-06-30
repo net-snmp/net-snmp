@@ -251,6 +251,7 @@ fi
 #
 NONAGENTLIBS=$LIBS	 # save old libraries
 SSHINSTALLBINPROGS=""
+TLSINSTALLBINPROGS=""
 if test "x$tryopenssl" != "xno" -a "x$tryopenssl" != "xinternal"; then
     # check for libpkcs11 if asked
     if test "x$askedopenssl" != "xyes" -a "x$askedpkcs" = "xyes"; then
@@ -293,6 +294,7 @@ if test "x$tryopenssl" != "xno" -a "x$tryopenssl" != "xinternal"; then
                     [Define to 1 if you have the `ssl' library (-lssl).])
                 LIBCRYPTO=" -lssl $LIBCRYPTO",	
 		AC_MSG_ERROR([The DTLS based transports require the libssl library from OpenSSL to be available])	,-lcrypto)
+            TLSINSTALLBINPROGS=snmptls
         fi
         if echo " $transport_result_list " | $GREP " SSH " > /dev/null; then
 	    AC_CHECK_LIB(ssh2, libssh2_session_startup,
@@ -310,6 +312,7 @@ elif test "x$askedpkcs" = "xyes"; then
 fi
 LIBS=$NONAGENTLIBS	 # restore old libraries
 AC_SUBST(SSHINSTALLBINPROGS)
+AC_SUBST(TLSINSTALLBINPROGS)
 
 #
 # If we're using internal crypto support we need to compile in extra files
