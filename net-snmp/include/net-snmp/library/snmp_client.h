@@ -104,6 +104,62 @@ int netsnmp_query_walk(    netsnmp_variable_list *, netsnmp_session *);
 NETSNMP_IMPORT
 int netsnmp_query_set(     netsnmp_variable_list *, netsnmp_session *);
 
+/** **************************************************************************
+ *
+ * state machine
+ *
+ */
+    /** forward declare */
+    struct netsnmp_state_machine_step_s;
+    struct netsnmp_state_machine_input_s;
+
+    /** state machine process */
+    typedef int (netsnmp_state_machine_func)(struct netsnmp_state_machine_input_s *input,
+                                             struct netsnmp_state_machine_step_s *step);
+
+    typedef struct netsnmp_state_machine_step_s {
+
+        const char   *name; /* primarily for logging/debugging */
+        u_int         sm_flags;
+        
+        netsnmp_state_machine_func *run;
+        int                         result; /* return code for this step */
+        
+        
+        struct netsnmp_state_machine_step_s *on_success;
+        struct netsnmp_state_machine_step_s *on_error;
+        
+        /*
+         * user fields (not touched by state machine functions)
+         */
+        u_int         flags;
+        void         *step_context;
+        
+    } netsnmp_state_machine_step;
+
+    typedef struct netsnmp_state_machine_input_s {
+        const char                  *name;
+        int                          steps_so_far;
+        netsnmp_state_machine_step  *steps;
+        netsnmp_state_machine_step  *cleanup;
+        netsnmp_state_machine_step  *last_run;
+
+        /*
+         * user fields (not touched by state machine functions)
+         */
+        void         *input_context;
+
+    } netsnmp_state_machine_input;
+
+
+    NETSNMP_IMPORT int
+    netsnmp_state_machine_run( netsnmp_state_machine_input *input );
+
+    NETSNMP_IMPORT int
+    netsnmp_row_create(netsnmp_session *sess, netsnmp_variable_list *vars,
+                       int row_status_index);
+
+
 #ifdef __cplusplus
 }
 #endif
