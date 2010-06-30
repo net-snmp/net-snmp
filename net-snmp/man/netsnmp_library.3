@@ -1,8 +1,8 @@
-.TH "The Net-SNMP library" 3 "28 Sep 2009" "Version 5.5" "net-snmp" \" -*- nroff -*-
+.TH "The Net-SNMP library" 3 "30 Jun 2010" "Version 5.6.pre2" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
-netsnmp_library \- the Net-SNMP library
+The Net-SNMP library \- 
 .SS "Data Structures"
 
 .in +1c
@@ -143,10 +143,10 @@ netsnmp_library \- the Net-SNMP library
 .RI "int \fBsnmp_get_errno\fP (void)"
 .br
 .ti -1c
-.RI "void \fBsnmp_synch_reset\fP (\fBnetsnmp_session\fP *notused)"
+.RI "NETSNMP_IMPORT void \fBsnmp_synch_reset\fP (\fBnetsnmp_session\fP *notused)"
 .br
 .ti -1c
-.RI "void \fBsnmp_synch_setup\fP (\fBnetsnmp_session\fP *notused)"
+.RI "NETSNMP_IMPORT void \fBsnmp_synch_setup\fP (\fBnetsnmp_session\fP *notused)"
 .br
 .ti -1c
 .RI "const char * \fBstrerror\fP (int err)"
@@ -196,6 +196,13 @@ netsnmp_library \- the Net-SNMP library
 .br
 .RI "\fICalls the functions to do config file loading and mib \fBmodule\fP parsing in the correct order. \fP"
 .ti -1c
+.RI "void \fBsnmp_store_needed\fP (const char *type)"
+.br
+.RI "\fIset a flag indicating that the persistent store needs to be saved. \fP"
+.ti -1c
+.RI "void \fBsnmp_store_if_needed\fP (void)"
+.br
+.ti -1c
 .RI "void \fBsnmp_store\fP (const char *type)"
 .br
 .ti -1c
@@ -216,6 +223,13 @@ netsnmp_library \- the Net-SNMP library
 .RI "int \fBsnmpv3_engineID_probe\fP (struct \fBsession_list\fP *slp, \fBnetsnmp_session\fP *in_session)"
 .br
 .RI "\fIprobe for peer engineID \fP"
+.ti -1c
+.RI "int \fBnetsnmp_sess_config_transport\fP (\fBnetsnmp_container\fP *transport_configuration, \fBnetsnmp_transport\fP *transport)"
+.br
+.ti -1c
+.RI "int \fBnetsnmp_sess_config_and_open_transport\fP (\fBnetsnmp_session\fP *in_session, \fBnetsnmp_transport\fP *transport)"
+.br
+.RI "\fICopies configuration from the session and calls f_open This function copies any configuration stored in the session pointer to the transport if it has a f_config pointer and then calls the transport's f_open function to actually open the connection. \fP"
 .ti -1c
 .RI "\fBnetsnmp_session\fP * \fBsnmp_add\fP (\fBnetsnmp_session\fP *in_session, \fBnetsnmp_transport\fP *transport, int(*fpre_parse)(\fBnetsnmp_session\fP *, \fBnetsnmp_transport\fP *, void *, int), int(*fpost_parse)(\fBnetsnmp_session\fP *, \fBnetsnmp_pdu\fP *, int))"
 .br
@@ -423,9 +437,6 @@ netsnmp_library \- the Net-SNMP library
 .RI "u_char \fBreturn_buf\fP [258]"
 .br
 .ti -1c
-.RI "struct timeval \fBstarttime\fP"
-.br
-.ti -1c
 .RI "int \fBcallback_master_num\fP = -1"
 .br
 .ti -1c
@@ -462,7 +473,7 @@ XXX-rks: why no SNMP_FREE(isp->packet); ??
 .PP
 XXX-rks: why no SNMP_FREE(isp->packet); ?? 
 .PP
-Definition at line 5679 of file snmp_api.c.
+Definition at line 5752 of file snmp_api.c.
 .SS "int init_agent (const char * app)"
 .PP
 Initialize the agent. Calls into init_agent_read_config to set tha app's configuration file in the appropriate default storage space, NETSNMP_DS_LIB_APPTYPE. Need to call init_agent before calling init_snmp.
@@ -484,7 +495,7 @@ Returns non-zero on failure and zero on success.
 .PP
 
 .PP
-Definition at line 273 of file snmp_vars.c.
+Definition at line 264 of file snmp_vars.c.
 .SS "void init_snmp (const char * type)"
 .PP
 Calls the functions to do config file loading and mib \fBmodule\fP parsing in the correct order. \fBParameters:\fP
@@ -504,7 +515,7 @@ void
 .PP
 
 .PP
-Definition at line 793 of file snmp_api.c.
+Definition at line 803 of file snmp_api.c.
 .SS "int netsnmp_oid_compare_ll (const oid * in_name1, size_t len1, const oid * in_name2, size_t len2, size_t * offpt)"
 .PP
 lexicographical compare two object identifiers and return the point where they differ Caution: this method is called often by command responder applications (ie, agent).
@@ -516,7 +527,7 @@ lexicographical compare two object identifiers and return the point where they d
 .PP
 
 .PP
-Definition at line 6680 of file snmp_api.c.
+Definition at line 6738 of file snmp_api.c.
 .SS "int netsnmp_oid_equals (const oid * in_name1, size_t len1, const oid * in_name2, size_t len2)"
 .PP
 Compares 2 OIDs to determine if they are exactly equal. This should be faster than doing a snmp_oid_compare for different length OIDs, since the length is checked first and if != returns immediately. Might be very slighly faster if lengths are ==. 
@@ -539,7 +550,7 @@ Compares 2 OIDs to determine if they are exactly equal. This should be faster th
 .PP
 
 .PP
-Definition at line 6761 of file snmp_api.c.
+Definition at line 6819 of file snmp_api.c.
 .SS "int netsnmp_oid_find_prefix (const oid * in_name1, size_t len1, const oid * in_name2, size_t len2)"
 .PP
 Given two OIDs, determine the common prefix to them both. \fBParameters:\fP
@@ -560,7 +571,7 @@ length of largest common index of commonality. 1 = first, 0 if none * or -1 on e
 .PP
 
 .PP
-Definition at line 6817 of file snmp_api.c.
+Definition at line 6875 of file snmp_api.c.
 .SS "int netsnmp_oid_is_subtree (const oid * in_name1, size_t len1, const oid * in_name2, size_t len2)"
 .PP
 Identical to netsnmp_oid_equals, except only the length up to len1 is compared. Functionally, this determines if in_name2 is equal or a subtree of in_name1 
@@ -583,7 +594,24 @@ Identical to netsnmp_oid_equals, except only the length up to len1 is compared. 
 .PP
 
 .PP
-Definition at line 6797 of file snmp_api.c.
+Definition at line 6855 of file snmp_api.c.
+.SS "int netsnmp_sess_config_and_open_transport (\fBnetsnmp_session\fP * in_session, \fBnetsnmp_transport\fP * transport)"
+.PP
+Copies configuration from the session and calls f_open This function copies any configuration stored in the session pointer to the transport if it has a f_config pointer and then calls the transport's f_open function to actually open the connection. \fBParameters:\fP
+.RS 4
+\fIin_session\fP A pointer to the session that config information is in. 
+.br
+\fItransport\fP A pointer to the transport to config/open.
+.RE
+.PP
+\fBReturns:\fP
+.RS 4
+SNMPERR_SUCCESS : on success 
+.RE
+.PP
+
+.PP
+Definition at line 1510 of file snmp_api.c.
 .SS "int snmp_oid_compare (const oid * in_name1, size_t len1, const oid * in_name2, size_t len2)"
 .PP
 lexicographical compare two object identifiers. Caution: this method is called often by command responder applications (ie, agent).
@@ -595,7 +623,7 @@ lexicographical compare two object identifiers. Caution: this method is called o
 .PP
 
 .PP
-Definition at line 6631 of file snmp_api.c.
+Definition at line 6689 of file snmp_api.c.
 .SS "int snmp_oidtree_compare (const oid * in_name1, size_t len1, const oid * in_name2, size_t len2)"
 .PP
 Compares 2 OIDs to determine if they are equal up until the shortest length. \fBParameters:\fP
@@ -616,17 +644,17 @@ Compares 2 OIDs to determine if they are equal up until the shortest length. \fB
 .PP
 
 .PP
-Definition at line 6733 of file snmp_api.c.
+Definition at line 6791 of file snmp_api.c.
 .SS "\fBnetsnmp_variable_list\fP* snmp_pdu_add_variable (\fBnetsnmp_pdu\fP * pdu, const oid * name, size_t name_length, u_char type, const void * value, size_t len)"
 .PP
 Library API routines concerned with \fBvariable\fP bindings and values. 
 .PP
-Definition at line 6885 of file snmp_api.c.
+Definition at line 6943 of file snmp_api.c.
 .SS "void snmp_sess_init (\fBnetsnmp_session\fP * session)"
 .PP
 Library API routines concerned with specifying and using SNMP 'sessions' including sending and receiving requests. 
 .PP
-Definition at line 715 of file snmp_api.c.
+Definition at line 725 of file snmp_api.c.
 .SS "void snmp_shutdown (const char * type)"
 .PP
 Shuts down the application, saving any needed persistent storage, and appropriate clean up. \fBParameters:\fP
@@ -641,7 +669,12 @@ void
 .PP
 
 .PP
-Definition at line 859 of file snmp_api.c.
+Definition at line 895 of file snmp_api.c.
+.SS "void snmp_store_needed (const char * type)"
+.PP
+set a flag indicating that the persistent store needs to be saved. 
+.PP
+Definition at line 858 of file snmp_api.c.
 .SS "int snmpv3_engineID_probe (struct \fBsession_list\fP * slp, \fBnetsnmp_session\fP * in_session)"
 .PP
 probe for peer engineID \fBParameters:\fP
@@ -671,12 +704,12 @@ the first session in slp should the internal allocated copy of in_session
 .PP
 
 .PP
-Definition at line 1371 of file snmp_api.c.
+Definition at line 1331 of file snmp_api.c.
 .SS "int snmpv3_probe_contextEngineID_rfc5343 (void * slp, \fBnetsnmp_session\fP * session)"
 .PP
 probe for engineID using RFC 5343 probing mechanisms Designed to be a callback for within a security model's probe_engineid hook. Since it's likely multiple security models won't have engineIDs to probe for then this function is a callback likely to be used by multiple future security models. E.G. both SSH and DTLS. 
 .PP
-Definition at line 1274 of file snmp_api.c.
+Definition at line 1234 of file snmp_api.c.
 .SH "Author"
 .PP 
 Generated automatically by Doxygen for net-snmp from the source code.

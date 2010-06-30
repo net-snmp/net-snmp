@@ -1,4 +1,4 @@
-.TH "instance" 3 "28 Sep 2009" "Version 5.5" "net-snmp" \" -*- nroff -*-
+.TH "instance" 3 "30 Jun 2010" "Version 5.6.pre2" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -6,6 +6,13 @@ instance \-
 .PP
 Process individual MIB instances easily.  
 
+.SS "Defines"
+
+.in +1c
+.ti -1c
+.RI "#define \fBfree_wrapper\fP   free"
+.br
+.in -1c
 .SS "Functions"
 
 .in +1c
@@ -115,7 +122,7 @@ Returns a pointer to a netsnmp_mib_handler struct which contains the handler's n
 .PP
 
 .PP
-Definition at line 49 of file instance.c.
+Definition at line 50 of file instance.c.
 .SS "int netsnmp_instance_counter32_handler (\fBnetsnmp_mib_handler\fP * handler, \fBnetsnmp_handler_registration\fP * reginfo, \fBnetsnmp_agent_request_info\fP * reqinfo, \fBnetsnmp_request_info\fP * requests)"\fBDeprecated\fP
 .RS 4
 This function is unused and scheduled for removal in Net-SNMP 5.6 
@@ -123,7 +130,7 @@ This function is unused and scheduled for removal in Net-SNMP 5.6
 .PP
 
 .PP
-Definition at line 571 of file instance.c.
+Definition at line 581 of file instance.c.
 .SS "int netsnmp_instance_int_handler (\fBnetsnmp_mib_handler\fP * handler, \fBnetsnmp_handler_registration\fP * reginfo, \fBnetsnmp_agent_request_info\fP * reqinfo, \fBnetsnmp_request_info\fP * requests)"\fBDeprecated\fP
 .RS 4
 This function is unused and scheduled for removal in Net-SNMP 5.6 
@@ -131,7 +138,7 @@ This function is unused and scheduled for removal in Net-SNMP 5.6
 .PP
 
 .PP
-Definition at line 688 of file instance.c.
+Definition at line 698 of file instance.c.
 .SS "int netsnmp_instance_long_handler (\fBnetsnmp_mib_handler\fP * handler, \fBnetsnmp_handler_registration\fP * reginfo, \fBnetsnmp_agent_request_info\fP * reqinfo, \fBnetsnmp_request_info\fP * requests)"\fBDeprecated\fP
 .RS 4
 This function is unused and scheduled for removal in Net-SNMP 5.6 
@@ -139,12 +146,12 @@ This function is unused and scheduled for removal in Net-SNMP 5.6
 .PP
 
 .PP
-Definition at line 610 of file instance.c.
+Definition at line 620 of file instance.c.
 .SS "int netsnmp_instance_num_file_handler (\fBnetsnmp_mib_handler\fP * handler, \fBnetsnmp_handler_registration\fP * reginfo, \fBnetsnmp_agent_request_info\fP * reqinfo, \fBnetsnmp_request_info\fP * requests)"
 .PP
 fall through 
 .PP
-Definition at line 770 of file instance.c.
+Definition at line 780 of file instance.c.
 .SS "int netsnmp_instance_uint_handler (\fBnetsnmp_mib_handler\fP * handler, \fBnetsnmp_handler_registration\fP * reginfo, \fBnetsnmp_agent_request_info\fP * reqinfo, \fBnetsnmp_request_info\fP * requests)"\fBDeprecated\fP
 .RS 4
 This function is unused and scheduled for removal in Net-SNMP 5.6 
@@ -152,7 +159,7 @@ This function is unused and scheduled for removal in Net-SNMP 5.6
 .PP
 
 .PP
-Definition at line 904 of file instance.c.
+Definition at line 914 of file instance.c.
 .SS "int netsnmp_instance_ulong_handler (\fBnetsnmp_mib_handler\fP * handler, \fBnetsnmp_handler_registration\fP * reginfo, \fBnetsnmp_agent_request_info\fP * reqinfo, \fBnetsnmp_request_info\fP * requests)"\fBDeprecated\fP
 .RS 4
 This function is unused and scheduled for removal in Net-SNMP 5.6 
@@ -160,7 +167,7 @@ This function is unused and scheduled for removal in Net-SNMP 5.6
 .PP
 
 .PP
-Definition at line 491 of file instance.c.
+Definition at line 501 of file instance.c.
 .SS "int netsnmp_register_instance (\fBnetsnmp_handler_registration\fP * reginfo)"
 .PP
 This function registers an instance helper handler, which is a way of registering an exact OID such that GENEXT requests are handled entirely by the helper. First need to inject it into the calling chain of the handler defined by the netsnmp_handler_registration struct, reginfo. The new handler is injected at the top of the list and will be the new handler to be called first. This function also injects a serialize handler before actually calling netsnmp_register_handle, registering reginfo.
@@ -181,7 +188,7 @@ MIB_REGISTERED_OK is returned if the registration was a success. Failures are MI
 .in +1c
 \fBdelayed_instance.c\fP.
 .PP
-Definition at line 74 of file instance.c.
+Definition at line 75 of file instance.c.
 .SS "int netsnmp_register_int_instance (const char * name, const oid * reg_oid, size_t reg_oid_len, int * it, Netsnmp_Node_Handler * subhandler)"
 .PP
 This function registers an int helper handler to a specified OID. \fBParameters:\fP
@@ -208,7 +215,7 @@ MIB_REGISTERED_OK is returned if the registration was a success. Failures are MI
 .in +1c
 \fBscalar_int.c\fP.
 .PP
-Definition at line 474 of file instance.c.
+Definition at line 475 of file instance.c.
 .SS "int netsnmp_register_read_only_instance (\fBnetsnmp_handler_registration\fP * reginfo)"
 .PP
 This function injects a 'read only' handler into the handler chain prior to serializing/registering the handler. The only purpose of this 'read only' handler is to return an appropriate error for any requests passed to it in a SET mode. Inserting it into your handler chain will ensure you're never asked to perform a SET request so you can ignore those error conditions.
@@ -225,7 +232,7 @@ MIB_REGISTERED_OK is returned if the registration was a success. Failures are MI
 .PP
 
 .PP
-Definition at line 101 of file instance.c.
+Definition at line 102 of file instance.c.
 .SH "Author"
 .PP 
 Generated automatically by Doxygen for net-snmp from the source code.

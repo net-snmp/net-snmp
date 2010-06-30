@@ -1,4 +1,4 @@
-.TH "debug" 3 "28 Sep 2009" "Version 5.5" "net-snmp" \" -*- nroff -*-
+.TH "debug" 3 "30 Jun 2010" "Version 5.6.pre2" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -13,9 +13,6 @@ Print out debugging information about the handler chain being called.
 .RI "\fBnetsnmp_mib_handler\fP * \fBnetsnmp_get_debug_handler\fP (void)"
 .br
 .RI "\fIreturns a debug handler that can be injected into a given handler chain. \fP"
-.ti -1c
-.RI "void \fBdebug_print_requests\fP (\fBnetsnmp_request_info\fP *requests)"
-.br
 .ti -1c
 .RI "int \fBnetsnmp_debug_helper\fP (\fBnetsnmp_mib_handler\fP *handler, \fBnetsnmp_handler_registration\fP *reginfo, \fBnetsnmp_agent_request_info\fP *reqinfo, \fBnetsnmp_request_info\fP *requests)"
 .br
@@ -48,7 +45,7 @@ Definition at line 44 of file debug_handler.c.
 .PP
 initializes the debug helper which then registers a debug handler as a run-time injectable handler for configuration file use. 
 .PP
-Definition at line 148 of file debug_handler.c.
+Definition at line 162 of file debug_handler.c.
 .SH "Author"
 .PP 
 Generated automatically by Doxygen for net-snmp from the source code.

@@ -1,4 +1,4 @@
-.TH "old_api" 3 "28 Sep 2009" "Version 5.5" "net-snmp" \" -*- nroff -*-
+.TH "old_api" 3 "30 Jun 2010" "Version 5.6.pre2" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -37,24 +37,24 @@ This is a backwards compatilibity \fBmodule\fP that allows code written in the o
 .PP
 returns a old_api handler that should be the final calling handler. Don't use this function. Use the \fBnetsnmp_register_old_api()\fP function instead. 
 .PP
-Definition at line 38 of file old_api.c.
+Definition at line 47 of file old_api.c.
 .SS "int netsnmp_old_api_helper (\fBnetsnmp_mib_handler\fP * handler, \fBnetsnmp_handler_registration\fP * reginfo, \fBnetsnmp_agent_request_info\fP * reqinfo, \fBnetsnmp_request_info\fP * requests)"
 .PP
 implements the old_api handler 
 .PP
-Definition at line 231 of file old_api.c.
+Definition at line 240 of file old_api.c.
 .SS "int netsnmp_register_mib_table_row (const char * moduleName, struct \fBvariable\fP * var, size_t varsize, size_t numvars, oid * mibloc, size_t mibloclen, int priority, int var_subid, \fBnetsnmp_session\fP * ss, const char * context, int timeout, int flags)"
 .PP
 registers a row within a mib table 
 .PP
-Definition at line 112 of file old_api.c.
+Definition at line 121 of file old_api.c.
 .SS "int netsnmp_register_old_api (const char * moduleName, struct \fBvariable\fP * var, size_t varsize, size_t numvars, oid * mibloc, size_t mibloclen, int priority, int range_subid, oid range_ubound, \fBnetsnmp_session\fP * ss, const char * context, int timeout, int flags)"
 .PP
 Registers an old API set into the mib \fBtree\fP. Functionally this mimics the old register_mib_context() function (and in fact the new register_mib_context() function merely calls this new old_api one). 
 .PP
 netsnmp_handler_registration_free(reginfo); already freed 
 .PP
-Definition at line 49 of file old_api.c.
+Definition at line 58 of file old_api.c.
 .SH "Author"
 .PP 
 Generated automatically by Doxygen for net-snmp from the source code.

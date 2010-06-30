@@ -1,4 +1,4 @@
-.TH "snmp_pdu" 3 "28 Sep 2009" "Version 5.5" "net-snmp" \" -*- nroff -*-
+.TH "snmp_pdu" 3 "30 Jun 2010" "Version 5.6.pre2" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -153,139 +153,139 @@ The snmp protocol data unit.
 .PP 
 The snmp protocol data unit. 
 .PP
-Definition at line 142 of file types.h.
+Definition at line 155 of file types.h.
 .SH "Field Documentation"
 .PP 
 .SS "unsigned char \fBsnmp_pdu::agent_addr\fP[4]"
 .PP
 This is ONLY used for v1 TRAPs. 
 .PP
-Definition at line 212 of file types.h.
+Definition at line 225 of file types.h.
 .SS "int \fBsnmp_pdu::command\fP"
 .PP
 Type of this PDU. 
 .PP
-Definition at line 153 of file types.h.
+Definition at line 166 of file types.h.
 .SS "u_char* \fBsnmp_pdu::community\fP"
 .PP
 community for outgoing requests. 
 .PP
-Definition at line 197 of file types.h.
+Definition at line 210 of file types.h.
 .SS "size_t \fBsnmp_pdu::community_len\fP"
 .PP
 length of community name. 
 .PP
-Definition at line 199 of file types.h.
+Definition at line 212 of file types.h.
 .SS "u_char* \fBsnmp_pdu::contextEngineID\fP"
 .PP
 context snmpEngineID 
 .PP
-Definition at line 218 of file types.h.
+Definition at line 231 of file types.h.
 .SS "size_t \fBsnmp_pdu::contextEngineIDLen\fP"
 .PP
 Length of contextEngineID. 
 .PP
-Definition at line 220 of file types.h.
+Definition at line 233 of file types.h.
 .SS "char* \fBsnmp_pdu::contextName\fP"
 .PP
 authoritative contextName 
 .PP
-Definition at line 222 of file types.h.
+Definition at line 235 of file types.h.
 .SS "size_t \fBsnmp_pdu::contextNameLen\fP"
 .PP
 Length of contextName. 
 .PP
-Definition at line 224 of file types.h.
+Definition at line 237 of file types.h.
 .SS "oid* \fBsnmp_pdu::enterprise\fP"
 .PP
 System OID. 
 .PP
-Definition at line 205 of file types.h.
+Definition at line 218 of file types.h.
 .SS "long \fBsnmp_pdu::errindex\fP"
 .PP
 Error index (max_repetitions in GetBulk). 
 .PP
-Definition at line 165 of file types.h.
+Definition at line 178 of file types.h.
 .SS "long \fBsnmp_pdu::errstat\fP"
 .PP
 Error status (non_repeaters in GetBulk). 
 .PP
-Definition at line 163 of file types.h.
+Definition at line 176 of file types.h.
 .SS "long \fBsnmp_pdu::msgid\fP"
 .PP
 Message id for V3 messages note: incremented for each retry. 
 .PP
-Definition at line 157 of file types.h.
+Definition at line 170 of file types.h.
 .SS "long \fBsnmp_pdu::reqid\fP"
 .PP
 Request id - note: not incremented on retries. 
 .PP
-Definition at line 155 of file types.h.
+Definition at line 168 of file types.h.
 .SS "u_char* \fBsnmp_pdu::securityEngineID\fP"
 .PP
 authoritative snmpEngineID for security 
 .PP
-Definition at line 226 of file types.h.
+Definition at line 239 of file types.h.
 .SS "size_t \fBsnmp_pdu::securityEngineIDLen\fP"
 .PP
 Length of securityEngineID. 
 .PP
-Definition at line 228 of file types.h.
+Definition at line 241 of file types.h.
 .SS "int \fBsnmp_pdu::securityLevel\fP"
 .PP
 noAuthNoPriv, authNoPriv, authPriv 
 .PP
-Definition at line 172 of file types.h.
+Definition at line 185 of file types.h.
 .SS "char* \fBsnmp_pdu::securityName\fP"
 .PP
 on behalf of this principal 
 .PP
-Definition at line 230 of file types.h.
+Definition at line 243 of file types.h.
 .SS "size_t \fBsnmp_pdu::securityNameLen\fP"
 .PP
 Length of securityName. 
 .PP
-Definition at line 232 of file types.h.
+Definition at line 245 of file types.h.
 .SS "long \fBsnmp_pdu::sessid\fP"
 .PP
 Session id for AgentX messages. 
 .PP
-Definition at line 161 of file types.h.
+Definition at line 174 of file types.h.
 .SS "long \fBsnmp_pdu::specific_type\fP"
 .PP
 specific type 
 .PP
-Definition at line 210 of file types.h.
+Definition at line 223 of file types.h.
 .SS "const oid* \fBsnmp_pdu::tDomain\fP"
 .PP
 The actual transport domain. This SHOULD NOT BE FREE()D. 
 .PP
-Definition at line 187 of file types.h.
+Definition at line 200 of file types.h.
 .SS "u_long \fBsnmp_pdu::time\fP"
 .PP
 Uptime. 
 .PP
-Definition at line 167 of file types.h.
+Definition at line 180 of file types.h.
 .SS "long \fBsnmp_pdu::transid\fP"
 .PP
 Unique ID for incoming transactions. 
 .PP
-Definition at line 159 of file types.h.
+Definition at line 172 of file types.h.
 .SS "void* \fBsnmp_pdu::transport_data\fP"
 .PP
 Transport-specific opaque data. This replaces the IP-centric address field. 
 .PP
-Definition at line 180 of file types.h.
+Definition at line 193 of file types.h.
 .SS "long \fBsnmp_pdu::trap_type\fP"
 .PP
 trap type 
 .PP
-Definition at line 208 of file types.h.
+Definition at line 221 of file types.h.
 .SS "long \fBsnmp_pdu::version\fP"
 .PP
 snmp version 
 .PP
-Definition at line 151 of file types.h.
+Definition at line 164 of file types.h.
 
 .SH "Author"
 .PP 

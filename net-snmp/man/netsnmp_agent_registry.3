@@ -1,4 +1,4 @@
-.TH "Maintain a registry of MIB subtrees, together with related information regarding mibmodule, sessions, etc" 3 "28 Sep 2009" "Version 5.5" "net-snmp" \" -*- nroff -*-
+.TH "Maintain a registry of MIB subtrees, together with related information regarding mibmodule, sessions, etc" 3 "30 Jun 2010" "Version 5.6.pre2" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -76,6 +76,9 @@ Maintain a registry of MIB subtrees, together with related information regarding
 .br
 .ti -1c
 .RI "\fBnetsnmp_subtree\fP * \fBadd_subtree\fP (\fBnetsnmp_subtree\fP *new_tree, const char *context_name)"
+.br
+.ti -1c
+.RI "void \fBnetsnmp_remove_subtree\fP (\fBnetsnmp_subtree\fP *\fBtree\fP)"
 .br
 .ti -1c
 .RI "\fBnetsnmp_subtree\fP * \fBnetsnmp_subtree_replace_first\fP (\fBnetsnmp_subtree\fP *new_tree, const char *context_name)"
@@ -226,7 +229,7 @@ checks to see if everything within a given subtree is either: in view, not in vi
 .PP
 
 .PP
-Definition at line 1459 of file agent_registry.c.
+Definition at line 1489 of file agent_registry.c.
 .SS "int netsnmp_get_lookup_cache_size (void)"
 .PP
 retrieves the current value of the lookup cache size \fBReturns:\fP
@@ -236,7 +239,7 @@ the current lookup cache size
 .PP
 
 .PP
-Definition at line 118 of file agent_registry.c.
+Definition at line 112 of file agent_registry.c.
 .SS "void netsnmp_set_lookup_cache_size (int newsize)"
 .PP
 set the lookup cache size for optimized agent registration performance. \fBParameters:\fP
@@ -246,7 +249,7 @@ set the lookup cache size for optimized agent registration performance. \fBParam
 .PP
 
 .PP
-Definition at line 105 of file agent_registry.c.
+Definition at line 99 of file agent_registry.c.
 .SS "int unregister_mib_context (oid * name, size_t len, int priority, int range_subid, oid range_ubound, const char * context)"
 .PP
 Unregisters an OID that has an associated context name value. Typically used when a \fBmodule\fP has multiple contexts defined. The parameters priority, range_subid, and range_ubound should be used in conjunction with agentx, see RFC 2741, otherwise these values should always be 0.
@@ -272,7 +275,7 @@ Unregisters an OID that has an associated context name value. Typically used whe
 .PP
 
 .PP
-Definition at line 1105 of file agent_registry.c.
+Definition at line 1135 of file agent_registry.c.
 .SH "Author"
 .PP 
 Generated automatically by Doxygen for net-snmp from the source code.

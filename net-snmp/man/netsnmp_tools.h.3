@@ -1,4 +1,4 @@
-.TH "tools.h" 3 "28 Sep 2009" "Version 5.5" "net-snmp" \" -*- nroff -*-
+.TH "tools.h" 3 "30 Jun 2010" "Version 5.6.pre2" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -66,6 +66,10 @@ tools.h \-
 .br
 .RI "\fIZeros l bytes of memory starting at s. \fP"
 .ti -1c
+.RI "#define \fBNETSNMP_REMOVE_CONST\fP(t, e)   ((t)(uintptr_t)(e))"
+.br
+.RI "\fICast away constness without that gcc -Wcast-qual prints a compiler warning, similar to const_cast<> in C++. \fP"
+.ti -1c
 .RI "#define \fBTOUPPER\fP(c)   (c >= 'a' && c <= 'z' ? c - ('a' - 'A') : c)"
 .br
 .ti -1c
@@ -99,6 +103,14 @@ tools.h \-
 .RI "#define \fBDIFFTIMEVAL\fP(now, then, diff)"
 .br
 .ti -1c
+.RI "#define \fBNETSNMP_TIMERADD\fP(a, b, res)"
+.br
+.RI "\fICompute res = a + b. \fP"
+.ti -1c
+.RI "#define \fBNETSNMP_TIMERSUB\fP(a, b, res)"
+.br
+.RI "\fICompute res = a - b. \fP"
+.ti -1c
 .RI "#define \fBUSM_LENGTH_OID_TRANSFORM\fP   10"
 .br
 .ti -1c
@@ -120,12 +132,16 @@ tools.h \-
 .ti -1c
 .RI "typedef void * \fBmarker_t\fP"
 .br
+.RI "\fIA pointer to an opaque time marker value. \fP"
+.ti -1c
+.RI "typedef const void * \fBconst_marker_t\fP"
+.br
 .in -1c
 .SS "Functions"
 
 .in +1c
 .ti -1c
-.RI "int \fBsnmp_realloc\fP (u_char **buf, size_t *buf_len)"
+.RI "NETSNMP_IMPORT int \fBsnmp_realloc\fP (u_char **buf, size_t *buf_len)"
 .br
 .RI "\fIThis function increase the size of the buffer pointed at by *buf, which is initially of size *buf_len. \fP"
 .ti -1c
@@ -140,11 +156,15 @@ tools.h \-
 .RI "u_char * \fBmalloc_zero\fP (size_t size)"
 .br
 .ti -1c
-.RI "int \fBmemdup\fP (u_char **to, const void *from, size_t size)"
+.RI "NETSNMP_IMPORT int \fBmemdup\fP (u_char **to, const void *from, size_t size)"
 .br
 .RI "\fIDuplicates a memory block. \fP"
 .ti -1c
-.RI "u_int \fBbinary_to_hex\fP (const u_char *input, size_t len, char **output)"
+.RI "NETSNMP_IMPORT u_int \fBnetsnmp_binary_to_hex\fP (u_char **dest, size_t *dest_len, int allow_realloc, const u_char *input, size_t len)"
+.br
+.RI "\fIconverts binary to hexidecimal \fP"
+.ti -1c
+.RI "NETSNMP_IMPORT u_int \fBbinary_to_hex\fP (const u_char *input, size_t len, char **output)"
 .br
 .RI "\fIconverts binary to hexidecimal \fP"
 .ti -1c
@@ -152,63 +172,63 @@ tools.h \-
 .br
 .RI "\fIconvert an ASCII hex string (with specified delimiters) to binary \fP"
 .ti -1c
-.RI "int \fBsnmp_hex_to_binary\fP (u_char **buf, size_t *buf_len, size_t *offset, int allow_realloc, const char *hex)"
+.RI "NETSNMP_IMPORT int \fBsnmp_hex_to_binary\fP (u_char **buf, size_t *buf_len, size_t *offset, int allow_realloc, const char *hex)"
 .br
 .RI "\fIconvert an ASCII hex string to binary \fP"
 .ti -1c
-.RI "int \fBhex_to_binary2\fP (const u_char *input, size_t len, char **output)"
+.RI "NETSNMP_IMPORT int \fBhex_to_binary2\fP (const u_char *input, size_t len, char **output)"
 .br
 .RI "\fIhex_to_binary2 \fP"
 .ti -1c
-.RI "int \fBsnmp_decimal_to_binary\fP (u_char **buf, size_t *buf_len, size_t *out_len, int allow_realloc, const char *decimal)"
+.RI "NETSNMP_IMPORT int \fBsnmp_decimal_to_binary\fP (u_char **buf, size_t *buf_len, size_t *out_len, int allow_realloc, const char *decimal)"
 .br
 .ti -1c
-.RI "int \fBsnmp_strcat\fP (u_char **buf, size_t *buf_len, size_t *out_len, int allow_realloc, const u_char *s)"
+.RI "NETSNMP_IMPORT int \fBsnmp_strcat\fP (u_char **buf, size_t *buf_len, size_t *out_len, int allow_realloc, const u_char *s)"
 .br
 .ti -1c
-.RI "char * \fBnetsnmp_strdup_and_null\fP (const u_char *from, size_t from_len)"
+.RI "NETSNMP_IMPORT char * \fBnetsnmp_strdup_and_null\fP (const u_char *from, size_t from_len)"
 .br
 .RI "\fIcopies a (possible) unterminated string of a given length into a new buffer and null terminates it as well (new buffer MAY be one byte longer to account for this \fP"
 .ti -1c
-.RI "void \fBdump_chunk\fP (const char *debugtoken, const char *title, const u_char *buf, int size)"
+.RI "NETSNMP_IMPORT void \fBdump_chunk\fP (const char *debugtoken, const char *title, const u_char *buf, int size)"
 .br
 .ti -1c
 .RI "char * \fBdump_snmpEngineID\fP (const u_char *buf, size_t *buflen)"
 .br
 .ti -1c
-.RI "marker_t \fBatime_newMarker\fP (void)"
+.RI "NETSNMP_IMPORT \fBmarker_t\fP \fBatime_newMarker\fP (void)"
 .br
 .RI "\fIcreate a new time marker. \fP"
 .ti -1c
-.RI "void \fBatime_setMarker\fP (marker_t pm)"
+.RI "NETSNMP_IMPORT void \fBatime_setMarker\fP (\fBmarker_t\fP pm)"
 .br
 .RI "\fIset a time marker. \fP"
 .ti -1c
-.RI "long \fBatime_diff\fP (marker_t first, marker_t second)"
+.RI "NETSNMP_IMPORT long \fBatime_diff\fP (const_marker_t first, const_marker_t second)"
 .br
 .RI "\fIReturns the difference (in msec) between the two markers. \fP"
 .ti -1c
-.RI "u_long \fBuatime_diff\fP (marker_t first, marker_t second)"
+.RI "u_long \fBuatime_diff\fP (const_marker_t first, const_marker_t second)"
 .br
 .RI "\fIReturns the difference (in u_long msec) between the two markers. \fP"
 .ti -1c
-.RI "u_long \fBuatime_hdiff\fP (marker_t first, marker_t second)"
+.RI "NETSNMP_IMPORT u_long \fBuatime_hdiff\fP (const_marker_t first, const_marker_t second)"
 .br
 .RI "\fIReturns the difference (in u_long 1/100th secs) between the two markers (functionally this is what sysUpTime needs). \fP"
 .ti -1c
-.RI "int \fBatime_ready\fP (marker_t pm, int deltaT)"
+.RI "NETSNMP_IMPORT int \fBatime_ready\fP (const_marker_t pm, int deltaT)"
 .br
 .RI "\fITest: Has (marked time plus delta) exceeded current time (in msec) ? Returns 0 if test fails or cannot be tested (no marker). \fP"
 .ti -1c
-.RI "int \fBuatime_ready\fP (marker_t pm, unsigned int deltaT)"
+.RI "int \fBuatime_ready\fP (const_marker_t pm, unsigned int deltaT)"
 .br
 .RI "\fITest: Has (marked time plus delta) exceeded current time (in msec) ? Returns 0 if test fails or cannot be tested (no marker). \fP"
 .ti -1c
-.RI "int \fBmarker_tticks\fP (marker_t pm)"
+.RI "int \fBmarker_tticks\fP (const_marker_t pm)"
 .br
 .RI "\fIReturn the number of timeTicks since the given marker. \fP"
 .ti -1c
-.RI "int \fBtimeval_tticks\fP (struct timeval *tv)"
+.RI "int \fBtimeval_tticks\fP (const struct timeval *tv)"
 .br
 .ti -1c
 .RI "char * \fBnetsnmp_getenv\fP (const char *name)"

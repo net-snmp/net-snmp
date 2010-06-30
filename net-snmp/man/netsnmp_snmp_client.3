@@ -1,8 +1,24 @@
-.TH "various PDU processing routines" 3 "28 Sep 2009" "Version 5.5" "net-snmp" \" -*- nroff -*-
+.TH "various PDU processing routines" 3 "30 Jun 2010" "Version 5.6.pre2" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
 various PDU processing routines \- 
+.SS "Data Structures"
+
+.in +1c
+.ti -1c
+.RI "struct \fBrowcreate_state_s\fP"
+.br
+.RI "\fI************************************************************************** \fP"
+.in -1c
+.SS "Typedefs"
+
+.in +1c
+.ti -1c
+.RI "typedef struct \fBrowcreate_state_s\fP \fBrowcreate_state\fP"
+.br
+.RI "\fI************************************************************************** \fP"
+.in -1c
 .SS "Functions"
 
 .in +1c
@@ -57,7 +73,7 @@ various PDU processing routines \-
 .RI "\fBnetsnmp_variable_list\fP * \fBfind_varbind_of_type\fP (\fBnetsnmp_variable_list\fP *var_ptr, u_char type)"
 .br
 .ti -1c
-.RI "\fBnetsnmp_variable_list\fP * \fBfind_varbind_in_list\fP (\fBnetsnmp_variable_list\fP *vblist, oid *name, size_t len)"
+.RI "\fBnetsnmp_variable_list\fP * \fBfind_varbind_in_list\fP (\fBnetsnmp_variable_list\fP *vblist, const oid *name, size_t len)"
 .br
 .ti -1c
 .RI "int \fBsnmp_set_var_value\fP (\fBnetsnmp_variable_list\fP *vars, const void *value, size_t len)"
@@ -84,8 +100,13 @@ various PDU processing routines \-
 .RI "void \fBnetsnmp_query_set_default_session\fP (\fBnetsnmp_session\fP *sess)"
 .br
 .ti -1c
+.RI "\fBnetsnmp_session\fP * \fBnetsnmp_query_get_default_session_unchecked\fP (void)"
+.br
+.RI "\fIReturn a pointer to the default internal query session. \fP"
+.ti -1c
 .RI "\fBnetsnmp_session\fP * \fBnetsnmp_query_get_default_session\fP (void)"
 .br
+.RI "\fIReturn a pointer to the default internal query session and log a warning message once if this session does not exist. \fP"
 .ti -1c
 .RI "int \fBnetsnmp_query_get\fP (\fBnetsnmp_variable_list\fP *list, \fBnetsnmp_session\fP *session)"
 .br
@@ -98,14 +119,47 @@ various PDU processing routines \-
 .ti -1c
 .RI "int \fBnetsnmp_query_walk\fP (\fBnetsnmp_variable_list\fP *list, \fBnetsnmp_session\fP *session)"
 .br
+.ti -1c
+.RI "int \fBnetsnmp_state_machine_run\fP (\fBnetsnmp_state_machine_input\fP *input)"
+.br
+.RI "\fI************************************************************************** \fP"
+.ti -1c
+.RI "int \fBnetsnmp_row_create\fP (\fBnetsnmp_session\fP *sess, \fBnetsnmp_variable_list\fP *vars, int row_status_index)"
+.br
+.RI "\fI************************************************************************** \fP"
 .in -1c
+.SH "Typedef Documentation"
+.PP 
+.SS "typedef struct \fBrowcreate_state_s\fP  \fBrowcreate_state\fP"
+.PP
+************************************************************************** row create state machine steps 
 .SH "Function Documentation"
 .PP 
+.SS "\fBnetsnmp_session\fP* netsnmp_query_get_default_session (void)"
+.PP
+Return a pointer to the default internal query session and log a warning message once if this session does not exist. 
+.PP
+Definition at line 1207 of file snmp_client.c.
+.SS "\fBnetsnmp_session\fP* netsnmp_query_get_default_session_unchecked (void)"
+.PP
+Return a pointer to the default internal query session. 
+.PP
+Definition at line 1197 of file snmp_client.c.
+.SS "int netsnmp_row_create (\fBnetsnmp_session\fP * sess, \fBnetsnmp_variable_list\fP * vars, int row_status_index)"
+.PP
+************************************************************************** row api 
+.PP
+Definition at line 1778 of file snmp_client.c.
+.SS "int netsnmp_state_machine_run (\fBnetsnmp_state_machine_input\fP * input)"
+.PP
+************************************************************************** state machine 
+.PP
+Definition at line 1393 of file snmp_client.c.
 .SS "\fBnetsnmp_pdu\fP* snmp_pdu_create (int command)"
 .PP
 Library API routines concerned with SNMP PDUs. 
 .PP
-Definition at line 128 of file snmp_client.c.
+Definition at line 123 of file snmp_client.c.
 .SS "int snmp_set_var_typed_value (\fBnetsnmp_variable_list\fP * newvar, u_char type, const void * val_str, size_t val_len)"
 .PP
 snmp_set_var_typed_value is used to set data into the netsnmp_variable_list structure. Used to return data to the snmp request via the netsnmp_request_info structure's requestvb pointer.
@@ -132,12 +186,12 @@ returns 0 on success and 1 on a malloc error
 .in +1c
 \fBdelayed_instance.c\fP.
 .PP
-Definition at line 697 of file snmp_client.c.
+Definition at line 691 of file snmp_client.c.
 .SS "int snmp_set_var_value (\fBnetsnmp_variable_list\fP * vars, const void * value, size_t len)"
 .PP
 FALL THROUGH 
 .PP
-Definition at line 762 of file snmp_client.c.
+Definition at line 756 of file snmp_client.c.
 .SH "Author"
 .PP 
 Generated automatically by Doxygen for net-snmp from the source code.
