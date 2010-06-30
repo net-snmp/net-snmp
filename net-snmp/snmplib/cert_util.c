@@ -1839,6 +1839,92 @@ netsnmp_cert_check_vb_fingerprint(const netsnmp_variable_list *var)
 }
 
 /**
+ * break a SnmpTLSFingerprint into an integer hash type + hex string
+ *
+ * @return SNMPERR_SUCCESS : on success
+ * @return SNMPERR_GENERR  : on failure
+ */
+int
+netsnmp_tls_fingerprint_parse(const u_char *binary_fp, int fp_len,
+                              char **fp_str_ptr, u_int *fp_str_len, int realloc,
+                              u_char *hash_type_ptr)
+{
+    int needed;
+
+    netsnmp_require_ptr_LRV( hash_type_ptr, SNMPERR_GENERR );
+    netsnmp_require_ptr_LRV( fp_str_ptr, SNMPERR_GENERR );
+
+    /*
+     * output string is binary fp length (minus 1 for initial hash type 
+     * char) * 2 for bin to hex conversion, + 1 for null termination.
+     */
+    needed = ((fp_len - 1) * 2) + 1;
+    if (*fp_str_len < needed) {
+        DEBUGMSGT(("tls:fp:parse", "need %d bytes for output\n", needed ));
+        return SNMPERR_GENERR;
+    }
+
+    /*
+     * make sure hash type is in valid range
+     */
+    if ((0 == binary_fp[0]) || (binary_fp[0] > NS_HASH_MAX)) {
+        DEBUGMSGT(("tls:fp:parse", "invalid hash type %d\n",
+                   binary_fp[0]));
+        return SNMPERR_GENERR;
+    }
+
+    /*
+     * netsnmp_binary_to_hex allocate space for string, if needed
+     */
+    *hash_type_ptr = binary_fp[0];
+    *fp_str_len = netsnmp_binary_to_hex((u_char**)fp_str_ptr, fp_str_len,
+                                        realloc, &binary_fp[1], fp_len - 1);
+    if (0 == *fp_str_len)
+        return SNMPERR_GENERR;
+
+    return SNMPERR_SUCCESS;
+}
+
+/**
+ * combine a hash type and hex fingerprint into a SnmpTLSFingerprint
+ */
+int
+netsnmp_tls_fingerprint_build(int hash_type, const char *hex_fp,
+                                   u_char **tls_fp, u_int *tls_fp_len,
+                                   int realloc)
+{
+    int     hex_fp_len;
+    size_t  offset;
+
+    netsnmp_require_ptr_LRV( hex_fp, SNMPERR_GENERR );
+    netsnmp_require_ptr_LRV( tls_fp, SNMPERR_GENERR );
+    netsnmp_require_ptr_LRV( tls_fp_len, SNMPERR_GENERR );
+
+    hex_fp_len = strlen(hex_fp);
+    if (0 == hex_fp_len) {
+        *tls_fp_len = 0;
+        return SNMPERR_SUCCESS;
+    }
+
+    if ((hash_type <= NS_HASH_NONE) || (hash_type > NS_HASH_MAX)) {
+        DEBUGMSGT(("tls:fp:build", "invalid hash type %d\n", hash_type ));
+        return SNMPERR_GENERR;
+    }
+
+    /*
+     * convert to binary
+     */
+    offset = 1;
+    if (netsnmp_hex_to_binary(tls_fp, tls_fp_len, &offset, realloc, hex_fp,
+                              ":") != 1)
+        return SNMPERR_GENERR;
+    *tls_fp_len = offset;
+    (*tls_fp)[0] = hash_type;
+                               
+    return SNMPERR_SUCCESS;
+}
+
+/**
  * Trusts a given certificate for use in TLS translations.
  *
  * @param ctx The SSL context to trust the certificate in
@@ -2413,9 +2499,8 @@ netsnmp_cert_map_container_create(int with_fp)
     return chain_map;
 }
 
-
-static int
-_parse_ht_str(const char *str)
+int
+netsnmp_cert_parse_hash_type(const char *str)
 {
     int rc = se_find_value_in_slist("cert_hash_alg", str);
     if (SE_DNE == rc)
@@ -2482,7 +2567,7 @@ netsnmp_certToTSN_parse_common(char **line)
     *line = read_config_read_octet_string(*line, (u_char **)&tmp, &len);
     tmp[len] = 0;
     if ((buf[0] == '-') && (buf[1] == '-')) {
-        map->hashType = _parse_ht_str(&buf[2]);
+        map->hashType = netsnmp_cert_parse_hash_type(&buf[2]);
         if (NS_HASH_NONE == map->hashType) {
             netsnmp_config_error("invalid hash type");
             goto end;
@@ -2792,7 +2877,7 @@ netsnmp_tlstmParams_restore_common(char **line)
     *line = read_config_read_octet_string(*line, (u_char **)&tmp, &len);
     tmp[len] = 0;
     if ((buf[0] == '-') && (buf[1] == '-')) {
-        stp->hashType = _parse_ht_str(&buf[2]);
+        stp->hashType = netsnmp_cert_parse_hash_type(&buf[2]);
 
         /** set up for fingerprint */
         len = sizeof(buf);
@@ -2986,7 +3071,7 @@ netsnmp_tlstmAddr_restore_common(char **line, char *name, size_t *name_len,
     }
     fp[*fp_len] = 0;
     if ((fp[0] == '-') && (fp[1] == '-')) {
-        *ht = _parse_ht_str(&fp[2]);
+        *ht = netsnmp_cert_parse_hash_type(&fp[2]);
         
         /** set up for fingerprint */
         *fp_len = fp_len_save;
