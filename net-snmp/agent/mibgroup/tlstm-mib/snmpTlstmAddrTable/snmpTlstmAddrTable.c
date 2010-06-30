@@ -10,12 +10,76 @@
 #include <net-snmp/library/cert_util.h>
 #include "tlstm-mib.h"
 #include "snmpTlstmAddrTable.h"
-#include "snmpTlstmAddrTable_internal.h"
 
 /** XXX - move these to table_data header? */
 #define FATE_NEWLY_CREATED    1
 #define FATE_NO_CHANGE        0
 #define FATE_DELETE_ME        -1
+
+/***********************************************************************
+ *
+ * PERSISTENCE
+ *
+ ***********************************************************************/
+    /*
+     * structure for undo storage and other vars for set processing 
+     */
+typedef struct tlstmAddrTable_undo_s {
+    char            fate;
+    char            copied;
+    char            is_consistent;
+    netsnmp_request_info *req[TLSTMADDRTABLE_MAX_COLUMN + 1];
+    /*
+     * undo Column space 
+     */
+    char       tlstmAddrServerFingerprint[TLSTMADDRSERVERFINGERPRINT_MAX_SIZE];
+    size_t          tlstmAddrServerFingerprint_len;
+    char            tlstmAddrServerIdentity[TLSTMADDRSERVERIDENTITY_MAX_SIZE];
+    size_t          tlstmAddrServerIdentity_len;
+    char            tlstmAddrStorageType;
+    char            tlstmAddrRowStatus;
+    char            hashType;
+} tlstmAddrTable_undo;
+
+    /*
+     * Typical data structure for a row entry 
+     */
+typedef struct tlstmAddrTable_entry_s {
+    /*
+     * Index values 
+     */
+    char            snmpTargetAddrName[SNMPTARGETADDRNAME_MAX_SIZE];
+    size_t          snmpTargetAddrName_len;
+
+    /*
+     * Column values 
+     */
+    char        tlstmAddrServerFingerprint[TLSTMADDRSERVERFINGERPRINT_MAX_SIZE];
+    size_t          tlstmAddrServerFingerprint_len;
+    char            tlstmAddrServerIdentity[TLSTMADDRSERVERIDENTITY_MAX_SIZE];
+    size_t          tlstmAddrServerIdentity_len;
+    char            tlstmAddrStorageType;
+    char            tlstmAddrRowStatus;
+    char            hashType;
+
+    /*
+     * used during set processing 
+     */
+    tlstmAddrTable_undo *undo;
+
+    /*
+     * user data
+     */
+    struct netsnmp_cert_s   *cert;
+    char                     addr_flags;
+
+} tlstmAddrTable_entry;
+
+netsnmp_tdata_row *tlstmAddrTable_createEntry(netsnmp_tdata * table_data,
+                                              char *snmpTargetAddrName,
+                                              size_t snmpTargetAddrName_len);
+void tlstmAddrTable_removeEntry(netsnmp_tdata * table_data,
+                                netsnmp_tdata_row * row);
 
 static Netsnmp_Node_Handler tlstmAddrTable_handler;
 static int _cache_load(netsnmp_cache *cache, netsnmp_tdata *table);
@@ -26,21 +90,24 @@ static int _count_handler(netsnmp_mib_handler *handler,
                           netsnmp_agent_request_info *reqinfo,
                           netsnmp_request_info *requests);
 
-void _tlstmAddr_container_init_persistence(netsnmp_tdata *table_data);
+static void _tlstmAddr_init_persistence(void);
 static void _addrs_add(tlstmAddrTable_entry *entry);
 static void _addrs_remove(tlstmAddrTable_entry *entry);
 static void _addr_tweak_storage(tlstmAddrTable_entry *entry);
+static netsnmp_tdata  *_table_data = NULL;
 
-static netsnmp_container *_table = NULL;
-
+/***********************************************************************
+ *
+ * PERSISTENCE
+ *
+ ***********************************************************************/
 /** Initializes the tlstmAddrTable module */
 void
 init_snmpTlstmAddrTable(void)
 {
-    oid             reg_oid[] = { SNMP_TLS_TM_BASE, 2, 2, 1, 9 };
+    oid             reg_oid[] = { SNMP_TLS_TM_ADDR_TABLE };
     const size_t    reg_oid_len = OID_LENGTH(reg_oid);
     netsnmp_handler_registration *reg;
-    netsnmp_tdata  *table_data;
     netsnmp_table_registration_info *table_info;
     netsnmp_cache                   *cache;
     netsnmp_watcher_info            *watcher;
@@ -54,15 +121,16 @@ init_snmpTlstmAddrTable(void)
                                             reg_oid, reg_oid_len,
                                             HANDLER_CAN_RWRITE);
 
-    table_data = netsnmp_tdata_create_table("tlstmAddrTable", 0);
-    if (NULL == table_data) {
+    _table_data = netsnmp_tdata_create_table("tlstmAddrTable", 0);
+    if (NULL == _table_data) {
         snmp_log(LOG_ERR, "error creating tdata table for tlstmAddrTable\n");
         return;
     }
     table_info = SNMP_MALLOC_TYPEDEF(netsnmp_table_registration_info);
     if (NULL == table_info) {
         snmp_log(LOG_ERR, "error creating table info for tlstmAddrTable\n");
-        netsnmp_tdata_delete_table(table_data);
+        netsnmp_tdata_delete_table(_table_data);
+        _table_data = NULL;
         return;
     }
 
@@ -74,11 +142,11 @@ init_snmpTlstmAddrTable(void)
                                  reg_oid, reg_oid_len);
     if (NULL == cache) {
         snmp_log(LOG_ERR,"error creating cache for tlstmCertToTSNTable\n");
-        netsnmp_tdata_delete_table(table_data);
-        table_data = NULL;
+        netsnmp_tdata_delete_table(_table_data);
+        _table_data = NULL;
         return;
     }
-    cache->magic = (void *)table_data;
+    cache->magic = (void *)_table_data;
     cache->flags = NETSNMP_CACHE_DONT_INVALIDATE_ON_SET;
 
     /*
@@ -92,7 +160,7 @@ init_snmpTlstmAddrTable(void)
     table_info->min_column = TLSTMADDRTABLE_MIN_COLUMN;
     table_info->max_column = TLSTMADDRTABLE_MAX_COLUMN;
 
-    netsnmp_tdata_register(reg, table_data, table_info);
+    netsnmp_tdata_register(reg, _table_data, table_info);
 
     if (cache) 
         netsnmp_inject_handler_before( reg, netsnmp_cache_handler_get(cache),
@@ -134,11 +202,14 @@ init_snmpTlstmAddrTable(void)
     /*
      * Initialise the contents of the table here 
      */
-    _tlstmAddr_container_init_persistence(table_data);
-
-    _table = table_data->container;
+    _tlstmAddr_init_persistence();
 }
 
+/***********************************************************************
+ *
+ * PERSISTENCE
+ *
+ ***********************************************************************/
 /*
  * create a new row in the table 
  */
@@ -262,6 +333,11 @@ tlstmAddrTable_removeEntry(netsnmp_tdata * table_data,
 }
 
 
+/***********************************************************************
+ *
+ * PERSISTENCE
+ *
+ ***********************************************************************/
 /** handles requests for the tlstmAddrTable table */
 static int
 tlstmAddrTable_handler(netsnmp_mib_handler *handler,
@@ -300,15 +376,19 @@ tlstmAddrTable_handler(netsnmp_mib_handler *handler,
                 u_char bin[42], *ptr = bin;
                 size_t len = sizeof(bin), offset = 1;
                 int    rc;
-                bin[0] = table_entry->hashType;
-                netsnmp_assert(table_entry->hashType != 0);
-                rc = netsnmp_hex_to_binary(
-                    &ptr, &len, &offset, 0,
-                    table_entry->tlstmAddrServerFingerprint, NULL);
-                if (1 != rc)
-                    netsnmp_set_request_error(reqinfo, request,
-                                              SNMP_ERR_GENERR);
-                else
+
+                if ((table_entry->hashType == 0) ||
+                    (table_entry->tlstmAddrServerFingerprint_len ==0))
+                    offset = 0;
+                else {
+                    bin[0] = table_entry->hashType;
+                    rc = netsnmp_hex_to_binary(
+                        &ptr, &len, &offset, 0,
+                        table_entry->tlstmAddrServerFingerprint, NULL);
+                    if (1 != rc)
+                        ret = SNMP_ERR_GENERR;
+                }
+                if (ret == SNMP_ERR_NOERROR)
                     snmp_set_var_typed_value(request->requestvb, ASN_OCTET_STR,
                                              bin, offset);
             }
@@ -748,6 +828,10 @@ tlstmAddrTable_handler(netsnmp_mib_handler *handler,
             if (!table_entry || !table_entry->undo)
                 continue;
 
+            if ((RS_NOTREADY == table_entry->tlstmAddrRowStatus) &&
+                table_entry->undo->is_consistent)
+                table_entry->tlstmAddrRowStatus = RS_NOTINSERVICE;
+
             /** release undo data for requests with no rowstatus */
             if (table_entry->undo &&
                 !table_entry->undo->req[COLUMN_SNMPTLSTMADDRROWSTATUS] != 0) {
@@ -813,6 +897,10 @@ tlstmAddrTable_handler(netsnmp_mib_handler *handler,
 
         /** update last changed */
         _last_changed = netsnmp_get_agent_uptime();
+
+        /** set up to save persistent store */
+        snmp_store_needed(NULL);
+
         break;                  /* case MODE_SET_COMMIT */
     }                           /* switch (reqinfo->mode) */
 
@@ -822,7 +910,11 @@ tlstmAddrTable_handler(netsnmp_mib_handler *handler,
     return SNMP_ERR_NOERROR;
 }
 
-
+/***********************************************************************
+ *
+ * PERSISTENCE
+ *
+ ***********************************************************************/
 static int
 _count_handler(netsnmp_mib_handler *handler,
                netsnmp_handler_registration *reginfo,
@@ -836,10 +928,10 @@ _count_handler(netsnmp_mib_handler *handler,
         return SNMP_ERR_GENERR;
     }
 
-    if (NULL == _table)
+    if ((NULL == _table_data) || (NULL == _table_data->container))
         val = 0;
     else
-        val = CONTAINER_SIZE(_table);
+        val = CONTAINER_SIZE(_table_data->container);
 
     snmp_set_var_typed_value(requests->requestvb, ASN_GAUGE,
                              (u_char *) &val, sizeof(val));
@@ -855,7 +947,7 @@ _count_handler(netsnmp_mib_handler *handler,
  *
  * handle cache / interactions with tlstmAddr container in snmplib
  *
- */
+ ** *************************************************************************/
 static void
 _addrs_add(tlstmAddrTable_entry *entry)
 {
@@ -1084,4 +1176,250 @@ _cache_free(netsnmp_cache *cache, netsnmp_tdata *table)
 
     DEBUGMSGTL(("tlstmAddrTable:cache:free", "done, %d rows\n",
                 CONTAINER_SIZE(table->container)));
+}
+
+/***********************************************************************
+ *
+ * PERSISTENCE
+ *
+ ***********************************************************************/
+
+static int  _tlstmAddrTable_save_rows(int majorID, int minorID,
+                                                void *serverarg,
+                                                void *clientarg);
+static void _tlstmAddrTable_row_restore_mib(const char *token,
+                                                       char *buf);
+static const char mib_token[] = "snmpTlstmAddrEntry";
+
+/************************************************************
+ * *_init_persistence should be called from the main table
+ * init routine.
+ *
+ * If your table depends on rows in another table,
+ * you should register your callback after the other table,
+ * which should ensure the rows on which you depend are saved
+ * (and re-created) before the dependent rows.
+ */
+static void
+_tlstmAddr_init_persistence(void)
+{
+    int             rc;
+
+    if (NULL == _table_data) {
+        snmp_log(LOG_ERR, "no table data for tlstmAddr persistence!\n");
+        return;
+    }
+
+    register_config_handler(NULL, mib_token,
+                            _tlstmAddrTable_row_restore_mib, NULL,
+                            NULL);
+    rc = snmp_register_callback(SNMP_CALLBACK_LIBRARY,
+                                SNMP_CALLBACK_STORE_DATA,
+                                _tlstmAddrTable_save_rows,
+                                _table_data->container);
+
+    if (rc != SNMP_ERR_NOERROR)
+        snmp_log(LOG_ERR, "error registering for STORE_DATA callback "
+                 "in _tlstmAddrTable_init_persistence\n");
+}
+
+static int
+_save_entry(tlstmAddrTable_entry *entry, void *type)
+{
+    char   buf[SNMP_MAXBUF_SMALL], *hashType;
+
+    hashType = se_find_label_in_slist("cert_hash_alg", entry->hashType);
+    if (NULL == hashType) {
+        snmp_log(LOG_ERR, "skipping entry unknown hash type %d\n",
+                 entry->hashType);
+        return SNMP_ERR_GENERR;
+    }
+
+    /*
+     * build the line
+     */
+    netsnmp_assert(0 == entry->snmpTargetAddrName[
+                       entry->snmpTargetAddrName_len]);
+    netsnmp_assert(0 == entry->tlstmAddrServerFingerprint[
+                       entry->tlstmAddrServerFingerprint_len]);
+    snprintf(buf, sizeof(buf), "%s %s --%s %s %s %d", mib_token,
+             entry->snmpTargetAddrName, hashType,
+             entry->tlstmAddrServerFingerprint,
+             entry->tlstmAddrServerIdentity,
+             entry->tlstmAddrRowStatus);
+    buf[sizeof(buf)-1] = 0;
+
+    read_config_store(type, buf);
+    DEBUGMSGTL(("tlstmAddrTable:row:save", "saving entry '%s'\n", buf));
+
+    return SNMP_ERR_NOERROR;
+}
+
+static int
+_save_addrs(snmpTlstmAddr *addrs, void *app_type)
+{
+    char buf[SNMP_MAXBUF_SMALL], *hashType;
+
+    if (NULL == addrs)
+        return SNMP_ERR_GENERR;
+
+    hashType = se_find_label_in_slist("cert_hash_alg", addrs->hashType);
+    if (NULL == hashType) {
+        snmp_log(LOG_ERR, "skipping entry unknown hash type %d\n",
+                 addrs->hashType);
+        return SNMP_ERR_GENERR;
+    }
+    snprintf(buf, sizeof(buf), "%s %s --%s %s %s %d", mib_token, addrs->name,
+             hashType, addrs->fingerprint, addrs->identity, RS_ACTIVE);
+
+    DEBUGMSGTL(("tlstmAddrTable:addrs:save", "saving addrs '%s'\n",
+                buf));
+    read_config_store(app_type, buf);
+
+    return SNMP_ERR_NOERROR;
+}
+
+static int
+_tlstmAddrTable_save_rows(int majorID, int minorID, void *serverarg,
+                      void *clientarg)
+{
+    char            sep[] =
+        "##############################################################";
+    char            buf[] = "#\n" "# tlstmAddr persistent data\n" "#";
+    char           *type = netsnmp_ds_get_string(NETSNMP_DS_LIBRARY_ID,
+                                                 NETSNMP_DS_LIB_APPTYPE);
+
+    netsnmp_container *mib_addrs = (netsnmp_container *) clientarg;
+    netsnmp_container *active_addrs = netsnmp_tlstmAddr_container();
+    netsnmp_iterator  *tbl_itr, *addrs_itr;
+    netsnmp_tdata_row *row;
+    snmpTlstmAddr     *addr;
+    tlstmAddrTable_entry *entry;
+
+    if (((NULL == mib_addrs) || (CONTAINER_SIZE(mib_addrs) == 0)) &&
+        ((NULL == active_addrs) || (CONTAINER_SIZE(active_addrs) == 0)))
+        return SNMPERR_SUCCESS;
+
+    read_config_store((char *) type, sep);
+    read_config_store((char *) type, buf);
+
+    /*
+     * save active rows from addr container
+     */
+    if (NULL != active_addrs) {
+        addrs_itr = CONTAINER_ITERATOR(active_addrs);
+        if (NULL == addrs_itr) {
+            DEBUGMSGTL(("tlstmAddrTable:save", "cant get addrs iterator\n"));
+            addr = NULL;
+        }
+        else
+            addr = ITERATOR_FIRST(addrs_itr);
+
+        for( ; addr; addr = ITERATOR_NEXT(addrs_itr)) {
+            /** don't store config rows */
+            if ((addr->flags & TLSTM_ADDR_FROM_CONFIG) ||
+                ! (addr->flags & TLSTM_ADDR_NONVOLATILE))
+                continue;
+            _save_addrs(addr, type);
+        }
+    }
+    ITERATOR_RELEASE(addrs_itr);
+
+    /*
+     * save inactive rows from mib
+     */
+    tbl_itr = CONTAINER_ITERATOR(mib_addrs);
+    if (NULL == tbl_itr)
+        DEBUGMSGTL(("tlstmAddrTable:save", "cant get table iterator\n"));
+    else {
+        row = ITERATOR_FIRST(tbl_itr);
+        for( ; row; row = ITERATOR_NEXT(tbl_itr)) {
+            entry = row->data;
+
+            /*
+             * skip all active rows (should be in active_addrs and thus saved
+             * above) and volatile rows.
+             */
+            if ((entry->tlstmAddrRowStatus == RS_ACTIVE) ||
+                (entry->tlstmAddrStorageType != ST_NONVOLATILE))
+                continue;
+
+            _save_entry(entry, type);
+        }
+        ITERATOR_RELEASE(tbl_itr);
+    }
+
+    read_config_store((char *) type, sep);
+    read_config_store((char *) type, "\n");
+
+    /*
+     * never fails 
+     */
+    return SNMPERR_SUCCESS;
+}
+
+static void
+_tlstmAddrTable_row_restore_mib(const char *token, char *buf)
+{
+    char                   name[SNMPADMINLENGTH + 1], id[SNMPADMINLENGTH + 1],
+                           fingerprint[SNMPTLSFINGERPRINT_MAX_LEN + 1];
+    u_int                  name_len = sizeof(name), id_len = sizeof(id),
+                           fp_len = sizeof(fingerprint);
+    u_char                 hashType, rowStatus;
+    int                    rc;
+
+    /** need somewhere to save rows */
+    netsnmp_assert(_table_data && _table_data->container); 
+
+    rc = netsnmp_tlstmAddr_restore_common(&buf, name, &name_len, id, &id_len,
+                                          fingerprint, &fp_len, &hashType);
+    if (rc < 0)
+        return;
+
+    if (NULL == buf) {
+        config_perror("incomplete line");
+        return;
+    }
+    rowStatus = atoi(buf);
+
+    /*
+     * if row is active, add it to the addrs container so it is available
+     * for use. Do not add it to the table, since it will be added
+     * during cache_load.
+     */
+    if (RS_ACTIVE == rowStatus) {
+        snmpTlstmAddr *addr;
+
+        addr = netsnmp_tlstmAddr_create(name);
+        if (!addr)
+            return;
+
+        if (fp_len)
+            addr->fingerprint = strndup(fingerprint, fp_len);
+        if (id_len)
+            addr->identity = strndup(id, id_len);
+        addr->hashType = hashType;
+        addr->flags = TLSTM_ADDR_FROM_MIB | TLSTM_ADDR_NONVOLATILE;
+
+        if (netsnmp_tlstmAddr_add(addr) != 0)
+            netsnmp_tlstmAddr_free(addr);
+    }
+    else {
+        netsnmp_tdata_row     *row;
+        tlstmAddrTable_entry  *entry;
+
+        row = tlstmAddrTable_createEntry(_table_data, name, name_len);
+        if (!row)
+            return;
+
+        entry = row->data;
+        
+        entry->hashType = hashType;
+        memcpy(entry->tlstmAddrServerFingerprint,fingerprint, fp_len);
+        entry->tlstmAddrServerFingerprint_len = fp_len;
+        memcpy(entry->tlstmAddrServerIdentity, id, id_len);
+        entry->tlstmAddrServerIdentity_len = id_len;
+        entry->tlstmAddrStorageType = ST_NONVOLATILE;
+        entry->tlstmAddrRowStatus = rowStatus;
+    }
 }

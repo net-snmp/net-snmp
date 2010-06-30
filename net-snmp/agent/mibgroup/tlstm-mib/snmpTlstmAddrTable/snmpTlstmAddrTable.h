@@ -5,9 +5,33 @@
 #ifndef SNMPTLSTMADDRTABLE_H
 #define SNMPTLSTMADDRTABLE_H
 
+#define SNMP_TLS_TM_ADDR_COUNT    SNMP_TLS_TM_BASE, 2, 2, 1, 7
+#define SNMP_TLS_TM_ADDR_CHANGED  SNMP_TLS_TM_BASE, 2, 2, 1, 8
+#define SNMP_TLS_TM_ADDR_TABLE    SNMP_TLS_TM_BASE, 2, 2, 1, 9
+
 /*
  * function declarations 
  */
 void            init_snmpTlstmAddrTable(void);
+
+/*
+ * index definitions for table tlstmAddrTable 
+ */
+#define SNMPTARGETADDRNAME_MAX_SIZE  255
+
+/*
+ * column number definitions for table tlstmAddrTable 
+ */
+#define COLUMN_SNMPTLSTMADDRSERVERFINGERPRINT       1
+#define COLUMN_SNMPTLSTMADDRSERVERIDENTITY          2
+#define COLUMN_SNMPTLSTMADDRSTORAGETYPE             3
+#define COLUMN_SNMPTLSTMADDRROWSTATUS               4
+
+#define TLSTMADDRTABLE_MIN_COLUMN         COLUMN_SNMPTLSTMADDRSERVERFINGERPRINT
+#define TLSTMADDRTABLE_MAX_COLUMN         COLUMN_SNMPTLSTMADDRROWSTATUS
+
+#define TLSTMADDRSERVERFINGERPRINT_MAX_SIZE      255
+#define TLSTMADDRSERVERIDENTITY_MAX_SIZE         255
+
 
 #endif                          /* SNMPTLSTMADDRTABLE_H */
