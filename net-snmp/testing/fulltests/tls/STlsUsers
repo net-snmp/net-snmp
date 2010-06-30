@@ -1,6 +1,6 @@
 #!/bin/sh
 
-. Stlsvars
+. STlsVars
 
 #########################################
 # CERTIFICATE SETUP

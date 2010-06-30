@@ -3,4 +3,4 @@
 checknametype="--cn"
 checknameprefix=""
 
-. Stlsservertests
+. STlsServer

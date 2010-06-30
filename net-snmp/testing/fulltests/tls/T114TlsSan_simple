@@ -2,7 +2,7 @@
 
 . ../support/simple_eval_tools.sh
 
-HEADER TLS-TCP server certificate tests
+HEADER TLS-TCP server SAN tests
 
 SKIPIFNOT NETSNMP_TRANSPORT_TLSTCP_DOMAIN
 
@@ -12,4 +12,4 @@ SKIPIFNOT NETSNMP_TRANSPORT_TLSTCP_DOMAIN
 
 SNMP_TRANSPORT_SPEC=tlstcp
 
-. ./Stlsnametests
+. ./STlsSan
