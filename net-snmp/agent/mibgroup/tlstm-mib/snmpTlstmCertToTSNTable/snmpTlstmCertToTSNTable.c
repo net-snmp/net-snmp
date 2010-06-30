@@ -38,7 +38,7 @@ typedef struct certToTSN_undo_s {
     int             mapType;
     char            data[SNMPTLSTMCERTTOTSN_DATA_MAX_SIZE];
     size_t          data_len;
-    char            hashType;
+    u_char          hashType;
     char            storageType;
     char            rowStatus;
 } certToTSN_undo;
@@ -62,7 +62,7 @@ typedef struct certToTSN_entry_s {
     size_t          data_len;
     char            storageType;
     char            rowStatus;
-    char            hashType;
+    u_char          hashType;
     char            map_flags;
 
     /*
@@ -95,7 +95,7 @@ static uint32_t _last_changed = 0;
 void
 init_snmpTlstmCertToTSNTable(void)
 {
-    oid             reg_oid[]   =  { SNMP_TLS_TM_BASE, 2, 2, 1, 3 };
+    oid             reg_oid[]   =  { SNMP_TLS_TM_CERT_TABLE };
     const size_t    reg_oid_len =  OID_LENGTH(reg_oid);
     netsnmp_handler_registration    *reg;
     netsnmp_table_registration_info *info;
@@ -349,19 +349,21 @@ tlstmCertToTSNTable_handler(netsnmp_mib_handler *handler,
             switch (info->colnum) {
             case COL_SNMPTLSTMCERTTOTSN_FINGERPRINT:
             {
+                /*
+                 * build SnmpTLSFingerprint
+                 */
                 u_char bin[42], *ptr = bin;
-                size_t len = sizeof(bin), offset = 1;
+                size_t len = sizeof(bin);
                 int    rc;
-                bin[0] = entry->hashType;
-                netsnmp_assert(entry->hashType != 0);
-                rc = netsnmp_hex_to_binary(&ptr, &len, &offset, 0,
-                                           entry->fingerprint, NULL);
-                if (1 != rc)
+                rc = netsnmp_tls_fingerprint_build(entry->hashType,
+                                                   entry->fingerprint,
+                                                   &ptr, &len, 0);
+                if (SNMPERR_SUCCESS != rc)
                     netsnmp_set_request_error(reqinfo, request,
                                               SNMP_ERR_GENERR);
                 else
                     snmp_set_var_typed_value(request->requestvb, ASN_OCTET_STR,
-                                             bin, offset);
+                                             bin, len);
             }
                 break;          /* case COL_SNMPTLSTMCERTTOTSN_FINGERPRINT */
             case COL_SNMPTLSTMCERTTOTSN_MAPTYPE:
@@ -434,21 +436,23 @@ tlstmCertToTSNTable_handler(netsnmp_mib_handler *handler,
             case COL_SNMPTLSTMCERTTOTSN_DATA:
                 ret = netsnmp_check_vb_type_and_max_size
                     (request->requestvb, ASN_OCTET_STR, sizeof(entry->data));
-                /** check len/algorithm MIB requirements */
-                if (ret == SNMP_ERR_NOERROR) {
-                    if (request->requestvb->val_len !=
-                        strlen((const char*)request->requestvb->val.string)) {
-                        DEBUGMSGT(("tlstmCertToSN:reserve1", 
-                                   "data strlen != val_len\n"));
-                        ret = SNMP_ERR_WRONGVALUE;
-                    }
-                }
                 break;          /* case COL_SNMPTLSTMCERTTOTSN_DATA */
             case COL_SNMPTLSTMCERTTOTSN_STORAGETYPE:
                 ret = netsnmp_check_vb_storagetype
                     (request->requestvb,(entry ? entry->storageType : ST_NONE));
                 break;          /* case COL_SNMPTLSTMCERTTOTSN_STORAGETYPE */
             case COL_SNMPTLSTMCERTTOTSN_ROWSTATUS:
+
+
+
+                if ((*request->requestvb->val.integer == 4) ||
+                    (requests != request) || request->next)
+                    ret = SNMP_ERR_GENERR;
+                else
+
+
+
+
                 ret = netsnmp_check_vb_rowstatus_with_storagetype
                     (request->requestvb,
                      (entry ? entry->rowStatus :RS_NONEXISTENT),
@@ -457,6 +461,14 @@ tlstmCertToTSNTable_handler(netsnmp_mib_handler *handler,
             default:
                 ret = SNMP_ERR_NOTWRITABLE;
             }                   /* switch colnum */
+
+
+
+            if (requests->next)
+                ret = SNMP_ERR_GENERR;
+
+
+
 
             if (ret != SNMP_ERR_NOERROR)
                 break;
@@ -604,18 +616,19 @@ tlstmCertToTSNTable_handler(netsnmp_mib_handler *handler,
             case COL_SNMPTLSTMCERTTOTSN_FINGERPRINT:
             {
                 u_char *tmp = (u_char*)entry->fingerprint;
+                u_int size = sizeof(entry->fingerprint);
+                netsnmp_variable_list *vb = request->requestvb;
+
                 memcpy(entry->undo->fingerprint,
                        entry->fingerprint, sizeof(entry->fingerprint));
                 entry->undo->fingerprint_len = entry->fingerprint_len;
                 entry->undo->hashType = entry->hashType;
                 memset(entry->fingerprint, 0, sizeof(entry->fingerprint));
 
-                entry->hashType = request->requestvb->val.string[0];
-                entry->fingerprint_len = sizeof(entry->fingerprint);
-                entry->fingerprint_len = 
-                    netsnmp_binary_to_hex(&tmp, &entry->fingerprint_len, 0,
-                                          &request->requestvb->val.string[1],
-                                          request->requestvb->val_len - 1);
+                (void)netsnmp_tls_fingerprint_parse(vb->val.string, vb->val_len,
+                                                    (char**)&tmp, &size, 0,
+                                                    &entry->hashType);
+                entry->fingerprint_len = size;
                 if (0 == entry->fingerprint_len)
                     ret = SNMP_ERR_GENERR;
             }
@@ -808,6 +821,12 @@ tlstmCertToTSNTable_handler(netsnmp_mib_handler *handler,
             info = netsnmp_extract_table_info(request);
             entry = (certToTSN_entry *) netsnmp_tdata_extract_entry(request);
 
+            if ((RS_NOTREADY == entry->rowStatus) && entry->undo->is_consistent)
+                entry->rowStatus = RS_NOTINSERVICE;
+            else if ((RS_NOTINSERVICE == entry->rowStatus) &&
+                     (0 == entry->undo->is_consistent))
+                entry->rowStatus = RS_NOTREADY;
+
             /** release undo data for requests with no rowstatus */
             if (entry->undo && !entry->undo->req[COL_SNMPTLSTMCERTTOTSN_ROWSTATUS]) {
                 _freeUndo(entry);
@@ -871,6 +890,10 @@ tlstmCertToTSNTable_handler(netsnmp_mib_handler *handler,
 
         /** update last changed */
         _last_changed = netsnmp_get_agent_uptime();
+
+        /** set up to save persistent store */
+        snmp_store_needed(NULL);
+
         break;                  /* case MODE_SET_COMMIT */
     }                           /* switch (reqinfo->mode) */
 
