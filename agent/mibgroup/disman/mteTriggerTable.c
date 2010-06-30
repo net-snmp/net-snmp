@@ -1606,6 +1606,7 @@ write_mteTriggerComment(int action,
          * permanently.  Make sure that anything done here can't fail! 
          */
         SNMP_FREE(tmpvar);
+        snmp_store_needed(NULL);
         break;
     }
     return SNMP_ERR_NOERROR;
@@ -1693,6 +1694,7 @@ write_mteTriggerTest(int action,
          * permanently.  Make sure that anything done here can't fail! 
          */
         SNMP_FREE(tmpvar);
+        snmp_store_needed(NULL);
         break;
     }
     return SNMP_ERR_NOERROR;
@@ -1775,7 +1777,7 @@ write_mteTriggerSampleType(int action,
          * Things are working well, so it's now safe to make the change
          * permanently.  Make sure that anything done here can't fail! 
          */
-
+        snmp_store_needed(NULL);
         break;
     }
     return SNMP_ERR_NOERROR;
@@ -1870,6 +1872,7 @@ write_mteTriggerValueID(int action,
          * previous values, as these are from a different object?  
          */
         SNMP_FREE(tmpvar);
+        snmp_store_needed(NULL);
         break;
     }
     return SNMP_ERR_NOERROR;
@@ -1953,7 +1956,7 @@ write_mteTriggerValueIDWildcard(int action,
          * Things are working well, so it's now safe to make the change
          * permanently.  Make sure that anything done here can't fail! 
          */
-
+        snmp_store_needed(NULL);
         break;
     }
     return SNMP_ERR_NOERROR;
@@ -2043,6 +2046,7 @@ write_mteTriggerTargetTag(int action,
          * permanently.  Make sure that anything done here can't fail! 
          */
         SNMP_FREE(tmpvar);
+        snmp_store_needed(NULL);
         break;
     }
     return SNMP_ERR_NOERROR;
@@ -2132,6 +2136,7 @@ write_mteTriggerContextName(int action,
          * permanently.  Make sure that anything done here can't fail! 
          */
         SNMP_FREE(tmpvar);
+        snmp_store_needed(NULL);
         break;
     }
     return SNMP_ERR_NOERROR;
@@ -2215,7 +2220,7 @@ write_mteTriggerContextNameWildcard(int action,
          * Things are working well, so it's now safe to make the change
          * permanently.  Make sure that anything done here can't fail! 
          */
-
+        snmp_store_needed(NULL);
         break;
     }
     return SNMP_ERR_NOERROR;
@@ -2302,6 +2307,7 @@ write_mteTriggerFrequency(int action,
             StorageTmp->mteTriggerEntryStatus == RS_ACTIVE)
             mte_enable_trigger(StorageTmp);
 
+        snmp_store_needed(NULL);
         break;
     }
     return SNMP_ERR_NOERROR;
@@ -2391,6 +2397,7 @@ write_mteTriggerObjectsOwner(int action,
          * permanently.  Make sure that anything done here can't fail! 
          */
         SNMP_FREE(tmpvar);
+        snmp_store_needed(NULL);
         break;
     }
     return SNMP_ERR_NOERROR;
@@ -2480,6 +2487,7 @@ write_mteTriggerObjects(int action,
          * permanently.  Make sure that anything done here can't fail! 
          */
         SNMP_FREE(tmpvar);
+        snmp_store_needed(NULL);
         break;
     }
     return SNMP_ERR_NOERROR;
@@ -2568,7 +2576,7 @@ write_mteTriggerEnabled(int action,
         else if (StorageTmp->mteTriggerEnabled == MTETRIGGERENABLED_FALSE)
             mte_disable_trigger(StorageTmp);
 
-
+        snmp_store_needed(NULL);
         break;
     }
     return SNMP_ERR_NOERROR;
@@ -2899,6 +2907,7 @@ write_mteTriggerEntryStatus(int action,
             StorageTmp->mteTriggerEnabled == MTETRIGGERENABLED_TRUE &&
             StorageTmp->mteTriggerEntryStatus == RS_ACTIVE)
             mte_enable_trigger(StorageTmp);
+        snmp_store_needed(NULL);
         break;
     }
     return SNMP_ERR_NOERROR;

@@ -425,6 +425,9 @@ write_mteObjectsID(int action,
          * permanently.  Make sure that anything done here can't fail! 
          */
         SNMP_FREE(tmpvar);
+
+        snmp_store_needed(NULL);
+
         break;
     }
     return SNMP_ERR_NOERROR;
@@ -508,6 +511,8 @@ write_mteObjectsIDWildcard(int action,
          * Things are working well, so it's now safe to make the change
          * permanently.  Make sure that anything done here can't fail! 
          */
+
+        snmp_store_needed(NULL);
 
         break;
     }
@@ -777,6 +782,8 @@ write_mteObjectsEntryStatus(int action,
                 StorageTmp->mteObjectsEntryStatus = RS_NOTINSERVICE;
             }
         }
+        snmp_store_needed(NULL);
+
         break;
     }
     return SNMP_ERR_NOERROR;

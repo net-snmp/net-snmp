@@ -438,6 +438,7 @@ write_snmpNotifyFilterProfileName(int action,
          * permanently.  Make sure that anything done here can't fail! 
          */
         SNMP_FREE(tmpvar);
+        snmp_store_needed(NULL);
         break;
     }
     return SNMP_ERR_NOERROR;
@@ -530,7 +531,7 @@ write_snmpNotifyFilterProfileStorType(int action,
          * Things are working well, so it's now safe to make the change
          * permanently.  Make sure that anything done here can't fail! 
          */
-
+        snmp_store_needed(NULL);
         break;
     }
     return SNMP_ERR_NOERROR;
@@ -783,6 +784,7 @@ write_snmpNotifyFilterProfileRowStatus(int action,
                 StorageTmp->snmpNotifyFilterProfileRowStatus = RS_NOTINSERVICE;
             StorageNew = NULL;
         }
+        snmp_store_needed(NULL);
         break;
     }
     return SNMP_ERR_NOERROR;

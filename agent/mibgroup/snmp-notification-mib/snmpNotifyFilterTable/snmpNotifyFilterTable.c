@@ -264,9 +264,9 @@ snmpNotifyFilterTable_post_request(snmpNotifyFilterTable_registration *
          */
         if (MFD_SUCCESS == rc) {
             /*
-             * save changed rows, if you haven't already
+             * notify library to save changed rows
              */
-            snmp_store(netsnmp_ds_get_string(NETSNMP_DS_LIBRARY_ID,
+            snmp_store_needed(netsnmp_ds_get_string(NETSNMP_DS_LIBRARY_ID,
                                              NETSNMP_DS_LIB_APPTYPE));
         }
 

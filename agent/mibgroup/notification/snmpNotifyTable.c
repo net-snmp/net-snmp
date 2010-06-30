@@ -807,6 +807,7 @@ write_snmpNotifyTag(int action,
          * permanently.  Make sure that anything done here can't fail! 
          */
         SNMP_FREE(tmpvar);
+        snmp_store_needed(NULL);
         break;
     }
 
@@ -1142,6 +1143,7 @@ write_snmpNotifyRowStatus(int action,
             StorageTmp->snmpNotifyRowStatus = RS_NOTINSERVICE;
             StorageNew = NULL;
         }
+        snmp_store_needed(NULL);
         break;
     }
     return SNMP_ERR_NOERROR;

@@ -1116,6 +1116,10 @@ write_lookupCtlTargetAddressType(int action,
          * Things are working well, so it's now safe to make the change
          * permanently.  Make sure that anything done here can't fail! 
          */
+
+        /** set up to save persistent store */
+        snmp_store_needed(NULL);
+
         break;
     }
     return SNMP_ERR_NOERROR;
@@ -1218,6 +1222,9 @@ write_lookupCtlTargetAddress(int action,
 
         free(tmpvar);
         tmpvar = NULL;
+
+        /** set up to save persistent store */
+        snmp_store_needed(NULL);
 
         break;
     }
@@ -1553,6 +1560,9 @@ write_lookupCtlRowStatus(int action,
             run_lookup((struct lookupTable_data *) StorageTmp);
 
         }
+
+        /** set up to save persistent store */
+        snmp_store_needed(NULL);
 
         break;
     }

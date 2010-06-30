@@ -445,6 +445,10 @@ mteTriggerTable_handler(netsnmp_mib_handler *handler,
                 break;
             }
         }
+
+        /** set up to save persistent store */
+        snmp_store_needed(NULL);
+
         break;
     }
     return SNMP_ERR_NOERROR;
