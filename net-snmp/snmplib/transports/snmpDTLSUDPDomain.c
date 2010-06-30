@@ -1281,17 +1281,36 @@ netsnmp_dtlsudp_agent_config_tokens_register(void)
 
 
 netsnmp_transport *
-netsnmp_dtlsudp_create_tstring(const char *str, int local,
+netsnmp_dtlsudp_create_tstring(const char *str, int isserver,
                                const char *default_target)
 {
     struct sockaddr_in addr;
     netsnmp_transport *t;
-    
+    _netsnmpTLSBaseData *tlsdata;
+    char buf[SPRINT_MAX_LEN], *cp;
+
     if (netsnmp_sockaddr_in2(&addr, str, default_target)) {
-        netsnmp_dtlsudp_transport(&addr, local);
+        t = netsnmp_dtlsudp_transport(&addr, isserver);
     } else {
         return NULL;
     }
+
+    /* see if we can extract the remote hostname */
+    if (!isserver && t && t->data && str) {
+        tlsdata = (_netsnmpTLSBaseData *) t->data;
+        /* search for a : */
+        if (NULL != (cp = strrchr(str, ':'))) {
+            strncpy(buf, str, SNMP_MIN(cp-str, sizeof(buf)-1));
+            buf[SNMP_MIN(cp-str, sizeof(buf)-1)] = '\0';
+        } else {
+            /* else the entire spec is a host name only */
+            strncpy(buf, str,
+                    SNMP_MIN(strlen(str), sizeof(buf)-1));
+            buf[SNMP_MIN(strlen(str), sizeof(buf)-1)] = '\0';
+        }
+        tlsdata->their_hostname = strdup(buf);
+    }
+    return t;
 }
 
 
