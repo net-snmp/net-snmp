@@ -320,7 +320,7 @@ sub Complete {
 	# (TAB) attempt completion
 	$_ eq "\t" && do {
 	  if ($tab) {
-	    print(join("\r\n", '', map {exists $help{$_} ? "\t$_ - $help{$_}" :
+	    print(join("\r\n", '', map {exists $help{$_} ? sprintf("\t%-10.10s - %s", $_, $help{$_}) :
 					  "\t$_"} grep(/^\Q$return/, @cmp_lst)), "\r\n");
 	    $tab--;
 	    redo LOOP;
@@ -1799,6 +1799,12 @@ sub userInputDN {
   $ret = NetSNMP::Term::Complete($prompt, $ret, "\tLocality - (e.g., Davis)");
   $opts->{'locality'} = $ret if defined $ret;
   # get SAN (loop)
+  if (!$config->{'brief'}) {
+      print "Enter Subject Alt Names.  Examples:\n";
+      foreach my $pair (@san_prefix) {
+	  printf("\t%-10.10s %s\n", $pair->[0], $pair->[1]);
+      }
+  }
   do {
     $ret = 'done';
     $prompt = "Enter Subject Alt Name (enter 'done' when finished) [$ret]: ";
@@ -1821,7 +1827,8 @@ sub userInputTag {
   my $ret;
   my $prompt;
 
-  print "Application Tag:\n\tused to name the certificate and associate with application\n";
+  print "Application Tag:\n\tused to name the certificate and dictate its filename\n";
+  print "\tIt may also associate it with a particular application (eg \"snmpd\")\n";
   print "\tif 'none', a name will be generated from other parameters\n";
   print "\tenter <tab><tab> for typical options, or enter new name\n";
   $prompt = "Enter Application Tag";
