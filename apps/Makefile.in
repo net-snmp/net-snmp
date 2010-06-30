@@ -18,6 +18,7 @@ top_builddir=..
 #
 
 SSHINSTALLBINPROGS = @SSHINSTALLBINPROGS@
+TLSINSTALLBINPROGS = @TLSINSTALLBINPROGS@$(EXEEXT)
 
 @NETSNMP_HAVE_AGENTX_LIBS_TRUE@AGENTXTRAP = agentxtrap$(EXEEXT)
 @NETSNMP_HAVE_AGENTX_LIBS_FALSE@AGENTXTRAP =
@@ -39,7 +40,7 @@ INSTALLBINPROGS	= snmpget$(EXEEXT) 			\
 		snmpdf$(EXEEXT) 			\
 		$(AGENTXTRAP)				\
 		snmpvacm$(EXEEXT)                       \
-                $(SSHINSTALLBINPROGS)
+                $(SSHINSTALLBINPROGS) $(TLSINSTALLBINPROGS)
 
 INSTALLSBINPROGS = snmptrapd$(EXEEXT)
 
@@ -141,6 +142,9 @@ snmpusm$(EXEEXT):    snmpusm.$(OSUFFIX) $(USELIBS)
 
 snmpvacm$(EXEEXT):    snmpvacm.$(OSUFFIX) $(USELIBS)
 	$(LINK) ${CFLAGS} -o $@ snmpvacm.$(OSUFFIX) $(LOCAL_LIBS) ${LDFLAGS} ${LIBS} 
+
+snmptls$(EXEEXT):    snmptls.$(OSUFFIX) $(USELIBS)
+	$(LINK) ${CFLAGS} -o $@ snmptls.$(OSUFFIX) $(LOCAL_LIBS) ${LDFLAGS} ${LIBS} 
 
 agentxtrap$(EXEEXT):    agentxtrap.$(OSUFFIX) $(USEAGENTLIBS)
 	$(LINK) ${CFLAGS} -o $@ agentxtrap.$(OSUFFIX) $(LOCAL_LIBS) ${LDFLAGS} $(USEAGENTLIBS) $(PERLLDOPTS_FOR_APPS) ${LIBS}
