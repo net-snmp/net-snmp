@@ -883,6 +883,8 @@ netsnmp_tlstcp_transport(const char *addr_string, int isserver)
 {
     netsnmp_transport *t = NULL;
     _netsnmpTLSBaseData *tlsdata;
+    char *cp;
+    char buf[SPRINT_MAX_LEN];
     
     /* allocate our transport structure */
     t = SNMP_MALLOC_TYPEDEF(netsnmp_transport);
@@ -899,6 +901,21 @@ netsnmp_tlstcp_transport(const char *addr_string, int isserver)
         t->flags |= NETSNMP_TLSBASE_IS_CLIENT;
 
     tlsdata->addr_string = strdup(addr_string);
+
+    /* see if we can extract the remote hostname */
+    if (!isserver && tlsdata && addr_string) {
+        /* search for a : */
+        if (NULL != (cp = strrchr(addr_string, ':'))) {
+            strncpy(buf, addr_string, SNMP_MIN(cp-addr_string, sizeof(buf)-1));
+            buf[SNMP_MIN(cp-addr_string, sizeof(buf)-1)] = '\0';
+        } else {
+            /* else the entire spec is a host name only */
+            strncpy(buf, addr_string,
+                    SNMP_MIN(strlen(addr_string), sizeof(buf)-1));
+            buf[SNMP_MIN(strlen(addr_string), sizeof(buf)-1)] = '\0';
+        }
+        tlsdata->their_hostname = strdup(buf);
+    }
 
     t->data = tlsdata;
     t->data_length = sizeof(_netsnmpTLSBaseData);

@@ -1285,9 +1285,10 @@ netsnmp_dtlsudp_create_tstring(const char *str, int local,
                                const char *default_target)
 {
     struct sockaddr_in addr;
-
+    netsnmp_transport *t;
+    
     if (netsnmp_sockaddr_in2(&addr, str, default_target)) {
-        return netsnmp_dtlsudp_transport(&addr, local);
+        netsnmp_dtlsudp_transport(&addr, local);
     } else {
         return NULL;
     }
