@@ -379,6 +379,10 @@ typedef struct request_list {
     u_char         *snmpv3_scopedPDU_parse(netsnmp_pdu *pdu, u_char * cp,
                                            size_t * length);
     NETSNMP_IMPORT
+    void            snmp_store_needed(const char *type);
+    NETSNMP_IMPORT
+    void            snmp_store_if_needed(void);
+    NETSNMP_IMPORT
     void            snmp_store(const char *type);
     NETSNMP_IMPORT
     void            snmp_shutdown(const char *type);

@@ -1,3 +1,4 @@
+
 /* Portions of this file are subject to the following copyright(s).  See
  * the Net-SNMP's COPYING file for more details and other copyrights
  * that may apply:
@@ -139,6 +140,8 @@ extern void netsnmp_certs_init(void);
 #endif
 
 static void     _init_snmp(void);
+
+static int      _snmp_store_needed = 0;
 
 #include "../agent/mibgroup/agentx/protocol.h"
 #include <net-snmp/library/transform_oids.h>
@@ -847,6 +850,28 @@ init_snmp(const char *type)
     read_configs();
 
 }                               /* end init_snmp() */
+
+/**
+ * set a flag indicating that the persistent store needs to be saved.
+ */
+void
+snmp_store_needed(const char *type)
+{
+    DEBUGMSGTL(("snmp_store", "setting needed flag...\n"));
+    _snmp_store_needed = 1;
+}
+
+void
+snmp_store_if_needed(void)
+{
+    if (0 == _snmp_store_needed)
+        return;
+    
+    DEBUGMSGTL(("snmp_store", "store needed...\n"));
+    snmp_store(netsnmp_ds_get_string(NETSNMP_DS_LIBRARY_ID, 
+                                     NETSNMP_DS_LIB_APPTYPE));
+    _snmp_store_needed = 0;
+}
 
 void
 snmp_store(const char *type)
