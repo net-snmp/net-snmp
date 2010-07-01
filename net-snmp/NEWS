@@ -28,6 +28,8 @@ listing of all changes made to the code.
       - moved all functions defined in libnetsnmphelpers to
 	libnetsnmpagent. libnetsnmphelpers is now an empty library.
       - Implemented the TSM-MIB and the TLSTM-MIB
+      - new API for indicating that persistent store needs to be saved
+	after the current request finishes processing
 
     apps:
       - A new tool 'net-snmp-cert' that easily creates and manages
@@ -36,6 +38,7 @@ listing of all changes made to the code.
         (See http://www.net-snmp.org/wiki/index.php/TUT:agentxtrap for details)
       - -T command line flag can be used to pass configuration
         directly to transports that can accept configuration tokens
+      - A new 'snmptls' command for manipulating the agent's TLS configuration
 
     snmplib:
       - A more modular transport subsystem that allows third party
@@ -48,6 +51,8 @@ listing of all changes made to the code.
 	affect the behaviour. Also remove the magic handling of some
 	application names.
       - A new X.509 certificate API for indexing and reading certificates
+      - new experimental row creation API which uses a state machine
+        to try really hard to create a row from a given varbind list
       - netsnmp_container enhancements:
         - added a free_item function
         - added a CONTAINER_FREE_ALL macro/function
@@ -57,6 +62,7 @@ listing of all changes made to the code.
       - new snmp token logOption allows specifying log destinations
         via configuration conf files
       - A very significant reduction in compiler warning output
+      - new experimental simple state machine handling API
 
     building:
       - Support for a stream-line stripped down version of internal
