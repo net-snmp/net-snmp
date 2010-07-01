@@ -250,8 +250,8 @@ fi
 #   Security related functions
 #
 NONAGENTLIBS=$LIBS	 # save old libraries
-SSHINSTALLBINPROGS=""
-TLSINSTALLBINPROGS=""
+SSHINSTALLBINPROG=""
+TLSINSTALLBINPROG=""
 if test "x$tryopenssl" != "xno" -a "x$tryopenssl" != "xinternal"; then
     # check for libpkcs11 if asked
     if test "x$askedopenssl" != "xyes" -a "x$askedpkcs" = "xyes"; then
@@ -294,7 +294,7 @@ if test "x$tryopenssl" != "xno" -a "x$tryopenssl" != "xinternal"; then
                     [Define to 1 if you have the `ssl' library (-lssl).])
                 LIBCRYPTO=" -lssl $LIBCRYPTO",	
 		AC_MSG_ERROR([The DTLS based transports require the libssl library from OpenSSL to be available])	,-lcrypto)
-            TLSINSTALLBINPROGS=snmptls
+            TLSINSTALLBINPROG=snmptls
         fi
         if echo " $transport_result_list " | $GREP " SSH " > /dev/null; then
 	    AC_CHECK_LIB(ssh2, libssh2_session_startup,
@@ -302,7 +302,7 @@ if test "x$tryopenssl" != "xno" -a "x$tryopenssl" != "xinternal"; then
                     [Define to 1 if you have the `ssh2' library (-lssh2).])
                 LIBCRYPTO=" -lssh2 $LIBCRYPTO",
                 AC_MSG_ERROR([The SSH transport requires the libssh2 library to be available]),)
-            SSHINSTALLBINPROGS=sshtosnmp
+            SSHINSTALLBINPROG=sshtosnmp
         fi
     fi
 elif test "x$askedpkcs" = "xyes"; then
@@ -311,8 +311,26 @@ elif test "x$askedpkcs" = "xyes"; then
         LIBPKCS11="-lpkcs11")
 fi
 LIBS=$NONAGENTLIBS	 # restore old libraries
-AC_SUBST(SSHINSTALLBINPROGS)
-AC_SUBST(TLSINSTALLBINPROGS)
+if test "x$SSHINSTALLBINPROG" != "x"; then
+    NETSNMP_HAVE_SSH_PROG_TRUE=''
+    NETSNMP_HAVE_SSH_PROG_FALSE='#'
+else
+    NETSNMP_HAVE_SSH_PROG_TRUE='#'
+    NETSNMP_HAVE_SSH_PROG_FALSE=''
+fi
+if test "x$TLSINSTALLBINPROG" != "x"; then
+    NETSNMP_HAVE_TLS_PROG_TRUE=''
+    NETSNMP_HAVE_TLS_PROG_FALSE='#'
+else
+    NETSNMP_HAVE_TLS_PROG_TRUE='#'
+    NETSNMP_HAVE_TLS_PROG_FALSE=''
+fi
+AC_SUBST(NETSNMP_HAVE_SSH_PROG_TRUE)
+AC_SUBST(NETSNMP_HAVE_SSH_PROG_FALSE)
+AC_SUBST(SSHINSTALLBINPROG)
+AC_SUBST(NETSNMP_HAVE_TLS_PROG_TRUE)
+AC_SUBST(NETSNMP_HAVE_TLS_PROG_FALSE)
+AC_SUBST(TLSINSTALLBINPROG)
 
 #
 # If we're using internal crypto support we need to compile in extra files
