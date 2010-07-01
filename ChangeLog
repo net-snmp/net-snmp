@@ -1,5 +1,1120 @@
 ----------------------------------------------------------------------
 
+Changes: V5.6.pre1 -> V5.6.pre2
+
+2010-06-30 23:55  hardaker
+
+   *  man/netsnmp_access_multiplexer.3, man/netsnmp_agent.3,   
+      man/netsnmp_agent_handler.h.3, man/netsnmp_agent_registry.3,   
+      man/netsnmp_agent_trap.3, man/netsnmp_asn1_packet_parse.3,   
+      man/netsnmp_baby_steps.3, man/netsnmp_bulk_to_next.3,   
+      man/netsnmp_cache_handler.3, man/netsnmp_callback.3,   
+      man/netsnmp_container.3, man/netsnmp_container_iterator.3,   
+      man/netsnmp_container_iterator.h.3, man/netsnmp_data_list.3,   
+      man/netsnmp_debug.3, man/netsnmp_default_store.3,   
+      man/netsnmp_handler.3, man/netsnmp_instance.3,   
+      man/netsnmp_iterator_info_s.3, man/netsnmp_leaf.3,   
+      man/netsnmp_library.3, man/netsnmp_mib_maintenance.3,   
+      man/netsnmp_mib_utilities.3, man/netsnmp_mode_end_call.3,   
+      man/netsnmp_multiplexer.3,   
+      man/netsnmp_netsnmp_agent_request_info_s.3,   
+      man/netsnmp_netsnmp_column_info_t.3,   
+      man/netsnmp_netsnmp_data_list_s.3,   
+      man/netsnmp_netsnmp_handler_registration_s.3,   
+      man/netsnmp_netsnmp_iterator_info_s.3,   
+      man/netsnmp_netsnmp_mib_handler_access_methods.3,   
+      man/netsnmp_netsnmp_mib_handler_methods.3,   
+      man/netsnmp_netsnmp_mib_handler_s.3,   
+      man/netsnmp_netsnmp_monitor_callback_header_s.3,   
+      man/netsnmp_netsnmp_request_info_s.3,   
+      man/netsnmp_netsnmp_table_registration_info_s.3,   
+      man/netsnmp_netsnmp_table_request_info_s.3,   
+      man/netsnmp_null_container.3, man/netsnmp_oid_stash.3,   
+      man/netsnmp_old_api.3, man/netsnmp_read_config.3,   
+      man/netsnmp_read_only.3, man/netsnmp_row_merge.3,   
+      man/netsnmp_scalar.3, man/netsnmp_scalar_group_group.3,   
+      man/netsnmp_serialize.3, man/netsnmp_snmp_agent.3,   
+      man/netsnmp_snmp_alarm.3, man/netsnmp_snmp_client.3,   
+      man/netsnmp_snmp_logging.3, man/netsnmp_snmp_pdu.3,   
+      man/netsnmp_snmp_session.3, man/netsnmp_stash_cache.3,   
+      man/netsnmp_stash_to_next.3, man/netsnmp_table.3,   
+      man/netsnmp_table_array.3, man/netsnmp_table_container.3,   
+      man/netsnmp_table_data.3, man/netsnmp_table_dataset.3,   
+      man/netsnmp_table_generic.3, man/netsnmp_table_indexes.3,   
+      man/netsnmp_table_iterator.3, man/netsnmp_table_iterator.h.3,   
+      man/netsnmp_table_maintenance.3, man/netsnmp_table_row.3,   
+      man/netsnmp_table_rows.3, man/netsnmp_tdata.3,   
+      man/netsnmp_tools.h.3, man/netsnmp_util.3,   
+      man/netsnmp_utilities.3, man/netsnmp_variable_list.3,   
+      man/netsnmp_watcher.3:
+
+   documentation update
+
+2010-06-30 23:48  hardaker
+
+   *  FAQ, README, configure, configure.ac, dist/Makefile,   
+      dist/net-snmp.spec, python/netsnmp/tests/snmpd.conf:
+
+   Version number update
+
+2010-06-30 23:45  hardaker
+
+   * man/snmpd.conf.5.def:
+
+   missed two tokens in the man pgaes
+
+2010-06-30 23:45  hardaker
+
+   *  man/snmpcmd.1.def, man/snmpd.8.def,   
+      snmplib/transports/snmpTLSBaseDomain.c,   
+      testing/fulltests/tls/SCipherTests, testing/fulltests/tls/SCrl,   
+      testing/fulltests/tls/STlsAgentTrap,   
+      testing/fulltests/tls/STlsServer,   
+      testing/fulltests/tls/STlsServerSession,   
+      testing/fulltests/tls/STlsTrapdUser,   
+      testing/fulltests/tls/STlsUsers,   
+      testing/fulltests/tls/STsmPrefix,   
+      testing/fulltests/transports/Stlstests:
+
+   rename the defX509 tokens to something more friendly: clientCert
+   and serverCert
+
+2010-06-30 23:44  hardaker
+
+   *  snmplib/transports/snmpDTLSUDPDomain.c,   
+      snmplib/transports/snmpTLSTCPDomain.c:
+
+   top-file comment updates
+
+2010-06-30 23:44  hardaker
+
+   * snmplib/cert_util.c:
+
+   don't call cert_find with a NULL argument
+
+2010-06-30 23:44  hardaker
+
+   * snmplib/cert_util.c:
+
+   allow def certs to be specified using a filename
+
+2010-06-30 23:41  tanders
+
+   * testing/fulltests/support/simple_run:
+
+   fix syntax error
+
+2010-06-30 23:01  hardaker
+
+   * snmplib/cert_util.c:
+
+   turn a couple of non-critical errors into debug statements per
+   discussion with rstory
+
+2010-06-30 23:00  hardaker
+
+   * testing/RUNFULLTESTS:
+
+   make the regexp pattern match for tests to run case insensitive
+
+2010-06-30 23:00  hardaker
+
+   * python/netsnmp/client.py:
+
+   import stderr from sys, per discussion on -users
+
+2010-06-30 22:17  hardaker
+
+   *  snmplib/transports/snmpTLSBaseDomain.c,   
+      snmplib/transports/snmpTLSTCPDomain.c:
+
+   add back in the default port specifier
+
+2010-06-30 22:17  hardaker
+
+   * local/net-snmp-cert:
+
+   enable pulling the private key over http
+
+2010-06-30 22:17  hardaker
+
+   * local/net-snmp-cert:
+
+   move URL collection into a sub function
+
+2010-06-30 22:16  hardaker
+
+   * local/net-snmp-cert:
+
+   added ability to pull a cert from a URL
+
+2010-06-30 22:16  hardaker
+
+   * local/net-snmp-cert:
+
+   fix argument bug in the is_url function
+
+2010-06-30 20:49  hardaker
+
+   * apps/snmptls.c:
+
+   remove debugging code
+
+2010-06-30 20:27  hardaker
+
+   *  testing/fulltests/tls/T117DtlsCNSession_simple,   
+      testing/fulltests/tls/T117dtlsCNSession_simple:
+
+   rename file for consistency
+
+2010-06-30 20:01  rstory
+
+   * configure:
+
+   update for new snmptls app
+
+2010-06-30 20:00  rstory
+
+   * 
+      agent/mibgroup/tlstm-mib/snmpTlstmCertToTSNTable/snmpTlstmCertToTSNTable.c:
+
+   remove accidentally checked int debug code
+
+2010-06-30 19:59  rstory
+
+   * 
+      agent/mibgroup/tlstm-mib/snmpTlstmCertToTSNTable/snmpTlstmCertToTSNTable.h:
+
+   define OIDs based on SNMP_TLS_TM_BASE
+
+2010-06-30 19:59  rstory
+
+   * agent/mibgroup/tlstm-mib/snmpTlstmAddrTable/snmpTlstmAddrTable.c:
+
+   auto-transistion between notReady/notInService
+
+2010-06-30 19:57  rstory
+
+   * 
+      agent/mibgroup/tlstm-mib/snmpTlstmParamsTable/snmpTlstmParamsTable.c,
+        
+      agent/mibgroup/tlstm-mib/snmpTlstmParamsTable/snmpTlstmParamsTable.h:
+
+   auto-transistion between notReady/notInService; add
+   snmp_store_needed on commit
+
+2010-06-30 19:56  rstory
+
+   * 
+      agent/mibgroup/tlstm-mib/snmpTlstmCertToTSNTable/snmpTlstmCertToTSNTable.c:
+
+   use new fingerprint parse/build functions; remove bad length
+   check; auto
+   transition between notReady and notInService
+
+2010-06-30 19:55  rstory
+
+   * mibs/TLSTM-MIB.txt:
+
+   remove pre-rfc mib; see SNMP-TLS-TM-MIB.txt instead
+
+2010-06-30 19:54  rstory
+
+   *  agent/mibgroup/tlstm-mib/snmpTlstmAddrTable.h,   
+      agent/mibgroup/tlstm-mib/snmpTlstmAddrTable/snmpTlstmAddrTable.c, 
+       
+      agent/mibgroup/tlstm-mib/snmpTlstmAddrTable/snmpTlstmAddrTable.h, 
+       
+      agent/mibgroup/tlstm-mib/snmpTlstmAddrTable/snmpTlstmAddrTable_internal.h,
+        
+      agent/mibgroup/tlstm-mib/snmpTlstmAddrTable/snmpTlstmAddrTable_persist.c:
+
+   consolidate multiple files
+
+2010-06-30 19:53  rstory
+
+   * include/net-snmp/library/cert_util.h, snmplib/cert_util.c:
+
+   make hash type parse routine public; add routines to build/parse
+   SnmpTLSFingerprint
+
+2010-06-30 19:51  rstory
+
+   *  Makefile.in, apps/Makefile.in, apps/snmptls.c,   
+      configure.d/config_os_libs:
+
+   NEWS: snmptls: new app for managing (D)TLS config via
+   SNMP-TLS-TM-MIB tables
+
+2010-06-30 19:50  rstory
+
+   *  agent/mibgroup/disman/event/mteObjectsTable.c,   
+      agent/mibgroup/disman/event/mteTriggerTable.c,   
+      agent/mibgroup/disman/expression/expExpressionTable.c,   
+      agent/mibgroup/disman/expression/expObjectTable.c,   
+      agent/mibgroup/disman/mteObjectsTable.c,   
+      agent/mibgroup/disman/mteTriggerTable.c,   
+      agent/mibgroup/disman/nslookup/lookupCtlTable.c,   
+      agent/mibgroup/disman/ping/pingCtlTable.c,   
+      agent/mibgroup/disman/traceroute/traceRouteCtlTable.c,   
+      agent/mibgroup/if-mib/ifTable/ifTable.c,   
+      agent/mibgroup/if-mib/ifXTable/ifXTable.c,   
+      agent/mibgroup/notification/snmpNotifyFilterProfileTable.c,   
+      agent/mibgroup/notification/snmpNotifyTable.c,   
+      agent/mibgroup/snmp-notification-mib/snmpNotifyFilterTable/snmpNotifyFilterTable.c:
+
+   call new snmp_store_needed() function after a commit in tables
+   that
+   have persistent store
+
+2010-06-30 19:49  rstory
+
+   * include/net-snmp/library/snmp_client.h, snmplib/snmp_client.c:
+
+   NEWS: snmplib: new experimental simple state machine
+   NEWS: snmplib: new experimental row creation API which uses a
+   state machine
+   to try really hard to create a row from a given varbind list
+
+2010-06-30 19:48  rstory
+
+   *  agent/snmp_agent.c, include/net-snmp/library/snmp_api.h,   
+      snmplib/snmp_api.c:
+
+   NEWS: snmpd: new API for indicating that persistent store needs
+   to be saved after the current request finishes processing
+
+2010-06-30 19:46  rstory
+
+   * include/net-snmp/library/snmp_assert.h:
+
+   add some new wrapper macros
+
+2010-06-30 15:59  hardaker
+
+   *  testing/fulltests/tls/STlsCNSession,   
+      testing/fulltests/tls/STlsSanSession,   
+      testing/fulltests/tls/STlsServerSession,   
+      testing/fulltests/tls/T115DtlsSanSession_simple,   
+      testing/fulltests/tls/T116TlsSanSession_simple,   
+      testing/fulltests/tls/T117dtlsCNSession_simple,   
+      testing/fulltests/tls/T118TlsCNSession_simple:
+
+   added checks for checking direct passing of localhost to the
+   expected name
+
+2010-06-30 15:59  hardaker
+
+   * testing/fulltests/tls/STlsServer:
+
+   check for wildcard support
+
+2010-06-30 15:58  hardaker
+
+   * snmplib/transports/snmpTLSBaseDomain.c:
+
+   support SAN and CN wildcard matching per spec
+
+2010-06-30 15:00  hardaker
+
+   *  testing/fulltests/tls/SCipherTests, testing/fulltests/tls/SCrl,   
+      testing/fulltests/tls/STlsAgentTrap,   
+      testing/fulltests/tls/STlsName, testing/fulltests/tls/STlsSan,   
+      testing/fulltests/tls/STlsServer,   
+      testing/fulltests/tls/STlsTrapdUser,   
+      testing/fulltests/tls/STlsUsers, testing/fulltests/tls/STlsVars,  
+       testing/fulltests/tls/STsmPrefix,   
+      testing/fulltests/tls/ScipherTests,   
+      testing/fulltests/tls/Scrltests,   
+      testing/fulltests/tls/Stlsagenttraptests,   
+      testing/fulltests/tls/Stlsnametests,   
+      testing/fulltests/tls/Stlssantests,   
+      testing/fulltests/tls/Stlsservertests,   
+      testing/fulltests/tls/Stlstrapdusertests,   
+      testing/fulltests/tls/Stlsuserstests,   
+      testing/fulltests/tls/Stlsvars, testing/fulltests/tls/Stsmprefix, 
+        testing/fulltests/tls/T101DtlsUser_simple,   
+      testing/fulltests/tls/T101dtlsudpusertests_simple,   
+      testing/fulltests/tls/T102TlsUser_simple,   
+      testing/fulltests/tls/T102tlstcpusertests_simple,   
+      testing/fulltests/tls/T111DtlsServer_simple,   
+      testing/fulltests/tls/T111dtlsudpservertests_simple,   
+      testing/fulltests/tls/T112TlsServer_simple,   
+      testing/fulltests/tls/T112tlstcpservertests_simple,   
+      testing/fulltests/tls/T113DtlsSan_simple,   
+      testing/fulltests/tls/T113dtlsudpsan_simple,   
+      testing/fulltests/tls/T114TlsSan_simple,   
+      testing/fulltests/tls/T114tlstcpsan_simple,   
+      testing/fulltests/tls/T121DtlsTrap_simple,   
+      testing/fulltests/tls/T121dtlsudptraptests_simple,   
+      testing/fulltests/tls/T122TlsTrap_simple,   
+      testing/fulltests/tls/T122tlstcptraptests_simple,   
+      testing/fulltests/tls/T131DtlsAgentTrap_simple,   
+      testing/fulltests/tls/T131dtlsudpagenttraptests_simple,   
+      testing/fulltests/tls/T132TlsAgentTrap_simple,   
+      testing/fulltests/tls/T132tlstcpagenttraptests_simple,   
+      testing/fulltests/tls/T141DtlsCrl_simple,   
+      testing/fulltests/tls/T141dtlsudpcrl_simple,   
+      testing/fulltests/tls/T142TlsCrl_simple,   
+      testing/fulltests/tls/T142tlstcpcrl_simple,   
+      testing/fulltests/tls/T151DtlsCiphers_simple,   
+      testing/fulltests/tls/T151dtlsciphers_simple,   
+      testing/fulltests/tls/T152TlsCiphers_simple,   
+      testing/fulltests/tls/T152tlsciphers_simple,   
+      testing/fulltests/tls/T200TlsIpv6_simple,   
+      testing/fulltests/tls/T200tlsipv6_simple,   
+      testing/fulltests/tls/T300TlsPerl.t,   
+      testing/fulltests/tls/T300tlstcpperl.t,   
+      testing/fulltests/tls/T301DtlsPerl.t,   
+      testing/fulltests/tls/T301dtlsperl.t,   
+      testing/fulltests/tls/T401DtlsTsmPrefix_simple,   
+      testing/fulltests/tls/T401dtlstsmprefix_simple,   
+      testing/fulltests/tls/T402TlsTsmPrefix_simple,   
+      testing/fulltests/tls/T402tlstsmprefix_simple:
+
+   moved test files around for better naming
+
+2010-06-30 14:58  hardaker
+
+   * snmplib/transports/snmpDTLSUDPDomain.c:
+
+   copy dtls transport address to the expected hostname
+
+2010-06-30 14:58  hardaker
+
+   *  snmplib/transports/snmpDTLSUDPDomain.c,   
+      snmplib/transports/snmpTLSTCPDomain.c:
+
+   set the expected hostname from the transport string if possible
+
+2010-06-30 14:58  hardaker
+
+   * local/net-snmp-cert:
+
+   a bit more help output by default
+
+2010-06-29 22:29  tanders
+
+   * apps/snmptrapd_auth.c:
+
+   Follow-up for r19116: make sure we include agent config
+
+2010-06-29 22:18  magfr
+
+   *  agent/mibgroup/host/hr_print.h,   
+      agent/mibgroup/if-mib/data_access/interface.h,   
+      agent/mibgroup/ip-mib/data_access/ipaddress_linux.h,   
+      agent/mibgroup/ucd-snmp/extensible.h:
+
+   Add missing config_requires
+
+2010-06-29 17:33  hardaker
+
+   * man/snmpcmd.1.def:
+
+   rework the snmpcmd manual page to separate out the flags into
+   sections appropriate for their usage type
+
+2010-06-29 16:51  marz
+
+   * local/net-snmp-cert:
+
+   pod docs, some default val fixes, info output normalized
+
+2010-06-29 16:32  hardaker
+
+   * agent/mibgroup/target/target.c:
+
+   added ssh.h include
+
+2010-06-29 16:27  hardaker
+
+   * man/snmpd.conf.5.def:
+
+   reorganize the manual page a bit for SNMPv3 and TLS
+
+2010-06-29 16:27  hardaker
+
+   * snmplib/transports/snmpTLSTCPDomain.c:
+
+   fix default tls registrations
+
+2010-06-29 16:26  hardaker
+
+   * agent/snmp_agent.c:
+
+   check for NULL transports after an open fails
+
+2010-06-29 16:26  hardaker
+
+   * snmplib/transports/snmpTLSBaseDomain.c:
+
+   moving logging around so that openssl errors are printed on
+   failures
+
+2010-06-29 16:26  hardaker
+
+   *  testing/fulltests/tls/Scrltests,   
+      testing/fulltests/tls/Stsmprefix:
+
+   fix some non-interactive invocation issues
+
+2010-06-29 16:26  hardaker
+
+   * snmplib/transports/snmpTLSBaseDomain.c:
+
+   move some common code into a common function
+
+2010-06-28 19:13  hardaker
+
+   *  include/net-snmp/library/default_store.h,   
+      snmplib/transports/snmpTLSBaseDomain.c,   
+      testing/fulltests/tls/ScipherTests,   
+      testing/fulltests/tls/T151dtlsciphers_simple,   
+      testing/fulltests/tls/T152tlsciphers_simple:
+
+   cipher suite selection and tests for it
+
+2010-06-28 19:12  hardaker
+
+   * python/LICENSE:
+
+   license updates
+
+2010-06-28 19:12  hardaker
+
+   *  python/README, python/netsnmp/client.py,   
+      python/netsnmp/client_intf.c:
+
+   SNMPv3 over TLS support
+
+2010-06-28 19:12  hardaker
+
+   * python/netsnmp/tests/test.py:
+
+   better output showing test types
+
+2010-06-28 00:54  tanders
+
+   *  man/mib_api.3.def, man/netsnmp_agent.3, man/netsnmp_container.3,  
+       man/netsnmp_example_scalar_int.3, man/netsnmp_handler.3,   
+      man/netsnmp_library.3, man/netsnmp_mib_utilities.3,   
+      man/netsnmp_table.3, man/snmpcmd.1.def, man/snmptrapd.conf.5.def:
+
+   CHANGES: man: clean up manual pages
+   (from Debian patch 56_manpage)
+
+2010-06-27 23:29  tanders
+
+   * apps/snmptrapd.c, apps/snmptrapd_auth.c:
+
+   CHANGES: build: Do not call vacm_standard_views() or
+   init_vacm_config_tokens() if the corresponding module was not
+   compiled
+   (from Debian patch 61_vacm_missing_dependency_check)
+
+2010-06-27 03:23  marz
+
+   * local/net-snmp-cert:
+
+   fix app tag completions
+
+2010-06-27 00:56  marz
+
+   * local/net-snmp-cert, local/net-snmp-cert.conf:
+
+   handle config file setting interactive, true/false values handled
+   in config
+
+2010-06-26 20:58  marz
+
+   * local/net-snmp-cert:
+
+   fix some bugs w/ spaces in names and app tag help
+
+2010-06-26 19:38  marz
+
+   *  testing/fulltests/tls/S300tlsperl.pl,   
+      testing/fulltests/tls/Stlsvars,   
+      testing/fulltests/transports/Stlstests:
+
+   fix tests to use non-interactive -I
+
+2010-06-26 17:46  marz
+
+   * local/certgen-test.pl, local/net-snmp-cert:
+
+   better interactive, ?=help, <tab> compl, more help, SAN loop
+   format and termination fix, tolerate spaces in fields and
+   filenames, more complete error output, embryonic import from url
+
+2010-06-26 13:48  bvassche
+
+   *  snmplib/snmp_transport.c, snmplib/transports/snmpDTLSUDPDomain.c, 
+        snmplib/transports/snmpTLSTCPDomain.c:
+
+   More compiler warning fixes.
+
+2010-06-26 13:47  bvassche
+
+   * acconfig.h, include/net-snmp/net-snmp-config.h.in:
+
+   Fixed the errors in acconfig.h and regenerated
+   net-snmp-config.h.in.
+
+2010-06-26 13:44  bvassche
+
+   * agent/mibgroup/smux/smux.c:
+
+   Fixed compiler warnings triggered by SMUX MIB implementation.
+
+2010-06-26 00:45  hardaker
+
+   *  snmplib/transports/snmpDTLSUDPDomain.c,   
+      snmplib/transports/snmpTLSBaseDomain.c,   
+      testing/fulltests/tls/Stlssantests,   
+      testing/fulltests/tls/T113dtlsudpsan_simple,   
+      testing/fulltests/tls/T114tlstcpsan_simple:
+
+   fixes and testing for checking SAN DNS names from the server
+
+2010-06-26 00:44  hardaker
+
+   *  testing/fulltests/tls/Stlsnametests,   
+      testing/fulltests/tls/Stlsservertests,   
+      testing/fulltests/tls/T111dtlsudpservertests_simple,   
+      testing/fulltests/tls/T112tlstcpservertests_simple:
+
+   genericize the server name tests
+
+2010-06-25 23:01  hardaker
+
+   *  agent/mibgroup/tsm-mib.h,   
+      agent/mibgroup/tsm-mib/snmpTsmConfigurationUsePrefix.c,   
+      agent/mibgroup/tsm-mib/snmpTsmConfigurationUsePrefix.h,   
+      snmplib/snmptsm.c, snmplib/transports/snmpDTLSUDPDomain.c,   
+      testing/fulltests/tls/Scrltests,   
+      testing/fulltests/tls/Stsmprefix,   
+      testing/fulltests/tls/T401dtlstsmprefix_simple,   
+      testing/fulltests/tls/T402tlstsmprefix_simple:
+
+   useprefix scalar testing and support
+
+2010-06-25 23:01  hardaker
+
+   * testing/fulltests/tls/Scrltests:
+
+   remove debugging lines
+
+2010-06-25 23:00  hardaker
+
+   * testing/fulltests/tls/Scrltests:
+
+   put in only minimial debug flags
+
+2010-06-25 23:00  hardaker
+
+   *  include/net-snmp/library/default_store.h,   
+      include/net-snmp/library/snmpTLSBaseDomain.h,   
+      snmplib/cert_util.c, snmplib/transports/snmpTLSBaseDomain.c,   
+      testing/fulltests/tls/Scrltests,   
+      testing/fulltests/tls/T141dtlsudpcrl_simple,   
+      testing/fulltests/tls/T142tlstcpcrl_simple:
+
+   code and test cases for CRL handling
+
+2010-06-25 15:24  bvassche
+
+   * testing/fulltests/default/T060trapdperl_simple:
+
+   Added a newline at the end of each line printed by the Perl
+   interpreter.
+
+2010-06-25 13:08  hardaker
+
+   * snmplib/transports/snmpDTLSUDPDomain.c:
+
+   reduce number of resend attempts and timeout
+
+2010-06-25 13:08  hardaker
+
+   *  include/net-snmp/library/snmpTLSBaseDomain.h,   
+      include/net-snmp/library/snmpTLSTCPDomain.h, snmplib/cert_util.c, 
+        snmplib/transports/snmpDTLSUDPDomain.c,   
+      snmplib/transports/snmpTLSBaseDomain.c,   
+      snmplib/transports/snmpTLSTCPDomain.c:
+
+   warning fixes
+
+2010-06-25 13:08  hardaker
+
+   * snmplib/transports/snmpTLSTCPDomain.c:
+
+   remove logic typo from previous commit
+
+2010-06-25 13:08  hardaker
+
+   *  include/net-snmp/library/snmpTLSBaseDomain.h,   
+      include/net-snmp/library/snmpTLSTCPDomain.h,   
+      snmplib/transports/snmpDTLSUDPDomain.c,   
+      snmplib/transports/snmpTLSTCPDomain.c,   
+      testing/fulltests/tls/T200tlsipv6_simple:
+
+   IPv6 fixes for TCP
+
+2010-06-25 13:01  jsafranek
+
+   * snmplib/snmp_api.c:
+
+   Reverting 19095, it breaks tests
+
+2010-06-25 09:40  jsafranek
+
+   * snmplib/snmp_api.c:
+
+   CHANGES: snmptranslate: fixed printing of ranges with UNSIGNED
+   type.
+
+2010-06-24 23:55  hardaker
+
+   * snmplib/transports/snmpTLSBaseDomain.c:
+
+   fix function names for stat increases
+
+2010-06-24 23:52  hardaker
+
+   * snmplib/transports/snmpDTLSUDPDomain.c:
+
+   fix errors in comments
+
+2010-06-24 23:44  hardaker
+
+   * snmplib/transports/snmpDTLSUDPDomain.c:
+
+   comments for 5.4 for dtls
+
+2010-06-24 23:44  hardaker
+
+   * snmplib/transports/snmpTLSBaseDomain.c:
+
+   comments for 5.3.2
+
+2010-06-24 23:43  hardaker
+
+   * snmplib/transports/snmpDTLSUDPDomain.c:
+
+   client side connect comments
+
+2010-06-24 23:43  hardaker
+
+   * snmplib/transports/snmpDTLSUDPDomain.c:
+
+   counter and comment improvements
+
+2010-06-24 23:43  hardaker
+
+   * snmplib/transports/snmpDTLSUDPDomain.c:
+
+   update counter calls and comment text
+
+2010-06-24 19:03  bvassche
+
+   *  testing/fulltests/default/T061agentperl_simple,   
+      testing/fulltests/default/T115agentxperl_simple,   
+      testing/fulltests/support/simple_TESTCONF.sh:
+
+   Moved LD_LIBRARY_PATH setup from individual tests scripts to
+   simple_TESTCONF.sh.
+
+2010-06-24 19:02  bvassche
+
+   * testing/fulltests/support/simple_run:
+
+   Fixed a comment.
+
+2010-06-24 17:48  bvassche
+
+   * include/net-snmp/library/snmpTLSBaseDomain.h:
+
+   Should have been included in r19084.
+
+2010-06-24 17:47  bvassche
+
+   *  snmplib/cert_util.c, snmplib/snmp_transport.c,   
+      snmplib/transports/snmpTLSBaseDomain.c:
+
+   Fixed several recently introduced compiler warnings.
+
+2010-06-24 12:30  tanders
+
+   * configure, configure.d/config_os_progs:
+
+   "test -e" isn't portable; use "test -x" instead for the Perl
+   system()
+   check
+
+2010-06-23 11:14  jsafranek
+
+   * agent/mibgroup/ip-mib/ipv6InterfaceTable/ipv6InterfaceTable.c:
+
+   CHANGES: snmpd: fixed value of IP-MIB::ipv6InterfaceForwarding on
+   Linux
+   
+   The value was 0 (not forwarding) or 1 (forwarding), should be 2
+   and 1
+   instead - netsnmp_interface_entry.forwarding_v6 is boolean, not
+   TruthValue.
+
+2010-06-22 23:06  hardaker
+
+   * snmplib/cert_util.c, testing/fulltests/tls/Stlsuserstests:
+
+   support for certSecName mapping from a local cert file name and a
+   test for it
+
+2010-06-22 22:44  hardaker
+
+   * perl/SNMP/SNMP.pm:
+
+   documenation update to clean up and include TLS parameters
+
+2010-06-22 22:44  hardaker
+
+   * perl/SNMP/SNMP.pm, perl/SNMP/SNMP.xs:
+
+   support for passing identities and full working version
+
+2010-06-22 22:44  hardaker
+
+   *  testing/fulltests/tls/S300tlsperl.pl,   
+      testing/fulltests/tls/T300tlstcpperl.t,   
+      testing/fulltests/tls/T301dtlsperl.t:
+
+   perl TLS/DTLS tests
+
+2010-06-22 22:43  hardaker
+
+   * perl/SNMP/SNMP.pm, perl/SNMP/SNMP.xs:
+
+   first ptach on SNMP/TLS creating a new session function
+
+2010-06-22 22:43  hardaker
+
+   * snmplib/transports/snmpDTLSUDPDomain.c:
+
+   first working support for a delayed close() to attempt to sending
+   outstanding packets in the queue; this is required for snmptrap
+   to work at all when sending traps (not informs) over DTLS
+
+2010-06-22 19:03  bvassche
+
+   *  testing/fulltests/default/T059trapdtraphandle_simple,   
+      testing/fulltests/default/T065agentextend_simple,   
+      testing/fulltests/support/simple_TESTCONF.sh:
+
+   CHANGES: MinGW: tests T059 and T065 do now pass.
+
+2010-06-22 19:01  bvassche
+
+   * apps/snmpnetstat/inet6.c:
+
+   The width argument for %.*d must have type int, not size_t. This
+   bug was introduced in r19014.
+
+2010-06-22 18:57  bvassche
+
+   * agent/mibgroup/utilities/execute.c:
+
+   CHANGES: MinGW: run_shell_command() with either input or output
+   (but not both) does now work.
+   This did not work until now because on MinGW mkstemp() generates
+   a MinGW-style path (/tmp/...) while system() invokes cmd.exe and
+   hence expects a Windows-style path (C:\...).
+
+2010-06-22 17:39  bvassche
+
+   * testing/fulltests/support/simple_eval_tools.sh:
+
+   Also report the port specification if [ $SNMP_VERBOSE -gt 0 ].
+
+2010-06-22 17:38  bvassche
+
+   *  testing/fulltests/default/T053agentv1trap_simple,   
+      testing/fulltests/default/T060trapdperl_simple,   
+      testing/fulltests/default/T061agentperl_simple,   
+      testing/fulltests/default/T100agenthup_simple,   
+      testing/fulltests/default/T115agentxperl_simple:
+
+   Replaced an explicit test for MinGW by a test on HAVE_SIGHUP.
+
+2010-06-22 17:36  bvassche
+
+   *  configure, configure.d/config_os_misc4,   
+      include/net-snmp/net-snmp-config.h.in:
+
+   Added configure test for SIGHUP.
+
+2010-06-22 17:35  bvassche
+
+   * testing/RUNTESTS:
+
+   Report which tests failed, if any.
+
+2010-06-22 08:37  bvassche
+
+   * agent/mibgroup/mibII/var_route.c:
+
+   Fixed an error in a comment block.
+
+2010-06-21 19:26  bvassche
+
+   * testing/fulltests/default/T059trapdtraphandle_simple:
+
+   Rearranged the implementation of this test such that it is no
+   longer necessary
+   to invoke simple_eval_tools.sh when this script is invoked as a
+   trap handler
+   by snmptrapd.
+
+2010-06-21 08:01  dts12
+
+   * snmplib/large_fd_set.c:
+
+   Ensure that fdset structure is resized sufficiently
+   to accomodate the specified socket ID.
+   Problem reported by Shiyalei.
+
+2010-06-20 19:32  dts12
+
+   *  snmplib/cert_util.c, snmplib/cmu_compat.c, snmplib/pkcs.c,   
+      snmplib/snprintf.c:
+
+   Avoid duplicate (unused) symbols.
+
+2010-06-20 19:31  bvassche
+
+   * testing/fulltests/default/T059trapdtraphandle_simple:
+
+   Commented out debug code.
+
+2010-06-20 19:30  bvassche
+
+   * testing/RUNTESTS, testing/fulltests/support/simple_run:
+
+   Restored summary success/failure count reporting.
+   Also, moved kill.exe test back to RUNTESTS.
+
+2010-06-20 19:29  bvassche
+
+   * testing/fulltests/support/simple_eval_tools.sh:
+
+   CHANGES: testing: add the test name to the start of the file
+   "invoked".
+
+2010-06-20 19:27  bvassche
+
+   *  testing/fulltests/default/T053agentv1trap_simple,   
+      testing/fulltests/default/T060trapdperl_simple,   
+      testing/fulltests/default/T061agentperl_simple,   
+      testing/fulltests/default/T100agenthup_simple,   
+      testing/fulltests/default/T115agentxperl_simple:
+
+   CHANGES: MinGW: testing: skip the tests that require SIGHUP since
+   MinGW does not support SIGHUP.
+
+2010-06-20 15:19  bvassche
+
+   * configure, configure.d/config_os_progs, testing/Makefile.in:
+
+   Added a configure test that detects whether or not Perl's
+   system() function
+   invokes a POSIX shell. "make test" does now fall back to RUNTESTS
+   if not.
+
+2010-06-20 15:16  bvassche
+
+   *  snmplib/snmp_transport.c, snmplib/transports/snmpAliasDomain.c,   
+      snmplib/transports/snmpIPv4BaseDomain.c,   
+      snmplib/transports/snmpIPv6BaseDomain.c,   
+      snmplib/transports/snmpSocketBaseDomain.c,   
+      snmplib/transports/snmpTCPBaseDomain.c,   
+      snmplib/transports/snmpTCPDomain.c,   
+      snmplib/transports/snmpTCPIPv6Domain.c,   
+      snmplib/transports/snmpUDPBaseDomain.c,   
+      snmplib/transports/snmpUDPDomain.c,   
+      snmplib/transports/snmpUDPIPv4BaseDomain.c:
+
+   Builds again on MinGW -- added #include <net-snmp/types.h> where
+   necessary.
+   Note: although <net-snmp/types.h> is included indirectly from the
+   *     *transport.h    header files, these #include statements are
+      necessary because of    a pesky    circular dependence between
+      <net-snmp/types.h> and    <net-snmp/library/snmp_api.h>. 
+      2010-06-20 15:12  bvassche
+
+
+   * testing/fulltests/support/simple_run:
+
+   CHANGES: MinGW: refuse to run the regression tests if kill.exe
+   cannot be found.
+
+2010-06-20 15:11  bvassche
+
+   * testing/RUNTESTS:
+
+   Shortened the srcdir path by making sure that it does not contain
+   /..
+
+2010-06-19 18:30  bvassche
+
+   * testing/RUNFULLTESTS:
+
+   Added support for running RUNFULLTESTS with Test::Harness in
+   another directory than the source directory.
+
+2010-06-19 16:41  rstory
+
+   * 
+      agent/mibgroup/tlstm-mib/snmpTlstmParamsTable/snmpTlstmParamsTable.c,
+        
+      agent/mibgroup/tlstm-mib/snmpTlstmParamsTable/snmpTlstmParamsTable.h:
+
+   complete rewrite of params to use table_dataset instead of
+   create-dataset
+
+2010-06-19 16:41  rstory
+
+   * 
+      agent/mibgroup/tlstm-mib/snmpTlstmAddrTable/snmpTlstmAddrTable_persist.c:
+
+   use text for hash type in persistent store
+
+2010-06-19 16:40  rstory
+
+   *  agent/mibgroup/Rmon/rows.c,   
+      agent/mibgroup/examples/ucdDemoPublic.c:
+
+   quiet compiler warnings
+
+2010-06-19 16:40  rstory
+
+   * snmplib/transports/snmpTLSBaseDomain.c:
+
+   fix missing specifier in debug
+
+2010-06-19 16:39  rstory
+
+   * 
+      agent/mibgroup/tlstm-mib/snmpTlstmCertToTSNTable/snmpTlstmCertToTSNTable.c:
+
+   use define instead of constant; fix check for rows to save
+
+2010-06-19 16:39  rstory
+
+   * include/net-snmp/library/cert_util.h, snmplib/cert_util.c:
+
+   add remove/find function for maps/addrs/params; rename params
+   tag->name;
+   destroy -> free; group recent trust functions together in src;
+   don't store
+   params fp as binary; hand text args for hash type (e.g --sha1)
+
+2010-06-18 15:35  bvassche
+
+   * agent/mibgroup/mibII/at.c:
+
+   CHANGES: Cygwin: corrected error handling in mibII/at.
+
+2010-06-18 07:23  bvassche
+
+   * include/net-snmp/library/snmp_api.h:
+
+   Fixed a compiler warning.
+
+2010-06-18 01:42  magfr
+
+   * snmplib/keytools.c:
+
+   Do not define ret twice when NETSNMP_USE_INTERNAL_CRYPTO is set.
+
+2010-06-18 01:39  magfr
+
+   * snmplib/transports/snmpTLSTCPDomain.c:
+
+   Corrected typo.
+
+2010-06-18 00:31  hardaker
+
+   * CHANGES, NEWS:
+
+   better NEWS and CHANGES files
+
+2010-06-17 20:39  hardaker
+
+   * ChangeLog:
+
+   version update
+
+2010-06-17 20:31  hardaker
+
+   *  agent/Makefile.depend, agent/helpers/Makefile.depend,   
+      agent/mibgroup/Makefile.depend, apps/Makefile.depend,   
+      apps/snmpnetstat/Makefile.depend, snmplib/Makefile.depend:
+
+   make depend
+
+2010-06-17 18:59  hardaker
+
+   *  man/netsnmp_access_multiplexer.3, man/netsnmp_agent.3,   
+      man/netsnmp_agent_handler.h.3, man/netsnmp_agent_registry.3,   
+      man/netsnmp_agent_trap.3, man/netsnmp_asn1_packet_parse.3,   
+      man/netsnmp_baby_steps.3, man/netsnmp_bulk_to_next.3,   
+      man/netsnmp_cache_handler.3, man/netsnmp_callback.3,   
+      man/netsnmp_container.3, man/netsnmp_container_iterator.3,   
+      man/netsnmp_container_iterator.h.3, man/netsnmp_data_list.3,   
+      man/netsnmp_debug.3, man/netsnmp_default_store.3,   
+      man/netsnmp_handler.3, man/netsnmp_instance.3,   
+      man/netsnmp_iterator_info_s.3, man/netsnmp_leaf.3,   
+      man/netsnmp_library.3, man/netsnmp_mib_maintenance.3,   
+      man/netsnmp_mib_utilities.3, man/netsnmp_mode_end_call.3,   
+      man/netsnmp_multiplexer.3,   
+      man/netsnmp_netsnmp_agent_request_info_s.3,   
+      man/netsnmp_netsnmp_column_info_t.3,   
+      man/netsnmp_netsnmp_data_list_s.3,   
+      man/netsnmp_netsnmp_handler_registration_s.3,   
+      man/netsnmp_netsnmp_iterator_info_s.3,   
+      man/netsnmp_netsnmp_mib_handler_access_methods.3,   
+      man/netsnmp_netsnmp_mib_handler_methods.3,   
+      man/netsnmp_netsnmp_mib_handler_s.3,   
+      man/netsnmp_netsnmp_monitor_callback_header_s.3,   
+      man/netsnmp_netsnmp_request_info_s.3,   
+      man/netsnmp_netsnmp_table_registration_info_s.3,   
+      man/netsnmp_netsnmp_table_request_info_s.3,   
+      man/netsnmp_null_container.3, man/netsnmp_oid_stash.3,   
+      man/netsnmp_old_api.3, man/netsnmp_read_config.3,   
+      man/netsnmp_read_only.3, man/netsnmp_row_merge.3,   
+      man/netsnmp_scalar.3, man/netsnmp_scalar_group_group.3,   
+      man/netsnmp_serialize.3, man/netsnmp_snmp_agent.3,   
+      man/netsnmp_snmp_alarm.3, man/netsnmp_snmp_client.3,   
+      man/netsnmp_snmp_logging.3, man/netsnmp_snmp_pdu.3,   
+      man/netsnmp_snmp_session.3, man/netsnmp_stash_cache.3,   
+      man/netsnmp_stash_to_next.3, man/netsnmp_table.3,   
+      man/netsnmp_table_array.3, man/netsnmp_table_container.3,   
+      man/netsnmp_table_data.3, man/netsnmp_table_dataset.3,   
+      man/netsnmp_table_generic.3, man/netsnmp_table_indexes.3,   
+      man/netsnmp_table_iterator.3, man/netsnmp_table_iterator.h.3,   
+      man/netsnmp_table_maintenance.3, man/netsnmp_table_row.3,   
+      man/netsnmp_table_rows.3, man/netsnmp_tdata.3,   
+      man/netsnmp_tools.h.3, man/netsnmp_util.3,   
+      man/netsnmp_utilities.3, man/netsnmp_variable_list.3,   
+      man/netsnmp_watcher.3:
+
+   documentation update
+
+
+
+----------------------------------------------------------------------
+
 Changes: V5.5 -> V5.6.pre1
 
 2010-06-17 20:31  hardaker
