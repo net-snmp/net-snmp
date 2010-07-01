@@ -147,6 +147,10 @@ listing of all changes made to the code.
 	socket generic parts to SocketBase.
       - when freeing a cache, stop timer and call cache free func - also
 	add netsnmp_cache_remove
+      - new experimental simple state machine
+      - new experimental simple state machine new experimental row creation
+	API which uses a state machine to try really hard to create a row
+	from a given varbind list
 
     snmplib, snmpd:
       - Do not check if values of type size_t are less than 0.
@@ -268,6 +272,11 @@ listing of all changes made to the code.
       - translate NOSUCH*/ENDOFMIB errors during RESERVE1 to NOCREATION
       - utilities/execute do not need anything from util_funcs, so stop
 	depending on it.
+      - fixed value of IP-MIB::ipv6InterfaceForwarding on Linux   The value
+	was 0 (not forwarding) or 1 (forwarding), should be 2 and 1 instead
+	- netsnmp_interface_entry.forwarding_v6 is boolean, not TruthValue.
+      - new API for indicating that persistent store needs to be saved
+	after the current request finishes processing
 
     snmpdlib:
       - new functions to make stash ptr and newrow available to
@@ -295,6 +304,9 @@ listing of all changes made to the code.
 	changed; plus white-space clean up, manual additions and help
 	output modifications by hardaker
 
+    man:
+      - clean up manual pages (from Debian patch 56_manpage)
+
     snmpwalk:
       - Handle the case when the end oid is longer than the current oid
 	correctly
@@ -307,15 +319,22 @@ listing of all changes made to the code.
 	case for agentxtrap. The enablement/disablement is inspiered by
 	automake conditionals
       - T command line flag can be used to configure transports
+      - A new 'snmptls' command for manipulating the agent's TLS configuration
 
     apps, snmplib:
       - [PATCH 2835577]: identified by "Bart Van Assche": Replace SNMP_ZERO
 	of arrays with a memset.
 
+    snmptranslate:
+      - fixed printing of ranges with UNSIGNED type.
+
     build:
       - [PATCH 2952020]: Explicitly set permission on temporary testing
 	output directories. Patch provided by Leonardo Chiquitto.
       - run rpm configure checks for hr_swinst rewrite (rpm version only)
+      - Do not call vacm_standard_views() or init_vacm_config_tokens() if
+	the corresponding module was not compiled (from Debian patch
+	61_vacm_missing_dependency_check)
 
     building:
       - 'make test TESTOPTS="-P tcp"' works fine now
@@ -458,6 +477,7 @@ listing of all changes made to the code.
       - Use olducd_run, not run_olducd. Change srcdir to refer to the top
 	directory and not the testing subdirectory as that is what is
 	expected in the test scripts.
+      - add the test name to the start of the file "invoked".
 
     unspecified:
       - Change the types of the return values of netsnmp_*_getSecName from
@@ -541,6 +561,7 @@ listing of all changes made to the code.
 	compiled" does no longer appear when running the configure script.
 	Follow-up for r18050: re-enabled libiphlpapi and iphlpapi.h tests
 	for non-MinGW platforms since the Cygwin build needs these.
+      - corrected error handling in mibII/at.
 
     Linux:
       - Improved EtherLike-MIB support Patch supplied by Josef Moellers
@@ -554,6 +575,14 @@ listing of all changes made to the code.
       - struct sockaddr_in6.sin6_scope_id configure test does now work.
       - winExtDLL compiles now under MinGW. building Net-SNMP works again.
 	Detailed overview: * Changes in the configure script:
+      - refuse to run the regression tests if kill.exe cannot be found.
+      - run_shell_command() with either input or output (but not both) does
+	now work. This did not work until now because on MinGW mkstemp()
+	generates a MinGW-style path (/tmp/...) while system() invokes
+	cmd.exe and hence expects a Windows-style path (C:\...).
+      - testing: skip the tests that require SIGHUP since MinGW does not
+	support SIGHUP.
+      - tests T059 and T065 do now pass.
 
     Solaris:
       - OS header detection check is now run before IPv6 stack detection.
