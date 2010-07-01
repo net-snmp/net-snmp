@@ -462,7 +462,8 @@ main(int argc, char **argv)
     if (strcmp(argv[arg], "certToSecName") == 0) {
 
         oid           map_type[MAX_OID_LEN];
-        u_int         pri, map_type_len;
+        u_int         pri;
+        size_t        map_type_len;
 
         if (strcmp(argv[++arg], "add") != 0) {
             fprintf(stderr, "only add is supported at this time\n");
