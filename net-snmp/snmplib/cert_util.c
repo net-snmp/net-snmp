@@ -1851,7 +1851,8 @@ netsnmp_tls_fingerprint_parse(const u_char *binary_fp, int fp_len,
                               char **fp_str_ptr, u_int *fp_str_len, int realloc,
                               u_char *hash_type_ptr)
 {
-    int needed;
+    int     needed;
+    size_t  fp_str_size;
 
     netsnmp_require_ptr_LRV( hash_type_ptr, SNMPERR_GENERR );
     netsnmp_require_ptr_LRV( fp_str_ptr, SNMPERR_GENERR );
@@ -1879,8 +1880,9 @@ netsnmp_tls_fingerprint_parse(const u_char *binary_fp, int fp_len,
      * netsnmp_binary_to_hex allocate space for string, if needed
      */
     *hash_type_ptr = binary_fp[0];
-    *fp_str_len = netsnmp_binary_to_hex((u_char**)fp_str_ptr, fp_str_len,
-                                        realloc, &binary_fp[1], fp_len - 1);
+    netsnmp_binary_to_hex((u_char**)fp_str_ptr, &fp_str_size,
+                          realloc, &binary_fp[1], fp_len - 1);
+    *fp_str_len = fp_str_size;
     if (0 == *fp_str_len)
         return SNMPERR_GENERR;
 
@@ -1896,6 +1898,7 @@ netsnmp_tls_fingerprint_build(int hash_type, const char *hex_fp,
                                    int realloc)
 {
     int     hex_fp_len;
+    size_t  tls_fp_size;
     size_t  offset;
 
     netsnmp_require_ptr_LRV( hex_fp, SNMPERR_GENERR );
@@ -1917,8 +1920,9 @@ netsnmp_tls_fingerprint_build(int hash_type, const char *hex_fp,
      * convert to binary
      */
     offset = 1;
-    if (netsnmp_hex_to_binary(tls_fp, tls_fp_len, &offset, realloc, hex_fp,
-                              ":") != 1)
+    netsnmp_hex_to_binary(tls_fp, &tls_fp_size, &offset, realloc, hex_fp, ":");
+    *tls_fp_len = tls_fp_size;
+    if (tls_fp_size != 1)
         return SNMPERR_GENERR;
     *tls_fp_len = offset;
     (*tls_fp)[0] = hash_type;
