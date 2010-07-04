@@ -91,6 +91,8 @@ export SNMP_UPDIR
 # Source the testing configuration file
 #
 
+testnum="`basename $testscript`"
+
 . simple_TESTCONF.sh
 
 . simple_eval_tools.sh
