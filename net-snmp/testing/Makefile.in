@@ -30,8 +30,8 @@ all:
 test:
 	@if test "x$(PERL)" = "x" \
 	         -o "x@PERL_SYSTEM_INVOKES_POSIX_SHELL@" != xyes \
-		 || ! $(PERL) -e 'require TAP::Harness;' >/dev/null 2>&1 \
-		    && ! $(PERL) -e 'require Test::Harness;' >/dev/null 2>&1;\
+		 || { ! $(PERL) -e 'require TAP::Harness;' >/dev/null 2>&1 \
+		    && ! $(PERL) -e 'require Test::Harness;' >/dev/null 2>&1; };\
 	then \
 		echo $(srcdir)/RUNTESTS ; \
 		$(srcdir)/RUNTESTS ; \
