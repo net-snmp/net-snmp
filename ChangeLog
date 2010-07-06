@@ -38258,7 +38258,7 @@ Changes: V5.2 -> V5.3
    * local/mib2c-conf.d/mfd-interface.m2c:
 
    - pass NULL to config handler reg, to use current apptype
-   - add seperators and headers when saving persistent data
+   - add separators and headers when saving persistent data
    - remove extraneous newline in persistent data
 
 2005-03-24 22:06  rstory
