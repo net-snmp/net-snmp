@@ -32,7 +32,7 @@ errnum=0
 junkoutputfilebase="$SNMP_TMPDIR/output-`basename $0`$$"
 junkoutputfile=$junkoutputfilebase
 outputcount=0
-seperator="-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-="
+separator="-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-="
 if [ -z "$OK_TO_SAVE_RESULT" ] ; then
 OK_TO_SAVE_RESULT=1
 export OK_TO_SAVE_RESULT
@@ -206,9 +206,9 @@ KNORG
 	if [ $SNMP_VERBOSE -gt 1 ]; then
 		echo "Command Output: "
 		echo "MIBDIR $MIBDIRS $MIBS"
-		echo "$seperator"
+		echo "$separator"
 		cat $junkoutputfile | sed 's/^/  /'
-		echo "$seperator"
+		echo "$separator"
 	fi
 	return $RC
 }
@@ -404,12 +404,14 @@ WAITFOR() {
 GOOD() {
     testnum=`expr $testnum + 1`
     echo "ok $testnum - $1"
+    echo "ok $testnum - $1" >> $SNMP_TMPDIR/invoked
 }
 
 BAD() {
     testnum=`expr $testnum + 1`
     errnum=`expr $errnum + 1`
     echo "not ok $testnum - $1"
+    echo "not ok $testnum - $1" >> $SNMP_TMPDIR/invoked
 }
 
 COMMENT() {
@@ -594,11 +596,11 @@ STOPAGENT() {
     fi
     if [ $SNMP_VERBOSE -gt 1 ]; then
 	echo "Agent Output:"
-	echo "$seperator [stdout]"
+	echo "$separator [stdout]"
 	cat $SNMP_SNMPD_LOG_FILE.stdout
-	echo "$seperator [logfile]"
+	echo "$separator [logfile]"
 	cat $SNMP_SNMPD_LOG_FILE
-	echo "$seperator"
+	echo "$separator"
     fi
 }
 
@@ -612,11 +614,11 @@ STOPTRAPD() {
     fi
     if [ $SNMP_VERBOSE -gt 1 ]; then
 	echo "snmptrapd Output:"
-	echo "$seperator [stdout]"
+	echo "$separator [stdout]"
 	cat $SNMP_SNMPTRAPD_LOG_FILE.stdout
-	echo "$seperator [logfile]"
+	echo "$separator [logfile]"
 	cat $SNMP_SNMPTRAPD_LOG_FILE
-	echo "$seperator"
+	echo "$separator"
     fi
 }
 

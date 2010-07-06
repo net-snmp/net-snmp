@@ -1859,7 +1859,7 @@ _ifXTable_container_row_save(ifXTable_rowreq_ctx * rowreq_ctx, void *type)
      * be treated a little differently. Specifically, you will need
      * (4 * len) + 4 [3 ASCII chars per byte + 1 for ., + 4 for len].
      *
-     * 3) Also, remeber to add space for the identifier and seperator
+     * 3) Also, remember to add space for the identifier and separator
      * characters (for example, each column is prefixed by the
      * column number and a semicolon. To allow for the maximum
      * column values, 12 bytes [11 for oid + 1 for ':'] per
