@@ -22,7 +22,7 @@ CONFIGAGENT proxy -t 2 -r 1 -v 2c -c testcommunity $SNMP_TRANSPORT_SPEC:${SNMP_T
 
 # Start the agent without initializing the system mib.
 ORIG_AGENT_FLAGS="$AGENT_FLAGS"
-AGENT_FLAGS="$ORIG_AGENT_FLAGS -I -system_mib -Dproxy"
+AGENT_FLAGS="$ORIG_AGENT_FLAGS -I -system_mib,winExtDLL -Dproxy"
 STARTAGENT
 
 # test to see that the current agent doesn't support the system mib

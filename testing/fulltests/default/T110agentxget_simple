@@ -21,7 +21,7 @@ ORIG_AGENT_FLAGS="$AGENT_FLAGS -x $SNMP_TMPDIR/agentx_socket"
 else
 ORIG_AGENT_FLAGS="$AGENT_FLAGS -x tcp:${SNMP_TEST_DEST}${SNMP_AGENTX_PORT}"
 fi
-AGENT_FLAGS="$ORIG_AGENT_FLAGS -I -system_mib"
+AGENT_FLAGS="$ORIG_AGENT_FLAGS -I -system_mib,winExtDLL"
 STARTAGENT
 
 # test to see that the current agent doesn't support the system mib
