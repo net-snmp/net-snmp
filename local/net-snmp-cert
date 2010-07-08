@@ -427,7 +427,7 @@ sub Complete {
 
 package NetSNMP::Cert;
 
-our $VERSION      = '0.2.7';
+our $VERSION      = '0.2.9';
 
 our $PROG         = ::basename($0);
 our $DEBUG        = 0;
@@ -943,15 +943,16 @@ sub check_output_file {
   my $opts = shift;
   my $file = shift;
   my $interactive = shift;
+  my $force = shift;
   my $continue = 1;
 
   if (-w $file) {
-    if ($interactive and not $opts->{'force'}) {
+    if ($interactive and not $force) {
       print "Output file ($file) exists; will be overwritten\nContinue [y/N]: ";
       $continue = <STDIN>; chomp $continue;
       $continue = 0 if $continue =~ /^\s*$|^no?\s*$/i;
     } else {
-      if ($opts->{'force'}) {
+      if ($force) {
 	NetSNMP::Cert::vprint("Output file ($file) exists; overwriting...\n", $opts);
       } else {
 	NetSNMP::Cert::vprint("Output file ($file) exists; exiting...\n", $opts);
@@ -1227,11 +1228,19 @@ sub autoSet {
 sub inherit {
   my $this = shift;
   my $field = shift;
+  my $id;
 
   # cmd opts override config settings
-  if (exists $this->{'APP'} and exists $this->{'APP'}->{'OPTS'}) {
-    my $opts = $this->{'APP'}->{'OPTS'};
+  if (exists $this->{'APP'} and exists $this->{'APP'}{'OPTS'}) {
+    my $opts = $this->{'APP'}{'OPTS'};
+    $id = $opts->{'identity'};
     return $opts->{$field} if defined $opts->{$field};
+  }
+
+  if (defined $id and exists $this->{'identity'} and
+      exists $this->{'identity'}{$id} and
+      exists $this->{'identity'}{$id}{$field}) {
+    return $this->{'identity'}{$id}{$field};
   }
 
   # return our field if we have it
@@ -1463,7 +1472,6 @@ sub parseArgs {
   NetSNMP::Cert::version(0) if $opts->{'version'};
 
   NetSNMP::Cert::usage(0) if $opts->{'help'};
-  NetSNMP::Cert::usage(2, '--identity') if $opts->{'identity'};
 
   # pull out the cmd - getOpts should leave it untouched for us
   $opts->{'cmd'} = NetSNMP::Cert::pull_cmd(\@args);
@@ -1488,11 +1496,11 @@ sub createTlsDir {
   my $app = shift;
   my $opts = $app->{'OPTS'};
   my $config = $app->{'config'};
-  my $dir = $opts->{'tlsdir'};
+  my $dir;
   my $file;
   my $cmd;
 
-  $dir ||= $config->inherit('tlsDir');
+  $dir = $config->inherit('tlsDir');
 
   if (not defined $dir) {
     my $cfgdir = $opts->{'cfgdir'};
@@ -1943,8 +1951,12 @@ sub genCa {
   # set command env
   my $env = $app->opensslEnv($cn, $days);
 
-  NetSNMP::Cert::check_output_file($opts, $outCrt, $config->inherit('interactive'));
-  NetSNMP::Cert::check_output_file($opts, $outKey, $config->inherit('interactive'));
+  NetSNMP::Cert::check_output_file($opts, $outCrt,
+				   $config->inherit('interactive'),
+				   $config->inherit('force'));
+  NetSNMP::Cert::check_output_file($opts, $outKey,
+				   $config->inherit('interactive'),
+				   $config->inherit('force'));
 
   my $cmd = "$env openssl req -extensions v3_ca_create -new -days $days -batch -config $NetSNMP::Cert::SSLCFG -keyout '$outKey'";
   $cmd .= " -nodes";
@@ -1952,7 +1964,9 @@ sub genCa {
   if (defined $ca) {
     # we have to gen a csr and then sign it, must preserve CA:TRUE
     my $outCsr = "$NetSNMP::Cert::NEWCRTDIR/$tag.csr";
-    NetSNMP::Cert::check_output_file($opts, $outCsr, $config->inherit('interactive'));
+    NetSNMP::Cert::check_output_file($opts, $outCsr,
+				   $config->inherit('interactive'),
+				   $config->inherit('force'));
     $cmd .= " -out '$outCsr'";
 
     NetSNMP::Cert::dprint("genCa (gencsr): $cmd\n", $opts);
@@ -1999,15 +2013,21 @@ sub genCert {
   my $outCrt = "$NetSNMP::Cert::CRTDIR/$tag.crt";
   my $outKey = "$NetSNMP::Cert::PRIVDIR/$tag.key";
 
-  NetSNMP::Cert::check_output_file($opts, $outCrt, $config->inherit('interactive'));
-  NetSNMP::Cert::check_output_file($opts, $outKey, $config->inherit('interactive'));
+  NetSNMP::Cert::check_output_file($opts, $outCrt,
+				   $config->inherit('interactive'),
+				   $config->inherit('force'));
+  NetSNMP::Cert::check_output_file($opts, $outKey,
+				   $config->inherit('interactive'),
+				   $config->inherit('force'));
 
   $cmd = "$env openssl req -extensions v3_user_create -new -days $days -keyout '$outKey' -batch -config $NetSNMP::Cert::SSLCFG";
   $cmd .= " -nodes";
 
   if (defined $ca) {
     my $outCsr = "$NetSNMP::Cert::NEWCRTDIR/$tag.csr";
-    NetSNMP::Cert::check_output_file($opts, $outCsr, $config->inherit('interactive'));
+    NetSNMP::Cert::check_output_file($opts, $outCsr,
+				   $config->inherit('interactive'),
+				   $config->inherit('force'));
     $cmd .= " -out '$outCsr'";
 
     NetSNMP::Cert::dprint("genCert (gencsr): $cmd\n", $opts);
@@ -2066,8 +2086,12 @@ sub genCsr {
 
   my $env = $app->opensslEnv($cn, $days);
 
-  NetSNMP::Cert::check_output_file($opts, $outCsr, $config->inherit('interactive'));
-  NetSNMP::Cert::check_output_file($opts, $csrKey, $config->inherit('interactive'));
+  NetSNMP::Cert::check_output_file($opts, $outCsr,
+				   $config->inherit('interactive'),
+				   $config->inherit('force'));
+  NetSNMP::Cert::check_output_file($opts, $csrKey,
+				   $config->inherit('interactive'),
+				   $config->inherit('force'));
 
   my $cmd = (defined $inCrt ?
   "$env openssl x509 -x509toreq -in $inCrt -out '$outCsr' -signkey '$csrKey' -nodes -days $days -batch -config $NetSNMP::Cert::SSLCFG" :
@@ -2113,7 +2137,9 @@ sub signCsr {
 
   my $env = $app->opensslEnv($cn, $days, ".ca/$ca_base");
 
-  NetSNMP::Cert::check_output_file($opts, $outCrt, $config->inherit('interactive'));
+  NetSNMP::Cert::check_output_file($opts, $outCrt,
+				   $config->inherit('interactive'),
+				   $config->inherit('force'));
 
   # XXX - handle keyfile search??
   my $cmd = "$env openssl ca -batch -days $days -extensions v3_ca_sign -cert '$ca' -keyfile '$ca_key' -in '$csr' -out '$outCrt' -config $NetSNMP::Cert::SSLCFG";
@@ -2164,42 +2190,42 @@ sub show {
 }
 
 sub import_file {
-    my ($file, $suffix, $targ, $rdir, $tag) = @_;
+  my ($file, $suffix, $targ, $rdir, $tag) = @_;
 
-    if (NetSNMP::Cert::is_url($file)) {
-	if ($NetSNMP::Cert::haveUserAgent) {
+  if (NetSNMP::Cert::is_url($file)) {
+    if ($NetSNMP::Cert::haveUserAgent) {
 
-	    require File::Temp;
-	    import File::Temp qw(tempfile);
+      require File::Temp;
+      import File::Temp qw(tempfile);
 
-	    my ($fh, $newfilename) = tempfile(SUFFIX => $suffix);
-	    return if (!$fh || !$newfilename);
-	    my $ua = LWP::UserAgent->new;
-	    my $response = $ua->get($file);
-	    if ($response->is_success) {
-		print $fh $response->decoded_content();
-	    } else {
-		NetSNMP::Cert::vwarn("failed to download a certificate from $file");
-		return;
-	    }
-	    $fh->close;
-	    $file = $newfilename;
-	} else {
-	    NetSNMP::Cert::vwarn("LWP::UserAgent not installed: unable to import certificate");
-	    return;
-	}
+      my ($fh, $newfilename) = tempfile(SUFFIX => $suffix);
+      return if (!$fh || !$newfilename);
+      my $ua = LWP::UserAgent->new;
+      my $response = $ua->get($file);
+      if ($response->is_success) {
+	print $fh $response->decoded_content();
+      } else {
+	NetSNMP::Cert::vwarn("failed to download a certificate from $file");
+	return;
+      }
+      $fh->close;
+      $file = $newfilename;
+    } else {
+      NetSNMP::Cert::vwarn("LWP::UserAgent not installed: unable to import certificate");
+      return;
     }
+  }
 
-    $file = NetSNMP::Cert::fq_rel_path($file, $rdir);
-    die("file unreadable: $file\n") unless -r $file;
+  $file = NetSNMP::Cert::fq_rel_path($file, $rdir);
+  die("file unreadable: $file\n") unless -r $file;
 
 
-    if (! $targ) {
-	$targ = (NetSNMP::Cert::is_ca_cert($file) ? $NetSNMP::Cert::CADIR : $NetSNMP::Cert::CRTDIR);
-    }
+  if (! $targ) {
+    $targ = (NetSNMP::Cert::is_ca_cert($file) ? $NetSNMP::Cert::CADIR : $NetSNMP::Cert::CRTDIR);
+  }
 
-    $targ .= "/" . $tag . $suffix if ($tag);
-    ::copy($file, $targ);
+  $targ .= "/" . $tag . $suffix if ($tag);
+  ::copy($file, $targ);
 }
 
 
@@ -2256,19 +2282,17 @@ sub parse {
 
     if (/^\s*(\w+)(?:\(([\)\(\d\,\.]+)\))?\s*=\s*{/) {
       my $obj = $1;
-      my $indices = $2 || 1;
 
-      $indices = "1..$indices" if $indices =~ /^\d+$/;
-      NetSNMP::Cert::dprint("object: $obj ($indices) = {\n", $opts);
+      NetSNMP::Cert::dprint("object: $obj ($2) = {\n", $opts);
+      die "error - identity: indices not supported: $2" if defined $2;
 
       # Found an object.
       if ( $obj eq 'identity' ) {
-	my $pos = tell(CONFIG);
-	for my $index (eval($indices)) {
-	  # must reset cfg file pos each loop
-	  seek(CONFIG,$pos,0);
-	  push( @{$config->{$obj}}, NetSNMP::Cert::Identity::parse(*CONFIG, $config, $index) );
-	}
+	my $identity = NetSNMP::Cert::Identity::parse(*CONFIG, $config);
+	my $id = $identity->{'id'};
+	die "error - identity: 'id' not defined" unless defined $id;
+	die "error - identity: duplicate '$id'" if exists $config->{$obj}{$id};
+	$config->{$obj}{$id} = $identity;
       } else {
         die "error - unrecognized object ($1) at scope (config)";
       }
@@ -2279,8 +2303,9 @@ sub parse {
       $val = $config->resolve($val) if $val =~ /\$\w+|\&\{.*?\}/;
       # Found a symbol.
       NetSNMP::Cert::dprint("  $key = $val\n", $opts);
-
-      if ( defined $config->{$key} ) {
+      if ($key eq 'subjectAltName' or $key eq 'san') {
+	push(@{$config->{$key}}, $val);
+      } elsif ( defined $config->{$key} ) {
         die "error - duplicate symbol $key";
       } else {
         $config->{$key} = (defined $val ? NetSNMP::Cert::map_bool($val) : 1 );
@@ -2329,9 +2354,8 @@ sub new {
 sub parse {
   my $FILE = shift;
   my $parent = shift;
-  my $ind = shift || 1;
   my $opts = $parent->inherit('OPTS');
-  my $identity = new NetSNMP::Cert::Obj('identity', $parent, $ind);
+  my $identity = new NetSNMP::Cert::Obj('identity', $parent);
 
   NetSNMP::Cert::dprint("parse identity\n", $opts);
 
@@ -2340,11 +2364,7 @@ sub parse {
 
     if (/^\s*(\w+)\s*=\s*{/) {
       # Found an object.
-      if ( $1 eq 'role' ) {
-	push( @{$identity->{$1}}, NetSNMP::Cert::Role::parse($FILE, $identity));
-      } else {
-	die "error - can't have nested $1";
-      }
+      die "error - can't have nested $1";
     } elsif (/^\s*(\w+)\s*=?\s*(.*?)\s*$/) {
       my $key = $1;
       my $val = $2;
@@ -2354,7 +2374,9 @@ sub parse {
 
       $val = $identity->resolve($val) if $val =~ /\$\w+|\&\{.*?\}/;
 
-      if ( defined $identity->{$key} ) {
+      if ( $key eq 'subjectAltName' or $key eq 'san') {
+	push(@{$identity->{$key}}, $val);
+      } elsif ( defined $identity->{$key} ) {
         die "error - duplicate symbol $key";
       } else {
         $identity->{$key} = (defined $val ? NetSNMP::Cert::map_bool($val) : 1 );
