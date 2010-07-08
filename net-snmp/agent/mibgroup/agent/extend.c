@@ -421,6 +421,7 @@ extend_parse_config(const char *token, char *cptr)
 {
     netsnmp_extend *extension;
     char exec_name[STRMAX];
+    char exec_name2[STRMAX];     /* For use with UCD execFix directive */
     char exec_command[STRMAX];
     oid  oid_buf[MAX_OID_LEN];
     size_t oid_len;
@@ -454,6 +455,7 @@ extend_parse_config(const char *token, char *cptr)
     if (!strcmp( token, "execFix"   ) ||
         !strcmp( token, "extendfix" ) ||
         !strcmp( token, "execFix2" )) {
+        strcpy( exec_name2, exec_name );
         strcat( exec_name, "Fix" );
         flags |= NS_EXTEND_FLAGS_WRITEABLE;
         /* XXX - Check for shell... */
@@ -477,7 +479,7 @@ extend_parse_config(const char *token, char *cptr)
     if (!strcmp( token, "execFix"  )) {
         int  i;
         for ( i=0; i < num_compatability_entries; i++ ) {
-            if (!strcmp( exec_name,
+            if (!strcmp( exec_name2,
                     compatability_entries[i].exec_entry->token))
                 break;
         }
