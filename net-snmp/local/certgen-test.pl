@@ -38,6 +38,17 @@ $str = "\ngencert: snmpd (signed w/ ca-snmp-2)\n\n";
 print("$str");
 die("$str\n") if system("net-snmp-cert gencert -I -C /tmp/.snmp2 -t snmpd --with-ca ca-snmp-2 --email snmpd\@net-snmp.org --host snmpd-host.net-snmp.org  --san DNS:snmpd.a.b.org --san EMAIL:snmpd\@net-snmp.org");
 
+system("cp net-snmp-cert.conf /tmp/.snmp2");
+
+$str = "\ngenca (in -C /tmp/.snmp2 -i CA-identity)\n\n";
+print("$str");
+die("$str\n") if system("net-snmp-cert genca -I -C /tmp/.snmp2 -i CA-identity");
+
+$str = "\ngencert (in -C /tmp/.snmp2 -i nocadm -t snmp-identity)\n\n";
+print("$str");
+die("$str\n") if system("net-snmp-cert gencert -I -C /tmp/.snmp2 -t snmp-identity -i nocadm --with-ca CA-identity");
+
+
 $str = "\nshow CAs\n\n";
 print("$str");
 die("$str\n") if system("net-snmp-cert -C /tmp/.snmp2 showca --issuer --subject");
