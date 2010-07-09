@@ -166,7 +166,7 @@ parse_mteMonitor(const char *token, const char *line)
     char   oid_name_buf[SPRINT_MAX_LEN];
     oid    name_buf[MAX_OID_LEN];
     size_t name_buf_len;
-    long   op    = 0;
+    u_char op    = 0;
     long   value = 0;
 
     struct mteObject  *object;

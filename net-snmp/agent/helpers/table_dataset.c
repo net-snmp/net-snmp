@@ -1362,7 +1362,7 @@ netsnmp_table_set_add_indexes(netsnmp_table_data_set *tset,
 
     if (tset)
         while ((type = va_arg(debugargs, int)) != 0)
-            netsnmp_table_data_add_index(tset->table, type);
+            netsnmp_table_data_add_index(tset->table, (u_char)type);
 
     va_end(debugargs);
 }
