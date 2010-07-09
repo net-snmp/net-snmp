@@ -29,7 +29,7 @@
 typedef struct netsnmp_num_file_instance_s {
     char *file_name;
     FILE *filep;
-    int   type;
+    u_char type;
     int   flags;
 } netsnmp_num_file_instance;
 
