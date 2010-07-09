@@ -1158,18 +1158,17 @@ http://www.mingw.org
 *
 ***************************************************************************
 
-An alternate way to build Net-SNMP for win32 is to use Cygnus's cygwin32
-environment.  Information on the Cygnus cygwin32 environment is available
+An alternate way to build and run Net-SNMP on Win32 is to use the Cygwin
+environment.  Detailed information about the Cygwin environment is available
 on the web at: http://sources.redhat.com/cygwin/.
 
 Cygwin allows you to compile almost the complete agent and applications.
-The following configure options creates a working set of programs:
+As an example, the following configure options create a working set of
+programs:
 
 ./configure \
-	--disable-shared \
 	--with-mib-modules="host agentx disman/event-mib examples/example" \
 	--with-out-mib-modules=host/hr_network \
-        --disable-embedded-perl --without-perl-modules \
 
 If you want to disable SNMPv3 auth and privacy features, add:
 	--without-openssl \
@@ -1177,23 +1176,14 @@ If you want to disable SNMPv3 auth and privacy features, add:
 If you want to use IPv6 transports, add:
 	--enable-ipv6
 
-Note:  The source code should *not* be in a folder that contains a space.  For
-       example, compiling in your 'My Documents' or your Desktop (usually
-       c:\Documents and Settings\xxxx\Desktop) is not supported.
-        
-This has been tested for Windows 98 and Windows NT 4.0.  In order for
-the process part of the host resources MIB to work under NT you will need
-to get hold of the PSAPI.DLL. This available under the download section
-of www.microsoft.com.  The DLL is included with Windows 2000 and XP,
-and is also part of the VC++ distribution.  The IPHLPAPI library is
-part of the "Microsoft Platform SDK", which is also available from
-www.microsoft.com.  See the section "Installing Platform SDK" for details.
+Note: the source code should *not* be in a folder that contains a space.
+For example, compiling in your 'My Documents' folder or your Desktop folder
+(usually c:\Documents and Settings\xxxx\Desktop) is not supported.
 
-Earlier releases of Cygwin may need to use the configure flag
-	--with-libs="-lregex -libphlpapi"
-but this regular expression support has since been incorporated
-into the main Cygwin package, and it is no longer necessary to
-include it separately.
+A note for Windows NT users: in order for the process part of the host
+resources MIB (hr_swrun) to work under Windows NT you will need to get hold
+of PSAPI.DLL. This DLL is available under the download section of
+www.microsoft.com, and is also included in the VC++ distribution.
 
 If the folder that Net-SNMP was installed to is ever changed, modify the 
 system environment variables or registry keys as explained in the 
