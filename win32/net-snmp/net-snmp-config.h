@@ -1430,6 +1430,32 @@
     available.  */
 /* #undef NETSNMP_TRANSPORT_TCPIPV6_DOMAIN */
 
+/*  This is defined if support for the TLS transport domain is
+    available.   */
+/* #undef NETSNMP_TRANSPORT_TLSBASE_DOMAIN */
+
+/*  This is defined if support for the Alias transport domain is
+    available.   */
+/* #undef NETSNMP_TRANSPORT_ALIAS_DOMAIN */
+
+/*  This is defined if support for the SSH transport domain is
+    available.   */
+/* #undef NETSNMP_TRANSPORT_SSH_DOMAIN */
+
+/*  This is defined if support for the DTLS/UDP transport domain is
+    available.   */
+/* #undef NETSNMP_TRANSPORT_DTLSUDP_DOMAIN */
+
+/*  This is defined if support for the TLS/TCP transport domain is
+    available.   */
+/* #undef NETSNMP_TRANSPORT_TLSTCP_DOMAIN */
+
+/*  This is defined if support for stdin/out transport domain is available.   */
+/* #undef NETSNMP_TRANSPORT_STD_DOMAIN */
+
+/*  This is defined if support for the IPv4Base transport domain is available.   */
+#define NETSNMP_TRANSPORT_IPV4BASE_DOMAIN 1
+
 /* define this if the USM security module is available */
 #define NETSNMP_SECMOD_USM 1
 
@@ -1449,6 +1475,7 @@
 #define config_require(x)
 #define config_version_require(x)
 #define config_warning(x)
+#define config_error(x)
 #define config_exclude(x)
 #define config_arch_require(x,y)
 #define config_parse_dot_conf(w,x,y,z)
