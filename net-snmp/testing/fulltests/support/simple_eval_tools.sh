@@ -404,18 +404,19 @@ WAITFOR() {
 GOOD() {
     testnum=`expr $testnum + 1`
     echo "ok $testnum - $1"
-    echo "ok $testnum - $1" >> $SNMP_TMPDIR/invoked
+    echo "# ok $testnum - $1" >> $SNMP_TMPDIR/invoked
 }
 
 BAD() {
     testnum=`expr $testnum + 1`
     errnum=`expr $errnum + 1`
     echo "not ok $testnum - $1"
-    echo "not ok $testnum - $1" >> $SNMP_TMPDIR/invoked
+    echo "# not ok $testnum - $1" >> $SNMP_TMPDIR/invoked
 }
 
 COMMENT() {
     echo "# $@"
+    echo "# $@" >> $SNMP_TMPDIR/invoked
 }
 
 # WAITFORORDIE "grep string" ["file"]
