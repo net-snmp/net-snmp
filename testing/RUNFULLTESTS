@@ -25,11 +25,11 @@ GetOptions(\%opts,
            "r=s",
            "debug",
            "srcdir|D=s",
-           "builddir=s",
+           "builddir|d=s",
 	   "f",
 	   "F",
 	   "failed-file=s",
-	   "master-directory|d=s",
+	   "master-directory=s",
 	  ) || ++$opts{'help'};
 
 # Change srcdir and builddir to absolute paths
@@ -459,6 +459,8 @@ sub usage {
     print "  -d PATH\t\tBuild directory to be tested\n";
     print "    --builddir PATH\n";
     print "    (currently '$opts{'builddir'}')\n";
+    print "  --master-directory DIRNAME\n";
+    print "    (default = 'fulltests')\n";
     print "  -h\t\t\tThis help output\n";
     print "    --help\n";
     print "  --debug\t\tDebugging output\n\n";
