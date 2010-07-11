@@ -36176,7 +36176,15 @@ $as_echo "$ac_cv_prog_gcc_traditional" >&6; }
   fi
 fi
 
-{ $as_echo "$as_me:$LINENO: checking for working memcmp" >&5
+
+if test "$cross_compiling" = yes -a "${ac_cv_func_memcmp_working+set}" != set
+then
+  # Cross-compiling and ac_cv_func_memcmp_working has not been set - assume
+  # that memcmp() is available.
+  ac_cv_func_memcmp_working=yes
+else
+  # Native compilation - test for the availability of memcmp().
+  { $as_echo "$as_me:$LINENO: checking for working memcmp" >&5
 $as_echo_n "checking for working memcmp... " >&6; }
 if test "${ac_cv_func_memcmp_working+set}" = set; then
   $as_echo_n "(cached) " >&6
@@ -36268,7 +36276,9 @@ test $ac_cv_func_memcmp_working = no && case " $LIBOBJS " in
  ;;
 esac
 
-          #  memcmp()   -  obs
+
+fi
+
 { $as_echo "$as_me:$LINENO: checking return type of signal handlers" >&5
 $as_echo_n "checking return type of signal handlers... " >&6; }
 if test "${ac_cv_type_signal+set}" = set; then
