@@ -458,7 +458,7 @@ parse_mteMonitor(const char *token, const char *line)
                      */
                     memcpy(oid_name_buf, buf, SPRINT_MAX_LEN);
                     cp = NULL;  /* To terminate the processing loop */
-                    DEBUGMSGTL(("disman:event:conf", "%s: Exist (%s, %ld)\n",
+                    DEBUGMSGTL(("disman:event:conf", "%s: Exist (%s, %d)\n",
                                                      tname, oid_name_buf, op));
                     break;
     
@@ -493,7 +493,7 @@ parse_mteMonitor(const char *token, const char *line)
                     cp    = copy_nword_const(cp, buf, SPRINT_MAX_LEN);
                     value = strtol(buf, NULL, 0);
                     cp = NULL;  /* To terminate the processing loop */
-                    DEBUGMSGTL(("disman:event:conf", "%s: Bool (%s, %ld, %ld)\n",
+                    DEBUGMSGTL(("disman:event:conf", "%s: Bool (%s, %d, %ld)\n",
                                               tname, oid_name_buf, op, value));
                     break;
     
