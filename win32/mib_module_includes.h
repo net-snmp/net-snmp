@@ -86,8 +86,9 @@
 #include "mibgroup/snmpv3/usmStats.h"
 #include "mibgroup/snmpv3/usmUser.h"
 #include "mibgroup/notification/snmpNotifyTable.h"
-#include "mibgroup/snmp-notification-mib/snmpNotifyFilterTable.h"
 #include "mibgroup/notification/snmpNotifyFilterProfileTable.h"
+#include "mibgroup/snmp-notification-mib/snmpNotifyFilterTable.h"
+#include "mibgroup/snmp-notification-mib/snmpNotifyFilterTable/snmpNotifyFilterTable.h"
 #include "mibgroup/target/snmpTargetAddrEntry.h"
 #include "mibgroup/target/snmpTargetParamsEntry.h"
 #include "mibgroup/target/target.h"
@@ -97,6 +98,7 @@
 #include "mibgroup/agent/nsDebug.h"
 #include "mibgroup/agent/nsCache.h"
 #include "mibgroup/agent/nsLogging.h"
+#include "mibgroup/utilities/iquery.h"
 #include "mibgroup/utilities/override.h"
 
 #ifdef USING_HOST_MODULE

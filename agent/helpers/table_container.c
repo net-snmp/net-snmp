@@ -180,7 +180,7 @@ netsnmp_tcontainer_create_table( const char *name,
     }
 
     if (flags)
-        table->key_type = flags & 0x03;  /* Use lowest two bits */
+        table->key_type = (char)(flags & 0x03);  /* Use lowest two bits */
     else
         table->key_type = TABLE_CONTAINER_KEY_NETSNMP_INDEX;
 
