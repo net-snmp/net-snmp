@@ -3648,7 +3648,7 @@ netsnmp_marker_uptime(marker_t pm)
     const_marker_t  start = netsnmp_get_agent_starttime();
 
     res = uatime_hdiff(start, pm);
-    return res;                 /* atime_diff works in msec, not csec */
+    return res;
 }
 
                         /*
