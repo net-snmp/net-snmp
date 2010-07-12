@@ -2665,7 +2665,7 @@ header_ifEntry(struct variable *vp,
         if ((exact && (result == 0)) || (!exact && (result < 0)))
             break;
     }
-    if (ifIndex > count) {
+    if (ifIndex >= count) {
         DEBUGMSGTL(("mibII/interfaces", "... index out of range\n"));
         return MATCH_FAILED;
     }
