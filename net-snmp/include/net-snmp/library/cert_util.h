@@ -210,6 +210,7 @@ netsnmp_container *netsnmp_cert_get_trustlist(void);
     void netsnmp_tlstmAddr_free(snmpTlstmAddr *entry);
     int netsnmp_tlstmAddr_add(snmpTlstmAddr *entry);
     int netsnmp_tlstmAddr_remove(snmpTlstmAddr *entry);
+    char *netsnmp_tlstmAddr_get_serverId(const char *name);
 
 #ifdef __cplusplus
 }

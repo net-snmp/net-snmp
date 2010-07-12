@@ -3191,6 +3191,23 @@ _find_tlstmAddr_fingerprint(const char *name)
 
     return result->fingerprint;
 }
+
+char *
+netsnmp_tlstmAddr_get_serverId(const char *name)
+{
+    snmpTlstmAddr    lookup_key, *result;
+
+    if (NULL == name)
+        return NULL;
+
+    lookup_key.name = NETSNMP_REMOVE_CONST(char*, name);
+
+    result = CONTAINER_FIND(_tlstmAddr, &lookup_key);
+    if (NULL == result)
+        return NULL;
+
+    return result->identity;
+}
 /*
  * END snmpTlstmAddrTable data
  * ***************************************************************************/
