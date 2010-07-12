@@ -13,6 +13,7 @@ DOSETTEST() {
   value=$1
   args=$2
 
+  # SNMPv2-MIB::sysLocation.0
   CAPTURE "snmpset $args .1.3.6.1.2.1.1.6.0 s '$value'"
 
   CAPTURE "snmpget $args .1.3.6.1.2.1.1.6.0"
@@ -25,6 +26,7 @@ DOFAILSETTEST() {
   value=$1
   args=$2
 
+  # SNMPv2-MIB::sysLocation.0
   CAPTURE "snmpset $args .1.3.6.1.2.1.1.6.0 s '$value'"
 
   CAPTURE "snmpget $args .1.3.6.1.2.1.1.6.0"
@@ -36,6 +38,7 @@ DOTRAPTEST() {
   value=$1
   args=$2
 
+  # IF-MIB::linkUp
   CAPTURE "snmptrap $args 0 .1.3.6.1.6.3.1.1.5.4 system.sysContact.0 s $value"
 
   CHECKTRAPD "STRING: $value"
@@ -45,6 +48,7 @@ DOFAILTRAPTEST() {
   value=$1
   args=$2
 
+  # IF-MIB::linkUp
   CAPTURE "snmptrap $args 0 .1.3.6.1.6.3.1.1.5.4 system.sysContact.0 s $value"
 
   CHECKTRAPDCOUNT 0 "$value"
