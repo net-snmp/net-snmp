@@ -144,7 +144,7 @@ var_vacm_sec2group(struct variable * vp,
 {
     struct vacm_groupEntry *gp;
     oid            *groupSubtree;
-    size_t          groupSubtreeLen;
+    ssize_t         groupSubtreeLen;
     int             secmodel;
     char            secname[VACMSTRINGLEN], *cp;
 
