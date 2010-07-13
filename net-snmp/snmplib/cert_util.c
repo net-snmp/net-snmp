@@ -1806,6 +1806,12 @@ netsnmp_cert_find(int what, int where, void *hint)
     /** make sure we have the cert data */
     if (netsnmp_cert_load_x509(result) < 0)
         return NULL;
+
+    DEBUGMSGT(("cert:find:found",
+               "using cert %s / %s for %s(%d) (uses=%s (%d))\n",
+               result->info.filename, result->fingerprint, _mode_str(what),
+               what , _mode_str(result->info.allowed_uses),
+               result->info.allowed_uses));
             
     return result;
 }
