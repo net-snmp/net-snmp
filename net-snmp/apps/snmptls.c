@@ -10,6 +10,7 @@
 
 #include <ctype.h>
 
+#include <openssl/ssl.h>
 #include <openssl/x509.h>
 #include <net-snmp/library/cert_util.h>
 
