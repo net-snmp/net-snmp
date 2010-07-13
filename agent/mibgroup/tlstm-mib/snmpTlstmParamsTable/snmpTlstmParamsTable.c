@@ -7,6 +7,7 @@
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 
+#include <openssl/ssl.h>
 #include <openssl/x509.h>
 #include <net-snmp/library/cert_util.h>
 #include "tlstm-mib.h"
