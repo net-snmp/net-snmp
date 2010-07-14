@@ -203,15 +203,15 @@ snmpTlstmParamsTable_createEntry(netsnmp_tdata *table_data,
     }
     row->data = entry;
 
-    DEBUGMSGT(("tlstmParamsTable:entry:create", "entry 0x%x / row 0x%x\n",
-               (uintptr_t)entry, (uintptr_t)row));
+    DEBUGMSGT(("tlstmParamsTable:entry:create", "entry %p / row %p\n",
+               entry, row));
 
     DEBUGIF("snmpTlstmParamTable:entry:create") {
         char name[sizeof(entry->snmpTargetParamsName)+1];
         snprintf(name, sizeof(name), "%s", snmpTargetParamsName);
         DEBUGMSGT(("tlstmParamsTable:entry:create",
-                   "entry %s 0x%x / row 0x%x\n",
-                   name, (uintptr_t) entry, (uintptr_t) row));
+                   "entry %s %p / row %p\n",
+                   name, entry, row));
     }
 
     /*
@@ -230,8 +230,8 @@ snmpTlstmParamsTable_createEntry(netsnmp_tdata *table_data,
     entry->snmpTlstmParamsStorageType = ST_NONVOLATILE;
         
     if (table_data) {
-        DEBUGMSGTL(("tlstmParamsTable:row:insert", "row 0x%x\n",
-                    (uintptr_t)row));
+        DEBUGMSGTL(("tlstmParamsTable:row:insert", "row %p\n",
+                    row));
         netsnmp_tdata_add_row( table_data, row );
     }
     return row;
@@ -278,11 +278,11 @@ snmpTlstmParamsTable_removeEntry(netsnmp_tdata     *table_data,
 
     entry = (snmpTlstmParamsTable_entry *)row->data;
 
-    DEBUGMSGT(("tlstmParamsTable:entry:delete", "entry 0x%x / row 0x%x\n",
-               (uintptr_t)entry, (uintptr_t)row));
+    DEBUGMSGT(("tlstmParamsTable:entry:delete", "entry %p / row %p\n",
+               entry, row));
 
     if (table_data) {
-        DEBUGMSGTL(("tlstmParamsTable:row:remove", "row 0x%x\n", (uintptr_t)row));
+        DEBUGMSGTL(("tlstmParamsTable:row:remove", "row %p\n", row));
         netsnmp_tdata_remove_and_delete_row( table_data, row );
     }
     else

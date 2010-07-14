@@ -239,8 +239,8 @@ tlstmAddrTable_createEntry(netsnmp_tdata * table_data,
     DEBUGIF("tlstmAddrTable:entry:create") {
         char name[sizeof(entry->snmpTargetAddrName)+1];
         snprintf(name, sizeof(name), "%s", snmpTargetAddrName);
-        DEBUGMSGT(("tlstmAddrTable:entry:create", "entry %s 0x%x / row 0x%x\n",
-                   name, (uintptr_t) entry, (uintptr_t) row));
+        DEBUGMSGT(("tlstmAddrTable:entry:create", "entry %s %p / row %p\n",
+                   name, entry, row));
     }
 
     /*
@@ -265,7 +265,7 @@ tlstmAddrTable_createEntry(netsnmp_tdata * table_data,
     entry->tlstmAddrRowStatus = RS_NOTREADY;
 
     if (table_data) {
-        DEBUGMSGTL(("tlstmAddrTable:row:insert", "row 0x%x\n",(uintptr_t) row));
+        DEBUGMSGTL(("tlstmAddrTable:row:insert", "row %p\n",row));
         netsnmp_tdata_add_row(table_data, row);
     }
     return row;
@@ -316,7 +316,7 @@ tlstmAddrTable_removeEntry(netsnmp_tdata * table_data,
     entry = (tlstmAddrTable_entry *) row->data;
 
     if (table_data) {
-        DEBUGMSGTL(("tlstmAddrTable:row:remove", "row 0x%x\n",(uintptr_t) row));
+        DEBUGMSGTL(("tlstmAddrTable:row:remove", "row %p\n",row));
         netsnmp_tdata_remove_and_delete_row(table_data, row);
     }
     else
@@ -325,8 +325,8 @@ tlstmAddrTable_removeEntry(netsnmp_tdata * table_data,
     DEBUGIF("tlstmAddrTable:entry:delete") {
         char name[sizeof(entry->snmpTargetAddrName)+1];
         snprintf(name, sizeof(name), "%s", entry->snmpTargetAddrName);
-        DEBUGMSGT(("tlstmAddrTable:entry:delete", "entry %s 0x%x / row 0x%x\n",
-                   name, (uintptr_t) entry, (uintptr_t) row));
+        DEBUGMSGT(("tlstmAddrTable:entry:delete", "entry %s %p / row %p\n",
+                   name, entry, row));
     }
     if (entry && entry->undo)
         _freeUndo(entry);
