@@ -1048,14 +1048,14 @@ _cache_load(netsnmp_cache *cache, netsnmp_tdata *table)
     certToTSN_entry   *entry;
     int                rc = 0;
 
-    DEBUGMSGTL(("tlstmCertToTSNTable:cache:load", "called, %d rows\n",
+    DEBUGMSGTL(("tlstmCertToTSNTable:cache:load", "called, %" NETSNMP_PRIz "d rows\n",
                 CONTAINER_SIZE(table->container)));
 
     /** get current active maps */
     maps = netsnmp_cert_map_container();
     if (NULL == maps)
         return 0;
-    DEBUGMSGTL(("tlstmCertToTSNTable:cache:load", "maps %d rows\n",
+    DEBUGMSGTL(("tlstmCertToTSNTable:cache:load", "maps %" NETSNMP_PRIz "d rows\n",
                 CONTAINER_SIZE(maps)));
 
     map_itr = CONTAINER_ITERATOR(maps);
@@ -1087,7 +1087,7 @@ _cache_load(netsnmp_cache *cache, netsnmp_tdata *table)
     }
     ITERATOR_RELEASE(map_itr);
 
-    DEBUGMSGTL(("tlstmCertToTSNTable:cache:load", "done, %d rows\n",
+    DEBUGMSGTL(("tlstmCertToTSNTable:cache:load", "done, %" NETSNMP_PRIz "d rows\n",
                 CONTAINER_SIZE(table->container)));
 
     return rc;
@@ -1100,7 +1100,7 @@ _cache_free(netsnmp_cache *cache, netsnmp_tdata *table)
     netsnmp_iterator   *tbl_itr;
     certToTSN_entry   *entry;
 
-    DEBUGMSGTL(("tlstmCertToTSNTable:cache:free", "called, %d rows\n",
+    DEBUGMSGTL(("tlstmCertToTSNTable:cache:free", "called, %" NETSNMP_PRIz "d rows\n",
                 CONTAINER_SIZE(table->container)));
 
     /** insert rows for active maps into tbl container */
@@ -1127,7 +1127,7 @@ _cache_free(netsnmp_cache *cache, netsnmp_tdata *table)
     }
     ITERATOR_RELEASE(tbl_itr);
 
-    DEBUGMSGTL(("tlstmCertToTSNTable:cache:free", "done, %d rows\n",
+    DEBUGMSGTL(("tlstmCertToTSNTable:cache:free", "done, %" NETSNMP_PRIz "d rows\n",
                 CONTAINER_SIZE(table->container)));
 }
 

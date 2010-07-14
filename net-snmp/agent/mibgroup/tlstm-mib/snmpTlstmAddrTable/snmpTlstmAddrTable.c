@@ -1102,7 +1102,7 @@ _cache_load(netsnmp_cache *cache, netsnmp_tdata *table)
     netsnmp_tdata_row *row;
     int                rc = 0;
 
-    DEBUGMSGTL(("tlstmAddrTable:cache:load", "called, %d rows\n",
+    DEBUGMSGTL(("tlstmAddrTable:cache:load", "called, %" NETSNMP_PRIz "d rows\n",
                 CONTAINER_SIZE(table->container)));
 
     /** get current active rows */
@@ -1110,7 +1110,7 @@ _cache_load(netsnmp_cache *cache, netsnmp_tdata *table)
     if (NULL == addrs)
         return 0;
 
-    DEBUGMSGTL(("tlstmAddrTable:cache:load", "tlstmAddr %d rows\n",
+    DEBUGMSGTL(("tlstmAddrTable:cache:load", "tlstmAddr %" NETSNMP_PRIz "d rows\n",
                 CONTAINER_SIZE(addrs)));
     itr = CONTAINER_ITERATOR(addrs);
     if (NULL == itr) {
@@ -1139,7 +1139,7 @@ _cache_load(netsnmp_cache *cache, netsnmp_tdata *table)
     }
     ITERATOR_RELEASE(itr);
 
-    DEBUGMSGTL(("tlstmAddrTable:cache:load", "done, %d rows\n",
+    DEBUGMSGTL(("tlstmAddrTable:cache:load", "done, %" NETSNMP_PRIz "d rows\n",
                 CONTAINER_SIZE(table->container)));
 
     return rc;
@@ -1152,7 +1152,7 @@ _cache_free(netsnmp_cache *cache, netsnmp_tdata *table)
     netsnmp_iterator   *tbl_itr;
     tlstmAddrTable_entry   *entry;
 
-    DEBUGMSGTL(("tlstmAddrTable:cache:free", "called, %d rows\n",
+    DEBUGMSGTL(("tlstmAddrTable:cache:free", "called, %d" NETSNMP_PRIz " rows\n",
                 CONTAINER_SIZE(table->container)));
 
     tbl_itr = CONTAINER_ITERATOR(table->container);
@@ -1178,7 +1178,7 @@ _cache_free(netsnmp_cache *cache, netsnmp_tdata *table)
     }
     ITERATOR_RELEASE(tbl_itr);
 
-    DEBUGMSGTL(("tlstmAddrTable:cache:free", "done, %d rows\n",
+    DEBUGMSGTL(("tlstmAddrTable:cache:free", "done, %d" NETSNMP_PRIz " rows\n",
                 CONTAINER_SIZE(table->container)));
 }
 
