@@ -124,7 +124,7 @@ CONFIGAGENT  rwuser -s tsm afileuser authpriv
 # this file contains tests common to both tls and dtls usages
 
 # start the agent up
-FLAGS="-Dtls -On $SNMP_FLAGS $SNMP_TRANSPORT_SPEC:$SNMP_TEST_DEST$SNMP_SNMPD_PORT"
+FLAGS="-Dtls -v3 -On $SNMP_FLAGS $SNMP_TRANSPORT_SPEC:$SNMP_TEST_DEST$SNMP_SNMPD_PORT"
 
 STARTAGENT
 
