@@ -423,7 +423,7 @@ snmpTlstmParamsTable_load( netsnmp_cache *cache, void *vmagic )
     if (NULL == active_params)
         return 0;
 
-    DEBUGMSGTL(("tlstmParamsTable:cache:load", "snmpTlstmParams %d rows\n",
+    DEBUGMSGTL(("tlstmParamsTable:cache:load", "snmpTlstmParams %" NETSNMP_PRIz "d rows\n",
                 CONTAINER_SIZE(active_params)));
     itr = CONTAINER_ITERATOR(active_params);
     if (NULL == itr) {
@@ -451,7 +451,7 @@ snmpTlstmParamsTable_load( netsnmp_cache *cache, void *vmagic )
     }
     ITERATOR_RELEASE(itr);
 
-    DEBUGMSGTL(("tlstmParamsTable:cache:load", "done, %d rows\n",
+    DEBUGMSGTL(("tlstmParamsTable:cache:load", "done, %" NETSNMP_PRIz "d rows\n",
                 CONTAINER_SIZE(table->container)));
 
     return rc;
@@ -465,7 +465,7 @@ snmpTlstmParamsTable_free( netsnmp_cache *cache, void *vmagic )
     netsnmp_iterator         *tbl_itr;
     snmpTlstmParamsTable_entry   *entry;
 
-    DEBUGMSGTL(("tlstmParamsTable:cache:free", "called, %d rows\n",
+    DEBUGMSGTL(("tlstmParamsTable:cache:free", "called, %" NETSNMP_PRIz "d rows\n",
                 CONTAINER_SIZE(table->container)));
 
     tbl_itr = CONTAINER_ITERATOR(table->container);
@@ -491,7 +491,7 @@ snmpTlstmParamsTable_free( netsnmp_cache *cache, void *vmagic )
     }
     ITERATOR_RELEASE(tbl_itr);
 
-    DEBUGMSGTL(("tlstmParamsTable:cache:free", "done, %d rows\n",
+    DEBUGMSGTL(("tlstmParamsTable:cache:free", "done, %" NETSNMP_PRIz "d rows\n",
                 CONTAINER_SIZE(table->container)));
 }
 
