@@ -225,8 +225,8 @@ tlstmCertToTSNTable_createEntry(netsnmp_tdata * table, u_long tlstmCertToTSNID)
     }
     row->data = entry;
 
-    DEBUGMSGT(("tlstmCertToSN:entry:create", "entry 0x%x / row 0x%x\n",
-               (uintptr_t)entry, (uintptr_t)row));
+    DEBUGMSGT(("tlstmCertToSN:entry:create", "entry %p / row %p\n",
+               entry, row));
     /*
      * populate index
      */
@@ -242,7 +242,7 @@ tlstmCertToTSNTable_createEntry(netsnmp_tdata * table, u_long tlstmCertToTSNID)
     entry->rowStatus = RS_NOTREADY;
 
     if (table) {
-        DEBUGMSGTL(("tlstmCertToTSN:row:insert", "row 0x%x\n", (uintptr_t)row));
+        DEBUGMSGTL(("tlstmCertToTSN:row:insert", "row %p\n", row));
         netsnmp_tdata_add_row(table, row);
     }
     return row;
@@ -297,15 +297,15 @@ tlstmCertToTSNTable_removeEntry(netsnmp_tdata * table,
 
     entry = (certToTSN_entry *) row->data;
 
-    DEBUGMSGT(("tlstmCertToSN:entry:delete", "entry 0x%x / row 0x%x\n",
-               (uintptr_t)entry, (uintptr_t)row));
+    DEBUGMSGT(("tlstmCertToSN:entry:delete", "entry %p / row %p\n",
+               entry, row));
 
     if (entry && entry->undo)
         _freeUndo(entry);
     SNMP_FREE(entry);
 
     if (table) {
-        DEBUGMSGTL(("tlstmCertToSN:row:remove", "row 0x%x\n", (uintptr_t)row));
+        DEBUGMSGTL(("tlstmCertToSN:row:remove", "row %p\n", row));
         netsnmp_tdata_remove_and_delete_row(table, row);
     }
     else
