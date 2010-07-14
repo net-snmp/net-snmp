@@ -1152,7 +1152,7 @@ _cache_free(netsnmp_cache *cache, netsnmp_tdata *table)
     netsnmp_iterator   *tbl_itr;
     tlstmAddrTable_entry   *entry;
 
-    DEBUGMSGTL(("tlstmAddrTable:cache:free", "called, %d" NETSNMP_PRIz " rows\n",
+    DEBUGMSGTL(("tlstmAddrTable:cache:free", "called, %" NETSNMP_PRIz "d rows\n",
                 CONTAINER_SIZE(table->container)));
 
     tbl_itr = CONTAINER_ITERATOR(table->container);
@@ -1178,7 +1178,7 @@ _cache_free(netsnmp_cache *cache, netsnmp_tdata *table)
     }
     ITERATOR_RELEASE(tbl_itr);
 
-    DEBUGMSGTL(("tlstmAddrTable:cache:free", "done, %d" NETSNMP_PRIz " rows\n",
+    DEBUGMSGTL(("tlstmAddrTable:cache:free", "done, %" NETSNMP_PRIz "d rows\n",
                 CONTAINER_SIZE(table->container)));
 }
 
