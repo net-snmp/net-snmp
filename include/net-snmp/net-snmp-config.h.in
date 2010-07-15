@@ -307,6 +307,9 @@
 /* Define to 1 if you have the `ssl' library (-lssl). */
 #undef HAVE_LIBSSL
 
+/* Define to 1 if your `ssl' library supports DTLS (-lssl). */
+#undef HAVE_LIBSSL_DTLS
+
 /* Define to 1 if you have the <limits.h> header file. */
 #undef HAVE_LIMITS_H
 

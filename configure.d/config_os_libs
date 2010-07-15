@@ -288,6 +288,14 @@ if test "x$tryopenssl" != "xno" -a "x$tryopenssl" != "xinternal"; then
                 AC_DEFINE(HAVE_AES_CFB128_ENCRYPT, 1,
                     [Define to 1 if you have the `AES_cfb128_encrypt' function.]))
         fi
+        if echo " $transport_result_list " | $GREP "DTLS" > /dev/null; then
+	    AC_CHECK_LIB(ssl, DTLSv1_method,
+                AC_DEFINE(HAVE_LIBSSL_DTLS, 1,
+                    [Define to 1 if your `ssl' library supports DTLS (-lssl).])
+                LIBCRYPTO=" -lssl $LIBCRYPTO",	
+		AC_MSG_ERROR([The DTLS based transports require the libssl library from OpenSSL to be available and support DTLS])	,-lcrypto)
+            TLSPROG=yes
+        fi
         if echo " $transport_result_list " | $GREP "TLS" > /dev/null; then
 	    AC_CHECK_LIB(ssl, SSL_library_init,
                 AC_DEFINE(HAVE_LIBSSL, 1,
