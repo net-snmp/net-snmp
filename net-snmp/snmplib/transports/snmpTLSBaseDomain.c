@@ -5,6 +5,11 @@
 #if HAVE_DMALLOC_H
 #include <dmalloc.h>
 #endif
+#if HAVE_STRING_H
+#include <string.h>
+#else
+#include <strings.h>
+#endif
 #if HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
 #endif
@@ -25,6 +30,7 @@
 #include <openssl/ssl.h>
 #include <openssl/err.h>
 #include <openssl/x509.h>
+#include <openssl/x509_vfy.h>
 #include <openssl/x509v3.h>
 
 #include <net-snmp/types.h>
@@ -954,18 +960,26 @@ const char * _x509_get_error(int x509failvalue, const char *location) {
     case X509_V_ERR_PROXY_CERTIFICATES_NOT_ALLOWED:
         reason = "X509_V_ERR_PROXY_CERTIFICATES_NOT_ALLOWED";
         break;
+#ifdef X509_V_ERR_INVALID_EXTENSION /* not avail on darwin */
     case X509_V_ERR_INVALID_EXTENSION:
         reason = "X509_V_ERR_INVALID_EXTENSION";
         break;
+#endif
+#ifdef X509_V_ERR_INVALID_POLICY_EXTENSION /* not avail on darwin */
     case X509_V_ERR_INVALID_POLICY_EXTENSION:
         reason = "X509_V_ERR_INVALID_POLICY_EXTENSION";
         break;
+#endif
+#ifdef X509_V_ERR_NO_EXPLICIT_POLICY /* not avail on darwin */
     case X509_V_ERR_NO_EXPLICIT_POLICY:
         reason = "X509_V_ERR_NO_EXPLICIT_POLICY";
         break;
+#endif
+#ifdef X509_V_ERR_UNNESTED_RESOURCE /* not avail on darwin */
     case X509_V_ERR_UNNESTED_RESOURCE:
         reason = "X509_V_ERR_UNNESTED_RESOURCE";
         break;
+#endif
     case X509_V_ERR_APPLICATION_VERIFICATION:
         reason = "X509_V_ERR_APPLICATION_VERIFICATION";
     default:
