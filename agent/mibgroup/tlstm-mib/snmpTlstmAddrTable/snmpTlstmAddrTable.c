@@ -974,11 +974,9 @@ _addrs_add(tlstmAddrTable_entry *entry)
         return;
 
     if (entry->tlstmAddrServerFingerprint_len)
-        addr->fingerprint = strndup(entry->tlstmAddrServerFingerprint,
-                                    entry->tlstmAddrServerFingerprint_len);
+        addr->fingerprint = strdup(entry->tlstmAddrServerFingerprint);
     if (entry->tlstmAddrServerIdentity_len)
-        addr->identity = strndup(entry->tlstmAddrServerIdentity,
-                                 entry->tlstmAddrServerIdentity_len);
+        addr->identity = strdup(entry->tlstmAddrServerIdentity);
     addr->hashType = entry->hashType;
 
     addr->flags = TLSTM_ADDR_FROM_MIB;
@@ -1399,9 +1397,9 @@ _tlstmAddrTable_row_restore_mib(const char *token, char *buf)
             return;
 
         if (fp_len)
-            addr->fingerprint = strndup(fingerprint, fp_len);
+            addr->fingerprint = strdup(fingerprint);
         if (id_len)
-            addr->identity = strndup(id, id_len);
+            addr->identity = strdup(id);
         addr->hashType = hashType;
         addr->flags = TLSTM_ADDR_FROM_MIB | TLSTM_ADDR_NONVOLATILE;
 
