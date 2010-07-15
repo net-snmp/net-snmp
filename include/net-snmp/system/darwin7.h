@@ -12,3 +12,9 @@
 
 #define SWAPFILE_DIR "/private/var/vm"
 #define SWAPFILE_PREFIX "swapfile"
+
+/*
+ * as of 7/2010, openssl on darwin does not have sha256
+ */
+#define OPENSSL_NO_SHA256 1
+#define OPENSSL_NO_SHA512 1
