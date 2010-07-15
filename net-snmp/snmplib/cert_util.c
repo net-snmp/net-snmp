@@ -3,6 +3,13 @@
 #if defined(NETSNMP_USE_OPENSSL) && defined(HAVE_LIBSSL)
 
 #include <ctype.h>
+
+#if HAVE_STRING_H
+#include <string.h>
+#else
+#include <strings.h>
+#endif
+
 #if HAVE_MALLOC_H
 # include <malloc.h>
 #endif
@@ -49,6 +56,10 @@
 #include <openssl/x509v3.h>
 #include <net-snmp/library/cert_util.h>
 #include <net-snmp/library/snmp_openssl.h>
+
+#ifndef NAME_MAX
+#define NAME_MAX 255
+#endif
 
 /*
  * bump this value whenever cert index format changes, so indexes
@@ -2837,7 +2848,7 @@ netsnmp_tlstmParams_create(const char *name, int hashType, const char *fp,
         stp->name = strdup(name);
     stp->hashType = hashType;
     if (fp)
-        stp->fingerprint = strndup(fp, fp_len);
+        stp->fingerprint = strdup(fp);
     DEBUGMSGT(("9:tlstmParams:create", "0x%lx: %s\n", (u_long)stp,
                stp->name ? stp->name : "null"));
 
