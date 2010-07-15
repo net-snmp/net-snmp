@@ -16,6 +16,8 @@
 
 #include <net-snmp/net-snmp-config.h>
 
+#ifdef HAVE_LIBSSL_DTLS
+
 #include <net-snmp/library/snmpDTLSUDPDomain.h>
 
 #include <stdio.h>
@@ -1284,3 +1286,4 @@ netsnmp_dtlsudp_ctor(void)
 
     netsnmp_tdomain_register(&dtlsudpDomain);
 }
+#endif /* HAVE_LIBSSL_DTLS */
