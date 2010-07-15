@@ -31,7 +31,7 @@
 #   include "ip-mib/ipv4InterfaceTable/ipv4InterfaceTable.h"
 #endif
 #ifdef USING_IP_MIB_IPV6INTERFACETABLE_IPV6INTERFACETABLE_MODULE
-#   include "ip-mib/ipv4InterfaceTable/ipv4InterfaceTable.h"
+#   include "ip-mib/ipv6InterfaceTable/ipv6InterfaceTable.h"
 #endif
 #ifdef USING_IF_MIB_IFXTABLE_IFXTABLE_MODULE
 #   include "if-mib/ifXTable/ifXTable.h"
