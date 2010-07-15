@@ -2438,11 +2438,18 @@ usm_process_in_msg(int msgProcModel,    /* (UNUSED) */
         return SNMPERR_USM_UNKNOWNSECURITYNAME;
     }
 
+    /* ensure the user is active */
+    if (user->userStatus != RS_ACTIVE) {
+        DEBUGMSGTL(("usm", "Attempt to use an inactive user.\n"));
+        return SNMPERR_USM_UNKNOWNSECURITYNAME;
+    }
 
     /*
      * Make sure the security level is appropriate.
      */
-    if (usm_check_secLevel(secLevel, user) == 1) {
+
+    rc = usm_check_secLevel(secLevel, user);
+    if (1 == rc) {
         DEBUGMSGTL(("usm", "Unsupported Security Level (%d).\n",
                     secLevel));
         if (snmp_increment_statistic
@@ -2450,8 +2457,10 @@ usm_process_in_msg(int msgProcModel,    /* (UNUSED) */
             DEBUGMSGTL(("usm", "%s\n", "Failed to increment statistic."));
         }
         return SNMPERR_USM_UNSUPPORTEDSECURITYLEVEL;
+    } else if (rc != 0) {
+        DEBUGMSGTL(("usm", "Unknown issue.\n"));
+        return SNMPERR_USM_GENERICERROR;
     }
-
 
     /*
      * Check the authentication credentials of the message.
