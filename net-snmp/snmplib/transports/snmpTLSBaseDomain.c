@@ -442,6 +442,7 @@ _load_trusted_certs(SSL_CTX *the_ctx) {
                 snmp_log(LOG_ERR, "failed to load trust cert: %s\n",
                          fingerprint);
         }
+        ITERATOR_RELEASE(trusted_cert_iterator);
     }
 }    
 
