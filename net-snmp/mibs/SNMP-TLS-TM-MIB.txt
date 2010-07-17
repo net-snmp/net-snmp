@@ -208,7 +208,7 @@ SnmpTLSAddress ::= TEXTUAL-CONVENTION
 -- instead.
 
 SnmpTLSFingerprint ::= TEXTUAL-CONVENTION
-    DISPLAY-HINT "1x:254x"
+    DISPLAY-HINT "1x:1x"
     STATUS       current
     DESCRIPTION
        "A fingerprint value that can be used to uniquely reference
