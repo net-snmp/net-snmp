@@ -44,7 +44,10 @@ test:
 	fi
 
 testsimple:
-	$(srcdir)/fulltests/support/simple_run $(TESTOPTS)
+	@(export srcdir=$(top_srcdir) ; \
+		export builddir=$(top_builddir) ; \
+		$(srcdir)/fulltests/support/simple_run $(TESTOPTS) \
+	)
 
 testall:
 	$(srcdir)/RUNFULLTESTS -g all $(TESTOPTS)
