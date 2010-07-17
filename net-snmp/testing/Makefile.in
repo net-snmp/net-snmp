@@ -24,6 +24,9 @@ all:
 	@echo "  make test        -- default test suites"
 	@echo "  make testall     -- Run all available tests"
 	@echo "  make testfailed  -- Run only the tests that failed last time."
+	@echo "  make testsimple  -- Run tests directly with simple_run"
+	@echo ""
+	@echo "Set additional test parameters with TESTOPTS=args"
 	@echo ""
 	@echo "Also see the RUNFULLTESTS script for details"
 
@@ -39,6 +42,9 @@ test:
 		echo $(srcdir)/RUNFULLTESTS $(TESTOPTS) ; \
 		$(PERL) $(srcdir)/RUNFULLTESTS $(TESTOPTS) ; \
 	fi
+
+testsimple:
+	$(srcdir)/fulltests/support/simple_run $(TESTOPTS)
 
 testall:
 	$(srcdir)/RUNFULLTESTS -g all $(TESTOPTS)
