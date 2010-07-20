@@ -158,6 +158,10 @@ SOFTWARE.
 #include <grp.h>
 #endif
 
+#if HAVE_LIMITS_H
+#include <limits.h>
+#endif
+
 #include <net-snmp/types.h>
 #include <net-snmp/output_api.h>
 #include <net-snmp/utilities.h>
@@ -1027,7 +1031,11 @@ mkdirhier(const char *pathname, mode_t mode, int skiplast)
 const char     *
 netsnmp_mktemp(void)
 {
-    static char     name[32];
+#ifdef PATH_MAX
+    static char     name[PATH_MAX];
+#else
+    static char     name[256];
+#endif
     int             fd = -1;
 
     strcpy(name, get_temp_file_pattern());
