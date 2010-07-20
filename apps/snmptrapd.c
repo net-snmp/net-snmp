@@ -249,7 +249,7 @@ usage(void)
     fprintf(stderr,
             "  -C\t\t\tdo not read the default configuration files\n");
     fprintf(stderr, "  -d\t\t\tdump sent and received SNMP packets\n");
-    fprintf(stderr, "  -D\t\t\tturn on debugging output\n");
+    fprintf(stderr, "  -D[TOKEN[,...]]\t\tturn on debugging output for the specified TOKENs\n\t\t\t   (ALL gives extremely verbose debugging output)\n");
     fprintf(stderr, "  -f\t\t\tdo not fork from the shell\n");
     fprintf(stderr,
             "  -F FORMAT\t\tuse specified format for logging to standard error\n");

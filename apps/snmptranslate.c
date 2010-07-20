@@ -79,7 +79,7 @@ usage(void)
     fprintf(stderr,
             "  -M DIR[:...]\t\tlook in given list of directories for MIBs\n");
     fprintf(stderr,
-            "  -D TOKEN[,...]\tturn on debugging output for the specified TOKENs\n\t\t\t   (ALL gives extremely verbose debugging output)\n");
+            "  -D[TOKEN[,...]]\tturn on debugging output for the specified TOKENs\n\t\t\t   (ALL gives extremely verbose debugging output)\n");
     fprintf(stderr, "  -w WIDTH\t\tset width of tree and detail output\n");
     fprintf(stderr,
             "  -T TRANSOPTS\t\tSet various options controlling report produced:\n");

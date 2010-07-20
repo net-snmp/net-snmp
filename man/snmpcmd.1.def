@@ -87,7 +87,7 @@ file.
 .B -d
 Dump (in hexadecimal) the raw SNMP packets sent and received.
 .TP
-.B -D \fITOKEN[,...]
+.B -D\fI[TOKEN[,...]]
 Turn on debugging output for the given
 .IR "TOKEN" "(s)."
 Try
