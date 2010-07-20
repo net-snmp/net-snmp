@@ -131,7 +131,7 @@ snmp_parse_args_descriptions(FILE * outf)
     fprintf(outf, "Debugging\n");
     fprintf(outf, "  -d\t\t\tdump input/output packets in hexadecimal\n");
     fprintf(outf,
-            "  -D TOKEN[,...]\tturn on debugging output for the specified TOKENs\n\t\t\t   (ALL gives extremely verbose debugging output)\n");
+            "  -D[TOKEN[,...]]\tturn on debugging output for the specified TOKENs\n\t\t\t   (ALL gives extremely verbose debugging output)\n");
     fprintf(outf, "General options\n");
     fprintf(outf,
             "  -m MIB[:...]\t\tload given list of MIBs (ALL loads everything)\n");

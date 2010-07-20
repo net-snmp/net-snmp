@@ -308,7 +308,7 @@ usage(void)
     fprintf(stderr,
             "  -C\t\t\tdo not read the default configuration files\n");
     fprintf(stderr, "  -d\t\t\tdump sent and received SNMP packets\n");
-    fprintf(stderr, "  -D\t\t\tturn on debugging output\n");
+    fprintf(stderr, "  -D[TOKEN[,...]]\t\tturn on debugging output\n");
     fprintf(stderr,
             "  -e\t\t\tprint event # (rising/falling alarm, etc.)\n");
     fprintf(stderr, "  -f\t\t\tdo not fork from the shell\n");
