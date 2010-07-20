@@ -43,7 +43,7 @@ usage(const char* progname)
             "  -m MIB[:...]\t\tload given list of MIBs (ALL loads "
             "everything)\n"
             "  -M DIR[:...]\t\tlook in given list of directories for MIBs\n"
-            "  -D TOKEN[,...]\tturn on debugging output for the specified "
+            "  -D[TOKEN[,...]]\tturn on debugging output for the specified "
             "TOKENs\n"
             "\t\t\t   (ALL gives extremely verbose debugging output)\n"
             "  -d\t\t\tdump all traffic\n");

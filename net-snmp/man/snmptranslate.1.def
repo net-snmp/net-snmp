@@ -43,7 +43,7 @@ values from their symbolic (textual) forms into their numerical forms
 OID is either a numeric or textual object identifier.
 .SH OPTIONS
 .TP 8
-.B -D \fITOKEN[,...]
+.B -D\fI[TOKEN[,...]]
 Turn on debugging output for the given
 .IR "TOKEN" "(s)."
 Try

@@ -273,7 +273,7 @@ usage(char *prog)
            "  -C\t\t\tdo not read the default configuration files\n",
            get_configuration_directory(),
            "  -d\t\t\tdump sent and received SNMP packets\n"
-           "  -DTOKEN[,...]\tturn on debugging output for the given TOKEN(s)\n"
+           "  -D[TOKEN[,...]]\tturn on debugging output for the given TOKEN(s)\n"
 	   "\t\t\t  (try ALL for extremely verbose output)\n"
 	   "\t\t\t  Don't put space(s) between -D and TOKEN(s).\n"
            "  -f\t\t\tdo not fork from the shell\n",
