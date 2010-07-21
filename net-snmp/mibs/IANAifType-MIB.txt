@@ -5,7 +5,7 @@
        TEXTUAL-CONVENTION          FROM SNMPv2-TC;
 
    ianaifType MODULE-IDENTITY
-       LAST-UPDATED "200905060000Z"  -- May 06, 2009
+       LAST-UPDATED "201002110000Z"  -- February 11, 2010
        ORGANIZATION "IANA"
        CONTACT-INFO "        Internet Assigned Numbers Authority
 
@@ -18,6 +18,12 @@
        DESCRIPTION  "This MIB module defines the IANAifType Textual
                      Convention, and thus the enumerated values of
                      the ifType object defined in MIB-II's ifTable."
+
+       REVISION     "201002110000Z"  -- February 11, 2010
+       DESCRIPTION  "Registration of new IANAifType 254."
+
+       REVISION     "201002080000Z"  -- February 08, 2010
+       DESCRIPTION  "Registration of new IANAifTypes 252 and 253."
 
        REVISION     "200905060000Z"  -- May 06, 2009
        DESCRIPTION  "Registration of new IANAifType 251."
@@ -488,7 +494,7 @@
                    pon155 (207), -- FSAN 155Mb Symetrical PON interface
                    pon622 (208), -- FSAN622Mb Symetrical PON interface
                    bridge (209), -- Transparent bridge interface
-                   linegroup (210), -- Interface common to multiple lines		   
+                   linegroup (210), -- Interface common to multiple lines   
                    voiceEMFGD (211), -- voice E&M Feature Group D
                    voiceFGDEANA (212), -- voice FGD Exchange Access North American
                    voiceDID (213), -- voice Direct Inward Dialing
@@ -498,7 +504,7 @@
                    pdnEtherLoop1 (217), -- Paradyne EtherLoop 1
                    pdnEtherLoop2 (218), -- Paradyne EtherLoop 2
                    opticalChannelGroup (219), -- Optical Channel Group
-                   homepna (220), -- HomePNA ITU-T G.989				   
+                   homepna (220), -- HomePNA ITU-T G.989
                    gfp (221), -- Generic Framing Procedure (GFP)
                    ciscoISLvlan (222), -- Layer 2 Virtual LAN using Cisco ISL
                    actelisMetaLOOP (223), -- Acteleis proprietary MetaLOOP High Speed Link 
@@ -532,7 +538,10 @@
                    pip (248), -- Provider Instance Port on a bridge per IEEE 802.1ah PBB
                    aluELP (249), -- Alcatel-Lucent Ethernet Link Protection
                    gpon (250), -- Gigabit-capable passive optical networks (G-PON) as per ITU-T G.948
-                   vdsl2 (251) -- Very high speed digital subscriber line Version 2 (as per ITU-T Recommendation G.993.2)
+                   vdsl2 (251), -- Very high speed digital subscriber line Version 2 (as per ITU-T Recommendation G.993.2)
+                   capwapDot11Profile (252), -- WLAN Profile Interface
+                   capwapDot11Bss (253), -- WLAN BSS Interface
+                   capwapWtpVirtualRadio (254) -- WTP Virtual Radio Interface
                    }
 
 IANAtunnelType ::= TEXTUAL-CONVENTION
