@@ -762,8 +762,10 @@ netsnmp_enable_filelog(netsnmp_log_handler *logh, int dont_zero_log)
 
     if (!logh->magic) {
         logfile = fopen(logh->token, dont_zero_log ? "a" : "w");
-        if (!logfile)
+        if (!logfile) {
+	    snmp_log_perror(logh->token);
             return;
+	}
         logh->magic = (void*)logfile;
         netsnmp_set_line_buffering(logfile);
     }
