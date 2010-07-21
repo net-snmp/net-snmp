@@ -13,7 +13,7 @@ extern          "C" {
                                           snmp_secmod_outgoing_params *);
     int             ksm_process_in_msg(struct snmp_secmod_incoming_params
                                        *);
-    void            init_usm(void);
+    void            init_ksm(void);
 
     /*
      * This is the "key usage" that is used by the new crypto API.  It's used
