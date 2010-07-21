@@ -53,7 +53,7 @@ int openssl_local_index;
 /* this is called during negotiationn */
 int verify_callback(int ok, X509_STORE_CTX *ctx) {
     int err, depth;
-    char buf[1024], *fingerprint;;
+    char buf[1024], *fingerprint;
     X509 *thecert;
     netsnmp_cert *cert;
     _netsnmp_verify_info *verify_info;
