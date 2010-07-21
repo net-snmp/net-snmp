@@ -460,6 +460,7 @@ netsnmp_dtlsudp_recv(netsnmp_transport *t, void *buf, int size,
     struct sockaddr *from;
     netsnmp_tmStateReference *tmStateRef = NULL;
     _netsnmpTLSBaseData *tlsdata;
+    bio_cache *cachep;
 
     DEBUGTRACETOK("dtlsudp");
 
@@ -558,7 +559,7 @@ netsnmp_dtlsudp_recv(netsnmp_transport *t, void *buf, int size,
     /* if we don't have a cachep for this connection then
        we're receiving something new and are the server
        side */
-    bio_cache *cachep =
+    cachep =
         find_or_create_bio_cache(t, &addr_pair->remote_addr, WE_ARE_SERVER);
     if (NULL == cachep) {
         snmp_increment_statistic(STAT_TLSTM_SNMPTLSTMSESSIONACCEPTS);
