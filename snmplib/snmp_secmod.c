@@ -30,7 +30,7 @@
 #include <net-snmp/library/snmp_enum.h>
 #include <net-snmp/library/callback.h>
 #include <net-snmp/library/snmp_secmod.h>
-#include <net-snmp/library/snmpusm.h>
+#include <net-snmp/library/snmpv3-security-includes.h>
 
 static struct snmp_secmod_list *registered_services = NULL;
 
