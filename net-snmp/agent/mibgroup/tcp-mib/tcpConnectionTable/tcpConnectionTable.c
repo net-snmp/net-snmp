@@ -404,7 +404,7 @@ tcpConnectionTable_indexes_set_tbl_idx(tcpConnectionTable_mib_index *
  * @internal
  * set row context indexes
  *
- * @param reqreq_ctx the row context that needs updated indexes
+ * @param rowreq_ctx the row context that needs updated indexes
  *
  * @retval MFD_SUCCESS     : success.
  * @retval MFD_ERROR       : other error.
