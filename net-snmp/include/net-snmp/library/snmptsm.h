@@ -13,7 +13,7 @@ extern          "C" {
                                           snmp_secmod_outgoing_params *);
     int             tsm_process_in_msg(struct snmp_secmod_incoming_params
                                        *);
-    void            init_usm(void);
+    void            init_tsm(void);
 
     #define NETSNMP_TM_SAME_SECURITY_NOT_REQUIRED 0
     #define NETSNMP_TM_USE_SAME_SECURITY          1
