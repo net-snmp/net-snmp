@@ -497,3 +497,176 @@ diff -ru /usr/local/share/snmp/rfc.orig/SMUX-MIB.txt /usr/local/share/snmp/rfc/S
          ACCESS  read-only
          STATUS  mandatory
          DESCRIPTION
+--- /usr/local/share/snmp/rfc.orig/IANA-IPPM-METRICS-REGISTRY-MIB.txt	2010-06-23 06:41:47.000000000 +0200
++++ /usr/local/share/snmp/rfc/IANA-IPPM-METRICS-REGISTRY-MIB.txt	2010-07-21 17:49:23.000000000 +0200
+@@ -490,7 +490,7 @@
+        DESCRIPTION
+           "Type-P-Spatial-One-way-Delay-Vector"
+        REFERENCE
+-          "Reference "RFC5644, section 5.1."
++          "Reference RFC5644, section 5.1."
+        ::= { ianaIppmMetrics 52 }
+ 
+    ietfSpatialPacketLossVector OBJECT-IDENTITY
+@@ -498,7 +498,7 @@
+        DESCRIPTION
+           "Type-P-Spatial-Packet-Loss-Vector"
+        REFERENCE
+-          "Reference "RFC5644, section 5.2."
++          "Reference RFC5644, section 5.2."
+        ::= { ianaIppmMetrics 53 } 
+ 
+    ietfSpatialOneWayIpdvVector OBJECT-IDENTITY
+@@ -506,7 +506,7 @@
+        DESCRIPTION
+           "Type-P-Spatial-One-way-ipdv-Vector"
+        REFERENCE
+-          "Reference "RFC5644, section 5.3."
++          "Reference RFC5644, section 5.3."
+        ::= { ianaIppmMetrics 54 }
+ 
+    ietfSegmentOneWayDelayStream OBJECT-IDENTITY
+@@ -514,7 +514,7 @@
+        DESCRIPTION
+           "Type-P-Segment-One-way-Delay-Stream"
+        REFERENCE
+-          "Reference "RFC5644, section 6.1."
++          "Reference RFC5644, section 6.1."
+        ::= { ianaIppmMetrics 55 } 
+ 
+    ietfSegmentPacketLossStream OBJECT-IDENTITY
+@@ -522,7 +522,7 @@
+        DESCRIPTION
+           "Type-P-Segment-Packet-Loss-Stream"
+        REFERENCE
+-          "Reference "RFC5644, section 6.2."
++          "Reference RFC5644, section 6.2."
+        ::= { ianaIppmMetrics 56 }
+ 
+    ietfSegmentIpdvPrevStream OBJECT-IDENTITY
+@@ -530,7 +530,7 @@
+        DESCRIPTION
+           "Type-P-Segment-ipdv-prev-Stream"
+        REFERENCE
+-          "Reference "RFC5644, section 6.3."
++          "Reference RFC5644, section 6.3."
+        ::= { ianaIppmMetrics 57 } 
+ 
+    ietfSegmentIpdvMinStream OBJECT-IDENTITY
+@@ -538,7 +538,7 @@
+        DESCRIPTION
+           "Type-P-Segment-ipdv-min-Stream"
+        REFERENCE
+-          "Reference "RFC5644, section 6.4."
++          "Reference RFC5644, section 6.4."
+        ::= { ianaIppmMetrics 58 }
+ 
+    -- One-to-group metrics
+@@ -548,7 +548,7 @@
+        DESCRIPTION
+           "Type-P-One-to-group-Delay-Vector"
+        REFERENCE
+-          "Reference "RFC5644, section 7.1."
++          "Reference RFC5644, section 7.1."
+        ::= { ianaIppmMetrics 59 }
+ 
+    ietfOneToGroupPacketLossVector OBJECT-IDENTITY
+@@ -556,7 +556,7 @@
+        DESCRIPTION
+           "Type-P-One-to-group-Packet-Loss-Vector"
+        REFERENCE
+-          "Reference "RFC5644, section 7.2."
++          "Reference RFC5644, section 7.2."
+        ::= { ianaIppmMetrics 60 } 
+ 
+    ietfOneToGroupIpdvVector OBJECT-IDENTITY
+@@ -564,7 +564,7 @@
+        DESCRIPTION
+           "Type-P-One-to-group-ipdv-Vector"
+        REFERENCE
+-          "Reference "RFC5644, section 7.3."
++          "Reference RFC5644, section 7.3."
+        ::= { ianaIppmMetrics 61 } 
+ 
+    -- One to group statistics
+@@ -576,7 +576,7 @@
+        DESCRIPTION
+           "Type-P-One-to-group-Receiver-n-Mean-Delay"
+        REFERENCE
+-          "Reference "RFC5644, section 8.3.1."
++          "Reference RFC5644, section 8.3.1."
+        ::= { ianaIppmMetrics 62 } 
+ 
+    ietfOneToGroupMeanDelay OBJECT-IDENTITY
+@@ -584,7 +584,7 @@
+        DESCRIPTION
+           "Type-P-One-to-group-Mean-Delay"
+        REFERENCE
+-       "Reference "RFC5644, section 8.3.2."
++       "Reference RFC5644, section 8.3.2."
+        ::= { ianaIppmMetrics 63 } 
+ 
+    ietfOneToGroupRangeMeanDelay OBJECT-IDENTITY
+@@ -592,7 +592,7 @@
+        DESCRIPTION
+           "Type-P-One-to-group-Range-Mean-Delay"
+        REFERENCE
+-          "Reference "RFC5644, section 8.3.3."
++          "Reference RFC5644, section 8.3.3."
+        ::= { ianaIppmMetrics 64 } 
+ 
+    ietfOneToGroupMaxMeanDelay OBJECT-IDENTITY
+@@ -600,7 +600,7 @@
+        DESCRIPTION
+           "Type-P-One-to-group-Max-Mean-Delay"
+        REFERENCE
+-          "Reference "RFC5644, section 8.3.4."
++          "Reference RFC5644, section 8.3.4."
+        ::= { ianaIppmMetrics 65 } 
+ 
+    ietfOneToGroupReceiverNLossRatio OBJECT-IDENTITY
+@@ -608,7 +608,7 @@
+        DESCRIPTION
+           "Type-P-One-to-group-Receiver-n-Loss-Ratio"
+        REFERENCE
+-          "Reference "RFC5644, section 8.4.1."
++          "Reference RFC5644, section 8.4.1."
+        ::= { ianaIppmMetrics 66 }
+    --
+ 
+@@ -617,7 +617,7 @@
+        DESCRIPTION
+           "Type-P-One-to-group-Receiver-n-Comp-Loss-Ratio"
+        REFERENCE
+-          "Reference "RFC5644, section 8.4.2."
++          "Reference RFC5644, section 8.4.2."
+        ::= { ianaIppmMetrics 67 } 
+ 
+    ietfOneToGroupLossRatio OBJECT-IDENTITY
+@@ -625,7 +625,7 @@
+        DESCRIPTION
+           "Type-P-One-to-group-Loss-Ratio"
+        REFERENCE
+-          "Reference "RFC5644, section 8.4.3."
++          "Reference RFC5644, section 8.4.3."
+        ::= { ianaIppmMetrics 68 } 
+    --
+ 
+@@ -634,7 +634,7 @@
+        DESCRIPTION
+           "Type-P-One-to-group-Range-Loss-Ratio"
+        REFERENCE
+-          "Reference "RFC5644, section 8.4.4."
++          "Reference RFC5644, section 8.4.4."
+        ::= { ianaIppmMetrics 69 } 
+ 
+    ietfOneToGroupRangeDelayVariation OBJECT-IDENTITY
+@@ -642,7 +642,7 @@
+        DESCRIPTION
+           "Type-P-One-to-group-Range-Delay-Variation"
+        REFERENCE
+-          "Reference "RFC5644, section 8.5.1."
++          "Reference RFC5644, section 8.5.1."
+        ::= { ianaIppmMetrics 70 } 
+ 
+    --
