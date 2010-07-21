@@ -158,7 +158,7 @@ init_diskio(void)
          var_diskio, 1, {5}},
         {DISKIO_WRITES, ASN_COUNTER, NETSNMP_OLDAPI_RONLY,
          var_diskio, 1, {6}},
-#if defined(freebsd4) || defined(freebsd5)
+#if defined(freebsd4) || defined(freebsd5) || defined(linux)
         {DISKIO_LA1, ASN_INTEGER, NETSNMP_OLDAPI_RONLY,
          var_diskio, 1, {9}},
         {DISKIO_LA5, ASN_INTEGER, NETSNMP_OLDAPI_RONLY,
