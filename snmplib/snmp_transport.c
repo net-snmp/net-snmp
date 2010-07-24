@@ -359,12 +359,16 @@ netsnmp_tdomain_transport_full(const char *application,
     const char         *addr = NULL;
     const char * const *spec = NULL;
     int                 any_found = 0;
+    extern const char *curfilename;		/* from read_config.c */
+    char         *prev_curfilename;
 
     DEBUGMSGTL(("tdomain",
                 "tdomain_transport_full(\"%s\", \"%s\", %d, \"%s\", \"%s\")\n",
                 application, str ? str : "[NIL]", local,
                 default_domain ? default_domain : "[NIL]",
                 default_target ? default_target : "[NIL]"));
+
+    prev_curfilename = curfilename;
 
     /* First try - assume that there is a domain in str (domain:target) */
 
@@ -441,8 +445,10 @@ netsnmp_tdomain_transport_full(const char *application,
                 t = match->f_create_from_tstring(addr, local);
             else
                 t = match->f_create_from_tstring_new(addr, local, addr2);
-            if (t)
+            if (t) {
+                curfilename = prev_curfilename;
                 return t;
+            }
         }
         addr = str;
         if (spec && *spec)
@@ -452,6 +458,7 @@ netsnmp_tdomain_transport_full(const char *application,
     }
     if (!any_found)
         snmp_log(LOG_ERR, "No support for any checked transport domain\n");
+    curfilename = prev_curfilename;
     return NULL;
 }
 
