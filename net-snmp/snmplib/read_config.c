@@ -800,12 +800,15 @@ read_config(const char *filename,
             } else if ((token[0] == 'i') && (strcmp(token,"include")==0)) {
                 struct config_files ctmp;
                 int len = strlen(cptr);
+                char *prev_curfilename;
                 ctmp.fileHeader = cptr;
                 ctmp.start = line_handler;
                 ctmp.next = NULL;
                 if ((len > 5) && (strcmp(&cptr[len-5],".conf") == 0))
                    cptr[len-5] = 0; /* chop off .conf */
+                prev_curfilename = curfilename;
                 read_config_files_of_type(when,&ctmp);
+                curfilename = prev_curfilename;
                 if ((len > 5) && (cptr[len-5] == 0))
                    cptr[len-5] = '.'; /* restore .conf */
                 continue;
