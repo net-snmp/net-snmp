@@ -61,19 +61,14 @@ if ( $#ARGV != 0) {
 
 my $targetbridge = $ARGV[0];
 
-print STDERR "registering at ".$regoid."\n";
-
 # are we running embedded ? If not, register as subagent
 if (!$agent) {
     $agent = new NetSNMP::agent('Name' => 'dot1qbridge',
 				'AgentX' => 1);
     $subagent = 1;
-    print STDERR "running as a subagent.\n";
 }
 
 $agent->register("dot1qbridge", ".1.3.6.1.2.1.17", \&request_handler) or die "registration of handler failed !\n";
-
-print STDERR "dot1qbridge agent started.\n";
 
 if ($subagent) {
 	# register handler for graceful shutdown
@@ -125,8 +120,6 @@ sub mode_get{
 	$SNMP::use_numeric = 1;
 	my $noid=SNMP::translateObj($oid);
 
-	print STDERR "processing get for $oid ($noid).\n";
-
 	reply($request, $noid) if (exists $oid_value{$noid});
 }
 
@@ -135,8 +128,6 @@ sub mode_get_next{
 	my $oid=$request->getOID();
 	$SNMP::use_numeric = 1;
 	my $noid=SNMP::translateObj($oid);
-
-	print STDERR "processing get_next for $oid ($noid).\n";
 
 	my $nextoid = $oid_next{$noid};
 	my $type = $oid_type{$nextoid};
@@ -154,8 +145,6 @@ sub reply{
 
 	my $type=$oid_type{$oid};
 	my $value=$oid_value{$oid};
-
-	print STDERR "REPLY: $oid -> $value ($type)\n";
 
 	$request->setOID(new NetSNMP::OID($oid));
 	$request->setValue($type, $value);
@@ -210,55 +199,35 @@ sub populate_mib {
 	%vlans=();
 	%tagged=();
 
-	print STDERR "populating MIB for bridge $bridge\n";
-
 	# first populated oid
 	$oid_next{".1.3.6.1.2.1.17"}=".1.3.6.1.2.1.17.1.1";
 
 	createbaseinfo($bridge);
 
-	print STDERR "identifying interfaces and forward db.\n";
-
 	readindexes($bridge);
 	readforwards($bridge);
 	readvlans($bridge);
 
-	print STDERR "determining baseports.\n";
-
 	createports($bridge);
-
-	print STDERR "determining dot1dStp properties.\n";
 
 	stpproperties($bridge);
 
-	print STDERR "determining dot1dStpPort properties.\n";
-
 	stpportproperties($bridge);
 
-	print STDERR "populating dot1dTp properties.\n";
-
 	dot1dTpproperties();
-
-	print STDERR "determining MAC addresses.\n";
 
 	my $prevoid = $oid;
 	my $curroid = createmacs($bridge);
 	$oid_next{$prevoid} = $curroid;
 
-	print STDERR "determining dot1dTpPort properties.\n";
 	portproperties($bridge);
 
 
-	print STDERR "populating dot1q MIB.\n";
 	dot1qbase($bridge);
 
-	print STDERR "populating dot1q fdb MIB.\n";
 	dot1qfdb($bridge);
 
-	print STDERR "populating current vlans.\n";
 	dot1qcurrentvlans($bridge);
-
-	print STDERR "finished populating MIB.\n";
 
 	return 0;
 }
@@ -273,7 +242,6 @@ sub findbridges()
 		next if $br eq ".";
 		next if $br eq "..";
 		next unless -d $netdir.$br."/bridge";
-		print STDERR "  ".$br."\n";
 		push @bridges, $br;
 	}
 
@@ -285,14 +253,11 @@ sub findbridges()
 sub createbaseinfo()
 {
 	my $bridge = shift;
-	print STDERR "determining bridge address.\n";
 
 	$oid=".1.3.6.1.2.1.17.1.1";
 	$oid_value{$oid}=mac2hex(readfile($netdir.$bridge."/address", 0));
 	$oid_type{$oid}=ASN_OCTET_STR;
 	$oid_next{$oid}=".1.3.6.1.2.1.17.1.2";
-
-	print STDERR "determining number of ports.\n";
 
 	opendir(DIR, $netdir.$bridge."/brif/") or die "Could not open ".$netdir.$bridge."brif !\n";
 
@@ -301,7 +266,6 @@ sub createbaseinfo()
 		next if $entry eq "..";
 		# only count non-vlan interfaces
 		next if $entry =~ /\.[0-9]*/;
-		print STDERR "  found interface $bridge - $entry\n";
 		$ports++;
 	}
 
@@ -311,8 +275,6 @@ sub createbaseinfo()
 	$oid_value{$oid}=$ports;
 	$oid_type{$oid}=ASN_INTEGER;
 	$oid_next{$oid}=".1.3.6.1.2.1.17.1.3";
-
-	print STDERR "determining base type.\n";
 
 	$oid=".1.3.6.1.2.1.17.1.3";
 	$oid_value{$oid}="2";	# transparent only
