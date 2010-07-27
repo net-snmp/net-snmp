@@ -108,6 +108,12 @@
 #ifndef MNTTYPE_VFAT
 #define MNTTYPE_VFAT     "vfat"
 #endif
+#ifndef MNTTYPE_GFS
+#define MNTTYPE_GFS      "gfs"
+#endif
+#ifndef MNTTYPE_GFS2
+#define MNTTYPE_GFS2     "gfs2"
+#endif
 
 /*
  *  File systems to monitor, but not covered by HR-TYPES enumerations
