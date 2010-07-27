@@ -331,7 +331,7 @@ $(srcdir)/configure: $(configure_ac) aclocal.m4
 	fi
 
 gendir=dist/generation-scripts
-generation-scripts: generation-scripts-dirs $(gendir)/gen-transport-headers
+generation-scripts: generation-scripts-dirs $(gendir)/gen-transport-headers $(gendir)/gen-security-headers
 
 $(gendir)/gen-variables: $(gendir)/gen-variables.in
 	./config.status
@@ -345,6 +345,11 @@ generation-scripts-dirs:
 	fi
 
 $(gendir)/gen-transport-headers: $(gendir)/gen-transport-headers.in $(gendir)/gen-variables
+	rm -f $@
+	autoconf -o $@ $<
+	chmod a+x $@
+
+$(gendir)/gen-security-headers: $(gendir)/gen-security-headers.in $(gendir)/gen-variables
 	rm -f $@
 	autoconf -o $@ $<
 	chmod a+x $@
