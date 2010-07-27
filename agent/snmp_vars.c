@@ -363,6 +363,9 @@ shutdown_agent(void) {
     clear_callback();
     clear_user_list();
     netsnmp_addrcache_destroy();
+#ifdef NETSNMP_CAN_USE_NLIST
+    free_kmem();
+#endif
 
     done_init_agent = 0;
 }

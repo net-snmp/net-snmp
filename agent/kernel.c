@@ -1,7 +1,19 @@
-
-/*
- *  13 Jun 91  wsak (wk0x@andrew) added mips support
+/***********************************************************************
+   Net-SNMP - Simple Network Management Protocol agent library.
+ ***********************************************************************/
+/** @file kernel.c
+ *     Net-SNMP Kernel Data Access Library.
+ *     Provides access to kernel virtual memory for systems that
+ *     support it.
+ * @author   See README file for a list of contributors
  */
+/* Copyrights:
+ *     Copyright holders are listed in README file.
+ *     Redistribution and use in source and binary forms, with or
+ *     without modification, are permitted. License terms are specified
+ *     in COPYING file distributed with the Net-SNMP package.
+ */
+/***********************************************************************/
 
 #include <net-snmp/net-snmp-config.h>
 
@@ -40,8 +52,10 @@
 
 
 #if HAVE_KVM_H
-kvm_t          *kd;
+kvm_t *kd = NULL;
 
+/** Initialize the kernel memory support.
+ */
 void
 init_kmem(const char *file)
 {
@@ -64,18 +78,18 @@ init_kmem(const char *file)
 #endif                          /* HAVE_KVM_OPENFILES */
 }
 
-
-/*
- *  klookup:
+/** Reads kernel memory.
+ *  Seeks to the specified location in kmem, then
+ *  does a read of given amount ob bytes into target buffer.
  *
- *  It seeks to the location  off  in kmem
- *  It does a read into  target  of  siz  bytes.
+ * @param off The location to seek.
  *
- *  Return 0 on failure and 1 on sucess.
+ * @param target The target buffer to read into.
  *
+ * @param siz Number of bytes to read.
+ *
+ * @return gives 1 on success and 0 on failure.
  */
-
-
 int
 klookup(unsigned long off, char *target, int siz)
 {
@@ -97,12 +111,26 @@ klookup(unsigned long off, char *target, int siz)
     return 1;
 }
 
+/** Closes the kernel memory support.
+ */
+void
+free_kmem(void)
+{
+    if (kd != NULL)
+    {
+      kvm_close(kd);
+      kd = NULL;
+    }
+}
+
 #else                           /* HAVE_KVM_H */
 
 static off_t    klseek(off_t);
 static int      klread(char *, int);
-int             swap, mem, kmem;
+int             swap=0, mem=0, kmem=0;
 
+/** Initialize the kernel memory support.
+ */
 void
 init_kmem(const char *file)
 {
@@ -131,19 +159,17 @@ init_kmem(const char *file)
 #endif
 }
 
-
-/*
+/** @private
  *  Seek into the kernel for a value.
  */
-static          off_t
+static off_t
 klseek(off_t base)
 {
     return (lseek(kmem, (off_t) base, SEEK_SET));
 }
 
-
-/*
- *  Read from the kernel 
+/** @private
+ *  Read from the kernel.
  */
 static int
 klread(char *buf, int buflen)
@@ -151,18 +177,18 @@ klread(char *buf, int buflen)
     return (read(kmem, buf, buflen));
 }
 
-
-/*
- *  klookup:
+/** Reads kernel memory.
+ *  Seeks to the specified location in kmem, then
+ *  does a read of given amount ob bytes into target buffer.
  *
- *  It seeks to the location  off  in kmem
- *  It does a read into  target  of  siz  bytes.
+ * @param off The location to seek.
  *
- *  Return 0 on failure and 1 on sucess.
+ * @param target The target buffer to read into.
  *
+ * @param siz Number of bytes to read.
+ *
+ * @return gives 1 on success and 0 on failure.
  */
-
-
 int
 klookup(unsigned long off, char *target, int siz)
 {
@@ -195,6 +221,25 @@ klookup(unsigned long off, char *target, int siz)
     }
     DEBUGMSGTL(("verbose:kernel:klookup", "klookup(%lx, %p, %d) succeeded", off, target, siz));
     return (1);
+}
+
+/** Closes the kernel memory support.
+ */
+void
+free_kmem(void)
+{
+    if (swap) {
+      close(swap);
+      swap = 0;
+    }
+    if (mem) {
+      close(mem);
+      mem = 0;
+    }
+    if (kmem) {
+      close(kmem);
+      kmem = 0;
+    }
 }
 
 #endif                          /* HAVE_KVM_H */
