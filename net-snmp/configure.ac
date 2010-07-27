@@ -74,6 +74,9 @@ AC_SUBST(OTHERAGENTLIBLOBJS)
 
 AC_SUBST(DLLIBS)
 
+AC_SUBST(PARTIALTARGETFLAGS)
+AC_SUBST(ac_cv_NETSNMP_SYSTEM_INCLUDE_FILE)
+
 AC_CONFIG_FILES([Makefile:Makefile.top:Makefile.in:Makefile.rules])
 AC_CONFIG_FILES([snmplib/Makefile:Makefile.top:snmplib/Makefile.in:Makefile.rules:snmplib/Makefile.depend])
 AC_CONFIG_FILES([apps/Makefile:Makefile.top:apps/Makefile.in:Makefile.rules:apps/Makefile.depend])
@@ -89,6 +92,7 @@ AC_CONFIG_FILES([net-snmp-config:net-snmp-config.in],
 		[chmod +x net-snmp-config])
 AC_CONFIG_FILES([net-snmp-create-v3-user:net-snmp-create-v3-user.in],
 		[chmod +x net-snmp-create-v3-user])
+AC_CONFIG_FILES([dist/generation-scripts/gen-variables:dist/generation-scripts/gen-variables.in])
 
 AC_CONFIG_COMMANDS([default], echo timestamp > stamp-h)
 
