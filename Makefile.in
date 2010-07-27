@@ -330,6 +330,25 @@ $(srcdir)/configure: $(configure_ac) aclocal.m4
 	    echo "WARNING: not running autoconf"; \
 	fi
 
+gendir=dist/generation-scripts
+generation-scripts: generation-scripts-dirs $(gendir)/gen-transport-headers
+
+$(gendir)/gen-variables: $(gendir)/gen-variables.in
+	./config.status
+
+generation-scripts-dirs:
+	@if [ ! -d dist ] ; then \
+	    mkdir dist ;        \
+	fi
+	@if [ ! -d dist/generation-scripts ] ; then \
+	    mkdir dist/generation-scripts ;        \
+	fi
+
+$(gendir)/gen-transport-headers: $(gendir)/gen-transport-headers.in $(gendir)/gen-variables
+	rm -f $@
+	autoconf -o $@ $<
+	chmod a+x $@
+
 config.status: configure
 	@if test "x$(NOAUTODEPS)" = "x"; then \
 	    echo "running config.status because $? changed"; \
