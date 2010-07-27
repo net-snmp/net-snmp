@@ -131,6 +131,8 @@ _fsys_type( char *typename )
      */    
     else if ( !strcmp(typename, MNTTYPE_MVFS) ||
               !strcmp(typename, MNTTYPE_TMPFS) ||
+              !strcmp(typename, MNTTYPE_GFS) ||
+              !strcmp(typename, MNTTYPE_GFS2) ||
               !strcmp(typename, MNTTYPE_LOFS))
        return NETSNMP_FS_TYPE_OTHER;
 
