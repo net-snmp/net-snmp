@@ -843,7 +843,6 @@ read_config(const char *filename,
                     }
                     closedir(d);
                     curfilename = prev_curfilename;
-                    continue;
                 } else if ( strcasecmp( token, "includefile" )==0) {
                     /* TODO: handle relative paths */
                     struct config_files ctmp;
@@ -854,22 +853,20 @@ read_config(const char *filename,
                     prev_curfilename = curfilename;
                     read_config(cptr, line_handler, when);
                     curfilename = prev_curfilename;
-                    continue;
                 } else if ( strcasecmp( token, "includesearch" )==0) {
-                struct config_files ctmp;
-                int len = strlen(cptr);
-                const char *prev_curfilename;
-                ctmp.fileHeader = cptr;
-                ctmp.start = line_handler;
-                ctmp.next = NULL;
-                if ((len > 5) && (strcmp(&cptr[len-5],".conf") == 0))
-                   cptr[len-5] = 0; /* chop off .conf */
-                prev_curfilename = curfilename;
-                read_config_files_of_type(when,&ctmp);
-                curfilename = prev_curfilename;
-                if ((len > 5) && (cptr[len-5] == 0))
-                   cptr[len-5] = '.'; /* restore .conf */
-                continue;
+                    struct config_files ctmp;
+                    int len = strlen(cptr);
+                    const char *prev_curfilename;
+                    ctmp.fileHeader = cptr;
+                    ctmp.start = line_handler;
+                    ctmp.next = NULL;
+                    if ((len > 5) && (strcmp(&cptr[len-5],".conf") == 0))
+                       cptr[len-5] = 0; /* chop off .conf */
+                    prev_curfilename = curfilename;
+                    read_config_files_of_type(when,&ctmp);
+                    curfilename = prev_curfilename;
+                    if ((len > 5) && (cptr[len-5] == 0))
+                       cptr[len-5] = '.'; /* restore .conf */
                 } else {
                     if (when != PREMIB_CONFIG && 
 	                !netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID, 
