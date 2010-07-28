@@ -417,8 +417,8 @@ AC_ARG_ENABLE(mibdirs,,
 
 AC_ARG_WITH(mibs,
 [  --with-mibs="item1:item2:"    Default mib IDs to read.
-                                  (The default list is "IP-MIB:IF-MIB:
-                                  TCP-MIB:UDP-MIB:SNMPv2-MIB:RFC1213-MIB"
+                                  (The default list is
+                                  "SNMPv2-MIB:IF-MIB:IP-MIB:TCP-MIB:UDP-MIB"
                                   with the addition of any mibs used
                                   by the mib modules the agent is
                                   configured with)],
@@ -1876,7 +1876,7 @@ new_module_list="$new_with_mib_modules default_modules"
 if test "x$enable_agent" = "xno"; then
    # minimum mib module list for snmptrapd
    new_module_list="mibII/vacm_vars mibII/vacm_conf utilities/execute $new_with_mib_modules"
-   default_mibs=SNMPv2-MIB:RFC1213-MIB
+   default_mibs=SNMPv2-MIB:IF-MIB:IP-MIB:TCP-MIB:UDP-MIB
    default_mibs_install=" "
 elif test "x$mini_agent" = "xyes"; then
    # define the mini agent flag to reduce our load list from default_mibs.h
