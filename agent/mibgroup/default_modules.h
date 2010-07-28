@@ -17,7 +17,10 @@ config_require(utilities/execute)
 
 /* very few default mibs */
 config_add_mib(SNMPv2-MIB)
-config_add_mib(RFC1213-MIB)
+config_add_mib(IF-MIB)
+config_add_mib(IP-MIB)
+config_add_mib(TCP-MIB)
+config_add_mib(UDP-MIB)
 
 #else /* !NETSNMP_MINI_AGENT == the full shabang */
 
@@ -36,13 +39,12 @@ config_require(utilities)
 /* NOTE: we consider these MIBs users will likely want to load by
    default, even if they're not supporting it in the agent (ie, the
    command line tools need to load them anyway) */
-config_add_mib(IP-MIB)
+config_add_mib(SNMPv2-MIB)
 config_add_mib(IF-MIB)
+config_add_mib(IP-MIB)
 config_add_mib(TCP-MIB)
 config_add_mib(UDP-MIB)
 config_add_mib(HOST-RESOURCES-MIB)
-config_add_mib(SNMPv2-MIB)
-config_add_mib(RFC1213-MIB)
 config_add_mib(NOTIFICATION-LOG-MIB)
 config_add_mib(DISMAN-EVENT-MIB)
 config_add_mib(DISMAN-SCHEDULE-MIB)
