@@ -113,6 +113,23 @@
 #endif
 #include <errno.h>
 
+#if HAVE_DIRENT_H
+# include <dirent.h>
+# define NAMLEN(dirent) strlen((dirent)->d_name)
+#else
+# define dirent direct
+# define NAMLEN(dirent) (dirent)->d_namlen
+# if HAVE_SYS_NDIR_H
+#  include <sys/ndir.h>
+# endif
+# if HAVE_SYS_DIR_H
+#  include <sys/dir.h>
+# endif
+# if HAVE_NDIR_H
+#  include <ndir.h>
+# endif
+#endif
+
 #if HAVE_DMALLOC_H
 #include <dmalloc.h>
 #endif
@@ -797,10 +814,51 @@ read_config(const char *filename,
                      */
                     cptr = copy_nword(cptr, token, sizeof(token));
                 }
-            } else if ((token[0] == 'i') && (strcmp(token,"include")==0)) {
+            } else if ((token[0] == 'i') && (strncasecmp(token,"include", 7 )==0)) {
+                if ( strcasecmp( token, "include" )==0) {
+                    if (when != PREMIB_CONFIG && 
+	                !netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID, 
+				                NETSNMP_DS_LIB_NO_TOKEN_WARNINGS)) {
+	                netsnmp_config_warn("Ambiguous token '%s' - use includeSearch (or includeFile) instead.", token);
+                    }
+                } else if ( strcasecmp( token, "includedir" )==0) {
+                    DIR *d;
+                    struct dirent *entry;
+                    char  filename[SNMP_MAXPATH];
+                    int   len;
+                    const char *prev_curfilename;
+
+                    if ((d=opendir(cptr)) == NULL )
+                        continue;
+                    prev_curfilename = curfilename;
+                    while ((entry = readdir( d )) != NULL ) {
+                        if ( entry->d_name && entry->d_name[0] != '.') {
+                            len = NAMLEN(entry);
+                            if ((len > 5) && (strcmp(&(entry->d_name[len-5]),".conf") == 0)) {
+                                snprintf(filename, SNMP_MAXPATH, "%s/%s",
+                                         cptr, entry->d_name);
+                                read_config(filename, line_handler, when);
+                            }
+                        }
+                    }
+                    closedir(d);
+                    curfilename = prev_curfilename;
+                    continue;
+                } else if ( strcasecmp( token, "includefile" )==0) {
+                    /* TODO: handle relative paths */
+                    struct config_files ctmp;
+                    const char *prev_curfilename;
+                    ctmp.fileHeader = cptr;
+                    ctmp.start = line_handler;
+                    ctmp.next = NULL;
+                    prev_curfilename = curfilename;
+                    read_config(cptr, line_handler, when);
+                    curfilename = prev_curfilename;
+                    continue;
+                } else if ( strcasecmp( token, "includesearch" )==0) {
                 struct config_files ctmp;
                 int len = strlen(cptr);
-                char *prev_curfilename;
+                const char *prev_curfilename;
                 ctmp.fileHeader = cptr;
                 ctmp.start = line_handler;
                 ctmp.next = NULL;
@@ -811,6 +869,14 @@ read_config(const char *filename,
                 curfilename = prev_curfilename;
                 if ((len > 5) && (cptr[len-5] == 0))
                    cptr[len-5] = '.'; /* restore .conf */
+                continue;
+                } else {
+                    if (when != PREMIB_CONFIG && 
+	                !netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID, 
+				                NETSNMP_DS_LIB_NO_TOKEN_WARNINGS)) {
+	                netsnmp_config_warn("Unknown include token: %s.", token);
+	            }
+                }
                 continue;
             } else {
                 lptr = line_handler;
