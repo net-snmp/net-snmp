@@ -34,11 +34,11 @@ extern          "C" {
 
     /* Setting Values */
     NETSNMP_IMPORT
-    int             snmp_set_var_value(netsnmp_variable_list * var,
-                                       const void * value, size_t len);
-    NETSNMP_IMPORT
     int             snmp_set_var_objid(netsnmp_variable_list * var,
                                        const oid * name, size_t name_length);
+    NETSNMP_IMPORT
+    int             snmp_set_var_value(netsnmp_variable_list * var,
+                                       const void * value, size_t len);
     NETSNMP_IMPORT
     int             snmp_set_var_typed_value(netsnmp_variable_list * var,
                                        u_char type,
@@ -63,6 +63,7 @@ extern          "C" {
     NETSNMP_IMPORT
     void             print_value(const oid * objid, size_t objidlen,
                                  const netsnmp_variable_list * variable);
+    NETSNMP_IMPORT
     void            fprint_value(FILE * fp,
                                  const oid * objid, size_t objidlen,
                                  const netsnmp_variable_list * variable);
@@ -70,6 +71,8 @@ extern          "C" {
     int            snprint_value(char *buf, size_t buf_len,
                                  const oid * objid, size_t objidlen,
                                  const netsnmp_variable_list * variable);
+
+           /* See mib_api.h for {,f,sn}print_objid */
 
     /* Deletion */
     NETSNMP_IMPORT
@@ -82,13 +85,18 @@ extern          "C" {
 #endif
 
     /*
-     *  For the initial release, this will just refer to the
-     *  relevant UCD header files.
-     *    In due course, the routines relevant to this area of the
-     *  API will be identified, and listed here directly.
+     *    Having extracted the main ("public API") calls relevant
+     *  to this area of the Net-SNMP project, the next step is to
+     *  identify the related "public internal API" routines.
      *
-     *  But for the time being, this header file is a placeholder,
-     *  to allow application writers to adopt the new header file names.
+     *    In due course, these should probably be gathered
+     *  together into a companion 'library/varbind_api.h' header file.
+     *  [Or some suitable name]
+     *
+     *    But for the time being, the expectation is that the
+     *  traditional headers that provided the above definitions
+     *  will probably also cover the relevant internal API calls.
+     *  Hence they are listed here:
      */
 #include <net-snmp/library/snmp_api.h>
 #include <net-snmp/library/snmp_client.h>

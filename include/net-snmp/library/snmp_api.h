@@ -26,6 +26,7 @@
 
 #include <net-snmp/types.h>
 #include <net-snmp/varbind_api.h>
+#include <net-snmp/output_api.h>
 #include <net-snmp/pdu_api.h>
 #include <net-snmp/session_api.h>
 
@@ -114,8 +115,10 @@ typedef struct request_list {
 #endif
 #define SNMP_DEFAULT_PRIV_PROTOLEN  USM_LENGTH_OID_TRANSFORM
 
+/* Moved to output_api.h
     NETSNMP_IMPORT const char *snmp_api_errstring(int);
     NETSNMP_IMPORT void     snmp_perror(const char *);
+ */
     NETSNMP_IMPORT void     snmp_set_detail(const char *);
 
 #define SNMP_MAX_MSG_SIZE          1472 /* ethernet MTU minus IP/UDP header */
@@ -456,16 +459,19 @@ struct netsnmp_transport_s;
     int             snmp_get_do_debugging(void);
 
 
-
+/* Moved to output_api.h
     NETSNMP_IMPORT
     void            snmp_sess_error(void *, int *, int *, char **);
+ */
     NETSNMP_IMPORT
     void            netsnmp_sess_log_error(int priority,
                                            const char *prog_string,
                                            netsnmp_session * ss);
+/* Moved to output_api.h
     NETSNMP_IMPORT
     void            snmp_sess_perror(const char *prog_string,
                                      netsnmp_session * ss);
+ */
     const char *    snmp_pdu_type(int type);
 
     /*

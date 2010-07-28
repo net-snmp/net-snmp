@@ -1,11 +1,17 @@
 .TH CONFIG_API 3 "07 Mar 2002" "" "Net-SNMP"
 .UC 5
 .SH NAME
-register_config_handler, register_premib_handler
-unregister_config_handler, register_mib_handlers, read_configs,
-read_premib_configs, config_perror, config_pwarn - config_api functions
+register_config_handler, register_const_config_handler,
+register_prenetsnmp_mib_handler, unregister_config_handler,
+register_mib_handlers, unregister_all_config_handlers,
+register_app_config_handler, register_app_prenetsnmp_mib_handler,
+unregister_app_config_handler,
+read_configs, read_premib_configs,
+read_config_print_usage, config_perror, config_pwarn - config_api functions
 .SH SYNOPSIS
 .B #include <net-snmp/config_api.h>
+.br
+.SS Config Handlers
 .PP
 .B struct config_line *
 .br
@@ -21,7 +27,20 @@ read_premib_configs, config_perror, config_pwarn - config_api functions
 .PP
 .B struct config_line *
 .br
-.BI "  register_premib_handler(const char *" filePrefix ", 
+.BI "  register_const_config_handler(const char *" filePrefix ", 
+.br
+.BI "                     const char *" token ,
+.br
+.BI "                     void (*" parser ")(const char *, const char *),"
+.br
+.BI "                     void (*" releaser ")(void),"
+.br
+.BI "                     const char *" usageLine ");"
+.PP
+.PP
+.B struct config_line *
+.br
+.BI "  register_prenetsnmp_mib_handler(const char *" filePrefix ", 
 .br
 .BI "                     const char *" token ,
 .br
@@ -31,14 +50,14 @@ read_premib_configs, config_perror, config_pwarn - config_api functions
 .br
 .BI "                     const char *" usageLine ");"
 .PP
-.B "void register_mib_handlers(void);"
-.PP
 .BI "void unregister_config_handler(const char *" filePrefix ","
 .br
 .BI "                     const char *" token ");"
-.br
 .PP
-.BI "void unregister_all_config_handlers(void);"
+.\" Defined in mib.c, rather than read_config.c
+.B  "void register_mib_handlers(void);"
+.br
+.B  "void unregister_all_config_handlers(void);"
 .br
 .SS Application Handlers
 .PP
@@ -54,7 +73,7 @@ read_premib_configs, config_perror, config_pwarn - config_api functions
 .PP
 .B struct config_line *
 .br
-.BI "  register_app_premib_handler(const char *" token ,
+.BI "  register_app_prenetsnmp_mib_handler(const char *" token ,
 .br
 .BI "                     void (*" parser ")(const char *, char *),"
 .br
@@ -136,7 +155,13 @@ is the responsibility of
 .B read_configs() 
 (see below).
 .TP
-.B register_premib_handler()
+.B register_const_config_handler()
+Similar to the
+.B register_config_handler()
+function, but the parser routine is explicitly constrained
+to not modify the string being parsed.
+.TP
+.B register_prenetsnmp_mib_handler()
 Similar to the
 .B register_config_handler()
 function, but the registered handler routine will be called
@@ -162,6 +187,12 @@ Handler functions should have the following signature:
 .PP
 .RS
 .BI "void handler(const char *" token ", char *" line ");"
+.br
+or
+.br
+.BI "void handler(const char *" token ", const char *" line ");"
+br
+(if registered using \fIregister_const_config_handler\fP)
 .RE
 .PP
 The function will be called with two arguments, the first being the
@@ -195,11 +226,11 @@ unregistered individually (but \fIis\fP called as part of
 .TP
 .B register_app_config_handler()
 .TP
-.B register_app_premib_handler()
+.B register_app_prenetsnmp_mib_handler()
 .TP
 .B unregister_app_config_handler()
 These functions are analagous to 
-.BR register_config_handler() ", " register_premib_handler() " and "
+.BR register_config_handler() ", " register_prenetsnmp_mib_handler() " and "
 .B unregister_config_handler()
 but do not require the file type argument (which is filled in by the
 application).  It is intended that MIB modules written for the agent
@@ -219,9 +250,9 @@ handler registered for that configuration token is called.
 .B read_premib_configs()
 is run before the MIB files are read in, and processes those
 configuration tokens registered using
-.B register_premib_handler()
+.B register_prenetsnmp_mib_handler()
 (or
-.B register_app_premib_handler()
+.B register_app_prenetsnmp_mib_handler()
 ).
 All other entries are ignored.
 .PP
@@ -243,8 +274,9 @@ of configuration directories for appropriately named files.
 In each such directory, the library will look for files named
 \fC snmp.conf\fP,
 \fC snmp.local.conf\fP,
-\fIapp\fP.conf\fP,
-\fIapp\fP.local.conf\fP,
+\fI app\fP\fC.conf\fP,
+\fI app\fP\fC.local.conf\fP,
+.br
 (where \fIapp\fP is the appication-specific filePrefix used to
 register configuration handlers).
 It is not necessary for any or all of these files to be present
@@ -255,9 +287,10 @@ be shared (via rdist or an NFS mount) across a large number of
 machines and the second file can be used to configure local settings
 for one particular machine.
 .PP
-The default list of directories to search is
-SYSCONFDIR/snmp, followed by DATADIR/snmp, followed by LIBDIR/snmp,
-followed by $HOME/.snmp.
+The default list of directories to search is \fC SYSCONFDIR/snmp\fP,
+followed by \fC DATADIR/snmp\fP,
+followed by \fC LIBDIR/snmp\fP,
+followed by \fC $HOME/.snmp\fP.
 This list can be changed by setting the environmental variable
 .I SNMPCONFPATH
 to be a (colon separated) list of directories to search.
@@ -269,7 +302,7 @@ configuration handlers, and then invoke
 .BR init_snmp() "."
 This would call the routines listed above to register the internal library
 configuration handlers, process any configuration tokens registered with
-.B register_premib_handler(),
+.B register_prenetsnmp_mib_handler(),
 read in the textual MIB files using
 .B init_mib(),
 and finally parse the configuration file tokens registered with 

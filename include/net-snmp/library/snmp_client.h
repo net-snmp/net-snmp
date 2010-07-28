@@ -29,6 +29,7 @@ SOFTWARE.
 #include <net-snmp/types.h>
 #include <net-snmp/varbind_api.h>
 #include <net-snmp/pdu_api.h>
+#include <net-snmp/output_api.h>
 #include <net-snmp/session_api.h>
 
 #ifdef __cplusplus
@@ -79,8 +80,10 @@ extern          "C" {
     NETSNMP_IMPORT
     int             snmp_clone_var(netsnmp_variable_list *,
                                    netsnmp_variable_list *);
+/* Moved to output_api.h
     NETSNMP_IMPORT
     const char     *snmp_errstring(int);
+ */
     NETSNMP_IMPORT
     int             snmp_synch_response_cb(netsnmp_session *,
                                            netsnmp_pdu *, netsnmp_pdu **,

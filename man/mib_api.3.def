@@ -1,29 +1,32 @@
 .TH MIB_API 3 "06 Mar 2002" VVERSIONINFO "Net-SNMP"
 .UC 5
 .SH NAME
-init_mib, add_mibdir, init_mib_internals,
-shutdown_mib,
+add_mibdir, netsnmp_init_mib, shutdown_mib,
 netsnmp_read_module, read_mib, read_all_mibs,
 add_module_replacement,
-read_objid, snmp_parse_oid, get_module_node,
 snmp_set_mib_errors, snmp_set_mib_warnings, snmp_set_save_descriptions,
+read_objid, snmp_parse_oid, get_module_node,
 print_mib,
 print_objid, fprint_objid, snprint_objid,
 print_description, fprint_description, snprint_description - mib_api functions
 .SH SYNOPSIS
 .B #include <net-snmp/mib_api.h>
 .PP
-.B "void init_mib(void);
-.PP
+.SS Initialisation and Shutdown
 .BI "int add_mibdir(const char *" "dirname" );
-.br
-.B "void init_mib_internals(void);
 .PP
+.B "void netsnmp_init_mib(void);
+.\".br
+.\".BI "void init_mib(void);"  "                (deprecated)"
+.\".br
+.\".BI "void init_mib_internals(void);"  "        (deprecated)"
+.br
 .B "void shutdown_mib(void);
 .SS Reading and Parsing MIBs
-.PP
 .BI "struct tree *netsnmp_read_module(const char *" "name" );
 .br
+.\".BI "struct tree *read_module(const char *" "name" ");"  "        (deprecated)"
+.\".PP
 .BI "struct tree *read_mib(const char *" "filename" );
 .br
 .B "struct tree *read_all_mibs(void);
@@ -36,7 +39,7 @@ print_description, fprint_description, snprint_description - mib_api functions
 .PP
 .BI "void snmp_set_mib_warnings(int " level );
 .br
-.BI "void snmp_set_mib_errors(  int " level );
+.BI "void snmp_set_mib_errors(int " level );
 .br
 .BI "void snmp_set_save_descriptions(int " save ");"
 .SS Searching the MIB Tree
@@ -92,25 +95,28 @@ them available to
 .BR netsnmp_read_module .
 This function returns a count of files found in the directory, or a -1
 if there is an error.  
+It should be called \fIbefore\fP invoking \fBnetsnmp_init_mib\fP.
 .PP
-.B init_mib_internals
-sets up the internal structures, preparatory to reading in MIB
-modules.  It should be called \fIafter\fP all calls to
-.BR add_mibdir ,
-and before any calls to
-.BR netsnmp_read_module .
-.PP
-.B init_mib
-is a convenience function that configures the MIB directory search path (using
+.\".B init_mib_internals
+.\"sets up the internal structures, preparatory to reading in MIB
+.\"modules.  It should be called \fIafter\fP all calls to
+.\".BR add_mibdir ,
+.\"and before any calls to
+.\".BR netsnmp_read_module .
+.\".PP
+.B netsnmp_init_mib
+configures the MIB directory search path (using
 .B add_mibdir
-), set up the internal MIB framework (using
-.B init_mib_internals
-), and then loads the appropriate MIB modules (using
+), sets up the internal MIB framework,
+and then loads the appropriate MIB modules (using
 .BR netsnmp_read_module " and " read_mib ")."
 See the ENVIRONMENTAL VARIABLES section for details.
 .br
 It should be called before any other
-routine that manipulates or accesses the MIB tree.
+routine that manipulates or accesses the MIB tree
+(but after any additional
+.B add_mibdir
+calls).
 .PP
 .B shutdown_mib
 will clear the information that was gathered by 

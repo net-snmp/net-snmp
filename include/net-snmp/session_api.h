@@ -40,6 +40,7 @@ extern          "C" {
      */
     NETSNMP_IMPORT
     int             snmp_close(netsnmp_session *);
+    NETSNMP_IMPORT
     int             snmp_close_sessions(void);
 
 
@@ -163,14 +164,6 @@ extern          "C" {
     void            snmp_timeout(void);
 
     /*
-     * snmp_error - return error data
-     * Inputs :  address of errno, address of snmp_errno, address of string
-     * Caller must free the string returned after use.
-     */
-    NETSNMP_IMPORT
-    void            snmp_error(netsnmp_session *, int *, int *, char **);
-
-    /*
      * single session API.
      *
      * These functions perform similar actions as snmp_XX functions,
@@ -228,6 +221,7 @@ extern          "C" {
     NETSNMP_IMPORT
     int             snmp_sess_select_info(void *, int *, fd_set *,
                                           struct timeval *, int *);
+    NETSNMP_IMPORT
     int             snmp_sess_select_info2(void *, int *,
 					   netsnmp_large_fd_set *,
                                            struct timeval *, int *);
@@ -240,6 +234,7 @@ extern          "C" {
      * Similar to snmp_sess_read(), but accepts a pointer to a large file
      * descriptor set instead of a pointer to a file descriptor set.
      */
+    NETSNMP_IMPORT
     int             snmp_sess_read2(void *,
                                     netsnmp_large_fd_set *);
     NETSNMP_IMPORT
@@ -257,13 +252,18 @@ extern          "C" {
 
 
     /*
-     *  For the initial release, this will just refer to the
-     *  relevant UCD header files.
-     *    In due course, the routines relevant to this area of the
-     *  API will be identified, and listed here directly.
+     *    Having extracted the main ("public API") calls relevant
+     *  to this area of the Net-SNMP project, the next step is to
+     *  identify the related "public internal API" routines.
      *
-     *  But for the time being, this header file is a placeholder,
-     *  to allow application writers to adopt the new header file names.
+     *    In due course, these should probably be gathered
+     *  together into a companion 'library/session_api.h' header file.
+     *  [Or some suitable name]
+     *
+     *    But for the time being, the expectation is that the
+     *  traditional headers that provided the above definitions
+     *  will probably also cover the relevant internal API calls.
+     *  Hence they are listed here:
      */
 
 #include <net-snmp/library/snmp_api.h>

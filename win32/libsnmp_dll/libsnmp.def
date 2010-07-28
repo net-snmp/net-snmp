@@ -1,10 +1,117 @@
 ;       @(#)snmp.def    1.0 10/26/97 (gmarzot@baynetworks.com)
 ;       Single session API mods by M. Slifcak, Internet Security Systems, Inc.
 
-DESCRIPTION     'UCD SNMP Library'
+DESCRIPTION     'Net SNMP Library'
 ;CODE            SHARED READ EXECUTE
 ;DATA            SHARED READ WRITE
 EXPORTS
+; config_api
+	register_config_handler
+	register_const_config_handler
+	register_prenetsnmp_mib_handler
+	unregister_config_handler
+	register_mib_handlers
+	unregister_all_config_handlers
+	register_app_config_handler
+	register_app_prenetsnmp_mib_handler
+	unregister_app_config_handler
+	read_premib_configs
+	read_configs
+	read_config_print_usage
+	config_perror
+	config_pwarn
+; mib_api
+	add_mibdir
+	netsnmp_init_mib
+	init_mib
+	init_mib_internals
+	shutdown_mib
+	netsnmp_read_module
+	read_module
+	read_mib
+	read_all_mibs
+	add_module_replacement
+	snmp_set_mib_warnings
+	snmp_set_mib_errors
+	snmp_set_save_descriptions
+	read_objid
+	snmp_parse_oid
+	get_module_node
+	print_mib
+	print_objid
+	fprint_objid
+	snprint_objid
+	print_description
+	fprint_description
+	snprint_description
+; output_api
+	snmp_error
+	snmp_sess_error
+	snmp_api_errstring
+	snmp_errstring
+	snmp_perror
+	snmp_sess_perror
+	snmp_log_perror
+	snmp_log
+	snmp_vlog
+	snmp_get_do_logging
+	netsnmp_logging_restart
+	snmp_disable_log
+	shutdown_snmp_logging
+	debug_register_tokens
+	debug_is_token_registered
+	snmp_set_do_debugging
+	snmp_get_do_debugging
+	snmp_set_detail
+; pdu_api
+	snmp_pdu_create
+	snmp_clone_pdu
+	snmp_fix_pdu
+	snmp_free_pdu
+; session_api  (Trad)
+	snmp_sess_init
+	snmp_open
+	snmp_close
+	snmp_close_sessions
+	snmp_send
+	snmp_async_send
+	snmp_read
+        snmp_read2
+	snmp_synch_response
+	snmp_select_info
+        snmp_select_info2
+	snmp_timeout
+; session_api  (SSI)
+	snmp_sess_open
+	snmp_sess_pointer
+	snmp_sess_session
+	snmp_sess_send
+	snmp_sess_async_send
+	snmp_sess_select_info
+	snmp_sess_select_info2
+	snmp_sess_read
+	snmp_sess_read2
+	snmp_sess_synch_response
+	snmp_sess_timeout
+	snmp_sess_close
+; varbind_api
+	snmp_pdu_add_variable
+	snmp_varlist_add_variable
+	snmp_add_null_var
+	snmp_clone_varbind
+	snmp_set_var_objid
+	snmp_set_var_value
+	snmp_set_var_typed_value
+	snmp_set_var_typed_integer
+	print_variable
+	fprint_variable
+	snprint_variable
+	print_value
+	fprint_value
+	snprint_value
+	snmp_free_var
+	snmp_free_varbind
+; other routines
 	asn_parse_int
 	asn_build_int
 	asn_parse_unsigned_int
@@ -27,39 +134,18 @@ EXPORTS
 	mib_to_asn_type
 	MDbegin
 	MDupdate
-	print_mib
 	print_mib_tree
 	print_ascii_dump
-	read_objid
 	get_tree_head
-	netsnmp_init_mib
-	init_mib
-	init_mib_internals
-	print_variable
-	print_value
 	printI64
-	print_objid
-	fprint_objid
-	print_description
-	fprint_description
-	get_module_node
 	get_node
-	snmp_parse_oid
 	find_node
 	find_best_tree_node
 	get_wild_node
 	find_tree_node
 	clear_tree_flags
 	get_tree
-	read_module
-	netsnmp_read_module
-	read_mib
-	read_all_mibs
-	add_mibdir
 	snmp_get_token
-	snmp_set_mib_warnings
-	snmp_set_save_descriptions
-	add_module_replacement
 	print_subtree
 	print_ascii_dump_tree
 	xdump
@@ -77,40 +163,15 @@ EXPORTS
 	winsock_cleanup
 	get_myaddr
 	get_uptime
-	snmp_open
 	snmp_open_ex
-	snmp_close
-	snmp_send
-	snmp_read
-	snmp_free_pdu
-	snmp_free_var
-	snmp_select_info
-	snmp_timeout
-	snmp_set_do_debugging
-	snmp_get_do_debugging
-	snmp_get_do_logging
 	snmp_disable_stderrlog
 	snmp_enable_syslog
 	snmp_enable_stderrlog
 	snmp_enable_filelog
-	snmp_log
-	snmp_log_perror
-	snmp_perror
-	snmp_sess_perror
-	snmp_add_null_var
-	snmp_pdu_create
 	snmp_fix_pdu
-	snmp_clone_pdu
 	snmp_clone_mem
-	snmp_set_var_value
-	snmp_set_var_typed_value
-	snmp_set_var_objid
 	snmp_replace_var_types
-	snmp_api_errstring
-	snmp_errstring
-	snmp_set_detail
 	snmp_synch_setup
-	snmp_synch_response
 	snmp_duplicate_objid
 	snmp_get_next_sessid
 	snmp_get_next_transid
@@ -133,24 +194,10 @@ EXPORTS
 	get_tc_description
 	setenv
 	find_module
-	snmp_async_send
-	snmp_error
-	snmp_sess_init
-	snmp_sess_open
-	snmp_sess_session
-	snmp_sess_send
-	snmp_sess_async_send
-	snmp_sess_select_info
-	snmp_sess_read
-	snmp_sess_timeout
-	snmp_sess_close
-	snmp_sess_error
-	snmp_sess_synch_response
 	snmp_mib_toggle_options
 	snmp_mib_toggle_options_usage
 	read_config_read_data
 	read_config_store_data
-	read_config_print_usage
 	read_config_with_type
 	read_config_store
 	read_config_read_octet_string
@@ -160,10 +207,7 @@ EXPORTS
 	free_config
 	skip_white
 	skip_not_white
-	register_app_config_handler
-	unregister_app_config_handler
 	read_app_config_store
-	unregister_config_handler
 	snmp_set_do_debugging
 	snmp_get_do_debugging
 	debug_indent
@@ -171,14 +215,12 @@ EXPORTS
         debug_indent_get
         debug_config_register_tokens
         debug_config_turn_on_debugging
-	debug_is_token_registered
 	debugmsg
 	debugmsg_hex
 	debugmsg_hextli
 	debugmsgtoken
 	debugmsg_var
 	debugmsg_oidrange
-	debug_register_tokens
 	generate_Ku
 	uptime_string
 	memdup
@@ -201,8 +243,6 @@ EXPORTS
 	netsnmp_ds_get_int
 	netsnmp_ds_set_string
 	netsnmp_ds_get_string
-	snmp_pdu_add_variable
-	snmp_varlist_add_variable
 	encode_keychange
 	decode_keychange
 	generate_kul
@@ -235,7 +275,6 @@ EXPORTS
 	usm_create_user
 	usm_remove_user
 	usm_set_user_password
-	read_premib_configs
 	init_snmpv3
 	snmpv3_local_snmpEngineTime
 	snmpv3_local_snmpEngineBoots
@@ -243,11 +282,7 @@ EXPORTS
 	snmpv3_generate_engineID
 	get_default_authtype
 	get_default_privtype
-	register_config_handler
-	read_configs
 	debugmsg_oid
-	config_perror
-	config_pwarn
 	copy_word
 	copy_nword
 	calculate_time_diff
@@ -279,8 +314,6 @@ EXPORTS
 	vacm_scanViewNext
 	vacm_checkSubtree
 	snmp_synch_response_cb
-	snmp_clone_varbind
-	snmp_free_varbind
 	snmp_get_dump_packet
 	snmp_get_quick_print
 	snmp_get_random_access
@@ -300,7 +333,6 @@ EXPORTS
 	atime_setMarker
 	atime_ready
 	snmp_strcat
-	fprint_variable
 	sprint_realloc_objid
 	sprint_realloc_asciistring
 	sprint_realloc_variable
@@ -314,12 +346,10 @@ EXPORTS
       snmpv3_options
       netsnmp_get_version
       snmp_sess_transport
-      snmp_sess_pointer
       snmp_decimal_to_binary
 	snmp_alarm_register
 	snmp_alarm_unregister
       date_n_time
-	snmp_disable_log
 	snmp_enable_syslog_ident
 	netsnmp_sess_log_error
 	snmp_add
@@ -373,9 +403,6 @@ EXPORTS
 	usmDESPrivProtocol      DATA
 	usmAESPrivProtocol      DATA
 	snprint_bitstring
-	snprint_value
-	snprint_objid
-	snprint_variable
 	snmp_synch_reset
 	snmp_log_options
 	snmp_log_syslogname
@@ -427,7 +454,6 @@ EXPORTS
         find_varbind_in_list
         netsnmp_dispatch_external_events
         netsnmp_external_event_info
-        netsnmp_logging_restart
         skip_token
         parse_secLevel_conf
         netsnmp_query_get_default_session
@@ -461,16 +487,13 @@ EXPORTS
         netsnmp_mktemp
         netsnmp_str_to_uid
         netsnmp_check_vb_truthvalue
-        snmp_set_var_typed_integer
         netsnmp_large_fd_set_cleanup
         netsnmp_large_fd_set_init
         netsnmp_large_fd_is_set
         netsnmp_large_fd_setfd
         netsnmp_large_fd_clr
-        snmp_read2
         netsnmp_dispatch_external_events2
         netsnmp_external_event_info2
-        snmp_select_info2
         sprint_realloc_hexstring
         netsnmp_parse_args
         netsnmp_set_line_buffering
