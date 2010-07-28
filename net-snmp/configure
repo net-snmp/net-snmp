@@ -1100,8 +1100,8 @@ Compiler Options:
   --with-mibdirs="dir1:dir2:"   Default directories to look for mibs.
                                   (Default: \$HOME/.snmp/mibs:DATADIR/snmp/mibs)
   --with-mibs="item1:item2:"    Default mib IDs to read.
-                                  (The default list is "IP-MIB:IF-MIB:
-                                  TCP-MIB:UDP-MIB:SNMPv2-MIB:RFC1213-MIB"
+                                  (The default list is 
+                                  "SNMPv2-MIB:IF-MIB:IP-MIB:TCP-MIB:UDP-MIB"
                                   with the addition of any mibs used
                                   by the mib modules the agent is
                                   configured with)
@@ -14533,15 +14533,15 @@ new_with_out_mib_modules=`echo $with_out_mib_modules | sed 's/,/ /g;'`
 if test "x$enable_agent" = "xno"; then
    # minimum mib module list for snmptrapd
    default_module_list=" mibII/vacm_vars mibII/vacm_conf utilities/execute "
-   default_mibs=SNMPv2-MIB:RFC1213-MIB
+   default_mibs=SNMPv2-MIB:IF-MIB:IP-MIB:TCP-MIB:UDP-MIB
    default_mibs_install=" "
 elif test "x$mini_agent" = "xyes"; then
    default_module_list=" snmpv3mibs mibII/snmp_mib mibII/system_mib mibII/sysORTable mibII/vacm_vars mibII/vacm_conf utilities/execute "
-   default_mibs=SNMPv2-MIB:RFC1213-MIB
+   default_mibs=SNMPv2-MIB:IF-MIB:IP-MIB:TCP-MIB:UDP-MIB
    default_mibs_install=" "
 else
    default_module_list=" mibII ucd_snmp snmpv3mibs notification notification-log-mib target agent_mibs agentx disman/event-mib disman/schedule utilities "
-   default_mibs=IP-MIB:IF-MIB:TCP-MIB:UDP-MIB:HOST-RESOURCES-MIB:SNMPv2-MIB:RFC1213-MIB:NOTIFICATION-LOG-MIB:DISMAN-EVENT-MIB:DISMAN-SCHEDULE-MIB
+   default_mibs=IP-MIB:IF-MIB:TCP-MIB:UDP-MIB:HOST-RESOURCES-MIB:SNMPv2-MIB:NOTIFICATION-LOG-MIB:DISMAN-EVENT-MIB:DISMAN-SCHEDULE-MIB
 
    case $target_os in
       linux* | freebsd* | dynix* | solaris2* | hpux* )
