@@ -5,6 +5,9 @@
 extern          "C" {
 #endif
 
+#include <net-snmp/types.h>
+#include <net-snmp/output_api.h>
+
 #if HAVE_SYSLOG_H
 #include <syslog.h>
 #endif
@@ -40,17 +43,21 @@ extern          "C" {
     } while(0)
 
     void            init_snmp_logging(void);
+/* Moved to output_api.h
     void            shutdown_snmp_logging(void);
     NETSNMP_IMPORT
     int             snmp_get_do_logging(void);
+ */
     NETSNMP_IMPORT
     void            snmp_disable_syslog(void);
     void            snmp_disable_filelog(void);
     NETSNMP_IMPORT
     void            snmp_disable_stderrlog(void);
     void            snmp_disable_calllog(void);
+/* Moved to output_api.h
     NETSNMP_IMPORT
     void            snmp_disable_log(void);
+ */
     NETSNMP_IMPORT
     void            snmp_enable_syslog(void);
     NETSNMP_IMPORT
@@ -66,6 +73,7 @@ extern          "C" {
     NETSNMP_IMPORT
     int             snmp_stderrlog_status(void);
 
+/* Moved to output_api.h
 #if !defined(__GNUC__) || __GNUC__ < 2 || (__GNUC__ == 2 && __GNUC_MINOR__ < 8)
     NETSNMP_IMPORT
     int             snmp_log(int priority, const char *format, ...);
@@ -76,6 +84,8 @@ extern          "C" {
 #endif
     int             snmp_vlog(int priority, const char *format,
                               va_list ap);
+ */
+
     /*
      * 0 - successful message formatting 
      * -1 - Could not format log-string 
@@ -83,8 +93,10 @@ extern          "C" {
      * -3 - Log-message too long! 
      */
 
+/* Moved to output_api.h
     NETSNMP_IMPORT
     void            snmp_log_perror(const char *s);
+ */
 
 
 #define NETSNMP_LOGHANDLER_STDOUT	1

@@ -199,95 +199,17 @@ extern          "C" {
 
 /******************* End   private macros ************************/
 /*****************************************************************/
+#endif /* NETSNMP_NO_DEBUGGING */
 
-/*****************************************************************/
-/********************Start public  macros ************************/
+    /* Public macros moved to top-level API header file */
+#include <net-snmp/output_api.h>
 
-#define DEBUGMSG(x)        do {if (_DBG_IF_) {debugmsg x;} }while(0)
-#define DEBUGMSGT(x)       do {if (_DBG_IF_) {__DBGMSGT(x);} }while(0)
-#define DEBUGTRACE         do {if (_DBG_IF_) {__DBGTRACE;} }while(0)
-#define DEBUGTRACETOK(x)   do {if (_DBG_IF_) {__DBGTRACETOK(x);} }while(0)
-#define DEBUGMSGL(x)       do {if (_DBG_IF_) {__DBGMSGL(x);} }while(0)
-#define DEBUGMSGTL(x)      do {if (_DBG_IF_) {__DBGMSGTL(x);} }while(0)
-#define DEBUGMSGOID(x)     do {if (_DBG_IF_) {__DBGMSGOID(x);} }while(0)
-#define DEBUGMSGSUBOID(x)  do {if (_DBG_IF_) {__DBGMSGSUBOID(x);} }while(0)
-#define DEBUGMSGVAR(x)     do {if (_DBG_IF_) {__DBGMSGVAR(x);} }while(0)
-#define DEBUGMSGOIDRANGE(x) do {if (_DBG_IF_) {__DBGMSGOIDRANGE(x);} }while(0)
-#define DEBUGMSGHEX(x)     do {if (_DBG_IF_) {__DBGMSGHEX(x);} }while(0)
-#define DEBUGMSGHEXTLI(x)  do {if (_DBG_IF_) {__DBGMSGHEXTLI(x);} }while(0)
-#define DEBUGINDENTADD(x)  do {if (_DBG_IF_) {__DBGINDENTADD(x);} }while(0)
-#define DEBUGINDENTMORE()  do {if (_DBG_IF_) {__DBGINDENTMORE();} }while(0)
-#define DEBUGINDENTLESS()  do {if (_DBG_IF_) {__DBGINDENTLESS();} }while(0)
-#define DEBUGPRINTINDENT(token) \
-	do {if (_DBG_IF_) {__DBGPRINTINDENT(token);} }while(0)
-
-
-#define DEBUGDUMPHEADER(token,x) \
-	do {if (_DBG_IF_) {__DBGDUMPHEADER(token,x);} }while(0)
-
-#define DEBUGDUMPSECTION(token,x) \
-	do {if (_DBG_IF_) {__DBGDUMPSECTION(token,x);} }while(0)
-
-#define DEBUGDUMPSETUP(token,buf,len) \
-	do {if (_DBG_IF_) {__DBGDUMPSETUP(token,buf,len);} }while(0)
-
-#define DEBUGMSG_NC(x)  do { __DBGMSG_NC(x); }while(0)
-#define DEBUGMSGT_NC(x) do { __DBGMSGT_NC(x); }while(0)
-
-#else                           /* NETSNMP_NO_DEBUGGING := enable streamlining of the code */
-
-#define DEBUGMSG(x)
-#define DEBUGMSGT(x)
-#define DEBUGTRACE
-#define DEBUGTRACETOK(x)
-#define DEBUGMSGL(x)
-#define DEBUGMSGTL(x)
-#define DEBUGMSGOID(x)
-#define DEBUGMSGSUBOID(x)
-#define DEBUGMSGVAR(x)
-#define DEBUGMSGOIDRANGE(x)
-#define DEBUGMSGHEX(x)
-#define DEBUGIF(x)        if(0)
-#define DEBUGDUMP(t,b,l,p)
-#define DEBUGINDENTMORE()
-#define DEBUGINDENTLESS()
-#define DEBUGINDENTADD(x)
-#define DEBUGMSGHEXTLI(x)
-#define DEBUGPRINTINDENT(token)
-#define DEBUGDUMPHEADER(token,x)
-#define DEBUGDUMPSECTION(token,x)
-#define DEBUGDUMPSETUP(token, buf, len)
-
-#define DEBUGMSG_NC(x)
-#define DEBUGMSGT_NC(x)
-
-#endif
+    void            snmp_debug_init(void);
 
 #define MAX_DEBUG_TOKENS 256
 #define MAX_DEBUG_TOKEN_LEN 128
 #define DEBUG_TOKEN_DELIMITER ","
 #define DEBUG_ALWAYS_TOKEN "all"
-
-    /*
-     * setup routines:
-     * 
-     * debug_register_tokens(char *):     registers a list of tokens to
-     * print debugging output for.
-     * 
-     * debug_is_token_registered(char *): returns SNMPERR_SUCCESS or SNMPERR_GENERR
-     * if a token has been registered or
-     * not (and debugging output is "on").
-     * snmp_debug_init(void):             registers .conf handlers.
-     */
-    NETSNMP_IMPORT
-    void            debug_register_tokens(char *tokens);
-    NETSNMP_IMPORT
-    int             debug_is_token_registered(const char *token);
-    void            snmp_debug_init(void);
-    NETSNMP_IMPORT
-    void            snmp_set_do_debugging(int);
-    NETSNMP_IMPORT
-    int             snmp_get_do_debugging(void);
 
 #ifndef NETSNMP_NO_DEBUGGING
 

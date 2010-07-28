@@ -24,54 +24,56 @@
 .SH NAME
 snmp_sess_init, snmp_open, snmp_send, snmp_select_info, snmp_read, snmp_timeout, snmp_close, snmp_perror, snmp_sess_perror, snmp_error, snmp_api_errstring \- session_api functions
 .SH SYNOPSIS
-#include <net-snmp/session_api.h>
+.B #include <net-snmp/session_api.h>
 .PP
-void snmp_sess_init ( struct snmp_session * );
+.BI "void snmp_sess_init ( netsnmp_session*" "sess" );
 .PP
-struct snmp_session * snmp_open ( struct snmp_session *);
+.BI "netsnmp_session* snmp_open ( netsnmp_session *" "sess");
 .RS
-.B /* Input parameter not used in active sessions */
+.I /* Input parameter not used in active sessions */
 .RE
 .PP
-int snmp_send ( struct snmp_session *session,
+.BI "int snmp_send ( netsnmp_session *" "session,"
 .RS
-struct snmp_pdu *pdu );
+.BI "netsnmp_pdu *" "pdu" );
 .RE
 .PP
-int snmp_select_info ( int *numfds, fd_set *fdset,
+.BI "int snmp_select_info ( int * " numfds, "fd_set *" fdset,
 .RS
-struct timeval *timeout, int *block );
+.BI "struct timeval *" timeout, "int *" block );
 .RE
 .PP
-void snmp_read ( fd_set *fdset );
+.BI "void snmp_read ( fd_set *" fdset );
 .PP
-void snmp_timeout ( void );
+.B  void snmp_timeout ( void );
 .PP
-int snmp_close ( struct snmp_session *session );
+.BI "int snmp_close ( netsnmp_session *" session );
+.br
+.B  "int snmp_close_sessions ( void );
 .PP
-void snmp_error (
-struct snmp_session *session,
+.SS Error Reporting
+.I (Move to output_api(3))
+.br
+.BI "void snmp_error ( netsnmp_session *session,
 .RS
-int *pcliberr,
-int *psnmperr,
-char **pperrstring );
+.BI "int *" pcliberr, "int *" psnmperr, "char **" pperrstring );
 .RE
 .PP
-char *snmp_api_errstring ( int snmperr );
+.BI "char *snmp_api_errstring ( int" snmperr );
 .PP
-void snmp_perror ( char * msg );
+.BI "void snmp_perror ( char *" msg );
 .RS
-.B /* for parsing errors only */
+.I /* for parsing errors only */
 .RE
 .PP
-void snmp_sess_perror (char * msg, struct snmp_session *);
+.BI "void snmp_sess_perror (char *" msg, "netsnmp_session *" sess );
 .RS
-.B /* all other SNMP library errors */
+.I /* all other SNMP library errors */
 .RE
 .PP
 .SH DESCRIPTION
 .I Snmp_sess_init
-prepares a struct snmp_session that sources transport characteristics
+prepares a netsnmp_session that sources transport characteristics
 and common information that will be used for a set of SNMP transactions.
 After this structure is passed to
 .I snmp_open
@@ -79,13 +81,13 @@ to create an SNMP session, the structure is not used.
 .PP
 .I Snmp_open
 returns a pointer to a newly-formed
-.I struct snmp_session
+.I netsnmp_session
 object, which the application must use to reference the
 active SNMP session.
 .PP
 .I Snmp_send
 takes as input a pointer to a
-.I struct snmp_pdu
+.I netsnmp_pdu
 object.
 This structure contains information that describes a transaction
 that will be performed over an open session.
@@ -169,13 +171,13 @@ that is associated with an error that occurred during a given session.
 Note that in all cases except one,
 .IR snmp_sess_perror
 should be handed the
-.I struct snmp_session *
+.I netsnmp_session *
 pointer returned from
 .IR snmp_open.
 If
 .IR snmp_open
 returns a null pointer, pass the INPUT
-.I struct snmp_session *
+.I netsnmp_session *
 pointer used to call
 .IR snmp_open.
 .PP
