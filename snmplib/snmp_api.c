@@ -602,7 +602,7 @@ snmp_sess_error(void *sessp, int *p_errno, int *p_snmp_errno, char **p_str)
 }
 
 /*
- * snmp_sess_perror(): print a error stored in a session pointer 
+ * netsnmp_sess_log_error(): print a error stored in a session pointer 
  */
 void
 netsnmp_sess_log_error(int priority,
