@@ -48,8 +48,8 @@ extern          "C" {
     NETSNMP_IMPORT
     void            netsnmp_config_remember(char *);    /* process later, during snmp_init() */
     void            netsnmp_config_process_memories(void);      /* run all memories through parser */
-    void            read_config(const char *, struct config_line *, int);
-    void            read_config_files(int);
+    int             read_config(const char *, struct config_line *, int);
+    int             read_config_files(int);
     NETSNMP_IMPORT
     void            free_config(void);
 #if !defined(__GNUC__) || __GNUC__ < 2 || (__GNUC__ == 2&& __GNUC_MINOR__ < 8)
@@ -81,7 +81,7 @@ extern          "C" {
     NETSNMP_IMPORT
     char           *copy_word(char *, char *);  /* do not use */
     NETSNMP_IMPORT
-    void            read_config_with_type(const char *, const char *);
+    int             read_config_with_type(const char *, const char *);
     NETSNMP_IMPORT
     char           *read_config_save_octet_string(char *saveto,
                                                   u_char * str,
@@ -114,7 +114,7 @@ extern          "C" {
     char           *read_config_store_data_prefix(char prefix, int type,
                                                   char *storeto,
                                                   void *dataptr, size_t len);
-    void read_config_files_of_type(int when, struct config_files *ctmp);
+    int  read_config_files_of_type(int when, struct config_files *ctmp);
     NETSNMP_IMPORT
     void            read_config_store(const char *type, const char *line);
     NETSNMP_IMPORT
