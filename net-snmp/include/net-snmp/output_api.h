@@ -7,6 +7,7 @@
      */
 
 #include <net-snmp/types.h>
+#include <stdarg.h>	/* for va_list */
 
     /* Error reporting */
     NETSNMP_IMPORT
