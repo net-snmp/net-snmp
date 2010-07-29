@@ -817,7 +817,7 @@ var_ifEntry(struct variable *vp,
         return (u_char *) & long_return;
     case NETSNMP_IFPHYSADDRESS:
         Interface_Get_Ether_By_Index(interface, return_buf);
-#if defined(aix4) || defined(aix5) || defined(aix6)
+#if defined(aix4) || defined(aix5) || defined(aix6) || defined(aix7)
 	*var_len = 0;
 #else
         if ((return_buf[0] == 0) && (return_buf[1] == 0) &&
@@ -866,7 +866,7 @@ var_ifEntry(struct variable *vp,
         return (u_char *) & long_return;
     case NETSNMP_IFINOCTETS:
 #ifdef HAVE_STRUCT_IFNET_IF_IBYTES
-#if defined(aix4) || defined(aix5) || defined(aix6)
+#if defined(aix4) || defined(aix5) || defined(aix6) || defined(aix7)
         long_return = (u_long) ifnet.if_ibytes & 0xffffffff;
 #else
         long_return = (u_long) ifnet.if_ibytes;
@@ -880,13 +880,13 @@ var_ifEntry(struct variable *vp,
         return (u_char *) & long_return;
     case NETSNMP_IFINUCASTPKTS:
         {
-#if defined(aix4) || defined(aix5) || defined(aix6)
+#if defined(aix4) || defined(aix5) || defined(aix6) || defined(aix7)
             long_return = (u_long) ifnet.if_ipackets & 0xffffffff;
 #else
             long_return = (u_long) ifnet.if_ipackets;
 #endif
 #if HAVE_STRUCT_IFNET_IF_IMCASTS
-#if defined(aix4) || defined(aix5) || defined(aix6)
+#if defined(aix4) || defined(aix5) || defined(aix6) || defined(aix7)
             long_return -= (u_long) ifnet.if_imcasts & 0xffffffff;
 #else
             long_return -= (u_long) ifnet.if_imcasts;
@@ -896,7 +896,7 @@ var_ifEntry(struct variable *vp,
         return (u_char *) & long_return;
     case NETSNMP_IFINNUCASTPKTS:
 #if HAVE_STRUCT_IFNET_IF_IMCASTS
-#if defined(aix4) || defined(aix5) || defined(aix6)
+#if defined(aix4) || defined(aix5) || defined(aix6) || defined(aix7)
         long_return = (u_long) ifnet.if_imcasts & 0xffffffff;
 #else
         long_return = (u_long) ifnet.if_imcasts;
@@ -910,7 +910,7 @@ var_ifEntry(struct variable *vp,
         return (u_char *) & long_return;
     case NETSNMP_IFINDISCARDS:
 #if HAVE_STRUCT_IFNET_IF_IQDROPS
-#if defined(aix4) || defined(aix5) || defined(aix6)
+#if defined(aix4) || defined(aix5) || defined(aix6) || defined(aix7)
         long_return = (u_long) ifnet.if_iqdrops & 0xffffffff;
 #else
         long_return = (u_long) ifnet.if_iqdrops;
@@ -923,7 +923,7 @@ var_ifEntry(struct variable *vp,
 #endif
         return (u_char *) & long_return;
     case NETSNMP_IFINERRORS:
-#if defined(aix4) || defined(aix5) || defined(aix6)
+#if defined(aix4) || defined(aix5) || defined(aix6) || defined(aix7)
         long_return = (u_long) ifnet.if_ierrors & 0xffffffff;
 #else
         long_return = (u_long) ifnet.if_ierrors;
@@ -931,7 +931,7 @@ var_ifEntry(struct variable *vp,
         return (u_char *) & long_return;
     case NETSNMP_IFINUNKNOWNPROTOS:
 #if HAVE_STRUCT_IFNET_IF_NOPROTO
-#if defined(aix4) || defined(aix5) || defined(aix6)
+#if defined(aix4) || defined(aix5) || defined(aix6) || defined(aix7)
         long_return = (u_long) ifnet.if_noproto & 0xffffffff;
 #else
         long_return = (u_long) ifnet.if_noproto;
@@ -945,7 +945,7 @@ var_ifEntry(struct variable *vp,
         return (u_char *) & long_return;
     case NETSNMP_IFOUTOCTETS:
 #ifdef HAVE_STRUCT_IFNET_IF_OBYTES
-#if defined(aix4) || defined(aix5) || defined(aix6)
+#if defined(aix4) || defined(aix5) || defined(aix6) || defined(aix7)
         long_return = (u_long) ifnet.if_obytes & 0xffffffff;
 #else
         long_return = (u_long) ifnet.if_obytes;
@@ -959,13 +959,13 @@ var_ifEntry(struct variable *vp,
         return (u_char *) & long_return;
     case NETSNMP_IFOUTUCASTPKTS:
         {
-#if defined(aix4) || defined(aix5) || defined(aix6)
+#if defined(aix4) || defined(aix5) || defined(aix6) || defined(aix7)
             long_return = (u_long) ifnet.if_opackets & 0xffffffff;
 #else
             long_return = (u_long) ifnet.if_opackets;
 #endif
 #if HAVE_STRUCT_IFNET_IF_OMCASTS
-#if defined(aix4) || defined(aix5) || defined(aix6)
+#if defined(aix4) || defined(aix5) || defined(aix6) || defined(aix7)
             long_return -= (u_long) ifnet.if_omcasts & 0xffffffff;
 #else
             long_return -= (u_long) ifnet.if_omcasts;
@@ -975,7 +975,7 @@ var_ifEntry(struct variable *vp,
         return (u_char *) & long_return;
     case NETSNMP_IFOUTNUCASTPKTS:
 #if HAVE_STRUCT_IFNET_IF_OMCASTS
-#if defined(aix4) || defined(aix5) || defined(aix6)
+#if defined(aix4) || defined(aix5) || defined(aix6) || defined(aix7)
         long_return = (u_long) ifnet.if_omcasts & 0xffffffff;
 #else
         long_return = (u_long) ifnet.if_omcasts;
@@ -988,21 +988,21 @@ var_ifEntry(struct variable *vp,
 #endif
         return (u_char *) & long_return;
     case NETSNMP_IFOUTDISCARDS:
-#if defined(aix4) || defined(aix5) || defined(aix6)
+#if defined(aix4) || defined(aix5) || defined(aix6) || defined(aix7)
         long_return = ifnet.if_snd.ifq_drops & 0xffffffff;
 #else
         long_return = ifnet.if_snd.ifq_drops;
 #endif
         return (u_char *) & long_return;
     case NETSNMP_IFOUTERRORS:
-#if defined(aix4) || defined(aix5) || defined(aix6)
+#if defined(aix4) || defined(aix5) || defined(aix6) || defined(aix7)
         long_return = ifnet.if_oerrors & 0xffffffff;
 #else
         long_return = ifnet.if_oerrors;
 #endif
         return (u_char *) & long_return;
     case NETSNMP_IFOUTQLEN:
-#if defined(aix4) || defined(aix5) || defined(aix6)
+#if defined(aix4) || defined(aix5) || defined(aix6) || defined(aix7)
         long_return = ifnet.if_snd.ifq_len & 0xffffffff;
 #else
         long_return = ifnet.if_snd.ifq_len;

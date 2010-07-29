@@ -62,7 +62,7 @@ auto_nlist_value(const char *string)
          * allocate an extra byte for inclusion of a preceding '_' later 
          */
         it->nl[0].n_name = (char *) malloc(strlen(string) + 2);
-#if defined(aix4) || defined(aix5) || defined(aix6)
+#if defined(aix4) || defined(aix5) || defined(aix6) || defined(aix7)
         strcpy(it->nl[0].n_name, string);
         it->nl[0].n_name[strlen(string)+1] = '\0';
 #else
@@ -70,7 +70,7 @@ auto_nlist_value(const char *string)
 #endif
         it->nl[1].n_name = 0;
         init_nlist(it->nl);
-#if !(defined(aix4) || defined(aix5) || defined(aix6)) 
+#if !(defined(aix4) || defined(aix5) || defined(aix6) || defined(aix7))
         if (it->nl[0].n_type == 0) {
             strcpy(it->nl[0].n_name, string);
             it->nl[0].n_name[strlen(string)+1] = '\0';
@@ -143,7 +143,7 @@ init_nlist(struct nlist nl[])
     }
     kvm_close(kernel);
 #else                           /* ! HAVE_KVM_OPENFILES */
-#if (defined(aix4) || defined(aix5) || defined(aix6)) && defined(HAVE_KNLIST)
+#if (defined(aix4) || defined(aix5) || defined(aix6) || defined(aix7)) && defined(HAVE_KNLIST)
     if (knlist(nl, 1, sizeof(struct nlist)) == -1) {
         DEBUGMSGTL(("auto_nlist:init_nlist", "knlist failed on symbol:  %s\n",
                     nl[0].n_name));
@@ -173,7 +173,7 @@ init_nlist(struct nlist nl[])
 #endif                          /*aix4 */
 #endif                          /* ! HAVE_KVM_OPENFILES */
     for (ret = 0; nl[ret].n_name != NULL; ret++) {
-#if defined(aix4) || defined(aix5) || defined(aix6)
+#if defined(aix4) || defined(aix5) || defined(aix6) || defined(aix7)
         if (nl[ret].n_type == 0 && nl[ret].n_value != 0)
             nl[ret].n_type = 1;
 #endif

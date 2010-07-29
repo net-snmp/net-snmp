@@ -51,7 +51,7 @@ static kstat_io_t kio;
 static int      cache_disknr = -1;
 #endif                          /* solaris2 */
 
-#if defined(aix4) || defined(aix5) || defined(aix6)
+#if defined(aix4) || defined(aix5) || defined(aix6) || defined(aix7)
 /*
  * handle disk statistics via libperfstat
  */
@@ -207,7 +207,7 @@ init_diskio(void)
     IOMasterPort(bootstrap_port, &masterPort);
 #endif
 
-#if defined(aix4) || defined(aix5) || defined(aix6)
+#if defined(aix4) || defined(aix5) || defined(aix6) || defined(aix7)
     /*
      * initialize values to gather information on first request
      */
@@ -1157,7 +1157,7 @@ var_diskio(struct variable * vp,
 #endif                          /* darwin */
 
 
-#if defined(aix4) || defined(aix5) || defined(aix6)
+#if defined(aix4) || defined(aix5) || defined(aix6) || defined(aix7)
 /*
  * collect statistics for all disks
  */

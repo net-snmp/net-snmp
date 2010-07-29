@@ -617,7 +617,7 @@ get_boottime(void)
 long
 get_uptime(void)
 {
-#if !defined(solaris2) && !defined(linux) && !defined(cygwin) && !defined(aix4) && !defined(aix5) && !defined(aix6)
+#if !defined(solaris2) && !defined(linux) && !defined(cygwin) && !defined(aix4) && !defined(aix5) && !defined(aix6) && !defined(aix7)
     struct timeval  now;
     long            boottime_csecs, nowtime_csecs;
 
@@ -630,7 +630,7 @@ get_uptime(void)
     return (nowtime_csecs - boottime_csecs);
 #endif
 
-#if defined(aix4) || defined(aix5) || defined(aix6)
+#if defined(aix4) || defined(aix5) || defined(aix6) || defined(aix7)
     struct nlist nl;
     int kmem;
     time_t lbolt;
@@ -1125,7 +1125,7 @@ netsnmp_os_kernel_width(void)
   } else {
     return -1;
   }
-#elif defined(aix4) || defined(aix5) || defined(aix6)
+#elif defined(aix4) || defined(aix5) || defined(aix6) || defined(aix7)
   return (__KERNEL_32() ? 32 : (__KERNEL_64() ? 64 : -1));
 #elif defined(osf4) || defined(osf5) || defined(__alpha)
   return 64; /* Alpha is always 64bit */

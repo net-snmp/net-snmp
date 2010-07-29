@@ -32,7 +32,7 @@ config_exclude(host/hr_swrun)
 # else
     config_require(host/data_access/swrun_kvm_proc)
 # endif
-#elif defined( aix4 ) || defined( aix5 ) || defined( aix6 )
+#elif defined( aix4 ) || defined( aix5 ) || defined( aix6 ) || defined( aix7 )
     config_require(host/data_access/swrun_procinfo)
 /* Should really be #elif HAVE_KVM_GETPROCS */
 #elif defined(freebsd) || defined(openbsd) || defined(netbsd)
