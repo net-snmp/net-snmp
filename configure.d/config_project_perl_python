@@ -177,7 +177,7 @@ case $target_os in
     # Embedded perl typically fails on HP-UX and Mac OS X
     # We really need to investigate why, and check for this explicitly
     # But for the time being, turn this off by default
-    hpux*|darwin8*|darwin9*)
+    hpux*|darwin8*|darwin9*|darwin10*)
         if test "x$embed_perl" = "xtry" ; then
             AC_MSG_WARN([Embedded perl defaulting to off])
             embed_perl="no"
