@@ -15190,7 +15190,7 @@ $as_echo "none" >&6; }
 	fi
 	;;
 
-    darwin8*|darwin9*)
+    darwin8*|darwin9*|darwin10*)
         #   Flat Namespace linking                      (Mac OS/X)
         #
         { $as_echo "$as_me:$LINENO: checking whether darwin ld might need -flat_namespace" >&5
@@ -34025,7 +34025,7 @@ $as_echo "none known" >&6; }
     # Embedded perl typically fails on HP-UX and Mac OS X
     # We really need to investigate why, and check for this explicitly
     # But for the time being, turn this off by default
-    hpux*|darwin8*|darwin9*)
+    hpux*|darwin8*|darwin9*|darwin10*)
         if test "x$embed_perl" = "xtry" ; then
             { $as_echo "$as_me:$LINENO: WARNING: Embedded perl defaulting to off" >&5
 $as_echo "$as_me: WARNING: Embedded perl defaulting to off" >&2;}
