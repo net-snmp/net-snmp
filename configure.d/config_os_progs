@@ -359,7 +359,7 @@ esac
 #
     
 case $target_os in
-    aix4.2*|aix4.3*|aix5*|aix6*)
+    aix4.2*|aix4.3*|aix5*|aix6*|aix7*)
         #   Runtime linking flags                       (AIX)
         #
         AC_MSG_CHECKING([what linker flags to add to enable runtime linking on AIX])
