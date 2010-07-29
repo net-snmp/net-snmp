@@ -830,9 +830,14 @@ read_config(const char *filename,
                 } else if ( strcasecmp( token, "includedir" )==0) {
                     DIR *d;
                     struct dirent *entry;
-                    char  filename[SNMP_MAXPATH];
+                    char  fname[SNMP_MAXPATH];
                     int   len;
 
+                    if (cptr == NULL) {
+                        if (when != PREMIB_CONFIG)
+		            netsnmp_config_error("Blank line following %s token.", token);
+                        continue;
+                    }
                     if ((d=opendir(cptr)) == NULL ) {
                         if (when != PREMIB_CONFIG)
                             netsnmp_config_error("Can't open include dir '%s'.", cptr);
@@ -844,9 +849,9 @@ read_config(const char *filename,
                         if ( entry->d_name && entry->d_name[0] != '.') {
                             len = NAMLEN(entry);
                             if ((len > 5) && (strcmp(&(entry->d_name[len-5]),".conf") == 0)) {
-                                snprintf(filename, SNMP_MAXPATH, "%s/%s",
+                                snprintf(fname, SNMP_MAXPATH, "%s/%s",
                                          cptr, entry->d_name);
-                                (void)read_config(filename, line_handler, when);
+                                (void)read_config(fname, line_handler, when);
                             }
                         }
                     }
@@ -854,21 +859,41 @@ read_config(const char *filename,
                     curfilename = prev_filename;
                     linecount   = prev_linecount;
                 } else if ( strcasecmp( token, "includefile" )==0) {
-                    /* TODO: handle relative paths */
-                    struct config_files ctmp;
-                    ctmp.fileHeader = cptr;
-                    ctmp.start = line_handler;
-                    ctmp.next = NULL;
+                    char  fname[SNMP_MAXPATH], *cp;
+
+                    if (cptr == NULL) {
+                        if (when != PREMIB_CONFIG)
+		            netsnmp_config_error("Blank line following %s token.", token);
+                        continue;
+                    }
+                    if ( cptr[0] == '/' ) {
+                        strncpy(fname, cptr, SNMP_MAXPATH);
+                        fname[SNMP_MAXPATH-1]='\0';
+                    } else {
+                        strncpy(fname, filename, SNMP_MAXPATH);
+                        fname[SNMP_MAXPATH-1]='\0';
+                        cp = strrchr(fname, '/');
+                        *(++cp) = '\0';
+                        strncat(fname, cptr, SNMP_MAXPATH-strlen(fname));
+                        fname[SNMP_MAXPATH-1]='\0';
+                    }
                     prev_filename  = curfilename;
                     prev_linecount = linecount;
-                    ret = read_config(cptr, line_handler, when);
+                    ret = read_config(fname, line_handler, when);
                     curfilename = prev_filename;
                     linecount   = prev_linecount;
                     if ((ret != SNMPERR_SUCCESS) && (when != PREMIB_CONFIG))
-                        netsnmp_config_error("Included file '%s' not found.", cptr);
+                        netsnmp_config_error("Included file '%s' not found.", fname);
                 } else if ( strcasecmp( token, "includesearch" )==0) {
                     struct config_files ctmp;
-                    int len = strlen(cptr);
+                    int len;
+
+                    if (cptr == NULL) {
+                        if (when != PREMIB_CONFIG)
+		            netsnmp_config_error("Blank line following %s token.", token);
+                        continue;
+                    }
+                    len = strlen(cptr);
                     ctmp.fileHeader = cptr;
                     ctmp.start = line_handler;
                     ctmp.next = NULL;
