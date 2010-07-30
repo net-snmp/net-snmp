@@ -1006,7 +1006,29 @@ int *err_ind;
 {
    int status;
    long command = pdu->command;
+   char *tmp_err_str;
+
+   *err_num = 0;
+   *err_ind = 0;
    *response = NULL;
+   tmp_err_str = NULL;
+   memset(err_str, '\0', STR_BUF_SIZE);
+
+   if (ss == NULL) {
+       *err_num = 0;
+       *err_ind = SNMPERR_BAD_SESSION;
+       strncpy(err_str, snmp_api_errstring(*err_ind), STR_BUF_SIZE - 1);
+       goto done;
+   }
+
+   tmp_err_str = calloc(1, STR_BUF_SIZE);
+   if (tmp_err_str == NULL) {
+       *err_num = errno;
+       *err_ind = SNMPERR_MALLOC;
+       strncpy(err_str, snmp_api_errstring(*err_ind), STR_BUF_SIZE - 1);
+       goto done;
+   }
+
 retry:
 
    Py_BEGIN_ALLOW_THREADS
@@ -1048,7 +1070,8 @@ retry:
             /* in SNMPv2c, SNMPv2u, SNMPv2*, and SNMPv3 PDUs */
             case SNMP_ERR_INCONSISTENTNAME:
             default:
-               strcat(err_str,(char*)snmp_errstring((*response)->errstat));
+               strncpy(err_str, (char*)snmp_errstring((*response)->errstat),
+		       STR_BUF_SIZE - 1);
                *err_num = (int)(*response)->errstat;
 	       *err_ind = (*response)->errindex;
                status = (*response)->errstat;
@@ -1058,14 +1081,19 @@ retry:
 
       case STAT_TIMEOUT:
       case STAT_ERROR:
-          strcat(err_str, (char*)snmp_api_errstring(ss->s_snmp_errno));
-          *err_num = ss->s_snmp_errno;
+	  snmp_sess_error(ss, err_num, err_ind, &tmp_err_str);
+	  strncpy(err_str, tmp_err_str, STR_BUF_SIZE - 1);
+	  err_str[STR_BUF_SIZE - 1] = '\0';
          break;
 
       default:
          strcat(err_str, "send_sync_pdu: unknown status");
          *err_num = ss->s_snmp_errno;
          break;
+   }
+done:
+   if (tmp_err_str) {
+   	free(tmp_err_str);
    }
    if (_debug_level && *err_num) printf("XXX sync PDU: %s\n", err_str);
    return(status);
@@ -1146,6 +1174,46 @@ py_netsnmp_attr_set_string(PyObject *obj, char *attr_name,
     Py_DECREF(val_obj);
   }
   return ret;
+}
+
+/**
+ * Update python session object error attributes.
+ *
+ * Copy the error info which may have been returned from __send_sync_pdu(...)
+ * into the python object. This will allow the python code to determine if
+ * an error occured during an snmp operation.
+ *
+ * Currently there are 3 attributes we care about
+ *
+ * ErrorNum - Copy of the value of netsnmp_session.s_errno. This is the system
+ * errno that was generated during our last call into the net-snmp library.
+ *
+ * ErrorInd - Copy of the value of netsmp_session.s_snmp_errno. These error
+ * numbers are separate from the system errno's and describe SNMP errors.
+ *
+ * ErrorStr - A string describing the ErrorInd that was returned during our last
+ * operation.
+ *
+ * @param[in] session The python object that represents our current Session
+ * @param[in|out] err_str A string describing err_ind
+ * @param[in|out] err_num The system errno currently stored by our session
+ * @param[in|out] err_ind The snmp errno currently stored by our session
+ */
+static void
+__py_netsnmp_update_session_errors(PyObject *session, char *err_str,
+                                    int err_num, int err_ind)
+{
+    PyObject *tmp_for_conversion; 
+
+    py_netsnmp_attr_set_string(session, "ErrorStr", err_str, STRLEN(err_str));
+
+    tmp_for_conversion = PyInt_FromLong(err_num);
+    PyObject_SetAttrString(session, "ErrorNum", tmp_for_conversion);
+    Py_DECREF(tmp_for_conversion);
+
+    tmp_for_conversion = PyInt_FromLong(err_ind);
+    PyObject_SetAttrString(session, "ErrorInd", tmp_for_conversion);
+    Py_DECREF(tmp_for_conversion);
 }
 
 static PyObject *
@@ -1421,9 +1489,6 @@ netsnmp_get(PyObject *self, PyObject *args)
     if (py_netsnmp_attr_string(session, "ErrorStr", &tmpstr, &tmplen) < 0) {
       goto done;
     }
-    memcpy(&err_str, tmpstr, tmplen);
-    err_num = py_netsnmp_attr_long(session, "ErrorNum");
-    err_ind = py_netsnmp_attr_long(session, "ErrorInd");
 
     if (py_netsnmp_attr_long(session, "UseLongNames"))
       getlabel_flag |= USE_LONG_NAMES;
@@ -1477,6 +1542,7 @@ netsnmp_get(PyObject *self, PyObject *args)
 
     status = __send_sync_pdu(ss, pdu, &response, retry_nosuch, 
 			     err_str, &err_num, &err_ind);
+    __py_netsnmp_update_session_errors(session, err_str, err_num, err_ind);
 
     /*
     ** Set up for numeric or full OID's, if necessary.  Save the old
@@ -1692,6 +1758,7 @@ netsnmp_getnext(PyObject *self, PyObject *args)
 
     status = __send_sync_pdu(ss, pdu, &response, retry_nosuch, 
 			     err_str, &err_num, &err_ind);
+    __py_netsnmp_update_session_errors(session, err_str, err_num, err_ind);
 
     /*
     ** Set up for numeric or full OID's, if necessary.  Save the old
@@ -1967,7 +2034,8 @@ netsnmp_walk(PyObject *self, PyObject *args)
 
       status = __send_sync_pdu(ss, pdu, &response, retry_nosuch, 
                                err_str, &err_num, &err_ind);
-      
+      __py_netsnmp_update_session_errors(session, err_str, err_num, err_ind);
+
       if (!response || !response->variables ||
           (response->variables->name_length < oid_arr_len) ||
           (memcmp(oid_arr, response->variables->name,
@@ -2185,6 +2253,7 @@ netsnmp_getbulk(PyObject *self, PyObject *args)
 
       status = __send_sync_pdu(ss, pdu, &response, retry_nosuch, 
 			       err_str, &err_num, &err_ind);
+      __py_netsnmp_update_session_errors(session, err_str, err_num, err_ind);
 
       /*
       ** Set up for numeric or full OID's, if necessary.  Save the old
@@ -2358,9 +2427,6 @@ netsnmp_set(PyObject *self, PyObject *args)
     if (py_netsnmp_attr_string(session, "ErrorStr", &tmpstr, &tmplen) < 0) {
       goto done;
     }
-    memcpy(&err_str, tmpstr, tmplen);
-    err_num = py_netsnmp_attr_long(session, "ErrorNum");
-    err_ind = py_netsnmp_attr_long(session, "ErrorInd");
 
     use_enums = py_netsnmp_attr_long(session, "UseEnums");
 	
@@ -2443,13 +2509,14 @@ netsnmp_set(PyObject *self, PyObject *args)
 
     status = __send_sync_pdu(ss, pdu, &response, NO_RETRY_NOSUCH, 
 			     err_str, &err_num, &err_ind);
+    __py_netsnmp_update_session_errors(session, err_str, err_num, err_ind);
 
     if (response) snmp_free_pdu(response);
 
     if (status == STAT_SUCCESS)
       ret = Py_BuildValue("i",1); /* success, return True */
     else
-      ret = Py_BuildValue("i",0); /* success, return False */
+      ret = Py_BuildValue("i",0); /* fail, return False */
   } 
  done:
   SAFE_FREE(oid_arr);
