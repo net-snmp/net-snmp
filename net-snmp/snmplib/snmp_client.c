@@ -1077,6 +1077,10 @@ snmp_sess_synch_response(void *sessp,
     int             block;
 
     ss = snmp_sess_session(sessp);
+    if (ss == NULL) {
+        return STAT_ERROR;
+    }
+
     memset((void *) &lstate, 0, sizeof(lstate));
     state = &lstate;
     cbsav = ss->callback;
