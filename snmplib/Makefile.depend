@@ -68,6 +68,9 @@
 ./callback.lo: ../include/net-snmp/library/snmp_client.h
 ./callback.lo: ../include/net-snmp/pdu_api.h
 ./callback.lo: ../include/net-snmp/library/asn1.h
+./callback.lo: ../include/net-snmp/output_api.h
+./callback.lo: ../include/net-snmp/library/snmp_debug.h
+./callback.lo: ../include/net-snmp/library/snmp_logging.h
 ./callback.lo: ../include/net-snmp/session_api.h
 ./callback.lo: ../include/net-snmp/library/callback.h
 ./callback.lo: ../include/net-snmp/library/snmp_transport.h
@@ -91,9 +94,6 @@
 ./callback.lo: ../include/net-snmp/library/snmp_impl.h
 ./callback.lo: ../include/net-snmp/library/snmp.h
 ./callback.lo: ../include/net-snmp/library/snmp-tc.h
-./callback.lo: ../include/net-snmp/output_api.h
-./callback.lo: ../include/net-snmp/library/snmp_debug.h
-./callback.lo: ../include/net-snmp/library/snmp_logging.h
 ./callback.lo: ../include/net-snmp/utilities.h 
 ./callback.lo: ../include/net-snmp/library/system.h
 ./callback.lo: ../include/net-snmp/library/tools.h
@@ -114,12 +114,60 @@
 ./cert_util.lo: ../include/net-snmp/system/linux.h
 ./cert_util.lo: ../include/net-snmp/system/sysv.h
 ./cert_util.lo: ../include/net-snmp/system/generic.h
-./cert_util.lo: ../include/net-snmp/machine/generic.h
+./cert_util.lo: ../include/net-snmp/machine/generic.h 
+./cert_util.lo:  ../include/net-snmp/types.h
+./cert_util.lo: ../include/net-snmp/library/oid.h
+./cert_util.lo: ../include/net-snmp/library/types.h
+./cert_util.lo: ../include/net-snmp/definitions.h
+./cert_util.lo: ../include/net-snmp/library/snmp_api.h
+./cert_util.lo: ../include/net-snmp/varbind_api.h
+./cert_util.lo: ../include/net-snmp/library/snmp_client.h
+./cert_util.lo: ../include/net-snmp/pdu_api.h
+./cert_util.lo: ../include/net-snmp/library/asn1.h
+./cert_util.lo: ../include/net-snmp/output_api.h
+./cert_util.lo: ../include/net-snmp/library/snmp_debug.h
+./cert_util.lo: ../include/net-snmp/library/snmp_logging.h
+./cert_util.lo: ../include/net-snmp/session_api.h
+./cert_util.lo: ../include/net-snmp/library/callback.h
+./cert_util.lo: ../include/net-snmp/library/snmp_transport.h
+./cert_util.lo: ../include/net-snmp/library/snmp_service.h
+./cert_util.lo: ../include/net-snmp/library/snmpCallbackDomain.h
+./cert_util.lo: ../include/net-snmp/library/snmpUnixDomain.h
+./cert_util.lo: ../include/net-snmp/library/snmpUDPDomain.h
+./cert_util.lo: ../include/net-snmp/library/snmpUDPIPv4BaseDomain.h
+./cert_util.lo: ../include/net-snmp/library/snmpIPv4BaseDomain.h
+./cert_util.lo: ../include/net-snmp/library/snmpUDPBaseDomain.h
+./cert_util.lo: ../include/net-snmp/library/snmpTCPDomain.h
+./cert_util.lo: ../include/net-snmp/library/snmpUDPIPv6Domain.h
+./cert_util.lo: ../include/net-snmp/library/snmpIPv6BaseDomain.h
+./cert_util.lo: ../include/net-snmp/library/snmpTCPIPv6Domain.h
+./cert_util.lo: ../include/net-snmp/library/snmpIPXDomain.h
+./cert_util.lo: ../include/net-snmp/library/ucd_compat.h
+./cert_util.lo: ../include/net-snmp/library/mib.h
+./cert_util.lo: ../include/net-snmp/mib_api.h
+./cert_util.lo: ../include/net-snmp/library/parse.h
+./cert_util.lo: ../include/net-snmp/library/oid_stash.h
+./cert_util.lo: ../include/net-snmp/library/snmp_impl.h
+./cert_util.lo: ../include/net-snmp/library/snmp.h
+./cert_util.lo: ../include/net-snmp/library/snmp-tc.h
+./cert_util.lo: ../include/net-snmp/config_api.h
+./cert_util.lo: ../include/net-snmp/library/read_config.h
+./cert_util.lo: ../include/net-snmp/library/default_store.h
+./cert_util.lo: ../include/net-snmp/net-snmp-config.h
+./cert_util.lo: ../include/net-snmp/library/snmp_parse_args.h
+./cert_util.lo: ../include/net-snmp/library/snmp_enum.h
+./cert_util.lo: ../include/net-snmp/library/vacm.h
+./cert_util.lo: ../include/net-snmp/library/snmp_assert.h
+./cert_util.lo: ../include/net-snmp/library/system.h
+./cert_util.lo: ../include/net-snmp/library/tools.h
+./cert_util.lo: ../include/net-snmp/library/container.h 
+./cert_util.lo:  ../include/net-snmp/library/factory.h
+./cert_util.lo: ../include/net-snmp/library/data_list.h
+./cert_util.lo: ../include/net-snmp/library/file_utils.h
+./cert_util.lo: ../include/net-snmp/library/dir_utils.h
+./cert_util.lo: ../include/net-snmp/library/cert_util.h
+./cert_util.lo: ../include/net-snmp/library/snmp_openssl.h
 ./check_varbind.lo: ../include/net-snmp/net-snmp-config.h
-./check_varbind.lo: ../include/net-snmp/system/linux.h
-./check_varbind.lo: ../include/net-snmp/system/sysv.h
-./check_varbind.lo: ../include/net-snmp/system/generic.h
-./check_varbind.lo: ../include/net-snmp/machine/generic.h
 ./check_varbind.lo: ../include/net-snmp/net-snmp-includes.h
 ./check_varbind.lo:  ../include/net-snmp/definitions.h
 ./check_varbind.lo: ../include/net-snmp/types.h 
@@ -130,6 +178,9 @@
 ./check_varbind.lo: ../include/net-snmp/library/snmp_client.h
 ./check_varbind.lo: ../include/net-snmp/pdu_api.h
 ./check_varbind.lo: ../include/net-snmp/library/asn1.h
+./check_varbind.lo: ../include/net-snmp/output_api.h
+./check_varbind.lo: ../include/net-snmp/library/snmp_debug.h
+./check_varbind.lo: ../include/net-snmp/library/snmp_logging.h
 ./check_varbind.lo: ../include/net-snmp/session_api.h
 ./check_varbind.lo: ../include/net-snmp/library/callback.h
 ./check_varbind.lo: ../include/net-snmp/library/snmp_transport.h
@@ -153,7 +204,7 @@
 ./check_varbind.lo: ../include/net-snmp/library/snmp_impl.h
 ./check_varbind.lo: ../include/net-snmp/library/snmp.h
 ./check_varbind.lo: ../include/net-snmp/library/snmp-tc.h
-./check_varbind.lo: ../include/net-snmp/utilities.h
+./check_varbind.lo: ../include/net-snmp/utilities.h 
 ./check_varbind.lo: ../include/net-snmp/library/system.h
 ./check_varbind.lo: ../include/net-snmp/library/tools.h
 ./check_varbind.lo: ../include/net-snmp/library/int64.h
@@ -163,7 +214,6 @@
 ./check_varbind.lo: ../include/net-snmp/library/check_varbind.h
 ./check_varbind.lo: ../include/net-snmp/library/container.h
 ./check_varbind.lo: ../include/net-snmp/library/factory.h
-./check_varbind.lo: ../include/net-snmp/library/snmp_logging.h
 ./check_varbind.lo: ../include/net-snmp/library/container_binary_array.h
 ./check_varbind.lo: ../include/net-snmp/library/container_list_ssll.h
 ./check_varbind.lo: ../include/net-snmp/library/container_iterator.h
@@ -173,12 +223,9 @@
 ./check_varbind.lo: ../include/net-snmp/config_api.h
 ./check_varbind.lo: ../include/net-snmp/library/read_config.h
 ./check_varbind.lo: ../include/net-snmp/library/default_store.h
-./check_varbind.lo: ../include/net-snmp/net-snmp-config.h
 ./check_varbind.lo: ../include/net-snmp/library/snmp_parse_args.h
 ./check_varbind.lo: ../include/net-snmp/library/snmp_enum.h
 ./check_varbind.lo: ../include/net-snmp/library/vacm.h
-./check_varbind.lo: ../include/net-snmp/output_api.h
-./check_varbind.lo: ../include/net-snmp/library/snmp_debug.h
 ./check_varbind.lo: ../include/net-snmp/snmpv3_api.h
 ./check_varbind.lo: ../include/net-snmp/library/snmpv3.h
 ./check_varbind.lo: ../include/net-snmp/library/transform_oids.h
@@ -187,6 +234,7 @@
 ./check_varbind.lo: ../include/net-snmp/library/lcd_time.h
 ./check_varbind.lo: ../include/net-snmp/library/snmp_secmod.h
 ./check_varbind.lo: ../include/net-snmp/library/snmpv3-security-includes.h
+./check_varbind.lo: ../include/net-snmp/library/snmptsm.h
 ./check_varbind.lo: ../include/net-snmp/library/snmpusm.h
 ./closedir.lo: ../include/net-snmp/net-snmp-config.h
 ./closedir.lo: ../include/net-snmp/types.h 
@@ -198,6 +246,9 @@
 ./closedir.lo: ../include/net-snmp/library/snmp_client.h
 ./closedir.lo: ../include/net-snmp/pdu_api.h
 ./closedir.lo: ../include/net-snmp/library/asn1.h
+./closedir.lo: ../include/net-snmp/output_api.h
+./closedir.lo: ../include/net-snmp/library/snmp_debug.h
+./closedir.lo: ../include/net-snmp/library/snmp_logging.h
 ./closedir.lo: ../include/net-snmp/session_api.h
 ./closedir.lo: ../include/net-snmp/library/callback.h
 ./closedir.lo: ../include/net-snmp/library/snmp_transport.h
@@ -234,6 +285,9 @@
 ./container.lo: ../include/net-snmp/library/snmp_client.h
 ./container.lo: ../include/net-snmp/pdu_api.h
 ./container.lo: ../include/net-snmp/library/asn1.h
+./container.lo: ../include/net-snmp/output_api.h
+./container.lo: ../include/net-snmp/library/snmp_debug.h
+./container.lo: ../include/net-snmp/library/snmp_logging.h
 ./container.lo: ../include/net-snmp/session_api.h
 ./container.lo: ../include/net-snmp/library/callback.h
 ./container.lo: ../include/net-snmp/library/snmp_transport.h
@@ -257,7 +311,7 @@
 ./container.lo: ../include/net-snmp/library/snmp_impl.h
 ./container.lo: ../include/net-snmp/library/snmp.h
 ./container.lo: ../include/net-snmp/library/snmp-tc.h
-./container.lo: ../include/net-snmp/utilities.h
+./container.lo: ../include/net-snmp/utilities.h 
 ./container.lo: ../include/net-snmp/library/system.h
 ./container.lo: ../include/net-snmp/library/tools.h
 ./container.lo: ../include/net-snmp/library/int64.h
@@ -265,9 +319,8 @@
 ./container.lo: ../include/net-snmp/library/snmp_alarm.h
 ./container.lo: ../include/net-snmp/library/data_list.h
 ./container.lo: ../include/net-snmp/library/check_varbind.h
-./container.lo: ../include/net-snmp/library/container.h
-./container.lo: ../include/net-snmp/library/factory.h
-./container.lo: ../include/net-snmp/library/snmp_logging.h
+./container.lo: ../include/net-snmp/library/container.h 
+./container.lo:  ../include/net-snmp/library/factory.h
 ./container.lo: ../include/net-snmp/library/container_binary_array.h
 ./container.lo: ../include/net-snmp/library/container_list_ssll.h
 ./container.lo: ../include/net-snmp/library/container_iterator.h
@@ -280,8 +333,6 @@
 ./container.lo: ../include/net-snmp/library/snmp_parse_args.h
 ./container.lo: ../include/net-snmp/library/snmp_enum.h
 ./container.lo: ../include/net-snmp/library/vacm.h
-./container.lo: ../include/net-snmp/output_api.h
-./container.lo: ../include/net-snmp/library/snmp_debug.h
 ./container.lo: ../include/net-snmp/snmpv3_api.h
 ./container.lo: ../include/net-snmp/library/snmpv3.h
 ./container.lo: ../include/net-snmp/library/transform_oids.h
@@ -290,6 +341,7 @@
 ./container.lo: ../include/net-snmp/library/lcd_time.h
 ./container.lo: ../include/net-snmp/library/snmp_secmod.h
 ./container.lo: ../include/net-snmp/library/snmpv3-security-includes.h
+./container.lo: ../include/net-snmp/library/snmptsm.h
 ./container.lo: ../include/net-snmp/library/snmpusm.h
 ./container.lo: ../include/net-snmp/library/container_null.h
 ./container_binary_array.lo: ../include/net-snmp/net-snmp-config.h
@@ -303,6 +355,9 @@
 ./container_binary_array.lo: ../include/net-snmp/library/snmp_client.h
 ./container_binary_array.lo: ../include/net-snmp/pdu_api.h
 ./container_binary_array.lo: ../include/net-snmp/library/asn1.h
+./container_binary_array.lo: ../include/net-snmp/output_api.h
+./container_binary_array.lo: ../include/net-snmp/library/snmp_debug.h
+./container_binary_array.lo: ../include/net-snmp/library/snmp_logging.h
 ./container_binary_array.lo: ../include/net-snmp/session_api.h
 ./container_binary_array.lo: ../include/net-snmp/library/callback.h
 ./container_binary_array.lo: ../include/net-snmp/library/snmp_transport.h
@@ -336,7 +391,6 @@
 ./container_binary_array.lo: ../include/net-snmp/library/check_varbind.h
 ./container_binary_array.lo: ../include/net-snmp/library/container.h
 ./container_binary_array.lo: ../include/net-snmp/library/factory.h
-./container_binary_array.lo: ../include/net-snmp/library/snmp_logging.h
 ./container_binary_array.lo: ../include/net-snmp/library/container_binary_array.h
 ./container_binary_array.lo: ../include/net-snmp/library/container_list_ssll.h
 ./container_binary_array.lo: ../include/net-snmp/library/container_iterator.h
@@ -349,8 +403,6 @@
 ./container_binary_array.lo: ../include/net-snmp/library/snmp_parse_args.h
 ./container_binary_array.lo: ../include/net-snmp/library/snmp_enum.h
 ./container_binary_array.lo: ../include/net-snmp/library/vacm.h
-./container_binary_array.lo: ../include/net-snmp/output_api.h
-./container_binary_array.lo: ../include/net-snmp/library/snmp_debug.h
 ./container_binary_array.lo: ../include/net-snmp/snmpv3_api.h
 ./container_binary_array.lo: ../include/net-snmp/library/snmpv3.h
 ./container_binary_array.lo: ../include/net-snmp/library/transform_oids.h
@@ -359,6 +411,7 @@
 ./container_binary_array.lo: ../include/net-snmp/library/lcd_time.h
 ./container_binary_array.lo: ../include/net-snmp/library/snmp_secmod.h
 ./container_binary_array.lo: ../include/net-snmp/library/snmpv3-security-includes.h
+./container_binary_array.lo: ../include/net-snmp/library/snmptsm.h
 ./container_binary_array.lo: ../include/net-snmp/library/snmpusm.h
 ./container_iterator.lo: ../include/net-snmp/net-snmp-config.h
 ./container_iterator.lo: ../include/net-snmp/net-snmp-includes.h
@@ -371,6 +424,9 @@
 ./container_iterator.lo: ../include/net-snmp/library/snmp_client.h
 ./container_iterator.lo: ../include/net-snmp/pdu_api.h
 ./container_iterator.lo: ../include/net-snmp/library/asn1.h
+./container_iterator.lo: ../include/net-snmp/output_api.h
+./container_iterator.lo: ../include/net-snmp/library/snmp_debug.h
+./container_iterator.lo: ../include/net-snmp/library/snmp_logging.h
 ./container_iterator.lo: ../include/net-snmp/session_api.h
 ./container_iterator.lo: ../include/net-snmp/library/callback.h
 ./container_iterator.lo: ../include/net-snmp/library/snmp_transport.h
@@ -404,7 +460,6 @@
 ./container_iterator.lo: ../include/net-snmp/library/check_varbind.h
 ./container_iterator.lo: ../include/net-snmp/library/container.h
 ./container_iterator.lo: ../include/net-snmp/library/factory.h
-./container_iterator.lo: ../include/net-snmp/library/snmp_logging.h
 ./container_iterator.lo: ../include/net-snmp/library/container_binary_array.h
 ./container_iterator.lo: ../include/net-snmp/library/container_list_ssll.h
 ./container_iterator.lo: ../include/net-snmp/library/container_iterator.h
@@ -417,8 +472,6 @@
 ./container_iterator.lo: ../include/net-snmp/library/snmp_parse_args.h
 ./container_iterator.lo: ../include/net-snmp/library/snmp_enum.h
 ./container_iterator.lo: ../include/net-snmp/library/vacm.h
-./container_iterator.lo: ../include/net-snmp/output_api.h
-./container_iterator.lo: ../include/net-snmp/library/snmp_debug.h
 ./container_iterator.lo: ../include/net-snmp/snmpv3_api.h
 ./container_iterator.lo: ../include/net-snmp/library/snmpv3.h
 ./container_iterator.lo: ../include/net-snmp/library/transform_oids.h
@@ -427,6 +480,7 @@
 ./container_iterator.lo: ../include/net-snmp/library/lcd_time.h
 ./container_iterator.lo: ../include/net-snmp/library/snmp_secmod.h
 ./container_iterator.lo: ../include/net-snmp/library/snmpv3-security-includes.h
+./container_iterator.lo: ../include/net-snmp/library/snmptsm.h
 ./container_iterator.lo: ../include/net-snmp/library/snmpusm.h
 ./container_list_ssll.lo: ../include/net-snmp/net-snmp-config.h
 ./container_list_ssll.lo: ../include/net-snmp/net-snmp-includes.h
@@ -439,6 +493,9 @@
 ./container_list_ssll.lo: ../include/net-snmp/library/snmp_client.h
 ./container_list_ssll.lo: ../include/net-snmp/pdu_api.h
 ./container_list_ssll.lo: ../include/net-snmp/library/asn1.h
+./container_list_ssll.lo: ../include/net-snmp/output_api.h
+./container_list_ssll.lo: ../include/net-snmp/library/snmp_debug.h
+./container_list_ssll.lo: ../include/net-snmp/library/snmp_logging.h
 ./container_list_ssll.lo: ../include/net-snmp/session_api.h
 ./container_list_ssll.lo: ../include/net-snmp/library/callback.h
 ./container_list_ssll.lo: ../include/net-snmp/library/snmp_transport.h
@@ -472,7 +529,6 @@
 ./container_list_ssll.lo: ../include/net-snmp/library/check_varbind.h
 ./container_list_ssll.lo: ../include/net-snmp/library/container.h
 ./container_list_ssll.lo: ../include/net-snmp/library/factory.h
-./container_list_ssll.lo: ../include/net-snmp/library/snmp_logging.h
 ./container_list_ssll.lo: ../include/net-snmp/library/container_binary_array.h
 ./container_list_ssll.lo: ../include/net-snmp/library/container_list_ssll.h
 ./container_list_ssll.lo: ../include/net-snmp/library/container_iterator.h
@@ -485,8 +541,6 @@
 ./container_list_ssll.lo: ../include/net-snmp/library/snmp_parse_args.h
 ./container_list_ssll.lo: ../include/net-snmp/library/snmp_enum.h
 ./container_list_ssll.lo: ../include/net-snmp/library/vacm.h
-./container_list_ssll.lo: ../include/net-snmp/output_api.h
-./container_list_ssll.lo: ../include/net-snmp/library/snmp_debug.h
 ./container_list_ssll.lo: ../include/net-snmp/snmpv3_api.h
 ./container_list_ssll.lo: ../include/net-snmp/library/snmpv3.h
 ./container_list_ssll.lo: ../include/net-snmp/library/transform_oids.h
@@ -495,18 +549,22 @@
 ./container_list_ssll.lo: ../include/net-snmp/library/lcd_time.h
 ./container_list_ssll.lo: ../include/net-snmp/library/snmp_secmod.h
 ./container_list_ssll.lo: ../include/net-snmp/library/snmpv3-security-includes.h
+./container_list_ssll.lo: ../include/net-snmp/library/snmptsm.h
 ./container_list_ssll.lo: ../include/net-snmp/library/snmpusm.h
 ./container_null.lo: ../include/net-snmp/net-snmp-config.h
 ./container_null.lo: ../include/net-snmp/net-snmp-includes.h
 ./container_null.lo: ../include/net-snmp/definitions.h
 ./container_null.lo: ../include/net-snmp/types.h 
-./container_null.lo: ../include/net-snmp/library/oid.h
+./container_null.lo:  ../include/net-snmp/library/oid.h
 ./container_null.lo: ../include/net-snmp/library/types.h
 ./container_null.lo: ../include/net-snmp/library/snmp_api.h
 ./container_null.lo: ../include/net-snmp/varbind_api.h
 ./container_null.lo: ../include/net-snmp/library/snmp_client.h
 ./container_null.lo: ../include/net-snmp/pdu_api.h
 ./container_null.lo: ../include/net-snmp/library/asn1.h
+./container_null.lo: ../include/net-snmp/output_api.h
+./container_null.lo: ../include/net-snmp/library/snmp_debug.h
+./container_null.lo: ../include/net-snmp/library/snmp_logging.h
 ./container_null.lo: ../include/net-snmp/session_api.h
 ./container_null.lo: ../include/net-snmp/library/callback.h
 ./container_null.lo: ../include/net-snmp/library/snmp_transport.h
@@ -530,7 +588,7 @@
 ./container_null.lo: ../include/net-snmp/library/snmp_impl.h
 ./container_null.lo: ../include/net-snmp/library/snmp.h
 ./container_null.lo: ../include/net-snmp/library/snmp-tc.h
-./container_null.lo: ../include/net-snmp/utilities.h
+./container_null.lo: ../include/net-snmp/utilities.h 
 ./container_null.lo: ../include/net-snmp/library/system.h
 ./container_null.lo: ../include/net-snmp/library/tools.h
 ./container_null.lo: ../include/net-snmp/library/int64.h
@@ -540,7 +598,6 @@
 ./container_null.lo: ../include/net-snmp/library/check_varbind.h
 ./container_null.lo: ../include/net-snmp/library/container.h
 ./container_null.lo: ../include/net-snmp/library/factory.h
-./container_null.lo: ../include/net-snmp/library/snmp_logging.h
 ./container_null.lo: ../include/net-snmp/library/container_binary_array.h
 ./container_null.lo: ../include/net-snmp/library/container_list_ssll.h
 ./container_null.lo: ../include/net-snmp/library/container_iterator.h
@@ -553,8 +610,6 @@
 ./container_null.lo: ../include/net-snmp/library/snmp_parse_args.h
 ./container_null.lo: ../include/net-snmp/library/snmp_enum.h
 ./container_null.lo: ../include/net-snmp/library/vacm.h
-./container_null.lo: ../include/net-snmp/output_api.h
-./container_null.lo: ../include/net-snmp/library/snmp_debug.h
 ./container_null.lo: ../include/net-snmp/snmpv3_api.h
 ./container_null.lo: ../include/net-snmp/library/snmpv3.h
 ./container_null.lo: ../include/net-snmp/library/transform_oids.h
@@ -563,6 +618,7 @@
 ./container_null.lo: ../include/net-snmp/library/lcd_time.h
 ./container_null.lo: ../include/net-snmp/library/snmp_secmod.h
 ./container_null.lo: ../include/net-snmp/library/snmpv3-security-includes.h
+./container_null.lo: ../include/net-snmp/library/snmptsm.h
 ./container_null.lo: ../include/net-snmp/library/snmpusm.h
 ./container_null.lo: ../include/net-snmp/library/container_null.h
 ./data_list.lo: ../include/net-snmp/net-snmp-config.h
@@ -576,6 +632,9 @@
 ./data_list.lo: ../include/net-snmp/library/snmp_client.h
 ./data_list.lo: ../include/net-snmp/pdu_api.h
 ./data_list.lo: ../include/net-snmp/library/asn1.h
+./data_list.lo: ../include/net-snmp/output_api.h
+./data_list.lo: ../include/net-snmp/library/snmp_debug.h
+./data_list.lo: ../include/net-snmp/library/snmp_logging.h
 ./data_list.lo: ../include/net-snmp/session_api.h
 ./data_list.lo: ../include/net-snmp/library/callback.h
 ./data_list.lo: ../include/net-snmp/library/snmp_transport.h
@@ -599,7 +658,7 @@
 ./data_list.lo: ../include/net-snmp/library/snmp_impl.h
 ./data_list.lo: ../include/net-snmp/library/snmp.h
 ./data_list.lo: ../include/net-snmp/library/snmp-tc.h
-./data_list.lo: ../include/net-snmp/utilities.h
+./data_list.lo: ../include/net-snmp/utilities.h 
 ./data_list.lo: ../include/net-snmp/library/system.h
 ./data_list.lo: ../include/net-snmp/library/tools.h
 ./data_list.lo: ../include/net-snmp/library/int64.h
@@ -607,9 +666,8 @@
 ./data_list.lo: ../include/net-snmp/library/snmp_alarm.h
 ./data_list.lo: ../include/net-snmp/library/data_list.h
 ./data_list.lo: ../include/net-snmp/library/check_varbind.h
-./data_list.lo: ../include/net-snmp/library/container.h
-./data_list.lo: ../include/net-snmp/library/factory.h
-./data_list.lo: ../include/net-snmp/library/snmp_logging.h
+./data_list.lo: ../include/net-snmp/library/container.h 
+./data_list.lo:  ../include/net-snmp/library/factory.h
 ./data_list.lo: ../include/net-snmp/library/container_binary_array.h
 ./data_list.lo: ../include/net-snmp/library/container_list_ssll.h
 ./data_list.lo: ../include/net-snmp/library/container_iterator.h
@@ -622,8 +680,6 @@
 ./data_list.lo: ../include/net-snmp/library/snmp_parse_args.h
 ./data_list.lo: ../include/net-snmp/library/snmp_enum.h
 ./data_list.lo: ../include/net-snmp/library/vacm.h
-./data_list.lo: ../include/net-snmp/output_api.h
-./data_list.lo: ../include/net-snmp/library/snmp_debug.h
 ./data_list.lo: ../include/net-snmp/snmpv3_api.h
 ./data_list.lo: ../include/net-snmp/library/snmpv3.h
 ./data_list.lo: ../include/net-snmp/library/transform_oids.h
@@ -632,6 +688,7 @@
 ./data_list.lo: ../include/net-snmp/library/lcd_time.h
 ./data_list.lo: ../include/net-snmp/library/snmp_secmod.h
 ./data_list.lo: ../include/net-snmp/library/snmpv3-security-includes.h
+./data_list.lo: ../include/net-snmp/library/snmptsm.h
 ./data_list.lo: ../include/net-snmp/library/snmpusm.h
 ./default_store.lo: ../include/net-snmp/net-snmp-config.h
 ./default_store.lo:  ../include/net-snmp/types.h
@@ -643,6 +700,9 @@
 ./default_store.lo: ../include/net-snmp/library/snmp_client.h
 ./default_store.lo: ../include/net-snmp/pdu_api.h
 ./default_store.lo: ../include/net-snmp/library/asn1.h
+./default_store.lo: ../include/net-snmp/output_api.h
+./default_store.lo: ../include/net-snmp/library/snmp_debug.h
+./default_store.lo: ../include/net-snmp/library/snmp_logging.h
 ./default_store.lo: ../include/net-snmp/session_api.h
 ./default_store.lo: ../include/net-snmp/library/callback.h
 ./default_store.lo: ../include/net-snmp/library/snmp_transport.h
@@ -666,9 +726,6 @@
 ./default_store.lo: ../include/net-snmp/library/snmp_impl.h
 ./default_store.lo: ../include/net-snmp/library/snmp.h
 ./default_store.lo: ../include/net-snmp/library/snmp-tc.h
-./default_store.lo: ../include/net-snmp/output_api.h
-./default_store.lo: ../include/net-snmp/library/snmp_debug.h
-./default_store.lo: ../include/net-snmp/library/snmp_logging.h
 ./default_store.lo: ../include/net-snmp/config_api.h
 ./default_store.lo: ../include/net-snmp/library/read_config.h
 ./default_store.lo: ../include/net-snmp/library/default_store.h
@@ -702,6 +759,9 @@
 ./dir_utils.lo: ../include/net-snmp/library/snmp_client.h
 ./dir_utils.lo: ../include/net-snmp/pdu_api.h
 ./dir_utils.lo: ../include/net-snmp/library/asn1.h
+./dir_utils.lo: ../include/net-snmp/output_api.h
+./dir_utils.lo: ../include/net-snmp/library/snmp_debug.h
+./dir_utils.lo: ../include/net-snmp/library/snmp_logging.h
 ./dir_utils.lo: ../include/net-snmp/session_api.h
 ./dir_utils.lo: ../include/net-snmp/library/callback.h
 ./dir_utils.lo: ../include/net-snmp/library/snmp_transport.h
@@ -725,7 +785,7 @@
 ./dir_utils.lo: ../include/net-snmp/library/snmp_impl.h
 ./dir_utils.lo: ../include/net-snmp/library/snmp.h
 ./dir_utils.lo: ../include/net-snmp/library/snmp-tc.h
-./dir_utils.lo: ../include/net-snmp/utilities.h
+./dir_utils.lo: ../include/net-snmp/utilities.h 
 ./dir_utils.lo: ../include/net-snmp/library/system.h
 ./dir_utils.lo: ../include/net-snmp/library/tools.h
 ./dir_utils.lo: ../include/net-snmp/library/int64.h
@@ -733,9 +793,8 @@
 ./dir_utils.lo: ../include/net-snmp/library/snmp_alarm.h
 ./dir_utils.lo: ../include/net-snmp/library/data_list.h
 ./dir_utils.lo: ../include/net-snmp/library/check_varbind.h
-./dir_utils.lo: ../include/net-snmp/library/container.h
-./dir_utils.lo: ../include/net-snmp/library/factory.h
-./dir_utils.lo: ../include/net-snmp/library/snmp_logging.h
+./dir_utils.lo: ../include/net-snmp/library/container.h 
+./dir_utils.lo:  ../include/net-snmp/library/factory.h
 ./dir_utils.lo: ../include/net-snmp/library/container_binary_array.h
 ./dir_utils.lo: ../include/net-snmp/library/container_list_ssll.h
 ./dir_utils.lo: ../include/net-snmp/library/container_iterator.h
@@ -748,8 +807,6 @@
 ./dir_utils.lo: ../include/net-snmp/library/snmp_parse_args.h
 ./dir_utils.lo: ../include/net-snmp/library/snmp_enum.h
 ./dir_utils.lo: ../include/net-snmp/library/vacm.h
-./dir_utils.lo: ../include/net-snmp/output_api.h
-./dir_utils.lo: ../include/net-snmp/library/snmp_debug.h
 ./dir_utils.lo: ../include/net-snmp/snmpv3_api.h
 ./dir_utils.lo: ../include/net-snmp/library/snmpv3.h
 ./dir_utils.lo: ../include/net-snmp/library/transform_oids.h
@@ -758,6 +815,7 @@
 ./dir_utils.lo: ../include/net-snmp/library/lcd_time.h
 ./dir_utils.lo: ../include/net-snmp/library/snmp_secmod.h
 ./dir_utils.lo: ../include/net-snmp/library/snmpv3-security-includes.h
+./dir_utils.lo: ../include/net-snmp/library/snmptsm.h
 ./dir_utils.lo: ../include/net-snmp/library/snmpusm.h 
 ./dir_utils.lo: ../include/net-snmp/library/file_utils.h
 ./dir_utils.lo: ../include/net-snmp/library/dir_utils.h
@@ -772,6 +830,9 @@
 ./fd_event_manager.lo: ../include/net-snmp/library/snmp_client.h
 ./fd_event_manager.lo: ../include/net-snmp/pdu_api.h
 ./fd_event_manager.lo: ../include/net-snmp/library/asn1.h
+./fd_event_manager.lo: ../include/net-snmp/output_api.h
+./fd_event_manager.lo: ../include/net-snmp/library/snmp_debug.h
+./fd_event_manager.lo: ../include/net-snmp/library/snmp_logging.h
 ./fd_event_manager.lo: ../include/net-snmp/session_api.h
 ./fd_event_manager.lo: ../include/net-snmp/library/callback.h
 ./fd_event_manager.lo: ../include/net-snmp/library/snmp_transport.h
@@ -795,7 +856,7 @@
 ./fd_event_manager.lo: ../include/net-snmp/library/snmp_impl.h
 ./fd_event_manager.lo: ../include/net-snmp/library/snmp.h
 ./fd_event_manager.lo: ../include/net-snmp/library/snmp-tc.h
-./fd_event_manager.lo: ../include/net-snmp/utilities.h
+./fd_event_manager.lo: ../include/net-snmp/utilities.h 
 ./fd_event_manager.lo: ../include/net-snmp/library/system.h
 ./fd_event_manager.lo: ../include/net-snmp/library/tools.h
 ./fd_event_manager.lo: ../include/net-snmp/library/int64.h
@@ -805,7 +866,6 @@
 ./fd_event_manager.lo: ../include/net-snmp/library/check_varbind.h
 ./fd_event_manager.lo: ../include/net-snmp/library/container.h
 ./fd_event_manager.lo: ../include/net-snmp/library/factory.h
-./fd_event_manager.lo: ../include/net-snmp/library/snmp_logging.h
 ./fd_event_manager.lo: ../include/net-snmp/library/container_binary_array.h
 ./fd_event_manager.lo: ../include/net-snmp/library/container_list_ssll.h
 ./fd_event_manager.lo: ../include/net-snmp/library/container_iterator.h
@@ -818,8 +878,6 @@
 ./fd_event_manager.lo: ../include/net-snmp/library/snmp_parse_args.h
 ./fd_event_manager.lo: ../include/net-snmp/library/snmp_enum.h
 ./fd_event_manager.lo: ../include/net-snmp/library/vacm.h
-./fd_event_manager.lo: ../include/net-snmp/output_api.h
-./fd_event_manager.lo: ../include/net-snmp/library/snmp_debug.h
 ./fd_event_manager.lo: ../include/net-snmp/snmpv3_api.h
 ./fd_event_manager.lo: ../include/net-snmp/library/snmpv3.h
 ./fd_event_manager.lo: ../include/net-snmp/library/transform_oids.h
@@ -828,6 +886,7 @@
 ./fd_event_manager.lo: ../include/net-snmp/library/lcd_time.h
 ./fd_event_manager.lo: ../include/net-snmp/library/snmp_secmod.h
 ./fd_event_manager.lo: ../include/net-snmp/library/snmpv3-security-includes.h
+./fd_event_manager.lo: ../include/net-snmp/library/snmptsm.h
 ./fd_event_manager.lo: ../include/net-snmp/library/snmpusm.h
 ./fd_event_manager.lo: ../include/net-snmp/library/fd_event_manager.h
 ./fd_event_manager.lo: ../include/net-snmp/library/large_fd_set.h
@@ -842,6 +901,9 @@
 ./file_utils.lo: ../include/net-snmp/library/snmp_client.h
 ./file_utils.lo: ../include/net-snmp/pdu_api.h
 ./file_utils.lo: ../include/net-snmp/library/asn1.h
+./file_utils.lo: ../include/net-snmp/output_api.h
+./file_utils.lo: ../include/net-snmp/library/snmp_debug.h
+./file_utils.lo: ../include/net-snmp/library/snmp_logging.h
 ./file_utils.lo: ../include/net-snmp/session_api.h
 ./file_utils.lo: ../include/net-snmp/library/callback.h
 ./file_utils.lo: ../include/net-snmp/library/snmp_transport.h
@@ -865,7 +927,7 @@
 ./file_utils.lo: ../include/net-snmp/library/snmp_impl.h
 ./file_utils.lo: ../include/net-snmp/library/snmp.h
 ./file_utils.lo: ../include/net-snmp/library/snmp-tc.h
-./file_utils.lo: ../include/net-snmp/utilities.h
+./file_utils.lo: ../include/net-snmp/utilities.h 
 ./file_utils.lo: ../include/net-snmp/library/system.h
 ./file_utils.lo: ../include/net-snmp/library/tools.h
 ./file_utils.lo: ../include/net-snmp/library/int64.h
@@ -875,7 +937,6 @@
 ./file_utils.lo: ../include/net-snmp/library/check_varbind.h
 ./file_utils.lo: ../include/net-snmp/library/container.h
 ./file_utils.lo: ../include/net-snmp/library/factory.h
-./file_utils.lo: ../include/net-snmp/library/snmp_logging.h
 ./file_utils.lo: ../include/net-snmp/library/container_binary_array.h
 ./file_utils.lo: ../include/net-snmp/library/container_list_ssll.h
 ./file_utils.lo: ../include/net-snmp/library/container_iterator.h
@@ -888,8 +949,6 @@
 ./file_utils.lo: ../include/net-snmp/library/snmp_parse_args.h
 ./file_utils.lo: ../include/net-snmp/library/snmp_enum.h
 ./file_utils.lo: ../include/net-snmp/library/vacm.h
-./file_utils.lo: ../include/net-snmp/output_api.h
-./file_utils.lo: ../include/net-snmp/library/snmp_debug.h
 ./file_utils.lo: ../include/net-snmp/snmpv3_api.h
 ./file_utils.lo: ../include/net-snmp/library/snmpv3.h
 ./file_utils.lo: ../include/net-snmp/library/transform_oids.h
@@ -898,6 +957,7 @@
 ./file_utils.lo: ../include/net-snmp/library/lcd_time.h
 ./file_utils.lo: ../include/net-snmp/library/snmp_secmod.h
 ./file_utils.lo: ../include/net-snmp/library/snmpv3-security-includes.h
+./file_utils.lo: ../include/net-snmp/library/snmptsm.h
 ./file_utils.lo: ../include/net-snmp/library/snmpusm.h 
 ./file_utils.lo: ../include/net-snmp/library/file_utils.h
 ./getopt.lo: ../include/net-snmp/net-snmp-config.h 
@@ -912,6 +972,9 @@
 ./gettimeofday.lo: ../include/net-snmp/library/snmp_client.h
 ./gettimeofday.lo: ../include/net-snmp/pdu_api.h
 ./gettimeofday.lo: ../include/net-snmp/library/asn1.h
+./gettimeofday.lo: ../include/net-snmp/output_api.h
+./gettimeofday.lo: ../include/net-snmp/library/snmp_debug.h
+./gettimeofday.lo: ../include/net-snmp/library/snmp_logging.h
 ./gettimeofday.lo: ../include/net-snmp/session_api.h
 ./gettimeofday.lo: ../include/net-snmp/library/callback.h
 ./gettimeofday.lo: ../include/net-snmp/library/snmp_transport.h
@@ -946,6 +1009,9 @@
 ./inet_ntop.lo: ../include/net-snmp/library/snmp_client.h
 ./inet_ntop.lo: ../include/net-snmp/pdu_api.h
 ./inet_ntop.lo: ../include/net-snmp/library/asn1.h
+./inet_ntop.lo: ../include/net-snmp/output_api.h
+./inet_ntop.lo: ../include/net-snmp/library/snmp_debug.h
+./inet_ntop.lo: ../include/net-snmp/library/snmp_logging.h
 ./inet_ntop.lo: ../include/net-snmp/session_api.h
 ./inet_ntop.lo: ../include/net-snmp/library/callback.h
 ./inet_ntop.lo: ../include/net-snmp/library/snmp_transport.h
@@ -979,6 +1045,9 @@
 ./inet_pton.lo: ../include/net-snmp/library/snmp_client.h
 ./inet_pton.lo: ../include/net-snmp/pdu_api.h
 ./inet_pton.lo: ../include/net-snmp/library/asn1.h
+./inet_pton.lo: ../include/net-snmp/output_api.h
+./inet_pton.lo: ../include/net-snmp/library/snmp_debug.h
+./inet_pton.lo: ../include/net-snmp/library/snmp_logging.h
 ./inet_pton.lo: ../include/net-snmp/session_api.h
 ./inet_pton.lo: ../include/net-snmp/library/callback.h
 ./inet_pton.lo: ../include/net-snmp/library/snmp_transport.h
@@ -1011,6 +1080,9 @@
 ./int64.lo: ../include/net-snmp/varbind_api.h
 ./int64.lo: ../include/net-snmp/library/snmp_client.h
 ./int64.lo: ../include/net-snmp/pdu_api.h ../include/net-snmp/library/asn1.h
+./int64.lo: ../include/net-snmp/output_api.h
+./int64.lo: ../include/net-snmp/library/snmp_debug.h
+./int64.lo: ../include/net-snmp/library/snmp_logging.h 
 ./int64.lo: ../include/net-snmp/session_api.h
 ./int64.lo: ../include/net-snmp/library/callback.h
 ./int64.lo: ../include/net-snmp/library/snmp_transport.h
@@ -1035,8 +1107,6 @@
 ./int64.lo: ../include/net-snmp/library/snmp-tc.h
 ./int64.lo: ../include/net-snmp/library/int64.h
 ./int64.lo: ../include/net-snmp/library/snmp_assert.h
-./int64.lo: ../include/net-snmp/library/snmp_logging.h 
-./int64.lo: ../include/net-snmp/library/snmp_debug.h
 ./keytools.lo: ../include/net-snmp/net-snmp-config.h 
 ./keytools.lo:  ../include/net-snmp/types.h
 ./keytools.lo:  ../include/net-snmp/library/oid.h
@@ -1047,6 +1117,9 @@
 ./keytools.lo: ../include/net-snmp/library/snmp_client.h
 ./keytools.lo: ../include/net-snmp/pdu_api.h
 ./keytools.lo: ../include/net-snmp/library/asn1.h
+./keytools.lo: ../include/net-snmp/output_api.h
+./keytools.lo: ../include/net-snmp/library/snmp_debug.h
+./keytools.lo: ../include/net-snmp/library/snmp_logging.h
 ./keytools.lo: ../include/net-snmp/session_api.h
 ./keytools.lo: ../include/net-snmp/library/callback.h
 ./keytools.lo: ../include/net-snmp/library/snmp_transport.h
@@ -1070,9 +1143,6 @@
 ./keytools.lo: ../include/net-snmp/library/snmp_impl.h
 ./keytools.lo: ../include/net-snmp/library/snmp.h
 ./keytools.lo: ../include/net-snmp/library/snmp-tc.h
-./keytools.lo: ../include/net-snmp/output_api.h
-./keytools.lo: ../include/net-snmp/library/snmp_debug.h
-./keytools.lo: ../include/net-snmp/library/snmp_logging.h
 ./keytools.lo: ../include/net-snmp/utilities.h 
 ./keytools.lo: ../include/net-snmp/library/system.h
 ./keytools.lo: ../include/net-snmp/library/tools.h
@@ -1094,7 +1164,7 @@
 ./keytools.lo: ../include/net-snmp/library/transform_oids.h
 ./large_fd_set.lo: ../include/net-snmp/net-snmp-config.h 
 ./large_fd_set.lo: ../include/net-snmp/net-snmp-includes.h
-./large_fd_set.lo:  ../include/net-snmp/definitions.h
+./large_fd_set.lo: ../include/net-snmp/definitions.h
 ./large_fd_set.lo: ../include/net-snmp/types.h 
 ./large_fd_set.lo: ../include/net-snmp/library/oid.h
 ./large_fd_set.lo: ../include/net-snmp/library/types.h
@@ -1103,6 +1173,9 @@
 ./large_fd_set.lo: ../include/net-snmp/library/snmp_client.h
 ./large_fd_set.lo: ../include/net-snmp/pdu_api.h
 ./large_fd_set.lo: ../include/net-snmp/library/asn1.h
+./large_fd_set.lo: ../include/net-snmp/output_api.h
+./large_fd_set.lo: ../include/net-snmp/library/snmp_debug.h
+./large_fd_set.lo: ../include/net-snmp/library/snmp_logging.h
 ./large_fd_set.lo: ../include/net-snmp/session_api.h
 ./large_fd_set.lo: ../include/net-snmp/library/callback.h
 ./large_fd_set.lo: ../include/net-snmp/library/snmp_transport.h
@@ -1126,7 +1199,7 @@
 ./large_fd_set.lo: ../include/net-snmp/library/snmp_impl.h
 ./large_fd_set.lo: ../include/net-snmp/library/snmp.h
 ./large_fd_set.lo: ../include/net-snmp/library/snmp-tc.h
-./large_fd_set.lo: ../include/net-snmp/utilities.h
+./large_fd_set.lo: ../include/net-snmp/utilities.h 
 ./large_fd_set.lo: ../include/net-snmp/library/system.h
 ./large_fd_set.lo: ../include/net-snmp/library/tools.h
 ./large_fd_set.lo: ../include/net-snmp/library/int64.h
@@ -1136,7 +1209,6 @@
 ./large_fd_set.lo: ../include/net-snmp/library/check_varbind.h
 ./large_fd_set.lo: ../include/net-snmp/library/container.h
 ./large_fd_set.lo: ../include/net-snmp/library/factory.h
-./large_fd_set.lo: ../include/net-snmp/library/snmp_logging.h
 ./large_fd_set.lo: ../include/net-snmp/library/container_binary_array.h
 ./large_fd_set.lo: ../include/net-snmp/library/container_list_ssll.h
 ./large_fd_set.lo: ../include/net-snmp/library/container_iterator.h
@@ -1149,8 +1221,6 @@
 ./large_fd_set.lo: ../include/net-snmp/library/snmp_parse_args.h
 ./large_fd_set.lo: ../include/net-snmp/library/snmp_enum.h
 ./large_fd_set.lo: ../include/net-snmp/library/vacm.h
-./large_fd_set.lo: ../include/net-snmp/output_api.h
-./large_fd_set.lo: ../include/net-snmp/library/snmp_debug.h
 ./large_fd_set.lo: ../include/net-snmp/snmpv3_api.h
 ./large_fd_set.lo: ../include/net-snmp/library/snmpv3.h
 ./large_fd_set.lo: ../include/net-snmp/library/transform_oids.h
@@ -1159,6 +1229,7 @@
 ./large_fd_set.lo: ../include/net-snmp/library/lcd_time.h
 ./large_fd_set.lo: ../include/net-snmp/library/snmp_secmod.h
 ./large_fd_set.lo: ../include/net-snmp/library/snmpv3-security-includes.h
+./large_fd_set.lo: ../include/net-snmp/library/snmptsm.h
 ./large_fd_set.lo: ../include/net-snmp/library/snmpusm.h
 ./large_fd_set.lo: ../include/net-snmp/library/large_fd_set.h
 ./lcd_time.lo: ../include/net-snmp/net-snmp-config.h 
@@ -1171,6 +1242,9 @@
 ./lcd_time.lo: ../include/net-snmp/library/snmp_client.h
 ./lcd_time.lo: ../include/net-snmp/pdu_api.h
 ./lcd_time.lo: ../include/net-snmp/library/asn1.h
+./lcd_time.lo: ../include/net-snmp/output_api.h
+./lcd_time.lo: ../include/net-snmp/library/snmp_debug.h
+./lcd_time.lo: ../include/net-snmp/library/snmp_logging.h
 ./lcd_time.lo: ../include/net-snmp/session_api.h
 ./lcd_time.lo: ../include/net-snmp/library/callback.h
 ./lcd_time.lo: ../include/net-snmp/library/snmp_transport.h
@@ -1194,9 +1268,6 @@
 ./lcd_time.lo: ../include/net-snmp/library/snmp_impl.h
 ./lcd_time.lo: ../include/net-snmp/library/snmp.h
 ./lcd_time.lo: ../include/net-snmp/library/snmp-tc.h
-./lcd_time.lo: ../include/net-snmp/output_api.h
-./lcd_time.lo: ../include/net-snmp/library/snmp_debug.h
-./lcd_time.lo: ../include/net-snmp/library/snmp_logging.h
 ./lcd_time.lo: ../include/net-snmp/utilities.h 
 ./lcd_time.lo: ../include/net-snmp/library/system.h
 ./lcd_time.lo: ../include/net-snmp/library/tools.h
@@ -1220,22 +1291,24 @@
 ./lcd_time.lo: ../include/net-snmp/library/snmpv3.h
 ./lcd_time.lo: ../include/net-snmp/library/transform_oids.h
 ./md5.lo: ../include/net-snmp/net-snmp-config.h 
-./md5.lo: ../include/net-snmp/net-snmp-includes.h 
-./md5.lo:  ../include/net-snmp/definitions.h
-./md5.lo: ../include/net-snmp/types.h 
-./md5.lo: ../include/net-snmp/library/oid.h
+./md5.lo: ../include/net-snmp/net-snmp-includes.h
+./md5.lo: ../include/net-snmp/definitions.h ../include/net-snmp/types.h
+./md5.lo:  ../include/net-snmp/library/oid.h
 ./md5.lo: ../include/net-snmp/library/types.h
 ./md5.lo: ../include/net-snmp/library/snmp_api.h
 ./md5.lo: ../include/net-snmp/varbind_api.h
 ./md5.lo: ../include/net-snmp/library/snmp_client.h
 ./md5.lo: ../include/net-snmp/pdu_api.h ../include/net-snmp/library/asn1.h
+./md5.lo: ../include/net-snmp/output_api.h
+./md5.lo: ../include/net-snmp/library/snmp_debug.h
+./md5.lo: ../include/net-snmp/library/snmp_logging.h 
 ./md5.lo: ../include/net-snmp/session_api.h
 ./md5.lo: ../include/net-snmp/library/callback.h
 ./md5.lo: ../include/net-snmp/library/snmp_transport.h
 ./md5.lo: ../include/net-snmp/library/snmp_service.h
 ./md5.lo: ../include/net-snmp/library/snmpCallbackDomain.h
 ./md5.lo: ../include/net-snmp/library/snmpUnixDomain.h 
-./md5.lo: ../include/net-snmp/library/snmpUDPDomain.h
+./md5.lo:  ../include/net-snmp/library/snmpUDPDomain.h
 ./md5.lo: ../include/net-snmp/library/snmpUDPIPv4BaseDomain.h
 ./md5.lo: ../include/net-snmp/library/snmpIPv4BaseDomain.h
 ./md5.lo: ../include/net-snmp/library/snmpUDPBaseDomain.h
@@ -1251,7 +1324,7 @@
 ./md5.lo: ../include/net-snmp/library/snmp_impl.h
 ./md5.lo: ../include/net-snmp/library/snmp.h
 ./md5.lo: ../include/net-snmp/library/snmp-tc.h
-./md5.lo: ../include/net-snmp/utilities.h
+./md5.lo: ../include/net-snmp/utilities.h 
 ./md5.lo: ../include/net-snmp/library/system.h
 ./md5.lo: ../include/net-snmp/library/tools.h
 ./md5.lo: ../include/net-snmp/library/int64.h
@@ -1259,9 +1332,8 @@
 ./md5.lo: ../include/net-snmp/library/snmp_alarm.h
 ./md5.lo: ../include/net-snmp/library/data_list.h
 ./md5.lo: ../include/net-snmp/library/check_varbind.h
-./md5.lo: ../include/net-snmp/library/container.h
-./md5.lo: ../include/net-snmp/library/factory.h
-./md5.lo: ../include/net-snmp/library/snmp_logging.h 
+./md5.lo: ../include/net-snmp/library/container.h 
+./md5.lo:  ../include/net-snmp/library/factory.h
 ./md5.lo: ../include/net-snmp/library/container_binary_array.h
 ./md5.lo: ../include/net-snmp/library/container_list_ssll.h
 ./md5.lo: ../include/net-snmp/library/container_iterator.h
@@ -1272,9 +1344,7 @@
 ./md5.lo: ../include/net-snmp/library/default_store.h
 ./md5.lo: ../include/net-snmp/library/snmp_parse_args.h
 ./md5.lo: ../include/net-snmp/library/snmp_enum.h
-./md5.lo: ../include/net-snmp/library/vacm.h ../include/net-snmp/output_api.h
-./md5.lo: ../include/net-snmp/library/snmp_debug.h
-./md5.lo: ../include/net-snmp/snmpv3_api.h
+./md5.lo: ../include/net-snmp/library/vacm.h ../include/net-snmp/snmpv3_api.h
 ./md5.lo: ../include/net-snmp/library/snmpv3.h
 ./md5.lo: ../include/net-snmp/library/transform_oids.h
 ./md5.lo: ../include/net-snmp/library/keytools.h
@@ -1282,6 +1352,7 @@
 ./md5.lo: ../include/net-snmp/library/lcd_time.h
 ./md5.lo: ../include/net-snmp/library/snmp_secmod.h
 ./md5.lo: ../include/net-snmp/library/snmpv3-security-includes.h
+./md5.lo: ../include/net-snmp/library/snmptsm.h
 ./md5.lo: ../include/net-snmp/library/snmpusm.h
 ./md5.lo: ../include/net-snmp/library/md5.h
 ./mib.lo: ../include/net-snmp/net-snmp-config.h 
@@ -1293,6 +1364,9 @@
 ./mib.lo: ../include/net-snmp/varbind_api.h
 ./mib.lo: ../include/net-snmp/library/snmp_client.h
 ./mib.lo: ../include/net-snmp/pdu_api.h ../include/net-snmp/library/asn1.h
+./mib.lo: ../include/net-snmp/output_api.h
+./mib.lo: ../include/net-snmp/library/snmp_debug.h
+./mib.lo: ../include/net-snmp/library/snmp_logging.h 
 ./mib.lo: ../include/net-snmp/session_api.h
 ./mib.lo: ../include/net-snmp/library/callback.h
 ./mib.lo: ../include/net-snmp/library/snmp_transport.h
@@ -1315,9 +1389,6 @@
 ./mib.lo: ../include/net-snmp/library/snmp_impl.h
 ./mib.lo: ../include/net-snmp/library/snmp.h
 ./mib.lo: ../include/net-snmp/library/snmp-tc.h
-./mib.lo: ../include/net-snmp/output_api.h
-./mib.lo: ../include/net-snmp/library/snmp_debug.h
-./mib.lo: ../include/net-snmp/library/snmp_logging.h 
 ./mib.lo: ../include/net-snmp/config_api.h
 ./mib.lo: ../include/net-snmp/library/read_config.h
 ./mib.lo: ../include/net-snmp/library/default_store.h
@@ -1352,6 +1423,9 @@
 ./oid_stash.lo: ../include/net-snmp/library/snmp_client.h
 ./oid_stash.lo: ../include/net-snmp/pdu_api.h
 ./oid_stash.lo: ../include/net-snmp/library/asn1.h
+./oid_stash.lo: ../include/net-snmp/output_api.h
+./oid_stash.lo: ../include/net-snmp/library/snmp_debug.h
+./oid_stash.lo: ../include/net-snmp/library/snmp_logging.h
 ./oid_stash.lo: ../include/net-snmp/session_api.h
 ./oid_stash.lo: ../include/net-snmp/library/callback.h
 ./oid_stash.lo: ../include/net-snmp/library/snmp_transport.h
@@ -1375,7 +1449,7 @@
 ./oid_stash.lo: ../include/net-snmp/library/snmp_impl.h
 ./oid_stash.lo: ../include/net-snmp/library/snmp.h
 ./oid_stash.lo: ../include/net-snmp/library/snmp-tc.h
-./oid_stash.lo: ../include/net-snmp/utilities.h
+./oid_stash.lo: ../include/net-snmp/utilities.h 
 ./oid_stash.lo: ../include/net-snmp/library/system.h
 ./oid_stash.lo: ../include/net-snmp/library/tools.h
 ./oid_stash.lo: ../include/net-snmp/library/int64.h
@@ -1385,7 +1459,6 @@
 ./oid_stash.lo: ../include/net-snmp/library/check_varbind.h
 ./oid_stash.lo: ../include/net-snmp/library/container.h
 ./oid_stash.lo: ../include/net-snmp/library/factory.h
-./oid_stash.lo: ../include/net-snmp/library/snmp_logging.h
 ./oid_stash.lo: ../include/net-snmp/library/container_binary_array.h
 ./oid_stash.lo: ../include/net-snmp/library/container_list_ssll.h
 ./oid_stash.lo: ../include/net-snmp/library/container_iterator.h
@@ -1398,8 +1471,6 @@
 ./oid_stash.lo: ../include/net-snmp/library/snmp_parse_args.h
 ./oid_stash.lo: ../include/net-snmp/library/snmp_enum.h
 ./oid_stash.lo: ../include/net-snmp/library/vacm.h
-./oid_stash.lo: ../include/net-snmp/output_api.h
-./oid_stash.lo: ../include/net-snmp/library/snmp_debug.h
 ./oid_stash.lo: ../include/net-snmp/snmpv3_api.h
 ./oid_stash.lo: ../include/net-snmp/library/snmpv3.h
 ./oid_stash.lo: ../include/net-snmp/library/transform_oids.h
@@ -1408,6 +1479,7 @@
 ./oid_stash.lo: ../include/net-snmp/library/lcd_time.h
 ./oid_stash.lo: ../include/net-snmp/library/snmp_secmod.h
 ./oid_stash.lo: ../include/net-snmp/library/snmpv3-security-includes.h
+./oid_stash.lo: ../include/net-snmp/library/snmptsm.h
 ./oid_stash.lo: ../include/net-snmp/library/snmpusm.h
 ./opendir.lo: ../include/net-snmp/net-snmp-config.h
 ./opendir.lo: ../include/net-snmp/types.h 
@@ -1419,6 +1491,9 @@
 ./opendir.lo: ../include/net-snmp/library/snmp_client.h
 ./opendir.lo: ../include/net-snmp/pdu_api.h
 ./opendir.lo: ../include/net-snmp/library/asn1.h
+./opendir.lo: ../include/net-snmp/output_api.h
+./opendir.lo: ../include/net-snmp/library/snmp_debug.h
+./opendir.lo: ../include/net-snmp/library/snmp_logging.h
 ./opendir.lo: ../include/net-snmp/session_api.h
 ./opendir.lo: ../include/net-snmp/library/callback.h
 ./opendir.lo: ../include/net-snmp/library/snmp_transport.h
@@ -1451,6 +1526,9 @@
 ./parse.lo: ../include/net-snmp/varbind_api.h
 ./parse.lo: ../include/net-snmp/library/snmp_client.h
 ./parse.lo: ../include/net-snmp/pdu_api.h ../include/net-snmp/library/asn1.h
+./parse.lo: ../include/net-snmp/output_api.h
+./parse.lo: ../include/net-snmp/library/snmp_debug.h
+./parse.lo: ../include/net-snmp/library/snmp_logging.h 
 ./parse.lo: ../include/net-snmp/session_api.h
 ./parse.lo: ../include/net-snmp/library/callback.h
 ./parse.lo: ../include/net-snmp/library/snmp_transport.h
@@ -1473,9 +1551,6 @@
 ./parse.lo: ../include/net-snmp/library/snmp_impl.h
 ./parse.lo: ../include/net-snmp/library/snmp.h
 ./parse.lo: ../include/net-snmp/library/snmp-tc.h
-./parse.lo: ../include/net-snmp/output_api.h
-./parse.lo: ../include/net-snmp/library/snmp_debug.h
-./parse.lo: ../include/net-snmp/library/snmp_logging.h 
 ./parse.lo: ../include/net-snmp/config_api.h
 ./parse.lo: ../include/net-snmp/library/read_config.h
 ./parse.lo: ../include/net-snmp/library/default_store.h
@@ -1509,6 +1584,9 @@
 ./read_config.lo: ../include/net-snmp/library/snmp_client.h
 ./read_config.lo: ../include/net-snmp/pdu_api.h
 ./read_config.lo: ../include/net-snmp/library/asn1.h
+./read_config.lo: ../include/net-snmp/output_api.h
+./read_config.lo: ../include/net-snmp/library/snmp_debug.h
+./read_config.lo: ../include/net-snmp/library/snmp_logging.h
 ./read_config.lo: ../include/net-snmp/session_api.h
 ./read_config.lo: ../include/net-snmp/library/callback.h
 ./read_config.lo: ../include/net-snmp/library/snmp_transport.h
@@ -1532,9 +1610,6 @@
 ./read_config.lo: ../include/net-snmp/library/snmp_impl.h
 ./read_config.lo: ../include/net-snmp/library/snmp.h
 ./read_config.lo: ../include/net-snmp/library/snmp-tc.h
-./read_config.lo: ../include/net-snmp/output_api.h
-./read_config.lo: ../include/net-snmp/library/snmp_debug.h
-./read_config.lo: ../include/net-snmp/library/snmp_logging.h
 ./read_config.lo: ../include/net-snmp/config_api.h
 ./read_config.lo: ../include/net-snmp/library/read_config.h
 ./read_config.lo: ../include/net-snmp/library/default_store.h
@@ -1567,6 +1642,9 @@
 ./readdir.lo: ../include/net-snmp/library/snmp_client.h
 ./readdir.lo: ../include/net-snmp/pdu_api.h
 ./readdir.lo: ../include/net-snmp/library/asn1.h
+./readdir.lo: ../include/net-snmp/output_api.h
+./readdir.lo: ../include/net-snmp/library/snmp_debug.h
+./readdir.lo: ../include/net-snmp/library/snmp_logging.h
 ./readdir.lo: ../include/net-snmp/session_api.h
 ./readdir.lo: ../include/net-snmp/library/callback.h
 ./readdir.lo: ../include/net-snmp/library/snmp_transport.h
@@ -1599,6 +1677,9 @@
 ./scapi.lo: ../include/net-snmp/varbind_api.h
 ./scapi.lo: ../include/net-snmp/library/snmp_client.h
 ./scapi.lo: ../include/net-snmp/pdu_api.h ../include/net-snmp/library/asn1.h
+./scapi.lo: ../include/net-snmp/output_api.h
+./scapi.lo: ../include/net-snmp/library/snmp_debug.h
+./scapi.lo: ../include/net-snmp/library/snmp_logging.h 
 ./scapi.lo: ../include/net-snmp/session_api.h
 ./scapi.lo: ../include/net-snmp/library/callback.h
 ./scapi.lo: ../include/net-snmp/library/snmp_transport.h
@@ -1621,9 +1702,6 @@
 ./scapi.lo: ../include/net-snmp/library/snmp_impl.h
 ./scapi.lo: ../include/net-snmp/library/snmp.h
 ./scapi.lo: ../include/net-snmp/library/snmp-tc.h
-./scapi.lo: ../include/net-snmp/output_api.h
-./scapi.lo: ../include/net-snmp/library/snmp_debug.h
-./scapi.lo: ../include/net-snmp/library/snmp_logging.h 
 ./scapi.lo: ../include/net-snmp/utilities.h 
 ./scapi.lo: ../include/net-snmp/library/system.h
 ./scapi.lo: ../include/net-snmp/library/tools.h
@@ -1655,6 +1733,9 @@
 ./snmp-tc.lo: ../include/net-snmp/library/snmp_client.h
 ./snmp-tc.lo: ../include/net-snmp/pdu_api.h
 ./snmp-tc.lo: ../include/net-snmp/library/asn1.h
+./snmp-tc.lo: ../include/net-snmp/output_api.h
+./snmp-tc.lo: ../include/net-snmp/library/snmp_debug.h
+./snmp-tc.lo: ../include/net-snmp/library/snmp_logging.h
 ./snmp-tc.lo: ../include/net-snmp/session_api.h
 ./snmp-tc.lo: ../include/net-snmp/library/callback.h
 ./snmp-tc.lo: ../include/net-snmp/library/snmp_transport.h
@@ -1686,6 +1767,9 @@
 ./snmp.lo: ../include/net-snmp/varbind_api.h
 ./snmp.lo: ../include/net-snmp/library/snmp_client.h
 ./snmp.lo: ../include/net-snmp/pdu_api.h ../include/net-snmp/library/asn1.h
+./snmp.lo: ../include/net-snmp/output_api.h
+./snmp.lo: ../include/net-snmp/library/snmp_debug.h
+./snmp.lo: ../include/net-snmp/library/snmp_logging.h 
 ./snmp.lo: ../include/net-snmp/session_api.h
 ./snmp.lo: ../include/net-snmp/library/callback.h
 ./snmp.lo: ../include/net-snmp/library/snmp_transport.h
@@ -1708,9 +1792,6 @@
 ./snmp.lo: ../include/net-snmp/library/snmp_impl.h
 ./snmp.lo: ../include/net-snmp/library/snmp.h
 ./snmp.lo: ../include/net-snmp/library/snmp-tc.h
-./snmp.lo: ../include/net-snmp/output_api.h
-./snmp.lo: ../include/net-snmp/library/snmp_debug.h
-./snmp.lo: ../include/net-snmp/library/snmp_logging.h 
 ./snmpTLSDomain.lo: ../include/net-snmp/net-snmp-config.h
 ./snmpTLSDomain.lo: ../include/net-snmp/types.h 
 ./snmpTLSDomain.lo: ../include/net-snmp/library/oid.h
@@ -1721,6 +1802,9 @@
 ./snmpTLSDomain.lo: ../include/net-snmp/library/snmp_client.h
 ./snmpTLSDomain.lo: ../include/net-snmp/pdu_api.h
 ./snmpTLSDomain.lo: ../include/net-snmp/library/asn1.h
+./snmpTLSDomain.lo: ../include/net-snmp/output_api.h
+./snmpTLSDomain.lo: ../include/net-snmp/library/snmp_debug.h
+./snmpTLSDomain.lo: ../include/net-snmp/library/snmp_logging.h
 ./snmpTLSDomain.lo: ../include/net-snmp/session_api.h
 ./snmpTLSDomain.lo: ../include/net-snmp/library/callback.h
 ./snmpTLSDomain.lo: ../include/net-snmp/library/snmp_transport.h
@@ -1744,9 +1828,6 @@
 ./snmpTLSDomain.lo: ../include/net-snmp/library/snmp_impl.h
 ./snmpTLSDomain.lo: ../include/net-snmp/library/snmp.h
 ./snmpTLSDomain.lo: ../include/net-snmp/library/snmp-tc.h
-./snmpTLSDomain.lo: ../include/net-snmp/output_api.h
-./snmpTLSDomain.lo: ../include/net-snmp/library/snmp_debug.h
-./snmpTLSDomain.lo: ../include/net-snmp/library/snmp_logging.h
 ./snmp_alarm.lo: ../include/net-snmp/net-snmp-config.h 
 ./snmp_alarm.lo:  ../include/net-snmp/types.h
 ./snmp_alarm.lo: ../include/net-snmp/library/oid.h
@@ -1757,6 +1838,9 @@
 ./snmp_alarm.lo: ../include/net-snmp/library/snmp_client.h
 ./snmp_alarm.lo: ../include/net-snmp/pdu_api.h
 ./snmp_alarm.lo: ../include/net-snmp/library/asn1.h
+./snmp_alarm.lo: ../include/net-snmp/output_api.h
+./snmp_alarm.lo: ../include/net-snmp/library/snmp_debug.h
+./snmp_alarm.lo: ../include/net-snmp/library/snmp_logging.h
 ./snmp_alarm.lo: ../include/net-snmp/session_api.h
 ./snmp_alarm.lo: ../include/net-snmp/library/callback.h
 ./snmp_alarm.lo: ../include/net-snmp/library/snmp_transport.h
@@ -1780,9 +1864,6 @@
 ./snmp_alarm.lo: ../include/net-snmp/library/snmp_impl.h
 ./snmp_alarm.lo: ../include/net-snmp/library/snmp.h
 ./snmp_alarm.lo: ../include/net-snmp/library/snmp-tc.h
-./snmp_alarm.lo: ../include/net-snmp/output_api.h
-./snmp_alarm.lo: ../include/net-snmp/library/snmp_debug.h
-./snmp_alarm.lo: ../include/net-snmp/library/snmp_logging.h
 ./snmp_alarm.lo: ../include/net-snmp/config_api.h
 ./snmp_alarm.lo: ../include/net-snmp/library/read_config.h
 ./snmp_alarm.lo: ../include/net-snmp/library/default_store.h
@@ -1815,6 +1896,9 @@
 ./snmp_api.lo: ../include/net-snmp/library/snmp_client.h
 ./snmp_api.lo: ../include/net-snmp/pdu_api.h
 ./snmp_api.lo: ../include/net-snmp/library/asn1.h
+./snmp_api.lo: ../include/net-snmp/output_api.h
+./snmp_api.lo: ../include/net-snmp/library/snmp_debug.h
+./snmp_api.lo: ../include/net-snmp/library/snmp_logging.h
 ./snmp_api.lo: ../include/net-snmp/session_api.h
 ./snmp_api.lo: ../include/net-snmp/library/callback.h
 ./snmp_api.lo: ../include/net-snmp/library/snmp_transport.h
@@ -1838,9 +1922,6 @@
 ./snmp_api.lo: ../include/net-snmp/library/snmp_impl.h
 ./snmp_api.lo: ../include/net-snmp/library/snmp.h
 ./snmp_api.lo: ../include/net-snmp/library/snmp-tc.h
-./snmp_api.lo: ../include/net-snmp/output_api.h
-./snmp_api.lo: ../include/net-snmp/library/snmp_debug.h
-./snmp_api.lo: ../include/net-snmp/library/snmp_logging.h
 ./snmp_api.lo: ../include/net-snmp/config_api.h
 ./snmp_api.lo: ../include/net-snmp/library/read_config.h
 ./snmp_api.lo: ../include/net-snmp/library/default_store.h
@@ -1880,6 +1961,9 @@
 ./snmp_auth.lo: ../include/net-snmp/library/snmp_client.h
 ./snmp_auth.lo: ../include/net-snmp/pdu_api.h
 ./snmp_auth.lo: ../include/net-snmp/library/asn1.h
+./snmp_auth.lo: ../include/net-snmp/output_api.h
+./snmp_auth.lo: ../include/net-snmp/library/snmp_debug.h
+./snmp_auth.lo: ../include/net-snmp/library/snmp_logging.h
 ./snmp_auth.lo: ../include/net-snmp/session_api.h
 ./snmp_auth.lo: ../include/net-snmp/library/callback.h
 ./snmp_auth.lo: ../include/net-snmp/library/snmp_transport.h
@@ -1903,9 +1987,6 @@
 ./snmp_auth.lo: ../include/net-snmp/library/snmp_impl.h
 ./snmp_auth.lo: ../include/net-snmp/library/snmp.h
 ./snmp_auth.lo: ../include/net-snmp/library/snmp-tc.h
-./snmp_auth.lo: ../include/net-snmp/output_api.h
-./snmp_auth.lo: ../include/net-snmp/library/snmp_debug.h
-./snmp_auth.lo: ../include/net-snmp/library/snmp_logging.h
 ./snmp_auth.lo: ../include/net-snmp/utilities.h 
 ./snmp_auth.lo: ../include/net-snmp/library/system.h
 ./snmp_auth.lo: ../include/net-snmp/library/tools.h
@@ -1934,6 +2015,9 @@
 ./snmp_client.lo: ../include/net-snmp/library/snmp_client.h
 ./snmp_client.lo: ../include/net-snmp/pdu_api.h
 ./snmp_client.lo: ../include/net-snmp/library/asn1.h
+./snmp_client.lo: ../include/net-snmp/output_api.h
+./snmp_client.lo: ../include/net-snmp/library/snmp_debug.h
+./snmp_client.lo: ../include/net-snmp/library/snmp_logging.h
 ./snmp_client.lo: ../include/net-snmp/session_api.h
 ./snmp_client.lo: ../include/net-snmp/library/callback.h
 ./snmp_client.lo: ../include/net-snmp/library/snmp_transport.h
@@ -1960,9 +2044,7 @@
 ./snmp_client.lo: ../include/net-snmp/agent/ds_agent.h
 ./snmp_client.lo: ../include/net-snmp/library/default_store.h
 ./snmp_client.lo: ../include/net-snmp/library/snmp_secmod.h
-./snmp_client.lo: ../include/net-snmp/library/snmp_logging.h
 ./snmp_client.lo: ../include/net-snmp/library/snmp_assert.h
-./snmp_client.lo: ../include/net-snmp/library/snmp_debug.h
 ./snmp_debug.lo: ../include/net-snmp/net-snmp-config.h 
 ./snmp_debug.lo:  ../include/net-snmp/types.h
 ./snmp_debug.lo: ../include/net-snmp/library/oid.h
@@ -1973,6 +2055,9 @@
 ./snmp_debug.lo: ../include/net-snmp/library/snmp_client.h
 ./snmp_debug.lo: ../include/net-snmp/pdu_api.h
 ./snmp_debug.lo: ../include/net-snmp/library/asn1.h
+./snmp_debug.lo: ../include/net-snmp/output_api.h
+./snmp_debug.lo: ../include/net-snmp/library/snmp_debug.h
+./snmp_debug.lo: ../include/net-snmp/library/snmp_logging.h
 ./snmp_debug.lo: ../include/net-snmp/session_api.h
 ./snmp_debug.lo: ../include/net-snmp/library/callback.h
 ./snmp_debug.lo: ../include/net-snmp/library/snmp_transport.h
@@ -1996,9 +2081,6 @@
 ./snmp_debug.lo: ../include/net-snmp/library/snmp_impl.h
 ./snmp_debug.lo: ../include/net-snmp/library/snmp.h
 ./snmp_debug.lo: ../include/net-snmp/library/snmp-tc.h
-./snmp_debug.lo: ../include/net-snmp/output_api.h
-./snmp_debug.lo: ../include/net-snmp/library/snmp_debug.h
-./snmp_debug.lo: ../include/net-snmp/library/snmp_logging.h
 ./snmp_debug.lo: ../include/net-snmp/config_api.h
 ./snmp_debug.lo: ../include/net-snmp/library/read_config.h
 ./snmp_debug.lo: ../include/net-snmp/library/default_store.h
@@ -2031,6 +2113,9 @@
 ./snmp_enum.lo: ../include/net-snmp/library/snmp_client.h
 ./snmp_enum.lo: ../include/net-snmp/pdu_api.h
 ./snmp_enum.lo: ../include/net-snmp/library/asn1.h
+./snmp_enum.lo: ../include/net-snmp/output_api.h
+./snmp_enum.lo: ../include/net-snmp/library/snmp_debug.h
+./snmp_enum.lo: ../include/net-snmp/library/snmp_logging.h
 ./snmp_enum.lo: ../include/net-snmp/session_api.h
 ./snmp_enum.lo: ../include/net-snmp/library/callback.h
 ./snmp_enum.lo: ../include/net-snmp/library/snmp_transport.h
@@ -2062,7 +2147,6 @@
 ./snmp_enum.lo: ../include/net-snmp/library/vacm.h
 ./snmp_enum.lo: ../include/net-snmp/library/tools.h
 ./snmp_enum.lo: ../include/net-snmp/library/snmp_assert.h
-./snmp_enum.lo: ../include/net-snmp/library/snmp_logging.h
 ./snmp_logging.lo: ../include/net-snmp/net-snmp-config.h 
 ./snmp_logging.lo: ../include/net-snmp/types.h 
 ./snmp_logging.lo: ../include/net-snmp/library/oid.h
@@ -2073,6 +2157,9 @@
 ./snmp_logging.lo: ../include/net-snmp/library/snmp_client.h
 ./snmp_logging.lo: ../include/net-snmp/pdu_api.h
 ./snmp_logging.lo: ../include/net-snmp/library/asn1.h
+./snmp_logging.lo: ../include/net-snmp/output_api.h
+./snmp_logging.lo: ../include/net-snmp/library/snmp_debug.h
+./snmp_logging.lo: ../include/net-snmp/library/snmp_logging.h
 ./snmp_logging.lo: ../include/net-snmp/session_api.h
 ./snmp_logging.lo: ../include/net-snmp/library/callback.h
 ./snmp_logging.lo: ../include/net-snmp/library/snmp_transport.h
@@ -2096,9 +2183,6 @@
 ./snmp_logging.lo: ../include/net-snmp/library/snmp_impl.h
 ./snmp_logging.lo: ../include/net-snmp/library/snmp.h
 ./snmp_logging.lo: ../include/net-snmp/library/snmp-tc.h
-./snmp_logging.lo: ../include/net-snmp/output_api.h
-./snmp_logging.lo: ../include/net-snmp/library/snmp_debug.h
-./snmp_logging.lo: ../include/net-snmp/library/snmp_logging.h
 ./snmp_logging.lo: ../include/net-snmp/config_api.h
 ./snmp_logging.lo: ../include/net-snmp/library/read_config.h
 ./snmp_logging.lo: ../include/net-snmp/library/default_store.h
@@ -2132,6 +2216,9 @@
 ./snmp_openssl.lo: ../include/net-snmp/library/snmp_client.h
 ./snmp_openssl.lo: ../include/net-snmp/pdu_api.h
 ./snmp_openssl.lo: ../include/net-snmp/library/asn1.h
+./snmp_openssl.lo: ../include/net-snmp/output_api.h
+./snmp_openssl.lo: ../include/net-snmp/library/snmp_debug.h
+./snmp_openssl.lo: ../include/net-snmp/library/snmp_logging.h
 ./snmp_openssl.lo: ../include/net-snmp/session_api.h
 ./snmp_openssl.lo: ../include/net-snmp/library/callback.h
 ./snmp_openssl.lo: ../include/net-snmp/library/snmp_transport.h
@@ -2155,7 +2242,7 @@
 ./snmp_openssl.lo: ../include/net-snmp/library/snmp_impl.h
 ./snmp_openssl.lo: ../include/net-snmp/library/snmp.h
 ./snmp_openssl.lo: ../include/net-snmp/library/snmp-tc.h
-./snmp_openssl.lo: ../include/net-snmp/utilities.h
+./snmp_openssl.lo: ../include/net-snmp/utilities.h 
 ./snmp_openssl.lo: ../include/net-snmp/library/system.h
 ./snmp_openssl.lo: ../include/net-snmp/library/tools.h
 ./snmp_openssl.lo: ../include/net-snmp/library/int64.h
@@ -2165,7 +2252,6 @@
 ./snmp_openssl.lo: ../include/net-snmp/library/check_varbind.h
 ./snmp_openssl.lo: ../include/net-snmp/library/container.h
 ./snmp_openssl.lo: ../include/net-snmp/library/factory.h
-./snmp_openssl.lo: ../include/net-snmp/library/snmp_logging.h
 ./snmp_openssl.lo: ../include/net-snmp/library/container_binary_array.h
 ./snmp_openssl.lo: ../include/net-snmp/library/container_list_ssll.h
 ./snmp_openssl.lo: ../include/net-snmp/library/container_iterator.h
@@ -2178,8 +2264,6 @@
 ./snmp_openssl.lo: ../include/net-snmp/library/snmp_parse_args.h
 ./snmp_openssl.lo: ../include/net-snmp/library/snmp_enum.h
 ./snmp_openssl.lo: ../include/net-snmp/library/vacm.h
-./snmp_openssl.lo: ../include/net-snmp/output_api.h
-./snmp_openssl.lo: ../include/net-snmp/library/snmp_debug.h
 ./snmp_openssl.lo: ../include/net-snmp/snmpv3_api.h
 ./snmp_openssl.lo: ../include/net-snmp/library/snmpv3.h
 ./snmp_openssl.lo: ../include/net-snmp/library/transform_oids.h
@@ -2188,6 +2272,7 @@
 ./snmp_openssl.lo: ../include/net-snmp/library/lcd_time.h
 ./snmp_openssl.lo: ../include/net-snmp/library/snmp_secmod.h
 ./snmp_openssl.lo: ../include/net-snmp/library/snmpv3-security-includes.h
+./snmp_openssl.lo: ../include/net-snmp/library/snmptsm.h
 ./snmp_openssl.lo: ../include/net-snmp/library/snmpusm.h
 ./snmp_parse_args.lo: ../include/net-snmp/net-snmp-config.h
 ./snmp_parse_args.lo: ../include/net-snmp/net-snmp-includes.h
@@ -2200,6 +2285,9 @@
 ./snmp_parse_args.lo: ../include/net-snmp/library/snmp_client.h
 ./snmp_parse_args.lo: ../include/net-snmp/pdu_api.h
 ./snmp_parse_args.lo: ../include/net-snmp/library/asn1.h
+./snmp_parse_args.lo: ../include/net-snmp/output_api.h
+./snmp_parse_args.lo: ../include/net-snmp/library/snmp_debug.h
+./snmp_parse_args.lo: ../include/net-snmp/library/snmp_logging.h
 ./snmp_parse_args.lo: ../include/net-snmp/session_api.h
 ./snmp_parse_args.lo: ../include/net-snmp/library/callback.h
 ./snmp_parse_args.lo: ../include/net-snmp/library/snmp_transport.h
@@ -2223,7 +2311,7 @@
 ./snmp_parse_args.lo: ../include/net-snmp/library/snmp_impl.h
 ./snmp_parse_args.lo: ../include/net-snmp/library/snmp.h
 ./snmp_parse_args.lo: ../include/net-snmp/library/snmp-tc.h
-./snmp_parse_args.lo: ../include/net-snmp/utilities.h
+./snmp_parse_args.lo: ../include/net-snmp/utilities.h 
 ./snmp_parse_args.lo: ../include/net-snmp/library/system.h
 ./snmp_parse_args.lo: ../include/net-snmp/library/tools.h
 ./snmp_parse_args.lo: ../include/net-snmp/library/int64.h
@@ -2233,7 +2321,6 @@
 ./snmp_parse_args.lo: ../include/net-snmp/library/check_varbind.h
 ./snmp_parse_args.lo: ../include/net-snmp/library/container.h
 ./snmp_parse_args.lo: ../include/net-snmp/library/factory.h
-./snmp_parse_args.lo: ../include/net-snmp/library/snmp_logging.h
 ./snmp_parse_args.lo: ../include/net-snmp/library/container_binary_array.h
 ./snmp_parse_args.lo: ../include/net-snmp/library/container_list_ssll.h
 ./snmp_parse_args.lo: ../include/net-snmp/library/container_iterator.h
@@ -2246,8 +2333,6 @@
 ./snmp_parse_args.lo: ../include/net-snmp/library/snmp_parse_args.h
 ./snmp_parse_args.lo: ../include/net-snmp/library/snmp_enum.h
 ./snmp_parse_args.lo: ../include/net-snmp/library/vacm.h
-./snmp_parse_args.lo: ../include/net-snmp/output_api.h
-./snmp_parse_args.lo: ../include/net-snmp/library/snmp_debug.h
 ./snmp_parse_args.lo: ../include/net-snmp/snmpv3_api.h
 ./snmp_parse_args.lo: ../include/net-snmp/library/snmpv3.h
 ./snmp_parse_args.lo: ../include/net-snmp/library/transform_oids.h
@@ -2256,6 +2341,7 @@
 ./snmp_parse_args.lo: ../include/net-snmp/library/lcd_time.h
 ./snmp_parse_args.lo: ../include/net-snmp/library/snmp_secmod.h
 ./snmp_parse_args.lo: ../include/net-snmp/library/snmpv3-security-includes.h
+./snmp_parse_args.lo: ../include/net-snmp/library/snmptsm.h
 ./snmp_parse_args.lo: ../include/net-snmp/library/snmpusm.h
 ./snmp_secmod.lo: ../include/net-snmp/net-snmp-config.h 
 ./snmp_secmod.lo:  ../include/net-snmp/types.h
@@ -2267,6 +2353,9 @@
 ./snmp_secmod.lo: ../include/net-snmp/library/snmp_client.h
 ./snmp_secmod.lo: ../include/net-snmp/pdu_api.h
 ./snmp_secmod.lo: ../include/net-snmp/library/asn1.h
+./snmp_secmod.lo: ../include/net-snmp/output_api.h
+./snmp_secmod.lo: ../include/net-snmp/library/snmp_debug.h
+./snmp_secmod.lo: ../include/net-snmp/library/snmp_logging.h
 ./snmp_secmod.lo: ../include/net-snmp/session_api.h
 ./snmp_secmod.lo: ../include/net-snmp/library/callback.h
 ./snmp_secmod.lo: ../include/net-snmp/library/snmp_transport.h
@@ -2290,9 +2379,6 @@
 ./snmp_secmod.lo: ../include/net-snmp/library/snmp_impl.h
 ./snmp_secmod.lo: ../include/net-snmp/library/snmp.h
 ./snmp_secmod.lo: ../include/net-snmp/library/snmp-tc.h
-./snmp_secmod.lo: ../include/net-snmp/output_api.h
-./snmp_secmod.lo: ../include/net-snmp/library/snmp_debug.h
-./snmp_secmod.lo: ../include/net-snmp/library/snmp_logging.h
 ./snmp_secmod.lo: ../include/net-snmp/config_api.h
 ./snmp_secmod.lo: ../include/net-snmp/library/read_config.h
 ./snmp_secmod.lo: ../include/net-snmp/library/default_store.h
@@ -2316,10 +2402,12 @@
 ./snmp_secmod.lo: ../include/net-snmp/library/snmp_assert.h
 ./snmp_secmod.lo: ../include/net-snmp/version.h
 ./snmp_secmod.lo: ../include/net-snmp/library/snmp_secmod.h
+./snmp_secmod.lo: ../include/net-snmp/library/snmpv3-security-includes.h
+./snmp_secmod.lo: ../include/net-snmp/library/snmptsm.h
 ./snmp_secmod.lo: ../include/net-snmp/library/snmpusm.h snmpsm_init.h
 ./snmp_service.lo: ../include/net-snmp/net-snmp-config.h
 ./snmp_service.lo: ../include/net-snmp/net-snmp-includes.h
-./snmp_service.lo:  ../include/net-snmp/definitions.h
+./snmp_service.lo: ../include/net-snmp/definitions.h
 ./snmp_service.lo: ../include/net-snmp/types.h 
 ./snmp_service.lo: ../include/net-snmp/library/oid.h
 ./snmp_service.lo: ../include/net-snmp/library/types.h
@@ -2328,6 +2416,9 @@
 ./snmp_service.lo: ../include/net-snmp/library/snmp_client.h
 ./snmp_service.lo: ../include/net-snmp/pdu_api.h
 ./snmp_service.lo: ../include/net-snmp/library/asn1.h
+./snmp_service.lo: ../include/net-snmp/output_api.h
+./snmp_service.lo: ../include/net-snmp/library/snmp_debug.h
+./snmp_service.lo: ../include/net-snmp/library/snmp_logging.h
 ./snmp_service.lo: ../include/net-snmp/session_api.h
 ./snmp_service.lo: ../include/net-snmp/library/callback.h
 ./snmp_service.lo: ../include/net-snmp/library/snmp_transport.h
@@ -2351,7 +2442,7 @@
 ./snmp_service.lo: ../include/net-snmp/library/snmp_impl.h
 ./snmp_service.lo: ../include/net-snmp/library/snmp.h
 ./snmp_service.lo: ../include/net-snmp/library/snmp-tc.h
-./snmp_service.lo: ../include/net-snmp/utilities.h
+./snmp_service.lo: ../include/net-snmp/utilities.h 
 ./snmp_service.lo: ../include/net-snmp/library/system.h
 ./snmp_service.lo: ../include/net-snmp/library/tools.h
 ./snmp_service.lo: ../include/net-snmp/library/int64.h
@@ -2361,7 +2452,6 @@
 ./snmp_service.lo: ../include/net-snmp/library/check_varbind.h
 ./snmp_service.lo: ../include/net-snmp/library/container.h
 ./snmp_service.lo: ../include/net-snmp/library/factory.h
-./snmp_service.lo: ../include/net-snmp/library/snmp_logging.h
 ./snmp_service.lo: ../include/net-snmp/library/container_binary_array.h
 ./snmp_service.lo: ../include/net-snmp/library/container_list_ssll.h
 ./snmp_service.lo: ../include/net-snmp/library/container_iterator.h
@@ -2374,8 +2464,6 @@
 ./snmp_service.lo: ../include/net-snmp/library/snmp_parse_args.h
 ./snmp_service.lo: ../include/net-snmp/library/snmp_enum.h
 ./snmp_service.lo: ../include/net-snmp/library/vacm.h
-./snmp_service.lo: ../include/net-snmp/output_api.h
-./snmp_service.lo: ../include/net-snmp/library/snmp_debug.h
 ./snmp_service.lo: ../include/net-snmp/snmpv3_api.h
 ./snmp_service.lo: ../include/net-snmp/library/snmpv3.h
 ./snmp_service.lo: ../include/net-snmp/library/transform_oids.h
@@ -2384,6 +2472,7 @@
 ./snmp_service.lo: ../include/net-snmp/library/lcd_time.h
 ./snmp_service.lo: ../include/net-snmp/library/snmp_secmod.h
 ./snmp_service.lo: ../include/net-snmp/library/snmpv3-security-includes.h
+./snmp_service.lo: ../include/net-snmp/library/snmptsm.h
 ./snmp_service.lo: ../include/net-snmp/library/snmpusm.h
 ./snmp_transport.lo: ../include/net-snmp/net-snmp-config.h
 ./snmp_transport.lo: ../include/net-snmp/types.h 
@@ -2395,6 +2484,9 @@
 ./snmp_transport.lo: ../include/net-snmp/library/snmp_client.h
 ./snmp_transport.lo: ../include/net-snmp/pdu_api.h
 ./snmp_transport.lo: ../include/net-snmp/library/asn1.h
+./snmp_transport.lo: ../include/net-snmp/output_api.h
+./snmp_transport.lo: ../include/net-snmp/library/snmp_debug.h
+./snmp_transport.lo: ../include/net-snmp/library/snmp_logging.h
 ./snmp_transport.lo: ../include/net-snmp/session_api.h
 ./snmp_transport.lo: ../include/net-snmp/library/callback.h
 ./snmp_transport.lo: ../include/net-snmp/library/snmp_transport.h
@@ -2418,9 +2510,6 @@
 ./snmp_transport.lo: ../include/net-snmp/library/snmp_impl.h
 ./snmp_transport.lo: ../include/net-snmp/library/snmp.h
 ./snmp_transport.lo: ../include/net-snmp/library/snmp-tc.h
-./snmp_transport.lo: ../include/net-snmp/output_api.h
-./snmp_transport.lo: ../include/net-snmp/library/snmp_debug.h
-./snmp_transport.lo: ../include/net-snmp/library/snmp_logging.h
 ./snmp_transport.lo: ../include/net-snmp/utilities.h 
 ./snmp_transport.lo: ../include/net-snmp/library/system.h
 ./snmp_transport.lo: ../include/net-snmp/library/tools.h
@@ -2510,14 +2599,18 @@
 ./snmpksm.lo: ../include/net-snmp/library/snmpksm.h
 ./snmptsm.lo: ../include/net-snmp/net-snmp-config.h
 ./snmptsm.lo: ../include/net-snmp/net-snmp-includes.h 
-./snmptsm.lo: ../include/net-snmp/definitions.h ../include/net-snmp/types.h
-./snmptsm.lo:  ../include/net-snmp/library/oid.h
+./snmptsm.lo:  ../include/net-snmp/definitions.h
+./snmptsm.lo: ../include/net-snmp/types.h 
+./snmptsm.lo: ../include/net-snmp/library/oid.h
 ./snmptsm.lo: ../include/net-snmp/library/types.h
 ./snmptsm.lo: ../include/net-snmp/library/snmp_api.h
 ./snmptsm.lo: ../include/net-snmp/varbind_api.h
 ./snmptsm.lo: ../include/net-snmp/library/snmp_client.h
 ./snmptsm.lo: ../include/net-snmp/pdu_api.h
 ./snmptsm.lo: ../include/net-snmp/library/asn1.h
+./snmptsm.lo: ../include/net-snmp/output_api.h
+./snmptsm.lo: ../include/net-snmp/library/snmp_debug.h
+./snmptsm.lo: ../include/net-snmp/library/snmp_logging.h
 ./snmptsm.lo: ../include/net-snmp/session_api.h
 ./snmptsm.lo: ../include/net-snmp/library/callback.h
 ./snmptsm.lo: ../include/net-snmp/library/snmp_transport.h
@@ -2540,7 +2633,7 @@
 ./snmptsm.lo: ../include/net-snmp/library/snmp_impl.h
 ./snmptsm.lo: ../include/net-snmp/library/snmp.h
 ./snmptsm.lo: ../include/net-snmp/library/snmp-tc.h
-./snmptsm.lo: ../include/net-snmp/utilities.h
+./snmptsm.lo: ../include/net-snmp/utilities.h 
 ./snmptsm.lo: ../include/net-snmp/library/system.h
 ./snmptsm.lo: ../include/net-snmp/library/tools.h
 ./snmptsm.lo: ../include/net-snmp/library/int64.h
@@ -2548,9 +2641,8 @@
 ./snmptsm.lo: ../include/net-snmp/library/snmp_alarm.h
 ./snmptsm.lo: ../include/net-snmp/library/data_list.h
 ./snmptsm.lo: ../include/net-snmp/library/check_varbind.h
-./snmptsm.lo: ../include/net-snmp/library/container.h
-./snmptsm.lo: ../include/net-snmp/library/factory.h
-./snmptsm.lo: ../include/net-snmp/library/snmp_logging.h
+./snmptsm.lo: ../include/net-snmp/library/container.h 
+./snmptsm.lo:  ../include/net-snmp/library/factory.h
 ./snmptsm.lo: ../include/net-snmp/library/container_binary_array.h
 ./snmptsm.lo: ../include/net-snmp/library/container_list_ssll.h
 ./snmptsm.lo: ../include/net-snmp/library/container_iterator.h
@@ -2562,8 +2654,6 @@
 ./snmptsm.lo: ../include/net-snmp/library/snmp_parse_args.h
 ./snmptsm.lo: ../include/net-snmp/library/snmp_enum.h
 ./snmptsm.lo: ../include/net-snmp/library/vacm.h
-./snmptsm.lo: ../include/net-snmp/output_api.h
-./snmptsm.lo: ../include/net-snmp/library/snmp_debug.h
 ./snmptsm.lo: ../include/net-snmp/snmpv3_api.h
 ./snmptsm.lo: ../include/net-snmp/library/snmpv3.h
 ./snmptsm.lo: ../include/net-snmp/library/transform_oids.h
@@ -2572,8 +2662,8 @@
 ./snmptsm.lo: ../include/net-snmp/library/lcd_time.h
 ./snmptsm.lo: ../include/net-snmp/library/snmp_secmod.h
 ./snmptsm.lo: ../include/net-snmp/library/snmpv3-security-includes.h
-./snmptsm.lo: ../include/net-snmp/library/snmpusm.h
 ./snmptsm.lo: ../include/net-snmp/library/snmptsm.h
+./snmptsm.lo: ../include/net-snmp/library/snmpusm.h 
 ./snmpusm.lo: ../include/net-snmp/net-snmp-config.h 
 ./snmpusm.lo:  ../include/net-snmp/types.h
 ./snmpusm.lo:  ../include/net-snmp/library/oid.h
@@ -2584,6 +2674,9 @@
 ./snmpusm.lo: ../include/net-snmp/library/snmp_client.h
 ./snmpusm.lo: ../include/net-snmp/pdu_api.h
 ./snmpusm.lo: ../include/net-snmp/library/asn1.h
+./snmpusm.lo: ../include/net-snmp/output_api.h
+./snmpusm.lo: ../include/net-snmp/library/snmp_debug.h
+./snmpusm.lo: ../include/net-snmp/library/snmp_logging.h
 ./snmpusm.lo: ../include/net-snmp/session_api.h
 ./snmpusm.lo: ../include/net-snmp/library/callback.h
 ./snmpusm.lo: ../include/net-snmp/library/snmp_transport.h
@@ -2606,9 +2699,6 @@
 ./snmpusm.lo: ../include/net-snmp/library/snmp_impl.h
 ./snmpusm.lo: ../include/net-snmp/library/snmp.h
 ./snmpusm.lo: ../include/net-snmp/library/snmp-tc.h
-./snmpusm.lo: ../include/net-snmp/output_api.h
-./snmpusm.lo: ../include/net-snmp/library/snmp_debug.h
-./snmpusm.lo: ../include/net-snmp/library/snmp_logging.h
 ./snmpusm.lo: ../include/net-snmp/config_api.h
 ./snmpusm.lo: ../include/net-snmp/library/read_config.h
 ./snmpusm.lo: ../include/net-snmp/library/default_store.h
@@ -2646,6 +2736,9 @@
 ./snmpv3.lo: ../include/net-snmp/varbind_api.h
 ./snmpv3.lo: ../include/net-snmp/library/snmp_client.h
 ./snmpv3.lo: ../include/net-snmp/pdu_api.h ../include/net-snmp/library/asn1.h
+./snmpv3.lo: ../include/net-snmp/output_api.h
+./snmpv3.lo: ../include/net-snmp/library/snmp_debug.h
+./snmpv3.lo: ../include/net-snmp/library/snmp_logging.h 
 ./snmpv3.lo: ../include/net-snmp/session_api.h
 ./snmpv3.lo: ../include/net-snmp/library/callback.h
 ./snmpv3.lo: ../include/net-snmp/library/snmp_transport.h
@@ -2668,9 +2761,6 @@
 ./snmpv3.lo: ../include/net-snmp/library/snmp_impl.h
 ./snmpv3.lo: ../include/net-snmp/library/snmp.h
 ./snmpv3.lo: ../include/net-snmp/library/snmp-tc.h
-./snmpv3.lo: ../include/net-snmp/output_api.h
-./snmpv3.lo: ../include/net-snmp/library/snmp_debug.h
-./snmpv3.lo: ../include/net-snmp/library/snmp_logging.h 
 ./snmpv3.lo: ../include/net-snmp/config_api.h
 ./snmpv3.lo: ../include/net-snmp/library/read_config.h
 ./snmpv3.lo: ../include/net-snmp/library/default_store.h
@@ -2712,6 +2802,9 @@
 ./strlcpy.lo: ../include/net-snmp/library/snmp_client.h
 ./strlcpy.lo: ../include/net-snmp/pdu_api.h
 ./strlcpy.lo: ../include/net-snmp/library/asn1.h
+./strlcpy.lo: ../include/net-snmp/output_api.h
+./strlcpy.lo: ../include/net-snmp/library/snmp_debug.h
+./strlcpy.lo: ../include/net-snmp/library/snmp_logging.h
 ./strlcpy.lo: ../include/net-snmp/session_api.h
 ./strlcpy.lo: ../include/net-snmp/library/callback.h
 ./strlcpy.lo: ../include/net-snmp/library/snmp_transport.h
@@ -2745,6 +2838,9 @@
 ./strtok_r.lo: ../include/net-snmp/library/snmp_client.h
 ./strtok_r.lo: ../include/net-snmp/pdu_api.h
 ./strtok_r.lo: ../include/net-snmp/library/asn1.h
+./strtok_r.lo: ../include/net-snmp/output_api.h
+./strtok_r.lo: ../include/net-snmp/library/snmp_debug.h
+./strtok_r.lo: ../include/net-snmp/library/snmp_logging.h
 ./strtok_r.lo: ../include/net-snmp/session_api.h
 ./strtok_r.lo: ../include/net-snmp/library/callback.h
 ./strtok_r.lo: ../include/net-snmp/library/snmp_transport.h
@@ -2780,6 +2876,9 @@
 ./strtoull.lo: ../include/net-snmp/library/snmp_client.h
 ./strtoull.lo: ../include/net-snmp/pdu_api.h
 ./strtoull.lo: ../include/net-snmp/library/asn1.h
+./strtoull.lo: ../include/net-snmp/output_api.h
+./strtoull.lo: ../include/net-snmp/library/snmp_debug.h
+./strtoull.lo: ../include/net-snmp/library/snmp_logging.h
 ./strtoull.lo: ../include/net-snmp/session_api.h
 ./strtoull.lo: ../include/net-snmp/library/callback.h
 ./strtoull.lo: ../include/net-snmp/library/snmp_transport.h
@@ -2813,6 +2912,9 @@
 ./system.lo: ../include/net-snmp/varbind_api.h
 ./system.lo: ../include/net-snmp/library/snmp_client.h
 ./system.lo: ../include/net-snmp/pdu_api.h ../include/net-snmp/library/asn1.h
+./system.lo: ../include/net-snmp/output_api.h
+./system.lo: ../include/net-snmp/library/snmp_debug.h
+./system.lo: ../include/net-snmp/library/snmp_logging.h 
 ./system.lo: ../include/net-snmp/session_api.h
 ./system.lo: ../include/net-snmp/library/callback.h
 ./system.lo: ../include/net-snmp/library/snmp_transport.h
@@ -2835,9 +2937,6 @@
 ./system.lo: ../include/net-snmp/library/snmp_impl.h
 ./system.lo: ../include/net-snmp/library/snmp.h
 ./system.lo: ../include/net-snmp/library/snmp-tc.h
-./system.lo: ../include/net-snmp/output_api.h
-./system.lo: ../include/net-snmp/library/snmp_debug.h
-./system.lo: ../include/net-snmp/library/snmp_logging.h 
 ./system.lo: ../include/net-snmp/utilities.h 
 ./system.lo: ../include/net-snmp/library/system.h
 ./system.lo: ../include/net-snmp/library/tools.h
@@ -2871,6 +2970,9 @@
 ./test_binary_array.lo: ../include/net-snmp/library/snmp_client.h
 ./test_binary_array.lo: ../include/net-snmp/pdu_api.h
 ./test_binary_array.lo: ../include/net-snmp/library/asn1.h
+./test_binary_array.lo: ../include/net-snmp/output_api.h
+./test_binary_array.lo: ../include/net-snmp/library/snmp_debug.h
+./test_binary_array.lo: ../include/net-snmp/library/snmp_logging.h
 ./test_binary_array.lo: ../include/net-snmp/session_api.h
 ./test_binary_array.lo: ../include/net-snmp/library/callback.h
 ./test_binary_array.lo: ../include/net-snmp/library/snmp_transport.h
@@ -2894,7 +2996,7 @@
 ./test_binary_array.lo: ../include/net-snmp/library/snmp_impl.h
 ./test_binary_array.lo: ../include/net-snmp/library/snmp.h
 ./test_binary_array.lo: ../include/net-snmp/library/snmp-tc.h
-./test_binary_array.lo: ../include/net-snmp/utilities.h
+./test_binary_array.lo: ../include/net-snmp/utilities.h 
 ./test_binary_array.lo: ../include/net-snmp/library/system.h
 ./test_binary_array.lo: ../include/net-snmp/library/tools.h
 ./test_binary_array.lo: ../include/net-snmp/library/int64.h
@@ -2904,7 +3006,6 @@
 ./test_binary_array.lo: ../include/net-snmp/library/check_varbind.h
 ./test_binary_array.lo: ../include/net-snmp/library/container.h
 ./test_binary_array.lo: ../include/net-snmp/library/factory.h
-./test_binary_array.lo: ../include/net-snmp/library/snmp_logging.h
 ./test_binary_array.lo: ../include/net-snmp/library/container_binary_array.h
 ./test_binary_array.lo: ../include/net-snmp/library/container_list_ssll.h
 ./test_binary_array.lo: ../include/net-snmp/library/container_iterator.h
@@ -2917,8 +3018,6 @@
 ./test_binary_array.lo: ../include/net-snmp/library/snmp_parse_args.h
 ./test_binary_array.lo: ../include/net-snmp/library/snmp_enum.h
 ./test_binary_array.lo: ../include/net-snmp/library/vacm.h
-./test_binary_array.lo: ../include/net-snmp/output_api.h
-./test_binary_array.lo: ../include/net-snmp/library/snmp_debug.h
 ./test_binary_array.lo: ../include/net-snmp/snmpv3_api.h
 ./test_binary_array.lo: ../include/net-snmp/library/snmpv3.h
 ./test_binary_array.lo: ../include/net-snmp/library/transform_oids.h
@@ -2927,6 +3026,7 @@
 ./test_binary_array.lo: ../include/net-snmp/library/lcd_time.h
 ./test_binary_array.lo: ../include/net-snmp/library/snmp_secmod.h
 ./test_binary_array.lo: ../include/net-snmp/library/snmpv3-security-includes.h
+./test_binary_array.lo: ../include/net-snmp/library/snmptsm.h
 ./test_binary_array.lo: ../include/net-snmp/library/snmpusm.h
 ./text_utils.lo: ../include/net-snmp/net-snmp-config.h
 ./text_utils.lo: ../include/net-snmp/net-snmp-includes.h 
@@ -2939,6 +3039,9 @@
 ./text_utils.lo: ../include/net-snmp/library/snmp_client.h
 ./text_utils.lo: ../include/net-snmp/pdu_api.h
 ./text_utils.lo: ../include/net-snmp/library/asn1.h
+./text_utils.lo: ../include/net-snmp/output_api.h
+./text_utils.lo: ../include/net-snmp/library/snmp_debug.h
+./text_utils.lo: ../include/net-snmp/library/snmp_logging.h
 ./text_utils.lo: ../include/net-snmp/session_api.h
 ./text_utils.lo: ../include/net-snmp/library/callback.h
 ./text_utils.lo: ../include/net-snmp/library/snmp_transport.h
@@ -2962,7 +3065,7 @@
 ./text_utils.lo: ../include/net-snmp/library/snmp_impl.h
 ./text_utils.lo: ../include/net-snmp/library/snmp.h
 ./text_utils.lo: ../include/net-snmp/library/snmp-tc.h
-./text_utils.lo: ../include/net-snmp/utilities.h
+./text_utils.lo: ../include/net-snmp/utilities.h 
 ./text_utils.lo: ../include/net-snmp/library/system.h
 ./text_utils.lo: ../include/net-snmp/library/tools.h
 ./text_utils.lo: ../include/net-snmp/library/int64.h
@@ -2972,7 +3075,6 @@
 ./text_utils.lo: ../include/net-snmp/library/check_varbind.h
 ./text_utils.lo: ../include/net-snmp/library/container.h
 ./text_utils.lo: ../include/net-snmp/library/factory.h
-./text_utils.lo: ../include/net-snmp/library/snmp_logging.h
 ./text_utils.lo: ../include/net-snmp/library/container_binary_array.h
 ./text_utils.lo: ../include/net-snmp/library/container_list_ssll.h
 ./text_utils.lo: ../include/net-snmp/library/container_iterator.h
@@ -2985,8 +3087,6 @@
 ./text_utils.lo: ../include/net-snmp/library/snmp_parse_args.h
 ./text_utils.lo: ../include/net-snmp/library/snmp_enum.h
 ./text_utils.lo: ../include/net-snmp/library/vacm.h
-./text_utils.lo: ../include/net-snmp/output_api.h
-./text_utils.lo: ../include/net-snmp/library/snmp_debug.h
 ./text_utils.lo: ../include/net-snmp/snmpv3_api.h
 ./text_utils.lo: ../include/net-snmp/library/snmpv3.h
 ./text_utils.lo: ../include/net-snmp/library/transform_oids.h
@@ -2995,6 +3095,7 @@
 ./text_utils.lo: ../include/net-snmp/library/lcd_time.h
 ./text_utils.lo: ../include/net-snmp/library/snmp_secmod.h
 ./text_utils.lo: ../include/net-snmp/library/snmpv3-security-includes.h
+./text_utils.lo: ../include/net-snmp/library/snmptsm.h
 ./text_utils.lo: ../include/net-snmp/library/snmpusm.h 
 ./text_utils.lo: ../include/net-snmp/library/file_utils.h
 ./text_utils.lo: ../include/net-snmp/library/text_utils.h
@@ -3007,6 +3108,9 @@
 ./tools.lo: ../include/net-snmp/varbind_api.h
 ./tools.lo: ../include/net-snmp/library/snmp_client.h
 ./tools.lo: ../include/net-snmp/pdu_api.h ../include/net-snmp/library/asn1.h
+./tools.lo: ../include/net-snmp/output_api.h
+./tools.lo: ../include/net-snmp/library/snmp_debug.h
+./tools.lo: ../include/net-snmp/library/snmp_logging.h 
 ./tools.lo: ../include/net-snmp/session_api.h
 ./tools.lo: ../include/net-snmp/library/callback.h
 ./tools.lo: ../include/net-snmp/library/snmp_transport.h
@@ -3029,9 +3133,6 @@
 ./tools.lo: ../include/net-snmp/library/snmp_impl.h
 ./tools.lo: ../include/net-snmp/library/snmp.h
 ./tools.lo: ../include/net-snmp/library/snmp-tc.h
-./tools.lo: ../include/net-snmp/output_api.h
-./tools.lo: ../include/net-snmp/library/snmp_debug.h
-./tools.lo: ../include/net-snmp/library/snmp_logging.h 
 ./tools.lo: ../include/net-snmp/utilities.h 
 ./tools.lo: ../include/net-snmp/library/system.h
 ./tools.lo: ../include/net-snmp/library/tools.h
@@ -3058,6 +3159,9 @@
 ./ucd_compat.lo: ../include/net-snmp/library/snmp_client.h
 ./ucd_compat.lo: ../include/net-snmp/pdu_api.h
 ./ucd_compat.lo: ../include/net-snmp/library/asn1.h
+./ucd_compat.lo: ../include/net-snmp/output_api.h
+./ucd_compat.lo: ../include/net-snmp/library/snmp_debug.h
+./ucd_compat.lo: ../include/net-snmp/library/snmp_logging.h
 ./ucd_compat.lo: ../include/net-snmp/session_api.h
 ./ucd_compat.lo: ../include/net-snmp/library/callback.h
 ./ucd_compat.lo: ../include/net-snmp/library/snmp_transport.h
@@ -3096,6 +3200,9 @@
 ./vacm.lo: ../include/net-snmp/varbind_api.h
 ./vacm.lo: ../include/net-snmp/library/snmp_client.h
 ./vacm.lo: ../include/net-snmp/pdu_api.h ../include/net-snmp/library/asn1.h
+./vacm.lo: ../include/net-snmp/output_api.h
+./vacm.lo: ../include/net-snmp/library/snmp_debug.h
+./vacm.lo: ../include/net-snmp/library/snmp_logging.h 
 ./vacm.lo: ../include/net-snmp/session_api.h
 ./vacm.lo: ../include/net-snmp/library/callback.h
 ./vacm.lo: ../include/net-snmp/library/snmp_transport.h
@@ -3118,9 +3225,6 @@
 ./vacm.lo: ../include/net-snmp/library/snmp_impl.h
 ./vacm.lo: ../include/net-snmp/library/snmp.h
 ./vacm.lo: ../include/net-snmp/library/snmp-tc.h
-./vacm.lo: ../include/net-snmp/output_api.h
-./vacm.lo: ../include/net-snmp/library/snmp_debug.h
-./vacm.lo: ../include/net-snmp/library/snmp_logging.h 
 ./vacm.lo: ../include/net-snmp/config_api.h
 ./vacm.lo: ../include/net-snmp/library/read_config.h
 ./vacm.lo: ../include/net-snmp/library/default_store.h
@@ -3161,6 +3265,9 @@
 ./transports/snmpAAL5PVCDomain.lo: ../include/net-snmp/library/snmp_client.h
 ./transports/snmpAAL5PVCDomain.lo: ../include/net-snmp/pdu_api.h
 ./transports/snmpAAL5PVCDomain.lo: ../include/net-snmp/library/asn1.h
+./transports/snmpAAL5PVCDomain.lo: ../include/net-snmp/output_api.h
+./transports/snmpAAL5PVCDomain.lo: ../include/net-snmp/library/snmp_debug.h
+./transports/snmpAAL5PVCDomain.lo: ../include/net-snmp/library/snmp_logging.h
 ./transports/snmpAAL5PVCDomain.lo: ../include/net-snmp/session_api.h
 ./transports/snmpAAL5PVCDomain.lo: ../include/net-snmp/library/callback.h
 ./transports/snmpAAL5PVCDomain.lo: ../include/net-snmp/library/snmp_transport.h
@@ -3184,9 +3291,6 @@
 ./transports/snmpAAL5PVCDomain.lo: ../include/net-snmp/library/snmp_impl.h
 ./transports/snmpAAL5PVCDomain.lo: ../include/net-snmp/library/snmp.h
 ./transports/snmpAAL5PVCDomain.lo: ../include/net-snmp/library/snmp-tc.h
-./transports/snmpAAL5PVCDomain.lo: ../include/net-snmp/output_api.h
-./transports/snmpAAL5PVCDomain.lo: ../include/net-snmp/library/snmp_debug.h
-./transports/snmpAAL5PVCDomain.lo: ../include/net-snmp/library/snmp_logging.h
 ./transports/snmpAAL5PVCDomain.lo: ../include/net-snmp/config_api.h
 ./transports/snmpAAL5PVCDomain.lo: ../include/net-snmp/library/read_config.h
 ./transports/snmpAAL5PVCDomain.lo: ../include/net-snmp/library/default_store.h
@@ -3203,6 +3307,9 @@
 ./transports/snmpAliasDomain.lo: ../include/net-snmp/library/snmp_client.h
 ./transports/snmpAliasDomain.lo: ../include/net-snmp/pdu_api.h
 ./transports/snmpAliasDomain.lo: ../include/net-snmp/library/asn1.h
+./transports/snmpAliasDomain.lo: ../include/net-snmp/output_api.h
+./transports/snmpAliasDomain.lo: ../include/net-snmp/library/snmp_debug.h
+./transports/snmpAliasDomain.lo: ../include/net-snmp/library/snmp_logging.h
 ./transports/snmpAliasDomain.lo: ../include/net-snmp/session_api.h
 ./transports/snmpAliasDomain.lo: ../include/net-snmp/library/callback.h
 ./transports/snmpAliasDomain.lo: ../include/net-snmp/library/snmp_transport.h
@@ -3238,7 +3345,6 @@
 ./transports/snmpAliasDomain.lo: ../include/net-snmp/library/check_varbind.h
 ./transports/snmpAliasDomain.lo: ../include/net-snmp/library/container.h
 ./transports/snmpAliasDomain.lo: ../include/net-snmp/library/factory.h
-./transports/snmpAliasDomain.lo: ../include/net-snmp/library/snmp_logging.h
 ./transports/snmpAliasDomain.lo: ../include/net-snmp/library/container_binary_array.h
 ./transports/snmpAliasDomain.lo: ../include/net-snmp/library/container_list_ssll.h
 ./transports/snmpAliasDomain.lo: ../include/net-snmp/library/container_iterator.h
@@ -3251,8 +3357,6 @@
 ./transports/snmpAliasDomain.lo: ../include/net-snmp/library/snmp_parse_args.h
 ./transports/snmpAliasDomain.lo: ../include/net-snmp/library/snmp_enum.h
 ./transports/snmpAliasDomain.lo: ../include/net-snmp/library/vacm.h
-./transports/snmpAliasDomain.lo: ../include/net-snmp/output_api.h
-./transports/snmpAliasDomain.lo: ../include/net-snmp/library/snmp_debug.h
 ./transports/snmpAliasDomain.lo: ../include/net-snmp/snmpv3_api.h
 ./transports/snmpAliasDomain.lo: ../include/net-snmp/library/snmpv3.h
 ./transports/snmpAliasDomain.lo: ../include/net-snmp/library/transform_oids.h
@@ -3261,6 +3365,7 @@
 ./transports/snmpAliasDomain.lo: ../include/net-snmp/library/lcd_time.h
 ./transports/snmpAliasDomain.lo: ../include/net-snmp/library/snmp_secmod.h
 ./transports/snmpAliasDomain.lo: ../include/net-snmp/library/snmpv3-security-includes.h
+./transports/snmpAliasDomain.lo: ../include/net-snmp/library/snmptsm.h
 ./transports/snmpAliasDomain.lo: ../include/net-snmp/library/snmpusm.h
 ./transports/snmpCallbackDomain.lo: ../include/net-snmp/net-snmp-config.h
 ./transports/snmpCallbackDomain.lo: ../include/net-snmp/library/snmpCallbackDomain.h
@@ -3273,6 +3378,9 @@
 ./transports/snmpCallbackDomain.lo: ../include/net-snmp/library/snmp_client.h
 ./transports/snmpCallbackDomain.lo: ../include/net-snmp/pdu_api.h
 ./transports/snmpCallbackDomain.lo: ../include/net-snmp/library/asn1.h
+./transports/snmpCallbackDomain.lo: ../include/net-snmp/output_api.h
+./transports/snmpCallbackDomain.lo: ../include/net-snmp/library/snmp_debug.h
+./transports/snmpCallbackDomain.lo: ../include/net-snmp/library/snmp_logging.h
 ./transports/snmpCallbackDomain.lo: ../include/net-snmp/session_api.h
 ./transports/snmpCallbackDomain.lo: ../include/net-snmp/library/callback.h
 ./transports/snmpCallbackDomain.lo: ../include/net-snmp/library/snmp_transport.h
@@ -3295,9 +3403,6 @@
 ./transports/snmpCallbackDomain.lo: ../include/net-snmp/library/snmp_impl.h
 ./transports/snmpCallbackDomain.lo: ../include/net-snmp/library/snmp.h
 ./transports/snmpCallbackDomain.lo: ../include/net-snmp/library/snmp-tc.h
-./transports/snmpCallbackDomain.lo: ../include/net-snmp/output_api.h
-./transports/snmpCallbackDomain.lo: ../include/net-snmp/library/snmp_debug.h
-./transports/snmpCallbackDomain.lo: ../include/net-snmp/library/snmp_logging.h
 ./transports/snmpCallbackDomain.lo: ../include/net-snmp/config_api.h
 ./transports/snmpCallbackDomain.lo: ../include/net-snmp/library/read_config.h
 ./transports/snmpCallbackDomain.lo: ../include/net-snmp/library/default_store.h
@@ -3321,56 +3426,6 @@
 ./transports/snmpCallbackDomain.lo: ../include/net-snmp/library/snmp_assert.h
 ./transports/snmpCallbackDomain.lo: ../include/net-snmp/version.h
 ./transports/snmpDTLSUDPDomain.lo: ../include/net-snmp/net-snmp-config.h
-./transports/snmpDTLSUDPDomain.lo: ../include/net-snmp/library/snmpDTLSUDPDomain.h
-./transports/snmpDTLSUDPDomain.lo: ../include/net-snmp/types.h
-./transports/snmpDTLSUDPDomain.lo: ../include/net-snmp/library/oid.h
-./transports/snmpDTLSUDPDomain.lo: ../include/net-snmp/library/types.h
-./transports/snmpDTLSUDPDomain.lo: ../include/net-snmp/definitions.h
-./transports/snmpDTLSUDPDomain.lo: ../include/net-snmp/library/snmp_api.h
-./transports/snmpDTLSUDPDomain.lo: ../include/net-snmp/varbind_api.h
-./transports/snmpDTLSUDPDomain.lo: ../include/net-snmp/library/snmp_client.h
-./transports/snmpDTLSUDPDomain.lo: ../include/net-snmp/pdu_api.h
-./transports/snmpDTLSUDPDomain.lo: ../include/net-snmp/library/asn1.h
-./transports/snmpDTLSUDPDomain.lo: ../include/net-snmp/session_api.h
-./transports/snmpDTLSUDPDomain.lo: ../include/net-snmp/library/callback.h
-./transports/snmpDTLSUDPDomain.lo: ../include/net-snmp/library/snmp_transport.h
-./transports/snmpDTLSUDPDomain.lo: ../include/net-snmp/library/snmp_service.h
-./transports/snmpDTLSUDPDomain.lo: ../include/net-snmp/library/snmpCallbackDomain.h
-./transports/snmpDTLSUDPDomain.lo: ../include/net-snmp/library/snmpUnixDomain.h
-./transports/snmpDTLSUDPDomain.lo: ../include/net-snmp/library/snmpUDPDomain.h
-./transports/snmpDTLSUDPDomain.lo: ../include/net-snmp/library/snmpUDPIPv4BaseDomain.h
-./transports/snmpDTLSUDPDomain.lo: ../include/net-snmp/library/snmpIPv4BaseDomain.h
-./transports/snmpDTLSUDPDomain.lo: ../include/net-snmp/library/snmpUDPBaseDomain.h
-./transports/snmpDTLSUDPDomain.lo: ../include/net-snmp/library/snmpTCPDomain.h
-./transports/snmpDTLSUDPDomain.lo: ../include/net-snmp/library/snmpUDPIPv6Domain.h
-./transports/snmpDTLSUDPDomain.lo: ../include/net-snmp/library/snmpIPv6BaseDomain.h
-./transports/snmpDTLSUDPDomain.lo: ../include/net-snmp/library/snmpTCPIPv6Domain.h
-./transports/snmpDTLSUDPDomain.lo: ../include/net-snmp/library/snmpIPXDomain.h
-./transports/snmpDTLSUDPDomain.lo: ../include/net-snmp/library/ucd_compat.h
-./transports/snmpDTLSUDPDomain.lo: ../include/net-snmp/library/mib.h
-./transports/snmpDTLSUDPDomain.lo: ../include/net-snmp/mib_api.h
-./transports/snmpDTLSUDPDomain.lo: ../include/net-snmp/library/parse.h
-./transports/snmpDTLSUDPDomain.lo: ../include/net-snmp/library/oid_stash.h
-./transports/snmpDTLSUDPDomain.lo: ../include/net-snmp/library/snmp_impl.h
-./transports/snmpDTLSUDPDomain.lo: ../include/net-snmp/library/snmp.h
-./transports/snmpDTLSUDPDomain.lo: ../include/net-snmp/library/snmp-tc.h
-./transports/snmpDTLSUDPDomain.lo: ../include/net-snmp/output_api.h
-./transports/snmpDTLSUDPDomain.lo: ../include/net-snmp/library/snmp_debug.h
-./transports/snmpDTLSUDPDomain.lo: ../include/net-snmp/library/snmp_logging.h
-./transports/snmpDTLSUDPDomain.lo: ../include/net-snmp/config_api.h
-./transports/snmpDTLSUDPDomain.lo: ../include/net-snmp/library/read_config.h
-./transports/snmpDTLSUDPDomain.lo: ../include/net-snmp/library/default_store.h
-./transports/snmpDTLSUDPDomain.lo: ../include/net-snmp/library/snmp_parse_args.h
-./transports/snmpDTLSUDPDomain.lo: ../include/net-snmp/library/snmp_enum.h
-./transports/snmpDTLSUDPDomain.lo: ../include/net-snmp/library/vacm.h
-./transports/snmpDTLSUDPDomain.lo: ../include/net-snmp/library/system.h
-./transports/snmpDTLSUDPDomain.lo: ../include/net-snmp/library/tools.h
-./transports/snmpDTLSUDPDomain.lo: ../include/net-snmp/library/snmpSocketBaseDomain.h
-./transports/snmpDTLSUDPDomain.lo: ../include/net-snmp/library/snmpTLSBaseDomain.h
-./transports/snmpDTLSUDPDomain.lo: ../include/net-snmp/library/container.h
-./transports/snmpDTLSUDPDomain.lo: ../include/net-snmp/library/factory.h
-./transports/snmpDTLSUDPDomain.lo: ../include/net-snmp/library/cert_util.h
-./transports/snmpDTLSUDPDomain.lo: ../include/net-snmp/library/snmp_openssl.h
 ./transports/snmpIPXDomain.lo: ../include/net-snmp/net-snmp-config.h
 ./transports/snmpIPXDomain.lo: ../include/net-snmp/library/snmpIPXDomain.h
 ./transports/snmpIPXDomain.lo: ../include/net-snmp/library/snmp_transport.h
@@ -3383,6 +3438,9 @@
 ./transports/snmpIPXDomain.lo: ../include/net-snmp/varbind_api.h
 ./transports/snmpIPXDomain.lo: ../include/net-snmp/library/snmp_client.h
 ./transports/snmpIPXDomain.lo: ../include/net-snmp/pdu_api.h
+./transports/snmpIPXDomain.lo: ../include/net-snmp/output_api.h
+./transports/snmpIPXDomain.lo: ../include/net-snmp/library/snmp_debug.h
+./transports/snmpIPXDomain.lo: ../include/net-snmp/library/snmp_logging.h
 ./transports/snmpIPXDomain.lo: ../include/net-snmp/session_api.h
 ./transports/snmpIPXDomain.lo: ../include/net-snmp/library/callback.h
 ./transports/snmpIPXDomain.lo: ../include/net-snmp/library/snmp_service.h
@@ -3404,9 +3462,6 @@
 ./transports/snmpIPXDomain.lo: ../include/net-snmp/library/snmp_impl.h
 ./transports/snmpIPXDomain.lo: ../include/net-snmp/library/snmp.h
 ./transports/snmpIPXDomain.lo: ../include/net-snmp/library/snmp-tc.h
-./transports/snmpIPXDomain.lo: ../include/net-snmp/output_api.h
-./transports/snmpIPXDomain.lo: ../include/net-snmp/library/snmp_debug.h
-./transports/snmpIPXDomain.lo: ../include/net-snmp/library/snmp_logging.h
 ./transports/snmpIPXDomain.lo: ../include/net-snmp/config_api.h
 ./transports/snmpIPXDomain.lo: ../include/net-snmp/library/read_config.h
 ./transports/snmpIPXDomain.lo: ../include/net-snmp/library/default_store.h
@@ -3423,6 +3478,9 @@
 ./transports/snmpIPv4BaseDomain.lo: ../include/net-snmp/library/snmp_client.h
 ./transports/snmpIPv4BaseDomain.lo: ../include/net-snmp/pdu_api.h
 ./transports/snmpIPv4BaseDomain.lo: ../include/net-snmp/library/asn1.h
+./transports/snmpIPv4BaseDomain.lo: ../include/net-snmp/output_api.h
+./transports/snmpIPv4BaseDomain.lo: ../include/net-snmp/library/snmp_debug.h
+./transports/snmpIPv4BaseDomain.lo: ../include/net-snmp/library/snmp_logging.h
 ./transports/snmpIPv4BaseDomain.lo: ../include/net-snmp/session_api.h
 ./transports/snmpIPv4BaseDomain.lo: ../include/net-snmp/library/callback.h
 ./transports/snmpIPv4BaseDomain.lo: ../include/net-snmp/library/snmp_transport.h
@@ -3446,7 +3504,6 @@
 ./transports/snmpIPv4BaseDomain.lo: ../include/net-snmp/library/snmp_impl.h
 ./transports/snmpIPv4BaseDomain.lo: ../include/net-snmp/library/snmp.h
 ./transports/snmpIPv4BaseDomain.lo: ../include/net-snmp/library/snmp-tc.h
-./transports/snmpIPv4BaseDomain.lo: ../include/net-snmp/library/snmp_debug.h
 ./transports/snmpIPv4BaseDomain.lo: ../include/net-snmp/library/default_store.h
 ./transports/snmpIPv4BaseDomain.lo: ../include/net-snmp/library/system.h
 ./transports/snmpIPv6BaseDomain.lo: ../include/net-snmp/net-snmp-config.h
@@ -3459,6 +3516,9 @@
 ./transports/snmpIPv6BaseDomain.lo: ../include/net-snmp/library/snmp_client.h
 ./transports/snmpIPv6BaseDomain.lo: ../include/net-snmp/pdu_api.h
 ./transports/snmpIPv6BaseDomain.lo: ../include/net-snmp/library/asn1.h
+./transports/snmpIPv6BaseDomain.lo: ../include/net-snmp/output_api.h
+./transports/snmpIPv6BaseDomain.lo: ../include/net-snmp/library/snmp_debug.h
+./transports/snmpIPv6BaseDomain.lo: ../include/net-snmp/library/snmp_logging.h
 ./transports/snmpIPv6BaseDomain.lo: ../include/net-snmp/session_api.h
 ./transports/snmpIPv6BaseDomain.lo: ../include/net-snmp/library/callback.h
 ./transports/snmpIPv6BaseDomain.lo: ../include/net-snmp/library/snmp_transport.h
@@ -3482,9 +3542,7 @@
 ./transports/snmpIPv6BaseDomain.lo: ../include/net-snmp/library/snmp_impl.h
 ./transports/snmpIPv6BaseDomain.lo: ../include/net-snmp/library/snmp.h
 ./transports/snmpIPv6BaseDomain.lo: ../include/net-snmp/library/snmp-tc.h
-./transports/snmpIPv6BaseDomain.lo: ../include/net-snmp/library/snmp_debug.h
 ./transports/snmpIPv6BaseDomain.lo: ../include/net-snmp/library/default_store.h
-./transports/snmpIPv6BaseDomain.lo: ../include/net-snmp/library/snmp_logging.h
 ./transports/snmpIPv6BaseDomain.lo: inet_ntop.h inet_pton.h
 ./transports/snmpSSHDomain.lo: ../include/net-snmp/net-snmp-config.h
 ./transports/snmpSSHDomain.lo: ../include/net-snmp/library/snmpSSHDomain.h
@@ -3497,6 +3555,9 @@
 ./transports/snmpSSHDomain.lo: ../include/net-snmp/library/snmp_client.h
 ./transports/snmpSSHDomain.lo: ../include/net-snmp/pdu_api.h
 ./transports/snmpSSHDomain.lo: ../include/net-snmp/library/asn1.h
+./transports/snmpSSHDomain.lo: ../include/net-snmp/output_api.h
+./transports/snmpSSHDomain.lo: ../include/net-snmp/library/snmp_debug.h
+./transports/snmpSSHDomain.lo: ../include/net-snmp/library/snmp_logging.h
 ./transports/snmpSSHDomain.lo: ../include/net-snmp/session_api.h
 ./transports/snmpSSHDomain.lo: ../include/net-snmp/library/callback.h
 ./transports/snmpSSHDomain.lo: ../include/net-snmp/library/snmp_transport.h
@@ -3520,9 +3581,6 @@
 ./transports/snmpSSHDomain.lo: ../include/net-snmp/library/snmp_impl.h
 ./transports/snmpSSHDomain.lo: ../include/net-snmp/library/snmp.h
 ./transports/snmpSSHDomain.lo: ../include/net-snmp/library/snmp-tc.h
-./transports/snmpSSHDomain.lo: ../include/net-snmp/output_api.h
-./transports/snmpSSHDomain.lo: ../include/net-snmp/library/snmp_debug.h
-./transports/snmpSSHDomain.lo: ../include/net-snmp/library/snmp_logging.h
 ./transports/snmpSSHDomain.lo: ../include/net-snmp/library/tools.h
 ./transports/snmpSSHDomain.lo: ../include/net-snmp/library/system.h
 ./transports/snmpSSHDomain.lo: ../include/net-snmp/library/default_store.h
@@ -3543,6 +3601,9 @@
 ./transports/snmpSTDDomain.lo: ../include/net-snmp/library/snmp_client.h
 ./transports/snmpSTDDomain.lo: ../include/net-snmp/pdu_api.h
 ./transports/snmpSTDDomain.lo: ../include/net-snmp/library/asn1.h
+./transports/snmpSTDDomain.lo: ../include/net-snmp/output_api.h
+./transports/snmpSTDDomain.lo: ../include/net-snmp/library/snmp_debug.h
+./transports/snmpSTDDomain.lo: ../include/net-snmp/library/snmp_logging.h
 ./transports/snmpSTDDomain.lo: ../include/net-snmp/session_api.h
 ./transports/snmpSTDDomain.lo: ../include/net-snmp/library/callback.h
 ./transports/snmpSTDDomain.lo: ../include/net-snmp/library/snmp_transport.h
@@ -3566,9 +3627,6 @@
 ./transports/snmpSTDDomain.lo: ../include/net-snmp/library/snmp_impl.h
 ./transports/snmpSTDDomain.lo: ../include/net-snmp/library/snmp.h
 ./transports/snmpSTDDomain.lo: ../include/net-snmp/library/snmp-tc.h
-./transports/snmpSTDDomain.lo: ../include/net-snmp/output_api.h
-./transports/snmpSTDDomain.lo: ../include/net-snmp/library/snmp_debug.h
-./transports/snmpSTDDomain.lo: ../include/net-snmp/library/snmp_logging.h
 ./transports/snmpSTDDomain.lo: ../include/net-snmp/library/tools.h
 ./transports/snmpSocketBaseDomain.lo: ../include/net-snmp/net-snmp-config.h
 ./transports/snmpSocketBaseDomain.lo: ../include/net-snmp/types.h
@@ -3580,6 +3638,9 @@
 ./transports/snmpSocketBaseDomain.lo: ../include/net-snmp/library/snmp_client.h
 ./transports/snmpSocketBaseDomain.lo: ../include/net-snmp/pdu_api.h
 ./transports/snmpSocketBaseDomain.lo: ../include/net-snmp/library/asn1.h
+./transports/snmpSocketBaseDomain.lo: ../include/net-snmp/output_api.h
+./transports/snmpSocketBaseDomain.lo: ../include/net-snmp/library/snmp_debug.h
+./transports/snmpSocketBaseDomain.lo: ../include/net-snmp/library/snmp_logging.h
 ./transports/snmpSocketBaseDomain.lo: ../include/net-snmp/session_api.h
 ./transports/snmpSocketBaseDomain.lo: ../include/net-snmp/library/callback.h
 ./transports/snmpSocketBaseDomain.lo: ../include/net-snmp/library/snmp_transport.h
@@ -3604,12 +3665,10 @@
 ./transports/snmpSocketBaseDomain.lo: ../include/net-snmp/library/snmp.h
 ./transports/snmpSocketBaseDomain.lo: ../include/net-snmp/library/snmp-tc.h
 ./transports/snmpSocketBaseDomain.lo: ../include/net-snmp/library/snmpSocketBaseDomain.h
-./transports/snmpSocketBaseDomain.lo: ../include/net-snmp/library/snmp_debug.h
 ./transports/snmpSocketBaseDomain.lo: ../include/net-snmp/library/tools.h
 ./transports/snmpSocketBaseDomain.lo: ../include/net-snmp/library/default_store.h
 ./transports/snmpSocketBaseDomain.lo: ../include/net-snmp/library/system.h
 ./transports/snmpSocketBaseDomain.lo: ../include/net-snmp/library/snmp_assert.h
-./transports/snmpSocketBaseDomain.lo: ../include/net-snmp/library/snmp_logging.h
 ./transports/snmpTCPBaseDomain.lo: ../include/net-snmp/net-snmp-config.h
 ./transports/snmpTCPBaseDomain.lo: ../include/net-snmp/types.h
 ./transports/snmpTCPBaseDomain.lo: ../include/net-snmp/library/oid.h
@@ -3620,6 +3679,9 @@
 ./transports/snmpTCPBaseDomain.lo: ../include/net-snmp/library/snmp_client.h
 ./transports/snmpTCPBaseDomain.lo: ../include/net-snmp/pdu_api.h
 ./transports/snmpTCPBaseDomain.lo: ../include/net-snmp/library/asn1.h
+./transports/snmpTCPBaseDomain.lo: ../include/net-snmp/output_api.h
+./transports/snmpTCPBaseDomain.lo: ../include/net-snmp/library/snmp_debug.h
+./transports/snmpTCPBaseDomain.lo: ../include/net-snmp/library/snmp_logging.h
 ./transports/snmpTCPBaseDomain.lo: ../include/net-snmp/session_api.h
 ./transports/snmpTCPBaseDomain.lo: ../include/net-snmp/library/callback.h
 ./transports/snmpTCPBaseDomain.lo: ../include/net-snmp/library/snmp_transport.h
@@ -3644,9 +3706,6 @@
 ./transports/snmpTCPBaseDomain.lo: ../include/net-snmp/library/snmp.h
 ./transports/snmpTCPBaseDomain.lo: ../include/net-snmp/library/snmp-tc.h
 ./transports/snmpTCPBaseDomain.lo: ../include/net-snmp/library/snmpTCPBaseDomain.h
-./transports/snmpTCPBaseDomain.lo: ../include/net-snmp/output_api.h
-./transports/snmpTCPBaseDomain.lo: ../include/net-snmp/library/snmp_debug.h
-./transports/snmpTCPBaseDomain.lo: ../include/net-snmp/library/snmp_logging.h
 ./transports/snmpTCPDomain.lo: ../include/net-snmp/net-snmp-config.h
 ./transports/snmpTCPDomain.lo: ../include/net-snmp/types.h
 ./transports/snmpTCPDomain.lo: ../include/net-snmp/library/oid.h
@@ -3657,6 +3716,9 @@
 ./transports/snmpTCPDomain.lo: ../include/net-snmp/library/snmp_client.h
 ./transports/snmpTCPDomain.lo: ../include/net-snmp/pdu_api.h
 ./transports/snmpTCPDomain.lo: ../include/net-snmp/library/asn1.h
+./transports/snmpTCPDomain.lo: ../include/net-snmp/output_api.h
+./transports/snmpTCPDomain.lo: ../include/net-snmp/library/snmp_debug.h
+./transports/snmpTCPDomain.lo: ../include/net-snmp/library/snmp_logging.h
 ./transports/snmpTCPDomain.lo: ../include/net-snmp/session_api.h
 ./transports/snmpTCPDomain.lo: ../include/net-snmp/library/callback.h
 ./transports/snmpTCPDomain.lo: ../include/net-snmp/library/snmp_transport.h
@@ -3680,9 +3742,6 @@
 ./transports/snmpTCPDomain.lo: ../include/net-snmp/library/snmp_impl.h
 ./transports/snmpTCPDomain.lo: ../include/net-snmp/library/snmp.h
 ./transports/snmpTCPDomain.lo: ../include/net-snmp/library/snmp-tc.h
-./transports/snmpTCPDomain.lo: ../include/net-snmp/output_api.h
-./transports/snmpTCPDomain.lo: ../include/net-snmp/library/snmp_debug.h
-./transports/snmpTCPDomain.lo: ../include/net-snmp/library/snmp_logging.h
 ./transports/snmpTCPDomain.lo: ../include/net-snmp/library/snmpSocketBaseDomain.h
 ./transports/snmpTCPDomain.lo: ../include/net-snmp/library/snmpTCPBaseDomain.h
 ./transports/snmpTCPIPv6Domain.lo: ../include/net-snmp/net-snmp-config.h
@@ -3699,6 +3758,9 @@
 ./transports/snmpTLSBaseDomain.lo: ../include/net-snmp/varbind_api.h
 ./transports/snmpTLSBaseDomain.lo: ../include/net-snmp/library/snmp_client.h
 ./transports/snmpTLSBaseDomain.lo: ../include/net-snmp/pdu_api.h
+./transports/snmpTLSBaseDomain.lo: ../include/net-snmp/output_api.h
+./transports/snmpTLSBaseDomain.lo: ../include/net-snmp/library/snmp_debug.h
+./transports/snmpTLSBaseDomain.lo: ../include/net-snmp/library/snmp_logging.h
 ./transports/snmpTLSBaseDomain.lo: ../include/net-snmp/session_api.h
 ./transports/snmpTLSBaseDomain.lo: ../include/net-snmp/library/callback.h
 ./transports/snmpTLSBaseDomain.lo: ../include/net-snmp/library/snmp_service.h
@@ -3722,12 +3784,10 @@
 ./transports/snmpTLSBaseDomain.lo: ../include/net-snmp/library/snmp.h
 ./transports/snmpTLSBaseDomain.lo: ../include/net-snmp/library/snmp-tc.h
 ./transports/snmpTLSBaseDomain.lo: ../include/net-snmp/library/factory.h
-./transports/snmpTLSBaseDomain.lo: ../include/net-snmp/library/snmp_logging.h
 ./transports/snmpTLSBaseDomain.lo: ../include/net-snmp/library/tools.h
 ./transports/snmpTLSBaseDomain.lo: ../include/net-snmp/library/cert_util.h
 ./transports/snmpTLSBaseDomain.lo: ../include/net-snmp/library/snmp_openssl.h
 ./transports/snmpTLSBaseDomain.lo: ../include/net-snmp/library/default_store.h
-./transports/snmpTLSBaseDomain.lo: ../include/net-snmp/library/snmp_debug.h
 ./transports/snmpTLSBaseDomain.lo: ../include/net-snmp/library/snmp_assert.h
 ./transports/snmpTLSBaseDomain.lo: ../include/net-snmp/library/snmp_secmod.h
 ./transports/snmpTLSTCPDomain.lo: ../include/net-snmp/net-snmp-config.h
@@ -3743,6 +3803,9 @@
 ./transports/snmpTLSTCPDomain.lo: ../include/net-snmp/varbind_api.h
 ./transports/snmpTLSTCPDomain.lo: ../include/net-snmp/library/snmp_client.h
 ./transports/snmpTLSTCPDomain.lo: ../include/net-snmp/pdu_api.h
+./transports/snmpTLSTCPDomain.lo: ../include/net-snmp/output_api.h
+./transports/snmpTLSTCPDomain.lo: ../include/net-snmp/library/snmp_debug.h
+./transports/snmpTLSTCPDomain.lo: ../include/net-snmp/library/snmp_logging.h
 ./transports/snmpTLSTCPDomain.lo: ../include/net-snmp/session_api.h
 ./transports/snmpTLSTCPDomain.lo: ../include/net-snmp/library/callback.h
 ./transports/snmpTLSTCPDomain.lo: ../include/net-snmp/library/snmp_service.h
@@ -3764,9 +3827,6 @@
 ./transports/snmpTLSTCPDomain.lo: ../include/net-snmp/library/snmp_impl.h
 ./transports/snmpTLSTCPDomain.lo: ../include/net-snmp/library/snmp.h
 ./transports/snmpTLSTCPDomain.lo: ../include/net-snmp/library/snmp-tc.h
-./transports/snmpTLSTCPDomain.lo: ../include/net-snmp/output_api.h
-./transports/snmpTLSTCPDomain.lo: ../include/net-snmp/library/snmp_debug.h
-./transports/snmpTLSTCPDomain.lo: ../include/net-snmp/library/snmp_logging.h
 ./transports/snmpTLSTCPDomain.lo: ../include/net-snmp/config_api.h
 ./transports/snmpTLSTCPDomain.lo: ../include/net-snmp/library/read_config.h
 ./transports/snmpTLSTCPDomain.lo: ../include/net-snmp/library/default_store.h
@@ -3792,6 +3852,9 @@
 ./transports/snmpUDPBaseDomain.lo: ../include/net-snmp/library/snmp_client.h
 ./transports/snmpUDPBaseDomain.lo: ../include/net-snmp/pdu_api.h
 ./transports/snmpUDPBaseDomain.lo: ../include/net-snmp/library/asn1.h
+./transports/snmpUDPBaseDomain.lo: ../include/net-snmp/output_api.h
+./transports/snmpUDPBaseDomain.lo: ../include/net-snmp/library/snmp_debug.h
+./transports/snmpUDPBaseDomain.lo: ../include/net-snmp/library/snmp_logging.h
 ./transports/snmpUDPBaseDomain.lo: ../include/net-snmp/session_api.h
 ./transports/snmpUDPBaseDomain.lo: ../include/net-snmp/library/callback.h
 ./transports/snmpUDPBaseDomain.lo: ../include/net-snmp/library/snmp_transport.h
@@ -3816,12 +3879,10 @@
 ./transports/snmpUDPBaseDomain.lo: ../include/net-snmp/library/snmp.h
 ./transports/snmpUDPBaseDomain.lo: ../include/net-snmp/library/snmp-tc.h
 ./transports/snmpUDPBaseDomain.lo: ../include/net-snmp/library/snmpSocketBaseDomain.h
-./transports/snmpUDPBaseDomain.lo: ../include/net-snmp/library/snmp_debug.h
 ./transports/snmpUDPBaseDomain.lo: ../include/net-snmp/library/tools.h
 ./transports/snmpUDPBaseDomain.lo: ../include/net-snmp/library/default_store.h
 ./transports/snmpUDPBaseDomain.lo: ../include/net-snmp/library/system.h
 ./transports/snmpUDPBaseDomain.lo: ../include/net-snmp/library/snmp_assert.h
-./transports/snmpUDPBaseDomain.lo: ../include/net-snmp/library/snmp_logging.h
 ./transports/snmpUDPDomain.lo: ../include/net-snmp/net-snmp-config.h
 ./transports/snmpUDPDomain.lo: ../include/net-snmp/types.h
 ./transports/snmpUDPDomain.lo: ../include/net-snmp/library/oid.h
@@ -3832,6 +3893,9 @@
 ./transports/snmpUDPDomain.lo: ../include/net-snmp/library/snmp_client.h
 ./transports/snmpUDPDomain.lo: ../include/net-snmp/pdu_api.h
 ./transports/snmpUDPDomain.lo: ../include/net-snmp/library/asn1.h
+./transports/snmpUDPDomain.lo: ../include/net-snmp/output_api.h
+./transports/snmpUDPDomain.lo: ../include/net-snmp/library/snmp_debug.h
+./transports/snmpUDPDomain.lo: ../include/net-snmp/library/snmp_logging.h
 ./transports/snmpUDPDomain.lo: ../include/net-snmp/session_api.h
 ./transports/snmpUDPDomain.lo: ../include/net-snmp/library/callback.h
 ./transports/snmpUDPDomain.lo: ../include/net-snmp/library/snmp_transport.h
@@ -3855,9 +3919,6 @@
 ./transports/snmpUDPDomain.lo: ../include/net-snmp/library/snmp_impl.h
 ./transports/snmpUDPDomain.lo: ../include/net-snmp/library/snmp.h
 ./transports/snmpUDPDomain.lo: ../include/net-snmp/library/snmp-tc.h
-./transports/snmpUDPDomain.lo: ../include/net-snmp/output_api.h
-./transports/snmpUDPDomain.lo: ../include/net-snmp/library/snmp_debug.h
-./transports/snmpUDPDomain.lo: ../include/net-snmp/library/snmp_logging.h
 ./transports/snmpUDPDomain.lo: ../include/net-snmp/config_api.h
 ./transports/snmpUDPDomain.lo: ../include/net-snmp/library/read_config.h
 ./transports/snmpUDPDomain.lo: ../include/net-snmp/library/default_store.h
@@ -3878,6 +3939,9 @@
 ./transports/snmpUDPIPv4BaseDomain.lo: ../include/net-snmp/library/snmp_client.h
 ./transports/snmpUDPIPv4BaseDomain.lo: ../include/net-snmp/pdu_api.h
 ./transports/snmpUDPIPv4BaseDomain.lo: ../include/net-snmp/library/asn1.h
+./transports/snmpUDPIPv4BaseDomain.lo: ../include/net-snmp/output_api.h
+./transports/snmpUDPIPv4BaseDomain.lo: ../include/net-snmp/library/snmp_debug.h
+./transports/snmpUDPIPv4BaseDomain.lo: ../include/net-snmp/library/snmp_logging.h
 ./transports/snmpUDPIPv4BaseDomain.lo: ../include/net-snmp/session_api.h
 ./transports/snmpUDPIPv4BaseDomain.lo: ../include/net-snmp/library/callback.h
 ./transports/snmpUDPIPv4BaseDomain.lo: ../include/net-snmp/library/snmp_transport.h
@@ -3901,10 +3965,8 @@
 ./transports/snmpUDPIPv4BaseDomain.lo: ../include/net-snmp/library/snmp_impl.h
 ./transports/snmpUDPIPv4BaseDomain.lo: ../include/net-snmp/library/snmp.h
 ./transports/snmpUDPIPv4BaseDomain.lo: ../include/net-snmp/library/snmp-tc.h
-./transports/snmpUDPIPv4BaseDomain.lo: ../include/net-snmp/library/snmp_debug.h
 ./transports/snmpUDPIPv4BaseDomain.lo: ../include/net-snmp/library/tools.h
 ./transports/snmpUDPIPv4BaseDomain.lo: ../include/net-snmp/library/snmp_assert.h
-./transports/snmpUDPIPv4BaseDomain.lo: ../include/net-snmp/library/snmp_logging.h
 ./transports/snmpUDPIPv4BaseDomain.lo: ../include/net-snmp/library/default_store.h
 ./transports/snmpUDPIPv4BaseDomain.lo: ../include/net-snmp/library/snmpSocketBaseDomain.h
 ./transports/snmpUDPIPv6Domain.lo: ../include/net-snmp/net-snmp-config.h
@@ -3918,6 +3980,9 @@
 ./transports/snmpUDPIPv6Domain.lo: ../include/net-snmp/library/snmp_client.h
 ./transports/snmpUDPIPv6Domain.lo: ../include/net-snmp/pdu_api.h
 ./transports/snmpUDPIPv6Domain.lo: ../include/net-snmp/library/asn1.h
+./transports/snmpUDPIPv6Domain.lo: ../include/net-snmp/output_api.h
+./transports/snmpUDPIPv6Domain.lo: ../include/net-snmp/library/snmp_debug.h
+./transports/snmpUDPIPv6Domain.lo: ../include/net-snmp/library/snmp_logging.h
 ./transports/snmpUDPIPv6Domain.lo: ../include/net-snmp/session_api.h
 ./transports/snmpUDPIPv6Domain.lo: ../include/net-snmp/library/callback.h
 ./transports/snmpUDPIPv6Domain.lo: ../include/net-snmp/library/snmp_transport.h
@@ -3952,6 +4017,9 @@
 ./transports/snmpUnixDomain.lo: ../include/net-snmp/varbind_api.h
 ./transports/snmpUnixDomain.lo: ../include/net-snmp/library/snmp_client.h
 ./transports/snmpUnixDomain.lo: ../include/net-snmp/pdu_api.h
+./transports/snmpUnixDomain.lo: ../include/net-snmp/output_api.h
+./transports/snmpUnixDomain.lo: ../include/net-snmp/library/snmp_debug.h
+./transports/snmpUnixDomain.lo: ../include/net-snmp/library/snmp_logging.h
 ./transports/snmpUnixDomain.lo: ../include/net-snmp/session_api.h
 ./transports/snmpUnixDomain.lo: ../include/net-snmp/library/callback.h
 ./transports/snmpUnixDomain.lo: ../include/net-snmp/library/snmp_service.h
@@ -3973,9 +4041,6 @@
 ./transports/snmpUnixDomain.lo: ../include/net-snmp/library/snmp_impl.h
 ./transports/snmpUnixDomain.lo: ../include/net-snmp/library/snmp.h
 ./transports/snmpUnixDomain.lo: ../include/net-snmp/library/snmp-tc.h
-./transports/snmpUnixDomain.lo: ../include/net-snmp/output_api.h
-./transports/snmpUnixDomain.lo: ../include/net-snmp/library/snmp_debug.h
-./transports/snmpUnixDomain.lo: ../include/net-snmp/library/snmp_logging.h
 ./transports/snmpUnixDomain.lo: ../include/net-snmp/config_api.h
 ./transports/snmpUnixDomain.lo: ../include/net-snmp/library/read_config.h
 ./transports/snmpUnixDomain.lo: ../include/net-snmp/library/default_store.h
