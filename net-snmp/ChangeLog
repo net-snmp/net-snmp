@@ -1,5 +1,817 @@
 ----------------------------------------------------------------------
 
+Changes: V5.6.pre2 -> V5.6.pre3
+	
+2010-07-31 20:31  hardaker
+
+   *  agent/Makefile.depend, agent/helpers/Makefile.depend,   
+      agent/mibgroup/Makefile.depend, apps/Makefile.depend,   
+      apps/snmpnetstat/Makefile.depend, snmplib/Makefile.depend:
+
+   make depend
+
+2010-07-31 20:24  hardaker
+
+   *  man/netsnmp_access_multiplexer.3, man/netsnmp_agent.3,   
+      man/netsnmp_agent_handler.h.3, man/netsnmp_agent_registry.3,   
+      man/netsnmp_agent_trap.3, man/netsnmp_asn1_packet_parse.3,   
+      man/netsnmp_baby_steps.3, man/netsnmp_bulk_to_next.3,   
+      man/netsnmp_cache_handler.3, man/netsnmp_callback.3,   
+      man/netsnmp_container.3, man/netsnmp_container_iterator.3,   
+      man/netsnmp_container_iterator.h.3, man/netsnmp_data_list.3,   
+      man/netsnmp_debug.3, man/netsnmp_default_store.3,   
+      man/netsnmp_handler.3, man/netsnmp_instance.3,   
+      man/netsnmp_iterator_info_s.3, man/netsnmp_leaf.3,   
+      man/netsnmp_library.3, man/netsnmp_mib_maintenance.3,   
+      man/netsnmp_mib_utilities.3, man/netsnmp_mode_end_call.3,   
+      man/netsnmp_multiplexer.3,   
+      man/netsnmp_netsnmp_agent_request_info_s.3,   
+      man/netsnmp_netsnmp_column_info_t.3,   
+      man/netsnmp_netsnmp_data_list_s.3,   
+      man/netsnmp_netsnmp_handler_registration_s.3,   
+      man/netsnmp_netsnmp_iterator_info_s.3,   
+      man/netsnmp_netsnmp_mib_handler_access_methods.3,   
+      man/netsnmp_netsnmp_mib_handler_methods.3,   
+      man/netsnmp_netsnmp_mib_handler_s.3,   
+      man/netsnmp_netsnmp_monitor_callback_header_s.3,   
+      man/netsnmp_netsnmp_request_info_s.3,   
+      man/netsnmp_netsnmp_table_registration_info_s.3,   
+      man/netsnmp_netsnmp_table_request_info_s.3,   
+      man/netsnmp_null_container.3, man/netsnmp_oid_stash.3,   
+      man/netsnmp_old_api.3, man/netsnmp_read_config.3,   
+      man/netsnmp_read_only.3, man/netsnmp_row_merge.3,   
+      man/netsnmp_scalar.3, man/netsnmp_scalar_group_group.3,   
+      man/netsnmp_serialize.3, man/netsnmp_snmp_agent.3,   
+      man/netsnmp_snmp_alarm.3, man/netsnmp_snmp_client.3,   
+      man/netsnmp_snmp_logging.3, man/netsnmp_snmp_pdu.3,   
+      man/netsnmp_snmp_session.3, man/netsnmp_stash_cache.3,   
+      man/netsnmp_stash_to_next.3, man/netsnmp_table.3,   
+      man/netsnmp_table_array.3, man/netsnmp_table_container.3,   
+      man/netsnmp_table_data.3, man/netsnmp_table_dataset.3,   
+      man/netsnmp_table_generic.3, man/netsnmp_table_indexes.3,   
+      man/netsnmp_table_iterator.3, man/netsnmp_table_iterator.h.3,   
+      man/netsnmp_table_maintenance.3, man/netsnmp_table_row.3,   
+      man/netsnmp_table_rows.3, man/netsnmp_tdata.3,   
+      man/netsnmp_tools.h.3, man/netsnmp_util.3,   
+      man/netsnmp_utilities.3, man/netsnmp_variable_list.3,   
+      man/netsnmp_watcher.3:
+
+   documentation update
+
+2010-07-31 20:16  hardaker
+
+   *  FAQ, README, configure, configure.ac, dist/Makefile,   
+      dist/net-snmp.spec:
+
+   Version number update
+
+2010-07-31 20:11  hardaker
+
+   * dist/makerelease.xml:
+
+   changed the name of the readme section to call out NEWS-too
+
+2010-07-31 20:10  hardaker
+
+   * NEWS:
+
+   added missing news items
+
+2010-07-30 13:06  hardaker
+
+   * snmplib/snmp_client.c:
+
+   CHANGES: python: PATCH 3035328: from: sws: check the results of
+   session creation for a failure case.
+
+2010-07-30 13:00  hardaker
+
+   * python/netsnmp/client_intf.c:
+
+   CHANGES: python: patch 3035578: from sws: keep error codes up to
+   date
+
+2010-07-29 15:48  dts12
+
+   * configure:
+
+   Add support for Mac OS X 10.6 (Snow Leopard - "darwin10")
+   (On the assumption that this is the same as Mac OS X 10.5
+   (Leopard - "darwin9"))
+
+2010-07-29 15:47  dts12
+
+   *  Makefile.in, configure.d/config_os_progs,   
+      configure.d/config_project_perl_python:
+
+   Add support for Mac OS X 10.6 (Snow Leopard - "darwin10")
+   (On the assumption that this is the same as Mac OS X 10.5
+   (Leopard - "darwin9"))
+
+2010-07-29 15:03  dts12
+
+   * include/net-snmp/output_api.h:
+
+   Provide a definition of 'va_list' for varargs-based APIs
+
+2010-07-29 14:58  dts12
+
+   *  acconfig.h, agent/auto_nlist.c, agent/mibgroup/hardware/cpu.h,   
+      agent/mibgroup/hardware/fsys.h, agent/mibgroup/hardware/memory.h, 
+        agent/mibgroup/host/data_access/swrun.h,   
+      agent/mibgroup/host/hr_filesys.c,   
+      agent/mibgroup/host/hr_storage.c, agent/mibgroup/host/hr_swrun.c, 
+        agent/mibgroup/host/hrh_filesys.c, agent/mibgroup/mibII/icmp.c, 
+        agent/mibgroup/mibII/interfaces.c, agent/mibgroup/mibII/ip.c,   
+      agent/mibgroup/mibII/tcp.c, agent/mibgroup/mibII/udp.c,   
+      agent/mibgroup/ucd-snmp/diskio.c,   
+      agent/mibgroup/ucd-snmp/loadave.c,   
+      agent/mibgroup/ucd-snmp/proc.c, configure,   
+      configure.d/config_os_progs,   
+      include/net-snmp/net-snmp-config.h.in, snmplib/system.c:
+
+   Add preliminary support for AIX 7
+   (on the assumption that this is identical to AIX 6)
+
+2010-07-29 14:56  dts12
+
+   * configure, configure.d/config_project_perl_python:
+
+   Disable embedded perl by default on architecures where
+   this seems to cause problems (HP-UX & Mac OS X)
+
+2010-07-29 11:13  dts12
+
+   * snmplib/read_config.c:
+
+   Guard against blank 'include*' lines.
+   Handle relative 'includeFile' paths
+
+2010-07-29 10:47  dts12
+
+   * include/net-snmp/library/read_config.h, snmplib/read_config.c:
+
+   Return an indication of whether config files are actually
+   processed.
+   Report problems with failing to include config files.
+
+2010-07-28 14:44  dts12
+
+   *  include/net-snmp/config_api.h,   
+      include/net-snmp/library/snmp_api.h,   
+      include/net-snmp/library/snmp_client.h,   
+      include/net-snmp/library/snmp_debug.h,   
+      include/net-snmp/library/snmp_logging.h,   
+      include/net-snmp/mib_api.h, include/net-snmp/output_api.h,   
+      include/net-snmp/pdu_api.h, include/net-snmp/session_api.h,   
+      include/net-snmp/varbind_api.h, man/config_api.3.def,   
+      man/mib_api.3.def, man/session_api.3.def, man/varbind_api.3.def,  
+       win32/libsnmp_dll/libsnmp.def:
+
+   Bring man page documentation, header files and Windows DLL
+   definitions
+   of top-level public API calls into line with each other.
+
+2010-07-28 14:40  dts12
+
+   * snmplib/snmp_api.c:
+
+   Fix misnamed comment
+
+2010-07-28 14:36  dts12
+
+   *  agent/mibgroup/default_modules.h, configure,   
+      configure.d/config_modules_agent,   
+      configure.d/config_project_with_enable:
+
+   Don't mix SMIv1 and SMIv2 MIBs in the list of default MIBs to
+   load.
+   Use newer SMIv2 versions (which include suitable display hints)
+   rather than the original RFC1213 MIB (which doesn't)
+
+2010-07-28 14:10  dts12
+
+   * snmplib/read_config.c:
+
+   Fix indentation for 'includeSearch' processing code.
+
+2010-07-28 14:09  dts12
+
+   * snmplib/read_config.c:
+
+   Extend 'include' config file processing to cover three
+   different modes of working:
+   - look for the file on the config search path
+   - include the specified file by name
+   - ioad the contents of the specified directory
+   Use different config tokens to distinguish these cases.
+
+2010-07-27 11:12  hardaker
+
+   * agent/kernel.c, agent/kernel.h, agent/snmp_vars.c:
+
+   CHANGES: snmpd: patch 2912520: from listom: Free kmem references
+   on shutdown
+
+2010-07-27 10:54  hardaker
+
+   * mibs/SMUX-MIB.txt:
+
+   CHANGES: mibs: patch 2974716: from bvassche: fix issues in the
+   SMUX-MIB
+
+2010-07-27 08:54  hardaker
+
+   * configure.d/config_modules_lib:
+
+   include the new security-hedaers module
+
+2010-07-27 08:54  hardaker
+
+   * local/snmp-bridge-mib:
+
+   remote debugging/processing stderr output
+
+2010-07-27 08:54  hardaker
+
+   * local/snmp-bridge-mib:
+
+   CHANGES: snmpd: patch: 3028923: from jenso: new copy of the
+   bridge-mib perl implementation
+
+2010-07-27 08:31  hardaker
+
+   *  Makefile.in, configure.d/config_modules_security_modules,   
+      dist/generation-scripts/gen-security-headers.in:
+
+   separate out the security header/init generation
+
+2010-07-27 08:31  hardaker
+
+   * configure.d/config_modules_transports:
+
+   transport configure portion
+
+2010-07-27 08:30  hardaker
+
+   *  Makefile.in, configure, configure.ac,   
+      configure.d/config_modules_lib, dist/generation-scripts,   
+      dist/generation-scripts/gen-transport-headers.in,   
+      dist/generation-scripts/gen-variables.in:
+
+   move transport header generation to a separate file and create an
+   external separate script for generating it
+
+2010-07-27 08:14  jsafranek
+
+   *  agent/mibgroup/hardware/fsys/fsys_mntent.c,   
+      agent/mibgroup/hardware/fsys/mnttypes.h:
+
+   CHANGES: snmpd: report gfs filesystems in hrStorageTable and
+   hrFSTable.
+
+2010-07-24 15:42  dts12
+
+   * snmplib/read_config.c:
+
+   Don't lose track of which config file was being parsed,
+   when processing an included config file.
+   Fixes a bug with reporting later config errors.
+
+2010-07-24 15:36  dts12
+
+   * snmplib/snmp_transport.c:
+
+   Don't lose track of which config file is being parsed,
+   when opening a new SNMP session.
+   Fixes a bug with reporting later config errors.
+
+2010-07-23 03:12  hardaker
+
+   * dist/makerelease.xml:
+
+   add the TLS modules to the list of test modules
+
+2010-07-21 19:25  nba
+
+   * agent/mibgroup/tcp-mib/tcpConnectionTable/tcpConnectionTable.c:
+
+   Fix typo in doxygen comment
+
+2010-07-21 19:24  nba
+
+   * agent/mibgroup/if-mib/data_access/interface_sysctl.c:
+
+   Fix typo in speed computation
+
+2010-07-21 19:21  nba
+
+   * snmplib/snmp_secmod.c:
+
+   Include generated security-includes.h
+
+2010-07-21 19:20  nba
+
+   *  include/net-snmp/library/snmpksm.h,   
+      include/net-snmp/library/snmptsm.h:
+
+   Fix init func name (copy-paste glitch)
+
+2010-07-21 19:18  nba
+
+   * snmplib/transports/snmpTLSBaseDomain.c:
+
+   Remove superfluous semicolon
+
+2010-07-21 19:18  nba
+
+   * snmplib/transports/snmpDTLSUDPDomain.c:
+
+   Out of order declaration
+
+2010-07-21 19:17  nba
+
+   * snmplib/snmp_logging.c:
+
+   Log error on file open error
+
+2010-07-21 19:16  nba
+
+   * configure.d/config_modules_lib:
+
+   Speling error
+
+2010-07-21 18:10  nba
+
+   * mibs/ianalist, mibs/rfclist, mibs/rfcmibs.diff:
+
+   Update for current RFCs
+
+2010-07-21 18:08  nba
+
+   * mibs/IANAifType-MIB.txt:
+
+   Current version from IANA
+
+2010-07-21 18:05  nba
+
+   * agent/mibgroup/ucd-snmp/diskio.c:
+
+   r17495 erroneously disabled diskIOLAx for linux
+
+2010-07-20 10:38  jsafranek
+
+   * snmplib/system.c:
+
+   CHANGES: snmplib: fixed potential buffer overflow when generating
+   temp. file names
+
+2010-07-20 07:32  jsafranek
+
+   *  agent/snmpd.c, apps/agentxtrap.c, apps/snmptranslate.c,   
+      apps/snmptrapd.c, man/snmpcmd.1.def, man/snmptranslate.1.def,   
+      man/snmptrapd.8.def, snmplib/snmp_parse_args.c:
+
+   Describe -D usage as -D[TOKEN] instead of -D [TOKEN]
+
+2010-07-17 15:10  rstory
+
+   * mibs/SNMP-TLS-TM-MIB.txt:
+
+   update display hint to some less ambiguous (and that works with
+   our lib)
+
+2010-07-17 04:13  rstory
+
+   * testing/Makefile.in:
+
+   fix testsimple for builddir!=srcdir
+
+2010-07-17 04:12  rstory
+
+   * testing/Makefile.in:
+
+   add testsimple target
+
+2010-07-16 19:21  rstory
+
+   * snmplib/transports/snmpTLSBaseDomain.c:
+
+   release iterator when done with it
+
+2010-07-15 18:28  hardaker
+
+   * snmplib/snmpusm.c:
+
+   CHANGES: snmplib: fix issue with USM using inactive users
+
+2010-07-15 01:35  rstory
+
+   * agent/mibgroup/tlstm-mib/snmpTlstmAddrTable/snmpTlstmAddrTable.c:
+
+   don't use strndup (portability)
+
+2010-07-15 01:35  rstory
+
+   * snmplib/cert_util.c:
+
+   include appropriate string header; define NAME_MAX if not already
+   defined;
+   don't use strndup (portability)
+
+2010-07-15 01:35  rstory
+
+   * snmplib/transports/snmpTLSBaseDomain.c:
+
+   check that some newer openssl macros are defined before using
+   them; include
+   appropriate string header
+
+2010-07-15 01:35  rstory
+
+   *  configure, configure.d/config_os_libs,   
+      include/net-snmp/net-snmp-config.h.in:
+
+   check for dtls support in openssl
+
+2010-07-15 01:34  rstory
+
+   * snmplib/transports/snmpDTLSUDPDomain.c:
+
+   don't compile dtls domain if no dtls support in openssl
+
+2010-07-15 01:34  rstory
+
+   * snmplib/snmp_openssl.c:
+
+   ifdef protection for later sha algorithms
+
+2010-07-15 01:34  rstory
+
+   *  include/net-snmp/system/darwin.h,   
+      include/net-snmp/system/darwin7.h,   
+      include/net-snmp/system/darwin8.h,   
+      include/net-snmp/system/darwin9.h:
+
+   darwin openssl does not support more recent sha algorithms
+
+2010-07-15 01:33  rstory
+
+   * agent/mibgroup/target/target.c:
+
+   fix typo in ifdef test
+
+2010-07-15 01:33  rstory
+
+   * agent/mibgroup/if-mib/ifTable/ifTable.c:
+
+   fix cut-n-paste error in included file name
+
+2010-07-14 15:08  rstory
+
+   * agent/mibgroup/tlstm-mib/snmpTlstmAddrTable/snmpTlstmAddrTable.c:
+
+   fix the fix: put PRIz spec in correct place
+
+2010-07-14 15:03  rstory
+
+   * testing/fulltests/tls/STlsUsers:
+
+   specify SNMP version on commandline
+
+2010-07-14 15:03  rstory
+
+   *  agent/mibgroup/tlstm-mib/snmpTlstmAddrTable/snmpTlstmAddrTable.c, 
+       
+      agent/mibgroup/tlstm-mib/snmpTlstmCertToTSNTable/snmpTlstmCertToTSNTable.c,
+        
+      agent/mibgroup/tlstm-mib/snmpTlstmParamsTable/snmpTlstmParamsTable.c:
+
+   quiet compiler
+
+2010-07-14 15:02  rstory
+
+   *  agent/mibgroup/tlstm-mib/snmpTlstmAddrTable/snmpTlstmAddrTable.c, 
+       
+      agent/mibgroup/tlstm-mib/snmpTlstmCertToTSNTable/snmpTlstmCertToTSNTable.c,
+        
+      agent/mibgroup/tlstm-mib/snmpTlstmParamsTable/snmpTlstmParamsTable.c:
+
+   quiet compiler warnings
+
+2010-07-13 20:03  rstory
+
+   *  agent/mibgroup/tlstm-mib/snmpTlstmAddrTable/snmpTlstmAddrTable.c, 
+       
+      agent/mibgroup/tlstm-mib/snmpTlstmCertToTSNTable/snmpTlstmCertToTSNTable.c,
+        
+      agent/mibgroup/tlstm-mib/snmpTlstmParamsTable/snmpTlstmParamsTable.c,
+         apps/snmptls.c, include/net-snmp/library/cert_util.h:
+
+   include ssl.h before cert_util.h
+
+2010-07-13 20:03  rstory
+
+   * snmplib/cert_util.c:
+
+   add debug output for found cert
+
+2010-07-13 16:24  rstory
+
+   * snmplib/transports/snmpTLSBaseDomain.c:
+
+   fix typo in log msg
+
+2010-07-12 10:26  bvassche
+
+   * agent/mibgroup/mibII/interfaces.c:
+
+   CHANGES: Win32 and Cygwin: made sure that accessing the mibII
+   interfaces table does not trigger out-of-range array accesses
+   (was detected by BoundsChecker).
+
+2010-07-12 10:21  bvassche
+
+   * agent/mibgroup/mibII/vacm_vars.c:
+
+   Fixed a dangling-pointer-read that was introduced in r19018. In
+   r19018 the type of groupSubtreeLen was changed from int to
+   size_t, which changed the behavior of the loop "while
+   (groupSubtreeLen-- > 0) ...": instead of not executing the loop
+   body when groupSubtreeLen was negative, r19018 caused the body of
+   that loop to be executed. Detected by running snmpd under
+   BoundsChecker while performing a MIB walk.
+
+2010-07-12 10:12  bvassche
+
+   * agent/mibgroup/mibII/at.c:
+
+   Reverted r19047 (which was wrong) and implemented a proper fix
+   for the compiler warnings about signed/unsigned mismatches.
+
+2010-07-12 10:09  bvassche
+
+   * agent/snmp_agent.c:
+
+   Removed an obsolete comment.
+
+2010-07-12 10:08  bvassche
+
+   * agent/helpers/table_container.c, win32/mib_module_includes.h:
+
+   Suppressed more MSVC compiler warnings.
+
+2010-07-12 04:45  rstory
+
+   * testing/fulltests/tls/STlsVars:
+
+   add comment with object name for numeric ids
+
+2010-07-12 04:45  rstory
+
+   *  agent/mibgroup/target/target.c,   
+      include/net-snmp/library/cert_util.h, snmplib/cert_util.c:
+
+   new function to get serverId from snmpTlstmAddrTable data; use
+   new api
+   to config serviceId for trap transport when sending traps
+
+2010-07-11 11:18  bvassche
+
+   * configure, configure.d/config_os_functions:
+
+   CHANGES: BUG: 3027900: when cross-compiling it is now assumed
+   that memcmp() is available instead of assuming that it is not
+   available.
+
+2010-07-11 10:30  bvassche
+
+   * agent/mibgroup/disman/event/mteTriggerConf.c:
+
+   Fixed compiler warnings triggered by r19197.
+
+2010-07-10 20:00  rstory
+
+   * testing/RUNFULLTESTS:
+
+   sync up help output and options processing
+
+2010-07-09 15:13  bvassche
+
+   * README.win32:
+
+   Updated Cygwin section in README.win32.
+
+2010-07-09 15:13  bvassche
+
+   *  agent/helpers/instance.c, agent/helpers/table_dataset.c,   
+      agent/mibgroup/disman/event/mteTriggerConf.c:
+
+   CHANGES: Win32: Suppressed "implicit cast from int to u_char"
+   warnings generated by MSVC.
+
+2010-07-09 15:11  bvassche
+
+   * testing/fulltests/support/simple_eval_tools.sh:
+
+   Testing: made the debug output that appears in the "invoked" file
+   even more verbose.
+
+2010-07-09 15:10  bvassche
+
+   *  win32/net-snmp/net-snmp-config.h,   
+      win32/net-snmp/net-snmp-config.h.in:
+
+   Win32 MSVC build fixes.
+
+2010-07-08 19:30  marz
+
+   *  local/certgen-test.pl, local/net-snmp-cert,   
+      local/net-snmp-cert.conf:
+
+   adds per identity configuration file support so defaults can be
+   customised on cmdline w -i <identity> - see net-snmp-cert.conf
+   for examples and some help info
+
+2010-07-08 12:17  dts12
+
+   * agent/agent_read_config.c:
+
+   CHANGES: snmpd: BUG: 3003981: Protect against buffer overflow
+
+2010-07-08 11:19  dts12
+
+   * agent/mibgroup/agent/extend.c:
+
+   CHANGES: snmpd: BUG: 3019243: Register execFix compatability
+   directive correctly.
+
+2010-07-07 10:19  bvassche
+
+   *  testing/fulltests/default/T110agentxget_simple,   
+      testing/fulltests/default/T111agentxset_simple,   
+      testing/fulltests/default/T112agentxsetfail_simple,   
+      testing/fulltests/default/T120proxyget_simple,   
+      testing/fulltests/default/T121proxyset_simple,   
+      testing/fulltests/default/T122proxysetfail_simple:
+
+   CHANGES: Cygwin and MinGW: tests T110, T111, T112, T120, T121 and
+   T122 do now pass when snmpd is built with winExtDLL support
+   enabled.
+
+2010-07-06 18:59  bvassche
+
+   *  ChangeLog, agent/mibgroup/if-mib/ifXTable/ifXTable_interface.c,   
+      agent/mibgroup/snmp-notification-mib/snmpNotifyFilterTable/snmpNotifyFilterTable_interface.c,
+         local/mib2c-conf.d/mfd-persistence.m2i,   
+      testing/fulltests/support/simple_eval_tools.sh:
+
+   Made regression tests easier to debug by including ok / not ok
+   status in the "invoked" file.
+   Spelling fixes: remeber -> remember; seperator -> separator.
+
+2010-07-06 15:04  bvassche
+
+   *  testing/fulltests/default/T065agentextend_simple,   
+      testing/fulltests/support/simple_TESTCONF.sh:
+
+   Test T065 does now really pass on MinGW.
+
+2010-07-05 10:01  bvassche
+
+   * testing/Makefile.in:
+
+   Added curly braces such that '||' and '&&' are evaluated in the
+   correct order.
+
+2010-07-04 11:37  bvassche
+
+   * apps:
+
+   Updated Subversion ignore list.
+
+2010-07-04 11:34  bvassche
+
+   * testing/Makefile.in:
+
+   Fall back from RUNFULLTESTS to RUNTESTS if neither TAP::Harness
+   nor Test::Harness is available.
+
+2010-07-04 11:21  bvassche
+
+   * testing/fulltests/support/simple_run:
+
+   Made sure that the test number in /tmp/snmp-tests-$testnum is set
+   to something more meaningful than just "0".
+
+2010-07-04 11:20  bvassche
+
+   * testing/RUNTESTS:
+
+   Split a long comment line.
+
+2010-07-04 10:52  bvassche
+
+   * testing/RUNTESTS:
+
+   Bug fix: made sure that srcdir is computed correctly if `dirname
+   $0` = .
+
+2010-07-02 16:27  bvassche
+
+   * apps/Makefile.in, configure, configure.d/config_os_libs:
+
+   Simplified r19181 (Fixed TLSTCP-enabled build for platforms with
+   non-empty $(EXEEXT), i.e. Cygwin and MinGW).
+
+2010-07-01 18:15  bvassche
+
+   * apps/Makefile.in, configure, configure.d/config_os_libs:
+
+   Fixed TLSTCP-enabled build for platforms with non-empty
+   $(EXEEXT), i.e. Cygwin and MinGW.
+
+2010-07-01 18:11  bvassche
+
+   * apps/snmptls.c:
+
+   Fixed yet another recently introduced compiler warning.
+
+2010-07-01 17:53  bvassche
+
+   * snmplib/cert_util.c:
+
+   Fixed two recently introduced compiler warnings.
+
+2010-07-01 00:19  hardaker
+
+   * CHANGES, NEWS:
+
+   version update
+
+2010-07-01 00:13  hardaker
+
+   * ChangeLog:
+
+   version update
+
+2010-07-01 00:03  hardaker
+
+   *  agent/mibgroup/Makefile.depend, apps/Makefile.depend,   
+      snmplib/Makefile.depend:
+
+   make depend
+
+2010-06-30 23:55  hardaker
+
+   *  man/netsnmp_access_multiplexer.3, man/netsnmp_agent.3,   
+      man/netsnmp_agent_handler.h.3, man/netsnmp_agent_registry.3,   
+      man/netsnmp_agent_trap.3, man/netsnmp_asn1_packet_parse.3,   
+      man/netsnmp_baby_steps.3, man/netsnmp_bulk_to_next.3,   
+      man/netsnmp_cache_handler.3, man/netsnmp_callback.3,   
+      man/netsnmp_container.3, man/netsnmp_container_iterator.3,   
+      man/netsnmp_container_iterator.h.3, man/netsnmp_data_list.3,   
+      man/netsnmp_debug.3, man/netsnmp_default_store.3,   
+      man/netsnmp_handler.3, man/netsnmp_instance.3,   
+      man/netsnmp_iterator_info_s.3, man/netsnmp_leaf.3,   
+      man/netsnmp_library.3, man/netsnmp_mib_maintenance.3,   
+      man/netsnmp_mib_utilities.3, man/netsnmp_mode_end_call.3,   
+      man/netsnmp_multiplexer.3,   
+      man/netsnmp_netsnmp_agent_request_info_s.3,   
+      man/netsnmp_netsnmp_column_info_t.3,   
+      man/netsnmp_netsnmp_data_list_s.3,   
+      man/netsnmp_netsnmp_handler_registration_s.3,   
+      man/netsnmp_netsnmp_iterator_info_s.3,   
+      man/netsnmp_netsnmp_mib_handler_access_methods.3,   
+      man/netsnmp_netsnmp_mib_handler_methods.3,   
+      man/netsnmp_netsnmp_mib_handler_s.3,   
+      man/netsnmp_netsnmp_monitor_callback_header_s.3,   
+      man/netsnmp_netsnmp_request_info_s.3,   
+      man/netsnmp_netsnmp_table_registration_info_s.3,   
+      man/netsnmp_netsnmp_table_request_info_s.3,   
+      man/netsnmp_null_container.3, man/netsnmp_oid_stash.3,   
+      man/netsnmp_old_api.3, man/netsnmp_read_config.3,   
+      man/netsnmp_read_only.3, man/netsnmp_row_merge.3,   
+      man/netsnmp_scalar.3, man/netsnmp_scalar_group_group.3,   
+      man/netsnmp_serialize.3, man/netsnmp_snmp_agent.3,   
+      man/netsnmp_snmp_alarm.3, man/netsnmp_snmp_client.3,   
+      man/netsnmp_snmp_logging.3, man/netsnmp_snmp_pdu.3,   
+      man/netsnmp_snmp_session.3, man/netsnmp_stash_cache.3,   
+      man/netsnmp_stash_to_next.3, man/netsnmp_table.3,   
+      man/netsnmp_table_array.3, man/netsnmp_table_container.3,   
+      man/netsnmp_table_data.3, man/netsnmp_table_dataset.3,   
+      man/netsnmp_table_generic.3, man/netsnmp_table_indexes.3,   
+      man/netsnmp_table_iterator.3, man/netsnmp_table_iterator.h.3,   
+      man/netsnmp_table_maintenance.3, man/netsnmp_table_row.3,   
+      man/netsnmp_table_rows.3, man/netsnmp_tdata.3,   
+      man/netsnmp_tools.h.3, man/netsnmp_util.3,   
+      man/netsnmp_utilities.3, man/netsnmp_variable_list.3,   
+      man/netsnmp_watcher.3:
+
+   documentation update
+
+----------------------------------------------------------------------
+
 Changes: V5.6.pre1 -> V5.6.pre2
 
 2010-06-30 23:55  hardaker
