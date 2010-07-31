@@ -379,7 +379,7 @@
 	    <command>perl dist/extractnews -c CHANGES.new2 -n NEWS.new2 ChangeLog.reallyadd</command>
 	  </commands>
 	</step>
-	<step type="informational" pause="true" stepname="docs:README" title="docs:README">
+	<step type="informational" pause="true" stepname="docs:README-and-NEWS" title="docs:README">
 	  <text>
 	    You need to manually insert the relevent portions of
 	    'CHANGES.new' and 'NEWS.new' into the CHANGES and NEWS file.
