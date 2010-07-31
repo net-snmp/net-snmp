@@ -91,6 +91,8 @@ listing of all changes made to the code.
 	packages openssl and openssl-devel is again possible.
       - running the regression test suite is again possible ('make test').
       - winExtDLL compiles now under MinGW.
+      - the snmpd.conf keyword 'extend' is now supported under MinGW
+      - the snmptrapd.conf keyword traphandle is now supported under MinGW
 
 *5.5*
 
