@@ -1,4 +1,4 @@
-.TH "The Net-SNMP library" 3 "30 Jun 2010" "Version 5.6.pre2" "net-snmp" \" -*- nroff -*-
+.TH "The Net-SNMP library" 3 "31 Jul 2010" "Version 5.6.pre3" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -178,6 +178,7 @@ The Net-SNMP library \-
 .ti -1c
 .RI "void \fBsnmp_error\fP (\fBnetsnmp_session\fP *psess, int *p_errno, int *p_snmp_errno, char **p_str)"
 .br
+.RI "\fILibrary API routines concerned with logging and message output (including error handling and debugging). \fP"
 .ti -1c
 .RI "void \fBsnmp_sess_error\fP (void *sessp, int *p_errno, int *p_snmp_errno, char **p_str)"
 .br
@@ -612,6 +613,11 @@ SNMPERR_SUCCESS : on success
 
 .PP
 Definition at line 1510 of file snmp_api.c.
+.SS "void snmp_error (\fBnetsnmp_session\fP * psess, int * p_errno, int * p_snmp_errno, char ** p_str)"
+.PP
+Library API routines concerned with logging and message output (including error handling and debugging). 
+.PP
+Definition at line 554 of file snmp_api.c.
 .SS "int snmp_oid_compare (const oid * in_name1, size_t len1, const oid * in_name2, size_t len2)"
 .PP
 lexicographical compare two object identifiers. Caution: this method is called often by command responder applications (ie, agent).

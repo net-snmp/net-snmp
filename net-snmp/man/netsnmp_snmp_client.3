@@ -1,4 +1,4 @@
-.TH "various PDU processing routines" 3 "30 Jun 2010" "Version 5.6.pre2" "net-snmp" \" -*- nroff -*-
+.TH "various PDU processing routines" 3 "31 Jul 2010" "Version 5.6.pre3" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -139,22 +139,22 @@ various PDU processing routines \-
 .PP
 Return a pointer to the default internal query session and log a warning message once if this session does not exist. 
 .PP
-Definition at line 1207 of file snmp_client.c.
+Definition at line 1211 of file snmp_client.c.
 .SS "\fBnetsnmp_session\fP* netsnmp_query_get_default_session_unchecked (void)"
 .PP
 Return a pointer to the default internal query session. 
 .PP
-Definition at line 1197 of file snmp_client.c.
+Definition at line 1201 of file snmp_client.c.
 .SS "int netsnmp_row_create (\fBnetsnmp_session\fP * sess, \fBnetsnmp_variable_list\fP * vars, int row_status_index)"
 .PP
 ************************************************************************** row api 
 .PP
-Definition at line 1778 of file snmp_client.c.
+Definition at line 1782 of file snmp_client.c.
 .SS "int netsnmp_state_machine_run (\fBnetsnmp_state_machine_input\fP * input)"
 .PP
 ************************************************************************** state machine 
 .PP
-Definition at line 1393 of file snmp_client.c.
+Definition at line 1397 of file snmp_client.c.
 .SS "\fBnetsnmp_pdu\fP* snmp_pdu_create (int command)"
 .PP
 Library API routines concerned with SNMP PDUs. 
