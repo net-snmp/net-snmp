@@ -65,6 +65,11 @@ extern          "C" {
     int             se_find_value_in_slist(const char *listname,
                                            const char *label);
     int             se_find_free_value_in_slist(const char *listname);
+    /**
+     * Add the pair (label, value) to the slist with name listname. Transfers
+     * ownership of the memory pointed to by label to the list:
+     * clear_snmp_enum() deallocates that memory.
+     */
     NETSNMP_IMPORT
     int             se_add_pair_to_slist(const char *listname, char *label,
                                          int value);
