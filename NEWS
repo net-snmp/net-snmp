@@ -526,7 +526,7 @@ listing of all changes made to the code.
        - Enable these talbles by specifying --enable-mfd-rewrites to configure.
        - Most of these tables have IPv6 support as well.
      - ifIndex no longer changes when interfaces are added/removed, and all
-         tables/object wiil now use the same ifIndex for the same interface.
+         tables/object will now use the same ifIndex for the same interface.
 
    Solaris:
      - new experimental support for ucd-snmp/lmSensors MIB module
@@ -560,7 +560,7 @@ listing of all changes made to the code.
 
  Ports:
    - Linux 2.6 improvements
-   - Win32 Suport for TCP and UDP over IPv6 via Winsock version 2
+   - Win32 support for TCP and UDP over IPv6 via Winsock version 2
    - Win32 fixes in many places.
    - Win32 service support for snmptrapd
    - Win32 support for snmpconf
@@ -753,7 +753,7 @@ listing of all changes made to the code.
 *5.0.4*
 
    During the testing for release 5.0.4, a release candidate was uploaded
-   to Sourceforge and marked as hidden. For variouse reasons, the release
+   to Sourceforge and marked as hidden. For various reasons, the release
    was delayed and further changes and fixes were made.  However, the 
    release candidate files still appeared on the public FTP server and our
    mirrors. To avoid the confusion that could occur to users who may have
@@ -1023,7 +1023,7 @@ UCD-SNMP NEWS:
       (see the trapsess section of the snmpd.conf manual page)
     - index matching in oids has been improved
       (see the snmpcmd manual page on -Ox, -OE, and -Ob).
-    - snmptrapd has new formating directives.
+    - snmptrapd has new formatting directives.
       (see the snmptrapd manual page on format1 and format2).
     - the agent can listen to multiple ports.
     - the agent can be restricted to listening on only certain interfaces.
@@ -1200,7 +1200,7 @@ UCD-SNMP NEWS:
     - many misc bug fixes, as always.
 
   Ports:
-    - snmpnetstat has been ported to the win32 enviornment.
+    - snmpnetstat has been ported to the win32 environment.
 
 *3.5.3*
     - Bug fixes, including row creation sets to mib modules should work again.
@@ -1356,7 +1356,7 @@ UCD-SNMP NEWS:
     - FAQ file!
     - bug-report script!
     - Agent can read .conf files from more places:
-      - SNMPCONFPATH enviornment variable.
+      - SNMPCONFPATH environment variable.
       - command line options:  -c FILE and -C.
     - Agent can send coldstart and authentication traps.
     - All requests/patches/questions should go to 
