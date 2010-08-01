@@ -1,5 +1,5 @@
 #define STRING1 "life, and everything"
-#define STRING2 "resturant at the end of the universe"
+#define STRING2 "restaurant at the end of the universe"
 
 init_snmp_enum("snmp");
 se_add_pair(1, 1, "hi", 1);
