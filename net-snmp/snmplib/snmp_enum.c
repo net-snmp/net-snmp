@@ -450,7 +450,7 @@ main()
     printf("2: %s\n", se_find_label(1, 1, 2));
 
     se_add_pair_to_slist("testing", "life, and everything", 42);
-    se_add_pair_to_slist("testing", "resturant at the end of the universe",
+    se_add_pair_to_slist("testing", "restaurant at the end of the universe",
                          2);
 
     printf("life, and everything: %d\n",
