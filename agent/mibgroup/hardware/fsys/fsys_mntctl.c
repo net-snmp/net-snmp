@@ -29,7 +29,7 @@ _fsys_remote( char *device, int type, char *host )
 }
 
 int
-_fsys_type( int *type)
+_fsys_type( int type)
 {
     DEBUGMSGTL(("fsys:type", "Classifying %d\n", type));
 
@@ -93,8 +93,8 @@ netsnmp_fsys_arch_load( void )
     /*
      * Retrieve information about the currently mounted filesystems...
      */
-    res = mntctl(MCTL_QUERY, sizeof(uint), &size);
-    if ( res != 0 || size<=0 ) {
+    ret = mntctl(MCTL_QUERY, sizeof(uint), &size);
+    if ( ret != 0 || size<=0 ) {
         snmp_log_perror( "initial mntctl failed" );
         return;
     }
@@ -105,8 +105,8 @@ netsnmp_fsys_arch_load( void )
         return;
     }
 
-    res = mntctl(MCTL_QUERY, size, aixmnt );
-    if ( res <= 0 ) {
+    ret = mntctl(MCTL_QUERY, size, aixmnt );
+    if ( ret <= 0 ) {
         free(aixmnt);
         snmp_log_perror( "main mntctl failed" );
         return;
