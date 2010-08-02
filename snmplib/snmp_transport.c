@@ -464,7 +464,7 @@ netsnmp_tdomain_transport_full(const char *application,
     int                 any_found = 0;
     char buf[SNMP_MAXPATH];
     extern const char *curfilename;		/* from read_config.c */
-    char         *prev_curfilename;
+    const char        *prev_curfilename;
 
     prev_curfilename = curfilename;
 

@@ -88,6 +88,7 @@ netsnmp_tcp_accept(netsnmp_transport *t)
         DEBUGMSGTL(("netsnmp_tcp", "accept: malloc failed\n"));
         return -1;
     }
+    memset(addr_pair, 0, sizeof *addr_pair);
     farend = (struct sockaddr *) &(addr_pair->remote_addr);
 
     if (t != NULL && t->sock >= 0) {
@@ -164,6 +165,7 @@ netsnmp_tcp_transport(struct sockaddr_in *addr, int local)
         netsnmp_transport_free(t);
         return NULL;
     }
+    memset(addr_pair, 0, sizeof *addr_pair);
     t->data = addr_pair;
     t->data_length = sizeof(netsnmp_udp_addr_pair);
     memcpy(&(addr_pair->remote_addr), addr, sizeof(struct sockaddr_in));
