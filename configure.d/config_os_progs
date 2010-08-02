@@ -85,7 +85,7 @@ have_gnu_make=$?
 ##
 
 AC_MSG_CHECKING([whether the Perl function system() invokes a POSIX shell])
-if test -x "$PERLPROG" -a "x`$PERLPROG -e 'system('"'"'echo $OSTYPE'"'"');'`" != 'x$OSTYPE'; then
+if test "x$PERLPROG" != 'x' && test -x "$PERLPROG" && test "x`$PERLPROG -e 'system('"'"'echo $OSTYPE'"'"');'`" != 'x$OSTYPE'; then
     PERL_SYSTEM_INVOKES_POSIX_SHELL=yes
 else
     PERL_SYSTEM_INVOKES_POSIX_SHELL=no
