@@ -29,24 +29,22 @@ _fsys_remote( char *device, int type, char *host )
 }
 
 int
-_fsys_type( char *typename )
+_fsys_type( int type )
 {
-    DEBUGMSGTL(("fsys:type", "Classifying %s\n", typename));
+    DEBUGMSGTL(("fsys:type", "Classifying %d\n", type));
 
-    if ( !typename || *typename=='\0' )
-       return NETSNMP_FS_TYPE_UNKNOWN;
+    switch ( type ) {
+        case MNT_AIX:
+        case MNT_JFS:
+            return NETSNMP_FS_TYPE_BERKELEY;
 
-/* #include "mnttypes.h" */
+        case MNT_CDROM:
+            return NETSNMP_FS_TYPE_ISO9660;
 
-    else if ( !strcmp(typename, MNT_AIX) ||
-              !strcmp(typename, MNT_JFS) )
-       return NETSNMP_FS_TYPE_BERKELEY;
-    else if ( !strcmp(typename, MNT_CDROM) )
-       return NETSNMP_FS_TYPE_ISO9660;
-    else if ( !strcmp(typename, MNT_NFS)  ||
-              !strcmp(typename, MNT_NFS3) ||
-              !strcmp(typename, MNT_AUTOFS) )
-       return NETSNMP_FS_TYPE_NFS;
+        case MNT_NFS:
+        case MNT_NFS3:
+        case MNT_AUTOFS:
+            return NETSNMP_FS_TYPE_NFS;
 
     /*
      *  The following code covers selected filesystems
@@ -55,21 +53,23 @@ _fsys_type( char *typename )
      *  These are all mapped into type "other"
      *
      */    
-    else if ( !strcmp(typename, MNT_SFS) ||
 #ifdef MNT_NAMEFS
-              !strcmp(typename, MNT_NAMEFS) ||
+        case MNT_NAMEFS:
 #endif
 #ifdef MNT_PROCFS
-              !strcmp(typename, MNT_PROCFS) ||
+        case MNT_PROCFS:
 #endif
-              !strcmp(typename, MNT_CACHEFS))
-       return NETSNMP_FS_TYPE_OTHER;
+        case MNT_SFS:
+        case MNT_CACHEFS:
+            return NETSNMP_FS_TYPE_OTHER;
 
     /*    
      *  All other types are silently skipped
      */
-    else
-       return NETSNMP_FS_TYPE_IGNORE;
+        default:
+            return NETSNMP_FS_TYPE_IGNORE;
+    }
+    return NETSNMP_FS_TYPE_IGNORE;    /* Not reached */
 }
 
 void
@@ -93,8 +93,8 @@ netsnmp_fsys_arch_load( void )
     /*
      * Retrieve information about the currently mounted filesystems...
      */
-    res = mntctl(MCTL_QUERY, sizeof(uint), &size);
-    if ( res != 0 || size<=0 ) {
+    ret = mntctl(MCTL_QUERY, sizeof(uint), &size);
+    if ( ret != 0 || size<=0 ) {
         snmp_log_perror( "initial mntctl failed" );
         return;
     }
@@ -105,8 +105,8 @@ netsnmp_fsys_arch_load( void )
         return;
     }
 
-    res = mntctl(MCTL_QUERY, size, aixmnt );
-    if ( res <= 0 ) {
+    ret = mntctl(MCTL_QUERY, size, aixmnt );
+    if ( ret <= 0 ) {
         free(aixmnt);
         snmp_log_perror( "main mntctl failed" );
         return;
