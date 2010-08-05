@@ -81,16 +81,16 @@ init_vacm_config_tokens(void) {
     /* easy community auth handler */
     snmpd_register_config_handler("authcommunity",
                                   vacm_parse_authcommunity,
-                                  NULL, "authtype1,authtype2 community [default|hostname|network/bits [oid|-V view]]");
+                                  NULL, "authtype1,authtype2 community [default|hostname|network/bits [oid|-V view [context]]]");
 
     /* easy user auth handler */
     snmpd_register_config_handler("authuser",
                                   vacm_parse_authuser,
-                                  NULL, "authtype1,authtype2 [-s secmodel] user [noauth|auth|priv [oid|-V view]]");
+                                  NULL, "authtype1,authtype2 [-s secmodel] user [noauth|auth|priv [oid|-V view [context]]]");
     /* easy group auth handler */
     snmpd_register_config_handler("authgroup",
                                   vacm_parse_authuser,
-                                  NULL, "authtype1,authtype2 [-s secmodel] group [noauth|auth|priv [oid|-V view]]");
+                                  NULL, "authtype1,authtype2 [-s secmodel] group [noauth|auth|priv [oid|-V view [context]]]");
 
     snmpd_register_config_handler("authaccess", vacm_parse_authaccess,
                                   vacm_free_access,
