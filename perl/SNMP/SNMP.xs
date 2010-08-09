@@ -4113,7 +4113,7 @@ snmp_bulkwalk(sess_ref, nonrepeaters, maxrepetitions, varlist_ref,perl_callback)
 	   if (context->req_oids == NULL) {
 	      sprintf(str_buf, "Newz(req_oids) failed (%s)", strerror(errno));
 	      if (verbose)
-	         warn(str_buf);
+	         warn("%s", str_buf);
 	      sv_setpv(*err_str_svp, str_buf);
 	      sv_setiv(*err_num_svp, SNMPERR_MALLOC);
 	      goto err;
