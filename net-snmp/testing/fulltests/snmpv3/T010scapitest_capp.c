@@ -68,27 +68,23 @@ int             doalltests = 0, docrypt = 0, dokeyedhash = 0, dorandom = 0;
 #define LOCAL_MAXBUF	(1024 * 8)
 #define NL		"\n"
 
-#define OUTPUT(o)	fprintf(stdout, "# %s\n", o);
+#define OUTPUT(o)	printf("# %s\n", o);
 
 #define SUCCESS(s)					\
 {							\
-    fprintf(stdout, "# Done with %s\n", s);             \
+    printf("# Done with %s\n", s);			\
 }
 
 #define FAILED(e, f)                                                    \
 {                                                                       \
     if (e != SNMPERR_SUCCESS) {                                         \
-                fprintf(stdout, "not ok: %d - %s\n", ++testcount, f);	\
+                printf("not ok: %d - %s\n", ++testcount, f);            \
 		failcount += 1;                                         \
 	} else {                                                        \
-                fprintf(stdout, "ok: %d - %s\n", ++testcount, f);	\
+                printf("ok: %d - %s\n", ++testcount, f);                \
         }                                                               \
     fflush(stdout); \
 }
-
-#define DETAILINT(s, i) \
-    fprintf(stdout, "# %s: %d\n", s, i);
-
 
 #define BIGSTRING							\
     (const u_char *)                                                    \
@@ -123,7 +119,7 @@ int             doalltests = 0, docrypt = 0, dokeyedhash = 0, dorandom = 0;
 /*
  * Prototypes.
  */
-void            usage(FILE * ofp);
+void            usage(void);
 
 int             test_docrypt(void);
 int             test_dokeyedhash(void);
@@ -160,7 +156,7 @@ main(int argc, char **argv)
         case 'h':
             rval = 0;
         default:
-            usage(stdout);
+            usage();
             exit(rval);
         }
 
@@ -170,7 +166,7 @@ main(int argc, char **argv)
     }                           /* endwhile getopt */
 
     if ((argc > 1)) {
-        usage(stdout);
+        usage();
         exit(1000);
 
     } else if (ALLOPTIONS != 1) {
@@ -195,7 +191,7 @@ main(int argc, char **argv)
         test_dorandom();
     }
 
-    fprintf(stdout, "1..%d\n", testcount);
+    printf("1..%d\n", testcount);
     return 0;
 }                               /* end main() */
 
@@ -204,10 +200,9 @@ main(int argc, char **argv)
 
 
 void
-usage(FILE * ofp)
+usage(void)
 {
-    fprintf(ofp,
-            USAGE
+    printf( USAGE
             "" NL
             "	-a		All tests." NL
             "	-c		Test of sc_encrypt()/sc_decrypt()."
@@ -353,7 +348,7 @@ test_dokeyedhash(void)
     FAILED(rval, "sc_check_keyed_hash() return code");
 
     binary_to_hex(hashbuf, hblen, &s);
-    fprintf(stdout, "# hash buffer (len=%d, request=%d):   %s\n",
+    printf("# hash buffer (len=%" NETSNMP_PRIz "u, request=%d):   %s\n",
             hblen, hashbuf_len[mlcount], s);
     SNMP_FREE(s);
 
@@ -390,7 +385,7 @@ test_dokeyedhash(void)
     FAILED(rval, "sc_check_keyed_hash() return code");
 
     binary_to_hex(hashbuf, hblen, &s);
-    fprintf(stdout, "# hash buffer (len=%d, request=%d):   %s\n",
+    printf("# hash buffer (len=%" NETSNMP_PRIz "u, request=%d):   %s\n",
             hblen, hashbuf_len[mlcount], s);
     SNMP_FREE(s);
 
@@ -455,8 +450,8 @@ test_docrypt(void)
     buf_len -= buf[buf_len-1];
 
     FAILED((buf_len != bigstring_len), "Decrypted buffer is the right length.");
-    DETAILINT("original length:", bigstring_len);
-    DETAILINT("output   length:", buf_len);
+    printf("# original length: %d\n", bigstring_len);
+    printf("# output   length: %" NETSNMP_PRIz "u\n", buf_len);
 
     FAILED((memcmp(buf, BIGSTRING, bigstring_len) != 0),
            "Decrypted buffer is the same as the original plaintext.");

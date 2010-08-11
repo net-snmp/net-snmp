@@ -109,7 +109,7 @@ main(int argc, char **argv) {
 void
 print_hash(const char *label, u_char *MAC, size_t MAC_LEN) {
     int i;
-    printf("# %-10s %d:\n", label, MAC_LEN);
+    printf("# %-10s %" NETSNMP_PRIz "u:\n", label, MAC_LEN);
     for(i=0; i < MAC_LEN; i++) {
         printf("# %02x ", MAC[i]);
     }

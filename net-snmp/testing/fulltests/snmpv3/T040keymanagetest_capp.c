@@ -314,7 +314,7 @@ test_genKu(void)
 
     binary_to_hex(Ku, kulen, &s);
     if (!bequiet)
-        fprintf(stdout, "# Ku (len=%d):  %s\n", kulen, s);
+        fprintf(stdout, "# Ku (len=%" NETSNMP_PRIz "u):  %s\n", kulen, s);
     free_zero(s, kulen);
 
     OUTPUT(hashname);
@@ -450,7 +450,7 @@ test_genkul(void)
                "checking if kul length is right for the given hashtype.");
 
         binary_to_hex(kul, kul_len, &s);
-        fprintf(stdout, "# kul (%s) (len=%d):  %s\n",
+        fprintf(stdout, "# kul (%s) (len=%" NETSNMP_PRIz "u):  %s\n",
                 ((hashtype_Ku == usmHMACMD5AuthProtocol) ? "MD5" : "SHA"),
                 kul_len, s);
         free_zero(s, kul_len);
