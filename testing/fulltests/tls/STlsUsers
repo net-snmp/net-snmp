@@ -76,6 +76,10 @@ CAPTURE $NSCERT gencert -t causer --with-ca ca-net-snmp.org --san email:user9@te
 CAUSERFP=`$NSCERT showcerts --fingerprint --brief causer $NSCERTARGS`
 CHECKVALUEISNT "$CAUSERFP" "" "generated fingerprint for causer certificate"
 
+CAPTURE $NSCERT gencert -t cadirect --with-ca ca-net-snmp.org --san email:user9b@test.net-snmp.org --email user9b@test.net-snmp.org  $NSCERTARGS
+CADIRECTFP=`$NSCERT showcerts --fingerprint --brief cadirect $NSCERTARGS`
+CHECKVALUEISNT "$CADIRECTFP" "" "generated fingerprint for cadirect certificate"
+
 #########################################
 # AGENT CONFIGURATION
 #
@@ -100,6 +104,7 @@ CONFIGAGENT certSecName 23 $IPUSERFP     --ip
 CONFIGAGENT certSecName 24 afile         --cn
 
 CONFIGAGENT certSecName 100 $CAFP        --rfc822
+CONFIGAGENT certSecName 101 $CADIRECTFP  --sn causerdirectmap
 
 # *** INTENTIONALLY NOT MAPPING AT ALL: ***
 # CONFIGAGENT certSecName 1000 $UNMAPPEDFP ....
@@ -119,6 +124,7 @@ CONFIGAGENT  rwuser -s tsm user8@test.net-snmp.org authpriv
 CONFIGAGENT  rwuser -s tsm user9@test.net-snmp.org authpriv
 CONFIGAGENT  rwuser -s tsm user10@test.net-snmp.org authpriv
 CONFIGAGENT  rwuser -s tsm afileuser authpriv
+CONFIGAGENT  rwuser -s tsm causerdirectmap authpriv
 
 
 # this file contains tests common to both tls and dtls usages
@@ -204,6 +210,9 @@ DOSETTEST afileuser "-T our_identity=afile $FLAGS"
 
 # using user 9 - a CA signed certificate
 DOSETTEST user9CASignedCert "-T our_identity=$CAUSERFP -T trust_cert=$CAFP $FLAGS"
+
+# using user 9b - a CA signed certificate with a user-based fp mapping
+DOSETTEST user9bCASignedDirectMap "-T our_identity=$CADIRECTFP $FLAGS"
 
 # using user unknown - the server will not have seen this fingerprint at all
 CAPTURE "snmpget -T our_identity=$UNKNOWNUSER -T trust_cert=$CAFP $FLAGS .1.3.6.1.2.1.1.6.0"
