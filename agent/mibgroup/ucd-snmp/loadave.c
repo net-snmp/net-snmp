@@ -128,7 +128,19 @@
 #include "util_funcs/header_simple_table.h"
 #include "kernel.h"
 
-double          maxload[3];
+static double maxload[3];
+static int laConfigSet = 0;
+
+static int
+loadave_store_config(int a, int b, void *c, void *d)
+{
+    char line[SNMP_MAXBUF_SMALL];
+    if (laConfigSet > 0) {
+        snprintf(line, SNMP_MAXBUF_SMALL, "pload %.02f %.02f %.02f", maxload[0], maxload[1], maxload[2]);
+        snmpd_store_config(line);
+    }
+    return SNMPERR_SUCCESS;
+}
 
 void
 init_loadave(void)
@@ -145,7 +157,7 @@ init_loadave(void)
          var_extensible_loadave, 1, {ERRORNAME}},
         {LOADAVE, ASN_OCTET_STR, NETSNMP_OLDAPI_RONLY,
          var_extensible_loadave, 1, {LOADAVE}},
-        {LOADMAXVAL, ASN_OCTET_STR, NETSNMP_OLDAPI_RONLY,
+        {LOADMAXVAL, ASN_OCTET_STR, NETSNMP_OLDAPI_RWRITE,
          var_extensible_loadave, 1, {LOADMAXVAL}},
         {LOADAVEINT, ASN_INTEGER, NETSNMP_OLDAPI_RONLY,
          var_extensible_loadave, 1, {LOADAVEINT}},
@@ -172,15 +184,47 @@ init_loadave(void)
     REGISTER_MIB("ucd-snmp/loadave", extensible_loadave_variables,
                  variable2, loadave_variables_oid);
 
+    laConfigSet = 0;
+
     snmpd_register_config_handler("load", loadave_parse_config,
                                   loadave_free_config,
                                   "max1 [max5] [max15]");
+
+    snmpd_register_config_handler("pload",
+                                  loadave_parse_config, NULL, NULL);
+
+
+    /*
+     * we need to be called back later
+     */
+    snmp_register_callback(SNMP_CALLBACK_LIBRARY, SNMP_CALLBACK_STORE_DATA,
+                                       loadave_store_config, NULL);
+
 }
 
 void
 loadave_parse_config(const char *token, char *cptr)
 {
     int             i;
+
+    if (strcmp(token, "pload") == 0) {
+        if (laConfigSet < 0) {
+            snmp_log(LOG_WARNING,
+                     "ignoring attempted override of read-only load\n");
+            return;
+        } else {
+            laConfigSet++;
+        }
+    } else {
+        if (laConfigSet > 0) {
+            snmp_log(LOG_WARNING,
+                     "ignoring attempted override of read-only load\n");
+            /*
+             * Fall through and copy in this value.
+             */
+        }
+        laConfigSet = -1;
+    }
 
     for (i = 0; i <= 2; i++) {
         if (cptr != NULL)
@@ -307,6 +351,71 @@ try_getloadavg(double *r_ave, size_t s_ave)
     return 0;
 }
 
+static int
+write_laConfig(int action,
+                          u_char * var_val,
+                          u_char var_val_type,
+                          size_t var_val_len,
+                          u_char * statP, oid * name, size_t name_len)
+{
+    static double laConfig = 0;
+
+    switch (action) {
+    case RESERVE1: /* Check values for acceptability */
+        if (var_val_type != ASN_OCTET_STR) {
+            DEBUGMSGTL(("ucd-snmp/loadave",
+                        "write to laConfig not ASN_OCTET_STR\n"));
+            return SNMP_ERR_WRONGTYPE;
+        }
+        if (var_val_len > 8 || var_val_len <= 0) {
+            DEBUGMSGTL(("ucd-snmp/loadave",
+                        "write to laConfig: bad length\n"));
+            return SNMP_ERR_WRONGLENGTH;
+        }
+
+        if (laConfigSet < 0) {
+            /*
+             * The object is set in a read-only configuration file.
+             */
+            return SNMP_ERR_NOTWRITABLE;
+        }
+        break;
+
+    case RESERVE2: /* Allocate memory and similar resources */
+        {
+            u_char buf[8];
+            int old_errno = errno;
+            double val;
+            char *endp;
+
+            strncpy(buf, var_val, var_val_len);
+            buf[var_val_len] = '\0';
+            val = strtod(buf, &endp);
+
+            if (errno == ERANGE || *endp != '\0' || val < 0 || val > 65536.00) {
+                errno = old_errno;
+                DEBUGMSGTL(("ucd-snmp/loadave",
+                            "write to laConfig: invalid value\n"));
+                return SNMP_ERR_WRONGVALUE;
+            }
+
+            errno = old_errno;
+
+            laConfig = val;
+        }
+        break;
+
+    case COMMIT:
+        {
+            int idx = name[name_len - 1] - 1;
+            maxload[idx] = laConfig;
+            laConfigSet = 1;
+        }
+    }
+
+    return SNMP_ERR_NOERROR;
+}
+
 u_char         *
 var_extensible_loadave(struct variable * vp,
                        oid * name,
@@ -326,6 +435,10 @@ var_extensible_loadave(struct variable * vp,
     case MIBINDEX:
         long_ret = name[*length - 1];
         return ((u_char *) (&long_ret));
+    case LOADMAXVAL:
+        /* setup write method, but don't return yet */
+        *write_method = write_laConfig;
+        break;
     case ERRORNAME:
         sprintf(errmsg, "Load-%d", ((name[*length - 1] == 1) ? 1 :
                                     ((name[*length - 1] == 2) ? 5 : 15)));
