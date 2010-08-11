@@ -896,7 +896,7 @@ laLoad OBJECT-TYPE
 
 laConfig OBJECT-TYPE
     SYNTAX	DisplayString
-    MAX-ACCESS	read-only
+    MAX-ACCESS	read-write
     STATUS	current
     DESCRIPTION
 	"The watch point for load-averages to signal an
