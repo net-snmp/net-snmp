@@ -83,8 +83,7 @@ int verify_callback(int ok, X509_STORE_CTX *ctx) {
        locally known fingerprint and then accept it */
     if (!ok &&
         (X509_V_ERR_DEPTH_ZERO_SELF_SIGNED_CERT == err ||
-         X509_V_ERR_SELF_SIGNED_CERT_IN_CHAIN == err ||
-         X509_V_ERR_DEPTH_ZERO_SELF_SIGNED_CERT == err)) {
+         X509_V_ERR_SELF_SIGNED_CERT_IN_CHAIN == err)) {
 
         cert = netsnmp_cert_find(NS_CERT_REMOTE_PEER, NS_CERTKEY_FINGERPRINT,
                                  (void*)fingerprint);
