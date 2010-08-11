@@ -80,6 +80,18 @@ CAPTURE $NSCERT gencert -t cadirect --with-ca ca-net-snmp.org --san email:user9b
 CADIRECTFP=`$NSCERT showcerts --fingerprint --brief cadirect $NSCERTARGS`
 CHECKVALUEISNT "$CADIRECTFP" "" "generated fingerprint for cadirect certificate"
 
+CAPTURE $NSCERT genca --cn ca2-net-snmp.org  $NSCERTARGS
+CA2FP=`$NSCERT showcas --fingerprint --brief ca2-net-snmp.org $NSCERTARGS`
+CHECKVALUEISNT "$CA2FP" "" "generated fingerprint for ca2-net-snmp.org certificate"
+
+CAPTURE $NSCERT gencert -t cadirect9c --with-ca ca2-net-snmp.org --san email:user9c@test.net-snmp.org --email user9c@test.net-snmp.org  $NSCERTARGS
+CADIRECT9CFP=`$NSCERT showcerts --fingerprint --brief cadirect9c $NSCERTARGS`
+CHECKVALUEISNT "$CADIRECT9CFP" "" "generated fingerprint for cadirect9c certificate"
+
+CAPTURE $NSCERT gencert -t cadirect9d --with-ca ca2-net-snmp.org --san email:user9d@test.net-snmp.org --email user9d@test.net-snmp.org  $NSCERTARGS
+CADIRECT9DFP=`$NSCERT showcerts --fingerprint --brief cadirect9d $NSCERTARGS`
+CHECKVALUEISNT "$CADIRECT9DFP" "" "generated fingerprint for cadirect9d certificate"
+
 #########################################
 # AGENT CONFIGURATION
 #
@@ -90,6 +102,7 @@ CONFIGAGENT '[snmp]' doDebugging 1
 CONFIGAGENT '[snmp]' serverCert $SERVERFP
 
 CONFIGAGENT '[snmp]' trustCert $CAFP
+CONFIGAGENT '[snmp]' trustCert $CADIRECT9CFP
 
 # common name mappings
 CONFIGAGENT certSecName 9  $TESTUSERFP     --cn
@@ -105,6 +118,9 @@ CONFIGAGENT certSecName 24 afile         --cn
 
 CONFIGAGENT certSecName 100 $CAFP        --rfc822
 CONFIGAGENT certSecName 101 $CADIRECTFP  --sn causerdirectmap
+CONFIGAGENT certSecName 102 $CADIRECT9CFP  --sn causerdirect9cmap
+# intentionally not mapped:
+#CONFIGAGENT certSecName 1001 $CADIRECT9DFP  --sn causerdirect9dmap
 
 # *** INTENTIONALLY NOT MAPPING AT ALL: ***
 # CONFIGAGENT certSecName 1000 $UNMAPPEDFP ....
@@ -125,6 +141,7 @@ CONFIGAGENT  rwuser -s tsm user9@test.net-snmp.org authpriv
 CONFIGAGENT  rwuser -s tsm user10@test.net-snmp.org authpriv
 CONFIGAGENT  rwuser -s tsm afileuser authpriv
 CONFIGAGENT  rwuser -s tsm causerdirectmap authpriv
+CONFIGAGENT  rwuser -s tsm causerdirect9cmap authpriv
 
 
 # this file contains tests common to both tls and dtls usages
@@ -213,6 +230,12 @@ DOSETTEST user9CASignedCert "-T our_identity=$CAUSERFP -T trust_cert=$CAFP $FLAG
 
 # using user 9b - a CA signed certificate with a user-based fp mapping
 DOSETTEST user9bCASignedDirectMap "-T our_identity=$CADIRECTFP $FLAGS"
+
+# using user 9c - a CA2 signed certificate with a user-based fp mapping
+DOSETTEST user9cCASignedDirectMap "-T our_identity=$CADIRECT9CFP $FLAGS"
+
+# using user 9d - a CA2 signed certificate no user-based fp mapping
+DOFAILSETTEST user9dCASignedDirectMap "-T our_identity=$CADIRECT9DFP $FLAGS"
 
 # using user unknown - the server will not have seen this fingerprint at all
 CAPTURE "snmpget -T our_identity=$UNKNOWNUSER -T trust_cert=$CAFP $FLAGS .1.3.6.1.2.1.1.6.0"
