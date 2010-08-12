@@ -1908,13 +1908,17 @@ netsnmp_tls_fingerprint_parse(const u_char *binary_fp, int fp_len,
 
 /**
  * combine a hash type and hex fingerprint into a SnmpTLSFingerprint
+ *
+ * On entry, tls_fp_len should point to the size of the tls_fp buffer.
+ * On a successful exit, tls_fp_len will contain the length of the
+ * fingerprint buffer.
  */
 int
 netsnmp_tls_fingerprint_build(int hash_type, const char *hex_fp,
                                    u_char **tls_fp, u_int *tls_fp_len,
                                    int realloc)
 {
-    int     hex_fp_len;
+    int     hex_fp_len, rc;
     size_t  tls_fp_size;
     size_t  offset;
 
@@ -1937,9 +1941,10 @@ netsnmp_tls_fingerprint_build(int hash_type, const char *hex_fp,
      * convert to binary
      */
     offset = 1;
-    netsnmp_hex_to_binary(tls_fp, &tls_fp_size, &offset, realloc, hex_fp, ":");
+    rc = netsnmp_hex_to_binary(tls_fp, &tls_fp_size, &offset, realloc, hex_fp,
+                               ":");
     *tls_fp_len = tls_fp_size;
-    if (tls_fp_size != 1)
+    if (rc != 1)
         return SNMPERR_GENERR;
     *tls_fp_len = offset;
     (*tls_fp)[0] = hash_type;
