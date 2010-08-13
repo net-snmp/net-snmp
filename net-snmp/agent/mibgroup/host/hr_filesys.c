@@ -53,6 +53,10 @@
 #include <stdlib.h>
 #endif
 
+#if HAVE_NBUTIL_H
+#include <nbutil.h>
+#endif
+
 #if defined(aix4) || defined(aix5) || defined(aix6) || defined(aix7)
 #include <sys/mntctl.h>
 #include <sys/vmount.h>
@@ -114,6 +118,16 @@ static int		fscount;
 #define	HRFS_name	f_mntfromname
 #define HRFS_statfs	statvfs
 #define	HRFS_type	f_fstypename
+#elif defined(HAVE_GETFSSTAT) && !defined(HAVE_STATFS) && defined(HAVE_STATVFS)
+
+static struct statfs	*fsstats = NULL;
+struct statfs		*HRFS_entry;
+static int		fscount;
+#define HRFS_mount	f_mntonname
+#define HRFS_name	f_mntfromname
+#define HRFS_statfs	statvfs
+#define HRFS_type	f_fstypename
+
 #elif defined(HAVE_GETFSSTAT)
 static struct statfs *fsstats = 0;
 static int      fscount;
@@ -542,7 +556,11 @@ var_hrfilesys(struct variable *vp,
 #if defined(HAVE_STATVFS) && defined(__NetBSD__)
 	long_return = HRFS_entry->f_flag & MNT_RDONLY ? 2 : 1;
 #elif defined(HAVE_GETFSSTAT)
+#if HAVE_STRUCT_STATFS_F_FLAGS
         long_return = HRFS_entry->f_flags & MNT_RDONLY ? 2 : 1;
+#else
+        long_return = HRFS_entry->f_flag & MNT_RDONLY ? 2 : 1;
+#endif
 #elif defined(cygwin)
         long_return = 1;
 #elif defined(aix4) || defined(aix5) || defined(aix6) || defined(aix7)

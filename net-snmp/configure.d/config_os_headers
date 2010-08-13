@@ -199,6 +199,9 @@ AC_CHECK_HEADERS(sys/disklabel.h,,,
 #endif
     ]])
 
+#	QNX
+AC_CHECK_HEADERS([nbutil.h])
+
 #       UFS headers
 #  Agent:
 #

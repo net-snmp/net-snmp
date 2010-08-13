@@ -154,6 +154,9 @@
 #else
 #include <strings.h>
 #endif
+#if HAVE_NBUTIL_H
+#include <nbutil.h>
+#endif
 
 #include <net-snmp/utilities.h>
 #include <net-snmp/output_api.h>
@@ -208,6 +211,14 @@ extern int      fscount;
 #define HRFS_statfs	statvfs
 #define HRFS_mount	mnt_dir
 #define HRFS_HAS_FRSIZE HAVE_STRUCT_STATVFS_F_FRSIZE
+
+#elif defined(HAVE_GETFSSTAT) && !defined(HAVE_STATFS) && defined(HAVE_STATVFS)
+
+extern struct statfs *HRFS_entry;
+extern int      fscount;
+#define HRFS_statfs	statvfs
+#define HRFS_mount	f_mntonname
+#define HRFS_HAS_FRSIZE STRUCT_STATVFS_HAS_F_FRSIZE
 
 #elif defined(HAVE_GETFSSTAT)
 

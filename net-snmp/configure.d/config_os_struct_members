@@ -195,6 +195,7 @@ struct sockaddr_un sockaddr_un;
 AC_CHECK_MEMBERS([struct statfs.f_favail,
                   struct statfs.f_ffree,
                   struct statfs.f_files,
+                  struct statfs.f_flags,
                   struct statfs.f_frsize],,,[
     AC_INCLUDES_DEFAULT()
     [
@@ -206,6 +207,9 @@ AC_CHECK_MEMBERS([struct statfs.f_favail,
 #endif
 #ifdef HAVE_SYS_MOUNT_H
 #include <sys/mount.h>
+#endif 
+#ifdef HAVE_NBUTIL_H
+#include <nbutil.h>
 #endif 
     ]])
 

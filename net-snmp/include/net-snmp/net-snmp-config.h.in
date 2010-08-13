@@ -872,6 +872,9 @@
 /* Define to 1 if `f_files' is member of `struct statfs'. */
 #undef HAVE_STRUCT_STATFS_F_FILES
 
+/* Define to 1 if `f_flags' is member of `struct statfs'. */
+#undef HAVE_STRUCT_STATFS_F_FLAGS
+
 /* Define to 1 if `f_frsize' is member of `struct statfs'. */
 #undef HAVE_STRUCT_STATFS_F_FRSIZE
 
@@ -935,6 +938,9 @@
 
 /* Define to 1 if you have the <sys/disklabel.h> header file. */
 #undef HAVE_SYS_DISKLABEL_H
+
+/* Define to 1 if you have the <nbutil.h> header file. */
+#undef HAVE_NBUTIL_H
 
 /* Define to 1 if you have the <sys/dkio.h> header file. */
 #undef HAVE_SYS_DKIO_H
