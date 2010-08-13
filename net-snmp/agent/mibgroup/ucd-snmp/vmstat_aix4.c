@@ -39,6 +39,9 @@
 /*
  * libperfstat structs 
  */
+#ifdef HAVE_SYS_PROTOSW_H
+#include <sys/protosw.h>
+#endif
 #include <libperfstat.h>
 
 #include <net-snmp/net-snmp-config.h>

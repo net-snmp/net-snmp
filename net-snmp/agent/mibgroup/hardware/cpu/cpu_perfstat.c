@@ -11,6 +11,7 @@
 #include <unistd.h>
 #include <sys/types.h>
 
+#include <sys/protosw.h>
 #include <libperfstat.h>
 
 void _cpu_copy_stats( netsnmp_cpu_info *cpu );
