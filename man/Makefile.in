@@ -29,7 +29,7 @@ MAN1G = $(AGENTXTRAP) snmpbulkget.1 snmpcmd.1 snmpget.1 snmpset.1 snmpwalk.1 \
 MAN3  = 
 MAN3_API = netsnmp_mib_api.3 netsnmp_config_api.3 snmp_alarm.3 \
 	netsnmp_session_api.3 netsnmp_sess_api.3 netsnmp_trap_api.3 netsnmp_varbind_api.3 netsnmp_pdu_api.3 
-MAN3G = default_store.3  snmp_agent_api.3 $(MAN3_API)
+MAN3G = default_store.3 $(MAN3_API)
 MAN5G = snmpd.conf.5 snmptrapd.conf.5 snmp.conf.5 snmp_config.5 variables.5 \
         mib2c.conf.5 snmpd.examples.5 snmpd.internal.5
 MAN8G = snmptrapd.8 snmpd.8
@@ -48,7 +48,7 @@ CONFIG_ALIASES  = config_perror.3 config_pwarn.3			    \
 	register_config_handler.3 register_const_config_handler.3	    \
 	register_mib_handlers.3 register_prenetsnmp_mib_handler.3	    \
 	unregister_all_config_handlers.3			 	    \
- 	unregister_app_config_handler.3 unregister_config_handler.3
+	unregister_app_config_handler.3 unregister_config_handler.3
 ALARM_ALIASES   = snmp_alarm_register.3 snmp_alarm_register_hr.3 snmp_alarm_unregister.3
 SESSION_ALIASES = snmp_api_errstring.3 snmp_close.3 snmp_error.3    \
 	snmp_open.3 snmp_perror.3 snmp_read.3 snmp_select_info.3    \
@@ -167,61 +167,58 @@ net-snmp-create-v3-user.1: $(srcdir)/net-snmp-create-v3-user.1.def ../sedscript
 	$(SED) -f ../sedscript < $(srcdir)/net-snmp-create-v3-user.1.def > net-snmp-create-v3-user.1
 
 tkmib.1: $(srcdir)/tkmib.1.def ../sedscript
-	$(SED) -f ../sedscript < $(srcdir)/tkmib.1.def > tkmib.1
+	$(SED) -f ../sedscript < $(srcdir)/tkmib.1.def > $@
 
 traptoemail.1: $(srcdir)/traptoemail.1.def ../sedscript
-	$(SED) -f ../sedscript < $(srcdir)/traptoemail.1.def > traptoemail.1
+	$(SED) -f ../sedscript < $(srcdir)/traptoemail.1.def > $@
 
-varbind_api.3: $(srcdir)/varbind_api.3.def ../sedscript
-	$(SED) -f ../sedscript < $(srcdir)/varbind_api.3.def > varbind_api.3
+netsnmp_varbind_api.3: $(srcdir)/netsnmp_varbind_api.3.def ../sedscript
+	$(SED) -f ../sedscript < $(srcdir)/netsnmp_varbind_api.3.def > $@
 
-pdu_api.3: $(srcdir)/pdu_api.3.def ../sedscript
-	$(SED) -f ../sedscript < $(srcdir)/pdu_api.3.def > pdu_api.3
+netsnmp_pdu_api.3: $(srcdir)/netsnmp_pdu_api.3.def ../sedscript
+	$(SED) -f ../sedscript < $(srcdir)/netsnmp_pdu_api.3.def > $@
 
-session_api.3: $(srcdir)/session_api.3.def ../sedscript
-	$(SED) -f ../sedscript < $(srcdir)/session_api.3.def > session_api.3
+netsnmp_session_api.3: $(srcdir)/netsnmp_session_api.3.def ../sedscript
+	$(SED) -f ../sedscript < $(srcdir)/netsnmp_session_api.3.def > $@
 
-mib_api.3: $(srcdir)/mib_api.3.def ../sedscript
-	$(SED) -f ../sedscript < $(srcdir)/mib_api.3.def > mib_api.3
+netsnmp_mib_api.3: $(srcdir)/netsnmp_mib_api.3.def ../sedscript
+	$(SED) -f ../sedscript < $(srcdir)/netsnmp_mib_api.3.def > $@
 
-config_api.3: $(srcdir)/config_api.3.def ../sedscript
-	$(SED) -f ../sedscript < $(srcdir)/config_api.3.def > config_api.3
-
-snmp_agent_api.3: $(srcdir)/snmp_agent_api.3.def ../sedscript
-	$(SED) -f ../sedscript < $(srcdir)/snmp_agent_api.3.def > snmp_agent_api.3
+netsnmp_config_api.3: $(srcdir)/netsnmp_config_api.3.def ../sedscript
+	$(SED) -f ../sedscript < $(srcdir)/netsnmp_config_api.3.def > $@
 
 snmp_alarm.3: $(srcdir)/snmp_alarm.3.def ../sedscript
-	$(SED) -f ../sedscript < $(srcdir)/snmp_alarm.3.def > snmp_alarm.3
+	$(SED) -f ../sedscript < $(srcdir)/snmp_alarm.3.def > $@
 
-snmp_sess_api.3: $(srcdir)/snmp_sess_api.3.def ../sedscript
-	$(SED) -f ../sedscript < $(srcdir)/snmp_sess_api.3.def > snmp_sess_api.3
+netsnmp_sess_api.3: $(srcdir)/netsnmp_sess_api.3.def ../sedscript
+	$(SED) -f ../sedscript < $(srcdir)/netsnmp_sess_api.3.def > $@
 
-snmp_trap_api.3: $(srcdir)/snmp_trap_api.3.def ../sedscript
-	$(SED) -f ../sedscript < $(srcdir)/snmp_trap_api.3.def > snmp_trap_api.3
+netsnmp_trap_api.3: $(srcdir)/netsnmp_trap_api.3.def ../sedscript
+	$(SED) -f ../sedscript < $(srcdir)/netsnmp_trap_api.3.def > $@
 
 snmp.conf.5: $(srcdir)/snmp.conf.5.def ../sedscript
-	$(SED) -f ../sedscript < $(srcdir)/snmp.conf.5.def > snmp.conf.5
+	$(SED) -f ../sedscript < $(srcdir)/snmp.conf.5.def > $@
 
 snmp_config.5: $(srcdir)/snmp_config.5.def ../sedscript
-	$(SED) -f ../sedscript < $(srcdir)/snmp_config.5.def > snmp_config.5
+	$(SED) -f ../sedscript < $(srcdir)/snmp_config.5.def > $@
 
 snmpd.conf.5: $(srcdir)/snmpd.conf.5.def ../sedscript
-	$(SED) -f ../sedscript < $(srcdir)/snmpd.conf.5.def > snmpd.conf.5
+	$(SED) -f ../sedscript < $(srcdir)/snmpd.conf.5.def > $@
 
 snmpd.examples.5: $(srcdir)/snmpd.examples.5.def ../sedscript
-	$(SED) -f ../sedscript < $(srcdir)/snmpd.examples.5.def > snmpd.examples.5
+	$(SED) -f ../sedscript < $(srcdir)/snmpd.examples.5.def > $@
 
 snmpd.internal.5: $(srcdir)/snmpd.internal.5.def ../sedscript
-	$(SED) -f ../sedscript < $(srcdir)/snmpd.internal.5.def > snmpd.internal.5
+	$(SED) -f ../sedscript < $(srcdir)/snmpd.internal.5.def > $@
 
 snmptrapd.conf.5: $(srcdir)/snmptrapd.conf.5.def ../sedscript
-	$(SED) -f ../sedscript < $(srcdir)/snmptrapd.conf.5.def > snmptrapd.conf.5
+	$(SED) -f ../sedscript < $(srcdir)/snmptrapd.conf.5.def > $@
 
 variables.5: $(srcdir)/variables.5.def ../sedscript
-	$(SED) -f ../sedscript < $(srcdir)/variables.5.def > variables.5
+	$(SED) -f ../sedscript < $(srcdir)/variables.5.def > $@
 
 snmptrapd.8: $(srcdir)/snmptrapd.8.def ../sedscript
-	$(SED) -f ../sedscript < $(srcdir)/snmptrapd.8.def > snmptrapd.8
+	$(SED) -f ../sedscript < $(srcdir)/snmptrapd.8.def > $@
 
 default_store.3.h: $(srcdir)/../include/net-snmp/library/default_store.h
 	awk '{ if ($$0 == "     * begin storage definitions ") { p = 1 } else if ($$0 == "     * end storage definitions ") { p = 0 } else if (p) { print $$0}}' < $(srcdir)/../include/net-snmp/library/default_store.h > default_store.3.h
