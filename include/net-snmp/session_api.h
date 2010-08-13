@@ -147,6 +147,20 @@ extern          "C" {
     int             snmp_select_info2(int *, netsnmp_large_fd_set *,
                                       struct timeval *, int *);
 
+    /*
+     * snmp_sess_select_info_flags() and
+     * snmp_sess_select_info2_flags() is similar to
+     * snmp_sess_select_info() and snmp_sess_select_info2(), but
+     * accepts a list of flags to control aspects of its behavior.
+     */
+#define NETSNMP_SELECT_NOFLAGS  0x00
+#define NETSNMP_SELECT_NOALARMS 0x01
+    NETSNMP_IMPORT
+    int             snmp_sess_select_info_flags(void *, int *, fd_set *,
+                                                struct timeval *, int *, int);
+    int             snmp_sess_select_info2_flags(void *, int *,
+                                                 netsnmp_large_fd_set *,
+                                                 struct timeval *, int *, int);
 
     /*
      * void snmp_timeout();

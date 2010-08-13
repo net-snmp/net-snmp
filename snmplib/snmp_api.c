@@ -6216,12 +6216,23 @@ snmp_sess_select_info(void *sessp,
                       int *numfds,
                       fd_set * fdset, struct timeval *timeout, int *block)
 {
+    return snmp_sess_select_info_flags(sessp, numfds, fdset, timeout, block,
+                                       NETSNMP_SELECT_NOFLAGS);
+}
+        
+int
+snmp_sess_select_info_flags(void *sessp,
+                            int *numfds,
+                            fd_set * fdset, struct timeval *timeout, int *block,
+                            int flags)
+{
   int rc;
   netsnmp_large_fd_set lfdset;
 
   netsnmp_large_fd_set_init(&lfdset, FD_SETSIZE);
   netsnmp_copy_fd_set_to_large_fd_set(&lfdset, fdset);
-  rc = snmp_sess_select_info2(sessp, numfds, &lfdset, timeout, block);
+  rc = snmp_sess_select_info2_flags(sessp, numfds, &lfdset, timeout,
+                                    block, flags);
   if (netsnmp_copy_large_fd_set_to_fd_set(fdset, &lfdset) < 0) {
       snmp_log(LOG_ERR,
 	     "Use snmp_sess_select_info2() for processing"
@@ -6236,6 +6247,16 @@ snmp_sess_select_info2(void *sessp,
                        int *numfds,
                        netsnmp_large_fd_set * fdset,
 		       struct timeval *timeout, int *block)
+{
+    return snmp_sess_select_info2_flags(sessp, numfds, fdset, timeout, block,
+                                        NETSNMP_SELECT_NOFLAGS);
+}
+
+int
+snmp_sess_select_info2_flags(void *sessp,
+                            int *numfds,
+                            netsnmp_large_fd_set * fdset,
+                            struct timeval *timeout, int *block, int flags)
 {
     struct session_list *slptest = (struct session_list *) sessp;
     struct session_list *slp, *next = NULL;
@@ -6318,7 +6339,9 @@ snmp_sess_select_info2(void *sessp,
     }
     DEBUGMSG(("sess_select", "\n"));
 
-    if (netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_ALARM_DONT_USE_SIG)) {
+    if (netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID,
+                               NETSNMP_DS_LIB_ALARM_DONT_USE_SIG) &&
+        !(flags & NETSNMP_SELECT_NOALARMS)) {
         next_alarm = get_next_alarm_delay_time(&delta);
         DEBUGMSGT(("sess_select","next alarm %d.%06d sec\n",
                    (int)delta.tv_sec, (int)delta.tv_usec));
