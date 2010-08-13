@@ -105,19 +105,12 @@ sedscript: sedscript.in include/net-snmp/net-snmp-config.h $(srcdir)/agent/mibgr
 EXAMPLE.conf: sedscript EXAMPLE.conf.def
 	$(SED) -f sedscript $(srcdir)/EXAMPLE.conf.def > EXAMPLE.conf
 
-docs: docsdir mancp
+docs: docsdir 
 
 docsdir: docsdox
 
 docsdox: doxygen.conf
 	srcdir=$(srcdir) VERSION=$(VERSION) doxygen $(srcdir)/doxygen.conf
-	-rm docs/man/man3/todo.3
-	-rm docs/man/man3/deprecated.3
-
-mancp:
-	@for i in docs/man/man3/* ; do \
-	     cp $$i man/netsnmp_`basename $$i` ; \
-	done
 
 net-snmp-config-x: net-snmp-config
 	chmod a+x net-snmp-config
