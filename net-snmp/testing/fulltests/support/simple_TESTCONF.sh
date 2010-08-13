@@ -206,7 +206,7 @@ if [ "x$SNMP_TRANSPORT_SPEC" = "x" ];then
 	SNMP_TRANSPORT_SPEC="udp"
 fi
 if [ "x$SNMP_TEST_DEST" = "x" -a $SNMP_TRANSPORT_SPEC != "unix" ];then
-	SNMP_TEST_DEST="localhost:"
+	SNMP_TEST_DEST="127.0.0.1:"
 fi
 export SNMP_FLAGS SNMP_SNMPD_PORT SNMP_SNMPTRAPD_PORT
 
