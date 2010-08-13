@@ -1,7 +1,7 @@
-.TH SNMP_AGENT_API 3 "02 Apr 2001" VVERSIONINFO "Net-SNMP"
+.TH NETSNMP_AGENT_API 3 "02 Apr 2001" VVERSIONINFO "Net-SNMP"
 .UC 5
 .SH NAME
-snmp_agent_api \- embedding an agent into a external application
+netsnmp_agent_api \- embedding an agent into a external application
 .SH SYNOPSIS
 .nf
 #include <net-snmp/net-snmp-config.h>
