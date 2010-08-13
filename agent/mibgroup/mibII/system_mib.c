@@ -60,7 +60,7 @@ static char     sysContact[SYS_STRING_LEN] = NETSNMP_SYS_CONTACT;
 static char     sysName[SYS_STRING_LEN] = NETSNMP_SYS_NAME;
 static char     sysLocation[SYS_STRING_LEN] = NETSNMP_SYS_LOC;
 static oid      sysObjectID[MAX_OID_LEN];
-static size_t   sysObjectIDLength;
+static size_t sysObjectIDByteLength;
 
 extern oid      version_sysoid[];
 extern int      version_sysoid_len;
@@ -171,12 +171,11 @@ system_parse_config_sysServices(const char *token, char *cptr)
 static void
 system_parse_config_sysObjectID(const char *token, char *cptr)
 {
-    sysObjectIDLength = MAX_OID_LEN;
+    int sysObjectIDLength = MAX_OID_LEN;
     if (!read_objid(cptr, sysObjectID, &sysObjectIDLength)) {
 	netsnmp_config_error("sysobjectid token not a parsable OID:\n\t%s",
 			     cptr);
         memcpy(sysObjectID, version_sysoid, version_sysoid_len * sizeof(oid));
-        sysObjectIDLength = version_sysoid_len;
     }
 }
 
@@ -318,7 +317,7 @@ init_system_mib(void)
 
     /* default sysObjectID */
     memcpy(sysObjectID, version_sysoid, version_sysoid_len * sizeof(oid));
-    sysObjectIDLength = version_sysoid_len;
+    sysObjectIDByteLength = version_sysoid_len * sizeof(oid);
 
     {
         const oid sysDescr_oid[] = { 1, 3, 6, 1, 2, 1, 1, 1 };
@@ -341,7 +340,7 @@ init_system_mib(void)
             netsnmp_init_watcher_info6(
 		&sysObjectID_winfo, sysObjectID, 0, ASN_OBJECT_ID,
                 WATCHER_MAX_SIZE | WATCHER_SIZE_IS_PTR | WATCHER_SIZE_UNIT_OIDS,
-                MAX_OID_LEN, &sysObjectIDLength));
+                MAX_OID_LEN, &sysObjectIDByteLength));
     }
     {
         const oid sysUpTime_oid[] = { 1, 3, 6, 1, 2, 1, 1, 3 };
