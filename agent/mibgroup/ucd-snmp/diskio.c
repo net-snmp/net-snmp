@@ -55,6 +55,9 @@ static int      cache_disknr = -1;
 /*
  * handle disk statistics via libperfstat
  */
+#ifdef HAVE_SYS_PROTOSW_H
+#include <sys/protosw.h>
+#endif
 #include <libperfstat.h>
 static perfstat_disk_t *ps_disk;	/* storage for all disk values */
 static int ps_numdisks;			/* number of disks in system, may change while running */

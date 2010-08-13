@@ -106,7 +106,11 @@
 #endif                          /* if HAVE_SYS_SYSCTL_H */
 #endif                          /* ifndef dynix */
 
-#if (defined(aix4) || defined(aix5) || defined(aix6) || defined(aix7)) && HAVE_LIBPERFSTAT_H
+#if (defined(aix4) || defined(aix5) || defined(aix6) || defined(aix7)) && HAVE_LI
+BPERFSTAT_H
+#ifdef HAVE_SYS_PROTOSW_H
+#include <sys/protosw.h>
+#endif
 #include <libperfstat.h>
 #endif
 

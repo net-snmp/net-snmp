@@ -113,6 +113,9 @@
 #include <sys/pstat.h>
 #endif
 #if defined(aix4) || defined(aix5) || defined(aix6) || defined(aix7)
+#ifdef HAVE_SYS_PROTOSW_H
+#include <sys/protosw.h>
+#endif
 #include <libperfstat.h>
 #endif
 #if HAVE_SYS_SYSGET_H

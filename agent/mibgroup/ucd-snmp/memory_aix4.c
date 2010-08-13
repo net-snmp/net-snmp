@@ -34,6 +34,9 @@
 #include "memory.h"             /* the module-specific header */
 #include "memory_aix4.h"    /* the module-specific header */
 
+#ifdef HAVE_SYS_PROTOSW_H
+#include <sys/protosw.h>
+#endif
 #include <libperfstat.h>
 #include <sys/stat.h>
 #include <unistd.h>
