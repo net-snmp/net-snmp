@@ -12,6 +12,7 @@ extern          "C" {
      * alarm flags 
      */
 #define SA_REPEAT 0x01          /* keep repeating every X seconds */
+#define SA_FIRED 0x10          /* Being processed in run_alarms */
 
     struct snmp_alarm {
         struct timeval  t;
