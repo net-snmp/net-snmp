@@ -183,23 +183,25 @@ sa_find_next(void)
     gettimeofday(&t_now, NULL);
 
     for (a = thealarms; a != NULL; a = a->next) {
-        /* check for time delta skew */
-        if ((a->t_next.tv_sec - t_now.tv_sec) > a->t.tv_sec)
-        {
-            DEBUGMSGTL(("time_skew", "Time delta too big (%ld seconds), should be %ld seconds - fixing\n",
-		(long)(a->t_next.tv_sec - t_now.tv_sec), (long)a->t.tv_sec));
-            a->t_next.tv_sec = t_now.tv_sec + a->t.tv_sec;
-            a->t_next.tv_usec = t_now.tv_usec + a->t.tv_usec;
-        }
-        if (lowest == NULL) {
-            lowest = a;
-        } else if (a->t_next.tv_sec == lowest->t_next.tv_sec) {
-            if (a->t_next.tv_usec < lowest->t_next.tv_usec) {
-                lowest = a;
-            }
-        } else if (a->t_next.tv_sec < lowest->t_next.tv_sec) {
-            lowest = a;
-        }
+        if (!(a->flags & SA_FIRED)) {
+            /* check for time delta skew */
+            if ((a->t_next.tv_sec - t_now.tv_sec) > a->t.tv_sec)
+            {
+                DEBUGMSGTL(("time_skew", "Time delta too big (%ld seconds), should be %ld seconds - fixing\n",
+		    (long)(a->t_next.tv_sec - t_now.tv_sec), (long)a->t.tv_sec));
+                a->t_next.tv_sec = t_now.tv_sec + a->t.tv_sec;
+                a->t_next.tv_usec = t_now.tv_usec + a->t.tv_usec;
+           }
+            if (lowest == NULL) {
+               lowest = a;
+            } else if (a->t_next.tv_sec == lowest->t_next.tv_sec) {
+                if (a->t_next.tv_usec < lowest->t_next.tv_usec) {
+                    lowest = a;
+                }
+            } else if (a->t_next.tv_sec < lowest->t_next.tv_sec) {
+               lowest = a;
+           }
+       }
     }
     return lowest;
 }
@@ -239,6 +241,7 @@ run_alarms(void)
 
         if (timercmp(&a->t_next, &t_now, <)) {
             clientreg = a->clientreg;
+            a->flags |= SA_FIRED;
             DEBUGMSGTL(("snmp_alarm", "run alarm %d\n", clientreg));
             (*(a->thecallback)) (clientreg, a->clientarg);
             DEBUGMSGTL(("snmp_alarm", "alarm %d completed\n", clientreg));
@@ -248,6 +251,7 @@ run_alarms(void)
                 a->t_last.tv_usec = t_now.tv_usec;
                 a->t_next.tv_sec = 0;
                 a->t_next.tv_usec = 0;
+                a->flags &= !SA_FIRED;
                 sa_update_entry(a);
             } else {
                 DEBUGMSGTL(("snmp_alarm", "alarm %d deleted itself\n",
