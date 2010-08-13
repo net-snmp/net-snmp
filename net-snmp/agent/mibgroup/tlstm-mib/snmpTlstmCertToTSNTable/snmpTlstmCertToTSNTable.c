@@ -96,6 +96,12 @@ static uint32_t _last_changed = 0;
 void
 init_snmpTlstmCertToTSNTable(void)
 {
+    init_snmpTlstmCertToTSNTable_context(NULL);
+}
+
+void
+init_snmpTlstmCertToTSNTable_context(char *contextName)
+{
     oid             reg_oid[]   =  { SNMP_TLS_TM_CERT_TABLE };
     const size_t    reg_oid_len =  OID_LENGTH(reg_oid);
     netsnmp_handler_registration    *reg;
@@ -117,6 +123,9 @@ init_snmpTlstmCertToTSNTable(void)
                  "error creating handler registration for tlstmCertToSN\n");
         return;
     }
+
+    if (NULL != contextName)
+        reg->contextName = strdup(contextName);
 
     _table = netsnmp_tdata_create_table("tlstmCertToTSNTable", 0);
     if (NULL == _table) {
@@ -173,6 +182,9 @@ init_snmpTlstmCertToTSNTable(void)
         snmp_log(LOG_ERR,
                  "could not create handler for snmpTlstmCertToTSNCount\n");
     else {
+        if (NULL != contextName)
+            reg->contextName = strdup(contextName);
+
         netsnmp_register_scalar(reg);
         if (cache) 
             netsnmp_inject_handler_before(reg, netsnmp_cache_handler_get(cache),
@@ -190,8 +202,11 @@ init_snmpTlstmCertToTSNTable(void)
     if ((NULL == reg) || (NULL == watcher))
         snmp_log(LOG_ERR,
                  "could not create handler for snmpTlstmCertToTSNCount\n");
-    else
+    else {
+        if (NULL != contextName)
+            reg->contextName = strdup(contextName);
         netsnmp_register_watched_scalar(reg, watcher);
+    }
 
     /*
      * persistence
