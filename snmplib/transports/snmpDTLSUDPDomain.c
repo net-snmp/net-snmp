@@ -138,7 +138,7 @@ start_new_cached_connection(netsnmp_transport *t,
 
     DEBUGTRACETOK("dtlsudp");
 
-    /* RFCXXXX: section 5.3.1, step 1:
+    /* RFC5953: section 5.3.1, step 1:
        1)  The snmpTlstmSessionOpens counter is incremented.
     */
     if (we_are_client)
@@ -158,7 +158,7 @@ start_new_cached_connection(netsnmp_transport *t,
         return NULL;
     cachep->tlsdata = tlsdata;
 
-    /* RFCXXXX: section 5.3.1, step 1:
+    /* RFC5953: section 5.3.1, step 1:
        2)  The client selects the appropriate certificate and cipher_suites
            for the key agreement based on the tmSecurityName and the
            tmRequestedSecurityLevel for the session.  For sessions being
@@ -255,7 +255,7 @@ start_new_cached_connection(netsnmp_transport *t,
     /* (and we'll do the opposite) */
     SSL_set_bio(tlsdata->ssl, cachep->read_bio, cachep->write_bio);
 
-    /* RFCXXXX: section 5.3.1, step 1:
+    /* RFC5953: section 5.3.1, step 1:
        3)  Using the destTransportDomain and destTransportAddress values,
            the client will initiate the (D)TLS handshake protocol to
            establish session keys for message integrity and encryption.
@@ -285,7 +285,7 @@ start_new_cached_connection(netsnmp_transport *t,
     else
         SSL_set_accept_state(tlsdata->ssl);
 
-    /* RFCXXXX: section 5.3.1, step 1:
+    /* RFC5953: section 5.3.1, step 1:
        6)  The TLSTM-specific session identifier (tlstmSessionID) is set in
            the tmSessionID of the tmStateReference passed to the TLS
            Transport Model to indicate that the session has been established
@@ -512,7 +512,7 @@ netsnmp_dtlsudp_recv(netsnmp_transport *t, void *buf, int size,
        the openssl context and have openssl read and process
        appropriately */
 
-    /* RFCXXXX: section 5.1, step 1:
+    /* RFC5953: section 5.1, step 1:
     1)  Determine the tlstmSessionID for the incoming message.  The
         tlstmSessionID MUST be a unique session identifier for this
         (D)TLS connection.  The contents and format of this identifier
@@ -537,7 +537,7 @@ netsnmp_dtlsudp_recv(netsnmp_transport *t, void *buf, int size,
         MUST be performed before continuing beyond this point.
     */
 
-    /* RFCXXXX: section 5.1, step 2:
+    /* RFC5953: section 5.1, step 2:
        2)  Create a tmStateReference cache for the subsequent reference and
            assign the following values within it:
 
@@ -578,7 +578,7 @@ netsnmp_dtlsudp_recv(netsnmp_transport *t, void *buf, int size,
     /* write the received buffer to the memory-based input bio */
     BIO_write(cachep->read_bio, buf, rc);
 
-    /* RFCXXXX: section 5.1, step 3:
+    /* RFC5953: section 5.1, step 3:
        3)  The incomingMessage and incomingMessageLength are assigned values
            from the (D)TLS processing.
      */
@@ -654,7 +654,7 @@ netsnmp_dtlsudp_recv(netsnmp_transport *t, void *buf, int size,
 
             /* verify that the server's certificate is the correct one */
 
-    	    /* RFCXXXX: section 5.3.1, step 1:
+    	    /* RFC5953: section 5.3.1, step 1:
     	       3)  Using the destTransportDomain and
     	           destTransportAddress values, the client will
     	           initiate the (D)TLS handshake protocol to establish
@@ -675,7 +675,7 @@ netsnmp_dtlsudp_recv(netsnmp_transport *t, void *buf, int size,
     	           limited to, cryptographic validation failures and
     	           an unexpected presented certificate identity.
     	    */
-    	    /* RFCXXXX: section 5.3.1, step 1:
+    	    /* RFC5953: section 5.3.1, step 1:
     	       4)  The (D)TLS client MUST then verify that the (D)TLS
     	           server's presented certificate is the expected
     	           certificate.  The (D)TLS client MUST NOT transmit
@@ -705,7 +705,7 @@ netsnmp_dtlsudp_recv(netsnmp_transport *t, void *buf, int size,
     	           fingerprint or the expected host name as a command
     	           line argument.
     	    */
-    	    /* RFCXXXX: section 5.3.1, step 1:
+    	    /* RFC5953: section 5.3.1, step 1:
     	       5)  (D)TLS provides assurance that the authenticated
     	           identity has been signed by a trusted configured
     	           certification authority.  If verification of the
@@ -803,7 +803,7 @@ netsnmp_dtlsudp_recv(netsnmp_transport *t, void *buf, int size,
         SNMPERR_SUCCESS)
         return SNMPERR_GENERR;
 
-    /* RFCXXXX: section 5.1, step 4:
+    /* RFC5953: section 5.1, step 4:
        4)  The TLS Transport Model passes the transportDomain,
            transportAddress, incomingMessage, and incomingMessageLength to
            the Dispatcher using the receiveMessage ASI:
@@ -864,7 +864,7 @@ netsnmp_dtlsudp_send(netsnmp_transport *t, void *buf, int size,
     }
 
     if (NULL == addr_pair) {
-      /* RFCXXXX: section 5.2, step 1:
+      /* RFC5953: section 5.2, step 1:
        1)  If tmStateReference does not refer to a cache containing values
            for tmTransportDomain, tmTransportAddress, tmSecurityName,
            tmRequestedSecurityLevel, and tmSameSecurity, then increment the
@@ -885,7 +885,7 @@ netsnmp_dtlsudp_send(netsnmp_transport *t, void *buf, int size,
         return -1;
     }
 
-    /* RFCXXXX: section 5.2, step 2:
+    /* RFC5953: section 5.2, step 2:
        2)  Extract the tmSessionID, tmTransportDomain, tmTransportAddress,
            tmSecurityName, tmRequestedSecurityLevel, and tmSameSecurity
            values from the tmStateReference.  Note: The tmSessionID value
@@ -900,14 +900,14 @@ netsnmp_dtlsudp_send(netsnmp_transport *t, void *buf, int size,
     */
 
 
-    /* RFCXXXX: section 5.2, step 3:
+    /* RFC5953: section 5.2, step 3:
        3)  If tmSameSecurity is true and either tmSessionID is undefined or
            refers to a session that is no longer open then increment the
            snmpTlstmSessionNoSessions counter, discard the message and
            return the error indication in the statusInformation.  Processing
            of this message stops.
     */
-    /* RFCXXXX: section 5.2, step 4:
+    /* RFC5953: section 5.2, step 4:
        4)  If tmSameSecurity is false and tmSessionID refers to a session
            that is no longer available then an implementation SHOULD open a
            new session using the openSession() ASI (described in greater
@@ -923,7 +923,7 @@ netsnmp_dtlsudp_send(netsnmp_transport *t, void *buf, int size,
        - Auto-connections are handled higher in the Net-SNMP library stack
      */
 
-    /* RFCXXXX: section 5.2, step 5:
+    /* RFC5953: section 5.2, step 5:
        5)  If tmSessionID is undefined, then use tmTransportDomain,
            tmTransportAddress, tmSecurityName and tmRequestedSecurityLevel
            to see if there is a corresponding entry in the LCD suitable to
@@ -986,7 +986,7 @@ netsnmp_dtlsudp_send(netsnmp_transport *t, void *buf, int size,
         free(str);
     }
 
-    /* RFCXXXX: section 5.2, step 6:
+    /* RFC5953: section 5.2, step 6:
        6)  Using either the session indicated by the tmSessionID if there
            was one or the session resulting from a previous step (4 or 5),
            pass the outgoingMessage to (D)TLS for encapsulation and
@@ -1071,13 +1071,13 @@ netsnmp_dtlsudp_close(netsnmp_transport *t)
 
     DEBUGTRACETOK("dtlsudp");
 
-    /* RFCXXXX: section 5.4, step 1:
+    /* RFC5953: section 5.4, step 1:
         1)  Increment either the snmpTlstmSessionClientCloses or the
             snmpTlstmSessionServerCloses counter as appropriate.
     */
     snmp_increment_statistic(STAT_TLSTM_SNMPTLSTMSESSIONCLIENTCLOSES);
     
-    /* RFCXXXX: section 5.4, step 2:
+    /* RFC5953: section 5.4, step 2:
         2)  Look up the session using the tmSessionID.
     */
     /* Implementation notes:
@@ -1090,7 +1090,7 @@ netsnmp_dtlsudp_close(netsnmp_transport *t)
             cachep = find_bio_cache((struct sockaddr_in *)tlsbase->remote_addr);
     }
 
-    /* RFCXXXX: section 5.4, step 3:
+    /* RFC5953: section 5.4, step 3:
         3)  If there is no open session associated with the tmSessionID, then
             closeSession processing is completed.
     */
@@ -1136,7 +1136,7 @@ netsnmp_dtlsudp_close(netsnmp_transport *t)
         }
     }
 
-    /* RFCXXXX: section 5.4, step 4:
+    /* RFC5953: section 5.4, step 4:
         4)  Have (D)TLS close the specified connection.  This MUST include
             sending a close_notify TLS Alert to inform the other side that
             session cleanup may be performed.

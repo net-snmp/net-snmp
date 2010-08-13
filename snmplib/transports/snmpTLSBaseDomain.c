@@ -310,7 +310,7 @@ netsnmp_tlsbase_verify_client_cert(SSL *ssl, _netsnmpTLSBaseData *tlsdata) {
     X509            *remote_cert;
     int ret;
 
-    /* RFCXXXX: section 5.3.2, paragraph 1:
+    /* RFC5953: section 5.3.2, paragraph 1:
        A (D)TLS server should accept new session connections from any client
        that it is able to verify the client's credentials for.  This is done
        by authenticating the client's presented certificate through a
@@ -776,13 +776,13 @@ netsnmp_tlsbase_allocate_tlsdata(netsnmp_transport *t, int isserver) {
 int netsnmp_tlsbase_wrapup_recv(netsnmp_tmStateReference *tmStateRef,
                                 _netsnmpTLSBaseData *tlsdata,
                                 void **opaque, int *olength) {
-    /* RFCXXXX Section 5.1.2 step 2: tmSecurityLevel */
+    /* RFC5953 Section 5.1.2 step 2: tmSecurityLevel */
     /* XXX: disallow NULL auth/encr algs in our implementations */
     tmStateRef->transportSecurityLevel = SNMP_SEC_LEVEL_AUTHPRIV;
 
     /* use x509 cert to do lookup to secname if DNE in cachep yet */
 
-    /* RFCXXXX: section 5.3.2, paragraph 2:
+    /* RFC5953: section 5.3.2, paragraph 2:
        The (D)TLS server identifies the authenticated identity from the
        (D)TLS client's principal certificate using configuration information
        from the snmpTlstmCertToTSNTable mapping table.  The (D)TLS server
@@ -815,7 +815,7 @@ int netsnmp_tlsbase_wrapup_recv(netsnmp_tmStateReference *tmStateRef,
         }
     }
 
-    /* RFCXXXX Section 5.1.2 step 2: tmSecurityName */
+    /* RFC5953 Section 5.1.2 step 2: tmSecurityName */
     /* XXX: detect and throw out overflow secname sizes rather
        than truncating. */
     strncpy(tmStateRef->securityName, tlsdata->securityName,
@@ -823,7 +823,7 @@ int netsnmp_tlsbase_wrapup_recv(netsnmp_tmStateReference *tmStateRef,
     tmStateRef->securityName[sizeof(tmStateRef->securityName)-1] = '\0';
     tmStateRef->securityNameLen = strlen(tmStateRef->securityName);
 
-    /* RFCXXXX Section 5.1.2 step 2: tmSessionID */
+    /* RFC5953 Section 5.1.2 step 2: tmSessionID */
     /* use our TLSData pointer as the session ID */
     memcpy(tmStateRef->sessionID, &tlsdata, sizeof(netsnmp_tmStateReference *));
 
