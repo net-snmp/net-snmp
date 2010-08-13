@@ -1015,7 +1015,8 @@ snmp_synch_response_cb(netsnmp_session * ss,
         block = NETSNMP_SNMPBLOCK;
         tvp = &timeout;
         timerclear(tvp);
-        snmp_select_info(&numfds, &fdset, tvp, &block);
+        snmp_sess_select_info_flags(0, &numfds, &fdset, tvp, &block,
+                                    NETSNMP_SELECT_NOALARMS);
         if (block == 1)
             tvp = NULL;         /* block without timeout */
         count = select(numfds, &fdset, NULL, NULL, tvp);
@@ -1106,7 +1107,8 @@ snmp_sess_synch_response(void *sessp,
         block = NETSNMP_SNMPBLOCK;
         tvp = &timeout;
         timerclear(tvp);
-        snmp_sess_select_info(sessp, &numfds, &fdset, tvp, &block);
+        snmp_sess_select_info_flags(sessp, &numfds, &fdset, tvp, &block,
+                                    NETSNMP_SELECT_NOALARMS);
         if (block == 1)
             tvp = NULL;         /* block without timeout */
         count = select(numfds, &fdset, NULL, NULL, tvp);
