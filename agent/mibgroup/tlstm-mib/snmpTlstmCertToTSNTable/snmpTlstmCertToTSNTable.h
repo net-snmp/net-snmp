@@ -13,6 +13,7 @@
  * function declarations 
  */
 void            init_snmpTlstmCertToTSNTable(void);
+void            init_snmpTlstmCertToTSNTable_context(char *);
 
 /*
  * index definitions for table tlstmCertToTSNTable 

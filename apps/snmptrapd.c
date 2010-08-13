@@ -1026,6 +1026,9 @@ main(int argc, char *argv[])
         /* register net-snmp vacm extensions */
         init_register_nsVacm_context("snmptrapd");
 #endif
+#ifdef USING_TLSTM_MIB_SNMPTLSTMCERTTOTSNTABLE_MODULE
+        init_snmpTlstmCertToTSNTable_context("snmptrapd");
+#endif
     }
 #endif
 
