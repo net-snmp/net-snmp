@@ -1,13 +1,20 @@
 .TH NETSNMP_CONFIG_API 3 "07 Mar 2002" "" "Net-SNMP"
 .UC 5
 .SH NAME
-register_config_handler, register_const_config_handler,
-register_prenetsnmp_mib_handler, unregister_config_handler,
-register_mib_handlers, unregister_all_config_handlers,
-register_app_config_handler, register_app_prenetsnmp_mib_handler,
+register_config_handler,
+register_const_config_handler,
+register_prenetsnmp_mib_handler,
+unregister_config_handler,
+register_mib_handlers,
+unregister_all_config_handlers,
+register_app_config_handler,
+register_app_prenetsnmp_mib_handler,
 unregister_app_config_handler,
-read_configs, read_premib_configs,
-read_config_print_usage, config_perror, config_pwarn - netsnmp_config_api functions
+read_configs,
+read_premib_configs,
+read_config_print_usage,
+config_perror,
+config_pwarn - netsnmp_config_api functions
 .SH SYNOPSIS
 .B #include <net-snmp/config_api.h>
 .br

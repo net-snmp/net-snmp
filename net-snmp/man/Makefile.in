@@ -29,7 +29,7 @@ MAN1G = $(AGENTXTRAP) snmpbulkget.1 snmpcmd.1 snmpget.1 snmpset.1 snmpwalk.1 \
 MAN3  = 
 MAN3_API = netsnmp_mib_api.3 netsnmp_config_api.3 snmp_alarm.3 \
 	netsnmp_session_api.3 netsnmp_sess_api.3 netsnmp_trap_api.3 netsnmp_varbind_api.3 netsnmp_pdu_api.3 
-MAN3G = default_store.3 $(MAN3_API)
+MAN3G = default_store.3 netsnmp_agent_api.3 $(MAN3_API)
 MAN5G = snmpd.conf.5 snmptrapd.conf.5 snmp.conf.5 snmp_config.5 variables.5 \
         mib2c.conf.5 snmpd.examples.5 snmpd.internal.5
 MAN8G = snmptrapd.8 snmpd.8
@@ -82,7 +82,7 @@ all: $(TARGETS) standardall manaliases
 manaliases: Makefile
 	touch manaliases
 	@for i in $(MAN3_API) ; do				  \
-            for j in `sed -n '/^.SH NAME/,/^.SH SYNOPSIS/p' $$i  | sed -e 's/.- .*//' | sed 's/, */\n/g'  | grep -vE '^.SH ' `; do \
+            for j in `sed -n '/^.SH NAME/,/^.SH SYNOPSIS/p' $$i  | sed -e 's/.- .*//' | sed 's/,.*//'  | grep -vE '^.SH ' `; do \
 		echo "making man page alias $$j -> $$i APIs" ;    \
 		echo ".so man3/$$i" > $$j.3 ; 		  \
 	    done                                                  \

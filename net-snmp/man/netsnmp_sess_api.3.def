@@ -22,10 +22,16 @@
 .TH NETSNMP_SESS_API 3 "07 Mar 2002" VVERSIONINFO "Net-SNMP"
 .UC 5
 .SH NAME
-snmp_sess_init, snmp_sess_open, snmp_sess_session,
-snmp_sess_send, snmp_sess_async_send,
-snmp_sess_select_info, snmp_sess_read,
-snmp_sess_timeout, snmp_sess_close, snmp_sess_error - session functions
+snmp_sess_init,
+snmp_sess_open,
+snmp_sess_session,
+snmp_sess_send,
+snmp_sess_async_send,
+snmp_sess_select_info,
+snmp_sess_read,
+snmp_sess_timeout,
+snmp_sess_close,
+snmp_sess_error - session functions
 .SH SYNOPSIS
 .B #include <net-snmp/session_api.h>
 .PP
