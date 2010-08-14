@@ -108,9 +108,6 @@
 #include "agent_module_includes.h"
 #include "mib_module_includes.h"
 
-char            dontReadConfigFiles;
-char           *optconfigfile;
-
 #ifdef HAVE_UNISTD_H
 void
 snmpd_set_agent_user(const char *token, char *cptr)
