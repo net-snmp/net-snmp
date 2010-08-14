@@ -1,14 +1,26 @@
 .TH NETSNMP_MIB_API 3 "06 Mar 2002" VVERSIONINFO "Net-SNMP"
 .UC 5
 .SH NAME
-add_mibdir, netsnmp_init_mib, shutdown_mib,
-netsnmp_read_module, read_mib, read_all_mibs,
+add_mibdir,
+netsnmp_init_mib,
+shutdown_mib,
+netsnmp_read_module,
+read_mib,
+read_all_mibs,
 add_module_replacement,
-snmp_set_mib_errors, snmp_set_mib_warnings, snmp_set_save_descriptions,
-read_objid, snmp_parse_oid, get_module_node,
+snmp_set_mib_errors,
+snmp_set_mib_warnings,
+snmp_set_save_descriptions,
+read_objid,
+snmp_parse_oid,
+get_module_node,
 print_mib,
-print_objid, fprint_objid, snprint_objid,
-print_description, fprint_description, snprint_description - netsnmp_mib_api functions
+print_objid,
+fprint_objid,
+snprint_objid,
+print_description,
+fprint_description,
+snprint_description - netsnmp_mib_api functions
 .SH SYNOPSIS
 .B #include <net-snmp/mib_api.h>
 .PP

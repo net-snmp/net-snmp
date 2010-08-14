@@ -1,7 +1,9 @@
 .TH SNMP_ALARM 3 "07 Mar 2002" VVERSIONINFO "Net-SNMP"
 .UC 5
 .SH NAME
-snmp_alarm_register, snmp_alarm_register_hr, snmp_alarm_unregister - alarm functions
+snmp_alarm_register,
+snmp_alarm_register_hr,
+snmp_alarm_unregister - alarm functions
 .SH SYNOPSIS
 .B #include <net-snmp/utilities.h>
 .PP
