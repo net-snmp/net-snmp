@@ -848,6 +848,8 @@ netsnmp_find_handler_by_name(netsnmp_handler_registration *reginfo,
                              const char *name)
 {
     netsnmp_mib_handler *it;
+    if (reginfo == NULL || name == NULL )
+        return NULL;
     for (it = reginfo->handler; it; it = it->next) {
         if (strcmp(it->handler_name, name) == 0) {
             return it;
@@ -891,9 +893,9 @@ _clone_handler(netsnmp_mib_handler *it)
 static netsnmp_data_list *handler_reg = NULL;
 
 void
-handler_free_callback(void *free)
+handler_free_callback(void *handler)
 {
-    netsnmp_handler_free((netsnmp_mib_handler *)free);
+    netsnmp_handler_free((netsnmp_mib_handler *)handler);
 }
 
 /** registers a given handler by name so that it can be found easily later.
@@ -956,7 +958,7 @@ netsnmp_inject_handler_into_subtree(netsnmp_subtree *tp, const char *name,
                                                   before_what);
                     break;
                 } else {
-                    DEBUGMSGTL(("yyyinjectHandler",
+                    DEBUGMSGTL(("injectHandler",
                                 "not injecting handler into %s\n",
                                 mh->handler_name));
                 }
@@ -1009,7 +1011,7 @@ parse_injectHandler_conf(const char *token, char *cptr)
  *  @todo replace this with a method to check the handler chain instead.
  */
 static int
-handler_mark_doneit(int majorID, int minorID,
+handler_mark_inject_handler_done(int majorID, int minorID,
                     void *serverarg, void *clientarg)
 {
     doneit = 1;
@@ -1017,7 +1019,7 @@ handler_mark_doneit(int majorID, int minorID,
 }
 
 /** @internal
- *  register's the injectHandle parser token.
+ *  Registers the injectHandle parser token.
  */
 void
 netsnmp_init_handler_conf(void)
@@ -1027,7 +1029,7 @@ netsnmp_init_handler_conf(void)
                                   NULL, "injectHandler NAME INTONAME [BEFORE_OTHER_NAME]");
     snmp_register_callback(SNMP_CALLBACK_LIBRARY,
                            SNMP_CALLBACK_POST_READ_CONFIG,
-                           handler_mark_doneit, NULL);
+                           handler_mark_inject_handler_done, NULL);
 
     se_add_pair_to_slist("agent_mode", strdup("GET"), MODE_GET);
     se_add_pair_to_slist("agent_mode", strdup("GETNEXT"), MODE_GETNEXT);
