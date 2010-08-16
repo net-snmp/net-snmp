@@ -969,11 +969,13 @@ read_sendmailcf(BOOL config)
                 }
 
                 /*
-                 * skip to next , 
+                 * skip to one past the next , 
                  */
                 while (*p && *p != ',') {
                     p++;
                 }
+		if (*p)
+		    p++;
             }
 
             /*
