@@ -197,71 +197,25 @@ invalidate_lookup_cache(const char *context) {
     }
 }
 
+void
+clear_lookup_cache(void) {
+
+    lookup_cache_context *ptr = NULL, *next = NULL;
+
+    ptr = thecontextcache;
+    while (ptr) {
+	next = ptr->next;
+	SNMP_FREE(ptr->context);
+	SNMP_FREE(ptr);
+	ptr = next;
+    }
+    thecontextcache = NULL; /* !!! */
+}
+
 /* End of Lookup cache code */
 
-static void register_mib_detach_node(netsnmp_subtree *s);
 subtree_context_cache *context_subtrees = NULL;
 
-void
-netsnmp_subtree_free(netsnmp_subtree *a)
-{
-  if (a != NULL) {
-    if (a->variables != NULL && netsnmp_oid_equals(a->name_a, a->namelen, 
-					     a->start_a, a->start_len) == 0) {
-      SNMP_FREE(a->variables);
-    }
-    SNMP_FREE(a->name_a);
-    a->namelen = 0;
-    SNMP_FREE(a->start_a);
-    a->start_len = 0;
-    SNMP_FREE(a->end_a);
-    a->end_len = 0;
-    SNMP_FREE(a->label_a);
-    netsnmp_handler_registration_free(a->reginfo);
-    a->reginfo = NULL;
-    SNMP_FREE(a);
-  }
-}
-
-netsnmp_subtree *
-netsnmp_subtree_deepcopy(netsnmp_subtree *a)
-{
-  netsnmp_subtree *b = (netsnmp_subtree *)calloc(1, sizeof(netsnmp_subtree));
-
-  if (b != NULL) {
-    memcpy(b, a, sizeof(netsnmp_subtree));
-    b->name_a  = snmp_duplicate_objid(a->name_a,  a->namelen);
-    b->start_a = snmp_duplicate_objid(a->start_a, a->start_len);
-    b->end_a   = snmp_duplicate_objid(a->end_a,   a->end_len);
-    b->label_a = strdup(a->label_a);
-    
-    if (b->name_a == NULL || b->start_a == NULL || 
-	b->end_a  == NULL || b->label_a == NULL) {
-      netsnmp_subtree_free(b);
-      return NULL;
-    }
-
-    if (a->variables != NULL) {
-      b->variables = (struct variable *)malloc(a->variables_len * 
-					       a->variables_width);
-      if (b->variables != NULL) {
-	memcpy(b->variables, a->variables,a->variables_len*a->variables_width);
-      } else {
-	netsnmp_subtree_free(b);
-	return NULL;
-      }
-    }
-
-    if (a->reginfo != NULL) {
-      b->reginfo = netsnmp_handler_registration_dup(a->reginfo);
-      if (b->reginfo == NULL) {
-	netsnmp_subtree_free(b);
-	return NULL;
-      }
-    }
-  }
-  return b;
-}
 
 subtree_context_cache *
 get_top_context_cache(void)
@@ -351,6 +305,95 @@ netsnmp_subtree_replace_first(netsnmp_subtree *new_tree,
         }
     }
     return add_subtree(new_tree, context_name);
+}
+
+void clear_subtree (netsnmp_subtree *sub);
+void
+clear_context(void) {
+
+    subtree_context_cache *ptr = NULL, *next = NULL;
+
+    DEBUGMSGTL(("agent_registry", "clear context\n"));
+
+    ptr = get_top_context_cache(); 
+    while (ptr) {
+	next = ptr->next;
+
+	if (ptr->first_subtree) {
+	    clear_subtree(ptr->first_subtree);
+	}
+
+        free(NETSNMP_REMOVE_CONST(char*, ptr->context_name));
+        SNMP_FREE(ptr);
+
+	ptr = next;
+    }
+    context_subtrees = NULL; /* !!! */
+    clear_lookup_cache();
+}
+
+
+static void register_mib_detach_node(netsnmp_subtree *s);
+
+void
+netsnmp_subtree_free(netsnmp_subtree *a)
+{
+  if (a != NULL) {
+    if (a->variables != NULL && netsnmp_oid_equals(a->name_a, a->namelen, 
+					     a->start_a, a->start_len) == 0) {
+      SNMP_FREE(a->variables);
+    }
+    SNMP_FREE(a->name_a);
+    a->namelen = 0;
+    SNMP_FREE(a->start_a);
+    a->start_len = 0;
+    SNMP_FREE(a->end_a);
+    a->end_len = 0;
+    SNMP_FREE(a->label_a);
+    netsnmp_handler_registration_free(a->reginfo);
+    a->reginfo = NULL;
+    SNMP_FREE(a);
+  }
+}
+
+netsnmp_subtree *
+netsnmp_subtree_deepcopy(netsnmp_subtree *a)
+{
+  netsnmp_subtree *b = (netsnmp_subtree *)calloc(1, sizeof(netsnmp_subtree));
+
+  if (b != NULL) {
+    memcpy(b, a, sizeof(netsnmp_subtree));
+    b->name_a  = snmp_duplicate_objid(a->name_a,  a->namelen);
+    b->start_a = snmp_duplicate_objid(a->start_a, a->start_len);
+    b->end_a   = snmp_duplicate_objid(a->end_a,   a->end_len);
+    b->label_a = strdup(a->label_a);
+    
+    if (b->name_a == NULL || b->start_a == NULL || 
+	b->end_a  == NULL || b->label_a == NULL) {
+      netsnmp_subtree_free(b);
+      return NULL;
+    }
+
+    if (a->variables != NULL) {
+      b->variables = (struct variable *)malloc(a->variables_len * 
+					       a->variables_width);
+      if (b->variables != NULL) {
+	memcpy(b->variables, a->variables,a->variables_len*a->variables_width);
+      } else {
+	netsnmp_subtree_free(b);
+	return NULL;
+      }
+    }
+
+    if (a->reginfo != NULL) {
+      b->reginfo = netsnmp_handler_registration_dup(a->reginfo);
+      if (b->reginfo == NULL) {
+	netsnmp_subtree_free(b);
+	return NULL;
+      }
+    }
+  }
+  return b;
 }
 
 NETSNMP_INLINE void
@@ -728,6 +771,134 @@ netsnmp_subtree_load(netsnmp_subtree *new_sub, const char *context_name)
 	}
     }
     return 0;
+}
+
+void
+clear_subtree (netsnmp_subtree *sub) {
+
+    netsnmp_subtree *nxt;
+    
+    if (sub == NULL)
+	return;
+
+    for(nxt = sub; nxt;) {
+        if (nxt->children != NULL) {
+            clear_subtree(nxt->children);
+        }
+        sub = nxt;
+        nxt = nxt->next;
+        netsnmp_subtree_free(sub);
+    }
+
+}
+
+netsnmp_subtree *
+netsnmp_subtree_find_prev(oid *name, size_t len, netsnmp_subtree *subtree,
+			  const char *context_name)
+{
+    lookup_cache *lookup_cache = NULL;
+    netsnmp_subtree *myptr = NULL, *previous = NULL;
+    int cmp = 1;
+    size_t ll_off = 0;
+
+    if (subtree) {
+        myptr = subtree;
+    } else {
+	/* look through everything */
+        if (lookup_cache_size) {
+            lookup_cache = lookup_cache_find(context_name, name, len, &cmp);
+            if (lookup_cache) {
+                myptr = lookup_cache->next;
+                previous = lookup_cache->previous;
+            }
+            if (!myptr)
+                myptr = netsnmp_subtree_find_first(context_name);
+        } else {
+            myptr = netsnmp_subtree_find_first(context_name);
+        }
+    }
+
+    /*
+     * this optimization causes a segfault on sf cf alpha-linux1.
+     * ifdef out until someone figures out why and fixes it. xxx-rks 20051117
+     */
+#ifndef __alpha
+#define WTEST_OPTIMIZATION 1
+#endif
+#ifdef WTEST_OPTIMIZATION
+    DEBUGMSGTL(("wtest","oid in: "));
+    DEBUGMSGOID(("wtest", name, len));
+    DEBUGMSG(("wtest","\n"));
+#endif
+    for (; myptr != NULL; previous = myptr, myptr = myptr->next) {
+#ifdef WTEST_OPTIMIZATION
+        /* Compare the incoming oid with the linked list.  If we have
+           results of previous compares, its faster to make sure the
+           length we differed in the last check is greater than the
+           length between this pointer and the last then we don't need
+           to actually perform a comparison */
+        DEBUGMSGTL(("wtest","oid cmp: "));
+        DEBUGMSGOID(("wtest", myptr->start_a, myptr->start_len));
+        DEBUGMSG(("wtest","  --- off = %lu, in off = %lu test = %d\n",
+                  (unsigned long)myptr->oid_off, (unsigned long)ll_off,
+                  !(ll_off && myptr->oid_off &&
+                    myptr->oid_off > ll_off)));
+        if (!(ll_off && myptr->oid_off && myptr->oid_off > ll_off) &&
+            netsnmp_oid_compare_ll(name, len,
+                                   myptr->start_a, myptr->start_len,
+                                   &ll_off) < 0) {
+#else
+        if (snmp_oid_compare(name, len, myptr->start_a, myptr->start_len) < 0) {
+#endif
+            if (lookup_cache_size && previous && cmp) {
+                if (lookup_cache) {
+                    lookup_cache_replace(lookup_cache, myptr, previous);
+                } else {
+                    lookup_cache_add(context_name, myptr, previous);
+                }
+            }
+            return previous;
+        }
+    }
+    return previous;
+}
+
+netsnmp_subtree *
+netsnmp_subtree_find_next(oid *name, size_t len,
+			  netsnmp_subtree *subtree, const char *context_name)
+{
+    netsnmp_subtree *myptr = NULL;
+
+    myptr = netsnmp_subtree_find_prev(name, len, subtree, context_name);
+
+    if (myptr != NULL) {
+        myptr = myptr->next;
+        while (myptr != NULL && (myptr->variables == NULL || 
+				 myptr->variables_len == 0)) {
+            myptr = myptr->next;
+        }
+        return myptr;
+    } else if (subtree != NULL && snmp_oid_compare(name, len, 
+				   subtree->start_a, subtree->start_len) < 0) {
+        return subtree;
+    } else {
+        return NULL;
+    }
+}
+
+netsnmp_subtree *
+netsnmp_subtree_find(oid *name, size_t len, netsnmp_subtree *subtree, 
+		     const char *context_name)
+{
+    netsnmp_subtree *myptr;
+
+    myptr = netsnmp_subtree_find_prev(name, len, subtree, context_name);
+    if (myptr && myptr->end_a &&
+        snmp_oid_compare(name, len, myptr->end_a, myptr->end_len)<0) {
+        return myptr;
+    }
+
+    return NULL;
 }
 
 /*
@@ -1515,114 +1686,6 @@ netsnmp_acm_check_subtree(netsnmp_pdu *pdu, oid *name, size_t namelen)
     return 1;
 }
 
-netsnmp_subtree *
-netsnmp_subtree_find_prev(oid *name, size_t len, netsnmp_subtree *subtree,
-			  const char *context_name)
-{
-    lookup_cache *lookup_cache = NULL;
-    netsnmp_subtree *myptr = NULL, *previous = NULL;
-    int cmp = 1;
-    size_t ll_off = 0;
-
-    if (subtree) {
-        myptr = subtree;
-    } else {
-	/* look through everything */
-        if (lookup_cache_size) {
-            lookup_cache = lookup_cache_find(context_name, name, len, &cmp);
-            if (lookup_cache) {
-                myptr = lookup_cache->next;
-                previous = lookup_cache->previous;
-            }
-            if (!myptr)
-                myptr = netsnmp_subtree_find_first(context_name);
-        } else {
-            myptr = netsnmp_subtree_find_first(context_name);
-        }
-    }
-
-    /*
-     * this optimization causes a segfault on sf cf alpha-linux1.
-     * ifdef out until someone figures out why and fixes it. xxx-rks 20051117
-     */
-#ifndef __alpha
-#define WTEST_OPTIMIZATION 1
-#endif
-#ifdef WTEST_OPTIMIZATION
-    DEBUGMSGTL(("wtest","oid in: "));
-    DEBUGMSGOID(("wtest", name, len));
-    DEBUGMSG(("wtest","\n"));
-#endif
-    for (; myptr != NULL; previous = myptr, myptr = myptr->next) {
-#ifdef WTEST_OPTIMIZATION
-        /* Compare the incoming oid with the linked list.  If we have
-           results of previous compares, its faster to make sure the
-           length we differed in the last check is greater than the
-           length between this pointer and the last then we don't need
-           to actually perform a comparison */
-        DEBUGMSGTL(("wtest","oid cmp: "));
-        DEBUGMSGOID(("wtest", myptr->start_a, myptr->start_len));
-        DEBUGMSG(("wtest","  --- off = %lu, in off = %lu test = %d\n",
-                  (unsigned long)myptr->oid_off, (unsigned long)ll_off,
-                  !(ll_off && myptr->oid_off &&
-                    myptr->oid_off > ll_off)));
-        if (!(ll_off && myptr->oid_off && myptr->oid_off > ll_off) &&
-            netsnmp_oid_compare_ll(name, len,
-                                   myptr->start_a, myptr->start_len,
-                                   &ll_off) < 0) {
-#else
-        if (snmp_oid_compare(name, len, myptr->start_a, myptr->start_len) < 0) {
-#endif
-            if (lookup_cache_size && previous && cmp) {
-                if (lookup_cache) {
-                    lookup_cache_replace(lookup_cache, myptr, previous);
-                } else {
-                    lookup_cache_add(context_name, myptr, previous);
-                }
-            }
-            return previous;
-        }
-    }
-    return previous;
-}
-
-netsnmp_subtree *
-netsnmp_subtree_find_next(oid *name, size_t len,
-			  netsnmp_subtree *subtree, const char *context_name)
-{
-    netsnmp_subtree *myptr = NULL;
-
-    myptr = netsnmp_subtree_find_prev(name, len, subtree, context_name);
-
-    if (myptr != NULL) {
-        myptr = myptr->next;
-        while (myptr != NULL && (myptr->variables == NULL || 
-				 myptr->variables_len == 0)) {
-            myptr = myptr->next;
-        }
-        return myptr;
-    } else if (subtree != NULL && snmp_oid_compare(name, len, 
-				   subtree->start_a, subtree->start_len) < 0) {
-        return subtree;
-    } else {
-        return NULL;
-    }
-}
-
-netsnmp_subtree *
-netsnmp_subtree_find(oid *name, size_t len, netsnmp_subtree *subtree, 
-		     const char *context_name)
-{
-    netsnmp_subtree *myptr;
-
-    myptr = netsnmp_subtree_find_prev(name, len, subtree, context_name);
-    if (myptr && myptr->end_a &&
-        snmp_oid_compare(name, len, myptr->end_a, myptr->end_len)<0) {
-        return myptr;
-    }
-
-    return NULL;
-}
 
 netsnmp_session *
 get_session_for_oid(oid *name, size_t len, const char *context_name)
@@ -1700,64 +1763,6 @@ shutdown_tree(void) {
     remove_tree_entry(iso, 1);
     remove_tree_entry(ccitt, 1);
 
-}
-
-void
-clear_subtree (netsnmp_subtree *sub) {
-
-    netsnmp_subtree *nxt;
-    
-    if (sub == NULL)
-	return;
-
-    for(nxt = sub; nxt;) {
-        if (nxt->children != NULL) {
-            clear_subtree(nxt->children);
-        }
-        sub = nxt;
-        nxt = nxt->next;
-        netsnmp_subtree_free(sub);
-    }
-
-}
-
-void
-clear_lookup_cache(void) {
-
-    lookup_cache_context *ptr = NULL, *next = NULL;
-
-    ptr = thecontextcache;
-    while (ptr) {
-	next = ptr->next;
-	SNMP_FREE(ptr->context);
-	SNMP_FREE(ptr);
-	ptr = next;
-    }
-    thecontextcache = NULL; /* !!! */
-}
-
-void
-clear_context(void) {
-
-    subtree_context_cache *ptr = NULL, *next = NULL;
-
-    DEBUGMSGTL(("agent_registry", "clear context\n"));
-
-    ptr = get_top_context_cache(); 
-    while (ptr) {
-	next = ptr->next;
-
-	if (ptr->first_subtree) {
-	    clear_subtree(ptr->first_subtree);
-	}
-
-        free(NETSNMP_REMOVE_CONST(char*, ptr->context_name));
-        SNMP_FREE(ptr);
-
-	ptr = next;
-    }
-    context_subtrees = NULL; /* !!! */
-    clear_lookup_cache();
 }
 
 extern void     dump_idx_registry(void);
