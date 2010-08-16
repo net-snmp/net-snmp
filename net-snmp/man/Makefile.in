@@ -193,6 +193,9 @@ snmp_alarm.3: $(srcdir)/snmp_alarm.3.def ../sedscript
 netsnmp_sess_api.3: $(srcdir)/netsnmp_sess_api.3.def ../sedscript
 	$(SED) -f ../sedscript < $(srcdir)/netsnmp_sess_api.3.def > $@
 
+netsnmp_agent_api.3: $(srcdir)/netsnmp_agent_api.3.def ../sedscript
+	$(SED) -f ../sedscript < $(srcdir)/netsnmp_agent_api.3.def > $@
+
 netsnmp_trap_api.3: $(srcdir)/netsnmp_trap_api.3.def ../sedscript
 	$(SED) -f ../sedscript < $(srcdir)/netsnmp_trap_api.3.def > $@
 
