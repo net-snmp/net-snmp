@@ -41,6 +41,7 @@ int   perl_trapd_handler( netsnmp_pdu           *pdu,
     int noValuesReturned;
     int callingCFfailed = 0;
     int result = NETSNMPTRAPD_HANDLER_OK;
+    netsnmp_pdu * v2pdu = NULL;
 
     dSP;
     ENTER;
@@ -50,8 +51,10 @@ int   perl_trapd_handler( netsnmp_pdu           *pdu,
         return 0;
 
     /* nuke v1 PDUs */
-    if (pdu->command == SNMP_MSG_TRAP)
-        pdu = convert_v1pdu_to_v2(pdu);
+    if (pdu->command == SNMP_MSG_TRAP) {
+        v2pdu = convert_v1pdu_to_v2(pdu);
+        pdu = v2pdu;
+    }
 
     cb_data = handler->handler_data;
     if (!cb_data || !cb_data->perl_cb)
@@ -244,6 +247,10 @@ int   perl_trapd_handler( netsnmp_pdu           *pdu,
     av_undef(varbinds);
 #endif    
     free(tmparray);
+
+      if (v2pdu) {
+              snmp_free_pdu(v2pdu);
+      }
 
     FREETMPS;
     LEAVE;
