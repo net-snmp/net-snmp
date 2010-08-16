@@ -2670,7 +2670,7 @@ snmp_new_session(version, community, peer, lport, retries, timeout)
 	           ss = snmp_sess_open(&session);
 	   } else {
 		   ss = snmp_open(&session);
-	  }
+	   }
 
            if (ss == NULL) {
 	      if (verbose) warn("error:snmp_new_session: Couldn't open SNMP session");
@@ -2839,7 +2839,12 @@ snmp_new_v3_session(version, peer, retries, timeout, sec_name, sec_level, sec_en
                }
             }
 
-           ss = snmp_open(&session);
+	   if(api_mode == SNMP_API_SINGLE)
+	   {
+	           ss = snmp_sess_open(&session);
+	   } else {
+		   ss = snmp_open(&session);
+	   }
 
            if (ss == NULL) {
 	      if (verbose) warn("error:snmp_new_v3_session:Couldn't open SNMP session");
