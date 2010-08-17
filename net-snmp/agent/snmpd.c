@@ -1252,6 +1252,11 @@ receive(void)
             }                   /* endif -- count>0 */
 
         /*
+         * see if persistent store needs to be saved
+         */
+        snmp_store_if_needed();
+
+        /*
          * run requested alarms 
          */
         run_alarms();
