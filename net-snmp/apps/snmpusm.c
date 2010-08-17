@@ -1010,7 +1010,9 @@ main(int argc, char *argv[])
         exitval = 1;
     }
 
+#if defined(HAVE_OPENSSL_DH_H) && defined(HAVE_LIBCRYPTO)
   begone:
+#endif
     if (response)
         snmp_free_pdu(response);
     snmp_close(ss);
