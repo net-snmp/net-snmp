@@ -465,6 +465,8 @@ sprint_realloc_octet_string(u_char ** buf, size_t * buf_len,
         int             repeat, width = 1;
         long            value;
         char            code = 'd', separ = 0, term = 0, ch, intbuf[16];
+#define HEX2DIGIT_NEED_INIT 3
+        char            hex2digit = HEX2DIGIT_NEED_INIT;
         u_char         *ecp;
 
         if (!netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_QUICK_PRINT)) {
@@ -511,9 +513,22 @@ sprint_realloc_octet_string(u_char ** buf, size_t * buf_len,
                 }
                 switch (code) {
                 case 'x':
-                    if (netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID,
-                                               NETSNMP_DS_LIB_2DIGIT_HEX_OUTPUT)
-                                       && value < 16) {
+                    if (HEX2DIGIT_NEED_INIT == hex2digit)
+                        hex2digit = netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID,
+                                                           NETSNMP_DS_LIB_2DIGIT_HEX_OUTPUT);
+                    /*
+                     * if value is < 16, it will be a single hex digit. If the
+                     * width is 1 (we are outputting a byte at a time), pat it
+                     * to 2 digits if NETSNMP_DS_LIB_2DIGIT_HEX_OUTPUT is set
+                     * or all of the following are true:
+                     *  - we do not have a separation character
+                     *  - there is no hint left (or there never was a hint)
+                     *
+                     * e.g. for the data 0xAA01BB, would anyone really ever
+                     * want the string "AA1BB"??
+                     */
+                    if (((value < 16) && (1 == width)) &&
+                        (hex2digit || ((0 == separ) && (0 == *hint)))) {
                         sprintf(intbuf, "0%lx", value);
                     } else {
                         sprintf(intbuf, "%lx", value);
