@@ -153,6 +153,14 @@ listing of all changes made to the code.
 	from a given varbind list
       - fix issue with USM using inactive users
       - fixed potential buffer overflow when generating temp. file names
+      - 0 [PATCH 3042765]: make snmp_synch_response_cb() re-entrant
+      - implemented a fix for the issue reported in patch #3042770. Created
+	a snmp_select_info_flags function, and similar, that allow for
+	alarms to not be run. This is then used in the synch_response
+	functions to avoid 100% CPU loops
+      - patch: 3042770: from mehaf: Made run_alarms() reentrant
+      - when displaying a byte as single digit hex value, default to
+	prefixing with 0 unless there is a seperator or addition hint data
 
     snmplib, snmpd:
       - Do not check if values of type size_t are less than 0.
@@ -285,6 +293,16 @@ listing of all changes made to the code.
       - patch: 3028923: from jenso: new copy of the bridge-mib perl
 	implementation
       - report gfs filesystems in hrStorageTable and hrFSTable.
+      - [PATCH 2904900]: Documentation plus assorted handler code fixes
+      - [PATCH 2911361]: Documentation (Provided by Tomasz Lis)
+      - [PATCH 2911361]: Re-order code to group related functions together
+      - [PATCH 2911361]: Remove redundant variables
+      - [PATCH 2931446]: make the load averages writable.
+      - [PATCH 3044512]: fix sysobjectid directive.
+      - patch 2790249: from willpwillp: reduce cache time for the iftable
+	to 3seconds to increase accuracy
+      - patch 2825653: from bru5ce: fix sendmail.cf parsing in certain
+	conditions
 
     snmpdlib:
       - new functions to make stash ptr and newrow available to
@@ -490,6 +508,12 @@ listing of all changes made to the code.
 	directory and not the testing subdirectory as that is what is
 	expected in the test scripts.
       - add the test name to the start of the file "invoked".
+      - made it possible to analyze all code covered by the regression
+	tests with a dynamic analyzer, at least if that analyzer supports
+	following child processes. An example:	 rm -rf /tmp/snmp-test-*
+	make -s SNMP_SAVE_TMPDIR=yes DYNAMIC_ANALYZER="valgrind
+	--trace-children=yes --track-origins=yes" make -s test grep -i
+	uninitialised /tmp/snmp-test-* | xargs less
 
     unspecified:
       - Change the types of the return values of netsnmp_*_getSecName from
@@ -533,6 +557,9 @@ listing of all changes made to the code.
       - moved transport code into a separate subdirectory in snmplib
       - [BUG 3027900]: when cross-compiling it is now assumed that memcmp()
 	is available instead of assuming that it is not available.
+      - Do no double declare the index values.
+      - Handle embedded %'s in the result message.
+      - ilence some compilation warnings from test cases.
 
     Cygwin:
       - IPv6 is only supported under Cygwin 1.7 or later. The old
@@ -1194,6 +1221,7 @@ listing of all changes made to the code.
       - Build fixes for embedded Perl
       - Fix default shared library building instead of forcing static
       - Use "-Wl,-brtl" when compiling with gcc
+      - [PATCH 2886598]: Header fixes for compiling on AIX6
 
     FreeBSD:
       - [BUG 1073782]: Restore PerfStat values for FreeBSD 5.x systems.
@@ -1345,6 +1373,9 @@ listing of all changes made to the code.
       - fixes for 64-bit platforms
       - make perltest fixes for HP-UX
       - make perltest fixes for IRIX
+      - [PATCH 2995098]: Fix creation of SNMPv3 sessions with API_SINGLE
+      - patch 3046371: from christophb4: Fix memory leak in SNMPv1 trap
+	handling.
 
     mib2c:
       - [BUG 1479916]: Restore consistency in row creation code.
@@ -1382,3 +1413,5 @@ listing of all changes made to the code.
       - [BUG 1205300]: nlist err: neither nproc nor _nproc found (same for
 	rt_table, rthashsize, rthost, rtnet)
 
+    qnx6:
+      - [PATCH 2836895]: support for QNX6

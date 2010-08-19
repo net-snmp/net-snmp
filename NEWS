@@ -30,6 +30,7 @@ listing of all changes made to the code.
       - Implemented the TSM-MIB and the TLSTM-MIB
       - new API for indicating that persistent store needs to be saved
 	after the current request finishes processing
+      - [PATCH 2931446]: make the load averages writable.
 
     apps:
       - A new tool 'net-snmp-cert' that easily creates and manages
@@ -93,6 +94,9 @@ listing of all changes made to the code.
       - winExtDLL compiles now under MinGW.
       - the snmpd.conf keyword 'extend' is now supported under MinGW
       - the snmptrapd.conf keyword traphandle is now supported under MinGW
+
+    qnx6:
+      - [PATCH 2836895]: support for QNX6
 
 *5.5*
 
