@@ -989,8 +989,6 @@ snmp_synch_response_cb(netsnmp_session * ss,
                        netsnmp_pdu **response, snmp_callback pcb)
 {
     struct synch_state lstate, *state;
-    snmp_callback   cbsav;
-    void           *cbmagsav;
     int             numfds, count;
     fd_set          fdset;
     struct timeval  timeout, *tvp;
@@ -998,12 +996,8 @@ snmp_synch_response_cb(netsnmp_session * ss,
 
     memset((void *) &lstate, 0, sizeof(lstate));
     state = &lstate;
-    cbsav = ss->callback;
-    cbmagsav = ss->callback_magic;
-    ss->callback = pcb;
-    ss->callback_magic = (void *) state;
 
-    if ((state->reqid = snmp_send(ss, pdu)) == 0) {
+    if ((state->reqid = snmp_async_send(ss, pdu, pcb, (void *) state)) == 0) {
         snmp_free_pdu(pdu);
         state->status = STAT_ERROR;
     } else
@@ -1058,8 +1052,6 @@ snmp_synch_response_cb(netsnmp_session * ss,
         }
     }
     *response = state->pdu;
-    ss->callback = cbsav;
-    ss->callback_magic = cbmagsav;
     return state->status;
 }
 
@@ -1076,8 +1068,6 @@ snmp_sess_synch_response(void *sessp,
 {
     netsnmp_session *ss;
     struct synch_state lstate, *state;
-    snmp_callback   cbsav;
-    void           *cbmagsav;
     int             numfds, count;
     fd_set          fdset;
     struct timeval  timeout, *tvp;
@@ -1090,12 +1080,9 @@ snmp_sess_synch_response(void *sessp,
 
     memset((void *) &lstate, 0, sizeof(lstate));
     state = &lstate;
-    cbsav = ss->callback;
-    cbmagsav = ss->callback_magic;
-    ss->callback = snmp_synch_input;
-    ss->callback_magic = (void *) state;
 
-    if ((state->reqid = snmp_sess_send(sessp, pdu)) == 0) {
+    if ((state->reqid = snmp_sess_async_send(sessp, pdu,
+                                             snmp_synch_input, state)) == 0) {
         snmp_free_pdu(pdu);
         state->status = STAT_ERROR;
     } else
@@ -1142,8 +1129,6 @@ snmp_sess_synch_response(void *sessp,
             }
     }
     *response = state->pdu;
-    ss->callback = cbsav;
-    ss->callback_magic = cbmagsav;
     return state->status;
 }
 
