@@ -1,7 +1,582 @@
 ----------------------------------------------------------------------
 
+Changes: V5.6.pre3 -> V5.6.rc1
+
+2010-08-19 21:11  hardaker
+
+   * agent/Makefile.depend, agent/mibgroup/Makefile.depend:
+
+   make depend
+
+2010-08-19 21:10  hardaker
+
+   * include/net-snmp/system/nto-qnx6.h:
+
+   // -> C comments
+
+2010-08-19 20:36  hardaker
+
+   *  FAQ, README, configure, configure.ac, dist/Makefile,   
+      dist/net-snmp.spec:
+
+   Version number update
+
+2010-08-19 20:14  hardaker
+
+   * snmplib/snmp_client.c:
+
+   CHANGES: snmplib: PATCH 3042765: from mehaf: make
+   snmp_synch_response_cb() re-entrant
+
+2010-08-19 20:14  hardaker
+
+   * snmplib/transports/snmpDTLSUDPDomain.c:
+
+   turn off cookie exchanges until a complete code set can be
+   written to support it based on the required function callbacks
+
+2010-08-17 18:31  rstory
+
+   * agent/snmpd.c:
+
+   add missing call to store persistent data as needed
+
+2010-08-17 18:31  rstory
+
+   * snmplib/mib.c:
+
+   CHANGES: snmplib: when displaying a byte as single digit hex
+   value, default to
+   prefixing with 0 unless there is a seperator or addition hint
+   data
+
+2010-08-17 10:31  bvassche
+
+   * apps/snmpusm.c:
+
+   Fixed a compiler warning about an unused label that was triggered
+   when
+   compiling without SSL support.
+
+2010-08-16 23:11  hardaker
+
+   * agent/mibgroup/if-mib/ifTable/ifTable_data_access.h:
+
+   CHANGES: snmpd: patch 2790249: from willpwillp: reduce cache time
+   for the iftable to 3seconds to increase accuracy
+
+2010-08-16 16:26  hardaker
+
+   * perl/TrapReceiver/TrapReceiver.xs:
+
+   CHANGES: perl: patch 3046371: from christophb4: Fix memory leak
+   in SNMPv1 trap handling.
+
+2010-08-16 16:03  hardaker
+
+   * agent/mibgroup/mibII/mta_sendmail.c:
+
+   CHANGES: snmpd: patch 2825653: from bru5ce: fix sendmail.cf
+   parsing in certain conditions
+
+2010-08-16 10:16  dts12
+
+   * man/Makefile.in:
+
+   Build netsnmp_agent_api.3 man page from template
+
+2010-08-16 09:20  dts12
+
+   * agent/agent_registry.c:
+
+   CHANGES: snmpd: PATCH: 2911361: Documentation (Provided by Tomasz
+   Lis)
+
+2010-08-16 08:06  dts12
+
+   * agent/agent_registry.c:
+
+   CHANGES: snmpd: PATCH: 2911361: Re-order code to group related
+   functions together
+
+2010-08-16 07:42  dts12
+
+   * perl/SNMP/SNMP.xs:
+
+   CHANGES: perl: PATCH: 2995098: Fix creation of SNMPv3 sessions
+   with API_SINGLE
+
+2010-08-14 16:30  dts12
+
+   * agent/agent_read_config.c:
+
+   CHANGES: snmpd: PATCH: 2911361: Remove redundant variables
+
+2010-08-14 16:23  dts12
+
+   * agent/agent_handler.c:
+
+   CHANGES: snmpd: PATCH: 2904900: Documentation plus assorted
+   handler code fixes
+
+2010-08-14 09:28  dts12
+
+   *  man/Makefile.in, man/netsnmp_config_api.3.def,   
+      man/netsnmp_mib_api.3.def, man/netsnmp_pdu_api.3.def,   
+      man/netsnmp_sess_api.3.def, man/netsnmp_session_api.3.def,   
+      man/netsnmp_trap_api.3.def, man/netsnmp_varbind_api.3.def,   
+      man/snmp_alarm.3.def:
+
+   Restore agent API man page
+   Don't try to extract multiple man page links per line
+   (which runs into problems with OS-specific line endings).
+   Instead, ensure the man page NAME section lists one
+   routine per line
+
+2010-08-13 23:50  hardaker
+
+   * man/Makefile.in:
+
+   fix broken Makefile after man page moves
+
+2010-08-13 23:50  hardaker
+
+   * mibs/SNMP-TLS-TM-MIB.txt, mibs/rfclist:
+
+   updated TLS MIB to current copy
+
+2010-08-13 23:50  hardaker
+
+   *  snmplib/transports/snmpDTLSUDPDomain.c,   
+      snmplib/transports/snmpTLSBaseDomain.c,   
+      snmplib/transports/snmpTLSTCPDomain.c:
+
+   replaced RFC comment number
+
+2010-08-13 23:50  hardaker
+
+   * include/net-snmp/library/snmp_alarm.h, snmplib/snmp_alarm.c:
+
+   CHANGES: snmplib: patch: 3042770: from mehaf: Made run_alarms()
+   reentrant
+
+2010-08-13 23:44  hardaker
+
+   * agent/mibgroup/mibII/system_mib.c:
+
+   CHANGES: snmpd: PATCH: 3044512: from philwebster: fix sysobjectid
+   directive.
+
+2010-08-13 19:00  rstory
+
+   *  testing/fulltests/support/simple_TESTCONF.sh,   
+      testing/fulltests/tls/STsmPrefix:
+
+   use 127.0.0.1 instead of localhost as default SNMP_TEST_DEST so
+   TLS tests work
+
+2010-08-13 18:50  hardaker
+
+   *  include/net-snmp/session_api.h, snmplib/snmp_api.c,   
+      snmplib/snmp_client.c:
+
+   CHANGES: snmplib: implemented a fix for the issue reported in
+   patch #3042770. Created a snmp_select_info_flags function, and
+   similar, that allow for alarms to not be run. This is then used
+   in the synch_response functions to avoid 100% CPU loops
+
+2010-08-13 18:50  hardaker
+
+   * 
+      agent/mibgroup/tlstm-mib/snmpTlstmCertToTSNTable/snmpTlstmCertToTSNTable.c,
+        
+      agent/mibgroup/tlstm-mib/snmpTlstmCertToTSNTable/snmpTlstmCertToTSNTable.h,
+         apps/snmptrapd.c:
+
+   make snmptrapd register the certtosecname table in the agentx
+   registrations
+
+2010-08-13 18:49  hardaker
+
+   * local/mib2c.conf:
+
+   minor wording additions
+
+2010-08-13 15:04  hardaker
+
+   *  agent/mibgroup/hardware/cpu/cpu_perfstat.c,   
+      agent/mibgroup/hardware/memory/memory_aix.c,   
+      agent/mibgroup/host/hr_storage.c, agent/mibgroup/mibII/icmp.c,   
+      agent/mibgroup/mibII/ip.c, agent/mibgroup/mibII/tcp.c,   
+      agent/mibgroup/mibII/udp.c, agent/mibgroup/ucd-snmp/diskio.c,   
+      agent/mibgroup/ucd-snmp/loadave.c,   
+      agent/mibgroup/ucd-snmp/memory_aix4.c,   
+      agent/mibgroup/ucd-snmp/vmstat_aix4.c:
+
+   CHANGES: aix: PATCH: 2886598: from exsnafu: Header fixes for
+   compiling on AIX6
+
+2010-08-13 15:04  hardaker
+
+   *  agent/mibgroup/host/hr_filesys.c,   
+      agent/mibgroup/host/hr_storage.c, apps/snmpnetstat/inet6.c,   
+      configure, configure.d/config_os_functions,   
+      configure.d/config_os_headers, configure.d/config_os_libs,   
+      configure.d/config_os_struct_members,   
+      include/net-snmp/net-snmp-config.h.in,   
+      include/net-snmp/system/nto-qnx6.h:
+
+   NEWS: ports: PATCH: 2836895: from seanboudreau: support for QNX6
+
+2010-08-13 14:33  dts12
+
+   *  man/Makefile.in, man/netsnmp_agent_api.3.def,   
+      man/netsnmp_config_api.3.def, man/netsnmp_mib_api.3.def,   
+      man/netsnmp_pdu_api.3.def, man/netsnmp_sess_api.3.def,   
+      man/netsnmp_session_api.3.def, man/netsnmp_trap_api.3.def,   
+      man/netsnmp_varbind_api.3.def:
+
+   'enforce netsnmp prefixes
+
+2010-08-13 14:29  dts12
+
+   * man/netsnmp_varbind_api.3.def, man/varbind_api.3.def:
+
+   enforce netsnmp prefix
+
+2010-08-13 14:29  dts12
+
+   * man/netsnmp_trap_api.3.def, man/snmp_trap_api.3.def:
+
+   enforce netsnmp prefix
+
+2010-08-13 14:28  dts12
+
+   * man/netsnmp_sess_api.3.def, man/snmp_sess_api.3.def:
+
+   enforce netsnmp prefix
+
+2010-08-13 14:28  dts12
+
+   * man/netsnmp_agent_api.3.def, man/snmp_agent_api.3.def:
+
+   enforce netsnmp prefix
+
+2010-08-13 14:28  dts12
+
+   * man/netsnmp_session_api.3.def, man/session_api.3.def:
+
+   enforce netsnmp prefix
+
+2010-08-13 14:27  dts12
+
+   * man/netsnmp_pdu_api.3.def, man/pdu_api.3.def:
+
+   enforce netsnmp prefix
+
+2010-08-13 14:27  dts12
+
+   * man/mib_api.3.def, man/netsnmp_mib_api.3.def:
+
+   enforce netsnmp prefix
+
+2010-08-13 14:27  dts12
+
+   * man/config_api.3.def, man/netsnmp_config_api.3.def:
+
+   enforce netsnmp prefix
+
+2010-08-13 14:20  dts12
+
+   * Makefile.in, doxygen.conf:
+
+   Don't automatically generate man pages
+
+2010-08-13 14:18  dts12
+
+   *  man/snmp_api_errstring.3, man/snmp_close.3, man/snmp_error.3,   
+      man/snmp_free_pdu.3, man/snmp_open.3, man/snmp_perror.3,   
+      man/snmp_read.3, man/snmp_select_info.3, man/snmp_send.3,   
+      man/snmp_sess_async_send.3, man/snmp_sess_close.3,   
+      man/snmp_sess_error.3, man/snmp_sess_init.3,   
+      man/snmp_sess_open.3, man/snmp_sess_perror.3,   
+      man/snmp_sess_read.3, man/snmp_sess_select_info.3,   
+      man/snmp_sess_send.3, man/snmp_sess_session.3,   
+      man/snmp_sess_timeout.3, man/snmp_set_mib_warnings.3,   
+      man/snmp_set_save_descriptions.3, man/snmp_timeout.3:
+
+   Remove redundant man page links
+   (Should be generated automatically, but don't exist any more
+   anyway)
+
+2010-08-13 14:13  dts12
+
+   *  man/Makefile.in, man/add_mibdir.3, man/add_module_replacement.3,  
+       man/get_module_node.3, man/init_mib.3, man/init_mib_internals.3, 
+        man/netsnmp_access_multiplexer.3, man/netsnmp_agent.3,   
+      man/netsnmp_agent_handler.h.3, man/netsnmp_agent_registry.3,   
+      man/netsnmp_agent_trap.3, man/netsnmp_asn1_packet_parse.3,   
+      man/netsnmp_baby_steps.3, man/netsnmp_bulk_to_next.3,   
+      man/netsnmp_cache_handler.3, man/netsnmp_callback.3,   
+      man/netsnmp_container.3, man/netsnmp_container_iterator.3,   
+      man/netsnmp_container_iterator.h.3, man/netsnmp_data_list.3,   
+      man/netsnmp_debug.3, man/netsnmp_default_store.3,   
+      man/netsnmp_example_scalar_int.3, man/netsnmp_handler.3,   
+      man/netsnmp_instance.3, man/netsnmp_iterator_info_s.3,   
+      man/netsnmp_leaf.3, man/netsnmp_library.3,   
+      man/netsnmp_mib_handler_methods.3, man/netsnmp_mib_maintenance.3, 
+        man/netsnmp_mib_utilities.3, man/netsnmp_mode_end_call.3,   
+      man/netsnmp_multiplexer.3,   
+      man/netsnmp_netsnmp_agent_request_info_s.3,   
+      man/netsnmp_netsnmp_column_info_t.3,   
+      man/netsnmp_netsnmp_data_list_s.3,   
+      man/netsnmp_netsnmp_handler_registration_s.3,   
+      man/netsnmp_netsnmp_iterator_info_s.3,   
+      man/netsnmp_netsnmp_mib_handler_access_methods.3,   
+      man/netsnmp_netsnmp_mib_handler_methods.3,   
+      man/netsnmp_netsnmp_mib_handler_s.3,   
+      man/netsnmp_netsnmp_monitor_callback_header_s.3,   
+      man/netsnmp_netsnmp_request_info_s.3,   
+      man/netsnmp_netsnmp_table_registration_info_s.3,   
+      man/netsnmp_netsnmp_table_request_info_s.3,   
+      man/netsnmp_null_container.3, man/netsnmp_oid_stash.3,   
+      man/netsnmp_old_api.3, man/netsnmp_read_config.3,   
+      man/netsnmp_read_only.3, man/netsnmp_row_merge.3,   
+      man/netsnmp_scalar.3, man/netsnmp_scalar_group_group.3,   
+      man/netsnmp_serialize.3, man/netsnmp_set_data.3,   
+      man/netsnmp_snmp_agent.3, man/netsnmp_snmp_alarm.3,   
+      man/netsnmp_snmp_client.3, man/netsnmp_snmp_logging.3,   
+      man/netsnmp_snmp_pdu.3, man/netsnmp_snmp_session.3,   
+      man/netsnmp_stash_cache.3, man/netsnmp_stash_to_next.3,   
+      man/netsnmp_table.3, man/netsnmp_table_array.3,   
+      man/netsnmp_table_container.3, man/netsnmp_table_data.3,   
+      man/netsnmp_table_dataset.3, man/netsnmp_table_generic.3,   
+      man/netsnmp_table_indexes.3, man/netsnmp_table_iterator.3,   
+      man/netsnmp_table_iterator.h.3, man/netsnmp_table_maintenance.3,  
+       man/netsnmp_table_row.3, man/netsnmp_table_rows.3,   
+      man/netsnmp_tdata.3, man/netsnmp_tools.h.3, man/netsnmp_util.3,   
+      man/netsnmp_utilities.3, man/netsnmp_variable_list.3,   
+      man/netsnmp_watcher.3, man/print_description.3, man/print_mib.3,  
+       man/print_objid.3, man/print_value.3, man/print_variable.3,   
+      man/read_all_mibs.3, man/read_mib.3, man/read_module.3,   
+      man/read_module_node.3, man/read_objid.3, man/shutdown_mib.3:
+
+   Remove Doxygen-generated man pages, and those linking
+   individual routines to the appropriate man page.
+   (These are better generated dynamically)
+
+2010-08-13 12:19  dts12
+
+   * local/mib2c.iterate.conf, local/mib2c.table_data.conf:
+
+   Prompt for whether to generate caching code or not.
+
+2010-08-13 12:19  dts12
+
+   * local/mib2c.conf:
+
+   Rework guidance questions when selecting the best table framework
+   to use.
+   Ensure table handling code doesn't overwrite scalar handling
+   code.
+   Check that the starting point is suitable for MfD framework.
+
+2010-08-12 15:40  rstory
+
+   * snmplib/cert_util.c:
+
+   fix code broken by 'compiler warning fix' in r19179
+
+2010-08-12 15:39  rstory
+
+   * agent/mibgroup/snmpv3mibs.h:
+
+   fix typo in comment
+
+2010-08-11 22:08  hardaker
+
+   * snmplib/transports/snmpTLSBaseDomain.c:
+
+   remove a duplicate value check
+
+2010-08-11 22:08  hardaker
+
+   * testing/fulltests/tls/STlsUsers:
+
+   add a test where we can trust a CA-signed cert and we don't trust
+   the CA
+
+2010-08-11 22:08  hardaker
+
+   * testing/fulltests/tls/STlsUsers:
+
+   test a directly mapped CA certificate
+
+2010-08-11 22:08  hardaker
+
+   * mibs/UCD-SNMP-MIB.txt:
+
+   change the laConfig to read-write to match the patch
+
+2010-08-11 22:07  hardaker
+
+   * agent/mibgroup/ucd-snmp/loadave.c:
+
+   NEWS: snmpd: PATCH: 2931446: from ahmake: make the load averages
+   writable.
+
+2010-08-11 06:43  magfr
+
+   *  testing/fulltests/snmpv3/T010scapitest_capp.c,   
+      testing/fulltests/snmpv3/T020hashtests_capp.c,   
+      testing/fulltests/snmpv3/T040keymanagetest_capp.c:
+
+   CHANGES: Silence some compilation warnings from test cases.
+
+2010-08-09 21:09  magfr
+
+   * perl/SNMP/SNMP.xs:
+
+   CHANGES: Handle embedded %'s in the result message.
+
+2010-08-09 21:07  magfr
+
+   * local/mib2c.raw-table.conf:
+
+   CHANGES: Do no double declare the index values.
+
+2010-08-05 11:49  dts12
+
+   * agent/mibgroup/mibII/vacm_conf.c:
+
+   Update "auth*" usage message with context support
+
+2010-08-02 20:08  dts12
+
+   * agent/mibgroup/hardware/fsys/fsys_mntctl.c:
+
+   Fix two silly mistakes.
+
+2010-08-02 14:18  dts12
+
+   * agent/mibgroup/hardware/fsys/fsys_mntctl.c:
+
+   AIX filesystem types are tagged as integers, not strings.
+
+2010-08-02 13:49  tanders
+
+   * configure, configure.d/config_os_progs:
+
+   fix Perl system() configure check to work reliably on systems
+   that lack
+   Perl
+
+2010-08-02 11:08  bvassche
+
+   * testing/fulltests/support/simple_eval_tools.sh:
+
+   CHANGES: testing: made it possible to analyze all code covered by
+   the regression tests with a dynamic analyzer, at least if that
+   analyzer supports following child processes. An example:
+   
+   rm -rf /tmp/snmp-test-*
+   make -s
+   SNMP_SAVE_TMPDIR=yes DYNAMIC_ANALYZER="valgrind
+   --trace-children=yes --track-origins=yes" make -s test
+   grep -i uninitialised /tmp/snmp-test-* | xargs less
+
+2010-08-02 11:02  bvassche
+
+   * snmplib/snmp_transport.c, snmplib/transports/snmpTCPDomain.c:
+
+   Fixed the following two Valgrind complaints:
+   
+   Conditional jump or move depends on uninitialised value(s)
+   at 0x6D702E0: vfprintf (in /lib64/libc-2.11.2.so)
+   by 0x6D99D11: vsnprintf (in /lib64/libc-2.11.2.so)
+   by 0x6D7A412: snprintf (in /lib64/libc-2.11.2.so)
+   by 0x6E14437: inet_ntoa (in /lib64/libc-2.11.2.so)
+   by 0x5E5E219: netsnmp_ipv4_fmtaddr (snmpIPv4BaseDomain.c:215)
+   by 0x5E65717: netsnmp_tcp_fmtaddr (snmpTCPDomain.c:70)
+   by 0x5E567EC: netsnmp_transport_peer_string
+   (snmp_transport.c:224)
+   by 0x5E2479A: _sess_process_packet (snmp_api.c:5441)
+   by 0x5E25E37: _sess_read (snmp_api.c:6037)
+   by 0x5E261DA: snmp_sess_read2 (snmp_api.c:6149)
+   by 0x5E26282: snmp_read2 (snmp_api.c:5740)
+   by 0x404DE4: main (snmpd.c:1227)
+   Uninitialised value was created by a heap allocation
+   at 0x4C270A5: malloc (vg_replace_malloc.c:236)
+   by 0x5E65739: netsnmp_tcp_accept (snmpTCPDomain.c:82)
+   by 0x5E25383: _sess_read (snmp_api.c:5786)
+   by 0x5E261DA: snmp_sess_read2 (snmp_api.c:6149)
+   by 0x5E26282: snmp_read2 (snmp_api.c:5740)
+   by 0x404DE4: main (snmpd.c:1227)
+   
+   Conditional jump or move depends on uninitialised value(s)
+   at 0x6F7B2E0: vfprintf (in /lib64/libc-2.11.2.so)
+   by 0x6FA4D11: vsnprintf (in /lib64/libc-2.11.2.so)
+   by 0x6F85412: snprintf (in /lib64/libc-2.11.2.so)
+   by 0x701F437: inet_ntoa (in /lib64/libc-2.11.2.so)
+   by 0x56FA219: netsnmp_ipv4_fmtaddr (snmpIPv4BaseDomain.c:215)
+   by 0x5701717: netsnmp_tcp_fmtaddr (snmpTCPDomain.c:70)
+   by 0x56F27EC: netsnmp_transport_peer_string
+   (snmp_transport.c:224)
+   by 0x56F294F: netsnmp_transport_send (snmp_transport.c:248)
+   by 0x56BC487: snmp_sess_async_send (snmp_api.c:5204)
+   by 0x56BC651: snmp_async_send (snmp_api.c:4998)
+   by 0x56BC677: snmp_send (snmp_api.c:4984)
+   by 0x5698440: snmp_synch_response_cb (snmp_client.c:1006)
+   Uninitialised value was created by a heap allocation
+   at 0x4C270A5: malloc (vg_replace_malloc.c:236)
+   by 0x5701B3E: netsnmp_tcp_transport (snmpTCPDomain.c:163)
+   by 0x5701E6F: netsnmp_tcp_create_tstring (snmpTCPDomain.c:305)
+   by 0x56F3804: netsnmp_tdomain_transport_full
+   (snmp_transport.c:601)
+   by 0x56F3ACC: netsnmp_transport_open_client
+   (snmp_transport.c:669)
+   by 0x54344F6: subagent_open_master_session (subagent.c:758)
+   by 0x54349C8: agentx_reopen_session (subagent.c:869)
+   by 0x5434D00: subagent_startup (subagent.c:99)
+   by 0x56EAEB7: snmp_call_callbacks (callback.c:338)
+   by 0x56DE6FB: read_configs (read_config.c:1018)
+   by 0x56C287E: init_snmp (snmp_api.c:850)
+   by 0x40477B: main (snmptrapd.c:1048)
+
+2010-08-01 06:11  bvassche
+
+   * CHANGES, NEWS:
+
+   Fixed spelling errors reported by ispell -l.
+
+2010-08-01 06:00  bvassche
+
+   *  snmplib/snmp_enum.c,   
+      testing/fulltests/unit-tests/T004snmp_enum_clib.c:
+
+   Fixed a typo in a text string in a unit test: resturant ->
+   restaurant.
+
+2010-08-01 05:53  bvassche
+
+   * include/net-snmp/library/snmp_enum.h:
+
+   Documented behavior of se_add_pair_to_slist().
+
+2010-07-31 23:50  tanders
+
+   * include/net-snmp/system/darwin10.h:
+
+   Follow-up for r19266: add missing header file to support Mac OS X
+   10.6
+   (Snow Leopard - "darwin10")
+
+
+
+----------------------------------------------------------------------
+
 Changes: V5.6.pre2 -> V5.6.pre3
-	
+
 2010-07-31 20:31  hardaker
 
    *  agent/Makefile.depend, agent/helpers/Makefile.depend,   
