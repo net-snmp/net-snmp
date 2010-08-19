@@ -249,7 +249,7 @@ start_new_cached_connection(netsnmp_transport *t,
 
     /* turn on cookie exchange */
     /* XXX: we need to only create cache entries when cookies succeed */
-    SSL_set_options(tlsdata->ssl, SSL_OP_COOKIE_EXCHANGE);
+    /* SSL_set_options(tlsdata->ssl, SSL_OP_COOKIE_EXCHANGE); */
 
     /* set the bios that openssl should read from and write to */
     /* (and we'll do the opposite) */
