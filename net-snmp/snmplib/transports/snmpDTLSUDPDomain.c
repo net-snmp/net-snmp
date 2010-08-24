@@ -242,7 +242,7 @@ start_new_cached_connection(netsnmp_transport *t,
     if (!tlsdata->ssl) {
         BIO_free(cachep->read_bio);
         BIO_free(cachep->write_bio);
-        DIEHERE("failed to create the write bio");
+        DIEHERE("failed to create the SSL session structure");
     }
         
     SSL_set_mode(tlsdata->ssl, SSL_MODE_AUTO_RETRY);
