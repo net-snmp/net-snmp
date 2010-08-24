@@ -55,9 +55,9 @@
 #include <arpa/inet.h>
 #endif
 
-#ifdef HAVE_OPENSSL_DH_H
+#if defined(HAVE_OPENSSL_DH_H) && defined(HAVE_LIBCRYPTO)
 #include <openssl/dh.h>
-#endif
+#endif /* HAVE_OPENSSL_DH_H && HAVE_LIBCRYPTO */
 
 #include <net-snmp/net-snmp-includes.h>
 
@@ -105,9 +105,11 @@ usmUserPublic[MAX_OID_LEN] = {1, 3, 6, 1, 6, 3, 15, 1, 2, 2, 1, 11},
 usmUserStatus[MAX_OID_LEN] = {1, 3, 6, 1, 6, 3, 15, 1, 2, 2, 1, 13},
 /* diffie helman change key objects */
 usmDHUserAuthKeyChange[MAX_OID_LEN] = {1, 3, 6, 1, 3, 101, 1, 1, 2, 1, 1 },
-usmDHUserOwnAuthKeyChange[MAX_OID_LEN] = {1, 3, 6, 1, 3, 101, 1, 1, 2, 1, 2 },
 usmDHUserPrivKeyChange[MAX_OID_LEN] = {1, 3, 6, 1, 3, 101, 1, 1, 2, 1, 3 },
+#if defined(HAVE_OPENSSL_DH_H) && defined(HAVE_LIBCRYPTO)
+usmDHUserOwnAuthKeyChange[MAX_OID_LEN] = {1, 3, 6, 1, 3, 101, 1, 1, 2, 1, 2 },
 usmDHUserOwnPrivKeyChange[MAX_OID_LEN] = {1, 3, 6, 1, 3, 101, 1, 1, 2, 1, 4 },
+#endif /* HAVE_OPENSSL_DH_H && HAVE_LIBCRYPTO */
 usmDHParameters[] = { 1,3,6,1,3,101,1,1,1,0 }
 ;
 size_t usmDHParameters_len = OID_LENGTH(usmDHParameters);
@@ -954,7 +956,7 @@ main(int argc, char *argv[])
             vars = vars->next_variable;
         }
         /* snmp_free_pdu(dhresponse); */ /* parts still in use somewhere */
-#endif /* HAVE_OPENSSL_DH_H */
+#endif /* HAVE_OPENSSL_DH_H && HAVE_LIBCRYPTO */
     } else {
         fprintf(stderr, "Unknown command\n");
         usage();
@@ -1012,7 +1014,7 @@ main(int argc, char *argv[])
 
 #if defined(HAVE_OPENSSL_DH_H) && defined(HAVE_LIBCRYPTO)
   begone:
-#endif
+#endif /* HAVE_OPENSSL_DH_H && HAVE_LIBCRYPTO */
     if (response)
         snmp_free_pdu(response);
     snmp_close(ss);
