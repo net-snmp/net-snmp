@@ -153,7 +153,6 @@ listing of all changes made to the code.
 	from a given varbind list
       - fix issue with USM using inactive users
       - fixed potential buffer overflow when generating temp. file names
-      - 0 [PATCH 3042765]: make snmp_synch_response_cb() re-entrant
       - implemented a fix for the issue reported in patch #3042770. Created
 	a snmp_select_info_flags function, and similar, that allow for
 	alarms to not be run. This is then used in the synch_response
