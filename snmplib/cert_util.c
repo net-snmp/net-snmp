@@ -1873,6 +1873,7 @@ netsnmp_tls_fingerprint_parse(const u_char *binary_fp, int fp_len,
 
     netsnmp_require_ptr_LRV( hash_type_ptr, SNMPERR_GENERR );
     netsnmp_require_ptr_LRV( fp_str_ptr, SNMPERR_GENERR );
+    netsnmp_require_ptr_LRV( fp_str_len, SNMPERR_GENERR );
 
     /*
      * output string is binary fp length (minus 1 for initial hash type 
@@ -1896,6 +1897,7 @@ netsnmp_tls_fingerprint_parse(const u_char *binary_fp, int fp_len,
     /*
      * netsnmp_binary_to_hex allocate space for string, if needed
      */
+    fp_str_size = *fp_str_len;
     *hash_type_ptr = binary_fp[0];
     netsnmp_binary_to_hex((u_char**)fp_str_ptr, &fp_str_size,
                           realloc, &binary_fp[1], fp_len - 1);
