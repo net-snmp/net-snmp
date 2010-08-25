@@ -1,5 +1,9 @@
 /* 
  * net-snmp configuration header file
+ *
+ * NOTE: DO NOT EDIT include/net-snmp/net-snmp-config.h.in as your changes
+ *       will be overwritten. This content is in acconfig.h and merged
+ *       into include/net-snmp/net-snmp-config.h.in by autoheader.
  */
 /* Portions of this file are subject to the following copyright(s).  See
  * the Net-SNMP's COPYING file for more details and other copyrights
