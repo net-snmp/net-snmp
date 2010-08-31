@@ -4911,11 +4911,12 @@ snmpv3_scopedPDU_parse(netsnmp_pdu *pdu, u_char * cp, size_t * length)
      * check that it agrees with engineID returned from USM above
      * * only a warning because this could be legal if we are a proxy
      */
-    if (pdu->securityEngineIDLen != pdu->contextEngineIDLen ||
-        memcmp(pdu->securityEngineID, pdu->contextEngineID,
-               pdu->securityEngineIDLen) != 0) {
+    if (pdu->securityModel == NETSNMP_SECMOD_USM &&
+        (pdu->securityEngineIDLen != pdu->contextEngineIDLen ||
+         memcmp(pdu->securityEngineID, pdu->contextEngineID,
+                pdu->securityEngineIDLen) != 0)) {
         DEBUGMSGTL(("scopedPDU_parse",
-                    "inconsistent engineID information in message\n"));
+                    "Note: security and context engineIDs differ\n"));
     }
 
     /*
