@@ -126,6 +126,47 @@ static bio_cache *find_bio_cache(struct sockaddr_in *from_addr) {
     return cachep;
 }
 
+/* removes a single cache entry and returns SUCCESS on finding and
+   removing it. */
+static int remove_bio_cache(bio_cache *thiscache) {
+    bio_cache *cachep = NULL, *prevcache = NULL;
+    cachep = biocache;
+    while(cachep) {
+        if (cachep == thiscache) {
+
+            /* remove it from the list */
+            if (NULL == prevcache) {
+                /* at the first cache in the list */
+                biocache = thiscache->next;
+            } else {
+                prevcache->next = thiscache->next;
+            }
+
+            return SNMPERR_SUCCESS;
+        }
+        prevcache = cachep;
+        cachep = cachep->next;
+    }
+    return SNMPERR_GENERR;
+}
+
+/* frees the contents of a bio_cache */
+static void free_bio_cache(bio_cache *cachep) {
+/* These are freed by the SSL_free() call */
+/*
+        BIO_free(cachep->read_bio);
+        BIO_free(cachep->write_bio);
+*/
+        SNMP_FREE(cachep->write_cache);
+        netsnmp_tlsbase_free_tlsdata(cachep->tlsdata);
+}
+
+static void remove_and_free_bio_cache(bio_cache *cachep) {
+    remove_bio_cache(cachep);
+    free_bio_cache(cachep);
+}
+
+
 /* XXX: lots of malloc/state cleanup needed */
 #define DIEHERE(msg) { snmp_log(LOG_ERR, "%s\n", msg); return NULL; }
 
@@ -1094,6 +1135,8 @@ netsnmp_dtlsudp_close(netsnmp_transport *t)
         3)  If there is no open session associated with the tmSessionID, then
             closeSession processing is completed.
     */
+
+
     /* if we have any remaining packtes to send, try to send them */
     if (NULL != cachep && cachep->write_cache_len > 0) {
         int i = 0;
@@ -1141,8 +1184,22 @@ netsnmp_dtlsudp_close(netsnmp_transport *t)
             sending a close_notify TLS Alert to inform the other side that
             session cleanup may be performed.
     */
-    if (NULL != tlsbase && NULL != tlsbase->ssl)
-        SSL_shutdown(tlsbase->ssl);
+    if (NULL != cachep && NULL != cachep->tlsdata &&
+        NULL != cachep->tlsdata->ssl) {
+        DEBUGMSGTL(("dtlsudp", "closing SSL socket\n"));
+        SSL_shutdown(cachep->tlsdata->ssl);
+    }
+
+    /* (this will include the close_notify we maybe generated in step 4 */
+    if (cachep && BIO_ctrl_pending(cachep->write_bio) > 0) {
+        _netsnmp_send_queued_dtls_pkts(t, cachep);
+    }
+
+    if (NULL != cachep && NULL != cachep->tlsdata &&
+        NULL != cachep->tlsdata->ssl) {
+        DEBUGMSGTL(("dtlsudp", "freeing OpenSSL datad\n"));
+        remove_and_free_bio_cache(cachep);
+    }
     return netsnmp_socketbase_close(t);
 }
 

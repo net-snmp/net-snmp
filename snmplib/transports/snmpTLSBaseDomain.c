@@ -772,6 +772,40 @@ netsnmp_tlsbase_allocate_tlsdata(netsnmp_transport *t, int isserver) {
     return tlsdata;
 }
 
+void *netsnmp_tlsbase_free_tlsdata(_netsnmpTLSBaseData *tlsbase) {
+    if (!tlsbase)
+        return;
+
+    DEBUGMSGTL(("tlsbase","Freeing TLS Base data for a session\n"));
+
+    if (tlsbase->ssl)
+        SSL_free(tlsbase->ssl);
+
+    if (tlsbase->ssl_context)
+        SSL_CTX_free(tlsbase->ssl_context);
+   /* don't free the accept_bio since it's the parent bio */
+    /*
+    if (tlsbase->accept_bio)
+        BIO_free(tlsbase->accept_bio);
+    */
+    /* and this is freed by the SSL shutdown */
+    /* 
+    if (tlsbase->accepted_bio)
+      BIO_free(tlsbase->accept_bio);
+    */
+
+    /* free the config data */
+    SNMP_FREE(tlsbase->securityName);
+    SNMP_FREE(tlsbase->addr_string);
+    SNMP_FREE(tlsbase->our_identity);
+    SNMP_FREE(tlsbase->their_identity);
+    SNMP_FREE(tlsbase->their_fingerprint);
+    SNMP_FREE(tlsbase->their_hostname);
+    SNMP_FREE(tlsbase->trust_cert);
+
+    /* free the base itself */
+    SNMP_FREE(tlsbase);
+}
 
 int netsnmp_tlsbase_wrapup_recv(netsnmp_tmStateReference *tmStateRef,
                                 _netsnmpTLSBaseData *tlsdata,

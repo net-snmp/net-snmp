@@ -76,6 +76,8 @@ extern          "C" {
     int netsnmp_tlsbase_session_init(struct netsnmp_transport_s *,
                                      struct snmp_session *sess);
     int tls_get_verify_info_index(void);
+
+    void *netsnmp_tlsbase_free_tlsdata(_netsnmpTLSBaseData *tlsbase);
 #ifdef __cplusplus
 }
 #endif
