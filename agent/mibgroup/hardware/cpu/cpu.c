@@ -84,8 +84,8 @@ netsnmp_cpu_info *netsnmp_cpu_get_byIdx(  int idx, int create ) {
          */
     cpu = SNMP_MALLOC_TYPEDEF( netsnmp_cpu_info );
     if (!cpu) {
-        return NULL;
         DEBUGMSG(("cpu", "(failed)\n"));
+        return NULL;
     }
     DEBUGMSG(("cpu", "(created)\n"));
     cpu->idx = idx;
