@@ -114,6 +114,25 @@ netsnmp_tlstcp_copy(netsnmp_transport *oldt, netsnmp_transport *newt)
     oldtlsdata->accepted_bio = NULL;
     oldtlsdata->ssl = NULL;
     newtlsdata->ssl_context = NULL;
+    
+    if (oldtlsdata->addr_string)
+        newtlsdata->addr_string = strdup(oldtlsdata->addr_string);
+    if (oldtlsdata->securityName)
+        newtlsdata->securityName = strdup(oldtlsdata->securityName);
+    if (oldtlsdata->our_identity)
+        newtlsdata->our_identity = strdup(oldtlsdata->our_identity);
+    if (oldtlsdata->their_identity)
+        newtlsdata->their_identity = strdup(oldtlsdata->their_identity);
+    if (oldtlsdata->their_fingerprint)
+        newtlsdata->their_fingerprint = strdup(oldtlsdata->their_fingerprint);
+    if (oldtlsdata->their_hostname)
+        newtlsdata->their_hostname = strdup(oldtlsdata->their_hostname);
+    if (oldtlsdata->trust_cert)
+        newtlsdata->trust_cert = strdup(oldtlsdata->trust_cert);
+    if (oldtlsdata->remote_addr)
+        memdup(&newtlsdata->remote_addr, oldtlsdata->remote_addr,
+               sizeof(netsnmp_indexed_addr_pair));
+
     return 0;
 }
 
@@ -454,30 +473,14 @@ netsnmp_tlstcp_close(netsnmp_transport *t)
            sending a close_notify TLS Alert to inform the other side that
            session cleanup may be performed.
     */
+
+    DEBUGMSGTL(("tlstcp", "Shutting down SSL connection\n"));
     if (tlsdata->ssl) {
         SSL_shutdown(tlsdata->ssl);
-        tlsdata->ssl = NULL;
     }
 
-    if (tlsdata->sslbio) {
-        BIO_free(tlsdata->sslbio);
-        tlsdata->sslbio = NULL;
-    }
+    netsnmp_tlsbase_free_tlsdata(tlsdata);
 
-    if (tlsdata->accepted_bio) {
-        BIO_free(tlsdata->accepted_bio);
-        tlsdata->accepted_bio = NULL;
-    }
-
-    SNMP_FREE(tlsdata->securityName);
-    SNMP_FREE(tlsdata->our_identity);
-    SNMP_FREE(tlsdata->their_identity);
-    SNMP_FREE(tlsdata->their_hostname);
-    SNMP_FREE(tlsdata->their_fingerprint);
-    SNMP_FREE(tlsdata->trust_cert);
-
-    /* don't free the accept_bio since it's the parent bio */
-    SNMP_FREE(tlsdata);
     t->data = NULL;
     return netsnmp_socketbase_close(t);
 }
@@ -915,14 +918,12 @@ netsnmp_tlstcp_transport(const char *addr_string, int isserver)
     if (!isserver && tlsdata && addr_string) {
         /* search for a : */
         if (NULL != (cp = strrchr(addr_string, ':'))) {
-            strncpy(buf, addr_string, SNMP_MIN(cp-addr_string, sizeof(buf)-1));
-            buf[SNMP_MIN(cp-addr_string, sizeof(buf)-1)] = '\0';
+            strncpy(buf, addr_string, sizeof(buf)-1);
         } else {
             /* else the entire spec is a host name only */
-            strncpy(buf, addr_string,
-                    SNMP_MIN(strlen(addr_string), sizeof(buf)-1));
-            buf[SNMP_MIN(strlen(addr_string), sizeof(buf)-1)] = '\0';
+            strncpy(buf, addr_string, sizeof(buf)-1);
         }
+        buf[sizeof(buf)-1] = '\0';
         tlsdata->their_hostname = strdup(buf);
     }
 
