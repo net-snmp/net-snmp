@@ -1520,7 +1520,6 @@ netsnmp_sess_config_and_open_transport(netsnmp_session *in_session,
 
     if ((rc = netsnmp_sess_config_transport(in_session->transport_configuration,
                                             transport)) != SNMPERR_SUCCESS) {
-        return rc;
         in_session->s_snmp_errno = rc;
         in_session->s_errno = 0;
         return rc;
