@@ -53,8 +53,6 @@ netsnmp_get_pid_from_inode(ino64_t inode)
         if (filelen <= 0 || PATH_MAX < filelen)
             continue;
 
-        pid = strtoul(procinfo->d_name, NULL, 0);
-
         if (!(piddirs = opendir(path_name)))
             continue;
 
@@ -77,6 +75,7 @@ netsnmp_get_pid_from_inode(ino64_t inode)
             } else
 		temp_inode = 0;
             if (inode == temp_inode) {
+                pid = strtoul(procinfo->d_name, NULL, 0);
                 iflag = 1;
                 break;
             }
