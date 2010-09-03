@@ -33,6 +33,11 @@ netsnmp_get_pid_from_inode(ino64_t inode)
     pid_t           pid = 0;
     ino64_t         temp_inode;
 
+    if (inode == 0) {
+        /* an inode set to zero means it is not associated with a process. */
+        return 0;
+    }
+
     if (!(procdirs = opendir(PROC_PATH))) {
         NETSNMP_LOGONCE((LOG_ERR, "snmpd: cannot open /proc\n"));
         return 0;
