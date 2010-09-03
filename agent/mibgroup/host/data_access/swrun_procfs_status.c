@@ -71,7 +71,6 @@ netsnmp_arch_swrun_container_load( netsnmp_container *container, u_int flags)
         entry = netsnmp_swrun_entry_create(pid);
         if (NULL == entry)
             continue;   /* error already logged by function */
-        rc = CONTAINER_INSERT(container, entry);
 
         /*
          * Now extract the interesting information
@@ -83,8 +82,13 @@ netsnmp_arch_swrun_container_load( netsnmp_container *container, u_int flags)
          */
         snprintf( buf2, BUFSIZ, "/proc/%d/status", pid );
         fp = fopen( buf2, "r" );
+        if (!fp)
+            continue; /* file (process) probably went away */
         memset(buf, 0, sizeof(buf));
-        fgets( buf, BUFSIZ-1, fp );
+        if (fgets( buf, BUFSIZ-1, fp ) == NULL) {
+            fclose(fp);
+            continue;
+        }
         fclose(fp);
 
         for ( cp = buf; *cp != ':'; cp++ )
@@ -104,8 +108,13 @@ netsnmp_arch_swrun_container_load( netsnmp_container *container, u_int flags)
          */
         snprintf( buf2, BUFSIZ, "/proc/%d/cmdline", pid );
         fp = fopen( buf2, "r" );
+        if (!fp)
+            continue; /* file (process) probably went away */
         memset(buf, 0, sizeof(buf));
-        cp = fgets( buf, BUFSIZ-1, fp );
+        if ((cp = fgets( buf, BUFSIZ-1, fp )) == NULL) {
+            fclose(fp);
+            continue;
+        }
         fclose(fp);
 
         if ( cp ) {
@@ -144,7 +153,12 @@ netsnmp_arch_swrun_container_load( netsnmp_container *container, u_int flags)
          */
         snprintf( buf, BUFSIZ, "/proc/%d/stat", pid );
         fp = fopen( buf, "r" );
-        fgets( buf, BUFSIZ-1, fp );
+        if (!fp)
+            continue; /* file (process) probably went away */
+        if (fgets( buf, BUFSIZ-1, fp ) == NULL) {
+            fclose(fp);
+            continue;
+        }
         fclose(fp);
 
         cp = buf;
@@ -183,6 +197,7 @@ netsnmp_arch_swrun_container_load( netsnmp_container *container, u_int flags)
         }
         entry->hrSWRunPerfMem  = atoi( cp );   /*  rss */
         entry->hrSWRunPerfMem *= (getpagesize()/1024);  /* in kB */
+        rc = CONTAINER_INSERT(container, entry);
     }
     closedir( procdir );
 
