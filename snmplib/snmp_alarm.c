@@ -251,7 +251,7 @@ run_alarms(void)
                 a->t_last.tv_usec = t_now.tv_usec;
                 a->t_next.tv_sec = 0;
                 a->t_next.tv_usec = 0;
-                a->flags &= !SA_FIRED;
+                a->flags &= ~SA_FIRED;
                 sa_update_entry(a);
             } else {
                 DEBUGMSGTL(("snmp_alarm", "alarm %d deleted itself\n",
