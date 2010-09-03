@@ -965,8 +965,24 @@ netsnmp_tlstcp_create_tstring(const char *str, int local,
     if (str == NULL || *str == '\0')
         str = default_target + 1; /* drop the leading : */
     else if (!strchr(str, ':')) {
-        /* add the default port */
-        snprintf(buf, sizeof(buf)-1, "%s%s", str, default_target);
+        /* it's either :port or :address.  Try to guess which. */
+        char *cp;
+        int isport = 1;
+        for(cp = str; *cp != '\0'; cp++) {
+            /* if ALL numbers, it must be just a port */
+            /* if it contains anything else, assume a host or ip address */
+            if (!isdigit(*cp)) {
+                isport = 0;
+                break;
+            }
+        }
+        if (isport) {
+            /* Just :NNN can be passed to openssl */
+            snprintf(buf, sizeof(buf)-1, "0.0.0.0:%s", str);
+        } else {
+            /* add the default port */
+            snprintf(buf, sizeof(buf)-1, "%s%s", str, default_target);
+        }
         str = buf;
     }
     return netsnmp_tlstcp_transport(str, local);
