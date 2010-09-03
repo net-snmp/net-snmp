@@ -134,7 +134,11 @@ netsnmp_unix_recv(netsnmp_transport *t, void *buf, int size,
             return -1;
         };
         while (rc < 0) {
+#ifdef MSG_DONTWAIT
+            rc = recv(t->sock, buf, size, MSG_DONTWAIT);
+#else
             rc = recv(t->sock, buf, size, 0);
+#endif
             if (rc < 0 && errno != EINTR) {
                 DEBUGMSGTL(("netsnmp_unix", "recv fd %d err %d (\"%s\")\n",
                             t->sock, errno, strerror(errno)));
