@@ -160,6 +160,8 @@ listing of all changes made to the code.
       - patch: 3042770: from mehaf: Made run_alarms() reentrant
       - when displaying a byte as single digit hex value, default to
 	prefixing with 0 unless there is a seperator or addition hint data
+      - 0 patch 3058645: from jorisesaturnus: modified version of the patch
+	to use MSG_DONTWAIT for the unix domain socket
 
     snmplib, snmpd:
       - Do not check if values of type size_t are less than 0.
@@ -302,6 +304,10 @@ listing of all changes made to the code.
 	to 3seconds to increase accuracy
       - patch 2825653: from bru5ce: fix sendmail.cf parsing in certain
 	conditions
+      - Log before returning.
+      - [PATCH 3053428]: fix get_pid_from_inode when the inode is not
+	found.
+      - [PATCH 3058140]: check that inode is non-zero
 
     snmpdlib:
       - new functions to make stash ptr and newrow available to
@@ -328,6 +334,7 @@ listing of all changes made to the code.
 	to be set to active until the authentication password has been
 	changed; plus white-space clean up, manual additions and help
 	output modifications by hardaker
+      - Correct ifdefs, remove dead variables.
 
     man:
       - clean up manual pages (from Debian patch 56_manpage)
