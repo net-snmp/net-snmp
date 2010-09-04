@@ -1,5 +1,141 @@
 ----------------------------------------------------------------------
 
+Changes: V5.6.rc1 -> V5.6.rc2
+
+2010-09-04 01:57  hardaker
+
+   *  agent/Makefile.depend, agent/helpers/Makefile.depend,   
+      agent/mibgroup/Makefile.depend, apps/Makefile.depend,   
+      apps/snmpnetstat/Makefile.depend, snmplib/Makefile.depend:
+
+   make depend
+
+2010-09-04 00:59  hardaker
+
+   *  FAQ, README, configure, configure.ac, dist/Makefile,   
+      dist/net-snmp.spec:
+
+   Version number update
+
+2010-09-03 22:14  hardaker
+
+   * snmplib/transports/snmpTLSTCPDomain.c:
+
+   fix tlstcp parsing of host names.
+
+2010-09-03 22:13  hardaker
+
+   * agent/mibgroup/host/data_access/swrun_procfs_status.c:
+
+   check the return code of fgets and fopen before inserting the
+   results.
+
+2010-09-03 22:12  hardaker
+
+   * snmplib/snmp_alarm.c:
+
+   Patch from tanders to fix broken alarms after the previous
+   re-entrant patch
+
+2010-09-03 22:05  hardaker
+
+   * snmplib/transports/snmpUnixDomain.c:
+
+   CHANGES: snmplib: patch 3058645: from jorisesaturnus: modified
+   version of the patch to use MSG_DONTWAIT for the unix domain
+   socket
+
+2010-09-03 21:56  hardaker
+
+   * agent/mibgroup/util_funcs/get_pid_from_inode.c:
+
+   CHANGES: snmpd: PATCH: 3058140: from takevos: check that inode is
+   non-zero
+
+2010-09-03 21:50  hardaker
+
+   * agent/mibgroup/util_funcs/get_pid_from_inode.c:
+
+   CHANGES: snmpd: PATCH: 3053428: from takevos: fix
+   get_pid_from_inode when the inode is not found.
+
+2010-09-03 20:20  hardaker
+
+   * snmplib/snmp_api.c:
+
+   remove the duplicate return before the error codes get set.
+
+2010-09-01 18:04  magfr
+
+   * agent/mibgroup/hardware/cpu/cpu.c:
+
+   CHANGES: snmpd: Log before returning.
+
+2010-09-01 02:43  hardaker
+
+   *  include/net-snmp/library/snmpTLSBaseDomain.h,   
+      snmplib/transports/snmpDTLSUDPDomain.c,   
+      snmplib/transports/snmpTLSBaseDomain.c,   
+      snmplib/transports/snmpTLSTCPDomain.c:
+
+   TLS send_notify on closure and some memory clean-up patches
+
+2010-08-31 17:58  hardaker
+
+   * snmplib/snmp_api.c:
+
+   Only print the security/context EngineID mismatch note under USM
+
+2010-08-25 15:13  rstory
+
+   * CHANGES:
+
+   remove reference to reverted patch 3042765
+
+2010-08-25 15:13  rstory
+
+   * acconfig.h:
+
+   add note on where to find content used to generate
+   net-snmp-config.h.in
+
+2010-08-25 02:45  rstory
+
+   * snmplib/snmp_client.c:
+
+   revert r19342, patch 3042765, which broke client tcp disconnect
+   handling
+
+2010-08-25 02:45  rstory
+
+   * snmplib/cert_util.c:
+
+   fix more code broken by 'compiler warning fix' in r19179
+
+2010-08-25 02:45  rstory
+
+   * testing/fulltests/tls/STlsUsers:
+
+   check for conf errors after agent startup; enable logTimestamp;
+   make sure
+   all cert name/tags are unique
+
+2010-08-24 21:04  hardaker
+
+   * snmplib/transports/snmpDTLSUDPDomain.c:
+
+   fix error string to discuss the right failed openssl new
+   invocation
+
+2010-08-24 05:37  magfr
+
+   * apps/snmpusm.c:
+
+   CHANGES: snmpusm: Correct ifdefs, remove dead variables.
+
+	
+----------------------------------------------------------------------
+
 Changes: V5.6.pre3 -> V5.6.rc1
 
 2010-08-19 21:11  hardaker
