@@ -772,7 +772,7 @@ netsnmp_tlsbase_allocate_tlsdata(netsnmp_transport *t, int isserver) {
     return tlsdata;
 }
 
-void *netsnmp_tlsbase_free_tlsdata(_netsnmpTLSBaseData *tlsbase) {
+void netsnmp_tlsbase_free_tlsdata(_netsnmpTLSBaseData *tlsbase) {
     if (!tlsbase)
         return;
 
