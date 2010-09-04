@@ -168,7 +168,7 @@ system_parse_config_sysServices(const char *token, char *cptr)
 static void
 system_parse_config_sysObjectID(const char *token, char *cptr)
 {
-    int sysObjectIDLength = MAX_OID_LEN;
+    size_t sysObjectIDLength = MAX_OID_LEN;
     if (!read_objid(cptr, sysObjectID, &sysObjectIDLength)) {
 	netsnmp_config_error("sysobjectid token not a parsable OID:\n\t%s",
 			     cptr);
