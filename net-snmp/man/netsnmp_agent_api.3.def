@@ -1,5 +1,4 @@
-.TH NETSNMP_AGENT_API 3 "02 Apr 2001" VVERSIONINFO "Net-SNMP"
-.UC 5
+.TH NETSNMP_AGENT_API 3 "13 Aug 2010" VVERSIONINFO "Net-SNMP"
 .SH NAME
 netsnmp_agent_api \- embedding an agent into a external application
 .SH SYNOPSIS
@@ -128,6 +127,6 @@ were processed, zero if an alarm occurred and -1 if an error occured.
 .IP "snmp_shutdown(char *name);"
 This shuts down the agent, saving any needed persistent storage, etc.
 .SH "SEE ALSO"
-http://www.net-snmp.org/tutorial-5/toolkit/, select(2), snmp_api(3),
+http://www.net-snmp.org/tutorial-5/toolkit/ select(2), snmp_api(3),
 default_store(3), snmp_alarm(3), read_config(3), snmp_config(5),
 snmpd.conf(5)

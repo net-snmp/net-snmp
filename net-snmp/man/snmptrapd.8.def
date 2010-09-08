@@ -19,8 +19,7 @@
 .\" ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS
 .\" SOFTWARE.
 .\" ******************************************************************/
-.TH SNMPTRAPD 8 "15 Jan 2004" VVERSIONINFO "Net-SNMP"
-.UC 4
+.TH SNMPTRAPD 8 "20 Jul 2010" VVERSIONINFO "Net-SNMP"
 .SH NAME
 snmptrapd - Receive and log SNMP trap messages.
 .SH SYNOPSIS

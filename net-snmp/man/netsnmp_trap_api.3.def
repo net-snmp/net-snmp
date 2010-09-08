@@ -1,5 +1,4 @@
-.TH NETSNMP_TRAP_API 3 "7 Mar 2002" VVERSIONINFO "Net-SNMP"
-.UC 5
+.TH NETSNMP_TRAP_API 3 "13 Aug 2010" VVERSIONINFO "Net-SNMP"
 .SH NAME
 send_easy_trap,
 send_trap_vars,

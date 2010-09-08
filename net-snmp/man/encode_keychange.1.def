@@ -1,5 +1,4 @@
-.TH encode_keychange "1" "16 Nov 2006" VVERSIONINFO "Net-SNMP"
-.UC 5
+.TH encode_keychange 1 "16 Nov 2006" VVERSIONINFO "Net-SNMP"
 .SH NAME
 encode_keychange - produce the KeyChange string for SNMPv3
 .SH SYNOPSIS

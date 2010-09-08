@@ -21,7 +21,6 @@
 .\" distributed with the Net-SNMP package.
 .\" ******************************************************************/
 .TH SNMPTABLE 1 "25 Jul 2003" VVERSIONINFO "Net-SNMP"
-.UC 4
 .SH NAME
 snmptable - retrieve an SNMP table and display it in tabular form
 .SH SYNOPSIS

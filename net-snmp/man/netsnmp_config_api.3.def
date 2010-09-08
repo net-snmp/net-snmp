@@ -1,5 +1,4 @@
-.TH NETSNMP_CONFIG_API 3 "07 Mar 2002" "" "Net-SNMP"
-.UC 5
+.TH NETSNMP_CONFIG_API 3 "13 Aug 2010" VVERSIONINFO "Net-SNMP"
 .SH NAME
 register_config_handler,
 register_const_config_handler,

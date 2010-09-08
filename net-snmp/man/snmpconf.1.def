@@ -1,5 +1,4 @@
-.TH SNMPCONF 1 "08 Feb 2002" VVERSIONINFO "Net-SNMP"
-.UC 4
+.TH SNMPCONF 1 "25 Feb 2003" VVERSIONINFO "Net-SNMP"
 .SH NAME
 snmpconf - creates and modifies SNMP configuration files
 .SH SYNOPSIS
