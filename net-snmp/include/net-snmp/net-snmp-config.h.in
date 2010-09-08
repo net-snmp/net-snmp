@@ -1,6 +1,10 @@
 /* include/net-snmp/net-snmp-config.h.in.  Generated from configure.ac by autoheader.  */
 /* 
  * net-snmp configuration header file
+ *
+ * NOTE: DO NOT EDIT include/net-snmp/net-snmp-config.h.in as your changes
+ *       will be overwritten. This content is in acconfig.h and merged
+ *       into include/net-snmp/net-snmp-config.h.in by autoheader.
  */
 /* Portions of this file are subject to the following copyright(s).  See
  * the Net-SNMP's COPYING file for more details and other copyrights
@@ -378,6 +382,9 @@
 
 /* Define to 1 if you have the <mysql/mysql.h> header file. */
 #undef HAVE_MYSQL_MYSQL_H
+
+/* Define to 1 if you have the <nbutil.h> header file. */
+#undef HAVE_NBUTIL_H
 
 /* Define to 1 if you have the <ndir.h> header file, and it defines `DIR'. */
 #undef HAVE_NDIR_H
@@ -939,9 +946,6 @@
 /* Define to 1 if you have the <sys/disklabel.h> header file. */
 #undef HAVE_SYS_DISKLABEL_H
 
-/* Define to 1 if you have the <nbutil.h> header file. */
-#undef HAVE_NBUTIL_H
-
 /* Define to 1 if you have the <sys/dkio.h> header file. */
 #undef HAVE_SYS_DKIO_H
 
@@ -1317,7 +1321,7 @@
 /* Define if you are using the codeS11 library ... */
 #undef NETSNMP_USE_PKCS11
 
-/* Define this if you have lim_sensors v3 or later */
+/* Define this if you have lm_sensors v3 or later */
 #undef NETSNMP_USE_SENSORS_V3
 
 /* Should we compile to use special opaque types: float, double, counter64,
