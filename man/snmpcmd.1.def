@@ -28,8 +28,7 @@
 .\" Use is subject to license terms specified in the COPYING file
 .\" distributed with the Net-SNMP package.
 .\" ******************************************************************/
-.TH SNMPCMD 1 "29 Jun 2005" VVERSIONINFO "Net-SNMP"
-.UC 4
+.TH SNMPCMD 1 "20 Jul 2010" VVERSIONINFO "Net-SNMP"
 .SH NAME
 snmpcmd - options and behaviour common to most of the Net-SNMP command-line tools
 .SH SYNOPSIS

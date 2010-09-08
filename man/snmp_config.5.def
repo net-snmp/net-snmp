@@ -1,5 +1,4 @@
-.TH SNMP_CONFIG 5 "5 May 2005" VVERSIONINFO "Net-SNMP"
-.UC 4
+.TH SNMP_CONFIG 5 "08 Mar 2010" VVERSIONINFO "Net-SNMP"
 .SH NAME
 snmp_config - handling of Net-SNMP configuration files
 .SH DESCRIPTION

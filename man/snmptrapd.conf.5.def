@@ -1,5 +1,4 @@
-.TH SNMPTRAPD.CONF 5 "29 Jun 2005" VVERSIONINFO "Net-SNMP"
-.UC 4
+.TH SNMPTRAPD.CONF 5 "19 Feb 2009" VVERSIONINFO "Net-SNMP"
 .SH NAME
 snmptrapd.conf - configuration file for the Net-SNMP notification receiver
 .SH DESCRIPTION

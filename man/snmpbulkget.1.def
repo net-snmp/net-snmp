@@ -19,8 +19,7 @@
 .\" ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS
 .\" SOFTWARE.
 .\" ******************************************************************/
-.TH SNMPBULKGET 1 "08 Feb 2002" VVERSIONINFO "Net-SNMP"
-.UC 4
+.TH SNMPBULKGET 1 "01 May 2002" VVERSIONINFO "Net-SNMP"
 .SH NAME
 snmpbulkget - communicates with a network entity using SNMP GETBULK requests.
 .SH SYNOPSIS
