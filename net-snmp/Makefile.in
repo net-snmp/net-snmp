@@ -132,7 +132,7 @@ copypersistentfiles:
 #
 # test targets
 #
-test test-mibs testall: all testdirs
+test test-mibs testall testfailed testsimple: all testdirs
 	( cd testing; $(MAKE) $@ )
 
 testdirs:
