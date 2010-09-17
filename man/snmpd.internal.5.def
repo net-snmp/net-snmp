@@ -86,7 +86,7 @@ They are deprecated, and should not be used.
 .SH "FILES"
 SYSCONFDIR/snmp/snmpd.conf
 .SH "SEE ALSO"
-snmpconf(1), snmpd.conf(5), snmp.conf(5), snmp_config(5), snmpd(8), EXAMPLE.conf, read_config(3).
+snmpconf(1), snmpd.conf(5), snmp.conf(5), snmp_config(5), snmpd(8), EXAMPLE.conf, netsnmp_config_api(3).
 .\" Local Variables:
 .\"  mode: nroff
 .\" End:

@@ -398,7 +398,7 @@ SYSCONFDIR/snmp/hosts/HOSTNAME.conf
 $HOME/.snmp/hosts/HOSTNAME.conf
 
 .SH "SEE ALSO"
-snmp_config(5), read_config(3), snmpcmd(1).
+snmp_config(5), netsnmp_config_api(3), snmpcmd(1).
 .\" Local Variables:
 .\"  mode: nroff
 .\" End:
