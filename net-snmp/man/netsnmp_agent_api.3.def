@@ -110,7 +110,7 @@ the
 .I name
 string that you passed in.  It can be used to configure access
 control, for instance.   Please see the
-.IR read_config(3) ", " snmp_config(5) ", and " snmpd.conf(5)
+.IR netsnmp_config_api(3) ", " snmp_config(5) ", and " snmpd.conf(5)
 manual pages for further details on this subject.
 .IP "init_master_agent(void)"
 Initializes the master agent and causes it to listen for SNMP requests 
@@ -128,5 +128,5 @@ were processed, zero if an alarm occurred and -1 if an error occured.
 This shuts down the agent, saving any needed persistent storage, etc.
 .SH "SEE ALSO"
 http://www.net-snmp.org/tutorial-5/toolkit/ select(2), snmp_api(3),
-default_store(3), snmp_alarm(3), read_config(3), snmp_config(5),
+default_store(3), snmp_alarm(3), netsnmp_config_api(3), snmp_config(5),
 snmpd.conf(5)

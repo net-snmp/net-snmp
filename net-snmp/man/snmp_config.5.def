@@ -161,11 +161,11 @@ in '.conf'.
 .PP
 Information about writing C code that makes use of this system in
 either the agent's MIB modules or in applications can be found in the
-.I read_config(3)
+.I netsnmp_config_api(3)
 manual page.
 .SH "SEE ALSO"
 snmpconf(1),
-read_config(3),
+netsnmp_config_api(3),
 snmp.conf(5),
 snmpd.conf(5)
 .\" Local Variables:

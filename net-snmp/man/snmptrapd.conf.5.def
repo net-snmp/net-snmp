@@ -262,5 +262,5 @@ directives are typically only used to enable the appropriate behaviour.
 .SH FILES
 SYSCONFDIR/snmp/snmptrapd.conf
 .SH "SEE ALSO"
-snmp_config(5), snmptrapd(8), syslog(8), variables(5), snmpd.conf(5), read_config(3).
+snmp_config(5), snmptrapd(8), syslog(8), variables(5), snmpd.conf(5), netsnmp_config_api(3).
 
