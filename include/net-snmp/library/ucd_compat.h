@@ -38,6 +38,7 @@ int             snmp_get_random_access(void);
          */
 NETSNMP_IMPORT
 void            snmp_set_mib_warnings(int);
+NETSNMP_IMPORT
 void            snmp_set_mib_errors(int);
 NETSNMP_IMPORT
 void            snmp_set_save_descriptions(int);
