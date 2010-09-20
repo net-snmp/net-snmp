@@ -3611,6 +3611,7 @@ int
 build_oid_segment(netsnmp_variable_list * var)
 {
     int             i;
+    uint32_t        ipaddr;
 
     if (var->name && var->name != var->name_loc)
         SNMP_FREE(var->name);
@@ -3627,14 +3628,11 @@ build_oid_segment(netsnmp_variable_list * var)
     case ASN_IPADDRESS:
         var->name_length = 4;
         var->name = var->name_loc;
-        var->name[0] =
-            (((unsigned int) *(var->val.integer)) & 0xff000000) >> 24;
-        var->name[1] =
-            (((unsigned int) *(var->val.integer)) & 0x00ff0000) >> 16;
-        var->name[2] =
-            (((unsigned int) *(var->val.integer)) & 0x0000ff00) >> 8;
-        var->name[3] =
-            (((unsigned int) *(var->val.integer)) & 0x000000ff);
+        memcpy(&ipaddr, var->val.string, sizeof(ipaddr));
+        var->name[0] = (ipaddr >> 24) & 0xff;
+        var->name[1] = (ipaddr >> 16) & 0xff;
+        var->name[2] = (ipaddr >>  8) & 0xff;
+        var->name[3] = (ipaddr >>  0) & 0xff;
         break;
         
     case ASN_PRIV_IMPLIED_OBJECT_ID:
