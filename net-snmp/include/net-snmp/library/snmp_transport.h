@@ -271,8 +271,10 @@ typedef struct netsnmp_transport_config_s {
    char *value;
 } netsnmp_transport_config;
     
+NETSNMP_IMPORT    
 int netsnmp_transport_config_compare(netsnmp_transport_config *left,
                                      netsnmp_transport_config *right);
+NETSNMP_IMPORT
 netsnmp_transport_config *netsnmp_transport_create_config(char *key,
                                                           char *value);
 #ifdef __cplusplus

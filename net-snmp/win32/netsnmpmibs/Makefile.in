@@ -88,7 +88,8 @@ LIB32_OBJS1= \
 	"$(INTDIR)\dlmod.obj" \
 	"$(INTDIR)\errormib.obj" \
 	"$(INTDIR)\extensible.obj" \
-	"$(INTDIR)\file.obj" \
+	"$(INTDIR)\file.obj"
+LIB32_OBJS2= \
 	"$(INTDIR)\loadave.obj" \
 	"$(INTDIR)\pass.obj" \
 	"$(INTDIR)\pass_persist.obj" \
@@ -133,7 +134,7 @@ LIB32_OBJS1= \
 	"$(INTDIR)\restart.obj" \
 	"$(INTDIR)\smux.obj"
 !IF "$(SDK)" == "true"
-LIB32_OBJS2= \
+LIB32_OBJS3= \
 	"$(INTDIR)\at.obj" \
 	"$(INTDIR)\icmp.obj" \
 	"$(INTDIR)\interfaces.obj" \
@@ -148,11 +149,12 @@ LIB32_OBJS2= \
 	"$(INTDIR)\var_route.obj" \
 	"$(INTDIR)\winExtDLL.obj"
 !ENDIF
-LIB32_OBJS=$(LIB32_OBJS1) $(LIB32_OBJS2)
+LIB32_OBJS=$(LIB32_OBJS1) $(LIB32_OBJS2) $(LIB32_OBJS3)
 
 CLEAN :
 	-@for %f in ($(LIB32_OBJS1)) do erase %%f
 	-@for %f in ($(LIB32_OBJS2)) do erase %%f
+	-@for %f in ($(LIB32_OBJS3)) do erase %%f
 	-@erase "..\lib\$(OUTDIR)\$(PROGNAME).lib"
 
 "..\lib\$(OUTDIR)\$(PROGNAME).lib" : "..\lib\$(OUTDIR)" $(DEF_FILE) $(LIB32_OBJS)
