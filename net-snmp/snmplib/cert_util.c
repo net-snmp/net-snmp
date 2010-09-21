@@ -1082,16 +1082,19 @@ _find_issuer(netsnmp_cert *cert)
     return issuer;
 }
 
+#define CERT_LOAD_OK       0
+#define CERT_LOAD_ERR     -1
+#define CERT_LOAD_PARTIAL -2
 int
 netsnmp_cert_load_x509(netsnmp_cert *cert)
 {
-    int rc = 0;
+    int rc = CERT_LOAD_OK;
 
     /** load ocert */
     if ((NULL == cert->ocert) && (netsnmp_ocert_get(cert) == NULL)) {
         DEBUGMSGT(("cert:load:err", "couldn't load cert for %s\n",
                    cert->info.filename));
-        rc = -1;
+        rc = CERT_LOAD_ERR;
     }
 
     /** load key */
@@ -1099,7 +1102,7 @@ netsnmp_cert_load_x509(netsnmp_cert *cert)
         (netsnmp_okey_get(cert->key) == NULL)) {
         DEBUGMSGT(("cert:load:err", "couldn't load key for cert %s\n",
                    cert->info.filename));
-        rc = -1;
+        rc = CERT_LOAD_ERR;
     }
 
     /** make sure we have cert chain */
@@ -1113,19 +1116,19 @@ netsnmp_cert_load_x509(netsnmp_cert *cert)
         if (NULL == cert->issuer_cert) {
             cert->issuer_cert =  _find_issuer(cert);
             if (NULL == cert->issuer_cert) {
-                DEBUGMSGT(("cert:load:err",
+                DEBUGMSGT(("cert:load:warn",
                            "couldn't load CA chain for cert %s\n",
                            cert->info.filename));
-                rc = -1;
+                rc = CERT_LOAD_PARTIAL;
                 break;
             }
         }
         /** get issuer ocert */
         if ((NULL == cert->issuer_cert->ocert) &&
             (netsnmp_ocert_get(cert->issuer_cert) == NULL)) {
-            DEBUGMSGT(("cert:load:err", "couldn't load cert chain for %s\n",
+            DEBUGMSGT(("cert:load:warn", "couldn't load cert chain for %s\n",
                        cert->info.filename));
-            rc = -1;
+            rc = CERT_LOAD_PARTIAL;
             break;
         }
     } /* cert CA for loop */
@@ -1815,7 +1818,7 @@ netsnmp_cert_find(int what, int where, void *hint)
     }
     
     /** make sure we have the cert data */
-    if (netsnmp_cert_load_x509(result) < 0)
+    if (netsnmp_cert_load_x509(result) == CERT_LOAD_ERR)
         return NULL;
 
     DEBUGMSGT(("cert:find:found",
