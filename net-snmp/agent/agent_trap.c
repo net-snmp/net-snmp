@@ -925,12 +925,12 @@ send_trap_to_sess(netsnmp_session * sess, netsnmp_pdu *template_pdu)
     } else {
         if ((sess->version == SNMP_VERSION_3) &&
                 (pdu->command == SNMP_MSG_TRAP2) &&
-                (pdu->securityEngineIDLen == 0)) {
+                (sess->securityEngineIDLen == 0)) {
             u_char          tmp[SPRINT_MAX_LEN];
 
             len = snmpv3_get_engineID(tmp, sizeof(tmp));
             memdup(&pdu->securityEngineID, tmp, len);
-            pdu->securityEngineIDLen = len;
+            sess->securityEngineIDLen = len;
         }
 
         result = snmp_send(sess, pdu);
