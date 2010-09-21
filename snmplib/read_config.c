@@ -820,7 +820,7 @@ read_config(const char *filename,
                      */
                     cptr = copy_nword(cptr, token, sizeof(token));
                 }
-            } else if ((token[0] == 'i') && (strncasecmp(token,"include", 7 )==0)) {
+            } else if ((token[0] == 'i') && (strncasecmp(token,"include", 7 )==0) && (strncasecmp(token, "includeAllDisks", 15) != 0)) {
                 if ( strcasecmp( token, "include" )==0) {
                     if (when != PREMIB_CONFIG && 
 	                !netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID, 
