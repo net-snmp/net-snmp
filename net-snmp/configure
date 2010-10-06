@@ -24599,7 +24599,7 @@ $as_echo "$ac_cv_member_struct_sockaddr_in6_sin6_addr" >&6; }
 
 	                { $as_echo "$as_me:$LINENO: checking ipv6 stack type" >&5
 $as_echo_n "checking ipv6 stack type... " >&6; }
-                        if test "x$ac_cv_have_struct_sockaddr_in6_sin6_addr" = "xyes"; then
+                        if test "x$ac_cv_member_struct_sockaddr_in6_sin6_addr" = "xyes"; then
 				v6type=$i
 				v6lib=dummy
 				v6libdir=none
