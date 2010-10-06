@@ -175,7 +175,7 @@ AC_INCLUDES_DEFAULT()
 #endif
 ]])
 	                AC_MSG_CHECKING([[ipv6 stack type]])
-                        if test "x$ac_cv_have_struct_sockaddr_in6_sin6_addr" = "xyes"; then
+                        if test "x$ac_cv_member_struct_sockaddr_in6_sin6_addr" = "xyes"; then
 				v6type=$i
 				v6lib=dummy
 				v6libdir=none
