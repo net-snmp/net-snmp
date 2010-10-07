@@ -370,6 +370,7 @@ listing of all changes made to the code.
       - Do not call vacm_standard_views() or init_vacm_config_tokens() if
 	the corresponding module was not compiled (from Debian patch
 	61_vacm_missing_dependency_check)
+      - Fix ipv6 generic case so test matches verification
 
     building:
       - 'make test TESTOPTS="-P tcp"' works fine now
