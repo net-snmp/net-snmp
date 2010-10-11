@@ -1,6 +1,6 @@
 config_require(hardware/sensors/hw_sensors)
 
-#if defined(solaris)
+#if defined(solaris2)
 # if defined(HAVE_PICL_H)
 config_require(hardware/sensors/picld_sensors)
 # else
