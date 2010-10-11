@@ -1,0 +1,228 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta name="generator" content=
+"HTML Tidy for Windows (vers 1st October 2003), see www.w3.org" />
+<meta content="text/html; charset=us-ascii" http-equiv=
+"content-type" />
+<title>snmpd.conf.win32</title>
+</head>
+<body>
+<h1>snmpd.conf Win32 options</h1>
+The following snmpd.conf options are available in this build of
+Net-SNMP:<br />
+<br style="font-family: monospace;" />
+<span style="font-family: monospace;">&nbsp; In snmpd.conf and
+snmpd.local.conf:<br />
+&nbsp;&nbsp;&nbsp;
+authtrapenable&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+1 | 2&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; (1 = enable, 2 =
+disable)<br />
+&nbsp;&nbsp;&nbsp;
+trapsink&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+host [community] [port]<br />
+&nbsp;&nbsp;&nbsp;
+trap2sink&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+host [community] [port]<br />
+&nbsp;&nbsp;&nbsp;
+informsink&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+host [community] [port]<br />
+&nbsp;&nbsp;&nbsp;
+trapsess&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+[snmpcmdargs] host<br />
+&nbsp;&nbsp;&nbsp;
+trapcommunity&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+community-string<br />
+&nbsp;&nbsp;&nbsp;
+agentaddress&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+SNMP bind address<br />
+&nbsp;&nbsp;&nbsp;
+quit&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+(1|yes|true|0|no|false)<br />
+&nbsp;&nbsp;&nbsp;
+leave_pidfile&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+(1|yes|true|0|no|false)<br />
+&nbsp;&nbsp;&nbsp; dontLogTCPWrappersConnects
+(1|yes|true|0|no|false)<br />
+&nbsp;&nbsp;&nbsp;
+injectHandler&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+injectHandler NAME INTONAME [BEFORE_OTHER_NAME]<br />
+&nbsp;&nbsp;&nbsp;
+table&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+tableoid<br />
+&nbsp;&nbsp;&nbsp;
+add_row&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+table_name indexes... values...<br />
+&nbsp;&nbsp;&nbsp;
+agentxsocket&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+AgentX bind address<br />
+&nbsp;&nbsp;&nbsp;
+master&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+specify 'agentx' for AgentX support<br />
+&nbsp;&nbsp;&nbsp;
+agentxperms&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+AgentX socket permissions: socket_perms [directory_perms
+[username|userid [groupname|groupid]]]<br />
+&nbsp;&nbsp;&nbsp;
+agentxRetries&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+AgentX Retries<br />
+&nbsp;&nbsp;&nbsp;
+agentxTimeout&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+AgentX Timeout (seconds)<br />
+&nbsp;&nbsp;&nbsp;
+com2sec&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+[-Cn CONTEXT] secName IPv4-network-address[/netmask]
+community<br />
+&nbsp;&nbsp;&nbsp;
+createUser&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+username (MD5|SHA) passphrase [DES [passphrase]]<br />
+&nbsp;&nbsp;&nbsp;
+agentSecName&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+string<br />
+&nbsp;&nbsp;&nbsp;
+iquerySecName&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+string<br />
+&nbsp;&nbsp;&nbsp;
+iqueryVersion&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+1 | 2c | 3<br />
+&nbsp;&nbsp;&nbsp;
+iquerySecLevel&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+noAuthNoPriv | authNoPriv | authPriv<br />
+&nbsp;&nbsp;&nbsp;
+group&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+name v1|v2c|usm|... security<br />
+&nbsp;&nbsp;&nbsp;
+access&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+name context model level prefix read write notify<br />
+&nbsp;&nbsp;&nbsp;
+setaccess&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+name context model level prefix viewname viewval<br />
+&nbsp;&nbsp;&nbsp;
+view&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+name type subtree [mask]<br />
+&nbsp;&nbsp;&nbsp;
+authcommunity&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+authtype1,authtype2 community [default|hostname|network/bits
+[oid|-V view]]<br />
+&nbsp;&nbsp;&nbsp;
+authuser&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+authtype1,authtype2 [-s secmodel] user [noauth|auth|priv [oid|-V
+view]]<br />
+&nbsp;&nbsp;&nbsp;
+authgroup&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+authtype1,authtype2 [-s secmodel] group [noauth|auth|priv [oid|-V
+view]]<br />
+&nbsp;&nbsp;&nbsp;
+authaccess&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+name authtype1,authtype2 [-s secmodel] group view [noauth|auth|priv
+[context|context*]]<br />
+&nbsp;&nbsp;&nbsp;
+rwcommunity&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+community [default|hostname|network/bits [oid]]<br />
+&nbsp;&nbsp;&nbsp;
+rocommunity&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+community [default|hostname|network/bits [oid]]<br />
+&nbsp;&nbsp;&nbsp;
+rwuser&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+user [noauth|auth|priv [oid]]<br />
+&nbsp;&nbsp;&nbsp;
+rouser&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+user [noauth|auth|priv [oid]]<br />
+&nbsp;&nbsp;&nbsp;
+sysdescr&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+description<br />
+&nbsp;&nbsp;&nbsp;
+syslocation&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+location<br />
+&nbsp;&nbsp;&nbsp;
+syscontact&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+contact-name<br />
+&nbsp;&nbsp;&nbsp;
+sysname&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+node-name<br />
+&nbsp;&nbsp;&nbsp;
+sysservices&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+NUMBER<br />
+&nbsp;&nbsp;&nbsp;
+sysobjectid&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+OID<br />
+&nbsp;&nbsp;&nbsp;
+setserialno&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+integer<br />
+&nbsp;&nbsp;&nbsp;
+proc&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+process-name [max-num] [min-num]<br />
+&nbsp;&nbsp;&nbsp;
+procfix&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+process-name program [arguments...]<br />
+&nbsp;&nbsp;&nbsp;
+pass&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+miboid command<br />
+&nbsp;&nbsp;&nbsp;
+pass_persist&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+miboid program<br />
+&nbsp;&nbsp;&nbsp;
+load&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+max1 [max5] [max15]<br />
+&nbsp;&nbsp;&nbsp;
+exec&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+[miboid] name program arguments<br />
+&nbsp;&nbsp;&nbsp;
+sh&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+[miboid] name program-or-script arguments<br />
+&nbsp;&nbsp;&nbsp;
+execfix&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+exec-or-sh-name program [arguments...]<br />
+&nbsp;&nbsp;&nbsp;
+file&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+file [maxsize]<br />
+&nbsp;&nbsp;&nbsp;
+proxy&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+[snmpcmd args] host oid [remoteoid]<br />
+&nbsp;&nbsp;&nbsp;
+override&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+[-rw] mibnode type value<br />
+&nbsp;&nbsp;&nbsp;
+monitor&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+[options] monitor_expression [see "man snmpd.conf"]<br />
+&nbsp;&nbsp;&nbsp;
+defaultMonitors&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+yes|no<br />
+&nbsp;&nbsp;&nbsp;
+notificationEvent&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+notificationEvent NAME TRAP_OID [[-w] EXTRA_OID ...]<br />
+&nbsp;&nbsp;&nbsp; linkUpDownNotifications&nbsp;
+linkUpDownNotifications (yes|no)<br />
+&nbsp;&nbsp;&nbsp;
+defDomain&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+application domain<br />
+&nbsp;&nbsp;&nbsp;
+defTarget&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+application domain target<br />
+&nbsp;&nbsp;&nbsp;
+engineID&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+string<br />
+&nbsp;&nbsp;&nbsp;
+engineIDType&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+num<br />
+&nbsp;&nbsp;&nbsp;
+engineIDNic&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+string<br />
+&nbsp; In agentx.conf and agentx.local.conf:<br />
+&nbsp;&nbsp;&nbsp;
+agentxsocket&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+AgentX bind address<br />
+&nbsp;&nbsp;&nbsp;
+agentxperms&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+AgentX socket permissions: socket_perms [directory_perms
+[username|userid [groupname|groupid]]]<br />
+&nbsp;&nbsp;&nbsp;
+agentxRetries&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+AgentX Retries<br />
+&nbsp;&nbsp;&nbsp;
+agentxTimeout&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+AgentX Timeout (seconds)<br />
+<br /></span>
+</body>
+</html>

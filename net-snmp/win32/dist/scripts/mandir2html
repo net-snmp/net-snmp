@@ -1,0 +1,103 @@
+#!/usr/bin/perl
+#
+# This program converts a directory of man pages into HTML format.
+#
+# Title:          mandir2html
+# Version:        1.0
+# Written by:     Alex Burger
+# Date:           March 1st, 2004
+# Last modified:  March 19th, 2004
+#
+# Requirements:
+#
+# -man 
+# -man2html3.0.1 (http://search.cpan.org/~ehood/man2html3.0.1/)
+# -tidy (http://tidy.sourceforge.net/)
+#
+# Usage:
+#
+# Create a temporary directory and copy all the man files to the
+# folder while retaining the man(x) directory structure.  Example:
+#
+# /tmp/net-snmp/man/man1
+# /tmp/net-snmp/man/man2
+# .
+# /tmp/net-snmp/man/man8
+# /tmp/net-snmp/man/man9
+# 
+# Some applications can install the man files using:
+#
+# cd (source folder)/man
+# make install prefix=/tmp/net-snmp
+#  
+################################################################
+# Options
+
+# Location of man pages to parse
+# Below this directory should be the folders man1 to man9.
+$man_dir = "/tmp/net-snmp/share/man/";
+
+# Output folder to create the HTML files
+$man_dir_html = "/tmp/net-snmp/html/";
+
+# man2html Perl script location
+$man2html = "man2html.pl";
+
+# tidy location
+$tidy = "tidy";
+
+# Folder separator
+$separator = '-';
+
+################################################################
+
+# Chop off trailing slash of $man_dir
+if ($man_dir =~ /\/$/) {
+  chop $man_dir;
+}
+
+# Chop off trailing slash of $man_dir_html
+if ($man_dir_html =~ /\/$/) {
+  chop $man_dir_html;
+}
+
+mkdir "$man_dir_html";
+if ($separator eq '/') {
+  # Make output directory structure
+  mkdir "$man_dir_html/man1";
+  mkdir "$man_dir_html/man2";
+  mkdir "$man_dir_html/man3";
+  mkdir "$man_dir_html/man4";
+  mkdir "$man_dir_html/man5";
+  mkdir "$man_dir_html/man6";
+  mkdir "$man_dir_html/man7";
+  mkdir "$man_dir_html/man8";
+  mkdir "$man_dir_html/man9";
+}
+
+# Get list of man files
+@files = `find $man_dir`;
+
+# Convert each man file
+foreach my $file (@files)
+{
+  chomp $file;
+
+  # Put man section number into $1, and man page name into $2
+  if ($file =~ /$man_dir\/(man\d+)\/(.*)/)
+  {
+   #print "$1-$2\n";
+
+   if ($separator eq '/') {
+     $command = "man $man_dir\/$1\/$2 | $man2html -topm 0 -botm 0 -cgiurl=\'..\/man\$section/\$title.\$section\$subsection.html\' | $tidy > $man_dir_html/$1/$2.html";
+   }
+   else {
+     $command = "man $man_dir\/$1\/$2 | $man2html -topm 0 -botm 0 -cgiurl=\'man\$section".$separator."\$title.\$section\$subsection.html\' | $tidy > $man_dir_html/$1$separator$2.html";
+   }
+ 
+   print "executing: $command\n";
+
+   system "$command";
+  }
+}
+
