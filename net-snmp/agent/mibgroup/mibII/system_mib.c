@@ -172,8 +172,10 @@ system_parse_config_sysObjectID(const char *token, char *cptr)
     if (!read_objid(cptr, sysObjectID, &sysObjectIDLength)) {
 	netsnmp_config_error("sysobjectid token not a parsable OID:\n\t%s",
 			     cptr);
-        memcpy(sysObjectID, version_sysoid, version_sysoid_len * sizeof(oid));
-    }
+        sysObjectIDByteLength = version_sysoid_len  * sizeof(oid);
+        memcpy(sysObjectID, version_sysoid, sysObjectIDByteLength);
+    } else
+        sysObjectIDByteLength = sysObjectIDLength * sizeof(oid);
 }
 
 
