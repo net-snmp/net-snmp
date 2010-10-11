@@ -132,7 +132,7 @@ _sensor_free( void )
  *  or (optionally) insert a new one into the container
  */
 netsnmp_sensor_info *
-sensor_by_name( char *name, int create_type )
+sensor_by_name( const char *name, int create_type )
 {
     netsnmp_sensor_info *sp;
 

@@ -2,6 +2,7 @@
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 #include <net-snmp/agent/hardware/sensors.h>
+#include "hardware/sensors/hw_sensors.h"
 #include "ucd-snmp/lmsensorsMib.h"
 
 netsnmp_container *sensorContainer = NULL;
