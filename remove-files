@@ -1,0 +1,18 @@
+#!/bin/sh
+
+DIR="cmusnmp"
+if [ "$1" != "" ]; then
+  DIR="$1"
+fi
+
+cd $DIR
+
+touch stamp-h.in stamp-h configure
+rm -f makedepend.in
+rm -f agent/mibgroup/versiontag
+rm -f ISSUES
+rm -f makenosysdepend.pl
+rm -f makefileindepend.pl
+rm -fR win32/dist
+find . -name .cvsignore | xargs rm -f
+rm -f remove-files
