@@ -399,6 +399,14 @@ case $target_os in
 esac
 
 
+#       dpkg package (swintst_apt)
+#	    used in agent only
+#
+AC_PATH_PROG([DPKG_QUERY_PATH], dpkg-query)
+if test x$DPKG_QUERY_PATH != x; then
+    AC_DEFINE(HAVE_DPKG_QUERY, 1, [Set if the dpkg-query command is available])
+fi
+
 
 ##
 #   Non-program/compilation checks:
