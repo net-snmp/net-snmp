@@ -415,7 +415,7 @@ sensor_load(void)
    the scale variable handles miniVolts */
 
 static int
-read_num_sensor(picl_nodehdl_t childh, char *prop ,int scale, int *value)
+read_num_sensor(picl_nodehdl_t childh, const char *prop, int scale, int *value)
  {
   picl_nodehdl_t  sensorh;
   picl_propinfo_t sensor_info;
@@ -481,7 +481,7 @@ read_num_sensor(picl_nodehdl_t childh, char *prop ,int scale, int *value)
 } /* end of read_num_sensor() */
 
 static int
-read_enum_sensor(picl_nodehdl_t childh, char **options, u_int *value)
+read_enum_sensor(picl_nodehdl_t childh, const char **options, u_int *value)
 {
   picl_nodehdl_t  sensorh;
   picl_propinfo_t sensor_info;
@@ -526,10 +526,10 @@ read_enum_sensor(picl_nodehdl_t childh, char **options, u_int *value)
 
 /* scale variable handles miniVolts*/
  
-static int
+static void
 process_num_sensor(picl_nodehdl_t childh, 
-                  char propname[PICL_PROPNAMELEN_MAX], 
-                  char propval[PICL_PROPNAMELEN_MAX], int typ, int scale)
+                  const char propname[PICL_PROPNAMELEN_MAX], 
+                  const char propval[PICL_PROPNAMELEN_MAX], int typ, int scale)
 {
   int value = 0;
   picl_errno_t error_code;
@@ -553,10 +553,10 @@ process_num_sensor(picl_nodehdl_t childh,
   }
 } /* end process_num_sensor() */
 
-static int
+static void
 process_enum_sensor(picl_nodehdl_t childh, 
-                  char propname[PICL_PROPNAMELEN_MAX], 
-                  int typ, char **options)
+                  const char propname[PICL_PROPNAMELEN_MAX], 
+                  int typ, const char **options)
 {
   int value = 0;
   picl_errno_t error_code;
@@ -583,69 +583,69 @@ process_enum_sensor(picl_nodehdl_t childh,
 /* The following are modules for dealing with individual sensors types.
    They call the generic modules above.  */
 
-static int
+static void
 process_individual_fan(picl_nodehdl_t childh, 
-                     char propname[PICL_PROPNAMELEN_MAX])
+                     const char propname[PICL_PROPNAMELEN_MAX])
 {
   process_num_sensor(childh, propname, "AtoDSensorValue", FAN_TYPE, 1);
 }
 
 
-static int
+static void
 process_newtype_fan(picl_nodehdl_t childh,
-                     char propname[PICL_PROPNAMELEN_MAX])
+                     const char propname[PICL_PROPNAMELEN_MAX])
 {
   process_num_sensor(childh, propname, "Speed", FAN_TYPE, 1);
 }
 
 
-static int
+static void
 process_temperature_sensor(picl_nodehdl_t childh,
-                               char propname[PICL_PROPNAMELEN_MAX])
+                               const char propname[PICL_PROPNAMELEN_MAX])
 {
   process_num_sensor(childh, propname, "Temperature", TEMP_TYPE, 1000);
 } /* MIB asks for mC */
 
-static int
+static void
 process_voltage_sensor(picl_nodehdl_t childh,
-                      char propname[PICL_PROPNAMELEN_MAX])
+                      const char propname[PICL_PROPNAMELEN_MAX])
 {
   process_num_sensor(childh, propname, "Voltage", VOLT_TYPE, 1000);
 } /* MIB asks for mV */
 
-static int
+static void
 process_digital_sensor(picl_nodehdl_t childh,
-                      char propname[PICL_PROPNAMELEN_MAX])
+                      const char propname[PICL_PROPNAMELEN_MAX])
 {
   process_num_sensor(childh, propname, "AtoDSensorValue", VOLT_TYPE, 1);
 }
 
 
-static int
+static void
 process_switch(picl_nodehdl_t childh,
-                   char propname[PICL_PROPNAMELEN_MAX])
+                   const char propname[PICL_PROPNAMELEN_MAX])
 {
 
-  char *settings[]={"OFF","ON","NORMAL","LOCKED","UNKNOWN",
+  const char *settings[]={"OFF","ON","NORMAL","LOCKED","UNKNOWN",
                    "DIAG","SECURE",NULL};
 
   process_enum_sensor(childh, propname, MISC_TYPE, settings);
 }
 
-static int
+static void
 process_led(picl_nodehdl_t childh,
-                   char propname[PICL_PROPNAMELEN_MAX])
+                   const char propname[PICL_PROPNAMELEN_MAX])
 {
 
-  char *settings[]={"OFF","ON","BLINK",NULL};
+  const char *settings[]={"OFF","ON","BLINK",NULL};
   process_enum_sensor(childh, propname, MISC_TYPE, settings);
 }
 
-static int
+static void
 process_i2c(picl_nodehdl_t childh,
-                   char propname[PICL_PROPNAMELEN_MAX])
+                   const char propname[PICL_PROPNAMELEN_MAX])
 {
-  char *settings[]={"OK",NULL};
+  const char *settings[]={"OK",NULL};
   process_enum_sensor(childh, propname, MISC_TYPE, settings);
 }
 
@@ -761,6 +761,15 @@ _sensor_load(time_t t)
     envctrl_fan_t *fan_info;
     envctrl_ps_t *power_info;
     envctrl_encl_t *enc_info;
+#ifdef HAVE_PICL_H 
+
+/* some more declarations */
+
+    int er_code;
+    picl_errno_t     error_code;
+    int level=0;
+    picl_nodehdl_t  rooth;
+#endif
 
 /* DEBUGMSG(("ucd-snmp/lmSensors", "Reading the sensors\n")); */
 
@@ -775,13 +784,6 @@ _sensor_load(time_t t)
 
 /* try picld (if supported), if that doesn't work, try kstat */
 #ifdef HAVE_PICL_H 
-
-/* some more declarations */
-
-    int er_code;
-    picl_errno_t     error_code;
-    int level=0;
-    picl_nodehdl_t  rooth;
 
 er_code = picl_initialize();
 
@@ -923,7 +925,7 @@ else{
                    temp++;
                    break;
                default:
-                   DEBUGMSG(("ucd-snmp/lmSensors", "unknown element instance &d type &d value %d\n",
+                   DEBUGMSG(("ucd-snmp/lmSensors", "unknown element instance %d type %d value %d\n",
                        enc_info->instance, enc_info->type, enc_info->value));
                    break;
                } /* end switch */
@@ -942,8 +944,9 @@ else{
     const sensors_chip_name *chip;
     const sensors_feature_data *data;
     int             chip_nr = 0;
-    int             rc = 0;
     unsigned int    i = 0;
+
+    DEBUGMSG(("ucd-snmp/lmSensors", "=> sensor_load\n"));
 
     for (i = 0; i < N_TYPES; i++)
     {
@@ -956,7 +959,7 @@ else{
         {
            /* Continuing would be unsafe */
            snmp_log(LOG_ERR, "Cannot malloc sensor array!"); 
-           return (rc = 1);
+           return 1;
         } /* end if */
         sensor_array[i].current_len = DEFAULT_SENSORS;
     } /* end for */
@@ -1034,10 +1037,11 @@ else{
 	    } /* end if label */
         } /* end while data */
     } /* end while chip */
-    return rc;
+    DEBUGMSG(("ucd-snmp/lmSensors", "<= sensor_load\n"));
 #endif  /* end else ie. ifdef everything else */
     /* Update the timestamp after a load. */
     timestamp = t;
+    return 0;
 }
 
 #ifndef solaris2
