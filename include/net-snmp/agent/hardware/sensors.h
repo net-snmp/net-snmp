@@ -43,6 +43,6 @@ struct netsnmp_sensor_info_s {
 
 netsnmp_container   *get_sensor_container( void );
 netsnmp_cache       *get_sensor_cache( void );
-netsnmp_sensor_info *sensor_by_name( char *, int );
+netsnmp_sensor_info *sensor_by_name( const char *, int );
 NetsnmpCacheLoad     netsnmp_sensor_load;
 NetsnmpCacheFree     netsnmp_sensor_free;
