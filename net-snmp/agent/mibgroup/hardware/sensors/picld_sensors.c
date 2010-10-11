@@ -18,7 +18,7 @@ void netsnmp_sensor_arch_init( void ) {
  * Handle a numeric-valued sensor
  */
 static int
-read_num_sensor( picl_nodehdl_t childh, char *propval, float *value )
+read_num_sensor( picl_nodehdl_t childh, const char *propval, float *value )
 {
     picl_nodehdl_t  sensorh;
     picl_propinfo_t sensor_info;
@@ -87,7 +87,7 @@ read_num_sensor( picl_nodehdl_t childh, char *propval, float *value )
 }
 
 static int
-process_num_sensor( picl_nodehdl_t childh, char *propname, char *propval, int typ )
+process_num_sensor( picl_nodehdl_t childh, const char *propname, const char *propval, int typ )
 {
     netsnmp_sensor_info        *sp;
     float                       value;
@@ -115,16 +115,16 @@ process_num_sensor( picl_nodehdl_t childh, char *propname, char *propval, int ty
 /*
  *    Handle an enumeration-valued sensor
  */
-char *switch_settings[] = { "OFF","ON","NORMAL","LOCKED",
-                            "UNKNOWN","DIAG","SECURE",
-                            NULL };
-char *led_settings[]    = { "OFF","ON","BLINK",
-                            NULL };
-char *i2c_settings[]    = { "OK",
-                            NULL };
+const char *switch_settings[] = { "OFF","ON","NORMAL","LOCKED",
+				  "UNKNOWN","DIAG","SECURE",
+                                  NULL };
+const char *led_settings[]    = { "OFF","ON","BLINK",
+                                  NULL };
+const char *i2c_settings[]    = { "OK",
+                                  NULL };
 
 static int
-read_enum_sensor( picl_nodehdl_t childh, float *value, char **options )
+read_enum_sensor( picl_nodehdl_t childh, float *value, const char **options )
 {
     picl_nodehdl_t  sensorh;
     picl_propinfo_t sensor_info;
@@ -169,7 +169,7 @@ read_enum_sensor( picl_nodehdl_t childh, float *value, char **options )
 }
 
 static int
-process_enum_sensor( picl_nodehdl_t childh, char *propname, int typ, char **options )
+process_enum_sensor( picl_nodehdl_t childh, const char *propname, int typ, const char **options )
 {
     netsnmp_sensor_info        *sp;
     float                       value;
@@ -191,11 +191,6 @@ process_enum_sensor( picl_nodehdl_t childh, char *propname, int typ, char **opti
     }
     return 0;
 }
-static int
-process_enum_sensor( picl_nodehdl_t childh, char *propname, int typ, char **options )
-{
-    return 0;
-}
 
 
 
@@ -213,7 +208,7 @@ process_sensors( int level, picl_nodehdl_t nodeh ) {
     DEBUGMSGTL(("sensors:arch:detail", "process_sensors - level %d\n", level));
 
     /* Look up the first child node at this level */
-    error_code = pick_get_propval_by_name( nodeh, PICL_PROP_CHILD,
+    error_code = picl_get_propval_by_name( nodeh, PICL_PROP_CHILD,
                                            &childh, sizeof(childh));
     if ( error_code != PICL_SUCCESS ) {
         DEBUGMSGTL(("sensors:arch:detail", "Failed to get first child node (%d)\n",
@@ -223,7 +218,7 @@ process_sensors( int level, picl_nodehdl_t nodeh ) {
 
     /* Step through the child nodes, retrieving the name and class of each one */
     while ( error_code == PICL_SUCCESS ) {
-        error_code = pick_get_propval_by_name( childh, PICL_PROP_NAME,
+        error_code = picl_get_propval_by_name( childh, PICL_PROP_NAME,
                                                propname, sizeof(propname)-1);
         if ( error_code != PICL_SUCCESS ) {
             /* The Node With No Name */
@@ -232,7 +227,7 @@ process_sensors( int level, picl_nodehdl_t nodeh ) {
             return( error_code );
         }
 
-        error_code = pick_get_propval_by_name( childh, PICL_PROP_CLASSNAME,
+        error_code = picl_get_propval_by_name( childh, PICL_PROP_CLASSNAME,
                                                propclass, sizeof(propclass)-1);
         if ( error_code != PICL_SUCCESS ) {
             /* The Classless Society */
@@ -298,7 +293,7 @@ process_sensors( int level, picl_nodehdl_t nodeh ) {
         /*
          *  Move on to the next child node at the current level (if any)
          */
-        error_code = pick_get_propval_by_name( childh, PICL_PROP_PEER,
+        error_code = picl_get_propval_by_name( childh, PICL_PROP_PEER,
                                                &nexth, sizeof(nexth));
         if ( error_code != PICL_SUCCESS ) {
             /* That's All Folks! */
