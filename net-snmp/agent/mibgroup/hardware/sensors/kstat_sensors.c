@@ -156,5 +156,6 @@ netsnmp_sensor_arch_load(netsnmp_cache *cache, void *vp) {
         }
     }
 
+    kstat_close(kc);
     return 0;
 }
