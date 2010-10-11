@@ -584,6 +584,8 @@ NETSNMP_ARG_ENABLE(developer,
      developer="yes"
    elif test "$enableval" != no ; then
      AC_MSG_ERROR([Please use --enable/--disable-developer])
+   else
+     developer="no"
    fi])
 
 NETSNMP_ARG_ENABLE(testing-code,
