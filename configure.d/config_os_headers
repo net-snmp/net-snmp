@@ -478,6 +478,6 @@ fi
 #
 # for ucd-snmp/lmsensorsMib
 #
-AC_CHECK_HEADERS([sensors/sensors.h])
+AC_CHECK_HEADERS([sensors/sensors.h picl.h])
 
 fi # NETSNMP_QUICK_CHECK
