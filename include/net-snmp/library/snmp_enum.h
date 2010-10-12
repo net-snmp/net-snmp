@@ -96,6 +96,7 @@ extern          "C" {
     void            se_store_enum_list(struct snmp_enum_list *new_list,
                                        const char *token, char *type);
     void            se_store_list(unsigned int major, unsigned int minor, char *type);
+    void            se_clear_slist(const char *listname);
     void            se_store_slist(const char *listname, char *type);
     int             se_store_slist_callback(int majorID, int minorID,
                                            void *serverargs, void *clientargs);
