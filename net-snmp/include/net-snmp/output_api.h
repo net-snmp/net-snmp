@@ -9,6 +9,10 @@
 #include <net-snmp/types.h>
 #include <stdarg.h>	/* for va_list */
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
     /* Error reporting */
     NETSNMP_IMPORT
     void    snmp_error(netsnmp_session *sess, int *clib_errorno,
@@ -21,7 +25,7 @@
     const char *snmp_api_errstring(int snmp_errorno);  /*  library errors */
     NETSNMP_IMPORT
     const char     *snmp_errstring(int snmp_errorno);  /* protocol errors */
-                   
+
     NETSNMP_IMPORT
     void    snmp_perror(const char *msg);   /* for parsing errors only */
 
@@ -136,6 +140,10 @@
      *  will probably also cover the relevant internal API calls.
      *  Hence they are listed here:
      */
+
+#ifdef __cplusplus
+}
+#endif
 
 #include <net-snmp/library/snmp_api.h>
 #include <net-snmp/library/snmp_client.h>

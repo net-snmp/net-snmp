@@ -80,10 +80,6 @@ extern          "C" {
     NETSNMP_IMPORT
     int             snmp_clone_var(netsnmp_variable_list *,
                                    netsnmp_variable_list *);
-/* Moved to output_api.h
-    NETSNMP_IMPORT
-    const char     *snmp_errstring(int);
- */
     NETSNMP_IMPORT
     int             snmp_synch_response_cb(netsnmp_session *,
                                            netsnmp_pdu *, netsnmp_pdu **,
