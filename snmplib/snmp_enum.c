@@ -28,10 +28,10 @@ struct snmp_enum_list_str {
     struct snmp_enum_list_str *next;
 };
 
-static struct snmp_enum_list ***snmp_enum_lists = NULL;
+static struct snmp_enum_list ***snmp_enum_lists;
 unsigned int    current_maj_num;
 unsigned int    current_min_num;
-static struct snmp_enum_list_str *sliststorage = NULL;
+static struct snmp_enum_list_str *sliststorage;
 
 int
 init_snmp_enum(const char *type)
@@ -120,7 +120,7 @@ se_read_conf(const char *word, char *cptr)
             cp2 = e_enum;
             while (*(cp2++) != ':')
                 ;
-            se_add_pair(major, minor, cp2, value);
+            se_add_pair(major, minor, strdup(cp2), value);
             if (!cp)
                 break;
         }
@@ -136,7 +136,7 @@ se_read_conf(const char *word, char *cptr)
             cp2 = e_enum;
             while (*(cp2++) != ':')
                 ;
-            se_add_pair_to_slist(e_name, cp2, value);
+            se_add_pair_to_slist(e_name, strdup(cp2), value);
             if (!cp)
                 break;
         }
@@ -304,8 +304,8 @@ se_add_pair(unsigned int major, unsigned int minor, char *label, int value)
 /*
  * remember a list of enums based on a lookup name.
  */
-struct snmp_enum_list *
-se_find_slist(const char *listname)
+static struct snmp_enum_list **
+se_find_slist_ptr(const char *listname)
 {
     struct snmp_enum_list_str *sptr, *lastp = NULL;
     if (!listname)
@@ -314,11 +314,17 @@ se_find_slist(const char *listname)
     for (sptr = sliststorage;
          sptr != NULL; lastp = sptr, sptr = sptr->next)
         if (sptr->name && strcmp(sptr->name, listname) == 0)
-            return sptr->list;
+            return &sptr->list;
 
     return NULL;
 }
 
+struct snmp_enum_list *
+se_find_slist(const char *listname)
+{
+    struct snmp_enum_list **ptr = se_find_slist_ptr(listname);
+    return ptr ? *ptr : NULL;
+}
 
 char           *
 se_find_label_in_slist(const char *listname, int value)
@@ -359,22 +365,28 @@ se_add_pair_to_slist(const char *listname, char *label, int value)
     return ret;
 }
 
+static void
+free_enum_list(struct snmp_enum_list *list)
+{
+    struct snmp_enum_list *next;
+
+    while (list) {
+        next = list->next;
+        SNMP_FREE(list->label);
+        SNMP_FREE(list);
+        list = next;
+    }
+}
+
 void
 clear_snmp_enum(void)
 {
     struct snmp_enum_list_str *sptr = sliststorage, *next = NULL;
-    struct snmp_enum_list *list = NULL, *nextlist = NULL;
-    int i;
+    int i, j;
 
     while (sptr != NULL) {
 	next = sptr->next;
-	list = sptr->list;
-	while (list != NULL) {
-	    nextlist = list->next;
-	    SNMP_FREE(list->label);
-	    SNMP_FREE(list);
-	    list = nextlist;
-	}
+	free_enum_list(sptr->list);
 	SNMP_FREE(sptr->name);
 	SNMP_FREE(sptr);
 	sptr = next;
@@ -383,8 +395,13 @@ clear_snmp_enum(void)
 
     if (snmp_enum_lists) {
         for (i = 0; i < SE_MAX_IDS; i++) {
-            if (snmp_enum_lists[i])
+            if (snmp_enum_lists[i]) {
+                for (j = 0; j < SE_MAX_SUBIDS; j++) {
+                    if (snmp_enum_lists[i][j])
+                        free_enum_list(snmp_enum_lists[i][j]);
+                }
                 SNMP_FREE(snmp_enum_lists[i]);
+            }
         }
         SNMP_FREE(snmp_enum_lists);
     }
@@ -412,8 +429,7 @@ se_clear_list(struct snmp_enum_list **list)
 void
 se_clear_slist(const char *listname)
 {
-    struct snmp_enum_list *list = se_find_slist(listname);
-    se_clear_list(&list);
+    se_clear_list(se_find_slist_ptr(listname));
 }
 
 void
@@ -441,22 +457,3 @@ se_clear_all_lists(void)
     for (sptr = sliststorage; sptr != NULL; sptr = sptr->next)
         se_clear_list(&(sptr->list));
 }
-
-#ifdef TESTING
-main()
-{
-    init_snmp_enum();
-    se_add_pair(1, 1, "hi", 1);
-    se_add_pair(1, 1, "there", 2);
-    printf("hi: %d\n", se_find_value(1, 1, "hi"));
-    printf("2: %s\n", se_find_label(1, 1, 2));
-
-    se_add_pair_to_slist("testing", "life, and everything", 42);
-    se_add_pair_to_slist("testing", "restaurant at the end of the universe",
-                         2);
-
-    printf("life, and everything: %d\n",
-           se_find_value_in_slist("testing", "life, and everything"));
-    printf("2: %s\n", se_find_label_in_slist("testing", 2));
-}
-#endif                          /* TESTING */
