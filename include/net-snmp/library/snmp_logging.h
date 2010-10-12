@@ -1,10 +1,6 @@
 #ifndef SNMP_LOGGING_H
 #define SNMP_LOGGING_H
 
-#ifdef __cplusplus
-extern          "C" {
-#endif
-
 #include <net-snmp/types.h>
 #include <net-snmp/output_api.h>
 
@@ -13,6 +9,10 @@ extern          "C" {
 #endif
 #include <stdio.h>
 #include <stdarg.h>
+
+#ifdef __cplusplus
+extern          "C" {
+#endif
 
 #ifndef LOG_ERR
 #define LOG_EMERG       0       /* system is unusable */
@@ -43,21 +43,12 @@ extern          "C" {
     } while(0)
 
     void            init_snmp_logging(void);
-/* Moved to output_api.h
-    void            shutdown_snmp_logging(void);
-    NETSNMP_IMPORT
-    int             snmp_get_do_logging(void);
- */
     NETSNMP_IMPORT
     void            snmp_disable_syslog(void);
     void            snmp_disable_filelog(void);
     NETSNMP_IMPORT
     void            snmp_disable_stderrlog(void);
     void            snmp_disable_calllog(void);
-/* Moved to output_api.h
-    NETSNMP_IMPORT
-    void            snmp_disable_log(void);
- */
     NETSNMP_IMPORT
     void            snmp_enable_syslog(void);
     NETSNMP_IMPORT
@@ -72,31 +63,6 @@ extern          "C" {
 
     NETSNMP_IMPORT
     int             snmp_stderrlog_status(void);
-
-/* Moved to output_api.h
-#if !defined(__GNUC__) || __GNUC__ < 2 || (__GNUC__ == 2 && __GNUC_MINOR__ < 8)
-    NETSNMP_IMPORT
-    int             snmp_log(int priority, const char *format, ...);
-#else
-    NETSNMP_IMPORT
-    int             snmp_log(int priority, const char *format, ...)
-                    	__attribute__ ((__format__ (__printf__, 2, 3)));
-#endif
-    int             snmp_vlog(int priority, const char *format,
-                              va_list ap);
- */
-
-    /*
-     * 0 - successful message formatting 
-     * -1 - Could not format log-string 
-     * -2 - Could not allocate memory for log-message 
-     * -3 - Log-message too long! 
-     */
-
-/* Moved to output_api.h
-    NETSNMP_IMPORT
-    void            snmp_log_perror(const char *s);
- */
 
 
 #define NETSNMP_LOGHANDLER_STDOUT	1
