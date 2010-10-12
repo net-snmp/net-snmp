@@ -462,9 +462,8 @@ of utility projects for the individual executable commands ('snmpget',
 'snmpwalk', etc...).  All of these projects require the .lib created by 
 the libsnmp project.
 
-The agent requires the core library plus the other three library projects
-('libagent', libhelpers' and 'netsnmpmibs') together with the main agent
-project ('snmpd').
+The agent requires the core library plus the other two library projects
+('libagent' and 'netsnmpmibs') together with the main agent project ('snmpd').
 
 The final application project is the trap handler 'snmptrapd'.  This also
 requires the agent libraries ('libagent' and 'netsnmpmibs') as well as the

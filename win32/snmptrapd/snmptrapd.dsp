@@ -88,6 +88,10 @@ SOURCE=..\..\apps\snmptrapd.c
 # End Source File
 # Begin Source File
 
+SOURCE=..\..\apps\snmptrapd_handlers.c
+# End Source File
+# Begin Source File
+
 SOURCE=..\..\snmplib\winservice.c
 # End Source File
 # Begin Source File
