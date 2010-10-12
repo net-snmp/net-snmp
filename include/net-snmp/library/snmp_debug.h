@@ -201,8 +201,16 @@ extern          "C" {
 /*****************************************************************/
 #endif /* NETSNMP_NO_DEBUGGING */
 
+#ifdef __cplusplus
+}
+#endif
+
     /* Public macros moved to top-level API header file */
 #include <net-snmp/output_api.h>
+
+#ifdef __cplusplus
+extern          "C" {
+#endif
 
     void            snmp_debug_init(void);
 
