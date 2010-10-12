@@ -48,6 +48,11 @@ extern          "C" {
     int             se_find_free_value(unsigned int major, unsigned int minor);
     char           *se_find_label(unsigned int major, unsigned int minor,
                                   int value);
+    /**
+     * Add the pair (label, value) to the list (major, minor). Transfers
+     * ownership of the memory pointed to by label to the list:
+     * clear_snmp_enum() deallocates that memory.
+     */
     int             se_add_pair(unsigned int major, unsigned int minor,
                                 char *label, int value);
 
@@ -95,6 +100,10 @@ extern          "C" {
     int             se_store_slist_callback(int majorID, int minorID,
                                            void *serverargs, void *clientargs);
     void            se_read_conf(const char *word, char *cptr);
+    /**
+     * Deallocate the memory allocated by init_snmp_enum(): remove all key/value
+     * pairs stored by se_add_*() calls.
+     */
     NETSNMP_IMPORT
     void            clear_snmp_enum(void);
 
