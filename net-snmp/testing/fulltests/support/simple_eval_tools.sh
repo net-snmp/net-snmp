@@ -665,7 +665,7 @@ FINISHED() {
 	fi
     done
 
-    # retuport the number of tests done
+    # report the number of tests done
     GOOD "got to FINISHED"
     echo "1..$testnum"
 
