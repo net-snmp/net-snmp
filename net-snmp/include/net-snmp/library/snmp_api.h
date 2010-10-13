@@ -477,7 +477,7 @@ struct netsnmp_transport_s;
 
     NETSNMP_IMPORT int
     netsnmp_sess_config_and_open_transport(netsnmp_session *in_session,
-                                           netsnmp_transport *transport);
+                                           struct netsnmp_transport_s *transport);
 
     /*
      * EXPERIMENTAL API EXTENSIONS ------------------------------------------ 
