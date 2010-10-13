@@ -35,6 +35,8 @@ GetOptions(\%opts,
 # Change srcdir and builddir to absolute paths
 $opts{'srcdir'} = abs_path($opts{'srcdir'});
 $opts{'builddir'} = abs_path($opts{'builddir'});
+# Set exeext.
+$opts{'exeext'} = join(readpipe($opts{'builddir'} . '/net-snmp-config --exeext'));
 
 usage() if ($opts{'help'});
 
@@ -42,7 +44,7 @@ usage() if ($opts{'help'});
 my %args = (
 	    verbosity => ($opts{'verbose'} ? 1 : ($opts{'quiet'} ? -1 : 0)),
 	    exec => \&decide_exec,
-	    # this option is *really* wierd in how it works
+	    # this option is *really* weird in how it works
 	    failures => ($opts{'quiet'} ? 0 : ($opts{'verbose'} ? 0 : 1)),
 	    errors => ($opts{'quiet'} ? 0 : 1),
 	   );
@@ -162,26 +164,17 @@ exit($results->all_passed() ? 0 : 1);
 sub decide_exec {
     my ( $harness, $testfile ) = @_;
 
-    # 1) if it's a known executable type, just run it.
-    if ($testfile =~ /\.exe$/) {
-	return [$testfile];
-    }
-
-    # 1) if it's a known executable built by libtool, call libtool to run it.
-    if ($testfile =~ /\.exe\.lt$/) {
-	return ["$opts{'builddir'}/libtool", "--mode=execute", $testfile];
-    }
-
-    # see if we have a registered runner script
+    # 1) Parse the $testfile argument.
     my ($dirname, $groupname, $basename, $app_extension, $file_extension) = 
       ($testfile =~ /([^\/]+)\/([^\/]+)\/([^\/]+)_([^_]+)\.*([^\.]*)$/);
+    $app_extension =~ s/$opts{'exeext'}\$//;
 
-    # 2) we have a BUILD_TYPE file in the same directory
+    # 2) we have a RUN_TYPE file in the same directory
     if (exists($support{'run'}{$app_extension}{$groupname})) {
 	return [$support{'run'}{$app_extension}{$groupname}, $testfile];
     }
 
-    # 3) return a generic build script
+    # 3) return a generic run script
     if (exists($support{'run'}{$app_extension}{'generic'})) {
 	return [$support{'run'}{$app_extension}{'generic'}, $testfile];
     }
@@ -368,7 +361,7 @@ sub call_build_script {
     my ($scriptname, $filename) = @_;
 
     my $maybenewfile = $filename;
-    $maybenewfile =~ s/.[^\.]+$/.exe/;   # add .exe suffix
+    $maybenewfile =~ s/.[^\.]+$/$opts{'exeext'}/;
     $maybenewfile =~ s/T([^\/]+)$/B$1/;  # change prefix to B for 'Built'
     $maybenewfile =~ s/^$opts{'srcdir'}\///;
 
