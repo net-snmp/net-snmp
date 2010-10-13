@@ -11,12 +11,6 @@ NULL=
 NULL=nul
 !ENDIF 
 
-!IF $(SSL) == 1
-OPENSSL=libeay32.lib gdi32.lib
-!ELSE
-OPENSSL=""
-!ENDIF
-
 ALL : "..\bin\$(OUTDIR)\netsnmp.dll"
 
 LINK32_OBJS= \
