@@ -4,7 +4,7 @@
 #
 # this shell script is designed to merely dump the configuration
 # information about how the net-snmp package was compiled.  The
-# information is particularily useful for applications that need to
+# information is particularly useful for applications that need to
 # link against the net-snmp libraries and hence must know about any
 # other libraries that must be linked in as well.
 
@@ -718,7 +718,7 @@ if test "x$usage" = "xyes"; then
   echo "    --build-lib-dirs      link path to libraries"
   echo "    --build-lib-deps      path to libraries for dependency target"
   echo ""
-  echo "  Automatted subagent building (produces an OUTPUTNAME binary file):"
+  echo "  Automated subagent building (produces an OUTPUTNAME binary file):"
   echo "  [this feature has not been tested very well yet.  use at your risk.]"
   echo ""
   echo "    --compile-subagent OUTPUTNAME [--norm] [--cflags flags]"
