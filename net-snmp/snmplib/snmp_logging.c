@@ -1012,7 +1012,7 @@ int
 log_handler_stdouterr(  netsnmp_log_handler* logh, int pri, const char *str)
 {
     static int      newline = 1;	 /* MTCRITICAL_RESOURCE */
-    char           *newline_ptr;
+    const char     *newline_ptr;
     char            sbuf[40];
 
     if (netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID, 

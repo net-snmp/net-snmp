@@ -527,7 +527,7 @@ netsnmp_tdomain_transport_full(const char *application,
     /* First try - assume that there is a domain in str (domain:target) */
 
     if (str != NULL) {
-        char *cp;
+        const char *cp;
         if ((cp = strchr(str, ':')) != NULL) {
             char* mystring = (char*)malloc(cp + 1 - str);
             memcpy(mystring, str, cp - str);
