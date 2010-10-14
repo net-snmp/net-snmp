@@ -130,7 +130,7 @@ netsnmp_tlstcp_copy(netsnmp_transport *oldt, netsnmp_transport *newt)
     if (oldtlsdata->trust_cert)
         newtlsdata->trust_cert = strdup(oldtlsdata->trust_cert);
     if (oldtlsdata->remote_addr)
-        memdup(&newtlsdata->remote_addr, oldtlsdata->remote_addr,
+        memdup((u_char**)&newtlsdata->remote_addr, oldtlsdata->remote_addr,
                sizeof(netsnmp_indexed_addr_pair));
 
     return 0;
