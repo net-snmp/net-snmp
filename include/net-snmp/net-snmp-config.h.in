@@ -128,6 +128,9 @@
 /* Define to 1 if you have the <dmalloc.h> header file. */
 #undef HAVE_DMALLOC_H
 
+/* Set if the dpkg-query command is available */
+#undef HAVE_DPKG_QUERY
+
 /* Define to 1 if you have the <err.h> header file. */
 #undef HAVE_ERR_H
 
@@ -259,6 +262,9 @@
 
 /* Define to 1 if you have the <iphlpapi.h> header file. */
 #undef HAVE_IPHLPAPI_H
+
+/* Define if you have /dev/kmem */
+#undef HAVE_KMEM
 
 /* Define to 1 if you have the `knlist' function. */
 #undef HAVE_KNLIST
@@ -2000,7 +2006,7 @@
 #undef CMU_COMPATIBLE
 
 /* final conclusion on nlist usage */
-#if defined(HAVE_NLIST) && defined(HAVE_STRUCT_NLIST_N_VALUE) && !defined(NETSNMP_DONT_USE_NLIST) && !defined(NETSNMP_NO_KMEM_USAGE)
+#if defined(HAVE_NLIST) && defined(HAVE_STRUCT_NLIST_N_VALUE) && !defined(NETSNMP_DONT_USE_NLIST) && defined(HAVE_KMEM) && !defined(NETSNMP_NO_KMEM_USAGE)
 #define NETSNMP_CAN_USE_NLIST
 #endif
 
