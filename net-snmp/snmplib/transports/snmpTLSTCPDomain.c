@@ -488,7 +488,6 @@ netsnmp_tlstcp_close(netsnmp_transport *t)
 static int
 netsnmp_tlstcp_accept(netsnmp_transport *t)
 {
-    char           *str = NULL;
     BIO            *accepted_bio;
     int             rc;
     SSL_CTX *ctx;
@@ -583,9 +582,7 @@ netsnmp_tlstcp_accept(netsnmp_transport *t)
 
     /* XXX: check acceptance criteria here */
 
-    DEBUGMSGTL(("tlstcp", "accept succeeded (from %s) on sock %d\n",
-                str, t->sock));
-    free(str);
+    DEBUGMSGTL(("tlstcp", "accept succeeded on sock %d\n", t->sock));
 
     /* RFC5953 Section 5.1.2 step 1, part2::
      * If this is the first message received through this session and
