@@ -814,4 +814,55 @@ netsnmp_openssl_err_log(const char *prefix)
     }
 }
 
+void
+netsnmp_openssl_null_checks(SSL *ssl, int *null_auth, int *null_cipher)
+{
+    SSL_CIPHER     *cipher;
+    char           *description, tmp_buf[128], *cipher_alg, *auth_alg;
+
+    if (null_auth)
+        *null_auth = -1; /* unknown */
+    if (null_cipher)
+        *null_cipher = -1; /* unknown */
+    if (NULL == ssl)
+        return;
+
+    cipher = SSL_get_current_cipher(ssl);
+    if (NULL == cipher) {
+        DEBUGMSGTL(("ssl:cipher", "no cipher yet\n"));
+        return;
+    }
+    description = SSL_CIPHER_description(cipher, tmp_buf, sizeof(tmp_buf));
+    /** no \n since tmp_buf already has one */
+    DEBUGMSGTL(("ssl:cipher", "current cipher: %s", tmp_buf));
+
+    /*
+     * run "openssl ciphers -v eNULL" and "openssl ciphers -v aNULL"
+     * to see NULL encryption/authentication algorithms. e.g.
+     *
+     * EXP-ADH-RC4-MD5 SSLv3 Kx=DH(512) Au=None Enc=RC4(40) Mac=MD5  export
+     * NULL-SHA        SSLv3 Kx=RSA     Au=RSA  Enc=None    Mac=SHA1
+     */
+    if (null_cipher) {
+        cipher_alg = strstr(tmp_buf, "Enc=");
+        if (cipher_alg) {
+            cipher_alg += 4;
+            if (strncmp(cipher_alg,"None", 4) == 0)
+                *null_cipher = 1;
+            else
+                *null_cipher = 0;
+        }
+    }
+    if (null_auth) {
+        auth_alg = strstr(tmp_buf, "Au=");
+        if (auth_alg) {
+            auth_alg += 3;
+            if (strncmp(auth_alg,"None", 4) == 0)
+                *null_auth = 1;
+            else
+                *null_auth = 0;
+        }
+    }
+}
+
 #endif /* NETSNMP_USE_OPENSSL && HAVE_LIBSSL */
