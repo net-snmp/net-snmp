@@ -300,7 +300,7 @@ netsnmp_sockaddr_ipx2(struct sockaddr_ipx *addr, const char *peername,
     addr->sipx_type = 4;        /*  Specified in RFC 1420.  */
 
     network = input = strdup(peername ? peername : "");
-    tmp = strchr(network, ':');
+    tmp = strchr(input, ':');
     if (tmp != NULL) {
         DEBUGMSGTL(("netsnmp_sockaddr_ipx", "Node identified\n"));
         *tmp++ = '\0';
@@ -308,7 +308,7 @@ netsnmp_sockaddr_ipx2(struct sockaddr_ipx *addr, const char *peername,
         tmp = strchr(tmp, '/');
     } else {
         node = NULL;
-        tmp = strchr(network, '/');
+        tmp = strchr(input, '/');
     }
     if (tmp != NULL) {
         DEBUGMSGTL(("netsnmp_sockaddr_ipx", "Port identified\n"));
