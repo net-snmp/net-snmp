@@ -137,11 +137,11 @@ AC_CACHE_CHECK([how to get the name of the current function],
                [netsnmp_cv__func__name],[
     netsnmp_cv__func__name=no
     AC_COMPILE_IFELSE(
-        AC_LANG_PROGRAM(,[[const char* cp = __func__;]]),
+        [AC_LANG_PROGRAM(,[[const char* cp = __func__;]])],
         [netsnmp_cv__func__name=__func__])
     if test "$netsnmp_cv__func__name" = no ; then
       AC_COMPILE_IFELSE(
-        AC_LANG_PROGRAM(,[[const char* cp = __FUNCTION__;]]),
+        [AC_LANG_PROGRAM(,[[const char* cp = __FUNCTION__;]])],
         [netsnmp_cv__func__name=__FUNCTION__])
     fi])
 if test "$netsnmp_cv__func__name" != no; then
@@ -154,14 +154,14 @@ fi
 #
 AC_CACHE_CHECK([[whether static inline functions are broken (Unixware)]],
                 [netsnmp_cv_c_broken_inline],
-    AC_COMPILE_IFELSE([[
+    AC_COMPILE_IFELSE([AC_LANG_SOURCE([
 static inline int nested_inline_function(void) {
   return 0;
 }
 inline int main_inline_function( void ) {
   return nested_inline_function();
 }
-    ]],
+    ])],
     netsnmp_cv_broken_inline=no,
     netsnmp_cv_broken_inline=yes))
 

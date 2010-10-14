@@ -341,7 +341,7 @@ AC_CACHE_CHECK([if _KERNEL needs to be defined for if_mtu],
         [ac_cv_IFNET_NEEDS_KERNEL],
         [ac_cv_IFNET_NEEDS_KERNEL=unknown
          AC_COMPILE_IFELSE(
-             AC_LANG_PROGRAM([
+             [AC_LANG_PROGRAM([
 #include <sys/types.h>
 #ifdef HAVE_SYS_PARAM_H
 #include <sys/param.h>
@@ -355,11 +355,11 @@ AC_CACHE_CHECK([if _KERNEL needs to be defined for if_mtu],
 #ifdef HAVE_NET_IF_VAR_H
 #include <net/if_var.h>
 #endif
-             ], [[struct ifnet test; test.if_mtu = 0;]]),
+             ], [[struct ifnet test; test.if_mtu = 0;]])],
              [ac_cv_IFNET_NEEDS_KERNEL=no])
          if test "$ac_cv_IFNET_NEEDS_KERNEL" = unknown ; then
          AC_COMPILE_IFELSE(
-             AC_LANG_PROGRAM([
+             [AC_LANG_PROGRAM([
 #define _KERNEL 1
 #include <sys/types.h>
 #ifdef HAVE_SYS_PARAM_H
@@ -374,7 +374,7 @@ AC_CACHE_CHECK([if _KERNEL needs to be defined for if_mtu],
 #ifdef HAVE_NET_IF_VAR_H
 #include <net/if_var.h>
 #endif
-             ], [[struct ifnet test; test.if_mtu = 0;]]),
+             ], [[struct ifnet test; test.if_mtu = 0;]])],
              [ac_cv_IFNET_NEEDS_KERNEL=yes])
          fi])
 
