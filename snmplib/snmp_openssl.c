@@ -505,7 +505,7 @@ netsnmp_openssl_cert_get_fingerprint(X509 *ocert, int alg)
             digest = EVP_sha1();
             break;
 
-#ifndef OPENSSL_NO_SHA256
+#ifdef HAVE_EVP_SHA224
         case NS_HASH_SHA224:
             digest = EVP_sha224();
             break;
@@ -515,7 +515,7 @@ netsnmp_openssl_cert_get_fingerprint(X509 *ocert, int alg)
             break;
 
 #endif
-#ifndef OPENSSL_NO_SHA512
+#ifdef HAVE_EVP_SHA384
         case NS_HASH_SHA384:
             digest = EVP_sha384();
             break;
