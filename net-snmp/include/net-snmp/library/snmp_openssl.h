@@ -38,6 +38,7 @@ extern          "C" {
      * misc
      */
     void netsnmp_openssl_err_log(const char *prefix);
+    void netsnmp_openssl_null_checks(SSL *ssl, int *nullAuth, int *nullCipher);
 
 #ifdef __cplusplus
 }
