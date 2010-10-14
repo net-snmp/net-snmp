@@ -32,5 +32,4 @@ for(i = 0; i < NETSNMP_DS_MAX_IDS; i++) {
     }
 }
 
-
-    
+netsnmp_ds_shutdown();
