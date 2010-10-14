@@ -58,6 +58,7 @@ extern          "C" {
                                                      netsnmp_table_row  *row);
     void   *netsnmp_table_data_remove_and_delete_row(netsnmp_table_data *table,
                                                      netsnmp_table_row  *row);
+    void    netsnmp_table_data_delete_table( netsnmp_table_data *table );
 
 /* =================================
  * Table Data API: MIB maintenance
