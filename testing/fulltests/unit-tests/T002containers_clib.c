@@ -1,5 +1,7 @@
 /* HEADER Testing the container API */
+
 netsnmp_container *container;
+void *p;
 
 init_snmp("container-test");
 container = netsnmp_container_find("fifo");
@@ -25,3 +27,9 @@ OK(CONTAINER_FIND(container, "bar") == NULL,
 
 OK(CONTAINER_SIZE(container) == 2,
    "container has the proper size for the elements after a removal");
+
+while ((p = CONTAINER_FIRST(container)))
+  CONTAINER_REMOVE(container, p);
+CONTAINER_FREE(container);
+
+snmp_shutdown("container-test");
