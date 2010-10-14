@@ -123,7 +123,7 @@ int verify_callback(int ok, X509_STORE_CTX *ctx) {
 }
 
 #define VERIFIED_FINGERPRINT      0
-#define NO_FINGERPNINT_AVAILABLE  1
+#define NO_FINGERPRINT_AVAILABLE  1
 #define FAILED_FINGERPRINT_VERIFY 2
 
 static int
@@ -177,7 +177,7 @@ _netsnmp_tlsbase_verify_remote_fingerprint(X509 *remote_cert,
         }
     } else {
         DEBUGMSGTL(("tls_x509:verify", "No fingerprint for the remote entity available to verify\n"));
-        return NO_FINGERPNINT_AVAILABLE;
+        return NO_FINGERPRINT_AVAILABLE;
     }
 
     free(fingerprint);
@@ -212,7 +212,7 @@ netsnmp_tlsbase_verify_server_cert(SSL *ssl, _netsnmpTLSBaseData *tlsdata) {
     case FAILED_FINGERPRINT_VERIFY:
         return SNMPERR_GENERR;
 
-    case NO_FINGERPNINT_AVAILABLE:
+    case NO_FINGERPRINT_AVAILABLE:
         if (tlsdata->their_hostname && tlsdata->their_hostname[0] != '\0') {
             GENERAL_NAMES      *onames;
             const GENERAL_NAME *oname = NULL;
@@ -341,7 +341,7 @@ netsnmp_tlsbase_verify_client_cert(SSL *ssl, _netsnmpTLSBaseData *tlsdata) {
         DEBUGMSGTL(("tls_x509:verify", "failed to verify a client fingerprint\n"));
         return SNMPERR_GENERR;
 
-    case NO_FINGERPNINT_AVAILABLE:
+    case NO_FINGERPRINT_AVAILABLE:
         DEBUGMSGTL(("tls_x509:verify", "no known fingerprint available (not a failure case)\n"));
         return SNMPERR_SUCCESS;
 
