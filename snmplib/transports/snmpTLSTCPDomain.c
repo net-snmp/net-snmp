@@ -539,6 +539,25 @@ netsnmp_tlstcp_accept(netsnmp_transport *t)
         return -1;
     }   
 
+    /*
+     * currently netsnmp_tlsbase_wrapup_recv is where we check for
+     * algorithm compliance, but for tls we know the algorithms
+     * at this point, so we could bail earlier...
+     */
+#if 0 /* moved checks to netsnmp_tlsbase_wrapup_recv */
+    netsnmp_openssl_null_checks(tlsdata->ssl, &no_auth, NULL);
+    if (no_auth != 0) { /* null/unknown authentication */
+        /* xxx-rks: snmp_increment_statistic(STAT_???); */
+        snmp_log(LOG_ERR, "tlstcp: connection with NULL authentication\n");
+        SSL_shutdown(tlsdata->ssl);
+        SSL_free(tlsdata->ssl);
+        BIO_free(accepted_bio);
+        tlsdata->accepted_bio = NULL;
+        tlsdata->ssl = NULL;
+        return -1;
+    }
+#endif
+
     /* RFC5953 Section 5.3.2: Accepting a Session as a Server
        A (D)TLS server should accept new session connections from any client
        that it is able to verify the client's credentials for.  This is done

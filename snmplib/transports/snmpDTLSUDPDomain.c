@@ -634,7 +634,22 @@ netsnmp_dtlsudp_recv(netsnmp_transport *t, void *buf, int size,
        net-snmp select loop because it's already been pulled
        out; need to deal with this) */
     rc = SSL_read(tlsdata->ssl, buf, size);
-            
+
+    /*
+     * currently netsnmp_tlsbase_wrapup_recv is where we check for
+     * algorithm compliance, but we (sometimes) know the algorithms
+     * at this point, so we could bail earlier...
+     */
+#if 0 /* moved checks to netsnmp_tlsbase_wrapup_recv */
+    netsnmp_openssl_null_checks(tlsdata->ssl, &no_auth, NULL);
+    if (no_auth == 1) { /* null/unknown authentication */
+        /* xxx-rks: snmp_increment_statistic(STAT_???); */
+        snmp_log(LOG_ERR, "dtlsudp: connection with NULL authentication\n");
+        SNMP_FREE(tmStateRef);
+        return -1;
+    }
+#endif
+
     while (rc == -1) {
         int errnum = SSL_get_error(tlsdata->ssl, rc);
         int bytesout;
