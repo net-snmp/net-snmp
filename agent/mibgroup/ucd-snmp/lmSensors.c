@@ -977,7 +977,7 @@ else{
                 !sensors_get_label(*chip, data->number, &label) &&
                 !sensors_get_feature(*chip, data->number, &val)) {
                 int             type = -1;
-                float           mul;
+                float           mul = 0;
                 _sensor_array  *array;
 
                 /* The label, as determined for a given chip in sensors.conf,
@@ -1019,10 +1019,10 @@ else{
                            free(label);
                            label = NULL;
                        } /* end if label */
-                       return (rc=1);
+                       return 1;
                     } /* end if array->sensor */
                     array->current_len = new_size / sizeof(_sensor);
-                    DEBUGMSG(("ucd-snmp/lmSensors", "type #%d increased to %d elements\n", type, array->current_len));
+                    DEBUGMSG(("ucd-snmp/lmSensors", "type #%d increased to %d elements\n", type, (int)array->current_len));
                 } /* end if array->current */
                 strncpy(array->sensor[array->n].name, label, MAX_NAME);
                 array->sensor[array->n].value = (int) (val * mul);
