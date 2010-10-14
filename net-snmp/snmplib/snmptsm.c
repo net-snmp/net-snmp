@@ -530,6 +530,7 @@ tsm_process_in_msg(struct snmp_secmod_incoming_params *parms)
        message.*/
     if (parms->secLevel > tmStateRef->transportSecurityLevel) {
         snmp_increment_statistic(STAT_TSM_SNMPTSMINADEQUATESECURITYLEVELS);
+        DEBUGMSGTL(("tsm", "inadequate security level\n", parms->secLevel));
         /* net-snmp returns error codes not OIDs, which are dealt with later */
         return SNMPERR_UNSUPPORTED_SEC_LEVEL;
     }

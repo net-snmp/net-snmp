@@ -810,9 +810,32 @@ void netsnmp_tlsbase_free_tlsdata(_netsnmpTLSBaseData *tlsbase) {
 int netsnmp_tlsbase_wrapup_recv(netsnmp_tmStateReference *tmStateRef,
                                 _netsnmpTLSBaseData *tlsdata,
                                 void **opaque, int *olength) {
+    int no_auth, no_priv;
+
+    if (NULL == tlsdata)
+        return SNMPERR_GENERR;
+
     /* RFC5953 Section 5.1.2 step 2: tmSecurityLevel */
-    /* XXX: disallow NULL auth/encr algs in our implementations */
-    tmStateRef->transportSecurityLevel = SNMP_SEC_LEVEL_AUTHPRIV;
+    /*
+     * Don't accept null authentication. Null encryption ok.
+     *
+     * XXX: this should actually check for a configured list of encryption
+     *      algorithms to map to NOPRIV, but for the moment we'll
+     *      accept any encryption alogrithms that openssl is using.
+     */
+    netsnmp_openssl_null_checks(tlsdata->ssl, &no_auth, &no_priv);
+    if (no_auth == 1) { /* null/unknown authentication */
+        /* xxx-rks: snmp_increment_statistic(STAT_???); */
+        snmp_log(LOG_ERR, "tls connection with NULL authentication\n");
+        SNMP_FREE(tmStateRef);
+        return SNMPERR_GENERR;
+    }
+    else if (no_priv == 1) /* null/unknown encryption */
+        tmStateRef->transportSecurityLevel = SNMP_SEC_LEVEL_AUTHNOPRIV;
+    else
+        tmStateRef->transportSecurityLevel = SNMP_SEC_LEVEL_AUTHPRIV;
+    DEBUGMSGTL(("tls:secLevel", "SecLevel %d\n",
+                tmStateRef->transportSecurityLevel));
 
     /* use x509 cert to do lookup to secname if DNE in cachep yet */
 
