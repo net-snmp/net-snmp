@@ -33,6 +33,9 @@ unsigned int    current_maj_num;
 unsigned int    current_min_num;
 static struct snmp_enum_list_str *sliststorage;
 
+static void
+free_enum_list(struct snmp_enum_list *list);
+
 int
 init_snmp_enum(const char *type)
 {
@@ -269,8 +272,10 @@ se_add_pair_to_list(struct snmp_enum_list **list, char *label, int value)
 
     tmp = *list;
     while (tmp) {
-        if (tmp->value == value)
+        if (tmp->value == value) {
+            free(label);
             return (SE_ALREADY_THERE);
+        }
         lastnode = tmp;
         tmp = tmp->next;
     }
@@ -355,8 +360,10 @@ se_add_pair_to_slist(const char *listname, char *label, int value)
     if (!created) {
         struct snmp_enum_list_str *sptr =
             SNMP_MALLOC_STRUCT(snmp_enum_list_str);
-        if (!sptr)
+        if (!sptr) {
+            free_enum_list(list);
             return SE_NOMEM;
+        }
         sptr->next = sliststorage;
         sptr->name = strdup(listname);
         sptr->list = list;
