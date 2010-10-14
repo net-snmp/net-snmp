@@ -63,14 +63,6 @@
 #endif
 
 /*
- * Although Darwin does have a kvm.h file, kvm_openfiles etc. always
- * return null because /dev/kmem was removed in OS X 10.4 for Intel.
- */
-#undef HAVE_KVM_H
-#undef HAVE_KVM_GETPROCS
-#undef HAVE_KVM_OPENFILES
-
-/*
  * Although Darwin does have an fstab.h file, getfsfile etc. always return null.
  * At least, as of 5.3.
  */
