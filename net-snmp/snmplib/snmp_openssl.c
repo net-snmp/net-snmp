@@ -481,6 +481,9 @@ netsnmp_openssl_cert_get_fingerprint(X509 *ocert, int alg)
     const EVP_MD    *digest;
     char            *result = NULL;
 
+    if (NULL == ocert)
+        return NULL;
+
     nid = OBJ_obj2nid(ocert->sig_alg->algorithm);
     DEBUGMSGT(("9:openssl:fingerprint", "alg %d, cert nid %d (%d)\n", alg, nid,
                _nid2ht(nid)));
