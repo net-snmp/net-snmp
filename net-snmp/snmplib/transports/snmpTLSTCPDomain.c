@@ -521,6 +521,8 @@ netsnmp_tlstcp_accept(netsnmp_transport *t)
     ssl = tlsdata->ssl = SSL_new(ctx);
     if (!tlsdata->ssl) {
         snmp_log(LOG_ERR, "TLSTCP: Failed to create a SSL BIO\n");
+        BIO_free(accepted_bio);
+        tlsdata->accepted_bio = NULL;
         return -1;
     }
         
@@ -529,6 +531,11 @@ netsnmp_tlstcp_accept(netsnmp_transport *t)
     if ((rc = SSL_accept(ssl)) <= 0) {
         snmp_log(LOG_ERR, "TLSTCP: Failed SSL_accept\n");
         _openssl_log_error(rc, ssl, "SSL_accept");
+        SSL_shutdown(tlsdata->ssl);
+        SSL_free(tlsdata->ssl);
+        BIO_free(accepted_bio);
+        tlsdata->accepted_bio = NULL;
+        tlsdata->ssl = NULL;
         return -1;
     }   
 
@@ -576,6 +583,11 @@ netsnmp_tlstcp_accept(netsnmp_transport *t)
         /* XXX: free needed memory */
         snmp_log(LOG_ERR, "TLSTCP: Falied checking client certificate\n");
         snmp_increment_statistic(STAT_TLSTM_SNMPTLSTMSESSIONINVALIDCLIENTCERTIFICATES);
+        SSL_shutdown(tlsdata->ssl);
+        SSL_free(tlsdata->ssl);
+        BIO_free(accepted_bio);
+        tlsdata->accepted_bio = NULL;
+        tlsdata->ssl = NULL;
         return -1;
     }
 
