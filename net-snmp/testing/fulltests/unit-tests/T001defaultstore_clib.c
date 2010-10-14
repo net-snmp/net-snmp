@@ -12,7 +12,7 @@ for(i = 0; i < NETSNMP_DS_MAX_IDS; i++) {
         OKF(SNMPERR_SUCCESS == netsnmp_ds_set_int(i, j, i*j),
             ("default store int: setting %d/%d returned failure", i, j));
         sprintf(buf,"%d/%d", i, j);
-        OKF(SNMPERR_SUCCESS == netsnmp_ds_set_string(i, j, strdup(buf)),
+        OKF(SNMPERR_SUCCESS == netsnmp_ds_set_string(i, j, buf),
             ("default store string: setting %d/%d returned failure", i, j));
     }
 }
