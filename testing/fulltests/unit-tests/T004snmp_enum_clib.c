@@ -1,5 +1,8 @@
+/* HEADER Testing snmp_enum */
+
 #define STRING1 "life, and everything"
 #define STRING2 "restaurant at the end of the universe"
+#define STRING3 "label3"
 
 char *se_find_result;
 
@@ -15,6 +18,7 @@ OK(strcmp(se_find_label(1, 1, 2), "there") == 0,
 
 se_add_pair_to_slist("testing", strdup(STRING1), 42);
 se_add_pair_to_slist("testing", strdup(STRING2), 2);
+se_add_pair_to_slist("testing", strdup(STRING3), 2);
     
 OK(se_find_value_in_slist("testing", STRING1) == 42,
    "lookup by number should be the proper string");
