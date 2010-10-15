@@ -588,7 +588,7 @@ netsnmp_handler_free(netsnmp_mib_handler *handler)
     }
 }
 
-/** dulpicates a handler and all subsequent handlers
+/** duplicates a handler and all subsequent handlers
  * see also _clone_handler
  */
 netsnmp_mib_handler *
