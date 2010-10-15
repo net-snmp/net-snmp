@@ -1562,12 +1562,20 @@ typedef unsigned short   uint16_t;
 /* (u)intptr_t should only be needed for MSVC 6 32-bit. */
 /* SDK has it for 64-bit and newer MSVC should also have it in stddef.h. */
 #ifndef _INTPTR_T_DEFINED
-typedef int            intptr_t;
+#ifdef _M_X64
+typedef __int64          intptr_t;
+#else
+typedef int              intptr_t;
+#endif
 #define _INTPTR_T_DEFINED
 #endif
 
 #ifndef _UINTPTR_T_DEFINED
-typedef unsigned int   uintptr_t;
+#ifdef _M_X64
+typedef unsigned __int64 uintptr_t;
+#else
+typedef unsigned int     uintptr_t;
+#endif
 #define _UINTPTR_T_DEFINED
 #endif
 
