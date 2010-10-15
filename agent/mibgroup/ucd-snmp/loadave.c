@@ -386,12 +386,12 @@ write_laConfig(int action,
 
     case RESERVE2: /* Allocate memory and similar resources */
         {
-            u_char buf[8];
+            char buf[8];
             int old_errno = errno;
             double val;
             char *endp;
 
-            strncpy(buf, var_val, var_val_len);
+            strncpy(buf, (char *)var_val, var_val_len);
             buf[var_val_len] = '\0';
             val = strtod(buf, &endp);
 
