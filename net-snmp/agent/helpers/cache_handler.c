@@ -186,6 +186,19 @@ netsnmp_cache_create(int timeout, NetsnmpCacheLoad * load_hook,
     return cache;
 }
 
+netsnmp_cache *netsnmp_cache_clone(netsnmp_cache *cache)
+{
+    netsnmp_cache *copy;
+
+    copy = malloc(sizeof *copy);
+    if (copy) {
+        *copy = *cache;
+        copy->rootoid = snmp_duplicate_objid(cache->rootoid,
+                                             cache->rootoid_len);
+    }
+    return copy;
+}
+
 /** frees a cache
  */
 int
