@@ -137,6 +137,7 @@ SOFTWARE.
 
 #if defined(NETSNMP_USE_OPENSSL) && defined(HAVE_LIBSSL)
 extern void netsnmp_certs_init(void);
+extern void netsnmp_certs_shutdown(void);
 #endif
 
 static void     _init_snmp(void);
@@ -902,6 +903,9 @@ snmp_shutdown(const char *type)
 #ifndef NETSNMP_DISABLE_MIB_LOADING
     shutdown_mib();
 #endif /* NETSNMP_DISABLE_MIB_LOADING */
+#if defined(NETSNMP_USE_OPENSSL) && defined(HAVE_LIBSSL)
+    netsnmp_certs_shutdown();
+#endif
     unregister_all_config_handlers();
     netsnmp_container_free_list();
     clear_sec_mod();
