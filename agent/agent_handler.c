@@ -605,6 +605,7 @@ netsnmp_handler_dup(netsnmp_mib_handler *handler)
     if (h != NULL) {
         h->myvoid = handler->myvoid;
         h->data_free = handler->data_free;
+        handler->myvoid = NULL;
 
         if (handler->next != NULL) {
             h->next = netsnmp_handler_dup(handler->next);
