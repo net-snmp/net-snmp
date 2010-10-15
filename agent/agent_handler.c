@@ -9,6 +9,7 @@
  * distributed with the Net-SNMP package.
  */
 #include <net-snmp/net-snmp-config.h>
+#include <net-snmp/library/snmp_assert.h>
 
 #include <sys/types.h>
 
@@ -715,7 +716,20 @@ netsnmp_handler_dup(netsnmp_mib_handler *handler)
     h = _clone_handler(handler);
 
     if (h != NULL) {
-        h->myvoid = handler->myvoid;
+        /*
+         * Providing a clone function without a free function is asking for
+         * memory leaks, and providing a free function without clone function
+         * is asking for memory corruption. Hence the log statement below.
+         */
+        if (!!handler->data_clone != !!handler->data_free) {
+            snmp_log(LOG_ERR, "data_clone / data_free inconsistent (%s)",
+                     handler->handler_name);
+        }
+        if (handler->myvoid && handler->data_clone)
+            h->myvoid = handler->data_clone(handler->myvoid);
+        else
+            h->myvoid = handler->myvoid;
+        h->data_clone = handler->data_clone;
         h->data_free = handler->data_free;
 
         if (handler->next != NULL) {

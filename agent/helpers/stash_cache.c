@@ -10,15 +10,6 @@
 extern NetsnmpCacheLoad _netsnmp_stash_cache_load;
 extern NetsnmpCacheFree _netsnmp_stash_cache_free;
  
-#ifdef HAVE_DMALLOC_H
-static void free_wrapper(void * p)
-{
-    free(p);
-}
-#else
-#define free_wrapper free
-#endif
-
 /** @defgroup stash_cache stash_cache
  *  Automatically caches data for certain handlers.
  *  This handler caches data in an optimized way which may aleviate
@@ -71,7 +62,8 @@ netsnmp_get_timed_bare_stash_cache_handler(int timeout, oid *rootoid, size_t roo
     }
 
     handler->myvoid = cinfo;
-    handler->data_free = &free_wrapper;
+    handler->data_clone = (void *(*)(void *))netsnmp_cache_clone;
+    handler->data_free = (void(*)(void*))netsnmp_cache_free;
 
     return handler;
 }

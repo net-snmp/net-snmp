@@ -95,6 +95,7 @@ extern          "C" {
     netsnmp_cache_create(int timeout, NetsnmpCacheLoad * load_hook,
                          NetsnmpCacheFree * free_hook,
                          const oid * rootoid, int rootoid_len);
+    netsnmp_cache *netsnmp_cache_clone(netsnmp_cache *cache);
     int netsnmp_cache_remove(netsnmp_cache *cache);
     int netsnmp_cache_free(netsnmp_cache *cache);
 

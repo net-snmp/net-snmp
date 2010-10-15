@@ -61,6 +61,7 @@ typedef struct netsnmp_mib_handler_s {
                                           struct
                                           netsnmp_agent_request_info_s *,
                                           struct netsnmp_request_info_s *);
+        void *(*data_clone)(void *myvoid); /**< data clone hook for myvoid */
         void (*data_free)(void *myvoid); /**< data free hook for myvoid */
 
         struct netsnmp_mib_handler_s *next;
