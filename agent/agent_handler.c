@@ -569,7 +569,7 @@ netsnmp_call_next_handler_one_request(netsnmp_mib_handler *current,
     return ret;
 }
 
-/** free's the resourceses associated with a given handler */
+/** frees the resources associated with a given handler */
 void
 netsnmp_handler_free(netsnmp_mib_handler *handler)
 {
