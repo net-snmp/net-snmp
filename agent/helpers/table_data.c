@@ -302,6 +302,9 @@ netsnmp_table_data_delete_table( netsnmp_table_data *table )
     if (!table)
         return;
 
+    snmp_free_varbind(table->indexes_template);
+    table->indexes_template = NULL;
+
     for (row = table->first_row; row; row=nextrow) {
         nextrow   = row->next;
         row->next = NULL;

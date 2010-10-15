@@ -95,6 +95,7 @@ extern          "C" {
         netsnmp_table_dataset_remove_and_delete_row(netsnmp_table_data_set
                                                     *table,
                                                     netsnmp_table_row *row);
+    void netsnmp_delete_table_data_set(netsnmp_table_data_set *table_set);
 
 /* ============================
  * DataSet API: Default row operations
