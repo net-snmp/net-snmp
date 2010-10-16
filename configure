@@ -26705,7 +26705,7 @@ echo ""
 
 #--------------------
 # construct the dll code files and make rules.  This can't be done
-# until now because dulpicate use of a module means it gets removed
+# until now because duplicate use of a module means it gets removed
 # from the dll and put into the main agent.
 #
 for i in $dl_names ; do
