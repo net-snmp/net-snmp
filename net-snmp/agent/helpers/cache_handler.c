@@ -195,6 +195,10 @@ netsnmp_cache *netsnmp_cache_clone(netsnmp_cache *cache)
         *copy = *cache;
         copy->rootoid = snmp_duplicate_objid(cache->rootoid,
                                              cache->rootoid_len);
+        if (!copy->rootoid) {
+            free(copy);
+            copy = NULL;
+        }
     }
     return copy;
 }
