@@ -170,12 +170,8 @@ netsnmp_watcher_helper_handler(netsnmp_mib_handler *handler,
 {
     netsnmp_watcher_info  *winfo = (netsnmp_watcher_info *) handler->myvoid;
     netsnmp_watcher_cache *old_data;
-    int                    cmp;
 
     DEBUGMSGTL(("helper:watcher", "Got request:  %d\n", reqinfo->mode));
-    cmp = snmp_oid_compare(requests->requestvb->name,
-                           requests->requestvb->name_length,
-                           reginfo->rootoid, reginfo->rootoid_len);
 
     DEBUGMSGTL(( "helper:watcher", "  oid:"));
     DEBUGMSGOID(("helper:watcher", requests->requestvb->name,
@@ -311,13 +307,9 @@ netsnmp_watched_timestamp_handler(netsnmp_mib_handler *handler,
 {
     marker_t timestamp = (marker_t) handler->myvoid;
     long     uptime;
-    int      cmp;
 
     DEBUGMSGTL(("helper:watcher:timestamp",
                                "Got request:  %d\n", reqinfo->mode));
-    cmp = snmp_oid_compare(requests->requestvb->name,
-                           requests->requestvb->name_length,
-                           reginfo->rootoid, reginfo->rootoid_len);
 
     DEBUGMSGTL(( "helper:watcher:timestamp", "  oid:"));
     DEBUGMSGOID(("helper:watcher:timestamp", requests->requestvb->name,
@@ -400,13 +392,9 @@ netsnmp_watched_spinlock_handler(netsnmp_mib_handler *handler,
 {
     int     *spinlock = (int *) handler->myvoid;
     netsnmp_request_info *request;
-    int      cmp;
 
     DEBUGMSGTL(("helper:watcher:spinlock",
                                "Got request:  %d\n", reqinfo->mode));
-    cmp = snmp_oid_compare(requests->requestvb->name,
-                           requests->requestvb->name_length,
-                           reginfo->rootoid, reginfo->rootoid_len);
 
     DEBUGMSGTL(( "helper:watcher:spinlock", "  oid:"));
     DEBUGMSGOID(("helper:watcher:spinlock", requests->requestvb->name,
