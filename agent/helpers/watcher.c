@@ -440,20 +440,56 @@ netsnmp_watched_spinlock_handler(netsnmp_mib_handler *handler,
      *
      ***************************/
 
+static netsnmp_watcher_info*
+clone_watcher_info(netsnmp_watcher_info* src)
+{
+    netsnmp_watcher_info* res = SNMP_MALLOC_TYPEDEF(netsnmp_watcher_info);
+    if (res)
+        memcpy(res, src, sizeof(*res));
+    return res;
+}
+
+static int
+register_scalar_watcher(const char* name,
+                        const oid* reg_oid, size_t reg_oid_len,
+                        void *data, size_t size, u_char type,
+                        Netsnmp_Node_Handler * subhandler, int mode)
+{
+    netsnmp_handler_registration *reginfo = NULL;
+    netsnmp_mib_handler *whandler = NULL;
+    netsnmp_watcher_info* watchinfo =
+        netsnmp_create_watcher_info(data, size, type, WATCHER_FIXED_SIZE);
+    if (watchinfo)
+        whandler = netsnmp_get_watcher_handler();
+    if (watchinfo && whandler) {
+        whandler->myvoid = (void*)watchinfo;
+        whandler->data_free = &free_wrapper;
+        whandler->data_clone = &clone_watcher_info;
+        reginfo =
+            netsnmp_create_handler_registration(
+                name, subhandler, reg_oid, reg_oid_len, mode);
+    }
+    if (watchinfo && whandler && reginfo) {
+        netsnmp_inject_handler(reginfo, whandler);
+        return netsnmp_register_scalar(reginfo);
+    }
+    if (whandler)
+        netsnmp_handler_free(whandler);
+    else if (watchinfo)
+        free(watchinfo);
+    return SNMP_ERR_RESOURCEUNAVAILABLE;
+}
+
 int
 netsnmp_register_ulong_scalar(const char *name,
                               const oid * reg_oid, size_t reg_oid_len,
                               u_long * it,
                               Netsnmp_Node_Handler * subhandler)
 {
-    return netsnmp_register_watched_scalar(
-               netsnmp_create_handler_registration(
-                   name, subhandler,
-                   reg_oid, reg_oid_len,
-                   HANDLER_CAN_RWRITE ),
-               netsnmp_create_watcher_info(
-                   (void *)it, sizeof( u_long ),
-                   ASN_UNSIGNED, WATCHER_FIXED_SIZE ));
+    return register_scalar_watcher(
+        name, reg_oid, reg_oid_len,
+        (void *)it, sizeof( u_long ),
+        ASN_UNSIGNED, subhandler, HANDLER_CAN_RWRITE);
 }
 
 int
@@ -462,14 +498,10 @@ netsnmp_register_read_only_ulong_scalar(const char *name,
                               u_long * it,
                               Netsnmp_Node_Handler * subhandler)
 {
-    return netsnmp_register_watched_scalar(
-               netsnmp_create_handler_registration(
-                   name, subhandler,
-                   reg_oid, reg_oid_len,
-                   HANDLER_CAN_RONLY ),
-               netsnmp_create_watcher_info(
-                   (void *)it, sizeof( u_long ),
-                   ASN_UNSIGNED, WATCHER_FIXED_SIZE ));
+    return register_scalar_watcher(
+        name, reg_oid, reg_oid_len,
+        (void *)it, sizeof( u_long ),
+        ASN_UNSIGNED, subhandler, HANDLER_CAN_RONLY);
 }
 
 int
@@ -478,14 +510,10 @@ netsnmp_register_long_scalar(const char *name,
                               long * it,
                               Netsnmp_Node_Handler * subhandler)
 {
-    return netsnmp_register_watched_scalar(
-               netsnmp_create_handler_registration(
-                   name, subhandler,
-                   reg_oid, reg_oid_len,
-                   HANDLER_CAN_RWRITE ),
-               netsnmp_create_watcher_info(
-                   (void *)it, sizeof( long ),
-                   ASN_INTEGER, WATCHER_FIXED_SIZE ));
+    return register_scalar_watcher(
+        name, reg_oid, reg_oid_len,
+        (void *)it, sizeof( long ),
+        ASN_INTEGER, subhandler, HANDLER_CAN_RWRITE);
 }
 
 int
@@ -494,14 +522,10 @@ netsnmp_register_read_only_long_scalar(const char *name,
                               long * it,
                               Netsnmp_Node_Handler * subhandler)
 {
-    return netsnmp_register_watched_scalar(
-               netsnmp_create_handler_registration(
-                   name, subhandler,
-                   reg_oid, reg_oid_len,
-                   HANDLER_CAN_RONLY ),
-               netsnmp_create_watcher_info(
-                   (void *)it, sizeof( long ),
-                   ASN_INTEGER, WATCHER_FIXED_SIZE ));
+    return register_scalar_watcher(
+        name, reg_oid, reg_oid_len,
+        (void *)it, sizeof( long ),
+        ASN_INTEGER, subhandler, HANDLER_CAN_RONLY);
 }
 
 
@@ -511,14 +535,10 @@ netsnmp_register_int_scalar(const char *name,
                               int * it,
                               Netsnmp_Node_Handler * subhandler)
 {
-    return netsnmp_register_watched_scalar(
-               netsnmp_create_handler_registration(
-                   name, subhandler,
-                   reg_oid, reg_oid_len,
-                   HANDLER_CAN_RWRITE ),
-               netsnmp_create_watcher_info(
-                   (void *)it, sizeof( int ),
-                   ASN_INTEGER, WATCHER_FIXED_SIZE ));
+    return register_scalar_watcher(
+        name, reg_oid, reg_oid_len,
+        (void *)it, sizeof( int ),
+        ASN_INTEGER, subhandler, HANDLER_CAN_RWRITE);
 }
 
 int
@@ -527,14 +547,10 @@ netsnmp_register_read_only_int_scalar(const char *name,
                               int * it,
                               Netsnmp_Node_Handler * subhandler)
 {
-    return netsnmp_register_watched_scalar(
-               netsnmp_create_handler_registration(
-                   name, subhandler,
-                   reg_oid, reg_oid_len,
-                   HANDLER_CAN_RONLY ),
-               netsnmp_create_watcher_info(
-                   (void *)it, sizeof( int ),
-                   ASN_INTEGER, WATCHER_FIXED_SIZE ));
+    return register_scalar_watcher(
+        name, reg_oid, reg_oid_len,
+        (void *)it, sizeof( int ),
+        ASN_INTEGER, subhandler, HANDLER_CAN_RONLY);
 }
 
 
@@ -544,14 +560,10 @@ netsnmp_register_read_only_counter32_scalar(const char *name,
                               u_long * it,
                               Netsnmp_Node_Handler * subhandler)
 {
-    return netsnmp_register_watched_scalar(
-               netsnmp_create_handler_registration(
-                   name, subhandler,
-                   reg_oid, reg_oid_len,
-                   HANDLER_CAN_RONLY ),
-               netsnmp_create_watcher_info(
-                   (void *)it, sizeof( u_long ),
-                   ASN_COUNTER, WATCHER_FIXED_SIZE ));
+    return register_scalar_watcher(
+        name, reg_oid, reg_oid_len,
+        (void *)it, sizeof( u_long ),
+        ASN_COUNTER, subhandler, HANDLER_CAN_RONLY);
 }
 /**  @} */
 
