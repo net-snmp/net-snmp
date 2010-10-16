@@ -34,6 +34,8 @@
 
 #include <net-snmp/library/snmp_assert.h>
 
+static netsnmp_table_registration_info *
+netsnmp_table_registration_info_clone(netsnmp_table_registration_info *tri);
 static void     table_helper_cleanup(netsnmp_agent_request_info *reqinfo,
                                      netsnmp_request_info *request,
                                      int status);
@@ -68,23 +70,6 @@ sparse_table_helper_handler(netsnmp_mib_handler *handler,
  *  @{
  */
 
-static netsnmp_table_registration_info *netsnmp_clone_netsnmp_table_registration_info(netsnmp_table_registration_info *p)
-{
-    netsnmp_table_registration_info *q;
-    q = malloc(sizeof(*q));
-    if (q) {
-        *q = *p;
-        q->indexes = snmp_clone_varbind(p->indexes);
-    }
-    return q;
-}
-
-static void netsnmp_free_netsnmp_table_registration_info(netsnmp_table_registration_info *tabreq)
-{
-    snmp_free_varbind(tabreq->indexes);
-    free(tabreq);
-}
-
 /** Given a netsnmp_table_registration_info object, creates a table handler.
  *  You can use this table handler by injecting it into a calling
  *  chain.  When the handler gets called, it'll do processing and
@@ -117,8 +102,8 @@ netsnmp_get_table_handler(netsnmp_table_registration_info *tabreq)
     ret = netsnmp_create_handler(TABLE_HANDLER_NAME, table_helper_handler);
     if (ret) {
         ret->myvoid = (void *) tabreq;
-        ret->data_clone = (void *(*)(void *)) netsnmp_clone_netsnmp_table_registration_info;
-        ret->data_free = (void(*)(void *)) netsnmp_free_netsnmp_table_registration_info;
+        ret->data_clone = (void *(*)(void *)) netsnmp_table_registration_info_clone;
+        ret->data_free = (void(*)(void *)) netsnmp_table_registration_info_free;
         tabreq->number_indexes = count_varbinds(tabreq->indexes);
     }
     return ret;
@@ -1004,6 +989,22 @@ netsnmp_check_getnext_reply(netsnmp_request_info *request,
         }
     }
     return 0;
+}
+
+static netsnmp_table_registration_info *
+netsnmp_table_registration_info_clone(netsnmp_table_registration_info *tri)
+{
+    netsnmp_table_registration_info *copy;
+    copy = malloc(sizeof(*copy));
+    if (copy) {
+        *copy = *tri;
+        copy->indexes = snmp_clone_varbind(tri->indexes);
+        if (!copy->indexes) {
+            free(copy);
+            copy = NULL;
+        }
+    }
+    return copy;
 }
 
 void
