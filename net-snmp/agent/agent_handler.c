@@ -752,7 +752,7 @@ netsnmp_handler_registration_free(netsnmp_handler_registration *reginfo)
     }
 }
 
-/** Dulpicates handler registration object and all subsequent handlers.
+/** Duplicates handler registration object and all subsequent handlers.
  *  Creates a copy of the handler registration object and all its data.
  *
  *  @param handler is the handler registration object to be duplicated
