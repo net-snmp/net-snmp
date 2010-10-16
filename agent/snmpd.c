@@ -189,9 +189,11 @@ LPCTSTR         app_name_long = _T("Net-SNMP Agent");     /* Application Name */
 const char     *app_name = "snmpd";
 
 extern int      netsnmp_running;
+#ifdef USING_UTIL_FUNCS_RESTART_MODULE
 extern char   **argvrestartp;
 extern char    *argvrestart;
 extern char    *argvrestartname;
+#endif /* USING_UTIL_FUNCS_RESTART_MODULE */
 
 #ifdef USING_SMUX_MODULE
 #include <mibgroup/smux/smux.h>
@@ -428,7 +430,6 @@ main(int argc, char *argv[])
     int             log_set = 0;
     int             uid = 0, gid = 0;
     int             agent_mode = -1;
-    char           *cptr, **argvptr;
     char           *pid_file = NULL;
     char            option_compatability[] = "-Le";
 #if HAVE_GETPID
@@ -872,41 +873,46 @@ main(int argc, char *argv[])
                                                    NETSNMP_DS_LIB_APPEND_LOGFILES));
 #endif
 
-    /*
-     * Initialize a argv set to the current for restarting the agent.   
-     */
-    argvrestartp = (char **)malloc((argc + 2) * sizeof(char *));
-    argvptr = argvrestartp;
-    for (i = 0, ret = 1; i < argc; i++) {
-        ret += strlen(argv[i]) + 1;
+#ifdef USING_UTIL_FUNCS_RESTART_MODULE
+    {
+        /*
+         * Initialize a argv set to the current for restarting the agent.
+         */
+        char *cptr, **argvptr;
+
+        argvrestartp = (char **)malloc((argc + 2) * sizeof(char *));
+        argvptr = argvrestartp;
+        for (i = 0, ret = 1; i < argc; i++) {
+            ret += strlen(argv[i]) + 1;
+        }
+        argvrestart = (char *) malloc(ret);
+        argvrestartname = (char *) malloc(strlen(argv[0]) + 1);
+        if (!argvrestartp || !argvrestart || !argvrestartname) {
+            fprintf(stderr, "malloc failure processing argvrestart\n");
+            exit(1);
+        }
+        strcpy(argvrestartname, argv[0]);
+
+        for (cptr = argvrestart, i = 0; i < argc; i++) {
+            strcpy(cptr, argv[i]);
+            *(argvptr++) = cptr;
+            cptr += strlen(argv[i]) + 1;
+        }
     }
-    argvrestart = (char *) malloc(ret);
-    argvrestartname = (char *) malloc(strlen(argv[0]) + 1);
-    if (!argvrestartp || !argvrestart || !argvrestartname) {
-        fprintf(stderr, "malloc failure processing argvrestart\n");
-        exit(1);
-    }
-    strcpy(argvrestartname, argv[0]);
+#endif /* USING_UTIL_FUNCS_RESTART_MODULE */
+
     if (agent_mode == -1) {
-        if (strstr(argvrestartname, "agentxd") != NULL) {
-            netsnmp_ds_set_boolean(NETSNMP_DS_APPLICATION_ID, 
+        if (strstr(argv[0], "agentxd") != NULL) {
+            netsnmp_ds_set_boolean(NETSNMP_DS_APPLICATION_ID,
 				   NETSNMP_DS_AGENT_ROLE, SUB_AGENT);
         } else {
-            netsnmp_ds_set_boolean(NETSNMP_DS_APPLICATION_ID, 
+            netsnmp_ds_set_boolean(NETSNMP_DS_APPLICATION_ID,
 				   NETSNMP_DS_AGENT_ROLE, MASTER_AGENT);
         }
     } else {
-        netsnmp_ds_set_boolean(NETSNMP_DS_APPLICATION_ID, 
+        netsnmp_ds_set_boolean(NETSNMP_DS_APPLICATION_ID,
 			       NETSNMP_DS_AGENT_ROLE, agent_mode);
     }
-
-    for (cptr = argvrestart, i = 0; i < argc; i++) {
-        strcpy(cptr, argv[i]);
-        *(argvptr++) = cptr;
-        cptr += strlen(argv[i]) + 1;
-    }
-    *cptr = 0;
-    *argvptr = NULL;
 
     SOCK_STARTUP;
     init_agent(app_name);        /* do what we need to do first. */
@@ -1079,9 +1085,12 @@ main(int argc, char *argv[])
     agent_status = AGENT_STOPPED;
 #endif
 
+#ifdef USING_UTIL_FUNCS_RESTART_MODULE
     SNMP_FREE(argvrestartname);
     SNMP_FREE(argvrestart);
     SNMP_FREE(argvrestartp);
+#endif /* USING_UTIL_FUNCS_RESTART_MODULE */
+
     SOCK_CLEANUP;
     return 0;
 }                               /* End main() -- snmpd */

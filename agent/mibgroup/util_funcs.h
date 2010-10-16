@@ -7,12 +7,10 @@
 config_require(util_funcs/Exit)
 config_require(util_funcs/header_generic)
 config_require(util_funcs/header_simple_table)
-config_require(util_funcs/restart)
 
 #include "util_funcs/Exit.h"
 #include "util_funcs/header_generic.h"
 #include "util_funcs/header_simple_table.h"
-#include "util_funcs/restart.h"
 
 #ifdef __cplusplus
 extern "C" {
