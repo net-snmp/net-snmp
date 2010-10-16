@@ -61,7 +61,17 @@ typedef struct netsnmp_mib_handler_s {
                                           struct
                                           netsnmp_agent_request_info_s *,
                                           struct netsnmp_request_info_s *);
-        void *(*data_clone)(void *myvoid); /**< data clone hook for myvoid */
+        /** data clone hook for myvoid
+         *  deep copy the myvoid member - default is to copy the pointer
+         *  This method is only called if myvoid != NULL
+         *  myvoid is the current myvoid pointer.
+         *  returns NULL on failure
+         */
+        void *(*data_clone)(void *myvoid);
+        /** data free hook for myvoid
+         *  delete the myvoid member - default is to do nothing
+         *  This method is only called if myvoid != NULL
+         */
         void (*data_free)(void *myvoid); /**< data free hook for myvoid */
 
         struct netsnmp_mib_handler_s *next;
