@@ -4,11 +4,9 @@
 #ifndef _MIBGROUP_UTIL_FUNCS_H
 #define _MIBGROUP_UTIL_FUNCS_H
 
-config_require(util_funcs/Exit)
 config_require(util_funcs/header_generic)
 config_require(util_funcs/header_simple_table)
 
-#include "util_funcs/Exit.h"
 #include "util_funcs/header_generic.h"
 #include "util_funcs/header_simple_table.h"
 

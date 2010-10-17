@@ -13,7 +13,6 @@ config_require(mibII/system_mib)
 config_require(mibII/sysORTable)
 config_require(mibII/vacm_vars)
 config_require(mibII/vacm_conf)
-config_require(util_funcs/Exit)
 
 /* very few default mibs */
 config_add_mib(SNMPv2-MIB)
