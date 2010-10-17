@@ -927,7 +927,8 @@ main(int argc, char *argv[])
         /*
          * Some error opening one of the specified agent transports.  
          */
-        Exit(1);                /*  Exit logs exit val for us  */
+        snmp_log(LOG_ERR, "Server Exiting with code 1\n");
+        exit(1);
     }
 
     /*
@@ -940,8 +941,10 @@ main(int argc, char *argv[])
         /*
          * xxx-rks: do we care if fork fails? I think we should...
          */
-        if(ret != 0)
-            Exit(1);                /*  Exit logs exit val for us  */
+        if(ret != 0) {
+            snmp_log(LOG_ERR, "Server Exiting with code 1\n");
+            exit(1);
+        }
     }
 
 #if HAVE_GETPID
