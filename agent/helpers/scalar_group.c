@@ -50,7 +50,7 @@ netsnmp_get_scalar_group_handler(oid first, oid last)
 	    sgroup->ubound = last;
             ret->myvoid = (void *)sgroup;
             ret->data_free = free;
-            ret->data_clone = clone_scalar_group;
+            ret->data_clone = (void *(*)(void *))clone_scalar_group;
 	}
     }
     return ret;

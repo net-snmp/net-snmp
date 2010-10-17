@@ -463,8 +463,8 @@ register_scalar_watcher(const char* name,
         whandler = netsnmp_get_watcher_handler();
     if (watchinfo && whandler) {
         whandler->myvoid = (void*)watchinfo;
-        whandler->data_free = &free_wrapper;
-        whandler->data_clone = &clone_watcher_info;
+        whandler->data_free = free_wrapper;
+        whandler->data_clone = (void* (*)(void *))clone_watcher_info;
         reginfo =
             netsnmp_create_handler_registration(
                 name, subhandler, reg_oid, reg_oid_len, mode);
