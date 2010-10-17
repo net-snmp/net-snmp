@@ -134,9 +134,10 @@ netsnmp_arch_swrun_container_load( netsnmp_container *container, u_int flags)
                     break;      /* '\0''\0' => End of command line */
                 *cp = ' ';
             }
-            entry->hrSWRunParameters_len = snprintf(entry->hrSWRunParameters,
-                                             sizeof(entry->hrSWRunParameters)-1,
-                                             "%s", buf + entry->hrSWRunPath_len+1);
+            entry->hrSWRunParameters_len
+                = sprintf(entry->hrSWRunParameters, "%.*s",
+                          (int)sizeof(entry->hrSWRunParameters) - 1,
+                          buf + entry->hrSWRunPath_len + 1);
         } else {
             memcpy(entry->hrSWRunPath, entry->hrSWRunName, entry->hrSWRunName_len);
             entry->hrSWRunPath_len       = entry->hrSWRunName_len;
