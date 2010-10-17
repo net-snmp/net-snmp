@@ -8,6 +8,10 @@
 #ifndef _TOOLS_H
 #define _TOOLS_H
 
+#ifdef HAVE_INTTYPES_H
+#include <inttypes.h> /* uintptr_t */
+#endif
+
 #ifdef __cplusplus
 extern          "C" {
 #endif
@@ -72,17 +76,6 @@ extern          "C" {
 #define SNMP_ZERO(s,l)	do { if (s) memset(s, 0, l); } while(0)
 
 
-#if defined(__GNUC__)
-typedef unsigned long netsnmp_uintptr_t;
-#else
-typedef uintptr_t netsnmp_uintptr_t;
-#endif
-#ifndef __cplusplus
-enum {
-    netsnmp_compile_time_uintptr_t_size_check
-    = sizeof(struct { int:-!(sizeof(netsnmp_uintptr_t) >= sizeof(void*)); })
-};
-#endif
 /**
  * @def NETSNMP_REMOVE_CONST(t, e)
  *
@@ -94,9 +87,9 @@ enum {
  */
 #if defined(__GNUC__)
 #define NETSNMP_REMOVE_CONST(t, e)                                      \
-    (__extension__ ({ const t tmp = (e); (t)(netsnmp_uintptr_t)tmp; }))
+    (__extension__ ({ const t tmp = (e); (t)(uintptr_t)tmp; }))
 #else
-#define NETSNMP_REMOVE_CONST(t, e) ((t)(netsnmp_uintptr_t)(e))
+#define NETSNMP_REMOVE_CONST(t, e) ((t)(uintptr_t)(e))
 #endif
 
 
