@@ -39,6 +39,9 @@
 #ifdef HAVE_ARPA_INET_H
 #include <arpa/inet.h>
 #endif
+#ifdef HAVE_VALGRIND_MEMCHECK_H
+#include <valgrind/memcheck.h>
+#endif
 #ifdef cygwin
 #include <windows.h>
 #endif
@@ -253,6 +256,31 @@ memdup(u_char ** to, const void * from, size_t size)
     return SNMPERR_SUCCESS;
 
 }                               /* end memdup() */
+
+/**
+ * When running under Valgrind, check whether all bytes in the range [packet,
+ * packet+length) are defined. Let Valgrind print a backtrace if one or more
+ * bytes with uninitialized values have been found. This function can help to
+ * find the cause of undefined value errors if --track-origins=yes is not
+ * sufficient. Does nothing when not running under Valgrind.
+ */
+void
+netsnmp_check_definedness(const void *packet, size_t length)
+{
+#ifdef HAVE_VALGRIND_MEMCHECK_H
+    if (RUNNING_ON_VALGRIND) {
+        int i;
+        char vbits;
+
+        for (i = 0; i < length; ++i) {
+            if (VALGRIND_GET_VBITS((const char *)packet + i, &vbits, 1) == 1
+                && vbits)
+                VALGRIND_PRINTF_BACKTRACE("Undefined: byte %d/%d", i,
+                                          (int)length);
+        }
+    }
+#endif
+}
 
 /** copies a (possible) unterminated string of a given length into a
  *  new buffer and null terminates it as well (new buffer MAY be one

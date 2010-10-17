@@ -228,6 +228,9 @@ extern          "C" {
     NETSNMP_IMPORT
     int             memdup(u_char ** to, const void * from, size_t size);
 
+    void            netsnmp_check_definedness(const void *packet,
+                                              size_t length);
+
     NETSNMP_IMPORT
     u_int           netsnmp_binary_to_hex(u_char ** dest, size_t *dest_len,
                                           int allow_realloc,
