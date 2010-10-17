@@ -197,6 +197,8 @@ netsnmp_callback_recv(netsnmp_transport *t, void *buf, int size,
 	    break;
 	}
     }
+    if (rc > 0)
+        memset(buf, 0, rc);
 
     if (mystuff->linkedto) {
         /*
@@ -520,6 +522,7 @@ netsnmp_callback_hook_build(netsnmp_session * sp,
             pdu->securityLevel = sp->securityLevel;
         /* WHAT ELSE ?? */
     }
+    ptk[0] = 0;
     *len = 1;
     DEBUGMSGTL(("transport_callback", "hook_build exit\n"));
     return 1;
