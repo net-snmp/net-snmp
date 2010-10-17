@@ -81,6 +81,8 @@ AC_CHECK_HEADERS([search.h   sgtty.h    xti.h      ] dnl
                  [pci/pci.h                        ])
 
 
+# Valgrind
+AC_CHECK_HEADERS([valgrind/valgrind.h valgrind/memcheck.h])
 # OpenSSL
 AC_CHECK_HEADERS([openssl/aes.h ])     #  (Core)
 AC_CHECK_HEADERS([openssl/dh.h  ])     #  (Apps)
