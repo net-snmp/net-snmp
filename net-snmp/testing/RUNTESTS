@@ -23,7 +23,12 @@ fi
 success_count=0
 failed_count=0
 rm -f failed_tests
-for i in ${srcdir}/testing/fulltests/default/T* ; do
+if [ "x$1" = "x" ]; then
+  testset="${srcdir}/testing/fulltests/default/T*"
+else
+  testset="${srcdir}/testing/fulltests/default/T`printf %03d $1`*"
+fi
+for i in $testset; do
     echo "RUNNING $i"
     ${srcdir}/testing/fulltests/support/simple_run $i
     if [ $? = 0 ]; then
