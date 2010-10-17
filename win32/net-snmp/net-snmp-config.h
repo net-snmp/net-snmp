@@ -1592,7 +1592,7 @@ typedef unsigned short   uint16_t;
 #ifndef __cplusplus
 enum {
     netsnmp_compile_time_uintptr_t_size_check
-    = sizeof(struct { int:-!(sizeof(netsnmp_uintptr_t) != sizeof(void*)); })
+    = sizeof(struct { int:-!(sizeof(uintptr_t) != sizeof(void*)); })
 };
 #endif
 
