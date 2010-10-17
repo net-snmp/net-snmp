@@ -175,7 +175,7 @@ table_helper_handler(netsnmp_mib_handler *handler,
     int             oid_index_pos;
     unsigned int    oid_column_pos;
     unsigned int    tmp_idx;
-    int 	    tmp_len;
+    ssize_t 	    tmp_len;
     int             incomplete, out_of_range;
     int             status = SNMP_ERR_NOERROR, need_processing = 0;
     oid            *tmp_name;
@@ -317,11 +317,11 @@ table_helper_handler(netsnmp_mib_handler *handler,
          * length) 
          */
         if (reginfo->rootoid_len > var->name_length)
-            tmp_len = (int)var->name_length;
+            tmp_len = var->name_length;
         else
-            tmp_len = (int)reginfo->rootoid_len;
+            tmp_len = reginfo->rootoid_len;
         if (snmp_oid_compare(reginfo->rootoid, reginfo->rootoid_len,
-                             var->name, (size_t)tmp_len) > 0) {
+                             var->name, tmp_len) > 0) {
             if (reqinfo->mode == MODE_GETNEXT) {
                 if (var->name != var->name_loc)
                     SNMP_FREE(var->name);
@@ -522,7 +522,7 @@ table_helper_handler(netsnmp_mib_handler *handler,
             incomplete = 1;
             tmp_len = -1;
         } else
-            tmp_len = (int)tbl_req_info->index_oid_len;
+            tmp_len = tbl_req_info->index_oid_len;
 
 
         /*
@@ -533,6 +533,8 @@ table_helper_handler(netsnmp_mib_handler *handler,
         for (tmp_idx = 0, vb = tbl_req_info->indexes;
              tmp_idx < tbl_info->number_indexes;
              ++tmp_idx, vb = vb->next_variable) {
+            size_t parsed_oid_len;
+
             if (incomplete && tmp_len) {
                 /*
                  * incomplete/illegal OID, set up dummy 0 to parse 
@@ -548,23 +550,26 @@ table_helper_handler(netsnmp_mib_handler *handler,
                  * Reject requests of the form 'myObject'   (no instance)
                  */
                 tmp_len = 0;
-                tmp_name = (oid *) & tmp_len;
+                tmp_name = NULL;
                 break;
             }
             /*
              * try and parse current index 
              */
-            if (parse_one_oid_index(&tmp_name, (size_t*)&tmp_len,
+            netsnmp_assert(tmp_len >= 0);
+            parsed_oid_len = tmp_len;
+            if (parse_one_oid_index(&tmp_name, &parsed_oid_len,
                                     vb, 1) != SNMPERR_SUCCESS) {
                 incomplete = 1;
                 tmp_len = -1;   /* is this necessary? Better safe than
                                  * sorry */
             } else {
+                tmp_len = parsed_oid_len;
+                DEBUGMSGTL(("helper:table", "  got 1 (incomplete=%d)\n",
+                            incomplete));
                 /*
                  * do not count incomplete indexes 
                  */
-                DEBUGMSGTL(("helper:table", "  got 1 (incomplete=%d)\n",
-                            incomplete));
                 if (incomplete)
                     continue;
                 ++tbl_req_info->number_indexes; /** got one ok */
