@@ -283,6 +283,7 @@ shutdown_sysORTable(void)
     netsnmp_container_table_unregister(sysORTable_reg);
     sysORTable_reg = NULL;
     table = NULL;
+    netsnmp_table_registration_info_free(sysORTable_table_info);
     sysORTable_table_info = NULL;
     netsnmp_unregister_handler(sysORLastChange_reg);
     sysORLastChange_reg = NULL;

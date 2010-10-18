@@ -48,6 +48,7 @@ init_mteObjectsTable(void)
 
 
     netsnmp_tdata_register(reg, objects_table_data, table_info);
+    netsnmp_registration_owns_table_info(reg);
 }
 
 

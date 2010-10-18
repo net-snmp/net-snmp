@@ -121,6 +121,7 @@ extern          "C" {
     int    netsnmp_register_table_iterator(   netsnmp_handler_registration
                                                                     *reginfo,
                                               netsnmp_iterator_info *iinfo);
+    netsnmp_iterator_info *netsnmp_iterator_clone(netsnmp_iterator_info *iinfo);
     void  netsnmp_iterator_delete_table(netsnmp_iterator_info *iinfo);
 
     void *netsnmp_extract_iterator_context(netsnmp_request_info *);

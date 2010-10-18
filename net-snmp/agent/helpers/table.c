@@ -34,8 +34,6 @@
 
 #include <net-snmp/library/snmp_assert.h>
 
-static netsnmp_table_registration_info *
-netsnmp_table_registration_info_clone(netsnmp_table_registration_info *tri);
 static void     table_helper_cleanup(netsnmp_agent_request_info *reqinfo,
                                      netsnmp_request_info *request,
                                      int status);
@@ -102,13 +100,32 @@ netsnmp_get_table_handler(netsnmp_table_registration_info *tabreq)
     ret = netsnmp_create_handler(TABLE_HANDLER_NAME, table_helper_handler);
     if (ret) {
         ret->myvoid = (void *) tabreq;
-        ret->data_clone = (void *(*)(void *)) netsnmp_table_registration_info_clone;
-        ret->data_free = (void(*)(void *)) netsnmp_table_registration_info_free;
         tabreq->number_indexes = count_varbinds(tabreq->indexes);
     }
     return ret;
 }
 
+/** Configures a handler such that table registration information is freed by
+ *  netsnmp_handler_free(). Should only be called if handler->myvoid points to
+ *  an object of type netsnmp_table_registration_info.
+ */
+void netsnmp_handler_owns_table_info(netsnmp_mib_handler *handler)
+{
+    if (handler) {
+        handler->data_clone = (void *(*)(void *)) netsnmp_table_registration_info_clone;
+        handler->data_free = (void(*)(void *)) netsnmp_table_registration_info_free;
+    }
+}
+
+/** Configures a handler such that table registration information is freed by
+ *  netsnmp_handler_free(). Should only be called if reg->handler->myvoid
+ *  points to an object of type netsnmp_table_registration_info.
+ */
+void netsnmp_registration_owns_table_info(netsnmp_handler_registration *reg)
+{
+    if (reg)
+        netsnmp_handler_owns_table_info(reg->handler);
+}
 
 /** creates a table handler given the netsnmp_table_registration_info object,
  *  inserts it into the request chain and then calls
@@ -996,7 +1013,7 @@ netsnmp_check_getnext_reply(netsnmp_request_info *request,
     return 0;
 }
 
-static netsnmp_table_registration_info *
+netsnmp_table_registration_info *
 netsnmp_table_registration_info_clone(netsnmp_table_registration_info *tri)
 {
     netsnmp_table_registration_info *copy;

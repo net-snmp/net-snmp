@@ -390,6 +390,8 @@ netsnmp_register_table_data_set(netsnmp_handler_registration *reginfo,
                                 netsnmp_table_data_set *data_set,
                                 netsnmp_table_registration_info *table_info)
 {
+    int ret;
+
     if (NULL == table_info) {
         /*
          * allocate the table if one wasn't allocated 
@@ -427,8 +429,10 @@ netsnmp_register_table_data_set(netsnmp_handler_registration *reginfo,
 
     netsnmp_inject_handler(reginfo,
                            netsnmp_get_table_data_set_handler(data_set));
-    return netsnmp_register_table_data(reginfo, data_set->table,
+    ret = netsnmp_register_table_data(reginfo, data_set->table,
                                        table_info);
+    netsnmp_registration_owns_table_info(reginfo);
+    return ret;
 }
 
 newrow_stash   *

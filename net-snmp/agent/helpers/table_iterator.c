@@ -138,6 +138,26 @@ netsnmp_iterator_create_table( Netsnmp_First_Data_Point *firstDP,
     return iinfo;
 }
 
+/** Duplicates a table iterator. */
+netsnmp_iterator_info *
+netsnmp_iterator_clone(netsnmp_iterator_info *iinfo)
+{
+    netsnmp_iterator_info *copy;
+
+    copy = malloc(sizeof *copy);
+    if (copy) {
+        *copy = *iinfo;
+        copy->table_reginfo = netsnmp_table_registration_info_clone(iinfo->table_reginfo);
+        copy->indexes = snmp_clone_varbind(iinfo->indexes);
+        if (!copy->table_reginfo || !copy->indexes) {
+            netsnmp_iterator_delete_table(copy);
+            copy = NULL;
+        }
+    }
+    return copy;
+}
+
+/** Free the memory that was allocated for a table iterator. */
 void
 netsnmp_iterator_delete_table( netsnmp_iterator_info *iinfo )
 {
@@ -148,6 +168,7 @@ netsnmp_iterator_delete_table( netsnmp_iterator_info *iinfo )
         snmp_free_varbind( iinfo->indexes );
         iinfo->indexes = NULL;
     }
+    netsnmp_table_registration_info_free(iinfo->table_reginfo);
     SNMP_FREE( iinfo );
 }
 
@@ -182,6 +203,8 @@ netsnmp_get_table_iterator_handler(netsnmp_iterator_info *iinfo)
         return NULL;
 
     me->myvoid = iinfo;
+    me->data_clone = (void *(*)(void *))netsnmp_iterator_clone;
+    me->data_free  = (void(*)(void *))netsnmp_iterator_delete_table;
     return me;
 }
 
