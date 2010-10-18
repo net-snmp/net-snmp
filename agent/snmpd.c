@@ -1080,6 +1080,40 @@ main(int argc, char *argv[])
     return 0;
 }                               /* End main() -- snmpd */
 
+#if defined(WIN32)
+
+#include <assert.h>
+#include <process.h>
+
+static unsigned s_threadid;
+HANDLE s_thread_handle;
+
+static unsigned __stdcall wait_for_stdin(void* arg)
+{
+    if (getc(stdin) != EOF)
+        netsnmp_running = 0;
+    return 0;
+}
+
+static void create_stdin_waiter_thread()
+{
+    assert(s_thread_handle == 0);
+    s_thread_handle = (HANDLE)_beginthreadex(0, 0, wait_for_stdin, 0, 0, &s_threadid);
+    assert(s_thread_handle != 0);
+}
+
+static void join_stdin_waiter_thread()
+{
+    int result;
+
+    assert(s_thread_handle != 0);
+    result = WaitForSingleObject(s_thread_handle, 1000);
+    assert(result != WAIT_TIMEOUT);
+    CloseHandle(s_thread_handle);
+    s_thread_handle = 0;
+}
+#endif
+
 /*******************************************************************-o-******
  * receive
  *
@@ -1112,6 +1146,10 @@ receive(void)
      * ignore early sighup during startup
      */
     reconfig = 0;
+
+#if defined(WIN32)
+    create_stdin_waiter_thread();
+#endif
 
     /*
      * Loop-forever: execute message handlers for sockets with data
@@ -1257,6 +1295,10 @@ receive(void)
     netsnmp_large_fd_set_cleanup(&readfds);
     netsnmp_large_fd_set_cleanup(&writefds);
     netsnmp_large_fd_set_cleanup(&exceptfds);
+
+#if defined(WIN32)
+    join_stdin_waiter_thread();
+#endif
 
     snmp_log(LOG_INFO, "Received TERM or STOP signal...  shutting down...\n");
     return 0;
