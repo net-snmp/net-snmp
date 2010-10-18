@@ -994,7 +994,7 @@ netsnmp_tlstcp_create_tstring(const char *str, int local,
         str = default_target + 1; /* drop the leading : */
     else if (!strchr(str, ':')) {
         /* it's either :port or :address.  Try to guess which. */
-        char *cp;
+        const char *cp;
         int isport = 1;
         for(cp = str; *cp != '\0'; cp++) {
             /* if ALL numbers, it must be just a port */
