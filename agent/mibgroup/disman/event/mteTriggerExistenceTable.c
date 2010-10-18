@@ -48,6 +48,7 @@ init_mteTriggerExistenceTable(void)
 
     /* Register this using the (common) trigger_table_data container */
     netsnmp_tdata_register(reg, trigger_table_data, table_info);
+    netsnmp_registration_owns_table_info(reg);
     DEBUGMSGTL(("disman:event:init", "Trigger Exist Table\n"));
 }
 
