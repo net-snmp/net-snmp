@@ -200,6 +200,7 @@ optProc(int argc, char *const *argv, int opt)
             default:
                 fprintf(stderr, "Bad option after -C: %c\n", optarg[-1]);
                 usage();
+                exit(1);
             }
         }
         break;
