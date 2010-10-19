@@ -2691,7 +2691,7 @@ parse_objecttype(FILE * fp, char *name)
                         defbuf[ sizeof(defbuf)-1 ] = 0;
                     }
                     strncat(defbuf, quoted_string_buffer,
-                            sizeof(defbuf)-strlen(defbuf));
+                            sizeof(defbuf)-strlen(defbuf)-1);
                     defbuf[ sizeof(defbuf)-1 ] = 0;
                     if (type == QUOTESTRING) {
                         if (strlen(defbuf)+2 < sizeof(defbuf)) {
