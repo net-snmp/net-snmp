@@ -55,7 +55,7 @@ char pkg_directory[SNMP_MAXPATH];
 void
 netsnmp_swinst_arch_init(void)
 {
-    char        *dbpath;
+    const char  *dbpath;
     struct stat  stat_buf;
 
 #ifdef HAVE_RPMGETPATH
@@ -155,7 +155,7 @@ netsnmp_swinst_arch_load( netsnmp_container *container, u_int flags)
     rpmdbClose( db );
 
     DEBUGMSGTL(("swinst:load:arch"," loaded %d entries\n",
-                CONTAINER_SIZE(container)));
+                (int)CONTAINER_SIZE(container)));
 
     return 0;
 }
