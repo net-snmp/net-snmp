@@ -940,10 +940,6 @@ snmp_input(int op, netsnmp_session *session,
     netsnmp_trapd_handler *traph;
     netsnmp_transport *transport = (netsnmp_transport *) magic;
     int ret, idx;
-    extern netsnmp_trapd_handler *netsnmp_auth_global_traphandlers;
-    extern netsnmp_trapd_handler *netsnmp_pre_global_traphandlers;
-    extern netsnmp_trapd_handler *netsnmp_post_global_traphandlers;
-
 
     switch (op) {
     case NETSNMP_CALLBACK_OP_RECEIVED_MESSAGE:
