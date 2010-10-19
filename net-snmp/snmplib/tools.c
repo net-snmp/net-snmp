@@ -4,6 +4,15 @@
 
 #define NETSNMP_TOOLS_C 1 /* dont re-define malloc wrappers here */
 
+#ifdef HAVE_CRTDBG_H
+/*
+ * Define _CRTDBG_MAP_ALLOC such that in debug builds (when _DEBUG has been
+ * defined) e.g. malloc() is rerouted to _malloc_dbg().
+ */
+#define _CRTDBG_MAP_ALLOC 1
+#include <crtdbg.h>
+#endif
+
 #include <net-snmp/net-snmp-config.h>
 
 #include <ctype.h>
@@ -58,15 +67,6 @@
 #include <net-snmp/library/snmp_api.h>
 #include <net-snmp/library/mib.h>
 #include <net-snmp/library/scapi.h>
-
-#ifdef HAVE_CRTDBG_H
-/*
- * Define _CRTDBG_MAP_ALLOC such that in debug builds (when _DEBUG has been
- * defined) e.g. malloc() is rerouted to _malloc_dbg().
- */
-#define _CRTDBG_MAP_ALLOC 1
-#include <crtdbg.h>
-#endif
 
 /**
  * This function is a wrapper for the strdup function.
