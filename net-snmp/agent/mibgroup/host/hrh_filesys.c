@@ -229,13 +229,13 @@ var_hrhfilesys(struct variable *vp,
         long_return = fsys_idx;
         return (u_char *) & long_return;
     case HRFSYS_MOUNT:
-        snprintf(string, sizeof(string), HRFS_entry->path);
+        snprintf(string, sizeof(string), "%s", HRFS_entry->path);
         string[ sizeof(string)-1 ] = 0;
         *var_len = strlen(string);
         return (u_char *) string;
     case HRFSYS_RMOUNT:
         if (HRFS_entry->flags & NETSNMP_FS_FLAG_REMOTE) {
-            snprintf(string, sizeof(string), HRFS_entry->device);
+            snprintf(string, sizeof(string), "%s", HRFS_entry->device);
             string[ sizeof(string)-1 ] = 0;
         } else
             string[0] = '\0';
