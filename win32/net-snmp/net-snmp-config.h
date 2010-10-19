@@ -5,11 +5,12 @@
 #define NET_SNMP_CONFIG_H
 
 /* _MSC_VER values
-   1500 = 9.0 (2008)
-   1400 = 8.0 (2005)
-   1310 = 7.1 (2003)
-   1300 = 7.0 (2002)
-   1200 = 6.0
+   1600 = 10.0 (2010)
+   1500 =  9.0 (2008)
+   1400 =  8.0 (2005)
+   1310 =  7.1 (2003)
+   1300 =  7.0 (2002)
+   1200 =  6.0
 */
 
 #ifdef _MSC_VER
@@ -1613,7 +1614,9 @@ typedef unsigned int     uintptr_t;
 #endif
 #define snprintf  _snprintf
 
+#if _MSC_VER < 1600
 #define EADDRINUSE	WSAEADDRINUSE
+#endif
 
 /* Define NETSNMP_USE_DLL when building or using netsnmp.DLL */
 /* #undef NETSNMP_USE_DLL */
