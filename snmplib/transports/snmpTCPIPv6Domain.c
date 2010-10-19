@@ -191,7 +191,7 @@ netsnmp_tcp6_transport(struct sockaddr_in6 *addr, int local)
         {
 	  int one=1;
 	  if (setsockopt(t->sock, IPPROTO_IPV6, IPV6_V6ONLY, (char *)&one, sizeof(one)) != 0) {
-	    DEBUGMSGTL(("netsnmp_udp6", "couldn't set IPV6_V6ONLY to %d bytes: %s\n", one, strerror(errno)));
+	    DEBUGMSGTL(("netsnmp_tcp6", "couldn't set IPV6_V6ONLY to %d bytes: %s\n", one, strerror(errno)));
 	  } 
 	}
 #endif
