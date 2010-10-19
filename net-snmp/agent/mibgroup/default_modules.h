@@ -5,6 +5,13 @@
 /* these go into both the mini agent and the full agent */
 config_require(snmpv3mibs)
 
+/* very few default mibs */
+config_add_mib(SNMPv2-MIB)
+config_add_mib(IF-MIB)
+config_add_mib(IP-MIB)
+config_add_mib(TCP-MIB)
+config_add_mib(UDP-MIB)
+
 #ifdef NETSNMP_MINI_AGENT
 
 /* limit the mibII modules to the bare minimum */
@@ -13,13 +20,6 @@ config_require(mibII/system_mib)
 config_require(mibII/sysORTable)
 config_require(mibII/vacm_vars)
 config_require(mibII/vacm_conf)
-
-/* very few default mibs */
-config_add_mib(SNMPv2-MIB)
-config_add_mib(IF-MIB)
-config_add_mib(IP-MIB)
-config_add_mib(TCP-MIB)
-config_add_mib(UDP-MIB)
 
 #else /* !NETSNMP_MINI_AGENT == the full shabang */
 
@@ -38,11 +38,6 @@ config_require(utilities)
 /* NOTE: we consider these MIBs users will likely want to load by
    default, even if they're not supporting it in the agent (ie, the
    command line tools need to load them anyway) */
-config_add_mib(SNMPv2-MIB)
-config_add_mib(IF-MIB)
-config_add_mib(IP-MIB)
-config_add_mib(TCP-MIB)
-config_add_mib(UDP-MIB)
 config_add_mib(HOST-RESOURCES-MIB)
 config_add_mib(NOTIFICATION-LOG-MIB)
 config_add_mib(DISMAN-EVENT-MIB)
