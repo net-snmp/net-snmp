@@ -107,7 +107,9 @@ void devla_getstats(unsigned int regno, void * dummy);
 static mach_port_t masterPort;		/* to communicate with I/O Kit	*/
 #endif                          /* darwin */
 
+#ifndef solaris2
 static int      getstats(void);
+#endif
 
 #if defined (freebsd4) || defined(freebsd5)
 void		devla_getstats(unsigned int regno, void *dummy);
