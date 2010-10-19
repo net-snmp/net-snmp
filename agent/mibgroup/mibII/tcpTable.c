@@ -688,7 +688,7 @@ tcpTable_load(netsnmp_cache *cache, void *vmagic)
         int             state, uid;
 
         if (6 != sscanf(line,
-                        "%*d: %x:%x %x:%x %d %*X:%*X %*X:%*X %*X %d",
+                        "%*d: %x:%x %x:%x %x %*X:%*X %*X:%*X %*X %d",
                         &pcb.inp_laddr.s_addr, &lp,
                         &pcb.inp_faddr.s_addr, &fp, &state, &uid))
             continue;
