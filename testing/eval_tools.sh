@@ -374,6 +374,9 @@ CONFIGTRAPD() {
 # delay after command to allow for settle
 #
 STARTPROG() {
+    if [ "x$DYNAMIC_ANALYZER" != "x" ]; then
+        COMMAND="$DYNAMIC_ANALYZER $COMMAND"
+    fi
     if [ $SNMP_VERBOSE -gt 1 ]; then
 	echo "$CFG_FILE contains: "
 	if [ -f $CFG_FILE ]; then
