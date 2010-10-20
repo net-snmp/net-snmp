@@ -13,6 +13,8 @@
 
 #include <net-snmp/agent/agent_callbacks.h>
 
+#include <stddef.h>
+
 #define MIB_CLIENTS_ARE_EVIL 1
 
 #ifdef HAVE_DMALLOC_H
@@ -49,6 +51,19 @@ get_old_api_handler(void)
     return netsnmp_create_handler("old_api", netsnmp_old_api_helper);
 }
 
+struct variable *
+netsnmp_duplicate_variable(struct variable *var)
+{
+    struct variable *var2 = NULL;
+    
+    if (var) {
+        const int varsize = offsetof(struct variable, name) + var->namelen * sizeof(var->name[0]);
+        var2 = malloc(varsize);
+        if (var2)
+            memcpy(var2, var, varsize);
+    }
+    return var2;
+}
 
 /** Registers an old API set into the mib tree.  Functionally this
  * mimics the old register_mib_context() function (and in fact the new
@@ -80,9 +95,8 @@ netsnmp_register_old_api(const char *moduleName,
         if (reginfo == NULL)
             return SNMP_ERR_GENERR;
 
-        memdup((u_char **) &vp,
-               (void *) (struct variable *) ((char *) var + varsize * i),
-               varsize);
+	vp = netsnmp_duplicate_variable((struct variable *)
+					((char *) var + varsize * i));
 
         reginfo->handler = get_old_api_handler();
         reginfo->handlerName = strdup(moduleName);
@@ -96,6 +110,9 @@ netsnmp_register_old_api(const char *moduleName,
         memcpy(reginfo->rootoid + mibloclen, vp->name, vp->namelen
                * sizeof(oid));
         reginfo->handler->myvoid = (void *) vp;
+        reginfo->handler->data_clone
+	    = (void *(*)(void *))netsnmp_duplicate_variable;
+        reginfo->handler->data_free = free;
 
         reginfo->priority = priority;
         reginfo->range_subid = range_subid;
@@ -175,14 +192,15 @@ netsnmp_register_mib_table_row(const char *moduleName,
                      r->rootoid_len));
         DEBUGMSG(("netsnmp_register_mib_table_row", "(%d)\n",
                      (var_subid - vr->namelen)));
-        r->handler->myvoid = (void *) malloc(varsize);
+        r->handler->myvoid = netsnmp_duplicate_variable(vr);
+        r->handler->data_clone = (void *(*)(void *))netsnmp_duplicate_variable;
+        r->handler->data_free = free;
 
         if (r->handler->myvoid == NULL) {
             netsnmp_handler_registration_free(r);
             rc = MIB_REGISTRATION_FAILED;
             break;
         }
-        memcpy((char *) r->handler->myvoid, vr, varsize);
 
         r->contextName = (context) ? strdup(context) : NULL;
 

@@ -211,7 +211,9 @@ init_callbacks(void)
  * @param new_callback is the callback function that is registered.
  *
  * @param arg when not NULL is a void pointer used whenever new_callback 
- *	function is exercised.
+ *	function is exercised. Ownership is transferred to the twodimensional
+ *      thecallbacks[][] array. The function clear_callback() will deallocate
+ *      the memory pointed at by calling free().
  *
  * @return 
  *	Returns SNMPERR_GENERR if major is >= MAX_CALLBACK_IDS or minor is >=
@@ -227,13 +229,72 @@ int
 snmp_register_callback(int major, int minor, SNMPCallback * new_callback,
                        void *arg)
 {
-    return netsnmp_register_callback( major, minor, new_callback, arg,
+    return netsnmp_register_callback2(major, minor, new_callback, arg, free,
                                       NETSNMP_CALLBACK_DEFAULT_PRIORITY);
 }
 
+/**
+ * Register a callback function.
+ *
+ * @param major        Major callback event type.
+ * @param minor        Minor callback event type.
+ * @param new_callback Callback function being registered.
+ * @param arg          Argument that will be passed to the callback function.
+ * @param arg_free     Function that will be called by clear_callback() to free
+ *   memory arg points at. May be NULL.
+ *
+ * @see snmp_register_callback
+ */
+int
+snmp_register_callback2(int major, int minor, SNMPCallback * new_callback,
+                        void *arg, void (*arg_free)(void*))
+{
+    return netsnmp_register_callback2(major, minor, new_callback, arg,
+                                      arg_free, NETSNMP_CALLBACK_DEFAULT_PRIORITY);
+}
+
+/**
+ * Register a callback function.
+ *
+ * @param major        Major callback event type.
+ * @param minor        Minor callback event type.
+ * @param new_callback Callback function being registered.
+ * @param arg          Argument that will be passed to the callback function.
+ * @param arg_free     Function that will be called by clear_callback() to free
+ *   memory arg points at. May be NULL.
+ * @priority           Handler invocation priority. When multiple handlers have
+ *   been registered for the same (major, minor) callback event type, handlers
+ *   with the numerically lowest priority will be invoked first. Handlers with
+ *   identical priority are invoked in the order they have been registered.
+ *
+ * @see snmp_register_callback
+ */
 int
 netsnmp_register_callback(int major, int minor, SNMPCallback * new_callback,
                           void *arg, int priority)
+{
+    return netsnmp_register_callback2(major, minor, new_callback, arg, free, priority);
+}
+
+/**
+ * Register a callback function.
+ *
+ * @param major        Major callback event type.
+ * @param minor        Minor callback event type.
+ * @param new_callback Callback function being registered.
+ * @param arg          Argument that will be passed to the callback function.
+ * @param arg_free     Function that will be called by clear_callback() to free
+ *   memory arg points at. May be NULL.
+ * @priority           Handler invocation priority. When multiple handlers have
+ *   been registered for the same (major, minor) callback event type, handlers
+ *   with the numerically lowest priority will be invoked first. Handlers with
+ *   identical priority are invoked in the order they have been registered.
+ *
+ * @see snmp_register_callback
+ */
+int
+netsnmp_register_callback2(int major, int minor, SNMPCallback * new_callback,
+                           void *arg, void (*arg_free)(void *), int priority)
 {
     struct snmp_gen_callback *newscp = NULL, *scp = NULL;
     struct snmp_gen_callback **prevNext = &(thecallbacks[major][minor]);
@@ -252,6 +313,7 @@ netsnmp_register_callback(int major, int minor, SNMPCallback * new_callback,
         return SNMPERR_GENERR;
     } else {
         newscp->priority = priority;
+        newscp->sc_client_arg_free = arg_free;
         newscp->sc_client_arg = arg;
         newscp->sc_callback = new_callback;
         newscp->next = NULL;
@@ -535,7 +597,8 @@ clear_callback(void)
                     scp->sc_client_arg = NULL;
                     DEBUGMSGTL(("9:callback", "  freeing %p at [%d,%d]\n", tmp_arg, i, j));
                     (void)netsnmp_callback_clear_client_arg(tmp_arg, i, j);
-                    free(tmp_arg);
+                    if (scp->sc_client_arg_free)
+                        scp->sc_client_arg_free(tmp_arg);
                 }
                 SNMP_FREE(scp);
                 scp = thecallbacks[i][j];
