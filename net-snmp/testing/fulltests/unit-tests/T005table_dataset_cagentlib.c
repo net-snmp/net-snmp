@@ -15,6 +15,7 @@ netsnmp_table_row* row;
 int32_t ival;
 int32_t i, j;
 
+init_agent("snmpd");
 init_snmp("snmpd");
 
 tds = netsnmp_create_table_data_set("table_dataset unit-test");
@@ -52,5 +53,6 @@ for (i = 1; i <= 2; i++) {
 netsnmp_delete_table_data_set(tds);
 
 snmp_shutdown("snmpd");
+shutdown_agent();
 
 OK(TRUE, "done");
