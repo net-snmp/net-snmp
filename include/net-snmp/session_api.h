@@ -221,6 +221,8 @@ extern          "C" {
     void           *snmp_sess_pointer(netsnmp_session *);
     NETSNMP_IMPORT
     netsnmp_session *snmp_sess_session(void *);
+    NETSNMP_IMPORT
+    netsnmp_session *snmp_sess_session_lookup(void *);
 
 
     /*

@@ -939,17 +939,14 @@ netsnmp_subtree_load(netsnmp_subtree *new_sub, const char *context_name)
 void
 clear_subtree (netsnmp_subtree *sub) {
 
-    netsnmp_subtree *nxt;
+    netsnmp_subtree *c;
     
     if (sub == NULL)
 	return;
 
-    for(nxt = sub; nxt;) {
-        if (nxt->children != NULL) {
-            clear_subtree(nxt->children);
-        }
-        sub = nxt;
-        nxt = nxt->next;
+    for(c = sub; c;) {
+        sub = c;
+        c = c->children;
         netsnmp_subtree_free(sub);
     }
 
