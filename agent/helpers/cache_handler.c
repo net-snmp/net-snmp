@@ -193,6 +193,7 @@ netsnmp_cache *netsnmp_cache_clone(netsnmp_cache *cache)
     copy = malloc(sizeof *copy);
     if (copy) {
         *copy = *cache;
+        copy->timestamp = NULL;
         copy->rootoid = snmp_duplicate_objid(cache->rootoid,
                                              cache->rootoid_len);
         if (!copy->rootoid) {
@@ -359,6 +360,15 @@ netsnmp_cache_handler_get(netsnmp_cache* cache)
     return ret;
 }
 
+/** Makes sure that memory allocated for the cache is freed when the handler
+ *  is unregistered.
+ */
+void netsnmp_cache_handler_owns_cache(netsnmp_mib_handler *handler)
+{
+    handler->data_clone = (void *(*)(void *))netsnmp_cache_clone;
+    handler->data_free = (void(*)(void*))netsnmp_cache_free;
+}
+
 /** returns a cache handler that can be injected into a given handler chain.  
  */
 netsnmp_mib_handler *
@@ -374,6 +384,7 @@ netsnmp_get_cache_handler(int timeout, NetsnmpCacheLoad * load_hook,
         cache = netsnmp_cache_create(timeout, load_hook, free_hook,
                                      rootoid, rootoid_len);
         ret->myvoid = (void *) cache;
+        netsnmp_cache_handler_owns_cache(ret);
     }
     return ret;
 }
@@ -606,6 +617,8 @@ _cache_free( netsnmp_cache *cache )
         cache->free_cache(cache, cache->magic);
         cache->valid = 0;
     }
+    SNMP_FREE(cache->timestamp);
+    SNMP_FREE(cache->rootoid);
 }
 
 static int

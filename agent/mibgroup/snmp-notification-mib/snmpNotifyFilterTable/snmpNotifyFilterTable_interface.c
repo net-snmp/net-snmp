@@ -1997,10 +1997,10 @@ snmpNotifyFilterTable_container_init_persistence(netsnmp_container
     register_config_handler(NULL, row_token,
                             _snmpNotifyFilterTable_container_row_restore,
                             NULL, NULL);
-    rc = snmp_register_callback(SNMP_CALLBACK_LIBRARY,
-                                SNMP_CALLBACK_STORE_DATA,
-                                _snmpNotifyFilterTable_container_save_rows,
-                                container);
+    rc = snmp_register_callback2(SNMP_CALLBACK_LIBRARY,
+                                 SNMP_CALLBACK_STORE_DATA,
+                                 _snmpNotifyFilterTable_container_save_rows,
+                                 container, NULL);
 
     if (rc != SNMP_ERR_NOERROR)
         snmp_log(LOG_ERR, "error registering for STORE_DATA callback "

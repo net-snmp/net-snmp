@@ -101,6 +101,7 @@ extern          "C" {
 
     netsnmp_mib_handler *
     netsnmp_cache_handler_get(netsnmp_cache* cache);
+    void netsnmp_cache_handler_owns_cache(netsnmp_mib_handler *handler);
 
     netsnmp_cache * netsnmp_cache_find_by_oid(const oid * rootoid,
                                               int rootoid_len);
