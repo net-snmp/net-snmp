@@ -1162,13 +1162,15 @@ netsnmp_deregister_agent_nsap(int handle)
 
     if (a != NULL && a->handle == handle) {
         *prevNext = a->next;
-        if (main_session == snmp_sess_session(a->s)) {
-            main_session_deregistered = 1;
+	if (snmp_sess_session_lookup(a)) {
+            if (main_session == snmp_sess_session(a->s)) {
+                main_session_deregistered = 1;
+            }
+            snmp_close(snmp_sess_session(a->s));
+            /*
+             * The above free()s the transport and session pointers.  
+             */
         }
-        snmp_close(snmp_sess_session(a->s));
-        /*
-         * The above free()s the transport and session pointers.  
-         */
         SNMP_FREE(a);
     }
 

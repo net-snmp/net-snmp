@@ -7465,6 +7465,30 @@ snmp_sess_session(void *sessp)
     return (slp->session);
 }
 
+/**
+ * Look up a session that already may have been closed.
+ *
+ * @param sessp Opaque pointer, returned by snmp_sess_open.
+ *
+ * @return Pointer to session upon success or NULL upon failure.
+ *
+ * @see snmp_sess_session()
+ */
+netsnmp_session *
+snmp_sess_session_lookup(void *sessp)
+{
+    struct session_list *slp;
+
+    snmp_res_lock(MT_LIBRARY_ID, MT_LIB_SESSION);
+    for (slp = Sessions; slp; slp = slp->next) {
+        if (slp == sessp) {
+            break;
+        }
+    }
+    snmp_res_unlock(MT_LIBRARY_ID, MT_LIB_SESSION);
+
+    return (netsnmp_session *)slp;
+}
 
 
 /*
