@@ -553,7 +553,7 @@ tcpTable_load(netsnmp_cache *cache, void *vmagic)
 
 #if HAVE_NETLINK_NETLINK_H
 static int
-tcpTable_load_netlink()
+tcpTable_load_netlink(void)
 {
 	/*  TODO: perhaps use permanent nl handle? */
 	struct nl_handle *nl = nl_handle_alloc();
