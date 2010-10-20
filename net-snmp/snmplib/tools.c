@@ -263,12 +263,16 @@ memdup(u_char ** to, const void * from, size_t size)
  * bytes with uninitialized values have been found. This function can help to
  * find the cause of undefined value errors if --track-origins=yes is not
  * sufficient. Does nothing when not running under Valgrind.
+ *
+ * Note: this requires a fairly recent valgrind.
  */
 void
 netsnmp_check_definedness(const void *packet, size_t length)
 {
-#ifdef HAVE_VALGRIND_MEMCHECK_H
-    /* Note: this requires a fairly recent valgrind */
+#if defined(__VALGRIND_MAJOR__) && defined(__VALGRIND_MINOR__)   \
+    && (__VALGRIND_MAJOR__ > 3                                   \
+        || (__VALGRIND_MAJOR__ == 3 && __VALGRIND_MINOR__ >= 6))
+
     if (RUNNING_ON_VALGRIND) {
         int i;
         char vbits;
@@ -280,6 +284,7 @@ netsnmp_check_definedness(const void *packet, size_t length)
                                           (int)length);
         }
     }
+
 #endif
 }
 
