@@ -268,6 +268,7 @@ void
 netsnmp_check_definedness(const void *packet, size_t length)
 {
 #ifdef HAVE_VALGRIND_MEMCHECK_H
+    /* Note: this requires a fairly recent valgrind */
     if (RUNNING_ON_VALGRIND) {
         int i;
         char vbits;
