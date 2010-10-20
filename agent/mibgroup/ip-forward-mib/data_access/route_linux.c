@@ -72,7 +72,7 @@ _load_ipv4(netsnmp_container* container, u_long *index )
     while (fgets(line, sizeof(line), in)) {
         char            rtent_name[32];
         int             refcnt, flags, rc;
-        uint32_t        dest, nexthop, mask, tmp_mask;
+        uint32_t        dest, nexthop, mask;
         unsigned        use;
 
         entry = netsnmp_access_route_entry_create();
@@ -89,7 +89,7 @@ _load_ipv4(netsnmp_container* container, u_long *index )
                      * XXX: fix type of the args 
                      */
                     &flags, &refcnt, &use, &entry->rt_metric1,
-                    &tmp_mask);
+                    &mask);
         DEBUGMSGTL(("9:access:route:container", "line |%s|\n", line));
         if (8 != rc) {
             snmp_log(LOG_ERR,
@@ -122,10 +122,8 @@ _load_ipv4(netsnmp_container* container, u_long *index )
          */
         entry->ns_rt_index = ++(*index);
 
-        mask = htonl(tmp_mask);
-
 #ifdef USING_IP_FORWARD_MIB_IPCIDRROUTETABLE_IPCIDRROUTETABLE_MODULE
-        entry->rt_mask = mask;
+        memcpy(&entry->rt_mask, &mask, 4);
         /** entry->rt_tos = XXX; */
         /** rt info ?? */
 #endif
@@ -143,6 +141,7 @@ _load_ipv4(netsnmp_container* container, u_long *index )
         /*
          * count bits in mask
          */
+        mask = htonl(mask);
         entry->rt_pfx_len = netsnmp_ipaddress_ipv4_prefix_len(mask);
 
 #ifdef USING_IP_FORWARD_MIB_INETCIDRROUTETABLE_INETCIDRROUTETABLE_MODULE
