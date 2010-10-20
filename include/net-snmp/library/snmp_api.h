@@ -883,6 +883,8 @@ struct variable_list {
     void           *snmp_sess_open(netsnmp_session *);
     void           *snmp_sess_pointer(netsnmp_session *);
     netsnmp_session *snmp_sess_session(void *);
+    NETSNMP_IMPORT
+    netsnmp_session *snmp_sess_session_lookup(void *);
 
     /*
      * Return the netsnmp_transport structure associated with the given opaque
