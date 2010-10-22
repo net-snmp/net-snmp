@@ -873,7 +873,19 @@ netsnmp_register_auto_data_table(netsnmp_table_data_set *table_set,
     if (!registration_name) {
         registration_name = table_set->table->name;
     }
-    netsnmp_add_list_data(&auto_tables, netsnmp_create_data_list(registration_name, tables, NULL));     /* XXX */
+    netsnmp_add_list_data(&auto_tables,
+                          netsnmp_create_data_list(registration_name,
+                                                   tables, free));     /* XXX */
+}
+
+/** Undo the effect of netsnmp_register_auto_data_table().
+ */
+void
+netsnmp_unregister_auto_data_table(netsnmp_table_data_set *table_set,
+				   char *registration_name)
+{
+    netsnmp_remove_list_node(&auto_tables, registration_name
+			     ? registration_name : table_set->table->name);
 }
 
 #ifndef NETSNMP_DISABLE_MIB_LOADING

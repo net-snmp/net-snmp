@@ -150,6 +150,8 @@ extern          "C" {
 
     void netsnmp_register_auto_data_table(netsnmp_table_data_set *table_set,
                                           char *registration_name);
+    void netsnmp_unregister_auto_data_table(netsnmp_table_data_set *table_set,
+					    char *registration_name);
     void netsnmp_config_parse_table_set(const char *token, char *line);
     void netsnmp_config_parse_add_row(  const char *token, char *line);
 
