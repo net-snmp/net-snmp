@@ -19,8 +19,7 @@ OK(snmp_oid_compare(nc->rootoid, nc->rootoid_len, Oid, OID_LENGTH(Oid)) == 0,
    "Handler private OID.");
 
 handler->handler->myvoid = nc;
-handler->handler->data_clone = (void *(*)(void *))netsnmp_cache_clone;
-handler->handler->data_free = (void(*)(void *))netsnmp_cache_free;
+netsnmp_cache_handler_owns_cache(handler->handler);
 
 nc2 = handler->handler->myvoid;
 OK(nc2, "Handler private data");
