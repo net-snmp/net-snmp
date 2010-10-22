@@ -1722,6 +1722,7 @@ void
 clear_context(void) {
 
     subtree_context_cache *ptr = NULL, *next = NULL;
+    netsnmp_subtree *t, *u;
 
     DEBUGMSGTL(("agent_registry", "clear context\n"));
 
@@ -1729,8 +1730,9 @@ clear_context(void) {
     while (ptr) {
 	next = ptr->next;
 
-	if (ptr->first_subtree) {
-	    clear_subtree(ptr->first_subtree);
+	for (t = ptr->first_subtree; t; t = u) {
+            u = t->next;
+	    clear_subtree(t);
 	}
 
 	SNMP_FREE(ptr->context_name);
