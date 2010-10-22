@@ -67,6 +67,8 @@
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 
+static netsnmp_table_data_set *table_set;
+
 /*
  * our initialization routine, automatically called by the agent 
  */
@@ -76,7 +78,6 @@
 void
 init_data_set(void)
 {
-    netsnmp_table_data_set *table_set;
     netsnmp_table_row *row;
 
     /*
@@ -203,4 +204,12 @@ init_data_set(void)
     netsnmp_register_auto_data_table(table_set, NULL);
 
     DEBUGMSGTL(("example_data_set", "Done initializing.\n"));
+}
+
+void
+shutdown_data_set(void)
+{
+    netsnmp_unregister_auto_data_table(table_set, NULL);
+    netsnmp_delete_table_data_set(table_set);
+    table_set = NULL;
 }
