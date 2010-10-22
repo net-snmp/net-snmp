@@ -43,6 +43,8 @@ extern          "C" {
  *  @{ */
 
     typedef struct netsnmp_baby_steps_modes_s {
+       /** Number of handlers whose myvoid pointer points at this object. */
+       int         refcnt;
        u_int       registered;
        u_int       completed;
     } netsnmp_baby_steps_modes;
