@@ -157,6 +157,7 @@ netsnmp_cache_create(int timeout, NetsnmpCacheLoad * load_hook,
         snmp_log(LOG_ERR,"malloc error in netsnmp_cache_create\n");
         return NULL;
     }
+    cache->refcnt = 1;
     cache->timeout = timeout;
     cache->load_cache = load_hook;
     cache->free_cache = free_hook;
@@ -186,22 +187,20 @@ netsnmp_cache_create(int timeout, NetsnmpCacheLoad * load_hook,
     return cache;
 }
 
-netsnmp_cache *netsnmp_cache_clone(netsnmp_cache *cache)
+static netsnmp_cache *
+netsnmp_cache_ref(netsnmp_cache *cache)
 {
-    netsnmp_cache *copy;
+    cache->refcnt++;
+    return cache;
+}
 
-    copy = malloc(sizeof *copy);
-    if (copy) {
-        *copy = *cache;
-        copy->timestamp = NULL;
-        copy->rootoid = snmp_duplicate_objid(cache->rootoid,
-                                             cache->rootoid_len);
-        if (!copy->rootoid) {
-            free(copy);
-            copy = NULL;
-        }
+static void
+netsnmp_cache_deref(netsnmp_cache *cache)
+{
+    if (--cache->refcnt == 0) {
+	netsnmp_cache_remove(cache);
+	netsnmp_cache_free(cache);
     }
-    return copy;
 }
 
 /** frees a cache
@@ -374,8 +373,8 @@ netsnmp_cache_handler_get(netsnmp_cache* cache)
  */
 void netsnmp_cache_handler_owns_cache(netsnmp_mib_handler *handler)
 {
-    handler->data_clone = (void *(*)(void *))netsnmp_cache_clone;
-    handler->data_free = (void(*)(void*))netsnmp_cache_free;
+    handler->data_clone = (void *(*)(void *))netsnmp_cache_ref;
+    handler->data_free = (void(*)(void*))netsnmp_cache_deref;
 }
 
 /** returns a cache handler that can be injected into a given handler chain.  
