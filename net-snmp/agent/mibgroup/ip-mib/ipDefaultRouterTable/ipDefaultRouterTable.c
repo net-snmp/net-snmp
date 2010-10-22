@@ -31,6 +31,7 @@ const int       ipDefaultRouterTable_oid_size =
 OID_LENGTH(ipDefaultRouterTable_oid);
 
 ipDefaultRouterTable_registration ipDefaultRouterTable_user_context;
+static ipDefaultRouterTable_registration *ipDefaultRouterTable_user_context_p;
 
 void            initialize_table_ipDefaultRouterTable(void);
 void            shutdown_table_ipDefaultRouterTable(void);
@@ -75,7 +76,6 @@ shutdown_ipDefaultRouterTable(void)
 void
 initialize_table_ipDefaultRouterTable(void)
 {
-    ipDefaultRouterTable_registration *user_context;
     u_long          flags;
 
     DEBUGMSGTL(("verbose:ipDefaultRouterTable:initialize_table_ipDefaultRouterTable", "called\n"));
@@ -93,7 +93,7 @@ initialize_table_ipDefaultRouterTable(void)
      * a netsnmp_data_list is a simple way to store void pointers. A simple
      * string token is used to add, find or remove pointers.
      */
-    user_context =
+    ipDefaultRouterTable_user_context_p =
         netsnmp_create_data_list("ipDefaultRouterTable", NULL, NULL);
 
     /*
@@ -105,7 +105,8 @@ initialize_table_ipDefaultRouterTable(void)
     /*
      * call interface initialization code
      */
-    _ipDefaultRouterTable_initialize_interface(user_context, flags);
+    _ipDefaultRouterTable_initialize_interface
+	(ipDefaultRouterTable_user_context_p, flags);
 }                               /* initialize_table_ipDefaultRouterTable */
 
 /**
@@ -118,7 +119,9 @@ shutdown_table_ipDefaultRouterTable(void)
      * call interface shutdown code
      */
     _ipDefaultRouterTable_shutdown_interface
-        (&ipDefaultRouterTable_user_context);
+        (ipDefaultRouterTable_user_context_p);
+    netsnmp_free_all_list_data(ipDefaultRouterTable_user_context_p);
+    ipDefaultRouterTable_user_context_p = NULL;
 }
 
 /**

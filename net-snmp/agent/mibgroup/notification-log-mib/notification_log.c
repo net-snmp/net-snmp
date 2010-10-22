@@ -564,6 +564,8 @@ shutdown_notification_log(void)
 {
     max_logged = 0;
     check_log_size(0, NULL);
+    netsnmp_delete_table_data_set(nlmLogTable);
+    nlmLogTable = NULL;
 }
 
 void
