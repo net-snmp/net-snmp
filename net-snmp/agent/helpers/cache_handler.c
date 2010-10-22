@@ -198,8 +198,10 @@ static void
 netsnmp_cache_deref(netsnmp_cache *cache)
 {
     if (--cache->refcnt == 0) {
+#if 0
 	netsnmp_cache_remove(cache);
 	netsnmp_cache_free(cache);
+#endif
     }
 }
 
