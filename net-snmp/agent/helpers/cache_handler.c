@@ -198,7 +198,16 @@ netsnmp_cache_free(netsnmp_cache *cache)
 
     for (pos = cache_head; pos; pos = pos->next) {
         if (pos == cache) {
-            snmp_log(LOG_WARNING, "not freeing cache (still in list)\n");
+            size_t          out_len = 0;
+            size_t          buf_len = 0;
+            char           *buf = NULL;
+
+            sprint_realloc_objid((u_char **) &buf, &buf_len, &out_len,
+                                 1, pos->rootoid, pos->rootoid_len);
+            snmp_log(LOG_WARNING,
+		     "not freeing cache with root OID %s (still in list)\n",
+		     buf);
+            free(buf);
             return SNMP_ERR_GENERR;
         }
     }
