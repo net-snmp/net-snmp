@@ -737,200 +737,200 @@
 /* Define to 1 if you have the `strtoull' function. */
 #undef HAVE_STRTOULL
 
-/* Define to 1 if `at_next' is member of `struct arphd'. */
+/* Define to 1 if `at_next' is a member of `struct arphd'. */
 #undef HAVE_STRUCT_ARPHD_AT_NEXT
 
-/* Define to 1 if `weak_key' is member of `struct des_ks_struct'. */
+/* Define to 1 if `weak_key' is a member of `struct des_ks_struct'. */
 #undef HAVE_STRUCT_DES_KS_STRUCT_WEAK_KEY
 
-/* Define to 1 if `d_type' is member of `struct dirent'. */
+/* Define to 1 if `d_type' is a member of `struct dirent'. */
 #undef HAVE_STRUCT_DIRENT_D_TYPE
 
-/* Define to 1 if `ifa_next' is member of `struct ifaddr'. */
+/* Define to 1 if `ifa_next' is a member of `struct ifaddr'. */
 #undef HAVE_STRUCT_IFADDR_IFA_NEXT
 
-/* Define to 1 if `if_addrhead.tqh_first' is member of `struct ifnet'. */
+/* Define to 1 if `if_addrhead.tqh_first' is a member of `struct ifnet'. */
 #undef HAVE_STRUCT_IFNET_IF_ADDRHEAD_TQH_FIRST
 
-/* Define to 1 if `if_addrlist' is member of `struct ifnet'. */
+/* Define to 1 if `if_addrlist' is a member of `struct ifnet'. */
 #undef HAVE_STRUCT_IFNET_IF_ADDRLIST
 
-/* Define to 1 if `if_baudrate' is member of `struct ifnet'. */
+/* Define to 1 if `if_baudrate' is a member of `struct ifnet'. */
 #undef HAVE_STRUCT_IFNET_IF_BAUDRATE
 
-/* Define to 1 if `if_baudrate.ifs_value' is member of `struct ifnet'. */
+/* Define to 1 if `if_baudrate.ifs_value' is a member of `struct ifnet'. */
 #undef HAVE_STRUCT_IFNET_IF_BAUDRATE_IFS_VALUE
 
-/* Define to 1 if `if_ibytes' is member of `struct ifnet'. */
+/* Define to 1 if `if_ibytes' is a member of `struct ifnet'. */
 #undef HAVE_STRUCT_IFNET_IF_IBYTES
 
-/* Define to 1 if `if_imcasts' is member of `struct ifnet'. */
+/* Define to 1 if `if_imcasts' is a member of `struct ifnet'. */
 #undef HAVE_STRUCT_IFNET_IF_IMCASTS
 
-/* Define to 1 if `if_iqdrops' is member of `struct ifnet'. */
+/* Define to 1 if `if_iqdrops' is a member of `struct ifnet'. */
 #undef HAVE_STRUCT_IFNET_IF_IQDROPS
 
-/* Define to 1 if `if_lastchange.tv_sec' is member of `struct ifnet'. */
+/* Define to 1 if `if_lastchange.tv_sec' is a member of `struct ifnet'. */
 #undef HAVE_STRUCT_IFNET_IF_LASTCHANGE_TV_SEC
 
-/* Define to 1 if `if_mtu' is member of `struct ifnet'. */
+/* Define to 1 if `if_mtu' is a member of `struct ifnet'. */
 #undef HAVE_STRUCT_IFNET_IF_MTU
 
-/* Define to 1 if `if_noproto' is member of `struct ifnet'. */
+/* Define to 1 if `if_noproto' is a member of `struct ifnet'. */
 #undef HAVE_STRUCT_IFNET_IF_NOPROTO
 
-/* Define to 1 if `if_obytes' is member of `struct ifnet'. */
+/* Define to 1 if `if_obytes' is a member of `struct ifnet'. */
 #undef HAVE_STRUCT_IFNET_IF_OBYTES
 
-/* Define to 1 if `if_omcasts' is member of `struct ifnet'. */
+/* Define to 1 if `if_omcasts' is a member of `struct ifnet'. */
 #undef HAVE_STRUCT_IFNET_IF_OMCASTS
 
-/* Define to 1 if `if_speed' is member of `struct ifnet'. */
+/* Define to 1 if `if_speed' is a member of `struct ifnet'. */
 #undef HAVE_STRUCT_IFNET_IF_SPEED
 
-/* Define to 1 if `if_type' is member of `struct ifnet'. */
+/* Define to 1 if `if_type' is a member of `struct ifnet'. */
 #undef HAVE_STRUCT_IFNET_IF_TYPE
 
-/* Define to 1 if `if_xname' is member of `struct ifnet'. */
+/* Define to 1 if `if_xname' is a member of `struct ifnet'. */
 #undef HAVE_STRUCT_IFNET_IF_XNAME
 
-/* Define to 1 if `ips_cantforward' is member of `struct ipstat'. */
+/* Define to 1 if `ips_cantforward' is a member of `struct ipstat'. */
 #undef HAVE_STRUCT_IPSTAT_IPS_CANTFORWARD
 
-/* Define to 1 if `ips_cantfrag' is member of `struct ipstat'. */
+/* Define to 1 if `ips_cantfrag' is a member of `struct ipstat'. */
 #undef HAVE_STRUCT_IPSTAT_IPS_CANTFRAG
 
-/* Define to 1 if `ips_delivered' is member of `struct ipstat'. */
+/* Define to 1 if `ips_delivered' is a member of `struct ipstat'. */
 #undef HAVE_STRUCT_IPSTAT_IPS_DELIVERED
 
-/* Define to 1 if `ips_fragdropped' is member of `struct ipstat'. */
+/* Define to 1 if `ips_fragdropped' is a member of `struct ipstat'. */
 #undef HAVE_STRUCT_IPSTAT_IPS_FRAGDROPPED
 
-/* Define to 1 if `ips_fragmented' is member of `struct ipstat'. */
+/* Define to 1 if `ips_fragmented' is a member of `struct ipstat'. */
 #undef HAVE_STRUCT_IPSTAT_IPS_FRAGMENTED
 
-/* Define to 1 if `ips_fragtimeout' is member of `struct ipstat'. */
+/* Define to 1 if `ips_fragtimeout' is a member of `struct ipstat'. */
 #undef HAVE_STRUCT_IPSTAT_IPS_FRAGTIMEOUT
 
-/* Define to 1 if `ips_localout' is member of `struct ipstat'. */
+/* Define to 1 if `ips_localout' is a member of `struct ipstat'. */
 #undef HAVE_STRUCT_IPSTAT_IPS_LOCALOUT
 
-/* Define to 1 if `ips_noproto' is member of `struct ipstat'. */
+/* Define to 1 if `ips_noproto' is a member of `struct ipstat'. */
 #undef HAVE_STRUCT_IPSTAT_IPS_NOPROTO
 
-/* Define to 1 if `ips_noroute' is member of `struct ipstat'. */
+/* Define to 1 if `ips_noroute' is a member of `struct ipstat'. */
 #undef HAVE_STRUCT_IPSTAT_IPS_NOROUTE
 
-/* Define to 1 if `ips_odropped' is member of `struct ipstat'. */
+/* Define to 1 if `ips_odropped' is a member of `struct ipstat'. */
 #undef HAVE_STRUCT_IPSTAT_IPS_ODROPPED
 
-/* Define to 1 if `ips_ofragments' is member of `struct ipstat'. */
+/* Define to 1 if `ips_ofragments' is a member of `struct ipstat'. */
 #undef HAVE_STRUCT_IPSTAT_IPS_OFRAGMENTS
 
-/* Define to 1 if `ips_reassembled' is member of `struct ipstat'. */
+/* Define to 1 if `ips_reassembled' is a member of `struct ipstat'. */
 #undef HAVE_STRUCT_IPSTAT_IPS_REASSEMBLED
 
-/* Define to 1 if `m_clfree' is member of `struct mbstat'. */
+/* Define to 1 if `m_clfree' is a member of `struct mbstat'. */
 #undef HAVE_STRUCT_MBSTAT_M_CLFREE
 
-/* Define to 1 if `m_clusters' is member of `struct mbstat'. */
+/* Define to 1 if `m_clusters' is a member of `struct mbstat'. */
 #undef HAVE_STRUCT_MBSTAT_M_CLUSTERS
 
-/* Define to 1 if `m_mbufs' is member of `struct mbstat'. */
+/* Define to 1 if `m_mbufs' is a member of `struct mbstat'. */
 #undef HAVE_STRUCT_MBSTAT_M_MBUFS
 
-/* Define to 1 if `n_value' is member of `struct nlist64'. */
+/* Define to 1 if `n_value' is a member of `struct nlist64'. */
 #undef HAVE_STRUCT_NLIST64_N_VALUE
 
-/* Define to 1 if `n_value' is member of `struct nlist'. */
+/* Define to 1 if `n_value' is a member of `struct nlist'. */
 #undef HAVE_STRUCT_NLIST_N_VALUE
 
-/* Define to 1 if `rt_dst' is member of `struct rtentry'. */
+/* Define to 1 if `rt_dst' is a member of `struct rtentry'. */
 #undef HAVE_STRUCT_RTENTRY_RT_DST
 
-/* Define to 1 if `rt_hash' is member of `struct rtentry'. */
+/* Define to 1 if `rt_hash' is a member of `struct rtentry'. */
 #undef HAVE_STRUCT_RTENTRY_RT_HASH
 
-/* Define to 1 if `rt_next' is member of `struct rtentry'. */
+/* Define to 1 if `rt_next' is a member of `struct rtentry'. */
 #undef HAVE_STRUCT_RTENTRY_RT_NEXT
 
-/* Define to 1 if `rt_refcnt' is member of `struct rtentry'. */
+/* Define to 1 if `rt_refcnt' is a member of `struct rtentry'. */
 #undef HAVE_STRUCT_RTENTRY_RT_REFCNT
 
-/* Define to 1 if `rt_unit' is member of `struct rtentry'. */
+/* Define to 1 if `rt_unit' is a member of `struct rtentry'. */
 #undef HAVE_STRUCT_RTENTRY_RT_UNIT
 
-/* Define to 1 if `rt_use' is member of `struct rtentry'. */
+/* Define to 1 if `rt_use' is a member of `struct rtentry'. */
 #undef HAVE_STRUCT_RTENTRY_RT_USE
 
-/* Define to 1 if `sa_sigaction' is member of `struct sigaction'. */
+/* Define to 1 if `sa_sigaction' is a member of `struct sigaction'. */
 #undef HAVE_STRUCT_SIGACTION_SA_SIGACTION
 
-/* Define to 1 if `sin6_scope_id' is member of `struct sockaddr_in6'. */
+/* Define to 1 if `sin6_scope_id' is a member of `struct sockaddr_in6'. */
 #undef HAVE_STRUCT_SOCKADDR_IN6_SIN6_SCOPE_ID
 
-/* Define to 1 if `sa_len' is member of `struct sockaddr'. */
+/* Define to 1 if `sa_len' is a member of `struct sockaddr'. */
 #undef HAVE_STRUCT_SOCKADDR_SA_LEN
 
-/* Define to 1 if `sa_union.sa_generic.sa_family2' is member of `struct
+/* Define to 1 if `sa_union.sa_generic.sa_family2' is a member of `struct
    sockaddr'. */
 #undef HAVE_STRUCT_SOCKADDR_SA_UNION_SA_GENERIC_SA_FAMILY2
 
-/* Define to 1 if `ss_family' is member of `struct sockaddr_storage'. */
+/* Define to 1 if `ss_family' is a member of `struct sockaddr_storage'. */
 #undef HAVE_STRUCT_SOCKADDR_STORAGE_SS_FAMILY
 
-/* Define to 1 if `__ss_family' is member of `struct sockaddr_storage'. */
+/* Define to 1 if `__ss_family' is a member of `struct sockaddr_storage'. */
 #undef HAVE_STRUCT_SOCKADDR_STORAGE___SS_FAMILY
 
-/* Define to 1 if `f_favail' is member of `struct statfs'. */
+/* Define to 1 if `f_favail' is a member of `struct statfs'. */
 #undef HAVE_STRUCT_STATFS_F_FAVAIL
 
-/* Define to 1 if `f_ffree' is member of `struct statfs'. */
+/* Define to 1 if `f_ffree' is a member of `struct statfs'. */
 #undef HAVE_STRUCT_STATFS_F_FFREE
 
-/* Define to 1 if `f_files' is member of `struct statfs'. */
+/* Define to 1 if `f_files' is a member of `struct statfs'. */
 #undef HAVE_STRUCT_STATFS_F_FILES
 
-/* Define to 1 if `f_flags' is member of `struct statfs'. */
+/* Define to 1 if `f_flags' is a member of `struct statfs'. */
 #undef HAVE_STRUCT_STATFS_F_FLAGS
 
-/* Define to 1 if `f_frsize' is member of `struct statfs'. */
+/* Define to 1 if `f_frsize' is a member of `struct statfs'. */
 #undef HAVE_STRUCT_STATFS_F_FRSIZE
 
-/* Define to 1 if `f_files' is member of `struct statvfs'. */
+/* Define to 1 if `f_files' is a member of `struct statvfs'. */
 #undef HAVE_STRUCT_STATVFS_F_FILES
 
-/* Define to 1 if `f_frsize' is member of `struct statvfs'. */
+/* Define to 1 if `f_frsize' is a member of `struct statvfs'. */
 #undef HAVE_STRUCT_STATVFS_F_FRSIZE
 
-/* Define to 1 if `mnt_dir' is member of `struct statvfs'. */
+/* Define to 1 if `mnt_dir' is a member of `struct statvfs'. */
 #undef HAVE_STRUCT_STATVFS_MNT_DIR
 
-/* Define to 1 if `sw_nblksenabled' is member of `struct swdevt'. */
+/* Define to 1 if `sw_nblksenabled' is a member of `struct swdevt'. */
 #undef HAVE_STRUCT_SWDEVT_SW_NBLKSENABLED
 
-/* Define to 1 if `tcp_rcvmemdrop' is member of `struct tcpstat'. */
+/* Define to 1 if `tcp_rcvmemdrop' is a member of `struct tcpstat'. */
 #undef HAVE_STRUCT_TCPSTAT_TCP_RCVMEMDROP
 
-/* Define to 1 if `tz_dsttime' is member of `struct timezone'. */
+/* Define to 1 if `tz_dsttime' is a member of `struct timezone'. */
 #undef HAVE_STRUCT_TIMEZONE_TZ_DSTTIME
 
-/* Define to 1 if `tm_gmtoff' is member of `struct tm'. */
+/* Define to 1 if `tm_gmtoff' is a member of `struct tm'. */
 #undef HAVE_STRUCT_TM_TM_GMTOFF
 
-/* Define to 1 if `udps_discard' is member of `struct udpstat'. */
+/* Define to 1 if `udps_discard' is a member of `struct udpstat'. */
 #undef HAVE_STRUCT_UDPSTAT_UDPS_DISCARD
 
-/* Define to 1 if `udps_fullsock' is member of `struct udpstat'. */
+/* Define to 1 if `udps_fullsock' is a member of `struct udpstat'. */
 #undef HAVE_STRUCT_UDPSTAT_UDPS_FULLSOCK
 
-/* Define to 1 if `udps_noport' is member of `struct udpstat'. */
+/* Define to 1 if `udps_noport' is a member of `struct udpstat'. */
 #undef HAVE_STRUCT_UDPSTAT_UDPS_NOPORT
 
-/* Define to 1 if `udps_noportbcast' is member of `struct udpstat'. */
+/* Define to 1 if `udps_noportbcast' is a member of `struct udpstat'. */
 #undef HAVE_STRUCT_UDPSTAT_UDPS_NOPORTBCAST
 
-/* Define to 1 if `udps_opackets' is member of `struct udpstat'. */
+/* Define to 1 if `udps_opackets' is a member of `struct udpstat'. */
 #undef HAVE_STRUCT_UDPSTAT_UDPS_OPACKETS
 
 /* Define to 1 if you have the `sysconf' function. */
@@ -1366,6 +1366,9 @@
 #undef PACKAGE_TARNAME
 #endif
 
+/* Define to the home page for this package. */
+#undef PACKAGE_URL
+
 /* Define to the version of this package. */
 #ifndef PACKAGE_VERSION
 #undef PACKAGE_VERSION
@@ -1530,6 +1533,9 @@
 
 /* Define to `int' if <sys/types.h> does not define. */
 #undef pid_t
+
+/* Define to `unsigned int' if <sys/types.h> does not define. */
+#undef size_t
 
 /* Define to the type of an unsigned integer type of width exactly 16 bits if
    such a type exists and the standard includes do not define it. */
