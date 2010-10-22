@@ -121,6 +121,8 @@ initialize_table_sctpAssocTable(void)
         goto bail;
     }
 
+    netsnmp_cache_handler_owns_cache(handler);
+
     if (SNMPERR_SUCCESS != netsnmp_inject_handler(reg, handler)) {
         snmp_log(LOG_ERR,
                  "error injecting cache handler for sctpAssocTable\n");

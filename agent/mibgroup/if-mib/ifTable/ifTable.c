@@ -41,6 +41,7 @@ const oid       ifTable_oid[] = { IFTABLE_OID };
 const int       ifTable_oid_size = OID_LENGTH(ifTable_oid);
 
 ifTable_registration ifTable_user_context;
+static ifTable_registration *ifTable_user_context_p;
 
 void            initialize_table_ifTable(void);
 void            shutdown_table_ifTable(void);
@@ -112,7 +113,6 @@ shutdown_ifTable(void)
 void
 initialize_table_ifTable(void)
 {
-    ifTable_registration *user_context;
     u_long          flags;
 
     DEBUGMSGTL(("verbose:ifTable:initialize_table_ifTable", "called\n"));
@@ -130,7 +130,7 @@ initialize_table_ifTable(void)
      * a netsnmp_data_list is a simple way to store void pointers. A simple
      * string token is used to add, find or remove pointers.
      */
-    user_context = netsnmp_create_data_list("ifTable", NULL, NULL);
+    ifTable_user_context_p = netsnmp_create_data_list("ifTable", NULL, NULL);
 
     /*
      * No support for any flags yet, but in the future you would
@@ -141,7 +141,7 @@ initialize_table_ifTable(void)
     /*
      * call interface initialization code
      */
-    _ifTable_initialize_interface(user_context, flags);
+    _ifTable_initialize_interface(ifTable_user_context_p, flags);
 
     /*
      * register scalar for ifNumber
@@ -170,7 +170,9 @@ shutdown_table_ifTable(void)
     /*
      * call interface shutdown code
      */
-    _ifTable_shutdown_interface(&ifTable_user_context);
+    _ifTable_shutdown_interface(ifTable_user_context_p);
+    netsnmp_free_all_list_data(ifTable_user_context_p);
+    ifTable_user_context_p = NULL;
 }
 
 /**
