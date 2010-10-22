@@ -51,6 +51,20 @@ _baby_steps_access_multiplexer(netsnmp_mib_handler *handler,
  *  @{
  */
 
+static netsnmp_baby_steps_modes *
+netsnmp_baby_steps_modes_ref(netsnmp_baby_steps_modes *md)
+{
+    md->refcnt++;
+    return md;
+}
+
+static void
+netsnmp_baby_steps_modes_deref(netsnmp_baby_steps_modes *md)
+{
+    if (--md->refcnt == 0)
+	free(md);
+}
+
 /** returns a baby_steps handler that can be injected into a given
  *  handler chain.
  */
@@ -71,7 +85,10 @@ netsnmp_baby_steps_handler_get(u_long modes)
         mh = NULL;
     }
     else {
+	md->refcnt = 1;
         mh->myvoid = md;
+	mh->data_clone = (void *(*)(void *))netsnmp_baby_steps_modes_ref;
+	mh->data_free = (void (*)(void *))netsnmp_baby_steps_modes_deref;
         if (0 == modes)
             modes = BABY_STEP_ALL;
         md->registered = modes;
