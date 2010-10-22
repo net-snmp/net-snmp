@@ -35,6 +35,9 @@
  */
 typedef struct container_table_data_s {
 
+    /** Number of handlers whose myvoid pointer points to this structure. */
+    int refcnt;
+
    /** registration info for the table */
     netsnmp_table_registration_info *tblreg_info;
 
@@ -250,6 +253,20 @@ netsnmp_tcontainer_replace_row( container_table_data *table,
  *
  * ================================== */
 
+static container_table_data *
+netsnmp_container_table_data_clone(container_table_data *tad)
+{
+    ++tad->refcnt;
+    return tad;
+}
+
+static void
+netsnmp_container_table_data_free(container_table_data *tad)
+{
+    if (--tad->refcnt == 0)
+	free(tad);
+}
+
 /** returns a netsnmp_mib_handler object for the table_container helper */
 netsnmp_mib_handler *
 netsnmp_container_table_handler_get(netsnmp_table_registration_info *tabreg,
@@ -264,6 +281,7 @@ netsnmp_container_table_handler_get(netsnmp_table_registration_info *tabreg,
     }
 
     tad = SNMP_MALLOC_TYPEDEF(container_table_data);
+    tad->refcnt = 1;
     handler = netsnmp_create_handler("table_container",
                                      _container_table_handler);
     if((NULL == tad) || (NULL == handler)) {
@@ -290,6 +308,8 @@ netsnmp_container_table_handler_get(netsnmp_table_registration_info *tabreg,
         container->ncompare = netsnmp_ncompare_netsnmp_index;
     
     handler->myvoid = (void*)tad;
+    handler->data_clone = (void *(*)(void *))netsnmp_container_table_data_clone;
+    handler->data_free = (void (*)(void *))netsnmp_container_table_data_free;
     handler->flags |= MIB_HANDLER_AUTO_NEXT;
     
     return handler;
@@ -328,8 +348,10 @@ netsnmp_container_table_unregister(netsnmp_handler_registration *reginfo)
     if (tad) {
         CONTAINER_FREE( tad->table );
         tad->table = NULL;
-        free(tad);
-        reginfo->handler->myvoid = NULL;
+	/*
+	 * Note: don't free the memory tad points at here - that is done
+	 * by netsnmp_container_table_data_free().
+	 */
     }
     return netsnmp_unregister_table( reginfo );
 }
