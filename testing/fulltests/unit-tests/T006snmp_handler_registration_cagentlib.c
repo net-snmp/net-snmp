@@ -11,9 +11,7 @@ handler = netsnmp_create_handler_registration("experimental.327", NULL,
 	Oid, OID_LENGTH(Oid), HANDLER_CAN_RWRITE);
 OK(handler != NULL, "Handler creation.");
 
-nc = calloc(1, sizeof(netsnmp_cache));
-nc->rootoid = snmp_duplicate_objid(Oid, OID_LENGTH(Oid));
-nc->rootoid_len = OID_LENGTH(Oid);
+nc = netsnmp_cache_create(10, NULL, NULL, Oid, OID_LENGTH(Oid));
 OK(nc, "netsnmp_cache allocation");
 OK(snmp_oid_compare(nc->rootoid, nc->rootoid_len, Oid, OID_LENGTH(Oid)) == 0,
    "Handler private OID.");
