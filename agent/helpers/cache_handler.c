@@ -257,7 +257,8 @@ netsnmp_cache_remove(netsnmp_cache *cache)
 
     if (cache == cache_head) {
         cache_head = cache_head->next;
-        cache_head->prev = NULL;
+        if (cache_head)
+            cache_head->prev = NULL;
         return 0;
     }
 
