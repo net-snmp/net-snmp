@@ -157,7 +157,6 @@ netsnmp_cache_create(int timeout, NetsnmpCacheLoad * load_hook,
         snmp_log(LOG_ERR,"malloc error in netsnmp_cache_create\n");
         return NULL;
     }
-    cache->refcnt = 1;
     cache->timeout = timeout;
     cache->load_cache = load_hook;
     cache->free_cache = free_hook;
@@ -198,10 +197,8 @@ static void
 netsnmp_cache_deref(netsnmp_cache *cache)
 {
     if (--cache->refcnt == 0) {
-#if 0
-	netsnmp_cache_remove(cache);
-	netsnmp_cache_free(cache);
-#endif
+        netsnmp_cache_remove(cache);
+        netsnmp_cache_free(cache);
     }
 }
 
@@ -224,8 +221,8 @@ netsnmp_cache_free(netsnmp_cache *cache)
             sprint_realloc_objid((u_char **) &buf, &buf_len, &out_len,
                                  1, pos->rootoid, pos->rootoid_len);
             snmp_log(LOG_WARNING,
-		     "not freeing cache with root OID %s (still in list)\n",
-		     buf);
+                     "not freeing cache with root OID %s (still in list)\n",
+                     buf);
             free(buf);
             return SNMP_ERR_GENERR;
         }
@@ -376,6 +373,8 @@ netsnmp_cache_handler_get(netsnmp_cache* cache)
  */
 void netsnmp_cache_handler_owns_cache(netsnmp_mib_handler *handler)
 {
+    netsnmp_assert(handler->myvoid);
+    ((netsnmp_cache *)handler->myvoid)->refcnt++;
     handler->data_clone = (void *(*)(void *))netsnmp_cache_ref;
     handler->data_free = (void(*)(void*))netsnmp_cache_deref;
 }
