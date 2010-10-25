@@ -977,7 +977,7 @@ Retrieve_Table_Data(mib_table_t t, int *max_idx)
     return table->data;
 }
 
-#if defined(HAVE_PTHREAD_H)
+#if defined(HAVE_LINUX_RTNETLINK_H)
 prefix_cbx *net_snmp_create_prefix_info(unsigned long OnLinkFlag,
                                         unsigned long AutonomousFlag,
                                         char *in6ptr)
@@ -1001,8 +1001,7 @@ prefix_cbx *net_snmp_create_prefix_info(unsigned long OnLinkFlag,
 
 int net_snmp_find_prefix_info(prefix_cbx **head,
                               char *address,
-                              prefix_cbx *node_to_find,
-                              pthread_mutex_t *lockid)
+                              prefix_cbx *node_to_find)
 {
     int iret;
     memset(node_to_find, 0, sizeof(prefix_cbx));
@@ -1010,7 +1009,7 @@ int net_snmp_find_prefix_info(prefix_cbx **head,
        return -1;
     memcpy(node_to_find->in6p, address, sizeof(node_to_find->in6p));
 
-    iret = net_snmp_search_update_prefix_info(head, node_to_find, 1, lockid);
+    iret = net_snmp_search_update_prefix_info(head, node_to_find, 1);
     if(iret < 0) {
        DEBUGMSGTL(("util_funcs:prefix", "Unable to search the list\n"));
        return -1;
@@ -1022,11 +1021,10 @@ int net_snmp_find_prefix_info(prefix_cbx **head,
 }
 
 int net_snmp_update_prefix_info(prefix_cbx **head,
-                                prefix_cbx *node_to_update,
-                                pthread_mutex_t *lockid)
+                                prefix_cbx *node_to_update)
 {
     int iret;
-    iret = net_snmp_search_update_prefix_info(head, node_to_update, 0, lockid);
+    iret = net_snmp_search_update_prefix_info(head, node_to_update, 0);
     if(iret < 0) {
        DEBUGMSGTL(("util_funcs:prefix", "Unable to update prefix info\n"));
        return -1;
@@ -1039,8 +1037,7 @@ int net_snmp_update_prefix_info(prefix_cbx **head,
 
 int net_snmp_search_update_prefix_info(prefix_cbx **head,
                                        prefix_cbx *node_to_use,
-                                       int functionality,
-                                       pthread_mutex_t *lockid)
+                                       int functionality)
 {
 
    /* We define functionality based on need                                                         *
@@ -1063,37 +1060,30 @@ int net_snmp_search_update_prefix_info(prefix_cbx **head,
            return 1;
        }
 
-       pthread_mutex_lock( lockid );
        for (temp_node = *head; temp_node->next_info != NULL ; temp_node = temp_node->next_info) {
             if (0 == strcmp(temp_node->in6p, node_to_use->in6p)) {
                 temp_node->ipAddressPrefixOnLinkFlag = node_to_use->ipAddressPrefixOnLinkFlag;
                 temp_node->ipAddressPrefixAutonomousFlag = node_to_use->ipAddressPrefixAutonomousFlag;
-                pthread_mutex_unlock( lockid );
                 return 2;
             }
        }
        temp_node->next_info = node_to_use;
-       pthread_mutex_unlock( lockid );
        return 1;
     } else {
-         pthread_mutex_lock( lockid );
          for (temp_node = *head; temp_node != NULL ; temp_node = temp_node->next_info) {
               if (0 == strcmp(temp_node->in6p, node_to_use->in6p)) {
                 /*need yo put sem here as i read here */
                 node_to_use->ipAddressPrefixOnLinkFlag = temp_node->ipAddressPrefixOnLinkFlag;
                 node_to_use->ipAddressPrefixAutonomousFlag = temp_node->ipAddressPrefixAutonomousFlag;
-                pthread_mutex_unlock( lockid );
                 return 1;
               }
          }
-         pthread_mutex_unlock( lockid );
          return 0;
     }
 }
 
 int net_snmp_delete_prefix_info(prefix_cbx **head,
-                                char *address,
-                                pthread_mutex_t *lockid)
+                                char *address)
 {
 
     prefix_cbx *temp_node,*prev_node;
@@ -1102,8 +1092,6 @@ int net_snmp_delete_prefix_info(prefix_cbx **head,
     if(!head)
        return -1;
 
-   /*Need to acquire lock here */
-    pthread_mutex_lock( lockid );
     for (temp_node = *head, prev_node = NULL; temp_node;
          prev_node = temp_node, temp_node = temp_node->next_info) {
 
@@ -1113,13 +1101,10 @@ int net_snmp_delete_prefix_info(prefix_cbx **head,
             else
                 *head = temp_node->next_info;
             free(temp_node);
-            pthread_mutex_unlock( lockid );
             return 1;
         }
 
     }
-   /*Release Lock here */
-    pthread_mutex_unlock( lockid );
     return 0;
 }
 #endif
