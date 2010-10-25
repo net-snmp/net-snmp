@@ -63,7 +63,7 @@ typedef struct netsnmp_sql_globals_t {
     char        *password;        /* password (def=none) */
     u_int        port_num;        /* port number (built-in value) */
     char        *socket_name;     /* socket name (built-in value) */
-    char        *db_name;         /* database name (def=none) */
+    const char  *db_name;         /* database name (def=none) */
     u_int        flags;           /* connection flags (none) */
     MYSQL       *conn;            /* connection */
     u_char       connected;       /* connected flag */
@@ -1078,7 +1078,7 @@ _sql_process_queue(u_int dontcare, void *meeither)
         return;
 
     DEBUGMSGT(("sql:process", "processing %d queued traps\n",
-               CONTAINER_SIZE(_sql.queue)));
+               (int)CONTAINER_SIZE(_sql.queue)));
 
     /*
      * if we don't have a database connection, try to reconnect. We
