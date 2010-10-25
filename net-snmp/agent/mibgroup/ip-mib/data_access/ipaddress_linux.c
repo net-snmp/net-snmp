@@ -21,20 +21,18 @@
 #if defined (NETSNMP_ENABLE_IPV6)
 #include <linux/types.h>
 #include <asm/types.h>
-#if defined(HAVE_PTHREAD_H) && defined(HAVE_LINUX_RTNETLINK_H)
+#if defined(HAVE_LINUX_RTNETLINK_H)
 #include <linux/netlink.h>
-#include <pthread.h>
 #include <linux/rtnetlink.h>
 #ifdef RTMGRP_IPV6_PREFIX
 #define SUPPORT_PREFIX_FLAGS 1
 #endif /* RTMGRP_IPV6_PREFIX */
-#endif /* HAVE_PTHREAD_H && HAVE_LINUX_RTNETLINK_H */
+#endif /* HAVE_LINUX_RTNETLINK_H */
 #endif
 
 #include "ipaddress_ioctl.h"
 #ifdef SUPPORT_PREFIX_FLAGS
 extern prefix_cbx *prefix_head_list;
-extern pthread_mutex_t prefix_mutex_lock;
 #endif
 int _load_v6(netsnmp_container *container, int idx_offset);
 #ifdef HAVE_LINUX_RTNETLINK_H
@@ -374,7 +372,7 @@ _load_v6(netsnmp_container *container, int idx_offset)
 #endif
 #ifdef SUPPORT_PREFIX_FLAGS
         memset(&prefix_val, 0, sizeof(prefix_cbx));
-        if(net_snmp_find_prefix_info(&prefix_head_list, addr, &prefix_val, &prefix_mutex_lock) < 0) {
+        if(net_snmp_find_prefix_info(&prefix_head_list, addr, &prefix_val) < 0) {
            DEBUGMSGTL(("access:ipaddress:container", "unable to find info\n"));
            entry->ia_onlink_flag = 1;  /*Set by default as true*/
            entry->ia_autonomous_flag = 2; /*Set by default as false*/
