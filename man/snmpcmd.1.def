@@ -291,6 +291,7 @@ messages.  Overrides the \fIdefAuthPassphrase\fR token in the
 file. It is insecure to specify pass phrases on the command line,
 see
 .I snmp.conf(5).
+.TP
 .BI -e " engineID"
 Set the authoritative (security) engineID used for SNMPv3 REQUEST
 messages, given as a hexadecimal string (optionally prefixed by "0x").
@@ -301,6 +302,7 @@ usually be discovered automatically.
 Set the context engineID used for SNMPv3 REQUEST messages scopedPdu,
 given as a hexadecimal string.
 If not specified, this will default to the authoritative engineID.
+.TP
 .BI -u " secName"
 Set the securityName used for authenticated SNMPv3 messages.
 Overrides the \fIdefSecurityName\fR token in the
