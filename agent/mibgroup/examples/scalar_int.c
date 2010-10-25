@@ -29,7 +29,7 @@
 /*
  * Then, we declare the variables we want to be accessed 
  */
-static int      example1 = 42;  /* default value */
+static long     example1 = 42;  /* default value */
 
 /*
  * our initialization routine, automatically called by the agent 
@@ -60,14 +60,14 @@ init_scalar_int(void)
      * the line below registers our "example1" variable above as
      * accessible and makes it writable.  A read only version of the
      * same registration would merely call
-     * register_read_only_int_instance() instead.
+     * register_read_only_long_instance() instead.
      * 
      * If we wanted a callback when the value was retrieved or set
      * (even though the details of doing this are handled for you),
      * you could change the NULL pointer below to a valid handler
      * function. 
      */
-    netsnmp_register_int_instance("my example int variable",
+    netsnmp_register_long_instance("my example int variable",
                                   my_registration_oid,
                                   OID_LENGTH(my_registration_oid),
                                   &example1, NULL);
