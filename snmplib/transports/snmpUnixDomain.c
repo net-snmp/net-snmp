@@ -1,10 +1,10 @@
 #include <net-snmp/net-snmp-config.h>
 
+#include <sys/types.h>
 #include <net-snmp/library/snmpUnixDomain.h>
 
 #include <stddef.h>
 #include <stdio.h>
-#include <sys/types.h>
 #include <ctype.h>
 #include <errno.h>
 
