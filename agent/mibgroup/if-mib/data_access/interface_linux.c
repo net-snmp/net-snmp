@@ -52,13 +52,12 @@ typedef __u8 u8;           /* ditto */
 #endif
 
 #ifdef NETSNMP_ENABLE_IPV6
-#if defined(HAVE_PTHREAD_H) && defined(HAVE_LINUX_RTNETLINK_H)
-#include <pthread.h>
+#if defined(HAVE_LINUX_RTNETLINK_H)
 #include <linux/rtnetlink.h>
 #ifdef RTMGRP_IPV6_PREFIX
 #define SUPPORT_PREFIX_FLAGS 1
 #endif  /* RTMGRP_IPV6_PREFIX */
-#endif  /* HAVE_PTHREAD_H && HAVE_LINUX_RTNETLINK_H */
+#endif  /* HAVE_LINUX_RTNETLINK_H */
 #endif  /* NETSNMP_ENABLE_IPV6 */
 unsigned long long
 netsnmp_linux_interface_get_if_speed(int fd, const char *name,
@@ -81,14 +80,15 @@ static const char *proc_sys_basereachable_time;
 static unsigned short basereachable_time_ms = 0;
 #ifdef SUPPORT_PREFIX_FLAGS
 prefix_cbx *prefix_head_list = NULL;
-pthread_mutex_t prefix_mutex_lock =  PTHREAD_MUTEX_INITIALIZER;
 netsnmp_prefix_listen_info list_info;
 pthread_t thread1;
 #define IF_PREFIX_ONLINK        0x01
 #define IF_PREFIX_AUTOCONF      0x02
  
-void *netsnmp_prefix_listen(void *formal);
+int netsnmp_prefix_listen(void);
 #endif
+
+
 void
 netsnmp_arch_interface_init(void)
 {
@@ -121,12 +121,10 @@ netsnmp_arch_interface_init(void)
     else {
         proc_sys_basereachable_time = PROC_SYS_NET_IPVx_BASE_REACHABLE_TIME;
     }
+
 #ifdef SUPPORT_PREFIX_FLAGS
     list_info.list_head = &prefix_head_list;
-    list_info.lockinfo = &prefix_mutex_lock;
-    
-    if(pthread_create(&thread1, NULL, netsnmp_prefix_listen, &list_info) < 0)
-       snmp_log(LOG_ERR,"Unable to create thread\n");
+    netsnmp_prefix_listen();
 #endif
 }
 
@@ -937,9 +935,11 @@ netsnmp_linux_interface_get_if_speed(int fd, const char *name,
     return retspeed;
 }
 #ifdef SUPPORT_PREFIX_FLAGS
-void *netsnmp_prefix_listen(void *formal)
+void netsnmp_prefix_process(int fd, void *data);
+
+/* Open netlink socket to watch new ipv6 addresses and prefixes. */
+int netsnmp_prefix_listen()
 {
-    netsnmp_prefix_listen_info *listen_info = (netsnmp_prefix_listen_info *)formal;
     struct {
                 struct nlmsghdr n;
                 struct ifinfomsg r;
@@ -948,26 +948,12 @@ void *netsnmp_prefix_listen(void *formal)
 
     struct rtattr      *rta;
     int                status;
-    char               buf[16384];
-    struct nlmsghdr    *nlmp;
-    struct rtattr      *rtatp;
-    struct in6_addr    *in6p;
     struct sockaddr_nl localaddrinfo;
-    struct ifaddrmsg   *ifa;
-    struct prefixmsg   *prefix;
     unsigned           groups = 0;
-    struct rtattr      *index_table[IFA_MAX+1];
-    char               in6pAddr[40];
-    int                flag1 = 0,flag2 = 0;
-    int                onlink = 2,autonomous = 2; /*Assume as false*/
-    prefix_cbx         *new;
-    int                iret;
-    int                len, req_len, length; 
+
     int fd = socket(PF_NETLINK, SOCK_DGRAM, NETLINK_ROUTE);
 
-
     memset(&localaddrinfo, 0, sizeof(struct sockaddr_nl));
-    memset(&in6pAddr, '\0', sizeof(in6pAddr));
 
     groups |= RTMGRP_IPV6_IFADDR;
     groups |= RTMGRP_IPV6_PREFIX;
@@ -975,8 +961,8 @@ void *netsnmp_prefix_listen(void *formal)
     localaddrinfo.nl_groups = groups;
 
     if (bind(fd, (struct sockaddr*)&localaddrinfo, sizeof(localaddrinfo)) < 0) {
-        snmp_log(LOG_ERR,"netsnmp_prefix_listen: Bind failed. Exiting thread.\n");
-        exit(0);
+        snmp_log(LOG_ERR,"netsnmp_prefix_listen: Bind failed.\n");
+        return -1;
     }
 
     memset(&req, 0, sizeof(req));
@@ -989,110 +975,140 @@ void *netsnmp_prefix_listen(void *formal)
 
     status = send(fd, &req, req.n.nlmsg_len, 0);
     if (status < 0) {
-        snmp_log(LOG_ERR,"netsnmp_prefix_listen: Send failed. Exiting thread\n");
-        exit(0);
+        snmp_log(LOG_ERR,"netsnmp_prefix_listen: send failed\n");
+        return -1;
     }
 
-    while(1) {
-          status = recv(fd, buf, sizeof(buf), 0);
-          if (status < 0) {
-              snmp_log(LOG_ERR,"netsnmp_prefix_listen: Recieve failed. Exiting thread\n");
-              exit(0);
-          }
+    if (register_readfd(fd, netsnmp_prefix_process, NULL) != 0) {
+        snmp_log(LOG_ERR,"netsnmp_prefix_listen: error registering netlink socket\n");
+        return -1;
+    }
+    return 0;
+}
 
-          if(status == 0){
-             DEBUGMSGTL(("access:interface:prefix", "End of File\n"));
-             continue;
-          }
+/* Process one incoming netlink packets.
+ * RTM_NEWADDR and RTM_NEWPREFIX usually arrive in separate packets
+ * -> information from these packets must be stored locally and
+ * new prefix is added when information from both packets is complete.
+ */
+void netsnmp_prefix_process(int fd, void *data)
+{
+    int                status;
+    char               buf[16384];
+    struct nlmsghdr    *nlmp;
+    struct rtattr      *rtatp;
+    struct ifaddrmsg   *ifa;
+    struct prefixmsg   *prefix;
+    struct in6_addr    *in6p;
 
-          for(nlmp = (struct nlmsghdr *)buf; status > sizeof(*nlmp);){
-              len = nlmp->nlmsg_len;
-              req_len = len - sizeof(*nlmp);
+    /* these values must persist between calls */
+    static char               in6pAddr[40];
+    static int                have_addr = 0,have_prefix = 0;
+    static int                onlink = 2,autonomous = 2; /*Assume as false*/
 
-              if (req_len < 0 || len > status) {
-                  snmp_log(LOG_ERR,"netsnmp_prefix_listen: Error in length. Exiting thread\n");
-                  exit(0);
-              }
+    int                iret;
+    prefix_cbx         *new;
+    int                len, req_len, length; 
 
-              if (!NLMSG_OK(nlmp, status)) {
-                  DEBUGMSGTL(("access:interface:prefix", "NLMSG not OK\n"));
-                  continue;
-              }
+    status = recv(fd, buf, sizeof(buf), 0);
+    if (status < 0) {
+        snmp_log(LOG_ERR,"netsnmp_prefix_listen: Receive failed.\n");
+        return;
+    }
 
-              if (nlmp->nlmsg_type == RTM_NEWADDR || nlmp->nlmsg_type == RTM_DELADDR) {
-                  ifa = NLMSG_DATA(nlmp);
-                  length = nlmp->nlmsg_len;
-                  length -= NLMSG_LENGTH(sizeof(*ifa));
+    if(status == 0){
+        DEBUGMSGTL(("access:interface:prefix", "End of File\n"));
+        return;
+    }
 
-                  if (length < 0) {
-                      DEBUGMSGTL(("access:interface:prefix", "wrong nlmsg length %d\n", length));
-                      continue;
-                  }
-                  memset(index_table, 0, sizeof(struct rtattr *) * (IFA_MAX + 1));
-                  if(!ifa->ifa_flags) {
-                     rtatp = IFA_RTA(ifa);
-                     while (RTA_OK(rtatp, length)) {
-                            if (rtatp->rta_type <= IFA_MAX)
-                                index_table[rtatp->rta_type] = rtatp;
-                            rtatp = RTA_NEXT(rtatp,length);
-                            }
-                            if (index_table[IFA_ADDRESS]) {
-                                in6p = (struct in6_addr *)RTA_DATA(index_table[IFA_ADDRESS]);
-                                if(nlmp->nlmsg_type == RTM_DELADDR) {
-                                   sprintf(in6pAddr, "%04x%04x%04x%04x%04x%04x%04x%04x", NIP6(*in6p));
-                                   flag1 = -1;
-                                } else {
-                                   sprintf(in6pAddr, "%04x%04x%04x%04x%04x%04x%04x%04x", NIP6(*in6p));
-                                   flag1 = 1;
-                                }
+    for(nlmp = (struct nlmsghdr *)buf; status > sizeof(*nlmp);){
+        len = nlmp->nlmsg_len;
+        req_len = len - sizeof(*nlmp);
 
-                            }
-                  }
-              }
+        if (req_len < 0 || len > status) {
+            snmp_log(LOG_ERR,"netsnmp_prefix_listen: Error in length.\n");
+            return;
+        }
 
-              if(nlmp->nlmsg_type == RTM_NEWPREFIX) {
-                 prefix = NLMSG_DATA(nlmp);
-                 length = nlmp->nlmsg_len;
-                 length -= NLMSG_LENGTH(sizeof(*prefix));
+        if (!NLMSG_OK(nlmp, status)) {
+            DEBUGMSGTL(("access:interface:prefix", "NLMSG not OK\n"));
+            continue;
+        }
 
-                 if (length < 0) {
-                     DEBUGMSGTL(("access:interface:prefix", "wrong nlmsg length %d\n", length));
-                     continue;
-                 }
-                 flag2 = 1;
-                 if (prefix->prefix_flags & IF_PREFIX_ONLINK)
-                     onlink = 1;
-                 if (prefix->prefix_flags & IF_PREFIX_AUTOCONF)
-                     autonomous = 1;
-              }
-              status -= NLMSG_ALIGN(len);
-              nlmp = (struct nlmsghdr*)((char*)nlmp + NLMSG_ALIGN(len));
-          }
-          if((flag1 == 1) && (flag2 == 1)){
-              if(!(new = net_snmp_create_prefix_info (onlink, autonomous, in6pAddr)))
-                 DEBUGMSGTL(("access:interface:prefix", "Unable to create prefix info\n"));
-              else {
-                    iret = net_snmp_search_update_prefix_info (listen_info->list_head, new, 0, listen_info->lockinfo);
-                    if(iret < 0) {
-                       DEBUGMSGTL(("access:interface:prefix", "Unable to add/update prefix info\n"));
-                       free(new);
+        if (nlmp->nlmsg_type == RTM_NEWADDR || nlmp->nlmsg_type == RTM_DELADDR) {
+            ifa = NLMSG_DATA(nlmp);
+            length = nlmp->nlmsg_len;
+            length -= NLMSG_LENGTH(sizeof(*ifa));
+
+            if (length < 0) {
+                DEBUGMSGTL(("access:interface:prefix", "wrong nlmsg length %d\n", length));
+                continue;
+            }
+
+            if(!ifa->ifa_flags) {
+                rtatp = IFA_RTA(ifa);
+                while (RTA_OK(rtatp, length)) {
+                    if (rtatp->rta_type == IFA_ADDRESS){
+                        in6p = (struct in6_addr *) RTA_DATA(rtatp);
+                        if(nlmp->nlmsg_type == RTM_DELADDR) {
+                            snprintf(in6pAddr, sizeof(in6pAddr), "%04x%04x%04x%04x%04x%04x%04x%04x", NIP6(*in6p));
+                            have_addr = -1;
+                            break;
+                        } else {
+                            snprintf(in6pAddr, sizeof(in6pAddr), "%04x%04x%04x%04x%04x%04x%04x%04x", NIP6(*in6p));
+                            have_addr = 1;
+                            break;
+                        }
                     }
-                    if(iret == 2) /*Only when enrty already exists and we are only updating*/
-                       free(new);
-              }      
-              flag1 = flag2 = 0;
-              onlink = autonomous = 2; /*Set to defaults again*/
-          } else if (flag1 == -1) {
-              iret = net_snmp_delete_prefix_info (listen_info->list_head, in6pAddr, listen_info->lockinfo);
-              if(iret < 0)
-                 DEBUGMSGTL(("access:interface:prefix", "Unable to delete the prefix info\n"));
-              if(!iret)
-                 DEBUGMSGTL(("access:interface:prefix", "Unable to find the node to delete\n"));
-              flag1 = 0;
-          }
+                    rtatp = RTA_NEXT(rtatp,length);
+                }
+            }
+        }
+
+        if(nlmp->nlmsg_type == RTM_NEWPREFIX) {
+            prefix = NLMSG_DATA(nlmp);
+            length = nlmp->nlmsg_len;
+            length -= NLMSG_LENGTH(sizeof(*prefix));
+
+            if (length < 0) {
+                DEBUGMSGTL(("access:interface:prefix", "wrong nlmsg length %d\n", length));
+                continue;
+            }
+            have_prefix = 1;
+            if (prefix->prefix_flags & IF_PREFIX_ONLINK) {
+                onlink = 1; 
+            }
+            if (prefix->prefix_flags & IF_PREFIX_AUTOCONF) {
+                autonomous = 1;
+            }
+        }
+        status -= NLMSG_ALIGN(len);
+        nlmp = (struct nlmsghdr*)((char*)nlmp + NLMSG_ALIGN(len));
     }
-    
-}      
-#endif          
-   
+
+    if((have_addr == 1) && (have_prefix == 1)){
+        if(!(new = net_snmp_create_prefix_info (onlink, autonomous, in6pAddr)))
+            DEBUGMSGTL(("access:interface:prefix", "Unable to create prefix info\n"));
+        else {
+
+            iret = net_snmp_search_update_prefix_info (list_info.list_head, new, 0);
+            if(iret < 0) {
+                DEBUGMSGTL(("access:interface:prefix", "Unable to add/update prefix info\n"));
+                free(new);
+            }
+            if(iret == 2) /*Only when enrty already exists and we are only updating*/
+                free(new);
+        }
+        have_addr = have_prefix = 0;
+        onlink = autonomous = 2; /*Set to defaults again*/
+    } else if (have_addr == -1) {
+        iret = net_snmp_delete_prefix_info (list_info.list_head, in6pAddr);
+        if(iret < 0)
+            DEBUGMSGTL(("access:interface:prefix", "Unable to delete the prefix info\n"));
+            if(!iret)
+                DEBUGMSGTL(("access:interface:prefix", "Unable to find the node to delete\n"));
+            have_addr = 0;
+    }
+}
+#endif
 
