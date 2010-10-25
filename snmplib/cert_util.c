@@ -1920,7 +1920,7 @@ netsnmp_tls_fingerprint_parse(const u_char *binary_fp, int fp_len,
  */
 int
 netsnmp_tls_fingerprint_build(int hash_type, const char *hex_fp,
-                                   u_char **tls_fp, u_int *tls_fp_len,
+                                   u_char **tls_fp, size_t *tls_fp_len,
                                    int realloc)
 {
     int     hex_fp_len, rc;

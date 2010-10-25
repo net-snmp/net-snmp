@@ -103,7 +103,7 @@ netsnmp_container *netsnmp_cert_get_trustlist(void);
     void netsnmp_fp_lowercase_and_strip_colon(char *fp);
     int netsnmp_cert_parse_hash_type(const char *str);
     int netsnmp_tls_fingerprint_build(int hash_type, const char *hex_fp,
-                                      u_char **tls_fp, u_int *tls_fp_len,
+                                      u_char **tls_fp, size_t *tls_fp_len,
                                       int allow_realloc);
     int netsnmp_tls_fingerprint_parse(const u_char *binary_fp, int fp_len,
                                       char **fp_str_ptr, u_int *fp_str_len,
