@@ -73,7 +73,8 @@ cert_row_create(u_int32_t priority, int hash_type, const char *fp,
     int                    name_len = OID_LENGTH(name), col_pos = name_len - 2;
     int                    rc, rs_index = 4;
     u_char                 bin_fp[SNMP_MAXBUF_SMALL], *bin_fp_ptr = bin_fp;
-    u_int                  rs, bin_fp_len;
+    u_int                  rs;
+    size_t                 bin_fp_len;
     netsnmp_variable_list *vl = NULL, *vb;
 
     netsnmp_require_ptr_LRV( fp, NULL );
@@ -154,7 +155,8 @@ params_row_create(const char *param_name, int hash_type, const char *fp,
     oid                    name[MAX_OID_LEN];
     int                    name_len, col_pos, rc, rs_index = 2;
     u_char                 bin_fp[SNMP_MAXBUF_SMALL], *bin_fp_ptr = bin_fp;
-    u_int                  rs, bin_fp_len;
+    u_int                  rs;
+    size_t                 bin_fp_len;
     netsnmp_variable_list *vl = NULL, *vb;
 
     netsnmp_require_ptr_LRV( param_name, NULL );
@@ -221,7 +223,8 @@ addr_row_create(const char *target_name, int hash_type, const char *fp,
     oid                    name[MAX_OID_LEN];
     int                    name_len, col_pos, rc, rs_index = 3;
     u_char                 bin_fp[SNMP_MAXBUF_SMALL], *bin_fp_ptr = bin_fp;
-    u_int                  rs, bin_fp_len;
+    u_int                  rs;
+    size_t                 bin_fp_len;
     netsnmp_variable_list *vl = NULL, *vb;
 
     netsnmp_require_ptr_LRV( target_name, NULL );
