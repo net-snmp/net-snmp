@@ -128,6 +128,9 @@
 /* Define to 1 if you have the <dmalloc.h> header file. */
 #undef HAVE_DMALLOC_H
 
+/* Set if the dpkg-query command is available */
+#undef HAVE_DPKG_QUERY
+
 /* Define to 1 if you have the <err.h> header file. */
 #undef HAVE_ERR_H
 
