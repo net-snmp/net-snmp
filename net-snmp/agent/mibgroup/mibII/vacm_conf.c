@@ -134,20 +134,20 @@ void
 init_vacm_snmpd_easy_tokens(void) {
 #if !defined(NETSNMP_DISABLE_SNMPV1) || !defined(NETSNMP_DISABLE_SNMPV2C)
     snmpd_register_config_handler("rwcommunity", vacm_parse_rwcommunity, NULL,
-                                  "community [default|hostname|network/bits [oid]]");
+                                  "community [default|hostname|network/bits [oid|-V view [context]]]");
     snmpd_register_config_handler("rocommunity", vacm_parse_rocommunity, NULL,
-                                  "community [default|hostname|network/bits [oid]]");
+                                  "community [default|hostname|network/bits [oid|-V view [context]]]");
 #ifdef NETSNMP_TRANSPORT_UDPIPV6_DOMAIN
     snmpd_register_config_handler("rwcommunity6", vacm_parse_rwcommunity6, NULL,
-                                  "community [default|hostname|network/bits [oid]]");
+                                  "community [default|hostname|network/bits [oid|-V view [context]]]");
     snmpd_register_config_handler("rocommunity6", vacm_parse_rocommunity6, NULL,
-                                  "community [default|hostname|network/bits [oid]]");
+                                  "community [default|hostname|network/bits [oid|-V view [context]]]");
 #endif
 #endif /* support for community based SNMP */
     snmpd_register_config_handler("rwuser", vacm_parse_rwuser, NULL,
-                                  "user [noauth|auth|priv [oid]]");
+                                  "user [noauth|auth|priv [oid|-V view [context]]]");
     snmpd_register_config_handler("rouser", vacm_parse_rouser, NULL,
-                                  "user [noauth|auth|priv [oid]]");
+                                  "user [noauth|auth|priv [oid|-V view [context]]]");
 }
 
 void
@@ -728,12 +728,13 @@ vacm_gen_com2sec(int commcount, char *community, char *addressname,
                  char *publishtoken,
                  void (*parser)(const char *, char *),
                  char *secname, size_t secname_len,
-                 char *viewname, size_t viewname_len, int version)
+                 char *viewname, size_t viewname_len, int version.
+                 const char *context)
 {
     char            line[SPRINT_MAX_LEN];
 
     /*
-     * com2sec6|comsec anonymousSecNameNUM    ADDRESS  COMMUNITY 
+     * com2sec6|comsec [-Cn CONTEXT] anonymousSecNameNUM    ADDRESS  COMMUNITY 
      */
     snprintf(secname, secname_len-1, "comm%d", commcount);
     secname[secname_len-1] = '\0';
@@ -741,7 +742,11 @@ vacm_gen_com2sec(int commcount, char *community, char *addressname,
         snprintf(viewname, viewname_len-1, "viewComm%d", commcount);
         viewname[viewname_len-1] = '\0';
     }
-    snprintf(line, sizeof(line), "%s %s '%s'",
+    if ( context && *context )
+       snprintf(line, sizeof(line), "-Cn %s %s %s '%s'",
+             context, secname, addressname, community);
+    else
+       snprintf(line, sizeof(line), "%s %s '%s'",
              secname, addressname, community);
     line[ sizeof(line)-1 ] = 0;
     DEBUGMSGTL((publishtoken, "passing: %s %s\n", publishtoken, line));
@@ -966,13 +971,17 @@ vacm_create_simple(const char *token, char *confline,
         vacm_gen_com2sec(commcount, community, addressname,
                          "com2sec", &netsnmp_udp_parse_security,
                          secname, sizeof(secname),
-                         view_ptr, sizeof(viewname), commversion);
+                         view_ptr, sizeof(viewname), commversion, context);
     }
     
 #ifdef NETSNMP_TRANSPORT_UNIX_DOMAIN
     if (parsetype == VACM_CREATE_SIMPLE_COMUNIX ||
         parsetype == VACM_CREATE_SIMPLE_COM) {
-        snprintf(line, sizeof(line), "%s %s '%s'",
+        if (context && *context)
+            snprintf(line, sizeof(line), "-Cn %s %s %s '%s'",
+                 context, secname, addressname, community);
+        else
+            snprintf(line, sizeof(line), "%s %s '%s'",
                  secname, addressname, community);
         line[ sizeof(line)-1 ] = 0;
         DEBUGMSGTL((token, "passing: %s %s\n", "com2secunix", line));
@@ -986,7 +995,7 @@ vacm_create_simple(const char *token, char *confline,
         vacm_gen_com2sec(commcount, community, addressname,
                          "com2sec6", &netsnmp_udp6_parse_security,
                          secname, sizeof(secname),
-                         view_ptr, sizeof(viewname), commversion);
+                         view_ptr, sizeof(viewname), commversion, context);
     }
 #endif
 #endif /* support for community based SNMP */
