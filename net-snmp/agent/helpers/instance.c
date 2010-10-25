@@ -139,6 +139,7 @@ get_reg(const char *name,
     return myreg;
 }
 
+/* Watched 'long' instances are writable on both 32-bit and 64-bit systems  */
 int
 netsnmp_register_read_only_ulong_instance(const char *name,
                                           oid * reg_oid,
@@ -211,7 +212,7 @@ netsnmp_register_long_instance(const char *name,
     return netsnmp_register_instance(myreg);
 }
 
-
+/* Watched 'int' instances are only writable on 32-bit systems  */
 int
 netsnmp_register_read_only_uint_instance(const char *name,
                                          oid * reg_oid, size_t reg_oid_len,
