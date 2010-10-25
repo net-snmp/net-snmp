@@ -200,7 +200,7 @@ perlrealclean:
 # python specific build rules
 #
 PYMAKE=$(PYTHON) setup.py $(PYTHONARGS)
-pythonmodules: 
+pythonmodules: subdirs
 	@(dir=`pwd`; cd python; $(PYMAKE) build --basedir=$$dir) ; \
         if test $$? != 0 ; then \
            exit 1 ; \
