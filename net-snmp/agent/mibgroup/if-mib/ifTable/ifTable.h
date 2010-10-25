@@ -343,6 +343,9 @@ config_exclude(mibII/interfaces)
      *********************************************************************
      * function prototypes
      */
+    	
+    int             _mfd_ifTable_undo_setup_allocate(ifTable_rowreq_ctx *rowreq_ctx);
+    void            _mfd_ifTable_undo_setup_release(ifTable_rowreq_ctx *rowreq_ctx);
     int             ifTable_pre_request(ifTable_registration *
                                         user_context);
     int             ifTable_post_request(ifTable_registration *
