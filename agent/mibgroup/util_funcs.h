@@ -30,7 +30,6 @@ typedef struct prefix_info
 typedef struct 
 {
  prefix_cbx **list_head;
- pthread_mutex_t *lockinfo;  
 }netsnmp_prefix_listen_info;
 #endif
 void            Exit(int);
@@ -58,18 +57,14 @@ prefix_cbx *net_snmp_create_prefix_info(unsigned long OnLinkFlag,
 #ifndef WIN32
 int net_snmp_find_prefix_info(prefix_cbx **head,
                               char *address,
-                              prefix_cbx *node_to_find,
-                              pthread_mutex_t *lockid);
+                              prefix_cbx *node_to_find);
 int net_snmp_update_prefix_info(prefix_cbx **head,
-                                prefix_cbx *node_to_update,
-                                pthread_mutex_t *lockid);
+                                prefix_cbx *node_to_update);
 int net_snmp_search_update_prefix_info(prefix_cbx **head,
                                        prefix_cbx *node_to_use,
-                                       int functionality,
-                                       pthread_mutex_t *lockid);
+                                       int functionality);
 int net_snmp_delete_prefix_info(prefix_cbx **head,
-                                char *address,
-                                pthread_mutex_t *lockid);
+                                char *address);
 #endif
 #define NIP6(addr) \
         ntohs((addr).s6_addr16[0]), \
