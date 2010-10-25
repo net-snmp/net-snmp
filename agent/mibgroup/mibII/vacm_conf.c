@@ -728,7 +728,7 @@ vacm_gen_com2sec(int commcount, char *community, char *addressname,
                  char *publishtoken,
                  void (*parser)(const char *, char *),
                  char *secname, size_t secname_len,
-                 char *viewname, size_t viewname_len, int version.
+                 char *viewname, size_t viewname_len, int version,
                  const char *context)
 {
     char            line[SPRINT_MAX_LEN];
