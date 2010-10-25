@@ -100,7 +100,7 @@ init_snmpTlstmCertToTSNTable(void)
 }
 
 void
-init_snmpTlstmCertToTSNTable_context(char *contextName)
+init_snmpTlstmCertToTSNTable_context(const char *contextName)
 {
     oid             reg_oid[]   =  { SNMP_TLS_TM_CERT_TABLE };
     const size_t    reg_oid_len =  OID_LENGTH(reg_oid);
