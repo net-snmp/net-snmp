@@ -820,13 +820,14 @@ read_config(const char *filename,
                      */
                     cptr = copy_nword(cptr, token, sizeof(token));
                 }
-            } else if ((token[0] == 'i') && (strncasecmp(token,"include", 7 )==0) && (strncasecmp(token, "includeAllDisks", 15) != 0)) {
+            } else if ((token[0] == 'i') && (strncasecmp(token,"include", 7 )==0)) {
                 if ( strcasecmp( token, "include" )==0) {
                     if (when != PREMIB_CONFIG && 
 	                !netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID, 
 				                NETSNMP_DS_LIB_NO_TOKEN_WARNINGS)) {
 	                netsnmp_config_warn("Ambiguous token '%s' - use 'includeSearch' (or 'includeFile') instead.", token);
                     }
+                    continue;
                 } else if ( strcasecmp( token, "includedir" )==0) {
                     DIR *d;
                     struct dirent *entry;
@@ -858,6 +859,7 @@ read_config(const char *filename,
                     closedir(d);
                     curfilename = prev_filename;
                     linecount   = prev_linecount;
+                    continue;
                 } else if ( strcasecmp( token, "includefile" )==0) {
                     char  fname[SNMP_MAXPATH], *cp;
 
@@ -884,6 +886,7 @@ read_config(const char *filename,
                     linecount   = prev_linecount;
                     if ((ret != SNMPERR_SUCCESS) && (when != PREMIB_CONFIG))
                         netsnmp_config_error("Included file '%s' not found.", fname);
+                    continue;
                 } else if ( strcasecmp( token, "includesearch" )==0) {
                     struct config_files ctmp;
                     int len;
@@ -908,14 +911,10 @@ read_config(const char *filename,
                        cptr[len-5] = '.'; /* restore .conf */
                     if (( ret != SNMPERR_SUCCESS ) && (when != PREMIB_CONFIG))
 		        netsnmp_config_error("Included config '%s' not found.", cptr);
+                    continue;
                 } else {
-                    if (when != PREMIB_CONFIG && 
-	                !netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID, 
-				                NETSNMP_DS_LIB_NO_TOKEN_WARNINGS)) {
-	                netsnmp_config_warn("Unknown include token: %s.", token);
-	            }
+                    lptr = line_handler;
                 }
-                continue;
             } else {
                 lptr = line_handler;
             }
