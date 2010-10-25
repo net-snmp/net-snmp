@@ -101,6 +101,7 @@ SOFTWARE.
 #include "snmptrapd_log.h"
 #include "snmptrapd_auth.h"
 #include "notification-log-mib/notification_log.h"
+#include "tlstm-mib/snmpTlstmCertToTSNTable/snmpTlstmCertToTSNTable.h"
 #include "mibII/vacm_conf.h"
 #ifdef NETSNMP_EMBEDDED_PERL
 #include "snmp_perl.h"
