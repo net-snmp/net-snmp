@@ -44,6 +44,8 @@
 
 #include "ipv4InterfaceTable_interface.h"
 
+#include "if-mib/ifTable/ifTable.h"
+
 #include <ctype.h>
 
 /**********************************************************************
