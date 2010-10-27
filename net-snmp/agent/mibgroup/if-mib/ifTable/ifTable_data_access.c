@@ -23,6 +23,10 @@
 #   include "mibgroup/ip-mib/ipv4InterfaceTable/ipv4InterfaceTable.h"
 #endif
 
+#ifdef USING_IP_MIB_IPV6INTERFACETABLE_IPV6INTERFACETABLE_MODULE
+#   include "mibgroup/ip-mib/ipv6InterfaceTable/ipv6InterfaceTable.h"
+#endif
+
 typedef struct cd_container_s {
     netsnmp_container *current;
     netsnmp_container *deleted;

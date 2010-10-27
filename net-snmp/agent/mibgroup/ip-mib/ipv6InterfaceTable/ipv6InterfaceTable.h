@@ -39,6 +39,7 @@ config_require(ip-mib/ipv6InterfaceTable/ipv6InterfaceTable_data_access)
      *********************************************************************
      * function declarations
      */
+    void            initialize_table_ipv6InterfaceTable(void);
     void            init_ipv6InterfaceTable(void);
     void            shutdown_ipv6InterfaceTable(void);
 

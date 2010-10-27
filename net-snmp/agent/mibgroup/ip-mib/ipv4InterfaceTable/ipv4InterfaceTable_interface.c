@@ -440,8 +440,6 @@ _mfd_ipv4InterfaceTable_post_request(netsnmp_mib_handler *handler,
                                      *agtreq_info,
                                      netsnmp_request_info *requests)
 {
-    ipv4InterfaceTable_rowreq_ctx *rowreq_ctx =
-        netsnmp_container_table_row_extract(requests);
     int             rc, packet_rc;
 
     DEBUGMSGTL(("internal:ipv4InterfaceTable:_mfd_ipv4InterfaceTable_post_request", "called\n"));
