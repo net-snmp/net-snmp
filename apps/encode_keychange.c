@@ -739,11 +739,15 @@ snmp_getpassphrase(const char *prompt, int bvisible)
         ti = snmp_ttyecho(0, 0);
     }
 
-    fgets(buffer, sizeof(buffer), stdin);
+    bufp = fgets(buffer, sizeof(buffer), stdin);
 
     if (!bvisible) {
         ti = snmp_ttyecho(0, ti);
         fputs("\n", ofp);
+    }
+    if (!bufp) {
+        fprintf(stderr, "Aborted...\n");
+        exit(1);
     }
 
 
