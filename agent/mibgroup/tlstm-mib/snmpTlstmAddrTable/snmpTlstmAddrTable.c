@@ -1365,7 +1365,7 @@ _tlstmAddrTable_row_restore_mib(const char *token, char *buf)
 {
     char                   name[SNMPADMINLENGTH + 1], id[SNMPADMINLENGTH + 1],
                            fingerprint[SNMPTLSFINGERPRINT_MAX_LEN + 1];
-    u_int                  name_len = sizeof(name), id_len = sizeof(id),
+    size_t                 name_len = sizeof(name), id_len = sizeof(id),
                            fp_len = sizeof(fingerprint);
     u_char                 hashType, rowStatus;
     int                    rc;
