@@ -18,6 +18,7 @@
  */
 #define NEED_USMDH_FUNCTIONS
 #include "usmDHUserKeyTable.h"
+#include "snmp-usm-dh-objects-mib/usmDHParameters/usmDHParameters.h"
 
 DH             *
 usmDHGetUserDHptr(struct usmUser *user, int for_auth_key)
@@ -57,14 +58,14 @@ usmDHGetUserDHptr(struct usmUser *user, int for_auth_key)
 
 int
 usmDHGetUserKeyChange(struct usmUser *user, int for_auth_key,
-                      char **keyobj, size_t *keyobj_len)
+                      u_char **keyobj, size_t *keyobj_len)
 {
     DH             *dh;
 
     dh = usmDHGetUserDHptr(user, for_auth_key);
 
     if (!dh) {
-        snmp_log(LOG_ERR, "ack...  shouldn't get here: %x %d\n",
+        snmp_log(LOG_ERR, "ack...  shouldn't get here: %p %d\n",
                  user, for_auth_key);
         return MFD_ERROR;
     }
@@ -183,7 +184,7 @@ usmDHUserKeyTable_release_data(usmDHUserKeyTable_data * data)
 int
 usmDHUserKeyTable_indexes_set_tbl_idx(usmDHUserKeyTable_mib_index *
                                       tbl_idx,
-                                      char *usmUserEngineID_val_ptr,
+                                      u_char *usmUserEngineID_val_ptr,
                                       size_t usmUserEngineID_val_ptr_len,
                                       char *usmUserName_val_ptr,
                                       size_t usmUserName_val_ptr_len)
@@ -245,7 +246,7 @@ usmDHUserKeyTable_indexes_set_tbl_idx(usmDHUserKeyTable_mib_index *
  */
 int
 usmDHUserKeyTable_indexes_set(usmDHUserKeyTable_rowreq_ctx * rowreq_ctx,
-                              char *usmUserEngineID_val_ptr,
+                              u_char *usmUserEngineID_val_ptr,
                               size_t usmUserEngineID_val_ptr_len,
                               char *usmUserName_val_ptr,
                               size_t usmUserName_val_ptr_len)
@@ -328,7 +329,7 @@ The object used to change any given user's Authentication Key
  */
 int
 usmDHUserAuthKeyChange_get(usmDHUserKeyTable_rowreq_ctx * rowreq_ctx,
-                           char **usmDHUserAuthKeyChange_val_ptr_ptr,
+                           u_char **usmDHUserAuthKeyChange_val_ptr_ptr,
                            size_t *usmDHUserAuthKeyChange_val_ptr_len_ptr)
 {
    /** we should have a non-NULL pointer and enough storage */
@@ -411,7 +412,7 @@ The object used to change the agents own Authentication Key
  */
 int
 usmDHUserOwnAuthKeyChange_get(usmDHUserKeyTable_rowreq_ctx * rowreq_ctx,
-                              char **usmDHUserOwnAuthKeyChange_val_ptr_ptr,
+                              u_char **usmDHUserOwnAuthKeyChange_val_ptr_ptr,
                               size_t
                               *usmDHUserOwnAuthKeyChange_val_ptr_len_ptr)
 {
@@ -495,7 +496,7 @@ The object used to change any given user's Privacy Key using
  */
 int
 usmDHUserPrivKeyChange_get(usmDHUserKeyTable_rowreq_ctx * rowreq_ctx,
-                           char **usmDHUserPrivKeyChange_val_ptr_ptr,
+                           u_char **usmDHUserPrivKeyChange_val_ptr_ptr,
                            size_t *usmDHUserPrivKeyChange_val_ptr_len_ptr)
 {
    /** we should have a non-NULL pointer and enough storage */
@@ -578,7 +579,7 @@ The object used to change the agent's own Privacy Key using a
  */
 int
 usmDHUserOwnPrivKeyChange_get(usmDHUserKeyTable_rowreq_ctx * rowreq_ctx,
-                              char **usmDHUserOwnPrivKeyChange_val_ptr_ptr,
+                              u_char **usmDHUserOwnPrivKeyChange_val_ptr_ptr,
                               size_t
                               *usmDHUserOwnPrivKeyChange_val_ptr_len_ptr)
 {
