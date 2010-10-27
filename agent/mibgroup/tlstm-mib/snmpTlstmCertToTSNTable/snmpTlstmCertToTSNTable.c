@@ -337,7 +337,7 @@ tlstmCertToTSNTable_handler(netsnmp_mib_handler *handler,
 {
     oid tsnm[] = { SNMP_TLS_TM_BASE, 1, 1, 0 };
     static const int tsnm_pos = OID_LENGTH(tsnm) - 1;
-    netsnmp_request_info *request;
+    netsnmp_request_info *request = NULL;
     netsnmp_table_request_info *info;
     netsnmp_tdata  *table;
     netsnmp_tdata_row *row;
