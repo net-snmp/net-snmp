@@ -39,6 +39,7 @@ config_require(ip-mib/ipv4InterfaceTable/ipv4InterfaceTable_data_access)
      *********************************************************************
      * function declarations
      */
+    void            initialize_table_ipv4InterfaceTable(void);
     void            init_ipv4InterfaceTable(void);
     void            shutdown_ipv4InterfaceTable(void);
 
