@@ -286,8 +286,8 @@ netsnmp_transport_recv(netsnmp_transport *t, void *packet, int length,
                                                   opaque ? *opaque : NULL,
                                                   olength ? *olength : 0);
         if (debugLength)
-            DEBUGMSGT_NC(("transport:recv","%lu bytes from %s\n",
-                          (unsigned long)length, str));
+            DEBUGMSGT_NC(("transport:recv","%d bytes from %s\n",
+                          length, str));
         SNMP_FREE(str);
     }
 
