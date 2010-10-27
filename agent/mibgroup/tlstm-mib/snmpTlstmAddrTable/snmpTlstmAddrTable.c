@@ -347,7 +347,7 @@ tlstmAddrTable_handler(netsnmp_mib_handler *handler,
                        netsnmp_request_info *requests)
 {
 
-    netsnmp_request_info *request;
+    netsnmp_request_info *request = NULL;
     netsnmp_table_request_info *table_info;
     netsnmp_tdata  *table_data;
     netsnmp_tdata_row *table_row;
@@ -1293,7 +1293,7 @@ _tlstmAddrTable_save_rows(int majorID, int minorID, void *serverarg,
 
     netsnmp_container *mib_addrs = (netsnmp_container *) clientarg;
     netsnmp_container *active_addrs = netsnmp_tlstmAddr_container();
-    netsnmp_iterator  *tbl_itr, *addrs_itr;
+    netsnmp_iterator  *tbl_itr, *addrs_itr = NULL;
     netsnmp_tdata_row *row;
     snmpTlstmAddr     *addr;
     tlstmAddrTable_entry *entry;
