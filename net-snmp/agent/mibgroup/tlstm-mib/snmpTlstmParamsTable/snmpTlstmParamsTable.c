@@ -507,7 +507,7 @@ snmpTlstmParamsTable_handler(
     netsnmp_agent_request_info        *reqinfo,
     netsnmp_request_info              *requests) {
 
-    netsnmp_request_info       *request;
+    netsnmp_request_info       *request = NULL;
     netsnmp_table_request_info *table_info;
     netsnmp_tdata              *table_data;
     netsnmp_tdata_row          *table_row;
