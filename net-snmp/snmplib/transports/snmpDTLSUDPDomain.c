@@ -382,7 +382,7 @@ _netsnmp_send_queued_dtls_pkts(netsnmp_transport *t, bio_cache *cachep) {
                                  outbuf, outsize);
 #else
         rc2 = sendto(t->sock, outbuf, outsize, 0,
-                     &cachep->sockaddr, sizeof(struct sockaddr));
+                     (struct sockaddr *)&cachep->sockaddr, sizeof(struct sockaddr));
 #endif /* linux && IP_PKTINFO */
 
         if (rc2 == -1) {
@@ -1108,7 +1108,7 @@ netsnmp_dtlsudp_send(netsnmp_transport *t, void *buf, int size,
        received it from (addr_pair) */
     rc = netsnmp_udpbase_sendto(t->sock, &cachep->sockaddr  remote  addr_pair ? &(addr_pair->local_addr) : NULL, to, outbuf, rc);
 #else
-    rc = sendto(t->sock, outbuf, rc, 0, &cachep->sockaddr,
+    rc = sendto(t->sock, outbuf, rc, 0, (struct sockaddr *)&cachep->sockaddr,
                 sizeof(struct sockaddr));
 #endif /* linux && IP_PKTINFO */
 
