@@ -364,7 +364,7 @@ _ifTable_initialize_interface(ifTable_registration * reg_ptr, u_long flags)
      */
     {
         const oid       iftlc_oid[] = { IFTABLE_LAST_CHANGE };
-        netsnmp_register_watched_scalar(netsnmp_create_handler_registration
+        netsnmp_register_watched_scalar2(netsnmp_create_handler_registration
                                         ("ifTableLastChanged", NULL,
                                          iftlc_oid, OID_LENGTH(iftlc_oid),
                                          HANDLER_CAN_RONLY),
@@ -1896,6 +1896,7 @@ _container_free(netsnmp_container *container)
     CONTAINER_CLEAR(container,
                     (netsnmp_container_obj_func *) _container_item_free,
                     NULL);
+    CONTAINER_FREE(container);
 }                               /* _container_free */
 
 /**

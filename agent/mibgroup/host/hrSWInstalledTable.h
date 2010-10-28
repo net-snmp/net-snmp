@@ -11,6 +11,7 @@ config_require(host/data_access/swinst)
  * function declarations 
  */
 void            init_hrSWInstalledTable(void);
+void            shutdown_hrSWInstalledTable(void);
 void            initialize_table_hrSWInstalledTable(void);
 Netsnmp_Node_Handler hrSWInstalledTable_handler;
 

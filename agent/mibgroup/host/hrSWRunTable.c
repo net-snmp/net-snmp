@@ -26,6 +26,8 @@
 
 #define MYTABLE "hrSWRunTable"
 
+static netsnmp_table_registration_info *table_info;
+
 /** Initializes the hrSWRunTable module */
 void
 init_hrSWRunTable(void)
@@ -34,6 +36,15 @@ init_hrSWRunTable(void)
      * here we initialize all the tables we're planning on supporting 
      */
     initialize_table_hrSWRunTable();
+}
+
+void
+shutdown_hrSWRunTable(void)
+{
+    if (table_info) {
+	netsnmp_table_registration_info_free(table_info);
+	table_info = NULL;
+    }
 }
 
 oid      hrSWRunTable_oid[] = { 1, 3, 6, 1, 2, 1, 25, 4, 2 };
@@ -45,7 +56,6 @@ initialize_table_hrSWRunTable(void)
 {
     netsnmp_handler_registration *reg;
     netsnmp_mib_handler *handler = NULL;
-    netsnmp_table_registration_info *table_info = NULL;
 
 #ifdef NETSNMP_INCLUDE_HRSWRUN_WRITE_SUPPORT
 #  define SWRUN_ACCESS_LEVEL HANDLER_CAN_RWRITE

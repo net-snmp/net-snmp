@@ -336,7 +336,7 @@ _ipv6InterfaceTable_initialize_interface(ipv6InterfaceTable_registration *
      */
     {
         oid             lc_oid[] = { IPV6INTERFACETABLELASTCHANGE_OID };
-        netsnmp_register_watched_scalar(netsnmp_create_handler_registration
+        netsnmp_register_watched_scalar2(netsnmp_create_handler_registration
                                         ("ipv6TableLastChanged", NULL,
                                          lc_oid, OID_LENGTH(lc_oid),
                                          HANDLER_CAN_RONLY),

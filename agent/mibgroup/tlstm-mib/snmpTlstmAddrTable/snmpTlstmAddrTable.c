@@ -198,7 +198,7 @@ init_snmpTlstmAddrTable(void)
         snmp_log(LOG_ERR,
                  "could not create handler for snmpTlstmAddrTableLastChanged\n");
     else
-        netsnmp_register_watched_scalar(reg, watcher);
+        netsnmp_register_watched_scalar2(reg, watcher);
 
     /*
      * Initialise the contents of the table here 

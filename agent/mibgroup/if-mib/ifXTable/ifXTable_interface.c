@@ -1787,13 +1787,17 @@ static const char row_token[] = "ifXTable";
 void
 ifXTable_container_init_persistence(netsnmp_container *container)
 {
+    netsnmp_container **container_p;
     int             rc;
 
     register_config_handler(NULL, row_token,
                             _ifXTable_container_row_restore, NULL, NULL);
+    netsnmp_assert(container);
+    memdup((u_char **)&container_p, &container, sizeof(container));
+    netsnmp_assert(container_p);
     rc = snmp_register_callback(SNMP_CALLBACK_LIBRARY,
                                 SNMP_CALLBACK_STORE_DATA,
-                                _ifXTable_container_save_rows, container);
+                                _ifXTable_container_save_rows, container_p);
 
     if (rc != SNMP_ERR_NOERROR)
         snmp_log(LOG_ERR, "error registering for STORE_DATA callback "
@@ -1816,7 +1820,7 @@ _ifXTable_container_save_rows(int majorID, int minorID, void *serverarg,
     /*
      * save all rows
      */
-    CONTAINER_FOR_EACH((netsnmp_container *) clientarg,
+    CONTAINER_FOR_EACH(*(netsnmp_container **)clientarg,
                        (netsnmp_container_obj_func *)
                        _ifXTable_container_row_save, type);
 

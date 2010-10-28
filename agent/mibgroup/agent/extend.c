@@ -174,7 +174,7 @@ _register_extend( oid *base, size_t len )
     winfo = netsnmp_create_watcher_info(
                 &(eptr->num_entries), sizeof(eptr->num_entries),
                 ASN_INTEGER, WATCHER_FIXED_SIZE);
-    netsnmp_register_watched_scalar( reg, winfo );
+    netsnmp_register_watched_scalar2( reg, winfo );
 
     return eptr;
 }
