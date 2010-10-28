@@ -84,9 +84,10 @@
     #include <kstat.h>
     #ifdef HAVE_PICL_H 
         #include <picl.h> /* accesses the picld daemon */
+    #else 
+        /* the following should be sufficient for any Sun-based sensors */
+	#include </usr/platform/sun4u/include/sys/envctrl.h>
     #endif 
-/* the following should be sufficient for any Sun-based sensors */
-    #include </usr/platform/sun4u/include/sys/envctrl.h>
 #else
     #include <sensors/sensors.h>
     #define CONFIG_FILE_NAME "/etc/sensors.conf"
@@ -379,9 +380,9 @@ sensor_init(void)
     }
 
     _sensor_load(t); /* I'll let the linux people decide whether they want to load right away */
+leaving:
 #endif /* not solaris2 */
 
-leaving:
     DEBUGMSG(("ucd-snmp/lmSensors", "<= sensor_init\n"));
     return res;
 }
@@ -752,6 +753,12 @@ _sensor_load(time_t t)
 {
 #ifdef solaris2
     int i,j;
+#ifdef HAVE_PICL_H 
+    int er_code;
+    picl_errno_t     error_code;
+    int level=0;
+    picl_nodehdl_t  rooth;
+#else
     int typ;
     int temp=0; /* do not reset this later, more than one typ has temperatures*/
     int other=0;
@@ -761,14 +768,6 @@ _sensor_load(time_t t)
     envctrl_fan_t *fan_info;
     envctrl_ps_t *power_info;
     envctrl_encl_t *enc_info;
-#ifdef HAVE_PICL_H 
-
-/* some more declarations */
-
-    int er_code;
-    picl_errno_t     error_code;
-    int level=0;
-    picl_nodehdl_t  rooth;
 #endif
 
 /* DEBUGMSG(("ucd-snmp/lmSensors", "Reading the sensors\n")); */
@@ -811,7 +810,7 @@ else {
 
 } /*end else picl_initialize */
 
-#endif  /* end of picld section */
+#else  /* end of picld section */
 /* initialize kstat */
 
 kc = kstat_open();
@@ -939,6 +938,8 @@ else{
     kstat_close(kc);
 
 } /* end else kstat */
+#endif
+
 #else /* end solaris2 only ie. ifdef everything else */
 
     const sensors_chip_name *chip;
