@@ -23,7 +23,7 @@ int _cpu_status(char *state);
      *   (including descriptions)
      */
 void init_cpu_kstat( void ) {
-    int               i, n=0, clock, state_begin;
+    int               i = 0, n = 0, clock, state_begin;
     char              ctype[15], ftype[15], state[10];
     kstat_t          *ksp;
     kstat_named_t    *ks_data;

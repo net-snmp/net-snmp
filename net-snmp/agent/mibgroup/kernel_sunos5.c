@@ -226,7 +226,7 @@ kernel_sunos5_cache_age(unsigned int regnumber, void *data)
 
     for (i = 0; i < MIBCACHE_SIZE; i++) {
 	DEBUGMSGTL(("kernel_sunos5", "cache[%d] time %ld ttl %d\n", i,
-		    Mibcache[i].cache_time, Mibcache[i].cache_ttl));
+		    Mibcache[i].cache_time, (int)Mibcache[i].cache_ttl));
 	if (Mibcache[i].cache_time < period) {
 	    Mibcache[i].cache_time = 0;
 	} else {
@@ -361,7 +361,7 @@ getKstat(const char *statname, const char *varname, void *value)
     kstat_t        *ks, *kstat_data;
     kstat_named_t  *d;
     uint_t          i;
-    int             instance;
+    int             instance = 0;
     char            module_name[64];
     int             ret;
     u_longlong_t    val;    /* The largest value */
@@ -469,11 +469,11 @@ getKstat(const char *statname, const char *varname, void *value)
 		break;
 	    case KSTAT_DATA_INT64:
 		*(int64_t *)v = d->value.i64;
-		DEBUGMSGTL(("kernel_sunos5", "value: %ld\n", d->value.i64));
+		DEBUGMSGTL(("kernel_sunos5", "value: %ld\n", (long)d->value.i64));
 		break;
 	    case KSTAT_DATA_UINT64:
 		*(uint64_t *)v = d->value.ui64;
-		DEBUGMSGTL(("kernel_sunos5", "value: %lu\n", d->value.ui64));
+		DEBUGMSGTL(("kernel_sunos5", "value: %lu\n", (unsigned long)d->value.ui64));
 		break;
 #else
 	    case KSTAT_DATA_LONG:
@@ -526,7 +526,7 @@ getKstatString(const char *statname, const char *varname,
     kstat_ctl_t    *ksc;
     kstat_t        *ks, *kstat_data;
     kstat_named_t  *d;
-    size_t          i, instance;
+    size_t          i, instance = 0;
     char            module_name[64];
     int             ret;
 
@@ -652,7 +652,7 @@ getMibstat(mibgroup_e grid, void *resp, size_t entrysize,
      */
 
     DEBUGMSGTL(("kernel_sunos5", "getMibstat (%d, *, %d, %d, *, *)\n",
-		grid, entrysize, req_type));
+		grid, (int)entrysize, req_type));
     cachep = &Mibcache[grid];
     mibgr = Mibmap[grid].group;
     mibtb = Mibmap[grid].table;
@@ -670,7 +670,7 @@ getMibstat(mibgroup_e grid, void *resp, size_t entrysize,
     cache_valid = (cachep->cache_time > 0);
 
     DEBUGMSGTL(("kernel_sunos5","... cache_valid %d time %ld ttl %d now %ld\n",
-		cache_valid, cachep->cache_time, cachep->cache_ttl,
+		cache_valid, cachep->cache_time, (int)cachep->cache_ttl,
 		time(NULL)));
     if (cache_valid) {
 	/*
@@ -777,7 +777,7 @@ getentry(req_e req_type, void *bufaddr, size_t len,
          */
         DEBUGMSGTL(("kernel_sunos5", 
             "bad cache length %d - not multiple of entry size %d\n", 
-            len, entrysize));
+            (int)len, (int)entrysize));
         return NOT_FOUND;
     }
 
@@ -1027,7 +1027,7 @@ getmib(int groupname, int subgroupname, void **statbuf, size_t *size,
 	    }
 	} while (rc == MOREDATA && result != FOUND);
 
-	DEBUGMSGTL(("kernel_sunos5", "...... getmib buffer size is %d\n", *size));
+	DEBUGMSGTL(("kernel_sunos5", "...... getmib buffer size is %d\n", (int)*size));
 
 	if (result == FOUND) {      /* Search is successful */
 	    if (rc != MOREDATA) {
@@ -1168,7 +1168,7 @@ _dlpi_get_phys_address(int fd, char *addr, int maxlen, int *addrlen)
         return (errp->dl_errno);
     }
     default:
-        DEBUGMSGTL(("kernel_sunos5:dlpi", "got type: %x\n", dlp->dl_primitive));
+        DEBUGMSGTL(("kernel_sunos5:dlpi", "got type: %x\n", (unsigned)dlp->dl_primitive));
         return (-1);
     }
 }
@@ -1214,7 +1214,7 @@ _dlpi_get_iftype(int fd, unsigned int *iftype)
             return (-1); 
 
         DEBUGMSGTL(("kernel_sunos5:dlpi", "dl_mac_type: %x\n",
-	           info->dl_mac_type));
+	           (unsigned)info->dl_mac_type));
 	switch (info->dl_mac_type) {
 	case DL_CSMACD:
 	case DL_ETHER:
@@ -1279,15 +1279,15 @@ _dlpi_get_iftype(int fd, unsigned int *iftype)
         dl_error_ack_t *errp = (dl_error_ack_t *)buf;
 
         DEBUGMSGTL(("kernel_sunos5:dlpi",
-                    "got DL_ERROR_ACK: dlpi %d, error %d\n", errp->dl_errno,
-                    errp->dl_unix_errno));
+                    "got DL_ERROR_ACK: dlpi %ld, error %ld\n",
+		    (long)errp->dl_errno, (long)errp->dl_unix_errno));
 
         if (ctlbuf.len < DL_ERROR_ACK_SIZE)
             return (-1);
         return (errp->dl_errno);
     }
     default:
-        DEBUGMSGTL(("kernel_sunos5:dlpi", "got type %x\n", dlp->dl_primitive));
+        DEBUGMSGTL(("kernel_sunos5:dlpi", "got type %x\n", (unsigned)dlp->dl_primitive));
         return (-1);
     }
 }
@@ -1330,7 +1330,7 @@ _dlpi_parse_devname(char *devname, int *ppap)
     int m = 1;
     int i = strlen(devname) - 1;
 
-    while (i >= 0 && isdigit(devname[i])) {
+    while (i >= 0 && isdigit(devname[i] & 0xFF)) {
         ppa += m * (devname[i] - '0'); 
         m *= 10;
         i--;
