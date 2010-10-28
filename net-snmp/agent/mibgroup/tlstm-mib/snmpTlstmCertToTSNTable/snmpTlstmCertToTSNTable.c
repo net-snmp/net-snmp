@@ -205,7 +205,7 @@ init_snmpTlstmCertToTSNTable_context(const char *contextName)
     else {
         if (NULL != contextName)
             reg->contextName = strdup(contextName);
-        netsnmp_register_watched_scalar(reg, watcher);
+        netsnmp_register_watched_scalar2(reg, watcher);
     }
 
     /*

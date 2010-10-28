@@ -295,7 +295,7 @@ _ipIfStatsTable_initialize_interface(ipIfStatsTable_registration * reg_ptr,
      */
     {
         oid     lc_oid[] = { IPIFSTATSTABLELASTCHANGE_OID };
-        netsnmp_register_watched_scalar(netsnmp_create_handler_registration
+        netsnmp_register_watched_scalar2(netsnmp_create_handler_registration
                 ("ipIfStatsTableLastChanged", NULL,
                  lc_oid, OID_LENGTH(lc_oid),
                  HANDLER_CAN_RONLY),

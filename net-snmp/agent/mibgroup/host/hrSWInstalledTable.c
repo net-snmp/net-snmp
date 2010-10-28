@@ -23,6 +23,8 @@
 
 #define MYTABLE "hrSWInstalledTable"
 
+static netsnmp_table_registration_info *table_info;
+
 static void _cache_free(netsnmp_cache * cache, void *magic);
 static int _cache_load(netsnmp_cache * cache, void *magic);
 
@@ -34,6 +36,15 @@ init_hrSWInstalledTable(void)
      * here we initialize all the tables we're planning on supporting 
      */
     initialize_table_hrSWInstalledTable();
+}
+
+void
+shutdown_hrSWInstalledTable(void)
+{
+    if (table_info) {
+	netsnmp_table_registration_info_free(table_info);
+	table_info = NULL;
+    }
 }
 
 /** Initialize the hrSWInstalledTable table by defining its contents and how it's structured */
@@ -48,7 +59,6 @@ initialize_table_hrSWInstalledTable(void)
     netsnmp_mib_handler *handler = NULL;
     netsnmp_container *container = NULL;
     netsnmp_cache *cache = NULL;
-    netsnmp_table_registration_info *table_info = NULL;
 
     DEBUGMSGTL(("hrSWInstalled", "initialize\n"));
 
@@ -268,4 +278,5 @@ _cache_free(netsnmp_cache * cache, void *magic)
     DEBUGMSGTL(("hrSWInstalledTable:cache", "free\n"));
 
     netsnmp_swinst_container_free_items((netsnmp_container *) cache->magic);
+    CONTAINER_FREE(cache->magic);
 }                               /* _cache_free */

@@ -22,6 +22,7 @@ config_require(host/hrSWRunPerfTable)
  * function declarations 
  */
 void            init_hrSWRunTable(void);
+void            shutdown_hrSWRunTable(void);
 void            initialize_table_hrSWRunTable(void);
 Netsnmp_Node_Handler hrSWRunTable_handler;
 
