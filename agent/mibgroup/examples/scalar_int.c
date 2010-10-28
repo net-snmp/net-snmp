@@ -53,7 +53,7 @@ init_scalar_int(void)
      * the output of this debugging statement. 
      */
     DEBUGMSGTL(("example_scalar_int",
-                "Initalizing example scalar int.  Default value = %d\n",
+                "Initalizing example scalar int.  Default value = %ld\n",
                 example1));
 
     /*
