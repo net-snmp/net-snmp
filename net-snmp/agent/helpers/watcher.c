@@ -82,6 +82,11 @@ netsnmp_create_watcher_info(void *data, size_t size, u_char type, int flags)
     return winfo;
 }
 
+/**
+ * Register a watched scalar. The caller remains the owner of watchinfo.
+ *
+ * @see netsnmp_register_watched_instance2()
+ */
 int
 netsnmp_register_watched_instance(netsnmp_handler_registration *reginfo,
                                   netsnmp_watcher_info         *watchinfo)
@@ -95,6 +100,30 @@ netsnmp_register_watched_instance(netsnmp_handler_registration *reginfo,
     return netsnmp_register_instance(reginfo);
 }
 
+/**
+ * Register a watched scalar. Ownership of watchinfo is transferred to the handler.
+ *
+ * @see netsnmp_register_watched_instance()
+ */
+int
+netsnmp_register_watched_instance2(netsnmp_handler_registration *reginfo,
+				   netsnmp_watcher_info         *watchinfo)
+{
+    netsnmp_mib_handler *whandler;
+
+    whandler         = netsnmp_get_watcher_handler();
+    whandler->myvoid = (void *)watchinfo;
+    netsnmp_owns_watcher_info(whandler);
+
+    netsnmp_inject_handler(reginfo, whandler);
+    return netsnmp_register_instance(reginfo);
+}
+
+/**
+ * Register a watched scalar. The caller remains the owner of watchinfo.
+ *
+ * @see netsnmp_register_watched_scalar2()
+ */
 int
 netsnmp_register_watched_scalar(netsnmp_handler_registration *reginfo,
                                   netsnmp_watcher_info         *watchinfo)
@@ -106,6 +135,34 @@ netsnmp_register_watched_scalar(netsnmp_handler_registration *reginfo,
 
     netsnmp_inject_handler(reginfo, whandler);
     return netsnmp_register_scalar(reginfo);
+}
+
+/**
+ * Register a watched scalar. Ownership of watchinfo is transferred to the handler.
+ *
+ * @see netsnmp_register_watched_scalar()
+ */
+int
+netsnmp_register_watched_scalar2(netsnmp_handler_registration *reginfo,
+                                  netsnmp_watcher_info         *watchinfo)
+{
+    netsnmp_mib_handler *whandler;
+
+    whandler         = netsnmp_get_watcher_handler();
+    whandler->myvoid = (void *)watchinfo;
+    netsnmp_owns_watcher_info(whandler);
+
+    netsnmp_inject_handler(reginfo, whandler);
+    return netsnmp_register_scalar(reginfo);
+}
+
+void
+netsnmp_owns_watcher_info(netsnmp_mib_handler *handler)
+{
+    netsnmp_assert(handler);
+    netsnmp_assert(handler->myvoid);
+    handler->data_clone = (void *(*)(void *))netsnmp_clone_watcher_info;
+    handler->data_free = free;
 }
 
 /** @cond */
@@ -380,7 +437,7 @@ netsnmp_register_watched_spinlock(netsnmp_handler_registration *reginfo,
     winfo            = netsnmp_create_watcher_info((void *)spinlock,
 		           sizeof(int), ASN_INTEGER, WATCHER_FIXED_SIZE);
     netsnmp_inject_handler(reginfo, whandler);
-    return netsnmp_register_watched_scalar(reginfo, winfo);
+    return netsnmp_register_watched_scalar2(reginfo, winfo);
 }
 
 
@@ -440,13 +497,13 @@ netsnmp_watched_spinlock_handler(netsnmp_mib_handler *handler,
      *
      ***************************/
 
-static netsnmp_watcher_info*
-clone_watcher_info(netsnmp_watcher_info* src)
+netsnmp_watcher_info *
+netsnmp_clone_watcher_info(netsnmp_watcher_info *winfo)
 {
-    netsnmp_watcher_info* res = SNMP_MALLOC_TYPEDEF(netsnmp_watcher_info);
-    if (res)
-        memcpy(res, src, sizeof(*res));
-    return res;
+    netsnmp_watcher_info *copy = malloc(sizeof(*copy));
+    if (copy)
+	*copy = *winfo;
+    return copy;
 }
 
 static int
@@ -462,9 +519,8 @@ register_scalar_watcher(const char* name,
     if (watchinfo)
         whandler = netsnmp_get_watcher_handler();
     if (watchinfo && whandler) {
-        whandler->myvoid = (void*)watchinfo;
-        whandler->data_free = free_wrapper;
-        whandler->data_clone = (void* (*)(void *))clone_watcher_info;
+        whandler->myvoid = watchinfo;
+	netsnmp_owns_watcher_info(whandler);
         reginfo =
             netsnmp_create_handler_registration(
                 name, subhandler, reg_oid, reg_oid_len, mode);
