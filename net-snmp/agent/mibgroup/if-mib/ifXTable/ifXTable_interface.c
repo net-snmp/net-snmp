@@ -1991,7 +1991,7 @@ _ifXTable_container_row_restore(const char *token, char *buf)
      * loop through and get each column
      */
     buf = skip_white(buf);
-    while ((NULL != buf) && isdigit(*buf)) {
+    while ((NULL != buf) && isdigit(*buf & 0xFF)) {
         /*
          * extract column, skip ':'
          */
