@@ -242,7 +242,7 @@ malloc_random(size_t * size)
  *	@return SNMPERR_SUCCESS	on success, SNMPERR_GENERR on failure.
  */
 int
-memdup(void **to, const void *from, size_t size)
+memdup(u_char ** to, const void * from, size_t size)
 {
     if (to == NULL)
         return SNMPERR_GENERR;
