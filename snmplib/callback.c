@@ -229,7 +229,7 @@ int
 snmp_register_callback(int major, int minor, SNMPCallback * new_callback,
                        void *arg)
 {
-    return netsnmp_register_callback2(major, minor, new_callback, arg, free,
+    return netsnmp_register_callback( major, minor, new_callback, arg,
                                       NETSNMP_CALLBACK_DEFAULT_PRIORITY);
 }
 
@@ -240,28 +240,6 @@ snmp_register_callback(int major, int minor, SNMPCallback * new_callback,
  * @param minor        Minor callback event type.
  * @param new_callback Callback function being registered.
  * @param arg          Argument that will be passed to the callback function.
- * @param arg_free     Function that will be called by clear_callback() to free
- *   memory arg points at. May be NULL.
- *
- * @see snmp_register_callback
- */
-int
-snmp_register_callback2(int major, int minor, SNMPCallback * new_callback,
-                        void *arg, void (*arg_free)(void*))
-{
-    return netsnmp_register_callback2(major, minor, new_callback, arg,
-                                      arg_free, NETSNMP_CALLBACK_DEFAULT_PRIORITY);
-}
-
-/**
- * Register a callback function.
- *
- * @param major        Major callback event type.
- * @param minor        Minor callback event type.
- * @param new_callback Callback function being registered.
- * @param arg          Argument that will be passed to the callback function.
- * @param arg_free     Function that will be called by clear_callback() to free
- *   memory arg points at. May be NULL.
  * @priority           Handler invocation priority. When multiple handlers have
  *   been registered for the same (major, minor) callback event type, handlers
  *   with the numerically lowest priority will be invoked first. Handlers with
@@ -272,29 +250,6 @@ snmp_register_callback2(int major, int minor, SNMPCallback * new_callback,
 int
 netsnmp_register_callback(int major, int minor, SNMPCallback * new_callback,
                           void *arg, int priority)
-{
-    return netsnmp_register_callback2(major, minor, new_callback, arg, free, priority);
-}
-
-/**
- * Register a callback function.
- *
- * @param major        Major callback event type.
- * @param minor        Minor callback event type.
- * @param new_callback Callback function being registered.
- * @param arg          Argument that will be passed to the callback function.
- * @param arg_free     Function that will be called by clear_callback() to free
- *   memory arg points at. May be NULL.
- * @priority           Handler invocation priority. When multiple handlers have
- *   been registered for the same (major, minor) callback event type, handlers
- *   with the numerically lowest priority will be invoked first. Handlers with
- *   identical priority are invoked in the order they have been registered.
- *
- * @see snmp_register_callback
- */
-int
-netsnmp_register_callback2(int major, int minor, SNMPCallback * new_callback,
-                           void *arg, void (*arg_free)(void *), int priority)
 {
     struct snmp_gen_callback *newscp = NULL, *scp = NULL;
     struct snmp_gen_callback **prevNext = &(thecallbacks[major][minor]);
@@ -313,7 +268,6 @@ netsnmp_register_callback2(int major, int minor, SNMPCallback * new_callback,
         return SNMPERR_GENERR;
     } else {
         newscp->priority = priority;
-        newscp->sc_client_arg_free = arg_free;
         newscp->sc_client_arg = arg;
         newscp->sc_callback = new_callback;
         newscp->next = NULL;
@@ -597,8 +551,7 @@ clear_callback(void)
                     scp->sc_client_arg = NULL;
                     DEBUGMSGTL(("9:callback", "  freeing %p at [%d,%d]\n", tmp_arg, i, j));
                     (void)netsnmp_callback_clear_client_arg(tmp_arg, i, j);
-                    if (scp->sc_client_arg_free)
-                        scp->sc_client_arg_free(tmp_arg);
+                    free(tmp_arg);
                 }
                 SNMP_FREE(scp);
                 scp = thecallbacks[i][j];

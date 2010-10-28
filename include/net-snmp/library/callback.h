@@ -43,7 +43,6 @@ extern          "C" {
 
     struct snmp_gen_callback {
         SNMPCallback   *sc_callback;
-        void          (*sc_client_arg_free)(void *);
         void           *sc_client_arg;
         int             priority;
         struct snmp_gen_callback *next;
@@ -60,20 +59,9 @@ extern          "C" {
                                               SNMPCallback * new_callback,
                                               void *arg, int priority);
     NETSNMP_IMPORT
-    int             netsnmp_register_callback2(int major, int minor,
-                                               SNMPCallback * new_callback,
-                                               void *arg,
-					       void (*arg_free)(void *),
-                                               int priority);
-    NETSNMP_IMPORT
     int             snmp_register_callback(int major, int minor,
                                            SNMPCallback * new_callback,
                                            void *arg);
-    NETSNMP_IMPORT
-    int             snmp_register_callback2(int major, int minor,
-                                            SNMPCallback * new_callback,
-                                            void *arg,
-					    void (*arg_free)(void *));
     NETSNMP_IMPORT
     int             snmp_call_callbacks(int major, int minor,
                                         void *caller_arg);

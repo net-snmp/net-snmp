@@ -617,7 +617,7 @@ agentx_registration_callback(int majorID, int minorID, void *serverarg,
 {
     struct register_parameters *reg_parms =
         (struct register_parameters *) serverarg;
-    netsnmp_session *agentx_ss = (netsnmp_session *) clientarg;
+    netsnmp_session *agentx_ss = *(netsnmp_session **)clientarg;
 
     if (minorID == SNMPD_CALLBACK_REGISTER_OID)
         return agentx_register(agentx_ss,
@@ -687,22 +687,29 @@ subagent_shutdown(int majorID, int minorID, void *serverarg, void *clientarg)
 void
 agentx_register_callbacks(netsnmp_session * s)
 {
+    netsnmp_session *sess_p;
+
     DEBUGMSGTL(("agentx/subagent",
                 "registering callbacks for session %p\n", s));
-    snmp_register_callback2(SNMP_CALLBACK_LIBRARY, SNMP_CALLBACK_SHUTDOWN,
-			    subagent_shutdown, s, NULL);
-    snmp_register_callback2(SNMP_CALLBACK_APPLICATION,
-			    SNMPD_CALLBACK_REGISTER_OID,
-			    agentx_registration_callback, s, NULL);
-    snmp_register_callback2(SNMP_CALLBACK_APPLICATION,
-			    SNMPD_CALLBACK_UNREGISTER_OID,
-			    agentx_registration_callback, s, NULL);
-    snmp_register_callback2(SNMP_CALLBACK_APPLICATION,
-			    SNMPD_CALLBACK_REG_SYSOR,
-			    agentx_sysOR_callback, s, NULL);
-    snmp_register_callback2(SNMP_CALLBACK_APPLICATION,
-			    SNMPD_CALLBACK_UNREG_SYSOR,
-			    agentx_sysOR_callback, s, NULL);
+    memdup(&sess_p, &s, sizeof(s));
+    netsnmp_assert(sess_p);
+    s->myvoid = sess_p;
+    if (!sess_p)
+        return;
+    snmp_register_callback(SNMP_CALLBACK_LIBRARY, SNMP_CALLBACK_SHUTDOWN,
+                           subagent_shutdown, sess_p);
+    snmp_register_callback(SNMP_CALLBACK_APPLICATION,
+                           SNMPD_CALLBACK_REGISTER_OID,
+                           agentx_registration_callback, sess_p);
+    snmp_register_callback(SNMP_CALLBACK_APPLICATION,
+                           SNMPD_CALLBACK_UNREGISTER_OID,
+                           agentx_registration_callback, sess_p);
+    snmp_register_callback(SNMP_CALLBACK_APPLICATION,
+                           SNMPD_CALLBACK_REG_SYSOR,
+                           agentx_sysOR_callback, sess_p);
+    snmp_register_callback(SNMP_CALLBACK_APPLICATION,
+                           SNMPD_CALLBACK_UNREG_SYSOR,
+                           agentx_sysOR_callback, sess_p);
 }
 
 /*
@@ -715,19 +722,19 @@ agentx_unregister_callbacks(netsnmp_session * ss)
     DEBUGMSGTL(("agentx/subagent",
                 "unregistering callbacks for session %p\n", ss));
     snmp_unregister_callback(SNMP_CALLBACK_LIBRARY, SNMP_CALLBACK_SHUTDOWN,
-                             subagent_shutdown, ss, 1);
+                             subagent_shutdown, ss->myvoid, 1);
     snmp_unregister_callback(SNMP_CALLBACK_APPLICATION,
                              SNMPD_CALLBACK_REGISTER_OID,
-                             agentx_registration_callback, ss, 1);
+                             agentx_registration_callback, ss->myvoid, 1);
     snmp_unregister_callback(SNMP_CALLBACK_APPLICATION,
                              SNMPD_CALLBACK_UNREGISTER_OID,
-                             agentx_registration_callback, ss, 1);
+                             agentx_registration_callback, ss->myvoid, 1);
     snmp_unregister_callback(SNMP_CALLBACK_APPLICATION,
                              SNMPD_CALLBACK_REG_SYSOR,
-                             agentx_sysOR_callback, ss, 1);
+                             agentx_sysOR_callback, ss->myvoid, 1);
     snmp_unregister_callback(SNMP_CALLBACK_APPLICATION,
                              SNMPD_CALLBACK_UNREG_SYSOR,
-                             agentx_sysOR_callback, ss, 1);
+                             agentx_sysOR_callback, ss->myvoid, 1);
 }
 
 /*

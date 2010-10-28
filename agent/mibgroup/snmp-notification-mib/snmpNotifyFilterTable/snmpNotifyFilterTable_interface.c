@@ -1992,15 +1992,18 @@ void
 snmpNotifyFilterTable_container_init_persistence(netsnmp_container
                                                  *container)
 {
+    netsnmp_container **container_p;
     int             rc;
 
     register_config_handler(NULL, row_token,
                             _snmpNotifyFilterTable_container_row_restore,
                             NULL, NULL);
-    rc = snmp_register_callback2(SNMP_CALLBACK_LIBRARY,
-                                 SNMP_CALLBACK_STORE_DATA,
-                                 _snmpNotifyFilterTable_container_save_rows,
-                                 container, NULL);
+    memdup(&container_p, &container, sizeof(container));
+    netsnmp_assert(container_p);
+    rc = snmp_register_callback(SNMP_CALLBACK_LIBRARY,
+                                SNMP_CALLBACK_STORE_DATA,
+                                _snmpNotifyFilterTable_container_save_rows,
+                                container_p);
 
     if (rc != SNMP_ERR_NOERROR)
         snmp_log(LOG_ERR, "error registering for STORE_DATA callback "
@@ -2018,7 +2021,7 @@ _snmpNotifyFilterTable_container_save_rows(int majorID, int minorID,
         "#\n" "# snmpNotifyFilterTable persistent data\n" "#";
     char           *type = netsnmp_ds_get_string(NETSNMP_DS_LIBRARY_ID,
                                                  NETSNMP_DS_LIB_APPTYPE);
-    netsnmp_container *c = (netsnmp_container *) clientarg;
+    netsnmp_container *c = *(netsnmp_container **)clientarg;
 
     DEBUGMSGTL(("internal:snmpNotifyFilterTable:"
                 "_snmpNotifyFilterTable_container_save_rows",
