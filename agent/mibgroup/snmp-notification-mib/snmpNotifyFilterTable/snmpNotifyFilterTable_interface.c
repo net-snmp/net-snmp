@@ -1998,7 +1998,7 @@ snmpNotifyFilterTable_container_init_persistence(netsnmp_container
     register_config_handler(NULL, row_token,
                             _snmpNotifyFilterTable_container_row_restore,
                             NULL, NULL);
-    memdup(&container_p, &container, sizeof(container));
+    memdup((void **)&container_p, &container, sizeof(container));
     netsnmp_assert(container_p);
     rc = snmp_register_callback(SNMP_CALLBACK_LIBRARY,
                                 SNMP_CALLBACK_STORE_DATA,
