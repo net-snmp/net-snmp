@@ -192,8 +192,10 @@ static int _get_type_value( const char *str_type );
 static void     parse_disk_config(const char *, char *);
 static void     free_disk_config(void);
 
+#ifdef linux
 static void     Add_LVM_Disks(void);
 static void     Remove_LVM_Disks(void);
+#endif
 
         /*********************
 	 *
@@ -287,7 +289,9 @@ init_hr_disk(void)
 void
 shutdown_hr_disk(void)
 {
+#ifdef linux
     Remove_LVM_Disks();
+#endif
 }
 
 #define ITEM_STRING	1
@@ -1348,6 +1352,7 @@ static int _get_type_from_protocol( const char *prot )
 #endif
 
 
+#ifdef linux
 #if defined(HAVE_REGEX_H) && defined(HAVE_REGCOMP)
 static char    *lvm_device_names[MAX_NUMBER_DISK_TYPES];
 static int      lvm_device_count;
@@ -1431,4 +1436,4 @@ Remove_LVM_Disks(void)
     lvm_device_count = 0;
 #endif
 }
-
+#endif
