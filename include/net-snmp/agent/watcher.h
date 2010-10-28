@@ -64,7 +64,11 @@ typedef struct netsnmp_watcher_info_s {
 
 int netsnmp_register_watched_instance( netsnmp_handler_registration *reginfo,
                                        netsnmp_watcher_info         *winfo);
+int netsnmp_register_watched_instance2(netsnmp_handler_registration *reginfo,
+                                       netsnmp_watcher_info         *winfo);
 int netsnmp_register_watched_scalar(   netsnmp_handler_registration *reginfo,
+                                       netsnmp_watcher_info         *winfo);
+int netsnmp_register_watched_scalar2(  netsnmp_handler_registration *reginfo,
                                        netsnmp_watcher_info         *winfo);
 int netsnmp_register_watched_timestamp(netsnmp_handler_registration *reginfo,
                                        marker_t timestamp);
@@ -123,6 +127,11 @@ netsnmp_create_watcher_info(void *, size_t, u_char, int);
 
 netsnmp_watcher_info *
 netsnmp_create_watcher_info6(void *, size_t, u_char, int, size_t, size_t*);
+
+netsnmp_watcher_info *
+netsnmp_clone_watcher_info(netsnmp_watcher_info *winfo);
+void
+netsnmp_owns_watcher_info(netsnmp_mib_handler *handler);
 
 Netsnmp_Node_Handler  netsnmp_watcher_helper_handler;
 
