@@ -961,7 +961,7 @@ vacm_create_simple(const char *token, char *confline,
 #ifdef NETSNMP_TRANSPORT_UNIX_DOMAIN
     if (parsetype == VACM_CREATE_SIMPLE_COMUNIX ||
         parsetype == VACM_CREATE_SIMPLE_COM) {
-        if ( context && *context )
+        if ( *context )
            snprintf(line, sizeof(line), "-Cn %s %s %s '%s'",
              context, secname, addressname, community);
         else
