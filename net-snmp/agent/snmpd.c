@@ -111,6 +111,9 @@
 #if HAVE_GRP_H
 #include <grp.h>
 #endif
+#ifdef HAVE_CRTDBG_H
+#include <crtdbg.h>
+#endif
 
 #ifndef PATH_MAX
 # ifdef _POSIX_PATH_MAX
@@ -1406,6 +1409,10 @@ _tmain(int argc, TCHAR * argv[])
     int             nRunType = RUN_AS_CONSOLE;
     int             quiet = 0;
     
+#if 0
+    _CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF /*| _CRTDBG_CHECK_ALWAYS_DF*/);
+#endif
+
     nRunType = ParseCmdLineForServiceOption(argc, argv, &quiet);
 
     switch (nRunType) {
