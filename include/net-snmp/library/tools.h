@@ -226,7 +226,7 @@ extern          "C" {
     u_char         *malloc_random(size_t * size);
     u_char         *malloc_zero(size_t size);
     NETSNMP_IMPORT
-    int             memdup(void **to, const void *from, size_t size);
+    int             memdup(u_char ** to, const void * from, size_t size);
 
     void            netsnmp_check_definedness(const void *packet,
                                               size_t length);
