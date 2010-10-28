@@ -353,7 +353,8 @@ AT_Cmp(void *addr, void *ep)
                                     mp->ipNetToMediaIfIndex.o_length);
 #endif
     DEBUGMSGTL(("mibII/at", "......... AT_Cmp %lx<>%lx %d<>%d (%.5s)\n",
-                mp->ipNetToMediaNetAddress, ((if_ip_t *) addr)->ipAddr,
+                (unsigned long)mp->ipNetToMediaNetAddress,
+                (unsigned long)((if_ip_t *) addr)->ipAddr,
                 ((if_ip_t *) addr)->ifIdx, index,
                 mp->ipNetToMediaIfIndex.o_bytes));
     if (mp->ipNetToMediaNetAddress != ((if_ip_t *) addr)->ipAddr)
@@ -389,7 +390,7 @@ var_atEntry(struct variable * vp,
     static mib2_ipNetToMediaEntry_t Lowentry;
     int             Found = 0;
     req_e           req_type;
-    int             offset, olength;
+    int             offset, olength = 0;
     static in_addr_t      addr_ret;
 
     /*

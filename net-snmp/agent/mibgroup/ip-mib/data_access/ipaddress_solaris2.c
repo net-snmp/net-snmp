@@ -157,7 +157,7 @@ _load_v4(netsnmp_container *container, int idx_offset)
             netsnmp_access_interface_index_find(ipae.ipAdEntIfIndex.o_bytes);
         if (entry->if_index == 0) {
             DEBUGMSGTL(("access:ipaddress:container", "cannot find if %s\n",
-                        ipae.ipAdEntIfIndex));
+                        ipae.ipAdEntIfIndex.o_bytes));
             netsnmp_access_ipaddress_entry_free(entry);
             return (-2);    
         }
