@@ -489,7 +489,7 @@ sslctx_client_setup(SSL_METHOD *method, _netsnmpTLSBaseData *tlsbase) {
     /***********************************************************************
      * Set up the client context
      */
-    the_ctx = SSL_CTX_new(method);
+    the_ctx = SSL_CTX_new(NETSNMP_REMOVE_CONST(SSL_METHOD *, method));
     if (!the_ctx) {
         snmp_log(LOG_ERR, "ack: %p\n", the_ctx);
         LOGANDDIE("can't create a new context");
@@ -564,7 +564,7 @@ sslctx_server_setup(SSL_METHOD *method) {
      * Set up the server context
      */
     /* setting up for ssl */
-    SSL_CTX *the_ctx = SSL_CTX_new(method);
+    SSL_CTX *the_ctx = SSL_CTX_new(NETSNMP_REMOVE_CONST(SSL_METHOD *, method));
     if (!the_ctx) {
         LOGANDDIE("can't create a new context");
     }
