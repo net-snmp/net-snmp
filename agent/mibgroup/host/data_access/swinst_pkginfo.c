@@ -133,7 +133,7 @@ netsnmp_swinst_arch_load( netsnmp_container *container, u_int flags)
     closedir( d );
 
     DEBUGMSGTL(("swinst:load:arch"," loaded %d entries\n",
-                CONTAINER_SIZE(container)));
+                (int)CONTAINER_SIZE(container)));
 
     return 0;
 }
