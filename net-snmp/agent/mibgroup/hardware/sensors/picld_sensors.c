@@ -6,7 +6,6 @@
 #include <time.h>
 
 #include <picl.h>
-#include </usr/platform/sun4u/include/sys/envctrl.h>
 
 void netsnmp_sensor_arch_init( void ) {
     DEBUGMSGTL(("sensors:arch", "Initialise PICLd Sensors module\n"));
