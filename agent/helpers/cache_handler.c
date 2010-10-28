@@ -264,7 +264,8 @@ netsnmp_cache_remove(netsnmp_cache *cache)
     for (; cur; prev = cur, cur = cur->next) {
         if (cache == cur) {
             prev->next = cur->next;
-            cur->next->prev = cur->prev;
+            if (cur->next)
+                cur->next->prev = cur->prev;
             return 0;
         }
     }
