@@ -832,7 +832,7 @@ netsnmp_openssl_null_checks(SSL *ssl, int *null_auth, int *null_cipher)
         DEBUGMSGTL(("ssl:cipher", "no cipher yet\n"));
         return;
     }
-    description = SSL_CIPHER_description(cipher, tmp_buf, sizeof(tmp_buf));
+    description = SSL_CIPHER_description(NETSNMP_REMOVE_CONST(SSL_CIPHER *, cipher), tmp_buf, sizeof(tmp_buf));
     /** no \n since tmp_buf already has one */
     DEBUGMSGTL(("ssl:cipher", "current cipher: %s", tmp_buf));
 
