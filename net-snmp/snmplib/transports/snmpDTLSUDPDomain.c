@@ -261,6 +261,7 @@ start_new_cached_connection(netsnmp_transport *t,
     if (!cachep->write_bio) {
         DIEHERE("failed to create the openssl write_bio");
         BIO_free(cachep->read_bio);
+        cachep->read_bio = NULL;
     }
 
     BIO_set_mem_eof_return(cachep->read_bio, -1);
@@ -283,6 +284,8 @@ start_new_cached_connection(netsnmp_transport *t,
     if (!tlsdata->ssl) {
         BIO_free(cachep->read_bio);
         BIO_free(cachep->write_bio);
+        cachep->read_bio = NULL;
+        cachep->write_bio = NULL;
         DIEHERE("failed to create the SSL session structure");
     }
         
@@ -608,6 +611,17 @@ netsnmp_dtlsudp_recv(netsnmp_transport *t, void *buf, int size,
         return -1;
     }
     tlsdata = cachep->tlsdata;
+    if (NULL == tlsdata->ssl) {
+        /*
+         * this happens when the server starts but doesn't have an
+         * identity and a client connects...
+         */
+        snmp_log(LOG_ERR,
+                 "DTLSUDP: missing tlsdata!\n");
+        /*snmp_increment_statistic( XXX-rks ??? );*/
+        SNMP_FREE(tmStateRef);
+        return -1;
+    }
 
     /* Implementation notes:
        - we use the t->data memory pointer as the session ID
