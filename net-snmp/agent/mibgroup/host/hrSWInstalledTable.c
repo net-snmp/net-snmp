@@ -278,5 +278,4 @@ _cache_free(netsnmp_cache * cache, void *magic)
     DEBUGMSGTL(("hrSWInstalledTable:cache", "free\n"));
 
     netsnmp_swinst_container_free_items((netsnmp_container *) cache->magic);
-    CONTAINER_FREE(cache->magic);
 }                               /* _cache_free */
