@@ -28,6 +28,7 @@ typedef struct netsnmp_extend_s {
 } netsnmp_extend;
 
 void                 init_extend(void);
+void                 shutdown_extend(void);
 Netsnmp_Node_Handler handle_nsExtendConfigTable;
 Netsnmp_Node_Handler handle_nsExtendOutput1Table;
 Netsnmp_Node_Handler handle_nsExtendOutput2Table;

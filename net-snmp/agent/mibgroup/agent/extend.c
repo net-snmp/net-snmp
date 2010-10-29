@@ -182,6 +182,27 @@ _register_extend( oid *base, size_t len )
     return eptr;
 }
 
+static void
+_unregister_extend(extend_registration_block *eptr)
+{
+    extend_registration_block *prev;
+
+    netsnmp_assert(eptr);
+    for (prev = ereg_head; prev && prev->next != eptr; prev = prev->next)
+	;
+    if (prev) {
+        netsnmp_assert(eptr == prev->next);
+	prev->next = eptr->next;
+    } else {
+        netsnmp_assert(eptr == ereg_head);
+	ereg_head = eptr->next;
+    }
+
+    netsnmp_table_data_delete_table(eptr->dinfo);
+    free(eptr->root_oid);
+    free(eptr);
+}
+
 int
 extend_clear_callback(int majorID, int minorID,
                     void *serverarg, void *clientarg)
@@ -222,6 +243,17 @@ void init_extend( void )
     snmp_register_callback(SNMP_CALLBACK_APPLICATION,
                            SNMPD_CALLBACK_PRE_UPDATE_CONFIG,
                            extend_clear_callback, NULL);
+}
+
+void
+shutdown_extend(void)
+{
+#ifndef USING_UCD_SNMP_EXTENSIBLE_MODULE
+    free(compatability_entries);
+    compatability_entries = NULL;
+#endif
+    while (ereg_head)
+	_unregister_extend(ereg_head);
 }
 
         /*************************
