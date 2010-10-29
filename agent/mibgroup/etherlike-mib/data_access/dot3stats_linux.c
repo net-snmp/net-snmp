@@ -63,7 +63,7 @@ dot3stats_interface_name_list_get (struct ifname *list_head, int *retval)
             DEBUGMSGTL(("access:dot3StatsTable:interface_name_list_get",
                         "memory allocation failed\n"));
             snmp_log (LOG_ERR, "access:dot3StatsTable,interface_name_list_get, memory allocation failed\n");
-            interface_name_list_free (list_head);
+            dot3stats_interface_name_list_free (list_head);
             freeifaddrs(addrs);
             *retval = -2;
             return NULL;
