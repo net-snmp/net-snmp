@@ -130,7 +130,6 @@ void netsnmp_swinst_container_free_items(netsnmp_container *container)
     CONTAINER_CLEAR(container,
                     (netsnmp_container_obj_func*)netsnmp_swinst_entry_free_cb,
                     NULL);
-    CONTAINER_FREE(container);
 }
 
 
