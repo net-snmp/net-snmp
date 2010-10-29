@@ -111,10 +111,12 @@ netsnmp_get_table_handler(netsnmp_table_registration_info *tabreq)
  */
 void netsnmp_handler_owns_table_info(netsnmp_mib_handler *handler)
 {
-    if (handler) {
-        handler->data_clone = (void *(*)(void *)) netsnmp_table_registration_info_clone;
-        handler->data_free = (void(*)(void *)) netsnmp_table_registration_info_free;
-    }
+    netsnmp_assert(handler);
+    netsnmp_assert(handler->myvoid);
+    handler->data_clone
+	= (void *(*)(void *)) netsnmp_table_registration_info_clone;
+    handler->data_free
+	= (void (*)(void *)) netsnmp_table_registration_info_free;
 }
 
 /** Configures a handler such that table registration information is freed by
