@@ -234,6 +234,9 @@ netsnmp_cache_free(netsnmp_cache *cache)
     if (cache->valid)
         _cache_free(cache);
 
+    if (cache->timestamp)
+	free(cache->timestamp);
+
     if (cache->rootoid)
         free(cache->rootoid);
 
@@ -628,8 +631,6 @@ _cache_free( netsnmp_cache *cache )
         cache->free_cache(cache, cache->magic);
         cache->valid = 0;
     }
-    SNMP_FREE(cache->timestamp);
-    SNMP_FREE(cache->rootoid);
 }
 
 static int
