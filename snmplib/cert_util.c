@@ -2520,7 +2520,7 @@ netsnmp_cert_map_container_create(int with_fp)
     fp = netsnmp_container_find("cert2sn_fp:binary_array");
     if (NULL == fp) {
         snmp_log(LOG_ERR,
-                 "error creating sub-containter for tlstmCertToTSNTable\n");
+                 "error creating sub-container for tlstmCertToTSNTable\n");
         CONTAINER_FREE(chain_map);
         return NULL;
     }
@@ -2832,7 +2832,7 @@ _init_tlstmParams(void)
     _tlstmParams = netsnmp_container_find("tlstmParams:string");
     if (NULL == _tlstmParams)
         snmp_log(LOG_ERR,
-                 "error creating sub-containter for tlstmParamsTable\n");
+                 "error creating sub-container for tlstmParamsTable\n");
     else
         _tlstmParams->container_name = strdup("tlstmParams");
 
@@ -3034,7 +3034,7 @@ _init_tlstmAddr(void)
     _tlstmAddr = netsnmp_container_find("tlstmAddr:string");
     if (NULL == _tlstmAddr)
         snmp_log(LOG_ERR,
-                 "error creating sub-containter for tlstmAddrTable\n");
+                 "error creating sub-container for tlstmAddrTable\n");
     else
         _tlstmAddr->container_name = strdup("tlstmAddr");
 

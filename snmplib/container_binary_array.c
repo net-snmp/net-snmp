@@ -761,7 +761,7 @@ _ba_iterator_position(binary_array_iterator *it, size_t pos)
         return NULL;
     }
     else if(pos >= t->count) {
-        DEBUGMSGTL(("container:iterator", "end of containter\n"));
+        DEBUGMSGTL(("container:iterator", "end of container\n"));
         return NULL;
     }
 
