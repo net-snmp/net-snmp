@@ -246,6 +246,7 @@ netsnmp_swrun_container_free_items(netsnmp_container *container)
     CONTAINER_CLEAR(container,
                     (netsnmp_container_obj_func*)_swrun_entry_release,
                     NULL);
+    CONTAINER_FREE(container);
 }
 
 /**---------------------------------------------------------------------*/

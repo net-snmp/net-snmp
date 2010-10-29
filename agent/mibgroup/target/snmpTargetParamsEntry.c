@@ -292,6 +292,13 @@ init_snmpTargetParamsEntry(void)
                            store_snmpTargetParamsEntry, NULL);
 }                               /*  init_snmpTargetParmsEntry  */
 
+void
+shutdown_snmpTargetParamsEntry(void)
+{
+    while (aPTable)
+	snmpTargetParamTable_remFromList(aPTable, &aPTable);
+}
+
 
 int
 snmpTargetParams_addParamName(struct targetParamTable_struct *entry,
