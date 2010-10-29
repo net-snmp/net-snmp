@@ -1844,12 +1844,18 @@ _cache_load(netsnmp_cache * cache, void *vmagic)
 static void
 _cache_free(netsnmp_cache * cache, void *magic)
 {
+    netsnmp_container *container;
+
     DEBUGMSGTL(("internal:ifTable:_cache_free", "called\n"));
 
     if ((NULL == cache) || (NULL == cache->magic)) {
         snmp_log(LOG_ERR, "invalid cache in ifTable_cache_free\n");
         return;
     }
+
+    container = (netsnmp_container *) cache->magic;
+
+    _container_free(container);
 }                               /* _cache_free */
 
 /**
@@ -1944,9 +1950,6 @@ _ifTable_container_shutdown(ifTable_interface_ctx * if_ctx)
     ifTable_container_shutdown(if_ctx->container);
 
     _container_free(if_ctx->container);
-
-    netsnmp_cache_remove(if_ctx->cache);
-    netsnmp_cache_free(if_ctx->cache);
 
 }                               /* _ifTable_container_shutdown */
 

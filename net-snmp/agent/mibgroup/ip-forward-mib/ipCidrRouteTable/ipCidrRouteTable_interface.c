@@ -2224,7 +2224,6 @@ _container_free(netsnmp_container *container)
     CONTAINER_CLEAR(container,
                     (netsnmp_container_obj_func *) _container_item_free,
                     NULL);
-    CONTAINER_FREE(container);
 }                               /* _container_free */
 
 /**
