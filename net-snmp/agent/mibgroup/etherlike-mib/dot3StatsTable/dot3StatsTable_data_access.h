@@ -66,6 +66,11 @@ extern          "C" {
     int             dot3StatsTable_row_prep(dot3StatsTable_rowreq_ctx *
                                             rowreq_ctx);
 
+    void            interface_sysclassnet_dot3stats_get
+        (dot3StatsTable_rowreq_ctx * rowreq_ctx, const char *name);
+    void            interface_dot3stats_get_errorcounters
+        (dot3StatsTable_rowreq_ctx * rowreq_ctx, const char *name);
+
 
 
 #ifdef __cplusplus
