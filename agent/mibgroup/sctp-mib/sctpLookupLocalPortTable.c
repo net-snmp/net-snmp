@@ -11,6 +11,7 @@
 #include "sctpLookupLocalPortTable.h"
 
 static netsnmp_container *sctpLookupLocalPortTable_container;
+static netsnmp_table_registration_info *table_info;
 
 /** Initializes the sctpLookupLocalPortTable module */
 void
@@ -25,8 +26,7 @@ init_sctpLookupLocalPortTable(void)
 void
 shutdown_sctpLookupLocalPortTable(void)
 {
-    sctpLookupLocalPortTable_container_clear
-        (sctpLookupLocalPortTable_container);
+    shutdown_table_sctpLookupLocalPortTable();
 }
 
 /** Initialize the sctpLookupLocalPortTable table by defining its contents and how it's structured */
@@ -40,7 +40,6 @@ initialize_table_sctpLookupLocalPortTable(void)
     netsnmp_handler_registration *reg = NULL;
     netsnmp_mib_handler *handler = NULL;
     netsnmp_container *container = NULL;
-    netsnmp_table_registration_info *table_info = NULL;
 
     reg =
         netsnmp_create_handler_registration("sctpLookupLocalPortTable",
@@ -127,6 +126,16 @@ initialize_table_sctpLookupLocalPortTable(void)
         netsnmp_handler_registration_free(reg);
 }
 
+void
+shutdown_table_sctpLookupLocalPortTable(void)
+{
+    if (table_info) {
+	netsnmp_table_registration_info_free(table_info);
+	table_info = NULL;
+    }
+    sctpLookupLocalPortTable_container_clear
+        (sctpLookupLocalPortTable_container);
+}
 
 /** handles requests for the sctpLookupLocalPortTable table */
 int

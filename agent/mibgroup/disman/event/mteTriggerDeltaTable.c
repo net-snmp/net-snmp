@@ -48,7 +48,7 @@ init_mteTriggerDeltaTable(void)
 
     /* Register this using the (common) trigger_table_data container */
     netsnmp_tdata_register(reg, trigger_table_data, table_info);
-    netsnmp_registration_owns_table_info(reg);
+    netsnmp_handler_owns_table_info(reg->handler->next);
     DEBUGMSGTL(("disman:event:init", "Trigger Delta Table\n"));
 }
 

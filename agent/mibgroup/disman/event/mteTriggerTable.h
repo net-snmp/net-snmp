@@ -11,6 +11,7 @@ config_require(utilities/iquery)
  * function declarations 
  */
 void            init_mteTriggerTable(void);
+void            shutdown_mteTriggerTable(void);
 Netsnmp_Node_Handler mteTriggerTable_handler;
 
 /*

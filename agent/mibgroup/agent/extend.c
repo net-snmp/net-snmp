@@ -126,6 +126,7 @@ _register_extend( oid *base, size_t len )
                 "nsExtendConfigTable", handle_nsExtendConfigTable, 
                 oid_buf, len+1, HANDLER_CAN_RWRITE);
     netsnmp_register_table_data( reg, dinfo, tinfo );
+    netsnmp_handler_owns_table_info(reg->handler->next);
     eptr->reg[0] = reg;
 
         /*
@@ -143,6 +144,7 @@ _register_extend( oid *base, size_t len )
                 "nsExtendOut1Table", handle_nsExtendOutput1Table, 
                 oid_buf, len+1, HANDLER_CAN_RONLY);
     netsnmp_register_table_data( reg, dinfo, tinfo );
+    netsnmp_handler_owns_table_info(reg->handler->next);
     eptr->reg[1] = reg;
 
         /*
@@ -162,6 +164,7 @@ _register_extend( oid *base, size_t len )
                 "nsExtendOut2Table", handle_nsExtendOutput2Table, 
                 oid_buf, len+1, HANDLER_CAN_RONLY);
     netsnmp_register_table( reg, tinfo );
+    netsnmp_handler_owns_table_info(reg->handler->next);
     eptr->reg[2] = reg;
 
         /*

@@ -32,8 +32,15 @@ init_hrSWRunPerfTable(void)
     initialize_table_hrSWRunPerfTable();
 }
 
+void
+shutdown_hrSWRunPerfTable(void)
+{
+    shutdown_table_hrSWRunPerfTable();
+}
+
 extern oid      hrSWRunTable_oid[];
 extern size_t   hrSWRunTable_oid_len;
+static netsnmp_table_registration_info *table_info;
 
 /** Initialize the hrSWRunPerfTable table by defining its contents and how it's structured */
 void
@@ -45,7 +52,6 @@ initialize_table_hrSWRunPerfTable(void)
         OID_LENGTH(hrSWRunPerfTable_oid);
     netsnmp_handler_registration *reg;
     netsnmp_mib_handler *handler = NULL;
-    netsnmp_table_registration_info *table_info = NULL;
 
     reg =
         netsnmp_create_handler_registration("hrSWRunPerfTable",
@@ -125,6 +131,15 @@ initialize_table_hrSWRunPerfTable(void)
 
     if (reg) 
         netsnmp_handler_registration_free(reg);
+}
+
+void
+shutdown_table_hrSWRunPerfTable(void)
+{
+    if (table_info) {
+	netsnmp_table_registration_info_free(table_info);
+	table_info = NULL;
+    }
 }
 
 /** handles requests for the hrSWRunPerfTable table */

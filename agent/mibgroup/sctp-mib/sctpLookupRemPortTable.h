@@ -13,6 +13,7 @@
 void            init_sctpLookupRemPortTable(void);
 void            shutdown_sctpLookupRemPortTable(void);
 void            initialize_table_sctpLookupRemPortTable(void);
+void            shutdown_table_sctpLookupRemPortTable(void);
 Netsnmp_Node_Handler sctpLookupRemPortTable_handler;
 
 /*

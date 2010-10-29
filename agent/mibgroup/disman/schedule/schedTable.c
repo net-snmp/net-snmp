@@ -13,6 +13,8 @@
 #include "disman/schedule/schedCore.h"
 #include "disman/schedule/schedTable.h"
 
+static netsnmp_table_registration_info *table_info;
+
 /** Initializes the schedTable module */
 void
 init_schedTable(void)
@@ -20,7 +22,6 @@ init_schedTable(void)
     static oid      schedTable_oid[] = { 1, 3, 6, 1, 2, 1, 63, 1, 2 };
     size_t          schedTable_oid_len = OID_LENGTH(schedTable_oid);
     netsnmp_handler_registration    *reg;
-    netsnmp_table_registration_info *table_info;
 
     DEBUGMSGTL(("disman:schedule:init", "Initializing table\n"));
     /*
@@ -48,6 +49,14 @@ init_schedTable(void)
     netsnmp_tdata_register(reg, schedule_table, table_info);
 }
 
+void
+shutdown_schedTable(void)
+{
+    if (table_info) {
+	netsnmp_table_registration_info_free(table_info);
+	table_info = NULL;
+    }
+}
 
 /** handles requests for the schedTable table */
 int

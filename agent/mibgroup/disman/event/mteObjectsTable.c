@@ -12,6 +12,8 @@
 #include "disman/event/mteObjects.h"
 #include "disman/event/mteObjectsTable.h"
 
+static netsnmp_table_registration_info *table_info;
+
 /** Initializes the mteObjectsTable module */
 void
 init_mteObjectsTable(void)
@@ -20,7 +22,6 @@ init_mteObjectsTable(void)
     static oid mteObjectsTable_oid[] = { 1, 3, 6, 1, 2, 1, 88, 1, 3, 1 };
     size_t     mteObjectsTable_oid_len = OID_LENGTH(mteObjectsTable_oid);
     netsnmp_handler_registration    *reg;
-    netsnmp_table_registration_info *table_info;
 
     /*
      * Ensure the object table container is available...
@@ -48,7 +49,15 @@ init_mteObjectsTable(void)
 
 
     netsnmp_tdata_register(reg, objects_table_data, table_info);
-    netsnmp_registration_owns_table_info(reg);
+}
+
+void
+shutdown_mteObjectsTable(void)
+{
+    if (table_info) {
+	netsnmp_table_registration_info_free(table_info);
+	table_info = NULL;
+    }
 }
 
 

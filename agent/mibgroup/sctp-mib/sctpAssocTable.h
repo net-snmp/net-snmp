@@ -13,6 +13,7 @@
 void            init_sctpAssocTable(void);
 void            shutdown_sctpAssocTable(void);
 void            initialize_table_sctpAssocTable(void);
+void            shutdown_table_sctpAssocTable(void);
 Netsnmp_Node_Handler sctpAssocTable_handler;
 
 /*

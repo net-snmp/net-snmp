@@ -17,6 +17,7 @@ static int      _cache_load(netsnmp_cache * cache, void *vmagic);
  * content of the sctpAssocTable 
  */
 static netsnmp_container *sctpAssocTable_container;
+static netsnmp_table_registration_info *table_info;
 
 /** Initializes the sctpAssocTable module */
 void
@@ -31,7 +32,7 @@ init_sctpAssocTable(void)
 void
 shutdown_sctpAssocTable(void)
 {
-    sctpAssocTable_container_clear(sctpAssocTable_container);
+    shutdown_table_sctpAssocTable();
 }
 
 /** Initialize the sctpAssocTable table by defining its contents and how it's structured */
@@ -44,7 +45,6 @@ initialize_table_sctpAssocTable(void)
     netsnmp_handler_registration *reg = NULL;
     netsnmp_mib_handler *handler = NULL;
     netsnmp_container *container = NULL;
-    netsnmp_table_registration_info *table_info = NULL;
     netsnmp_cache  *cache = NULL;
 
     reg =
@@ -165,6 +165,17 @@ initialize_table_sctpAssocTable(void)
 
     if (reg)
         netsnmp_handler_registration_free(reg);
+}
+
+void
+shutdown_table_sctpAssocTable(void)
+{
+    if (table_info) {
+	netsnmp_table_registration_info_free(table_info);
+	table_info = NULL;
+    }
+    if (sctpAssocTable_container)
+	sctpAssocTable_container_clear(sctpAssocTable_container);
 }
 
 
