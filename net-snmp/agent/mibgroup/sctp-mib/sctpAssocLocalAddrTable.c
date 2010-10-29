@@ -13,6 +13,7 @@
  * content of the sctpAssocLocalAddrTable 
  */
 static netsnmp_container *sctpAssocLocalAddrTable_container;
+static netsnmp_table_registration_info *table_info;
 
 /** Initializes the sctpAssocLocalAddrTable module */
 void
@@ -27,8 +28,7 @@ init_sctpAssocLocalAddrTable(void)
 void
 shutdown_sctpAssocLocalAddrTable(void)
 {
-    sctpAssocLocalAddrTable_container_clear
-        (sctpAssocLocalAddrTable_container);
+    shutdown_table_sctpAssocLocalAddrTable();
 }
 
 /** Initialize the sctpAssocLocalAddrTable table by defining its contents and how it's structured */
@@ -42,7 +42,6 @@ initialize_table_sctpAssocLocalAddrTable(void)
     netsnmp_handler_registration *reg = NULL;
     netsnmp_mib_handler *handler = NULL;
     netsnmp_container *container = NULL;
-    netsnmp_table_registration_info *table_info = NULL;
 
     reg =
         netsnmp_create_handler_registration("sctpAssocLocalAddrTable",
@@ -129,6 +128,17 @@ initialize_table_sctpAssocLocalAddrTable(void)
 
     if (reg)
         netsnmp_handler_registration_free(reg);
+}
+
+void
+shutdown_table_sctpAssocLocalAddrTable(void)
+{
+    if (table_info) {
+        netsnmp_table_registration_info_free(table_info);
+	table_info = NULL;
+    }
+    sctpAssocLocalAddrTable_container_clear
+        (sctpAssocLocalAddrTable_container);
 }
 
 /** handles requests for the sctpAssocLocalAddrTable table */

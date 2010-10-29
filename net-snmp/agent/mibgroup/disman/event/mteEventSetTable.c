@@ -12,6 +12,7 @@
 #include "disman/event/mteEvent.h"
 #include "disman/event/mteEventSetTable.h"
 
+static netsnmp_table_registration_info *table_info;
 
 /* Initializes the mteEventSetTable module */
 void
@@ -20,7 +21,6 @@ init_mteEventSetTable(void)
     static oid  mteEventSetTable_oid[]   = { 1, 3, 6, 1, 2, 1, 88, 1, 4, 4 };
     size_t      mteEventSetTable_oid_len = OID_LENGTH(mteEventSetTable_oid);
     netsnmp_handler_registration    *reg;
-    netsnmp_table_registration_info *table_info;
 
     /*
      * Ensure the (combined) table container is available...
@@ -48,9 +48,17 @@ init_mteEventSetTable(void)
 
     /* Register this using the (common) event_table_data container */
     netsnmp_tdata_register(reg, event_table_data, table_info);
-    netsnmp_registration_owns_table_info(reg);
     DEBUGMSGTL(("disman:event:init", "Event Set Table container (%p)\n",
                                       event_table_data));
+}
+
+void
+shutdown_mteEventSetTable(void)
+{
+    if (table_info) {
+	netsnmp_table_registration_info_free(table_info);
+	table_info = NULL;
+    }
 }
 
 

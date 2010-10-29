@@ -8,6 +8,7 @@ config_add_mib(DISMAN-SCHEDULE-MIB)
  * function declarations 
  */
 void            init_schedTable(void);
+void            shutdown_schedTable(void);
 Netsnmp_Node_Handler schedTable_handler;
 
 /*

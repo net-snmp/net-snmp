@@ -12,6 +12,7 @@
 #include "disman/event/mteTrigger.h"
 #include "disman/event/mteTriggerThresholdTable.h"
 
+static netsnmp_table_registration_info *table_info;
 
 /** Initializes the mteTriggerThresholdTable module */
 void
@@ -20,7 +21,6 @@ init_mteTriggerThresholdTable(void)
     static oid mteTThreshTable_oid[]   = { 1, 3, 6, 1, 2, 1, 88, 1, 2, 6 };
     size_t     mteTThreshTable_oid_len = OID_LENGTH(mteTThreshTable_oid);
     netsnmp_handler_registration    *reg;
-    netsnmp_table_registration_info *table_info;
 
     /*
      * Ensure the (combined) table container is available...
@@ -48,8 +48,16 @@ init_mteTriggerThresholdTable(void)
 
     /* Register this using the (common) trigger_table_data container */
     netsnmp_tdata_register(reg, trigger_table_data, table_info);
-    netsnmp_registration_owns_table_info(reg);
     DEBUGMSGTL(("disman:event:init", "Trigger Threshold Table\n"));
+}
+
+void
+shutdown_mteTriggerThresholdTable(void)
+{
+    if (table_info) {
+	netsnmp_table_registration_info_free(table_info);
+	table_info = NULL;
+    }
 }
 
 
