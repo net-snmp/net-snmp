@@ -328,8 +328,11 @@ fillup_entry_info(netsnmp_arp_entry *entry, struct nlmsghdr *nlmp)
     u_char          *hwaddr;
 
     rtmp = (struct ndmsg *)NLMSG_DATA(nlmp);
-    if (nlmp->nlmsg_type != RTM_NEWNEIGH && nlmp->nlmsg_type != RTM_DELNEIGH)
+    if (nlmp->nlmsg_type != RTM_NEWNEIGH && nlmp->nlmsg_type != RTM_DELNEIGH) {
+	DEBUGMSGTL(("access:arp:load_v6", "Wrong Netlink message type %d\n",
+		    nlmp->nlmsg_type));
         return -1;
+    }
 
     if(rtmp->ndm_state != NUD_NOARP) {
        memset(tb, 0, sizeof(struct rtattr *) * (NDA_MAX + 1));
@@ -342,8 +345,11 @@ fillup_entry_info(netsnmp_arp_entry *entry, struct nlmsghdr *nlmp)
                   tb[rta->rta_type] = rta;
               rta = RTA_NEXT(rta,length);
        }
-       if(length)
+       if (length) {
+          DEBUGMSGTL(("access:arp:load_v6", "Received uneven number of"
+                      " messages - %d bytes remaining\n", length));
           return -1;
+       }
        /* Fill up the index
        */
        entry->if_index = rtmp->ndm_ifindex;
