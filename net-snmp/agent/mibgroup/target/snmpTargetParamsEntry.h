@@ -53,6 +53,7 @@
  */
 
      void            init_snmpTargetParamsEntry(void);
+     void            shutdown_snmpTargetParamsEntry(void);
      int             store_snmpTargetParamsEntry(int majorID, int minorID,
                                                  void *serverarg,
                                                  void *clientarg);
