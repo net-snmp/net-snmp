@@ -20,7 +20,6 @@
 .\" SOFTWARE.
 .\" ******************************************************************/
 .TH SNMP_API 3 "28 Mar 2002" VVERSIONINFO "Net-SNMP"
-.UC 5
 .SH NAME
 snmp_sess_init, snmp_open, snmp_send, snmp_free_pdu, snmp_select_info, snmp_read, snmp_timeout, snmp_close, snmp_perror, snmp_sess_perror, snmp_error, snmp_api_errstring \- send and receive SNMP messages
 .SH SYNOPSIS

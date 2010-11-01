@@ -28,7 +28,6 @@
 .\" distributed with the Net-SNMP package.
 .\" ******************************************************************/
 .TH SNMPTEST 1 "06 Sep 2003" VVERSIONINFO "Net-SNMP"
-.UC 4
 .SH NAME
 snmptest - communicates with a network entity using SNMP requests
 .SH SYNOPSIS

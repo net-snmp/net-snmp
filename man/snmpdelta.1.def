@@ -8,7 +8,6 @@
 .\" distributed with the Net-SNMP package.
 .\" ******************************************************************/
 .TH SNMPDELTA 1 "25 Jul 2003" VVERSIONINFO "Net-SNMP"
-.UC 4
 .SH NAME
 snmpdelta \- Monitor delta differences in SNMP Counter values
 .SH SYNOPSIS

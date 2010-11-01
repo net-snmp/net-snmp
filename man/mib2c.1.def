@@ -8,7 +8,6 @@
 .\" distributed with the Net-SNMP package.
 .\" ******************************************************************/
 .TH MIB2C 1 "1 Sep 2004" VVERSIONINFO "Net-SNMP"
-.UC 4
 .SH NAME
 mib2c -- generate template code for extending the agent
 .SH SYNOPSIS

@@ -20,7 +20,6 @@
 .\" SOFTWARE.
 .\" ******************************************************************/
 .TH SNMPGETNEXT 1 "04 Mar 2002" VVERSIONINFO "Net-SNMP"
-.UC 4
 .SH NAME
 snmpgetnext - communicates with a network entity using SNMP GETNEXT requests
 .SH SYNOPSIS

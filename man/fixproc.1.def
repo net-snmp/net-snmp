@@ -1,5 +1,4 @@
-.TH fixproc "1" "16 Nov 2006" VVERSIONINFO "Net-SNMP"
-.UC 5
+.TH fixproc 1 "16 Nov 2006" VVERSIONINFO "Net-SNMP"
 .SH NAME
 fixproc - Fixes a process by performing the specified action.
 .SH SYNOPSIS

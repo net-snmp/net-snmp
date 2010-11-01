@@ -1,5 +1,4 @@
 .TH traptoemail "1" "16 Nov 2006" VVERSIONINFO "Net-SNMP"
-.UC 5
 .SH NAME
 traptoemail - snmptrapd handler script to convert snmp traps into emails
 .SH SYNOPSIS

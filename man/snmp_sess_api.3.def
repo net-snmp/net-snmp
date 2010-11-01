@@ -20,7 +20,6 @@
 .\" SOFTWARE.
 .\" ******************************************************************/
 .TH SNMP_SESS_API 3 "12 Jul 2007" VVERSIONINFO "Net-SNMP"
-.UC 5
 .SH NAME
 snmp_sess_init, snmp_sess_open, snmp_sess_session,
 snmp_sess_send, snmp_sess_async_send,

@@ -20,7 +20,6 @@
 .\" SOFTWARE.
 .\" ******************************************************************/
 .TH VARIABLES 5 "08 Feb 2002" VVERSIONINFO "Net-SNMP"
-.UC 4
 .SH NAME
     variables - Format of specifying variable names to SNMP tools.
 .SH SYNOPSIS

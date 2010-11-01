@@ -20,7 +20,6 @@
 .\" SOFTWARE.
 .\" ******************************************************************/
 .TH SNMPGET 1 "01 May 2002" VVERSIONINFO "Net-SNMP"
-.UC 4
 .SH NAME
 snmpget - communicates with a network entity using SNMP GET requests
 .SH SYNOPSIS
