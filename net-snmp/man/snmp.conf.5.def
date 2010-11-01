@@ -1,4 +1,4 @@
-.TH SNMP.CONF 5 "29 Jun 2005" VVERSIONINFO "Net-SNMP"
+.TH SNMP.CONF 5 "21 Feb 2007" VVERSIONINFO "Net-SNMP"
 .UC 4
 .SH NAME
 snmp.conf - configuration files for the Net-SNMP applications

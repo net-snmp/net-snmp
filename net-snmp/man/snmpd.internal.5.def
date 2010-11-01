@@ -1,4 +1,4 @@
-.TH SNMPD.INTERNAL 5 "08 Feb 2002" VVERSIONINFO "Net-SNMP"
+.TH SNMPD.INTERNAL 5 "06 Dec 2005" VVERSIONINFO "Net-SNMP"
 .UC 4
 .SH NAME
 snmpd.internal - internal configuration of the Net-SNMP agent

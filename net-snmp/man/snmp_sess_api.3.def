@@ -19,7 +19,7 @@
 .\" ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS
 .\" SOFTWARE.
 .\" ******************************************************************/
-.TH SNMP_SESS_API 3 "07 Mar 2002" VVERSIONINFO "Net-SNMP"
+.TH SNMP_SESS_API 3 "12 Jul 2007" VVERSIONINFO "Net-SNMP"
 .UC 5
 .SH NAME
 snmp_sess_init, snmp_sess_open, snmp_sess_session,

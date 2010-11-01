@@ -20,7 +20,7 @@
 .\" Use is subject to license terms specified in the COPYING file
 .\" distributed with the Net-SNMP package.
 .\" ******************************************************************/
-.TH SNMPTABLE 1 "25 Jul 2003" VVERSIONINFO "Net-SNMP"
+.TH SNMPTABLE 1 "06 Sep 2003" VVERSIONINFO "Net-SNMP"
 .UC 4
 .SH NAME
 snmptable - retrieve an SNMP table and display it in tabular form

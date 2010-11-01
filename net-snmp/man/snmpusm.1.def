@@ -1,4 +1,4 @@
-.TH SNMPUSM 1 "22 Oct 2005" VVERSIONINFO "Net-SNMP"
+.TH SNMPUSM 1 "28 Oct 2005" VVERSIONINFO "Net-SNMP"
 .UC 4
 .SH NAME
 snmpusm - creates and maintains SNMPv3 users on a network entity
