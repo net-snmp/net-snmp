@@ -7,7 +7,7 @@
 .\" Use is subject to license terms specified in the COPYING file
 .\" distributed with the Net-SNMP package.
 .\" ******************************************************************/
-.TH MIB2C 1 "25 Jul 2003" VVERSIONINFO "Net-SNMP"
+.TH MIB2C 1 "1 Sep 2004" VVERSIONINFO "Net-SNMP"
 .UC 4
 .SH NAME
 mib2c -- generate template code for extending the agent

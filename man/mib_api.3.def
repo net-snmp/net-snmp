@@ -1,4 +1,4 @@
-.TH MIB_API 3 "06 Mar 2002" VVERSIONINFO "Net-SNMP"
+.TH MIB_API 3 "22 Apr 2009" VVERSIONINFO "Net-SNMP"
 .UC 5
 .SH NAME
 init_mib, add_mibdir, init_mib_internals,

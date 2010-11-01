@@ -1,4 +1,4 @@
-.TH READ_CONFIG 3 "07 Mar 2002" "" "Net-SNMP"
+.TH READ_CONFIG 3 "23 Feb 2003" "" "Net-SNMP"
 .UC 5
 .SH NAME
 register_config_handler, register_premib_handler
