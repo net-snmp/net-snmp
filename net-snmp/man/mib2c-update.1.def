@@ -1,5 +1,4 @@
 .TH mib2c-update "1" "16 Nov 2006" VVERSIONINFO "Net-SNMP"
-.UC 5
 .SH NAME
 mib2c-update - script to merge custom code into updated mib2c code
 .SH SYNOPSIS
