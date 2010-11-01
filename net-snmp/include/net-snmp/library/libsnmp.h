@@ -76,8 +76,6 @@ extern          "C" {
 
 #ifdef UCD_SNMP_LIBRARY
 
-#define snmp_parse cmu_snmp_parse
-
 #include <ucd-snmp/asn1.h>
 #include <ucd-snmp/snmp_api.h>
 #include <ucd-snmp/snmp_impl.h>

@@ -84,7 +84,6 @@ INCLUDESUBDIRHEADERS=README \
 	tools.h \
 	transform_oids.h \
 	types.h \
-        cmu_compat.h \
         getopt.h \
         lcd_time.h \
         mt_support.h \
@@ -153,7 +152,7 @@ CSRCS=	snmp_client.c mib.c parse.c snmp_api.c snmp.c 		\
 	snmp_secmod.c @security_src_list@ snmp_version.c        \
 	check_varbind.c container.c container_binary_array.c	\
 	container_null.c container_list_ssll.c container_iterator.c \
-	cmu_compat.c ucd_compat.c                               \
+	ucd_compat.c                               \
 	snmp_openssl.c @other_src_list@ @crypto_files_c@
 
 OBJS=	snmp_client.o mib.o parse.o snmp_api.o snmp.o 		\
@@ -170,7 +169,7 @@ OBJS=	snmp_client.o mib.o parse.o snmp_api.o snmp.o 		\
 	snmp_secmod.o @security_obj_list@ snmp_version.o        \
 	check_varbind.o container.o container_binary_array.o	\
 	container_null.o container_list_ssll.o container_iterator.o \
-	cmu_compat.o ucd_compat.o                               \
+	ucd_compat.o                               \
         snmp_openssl.o @crypto_files_o@ @other_objs_list@ @LIBOBJS@
 
 LOBJS=	snmp_client.lo mib.lo parse.lo snmp_api.lo snmp.lo 	\
@@ -187,7 +186,7 @@ LOBJS=	snmp_client.lo mib.lo parse.lo snmp_api.lo snmp.lo 	\
 	snmp_secmod.lo @security_lobj_list@ snmp_version.lo     \
 	check_varbind.lo container.lo container_binary_array.lo	\
 	container_null.lo container_list_ssll.lo container_iterator.lo \
-	cmu_compat.lo ucd_compat.lo                             \
+	ucd_compat.lo                             \
         snmp_openssl.lo @crypto_files_lo@ @other_lobjs_list@ @LTLIBOBJS@
 
 # just in case someone wants to remove libtool, change this to OBJS.
