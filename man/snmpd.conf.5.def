@@ -1,4 +1,4 @@
-.TH SNMPD.CONF 5 "08 Feb 2002" VVERSIONINFO "Net-SNMP"
+.TH SNMPD.CONF 5 "13 May 2009" VVERSIONINFO "Net-SNMP"
 .UC 4
 .SH NAME
 snmpd.conf - configuration file for the Net-SNMP SNMP agent
