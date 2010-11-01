@@ -19,7 +19,7 @@
 .\" ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS
 .\" SOFTWARE.
 .\" ******************************************************************/
-.TH SNMPWALK 1 "08 Feb 2002" VVERSIONINFO "Net-SNMP"
+.TH SNMPWALK 1 "28 May 2007" VVERSIONINFO "Net-SNMP"
 .UC 4
 .SH NAME
 snmpwalk - retrieve a subtree of management values using SNMP GETNEXT requests

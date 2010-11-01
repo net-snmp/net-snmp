@@ -19,7 +19,7 @@
 .\" ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS
 .\" SOFTWARE.
 .\" ******************************************************************/
-.TH SNMPBULKWALK 1 "17 Jun 1998" "" "Net-SNMP"
+.TH SNMPBULKWALK 1 "01 May 2002" "" "Net-SNMP"
 .UC 4
 .SH NAME
 snmpbulkwalk - retrieve a subtree of management values using SNMP GETBULK requests

@@ -1,4 +1,4 @@
-.TH SNMPD.EXAMPLES 5 "05 Dec 2005" VVERSIONINFO "Net-SNMP"
+.TH SNMPD.EXAMPLES 5 "13 Oct 2006" VVERSIONINFO "Net-SNMP"
 .UC 4
 .SH NAME
 snmpd.examples - example configuration for the Net-SNMP agent
