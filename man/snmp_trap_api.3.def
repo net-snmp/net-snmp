@@ -1,5 +1,4 @@
 .TH SNMP_TRAP_API 3 "29 Sep 2003" VVERSIONINFO "Net-SNMP"
-.UC 5
 .SH NAME
 send_easy_trap, send_trap_vars, send_v2trap - send TRAPs or INFORMs from a Net-SNMP MIB module
 .SH SYNOPSIS

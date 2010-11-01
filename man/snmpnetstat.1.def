@@ -59,7 +59,6 @@
 .\" distributed with the Net-SNMP package.
 .\" ******************************************************************/
 .TH SNMPNETSTAT 1 "20 Jan 2010" VVERSIONINFO "Net-SNMP"
-.UC 5
 .SH NAME
 snmpnetstat \- display networking status and configuration information from a network entity via SNMP
 .SH SYNOPSIS
