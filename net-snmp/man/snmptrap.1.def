@@ -20,7 +20,6 @@
 .\" SOFTWARE.
 .\" ******************************************************************/
 .TH SNMPTRAP 1 "19 Jun 2003" VVERSIONINFO "Net-SNMP"
-.UC 4
 .SH NAME
 snmptrap, snmpinform - sends an SNMP notification to a manager
 .SH SYNOPSIS
