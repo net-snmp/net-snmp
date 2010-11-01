@@ -1,5 +1,4 @@
 .TH CONFIG_API 3 "21 Apr 2009" "" "Net-SNMP"
-.UC 5
 .SH NAME
 register_config_handler, register_premib_handler
 unregister_config_handler, register_mib_handlers, read_configs,

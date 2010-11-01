@@ -28,7 +28,6 @@
 .\" distributed with the Net-SNMP package.
 .\" ******************************************************************/
 .TH SNMPTRANSLATE 1 "20 Jul 2010" VVERSIONINFO "Net-SNMP"
-.UC 4
 .SH NAME
 snmptranslate - translate MIB OID names between numeric and textual forms
 .SH SYNOPSIS

@@ -20,7 +20,6 @@
 .\" SOFTWARE.
 .\" ******************************************************************/
 .TH SNMPWALK 1 "28 May 2007" VVERSIONINFO "Net-SNMP"
-.UC 4
 .SH NAME
 snmpwalk - retrieve a subtree of management values using SNMP GETNEXT requests
 .SH SYNOPSIS

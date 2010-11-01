@@ -1,5 +1,4 @@
 .TH SNMPD 8 "01 Apr 2009" VVERSIONINFO "Net-SNMP"
-.UC 4
 .SH NAME
 snmpd - daemon to respond to SNMP request packets.
 .SH SYNOPSIS

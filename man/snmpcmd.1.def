@@ -28,7 +28,6 @@
 .\" distributed with the Net-SNMP package.
 .\" ******************************************************************/
 .TH SNMPCMD 1 "20 Mar 2009" VVERSIONINFO "Net-SNMP"
-.UC 4
 .SH NAME
 snmpcmd - options and behaviour common to most of the Net-SNMP command-line tools
 .SH SYNOPSIS

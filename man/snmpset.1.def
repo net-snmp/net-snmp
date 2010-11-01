@@ -20,7 +20,6 @@
 .\" SOFTWARE.
 .\" ******************************************************************/
 .TH SNMPSET 1 "19 Jun 2003" VVERSIONINFO "Net-SNMP"
-.UC 4
 .SH NAME
 snmpset - communicates with a network entity using SNMP SET requests
 .SH SYNOPSIS

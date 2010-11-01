@@ -20,7 +20,6 @@
 .\" SOFTWARE.
 .\" ******************************************************************/
 .TH SNMPTRAPD 8 "20 Jul 2010" VVERSIONINFO "Net-SNMP"
-.UC 4
 .SH NAME
 snmptrapd - Receive and log SNMP trap messages.
 .SH SYNOPSIS

@@ -1,5 +1,4 @@
-.TH net-snmp-config "1" "16 Nov 2006" VVERSIONINFO "Net-SNMP"
-.UC 5
+.TH net-snmp-config 1 "16 Nov 2006" VVERSIONINFO "Net-SNMP"
 .SH NAME
 net-snmp-config \- returns information about installed net-snmp libraries and binaries 
 .SH SYNOPSIS
