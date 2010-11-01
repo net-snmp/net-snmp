@@ -52,12 +52,11 @@ SNMPv1 which requires "all or nothing" kinds of requests.
 .PP
 In addition to this option,
 .B snmpget
-.B snmpgetnext
 takes the common options described in the
 .I snmpcmd(1)
 manual page.  
 Note that 
-.B snmpgetnext
+.B snmpget
 REQUIRES an argument specifying the agent to query
 and at least one OID argument, as described in the 
 .I snmpcmd(1)
