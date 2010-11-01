@@ -1064,8 +1064,11 @@ main(int argc, char *argv[])
     SnmpTrapNodeDown();
     DEBUGMSGTL(("snmpd/main", "Bye...\n"));
     snmp_shutdown(app_name);
+#ifdef SHUTDOWN_AGENT_CLEANLY /* broken code */
+    /* these attempt to free all known memory, but result in double frees */
     shutdown_master_agent();
     shutdown_agent();
+#endif
 
     if (!netsnmp_ds_get_boolean(NETSNMP_DS_APPLICATION_ID, 
 				NETSNMP_DS_AGENT_LEAVE_PIDFILE) &&
