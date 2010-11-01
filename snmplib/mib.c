@@ -5968,7 +5968,6 @@ print_subtree_oid_report(FILE * f, struct tree *tree, int count)
 
 /**
  * Converts timeticks to hours, minutes, seconds string.
- * CMU compatible does not show centiseconds.
  *
  * @param timeticks    The timeticks to convert.
  * @param buf          Buffer to write to, has to be at 
@@ -5988,13 +5987,6 @@ char           *
 uptime_string_n(u_long timeticks, char *buf, size_t buflen)
 {
     uptimeString(timeticks, buf, buflen);
-#ifdef CMU_COMPATIBLE
-    {
-    char *cp = strrchr(buf, '.');
-    if (cp)
-        *cp = '\0';
-    }
-#endif
     return buf;
 }
 

@@ -493,9 +493,6 @@
    and are not using the UC-Davis SNMP library. */
 #define UCD_SNMP_LIBRARY 1
 
-/* add in recent CMU library extensions (not complete) */
-#undef CMU_COMPATIBLE
-
 /* final conclusion on nlist usage */
 #if defined(HAVE_NLIST) && defined(HAVE_STRUCT_NLIST_N_VALUE) && !defined(NETSNMP_DONT_USE_NLIST) && defined(HAVE_KMEM) && !defined(NETSNMP_NO_KMEM_USAGE)
 #define NETSNMP_CAN_USE_NLIST

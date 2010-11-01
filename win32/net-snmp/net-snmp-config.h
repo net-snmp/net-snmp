@@ -82,9 +82,6 @@
 /* define if you are using the codeS11 library ...*/
 /* #undef NETSNMP_USE_PKCS11 */
 
-/* add in recent CMU library extensions (not complete) */
-/* #undef CMU_COMPATIBLE */
-
 /* add in recent resource lock functions (not complete) */
 /* #undef NETSNMP_REENTRANT */
 
