@@ -21387,7 +21387,7 @@ esac
 # get version number.
 echo "$as_me:$LINENO: checking for net-snmp version number" >&5
 echo $ECHO_N "checking for net-snmp version number... $ECHO_C" >&6
-VERSION=`grep NetSnmpVersionInfo.*= $srcdir/snmplib/snmp_version.c | sed 's/";.*//;s/.*"//;'`
+VERSION=$PACKAGE_VERSION
 
 # create the release version number....  I'm not sure this is used
 # anywhere any longer.
