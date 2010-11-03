@@ -1107,7 +1107,7 @@ AC_C_INLINE
 
 # get version number.
 AC_MSG_CHECKING([for net-snmp version number])
-VERSION=`grep NetSnmpVersionInfo.*= $srcdir/snmplib/snmp_version.c | sed 's/";.*//;s/.*"//;'`
+VERSION=$PACKAGE_VERSION
 
 # create the release version number....  I'm not sure this is used
 # anywhere any longer.
