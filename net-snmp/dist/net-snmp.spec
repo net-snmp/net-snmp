@@ -10,7 +10,7 @@
 %if 0%{?rhel_version}
 %define rhel %{?rhel_version}
 %else
-%define is_rhel %(grep "Red Hat Enterprise Linux" /etc/redhat-release &>/dev/null && echo 1 || echo 0)
+%define is_rhel %(grep -E "Red Hat Enterprise Linux|CentOS" /etc/redhat-release &>/dev/null && echo 1 || echo 0)
 %if %{is_rhel}
 %define rhel %(sed </etc/redhat-release -e 's/.*release \\(.\\).*/\\1/'  )
 %endif
@@ -105,6 +105,8 @@ Requires: net-snmp = %{epoch}:%{version}, perl
 
 %if 0%{?fedora}%{?rhel}
 Provides: net-snmp-perl
+Provides: perl(SNMP) perl(NetSNMP::OID)
+Provides: perl(NetSNMP::default_store) perl(NetSNMP::agent::default_store)
 Obsoletes: net-snmp-perl
 %endif
 
@@ -231,6 +233,12 @@ rm -rf $RPM_BUILD_ROOT
 echo "No additional verification is done for net-snmp"
 
 %changelog
+* Thu Oct  7 2010 Peter Green <peter.green@az-tek.co.uk>
+- Modified RHEL detection to include CentOS.
+- Added extra "Provides:" to the perlmods package definition;
+  otherwise subsequent package installations that require certain
+  Perl modules try to re-install RHEL/CentOS stock net-snmp
+
 * Tue May  6 2008 Jan Safranek <jsafranek@users.sf.net>
 - remove %{libcurrent}
 - add openssl-devel to build requirements
