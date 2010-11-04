@@ -62,12 +62,6 @@ sparse_table_helper_handler(netsnmp_mib_handler *handler,
  *  @{
  */
 
-static void netsnmp_free_netsnmp_table_registration_info(netsnmp_table_registration_info *tabreq)
-{
-    snmp_free_varbind(tabreq->indexes);
-    free(tabreq);
-}
-
 /** Given a netsnmp_table_registration_info object, creates a table handler.
  *  You can use this table handler by injecting it into a calling
  *  chain.  When the handler gets called, it'll do processing and
@@ -100,7 +94,6 @@ netsnmp_get_table_handler(netsnmp_table_registration_info *tabreq)
     ret = netsnmp_create_handler(TABLE_HANDLER_NAME, table_helper_handler);
     if (ret) {
         ret->myvoid = (void *) tabreq;
-        ret->data_free = (void(*)(void *)) netsnmp_free_netsnmp_table_registration_info;
         tabreq->number_indexes = count_varbinds(tabreq->indexes);
     }
     return ret;
