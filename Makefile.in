@@ -280,7 +280,8 @@ configure_ac = configure.ac \
 	configure.d/config_modules_lib \
 	configure.d/config_os_functions \
 	configure.d/config_os_headers \
-	configure.d/config_os_libs \
+	configure.d/config_os_libs1 \
+	configure.d/config_os_libs2 \
 	configure.d/config_os_misc1 \
 	configure.d/config_os_misc2 \
 	configure.d/config_os_misc3 \
