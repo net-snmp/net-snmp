@@ -16004,8 +16004,7 @@ done
 
 
 # RPM subdirectory path                   (Agent)
-if test "x$with_rpm" != "xno" && \
-        echo " $module_list " | $GREP " host/hr_swinst " > /dev/null; then
+if test "x$with_rpm" != "xno"; then
   for ac_header in rpm/rpmdb.h   rpm/rpmfileutil.h
 do :
   as_ac_Header=`$as_echo "ac_cv_header_$ac_header" | $as_tr_sh`
@@ -18499,6 +18498,801 @@ $as_echo "$as_me: not updating unwritable cache $cache_file" >&6;}
 fi
 rm -f confcache
 # -*- autoconf -*-
+#########################################
+##
+# Checks for libraries that are run
+# before the agent module tests.
+##
+#########################################
+
+
+##
+#   RPM checks
+#
+##
+for ac_header in rpm/rpmlib.h rpm/header.h
+do :
+  as_ac_Header=`$as_echo "ac_cv_header_$ac_header" | $as_tr_sh`
+ac_fn_c_check_header_mongrel "$LINENO" "$ac_header" "$as_ac_Header" "$ac_includes_default"
+if eval test \"x\$"$as_ac_Header"\" = x"yes"; then :
+  cat >>confdefs.h <<_ACEOF
+#define `$as_echo "HAVE_$ac_header" | $as_tr_cpp` 1
+_ACEOF
+
+fi
+
+done
+
+
+ac_fn_c_check_header_mongrel "$LINENO" "rpm/rpmlib.h" "ac_cv_header_rpm_rpmlib_h" "$ac_includes_default"
+if test "x$ac_cv_header_rpm_rpmlib_h" = xyes; then :
+  rpmlib_h=yes
+else
+  rpmlib_h=no
+fi
+
+
+ac_fn_c_check_header_mongrel "$LINENO" "rpm/header.h" "ac_cv_header_rpm_header_h" "$ac_includes_default"
+if test "x$ac_cv_header_rpm_header_h" = xyes; then :
+  rpmheader_h=yes
+else
+  rpmheader_h=no
+fi
+
+
+
+if test "x$rpmheader_h" = "xno" -o "x$rpmlib_h" = "xno" ; then
+  if test "x$with_rpm" = "xyes" ; then
+    as_fn_error $? "Could not find either the RPM header files needed and was specifically asked to use RPM support" "$LINENO" 5
+  else
+    with_rpm=no
+  fi
+fi
+
+#
+# rpm libraries only needed for the host resources mib software
+# installed tables (on linux in particular)
+#
+if test "x$with_rpm" != "xno"; then
+  # ARG.  RPM is a real pain.
+  # FWIW librpm.la, librpmio.la, and libpopt.la have correct dependencies.
+  _rpmlibs=""
+
+  # zlib is required for newer versions of rpm
+  _cppflags="${CPPFLAGS}"
+  _ldflags="${LDFLAGS}"
+
+  # check for zlib
+  if test "x${with_zlib}" != "xno" -a -d "${with_zlib}"; then
+    CPPFLAGS="${CPPFLAGS} -I${with_zlib}/include"
+    LDFLAGS="${LDFLAGS} -L${with_zlib}/lib"
+  fi
+
+  # dunno if this is needed for rpm-4.0.x, earlier probably needs.
+  ac_fn_c_check_header_mongrel "$LINENO" "zlib.h" "ac_cv_header_zlib_h" "$ac_includes_default"
+if test "x$ac_cv_header_zlib_h" = xyes; then :
+
+ { $as_echo "$as_me:${as_lineno-$LINENO}: checking for library containing gzread" >&5
+$as_echo_n "checking for library containing gzread... " >&6; }
+if ${netsnmp_cv_func_gzread__rpmlibs+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  netsnmp_func_search_save_LIBS="$LIBS"
+     netsnmp_target_val="$_rpmlibs"
+          netsnmp_temp_LIBS="${netsnmp_target_val} $LMIBLIBS ${LIBS}"
+     netsnmp_result=no
+     LIBS="${netsnmp_temp_LIBS}"
+     cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+/* Override any GCC internal prototype to avoid an error.
+   Use char because int might match the return type of a GCC
+   builtin and then its argument prototype would still apply.  */
+#ifdef __cplusplus
+extern "C"
+#endif
+char gzread ();
+int
+main ()
+{
+return gzread ();
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_link "$LINENO"; then :
+  netsnmp_result="none required"
+else
+  for netsnmp_cur_lib in z ; do
+              LIBS="-l${netsnmp_cur_lib} ${netsnmp_temp_LIBS}"
+              cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+/* Override any GCC internal prototype to avoid an error.
+   Use char because int might match the return type of a GCC
+   builtin and then its argument prototype would still apply.  */
+#ifdef __cplusplus
+extern "C"
+#endif
+char gzread ();
+int
+main ()
+{
+return gzread ();
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_link "$LINENO"; then :
+  netsnmp_result=-l${netsnmp_cur_lib}
+                   break
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
+          done
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
+     LIBS="${netsnmp_func_search_save_LIBS}"
+     netsnmp_cv_func_gzread__rpmlibs="${netsnmp_result}"
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $netsnmp_cv_func_gzread__rpmlibs" >&5
+$as_echo "$netsnmp_cv_func_gzread__rpmlibs" >&6; }
+ if test "${netsnmp_cv_func_gzread__rpmlibs}" != "no" ; then
+    if test "${netsnmp_cv_func_gzread__rpmlibs}" != "none required" ; then
+       _rpmlibs="${netsnmp_result} ${netsnmp_target_val}"
+    fi
+
+ else
+    CPPFLAGS=${_cppflags} LDFLAGS=${_ldflags}
+ fi
+
+else
+  CPPFLAGS=${_cppflags} LDFLAGS=${_ldflags}
+fi
+
+
+
+  # two variants of bzip2 need checking.
+  if test "x${with_bzip2}" != "xno"; then
+    if test -d "${with_bzip2}"; then
+      CPPFLAGS="${CPPFLAGS} -I${with_bzip2}/include"
+      LDFLAGS="${LDFLAGS} -L${with_bzip2}/lib"
+    fi
+
+ { $as_echo "$as_me:${as_lineno-$LINENO}: checking for library containing bzread" >&5
+$as_echo_n "checking for library containing bzread... " >&6; }
+if ${netsnmp_cv_func_bzread__rpmlibs+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  netsnmp_func_search_save_LIBS="$LIBS"
+     netsnmp_target_val="$_rpmlibs"
+          netsnmp_temp_LIBS="${netsnmp_target_val} $LMIBLIBS ${LIBS}"
+     netsnmp_result=no
+     LIBS="${netsnmp_temp_LIBS}"
+     cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+/* Override any GCC internal prototype to avoid an error.
+   Use char because int might match the return type of a GCC
+   builtin and then its argument prototype would still apply.  */
+#ifdef __cplusplus
+extern "C"
+#endif
+char bzread ();
+int
+main ()
+{
+return bzread ();
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_link "$LINENO"; then :
+  netsnmp_result="none required"
+else
+  for netsnmp_cur_lib in bz2 ; do
+              LIBS="-l${netsnmp_cur_lib} ${netsnmp_temp_LIBS}"
+              cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+/* Override any GCC internal prototype to avoid an error.
+   Use char because int might match the return type of a GCC
+   builtin and then its argument prototype would still apply.  */
+#ifdef __cplusplus
+extern "C"
+#endif
+char bzread ();
+int
+main ()
+{
+return bzread ();
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_link "$LINENO"; then :
+  netsnmp_result=-l${netsnmp_cur_lib}
+                   break
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
+          done
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
+     LIBS="${netsnmp_func_search_save_LIBS}"
+     netsnmp_cv_func_bzread__rpmlibs="${netsnmp_result}"
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $netsnmp_cv_func_bzread__rpmlibs" >&5
+$as_echo "$netsnmp_cv_func_bzread__rpmlibs" >&6; }
+ if test "${netsnmp_cv_func_bzread__rpmlibs}" != "no" ; then
+    if test "${netsnmp_cv_func_bzread__rpmlibs}" != "none required" ; then
+       _rpmlibs="${netsnmp_result} ${netsnmp_target_val}"
+    fi
+
+
+ fi
+
+
+ { $as_echo "$as_me:${as_lineno-$LINENO}: checking for library containing BZ2_bzread" >&5
+$as_echo_n "checking for library containing BZ2_bzread... " >&6; }
+if ${netsnmp_cv_func_BZ2_bzread__rpmlibs+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  netsnmp_func_search_save_LIBS="$LIBS"
+     netsnmp_target_val="$_rpmlibs"
+          netsnmp_temp_LIBS="${netsnmp_target_val} $LMIBLIBS ${LIBS}"
+     netsnmp_result=no
+     LIBS="${netsnmp_temp_LIBS}"
+     cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+/* Override any GCC internal prototype to avoid an error.
+   Use char because int might match the return type of a GCC
+   builtin and then its argument prototype would still apply.  */
+#ifdef __cplusplus
+extern "C"
+#endif
+char BZ2_bzread ();
+int
+main ()
+{
+return BZ2_bzread ();
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_link "$LINENO"; then :
+  netsnmp_result="none required"
+else
+  for netsnmp_cur_lib in bz2 ; do
+              LIBS="-l${netsnmp_cur_lib} ${netsnmp_temp_LIBS}"
+              cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+/* Override any GCC internal prototype to avoid an error.
+   Use char because int might match the return type of a GCC
+   builtin and then its argument prototype would still apply.  */
+#ifdef __cplusplus
+extern "C"
+#endif
+char BZ2_bzread ();
+int
+main ()
+{
+return BZ2_bzread ();
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_link "$LINENO"; then :
+  netsnmp_result=-l${netsnmp_cur_lib}
+                   break
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
+          done
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
+     LIBS="${netsnmp_func_search_save_LIBS}"
+     netsnmp_cv_func_BZ2_bzread__rpmlibs="${netsnmp_result}"
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $netsnmp_cv_func_BZ2_bzread__rpmlibs" >&5
+$as_echo "$netsnmp_cv_func_BZ2_bzread__rpmlibs" >&6; }
+ if test "${netsnmp_cv_func_BZ2_bzread__rpmlibs}" != "no" ; then
+    if test "${netsnmp_cv_func_BZ2_bzread__rpmlibs}" != "none required" ; then
+       _rpmlibs="${netsnmp_result} ${netsnmp_target_val}"
+    fi
+
+
+ fi
+
+  fi
+
+  # two variants of db1 need checking.
+
+ { $as_echo "$as_me:${as_lineno-$LINENO}: checking for library containing dbopen" >&5
+$as_echo_n "checking for library containing dbopen... " >&6; }
+if ${netsnmp_cv_func_dbopen__rpmlibs+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  netsnmp_func_search_save_LIBS="$LIBS"
+     netsnmp_target_val="$_rpmlibs"
+          netsnmp_temp_LIBS="${netsnmp_target_val} $LMIBLIBS ${LIBS}"
+     netsnmp_result=no
+     LIBS="${netsnmp_temp_LIBS}"
+     cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+/* Override any GCC internal prototype to avoid an error.
+   Use char because int might match the return type of a GCC
+   builtin and then its argument prototype would still apply.  */
+#ifdef __cplusplus
+extern "C"
+#endif
+char dbopen ();
+int
+main ()
+{
+return dbopen ();
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_link "$LINENO"; then :
+  netsnmp_result="none required"
+else
+  for netsnmp_cur_lib in db1 db ; do
+              LIBS="-l${netsnmp_cur_lib} ${netsnmp_temp_LIBS}"
+              cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+/* Override any GCC internal prototype to avoid an error.
+   Use char because int might match the return type of a GCC
+   builtin and then its argument prototype would still apply.  */
+#ifdef __cplusplus
+extern "C"
+#endif
+char dbopen ();
+int
+main ()
+{
+return dbopen ();
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_link "$LINENO"; then :
+  netsnmp_result=-l${netsnmp_cur_lib}
+                   break
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
+          done
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
+     LIBS="${netsnmp_func_search_save_LIBS}"
+     netsnmp_cv_func_dbopen__rpmlibs="${netsnmp_result}"
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $netsnmp_cv_func_dbopen__rpmlibs" >&5
+$as_echo "$netsnmp_cv_func_dbopen__rpmlibs" >&6; }
+ if test "${netsnmp_cv_func_dbopen__rpmlibs}" != "no" ; then
+    if test "${netsnmp_cv_func_dbopen__rpmlibs}" != "none required" ; then
+       _rpmlibs="${netsnmp_result} ${netsnmp_target_val}"
+    fi
+
+
+ fi
+
+
+  # two variants of db3 need checking.
+
+ { $as_echo "$as_me:${as_lineno-$LINENO}: checking for library containing db_create" >&5
+$as_echo_n "checking for library containing db_create... " >&6; }
+if ${netsnmp_cv_func_db_create__rpmlibs+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  netsnmp_func_search_save_LIBS="$LIBS"
+     netsnmp_target_val="$_rpmlibs"
+          netsnmp_temp_LIBS="${netsnmp_target_val} $LMIBLIBS ${LIBS}"
+     netsnmp_result=no
+     LIBS="${netsnmp_temp_LIBS}"
+     cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+/* Override any GCC internal prototype to avoid an error.
+   Use char because int might match the return type of a GCC
+   builtin and then its argument prototype would still apply.  */
+#ifdef __cplusplus
+extern "C"
+#endif
+char db_create ();
+int
+main ()
+{
+return db_create ();
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_link "$LINENO"; then :
+  netsnmp_result="none required"
+else
+  for netsnmp_cur_lib in db-3.1 db-3.0 ; do
+              LIBS="-l${netsnmp_cur_lib} ${netsnmp_temp_LIBS}"
+              cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+/* Override any GCC internal prototype to avoid an error.
+   Use char because int might match the return type of a GCC
+   builtin and then its argument prototype would still apply.  */
+#ifdef __cplusplus
+extern "C"
+#endif
+char db_create ();
+int
+main ()
+{
+return db_create ();
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_link "$LINENO"; then :
+  netsnmp_result=-l${netsnmp_cur_lib}
+                   break
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
+          done
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
+     LIBS="${netsnmp_func_search_save_LIBS}"
+     netsnmp_cv_func_db_create__rpmlibs="${netsnmp_result}"
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $netsnmp_cv_func_db_create__rpmlibs" >&5
+$as_echo "$netsnmp_cv_func_db_create__rpmlibs" >&6; }
+ if test "${netsnmp_cv_func_db_create__rpmlibs}" != "no" ; then
+    if test "${netsnmp_cv_func_db_create__rpmlibs}" != "none required" ; then
+       _rpmlibs="${netsnmp_result} ${netsnmp_target_val}"
+    fi
+
+
+ fi
+
+
+  # rpm-3.0.5 and later needs popt.
+
+ { $as_echo "$as_me:${as_lineno-$LINENO}: checking for library containing poptParseArgvString" >&5
+$as_echo_n "checking for library containing poptParseArgvString... " >&6; }
+if ${netsnmp_cv_func_poptParseArgvString__rpmlibs+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  netsnmp_func_search_save_LIBS="$LIBS"
+     netsnmp_target_val="$_rpmlibs"
+          netsnmp_temp_LIBS="${netsnmp_target_val} $LMIBLIBS ${LIBS}"
+     netsnmp_result=no
+     LIBS="${netsnmp_temp_LIBS}"
+     cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+/* Override any GCC internal prototype to avoid an error.
+   Use char because int might match the return type of a GCC
+   builtin and then its argument prototype would still apply.  */
+#ifdef __cplusplus
+extern "C"
+#endif
+char poptParseArgvString ();
+int
+main ()
+{
+return poptParseArgvString ();
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_link "$LINENO"; then :
+  netsnmp_result="none required"
+else
+  for netsnmp_cur_lib in popt ; do
+              LIBS="-l${netsnmp_cur_lib} ${netsnmp_temp_LIBS}"
+              cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+/* Override any GCC internal prototype to avoid an error.
+   Use char because int might match the return type of a GCC
+   builtin and then its argument prototype would still apply.  */
+#ifdef __cplusplus
+extern "C"
+#endif
+char poptParseArgvString ();
+int
+main ()
+{
+return poptParseArgvString ();
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_link "$LINENO"; then :
+  netsnmp_result=-l${netsnmp_cur_lib}
+                   break
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
+          done
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
+     LIBS="${netsnmp_func_search_save_LIBS}"
+     netsnmp_cv_func_poptParseArgvString__rpmlibs="${netsnmp_result}"
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $netsnmp_cv_func_poptParseArgvString__rpmlibs" >&5
+$as_echo "$netsnmp_cv_func_poptParseArgvString__rpmlibs" >&6; }
+ if test "${netsnmp_cv_func_poptParseArgvString__rpmlibs}" != "no" ; then
+    if test "${netsnmp_cv_func_poptParseArgvString__rpmlibs}" != "none required" ; then
+       _rpmlibs="${netsnmp_result} ${netsnmp_target_val}"
+    fi
+
+
+ fi
+
+
+  # rpm-4.0.x needs rpmio.
+
+ { $as_echo "$as_me:${as_lineno-$LINENO}: checking for library containing Fopen" >&5
+$as_echo_n "checking for library containing Fopen... " >&6; }
+if ${netsnmp_cv_func_Fopen__rpmlibs+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  netsnmp_func_search_save_LIBS="$LIBS"
+     netsnmp_target_val="$_rpmlibs"
+          netsnmp_temp_LIBS="${netsnmp_target_val} $LMIBLIBS ${LIBS}"
+     netsnmp_result=no
+     LIBS="${netsnmp_temp_LIBS}"
+     cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+/* Override any GCC internal prototype to avoid an error.
+   Use char because int might match the return type of a GCC
+   builtin and then its argument prototype would still apply.  */
+#ifdef __cplusplus
+extern "C"
+#endif
+char Fopen ();
+int
+main ()
+{
+return Fopen ();
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_link "$LINENO"; then :
+  netsnmp_result="none required"
+else
+  for netsnmp_cur_lib in rpmio ; do
+              LIBS="-l${netsnmp_cur_lib} ${netsnmp_temp_LIBS}"
+              cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+/* Override any GCC internal prototype to avoid an error.
+   Use char because int might match the return type of a GCC
+   builtin and then its argument prototype would still apply.  */
+#ifdef __cplusplus
+extern "C"
+#endif
+char Fopen ();
+int
+main ()
+{
+return Fopen ();
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_link "$LINENO"; then :
+  netsnmp_result=-l${netsnmp_cur_lib}
+                   break
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
+          done
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
+     LIBS="${netsnmp_func_search_save_LIBS}"
+     netsnmp_cv_func_Fopen__rpmlibs="${netsnmp_result}"
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $netsnmp_cv_func_Fopen__rpmlibs" >&5
+$as_echo "$netsnmp_cv_func_Fopen__rpmlibs" >&6; }
+ if test "${netsnmp_cv_func_Fopen__rpmlibs}" != "no" ; then
+    if test "${netsnmp_cv_func_Fopen__rpmlibs}" != "none required" ; then
+       _rpmlibs="${netsnmp_result} ${netsnmp_target_val}"
+    fi
+
+
+ fi
+
+
+  # rpm-4.0.3 librpmdb actually contains what we need.
+
+ { $as_echo "$as_me:${as_lineno-$LINENO}: checking for library containing rpmdbOpen" >&5
+$as_echo_n "checking for library containing rpmdbOpen... " >&6; }
+if ${netsnmp_cv_func_rpmdbOpen__rpmlibs+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  netsnmp_func_search_save_LIBS="$LIBS"
+     netsnmp_target_val="$_rpmlibs"
+          netsnmp_temp_LIBS="${netsnmp_target_val} $LMIBLIBS ${LIBS}"
+     netsnmp_result=no
+     LIBS="${netsnmp_temp_LIBS}"
+     cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+/* Override any GCC internal prototype to avoid an error.
+   Use char because int might match the return type of a GCC
+   builtin and then its argument prototype would still apply.  */
+#ifdef __cplusplus
+extern "C"
+#endif
+char rpmdbOpen ();
+int
+main ()
+{
+return rpmdbOpen ();
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_link "$LINENO"; then :
+  netsnmp_result="none required"
+else
+  for netsnmp_cur_lib in rpmdb ; do
+              LIBS="-l${netsnmp_cur_lib} ${netsnmp_temp_LIBS}"
+              cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+/* Override any GCC internal prototype to avoid an error.
+   Use char because int might match the return type of a GCC
+   builtin and then its argument prototype would still apply.  */
+#ifdef __cplusplus
+extern "C"
+#endif
+char rpmdbOpen ();
+int
+main ()
+{
+return rpmdbOpen ();
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_link "$LINENO"; then :
+  netsnmp_result=-l${netsnmp_cur_lib}
+                   break
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
+          done
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
+     LIBS="${netsnmp_func_search_save_LIBS}"
+     netsnmp_cv_func_rpmdbOpen__rpmlibs="${netsnmp_result}"
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $netsnmp_cv_func_rpmdbOpen__rpmlibs" >&5
+$as_echo "$netsnmp_cv_func_rpmdbOpen__rpmlibs" >&6; }
+ if test "${netsnmp_cv_func_rpmdbOpen__rpmlibs}" != "no" ; then
+    if test "${netsnmp_cv_func_rpmdbOpen__rpmlibs}" != "none required" ; then
+       _rpmlibs="${netsnmp_result} ${netsnmp_target_val}"
+    fi
+
+
+ fi
+
+  # now check for rpm using the appropriate libraries.
+
+ { $as_echo "$as_me:${as_lineno-$LINENO}: checking for library containing rpmGetFilesystemList" >&5
+$as_echo_n "checking for library containing rpmGetFilesystemList... " >&6; }
+if ${netsnmp_cv_func_rpmGetFilesystemList__rpmlibs+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  netsnmp_func_search_save_LIBS="$LIBS"
+     netsnmp_target_val="$_rpmlibs"
+          netsnmp_temp_LIBS="${netsnmp_target_val} $LMIBLIBS ${LIBS}"
+     netsnmp_result=no
+     LIBS="${netsnmp_temp_LIBS}"
+     cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+/* Override any GCC internal prototype to avoid an error.
+   Use char because int might match the return type of a GCC
+   builtin and then its argument prototype would still apply.  */
+#ifdef __cplusplus
+extern "C"
+#endif
+char rpmGetFilesystemList ();
+int
+main ()
+{
+return rpmGetFilesystemList ();
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_link "$LINENO"; then :
+  netsnmp_result="none required"
+else
+  for netsnmp_cur_lib in rpm ; do
+              LIBS="-l${netsnmp_cur_lib} ${netsnmp_temp_LIBS}"
+              cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+/* Override any GCC internal prototype to avoid an error.
+   Use char because int might match the return type of a GCC
+   builtin and then its argument prototype would still apply.  */
+#ifdef __cplusplus
+extern "C"
+#endif
+char rpmGetFilesystemList ();
+int
+main ()
+{
+return rpmGetFilesystemList ();
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_link "$LINENO"; then :
+  netsnmp_result=-l${netsnmp_cur_lib}
+                   break
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
+          done
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
+     LIBS="${netsnmp_func_search_save_LIBS}"
+     netsnmp_cv_func_rpmGetFilesystemList__rpmlibs="${netsnmp_result}"
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $netsnmp_cv_func_rpmGetFilesystemList__rpmlibs" >&5
+$as_echo "$netsnmp_cv_func_rpmGetFilesystemList__rpmlibs" >&6; }
+ if test "${netsnmp_cv_func_rpmGetFilesystemList__rpmlibs}" != "no" ; then
+    if test "${netsnmp_cv_func_rpmGetFilesystemList__rpmlibs}" != "none required" ; then
+       _rpmlibs="${netsnmp_result} ${netsnmp_target_val}"
+    fi
+
+
+$as_echo "#define HAVE_LIBRPM 1" >>confdefs.h
+
+    LMIBLIBS="$_rpmlibs $LMIBLIBS"
+    CFLAGS="$CFLAGS -I/usr/include/rpm"
+
+
+ fi
+
+
+  # rpm 4.6 has incompatible API, turn on the legacy one
+  ac_fn_c_check_decl "$LINENO" "headerGetEntry" "ac_cv_have_decl_headerGetEntry" "#include <rpm/rpmlib.h>
+
+"
+if test "x$ac_cv_have_decl_headerGetEntry" = xyes; then :
+  :
+else
+
+$as_echo "#define _RPM_4_4_COMPAT /**/" >>confdefs.h
+
+fi
+
+fi
+
+# -*- autoconf -*-
 #
 # generate empty files
 #
@@ -19489,7 +20283,8 @@ fi
 # -*- autoconf -*-
 #########################################
 ##
-# Checks for libraries
+# Checks for libraries that are run
+# after the agent module tests.
 ##
 #########################################
 
@@ -21752,793 +22547,6 @@ rm -f core conftest.err conftest.$ac_objext \
   LIBS=${_libs}
 fi
 
-
-##
-#   RPM checks
-#
-##
-for ac_header in rpm/rpmlib.h rpm/header.h
-do :
-  as_ac_Header=`$as_echo "ac_cv_header_$ac_header" | $as_tr_sh`
-ac_fn_c_check_header_mongrel "$LINENO" "$ac_header" "$as_ac_Header" "$ac_includes_default"
-if eval test \"x\$"$as_ac_Header"\" = x"yes"; then :
-  cat >>confdefs.h <<_ACEOF
-#define `$as_echo "HAVE_$ac_header" | $as_tr_cpp` 1
-_ACEOF
-
-fi
-
-done
-
-
-ac_fn_c_check_header_mongrel "$LINENO" "rpm/rpmlib.h" "ac_cv_header_rpm_rpmlib_h" "$ac_includes_default"
-if test "x$ac_cv_header_rpm_rpmlib_h" = xyes; then :
-  rpmlib_h=yes
-else
-  rpmlib_h=no
-fi
-
-
-ac_fn_c_check_header_mongrel "$LINENO" "rpm/header.h" "ac_cv_header_rpm_header_h" "$ac_includes_default"
-if test "x$ac_cv_header_rpm_header_h" = xyes; then :
-  rpmheader_h=yes
-else
-  rpmheader_h=no
-fi
-
-
-
-if test "x$rpmheader_h" = "xno" -o "x$rpmlib_h" = "xno" ; then
-  if test "x$with_rpm" = "xyes" ; then
-    as_fn_error $? "Could not find either the RPM header files needed and was specifically asked to use RPM support" "$LINENO" 5
-  else
-    with_rpm=no
-  fi
-fi
-
-#
-# rpm libraries only needed for the host resources mib software
-# installed tables (on linux in particular)
-#
-if test "x$with_rpm" != "xno" && \
-        echo " $module_list " | $EGREP " host/(hr_swinst|data_access/swinst_rpm) " > /dev/null; then
-  # ARG.  RPM is a real pain.
-  # FWIW librpm.la, librpmio.la, and libpopt.la have correct dependencies.
-  _rpmlibs=""
-
-  # zlib is required for newer versions of rpm
-  _cppflags="${CPPFLAGS}"
-  _ldflags="${LDFLAGS}"
-
-  # check for zlib
-  if test "x${with_zlib}" != "xno" -a -d "${with_zlib}"; then
-    CPPFLAGS="${CPPFLAGS} -I${with_zlib}/include"
-    LDFLAGS="${LDFLAGS} -L${with_zlib}/lib"
-  fi
-
-  # dunno if this is needed for rpm-4.0.x, earlier probably needs.
-  ac_fn_c_check_header_mongrel "$LINENO" "zlib.h" "ac_cv_header_zlib_h" "$ac_includes_default"
-if test "x$ac_cv_header_zlib_h" = xyes; then :
-
- { $as_echo "$as_me:${as_lineno-$LINENO}: checking for library containing gzread" >&5
-$as_echo_n "checking for library containing gzread... " >&6; }
-if ${netsnmp_cv_func_gzread__rpmlibs+:} false; then :
-  $as_echo_n "(cached) " >&6
-else
-  netsnmp_func_search_save_LIBS="$LIBS"
-     netsnmp_target_val="$_rpmlibs"
-          netsnmp_temp_LIBS="${netsnmp_target_val} $LMIBLIBS ${LIBS}"
-     netsnmp_result=no
-     LIBS="${netsnmp_temp_LIBS}"
-     cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-
-/* Override any GCC internal prototype to avoid an error.
-   Use char because int might match the return type of a GCC
-   builtin and then its argument prototype would still apply.  */
-#ifdef __cplusplus
-extern "C"
-#endif
-char gzread ();
-int
-main ()
-{
-return gzread ();
-  ;
-  return 0;
-}
-_ACEOF
-if ac_fn_c_try_link "$LINENO"; then :
-  netsnmp_result="none required"
-else
-  for netsnmp_cur_lib in z ; do
-              LIBS="-l${netsnmp_cur_lib} ${netsnmp_temp_LIBS}"
-              cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-
-/* Override any GCC internal prototype to avoid an error.
-   Use char because int might match the return type of a GCC
-   builtin and then its argument prototype would still apply.  */
-#ifdef __cplusplus
-extern "C"
-#endif
-char gzread ();
-int
-main ()
-{
-return gzread ();
-  ;
-  return 0;
-}
-_ACEOF
-if ac_fn_c_try_link "$LINENO"; then :
-  netsnmp_result=-l${netsnmp_cur_lib}
-                   break
-fi
-rm -f core conftest.err conftest.$ac_objext \
-    conftest$ac_exeext conftest.$ac_ext
-          done
-fi
-rm -f core conftest.err conftest.$ac_objext \
-    conftest$ac_exeext conftest.$ac_ext
-     LIBS="${netsnmp_func_search_save_LIBS}"
-     netsnmp_cv_func_gzread__rpmlibs="${netsnmp_result}"
-fi
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $netsnmp_cv_func_gzread__rpmlibs" >&5
-$as_echo "$netsnmp_cv_func_gzread__rpmlibs" >&6; }
- if test "${netsnmp_cv_func_gzread__rpmlibs}" != "no" ; then
-    if test "${netsnmp_cv_func_gzread__rpmlibs}" != "none required" ; then
-       _rpmlibs="${netsnmp_result} ${netsnmp_target_val}"
-    fi
-
- else
-    CPPFLAGS=${_cppflags} LDFLAGS=${_ldflags}
- fi
-
-else
-  CPPFLAGS=${_cppflags} LDFLAGS=${_ldflags}
-fi
-
-
-
-  # two variants of bzip2 need checking.
-  if test "x${with_bzip2}" != "xno"; then
-    if test -d "${with_bzip2}"; then
-      CPPFLAGS="${CPPFLAGS} -I${with_bzip2}/include"
-      LDFLAGS="${LDFLAGS} -L${with_bzip2}/lib"
-    fi
-
- { $as_echo "$as_me:${as_lineno-$LINENO}: checking for library containing bzread" >&5
-$as_echo_n "checking for library containing bzread... " >&6; }
-if ${netsnmp_cv_func_bzread__rpmlibs+:} false; then :
-  $as_echo_n "(cached) " >&6
-else
-  netsnmp_func_search_save_LIBS="$LIBS"
-     netsnmp_target_val="$_rpmlibs"
-          netsnmp_temp_LIBS="${netsnmp_target_val} $LMIBLIBS ${LIBS}"
-     netsnmp_result=no
-     LIBS="${netsnmp_temp_LIBS}"
-     cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-
-/* Override any GCC internal prototype to avoid an error.
-   Use char because int might match the return type of a GCC
-   builtin and then its argument prototype would still apply.  */
-#ifdef __cplusplus
-extern "C"
-#endif
-char bzread ();
-int
-main ()
-{
-return bzread ();
-  ;
-  return 0;
-}
-_ACEOF
-if ac_fn_c_try_link "$LINENO"; then :
-  netsnmp_result="none required"
-else
-  for netsnmp_cur_lib in bz2 ; do
-              LIBS="-l${netsnmp_cur_lib} ${netsnmp_temp_LIBS}"
-              cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-
-/* Override any GCC internal prototype to avoid an error.
-   Use char because int might match the return type of a GCC
-   builtin and then its argument prototype would still apply.  */
-#ifdef __cplusplus
-extern "C"
-#endif
-char bzread ();
-int
-main ()
-{
-return bzread ();
-  ;
-  return 0;
-}
-_ACEOF
-if ac_fn_c_try_link "$LINENO"; then :
-  netsnmp_result=-l${netsnmp_cur_lib}
-                   break
-fi
-rm -f core conftest.err conftest.$ac_objext \
-    conftest$ac_exeext conftest.$ac_ext
-          done
-fi
-rm -f core conftest.err conftest.$ac_objext \
-    conftest$ac_exeext conftest.$ac_ext
-     LIBS="${netsnmp_func_search_save_LIBS}"
-     netsnmp_cv_func_bzread__rpmlibs="${netsnmp_result}"
-fi
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $netsnmp_cv_func_bzread__rpmlibs" >&5
-$as_echo "$netsnmp_cv_func_bzread__rpmlibs" >&6; }
- if test "${netsnmp_cv_func_bzread__rpmlibs}" != "no" ; then
-    if test "${netsnmp_cv_func_bzread__rpmlibs}" != "none required" ; then
-       _rpmlibs="${netsnmp_result} ${netsnmp_target_val}"
-    fi
-
-
- fi
-
-
- { $as_echo "$as_me:${as_lineno-$LINENO}: checking for library containing BZ2_bzread" >&5
-$as_echo_n "checking for library containing BZ2_bzread... " >&6; }
-if ${netsnmp_cv_func_BZ2_bzread__rpmlibs+:} false; then :
-  $as_echo_n "(cached) " >&6
-else
-  netsnmp_func_search_save_LIBS="$LIBS"
-     netsnmp_target_val="$_rpmlibs"
-          netsnmp_temp_LIBS="${netsnmp_target_val} $LMIBLIBS ${LIBS}"
-     netsnmp_result=no
-     LIBS="${netsnmp_temp_LIBS}"
-     cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-
-/* Override any GCC internal prototype to avoid an error.
-   Use char because int might match the return type of a GCC
-   builtin and then its argument prototype would still apply.  */
-#ifdef __cplusplus
-extern "C"
-#endif
-char BZ2_bzread ();
-int
-main ()
-{
-return BZ2_bzread ();
-  ;
-  return 0;
-}
-_ACEOF
-if ac_fn_c_try_link "$LINENO"; then :
-  netsnmp_result="none required"
-else
-  for netsnmp_cur_lib in bz2 ; do
-              LIBS="-l${netsnmp_cur_lib} ${netsnmp_temp_LIBS}"
-              cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-
-/* Override any GCC internal prototype to avoid an error.
-   Use char because int might match the return type of a GCC
-   builtin and then its argument prototype would still apply.  */
-#ifdef __cplusplus
-extern "C"
-#endif
-char BZ2_bzread ();
-int
-main ()
-{
-return BZ2_bzread ();
-  ;
-  return 0;
-}
-_ACEOF
-if ac_fn_c_try_link "$LINENO"; then :
-  netsnmp_result=-l${netsnmp_cur_lib}
-                   break
-fi
-rm -f core conftest.err conftest.$ac_objext \
-    conftest$ac_exeext conftest.$ac_ext
-          done
-fi
-rm -f core conftest.err conftest.$ac_objext \
-    conftest$ac_exeext conftest.$ac_ext
-     LIBS="${netsnmp_func_search_save_LIBS}"
-     netsnmp_cv_func_BZ2_bzread__rpmlibs="${netsnmp_result}"
-fi
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $netsnmp_cv_func_BZ2_bzread__rpmlibs" >&5
-$as_echo "$netsnmp_cv_func_BZ2_bzread__rpmlibs" >&6; }
- if test "${netsnmp_cv_func_BZ2_bzread__rpmlibs}" != "no" ; then
-    if test "${netsnmp_cv_func_BZ2_bzread__rpmlibs}" != "none required" ; then
-       _rpmlibs="${netsnmp_result} ${netsnmp_target_val}"
-    fi
-
-
- fi
-
-  fi
-
-  # two variants of db1 need checking.
-
- { $as_echo "$as_me:${as_lineno-$LINENO}: checking for library containing dbopen" >&5
-$as_echo_n "checking for library containing dbopen... " >&6; }
-if ${netsnmp_cv_func_dbopen__rpmlibs+:} false; then :
-  $as_echo_n "(cached) " >&6
-else
-  netsnmp_func_search_save_LIBS="$LIBS"
-     netsnmp_target_val="$_rpmlibs"
-          netsnmp_temp_LIBS="${netsnmp_target_val} $LMIBLIBS ${LIBS}"
-     netsnmp_result=no
-     LIBS="${netsnmp_temp_LIBS}"
-     cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-
-/* Override any GCC internal prototype to avoid an error.
-   Use char because int might match the return type of a GCC
-   builtin and then its argument prototype would still apply.  */
-#ifdef __cplusplus
-extern "C"
-#endif
-char dbopen ();
-int
-main ()
-{
-return dbopen ();
-  ;
-  return 0;
-}
-_ACEOF
-if ac_fn_c_try_link "$LINENO"; then :
-  netsnmp_result="none required"
-else
-  for netsnmp_cur_lib in db1 db ; do
-              LIBS="-l${netsnmp_cur_lib} ${netsnmp_temp_LIBS}"
-              cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-
-/* Override any GCC internal prototype to avoid an error.
-   Use char because int might match the return type of a GCC
-   builtin and then its argument prototype would still apply.  */
-#ifdef __cplusplus
-extern "C"
-#endif
-char dbopen ();
-int
-main ()
-{
-return dbopen ();
-  ;
-  return 0;
-}
-_ACEOF
-if ac_fn_c_try_link "$LINENO"; then :
-  netsnmp_result=-l${netsnmp_cur_lib}
-                   break
-fi
-rm -f core conftest.err conftest.$ac_objext \
-    conftest$ac_exeext conftest.$ac_ext
-          done
-fi
-rm -f core conftest.err conftest.$ac_objext \
-    conftest$ac_exeext conftest.$ac_ext
-     LIBS="${netsnmp_func_search_save_LIBS}"
-     netsnmp_cv_func_dbopen__rpmlibs="${netsnmp_result}"
-fi
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $netsnmp_cv_func_dbopen__rpmlibs" >&5
-$as_echo "$netsnmp_cv_func_dbopen__rpmlibs" >&6; }
- if test "${netsnmp_cv_func_dbopen__rpmlibs}" != "no" ; then
-    if test "${netsnmp_cv_func_dbopen__rpmlibs}" != "none required" ; then
-       _rpmlibs="${netsnmp_result} ${netsnmp_target_val}"
-    fi
-
-
- fi
-
-
-  # two variants of db3 need checking.
-
- { $as_echo "$as_me:${as_lineno-$LINENO}: checking for library containing db_create" >&5
-$as_echo_n "checking for library containing db_create... " >&6; }
-if ${netsnmp_cv_func_db_create__rpmlibs+:} false; then :
-  $as_echo_n "(cached) " >&6
-else
-  netsnmp_func_search_save_LIBS="$LIBS"
-     netsnmp_target_val="$_rpmlibs"
-          netsnmp_temp_LIBS="${netsnmp_target_val} $LMIBLIBS ${LIBS}"
-     netsnmp_result=no
-     LIBS="${netsnmp_temp_LIBS}"
-     cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-
-/* Override any GCC internal prototype to avoid an error.
-   Use char because int might match the return type of a GCC
-   builtin and then its argument prototype would still apply.  */
-#ifdef __cplusplus
-extern "C"
-#endif
-char db_create ();
-int
-main ()
-{
-return db_create ();
-  ;
-  return 0;
-}
-_ACEOF
-if ac_fn_c_try_link "$LINENO"; then :
-  netsnmp_result="none required"
-else
-  for netsnmp_cur_lib in db-3.1 db-3.0 ; do
-              LIBS="-l${netsnmp_cur_lib} ${netsnmp_temp_LIBS}"
-              cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-
-/* Override any GCC internal prototype to avoid an error.
-   Use char because int might match the return type of a GCC
-   builtin and then its argument prototype would still apply.  */
-#ifdef __cplusplus
-extern "C"
-#endif
-char db_create ();
-int
-main ()
-{
-return db_create ();
-  ;
-  return 0;
-}
-_ACEOF
-if ac_fn_c_try_link "$LINENO"; then :
-  netsnmp_result=-l${netsnmp_cur_lib}
-                   break
-fi
-rm -f core conftest.err conftest.$ac_objext \
-    conftest$ac_exeext conftest.$ac_ext
-          done
-fi
-rm -f core conftest.err conftest.$ac_objext \
-    conftest$ac_exeext conftest.$ac_ext
-     LIBS="${netsnmp_func_search_save_LIBS}"
-     netsnmp_cv_func_db_create__rpmlibs="${netsnmp_result}"
-fi
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $netsnmp_cv_func_db_create__rpmlibs" >&5
-$as_echo "$netsnmp_cv_func_db_create__rpmlibs" >&6; }
- if test "${netsnmp_cv_func_db_create__rpmlibs}" != "no" ; then
-    if test "${netsnmp_cv_func_db_create__rpmlibs}" != "none required" ; then
-       _rpmlibs="${netsnmp_result} ${netsnmp_target_val}"
-    fi
-
-
- fi
-
-
-  # rpm-3.0.5 and later needs popt.
-
- { $as_echo "$as_me:${as_lineno-$LINENO}: checking for library containing poptParseArgvString" >&5
-$as_echo_n "checking for library containing poptParseArgvString... " >&6; }
-if ${netsnmp_cv_func_poptParseArgvString__rpmlibs+:} false; then :
-  $as_echo_n "(cached) " >&6
-else
-  netsnmp_func_search_save_LIBS="$LIBS"
-     netsnmp_target_val="$_rpmlibs"
-          netsnmp_temp_LIBS="${netsnmp_target_val} $LMIBLIBS ${LIBS}"
-     netsnmp_result=no
-     LIBS="${netsnmp_temp_LIBS}"
-     cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-
-/* Override any GCC internal prototype to avoid an error.
-   Use char because int might match the return type of a GCC
-   builtin and then its argument prototype would still apply.  */
-#ifdef __cplusplus
-extern "C"
-#endif
-char poptParseArgvString ();
-int
-main ()
-{
-return poptParseArgvString ();
-  ;
-  return 0;
-}
-_ACEOF
-if ac_fn_c_try_link "$LINENO"; then :
-  netsnmp_result="none required"
-else
-  for netsnmp_cur_lib in popt ; do
-              LIBS="-l${netsnmp_cur_lib} ${netsnmp_temp_LIBS}"
-              cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-
-/* Override any GCC internal prototype to avoid an error.
-   Use char because int might match the return type of a GCC
-   builtin and then its argument prototype would still apply.  */
-#ifdef __cplusplus
-extern "C"
-#endif
-char poptParseArgvString ();
-int
-main ()
-{
-return poptParseArgvString ();
-  ;
-  return 0;
-}
-_ACEOF
-if ac_fn_c_try_link "$LINENO"; then :
-  netsnmp_result=-l${netsnmp_cur_lib}
-                   break
-fi
-rm -f core conftest.err conftest.$ac_objext \
-    conftest$ac_exeext conftest.$ac_ext
-          done
-fi
-rm -f core conftest.err conftest.$ac_objext \
-    conftest$ac_exeext conftest.$ac_ext
-     LIBS="${netsnmp_func_search_save_LIBS}"
-     netsnmp_cv_func_poptParseArgvString__rpmlibs="${netsnmp_result}"
-fi
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $netsnmp_cv_func_poptParseArgvString__rpmlibs" >&5
-$as_echo "$netsnmp_cv_func_poptParseArgvString__rpmlibs" >&6; }
- if test "${netsnmp_cv_func_poptParseArgvString__rpmlibs}" != "no" ; then
-    if test "${netsnmp_cv_func_poptParseArgvString__rpmlibs}" != "none required" ; then
-       _rpmlibs="${netsnmp_result} ${netsnmp_target_val}"
-    fi
-
-
- fi
-
-
-  # rpm-4.0.x needs rpmio.
-
- { $as_echo "$as_me:${as_lineno-$LINENO}: checking for library containing Fopen" >&5
-$as_echo_n "checking for library containing Fopen... " >&6; }
-if ${netsnmp_cv_func_Fopen__rpmlibs+:} false; then :
-  $as_echo_n "(cached) " >&6
-else
-  netsnmp_func_search_save_LIBS="$LIBS"
-     netsnmp_target_val="$_rpmlibs"
-          netsnmp_temp_LIBS="${netsnmp_target_val} $LMIBLIBS ${LIBS}"
-     netsnmp_result=no
-     LIBS="${netsnmp_temp_LIBS}"
-     cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-
-/* Override any GCC internal prototype to avoid an error.
-   Use char because int might match the return type of a GCC
-   builtin and then its argument prototype would still apply.  */
-#ifdef __cplusplus
-extern "C"
-#endif
-char Fopen ();
-int
-main ()
-{
-return Fopen ();
-  ;
-  return 0;
-}
-_ACEOF
-if ac_fn_c_try_link "$LINENO"; then :
-  netsnmp_result="none required"
-else
-  for netsnmp_cur_lib in rpmio ; do
-              LIBS="-l${netsnmp_cur_lib} ${netsnmp_temp_LIBS}"
-              cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-
-/* Override any GCC internal prototype to avoid an error.
-   Use char because int might match the return type of a GCC
-   builtin and then its argument prototype would still apply.  */
-#ifdef __cplusplus
-extern "C"
-#endif
-char Fopen ();
-int
-main ()
-{
-return Fopen ();
-  ;
-  return 0;
-}
-_ACEOF
-if ac_fn_c_try_link "$LINENO"; then :
-  netsnmp_result=-l${netsnmp_cur_lib}
-                   break
-fi
-rm -f core conftest.err conftest.$ac_objext \
-    conftest$ac_exeext conftest.$ac_ext
-          done
-fi
-rm -f core conftest.err conftest.$ac_objext \
-    conftest$ac_exeext conftest.$ac_ext
-     LIBS="${netsnmp_func_search_save_LIBS}"
-     netsnmp_cv_func_Fopen__rpmlibs="${netsnmp_result}"
-fi
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $netsnmp_cv_func_Fopen__rpmlibs" >&5
-$as_echo "$netsnmp_cv_func_Fopen__rpmlibs" >&6; }
- if test "${netsnmp_cv_func_Fopen__rpmlibs}" != "no" ; then
-    if test "${netsnmp_cv_func_Fopen__rpmlibs}" != "none required" ; then
-       _rpmlibs="${netsnmp_result} ${netsnmp_target_val}"
-    fi
-
-
- fi
-
-
-  # rpm-4.0.3 librpmdb actually contains what we need.
-
- { $as_echo "$as_me:${as_lineno-$LINENO}: checking for library containing rpmdbOpen" >&5
-$as_echo_n "checking for library containing rpmdbOpen... " >&6; }
-if ${netsnmp_cv_func_rpmdbOpen__rpmlibs+:} false; then :
-  $as_echo_n "(cached) " >&6
-else
-  netsnmp_func_search_save_LIBS="$LIBS"
-     netsnmp_target_val="$_rpmlibs"
-          netsnmp_temp_LIBS="${netsnmp_target_val} $LMIBLIBS ${LIBS}"
-     netsnmp_result=no
-     LIBS="${netsnmp_temp_LIBS}"
-     cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-
-/* Override any GCC internal prototype to avoid an error.
-   Use char because int might match the return type of a GCC
-   builtin and then its argument prototype would still apply.  */
-#ifdef __cplusplus
-extern "C"
-#endif
-char rpmdbOpen ();
-int
-main ()
-{
-return rpmdbOpen ();
-  ;
-  return 0;
-}
-_ACEOF
-if ac_fn_c_try_link "$LINENO"; then :
-  netsnmp_result="none required"
-else
-  for netsnmp_cur_lib in rpmdb ; do
-              LIBS="-l${netsnmp_cur_lib} ${netsnmp_temp_LIBS}"
-              cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-
-/* Override any GCC internal prototype to avoid an error.
-   Use char because int might match the return type of a GCC
-   builtin and then its argument prototype would still apply.  */
-#ifdef __cplusplus
-extern "C"
-#endif
-char rpmdbOpen ();
-int
-main ()
-{
-return rpmdbOpen ();
-  ;
-  return 0;
-}
-_ACEOF
-if ac_fn_c_try_link "$LINENO"; then :
-  netsnmp_result=-l${netsnmp_cur_lib}
-                   break
-fi
-rm -f core conftest.err conftest.$ac_objext \
-    conftest$ac_exeext conftest.$ac_ext
-          done
-fi
-rm -f core conftest.err conftest.$ac_objext \
-    conftest$ac_exeext conftest.$ac_ext
-     LIBS="${netsnmp_func_search_save_LIBS}"
-     netsnmp_cv_func_rpmdbOpen__rpmlibs="${netsnmp_result}"
-fi
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $netsnmp_cv_func_rpmdbOpen__rpmlibs" >&5
-$as_echo "$netsnmp_cv_func_rpmdbOpen__rpmlibs" >&6; }
- if test "${netsnmp_cv_func_rpmdbOpen__rpmlibs}" != "no" ; then
-    if test "${netsnmp_cv_func_rpmdbOpen__rpmlibs}" != "none required" ; then
-       _rpmlibs="${netsnmp_result} ${netsnmp_target_val}"
-    fi
-
-
- fi
-
-  # now check for rpm using the appropriate libraries.
-
- { $as_echo "$as_me:${as_lineno-$LINENO}: checking for library containing rpmGetFilesystemList" >&5
-$as_echo_n "checking for library containing rpmGetFilesystemList... " >&6; }
-if ${netsnmp_cv_func_rpmGetFilesystemList__rpmlibs+:} false; then :
-  $as_echo_n "(cached) " >&6
-else
-  netsnmp_func_search_save_LIBS="$LIBS"
-     netsnmp_target_val="$_rpmlibs"
-          netsnmp_temp_LIBS="${netsnmp_target_val} $LMIBLIBS ${LIBS}"
-     netsnmp_result=no
-     LIBS="${netsnmp_temp_LIBS}"
-     cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-
-/* Override any GCC internal prototype to avoid an error.
-   Use char because int might match the return type of a GCC
-   builtin and then its argument prototype would still apply.  */
-#ifdef __cplusplus
-extern "C"
-#endif
-char rpmGetFilesystemList ();
-int
-main ()
-{
-return rpmGetFilesystemList ();
-  ;
-  return 0;
-}
-_ACEOF
-if ac_fn_c_try_link "$LINENO"; then :
-  netsnmp_result="none required"
-else
-  for netsnmp_cur_lib in rpm ; do
-              LIBS="-l${netsnmp_cur_lib} ${netsnmp_temp_LIBS}"
-              cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-
-/* Override any GCC internal prototype to avoid an error.
-   Use char because int might match the return type of a GCC
-   builtin and then its argument prototype would still apply.  */
-#ifdef __cplusplus
-extern "C"
-#endif
-char rpmGetFilesystemList ();
-int
-main ()
-{
-return rpmGetFilesystemList ();
-  ;
-  return 0;
-}
-_ACEOF
-if ac_fn_c_try_link "$LINENO"; then :
-  netsnmp_result=-l${netsnmp_cur_lib}
-                   break
-fi
-rm -f core conftest.err conftest.$ac_objext \
-    conftest$ac_exeext conftest.$ac_ext
-          done
-fi
-rm -f core conftest.err conftest.$ac_objext \
-    conftest$ac_exeext conftest.$ac_ext
-     LIBS="${netsnmp_func_search_save_LIBS}"
-     netsnmp_cv_func_rpmGetFilesystemList__rpmlibs="${netsnmp_result}"
-fi
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $netsnmp_cv_func_rpmGetFilesystemList__rpmlibs" >&5
-$as_echo "$netsnmp_cv_func_rpmGetFilesystemList__rpmlibs" >&6; }
- if test "${netsnmp_cv_func_rpmGetFilesystemList__rpmlibs}" != "no" ; then
-    if test "${netsnmp_cv_func_rpmGetFilesystemList__rpmlibs}" != "none required" ; then
-       _rpmlibs="${netsnmp_result} ${netsnmp_target_val}"
-    fi
-
-
-$as_echo "#define HAVE_LIBRPM 1" >>confdefs.h
-
-    LMIBLIBS="$_rpmlibs $LMIBLIBS"
-    CFLAGS="$CFLAGS -I/usr/include/rpm"
-
-
- fi
-
-
-  # rpm 4.6 has incompatible API, turn on the legacy one
-  ac_fn_c_check_decl "$LINENO" "headerGetEntry" "ac_cv_have_decl_headerGetEntry" "#include <rpm/rpmlib.h>
-
-"
-if test "x$ac_cv_have_decl_headerGetEntry" = xyes; then :
-  :
-else
-
-$as_echo "#define _RPM_4_4_COMPAT /**/" >>confdefs.h
-
-fi
-
-fi
 
 ##
 #   mysql

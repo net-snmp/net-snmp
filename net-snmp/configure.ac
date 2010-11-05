@@ -50,9 +50,10 @@ AC_CACHE_SAVE
 m4_include([configure.d/config_project_ipv6_types])
 m4_include([configure.d/config_modules_lib])
 AC_CACHE_SAVE
+m4_include([configure.d/config_os_libs1])
 m4_include([configure.d/config_modules_agent])
 m4_include([configure.d/config_os_misc1])
-m4_include([configure.d/config_os_libs])
+m4_include([configure.d/config_os_libs2])
 AC_CACHE_SAVE
 m4_include([configure.d/config_project_perl_python])
 m4_include([configure.d/config_os_misc2])
