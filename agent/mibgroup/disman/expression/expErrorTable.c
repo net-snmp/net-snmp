@@ -139,4 +139,6 @@ var_expErrorTable(struct variable *vp,
         *var_len = StorageTmp->expErrorInstanceLen * sizeof(oid);
         return (u_char *) StorageTmp->expErrorInstance;
     }
+
+    return NULL;
 }
