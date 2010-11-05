@@ -78,7 +78,6 @@ if test "x$with_rpm" != "xno"; then
     AC_DEFINE(HAVE_LIBRPM, 1,
       [Define to 1 if you have the `rpm' library (-lrpm).])
     LMIBLIBS="$_rpmlibs $LMIBLIBS"
-    CFLAGS="$CFLAGS -I/usr/include/rpm"
   ],, $LMIBLIBS, _rpmlibs)
 
   # rpm 4.6 has incompatible API, turn on the legacy one
