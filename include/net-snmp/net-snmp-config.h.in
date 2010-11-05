@@ -124,6 +124,12 @@
 /* Define to 1 if you have the `eval_pv' function. */
 #undef HAVE_EVAL_PV
 
+/* Define if you have EVP_sha224/256 in openssl */
+#undef HAVE_EVP_SHA224
+
+/* Define if you have EVP_sha384/256 in openssl */
+#undef HAVE_EVP_SHA384
+
 /* Define to 1 if you have the `execv' function. */
 #undef HAVE_EXECV
 
@@ -291,6 +297,9 @@
 
 /* Define to 1 if you have the `ssl' library (-lssl). */
 #undef HAVE_LIBSSL
+
+/* Define to 1 if your `ssl' library supports DTLS (-lssl). */
+#undef HAVE_LIBSSL_DTLS
 
 /* Define to 1 if you have the <limits.h> header file. */
 #undef HAVE_LIMITS_H
@@ -1165,6 +1174,9 @@
 
 /* Define if static inline functions are unsupported */
 #undef NETSNMP_BROKEN_INLINE
+
+/* "Define if crytography support is possible" */
+#undef NETSNMP_CAN_DO_CRYPTO
 
 /* sysctl works to get boottime, etc... */
 #undef NETSNMP_CAN_USE_SYSCTL
