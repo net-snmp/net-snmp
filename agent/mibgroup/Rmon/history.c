@@ -298,7 +298,7 @@ var_historyControlTable(struct variable *vp,
             return (unsigned char *) hdr->owner;
         } else {
             *var_len = 0;
-            return (unsigned char *) "";
+            return NETSNMP_REMOVE_CONST(unsigned char *, "");
         }
 
     case CTRL_STATUS:

@@ -66,7 +66,7 @@ event_api_send_alarm(u_char is_rising,
                      size_t alarmed_var_length,
                      u_long sample_type,
                      u_long value,
-                     u_long the_threshold, char *alarm_descr);
+                     u_long the_threshold, const char *alarm_descr);
 
 #define ALARM_STR1_LEN	32
 typedef enum {
@@ -178,8 +178,8 @@ alarmTable_run( unsigned int reg, void *clientarg)
         return ;
     }
 
-    DEBUGMSGTL(("rmon:alarmTable", "alarmIndex.%d last value (%d)\n", entry->alarmIndex, entry->last_abs_value));
-    DEBUGMSGTL(("rmon:alarmTable", "alarmIndex.%d new_value (%d)\n", entry->alarmIndex, new_value));
+    DEBUGMSGTL(("rmon:alarmTable", "alarmIndex.%ld last value (%ld)\n", entry->alarmIndex, entry->last_abs_value));
+    DEBUGMSGTL(("rmon:alarmTable", "alarmIndex.%ld new_value (%ld)\n", entry->alarmIndex, new_value));
 
     entry->alarmValue = (SAMPLE_TYPE_ABSOLUTE == entry->alarmSampleType) ?
         new_value : new_value - entry->last_abs_value;
