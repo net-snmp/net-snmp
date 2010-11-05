@@ -14,7 +14,6 @@
 /*
  * all platforms use this generic code
  */
-config_require(host/data_access/swinst)
 config_exclude(host/hr_swinst)
 
 /*
