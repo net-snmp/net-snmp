@@ -101,13 +101,14 @@ netsnmp_swinst_arch_load( netsnmp_container *container, u_int flags)
 #endif
     Header                h;
     char                 *n, *v, *r, *g;
-    int_32               *t;
+    int32_t              *t;
     time_t                install_time;
     size_t                date_len;
     int                   rc, i = 1;
     netsnmp_swinst_entry *entry;
 
-    rpmdbOpen( " ", &db, O_RDONLY, 0644);
+    if (rpmdbOpen("", &db, O_RDONLY, 0644))
+	NETSNMP_LOGONCE((LOG_ERR, "rpmdbOpen() failed\n"));
 
 #if defined(RPMDBI_PACKAGES)
     mi = rpmdbInitIterator( db, RPMDBI_PACKAGES, NULL, 0);
@@ -154,7 +155,7 @@ netsnmp_swinst_arch_load( netsnmp_container *container, u_int flags)
 #endif
     rpmdbClose( db );
 
-    DEBUGMSGTL(("swinst:load:arch"," loaded %d entries\n",
+    DEBUGMSGTL(("swinst:load:arch", "loaded %d entries\n",
                 (int)CONTAINER_SIZE(container)));
 
     return 0;
