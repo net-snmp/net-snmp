@@ -24408,8 +24408,7 @@ done
 
 #       rpmGetPath check needs clean LIBS environment   (Linux)
 #
-if test "x$with_rpm" != "xno" && \
-        echo " $module_list " | $GREP " host/hr_swinst " > /dev/null; then
+if test "x$with_rpm" != "xno"; then
     OLDLIBS=$LIBS
     LIBS=$LMIBLIBS
     for ac_func in rpmGetPath
