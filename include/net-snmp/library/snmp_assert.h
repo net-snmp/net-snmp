@@ -23,6 +23,9 @@
 #  endif /* __STDC__ */
 #endif /* __STRING */
 
+#define netsnmp_static_assert(x) switch(0) { case (x): case 0: ; }
+
+
 /*
  * always use assert if requested
  */
