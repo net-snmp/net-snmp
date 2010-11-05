@@ -318,9 +318,7 @@ store_expExpressionTable(int majorID, int minorID, void *serverarg,
     char           *cptr;
     size_t          tmpint;
     struct expExpressionTable_data *StorageTmp;
-    struct expObjectTable_data *ObjectStorageTmp;
-    struct expValueTable_data *ValueStorageTmp;
-    struct header_complex_index *hcindex, *hc_object, *hc_value;
+    struct header_complex_index *hcindex;
 
     DEBUGMSGTL(("expExpressionTable", "storing data...  "));
 

@@ -217,7 +217,6 @@ void
 parse_expObjectTable(const char *token, char *line)
 {
     size_t          tmpint;
-    oid            *tmpoid = NULL;
     struct expObjectTable_data *StorageTmp =
         SNMP_MALLOC_STRUCT(expObjectTable_data);
 
@@ -404,6 +403,7 @@ store_expObjectTable(int majorID, int minorID, void *serverarg,
         }
     }
     DEBUGMSGTL(("expObjectTable", "storage done\n"));
+    return 0;
 }
 
 

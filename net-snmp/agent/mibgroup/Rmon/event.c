@@ -403,7 +403,7 @@ var_eventTable(struct variable *vp,
             return (unsigned char *) theEntry.event_description;
         } else {
             *var_len = 0;
-            return (unsigned char *) "";
+            return NETSNMP_REMOVE_CONST(unsigned char *, "");
         }
     case EVENTTYPE:
         long_ret = theEntry.event_type;
@@ -414,7 +414,7 @@ var_eventTable(struct variable *vp,
             return (unsigned char *) theEntry.event_community;
         } else {
             *var_len = 0;
-            return (unsigned char *) "";
+            return NETSNMP_REMOVE_CONST(unsigned char *, "");
         }
     case EVENTLASTTIMESENT:
         long_ret = theEntry.event_last_time_sent;
@@ -425,7 +425,7 @@ var_eventTable(struct variable *vp,
             return (unsigned char *) hdr->owner;
         } else {
             *var_len = 0;
-            return (unsigned char *) "";
+            return NETSNMP_REMOVE_CONST(unsigned char *, "");
         }
     case EVENTSTATUS:
         long_ret = hdr->status;
@@ -484,7 +484,7 @@ var_logTable(struct variable *vp,
             return (unsigned char *) theEntry.log_description;
         } else {
             *var_len = 0;
-            return (unsigned char *) "";
+            return NETSNMP_REMOVE_CONST(unsigned char *, "");
         }
     default:
         ERROR_MSG("");

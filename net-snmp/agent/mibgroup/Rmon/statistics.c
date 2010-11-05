@@ -397,7 +397,7 @@ var_etherStatsEntry(struct variable * vp, oid * name, size_t * length,
             return (unsigned char *) hdr->owner;
         } else {
             *var_len = 0;
-            return (unsigned char *) "";
+            return NETSNMP_REMOVE_CONST(unsigned char *, "");
         }
     case IDetherStatsStatus:
         long_return = hdr->status;
