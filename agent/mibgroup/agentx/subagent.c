@@ -643,7 +643,7 @@ agentx_sysOR_callback(int majorID, int minorID, void *serverarg,
 {
     const struct register_sysOR_parameters *reg_parms =
         (const struct register_sysOR_parameters *) serverarg;
-    netsnmp_session *agentx_ss = (netsnmp_session *) clientarg;
+    netsnmp_session *agentx_ss = *(netsnmp_session **)clientarg;
 
     if (minorID == SNMPD_CALLBACK_REG_SYSOR)
         return agentx_add_agentcaps(agentx_ss,
@@ -659,7 +659,7 @@ agentx_sysOR_callback(int majorID, int minorID, void *serverarg,
 static int
 subagent_shutdown(int majorID, int minorID, void *serverarg, void *clientarg)
 {
-    netsnmp_session *thesession = (netsnmp_session *)clientarg;
+    netsnmp_session *thesession = *(netsnmp_session **)clientarg;
     DEBUGMSGTL(("agentx/subagent", "shutting down session....\n"));
     if (thesession == NULL) {
 	DEBUGMSGTL(("agentx/subagent", "Empty session to shutdown\n"));
