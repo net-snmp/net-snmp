@@ -16909,8 +16909,7 @@ done
 
 
 # RPM subdirectory path                   (Agent)
-if test "x$with_rpm" != "xno" && \
-        echo " $module_list " | $GREP " host/hr_swinst " > /dev/null; then
+if test "x$with_rpm" != "xno"; then
 
 
 for ac_header in rpm/rpmdb.h   rpm/rpmfileutil.h
@@ -24659,6 +24658,1930 @@ fi
 fi
 
 # -*- autoconf -*-
+#########################################
+##
+# Checks for libraries that are run
+# before the agent module tests.
+##
+#########################################
+
+
+##
+#   RPM checks
+#
+##
+
+
+for ac_header in rpm/rpmlib.h rpm/header.h
+do
+as_ac_Header=`$as_echo "ac_cv_header_$ac_header" | $as_tr_sh`
+if { as_var=$as_ac_Header; eval "test \"\${$as_var+set}\" = set"; }; then
+  { $as_echo "$as_me:$LINENO: checking for $ac_header" >&5
+$as_echo_n "checking for $ac_header... " >&6; }
+if { as_var=$as_ac_Header; eval "test \"\${$as_var+set}\" = set"; }; then
+  $as_echo_n "(cached) " >&6
+fi
+ac_res=`eval 'as_val=${'$as_ac_Header'}
+		 $as_echo "$as_val"'`
+	       { $as_echo "$as_me:$LINENO: result: $ac_res" >&5
+$as_echo "$ac_res" >&6; }
+else
+  # Is the header compilable?
+{ $as_echo "$as_me:$LINENO: checking $ac_header usability" >&5
+$as_echo_n "checking $ac_header usability... " >&6; }
+cat >conftest.$ac_ext <<_ACEOF
+/* confdefs.h.  */
+_ACEOF
+cat confdefs.h >>conftest.$ac_ext
+cat >>conftest.$ac_ext <<_ACEOF
+/* end confdefs.h.  */
+$ac_includes_default
+#include <$ac_header>
+_ACEOF
+rm -f conftest.$ac_objext
+if { (ac_try="$ac_compile"
+case "(($ac_try" in
+  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
+  *) ac_try_echo=$ac_try;;
+esac
+eval ac_try_echo="\"\$as_me:$LINENO: $ac_try_echo\""
+$as_echo "$ac_try_echo") >&5
+  (eval "$ac_compile") 2>conftest.er1
+  ac_status=$?
+  grep -v '^ *+' conftest.er1 >conftest.err
+  rm -f conftest.er1
+  cat conftest.err >&5
+  $as_echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } && {
+	 test -z "$ac_c_werror_flag" ||
+	 test ! -s conftest.err
+       } && test -s conftest.$ac_objext; then
+  ac_header_compiler=yes
+else
+  $as_echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
+
+	ac_header_compiler=no
+fi
+
+rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+{ $as_echo "$as_me:$LINENO: result: $ac_header_compiler" >&5
+$as_echo "$ac_header_compiler" >&6; }
+
+# Is the header present?
+{ $as_echo "$as_me:$LINENO: checking $ac_header presence" >&5
+$as_echo_n "checking $ac_header presence... " >&6; }
+cat >conftest.$ac_ext <<_ACEOF
+/* confdefs.h.  */
+_ACEOF
+cat confdefs.h >>conftest.$ac_ext
+cat >>conftest.$ac_ext <<_ACEOF
+/* end confdefs.h.  */
+#include <$ac_header>
+_ACEOF
+if { (ac_try="$ac_cpp conftest.$ac_ext"
+case "(($ac_try" in
+  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
+  *) ac_try_echo=$ac_try;;
+esac
+eval ac_try_echo="\"\$as_me:$LINENO: $ac_try_echo\""
+$as_echo "$ac_try_echo") >&5
+  (eval "$ac_cpp conftest.$ac_ext") 2>conftest.er1
+  ac_status=$?
+  grep -v '^ *+' conftest.er1 >conftest.err
+  rm -f conftest.er1
+  cat conftest.err >&5
+  $as_echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } >/dev/null && {
+	 test -z "$ac_c_preproc_warn_flag$ac_c_werror_flag" ||
+	 test ! -s conftest.err
+       }; then
+  ac_header_preproc=yes
+else
+  $as_echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
+
+  ac_header_preproc=no
+fi
+
+rm -f conftest.err conftest.$ac_ext
+{ $as_echo "$as_me:$LINENO: result: $ac_header_preproc" >&5
+$as_echo "$ac_header_preproc" >&6; }
+
+# So?  What about this header?
+case $ac_header_compiler:$ac_header_preproc:$ac_c_preproc_warn_flag in
+  yes:no: )
+    { $as_echo "$as_me:$LINENO: WARNING: $ac_header: accepted by the compiler, rejected by the preprocessor!" >&5
+$as_echo "$as_me: WARNING: $ac_header: accepted by the compiler, rejected by the preprocessor!" >&2;}
+    { $as_echo "$as_me:$LINENO: WARNING: $ac_header: proceeding with the compiler's result" >&5
+$as_echo "$as_me: WARNING: $ac_header: proceeding with the compiler's result" >&2;}
+    ac_header_preproc=yes
+    ;;
+  no:yes:* )
+    { $as_echo "$as_me:$LINENO: WARNING: $ac_header: present but cannot be compiled" >&5
+$as_echo "$as_me: WARNING: $ac_header: present but cannot be compiled" >&2;}
+    { $as_echo "$as_me:$LINENO: WARNING: $ac_header:     check for missing prerequisite headers?" >&5
+$as_echo "$as_me: WARNING: $ac_header:     check for missing prerequisite headers?" >&2;}
+    { $as_echo "$as_me:$LINENO: WARNING: $ac_header: see the Autoconf documentation" >&5
+$as_echo "$as_me: WARNING: $ac_header: see the Autoconf documentation" >&2;}
+    { $as_echo "$as_me:$LINENO: WARNING: $ac_header:     section \"Present But Cannot Be Compiled\"" >&5
+$as_echo "$as_me: WARNING: $ac_header:     section \"Present But Cannot Be Compiled\"" >&2;}
+    { $as_echo "$as_me:$LINENO: WARNING: $ac_header: proceeding with the preprocessor's result" >&5
+$as_echo "$as_me: WARNING: $ac_header: proceeding with the preprocessor's result" >&2;}
+    { $as_echo "$as_me:$LINENO: WARNING: $ac_header: in the future, the compiler will take precedence" >&5
+$as_echo "$as_me: WARNING: $ac_header: in the future, the compiler will take precedence" >&2;}
+    ( cat <<\_ASBOX
+## ---------------------------------------------------- ##
+## Report this to net-snmp-coders@lists.sourceforge.net ##
+## ---------------------------------------------------- ##
+_ASBOX
+     ) | sed "s/^/$as_me: WARNING:     /" >&2
+    ;;
+esac
+{ $as_echo "$as_me:$LINENO: checking for $ac_header" >&5
+$as_echo_n "checking for $ac_header... " >&6; }
+if { as_var=$as_ac_Header; eval "test \"\${$as_var+set}\" = set"; }; then
+  $as_echo_n "(cached) " >&6
+else
+  eval "$as_ac_Header=\$ac_header_preproc"
+fi
+ac_res=`eval 'as_val=${'$as_ac_Header'}
+		 $as_echo "$as_val"'`
+	       { $as_echo "$as_me:$LINENO: result: $ac_res" >&5
+$as_echo "$ac_res" >&6; }
+
+fi
+as_val=`eval 'as_val=${'$as_ac_Header'}
+		 $as_echo "$as_val"'`
+   if test "x$as_val" = x""yes; then
+  cat >>confdefs.h <<_ACEOF
+#define `$as_echo "HAVE_$ac_header" | $as_tr_cpp` 1
+_ACEOF
+
+fi
+
+done
+
+
+if test "${ac_cv_header_rpm_rpmlib_h+set}" = set; then
+  { $as_echo "$as_me:$LINENO: checking for rpm/rpmlib.h" >&5
+$as_echo_n "checking for rpm/rpmlib.h... " >&6; }
+if test "${ac_cv_header_rpm_rpmlib_h+set}" = set; then
+  $as_echo_n "(cached) " >&6
+fi
+{ $as_echo "$as_me:$LINENO: result: $ac_cv_header_rpm_rpmlib_h" >&5
+$as_echo "$ac_cv_header_rpm_rpmlib_h" >&6; }
+else
+  # Is the header compilable?
+{ $as_echo "$as_me:$LINENO: checking rpm/rpmlib.h usability" >&5
+$as_echo_n "checking rpm/rpmlib.h usability... " >&6; }
+cat >conftest.$ac_ext <<_ACEOF
+/* confdefs.h.  */
+_ACEOF
+cat confdefs.h >>conftest.$ac_ext
+cat >>conftest.$ac_ext <<_ACEOF
+/* end confdefs.h.  */
+$ac_includes_default
+#include <rpm/rpmlib.h>
+_ACEOF
+rm -f conftest.$ac_objext
+if { (ac_try="$ac_compile"
+case "(($ac_try" in
+  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
+  *) ac_try_echo=$ac_try;;
+esac
+eval ac_try_echo="\"\$as_me:$LINENO: $ac_try_echo\""
+$as_echo "$ac_try_echo") >&5
+  (eval "$ac_compile") 2>conftest.er1
+  ac_status=$?
+  grep -v '^ *+' conftest.er1 >conftest.err
+  rm -f conftest.er1
+  cat conftest.err >&5
+  $as_echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } && {
+	 test -z "$ac_c_werror_flag" ||
+	 test ! -s conftest.err
+       } && test -s conftest.$ac_objext; then
+  ac_header_compiler=yes
+else
+  $as_echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
+
+	ac_header_compiler=no
+fi
+
+rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+{ $as_echo "$as_me:$LINENO: result: $ac_header_compiler" >&5
+$as_echo "$ac_header_compiler" >&6; }
+
+# Is the header present?
+{ $as_echo "$as_me:$LINENO: checking rpm/rpmlib.h presence" >&5
+$as_echo_n "checking rpm/rpmlib.h presence... " >&6; }
+cat >conftest.$ac_ext <<_ACEOF
+/* confdefs.h.  */
+_ACEOF
+cat confdefs.h >>conftest.$ac_ext
+cat >>conftest.$ac_ext <<_ACEOF
+/* end confdefs.h.  */
+#include <rpm/rpmlib.h>
+_ACEOF
+if { (ac_try="$ac_cpp conftest.$ac_ext"
+case "(($ac_try" in
+  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
+  *) ac_try_echo=$ac_try;;
+esac
+eval ac_try_echo="\"\$as_me:$LINENO: $ac_try_echo\""
+$as_echo "$ac_try_echo") >&5
+  (eval "$ac_cpp conftest.$ac_ext") 2>conftest.er1
+  ac_status=$?
+  grep -v '^ *+' conftest.er1 >conftest.err
+  rm -f conftest.er1
+  cat conftest.err >&5
+  $as_echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } >/dev/null && {
+	 test -z "$ac_c_preproc_warn_flag$ac_c_werror_flag" ||
+	 test ! -s conftest.err
+       }; then
+  ac_header_preproc=yes
+else
+  $as_echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
+
+  ac_header_preproc=no
+fi
+
+rm -f conftest.err conftest.$ac_ext
+{ $as_echo "$as_me:$LINENO: result: $ac_header_preproc" >&5
+$as_echo "$ac_header_preproc" >&6; }
+
+# So?  What about this header?
+case $ac_header_compiler:$ac_header_preproc:$ac_c_preproc_warn_flag in
+  yes:no: )
+    { $as_echo "$as_me:$LINENO: WARNING: rpm/rpmlib.h: accepted by the compiler, rejected by the preprocessor!" >&5
+$as_echo "$as_me: WARNING: rpm/rpmlib.h: accepted by the compiler, rejected by the preprocessor!" >&2;}
+    { $as_echo "$as_me:$LINENO: WARNING: rpm/rpmlib.h: proceeding with the compiler's result" >&5
+$as_echo "$as_me: WARNING: rpm/rpmlib.h: proceeding with the compiler's result" >&2;}
+    ac_header_preproc=yes
+    ;;
+  no:yes:* )
+    { $as_echo "$as_me:$LINENO: WARNING: rpm/rpmlib.h: present but cannot be compiled" >&5
+$as_echo "$as_me: WARNING: rpm/rpmlib.h: present but cannot be compiled" >&2;}
+    { $as_echo "$as_me:$LINENO: WARNING: rpm/rpmlib.h:     check for missing prerequisite headers?" >&5
+$as_echo "$as_me: WARNING: rpm/rpmlib.h:     check for missing prerequisite headers?" >&2;}
+    { $as_echo "$as_me:$LINENO: WARNING: rpm/rpmlib.h: see the Autoconf documentation" >&5
+$as_echo "$as_me: WARNING: rpm/rpmlib.h: see the Autoconf documentation" >&2;}
+    { $as_echo "$as_me:$LINENO: WARNING: rpm/rpmlib.h:     section \"Present But Cannot Be Compiled\"" >&5
+$as_echo "$as_me: WARNING: rpm/rpmlib.h:     section \"Present But Cannot Be Compiled\"" >&2;}
+    { $as_echo "$as_me:$LINENO: WARNING: rpm/rpmlib.h: proceeding with the preprocessor's result" >&5
+$as_echo "$as_me: WARNING: rpm/rpmlib.h: proceeding with the preprocessor's result" >&2;}
+    { $as_echo "$as_me:$LINENO: WARNING: rpm/rpmlib.h: in the future, the compiler will take precedence" >&5
+$as_echo "$as_me: WARNING: rpm/rpmlib.h: in the future, the compiler will take precedence" >&2;}
+    ( cat <<\_ASBOX
+## ---------------------------------------------------- ##
+## Report this to net-snmp-coders@lists.sourceforge.net ##
+## ---------------------------------------------------- ##
+_ASBOX
+     ) | sed "s/^/$as_me: WARNING:     /" >&2
+    ;;
+esac
+{ $as_echo "$as_me:$LINENO: checking for rpm/rpmlib.h" >&5
+$as_echo_n "checking for rpm/rpmlib.h... " >&6; }
+if test "${ac_cv_header_rpm_rpmlib_h+set}" = set; then
+  $as_echo_n "(cached) " >&6
+else
+  ac_cv_header_rpm_rpmlib_h=$ac_header_preproc
+fi
+{ $as_echo "$as_me:$LINENO: result: $ac_cv_header_rpm_rpmlib_h" >&5
+$as_echo "$ac_cv_header_rpm_rpmlib_h" >&6; }
+
+fi
+if test "x$ac_cv_header_rpm_rpmlib_h" = x""yes; then
+  rpmlib_h=yes
+else
+  rpmlib_h=no
+fi
+
+
+if test "${ac_cv_header_rpm_header_h+set}" = set; then
+  { $as_echo "$as_me:$LINENO: checking for rpm/header.h" >&5
+$as_echo_n "checking for rpm/header.h... " >&6; }
+if test "${ac_cv_header_rpm_header_h+set}" = set; then
+  $as_echo_n "(cached) " >&6
+fi
+{ $as_echo "$as_me:$LINENO: result: $ac_cv_header_rpm_header_h" >&5
+$as_echo "$ac_cv_header_rpm_header_h" >&6; }
+else
+  # Is the header compilable?
+{ $as_echo "$as_me:$LINENO: checking rpm/header.h usability" >&5
+$as_echo_n "checking rpm/header.h usability... " >&6; }
+cat >conftest.$ac_ext <<_ACEOF
+/* confdefs.h.  */
+_ACEOF
+cat confdefs.h >>conftest.$ac_ext
+cat >>conftest.$ac_ext <<_ACEOF
+/* end confdefs.h.  */
+$ac_includes_default
+#include <rpm/header.h>
+_ACEOF
+rm -f conftest.$ac_objext
+if { (ac_try="$ac_compile"
+case "(($ac_try" in
+  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
+  *) ac_try_echo=$ac_try;;
+esac
+eval ac_try_echo="\"\$as_me:$LINENO: $ac_try_echo\""
+$as_echo "$ac_try_echo") >&5
+  (eval "$ac_compile") 2>conftest.er1
+  ac_status=$?
+  grep -v '^ *+' conftest.er1 >conftest.err
+  rm -f conftest.er1
+  cat conftest.err >&5
+  $as_echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } && {
+	 test -z "$ac_c_werror_flag" ||
+	 test ! -s conftest.err
+       } && test -s conftest.$ac_objext; then
+  ac_header_compiler=yes
+else
+  $as_echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
+
+	ac_header_compiler=no
+fi
+
+rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+{ $as_echo "$as_me:$LINENO: result: $ac_header_compiler" >&5
+$as_echo "$ac_header_compiler" >&6; }
+
+# Is the header present?
+{ $as_echo "$as_me:$LINENO: checking rpm/header.h presence" >&5
+$as_echo_n "checking rpm/header.h presence... " >&6; }
+cat >conftest.$ac_ext <<_ACEOF
+/* confdefs.h.  */
+_ACEOF
+cat confdefs.h >>conftest.$ac_ext
+cat >>conftest.$ac_ext <<_ACEOF
+/* end confdefs.h.  */
+#include <rpm/header.h>
+_ACEOF
+if { (ac_try="$ac_cpp conftest.$ac_ext"
+case "(($ac_try" in
+  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
+  *) ac_try_echo=$ac_try;;
+esac
+eval ac_try_echo="\"\$as_me:$LINENO: $ac_try_echo\""
+$as_echo "$ac_try_echo") >&5
+  (eval "$ac_cpp conftest.$ac_ext") 2>conftest.er1
+  ac_status=$?
+  grep -v '^ *+' conftest.er1 >conftest.err
+  rm -f conftest.er1
+  cat conftest.err >&5
+  $as_echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } >/dev/null && {
+	 test -z "$ac_c_preproc_warn_flag$ac_c_werror_flag" ||
+	 test ! -s conftest.err
+       }; then
+  ac_header_preproc=yes
+else
+  $as_echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
+
+  ac_header_preproc=no
+fi
+
+rm -f conftest.err conftest.$ac_ext
+{ $as_echo "$as_me:$LINENO: result: $ac_header_preproc" >&5
+$as_echo "$ac_header_preproc" >&6; }
+
+# So?  What about this header?
+case $ac_header_compiler:$ac_header_preproc:$ac_c_preproc_warn_flag in
+  yes:no: )
+    { $as_echo "$as_me:$LINENO: WARNING: rpm/header.h: accepted by the compiler, rejected by the preprocessor!" >&5
+$as_echo "$as_me: WARNING: rpm/header.h: accepted by the compiler, rejected by the preprocessor!" >&2;}
+    { $as_echo "$as_me:$LINENO: WARNING: rpm/header.h: proceeding with the compiler's result" >&5
+$as_echo "$as_me: WARNING: rpm/header.h: proceeding with the compiler's result" >&2;}
+    ac_header_preproc=yes
+    ;;
+  no:yes:* )
+    { $as_echo "$as_me:$LINENO: WARNING: rpm/header.h: present but cannot be compiled" >&5
+$as_echo "$as_me: WARNING: rpm/header.h: present but cannot be compiled" >&2;}
+    { $as_echo "$as_me:$LINENO: WARNING: rpm/header.h:     check for missing prerequisite headers?" >&5
+$as_echo "$as_me: WARNING: rpm/header.h:     check for missing prerequisite headers?" >&2;}
+    { $as_echo "$as_me:$LINENO: WARNING: rpm/header.h: see the Autoconf documentation" >&5
+$as_echo "$as_me: WARNING: rpm/header.h: see the Autoconf documentation" >&2;}
+    { $as_echo "$as_me:$LINENO: WARNING: rpm/header.h:     section \"Present But Cannot Be Compiled\"" >&5
+$as_echo "$as_me: WARNING: rpm/header.h:     section \"Present But Cannot Be Compiled\"" >&2;}
+    { $as_echo "$as_me:$LINENO: WARNING: rpm/header.h: proceeding with the preprocessor's result" >&5
+$as_echo "$as_me: WARNING: rpm/header.h: proceeding with the preprocessor's result" >&2;}
+    { $as_echo "$as_me:$LINENO: WARNING: rpm/header.h: in the future, the compiler will take precedence" >&5
+$as_echo "$as_me: WARNING: rpm/header.h: in the future, the compiler will take precedence" >&2;}
+    ( cat <<\_ASBOX
+## ---------------------------------------------------- ##
+## Report this to net-snmp-coders@lists.sourceforge.net ##
+## ---------------------------------------------------- ##
+_ASBOX
+     ) | sed "s/^/$as_me: WARNING:     /" >&2
+    ;;
+esac
+{ $as_echo "$as_me:$LINENO: checking for rpm/header.h" >&5
+$as_echo_n "checking for rpm/header.h... " >&6; }
+if test "${ac_cv_header_rpm_header_h+set}" = set; then
+  $as_echo_n "(cached) " >&6
+else
+  ac_cv_header_rpm_header_h=$ac_header_preproc
+fi
+{ $as_echo "$as_me:$LINENO: result: $ac_cv_header_rpm_header_h" >&5
+$as_echo "$ac_cv_header_rpm_header_h" >&6; }
+
+fi
+if test "x$ac_cv_header_rpm_header_h" = x""yes; then
+  rpmheader_h=yes
+else
+  rpmheader_h=no
+fi
+
+
+
+if test "x$rpmheader_h" = "xno" -o "x$rpmlib_h" = "xno" ; then
+  if test "x$with_rpm" = "xyes" ; then
+    { { $as_echo "$as_me:$LINENO: error: Could not find either the RPM header files needed and was specifically asked to use RPM support" >&5
+$as_echo "$as_me: error: Could not find either the RPM header files needed and was specifically asked to use RPM support" >&2;}
+   { (exit 1); exit 1; }; }
+  else
+    with_rpm=no
+  fi
+fi
+
+#
+# rpm libraries only needed for the host resources mib software
+# installed tables (on linux in particular)
+#
+if test "x$with_rpm" != "xno"; then
+  # ARG.  RPM is a real pain.
+  # FWIW librpm.la, librpmio.la, and libpopt.la have correct dependencies.
+  _rpmlibs=""
+
+  # zlib is required for newer versions of rpm
+  _cppflags="${CPPFLAGS}"
+  _ldflags="${LDFLAGS}"
+
+  # check for zlib
+  if test "x${with_zlib}" != "xno" -a -d "${with_zlib}"; then
+    CPPFLAGS="${CPPFLAGS} -I${with_zlib}/include"
+    LDFLAGS="${LDFLAGS} -L${with_zlib}/lib"
+  fi
+
+  # dunno if this is needed for rpm-4.0.x, earlier probably needs.
+  if test "${ac_cv_header_zlib_h+set}" = set; then
+  { $as_echo "$as_me:$LINENO: checking for zlib.h" >&5
+$as_echo_n "checking for zlib.h... " >&6; }
+if test "${ac_cv_header_zlib_h+set}" = set; then
+  $as_echo_n "(cached) " >&6
+fi
+{ $as_echo "$as_me:$LINENO: result: $ac_cv_header_zlib_h" >&5
+$as_echo "$ac_cv_header_zlib_h" >&6; }
+else
+  # Is the header compilable?
+{ $as_echo "$as_me:$LINENO: checking zlib.h usability" >&5
+$as_echo_n "checking zlib.h usability... " >&6; }
+cat >conftest.$ac_ext <<_ACEOF
+/* confdefs.h.  */
+_ACEOF
+cat confdefs.h >>conftest.$ac_ext
+cat >>conftest.$ac_ext <<_ACEOF
+/* end confdefs.h.  */
+$ac_includes_default
+#include <zlib.h>
+_ACEOF
+rm -f conftest.$ac_objext
+if { (ac_try="$ac_compile"
+case "(($ac_try" in
+  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
+  *) ac_try_echo=$ac_try;;
+esac
+eval ac_try_echo="\"\$as_me:$LINENO: $ac_try_echo\""
+$as_echo "$ac_try_echo") >&5
+  (eval "$ac_compile") 2>conftest.er1
+  ac_status=$?
+  grep -v '^ *+' conftest.er1 >conftest.err
+  rm -f conftest.er1
+  cat conftest.err >&5
+  $as_echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } && {
+	 test -z "$ac_c_werror_flag" ||
+	 test ! -s conftest.err
+       } && test -s conftest.$ac_objext; then
+  ac_header_compiler=yes
+else
+  $as_echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
+
+	ac_header_compiler=no
+fi
+
+rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+{ $as_echo "$as_me:$LINENO: result: $ac_header_compiler" >&5
+$as_echo "$ac_header_compiler" >&6; }
+
+# Is the header present?
+{ $as_echo "$as_me:$LINENO: checking zlib.h presence" >&5
+$as_echo_n "checking zlib.h presence... " >&6; }
+cat >conftest.$ac_ext <<_ACEOF
+/* confdefs.h.  */
+_ACEOF
+cat confdefs.h >>conftest.$ac_ext
+cat >>conftest.$ac_ext <<_ACEOF
+/* end confdefs.h.  */
+#include <zlib.h>
+_ACEOF
+if { (ac_try="$ac_cpp conftest.$ac_ext"
+case "(($ac_try" in
+  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
+  *) ac_try_echo=$ac_try;;
+esac
+eval ac_try_echo="\"\$as_me:$LINENO: $ac_try_echo\""
+$as_echo "$ac_try_echo") >&5
+  (eval "$ac_cpp conftest.$ac_ext") 2>conftest.er1
+  ac_status=$?
+  grep -v '^ *+' conftest.er1 >conftest.err
+  rm -f conftest.er1
+  cat conftest.err >&5
+  $as_echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } >/dev/null && {
+	 test -z "$ac_c_preproc_warn_flag$ac_c_werror_flag" ||
+	 test ! -s conftest.err
+       }; then
+  ac_header_preproc=yes
+else
+  $as_echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
+
+  ac_header_preproc=no
+fi
+
+rm -f conftest.err conftest.$ac_ext
+{ $as_echo "$as_me:$LINENO: result: $ac_header_preproc" >&5
+$as_echo "$ac_header_preproc" >&6; }
+
+# So?  What about this header?
+case $ac_header_compiler:$ac_header_preproc:$ac_c_preproc_warn_flag in
+  yes:no: )
+    { $as_echo "$as_me:$LINENO: WARNING: zlib.h: accepted by the compiler, rejected by the preprocessor!" >&5
+$as_echo "$as_me: WARNING: zlib.h: accepted by the compiler, rejected by the preprocessor!" >&2;}
+    { $as_echo "$as_me:$LINENO: WARNING: zlib.h: proceeding with the compiler's result" >&5
+$as_echo "$as_me: WARNING: zlib.h: proceeding with the compiler's result" >&2;}
+    ac_header_preproc=yes
+    ;;
+  no:yes:* )
+    { $as_echo "$as_me:$LINENO: WARNING: zlib.h: present but cannot be compiled" >&5
+$as_echo "$as_me: WARNING: zlib.h: present but cannot be compiled" >&2;}
+    { $as_echo "$as_me:$LINENO: WARNING: zlib.h:     check for missing prerequisite headers?" >&5
+$as_echo "$as_me: WARNING: zlib.h:     check for missing prerequisite headers?" >&2;}
+    { $as_echo "$as_me:$LINENO: WARNING: zlib.h: see the Autoconf documentation" >&5
+$as_echo "$as_me: WARNING: zlib.h: see the Autoconf documentation" >&2;}
+    { $as_echo "$as_me:$LINENO: WARNING: zlib.h:     section \"Present But Cannot Be Compiled\"" >&5
+$as_echo "$as_me: WARNING: zlib.h:     section \"Present But Cannot Be Compiled\"" >&2;}
+    { $as_echo "$as_me:$LINENO: WARNING: zlib.h: proceeding with the preprocessor's result" >&5
+$as_echo "$as_me: WARNING: zlib.h: proceeding with the preprocessor's result" >&2;}
+    { $as_echo "$as_me:$LINENO: WARNING: zlib.h: in the future, the compiler will take precedence" >&5
+$as_echo "$as_me: WARNING: zlib.h: in the future, the compiler will take precedence" >&2;}
+    ( cat <<\_ASBOX
+## ---------------------------------------------------- ##
+## Report this to net-snmp-coders@lists.sourceforge.net ##
+## ---------------------------------------------------- ##
+_ASBOX
+     ) | sed "s/^/$as_me: WARNING:     /" >&2
+    ;;
+esac
+{ $as_echo "$as_me:$LINENO: checking for zlib.h" >&5
+$as_echo_n "checking for zlib.h... " >&6; }
+if test "${ac_cv_header_zlib_h+set}" = set; then
+  $as_echo_n "(cached) " >&6
+else
+  ac_cv_header_zlib_h=$ac_header_preproc
+fi
+{ $as_echo "$as_me:$LINENO: result: $ac_cv_header_zlib_h" >&5
+$as_echo "$ac_cv_header_zlib_h" >&6; }
+
+fi
+if test "x$ac_cv_header_zlib_h" = x""yes; then
+
+ { $as_echo "$as_me:$LINENO: checking for library containing gzread" >&5
+$as_echo_n "checking for library containing gzread... " >&6; }
+if test "${netsnmp_cv_func_gzread__rpmlibs+set}" = set; then
+  $as_echo_n "(cached) " >&6
+else
+  netsnmp_func_search_save_LIBS="$LIBS"
+     netsnmp_target_val="$_rpmlibs"
+          netsnmp_temp_LIBS="${netsnmp_target_val} $LMIBLIBS ${LIBS}"
+     netsnmp_result=no
+     LIBS="${netsnmp_temp_LIBS}"
+     cat >conftest.$ac_ext <<_ACEOF
+/* confdefs.h.  */
+_ACEOF
+cat confdefs.h >>conftest.$ac_ext
+cat >>conftest.$ac_ext <<_ACEOF
+/* end confdefs.h.  */
+
+/* Override any GCC internal prototype to avoid an error.
+   Use char because int might match the return type of a GCC
+   builtin and then its argument prototype would still apply.  */
+#ifdef __cplusplus
+extern "C"
+#endif
+char gzread ();
+int
+main ()
+{
+return gzread ();
+  ;
+  return 0;
+}
+_ACEOF
+rm -f conftest.$ac_objext conftest$ac_exeext
+if { (ac_try="$ac_link"
+case "(($ac_try" in
+  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
+  *) ac_try_echo=$ac_try;;
+esac
+eval ac_try_echo="\"\$as_me:$LINENO: $ac_try_echo\""
+$as_echo "$ac_try_echo") >&5
+  (eval "$ac_link") 2>conftest.er1
+  ac_status=$?
+  grep -v '^ *+' conftest.er1 >conftest.err
+  rm -f conftest.er1
+  cat conftest.err >&5
+  $as_echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } && {
+	 test -z "$ac_c_werror_flag" ||
+	 test ! -s conftest.err
+       } && test -s conftest$ac_exeext && {
+	 test "$cross_compiling" = yes ||
+	 $as_test_x conftest$ac_exeext
+       }; then
+  netsnmp_result="none required"
+else
+  $as_echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
+
+	for netsnmp_cur_lib in z ; do
+              LIBS="-l${netsnmp_cur_lib} ${netsnmp_temp_LIBS}"
+              cat >conftest.$ac_ext <<_ACEOF
+/* confdefs.h.  */
+_ACEOF
+cat confdefs.h >>conftest.$ac_ext
+cat >>conftest.$ac_ext <<_ACEOF
+/* end confdefs.h.  */
+
+/* Override any GCC internal prototype to avoid an error.
+   Use char because int might match the return type of a GCC
+   builtin and then its argument prototype would still apply.  */
+#ifdef __cplusplus
+extern "C"
+#endif
+char gzread ();
+int
+main ()
+{
+return gzread ();
+  ;
+  return 0;
+}
+_ACEOF
+rm -f conftest.$ac_objext conftest$ac_exeext
+if { (ac_try="$ac_link"
+case "(($ac_try" in
+  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
+  *) ac_try_echo=$ac_try;;
+esac
+eval ac_try_echo="\"\$as_me:$LINENO: $ac_try_echo\""
+$as_echo "$ac_try_echo") >&5
+  (eval "$ac_link") 2>conftest.er1
+  ac_status=$?
+  grep -v '^ *+' conftest.er1 >conftest.err
+  rm -f conftest.er1
+  cat conftest.err >&5
+  $as_echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } && {
+	 test -z "$ac_c_werror_flag" ||
+	 test ! -s conftest.err
+       } && test -s conftest$ac_exeext && {
+	 test "$cross_compiling" = yes ||
+	 $as_test_x conftest$ac_exeext
+       }; then
+  netsnmp_result=-l${netsnmp_cur_lib}
+                   break
+else
+  $as_echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
+
+
+fi
+
+rm -rf conftest.dSYM
+rm -f core conftest.err conftest.$ac_objext conftest_ipa8_conftest.oo \
+      conftest$ac_exeext conftest.$ac_ext
+          done
+fi
+
+rm -rf conftest.dSYM
+rm -f core conftest.err conftest.$ac_objext conftest_ipa8_conftest.oo \
+      conftest$ac_exeext conftest.$ac_ext
+     LIBS="${netsnmp_func_search_save_LIBS}"
+     netsnmp_cv_func_gzread__rpmlibs="${netsnmp_result}"
+fi
+{ $as_echo "$as_me:$LINENO: result: $netsnmp_cv_func_gzread__rpmlibs" >&5
+$as_echo "$netsnmp_cv_func_gzread__rpmlibs" >&6; }
+ if test "${netsnmp_cv_func_gzread__rpmlibs}" != "no" ; then
+    if test "${netsnmp_cv_func_gzread__rpmlibs}" != "none required" ; then
+       _rpmlibs="${netsnmp_result} ${netsnmp_target_val}"
+    fi
+
+ else
+    CPPFLAGS=${_cppflags} LDFLAGS=${_ldflags}
+ fi
+
+else
+  CPPFLAGS=${_cppflags} LDFLAGS=${_ldflags}
+fi
+
+
+
+  # two variants of bzip2 need checking.
+  if test "x${with_bzip2}" != "xno"; then
+    if test -d "${with_bzip2}"; then
+      CPPFLAGS="${CPPFLAGS} -I${with_bzip2}/include"
+      LDFLAGS="${LDFLAGS} -L${with_bzip2}/lib"
+    fi
+
+ { $as_echo "$as_me:$LINENO: checking for library containing bzread" >&5
+$as_echo_n "checking for library containing bzread... " >&6; }
+if test "${netsnmp_cv_func_bzread__rpmlibs+set}" = set; then
+  $as_echo_n "(cached) " >&6
+else
+  netsnmp_func_search_save_LIBS="$LIBS"
+     netsnmp_target_val="$_rpmlibs"
+          netsnmp_temp_LIBS="${netsnmp_target_val} $LMIBLIBS ${LIBS}"
+     netsnmp_result=no
+     LIBS="${netsnmp_temp_LIBS}"
+     cat >conftest.$ac_ext <<_ACEOF
+/* confdefs.h.  */
+_ACEOF
+cat confdefs.h >>conftest.$ac_ext
+cat >>conftest.$ac_ext <<_ACEOF
+/* end confdefs.h.  */
+
+/* Override any GCC internal prototype to avoid an error.
+   Use char because int might match the return type of a GCC
+   builtin and then its argument prototype would still apply.  */
+#ifdef __cplusplus
+extern "C"
+#endif
+char bzread ();
+int
+main ()
+{
+return bzread ();
+  ;
+  return 0;
+}
+_ACEOF
+rm -f conftest.$ac_objext conftest$ac_exeext
+if { (ac_try="$ac_link"
+case "(($ac_try" in
+  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
+  *) ac_try_echo=$ac_try;;
+esac
+eval ac_try_echo="\"\$as_me:$LINENO: $ac_try_echo\""
+$as_echo "$ac_try_echo") >&5
+  (eval "$ac_link") 2>conftest.er1
+  ac_status=$?
+  grep -v '^ *+' conftest.er1 >conftest.err
+  rm -f conftest.er1
+  cat conftest.err >&5
+  $as_echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } && {
+	 test -z "$ac_c_werror_flag" ||
+	 test ! -s conftest.err
+       } && test -s conftest$ac_exeext && {
+	 test "$cross_compiling" = yes ||
+	 $as_test_x conftest$ac_exeext
+       }; then
+  netsnmp_result="none required"
+else
+  $as_echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
+
+	for netsnmp_cur_lib in bz2 ; do
+              LIBS="-l${netsnmp_cur_lib} ${netsnmp_temp_LIBS}"
+              cat >conftest.$ac_ext <<_ACEOF
+/* confdefs.h.  */
+_ACEOF
+cat confdefs.h >>conftest.$ac_ext
+cat >>conftest.$ac_ext <<_ACEOF
+/* end confdefs.h.  */
+
+/* Override any GCC internal prototype to avoid an error.
+   Use char because int might match the return type of a GCC
+   builtin and then its argument prototype would still apply.  */
+#ifdef __cplusplus
+extern "C"
+#endif
+char bzread ();
+int
+main ()
+{
+return bzread ();
+  ;
+  return 0;
+}
+_ACEOF
+rm -f conftest.$ac_objext conftest$ac_exeext
+if { (ac_try="$ac_link"
+case "(($ac_try" in
+  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
+  *) ac_try_echo=$ac_try;;
+esac
+eval ac_try_echo="\"\$as_me:$LINENO: $ac_try_echo\""
+$as_echo "$ac_try_echo") >&5
+  (eval "$ac_link") 2>conftest.er1
+  ac_status=$?
+  grep -v '^ *+' conftest.er1 >conftest.err
+  rm -f conftest.er1
+  cat conftest.err >&5
+  $as_echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } && {
+	 test -z "$ac_c_werror_flag" ||
+	 test ! -s conftest.err
+       } && test -s conftest$ac_exeext && {
+	 test "$cross_compiling" = yes ||
+	 $as_test_x conftest$ac_exeext
+       }; then
+  netsnmp_result=-l${netsnmp_cur_lib}
+                   break
+else
+  $as_echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
+
+
+fi
+
+rm -rf conftest.dSYM
+rm -f core conftest.err conftest.$ac_objext conftest_ipa8_conftest.oo \
+      conftest$ac_exeext conftest.$ac_ext
+          done
+fi
+
+rm -rf conftest.dSYM
+rm -f core conftest.err conftest.$ac_objext conftest_ipa8_conftest.oo \
+      conftest$ac_exeext conftest.$ac_ext
+     LIBS="${netsnmp_func_search_save_LIBS}"
+     netsnmp_cv_func_bzread__rpmlibs="${netsnmp_result}"
+fi
+{ $as_echo "$as_me:$LINENO: result: $netsnmp_cv_func_bzread__rpmlibs" >&5
+$as_echo "$netsnmp_cv_func_bzread__rpmlibs" >&6; }
+ if test "${netsnmp_cv_func_bzread__rpmlibs}" != "no" ; then
+    if test "${netsnmp_cv_func_bzread__rpmlibs}" != "none required" ; then
+       _rpmlibs="${netsnmp_result} ${netsnmp_target_val}"
+    fi
+
+
+ fi
+
+
+ { $as_echo "$as_me:$LINENO: checking for library containing BZ2_bzread" >&5
+$as_echo_n "checking for library containing BZ2_bzread... " >&6; }
+if test "${netsnmp_cv_func_BZ2_bzread__rpmlibs+set}" = set; then
+  $as_echo_n "(cached) " >&6
+else
+  netsnmp_func_search_save_LIBS="$LIBS"
+     netsnmp_target_val="$_rpmlibs"
+          netsnmp_temp_LIBS="${netsnmp_target_val} $LMIBLIBS ${LIBS}"
+     netsnmp_result=no
+     LIBS="${netsnmp_temp_LIBS}"
+     cat >conftest.$ac_ext <<_ACEOF
+/* confdefs.h.  */
+_ACEOF
+cat confdefs.h >>conftest.$ac_ext
+cat >>conftest.$ac_ext <<_ACEOF
+/* end confdefs.h.  */
+
+/* Override any GCC internal prototype to avoid an error.
+   Use char because int might match the return type of a GCC
+   builtin and then its argument prototype would still apply.  */
+#ifdef __cplusplus
+extern "C"
+#endif
+char BZ2_bzread ();
+int
+main ()
+{
+return BZ2_bzread ();
+  ;
+  return 0;
+}
+_ACEOF
+rm -f conftest.$ac_objext conftest$ac_exeext
+if { (ac_try="$ac_link"
+case "(($ac_try" in
+  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
+  *) ac_try_echo=$ac_try;;
+esac
+eval ac_try_echo="\"\$as_me:$LINENO: $ac_try_echo\""
+$as_echo "$ac_try_echo") >&5
+  (eval "$ac_link") 2>conftest.er1
+  ac_status=$?
+  grep -v '^ *+' conftest.er1 >conftest.err
+  rm -f conftest.er1
+  cat conftest.err >&5
+  $as_echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } && {
+	 test -z "$ac_c_werror_flag" ||
+	 test ! -s conftest.err
+       } && test -s conftest$ac_exeext && {
+	 test "$cross_compiling" = yes ||
+	 $as_test_x conftest$ac_exeext
+       }; then
+  netsnmp_result="none required"
+else
+  $as_echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
+
+	for netsnmp_cur_lib in bz2 ; do
+              LIBS="-l${netsnmp_cur_lib} ${netsnmp_temp_LIBS}"
+              cat >conftest.$ac_ext <<_ACEOF
+/* confdefs.h.  */
+_ACEOF
+cat confdefs.h >>conftest.$ac_ext
+cat >>conftest.$ac_ext <<_ACEOF
+/* end confdefs.h.  */
+
+/* Override any GCC internal prototype to avoid an error.
+   Use char because int might match the return type of a GCC
+   builtin and then its argument prototype would still apply.  */
+#ifdef __cplusplus
+extern "C"
+#endif
+char BZ2_bzread ();
+int
+main ()
+{
+return BZ2_bzread ();
+  ;
+  return 0;
+}
+_ACEOF
+rm -f conftest.$ac_objext conftest$ac_exeext
+if { (ac_try="$ac_link"
+case "(($ac_try" in
+  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
+  *) ac_try_echo=$ac_try;;
+esac
+eval ac_try_echo="\"\$as_me:$LINENO: $ac_try_echo\""
+$as_echo "$ac_try_echo") >&5
+  (eval "$ac_link") 2>conftest.er1
+  ac_status=$?
+  grep -v '^ *+' conftest.er1 >conftest.err
+  rm -f conftest.er1
+  cat conftest.err >&5
+  $as_echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } && {
+	 test -z "$ac_c_werror_flag" ||
+	 test ! -s conftest.err
+       } && test -s conftest$ac_exeext && {
+	 test "$cross_compiling" = yes ||
+	 $as_test_x conftest$ac_exeext
+       }; then
+  netsnmp_result=-l${netsnmp_cur_lib}
+                   break
+else
+  $as_echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
+
+
+fi
+
+rm -rf conftest.dSYM
+rm -f core conftest.err conftest.$ac_objext conftest_ipa8_conftest.oo \
+      conftest$ac_exeext conftest.$ac_ext
+          done
+fi
+
+rm -rf conftest.dSYM
+rm -f core conftest.err conftest.$ac_objext conftest_ipa8_conftest.oo \
+      conftest$ac_exeext conftest.$ac_ext
+     LIBS="${netsnmp_func_search_save_LIBS}"
+     netsnmp_cv_func_BZ2_bzread__rpmlibs="${netsnmp_result}"
+fi
+{ $as_echo "$as_me:$LINENO: result: $netsnmp_cv_func_BZ2_bzread__rpmlibs" >&5
+$as_echo "$netsnmp_cv_func_BZ2_bzread__rpmlibs" >&6; }
+ if test "${netsnmp_cv_func_BZ2_bzread__rpmlibs}" != "no" ; then
+    if test "${netsnmp_cv_func_BZ2_bzread__rpmlibs}" != "none required" ; then
+       _rpmlibs="${netsnmp_result} ${netsnmp_target_val}"
+    fi
+
+
+ fi
+
+  fi
+
+  # two variants of db1 need checking.
+
+ { $as_echo "$as_me:$LINENO: checking for library containing dbopen" >&5
+$as_echo_n "checking for library containing dbopen... " >&6; }
+if test "${netsnmp_cv_func_dbopen__rpmlibs+set}" = set; then
+  $as_echo_n "(cached) " >&6
+else
+  netsnmp_func_search_save_LIBS="$LIBS"
+     netsnmp_target_val="$_rpmlibs"
+          netsnmp_temp_LIBS="${netsnmp_target_val} $LMIBLIBS ${LIBS}"
+     netsnmp_result=no
+     LIBS="${netsnmp_temp_LIBS}"
+     cat >conftest.$ac_ext <<_ACEOF
+/* confdefs.h.  */
+_ACEOF
+cat confdefs.h >>conftest.$ac_ext
+cat >>conftest.$ac_ext <<_ACEOF
+/* end confdefs.h.  */
+
+/* Override any GCC internal prototype to avoid an error.
+   Use char because int might match the return type of a GCC
+   builtin and then its argument prototype would still apply.  */
+#ifdef __cplusplus
+extern "C"
+#endif
+char dbopen ();
+int
+main ()
+{
+return dbopen ();
+  ;
+  return 0;
+}
+_ACEOF
+rm -f conftest.$ac_objext conftest$ac_exeext
+if { (ac_try="$ac_link"
+case "(($ac_try" in
+  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
+  *) ac_try_echo=$ac_try;;
+esac
+eval ac_try_echo="\"\$as_me:$LINENO: $ac_try_echo\""
+$as_echo "$ac_try_echo") >&5
+  (eval "$ac_link") 2>conftest.er1
+  ac_status=$?
+  grep -v '^ *+' conftest.er1 >conftest.err
+  rm -f conftest.er1
+  cat conftest.err >&5
+  $as_echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } && {
+	 test -z "$ac_c_werror_flag" ||
+	 test ! -s conftest.err
+       } && test -s conftest$ac_exeext && {
+	 test "$cross_compiling" = yes ||
+	 $as_test_x conftest$ac_exeext
+       }; then
+  netsnmp_result="none required"
+else
+  $as_echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
+
+	for netsnmp_cur_lib in db1 db ; do
+              LIBS="-l${netsnmp_cur_lib} ${netsnmp_temp_LIBS}"
+              cat >conftest.$ac_ext <<_ACEOF
+/* confdefs.h.  */
+_ACEOF
+cat confdefs.h >>conftest.$ac_ext
+cat >>conftest.$ac_ext <<_ACEOF
+/* end confdefs.h.  */
+
+/* Override any GCC internal prototype to avoid an error.
+   Use char because int might match the return type of a GCC
+   builtin and then its argument prototype would still apply.  */
+#ifdef __cplusplus
+extern "C"
+#endif
+char dbopen ();
+int
+main ()
+{
+return dbopen ();
+  ;
+  return 0;
+}
+_ACEOF
+rm -f conftest.$ac_objext conftest$ac_exeext
+if { (ac_try="$ac_link"
+case "(($ac_try" in
+  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
+  *) ac_try_echo=$ac_try;;
+esac
+eval ac_try_echo="\"\$as_me:$LINENO: $ac_try_echo\""
+$as_echo "$ac_try_echo") >&5
+  (eval "$ac_link") 2>conftest.er1
+  ac_status=$?
+  grep -v '^ *+' conftest.er1 >conftest.err
+  rm -f conftest.er1
+  cat conftest.err >&5
+  $as_echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } && {
+	 test -z "$ac_c_werror_flag" ||
+	 test ! -s conftest.err
+       } && test -s conftest$ac_exeext && {
+	 test "$cross_compiling" = yes ||
+	 $as_test_x conftest$ac_exeext
+       }; then
+  netsnmp_result=-l${netsnmp_cur_lib}
+                   break
+else
+  $as_echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
+
+
+fi
+
+rm -rf conftest.dSYM
+rm -f core conftest.err conftest.$ac_objext conftest_ipa8_conftest.oo \
+      conftest$ac_exeext conftest.$ac_ext
+          done
+fi
+
+rm -rf conftest.dSYM
+rm -f core conftest.err conftest.$ac_objext conftest_ipa8_conftest.oo \
+      conftest$ac_exeext conftest.$ac_ext
+     LIBS="${netsnmp_func_search_save_LIBS}"
+     netsnmp_cv_func_dbopen__rpmlibs="${netsnmp_result}"
+fi
+{ $as_echo "$as_me:$LINENO: result: $netsnmp_cv_func_dbopen__rpmlibs" >&5
+$as_echo "$netsnmp_cv_func_dbopen__rpmlibs" >&6; }
+ if test "${netsnmp_cv_func_dbopen__rpmlibs}" != "no" ; then
+    if test "${netsnmp_cv_func_dbopen__rpmlibs}" != "none required" ; then
+       _rpmlibs="${netsnmp_result} ${netsnmp_target_val}"
+    fi
+
+
+ fi
+
+
+  # two variants of db3 need checking.
+
+ { $as_echo "$as_me:$LINENO: checking for library containing db_create" >&5
+$as_echo_n "checking for library containing db_create... " >&6; }
+if test "${netsnmp_cv_func_db_create__rpmlibs+set}" = set; then
+  $as_echo_n "(cached) " >&6
+else
+  netsnmp_func_search_save_LIBS="$LIBS"
+     netsnmp_target_val="$_rpmlibs"
+          netsnmp_temp_LIBS="${netsnmp_target_val} $LMIBLIBS ${LIBS}"
+     netsnmp_result=no
+     LIBS="${netsnmp_temp_LIBS}"
+     cat >conftest.$ac_ext <<_ACEOF
+/* confdefs.h.  */
+_ACEOF
+cat confdefs.h >>conftest.$ac_ext
+cat >>conftest.$ac_ext <<_ACEOF
+/* end confdefs.h.  */
+
+/* Override any GCC internal prototype to avoid an error.
+   Use char because int might match the return type of a GCC
+   builtin and then its argument prototype would still apply.  */
+#ifdef __cplusplus
+extern "C"
+#endif
+char db_create ();
+int
+main ()
+{
+return db_create ();
+  ;
+  return 0;
+}
+_ACEOF
+rm -f conftest.$ac_objext conftest$ac_exeext
+if { (ac_try="$ac_link"
+case "(($ac_try" in
+  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
+  *) ac_try_echo=$ac_try;;
+esac
+eval ac_try_echo="\"\$as_me:$LINENO: $ac_try_echo\""
+$as_echo "$ac_try_echo") >&5
+  (eval "$ac_link") 2>conftest.er1
+  ac_status=$?
+  grep -v '^ *+' conftest.er1 >conftest.err
+  rm -f conftest.er1
+  cat conftest.err >&5
+  $as_echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } && {
+	 test -z "$ac_c_werror_flag" ||
+	 test ! -s conftest.err
+       } && test -s conftest$ac_exeext && {
+	 test "$cross_compiling" = yes ||
+	 $as_test_x conftest$ac_exeext
+       }; then
+  netsnmp_result="none required"
+else
+  $as_echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
+
+	for netsnmp_cur_lib in db-3.1 db-3.0 ; do
+              LIBS="-l${netsnmp_cur_lib} ${netsnmp_temp_LIBS}"
+              cat >conftest.$ac_ext <<_ACEOF
+/* confdefs.h.  */
+_ACEOF
+cat confdefs.h >>conftest.$ac_ext
+cat >>conftest.$ac_ext <<_ACEOF
+/* end confdefs.h.  */
+
+/* Override any GCC internal prototype to avoid an error.
+   Use char because int might match the return type of a GCC
+   builtin and then its argument prototype would still apply.  */
+#ifdef __cplusplus
+extern "C"
+#endif
+char db_create ();
+int
+main ()
+{
+return db_create ();
+  ;
+  return 0;
+}
+_ACEOF
+rm -f conftest.$ac_objext conftest$ac_exeext
+if { (ac_try="$ac_link"
+case "(($ac_try" in
+  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
+  *) ac_try_echo=$ac_try;;
+esac
+eval ac_try_echo="\"\$as_me:$LINENO: $ac_try_echo\""
+$as_echo "$ac_try_echo") >&5
+  (eval "$ac_link") 2>conftest.er1
+  ac_status=$?
+  grep -v '^ *+' conftest.er1 >conftest.err
+  rm -f conftest.er1
+  cat conftest.err >&5
+  $as_echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } && {
+	 test -z "$ac_c_werror_flag" ||
+	 test ! -s conftest.err
+       } && test -s conftest$ac_exeext && {
+	 test "$cross_compiling" = yes ||
+	 $as_test_x conftest$ac_exeext
+       }; then
+  netsnmp_result=-l${netsnmp_cur_lib}
+                   break
+else
+  $as_echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
+
+
+fi
+
+rm -rf conftest.dSYM
+rm -f core conftest.err conftest.$ac_objext conftest_ipa8_conftest.oo \
+      conftest$ac_exeext conftest.$ac_ext
+          done
+fi
+
+rm -rf conftest.dSYM
+rm -f core conftest.err conftest.$ac_objext conftest_ipa8_conftest.oo \
+      conftest$ac_exeext conftest.$ac_ext
+     LIBS="${netsnmp_func_search_save_LIBS}"
+     netsnmp_cv_func_db_create__rpmlibs="${netsnmp_result}"
+fi
+{ $as_echo "$as_me:$LINENO: result: $netsnmp_cv_func_db_create__rpmlibs" >&5
+$as_echo "$netsnmp_cv_func_db_create__rpmlibs" >&6; }
+ if test "${netsnmp_cv_func_db_create__rpmlibs}" != "no" ; then
+    if test "${netsnmp_cv_func_db_create__rpmlibs}" != "none required" ; then
+       _rpmlibs="${netsnmp_result} ${netsnmp_target_val}"
+    fi
+
+
+ fi
+
+
+  # rpm-3.0.5 and later needs popt.
+
+ { $as_echo "$as_me:$LINENO: checking for library containing poptParseArgvString" >&5
+$as_echo_n "checking for library containing poptParseArgvString... " >&6; }
+if test "${netsnmp_cv_func_poptParseArgvString__rpmlibs+set}" = set; then
+  $as_echo_n "(cached) " >&6
+else
+  netsnmp_func_search_save_LIBS="$LIBS"
+     netsnmp_target_val="$_rpmlibs"
+          netsnmp_temp_LIBS="${netsnmp_target_val} $LMIBLIBS ${LIBS}"
+     netsnmp_result=no
+     LIBS="${netsnmp_temp_LIBS}"
+     cat >conftest.$ac_ext <<_ACEOF
+/* confdefs.h.  */
+_ACEOF
+cat confdefs.h >>conftest.$ac_ext
+cat >>conftest.$ac_ext <<_ACEOF
+/* end confdefs.h.  */
+
+/* Override any GCC internal prototype to avoid an error.
+   Use char because int might match the return type of a GCC
+   builtin and then its argument prototype would still apply.  */
+#ifdef __cplusplus
+extern "C"
+#endif
+char poptParseArgvString ();
+int
+main ()
+{
+return poptParseArgvString ();
+  ;
+  return 0;
+}
+_ACEOF
+rm -f conftest.$ac_objext conftest$ac_exeext
+if { (ac_try="$ac_link"
+case "(($ac_try" in
+  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
+  *) ac_try_echo=$ac_try;;
+esac
+eval ac_try_echo="\"\$as_me:$LINENO: $ac_try_echo\""
+$as_echo "$ac_try_echo") >&5
+  (eval "$ac_link") 2>conftest.er1
+  ac_status=$?
+  grep -v '^ *+' conftest.er1 >conftest.err
+  rm -f conftest.er1
+  cat conftest.err >&5
+  $as_echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } && {
+	 test -z "$ac_c_werror_flag" ||
+	 test ! -s conftest.err
+       } && test -s conftest$ac_exeext && {
+	 test "$cross_compiling" = yes ||
+	 $as_test_x conftest$ac_exeext
+       }; then
+  netsnmp_result="none required"
+else
+  $as_echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
+
+	for netsnmp_cur_lib in popt ; do
+              LIBS="-l${netsnmp_cur_lib} ${netsnmp_temp_LIBS}"
+              cat >conftest.$ac_ext <<_ACEOF
+/* confdefs.h.  */
+_ACEOF
+cat confdefs.h >>conftest.$ac_ext
+cat >>conftest.$ac_ext <<_ACEOF
+/* end confdefs.h.  */
+
+/* Override any GCC internal prototype to avoid an error.
+   Use char because int might match the return type of a GCC
+   builtin and then its argument prototype would still apply.  */
+#ifdef __cplusplus
+extern "C"
+#endif
+char poptParseArgvString ();
+int
+main ()
+{
+return poptParseArgvString ();
+  ;
+  return 0;
+}
+_ACEOF
+rm -f conftest.$ac_objext conftest$ac_exeext
+if { (ac_try="$ac_link"
+case "(($ac_try" in
+  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
+  *) ac_try_echo=$ac_try;;
+esac
+eval ac_try_echo="\"\$as_me:$LINENO: $ac_try_echo\""
+$as_echo "$ac_try_echo") >&5
+  (eval "$ac_link") 2>conftest.er1
+  ac_status=$?
+  grep -v '^ *+' conftest.er1 >conftest.err
+  rm -f conftest.er1
+  cat conftest.err >&5
+  $as_echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } && {
+	 test -z "$ac_c_werror_flag" ||
+	 test ! -s conftest.err
+       } && test -s conftest$ac_exeext && {
+	 test "$cross_compiling" = yes ||
+	 $as_test_x conftest$ac_exeext
+       }; then
+  netsnmp_result=-l${netsnmp_cur_lib}
+                   break
+else
+  $as_echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
+
+
+fi
+
+rm -rf conftest.dSYM
+rm -f core conftest.err conftest.$ac_objext conftest_ipa8_conftest.oo \
+      conftest$ac_exeext conftest.$ac_ext
+          done
+fi
+
+rm -rf conftest.dSYM
+rm -f core conftest.err conftest.$ac_objext conftest_ipa8_conftest.oo \
+      conftest$ac_exeext conftest.$ac_ext
+     LIBS="${netsnmp_func_search_save_LIBS}"
+     netsnmp_cv_func_poptParseArgvString__rpmlibs="${netsnmp_result}"
+fi
+{ $as_echo "$as_me:$LINENO: result: $netsnmp_cv_func_poptParseArgvString__rpmlibs" >&5
+$as_echo "$netsnmp_cv_func_poptParseArgvString__rpmlibs" >&6; }
+ if test "${netsnmp_cv_func_poptParseArgvString__rpmlibs}" != "no" ; then
+    if test "${netsnmp_cv_func_poptParseArgvString__rpmlibs}" != "none required" ; then
+       _rpmlibs="${netsnmp_result} ${netsnmp_target_val}"
+    fi
+
+
+ fi
+
+
+  # rpm-4.0.x needs rpmio.
+
+ { $as_echo "$as_me:$LINENO: checking for library containing Fopen" >&5
+$as_echo_n "checking for library containing Fopen... " >&6; }
+if test "${netsnmp_cv_func_Fopen__rpmlibs+set}" = set; then
+  $as_echo_n "(cached) " >&6
+else
+  netsnmp_func_search_save_LIBS="$LIBS"
+     netsnmp_target_val="$_rpmlibs"
+          netsnmp_temp_LIBS="${netsnmp_target_val} $LMIBLIBS ${LIBS}"
+     netsnmp_result=no
+     LIBS="${netsnmp_temp_LIBS}"
+     cat >conftest.$ac_ext <<_ACEOF
+/* confdefs.h.  */
+_ACEOF
+cat confdefs.h >>conftest.$ac_ext
+cat >>conftest.$ac_ext <<_ACEOF
+/* end confdefs.h.  */
+
+/* Override any GCC internal prototype to avoid an error.
+   Use char because int might match the return type of a GCC
+   builtin and then its argument prototype would still apply.  */
+#ifdef __cplusplus
+extern "C"
+#endif
+char Fopen ();
+int
+main ()
+{
+return Fopen ();
+  ;
+  return 0;
+}
+_ACEOF
+rm -f conftest.$ac_objext conftest$ac_exeext
+if { (ac_try="$ac_link"
+case "(($ac_try" in
+  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
+  *) ac_try_echo=$ac_try;;
+esac
+eval ac_try_echo="\"\$as_me:$LINENO: $ac_try_echo\""
+$as_echo "$ac_try_echo") >&5
+  (eval "$ac_link") 2>conftest.er1
+  ac_status=$?
+  grep -v '^ *+' conftest.er1 >conftest.err
+  rm -f conftest.er1
+  cat conftest.err >&5
+  $as_echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } && {
+	 test -z "$ac_c_werror_flag" ||
+	 test ! -s conftest.err
+       } && test -s conftest$ac_exeext && {
+	 test "$cross_compiling" = yes ||
+	 $as_test_x conftest$ac_exeext
+       }; then
+  netsnmp_result="none required"
+else
+  $as_echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
+
+	for netsnmp_cur_lib in rpmio ; do
+              LIBS="-l${netsnmp_cur_lib} ${netsnmp_temp_LIBS}"
+              cat >conftest.$ac_ext <<_ACEOF
+/* confdefs.h.  */
+_ACEOF
+cat confdefs.h >>conftest.$ac_ext
+cat >>conftest.$ac_ext <<_ACEOF
+/* end confdefs.h.  */
+
+/* Override any GCC internal prototype to avoid an error.
+   Use char because int might match the return type of a GCC
+   builtin and then its argument prototype would still apply.  */
+#ifdef __cplusplus
+extern "C"
+#endif
+char Fopen ();
+int
+main ()
+{
+return Fopen ();
+  ;
+  return 0;
+}
+_ACEOF
+rm -f conftest.$ac_objext conftest$ac_exeext
+if { (ac_try="$ac_link"
+case "(($ac_try" in
+  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
+  *) ac_try_echo=$ac_try;;
+esac
+eval ac_try_echo="\"\$as_me:$LINENO: $ac_try_echo\""
+$as_echo "$ac_try_echo") >&5
+  (eval "$ac_link") 2>conftest.er1
+  ac_status=$?
+  grep -v '^ *+' conftest.er1 >conftest.err
+  rm -f conftest.er1
+  cat conftest.err >&5
+  $as_echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } && {
+	 test -z "$ac_c_werror_flag" ||
+	 test ! -s conftest.err
+       } && test -s conftest$ac_exeext && {
+	 test "$cross_compiling" = yes ||
+	 $as_test_x conftest$ac_exeext
+       }; then
+  netsnmp_result=-l${netsnmp_cur_lib}
+                   break
+else
+  $as_echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
+
+
+fi
+
+rm -rf conftest.dSYM
+rm -f core conftest.err conftest.$ac_objext conftest_ipa8_conftest.oo \
+      conftest$ac_exeext conftest.$ac_ext
+          done
+fi
+
+rm -rf conftest.dSYM
+rm -f core conftest.err conftest.$ac_objext conftest_ipa8_conftest.oo \
+      conftest$ac_exeext conftest.$ac_ext
+     LIBS="${netsnmp_func_search_save_LIBS}"
+     netsnmp_cv_func_Fopen__rpmlibs="${netsnmp_result}"
+fi
+{ $as_echo "$as_me:$LINENO: result: $netsnmp_cv_func_Fopen__rpmlibs" >&5
+$as_echo "$netsnmp_cv_func_Fopen__rpmlibs" >&6; }
+ if test "${netsnmp_cv_func_Fopen__rpmlibs}" != "no" ; then
+    if test "${netsnmp_cv_func_Fopen__rpmlibs}" != "none required" ; then
+       _rpmlibs="${netsnmp_result} ${netsnmp_target_val}"
+    fi
+
+
+ fi
+
+
+  # rpm-4.0.3 librpmdb actually contains what we need.
+
+ { $as_echo "$as_me:$LINENO: checking for library containing rpmdbOpen" >&5
+$as_echo_n "checking for library containing rpmdbOpen... " >&6; }
+if test "${netsnmp_cv_func_rpmdbOpen__rpmlibs+set}" = set; then
+  $as_echo_n "(cached) " >&6
+else
+  netsnmp_func_search_save_LIBS="$LIBS"
+     netsnmp_target_val="$_rpmlibs"
+          netsnmp_temp_LIBS="${netsnmp_target_val} $LMIBLIBS ${LIBS}"
+     netsnmp_result=no
+     LIBS="${netsnmp_temp_LIBS}"
+     cat >conftest.$ac_ext <<_ACEOF
+/* confdefs.h.  */
+_ACEOF
+cat confdefs.h >>conftest.$ac_ext
+cat >>conftest.$ac_ext <<_ACEOF
+/* end confdefs.h.  */
+
+/* Override any GCC internal prototype to avoid an error.
+   Use char because int might match the return type of a GCC
+   builtin and then its argument prototype would still apply.  */
+#ifdef __cplusplus
+extern "C"
+#endif
+char rpmdbOpen ();
+int
+main ()
+{
+return rpmdbOpen ();
+  ;
+  return 0;
+}
+_ACEOF
+rm -f conftest.$ac_objext conftest$ac_exeext
+if { (ac_try="$ac_link"
+case "(($ac_try" in
+  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
+  *) ac_try_echo=$ac_try;;
+esac
+eval ac_try_echo="\"\$as_me:$LINENO: $ac_try_echo\""
+$as_echo "$ac_try_echo") >&5
+  (eval "$ac_link") 2>conftest.er1
+  ac_status=$?
+  grep -v '^ *+' conftest.er1 >conftest.err
+  rm -f conftest.er1
+  cat conftest.err >&5
+  $as_echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } && {
+	 test -z "$ac_c_werror_flag" ||
+	 test ! -s conftest.err
+       } && test -s conftest$ac_exeext && {
+	 test "$cross_compiling" = yes ||
+	 $as_test_x conftest$ac_exeext
+       }; then
+  netsnmp_result="none required"
+else
+  $as_echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
+
+	for netsnmp_cur_lib in rpmdb ; do
+              LIBS="-l${netsnmp_cur_lib} ${netsnmp_temp_LIBS}"
+              cat >conftest.$ac_ext <<_ACEOF
+/* confdefs.h.  */
+_ACEOF
+cat confdefs.h >>conftest.$ac_ext
+cat >>conftest.$ac_ext <<_ACEOF
+/* end confdefs.h.  */
+
+/* Override any GCC internal prototype to avoid an error.
+   Use char because int might match the return type of a GCC
+   builtin and then its argument prototype would still apply.  */
+#ifdef __cplusplus
+extern "C"
+#endif
+char rpmdbOpen ();
+int
+main ()
+{
+return rpmdbOpen ();
+  ;
+  return 0;
+}
+_ACEOF
+rm -f conftest.$ac_objext conftest$ac_exeext
+if { (ac_try="$ac_link"
+case "(($ac_try" in
+  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
+  *) ac_try_echo=$ac_try;;
+esac
+eval ac_try_echo="\"\$as_me:$LINENO: $ac_try_echo\""
+$as_echo "$ac_try_echo") >&5
+  (eval "$ac_link") 2>conftest.er1
+  ac_status=$?
+  grep -v '^ *+' conftest.er1 >conftest.err
+  rm -f conftest.er1
+  cat conftest.err >&5
+  $as_echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } && {
+	 test -z "$ac_c_werror_flag" ||
+	 test ! -s conftest.err
+       } && test -s conftest$ac_exeext && {
+	 test "$cross_compiling" = yes ||
+	 $as_test_x conftest$ac_exeext
+       }; then
+  netsnmp_result=-l${netsnmp_cur_lib}
+                   break
+else
+  $as_echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
+
+
+fi
+
+rm -rf conftest.dSYM
+rm -f core conftest.err conftest.$ac_objext conftest_ipa8_conftest.oo \
+      conftest$ac_exeext conftest.$ac_ext
+          done
+fi
+
+rm -rf conftest.dSYM
+rm -f core conftest.err conftest.$ac_objext conftest_ipa8_conftest.oo \
+      conftest$ac_exeext conftest.$ac_ext
+     LIBS="${netsnmp_func_search_save_LIBS}"
+     netsnmp_cv_func_rpmdbOpen__rpmlibs="${netsnmp_result}"
+fi
+{ $as_echo "$as_me:$LINENO: result: $netsnmp_cv_func_rpmdbOpen__rpmlibs" >&5
+$as_echo "$netsnmp_cv_func_rpmdbOpen__rpmlibs" >&6; }
+ if test "${netsnmp_cv_func_rpmdbOpen__rpmlibs}" != "no" ; then
+    if test "${netsnmp_cv_func_rpmdbOpen__rpmlibs}" != "none required" ; then
+       _rpmlibs="${netsnmp_result} ${netsnmp_target_val}"
+    fi
+
+
+ fi
+
+  # now check for rpm using the appropriate libraries.
+
+ { $as_echo "$as_me:$LINENO: checking for library containing rpmGetFilesystemList" >&5
+$as_echo_n "checking for library containing rpmGetFilesystemList... " >&6; }
+if test "${netsnmp_cv_func_rpmGetFilesystemList__rpmlibs+set}" = set; then
+  $as_echo_n "(cached) " >&6
+else
+  netsnmp_func_search_save_LIBS="$LIBS"
+     netsnmp_target_val="$_rpmlibs"
+          netsnmp_temp_LIBS="${netsnmp_target_val} $LMIBLIBS ${LIBS}"
+     netsnmp_result=no
+     LIBS="${netsnmp_temp_LIBS}"
+     cat >conftest.$ac_ext <<_ACEOF
+/* confdefs.h.  */
+_ACEOF
+cat confdefs.h >>conftest.$ac_ext
+cat >>conftest.$ac_ext <<_ACEOF
+/* end confdefs.h.  */
+
+/* Override any GCC internal prototype to avoid an error.
+   Use char because int might match the return type of a GCC
+   builtin and then its argument prototype would still apply.  */
+#ifdef __cplusplus
+extern "C"
+#endif
+char rpmGetFilesystemList ();
+int
+main ()
+{
+return rpmGetFilesystemList ();
+  ;
+  return 0;
+}
+_ACEOF
+rm -f conftest.$ac_objext conftest$ac_exeext
+if { (ac_try="$ac_link"
+case "(($ac_try" in
+  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
+  *) ac_try_echo=$ac_try;;
+esac
+eval ac_try_echo="\"\$as_me:$LINENO: $ac_try_echo\""
+$as_echo "$ac_try_echo") >&5
+  (eval "$ac_link") 2>conftest.er1
+  ac_status=$?
+  grep -v '^ *+' conftest.er1 >conftest.err
+  rm -f conftest.er1
+  cat conftest.err >&5
+  $as_echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } && {
+	 test -z "$ac_c_werror_flag" ||
+	 test ! -s conftest.err
+       } && test -s conftest$ac_exeext && {
+	 test "$cross_compiling" = yes ||
+	 $as_test_x conftest$ac_exeext
+       }; then
+  netsnmp_result="none required"
+else
+  $as_echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
+
+	for netsnmp_cur_lib in rpm ; do
+              LIBS="-l${netsnmp_cur_lib} ${netsnmp_temp_LIBS}"
+              cat >conftest.$ac_ext <<_ACEOF
+/* confdefs.h.  */
+_ACEOF
+cat confdefs.h >>conftest.$ac_ext
+cat >>conftest.$ac_ext <<_ACEOF
+/* end confdefs.h.  */
+
+/* Override any GCC internal prototype to avoid an error.
+   Use char because int might match the return type of a GCC
+   builtin and then its argument prototype would still apply.  */
+#ifdef __cplusplus
+extern "C"
+#endif
+char rpmGetFilesystemList ();
+int
+main ()
+{
+return rpmGetFilesystemList ();
+  ;
+  return 0;
+}
+_ACEOF
+rm -f conftest.$ac_objext conftest$ac_exeext
+if { (ac_try="$ac_link"
+case "(($ac_try" in
+  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
+  *) ac_try_echo=$ac_try;;
+esac
+eval ac_try_echo="\"\$as_me:$LINENO: $ac_try_echo\""
+$as_echo "$ac_try_echo") >&5
+  (eval "$ac_link") 2>conftest.er1
+  ac_status=$?
+  grep -v '^ *+' conftest.er1 >conftest.err
+  rm -f conftest.er1
+  cat conftest.err >&5
+  $as_echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } && {
+	 test -z "$ac_c_werror_flag" ||
+	 test ! -s conftest.err
+       } && test -s conftest$ac_exeext && {
+	 test "$cross_compiling" = yes ||
+	 $as_test_x conftest$ac_exeext
+       }; then
+  netsnmp_result=-l${netsnmp_cur_lib}
+                   break
+else
+  $as_echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
+
+
+fi
+
+rm -rf conftest.dSYM
+rm -f core conftest.err conftest.$ac_objext conftest_ipa8_conftest.oo \
+      conftest$ac_exeext conftest.$ac_ext
+          done
+fi
+
+rm -rf conftest.dSYM
+rm -f core conftest.err conftest.$ac_objext conftest_ipa8_conftest.oo \
+      conftest$ac_exeext conftest.$ac_ext
+     LIBS="${netsnmp_func_search_save_LIBS}"
+     netsnmp_cv_func_rpmGetFilesystemList__rpmlibs="${netsnmp_result}"
+fi
+{ $as_echo "$as_me:$LINENO: result: $netsnmp_cv_func_rpmGetFilesystemList__rpmlibs" >&5
+$as_echo "$netsnmp_cv_func_rpmGetFilesystemList__rpmlibs" >&6; }
+ if test "${netsnmp_cv_func_rpmGetFilesystemList__rpmlibs}" != "no" ; then
+    if test "${netsnmp_cv_func_rpmGetFilesystemList__rpmlibs}" != "none required" ; then
+       _rpmlibs="${netsnmp_result} ${netsnmp_target_val}"
+    fi
+
+
+cat >>confdefs.h <<\_ACEOF
+#define HAVE_LIBRPM 1
+_ACEOF
+
+    LMIBLIBS="$_rpmlibs $LMIBLIBS"
+
+
+ fi
+
+
+  # rpm 4.6 has incompatible API, turn on the legacy one
+  { $as_echo "$as_me:$LINENO: checking whether headerGetEntry is declared" >&5
+$as_echo_n "checking whether headerGetEntry is declared... " >&6; }
+if test "${ac_cv_have_decl_headerGetEntry+set}" = set; then
+  $as_echo_n "(cached) " >&6
+else
+  cat >conftest.$ac_ext <<_ACEOF
+/* confdefs.h.  */
+_ACEOF
+cat confdefs.h >>conftest.$ac_ext
+cat >>conftest.$ac_ext <<_ACEOF
+/* end confdefs.h.  */
+#include <rpm/rpmlib.h>
+
+
+int
+main ()
+{
+#ifndef headerGetEntry
+  (void) headerGetEntry;
+#endif
+
+  ;
+  return 0;
+}
+_ACEOF
+rm -f conftest.$ac_objext
+if { (ac_try="$ac_compile"
+case "(($ac_try" in
+  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
+  *) ac_try_echo=$ac_try;;
+esac
+eval ac_try_echo="\"\$as_me:$LINENO: $ac_try_echo\""
+$as_echo "$ac_try_echo") >&5
+  (eval "$ac_compile") 2>conftest.er1
+  ac_status=$?
+  grep -v '^ *+' conftest.er1 >conftest.err
+  rm -f conftest.er1
+  cat conftest.err >&5
+  $as_echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } && {
+	 test -z "$ac_c_werror_flag" ||
+	 test ! -s conftest.err
+       } && test -s conftest.$ac_objext; then
+  ac_cv_have_decl_headerGetEntry=yes
+else
+  $as_echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
+
+	ac_cv_have_decl_headerGetEntry=no
+fi
+
+rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+fi
+{ $as_echo "$as_me:$LINENO: result: $ac_cv_have_decl_headerGetEntry" >&5
+$as_echo "$ac_cv_have_decl_headerGetEntry" >&6; }
+if test "x$ac_cv_have_decl_headerGetEntry" = x""yes; then
+  :
+else
+
+cat >>confdefs.h <<\_ACEOF
+#define _RPM_4_4_COMPAT /**/
+_ACEOF
+
+fi
+
+fi
+
+# -*- autoconf -*-
 #
 # generate empty files
 #
@@ -25661,7 +27584,8 @@ fi
 # -*- autoconf -*-
 #########################################
 ##
-# Checks for libraries
+# Checks for libraries that are run
+# after the agent module tests.
 ##
 #########################################
 
@@ -30253,1923 +32177,6 @@ rm -f core conftest.err conftest.$ac_objext conftest_ipa8_conftest.oo \
   LIBS=${_libs}
 fi
 
-
-##
-#   RPM checks
-#
-##
-
-
-for ac_header in rpm/rpmlib.h rpm/header.h
-do
-as_ac_Header=`$as_echo "ac_cv_header_$ac_header" | $as_tr_sh`
-if { as_var=$as_ac_Header; eval "test \"\${$as_var+set}\" = set"; }; then
-  { $as_echo "$as_me:$LINENO: checking for $ac_header" >&5
-$as_echo_n "checking for $ac_header... " >&6; }
-if { as_var=$as_ac_Header; eval "test \"\${$as_var+set}\" = set"; }; then
-  $as_echo_n "(cached) " >&6
-fi
-ac_res=`eval 'as_val=${'$as_ac_Header'}
-		 $as_echo "$as_val"'`
-	       { $as_echo "$as_me:$LINENO: result: $ac_res" >&5
-$as_echo "$ac_res" >&6; }
-else
-  # Is the header compilable?
-{ $as_echo "$as_me:$LINENO: checking $ac_header usability" >&5
-$as_echo_n "checking $ac_header usability... " >&6; }
-cat >conftest.$ac_ext <<_ACEOF
-/* confdefs.h.  */
-_ACEOF
-cat confdefs.h >>conftest.$ac_ext
-cat >>conftest.$ac_ext <<_ACEOF
-/* end confdefs.h.  */
-$ac_includes_default
-#include <$ac_header>
-_ACEOF
-rm -f conftest.$ac_objext
-if { (ac_try="$ac_compile"
-case "(($ac_try" in
-  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
-  *) ac_try_echo=$ac_try;;
-esac
-eval ac_try_echo="\"\$as_me:$LINENO: $ac_try_echo\""
-$as_echo "$ac_try_echo") >&5
-  (eval "$ac_compile") 2>conftest.er1
-  ac_status=$?
-  grep -v '^ *+' conftest.er1 >conftest.err
-  rm -f conftest.er1
-  cat conftest.err >&5
-  $as_echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); } && {
-	 test -z "$ac_c_werror_flag" ||
-	 test ! -s conftest.err
-       } && test -s conftest.$ac_objext; then
-  ac_header_compiler=yes
-else
-  $as_echo "$as_me: failed program was:" >&5
-sed 's/^/| /' conftest.$ac_ext >&5
-
-	ac_header_compiler=no
-fi
-
-rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
-{ $as_echo "$as_me:$LINENO: result: $ac_header_compiler" >&5
-$as_echo "$ac_header_compiler" >&6; }
-
-# Is the header present?
-{ $as_echo "$as_me:$LINENO: checking $ac_header presence" >&5
-$as_echo_n "checking $ac_header presence... " >&6; }
-cat >conftest.$ac_ext <<_ACEOF
-/* confdefs.h.  */
-_ACEOF
-cat confdefs.h >>conftest.$ac_ext
-cat >>conftest.$ac_ext <<_ACEOF
-/* end confdefs.h.  */
-#include <$ac_header>
-_ACEOF
-if { (ac_try="$ac_cpp conftest.$ac_ext"
-case "(($ac_try" in
-  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
-  *) ac_try_echo=$ac_try;;
-esac
-eval ac_try_echo="\"\$as_me:$LINENO: $ac_try_echo\""
-$as_echo "$ac_try_echo") >&5
-  (eval "$ac_cpp conftest.$ac_ext") 2>conftest.er1
-  ac_status=$?
-  grep -v '^ *+' conftest.er1 >conftest.err
-  rm -f conftest.er1
-  cat conftest.err >&5
-  $as_echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); } >/dev/null && {
-	 test -z "$ac_c_preproc_warn_flag$ac_c_werror_flag" ||
-	 test ! -s conftest.err
-       }; then
-  ac_header_preproc=yes
-else
-  $as_echo "$as_me: failed program was:" >&5
-sed 's/^/| /' conftest.$ac_ext >&5
-
-  ac_header_preproc=no
-fi
-
-rm -f conftest.err conftest.$ac_ext
-{ $as_echo "$as_me:$LINENO: result: $ac_header_preproc" >&5
-$as_echo "$ac_header_preproc" >&6; }
-
-# So?  What about this header?
-case $ac_header_compiler:$ac_header_preproc:$ac_c_preproc_warn_flag in
-  yes:no: )
-    { $as_echo "$as_me:$LINENO: WARNING: $ac_header: accepted by the compiler, rejected by the preprocessor!" >&5
-$as_echo "$as_me: WARNING: $ac_header: accepted by the compiler, rejected by the preprocessor!" >&2;}
-    { $as_echo "$as_me:$LINENO: WARNING: $ac_header: proceeding with the compiler's result" >&5
-$as_echo "$as_me: WARNING: $ac_header: proceeding with the compiler's result" >&2;}
-    ac_header_preproc=yes
-    ;;
-  no:yes:* )
-    { $as_echo "$as_me:$LINENO: WARNING: $ac_header: present but cannot be compiled" >&5
-$as_echo "$as_me: WARNING: $ac_header: present but cannot be compiled" >&2;}
-    { $as_echo "$as_me:$LINENO: WARNING: $ac_header:     check for missing prerequisite headers?" >&5
-$as_echo "$as_me: WARNING: $ac_header:     check for missing prerequisite headers?" >&2;}
-    { $as_echo "$as_me:$LINENO: WARNING: $ac_header: see the Autoconf documentation" >&5
-$as_echo "$as_me: WARNING: $ac_header: see the Autoconf documentation" >&2;}
-    { $as_echo "$as_me:$LINENO: WARNING: $ac_header:     section \"Present But Cannot Be Compiled\"" >&5
-$as_echo "$as_me: WARNING: $ac_header:     section \"Present But Cannot Be Compiled\"" >&2;}
-    { $as_echo "$as_me:$LINENO: WARNING: $ac_header: proceeding with the preprocessor's result" >&5
-$as_echo "$as_me: WARNING: $ac_header: proceeding with the preprocessor's result" >&2;}
-    { $as_echo "$as_me:$LINENO: WARNING: $ac_header: in the future, the compiler will take precedence" >&5
-$as_echo "$as_me: WARNING: $ac_header: in the future, the compiler will take precedence" >&2;}
-    ( cat <<\_ASBOX
-## ---------------------------------------------------- ##
-## Report this to net-snmp-coders@lists.sourceforge.net ##
-## ---------------------------------------------------- ##
-_ASBOX
-     ) | sed "s/^/$as_me: WARNING:     /" >&2
-    ;;
-esac
-{ $as_echo "$as_me:$LINENO: checking for $ac_header" >&5
-$as_echo_n "checking for $ac_header... " >&6; }
-if { as_var=$as_ac_Header; eval "test \"\${$as_var+set}\" = set"; }; then
-  $as_echo_n "(cached) " >&6
-else
-  eval "$as_ac_Header=\$ac_header_preproc"
-fi
-ac_res=`eval 'as_val=${'$as_ac_Header'}
-		 $as_echo "$as_val"'`
-	       { $as_echo "$as_me:$LINENO: result: $ac_res" >&5
-$as_echo "$ac_res" >&6; }
-
-fi
-as_val=`eval 'as_val=${'$as_ac_Header'}
-		 $as_echo "$as_val"'`
-   if test "x$as_val" = x""yes; then
-  cat >>confdefs.h <<_ACEOF
-#define `$as_echo "HAVE_$ac_header" | $as_tr_cpp` 1
-_ACEOF
-
-fi
-
-done
-
-
-if test "${ac_cv_header_rpm_rpmlib_h+set}" = set; then
-  { $as_echo "$as_me:$LINENO: checking for rpm/rpmlib.h" >&5
-$as_echo_n "checking for rpm/rpmlib.h... " >&6; }
-if test "${ac_cv_header_rpm_rpmlib_h+set}" = set; then
-  $as_echo_n "(cached) " >&6
-fi
-{ $as_echo "$as_me:$LINENO: result: $ac_cv_header_rpm_rpmlib_h" >&5
-$as_echo "$ac_cv_header_rpm_rpmlib_h" >&6; }
-else
-  # Is the header compilable?
-{ $as_echo "$as_me:$LINENO: checking rpm/rpmlib.h usability" >&5
-$as_echo_n "checking rpm/rpmlib.h usability... " >&6; }
-cat >conftest.$ac_ext <<_ACEOF
-/* confdefs.h.  */
-_ACEOF
-cat confdefs.h >>conftest.$ac_ext
-cat >>conftest.$ac_ext <<_ACEOF
-/* end confdefs.h.  */
-$ac_includes_default
-#include <rpm/rpmlib.h>
-_ACEOF
-rm -f conftest.$ac_objext
-if { (ac_try="$ac_compile"
-case "(($ac_try" in
-  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
-  *) ac_try_echo=$ac_try;;
-esac
-eval ac_try_echo="\"\$as_me:$LINENO: $ac_try_echo\""
-$as_echo "$ac_try_echo") >&5
-  (eval "$ac_compile") 2>conftest.er1
-  ac_status=$?
-  grep -v '^ *+' conftest.er1 >conftest.err
-  rm -f conftest.er1
-  cat conftest.err >&5
-  $as_echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); } && {
-	 test -z "$ac_c_werror_flag" ||
-	 test ! -s conftest.err
-       } && test -s conftest.$ac_objext; then
-  ac_header_compiler=yes
-else
-  $as_echo "$as_me: failed program was:" >&5
-sed 's/^/| /' conftest.$ac_ext >&5
-
-	ac_header_compiler=no
-fi
-
-rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
-{ $as_echo "$as_me:$LINENO: result: $ac_header_compiler" >&5
-$as_echo "$ac_header_compiler" >&6; }
-
-# Is the header present?
-{ $as_echo "$as_me:$LINENO: checking rpm/rpmlib.h presence" >&5
-$as_echo_n "checking rpm/rpmlib.h presence... " >&6; }
-cat >conftest.$ac_ext <<_ACEOF
-/* confdefs.h.  */
-_ACEOF
-cat confdefs.h >>conftest.$ac_ext
-cat >>conftest.$ac_ext <<_ACEOF
-/* end confdefs.h.  */
-#include <rpm/rpmlib.h>
-_ACEOF
-if { (ac_try="$ac_cpp conftest.$ac_ext"
-case "(($ac_try" in
-  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
-  *) ac_try_echo=$ac_try;;
-esac
-eval ac_try_echo="\"\$as_me:$LINENO: $ac_try_echo\""
-$as_echo "$ac_try_echo") >&5
-  (eval "$ac_cpp conftest.$ac_ext") 2>conftest.er1
-  ac_status=$?
-  grep -v '^ *+' conftest.er1 >conftest.err
-  rm -f conftest.er1
-  cat conftest.err >&5
-  $as_echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); } >/dev/null && {
-	 test -z "$ac_c_preproc_warn_flag$ac_c_werror_flag" ||
-	 test ! -s conftest.err
-       }; then
-  ac_header_preproc=yes
-else
-  $as_echo "$as_me: failed program was:" >&5
-sed 's/^/| /' conftest.$ac_ext >&5
-
-  ac_header_preproc=no
-fi
-
-rm -f conftest.err conftest.$ac_ext
-{ $as_echo "$as_me:$LINENO: result: $ac_header_preproc" >&5
-$as_echo "$ac_header_preproc" >&6; }
-
-# So?  What about this header?
-case $ac_header_compiler:$ac_header_preproc:$ac_c_preproc_warn_flag in
-  yes:no: )
-    { $as_echo "$as_me:$LINENO: WARNING: rpm/rpmlib.h: accepted by the compiler, rejected by the preprocessor!" >&5
-$as_echo "$as_me: WARNING: rpm/rpmlib.h: accepted by the compiler, rejected by the preprocessor!" >&2;}
-    { $as_echo "$as_me:$LINENO: WARNING: rpm/rpmlib.h: proceeding with the compiler's result" >&5
-$as_echo "$as_me: WARNING: rpm/rpmlib.h: proceeding with the compiler's result" >&2;}
-    ac_header_preproc=yes
-    ;;
-  no:yes:* )
-    { $as_echo "$as_me:$LINENO: WARNING: rpm/rpmlib.h: present but cannot be compiled" >&5
-$as_echo "$as_me: WARNING: rpm/rpmlib.h: present but cannot be compiled" >&2;}
-    { $as_echo "$as_me:$LINENO: WARNING: rpm/rpmlib.h:     check for missing prerequisite headers?" >&5
-$as_echo "$as_me: WARNING: rpm/rpmlib.h:     check for missing prerequisite headers?" >&2;}
-    { $as_echo "$as_me:$LINENO: WARNING: rpm/rpmlib.h: see the Autoconf documentation" >&5
-$as_echo "$as_me: WARNING: rpm/rpmlib.h: see the Autoconf documentation" >&2;}
-    { $as_echo "$as_me:$LINENO: WARNING: rpm/rpmlib.h:     section \"Present But Cannot Be Compiled\"" >&5
-$as_echo "$as_me: WARNING: rpm/rpmlib.h:     section \"Present But Cannot Be Compiled\"" >&2;}
-    { $as_echo "$as_me:$LINENO: WARNING: rpm/rpmlib.h: proceeding with the preprocessor's result" >&5
-$as_echo "$as_me: WARNING: rpm/rpmlib.h: proceeding with the preprocessor's result" >&2;}
-    { $as_echo "$as_me:$LINENO: WARNING: rpm/rpmlib.h: in the future, the compiler will take precedence" >&5
-$as_echo "$as_me: WARNING: rpm/rpmlib.h: in the future, the compiler will take precedence" >&2;}
-    ( cat <<\_ASBOX
-## ---------------------------------------------------- ##
-## Report this to net-snmp-coders@lists.sourceforge.net ##
-## ---------------------------------------------------- ##
-_ASBOX
-     ) | sed "s/^/$as_me: WARNING:     /" >&2
-    ;;
-esac
-{ $as_echo "$as_me:$LINENO: checking for rpm/rpmlib.h" >&5
-$as_echo_n "checking for rpm/rpmlib.h... " >&6; }
-if test "${ac_cv_header_rpm_rpmlib_h+set}" = set; then
-  $as_echo_n "(cached) " >&6
-else
-  ac_cv_header_rpm_rpmlib_h=$ac_header_preproc
-fi
-{ $as_echo "$as_me:$LINENO: result: $ac_cv_header_rpm_rpmlib_h" >&5
-$as_echo "$ac_cv_header_rpm_rpmlib_h" >&6; }
-
-fi
-if test "x$ac_cv_header_rpm_rpmlib_h" = x""yes; then
-  rpmlib_h=yes
-else
-  rpmlib_h=no
-fi
-
-
-if test "${ac_cv_header_rpm_header_h+set}" = set; then
-  { $as_echo "$as_me:$LINENO: checking for rpm/header.h" >&5
-$as_echo_n "checking for rpm/header.h... " >&6; }
-if test "${ac_cv_header_rpm_header_h+set}" = set; then
-  $as_echo_n "(cached) " >&6
-fi
-{ $as_echo "$as_me:$LINENO: result: $ac_cv_header_rpm_header_h" >&5
-$as_echo "$ac_cv_header_rpm_header_h" >&6; }
-else
-  # Is the header compilable?
-{ $as_echo "$as_me:$LINENO: checking rpm/header.h usability" >&5
-$as_echo_n "checking rpm/header.h usability... " >&6; }
-cat >conftest.$ac_ext <<_ACEOF
-/* confdefs.h.  */
-_ACEOF
-cat confdefs.h >>conftest.$ac_ext
-cat >>conftest.$ac_ext <<_ACEOF
-/* end confdefs.h.  */
-$ac_includes_default
-#include <rpm/header.h>
-_ACEOF
-rm -f conftest.$ac_objext
-if { (ac_try="$ac_compile"
-case "(($ac_try" in
-  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
-  *) ac_try_echo=$ac_try;;
-esac
-eval ac_try_echo="\"\$as_me:$LINENO: $ac_try_echo\""
-$as_echo "$ac_try_echo") >&5
-  (eval "$ac_compile") 2>conftest.er1
-  ac_status=$?
-  grep -v '^ *+' conftest.er1 >conftest.err
-  rm -f conftest.er1
-  cat conftest.err >&5
-  $as_echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); } && {
-	 test -z "$ac_c_werror_flag" ||
-	 test ! -s conftest.err
-       } && test -s conftest.$ac_objext; then
-  ac_header_compiler=yes
-else
-  $as_echo "$as_me: failed program was:" >&5
-sed 's/^/| /' conftest.$ac_ext >&5
-
-	ac_header_compiler=no
-fi
-
-rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
-{ $as_echo "$as_me:$LINENO: result: $ac_header_compiler" >&5
-$as_echo "$ac_header_compiler" >&6; }
-
-# Is the header present?
-{ $as_echo "$as_me:$LINENO: checking rpm/header.h presence" >&5
-$as_echo_n "checking rpm/header.h presence... " >&6; }
-cat >conftest.$ac_ext <<_ACEOF
-/* confdefs.h.  */
-_ACEOF
-cat confdefs.h >>conftest.$ac_ext
-cat >>conftest.$ac_ext <<_ACEOF
-/* end confdefs.h.  */
-#include <rpm/header.h>
-_ACEOF
-if { (ac_try="$ac_cpp conftest.$ac_ext"
-case "(($ac_try" in
-  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
-  *) ac_try_echo=$ac_try;;
-esac
-eval ac_try_echo="\"\$as_me:$LINENO: $ac_try_echo\""
-$as_echo "$ac_try_echo") >&5
-  (eval "$ac_cpp conftest.$ac_ext") 2>conftest.er1
-  ac_status=$?
-  grep -v '^ *+' conftest.er1 >conftest.err
-  rm -f conftest.er1
-  cat conftest.err >&5
-  $as_echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); } >/dev/null && {
-	 test -z "$ac_c_preproc_warn_flag$ac_c_werror_flag" ||
-	 test ! -s conftest.err
-       }; then
-  ac_header_preproc=yes
-else
-  $as_echo "$as_me: failed program was:" >&5
-sed 's/^/| /' conftest.$ac_ext >&5
-
-  ac_header_preproc=no
-fi
-
-rm -f conftest.err conftest.$ac_ext
-{ $as_echo "$as_me:$LINENO: result: $ac_header_preproc" >&5
-$as_echo "$ac_header_preproc" >&6; }
-
-# So?  What about this header?
-case $ac_header_compiler:$ac_header_preproc:$ac_c_preproc_warn_flag in
-  yes:no: )
-    { $as_echo "$as_me:$LINENO: WARNING: rpm/header.h: accepted by the compiler, rejected by the preprocessor!" >&5
-$as_echo "$as_me: WARNING: rpm/header.h: accepted by the compiler, rejected by the preprocessor!" >&2;}
-    { $as_echo "$as_me:$LINENO: WARNING: rpm/header.h: proceeding with the compiler's result" >&5
-$as_echo "$as_me: WARNING: rpm/header.h: proceeding with the compiler's result" >&2;}
-    ac_header_preproc=yes
-    ;;
-  no:yes:* )
-    { $as_echo "$as_me:$LINENO: WARNING: rpm/header.h: present but cannot be compiled" >&5
-$as_echo "$as_me: WARNING: rpm/header.h: present but cannot be compiled" >&2;}
-    { $as_echo "$as_me:$LINENO: WARNING: rpm/header.h:     check for missing prerequisite headers?" >&5
-$as_echo "$as_me: WARNING: rpm/header.h:     check for missing prerequisite headers?" >&2;}
-    { $as_echo "$as_me:$LINENO: WARNING: rpm/header.h: see the Autoconf documentation" >&5
-$as_echo "$as_me: WARNING: rpm/header.h: see the Autoconf documentation" >&2;}
-    { $as_echo "$as_me:$LINENO: WARNING: rpm/header.h:     section \"Present But Cannot Be Compiled\"" >&5
-$as_echo "$as_me: WARNING: rpm/header.h:     section \"Present But Cannot Be Compiled\"" >&2;}
-    { $as_echo "$as_me:$LINENO: WARNING: rpm/header.h: proceeding with the preprocessor's result" >&5
-$as_echo "$as_me: WARNING: rpm/header.h: proceeding with the preprocessor's result" >&2;}
-    { $as_echo "$as_me:$LINENO: WARNING: rpm/header.h: in the future, the compiler will take precedence" >&5
-$as_echo "$as_me: WARNING: rpm/header.h: in the future, the compiler will take precedence" >&2;}
-    ( cat <<\_ASBOX
-## ---------------------------------------------------- ##
-## Report this to net-snmp-coders@lists.sourceforge.net ##
-## ---------------------------------------------------- ##
-_ASBOX
-     ) | sed "s/^/$as_me: WARNING:     /" >&2
-    ;;
-esac
-{ $as_echo "$as_me:$LINENO: checking for rpm/header.h" >&5
-$as_echo_n "checking for rpm/header.h... " >&6; }
-if test "${ac_cv_header_rpm_header_h+set}" = set; then
-  $as_echo_n "(cached) " >&6
-else
-  ac_cv_header_rpm_header_h=$ac_header_preproc
-fi
-{ $as_echo "$as_me:$LINENO: result: $ac_cv_header_rpm_header_h" >&5
-$as_echo "$ac_cv_header_rpm_header_h" >&6; }
-
-fi
-if test "x$ac_cv_header_rpm_header_h" = x""yes; then
-  rpmheader_h=yes
-else
-  rpmheader_h=no
-fi
-
-
-
-if test "x$rpmheader_h" = "xno" -o "x$rpmlib_h" = "xno" ; then
-  if test "x$with_rpm" = "xyes" ; then
-    { { $as_echo "$as_me:$LINENO: error: Could not find either the RPM header files needed and was specifically asked to use RPM support" >&5
-$as_echo "$as_me: error: Could not find either the RPM header files needed and was specifically asked to use RPM support" >&2;}
-   { (exit 1); exit 1; }; }
-  else
-    with_rpm=no
-  fi
-fi
-
-#
-# rpm libraries only needed for the host resources mib software
-# installed tables (on linux in particular)
-#
-if test "x$with_rpm" != "xno" && \
-        echo " $module_list " | $EGREP " host/(hr_swinst|data_access/swinst_rpm) " > /dev/null; then
-  # ARG.  RPM is a real pain.
-  # FWIW librpm.la, librpmio.la, and libpopt.la have correct dependencies.
-  _rpmlibs=""
-
-  # zlib is required for newer versions of rpm
-  _cppflags="${CPPFLAGS}"
-  _ldflags="${LDFLAGS}"
-
-  # check for zlib
-  if test "x${with_zlib}" != "xno" -a -d "${with_zlib}"; then
-    CPPFLAGS="${CPPFLAGS} -I${with_zlib}/include"
-    LDFLAGS="${LDFLAGS} -L${with_zlib}/lib"
-  fi
-
-  # dunno if this is needed for rpm-4.0.x, earlier probably needs.
-  if test "${ac_cv_header_zlib_h+set}" = set; then
-  { $as_echo "$as_me:$LINENO: checking for zlib.h" >&5
-$as_echo_n "checking for zlib.h... " >&6; }
-if test "${ac_cv_header_zlib_h+set}" = set; then
-  $as_echo_n "(cached) " >&6
-fi
-{ $as_echo "$as_me:$LINENO: result: $ac_cv_header_zlib_h" >&5
-$as_echo "$ac_cv_header_zlib_h" >&6; }
-else
-  # Is the header compilable?
-{ $as_echo "$as_me:$LINENO: checking zlib.h usability" >&5
-$as_echo_n "checking zlib.h usability... " >&6; }
-cat >conftest.$ac_ext <<_ACEOF
-/* confdefs.h.  */
-_ACEOF
-cat confdefs.h >>conftest.$ac_ext
-cat >>conftest.$ac_ext <<_ACEOF
-/* end confdefs.h.  */
-$ac_includes_default
-#include <zlib.h>
-_ACEOF
-rm -f conftest.$ac_objext
-if { (ac_try="$ac_compile"
-case "(($ac_try" in
-  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
-  *) ac_try_echo=$ac_try;;
-esac
-eval ac_try_echo="\"\$as_me:$LINENO: $ac_try_echo\""
-$as_echo "$ac_try_echo") >&5
-  (eval "$ac_compile") 2>conftest.er1
-  ac_status=$?
-  grep -v '^ *+' conftest.er1 >conftest.err
-  rm -f conftest.er1
-  cat conftest.err >&5
-  $as_echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); } && {
-	 test -z "$ac_c_werror_flag" ||
-	 test ! -s conftest.err
-       } && test -s conftest.$ac_objext; then
-  ac_header_compiler=yes
-else
-  $as_echo "$as_me: failed program was:" >&5
-sed 's/^/| /' conftest.$ac_ext >&5
-
-	ac_header_compiler=no
-fi
-
-rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
-{ $as_echo "$as_me:$LINENO: result: $ac_header_compiler" >&5
-$as_echo "$ac_header_compiler" >&6; }
-
-# Is the header present?
-{ $as_echo "$as_me:$LINENO: checking zlib.h presence" >&5
-$as_echo_n "checking zlib.h presence... " >&6; }
-cat >conftest.$ac_ext <<_ACEOF
-/* confdefs.h.  */
-_ACEOF
-cat confdefs.h >>conftest.$ac_ext
-cat >>conftest.$ac_ext <<_ACEOF
-/* end confdefs.h.  */
-#include <zlib.h>
-_ACEOF
-if { (ac_try="$ac_cpp conftest.$ac_ext"
-case "(($ac_try" in
-  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
-  *) ac_try_echo=$ac_try;;
-esac
-eval ac_try_echo="\"\$as_me:$LINENO: $ac_try_echo\""
-$as_echo "$ac_try_echo") >&5
-  (eval "$ac_cpp conftest.$ac_ext") 2>conftest.er1
-  ac_status=$?
-  grep -v '^ *+' conftest.er1 >conftest.err
-  rm -f conftest.er1
-  cat conftest.err >&5
-  $as_echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); } >/dev/null && {
-	 test -z "$ac_c_preproc_warn_flag$ac_c_werror_flag" ||
-	 test ! -s conftest.err
-       }; then
-  ac_header_preproc=yes
-else
-  $as_echo "$as_me: failed program was:" >&5
-sed 's/^/| /' conftest.$ac_ext >&5
-
-  ac_header_preproc=no
-fi
-
-rm -f conftest.err conftest.$ac_ext
-{ $as_echo "$as_me:$LINENO: result: $ac_header_preproc" >&5
-$as_echo "$ac_header_preproc" >&6; }
-
-# So?  What about this header?
-case $ac_header_compiler:$ac_header_preproc:$ac_c_preproc_warn_flag in
-  yes:no: )
-    { $as_echo "$as_me:$LINENO: WARNING: zlib.h: accepted by the compiler, rejected by the preprocessor!" >&5
-$as_echo "$as_me: WARNING: zlib.h: accepted by the compiler, rejected by the preprocessor!" >&2;}
-    { $as_echo "$as_me:$LINENO: WARNING: zlib.h: proceeding with the compiler's result" >&5
-$as_echo "$as_me: WARNING: zlib.h: proceeding with the compiler's result" >&2;}
-    ac_header_preproc=yes
-    ;;
-  no:yes:* )
-    { $as_echo "$as_me:$LINENO: WARNING: zlib.h: present but cannot be compiled" >&5
-$as_echo "$as_me: WARNING: zlib.h: present but cannot be compiled" >&2;}
-    { $as_echo "$as_me:$LINENO: WARNING: zlib.h:     check for missing prerequisite headers?" >&5
-$as_echo "$as_me: WARNING: zlib.h:     check for missing prerequisite headers?" >&2;}
-    { $as_echo "$as_me:$LINENO: WARNING: zlib.h: see the Autoconf documentation" >&5
-$as_echo "$as_me: WARNING: zlib.h: see the Autoconf documentation" >&2;}
-    { $as_echo "$as_me:$LINENO: WARNING: zlib.h:     section \"Present But Cannot Be Compiled\"" >&5
-$as_echo "$as_me: WARNING: zlib.h:     section \"Present But Cannot Be Compiled\"" >&2;}
-    { $as_echo "$as_me:$LINENO: WARNING: zlib.h: proceeding with the preprocessor's result" >&5
-$as_echo "$as_me: WARNING: zlib.h: proceeding with the preprocessor's result" >&2;}
-    { $as_echo "$as_me:$LINENO: WARNING: zlib.h: in the future, the compiler will take precedence" >&5
-$as_echo "$as_me: WARNING: zlib.h: in the future, the compiler will take precedence" >&2;}
-    ( cat <<\_ASBOX
-## ---------------------------------------------------- ##
-## Report this to net-snmp-coders@lists.sourceforge.net ##
-## ---------------------------------------------------- ##
-_ASBOX
-     ) | sed "s/^/$as_me: WARNING:     /" >&2
-    ;;
-esac
-{ $as_echo "$as_me:$LINENO: checking for zlib.h" >&5
-$as_echo_n "checking for zlib.h... " >&6; }
-if test "${ac_cv_header_zlib_h+set}" = set; then
-  $as_echo_n "(cached) " >&6
-else
-  ac_cv_header_zlib_h=$ac_header_preproc
-fi
-{ $as_echo "$as_me:$LINENO: result: $ac_cv_header_zlib_h" >&5
-$as_echo "$ac_cv_header_zlib_h" >&6; }
-
-fi
-if test "x$ac_cv_header_zlib_h" = x""yes; then
-
- { $as_echo "$as_me:$LINENO: checking for library containing gzread" >&5
-$as_echo_n "checking for library containing gzread... " >&6; }
-if test "${netsnmp_cv_func_gzread__rpmlibs+set}" = set; then
-  $as_echo_n "(cached) " >&6
-else
-  netsnmp_func_search_save_LIBS="$LIBS"
-     netsnmp_target_val="$_rpmlibs"
-          netsnmp_temp_LIBS="${netsnmp_target_val} $LMIBLIBS ${LIBS}"
-     netsnmp_result=no
-     LIBS="${netsnmp_temp_LIBS}"
-     cat >conftest.$ac_ext <<_ACEOF
-/* confdefs.h.  */
-_ACEOF
-cat confdefs.h >>conftest.$ac_ext
-cat >>conftest.$ac_ext <<_ACEOF
-/* end confdefs.h.  */
-
-/* Override any GCC internal prototype to avoid an error.
-   Use char because int might match the return type of a GCC
-   builtin and then its argument prototype would still apply.  */
-#ifdef __cplusplus
-extern "C"
-#endif
-char gzread ();
-int
-main ()
-{
-return gzread ();
-  ;
-  return 0;
-}
-_ACEOF
-rm -f conftest.$ac_objext conftest$ac_exeext
-if { (ac_try="$ac_link"
-case "(($ac_try" in
-  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
-  *) ac_try_echo=$ac_try;;
-esac
-eval ac_try_echo="\"\$as_me:$LINENO: $ac_try_echo\""
-$as_echo "$ac_try_echo") >&5
-  (eval "$ac_link") 2>conftest.er1
-  ac_status=$?
-  grep -v '^ *+' conftest.er1 >conftest.err
-  rm -f conftest.er1
-  cat conftest.err >&5
-  $as_echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); } && {
-	 test -z "$ac_c_werror_flag" ||
-	 test ! -s conftest.err
-       } && test -s conftest$ac_exeext && {
-	 test "$cross_compiling" = yes ||
-	 $as_test_x conftest$ac_exeext
-       }; then
-  netsnmp_result="none required"
-else
-  $as_echo "$as_me: failed program was:" >&5
-sed 's/^/| /' conftest.$ac_ext >&5
-
-	for netsnmp_cur_lib in z ; do
-              LIBS="-l${netsnmp_cur_lib} ${netsnmp_temp_LIBS}"
-              cat >conftest.$ac_ext <<_ACEOF
-/* confdefs.h.  */
-_ACEOF
-cat confdefs.h >>conftest.$ac_ext
-cat >>conftest.$ac_ext <<_ACEOF
-/* end confdefs.h.  */
-
-/* Override any GCC internal prototype to avoid an error.
-   Use char because int might match the return type of a GCC
-   builtin and then its argument prototype would still apply.  */
-#ifdef __cplusplus
-extern "C"
-#endif
-char gzread ();
-int
-main ()
-{
-return gzread ();
-  ;
-  return 0;
-}
-_ACEOF
-rm -f conftest.$ac_objext conftest$ac_exeext
-if { (ac_try="$ac_link"
-case "(($ac_try" in
-  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
-  *) ac_try_echo=$ac_try;;
-esac
-eval ac_try_echo="\"\$as_me:$LINENO: $ac_try_echo\""
-$as_echo "$ac_try_echo") >&5
-  (eval "$ac_link") 2>conftest.er1
-  ac_status=$?
-  grep -v '^ *+' conftest.er1 >conftest.err
-  rm -f conftest.er1
-  cat conftest.err >&5
-  $as_echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); } && {
-	 test -z "$ac_c_werror_flag" ||
-	 test ! -s conftest.err
-       } && test -s conftest$ac_exeext && {
-	 test "$cross_compiling" = yes ||
-	 $as_test_x conftest$ac_exeext
-       }; then
-  netsnmp_result=-l${netsnmp_cur_lib}
-                   break
-else
-  $as_echo "$as_me: failed program was:" >&5
-sed 's/^/| /' conftest.$ac_ext >&5
-
-
-fi
-
-rm -rf conftest.dSYM
-rm -f core conftest.err conftest.$ac_objext conftest_ipa8_conftest.oo \
-      conftest$ac_exeext conftest.$ac_ext
-          done
-fi
-
-rm -rf conftest.dSYM
-rm -f core conftest.err conftest.$ac_objext conftest_ipa8_conftest.oo \
-      conftest$ac_exeext conftest.$ac_ext
-     LIBS="${netsnmp_func_search_save_LIBS}"
-     netsnmp_cv_func_gzread__rpmlibs="${netsnmp_result}"
-fi
-{ $as_echo "$as_me:$LINENO: result: $netsnmp_cv_func_gzread__rpmlibs" >&5
-$as_echo "$netsnmp_cv_func_gzread__rpmlibs" >&6; }
- if test "${netsnmp_cv_func_gzread__rpmlibs}" != "no" ; then
-    if test "${netsnmp_cv_func_gzread__rpmlibs}" != "none required" ; then
-       _rpmlibs="${netsnmp_result} ${netsnmp_target_val}"
-    fi
-
- else
-    CPPFLAGS=${_cppflags} LDFLAGS=${_ldflags}
- fi
-
-else
-  CPPFLAGS=${_cppflags} LDFLAGS=${_ldflags}
-fi
-
-
-
-  # two variants of bzip2 need checking.
-  if test "x${with_bzip2}" != "xno"; then
-    if test -d "${with_bzip2}"; then
-      CPPFLAGS="${CPPFLAGS} -I${with_bzip2}/include"
-      LDFLAGS="${LDFLAGS} -L${with_bzip2}/lib"
-    fi
-
- { $as_echo "$as_me:$LINENO: checking for library containing bzread" >&5
-$as_echo_n "checking for library containing bzread... " >&6; }
-if test "${netsnmp_cv_func_bzread__rpmlibs+set}" = set; then
-  $as_echo_n "(cached) " >&6
-else
-  netsnmp_func_search_save_LIBS="$LIBS"
-     netsnmp_target_val="$_rpmlibs"
-          netsnmp_temp_LIBS="${netsnmp_target_val} $LMIBLIBS ${LIBS}"
-     netsnmp_result=no
-     LIBS="${netsnmp_temp_LIBS}"
-     cat >conftest.$ac_ext <<_ACEOF
-/* confdefs.h.  */
-_ACEOF
-cat confdefs.h >>conftest.$ac_ext
-cat >>conftest.$ac_ext <<_ACEOF
-/* end confdefs.h.  */
-
-/* Override any GCC internal prototype to avoid an error.
-   Use char because int might match the return type of a GCC
-   builtin and then its argument prototype would still apply.  */
-#ifdef __cplusplus
-extern "C"
-#endif
-char bzread ();
-int
-main ()
-{
-return bzread ();
-  ;
-  return 0;
-}
-_ACEOF
-rm -f conftest.$ac_objext conftest$ac_exeext
-if { (ac_try="$ac_link"
-case "(($ac_try" in
-  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
-  *) ac_try_echo=$ac_try;;
-esac
-eval ac_try_echo="\"\$as_me:$LINENO: $ac_try_echo\""
-$as_echo "$ac_try_echo") >&5
-  (eval "$ac_link") 2>conftest.er1
-  ac_status=$?
-  grep -v '^ *+' conftest.er1 >conftest.err
-  rm -f conftest.er1
-  cat conftest.err >&5
-  $as_echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); } && {
-	 test -z "$ac_c_werror_flag" ||
-	 test ! -s conftest.err
-       } && test -s conftest$ac_exeext && {
-	 test "$cross_compiling" = yes ||
-	 $as_test_x conftest$ac_exeext
-       }; then
-  netsnmp_result="none required"
-else
-  $as_echo "$as_me: failed program was:" >&5
-sed 's/^/| /' conftest.$ac_ext >&5
-
-	for netsnmp_cur_lib in bz2 ; do
-              LIBS="-l${netsnmp_cur_lib} ${netsnmp_temp_LIBS}"
-              cat >conftest.$ac_ext <<_ACEOF
-/* confdefs.h.  */
-_ACEOF
-cat confdefs.h >>conftest.$ac_ext
-cat >>conftest.$ac_ext <<_ACEOF
-/* end confdefs.h.  */
-
-/* Override any GCC internal prototype to avoid an error.
-   Use char because int might match the return type of a GCC
-   builtin and then its argument prototype would still apply.  */
-#ifdef __cplusplus
-extern "C"
-#endif
-char bzread ();
-int
-main ()
-{
-return bzread ();
-  ;
-  return 0;
-}
-_ACEOF
-rm -f conftest.$ac_objext conftest$ac_exeext
-if { (ac_try="$ac_link"
-case "(($ac_try" in
-  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
-  *) ac_try_echo=$ac_try;;
-esac
-eval ac_try_echo="\"\$as_me:$LINENO: $ac_try_echo\""
-$as_echo "$ac_try_echo") >&5
-  (eval "$ac_link") 2>conftest.er1
-  ac_status=$?
-  grep -v '^ *+' conftest.er1 >conftest.err
-  rm -f conftest.er1
-  cat conftest.err >&5
-  $as_echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); } && {
-	 test -z "$ac_c_werror_flag" ||
-	 test ! -s conftest.err
-       } && test -s conftest$ac_exeext && {
-	 test "$cross_compiling" = yes ||
-	 $as_test_x conftest$ac_exeext
-       }; then
-  netsnmp_result=-l${netsnmp_cur_lib}
-                   break
-else
-  $as_echo "$as_me: failed program was:" >&5
-sed 's/^/| /' conftest.$ac_ext >&5
-
-
-fi
-
-rm -rf conftest.dSYM
-rm -f core conftest.err conftest.$ac_objext conftest_ipa8_conftest.oo \
-      conftest$ac_exeext conftest.$ac_ext
-          done
-fi
-
-rm -rf conftest.dSYM
-rm -f core conftest.err conftest.$ac_objext conftest_ipa8_conftest.oo \
-      conftest$ac_exeext conftest.$ac_ext
-     LIBS="${netsnmp_func_search_save_LIBS}"
-     netsnmp_cv_func_bzread__rpmlibs="${netsnmp_result}"
-fi
-{ $as_echo "$as_me:$LINENO: result: $netsnmp_cv_func_bzread__rpmlibs" >&5
-$as_echo "$netsnmp_cv_func_bzread__rpmlibs" >&6; }
- if test "${netsnmp_cv_func_bzread__rpmlibs}" != "no" ; then
-    if test "${netsnmp_cv_func_bzread__rpmlibs}" != "none required" ; then
-       _rpmlibs="${netsnmp_result} ${netsnmp_target_val}"
-    fi
-
-
- fi
-
-
- { $as_echo "$as_me:$LINENO: checking for library containing BZ2_bzread" >&5
-$as_echo_n "checking for library containing BZ2_bzread... " >&6; }
-if test "${netsnmp_cv_func_BZ2_bzread__rpmlibs+set}" = set; then
-  $as_echo_n "(cached) " >&6
-else
-  netsnmp_func_search_save_LIBS="$LIBS"
-     netsnmp_target_val="$_rpmlibs"
-          netsnmp_temp_LIBS="${netsnmp_target_val} $LMIBLIBS ${LIBS}"
-     netsnmp_result=no
-     LIBS="${netsnmp_temp_LIBS}"
-     cat >conftest.$ac_ext <<_ACEOF
-/* confdefs.h.  */
-_ACEOF
-cat confdefs.h >>conftest.$ac_ext
-cat >>conftest.$ac_ext <<_ACEOF
-/* end confdefs.h.  */
-
-/* Override any GCC internal prototype to avoid an error.
-   Use char because int might match the return type of a GCC
-   builtin and then its argument prototype would still apply.  */
-#ifdef __cplusplus
-extern "C"
-#endif
-char BZ2_bzread ();
-int
-main ()
-{
-return BZ2_bzread ();
-  ;
-  return 0;
-}
-_ACEOF
-rm -f conftest.$ac_objext conftest$ac_exeext
-if { (ac_try="$ac_link"
-case "(($ac_try" in
-  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
-  *) ac_try_echo=$ac_try;;
-esac
-eval ac_try_echo="\"\$as_me:$LINENO: $ac_try_echo\""
-$as_echo "$ac_try_echo") >&5
-  (eval "$ac_link") 2>conftest.er1
-  ac_status=$?
-  grep -v '^ *+' conftest.er1 >conftest.err
-  rm -f conftest.er1
-  cat conftest.err >&5
-  $as_echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); } && {
-	 test -z "$ac_c_werror_flag" ||
-	 test ! -s conftest.err
-       } && test -s conftest$ac_exeext && {
-	 test "$cross_compiling" = yes ||
-	 $as_test_x conftest$ac_exeext
-       }; then
-  netsnmp_result="none required"
-else
-  $as_echo "$as_me: failed program was:" >&5
-sed 's/^/| /' conftest.$ac_ext >&5
-
-	for netsnmp_cur_lib in bz2 ; do
-              LIBS="-l${netsnmp_cur_lib} ${netsnmp_temp_LIBS}"
-              cat >conftest.$ac_ext <<_ACEOF
-/* confdefs.h.  */
-_ACEOF
-cat confdefs.h >>conftest.$ac_ext
-cat >>conftest.$ac_ext <<_ACEOF
-/* end confdefs.h.  */
-
-/* Override any GCC internal prototype to avoid an error.
-   Use char because int might match the return type of a GCC
-   builtin and then its argument prototype would still apply.  */
-#ifdef __cplusplus
-extern "C"
-#endif
-char BZ2_bzread ();
-int
-main ()
-{
-return BZ2_bzread ();
-  ;
-  return 0;
-}
-_ACEOF
-rm -f conftest.$ac_objext conftest$ac_exeext
-if { (ac_try="$ac_link"
-case "(($ac_try" in
-  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
-  *) ac_try_echo=$ac_try;;
-esac
-eval ac_try_echo="\"\$as_me:$LINENO: $ac_try_echo\""
-$as_echo "$ac_try_echo") >&5
-  (eval "$ac_link") 2>conftest.er1
-  ac_status=$?
-  grep -v '^ *+' conftest.er1 >conftest.err
-  rm -f conftest.er1
-  cat conftest.err >&5
-  $as_echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); } && {
-	 test -z "$ac_c_werror_flag" ||
-	 test ! -s conftest.err
-       } && test -s conftest$ac_exeext && {
-	 test "$cross_compiling" = yes ||
-	 $as_test_x conftest$ac_exeext
-       }; then
-  netsnmp_result=-l${netsnmp_cur_lib}
-                   break
-else
-  $as_echo "$as_me: failed program was:" >&5
-sed 's/^/| /' conftest.$ac_ext >&5
-
-
-fi
-
-rm -rf conftest.dSYM
-rm -f core conftest.err conftest.$ac_objext conftest_ipa8_conftest.oo \
-      conftest$ac_exeext conftest.$ac_ext
-          done
-fi
-
-rm -rf conftest.dSYM
-rm -f core conftest.err conftest.$ac_objext conftest_ipa8_conftest.oo \
-      conftest$ac_exeext conftest.$ac_ext
-     LIBS="${netsnmp_func_search_save_LIBS}"
-     netsnmp_cv_func_BZ2_bzread__rpmlibs="${netsnmp_result}"
-fi
-{ $as_echo "$as_me:$LINENO: result: $netsnmp_cv_func_BZ2_bzread__rpmlibs" >&5
-$as_echo "$netsnmp_cv_func_BZ2_bzread__rpmlibs" >&6; }
- if test "${netsnmp_cv_func_BZ2_bzread__rpmlibs}" != "no" ; then
-    if test "${netsnmp_cv_func_BZ2_bzread__rpmlibs}" != "none required" ; then
-       _rpmlibs="${netsnmp_result} ${netsnmp_target_val}"
-    fi
-
-
- fi
-
-  fi
-
-  # two variants of db1 need checking.
-
- { $as_echo "$as_me:$LINENO: checking for library containing dbopen" >&5
-$as_echo_n "checking for library containing dbopen... " >&6; }
-if test "${netsnmp_cv_func_dbopen__rpmlibs+set}" = set; then
-  $as_echo_n "(cached) " >&6
-else
-  netsnmp_func_search_save_LIBS="$LIBS"
-     netsnmp_target_val="$_rpmlibs"
-          netsnmp_temp_LIBS="${netsnmp_target_val} $LMIBLIBS ${LIBS}"
-     netsnmp_result=no
-     LIBS="${netsnmp_temp_LIBS}"
-     cat >conftest.$ac_ext <<_ACEOF
-/* confdefs.h.  */
-_ACEOF
-cat confdefs.h >>conftest.$ac_ext
-cat >>conftest.$ac_ext <<_ACEOF
-/* end confdefs.h.  */
-
-/* Override any GCC internal prototype to avoid an error.
-   Use char because int might match the return type of a GCC
-   builtin and then its argument prototype would still apply.  */
-#ifdef __cplusplus
-extern "C"
-#endif
-char dbopen ();
-int
-main ()
-{
-return dbopen ();
-  ;
-  return 0;
-}
-_ACEOF
-rm -f conftest.$ac_objext conftest$ac_exeext
-if { (ac_try="$ac_link"
-case "(($ac_try" in
-  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
-  *) ac_try_echo=$ac_try;;
-esac
-eval ac_try_echo="\"\$as_me:$LINENO: $ac_try_echo\""
-$as_echo "$ac_try_echo") >&5
-  (eval "$ac_link") 2>conftest.er1
-  ac_status=$?
-  grep -v '^ *+' conftest.er1 >conftest.err
-  rm -f conftest.er1
-  cat conftest.err >&5
-  $as_echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); } && {
-	 test -z "$ac_c_werror_flag" ||
-	 test ! -s conftest.err
-       } && test -s conftest$ac_exeext && {
-	 test "$cross_compiling" = yes ||
-	 $as_test_x conftest$ac_exeext
-       }; then
-  netsnmp_result="none required"
-else
-  $as_echo "$as_me: failed program was:" >&5
-sed 's/^/| /' conftest.$ac_ext >&5
-
-	for netsnmp_cur_lib in db1 db ; do
-              LIBS="-l${netsnmp_cur_lib} ${netsnmp_temp_LIBS}"
-              cat >conftest.$ac_ext <<_ACEOF
-/* confdefs.h.  */
-_ACEOF
-cat confdefs.h >>conftest.$ac_ext
-cat >>conftest.$ac_ext <<_ACEOF
-/* end confdefs.h.  */
-
-/* Override any GCC internal prototype to avoid an error.
-   Use char because int might match the return type of a GCC
-   builtin and then its argument prototype would still apply.  */
-#ifdef __cplusplus
-extern "C"
-#endif
-char dbopen ();
-int
-main ()
-{
-return dbopen ();
-  ;
-  return 0;
-}
-_ACEOF
-rm -f conftest.$ac_objext conftest$ac_exeext
-if { (ac_try="$ac_link"
-case "(($ac_try" in
-  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
-  *) ac_try_echo=$ac_try;;
-esac
-eval ac_try_echo="\"\$as_me:$LINENO: $ac_try_echo\""
-$as_echo "$ac_try_echo") >&5
-  (eval "$ac_link") 2>conftest.er1
-  ac_status=$?
-  grep -v '^ *+' conftest.er1 >conftest.err
-  rm -f conftest.er1
-  cat conftest.err >&5
-  $as_echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); } && {
-	 test -z "$ac_c_werror_flag" ||
-	 test ! -s conftest.err
-       } && test -s conftest$ac_exeext && {
-	 test "$cross_compiling" = yes ||
-	 $as_test_x conftest$ac_exeext
-       }; then
-  netsnmp_result=-l${netsnmp_cur_lib}
-                   break
-else
-  $as_echo "$as_me: failed program was:" >&5
-sed 's/^/| /' conftest.$ac_ext >&5
-
-
-fi
-
-rm -rf conftest.dSYM
-rm -f core conftest.err conftest.$ac_objext conftest_ipa8_conftest.oo \
-      conftest$ac_exeext conftest.$ac_ext
-          done
-fi
-
-rm -rf conftest.dSYM
-rm -f core conftest.err conftest.$ac_objext conftest_ipa8_conftest.oo \
-      conftest$ac_exeext conftest.$ac_ext
-     LIBS="${netsnmp_func_search_save_LIBS}"
-     netsnmp_cv_func_dbopen__rpmlibs="${netsnmp_result}"
-fi
-{ $as_echo "$as_me:$LINENO: result: $netsnmp_cv_func_dbopen__rpmlibs" >&5
-$as_echo "$netsnmp_cv_func_dbopen__rpmlibs" >&6; }
- if test "${netsnmp_cv_func_dbopen__rpmlibs}" != "no" ; then
-    if test "${netsnmp_cv_func_dbopen__rpmlibs}" != "none required" ; then
-       _rpmlibs="${netsnmp_result} ${netsnmp_target_val}"
-    fi
-
-
- fi
-
-
-  # two variants of db3 need checking.
-
- { $as_echo "$as_me:$LINENO: checking for library containing db_create" >&5
-$as_echo_n "checking for library containing db_create... " >&6; }
-if test "${netsnmp_cv_func_db_create__rpmlibs+set}" = set; then
-  $as_echo_n "(cached) " >&6
-else
-  netsnmp_func_search_save_LIBS="$LIBS"
-     netsnmp_target_val="$_rpmlibs"
-          netsnmp_temp_LIBS="${netsnmp_target_val} $LMIBLIBS ${LIBS}"
-     netsnmp_result=no
-     LIBS="${netsnmp_temp_LIBS}"
-     cat >conftest.$ac_ext <<_ACEOF
-/* confdefs.h.  */
-_ACEOF
-cat confdefs.h >>conftest.$ac_ext
-cat >>conftest.$ac_ext <<_ACEOF
-/* end confdefs.h.  */
-
-/* Override any GCC internal prototype to avoid an error.
-   Use char because int might match the return type of a GCC
-   builtin and then its argument prototype would still apply.  */
-#ifdef __cplusplus
-extern "C"
-#endif
-char db_create ();
-int
-main ()
-{
-return db_create ();
-  ;
-  return 0;
-}
-_ACEOF
-rm -f conftest.$ac_objext conftest$ac_exeext
-if { (ac_try="$ac_link"
-case "(($ac_try" in
-  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
-  *) ac_try_echo=$ac_try;;
-esac
-eval ac_try_echo="\"\$as_me:$LINENO: $ac_try_echo\""
-$as_echo "$ac_try_echo") >&5
-  (eval "$ac_link") 2>conftest.er1
-  ac_status=$?
-  grep -v '^ *+' conftest.er1 >conftest.err
-  rm -f conftest.er1
-  cat conftest.err >&5
-  $as_echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); } && {
-	 test -z "$ac_c_werror_flag" ||
-	 test ! -s conftest.err
-       } && test -s conftest$ac_exeext && {
-	 test "$cross_compiling" = yes ||
-	 $as_test_x conftest$ac_exeext
-       }; then
-  netsnmp_result="none required"
-else
-  $as_echo "$as_me: failed program was:" >&5
-sed 's/^/| /' conftest.$ac_ext >&5
-
-	for netsnmp_cur_lib in db-3.1 db-3.0 ; do
-              LIBS="-l${netsnmp_cur_lib} ${netsnmp_temp_LIBS}"
-              cat >conftest.$ac_ext <<_ACEOF
-/* confdefs.h.  */
-_ACEOF
-cat confdefs.h >>conftest.$ac_ext
-cat >>conftest.$ac_ext <<_ACEOF
-/* end confdefs.h.  */
-
-/* Override any GCC internal prototype to avoid an error.
-   Use char because int might match the return type of a GCC
-   builtin and then its argument prototype would still apply.  */
-#ifdef __cplusplus
-extern "C"
-#endif
-char db_create ();
-int
-main ()
-{
-return db_create ();
-  ;
-  return 0;
-}
-_ACEOF
-rm -f conftest.$ac_objext conftest$ac_exeext
-if { (ac_try="$ac_link"
-case "(($ac_try" in
-  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
-  *) ac_try_echo=$ac_try;;
-esac
-eval ac_try_echo="\"\$as_me:$LINENO: $ac_try_echo\""
-$as_echo "$ac_try_echo") >&5
-  (eval "$ac_link") 2>conftest.er1
-  ac_status=$?
-  grep -v '^ *+' conftest.er1 >conftest.err
-  rm -f conftest.er1
-  cat conftest.err >&5
-  $as_echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); } && {
-	 test -z "$ac_c_werror_flag" ||
-	 test ! -s conftest.err
-       } && test -s conftest$ac_exeext && {
-	 test "$cross_compiling" = yes ||
-	 $as_test_x conftest$ac_exeext
-       }; then
-  netsnmp_result=-l${netsnmp_cur_lib}
-                   break
-else
-  $as_echo "$as_me: failed program was:" >&5
-sed 's/^/| /' conftest.$ac_ext >&5
-
-
-fi
-
-rm -rf conftest.dSYM
-rm -f core conftest.err conftest.$ac_objext conftest_ipa8_conftest.oo \
-      conftest$ac_exeext conftest.$ac_ext
-          done
-fi
-
-rm -rf conftest.dSYM
-rm -f core conftest.err conftest.$ac_objext conftest_ipa8_conftest.oo \
-      conftest$ac_exeext conftest.$ac_ext
-     LIBS="${netsnmp_func_search_save_LIBS}"
-     netsnmp_cv_func_db_create__rpmlibs="${netsnmp_result}"
-fi
-{ $as_echo "$as_me:$LINENO: result: $netsnmp_cv_func_db_create__rpmlibs" >&5
-$as_echo "$netsnmp_cv_func_db_create__rpmlibs" >&6; }
- if test "${netsnmp_cv_func_db_create__rpmlibs}" != "no" ; then
-    if test "${netsnmp_cv_func_db_create__rpmlibs}" != "none required" ; then
-       _rpmlibs="${netsnmp_result} ${netsnmp_target_val}"
-    fi
-
-
- fi
-
-
-  # rpm-3.0.5 and later needs popt.
-
- { $as_echo "$as_me:$LINENO: checking for library containing poptParseArgvString" >&5
-$as_echo_n "checking for library containing poptParseArgvString... " >&6; }
-if test "${netsnmp_cv_func_poptParseArgvString__rpmlibs+set}" = set; then
-  $as_echo_n "(cached) " >&6
-else
-  netsnmp_func_search_save_LIBS="$LIBS"
-     netsnmp_target_val="$_rpmlibs"
-          netsnmp_temp_LIBS="${netsnmp_target_val} $LMIBLIBS ${LIBS}"
-     netsnmp_result=no
-     LIBS="${netsnmp_temp_LIBS}"
-     cat >conftest.$ac_ext <<_ACEOF
-/* confdefs.h.  */
-_ACEOF
-cat confdefs.h >>conftest.$ac_ext
-cat >>conftest.$ac_ext <<_ACEOF
-/* end confdefs.h.  */
-
-/* Override any GCC internal prototype to avoid an error.
-   Use char because int might match the return type of a GCC
-   builtin and then its argument prototype would still apply.  */
-#ifdef __cplusplus
-extern "C"
-#endif
-char poptParseArgvString ();
-int
-main ()
-{
-return poptParseArgvString ();
-  ;
-  return 0;
-}
-_ACEOF
-rm -f conftest.$ac_objext conftest$ac_exeext
-if { (ac_try="$ac_link"
-case "(($ac_try" in
-  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
-  *) ac_try_echo=$ac_try;;
-esac
-eval ac_try_echo="\"\$as_me:$LINENO: $ac_try_echo\""
-$as_echo "$ac_try_echo") >&5
-  (eval "$ac_link") 2>conftest.er1
-  ac_status=$?
-  grep -v '^ *+' conftest.er1 >conftest.err
-  rm -f conftest.er1
-  cat conftest.err >&5
-  $as_echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); } && {
-	 test -z "$ac_c_werror_flag" ||
-	 test ! -s conftest.err
-       } && test -s conftest$ac_exeext && {
-	 test "$cross_compiling" = yes ||
-	 $as_test_x conftest$ac_exeext
-       }; then
-  netsnmp_result="none required"
-else
-  $as_echo "$as_me: failed program was:" >&5
-sed 's/^/| /' conftest.$ac_ext >&5
-
-	for netsnmp_cur_lib in popt ; do
-              LIBS="-l${netsnmp_cur_lib} ${netsnmp_temp_LIBS}"
-              cat >conftest.$ac_ext <<_ACEOF
-/* confdefs.h.  */
-_ACEOF
-cat confdefs.h >>conftest.$ac_ext
-cat >>conftest.$ac_ext <<_ACEOF
-/* end confdefs.h.  */
-
-/* Override any GCC internal prototype to avoid an error.
-   Use char because int might match the return type of a GCC
-   builtin and then its argument prototype would still apply.  */
-#ifdef __cplusplus
-extern "C"
-#endif
-char poptParseArgvString ();
-int
-main ()
-{
-return poptParseArgvString ();
-  ;
-  return 0;
-}
-_ACEOF
-rm -f conftest.$ac_objext conftest$ac_exeext
-if { (ac_try="$ac_link"
-case "(($ac_try" in
-  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
-  *) ac_try_echo=$ac_try;;
-esac
-eval ac_try_echo="\"\$as_me:$LINENO: $ac_try_echo\""
-$as_echo "$ac_try_echo") >&5
-  (eval "$ac_link") 2>conftest.er1
-  ac_status=$?
-  grep -v '^ *+' conftest.er1 >conftest.err
-  rm -f conftest.er1
-  cat conftest.err >&5
-  $as_echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); } && {
-	 test -z "$ac_c_werror_flag" ||
-	 test ! -s conftest.err
-       } && test -s conftest$ac_exeext && {
-	 test "$cross_compiling" = yes ||
-	 $as_test_x conftest$ac_exeext
-       }; then
-  netsnmp_result=-l${netsnmp_cur_lib}
-                   break
-else
-  $as_echo "$as_me: failed program was:" >&5
-sed 's/^/| /' conftest.$ac_ext >&5
-
-
-fi
-
-rm -rf conftest.dSYM
-rm -f core conftest.err conftest.$ac_objext conftest_ipa8_conftest.oo \
-      conftest$ac_exeext conftest.$ac_ext
-          done
-fi
-
-rm -rf conftest.dSYM
-rm -f core conftest.err conftest.$ac_objext conftest_ipa8_conftest.oo \
-      conftest$ac_exeext conftest.$ac_ext
-     LIBS="${netsnmp_func_search_save_LIBS}"
-     netsnmp_cv_func_poptParseArgvString__rpmlibs="${netsnmp_result}"
-fi
-{ $as_echo "$as_me:$LINENO: result: $netsnmp_cv_func_poptParseArgvString__rpmlibs" >&5
-$as_echo "$netsnmp_cv_func_poptParseArgvString__rpmlibs" >&6; }
- if test "${netsnmp_cv_func_poptParseArgvString__rpmlibs}" != "no" ; then
-    if test "${netsnmp_cv_func_poptParseArgvString__rpmlibs}" != "none required" ; then
-       _rpmlibs="${netsnmp_result} ${netsnmp_target_val}"
-    fi
-
-
- fi
-
-
-  # rpm-4.0.x needs rpmio.
-
- { $as_echo "$as_me:$LINENO: checking for library containing Fopen" >&5
-$as_echo_n "checking for library containing Fopen... " >&6; }
-if test "${netsnmp_cv_func_Fopen__rpmlibs+set}" = set; then
-  $as_echo_n "(cached) " >&6
-else
-  netsnmp_func_search_save_LIBS="$LIBS"
-     netsnmp_target_val="$_rpmlibs"
-          netsnmp_temp_LIBS="${netsnmp_target_val} $LMIBLIBS ${LIBS}"
-     netsnmp_result=no
-     LIBS="${netsnmp_temp_LIBS}"
-     cat >conftest.$ac_ext <<_ACEOF
-/* confdefs.h.  */
-_ACEOF
-cat confdefs.h >>conftest.$ac_ext
-cat >>conftest.$ac_ext <<_ACEOF
-/* end confdefs.h.  */
-
-/* Override any GCC internal prototype to avoid an error.
-   Use char because int might match the return type of a GCC
-   builtin and then its argument prototype would still apply.  */
-#ifdef __cplusplus
-extern "C"
-#endif
-char Fopen ();
-int
-main ()
-{
-return Fopen ();
-  ;
-  return 0;
-}
-_ACEOF
-rm -f conftest.$ac_objext conftest$ac_exeext
-if { (ac_try="$ac_link"
-case "(($ac_try" in
-  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
-  *) ac_try_echo=$ac_try;;
-esac
-eval ac_try_echo="\"\$as_me:$LINENO: $ac_try_echo\""
-$as_echo "$ac_try_echo") >&5
-  (eval "$ac_link") 2>conftest.er1
-  ac_status=$?
-  grep -v '^ *+' conftest.er1 >conftest.err
-  rm -f conftest.er1
-  cat conftest.err >&5
-  $as_echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); } && {
-	 test -z "$ac_c_werror_flag" ||
-	 test ! -s conftest.err
-       } && test -s conftest$ac_exeext && {
-	 test "$cross_compiling" = yes ||
-	 $as_test_x conftest$ac_exeext
-       }; then
-  netsnmp_result="none required"
-else
-  $as_echo "$as_me: failed program was:" >&5
-sed 's/^/| /' conftest.$ac_ext >&5
-
-	for netsnmp_cur_lib in rpmio ; do
-              LIBS="-l${netsnmp_cur_lib} ${netsnmp_temp_LIBS}"
-              cat >conftest.$ac_ext <<_ACEOF
-/* confdefs.h.  */
-_ACEOF
-cat confdefs.h >>conftest.$ac_ext
-cat >>conftest.$ac_ext <<_ACEOF
-/* end confdefs.h.  */
-
-/* Override any GCC internal prototype to avoid an error.
-   Use char because int might match the return type of a GCC
-   builtin and then its argument prototype would still apply.  */
-#ifdef __cplusplus
-extern "C"
-#endif
-char Fopen ();
-int
-main ()
-{
-return Fopen ();
-  ;
-  return 0;
-}
-_ACEOF
-rm -f conftest.$ac_objext conftest$ac_exeext
-if { (ac_try="$ac_link"
-case "(($ac_try" in
-  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
-  *) ac_try_echo=$ac_try;;
-esac
-eval ac_try_echo="\"\$as_me:$LINENO: $ac_try_echo\""
-$as_echo "$ac_try_echo") >&5
-  (eval "$ac_link") 2>conftest.er1
-  ac_status=$?
-  grep -v '^ *+' conftest.er1 >conftest.err
-  rm -f conftest.er1
-  cat conftest.err >&5
-  $as_echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); } && {
-	 test -z "$ac_c_werror_flag" ||
-	 test ! -s conftest.err
-       } && test -s conftest$ac_exeext && {
-	 test "$cross_compiling" = yes ||
-	 $as_test_x conftest$ac_exeext
-       }; then
-  netsnmp_result=-l${netsnmp_cur_lib}
-                   break
-else
-  $as_echo "$as_me: failed program was:" >&5
-sed 's/^/| /' conftest.$ac_ext >&5
-
-
-fi
-
-rm -rf conftest.dSYM
-rm -f core conftest.err conftest.$ac_objext conftest_ipa8_conftest.oo \
-      conftest$ac_exeext conftest.$ac_ext
-          done
-fi
-
-rm -rf conftest.dSYM
-rm -f core conftest.err conftest.$ac_objext conftest_ipa8_conftest.oo \
-      conftest$ac_exeext conftest.$ac_ext
-     LIBS="${netsnmp_func_search_save_LIBS}"
-     netsnmp_cv_func_Fopen__rpmlibs="${netsnmp_result}"
-fi
-{ $as_echo "$as_me:$LINENO: result: $netsnmp_cv_func_Fopen__rpmlibs" >&5
-$as_echo "$netsnmp_cv_func_Fopen__rpmlibs" >&6; }
- if test "${netsnmp_cv_func_Fopen__rpmlibs}" != "no" ; then
-    if test "${netsnmp_cv_func_Fopen__rpmlibs}" != "none required" ; then
-       _rpmlibs="${netsnmp_result} ${netsnmp_target_val}"
-    fi
-
-
- fi
-
-
-  # rpm-4.0.3 librpmdb actually contains what we need.
-
- { $as_echo "$as_me:$LINENO: checking for library containing rpmdbOpen" >&5
-$as_echo_n "checking for library containing rpmdbOpen... " >&6; }
-if test "${netsnmp_cv_func_rpmdbOpen__rpmlibs+set}" = set; then
-  $as_echo_n "(cached) " >&6
-else
-  netsnmp_func_search_save_LIBS="$LIBS"
-     netsnmp_target_val="$_rpmlibs"
-          netsnmp_temp_LIBS="${netsnmp_target_val} $LMIBLIBS ${LIBS}"
-     netsnmp_result=no
-     LIBS="${netsnmp_temp_LIBS}"
-     cat >conftest.$ac_ext <<_ACEOF
-/* confdefs.h.  */
-_ACEOF
-cat confdefs.h >>conftest.$ac_ext
-cat >>conftest.$ac_ext <<_ACEOF
-/* end confdefs.h.  */
-
-/* Override any GCC internal prototype to avoid an error.
-   Use char because int might match the return type of a GCC
-   builtin and then its argument prototype would still apply.  */
-#ifdef __cplusplus
-extern "C"
-#endif
-char rpmdbOpen ();
-int
-main ()
-{
-return rpmdbOpen ();
-  ;
-  return 0;
-}
-_ACEOF
-rm -f conftest.$ac_objext conftest$ac_exeext
-if { (ac_try="$ac_link"
-case "(($ac_try" in
-  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
-  *) ac_try_echo=$ac_try;;
-esac
-eval ac_try_echo="\"\$as_me:$LINENO: $ac_try_echo\""
-$as_echo "$ac_try_echo") >&5
-  (eval "$ac_link") 2>conftest.er1
-  ac_status=$?
-  grep -v '^ *+' conftest.er1 >conftest.err
-  rm -f conftest.er1
-  cat conftest.err >&5
-  $as_echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); } && {
-	 test -z "$ac_c_werror_flag" ||
-	 test ! -s conftest.err
-       } && test -s conftest$ac_exeext && {
-	 test "$cross_compiling" = yes ||
-	 $as_test_x conftest$ac_exeext
-       }; then
-  netsnmp_result="none required"
-else
-  $as_echo "$as_me: failed program was:" >&5
-sed 's/^/| /' conftest.$ac_ext >&5
-
-	for netsnmp_cur_lib in rpmdb ; do
-              LIBS="-l${netsnmp_cur_lib} ${netsnmp_temp_LIBS}"
-              cat >conftest.$ac_ext <<_ACEOF
-/* confdefs.h.  */
-_ACEOF
-cat confdefs.h >>conftest.$ac_ext
-cat >>conftest.$ac_ext <<_ACEOF
-/* end confdefs.h.  */
-
-/* Override any GCC internal prototype to avoid an error.
-   Use char because int might match the return type of a GCC
-   builtin and then its argument prototype would still apply.  */
-#ifdef __cplusplus
-extern "C"
-#endif
-char rpmdbOpen ();
-int
-main ()
-{
-return rpmdbOpen ();
-  ;
-  return 0;
-}
-_ACEOF
-rm -f conftest.$ac_objext conftest$ac_exeext
-if { (ac_try="$ac_link"
-case "(($ac_try" in
-  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
-  *) ac_try_echo=$ac_try;;
-esac
-eval ac_try_echo="\"\$as_me:$LINENO: $ac_try_echo\""
-$as_echo "$ac_try_echo") >&5
-  (eval "$ac_link") 2>conftest.er1
-  ac_status=$?
-  grep -v '^ *+' conftest.er1 >conftest.err
-  rm -f conftest.er1
-  cat conftest.err >&5
-  $as_echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); } && {
-	 test -z "$ac_c_werror_flag" ||
-	 test ! -s conftest.err
-       } && test -s conftest$ac_exeext && {
-	 test "$cross_compiling" = yes ||
-	 $as_test_x conftest$ac_exeext
-       }; then
-  netsnmp_result=-l${netsnmp_cur_lib}
-                   break
-else
-  $as_echo "$as_me: failed program was:" >&5
-sed 's/^/| /' conftest.$ac_ext >&5
-
-
-fi
-
-rm -rf conftest.dSYM
-rm -f core conftest.err conftest.$ac_objext conftest_ipa8_conftest.oo \
-      conftest$ac_exeext conftest.$ac_ext
-          done
-fi
-
-rm -rf conftest.dSYM
-rm -f core conftest.err conftest.$ac_objext conftest_ipa8_conftest.oo \
-      conftest$ac_exeext conftest.$ac_ext
-     LIBS="${netsnmp_func_search_save_LIBS}"
-     netsnmp_cv_func_rpmdbOpen__rpmlibs="${netsnmp_result}"
-fi
-{ $as_echo "$as_me:$LINENO: result: $netsnmp_cv_func_rpmdbOpen__rpmlibs" >&5
-$as_echo "$netsnmp_cv_func_rpmdbOpen__rpmlibs" >&6; }
- if test "${netsnmp_cv_func_rpmdbOpen__rpmlibs}" != "no" ; then
-    if test "${netsnmp_cv_func_rpmdbOpen__rpmlibs}" != "none required" ; then
-       _rpmlibs="${netsnmp_result} ${netsnmp_target_val}"
-    fi
-
-
- fi
-
-  # now check for rpm using the appropriate libraries.
-
- { $as_echo "$as_me:$LINENO: checking for library containing rpmGetFilesystemList" >&5
-$as_echo_n "checking for library containing rpmGetFilesystemList... " >&6; }
-if test "${netsnmp_cv_func_rpmGetFilesystemList__rpmlibs+set}" = set; then
-  $as_echo_n "(cached) " >&6
-else
-  netsnmp_func_search_save_LIBS="$LIBS"
-     netsnmp_target_val="$_rpmlibs"
-          netsnmp_temp_LIBS="${netsnmp_target_val} $LMIBLIBS ${LIBS}"
-     netsnmp_result=no
-     LIBS="${netsnmp_temp_LIBS}"
-     cat >conftest.$ac_ext <<_ACEOF
-/* confdefs.h.  */
-_ACEOF
-cat confdefs.h >>conftest.$ac_ext
-cat >>conftest.$ac_ext <<_ACEOF
-/* end confdefs.h.  */
-
-/* Override any GCC internal prototype to avoid an error.
-   Use char because int might match the return type of a GCC
-   builtin and then its argument prototype would still apply.  */
-#ifdef __cplusplus
-extern "C"
-#endif
-char rpmGetFilesystemList ();
-int
-main ()
-{
-return rpmGetFilesystemList ();
-  ;
-  return 0;
-}
-_ACEOF
-rm -f conftest.$ac_objext conftest$ac_exeext
-if { (ac_try="$ac_link"
-case "(($ac_try" in
-  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
-  *) ac_try_echo=$ac_try;;
-esac
-eval ac_try_echo="\"\$as_me:$LINENO: $ac_try_echo\""
-$as_echo "$ac_try_echo") >&5
-  (eval "$ac_link") 2>conftest.er1
-  ac_status=$?
-  grep -v '^ *+' conftest.er1 >conftest.err
-  rm -f conftest.er1
-  cat conftest.err >&5
-  $as_echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); } && {
-	 test -z "$ac_c_werror_flag" ||
-	 test ! -s conftest.err
-       } && test -s conftest$ac_exeext && {
-	 test "$cross_compiling" = yes ||
-	 $as_test_x conftest$ac_exeext
-       }; then
-  netsnmp_result="none required"
-else
-  $as_echo "$as_me: failed program was:" >&5
-sed 's/^/| /' conftest.$ac_ext >&5
-
-	for netsnmp_cur_lib in rpm ; do
-              LIBS="-l${netsnmp_cur_lib} ${netsnmp_temp_LIBS}"
-              cat >conftest.$ac_ext <<_ACEOF
-/* confdefs.h.  */
-_ACEOF
-cat confdefs.h >>conftest.$ac_ext
-cat >>conftest.$ac_ext <<_ACEOF
-/* end confdefs.h.  */
-
-/* Override any GCC internal prototype to avoid an error.
-   Use char because int might match the return type of a GCC
-   builtin and then its argument prototype would still apply.  */
-#ifdef __cplusplus
-extern "C"
-#endif
-char rpmGetFilesystemList ();
-int
-main ()
-{
-return rpmGetFilesystemList ();
-  ;
-  return 0;
-}
-_ACEOF
-rm -f conftest.$ac_objext conftest$ac_exeext
-if { (ac_try="$ac_link"
-case "(($ac_try" in
-  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
-  *) ac_try_echo=$ac_try;;
-esac
-eval ac_try_echo="\"\$as_me:$LINENO: $ac_try_echo\""
-$as_echo "$ac_try_echo") >&5
-  (eval "$ac_link") 2>conftest.er1
-  ac_status=$?
-  grep -v '^ *+' conftest.er1 >conftest.err
-  rm -f conftest.er1
-  cat conftest.err >&5
-  $as_echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); } && {
-	 test -z "$ac_c_werror_flag" ||
-	 test ! -s conftest.err
-       } && test -s conftest$ac_exeext && {
-	 test "$cross_compiling" = yes ||
-	 $as_test_x conftest$ac_exeext
-       }; then
-  netsnmp_result=-l${netsnmp_cur_lib}
-                   break
-else
-  $as_echo "$as_me: failed program was:" >&5
-sed 's/^/| /' conftest.$ac_ext >&5
-
-
-fi
-
-rm -rf conftest.dSYM
-rm -f core conftest.err conftest.$ac_objext conftest_ipa8_conftest.oo \
-      conftest$ac_exeext conftest.$ac_ext
-          done
-fi
-
-rm -rf conftest.dSYM
-rm -f core conftest.err conftest.$ac_objext conftest_ipa8_conftest.oo \
-      conftest$ac_exeext conftest.$ac_ext
-     LIBS="${netsnmp_func_search_save_LIBS}"
-     netsnmp_cv_func_rpmGetFilesystemList__rpmlibs="${netsnmp_result}"
-fi
-{ $as_echo "$as_me:$LINENO: result: $netsnmp_cv_func_rpmGetFilesystemList__rpmlibs" >&5
-$as_echo "$netsnmp_cv_func_rpmGetFilesystemList__rpmlibs" >&6; }
- if test "${netsnmp_cv_func_rpmGetFilesystemList__rpmlibs}" != "no" ; then
-    if test "${netsnmp_cv_func_rpmGetFilesystemList__rpmlibs}" != "none required" ; then
-       _rpmlibs="${netsnmp_result} ${netsnmp_target_val}"
-    fi
-
-
-cat >>confdefs.h <<\_ACEOF
-#define HAVE_LIBRPM 1
-_ACEOF
-
-    LMIBLIBS="$_rpmlibs $LMIBLIBS"
-    CFLAGS="$CFLAGS -I/usr/include/rpm"
-
-
- fi
-
-
-  # rpm 4.6 has incompatible API, turn on the legacy one
-  { $as_echo "$as_me:$LINENO: checking whether headerGetEntry is declared" >&5
-$as_echo_n "checking whether headerGetEntry is declared... " >&6; }
-if test "${ac_cv_have_decl_headerGetEntry+set}" = set; then
-  $as_echo_n "(cached) " >&6
-else
-  cat >conftest.$ac_ext <<_ACEOF
-/* confdefs.h.  */
-_ACEOF
-cat confdefs.h >>conftest.$ac_ext
-cat >>conftest.$ac_ext <<_ACEOF
-/* end confdefs.h.  */
-#include <rpm/rpmlib.h>
-
-
-int
-main ()
-{
-#ifndef headerGetEntry
-  (void) headerGetEntry;
-#endif
-
-  ;
-  return 0;
-}
-_ACEOF
-rm -f conftest.$ac_objext
-if { (ac_try="$ac_compile"
-case "(($ac_try" in
-  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
-  *) ac_try_echo=$ac_try;;
-esac
-eval ac_try_echo="\"\$as_me:$LINENO: $ac_try_echo\""
-$as_echo "$ac_try_echo") >&5
-  (eval "$ac_compile") 2>conftest.er1
-  ac_status=$?
-  grep -v '^ *+' conftest.er1 >conftest.err
-  rm -f conftest.er1
-  cat conftest.err >&5
-  $as_echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); } && {
-	 test -z "$ac_c_werror_flag" ||
-	 test ! -s conftest.err
-       } && test -s conftest.$ac_objext; then
-  ac_cv_have_decl_headerGetEntry=yes
-else
-  $as_echo "$as_me: failed program was:" >&5
-sed 's/^/| /' conftest.$ac_ext >&5
-
-	ac_cv_have_decl_headerGetEntry=no
-fi
-
-rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
-fi
-{ $as_echo "$as_me:$LINENO: result: $ac_cv_have_decl_headerGetEntry" >&5
-$as_echo "$ac_cv_have_decl_headerGetEntry" >&6; }
-if test "x$ac_cv_have_decl_headerGetEntry" = x""yes; then
-  :
-else
-
-cat >>confdefs.h <<\_ACEOF
-#define _RPM_4_4_COMPAT /**/
-_ACEOF
-
-fi
-
-fi
 
 ##
 #   mysql
