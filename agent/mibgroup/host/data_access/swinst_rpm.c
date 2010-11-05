@@ -55,16 +55,19 @@ char pkg_directory[SNMP_MAXPATH];
 void
 netsnmp_swinst_arch_init(void)
 {
+    char        *rpmdbpath = NULL;
     const char  *dbpath;
     struct stat  stat_buf;
 
 #ifdef HAVE_RPMGETPATH
     rpmReadConfigFiles( NULL, NULL );
-    dbpath = rpmGetPath( "%{_dbpath}", NULL );
+    rpmdbpath = rpmGetPath( "%{_dbpath}", NULL );
+    dbpath = rpmdbpath;
 #else
 #ifdef RPMVAR_DBPATH
     rpmReadConfigFiles( NULL, NULL, NULL, 0 );
-    dbpath = rpmGetVar( RPMVAR_DBPATH );
+    rpmdbpath = rpmGetVar( RPMVAR_DBPATH );
+    dbpath = rpmdbpath;
 #else
     dbpath = "/var/lib/rpm";   /* Most likely */
 #endif
@@ -73,11 +76,12 @@ netsnmp_swinst_arch_init(void)
     snprintf( pkg_directory, SNMP_MAXPATH, "%s/Packages", dbpath );
     if (-1 == stat( pkg_directory, &stat_buf ))
         snprintf( pkg_directory, SNMP_MAXPATH, "%s/packages.rpm", dbpath );
+    SNMP_FREE(rpmdbpath);
+    dbpath = NULL;
     if (-1 == stat( pkg_directory, &stat_buf )) {
         snmp_log(LOG_ERR, "Can't find directory of RPM packages");
         pkg_directory[0] = '\0';
     }
-    return;
 }
 
 void
