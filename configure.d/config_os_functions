@@ -80,8 +80,7 @@ AC_CHECK_FUNCS([if_freenameindex              getpagesize      ] dnl
 
 #       rpmGetPath check needs clean LIBS environment   (Linux)
 #
-if test "x$with_rpm" != "xno" && \
-        echo " $module_list " | $GREP " host/hr_swinst " > /dev/null; then
+if test "x$with_rpm" != "xno"; then
     OLDLIBS=$LIBS
     LIBS=$LMIBLIBS
     AC_CHECK_FUNCS(rpmGetPath)
