@@ -607,7 +607,7 @@ convert_v1pdu_to_v2( netsnmp_pdu* template_v1pdu )
  *			
  * @param specific is the specific trap value.
  *
- * @param enterprise is an enterprise oid in which you want to send specifc 
+ * @param enterprise is an enterprise oid in which you want to send specific 
  *	traps from. 
  *
  * @param enterprise_length is the length of the enterprise oid, use macro,
@@ -1101,7 +1101,6 @@ snmpd_parse_config_trap2sink(const char *word, char *cptr)
 {
     char            tmpbuf[1024];
     char           *sp, *cp, *pp = NULL;
-    int             sinkport;
     char            *st;
 
     if (!snmp_trapcommunity)
@@ -1124,7 +1123,6 @@ snmpd_parse_config_informsink(const char *word, char *cptr)
 {
     char            tmpbuf[1024];
     char           *sp, *cp, *pp = NULL;
-    int             sinkport;
     char            *st;
 
     if (!snmp_trapcommunity)
