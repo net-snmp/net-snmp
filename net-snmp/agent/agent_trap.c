@@ -265,7 +265,7 @@ create_trap_session(char *sink, u_short sinkport,
     if ((NULL == netsnmp_ds_get_string(NETSNMP_DS_LIBRARY_ID,
                                        NETSNMP_DS_LIB_CLIENT_ADDR)) && 
         ((0 == strcmp("localhost",sink)) || (0 == strcmp("127.0.0.1",sink))))
-        session.localname = "localhost";
+        session.localname = strdup("localhost");
     sesp = snmp_open(&session);
     free(peername);
 
@@ -426,7 +426,7 @@ convert_v2pdu_to_v1( netsnmp_pdu* template_v2pdu )
         len = vblist->val_len / sizeof(oid);
         if ( len <= 2 ) {
             snmp_log(LOG_WARNING,
-                     "send_trap: v2 trapOID too short (%d)\n", len);
+                     "send_trap: v2 trapOID too short (%d)\n", (int)len);
             snmp_free_pdu(template_v1pdu);
             return NULL;
         }
@@ -889,7 +889,7 @@ send_trap_to_sess(netsnmp_session * sess, netsnmp_pdu *template_pdu)
     if (!sess || !template_pdu)
         return;
 
-    DEBUGMSGTL(("trap", "sending trap type=%d, version=%d\n",
+    DEBUGMSGTL(("trap", "sending trap type=%d, version=%ld\n",
                 template_pdu->command, sess->version));
 
 #ifndef DISABLE_SNMPV1
