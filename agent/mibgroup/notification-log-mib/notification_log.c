@@ -585,6 +585,7 @@ log_notification(netsnmp_pdu *pdu, netsnmp_transport *transport)
     u_long          vbcount = 0;
     u_long          tmpul;
     int             col;
+    int             trapOID_found = 0;  /* Was snmpTrapOID found in the varbinds? (not true for v1 traps) */
 
     if (!nlmLogVarTable
         || netsnmp_ds_get_boolean(NETSNMP_DS_APPLICATION_ID,
@@ -657,6 +658,7 @@ log_notification(netsnmp_pdu *pdu, netsnmp_transport *transport)
             netsnmp_set_row_column(row, COLUMN_NLMLOGNOTIFICATIONID,
                                    ASN_OBJECT_ID, vptr->val.string,
                                    vptr->val_len);
+            trapOID_found = 1;
 
         } else {
             netsnmp_table_row *myrow;
@@ -747,6 +749,17 @@ log_notification(netsnmp_pdu *pdu, netsnmp_transport *transport)
                         "adding a row to the variables table\n"));
             netsnmp_table_dataset_add_row(nlmLogVarTable, myrow);
         }
+    }
+
+    if (!trapOID_found) {
+        /* SNMPv1 traps don't include an snmpTrapOID varbind,
+         * so this must be constructed using the RFC 2576 mappings */
+        netsnmp_pdu *v2pdu = convert_v1pdu_to_v2( pdu );
+        if ( v2pdu && v2pdu->variables && v2pdu->variables->val.string)
+            netsnmp_set_row_column(row, COLUMN_NLMLOGNOTIFICATIONID,
+                                   ASN_OBJECT_ID, v2pdu->variables->val.string,
+                                   v2pdu->variables->val_len);
+        snmp_free_pdu( v2pdu );
     }
 
     /*
