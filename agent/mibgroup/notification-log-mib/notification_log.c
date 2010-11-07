@@ -218,15 +218,6 @@ initialize_table_nlmLogVariableTable(const char * context)
     netsnmp_table_dataset_add_index(table_set, ASN_UNSIGNED);
 
     /*
-     * adding column nlmLogVariableIndex of type ASN_UNSIGNED and access
-     * of NoAccess 
-     */
-    DEBUGMSGTL(("initialize_table_nlmLogVariableTable",
-                "adding column nlmLogVariableIndex (#1) of type ASN_UNSIGNED to table nlmLogVariableTable\n"));
-    netsnmp_table_set_add_default_row(table_set,
-                                      COLUMN_NLMLOGVARIABLEINDEX,
-                                      ASN_UNSIGNED, 0, NULL, 0);
-    /*
      * adding column nlmLogVariableID of type ASN_OBJECT_ID and access of
      * ReadOnly 
      */
