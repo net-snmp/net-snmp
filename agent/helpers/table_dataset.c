@@ -594,7 +594,13 @@ netsnmp_table_data_set_helper_handler(netsnmp_mib_handler *handler,
         case MODE_GET:
         case MODE_GETNEXT:
         case MODE_GETBULK:     /* XXXWWW */
-            if (data && data->data.voidp)
+            if (!data || data->type == SNMP_NOSUCHINSTANCE)
+                netsnmp_set_request_error(reqinfo, request, SNMP_NOSUCHINSTANCE);
+            else
+                /*
+                 * Note: data->data.voidp can be NULL, e.g. when a zero-length
+                 * octet string has been stored in the table cache.
+                 */
                 netsnmp_table_data_build_result(reginfo, reqinfo, request,
                                                 row,
                                                 table_info->colnum,
