@@ -523,13 +523,11 @@ really_try_next:
 	    return NULL;
 
         store_idx = name[ HRSTORE_ENTRY_NAME_LENGTH ];
-        if (HRFS_entry &&
-	    store_idx > NETSNMP_MEM_TYPE_MAX &&
-            netsnmp_ds_get_boolean(NETSNMP_DS_APPLICATION_ID,
-                                   NETSNMP_DS_AGENT_SKIPNFSINHOSTRESOURCES) &&
-            Check_HR_FileSys_NFS())
-            return NULL;
         if (store_idx > NETSNMP_MEM_TYPE_MAX ) {
+            if ( netsnmp_ds_get_boolean(NETSNMP_DS_APPLICATION_ID,
+                                        NETSNMP_DS_AGENT_SKIPNFSINHOSTRESOURCES) &&
+                 Check_HR_FileSys_NFS())
+                return NULL;  /* or goto try_next; */
 	    if (HRFS_statfs(HRFS_entry->HRFS_mount, &stat_buf) < 0) {
 		snmp_log_perror(HRFS_entry->HRFS_mount);
 		goto try_next;
