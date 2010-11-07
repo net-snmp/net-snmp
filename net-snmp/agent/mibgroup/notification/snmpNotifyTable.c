@@ -447,9 +447,11 @@ init_snmpNotifyTable(void)
     snmp_register_callback(SNMP_CALLBACK_LIBRARY, SNMP_CALLBACK_STORE_DATA,
                            store_snmpNotifyTable, NULL);
 
+#ifndef DISABLE_SNMPV1
     snmp_register_callback(SNMP_CALLBACK_APPLICATION,
                            SNMPD_CALLBACK_SEND_TRAP1, send_notifications,
                            NULL);
+#endif
     snmp_register_callback(SNMP_CALLBACK_APPLICATION,
                            SNMPD_CALLBACK_SEND_TRAP2, send_notifications,
                            NULL);
