@@ -68,6 +68,10 @@ netsnmp_create_data_list(const char *name, void *data,
     if (!node)
         return NULL;
     node->name = strdup(name);
+    if (!node->name) {
+      free(node);
+      return NULL;
+    }
     node->data = data;
     node->free_func = beer;
     return node;
