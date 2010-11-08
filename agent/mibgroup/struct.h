@@ -20,7 +20,7 @@ struct extensible {
     size_t          miblen;
     int             pid;
 #if defined(WIN32) && !defined (mingw32)
-    int             tid;                /* WIN32 thread */
+    HANDLE          tid;                /* WIN32 thread */
 #endif
 };
 

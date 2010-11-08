@@ -227,7 +227,7 @@ wait_on_exec(struct extensible *ex)
 #if defined(WIN32) && !defined (mingw32)
   int rc;
   if (ex->tid != 0 && ex->pid != 0) {
-    HANDLE hThread = (HANDLE) ex->tid;
+    HANDLE hThread = ex->tid;
     HANDLE hProcess = (HANDLE) ex->pid;
     rc = WaitForSingleObject(hProcess, NETSNMP_TIMEOUT_WAITFORSINGLEOBJECT);
     DEBUGMSGT(("exec:wait_on_exec","WaitForSingleObject rc=(%d)\n",rc ));
@@ -380,7 +380,7 @@ get_exec_output(struct extensible *ex)
     
     /* Set global child process handle */
     ex->pid = (int)pi.hProcess;
-    ex->tid = (int)pi.hThread;
+    ex->tid = pi.hThread;
 
     /* Close pipe handles to make sure that no handles to the write end of the
      * output pipe are maintained in this process or else the pipe will
