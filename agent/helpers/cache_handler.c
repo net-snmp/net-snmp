@@ -432,7 +432,7 @@ netsnmp_register_cache_handler(netsnmp_handler_registration * reginfo,
     return netsnmp_register_handler(reginfo);
 }
 
-NETSNMP_STATIC_INLINE char *
+static char *
 _build_cache_name(const char *name)
 {
     char *dup = (char*)malloc(strlen(name) + strlen(CACHE_NAME) + 2);
