@@ -91,6 +91,7 @@ netsnmp_table_data_clone_row(netsnmp_table_row *row)
         newrow->index_oid =
             snmp_duplicate_objid(row->index_oid, row->index_oid_len);
         if (!newrow->index_oid) {
+            free(newrow->indexes);
             free(newrow);
             return NULL;
         }
