@@ -22,6 +22,12 @@ cat >>"$2.c" <<EOF
 #else
 #include <strings.h>
 #endif
+#ifdef HAVE_ARPA_INET_H
+#include <arpa/inet.h>
+#endif
+#ifdef HAVE_NETINET_IP6_H
+#include <netinet/ip6.h>
+#endif
 
 int
 main(int argc, char *argv[]) {
