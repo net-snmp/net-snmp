@@ -535,6 +535,9 @@ netsnmp_udp6_parse_security(const char *token, char *param)
                     config_perror(gai_strerror(gai_error));
                     return;
                 }
+#else
+                config_perror("getaddrinfo() not available");
+                return;
 #endif
             }
             if (res == NULL) {
