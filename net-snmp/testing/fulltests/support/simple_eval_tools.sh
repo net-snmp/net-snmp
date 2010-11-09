@@ -360,6 +360,28 @@ CHECKAGENTCOUNT() {
     CHECKFILECOUNT $SNMP_SNMPD_LOG_FILE $count $@
 }
 
+WAITFORAGENTSHUTTINGDOWN() {
+    if [ "x$OSTYPE" != "xmsys" ]; then
+        WAITFORAGENT "shutting down"
+    else
+	CAN_USLEEP
+	if [ $SNMP_CAN_USLEEP = 1 ] ; then
+	  sleeptime=`expr $SNMP_SLEEP '*' 50`
+	else 
+	  sleeptime=`expr $SNMP_SLEEP '*' 5`
+	fi
+        snmpd_pid=`cat $SNMP_SNMPD_PID_FILE`
+        while [ $sleeptime -gt 0 ] && kill -0 "$snmpd_pid" 2>/dev/null; do
+            if [ $SNMP_CAN_USLEEP = 1 ]; then
+                sleep .1
+            else
+                sleep 1
+            fi
+            sleeptime=`expr $sleeptime - 1`
+        done
+    fi
+}
+
 WAITFORAGENT() {
     WAITFOR "$@" $SNMP_SNMPD_LOG_FILE
 }
@@ -617,9 +639,7 @@ STOPPROG() {
 STOPAGENT() {
     SAVE_RESULTS
     STOPPROG $SNMP_SNMPD_PID_FILE
-    if [ "x$OSTYPE" != "xmsys" ]; then
-        WAITFORAGENT "shutting down"
-    fi
+    WAITFORAGENTSHUTTINGDOWN
     if [ $SNMP_VERBOSE -gt 1 ]; then
 	echo "Agent Output:"
 	echo "$separator [stdout]"
