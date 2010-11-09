@@ -24271,6 +24271,8 @@ main ()
 _ACEOF
 if ac_fn_c_try_link "$LINENO"; then :
    ac_cv_func_gai_strerror=yes
+      $as_echo  "#define HAVE_GAI_STRERROR 1" >>confdefs.h
+
 fi
 rm -f core conftest.err conftest.$ac_objext \
     conftest$ac_exeext conftest.$ac_ext
@@ -24288,6 +24290,8 @@ main ()
 _ACEOF
 if ac_fn_c_try_link "$LINENO"; then :
    ac_cv_func_getaddrinfo=yes
+      $as_echo  "#define HAVE_GETADDRINFO 1" >>confdefs.h
+
 fi
 rm -f core conftest.err conftest.$ac_objext \
     conftest$ac_exeext conftest.$ac_ext
@@ -24305,6 +24309,8 @@ main ()
 _ACEOF
 if ac_fn_c_try_link "$LINENO"; then :
    ac_cv_func_gethostbyname=yes
+      $as_echo  "#define HAVE_GETHOSTBYNAME 1" >>confdefs.h
+
 fi
 rm -f core conftest.err conftest.$ac_objext \
     conftest$ac_exeext conftest.$ac_ext
@@ -24322,6 +24328,8 @@ main ()
 _ACEOF
 if ac_fn_c_try_link "$LINENO"; then :
    ac_cv_func_gethostname=yes
+      $as_echo  "#define HAVE_GETHOSTNAME 1" >>confdefs.h
+
 fi
 rm -f core conftest.err conftest.$ac_objext \
     conftest$ac_exeext conftest.$ac_ext
