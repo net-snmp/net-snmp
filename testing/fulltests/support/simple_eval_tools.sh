@@ -118,16 +118,13 @@ ISDEFINED() {
 }
 
 SKIPIFNOT() {
-	if ISDEFINED "$1" ; then
-            true
-        else
+	if ! ISDEFINED "$1"; then
 	    SKIP "$1 is not defined"
 	fi
 }
 
 SKIPIF() {
-        ISDEFINED "$1"
-	if ISDEFINED "$1" ; then
+	if ISDEFINED "$1"; then
 	    SKIP "$1 is defined"
 	fi
 }
