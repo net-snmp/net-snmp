@@ -355,6 +355,20 @@ case $target_os in
 esac
 
 
+#   Compiler flags:
+#
+
+# The Net-SNMP source code is not strict-aliasing safe, so add
+# -fno-strict-aliasing to $CFLAGS if the compiler supports it.
+AC_MSG_CHECKING([whether the compiler supports -fno-strict-aliasing])
+netsnmp_save_CFLAGS="$CFLAGS"
+CFLAGS="-fno-strict-aliasing $CFLAGS"
+AC_LINK_IFELSE([AC_LANG_PROGRAM([], [])], [AC_MSG_RESULT([yes])], [
+  AC_MSG_RESULT([no])
+  CFLAGS="$netsnmp_save_CFLAGS"
+])
+
+
 #   Linker checks:
 #
     
