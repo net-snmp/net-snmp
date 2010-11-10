@@ -10388,6 +10388,67 @@ fi
 echo "$as_me:$LINENO: result: $EXTRACPPFLAGS" >&5
 echo "${ECHO_T}$EXTRACPPFLAGS" >&6
 
+#   Compiler flags:
+#
+
+# The Net-SNMP source code is not strict-aliasing safe, so add
+# -fno-strict-aliasing to $CFLAGS if the compiler supports it.
+echo "$as_me:$LINENO: checking whether the compiler supports -fno-strict-aliasing" >&5
+echo $ECHO_N "checking whether the compiler supports -fno-strict-aliasing... $ECHO_C" >&6
+netsnmp_save_CFLAGS="$CFLAGS"
+CFLAGS="-fno-strict-aliasing $CFLAGS"
+cat >conftest.$ac_ext <<_ACEOF
+/* confdefs.h.  */
+_ACEOF
+cat confdefs.h >>conftest.$ac_ext
+cat >>conftest.$ac_ext <<_ACEOF
+/* end confdefs.h.  */
+
+int
+main ()
+{
+
+  ;
+  return 0;
+}
+_ACEOF
+rm -f conftest.$ac_objext conftest$ac_exeext
+if { (eval echo "$as_me:$LINENO: \"$ac_link\"") >&5
+  (eval $ac_link) 2>conftest.er1
+  ac_status=$?
+  grep -v '^ *+' conftest.er1 >conftest.err
+  rm -f conftest.er1
+  cat conftest.err >&5
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } &&
+	 { ac_try='test -z "$ac_c_werror_flag"
+			 || test ! -s conftest.err'
+  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
+  (eval $ac_try) 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); }; } &&
+	 { ac_try='test -s conftest$ac_exeext'
+  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
+  (eval $ac_try) 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); }; }; then
+  echo "$as_me:$LINENO: result: yes" >&5
+echo "${ECHO_T}yes" >&6
+else
+  echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
+
+
+  echo "$as_me:$LINENO: result: no" >&5
+echo "${ECHO_T}no" >&6
+  CFLAGS="$netsnmp_save_CFLAGS"
+
+fi
+rm -f conftest.err conftest.$ac_objext \
+      conftest$ac_exeext conftest.$ac_ext
+
 # Prefixes must begin with "/" or [A-Z] followed by colon.
 
 if test "x$prefix" = "xNONE"; then
