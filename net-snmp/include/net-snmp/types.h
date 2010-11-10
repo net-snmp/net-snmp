@@ -54,6 +54,19 @@
 # endif
 #endif
 
+#if defined(WIN32) && !defined(cygwin)
+typedef HANDLE netsnmp_pid_t;
+#define NETSNMP_NO_SUCH_PROCESS INVALID_HANDLE_VALUE
+#else
+/*
+ * Note: on POSIX-compliant systems, pid_t is defined in <sys/types.h>.
+ * And if pid_t has not been defined in <sys/types.h>, AC_TYPE_PID_T ensures
+ * that a pid_t definition is present in net-snmp-config.h.
+ */
+typedef pid_t netsnmp_pid_t;
+#define NETSNMP_NO_SUCH_PROCESS -1
+#endif
+
 #if HAVE_NETINET_IN_H
 #include <netinet/in.h>		/* For definition of in_addr_t */
 #endif

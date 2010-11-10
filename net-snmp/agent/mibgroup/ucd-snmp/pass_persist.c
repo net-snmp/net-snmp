@@ -45,7 +45,7 @@ int             numpersistpassthrus = 0;
 struct persist_pipe_type {
     FILE           *fIn, *fOut;
     int             fdIn, fdOut;
-    int             pid;
+    netsnmp_pid_t   pid;
 }              *persist_pipes = (struct persist_pipe_type *) NULL;
 static int      init_persist_pipes(void);
 static void     close_persist_pipe(int iindex);
@@ -560,7 +560,7 @@ init_persist_pipes(void)
         for (i = 0; i <= numpersistpassthrus; i++) {
             persist_pipes[i].fIn = persist_pipes[i].fOut = (FILE *) 0;
             persist_pipes[i].fdIn = persist_pipes[i].fdOut = -1;
-            persist_pipes[i].pid = -1;
+            persist_pipes[i].pid = NETSNMP_NO_SUCH_PROCESS;
         }
     }
     return persist_pipes ? 1 : 0;
@@ -603,14 +603,15 @@ open_persist_pipe(int iindex, char *command)
     /*
      * Open if it's not already open 
      */
-    if (persist_pipes[iindex].pid == -1) {
-        int             fdIn, fdOut, pid;
+    if (persist_pipes[iindex].pid == NETSNMP_NO_SUCH_PROCESS) {
+        int             fdIn, fdOut;
+        netsnmp_pid_t   pid;
 
         /*
          * Did we fail? 
          */
         if ((0 == get_exec_pipes(command, &fdIn, &fdOut, &pid)) ||
-            (pid == -1)) {
+            (pid == NETSNMP_NO_SUCH_PROCESS)) {
             DEBUGMSGTL(("ucd-snmp/pass_persist",
                         "open_persist_pipe: pid == -1\n"));
             recurse = 0;
@@ -795,7 +796,7 @@ close_persist_pipe(int iindex)
     }
 
 #if defined(WIN32) && !defined (mingw32) && !defined (HAVE_SIGNAL)
-    if (!CloseHandle((HANDLE)persist_pipes[iindex].pid)) {
+    if (!CloseHandle(persist_pipes[iindex].pid)) {
           DEBUGMSGTL(("ucd-snmp/pass_persist","close_persist_pipe pid: close error\n"));
         } 
 #endif
@@ -806,11 +807,11 @@ close_persist_pipe(int iindex)
 	unlink(fifo_out_path);
 #endif
 
-    if (persist_pipes[iindex].pid != -1) {
+    if (persist_pipes[iindex].pid != NETSNMP_NO_SUCH_PROCESS) {
 #if HAVE_SYS_WAIT_H
         waitpid(persist_pipes[iindex].pid, NULL, 0);
 #endif
-        persist_pipes[iindex].pid = -1;
+        persist_pipes[iindex].pid = NETSNMP_NO_SUCH_PROCESS;
     }
 
 }

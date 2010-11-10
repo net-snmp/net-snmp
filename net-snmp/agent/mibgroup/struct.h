@@ -18,7 +18,7 @@ struct extensible {
     struct extensible *next;
     oid             miboid[MIBMAX];
     size_t          miblen;
-    int             pid;
+    netsnmp_pid_t   pid;
 #if defined(WIN32)
     HANDLE          tid;                /* WIN32 thread */
 #endif
