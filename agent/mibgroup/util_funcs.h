@@ -36,7 +36,11 @@ int             shell_command(struct extensible *);
 int             exec_command(struct extensible *);
 struct extensible *get_exten_instance(struct extensible *, size_t);
 int             get_exec_output(struct extensible *);
+#if defined(WIN32) && !defined(cygwin)
+int             get_exec_pipes(char *cmd, int *fdIn, int *fdOut, HANDLE *pid);
+#else
 int             get_exec_pipes(char *cmd, int *fdIn, int *fdOut, int *pid);
+#endif
 WriteMethod     clear_cache;
 void            print_mib_oid(oid *, size_t);
 void            sprint_mib_oid(char *, oid *, size_t);

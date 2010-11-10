@@ -215,7 +215,7 @@ wait_on_exec(struct extensible *ex)
   int rc;
   if (ex->tid != 0 && ex->pid != 0) {
     HANDLE hThread = ex->tid;
-    HANDLE hProcess = (HANDLE) ex->pid;
+    HANDLE hProcess = ex->pid;
     rc = WaitForSingleObject(hProcess, NETSNMP_TIMEOUT_WAITFORSINGLEOBJECT);
     DEBUGMSGT(("exec:wait_on_exec","WaitForSingleObject rc=(%d)\n",rc ));
     rc = CloseHandle( hThread );
@@ -370,7 +370,7 @@ get_exec_output(struct extensible *ex)
     }
     
     /* Set global child process handle */
-    ex->pid = (int)pi.hProcess;
+    ex->pid = pi.hProcess;
     ex->tid = pi.hThread;
 
     /* Close pipe handles to make sure that no handles to the write end of the
@@ -396,7 +396,7 @@ get_exec_output(struct extensible *ex)
     return -1;
 }
 int
-get_exec_pipes(char *cmd, int *fdIn, int *fdOut, int *pid)
+get_exec_pipes(char *cmd, int *fdIn, int *fdOut, netsnmp_pid_t *pid)
 {
 /* 	Alexander Prömel, alexander@proemel.de 08/24/2006
 	The following code, is tested on picotux rev. 1.01.
@@ -629,7 +629,7 @@ get_exec_pipes(char *cmd, int *fdIn, int *fdOut, int *pid)
     DEBUGMSGTL(("util_funcs","child dwProcessId (task manager): %d\n",(int)pi.dwProcessId));
 
     /* Set global child process handle */
-    *pid = (int)pi.hProcess;
+    *pid = pi.hProcess;
 
     /* Cleanup */
     if (!CloseHandle(pi.hThread))
