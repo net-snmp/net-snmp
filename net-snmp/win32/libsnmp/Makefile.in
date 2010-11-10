@@ -17,7 +17,6 @@ LIB32_OBJS= \
 	"$(INTDIR)\callback.obj" \
 	"$(INTDIR)\check_varbind.obj" \
 	"$(INTDIR)\closedir.obj" \
-	"$(INTDIR)\cmu_compat.obj" \
 	"$(INTDIR)\container.obj" \
 	"$(INTDIR)\container_binary_array.obj" \
 	"$(INTDIR)\container_iterator.obj" \
@@ -154,12 +153,6 @@ SOURCE=..\..\snmplib\check_varbind.c
 SOURCE=..\..\snmplib\closedir.c
 
 "$(INTDIR)\closedir.obj" : $(SOURCE) "$(INTDIR)"
-	$(CPP) $(CPP_PROJ) $(SOURCE)
-
-
-SOURCE=..\..\snmplib\cmu_compat.c
-
-"$(INTDIR)\cmu_compat.obj" : $(SOURCE) "$(INTDIR)"
 	$(CPP) $(CPP_PROJ) $(SOURCE)
 
 
