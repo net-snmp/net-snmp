@@ -14,9 +14,6 @@ config_require(util_funcs/header_simple_table)
 extern "C" {
 #endif
 
-#ifdef HAVE_PTHREAD_H
-#include <pthread.h>
-#endif
 #include "struct.h"
 
 typedef struct prefix_info
