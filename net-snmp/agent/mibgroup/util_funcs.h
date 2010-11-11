@@ -7,6 +7,9 @@
 config_require(util_funcs/header_generic)
 config_require(util_funcs/header_simple_table)
 
+#ifdef HAVE_SYS_TYPES_H
+#include <sys/types.h>
+#endif
 #include "util_funcs/header_generic.h"
 #include "util_funcs/header_simple_table.h"
 
@@ -39,7 +42,7 @@ int             get_exec_output(struct extensible *);
 #if defined(WIN32) && !defined(cygwin)
 int             get_exec_pipes(char *cmd, int *fdIn, int *fdOut, HANDLE *pid);
 #else
-int             get_exec_pipes(char *cmd, int *fdIn, int *fdOut, int *pid);
+int             get_exec_pipes(char *cmd, int *fdIn, int *fdOut, pid_t *pid);
 #endif
 WriteMethod     clear_cache;
 void            print_mib_oid(oid *, size_t);
