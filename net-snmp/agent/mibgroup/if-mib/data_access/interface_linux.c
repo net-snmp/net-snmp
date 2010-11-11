@@ -81,7 +81,6 @@ static unsigned short basereachable_time_ms = 0;
 #ifdef SUPPORT_PREFIX_FLAGS
 prefix_cbx *prefix_head_list = NULL;
 netsnmp_prefix_listen_info list_info;
-pthread_t thread1;
 #define IF_PREFIX_ONLINK        0x01
 #define IF_PREFIX_AUTOCONF      0x02
  
