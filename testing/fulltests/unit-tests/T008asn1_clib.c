@@ -2,6 +2,11 @@
 
 int i;
 
+#if 0
+snmp_set_do_debugging(TRUE);
+debug_register_tokens("dumpv_recv,dumpv_send,asn");
+#endif
+
 {
     const long intval[] = {
 	-0x80000000, -0x7fffffff, -0xffff, -3, -1, 0, 1, 3, 0xffff, 0x7fffffff
@@ -68,13 +73,12 @@ int i;
 
 {
     const struct counter64 intval[] = {
-	{ -0x80000000,           0 },
-	{ -0x7fffffff,  0xffffffff },
-	{          -1,           0 },
-	{           0, -0xffffffff },
-	{           0,     -0xffff },
-	{           0,          -3 },
-	{           0,          -1 },
+	{ 0x80000000U,          0U },
+	{ 0x80000000U, 0xffffffffU },
+	{ 0xffffffffU,           0 },
+	{ 0xffffffffU, 0xffff0000U },
+	{ 0xffffffffU, 0xfffffffcU },
+	{ 0xffffffffU, 0xffffffffU },
 	{           0,           0 },
 	{           0,           1 },
 	{           0,           3 },
