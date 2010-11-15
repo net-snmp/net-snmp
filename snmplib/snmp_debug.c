@@ -92,7 +92,7 @@ debug_config_turn_on_debugging(const char *configtoken, char *line)
 }
 
 void
-debug_register_tokens(char *tokens)
+debug_register_tokens(const char *tokens)
 {
     char           *newp, *cp;
     char           *st = NULL;
