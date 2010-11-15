@@ -19,7 +19,9 @@ struct extensible {
     unsigned long   miboid[MIBMAX];
     size_t          miblen;
     int             pid;
+#if defined(WIN32)
     HANDLE          tid;                /* WIN32 thread */
+#endif
 };
 
 struct myproc {
