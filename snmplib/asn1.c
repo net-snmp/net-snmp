@@ -208,16 +208,14 @@ SOFTWARE.
 #  define CHECK_OVERFLOW_S(x,y)
 #  define CHECK_OVERFLOW_U(x,y)
 #else
-#  define CHECK_OVERFLOW_S(x,y) do { int trunc = 0;                     \
+#  define CHECK_OVERFLOW_S(x,y) do {                                    \
         if (x > INT32_MAX) {                                            \
-            trunc = 1;                                                  \
+            DEBUGMSG(("asn","truncating signed value %ld to 32 bits (%d)\n",(long)(x),y)); \
             x &= 0xffffffff;                                            \
         } else if (x < INT32_MIN) {                                     \
-            trunc = 1;                                                  \
+            DEBUGMSG(("asn","truncating signed value %ld to 32 bits (%d)\n",(long)(x),y)); \
             x = 0 - (x & 0xffffffff);                                   \
         }                                                               \
-        if (trunc)                                                      \
-            DEBUGMSG(("asn","truncating signed value to 32 bits (%d)\n",y)); \
     } while(0)
 
 #  define CHECK_OVERFLOW_U(x,y) do {                                    \
@@ -1878,13 +1876,8 @@ asn_parse_unsigned_int64(u_char * data,
         return NULL;
     }
     *datalength -= (int) asn_length + (bufp - data);
-    if (*bufp & 0x80) {
-        low = 0xFFFFFF;     /* first byte bit 1 means start the data with 1s */
-        high = 0xFFFFFF;
-    }
-
     while (asn_length--) {
-        high = ((0x00FFFFFF & high) << 8) | ((low & 0xFF000000) >> 24);
+        high = ((0x00FFFFFF & high) << 8) | ((low & 0xFF000000U) >> 24);
         low = ((low & 0x00FFFFFF) << 8) | *bufp++;
     }
 
@@ -1897,7 +1890,7 @@ asn_parse_unsigned_int64(u_char * data,
     DEBUGIF("dumpv_recv") {
         char            i64buf[I64CHARSZ + 1];
         printU64(i64buf, cp);
-        DEBUGMSG(("dumpv_recv", "Counter64: %s", i64buf));
+        DEBUGMSG(("dumpv_recv", "Counter64: %s\n", i64buf));
     }
 
     return bufp;
@@ -1955,11 +1948,8 @@ asn_build_unsigned_int64(u_char * data,
     CHECK_OVERFLOW_U(high,7);
     CHECK_OVERFLOW_U(low,7);
 
-    mask = ((u_long) 0xFF) << (8 * (sizeof(long) - 1));
-    /*
-     * mask is 0xFF000000 on a big-endian machine 
-     */
-    if ((u_char) ((high & mask) >> (8 * (sizeof(long) - 1))) & 0x80) {
+    mask = 0xff000000U;
+    if (high & 0x80000000U) {
         /*
          * if MSB is set 
          */
@@ -1972,16 +1962,12 @@ asn_build_unsigned_int64(u_char * data,
          * There should be no sequence of 9 consecutive 1's or 0's at the most
          * significant end of the integer.
          */
-        mask2 = ((u_long) 0x1FF) << ((8 * (sizeof(long) - 1)) - 1);
-        /*
-         * mask2 is 0xFF800000 on a big-endian machine 
-         */
+        mask2 = 0xff800000U;
         while ((((high & mask2) == 0) || ((high & mask2) == mask2))
                && intsize > 1) {
             intsize--;
-            high = (high << 8)
-                | ((low & mask) >> (8 * (sizeof(long) - 1)));
-            low <<= 8;
+            high = ((high & 0x00ffffffu) << 8) | ((low & mask) >> 24);
+            low = (low & 0x00ffffffu) << 8;
         }
     }
 #ifdef NETSNMP_WITH_OPAQUE_SPECIAL_TYPES
@@ -2046,10 +2032,9 @@ asn_build_unsigned_int64(u_char * data,
         intsize--;
     }
     while (intsize--) {
-        *data++ = (u_char) ((high & mask) >> (8 * (sizeof(long) - 1)));
-        high = (high << 8)
-            | ((low & mask) >> (8 * (sizeof(long) - 1)));
-        low <<= 8;
+        *data++ = (u_char) (high >> 24);
+        high = ((high & 0x00ffffff) << 8) | ((low & mask) >> 24);
+        low = (low & 0x00ffffff) << 8;
 
     }
     DEBUGDUMPSETUP("send", initdatap, data - initdatap);
@@ -2144,12 +2129,12 @@ asn_parse_signed_int64(u_char * data,
     }
     *datalength -= (int) asn_length + (bufp - data);
     if (*bufp & 0x80) {
-        low = 0xFFFFFF;     /* first byte bit 1 means start the data with 1s */
+        low = 0xFFFFFFFFU;   /* first byte bit 1 means start the data with 1s */
         high = 0xFFFFFF;
     }
 
     while (asn_length--) {
-        high = ((0x00FFFFFF & high) << 8) | ((low & 0xFF000000) >> 24);
+        high = ((0x00FFFFFF & high) << 8) | ((low & 0xFF000000U) >> 24);
         low = ((low & 0x00FFFFFF) << 8) | *bufp++;
     }
 
@@ -2162,7 +2147,7 @@ asn_parse_signed_int64(u_char * data,
     DEBUGIF("dumpv_recv") {
         char            i64buf[I64CHARSZ + 1];
         printI64(i64buf, cp);
-        DEBUGMSG(("dumpv_recv", "Integer64: %s", i64buf));
+        DEBUGMSG(("dumpv_recv", "Integer64: %s\n", i64buf));
     }
 
     return bufp;
@@ -2201,9 +2186,9 @@ asn_build_signed_int64(u_char * data,
      * ASN.1 integer ::= 0x02 asnlength byte {byte}*
      */
 
-    struct counter64 c64;
     register u_int  mask, mask2;
-    u_long          low, high;
+    u_long          low;
+    long            high; /* MUST be signed because of CHECK_OVERFLOW_S(). */
     size_t          intsize;
 #ifndef NETSNMP_NO_DEBUGGING
     u_char         *initdatap = data;
@@ -2215,9 +2200,8 @@ asn_build_signed_int64(u_char * data,
         return NULL;
     }
     intsize = 8;
-    memcpy(&c64, cp, sizeof(struct counter64)); /* we're may modify it */
-    low = c64.low;
-    high = c64.high;
+    low = cp->low;
+    high = cp->high; /* unsigned to signed conversion */
 
     CHECK_OVERFLOW_S(high,9);
     CHECK_OVERFLOW_U(low,9);
@@ -2228,17 +2212,13 @@ asn_build_signed_int64(u_char * data,
      * consecutive 1's or 0's at the most significant end of the
      * integer.
      */
-    mask = ((u_int) 0xFF) << (8 * (sizeof(u_int) - 1));
-    mask2 = ((u_int) 0x1FF) << ((8 * (sizeof(u_int) - 1)) - 1);
-    /*
-     * mask is 0xFF800000 on a big-endian machine 
-     */
+    mask = 0xFF000000U;
+    mask2 = 0xFF800000U;
     while ((((high & mask2) == 0) || ((high & mask2) == mask2))
            && intsize > 1) {
         intsize--;
-        high = (high << 8)
-            | ((low & mask) >> (8 * (sizeof(u_int) - 1)));
-        low <<= 8;
+        high = ((high & 0x00ffffff) << 8) | ((low & mask) >> 24);
+        low = (low & 0x00ffffff) << 8;
     }
     /*
      * until a real int64 gets incorperated into SNMP, we are going to
@@ -2257,16 +2237,15 @@ asn_build_signed_int64(u_char * data,
     *datalength -= (3 + intsize);
 
     while (intsize--) {
-        *data++ = (u_char) ((high & mask) >> (8 * (sizeof(u_int) - 1)));
-        high = (high << 8)
-            | ((low & mask) >> (8 * (sizeof(u_int) - 1)));
-        low <<= 8;
+        *data++ = (u_char) (high >> 24);
+        high = ((high & 0x00ffffff) << 8) | ((low & mask) >> 24);
+        low = (low & 0x00ffffff) << 8;
     }
     DEBUGDUMPSETUP("send", initdatap, data - initdatap);
     DEBUGIF("dumpv_send") {
         char            i64buf[I64CHARSZ + 1];
         printU64(i64buf, cp);
-        DEBUGMSG(("dumpv_send", "%s", i64buf));
+        DEBUGMSG(("dumpv_send", "%s\n", i64buf));
     }
     return data;
 }
@@ -2616,7 +2595,7 @@ asn_build_double(u_char * data,
 
     data += doublesize;
     DEBUGDUMPSETUP("send", initdatap, data - initdatap);
-    DEBUGMSG(("dumpv_send", "  Opaque double: %f", *doublep));
+    DEBUGMSG(("dumpv_send", "  Opaque double: %f\n", *doublep));
     return data;
 }
 
