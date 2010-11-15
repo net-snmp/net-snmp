@@ -9,7 +9,16 @@ debug_register_tokens("dumpv_recv,dumpv_send,asn");
 
 {
     const long intval[] = {
-	-0x80000000, -0x7fffffff, -0xffff, -3, -1, 0, 1, 3, 0xffff, 0x7fffffff
+        -0x80000000L,
+        -0x7fffffffL,
+        -0xffffL,
+        -3,
+        -1,
+        0,
+        1,
+        3,
+        0xffff,
+        0x7fffffff,
     };
     for (i = 0; i < sizeof(intval)/sizeof(intval[0]); ++i) {
 	u_char encoded[256];
@@ -39,7 +48,7 @@ debug_register_tokens("dumpv_recv,dumpv_send,asn");
 
 {
     const unsigned long intval[] = {
-	0, 1, 3, 0xffff, 0x7fffffff, 0x80000000, 0xffffffff
+	0, 1, 3, 0xffff, 0x7fffffff, 0x80000000U, 0xffffffffU
     };
     for (i = 0; i < sizeof(intval)/sizeof(intval[0]); ++i) {
 	u_char encoded[256];
