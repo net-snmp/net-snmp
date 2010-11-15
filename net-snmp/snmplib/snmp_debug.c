@@ -489,7 +489,7 @@ debug_config_turn_on_debugging(const char *configtoken UNUSED,
 { }
 
 void
-debug_register_tokens(char *tokens UNUSED)
+debug_register_tokens(const char *tokens UNUSED)
 { }
 
 void
