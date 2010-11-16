@@ -97,7 +97,8 @@ case `uname` in
 esac
 
 # Set up temporary directory
-if [ "x$SNMP_TMPDIR" = "x" -a "x$SNMP_HEADERONLY" != "xyes" ]; then
+if [ "x$SNMP_HEADERONLY" != "xyes" ]; then
+  if [ "x$SNMP_TMPDIR" = "x" ]; then
     if [ "x$testnum" = "x" ] ; then
         testnum=0
     fi
@@ -107,11 +108,19 @@ if [ "x$SNMP_TMPDIR" = "x" -a "x$SNMP_HEADERONLY" != "xyes" ]; then
 	echo "$0: ERROR: $SNMP_TMPDIR already existed."
 	exit 1;
     fi
+  fi
+  if [ ! -d $SNMP_TMPDIR ]; then
+    mkdir $SNMP_TMPDIR
+    chmod 0700 $SNMP_TMPDIR
+  fi
+  if [ "x$SNMP_TMP_PERSISTENTDIR" = "x" ]; then
     SNMP_TMP_PERSISTENTDIR=$SNMP_TMPDIR/persist
     export SNMP_TMP_PERSISTENTDIR
-    mkdir $SNMP_TMPDIR
+  fi
+  if [ ! -d $SNMP_TMP_PERSISTENTDIR ]; then
     mkdir $SNMP_TMP_PERSISTENTDIR
-    chmod 0700 $SNMP_TMPDIR $SNMP_TMP_PERSISTENTDIR
+    chmod 0700 $SNMP_TMP_PERSISTENTDIR
+  fi
 fi
 
 if [ "x$SNMP_SAVE_TMPDIR" = "x" ]; then

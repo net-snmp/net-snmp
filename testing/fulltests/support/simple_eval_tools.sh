@@ -175,15 +175,34 @@ REMOVETESTDATA() {
 	rm -rf $SNMP_TMPDIR
 }
 
-
+#------------------------------------ -o-
+#
+OUTPUTENVVARS() {
+    echo "SNMPCONFPATH=$SNMPCONFPATH" >> $1
+    echo "SNMP_PERSISTENT_DIR=$SNMP_PERSISTENT_DIR" >> $1
+    echo "MIBDIRS=$MIBDIRS" >> $1
+    echo "PATH=$PATH" >> $1
+    echo "export SNMPCONFPATH" >> $1
+    echo "export SNMP_PERSISTENT_DIR" >> $1
+    echo "export MIBDIRS" >> $1
+    echo "export PATH" >> $1
+}
+    
 #------------------------------------ -o-
 # Captures output from command, and returns the command's exit code.
 loggedvars=0
 CAPTURE() {	# <command_with_arguments_to_execute>
+    NEWOUTPUTFILE
+
+    # track invoked command per test when verbose
+    if [ $SNMP_VERBOSE -gt 0 ]; then
+        OUTPUTENVVARS $junkoutputfile.invoked
+        echo $* >> $junkoutputfile.invoked
+    fi
+
     if [ $loggedvars = 0 ]; then
-	echo "SNMPCONFPATH=$SNMPCONFPATH" >> $SNMP_TMPDIR/invoked
-	echo "SNMP_PERSISTENT_DIR=$SNMP_PERSISTENT_DIR" >> $SNMP_TMPDIR/invoked
-	loggedvars=1
+        OUTPUTENVVARS $SNMP_TMPDIR/invoked
+        loggedvars=1
     fi
     echo $* >> $SNMP_TMPDIR/invoked
 
@@ -195,7 +214,6 @@ EXECUTING: $*
 KNORG
 
 	fi
-	NEWOUTPUTFILE
 	echo "RUNNING: $*" > $junkoutputfile
 	( $* 2>&1 ) >> $junkoutputfile 2>&1
 	RC=$?
@@ -527,6 +545,10 @@ STARTPROG() {
 	echo "running: $COMMAND"
     fi
     echo $COMMAND >> $SNMP_TMPDIR/invoked
+    if [ $SNMP_VERBOSE -gt 0 ]; then
+        OUTPUTENVVARS $LOG_FILE.command
+        echo $COMMAND >> $LOG_FILE.command
+    fi
     if [ "x$OSTYPE" = "xmsys" ]; then
       $COMMAND > $LOG_FILE.stdout 2>&1 &
       ## COMMAND="cmd.exe //c start //min $COMMAND"
