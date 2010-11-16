@@ -32,15 +32,39 @@ AC_CHECK_FUNCS([lrand48         rand          random    ] dnl
                [signal          sigset                  ] )
 
 #  Library:
-AC_CHECK_FUNCS([closedir        fork          gai_strerror     ] dnl
-               [getaddrinfo     gethostname   gethostbyname    ] dnl
-               [getipnodebyname               gettimeofday     ] dnl
-               [if_nametoindex  mkstemp       opendir          ] dnl
-               [readdir         regcomp                        ] dnl
-               [setenv          setitimer     setlocale        ] dnl
-               [setsid          snprintf      strcasestr       ] dnl
-               [strdup          strerror      strncasecmp      ] dnl
-               [sysconf         times         vsnprintf        ] )
+AC_CHECK_FUNCS([closedir        fork            getipnodebyname  ] dnl
+               [gettimeofday    if_nametoindex  mkstemp          ] dnl
+               [opendir         readdir         regcomp          ] dnl
+               [setenv          setitimer       setlocale        ] dnl
+               [setsid          snprintf        strcasestr       ] dnl
+               [strdup          strerror        strncasecmp      ] dnl
+               [sysconf         times           vsnprintf        ] )
+
+# IPv4/IPv6 function checks. AC_CHECK_FUNC() can't find these on MinGW
+# since these functions have the __cdecl calling convention on MinGW.
+case x$target_os in
+  xmingw*)
+    AC_LINK_IFELSE([AC_LANG_PROGRAM([#include <ws2tcpip.h>],
+    [ gai_strerror(0); ])],
+    [ ac_cv_func_gai_strerror=yes ], [ ])
+
+    AC_LINK_IFELSE([AC_LANG_PROGRAM([#include <ws2tcpip.h>],
+    [ getaddrinfo(NULL, NULL, NULL, NULL); ])],
+    [ ac_cv_func_getaddrinfo=yes ], [ ])
+
+    AC_LINK_IFELSE([AC_LANG_PROGRAM([#include <winsock2.h>],
+    [ gethostbyname(NULL); ])],
+    [ ac_cv_func_gethostbyname=yes ], [ ])
+
+    AC_LINK_IFELSE([AC_LANG_PROGRAM([#include <winsock2.h>],
+    [ gethostname(NULL, 0); ])],
+    [ ac_cv_func_gethostname=yes ], [ ])
+    ;;
+
+  *)
+    AC_CHECK_FUNCS([gai_strerror getaddrinfo gethostbyname gethostname])
+    ;;
+esac
 
 AC_CONFIG_LIBOBJ_DIR([snmplib])
 
