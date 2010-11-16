@@ -21,7 +21,7 @@ TESTCOMMUNITY=testcommunity
 #
 
 if [ "x$OSTYPE" = "xmsys" ]; then
-    index='"hello"'
+    index='\"hello\"'
     CONFIGAGENT extend hello $MSYS_SH -c "'" echo hello_world "'"
 else
     index='"hello"'
