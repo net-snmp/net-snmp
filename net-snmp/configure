@@ -37145,6 +37145,8 @@ $as_echo "$ac_try_echo") >&5
 	 $as_test_x conftest$ac_exeext
        }; then
    ac_cv_func_gai_strerror=yes
+      $as_echo  "#define HAVE_GAI_STRERROR 1" >>confdefs.h
+
 else
   $as_echo "$as_me: failed program was:" >&5
 sed 's/^/| /' conftest.$ac_ext >&5
@@ -37193,6 +37195,8 @@ $as_echo "$ac_try_echo") >&5
 	 $as_test_x conftest$ac_exeext
        }; then
    ac_cv_func_getaddrinfo=yes
+      $as_echo  "#define HAVE_GETADDRINFO 1" >>confdefs.h
+
 else
   $as_echo "$as_me: failed program was:" >&5
 sed 's/^/| /' conftest.$ac_ext >&5
@@ -37241,6 +37245,8 @@ $as_echo "$ac_try_echo") >&5
 	 $as_test_x conftest$ac_exeext
        }; then
    ac_cv_func_gethostbyname=yes
+      $as_echo  "#define HAVE_GETHOSTBYNAME 1" >>confdefs.h
+
 else
   $as_echo "$as_me: failed program was:" >&5
 sed 's/^/| /' conftest.$ac_ext >&5
@@ -37289,6 +37295,8 @@ $as_echo "$ac_try_echo") >&5
 	 $as_test_x conftest$ac_exeext
        }; then
    ac_cv_func_gethostname=yes
+      $as_echo  "#define HAVE_GETHOSTNAME 1" >>confdefs.h
+
 else
   $as_echo "$as_me: failed program was:" >&5
 sed 's/^/| /' conftest.$ac_ext >&5
