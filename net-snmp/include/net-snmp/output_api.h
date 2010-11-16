@@ -118,7 +118,7 @@ extern "C" {
 #endif    /* NETSNMP_NO_DEBUGGING */
 
     NETSNMP_IMPORT
-    void            debug_register_tokens(char *tokens);
+    void            debug_register_tokens(const char *tokens);
     NETSNMP_IMPORT
     int             debug_is_token_registered(const char *token);
     NETSNMP_IMPORT
