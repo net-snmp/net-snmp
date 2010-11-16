@@ -257,7 +257,8 @@ _load_v6(netsnmp_container *container, int idx_offset)
          }
          entry->ns_arp_index = ++idx_offset;
          if(fillup_entry_info (entry, nlmp) < 0) {
-            DEBUGMSGTL(("access:arp:load_v6", "filling entry info failed\n"));
+            DEBUGMSGTL(("access:arp:load_v6", "skipping netlink message that"
+                        "did not contain valid ARP information\n"));
             netsnmp_access_arp_entry_free(entry);
             status -= NLMSG_ALIGN(len);
             nlmp = (struct nlmsghdr*)((char*)nlmp + NLMSG_ALIGN(len));
@@ -325,16 +326,19 @@ fillup_entry_info(netsnmp_arp_entry *entry, struct nlmsghdr *nlmp)
     u_char         *hwaddr;
 
     rtmp = (struct ndmsg *) NLMSG_DATA(nlmp);
-    if (nlmp->nlmsg_type != RTM_NEWNEIGH
-        && nlmp->nlmsg_type != RTM_DELNEIGH) {
-        DEBUGMSGTL(("access:arp:load_v6",
-                    "Wrong Netlink message type %d\n", nlmp->nlmsg_type));
+    if (nlmp->nlmsg_type != RTM_NEWNEIGH) {
+        snmp_log(LOG_ERR, "Wrong netlink message type %d\n", nlmp->nlmsg_type);
         return -1;
     }
 
     if (rtmp->ndm_state != NUD_NOARP) {
         memset(tb, 0, sizeof(struct rtattr *) * (NDA_MAX + 1));
         length = nlmp->nlmsg_len - NLMSG_LENGTH(sizeof(*rtmp));
+        if (length < 0) {
+            snmp_log(LOG_ERR, "netlink message length %d < %d is invalid\n",
+                     nlmp->nlmsg_len, NLMSG_LENGTH(sizeof(*rtmp)));
+            return -1;
+        }
         /*
          * this is what the kernel-removed NDA_RTA define did 
          */
@@ -346,8 +350,8 @@ fillup_entry_info(netsnmp_arp_entry *entry, struct nlmsghdr *nlmp)
             rta = RTA_NEXT(rta, length);
         }
         if (length) {
-            DEBUGMSGTL(("access:arp:load_v6", "Received uneven number of"
-                        " messages - %d bytes remaining\n", length));
+            snmp_log(LOG_ERR, "Received uneven number of netlink"
+                        " messages - %d bytes remaining\n", length);
             return -1;
         }
         /*
@@ -406,6 +410,9 @@ fillup_entry_info(netsnmp_arp_entry *entry, struct nlmsghdr *nlmp)
             break;
         case NUD_NONE:
             entry->arp_state = INETNETTOMEDIASTATE_UNKNOWN;
+            break;
+        default:
+            snmp_log(LOG_ERR, "Unrecognized ARP entry state %d", rtmp->ndm_state);
             break;
         }
 
