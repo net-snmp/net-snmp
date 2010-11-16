@@ -46,19 +46,27 @@ case x$target_os in
   xmingw*)
     AC_LINK_IFELSE([AC_LANG_PROGRAM([#include <ws2tcpip.h>],
     [ gai_strerror(0); ])],
-    [ ac_cv_func_gai_strerror=yes ], [ ])
+    [ ac_cv_func_gai_strerror=yes
+      AS_ECHO "#define HAVE_GAI_STRERROR 1" >>confdefs.h
+    ], [ ])
 
     AC_LINK_IFELSE([AC_LANG_PROGRAM([#include <ws2tcpip.h>],
     [ getaddrinfo(NULL, NULL, NULL, NULL); ])],
-    [ ac_cv_func_getaddrinfo=yes ], [ ])
+    [ ac_cv_func_getaddrinfo=yes
+      AS_ECHO "#define HAVE_GETADDRINFO 1" >>confdefs.h
+    ], [ ])
 
     AC_LINK_IFELSE([AC_LANG_PROGRAM([#include <winsock2.h>],
     [ gethostbyname(NULL); ])],
-    [ ac_cv_func_gethostbyname=yes ], [ ])
+    [ ac_cv_func_gethostbyname=yes
+      AS_ECHO "#define HAVE_GETHOSTBYNAME 1" >>confdefs.h
+    ], [ ])
 
     AC_LINK_IFELSE([AC_LANG_PROGRAM([#include <winsock2.h>],
     [ gethostname(NULL, 0); ])],
-    [ ac_cv_func_gethostname=yes ], [ ])
+    [ ac_cv_func_gethostname=yes
+      AS_ECHO "#define HAVE_GETHOSTNAME 1" >>confdefs.h
+    ], [ ])
     ;;
 
   *)
