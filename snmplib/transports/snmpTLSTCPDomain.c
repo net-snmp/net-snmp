@@ -533,8 +533,7 @@ netsnmp_tlstcp_accept(netsnmp_transport *t)
         _openssl_log_error(rc, ssl, "SSL_accept");
         SSL_shutdown(tlsdata->ssl);
         SSL_free(tlsdata->ssl);
-        BIO_free(accepted_bio);
-        tlsdata->accepted_bio = NULL;
+        tlsdata->accepted_bio = NULL; /* freed by SSL_free */
         tlsdata->ssl = NULL;
         return -1;
     }   
@@ -551,8 +550,7 @@ netsnmp_tlstcp_accept(netsnmp_transport *t)
         snmp_log(LOG_ERR, "tlstcp: connection with NULL authentication\n");
         SSL_shutdown(tlsdata->ssl);
         SSL_free(tlsdata->ssl);
-        BIO_free(accepted_bio);
-        tlsdata->accepted_bio = NULL;
+        tlsdata->accepted_bio = NULL; /* freed by SSL_free */
         tlsdata->ssl = NULL;
         return -1;
     }
@@ -604,8 +602,7 @@ netsnmp_tlstcp_accept(netsnmp_transport *t)
         snmp_increment_statistic(STAT_TLSTM_SNMPTLSTMSESSIONINVALIDCLIENTCERTIFICATES);
         SSL_shutdown(tlsdata->ssl);
         SSL_free(tlsdata->ssl);
-        BIO_free(accepted_bio);
-        tlsdata->accepted_bio = NULL;
+        tlsdata->accepted_bio = NULL; /* freed by SSL_free */
         tlsdata->ssl = NULL;
         return -1;
     }
