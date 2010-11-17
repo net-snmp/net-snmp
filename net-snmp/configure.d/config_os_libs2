@@ -147,9 +147,6 @@ AC_LINK_IFELSE([AC_LANG_PROGRAM([
   LIBS="$netsnmp_save_LIBS"
 ])
 
-AC_SEARCH_LIBS(getfsstat, [nbutil])
-AC_CHECK_FUNCS(getfsstat)
-
 
 #   kstat library                                       (Solaris)
 #
