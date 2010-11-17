@@ -87,3 +87,10 @@ if test "x$with_rpm" != "xno"; then
     [[#include <rpm/rpmlib.h>]]
   )
 fi
+
+#
+# getfsstat/getvfsstat
+#
+AC_SEARCH_LIBS(getfsstat, [nbutil])
+AC_CHECK_FUNCS(getfsstat)
+AC_CHECK_FUNCS(getvfsstat)
