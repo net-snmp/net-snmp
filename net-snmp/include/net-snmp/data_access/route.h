@@ -45,7 +45,7 @@ typedef struct netsnmp_route_s {
     * define the maximum oid length for a policy, for use by the
     * inetCidrRouteTable. Must be at least 2, for default nullOid case.
     */
-#define NETSNMP_POLICY_OID_MAX_LEN  2
+#define NETSNMP_POLICY_OID_MAX_LEN  3
    oid      *rt_policy;      /* NULL should be interpreted as { 0, 0 } */
    u_char    rt_policy_len;  /* 0-128 oids */
 #endif

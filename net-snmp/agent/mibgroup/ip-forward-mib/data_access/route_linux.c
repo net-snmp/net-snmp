@@ -163,12 +163,12 @@ _load_ipv4(netsnmp_container* container, u_long *index )
          * as the policy, to distinguise between them. Hopefully this is
          * unique.
          * xxx-rks: It should really only be for the duplicate case, but that
-         *     would be more complicated thanI want to get into now. Fix later.
+         *     would be more complicated than I want to get into now. Fix later.
          */
         if (0 == nexthop) {
-            entry->rt_policy = &entry->if_index;
-            entry->rt_policy_len = 1;
-            entry->flags |= NETSNMP_ACCESS_ROUTE_POLICY_STATIC;
+            entry->rt_policy = calloc(3, sizeof(oid));
+            entry->rt_policy[2] = entry->if_index;
+            entry->rt_policy_len = sizeof(oid)*3;
         }
 #endif
 
@@ -323,11 +323,11 @@ _load_ipv6(netsnmp_container* container, u_long *index )
         /*
          * on linux, default routes all look alike, and would have the same
          * indexed based on dest and next hop. So we use our arbitrary index
-         * as the policy, to distinguise between them.
+         * as the policy, to distinguish between them.
          */
-        entry->rt_policy = &entry->ns_rt_index;
-        entry->rt_policy_len = 1;
-        entry->flags |= NETSNMP_ACCESS_ROUTE_POLICY_STATIC;
+        entry->rt_policy = calloc(3, sizeof(oid));
+        entry->rt_policy[2] = entry->ns_rt_index;
+        entry->rt_policy_len = sizeof(oid)*3;
 #endif
 
         /*
