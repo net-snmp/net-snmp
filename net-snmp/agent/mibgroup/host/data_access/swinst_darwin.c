@@ -258,6 +258,8 @@ _add_applications_in_dir(netsnmp_container *container, const char* path)
             snprintf(entry->swName, sizeof(entry->swName),
                      "%s %s", CFStringGetCStringPtr(prodName,0),
                      CFStringGetCStringPtr(version,0));
+	if (entry->swName_len >= sizeof(entry->swName))
+	    entry->swName_len = sizeof(entry->swName)-1;
 
         DEBUGMSGTL(("swinst:arch:darwin", "\t%s %s\n", file, entry->swName));
 
