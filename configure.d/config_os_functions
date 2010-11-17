@@ -84,7 +84,7 @@ AC_REPLACE_FUNCS([getopt        inet_ntop     inet_pton        ] dnl
 AC_CHECK_FUNCS([cgetnext        chown          execv           ] dnl
                [gai_strerror                   getgrnam        ] dnl
                [gethostname     getloadavg                     ] dnl
-               [getpid          getpwnam      getvfsstat       ] dnl
+               [getpid          getpwnam                       ] dnl
                [hasmntopt       initgroups                     ] dnl
                [if_nameindex    if_nametoindex localtime_r     ] dnl
                [mkstemp         mktime                         ] dnl
