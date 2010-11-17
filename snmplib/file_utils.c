@@ -123,15 +123,9 @@ netsnmp_file_fill(netsnmp_file * filei, const char* name,
     if (NULL != name)
         filei->name = strdup(name);
 
-    /** defaul to rdonly */
-    if (0 == filei->fs_flags) {
-        DEBUGMSGT(("nsfile:fill", "defaulting to O_RDONLY for %s\n",
-                   filei->name));
-        filei->fs_flags = O_RDONLY;
-    }
-    else
-        filei->fs_flags = fs_flags;
+    filei->fs_flags = fs_flags;
     filei->ns_flags = ns_flags;
+    filei->mode = mode;
 
     return filei;
 }
@@ -186,11 +180,6 @@ netsnmp_file_open(netsnmp_file * filei)
      */
     if (-1 != filei->fd)
         return filei->fd;
-
-    if (0 == filei->fs_flags) {
-        DEBUGMSGT(("nsfile:open", "invalid flags for %s\n", filei->name));
-        return -1;
-    }
 
     /*
      * try to open the file, loging an error if we failed
