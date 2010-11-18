@@ -172,15 +172,9 @@ icmp_handler(netsnmp_mib_handler          *handler,
     /*
      * The cached data should already have been loaded by the
      *    cache handler, higher up the handler chain.
-     * But just to be safe, check this and load it manually if necessary
      */
 #if defined(_USE_PERFSTAT_PROTOCOL)
     icmp_load(NULL, NULL);
-#elif !defined(hpux11)
-    if (!netsnmp_cache_is_valid(reqinfo, reginfo->handlerName)) {
-        netsnmp_assert(!"cache == valid"); /* always false */
-        icmp_load( NULL, NULL );	/* XXX - check for failure */
-    }
 #endif
 
 
