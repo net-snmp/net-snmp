@@ -421,7 +421,7 @@ inetCidrRouteTable_indexes_set_tbl_idx(inetCidrRouteTable_mib_index *
         snmp_log(LOG_ERR,
 	    "inetCidrRoutePolicy: Not enough space for value (%d < %d)\n",
 	    (int)tbl_idx->inetCidrRoutePolicy_len,
-	    (int)inetCidrRoutePolicy_val_ptr_len) / sizeof(inetCidrRoutePolicy_val_ptr[0]);
+	    (int)(inetCidrRoutePolicy_val_ptr_len / sizeof(inetCidrRoutePolicy_val_ptr[0])));
         return MFD_ERROR;
     }
     if (0 == inetCidrRoutePolicy_val_ptr_len) {
