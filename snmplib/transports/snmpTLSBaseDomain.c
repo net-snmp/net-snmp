@@ -482,7 +482,7 @@ _sslctx_common_setup(SSL_CTX *the_ctx, _netsnmpTLSBaseData *tlsbase) {
 }
 
 SSL_CTX *
-sslctx_client_setup(SSL_METHOD *method, _netsnmpTLSBaseData *tlsbase) {
+sslctx_client_setup(const SSL_METHOD *method, _netsnmpTLSBaseData *tlsbase) {
     netsnmp_cert *id_cert, *peer_cert;
     SSL_CTX      *the_ctx;
 
@@ -557,7 +557,7 @@ sslctx_client_setup(SSL_METHOD *method, _netsnmpTLSBaseData *tlsbase) {
 }
 
 SSL_CTX *
-sslctx_server_setup(SSL_METHOD *method) {
+sslctx_server_setup(const SSL_METHOD *method) {
     netsnmp_cert *id_cert;
 
     /***********************************************************************
