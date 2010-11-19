@@ -445,14 +445,14 @@ inetCidrRouteTable_indexes_set_tbl_idx(inetCidrRouteTable_mib_index *
      */
     if ((NULL == tbl_idx->inetCidrRouteNextHop) ||
         (tbl_idx->inetCidrRouteNextHop_len <
-         (inetCidrRouteNextHop_val_ptr_len / sizeof(oid)))) {
+         (inetCidrRouteNextHop_val_ptr_len / sizeof(inetCidrRouteNextHop_val_ptr[0])))) {
         snmp_log(LOG_ERR,
 	    "inetCidrRouteNexthop: Not enough space for value (%d < %d)\n",
 	    (int)tbl_idx->inetCidrRouteNextHop_len,
-	    (int)(inetCidrRouteNextHop_val_ptr_len / sizeof(oid)));
+	    (int)(inetCidrRouteNextHop_val_ptr_len / sizeof(inetCidrRouteNextHop_val_ptr[0])));
         return MFD_ERROR;
     }
-    tbl_idx->inetCidrRouteNextHop_len = inetCidrRouteNextHop_val_ptr_len / sizeof(oid);
+    tbl_idx->inetCidrRouteNextHop_len = inetCidrRouteNextHop_val_ptr_len / sizeof(inetCidrRouteNextHop_val_ptr[0]);
     memcpy(tbl_idx->inetCidrRouteNextHop, inetCidrRouteNextHop_val_ptr,
            inetCidrRouteNextHop_val_ptr_len *
            sizeof(inetCidrRouteNextHop_val_ptr[0]));
