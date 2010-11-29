@@ -422,6 +422,8 @@ netsnmp_cache_helper_handler(netsnmp_mib_handler * handler,
                              netsnmp_agent_request_info * reqinfo,
                              netsnmp_request_info * requests)
 {
+    char addrstr[32];
+
     netsnmp_cache  *cache = NULL;
     netsnmp_handler_args cache_hint;
 
@@ -441,6 +443,10 @@ netsnmp_cache_helper_handler(netsnmp_mib_handler * handler,
                    "cache not found, disabled or had no load method\n"));
         return SNMP_ERR_NOERROR;
     }
+    snprintf(addrstr,sizeof(addrstr), "%ld", cache);
+    DEBUGMSGTL(("helper:cache_handler", "using cache %s: ", addrstr));
+    DEBUGMSGOID(("helper:cache_handler", cache->rootoid, cache->rootoid_len));
+    DEBUGMSG(("helper:cache_handler", "\n"));
 
     /*
      * Make the handler-chain parameters available to
@@ -467,7 +473,7 @@ netsnmp_cache_helper_handler(netsnmp_mib_handler * handler,
          * a previous (delegated) request is still using the cache.
          * maybe use a reference counter?
          */
-        if (netsnmp_cache_is_valid(reqinfo, reginfo->handlerName))
+        if (netsnmp_cache_is_valid(reqinfo, addrstr))
             return SNMP_ERR_NOERROR;
 
         /*
@@ -475,7 +481,7 @@ netsnmp_cache_helper_handler(netsnmp_mib_handler * handler,
          * If it's not already there, add to reqinfo
          */
         netsnmp_cache_check_and_reload(cache);
-        netsnmp_cache_reqinfo_insert(cache, reqinfo, reginfo->handlerName);
+        netsnmp_cache_reqinfo_insert(cache, reqinfo, addrstr);
         /** next handler called automatically - 'AUTO_NEXT' */
         }
         return SNMP_ERR_NOERROR;
@@ -484,7 +490,7 @@ netsnmp_cache_helper_handler(netsnmp_mib_handler * handler,
     case MODE_SET_FREE:
     case MODE_SET_ACTION:
     case MODE_SET_UNDO:
-        netsnmp_assert(netsnmp_cache_is_valid(reqinfo, reginfo->handlerName));
+        netsnmp_assert(netsnmp_cache_is_valid(reqinfo, addrstr));
         /** next handler called automatically - 'AUTO_NEXT' */
         return SNMP_ERR_NOERROR;
 
