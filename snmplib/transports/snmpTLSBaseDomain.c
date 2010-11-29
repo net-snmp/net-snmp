@@ -46,7 +46,7 @@
 #include <net-snmp/library/snmp_transport.h>
 #include <net-snmp/library/snmp_secmod.h>
 
-#define LOGANDDIE(msg) { snmp_log(LOG_ERR, "%s\n", msg); return 0; }
+#define LOGANDDIE(msg) do { snmp_log(LOG_ERR, "%s\n", msg); return 0; } while(0)
 
 int openssl_local_index;
 
@@ -170,7 +170,7 @@ _netsnmp_tlsbase_verify_remote_fingerprint(X509 *remote_cert,
         netsnmp_fp_lowercase_and_strip_colon(tlsdata->their_fingerprint);
         if (0 != strcmp(tlsdata->their_fingerprint, fingerprint)) {
             snmp_log(LOG_ERR, "The fingerprint from the remote side's certificate didn't match the expected\n");
-            snmp_log(LOG_ERR, "  %s != %s\n",
+            snmp_log(LOG_ERR, "  got %s, expected %s\n",
                      fingerprint, tlsdata->their_fingerprint);
             free(fingerprint);
             return FAILED_FINGERPRINT_VERIFY;
@@ -477,6 +477,8 @@ _sslctx_common_setup(SSL_CTX *the_ctx, _netsnmpTLSBaseData *tlsbase) {
     if (NULL != cipherList)
         if (SSL_CTX_set_cipher_list(the_ctx, cipherList) != 1)
             LOGANDDIE("failed to set the cipher list to the requested value");
+        else
+            snmp_log(LOG_INFO,"set SSL cipher list to '%s'\n", cipherList);
 
     return the_ctx;
 }
