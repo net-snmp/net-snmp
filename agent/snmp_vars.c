@@ -339,6 +339,9 @@ init_agent(const char *app)
         return r;
 #endif
 
+    /** init secname mapping */
+    netsnmp_certs_agent_init();
+
 #  include "agent_module_inits.h"
 
     return r;
