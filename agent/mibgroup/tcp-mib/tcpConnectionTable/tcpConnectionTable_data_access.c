@@ -168,15 +168,23 @@ tcpConnectionTable_container_shutdown(netsnmp_container *container_ptr)
 static void
 _add_connection(netsnmp_tcpconn_entry *entry, netsnmp_container *container)
 {
+    netsnmp_tcpconn_entry *new_entry;
     tcpConnectionTable_rowreq_ctx *rowreq_ctx;
 
     DEBUGMSGTL(("tcpConnectionTable:access", "creating new entry\n"));
+
+    /* Allocate a new entry, becuase the old entry will be destroyed by
+     * the function which called this one.
+     */
+    new_entry = netsnmp_access_tcpconn_entry_create();
+    (void)netsnmp_access_tcpconn_entry_update(new_entry, entry);
+
 
     /*
      * allocate an row context and set the index(es), then add it to
      * the container
      */
-    rowreq_ctx = tcpConnectionTable_allocate_rowreq_ctx(entry, NULL);
+    rowreq_ctx = tcpConnectionTable_allocate_rowreq_ctx(new_entry, NULL);
     if ((NULL != rowreq_ctx) &&
         (MFD_SUCCESS == tcpConnectionTable_indexes_set(rowreq_ctx,
                                                        entry->loc_addr_len,
@@ -196,7 +204,7 @@ _add_connection(netsnmp_tcpconn_entry *entry, netsnmp_container *container)
         } else {
             snmp_log(LOG_ERR, "memory allocation failed while loading "
                      "tcpConnectionTable cache.\n");
-            netsnmp_access_tcpconn_entry_free(entry);
+            netsnmp_access_tcpconn_entry_free(new_entry);
         }
     }
 }
