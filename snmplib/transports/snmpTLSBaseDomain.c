@@ -474,12 +474,12 @@ _sslctx_common_setup(SSL_CTX *the_ctx, _netsnmpTLSBaseData *tlsbase) {
 
     cipherList = netsnmp_ds_get_string(NETSNMP_DS_LIBRARY_ID,
                                        NETSNMP_DS_LIB_TLS_ALGORITMS);
-    if (NULL != cipherList)
+    if (NULL != cipherList) {
         if (SSL_CTX_set_cipher_list(the_ctx, cipherList) != 1)
             LOGANDDIE("failed to set the cipher list to the requested value");
         else
             snmp_log(LOG_INFO,"set SSL cipher list to '%s'\n", cipherList);
-
+    }
     return the_ctx;
 }
 
