@@ -169,27 +169,26 @@ _setup_trusted_certs(void)
     _trusted_certs->compare = (netsnmp_container_compare*) strcmp;
 }
 
+/*
+ * secname mapping for servers.
+ */
+void
+netsnmp_certs_agent_init(void)
+{
+    _init_tlstmCertToTSN();
+    _init_tlstmParams();
+    _init_tlstmAddr();
+}
+
 void
 netsnmp_certs_init(void)
 {
     const char *trustCert_help = TRUSTCERT_CONFIG_TOKEN
         " FINGERPRINT|FILENAME";
 
-    char *app = netsnmp_ds_get_string(NETSNMP_DS_LIBRARY_ID,
-                                      NETSNMP_DS_LIB_APPTYPE);
-
     register_config_handler("snmp", TRUSTCERT_CONFIG_TOKEN,
                             _parse_trustcert, _netsnmp_release_trustcerts,
                             trustCert_help);
-    /*
-     * secname mapping only makes sense for servers.
-     * Is there a better way than apptype to determine that?
-     */
-    if ((strcmp(app, "snmpd") == 0) || (strcmp(app, "snmptrapd") == 0)) {
-        _init_tlstmCertToTSN();
-        _init_tlstmParams();
-        _init_tlstmAddr();
-    }
     _setup_containers();
 
     /** add certificate type mapping */
