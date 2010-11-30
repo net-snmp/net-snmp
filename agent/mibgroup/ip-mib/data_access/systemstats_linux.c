@@ -254,8 +254,13 @@ _systemstats_v4(netsnmp_container* container, u_int load_flags)
         /*
          * add to container
          */
-        CONTAINER_INSERT(container, entry);
+        if (CONTAINER_INSERT(container, entry) < 0)
+        {
+            DEBUGMSGTL(("access:systemstats:container","error with systemstats_entry: insert into container failed.\n"));
+            netsnmp_access_systemstats_entry_free(entry);
+        }
     }
+
     return 0;
 }
     
@@ -558,7 +563,12 @@ _systemstats_v6_load_systemstats(netsnmp_container* container, u_int load_flags)
     /*
      * add to container
      */
-    CONTAINER_INSERT(container, entry);
+        if (CONTAINER_INSERT(container, entry) < 0)
+        {
+            DEBUGMSGTL(("access:systemstats:container","error with systemstats_entry: insert into container failed.\n"));
+            netsnmp_access_systemstats_entry_free(entry);
+        }
+
 
     return rc;
 }
