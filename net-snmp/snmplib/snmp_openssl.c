@@ -751,8 +751,8 @@ netsnmp_openssl_extract_secname(netsnmp_cert_map *cert_map,
         return NULL;
 
     DEBUGMSGT(("openssl:secname:extract",
-               "checking san of type %d for %s\n",
-               cert_map->mapType, peer_cert->fingerprint));
+               "checking priority %d, san of type %d for %s\n",
+               cert_map->priority, cert_map->mapType, peer_cert->fingerprint));
 
     switch(cert_map->mapType) {
         case TSNM_tlstmCertSpecified:
@@ -785,11 +785,17 @@ netsnmp_openssl_extract_secname(netsnmp_cert_map *cert_map,
             break;
     } /* switch mapType */
 
-   if (rtn)
+    if (rtn) {
         DEBUGMSGT(("openssl:secname:extract",
-                   "found map of type %d for %s: %s\n",
+                   "found map %d, type %d for %s: %s\n", cert_map->priority,
                    cert_map->mapType, peer_cert->fingerprint, rtn));
-   else
+        if (strlen(rtn) >32) {
+            DEBUGMSGT(("openssl:secname:extract",
+                       "secName longer than 32 chars! dropping...\n"));
+            SNMP_FREE(rtn);
+        }
+    }
+    else
         DEBUGMSGT(("openssl:secname:extract",
                    "no map of type %d for %s\n",
                    cert_map->mapType, peer_cert->fingerprint));
