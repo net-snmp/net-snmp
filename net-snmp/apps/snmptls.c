@@ -65,7 +65,7 @@ const oid *certMapTypes[TSNM_tlstmCert_MAX + 1] = {
  *
  */
 netsnmp_variable_list *
-cert_row_create(u_int32_t priority, int hash_type, const char *fp,
+cert_row_create(uint32_t priority, int hash_type, const char *fp,
                 const oid *map_type, int map_type_len, const u_char *data,
                 int data_len, uint32_t st, int *row_status_index)
 {
