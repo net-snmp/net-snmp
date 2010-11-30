@@ -1714,6 +1714,8 @@ netsnmp_cert_find(int what, int where, void *hint)
         switch (what) {
             case NS_CERT_IDENTITY: /* want my ID */
                 tmp = (ptrdiff_t)hint;
+                DEBUGMSGT(("cert:find:params", " hint = %s\n",
+                           tmp ? "server" : "client"));
                 fp =
                     netsnmp_ds_get_string(NETSNMP_DS_LIBRARY_ID,
                                           tmp ? NETSNMP_DS_LIB_X509_SERVER_PUB :
@@ -1750,6 +1752,7 @@ netsnmp_cert_find(int what, int where, void *hint)
         }
     }
     else if (NS_CERTKEY_FINGERPRINT == where) {
+        DEBUGMSGT(("cert:find:params", " hint = %s\n", (char *)hint));
         result = _cert_find_fp((char *)hint);
     }
     else if (NS_CERTKEY_TARGET_PARAM == where) {
@@ -1783,6 +1786,7 @@ netsnmp_cert_find(int what, int where, void *hint)
         char               *filename = (char*)hint;
         netsnmp_void_array *matching;
 
+        DEBUGMSGT(("cert:find:params", " hint = %s\n", (char *)hint));
         matching = _cert_find_subset_fn( filename, NULL );
         if (!matching)
             return NULL;
