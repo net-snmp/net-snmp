@@ -2340,6 +2340,10 @@ _bulkwalk_finish(walk_context *context, int okay)
       if (!async) {
 	 XPUSHs(&sv_undef);
 	 npushed = 1;
+      } else {
+          for (i = 0; i < context->nreq_oids; i++) {
+              sv_2mortal((SV *) (context->req_oids[i].vars));
+          }
       }
    }
 
