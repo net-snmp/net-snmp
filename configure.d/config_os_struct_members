@@ -33,6 +33,17 @@ AC_CHECK_MEMBERS([struct arphd.at_next],,,[
 #endif
     ]])
 
+
+#	struct ethtool_cmd
+#   Agent:
+if test "x$ac_cv_header_linux_ethtool_h" = "xyes" ; then
+    AC_CHECK_MEMBERS([struct ethtool_cmd.speed_hi],,,[[
+#if HAVE_LINUX_ETHTOOL_H
+#include <linux/ethtool.h>
+#endif
+    ]])
+fi
+
 #       struct des_ks_struct
 #         ('weak_key' indicates older version of OpenSSL)
 #   Library:
