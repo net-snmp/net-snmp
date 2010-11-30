@@ -6,12 +6,20 @@
 #include <net-snmp/net-snmp-config.h>
 #include <net-snmp/net-snmp-includes.h>
 
+#ifdef HAVE_PCI_LOOKUP_NAME
+#include <pci/pci.h>
+static struct pci_access *pci_access;
+#endif
+
 #ifdef HAVE_LINUX_ETHTOOL_H
+#ifndef HAVE_PCI_LOOKUP_NAME
 #include <linux/types.h>
 typedef __u64 u64;         /* hack, so we may include kernel's ethtool.h */
 typedef __u32 u32;         /* ditto */
 typedef __u16 u16;         /* ditto */
 typedef __u8 u8;           /* ditto */
+#endif
+
 #include <linux/ethtool.h>
 #endif /* HAVE_LINUX_ETHTOOL_H */
 
@@ -124,6 +132,14 @@ netsnmp_arch_interface_init(void)
 #ifdef SUPPORT_PREFIX_FLAGS
     list_info.list_head = &prefix_head_list;
     netsnmp_prefix_listen();
+#endif
+
+#ifdef HAVE_PCI_LOOKUP_NAME
+    pci_access = pci_alloc();
+    if (pci_access)
+	pci_init(pci_access);
+    else
+	snmp_log(LOG_ERR, "Unable to create pci access method\n");
 #endif
 }
 
@@ -253,6 +269,69 @@ _arch_interface_flags_v4_get(netsnmp_interface_entry *entry)
         fclose(fin);
     }
 }
+
+#ifdef HAVE_PCI_LOOKUP_NAME
+
+/* Get value from sysfs file */
+static int sysfs_get_id(const char *path, unsigned short *id)
+{
+    FILE *fin;
+    int n;
+
+    if (!(fin = fopen(path, "r"))) {
+        DEBUGMSGTL(("access:interface",
+                    "Failed to open %s\n", path));
+	return 0;
+    }
+
+    n = fscanf(fin, "%hx", id);
+    fclose(fin);
+
+    return n == 1;
+}
+
+/* Get interface description for PCI device
+ * by using sysfs to find vendor and device
+ * then lookup name (-lpci)
+ *
+ * For software interfaces there is no PCI information
+ * so description will not be set.
+ */
+static void
+_arch_interface_description_get(netsnmp_interface_entry *entry)
+{
+    const char *descr;
+    char buf[256];
+    unsigned short vendor_id, device_id;
+
+    if (!pci_access)
+	return;
+
+    snprintf(buf, sizeof(buf),
+	     "/sys/class/net/%s/device/vendor", entry->name);
+
+    if (!sysfs_get_id(buf, &vendor_id))
+	return;
+
+    snprintf(buf, sizeof(buf),
+	     "/sys/class/net/%s/device/device", entry->name);
+
+    if (!sysfs_get_id(buf, &device_id))
+	return;
+
+    descr = pci_lookup_name(pci_access, buf, sizeof(buf),
+			    PCI_LOOKUP_VENDOR | PCI_LOOKUP_DEVICE,
+			    vendor_id, device_id);
+    if (descr) {
+	free(entry->descr);
+	entry->descr = strdup(descr);
+    } else {
+        DEBUGMSGTL(("access:interface",
+                    "Failed pci_lookup_name vendor=%#hx device=%#hx\n",
+		    vendor_id, device_id));
+    }
+}
+#endif
 
 
 #ifdef NETSNMP_ENABLE_IPV6
@@ -610,9 +689,9 @@ netsnmp_arch_interface_container_load(netsnmp_container* container,
         }
         entry->ns_flags = flags; /* initial flags; we'll set more later */
 
-        /*
-         * xxx-rks: get descr by linking mem from /proc/pci and /proc/iomem
-         */
+#ifdef HAVE_PCI_LOOKUP_NAME
+	_arch_interface_description_get(entry);
+#endif
 
 
         /*

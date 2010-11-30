@@ -19329,6 +19329,88 @@ fi
 
 fi
 
+#
+# getfsstat/getvfsstat
+#
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for library containing getfsstat" >&5
+$as_echo_n "checking for library containing getfsstat... " >&6; }
+if ${ac_cv_search_getfsstat+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  ac_func_search_save_LIBS=$LIBS
+cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+/* Override any GCC internal prototype to avoid an error.
+   Use char because int might match the return type of a GCC
+   builtin and then its argument prototype would still apply.  */
+#ifdef __cplusplus
+extern "C"
+#endif
+char getfsstat ();
+int
+main ()
+{
+return getfsstat ();
+  ;
+  return 0;
+}
+_ACEOF
+for ac_lib in '' nbutil; do
+  if test -z "$ac_lib"; then
+    ac_res="none required"
+  else
+    ac_res=-l$ac_lib
+    LIBS="-l$ac_lib  $ac_func_search_save_LIBS"
+  fi
+  if ac_fn_c_try_link "$LINENO"; then :
+  ac_cv_search_getfsstat=$ac_res
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext
+  if ${ac_cv_search_getfsstat+:} false; then :
+  break
+fi
+done
+if ${ac_cv_search_getfsstat+:} false; then :
+
+else
+  ac_cv_search_getfsstat=no
+fi
+rm conftest.$ac_ext
+LIBS=$ac_func_search_save_LIBS
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_search_getfsstat" >&5
+$as_echo "$ac_cv_search_getfsstat" >&6; }
+ac_res=$ac_cv_search_getfsstat
+if test "$ac_res" != no; then :
+  test "$ac_res" = "none required" || LIBS="$ac_res $LIBS"
+
+fi
+
+for ac_func in getfsstat
+do :
+  ac_fn_c_check_func "$LINENO" "getfsstat" "ac_cv_func_getfsstat"
+if test "x$ac_cv_func_getfsstat" = xyes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_GETFSSTAT 1
+_ACEOF
+
+fi
+done
+
+for ac_func in getvfsstat
+do :
+  ac_fn_c_check_func "$LINENO" "getvfsstat" "ac_cv_func_getvfsstat"
+if test "x$ac_cv_func_getvfsstat" = xyes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_GETVFSSTAT 1
+_ACEOF
+
+fi
+done
+
+
 # -*- autoconf -*-
 #
 # generate empty files
@@ -20962,74 +21044,6 @@ fi
 rm -f core conftest.err conftest.$ac_objext \
     conftest$ac_exeext conftest.$ac_ext
 
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for library containing getfsstat" >&5
-$as_echo_n "checking for library containing getfsstat... " >&6; }
-if ${ac_cv_search_getfsstat+:} false; then :
-  $as_echo_n "(cached) " >&6
-else
-  ac_func_search_save_LIBS=$LIBS
-cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-
-/* Override any GCC internal prototype to avoid an error.
-   Use char because int might match the return type of a GCC
-   builtin and then its argument prototype would still apply.  */
-#ifdef __cplusplus
-extern "C"
-#endif
-char getfsstat ();
-int
-main ()
-{
-return getfsstat ();
-  ;
-  return 0;
-}
-_ACEOF
-for ac_lib in '' nbutil; do
-  if test -z "$ac_lib"; then
-    ac_res="none required"
-  else
-    ac_res=-l$ac_lib
-    LIBS="-l$ac_lib  $ac_func_search_save_LIBS"
-  fi
-  if ac_fn_c_try_link "$LINENO"; then :
-  ac_cv_search_getfsstat=$ac_res
-fi
-rm -f core conftest.err conftest.$ac_objext \
-    conftest$ac_exeext
-  if ${ac_cv_search_getfsstat+:} false; then :
-  break
-fi
-done
-if ${ac_cv_search_getfsstat+:} false; then :
-
-else
-  ac_cv_search_getfsstat=no
-fi
-rm conftest.$ac_ext
-LIBS=$ac_func_search_save_LIBS
-fi
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_search_getfsstat" >&5
-$as_echo "$ac_cv_search_getfsstat" >&6; }
-ac_res=$ac_cv_search_getfsstat
-if test "$ac_res" != no; then :
-  test "$ac_res" = "none required" || LIBS="$ac_res $LIBS"
-
-fi
-
-for ac_func in getfsstat
-do :
-  ac_fn_c_check_func "$LINENO" "getfsstat" "ac_cv_func_getfsstat"
-if test "x$ac_cv_func_getfsstat" = xyes; then :
-  cat >>confdefs.h <<_ACEOF
-#define HAVE_GETFSSTAT 1
-_ACEOF
-
-fi
-done
-
-
 
 #   kstat library                                       (Solaris)
 #
@@ -21690,6 +21704,86 @@ $as_echo "#define HAVE_DEVSTAT_GETDEVS 1" >>confdefs.h
  fi
 
 fi
+
+#   libpci
+#        (for if-mib description)
+#
+
+ { $as_echo "$as_me:${as_lineno-$LINENO}: checking for library containing pci_lookup_name" >&5
+$as_echo_n "checking for library containing pci_lookup_name... " >&6; }
+if ${netsnmp_cv_func_pci_lookup_name_LMIBLIBS+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  netsnmp_func_search_save_LIBS="$LIBS"
+     netsnmp_target_val="$LMIBLIBS"
+          netsnmp_temp_LIBS="${netsnmp_target_val}  ${LIBS}"
+     netsnmp_result=no
+     LIBS="${netsnmp_temp_LIBS}"
+     cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+/* Override any GCC internal prototype to avoid an error.
+   Use char because int might match the return type of a GCC
+   builtin and then its argument prototype would still apply.  */
+#ifdef __cplusplus
+extern "C"
+#endif
+char pci_lookup_name ();
+int
+main ()
+{
+return pci_lookup_name ();
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_link "$LINENO"; then :
+  netsnmp_result="none required"
+else
+  for netsnmp_cur_lib in pci ; do
+              LIBS="-l${netsnmp_cur_lib} ${netsnmp_temp_LIBS}"
+              cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+/* Override any GCC internal prototype to avoid an error.
+   Use char because int might match the return type of a GCC
+   builtin and then its argument prototype would still apply.  */
+#ifdef __cplusplus
+extern "C"
+#endif
+char pci_lookup_name ();
+int
+main ()
+{
+return pci_lookup_name ();
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_link "$LINENO"; then :
+  netsnmp_result=-l${netsnmp_cur_lib}
+                   break
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
+          done
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
+     LIBS="${netsnmp_func_search_save_LIBS}"
+     netsnmp_cv_func_pci_lookup_name_LMIBLIBS="${netsnmp_result}"
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $netsnmp_cv_func_pci_lookup_name_LMIBLIBS" >&5
+$as_echo "$netsnmp_cv_func_pci_lookup_name_LMIBLIBS" >&6; }
+ if test "${netsnmp_cv_func_pci_lookup_name_LMIBLIBS}" != "no" ; then
+    if test "${netsnmp_cv_func_pci_lookup_name_LMIBLIBS}" != "none required" ; then
+       LMIBLIBS="${netsnmp_result} ${netsnmp_target_val}"
+    fi
+
+$as_echo "#define HAVE_PCI_LOOKUP_NAME 1" >>confdefs.h
+
+
+ fi
 
 
 #   LM-SENSORS-MIB support
@@ -24494,7 +24588,7 @@ fi
 
 
 #  Agent:
-for ac_func in cgetnext        chown          execv                           gai_strerror                   getgrnam                        gethostname     getloadavg                                     getpid          getpwnam      getvfsstat                       hasmntopt       initgroups                                     if_nameindex    if_nametoindex localtime_r                     mkstemp         mktime                                         poll            regcomp                                        setgid          setgroups                                      setmntent       setuid                                         sigaction       sigblock      sighold                          sigprocmask                                                    statfs          statvfs       stime                            strncasecmp     system                                         uname           usleep
+for ac_func in cgetnext        chown          execv                           gai_strerror                   getgrnam                        gethostname     getloadavg                                     getpid          getpwnam                                       hasmntopt       initgroups                                     if_nameindex    if_nametoindex localtime_r                     mkstemp         mktime                                         poll            regcomp                                        setgid          setgroups                                      setmntent       setuid                                         sigaction       sigblock      sighold                          sigprocmask                                                    statfs          statvfs       stime                            strncasecmp     system                                         uname           usleep
 do :
   as_ac_var=`$as_echo "ac_cv_func_$ac_func" | $as_tr_sh`
 ac_fn_c_check_func "$LINENO" "$ac_func" "$as_ac_var"

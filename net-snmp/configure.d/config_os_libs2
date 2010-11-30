@@ -196,6 +196,12 @@ if test $? -eq 0 ; then
                         [define if you have devstat_getdevs()]),,,LMIBLIBS)
 fi
 
+#   libpci
+#        (for if-mib description)
+#
+NETSNMP_SEARCH_LIBS(pci_lookup_name, pci,
+	AC_DEFINE(HAVE_PCI_LOOKUP_NAME, 1,
+		[define if you have pci_lookup_name()]),,,LMIBLIBS)
 
 #   LM-SENSORS-MIB support
 #
