@@ -145,7 +145,7 @@ typedef struct sql_vb_buf_t {
     u_char    *val;
     u_long     val_len;
 
-    u_int16_t  type;
+    uint16_t   type;
 
 } sql_vb_buf;
 
@@ -161,14 +161,14 @@ typedef struct sql_buf_t {
     u_long     user_len;
 
     MYSQL_TIME time;
-    u_int16_t  version, type;
-    u_int32_t  reqid;
+    uint16_t   version, type;
+    uint32_t   reqid;
 
     char      *transport;
     u_long     transport_len;
 
-    u_int16_t  security_level, security_model;
-    u_int32_t  msgid;
+    uint16_t   security_level, security_model;
+    uint32_t   msgid;
 
     char      *context;
     u_long     context_len;
