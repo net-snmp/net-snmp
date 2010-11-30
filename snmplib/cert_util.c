@@ -159,8 +159,8 @@ void
 _setup_trusted_certs(void)
 {
     _trusted_certs = netsnmp_container_find("trusted_certs:fifo");
-    if (NULL == _keys) {
-        snmp_log(LOG_ERR, "could not create container for trusted keys\n");
+    if (NULL == _trusted_certs) {
+        snmp_log(LOG_ERR, "could not create container for trusted certs\n");
         netsnmp_certs_shutdown();
         return;
     }
