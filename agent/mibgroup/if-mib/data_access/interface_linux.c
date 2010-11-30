@@ -881,7 +881,6 @@ netsnmp_linux_interface_get_if_speed(int fd, const char *name,
 {
     struct ifreq ifr;
     struct ethtool_cmd edata;
-    __u32 speed;
 
     memset(&ifr, 0, sizeof(ifr));
     edata.cmd = ETHTOOL_GSET;
@@ -896,20 +895,24 @@ netsnmp_linux_interface_get_if_speed(int fd, const char *name,
         return netsnmp_linux_interface_get_if_speed_mii(fd,name,defaultspeed);
     }
     
-    speed = edata.speed;
-#if HAVE_STRUCT_ETHTOOL_CMD_SPEED_HI
-    speed |= edata.speed_hi << 16;
+    if (edata.speed != SPEED_10 && edata.speed != SPEED_100
+#ifdef SPEED_10000
+        && edata.speed != SPEED_10000
 #endif
-    if (speed == 0 || speed == (__u16)(-1) || speed == (__u32)(-1)) {
-	    DEBUGMSGTL(("mibII/interfaces", "speed is not known for %s\n",
-			ifr.ifr_name));
-	    return defaultspeed;
+#ifdef SPEED_2500
+        && edata.speed != SPEED_2500
+#endif
+        && edata.speed != SPEED_1000 ) {
+        DEBUGMSGTL(("mibII/interfaces", "fallback to mii for %s\n",
+                    ifr.ifr_name));
+        /* try MII */
+        return netsnmp_linux_interface_get_if_speed_mii(fd,name,defaultspeed);
     }
 
     /* return in bps */
     DEBUGMSGTL(("mibII/interfaces", "ETHTOOL_GSET on %s speed = %d\n",
-                ifr.ifr_name, speed));
-    return speed*1000LL*1000LL;
+                ifr.ifr_name, edata.speed));
+    return edata.speed*1000LL*1000LL;
 }
 #endif
  
