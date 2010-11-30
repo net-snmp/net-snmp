@@ -25146,27 +25146,6 @@ _ACEOF
 fi
 
 
-
-#	struct ethtool_cmd
-#   Agent:
-if test "x$ac_cv_header_linux_ethtool_h" = "xyes" ; then
-    ac_fn_c_check_member "$LINENO" "struct ethtool_cmd" "speed_hi" "ac_cv_member_struct_ethtool_cmd_speed_hi" "
-#if HAVE_LINUX_ETHTOOL_H
-#include <linux/ethtool.h>
-#endif
-
-"
-if test "x$ac_cv_member_struct_ethtool_cmd_speed_hi" = xyes; then :
-
-cat >>confdefs.h <<_ACEOF
-#define HAVE_STRUCT_ETHTOOL_CMD_SPEED_HI 1
-_ACEOF
-
-
-fi
-
-fi
-
 #       struct des_ks_struct
 #         ('weak_key' indicates older version of OpenSSL)
 #   Library:
