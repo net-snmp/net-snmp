@@ -1281,6 +1281,7 @@
 ./snmptrapd.lo: snmptrapd_handlers.h snmptrapd_log.h snmptrapd_ds.h
 ./snmptrapd.lo: snmptrapd_auth.h
 ./snmptrapd.lo: ../agent/mibgroup/notification-log-mib/notification_log.h
+./snmptrapd.lo: ../agent/mibgroup/tlstm-mib/snmpTlstmCertToTSNTable/snmpTlstmCertToTSNTable.h
 ./snmptrapd.lo: ../agent/mibgroup/mibII/vacm_conf.h
 ./snmptrapd_handlers.lo: ../include/net-snmp/net-snmp-config.h
 ./snmptrapd_handlers.lo: ../include/net-snmp/config_api.h
