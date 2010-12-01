@@ -1,0 +1,98 @@
+# -*- autoconf -*-
+#########################################
+##
+# Miscellaneous checks
+##
+#########################################
+
+##
+#   Package characteristics
+#       Authentication/Encryption support
+##
+
+#       Check for PKCS11
+#
+AC_MSG_CHECKING([for authentication support])
+useopenssl=no
+usepkcs=no
+if test "x$ac_cv_lib_pkcs11_C_Initialize" != "xyes" -o "x$ac_cv_header_security_cryptoki_h" != "xyes"; then
+    if test "x$askedpkcs" = "xyes"; then
+        AC_MSG_ERROR(Asked to use PKCS11 but I couldn't find it.)
+    fi
+else
+    if test "x$askedpkcs" = "xyes"; then
+        usepkcs=yes
+    fi
+fi
+
+#       Check for OpenSSL
+#
+if test "x$ac_cv_lib_crypto_EVP_md5" != "xyes" -a "x$ac_cv_lib_eay32_EVP_md5" != "xyes" -o "x$ac_cv_header_openssl_hmac_h" != "xyes"; then
+    if test "x$askedopenssl" = "xyes"; then
+        AC_MSG_ERROR(Asked to use OpenSSL but I couldn't find it.)
+    fi
+else
+    if test "x$askedopenssl" = "xyes"; then
+        useopenssl=yes
+    elif test "x$tryopenssl" = "xyes"; then
+        if test "x$usepkcs" != "xyes"; then
+            useopenssl=yes
+        fi
+    fi
+fi
+
+#       Available authentication/encryption modes
+#
+if test "x$CRYPTO" = "xinternal" ; then
+    authmodes="MD5 SHA1"
+    if test "x$enable_privacy" != "xno" ; then
+        encrmodes="DES AES"
+    else
+        encrmodes="[disabled]"
+    fi
+    AC_DEFINE(NETSNMP_USE_INTERNAL_CRYPTO, 1, "Define if internal cryptography code should be used")
+    AC_MSG_RESULT(Internal Crypto Support)
+elif test "x$useopenssl" != "xno" ; then
+    authmodes="MD5 SHA1"
+    if test "x$enable_privacy" != "xno" ; then
+        if test "x$ac_cv_header_openssl_aes_h" = "xyes" ; then
+            encrmodes="DES AES"
+	else
+	    encrmodes="DES"
+	fi
+    else
+        encrmodes="[disabled]"
+    fi
+    AC_DEFINE(NETSNMP_USE_OPENSSL)
+    LNETSNMPLIBS="$LNETSNMPLIBS $LIBCRYPTO"
+    AC_MSG_RESULT(OpenSSL Support)
+elif test "x$usepkcs" != "xno" ; then
+    authmodes="MD5 SHA1"
+    if test "x$enable_privacy" != "xno" ; then
+        encrmodes="DES"
+    else
+        encrmodes="[disabled]"
+    fi
+    AC_DEFINE(NETSNMP_USE_PKCS11, 1,
+      [Define if you are using the codeS11 library ...])
+    LNETSNMPLIBS="$LNETSNMPLIBS $LIBPKCS11"
+    AC_MSG_RESULT(PKCS11 Support)
+elif test "x$enable_md5" != "xno"; then
+    authmodes="MD5"
+    encrmodes=""
+    AC_DEFINE(NETSNMP_USE_INTERNAL_MD5)
+    AC_MSG_RESULT(Internal MD5 Support)
+fi
+if test "x$enable_md5" = "xno"; then
+    authmodes=`echo $authmodes | $SED 's/MD5 *//;'`
+fi
+AC_SUBST(LNETSNMPLIBS)
+AC_SUBST(LAGENTLIBS)
+
+AC_MSG_CACHE_ADD(Crypto support from:        $CRYPTO)
+AC_MSG_CACHE_ADD(Authentication support:     $authmodes)
+AC_MSG_CACHE_ADD(Encryption support:         $encrmodes)
+
+if test "x$all_warnings" != "x"; then
+    AC_MSG_CACHE_ADD(WARNING: $all_warnings)
+fi

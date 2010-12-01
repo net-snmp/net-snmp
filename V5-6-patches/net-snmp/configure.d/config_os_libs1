@@ -1,0 +1,96 @@
+# -*- autoconf -*-
+#########################################
+##
+# Checks for libraries that are run
+# before the agent module tests.
+##
+#########################################
+
+
+##
+#   RPM checks
+#
+##
+AC_CHECK_HEADERS(rpm/rpmlib.h rpm/header.h)
+
+AC_CHECK_HEADER(rpm/rpmlib.h,rpmlib_h=yes,rpmlib_h=no)
+AC_CHECK_HEADER(rpm/header.h,rpmheader_h=yes,rpmheader_h=no)
+
+if test "x$rpmheader_h" = "xno" -o "x$rpmlib_h" = "xno" ; then
+  if test "x$with_rpm" = "xyes" ; then
+    AC_MSG_ERROR([Could not find either the RPM header files needed and was specifically asked to use RPM support])
+  else
+    with_rpm=no
+  fi
+fi
+
+#
+# rpm libraries only needed for the host resources mib software
+# installed tables (on linux in particular)
+#
+if test "x$with_rpm" != "xno"; then
+  # ARG.  RPM is a real pain.
+  # FWIW librpm.la, librpmio.la, and libpopt.la have correct dependencies.
+  _rpmlibs=""
+
+  # zlib is required for newer versions of rpm
+  _cppflags="${CPPFLAGS}"
+  _ldflags="${LDFLAGS}"
+
+  # check for zlib
+  if test "x${with_zlib}" != "xno" -a -d "${with_zlib}"; then
+    CPPFLAGS="${CPPFLAGS} -I${with_zlib}/include"
+    LDFLAGS="${LDFLAGS} -L${with_zlib}/lib"
+  fi
+
+  # dunno if this is needed for rpm-4.0.x, earlier probably needs.
+  AC_CHECK_HEADER(zlib.h,
+      NETSNMP_SEARCH_LIBS(gzread, z,,
+          CPPFLAGS=${_cppflags} LDFLAGS=${_ldflags}, $LMIBLIBS, _rpmlibs),
+      CPPFLAGS=${_cppflags} LDFLAGS=${_ldflags})
+
+  # two variants of bzip2 need checking.
+  if test "x${with_bzip2}" != "xno"; then
+    if test -d "${with_bzip2}"; then
+      CPPFLAGS="${CPPFLAGS} -I${with_bzip2}/include"
+      LDFLAGS="${LDFLAGS} -L${with_bzip2}/lib"
+    fi
+    NETSNMP_SEARCH_LIBS(bzread, bz2,,, $LMIBLIBS, _rpmlibs)
+    NETSNMP_SEARCH_LIBS(BZ2_bzread, bz2,,, $LMIBLIBS, _rpmlibs)
+  fi
+
+  # two variants of db1 need checking.
+  NETSNMP_SEARCH_LIBS(dbopen, [db1 db],,, $LMIBLIBS, _rpmlibs)
+
+  # two variants of db3 need checking.
+  NETSNMP_SEARCH_LIBS(db_create, [db-3.1 db-3.0],,, $LMIBLIBS, _rpmlibs)
+  
+  # rpm-3.0.5 and later needs popt.
+  NETSNMP_SEARCH_LIBS(poptParseArgvString, popt,,, $LMIBLIBS, _rpmlibs)
+  
+  # rpm-4.0.x needs rpmio.
+  NETSNMP_SEARCH_LIBS(Fopen, rpmio,,, $LMIBLIBS, _rpmlibs)
+  
+  # rpm-4.0.3 librpmdb actually contains what we need.
+  NETSNMP_SEARCH_LIBS(rpmdbOpen, rpmdb,,, $LMIBLIBS, _rpmlibs)
+  # now check for rpm using the appropriate libraries.
+  NETSNMP_SEARCH_LIBS(rpmGetFilesystemList, rpm, [
+    AC_DEFINE(HAVE_LIBRPM, 1,
+      [Define to 1 if you have the `rpm' library (-lrpm).])
+    LMIBLIBS="$_rpmlibs $LMIBLIBS"
+  ],, $LMIBLIBS, _rpmlibs)
+
+  # rpm 4.6 has incompatible API, turn on the legacy one
+  AC_CHECK_DECL([headerGetEntry],
+    : ,
+    AC_DEFINE([_RPM_4_4_COMPAT], [], [Define if you have RPM 4.6 or newer to turn on legacy API]),
+    [[#include <rpm/rpmlib.h>]]
+  )
+fi
+
+#
+# getfsstat/getvfsstat
+#
+AC_SEARCH_LIBS(getfsstat, [nbutil])
+AC_CHECK_FUNCS(getfsstat)
+AC_CHECK_FUNCS(getvfsstat)
