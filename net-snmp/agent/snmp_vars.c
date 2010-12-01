@@ -339,8 +339,10 @@ init_agent(const char *app)
         return r;
 #endif
 
+#if defined(NETSNMP_USE_OPENSSL) && defined(HAVE_LIBSSL)
     /** init secname mapping */
     netsnmp_certs_agent_init();
+#endif
 
 #  include "agent_module_inits.h"
 
