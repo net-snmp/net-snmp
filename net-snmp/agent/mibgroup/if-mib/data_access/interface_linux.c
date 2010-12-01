@@ -12,8 +12,8 @@ static struct pci_access *pci_access;
 #endif
 
 #ifdef HAVE_LINUX_ETHTOOL_H
-#ifndef HAVE_PCI_LOOKUP_NAME
 #include <linux/types.h>
+#ifndef HAVE_PCI_LOOKUP_NAME
 typedef __u64 u64;         /* hack, so we may include kernel's ethtool.h */
 typedef __u32 u32;         /* ditto */
 typedef __u16 u16;         /* ditto */
