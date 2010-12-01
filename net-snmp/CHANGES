@@ -3,6 +3,231 @@ that have been applied in released versions.  Please see the NEWS file for
 a summary of the major changes, and the ChangeLog file for a comprehensive
 listing of all changes made to the code.
 
+*5.7*
+
+    snmplib:
+      - Added function netsnmp_delete_table_data_set().
+      - Added function netsnmp_delete_table_data_set(). Added declaration
+	for the function netsnmp_table_data_delete_table() in a public
+	agent header file.
+      - Added function netsnmp_delete_table_data_set(). Added declaration
+	for the function netsnmp_table_data_delete_table() in a public
+	agent header file. Fixed memory leak in
+	netsnmp_table_data_delete_table(). (Backported r19450 and r19454
+	from trunk.)
+      - Added macro netsnmp_static_assert().
+      - Added snmp_sess_session_lookup().
+      - Avoid that Valgrind complains about uninitialized data for the
+	buffers returned by netsnmp_callback_recv() and
+	netsnmp_callback_hook_build().
+      - Be const correct over calls to str* functions.
+      - Changed the argument type of debug_register_tokens() from char *
+	into const char *. (Backported r19665 and r19666 from the trunk.)
+      - Check the return value of strdup in netsnmp_create_data_list and
+	fail if strdup fails.
+      - Correct the extern "C" declarations to be consistent. Remove
+	commented out code.
+      - Fixed bugs in asn_parse_unsigned_int64(),
+	asn_build_unsigned_int64(), asn_parse_signed_int64() and
+	asn_build_signed_int64(). Most but not all of these bugs were
+	specific to 64-bit systems. Fixes bug #3093199.
+      - Fixed memory leak triggered by calling se_add_pair_to_list() with a
+	value that already existed in the list.
+      - Invoking se_clear_slist() does no longer create a dangling pointer.
+      - Invoking se_clear_slist() does no longer create a dangling pointer.
+	Fixed leaks-at-exit triggered by using the snmp_enum code.
+      - Invoking se_clear_slist() does no longer create a dangling pointer.
+	Fixed leaks-at-exit triggered by using the snmp_enum code.
+	Documented behavior of se_add_pair(), se_add_pair_to_slist() and
+	clear_snmp_enum(). Made snmp_enum example consistent with the rest
+	of the code by adding strdup() calls and added a call to
+	se_clear_all_lists().
+      - Invoking se_clear_slist() does no longer create a dangling pointer.
+	Fixed leaks-at-exit triggered by using the snmp_enum code.
+	Documented behavior of se_add_pair(), se_add_pair_to_slist() and
+	clear_snmp_enum(). Made snmp_enum example consistent with the rest
+	of the code by adding strdup() calls and added a call to
+	se_clear_all_lists(). Fixed a memory corruption problem triggered
+	by the (undocumented) snmpd.conf "enum" keyword handler - storing
+	pointers to strings allocated on the stack in a global list does
+	not work.
+      - Invoking se_clear_slist() does no longer create a dangling pointer.
+	Fixed leaks-at-exit triggered by using the snmp_enum code.
+	Documented behavior of se_add_pair(), se_add_pair_to_slist() and
+	clear_snmp_enum(). Made snmp_enum example consistent with the rest
+	of the code by adding strdup() calls and added a call to
+	se_clear_all_lists(). Fixed a memory corruption problem triggered
+	by the (undocumented) snmpd.conf "enum" keyword handler - storing
+	pointers to strings allocated on the stack in a global list does
+	not work. 
+      - force a ; at the end of the static_assert macro.
+      - netsnmp_handler_dup(): freeing the duplicated handler no longer
+	causes a crash (double free) when handler->myvoid of the original
+	handler was non-NULL.
+
+    snmpd:
+      - Added snmp_sess_session_lookup(). Call shutdown_master_agent() and
+	shutdown_agent() during shutdown.
+      - Added snmp_sess_session_lookup(). Call shutdown_master_agent() and
+	shutdown_agent() during shutdown. The function clean_subtree() does
+	no longer trigger double frees and invalid memory reads. Note: this
+	function was already wrong at the time it was introduced (patch
+	#724925 / r8531, July 2003).
+      - Added snmp_sess_session_lookup(). Call shutdown_master_agent() and
+	shutdown_agent() during shutdown. The function clean_subtree() does
+	no longer trigger double frees and invalid memory reads. Note: this
+	function was already wrong at the time it was introduced (patch
+	#724925 / r8531, July 2003). Removed a comment in
+	netsnmp_handler_free() that is now obsolete because of the
+	clean_subtree() changes.
+      - Added snmp_sess_session_lookup(). Call shutdown_master_agent() and
+	shutdown_agent() during shutdown. The function clean_subtree() does
+	no longer trigger double frees and invalid memory reads. Note: this
+	function was already wrong at the time it was introduced (patch
+	#724925 / r8531, July 2003). Removed a comment in
+	netsnmp_handler_free() that is now obsolete because of the
+	clean_subtree() changes. Modified netsnmp_deregister_agent_nsap()
+	such that it never examines sessions that already have been closed.
+	It is for this change that it was necessary to introduce the new
+	function snmp_sess_session_lookup().
+      - Fixed a double free at exit that was triggered by cleaning up the
+	data structures used for embedded Perl support.
+      - Fixed order of rpmlib detection and agent module configuration
+	(backported r19621 from trunk).
+      - Removing the last cache via netsnmp_cache_remove() does no longer
+	trigger a crash.
+      - Update the length of sysObjectID as well as the data when it is set
+	from a configuration file.
+      - Use the same autoconf symbol to decide both if strcasecmp should be
+	declared and if it should be defined.
+      - [BUG 1840230]: Don't include the index object as
+	(pseudo-)accessible column.
+      - [BUG 3058101]: Writeable 'long' instances work on 64-bit systems,
+	but not writable 'int's
+      - [BUG 3062538]: Fix com2sec* handling of non-default contexts
+      - [BUG ]: enforce max length on TLS secName maps
+      - [PATCH 2119725]: Fix skipNFSInHostResources handling of
+	hrStorageTable
+      - [PATCH 3053436]: from: takevos: fix: tcpConnectionTable_data_access
+	invalid memory access
+      - [PATCH 3057090]: make ethtool support on linux use the high speed
+	struct info for 100G+.
+      - [PATCH 3096725]: Don't register v1Trap callback, if SNMPv1 is not
+	supported
+      - [PATCH 3096725]: Include SNMPv1 trap OIDs in nlmLogNotificationID
+	column
+      - add debug for cert find hint as string/int
+      - add debug for ssl ciphers, clarify fingerprint match debug
+      - com2sec6 directive: If configure has not found getaddrinfo(),
+	non-numeric IPv6 addresses do now trigger an error message.
+	(Backported r19650.)
+      - don't second-guess cache handler   (waves hand) this is not the
+	function you are looking for. netsnmp_cache_is_valid() is not meant
+	for mib modules
+      - fix double free in TLS error handling
+      - host/data_access/swinst_rpm: Fixed a memory leak in
+	netsnm_swinst_arch_init().
+      - host/data_access/swinst_rpm: Pass correct path to rpmdbOpen() such
+	that opening the database succeeds.
+      - host/data_access/swinst_rpm: Pass correct path to rpmdbOpen() such
+	that opening the database succeeds. host/data_access/swinst_rpm:
+	Log an error message if rpmdbOpen() fails.
+      - instead of relying on NETSNMP_DS_LIB_APPTYPE, break out cert table
+	inits to new agent cert init function, called from init_agent.
+      - netsnmp_cache_free(): A more detailed message is now logged when
+	attempting to free a cache that is still in the cache list.
+	(Backported r19524.)
+      - snmpd is again single-threaded. [PATCH 2959811]: Safranek:
+	Reimplement Linux Netlink IPv6 prefix listener.
+      - use cache-unique id instead of handler name for shared cache reload
+	protection
+
+    snmptrapd:
+      - Fixed a double free at exit that was triggered by cleaning up the
+	data structures used for embedded Perl support. Fixed a double free
+	at exit that was triggered by cleaning up the data structures used
+	for embedded Perl support. Valgrind reported that double free as
+	follows: Invalid read of size 4 at 0x59D0501: perl_destruct (in
+	/usr/lib/perl5/5.12.1/x86_64-linux-thread-multi/CORE/libperl.so) by
+	0x544DF8E: shutdown_perl (snmp_perl.c:166) by 0x403966:
+	term_handler (snmptrapd.c:318) by 0x6D43A5F: ??? (in
+	/lib64/libc-2.11.2.so) Address 0x7660f88 is 56 bytes inside a block
+	of size 2,912 free'd at 0x4C26496: free (vg_replace_malloc.c:366)
+	by 0x544DF9A: shutdown_perl (snmp_perl.c:167) by 0x6DDADF2:
+	__select_nocancel (in /lib64/libc-2.11.2.so) by 0x404E20: main
+	(snmptrapd.c:1258)
+
+    build:
+      - [BUG 3088360]: Ensure python modules are built against the correct
+	libraries
+
+    building:
+      - Some systems do not support the -E flag to grep, use autoconf to
+	find the right egrep at all times.
+
+    perl:
+      - 0 patch 3049029: from fennec: fix a memory leak with snmp bulkwalks
+
+    testing:
+      - Generate a normal #line directive as per C99 instead of the
+	compiler-specific #<n>-directive.
+      - Introduced new test type next to capp and clib: cagentlib.
+      - It is again possible to run an individual test via the script
+	testing/RUNTESTS.
+      - It is now possible to analyze the unit tests with Valgrind by
+	setting the environment variables SNMP_SAVE_TMPDIR and
+	DYNAMIC_ANALYZER. An example: (export SNMP_SAVE_TMPDIR=yes
+	DYNAMIC_ANALYZER="valgrind --trace-children=yes --leak-check=full";
+	cd testing && ./RUNFULLTESTS -g unit-tests)
+      - Test 71 (com2sec6_simple) does now succeed even if IPv6 DNS
+	resolution is not available. (Backported r19648.)
+      - Test T030 does now pass on MinGW.
+      - Unit tests can now invoke functions from libagent.
+      - Unit tests can now invoke functions from libagent. Added unit test
+	for table_dataset. (Backported from r19450 from the trunk.)
+
+    unspecified:
+      - [BUG 3102904]: All Net-SNMP C source files are now compiled with
+	-fno-st rict-aliasing, at least if the configured compiler supports
+	this flag.
+      - [PATCH 3074918]: from weizheng: check for CONTAINER_INSERT failures
+	and react appropriately to avoid memory leaks
+
+    Cygwin:
+
+    Linux:
+      - [PATCH 3083027]: Fix RPM spec file to support CentOS
+      - agent: ipNetToPhysicalTable: Do not log an error message if one or
+	more interfaces are present that do not have such information
+	(NUD_NOARP), e.g. tunnels. Reported by Stephen Hemminger. See also
+	patch #3107003.
+      - snmpd is again single-threaded.
+
+    MinGW:
+      - configure: Detection of the functions gai_strerror(),
+	getaddrinfo(), gethostname() and gethostname() does now succeed.
+	(Backported r19646 from the trunk.)
+      - testing: If the agent has been asked to stop, wait until the snmpd
+	process disappeared before proceeding.
+
+    Win32:
+      - Avoid that MSVC reports a warning message about redefinition of the
+	malloc() macro during building the Net-SNMP source code.
+      - When snmpd.exe is started in a command prompt window, the snmpd
+	process now stops upon the first key press. This makes it easier to
+	debug snmpd.exe for memory leaks.
+      - [PATCH 3085187]: Building via the Microsoft Visual Studio project
+	file (.dsw/.dsp) works again.
+      - building: Avoid that MSVC 2010 prints a warning message about
+	redefining EADDRINUSE.
+      - building: Builds now correctly with a 64-bit compiler.
+      - building: batch build with OpenSSL enabled and with recent OpenSSL
+	development files works again.
+      - shutdown_snmpNotifyFilterTable() and shutdown_winExtDLL() are now
+	invoked when the Net-SNMP service is stopped. (Partially backported
+	r19515 from the trunk.)
+      - testing: Avoid that T200 fails on known Microsoft SNMP extension
+	DLL bugs.
 
 *5.6*
 
