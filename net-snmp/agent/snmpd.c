@@ -1061,8 +1061,8 @@ main(int argc, char *argv[])
 
 #if defined(WIN32)
 
-#include <assert.h>
 #include <process.h>
+#include <net-snmp/library/snmp_assert.h>
 
 static unsigned s_threadid;
 HANDLE s_thread_handle;
@@ -1076,18 +1076,18 @@ static unsigned __stdcall wait_for_stdin(void* arg)
 
 static void create_stdin_waiter_thread()
 {
-    assert(s_thread_handle == 0);
+    netsnmp_assert(s_thread_handle == 0);
     s_thread_handle = (HANDLE)_beginthreadex(0, 0, wait_for_stdin, 0, 0, &s_threadid);
-    assert(s_thread_handle != 0);
+    netsnmp_assert(s_thread_handle != 0);
 }
 
 static void join_stdin_waiter_thread()
 {
     int result;
 
-    assert(s_thread_handle != 0);
+    netsnmp_assert(s_thread_handle != 0);
     result = WaitForSingleObject(s_thread_handle, 1000);
-    assert(result != WAIT_TIMEOUT);
+    netsnmp_assert(result != WAIT_TIMEOUT);
     CloseHandle(s_thread_handle);
     s_thread_handle = 0;
 }
