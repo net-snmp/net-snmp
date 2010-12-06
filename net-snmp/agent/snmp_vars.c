@@ -330,6 +330,11 @@ init_agent(const char *app)
     init_perl();
 #endif
 
+#if defined(NETSNMP_USE_OPENSSL) && defined(HAVE_LIBSSL)
+    /** init secname mapping */
+    netsnmp_certs_agent_init();
+#endif
+
 #ifdef USING_AGENTX_SUBAGENT_MODULE
     /*
      * don't init agent modules for a sub-agent
@@ -337,11 +342,6 @@ init_agent(const char *app)
     if (netsnmp_ds_get_boolean(NETSNMP_DS_APPLICATION_ID, 
 			       NETSNMP_DS_AGENT_ROLE) == SUB_AGENT)
         return r;
-#endif
-
-#if defined(NETSNMP_USE_OPENSSL) && defined(HAVE_LIBSSL)
-    /** init secname mapping */
-    netsnmp_certs_agent_init();
 #endif
 
 #  include "agent_module_inits.h"
