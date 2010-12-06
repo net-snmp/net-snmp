@@ -186,6 +186,20 @@ main(int argc, char *argv[])
     session.callback = snmp_input;
     session.callback_magic = NULL;
 
+    /*
+     * setup the local engineID which may be for either or both of the
+     * contextEngineID and/or the securityEngineID.
+     */
+    setup_engineID(NULL, NULL);
+
+    /* if we don't have a contextEngineID set via command line
+       arguments, use our internal engineID as the context. */
+    if (session.contextEngineIDLen == 0 ||
+        session.contextEngineID == NULL) {
+        session.contextEngineID =
+            snmpv3_generate_engineID(&session.contextEngineIDLen);
+    }
+
     if (session.version == SNMP_VERSION_3 && !inform) {
         /*
          * for traps, we use ourselves as the authoritative engine
@@ -205,24 +219,12 @@ main(int argc, char *argv[])
          */
 
         /*
-         * setup the engineID based on IP addr.  Need a different
-         * algorthim here.  This will cause problems with agents on the
-         * same machine sending traps. 
-         */
-        setup_engineID(NULL, NULL);
-
-        /*
          * pick our own engineID 
          */
         if (session.securityEngineIDLen == 0 ||
             session.securityEngineID == NULL) {
             session.securityEngineID =
                 snmpv3_generate_engineID(&session.securityEngineIDLen);
-        }
-        if (session.contextEngineIDLen == 0 ||
-            session.contextEngineID == NULL) {
-            session.contextEngineID =
-                snmpv3_generate_engineID(&session.contextEngineIDLen);
         }
 
         /*
