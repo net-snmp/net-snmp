@@ -139,11 +139,7 @@ dot3stats_interface_ioctl_ifindex_get (int fd, const char *name) {
 /*
  * The following code is based upon code I got from Stephen Hemminger
  */
-#include <linux/netlink.h>
 #include <linux/rtnetlink.h>
-#include <linux/if_link.h>
-#include <linux/if_addr.h>
-#include <linux/neighbour.h>
 #include <errno.h>
 
 struct rtnl_handle {
