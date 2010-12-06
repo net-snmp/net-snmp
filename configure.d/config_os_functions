@@ -294,3 +294,24 @@ esac
 AC_MSG_RESULT($netsnmp_PRI32)
 AC_DEFINE_UNQUOTED([NETSNMP_PRI32], ["$netsnmp_PRI32"],
                    [Size prefix to use to printf a uint32_t])
+
+# check to see if the openssl is good enough for DTLS
+# (BIO_dgram_get_peer is a macro, not a true function)
+if echo " $transport_result_list " | $GREP "DTLS" > /dev/null; then
+    AC_CACHE_VAL(
+       netsnmp_cv_bio_dgram_get_peer,
+       AC_MSG_CHECKING([[for BIO_dgram_get_peer]])
+       [
+        oldLIBS="$LIBS"
+        LIBS="$LIBS -lcrypto"
+        AC_TRY_LINK(
+         [#include <openssl/bio.h>],
+         [BIO_dgram_get_peer(NULL, NULL);],,
+         AC_MSG_ERROR([DTLS support requires a newer version of OpenSSL]))
+
+        LIBS="$oldLIBS"
+       ]
+       AC_MSG_RESULT(yes)
+    )
+fi
+
