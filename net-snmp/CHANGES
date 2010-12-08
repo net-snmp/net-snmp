@@ -157,6 +157,10 @@ listing of all changes made to the code.
 	__select_nocancel (in /lib64/libc-2.11.2.so) by 0x404E20: main
 	(snmptrapd.c:1258)
 
+    snmpinform:
+      - fix contextEngineIDs for outgoing informs from snmpinform to
+        be the local engineID
+
     build:
       - [BUG 3088360]: Ensure python modules are built against the correct
 	libraries
