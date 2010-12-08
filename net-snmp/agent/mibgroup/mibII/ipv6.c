@@ -778,6 +778,10 @@ var_ifv6Entry(register struct variable * vp,
     int             max;
     char           *p;
 
+    /* Reload list of interfaces */
+    if (if_initialize() < 0)
+        return NULL;
+
     max = if_maxifindex();
     if (max < 0)
         return NULL;
@@ -1077,6 +1081,10 @@ var_icmpv6Entry(register struct variable * vp,
 #else
     int             interface;
     int             max;
+
+    /* Reload list of interfaces */
+    if (if_initialize() < 0)
+        return NULL;
 
     max = if_maxifindex();
     if (max < 0)
@@ -1953,6 +1961,10 @@ var_ifv6Entry(register struct variable * vp,
     struct ifreq    ifr;
     int             s;
 
+    /* Reload list of interfaces */
+    if (if_initialize() < 0)
+        return NULL;
+
     max = if_maxifindex();
     if (max < 0)
         return NULL;
@@ -2098,10 +2110,11 @@ linux_if_freenameindex(struct if_nameindex *ifndx)
     int             i;
     if (!ifndx)
         return;
-    for (i = 1; ifndx[i].if_index; i++) {
+    for (i = 0; ifndx[i].if_index; i++) {
         free(ifndx[i].if_name);
     }
     free(ifndx);
+    ifndx = NULL;
 }
 
 #define linux_freeinternalnameindex(ifni, max)  { \
@@ -2122,6 +2135,7 @@ linux_if_nameindex(void)
     struct if_nameindex *ifndx = NULL, *iflist = NULL, *tmp;
     int             i, j;
     int             maxidx, if_count = 0;
+    static int      last_if_count;
 
     f = fopen(LINUX_PROC_NET_IFINET6, "r");
     if (f) {
@@ -2135,10 +2149,11 @@ linux_if_nameindex(void)
                 continue;
             if_name[sizeof(if_name) - 1] = '\0';
             if (maxidx < 0 || maxidx < if_index) {
-
+                if (last_if_count < if_index)
+                    last_if_count = if_index;
                 tmp =
                     realloc(iflist,
-                            (sizeof(struct if_nameindex)) * (if_index +
+                            (sizeof(struct if_nameindex)) * (last_if_count +
                                                              2));
                 if (!tmp) {
                     linux_freeinternalnameindex(iflist, if_index);
