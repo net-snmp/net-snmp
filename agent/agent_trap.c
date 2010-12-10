@@ -930,7 +930,7 @@ send_trap_to_sess(netsnmp_session * sess, netsnmp_pdu *template_pdu)
 
             len = snmpv3_get_engineID(tmp, sizeof(tmp));
             memdup(&pdu->securityEngineID, tmp, len);
-            sess->securityEngineIDLen = len;
+            pdu->securityEngineIDLen = len;
         }
 
         result = snmp_send(sess, pdu);
