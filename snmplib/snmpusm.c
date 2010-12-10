@@ -3034,7 +3034,11 @@ usm_get_user_from_list(u_char * engineID, size_t engineIDLen,
               memcmp(ptr->engineID, engineID, engineIDLen) == 0)))
             return ptr;
           DEBUGMSGTL(("usm", "no match on engineID ("));
-          DEBUGMSGHEX(("usm", engineID, engineIDLen));
+          if (engineID) {
+              DEBUGMSGHEX(("usm", engineID, engineIDLen));
+          } else {
+              DEBUGMSGTL(("usm", "Empty EngineID"));
+          }
           DEBUGMSG(("usm", ")\n"));
         }
     }
