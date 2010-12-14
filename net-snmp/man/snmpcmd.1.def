@@ -222,7 +222,7 @@ creating and managing Net-SNMP certificates.
 .I "<certificate-specifier>s"
 can reference either a fingerprint of the certificate to use (the
 net-snmp-cert tool can help you figure out the certificates) or the
-filename's prefix can be used.  For example, if you had a "snmp.crt"
+filename's prefix can be used.  For example, if you had a "snmpd.crt"
 certificate file then you could simply refer to the certificate via
 the "snmpd" specifier.
 .TP
