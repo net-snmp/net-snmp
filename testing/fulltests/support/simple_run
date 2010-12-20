@@ -8,7 +8,9 @@ fi
 if [ "x$builddir" = "x" ]; then
     cd ..
     builddir=`pwd`
-    if ! cd testing 2>/dev/null; then
+    if cd testing 2>/dev/null; then
+       :
+    else
        echo "Error: $0 must be started from inside the testing directory."
        exit 1
     fi
@@ -17,7 +19,9 @@ fi
 if [ "x$srcdir" = "x" ]; then
     cd ..
     srcdir=`pwd`
-    if ! cd testing 2>/dev/null; then
+    if cd testing 2>/dev/null; then
+       :
+    else
        echo "Error: $0 must be started from inside the testing directory."
        exit 1
     fi
