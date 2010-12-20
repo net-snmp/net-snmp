@@ -1,8 +1,8 @@
-.TH "mib parsing and datatype manipulation routines." 3 "23 Sep 2009" "Version 5.5" "net-snmp" \" -*- nroff -*-
+.TH "mib parsing and datatype manipulation routines." 3 "20 Dec 2010" "Version 5.5.1.pre1" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
-netsnmp_mib_utilities \- the Net-SNMP mib parsing and datatype manipulation routines.
+mib parsing and datatype manipulation routines. \- 
 .SS "Data Structures"
 
 .in +1c
@@ -437,7 +437,7 @@ Definition at line 289 of file mib.c.
 .PP
 xxx-rks: should free previous value? 
 .PP
-Definition at line 3739 of file mib.c.
+Definition at line 3737 of file mib.c.
 .SS "int build_oid_segment (\fBnetsnmp_variable_list\fP * var)"
 .PP
 Takes the value in VAR and turns it into an OID segment in var->name. \fBParameters:\fP
@@ -468,7 +468,7 @@ Prints on oid description into a file descriptor. \fBParameters:\fP
 .PP
 
 .PP
-Definition at line 4609 of file mib.c.
+Definition at line 4607 of file mib.c.
 .SS "void fprint_objid (FILE * f, const oid * objid, size_t objidlen)"
 .PP
 Prints an oid to a file descriptor. \fBParameters:\fP
@@ -516,7 +516,7 @@ comments on find_best_tree_node for usage after first time.
 .PP
 
 .PP
-Definition at line 5629 of file mib.c.
+Definition at line 5646 of file mib.c.
 .SS "void netsnmp_fixup_mib_directory (void)"
 .PP
 swap in the new value and repeat 
@@ -558,7 +558,7 @@ Converts an OID to its character form. in example 5 . 1 . 2 . 3 . 4 . 5 = 12345
 .PP
 length 
 .PP
-Definition at line 6416 of file mib.c.
+Definition at line 6433 of file mib.c.
 .SS "int netsnmp_oid2str (char * S, int L, oid * O)"
 .PP
 Converts an OID to its string form. in example 5 . 'h' . 'e' . 'l' . 'l' . 'o' = 'hello\\0' (null terminated)
@@ -579,7 +579,7 @@ Converts an OID to its string form. in example 5 . 'h' . 'e' . 'l' . 'l' . 'o' =
 .PP
 
 .PP
-Definition at line 6444 of file mib.c.
+Definition at line 6461 of file mib.c.
 .SS "void netsnmp_set_mib_directory (const char * dir)"
 .PP
 New dir starts with '+', thus we add it.
@@ -609,7 +609,7 @@ Converts a string to its OID form. in example 'hello' = 5 . 'h' . 'e' . 'l' . 'l
 .PP
 
 .PP
-Definition at line 6381 of file mib.c.
+Definition at line 6398 of file mib.c.
 .SS "void print_description (oid * objid, size_t objidlen, int width)"
 .PP
 Prints on oid description on stdout. \fBSee also:\fP
@@ -619,7 +619,7 @@ Prints on oid description on stdout. \fBSee also:\fP
 .PP
 
 .PP
-Definition at line 4593 of file mib.c.
+Definition at line 4591 of file mib.c.
 .SS "void print_mib (FILE * fp)"
 .PP
 Prints the MIBs to the file fp. \fBParameters:\fP
@@ -724,7 +724,7 @@ The root oid pointer if successful, or NULL otherwise.
 .PP
 
 .PP
-Definition at line 5987 of file mib.c.
+Definition at line 6004 of file mib.c.
 .SS "int sprint_realloc_asciistring (u_char ** buf, size_t * buf_len, size_t * out_len, int allow_realloc, const u_char * cp, size_t len)"
 .PP
 Prints an ascii string into a buffer. The characters pointed by *cp are encoded as an ascii string.
@@ -1277,7 +1277,7 @@ uptimeString
 .PP
 
 .PP
-Definition at line 5952 of file mib.c.
+Definition at line 5969 of file mib.c.
 .SH "Variable Documentation"
 .PP 
 .SS "\fBPrefixList\fP mib_prefixes[]"\fBInitial value:\fP

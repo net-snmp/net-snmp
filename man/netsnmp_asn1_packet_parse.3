@@ -1,4 +1,4 @@
-.TH "asn1 parsing and datatype manipulation routines." 3 "23 Sep 2009" "Version 5.5" "net-snmp" \" -*- nroff -*-
+.TH "asn1 parsing and datatype manipulation routines." 3 "20 Dec 2010" "Version 5.5.1.pre1" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -234,16 +234,14 @@ IS EQUIVALENT TO:
 .SS "#define CHECK_OVERFLOW_S(x, y)"\fBValue:\fP
 .PP
 .nf
-do { int trunc = 0;                     \
+do {                                    \
         if (x > INT32_MAX) {                                            \
-            trunc = 1;                                                  \
+            DEBUGMSG(('asn','truncating signed value %ld to 32 bits (%d)\n',(long)(x),y)); \
             x &= 0xffffffff;                                            \
         } else if (x < INT32_MIN) {                                     \
-            trunc = 1;                                                  \
+            DEBUGMSG(('asn','truncating signed value %ld to 32 bits (%d)\n',(long)(x),y)); \
             x = 0 - (x & 0xffffffff);                                   \
         }                                                               \
-        if (trunc)                                                      \
-            DEBUGMSG(('asn','truncating signed value to 32 bits (%d)\n',y)); \
     } while(0)
 .fi
 .PP
@@ -259,7 +257,7 @@ do {                                    \
     } while(0)
 .fi
 .PP
-Definition at line 226 of file asn1.c.
+Definition at line 224 of file asn1.c.
 .SH "Author"
 .PP 
 Generated automatically by Doxygen for net-snmp from the source code.

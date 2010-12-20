@@ -1,10 +1,10 @@
-.TH "Net-SNMP Agent handler and extensibility API" 3 "23 Sep 2009" "Version 5.5" "net-snmp" \" -*- nroff -*-
+.TH "Net-SNMP Agent handler and extensibility API" 3 "20 Dec 2010" "Version 5.5.1.pre1" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
-netsnmp_handler \- 
+Net-SNMP Agent handler and extensibility API \- 
 .PP
-Net-SNMP Agent handler and extensibility API. The basic theory goes something like this: In the past, with the original mib \fBmodule\fP api (which derived from the original CMU SNMP code) the underlying mib modules were passed very little information (only the truly most basic information about a request).  
+The basic theory goes something like this: In the past, with the original mib \fBmodule\fP api (which derived from the original CMU SNMP code) the underlying mib modules were passed very little information (only the truly most basic information about a request).  
 
 .SS "Data Structures"
 
@@ -198,7 +198,7 @@ Net-SNMP Agent handler and extensibility API. The basic theory goes something li
 .ti -1c
 .RI "void \fBnetsnmp_handler_free\fP (\fBnetsnmp_mib_handler\fP *handler)"
 .br
-.RI "\fIfree's the resourceses associated with a given handler \fP"
+.RI "\fIfrees the resources associated with a given handler \fP"
 .ti -1c
 .RI "\fBnetsnmp_mib_handler\fP * \fBnetsnmp_handler_dup\fP (\fBnetsnmp_mib_handler\fP *handler)"
 .br
@@ -256,7 +256,7 @@ Net-SNMP Agent handler and extensibility API. The basic theory goes something li
 .br
 .RI "\fIReturns a handler's void * pointer from a chain based on the name. \fP"
 .ti -1c
-.RI "void \fBhandler_free_callback\fP (void *free)"
+.RI "void \fBhandler_free_callback\fP (void *handler)"
 .br
 .ti -1c
 .RI "void \fBnetsnmp_register_handler_by_name\fP (const char *name, \fBnetsnmp_mib_handler\fP *handler)"
@@ -376,11 +376,9 @@ check's a given cache and returns it if it is still valid (ie, the agent still c
 duplicates a handler and all subsequent handlers see also _clone_handler 
 .SS "void netsnmp_handler_free (\fBnetsnmp_mib_handler\fP * handler)"
 .PP
-free's the resourceses associated with a given handler 
+frees the resources associated with a given handler 
 .PP
-make sure we aren't pointing to ourselves.
-.PP
-XXX : segv here at shutdown if SHUTDOWN_AGENT_CLEANLY defined. About 30 functions down the stack, starting in clear_context() -> clear_subtree()
+make sure we aren't pointing to ourselves. 
 .SS "void netsnmp_handler_mark_requests_as_delegated (\fBnetsnmp_request_info\fP * requests, int isdelegated)"
 .PP
 marks a list of requests as delegated (or not if isdelegaded = 0) 

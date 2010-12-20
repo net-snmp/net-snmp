@@ -1,8 +1,8 @@
-.TH "The Net-SNMP library" 3 "23 Sep 2009" "Version 5.5" "net-snmp" \" -*- nroff -*-
+.TH "The Net-SNMP library" 3 "20 Dec 2010" "Version 5.5.1.pre1" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
-netsnmp_library \- the Net-SNMP library
+The Net-SNMP library \- 
 .SS "Data Structures"
 
 .in +1c
@@ -383,6 +383,10 @@ netsnmp_library \- the Net-SNMP library
 .RI "\fBnetsnmp_session\fP * \fBsnmp_sess_session\fP (void *sessp)"
 .br
 .ti -1c
+.RI "\fBnetsnmp_session\fP * \fBsnmp_sess_session_lookup\fP (void *sessp)"
+.br
+.RI "\fILook up a session that already may have been closed. \fP"
+.ti -1c
 .RI "\fBnetsnmp_transport\fP * \fBsnmp_sess_transport\fP (void *sessp)"
 .br
 .ti -1c
@@ -627,6 +631,26 @@ Definition at line 6885 of file snmp_api.c.
 Library API routines concerned with specifying and using SNMP 'sessions' including sending and receiving requests. 
 .PP
 Definition at line 715 of file snmp_api.c.
+.SS "\fBnetsnmp_session\fP* snmp_sess_session_lookup (void * sessp)"
+.PP
+Look up a session that already may have been closed. \fBParameters:\fP
+.RS 4
+\fIsessp\fP Opaque pointer, returned by snmp_sess_open.
+.RE
+.PP
+\fBReturns:\fP
+.RS 4
+Pointer to session upon success or NULL upon failure.
+.RE
+.PP
+\fBSee also:\fP
+.RS 4
+snmp_sess_session() 
+.RE
+.PP
+
+.PP
+Definition at line 7478 of file snmp_api.c.
 .SS "void snmp_shutdown (const char * type)"
 .PP
 Shuts down the application, saving any needed persistent storage, and appropriate clean up. \fBParameters:\fP
