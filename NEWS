@@ -4,7 +4,15 @@ that have been fixed/applied, and the ChangeLog file for a comprehensive
 listing of all changes made to the code.
 
 
-*5.5.dev*      (SVN snapshot)
+* 5.5.1 *
+
+    snmpd:
+      - Fix handling of multiple matching VACM entries.
+        (Use the "best" match, rather than the first one).
+	Note that this could potentially affect the behaviour
+	of existing access control configurations.
+
+* 5.5 *
 
     All applications:
       - Added the ability to "alias" transports to a more simple name

@@ -4,6 +4,213 @@ a summary of the major changes, and the ChangeLog file for a comprehensive
 listing of all changes made to the code.
 
 
+*5.5.1*
+
+    snmplib:
+      - [BUG 2838243]: Correct the output of unsigned values
+      - [BUG 2919320]: Avoid accessing freed memory Reported by Tomasz Lis
+      - [BUG 2922390]: Fix test for missing contextName parameter
+      - [BUG 3093199]: Fixed bugs in 64-bit integer parsing
+      - [PATCH 2871747]: plug memory leak in OID processing
+      - [PATCH 2952140]: Fix overflow of counter32 and gauge32 on 64bit systems
+      - [PATCH 2971270]: refuse to parse ASN.1 tokens with wrong type field
+      - [PATCH 3067540]: Fix IPv4 OID indexes on 64-bit big-endian systems.
+      - [PATCH 3058645]: Use MSG_DONTWAIT for the unix domain socket
+      - Added function netsnmp_delete_table_data_set()
+      - Added netsnmp_xxx() memory allocation functions
+      - Added macro netsnmp_static_assert().
+      - Added snmp_sess_session_lookup().
+      - Avoid Valgrind complaints about uninitialized data
+      - Change the parsing of ranges to accept all valid values.
+      - Fix __cplusplus extern "C" wrapping
+      - Fix agent crash when sending encrypted SNMPv3 traps.
+      - Fix double free crash when releasing duplicated handlers
+      - Fix duplicate se_add_pair_to_list() memory leak
+      - Fix issue with USM using inactive users
+      - Fix potential buffer overflow when generating temp. file names
+      - Fix various problems with se_clear_slist()
+      - Force a ; at the end of the static_assert macro.
+      - Handle memory allocation failures in netsnmp_create_data_list
+      - Make sure that a mask is given to open when O_CREAT is specified
+
+    snmpd:
+      - [BUG 1840230]: Don't include the index object as (pseudo-)accessible column
+      - [BUG 2822360]: Fix memory leak when building table OIDs
+      - [BUG 2841008]: Protect against crash following failed AgentX response
+      - [BUG 2873858]: Fix handling of schedOwner index
+      - [BUG 2894059]: Handle errors when counting interfaces
+      - [BUG 2897000]: Suppress 32-bit counter truncation warnings
+      - [BUG 2900078]: Add support for OID variables with size in elements
+	               instead of bytes, correct sysObjectID to use this
+      - [BUG 2924140]: Fix termination of CPU/FPU types
+      - [BUG 2972579]: Fix checking of snmpTargetAddrRowStatus SET requests
+      - [BUG 3003981]: Protect against buffer overflow
+      - [BUG 3058101]: 64-bit systems only support writeable 'long' instances (not int)
+      - [BUG 3062538]: Fix com2sec* handling of non-default contexts
+      - [PATCH 2119725]: Fix skipNFSInHostResources handling of hrStorageTable
+      - [PATCH 2825653]: Fix sendmail.cf parsing in certain conditions
+      - [PATCH 2835576]: Fix endianness issues in pass/pass_persist
+      - [PATCH 2877518]: Fix handling of scoped AgentX variables
+      - [PATCH 2883155]: Fix memory leak in proxy handling
+      - [PATCH 2883220]: Fix compilation problems when ifXTable is not included
+      - [PATCH 2887816]: Protect against division-by-zero crash
+      - [PATCH 2901029]: Fix compiler warning on CloseHandle()
+      - [PATCH 2903092]: Fix broken handling of broadcast entries.
+      - [PATCH 2904900]: Documentation plus assorted handler code fixes
+      - [PATCH 2911323]: Fix agent lockup when monitoring AgentX-delegated information
+      - [PATCH 2911361]: Remove redundant variables
+      - [PATCH 2911970]: Properly terminate linked list of registrations
+      - [PATCH 2967400]: Retrieve error counters for the EtherLike-MIB
+      - [PATCH 2968642]: Catch overflow of pass-through command buffer
+      - [PATCH 3044512]: Fix sysobjectid directive
+      - [PATCH 3053428]: Fix get_pid_from_inode when the inode is not found
+      - [PATCH 3053436]: Fix tcpConnectionTable_data_access invalid memory access
+      - [PATCH 3058140]: Check that inode is non-zero
+      - [PATCH 3062526]: Fix security engineID setting in 'trapsess' directive
+      - [PATCH 3074918]: Avoid memory leaks following CONTAINER_INSERT failures
+      - [PATCH 3096725]: Don't register v1Trap callback, if SNMPv1 not supported
+      - [PATCH 3096725]: Include SNMPv1 trap OIDs in nlmLogNotificationID column
+
+      - Add newly created/destroyed interfaces to ipv6IfTable
+      - Don't let MIB modules second-guess the cache handler
+      - Fix engineID generation on outgoing v3 traps from the agent
+      - Fix invalid access to memory in TCP-MIB
+      - Fix IP-MIB::ipIfStatsReasmReqds value (typo)
+      - Fix IPv6 forwarding MIB object (boolean, not TruthValue)
+      - Fix rare race condition when reading RPM database
+      - Fix various memory & file-descriptor leaks
+      - Handle I/Fs without broadcast addresses (IF/IP-MIBs)
+      - Improve agent shutdown processing
+      - Improve error logging when freeing active caches
+      - Make sure that a mask is given to open when O_CREAT is specified
+      - Report GFS filesystems in hrStorageTable and hrFSTable
+      - Report real ifSpeed of (down) network interface (where possible)
+      - Support N/W interfaces with HW address >6 bytes (e.g. InfiniBand)
+        in ipNetToMediaTable and ipNetToPhysicalTable.
+      - Support views with indexes values>255
+      - Suppress 32-bit truncation warnings (IP-MIB & TCP-MIB)
+      - Suppress missing iquerySecName warning if it won't be needed
+
+    snmpdx:
+      - changed default TCP target from 0.0.0.0:705 to localhost:705
+
+    snmptrapd:
+      - Fixed assorted double free at exit problems
+
+    snmptable:
+      - [BUG 2837998]: Handle missing instance subidentifiers in results
+      - [PATCH 2850067]: Suppress extraneous "index" header token
+
+    snmptranslate:
+      - fixed printing of ranges with UNSIGNED type.
+
+    snmpusm:
+      - Correct ifdefs, remove dead variables.
+
+    snmpwalk:
+      - Fix handling of end OID being longer than the starting OID
+
+    build:
+      - [BUG 3102904]: Build with -fno-strict-aliasing (if supported)
+      - Add detection of lm_sensors version
+      - Avoid use of "tail -1" (non POSIX-compliant)
+      - Do not call VACM APIs if VACM module is not included
+      - Fix compilation with rpm-4.6 (using legacy API)
+      - Fix 'make test TESTOPTS="-P tcp"'
+      - Fix order of rpmlib detection and agent module configuration
+      - Run rpm configure checks for (rpm-based) hr_swinst rewrite
+      - Use a sensible default for system location (if no domain name found)
+
+    man:
+      - [BUG 2972860]: Update broken references
+      - Clean up manual pages (from Debian patch 56_manpage)
+
+    mib2c:
+      - [BUG 2888569]: Fix generation of table columns array
+      - Remove unnecessary casts to u_char*
+
+    mibs:
+      - [BUG 2973890]: Fix imports, DiskIOEntry list and revision histories
+      - [PATCH 2974716]: Fix issues in the SMUX-MIB
+
+    misc:
+      - [PATCH 2836112]: Use the right modifier for size_t/ssize_t variables
+      - [PATCH 2952034]: Return of the Great SuSE 'sprintf' Hunt... 
+
+    perl:
+      - [PATCH 2890931]: Better handling of Counter64 values
+      - [PATCH 2995098]: Fix creation of SNMPv3 sessions with API_SINGLE
+      - [PATCH 3046371]: Fix memory leak in SNMPv1 trap handling
+      - [PATCH 3049029]: Fix memory leak with snmp bulkwalks
+      - Fix various other memory leaks, out-of-bounds array access
+            and uninitialized variable access issues
+      - Fix several "Free to wrong pool" errors
+
+    python:
+      - [BUG 2919379]: Initialise SNMP sessions properly
+      - [BUG 3088360]: Ensure python modules are built against the correct libraries
+      - [PATCH 2001656]: Handle null-termination of string values properly.
+      - [PATCH 3035328]: Detect failures in session creation
+      - [PATCH 3035578]: Update error codes
+      - Support null-bytes in octet strings
+
+    test:
+      - [PATCH 2952020]: Explicitly set permission on output directories
+      - Support dynamic analysis of regression tests
+      - Fix tests (T030) for MinGW
+
+    Cygwin:
+      - [BUG 2997492]: byte order of udpLocalPort is now correct
+      - Enabled Unix transport
+      - Fix building with IPv6, OpenSSL & embedded Perl support
+      - Fix building with remotely mounted source files
+      - Fix free UDP port detection in regression tests
+      - Fix out-of-range array access in 'interfaces' table
+      - Omit inet_ntop.c and inet_pton.c
+      - Removed winpipe.c from the list of source files
+
+    HP-UX:
+      - fix build error on HP-UX 10.20
+
+    Linux:
+      - [BUG 2985915]: Fix build without embedded Perl
+      - [PATCH 2926374]: Fix reading of ipAddressTable from /proc/net/if_inet6
+      - [PATCH 2959811]: Reimplement Netlink IPv6 prefix listener
+      - [PATCH 3083027]: Fix RPM spec file to support CentOS
+      - [PATCH 3107003]: Suppress ipNetToPhysicalTable error messages
+                         for tunnel and similar (non-physical) interfaces
+      - Fix calculation of ifHCInUcastPkts on 32-bit Linux
+      - Fix udpTable indexes on big-endian 64bit Linux
+      - Fix value of IP-MIB::ipv6InterfaceForwarding
+      - Improved EtherLike-MIB support 
+      - Pass correct path to rpmdbOpen, and log errors
+      - snmpd is again single-threaded.
+
+    Solaris:
+      - Fix crash triggered by missing package version information 
+
+    Windows:
+      - [BUG 2969872]: Ensure SOCK_STARTUP is invoked before init_agent
+      - [BUG 2971257]: Fixed winExtDLL handling of multi-varbind getNext
+	               requests with OIDs in reverse lexicographical order
+      - Avoid test failure (T200) on known MS SNMP extension DLL bugs
+      - Fix and improve batch build using recent versions of Visual Studio
+      - Fix build under MinGW
+      - Fix build with 64-bit compiler
+      - Fix building with IPv6 and OpenSSL support
+      - Fix handling of strtoull (both MSVC 6.0, and 2002 & above)
+      - Fix handling of winExtDLL multi-varbind SET requests
+      - Fix MIB output truncation with winExtDLL GETNEXT requests
+      - Fix out-of-range array access in 'interfaces' table
+      - Halt agent on key press, when run in command prompt window (to aid debugging)
+      - Improve Net-SNMP DLL build
+      - Improve support for winExtDLL build
+      - Suppress/remove various compilation warnings
+      - winExtDLL: Don't trigger an assertion if no extension DLLs loaded
+      - winExtDLL: Improve RFC-compliance of response error codes 
+      - winExtDLL: Log the reason why loading an extension DLL fails
+      - winExtDLL: Fix a memory leak when SnmpExtensionQuery(Ex) fails
+
 *5.5*
 
     snmplib:
