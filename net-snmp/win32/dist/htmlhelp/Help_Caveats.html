@@ -1,0 +1,111 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+  <meta content="text/html; charset=ISO-8859-1"
+ http-equiv="content-type">
+  <title>Help Caveats</title>
+</head>
+<body>
+<h1>Help Caveats</h1>
+<br>
+There are a few anomalies in the help files for Net-SNMP that deserve
+your attention.<br>
+<h2>1. Volunteers are welcomed</h2>
+Please understand that this is a volunteer effort.  Suggestions
+are welcomed.  Offers to contribute are encouraged.<br>
+<br>
+<h2>2. Documentation format is mostly fixed width<br>
+</h2>
+The documentation is set for fixed width text. Changing this would be
+time consuming and would have to be re-done for each release if the
+original man pages change.&nbsp; See the note on offers to contribute.<br>
+<br>
+<h2>3. Conventions may be different from what you are used to</h2>
+The Net-SNMP project is subject to conventions that may conflict with
+what you may have been comfortably using.&nbsp; If you are not aware of
+these conventions, there will be hours of entertainment in store for
+you.&nbsp; Please know that the Net-SNMP coders are sympathetic to
+different conventions, but as conventions go, these are not too
+distasteful.<br>
+<br>
+CLI = MS-DOS command line interpreter.&nbsp; When you open a command
+prompt window, you are using the CLI.<br>
+<br>
+SH = UNIX command shell.&nbsp; May be sh, bash, ksh, csh, all are
+variations on the UNIX command shell.<br>
+<ol style="list-style-type: lower-alpha;">
+  <li>If you use .BAT files, follow the MS-DOS conventions.</li>
+  <li>If you use GNU shell, follow the UNIX conventions.</li>
+  <li>If you don't know what you are using, follow the MS-DOS
+conventions.</li>
+</ol>
+<h3>3.1&nbsp; Environment variables</h3>
+MS-DOS convention used in CLI as would be used in a batch file:<br>
+<ol style="list-style-type: lower-alpha; font-family: monospace;">
+  <li>create&nbsp;&nbsp;&nbsp;&nbsp; :&nbsp;&nbsp;&nbsp;&nbsp; set
+MYVAR=myvalue</li>
+  <li>use&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+:&nbsp;&nbsp;&nbsp;&nbsp; %MYVAR%</li>
+  <li>view&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+:&nbsp;&nbsp;&nbsp;&nbsp; echo %MYVAR%</li>
+  <li>destroy&nbsp;&nbsp;&nbsp; :&nbsp;&nbsp;&nbsp;&nbsp; set MYVAR=</li>
+  <li>%MYVAR% and %MyVar% are the same</li>
+  <li>values with embedded spaces must be bracketed using double quotes.</li>
+</ol>
+UNIX convention used in SH as would be used in a shell script:<br>
+<ol style="list-style-type: lower-alpha; font-family: monospace;">
+  <li>create&nbsp;&nbsp;&nbsp;&nbsp; :&nbsp;&nbsp;&nbsp;&nbsp;
+MYVAR=myvalue ; export MYVAR</li>
+  <li>use&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+:&nbsp;&nbsp;&nbsp;&nbsp; $MYVAR</li>
+  <li>view&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+:&nbsp;&nbsp;&nbsp;&nbsp; echo $MYVAR</li>
+  <li>destroy&nbsp;&nbsp;&nbsp; :&nbsp;&nbsp;&nbsp;&nbsp; unset MYVAR</li>
+  <li>$MYVAR and $MyVar are _not_ the same!</li>
+  <li>values with embedded spaces must be bracketed using double quotes.</li>
+</ol>
+<h3>3.2&nbsp; Pathname specifiers</h3>
+MS-DOS convention used in CLI as would be used in a batch file:<br>
+<ol style="list-style-type: lower-alpha;">
+  <li>volume names (drive letters) [A-Z] followed by colon ":" are
+acceptable.</li>
+  <li>Directory segments are separated using the backslash "\"</li>
+  <li>UNC components of pathnames may work</li>
+</ol>
+UNIX convention used in SH as would be used in a shell script or in a
+configuration file:<br>
+<ol style="list-style-type: lower-alpha;">
+  <li>volume names [A-Z] followed by colon ":" are acceptable.</li>
+  <li>Directory segments are separated using the slash "/"</li>
+  <li>UNC components of pathnames do _not_ work!</li>
+</ol>
+<span style="font-weight: bold;">Note:&nbsp; All paths contained in
+configuration files must use forward slashes (Unix convention), NOT
+back slashes.</span><br>
+<h3>3.3&nbsp; List delimiters</h3>
+MS-DOS convention used in CLI as would be used in a batch file:<br>
+<ol style="list-style-type: lower-alpha;">
+  <li>Elements are separated using the semi-colon ";".</li>
+  <li>The last element must not be empty [list does not end with ";"].</li>
+</ol>
+<br>
+The UNIX convention is not listed, because the Net-SNMP project, when
+it is built on Windows platforms, honors the MS-DOS convention for
+lists.<br>
+<br>
+<h2>4. Pathnames are different than they appear to be</h2>
+The manual pages were written over a period of years and for systems
+that were primarily UNIX-based.&nbsp; The pathnames are not absolutely
+the same as what you see in the documentation.<br>
+<br>
+You can pretty much see that many paths start with "/usr/local".&nbsp;
+For this platform, most of the time, you can substitute the instllation
+folder of Net-SNMP for "/usr/local".&nbsp; For example, c:\usr or
+c:\Program Files\Net-SNMP.<br>
+<br>
+<h2>5. Configuration Files</h2>
+All the configuration files follow the UNIX conventions for pathnames
+and the MS-DOS convention for list delimiters.<br>
+<br>
+</body>
+</html>
