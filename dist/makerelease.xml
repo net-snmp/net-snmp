@@ -42,6 +42,12 @@
     	          $self->{'parameters'}{'VERSION'};
 	      $self->{'parameters'}{'VERSIONDASHES'} =~ s/\./-/g;
 
+	      # target version number (without preN/rcN)
+	      $self->{'parameters'}{'VERSIONTARGET'} =
+    	          $self->{'parameters'}{'VERSION'};
+	      $self->{'parameters'}{'VERSIONTARGET'} =~ s/\.pre.*//;
+	      $self->{'parameters'}{'VERSIONTARGET'} =~ s/\.rc.*//;
+
 	      # version in floating point form for perl modules
               my ($major, $minor, $patch, $opps) =
 	          ($self->{'parameters'}{'VERSION'} =~
@@ -502,29 +508,31 @@
 	<step pause="true" type="system" stepname="publish:rsync"
 	  title="rsync the new files">
 	  <text>This will copy the results to the SF uploads directory
-	    in your account on frs.sourceforge.net.  Do something like:</text>
+	    in your account on frs.sourceforge.net.  The following command
+	    is just as an example - this script does *not* upload the
+	    files automatically.  You must do something like:</text>
 	  <commands>
-	    <command>echo rsync -v net-snmp-{VERSION}.tar.gz net-snmp-{VERSION}.tar.gz.asc net-snmp-{VERSION}.zip net-snmp-{VERSION}.zip.asc hardaker,net-snmp@frs.sourceforge.net:/home/frs/project/n/ne/net-snmp/net-snmp/'{VERSION} pre-releases'/</command>
+	    <command>echo rsync -v net-snmp-{VERSION}.tar.gz net-snmp-{VERSION}.tar.gz.asc net-snmp-{VERSION}.zip net-snmp-{VERSION}.zip.asc hardaker,net-snmp@frs.sourceforge.net:/home/frs/project/n/ne/net-snmp/net-snmp/{VERSIONTARGET}-pre-releases/</command>
 	  </commands>
 	</step>
 	<step type="informational" stepname="publish:editrelease"
 	title="Update the SF release web page">
-      <text>
-        Update the project download web page (http://www.net-snmp.org/download.html) to mention this new release
-      </text>
+	  <text>
+	    Update the project download web page (http://www.net-snmp.org/download.html) to mention this new release
+	  </text>
 <!-- Doesn't work
 	  <commands>
 	    <command>firefox 'http://sourceforge.net/project/admin/editpackages.php?group_id=12694'</command>
 	  </commands>
-  -->
+ -->
 	</step>
 	<step type="system" stepname="publish:editpatches"
 	title="Update the SF Official Patch tracker">
-      <text>
-        If this the final version of this release, then:
-	Any official patches for the previous release should be re-prioritised to level 5.
-	Any official patches for the earlier releases should be re-prioritised to level 1 and closed.
-      </text>
+	  <text>
+	    If this the final version of this release, then:
+	    Any official patches for the previous release should be re-prioritised to level 5.
+	    Any official patches for the earlier releases should be re-prioritised to level 1 and closed.
+	  </text>
 	  <commands>
 	    <command>firefox 'http://www.net-snmp.org/official_patches/'</command>
 	  </commands>
