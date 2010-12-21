@@ -141,6 +141,12 @@ listing of all changes made to the code.
 	Reimplement Linux Netlink IPv6 prefix listener.
       - use cache-unique id instead of handler name for shared cache reload
 	protection
+      - Patch from Claus Klein to fix engineid generation on outgoing v3
+	traps from the agent
+      - add newly created/destroyed interfaces to ipv6IfTable	The list of
+	interfaces was never refreshed, now it is reloaded every time the
+	table is accessed. I've also fixed a memory leak and optimized the
+	loading of the list a bit.
 
     snmptrapd:
       - Fixed a double free at exit that was triggered by cleaning up the
