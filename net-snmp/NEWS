@@ -3,12 +3,9 @@ Please see the CHANGES file for a more detailed list of specific bugs/patches
 that have been fixed/applied, and the ChangeLog file for a comprehensive
 listing of all changes made to the code.
 
-*5.7*
+*5.6.1*
     General:
-      - Many Bug Fixes
-
-    Linux:
-      - snmpd is again single-threaded.
+      - Many Bug Fixes (see the CHANGES and ChangeLog files for full details)
 
 *5.6*
 
