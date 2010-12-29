@@ -199,10 +199,10 @@ vacm_parse_config_view(const char *token, char *line)
     vptr->viewStatus = view.viewStatus;
     vptr->viewStorageType = view.viewStorageType;
     vptr->viewType = view.viewType;
-    viewMask = (u_char *) vptr->viewMask;
+    viewMask = vptr->viewMask;
+    vptr->viewMaskLen = sizeof(vptr->viewMask);
     line =
-        read_config_read_octet_string(line, (u_char **) & viewMask,
-                                      &vptr->viewMaskLen);
+        read_config_read_octet_string(line, &viewMask, &vptr->viewMaskLen);
 }
 
 /*
