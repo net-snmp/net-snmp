@@ -7,6 +7,11 @@ listing of all changes made to the code.
     General:
       - Many Bug Fixes (see the CHANGES and ChangeLog files for full details)
 
+    snmpd:
+      - 0 Patch 3141462: from fenner: fix agentx subagent issues with
+	multiple-object requests
+      - Patch from Niels to fix VACM persistant storage.
+
 *5.6*
 
     all:
