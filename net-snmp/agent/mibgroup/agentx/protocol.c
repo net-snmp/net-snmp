@@ -1779,11 +1779,11 @@ agentx_parse(netsnmp_session * session, netsnmp_pdu *pdu, u_char * data,
                                       (u_char *) end_oid_buf,
                                       end_oid_buf_len);
             }
+            oid_buf_len = MAX_OID_LEN;
+            end_oid_buf_len = MAX_OID_LEN;
         }
 
         DEBUGINDENTLESS();
-        oid_buf_len = MAX_OID_LEN;
-        end_oid_buf_len = MAX_OID_LEN;
         break;
 
 
