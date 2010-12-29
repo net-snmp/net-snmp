@@ -66,6 +66,9 @@ listing of all changes made to the code.
 	handler was non-NULL.
 
     snmpd:
+      - Patch 3141462: from fenner: fix agentx subagent issues with
+	multiple-object requests
+      - Patch from Niels to fix VACM persistant storage.
       - Added snmp_sess_session_lookup(). Call shutdown_master_agent() and
 	shutdown_agent() during shutdown.
       - Added snmp_sess_session_lookup(). Call shutdown_master_agent() and
