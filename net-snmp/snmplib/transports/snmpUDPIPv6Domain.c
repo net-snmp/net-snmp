@@ -212,7 +212,7 @@ netsnmp_udp6_transport(struct sockaddr_in6 *addr, int local)
 
     if (local) {
         /*
-         * This session is inteneded as a server, so we must bind on to the
+         * This session is intended as a server, so we must bind on to the
          * given IP address, which may include an interface address, or could
          * be INADDR_ANY, but certainly includes a port number.
          */

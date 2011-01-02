@@ -105,9 +105,9 @@ It contains partial support for SNMPv3/SSH as well but has not been as
 extensively tested.  It also contains code for support for an
 experimental Kerberos based SNMPv3 that never got standardized.
 .PP
-Hopeful more SNMP software and devices will eventually support SNMP
+Hopefully more SNMP software and devices will eventually support SNMP
 over (D)TLS or SSH, but it is likely that devices with original
-support for SNMP will only contain support for SNMP over USM.  If your
+support for SNMP will only contain support for USM users.  If your
 network manager supports SNMP over (D)TLS or SNMP over SSH we suggest
 you use one of these mechanisms instead of using USM, but as always
 with Net-SNMP we give you the options to pick from so you can make the
