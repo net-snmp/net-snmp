@@ -729,8 +729,6 @@ netsnmp_tlstcp_open(netsnmp_transport *t)
             snmp_increment_statistic(STAT_TLSTM_SNMPTLSTMSESSIONOPENERRORS);
             snmp_log(LOG_ERR, "tlstcp: failed to create bio\n");
             _openssl_log_error(rc, NULL, "BIO creation");
-            SNMP_FREE(tlsdata);
-            SNMP_FREE(t);
             return NULL;
         }
             
@@ -742,8 +740,6 @@ netsnmp_tlstcp_open(netsnmp_transport *t)
 		     tlsdata->addr_string);
             _openssl_log_error(rc, NULL, "BIO_do_connect");
             BIO_free(bio);
-            SNMP_FREE(tlsdata);
-            SNMP_FREE(t);
             return NULL;
         }
 
@@ -753,8 +749,6 @@ netsnmp_tlstcp_open(netsnmp_transport *t)
             snmp_increment_statistic(STAT_TLSTM_SNMPTLSTMSESSIONOPENERRORS);
             snmp_log(LOG_ERR, "tlstcp: failed to create a SSL connection\n");
             BIO_free(bio);
-            SNMP_FREE(tlsdata);
-            SNMP_FREE(t);
             return NULL;
         }
         
@@ -768,8 +762,6 @@ netsnmp_tlstcp_open(netsnmp_transport *t)
             snmp_log(LOG_ERR, "tlstcp: failed to create a SSL connection\n");
             SSL_shutdown(ssl);
             BIO_free(bio);
-            SNMP_FREE(tlsdata);
-            SNMP_FREE(t);
             return NULL;
         }
 
@@ -780,8 +772,6 @@ netsnmp_tlstcp_open(netsnmp_transport *t)
             snmp_increment_statistic(STAT_TLSTM_SNMPTLSTMSESSIONOPENERRORS);
             snmp_log(LOG_ERR, "tlstcp: failed to ssl_connect\n");
             BIO_free(bio);
-            SNMP_FREE(tlsdata);
-            SNMP_FREE(t);
             return NULL;
         }
 
@@ -836,8 +826,6 @@ netsnmp_tlstcp_open(netsnmp_transport *t)
             snmp_log(LOG_ERR, "tlstcp: failed to verify ssl certificate\n");
             SSL_shutdown(ssl);
             BIO_free(bio);
-            SNMP_FREE(tlsdata);
-            SNMP_FREE(t);
             return NULL;
         }
 
@@ -884,8 +872,6 @@ netsnmp_tlstcp_open(netsnmp_transport *t)
         t->local = (void *) strdup(tlsdata->addr_string);
         t->local_length = strlen(tlsdata->addr_string)+1;
         if (NULL == tlsdata->accept_bio) {
-            SNMP_FREE(t);
-            SNMP_FREE(tlsdata);
             snmp_log(LOG_ERR, "TLSTCP: Falied to create a accept BIO\n");
             return NULL;
         }
@@ -893,8 +879,6 @@ netsnmp_tlstcp_open(netsnmp_transport *t)
         /* openssl requires an initial accept to bind() the socket */
         if (BIO_do_accept(tlsdata->accept_bio) <= 0) {
 	    _openssl_log_error(rc, tlsdata->ssl, "BIO_do__accept");
-            SNMP_FREE(t);
-            SNMP_FREE(tlsdata);
             snmp_log(LOG_ERR, "TLSTCP: Falied to do first accept on the TLS accept BIO\n");
             return NULL;
         }
