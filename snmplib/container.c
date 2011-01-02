@@ -286,8 +286,6 @@ netsnmp_container_add_index(netsnmp_container *primary,
     new_index->prev = curr;
 }
 
-#ifndef NETSNMP_USE_INLINE /* default is to inline */
-
 /*------------------------------------------------------------------
  * These functions should EXACTLY match the inline version in
  * container.h. If you change one, change them both.
@@ -446,7 +444,6 @@ netsnmp_container *SUBCONTAINER_FIND(netsnmp_container *x,
     }
     return x;
 }
-#endif
 
 
 /*------------------------------------------------------------------
