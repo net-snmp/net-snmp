@@ -1487,12 +1487,12 @@ netsnmp_create_session_tunneled(PyObject *self, PyObject *args)
 
   if (our_identity && our_identity[0] != '\0')
       CONTAINER_INSERT(session.transport_configuration,
-                       netsnmp_transport_create_config("our_identity",
+                       netsnmp_transport_create_config("localCert",
                                                        our_identity));
 
   if (their_identity && their_identity[0] != '\0')
       CONTAINER_INSERT(session.transport_configuration,
-                       netsnmp_transport_create_config("their_identity",
+                       netsnmp_transport_create_config("peerCert",
                                                        their_identity));
 
   if (their_hostname && their_hostname[0] != '\0')

@@ -612,24 +612,28 @@ netsnmp_tlsbase_config(struct netsnmp_transport_s *t, const char *token, const c
 
     tlsdata = t->data;
 
-    if (strcmp(token, "our_identity") == 0) {
+    if ((strcmp(token, "localCert") == 0) ||
+        (strcmp(token, "our_identity") == 0)) {
         SNMP_FREE(tlsdata->our_identity);
         tlsdata->our_identity = strdup(value);
         DEBUGMSGT(("tls:config","our identity %s\n", value));
     }
 
-    if (strcmp(token, "their_identity") == 0) {
+    if ((strcmp(token, "peerCert") == 0) ||
+        (strcmp(token, "their_identity") == 0)) {
         SNMP_FREE(tlsdata->their_identity);
         tlsdata->their_identity = strdup(value);
         DEBUGMSGT(("tls:config","their identity %s\n", value));
     }
 
-    if (strcmp(token, "their_hostname") == 0) {
+    if ((strcmp(token, "peerHostname") == 0) ||
+        (strcmp(token, "their_hostname") == 0)) {
         SNMP_FREE(tlsdata->their_hostname);
         tlsdata->their_hostname = strdup(value);
     }
 
-    if (strcmp(token, "trust_cert") == 0) {
+    if ((strcmp(token, "trust_cert") == 0) ||
+        (strcmp(token, "trustCert") == 0)) {
         SNMP_FREE(tlsdata->trust_cert);
         tlsdata->trust_cert = strdup(value);
     }
