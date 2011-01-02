@@ -158,6 +158,8 @@ extern          "C" {
 #define NETSNMP_DS_LIB_HOSTNAME          27
 #define NETSNMP_DS_LIB_X509_CRL_FILE     28
 #define NETSNMP_DS_LIB_TLS_ALGORITMS     29
+#define NETSNMP_DS_LIB_TLS_LOCAL_CERT    30
+#define NETSNMP_DS_LIB_TLS_PEER_CERT     31
 
     /*
      * end storage definitions 

@@ -1714,7 +1714,6 @@ netsnmp_cert *
 netsnmp_cert_find(int what, int where, void *hint)
 {
     netsnmp_cert *result = NULL;
-    int           tmp;
     char         *fp, *hint_str;
 
     DEBUGMSGT(("cert:find:params", "looking for %s(%d) in %s(0x%x), hint %lu\n",
@@ -1724,13 +1723,20 @@ netsnmp_cert_find(int what, int where, void *hint)
             
         switch (what) {
             case NS_CERT_IDENTITY: /* want my ID */
-                tmp = (ptrdiff_t)hint;
-                DEBUGMSGT(("cert:find:params", " hint = %s\n",
-                           tmp ? "server" : "client"));
                 fp =
                     netsnmp_ds_get_string(NETSNMP_DS_LIBRARY_ID,
-                                          tmp ? NETSNMP_DS_LIB_X509_SERVER_PUB :
-                                          NETSNMP_DS_LIB_X509_CLIENT_PUB );
+                                          NETSNMP_DS_LIB_TLS_LOCAL_CERT);
+                /** temp backwards compability; remove in 5.7 */
+                if (!fp) {
+                    int           tmp;
+                    tmp = (ptrdiff_t)hint;
+                    DEBUGMSGT(("cert:find:params", " hint = %s\n",
+                               tmp ? "server" : "client"));
+                    fp =
+                        netsnmp_ds_get_string(NETSNMP_DS_LIBRARY_ID, tmp ?
+                                              NETSNMP_DS_LIB_X509_SERVER_PUB :
+                                              NETSNMP_DS_LIB_X509_CLIENT_PUB );
+                }
                 if (!fp) {
                     /* As a special case, use the application type to
                        determine a file name to pull the default identity
@@ -1740,7 +1746,11 @@ netsnmp_cert_find(int what, int where, void *hint)
                 break;
             case NS_CERT_REMOTE_PEER:
                 fp = netsnmp_ds_get_string(NETSNMP_DS_LIBRARY_ID,
-                                           NETSNMP_DS_LIB_X509_SERVER_PUB);
+                                           NETSNMP_DS_LIB_TLS_PEER_CERT);
+                /** temp backwards compability; remove in 5.7 */
+                if (!fp)
+                    fp = netsnmp_ds_get_string(NETSNMP_DS_LIBRARY_ID,
+                                               NETSNMP_DS_LIB_X509_SERVER_PUB);
                 break;
             default:
                 DEBUGMSGT(("cert:find:err", "unhandled type %d for %s(%d)\n",

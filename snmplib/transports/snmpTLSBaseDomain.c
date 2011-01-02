@@ -144,26 +144,26 @@ _netsnmp_tlsbase_verify_remote_fingerprint(X509 *remote_cert,
 
     if (!tlsdata->their_fingerprint && tlsdata->their_identity) {
         /* we have an identity; try and find it's fingerprint */
-        netsnmp_cert *their_cert;
-        their_cert =
+        netsnmp_cert *peer_cert;
+        peer_cert =
             netsnmp_cert_find(NS_CERT_REMOTE_PEER, NS_CERTKEY_MULTIPLE,
                               tlsdata->their_identity);
 
-        if (their_cert)
+        if (peer_cert)
             tlsdata->their_fingerprint =
-                netsnmp_openssl_cert_get_fingerprint(their_cert->ocert, -1);
+                netsnmp_openssl_cert_get_fingerprint(peer_cert->ocert, -1);
     }
 
     if (!tlsdata->their_fingerprint && try_default) {
         /* try for the default instead */
-        netsnmp_cert *their_cert;
-        their_cert =
+        netsnmp_cert *peer_cert;
+        peer_cert =
             netsnmp_cert_find(NS_CERT_REMOTE_PEER, NS_CERTKEY_DEFAULT,
                               NULL);
 
-        if (their_cert)
+        if (peer_cert)
             tlsdata->their_fingerprint =
-                netsnmp_openssl_cert_get_fingerprint(their_cert->ocert, -1);
+                netsnmp_openssl_cert_get_fingerprint(peer_cert->ocert, -1);
     }
     
     if (tlsdata->their_fingerprint) {
@@ -571,8 +571,7 @@ sslctx_server_setup(const SSL_METHOD *method) {
         LOGANDDIE("can't create a new context");
     }
 
-    id_cert = netsnmp_cert_find(NS_CERT_IDENTITY, NS_CERTKEY_DEFAULT,
-                                (void*)1);
+    id_cert = netsnmp_cert_find(NS_CERT_IDENTITY, NS_CERTKEY_DEFAULT, NULL);
     if (!id_cert)
         LOGANDDIE ("error finding server identity keys");
 
@@ -697,6 +696,58 @@ tls_get_verify_info_index() {
     return openssl_local_index;
 }
 
+static void _parse_client_cert(const char *tok, char *line)
+{
+    config_pwarn("clientCert is deprecated. Clients should use ourCert, servers should use theirCert");
+    if (*line == '"') {
+        char buf[SNMP_MAXBUF];
+        copy_nword(line, buf, sizeof(buf));
+        netsnmp_ds_set_string(NETSNMP_DS_LIBRARY_ID,
+                              NETSNMP_DS_LIB_X509_CLIENT_PUB, buf);
+    } else
+        netsnmp_ds_set_string(NETSNMP_DS_LIBRARY_ID,
+                              NETSNMP_DS_LIB_X509_CLIENT_PUB, line);
+}
+
+static void _parse_defX509ClientPub(const char *tok, char *line)
+{
+    config_pwarn("defX509ClientPub is deprecated. Clients should use ourCert, servers should use theirCert.");
+    if (*line == '"') {
+        char buf[SNMP_MAXBUF];
+        copy_nword(line, buf, sizeof(buf));
+        netsnmp_ds_set_string(NETSNMP_DS_LIBRARY_ID,
+                              NETSNMP_DS_LIB_X509_CLIENT_PUB, buf);
+    } else
+        netsnmp_ds_set_string(NETSNMP_DS_LIBRARY_ID,
+                              NETSNMP_DS_LIB_X509_CLIENT_PUB, line);
+}
+
+static void _parse_server_cert(const char *tok, char *line)
+{
+    config_pwarn("serverCert is deprecated. Clients should use theirCert, servers should use ourCert.");
+    if (*line == '"') {
+        char buf[SNMP_MAXBUF];
+        copy_nword(line, buf, sizeof(buf));
+        netsnmp_ds_set_string(NETSNMP_DS_LIBRARY_ID,
+                              NETSNMP_DS_LIB_X509_CLIENT_PUB, buf);
+    } else
+        netsnmp_ds_set_string(NETSNMP_DS_LIBRARY_ID,
+                              NETSNMP_DS_LIB_X509_SERVER_PUB, line);
+}
+
+static void _parse_defX509ServerPub(const char *tok, char *line)
+{
+    config_pwarn("defX509ServerPub is deprecated. Clients should use theirCert, servers should use ourCert.");
+    if (*line == '"') {
+        char buf[SNMP_MAXBUF];
+        copy_nword(line, buf, sizeof(buf));
+        netsnmp_ds_set_string(NETSNMP_DS_LIBRARY_ID,
+                              NETSNMP_DS_LIB_X509_CLIENT_PUB, buf);
+    } else
+        netsnmp_ds_set_string(NETSNMP_DS_LIBRARY_ID,
+                              NETSNMP_DS_LIB_X509_SERVER_PUB, line);
+}
+
 void
 netsnmp_tlsbase_ctor(void) {
 
@@ -723,26 +774,32 @@ netsnmp_tlsbase_ctor(void) {
      */
 
     /* the public client cert to authenticate with */
-    netsnmp_ds_register_config(ASN_OCTET_STR, "snmp", "clientCert",
-                               NETSNMP_DS_LIBRARY_ID,
-                               NETSNMP_DS_LIB_X509_CLIENT_PUB);
+    register_config_handler("snmp", "clientCert", _parse_client_cert, NULL,
+                            NULL);
     /* XXX: this one needs to go away before 5.6 final */
-    netsnmp_ds_register_config(ASN_OCTET_STR, "snmp", "defX509ClientPub",
-                               NETSNMP_DS_LIBRARY_ID,
-                               NETSNMP_DS_LIB_X509_CLIENT_PUB);
+    register_config_handler("snmp", "defX509ClientPub", _parse_client_cert,
+                            NULL, NULL);
 
     /*
      * for the server
      */
 
     /* The X509 server key to use */
-    netsnmp_ds_register_config(ASN_OCTET_STR, "snmp", "serverCert",
-                               NETSNMP_DS_LIBRARY_ID,
-                               NETSNMP_DS_LIB_X509_SERVER_PUB);
+    register_config_handler("snmp", "serverCert", _parse_server_cert, NULL,
+                            NULL);
     /* XXX: this one needs to go away before 5.6 final */
-    netsnmp_ds_register_config(ASN_OCTET_STR, "snmp", "defX509ServerPub",
+    register_config_handler("snmp", "defX509ServerPub", _parse_server_cert,
+                            NULL, NULL);
+    
+    /*
+     * remove cert config ambiguity: ourCert, theirCert
+     */
+    netsnmp_ds_register_config(ASN_OCTET_STR, "snmp", "localCert",
                                NETSNMP_DS_LIBRARY_ID,
-                               NETSNMP_DS_LIB_X509_SERVER_PUB);
+                               NETSNMP_DS_LIB_TLS_LOCAL_CERT);
+    netsnmp_ds_register_config(ASN_OCTET_STR, "snmp", "peerCert",
+                               NETSNMP_DS_LIBRARY_ID,
+                               NETSNMP_DS_LIB_TLS_PEER_CERT);
 
     /*
      * register our boot-strapping needs
