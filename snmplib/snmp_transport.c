@@ -96,9 +96,6 @@ size_t          netsnmpIPXDomain_len = OID_LENGTH(netsnmpIPXDomain);
 static void     netsnmp_tdomain_dump(void);
 
 
-/*
- * Make a deep copy of an netsnmp_transport.  
- */
 
 void
 init_snmp_transport(void)
@@ -109,6 +106,9 @@ init_snmp_transport(void)
                                NETSNMP_DS_LIB_DONT_LOAD_HOST_FILES);
 }
 
+/*
+ * Make a deep copy of an netsnmp_transport.  
+ */
 netsnmp_transport *
 netsnmp_transport_copy(netsnmp_transport *t)
 {
@@ -177,6 +177,7 @@ netsnmp_transport_copy(netsnmp_transport *t)
     n->f_fmtaddr = t->f_fmtaddr;
     n->sock = t->sock;
     n->flags = t->flags;
+    n->base_transport = netsnmp_transport_copy(t->base_transport);
 
     /* give the transport a chance to do "special things" */
     if (t->f_copy)
@@ -193,15 +194,11 @@ netsnmp_transport_free(netsnmp_transport *t)
     if (NULL == t)
         return;
 
-    if (t->local != NULL) {
-        SNMP_FREE(t->local);
-    }
-    if (t->remote != NULL) {
-        SNMP_FREE(t->remote);
-    }
-    if (t->data != NULL) {
-        SNMP_FREE(t->data);
-    }
+    SNMP_FREE(t->local);
+    SNMP_FREE(t->remote);
+    SNMP_FREE(t->data);
+    netsnmp_transport_free(t->base_transport);
+
     SNMP_FREE(t);
 }
 
@@ -226,6 +223,26 @@ netsnmp_transport_peer_string(netsnmp_transport *t, void *data, int len)
         str = strdup("<UNKNOWN>");
 
     return str;
+}
+
+int
+netsnmp_sockaddr_size(struct sockaddr *sa)
+{
+    if (NULL == sa)
+        return 0;
+
+    switch (sa->sa_family) {
+        case AF_INET:
+            return sizeof(struct sockaddr_in);
+        break;
+#ifdef NETSNMP_ENABLE_IPV6
+        case AF_INET6:
+            return sizeof(struct sockaddr_in6);
+            break;
+#endif
+    }
+
+    return 0;
 }
     
 int

@@ -146,7 +146,8 @@ netsnmp_udp6_send(netsnmp_transport *t, void *buf, int size,
         *olength == sizeof(struct sockaddr_in6)) {
         to = (struct sockaddr *) (*opaque);
     } else if (t != NULL && t->data != NULL &&
-               t->data_length == sizeof(struct sockaddr_in6)) {
+               ((t->data_length == sizeof(struct sockaddr_in6)) ||
+                (t->data_length == sizeof(netsnmp_indexed_addr_pair)))) {
         to = (struct sockaddr *) (t->data);
     }
 
@@ -251,14 +252,14 @@ netsnmp_udp6_transport(struct sockaddr_in6 *addr, int local)
          * transport-specific data pointer for later use by netsnmp_udp6_send.
          */
 
-        t->data = malloc(sizeof(struct sockaddr_in6));
+        t->data = malloc(sizeof(netsnmp_indexed_addr_pair));
         if (t->data == NULL) {
             netsnmp_socketbase_close(t);
             netsnmp_transport_free(t);
             return NULL;
         }
         memcpy(t->data, addr, sizeof(struct sockaddr_in6));
-        t->data_length = sizeof(struct sockaddr_in6);
+        t->data_length = sizeof(netsnmp_indexed_addr_pair);
         t->remote = (unsigned char*)malloc(18);
         if (t->remote == NULL) {
             netsnmp_socketbase_close(t);
