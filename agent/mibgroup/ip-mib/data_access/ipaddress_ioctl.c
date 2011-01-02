@@ -159,6 +159,14 @@ _netsnmp_ioctl_ipaddress_container_load_v4(netsnmp_container *container,
 
         DEBUGMSGTL(("access:ipaddress:container",
                     " interface %d, %s\n", i, ifrp->ifr_name));
+
+        if (AF_INET != ifrp->ifr_addr.sa_family) {
+            DEBUGMSGTL(("access:ipaddress:container",
+                        " skipping %s; non AF_INET family %d\n",
+                        ifrp->ifr_name, ifrp->ifr_addr.sa_family));
+            continue;
+        }
+
         /*
          */
         entry = netsnmp_access_ipaddress_entry_create();
@@ -183,7 +191,6 @@ _netsnmp_ioctl_ipaddress_container_load_v4(netsnmp_container *container,
         /*
          * set indexes
          */
-        netsnmp_assert(AF_INET == ifrp->ifr_addr.sa_family);
         si = (struct sockaddr_in *) &ifrp->ifr_addr;
         entry->ia_address_len = sizeof(si->sin_addr.s_addr);
         ipval = si->sin_addr.s_addr;
