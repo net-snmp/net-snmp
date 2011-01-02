@@ -174,7 +174,7 @@ netsnmp_udpbase_send(netsnmp_transport *t, void *buf, int size,
 	while (rc < 0) {
 #if defined(linux) && defined(IP_PKTINFO)
             rc = netsnmp_udp_sendto(t->sock,
-                    addr_pair ? &(addr_pair->local_addr.sin_addr) : NULL,
+                    addr_pair ? &(addr_pair->local_addr.sin.sin_addr) : NULL,
                     addr_pair ? addr_pair->if_index : 0, to, buf, size);
 #else
             rc = sendto(t->sock, buf, size, 0, to, sizeof(struct sockaddr));

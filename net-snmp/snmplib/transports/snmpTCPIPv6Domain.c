@@ -158,13 +158,13 @@ netsnmp_tcp6_transport(struct sockaddr_in6 *addr, int local)
 
     memset(t, 0, sizeof(netsnmp_transport));
 
-    t->data = malloc(sizeof(struct sockaddr_in6));
+    t->data = malloc(sizeof(netsnmp_indexed_addr_pair));
     if (t->data == NULL) {
         netsnmp_transport_free(t);
         return NULL;
     }
-    t->data_length = sizeof(struct sockaddr_in6);
-    memcpy(t->data, addr, sizeof(struct sockaddr_in6));
+    t->data_length = sizeof(netsnmp_indexed_addr_pair);
+    memcpy(t->data, addr, sizeof(netsnmp_indexed_addr_pair));
 
     t->domain = netsnmp_TCPIPv6Domain;
     t->domain_length = sizeof(netsnmp_TCPIPv6Domain) / sizeof(oid);

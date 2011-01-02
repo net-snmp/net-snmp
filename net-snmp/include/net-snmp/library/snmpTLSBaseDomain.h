@@ -42,13 +42,12 @@ extern          "C" {
        BIO                       *accepted_bio;
        char                      *securityName;
        char                      *addr_string;
-       struct sockaddr_in         addr;
+       netsnmp_indexed_addr_pair *addr;
        char                      *our_identity;
        char                      *their_identity;
        char                      *their_fingerprint;
        char                      *their_hostname;
        char                      *trust_cert;
-       netsnmp_indexed_addr_pair *remote_addr;
     } _netsnmpTLSBaseData;
 
 #define VRFY_PARENT_WAS_OK 1
