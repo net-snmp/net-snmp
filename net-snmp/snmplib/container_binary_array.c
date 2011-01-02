@@ -231,9 +231,7 @@ void
 netsnmp_binary_array_release(netsnmp_container *c)
 {
     binary_array_table *t = (binary_array_table*)c->container_data;
-    if (t->data != NULL) {
-	SNMP_FREE(t->data);
-    }
+    SNMP_FREE(t->data);
     SNMP_FREE(t);
     SNMP_FREE(c);
 }

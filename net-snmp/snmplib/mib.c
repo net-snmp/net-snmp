@@ -2882,7 +2882,6 @@ shutdown_mib(void)
         if (tree_top->label)
             SNMP_FREE(tree_top->label);
         SNMP_FREE(tree_top);
-        tree_top = NULL;
     }
     tree_head = NULL;
     Mib = NULL;

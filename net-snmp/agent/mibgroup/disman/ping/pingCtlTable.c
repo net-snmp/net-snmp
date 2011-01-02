@@ -1285,7 +1285,6 @@ readloop(struct pingCtlTable_data *item, struct addrinfo *ai, int datalen,
         printf("receiver success!\n");
         if (current_probe_temp >= item->pingCtlProbeCount) {
             SNMP_FREE(sumrtt);
-            sumrtt = NULL;
             return;
         }
     }
@@ -1694,13 +1693,9 @@ run_ping(unsigned int clientreg, void *clientarg)
         readloop(item, ai, datalen, minrtt, maxrtt, averagertt, pid);
 
         SNMP_FREE(minrtt);
-        minrtt = NULL;
         SNMP_FREE(maxrtt);
-        maxrtt = NULL;
         SNMP_FREE(averagertt);
-        averagertt = NULL;
-        free(ai);
-        ai = NULL;
+        SNMP_FREE(ai);
     }
 
     else if (item->pingCtlTargetAddressType == 2) {
@@ -2083,7 +2078,6 @@ init_resultsTable(struct pingCtlTable_data *item)
         }
     }
     SNMP_FREE(ai);
-    ai = NULL;
 
 }
 
@@ -2347,7 +2341,6 @@ write_pingCtlTargetAddress(int action,
          * Back out any changes made in the ACTION case 
          */
         SNMP_FREE(StorageTmp->pingCtlTargetAddress);
-        StorageTmp->pingCtlTargetAddress = NULL;
         StorageTmp->pingCtlTargetAddress = tmpvar;
         StorageTmp->pingCtlTargetAddressLen = tmplen;
         break;
@@ -2827,7 +2820,6 @@ write_pingCtlDataFill(int action,
          * Back out any changes made in the ACTION case 
          */
         SNMP_FREE(StorageTmp->pingCtlDataFill);
-        StorageTmp->pingCtlDataFill = NULL;
         StorageTmp->pingCtlDataFill = tmpvar;
         StorageTmp->pingCtlDataFillLen = tmplen;
         break;
@@ -3190,7 +3182,6 @@ write_pingCtlTrapGeneration(int action,
          * Back out any changes made in the ACTION case 
          */
         SNMP_FREE(StorageTmp->pingCtlTrapGeneration);
-        StorageTmp->pingCtlTrapGeneration = NULL;
         StorageTmp->pingCtlTrapGeneration = tmpvar;
         StorageTmp->pingCtlTrapGenerationLen = tmplen;
         break;
@@ -3475,7 +3466,6 @@ write_pingCtlType(int action,
          * Back out any changes made in the ACTION case 
          */
         SNMP_FREE(StorageTmp->pingCtlType);
-        StorageTmp->pingCtlType = NULL;
         StorageTmp->pingCtlType = tmpvar;
         StorageTmp->pingCtlTypeLen = tmplen;
         break;
@@ -3573,7 +3563,6 @@ write_pingCtlDescr(int action,
          * Back out any changes made in the ACTION case 
          */
         SNMP_FREE(StorageTmp->pingCtlDescr);
-        StorageTmp->pingCtlDescr = NULL;
         StorageTmp->pingCtlDescr = tmpvar;
         StorageTmp->pingCtlDescrLen = tmplen;
         break;
@@ -3761,7 +3750,6 @@ write_pingCtlSourceAddress(int action,
          * Back out any changes made in the ACTION case 
          */
         SNMP_FREE(StorageTmp->pingCtlSourceAddress);
-        StorageTmp->pingCtlSourceAddress = NULL;
         StorageTmp->pingCtlSourceAddress = tmpvar;
         StorageTmp->pingCtlSourceAddressLen = tmplen;
         break;

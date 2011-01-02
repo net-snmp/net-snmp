@@ -319,8 +319,7 @@ sctpAssocRemAddrTable_entry_copy(sctpAssocRemAddrTable_entry * from,
 void
 sctpAssocRemAddrTable_entry_free(sctpAssocRemAddrTable_entry * entry)
 {
-    if (entry != NULL)
-        SNMP_FREE(entry);
+    SNMP_FREE(entry);
 }
 
 netsnmp_container *

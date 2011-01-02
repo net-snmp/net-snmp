@@ -273,8 +273,7 @@ sctpAssocLocalAddrTable_entry_copy(sctpAssocLocalAddrTable_entry * from,
 void
 sctpAssocLocalAddrTable_entry_free(sctpAssocLocalAddrTable_entry * entry)
 {
-    if (entry != NULL)
-        SNMP_FREE(entry);
+    SNMP_FREE(entry);
 }
 
 netsnmp_container *

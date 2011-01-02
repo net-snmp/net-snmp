@@ -253,8 +253,7 @@ sctpLookupRemPortTable_entry_copy(sctpLookupRemPortTable_entry * from,
 void
 sctpLookupRemPortTable_entry_free(sctpLookupRemPortTable_entry * entry)
 {
-    if (entry != NULL)
-        SNMP_FREE(entry);
+    SNMP_FREE(entry);
 }
 
 netsnmp_container *

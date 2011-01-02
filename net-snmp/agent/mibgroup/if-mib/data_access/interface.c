@@ -666,8 +666,7 @@ netsnmp_access_interface_entry_copy(netsnmp_interface_entry * lhs,
        (0 == strcmp(lhs->descr, rhs->descr)))
         ;
     else {
-        if (NULL != lhs->descr)
-            SNMP_FREE(lhs->descr);
+        SNMP_FREE(lhs->descr);
         if (rhs->descr) {
             lhs->descr = strdup(rhs->descr);
             if(NULL == lhs->descr)
@@ -695,8 +694,7 @@ netsnmp_access_interface_entry_copy(netsnmp_interface_entry * lhs,
         if(rhs->paddr_len)
             memcpy(lhs->paddr,rhs->paddr,rhs->paddr_len);
     } else {
-        if (NULL != lhs->paddr)
-            SNMP_FREE(lhs->paddr);
+        SNMP_FREE(lhs->paddr);
         if (rhs->paddr) {
             lhs->paddr = (char*)malloc(rhs->paddr_len);
             if(NULL == lhs->paddr)

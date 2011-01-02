@@ -747,7 +747,6 @@ write_usmUserAuthProtocol(int action,
         }
     } else if (action == COMMIT) {
         SNMP_FREE(optr);
-        optr = NULL;
     } else if (action == FREE || action == UNDO) {
         if ((uptr = usm_parse_user(name, name_len)) != NULL) {
             if (resetOnFail) {
@@ -890,7 +889,6 @@ write_usmUserAuthKeyChange(int action,
         uptr->authKeyLen = buflen;
     } else if (action == COMMIT) {
         SNMP_FREE(oldkey);
-        oldkey = NULL;
     } else if (action == UNDO) {
         if ((uptr = usm_parse_user(name, name_len)) != NULL && resetOnFail) {
             SNMP_FREE(uptr->authKey);
@@ -1015,7 +1013,6 @@ write_usmUserPrivProtocol(int action,
         }
     } else if (action == COMMIT) {
         SNMP_FREE(optr);
-        optr = NULL;
     } else if (action == FREE || action == UNDO) {
         if ((uptr = usm_parse_user(name, name_len)) != NULL) {
             if (resetOnFail) {
@@ -1140,7 +1137,6 @@ write_usmUserPrivKeyChange(int action,
         uptr->privKeyLen = buflen;
     } else if (action == COMMIT) {
         SNMP_FREE(oldkey);
-        oldkey = NULL;
     } else if (action == UNDO) {
         if ((uptr = usm_parse_user(name, name_len)) != NULL && resetOnFail) {
             SNMP_FREE(uptr->privKey);

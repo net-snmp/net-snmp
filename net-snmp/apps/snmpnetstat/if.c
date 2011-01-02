@@ -278,7 +278,6 @@ intpr(int interval)
                  * XXX - Try to recover ?
                  */
                 SNMP_FREE( cur_if );
-                cur_if = NULL;
                 break;    /* not for now, no */
             }
             switch ( vp->name[ var->name_length-2 ] ) {
@@ -375,7 +374,6 @@ intpr(int interval)
          */
         if ( intrface && strcmp( cur_if->name, intrface ) != 0) {
             SNMP_FREE( cur_if );
-            cur_if = NULL;
         }
 
         /*

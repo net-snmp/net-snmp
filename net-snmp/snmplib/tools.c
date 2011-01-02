@@ -1032,8 +1032,7 @@ char *netsnmp_getenv(const char *name)
             NULL,               /* Just get the size */
             &key_value_size) == ERROR_SUCCESS) {
 
-        if (key_value)
-          SNMP_FREE(key_value);
+        SNMP_FREE(key_value);
 
         /* Allocate memory needed +1 to allow RegQueryValueExA to NULL terminate the
          * string data in registry is missing one (which is unlikely).
@@ -1074,8 +1073,7 @@ char *netsnmp_getenv(const char *name)
             NULL,               /* Just get the size */
             &key_value_size) == ERROR_SUCCESS) {
 
-        if (key_value)
-          SNMP_FREE(key_value);
+        SNMP_FREE(key_value);
 
         /* Allocate memory needed +1 to allow RegQueryValueExA to NULL terminate the
          * string data in registry is missing one (which is unlikely).

@@ -1716,8 +1716,6 @@ write_traceRouteCtlTargetAddress(int action,
          * Back out any changes made in the ACTION case 
          */
         SNMP_FREE(StorageTmp->traceRouteCtlTargetAddress);
-        StorageTmp->traceRouteCtlTargetAddress = NULL;
-
         StorageTmp->traceRouteCtlTargetAddress = tmpvar;
         StorageTmp->traceRouteCtlTargetAddressLen = tmplen;
         break;
@@ -2498,7 +2496,6 @@ write_traceRouteCtlSourceAddress(int action,
          * Back out any changes made in the ACTION case 
          */
         SNMP_FREE(StorageTmp->traceRouteCtlSourceAddress);
-        StorageTmp->traceRouteCtlSourceAddress = NULL;
         StorageTmp->traceRouteCtlSourceAddress = tmpvar;
         StorageTmp->traceRouteCtlSourceAddressLen = tmplen;
         break;
@@ -2681,7 +2678,6 @@ write_traceRouteCtlMiscOptions(int action,
          * Back out any changes made in the ACTION case 
          */
         SNMP_FREE(StorageTmp->traceRouteCtlMiscOptions);
-        StorageTmp->traceRouteCtlMiscOptions = NULL;
         StorageTmp->traceRouteCtlMiscOptions = tmpvar;
         StorageTmp->traceRouteCtlMiscOptionsLen = tmplen;
         break;
@@ -3338,7 +3334,6 @@ write_traceRouteCtlDescr(int action,
          * Back out any changes made in the ACTION case 
          */
         SNMP_FREE(StorageTmp->traceRouteCtlDescr);
-        StorageTmp->traceRouteCtlDescr = NULL;
         StorageTmp->traceRouteCtlDescr = tmpvar;
         StorageTmp->traceRouteCtlDescrLen = tmplen;
         break;
@@ -3522,7 +3517,6 @@ write_traceRouteCtlTrapGeneration(int action,
          * Back out any changes made in the ACTION case 
          */
         SNMP_FREE(StorageTmp->traceRouteCtlTrapGeneration);
-        StorageTmp->traceRouteCtlTrapGeneration = NULL;
         StorageTmp->traceRouteCtlTrapGeneration = tmpvar;
         StorageTmp->traceRouteCtlTrapGenerationLen = tmplen;
         break;
@@ -3699,7 +3693,6 @@ write_traceRouteCtlType(int action,
          * Back out any changes made in the ACTION case 
          */
         SNMP_FREE(StorageTmp->traceRouteCtlType);
-        StorageTmp->traceRouteCtlType = NULL;
         StorageTmp->traceRouteCtlType = tmpvar;
         StorageTmp->traceRouteCtlTypeLen = tmplen;
         break;

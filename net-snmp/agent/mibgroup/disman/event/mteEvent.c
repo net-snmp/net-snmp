@@ -208,8 +208,7 @@ mteEvent_removeEntry(netsnmp_tdata_row *row)
         return;                 /* Nothing to remove */
     entry = (struct mteEvent *)
         netsnmp_tdata_remove_and_delete_row(event_table_data, row);
-    if (entry)
-        SNMP_FREE(entry);
+    SNMP_FREE(entry);
 }
 
     /* ===================================================

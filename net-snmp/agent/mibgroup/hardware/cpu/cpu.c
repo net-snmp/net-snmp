@@ -107,8 +107,7 @@ netsnmp_cpu_info *netsnmp_cpu_get_byIdx(  int idx, int create ) {
             return cpu;
         }
     }
-    if (cpu)
-        SNMP_FREE(cpu); /* just in case */
+    SNMP_FREE(cpu); /* just in case */
     return NULL;  /* Shouldn't happen! */
 }
 

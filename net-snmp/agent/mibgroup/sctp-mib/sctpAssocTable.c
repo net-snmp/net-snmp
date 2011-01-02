@@ -507,8 +507,7 @@ sctpAssocTable_entry_copy(sctpAssocTable_entry * from,
 void
 sctpAssocTable_entry_free(sctpAssocTable_entry * entry)
 {
-    if (entry != NULL)
-        SNMP_FREE(entry);
+    SNMP_FREE(entry);
 }
 
 netsnmp_container *

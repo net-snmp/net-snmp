@@ -263,8 +263,7 @@ void
 sctpLookupRemHostNameTable_entry_free(sctpLookupRemHostNameTable_entry *
                                       entry)
 {
-    if (entry != NULL)
-        SNMP_FREE(entry);
+    SNMP_FREE(entry);
 }
 
 netsnmp_container *

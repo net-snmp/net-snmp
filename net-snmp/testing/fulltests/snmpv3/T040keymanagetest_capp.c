@@ -402,9 +402,7 @@ test_genkul(void)
         fprintf(stdout, "# engineID%s (len=%d):  %s\n",
                 (isdefault) ? " (default)" : "",
                 engineID_len, ((s != 0) ? ((u_char *) s) : engineID));
-    if (s) {
-        SNMP_FREE(s);
-    }
+    SNMP_FREE(s);
 
 
 
