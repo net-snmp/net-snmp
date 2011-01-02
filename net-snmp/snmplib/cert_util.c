@@ -2266,8 +2266,13 @@ _cert_find_subset_common(const char *filename, netsnmp_container *container)
     matching = CONTAINER_GET_SUBSET(container, &search);
     DEBUGMSGT(("9:cert:subset:found", "%" NETSNMP_PRIz "d matches\n", matching ?
                matching->size : 0));
-    if (matching && matching->size > 1)
+    if (matching && matching->size > 1) {
         _reduce_subset(matching, filename);
+        if (0 == matching->size) {
+            free(matching->array);
+            SNMP_FREE(matching);
+        }
+    }
     return matching;
 }
 
@@ -2282,8 +2287,13 @@ _cert_find_subset_fn(const char *filename, const char *directory)
     netsnmp_assert(fn_container);
 
     matching = _cert_find_subset_common(filename, fn_container);
-    if (matching && (matching->size > 1) && directory)
+    if (matching && (matching->size > 1) && directory) {
         _reduce_subset_dir(matching, directory);
+        if (0 == matching->size) {
+            free(matching->array);
+            SNMP_FREE(matching);
+        }
+    }
     return matching;
 }
 
