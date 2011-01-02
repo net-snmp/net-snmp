@@ -205,7 +205,7 @@ get_target_sessions(char *taglist, TargetFilterFunction * filterfunct,
                                     DEBUGMSGTL(("target_sessions",
                                             "  found fingerprint: %s\n", 
                                                 cert->fingerprint));
-                                    t->f_config(t, "our_identity",
+                                    t->f_config(t, "localCert",
                                                 cert->fingerprint);
                                 }
                                 DEBUGMSGTL(("target_sessions",
@@ -219,7 +219,7 @@ get_target_sessions(char *taglist, TargetFilterFunction * filterfunct,
                                     DEBUGMSGTL(("target_sessions",
                                             "  found fingerprint: %s\n", 
                                                 cert->fingerprint));
-                                    t->f_config(t, "their_identity",
+                                    t->f_config(t, "peerCert",
                                                 cert->fingerprint);
                                 }
                                 server_id = netsnmp_tlstmAddr_get_serverId(
