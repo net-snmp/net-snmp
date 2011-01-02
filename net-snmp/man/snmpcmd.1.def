@@ -226,21 +226,21 @@ filename's prefix can be used.  For example, if you had a "snmpd.crt"
 certificate file then you could simply refer to the certificate via
 the "snmpd" specifier.
 .TP
-.BI "-T our_identity=<certificate-specifier>"
+.BI "-T localCert=<certificate-specifier>"
 Indicates to the transport which key should be used to initiate (D)TLS
 client connections.  This would typically be a certificate found using
-the application name (eg snmpd, snmptrapd, perl, python) or
+the certificate fingerprint, the application name (eg snmpd, snmptrapd, perl, python) or
 genericized name "snmpapp" if using one of the generic applications
 (snmpget, snmpwalk, etc).  This can also be set using the
-clientCert specifier in a snmp.conf configuration file.
+localCert specifier in a snmp.conf configuration file.
 .TP
-.BI "-T their_identity=<certificate-specifier>"
+.BI "-T peerCert=<certificate-specifier>"
 If you expect a particular certificate to be presented by the other
 side then you can use this specifier to indicate the certificate it
 should present.  If it fails to present the expected certificate the
 client will refuse to open the connection (because doing otherwise
 could lead to man-in-the-middle attacks).  This can also be set using
-the serverCert specifier in a snmp.conf configuration file.
+the peerCert specifier in a snmp.conf configuration file.
 .TP
 .BI "-T trust_cert=<certificate-specifier>"
 If you have a trusted CA certificate you wish to anchor trust with,

@@ -158,7 +158,7 @@ Many of the configuration tokens described below are prefixed with
 a '[snmp]' tag.  If you place these tokens in your snmpd.conf file,
 this take is required.  See the snmp_config(5) manual page for the
 meaning of this context switch.
-.IP "[snmp] serverCert <specifier>"
+.IP "[snmp] localCert <specifier>"
 This token defines the default X.509 public key to use as the server's
 identity.  It should either be a fingerprint or a filename.  To create
 a public key for use, please run the "net-snmp-cert" utility which
@@ -166,12 +166,6 @@ will help you create the required certificate.
 .IP
 The default value for this is the certificate in the "snmpd" named
 certificate file.
-.IP "[snmp] clientCert <specifier>"
-If outgoing TLS connections are to be opened, for example because
-notifications are to be sent over TLS, then this will select the
-client-side public key to use for those outgoing connections.  It can
-either be specified as a fingerprint or a filename.  See the
-"net-snmp-cert" utility for creating certificates.
 .IP "[snmp] tlsAlgorithms <algorithms>"
 This string will select the algorithms to use when negotiating
 security during (D)TLS session establishment.  See the openssl manual
