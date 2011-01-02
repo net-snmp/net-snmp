@@ -289,10 +289,7 @@ netsnmp_callback_send(netsnmp_transport *t, void *buf, int size,
         /*
          * we don't need the transport data any more 
          */
-        if (*opaque) {
-            SNMP_FREE(*opaque);
-            *opaque = NULL;
-        }
+        SNMP_FREE(*opaque);
     } else {
         /*
          * we're the server, send it to the person that sent us the request 
@@ -301,10 +298,7 @@ netsnmp_callback_send(netsnmp_transport *t, void *buf, int size,
         /*
          * we don't need the transport data any more 
          */
-        if (*opaque) {
-            SNMP_FREE(*opaque);
-            *opaque = NULL;
-        }
+        SNMP_FREE(*opaque);
         other_side = find_transport_from_callback_num(from);
         if (!other_side) {
             snmp_free_pdu(cp->pdu);

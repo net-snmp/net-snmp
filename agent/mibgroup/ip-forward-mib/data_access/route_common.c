@@ -242,8 +242,7 @@ netsnmp_access_route_entry_copy(netsnmp_route_entry *lhs,
     lhs->rt_proto = rhs->rt_proto;
 
 #ifdef USING_IP_FORWARD_MIB_IPCIDRROUTETABLE_IPCIDRROUTETABLE_MODULE
-    if (NULL != lhs->rt_info)
-        SNMP_FREE(lhs->rt_info);
+    SNMP_FREE(lhs->rt_info);
     if (NULL != rhs->rt_info)
         snmp_clone_mem((void **) &lhs->rt_info, rhs->rt_info,
                        rhs->rt_info_len * sizeof(oid));

@@ -258,8 +258,7 @@ sctpLookupLocalPortTable_entry_copy(sctpLookupLocalPortTable_entry * from,
 void
 sctpLookupLocalPortTable_entry_free(sctpLookupLocalPortTable_entry * entry)
 {
-    if (entry != NULL)
-        SNMP_FREE(entry);
+    SNMP_FREE(entry);
 }
 
 netsnmp_container *

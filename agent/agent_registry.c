@@ -2279,15 +2279,9 @@ dump_registry(void)
         }
     }
 
-    if (s != NULL) {
-        SNMP_FREE(s);
-    }
-    if (e != NULL) {
-        SNMP_FREE(e);
-    }
-    if (v != NULL) {
-        SNMP_FREE(v);
-    }
+    SNMP_FREE(s);
+    SNMP_FREE(e);
+    SNMP_FREE(v);
 
     dump_idx_registry();
 }

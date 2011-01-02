@@ -605,7 +605,6 @@ run_lookup(struct lookupTable_data *item)
                             "registered an entry error\n"));
 
         SNMP_FREE(address);
-        address = NULL;
         return;
     }
 
@@ -772,8 +771,6 @@ run_lookup(struct lookupTable_data *item)
             modify_lookupCtlRc(item, 1l);
         }
         SNMP_FREE(address);
-        address = NULL;
-
         return;
 
     }
@@ -916,11 +913,9 @@ run_lookup(struct lookupTable_data *item)
                 DEBUGMSGTL(("lookupResultsTable",
                             "registered an entry error\n"));
         SNMP_FREE(address);
-        address = NULL;
         return;
     } else {
         SNMP_FREE(address);
-        address = NULL;
         return;
     }
 }
@@ -1526,13 +1521,9 @@ write_lookupCtlRowStatus(int action,
 
         if (StorageDel != NULL) {
             SNMP_FREE(StorageDel->lookupCtlOwnerIndex);
-            StorageDel->lookupCtlOwnerIndex = NULL;
             SNMP_FREE(StorageDel->lookupCtlOperationName);
-            StorageDel->lookupCtlOperationName = NULL;
             SNMP_FREE(StorageDel->lookupCtlTargetAddress);
-            StorageDel->lookupCtlTargetAddress = NULL;
             SNMP_FREE(StorageDel);
-            StorageDel = NULL;
 
             StorageDel = 0;
             /*

@@ -628,8 +628,7 @@ decode_keychange(const oid * hashtype, u_int hashtype_len,
         memset(newkey, 0, properlength);
     }
     memset(tmp_buf, 0, SNMP_MAXBUF);
-    if (tmpbuf != NULL)
-        SNMP_FREE(tmpbuf);
+    SNMP_FREE(tmpbuf);
 
     return rval;
 

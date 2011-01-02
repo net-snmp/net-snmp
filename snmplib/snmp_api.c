@@ -3151,7 +3151,6 @@ _snmp_build(u_char ** pkt, size_t * pkt_len, size_t * offset,
              */
             if (0 == session->community_len) {
                 SNMP_FREE(pdu->community);
-                pdu->community = NULL;
             } else if (pdu->community_len == session->community_len) {
                 memmove(pdu->community,
                         session->community, session->community_len);
@@ -4063,9 +4062,7 @@ snmpv3_parse(netsnmp_pdu *pdu,
             DEBUGINDENTADD(-4);
         }
 
-        if (mallocbuf) {
-            SNMP_FREE(mallocbuf);
-        }
+        SNMP_FREE(mallocbuf);
         return ret_val;
     }
 
@@ -4078,9 +4075,7 @@ snmpv3_parse(netsnmp_pdu *pdu,
     if (data == NULL) {
         snmp_increment_statistic(STAT_SNMPINASNPARSEERRS);
         DEBUGINDENTADD(-4);
-        if (mallocbuf) {
-            SNMP_FREE(mallocbuf);
-        }
+        SNMP_FREE(mallocbuf);
         return SNMPERR_ASN_PARSE_ERR;
     }
 
@@ -4103,15 +4098,11 @@ snmpv3_parse(netsnmp_pdu *pdu,
     if (ret != SNMPERR_SUCCESS) {
         ERROR_MSG("error parsing PDU");
         snmp_increment_statistic(STAT_SNMPINASNPARSEERRS);
-        if (mallocbuf) {
-            SNMP_FREE(mallocbuf);
-        }
+        SNMP_FREE(mallocbuf);
         return SNMPERR_ASN_PARSE_ERR;
     }
 
-    if (mallocbuf) {
-        SNMP_FREE(mallocbuf);
-    }
+    SNMP_FREE(mallocbuf);
     return SNMPERR_SUCCESS;
 }                               /* end snmpv3_parse() */
 
@@ -5456,9 +5447,7 @@ _sess_process_packet(void *sessp, netsnmp_session * sp,
   if (isp->hook_pre) {
     if (isp->hook_pre(sp, transport, opaque, olength) == 0) {
       DEBUGMSGTL(("sess_process_packet", "pre-parse fail\n"));
-      if (opaque != NULL) {
-	SNMP_FREE(opaque);
-      }
+      SNMP_FREE(opaque);
       return -1;
     }
   }
@@ -5477,9 +5466,7 @@ _sess_process_packet(void *sessp, netsnmp_session * sp,
 
   if (pdu == NULL) {
     snmp_log(LOG_ERR, "pdu failed to be created\n");
-    if (opaque != NULL) {
-      SNMP_FREE(opaque);
-    }
+    SNMP_FREE(opaque);
     return -1;
   }
 
@@ -5916,9 +5903,7 @@ _sess_read(void *sessp, netsnmp_large_fd_set * fdset)
         sp->s_errno = errno;
         snmp_set_detail(strerror(errno));
         SNMP_FREE(rxbuf);
-        if (opaque != NULL) {
-            SNMP_FREE(opaque);
-        }
+        SNMP_FREE(opaque);
         return -1;
     }
 
@@ -5952,9 +5937,7 @@ _sess_read(void *sessp, netsnmp_large_fd_set * fdset)
         DEBUGMSGTL(("sess_read", "fd %d closed\n", transport->sock));
         transport->f_close(transport);
         SNMP_FREE(isp->packet);
-        if (opaque != NULL) {
-            SNMP_FREE(opaque);
-        }
+        SNMP_FREE(opaque);
         return -1;
     }
 
@@ -5993,9 +5976,7 @@ _sess_read(void *sessp, netsnmp_large_fd_set * fdset)
 		}
 		DEBUGMSGTL(("sess_read", "fd %d closed\n", transport->sock));
                 transport->f_close(transport);
-                if (opaque != NULL) {
-                    SNMP_FREE(opaque);
-                }
+                SNMP_FREE(opaque);
                 /** XXX-rks: why no SNMP_FREE(isp->packet); ?? */
                 return -1;
             }
@@ -6014,9 +5995,7 @@ _sess_read(void *sessp, netsnmp_large_fd_set * fdset)
                 if (pptr != isp->packet)
                     break; /* opaque freed for us outside of loop. */
 
-                if (opaque != NULL) {
-                    SNMP_FREE(opaque);
-                }
+                SNMP_FREE(opaque);
                 return 0;
             }
 
@@ -6065,9 +6044,7 @@ _sess_read(void *sessp, netsnmp_large_fd_set * fdset)
 	    of the opaque pointer, so we still need to free() the opaque
 	    pointer itself.  */
 
-	if (opaque != NULL) {
-	    SNMP_FREE(opaque);
-	}
+	SNMP_FREE(opaque);
 
         if (isp->packet_len >= MAXIMUM_PACKET_SIZE) {
             /*
@@ -6087,7 +6064,6 @@ _sess_read(void *sessp, netsnmp_large_fd_set * fdset)
              * footprint down.
              */
             SNMP_FREE(isp->packet);
-            isp->packet = NULL;
             isp->packet_size = 0;
             isp->packet_len = 0;
             return rc;
@@ -6510,9 +6486,7 @@ snmp_resend_request(struct session_list *slp, netsnmp_request_list *rp,
          * This should never happen.  
          */
         DEBUGMSGTL(("sess_resend", "encoding failure\n"));
-        if (pktbuf != NULL) {
-            SNMP_FREE(pktbuf);
-        }
+        SNMP_FREE(pktbuf);
         return -1;
     }
 
@@ -6530,7 +6504,7 @@ snmp_resend_request(struct session_list *slp, netsnmp_request_list *rp,
 
     if (pktbuf != NULL) {
         SNMP_FREE(pktbuf);
-        pktbuf = packet = NULL;
+        packet = NULL;
     }
 
     if (result < 0) {

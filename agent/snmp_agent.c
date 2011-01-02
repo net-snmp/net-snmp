@@ -1410,12 +1410,8 @@ free_agent_snmp_session(netsnmp_agent_session *asp)
         snmp_free_pdu(asp->pdu);
     if (asp->reqinfo)
         netsnmp_free_agent_request_info(asp->reqinfo);
-    if (asp->treecache) {
-        SNMP_FREE(asp->treecache);
-    }
-    if (asp->bulkcache) {
-        SNMP_FREE(asp->bulkcache);
-    }
+    SNMP_FREE(asp->treecache);
+    SNMP_FREE(asp->bulkcache);
     if (asp->requests) {
         int             i;
         for (i = 0; i < asp->vbcount; i++) {
@@ -2477,10 +2473,7 @@ netsnmp_reassign_requests(netsnmp_agent_session *asp)
             if (!netsnmp_add_varbind_to_cache(asp, asp->requests[i].index,
                                               asp->requests[i].requestvb,
                                               asp->requests[i].subtree->next)) {
-                if (old_treecache != NULL) {
-                    SNMP_FREE(old_treecache);
-                    old_treecache = NULL;
-                }
+                SNMP_FREE(old_treecache);
             }
         } else if (asp->requests[i].requestvb->type == ASN_PRIV_RETRY) {
             /*
@@ -2490,17 +2483,12 @@ netsnmp_reassign_requests(netsnmp_agent_session *asp)
             if (!netsnmp_add_varbind_to_cache(asp, asp->requests[i].index,
                                               asp->requests[i].requestvb,
                                               asp->requests[i].subtree)) {
-                if (old_treecache != NULL) {
-                    SNMP_FREE(old_treecache);
-                    old_treecache = NULL;
-                }
+                SNMP_FREE(old_treecache);
             }
         }
     }
 
-    if (old_treecache != NULL) {
-        SNMP_FREE(old_treecache);
-    }
+    SNMP_FREE(old_treecache);
     return SNMP_ERR_NOERROR;
 }
 

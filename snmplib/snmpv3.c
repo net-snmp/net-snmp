@@ -1119,9 +1119,7 @@ engineIDNic_conf(const char *word, char *cptr)
         /*
          * See if already set if so erase & release it 
          */
-        if (NULL != engineIDNic) {
-            SNMP_FREE(engineIDNic);
-        }
+        SNMP_FREE(engineIDNic);
         engineIDNic = (u_char *) malloc(strlen(cptr) + 1);
         if (NULL != engineIDNic) {
             strcpy((char *) engineIDNic, cptr);
@@ -1521,10 +1519,7 @@ snmpv3_clone_engineID(u_char ** dest, size_t * destlen, u_char * src,
     if (!dest || !destlen)
         return 0;
 
-    if (*dest) {
-        SNMP_FREE(*dest);
-        *dest = NULL;
-    }
+    SNMP_FREE(*dest);
     *destlen = 0;
 
     if (srclen && src) {

@@ -149,7 +149,6 @@ netsnmp_unregister_table(netsnmp_handler_registration *reginfo)
 {
     /* Locate "this" reginfo */
     /* SNMP_FREE(reginfo->myvoid); */
-    /* reginfo->myvoid = NULL; */
     return netsnmp_unregister_handler(reginfo);
 }
 

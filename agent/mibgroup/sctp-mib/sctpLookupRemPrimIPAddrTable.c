@@ -268,8 +268,7 @@ void
 sctpLookupRemPrimIPAddrTable_entry_free(sctpLookupRemPrimIPAddrTable_entry
                                         * entry)
 {
-    if (entry != NULL)
-        SNMP_FREE(entry);
+    SNMP_FREE(entry);
 }
 
 netsnmp_container *

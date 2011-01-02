@@ -314,10 +314,7 @@ netsnmp_table_data_delete_table( netsnmp_table_data *table )
     }
     table->first_row = NULL;
 
-    if (table->name) {
-        SNMP_FREE(table->name);
-        table->name = NULL;
-    }
+    SNMP_FREE(table->name);
     SNMP_FREE(table);
     return;
 }
