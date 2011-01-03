@@ -5,6 +5,10 @@ listing of all changes made to the code.
 
 *5.6.1*
 
+    general:
+      - Upgraded DTLS support from alpha to full; mention that tsm is
+	needed for TLS too
+
     snmplib:
       - Added function netsnmp_delete_table_data_set().
       - Added function netsnmp_delete_table_data_set(). Added declaration
