@@ -34,6 +34,7 @@
 #include <openssl/x509v3.h>
 
 #include <net-snmp/types.h>
+#include <net-snmp/config_api.h>
 #include <net-snmp/library/cert_util.h>
 #include <net-snmp/library/snmp_openssl.h>
 #include <net-snmp/library/default_store.h>
@@ -45,6 +46,7 @@
 #include <net-snmp/library/snmp_assert.h>
 #include <net-snmp/library/snmp_transport.h>
 #include <net-snmp/library/snmp_secmod.h>
+#include <net-snmp/library/read_config.h>
 
 #define LOGANDDIE(msg) do { snmp_log(LOG_ERR, "%s\n", msg); return 0; } while(0)
 
@@ -713,6 +715,7 @@ static void _parse_client_cert(const char *tok, char *line)
                               NETSNMP_DS_LIB_X509_CLIENT_PUB, line);
 }
 
+#if 0
 static void _parse_defX509ClientPub(const char *tok, char *line)
 {
     config_pwarn("defX509ClientPub is deprecated. Clients should use ourCert, servers should use theirCert.");
@@ -725,6 +728,7 @@ static void _parse_defX509ClientPub(const char *tok, char *line)
         netsnmp_ds_set_string(NETSNMP_DS_LIBRARY_ID,
                               NETSNMP_DS_LIB_X509_CLIENT_PUB, line);
 }
+#endif
 
 static void _parse_server_cert(const char *tok, char *line)
 {
@@ -739,6 +743,7 @@ static void _parse_server_cert(const char *tok, char *line)
                               NETSNMP_DS_LIB_X509_SERVER_PUB, line);
 }
 
+#if 0
 static void _parse_defX509ServerPub(const char *tok, char *line)
 {
     config_pwarn("defX509ServerPub is deprecated. Clients should use theirCert, servers should use ourCert.");
@@ -751,6 +756,7 @@ static void _parse_defX509ServerPub(const char *tok, char *line)
         netsnmp_ds_set_string(NETSNMP_DS_LIBRARY_ID,
                               NETSNMP_DS_LIB_X509_SERVER_PUB, line);
 }
+#endif
 
 void
 netsnmp_tlsbase_ctor(void) {
