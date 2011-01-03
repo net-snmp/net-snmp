@@ -5,6 +5,8 @@ listing of all changes made to the code.
 
 *5.6.1*
     General:
+      - The DTLS and TLS transports and the TSM security model are no
+        longer "beta" (they've undergone rigorous interoperability testing).
       - Many Bug Fixes (see the CHANGES and ChangeLog files for full details)
 
     snmpd:
