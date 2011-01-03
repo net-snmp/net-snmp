@@ -65,7 +65,6 @@ sctp_stats_handler(netsnmp_mib_handler *handler,
 {
     netsnmp_variable_list *requestvb;
     int             subid;
-    int             ret;
 
     DEBUGMSGTL(("sctp:scalars:stats", "Handler - mode %s\n",
                 se_find_label_in_slist("agent_mode", reqinfo->mode)));
@@ -215,7 +214,6 @@ sctp_params_handler(netsnmp_mib_handler *handler,
 {
     netsnmp_variable_list *requestvb;
     int             subid;
-    int             ret;
 
     DEBUGMSGTL(("sctp:scalars:params", "Handler - mode %s\n",
                 se_find_label_in_slist("agent_mode", reqinfo->mode)));
