@@ -532,8 +532,9 @@ AC_ARG_WITH(out_transports,
     IPX         support for SNMP over IPX per RFC 1420.
                 This transport is presently only available for Linux,
                 is never compiled in by default and may be omitted.
+    DTLSUDP     support for tunneling SNMP over DTLS/UDP
+    TLSTCP      support for tunneling SNMP over TLS/TCP
     SSH         (alpha) support for tunneling SNMP over SSH
-    DTLSUDP     (alpha) support for tunneling SNMP over DTLS/UDP
 ])
 
 #
@@ -557,7 +558,7 @@ NETSNMP_ARG_WITH(security-modules,
                            (required and always compiled in)
         ksm                support for kerberos based SNMP security
         tsm                support for the Transport-based security
-                           (for use with the SSH and DTLSUDP transports)
+                           (for use with the SSH, DTLSUDP and TLSTCP transports)
 ])
 
 
