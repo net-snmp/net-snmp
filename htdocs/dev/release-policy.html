@@ -84,32 +84,34 @@
     <h3>Release Manager</h3>
 
     <p>The person responsible for producing a particular release.
-      Release managers are appointed
-<!-- XXX: How ?   Anwser: by me, of course. -->
+      Release managers are appointed by Wes Hardaker
       and are listed in the
-      <a href="http://www.net-snmp.org/dev/schedule.html">schedule document</a>.
+      <a href="http://www.net-snmp.org/dev/schedule.html">schedule
+      document</a> (when it's up to date).
     </p>
+
+    <h3>-coders</h3>
+
+    <p>Refers to the net-snmp-coders <a href="/lists/">mailing
+	list</a> where all active discussion about the project occurs.</p>
  
     <h3>+N:</h3>
 
     <p>Differences in opinion are resolved by a generic voting
-       mechanism: +N.  +N means that at least N more developers
-       should agree than disagree with a given proposal ("yes votes"
+       mechanism: +N.  +N means that at least N more developers should
+       agree than disagree with a given proposal (i.e., "yes votes"
        minus "no votes").
     </p>
       <ul>
-      <li> A vote discussion should last at least 24 hours, covering
+      <li> A vote discussion should last at least 24 business-day
+        hours (M-F), covering
         normal working hours (9-5, Monday to Friday) for all <i>active
         developers</i>.</li>
 
       <li>Any active developer can vote in such a discussion, but must
 	be able to demonstrate understanding of the issue and code.</li>
 
-      <li>Everyone gets 1 vote on
-	a subject, except for the person who is currently actively
-	maintaining/writing the given section of code in question.
-	They get 1.001 votes.</li>
-
+      <li>Everyone gets 1 vote on a subject.</li>
     </ul>
     
     <p>For example, a +3 requirement to include a patch during the RC
@@ -118,12 +120,16 @@
 	for applying the patch would need at least 3 votes more than
 	those who object (e.g. tallies of 3-0, 4-1, 5-2, ...).</p>
 
-    <p>Calling for a vote may force a delay in making a scheduled release,
-        to allow this vote to take place.  The Release Manager may need
-        to issue the release before the end of the voting period which
-        is a judgment call left to the discretion of the Release
-        Manager and the other "Resolving Disputes" precedence
-        discussed below.</p>
+    <p>Calling for a vote ("CFV") may force a delay in making a
+       scheduled release, to allow this vote to take place.  The
+       Release Manager may need to issue the release before the end of
+       the voting period which is a judgment call left to the
+       discretion of the Release Manager and the other "Resolving
+       Disputes" precedence discussed below.</p>
+
+    <p>Thus, when a release manager has indicated that the next
+      release will be published on Friday, all CFV requests should be
+      issued by Thursday to ensure they have 24 hours to collect votes.</p>
         
     <h3>Supported System:</h3>
 
@@ -133,18 +139,36 @@
        force developers to work on a platform they're not interested in.)</p>
 
     <p>Note that as active developers come and go, and as their
-      attention is attracted to and distracted from certain system types
-      the Net-SNMP project may gain or lose support for a given system.
-      However, emphasis should always be placed on trying to ensure that
-      changes do not break a system that was once working.
+      attention is attracted to and distracted from certain systems
+      types, the Net-SNMP project may gain or lose support for a given
+      system.  However, emphasis should always be placed on trying to
+      ensure that changes do not break a system that was once working.
       Portable code is very important to this project and great care
       should be taken to make sure that new code doesn't introduce
       system incompatibilities.</p>
 
     <h3>Show stopper:</h3>
+
+    <p>A <i>show stopper</i> is a condition which indicates the
+      release cycle can not progress forward without the issue being
+      fixed.</p>
+
+    <p>Any active developer may request that a release process be
+      halted and may request a CFV on the -coders list.  A CFV count of
+      +1 will indicate a show-stopper and the release-manager should act
+      accordingly.  A show-stopper will be considered resolved once a
+      second +1 CFV has been reached proposing to continue the
+      release.  (The rough up-shot will be that at least 2 people have
+      switched positions on an issue because of discussion or resolution).</p>
+
+      <p>Examples that active developers are likely to
+	accept as show-stoppers are:</p>
+
     <ul>
       <li>Paramount: A condition that is agreed upon by at least +3
-	developers when discussed on the coders list.</li>
+	developers when discussed on the coders list.  The concept of
+	a "show stopper" is always based on agreement of the active
+	developers.</li>
 
       <li>A condition that results in a security vulnerability.</li>
 
@@ -158,6 +182,9 @@
 	supported system, (excluding problems within the test suite
 	itself).
       </li>
+
+      <li>A regression test failure that is identified by the test
+	suite.</li>
     </ul>
 
     <h3>Bug Fix / New Feature:</h3>
@@ -198,8 +225,8 @@
 
     <p>Other changes do not need prior
       agreement (although significant new features should probably be
-      announced afterwards).  If challenged the feature will only
-      exist in future code if it meets a +.001 vote.</p>
+      announced afterwards and ideally their architecture discussed
+      beforehand).</p>
 
     <h3>Pre-Releases</h3>
 
@@ -209,7 +236,7 @@
       first release-candidate being made available:
     </p>
 
-      <ul>
+    <ul>
       <li>Only bug fixes should be applied - no new features.</li>
 
       <li>Significant issues should be discussed on the -coders
@@ -221,12 +248,11 @@
 	of +1 is needed to keep the patch in place.</li>
 
       <li>No new features are allowed.</li>
-
     </ul>
 
     <p>Pre-Release packages use a numbering scheme of
     <i>Version.Number</i>.pre<i>N</i> (e.g. 5.3.pre1).
-    The Pre-Release phase generally lasts for 3-4 weeks, typically
+    The Pre-Release phase generally lasts for 2-3 weeks, typically
     with one pre-release being issued each week. The exact length
     of the Pre-Release phase, and the timing of pre-release
     versions is at the discretion of the Release Manager.</p>
@@ -236,12 +262,14 @@
     <p> The Release Candidate phase is intended to mark the end of
     active delopment for a particular release version.  The aim is
     that the final released version should be ideally identical to the
-    last Release-Candidate issued.  During the period
-    between the first release-candidate being made available and the
-    final release being made available:
+    last Release-Candidate issued.  However, any patches approved by a
+    +3 vote may be applied before the final release by the release
+    manager.  During the period between the first release-candidate
+    being made available and the final release being made available
+    the following goals and guidelines are suggested (but +3 voted
+    patches will always take precedence):
     </p>
       <ul>
-
       
       <li>Only show-stopper bugs should be fixed.</li> 
 
@@ -257,16 +285,18 @@
       standalone documentation can be applied right up to 2 hours
       before a release manager has indicated they're going to begin
       packaging the next release.  Changes to documentation embedded
-      in code files (e.g. 'doxygen' and other comments) should only be
-      applied if another Release-Candidate is planned.</li>
+      in code files (e.g. 'doxygen', 'configure' and other comments)
+      should only be applied if another Release-Candidate is
+      planned.</li>
 
     </ul>
 
-    <p> Release-Candidate packages use a numbering scheme of
-    <i>Version.Number</i>.rc<i>N</i> (e.g. 5.3.rc1).
-    This phase lasts until the Release Manager judges that
-    the software is sufficiently stable to be properly
-    released (i.e. no show-stopper bugs have been reported).</p>
+    <p> Release-Candidate packages use a numbering scheme
+    of <i>Version.Number</i>.rc<i>N</i> (e.g. 5.3.rc1).  This phase
+    lasts until the Release Manager, with the input of the active
+    developers, judges that the software is sufficiently stable to be
+    properly released (i.e. no show-stopper bugs have been
+    reported).</p>
     
     <p> While testing is expected (and encouraged) throughout
     the full development and release cycle, it is particularly
@@ -276,22 +306,39 @@
     as many others as the combined community can lay their
     collective hands on.</p>
 
-    <p> The length of a release cycle phase should be at least 2-3 RC
-    releases in length and is subject to the judgment of the Release
-    Manager.  A +1 vote is needed to force another release-candidate
-    if the release manager wasn't planning on issuing another one.</p>
+    <p> The length of a release cycle phase should be at least 1-2 RC
+    releases in length, with about one RC release per week, and is
+    subject to the judgment of the Release Manager.  A +1 vote is
+    needed to force another release-candidate if the release manager
+    wasn't planning on issuing another one.</p>
+
+    <p>CFV processing during the RC phase is augmented by an active
+    developers belief that a patch is sufficiently acceptable to apply
+    even before a final release.  If no further RC releases are
+    planned, then an active developer is suggested to potentially
+      place multiple votes on a patch given each of the following
+      criteria:</p>
+
+    <ul>
+      <li>The patch is acceptable for applying to the final release
+	without another RC.</li>
+      <li>The patch should be applied and another RC should be
+	issued.</li>
+    </ul>
     
     <h3>Final Release</h3>
 
     <p>Despite the above policy of rigorous, exhaustive and
-    largely fictional testing, a new final release is invariably
-    followed by an avalanche of problem reports - some trivial
-    and/or very specific to a particular environment, others more
-    widereaching and serious (possibly verging on catastrophic).
-    During the period immediately following a release, the project
-    must be ready to respond to such problems, and possibly issue
-    an updated version of the software with minimal delay.
-    To this end:</p>
+      largely fictional testing, a new final release is invariably
+      followed by an avalanche of problem reports - some trivial
+      and/or very specific to a particular environment, others more
+      widereaching and serious (possibly verging on catastrophic).
+      We've been known to accidentally alter the moon's orbit.</p>
+
+    <p>During the period immediately following a release, the project
+      must be ready to respond to such problems, and possibly issue
+      an updated version of the software with minimal delay.
+      To this end:</p>
 
     <ul>    
       <li> Following a final release, the SVN tree continues in a
@@ -325,7 +372,9 @@
 
     <ul>
       <li>+N vote as described above.
-        If not explicitly specified, voting should be +3</li>
+        If not explicitly specified, voting should be +3 for requiring
+        changes to a repository, +1 for general decisions (such as
+        stopping the release cycle).</li>
         
       <li>The release manager.</li>
 
@@ -345,7 +394,7 @@
 
     <h2>Warnings</h2>
     <p>We're all friends generally, but just to be clear: attempts to
-      misuse this policy will be severely frowned upon.  Don't test this.</p>
+      misuse this policy will be severely frowned upon.</p>
 
 <!-- CONTENT END -->
 <!--#include virtual="/page-bottom.html" -->
