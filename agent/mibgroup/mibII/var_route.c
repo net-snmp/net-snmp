@@ -1468,7 +1468,7 @@ var_ipRouteEntry(struct variable *vp,
      * 1.3.6.1.2.1.4.21.1.?.A.B.C.D,  where A.B.C.D is IP address.
      * IPADDR starts at offset 10.
      */
-    register int    Save_Valid, result, RtIndex;
+    register int    Save_Valid, result, RtIndex = 0;
     static int      saveNameLen = 0, saveExact = 0, saveRtIndex =
         0, rtsize = 0;
     static oid      saveName[MAX_OID_LEN], Current[MAX_OID_LEN];
@@ -1479,8 +1479,6 @@ var_ipRouteEntry(struct variable *vp,
     static PMIB_IPFORWARDTABLE pIpRtrTable = NULL;
     struct timeval  now;
     static long     Time_Of_Last_Reload = 0;
-    u_char          dest_addr[4];
-    MIB_IPFORWARDROW temp_row;
     static in_addr_t addr_ret;
 
 
@@ -1575,12 +1573,16 @@ var_ipRouteEntry(struct variable *vp,
              * for creation of new row, only ipNetToMediaTable case is considered 
              */
             if (*length == 14) {
+                u_char           dest_addr[4];
+                MIB_IPFORWARDROW temp_row;
+
                 create_flag = 1;
                 *write_method = write_rte;
                 dest_addr[0] = (u_char) name[10];
                 dest_addr[1] = (u_char) name[11];
                 dest_addr[2] = (u_char) name[12];
                 dest_addr[3] = (u_char) name[13];
+                memset(&temp_row, 0, sizeof(temp_row));
                 temp_row.dwForwardDest = *((DWORD *) dest_addr);
                 temp_row.dwForwardPolicy = 0;
                 temp_row.dwForwardProto = MIB_IPPROTO_NETMGMT;
