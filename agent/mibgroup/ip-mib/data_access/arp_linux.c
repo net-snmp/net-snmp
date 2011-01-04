@@ -336,7 +336,7 @@ fillup_entry_info(netsnmp_arp_entry *entry, struct nlmsghdr *nlmp)
         length = nlmp->nlmsg_len - NLMSG_LENGTH(sizeof(*rtmp));
         if (length < 0) {
             snmp_log(LOG_ERR, "netlink message length %d < %d is invalid\n",
-                     nlmp->nlmsg_len, NLMSG_LENGTH(sizeof(*rtmp)));
+                     nlmp->nlmsg_len, (int)NLMSG_LENGTH(sizeof(*rtmp)));
             return -1;
         }
         /*
