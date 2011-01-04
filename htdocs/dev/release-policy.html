@@ -41,7 +41,7 @@
         related) fixes need to be applied to closed branches as well,
         as it may be necessary to even release code from a closed
         branch at some point.  It is much easier to maintain
-        consistency across the CVS tree by applying necessary patches
+        consistency across the SVN tree by applying necessary patches
         to each tree at the same time.</li>
 
       <li> All code released should have been properly tested on as
@@ -74,7 +74,7 @@
     <h3>Developer</h3>
 
     Anyone contributing to the project by submitting code - either
-    directly to the CVS repository or via patches sent to the mailing
+    directly to the SVN repository or via patches sent to the mailing
     lists or SourceForge tracker databases.  If you understand the
     issues involved (and can discuss them sensibly), then it's
     reasonable for you to submit an opinion.  A developer is
@@ -181,9 +181,9 @@
 
     <h3>Open Development</h3>
 
-    <p> Anyone with write access to the CVS repository can submit
+    <p> Anyone with write access to the SVN repository can submit
       changes at will, including new features (on the main development
-      trunk) and bug fixes (on the main trunk and on all CVS
+      trunk) and bug fixes (on the main trunk and on all SVN
       branches).
 
     <p> Any incompatible
@@ -251,7 +251,7 @@
 
       <li>Any code changes require a +3 vote on the -coders list.
       This vote <b>MUST</b> take place prior to committing such
-      changes to the CVS tree.</li>
+      changes to the SVN tree.</li>
       
       <li>Documentation may be updated without a vote.  Changes to
       standalone documentation can be applied right up to 2 hours
@@ -294,7 +294,7 @@
     To this end:</p>
 
     <ul>    
-      <li> Following a final release, the CVS tree continues in a
+      <li> Following a final release, the SVN tree continues in a
       Release-Candidate style freeze for 1 week (7 days) unless the
       release manager for that branch indicates a longer one is
       needed.</li>
@@ -304,12 +304,12 @@
       immediate "minor minor" release (the Z in W.X.Y.Z).  If a
       critical bug warranting one of these releases is found after a
       code freeze has ended this will typically require the creation
-      of a special branch in the CVS tree where the minor minor
+      of a special branch in the SVN tree where the minor minor
       release can be distributed from containing only the critical
       patch.</li>
 
       <li> Following a major release (X.Y), a patch branch should
-      be created in the CVS repository, labelled (tagged)
+      be created in the SVN repository, labelled (tagged)
       V<i>X</i>-<i>Y</i>-patches.  The post-release code freeze
       applies to this branch - the main trunk becomes open for
       active development immediately.</li>
@@ -329,7 +329,7 @@
         
       <li>The release manager.</li>
 
-      <li>Active project developers with CVS write access.  Ordered
+      <li>Active project developers with SVN write access.  Ordered
       by seniority, as listed in the ChangeLog.txt history.
       </li>
 
