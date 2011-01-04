@@ -114,6 +114,10 @@ netsnmp_transport_copy(netsnmp_transport *t)
 {
     netsnmp_transport *n = NULL;
 
+    if (t == NULL) {
+        return NULL;
+    }
+
     n = (netsnmp_transport *) malloc(sizeof(netsnmp_transport));
     if (n == NULL) {
         return NULL;
