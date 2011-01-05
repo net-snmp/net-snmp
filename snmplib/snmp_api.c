@@ -6771,6 +6771,13 @@ netsnmp_oid_equals(const oid * in_name1,
     if (len1 != len2)
         return 1;
     /*
+     * Handle 'null' OIDs
+     */
+    if (len1 == 0)
+        return 0;   /* Two null OIDs are (trivially) the same */
+    if (!name1 || !name2)
+        return 1;   /* Otherwise something's wrong, so report a non-match */
+    /*
      * find first non-matching OID 
      */
     while (len-- > 0) {
