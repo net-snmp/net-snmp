@@ -208,11 +208,11 @@ main(int argc, char *argv[])
 
     netsnmp_ds_register_config(ASN_BOOLEAN, "snmpwalk", "timeResults",
                                NETSNMP_DS_APPLICATION_ID,
-			       NETSNMP_DS_WALK_TIME_RESULTS);
+                               NETSNMP_DS_WALK_TIME_RESULTS);
 
     netsnmp_ds_register_config(ASN_BOOLEAN, "snmpwalk", "timeResultsSingle",
                                NETSNMP_DS_APPLICATION_ID,
-			       NETSNMP_DS_WALK_TIME_RESULTS_SINGLE);
+                               NETSNMP_DS_WALK_TIME_RESULTS_SINGLE);
 
     /*
      * get the common command line arguments 
@@ -309,12 +309,12 @@ main(int argc, char *argv[])
         /*
          * do the request 
          */
-    	if (netsnmp_ds_get_boolean(NETSNMP_DS_APPLICATION_ID, NETSNMP_DS_WALK_TIME_RESULTS_SINGLE))
-        	gettimeofday(&tv_a, NULL);
+        if (netsnmp_ds_get_boolean(NETSNMP_DS_APPLICATION_ID, NETSNMP_DS_WALK_TIME_RESULTS_SINGLE))
+            gettimeofday(&tv_a, NULL);
         status = snmp_synch_response(ss, pdu, &response);
         if (status == STAT_SUCCESS) {
-    	    if (netsnmp_ds_get_boolean(NETSNMP_DS_APPLICATION_ID, NETSNMP_DS_WALK_TIME_RESULTS_SINGLE))
-        	gettimeofday(&tv_b, NULL);
+            if (netsnmp_ds_get_boolean(NETSNMP_DS_APPLICATION_ID, NETSNMP_DS_WALK_TIME_RESULTS_SINGLE))
+                gettimeofday(&tv_b, NULL);
             if (response->errstat == SNMP_ERR_NOERROR) {
                 /*
                  * check resulting variables 
@@ -330,10 +330,10 @@ main(int argc, char *argv[])
                         continue;
                     }
                     numprinted++;
-    		    if (netsnmp_ds_get_boolean(NETSNMP_DS_APPLICATION_ID, NETSNMP_DS_WALK_TIME_RESULTS_SINGLE))
-        		fprintf(stdout, "%f s: ",  
-				(double) (tv_b.tv_usec - tv_a.tv_usec)/1000000 +
-               			(double) (tv_b.tv_sec - tv_a.tv_sec));
+                    if (netsnmp_ds_get_boolean(NETSNMP_DS_APPLICATION_ID, NETSNMP_DS_WALK_TIME_RESULTS_SINGLE))
+                        fprintf(stdout, "%f s: ",  
+                                (double) (tv_b.tv_usec - tv_a.tv_usec)/1000000 +
+                                (double) (tv_b.tv_sec - tv_a.tv_sec));
                     print_variable(vars->name, vars->name_length, vars);
                     if ((vars->type != SNMP_ENDOFMIBVIEW) &&
                         (vars->type != SNMP_NOSUCHOBJECT) &&
