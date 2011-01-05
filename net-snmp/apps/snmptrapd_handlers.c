@@ -86,7 +86,7 @@ snmptrapd_parse_traphandle(const char *token, char *line)
     memset(obuf, 0, sizeof(obuf));
     cptr = copy_nword(line, buf, sizeof(buf));
     if ( !cptr ) {
-        netsnmp_config_error("Missing traphandle command (%s)", buf);
+        config_perror("Missing traphandle command");
         return;
     }
 
