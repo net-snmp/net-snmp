@@ -82,6 +82,11 @@ snmptrapd_parse_traphandle(const char *token, char *line)
     netsnmp_trapd_handler *traph;
 
     cptr = copy_nword(line, buf, sizeof(buf));
+    if ( !cptr ) {
+        netsnmp_config_error("Missing traphandle command (%s)", buf);
+        return;
+    }
+
     DEBUGMSGTL(("read_config:traphandle", "registering handler for: "));
     if (!strcmp(buf, "default")) {
         DEBUGMSG(("read_config:traphandle", "default"));
