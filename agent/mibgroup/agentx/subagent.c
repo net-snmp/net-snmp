@@ -111,6 +111,18 @@ subagent_startup(int majorID, int minorID,
     return 0;
 }
 
+static void
+subagent_init_callback_session(void)
+{
+    if (agentx_callback_sess == NULL) {
+        agentx_callback_sess = netsnmp_callback_open(callback_master_num,
+                                                     handle_subagent_response,
+                                                     NULL, NULL);
+        DEBUGMSGTL(("agentx/subagent", "subagent_init sess %08x\n",
+                    agentx_callback_sess));
+    }
+}
+
 static int subagent_init_init = 0;
 /**
  * init subagent callback (local) session and connect to master agent
@@ -139,13 +151,7 @@ subagent_init(void)
     /*
      * open (local) callback session
      */
-    if (agentx_callback_sess == NULL) {
-        agentx_callback_sess = netsnmp_callback_open(callback_master_num,
-                                                     handle_subagent_response,
-                                                     NULL, NULL);
-        DEBUGMSGTL(("agentx/subagent", "subagent_init sess %08x\n",
-                    agentx_callback_sess));
-    }
+    subagent_init_callback_session();
     if (NULL == agentx_callback_sess)
         return -1;
 
@@ -483,6 +489,12 @@ handle_subagent_response(int op, netsnmp_session * session, int reqid,
     int             rc = 0;
 
     if (op != NETSNMP_CALLBACK_OP_RECEIVED_MESSAGE || magic == NULL) {
+        if (op == NETSNMP_CALLBACK_OP_TIMED_OUT && magic != NULL) {
+            if (smagic->ovars != NULL) {
+                snmp_free_varbind(smagic->ovars);
+            }
+            free(smagic);
+        }
         return 1;
     }
 
@@ -983,6 +995,21 @@ agentx_check_session(unsigned int clientreg, void *clientarg)
         if (main_session != NULL) {
             remove_trap_session(ss);
             snmp_close(main_session);
+            /*
+             * We need to remove the callbacks attached to the callback
+             * session because they have a magic callback data structure
+             * which includes a pointer to the main session
+             *    (which is no longer valid).
+             * 
+             * Given that the main session is not responsive anyway.
+             * it shoudn't matter if we lose some outstanding requests.
+             */
+            if (agentx_callback_sess != NULL ) {
+                snmp_close(agentx_callback_sess);
+                agentx_callback_sess = NULL;
+    
+                subagent_init_callback_session();
+            }
             main_session = NULL;
             agentx_reopen_session(0, NULL);
         }
