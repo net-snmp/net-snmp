@@ -163,7 +163,7 @@ init_udpTable(void)
             udpTable_handler,
             udpTable_oid, OID_LENGTH(udpTable_oid),
             HANDLER_CAN_RONLY),
-    netsnmp_register_table_iterator(reginfo, iinfo);
+    netsnmp_register_table_iterator2(reginfo, iinfo);
 
     /*
      * .... with a local cache

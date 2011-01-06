@@ -61,7 +61,7 @@ initialize_table_nsTransactionTable(void)
      */
     DEBUGMSGTL(("initialize_table_nsTransactionTable",
                 "Registering table nsTransactionTable as a table iterator\n"));
-    netsnmp_register_table_iterator(my_handler, iinfo);
+    netsnmp_register_table_iterator2(my_handler, iinfo);
 }
 
 /** Initialzies the nsTransactionTable module */

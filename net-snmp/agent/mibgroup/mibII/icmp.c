@@ -507,7 +507,7 @@ init_icmp(void)
     iinfo->get_next_data_point  = icmp_stats_next_entry;
     iinfo->table_reginfo        = table_info;
 
-    netsnmp_register_table_iterator(reginfo, iinfo);
+    netsnmp_register_table_iterator2(reginfo, iinfo);
 
     /* register icmpMsgStatsTable */
     msg_stats_reginfo = netsnmp_create_handler_registration("icmpMsgStatsTable",
@@ -531,7 +531,7 @@ init_icmp(void)
     msg_stats_iinfo->get_next_data_point  = icmp_msg_stats_next_entry;
     msg_stats_iinfo->table_reginfo        = msg_stats_table_info;
 
-    netsnmp_register_table_iterator(msg_stats_reginfo, msg_stats_iinfo);
+    netsnmp_register_table_iterator2(msg_stats_reginfo, msg_stats_iinfo);
     netsnmp_inject_handler( msg_stats_reginfo,
             netsnmp_get_cache_handler(ICMP_STATS_CACHE_TIMEOUT,
                 icmp_load, icmp_free,

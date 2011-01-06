@@ -95,11 +95,11 @@ snmpTargetAddrTable_create(void)
 void
 snmpTargetAddrTable_dispose(struct targetAddrTable_struct *reaped)
 {
-    if (reaped->sess != NULL) {
+    if (reaped->sess)
         snmp_close(reaped->sess);
-    }
+    else
+        SNMP_FREE(reaped->tAddress);
     SNMP_FREE(reaped->name);
-    SNMP_FREE(reaped->tAddress);
     SNMP_FREE(reaped->tagList);
     SNMP_FREE(reaped->params);
 
@@ -328,7 +328,7 @@ init_snmpTargetAddrEntry(void)
 
     snmpd_register_config_handler("targetAddr",
                                   snmpd_parse_config_targetAddr,
-				  (void (*)(void))0, NULL);
+                                  (void (*)(void))0, NULL);
 
     /*
      * we need to be called back later 
@@ -338,6 +338,21 @@ init_snmpTargetAddrEntry(void)
 
 }                               /* init_snmpTargetAddrEntry */
 
+void
+shutdown_snmpTargetAddrEntry(void)
+{
+    struct targetAddrTable_struct *ptr;
+    struct targetAddrTable_struct *next;
+
+    for (ptr = aAddrTable; ptr; ptr = next) {
+        next = ptr->next;
+        snmpTargetAddrTable_dispose(ptr);
+    }
+    aAddrTable = NULL;
+
+    snmp_unregister_callback(SNMP_CALLBACK_LIBRARY, SNMP_CALLBACK_STORE_DATA,
+                             store_snmpTargetAddrEntry, NULL, FALSE);
+}
 
 int
 snmpTargetAddr_addName(struct targetAddrTable_struct *entry, char *cptr)
@@ -551,7 +566,7 @@ snmpTargetAddr_addStorageType(struct targetAddrTable_struct *entry,
              (entry->storageType != SNMP_STORAGE_NONVOLATILE) &&
              (entry->storageType != SNMP_STORAGE_PERMANENT) &&
              (entry->storageType != SNMP_STORAGE_READONLY)) {
-	DEBUGMSGTL(("snmpTargetAddrEntry",
+        DEBUGMSGTL(("snmpTargetAddrEntry",
                     "ERROR snmpTargetAddrEntry: storage type not a valid "
                     "value of other(%d), volatile(%d), nonvolatile(%d), "
                     "permanent(%d), or readonly(%d) in config string.\n",
