@@ -970,9 +970,9 @@ agentx_check_session(unsigned int clientreg, void *clientarg)
         register_mib_detach();
         if (main_session != NULL) {
             remove_trap_session(ss);
-        snmp_close(main_session);
-        main_session = NULL;
-        agentx_reopen_session(0, NULL);
+            snmp_close(main_session);
+            main_session = NULL;
+            agentx_reopen_session(0, NULL);
         }
         else {
             snmp_close(main_session);
