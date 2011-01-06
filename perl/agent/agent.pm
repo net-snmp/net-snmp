@@ -384,6 +384,8 @@ functional "enough" at this point in time.
 
 	$mode = $request->getMode();
 
+=head2 $registration_info object functions
+
     getRootOID ()
 	Returns a NetSNMP::OID object that describes the registration
 	point that the handler is getting called for (in case you
