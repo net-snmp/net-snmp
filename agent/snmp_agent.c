@@ -1755,7 +1755,8 @@ netsnmp_wrap_up_request(netsnmp_agent_session *asp, int status)
         asp->pdu->command = SNMP_MSG_RESPONSE;
         asp->pdu->errstat = asp->status;
         asp->pdu->errindex = asp->index;
-        if (!snmp_send(asp->session, asp->pdu)) {
+        if (!snmp_send(asp->session, asp->pdu) &&
+             asp->session->s_snmp_errno != SNMPERR_SUCCESS) {
             netsnmp_variable_list *var_ptr;
             snmp_perror("send response");
             for (var_ptr = asp->pdu->variables; var_ptr != NULL;
