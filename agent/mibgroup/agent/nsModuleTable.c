@@ -75,7 +75,7 @@ initialize_table_nsModuleTable(void)
     netsnmp_register_table_iterator(my_handler, iinfo);
 }
 
-/** Initialzies the nsModuleTable module */
+/** Initializes the nsModuleTable module */
 void
 init_nsModuleTable(void)
 {
