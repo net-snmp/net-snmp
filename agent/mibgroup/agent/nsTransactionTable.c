@@ -64,7 +64,7 @@ initialize_table_nsTransactionTable(void)
     netsnmp_register_table_iterator2(my_handler, iinfo);
 }
 
-/** Initialzies the nsTransactionTable module */
+/** Initializes the nsTransactionTable module */
 void
 init_nsTransactionTable(void)
 {
