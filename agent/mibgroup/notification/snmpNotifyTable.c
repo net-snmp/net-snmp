@@ -401,18 +401,18 @@ notifyTable_unregister_notifications(int major, int minor,
                                      void *serverarg, void *clientarg)
 {
     struct header_complex_index *hptr, *nhptr;
-    struct snmpNotifyTable_data *nptr;
 
     for (hptr = snmpNotifyTableStorage; hptr; hptr = nhptr) {
-        nptr = (struct snmpNotifyTable_data *) hptr->data;
+        struct snmpNotifyTable_data *nptr = hptr->data;
         nhptr = hptr->next;
         if (nptr->snmpNotifyStorageType == ST_READONLY) {
             header_complex_extract_entry(&snmpNotifyTableStorage, hptr);
-            SNMP_FREE(nptr->snmpNotifyName);
-            SNMP_FREE(nptr->snmpNotifyTag);
-            SNMP_FREE(nptr);
+            free(nptr->snmpNotifyName);
+            free(nptr->snmpNotifyTag);
+            free(nptr);
         }
     }
+    snmpNotifyTableStorage = NULL;
     return (0);
 }
 
@@ -470,6 +470,35 @@ init_snmpNotifyTable(void)
     DEBUGMSGTL(("snmpNotifyTable", "done.\n"));
 }
 
+void
+shutdown_snmpNotifyTable(void)
+{
+    DEBUGMSGTL(("snmpNotifyTable", "shutting down ... "));
+
+    notifyTable_unregister_notifications(SNMP_CALLBACK_APPLICATION,
+                                         SNMPD_CALLBACK_PRE_UPDATE_CONFIG,
+                                         NULL,
+                                         NULL);
+
+    snmp_unregister_callback(SNMP_CALLBACK_APPLICATION,
+                             SNMPD_CALLBACK_PRE_UPDATE_CONFIG,
+                             notifyTable_unregister_notifications, NULL, FALSE);
+    snmp_unregister_callback(SNMP_CALLBACK_APPLICATION,
+                             SNMPD_CALLBACK_REGISTER_NOTIFICATIONS,
+                             notifyTable_register_notifications, NULL, FALSE);
+    snmp_unregister_callback(SNMP_CALLBACK_APPLICATION,
+                             SNMPD_CALLBACK_SEND_TRAP2, send_notifications,
+                             NULL, FALSE);
+#ifndef DISABLE_SNMPV1
+    snmp_unregister_callback(SNMP_CALLBACK_APPLICATION,
+                             SNMPD_CALLBACK_SEND_TRAP1, send_notifications,
+                             NULL, FALSE);
+#endif
+    snmp_unregister_callback(SNMP_CALLBACK_LIBRARY, SNMP_CALLBACK_STORE_DATA,
+                             store_snmpNotifyTable, NULL, FALSE);
+
+    DEBUGMSGTL(("snmpNotifyTable", "done.\n"));
+}
 
 /*
  * snmpNotifyTable_add(): adds a structure node to our data set 

@@ -138,25 +138,6 @@ netsnmp_iterator_create_table( Netsnmp_First_Data_Point *firstDP,
     return iinfo;
 }
 
-/** Duplicates a table iterator. */
-netsnmp_iterator_info *
-netsnmp_iterator_clone(netsnmp_iterator_info *iinfo)
-{
-    netsnmp_iterator_info *copy;
-
-    copy = malloc(sizeof *copy);
-    if (copy) {
-        *copy = *iinfo;
-        copy->table_reginfo = netsnmp_table_registration_info_clone(iinfo->table_reginfo);
-        copy->indexes = snmp_clone_varbind(iinfo->indexes);
-        if (!copy->table_reginfo || !copy->indexes) {
-            netsnmp_iterator_delete_table(copy);
-            copy = NULL;
-        }
-    }
-    return copy;
-}
-
 /** Free the memory that was allocated for a table iterator. */
 void
 netsnmp_iterator_delete_table( netsnmp_iterator_info *iinfo )
@@ -186,7 +167,33 @@ netsnmp_iterator_delete_table( netsnmp_iterator_info *iinfo )
  *
  * ================================== */
 
-/** returns a netsnmp_mib_handler object for the table_iterator helper */
+static netsnmp_iterator_info *
+netsnmp_iterator_ref(netsnmp_iterator_info *iinfo)
+{
+    iinfo->refcnt++;
+    return iinfo;
+}
+
+static void
+netsnmp_iterator_deref(netsnmp_iterator_info *iinfo)
+{
+    if (--iinfo->refcnt == 0)
+        netsnmp_iterator_delete_table(iinfo);
+}
+
+void netsnmp_handler_owns_iterator_info(netsnmp_mib_handler *h)
+{
+    netsnmp_assert(h);
+    netsnmp_assert(h->myvoid);
+    ((netsnmp_iterator_info *)(h->myvoid))->refcnt++;
+    h->data_clone = (void *(*)(void *))netsnmp_iterator_ref;
+    h->data_free  = (void(*)(void *))netsnmp_iterator_deref;
+}
+
+/**
+ * Returns a netsnmp_mib_handler object for the table_iterator helper.
+ * The caller remains the owner of the iterator information object.
+ */
 netsnmp_mib_handler *
 netsnmp_get_table_iterator_handler(netsnmp_iterator_info *iinfo)
 {
@@ -203,8 +210,30 @@ netsnmp_get_table_iterator_handler(netsnmp_iterator_info *iinfo)
         return NULL;
 
     me->myvoid = iinfo;
-    me->data_clone = (void *(*)(void *))netsnmp_iterator_clone;
-    me->data_free  = (void(*)(void *))netsnmp_iterator_delete_table;
+    return me;
+}
+
+/**
+ * Returns a netsnmp_mib_handler object for the table_iterator helper.
+ * Ownership of the iterator information object is transferred to the
+ * returned MIB handler.
+ */
+netsnmp_mib_handler *
+netsnmp_get_table_iterator_handler2(netsnmp_iterator_info *iinfo)
+{
+    netsnmp_mib_handler *me;
+
+    if (!iinfo)
+        return NULL;
+
+    me = netsnmp_create_handler(TABLE_ITERATOR_NAME,
+                                netsnmp_table_iterator_helper_handler);
+
+    if (!me)
+        return NULL;
+
+    me->myvoid = iinfo;
+    netsnmp_handler_owns_iterator_info(me);
     return me;
 }
 
@@ -219,6 +248,7 @@ netsnmp_get_table_iterator_handler(netsnmp_iterator_info *iinfo)
  * @param reginfo is a pointer to a netsnmp_handler_registration struct
  *
  * @param iinfo is a pointer to a netsnmp_iterator_info struct
+ * The caller remains the owner of this structure.
  *
  * @return MIB_REGISTERED_OK is returned if the registration was a success.
  *	Failures are MIB_REGISTRATION_FAILED, MIB_DUPLICATE_REGISTRATION.
@@ -232,6 +262,40 @@ netsnmp_register_table_iterator(netsnmp_handler_registration *reginfo,
     reginfo->modes |= HANDLER_CAN_STASH;
     netsnmp_inject_handler(reginfo,
                            netsnmp_get_table_iterator_handler(iinfo));
+    if (!iinfo)
+        return SNMPERR_GENERR;
+    if (!iinfo->indexes && iinfo->table_reginfo &&
+                           iinfo->table_reginfo->indexes )
+        iinfo->indexes = snmp_clone_varbind( iinfo->table_reginfo->indexes );
+
+    return netsnmp_register_table(reginfo, iinfo->table_reginfo);
+}
+
+/** 
+ * Creates and registers a table iterator helper handler calling 
+ * netsnmp_create_handler with a handler name set to TABLE_ITERATOR_NAME 
+ * and access method, netsnmp_table_iterator_helper_handler.
+ *
+ * If NOT_SERIALIZED is not defined the function injects the serialize
+ * handler into the calling chain prior to calling netsnmp_register_table.
+ *
+ * @param reginfo is a pointer to a netsnmp_handler_registration struct
+ *
+ * @param iinfo is a pointer to a netsnmp_iterator_info struct
+ * Ownership of this structure is transferred to the handler registration.
+ *
+ * @return MIB_REGISTERED_OK is returned if the registration was a success.
+ *	Failures are MIB_REGISTRATION_FAILED, MIB_DUPLICATE_REGISTRATION.
+ *	If iinfo is NULL, SNMPERR_GENERR is returned.
+ *
+ */
+int
+netsnmp_register_table_iterator2(netsnmp_handler_registration *reginfo,
+                                 netsnmp_iterator_info *iinfo)
+{
+    reginfo->modes |= HANDLER_CAN_STASH;
+    netsnmp_inject_handler(reginfo,
+                           netsnmp_get_table_iterator_handler2(iinfo));
     if (!iinfo)
         return SNMPERR_GENERR;
     if (!iinfo->indexes && iinfo->table_reginfo &&

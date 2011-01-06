@@ -67,6 +67,7 @@ config_add_mib(SNMPv2-TM)
  */
 
      void            init_snmpTargetAddrEntry(void);
+     void            shutdown_snmpTargetAddrEntry(void);
      int             store_snmpTargetAddrEntry(int majorID, int minorID,
                                                void *serverarg,
                                                void *clientarg);

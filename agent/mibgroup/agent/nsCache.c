@@ -102,7 +102,7 @@ init_nsCache(void)
     /*
      * .... and register the table with the agent.
      */
-    netsnmp_register_table_iterator(
+    netsnmp_register_table_iterator2(
         netsnmp_create_handler_registration(
             "tzCacheTable", handle_nsCacheTable,
             nsCacheTable_oid, OID_LENGTH(nsCacheTable_oid),

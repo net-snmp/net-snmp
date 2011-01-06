@@ -92,7 +92,7 @@ initialize_table_netSnmpHostsTable(void)
      */
     DEBUGMSGTL(("initialize_table_netSnmpHostsTable",
                 "Registering table netSnmpHostsTable as a table iterator\n"));
-    netsnmp_register_table_iterator(my_handler, iinfo);
+    netsnmp_register_table_iterator2(my_handler, iinfo);
 }
 
 /** Initializes the netSnmpHostsTable module */

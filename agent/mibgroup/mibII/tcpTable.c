@@ -180,7 +180,7 @@ init_tcpTable(void)
             tcpTable_handler,
             tcpTable_oid, OID_LENGTH(tcpTable_oid),
             HANDLER_CAN_RONLY),
-    netsnmp_register_table_iterator(reginfo, iinfo);
+    netsnmp_register_table_iterator2(reginfo, iinfo);
 
     /*
      * .... with a local cache

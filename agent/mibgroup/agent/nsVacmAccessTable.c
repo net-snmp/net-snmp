@@ -46,7 +46,7 @@ init_register_nsVacm_context(const char *context)
     if ( context && context[0] )
         reg->contextName = strdup(context);
 
-    netsnmp_register_table_iterator(reg, iinfo);
+    netsnmp_register_table_iterator2(reg, iinfo);
 }
 
 void

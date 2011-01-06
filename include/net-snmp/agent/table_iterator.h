@@ -51,6 +51,9 @@ extern          "C" {
        The netsnmp_iterator_info typedef can be used instead of directly calling this struct if you would prefer.
      */
     typedef struct netsnmp_iterator_info_s {
+       /** Number of handlers that own this data structure. */
+       int refcnt;
+
        /** Responsible for: returning the first set of "index" data, a
            loop-context pointer, and optionally a data context
            pointer */
@@ -116,12 +119,15 @@ extern          "C" {
  * Iterator API: MIB maintenance
  * ============================ */
 
+    void   netsnmp_handler_owns_iterator_info(netsnmp_mib_handler *h);
     netsnmp_mib_handler
           *netsnmp_get_table_iterator_handler(netsnmp_iterator_info *iinfo);
-    int    netsnmp_register_table_iterator(   netsnmp_handler_registration
-                                                                    *reginfo,
-                                              netsnmp_iterator_info *iinfo);
-    netsnmp_iterator_info *netsnmp_iterator_clone(netsnmp_iterator_info *iinfo);
+    netsnmp_mib_handler
+          *netsnmp_get_table_iterator_handler2(netsnmp_iterator_info *iinfo);
+    int netsnmp_register_table_iterator(netsnmp_handler_registration *reginfo,
+                                        netsnmp_iterator_info *iinfo);
+    int netsnmp_register_table_iterator2(netsnmp_handler_registration *reginfo,
+                                         netsnmp_iterator_info *iinfo);
     void  netsnmp_iterator_delete_table(netsnmp_iterator_info *iinfo);
 
     void *netsnmp_extract_iterator_context(netsnmp_request_info *);

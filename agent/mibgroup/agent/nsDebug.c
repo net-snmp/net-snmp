@@ -91,7 +91,7 @@ init_nsDebug(void)
     /*
      * .... and register the table with the agent.
      */
-    netsnmp_register_table_iterator(
+    netsnmp_register_table_iterator2(
         netsnmp_create_handler_registration(
             "tzDebugTable", handle_nsDebugTable,
             nsDebugTokenTable_oid, OID_LENGTH(nsDebugTokenTable_oid),

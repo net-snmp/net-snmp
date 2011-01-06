@@ -72,7 +72,7 @@ initialize_table_nsModuleTable(void)
      */
     DEBUGMSGTL(("initialize_table_nsModuleTable",
                 "Registering table nsModuleTable as a table iterator\n"));
-    netsnmp_register_table_iterator(my_handler, iinfo);
+    netsnmp_register_table_iterator2(my_handler, iinfo);
 }
 
 /** Initialzies the nsModuleTable module */

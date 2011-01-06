@@ -99,7 +99,7 @@ initialize_table_ipCidrRouteTable(void)
      */
     DEBUGMSGTL(("initialize_table_ipCidrRouteTable",
                 "Registering table ipCidrRouteTable as a table iterator\n"));
-    netsnmp_register_table_iterator(my_handler, iinfo);
+    netsnmp_register_table_iterator2(my_handler, iinfo);
 }
 
 /** Initializes the ipCidrRouteTable module */
