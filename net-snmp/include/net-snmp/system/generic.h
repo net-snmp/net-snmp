@@ -1,3 +1,5 @@
+#ifndef __NET_SNMP_SYSTEM_GENERIC_H__
+#define __NET_SNMP_SYSTEM_GENERIC_H__
 
 #define bsdlike bsdlike
 
@@ -72,3 +74,5 @@
  */
 #define INP_NEXT_SYMBOL inp_next
 #define INP_PREV_SYMBOL inp_prev
+
+#endif /* !__NET_SNMP_SYSTEM_GENERIC_H__ */
