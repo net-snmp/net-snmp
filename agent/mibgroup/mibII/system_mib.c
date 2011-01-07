@@ -171,12 +171,14 @@ system_parse_config_sysServices(const char *token, char *cptr)
 static void
 system_parse_config_sysObjectID(const char *token, char *cptr)
 {
-    int sysObjectIDLength = MAX_OID_LEN;
+    size_t sysObjectIDLength = MAX_OID_LEN;
     if (!read_objid(cptr, sysObjectID, &sysObjectIDLength)) {
 	netsnmp_config_error("sysobjectid token not a parsable OID:\n\t%s",
 			     cptr);
-        memcpy(sysObjectID, version_sysoid, version_sysoid_len * sizeof(oid));
-    }
+        sysObjectIDByteLength = version_sysoid_len  * sizeof(oid);
+        memcpy(sysObjectID, version_sysoid, sysObjectIDByteLength);
+    } else
+        sysObjectIDByteLength = sysObjectIDLength * sizeof(oid);
 }
 
 
@@ -339,7 +341,7 @@ init_system_mib(void)
                 HANDLER_CAN_RONLY),
             netsnmp_init_watcher_info6(
 		&sysObjectID_winfo, sysObjectID, 0, ASN_OBJECT_ID,
-                WATCHER_MAX_SIZE | WATCHER_SIZE_IS_PTR | WATCHER_SIZE_UNIT_OIDS,
+                WATCHER_MAX_SIZE | WATCHER_SIZE_IS_PTR,
                 MAX_OID_LEN, &sysObjectIDByteLength));
     }
     {
