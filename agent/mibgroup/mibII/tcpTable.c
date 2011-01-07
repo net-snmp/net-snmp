@@ -289,6 +289,7 @@ tcpTable_handler(netsnmp_mib_handler          *handler,
 
 int
 TCP_Count_Connections( void ) {
+    tcpTable_load(NULL, NULL);
     return tcp_estab;
 }
 
