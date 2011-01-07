@@ -97,7 +97,7 @@
 int
 addRoute(u_long dstip, u_long gwip, u_long iff, u_short flags)
 {
-#if defined SIOCADDRT && !defined(irix6)
+#if defined SIOCADDRT && !(defined(irix6) || defined(__OpenBSD__))
     struct sockaddr_in dst;
     struct sockaddr_in gateway;
     int             s, rc;
@@ -133,6 +133,49 @@ addRoute(u_long dstip, u_long gwip, u_long iff, u_short flags)
         snmp_log_perror("ioctl");
     return rc;
 
+#elif defined __OpenBSD__
+
+       int     s, rc;
+       struct {
+               struct  rt_msghdr hdr;
+               struct  sockaddr_in dst;
+               struct  sockaddr_in gateway;
+       } rtmsg;
+
+       s = socket(PF_ROUTE, SOCK_RAW, 0);
+       if (s < 0) {
+            snmp_log_perror("socket");
+            return -1;
+       }
+
+       shutdown(s, SHUT_RD);
+
+       /* possible panic otherwise */
+       flags |= (RTF_UP | RTF_GATEWAY);
+
+       bzero(&rtmsg, sizeof(rtmsg));
+
+       rtmsg.hdr.rtm_type = RTM_ADD;
+       rtmsg.hdr.rtm_version = RTM_VERSION;
+       rtmsg.hdr.rtm_addrs = RTA_DST | RTA_GATEWAY;
+       rtmsg.hdr.rtm_flags = RTF_GATEWAY;
+
+       rtmsg.dst.sin_len = sizeof(rtmsg.dst);
+       rtmsg.dst.sin_family = AF_INET;
+       rtmsg.dst.sin_addr.s_addr = htonl(dstip);
+
+       rtmsg.gateway.sin_len = sizeof(rtmsg.gateway);
+       rtmsg.gateway.sin_family = AF_INET;
+       rtmsg.gateway.sin_addr.s_addr = htonl(gwip);
+
+       rc = sizeof(rtmsg);
+       rtmsg.hdr.rtm_msglen = rc;
+
+       if ((rc = write(s, &rtmsg, rc)) < 0) {
+               snmp_log_perror("writing to routing socket");
+               return -1;
+       }
+       return (rc);
 #else                           /* SIOCADDRT */
     return -1;
 #endif
@@ -143,7 +186,7 @@ addRoute(u_long dstip, u_long gwip, u_long iff, u_short flags)
 int
 delRoute(u_long dstip, u_long gwip, u_long iff, u_short flags)
 {
-#if defined SIOCDELRT && !defined(irix6)
+#if defined SIOCDELRT && !(defined(irix6) || defined(__OpenBSD__))
 
     struct sockaddr_in dst;
     struct sockaddr_in gateway;
@@ -177,7 +220,49 @@ delRoute(u_long dstip, u_long gwip, u_long iff, u_short flags)
     rc = ioctl(s, SIOCDELRT, (caddr_t) & route);
     close(s);
     return rc;
+#elif defined __OpenBSD__
+ 
+       int     s, rc;
+       struct {
+               struct  rt_msghdr hdr;
+               struct  sockaddr_in dst;
+               struct  sockaddr_in gateway;
+       } rtmsg;
 
+       s = socket(PF_ROUTE, SOCK_RAW, 0);
+       if (s < 0) {
+            snmp_log_perror("socket");
+            return -1;
+       }
+
+       shutdown(s, SHUT_RD);
+
+       /* possible panic otherwise */
+       flags |= (RTF_UP | RTF_GATEWAY);
+
+       bzero(&rtmsg, sizeof(rtmsg));
+
+       rtmsg.hdr.rtm_type = RTM_DELETE;
+       rtmsg.hdr.rtm_version = RTM_VERSION;
+       rtmsg.hdr.rtm_addrs = RTA_DST | RTA_GATEWAY;
+       rtmsg.hdr.rtm_flags = RTF_GATEWAY;
+
+       rtmsg.dst.sin_len = sizeof(rtmsg.dst);
+       rtmsg.dst.sin_family = AF_INET;
+       rtmsg.dst.sin_addr.s_addr = htonl(dstip);
+
+       rtmsg.gateway.sin_len = sizeof(rtmsg.gateway);
+       rtmsg.gateway.sin_family = AF_INET;
+       rtmsg.gateway.sin_addr.s_addr = htonl(gwip);
+
+       rc = sizeof(rtmsg);
+       rtmsg.hdr.rtm_msglen = rc;
+
+       if ((rc = write(s, &rtmsg, rc)) < 0) {
+               snmp_log_perror("writing to routing socket");
+               return -1;
+       }
+       return (rc);
 #else                           /* SIOCDELRT */
     return 0;
 #endif
