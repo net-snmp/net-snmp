@@ -64,6 +64,9 @@ struct netsnmp_udpEntry_s {
 #ifdef linux
 #define INP_NEXT_SYMBOL		inp_next
 #endif
+#ifdef openbsd4
+#define INP_NEXT_SYMBOL		inp_queue.cqe_next	/* or set via <net-snmp/system/openbsd.h> */
+#endif
 
 #if defined(freebsd4) || defined(darwin) || defined(osf5)
 typedef struct netsnmp_inpcb_s netsnmp_inpcb;
