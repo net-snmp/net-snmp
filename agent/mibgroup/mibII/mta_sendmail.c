@@ -499,7 +499,7 @@ open_sendmailst(BOOL config)
 count_queuegroup(struct QGrp *qg)
 {
     struct QDir    *d;
-    char            cwd[200];
+    char            cwd[SNMP_MAXPATH];
     time_t          current_time = time(NULL);
 
     if (current_time <= (qg->last + dir_cache_time)) {
