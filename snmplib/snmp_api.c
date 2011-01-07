@@ -1919,6 +1919,11 @@ snmp_sess_close(void *sessp)
         while (rp) {
             orp = rp;
             rp = rp->next_request;
+            if (orp->callback) {
+                orp->callback(NETSNMP_CALLBACK_OP_TIMED_OUT,
+                              slp->session, orp->pdu->reqid,
+                              orp->pdu, orp->cb_data);
+            }
             snmp_free_pdu(orp->pdu);
             free((char *) orp);
         }
