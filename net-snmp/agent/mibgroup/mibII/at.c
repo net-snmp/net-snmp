@@ -661,7 +661,11 @@ ARP_Scan_Init(void)
     mib[2] = 0;
     mib[3] = AF_INET;
     mib[4] = NET_RT_FLAGS;
+#if defined RTF_LLINFO
     mib[5] = RTF_LLINFO;
+#else
+    mib[5] = 0;
+#endif
 
     if (at)
         free(at);
