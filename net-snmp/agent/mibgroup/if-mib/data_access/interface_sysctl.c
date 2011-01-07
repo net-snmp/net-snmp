@@ -183,6 +183,7 @@ netsnmp_sysctl_ifmedia_to_speed(int media, u_int *speed,
 #endif
             }
             break;
+#if defined(IFM_TOKEN)
         case IFM_TOKEN:
             switch (IFM_SUBTYPE(media)) {
                 case IFM_TOK_STP4:
@@ -201,9 +202,10 @@ netsnmp_sysctl_ifmedia_to_speed(int media, u_int *speed,
                     *speed = 100000000;
                     *speed_high = 100;
                     break;
-#endif
+#endif /* IFM_TOK_STP100 */
             }
             break;
+#endif /* IFM_TOKEN */
 #ifdef IFM_ATM
         case IFM_ATM:
             switch (IFM_SUBTYPE(media)) {
