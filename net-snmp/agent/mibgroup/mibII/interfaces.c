@@ -2042,11 +2042,10 @@ Interface_Scan_Get_Count(void)
 
 #else                           /* hpux11 */
 
-static time_t   scan_time = 0;
-
 int
 Interface_Scan_Get_Count(void)
 {
+    static time_t   scan_time = 0;
     time_t          time_now = time(NULL);
 
     if (!Interface_Count || (time_now > scan_time + 60)) {
