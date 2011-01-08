@@ -488,7 +488,7 @@
 
 #define EXCACHETIME 30
 #define CACHEFILE ".snmp-exec-cache"
-#define MAXCACHESIZE (200*80)   /* roughly 200 lines max */
+#define MAXCACHESIZE (1500*80)   /* roughly 1500 lines max */
 
 /* misc defaults */
 
