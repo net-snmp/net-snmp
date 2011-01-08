@@ -545,11 +545,11 @@
 /* Define to 1 if you have the <osreldate.h> header file. */
 #undef HAVE_OSRELDATE_H
 
+/* define if you have pci_lookup_name() */
+#undef HAVE_PCI_LOOKUP_NAME
+
 /* Define to 1 if you have the <pci/pci.h> header file. */
 #undef HAVE_PCI_PCI_H
-
-/* Define to 1 if you have the `pci_lookup_name' function. */
-#undef HAVE_PCI_LOOKUP_NAME
 
 /* on aix, if you have perfstat */
 #undef HAVE_PERFSTAT
