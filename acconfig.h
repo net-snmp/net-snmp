@@ -313,7 +313,7 @@
 
 #define NETSNMP_EXCACHETIME 30
 #define NETSNMP_CACHEFILE ".snmp-exec-cache"
-#define NETSNMP_MAXCACHESIZE (200*80)   /* roughly 200 lines max */
+#define NETSNMP_MAXCACHESIZE (1500*80)   /* roughly 1500 lines max */
 
 /* misc defaults */
 

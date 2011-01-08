@@ -323,9 +323,6 @@
 /* Define to 1 if you have the <linux/ethtool.h> header file. */
 #undef HAVE_LINUX_ETHTOOL_H
 
-/* Define to 1 if `speed_hi' is member of `struct ethtool_cmd'. */
-#undef HAVE_STRUCT_ETHTOOL_CMD_SPEED_HI
-
 /* Define to 1 if you have the <linux/hdreg.h> header file. */
 #undef HAVE_LINUX_HDREG_H
 
@@ -739,6 +736,9 @@
 
 /* Define to 1 if `d_type' is member of `struct dirent'. */
 #undef HAVE_STRUCT_DIRENT_D_TYPE
+
+/* Define to 1 if `speed_hi' is member of `struct ethtool_cmd'. */
+#undef HAVE_STRUCT_ETHTOOL_CMD_SPEED_HI
 
 /* Define to 1 if `ifa_next' is member of `struct ifaddr'. */
 #undef HAVE_STRUCT_IFADDR_IFA_NEXT
