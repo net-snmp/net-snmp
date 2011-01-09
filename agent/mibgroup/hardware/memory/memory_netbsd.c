@@ -30,7 +30,7 @@ int netsnmp_mem_arch_load( netsnmp_cache *cache, void *magic ) {
     long           pagesize;
 
     struct uvmexp  uvmexp;
-    int            uvmexp_size  = sizeof(uvmexp);
+    size_t         uvmexp_size  = sizeof(uvmexp);
     int            uvmexp_mib[] = { CTL_VM, VM_UVMEXP };
 
     struct vmtotal total;

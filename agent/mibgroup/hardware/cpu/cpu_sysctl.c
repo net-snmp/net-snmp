@@ -37,7 +37,8 @@ void _cpu_copy_stats( netsnmp_cpu_info *cpu );
      *   (including descriptions)
      */
 void init_cpu_sysctl( void ) {
-    int               i, n;
+    int               n;
+    size_t            i;
     int               ncpu_mib[]  = { CTL_HW, HW_NCPU };
     int               model_mib[] = { CTL_HW, HW_MODEL };
     char              descr[ SNMP_MAXBUF ];
@@ -45,11 +46,11 @@ void init_cpu_sysctl( void ) {
     strcpy(cpu->name, "Overall CPU statistics");
 
     i = sizeof(n);
-    sysctl(ncpu_mib, 2, &n, (void *)&i, NULL, 0);
+    sysctl(ncpu_mib, 2, &n, &i, NULL, 0);
     if ( n <= 0 )
         n = 1;   /* Single CPU system */
     i = sizeof(descr);
-    sysctl(model_mib, 2, descr, (void *)&i, NULL, 0);
+    sysctl(model_mib, 2, descr, &i, NULL, 0);
     for ( i = 0; i < n; i++ ) {
         cpu = netsnmp_cpu_get_byIdx( i, 1 );
         cpu->status = 2;  /* running */
