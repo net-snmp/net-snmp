@@ -38,7 +38,8 @@ void _cpu_copy_stats( netsnmp_cpu_info *cpu );
      *   (including descriptions)
      */
 void init_cpu_nlist( void ) {
-    int            i, n;
+    int            n;
+    size_t         i;
     int            ncpu_mib[] = { CTL_HW, HW_NCPU  };
     int           model_mib[] = { CTL_HW, HW_MODEL };
     char           descr[ SNMP_MAXBUF ];
