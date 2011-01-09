@@ -341,7 +341,8 @@ getstats(void)
     time_t          now;
     int             mib[2];
     char           *t, *tp;
-    int             size, dkn_size, i;
+    size_t          size, dkn_size;
+    int             i;
 
     now = time(NULL);
     if (cache_time + CACHE_TIMEOUT > now) {
