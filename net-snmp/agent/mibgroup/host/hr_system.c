@@ -223,7 +223,7 @@ var_hrsys(struct variable * vp,
 #endif
 #if NETSNMP_CAN_USE_SYSCTL && defined(CTL_KERN) && defined(KERN_MAXPROC)
     static int      maxproc_mib[] = { CTL_KERN, KERN_MAXPROC };
-    int             buf_size;
+    size_t          buf_size;
 #endif
 #if defined(hpux10) || defined(hpux11)
     struct pst_static pst_buf;

@@ -360,8 +360,8 @@ get_proc_instance(struct myproc *proc, oid inst)
  * these are for keeping track of the proc array 
  */
 
-static int      nproc = 0;
-static int      onproc = -1;
+static size_t   nproc = 0;
+static size_t   onproc = -1;
 static struct kinfo_proc *pbase = 0;
 
 int
