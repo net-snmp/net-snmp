@@ -153,7 +153,7 @@ int netsnmp_cpu_arch_load( netsnmp_cache *cache, void *magic ) {
 #ifdef NETSNMP_KERN_MCPU 
     NETSNMP_KERN_MCPU_TYPE *mcpu_stats;
     int            mcpu_mib[] = { CTL_KERN, NETSNMP_KERN_MCPU };
-    size_t         mcpu_size  = sizeof(NETSNMP_KERN_MCPU_TYPE);
+    size_t         mcpu_size;
 #endif
     NETSNMP_VM_STATS_TYPE mem_stats;
     int            mem_mib[] = { CTL_VM, NETSNMP_VM_STATS };
@@ -190,9 +190,9 @@ int netsnmp_cpu_arch_load( netsnmp_cache *cache, void *magic ) {
 #endif
 
 #ifdef NETSNMP_KERN_MCPU
-    mcpu_stats = (NETSNMP_KERN_MCPU_TYPE *)malloc(cpu_num*sizeof(NETSNMP_KERN_MCPU_TYPE));
-    sysctl(mcpu_mib, 2, mcpu_stats,
-           cpu_num*sizeof(NETSNMP_KERN_MCPU_TYPE), NULL, 0);
+    mcpu_size  = cpu_num*sizeof(NETSNMP_KERN_MCPU_TYPE);
+    mcpu_stats = malloc(mcpu_size);
+    sysctl(mcpu_mib, 2, mcpu_stats, &mcpu_size, NULL, 0);
     for ( i = 0; i < cpu_num; i++ ) {
         cpu = netsnmp_cpu_get_byIdx( i, 0 );
         /* XXX - per-CPU statistics - mcpu_mib[i].??? */
