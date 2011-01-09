@@ -170,7 +170,7 @@ var_extensible_vmstat(struct variable *vp,
 
     static struct uvmexp mem_old, mem_new;
     int             mem_mib[] = { CTL_VM, VM_UVMEXP };
-    int             mem_size = sizeof(struct uvmexp);
+    size_t          mem_size = sizeof(struct uvmexp);
 
     static long     long_ret;
     static char     errmsg[300];
@@ -186,13 +186,13 @@ var_extensible_vmstat(struct variable *vp,
     if (time_new != time_old) {
 #ifdef KERN_CP_TIME
         int             mib[2] = { CTL_KERN, KERN_CP_TIME };
-        int             ssize = sizeof(cpu_new);
+        size_t          ssize = sizeof(cpu_new);
 
         if (sysctl(mib, 2, cpu_new, &ssize, NULL, 0) < 0)
             memset(cpu_new, 0, sizeof(cpu_new));
 #elif defined(KERN_CPTIME)
         int             mib[2] = { CTL_KERN, KERN_CPTIME };
-        int             ssize = sizeof(cpu_new);
+        size_t          ssize = sizeof(cpu_new);
 
         if (sysctl(mib, 2, cpu_new, &ssize, NULL, 0) < 0)
             memset(cpu_new, 0, sizeof(cpu_new));
