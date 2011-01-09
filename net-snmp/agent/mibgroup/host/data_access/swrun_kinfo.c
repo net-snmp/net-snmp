@@ -51,6 +51,7 @@
     /*
      * later FreeBSD kinfo_proc field names
      */
+#define SWRUN_TABLE	kinfo_proc
 #define SWRUN_K_STAT	ki_stat
 #define SWRUN_K_PID	ki_pid
 #define SWRUN_K_COMM	ki_comm
@@ -59,8 +60,19 @@
 
 #else
     /*
+     * newer NetBSD, OpenBSD kinfo_proc2 field names
+     */
+#define SWRUN_TABLE	kinfo_proc2
+#define SWRUN_K_STAT	p_stat
+#define SWRUN_K_PID	p_pid
+#define SWRUN_K_COMM	p_comm
+#define SWRUN_K_FLAG	p_flag
+/*      SWRUN_K_CLASS	not defined     */
+#else
+    /*
      * early FreeBSD, NetBSD, OpenBSD kinfo_proc field names
      */
+#define SWRUN_TABLE	kinfo_proc
 #define SWRUN_K_STAT	kp_proc.p_stat
 #define SWRUN_K_PID	kp_proc.p_pid
 #define SWRUN_K_COMM	kp_proc.p_comm
@@ -123,7 +135,7 @@ netsnmp_arch_swrun_init(void)
 int
 netsnmp_arch_swrun_container_load( netsnmp_container *container, u_int flags)
 {
-    struct kinfo_proc   *proc_table;
+    struct SWRUN_TABLE  *proc_table;
     int                  nprocs, i, rc;
     char                 buf[BUFSIZ], **argv, *cp;
     char                *name, *path;
@@ -133,7 +145,11 @@ netsnmp_arch_swrun_container_load( netsnmp_container *container, u_int flags)
         DEBUGMSGTL(("swrun:load:arch"," Can't query kvm info\n"));
         return 1;     /* No handle for retrieving process table */
     }
+#if HAVE_KVM_GETPROC2
+    proc_table = kvm_getproc2(kd, KERN_PROC_ALL, 0, sizeof(struct kinfo_proc2), &nprocs );
+#else
     proc_table = kvm_getprocs(kd, KERN_PROC_ALL, 0, &nprocs );
+#endif
     for ( i=0 ; i<nprocs; i++ ) {
         if ( 0 == proc_table[i].SWRUN_K_STAT )
             continue;
@@ -153,7 +169,11 @@ netsnmp_arch_swrun_container_load( netsnmp_container *container, u_int flags)
          * We'll use SWRUN_K_COMM for hrSWRunName,
          *   and as an alternative for hrSWRunPath
          */
-        argv = kvm_getargv( kd, &(proc_table[i]), 0);
+#if HAVE_KVM_GETPROC2
+        argv = kvm_getargv2( kd, &(proc_table[i]), 0);
+#else
+        argv = kvm_getargv(  kd, &(proc_table[i]), 0);
+#endif
 
         entry->hrSWRunName_len = snprintf(entry->hrSWRunName,
                                    sizeof(entry->hrSWRunName)-1,
@@ -234,6 +254,17 @@ netsnmp_arch_swrun_container_load( netsnmp_container *container, u_int flags)
 # endif
         entry->hrSWRunPerfCPU  = proc_table[i].ki_runtime / 100000;
         entry->hrSWRunPerfMem  = proc_table[i].ki_size / 1024;;
+#elif defined(HAVE_KVM_GETPROC2)
+        /*
+         * newer NetBSD, OpenBSD
+         */
+        entry->hrSWRunPerfCPU  = proc_table[i].p_uticks;
+        entry->hrSWRunPerfCPU += proc_table[i].p_sticks;
+        entry->hrSWRunPerfCPU += proc_table[i].p_iticks;
+        entry->hrSWRunPerfMem  = proc_table[i].p_vm_tsize;
+        entry->hrSWRunPerfMem += proc_table[i].p_vm_ssize;
+        entry->hrSWRunPerfMem += proc_table[i].p_vm_dsize;
+        entry->hrSWRunPerfMem *= (getpagesize() / 1024);
 #else
         /*
          * early FreeBSD, NetBSD, OpenBSD
