@@ -155,9 +155,9 @@ var_extensible_vmstat(struct variable *vp,
 
     static struct vmmeter mem_old, mem_new;
     int             mem_mib[] = { CTL_VM, VM_CNT };
-    int             mem_size = sizeof(struct vmmeter);
+    size_t          mem_size = sizeof(struct vmmeter);
     int             cpu_mib[] = { CTL_KERN, KERN_CPUSTATS };
-    int             cpu_size = sizeof(struct cpustats);
+    size_t          cpu_size = sizeof(struct cpustats);
 
     static long     long_ret;
     static char     errmsg[300];
