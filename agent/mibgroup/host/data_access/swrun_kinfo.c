@@ -110,7 +110,7 @@ netsnmp_arch_swrun_init(void)
 {
 #if NETSNMP_CAN_USE_SYSCTL && defined(CTL_KERN) && defined(KERN_MAXPROC)
     extern int _swrun_max;
-    int max_size = sizeof(_swrun_max);
+    size_t max_size = sizeof(_swrun_max);
     int maxproc_mib[] = { CTL_KERN, KERN_MAXPROC };
     sysctl(maxproc_mib, 2, &_swrun_max, &max_size, NULL, 0);
 #endif
