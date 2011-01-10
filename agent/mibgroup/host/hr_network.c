@@ -193,6 +193,10 @@ static netsnmp_interface_entry *HRN_ifnet;
 static char     HRN_name[MAX_PHYSADDR_LEN];
 static nmapi_phystat HRN_ifnet;
 #define M_Interface_Scan_Next(a, b, c, d)	Interface_Scan_Next(a, b, c)
+#elif defined darwin
+static char     HRN_name[IFNAMSIZ];
+static struct if_msghdr HRN_ifnet;
+#define M_Interface_Scan_Next(a, b, c, d)	Interface_Scan_Next(a, b, c, d)
 #else                           /* hpux11 */
 static char     HRN_name[16];
 #ifndef WIN32
@@ -222,7 +226,7 @@ int
 Get_Next_HR_Network(void)
 {
 short    HRN_index;
-#if !defined( solaris2) && ! defined( WIN32 )
+#if !(defined(solaris2) || defined(darwin) || defined(WIN32))
     if (M_Interface_Scan_Next(&HRN_index, HRN_name, &HRN_ifnet, NULL) == 0)
         HRN_index = -1;
 #else
@@ -239,18 +243,20 @@ Save_HR_Network_Info(void)
 {
     strcpy(HRN_savedName, HRN_name);
 #if defined( USING_IF_MIB_IFTABLE_IFTABLE_DATA_ACCESS_MODULE )
-    HRN_savedFlags = HRN_ifnet->os_flags;
+    HRN_savedFlags  = HRN_ifnet->os_flags;
     HRN_savedErrors = HRN_ifnet->stats.ierrors + HRN_ifnet->stats.oerrors;
 #elif defined( hpux11 )
-    HRN_savedFlags = HRN_ifnet.if_entry.ifOper;
+    HRN_savedFlags  = HRN_ifnet.if_entry.ifOper;
     HRN_savedErrors = HRN_ifnet.if_entry.ifInErrors +
-        HRN_ifnet.if_entry.ifOutErrors;
-#else                           /* hpux11 */
-#ifndef WIN32
+                      HRN_ifnet.if_entry.ifOutErrors;
+#elif defined(__APPLE__)       /* or darwin? */
+    HRN_savedFlags  = HRN_ifnet.ifm_flags;
+    HRN_savedErrors = HRN_ifnet.ifm_data.ifi_ierrors +
+                      HRN_ifnet.ifm_data.ifi_oerrors;
+#elif !defined(WIN32)
     HRN_savedFlags = HRN_ifnet.if_flags;
     HRN_savedErrors = HRN_ifnet.if_ierrors + HRN_ifnet.if_oerrors;
-#endif /* WIN32 */
-#endif                          /* hpux11 */
+#endif
 }
 
 
