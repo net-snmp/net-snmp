@@ -129,7 +129,10 @@ vmstat_handler(netsnmp_mib_handler          *handler,
         case CPUUSER:
              if ( info->history && info->history[0].total_hist ) {
                  value  = (info->user_ticks  - info->history[0].user_hist)*100;
-                 value /= (info->total_ticks - info->history[0].total_hist);
+                 if ( info->total_ticks - info->history[0].total_hist)
+                     value /= (info->total_ticks - info->history[0].total_hist);
+                 else
+                     value = 0;    /* or skip this entry */
                  snmp_set_var_typed_integer(requests->requestvb,
                                             ASN_INTEGER, value);
              }
@@ -138,7 +141,10 @@ vmstat_handler(netsnmp_mib_handler          *handler,
              if ( info->history && info->history[0].total_hist ) {
                      /* or sys2_ticks ??? */
                  value  = (info->sys_ticks  - info->history[0].sys_hist)*100;
-                 value /= (info->total_ticks - info->history[0].total_hist);
+                 if ( info->total_ticks - info->history[0].total_hist)
+                     value /= (info->total_ticks - info->history[0].total_hist);
+                 else
+                     value = 0;    /* or skip this entry */
                  snmp_set_var_typed_integer(requests->requestvb,
                                             ASN_INTEGER, value);
              }
@@ -146,7 +152,10 @@ vmstat_handler(netsnmp_mib_handler          *handler,
         case CPUIDLE:
              if ( info->history && info->history[0].total_hist ) {
                  value  = (info->idle_ticks  - info->history[0].idle_hist)*100;
-                 value /= (info->total_ticks - info->history[0].total_hist);
+                 if ( info->total_ticks - info->history[0].total_hist)
+                     value /= (info->total_ticks - info->history[0].total_hist);
+                 else
+                     value = 0;    /* or skip this entry */
                  snmp_set_var_typed_integer(requests->requestvb,
                                             ASN_INTEGER, value);
              }
