@@ -4,7 +4,11 @@
 #include <net-snmp/agent/hardware/memory.h>
 
 #include <unistd.h>
+#include <errno.h>
 #include <sys/sysctl.h>
+#if HAVE_SYS_VMMETER_H
+#include <sys/vmmeter.h>
+#endif
 #include <sys/swap.h>
 
 #if defined(HAVE_UVM_UVM_PARAM_H) && defined(HAVE_UVM_UVM_EXTERN_H)
@@ -37,20 +41,33 @@ int netsnmp_mem_arch_load( netsnmp_cache *cache, void *magic ) {
     size_t         total_size  = sizeof(total);
     int            total_mib[] = { CTL_VM, VM_METER };
 
-    long            phys_mem;
-    long            user_mem;
+    quad_t          phys_mem;
+    quad_t          user_mem;
+    unsigned int    bufspace
+    unsigned int    maxbufspace
     size_t          mem_size  = sizeof(phys_mem);
+    size_t          buf_size  = sizeof(bufspace);
     int             phys_mem_mib[] = { CTL_HW, HW_PHYSMEM };
     int             user_mem_mib[] = { CTL_HW, HW_USERMEM };
 
     /*
      * Retrieve the memory information from the underlying O/S...
      */
+#if defined(__NetBSD__)
+    sysctlbyname("vm.uvmexp",              &uvmexp, &uvmexp_size, NULL, 0);
+    sysctlbyname("vm.vmmeter",              &total,  &total_size, NULL, 0);
+    sysctlbyname("hw.physmem64",         &phys_mem,    &mem_size, NULL, 0);
+    sysctlbyname("hw.usermem64",         &user_mem,    &mem_size, NULL, 0);
+    sysctlbyname("vm.bufmem",            &bufspace,    &buf_size, NULL, 0);
+    sysctlbyname("vm.bufmem_hiwater", &maxbufspace,    &buf_size, NULL, 0);
+    pagesize = sysconf(_SC_PAGESIZE);
+#else  /* do we still need this section ? */
     sysctl(uvmexp_mib,   2, &uvmexp,   &uvmexp_size,   NULL, 0);
     sysctl(total_mib,    2, &total,    &total_size,    NULL, 0);
     sysctl(phys_mem_mib, 2, &phys_mem, &mem_size,      NULL, 0);
     sysctl(user_mem_mib, 2, &user_mem, &mem_size,      NULL, 0);
     pagesize = uvmexp.pagesize;
+#endif
 
     /*
      * ... and save this in a standard form.
@@ -64,7 +81,6 @@ int netsnmp_mem_arch_load( netsnmp_cache *cache, void *magic ) {
         mem->units = pagesize;
         mem->size  = phys_mem/pagesize;
         mem->free  = total.t_free;
-        mem->other = -1;
     }
 
     mem = netsnmp_memory_get_byIdx( NETSNMP_MEM_TYPE_USERMEM, 1 );
@@ -76,8 +92,42 @@ int netsnmp_mem_arch_load( netsnmp_cache *cache, void *magic ) {
         mem->units = pagesize;
         mem->size  = user_mem/pagesize;
         mem->free  = uvmexp.free;
-        mem->other = -1;
     }
+
+#if defined(__NetBSD__)
+    mem = netsnmp_memory_get_byIdx( NETSNMP_MEM_TYPE_VIRTMEM, 1 );
+    if (!mem) {
+        snmp_log_perror("No Virtual Memory info entry");
+    } else {
+        if (!mem->descr)
+             mem->descr = strdup("Virtual memory");
+        mem->units = pagesize;
+        mem->size  = total.t_vm;
+        mem->free  = total.t_avm;
+    }
+
+    mem = netsnmp_memory_get_byIdx( NETSNMP_MEM_TYPE_SHARED, 1 );
+    if (!mem) {
+        snmp_log_perror("No Shared Memory info entry");
+    } else {
+        if (!mem->descr)
+             mem->descr = strdup("Shared virtual memory");
+        mem->units = pagesize;
+        mem->size  = total.t_vmshr;
+        mem->free  = total.t_avmshr;
+    }
+
+    mem = netsnmp_memory_get_byIdx( NETSNMP_MEM_TYPE_SHARED2, 1 );
+    if (!mem) {
+        snmp_log_perror("No Shared2 Memory info entry");
+    } else {
+        if (!mem->descr)
+             mem->descr = strdup("Shared real memory");
+        mem->units = pagesize;
+        mem->size  = total.t_rmshr;
+        mem->free  = total.t_armshr;
+    }
+#endif
 
 #ifdef SWAP_NSWAP
     swapinfo(pagesize);
@@ -93,6 +143,19 @@ int netsnmp_mem_arch_load( netsnmp_cache *cache, void *magic ) {
         mem->free  = uvmexp.swpages - uvmexp.swpginuse;
         mem->other = -1;
     }
+
+#if defined(__NetBSD__)
+    mem = netsnmp_memory_get_byIdx( NETSNMP_MEM_TYPE_MBUF, 1 );
+    if (!mem) {
+        snmp_log_perror("No Buffer, etc info entry");
+    } else {
+        if (!mem->descr)
+             mem->descr = strdup("Memory buffers");
+        mem->units = 1024;
+        mem->size  =  maxbufspace            /1024;
+        mem->size  = (maxbufspace - bufspace)/1024;
+    }
+#endif
 
     return 0;
 }
