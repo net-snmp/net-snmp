@@ -50,7 +50,11 @@ void init_cpu_sysctl( void ) {
     if ( n <= 0 )
         n = 1;   /* Single CPU system */
     i = sizeof(descr);
+#if defined(__NetBSD__) && ( defined(__i386__) || defined(__x86_64__) )
+    sysctlbyname("machdep.cpu_brand", descr, (void *)&i, NULL, 0);
+#else
     sysctl(model_mib, 2, descr, &i, NULL, 0);
+#endif
     for ( i = 0; i < n; i++ ) {
         cpu = netsnmp_cpu_get_byIdx( i, 1 );
         cpu->status = 2;  /* running */
@@ -61,18 +65,18 @@ void init_cpu_sysctl( void ) {
 }
 
 
+#if defined(__NetBSD__)
+#define NETSNMP_CPU_STATS uint64_t
+#else
 #define NETSNMP_CPU_STATS long
-#if defined(KERN_CPUSTATS)                /* BSDi */
+#endif
+
+#if defined(__NetBSD__)
+#define NETSNMP_KERN_CPU  KERN_CP_TIME
+#elif defined(KERN_CPUSTATS)              /* BSDi */
 #define NETSNMP_KERN_CPU  KERN_CPUSTATS
 #elif defined(KERN_CPTIME)                /* OpenBSD */
 #define NETSNMP_KERN_CPU  KERN_CPTIME
-#elif defined(KERN_CP_TIME)               /* NetBSD */
-#define NETSNMP_KERN_CPU  KERN_CP_TIME
-
-#if defined(netbsdelf3)
-#undef  NETSNMP_CPU_STATS 
-#define NETSNMP_CPU_STATS uint64_t
-#endif
 
 #elif defined(__FreeBSD__)
 #define NETSNMP_KERN_CPU  0    /* dummy value - sysctlnametomib(2) should be used */
@@ -160,7 +164,7 @@ int netsnmp_cpu_arch_load( netsnmp_cache *cache, void *magic ) {
     size_t         mem_size  = sizeof(NETSNMP_VM_STATS_TYPE);
     netsnmp_cpu_info *cpu = netsnmp_cpu_get_byIdx( -1, 0 );
 
-#if defined(__FreeBSD__)
+#if (defined(__FreeBSD__) || defined(__NetBSD__))
     sysctlbyname("kern.cp_time", cpu_stats, &cpu_size, NULL, 0);
 #else
     sysctl(cpu_mib, 2,  cpu_stats, &cpu_size, NULL, 0);
