@@ -93,7 +93,7 @@
 int
 addRoute(u_long dstip, u_long gwip, u_long iff, u_short flags)
 {
-#if defined SIOCADDRT && !(defined(irix6) || defined(__OpenBSD__))
+#if defined SIOCADDRT && !(defined(irix6) || defined(__OpenBSD__) || defined(darwin))
     struct sockaddr_in dst;
     struct sockaddr_in gateway;
     int             s, rc;
@@ -129,7 +129,7 @@ addRoute(u_long dstip, u_long gwip, u_long iff, u_short flags)
         snmp_log_perror("ioctl");
     return rc;
 
-#elif defined __OpenBSD__
+#elif (defined __OpenBSD__ || defined(darwin))
 
        int     s, rc;
        struct {
@@ -182,7 +182,7 @@ addRoute(u_long dstip, u_long gwip, u_long iff, u_short flags)
 int
 delRoute(u_long dstip, u_long gwip, u_long iff, u_short flags)
 {
-#if defined SIOCDELRT && !(defined(irix6) || defined(__OpenBSD__))
+#if defined SIOCADDRT && !(defined(irix6) || defined(__OpenBSD__) || defined(darwin))
 
     struct sockaddr_in dst;
     struct sockaddr_in gateway;
@@ -216,7 +216,7 @@ delRoute(u_long dstip, u_long gwip, u_long iff, u_short flags)
     rc = ioctl(s, SIOCDELRT, (caddr_t) & route);
     close(s);
     return rc;
-#elif defined __OpenBSD__
+#elif (defined __OpenBSD__ || defined(darwin))
  
        int     s, rc;
        struct {
