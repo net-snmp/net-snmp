@@ -149,6 +149,12 @@ init_udp(void)
 #define USES_SNMP_DESIGNED_UDPSTAT
 #endif
 
+#ifdef NETBSD_STATS_VIA_SYSCTL
+#define UDP_STAT_STRUCTURE      struct udp_mib
+#define USES_SNMP_DESIGNED_UDPSTAT
+#undef UDP_NSTATS
+#endif
+
 #ifdef WIN32
 #include <iphlpapi.h>
 #define UDP_STAT_STRUCTURE MIB_UDPSTATS
@@ -455,6 +461,21 @@ udp_load(netsnmp_cache *cache, void *vmagic)
         DEBUGMSGTL(("mibII/udpScalar", "Failed to load UDP scalar Group (solaris)\n"));
     } else {
         DEBUGMSGTL(("mibII/udpScalar", "Loaded UDP scalar Group (solaris)\n"));
+    }
+    return ret_value;
+}
+#elif defined(NETBSD_STATS_VIA_SYSCTL)
+int
+udp_load(netsnmp_cache *cache, void *vmagic)
+{
+    long ret_value = -1;
+
+    ret_value = netbsd_read_udp_stat(&udpstat);
+
+    if ( ret_value < 0 ) {
+        DEBUGMSGTL(("mibII/udpScalar", "Failed to load UDP scalar Group (netbsd)\n"));
+    } else {
+        DEBUGMSGTL(("mibII/udpScalar", "Loaded UDP scalar Group (netbsd)\n"));
     }
     return ret_value;
 }

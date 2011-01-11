@@ -100,6 +100,9 @@
 #ifdef linux
 #include "kernel_linux.h"
 #endif
+#ifdef NETBSD_STATS_VIA_SYSCTL
+#include "kernel_netbsd.h"
+#endif
 	/* or MIB_xxxCOUNTER_SYMBOL || hpux11 */
 #ifdef hpux
 #include <sys/mib.h>
