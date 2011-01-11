@@ -16496,6 +16496,12 @@ ac_fn_c_check_header_compile "$LINENO" "$ac_header" "$as_ac_Header" "
 #if HAVE_NETINET_IP6_H
 #include <netinet/ip6.h>
 #endif
+#if HAVE_NET_IF_H
+#include <net/if.h>
+#endif
+#if HAVE_NET_ROUTE_H
+#include <net/route.h>
+#endif
 
 "
 if eval test \"x\$"$as_ac_Header"\" = x"yes"; then :
