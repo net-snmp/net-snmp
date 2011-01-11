@@ -61,6 +61,10 @@ static const struct in6_addr in6addr_any = IN6ADDR_ANY_INIT;
 #define SS_FAMILY __ss_family
 #endif
 
+#if defined(darwin)
+#include <stdint.h> /* for uint8_t */
+#endif
+
 #include <net-snmp/types.h>
 #include <net-snmp/output_api.h>
 #include <net-snmp/config_api.h>
