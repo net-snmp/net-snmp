@@ -26991,6 +26991,70 @@ _ACEOF
 
 
 fi
+ac_fn_c_check_member "$LINENO" "struct ifnet" "if_lastchange.tv_nsec" "ac_cv_member_struct_ifnet_if_lastchange_tv_nsec" "
+#ifdef NETSNMP_IFNET_NEEDS_KERNEL
+#define _KERNEL 1
+#endif
+#ifdef HAVE_SYS_TYPES_H
+#include <sys/types.h>
+#endif
+#ifdef HAVE_SYS_SOCKET_H
+#include <sys/socket.h>
+#endif
+#ifdef HAVE_SYS_TIME_H
+#include <sys/time.h>
+#endif
+#ifdef HAVE_NET_IF_H
+#include <net/if.h>
+#endif
+#ifdef HAVE_NET_IF_VAR_H
+#include <net/if_var.h>
+#endif
+#ifdef HAVE_SYS_QUEUE_H
+#include <sys/queue.h>
+#endif
+#ifdef linux
+struct ifnet {
+	char	*if_name;		/* name, e.g. \"en\" or \"lo\" */
+	short	if_unit;		/* sub-unit for lower level driver */
+	short	if_mtu;			/* maximum transmission unit */
+	short	if_flags;		/* up/down, broadcast, etc. */
+	int	if_metric;		/* routing metric (external only) */
+	char    if_hwaddr [6];		/* ethernet address */
+	int	if_type;		/* interface type: 1=generic,
+					   28=slip, ether=6, loopback=24 */
+	int	if_speed;		/* interface speed: in bits/sec */
+
+	struct sockaddr if_addr;	/* interface's address */
+	struct sockaddr ifu_broadaddr;	/* broadcast address */
+	struct sockaddr ia_subnetmask; 	/* interface's mask */
+
+	struct	ifqueue {
+		int	ifq_len;
+		int	ifq_drops;
+	} if_snd;			/* output queue */
+	int	if_ibytes;		/* octets received on interface */
+	int	if_ipackets;		/* packets received on interface */
+	int	if_ierrors;		/* input errors on interface */
+        int     if_iqdrops;             /* input queue overruns */
+	int	if_obytes;		/* octets sent on interface */
+	int	if_opackets;		/* packets sent on interface */
+	int	if_oerrors;		/* output errors on interface */
+	int	if_collisions;		/* collisions on csma interfaces */
+/* end statistics */
+	struct	ifnet *if_next;
+};
+#endif
+
+"
+if test "x$ac_cv_member_struct_ifnet_if_lastchange_tv_nsec" = xyes; then :
+
+cat >>confdefs.h <<_ACEOF
+#define HAVE_STRUCT_IFNET_IF_LASTCHANGE_TV_NSEC 1
+_ACEOF
+
+
+fi
 ac_fn_c_check_member "$LINENO" "struct ifnet" "if_mtu" "ac_cv_member_struct_ifnet_if_mtu" "
 #ifdef NETSNMP_IFNET_NEEDS_KERNEL
 #define _KERNEL 1

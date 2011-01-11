@@ -776,6 +776,9 @@
 /* Define to 1 if `if_lastchange.tv_sec' is a member of `struct ifnet'. */
 #undef HAVE_STRUCT_IFNET_IF_LASTCHANGE_TV_SEC
 
+/* Define to 1 if `if_lastchange.tv_nsec' is member of `struct ifnet'. */
+#undef HAVE_STRUCT_IFNET_IF_LASTCHANGE_TV_NSEC
+
 /* Define to 1 if `if_mtu' is a member of `struct ifnet'. */
 #undef HAVE_STRUCT_IFNET_IF_MTU
 
