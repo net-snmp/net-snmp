@@ -447,6 +447,155 @@ var_diskio(struct variable * vp,
 }
 #endif                          /* bsdi */
 
+#ifdef __NetBSD__
+#include <sys/sysctl.h>
+static int      ndisk;
+#ifdef HW_IOSTATNAMES
+static int nmib[2] = {CTL_HW, HW_IOSTATNAMES};
+#else
+static int nmib[2] = {CTL_HW, HW_DISKNAMES};
+#endif
+#ifdef HW_DISKSTATS
+#include <sys/disk.h>
+static int dmib[3] = {CTL_HW, HW_DISKSTATS, sizeof(struct disk_sysctl)};
+static struct disk_sysctl *dk;
+#endif
+#ifdef HW_IOSTATS
+#include <sys/iostat.h>
+static int dmib[3] = {CTL_HW, HW_IOSTATS, sizeof(struct io_sysctl)};
+static struct io_sysctl *dk;
+#endif
+static char   **dkname;
+
+static int
+getstats(void)
+{
+    time_t          now;
+    char           *t, *tp;
+    int             size, dkn_size, i;
+
+    now = time(NULL);
+    if (cache_time + CACHE_TIMEOUT > now) {
+        return 1;
+    }
+    size = 0;
+    if (sysctl(dmib, 3, NULL, &size, NULL, 0) < 0) {
+        perror("Can't get size of HW_DISKSTATS/HW_IOSTATS mib");
+        return 0;
+    }
+    if (ndisk != size / dmib[2]) {
+        if (dk)
+            free(dk);
+        if (dkname) {
+            for (i = 0; i < ndisk; i++)
+                if (dkname[i])
+                    free(dkname[i]);
+            free(dkname);
+        }
+        ndisk = size / dmib[2];
+        if (ndisk == 0)
+            return 0;
+        dkname = malloc(ndisk * sizeof(char *));
+        if (sysctl(nmib, 2, NULL, &dkn_size, NULL, 0) < 0) {
+            perror("Can't get size of HW_DISKNAMES mib");
+            return 0;
+        }
+        t = malloc(dkn_size);
+        if (sysctl(nmib, 2, t, &dkn_size, NULL, 0) < 0) {
+            perror("Can't get size of HW_DISKNAMES mib");
+            return 0;
+        }
+        for (i = 0, tp = strtok(t, " "); tp && i < ndisk; i++,
+	    tp = strtok(NULL, " ")) {
+            dkname[i] = strdup(tp);
+        }
+        free(t);
+        dk = malloc(ndisk * sizeof(*dk));
+    }
+    if (sysctl(dmib, 3, dk, &size, NULL, 0) < 0) {
+        perror("Can't get HW_DISKSTATS/HW_IOSTATS mib");
+        return 0;
+    }
+    cache_time = now;
+    return 1;
+}
+
+u_char *
+var_diskio(struct variable * vp,
+           oid * name,
+           size_t * length,
+           int exact, size_t * var_len, WriteMethod ** write_method)
+{
+    static long     long_ret;
+    unsigned int    indx;
+
+    if (getstats() == 0)
+        return 0;
+
+    if (header_simple_table
+        (vp, name, length, exact, var_len, write_method, ndisk))
+        return NULL;
+
+    indx = (unsigned int) (name[*length - 1] - 1);
+    if (indx >= ndisk)
+        return NULL;
+
+    switch (vp->magic) {
+    case DISKIO_INDEX:
+        long_ret = (long) indx + 1;
+        return (u_char *) & long_ret;
+
+    case DISKIO_DEVICE:
+        *var_len = strlen(dkname[indx]);
+        return (u_char *) dkname[indx];
+
+    case DISKIO_NREAD:
+#ifdef HW_DISKSTATS
+     	long_ret = dk[indx].dk_rbytes;
+#endif
+#ifdef HW_IOSTATS
+	if (dk[indx].type == IOSTAT_DISK)
+	    long_ret = dk[indx].rbytes;
+#endif
+        return (u_char *) & long_ret;
+
+    case DISKIO_NWRITTEN:
+#ifdef HW_DISKSTATS
+     	long_ret = dk[indx].dk_wbytes;
+#endif
+#ifdef HW_IOSTATS
+	if (dk[indx].type == IOSTAT_DISK)
+	    long_ret = dk[indx].wbytes;
+#endif
+        return (u_char *) & long_ret;
+
+    case DISKIO_READS:
+#ifdef HW_DISKSTATS
+     	long_ret = dk[indx].dk_rxfer;
+#endif
+#ifdef HW_IOSTATS
+	if (dk[indx].type == IOSTAT_DISK)
+	    long_ret = dk[indx].rxfer;
+#endif
+        return (u_char *) & long_ret;
+
+    case DISKIO_WRITES:
+#ifdef HW_DISKSTATS
+     	long_ret = dk[indx].dk_wxfer;
+#endif
+#ifdef HW_IOSTATS
+	if (dk[indx].type == IOSTAT_DISK)
+	    long_ret = dk[indx].wxfer;
+#endif
+        return (u_char *) & long_ret;
+
+    default:
+        ERROR_MSG("diskio.c: don't know how to handle this request.");
+    }
+    return NULL;
+}
+#endif /* __NetBSD__ */
+
 #if defined(freebsd4) || defined(freebsd5)
 
 /* disk load average patch by Rojer */
