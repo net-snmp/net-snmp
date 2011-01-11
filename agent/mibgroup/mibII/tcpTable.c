@@ -839,7 +839,11 @@ tcpTable_load(netsnmp_cache *cache, void *vmagic)
     size_t   len;
     int      sname[] = { CTL_NET, PF_INET, IPPROTO_TCP, TCPCTL_PCBLIST };
     char     *tcpcb_buf = NULL;
+#if defined(dragonfly)
+    struct xinpcb  *xig = NULL;
+#else
     struct xinpgen *xig = NULL;
+#endif
     netsnmp_inpcb  *nnew;
     int      StateMap[] = { 1, 2, 3, 4, 5, 8, 6, 10, 9, 7, 11 };
 
@@ -861,10 +865,19 @@ tcpTable_load(netsnmp_cache *cache, void *vmagic)
      *  Unpick this into the constituent 'xinpgen' structures, and extract
      *     the 'inpcb' elements into a linked list (built in reverse)
      */
+#if defined(dragonfly)
+    xig = (struct xinpcb  *) tcpcb_buf;
+#else
     xig = (struct xinpgen *) tcpcb_buf;
     xig = (struct xinpgen *) ((char *) xig + xig->xig_len);
+#endif
 
-    while (xig && (xig->xig_len > sizeof(struct xinpgen))) {
+#if defined(dragonfly)
+    while (xig && ((char *)xig + xig->xi_len < tcpcb_buf + len))
+#else
+    while (xig && (xig->xig_len > sizeof(struct xinpgen)))
+#endif
+    {
         nnew = SNMP_MALLOC_TYPEDEF(netsnmp_inpcb);
         if (!nnew)
             break;
@@ -877,7 +890,11 @@ tcpTable_load(netsnmp_cache *cache, void *vmagic)
 
 	nnew->inp_next = tcp_head;
 	tcp_head   = nnew;
+#if defined(dragonfly)
+        xig = (struct xinpcb  *) ((char *) xig + xig->xi_len);
+#else
         xig = (struct xinpgen *) ((char *) xig + xig->xig_len);
+#endif
     }
 
     free(tcpcb_buf);
