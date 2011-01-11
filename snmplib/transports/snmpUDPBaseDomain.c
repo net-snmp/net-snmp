@@ -258,7 +258,7 @@ int netsnmp_udpbase_sendto(int fd, struct in_addr *srcip, int if_index,
     cmsg.cm.cmsg_len = sizeof(struct cmsghdr) + sizeof(struct in_pktinfo);
     cmsg.cm.cmsg_level = SOL_IP;
     cmsg.cm.cmsg_type = IP_PKTINFO;
-    cmsg.ipi.ipi_ifindex = if_index;
+    cmsg.ipi.ipi_ifindex = 0;
     cmsg.ipi.ipi_spec_dst.s_addr = (srcip ? srcip->s_addr : INADDR_ANY);
 
     m.msg_name		= remote;
@@ -276,7 +276,9 @@ int netsnmp_udpbase_sendto(int fd, struct in_addr *srcip, int if_index,
     if (ret < 0 && errno == EINVAL && srcip) {
         /* The error might be caused by broadcast srcip (i.e. we're responding
          * to broadcast request) - sendmsg does not like it. Try to resend it
-         * with global address. */
+         * with global address and using the interface on whicg it was
+         * received */
+        cmsg.ipi.ipi_ifindex = if_index;
         cmsg.ipi.ipi_spec_dst.s_addr = INADDR_ANY;
         DEBUGMSGTL(("udpbase:sendto", "re-sending the message\n"));
         ret = sendmsg(fd, &m, MSG_NOSIGNAL|MSG_DONTWAIT);
