@@ -45,8 +45,10 @@
 #ifdef HAVE_SYS_STAT_H
 #include <sys/stat.h>
 #endif
+#if !defined(dragonfly)
 #ifdef HAVE_SYS_VNODE_H
 #include <sys/vnode.h>
+#endif
 #endif
 #ifdef HAVE_UFS_UFS_QUOTA_H
 #include <ufs/ufs/quota.h>

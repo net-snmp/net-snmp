@@ -10,8 +10,12 @@
  */
 #include <sys/param.h>
 #include <sys/time.h>
+#ifdef dragonfly
+#include <sys/user.h>
+#else
 #include <sys/proc.h>
 #include <sys/dkstat.h>
+#endif
 #ifdef freebsd5
 #include <sys/bio.h>
 #endif
@@ -249,8 +253,14 @@ var_extensible_mem(struct variable *vp,
     static long     long_ret;
     static char     errmsg[1024];
 
+#ifdef dragonfly
+    static struct vmstats mem;
+    size_t        vmstats_size = sizeof(mem);
+#endif
     static struct vmmeter mem;
+#endif
     static struct vmtotal total;
+
     size_t          total_size = sizeof(total);
     int             total_mib[] = { CTL_VM, VM_METER };
 
@@ -268,7 +278,11 @@ var_extensible_mem(struct variable *vp,
     /*
      * Memory info 
      */
+#ifdef dragonfly
+    sysctlbyname("vm.vmstats", &vmstats, &vmstats_size, NULL, 0);
+#else
     auto_nlist(SUM_SYMBOL, (char *) &mem, sizeof(mem));
+#endif
     sysctl(total_mib, 2, &total, &total_size, NULL, 0);
 
     /*
@@ -351,6 +365,8 @@ var_extensible_mem(struct variable *vp,
     case MEMCACHED:
 #ifdef darwin
         long_ret = ptok(mem.v_lookups);
+#elif  defined(dragonfly)
+        long_ret = ptok(mem.v_cache_count);
 #else
         long_ret = ptok(mem.v_cache_count) + ptok(mem.v_inactive_count);
 #endif

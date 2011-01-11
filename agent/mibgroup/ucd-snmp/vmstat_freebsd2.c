@@ -9,9 +9,15 @@
  */
 #include <sys/param.h>
 #include <sys/time.h>
+#if defined(dragonfly)
+#include <sys/user.h>
+#else
 #include <sys/proc.h>
+#endif
 #if defined(freebsd5) && __FreeBSD_version >= 500101
 #include <sys/resource.h>
+#elif defined(dragonfly)
+#include <kinfo.h>
 #else
 #include <sys/dkstat.h>
 #endif
@@ -168,17 +174,29 @@ var_extensible_vmstat(struct variable *vp,
     static time_t   time_old;
     static time_t   time_diff;
 
+#if defined(dragonfly)
+    static struct kinfo_cputime cpu_old, cpu_new, cpu_diff;
+    static uint64_t cpu_total;
+    uint64_t cpu_sum;
+    static int pagesize;
+#else
     static long     cpu_old[CPUSTATES];
     static long     cpu_new[CPUSTATES];
     static long     cpu_diff[CPUSTATES];
     static long     cpu_total;
     long            cpu_sum;
+#endif
     double          cpu_prc;
 
     static struct vmmeter mem_old, mem_new;
 
     static long     long_ret;
     static char     errmsg[300];
+
+#if defined(dragonfly)
+    if (pagesize == 0)
+	    pagesize = getpagesize() >> 10;
+#endif
 
     long_ret = 0;               /* set to 0 as default */
 
@@ -195,15 +213,28 @@ var_extensible_vmstat(struct variable *vp,
         /*
          * CPU usage 
          */
-        auto_nlist(CPTIME_SYMBOL, (char *) cpu_new, sizeof(cpu_new));
 
         cpu_total = 0;
+
+#if defined(dragonfly)
+	kinfo_get_sched_cputime(&cpu_new);
+#define CP_UPDATE(field) cpu_diff.field = cpu_new.field - cpu_old.field; cpu_total += cpu_diff.field;
+	CP_UPDATE(cp_user);
+	CP_UPDATE(cp_nice);
+	CP_UPDATE(cp_sys);
+	CP_UPDATE(cp_intr);
+	CP_UPDATE(cp_idle);
+	cpu_old = cpu_new;
+#undef CP_UPDATE
+#else
+        auto_nlist(CPTIME_SYMBOL, (char *) cpu_new, sizeof(cpu_new));
 
         for (loop = 0; loop < CPUSTATES; loop++) {
             cpu_diff[loop] = cpu_new[loop] - cpu_old[loop];
             cpu_old[loop] = cpu_new[loop];
             cpu_total += cpu_diff[loop];
         }
+#endif
 
         if (cpu_total == 0)
             cpu_total = 1;
@@ -223,7 +254,11 @@ var_extensible_vmstat(struct variable *vp,
     /*
      * Page-to-kb macro 
      */
+#if defined(dragonfly)
+#define ptok(p) ((p) * pagesize)
+#else
 #define ptok(p) ((p) * (mem_new.v_page_size >> 10))
+#endif
 
     switch (vp->magic) {
     case MIBINDEX:
@@ -270,37 +305,73 @@ var_extensible_vmstat(struct variable *vp,
         long_ret = rate(mem_new.v_swtch - mem_old.v_swtch);
         return ((u_char *) (&long_ret));
     case CPUUSER:
+#if defined(dragonfly)
+        cpu_sum = cpu_diff.cp_user  + cpu_diff.cp_nice;
+#else
         cpu_sum = cpu_diff[CP_USER] + cpu_diff[CP_NICE];
+#endif
         cpu_prc = (float) cpu_sum / (float) cpu_total;
         long_ret = cpu_prc * CPU_PRC;
         return ((u_char *) (&long_ret));
     case CPUSYSTEM:
+#if defined(dragonfly)
+        cpu_sum = cpu_diff.cp_sys  + cpu_diff.cp_intr;
+#else
         cpu_sum = cpu_diff[CP_SYS] + cpu_diff[CP_INTR];
+#endif
         cpu_prc = (float) cpu_sum / (float) cpu_total;
         long_ret = cpu_prc * CPU_PRC;
         return ((u_char *) (&long_ret));
     case CPUIDLE:
+#if defined(dragonfly)
+        cpu_sum = cpu_diff.cp_idle;
+#else
         cpu_sum = cpu_diff[CP_IDLE];
+#endif
         cpu_prc = (float) cpu_sum / (float) cpu_total;
         long_ret = cpu_prc * CPU_PRC;
         return ((u_char *) (&long_ret));
     case CPURAWUSER:
+#if defined(dragonfly)
+        long_ret = cpu_new.cp_user;
+#else
         long_ret = cpu_new[CP_USER];
+#endif
         return ((u_char *) (&long_ret));
     case CPURAWNICE:
+#if defined(dragonfly)
+        long_ret = cpu_new.cp_nice;
+#else
         long_ret = cpu_new[CP_NICE];
+#endif
         return ((u_char *) (&long_ret));
     case CPURAWSYSTEM:
+#if defined(dragonfly)
+        long_ret = cpu_new.cp_sys  + cpu_new.cp_nice;
+#else
         long_ret = cpu_new[CP_SYS] + cpu_new[CP_INTR];
+#endif
         return ((u_char *) (&long_ret));
     case CPURAWIDLE:
+#if defined(dragonfly)
+        long_ret = cpu_new.cp_idle;
+#else
         long_ret = cpu_new[CP_IDLE];
+#endif
         return ((u_char *) (&long_ret));
     case CPURAWKERNEL:
+#if defined(dragonfly)
+        long_ret = cpu_new.cp_sys;
+#else
         long_ret = cpu_new[CP_SYS];
+#endif
         return ((u_char *) (&long_ret));
     case CPURAWINTR:
+#if defined(dragonfly)
+        long_ret = cpu_new.cp_intr;
+#else
         long_ret = cpu_new[CP_INTR];
+#endif
         return ((u_char *) (&long_ret));
     case SYSRAWINTERRUPTS:
         long_ret = mem_new.v_intr;
