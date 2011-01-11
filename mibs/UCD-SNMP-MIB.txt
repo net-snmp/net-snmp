@@ -112,8 +112,10 @@ ucdExperimental       OBJECT IDENTIFIER ::= { ucdavis 13 }
 --   lmSensors        OBJECT IDENTIFIER ::= { ucdExperimental 16 } - LM-SENSORS-MIB
 
 
--- These are the returned values of the agent type.
--- returned to:  .iso.org.dod.internet.mgmt.mib-2.system.sysObjectID.0 
+-- These are the old returned values of the agent type.
+-- originally returned to:  .iso.org.dod.internet.mgmt.mib-2.system.sysObjectID.0 
+-- Current versions of the agent return an equivalent OID from the netSnmpAgentOIDs
+-- tree (defined in NET-SNMP-TC), which includes values for some additional O/Ss
 
 ucdSnmpAgent      OBJECT IDENTIFIER ::= { ucdavis 250 }
 hpux9             OBJECT IDENTIFIER ::= { ucdSnmpAgent 1 }
