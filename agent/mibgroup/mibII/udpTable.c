@@ -622,7 +622,11 @@ udpTable_load(netsnmp_cache *cache, void *vmagic)
     size_t   len;
     int      sname[] = { CTL_NET, PF_INET, IPPROTO_UDP, UDPCTL_PCBLIST };
     char     *udpcb_buf = NULL;
+#if defined(dragonfly)
+    struct xinpcb  *xig = NULL;
+#else
     struct xinpgen *xig = NULL;
+#endif
     UDPTABLE_ENTRY_TYPE  *nnew;
 
     udpTable_free(NULL, NULL);
@@ -643,10 +647,19 @@ udpTable_load(netsnmp_cache *cache, void *vmagic)
      *  Unpick this into the constituent 'xinpgen' structures, and extract
      *     the 'inpcb' elements into a linked list (built in reverse)
      */
+#if defined(dragonfly)
+    xig = (struct xinpcb  *) udpcb_buf;
+#else
     xig = (struct xinpgen *) udpcb_buf;
     xig = (struct xinpgen *) ((char *) xig + xig->xig_len);
+#endif
 
-    while (xig && (xig->xig_len > sizeof(struct xinpgen))) {
+#if defined(dragonfly)
+    while (xig && ((char *)xig + xig->xi_len < udpcb_buf + len))
+#else
+    while (xig && (xig->xig_len > sizeof(struct xinpgen)))
+#endif
+    {
         nnew = SNMP_MALLOC_TYPEDEF(UDPTABLE_ENTRY_TYPE);
         if (!nnew)
             break;
@@ -654,12 +667,16 @@ udpTable_load(netsnmp_cache *cache, void *vmagic)
         memcpy(nnew, &((struct xinpcb *) xig)->xi_inp, sizeof(struct inpcb));
 	nnew->inp_next = udp_head;
 #else
-        memcpy(nnew, ((struct xinpcb *) xig)->xi_inp, sizeof(struct inpcb));
+        memcpy(nnew,  ((struct xinpcb *) xig)->xi_inp, sizeof(struct inpcb));
 	nnew->next = udp_head;		/* XXX - ?? Check 'next' pointer */
 #endif
 
 	udp_head   = nnew;
+#if defined(dragonfly)
+        xig = (struct xinpcb  *) ((char *) xig + xig->xi_len);
+#else
         xig = (struct xinpgen *) ((char *) xig + xig->xig_len);
+#endif
     }
 
     free(udpcb_buf);
