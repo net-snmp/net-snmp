@@ -42369,7 +42369,10 @@ cat >>conftest.$ac_ext <<_ACEOF
 
 
 #ifdef NETSNMP_IFNET_NEEDS_KERNEL
-#define _KERNEL 1
+#define KERNEL
+#if !defined(__DragonFly__)
+#define _KERNEL
+#endif
 #endif
 
     $ac_includes_default
@@ -42433,7 +42436,10 @@ cat >>conftest.$ac_ext <<_ACEOF
 
 
 #ifdef NETSNMP_IFNET_NEEDS_KERNEL
-#define _KERNEL 1
+#define KERNEL
+#if !defined(__DragonFly__)
+#define _KERNEL
+#endif
 #endif
 
     $ac_includes_default
@@ -42525,7 +42531,10 @@ cat >>conftest.$ac_ext <<_ACEOF
 /* end confdefs.h.  */
 
 #ifdef NETSNMP_IFNET_NEEDS_KERNEL
-#define _KERNEL 1
+#define KERNEL
+#if !defined(__DragonFly__)
+#define _KERNEL
+#endif
 #endif
 #ifdef HAVE_SYS_TYPES_H
 #include <sys/types.h>
@@ -42620,7 +42629,10 @@ cat >>conftest.$ac_ext <<_ACEOF
 /* end confdefs.h.  */
 
 #ifdef NETSNMP_IFNET_NEEDS_KERNEL
-#define _KERNEL 1
+#define KERNEL
+#if !defined(__DragonFly__)
+#define _KERNEL
+#endif
 #endif
 #ifdef HAVE_SYS_TYPES_H
 #include <sys/types.h>
@@ -42738,7 +42750,10 @@ cat >>conftest.$ac_ext <<_ACEOF
 /* end confdefs.h.  */
 
 #ifdef NETSNMP_IFNET_NEEDS_KERNEL
-#define _KERNEL 1
+#define KERNEL
+#if !defined(__DragonFly__)
+#define _KERNEL
+#endif
 #endif
 #ifdef HAVE_SYS_TYPES_H
 #include <sys/types.h>
@@ -42833,7 +42848,10 @@ cat >>conftest.$ac_ext <<_ACEOF
 /* end confdefs.h.  */
 
 #ifdef NETSNMP_IFNET_NEEDS_KERNEL
-#define _KERNEL 1
+#define KERNEL
+#if !defined(__DragonFly__)
+#define _KERNEL
+#endif
 #endif
 #ifdef HAVE_SYS_TYPES_H
 #include <sys/types.h>
@@ -42951,7 +42969,10 @@ cat >>conftest.$ac_ext <<_ACEOF
 /* end confdefs.h.  */
 
 #ifdef NETSNMP_IFNET_NEEDS_KERNEL
-#define _KERNEL 1
+#define KERNEL
+#if !defined(__DragonFly__)
+#define _KERNEL
+#endif
 #endif
 #ifdef HAVE_SYS_TYPES_H
 #include <sys/types.h>
@@ -43046,7 +43067,10 @@ cat >>conftest.$ac_ext <<_ACEOF
 /* end confdefs.h.  */
 
 #ifdef NETSNMP_IFNET_NEEDS_KERNEL
-#define _KERNEL 1
+#define KERNEL
+#if !defined(__DragonFly__)
+#define _KERNEL
+#endif
 #endif
 #ifdef HAVE_SYS_TYPES_H
 #include <sys/types.h>
@@ -43164,7 +43188,10 @@ cat >>conftest.$ac_ext <<_ACEOF
 /* end confdefs.h.  */
 
 #ifdef NETSNMP_IFNET_NEEDS_KERNEL
-#define _KERNEL 1
+#define KERNEL
+#if !defined(__DragonFly__)
+#define _KERNEL
+#endif
 #endif
 #ifdef HAVE_SYS_TYPES_H
 #include <sys/types.h>
@@ -43259,7 +43286,10 @@ cat >>conftest.$ac_ext <<_ACEOF
 /* end confdefs.h.  */
 
 #ifdef NETSNMP_IFNET_NEEDS_KERNEL
-#define _KERNEL 1
+#define KERNEL
+#if !defined(__DragonFly__)
+#define _KERNEL
+#endif
 #endif
 #ifdef HAVE_SYS_TYPES_H
 #include <sys/types.h>
@@ -43377,7 +43407,10 @@ cat >>conftest.$ac_ext <<_ACEOF
 /* end confdefs.h.  */
 
 #ifdef NETSNMP_IFNET_NEEDS_KERNEL
-#define _KERNEL 1
+#define KERNEL
+#if !defined(__DragonFly__)
+#define _KERNEL
+#endif
 #endif
 #ifdef HAVE_SYS_TYPES_H
 #include <sys/types.h>
@@ -43472,7 +43505,10 @@ cat >>conftest.$ac_ext <<_ACEOF
 /* end confdefs.h.  */
 
 #ifdef NETSNMP_IFNET_NEEDS_KERNEL
-#define _KERNEL 1
+#define KERNEL
+#if !defined(__DragonFly__)
+#define _KERNEL
+#endif
 #endif
 #ifdef HAVE_SYS_TYPES_H
 #include <sys/types.h>
@@ -43590,7 +43626,10 @@ cat >>conftest.$ac_ext <<_ACEOF
 /* end confdefs.h.  */
 
 #ifdef NETSNMP_IFNET_NEEDS_KERNEL
-#define _KERNEL 1
+#define KERNEL
+#if !defined(__DragonFly__)
+#define _KERNEL
+#endif
 #endif
 #ifdef HAVE_SYS_TYPES_H
 #include <sys/types.h>
@@ -43685,7 +43724,10 @@ cat >>conftest.$ac_ext <<_ACEOF
 /* end confdefs.h.  */
 
 #ifdef NETSNMP_IFNET_NEEDS_KERNEL
-#define _KERNEL 1
+#define KERNEL
+#if !defined(__DragonFly__)
+#define _KERNEL
+#endif
 #endif
 #ifdef HAVE_SYS_TYPES_H
 #include <sys/types.h>
@@ -43803,7 +43845,10 @@ cat >>conftest.$ac_ext <<_ACEOF
 /* end confdefs.h.  */
 
 #ifdef NETSNMP_IFNET_NEEDS_KERNEL
-#define _KERNEL 1
+#define KERNEL
+#if !defined(__DragonFly__)
+#define _KERNEL
+#endif
 #endif
 #ifdef HAVE_SYS_TYPES_H
 #include <sys/types.h>
@@ -43898,7 +43943,10 @@ cat >>conftest.$ac_ext <<_ACEOF
 /* end confdefs.h.  */
 
 #ifdef NETSNMP_IFNET_NEEDS_KERNEL
-#define _KERNEL 1
+#define KERNEL
+#if !defined(__DragonFly__)
+#define _KERNEL
+#endif
 #endif
 #ifdef HAVE_SYS_TYPES_H
 #include <sys/types.h>
@@ -44016,7 +44064,10 @@ cat >>conftest.$ac_ext <<_ACEOF
 /* end confdefs.h.  */
 
 #ifdef NETSNMP_IFNET_NEEDS_KERNEL
-#define _KERNEL 1
+#define KERNEL
+#if !defined(__DragonFly__)
+#define _KERNEL
+#endif
 #endif
 #ifdef HAVE_SYS_TYPES_H
 #include <sys/types.h>
@@ -44111,7 +44162,10 @@ cat >>conftest.$ac_ext <<_ACEOF
 /* end confdefs.h.  */
 
 #ifdef NETSNMP_IFNET_NEEDS_KERNEL
-#define _KERNEL 1
+#define KERNEL
+#if !defined(__DragonFly__)
+#define _KERNEL
+#endif
 #endif
 #ifdef HAVE_SYS_TYPES_H
 #include <sys/types.h>
@@ -44229,7 +44283,10 @@ cat >>conftest.$ac_ext <<_ACEOF
 /* end confdefs.h.  */
 
 #ifdef NETSNMP_IFNET_NEEDS_KERNEL
-#define _KERNEL 1
+#define KERNEL
+#if !defined(__DragonFly__)
+#define _KERNEL
+#endif
 #endif
 #ifdef HAVE_SYS_TYPES_H
 #include <sys/types.h>
@@ -44324,7 +44381,10 @@ cat >>conftest.$ac_ext <<_ACEOF
 /* end confdefs.h.  */
 
 #ifdef NETSNMP_IFNET_NEEDS_KERNEL
-#define _KERNEL 1
+#define KERNEL
+#if !defined(__DragonFly__)
+#define _KERNEL
+#endif
 #endif
 #ifdef HAVE_SYS_TYPES_H
 #include <sys/types.h>
@@ -44442,7 +44502,10 @@ cat >>conftest.$ac_ext <<_ACEOF
 /* end confdefs.h.  */
 
 #ifdef NETSNMP_IFNET_NEEDS_KERNEL
-#define _KERNEL 1
+#define KERNEL
+#if !defined(__DragonFly__)
+#define _KERNEL
+#endif
 #endif
 #ifdef HAVE_SYS_TYPES_H
 #include <sys/types.h>
@@ -44537,7 +44600,10 @@ cat >>conftest.$ac_ext <<_ACEOF
 /* end confdefs.h.  */
 
 #ifdef NETSNMP_IFNET_NEEDS_KERNEL
-#define _KERNEL 1
+#define KERNEL
+#if !defined(__DragonFly__)
+#define _KERNEL
+#endif
 #endif
 #ifdef HAVE_SYS_TYPES_H
 #include <sys/types.h>
@@ -44655,7 +44721,10 @@ cat >>conftest.$ac_ext <<_ACEOF
 /* end confdefs.h.  */
 
 #ifdef NETSNMP_IFNET_NEEDS_KERNEL
-#define _KERNEL 1
+#define KERNEL
+#if !defined(__DragonFly__)
+#define _KERNEL
+#endif
 #endif
 #ifdef HAVE_SYS_TYPES_H
 #include <sys/types.h>
@@ -44750,7 +44819,10 @@ cat >>conftest.$ac_ext <<_ACEOF
 /* end confdefs.h.  */
 
 #ifdef NETSNMP_IFNET_NEEDS_KERNEL
-#define _KERNEL 1
+#define KERNEL
+#if !defined(__DragonFly__)
+#define _KERNEL
+#endif
 #endif
 #ifdef HAVE_SYS_TYPES_H
 #include <sys/types.h>
@@ -44868,7 +44940,10 @@ cat >>conftest.$ac_ext <<_ACEOF
 /* end confdefs.h.  */
 
 #ifdef NETSNMP_IFNET_NEEDS_KERNEL
-#define _KERNEL 1
+#define KERNEL
+#if !defined(__DragonFly__)
+#define _KERNEL
+#endif
 #endif
 #ifdef HAVE_SYS_TYPES_H
 #include <sys/types.h>
@@ -44963,7 +45038,10 @@ cat >>conftest.$ac_ext <<_ACEOF
 /* end confdefs.h.  */
 
 #ifdef NETSNMP_IFNET_NEEDS_KERNEL
-#define _KERNEL 1
+#define KERNEL
+#if !defined(__DragonFly__)
+#define _KERNEL
+#endif
 #endif
 #ifdef HAVE_SYS_TYPES_H
 #include <sys/types.h>
@@ -45081,7 +45159,10 @@ cat >>conftest.$ac_ext <<_ACEOF
 /* end confdefs.h.  */
 
 #ifdef NETSNMP_IFNET_NEEDS_KERNEL
-#define _KERNEL 1
+#define KERNEL
+#if !defined(__DragonFly__)
+#define _KERNEL
+#endif
 #endif
 #ifdef HAVE_SYS_TYPES_H
 #include <sys/types.h>
@@ -45176,7 +45257,10 @@ cat >>conftest.$ac_ext <<_ACEOF
 /* end confdefs.h.  */
 
 #ifdef NETSNMP_IFNET_NEEDS_KERNEL
-#define _KERNEL 1
+#define KERNEL
+#if !defined(__DragonFly__)
+#define _KERNEL
+#endif
 #endif
 #ifdef HAVE_SYS_TYPES_H
 #include <sys/types.h>
@@ -45294,7 +45378,10 @@ cat >>conftest.$ac_ext <<_ACEOF
 /* end confdefs.h.  */
 
 #ifdef NETSNMP_IFNET_NEEDS_KERNEL
-#define _KERNEL 1
+#define KERNEL
+#if !defined(__DragonFly__)
+#define _KERNEL
+#endif
 #endif
 #ifdef HAVE_SYS_TYPES_H
 #include <sys/types.h>
@@ -45389,7 +45476,10 @@ cat >>conftest.$ac_ext <<_ACEOF
 /* end confdefs.h.  */
 
 #ifdef NETSNMP_IFNET_NEEDS_KERNEL
-#define _KERNEL 1
+#define KERNEL
+#if !defined(__DragonFly__)
+#define _KERNEL
+#endif
 #endif
 #ifdef HAVE_SYS_TYPES_H
 #include <sys/types.h>
@@ -45507,7 +45597,10 @@ cat >>conftest.$ac_ext <<_ACEOF
 /* end confdefs.h.  */
 
 #ifdef NETSNMP_IFNET_NEEDS_KERNEL
-#define _KERNEL 1
+#define KERNEL
+#if !defined(__DragonFly__)
+#define _KERNEL
+#endif
 #endif
 #ifdef HAVE_SYS_TYPES_H
 #include <sys/types.h>
@@ -45602,7 +45695,10 @@ cat >>conftest.$ac_ext <<_ACEOF
 /* end confdefs.h.  */
 
 #ifdef NETSNMP_IFNET_NEEDS_KERNEL
-#define _KERNEL 1
+#define KERNEL
+#if !defined(__DragonFly__)
+#define _KERNEL
+#endif
 #endif
 #ifdef HAVE_SYS_TYPES_H
 #include <sys/types.h>
@@ -45720,7 +45816,10 @@ cat >>conftest.$ac_ext <<_ACEOF
 /* end confdefs.h.  */
 
 #ifdef NETSNMP_IFNET_NEEDS_KERNEL
-#define _KERNEL 1
+#define KERNEL
+#if !defined(__DragonFly__)
+#define _KERNEL
+#endif
 #endif
 #ifdef HAVE_SYS_TYPES_H
 #include <sys/types.h>
@@ -45815,7 +45914,10 @@ cat >>conftest.$ac_ext <<_ACEOF
 /* end confdefs.h.  */
 
 #ifdef NETSNMP_IFNET_NEEDS_KERNEL
-#define _KERNEL 1
+#define KERNEL
+#if !defined(__DragonFly__)
+#define _KERNEL
+#endif
 #endif
 #ifdef HAVE_SYS_TYPES_H
 #include <sys/types.h>
@@ -45949,7 +46051,9 @@ cat >>conftest.$ac_ext <<_ACEOF
 #ifdef HAVE_SYS_SOCKET_H
 #ifdef NETSNMP_IFNET_NEEDS_KERNEL
 #define KERNEL
+#if !defined(__DragonFly__)
 #define _KERNEL
+#endif
 #endif
 #include <sys/socket.h>
 #undef KERNEL
@@ -46007,7 +46111,9 @@ cat >>conftest.$ac_ext <<_ACEOF
 #ifdef HAVE_SYS_SOCKET_H
 #ifdef NETSNMP_IFNET_NEEDS_KERNEL
 #define KERNEL
+#if !defined(__DragonFly__)
 #define _KERNEL
+#endif
 #endif
 #include <sys/socket.h>
 #undef KERNEL
@@ -46088,7 +46194,9 @@ cat >>conftest.$ac_ext <<_ACEOF
 #ifdef HAVE_SYS_SOCKET_H
 #ifdef NETSNMP_IFNET_NEEDS_KERNEL
 #define KERNEL
+#if !defined(__DragonFly__)
 #define _KERNEL
+#endif
 #endif
 #include <sys/socket.h>
 #undef KERNEL
@@ -46146,7 +46254,9 @@ cat >>conftest.$ac_ext <<_ACEOF
 #ifdef HAVE_SYS_SOCKET_H
 #ifdef NETSNMP_IFNET_NEEDS_KERNEL
 #define KERNEL
+#if !defined(__DragonFly__)
 #define _KERNEL
+#endif
 #endif
 #include <sys/socket.h>
 #undef KERNEL
@@ -46227,7 +46337,9 @@ cat >>conftest.$ac_ext <<_ACEOF
 #ifdef HAVE_SYS_SOCKET_H
 #ifdef NETSNMP_IFNET_NEEDS_KERNEL
 #define KERNEL
+#if !defined(__DragonFly__)
 #define _KERNEL
+#endif
 #endif
 #include <sys/socket.h>
 #undef KERNEL
@@ -46285,7 +46397,9 @@ cat >>conftest.$ac_ext <<_ACEOF
 #ifdef HAVE_SYS_SOCKET_H
 #ifdef NETSNMP_IFNET_NEEDS_KERNEL
 #define KERNEL
+#if !defined(__DragonFly__)
 #define _KERNEL
+#endif
 #endif
 #include <sys/socket.h>
 #undef KERNEL
@@ -46366,7 +46480,9 @@ cat >>conftest.$ac_ext <<_ACEOF
 #ifdef HAVE_SYS_SOCKET_H
 #ifdef NETSNMP_IFNET_NEEDS_KERNEL
 #define KERNEL
+#if !defined(__DragonFly__)
 #define _KERNEL
+#endif
 #endif
 #include <sys/socket.h>
 #undef KERNEL
@@ -46424,7 +46540,9 @@ cat >>conftest.$ac_ext <<_ACEOF
 #ifdef HAVE_SYS_SOCKET_H
 #ifdef NETSNMP_IFNET_NEEDS_KERNEL
 #define KERNEL
+#if !defined(__DragonFly__)
 #define _KERNEL
+#endif
 #endif
 #include <sys/socket.h>
 #undef KERNEL
@@ -46505,7 +46623,9 @@ cat >>conftest.$ac_ext <<_ACEOF
 #ifdef HAVE_SYS_SOCKET_H
 #ifdef NETSNMP_IFNET_NEEDS_KERNEL
 #define KERNEL
+#if !defined(__DragonFly__)
 #define _KERNEL
+#endif
 #endif
 #include <sys/socket.h>
 #undef KERNEL
@@ -46563,7 +46683,9 @@ cat >>conftest.$ac_ext <<_ACEOF
 #ifdef HAVE_SYS_SOCKET_H
 #ifdef NETSNMP_IFNET_NEEDS_KERNEL
 #define KERNEL
+#if !defined(__DragonFly__)
 #define _KERNEL
+#endif
 #endif
 #include <sys/socket.h>
 #undef KERNEL
@@ -46644,7 +46766,9 @@ cat >>conftest.$ac_ext <<_ACEOF
 #ifdef HAVE_SYS_SOCKET_H
 #ifdef NETSNMP_IFNET_NEEDS_KERNEL
 #define KERNEL
+#if !defined(__DragonFly__)
 #define _KERNEL
+#endif
 #endif
 #include <sys/socket.h>
 #undef KERNEL
@@ -46702,7 +46826,9 @@ cat >>conftest.$ac_ext <<_ACEOF
 #ifdef HAVE_SYS_SOCKET_H
 #ifdef NETSNMP_IFNET_NEEDS_KERNEL
 #define KERNEL
+#if !defined(__DragonFly__)
 #define _KERNEL
+#endif
 #endif
 #include <sys/socket.h>
 #undef KERNEL
@@ -46791,7 +46917,9 @@ cat >>conftest.$ac_ext <<_ACEOF
 #include <sys/types.h>
 #ifdef NETSNMP_IFNET_NEEDS_KERNEL
 #define KERNEL
+#if !defined(__DragonFly__)
 #define _KERNEL
+#endif
 #endif
 #include <sys/socket.h>
 #undef KERNEL
@@ -46860,7 +46988,9 @@ cat >>conftest.$ac_ext <<_ACEOF
 #include <sys/types.h>
 #ifdef NETSNMP_IFNET_NEEDS_KERNEL
 #define KERNEL
+#if !defined(__DragonFly__)
 #define _KERNEL
+#endif
 #endif
 #include <sys/socket.h>
 #undef KERNEL
