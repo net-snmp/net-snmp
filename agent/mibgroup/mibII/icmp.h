@@ -5,8 +5,10 @@
 #ifndef _MIBGROUP_ICMP_H
 #define _MIBGROUP_ICMP_H
 
-config_arch_require(solaris2, kernel_sunos5)
-config_arch_require(linux, mibII/kernel_linux)
+config_arch_require(solaris2,        kernel_sunos5)
+config_arch_require(linux,     mibII/kernel_linux)
+config_arch_require(netbsd,    mibII/kernel_netbsd)
+config_arch_require(netbsdelf, mibII/kernel_netbsd)
 
 #include <net-snmp/agent/cache_handler.h>
 
