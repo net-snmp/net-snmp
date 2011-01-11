@@ -321,7 +321,7 @@ _arch_interface_description_get(netsnmp_interface_entry *entry)
 
     descr = pci_lookup_name(pci_access, buf, sizeof(buf),
 			    PCI_LOOKUP_VENDOR | PCI_LOOKUP_DEVICE,
-			    vendor_id, device_id);
+			    vendor_id, device_id, 0, 0);
     if (descr) {
 	free(entry->descr);
 	entry->descr = strdup(descr);
