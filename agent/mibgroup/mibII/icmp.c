@@ -582,6 +582,12 @@ init_icmp(void)
 #define USES_SNMP_DESIGNED_ICMPSTAT
 #endif
 
+#ifdef NETBSD_STATS_VIA_SYSCTL
+#define ICMP_STAT_STRUCTURE     struct icmp_mib
+#define USES_SNMP_DESIGNED_ICMPSTAT
+#undef ICMP_NSTATS
+#endif
+
 #ifdef HAVE_IPHLPAPI_H
 #include <iphlpapi.h>
 #define ICMP_STAT_STRUCTURE MIB_ICMP
@@ -1279,6 +1285,21 @@ icmp_load(netsnmp_cache *cache, void *vmagic)
         DEBUGMSGTL(("mibII/icmp", "Failed to load ICMP Group (solaris)\n"));
     } else {
         DEBUGMSGTL(("mibII/icmp", "Loaded ICMP Group (solaris)\n"));
+    }
+    return ret_value;
+}
+#elif defined(NETBSD_STATS_VIA_SYSCTL)
+int
+icmp_load(netsnmp_cache *cache, void *vmagic)
+{
+    long            ret_value =- -1;
+
+    ret_value = netbsd_read_icmp_stat(&icmpstat);
+
+    if ( ret_value < 0 ) {
+	DEBUGMSGTL(("mibII/icmp", "Failed to load ICMP Group (netbsd)\n"));
+    } else {
+	DEBUGMSGTL(("mibII/icmp", "Loaded ICMP Group (netbsd)\n"));
     }
     return ret_value;
 }

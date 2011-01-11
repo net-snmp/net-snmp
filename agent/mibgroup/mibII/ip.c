@@ -228,6 +228,12 @@ init_ip(void)
 #define	USES_SNMP_DESIGNED_IPSTAT
 #endif
 
+#ifdef NETBSD_STATS_VIA_SYSCTL
+#define IP_STAT_STRUCTURE	struct ip_mib
+#define USES_SNMP_DESIGNED_IPSTAT
+#undef IP_NSTATS
+#endif
+
 #ifdef HAVE_IPHLPAPI_H
 #include <iphlpapi.h>
 #define IP_STAT_STRUCTURE MIB_IPSTATS
@@ -812,6 +818,21 @@ ip_load(netsnmp_cache *cache, void *vmagic)
         DEBUGMSGTL(("mibII/ip", "Failed to load IP Group (solaris)\n"));
     } else {
         DEBUGMSGTL(("mibII/ip", "Loaded IP Group (solaris)\n"));
+    }
+    return ret_value;
+}
+#elif defined (NETBSD_STATS_VIA_SYSCTL)
+int
+ip_load(netsnmp_cache *cache, void *vmagic)
+{
+    long ret_value = -1;
+
+    ret_value = netbsd_read_ip_stat(&ipstat);
+
+    if ( ret_value < 0) {
+	DEBUGMSGTL(("mibII/ip", "Failed to load IP Group (netbsd)\n"));
+    } else {
+	DEBUGMSGTL(("mibII/ip", "Loaded IP Group (netbsd)\n"));
     }
     return ret_value;
 }
