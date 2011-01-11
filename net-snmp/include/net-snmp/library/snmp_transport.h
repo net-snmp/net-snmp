@@ -57,7 +57,9 @@ NETSNMP_IMPORT size_t   netsnmpIPXDomain_len;
 typedef union netsnmp_sockaddr_storage_u {
     struct sockaddr     sa;
     struct sockaddr_in  sin;
+#ifdef NETSNMP_ENABLE_IPV6
     struct sockaddr_in6 sin6;
+#endif
 } netsnmp_sockaddr_storage;
 
 typedef struct netsnmp_addr_pair_s {
