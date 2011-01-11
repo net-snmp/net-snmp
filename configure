@@ -42986,7 +42986,9 @@ cat >>conftest.$ac_ext <<_ACEOF
 #include <sys/types.h>
 #ifdef IFNET_NEEDS_KERNEL
 #define KERNEL
+#if !defined(__DragonFly__)
 #define _KERNEL
+#endif
 #endif
 #include <sys/socket.h>
 
@@ -43084,7 +43086,9 @@ cat >>conftest.$ac_ext <<_ACEOF
 #include <sys/types.h>
 #ifdef IFNET_NEEDS_KERNEL
 #define KERNEL
+#if !defined(__DragonFly__)
 #define _KERNEL
+#endif
 #endif
 #include <sys/socket.h>
 
@@ -43378,7 +43382,9 @@ cat >>conftest.$ac_ext <<_ACEOF
 #include <sys/types.h>
 #ifdef IFNET_NEEDS_KERNEL
 #define KERNEL
+#if !defined(__DragonFly__)
 #define _KERNEL
+#endif
 #endif
 #include <sys/socket.h>
 #undef KERNEL
@@ -43467,7 +43473,9 @@ cat >>conftest.$ac_ext <<_ACEOF
 #include <sys/types.h>
 #ifdef IFNET_NEEDS_KERNEL
 #define KERNEL
+#if !defined(__DragonFly__)
 #define _KERNEL
+#endif
 #endif
 #include <sys/socket.h>
 #undef KERNEL
@@ -43536,7 +43544,9 @@ cat >>conftest.$ac_ext <<_ACEOF
 #include <sys/types.h>
 #ifdef IFNET_NEEDS_KERNEL
 #define KERNEL
+#if !defined(__DragonFly__)
 #define _KERNEL
+#endif
 #endif
 #include <sys/socket.h>
 #undef KERNEL
@@ -43676,7 +43686,9 @@ cat >>conftest.$ac_ext <<_ACEOF
 #include <sys/types.h>
 #ifdef IFNET_NEEDS_KERNEL
 #define KERNEL
+#if !defined(__DragonFly__)
 #define _KERNEL
+#endif
 #endif
 #include <sys/socket.h>
 #undef KERNEL
@@ -43909,7 +43921,9 @@ cat >>conftest.$ac_ext <<_ACEOF
 #include <sys/types.h>
 #ifdef IFNET_NEEDS_KERNEL
 #define KERNEL
+#if !defined(__DragonFly__)
 #define _KERNEL
+#endif
 #endif
 #include <sys/socket.h>
 #undef KERNEL
@@ -44010,7 +44024,9 @@ cat >>conftest.$ac_ext <<_ACEOF
 #include <sys/types.h>
 #ifdef IFNET_NEEDS_KERNEL
 #define KERNEL
+#if !defined(__DragonFly__)
 #define _KERNEL
+#endif
 #endif
 #include <sys/socket.h>
 #undef KERNEL
@@ -44111,7 +44127,9 @@ cat >>conftest.$ac_ext <<_ACEOF
 #include <sys/types.h>
 #ifdef IFNET_NEEDS_KERNEL
 #define KERNEL
+#if !defined(__DragonFly__)
 #define _KERNEL
+#endif
 #endif
 #include <sys/socket.h>
 #undef KERNEL
@@ -44212,7 +44230,9 @@ cat >>conftest.$ac_ext <<_ACEOF
 #include <sys/types.h>
 #ifdef IFNET_NEEDS_KERNEL
 #define KERNEL
+#if !defined(__DragonFly__)
 #define _KERNEL
+#endif
 #endif
 #include <sys/socket.h>
 #undef KERNEL
@@ -44414,7 +44434,10 @@ cat >>conftest.$ac_ext <<_ACEOF
 
 
 #ifdef IFNET_NEEDS_KERNEL
-#define _KERNEL 1
+#define KERNEL
+#if !defined(__DragonFly__)
+#define _KERNEL
+#endif
 #endif
 #ifdef HAVE_SYS_PARAM_H
 #include <sys/param.h>
@@ -44523,7 +44546,10 @@ cat >>conftest.$ac_ext <<_ACEOF
 
 
 #ifdef IFNET_NEEDS_KERNEL
-#define _KERNEL 1
+#define KERNEL
+#if !defined(__DragonFly__)
+#define _KERNEL
+#endif
 #endif
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -44660,7 +44686,10 @@ cat >>conftest.$ac_ext <<_ACEOF
 
 
 #ifdef IFNET_NEEDS_KERNEL
-#define _KERNEL 1
+#define KERNEL
+#if !defined(__DragonFly__)
+#define _KERNEL
+#endif
 #endif
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -44797,7 +44826,10 @@ cat >>conftest.$ac_ext <<_ACEOF
 
 
 #ifdef IFNET_NEEDS_KERNEL
-#define _KERNEL 1
+#define KERNEL
+#if !defined(__DragonFly__)
+#define _KERNEL
+#endif
 #endif
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -44934,7 +44966,10 @@ cat >>conftest.$ac_ext <<_ACEOF
 
 
 #ifdef IFNET_NEEDS_KERNEL
-#define _KERNEL 1
+#define KERNEL
+#if !defined(__DragonFly__)
+#define _KERNEL
+#endif
 #endif
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -45071,7 +45106,10 @@ cat >>conftest.$ac_ext <<_ACEOF
 
 
 #ifdef IFNET_NEEDS_KERNEL
-#define _KERNEL 1
+#define KERNEL
+#if !defined(__DragonFly__)
+#define _KERNEL
+#endif
 #endif
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -45208,7 +45246,10 @@ cat >>conftest.$ac_ext <<_ACEOF
 
 
 #ifdef IFNET_NEEDS_KERNEL
-#define _KERNEL 1
+#define KERNEL
+#if !defined(__DragonFly__)
+#define _KERNEL
+#endif
 #endif
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -45345,7 +45386,10 @@ cat >>conftest.$ac_ext <<_ACEOF
 
 
 #ifdef IFNET_NEEDS_KERNEL
-#define _KERNEL 1
+#define KERNEL
+#if !defined(__DragonFly__)
+#define _KERNEL
+#endif
 #endif
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -45482,7 +45526,10 @@ cat >>conftest.$ac_ext <<_ACEOF
 
 
 #ifdef IFNET_NEEDS_KERNEL
-#define _KERNEL 1
+#define KERNEL
+#if !defined(__DragonFly__)
+#define _KERNEL
+#endif
 #endif
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -45619,7 +45666,10 @@ cat >>conftest.$ac_ext <<_ACEOF
 
 
 #ifdef IFNET_NEEDS_KERNEL
-#define _KERNEL 1
+#define KERNEL
+#if !defined(__DragonFly__)
+#define _KERNEL
+#endif
 #endif
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -45756,7 +45806,10 @@ cat >>conftest.$ac_ext <<_ACEOF
 
 
 #ifdef IFNET_NEEDS_KERNEL
-#define _KERNEL 1
+#define KERNEL
+#if !defined(__DragonFly__)
+#define _KERNEL
+#endif
 #endif
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -45893,7 +45946,10 @@ cat >>conftest.$ac_ext <<_ACEOF
 
 
 #ifdef IFNET_NEEDS_KERNEL
-#define _KERNEL 1
+#define KERNEL
+#if !defined(__DragonFly__)
+#define _KERNEL
+#endif
 #endif
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -46030,7 +46086,10 @@ cat >>conftest.$ac_ext <<_ACEOF
 
 
 #ifdef IFNET_NEEDS_KERNEL
-#define _KERNEL 1
+#define KERNEL
+#if !defined(__DragonFly__)
+#define _KERNEL
+#endif
 #endif
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -46167,7 +46226,10 @@ cat >>conftest.$ac_ext <<_ACEOF
 
 
 #ifdef IFNET_NEEDS_KERNEL
-#define _KERNEL 1
+#define KERNEL
+#if !defined(__DragonFly__)
+#define _KERNEL
+#endif
 #endif
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -46304,7 +46366,10 @@ cat >>conftest.$ac_ext <<_ACEOF
 
 
 #ifdef IFNET_NEEDS_KERNEL
-#define _KERNEL 1
+#define KERNEL
+#if !defined(__DragonFly__)
+#define _KERNEL
+#endif
 #endif
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -46441,7 +46506,10 @@ cat >>conftest.$ac_ext <<_ACEOF
 
 
 #ifdef IFNET_NEEDS_KERNEL
-#define _KERNEL 1
+#define KERNEL
+#if !defined(__DragonFly__)
+#define _KERNEL
+#endif
 #endif
 #include <sys/types.h>
 #include <sys/socket.h>
