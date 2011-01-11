@@ -26449,7 +26449,10 @@ fi
 ac_fn_c_check_member "$LINENO" "struct ifaddr" "ifa_next" "ac_cv_member_struct_ifaddr_ifa_next" "
 
 #ifdef NETSNMP_IFNET_NEEDS_KERNEL
-#define _KERNEL 1
+#define KERNEL
+#if !defined(__DragonFly__)
+#define _KERNEL
+#endif
 #endif
 
     $ac_includes_default
@@ -26487,7 +26490,10 @@ fi
 #
 ac_fn_c_check_member "$LINENO" "struct ifnet" "if_addrlist" "ac_cv_member_struct_ifnet_if_addrlist" "
 #ifdef NETSNMP_IFNET_NEEDS_KERNEL
-#define _KERNEL 1
+#define KERNEL
+#if !defined(__DragonFly__)
+#define _KERNEL
+#endif
 #endif
 #ifdef HAVE_SYS_TYPES_H
 #include <sys/types.h>
@@ -26551,7 +26557,10 @@ _ACEOF
 fi
 ac_fn_c_check_member "$LINENO" "struct ifnet" "if_addrhead.tqh_first" "ac_cv_member_struct_ifnet_if_addrhead_tqh_first" "
 #ifdef NETSNMP_IFNET_NEEDS_KERNEL
-#define _KERNEL 1
+#define KERNEL
+#if !defined(__DragonFly__)
+#define _KERNEL
+#endif
 #endif
 #ifdef HAVE_SYS_TYPES_H
 #include <sys/types.h>
@@ -26615,7 +26624,10 @@ _ACEOF
 fi
 ac_fn_c_check_member "$LINENO" "struct ifnet" "if_baudrate" "ac_cv_member_struct_ifnet_if_baudrate" "
 #ifdef NETSNMP_IFNET_NEEDS_KERNEL
-#define _KERNEL 1
+#define KERNEL
+#if !defined(__DragonFly__)
+#define _KERNEL
+#endif
 #endif
 #ifdef HAVE_SYS_TYPES_H
 #include <sys/types.h>
@@ -26679,7 +26691,10 @@ _ACEOF
 fi
 ac_fn_c_check_member "$LINENO" "struct ifnet" "if_baudrate.ifs_value" "ac_cv_member_struct_ifnet_if_baudrate_ifs_value" "
 #ifdef NETSNMP_IFNET_NEEDS_KERNEL
-#define _KERNEL 1
+#define KERNEL
+#if !defined(__DragonFly__)
+#define _KERNEL
+#endif
 #endif
 #ifdef HAVE_SYS_TYPES_H
 #include <sys/types.h>
@@ -26743,7 +26758,10 @@ _ACEOF
 fi
 ac_fn_c_check_member "$LINENO" "struct ifnet" "if_ibytes" "ac_cv_member_struct_ifnet_if_ibytes" "
 #ifdef NETSNMP_IFNET_NEEDS_KERNEL
-#define _KERNEL 1
+#define KERNEL
+#if !defined(__DragonFly__)
+#define _KERNEL
+#endif
 #endif
 #ifdef HAVE_SYS_TYPES_H
 #include <sys/types.h>
@@ -26807,7 +26825,10 @@ _ACEOF
 fi
 ac_fn_c_check_member "$LINENO" "struct ifnet" "if_imcasts" "ac_cv_member_struct_ifnet_if_imcasts" "
 #ifdef NETSNMP_IFNET_NEEDS_KERNEL
-#define _KERNEL 1
+#define KERNEL
+#if !defined(__DragonFly__)
+#define _KERNEL
+#endif
 #endif
 #ifdef HAVE_SYS_TYPES_H
 #include <sys/types.h>
@@ -26871,7 +26892,10 @@ _ACEOF
 fi
 ac_fn_c_check_member "$LINENO" "struct ifnet" "if_iqdrops" "ac_cv_member_struct_ifnet_if_iqdrops" "
 #ifdef NETSNMP_IFNET_NEEDS_KERNEL
-#define _KERNEL 1
+#define KERNEL
+#if !defined(__DragonFly__)
+#define _KERNEL
+#endif
 #endif
 #ifdef HAVE_SYS_TYPES_H
 #include <sys/types.h>
@@ -26935,7 +26959,10 @@ _ACEOF
 fi
 ac_fn_c_check_member "$LINENO" "struct ifnet" "if_lastchange.tv_sec" "ac_cv_member_struct_ifnet_if_lastchange_tv_sec" "
 #ifdef NETSNMP_IFNET_NEEDS_KERNEL
-#define _KERNEL 1
+#define KERNEL
+#if !defined(__DragonFly__)
+#define _KERNEL
+#endif
 #endif
 #ifdef HAVE_SYS_TYPES_H
 #include <sys/types.h>
@@ -26999,7 +27026,10 @@ _ACEOF
 fi
 ac_fn_c_check_member "$LINENO" "struct ifnet" "if_lastchange.tv_nsec" "ac_cv_member_struct_ifnet_if_lastchange_tv_nsec" "
 #ifdef NETSNMP_IFNET_NEEDS_KERNEL
-#define _KERNEL 1
+#define KERNEL
+#if !defined(__DragonFly__)
+#define _KERNEL
+#endif
 #endif
 #ifdef HAVE_SYS_TYPES_H
 #include <sys/types.h>
@@ -27063,7 +27093,10 @@ _ACEOF
 fi
 ac_fn_c_check_member "$LINENO" "struct ifnet" "if_mtu" "ac_cv_member_struct_ifnet_if_mtu" "
 #ifdef NETSNMP_IFNET_NEEDS_KERNEL
-#define _KERNEL 1
+#define KERNEL
+#if !defined(__DragonFly__)
+#define _KERNEL
+#endif
 #endif
 #ifdef HAVE_SYS_TYPES_H
 #include <sys/types.h>
@@ -27127,7 +27160,10 @@ _ACEOF
 fi
 ac_fn_c_check_member "$LINENO" "struct ifnet" "if_noproto" "ac_cv_member_struct_ifnet_if_noproto" "
 #ifdef NETSNMP_IFNET_NEEDS_KERNEL
-#define _KERNEL 1
+#define KERNEL
+#if !defined(__DragonFly__)
+#define _KERNEL
+#endif
 #endif
 #ifdef HAVE_SYS_TYPES_H
 #include <sys/types.h>
@@ -27191,7 +27227,10 @@ _ACEOF
 fi
 ac_fn_c_check_member "$LINENO" "struct ifnet" "if_obytes" "ac_cv_member_struct_ifnet_if_obytes" "
 #ifdef NETSNMP_IFNET_NEEDS_KERNEL
-#define _KERNEL 1
+#define KERNEL
+#if !defined(__DragonFly__)
+#define _KERNEL
+#endif
 #endif
 #ifdef HAVE_SYS_TYPES_H
 #include <sys/types.h>
@@ -27255,7 +27294,10 @@ _ACEOF
 fi
 ac_fn_c_check_member "$LINENO" "struct ifnet" "if_omcasts" "ac_cv_member_struct_ifnet_if_omcasts" "
 #ifdef NETSNMP_IFNET_NEEDS_KERNEL
-#define _KERNEL 1
+#define KERNEL
+#if !defined(__DragonFly__)
+#define _KERNEL
+#endif
 #endif
 #ifdef HAVE_SYS_TYPES_H
 #include <sys/types.h>
@@ -27319,7 +27361,10 @@ _ACEOF
 fi
 ac_fn_c_check_member "$LINENO" "struct ifnet" "if_speed" "ac_cv_member_struct_ifnet_if_speed" "
 #ifdef NETSNMP_IFNET_NEEDS_KERNEL
-#define _KERNEL 1
+#define KERNEL
+#if !defined(__DragonFly__)
+#define _KERNEL
+#endif
 #endif
 #ifdef HAVE_SYS_TYPES_H
 #include <sys/types.h>
@@ -27383,7 +27428,10 @@ _ACEOF
 fi
 ac_fn_c_check_member "$LINENO" "struct ifnet" "if_type" "ac_cv_member_struct_ifnet_if_type" "
 #ifdef NETSNMP_IFNET_NEEDS_KERNEL
-#define _KERNEL 1
+#define KERNEL
+#if !defined(__DragonFly__)
+#define _KERNEL
+#endif
 #endif
 #ifdef HAVE_SYS_TYPES_H
 #include <sys/types.h>
@@ -27447,7 +27495,10 @@ _ACEOF
 fi
 ac_fn_c_check_member "$LINENO" "struct ifnet" "if_xname" "ac_cv_member_struct_ifnet_if_xname" "
 #ifdef NETSNMP_IFNET_NEEDS_KERNEL
-#define _KERNEL 1
+#define KERNEL
+#if !defined(__DragonFly__)
+#define _KERNEL
+#endif
 #endif
 #ifdef HAVE_SYS_TYPES_H
 #include <sys/types.h>
@@ -27527,6 +27578,10 @@ ac_fn_c_check_member "$LINENO" "struct rtentry" "rt_dst" "ac_cv_member_struct_rt
 #ifdef HAVE_SYS_SOCKET_H
 #ifdef NETSNMP_IFNET_NEEDS_KERNEL
 #define KERNEL
+#if !defined(__DragonFly__)
+#define _KERNEL
+#endif
+#define KERNEL
 #define _KERNEL
 #endif
 #include <sys/socket.h>
@@ -27553,6 +27608,10 @@ ac_fn_c_check_member "$LINENO" "struct rtentry" "rt_hash" "ac_cv_member_struct_r
 #endif
 #ifdef HAVE_SYS_SOCKET_H
 #ifdef NETSNMP_IFNET_NEEDS_KERNEL
+#define KERNEL
+#if !defined(__DragonFly__)
+#define _KERNEL
+#endif
 #define KERNEL
 #define _KERNEL
 #endif
@@ -27581,6 +27640,10 @@ ac_fn_c_check_member "$LINENO" "struct rtentry" "rt_next" "ac_cv_member_struct_r
 #ifdef HAVE_SYS_SOCKET_H
 #ifdef NETSNMP_IFNET_NEEDS_KERNEL
 #define KERNEL
+#if !defined(__DragonFly__)
+#define _KERNEL
+#endif
+#define KERNEL
 #define _KERNEL
 #endif
 #include <sys/socket.h>
@@ -27607,6 +27670,10 @@ ac_fn_c_check_member "$LINENO" "struct rtentry" "rt_refcnt" "ac_cv_member_struct
 #endif
 #ifdef HAVE_SYS_SOCKET_H
 #ifdef NETSNMP_IFNET_NEEDS_KERNEL
+#define KERNEL
+#if !defined(__DragonFly__)
+#define _KERNEL
+#endif
 #define KERNEL
 #define _KERNEL
 #endif
@@ -27635,6 +27702,10 @@ ac_fn_c_check_member "$LINENO" "struct rtentry" "rt_unit" "ac_cv_member_struct_r
 #ifdef HAVE_SYS_SOCKET_H
 #ifdef NETSNMP_IFNET_NEEDS_KERNEL
 #define KERNEL
+#if !defined(__DragonFly__)
+#define _KERNEL
+#endif
+#define KERNEL
 #define _KERNEL
 #endif
 #include <sys/socket.h>
@@ -27662,7 +27733,9 @@ ac_fn_c_check_member "$LINENO" "struct rtentry" "rt_use" "ac_cv_member_struct_rt
 #ifdef HAVE_SYS_SOCKET_H
 #ifdef NETSNMP_IFNET_NEEDS_KERNEL
 #define KERNEL
+#if !defined(__DragonFly__)
 #define _KERNEL
+#endif
 #endif
 #include <sys/socket.h>
 #undef KERNEL
@@ -27704,7 +27777,9 @@ else
 #include <sys/types.h>
 #ifdef NETSNMP_IFNET_NEEDS_KERNEL
 #define KERNEL
+#if !defined(__DragonFly__)
 #define _KERNEL
+#endif
 #endif
 #include <sys/socket.h>
 #undef KERNEL
@@ -27746,7 +27821,9 @@ rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
 #include <sys/types.h>
 #ifdef NETSNMP_IFNET_NEEDS_KERNEL
 #define KERNEL
+#if !defined(__DragonFly__)
 #define _KERNEL
+#endif
 #endif
 #include <sys/socket.h>
 #undef KERNEL

@@ -390,7 +390,10 @@ fi
 AC_CHECK_MEMBERS([struct ifaddr.ifa_next],,,[
     [
 #ifdef NETSNMP_IFNET_NEEDS_KERNEL
-#define _KERNEL 1
+#define KERNEL
+#if !defined(__DragonFly__)
+#define _KERNEL
+#endif
 #endif
     ]
     AC_INCLUDES_DEFAULT()
@@ -433,7 +436,10 @@ AC_CHECK_MEMBERS([struct ifnet.if_addrlist,
                   struct ifnet.if_type,
                   struct ifnet.if_xname],,,[[
 #ifdef NETSNMP_IFNET_NEEDS_KERNEL
-#define _KERNEL 1
+#define KERNEL
+#if !defined(__DragonFly__)
+#define _KERNEL
+#endif
 #endif
 #ifdef HAVE_SYS_TYPES_H
 #include <sys/types.h>
@@ -509,7 +515,9 @@ AC_CHECK_MEMBERS([struct rtentry.rt_dst,
 #ifdef HAVE_SYS_SOCKET_H
 #ifdef NETSNMP_IFNET_NEEDS_KERNEL
 #define KERNEL
+#if !defined(__DragonFly__)
 #define _KERNEL
+#endif
 #endif
 #include <sys/socket.h>
 #undef KERNEL
@@ -536,7 +544,9 @@ AC_CACHE_CHECK([type of rtentry structure],
 #include <sys/types.h>
 #ifdef NETSNMP_IFNET_NEEDS_KERNEL
 #define KERNEL
+#if !defined(__DragonFly__)
 #define _KERNEL
+#endif
 #endif
 #include <sys/socket.h>
 #undef KERNEL
@@ -564,7 +574,9 @@ AC_CACHE_CHECK([type of rtentry structure],
 #include <sys/types.h>
 #ifdef NETSNMP_IFNET_NEEDS_KERNEL
 #define KERNEL
+#if !defined(__DragonFly__)
 #define _KERNEL
+#endif
 #endif
 #include <sys/socket.h>
 #undef KERNEL
