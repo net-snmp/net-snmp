@@ -38,6 +38,10 @@
 # define netbsd1 netbsd1
 #endif
 
+#if __NetBSD_Version__ >= 499005800
+#define NETBSD_STATS_VIA_SYSCTL
+#endif /* __NetBSD_Version__ >= 499005800 */
+
 /* define the extra mib modules that are supported */
 #define NETSNMP_INCLUDE_HOST_RESOURCES
 #define NETSNMP_INCLUDE_IFTABLE_REWRITES
