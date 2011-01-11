@@ -12,6 +12,9 @@ config_require(hardware/cpu/cpu_pcp)
 #elif defined(irix6)
 config_require(hardware/cpu/cpu_sysinfo)
 
+#elif defined(dragonfly)
+config_require(hardware/cpu/cpu_kinfo)
+
 #elif (defined(netbsd) || defined(netbsd1) || defined(netbsdelf) || defined(netbsdelf2)|| defined(netbsdelf3) || defined(openbsd2) || defined(openbsd3) || defined(openbsd4) || defined(freebsd4) || defined(freebsd5) || defined(freebsd6))
 config_require(hardware/cpu/cpu_sysctl)
 
