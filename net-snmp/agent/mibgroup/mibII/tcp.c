@@ -167,6 +167,12 @@ init_tcp(void)
 #define USES_SNMP_DESIGNED_TCPSTAT
 #endif
 
+#ifdef NETBSD_STATS_VIA_SYSCTL
+#define TCP_STAT_STRUCTURE      struct tcp_mib
+#define USES_SNMP_DESIGNED_TCPSTAT
+#undef TCP_NSTATS
+#endif
+
 #if defined (WIN32) || defined (cygwin)
 #include <iphlpapi.h>
 #define TCP_STAT_STRUCTURE     MIB_TCPSTATS
@@ -681,6 +687,21 @@ tcp_load(netsnmp_cache *cache, void *vmagic)
         DEBUGMSGTL(("mibII/tcpScalar", "Failed to load TCP scalar Group (solaris)\n"));
     } else {
         DEBUGMSGTL(("mibII/tcpScalar", "Loaded TCP scalar Group (solaris)\n"));
+    }
+    return ret_value;
+}
+#elif defined(NETBSD_STATS_VIA_SYSCTL)
+int
+tcp_load(netsnmp_cache *cache, void *vmagic)
+{
+    long ret_value = -1;
+
+    ret_value = netbsd_read_tcp_stat(&tcpstat);
+
+    if ( ret_value < 0 ) {
+       DEBUGMSGTL(("mibII/tcpScalar", "Failed to load TCP scalar Group (netbsd)\n"));
+    } else {
+        DEBUGMSGTL(("mibII/tcpScalar", "Loaded TCP scalar Group (netbsd)\n"));
     }
     return ret_value;
 }
