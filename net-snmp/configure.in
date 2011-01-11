@@ -2810,6 +2810,12 @@ AC_CHECK_HEADERS(netinet/ip6.h netinet6/in6_var.h netinet6/in6_pcb.h netinet6/ip
 #if HAVE_NETINET_IP6_H
 #include <netinet/ip6.h>
 #endif
+#if HAVE_NET_IF_H
+#include <net/if.h>
+#endif
+#if HAVE_NET_ROUTE_H
+#include <net/route.h>
+#endif
 ]])
 # DYNAMIC MODULE SUPPORT
 AC_CHECK_HEADERS(dlfcn.h)
