@@ -35,6 +35,7 @@
 #include <net-snmp/agent/agent_callbacks.h>
 #include <net-snmp/agent/agent_trap.h>
 #include <net-snmp/agent/mib_module_config.h>
+#include "net-snmp/agent/sysORTable.h"
 
 #ifdef USING_NOTIFICATION_LOG_MIB_NOTIFICATION_LOG_MODULE
 #   include "notification-log-mib/notification_log.h"
@@ -52,6 +53,14 @@ SNMPCallback    store_snmpNotifyTable;
 
 oid             snmpNotifyTable_variables_oid[] =
     { 1, 3, 6, 1, 6, 3, 13, 1, 1 };
+
+static oid snmpNotifyFullCompliance[] =
+    { SNMP_OID_SNMPMODULES, 13, 3, 1, 3 }; /* SNMP-NOTIFICATION-MIB::snmpNotifyFullCompliance */
+
+void shutdown_snmpNotifyTable(void)
+{
+    UNREGISTER_SYSOR_ENTRY(snmpNotifyFullCompliance);
+}
 
 
 /*
@@ -466,6 +475,8 @@ init_snmpNotifyTable(void)
      * place any other initialization junk you need here 
      */
 
+    REGISTER_SYSOR_ENTRY(snmpNotifyFullCompliance,
+        "The MIB modules for managing SNMP Notification, plus filtering.");
 
     DEBUGMSGTL(("snmpNotifyTable", "done.\n"));
 }
