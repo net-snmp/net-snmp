@@ -16,6 +16,7 @@
 #include <net-snmp/agent/table.h>
 #include <net-snmp/agent/table_data.h>
 #include <net-snmp/agent/table_dataset.h>
+#include "net-snmp/agent/sysORTable.h"
 #include "notification_log.h"
 
 /*
@@ -56,6 +57,8 @@ static u_long   max_age = 1440; /* 1440 = 24 hours, which is the mib default */
 
 static netsnmp_table_data_set *nlmLogTable;
 static netsnmp_table_data_set *nlmLogVarTable;
+
+static oid nlm_module_oid[] = { SNMP_OID_MIB2, 92 }; /* NOTIFICATION-LOG-MIB::notificationLogMIB */
 
 static void
 netsnmp_notif_log_remove_oldest(int count)
@@ -548,6 +551,9 @@ init_notification_log(void)
                                NETSNMP_DS_APPLICATION_ID,
                                NETSNMP_DS_AGENT_NOTIF_LOG_MAX);
 #endif
+
+    REGISTER_SYSOR_ENTRY(nlm_module_oid, 
+        "The MIB module for logging SNMP Notifications.");
 }
 
 void
@@ -557,6 +563,8 @@ shutdown_notification_log(void)
     check_log_size(0, NULL);
     netsnmp_delete_table_data_set(nlmLogTable);
     nlmLogTable = NULL;
+
+    UNREGISTER_SYSOR_ENTRY(nlm_module_oid);
 }
 
 void
