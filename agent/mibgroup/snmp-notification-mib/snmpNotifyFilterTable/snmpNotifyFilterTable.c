@@ -32,6 +32,7 @@ const int       snmpNotifyFilterTable_oid_size =
 OID_LENGTH(snmpNotifyFilterTable_oid);
 
 snmpNotifyFilterTable_registration snmpNotifyFilterTable_user_context;
+static snmpNotifyFilterTable_registration *snmpNotifyFilterTable_user_context_p;
 
 void            initialize_table_snmpNotifyFilterTable(void);
 void            shutdown_table_snmpNotifyFilterTable(void);
@@ -76,7 +77,6 @@ shutdown_snmpNotifyFilterTable(void)
 void
 initialize_table_snmpNotifyFilterTable(void)
 {
-    snmpNotifyFilterTable_registration *user_context;
     u_long          flags;
 
     DEBUGMSGTL(("verbose:snmpNotifyFilterTable:initialize_table_snmpNotifyFilterTable", "called\n"));
@@ -94,7 +94,7 @@ initialize_table_snmpNotifyFilterTable(void)
      * a netsnmp_data_list is a simple way to store void pointers. A simple
      * string token is used to add, find or remove pointers.
      */
-    user_context =
+    snmpNotifyFilterTable_user_context_p =
         netsnmp_create_data_list("snmpNotifyFilterTable", NULL, NULL);
 
     /*
@@ -106,7 +106,8 @@ initialize_table_snmpNotifyFilterTable(void)
     /*
      * call interface initialization code
      */
-    _snmpNotifyFilterTable_initialize_interface(user_context, flags);
+    _snmpNotifyFilterTable_initialize_interface
+	(snmpNotifyFilterTable_user_context_p, flags);
 }                               /* initialize_table_snmpNotifyFilterTable */
 
 /**
@@ -119,7 +120,9 @@ shutdown_table_snmpNotifyFilterTable(void)
      * call interface shutdown code
      */
     _snmpNotifyFilterTable_shutdown_interface
-        (&snmpNotifyFilterTable_user_context);
+        (snmpNotifyFilterTable_user_context_p);
+    netsnmp_free_all_list_data(snmpNotifyFilterTable_user_context_p);
+    snmpNotifyFilterTable_user_context_p = NULL;
 }
 
 /**

@@ -32,6 +32,7 @@ const oid       ipAddressTable_oid[] = { IPADDRESSTABLE_OID };
 const int       ipAddressTable_oid_size = OID_LENGTH(ipAddressTable_oid);
 
 ipAddressTable_registration ipAddressTable_user_context;
+static ipAddressTable_registration *ipAddressTable_user_context_p;
 
 void            initialize_table_ipAddressTable(void);
 void            shutdown_table_ipAddressTable(void);
@@ -75,7 +76,6 @@ shutdown_ipAddressTable(void)
 void
 initialize_table_ipAddressTable(void)
 {
-    ipAddressTable_registration *user_context;
     u_long          flags;
 
     DEBUGMSGTL(("verbose:ipAddressTable:initialize_table_ipAddressTable",
@@ -90,7 +90,7 @@ initialize_table_ipAddressTable(void)
      * if you'd like to pass in a pointer to some data for this
      * table, allocate or set it up here.
      */
-    user_context = NULL;
+    ipAddressTable_user_context_p = NULL;
 
     /*
      * No support for any flags yet, but in the future you would
@@ -101,7 +101,7 @@ initialize_table_ipAddressTable(void)
     /*
      * call interface initialization code
      */
-    _ipAddressTable_initialize_interface(user_context, flags);
+    _ipAddressTable_initialize_interface(ipAddressTable_user_context_p, flags);
 }                               /* initialize_table_ipAddressTable */
 
 /**
@@ -113,7 +113,9 @@ shutdown_table_ipAddressTable(void)
     /*
      * call interface shutdown code
      */
-    _ipAddressTable_shutdown_interface(&ipAddressTable_user_context);
+    _ipAddressTable_shutdown_interface(ipAddressTable_user_context_p);
+    netsnmp_free_all_list_data(ipAddressTable_user_context_p);
+    ipAddressTable_user_context_p = NULL;
 }
 
 /**

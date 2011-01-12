@@ -32,6 +32,7 @@ const int       ipv6ScopeZoneIndexTable_oid_size =
 OID_LENGTH(ipv6ScopeZoneIndexTable_oid);
 
 ipv6ScopeZoneIndexTable_registration ipv6ScopeZoneIndexTable_user_context;
+static ipv6ScopeZoneIndexTable_registration *ipv6ScopeZoneIndexTable_user_context_p;
 
 void            initialize_table_ipv6ScopeZoneIndexTable(void);
 void            shutdown_table_ipv6ScopeZoneIndexTable(void);
@@ -75,7 +76,6 @@ shutdown_ipv6ScopeZoneIndexTable(void)
 void
 initialize_table_ipv6ScopeZoneIndexTable(void)
 {
-    ipv6ScopeZoneIndexTable_registration *user_context;
     u_long          flags;
 
     DEBUGMSGTL(("verbose:ipv6ScopeZoneIndexTable:initialize_table_ipv6ScopeZoneIndexTable", "called\n"));
@@ -93,7 +93,7 @@ initialize_table_ipv6ScopeZoneIndexTable(void)
      * a netsnmp_data_list is a simple way to store void pointers. A simple
      * string token is used to add, find or remove pointers.
      */
-    user_context =
+    ipv6ScopeZoneIndexTable_user_context_p =
         netsnmp_create_data_list("ipv6ScopeZoneIndexTable", NULL, NULL);
 
     /*
@@ -105,7 +105,8 @@ initialize_table_ipv6ScopeZoneIndexTable(void)
     /*
      * call interface initialization code
      */
-    _ipv6ScopeZoneIndexTable_initialize_interface(user_context, flags);
+    _ipv6ScopeZoneIndexTable_initialize_interface
+	(ipv6ScopeZoneIndexTable_user_context_p, flags);
 }                               /* initialize_table_ipv6ScopeZoneIndexTable */
 
 /**
@@ -118,7 +119,9 @@ shutdown_table_ipv6ScopeZoneIndexTable(void)
      * call interface shutdown code
      */
     _ipv6ScopeZoneIndexTable_shutdown_interface
-        (&ipv6ScopeZoneIndexTable_user_context);
+        (ipv6ScopeZoneIndexTable_user_context_p);
+    netsnmp_free_all_list_data(ipv6ScopeZoneIndexTable_user_context_p);
+    ipv6ScopeZoneIndexTable_user_context_p = NULL;
 }
 
 /**

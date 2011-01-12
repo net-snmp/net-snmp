@@ -31,6 +31,7 @@ const int       ipCidrRouteTable_oid_size =
 OID_LENGTH(ipCidrRouteTable_oid);
 
 ipCidrRouteTable_registration ipCidrRouteTable_user_context;
+static ipCidrRouteTable_registration *ipCidrRouteTable_user_context_p;
 
 void            initialize_table_ipCidrRouteTable(void);
 void            shutdown_table_ipCidrRouteTable(void);
@@ -75,7 +76,6 @@ shutdown_ipCidrRouteTable(void)
 void
 initialize_table_ipCidrRouteTable(void)
 {
-    ipCidrRouteTable_registration *user_context;
     u_long          flags;
 
     DEBUGMSGTL(("verbose:ipCidrRouteTable:initialize_table_ipCidrRouteTable", "called\n"));
@@ -93,8 +93,8 @@ initialize_table_ipCidrRouteTable(void)
      * a netsnmp_data_list is a simple way to store void pointers. A simple
      * string token is used to add, find or remove pointers.
      */
-    user_context =
-        netsnmp_create_data_list("ipCidrRouteTable", NULL, NULL);
+    ipCidrRouteTable_user_context_p
+	= netsnmp_create_data_list("ipCidrRouteTable", NULL, NULL);
 
     /*
      * No support for any flags yet, but in the future you would
@@ -105,7 +105,8 @@ initialize_table_ipCidrRouteTable(void)
     /*
      * call interface initialization code
      */
-    _ipCidrRouteTable_initialize_interface(user_context, flags);
+    _ipCidrRouteTable_initialize_interface
+	(ipCidrRouteTable_user_context_p, flags);
 }                               /* initialize_table_ipCidrRouteTable */
 
 /**
@@ -117,7 +118,9 @@ shutdown_table_ipCidrRouteTable(void)
     /*
      * call interface shutdown code
      */
-    _ipCidrRouteTable_shutdown_interface(&ipCidrRouteTable_user_context);
+    _ipCidrRouteTable_shutdown_interface(ipCidrRouteTable_user_context_p);
+    netsnmp_free_all_list_data(ipCidrRouteTable_user_context_p);
+    ipCidrRouteTable_user_context_p = NULL;
 }
 
 /**
