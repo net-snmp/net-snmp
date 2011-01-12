@@ -57,11 +57,6 @@ oid             snmpNotifyTable_variables_oid[] =
 static oid snmpNotifyFullCompliance[] =
     { SNMP_OID_SNMPMODULES, 13, 3, 1, 3 }; /* SNMP-NOTIFICATION-MIB::snmpNotifyFullCompliance */
 
-void shutdown_snmpNotifyTable(void)
-{
-    UNREGISTER_SYSOR_ENTRY(snmpNotifyFullCompliance);
-}
-
 
 /*
  * variable2 snmpNotifyTable_variables:
@@ -507,6 +502,8 @@ shutdown_snmpNotifyTable(void)
 #endif
     snmp_unregister_callback(SNMP_CALLBACK_LIBRARY, SNMP_CALLBACK_STORE_DATA,
                              store_snmpNotifyTable, NULL, FALSE);
+
+    UNREGISTER_SYSOR_ENTRY(snmpNotifyFullCompliance);
 
     DEBUGMSGTL(("snmpNotifyTable", "done.\n"));
 }
