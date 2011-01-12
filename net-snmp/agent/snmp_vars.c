@@ -144,6 +144,11 @@ PERFORMANCE OF THIS SOFTWARE.
 #include "mib_module_includes.h"
 #include "net-snmp/library/container.h"
 
+#if defined(NETSNMP_USE_OPENSSL) && defined(HAVE_LIBSSL)
+/* From <net-snmp/library/cert_util.h> */
+void netsnmp_certs_agent_init(void);
+#endif
+
 #include "snmp_perl.h"
 
 #ifndef  MIN
