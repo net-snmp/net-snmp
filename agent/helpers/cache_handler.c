@@ -526,7 +526,7 @@ netsnmp_cache_helper_handler(netsnmp_mib_handler * handler,
                    "cache not found, disabled or had no load method\n"));
         return SNMP_ERR_NOERROR;
     }
-    snprintf(addrstr,sizeof(addrstr), "%ld", cache);
+    snprintf(addrstr, sizeof(addrstr), "%p", cache);
     DEBUGMSGTL(("helper:cache_handler", "using cache %s: ", addrstr));
     DEBUGMSGOID(("helper:cache_handler", cache->rootoid, cache->rootoid_len));
     DEBUGMSG(("helper:cache_handler", "\n"));
