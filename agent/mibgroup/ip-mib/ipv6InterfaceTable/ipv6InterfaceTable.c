@@ -31,6 +31,7 @@ int             ipv6InterfaceTable_oid_size =
 OID_LENGTH(ipv6InterfaceTable_oid);
 
 ipv6InterfaceTable_registration ipv6InterfaceTable_user_context;
+static ipv6InterfaceTable_registration *ipv6InterfaceTable_user_context_p;
 
 void            initialize_table_ipv6InterfaceTable(void);
 void            shutdown_table_ipv6InterfaceTable(void);
@@ -80,7 +81,6 @@ shutdown_ipv6InterfaceTable(void)
 void
 initialize_table_ipv6InterfaceTable(void)
 {
-    ipv6InterfaceTable_registration *user_context;
     u_long          flags;
 
     DEBUGMSGTL(("verbose:ipv6InterfaceTable:initialize_table_ipv6InterfaceTable", "called\n"));
@@ -98,7 +98,7 @@ initialize_table_ipv6InterfaceTable(void)
      * a netsnmp_data_list is a simple way to store void pointers. A simple
      * string token is used to add, find or remove pointers.
      */
-    user_context =
+    ipv6InterfaceTable_user_context_p =
         netsnmp_create_data_list("ipv6InterfaceTable", NULL, NULL);
 
     /*
@@ -110,7 +110,8 @@ initialize_table_ipv6InterfaceTable(void)
     /*
      * call interface initialization code
      */
-    _ipv6InterfaceTable_initialize_interface(user_context, flags);
+    _ipv6InterfaceTable_initialize_interface
+	(ipv6InterfaceTable_user_context_p, flags);
 }                               /* initialize_table_ipv6InterfaceTable */
 
 /**
@@ -123,7 +124,9 @@ shutdown_table_ipv6InterfaceTable(void)
      * call interface shutdown code
      */
     _ipv6InterfaceTable_shutdown_interface
-        (&ipv6InterfaceTable_user_context);
+        (ipv6InterfaceTable_user_context_p);
+    netsnmp_free_all_list_data(ipv6InterfaceTable_user_context_p);
+    ipv6InterfaceTable_user_context_p = NULL;
 }
 
 /**

@@ -31,6 +31,7 @@ int             inetNetToMediaTable_oid_size =
 OID_LENGTH(inetNetToMediaTable_oid);
 
 inetNetToMediaTable_registration inetNetToMediaTable_user_context;
+static inetNetToMediaTable_registration *inetNetToMediaTable_user_context_p;
 
 void            initialize_table_inetNetToMediaTable(void);
 void            shutdown_table_inetNetToMediaTable(void);
@@ -75,7 +76,6 @@ shutdown_inetNetToMediaTable(void)
 void
 initialize_table_inetNetToMediaTable(void)
 {
-    inetNetToMediaTable_registration *user_context;
     u_long          flags;
 
     DEBUGMSGTL(("verbose:inetNetToMediaTable:initialize_table_inetNetToMediaTable", "called\n"));
@@ -93,7 +93,7 @@ initialize_table_inetNetToMediaTable(void)
      * a netsnmp_data_list is a simple way to store void pointers. A simple
      * string token is used to add, find or remove pointers.
      */
-    user_context =
+    inetNetToMediaTable_user_context_p =
         netsnmp_create_data_list("inetNetToMediaTable", NULL, NULL);
 
     /*
@@ -105,7 +105,8 @@ initialize_table_inetNetToMediaTable(void)
     /*
      * call interface initialization code
      */
-    _inetNetToMediaTable_initialize_interface(user_context, flags);
+    _inetNetToMediaTable_initialize_interface
+	(inetNetToMediaTable_user_context_p, flags);
 }                               /* initialize_table_inetNetToMediaTable */
 
 /**
@@ -118,7 +119,9 @@ shutdown_table_inetNetToMediaTable(void)
      * call interface shutdown code
      */
     _inetNetToMediaTable_shutdown_interface
-        (&inetNetToMediaTable_user_context);
+        (inetNetToMediaTable_user_context_p);
+    netsnmp_free_all_list_data(inetNetToMediaTable_user_context_p);
+    inetNetToMediaTable_user_context_p = NULL;
 }
 
 /**

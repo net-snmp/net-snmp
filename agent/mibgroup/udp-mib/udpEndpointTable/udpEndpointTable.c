@@ -31,6 +31,7 @@ int             udpEndpointTable_oid_size =
 OID_LENGTH(udpEndpointTable_oid);
 
 udpEndpointTable_registration udpEndpointTable_user_context;
+static udpEndpointTable_registration *udpEndpointTable_user_context_p;
 
 void            initialize_table_udpEndpointTable(void);
 void            shutdown_table_udpEndpointTable(void);
@@ -75,7 +76,6 @@ shutdown_udpEndpointTable(void)
 void
 initialize_table_udpEndpointTable(void)
 {
-    udpEndpointTable_registration *user_context;
     u_long          flags;
 
     DEBUGMSGTL(("verbose:udpEndpointTable:initialize_table_udpEndpointTable", "called\n"));
@@ -93,7 +93,7 @@ initialize_table_udpEndpointTable(void)
      * a netsnmp_data_list is a simple way to store void pointers. A simple
      * string token is used to add, find or remove pointers.
      */
-    user_context =
+    udpEndpointTable_user_context_p =
         netsnmp_create_data_list("udpEndpointTable", NULL, NULL);
 
     /*
@@ -105,7 +105,8 @@ initialize_table_udpEndpointTable(void)
     /*
      * call interface initialization code
      */
-    _udpEndpointTable_initialize_interface(user_context, flags);
+    _udpEndpointTable_initialize_interface
+	(udpEndpointTable_user_context_p, flags);
 }                               /* initialize_table_udpEndpointTable */
 
 /**
@@ -117,7 +118,9 @@ shutdown_table_udpEndpointTable(void)
     /*
      * call interface shutdown code
      */
-    _udpEndpointTable_shutdown_interface(&udpEndpointTable_user_context);
+    _udpEndpointTable_shutdown_interface(udpEndpointTable_user_context_p);
+    netsnmp_free_all_list_data(udpEndpointTable_user_context_p);
+    udpEndpointTable_user_context_p = NULL;
 }
 
 /**

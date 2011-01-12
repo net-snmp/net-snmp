@@ -43,6 +43,7 @@ int             ifXTable_oid_size = OID_LENGTH(ifXTable_oid);
 const char     *row_token = "ifXTable";
 
 ifXTable_registration ifXTable_user_context;
+static ifXTable_registration *ifXTable_user_context_p;
 
 /**
  * Initializes the ifXTable module
@@ -70,7 +71,6 @@ init_ifXTable(void)
 void
 initialize_table_ifXTable(void)
 {
-    ifXTable_registration *user_context;
     u_long          flags;
 
     DEBUGMSGTL(("verbose:ifXTable:initialize_table_ifXTable", "called\n"));
@@ -88,7 +88,7 @@ initialize_table_ifXTable(void)
      * a netsnmp_data_list is a simple way to store void pointers. A simple
      * string token is used to add, find or remove pointers.
      */
-    user_context = netsnmp_create_data_list("ifXTable", NULL, NULL);
+    ifXTable_user_context_p = netsnmp_create_data_list("ifXTable", NULL, NULL);
 
     /*
      * No support for any flags yet, but in the future you would
@@ -99,7 +99,7 @@ initialize_table_ifXTable(void)
     /*
      * call interface initialization code
      */
-    _ifXTable_initialize_interface(user_context, flags);
+    _ifXTable_initialize_interface(ifXTable_user_context_p, flags);
 
     /*
      * if there is no container, bail. otherwise, register the callbacks
@@ -109,6 +109,13 @@ initialize_table_ifXTable(void)
         return;                 /* msg already logged */
 
 }                               /* initialize_table_ifXTable */
+
+void
+shutdown_ifXTable(void)
+{
+    netsnmp_free_all_list_data(ifXTable_user_context_p);
+    ifXTable_user_context_p = NULL;
+}
 
 /**
  * extra context initialization (eg default values)
