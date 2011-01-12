@@ -97,6 +97,7 @@ extern          "C" {
         void           *myvoid;
         int             flags;
 #define NETSNMP_ITERATOR_FLAG_SORTED	0x01
+#define NETSNMP_HANDLER_OWNS_IINFO	0x02
 
        /** A pointer to the netsnmp_table_registration_info object
            this iterator is registered along with. */
@@ -122,18 +123,18 @@ extern          "C" {
     void   netsnmp_handler_owns_iterator_info(netsnmp_mib_handler *h);
     netsnmp_mib_handler
           *netsnmp_get_table_iterator_handler(netsnmp_iterator_info *iinfo);
-    netsnmp_mib_handler
-          *netsnmp_get_table_iterator_handler2(netsnmp_iterator_info *iinfo);
     int netsnmp_register_table_iterator(netsnmp_handler_registration *reginfo,
                                         netsnmp_iterator_info *iinfo);
-    int netsnmp_register_table_iterator2(netsnmp_handler_registration *reginfo,
-                                         netsnmp_iterator_info *iinfo);
     void  netsnmp_iterator_delete_table(netsnmp_iterator_info *iinfo);
 
     void *netsnmp_extract_iterator_context(netsnmp_request_info *);
     void   netsnmp_insert_iterator_context(netsnmp_request_info *, void *);
 
     Netsnmp_Node_Handler netsnmp_table_iterator_helper_handler;
+
+#define netsnmp_register_table_iterator2(reginfo, iinfo)        \
+    (((iinfo)->flags |= NETSNMP_HANDLER_OWNS_IINFO),           \
+        netsnmp_register_table_iterator((reginfo), (iinfo)))
 
 
 /* ============================

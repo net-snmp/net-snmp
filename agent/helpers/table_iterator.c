@@ -192,7 +192,11 @@ void netsnmp_handler_owns_iterator_info(netsnmp_mib_handler *h)
 
 /**
  * Returns a netsnmp_mib_handler object for the table_iterator helper.
- * The caller remains the owner of the iterator information object.
+ *
+ * The caller remains the owner of the iterator information object if
+ * the flag NETSNMP_HANDLER_OWNS_IINFO has not been set, and the created
+ * handler becomes the owner of the iterator information if the flag
+ * NETSNMP_HANDLER_OWNS_IINFO has been set.
  */
 netsnmp_mib_handler *
 netsnmp_get_table_iterator_handler(netsnmp_iterator_info *iinfo)
@@ -210,30 +214,8 @@ netsnmp_get_table_iterator_handler(netsnmp_iterator_info *iinfo)
         return NULL;
 
     me->myvoid = iinfo;
-    return me;
-}
-
-/**
- * Returns a netsnmp_mib_handler object for the table_iterator helper.
- * Ownership of the iterator information object is transferred to the
- * returned MIB handler.
- */
-netsnmp_mib_handler *
-netsnmp_get_table_iterator_handler2(netsnmp_iterator_info *iinfo)
-{
-    netsnmp_mib_handler *me;
-
-    if (!iinfo)
-        return NULL;
-
-    me = netsnmp_create_handler(TABLE_ITERATOR_NAME,
-                                netsnmp_table_iterator_helper_handler);
-
-    if (!me)
-        return NULL;
-
-    me->myvoid = iinfo;
-    netsnmp_handler_owns_iterator_info(me);
+    if (iinfo->flags & NETSNMP_HANDLER_OWNS_IINFO)
+        netsnmp_handler_owns_iterator_info(me);
     return me;
 }
 
@@ -247,8 +229,11 @@ netsnmp_get_table_iterator_handler2(netsnmp_iterator_info *iinfo)
  *
  * @param reginfo is a pointer to a netsnmp_handler_registration struct
  *
- * @param iinfo is a pointer to a netsnmp_iterator_info struct
- * The caller remains the owner of this structure.
+ * @param iinfo A pointer to a netsnmp_iterator_info struct. If the flag
+ * NETSNMP_HANDLER_OWNS_IINFO is not set in iinfo->flags, the caller remains
+ * the owner of this structure. And if the flag NETSNMP_HANDLER_OWNS_IINFO is
+ * set in iinfo->flags, ownership of this data structure is passed to the
+ * handler.
  *
  * @return MIB_REGISTERED_OK is returned if the registration was a success.
  *	Failures are MIB_REGISTRATION_FAILED, MIB_DUPLICATE_REGISTRATION.
@@ -262,40 +247,6 @@ netsnmp_register_table_iterator(netsnmp_handler_registration *reginfo,
     reginfo->modes |= HANDLER_CAN_STASH;
     netsnmp_inject_handler(reginfo,
                            netsnmp_get_table_iterator_handler(iinfo));
-    if (!iinfo)
-        return SNMPERR_GENERR;
-    if (!iinfo->indexes && iinfo->table_reginfo &&
-                           iinfo->table_reginfo->indexes )
-        iinfo->indexes = snmp_clone_varbind( iinfo->table_reginfo->indexes );
-
-    return netsnmp_register_table(reginfo, iinfo->table_reginfo);
-}
-
-/** 
- * Creates and registers a table iterator helper handler calling 
- * netsnmp_create_handler with a handler name set to TABLE_ITERATOR_NAME 
- * and access method, netsnmp_table_iterator_helper_handler.
- *
- * If NOT_SERIALIZED is not defined the function injects the serialize
- * handler into the calling chain prior to calling netsnmp_register_table.
- *
- * @param reginfo is a pointer to a netsnmp_handler_registration struct
- *
- * @param iinfo is a pointer to a netsnmp_iterator_info struct
- * Ownership of this structure is transferred to the handler registration.
- *
- * @return MIB_REGISTERED_OK is returned if the registration was a success.
- *	Failures are MIB_REGISTRATION_FAILED, MIB_DUPLICATE_REGISTRATION.
- *	If iinfo is NULL, SNMPERR_GENERR is returned.
- *
- */
-int
-netsnmp_register_table_iterator2(netsnmp_handler_registration *reginfo,
-                                 netsnmp_iterator_info *iinfo)
-{
-    reginfo->modes |= HANDLER_CAN_STASH;
-    netsnmp_inject_handler(reginfo,
-                           netsnmp_get_table_iterator_handler2(iinfo));
     if (!iinfo)
         return SNMPERR_GENERR;
     if (!iinfo->indexes && iinfo->table_reginfo &&
