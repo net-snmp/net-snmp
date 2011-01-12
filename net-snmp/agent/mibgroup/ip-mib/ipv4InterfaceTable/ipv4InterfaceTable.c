@@ -31,6 +31,7 @@ int             ipv4InterfaceTable_oid_size =
 OID_LENGTH(ipv4InterfaceTable_oid);
 
 ipv4InterfaceTable_registration ipv4InterfaceTable_user_context;
+static ipv4InterfaceTable_registration *ipv4InterfaceTable_user_context_p;
 
 void            initialize_table_ipv4InterfaceTable(void);
 void            shutdown_table_ipv4InterfaceTable(void);
@@ -80,7 +81,6 @@ shutdown_ipv4InterfaceTable(void)
 void
 initialize_table_ipv4InterfaceTable(void)
 {
-    ipv4InterfaceTable_registration *user_context;
     u_long          flags;
 
     DEBUGMSGTL(("verbose:ipv4InterfaceTable:initialize_table_ipv4InterfaceTable", "called\n"));
@@ -98,7 +98,7 @@ initialize_table_ipv4InterfaceTable(void)
      * a netsnmp_data_list is a simple way to store void pointers. A simple
      * string token is used to add, find or remove pointers.
      */
-    user_context =
+    ipv4InterfaceTable_user_context_p =
         netsnmp_create_data_list("ipv4InterfaceTable", NULL, NULL);
 
     /*
@@ -110,7 +110,8 @@ initialize_table_ipv4InterfaceTable(void)
     /*
      * call interface initialization code
      */
-    _ipv4InterfaceTable_initialize_interface(user_context, flags);
+    _ipv4InterfaceTable_initialize_interface
+	(ipv4InterfaceTable_user_context_p, flags);
 }                               /* initialize_table_ipv4InterfaceTable */
 
 /**
@@ -123,7 +124,9 @@ shutdown_table_ipv4InterfaceTable(void)
      * call interface shutdown code
      */
     _ipv4InterfaceTable_shutdown_interface
-        (&ipv4InterfaceTable_user_context);
+        (ipv4InterfaceTable_user_context_p);
+    netsnmp_free_all_list_data(ipv4InterfaceTable_user_context_p);
+    ipv4InterfaceTable_user_context_p = NULL;
 }
 
 /**

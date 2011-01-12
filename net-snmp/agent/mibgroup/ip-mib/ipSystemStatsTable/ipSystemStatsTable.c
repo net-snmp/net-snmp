@@ -31,6 +31,7 @@ int             ipSystemStatsTable_oid_size =
 OID_LENGTH(ipSystemStatsTable_oid);
 
 ipSystemStatsTable_registration ipSystemStatsTable_user_context;
+static ipSystemStatsTable_registration *ipSystemStatsTable_user_context_p;
 
 void            initialize_table_ipSystemStatsTable(void);
 void            shutdown_table_ipSystemStatsTable(void);
@@ -75,7 +76,6 @@ shutdown_ipSystemStatsTable(void)
 void
 initialize_table_ipSystemStatsTable(void)
 {
-    ipSystemStatsTable_registration *user_context;
     u_long          flags;
 
     DEBUGMSGTL(("verbose:ipSystemStatsTable:initialize_table_ipSystemStatsTable", "called\n"));
@@ -93,7 +93,7 @@ initialize_table_ipSystemStatsTable(void)
      * a netsnmp_data_list is a simple way to store void pointers. A simple
      * string token is used to add, find or remove pointers.
      */
-    user_context =
+    ipSystemStatsTable_user_context_p =
         netsnmp_create_data_list("ipSystemStatsTable", NULL, NULL);
 
     /*
@@ -105,7 +105,8 @@ initialize_table_ipSystemStatsTable(void)
     /*
      * call interface initialization code
      */
-    _ipSystemStatsTable_initialize_interface(user_context, flags);
+    _ipSystemStatsTable_initialize_interface
+	(ipSystemStatsTable_user_context_p, flags);
 }                               /* initialize_table_ipSystemStatsTable */
 
 /**
@@ -118,7 +119,9 @@ shutdown_table_ipSystemStatsTable(void)
      * call interface shutdown code
      */
     _ipSystemStatsTable_shutdown_interface
-        (&ipSystemStatsTable_user_context);
+        (ipSystemStatsTable_user_context_p);
+    netsnmp_free_all_list_data(ipSystemStatsTable_user_context_p);
+    ipSystemStatsTable_user_context_p = NULL;
 }
 
 /**
