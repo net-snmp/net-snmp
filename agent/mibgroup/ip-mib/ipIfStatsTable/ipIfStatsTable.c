@@ -30,6 +30,7 @@ const oid       ipIfStatsTable_oid[] = { IPIFSTATSTABLE_OID };
 const int       ipIfStatsTable_oid_size = OID_LENGTH(ipIfStatsTable_oid);
 
 ipIfStatsTable_registration ipIfStatsTable_user_context;
+static ipIfStatsTable_registration *ipIfStatsTable_user_context_p;
 
 void            initialize_table_ipIfStatsTable(void);
 void            shutdown_table_ipIfStatsTable(void);
@@ -77,7 +78,6 @@ shutdown_ipIfStatsTable(void)
 void
 initialize_table_ipIfStatsTable(void)
 {
-    ipIfStatsTable_registration *user_context;
     u_long          flags;
 
     DEBUGMSGTL(("verbose:ipIfStatsTable:initialize_table_ipIfStatsTable",
@@ -96,7 +96,8 @@ initialize_table_ipIfStatsTable(void)
      * a netsnmp_data_list is a simple way to store void pointers. A simple
      * string token is used to add, find or remove pointers.
      */
-    user_context = netsnmp_create_data_list("ipIfStatsTable", NULL, NULL);
+    ipIfStatsTable_user_context_p
+	= netsnmp_create_data_list("ipIfStatsTable", NULL, NULL);
 
     /*
      * No support for any flags yet, but in the future you would
@@ -107,7 +108,8 @@ initialize_table_ipIfStatsTable(void)
     /*
      * call interface initialization code
      */
-    _ipIfStatsTable_initialize_interface(user_context, flags);
+    _ipIfStatsTable_initialize_interface
+	(ipIfStatsTable_user_context_p, flags);
 }                               /* initialize_table_ipIfStatsTable */
 
 /**
@@ -119,7 +121,9 @@ shutdown_table_ipIfStatsTable(void)
     /*
      * call interface shutdown code
      */
-    _ipIfStatsTable_shutdown_interface(&ipIfStatsTable_user_context);
+    _ipIfStatsTable_shutdown_interface(ipIfStatsTable_user_context_p);
+    netsnmp_free_all_list_data(ipIfStatsTable_user_context_p);
+    ipIfStatsTable_user_context_p = NULL;
 }
 
 /**

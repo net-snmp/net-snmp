@@ -30,6 +30,7 @@ oid             etherStatsTable_oid[] = { ETHERSTATSTABLE_OID };
 int             etherStatsTable_oid_size = OID_LENGTH(etherStatsTable_oid);
 
 etherStatsTable_registration etherStatsTable_user_context;
+static etherStatsTable_registration *etherStatsTable_user_context_p;
 
 void            initialize_table_etherStatsTable(void);
 void            shutdown_table_etherStatsTable(void);
@@ -74,7 +75,6 @@ shutdown_etherStatsTable(void)
 void
 initialize_table_etherStatsTable(void)
 {
-    etherStatsTable_registration *user_context;
     u_long          flags;
 
     DEBUGMSGTL(("verbose:etherStatsTable:initialize_table_etherStatsTable",
@@ -93,7 +93,8 @@ initialize_table_etherStatsTable(void)
      * a netsnmp_data_list is a simple way to store void pointers. A simple
      * string token is used to add, find or remove pointers.
      */
-    user_context = netsnmp_create_data_list("etherStatsTable", NULL, NULL);
+    etherStatsTable_user_context_p
+	= netsnmp_create_data_list("etherStatsTable", NULL, NULL);
 
     /*
      * No support for any flags yet, but in the future you would
@@ -104,7 +105,8 @@ initialize_table_etherStatsTable(void)
     /*
      * call interface initialization code
      */
-    _etherStatsTable_initialize_interface(user_context, flags);
+    _etherStatsTable_initialize_interface
+	(etherStatsTable_user_context_p, flags);
 }                               /* initialize_table_etherStatsTable */
 
 /**
@@ -116,7 +118,9 @@ shutdown_table_etherStatsTable(void)
     /*
      * call interface shutdown code
      */
-    _etherStatsTable_shutdown_interface(&etherStatsTable_user_context);
+    _etherStatsTable_shutdown_interface(etherStatsTable_user_context_p);
+    netsnmp_free_all_list_data(etherStatsTable_user_context_p);
+    etherStatsTable_user_context_p = NULL;
 }
 
 /**

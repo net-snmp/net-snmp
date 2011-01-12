@@ -30,6 +30,7 @@ oid             dot3StatsTable_oid[] = { DOT3STATSTABLE_OID };
 int             dot3StatsTable_oid_size = OID_LENGTH(dot3StatsTable_oid);
 
 dot3StatsTable_registration dot3StatsTable_user_context;
+static dot3StatsTable_registration *dot3StatsTable_user_context_p;
 
 void            initialize_table_dot3StatsTable(void);
 void            shutdown_table_dot3StatsTable(void);
@@ -73,7 +74,6 @@ shutdown_dot3StatsTable(void)
 void
 initialize_table_dot3StatsTable(void)
 {
-    dot3StatsTable_registration *user_context;
     u_long          flags;
 
     DEBUGMSGTL(("verbose:dot3StatsTable:initialize_table_dot3StatsTable",
@@ -92,7 +92,8 @@ initialize_table_dot3StatsTable(void)
      * a netsnmp_data_list is a simple way to store void pointers. A simple
      * string token is used to add, find or remove pointers.
      */
-    user_context = netsnmp_create_data_list("dot3StatsTable", NULL, NULL);
+    dot3StatsTable_user_context_p
+	= netsnmp_create_data_list("dot3StatsTable", NULL, NULL);
 
     /*
      * No support for any flags yet, but in the future you would
@@ -103,7 +104,7 @@ initialize_table_dot3StatsTable(void)
     /*
      * call interface initialization code
      */
-    _dot3StatsTable_initialize_interface(user_context, flags);
+    _dot3StatsTable_initialize_interface(dot3StatsTable_user_context_p, flags);
 }                               /* initialize_table_dot3StatsTable */
 
 /**
@@ -115,7 +116,9 @@ shutdown_table_dot3StatsTable(void)
     /*
      * call interface shutdown code
      */
-    _dot3StatsTable_shutdown_interface(&dot3StatsTable_user_context);
+    _dot3StatsTable_shutdown_interface(dot3StatsTable_user_context_p);
+    netsnmp_free_all_list_data(dot3StatsTable_user_context_p);
+    dot3StatsTable_user_context_p = NULL;
 }
 
 /**
