@@ -6,6 +6,7 @@
 #define freebsd2 freebsd2
 #define freebsd3 freebsd3
 #define freebsd4 freebsd4
+#define dragonfly dragonfly
 
 #undef IFADDR_SYMBOL
 #define IFADDR_SYMBOL "in_ifaddrhead"
