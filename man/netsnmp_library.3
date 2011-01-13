@@ -1,4 +1,4 @@
-.TH "The Net-SNMP library" 3 "21 Dec 2010" "Version 5.5.1.pre1" "net-snmp" \" -*- nroff -*-
+.TH "The Net-SNMP library" 3 "13 Jan 2011" "Version 5.5.1.pre2" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -466,7 +466,7 @@ XXX-rks: why no SNMP_FREE(isp->packet); ??
 .PP
 XXX-rks: why no SNMP_FREE(isp->packet); ?? 
 .PP
-Definition at line 5679 of file snmp_api.c.
+Definition at line 5684 of file snmp_api.c.
 .SS "int init_agent (const char * app)"
 .PP
 Initialize the agent. Calls into init_agent_read_config to set tha app's configuration file in the appropriate default storage space, NETSNMP_DS_LIB_APPTYPE. Need to call init_agent before calling init_snmp.
@@ -520,7 +520,7 @@ lexicographical compare two object identifiers and return the point where they d
 .PP
 
 .PP
-Definition at line 6680 of file snmp_api.c.
+Definition at line 6685 of file snmp_api.c.
 .SS "int netsnmp_oid_equals (const oid * in_name1, size_t len1, const oid * in_name2, size_t len2)"
 .PP
 Compares 2 OIDs to determine if they are exactly equal. This should be faster than doing a snmp_oid_compare for different length OIDs, since the length is checked first and if != returns immediately. Might be very slighly faster if lengths are ==. 
@@ -543,7 +543,7 @@ Compares 2 OIDs to determine if they are exactly equal. This should be faster th
 .PP
 
 .PP
-Definition at line 6761 of file snmp_api.c.
+Definition at line 6766 of file snmp_api.c.
 .SS "int netsnmp_oid_find_prefix (const oid * in_name1, size_t len1, const oid * in_name2, size_t len2)"
 .PP
 Given two OIDs, determine the common prefix to them both. \fBParameters:\fP
@@ -564,7 +564,7 @@ length of largest common index of commonality. 1 = first, 0 if none * or -1 on e
 .PP
 
 .PP
-Definition at line 6817 of file snmp_api.c.
+Definition at line 6829 of file snmp_api.c.
 .SS "int netsnmp_oid_is_subtree (const oid * in_name1, size_t len1, const oid * in_name2, size_t len2)"
 .PP
 Identical to netsnmp_oid_equals, except only the length up to len1 is compared. Functionally, this determines if in_name2 is equal or a subtree of in_name1 
@@ -587,7 +587,7 @@ Identical to netsnmp_oid_equals, except only the length up to len1 is compared. 
 .PP
 
 .PP
-Definition at line 6797 of file snmp_api.c.
+Definition at line 6809 of file snmp_api.c.
 .SS "int snmp_oid_compare (const oid * in_name1, size_t len1, const oid * in_name2, size_t len2)"
 .PP
 lexicographical compare two object identifiers. Caution: this method is called often by command responder applications (ie, agent).
@@ -599,7 +599,7 @@ lexicographical compare two object identifiers. Caution: this method is called o
 .PP
 
 .PP
-Definition at line 6631 of file snmp_api.c.
+Definition at line 6636 of file snmp_api.c.
 .SS "int snmp_oidtree_compare (const oid * in_name1, size_t len1, const oid * in_name2, size_t len2)"
 .PP
 Compares 2 OIDs to determine if they are equal up until the shortest length. \fBParameters:\fP
@@ -620,12 +620,12 @@ Compares 2 OIDs to determine if they are equal up until the shortest length. \fB
 .PP
 
 .PP
-Definition at line 6733 of file snmp_api.c.
+Definition at line 6738 of file snmp_api.c.
 .SS "\fBnetsnmp_variable_list\fP* snmp_pdu_add_variable (\fBnetsnmp_pdu\fP * pdu, const oid * name, size_t name_length, u_char type, const void * value, size_t len)"
 .PP
 Library API routines concerned with \fBvariable\fP bindings and values. 
 .PP
-Definition at line 6885 of file snmp_api.c.
+Definition at line 6897 of file snmp_api.c.
 .SS "void snmp_sess_init (\fBnetsnmp_session\fP * session)"
 .PP
 Library API routines concerned with specifying and using SNMP 'sessions' including sending and receiving requests. 
@@ -650,7 +650,7 @@ snmp_sess_session()
 .PP
 
 .PP
-Definition at line 7478 of file snmp_api.c.
+Definition at line 7490 of file snmp_api.c.
 .SS "void snmp_shutdown (const char * type)"
 .PP
 Shuts down the application, saving any needed persistent storage, and appropriate clean up. \fBParameters:\fP

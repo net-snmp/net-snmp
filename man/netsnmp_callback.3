@@ -1,4 +1,4 @@
-.TH "A generic callback mechanism" 3 "21 Dec 2010" "Version 5.5.1.pre1" "net-snmp" \" -*- nroff -*-
+.TH "A generic callback mechanism" 3 "13 Jan 2011" "Version 5.5.1.pre2" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -81,7 +81,7 @@ find and clear client args that match ptr \fBParameters:\fP
 .PP
 
 .PP
-Definition at line 474 of file callback.c.
+Definition at line 477 of file callback.c.
 .SS "int snmp_call_callbacks (int major, int minor, void * caller_arg)"
 .PP
 This function calls the callback function for each registered callback of type major and minor. \fBParameters:\fP
@@ -107,7 +107,7 @@ Returns SNMPERR_GENERR if major is >= MAX_CALLBACK_IDS or minor is >= MAX_CALLBA
 .PP
 
 .PP
-Definition at line 298 of file callback.c.
+Definition at line 301 of file callback.c.
 .SS "int snmp_register_callback (int major, int minor, SNMPCallback * new_callback, void * arg)"
 .PP
 This function registers a generic callback function. The major and minor values are used to set the new_callback function into a global static multi-dimensional array of type struct \fBsnmp_gen_callback\fP. The function makes sure to append this callback function at the end of the link list, snmp_gen_callback->next.
@@ -165,7 +165,7 @@ Returns SNMPERR_GENERR if major is >= MAX_CALLBACK_IDS or minor is >= MAX_CALLBA
 .PP
 
 .PP
-Definition at line 230 of file callback.c.
+Definition at line 233 of file callback.c.
 .SS "int snmp_unregister_callback (int major, int minor, SNMPCallback * target, void * arg, int matchargs)"
 .PP
 This function unregisters a specified callback function given a major and minor type. Note: no bound checking on major and minor.
@@ -199,7 +199,7 @@ Returns the number of callbacks that were unregistered.
 .PP
 set cleanup flag? 
 .PP
-Definition at line 418 of file callback.c.
+Definition at line 421 of file callback.c.
 .SH "Author"
 .PP 
 Generated automatically by Doxygen for net-snmp from the source code.
