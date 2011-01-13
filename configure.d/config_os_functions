@@ -52,6 +52,7 @@ AC_CHECK_FUNCS([cgetnext        execv         gai_strerror     ] dnl
                [getpid          getpwnam      getvfsstat       ] dnl
                [hasmntopt       initgroups                     ] dnl
                [if_nameindex    if_nametoindex                 ] dnl
+               [kinfo_get_cpus                                 ] dnl
                [mkstemp         mktime                         ] dnl
                [poll            regcomp                        ] dnl
                [setgid          setgroups                      ] dnl
