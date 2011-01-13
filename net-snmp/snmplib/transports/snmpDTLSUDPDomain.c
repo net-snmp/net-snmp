@@ -1553,7 +1553,7 @@ netsnmp_dtlsudp_ctor(void)
 #ifdef NETSNMP_ENABLE_IPV6
     dtlsudp6Domain.name = netsnmpDTLSUDPDomain;
     dtlsudp6Domain.name_length = netsnmpDTLSUDPDomain_len;
-    dtlsudp6Domain.prefix = (const char**)calloc(num_prefixes6,
+    dtlsudp6Domain.prefix = (const char**)calloc(num_prefixes6 + 1,
                                                 sizeof(char *));
     for (i = 0; i < num_prefixes6; ++ i)
         dtlsudp6Domain.prefix[i] = prefixes6[i];
@@ -1570,7 +1570,7 @@ netsnmp_dtlsudp_ctor(void)
 
     dtlsudpDomain.name = netsnmpDTLSUDPDomain;
     dtlsudpDomain.name_length = netsnmpDTLSUDPDomain_len;
-    dtlsudpDomain.prefix = (const char**)calloc(num_prefixes,
+    dtlsudpDomain.prefix = (const char**)calloc(num_prefixes + 1,
                                                 sizeof(char *));
     for (i = 0; i < num_prefixes; ++ i)
         dtlsudpDomain.prefix[i] = prefixes[i];
