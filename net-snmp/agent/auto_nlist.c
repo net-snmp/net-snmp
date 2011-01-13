@@ -74,8 +74,6 @@ auto_nlist_value(const char *string)
                     defined(netbsd1) || defined(dragonfly)) 
         if (it->nl[0].n_type == 0) {
             strcpy(it->nl[0].n_name, string);
-        if (it->nl[0].n_type == 0) {
-            strcpy(it->nl[0].n_name, string);
             it->nl[0].n_name[strlen(string)+1] = '\0';
             init_nlist(it->nl);
         }
