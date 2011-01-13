@@ -54,8 +54,8 @@
 ./callback.lo: ../include/net-snmp/system/sysv.h
 ./callback.lo: ../include/net-snmp/system/generic.h
 ./callback.lo: ../include/net-snmp/machine/generic.h 
-./callback.lo:  ../include/net-snmp/types.h
-./callback.lo:  ../include/net-snmp/library/types.h
+./callback.lo: ../include/net-snmp/types.h 
+./callback.lo: ../include/net-snmp/library/types.h
 ./callback.lo: ../include/net-snmp/definitions.h
 ./callback.lo: ../include/net-snmp/library/snmp_api.h
 ./callback.lo: ../include/net-snmp/varbind_api.h
@@ -84,7 +84,7 @@
 ./callback.lo: ../include/net-snmp/output_api.h
 ./callback.lo: ../include/net-snmp/library/snmp_debug.h
 ./callback.lo: ../include/net-snmp/library/snmp_logging.h
-./callback.lo: ../include/net-snmp/utilities.h 
+./callback.lo: ../include/net-snmp/utilities.h
 ./callback.lo: ../include/net-snmp/library/system.h
 ./callback.lo: ../include/net-snmp/library/tools.h
 ./callback.lo: ../include/net-snmp/library/int64.h
@@ -581,7 +581,7 @@
 ./default_store.lo: ../include/net-snmp/system/sysv.h
 ./default_store.lo: ../include/net-snmp/system/generic.h
 ./default_store.lo: ../include/net-snmp/machine/generic.h
-./default_store.lo:  ../include/net-snmp/types.h
+./default_store.lo: ../include/net-snmp/types.h 
 ./default_store.lo: ../include/net-snmp/library/types.h
 ./default_store.lo: ../include/net-snmp/definitions.h
 ./default_store.lo: ../include/net-snmp/library/snmp_api.h
@@ -617,7 +617,7 @@
 ./default_store.lo: ../include/net-snmp/library/snmp_parse_args.h
 ./default_store.lo: ../include/net-snmp/library/snmp_enum.h
 ./default_store.lo: ../include/net-snmp/library/vacm.h
-./default_store.lo: ../include/net-snmp/utilities.h 
+./default_store.lo: ../include/net-snmp/utilities.h
 ./default_store.lo: ../include/net-snmp/library/system.h
 ./default_store.lo: ../include/net-snmp/library/tools.h
 ./default_store.lo: ../include/net-snmp/library/int64.h
