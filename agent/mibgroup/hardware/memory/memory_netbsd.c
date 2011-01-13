@@ -43,8 +43,8 @@ int netsnmp_mem_arch_load( netsnmp_cache *cache, void *magic ) {
 
     quad_t          phys_mem;
     quad_t          user_mem;
-    unsigned int    bufspace
-    unsigned int    maxbufspace
+    unsigned int    bufspace;
+    unsigned int    maxbufspace;
     size_t          mem_size  = sizeof(phys_mem);
     size_t          buf_size  = sizeof(bufspace);
     int             phys_mem_mib[] = { CTL_HW, HW_PHYSMEM };
