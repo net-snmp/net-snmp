@@ -1,7 +1,609 @@
 
 ----------------------------------------------------------------------
 
-Changes: V5.5 -> V5.5.1.pre1
+Changes: V5.5 -> V5.5.1.pre2
+
+2011-01-13 15:26  dts12
+
+   * agent/mibgroup/Makefile.depend, snmplib/Makefile.depend:
+
+   make depend
+
+2011-01-13 15:15  dts12
+
+   * agent/mibgroup/mibII/kernel_netbsd.c:
+
+   Remove C++ comments
+
+2011-01-13 14:55  dts12
+
+   *  man/netsnmp_access_multiplexer.3, man/netsnmp_agent.3,   
+      man/netsnmp_agent_handler.h.3, man/netsnmp_agent_registry.3,   
+      man/netsnmp_agent_trap.3, man/netsnmp_asn1_packet_parse.3,   
+      man/netsnmp_baby_steps.3, man/netsnmp_bulk_to_next.3,   
+      man/netsnmp_cache_handler.3, man/netsnmp_callback.3,   
+      man/netsnmp_container.3, man/netsnmp_container_iterator.3,   
+      man/netsnmp_container_iterator.h.3, man/netsnmp_data_list.3,   
+      man/netsnmp_debug.3, man/netsnmp_default_store.3,   
+      man/netsnmp_handler.3, man/netsnmp_instance.3,   
+      man/netsnmp_iterator_info_s.3, man/netsnmp_leaf.3,   
+      man/netsnmp_library.3, man/netsnmp_mib_maintenance.3,   
+      man/netsnmp_mib_utilities.3, man/netsnmp_mode_end_call.3,   
+      man/netsnmp_multiplexer.3,   
+      man/netsnmp_netsnmp_agent_request_info_s.3,   
+      man/netsnmp_netsnmp_column_info_t.3,   
+      man/netsnmp_netsnmp_data_list_s.3,   
+      man/netsnmp_netsnmp_handler_registration_s.3,   
+      man/netsnmp_netsnmp_iterator_info_s.3,   
+      man/netsnmp_netsnmp_mib_handler_access_methods.3,   
+      man/netsnmp_netsnmp_mib_handler_methods.3,   
+      man/netsnmp_netsnmp_mib_handler_s.3,   
+      man/netsnmp_netsnmp_monitor_callback_header_s.3,   
+      man/netsnmp_netsnmp_request_info_s.3,   
+      man/netsnmp_netsnmp_table_registration_info_s.3,   
+      man/netsnmp_netsnmp_table_request_info_s.3,   
+      man/netsnmp_null_container.3, man/netsnmp_oid_stash.3,   
+      man/netsnmp_old_api.3, man/netsnmp_read_config.3,   
+      man/netsnmp_read_only.3, man/netsnmp_row_merge.3,   
+      man/netsnmp_scalar.3, man/netsnmp_scalar_group_group.3,   
+      man/netsnmp_serialize.3, man/netsnmp_snmp_agent.3,   
+      man/netsnmp_snmp_alarm.3, man/netsnmp_snmp_client.3,   
+      man/netsnmp_snmp_logging.3, man/netsnmp_snmp_pdu.3,   
+      man/netsnmp_snmp_session.3, man/netsnmp_stash_cache.3,   
+      man/netsnmp_stash_to_next.3, man/netsnmp_table.3,   
+      man/netsnmp_table_array.3, man/netsnmp_table_container.3,   
+      man/netsnmp_table_data.3, man/netsnmp_table_dataset.3,   
+      man/netsnmp_table_generic.3, man/netsnmp_table_indexes.3,   
+      man/netsnmp_table_iterator.3, man/netsnmp_table_iterator.h.3,   
+      man/netsnmp_table_maintenance.3, man/netsnmp_table_row.3,   
+      man/netsnmp_table_rows.3, man/netsnmp_tdata.3,   
+      man/netsnmp_tools.h.3, man/netsnmp_util.3,   
+      man/netsnmp_utilities.3, man/netsnmp_variable_list.3,   
+      man/netsnmp_watcher.3:
+
+   documentation update
+
+2011-01-13 14:42  dts12
+
+   * configure:
+
+   Version number update
+
+2011-01-13 14:41  dts12
+
+   *  FAQ, README, configure, configure.ac, dist/Makefile,   
+      dist/net-snmp.spec:
+
+   Version number update
+
+2011-01-13 13:17  dts12
+
+   * agent/auto_nlist.c:
+
+   Fix broken patch
+
+2011-01-13 12:14  dts12
+
+   *  configure, configure.d/config_os_functions,   
+      configure.d/config_os_headers:
+
+   Configure fixes for DragonFly support
+
+2011-01-13 12:04  dts12
+
+   *  agent/auto_nlist.c, agent/mibgroup/host/hr_filesys.c,   
+      agent/mibgroup/if-mib/data_access/interface.h,   
+      agent/mibgroup/mibII/ip.c, agent/mibgroup/mibII/ip.h,   
+      agent/mibgroup/mibII/tcp.c, include/net-snmp/system/dragonfly.h:
+
+   Code fixes for DragonFly support
+
+2011-01-13 11:33  dts12
+
+   * agent/mibgroup/hardware/memory/memory_netbsd.c:
+
+   Fix typo
+
+2011-01-12 19:20  bvassche
+
+   * 
+      agent/mibgroup/snmp-usm-dh-objects-mib/usmDHParameters/usmDHParameters.c:
+
+   Get rid of a compiler warning in
+   agent/mibgroup/snmp-usm-dh-objects-mib/usmDHParameters/usmDHParameters.c.
+
+2011-01-12 19:04  bvassche
+
+   * agent/mibgroup/agentx/subagent.c:
+
+   Fixed a compiler warning (format specification mismatch) that was
+   introduced
+   in r19808 ("snmpd: PATCHES: 2975254: Avoid callback re-use of
+   closed sessions").
+
+2011-01-12 15:03  rstory
+
+   *  agent/mibgroup/notification-log-mib/notification_log.c,   
+      agent/mibgroup/notification/snmpNotifyTable.c:
+
+   CHANGES: snmp: patch: 3096725: sysORTable registation for
+   notification log mib
+   
+   original patch fixed several issues, other parts applied earlier
+
+2011-01-12 14:37  rstory
+
+   *  agent/mibgroup/etherlike-mib/dot3StatsTable/dot3StatsTable.c,   
+      agent/mibgroup/if-mib/ifTable/ifTable.c,   
+      agent/mibgroup/if-mib/ifXTable/ifXTable.c,   
+      agent/mibgroup/ip-forward-mib/inetCidrRouteTable/inetCidrRouteTable.c,
+        
+      agent/mibgroup/ip-forward-mib/ipCidrRouteTable/ipCidrRouteTable.c,
+        
+      agent/mibgroup/ip-mib/inetNetToMediaTable/inetNetToMediaTable.c,  
+      
+      agent/mibgroup/ip-mib/ipAddressPrefixTable/ipAddressPrefixTable.c,
+         agent/mibgroup/ip-mib/ipAddressTable/ipAddressTable.c,   
+      agent/mibgroup/ip-mib/ipDefaultRouterTable/ipDefaultRouterTable.c,
+         agent/mibgroup/ip-mib/ipIfStatsTable/ipIfStatsTable.c,   
+      agent/mibgroup/ip-mib/ipSystemStatsTable/ipSystemStatsTable.c,   
+      agent/mibgroup/ip-mib/ipv4InterfaceTable/ipv4InterfaceTable.c,   
+      agent/mibgroup/ip-mib/ipv6InterfaceTable/ipv6InterfaceTable.c,   
+      agent/mibgroup/ip-mib/ipv6ScopeZoneIndexTable/ipv6ScopeZoneIndexTable.c,
+         agent/mibgroup/notification-log-mib/notification_log.c,   
+      agent/mibgroup/rmon-mib/etherStatsTable/etherStatsTable.c,   
+      agent/mibgroup/snmp-notification-mib/snmpNotifyFilterTable/snmpNotifyFilterTable.c,
+         agent/mibgroup/udp-mib/udpEndpointTable/udpEndpointTable.c:
+
+   CHANGES: agent: MIB-specific leak-at-exit fixes.
+   
+   backport applicable parts of r19533 from trunk
+
+2011-01-11 16:04  dts12
+
+   * ov/UCD-fields, ov/oid_to_sym.in, ov/oid_to_type.in:
+
+   Recognise Agent OID for DragonFly systems (and general tidying
+   up)
+   [From NetBSD patch archive]
+   
+   Qn: Should these be updated to refer to Net-SNMP (rather than
+   UCD)?
+
+2011-01-11 16:01  dts12
+
+   *  include/net-snmp/net-snmp-config.h.in, mibs/NET-SNMP-TC.txt,   
+      mibs/UCD-SNMP-MIB.txt, sedscript.in:
+
+   Define Agent OID for DragonFly systems
+   (and general tidying up)
+   [From NetBSD patch archive]
+
+2011-01-11 15:27  dts12
+
+   * agent/mibgroup/mibII/tcpTable.c, agent/mibgroup/mibII/udpTable.c:
+
+   NetBSD DragonFly support for UDP & TCP tables
+   [From NetBSD patch archive]
+
+2011-01-11 14:41  dts12
+
+   *  agent/mibgroup/hardware/cpu.h,   
+      agent/mibgroup/hardware/cpu/cpu_kinfo.c,   
+      agent/mibgroup/hardware/cpu/cpu_kinfo.h,   
+      agent/mibgroup/host/hr_swrun.c, agent/mibgroup/ucd-snmp/disk.c,   
+      agent/mibgroup/ucd-snmp/errormib.c,   
+      agent/mibgroup/ucd-snmp/loadave.c,   
+      agent/mibgroup/ucd-snmp/memory_freebsd2.c,   
+      agent/mibgroup/ucd-snmp/vmstat_freebsd2.c:
+
+   NEWS: NetBSD: DragonFly support
+   [From NetBSD patch archive]
+
+2011-01-11 14:36  dts12
+
+   * configure, configure.d/config_os_struct_members:
+
+   NetBSD/DragonFly 'struct ifnet' requires KERNEL, but not _KERNEL
+   [From NetBSD patch archive]
+   (I hope I've got this one right!)
+
+2011-01-11 14:14  rstory
+
+   * 
+      agent/mibgroup/tcp-mib/tcpConnectionTable/tcpConnectionTable_data_access.c,
+        
+      agent/mibgroup/tcp-mib/tcpListenerTable/tcpListenerTable_data_access.c:
+
+   revert PATCH 3053436: tcpConnectionTable_data_access invalid
+   memory access
+   
+   the bug this is fixing was introduced in r17719, and fixed in
+   r17861.
+
+2011-01-11 13:22  dts12
+
+   * agent/mibgroup/mibII/interfaces.c:
+
+   Really handle systems with 'struct timespec ifnet.if_lastchange'
+   (missing element from SVN revision 19841)
+
+2011-01-11 12:24  dts12
+
+   * configure, configure.d/config_os_headers:
+
+   Additional headers when testing for IPv6 headers
+   [From NetBSD patch archive]
+
+2011-01-11 12:14  dts12
+
+   * snmplib/snmpUDPIPv6Domain.c:
+
+   Missing type under darwin
+   [From NetBSD patch archive]
+
+2011-01-11 12:10  dts12
+
+   * agent/mibgroup/ucd-snmp/diskio.c:
+
+   NetBSD support for Disk I/O stats
+   [From NetBSD patch archive]
+
+2011-01-11 12:01  dts12
+
+   *  configure, configure.d/config_os_struct_members,   
+      include/net-snmp/net-snmp-config.h.in:
+
+   Handle systems with 'struct timespec ifnet.if_lastchange' (rather
+   than struct timeval)
+   [From NetBSD patch archive]
+
+2011-01-11 11:27  dts12
+
+   *  agent/mibgroup/mibII/icmp.h, agent/mibgroup/mibII/ip.h,   
+      agent/mibgroup/mibII/tcp.h, agent/mibgroup/mibII/udp.h:
+
+   Pull in kernel_netbsd module when required
+   [Based on fix from NetBSD patch archive]
+
+2011-01-11 10:36  dts12
+
+   *  agent/mibgroup/mibII/icmp.c, agent/mibgroup/mibII/ip.c,   
+      agent/mibgroup/mibII/kernel_netbsd.c,   
+      agent/mibgroup/mibII/kernel_netbsd.h,   
+      agent/mibgroup/mibII/mibII_common.h, agent/mibgroup/mibII/tcp.c,  
+       agent/mibgroup/mibII/udp.c, include/net-snmp/system/netbsd.h:
+
+   CHANGES: NetBSD: Retrieve MIB-II network statistics via sysctl
+   [From NetBSD patch archive]
+
+2011-01-10 16:56  dts12
+
+   * agent/mibgroup/mibII/route_write.c:
+
+   Add support for darwin
+   (The patch from the NetBSD archive appears to be essentially the
+   same as the equivalent code from the OpenBSD patch archive)
+
+2011-01-10 16:54  dts12
+
+   * agent/mibgroup/host/hr_network.c:
+
+   Add support for darwin
+   [From NetBSD patch archive]
+
+2011-01-10 14:55  dts12
+
+   *  agent/mibgroup/hardware/cpu/cpu_sysctl.c,   
+      agent/mibgroup/hardware/memory/memory_netbsd.c:
+
+   CHANGES: NetBSD: Update memory and CPU statistics handling
+   [From NetBSD patch archive]
+
+2011-01-10 14:22  dts12
+
+   * agent/mibgroup/ucd-snmp/vmstat.c:
+
+   Fix divide-by-zero error in CPU performance statistics
+   [From NetBSD patch archive]
+
+2011-01-09 22:54  dts12
+
+   *  agent/mibgroup/host/data_access/swrun_kinfo.c,   
+      agent/mibgroup/host/hr_swrun.c, configure,   
+      configure.d/config_os_libs2:
+
+   CHANGES: OpenBSD: Update SWRun code to use kvm_getproc2
+   [From OpenBSD patch archive]
+
+2011-01-09 21:30  dts12
+
+   * configure, configure.d/config_os_headers:
+
+   CHANGES: build: OpenBSD: Fix order of headers when checking
+   <netinet/in_pcb.h>
+   [From OpenBSD patch archive]
+
+2011-01-09 19:44  dts12
+
+   * agent/mibgroup/hardware/cpu/cpu_sysctl.c:
+
+   Amend how multi-CPU statistics are retreived using sysctl on
+   OpenBSD systems
+   (if this block was active, which it isn't, but that's not
+   important right not)
+   [Based on OpenBSD patch archive, amended (probably wrongly) by
+   DTS]
+
+2011-01-09 18:13  dts12
+
+   *  agent/mibgroup/host/hr_system.c,   
+      agent/mibgroup/ucd-snmp/diskio.c, agent/mibgroup/ucd-snmp/proc.c, 
+        agent/mibgroup/ucd-snmp/vmstat_bsdi4.c,   
+      agent/mibgroup/ucd-snmp/vmstat_netbsd1.c:
+
+   sysctl takes a 'size_t' variable for the size parameter
+
+2011-01-09 18:11  dts12
+
+   *  agent/mibgroup/hardware/cpu/cpu_nlist.c,   
+      agent/mibgroup/hardware/cpu/cpu_sysctl.c,   
+      agent/mibgroup/hardware/memory/memory_netbsd.c,   
+      agent/mibgroup/host/data_access/swrun_kinfo.c:
+
+   sysctl takes a 'size_t' variable for the size parameter
+
+2011-01-08 00:47  magfr
+
+   * acconfig.h, include/net-snmp/net-snmp-config.h.in:
+
+   Update acconfig.h with changes from r19819.
+   Rerun autoheader.
+
+2011-01-07 20:56  dts12
+
+   * agent/mibgroup/mibII/route_write.c:
+
+   CHANGES: OpenBSD: Support updating the routing table
+   [From OpenBSD patch archive]
+
+2011-01-07 20:29  dts12
+
+   * agent/mibgroup/mibII/udpTable.c:
+
+   Set 'next' field for udp entry linked list on OpenBSD4
+   [From OpenBSD patch archive]
+   
+   This should probably be set in <net-snmp/system/openbsd.h>
+
+2011-01-07 20:12  dts12
+
+   * agent/mibgroup/mibII/mta_sendmail.c:
+
+   Use a suitable constant for CWD buffer size
+   [Based on OpenBSD patch archive]
+
+2011-01-07 20:07  dts12
+
+   * agent/mibgroup/mibII/interfaces.c:
+
+   Move global variable into the method where it's used.
+   [From OpenBSD patch archive]
+
+2011-01-07 16:48  dts12
+
+   * agent/mibgroup/if-mib/data_access/interface_sysctl.c:
+
+   Handle systems without IFM_TOKEN
+   [From OpenBSD patch archive]
+
+2011-01-07 14:38  dts12
+
+   * agent/mibgroup/hardware/memory/memory_freebsd.c:
+
+   Update retrieval of cache usage statistics on FreeBSD
+   [From FreeBSD patch archive]
+
+2011-01-07 14:31  dts12
+
+   * agent/mibgroup/mibII/system_mib.c:
+
+   Fix handling of sysObjectID length
+   (backport of revisions 19382 & 19404)
+
+2011-01-07 14:20  dts12
+
+   * include/net-snmp/net-snmp-config.h.in:
+
+   Increase maximum size of execute output cache
+   [From FreeBSD patch archive]
+
+2011-01-07 14:10  dts12
+
+   * agent/mibgroup/sctp-mib/sctpTables_freebsd.c:
+
+   Add missing standard Net-SNMP header files
+
+2011-01-07 14:09  dts12
+
+   *  agent/mibgroup/sctp-mib/sctpAssocRemAddrTable.c,   
+      agent/mibgroup/sctp-mib/sctpAssocTable.c,   
+      agent/mibgroup/sctp-mib/sctpLookupLocalPortTable.c,   
+      agent/mibgroup/sctp-mib/sctpLookupRemHostNameTable.c,   
+      agent/mibgroup/sctp-mib/sctpLookupRemIPAddrTable.c,   
+      agent/mibgroup/sctp-mib/sctpLookupRemPortTable.c,   
+      agent/mibgroup/sctp-mib/sctpLookupRemPrimIPAddrTable.c:
+
+   Remove duplicate include directives
+   [From FreeBSD patches archive]
+
+2011-01-07 13:47  dts12
+
+   * agent/mibgroup/mibII/at.c:
+
+   Handle systems where RTF_LLINFO is not defined
+   [From FreeBSD patch archive]
+
+2011-01-07 13:40  dts12
+
+   * agent/mibgroup/ucd-snmp/disk.c:
+
+   Include zfs mount points for disk reports under FreeBSD
+   [From FreeBSD patch archive]
+
+2011-01-07 13:34  dts12
+
+   * include/net-snmp/system/generic.h:
+
+   Protect against multiple-inclusion
+   [From FreeBSD patches archive]
+
+2011-01-07 13:24  dts12
+
+   *  snmplib/callback.c, snmplib/default_store.c, snmplib/keytools.c,  
+       snmplib/lcd_time.c, snmplib/mib.c, snmplib/parse.c,   
+      snmplib/scapi.c, snmplib/snmp_auth.c, snmplib/snmp_debug.c,   
+      snmplib/snmp_logging.c, snmplib/snmp_transport.c,   
+      snmplib/snmpusm.c, snmplib/tools.c:
+
+   Include <unistd.h>
+   [From BSD patches archive]
+
+2011-01-07 13:21  dts12
+
+   * snmplib/snmp_api.c:
+
+   Avoid callback re-use of closed sessions.
+   (Part of patch #2975254 - see SVN revision 19808)
+
+2011-01-07 12:55  dts12
+
+   * agent/mibgroup/if-mib/data_access/interface_ioctl.c:
+
+   FreeBSD uses a slightly different naming scheme for struct ifreq
+   [From FreeBSD patches archive]
+
+2011-01-07 12:22  dts12
+
+   * agent/mibgroup/mibII/tcpTable.c:
+
+   Ensure TCP table information is loaded before counting
+   connections
+   [From FreeBSD patch archive]
+
+2011-01-06 19:35  hardaker
+
+   * perl/agent/agent.pm:
+
+   Fix documentation bug pointed out in cpan bug #52618
+
+2011-01-06 14:11  dts12
+
+   * agent/mibgroup/agentx/subagent.c:
+
+   CHANGES: snmpd: PATCHES: 2975254: Avoid callback re-use of closed
+   sessions
+   
+   Qn: Should this also be applied when main session is NULL?
+
+2011-01-06 13:21  dts12
+
+   * agent/mibgroup/agentx/subagent.c:
+
+   Fix misleading indentation
+   
+   Qn: Should this call 'subagent_startup' rather than
+   'agentx_reopen_session'?
+   Qn: Why doesn't this attempt to re-open the session if it was
+   originally NULL?
+
+2011-01-06 12:46  dts12
+
+   * agent/snmp_agent.c:
+
+   CHANGES: snmpd: PATCHES: 2941811: Handle successful requests with
+   reqID 0
+
+2011-01-06 09:38  bvassche
+
+   *  agent/mibgroup/agent/nsModuleTable.c,   
+      agent/mibgroup/agent/nsTransactionTable.c:
+
+   Spelling fix: Initialzies -> Initializes.
+
+2011-01-05 14:06  dts12
+
+   * snmplib/snmp_api.c:
+
+   CHANGES: snmplib: BUGS: 3134323: Fix crash when comparing invalid
+   OIDs
+
+2011-01-05 14:04  dts12
+
+   * apps/snmptrapd_handlers.c:
+
+   CHANGES: snmptrapd: BUGS: 3151254: Fix crash with invalid
+   traphandle directive
+
+2011-01-04 18:24  hardaker
+
+   * COPYING:
+
+   Copyright update for 2011
+
+2011-01-04 12:19  bvassche
+
+   * agent/mibgroup/mibII/var_route.c:
+
+   Fix compiler warnings triggered by the Win32 MIB-II
+   implementation (backported r19790 from the trunk).
+
+2011-01-04 12:17  bvassche
+
+   * agent/mibgroup/sctp-mib/sctpScalars.c:
+
+   Removed two unused variables from the sctp-mib implementation
+   (backported r19780 from the trunk).
+
+2011-01-04 12:15  bvassche
+
+   * agent/mibgroup/ip-mib/data_access/arp_linux.c:
+
+   Fixed a recently introduced mismatch between format specification
+   and argument list in the ip-mib implementation (backported r19779
+   from the trunk).
+
+2011-01-02 05:42  rstory
+
+   * agent/mibgroup/ip-mib/data_access/ipaddress_ioctl.c:
+
+   CHANGES: snmpd: skip non-AF_INET interfaces when loading ipv4
+   addrs
+
+2010-12-29 01:37  hardaker
+
+   * agent/mibgroup/agentx/protocol.c:
+
+   CHANGES: snmpd: PATCHES: 3141462: fix agentx subagent
+   issues with multiple-object requests
+
+2010-12-29 01:33  hardaker
+
+   * snmplib/vacm.c:
+
+   CHANGES: snmpd: Patch from Niels to fix VACM persistant storage.
+
+2010-12-21 11:29  dts12
+
+   * dist/makerelease.xml:
+
+   Bring all versions of makerelease.xml into line
+
+2010-12-21 09:44  dts12
+
+   * ChangeLog:
+
+   version update
 
 2010-12-21 09:25  dts12
 
