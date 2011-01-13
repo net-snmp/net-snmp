@@ -11,6 +11,7 @@ listing of all changes made to the code.
       - [BUG 2919320]: Avoid accessing freed memory Reported by Tomasz Lis
       - [BUG 2922390]: Fix test for missing contextName parameter
       - [BUG 3093199]: Fixed bugs in 64-bit integer parsing
+      - [BUG 3134323]: Fix crash when comparing invalid OIDs
       - [PATCH 2871747]: plug memory leak in OID processing
       - [PATCH 2952140]: Fix overflow of counter32 and gauge32 on 64bit systems
       - [PATCH 2971270]: refuse to parse ASN.1 tokens with wrong type field
@@ -60,8 +61,10 @@ listing of all changes made to the code.
       - [PATCH 2911323]: Fix agent lockup when monitoring AgentX-delegated information
       - [PATCH 2911361]: Remove redundant variables
       - [PATCH 2911970]: Properly terminate linked list of registrations
+      - [PATCH 2941811]: Handle successful requests with reqID 0
       - [PATCH 2967400]: Retrieve error counters for the EtherLike-MIB
       - [PATCH 2968642]: Catch overflow of pass-through command buffer
+      - [PATCH 2975254]: Avoid callback re-use of closed sessions
       - [PATCH 3044512]: Fix sysobjectid directive
       - [PATCH 3053428]: Fix get_pid_from_inode when the inode is not found
       - [PATCH 3053436]: Fix tcpConnectionTable_data_access invalid memory access
@@ -70,6 +73,8 @@ listing of all changes made to the code.
       - [PATCH 3074918]: Avoid memory leaks following CONTAINER_INSERT failures
       - [PATCH 3096725]: Don't register v1Trap callback, if SNMPv1 not supported
       - [PATCH 3096725]: Include SNMPv1 trap OIDs in nlmLogNotificationID column
+      - [PATCH 3096725]: sysORTable registation for notification log mib  
+      - [PATCH 3141462]: fix agentx subagent issues with multiple-object requests
 
       - Add newly created/destroyed interfaces to ipv6IfTable
       - Don't let MIB modules second-guess the cache handler
@@ -78,6 +83,7 @@ listing of all changes made to the code.
       - Fix IP-MIB::ipIfStatsReasmReqds value (typo)
       - Fix IPv6 forwarding MIB object (boolean, not TruthValue)
       - Fix rare race condition when reading RPM database
+      - Fix VACM persistant storage.
       - Fix various memory & file-descriptor leaks
       - Handle I/Fs without broadcast addresses (IF/IP-MIBs)
       - Improve agent shutdown processing
@@ -85,6 +91,7 @@ listing of all changes made to the code.
       - Make sure that a mask is given to open when O_CREAT is specified
       - Report GFS filesystems in hrStorageTable and hrFSTable
       - Report real ifSpeed of (down) network interface (where possible)
+      - Skip non-AF_INET interfaces when loading ipv4 addrs
       - Support N/W interfaces with HW address >6 bytes (e.g. InfiniBand)
         in ipNetToMediaTable and ipNetToPhysicalTable.
       - Support views with indexes values>255
@@ -95,6 +102,7 @@ listing of all changes made to the code.
       - changed default TCP target from 0.0.0.0:705 to localhost:705
 
     snmptrapd:
+      - [BUG 3151254]: Fix crash with invalid traphandle directive
       - Fixed assorted double free at exit problems
 
     snmptable:
@@ -185,6 +193,16 @@ listing of all changes made to the code.
       - Improved EtherLike-MIB support 
       - Pass correct path to rpmdbOpen, and log errors
       - snmpd is again single-threaded.
+
+    NetBSD:
+      - DragonFly support
+      - Retrieve MIB-II network statistics via sysctl
+      - Update memory and CPU statistics handling
+
+    OpenBSD:
+      - Fix order of headers when checking <netinet/in_pcb.h>
+      - Support updating the routing table
+      - Update SWRun code to use kvm_getproc2
 
     Solaris:
       - Fix crash triggered by missing package version information 

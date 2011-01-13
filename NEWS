@@ -12,6 +12,9 @@ listing of all changes made to the code.
 	Note that this could potentially affect the behaviour
 	of existing access control configurations.
 
+    FreeBSD,NetBSD,OpenBSD:
+        Incorporate fixes from these O/S patch archives
+
 * 5.5 *
 
     All applications:
