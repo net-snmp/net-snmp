@@ -3703,6 +3703,7 @@ AC_CHECK_FUNCS(usleep)
 AC_CHECK_FUNCS(setlocale)
 AC_CHECK_FUNCS(tcgetattr)
 AC_CHECK_FUNCS(if_nameindex if_freenameindex)
+AC_CHECK_FUNCS(kinfo_get_cpus)
 # solaris checks
 AC_CHECK_FUNCS(getpagesize)
 AC_CHECK_FUNCS(mkstemp)
