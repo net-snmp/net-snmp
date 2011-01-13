@@ -37,7 +37,8 @@ config_exclude(mibII/interfaces)
     config_require(if-mib/data_access/interface_ioctl)
 
 #   elif defined( openbsd3 ) || defined( openbsd4 ) || \
-    defined( freebsd4 ) || defined( freebsd5 ) || defined( freebsd6 ) || defined (darwin)
+         defined( freebsd4 ) || defined( freebsd5 ) || defined( freebsd6 ) || \
+         defined (darwin)    || defined( dragonfly )
 
     config_require(if-mib/data_access/interface_sysctl)
 

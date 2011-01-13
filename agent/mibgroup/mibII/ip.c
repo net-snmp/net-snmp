@@ -247,6 +247,11 @@ long            ipTTL, oldipTTL;
 #define	USES_TRADITIONAL_IPSTAT
 #endif
 
+#ifdef dragonfly
+#define IP_STAT_STRUCTURE	struct ip_stats
+#define	USES_TRADITIONAL_IPSTAT
+#endif
+
 #if !defined(IP_STAT_STRUCTURE)
 #define IP_STAT_STRUCTURE	struct ipstat
 #define	USES_TRADITIONAL_IPSTAT

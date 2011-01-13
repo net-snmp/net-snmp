@@ -15,7 +15,9 @@ config_require(mibII/var_route mibII/route_write)
 config_arch_require(solaris2,        kernel_sunos5)
 config_arch_require(linux,     mibII/kernel_linux)
 config_arch_require(netbsd,    mibII/kernel_netbsd)
+config_arch_require(netbsd5,   mibII/kernel_netbsd)
 config_arch_require(netbsdelf, mibII/kernel_netbsd)
+config_arch_require(netbsdelf5, mibII/kernel_netbsd)
 
 #include "var_route.h"
 #include "route_write.h"
