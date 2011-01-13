@@ -111,6 +111,12 @@ struct mnttab  *HRFS_entry = &HRFS_entry_struct;
 
 #elif defined(HAVE_STATVFS) && defined(__NetBSD__)
 
+#if !defined(MFSNAMELEN) && defined(_VFS_NAMELEN)
+#define MFSNAMELEN _VFS_NAMELEN
+#endif
+
+#define getfsstat getvfsstat
+
 static struct statvfs	*fsstats = NULL;
 struct statvfs		*HRFS_entry;
 static int		fscount;

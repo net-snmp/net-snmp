@@ -186,6 +186,11 @@ init_tcp(void)
 #define USES_TRADITIONAL_TCPSTAT
 #endif
 
+#ifdef dragonfly
+#define TCP_STAT_STRUCTURE	struct tcp_stats
+#define USES_TRADITIONAL_TCPSTAT
+#endif
+
 #if !defined(TCP_STAT_STRUCTURE)
 #define TCP_STAT_STRUCTURE	struct tcpstat
 #define USES_TRADITIONAL_TCPSTAT
