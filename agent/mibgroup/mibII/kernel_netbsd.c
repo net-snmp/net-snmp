@@ -92,7 +92,7 @@ netbsd_read_ip_stat(struct ip_mib *mib)
     size_t   size;
     uint64_t ipstat[IP_NSTATS];
     int      i;
-    static   int sname[4] = { 4, 2, 0, 0 }; // CTL_NET, PF_INET, IPPROTO_IP, 0
+    static   int sname[4] = { 4, 2, 0, 0 }; /* CTL_NET, PF_INET, IPPROTO_IP, 0 */
     size_t   len;
 
     (void)memset(mib, 0, sizeof(*mib));
@@ -189,7 +189,7 @@ netbsd_read_udp_stat(struct udp_mib *mib)
     mib->udpNoPorts = udpstat[UDP_STAT_NOPORT];
     mib->udpOutDatagrams = udpstat[UDP_STAT_OPACKETS];
     mib->udpInErrors = udpstat[UDP_STAT_HDROPS]
-        + udpstat[UDP_STAT_BADSUM] //+ udpstat[UDP_STAT_DISCARD] /* FIXME */
+        + udpstat[UDP_STAT_BADSUM] /* + udpstat[UDP_STAT_DISCARD] /* FIXME */
         + udpstat[UDP_STAT_FULLSOCK] + udpstat[UDP_STAT_BADLEN];
 
     return 0;
