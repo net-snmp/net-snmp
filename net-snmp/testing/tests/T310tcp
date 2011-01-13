@@ -1,0 +1,16 @@
+#!/bin/sh
+
+. ../eval_tools.sh
+
+HEADER TCP Transport
+
+SKIPIFNOT USING_MIBII_SYSTEM_MIB_MODULE
+SKIPIFNOT NETSNMP_TRANSPORT_TCP_DOMAIN
+
+#
+# Begin test
+#
+
+SNMP_TRANSPORT_SPEC=tcp
+
+. ./Stransport

@@ -1,0 +1,56 @@
+#!/bin/sh
+
+DOIT=echo
+
+if [ $2 = "tag" -o $2 = "tar" ];
+then
+    VERSIONTAG="$1"
+    VERSION=`echo $1 | sed 's/Ext-*//g;s/-/./g;'`
+else
+    case "$1" in
+    Ext*) ;;
+    *)  echo "VERSION must begin with Ext"
+        exit 1 ;;
+    esac
+
+    VERSION="$1"
+    VERSIONTAG=`echo Ext-$1 | sed 's/\./-/g;'`
+fi
+
+if [ $2 = "tag" ]; then
+    echo "ERROR: tagging is now handled by the 'makerelease' script."
+    exit 1
+fi
+
+if [ $2 = "tar" ]; then
+    # gnu tar (as of 1.15.1) is unable to create portable tar archives, 
+    # especially if long file names (>100 char) are present.
+    # star is a better replacement.
+    if [ -x /usr/bin/star ]; then
+        TAR="/usr/bin/star -Hustar -z -c -f"
+    elif [ -x /bin/tar ]; then
+        echo "WARNING: about to create non-portable tar archives using GNU tar."
+        echo "You'd better install /usr/bin/star and rerun."
+        TAR="/bin/tar czf"
+    else
+        echo "neither /usr/bin/star nor /bin/tar found."
+        exit 1
+    fi
+    if [ -d CVS ]; then
+        $DOIT cvs export -d net-snmp-$VERSION -r $VERSIONTAG net-snmp
+    else
+        if [ "x$CVSUSER" = "x" ] ; then
+          CVSUSER=hardaker
+        fi
+        $DOIT cvs -d $CVSUSER@net-snmp.cvs.sourceforge.net:/cvsroot/net-snmp export -d net-snmp-$VERSION -r $VERSIONTAG net-snmp
+    fi
+    $DOIT net-snmp-$VERSION/remove-files net-snmp-$VERSION
+    $DOIT $TAR net-snmp-$VERSION.tar.gz net-snmp-$VERSION
+    $DOIT md5sum net-snmp-$VERSION.tar.gz > net-snmp-$VERSION.tar.gz.md5
+fi
+
+if [ $2 = "clean" ]; then
+    $DOIT rm -fR net-snmp-[0-9]*
+fi
+
+exit 0
