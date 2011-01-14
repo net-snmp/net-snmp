@@ -1258,7 +1258,6 @@ int
 ipAddressTable_commit(ipAddressTable_rowreq_ctx * rowreq_ctx)
 {
     int             rc = MFD_SUCCESS;
-    int             save_flags;
 
     DEBUGMSGTL(("verbose:ipAddressTable:ipAddressTable_commit",
                 "called\n"));
@@ -1267,14 +1266,8 @@ ipAddressTable_commit(ipAddressTable_rowreq_ctx * rowreq_ctx)
     netsnmp_assert(NULL != rowreq_ctx);
 
     /*
-     * save flags, then clear until we actually do something
-     */
-    save_flags = rowreq_ctx->column_set_flags;
-    rowreq_ctx->column_set_flags = 0;
-
-    /*
      * commit ipAddressTable data
-     * 1) check the column's flag in save_flags to see if it was set.
+     * 1) check the column's flag to see if it was set.
      * 2) clear the flag when you handle that column
      * 3) set the column's flag in column_set_flags if it needs undo
      *    processing in case of a failure.
@@ -1282,7 +1275,7 @@ ipAddressTable_commit(ipAddressTable_rowreq_ctx * rowreq_ctx)
     /*
      * did anything change?
      */
-    if (0 == save_flags) {
+    if (0 == rowreq_ctx->column_set_flags) {
         DEBUGMSGTL(("ipAddressTable:ipAddressTable_commit",
                     "no change\n"));
         return MFD_SUCCESS;
@@ -1292,12 +1285,10 @@ ipAddressTable_commit(ipAddressTable_rowreq_ctx * rowreq_ctx)
      * pass everything to data access
      * let data access know what columns are set
      */
-    rowreq_ctx->data->flags = save_flags;
+    rowreq_ctx->data->flags = rowreq_ctx->column_set_flags;
 
-    if (save_flags & COLUMN_IPADDRESSROWSTATUS_FLAG) {
+    if (rowreq_ctx->column_set_flags & COLUMN_IPADDRESSROWSTATUS_FLAG) {
         if (rowreq_ctx->rowreq_flags & MFD_ROW_CREATED) {
-            netsnmp_assert(ROWSTATUS_CREATEANDGO ==
-                           rowreq_ctx->ipAddressRowStatus);
             rowreq_ctx->data->flags |= NETSNMP_ACCESS_IPADDRESS_CREATE;
             rowreq_ctx->ipAddressCreated = netsnmp_get_agent_uptime();
         } else if (ROWSTATUS_DESTROY == rowreq_ctx->ipAddressRowStatus) {
@@ -1317,10 +1308,6 @@ ipAddressTable_commit(ipAddressTable_rowreq_ctx * rowreq_ctx)
         rc = MFD_ERROR;
     } else {
         rowreq_ctx->ipAddressLastChanged = netsnmp_get_agent_uptime();
-        /*
-         * set flag, in case we need to undo
-         */
-        rowreq_ctx->column_set_flags |= save_flags;
     }
 
     /*
@@ -1328,12 +1315,6 @@ ipAddressTable_commit(ipAddressTable_rowreq_ctx * rowreq_ctx)
      */
     if (MFD_SUCCESS == rc) {
         rowreq_ctx->rowreq_flags |= MFD_ROW_DIRTY;
-    }
-
-    if (save_flags) {
-        snmp_log(LOG_ERR, "unhandled columns (0x%x) in commit\n",
-                 save_flags);
-        return MFD_ERROR;
     }
 
     return rc;
