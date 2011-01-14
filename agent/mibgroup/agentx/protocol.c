@@ -1550,14 +1550,9 @@ agentx_parse(netsnmp_session * session, netsnmp_pdu *pdu, u_char * data,
     int             type;       /* VarBind data type */
     size_t         *length = &len;
 
-    if (pdu == NULL) {
-        /*
-         * Dump the packet in a formatted style 
-         */
-        pdu = (netsnmp_pdu *) malloc(sizeof(netsnmp_pdu));
-        free(pdu);
+    if (pdu == NULL)
         return (0);
-    }
+ 
     if (!IS_AGENTX_VERSION(session->version))
         return SNMPERR_BAD_VERSION;
 
