@@ -553,6 +553,91 @@ _netsnmp_ioctl_ipaddress_delete_v4(netsnmp_ipaddress_entry * entry)
     return 0;
 }
 
+
+/**
+ * Add/remove IPv6 address using ioctl.
+ * @retval  0 : no error
+ * @retval -1 : bad parameter
+ * @retval -2 : couldn't create socket
+ * @retval -3 : ioctl failed
+ */
+int
+_netsnmp_ioctl_ipaddress_v6(netsnmp_ipaddress_entry * entry, int operation)
+{
+#ifdef linux
+    /*
+     * From linux/ipv6.h. It cannot be included because it collides
+     * with netinet/in.h
+     */
+    struct in6_ifreq {
+            struct in6_addr ifr6_addr;
+            uint32_t        ifr6_prefixlen;
+            int             ifr6_ifindex;
+    };
+
+    struct in6_ifreq               ifrq;
+    int                            rc, fd = -1;
+
+    DEBUGMSGT(("access:ipaddress:set", "_netsnmp_ioctl_ipaddress_set_v6 started\n"));
+
+    if (NULL == entry)
+        return -1;
+
+    netsnmp_assert(16 == entry->ia_address_len);
+
+    fd = socket(AF_INET6, SOCK_DGRAM, 0);
+    if(fd < 0) {
+        snmp_log(LOG_ERR,"couldn't create socket\n");
+        return -2;
+    }
+    memset(&ifrq, 0, sizeof(ifrq));
+    ifrq.ifr6_ifindex = entry->if_index;
+    ifrq.ifr6_prefixlen = 64;
+
+    memcpy(&ifrq.ifr6_addr, entry->ia_address,
+           entry->ia_address_len);
+
+    rc = ioctl(fd, operation, &ifrq);
+    close(fd);
+    if(rc < 0) {
+        snmp_log(LOG_ERR,"error setting address: %s(%d)\n", strerror(errno), errno);
+        return -3;
+    }
+    DEBUGMSGT(("access:ipaddress:set", "_netsnmp_ioctl_ipaddress_set_v6 finished\n"));
+    return 0;
+#else
+    /* we don't support ipv6 on this platform (yet) */
+    return -3;
+#endif
+
+}
+
+/**
+ *
+ * @retval  0 : no error
+ * @retval -1 : bad parameter
+ * @retval -2 : couldn't create socket
+ * @retval -3 : ioctl failed
+ */
+int
+_netsnmp_ioctl_ipaddress_set_v6(netsnmp_ipaddress_entry * entry)
+{
+    return _netsnmp_ioctl_ipaddress_v6(entry, SIOCSIFADDR);
+}
+
+/**
+ *
+ * @retval  0 : no error
+ * @retval -1 : bad parameter
+ * @retval -2 : couldn't create socket
+ * @retval -3 : ioctl failed
+ */
+int
+_netsnmp_ioctl_ipaddress_delete_v6(netsnmp_ipaddress_entry * entry)
+{
+    return _netsnmp_ioctl_ipaddress_v6(entry, SIOCDIFADDR);
+}
+
 /**
  * get the interface count and populate the ifc_buf
  *
