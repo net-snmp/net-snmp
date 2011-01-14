@@ -673,9 +673,9 @@ ipAddressTable_validate_index(ipAddressTable_registration *
      * TODO:430:M: |-> Validate potential ipAddressTable index.
      *
      *
-     * xxx-rks: we only plan ipv4 support initially
      */
-    if ((4 != rowreq_ctx->tbl_idx.ipAddressAddr_len)) {
+    if ((4 != rowreq_ctx->tbl_idx.ipAddressAddr_len)
+            && (16 != rowreq_ctx->tbl_idx.ipAddressAddr_len)) {
         snmp_log(LOG_WARNING, "invalid index for a new row in the "
                  "ipAddressTable table.\n");
         /*
@@ -692,15 +692,9 @@ ipAddressTable_validate_index(ipAddressTable_registration *
             return MFD_CANNOT_CREATE_NOW;
         }
     } else {
-        rowreq_ctx->data->ia_address[0] =
-            rowreq_ctx->tbl_idx.ipAddressAddr[0];
-        rowreq_ctx->data->ia_address[1] =
-            rowreq_ctx->tbl_idx.ipAddressAddr[1];
-        rowreq_ctx->data->ia_address[2] =
-            rowreq_ctx->tbl_idx.ipAddressAddr[2];
-        rowreq_ctx->data->ia_address[3] =
-            rowreq_ctx->tbl_idx.ipAddressAddr[3];
-        rowreq_ctx->data->ia_address_len = 4;
+        memcpy(rowreq_ctx->data->ia_address, rowreq_ctx->tbl_idx.ipAddressAddr,
+                rowreq_ctx->tbl_idx.ipAddressAddr_len);
+        rowreq_ctx->data->ia_address_len = rowreq_ctx->tbl_idx.ipAddressAddr_len;
     }
 
     return rc;

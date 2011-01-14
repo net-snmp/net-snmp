@@ -116,12 +116,14 @@ netsnmp_arch_ipaddress_create(netsnmp_ipaddress_entry *entry)
     if (NULL == entry)
         return -1;
 
-    if (4 != entry->ia_address_len) {
-        DEBUGMSGT(("access:ipaddress:create", "only ipv4 supported\n"));
+    if (4 == entry->ia_address_len) {
+        return _netsnmp_ioctl_ipaddress_set_v4(entry);
+    } else if (16 == entry->ia_address_len) {
+        return _netsnmp_ioctl_ipaddress_set_v6(entry);
+    } else {
+        DEBUGMSGT(("access:ipaddress:create", "wrong length of IP address\n"));
         return -2;
     }
-
-    return _netsnmp_ioctl_ipaddress_set_v4(entry);
 }
 
 /*
@@ -133,12 +135,14 @@ netsnmp_arch_ipaddress_delete(netsnmp_ipaddress_entry *entry)
     if (NULL == entry)
         return -1;
 
-    if (4 != entry->ia_address_len) {
+    if (4 == entry->ia_address_len) {
+        return _netsnmp_ioctl_ipaddress_delete_v4(entry);
+    } else if (16 == entry->ia_address_len) {
+        return _netsnmp_ioctl_ipaddress_delete_v6(entry);
+    } else {
         DEBUGMSGT(("access:ipaddress:create", "only ipv4 supported\n"));
         return -2;
     }
-
-    return _netsnmp_ioctl_ipaddress_delete_v4(entry);
 }
 
 /**

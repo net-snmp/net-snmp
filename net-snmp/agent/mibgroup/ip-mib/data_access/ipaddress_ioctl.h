@@ -22,6 +22,11 @@ int
 _netsnmp_ioctl_ipaddress_remove_v4(netsnmp_ipaddress_entry * entry);
 
 int
+_netsnmp_ioctl_ipaddress_set_v6(netsnmp_ipaddress_entry * entry);
+int
+_netsnmp_ioctl_ipaddress_remove_v6(netsnmp_ipaddress_entry * entry);
+
+int
 netsnmp_access_ipaddress_ioctl_get_interface_count(int sd, struct ifconf * ifc);
 
 struct address_flag_info
