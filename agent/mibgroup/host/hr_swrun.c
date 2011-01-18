@@ -1268,7 +1268,7 @@ var_hrswrun(struct variable * vp,
     #if defined(freebsd5)
             proc_table[LowProcIndex].ki_size / 1024;
     #elif defined(dragonfly) && __DragonFly_version >= 190000
-            proc_table[LowProcIndex].kp_vm_map.size / 1024;
+            proc_table[LowProcIndex].kp_vm_map_size / 1024;
     #else
             proc_table[LowProcIndex].kp_eproc.e_vm.vm_map.size / 1024;
     #endif
