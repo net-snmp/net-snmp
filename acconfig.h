@@ -212,6 +212,7 @@
 #define NETSNMP_HPUX11ID 14
 #define NETSNMP_AIXID 15
 #define NETSNMP_MACOSXID 16
+#define NETSNMP_DRAGONFLYID 17
 #define NETSNMP_UNKNOWNID 255
 
 #ifdef hpux9
@@ -240,6 +241,9 @@
 #endif
 #if defined(__FreeBSD__)
 #define NETSNMP_OSTYPE NETSNMP_FREEBSDID
+#endif
+#if defined(__DragonFly__)
+#define NETSNMP_OSTYPE NETSNMP_DRAGONFLYID
 #endif
 #if defined(irix6) || defined(irix5)
 #define NETSNMP_OSTYPE NETSNMP_IRIXID
