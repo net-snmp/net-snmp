@@ -100,3 +100,8 @@ AC_CHECK_FUNCS(getvfsstat)
 #
 AC_SEARCH_LIBS(kinfo_get_cpus, [kinfo])
 AC_CHECK_FUNCS(kinfo_get_cpus)
+
+#
+# diskIOLAx requires exp which may require -lm
+#
+AC_SEARCH_LIBS(exp, [m])
