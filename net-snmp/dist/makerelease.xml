@@ -313,7 +313,7 @@
 	  set up test results.  If not, this needs to be fixed or at
 	  least understood and accepted as is for some other reason.</text>
 	  <commands>
-	    <command>make test TESTOPTS=-n</command>
+	    <command>make test</command>
 	  </commands>
 	</step>
 	<step type="system" stepname="code:checkcomments" title="code:checkcomments">
