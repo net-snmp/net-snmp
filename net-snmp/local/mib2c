@@ -952,6 +952,7 @@ sub process {
             m2c_die("foreach did not end with \@end@") if($return ne "end");
 	  } elsif (/\@\s*foreach\s+\$([^\@]+)\s+\$([^\@]+)\s+range\s+([^\@]+)\@/) {
 	    my ($svar, $evar, $node) = ($1, $2, $3);
+	    $svar =~ s/,$//;
 	    my $stash = do_tell();
 	    my $range;
 	    $node = $currentcolumn if (!$node);
