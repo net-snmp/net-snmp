@@ -482,7 +482,7 @@ sh_count_procs(char *procname)
           continue;
       if (fgets(cmdline, sizeof(cmdline), status) == NULL) {
           fclose(status);
-          break;
+          continue;
       }
       /* Grab the state of the process as well
        * (so we can ignore zombie processes)
