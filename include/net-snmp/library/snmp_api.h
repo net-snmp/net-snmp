@@ -890,7 +890,7 @@ struct variable_list {
 					    struct netsnmp_transport_s *);
 
     /*
-     * EXPERIMENTAL API EXTENSIONS ------------------------------------------ 
+     * EXTENDED SESSION API ------------------------------------------ 
      * 
      * snmp_sess_add_ex, snmp_sess_add, snmp_add 
      * 
