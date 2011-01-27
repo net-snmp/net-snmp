@@ -1556,7 +1556,7 @@ _sess_open(netsnmp_session * in_session)
 }
 
 /*
- * EXPERIMENTAL API EXTENSIONS ------------------------------------------ 
+ * EXTENDED SESSION API ------------------------------------------ 
  * 
  * snmp_sess_add_ex, snmp_sess_add, snmp_add 
  * 
