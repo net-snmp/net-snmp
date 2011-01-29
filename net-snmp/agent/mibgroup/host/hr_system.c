@@ -106,7 +106,7 @@ static long     get_max_solaris_processes(void);
 static int      get_load_dev(void);
 static int      count_users(void);
 extern int      count_processes(void);
-
+extern int      swrun_count_processes(void);
 
         /*********************
 	 *
@@ -287,7 +287,9 @@ var_hrsys(struct variable * vp,
         long_return = count_users();
         return (u_char *) & long_return;
     case HRSYS_PROCS:
-#if USING_HOST_HR_SWRUN_MODULE
+#if USING_HOST_DATA_ACCESS_SWRUN_MODULE
+        long_return = swrun_count_processes();
+#elif USING_HOST_HR_SWRUN_MODULE
         long_return = count_processes();
 #else
 #if NETSNMP_NO_DUMMY_VALUES
