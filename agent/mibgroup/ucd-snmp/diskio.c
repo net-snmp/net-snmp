@@ -1002,6 +1002,7 @@ getstats(void)
 		    &pTemp->running, &pTemp->use, &pTemp->aveq);
             if (rc != 15) {
                snmp_log(LOG_ERR, "diskio.c: cannot find statistics in /proc/partitions\n");
+               fclose(parts);
                return 1;
             }
 	    head.length++;
