@@ -8,7 +8,7 @@
 #endif
 
 #include <net-snmp/net-snmp-includes.h>
-#include <net-snmp/agent/net-snmp-agent-includes.h>
+#include <net-snmp/agent/ds_agent.h>
 
 #include "../agent/mibgroup/agentx/agentx_config.h"
 #include "../agent/mibgroup/agentx/client.h"
