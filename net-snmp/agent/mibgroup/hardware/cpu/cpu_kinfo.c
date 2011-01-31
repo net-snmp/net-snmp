@@ -11,6 +11,7 @@
 #include <kinfo.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <sys/sysctl.h>
 
 void _cpu_copy_stats( netsnmp_cpu_info *cpu );
 
@@ -18,7 +19,7 @@ void _cpu_copy_stats( netsnmp_cpu_info *cpu );
      * Initialise the list of CPUs on the system
      *   (including descriptions)
      */
-void init_cpu_info( void ) {
+void init_cpu_kinfo( void ) {
     netsnmp_cpu_info *cpu;
     int i;
     size_t len;
