@@ -66,11 +66,11 @@ void             init_expObject_table_data(void);
  * function declarations 
  */
 void             init_expObject(void);
-struct expObject  * expObject_createEntry( char *, char *, long, int );
-netsnmp_tdata_row * expObject_createRow(   char *, char *, long, int );
+struct expObject  * expObject_createEntry( const char *, const char *, long, int );
+netsnmp_tdata_row * expObject_createRow(   const char *, const char *, long, int );
 void                expObject_removeEntry( netsnmp_tdata_row * );
 
-netsnmp_tdata_row * expObject_getFirst( char *, char * );
+netsnmp_tdata_row * expObject_getFirst( const char *, const char * );
 netsnmp_tdata_row * expObject_getNext(  netsnmp_tdata_row * );
 void                expObject_getData( struct expExpression *,
                                        struct expObject * );

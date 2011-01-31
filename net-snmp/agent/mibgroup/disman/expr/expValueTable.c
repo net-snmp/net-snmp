@@ -95,7 +95,7 @@ expValueTable_getEntry(netsnmp_variable_list * indexes,
      */
     while (exp && exp->expValueType != type) {
         if (mode != MODE_GETNEXT && mode != MODE_GETBULK) {
-            DEBUGMSGTL(( "disman:expr:val", "wrong type (%d != %d)\n",
+            DEBUGMSGTL(( "disman:expr:val", "wrong type (%d != %ld)\n",
                           type, (exp ? exp->expValueType : 0 )));
             return NULL;        /* Wrong type */
         }
