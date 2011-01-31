@@ -69,7 +69,7 @@ _mteExpr_dump(void)
  * Create a new row in the expression table 
  */
 struct expExpression *
-expExpression_createEntry(char *expOwner, char *expName, int fixed)
+expExpression_createEntry(const char *expOwner, const char *expName, int fixed)
 {
     netsnmp_tdata_row    *row;
 
@@ -79,7 +79,7 @@ expExpression_createEntry(char *expOwner, char *expName, int fixed)
  
 
 netsnmp_tdata_row *
-expExpression_createRow(char *expOwner, char *expName, int fixed)
+expExpression_createRow(const char *expOwner, const char *expName, int fixed)
 {
     struct expExpression *entry;
     netsnmp_tdata_row    *row;
@@ -155,16 +155,16 @@ expExpression_getFirstEntry( void )
 }
 
 struct expExpression *
-expExpression_getNextEntry( char *owner, char *name )
+expExpression_getNextEntry(const  char *owner, const char *name )
 {
     netsnmp_variable_list owner_var, name_var;
 
     memset(&owner_var, 0, sizeof(netsnmp_variable_list));
     memset(&name_var,  0, sizeof(netsnmp_variable_list));
     snmp_set_var_typed_value( &owner_var, ASN_OCTET_STR,
-                          (u_char*)owner, strlen(owner));
+                          (const u_char*)owner, strlen(owner));
     snmp_set_var_typed_value( &name_var,  ASN_OCTET_STR,
-                          (u_char*)name,  strlen(name));
+                          (const u_char*)name,  strlen(name));
     owner_var.next_variable = &name_var;
 
     return (struct expExpression *)
@@ -173,16 +173,16 @@ expExpression_getNextEntry( char *owner, char *name )
 }
 
 struct expExpression *
-expExpression_getEntry( char *owner, char *name )
+expExpression_getEntry(const char *owner, const char *name )
 {
     netsnmp_variable_list owner_var, name_var;
 
     memset(&owner_var, 0, sizeof(netsnmp_variable_list));
     memset(&name_var,  0, sizeof(netsnmp_variable_list));
     snmp_set_var_typed_value( &owner_var, ASN_OCTET_STR,
-                          (u_char*)owner, strlen(owner));
+                          (const u_char*)owner, strlen(owner));
     snmp_set_var_typed_value( &name_var,  ASN_OCTET_STR,
-                          (u_char*)name,  strlen(name));
+                          (const u_char*)name,  strlen(name));
     owner_var.next_variable = &name_var;
 
     return (struct expExpression *)

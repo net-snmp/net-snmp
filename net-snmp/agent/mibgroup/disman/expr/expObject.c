@@ -38,7 +38,7 @@ init_expObject(void)
  * Create a new row in the object table 
  */
 struct expObject *
-expObject_createEntry(char *expOwner, char *expName, long expIndex, int fixed)
+expObject_createEntry(const char *expOwner, const char *expName, long expIndex, int fixed)
 {
     netsnmp_tdata_row *row;
 
@@ -47,7 +47,7 @@ expObject_createEntry(char *expOwner, char *expName, long expIndex, int fixed)
 }
 
 netsnmp_tdata_row *
-expObject_createRow( char *expOwner, char *expName, long expIndex, int fixed)
+expObject_createRow( const char *expOwner, const char *expName, long expIndex, int fixed)
 {
     struct expObject  *entry;
     netsnmp_tdata_row *row;
@@ -121,7 +121,7 @@ expObject_removeEntry(netsnmp_tdata_row * row)
 
 
 netsnmp_tdata_row *
-expObject_getFirst( char *expOwner, char *expName )
+expObject_getFirst( const char *expOwner, const char *expName )
 {
     netsnmp_tdata_row *row;
     struct expObject  *entry;
@@ -138,9 +138,9 @@ expObject_getFirst( char *expOwner, char *expName )
     memset(&owner_var, 0, sizeof(netsnmp_variable_list));
     memset(&name_var,  0, sizeof(netsnmp_variable_list));
     snmp_set_var_typed_value( &owner_var, ASN_OCTET_STR,
-                       (u_char*)expOwner, strlen(expOwner));
+                       (const u_char*)expOwner, strlen(expOwner));
     snmp_set_var_typed_value( &name_var,  ASN_OCTET_STR,
-                       (u_char*)expName,  strlen(expName));
+                       (const u_char*)expName,  strlen(expName));
     owner_var.next_variable = &name_var;
     row = netsnmp_tdata_row_next_byidx( expObject_table_data, &owner_var );
 
