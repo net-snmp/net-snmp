@@ -73,13 +73,13 @@ extern void      init_expr_table_data(void);
  */
 void             init_expExpression(void);
 
-struct expExpression *expExpression_createEntry(   char *, char *, int);
-netsnmp_tdata_row    *expExpression_createRow(     char *, char *, int);
+struct expExpression *expExpression_createEntry(const char *, const char *, int);
+netsnmp_tdata_row    *expExpression_createRow(const char *, const char *, int);
 void                  expExpression_removeEntry(   netsnmp_tdata_row *);
 
-struct expExpression *expExpression_getEntry(      char *, char *);
+struct expExpression *expExpression_getEntry(const char *, const char *);
 struct expExpression *expExpression_getFirstEntry( void );
-struct expExpression *expExpression_getNextEntry(  char *, char *);
+struct expExpression *expExpression_getNextEntry(const char *, const char *);
 
 void                  expExpression_enable(  struct expExpression *);
 void                  expExpression_disable( struct expExpression *);
