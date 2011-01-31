@@ -78,6 +78,11 @@ struct variable2 lookupCtlTable_variables[] = {
 struct header_complex_index *lookupCtlTableStorage = NULL;
 struct header_complex_index *lookupResultsTableStorage = NULL;
 
+int modify_lookupCtlTime(struct lookupTable_data *thedata, unsigned long val);
+int modify_lookupCtlOperStatus(struct lookupTable_data *thedata, long val);
+int modify_lookupCtlRc(struct lookupTable_data *thedata, long val);
+
+
 void
 init_lookupCtlTable(void)
 {
@@ -182,6 +187,7 @@ lookupResultsTable_add(struct lookupTable_data *thedata)
 
 
     DEBUGMSGTL(("lookupResultsTable", "done.\n"));
+    return SNMPERR_SUCCESS;
 }
 
 void
@@ -441,7 +447,6 @@ run_lookup(struct lookupTable_data *item)
     long            addressType;
     char           *address = NULL;
     size_t          addresslen;
-    struct lookupResultsTable_data *head = NULL;
     struct lookupResultsTable_data *current = NULL;
     struct lookupResultsTable_data *temp = NULL;
     int             i = 0, n = 1, t = 0;
@@ -449,7 +454,6 @@ run_lookup(struct lookupTable_data *item)
     /* for ipv4,ipv6 */
     unsigned int    addr_in, addr_in6;
     struct hostent *lookup = NULL;
-    struct sockaddr_in *addr = NULL;
 
     struct timeval  tpstart, tpend;
     unsigned long   timeuse, timeuse4, timeuse6;
@@ -458,11 +462,6 @@ run_lookup(struct lookupTable_data *item)
 
     struct in_addr  a;
     struct in6_addr a6;
-    char           *strptr = NULL;
-    struct addrinfo hints, *res = NULL, *tempinfo = NULL;
-    struct sockaddr_in6 myaddress6;
-    char            buf[BUFSIZ];
-
 
     if (item == NULL)
         return;
@@ -1044,7 +1043,6 @@ write_lookupCtlTargetAddressType(int action,
 {
     static size_t   tmpvar;
     struct lookupTable_data *StorageTmp = NULL;
-    static size_t   tmplen;
     size_t          newlen =
         name_len - (sizeof(lookupCtlTable_variables_oid) / sizeof(oid) +
                     3 - 1);
