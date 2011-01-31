@@ -72,7 +72,7 @@ static int ps_numdisks;			/* number of disks in system, may change while running
 #include <sys/param.h>
 #if __FreeBSD_version >= 500101
 #include <sys/resource.h>       /* for CPUSTATES in devstat.h */
-#else
+#elif !defined(dragonfly)
 #include <sys/dkstat.h>
 #endif
 #include <devstat.h>
