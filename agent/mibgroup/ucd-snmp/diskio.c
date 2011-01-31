@@ -71,7 +71,7 @@ static int ps_numdisks;			/* number of disks in system, may change while running
 #include <sys/param.h>
 #if __FreeBSD_version >= 500101
 #include <sys/resource.h>       /* for CPUSTATES in devstat.h */
-#else
+#elif !defined(dragonfly)
 #include <sys/dkstat.h>
 #endif
 #include <devstat.h>
@@ -215,14 +215,9 @@ init_diskio(void)
     ps_disk = NULL;
 #endif
 
-#if defined (freebsd4) || defined(freebsd5)
-	devla_getstats(0, NULL);
-	/* collect LA data regularly */
-	snmp_alarm_register(DISKIO_SAMPLE_INTERVAL, SA_REPEAT, devla_getstats, NULL);
-#endif
-
-#if defined (linux)
+#if defined (freebsd4) || defined(freebsd5) || defined(linux)
     devla_getstats(0, NULL);
+    /* collect LA data regularly */
     snmp_alarm_register(DISKIO_SAMPLE_INTERVAL, SA_REPEAT, devla_getstats, NULL);
 #endif
 
