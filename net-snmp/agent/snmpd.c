@@ -142,16 +142,13 @@ typedef long    fd_mask;
 #include <net-snmp/agent/mib_module_config.h>
 
 #include "snmpd.h"
-#include "mibgroup/struct.h"
-#include <net-snmp/agent/mib_modules.h>
 
-#include "mibgroup/util_funcs.h"
+#include <net-snmp/agent/mib_modules.h>
 
 #include <net-snmp/agent/agent_trap.h>
 
 #include <net-snmp/agent/table.h>
 #include <net-snmp/agent/table_iterator.h>
-#include "mib_module_includes.h"
 
 /*
  * Include winservice.h to support Windows Service
