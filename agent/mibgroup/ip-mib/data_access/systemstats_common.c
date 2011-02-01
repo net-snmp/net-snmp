@@ -314,6 +314,7 @@ netsnmp_access_systemstats_entry_update_stats(netsnmp_systemstats_entry * prev_v
         if (NULL == prev_vals->old_stats) {
             return -2;
         }
+        memcpy(&prev_vals->stats, &new_vals->stats, sizeof(new_vals->stats));
     }
     else {
         /*
