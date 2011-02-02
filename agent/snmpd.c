@@ -139,6 +139,7 @@ typedef long    fd_mask;
 #include <net-snmp/library/large_fd_set.h>
 
 #include "m2m.h"
+#include <net-snmp/agent/agent_module_config.h>
 #include <net-snmp/agent/mib_module_config.h>
 
 #include "snmpd.h"
