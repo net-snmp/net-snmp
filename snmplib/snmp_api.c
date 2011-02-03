@@ -1140,6 +1140,7 @@ _sess_copy(netsnmp_session * in_session)
             snmp_sess_close(slp);
             return (NULL);
         }
+        session->contextNameLen = in_session->contextNameLen;
     } else {
         if ((cp = netsnmp_ds_get_string(NETSNMP_DS_LIBRARY_ID,
                                         NETSNMP_DS_LIB_CONTEXT)) != NULL)
