@@ -81,29 +81,23 @@ static void     windowsOSVersionString(char [], size_t);
 	 *********************/
 
 static void
-system_parse_config_sysdescr(const char *token, char *cptr)
+system_parse_config_string2(const char *token, char *cptr,
+                            char* value, size_t size)
 {
-    if (strlen(cptr) >= sizeof(version_descr)) {
-	netsnmp_config_error("sysdescr token too long (must be < %lu):\n\t%s",
-			     (unsigned long)sizeof(version_descr), cptr);
-    } else if (strcmp(cptr, "\"\"") == 0) {
-        version_descr[0] = '\0';
+    if (strlen(cptr) < size) {
+        strcpy(value, cptr);
     } else {
-        strcpy(version_descr, cptr);
+        netsnmp_config_error("%s token too long (must be < %lu):\n\t%s",
+                             token, (unsigned long)size, cptr);
     }
 }
 
-NETSNMP_STATIC_INLINE void
+static void
 system_parse_config_string(const char *token, char *cptr,
                            const char *name, char* value, size_t size,
                            int* guard)
 {
-    if (strlen(cptr) >= size) {
-	netsnmp_config_error("%s token too long (must be < %lu):\n\t%s",
-			     token, (unsigned long)size, cptr);
-    }
-
-    if (*token == 'p' && strcasecmp(token + 1, name) == 0) {
+    if (*token == 'p') {
         if (*guard < 0) {
             /*
              * This is bogus (and shouldn't happen anyway) -- the value is
@@ -113,7 +107,7 @@ system_parse_config_string(const char *token, char *cptr,
                      "ignoring attempted override of read-only %s.0\n", name);
             return;
         } else {
-            ++(*guard);
+            *guard = 1;
         }
     } else {
         if (*guard > 0) {
@@ -130,11 +124,14 @@ system_parse_config_string(const char *token, char *cptr,
         *guard = -1;
     }
 
-    if (strcmp(cptr, "\"\"") == 0) {
-        *value = '\0';
-    } else if (strlen(cptr) < size) {
-        strcpy(value, cptr);
-    }
+    system_parse_config_string2(token, cptr, value, size);
+}
+
+static void
+system_parse_config_sysdescr(const char *token, char *cptr)
+{
+    system_parse_config_string2(token, cptr, version_descr,
+                                sizeof(version_descr));
 }
 
 static void
