@@ -256,6 +256,12 @@ through the sshtosnmp unix socket.  The socket needs to be read/write
 privileged for SSH users that are allowed to connect to the SNMP
 service (VACM access still needs to be granted as well, most likely
 through the TSM security model).
+.IP "sshusername NAME"
+Sets the SSH user name for logging into the remote system.
+.IP "sshpubkey FILE"
+Set the public key file to use when connecting to a remote system.
+.IP "sshprivkey FILE"
+Set the private key file to use when connecting to a remote system.
 .\"
 .\" XXX - are these lengths still correct ?
 .\"
