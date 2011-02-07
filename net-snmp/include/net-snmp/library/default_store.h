@@ -160,6 +160,9 @@ extern          "C" {
 #define NETSNMP_DS_LIB_TLS_ALGORITMS     29
 #define NETSNMP_DS_LIB_TLS_LOCAL_CERT    30
 #define NETSNMP_DS_LIB_TLS_PEER_CERT     31
+#define NETSNMP_DS_LIB_SSH_USERNAME      32
+#define NETSNMP_DS_LIB_SSH_PUBKEY        33
+#define NETSNMP_DS_LIB_SSH_PRIVKEY       34
 
     /*
      * end storage definitions 
