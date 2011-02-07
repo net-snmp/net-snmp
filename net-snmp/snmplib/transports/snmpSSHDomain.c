@@ -80,10 +80,6 @@ typedef struct netsnmp_ssh_addr_pair_s {
 const oid netsnmp_snmpSSHDomain[] = { TRANSPORT_DOMAIN_SSH_IP };
 static netsnmp_tdomain sshDomain;
 
-const char *keyfile1="/home/hardaker/.ssh/id_rsa.pub";
-const char *keyfile2="/home/hardaker/.ssh/id_rsa";
-const char *username="hardaker";
-
 #define SNMPSSHDOMAIN_USE_EXTERNAL_PIPE 1
 
 /*
@@ -720,7 +716,40 @@ netsnmp_ssh_transport(struct sockaddr_in *addr, int local)
 #endif /* ! SNMPSSHDOMAIN_USE_EXTERNAL_PIPE */
 
     } else {
-        /* XXX: need an ipv6 friendly one too (sigh) */
+        char *username;
+        size_t username_len;
+        char *keyfilepub;
+        char *keyfilepriv;
+        
+        /* use the requested user name */
+        /* XXX: default to the current user name on the system like ssh does */
+        username = netsnmp_ds_get_string(NETSNMP_DS_LIBRARY_ID,
+                                         NETSNMP_DS_LIB_SSH_USERNAME);
+        if (!username || 0 == *username) {
+            snmp_log(LOG_ERR, "You must specify a ssh username to use.  See the snmp.conf manual page\n");
+            return NULL;
+        }
+        username_len = strlen(username);
+
+        /* use the requested public key file */
+        keyfilepub = netsnmp_ds_get_string(NETSNMP_DS_LIBRARY_ID,
+                                           NETSNMP_DS_LIB_SSH_PUBKEY);
+        if (!keyfilepub || 0 == *keyfilepub) {
+            /* XXX: default to ~/.ssh/id_rsa.pub */
+            snmp_log(LOG_ERR, "You must specify a ssh public key file to use.  See the snmp.conf manual page\n");
+            return NULL;
+        }
+
+        /* use the requested private key file */
+        keyfilepriv = netsnmp_ds_get_string(NETSNMP_DS_LIBRARY_ID,
+                                            NETSNMP_DS_LIB_SSH_PRIVKEY);
+        if (!keyfilepriv || 0 == *keyfilepriv) {
+            /* XXX: default to keyfilepub without the .pub suffix */
+            snmp_log(LOG_ERR, "You must specify a ssh private key file to use.  See the snmp.conf manual page\n");
+            return NULL;
+        }
+
+        /* xxx: need an ipv6 friendly one too (sigh) */
 
         /* XXX: not ideal when structs don't actually match size wise */
         memcpy(&(addr_pair->remote_addr), addr, sizeof(struct sockaddr_in));
@@ -807,7 +836,7 @@ netsnmp_ssh_transport(struct sockaddr_in *addr, int local)
             /* public key */
             if (libssh2_userauth_publickey_fromfile(addr_pair->session,
                                                     username,
-                                                    keyfile1, keyfile2,
+                                                    keyfilepub, keyfilepriv,
                                                     NULL)) {
                 snmp_log(LOG_ERR,"Authentication by public key failed!\n");
                 goto shutdown;
@@ -955,6 +984,18 @@ netsnmp_ssh_ctor(void)
     netsnmp_ds_register_config(ASN_OCTET_STR, "snmp", "sshtosnmpsocket",
                                NETSNMP_DS_LIBRARY_ID,
                                NETSNMP_DS_LIB_SSHTOSNMP_SOCKET);
+
+    netsnmp_ds_register_config(ASN_OCTET_STR, "snmp", "sshusername",
+                               NETSNMP_DS_LIBRARY_ID,
+                               NETSNMP_DS_LIB_SSH_USERNAME);
+
+    netsnmp_ds_register_config(ASN_OCTET_STR, "snmp", "sshpublickey",
+                               NETSNMP_DS_LIBRARY_ID,
+                               NETSNMP_DS_LIB_SSH_PUBKEY);
+
+    netsnmp_ds_register_config(ASN_OCTET_STR, "snmp", "sshprivatekey",
+                               NETSNMP_DS_LIBRARY_ID,
+                               NETSNMP_DS_LIB_SSH_PRIVKEY);
 
     DEBUGMSGTL(("ssh", "registering the ssh domain\n"));
     netsnmp_tdomain_register(&sshDomain);
