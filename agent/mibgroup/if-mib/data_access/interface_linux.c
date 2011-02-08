@@ -345,7 +345,7 @@ _parse_stats(netsnmp_interface_entry *entry, char *stats, int expected)
 
     if ((*stats == 'N') &&
         (0 == strncmp(stats, "No statistics available",
-                      sizeof("No statistics available"))))
+                      strlen("No statistics available"))))
         return -1;
 
     /*
