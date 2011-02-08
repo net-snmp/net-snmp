@@ -130,7 +130,6 @@ sub AUTOLOAD {
 	return if ($haveinit);
 	$haveinit = 1;
 
-	snmp_enable_stderrlog();
 	my $flags = $_[0];
 	if ($flags->{'AgentX'}) {
 	    netsnmp_ds_set_boolean(NETSNMP_DS_APPLICATION_ID, NETSNMP_DS_AGENT_ROLE, 1);
