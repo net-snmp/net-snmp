@@ -371,16 +371,19 @@ extern "C" {
     /*
      * insert k into all containers
      */
+    NETSNMP_IMPORT
     int CONTAINER_INSERT(netsnmp_container *x, const void *k);
 
     /*
      * remove k from all containers
      */
+    NETSNMP_IMPORT
     int CONTAINER_REMOVE(netsnmp_container *x, const void *k);
 
     /*
      * duplicate container
      */
+    NETSNMP_IMPORT
     netsnmp_container *CONTAINER_DUP(netsnmp_container *x, void *ctx,
                                      u_int flags);
 
@@ -389,6 +392,7 @@ extern "C" {
      * *only* the first container, call the function f for each item.
      * After calling this function, all containers should be empty.
      */
+    NETSNMP_IMPORT
     void CONTAINER_CLEAR(netsnmp_container *x, netsnmp_container_obj_func *f,
                         void *c);
 
@@ -397,13 +401,16 @@ extern "C" {
      * *only* the first container, call the free_item function for each item.
      * After calling this function, all containers should be empty.
      */
+    NETSNMP_IMPORT
     void CONTAINER_FREE_ALL(netsnmp_container *x, void *c);
 
     /*
      * free all containers
      */
+    NETSNMP_IMPORT
     int CONTAINER_FREE(netsnmp_container *x);
 
+    NETSNMP_IMPORT
     netsnmp_container *SUBCONTAINER_FIND(netsnmp_container *x,
                                          const char* name);
 
