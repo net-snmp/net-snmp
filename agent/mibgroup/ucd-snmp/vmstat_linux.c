@@ -226,7 +226,13 @@ getstat(unsigned long *cuse, unsigned long *cice, unsigned long *csys,
             statfd = open(STAT_FILE, O_RDONLY, 0);
         }
         close(statfd);
-	if (has_vmstat && (vmstatfd = open(VMSTAT_FILE, O_RDONLY, 0)) != -1) {
+
+	if (has_vmstat) {
+          vmstatfd = open(VMSTAT_FILE, O_RDONLY, 0);
+          if (vmstatfd == -1) {
+                snmp_log(LOG_ERR, "cannot open %s\n", VMSTAT_FILE);
+                has_vmstat = 0;
+          } else {
 	    if (vmbsize == 0) {
 		vmbsize = 256;
 		vmbuff = malloc(vmbsize);
@@ -238,9 +244,8 @@ getstat(unsigned long *cuse, unsigned long *cice, unsigned long *csys,
 		vmstatfd = open(VMSTAT_FILE, O_RDONLY, 0);
 	    }
 	    close(vmstatfd);
+          }
 	}
-	else
-	    has_vmstat = 0;
 	cache_time = now;
     }
 
