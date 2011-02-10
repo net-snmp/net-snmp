@@ -456,7 +456,7 @@ sprint_realloc_octet_string(u_char ** buf, size_t * buf_len,
     if (hint) {
         int             repeat, width = 1;
         long            value;
-        char            code = 'd', separ = 0, term = 0, ch, intbuf[16];
+        char            code = 'd', separ = 0, term = 0, ch, intbuf[32];
         u_char         *ecp;
 
         if (!netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_QUICK_PRINT)) {
@@ -1168,7 +1168,7 @@ sprint_realloc_timeticks(u_char ** buf, size_t * buf_len, size_t * out_len,
     }
 
     if (netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_NUMERIC_TIMETICKS)) {
-        char            str[16];
+        char            str[32];
         sprintf(str, "%lu", *(u_long *) var->val.integer);
         if (!snmp_strcat
             (buf, buf_len, out_len, allow_realloc, (const u_char *) str)) {
@@ -1338,7 +1338,7 @@ sprint_realloc_integer(u_char ** buf, size_t * buf_len, size_t * out_len,
                 return 0;
             }
         } else {
-            char            str[16];
+            char            str[32];
             sprintf(str, "%ld", *var->val.integer);
             if (!snmp_strcat
                 (buf, buf_len, out_len, allow_realloc,
@@ -1353,7 +1353,7 @@ sprint_realloc_integer(u_char ** buf, size_t * buf_len, size_t * out_len,
             return 0;
         }
     } else {
-        char            str[16];
+        char            str[32];
         sprintf(str, "(%ld)", *var->val.integer);
         if (!snmp_strcat
             (buf, buf_len, out_len, allow_realloc,
@@ -1435,7 +1435,7 @@ sprint_realloc_uinteger(u_char ** buf, size_t * buf_len, size_t * out_len,
                 return 0;
             }
         } else {
-            char            str[16];
+            char            str[32];
             sprintf(str, "%lu", *var->val.integer);
             if (!snmp_strcat
                 (buf, buf_len, out_len, allow_realloc,
@@ -1450,7 +1450,7 @@ sprint_realloc_uinteger(u_char ** buf, size_t * buf_len, size_t * out_len,
             return 0;
         }
     } else {
-        char            str[16];
+        char            str[32];
         sprintf(str, "(%lu)", *var->val.integer);
         if (!snmp_strcat
             (buf, buf_len, out_len, allow_realloc,
@@ -1859,7 +1859,7 @@ sprint_realloc_bitstring(u_char ** buf, size_t * buf_len, size_t * out_len,
                     if (enum_string == NULL ||
                         netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID,
                                        NETSNMP_DS_LIB_PRINT_NUMERIC_ENUM)) {
-                        char            str[16];
+                        char            str[32];
                         sprintf(str, "%d ", (len * 8) + bit);
                         if (!snmp_strcat
                             (buf, buf_len, out_len, allow_realloc,
@@ -1867,7 +1867,7 @@ sprint_realloc_bitstring(u_char ** buf, size_t * buf_len, size_t * out_len,
                             return 0;
                         }
                     } else {
-                        char            str[16];
+                        char            str[32];
                         sprintf(str, "(%d) ", (len * 8) + bit);
                         if (!snmp_strcat
                             (buf, buf_len, out_len, allow_realloc,
