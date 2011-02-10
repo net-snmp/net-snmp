@@ -205,7 +205,12 @@ void _cpu_load_swap_etc( char *buff, netsnmp_cpu_info *cpu ) {
     unsigned long long pin, pout, swpin, swpout;
     unsigned long long itot, iticks, ctx;
 
-    if (has_vmstat && (vmstatfd = open(VMSTAT_FILE, O_RDONLY, 0)) != -1) {
+    if (has_vmstat) {
+      vmstatfd = open(VMSTAT_FILE, O_RDONLY, 0);
+      if (vmstatfd == -1 ) {
+            snmp_log(LOG_ERR, "cannot open %s\n", VMSTAT_FILE);
+            has_vmstat = 0;
+      } else {
         if (vmbsize == 0) {
 	    vmbsize = getpagesize()-1;
 	    vmbuff = (char*)malloc(vmbsize+1);
@@ -218,13 +223,12 @@ void _cpu_load_swap_etc( char *buff, netsnmp_cpu_info *cpu ) {
         }
         close(vmstatfd);
         if ( bytes_read < 0 ) {
-            snmp_log_perror(STAT_FILE "read error");
+            snmp_log_perror(VMSTAT_FILE "read error");
             return;
         }
         vmbuff[bytes_read] = '\0';
+      }
     }
-    else
-        has_vmstat = 0;
 
     if (has_vmstat) {
 	b = strstr(vmbuff, "pgpgin ");
