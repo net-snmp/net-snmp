@@ -47,17 +47,28 @@ includedir=@includedir@
 libdir=@libdir@
 datarootdir=@datarootdir@
 NSC_LDFLAGS="@LDFLAGS@"
+
+NSC_LIBS="@LIBS@"
 NSC_LNETSNMPLIBS="@LNETSNMPLIBS@"
+NSC_LAGENTLIBS="@LAGENTLIBS@ @PERLLDOPTS_FOR_APPS@"
+NSC_LMIBLIBS="@LMIBLIBS@"
+
 NSC_INCLUDEDIR=${includedir}
 NSC_LIBDIR=-L${libdir}
-NSC_LIBS="@LIBS@"
-NSC_AGENTLIBS="@AGENTLIBS@ @PERLLDOPTS_FOR_APPS@"
+
+NSC_SNMPLIBS="-lnetsnmp ${NSC_LNETSNMPLIBS}"
+NSC_SUBAGENTLIBS="-lnetsnmpagent -lnetsnmphelpers ${NSC_LAGENTLIBS} ${NSC_SNMPLIBS}"
+NSC_AGENTLIBS="-lnetsnmpmibs ${NSC_LMIBLIBS} ${NSC_SUBAGENTLIBS}"
+
 NSC_PREFIX=$prefix
 NSC_EXEC_PREFIX=$exec_prefix
 NSC_SRCDIR=@srcdir@
 NSC_INCDIR=${NSC_PREFIX}/include
-NSC_BASE_SUBAGENT_LIBS="-lnetsnmpagent -lnetsnmphelpers -lnetsnmp"
-NSC_BASE_AGENT_LIBS="-lnetsnmpagent -lnetsnmpmibs -lnetsnmphelpers -lnetsnmp"
+
+NSC_BASE_SNMP_LIBS="-lnetsnmp"
+NSC_BASE_SUBAGENT_LIBS="-lnetsnmpagent -lnetsnmphelpers ${NSC_BASE_SNMP_LIBS}"
+NSC_BASE_AGENT_LIBS="-lnetsnmpmibs ${NSC_BASE_SUBAGENT_LIBS}"
+
 NSC_SRC_LIBDIRS="agent/.libs snmplib/.libs agent/helpers/.libs"
 NSC_SRC_LIBDEPS="agent/.libs/libnetsnmpmibs.a agent/.libs/libnetsnmpagent.a agent/helpers/.libs/libnetsnmphelpers.a snmplib/.libs/libnetsnmp.a"
 
@@ -171,30 +182,30 @@ else
     #################################################### client lib
     --libs)
       # use this one == --netsnmp-libs + --external-libs
-      echo $NSC_LDFLAGS $NSC_LIBDIR -lnetsnmp $NSC_LIBS $NSC_LNETSNMPLIBS
+      echo $NSC_LDFLAGS $NSC_LIBDIR $NSC_SNMPLIBS $NSC_LIBS
       ;;
     --netsnmp-libs)
-      echo $NSC_LIBDIR -lnetsnmp
+      echo $NSC_LIBDIR $NSC_BASE_SNMP_LIBS
       ;;
     --external-libs)
-      echo $NSC_LDFLAGS $NSC_LIBS $NSC_LNETSNMPLIBS
+      echo $NSC_LDFLAGS $NSC_LNETSNMPLIBS $NSC_LIBS
       ;;
     #################################################### agent lib
     --base-agent-libs)
-      echo $NSC_BASE_AGENT_LIBS $NSC_LNETSNMPLIBS
+      echo $NSC_BASE_AGENT_LIBS
       ;;
     --base-subagent-libs)
       echo $NSC_BASE_SUBAGENT_LIBS
       ;;
     --agent-libs)
       # use this one == --netsnmp-agent-libs + --external-libs
-      echo $NSC_LDFLAGS $NSC_LIBDIR $NSC_BASE_AGENT_LIBS $NSC_AGENTLIBS
+      echo $NSC_LDFLAGS $NSC_LIBDIR $NSC_AGENTLIBS $NSC_LIBS
       ;;
     --netsnmp-agent-libs)
       echo $NSC_LIBDIR $NSC_BASE_AGENT_LIBS
       ;;
     --external-agent-libs)
-      echo $NSC_LDFLAGS $NSC_AGENTLIBS
+      echo $NSC_LDFLAGS $NSC_LMIBLIBS $NSC_LAGENTLIBS $NSC_LNETSNMPLIBS $NSC_LIBS
       ;;
     ####################################################
     --version|--ver*)
