@@ -1209,8 +1209,6 @@ snmp_log_string(int priority, const char *str)
         if (!stderr_enabled) {
             ++stderr_enabled;
             netsnmp_set_line_buffering(stderr);
-            log_handler_stdouterr( &lh, LOG_WARNING,
-                                   "No log handling enabled - using stderr logging\n");
         }
         log_handler_stdouterr( &lh, priority, str );
 
