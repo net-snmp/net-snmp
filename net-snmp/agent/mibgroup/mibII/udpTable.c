@@ -455,7 +455,7 @@ udpTable_load(netsnmp_cache *cache, void *vmagic)
     }
 
     if (udp_size > 0) {
-        DEBUGMSGTL(("mibII/udpTable", "Loaded UDP Table\n"));
+        DEBUGMSGTL(("mibII/udpTable", "Loaded UDP Table (hpux11)\n"));
         return 0;
     }
     DEBUGMSGTL(("mibII/udpTable", "Failed to load UDP Table (hpux11)\n"));
@@ -508,7 +508,7 @@ udpTable_load(netsnmp_cache *cache, void *vmagic)
 
     fclose(in);
 
-    DEBUGMSGTL(("mibII/udpTable", "Loaded UDP Table\n"));
+    DEBUGMSGTL(("mibII/udpTable", "Loaded UDP Table (linux)\n"));
     return 0;
 }
 #else                           /* linux */
@@ -572,7 +572,7 @@ udpTable_load(netsnmp_cache *cache, void *vmagic)
     }
 
     if (udp_head) {
-        DEBUGMSGTL(("mibII/udpTable", "Loaded UDP Table\n"));
+        DEBUGMSGTL(("mibII/udpTable", "Loaded UDP Table (solaris)\n"));
         return 0;
     }
     DEBUGMSGTL(("mibII/udpTable", "Failed to load UDP Table (solaris)\n"));
@@ -602,7 +602,7 @@ udpTable_load(netsnmp_cache *cache, void *vmagic)
         }
     }
     if (status == NO_ERROR) {
-        DEBUGMSGTL(("mibII/udpTable", "Loaded UDP Table\n"));
+        DEBUGMSGTL(("mibII/udpTable", "Loaded UDP Table (win32)\n"));
         udp_size = pUdpTable->dwNumEntries -1;  /* entries are counted starting with 0 */
         udp_head = pUdpTable->table;
         return 0;
@@ -662,14 +662,8 @@ udpTable_load(netsnmp_cache *cache, void *vmagic)
         nnew = SNMP_MALLOC_TYPEDEF(UDPTABLE_ENTRY_TYPE);
         if (!nnew)
             break;
-#if defined(freebsd4) || defined(darwin)
-        memcpy(nnew, &((struct xinpcb *) xig)->xi_inp, sizeof(struct inpcb));
+        memcpy(&nnew->pcb, &((struct xinpcb *) xig)->xi_inp, sizeof(struct inpcb));
 	nnew->inp_next = udp_head;
-#else
-        memcpy(nnew,  ((struct xinpcb *) xig)->xi_inp, sizeof(struct inpcb));
-	nnew->next = udp_head;		/* XXX - ?? Check 'next' pointer */
-#endif
-
 	udp_head   = nnew;
 #if defined(dragonfly)
         xig = (struct xinpcb  *) ((char *) xig + xig->xi_len);
@@ -680,7 +674,7 @@ udpTable_load(netsnmp_cache *cache, void *vmagic)
 
     free(udpcb_buf);
     if (udp_head) {
-        DEBUGMSGTL(("mibII/udpTable", "Loaded UDP Table\n"));
+        DEBUGMSGTL(("mibII/udpTable", "Loaded UDP Table (sysctl)\n"));
         return 0;
     }
     DEBUGMSGTL(("mibII/udpTable", "Failed to load UDP Table (sysctl)\n"));
@@ -725,7 +719,7 @@ udpTable_load(netsnmp_cache *cache, void *vmagic)
     }
 
     if (udp_head) {
-        DEBUGMSGTL(("mibII/udpTable", "Loaded UDP Table\n"));
+        DEBUGMSGTL(("mibII/udpTable", "Loaded UDP Table (pcb_table)\n"));
         return 0;
     }
     DEBUGMSGTL(("mibII/udpTable", "Failed to load UDP Table (pcb_table)\n"));
@@ -771,7 +765,7 @@ udpTable_load(netsnmp_cache *cache, void *vmagic)
     }
 
     if (udp_head) {
-        DEBUGMSGTL(("mibII/udpTable", "Loaded UDP Table\n"));
+        DEBUGMSGTL(("mibII/udpTable", "Loaded UDP Table (udb_symbol)\n"));
         return 0;
     }
     DEBUGMSGTL(("mibII/udpTable", "Failed to load UDP Table (udb_symbol)\n"));
