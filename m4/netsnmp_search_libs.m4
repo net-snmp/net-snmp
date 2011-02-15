@@ -7,7 +7,7 @@ AC_DEFUN([NETSNMP_SEARCH_LIBS],
  AC_CACHE_CHECK([for library containing $1],
     [netsnmp_cv_func_$1_]netsnmp_target,
     [netsnmp_func_search_save_LIBS="$LIBS"
-     m4_if([netsnmp_target], [LIBS],
+     m4_if(netsnmp_target, [LIBS],
          [netsnmp_target_val="$LIBS"
           netsnmp_temp_LIBS="$5 ${LIBS}"],
          [netsnmp_target_val="$netsnmp_target"
