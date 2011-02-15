@@ -55,6 +55,9 @@ struct variable2 lookupResultsTable_variables[] = {
 extern struct header_complex_index *lookupCtlTableStorage;
 extern struct header_complex_index *lookupResultsTableStorage;
 
+int
+lookupResultsTable_inadd(struct lookupResultsTable_data *thedata);
+
 void
 lookupResultsTable_cleaner(struct header_complex_index *thestuff)
 {
