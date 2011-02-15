@@ -421,6 +421,9 @@
 /* Define to 1 if you have the <io.h> header file. */
 #undef HAVE_IO_H
 
+/* Define to 1 if you have the `kinfo_get_cpus' function. */
+#undef HAVE_KINFO_GET_CPUS
+
 /* Define to 1 if you have the `knlist' function. */
 #undef HAVE_KNLIST
 
