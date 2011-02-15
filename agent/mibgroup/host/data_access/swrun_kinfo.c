@@ -58,7 +58,7 @@
 #define SWRUN_K_FLAG	ki_flag
 #define SWRUN_K_CLASS	ki_pri.pri_class
 
-#else
+#elif HAVE_KVM_GETPROC2
     /*
      * newer NetBSD, OpenBSD kinfo_proc2 field names
      */
@@ -68,6 +68,18 @@
 #define SWRUN_K_COMM	p_comm
 #define SWRUN_K_FLAG	p_flag
 /*      SWRUN_K_CLASS	not defined     */
+
+#elif defined(dragonfly)
+    /*
+     * DragonFly is different ...
+     */
+#define SWRUN_TABLE	kinfo_proc
+#define SWRUN_K_STAT	kp_stat
+#define SWRUN_K_PID 	kp_pid
+#define SWRUN_K_COMM	kp_comm
+#define SWRUN_K_FLAG	kp_flags
+/*      SWRUN_K_CLASS	not defined     */
+
 #else
     /*
      * early FreeBSD, NetBSD, OpenBSD kinfo_proc field names
@@ -137,8 +149,7 @@ netsnmp_arch_swrun_container_load( netsnmp_container *container, u_int flags)
 {
     struct SWRUN_TABLE  *proc_table;
     int                  nprocs, i, rc;
-    char                 buf[BUFSIZ], **argv, *cp;
-    char                *name, *path;
+    char                 buf[BUFSIZ], **argv;
     netsnmp_swrun_entry *entry;
 
     if ( 0 == kd ) {
@@ -265,6 +276,17 @@ netsnmp_arch_swrun_container_load( netsnmp_container *container, u_int flags)
         entry->hrSWRunPerfMem += proc_table[i].p_vm_ssize;
         entry->hrSWRunPerfMem += proc_table[i].p_vm_dsize;
         entry->hrSWRunPerfMem *= (getpagesize() / 1024);
+#elif defined(dragonfly) && __DragonFly_version >= 190000
+	entry->hrSWRunPerfCPU  = proc_table[i].kp_lwp.kl_uticks;
+	entry->hrSWRunPerfCPU += proc_table[i].kp_lwp.kl_sticks;
+	entry->hrSWRunPerfCPU += proc_table[i].kp_lwp.kl_iticks;
+	entry->hrSWRunPerfMem  = proc_table[i].kp_vm_map_size / 1024;
+#elif defined(dragonfly)
+	entry->hrSWRunPerfCPU  = proc_table[i].kp_eproc.e_uticks;
+	entry->hrSWRunPerfCPU += proc_table[i].kp_eproc.e_sticks;
+	entry->hrSWRunPerfCPU += proc_table[i].kp_eproc.e_iticks;
+	entry->hrSWRunPerfMem  = proc_table[i].kp_vm_map_size / 1024;
+
 #else
         /*
          * early FreeBSD, NetBSD, OpenBSD
@@ -284,7 +306,7 @@ netsnmp_arch_swrun_container_load( netsnmp_container *container, u_int flags)
      */
 
     DEBUGMSGTL(("swrun:load:arch"," loaded %d entries\n",
-                CONTAINER_SIZE(container)));
+                (int)CONTAINER_SIZE(container)));
 
     return 0;
 }
