@@ -15,7 +15,7 @@ config_require(mibII/vacm_vars)
 config_require(mibII/setSerialNo)
 
 /* mibII/ipv6 is activated via --enable-ipv6 and only builds on Linux+*BSD */
-#if defined(NETSNMP_ENABLE_IPV6) && (defined(linux) || defined(freebsd3) || defined(netbsd) || defined(openbsd))
+#if defined(NETSNMP_ENABLE_IPV6) && (defined(linux) || defined(freebsd3) || defined(netbsd1) || defined(openbsd))
 config_require(mibII/ipv6)
 #endif
 
