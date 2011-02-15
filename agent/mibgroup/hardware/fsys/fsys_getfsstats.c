@@ -24,7 +24,7 @@
 #define NSFS_NAMELEN  MNAMELEN
 #endif
 
-#if defined(HAVE_GETVFSSTAT)
+#if defined(HAVE_GETVFSSTAT) && defined(__NetBSD__)
 #define NSFS_GETFSSTAT  getvfsstat
 #define NSFS_STATFS     statvfs
 #define NSFS_FLAGS      f_flag
