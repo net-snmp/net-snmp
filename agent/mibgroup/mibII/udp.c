@@ -20,26 +20,6 @@
 
 #include "util_funcs/MIB_STATS_CACHE_TIMEOUT.h"
 
-#ifdef solaris2
-#include "kernel_sunos5.h"
-#else
-#include "kernel.h"
-#endif
-
-#ifdef linux
-#include "kernel_linux.h"
-#endif
-
-#ifdef cygwin
-#define WIN32
-#include <windows.h>
-#endif
-
-#ifdef hpux
-#include <sys/mib.h>
-#include <netinet/mib_kern.h>
-#endif                          /* hpux */
-
 #ifdef linux
 #include "tcp.h"
 #endif
