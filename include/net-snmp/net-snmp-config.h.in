@@ -257,11 +257,17 @@
 /* Define to 1 if you have the <iphlpapi.h> header file. */
 #undef HAVE_IPHLPAPI_H
 
+/* Define to 1 if you have the `kinfo_get_cpus' function. */
+#undef HAVE_KINFO_GET_CPUS
+
 /* Define to 1 if you have the `knlist' function. */
 #undef HAVE_KNLIST
 
 /* Define to 1 if you have the <kstat.h> header file. */
 #undef HAVE_KSTAT_H
+
+/* Define to 1 if you have the `kvm_getproc2' function. */
+#undef HAVE_KVM_GETPROC2
 
 /* Define to 1 if you have the `kvm_getprocs' function. */
 #undef HAVE_KVM_GETPROCS
@@ -764,11 +770,11 @@
 /* Define to 1 if `if_iqdrops' is member of `struct ifnet'. */
 #undef HAVE_STRUCT_IFNET_IF_IQDROPS
 
-/* Define to 1 if `if_lastchange.tv_sec' is member of `struct ifnet'. */
-#undef HAVE_STRUCT_IFNET_IF_LASTCHANGE_TV_SEC
-
 /* Define to 1 if `if_lastchange.tv_nsec' is member of `struct ifnet'. */
 #undef HAVE_STRUCT_IFNET_IF_LASTCHANGE_TV_NSEC
+
+/* Define to 1 if `if_lastchange.tv_sec' is member of `struct ifnet'. */
+#undef HAVE_STRUCT_IFNET_IF_LASTCHANGE_TV_SEC
 
 /* Define to 1 if `if_mtu' is member of `struct ifnet'. */
 #undef HAVE_STRUCT_IFNET_IF_MTU
