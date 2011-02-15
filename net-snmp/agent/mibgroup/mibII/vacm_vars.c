@@ -654,31 +654,6 @@ var_vacm_view(struct variable * vp,
     return NULL;
 }
 
-oid            *
-sec2group_generate_OID(oid * prefix, size_t prefixLen,
-                       struct vacm_groupEntry * geptr, size_t * length)
-{
-    oid            *indexOid;
-    int             i, securityNameLen;
-
-    securityNameLen = strlen(geptr->securityName);
-
-    *length = 2 + securityNameLen + prefixLen;
-    indexOid = (oid *) malloc(*length * sizeof(oid));
-    if (indexOid) {
-        memmove(indexOid, prefix, prefixLen * sizeof(oid));
-
-        indexOid[prefixLen] = geptr->securityModel;
-
-        indexOid[prefixLen + 1] = securityNameLen;
-        for (i = 0; i < securityNameLen; i++)
-            indexOid[prefixLen + 2 + i] = (oid) geptr->securityName[i];
-
-    }
-    return indexOid;
-
-}
-
 int
 sec2group_parse_oid(oid * oidIndex, size_t oidLen,
                     int *model, unsigned char **name, size_t * nameLen)
@@ -979,40 +954,6 @@ write_vacmSecurityToGroupStatus(int action,
     }
 
     return SNMP_ERR_NOERROR;
-}
-
-oid            *
-access_generate_OID(oid * prefix, size_t prefixLen,
-                    struct vacm_accessEntry * aptr, size_t * length)
-{
-    oid            *indexOid;
-    int             i, groupNameLen, contextPrefixLen;
-
-    groupNameLen = strlen(aptr->groupName);
-    contextPrefixLen = strlen(aptr->contextPrefix);
-
-    *length = 4 + groupNameLen + contextPrefixLen + prefixLen;
-    indexOid = (oid *) malloc(*length * sizeof(oid));
-    if (indexOid) {
-        memmove(indexOid, prefix, prefixLen * sizeof(oid));
-
-        indexOid[prefixLen] = groupNameLen;
-        for (i = 0; i < groupNameLen; i++)
-            indexOid[groupNameLen + 1 + i] = (oid) aptr->groupName[i];
-
-        indexOid[prefixLen + groupNameLen + 1] = contextPrefixLen;
-        for (i = 0; i < contextPrefixLen; i++)
-            indexOid[prefixLen + groupNameLen + 2 + i] =
-                (oid) aptr->contextPrefix[i];
-
-        indexOid[prefixLen + groupNameLen + contextPrefixLen + 3] =
-            aptr->securityModel;
-        indexOid[prefixLen + groupNameLen + contextPrefixLen + 4] =
-            aptr->securityLevel;
-
-    }
-    return indexOid;
-
 }
 
 int
@@ -1548,35 +1489,6 @@ view_parse_oid(oid * oidIndex, size_t oidLen,
     }
 
     return 0;
-}
-
-oid            *
-view_generate_OID(oid * prefix, size_t prefixLen,
-                  struct vacm_viewEntry * vptr, size_t * length)
-{
-    oid            *indexOid;
-    int             i, viewNameLen, viewSubtreeLen;
-
-    viewNameLen = strlen(vptr->viewName);
-    viewSubtreeLen = vptr->viewSubtreeLen;
-
-    *length = 2 + viewNameLen + viewSubtreeLen + prefixLen;
-    indexOid = (oid *) malloc(*length * sizeof(oid));
-    if (indexOid) {
-        memmove(indexOid, prefix, prefixLen * sizeof(oid));
-
-        indexOid[prefixLen] = viewNameLen;
-        for (i = 0; i < viewNameLen; i++)
-            indexOid[viewNameLen + 1 + i] = (oid) vptr->viewName[i];
-
-        indexOid[prefixLen + viewNameLen + 1] = viewSubtreeLen;
-        for (i = 0; i < viewSubtreeLen; i++)
-            indexOid[prefixLen + viewNameLen + 2 + i] =
-                (oid) vptr->viewSubtree[i];
-
-    }
-    return indexOid;
-
 }
 
 struct vacm_viewEntry *
