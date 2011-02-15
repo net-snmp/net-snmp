@@ -503,7 +503,7 @@ DIGIT:
                 var->data = (void *)(cp1 - exprRaw);
                 return var;
             }
-            n = ops[ *cp1 ];
+            n = ops[ *cp1 & 0xFF ];
             DEBUGMSGTL(("disman:expr:eval", "Binary operator %c (%d)\n", *cp1, n));
             var = snmp_varlist_add_variable( &exprAlDente, NULL, 0,
                                              ASN_INTEGER,
@@ -538,7 +538,7 @@ DIGIT:
             else if ( *(cp1+1) == *cp1 )
                 n = ops[ *cp1++ - 30];
             else
-                n = ops[ *cp1 ];
+                n = ops[ *cp1 & 0xFF ];
             var = snmp_varlist_add_variable( &exprAlDente, NULL, 0,
                                              ASN_INTEGER,
                                              (u_char*)&n, sizeof(n));
@@ -615,7 +615,7 @@ _expValue_evalExpr2( netsnmp_variable_list *exprAlD )
     DEBUGIF(( "disman:expr:eval2")) {
         for (vp = exprAlD; vp; vp=vp->next_variable) {
             if ( vp->type == ASN_PRIV_OPERATOR )
-                DEBUGMSGTL(( "disman:expr:eval2", "Operator %d\n",
+                DEBUGMSGTL(( "disman:expr:eval2", "Operator %ld\n",
                                                   *vp->val.integer));
             else if ( vp->type == ASN_PRIV_FUNCTION )
                 DEBUGMSGTL(( "disman:expr:eval2", "Function %s\n",
