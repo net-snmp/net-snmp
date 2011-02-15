@@ -1,14 +1,14 @@
 #ifndef _SNMP_TRANSPORT_H
 #define _SNMP_TRANSPORT_H
 
+#include <sys/types.h>
+
 #ifdef HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
 #endif
 #ifdef HAVE_NETINET_IN_H
 #include <netinet/in.h>
 #endif
-
-#include <sys/types.h>
 
 #include <net-snmp/library/asn1.h>
 
