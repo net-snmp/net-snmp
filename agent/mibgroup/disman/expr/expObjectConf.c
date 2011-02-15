@@ -96,7 +96,7 @@ parse_expOTable(const char *token, char *line)
     line  = read_config_read_data(ASN_UNSIGNED,  line, &idx, NULL);
     entry = expObject_createEntry( owner, oname, idx, 0 );
 
-    DEBUGMSG(("disman:expr:conf", "(%s, %s, %d) ", owner, oname, idx));
+    DEBUGMSG(("disman:expr:conf", "(%s, %s, %ld) ", owner, oname, idx));
     
     /*
      * Read in the accessible column values.
@@ -135,7 +135,7 @@ store_expOTable(int majorID, int minorID, void *serverarg, void *clientarg)
         if ( entry->flags & EXP_OBJ_FLAG_FIXED )
             continue;
 
-        DEBUGMSGTL(("disman:expr:conf", "  Storing (%s %s %d)\n",
+        DEBUGMSGTL(("disman:expr:conf", "  Storing (%s %s %lu)\n",
                     entry->expOwner, entry->expName, entry->expObjectIndex));
 
         /*
