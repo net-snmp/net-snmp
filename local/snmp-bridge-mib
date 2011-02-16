@@ -123,19 +123,44 @@ sub mode_get{
 	reply($request, $noid) if (exists $oid_value{$noid});
 }
 
+sub find_next{
+	my ($noid) = @_;
+	my $nextoid = $oid_next{$noid};
+	if(!defined($nextoid) || !defined($oid_value{$nextoid})) {
+		# find the lowest OID whis is higher than $noid
+		$prev = ".1.3.6.1.2.1.18";
+		$prev_oid = new NetSNMP::OID($prev);
+		$noid_oid = new NetSNMP::OID($noid);
+		#print "looking for next of $noid\n";
+		for my $candidate (keys %oid_value) {
+			#print "evaluating $candidate\n";
+			$candidate_oid = new NetSNMP::OID($candidate);
+			if ($noid_oid < $candidate_oid && $prev_oid > $candidate_oid) {
+				#print "found candidate $candidate\n";
+				$prev = $candidate;
+				$prev_oid = $candidate_oid;
+			}
+		}
+		if ($prev eq ".1.3.6.1.2.1.18") {
+			return; # no OID higher than $noid found
+		}
+		$nextoid = $prev;
+	}
+	return $nextoid;
+}
+
 sub mode_get_next{
 	my ($request)=@_;
 	my $oid=$request->getOID();
 	$SNMP::use_numeric = 1;
 	my $noid=SNMP::translateObj($oid);
-
-	my $nextoid = $oid_next{$noid};
-	my $type = $oid_type{$nextoid};
-	my $value = $oid_value{$nextoid};
-
+	my $nextoid = find_next($noid);
+	#print "found $nextoid\n";
 	if(defined($nextoid)) {
+		my $type = $oid_type{$nextoid};
+		my $value = $oid_value{$nextoid};
 		if (defined($type) and defined($value)) {
-			reply($request,	$oid_next{$noid});
+			reply($request,	$nextoid);
 		}
 	}
 }
