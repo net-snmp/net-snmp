@@ -46,26 +46,29 @@ my %oid_next;
 my (%indexes, %interfaces, %macs, %ages, %locals, %vlans, %tagged);
 my $oid;
 
-my $subagent=0;
+$subagent=0;
 my $netdir="/sys/class/net/";
 
 $cache_timout=60;
 $last_populated=0;
 
 my $regoid = ".1.3.6.1.2.1.17";
-
-if ( $#ARGV != 0) {
-	usage($0);
-	exit();
-}
-
-my $targetbridge = $ARGV[0];
-
 # are we running embedded ? If not, register as subagent
 if (!$agent) {
     $agent = new NetSNMP::agent('Name' => 'dot1qbridge',
 				'AgentX' => 1);
     $subagent = 1;
+    if ( $#ARGV != 0) {
+	usage($0);
+	exit();
+    } 
+    my $targetbridge = $ARGV[0];
+} else {
+    if (!defined($bridge)) {
+	usage($0);
+	exit();
+    }
+    $targetbridge = $bridge;
 }
 
 $agent->register("dot1qbridge", ".1.3.6.1.2.1.17", \&request_handler) or die "registration of handler failed !\n";
@@ -85,15 +88,16 @@ if ($subagent) {
 
 sub usage {
 	my $name = shift;
-
-	print $name."\n\n";
-	print "usage: \t$name <bridge>	start snmp bridge module".
-		" for bridge <bridge>\n\n";
-	print "arguments:	bridge		name of the Linux bridge".
-		" which you want to provide info via snmp for.\n\n";
-
+	if ($subagent) {
+		print $name."\n\n";
+		print "usage: \t$name <bridge>	start snmp bridge module".
+			" for bridge <bridge>\n\n";
+		print "arguments:	bridge		name of the Linux bridge".
+			" which you want to provide info via snmp for.\n\n";
+	} else {
+		print 'usage in snmpd.conf: perl $bridge="br0"; perl do <path to $name>\n';
+	}
 	print "number of arguments given $#ARGV\n\n";
-
 }
 
 sub request_handler {
