@@ -48,6 +48,7 @@ my $oid;
 
 $subagent=0;
 my $netdir="/sys/class/net/";
+my $targetbridge;
 
 $cache_timout=60;
 $last_populated=0;
@@ -61,8 +62,8 @@ if (!$agent) {
     if ( $#ARGV != 0) {
 	usage($0);
 	exit();
-    } 
-    my $targetbridge = $ARGV[0];
+    }
+    $targetbridge = $ARGV[0];
 } else {
     if (!defined($bridge)) {
 	usage($0);
