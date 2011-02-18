@@ -171,6 +171,7 @@ netsnmp_fsys_arch_load( void )
         entry->avail =  stat_buf.f_bavail;
         entry->inums_total = stat_buf.f_files;
         entry->inums_avail = stat_buf.f_ffree;
+        netsnmp_fsys_calculate32(entry);
     }
     free(aixmnt);
     aixmnt  = NULL;

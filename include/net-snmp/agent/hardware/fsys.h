@@ -60,13 +60,19 @@ struct netsnmp_fsys_info_s {
      char device[SNMP_MAXPATH+1];
      int  type;
 
-     long size;
-     long used;
-     long avail;
-     long units;
+     unsigned long long size;
+     unsigned long long used;
+     unsigned long long avail;
+     unsigned long long units;
 
-     long inums_total;
-     long inums_avail;
+     /* artificially computed values, both 'size_32' and 'units_32' fit INT32 */
+     unsigned long size_32;
+     unsigned long used_32;
+     unsigned long avail_32;
+     unsigned long units_32;
+
+     unsigned long long inums_total;
+     unsigned long long inums_avail;
 
      int  minspace;
      int  minpercent;
@@ -99,3 +105,5 @@ int netsnmp_fsys_avail(netsnmp_fsys_info* );
 unsigned long long netsnmp_fsys_size_ull( netsnmp_fsys_info* );
 unsigned long long netsnmp_fsys_used_ull( netsnmp_fsys_info* );
 unsigned long long netsnmp_fsys_avail_ull(netsnmp_fsys_info* );
+
+void netsnmp_fsys_calculate32( netsnmp_fsys_info *f);

@@ -130,6 +130,10 @@ init_hrh_storage(void)
 			       NETSNMP_DS_APPLICATION_ID,
 			       NETSNMP_DS_AGENT_SKIPNFSINHOSTRESOURCES);
 
+    netsnmp_ds_register_config(ASN_BOOLEAN, appname, "realStorageUnits",
+                   NETSNMP_DS_APPLICATION_ID,
+                   NETSNMP_DS_AGENT_REALSTORAGEUNITS);
+
     snmpd_register_config_handler("storageUseNFS", parse_storage_config, NULL,
 	"1 | 2\t\t(1 = enable, 2 = disable)");
 }
@@ -415,27 +419,39 @@ really_try_next:
             return (u_char *) mem->descr;
         }
     case HRSTORE_UNITS:
-        if (store_idx > NETSNMP_MEM_TYPE_MAX)
-            long_return = HRFS_entry->units;
-        else {
+        if (store_idx > NETSNMP_MEM_TYPE_MAX) {
+            if (netsnmp_ds_get_boolean(NETSNMP_DS_APPLICATION_ID,
+                    NETSNMP_DS_AGENT_REALSTORAGEUNITS))
+                long_return = HRFS_entry->units & 0xffffffff;
+            else
+                long_return = HRFS_entry->units_32;
+        } else {
             if ( !mem || mem->units == -1 )
                 goto try_next;
             long_return = mem->units;
         }
         return (u_char *) & long_return;
     case HRSTORE_SIZE:
-        if (store_idx > NETSNMP_MEM_TYPE_MAX)
-            long_return = HRFS_entry->size;
-        else {
+        if (store_idx > NETSNMP_MEM_TYPE_MAX) {
+            if (netsnmp_ds_get_boolean(NETSNMP_DS_APPLICATION_ID,
+                    NETSNMP_DS_AGENT_REALSTORAGEUNITS))
+                long_return = HRFS_entry->size & 0xffffffff;
+            else
+                long_return = HRFS_entry->size_32;
+        } else {
             if ( !mem || mem->size == -1 )
                 goto try_next;
             long_return = mem->size;
         }
         return (u_char *) & long_return;
     case HRSTORE_USED:
-        if (store_idx > NETSNMP_MEM_TYPE_MAX)
-            long_return = HRFS_entry->used;
-        else {
+        if (store_idx > NETSNMP_MEM_TYPE_MAX) {
+            if (netsnmp_ds_get_boolean(NETSNMP_DS_APPLICATION_ID,
+                    NETSNMP_DS_AGENT_REALSTORAGEUNITS))
+                long_return = HRFS_entry->used & 0xffffffff;
+            else
+                long_return = HRFS_entry->used_32;
+        } else {
             if ( !mem || mem->size == -1 || mem->free == -1 )
                 goto try_next;
             long_return = mem->size - mem->free;

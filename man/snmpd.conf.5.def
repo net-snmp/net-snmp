@@ -572,6 +572,25 @@ Historically, the Net-SNMP agent has reported such file systems
 as 'Fixed Disks', and this is still the default behaviour.
 Setting this directive to '1' reports such file systems as
 \'Network Disks', as required by the Host Resources MIB.
+.IP "realStorageUnits"
+controlls how the agent reports hrStorageAllocationUnits, hrStorageSize and
+hrStorageUsed in hrStorageTable.
+For big storage drives with small allocation units the agent re-calculates
+these values so they all fit Integer32 and
+hrStorageAllocationUnits x hrStorageSize
+gives real size of the storage.
+.RS
+.IP "Example:"
+Linux xfs 16TB filesystem with 4096 bytes large blocks will be
+reported as  hrStorageAllocationUnits = 8192 and hrStorageSize = 2147483647,
+so 8192 x 2147483647 gives real size of the filesystem (=16 TB).
+.RE
+.IP
+Setting this directive to '1' turns off
+this calculation and the agent reports real hrStorageAllocationUnits, but it
+might report wrong hrStorageSize for big drives because the value won't fit into
+Integer32. In this case, hrStorageAllocationUnits x hrStorageSize won't give
+real size of the storage.
 .SS Process Monitoring 
 The \fChrSWRun\fR group of the Host Resources MIB provides
 information about individual processes running on the local system.

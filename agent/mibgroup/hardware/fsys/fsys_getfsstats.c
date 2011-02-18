@@ -173,6 +173,6 @@ netsnmp_fsys_arch_load( void )
         if (  stats[i].NSFS_FLAGS & MNT_ROOTFS ) {
             entry->flags |= NETSNMP_FS_FLAG_BOOTABLE;
         }
-        
+        netsnmp_fsys_calculate32(entry);
     }
 }
