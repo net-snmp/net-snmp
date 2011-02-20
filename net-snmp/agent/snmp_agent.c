@@ -1102,7 +1102,7 @@ netsnmp_deregister_agent_nsap(int handle)
 
     if (a != NULL && a->handle == handle) {
         *prevNext = a->next;
-	if (snmp_sess_session_lookup(a)) {
+	if (snmp_sess_session_lookup(a->s)) {
             if (main_session == snmp_sess_session(a->s)) {
                 main_session_deregistered = 1;
             }
