@@ -190,7 +190,7 @@ _add_connection(netsnmp_tcpconn_entry *entry, netsnmp_container *container)
         if (CONTAINER_INSERT(container, rowreq_ctx)) {
             NETSNMP_LOGONCE((LOG_DEBUG,
                     "Error inserting entry to tcpConnectionTable,"\
-                    " entry already exists."));
+                    " entry already exists.\n"));
             tcpConnectionTable_release_rowreq_ctx(rowreq_ctx);
         }
     } else {
