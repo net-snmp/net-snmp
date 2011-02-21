@@ -433,6 +433,8 @@ sc_hash(const oid * hashtype, size_t hashtypelen, const u_char * buf,
 {
 #if defined(NETSNMP_USE_OPENSSL) || defined(NETSNMP_USE_PKCS11) || defined(NETSNMP_USE_INTERNAL_CRYPTO)
     int            rval = SNMPERR_SUCCESS;
+#endif
+#if defined(NETSNMP_USE_OPENSSL) || defined(NETSNMP_USE_PKCS11)
     unsigned int   tmp_len;
 #endif
     int            ret;
