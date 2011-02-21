@@ -236,6 +236,26 @@ netsnmp_arch_swrun_container_load( netsnmp_container *container, u_int flags)
                              : 4  /*  application     */
                              ;
 
+#ifdef netbsdelf5
+        switch (proc_table[i].SWRUN_K_STAT) {
+	case LSONPROC:
+        case LSRUN:   entry->hrSWRunStatus = HRSWRUNSTATUS_RUNNING;
+                      break;
+        case LSSLEEP: entry->hrSWRunStatus = HRSWRUNSTATUS_RUNNABLE;
+                      break;
+        case LSIDL:
+	case LSSUSPENDED:
+        case LSSTOP:  entry->hrSWRunStatus = HRSWRUNSTATUS_NOTRUNNABLE;
+                      break;
+	case LSDEAD:
+        case LSZOMB:  entry->hrSWRunStatus = HRSWRUNSTATUS_INVALID;
+		      break;
+        default:   
+		      snmp_log(LOG_ERR, "Bad process status %c (0x%x)\n", proc_table[i].SWRUN_K_STAT, proc_table[i].SWRUN_K_STAT);
+		      entry->hrSWRunStatus = HRSWRUNSTATUS_INVALID;
+                      break;
+        }
+#else
         switch (proc_table[i].SWRUN_K_STAT) {
         case SRUN:    entry->hrSWRunStatus = HRSWRUNSTATUS_RUNNING;
                       break;
@@ -248,8 +268,10 @@ netsnmp_arch_swrun_container_load( netsnmp_container *container, u_int flags)
         case SIDL:
         case SZOMB:
         default:      entry->hrSWRunStatus = HRSWRUNSTATUS_INVALID;
+		      snmp_log(LOG_ERR, "Bad process status %c (0x%x)\n", proc_table[i].SWRUN_K_STAT, proc_table[i].SWRUN_K_STAT);
                       break;
         }
+#endif
         
 #if defined(freebsd5) && __FreeBSD_version >= 500014
 # ifdef NOT_DEFINED
