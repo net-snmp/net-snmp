@@ -29,6 +29,8 @@ config_require(if-mib)
  */
 #if defined( linux )
 config_require(ip-mib ip-forward-mib tcp-mib udp-mib)
+#elif defined(solaris2)
+config_require(tcp-mib udp-mib)
 #endif
 
 /*
