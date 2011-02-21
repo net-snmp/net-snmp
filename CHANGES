@@ -12,11 +12,13 @@ listing of all changes made to the code.
       - [BUG 2922390]: Fix test for missing contextName parameter
       - [BUG 3093199]: Fixed bugs in 64-bit integer parsing
       - [BUG 3134323]: Fix crash when comparing invalid OIDs
+      - [BUG 3171878]: Using SNMPv3 context does not work
       - [PATCH 2871747]: plug memory leak in OID processing
       - [PATCH 2952140]: Fix overflow of counter32 and gauge32 on 64bit systems
       - [PATCH 2971270]: refuse to parse ASN.1 tokens with wrong type field
       - [PATCH 3067540]: Fix IPv4 OID indexes on 64-bit big-endian systems.
       - [PATCH 3058645]: Use MSG_DONTWAIT for the unix domain socket
+      - [PATCH 3165878]: Catch buffer overrun on 64-bit systems
       - Added function netsnmp_delete_table_data_set()
       - Added netsnmp_xxx() memory allocation functions
       - Added macro netsnmp_static_assert().
@@ -48,6 +50,7 @@ listing of all changes made to the code.
       - [BUG 3003981]: Protect against buffer overflow
       - [BUG 3058101]: 64-bit systems only support writeable 'long' instances (not int)
       - [BUG 3062538]: Fix com2sec* handling of non-default contexts
+      - [BUG 3185528]: shutdown_master_agent didn't close UDP socket
       - [PATCH 2119725]: Fix skipNFSInHostResources handling of hrStorageTable
       - [PATCH 2825653]: Fix sendmail.cf parsing in certain conditions
       - [PATCH 2835576]: Fix endianness issues in pass/pass_persist
@@ -75,10 +78,13 @@ listing of all changes made to the code.
       - [PATCH 3096725]: Include SNMPv1 trap OIDs in nlmLogNotificationID column
       - [PATCH 3096725]: sysORTable registation for notification log mib  
       - [PATCH 3141462]: fix agentx subagent issues with multiple-object requests
+      - [PATCH 3152412]: Handle (and report) problems reading /proc/vmstat
 
       - Add newly created/destroyed interfaces to ipv6IfTable
       - Don't let MIB modules second-guess the cache handler
+      - Fix adding new addresses to ipAddressTable
       - Fix engineID generation on outgoing v3 traps from the agent
+      - Fix erroneous "64bit wrap" warnings when computing ipSystemStats
       - Fix invalid access to memory in TCP-MIB
       - Fix IP-MIB::ipIfStatsReasmReqds value (typo)
       - Fix IPv6 forwarding MIB object (boolean, not TruthValue)
@@ -123,6 +129,7 @@ listing of all changes made to the code.
       - Add detection of lm_sensors version
       - Avoid use of "tail -1" (non POSIX-compliant)
       - Do not call VACM APIs if VACM module is not included
+      - Fix building static applications using net-snmp-config
       - Fix compilation with rpm-4.6 (using legacy API)
       - Fix 'make test TESTOPTS="-P tcp"'
       - Fix order of rpmlib detection and agent module configuration
@@ -136,6 +143,7 @@ listing of all changes made to the code.
     mib2c:
       - [BUG 2888569]: Fix generation of table columns array
       - Remove unnecessary casts to u_char*
+      - make the mib2c foreach ranges work as advertised in the comments
 
     mibs:
       - [BUG 2973890]: Fix imports, DiskIOEntry list and revision histories
@@ -150,6 +158,7 @@ listing of all changes made to the code.
       - [PATCH 2995098]: Fix creation of SNMPv3 sessions with API_SINGLE
       - [PATCH 3046371]: Fix memory leak in SNMPv1 trap handling
       - [PATCH 3049029]: Fix memory leak with snmp bulkwalks
+      - Don't automatically open stderr (breaks embedded perl within the agent)
       - Fix various other memory leaks, out-of-bounds array access
             and uninitialized variable access issues
       - Fix several "Free to wrong pool" errors
@@ -174,7 +183,9 @@ listing of all changes made to the code.
       - Fix building with remotely mounted source files
       - Fix free UDP port detection in regression tests
       - Fix out-of-range array access in 'interfaces' table
+      - libnetsnmp now builds as a DLL when configured with --enable-shared
       - Omit inet_ntop.c and inet_pton.c
+      - perl modules do now build (--with-perl-modules).
       - Removed winpipe.c from the list of source files
 
     HP-UX:
