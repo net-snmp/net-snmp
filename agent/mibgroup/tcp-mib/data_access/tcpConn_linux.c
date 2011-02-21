@@ -134,7 +134,6 @@ _load4(netsnmp_container *container, u_int load_flags)
      */
     while (fgets(line, sizeof(line), in)) {
         netsnmp_tcpconn_entry *entry;
-        int             rc;
         unsigned int    state, local_port, remote_port, tmp_state;
         unsigned long long inode;
         size_t          buf_len, offset;
