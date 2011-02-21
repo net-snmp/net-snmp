@@ -1022,6 +1022,7 @@ _udpEndpointTable_container_init(udpEndpointTable_interface_ctx * if_ctx)
                  "udpEndpointTable_container_init\n");
         return;
     }
+    if_ctx->container->container_name = strdup("udpEndpointTable");
 
     if (NULL != if_ctx->cache)
         if_ctx->cache->magic = (void *) if_ctx->container;
