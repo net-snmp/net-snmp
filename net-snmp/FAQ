@@ -1311,7 +1311,7 @@ How do I send traps and notifications?
   covered in the AGENT and CODING sections.
 
   You should also read the snmptrap tutorial at
-	http://www.net-snmp.org/tutorial-5/commands/snmptrap.html
+        http://www.net-snmp.org/wiki/index.php/TUT:snmptrap
   which will help you understand everything you need to know about traps.
 
 
@@ -1348,7 +1348,7 @@ How do I receive traps and notifications?
         forward default                  10.0.0.2
 
   There's a tutorial with more details on the web site at
-	http://www.net-snmp.org/tutorial-5/commands/snmptrap.html
+        http://www.net-snmp.org/wiki/index.php/TUT:snmptrap
 
 
 
