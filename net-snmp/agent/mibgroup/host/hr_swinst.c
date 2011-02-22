@@ -249,14 +249,6 @@ init_hr_swinst(void)
                  hrswinst_variables_oid);
 }
 
-void
-shutdown_hr_swinst(void)
-{
-#ifdef HAVE_LIBRPM
-    rpmFreeCrypto();
-    rpmFreeMacros (NULL);
-#endif
-}
 
 /*
  * header_hrswinst(...
