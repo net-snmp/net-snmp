@@ -7,6 +7,7 @@ top_builddir	= .
 VPATH		= @srcdir@
 
 SUBDIRS		= snmplib @MAINSUBS@
+FTSUBDIRS	= @FTMAINSUBS@ snmplib
 TESTDIRS	= testing
 
 CPP		= @CPP@ 					        \
@@ -58,7 +59,7 @@ LIBTOOL_DEPS = @LIBTOOL_DEPS@
 #
 # targets
 #
-all:    sedscript EXAMPLE.conf standardall net-snmp-config-x net-snmp-create-v3-user @PERLTARGS@ @PYTHONTARGS@
+all:    sedscript EXAMPLE.conf  @FEATURETARGS@ standardall net-snmp-config-x net-snmp-create-v3-user @PERLTARGS@ @PYTHONTARGS@
 
 start-flag:
 	@touch build-in-progress-flag
@@ -146,7 +147,7 @@ testdirs:
 distall: ${srcdir}/configure ${srcdir}/include/net-snmp/net-snmp-config.h 
 
 OTHERCLEANTARGETS=EXAMPLE.conf sedscript
-OTHERCLEANTODOS=perlclean @PYTHONCLEANTARGS@
+OTHERCLEANTODOS=perlclean @PYTHONCLEANTARGS@ cleanfeatures
 
 #
 # perl specific build rules
@@ -245,7 +246,8 @@ configclean: makefileclean
 	rm -f include/net-snmp/agent/mib_module_config.h		\
 		include/net-snmp/agent/agent_module_config.h		\
 		include/net-snmp/library/snmpv3-security-includes.h \
-		snmplib/snmpsm_init.h                               \
+		include/net-snmp/feature-details.h                  \
+		snmplib/snmpsm_init.h snmplib/snmpsm_shutdown.h     \
                 snmplib/transports/snmp_transport_inits.h           \
 		agent/mibgroup/agent_module_includes.h 	\
 		agent/mibgroup/agent_module_inits.h 	\

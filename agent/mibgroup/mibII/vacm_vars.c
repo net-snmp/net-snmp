@@ -156,6 +156,7 @@ var_vacm_sec2group(struct variable * vp,
      */
 
     switch (vp->magic) {
+#ifndef NETSNMP_NO_WRITE_SUPPORT 
     case SECURITYGROUP:
         *write_method = write_vacmGroupName;
         break;
@@ -165,9 +166,12 @@ var_vacm_sec2group(struct variable * vp,
     case SECURITYSTATUS:
         *write_method = write_vacmSecurityToGroupStatus;
         break;
+#endif /* !NETSNMP_NO_WRITE_SUPPORT */ 
     default:
         *write_method = NULL;
     }
+
+	*var_len = 0; /* assume 0 length until found */
 
     if (memcmp(name, vp->name, sizeof(oid) * vp->namelen) != 0) {
         memcpy(name, vp->name, sizeof(oid) * vp->namelen);
@@ -252,6 +256,7 @@ var_vacm_sec2group(struct variable * vp,
     default:
         break;
     }
+
     return NULL;
 }
 
@@ -278,6 +283,7 @@ var_vacm_access(struct variable * vp,
      */
 
     switch (vp->magic) {
+#ifndef NETSNMP_NO_WRITE_SUPPORT 
     case ACCESSMATCH:
         *write_method = write_vacmAccessContextMatch;
         break;
@@ -296,9 +302,12 @@ var_vacm_access(struct variable * vp,
     case ACCESSSTATUS:
         *write_method = write_vacmAccessStatus;
         break;
+#endif /* !NETSNMP_NO_WRITE_SUPPORT */ 
     default:
         *write_method = NULL;
     }
+
+	*var_len = 0; /* assume 0 length until found */
 
     if (memcmp(name, vp->name, sizeof(oid) * vp->namelen) != 0) {
         memcpy(name, vp->name, sizeof(oid) * vp->namelen);
@@ -469,6 +478,7 @@ var_vacm_access(struct variable * vp,
         long_return = gp->status;
         return (u_char *) & long_return;
     }
+
     return NULL;
 }
 
@@ -495,6 +505,7 @@ var_vacm_view(struct variable * vp,
      */
 
     switch (vp->magic) {
+#ifndef NETSNMP_NO_WRITE_SUPPORT 
     case VIEWMASK:
         *write_method = write_vacmViewMask;
         break;
@@ -507,11 +518,13 @@ var_vacm_view(struct variable * vp,
     case VIEWSTATUS:
         *write_method = write_vacmViewStatus;
         break;
+#endif /* !NETSNMP_NO_WRITE_SUPPORT */ 
     default:
         *write_method = NULL;
     }
 
     *var_len = sizeof(long_return);
+
     if (vp->magic != VACMVIEWSPINLOCK) {
         if (memcmp(name, vp->name, sizeof(oid) * vp->namelen) != 0) {
             memcpy(name, vp->name, sizeof(oid) * vp->namelen);
@@ -623,7 +636,9 @@ var_vacm_view(struct variable * vp,
 
     switch (vp->magic) {
     case VACMVIEWSPINLOCK:
+#ifndef NETSNMP_NO_WRITE_SUPPORT
         *write_method = write_vacmViewSpinLock;
+#endif /* !NETSNMP_NO_WRITE_SUPPORT */
         long_return = vacmViewSpinLock;
         return (u_char *) & long_return;
 
@@ -651,9 +666,11 @@ var_vacm_view(struct variable * vp,
         long_return = gp->viewStatus;
         return (u_char *) & long_return;
     }
+
     return NULL;
 }
 
+#ifndef NETSNMP_NO_WRITE_SUPPORT 
 int
 sec2group_parse_oid(oid * oidIndex, size_t oidLen,
                     int *model, unsigned char **name, size_t * nameLen)
@@ -1823,3 +1840,4 @@ write_vacmViewSpinLock(int action,
     }
     return SNMP_ERR_NOERROR;
 }
+#endif /* !NETSNMP_NO_WRITE_SUPPORT */ 

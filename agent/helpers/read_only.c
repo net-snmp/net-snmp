@@ -44,6 +44,7 @@ netsnmp_read_only_helper(netsnmp_mib_handler *handler,
 
     switch (reqinfo->mode) {
 
+#ifndef NETSNMP_NO_WRITE_SUPPORT
     case MODE_SET_RESERVE1:
     case MODE_SET_RESERVE2:
     case MODE_SET_ACTION:
@@ -52,6 +53,7 @@ netsnmp_read_only_helper(netsnmp_mib_handler *handler,
     case MODE_SET_UNDO:
         netsnmp_request_set_error_all(requests, SNMP_ERR_NOTWRITABLE);
         return SNMP_ERR_NOTWRITABLE;
+#endif /* NETSNMP_NO_WRITE_SUPPORT */
 
     case MODE_GET:
     case MODE_GETNEXT:

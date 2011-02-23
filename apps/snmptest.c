@@ -333,11 +333,14 @@ input_variable(netsnmp_variable_list * vp)
             printf("(Are you sending to the right port?)\n");
             break;
         case 'D':
-            if (snmp_get_dump_packet()) {
-                snmp_set_dump_packet(0);
+            if (netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID, 
+                                       NETSNMP_DS_LIB_DUMP_PACKET)) {
+                netsnmp_ds_set_boolean(NETSNMP_DS_LIBRARY_ID, 
+                                       NETSNMP_DS_LIB_DUMP_PACKET, 0);
                 printf("Turned packet dump off\n");
             } else {
-                snmp_set_dump_packet(1);
+                netsnmp_ds_set_boolean(NETSNMP_DS_LIBRARY_ID, 
+                                       NETSNMP_DS_LIB_DUMP_PACKET, 1);
                 printf("Turned packet dump on\n");
             }
             break;
@@ -350,11 +353,14 @@ input_variable(netsnmp_variable_list * vp)
                 exit(0);
                 break;
             case 'P':
-                if (snmp_get_quick_print()) {
-                    snmp_set_quick_print(0);
+                if (netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID, 
+                                           NETSNMP_DS_LIB_QUICK_PRINT)) {
+                    netsnmp_ds_set_boolean(NETSNMP_DS_LIBRARY_ID, 
+                                           NETSNMP_DS_LIB_QUICK_PRINT, 0);
                     printf("Turned quick printing off\n");
                 } else {
-                    snmp_set_quick_print(1);
+                    netsnmp_ds_set_boolean(NETSNMP_DS_LIBRARY_ID, 
+                                           NETSNMP_DS_LIB_QUICK_PRINT, 1);
                     printf("Turned quick printing on\n");
                 }
                 break;

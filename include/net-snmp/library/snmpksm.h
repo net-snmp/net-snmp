@@ -15,6 +15,8 @@ extern          "C" {
                                        *);
     void            init_ksm(void);
 
+    void            shutdown_ksm(void);
+
     /*
      * This is the "key usage" that is used by the new crypto API.  It's used
      * generally only if you are using derived keys.  The specifical says that
@@ -24,6 +26,8 @@ extern          "C" {
 
 #define KSM_KEY_USAGE_ENCRYPTION	1030
 #define KSM_KEY_USAGE_CHECKSUM		1031
+
+#define KSM_SEC_MODEL_NUMBER            SNMP_SEC_MODEL_KSM
 
 #ifdef __cplusplus
 }

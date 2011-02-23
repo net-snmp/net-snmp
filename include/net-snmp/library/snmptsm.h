@@ -5,6 +5,8 @@
 #ifndef SNMPTSM_H
 #define SNMPTSM_H
 
+#define TSM_SEC_MODEL_NUMBER            SNMP_SEC_MODEL_TSM
+
 #ifdef __cplusplus
 extern          "C" {
 #endif
@@ -14,6 +16,8 @@ extern          "C" {
     int             tsm_process_in_msg(struct snmp_secmod_incoming_params
                                        *);
     void            init_tsm(void);
+
+    void            shutdown_tsm(void);
 
     #define NETSNMP_TM_SAME_SECURITY_NOT_REQUIRED 0
     #define NETSNMP_TM_USE_SAME_SECURITY          1

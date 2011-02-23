@@ -1,5 +1,7 @@
 #include <net-snmp/net-snmp-config.h>
+#include <net-snmp/net-snmp-features.h>
 
+#include <net-snmp/net-snmp-features.h>
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 
@@ -10,6 +12,23 @@
 #else
 #include <strings.h>
 #endif
+
+netsnmp_feature_provide(table_dataset_all)
+netsnmp_feature_child_of(table_dataset, table_dataset_all)
+netsnmp_feature_child_of(table_dataset_all, mib_helpers)
+
+#ifdef NETSNMP_FEATURE_REQUIRE_TABLE_DATASET
+netsnmp_feature_require(table_get_or_create_row_stash)
+netsnmp_feature_require(table_data_delete_table)
+netsnmp_feature_require(table_data)
+#endif /* NETSNMP_FEATURE_REQUIRE_TABLE_DATASET */
+
+#ifndef NETSNMP_FEATURE_REMOVE_TABLE_DATASET
+
+#ifndef NETSNMP_NO_WRITE_SUPPORT
+netsnmp_feature_require(oid_stash)
+#endif /* !NETSNMP_NO_WRITE_SUPPORT */
+
 
 static netsnmp_data_list *auto_tables;
 
@@ -134,6 +153,8 @@ netsnmp_table_dataset_replace_row(netsnmp_table_data_set *table,
 }
 
 /** removes a row from the table, but doesn't delete/free the column values */
+netsnmp_feature_child_of(table_dataset_remove_row,table_dataset_all)
+#ifndef NETSNMP_FEATURE_REMOVE_TABLE_DATASET_REMOVE_ROW
 NETSNMP_INLINE void
 netsnmp_table_dataset_remove_row(netsnmp_table_data_set *table,
                                  netsnmp_table_row *row)
@@ -143,6 +164,7 @@ netsnmp_table_dataset_remove_row(netsnmp_table_data_set *table,
 
     netsnmp_table_data_remove_and_delete_row(table->table, row);
 }
+#endif /* NETSNMP_FEATURE_REMOVE_TABLE_DATASET_REMOVE_ROW */
 
 /** removes a row from the table and then deletes it (and all its data) */
 NETSNMP_INLINE void
@@ -351,7 +373,6 @@ netsnmp_table_set_multi_add_default_row(netsnmp_table_data_set *tset, ...)
     va_end(debugargs);
 }
 
-
 /* ==================================
  *
  * Data Set API: MIB maintenance
@@ -494,6 +515,7 @@ netsnmp_table_data_set_helper_handler(netsnmp_mib_handler *handler,
         row = netsnmp_extract_table_row(request);
         table_info = netsnmp_extract_table_info(request);
 
+#ifndef NETSNMP_NO_WRITE_SUPPORT
         if (MODE_IS_SET(reqinfo->mode)) {
 
             /*
@@ -562,12 +584,17 @@ netsnmp_table_data_set_helper_handler(netsnmp_mib_handler *handler,
                 reqinfo->mode == MODE_SET_RESERVE2)
                 row = newrow;
         }
+#endif /* NETSNMP_NO_WRITE_SUPPORT */
 
         if (row)
             data = (netsnmp_table_data_set_storage *) row->data;
 
         if (!row || !table_info || !data) {
-            if (!MODE_IS_SET(reqinfo->mode) || !table_info) {
+            if (!table_info
+#ifndef NETSNMP_NO_WRITE_SUPPORT
+                || !MODE_IS_SET(reqinfo->mode)
+#endif /* !NETSNMP_NO_WRITE_SUPPORT */
+                ) {
                 netsnmp_set_request_error(reqinfo, request,
                                           SNMP_NOSUCHINSTANCE);
                 continue;
@@ -598,6 +625,7 @@ netsnmp_table_data_set_helper_handler(netsnmp_mib_handler *handler,
             }
             break;
 
+#ifndef NETSNMP_NO_WRITE_SUPPORT
         case MODE_SET_RESERVE1:
             if (data) {
                 /*
@@ -814,6 +842,12 @@ netsnmp_table_data_set_helper_handler(netsnmp_mib_handler *handler,
 		newrow = NULL;
             }
             break;
+#endif /* NETSNMP_NO_WRITE_SUPPORT */
+
+        default:
+            snmp_log(LOG_ERR,
+                     "table_dataset: unknown mode passed into the handler\n");
+            return SNMP_ERR_GENERR;
         }
     }
 
@@ -834,6 +868,8 @@ netsnmp_extract_table_data_set(netsnmp_request_info *request)
 /**
  * extracts a netsnmp_table_data_set pointer from a given request
  */
+netsnmp_feature_child_of(table_data_set_column,table_dataset_all)
+#ifndef NETSNMP_FEATURE_REMOVE_TABLE_DATA_SET_COLUMN
 netsnmp_table_data_set_storage *
 netsnmp_extract_table_data_set_column(netsnmp_request_info *request,
                                      unsigned int column)
@@ -845,7 +881,7 @@ netsnmp_extract_table_data_set_column(netsnmp_request_info *request,
     }
     return data;
 }
-
+#endif /* NETSNMP_FEATURE_REMOVE_TABLE_DATA_SET_COLUMN */
 
 /* ==================================
  *
@@ -1162,6 +1198,7 @@ netsnmp_config_parse_add_row(const char *token, char *line)
 }
 
 
+#ifndef NETSNMP_NO_WRITE_SUPPORT
 netsnmp_oid_stash_node **
 netsnmp_table_dataset_get_or_create_stash(netsnmp_agent_request_info *reqinfo,
                                           netsnmp_table_data_set *datatable,
@@ -1192,6 +1229,8 @@ netsnmp_table_dataset_get_or_create_stash(netsnmp_agent_request_info *reqinfo,
     return stashp;
 }
 
+netsnmp_feature_child_of(table_dataset_get_newrow,table_dataset_all)
+#ifndef NETSNMP_FEATURE_REMOVE_TABLE_DATASET_GET_NEWROW
 netsnmp_table_row *
 netsnmp_table_dataset_get_newrow(netsnmp_request_info *request,
                                  netsnmp_agent_request_info *reqinfo,
@@ -1215,6 +1254,8 @@ netsnmp_table_dataset_get_newrow(netsnmp_request_info *request,
 
     return newrowstash->newrow;
 }
+#endif /* NETSNMP_FEATURE_REMOVE_TABLE_DATASET_GET_NEWROW */
+#endif /* NETSNMP_NO_WRITE_SUPPORT */
 
 /* ==================================
  *
@@ -1263,6 +1304,7 @@ netsnmp_table_data_set_find_column(netsnmp_table_data_set_storage *start,
     return start;
 }
 
+#ifndef NETSNMP_NO_WRITE_SUPPORT
 /**
  * marks a given column in a row as writable or not.
  */
@@ -1369,6 +1411,8 @@ netsnmp_set_row_column(netsnmp_table_row *row, unsigned int column,
     data->data_len = value_len;
     return SNMPERR_SUCCESS;
 }
+#endif /* NETSNMP_NO_WRITE_SUPPORT */
+
 
 /* ==================================
  *
@@ -1387,6 +1431,8 @@ netsnmp_table_dataset_add_index(netsnmp_table_data_set *table, u_char type)
 
 /** adds multiple indexes to a table_dataset helper object.
  *  To end the list, use a 0 after the list of ASN index types. */
+netsnmp_feature_child_of(table_set_add_indexes,table_dataset_all)
+#ifndef NETSNMP_FEATURE_REMOVE_TABLE_SET_ADD_INDEXES
 void
 netsnmp_table_set_add_indexes(netsnmp_table_data_set *tset,
                               ...)
@@ -1402,6 +1448,10 @@ netsnmp_table_set_add_indexes(netsnmp_table_data_set *tset,
 
     va_end(debugargs);
 }
+#endif /* NETSNMP_FEATURE_REMOVE_TABLE_SET_ADD_INDEXES */
 
+#else /* NETSNMP_FEATURE_REMOVE_TABLE_DATASET */
+netsnmp_feature_unused(table_dataset);
+#endif /* NETSNMP_FEATURE_REMOVE_TABLE_DATASET */
 /** @} 
  */

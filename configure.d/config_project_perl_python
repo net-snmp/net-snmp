@@ -276,6 +276,7 @@ if test "x$embed_perl" != "xno" ; then
         [Define if you are embedding perl in the main agent.])
       OTHERAGENTLIBOBJS="snmp_perl.o"
       OTHERAGENTLIBLOBJS="snmp_perl.lo"
+      OTHERAGENTLIBLFTS="snmp_perl.ft"
 
       EMBEDPERLINSTALL="embedperlinstall"
       EMBEDPERLUNINSTALL="embedperluninstall"

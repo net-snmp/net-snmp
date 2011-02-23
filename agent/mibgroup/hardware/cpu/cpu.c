@@ -114,6 +114,8 @@ netsnmp_cpu_info *netsnmp_cpu_get_byIdx(  int idx, int create ) {
     /*
      * Work with a list of CPU entries, indexed by name
      */
+netsnmp_feature_child_of(hardware_cpu_get_byName, hardware_cpu)
+#ifndef NETSNMP_FEATURE_REMOVE_HARDWARE_CPU_GET_BYNAME
 netsnmp_cpu_info *netsnmp_cpu_get_byName( char *name, int create ) {
     netsnmp_cpu_info *cpu;
 
@@ -145,11 +147,17 @@ netsnmp_cpu_info *netsnmp_cpu_get_byName( char *name, int create ) {
     }
     return cpu;
 }
+#endif /* NETSNMP_FEATURE_REMOVE_HARDWARE_CPU_GET_BYNAME */
 
+netsnmp_feature_child_of(hardware_cpu_get_cache, hardware_cpu)
+#ifndef NETSNMP_FEATURE_REMOVE_HARDWARE_CPU_GET_CACHE
 netsnmp_cache *netsnmp_cpu_get_cache( void ) {
     return _cpu_cache;
 }
+#endif /* NETSNMP_FEATURE_REMOVE_HARDWARE_CPU_GET_CACHE */
 
+netsnmp_feature_child_of(hardware_cpu_load, hardware_cpu)
+#ifndef NETSNMP_FEATURE_REMOVE_HARDWARE_CPU_LOAD
 int netsnmp_cpu_load( void ) {
         /*
          * If we're automatically updating the stats regularly,
@@ -158,6 +166,7 @@ int netsnmp_cpu_load( void ) {
     return ( _cpuAutoUpdate ? 1
                             : netsnmp_cache_check_and_reload( _cpu_cache ));
 }
+#endif /* NETSNMP_FEATURE_REMOVE_HARDWARE_CPU_LOAD */
 
     /*
      * Call the system-specific load routine regularly,
@@ -217,6 +226,8 @@ _cpu_update_stats( unsigned int reg, void* magic ) {
     }
 }
 
+netsnmp_feature_child_of(hardware_cpu_copy_stats, hardware_cpu)
+#ifndef NETSNMP_FEATURE_REMOVE_HARDWARE_CPU_COPY_STATS
 void _cpu_copy_stats( netsnmp_cpu_info *cpu )
 {
     netsnmp_cpu_info *cpu2;
@@ -244,3 +255,4 @@ void _cpu_copy_stats( netsnmp_cpu_info *cpu )
     cpu2->pageIn     = cpu->pageIn;
     cpu2->pageOut    = cpu->pageOut;
 }
+#endif /* NETSNMP_FEATURE_REMOVE_HARDWARE_CPU_COPY_STATS */

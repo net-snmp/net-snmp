@@ -4,6 +4,7 @@
  */
 
 #include <net-snmp/net-snmp-config.h>
+#include <net-snmp/net-snmp-features.h>
 
 #include <net-snmp/types.h>
 #include <net-snmp/session_api.h>
@@ -11,6 +12,9 @@
 #include <net-snmp/library/mib.h>	/* for OID O/P format enums */
 #include <net-snmp/library/ucd_compat.h>
 
+netsnmp_feature_provide(ucd_compatibility)
+
+#ifndef NETSNMP_FEATURE_REMOVE_UCD_COMPATIBILITY
 /*
  * use <netsnmp_session *)->s_snmp_errno instead 
  */
@@ -221,3 +225,6 @@ ds_shutdown		(void)
 {
   netsnmp_ds_shutdown();
 }
+#else /* !NETSNMP_FEATURE_REMOVE_UCD_COMPATIBILITY */
+netsnmp_feature_unused(ucd_compatibility);
+#endif /* !NETSNMP_FEATURE_REMOVE_UCD_COMPATIBILITY */

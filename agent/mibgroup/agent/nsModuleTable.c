@@ -4,9 +4,12 @@
  */
 
 #include <net-snmp/net-snmp-config.h>
+#include <net-snmp/net-snmp-features.h>
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 #include "nsModuleTable.h"
+
+netsnmp_feature_require(table_dataset)
 
 void
 nsModuleTable_free(void *context, netsnmp_iterator_info *dont_care)

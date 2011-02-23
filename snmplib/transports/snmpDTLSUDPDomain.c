@@ -18,6 +18,10 @@
 
 #ifdef HAVE_LIBSSL_DTLS
 
+#include <net-snmp/net-snmp-features.h>
+
+netsnmp_feature_require(cert_util)
+
 #include <net-snmp/library/snmpDTLSUDPDomain.h>
 #include <net-snmp/library/snmpUDPIPv6Domain.h>
 
@@ -1377,14 +1381,6 @@ netsnmp_dtlsudp_transport(struct sockaddr_in *addr, int local)
 
     return t;
 }
-
-
-void
-netsnmp_dtlsudp_agent_config_tokens_register(void)
-{
-}
-
-
 
 
 netsnmp_transport *

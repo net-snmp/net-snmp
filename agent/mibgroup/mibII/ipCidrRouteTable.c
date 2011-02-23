@@ -4,6 +4,7 @@
  */
 
 #include <net-snmp/net-snmp-config.h>
+#include <net-snmp/net-snmp-features.h>
 #include "route_headers.h"
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
@@ -12,6 +13,9 @@
 #include "ipCidrRouteTable_access.h"
 
 #include "var_route.h"
+
+netsnmp_feature_require(oid_stash)
+netsnmp_feature_require(get_routes)
 
 static netsnmp_oid_stash_node *undoStorage;
 

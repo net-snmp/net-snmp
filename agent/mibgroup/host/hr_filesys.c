@@ -14,6 +14,7 @@
  */
 
 #include <net-snmp/net-snmp-config.h>
+#include <net-snmp/net-snmp-features.h>
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 #include <net-snmp/agent/hardware/memory.h>
@@ -62,6 +63,10 @@
 #include <sys/vmount.h>
 #include <sys/statfs.h>
 #endif
+
+netsnmp_feature_require(se_find_free_value_in_slist)
+netsnmp_feature_require(date_n_time)
+netsnmp_feature_require(ctime_to_timet)
 
 #if defined(bsdi4) || defined(freebsd3) || defined(freebsd4) || defined(freebsd5) || defined(darwin)
 #if HAVE_GETFSSTAT && defined(MFSNAMELEN)

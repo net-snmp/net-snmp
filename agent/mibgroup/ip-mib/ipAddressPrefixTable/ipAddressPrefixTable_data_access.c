@@ -8,6 +8,7 @@
  * standard Net-SNMP includes 
  */
 #include <net-snmp/net-snmp-config.h>
+#include <net-snmp/net-snmp-features.h>
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 
@@ -20,6 +21,8 @@
 #include "ipAddressPrefixTable_data_access.h"
 
 #include "ip-mib/ipAddressTable/ipAddressTable.h"
+
+netsnmp_feature_require(netsnmp_ipaddress_flags_copy)
 
 /** @ingroup interface 
  * @addtogroup data_access data_access: Routines to access data

@@ -30,6 +30,7 @@
  * standard Net-SNMP includes 
  */
 #include <net-snmp/net-snmp-config.h>
+#include <net-snmp/net-snmp-features.h>
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 
@@ -45,6 +46,11 @@
 #include "udpEndpointTable_interface.h"
 
 #include <ctype.h>
+
+netsnmp_feature_provide(udpEndpointTable_external_access)
+netsnmp_feature_require(row_merge)
+netsnmp_feature_require(baby_steps)
+netsnmp_feature_require(check_all_requests_error)
 
 /**********************************************************************
  **********************************************************************
@@ -79,19 +85,26 @@ static void
                 _udpEndpointTable_container_shutdown(udpEndpointTable_interface_ctx *
                                                      if_ctx);
 
-
+netsnmp_feature_child_of(udpEndpointTable_container_get, udpEndpointTable_external_access)
+#ifndef NETSNMP_FEATURE_REMOVE_UDPENDPOINTTABLE_CONTAINER_GET
 netsnmp_container *
 udpEndpointTable_container_get(void)
 {
     return udpEndpointTable_if_ctx.container;
 }
+#endif /* NETSNMP_FEATURE_REMOVE_UDPENDPOINTTABLE_CONTAINER_GET */
 
+netsnmp_feature_child_of(udpEndpointTable_registration_get, udpEndpointTable_external_access)
+#ifndef NETSNMP_FEATURE_REMOVE_UDPENDPOINTTABLE_REGISTRATION_GET
 udpEndpointTable_registration *
 udpEndpointTable_registration_get(void)
 {
     return udpEndpointTable_if_ctx.user_ctx;
 }
+#endif /* NETSNMP_FEATURE_REMOVE_UDPENDPOINTTABLE_REGISTRATION_GET */
 
+netsnmp_feature_child_of(udpEndpointTable_registration_set, udpEndpointTable_external_access)
+#ifndef NETSNMP_FEATURE_REMOVE_UDPENDPOINTTABLE_REGISTRATION_SET
 udpEndpointTable_registration *
 udpEndpointTable_registration_set(udpEndpointTable_registration * newreg)
 {
@@ -99,12 +112,16 @@ udpEndpointTable_registration_set(udpEndpointTable_registration * newreg)
     udpEndpointTable_if_ctx.user_ctx = newreg;
     return old;
 }
+#endif /* NETSNMP_FEATURE_REMOVE_UDPENDPOINTTABLE_REGISTRATION_SET */
 
+netsnmp_feature_child_of(udpEndpointTable_container_size, udpEndpointTable_external_access)
+#ifndef NETSNMP_FEATURE_REMOVE_UDPENDPOINTTABLE_CONTAINER_SIZE
 int
 udpEndpointTable_container_size(void)
 {
     return CONTAINER_SIZE(udpEndpointTable_if_ctx.container);
 }
+#endif /* NETSNMP_FEATURE_REMOVE_UDPENDPOINTTABLE_CONTAINER_SIZE */
 
 /*
  * mfd multiplexer modes
@@ -1045,6 +1062,7 @@ _udpEndpointTable_container_shutdown(udpEndpointTable_interface_ctx *
 }                               /* _udpEndpointTable_container_shutdown */
 
 
+#ifndef NETSNMP_FEATURE_REMOVE_UDPENDPOINTTABLE_EXTERNAL_ACCESS
 udpEndpointTable_rowreq_ctx *
 udpEndpointTable_row_find_by_mib_index(udpEndpointTable_mib_index *
                                        mib_idx)
@@ -1072,3 +1090,4 @@ udpEndpointTable_row_find_by_mib_index(udpEndpointTable_mib_index *
 
     return rowreq_ctx;
 }
+#endif /* NETSNMP_FEATURE_REMOVE_UDPENDPOINTTABLE_EXTERNAL_ACCESS */

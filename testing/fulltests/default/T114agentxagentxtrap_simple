@@ -5,6 +5,7 @@
 HEADER AgentX trap sending support using agentxtrap
 
 SKIPIFNOT USING_AGENTX_MASTER_MODULE
+SKIPIFNOT NETSNMP_SECMOD_USM
 
 #
 # Begin test

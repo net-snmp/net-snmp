@@ -3,6 +3,7 @@
  *
  */
 #include <net-snmp/net-snmp-config.h>
+#include <net-snmp/net-snmp-features.h>
 
 #if HAVE_STDLIB_H
 #include <stdlib.h>
@@ -92,12 +93,18 @@ init_dlmod(void)
     DEBUGMSGTL(("dlmod", "dlmod_path: %s\n", dlmod_path));
 }
 
+netsnmp_feature_child_of(deinit_dlmod, netsnmp_unused)
+#ifdef NETSNMP_FEATURE_REQUIRE_DEINIT_DLMOD
+netsnmp_feature_require(snmpd_unregister_config_handler)
+#endif /* NETSNMP_FEATURE_REQUIRE_DEINIT_DLMOD */
+#ifndef NETSNMP_FEATURE_REMOVE_DEINIT_DLMOD
 void
 deinit_dlmod(void)
 {
     unregister_mib(dlmod_variables_oid, dlmod_variables_oid_len);
     snmpd_unregister_config_handler("dlmod");
 }
+#endif /* NETSNMP_FEATURE_REMOVE_DEINIT_DLMOD */
 
 struct dlmod   *
 dlmod_create_module(void)

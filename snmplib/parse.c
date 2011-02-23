@@ -33,6 +33,7 @@ SOFTWARE.
  * distributed with the Net-SNMP package.
  */
 #include <net-snmp/net-snmp-config.h>
+#include <net-snmp/net-snmp-features.h>
 
 #ifndef NETSNMP_DISABLE_MIB_LOADING
 
@@ -774,11 +775,14 @@ init_node_hash(struct node *nodes)
 
 static int      erroneousMibs = 0;
 
+netsnmp_feature_child_of(parse_get_error_count, netsnmp_unused)
+#ifndef NETSNMP_FEATURE_REMOVE_PARSE_GET_ERROR_COUNT
 int
 get_mib_parse_error_count(void)
 {
     return erroneousMibs;
 }
+#endif /* NETSNMP_FEATURE_REMOVE_PARSE_GET_ERROR_COUNT */
 
 
 static void
@@ -2132,6 +2136,7 @@ get_tc_descriptor(int tc_index)
     return (tclist[tc_index].descriptor);
 }
 
+/* used in the perl module */
 const char     *
 get_tc_description(int tc_index)
 {
@@ -3763,6 +3768,8 @@ module_name(int modid, char *cp)
  *      or those relating to a specified identifier (read_import_replacements)
  *      plus an interface to add new replacement requirements
  */
+netsnmp_feature_child_of(parse_add_module_replacement, netsnmp_unused)
+#ifndef NETSNMP_FEATURE_REMOVE_PARSE_ADD_MODULE_REPLACEMENT
 void
 add_module_replacement(const char *old_module,
                        const char *new_module_name,
@@ -3784,6 +3791,7 @@ add_module_replacement(const char *old_module,
     mcp->next = module_map_head;
     module_map_head = mcp;
 }
+#endif /* NETSNMP_FEATURE_REMOVE_PARSE_ADD_MODULE_REPLACEMENT */
 
 static int
 read_module_replacements(const char *name)
@@ -4757,11 +4765,14 @@ get_token(FILE * fp, char *token, int maxtlen)
     }
 }
 
+netsnmp_feature_child_of(parse_get_token, netsnmp_unused)
+#ifndef NETSNMP_FEATURE_REMOVE_PARSE_GET_TOKEN
 int
 snmp_get_token(FILE * fp, char *token, int maxtlen)
 {
     return get_token(fp, token, maxtlen);
 }
+#endif /* NETSNMP_FEATURE_REMOVE_PARSE_GET_TOKEN */
 
 int
 add_mibfile(const char* tmpstr, const char* d_name, FILE *ip )
@@ -5232,8 +5243,8 @@ find_node(const char *name, struct tree *subtree)
     return (find_tree_node(name, -1));
 }
 
-/* Find node in specific MIB module
-   Used by Perl modules		*/
+netsnmp_feature_child_of(parse_find_node2, netsnmp_unsused)
+#ifndef NETSNMP_FEATURE_REMOVE_PARSE_FIND_NODE2
 struct tree    *
 find_node2(const char *name, const char *module)
 {                               
@@ -5247,7 +5258,9 @@ find_node2(const char *name, const char *module)
   }
   return (find_tree_node(name, modid));
 }
+#endif /* NETSNMP_FEATURE_REMOVE_PARSE_FIND_NODE2 */
 
+/* Used in the perl module */
 struct module  *
 find_module(int mid)
 {

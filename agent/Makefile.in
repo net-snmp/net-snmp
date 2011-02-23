@@ -16,6 +16,7 @@ top_builddir	= ..
 # what to install
 #
 SUBDIRS=helpers mibgroup
+FTSUBDIRS=mibgroup helpers
 
 INSTALLSBINPROGS= @SNMPD@
 INSTALLLIBS	= libnetsnmpagent.$(LIB_EXTENSION)$(LIB_VERSION)
@@ -131,23 +132,14 @@ CPPFLAGS	= $(TOP_INCLUDES) -I. $(AGENT_INCLUDES) $(MIBGROUP_INCLUDES) \
 @mibgroup_list_lo@
 @mibgroup_list_o@
 @agentgroup_list_lo@
+@agentgroup_list_ft@
 @agentgroup_list_o@
+FTMIBOBJS	= $(mibgroup_list_ft) mib_modules.ft auto_nlist.ft
 LMIBOBJS	= $(mibgroup_list_lo) mib_modules.lo auto_nlist.lo
 MIBOBJS		= $(mibgroup_list_o) mib_modules.o auto_nlist.o
 
 # libnetsnmpagent objects
 LIBAGENTOBJS= \
-	agent_handler.o \
-	agent_index.o \
-	agent_read_config.o \
-	agent_registry.o \
-	agent_sysORTable.o \
-	agent_trap.o \
-	kernel.o \
-	snmp_agent.o \
-	snmp_vars.o \
-	$(agentgroup_list_o) \
-	@OTHERAGENTLIBOBJS@ \
 	helpers/all_helpers.o \
 	helpers/baby_steps.o \
 	helpers/bulk_to_next.o \
@@ -174,20 +166,20 @@ LIBAGENTOBJS= \
 	helpers/table_iterator.o \
 	helpers/table_row.o \
 	helpers/table_tdata.o \
-	helpers/watcher.o
+	helpers/watcher.o \
+	agent_handler.o \
+	agent_index.o \
+	agent_read_config.o \
+	agent_registry.o \
+	agent_sysORTable.o \
+	agent_trap.o \
+	kernel.o \
+	snmp_agent.o \
+	snmp_vars.o \
+	$(agentgroup_list_o) \
+	@OTHERAGENTLIBOBJS@
 
 LLIBAGENTOBJS= \
-	agent_handler.lo \
-	agent_index.lo \
-	agent_read_config.lo \
-	agent_registry.lo \
-	agent_sysORTable.lo \
-	agent_trap.lo \
-	kernel.lo \
-	snmp_agent.lo \
-	snmp_vars.lo \
-	$(agentgroup_list_lo) \
-	@OTHERAGENTLIBLOBJS@ \
 	helpers/all_helpers.lo \
 	helpers/baby_steps.lo \
 	helpers/bulk_to_next.lo \
@@ -214,18 +206,72 @@ LLIBAGENTOBJS= \
 	helpers/table_iterator.lo \
 	helpers/table_row.lo \
 	helpers/table_tdata.lo \
-	helpers/watcher.lo
+	helpers/watcher.lo \
+	agent_handler.lo \
+	agent_index.lo \
+	agent_read_config.lo \
+	agent_registry.lo \
+	agent_sysORTable.lo \
+	agent_trap.lo \
+	kernel.lo \
+	snmp_agent.lo \
+	snmp_vars.lo \
+	$(agentgroup_list_lo) \
+	@OTHERAGENTLIBLOBJS@
+
+LLIBAGENTFTS= \
+	helpers/all_helpers.ft \
+	helpers/baby_steps.ft \
+	helpers/bulk_to_next.ft \
+	helpers/cache_handler.ft \
+	helpers/debug_handler.ft \
+	helpers/instance.ft \
+	helpers/mode_end_call.ft \
+	helpers/multiplexer.ft \
+	helpers/null.ft \
+	helpers/old_api.ft \
+	helpers/read_only.ft \
+	helpers/row_merge.ft \
+	helpers/scalar.ft \
+	helpers/scalar_group.ft \
+	helpers/serialize.ft \
+	helpers/snmp_get_statistic.ft \
+	helpers/stash_cache.ft \
+	helpers/stash_to_next.ft \
+	helpers/table.ft \
+	helpers/table_array.ft \
+	helpers/table_container.ft \
+	helpers/table_data.ft \
+	helpers/table_dataset.ft \
+	helpers/table_iterator.ft \
+	helpers/table_row.ft \
+	helpers/table_tdata.ft \
+	helpers/watcher.ft \
+	agent_handler.ft \
+	agent_index.ft \
+	agent_read_config.ft \
+	agent_registry.ft \
+	agent_sysORTable.ft \
+	agent_trap.ft \
+	kernel.ft \
+	snmp_agent.ft \
+	snmp_vars.ft \
+	$(agentgroup_list_ft) \
+	@OTHERAGENTLIBLFTS@
 
 # The agent objects.
 AGENTOBJS=snmpd.o @other_agentobjs@
 LAGENTOBJS=snmpd.lo @other_lagentobjs@
+FTAGENTOBJS=snmpd.ft @other_ftagentobjs@
 
 #
 # Define OBJS and LOBJS for clean target (just this directory)
 #
 OBJS		= $(LIBAGENTOBJS)  $(AGENTOBJS)  mib_modules.o  auto_nlist.o
 LOBJS		= $(LLIBAGENTOBJS) $(LAGENTOBJS) mib_modules.lo auto_nlist.lo
+FTOBJS		= $(LLIBAGENTFTS) $(FTAGENTOBJS) mib_modules.ft auto_nlist.ft
 
+FEATUREFILE     = $(top_builddir)/include/net-snmp/agent/features.h
 
 all: agentlib subdirs miblib $(INSTALLBINPROGS) $(INSTALLSBINPROGS)
 

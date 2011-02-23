@@ -1,4 +1,5 @@
 #include <net-snmp/net-snmp-config.h>
+#include <net-snmp/net-snmp-features.h>
 
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
@@ -18,6 +19,15 @@
 #if HAVE_DMALLOC_H
 #include <dmalloc.h>
 #endif
+
+netsnmp_feature_provide(table_tdata)
+netsnmp_feature_child_of(table_tdata, mib_helpers)
+#ifdef NETSNMP_FEATURE_REQUIRE_TABLE_TDATA
+netsnmp_feature_require(table_container_row_insert)
+netsnmp_feature_require(table_container_row_remove)
+#endif /* NETSNMP_FEATURE_REQUIRE_TABLE_TDATA */
+
+#ifndef NETSNMP_FEATURE_REMOVE_TABLE_TDATA
 
 /** @defgroup tdata tdata
  *  Implement a table with datamatted storage.
@@ -97,6 +107,8 @@ netsnmp_tdata_create_row(void)
 }
 
 /** clones a 'tdata' row. DOES NOT CLONE THE TABLE-SPECIFIC ENTRY DATA. */
+netsnmp_feature_child_of(tdata_clone_row,table_tdata)
+#ifndef NETSNMP_FEATURE_REMOVE_TDATA_CLONE_ROW
 netsnmp_tdata_row *
 netsnmp_tdata_clone_row(netsnmp_tdata_row *row)
 {
@@ -130,9 +142,12 @@ netsnmp_tdata_clone_row(netsnmp_tdata_row *row)
 
     return newrow;
 }
+#endif /* NETSNMP_FEATURE_REMOVE_TDATA_CLONE_ROW */
 
 /** copy the contents of a 'tdata' row.
     DOES NOT COPY THE TABLE-SPECIFIC ENTRY DATA. */
+netsnmp_feature_child_of(tdata_copy_row,table_tdata)
+#ifndef NETSNMP_FEATURE_REMOVE_TDATA_COPY_ROW
 int
 netsnmp_tdata_copy_row(netsnmp_tdata_row *dst_row, netsnmp_tdata_row *src_row)
 {
@@ -156,6 +171,7 @@ netsnmp_tdata_copy_row(netsnmp_tdata_row *dst_row, netsnmp_tdata_row *src_row)
 
     return 0;
 }
+#endif /* NETSNMP_FEATURE_REMOVE_TDATA_COPY_ROW */
 
 /** deletes the memory used by the specified row
  *  returns the table-specific entry data
@@ -232,6 +248,8 @@ netsnmp_tdata_add_row(netsnmp_tdata     *table,
 }
 
 /** swaps out origrow with newrow.  This does *not* delete/free anything! */
+netsnmp_feature_child_of(tdata_replace_row,table_tdata)
+#ifndef NETSNMP_FEATURE_REMOVE_TDATA_REPLACE_ROW
 void
 netsnmp_tdata_replace_row(netsnmp_tdata *table,
                                netsnmp_tdata_row *origrow,
@@ -240,6 +258,7 @@ netsnmp_tdata_replace_row(netsnmp_tdata *table,
     netsnmp_tdata_remove_row(table, origrow);
     netsnmp_tdata_add_row(table, newrow);
 }
+#endif /* NETSNMP_FEATURE_REMOVE_TDATA_REPLACE_ROW */
 
 /**
  * removes a row from the given table and returns it (no free's called)
@@ -334,7 +353,9 @@ _netsnmp_tdata_helper_handler(netsnmp_mib_handler *handler,
         need_processing = 0; /* only need processing if some vars found */
         /** Fall through */
 
+#ifndef NETSNMP_NO_WRITE_SUPPORT
     case MODE_SET_RESERVE1:
+#endif /* NETSNMP_NO_WRITE_SUPPORT */
 
         for (request = requests; request; request = request->next) {
             if (request->processed)
@@ -381,12 +402,15 @@ netsnmp_tdata_register(netsnmp_handler_registration    *reginfo,
                   table->container, TABLE_CONTAINER_KEY_NETSNMP_INDEX);
 }
 
+netsnmp_feature_child_of(tdata_unregister,table_tdata)
+#ifndef NETSNMP_FEATURE_REMOVE_TDATA_UNREGISTER
 int
 netsnmp_tdata_unregister(netsnmp_handler_registration    *reginfo)
 {
     /* free table; */
     return netsnmp_container_table_unregister(reginfo);
 }
+#endif /* NETSNMP_FEATURE_REMOVE_TDATA_UNREGISTER */
 
 /** extracts the tdata table from the request structure */
 netsnmp_tdata *
@@ -397,6 +421,8 @@ netsnmp_tdata_extract_table(netsnmp_request_info *request)
 }
 
 /** extracts the tdata container from the request structure */
+netsnmp_feature_child_of(tdata_extract_container,table_tdata)
+#ifndef NETSNMP_FEATURE_REMOVE_TDATA_EXTRACT_CONTAINER
 netsnmp_container *
 netsnmp_tdata_extract_container(netsnmp_request_info *request)
 {
@@ -404,6 +430,7 @@ netsnmp_tdata_extract_container(netsnmp_request_info *request)
         netsnmp_request_get_list_data(request, TABLE_TDATA_TABLE);
     return ( tdata ? tdata->container : NULL );
 }
+#endif /* NETSNMP_FEATURE_REMOVE_TDATA_EXTRACT_CONTAINER */
 
 /** extracts the tdata row being accessed from the request structure */
 netsnmp_tdata_row *
@@ -537,6 +564,8 @@ netsnmp_tdata_row_next_byoid(netsnmp_tdata *table,
     return (netsnmp_tdata_row*)CONTAINER_NEXT( table->container, &index );
 }
 
+netsnmp_feature_child_of(tdata_row_count,table_tdata)
+#ifndef NETSNMP_FEATURE_REMOVE_TDATA_ROW_COUNT
 int
 netsnmp_tdata_row_count(netsnmp_tdata *table)
 {
@@ -544,6 +573,7 @@ netsnmp_tdata_row_count(netsnmp_tdata *table)
         return 0;
     return CONTAINER_SIZE( table->container );
 }
+#endif /* NETSNMP_FEATURE_REMOVE_TDATA_ROW_COUNT */
 
 /* ==================================
  *
@@ -553,6 +583,8 @@ netsnmp_tdata_row_count(netsnmp_tdata *table)
 
 
 /** compare a row with the given index values */
+netsnmp_feature_child_of(tdata_compare_idx,table_tdata)
+#ifndef NETSNMP_FEATURE_REMOVE_TDATA_COMPARE_IDX
 int
 netsnmp_tdata_compare_idx(netsnmp_tdata_row     *row,
                           netsnmp_variable_list *indexes)
@@ -564,6 +596,7 @@ netsnmp_tdata_compare_idx(netsnmp_tdata_row     *row,
                       indexes);
     return netsnmp_tdata_compare_oid(row, searchfor, searchfor_len);
 }
+#endif /* NETSNMP_FEATURE_REMOVE_TDATA_COMPARE_IDX */
 
 /** compare a row with the given index OID */
 int
@@ -595,6 +628,10 @@ netsnmp_tdata_compare_subtree_oid(netsnmp_tdata_row     *row,
     return snmp_oidtree_compare( index->oids, index->len,
                                  compareto,   compareto_len);
 }
+#else /* NETSNMP_FEATURE_REMOVE_TABLE_TDATA */
+netsnmp_feature_unesed(table_tdata);
+#endif /* NETSNMP_FEATURE_REMOVE_TABLE_TDATA */
+
 
 /** @} 
  */

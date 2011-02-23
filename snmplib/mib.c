@@ -38,6 +38,7 @@ SOFTWARE.
  * distributed with the Net-SNMP package.
  */
 #include <net-snmp/net-snmp-config.h>
+#include <net-snmp/net-snmp-features.h>
 
 #include <stdio.h>
 #include <ctype.h>
@@ -103,6 +104,11 @@ SOFTWARE.
 #include <net-snmp/library/parse.h>
 #include <net-snmp/library/int64.h>
 #include <net-snmp/library/snmp_client.h>
+
+netsnmp_feature_provide(mib_strings)
+netsnmp_feature_child_of(mib_snprint, mib_strings)
+netsnmp_feature_child_of(mib_snprint_description, mib_strings)
+netsnmp_feature_child_of(mib_snprint_variable, mib_strings)
 
 /** @defgroup mib_utilities mib parsing and datatype manipulation routines.
  *  @ingroup library
@@ -2910,11 +2916,14 @@ shutdown_mib(void)
  *
  * @param fp   The file descriptor to print to.
  */
+netsnmp_feature_child_of(print_mib, mib_strings)
+#ifndef NETSNMP_FEATURE_REMOVE_PRINT_MIB
 void
 print_mib(FILE * fp)
 {
     print_subtree(fp, tree_head, 0);
 }
+#endif /* NETSNMP_FEATURE_REMOVE_PRINT_MIB */
 
 void
 print_ascii_dump(FILE * fp)
@@ -3448,6 +3457,7 @@ sprint_realloc_variable(u_char ** buf, size_t * buf_len,
     }
 }
 
+#ifndef NETSNMP_FEATURE_REMOVE_SNPRINT_VARABLE
 int
 snprint_variable(char *buf, size_t buf_len,
                  const oid * objid, size_t objidlen,
@@ -3462,6 +3472,7 @@ snprint_variable(char *buf, size_t buf_len,
         return -1;
     }
 }
+#endif /* NETSNMP_FEATURE_REMOVE_SNPRINT_VARABLE */
 
 /**
  * Prints a variable to stdout.
@@ -3556,6 +3567,7 @@ sprint_realloc_value(u_char ** buf, size_t * buf_len,
     }
 }
 
+/* used in the perl module */
 int
 snprint_value(char *buf, size_t buf_len,
               const oid * objid, size_t objidlen,
@@ -4640,6 +4652,7 @@ fprint_description(FILE * f, oid * objid, size_t objidlen,
     SNMP_FREE(buf);
 }
 
+#ifndef NETSNMP_FEATURE_REMOVE_MIB_SNPRINT_DESCRIPTION
 int
 snprint_description(char *buf, size_t buf_len,
                     oid * objid, size_t objidlen, int width)
@@ -4653,6 +4666,7 @@ snprint_description(char *buf, size_t buf_len,
         return -1;
     }
 }
+#endif /* NETSNMP_FEATURE_REMOVE_MIB_SNPRINT_DESCRIPTION */
 
 int
 sprint_realloc_description(u_char ** buf, size_t * buf_len,
@@ -6401,6 +6415,8 @@ mib_to_asn_type(int mib_type)
  *
  * @return 0 on Sucess, 1 on failure.
  */
+netsnmp_feature_child_of(mib_string_conversions, mib_strings)
+#ifndef NETSNMP_FEATURE_REMOVE_MIB_STRING_CONVERSIONS
 int
 netsnmp_str2oid(const char *S, oid * O, int L)
 {
@@ -6480,7 +6496,10 @@ netsnmp_oid2str(char *S, int L, oid * O)
 
     return 0;
 }
+#endif /* NETSNMP_FEATURE_REMOVE_MIB_STRING_CONVERSIONS */
 
+
+#ifndef NETSNMP_FEATURE_REMOVE_MIB_SNPRINT
 int
 snprint_by_type(char *buf, size_t buf_len,
                 netsnmp_variable_list * var,
@@ -6758,5 +6777,6 @@ snprint_double(char *buf, size_t buf_len,
         return -1;
 }
 #endif
+#endif /* NETSNMP_FEATURE_REMOVE_MIB_SNPRINT */
 /** @} */
 

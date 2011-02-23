@@ -5,6 +5,7 @@
 
 
 #include <net-snmp/net-snmp-config.h>
+#include <net-snmp/net-snmp-features.h>
 #include <sys/types.h>
 #if HAVE_NETINET_IN_H
 #include <netinet/in.h>
@@ -35,6 +36,12 @@
 #include <net-snmp/library/snmp-tc.h>   /* for "internal" definitions */
 #include <net-snmp/library/snmp_api.h>
 
+netsnmp_feature_child_of(netsnmp_dateandtime_set_buf_from_vars, netsnmp_unused)
+netsnmp_feature_child_of(date_n_time, snmp_tc_all)
+netsnmp_feature_child_of(ctime_to_timet, snmp_tc_all)
+netsnmp_feature_child_of(check_rowstatus_with_storagetype_transition, snmp_tc_all)
+
+#ifndef NETSNMP_FEATURE_REMOVE_NETSNMP_DATEANDTIME_SET_BUF_FROM_VARS
 /*
   DateAndTime ::= TEXTUAL-CONVENTION
     DISPLAY-HINT "2d-1d-1d,1d:1d:1d.1d,1a1d:1d"
@@ -115,7 +122,9 @@ netsnmp_dateandtime_set_buf_from_vars(u_char *buf, size_t *bufsize,
 
     return SNMPERR_SUCCESS;
 }
+#endif /* NETSNMP_FEATURE_REMOVE_NETSNMP_DATEANDTIME_SET_BUF_FROM_VARS */
 
+#ifndef NETSNMP_FEATURE_REMOVE_DATE_N_TIME
 u_char         *
 date_n_time(const time_t * when, size_t * length)
 {
@@ -195,8 +204,9 @@ date_n_time(const time_t * when, size_t * length)
 
     return string;
 }
+#endif /* NETSNMP_FEATURE_REMOVE_DATE_N_TIME */
 
-
+#ifndef NETSNMP_FEATURE_REMOVE_CTIME_TO_TIMET
 time_t
 ctime_to_timet(const char *str)
 {
@@ -254,9 +264,10 @@ ctime_to_timet(const char *str)
 
     return (mktime(&tm));
 }
+#endif /* NETSNMP_FEATURE_REMOVE_CTIME_TO_TIMET */
 
 /*
- * blatantly lifted from opensmp 
+ * blatantly lifted from opensnmp 
  */
 char
 check_rowstatus_transition(int oldValue, int newValue)
@@ -404,6 +415,7 @@ check_rowstatus_transition(int oldValue, int newValue)
     return SNMP_ERR_NOERROR;
 }
 
+#ifndef NETSNMP_FEATURE_REMOVE_CHECK_ROWSTATUS_WITH_STORAGETYPE_TRANSITION
 char
 check_rowstatus_with_storagetype_transition(int oldValue, int newValue,
                                             int oldStorage)
@@ -418,7 +430,10 @@ check_rowstatus_with_storagetype_transition(int oldValue, int newValue,
 
     return check_rowstatus_transition(oldValue, newValue);
 }
+#endif /* NETSNMP_FEATURE_REMOVE_CHECK_ROWSTATUS_WITH_STORAGETYPE_TRANSITION */
 
+netsnmp_feature_child_of(check_storage_transition, snmp_tc_all)
+#ifndef NETSNMP_FEATURE_REMOVE_CHECK_STORAGE_TRANSITION
 char
 check_storage_transition(int oldValue, int newValue)
 {
@@ -459,3 +474,4 @@ check_storage_transition(int oldValue, int newValue)
 
     return SNMP_ERR_NOERROR;
 }
+#endif /* NETSNMP_FEATURE_REMOVE_CHECK_STORAGE_TRANSITION */

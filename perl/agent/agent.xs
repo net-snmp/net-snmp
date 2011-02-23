@@ -705,7 +705,7 @@ nari_getValue(me)
 	sprint_realloc_by_type((u_char **) &outbuf, &ob_len, &oo_len, 1,
                                request->requestvb, 0, 0, 0);
         RETVAL = newSVpv(outbuf, 0);
-	netsnmp_free(outbuf);
+	SNMP_FREE(outbuf);
     OUTPUT:
         RETVAL
 

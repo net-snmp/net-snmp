@@ -8,6 +8,7 @@
  * standard Net-SNMP includes 
  */
 #include <net-snmp/net-snmp-config.h>
+#include <net-snmp/net-snmp-features.h>
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 
@@ -22,6 +23,7 @@
 #include <sys/ioctl.h>
 #include <errno.h>
 
+netsnmp_feature_require(container_lifo)
 
 /** @ingroup interface 
  * @addtogroup data_access data_access: Routines to access data

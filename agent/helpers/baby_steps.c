@@ -3,8 +3,20 @@
  * $Id$
  */
 #include <net-snmp/net-snmp-config.h>
+#include <net-snmp/net-snmp-features.h>
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
+
+netsnmp_feature_provide(baby_steps)
+netsnmp_feature_child_of(baby_steps, mib_helpers)
+
+#ifdef NETSNMP_FEATURE_REQUIRE_BABY_STEPS
+netsnmp_feature_require(check_requests_error)
+#endif
+
+#ifndef NETSNMP_FEATURE_REMOVE_BABY_STEPS
+
+#ifndef NETSNMP_NO_WRITE_SUPPORT
 
 #include <net-snmp/agent/baby_steps.h>
 
@@ -332,12 +344,15 @@ _baby_steps_helper(netsnmp_mib_handler *handler,
  *  handler as a run-time injectable handler for configuration file
  *  use.
  */
+netsnmp_feature_child_of(netsnmp_baby_steps_handler_init,netsnmp_unused)
+#ifndef NETSNMP_FEATURE_REMOVE_NETSNMP_BABY_STEPS_HANDLER_INIT
 void
 netsnmp_baby_steps_handler_init(void)
 {
     netsnmp_register_handler_by_name("baby_steps",
                                      netsnmp_baby_steps_handler_get(BABY_STEP_ALL));
 }
+#endif /* NETSNMP_FEATURE_REMOVE_NETSNMP_BABY_STEPS_HANDLER_INIT */
 
 /** @} */
 
@@ -532,4 +547,11 @@ netsnmp_baby_step_mode2flag( u_int mode )
     return 0;
 }
 /**  @} */
+
+#else /* NETSNMP_NO_WRITE_SUPPORT */
+netsnmp_feature_unused(baby_steps);
+#endif /* NETSNMP_NO_WRITE_SUPPORT */
+#else  /* NETSNMP_FEATURE_REMOVE_BABY_STEPS */
+netsnmp_feature_unused(baby_steps);
+#endif /* NETSNMP_FEATURE_REMOVE_BABY_STEPS */
 

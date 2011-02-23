@@ -30,6 +30,7 @@
  * standard Net-SNMP includes 
  */
 #include <net-snmp/net-snmp-config.h>
+#include <net-snmp/net-snmp-features.h>
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 
@@ -45,6 +46,11 @@
 #include "tcpListenerTable_interface.h"
 
 #include <ctype.h>
+
+netsnmp_feature_provide(tcpListenerTable_external_access)
+netsnmp_feature_require(row_merge)
+netsnmp_feature_require(baby_steps)
+netsnmp_feature_require(check_all_requests_error)
 
 /**********************************************************************
  **********************************************************************
@@ -79,19 +85,26 @@ static void
                 _tcpListenerTable_container_shutdown(tcpListenerTable_interface_ctx *
                                                      if_ctx);
 
-
+netsnmp_feature_child_of(tcpListenerTable_container_get, tcpListenerTable_external_access)
+#ifndef NETSNMP_FEATURE_REMOVE_TCPLISTENERTABLE_CONTAINER_GET
 netsnmp_container *
 tcpListenerTable_container_get(void)
 {
     return tcpListenerTable_if_ctx.container;
 }
+#endif /* NETSNMP_FEATURE_REMOVE_TCPLISTENERTABLE_CONTAINER_GET */
 
+netsnmp_feature_child_of(tcpListenerTable_registration_get, tcpListenerTable_external_access)
+#ifndef NETSNMP_FEATURE_REMOVE_TCPLISTENERTABLE_REGISTRATION_GET
 tcpListenerTable_registration *
 tcpListenerTable_registration_get(void)
 {
     return tcpListenerTable_if_ctx.user_ctx;
 }
+#endif /* NETSNMP_FEATURE_REMOVE_TCPLISTENERTABLE_REGISTRATION_GET */
 
+netsnmp_feature_child_of(tcpListenerTable_registration_set, tcpListenerTable_external_access)
+#ifndef NETSNMP_FEATURE_REMOVE_TCPLISTENERTABLE_REGISTRATION_SET
 tcpListenerTable_registration *
 tcpListenerTable_registration_set(tcpListenerTable_registration * newreg)
 {
@@ -99,12 +112,16 @@ tcpListenerTable_registration_set(tcpListenerTable_registration * newreg)
     tcpListenerTable_if_ctx.user_ctx = newreg;
     return old;
 }
+#endif /* NETSNMP_FEATURE_REMOVE_TCPLISTENERTABLE_REGISTRATION_SET */
 
+netsnmp_feature_child_of(tcpListenerTable_container_size, tcpListenerTable_external_access)
+#ifndef NETSNMP_FEATURE_REMOVE_TCPLISTENERTABLE_CONTAINER_SIZE
 int
 tcpListenerTable_container_size(void)
 {
     return CONTAINER_SIZE(tcpListenerTable_if_ctx.container);
 }
+#endif /* NETSNMP_FEATURE_REMOVE_TCPLISTENERTABLE_CONTAINER_SIZE */
 
 /*
  * mfd multiplexer modes
@@ -955,6 +972,7 @@ _tcpListenerTable_container_shutdown(tcpListenerTable_interface_ctx *
 }                               /* _tcpListenerTable_container_shutdown */
 
 
+#ifndef NETSNMP_FEATURE_REMOVE_TCPLISTENERTABLE_EXTERNAL_ACCESS
 tcpListenerTable_rowreq_ctx *
 tcpListenerTable_row_find_by_mib_index(tcpListenerTable_mib_index *
                                        mib_idx)
@@ -982,3 +1000,4 @@ tcpListenerTable_row_find_by_mib_index(tcpListenerTable_mib_index *
 
     return rowreq_ctx;
 }
+#endif /* NETSNMP_FEATURE_REMOVE_TCPLISTENERTABLE_EXTERNAL_ACCESS */

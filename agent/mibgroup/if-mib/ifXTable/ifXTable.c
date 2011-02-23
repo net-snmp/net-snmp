@@ -14,6 +14,7 @@
  * standard Net-SNMP includes 
  */
 #include <net-snmp/net-snmp-config.h>
+#include <net-snmp/net-snmp-features.h>
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 
@@ -28,6 +29,9 @@
 #include <net-snmp/agent/mib_modules.h>
 
 #include "ifXTable_interface.h"
+
+netsnmp_feature_require(ifTable_container_get)
+netsnmp_feature_require(ifTable_container_size)
 
 /*
  * not sure if we want to support set for promiscuous mode, because
@@ -1579,6 +1583,7 @@ ifCounterDiscontinuityTime_get(ifXTable_rowreq_ctx * rowreq_ctx,
 }                               /* ifCounterDiscontinuityTime_get */
 
 
+#ifndef NETSNMP_NO_WRITE_SUPPORT
 
 /** @} */
 /**********************************************************************
@@ -2536,6 +2541,8 @@ ifXTable_check_dependencies(ifXTable_rowreq_ctx * rowreq_ctx)
      */
     return rc;
 }                               /* ifXTable_check_dependencies */
+
+#endif /* !NETSNMP_NO_WRITE_SUPPORT */
 
 /** @} */
 /** @{ */

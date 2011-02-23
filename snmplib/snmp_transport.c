@@ -1,4 +1,5 @@
 #include <net-snmp/net-snmp-config.h>
+#include <net-snmp/net-snmp-features.h>
 
 #include <net-snmp/types.h>
 #include <net-snmp/library/snmp_transport.h>
@@ -70,6 +71,8 @@
 #include <net-snmp/library/snmp_service.h>
 #include <net-snmp/library/read_config.h>
 
+netsnmp_feature_child_of(tdomain_support, transport_all)
+netsnmp_feature_child_of(tdomain_transport_oid, transport_all)
 
 /*
  * Our list of supported transport domains.  
@@ -320,6 +323,7 @@ netsnmp_transport_recv(netsnmp_transport *t, void *packet, int length,
 
 
 
+#ifndef NETSNMP_FEATURE_REMOVE_TDOMAIN_SUPPORT
 int
 netsnmp_tdomain_support(const oid * in_oid,
                         size_t in_len,
@@ -338,7 +342,7 @@ netsnmp_tdomain_support(const oid * in_oid,
     }
     return 0;
 }
-
+#endif /* NETSNMP_FEATURE_REMOVE_TDOMAIN_SUPPORT */
 
 
 void
@@ -416,6 +420,8 @@ netsnmp_tdomain_register(netsnmp_tdomain *n)
 
 
 
+netsnmp_feature_child_of(tdomain_unregister, netsnmp_unused)
+#ifndef NETSNMP_FEATURE_REMOVE_TDOMAIN_UNREGISTER
 int
 netsnmp_tdomain_unregister(netsnmp_tdomain *n)
 {
@@ -436,6 +442,7 @@ netsnmp_tdomain_unregister(netsnmp_tdomain *n)
         return 0;
     }
 }
+#endif /* NETSNMP_FEATURE_REMOVE_TDOMAIN_UNREGISTER */
 
 
 static netsnmp_tdomain *
@@ -650,6 +657,7 @@ netsnmp_tdomain_transport(const char *str, int local,
 }
 
 
+#ifndef NETSNMP_FEATURE_REMOVE_TDOMAIN_TRANSPORT_OID
 netsnmp_transport *
 netsnmp_tdomain_transport_oid(const oid * dom,
                               size_t dom_len,
@@ -674,6 +682,7 @@ netsnmp_tdomain_transport_oid(const oid * dom,
     snmp_log(LOG_ERR, "No support for requested transport domain\n");
     return NULL;
 }
+#endif /* NETSNMP_FEATURE_REMOVE_TDOMAIN_TRANSPORT_OID */
 
 netsnmp_transport*
 netsnmp_transport_open(const char* application, const char* str, int local)

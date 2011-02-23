@@ -5,7 +5,14 @@
 #include <stdlib.h>
 #include <sys/types.h>
 
+#include <net-snmp/net-snmp-features.h>
 #include <net-snmp/net-snmp-includes.h>
+
+netsnmp_feature_provide(oid_stash_all)
+netsnmp_feature_child_of(oid_stash, oid_stash_all)
+netsnmp_feature_child_of(oid_stash_no_free, oid_stash_all)
+
+#ifndef NETSNMP_FEATURE_REMOVE_OID_STASH
 
 /** @defgroup oid_stash Store and retrieve data referenced by an OID.
     This is essentially a way of storing data associated with a given
@@ -187,6 +194,8 @@ netsnmp_oid_stash_get_node(netsnmp_oid_stash_node *root,
  * @param lookup the oid to look up a node for.
  * @param lookup_len the length of the lookup oid
  */
+netsnmp_feature_child_of(oid_stash_iterate, oid_stash_all)
+#ifndef NETSNMP_FEATURE_REMOVE_OID_STASH_ITERATE
 netsnmp_oid_stash_node *
 netsnmp_oid_stash_getnext_node(netsnmp_oid_stash_node *root,
                                oid * lookup, size_t lookup_len)
@@ -268,6 +277,7 @@ netsnmp_oid_stash_getnext_node(netsnmp_oid_stash_node *root,
     /* fell off the top */
     return NULL;
 }
+#endif /* NETSNMP_FEATURE_REMOVE_OID_STASH_ITERATE */
 
 /** returns a data pointer associated with a given OID.
 
@@ -300,6 +310,8 @@ netsnmp_oid_stash_get_data(netsnmp_oid_stash_node *root,
  * @param serverarg
  * @param clientarg A pointer to a netsnmp_oid_stash_save_info structure.
  */
+netsnmp_feature_child_of(oid_stash_store_all, oid_stash_all)
+#ifndef NETSNMP_FEATURE_REMOVE_OID_STASH_STORE_ALL
 int
 netsnmp_oid_stash_store_all(int majorID, int minorID,
                             void *serverarg, void *clientarg) {
@@ -314,6 +326,7 @@ netsnmp_oid_stash_store_all(int majorID, int minorID,
                             oidbase,0);
     return SNMP_ERR_NOERROR;
 }
+#endif /* NETSNMP_FEATURE_REMOVE_OID_STASH_STORE_ALL */
 
 /** stores data in a starsh tree to peristent storage.
 
@@ -427,10 +440,16 @@ netsnmp_oid_stash_free(netsnmp_oid_stash_node **root,
     *root = NULL;
 }
 
+#else /* NETSNMP_FEATURE_REMOVE_OID_STASH */
+netsnmp_feature_unused(oid_stash);
+#endif/* NETSNMP_FEATURE_REMOVE_OID_STASH */
+
+#ifndef NETSNMP_FEATURE_REMOVE_OID_STASH_NO_FREE
 void
 netsnmp_oid_stash_no_free(void *bogus)
 {
     /* noop */
 }
+#endif /* NETSNMP_FEATURE_REMOVE_OID_STASH_NO_FREE */
 
 /** @} */

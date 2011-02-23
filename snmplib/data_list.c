@@ -131,6 +131,8 @@ netsnmp_add_list_data(netsnmp_data_list **head, netsnmp_data_list *node)
  * @param beer A function that can free the data pointer (in the future)
  * @return a newly created data_list node which was inserted in the list
  */
+netsnmp_feature_child_of(data_list_add_data, data_list)
+#ifndef NETSNMP_FEATURE_REMOVE_DATA_LIST_ADD_DATA
 NETSNMP_INLINE netsnmp_data_list *
 netsnmp_data_list_add_data(netsnmp_data_list **head, const char *name,
                            void *data, Netsnmp_Free_List_Data * beer)
@@ -150,6 +152,7 @@ netsnmp_data_list_add_data(netsnmp_data_list **head, const char *name,
 
     return node;
 }
+#endif /* NETSNMP_FEATURE_REMOVE_DATA_LIST_ADD_DATA */
 
 /** returns a data_list node's data for a given name within a data_list
  * @param head the head node of a data_list

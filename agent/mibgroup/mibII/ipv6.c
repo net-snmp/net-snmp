@@ -4,6 +4,7 @@
  */
 
 #include <net-snmp/net-snmp-config.h>
+#include <net-snmp/net-snmp-features.h>
 #if defined(NETSNMP_IFNET_NEEDS_KERNEL) && !defined(_KERNEL)
 #define _KERNEL 1
 #define _I_DEFINED_KERNEL
@@ -139,6 +140,8 @@
 #include "kernel.h"
 #include "ipv6.h"
 #include "interfaces.h"
+
+netsnmp_feature_require(linux_read_ip6_stat)
 
 #if defined(netbsd1) && !defined(openbsd4)
 #define inp_lport in6p_lport

@@ -7,11 +7,14 @@
  */
 
 #include <net-snmp/net-snmp-config.h>
+#include <net-snmp/net-snmp-features.h>
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 #include "disman/expr/expObject.h"
 #include "disman/expr/expObjectTable.h"
 
+netsnmp_feature_require(table_tdata)
+netsnmp_feature_require(check_vb_oid)
 
 /* Initializes the expObjectTable module */
 void

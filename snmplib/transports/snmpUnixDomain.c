@@ -1,4 +1,5 @@
 #include <net-snmp/net-snmp-config.h>
+#include <net-snmp/net-snmp-features.h>
 
 #include <sys/types.h>
 #include <net-snmp/library/snmpUnixDomain.h>
@@ -35,6 +36,7 @@
 #include <net-snmp/library/snmpSocketBaseDomain.h>
 #include <net-snmp/library/system.h> /* mkdirhier */
 
+netsnmp_feature_provide(unix_socket_paths)
 
 #ifndef NETSNMP_STREAM_QUEUE_LEN
 #define NETSNMP_STREAM_QUEUE_LEN  5
@@ -259,6 +261,7 @@ netsnmp_unix_accept(netsnmp_transport *t)
 static int create_path = 0;
 static mode_t create_mode;
 
+#ifndef NETSNMP_FEATURE_REMOVE_UNIX_SOCKET_PATHS
 /** If trying to create unix sockets in nonexisting directories then
  *  try to create the directory with mask mode.
  */
@@ -275,6 +278,7 @@ void netsnmp_unix_dont_create_path(void)
 {
     create_path = 0;
 }
+#endif /* NETSNMP_FEATURE_REMOVE_UNIX_DONT_CREATE_PATH */
 
 /*
  * Open a Unix-domain transport for SNMP.  Local is TRUE if addr is the local

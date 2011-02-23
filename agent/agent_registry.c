@@ -22,6 +22,8 @@
 #define IN_SNMP_VARS_C
 
 #include <net-snmp/net-snmp-config.h>
+#include <net-snmp/net-snmp-features.h>
+
 #include <signal.h>
 #if HAVE_STRING_H
 #include <string.h>
@@ -557,11 +559,14 @@ netsnmp_subtree_change_prev(netsnmp_subtree *ptr, netsnmp_subtree *theprev)
  *
  *  @see snmp_oid_compare()
  */
+netsnmp_feature_child_of(netsnmp_subtree_compare,netsnmp_unused)
+#ifndef NETSNMP_FEATURE_REMOVE_NETSNMP_SUBTREE_COMPARE
 int
 netsnmp_subtree_compare(const netsnmp_subtree *ap, const netsnmp_subtree *bp)
 {
     return snmp_oid_compare(ap->name_a, ap->namelen, bp->name_a, bp->namelen);
 }
+#endif /* NETSNMP_FEATURE_REMOVE_NETSNMP_SUBTREE_COMPARE */
 
 /** Joins the given subtree with the current tree.
  *  Trees are joined and the one supplied as parameter is freed.
@@ -1748,6 +1753,9 @@ unregister_mib_context(oid * name, size_t len, int priority,
     return MIB_UNREGISTERED_OK;
 }
 
+netsnmp_feature_provide(unregister_mib_table_row)
+
+#ifndef NETSNMP_FEATURE_REMOVE_UNREGISTER_MIB_TABLE_ROW
 int
 netsnmp_unregister_mib_table_row(oid * name, size_t len, int priority,
                                  int var_subid, oid range_ubound,
@@ -1826,6 +1834,7 @@ netsnmp_unregister_mib_table_row(oid * name, size_t len, int priority,
 
     return 0;
 }
+#endif /* NETSNMP_FEATURE_REMOVE_UNREGISTER_MIB_TABLE_ROW */
 
 /**
  * Unregisters a module registered against a given OID (or range) in the default context. 
@@ -2124,7 +2133,8 @@ netsnmp_acm_check_subtree(netsnmp_pdu *pdu, oid *name, size_t namelen)
     return 1;
 }
 
-
+netsnmp_feature_child_of(get_session_for_oid,netsnmp_unused)
+#ifndef NETSNMP_FEATURE_REMOVE_GET_SESSION_FOR_OID
 netsnmp_session *
 get_session_for_oid(oid *name, size_t len, const char *context_name)
 {
@@ -2144,6 +2154,7 @@ get_session_for_oid(oid *name, size_t len, const char *context_name)
         return myptr->session;
     }
 }
+#endif /* NETSNMP_FEATURE_REMOVE_GET_SESSION_FOR_OID */
 
 void
 setup_tree(void)

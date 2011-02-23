@@ -1,4 +1,5 @@
 #include <net-snmp/net-snmp-config.h>
+#include <net-snmp/net-snmp-features.h>
 
 #include <sys/types.h>
 #if TIME_WITH_SYS_TIME
@@ -26,6 +27,9 @@
 #include "util_funcs/header_generic.h"
 #include "util_funcs/restart.h"
 #include "util_funcs.h" /* clear_cache */
+
+netsnmp_feature_require(clear_cache)
+
 
 void
 init_versioninfo(void)

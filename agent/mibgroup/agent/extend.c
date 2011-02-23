@@ -1,5 +1,6 @@
 
 #include <net-snmp/net-snmp-config.h>
+#include <net-snmp/net-snmp-features.h>
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 #include <net-snmp/agent/watcher.h>
@@ -14,6 +15,10 @@
 #include "mibdefs.h"
 #define SHELLCOMMAND 3
 #endif
+
+netsnmp_feature_require(extract_table_row_data)
+netsnmp_feature_require(insert_table_row)
+netsnmp_feature_require(table_data_delete_table)
 
 oid  ns_extend_oid[]    = { 1, 3, 6, 1, 4, 1, 8072, 1, 3, 2 };
 oid  extend_count_oid[] = { 1, 3, 6, 1, 4, 1, 8072, 1, 3, 2, 1 };

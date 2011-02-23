@@ -1,4 +1,5 @@
 #include <net-snmp/net-snmp-config.h>
+#include <net-snmp/net-snmp-features.h>
 
 #ifdef HAVE_STDLIB_H
 #include <stdlib.h>
@@ -8,6 +9,11 @@
 #else
 #include <strings.h>
 #endif
+
+netsnmp_feature_require(ulong_instance)
+netsnmp_feature_require(register_read_only_table_data)
+netsnmp_feature_require(table_build_result)
+netsnmp_feature_require(table_dataset)
 
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
@@ -343,6 +349,7 @@ my_test_instance_handler(netsnmp_mib_handler *handler,
                                  (u_char *) & accesses, sizeof(accesses));
         break;
 
+#ifndef NETSNMP_NO_WRITE_SUPPORT
     case MODE_SET_RESERVE1:
         if (requests->requestvb->type != ASN_UNSIGNED)
             netsnmp_set_request_error(reqinfo, requests,
@@ -386,6 +393,7 @@ my_test_instance_handler(netsnmp_mib_handler *handler,
          * nothing to do 
          */
         break;
+#endif /* NETSNMP_NO_WRITE_SUPPORT */
     }
 
     return SNMP_ERR_NOERROR;

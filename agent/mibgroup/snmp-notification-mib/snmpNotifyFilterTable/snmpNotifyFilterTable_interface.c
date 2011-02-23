@@ -30,6 +30,7 @@
  * standard Net-SNMP includes 
  */
 #include <net-snmp/net-snmp-config.h>
+#include <net-snmp/net-snmp-features.h>
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 
@@ -45,6 +46,13 @@
 #include "snmpNotifyFilterTable_interface.h"
 
 #include <ctype.h>
+
+netsnmp_feature_provide(snmpNotifyFilterTable_external_access)
+netsnmp_feature_require(row_merge)
+netsnmp_feature_require(baby_steps)
+netsnmp_feature_require(table_container_row_insert)
+netsnmp_feature_require(check_all_requests_error)
+netsnmp_feature_require(check_vb_type_and_max_size)
 
 /**********************************************************************
  **********************************************************************
@@ -96,19 +104,26 @@ static void
     _snmpNotifyFilterTable_container_shutdown
     (snmpNotifyFilterTable_interface_ctx * if_ctx);
 
-
+netsnmp_feature_child_of(snmpNotifyFilterTable_container_get, snmpNotifyFilterTable_external_access)
+#ifndef NETSNMP_FEATURE_REMOVE_SNMPNOTIFYFILTERTABLE_CONTAINER_GET
 netsnmp_container *
 snmpNotifyFilterTable_container_get(void)
 {
     return snmpNotifyFilterTable_if_ctx.container;
 }
+#endif /* NETSNMP_FEATURE_REMOVE_SNMPNOTIFYFILTERTABLE_CONTAINER_GET */
 
+netsnmp_feature_child_of(snmpNotifyFilterTable_registration_get, snmpNotifyFilterTable_external_access)
+#ifndef NETSNMP_FEATURE_REMOVE_SNMPNOTIFYFILTERTABLE_REGISTRATION_GET
 snmpNotifyFilterTable_registration *
 snmpNotifyFilterTable_registration_get(void)
 {
     return snmpNotifyFilterTable_if_ctx.user_ctx;
 }
+#endif /* NETSNMP_FEATURE_REMOVE_SNMPNOTIFYFILTERTABLE_REGISTRATION_GET */
 
+netsnmp_feature_child_of(snmpNotifyFilterTable_registration_set, snmpNotifyFilterTable_external_access)
+#ifndef NETSNMP_FEATURE_REMOVE_SNMPNOTIFYFILTERTABLE_REGISTRATION_SET
 snmpNotifyFilterTable_registration *
 snmpNotifyFilterTable_registration_set(snmpNotifyFilterTable_registration *
                                        newreg)
@@ -118,12 +133,16 @@ snmpNotifyFilterTable_registration_set(snmpNotifyFilterTable_registration *
     snmpNotifyFilterTable_if_ctx.user_ctx = newreg;
     return old;
 }
+#endif /* NETSNMP_FEATURE_REMOVE_SNMPNOTIFYFILTERTABLE_REGISTRATION_SET */
 
+netsnmp_feature_child_of(snmpNotifyFilterTable_container_size, snmpNotifyFilterTable_external_access)
+#ifndef NETSNMP_FEATURE_REMOVE_SNMPNOTIFYFILTERTABLE_CONTAINER_SIZE
 int
 snmpNotifyFilterTable_container_size(void)
 {
     return CONTAINER_SIZE(snmpNotifyFilterTable_if_ctx.container);
 }
+#endif /* NETSNMP_FEATURE_REMOVE_SNMPNOTIFYFILTERTABLE_CONTAINER_SIZE */
 
 u_int
 snmpNotifyFilterTable_dirty_get(void)
@@ -2387,6 +2406,7 @@ static char    *_snmpNotifyFilterTable_container_col_restore
 }
 
 
+#ifndef NETSNMP_FEATURE_REMOVE_SNMPNOTIFYFILTERTABLE_EXTERNAL_ACCESS
 snmpNotifyFilterTable_rowreq_ctx *
 snmpNotifyFilterTable_row_find_by_mib_index(snmpNotifyFilterTable_mib_index
                                             * mib_idx)
@@ -2414,3 +2434,4 @@ snmpNotifyFilterTable_row_find_by_mib_index(snmpNotifyFilterTable_mib_index
 
     return rowreq_ctx;
 }
+#endif /* NETSNMP_FEATURE_REMOVE_SNMPNOTIFYFILTERTABLE_EXTERNAL_ACCESS */

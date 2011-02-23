@@ -9,6 +9,10 @@
  */
 #include <net-snmp/net-snmp-config.h>
 
+#include <net-snmp/net-snmp-features.h>
+
+netsnmp_feature_require(cert_util)
+
 #include <net-snmp/library/snmpTLSTCPDomain.h>
 
 #include <stdio.h>

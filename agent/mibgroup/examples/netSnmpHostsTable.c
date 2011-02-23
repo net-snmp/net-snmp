@@ -4,11 +4,14 @@
  */
 
 #include <net-snmp/net-snmp-config.h>
+#include <net-snmp/net-snmp-features.h>
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 #include "netSnmpHostsTable.h"
 #include "netSnmpHostsTable_checkfns.h"
 #include "netSnmpHostsTable_access.h"
+
+netsnmp_feature_require(oid_stash)
 
 static netsnmp_oid_stash_node *undoStorage = NULL;
 static netsnmp_oid_stash_node *commitStorage = NULL;

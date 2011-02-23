@@ -21,6 +21,10 @@ top_builddir=..
 @NETSNMP_BUILD_SSH_PROG_FALSE@SSHINSTALLBINPROG =
 @NETSNMP_BUILD_TLS_PROG_TRUE@TLSINSTALLBINPROG = snmptls$(EXEEXT)
 @NETSNMP_BUILD_TLS_PROG_FALSE@TLSINSTALLBINPROG =
+@NETSNMP_BUILD_USM_PROG_TRUE@USMINSTALLBINPROG = snmpusm$(EXEEXT)
+@NETSNMP_BUILD_USM_PROG_FALSE@USMINSTALLBINPROG =
+@NETSNMP_BUILD_USM_PROG_TRUE@EKCSTALLBINPROG = encode_keychange$(EXEEXT)
+@NETSNMP_BUILD_USM_PROG_FALSE@EKCSTALLBINPROG =
 
 @NETSNMP_HAVE_AGENTX_LIBS_TRUE@AGENTXTRAP = agentxtrap$(EXEEXT)
 @NETSNMP_HAVE_AGENTX_LIBS_FALSE@AGENTXTRAP =
@@ -28,7 +32,6 @@ top_builddir=..
 INSTALLBINPROGS	= snmpget$(EXEEXT) 			\
 		snmpgetnext$(EXEEXT) 			\
 		snmpset$(EXEEXT) 			\
-		snmpusm$(EXEEXT)			\
 		snmpwalk$(EXEEXT) 			\
 		snmpbulkwalk$(EXEEXT) 			\
 		snmptable$(EXEEXT)			\
@@ -38,17 +41,19 @@ INSTALLBINPROGS	= snmpget$(EXEEXT) 			\
 		snmpstatus$(EXEEXT) 			\
 		snmpdelta$(EXEEXT) 			\
 		snmptest$(EXEEXT)			\
-		encode_keychange$(EXEEXT) 		\
 		snmpdf$(EXEEXT) 			\
 		$(AGENTXTRAP)				\
 		snmpvacm$(EXEEXT)                       \
-                $(SSHINSTALLBINPROG) $(TLSINSTALLBINPROG)
+                $(SSHINSTALLBINPROG) $(TLSINSTALLBINPROG) \
+		$(USMINSTALLBINPROG) $(EKCSTALLBINPROG)
 
 INSTALLSBINPROGS = snmptrapd$(EXEEXT)
 
 INSTALLLIBS     = libnetsnmptrapd.$(LIB_EXTENSION)$(LIB_VERSION)
 
 SUBDIRS		= snmpnetstat
+
+FEATUREFILE=../include/net-snmp/features-apps.h
 
 #
 # build variables.
@@ -88,8 +93,31 @@ LIBTRAPD_OBJS   = snmptrapd_handlers.o  snmptrapd_log.o \
 		  snmptrapd_auth.o snmptrapd_sql.o
 LLIBTRAPD_OBJS  = snmptrapd_handlers.lo snmptrapd_log.lo \
 		  snmptrapd_auth.lo snmptrapd_sql.lo
+LIBTRAPD_FTS    = snmptrapd_handlers.ft snmptrapd_log.ft \
+		  snmptrapd_auth.ft snmptrapd_sql.ft
 OBJS  = *.o
 LOBJS = *.lo
+FTOBJS=$(LIBTRAPD_FTS) \
+       snmpwalk.ft \
+       snmpbulkwalk.ft \
+       snmpbulkget.ft \
+       snmptranslate.ft \
+       snmpstatus.ft \
+       snmpget.ft \
+       snmpdelta.ft \
+       snmptable.ft \
+       snmptest.ft \
+       snmptrapd.ft \
+       snmptrap.ft \
+       snmpset.ft \
+       snmpusm.ft \
+       snmpvacm.ft \
+       snmptls.ft \
+       agentxtrap.ft \
+       snmpgetnext.ft \
+       encode_keychange.ft \
+       snmpdf.ft \
+       sshtosnmp.ft
 
 all: standardall
 

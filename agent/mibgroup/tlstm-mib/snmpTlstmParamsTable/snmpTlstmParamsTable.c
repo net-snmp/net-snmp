@@ -4,6 +4,7 @@
  */
 
 #include <net-snmp/net-snmp-config.h>
+#include <net-snmp/net-snmp-features.h>
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 
@@ -13,6 +14,14 @@
 #include "tlstm-mib.h"
 
 #include "snmpTlstmParamsTable.h"
+
+netsnmp_feature_require(table_tdata)
+netsnmp_feature_require(tlstmparams_find)
+netsnmp_feature_require(tlstmparams_external)
+netsnmp_feature_require(cert_fingerprints)
+netsnmp_feature_require(check_vb_storagetype)
+netsnmp_feature_require(check_vb_type_and_max_size)
+netsnmp_feature_require(check_vb_rowstatus_with_storagetype)
 
 /** XXX - move these to table_data header? */
 #define FATE_NEWLY_CREATED    1

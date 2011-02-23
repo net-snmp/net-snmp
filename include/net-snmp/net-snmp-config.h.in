@@ -1301,6 +1301,9 @@
 /* ifnet needs to have _KERNEL defined */
 #undef NETSNMP_IFNET_NEEDS_KERNEL
 
+/* Define if you want to remove all non-essential code features. */
+#undef NETSNMP_MINIMAL_CODE
+
 /* Define to suppress inclusion of deprecated functions */
 #undef NETSNMP_NO_DEPRECATED_FUNCTIONS
 
@@ -1313,6 +1316,9 @@
 
 /* If you don't have root access don't exit upon kmem errors */
 #undef NETSNMP_NO_ROOT_ACCESS
+
+/* Define if you want to remove all SET/write access from the code */
+#undef NETSNMP_NO_WRITE_SUPPORT
 
 /* umask permissions to set up persistent files with */
 #undef NETSNMP_PERSISTENT_MASK
@@ -1545,9 +1551,6 @@
 
 /* Define to `int' if <sys/types.h> does not define. */
 #undef pid_t
-
-/* Define to `unsigned int' if <sys/types.h> does not define. */
-#undef size_t
 
 /* Define to the type of an unsigned integer type of width exactly 16 bits if
    such a type exists and the standard includes do not define it. */

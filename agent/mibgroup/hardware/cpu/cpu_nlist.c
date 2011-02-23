@@ -3,6 +3,7 @@
  *     e.g. FreeBSD
  */
 #include <net-snmp/net-snmp-config.h>
+#include <net-snmp/net-snmp-features.h>
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 #include <net-snmp/agent/hardware/cpu.h>
@@ -31,6 +32,7 @@
 #define CPU_SYMBOL  "cp_time"
 #define MEM_SYMBOL  "cnt"
 
+netsnmp_feature_require(hardware_cpu_copy_stats)
 void _cpu_copy_stats( netsnmp_cpu_info *cpu );
 
     /*

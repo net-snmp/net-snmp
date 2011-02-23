@@ -15,6 +15,7 @@
  */
 
 #include <net-snmp/net-snmp-config.h>
+#include <net-snmp/net-snmp-features.h>
 #if HAVE_STRING_H
 #include <string.h>
 #else
@@ -76,6 +77,8 @@
 #ifdef HAVE_SYS_SYSCTL_H
 #include <sys/sysctl.h>
 #endif
+
+netsnmp_feature_require(date_n_time)
 
 #if !defined(UTMP_FILE) && defined(_PATH_UTMP)
 #define UTMP_FILE _PATH_UTMP

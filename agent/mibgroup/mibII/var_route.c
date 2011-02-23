@@ -46,6 +46,7 @@ PERFORMANCE OF THIS SOFTWARE.
  */
 
 #include <net-snmp/net-snmp-config.h>
+#include <net-snmp/net-snmp-features.h>
 
 #include "route_headers.h"
 #define CACHE_TIME (120)        /* Seconds */
@@ -317,12 +318,16 @@ static int      rtsize = 0, rtallocate = 0;
 
 static void     Route_Scan_Reload(void);
 
+netsnmp_feature_provide(get_routes)
+
+#ifndef NETSNMP_FEATURE_REMOVE_GET_ROUTES
 RTENTRY **netsnmp_get_routes(size_t *size) {
     Route_Scan_Reload();
     if (size)
         *size = rtsize;
     return rthead;
 }
+#endif /* NETSNMP_FEATURE_REMOVE_GET_ROUTES */
 #endif                          /* hpux11 */
 
 #if !(defined(linux) || defined(solaris2) || defined(hpux11)) && defined(RTHOST_SYMBOL) && defined(RTNET_SYMBOL)
@@ -923,6 +928,10 @@ load_rtentries(struct radix_node *pt)
 #endif
             name[sizeof(name) - 1] = '\0';
 #else
+#ifdef NETSNMP_FEATURE_CHECKIN
+            /* this exists here just so we don't copy ifdef logic elsewhere */
+            netsnmp_feature_require(string_append_int);
+#endif
             if (!NETSNMP_KLOOKUP(ifnet.if_name, name, sizeof name)) {
                 DEBUGMSGTL(("mibII/var_route", "klookup failed\n"));
                 return;
@@ -1080,6 +1089,10 @@ Route_Scan_Reload(void)
     }
 
 #else                           /* rtentry is a BSD 4.3 compat */
+#ifdef NETSNMP_FEATURE_CHECKIN
+    /* this exists here just so we don't copy ifdef logic elsewhere */
+    netsnmp_feature_require(string_append_int);
+#endif
     for (table = 0; table < NUM_ROUTE_SYMBOLS; table++) {
         auto_nlist(RTHASHSIZE_SYMBOL, (char *) &hashsize,
                    sizeof(hashsize));
@@ -1164,6 +1177,7 @@ Route_Scan_Reload(void)
 #else
 
 #if HAVE_SYS_MBUF_H
+netsnmp_feature_require(string_append_int)
 static void
 Route_Scan_Reload(void)
 {

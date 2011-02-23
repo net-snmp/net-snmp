@@ -18,6 +18,8 @@
 
 
 #include <net-snmp/net-snmp-config.h>
+#include <net-snmp/net-snmp-features.h>
+
 #if HAVE_STDLIB_H
 #include <stdlib.h>
 #endif
@@ -39,6 +41,8 @@
 #include "traceRouteProbeHistoryTable.h"
 #include "traceRouteHopsTable.h"
 #include "header_complex.h"
+
+netsnmp_feature_require(table_dataset)
 
 /*
  *traceRouteResultsTable_variables_oid:

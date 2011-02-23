@@ -3,12 +3,15 @@
  */
 
 #include <net-snmp/net-snmp-config.h>
+#include <net-snmp/net-snmp-features.h>
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 
 #include <net-snmp/agent/table.h>
 #include <net-snmp/agent/table_iterator.h>
 #include "nsTransactionTable.h"
+
+netsnmp_feature_require(table_dataset)
 
 /** Initialize the nsTransactionTable table by defining it's contents
    and how it's structured */

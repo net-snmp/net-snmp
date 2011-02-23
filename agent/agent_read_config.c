@@ -3,6 +3,7 @@
  */
 
 #include <net-snmp/net-snmp-config.h>
+#include <net-snmp/net-snmp-features.h>
 
 #include <sys/types.h>
 #if HAVE_STDLIB_H
@@ -101,6 +102,8 @@
 #include <net-snmp/agent/table_dataset.h>
 #include "agent_module_includes.h"
 #include "mib_module_includes.h"
+
+netsnmp_feature_provide(snmpd_unregister_config_handler)
 
 #ifdef HAVE_UNISTD_H
 void
@@ -301,11 +304,17 @@ snmpd_register_const_config_handler(const char *token,
                                 releaser, help);
 }
 
+#ifdef NETSNMP_FEATURE_REQUIRE_SNMPD_UNREGISTER_CONFIG_HANDLER
+netsnmp_feature_require(unregister_app_config_handler)
+#endif /* NETSNMP_FEATURE_REQUIRE_SNMPD_UNREGISTER_CONFIG_HANDLER */
+
+#ifndef NETSNMP_FEATURE_REMOVE_SNMPD_UNREGISTER_CONFIG_HANDLER
 void
 snmpd_unregister_config_handler(const char *token)
 {
     unregister_app_config_handler(token);
 }
+#endif /* NETSNMP_FEATURE_REMOVE_SNMPD_UNREGISTER_CONFIG_HANDLER */
 
 /*
  * this function is intended for use by mib-modules to store permenant

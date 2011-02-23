@@ -232,6 +232,10 @@ init_ksm(void)
     register_sec_mod(NETSNMP_SEC_MODEL_KSM, "ksm", def);
 }
 
+void shutdown_ksm(void)
+{
+}
+
 /*
  * These routines implement a simple cache for information we need to
  * process responses.  When we send out a request, it contains an AP_REQ;

@@ -18,6 +18,7 @@
  */
 
 #include <net-snmp/net-snmp-config.h>
+#include <net-snmp/net-snmp-features.h>
 
 #if HAVE_UNISTD_H
 #include <unistd.h>
@@ -106,6 +107,9 @@ char           *snmp_trapcommunity = NULL;
 int             snmp_enableauthentraps = SNMP_AUTHENTICATED_TRAPS_DISABLED;
 int             snmp_enableauthentrapsset = 0;
 
+netsnmp_feature_provide(trap_vars_with_context)
+netsnmp_feature_provide(remove_trap_session)
+
 /*
  * Prototypes 
  */
@@ -175,6 +179,7 @@ add_trap_session(netsnmp_session * ss, int pdutype, int confirm,
     return 1;
 }
 
+#ifndef NETSNMP_FEATURE_REMOVE_REMOVE_TRAP_SESSION
 int
 remove_trap_session(netsnmp_session * ss)
 {
@@ -207,6 +212,7 @@ remove_trap_session(netsnmp_session * ss)
     }
     return 0;
 }
+#endif /* NETSNMP_FEATURE_REMOVE_REMOVE_TRAP_SESSION */
 
 #if !defined(NETSNMP_DISABLE_SNMPV1) || !defined(NETSNMP_DISABLE_SNMPV2C)
 static int
@@ -956,6 +962,7 @@ send_trap_vars(int trap, int specific, netsnmp_variable_list * vars)
                                   OID_LENGTH(trap_version_id), vars);
 }
 
+#ifndef NETSNMP_FEATURE_REMOVE_TRAP_VARS_WITH_CONTEXT
 /* Send a trap under a context */
 void send_trap_vars_with_context(int trap, int specific, 
               netsnmp_variable_list *vars, const char *context)
@@ -970,6 +977,7 @@ void send_trap_vars_with_context(int trap, int specific,
 								  context, 0);
     	
 }
+#endif /* NETSNMP_FEATURE_REMOVE_TRAP_VARS_WITH_CONTEXT */
 
 /**
  * Sends an SNMPv1 trap (or the SNMPv2 equivalent) to the list of  
@@ -1041,18 +1049,24 @@ send_v2trap(netsnmp_variable_list * vars)
  *
  * @see send_v2trap
  */
+netsnmp_feature_child_of(send_v3trap,netsnmp_unused)
+#ifndef NETSNMP_FEATURE_REMOVE_SEND_V3TRAP
 void send_v3trap(netsnmp_variable_list *vars, const char *context)
 {
     netsnmp_send_traps(-1, -1, 
                        trap_version_id, OID_LENGTH(trap_version_id),
                        vars, context, 0);
 }
+#endif /* NETSNMP_FEATURE_REMOVE_SEND_V3TRAP */
 
+netsnmp_feature_child_of(send_trap_pdu,netsnmp_unused)
+#ifndef NETSNMP_FEATURE_REMOVE_SEND_TRAP_PDU
 void
 send_trap_pdu(netsnmp_pdu *pdu)
 {
     send_trap_vars(-1, -1, pdu->variables);
 }
+#endif /* NETSNMP_FEATURE_REMOVE_SEND_TRAP_PDU */
 
 
 

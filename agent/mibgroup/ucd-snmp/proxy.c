@@ -9,6 +9,7 @@
  * distributed with the Net-SNMP package.
  */
 #include <net-snmp/net-snmp-config.h>
+#include <net-snmp/net-snmp-features.h>
 
 #include <sys/types.h>
 #if HAVE_STRING_H
@@ -22,6 +23,9 @@
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 
 #include "proxy.h"
+
+netsnmp_feature_require(handler_mark_requests_as_delegated)
+netsnmp_feature_require(request_set_error_idx)
 
 static struct simple_proxy *proxies = NULL;
 

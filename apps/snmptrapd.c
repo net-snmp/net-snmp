@@ -622,7 +622,9 @@ main(int argc, char *argv[])
 #ifdef NETSNMP_USE_MYSQL
     snmptrapd_register_sql_configs( );
 #endif
+#ifdef NETSNMP_SECMOD_USM
     init_usm_conf( "snmptrapd" );
+#endif /* NETSNMP_SECMOD_USM */
     register_config_handler("snmptrapd", "snmpTrapdAddr",
                             parse_trapd_address, free_trapd_address, "string");
 
@@ -655,11 +657,13 @@ main(int argc, char *argv[])
     strcat(options, "p:");
 #endif
 
+#ifndef NETSNMP_FEATURE_REMOVE_LOGGING_SYSLOG
 #ifdef WIN32
     snmp_log_syslogname(app_name_long);
 #else
     snmp_log_syslogname(app_name);
 #endif
+#endif /* NETSNMP_FEATURE_REMOVE_LOGGING_SYSLOG */
 
     /*
      * Now process options normally.  
@@ -705,7 +709,8 @@ main(int argc, char *argv[])
             break;
 
         case 'd':
-            snmp_set_dump_packet(1);
+            netsnmp_ds_set_boolean(NETSNMP_DS_LIBRARY_ID, 
+                                   NETSNMP_DS_LIB_DUMP_PACKET, 1);
             break;
 
         case 'D':
@@ -939,10 +944,19 @@ main(int argc, char *argv[])
      * Don't try this at home, children!
      */
     if (0 == snmp_get_do_logging()) {
+#ifndef NETSNMP_FEATURE_REMOVE_LOGGING_SYSLOG
         traph = netsnmp_add_global_traphandler(NETSNMPTRAPD_PRE_HANDLER,
                                                syslog_handler);
         traph->authtypes = TRAP_AUTH_LOG;
         snmp_enable_syslog();
+#else /* NETSNMP_FEATURE_REMOVE_LOGGING_SYSLOG */
+#ifndef NETSNMP_FEATURE_REMOVE_LOGGING_STDIO
+        traph = netsnmp_add_global_traphandler(NETSNMPTRAPD_PRE_HANDLER,
+                                               print_handler);
+        traph->authtypes = TRAP_AUTH_LOG;
+        snmp_enable_stderr();
+#endif /* NETSNMP_FEATURE_REMOVE_LOGGING_STDIO */
+#endif /* NETSNMP_FEATURE_REMOVE_LOGGING_SYSLOG */
     } else {
         traph = netsnmp_add_global_traphandler(NETSNMPTRAPD_PRE_HANDLER,
                                                print_handler);
@@ -979,6 +993,9 @@ main(int argc, char *argv[])
     init_agent("snmptrapd");
 
 #if defined(USING_AGENTX_SUBAGENT_MODULE) && !defined(NETSNMP_SNMPTRAPD_DISABLE_AGENTX)
+#ifdef NETSNMP_FEATURE_CHECKING
+    netsnmp_feature_require(register_snmpEngine_scalars_context)
+#endif /* NETSNMP_FEATURE_CHECKING */
     /*
      * initialize local modules 
      */
@@ -1019,6 +1036,9 @@ main(int argc, char *argv[])
         extern void init_register_nsVacm_context(const char *);
 #endif
 #ifdef USING_SNMPV3_USMUSER_MODULE
+#ifdef NETSNMP_FEATURE_CHECKING
+        netsnmp_feature_require(init_register_usmUser_context)
+#endif /* NETSNMP_FEATURE_CHECKING */
         extern void init_register_usmUser_context(const char *);
         /* register ourselves as having a USM user database */
         init_register_usmUser_context("snmptrapd");
@@ -1072,11 +1092,13 @@ main(int argc, char *argv[])
      * if no logging options on command line or in conf files, use syslog
      */
     if (0 == snmp_get_do_logging()) {
+#ifndef NETSNMP_FEATURE_REMOVE_LOGGING_SYSLOG
 #ifdef WIN32
         snmp_enable_syslog_ident(app_name_long, Facility);
 #else
         snmp_enable_syslog_ident(app_name, Facility);
 #endif        
+#endif /* NETSNMP_FEATURE_REMOVE_LOGGING_SYSLOG */
     }
 
     if (listen_ports)
@@ -1255,12 +1277,16 @@ main(int argc, char *argv[])
         snmp_select_info(&numfds, &readfds, tvp, &block);
         if (block == 1)
             tvp = NULL;         /* block without timeout */
+#ifndef NETSNMP_FEATURE_REMOVE_FD_EVENT_MANAGER
         netsnmp_external_event_info(&numfds, &readfds, &writefds, &exceptfds);
+#endif /* NETSNMP_FEATURE_REMOVE_FD_EVENT_MANAGER */
         count = select(numfds, &readfds, &writefds, &exceptfds, tvp);
         gettimeofday(&Now, NULL);
         if (count > 0) {
+#ifndef NETSNMP_FEATURE_REMOVE_FD_EVENT_MANAGER
             netsnmp_dispatch_external_events(&count, &readfds, &writefds,
                                              &exceptfds);
+#endif /* NETSNMP_FEATURE_REMOVE_FD_EVENT_MANAGER */
             /* If there are any more events after external events, then
              * try SNMP events. */
             if (count > 0) {

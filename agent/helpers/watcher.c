@@ -1,4 +1,5 @@
 #include <net-snmp/net-snmp-config.h>
+#include <net-snmp/net-snmp-features.h>
 
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
@@ -18,6 +19,18 @@ static void free_wrapper(void * p)
 #else
 #define free_wrapper free
 #endif
+
+netsnmp_feature_provide(watcher_all)
+netsnmp_feature_child_of(watcher_all, mib_helpers)
+netsnmp_feature_child_of(watcher_create_info6, watcher_all)
+netsnmp_feature_child_of(watcher_register_timestamp, watcher_all)
+netsnmp_feature_child_of(watcher_ulong_scalar, watcher_all)
+netsnmp_feature_child_of(watcher_read_only_ulong_scalar, watcher_all)
+netsnmp_feature_child_of(watcher_long_scalar, watcher_all)
+netsnmp_feature_child_of(watcher_read_only_long_scalar, watcher_all)
+netsnmp_feature_child_of(watcher_int_scalar, watcher_all)
+netsnmp_feature_child_of(read_only_counter32_scalar, watcher_all)
+netsnmp_feature_child_of(watcher_spinlock, watcher_all)
 
 /** @defgroup watcher watcher
  *  Watch a specified variable and process it as an instance or scalar object
@@ -51,6 +64,7 @@ netsnmp_init_watcher_info6(netsnmp_watcher_info *winfo,
     return winfo;
 }
 
+#ifndef NETSNMP_FEATURE_REMOVE_WATCHER_CREATE_INFO6
 netsnmp_watcher_info *
 netsnmp_create_watcher_info6(void *data, size_t size, u_char type,
                              int flags, size_t max_size, size_t* size_p)
@@ -61,6 +75,7 @@ netsnmp_create_watcher_info6(void *data, size_t size, u_char type,
                                    size_p);
     return winfo;
 }
+#endif /* NETSNMP_FEATURE_REMOVE_WATCHER_CREATE_INFO6 */
 
 netsnmp_watcher_info *
 netsnmp_init_watcher_info(netsnmp_watcher_info *winfo,
@@ -251,6 +266,7 @@ netsnmp_watcher_helper_handler(netsnmp_mib_handler *handler,
         /*
          * SET requests.  Should only get here if registered RWRITE 
          */
+#ifndef NETSNMP_NO_WRITE_SUPPORT
     case MODE_SET_RESERVE1:
         if (requests->requestvb->type != winfo->type) {
             netsnmp_set_request_error(reqinfo, requests, SNMP_ERR_WRONGTYPE);
@@ -306,6 +322,12 @@ netsnmp_watcher_helper_handler(netsnmp_mib_handler *handler,
 
     case MODE_SET_COMMIT:
         break;
+#endif /* NETSNMP_NO_WRITE_SUPPORT */
+
+    default:
+        snmp_log(LOG_ERR, "watcher handler called with an unknown mode: %d\n",
+                 reqinfo->mode);
+        return SNMP_ERR_GENERR;
 
     }
 
@@ -344,6 +366,7 @@ netsnmp_watched_timestamp_register(netsnmp_mib_handler *whandler,
     return netsnmp_register_scalar(reginfo);   /* XXX - or instance? */
 }
 
+#ifndef NETSNMP_FEATURE_REMOVE_WATCHER_REGISTER_TIMESTAMP
 int
 netsnmp_register_watched_timestamp(netsnmp_handler_registration *reginfo,
                                    marker_t timestamp)
@@ -354,6 +377,7 @@ netsnmp_register_watched_timestamp(netsnmp_handler_registration *reginfo,
 
     return netsnmp_watched_timestamp_register(whandler, reginfo, timestamp);
 }
+#endif /* NETSNMP_FEATURE_REMOVE_WATCHER_REGISTER_TIMESTAMP */
 
 
 int
@@ -394,11 +418,13 @@ netsnmp_watched_timestamp_handler(netsnmp_mib_handler *handler,
          * Timestamps are inherently Read-Only,
          *  so don't need to support SET requests.
          */
+#ifndef NETSNMP_NO_WRITE_SUPPORT
     case MODE_SET_RESERVE1:
         netsnmp_set_request_error(reqinfo, requests,
                                   SNMP_ERR_NOTWRITABLE);
         handler->flags |= MIB_HANDLER_AUTO_NEXT_OVERRIDE_ONCE;
         return SNMP_ERR_NOTWRITABLE;
+#endif /* NETSNMP_NO_WRITE_SUPPORT */
     }
 
     /* next handler called automatically - 'AUTO_NEXT' */
@@ -411,6 +437,8 @@ netsnmp_watched_timestamp_handler(netsnmp_mib_handler *handler,
      *   implementing a 'TestAndIncr' spinlock
      *
      ***************************/
+
+#ifndef NETSNMP_FEATURE_REMOVE_WATCHER_SPINLOCK
 
 netsnmp_mib_handler *
 netsnmp_get_watched_spinlock_handler(void)
@@ -464,6 +492,7 @@ netsnmp_watched_spinlock_handler(netsnmp_mib_handler *handler,
         /*
          * Ensure the assigned value matches the current one
          */
+#ifndef NETSNMP_NO_WRITE_SUPPORT
     case MODE_SET_RESERVE1:
         for (request=requests; request; request=request->next) {
             if (request->processed)
@@ -484,11 +513,13 @@ netsnmp_watched_spinlock_handler(netsnmp_mib_handler *handler,
     case MODE_SET_COMMIT:
 	(*spinlock)++;
 	break;
+#endif /* NETSNMP_NO_WRITE_SUPPORT */
     }
 
     /* next handler called automatically - 'AUTO_NEXT' */
     return SNMP_ERR_NOERROR;
 }
+#endif /* NETSNMP_FEATURE_REMOVE_WATCHER_SPINLOCK */
 
     /***************************
      *
@@ -536,6 +567,7 @@ register_scalar_watcher(const char* name,
     return SNMP_ERR_RESOURCEUNAVAILABLE;
 }
 
+#ifndef NETSNMP_FEATURE_REMOVE_WATCHER_ULONG_SCALAR
 int
 netsnmp_register_ulong_scalar(const char *name,
                               const oid * reg_oid, size_t reg_oid_len,
@@ -547,7 +579,9 @@ netsnmp_register_ulong_scalar(const char *name,
         (void *)it, sizeof( u_long ),
         ASN_UNSIGNED, subhandler, HANDLER_CAN_RWRITE);
 }
+#endif /* NETSNMP_FEATURE_REMOVE_WATCHER_ULONG_SCALAR */
 
+#ifndef NETSNMP_FEATURE_REMOVE_WATCHER_READ_ONLY_ULONG_SCALAR
 int
 netsnmp_register_read_only_ulong_scalar(const char *name,
                               const oid * reg_oid, size_t reg_oid_len,
@@ -559,7 +593,9 @@ netsnmp_register_read_only_ulong_scalar(const char *name,
         (void *)it, sizeof( u_long ),
         ASN_UNSIGNED, subhandler, HANDLER_CAN_RONLY);
 }
+#endif /* NETSNMP_FEATURE_REMOVE_WATCHER_READ_ONLY_ULONG_SCALAR */
 
+#ifndef NETSNMP_FEATURE_REMOVE_WATCHER_LONG_SCALAR
 int
 netsnmp_register_long_scalar(const char *name,
                               const oid * reg_oid, size_t reg_oid_len,
@@ -571,7 +607,9 @@ netsnmp_register_long_scalar(const char *name,
         (void *)it, sizeof( long ),
         ASN_INTEGER, subhandler, HANDLER_CAN_RWRITE);
 }
+#endif /* NETSNMP_FEATURE_REMOVE_WATCHER_LONG_SCALAR */
 
+#ifndef NETSNMP_FEATURE_REMOVE_WATCHER_READ_ONLY_LONG_SCALAR
 int
 netsnmp_register_read_only_long_scalar(const char *name,
                               const oid * reg_oid, size_t reg_oid_len,
@@ -583,8 +621,10 @@ netsnmp_register_read_only_long_scalar(const char *name,
         (void *)it, sizeof( long ),
         ASN_INTEGER, subhandler, HANDLER_CAN_RONLY);
 }
+#endif /* NETSNMP_FEATURE_REMOVE_WATCHER_READ_ONLY_LONG_SCALAR */
 
 
+#ifndef NETSNMP_FEATURE_REMOVE_WATCHER_INT_SCALAR
 int
 netsnmp_register_int_scalar(const char *name,
                               const oid * reg_oid, size_t reg_oid_len,
@@ -596,7 +636,9 @@ netsnmp_register_int_scalar(const char *name,
         (void *)it, sizeof( int ),
         ASN_INTEGER, subhandler, HANDLER_CAN_RWRITE);
 }
+#endif /* NETSNMP_FEATURE_REMOVE_WATCHER_INT_SCALAR */
 
+#ifndef NETSNMP_FEATURE_REMOVE_WATCHER_READ_ONLY_INT_SCALAR
 int
 netsnmp_register_read_only_int_scalar(const char *name,
                               const oid * reg_oid, size_t reg_oid_len,
@@ -608,8 +650,9 @@ netsnmp_register_read_only_int_scalar(const char *name,
         (void *)it, sizeof( int ),
         ASN_INTEGER, subhandler, HANDLER_CAN_RONLY);
 }
+#endif /* NETSNMP_FEATURE_REMOVE_WATCHER_READ_ONLY_INT_SCALAR */
 
-
+#ifndef NETSNMP_FEATURE_REMOVE_READ_ONLY_COUNTER32_SCALAR
 int
 netsnmp_register_read_only_counter32_scalar(const char *name,
                               const oid * reg_oid, size_t reg_oid_len,
@@ -621,5 +664,6 @@ netsnmp_register_read_only_counter32_scalar(const char *name,
         (void *)it, sizeof( u_long ),
         ASN_COUNTER, subhandler, HANDLER_CAN_RONLY);
 }
+#endif /* NETSNMP_FEATURE_REMOVE_READ_ONLY_COUNTER32_SCALAR */
 /**  @} */
 

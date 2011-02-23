@@ -9,6 +9,7 @@
  * distributed with the Net-SNMP package.
  */
 #include <net-snmp/net-snmp-config.h>
+#include <net-snmp/net-snmp-features.h>
 
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
@@ -25,6 +26,9 @@
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/serialize.h>
 #include <net-snmp/agent/read_only.h>
+
+netsnmp_feature_provide(instance)
+netsnmp_feature_child_of(instance, mib_helpers)
 
 typedef struct netsnmp_num_file_instance_s {
     int   refcnt;
@@ -165,6 +169,8 @@ get_reg(const char *name,
 }
 
 /* Watched 'long' instances are writable on both 32-bit and 64-bit systems  */
+netsnmp_feature_child_of(read_only_ulong_instance,instance)
+#ifndef NETSNMP_FEATURE_REMOVE_READ_ONLY_ULONG_INSTANCE
 int
 netsnmp_register_read_only_ulong_instance(const char *name,
                                           const oid * reg_oid,
@@ -179,7 +185,10 @@ netsnmp_register_read_only_ulong_instance(const char *name,
                    (void *)it, sizeof(u_long),
                    ASN_UNSIGNED, WATCHER_FIXED_SIZE));
 }
+#endif /* NETSNMP_FEATURE_REMOVE_READ_ONLY_ULONG_INSTANCE */
 
+netsnmp_feature_child_of(ulong_instance,instance)
+#ifndef NETSNMP_FEATURE_REMOVE_ULONG_INSTANCE
 int
 netsnmp_register_ulong_instance(const char *name,
                                 const oid * reg_oid, size_t reg_oid_len,
@@ -193,7 +202,10 @@ netsnmp_register_ulong_instance(const char *name,
                    (void *)it, sizeof(u_long),
                    ASN_UNSIGNED, WATCHER_FIXED_SIZE));
 }
+#endif /* NETSNMP_FEATURE_REMOVE_ULONG_INSTANCE */
 
+netsnmp_feature_child_of(read_only_counter32_instance,instance)
+#ifndef NETSNMP_FEATURE_REMOVE_READ_ONLY_COUNTER32_INSTANCE
 int
 netsnmp_register_read_only_counter32_instance(const char *name,
                                               const oid * reg_oid,
@@ -209,7 +221,10 @@ netsnmp_register_read_only_counter32_instance(const char *name,
                    (void *)it, sizeof(u_long),
                    ASN_COUNTER, WATCHER_FIXED_SIZE));
 }
+#endif /* NETSNMP_FEATURE_REMOVE_READ_ONLY_COUNTER32_INSTANCE */
 
+netsnmp_feature_child_of(read_only_long_instance,instance)
+#ifndef NETSNMP_FEATURE_REMOVE_READ_ONLY_LONG_INSTANCE
 int
 netsnmp_register_read_only_long_instance(const char *name,
                                          const oid * reg_oid,
@@ -223,7 +238,10 @@ netsnmp_register_read_only_long_instance(const char *name,
                netsnmp_create_watcher_info(
                    (void *)it, sizeof(long), ASN_INTEGER, WATCHER_FIXED_SIZE));
 }
+#endif /* NETSNMP_FEATURE_REMOVE_READ_ONLY_LONG_INSTANCE */
 
+netsnmp_feature_child_of(long_instance,instance)
+#ifndef NETSNMP_FEATURE_REMOVE_LONG_INSTANCE
 int
 netsnmp_register_long_instance(const char *name,
                                const oid * reg_oid, size_t reg_oid_len,
@@ -235,8 +253,11 @@ netsnmp_register_long_instance(const char *name,
                netsnmp_create_watcher_info(
                    (void *)it, sizeof(long), ASN_INTEGER, WATCHER_FIXED_SIZE));
 }
+#endif /* NETSNMP_FEATURE_REMOVE_LONG_INSTANCE */
 
 /* Watched 'int' instances are only writable on 32-bit systems  */
+netsnmp_feature_child_of(read_only_uint_instance,instance)
+#ifndef NETSNMP_FEATURE_REMOVE_READ_ONLY_UINT_INSTANCE
 int
 netsnmp_register_read_only_uint_instance(const char *name,
                                          const oid * reg_oid,
@@ -251,7 +272,10 @@ netsnmp_register_read_only_uint_instance(const char *name,
                    (void *)it, sizeof(unsigned int),
                    ASN_UNSIGNED, WATCHER_FIXED_SIZE));
 }
+#endif /* NETSNMP_FEATURE_REMOVE_READ_ONLY_UINT_INSTANCE */
 
+netsnmp_feature_child_of(uint_instance,instance)
+#ifndef NETSNMP_FEATURE_REMOVE_UINT_INSTANCE
 int
 netsnmp_register_uint_instance(const char *name,
                                const oid * reg_oid, size_t reg_oid_len,
@@ -264,7 +288,10 @@ netsnmp_register_uint_instance(const char *name,
                    (void *)it, sizeof(unsigned int),
                    ASN_UNSIGNED, WATCHER_FIXED_SIZE));
 }
+#endif /* NETSNMP_FEATURE_REMOVE_UINT_INSTANCE */
 
+netsnmp_feature_child_of(read_only_int_instance,instance)
+#ifndef NETSNMP_FEATURE_REMOVE_READ_ONLY_INT_INSTANCE
 int
 netsnmp_register_read_only_int_instance(const char *name,
                                 const oid * reg_oid, size_t reg_oid_len,
@@ -276,10 +303,13 @@ netsnmp_register_read_only_int_instance(const char *name,
                netsnmp_create_watcher_info(
                    (void *)it, sizeof(int), ASN_INTEGER, WATCHER_FIXED_SIZE));
 }
+#endif /* NETSNMP_FEATURE_REMOVE_READ_ONLY_INT_INSTANCE */
 
   /*
    * Compatibility with earlier (inconsistently named) routine
    */
+netsnmp_feature_child_of(register_read_only_int_instance,netsnmp_unused)
+#ifndef NETSNMP_FEATURE_REMOVE_REGISTER_READ_ONLY_INT_INSTANCE
 int
 register_read_only_int_instance(const char *name,
                                 const oid * reg_oid, size_t reg_oid_len,
@@ -289,11 +319,14 @@ register_read_only_int_instance(const char *name,
                                 reg_oid, reg_oid_len,
                                 it, subhandler);
 }
+#endif /* NETSNMP_FEATURE_REMOVE_REGISTER_READ_ONLY_INT_INSTANCE */
 
 /*
  * Context registrations
  */
 
+netsnmp_feature_child_of(register_read_only_ulong_instance_context,instance)
+#ifndef NETSNMP_FEATURE_REMOVE_REGISTER_READ_ONLY_ULONG_INSTANCE_CONTEXT
 int
 netsnmp_register_read_only_ulong_instance_context(const char *name,
                                                   const oid * reg_oid,
@@ -312,7 +345,10 @@ netsnmp_register_read_only_ulong_instance_context(const char *name,
         myreg, netsnmp_create_watcher_info(
             (void *)it, sizeof(u_long), ASN_UNSIGNED, WATCHER_FIXED_SIZE));
 }
+#endif /* NETSNMP_FEATURE_REMOVE_READ_ONLY_ULONG_INSTANCE_CONTEXT */
 
+netsnmp_feature_child_of(register_ulong_instance_context,instance)
+#ifndef NETSNMP_FEATURE_REMOVE_REGISTER_ULONG_INSTANCE_CONTEXT
 int
 netsnmp_register_ulong_instance_context(const char *name,
                                         const oid * reg_oid, size_t reg_oid_len,
@@ -329,7 +365,10 @@ netsnmp_register_ulong_instance_context(const char *name,
         myreg, netsnmp_create_watcher_info(
             (void *)it, sizeof(u_long), ASN_UNSIGNED, WATCHER_FIXED_SIZE));
 }
+#endif /* NETSNMP_FEATURE_REMOVE_REGISTER_ULONG_INSTANCE_CONTEXT */
 
+netsnmp_feature_child_of(register_read_only_counter32_instance_context,instance)
+#ifndef NETSNMP_FEATURE_REMOVE_REGISTER_READ_ONLY_COUNTER32_INSTANCE_CONTEXT
 int
 netsnmp_register_read_only_counter32_instance_context(const char *name,
                                                       const oid * reg_oid,
@@ -348,7 +387,10 @@ netsnmp_register_read_only_counter32_instance_context(const char *name,
         myreg, netsnmp_create_watcher_info(
             (void *)it, sizeof(u_long), ASN_COUNTER, WATCHER_FIXED_SIZE));
 }
+#endif /* NETSNMP_FEATURE_REMOVE_REGISTER_READ_ONLY_COUNTER32_INSTANCE_CONTEXT */
 
+netsnmp_feature_child_of(register_read_only_long_instance_context,instance)
+#ifndef NETSNMP_FEATURE_REMOVE_REGISTER_READ_ONLY_LONG_INSTANCE_CONTEXT
 int
 netsnmp_register_read_only_long_instance_context(const char *name,
                                                  const oid * reg_oid,
@@ -367,7 +409,10 @@ netsnmp_register_read_only_long_instance_context(const char *name,
         myreg, netsnmp_create_watcher_info(
             (void *)it, sizeof(long), ASN_INTEGER, WATCHER_FIXED_SIZE));
 }
+#endif /* NETSNMP_FEATURE_REMOVE_REGISTER_READ_ONLY_LONG_INSTANCE_CONTEXT */
 
+netsnmp_feature_child_of(register_long_instance_context,instance)
+#ifndef NETSNMP_FEATURE_REMOVE_REGISTER_LONG_INSTANCE_CONTEXT
 int
 netsnmp_register_long_instance_context(const char *name,
                                        const oid * reg_oid, size_t reg_oid_len,
@@ -384,7 +429,10 @@ netsnmp_register_long_instance_context(const char *name,
         myreg, netsnmp_create_watcher_info(
             (void *)it, sizeof(long), ASN_INTEGER, WATCHER_FIXED_SIZE));
 }
+#endif /* NETSNMP_FEATURE_REMOVE_REGISTER_LONG_INSTANCE_CONTEXT */
 
+netsnmp_feature_child_of(register_int_instance_context,instance)
+#ifndef NETSNMP_FEATURE_REMOVE_REGISTER_INT_INSTANCE_CONTEXT
 int
 netsnmp_register_int_instance_context(const char *name,
                                       const oid * reg_oid,
@@ -402,7 +450,10 @@ netsnmp_register_int_instance_context(const char *name,
         myreg, netsnmp_create_watcher_info(
             (void *)it, sizeof(int), ASN_INTEGER, WATCHER_FIXED_SIZE));
 }
+#endif /* NETSNMP_FEATURE_REMOVE_REGISTER_INT_INSTANCE_CONTEXT */
 
+netsnmp_feature_child_of(register_read_only_int_instance_context,instance)
+#ifndef NETSNMP_FEATURE_REMOVE_REGISTER_READ_ONLY_INT_INSTANCE_CONTEXT
 int
 netsnmp_register_read_only_int_instance_context(const char *name,
                                                 const oid * reg_oid,
@@ -420,10 +471,13 @@ netsnmp_register_read_only_int_instance_context(const char *name,
         myreg, netsnmp_create_watcher_info(
             (void *)it, sizeof(int), ASN_INTEGER, WATCHER_FIXED_SIZE));
 }
+#endif /* NETSNMP_FEATURE_REMOVE_REGISTER_READ_ONLY_INT_INSTANCE_CONTEXT */
 
 /*
  * Compatibility with earlier (inconsistently named) routine
  */
+netsnmp_feature_child_of(read_only_int_instance_context,instance)
+#ifndef NETSNMP_FEATURE_REMOVE_READ_ONLY_INT_INSTANCE_CONTEXT
 int
 register_read_only_int_instance_context(const char *name,
                                         const oid * reg_oid, size_t reg_oid_len,
@@ -436,7 +490,10 @@ register_read_only_int_instance_context(const char *name,
                                                            it, subhandler,
                                                            contextName);
 }
+#endif /* NETSNMP_FEATURE_REMOVE_READ_ONLY_INT_INSTANCE_CONTEXT */
 
+netsnmp_feature_child_of(register_num_file_instance,instance)
+#ifndef NETSNMP_FEATURE_REMOVE_REGISTER_NUM_FILE_INSTANCE
 int
 netsnmp_register_num_file_instance(const char *name,
                                    const oid * reg_oid, size_t reg_oid_len,
@@ -477,6 +534,7 @@ netsnmp_register_num_file_instance(const char *name,
 
     return netsnmp_register_instance(myreg);
 }
+#endif /* NETSNMP_FEATURE_REMOVE_REGISTER_NUM_FILE_INSTANCE */
 
 /**
  * This function registers an int helper handler to a specified OID.
@@ -496,6 +554,8 @@ netsnmp_register_num_file_instance(const char *name,
  *      MIB_REGISTERED_OK is returned if the registration was a success.
  *	Failures are MIB_REGISTRATION_FAILED and MIB_DUPLICATE_REGISTRATION.
  */
+netsnmp_feature_child_of(register_int_instance,instance)
+#ifndef NETSNMP_FEATURE_REMOVE_REGISTER_INT_INSTANCE
 int
 netsnmp_register_int_instance(const char *name,
                               const oid * reg_oid, size_t reg_oid_len,
@@ -507,6 +567,7 @@ netsnmp_register_int_instance(const char *name,
                netsnmp_create_watcher_info(
                    (void *)it, sizeof(int), ASN_INTEGER, WATCHER_FIXED_SIZE));
 }
+#endif /* NETSNMP_FEATURE_REMOVE_REGISTER_INT_INSTANCE */
 
 #ifdef HAVE_DMALLOC_H
 static void free_wrapper(void * p)
@@ -524,7 +585,10 @@ netsnmp_instance_num_file_handler(netsnmp_mib_handler *handler,
                                   netsnmp_request_info *requests)
 {
     netsnmp_num_file_instance *nfi;
-    u_long it, *it_save;
+    u_long it;
+#ifndef NETSNMP_NO_WRITE_SUPPORT
+    u_long *it_save;
+#endif /* NETSNMP_NO_WRITE_SUPPORT */
     int rc;
 
     netsnmp_assert(NULL != handler);
@@ -566,6 +630,7 @@ netsnmp_instance_num_file_handler(netsnmp_mib_handler *handler,
         /*
          * SET requests.  Should only get here if registered RWRITE 
          */
+#ifndef NETSNMP_NO_WRITE_SUPPORT
     case MODE_SET_RESERVE1:
         netsnmp_assert(NULL == nfi->filep);
         if (requests->requestvb->type != nfi->type)
@@ -638,6 +703,12 @@ netsnmp_instance_num_file_handler(netsnmp_mib_handler *handler,
             nfi->filep = NULL;
         }
         break;
+#endif /* NETSNMP_NO_WRITE_SUPPORT */
+    default:
+        snmp_log(LOG_ERR,
+                 "netsnmp_instance_num_file_handler: illegal mode\n");
+        netsnmp_set_request_error(reqinfo, requests, SNMP_ERR_GENERR);
+        return SNMP_ERR_NOERROR;
     }
 
     if (handler->next && handler->next->access_method)
@@ -678,6 +749,7 @@ netsnmp_instance_helper_handler(netsnmp_mib_handler *handler,
         }
         break;
 
+#ifndef NETSNMP_NO_WRITE_SUPPORT
     case MODE_SET_RESERVE1:
     case MODE_SET_RESERVE2:
     case MODE_SET_ACTION:
@@ -693,6 +765,7 @@ netsnmp_instance_helper_handler(netsnmp_mib_handler *handler,
                                              requests);
         }
         break;
+#endif /* NETSNMP_NO_WRITE_SUPPORT */
 
     case MODE_GETNEXT:
         if (cmp < 0 || (cmp == 0 && requests->inclusive)) {
@@ -718,6 +791,11 @@ netsnmp_instance_helper_handler(netsnmp_mib_handler *handler,
             return SNMP_ERR_NOERROR;
         }
         break;
+    default:
+        snmp_log(LOG_ERR,
+                 "netsnmp_instance_helper_handler: illegal mode\n");
+        netsnmp_set_request_error(reqinfo, requests, SNMP_ERR_GENERR);
+        return SNMP_ERR_NOERROR;
     }
     /*
      * got here only if illegal mode found 

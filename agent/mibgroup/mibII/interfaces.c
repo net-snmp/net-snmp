@@ -220,6 +220,7 @@ struct variable3 interfaces_variables[] = {
      var_ifEntry, 3, {2, 1, 5}},
     {NETSNMP_IFPHYSADDRESS, ASN_OCTET_STR, NETSNMP_OLDAPI_RONLY,
      var_ifEntry, 3, {2, 1, 6}},
+#ifndef NETSNMP_NO_WRITE_SUPPORT
 #if defined (WIN32) || defined (cygwin)
     {NETSNMP_IFADMINSTATUS, ASN_INTEGER, NETSNMP_OLDAPI_RWRITE,
      var_ifEntry, 3, {2, 1, 7}},
@@ -227,6 +228,10 @@ struct variable3 interfaces_variables[] = {
     {NETSNMP_IFADMINSTATUS, ASN_INTEGER, NETSNMP_OLDAPI_RONLY,
      var_ifEntry, 3, {2, 1, 7}},
 #endif
+#else  /* !NETSNMP_NO_WRITE_SUPPORT */
+    {NETSNMP_IFADMINSTATUS, ASN_INTEGER, NETSNMP_OLDAPI_RONLY,
+     var_ifEntry, 3, {2, 1, 7}},
+#endif /* !NETSNMP_NO_WRITE_SUPPORT */
     {NETSNMP_IFOPERSTATUS, ASN_INTEGER, NETSNMP_OLDAPI_RONLY,
      var_ifEntry, 3, {2, 1, 8}},
     {NETSNMP_IFLASTCHANGE, ASN_TIMETICKS, NETSNMP_OLDAPI_RONLY,
@@ -1883,6 +1888,10 @@ Interface_Scan_Next(short *Index,
         strncat(cp, ifnet.if_unit, sizeof(saveName)-strlen(saveName)-1);
         saveName[sizeof(saveName) - 1] = '\0';
 #else
+#ifdef NETSNMP_FEATURE_CHECKIN
+        /* this exists here just so we don't copy ifdef logic elsewhere */
+        netsnmp_feature_require(string_append_int);
+#endif
         string_append_int(cp, ifnet.if_unit);
 #endif
         if (1 || strcmp(saveName, "lo0") != 0) {        /* XXX */
@@ -2004,6 +2013,10 @@ Interface_Scan_Next(short *Index,
 
         saveName[sizeof(saveName) - 1] = '\0';
         cp = strchr(saveName, '\0');
+#ifdef NETSNMP_FEATURE_CHECKIN
+        /* this exists here just so we don't copy ifdef logic elsewhere */
+        netsnmp_feature_require(string_append_int);
+#endif
         string_append_int(cp, ifnet.if_unit);
 #endif
         if (1 || strcmp(saveName, "lo0") != 0) {        /* XXX */
@@ -2610,7 +2623,9 @@ var_ifEntry(struct variable * vp,
 #elif defined(HAVE_IPHLPAPI_H)  /* WIN32 cygwin */
 #include <iphlpapi.h>
 
+#ifndef NETSNMP_NO_WRITE_SUPPORT
 WriteMethod     writeIfEntry;
+#endif /* !NETSNMP_NO_WRITE_SUPPORT */
 long            admin_status = 0;
 long            oldadmin_status = 0;
 
@@ -2766,7 +2781,9 @@ var_ifEntry(struct variable * vp,
     case NETSNMP_IFADMINSTATUS:
         long_return = ifRow.dwAdminStatus;
         admin_status = long_return;
+#ifndef NETSNMP_NO_WRITE_SUPPORT
         *write_method = writeIfEntry;
+#endif /* !NETSNMP_NO_WRITE_SUPPORT */
         return (u_char *) & long_return;
     case NETSNMP_IFOPERSTATUS:
         long_return =
@@ -2822,6 +2839,7 @@ var_ifEntry(struct variable * vp,
 }
 
 
+#ifndef NETSNMP_NO_WRITE_SUPPORT
 int
 writeIfEntry(int action,
              u_char * var_val,
@@ -2893,4 +2911,5 @@ writeIfEntry(int action,
     }
     return SNMP_ERR_NOERROR;
 }                               /* end of writeIfEntry */
+#endif /* !NETSNMP_NO_WRITE_SUPPORT */ 
 #endif                          /* WIN32 cygwin */

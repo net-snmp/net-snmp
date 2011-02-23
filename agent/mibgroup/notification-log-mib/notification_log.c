@@ -1,4 +1,5 @@
 #include <net-snmp/net-snmp-config.h>
+#include <net-snmp/net-snmp-features.h>
 
 #include <sys/types.h>
 #if HAVE_NETINET_IN_H
@@ -18,6 +19,13 @@
 #include <net-snmp/agent/table_dataset.h>
 #include "net-snmp/agent/sysORTable.h"
 #include "notification_log.h"
+
+netsnmp_feature_require(register_ulong_instance_context)
+netsnmp_feature_require(register_read_only_counter32_instance_context)
+netsnmp_feature_require(table_data_set_iterate)
+netsnmp_feature_require(delete_table_data_set)
+netsnmp_feature_require(table_dataset)
+netsnmp_feature_require(date_n_time)
 
 /*
  * column number definitions for table nlmLogTable

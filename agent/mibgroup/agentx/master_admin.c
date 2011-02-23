@@ -2,6 +2,7 @@
  *  AgentX Administrative request handling
  */
 #include <net-snmp/net-snmp-config.h>
+#include <net-snmp/net-snmp-features.h>
 
 #include <sys/types.h>
 #ifdef HAVE_STRING_H
@@ -41,6 +42,11 @@
 #include <net-snmp/agent/agent_sysORTable.h>
 #include "master.h"
 
+netsnmp_feature_require(unregister_mib_table_row)
+netsnmp_feature_require(trap_vars_with_context)
+netsnmp_feature_require(calculate_sectime_diff)
+netsnmp_feature_require(allocate_globalcacheid)
+netsnmp_feature_require(remove_index)
 
 netsnmp_session *
 find_agentx_session(netsnmp_session * session, int sessid)

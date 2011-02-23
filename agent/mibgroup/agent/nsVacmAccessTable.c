@@ -4,10 +4,15 @@
  */
 
 #include <net-snmp/net-snmp-config.h>
+#include <net-snmp/net-snmp-features.h>
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/library/vacm.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 #include "nsVacmAccessTable.h"
+
+netsnmp_feature_require(table_iterator_insert_context)
+netsnmp_feature_require(check_vb_storagetype)
+netsnmp_feature_require(check_vb_type_and_max_size)
 
 /** Initializes the nsVacmAccessTable module */
 void

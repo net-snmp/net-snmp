@@ -137,60 +137,90 @@ INSTALLUCDLIBS=libsnmp.$(LIB_EXTENSION)$(LIB_VERSION)
 
 #
 # Things to build
+#   - for the feature checking / removal / minimialist support these
+#     must be listed such that code requiring a feature must be listed
+#     *before* the code implementing the feature.
 #
 CSRCS=	snmp_client.c mib.c parse.c snmp_api.c snmp.c 		\
-	large_fd_set.c cert_util.c				\
 	snmp_auth.c asn1.c md5.c snmp_parse_args.c		\
 	system.c vacm.c int64.c read_config.c pkcs.c		\
 	snmp_debug.c tools.c  snmp_logging.c text_utils.c	\
-	snmpv3.c lcd_time.c keytools.c file_utils.c dir_utils.c \
+	large_fd_set.c cert_util.c snmp_openssl.c 		\
+	snmpv3.c lcd_time.c keytools.c                          \
 	scapi.c callback.c default_store.c snmp_alarm.c		\
 	data_list.c oid_stash.c fd_event_manager.c 		\
+	check_varbind.c 					\
 	mt_support.c snmp_enum.c snmp-tc.c snmp_service.c	\
 	snprintf.c						\
 	snmp_transport.c @transport_src_list@			\
 	snmp_secmod.c @security_src_list@ snmp_version.c        \
-	check_varbind.c container.c container_binary_array.c	\
 	container_null.c container_list_ssll.c container_iterator.c \
-	ucd_compat.c                               \
-	snmp_openssl.c @other_src_list@ @crypto_files_c@
+	ucd_compat.c		                                \
+	@other_src_list@ @crypto_files_c@        		\
+	dir_utils.c file_utils.c 	                        \
+	container.c container_binary_array.c	
 
 OBJS=	snmp_client.o mib.o parse.o snmp_api.o snmp.o 		\
-	large_fd_set.o cert_util.o				\
 	snmp_auth.o asn1.o md5.o snmp_parse_args.o		\
 	system.o vacm.o int64.o read_config.o pkcs.o 		\
 	snmp_debug.o tools.o  snmp_logging.o text_utils.o	\
-	snmpv3.o lcd_time.o keytools.o file_utils.o dir_utils.o \
+	large_fd_set.o cert_util.o snmp_openssl.o 		\
+	snmpv3.o lcd_time.o keytools.o                          \
 	scapi.o callback.o default_store.o snmp_alarm.o		\
 	data_list.o oid_stash.o fd_event_manager.o		\
+	check_varbind.o 					\
 	mt_support.o snmp_enum.o snmp-tc.o snmp_service.o	\
 	snprintf.o						\
 	snmp_transport.o @transport_obj_list@                   \
 	snmp_secmod.o @security_obj_list@ snmp_version.o        \
-	check_varbind.o container.o container_binary_array.o	\
 	container_null.o container_list_ssll.o container_iterator.o \
-	ucd_compat.o                               \
-        snmp_openssl.o @crypto_files_o@ @other_objs_list@ @LIBOBJS@
+	ucd_compat.o                               		\
+        @crypto_files_o@ @other_objs_list@ @LIBOBJS@ 		\
+	dir_utils.o file_utils.o 	                        \
+	container.o container_binary_array.o	
 
 LOBJS=	snmp_client.lo mib.lo parse.lo snmp_api.lo snmp.lo 	\
-	large_fd_set.lo cert_util.lo				\
 	snmp_auth.lo asn1.lo md5.lo snmp_parse_args.lo		\
 	system.lo vacm.lo int64.lo read_config.lo pkcs.lo	\
 	snmp_debug.lo tools.lo  snmp_logging.lo	 text_utils.lo	\
-	snmpv3.lo lcd_time.lo keytools.lo file_utils.lo dir_utils.lo \
-	scapi.lo callback.lo default_store.lo snmp_alarm.lo		\
+	large_fd_set.lo cert_util.lo snmp_openssl.lo 		\
+	snmpv3.lo lcd_time.lo keytools.lo                       \
+	scapi.lo callback.lo default_store.lo snmp_alarm.lo	\
 	data_list.lo oid_stash.lo fd_event_manager.lo		\
+	check_varbind.lo 					\
 	mt_support.lo snmp_enum.lo snmp-tc.lo snmp_service.lo	\
 	snprintf.lo						\
 	snmp_transport.lo @transport_lobj_list@                 \
 	snmp_secmod.lo @security_lobj_list@ snmp_version.lo     \
-	check_varbind.lo container.lo container_binary_array.lo	\
-	container_null.lo container_list_ssll.lo container_iterator.lo \
-	ucd_compat.lo                             \
-        snmp_openssl.lo @crypto_files_lo@ @other_lobjs_list@ @LTLIBOBJS@
+	container.lo container_binary_array.lo			\
+	ucd_compat.lo		                                \
+        @crypto_files_lo@ @other_lobjs_list@ @LTLIBOBJS@        \
+	dir_utils.lo file_utils.lo 	                        \
+	container_null.lo container_list_ssll.lo container_iterator.lo 
+
+FTOBJS=	snmp_client.ft mib.ft parse.ft snmp_api.ft snmp.ft 	\
+	snmp_auth.ft asn1.ft md5.ft snmp_parse_args.ft		\
+	system.ft vacm.ft int64.ft read_config.ft pkcs.ft	\
+	snmp_debug.ft tools.ft  snmp_logging.ft	 text_utils.ft	\
+	snmpv3.ft lcd_time.ft keytools.ft                       \
+	scapi.ft callback.ft default_store.ft snmp_alarm.ft	\
+	data_list.ft oid_stash.ft fd_event_manager.ft		\
+	check_varbind.ft 					\
+	mt_support.ft snmp_enum.ft snmp-tc.ft snmp_service.ft	\
+	snprintf.ft						\
+	snmp_transport.ft @transport_ftobj_list@                \
+	snmp_secmod.ft @security_ftobj_list@ snmp_version.ft    \
+	container.ft container_binary_array.ft	\
+	ucd_compat.ft		                             	\
+        @other_ftobjs_list@                     		\
+	large_fd_set.ft cert_util.ft snmp_openssl.ft 		\
+	dir_utils.ft file_utils.ft 	                        \
+	container_null.ft container_list_ssll.ft container_iterator.ft
 
 # just in case someone wants to remove libtool, change this to OBJS.
 TOBJS=$(LOBJS)
+
+FEATUREFILE     = $(top_builddir)/include/net-snmp/library/features.h
 
 # 
 CPPFLAGS = $(TOP_INCLUDES) -I. 	$(SNMPLIB_INCLUDES) @CPPFLAGS@

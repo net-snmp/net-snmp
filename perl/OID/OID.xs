@@ -279,14 +279,14 @@ nsop_get_indexes(oid1)
                      strcmp(tpnode->label + strlen(tpnode->label) - 5,
                             "Table"))) {
                     /* we're not within a table.  bad logic, little choice */
-                    netsnmp_free(buf);
+                    SNMP_FREE(buf);
                     RETVAL = NULL;
                     return;
                 }
             }
 
             if (!tpe) {
-                netsnmp_free(buf);
+                SNMP_FREE(buf);
                 RETVAL = NULL;
                 return;
             }
@@ -297,7 +297,7 @@ nsop_get_indexes(oid1)
                     (NULL ==
                      (tpe = get_tree(name, name_len,
                                      get_tree_head())))) {
-                    netsnmp_free(buf);
+                    SNMP_FREE(buf);
                     RETVAL = NULL;
                     return; /* XXX: better error recovery needed? */
                 }
@@ -320,14 +320,14 @@ nsop_get_indexes(oid1)
                     (NULL ==
                      (indexnode = get_tree(name, name_len,
                                            get_tree_head())))) {
-                    netsnmp_free(buf);
+                    SNMP_FREE(buf);
                     RETVAL = NULL;
                     return;             /* xxx mem leak */
                 }
                 vbdata.type = mib_to_asn_type(indexnode->type);
 
                 if (vbdata.type == (u_char) -1) {
-                    netsnmp_free(buf);
+                    SNMP_FREE(buf);
                     RETVAL = NULL;
                     return; /* XXX: not good.  half populated stack? */
                 }
@@ -351,7 +351,7 @@ nsop_get_indexes(oid1)
 
                 if (parse_one_oid_index(&oidp, &oidp_len, &vbdata, 0)
                     != SNMPERR_SUCCESS) {
-                    netsnmp_free(buf);
+                    SNMP_FREE(buf);
                     RETVAL = NULL;
                     return;
                 }
@@ -368,7 +368,7 @@ nsop_get_indexes(oid1)
                 snmp_free_var_internals(&vbdata);
                 av_push(myret, newSVpv((char *)buf, out_len));
             }
-            netsnmp_free(buf);
+            SNMP_FREE(buf);
             RETVAL = newRV((SV *)myret);
         }
     OUTPUT:

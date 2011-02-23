@@ -1,4 +1,5 @@
 #include <net-snmp/net-snmp-config.h>
+#include <net-snmp/net-snmp-features.h>
 
 #ifdef HAVE_STDLIB_H
 #include <stdlib.h>
@@ -21,6 +22,8 @@
 #include <net-snmp/library/snmp_enum.h>
 #include <net-snmp/library/tools.h>
 #include <net-snmp/library/snmp_assert.h>
+
+netsnmp_feature_provide(se_find_free_value_in_slist)
 
 struct snmp_enum_list_str {
     char           *name;
@@ -184,6 +187,8 @@ se_store_enum_list(struct snmp_enum_list *new_list,
     return;
 }
 
+netsnmp_feature_child_of(snmp_enum_store_list, snmp_enum)
+#ifndef NETSNMP_FEATURE_REMOVE_SNMP_ENUM_STORE_LIST
 void
 se_store_list(unsigned int major, unsigned int minor, char *type)
 {
@@ -192,6 +197,7 @@ se_store_list(unsigned int major, unsigned int minor, char *type)
     snprintf(token, sizeof(token), "%d:%d", major, minor);
     se_store_enum_list(se_find_list(major, minor), token, type);
 }
+#endif /* NETSNMP_FEATURE_REMOVE_SNMP_ENUM_STORE_LIST */
 
 struct snmp_enum_list *
 se_find_list(unsigned int major, unsigned int minor)
@@ -337,18 +343,19 @@ se_find_label_in_slist(const char *listname, int value)
     return (se_find_label_in_list(se_find_slist(listname), value));
 }
 
-
 int
 se_find_value_in_slist(const char *listname, const char *label)
 {
     return (se_find_value_in_list(se_find_slist(listname), label));
 }
 
+#ifndef NETSNMP_FEATURE_REMOVE_SE_FIND_FREE_VALUE_IN_SLIST
 int
 se_find_free_value_in_slist(const char *listname)
 {
     return (se_find_free_value_in_list(se_find_slist(listname)));
 }
+#endif /* NETSNMP_FEATURE_REMOVE_SE_FIND_FREE_VALUE_IN_SLIST */
 
 int
 se_add_pair_to_slist(const char *listname, char *label, int value)
@@ -433,12 +440,8 @@ se_clear_list(struct snmp_enum_list **list)
     return;
 }
 
-void
-se_clear_slist(const char *listname)
-{
-    se_clear_list(se_find_slist_ptr(listname));
-}
-
+netsnmp_feature_child_of(snmp_enum_store_slist, snmp_enum)
+#ifndef NETSNMP_FEATURE_REMOVE_SNMP_ENUM_STORE_SLIST
 void
 se_store_slist(const char *listname, char *type)
 {
@@ -455,6 +458,15 @@ se_store_slist_callback(int majorID, int minorID,
     se_store_slist((char *)clientargs, appname);
     return SNMPERR_SUCCESS;
 }
+#endif /* NETSNMP_FEATURE_REMOVE_SNMP_ENUM_STORE_SLIST */
+
+netsnmp_feature_child_of(snmp_enum_clear, snmp_enum)
+#ifndef NETSNMP_FEATURE_REMOVE_SNMP_ENUM_CLEAR
+void
+se_clear_slist(const char *listname)
+{
+    se_clear_list(se_find_slist_ptr(listname));
+}
 
 void
 se_clear_all_lists(void)
@@ -464,3 +476,4 @@ se_clear_all_lists(void)
     for (sptr = sliststorage; sptr != NULL; sptr = sptr->next)
         se_clear_list(&(sptr->list));
 }
+#endif /* NETSNMP_FEATURE_REMOVE_SNMP_ENUM_CLEAR */

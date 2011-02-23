@@ -1,4 +1,5 @@
 #include <net-snmp/net-snmp-config.h>
+#include <net-snmp/net-snmp-features.h>
 
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
@@ -11,6 +12,12 @@
 #include <strings.h>
 #endif
 
+netsnmp_feature_provide(row_merge)
+netsnmp_feature_child_of(row_merge, row_merge_all)
+netsnmp_feature_child_of(row_merge_all, mib_helpers)
+
+
+#ifndef NETSNMP_FEATURE_REMOVE_ROW_MERGE
 /** @defgroup row_merge row_merge
  *  Calls sub handlers with request for one row at a time.
  *  @ingroup utilities
@@ -38,6 +45,8 @@ netsnmp_get_row_merge_handler(int prefix_len)
 
 /** functionally the same as calling netsnmp_register_handler() but also
  * injects a row_merge handler at the same time for you. */
+netsnmp_feature_child_of(register_row_merge, row_merge_all)
+#ifndef NETSNMP_FEATURE_REMOVE_REGISTER_ROW_MERGE
 int
 netsnmp_register_row_merge(netsnmp_handler_registration *reginfo)
 {
@@ -45,6 +54,7 @@ netsnmp_register_row_merge(netsnmp_handler_registration *reginfo)
 		    netsnmp_get_row_merge_handler(reginfo->rootoid_len+1));
     return netsnmp_register_handler(reginfo);
 }
+#endif /* NETSNMP_FEATURE_REMOVE_REGISTER_ROW_MERGE */
 
 static void
 _rm_status_free(void *mem)
@@ -362,5 +372,10 @@ netsnmp_init_row_merge(void)
     netsnmp_register_handler_by_name("row_merge",
                                      netsnmp_get_row_merge_handler(-1));
 }
+#else /* NETSNMP_FEATURE_REMOVE_ROW_MERGE */
+netsnmp_feature_unused(row_merge);
+#endif /* NETSNMP_FEATURE_REMOVE_ROW_MERGE */
+
+
 /**  @} */
 

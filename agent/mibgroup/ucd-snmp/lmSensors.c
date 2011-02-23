@@ -66,6 +66,7 @@
  */
 
 #include <net-snmp/net-snmp-config.h>
+#include <net-snmp/net-snmp-features.h>
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 
@@ -75,6 +76,9 @@
 
 #include "util_funcs/header_simple_table.h"
 #include <time.h>
+
+netsnmp_feature_require(table_container)
+
 
 /*
  * Load required drivers and libraries.

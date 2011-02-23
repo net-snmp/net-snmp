@@ -1,4 +1,5 @@
 #include <net-snmp/net-snmp-config.h>
+#include <net-snmp/net-snmp-features.h>
 
 #if HAVE_LIMITS_H
 #include <limits.h>
@@ -110,6 +111,9 @@
 #include "struct.h"
 #include "util_funcs/header_generic.h"
 #include "vmstat.h"
+
+netsnmp_feature_require(hardware_cpu_load)
+
 
 FindVarMethod var_extensible_vmstat;
 

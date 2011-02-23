@@ -23,8 +23,15 @@
  * start be including the appropriate header files 
  */
 #include <net-snmp/net-snmp-config.h>
+#include <net-snmp/net-snmp-features.h>
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
+
+/*
+ * if --enable-minimalist has been turned on, we need to register
+ * the support we need so the needed functions aren't removed at compile time
+ */
+netsnmp_feature_require(long_instance)
 
 /*
  * Then, we declare the variables we want to be accessed 

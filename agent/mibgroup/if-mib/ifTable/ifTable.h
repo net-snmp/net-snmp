@@ -451,6 +451,7 @@ config_exclude(mibII/interfaces)
 
 
 
+#ifndef NETSNMP_NO_WRITE_SUPPORT
     /*
      *********************************************************************
      * SET function declarations
@@ -666,7 +667,7 @@ config_exclude(mibII/interfaces)
 
 
     int             ifTable_check_dependencies(ifTable_rowreq_ctx * ctx);
-
+#endif /* !NETSNMP_NO_WRITE_SUPPORT */
 
     /*
      * DUMMY markers, ignore

@@ -4,6 +4,7 @@
  * $Id$
  */
 #include <net-snmp/net-snmp-config.h>
+#include <net-snmp/net-snmp-features.h>
 #include <net-snmp/net-snmp-includes.h>
 
 #include <net-snmp/agent/net-snmp-agent-includes.h>
@@ -19,6 +20,10 @@
 
 #include <fcntl.h>
 
+netsnmp_feature_require(text_utils)
+netsnmp_feature_provide(udp_endpoint)
+netsnmp_feature_child_of(udp_endpoint_writable, udp_endpoint)
+
 static int _load4(netsnmp_container *container, u_int flags);
 #if defined (NETSNMP_ENABLE_IPV6)
 static int _load6(netsnmp_container *container, u_int flags);
@@ -30,6 +35,7 @@ static int _load6(netsnmp_container *container, u_int flags);
  * @retval  0: success
  * @retval <0: error
  */
+#ifndef NETSNMP_FEATURE_REMOVE_UDP_ENDPOINT_WRITABLE
 int
 netsnmp_arch_udp_endpoint_entry_init(netsnmp_udp_endpoint_entry *entry)
 {
@@ -71,6 +77,7 @@ netsnmp_arch_udp_endpoint_delete(netsnmp_udp_endpoint_entry *entry)
     /** xxx-rks:9 udp_endpoint delete not implemented */
     return -1;
 }
+#endif /* NETSNMP_FEATURE_REMOVE_UDP_ENDPOINT_WRITABLE */
 
 
 /**

@@ -9,6 +9,7 @@
  * distributed with the Net-SNMP package.
  */
 #include <net-snmp/net-snmp-config.h>
+#include <net-snmp/net-snmp-features.h>
 
 #if HAVE_STRING_H
 #include <string.h>
@@ -20,6 +21,9 @@
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 
 #include <net-snmp/agent/cache_handler.h>
+
+netsnmp_feature_provide(cache_find_by_oid)
+netsnmp_feature_provide(cache_get_head)
 
 static netsnmp_cache  *cache_head = NULL;
 static int             cache_outstanding_valid = 0;
@@ -116,6 +120,7 @@ void            release_cached_resources(unsigned int regNo,
 static void
 _cache_free( netsnmp_cache *cache );
 
+#ifndef NETSNMP_FEATURE_REMOVE_CACHE_GET_HEAD
 /** get cache head
  * @internal
  * unadvertised function to get cache head. You really should not
@@ -126,7 +131,9 @@ netsnmp_cache_get_head(void)
 {
     return cache_head;
 }
+#endif /* NETSNMP_FEATURE_REMOVE_CACHE_GET_HEAD */
 
+#ifndef NETSNMP_FEATURE_REMOVE_CACHE_FIND_BY_OID
 /** find existing cache
  */
 netsnmp_cache *
@@ -142,6 +149,7 @@ netsnmp_cache_find_by_oid(const oid * rootoid, int rootoid_len)
     
     return NULL;
 }
+#endif /* NETSNMP_FEATURE_REMOVE_CACHE_FIND_BY_OID */
 
 /** returns a cache
  */
@@ -405,6 +413,8 @@ netsnmp_get_cache_handler(int timeout, NetsnmpCacheLoad * load_hook,
 
 /** functionally the same as calling netsnmp_register_handler() but also
  * injects a cache handler at the same time for you. */
+netsnmp_feature_child_of(netsnmp_cache_handler_register,netsnmp_unused)
+#ifndef NETSNMP_FEATURE_REMOVE_NETSNMP_CACHE_HANDLER_REGISTER
 int
 netsnmp_cache_handler_register(netsnmp_handler_registration * reginfo,
                                netsnmp_cache* cache)
@@ -415,9 +425,12 @@ netsnmp_cache_handler_register(netsnmp_handler_registration * reginfo,
     netsnmp_inject_handler(reginfo, handler);
     return netsnmp_register_handler(reginfo);
 }
+#endif /* NETSNMP_FEATURE_REMOVE_NETSNMP_CACHE_HANDLER_REGISTER */
 
 /** functionally the same as calling netsnmp_register_handler() but also
  * injects a cache handler at the same time for you. */
+netsnmp_feature_child_of(netsnmp_register_cache_handler,netsnmp_unused)
+#ifndef NETSNMP_FEATURE_REMOVE_NETSNMP_REGISTER_CACHE_HANDLER
 int
 netsnmp_register_cache_handler(netsnmp_handler_registration * reginfo,
                                int timeout, NetsnmpCacheLoad * load_hook,
@@ -431,6 +444,7 @@ netsnmp_register_cache_handler(netsnmp_handler_registration * reginfo,
     netsnmp_inject_handler(reginfo, handler);
     return netsnmp_register_handler(reginfo);
 }
+#endif /* NETSNMP_FEATURE_REMOVE_NETSNMP_REGISTER_CACHE_HANDLER */
 
 static char *
 _build_cache_name(const char *name)
@@ -472,11 +486,14 @@ netsnmp_cache_reqinfo_extract(netsnmp_agent_request_info * reqinfo,
 }
 
 /** Extract the cache information for a given request (PDU) */
+netsnmp_feature_child_of(netsnmp_extract_cache_info,netsnmp_unused)
+#ifndef NETSNMP_FEATURE_REMOVE_NETSNMP_EXTRACT_CACHE_INFO
 netsnmp_cache  *
 netsnmp_extract_cache_info(netsnmp_agent_request_info * reqinfo)
 {
     return netsnmp_cache_reqinfo_extract(reqinfo, CACHE_NAME);
 }
+#endif /* NETSNMP_FEATURE_REMOVE_NETSNMP_EXTRACT_CACHE_INFO */
 
 
 /** Check if the cache timeout has passed. Sets and return the expired flag. */
@@ -523,11 +540,14 @@ netsnmp_cache_is_valid(netsnmp_agent_request_info * reqinfo,
 /** Is the cache valid for a given request?
  * for backwards compatability. netsnmp_cache_is_valid() is preferred.
  */
+netsnmp_feature_child_of(netsnmp_is_cache_valid,netsnmp_unused)
+#ifndef NETSNMP_FEATURE_REMOVE_NETSNMP_IS_CACHE_VALID
 int
 netsnmp_is_cache_valid(netsnmp_agent_request_info * reqinfo)
 {
     return netsnmp_cache_is_valid(reqinfo, CACHE_NAME);
 }
+#endif /* NETSNMP_FEATURE_REMOVE_NETSNMP_IS_CACHE_VALID */
 
 /** Implements the cache handler */
 int
@@ -577,6 +597,7 @@ netsnmp_cache_helper_handler(netsnmp_mib_handler * handler,
     case MODE_GET:
     case MODE_GETNEXT:
     case MODE_GETBULK:
+#ifndef NETSNMP_NO_WRITE_SUPPORT
     case MODE_SET_RESERVE1:
 
         /*
@@ -620,6 +641,7 @@ netsnmp_cache_helper_handler(netsnmp_mib_handler * handler,
         }
         /** next handler called automatically - 'AUTO_NEXT' */
         break;
+#endif /* NETSNMP_NO_WRITE_SUPPORT */
 
     default:
         snmp_log(LOG_WARNING, "cache_handler: Unrecognised mode (%d)\n",

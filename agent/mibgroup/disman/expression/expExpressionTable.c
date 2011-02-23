@@ -21,6 +21,7 @@
  * This should always be included first before anything else 
  */
 #include <net-snmp/net-snmp-config.h>
+#include <net-snmp/net-snmp-features.h>
 #if HAVE_STDLIB_H
 #include <stdlib.h>
 #endif
@@ -45,6 +46,7 @@
 #include "expObjectTable.h"
 #include "expValueTable.h"
 
+netsnmp_feature_require(tdomain_support)
 
 /*
  * expExpressionTable_variables_oid:

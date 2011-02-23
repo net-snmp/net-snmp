@@ -149,7 +149,6 @@ vacm_context_handler(netsnmp_mib_handler *handler,
                                      strlen(context_ptr->context_name));
 
             break;
-
         default:
             /*
              * We should never get here, getnext already have been
@@ -159,8 +158,6 @@ vacm_context_handler(netsnmp_mib_handler *handler,
                      "vacm_context table accessed as mode=%d.  We're improperly registered!",
                      reqinfo->mode);
             break;
-
-
         }
     }
 

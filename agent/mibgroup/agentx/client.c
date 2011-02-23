@@ -3,6 +3,7 @@
  */
 
 #include <net-snmp/net-snmp-config.h>
+#include <net-snmp/net-snmp-features.h>
 
 #include <stdio.h>
 #include <errno.h>
@@ -40,6 +41,8 @@
 #include "agentx/protocol.h"
 #include "agentx/client.h"
 #include "agentx/subagent.h"
+
+netsnmp_feature_require(set_agent_uptime)
 
         /*
          * AgentX handling utility routines

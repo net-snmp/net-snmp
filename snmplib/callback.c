@@ -17,6 +17,7 @@
  *  @{
  */
 #include <net-snmp/net-snmp-config.h>
+#include <net-snmp/net-snmp-features.h>
 #include <sys/types.h>
 #include <stdio.h>
 #if HAVE_STDLIB_H
@@ -367,6 +368,8 @@ snmp_call_callbacks(int major, int minor, void *caller_arg)
     return SNMPERR_SUCCESS;
 }
 
+netsnmp_feature_child_of(callback_count, callbacks)
+#ifndef NETSNMP_FEATURE_REMOVE_CALLBACK_COUNT
 int
 snmp_count_callbacks(int major, int minor)
 {
@@ -386,6 +389,7 @@ snmp_count_callbacks(int major, int minor)
 
     return count;
 }
+#endif /* NETSNMP_FEATURE_REMOVE_CALLBACK_COUNT */
 
 int
 snmp_callback_available(int major, int minor)
@@ -564,6 +568,8 @@ clear_callback(void)
     }
 }
 
+netsnmp_feature_child_of(callback_list, callbacks)
+#ifndef NETSNMP_FEATURE_REMOVE_CALLBACK_LIST
 struct snmp_gen_callback *
 snmp_callback_list(int major, int minor)
 {
@@ -572,4 +578,5 @@ snmp_callback_list(int major, int minor)
 
     return (thecallbacks[major][minor]);
 }
+#endif /* NETSNMP_FEATURE_REMOVE_CALLBACK_LIST */
 /**  @} */

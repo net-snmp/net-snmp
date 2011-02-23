@@ -254,6 +254,21 @@ extern          "C" {
 					   void *clientarg);
     NETSNMP_IMPORT
     void            clear_user_list(void);
+    NETSNMP_IMPORT
+    void            shutdown_usm(void);
+
+    NETSNMP_IMPORT
+    int             usm_create_user_from_session(netsnmp_session * session);
+    SecmodPostDiscovery usm_create_user_from_session_hook;
+    NETSNMP_IMPORT
+    void            usm_parse_create_usmUser(const char *token,
+                                             char *line);
+    NETSNMP_IMPORT
+    const oid      *get_default_authtype(size_t *);
+    NETSNMP_IMPORT
+    const oid      *get_default_privtype(size_t *);
+    void            snmpv3_authtype_conf(const char *word, char *cptr);
+    void            snmpv3_privtype_conf(const char *word, char *cptr);
 
 #ifdef __cplusplus
 }

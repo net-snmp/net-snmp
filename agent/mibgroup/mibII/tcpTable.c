@@ -15,6 +15,7 @@
  */
 
 #include <net-snmp/net-snmp-config.h>
+#include <net-snmp/net-snmp-features.h>
 #include "mibII_common.h"
 
 #if HAVE_NETINET_TCP_H
@@ -288,11 +289,16 @@ tcpTable_handler(netsnmp_mib_handler          *handler,
     return SNMP_ERR_NOERROR;
 }
 
+netsnmp_feature_provide(tcp_count_connections)
+
+
+#ifndef NETSNMP_FEATURE_REMOVE_TCP_COUNT_CONNECTIONS
 int
 TCP_Count_Connections( void ) {
     tcpTable_load(NULL, NULL);
     return tcp_estab;
 }
+#endif /* NETSNMP_FEATURE_REMOVE_TCP_COUNT_CONNECTIONS */
 
 	/*
 	 * Two forms of iteration hook routines:

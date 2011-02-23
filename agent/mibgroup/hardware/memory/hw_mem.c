@@ -87,9 +87,12 @@ netsnmp_memory_info *netsnmp_memory_get_next_byIdx( int idx, int type ) {
 
 
 
+netsnmp_feature_child_of(memory_get_cache, netsnmp_unused)
+#ifndef NETSNMP_FEATURE_REMOVE_MEMORY_GET_CACHE
 netsnmp_cache *netsnmp_memory_get_cache( void ) {
     return _mem_cache;
 }
+#endif /* NETSNMP_FEATURE_REMOVE_MEMORY_GET_CACHE */
 
 int netsnmp_memory_load( void ) {
      return netsnmp_cache_check_and_reload( _mem_cache );

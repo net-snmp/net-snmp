@@ -5,6 +5,7 @@
  */
 
 #include <net-snmp/net-snmp-config.h>
+#include <net-snmp/net-snmp-features.h>
 #include "mibII_common.h"
 
 #if HAVE_STDLIB_H
@@ -91,7 +92,9 @@ perfstat_id_t ps_name;
 int  hz = 1000;
 #endif
 
+#ifdef NETSNMP_FEATURE_REMOVE_TCP_COUNT_CONNECTIONS
 extern int TCP_Count_Connections( void );
+#endif /* NETSNMP_FEATURE_REMOVE_TCP_COUNT_CONNECTIONS */
         /*********************
 	 *
 	 *  Initialisation & common implementation functions
@@ -367,11 +370,14 @@ tcp_handler(netsnmp_mib_handler          *handler,
         ret_value = tcpstat.tcps_drops;
         break;
     case TCPCURRESTAB:
-#ifdef USING_MIBII_TCPTABLE_MODULE
-        ret_value = TCP_Count_Connections();
-#else
-        ret_value = 0;
+#ifdef NETSNMP_FEATURE_CHECKING
+        netsnmp_feature_want(tcp_count_connections)
 #endif
+#ifdef NETSNMP_FEATURE_HAS_TCP_COUNT_CONNECTIONS
+        ret_value = TCP_Count_Connections();
+#else /*  NETSNMP_FEATURE_HAS_TCP_COUNT_CONNECTIONS */
+        ret_value = 0;
+#endif /*  NETSNMP_FEATURE_HAS_TCP_COUNT_CONNECTIONS */
         type = ASN_GAUGE;
         break;
     case TCPINSEGS:
@@ -546,6 +552,7 @@ tcp_handler(netsnmp_mib_handler          *handler,
 
     case MODE_GETNEXT:
     case MODE_GETBULK:
+#ifndef NETSNMP_NO_WRITE_SUPPORT
     case MODE_SET_RESERVE1:
     case MODE_SET_RESERVE2:
     case MODE_SET_ACTION:
@@ -555,6 +562,7 @@ tcp_handler(netsnmp_mib_handler          *handler,
         snmp_log(LOG_WARNING, "mibII/tcp: Unsupported mode (%d)\n",
                                reqinfo->mode);
         break;
+#endif /* !NETSNMP_NO_WRITE_SUPPORT */
     default:
         snmp_log(LOG_WARNING, "mibII/tcp: Unrecognised mode (%d)\n",
                                reqinfo->mode);

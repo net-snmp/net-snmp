@@ -3,12 +3,15 @@
  */
 
 #include <net-snmp/net-snmp-config.h>
+#include <net-snmp/net-snmp-features.h>
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 #include <net-snmp/library/snmp_api.h>
 #include "snmpTsmStats.h"
 
 static netsnmp_handler_registration* _myreg = NULL;
+
+netsnmp_feature_require(helper_statistics)
 
 /** Initializes the snmpTsmStats module */
 void
@@ -36,6 +39,8 @@ init_snmpTsmStats(void)
     }
 }
 
+netsnmp_feature_child_of(shutdown_snmptsmsession, netsnmp_unused)
+#ifndef NETSNMP_FEATURE_REMOVE_SHUTDOWN_SNMPTSMSESSION
 void
 shutdown_snmpTsmSession(void)
 {
@@ -44,3 +49,4 @@ shutdown_snmpTsmSession(void)
         _myreg = NULL;
     }
 }
+#endif /* NETSNMP_FEATURE_REMOVE_SHUTDOWN_SNMPTSMSESSION */

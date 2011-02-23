@@ -784,6 +784,7 @@ var_snmpTargetAddrEntry(struct variable * vp,
      */
 
     switch (vp->magic) {
+#ifndef NETSNMP_NO_WRITE_SUPPORT
     case SNMPTARGETADDRTDOMAIN:
         *write_method = write_snmpTargetAddrTDomain;
         break;
@@ -808,11 +809,13 @@ var_snmpTargetAddrEntry(struct variable * vp,
     case SNMPTARGETADDRROWSTATUS:
         *write_method = write_snmpTargetAddrRowStatus;
         break;
+#endif /*  !NETSNMP_NO_WRITE_SUPPORT */
     default:
         *write_method = NULL;
     }
 
-    *var_len = sizeof(long_ret);        /* assume an integer and change later if not */
+    /* assume an integer and change later if not */
+    *var_len = sizeof(long_ret);
 
     /*
      * look for OID in current table 
@@ -884,10 +887,12 @@ var_snmpTargetAddrEntry(struct variable * vp,
                     "unknown sub-id %d in var_snmpTargetAddrEntry\n",
                     vp->magic));
     }
+
     return NULL;
 }                               /* var_snmpTargetAddrEntry */
 
 
+#ifndef NETSNMP_NO_WRITE_SUPPORT
 int
 write_snmpTargetAddrTDomain(int action,
                             u_char * var_val,
@@ -1675,6 +1680,7 @@ write_targetSpinLock(int action,
     return SNMP_ERR_NOERROR;
 }
 
+#endif /* !NETSNMP_NO_WRITE_SUPPORT */
 
 
 u_char         *
@@ -1686,12 +1692,20 @@ var_targetSpinLock(struct variable * vp,
 {
     if (header_generic(vp, name, length, exact, var_len, write_method) ==
         MATCH_FAILED) {
+#ifndef NETSNMP_NO_WRITE_SUPPORT
         *write_method = write_targetSpinLock;
+#else
+		*write_method = NULL;
+#endif /* !NETSNMP_NO_WRITE_SUPPORT */
         return NULL;
     }
     if (vp->magic == SNMPTARGETSPINLOCK) {
-        *write_method = write_targetSpinLock;
         *var_len = sizeof(unsigned long);
+#ifndef NETSNMP_NO_WRITE_SUPPORT
+        *write_method = write_targetSpinLock;
+#else
+		*write_method = NULL;
+#endif /* !NETSNMP_NO_WRITE_SUPPORT */
         return (u_char *) & (snmpTargetSpinLock);
     }
     return NULL;

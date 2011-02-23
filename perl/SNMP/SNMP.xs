@@ -1242,7 +1242,7 @@ void *cb_data;
 	cp = transport->f_fmtaddr(transport, pdu->transport_data,
 				  pdu->transport_data_length);
 	av_push(traplist, newSVpv(cp, strlen(cp)));
-	netsnmp_free(cp);
+	SNMP_FREE(cp);
       } else {
 	/*  This shouldn't ever happen; every session has a transport.  */
 	av_push(traplist, newSVpv("", 0));
@@ -2573,7 +2573,7 @@ void snmp_return_err( struct snmp_session *ss, SV *err_str, SV *err_num, SV *err
 	sv_catpv(err_str, errstr);
 	sv_setiv(err_num, liberr);
 	sv_setiv(err_ind, err);
-	netsnmp_free(errstr);
+	SNMP_FREE(errstr);
 }
 
 
@@ -2854,12 +2854,12 @@ snmp_new_v3_session(version, peer, retries, timeout, sec_name, sec_level, sec_en
            }
         end:
            RETVAL = ss;
-	   netsnmp_free(session.securityPrivLocalKey);
-	   netsnmp_free(session.securityPrivProto);
-	   netsnmp_free(session.securityAuthLocalKey);
-	   netsnmp_free(session.securityAuthProto);
-	   netsnmp_free(session.contextEngineID);
-	   netsnmp_free(session.securityEngineID);
+	   SNMP_FREE(session.securityPrivLocalKey);
+	   SNMP_FREE(session.securityPrivProto);
+	   SNMP_FREE(session.securityAuthLocalKey);
+	   SNMP_FREE(session.securityAuthProto);
+	   SNMP_FREE(session.contextEngineID);
+	   SNMP_FREE(session.securityEngineID);
 	}
         OUTPUT:
         RETVAL
@@ -2945,12 +2945,12 @@ snmp_new_tunneled_session(version, peer, retries, timeout, sec_name, sec_level, 
            }
         end:
            RETVAL = ss;
-	   netsnmp_free(session.securityPrivLocalKey);
-	   netsnmp_free(session.securityPrivProto);
-	   netsnmp_free(session.securityAuthLocalKey);
-	   netsnmp_free(session.securityAuthProto);
-	   netsnmp_free(session.contextEngineID);
-	   netsnmp_free(session.securityEngineID);
+	   SNMP_FREE(session.securityPrivLocalKey);
+	   SNMP_FREE(session.securityPrivProto);
+	   SNMP_FREE(session.securityAuthLocalKey);
+	   SNMP_FREE(session.securityAuthProto);
+	   SNMP_FREE(session.contextEngineID);
+	   SNMP_FREE(session.securityEngineID);
 	}
         OUTPUT:
         RETVAL

@@ -36,6 +36,8 @@ INSTALL_PREFIX  = $(DESTDIR)
 INSTALL		= $(LIBTOOL) --mode=install @INSTALL@
 UNINSTALL	= $(LIBTOOL) --mode=uninstall rm -f
 LIBTOOLCLEAN	= $(LIBTOOL) --mode=clean rm -f
+FEATURECHECK	= $(top_srcdir)/local/minimalist/feature-check
+FEATUREPROCESS	= $(top_srcdir)/local/minimalist/feature-remove
 INSTALL_DATA    = @INSTALL_DATA@
 SED		= @SED@
 LN_S		= @LN_S@

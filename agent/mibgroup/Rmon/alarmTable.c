@@ -10,10 +10,16 @@
  */
 
 #include <net-snmp/net-snmp-config.h>
+#include <net-snmp/net-snmp-features.h>
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 #include "utilities/iquery.h"
 #include "alarmTable.h"
+
+netsnmp_feature_require(iquery)
+netsnmp_feature_require(query_set_default_session)
+netsnmp_feature_require(table_tdata)
+netsnmp_feature_require(check_vb_type_and_max_size)
 
 /** Initializes the alarmTable module */
 void

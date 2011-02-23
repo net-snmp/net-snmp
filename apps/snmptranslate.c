@@ -202,7 +202,8 @@ main(int argc, char *argv[])
 #endif /* NETSNMP_DISABLE_MIB_LOADING */
                 case 'd':
                     description = 1;
-                    snmp_set_save_descriptions(1);
+                    netsnmp_ds_set_boolean(NETSNMP_DS_LIBRARY_ID, 
+                                           NETSNMP_DS_LIB_SAVE_MIB_DESCRS, 1);
                     break;
                 case 'B':
                     find_all = 1;
@@ -261,7 +262,8 @@ main(int argc, char *argv[])
 
     do {
         name_length = MAX_OID_LEN;
-        if (snmp_get_random_access()) {
+        if (netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID, 
+				  NETSNMP_DS_LIB_RANDOM_ACCESS)) {
 #ifndef NETSNMP_DISABLE_MIB_LOADING
             if (!get_node(current_name, name, &name_length)) {
 #endif /* NETSNMP_DISABLE_MIB_LOADING */

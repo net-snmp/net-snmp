@@ -371,7 +371,7 @@ shutdown_agent(void) {
     clear_sec_mod();
     clear_snmp_enum();
     clear_callback();
-    clear_user_list();
+    shutdown_secmod();
     netsnmp_addrcache_destroy();
 #ifdef NETSNMP_CAN_USE_NLIST
     free_kmem();

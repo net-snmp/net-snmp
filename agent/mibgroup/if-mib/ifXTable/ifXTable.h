@@ -218,7 +218,7 @@ config_require(if-mib/ifXTable/ifXTable_data_access)
      * OID: .1.3.6.1.2.1.31.1.1, length: 9
      */
 
-
+#ifndef NETSNMP_NO_WRITE_SUPPORT
     int             ifXTable_undo_setup(ifXTable_rowreq_ctx * rowreq_ctx);
     int             ifXTable_undo_cleanup(ifXTable_rowreq_ctx *
                                           rowreq_ctx);
@@ -438,7 +438,7 @@ config_require(if-mib/ifXTable/ifXTable_data_access)
 
 
     int             ifXTable_check_dependencies(ifXTable_rowreq_ctx * ctx);
-
+#endif /* !NETSNMP_NO_WRITE_SUPPORT */
 
     /*
      * DUMMY markers, ignore
