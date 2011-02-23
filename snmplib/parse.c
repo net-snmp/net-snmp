@@ -5243,7 +5243,7 @@ find_node(const char *name, struct tree *subtree)
     return (find_tree_node(name, -1));
 }
 
-netsnmp_feature_child_of(parse_find_node2, netsnmp_unsused)
+netsnmp_feature_child_of(parse_find_node2, netsnmp_unused)
 #ifndef NETSNMP_FEATURE_REMOVE_PARSE_FIND_NODE2
 struct tree    *
 find_node2(const char *name, const char *module)
