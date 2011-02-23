@@ -177,7 +177,7 @@ int
 free_enginetime_on_shutdown(int majorid, int minorid, void *serverarg,
 			    void *clientarg)
 {
-    char engineID[SNMP_MAX_ENG_SIZE];
+    u_char engineID[SNMP_MAX_ENG_SIZE];
     size_t engineID_len = sizeof(engineID);
 
     DEBUGMSGTL(("snmpv3", "free enginetime callback called\n"));
