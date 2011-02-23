@@ -1,7 +1,5 @@
 /*
- *  tcpConnTable MIB architecture support
- *
- * $Id: tcpConn_linux.c 18994 2010-06-16 13:13:25Z dts12 $
+ *  UDP MIB architecture support for FreeBSD/DragonFlyBsd
  */
 #include <net-snmp/net-snmp-config.h>
 #include <net-snmp/net-snmp-includes.h>
@@ -152,6 +150,11 @@ _load(netsnmp_container *container, u_int load_flags)
 	xig = (struct xinpcb  *) ((char *) xig + xig->xi_len);
 #else
 	xig = (struct xinpgen *) ((char *) xig + xig->xig_len);
+#endif
+
+#if !defined(NETSNMP_ENABLE_IPV6)
+        if (pcb.xi_inp.inp_vflag & INP_IPV6)
+	    continue;
 #endif
 
         entry = netsnmp_access_udp_endpoint_entry_create();
