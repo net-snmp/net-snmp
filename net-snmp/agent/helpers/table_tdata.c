@@ -629,7 +629,7 @@ netsnmp_tdata_compare_subtree_oid(netsnmp_tdata_row     *row,
                                  compareto,   compareto_len);
 }
 #else /* NETSNMP_FEATURE_REMOVE_TABLE_TDATA */
-netsnmp_feature_unesed(table_tdata);
+netsnmp_feature_unused(table_tdata);
 #endif /* NETSNMP_FEATURE_REMOVE_TABLE_TDATA */
 
 
