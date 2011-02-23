@@ -4536,6 +4536,8 @@ if test "x$enable_minimalist" = "xyes"; then
    # we'll assume the mini agent is desired here as well
    mini_agent="yes"
    FEATURETARGS="features"
+   # needed to bootstrap later checks
+   echo "" > include/net-snmp/feature-details.h
 
 $as_echo "#define NETSNMP_MINIMAL_CODE 1" >>confdefs.h
 
@@ -18189,6 +18191,7 @@ while test "x$new_transport_list" != "x"; do
 /* end confdefs.h.  */
 
 #include NETSNMP_SYSTEM_INCLUDE_FILE
+#define NETSNMP_FEATURE_CHECKING
 #define NET_SNMP_CONFIG_H
 #undef config_require
 #define config_require(foo) config_checkit_require(foo)
@@ -20182,7 +20185,7 @@ done
 $as_echo_n "checking for and configuring mib modules to use... " >&6; }
 
 # set up the CPP command
-MODULECPP="$CPP $PARTIALTARGETFLAGS -I${srcdir}/include -I${srcdir}/agent/mibgroup"
+MODULECPP="$CPP $PARTIALTARGETFLAGS -DNETSNMP_FEATURE_CHECKING -I${srcdir}/include -I${srcdir}/agent/mibgroup"
 if test "x$enable_mfd_rewrites" = "xyes"; then
   MODULECPP="$MODULECPP -DNETSNMP_ENABLE_MFD_REWRITES"
 fi

@@ -765,6 +765,8 @@ if test "x$enable_minimalist" = "xyes"; then
    # we'll assume the mini agent is desired here as well
    mini_agent="yes"
    FEATURETARGS="features"
+   # needed to bootstrap later checks
+   echo "" > include/net-snmp/feature-details.h
    AC_DEFINE(NETSNMP_MINIMAL_CODE, 1,
      [Define if you want to remove all non-essential code features.])
 fi
