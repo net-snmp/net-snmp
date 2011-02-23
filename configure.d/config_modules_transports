@@ -71,6 +71,7 @@ while test "x$new_transport_list" != "x"; do
       rm -f conftest.$ac_ext module_tmp_header.h
       AC_LANG_CONFTEST([AC_LANG_SOURCE([[
 #include NETSNMP_SYSTEM_INCLUDE_FILE
+#define NETSNMP_FEATURE_CHECKING
 #define NET_SNMP_CONFIG_H
 #undef config_require
 #define config_require(foo) config_checkit_require(foo)
