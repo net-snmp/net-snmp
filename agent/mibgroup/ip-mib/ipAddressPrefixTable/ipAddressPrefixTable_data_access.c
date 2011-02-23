@@ -205,7 +205,7 @@ ipAddressPrefixTable_container_load(netsnmp_container *container)
     ipAddressTable_rowreq_ctx *addr_rowreq_ctx;
     netsnmp_container *addr_container;
     netsnmp_iterator *addr_it;
-    size_t          count = 0;
+    int             count = 0;
     u_char          tmp_pfx[NETSNMP_ACCESS_IPADDRESS_BUF_SIZE];
 
     DEBUGMSGTL(("verbose:ipAddressPrefixTable:ipAddressPrefixTable_container_load", "called\n"));
