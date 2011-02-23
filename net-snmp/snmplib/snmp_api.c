@@ -38,6 +38,7 @@ SOFTWARE.
  * snmp_api.c - API for access to snmp.
  */
 #include <net-snmp/net-snmp-config.h>
+#include <net-snmp/net-snmp-features.h>
 
 #include <stdio.h>
 #include <ctype.h>
@@ -135,6 +136,9 @@ SOFTWARE.
 #include <net-snmp/library/snmp_service.h>
 #include <net-snmp/library/vacm.h>
 
+netsnmp_feature_provide(statistics)
+netsnmp_feature_child_of(oid_is_subtree, snmp_api)
+
 #if defined(NETSNMP_USE_OPENSSL) && defined(HAVE_LIBSSL)
 extern void netsnmp_certs_init(void);
 extern void netsnmp_certs_shutdown(void);
@@ -222,18 +226,6 @@ struct snmp_internal_session {
     u_char         *packet;
     size_t          packet_len, packet_size;
 };
-
-/*
- * The list of active/open sessions.
- */
-struct session_list {
-    struct session_list *next;
-    netsnmp_session *session;
-    netsnmp_transport *transport;
-    struct snmp_internal_session *internal;
-};
-
-
 
 static const char *api_errors[-SNMPERR_MAX + 1] = {
     "No error",                 /* SNMPERR_SUCCESS */
@@ -354,7 +346,6 @@ static int      snmp_parse(void *, netsnmp_session *, netsnmp_pdu *,
 
 static void     snmpv3_calc_msg_flags(int, int, u_char *);
 static int      snmpv3_verify_msg(netsnmp_request_list *, netsnmp_pdu *);
-static int      snmpv3_build_probe_pdu(netsnmp_pdu **);
 static int      snmpv3_build(u_char ** pkt, size_t * pkt_len,
                              size_t * offset, netsnmp_session * session,
                              netsnmp_pdu *pdu);
@@ -394,8 +385,10 @@ snmp_pdu_type(int type)
         return "GETNEXT";
     case SNMP_MSG_RESPONSE:
         return "RESPONSE";
+#ifndef NETSNMP_NO_WRITE_SUPPORT
     case SNMP_MSG_SET:
         return "SET";
+#endif /* !NETSNMP_NO_WRITE_SUPPORT */
     case SNMP_MSG_GETBULK:
         return "GETBULK";
     case SNMP_MSG_INFORM:
@@ -913,10 +906,9 @@ snmp_shutdown(const char *type)
     netsnmp_clear_tdomain_list();
     clear_callback();
     netsnmp_ds_shutdown();
-    clear_user_list();
     netsnmp_clear_default_target();
     netsnmp_clear_default_domain();
-    free_etimelist();
+    shutdown_secmod();
 
     init_snmp_init_done  = 0;
     _init_snmp_init_done = 0;
@@ -950,6 +942,8 @@ snmp_open(netsnmp_session *session)
 /*
  * extended open 
  */
+netsnmp_feature_child_of(snmp_open_ex, netsnmp_unused)
+#ifndef NETSNMP_FEATURE_REMOVE_SNMP_OPEN_EX
 netsnmp_session *
 snmp_open_ex(netsnmp_session *session,
              int (*fpre_parse)	(netsnmp_session *, netsnmp_transport *,
@@ -984,6 +978,7 @@ snmp_open_ex(netsnmp_session *session,
 
     return (slp->session);
 }
+#endif /* NETSNMP_FEATURE_REMOVE_SNMP_OPEN_EX */
 
 static struct session_list *
 _sess_copy(netsnmp_session * in_session)
@@ -1336,16 +1331,17 @@ int
 snmpv3_engineID_probe(struct session_list *slp,
                       netsnmp_session * in_session)
 {
-    netsnmp_pdu    *pdu = NULL, *response = NULL;
     netsnmp_session *session;
-    unsigned int    i;
     int             status;
+    struct snmp_secmod_def *sptr = NULL;
 
     if (slp == NULL || slp->session == NULL) {
         return 0;
     }
 
     session = slp->session;
+    netsnmp_assert_or_return(session != NULL, 0);
+    sptr = find_sec_mod(session->securityModel);
 
     /*
      * If we are opening a V3 session and we don't know engineID we must probe
@@ -1353,86 +1349,25 @@ snmpv3_engineID_probe(struct session_list *slp,
      * list so that the response can handled correctly. 
      */
 
-    if ((session->flags & SNMP_FLAGS_DONT_PROBE) == SNMP_FLAGS_DONT_PROBE)
-        return 1;
-
-    if (session->version == SNMP_VERSION_3) {
-        struct snmp_secmod_def *sptr = find_sec_mod(session->securityModel);
-
+    if (session->version == SNMP_VERSION_3 &&
+        (0 == (session->flags & SNMP_FLAGS_DONT_PROBE))) {
         if (NULL != sptr && NULL != sptr->probe_engineid) {
             DEBUGMSGTL(("snmp_api", "probing for engineID using security model callback...\n"));
             /* security model specific mechanism of determining engineID */
-            status = (*sptr->probe_engineid) (slp, session);
-            if (status)
+            status = (*sptr->probe_engineid) (slp, in_session);
+            if (status != SNMPERR_SUCCESS)
                 return 0;
-            return 1; /* success! */
-        } else if (session->securityEngineIDLen == 0) {
-            if (snmpv3_build_probe_pdu(&pdu) != 0) {
-                DEBUGMSGTL(("snmp_api", "unable to create probe PDU\n"));
-                return 0;
-            }
-            DEBUGMSGTL(("snmp_api", "probing for engineID...\n"));
-            session->flags |= SNMP_FLAGS_DONT_PROBE; /* prevent recursion */
-            status = snmp_sess_synch_response(slp, pdu, &response);
-
-            if ((response == NULL) && (status == STAT_SUCCESS)) {
-                status = STAT_ERROR;
-            }
-
-            switch (status) {
-            case STAT_SUCCESS:
-                in_session->s_snmp_errno = SNMPERR_INVALID_MSG; /* XX?? */
-                DEBUGMSGTL(("snmp_sess_open",
-                            "error: expected Report as response to probe: %s (%ld)\n",
-                            snmp_errstring(response->errstat),
-                            response->errstat));
-                break;
-            case STAT_ERROR:   /* this is what we expected -> Report == STAT_ERROR */
-                in_session->s_snmp_errno = SNMPERR_UNKNOWN_ENG_ID;
-                break;
-            case STAT_TIMEOUT:
-                in_session->s_snmp_errno = SNMPERR_TIMEOUT;
-            default:
-                DEBUGMSGTL(("snmp_sess_open",
-                            "unable to connect with remote engine: %s (%d)\n",
-                            snmp_api_errstring(session->s_snmp_errno),
-                            session->s_snmp_errno));
-                break;
-            }
-
-            if (slp->session->securityEngineIDLen == 0) {
-                DEBUGMSGTL(("snmp_api",
-                            "unable to determine remote engine ID\n"));
-                return 0;
-            }
-
-            in_session->s_snmp_errno = SNMPERR_SUCCESS;
-            if (snmp_get_do_debugging()) {
-                DEBUGMSGTL(("snmp_sess_open",
-                            "  probe found engineID:  "));
-                for (i = 0; i < slp->session->securityEngineIDLen; i++)
-                    DEBUGMSG(("snmp_sess_open", "%02x",
-                              slp->session->securityEngineID[i]));
-                DEBUGMSG(("snmp_sess_open", "\n"));
-            }
-        }
-
-        /*
-         * if boot/time supplied set it for this engineID 
-         */
-        if (session->engineBoots || session->engineTime) {
-            set_enginetime(session->securityEngineID,
-                           session->securityEngineIDLen,
-                           session->engineBoots, session->engineTime,
-                           TRUE);
-        }
-
-        if (create_user_from_session(slp->session) != SNMPERR_SUCCESS) {
-            in_session->s_snmp_errno = SNMPERR_UNKNOWN_USER_NAME;       /* XX?? */
-            DEBUGMSGTL(("snmp_api",
-                        "snmpv3_engine_probe(): failed(2) to create a new user from session\n"));
+        } else {
+            /* XXX: default to the default RFC5343 contextEngineID Probe? */
             return 0;
         }
+    }
+
+    /* see if there was any hooks to call after the engineID probing */
+    if (sptr->post_probe_engineid) {
+        status = (*sptr->post_probe_engineid)(slp, in_session);
+        if (status != SNMPERR_SUCCESS)
+            return 0;
     }
 
     return 1;
@@ -1778,15 +1713,8 @@ snmp_sess_add_ex(netsnmp_session * in_session,
     if (slp->session->version == SNMP_VERSION_3) {
         DEBUGMSGTL(("snmp_sess_add",
                     "adding v3 session -- maybe engineID probe now\n"));
-        if (!snmpv3_engineID_probe(slp, in_session)) {
+        if (!snmpv3_engineID_probe(slp, slp->session)) {
             DEBUGMSGTL(("snmp_sess_add", "engine ID probe failed\n"));
-            snmp_sess_close(slp);
-            return NULL;
-        }
-        if (create_user_from_session(slp->session) != SNMPERR_SUCCESS) {
-            in_session->s_snmp_errno = SNMPERR_UNKNOWN_USER_NAME;
-            DEBUGMSGTL(("snmp_api",
-                        "snmp_sess_add(): failed(2) to create a new user from session\n"));
             snmp_sess_close(slp);
             return NULL;
         }
@@ -1823,217 +1751,17 @@ snmp_sess_open(netsnmp_session * pss)
     return pvoid;
 }
 
-
-
-/*
- * create_user_from_session(netsnmp_session *session):
- * 
- * creates a user in the usm table from the information in a session.
- * If the user already exists, it is updated with the current
- * information from the session
- * 
- * Parameters:
- * session -- IN: pointer to the session to use when creating the user.
- * 
- * Returns:
- * SNMPERR_SUCCESS
- * SNMPERR_GENERR 
- */
 int
-create_user_from_session(netsnmp_session * session)
-{
-    struct usmUser *user;
-    int             user_just_created = 0;
-    char *cp;
+create_user_from_session(netsnmp_session * session) {
+#ifdef NETSNMP_SECMOD_USM
+    return usm_create_user_from_session(session);
+#else
+    snmp_log(LOG_ERR, "create_user_from_session called when USM wasn't compiled in");
+    netsnmp_assert(0 == 1);
+    return SNMP_ERR_GENERR;
+#endif
+}
 
-    /*
-     * - don't create-another/copy-into user for this session by default
-     * - bail now (no error) if we don't have an engineID
-     */
-    if (SNMP_FLAGS_USER_CREATED == (session->flags & SNMP_FLAGS_USER_CREATED) ||
-        session->securityModel != SNMP_SEC_MODEL_USM ||
-        session->version != SNMP_VERSION_3 ||
-        session->securityNameLen == 0 ||
-        session->securityEngineIDLen == 0)
-        return SNMPERR_SUCCESS;
-
-    session->flags |= SNMP_FLAGS_USER_CREATED;
-
-    /*
-     * now that we have the engineID, create an entry in the USM list
-     * for this user using the information in the session 
-     */
-    user = usm_get_user_from_list(session->securityEngineID,
-                                  session->securityEngineIDLen,
-                                  session->securityName,
-                                  usm_get_userList(), 0);
-    if (user == NULL) {
-        DEBUGMSGTL(("snmp_api", "Building user %s...\n",
-                    session->securityName));
-        /*
-         * user doesn't exist so we create and add it 
-         */
-        user = (struct usmUser *) calloc(1, sizeof(struct usmUser));
-        if (user == NULL)
-            return SNMPERR_GENERR;
-
-        /*
-         * copy in the securityName 
-         */
-        if (session->securityName) {
-            user->name = strdup(session->securityName);
-            user->secName = strdup(session->securityName);
-            if (user->name == NULL || user->secName == NULL) {
-                usm_free_user(user);
-                return SNMPERR_GENERR;
-            }
-        }
-
-        /*
-         * copy in the engineID 
-         */
-        if (memdup(&user->engineID, session->securityEngineID,
-                   session->securityEngineIDLen) != SNMPERR_SUCCESS) {
-            usm_free_user(user);
-            return SNMPERR_GENERR;
-        }
-        user->engineIDLen = session->securityEngineIDLen;
-
-        user_just_created = 1;
-    }
-    /*
-     * copy the auth protocol 
-     */
-    if (session->securityAuthProto != NULL) {
-        SNMP_FREE(user->authProtocol);
-        user->authProtocol =
-            snmp_duplicate_objid(session->securityAuthProto,
-                                 session->securityAuthProtoLen);
-        if (user->authProtocol == NULL) {
-            usm_free_user(user);
-            return SNMPERR_GENERR;
-        }
-        user->authProtocolLen = session->securityAuthProtoLen;
-    }
-
-    /*
-     * copy the priv protocol 
-     */
-    if (session->securityPrivProto != NULL) {
-        SNMP_FREE(user->privProtocol);
-        user->privProtocol =
-            snmp_duplicate_objid(session->securityPrivProto,
-                                 session->securityPrivProtoLen);
-        if (user->privProtocol == NULL) {
-            usm_free_user(user);
-            return SNMPERR_GENERR;
-        }
-        user->privProtocolLen = session->securityPrivProtoLen;
-    }
-
-    /*
-     * copy in the authentication Key.  If not localized, localize it 
-     */
-    if (session->securityAuthLocalKey != NULL
-        && session->securityAuthLocalKeyLen != 0) {
-        /* already localized key passed in.  use it */
-        SNMP_FREE(user->authKey);
-        if (memdup(&user->authKey, session->securityAuthLocalKey,
-                   session->securityAuthLocalKeyLen) != SNMPERR_SUCCESS) {
-            usm_free_user(user);
-            return SNMPERR_GENERR;
-        }
-        user->authKeyLen = session->securityAuthLocalKeyLen;
-    } else if (session->securityAuthKey != NULL
-        && session->securityAuthKeyLen != 0) {
-        SNMP_FREE(user->authKey);
-        user->authKey = (u_char *) calloc(1, USM_LENGTH_KU_HASHBLOCK);
-        if (user->authKey == NULL) {
-            usm_free_user(user);
-            return SNMPERR_GENERR;
-        }
-        user->authKeyLen = USM_LENGTH_KU_HASHBLOCK;
-        if (generate_kul(user->authProtocol, user->authProtocolLen,
-                         session->securityEngineID,
-                         session->securityEngineIDLen,
-                         session->securityAuthKey,
-                         session->securityAuthKeyLen, user->authKey,
-                         &user->authKeyLen) != SNMPERR_SUCCESS) {
-            usm_free_user(user);
-            return SNMPERR_GENERR;
-        }
-    } else if ((cp = netsnmp_ds_get_string(NETSNMP_DS_LIBRARY_ID, 
-                                           NETSNMP_DS_LIB_AUTHLOCALIZEDKEY))) {
-        size_t buflen = USM_AUTH_KU_LEN;
-        SNMP_FREE(user->authKey);
-        user->authKey = (u_char *)malloc(buflen); /* max length needed */
-        user->authKeyLen = 0;
-        /* it will be a hex string */
-        if (!snmp_hex_to_binary(&user->authKey, &buflen, &user->authKeyLen,
-                                0, cp)) {
-            usm_free_user(user);
-            return SNMPERR_GENERR;
-        }
-    }
-
-    /*
-     * copy in the privacy Key.  If not localized, localize it 
-     */
-    if (session->securityPrivLocalKey != NULL
-        && session->securityPrivLocalKeyLen != 0) {
-        /* already localized key passed in.  use it */
-        SNMP_FREE(user->privKey);
-        if (memdup(&user->privKey, session->securityPrivLocalKey,
-                   session->securityPrivLocalKeyLen) != SNMPERR_SUCCESS) {
-            usm_free_user(user);
-            return SNMPERR_GENERR;
-        }
-        user->privKeyLen = session->securityPrivLocalKeyLen;
-    } else if (session->securityPrivKey != NULL
-        && session->securityPrivKeyLen != 0) {
-        SNMP_FREE(user->privKey);
-        user->privKey = (u_char *) calloc(1, USM_LENGTH_KU_HASHBLOCK);
-        if (user->privKey == NULL) {
-            usm_free_user(user);
-            return SNMPERR_GENERR;
-        }
-        user->privKeyLen = USM_LENGTH_KU_HASHBLOCK;
-        if (generate_kul(user->authProtocol, user->authProtocolLen,
-                         session->securityEngineID,
-                         session->securityEngineIDLen,
-                         session->securityPrivKey,
-                         session->securityPrivKeyLen, user->privKey,
-                         &user->privKeyLen) != SNMPERR_SUCCESS) {
-            usm_free_user(user);
-            return SNMPERR_GENERR;
-        }
-    } else if ((cp = netsnmp_ds_get_string(NETSNMP_DS_LIBRARY_ID, 
-                                           NETSNMP_DS_LIB_PRIVLOCALIZEDKEY))) {
-        size_t buflen = USM_PRIV_KU_LEN;
-        SNMP_FREE(user->privKey);
-        user->privKey = (u_char *)malloc(buflen); /* max length needed */
-        user->privKeyLen = 0;
-        /* it will be a hex string */
-        if (!snmp_hex_to_binary(&user->privKey, &buflen, &user->privKeyLen,
-                                0, cp)) {
-            usm_free_user(user);
-            return SNMPERR_GENERR;
-        }
-    }
-
-    if (user_just_created) {
-        /*
-         * add the user into the database 
-         */
-        user->userStatus = RS_ACTIVE;
-        user->userStorageType = ST_READONLY;
-        usm_add_user(user);
-    }
-
-    return SNMPERR_SUCCESS;
-
-
-}                               /* end create_user_from_session() */
 
 /*
  *  Do a "deep free()" of a netsnmp_session.
@@ -2194,49 +1922,6 @@ snmp_close_sessions(void)
     return 1;
 }
 
-static int
-snmpv3_build_probe_pdu(netsnmp_pdu **pdu)
-{
-    struct usmUser *user;
-
-    /*
-     * create the pdu 
-     */
-    if (!pdu)
-        return -1;
-    *pdu = snmp_pdu_create(SNMP_MSG_GET);
-    if (!(*pdu))
-        return -1;
-    (*pdu)->version = SNMP_VERSION_3;
-    (*pdu)->securityName = strdup("");
-    (*pdu)->securityNameLen = strlen((*pdu)->securityName);
-    (*pdu)->securityLevel = SNMP_SEC_LEVEL_NOAUTH;
-    (*pdu)->securityModel = SNMP_SEC_MODEL_USM;
-
-    /*
-     * create the empty user 
-     */
-    user = usm_get_user(NULL, 0, (*pdu)->securityName);
-    if (user == NULL) {
-        user = (struct usmUser *) calloc(1, sizeof(struct usmUser));
-        if (user == NULL) {
-            snmp_free_pdu(*pdu);
-            *pdu = (netsnmp_pdu *) NULL;
-            return -1;
-        }
-        user->name = strdup((*pdu)->securityName);
-        user->secName = strdup((*pdu)->securityName);
-        user->authProtocolLen = sizeof(usmNoAuthProtocol) / sizeof(oid);
-        user->authProtocol =
-            snmp_duplicate_objid(usmNoAuthProtocol, user->authProtocolLen);
-        user->privProtocolLen = sizeof(usmNoPrivProtocol) / sizeof(oid);
-        user->privProtocol =
-            snmp_duplicate_objid(usmNoPrivProtocol, user->privProtocolLen);
-        usm_add_user(user);
-    }
-    return 0;
-}
-
 static void
 snmpv3_calc_msg_flags(int sec_level, int msg_command, u_char * flags)
 {
@@ -2328,7 +2013,9 @@ snmpv3_build(u_char ** pkt, size_t * pkt_len, size_t * offset,
          */
     case SNMP_MSG_GET:
     case SNMP_MSG_GETNEXT:
+#ifndef NETSNMP_NO_WRITE_SUPPORT
     case SNMP_MSG_SET:
+#endif /* !NETSNMP_NO_WRITE_SUPPORT */
     case SNMP_MSG_INFORM:
         if (pdu->errstat == SNMP_DEFAULT_ERRSTAT)
             pdu->errstat = 0;
@@ -3019,7 +2706,9 @@ _snmp_build(u_char ** pkt, size_t * pkt_len, size_t * offset,
          */
     case SNMP_MSG_GET:
     case SNMP_MSG_GETNEXT:
+#ifndef NETSNMP_NO_WRITE_SUPPORT
     case SNMP_MSG_SET:
+#endif /* !NETSNMP_NO_WRITE_SUPPORT */
         /*
          * all versions support these PDU types 
          */
@@ -4220,7 +3909,11 @@ snmpv3_make_report(netsnmp_pdu *pdu, int error)
     /*
      * find the appropriate error counter  
      */
+#ifndef NETSNMP_FEATURE_REMOVE_STATISTICS
     ltmp = snmp_get_statistic(stat_ind);
+#else /* !NETSNMP_FEATURE_REMOVE_STATISTICS */
+    ltmp = 1;
+#endif /* !NETSNMP_FEATURE_REMOVE_STATISTICS */
 
     /*
      * return the appropriate error counter  
@@ -4682,7 +4375,9 @@ snmp_pdu_parse(netsnmp_pdu *pdu, u_char * data, size_t * length)
     case SNMP_MSG_GETBULK:
     case SNMP_MSG_TRAP2:
     case SNMP_MSG_INFORM:
+#ifndef NETSNMP_NO_WRITE_SUPPORT
     case SNMP_MSG_SET:
+#endif /* !NETSNMP_NO_WRITE_SUPPORT */
         /*
          * PDU is not an SNMPv1 TRAP 
          */
@@ -4908,18 +4603,6 @@ snmpv3_scopedPDU_parse(netsnmp_pdu *pdu, u_char * cp, size_t * length)
     }
 
     /*
-     * check that it agrees with engineID returned from USM above
-     * * only a warning because this could be legal if we are a proxy
-     */
-    if (pdu->securityModel == NETSNMP_SECMOD_USM &&
-        (pdu->securityEngineIDLen != pdu->contextEngineIDLen ||
-         memcmp(pdu->securityEngineID, pdu->contextEngineID,
-                pdu->securityEngineIDLen) != 0)) {
-        DEBUGMSGTL(("scopedPDU_parse",
-                    "Note: security and context engineIDs differ\n"));
-    }
-
-    /*
      * parse contextName from scopedPdu
      */
     tmp_buf_len = SNMP_MAX_CONTEXT_SIZE;
@@ -5086,16 +4769,6 @@ _sess_async_send(void *sessp,
             return 0; /* s_snmp_errno already set */
     }
 
-    /*
-     * check to see if we need to create a v3 user from the session info
-     */
-    if (create_user_from_session(session) != SNMPERR_SUCCESS) {
-        session->s_snmp_errno = SNMPERR_UNKNOWN_USER_NAME;  /* XX?? */
-        DEBUGMSGTL(("snmp_api",
-                    "snmp_send(): failed(2) to create a new user from session\n"));
-        return 0;
-    }
-
     if ((pktbuf = (u_char *)malloc(2048)) == NULL) {
         DEBUGMSGTL(("sess_async_send",
                     "couldn't malloc initial packet buffer\n"));
@@ -5117,7 +4790,9 @@ _sess_async_send(void *sessp,
     if (pdu->variables == NULL) {
         switch (pdu->command) {
         case SNMP_MSG_GET:
+#ifndef NETSNMP_NO_WRITE_SUPPORT
         case SNMP_MSG_SET:
+#endif /* !NETSNMP_NO_WRITE_SUPPORT */
         case SNMP_MSG_GETNEXT:
         case SNMP_MSG_GETBULK:
         case SNMP_MSG_RESPONSE:
@@ -6857,6 +6532,7 @@ netsnmp_oid_equals(const oid * in_name1,
     return 0;
 }
 
+#ifndef NETSNMP_FEATURE_REMOVE_OID_IS_SUBTREE
 /** Identical to netsnmp_oid_equals, except only the length up to len1 is compared.
  * Functionally, this determines if in_name2 is equal or a subtree of in_name1
  * @param in_name1 A pointer to the first oid.
@@ -6877,6 +6553,7 @@ netsnmp_oid_is_subtree(const oid * in_name1,
 
     return 0;
 }
+#endif /* NETSNMP_FEATURE_REMOVE_OID_IS_SUBTREE */
 
 /** Given two OIDs, determine the common prefix to them both.
  * @param in_name1 A pointer to the first oid.
@@ -7616,6 +7293,7 @@ snmp_duplicate_objid(const oid * objToCopy, size_t objToCopyLen)
     return returnOid;
 }
 
+#ifndef NETSNMP_FEATURE_REMOVE_STATISTICS
 /*
  * generic statistics counter functions 
  */
@@ -7655,4 +7333,4 @@ snmp_init_statistics(void)
     memset(statistics, 0, sizeof(statistics));
 }
 /**  @} */
-
+#endif /* NETSNMP_FEATURE_REMOVE_STATISTICS */

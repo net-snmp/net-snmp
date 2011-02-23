@@ -4,6 +4,7 @@
  */
 
 #include <net-snmp/net-snmp-config.h>
+#include <net-snmp/net-snmp-features.h>
 
 #if HAVE_SYS_PARAM_H
 #include <sys/param.h>
@@ -69,6 +70,8 @@
 #include <net-snmp/utilities.h>
 
 #define HRSWINST_MONOTONICALLY_INCREASING
+
+netsnmp_feature_require(date_n_time)
 
         /*********************
 	 *

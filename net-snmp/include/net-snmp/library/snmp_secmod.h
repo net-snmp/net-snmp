@@ -91,8 +91,8 @@ typedef void    (SecmodHandleReport) (void *sessp,
                                       netsnmp_session *,
                                       int result,
                                       netsnmp_pdu *origpdu);
-typedef int     (SecmodDiscoveryMethod) (void *slp,
-                                         netsnmp_session *session);
+typedef int     (SecmodDiscoveryMethod) (void *slp, netsnmp_session *session);
+typedef int     (SecmodPostDiscovery) (void *slp, netsnmp_session *session);
 
 typedef int     (SecmodSessionSetup) (netsnmp_session *in_session,
                                       netsnmp_session *out_session);
@@ -136,6 +136,7 @@ struct snmp_secmod_def {
     * default engineID discovery mechanism
     */
    SecmodDiscoveryMethod *probe_engineid;
+   SecmodPostDiscovery   *post_probe_engineid;
 };
 
 
@@ -164,6 +165,7 @@ struct snmp_secmod_def *find_sec_mod(int);
  */
 int             unregister_sec_mod(int);        /* register a security service */
 void            init_secmod(void);
+void            shutdown_secmod(void);
 
 /*
  * clears the sec_mod list

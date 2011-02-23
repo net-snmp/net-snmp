@@ -14,6 +14,59 @@ standardall: subdirs $(STANDARDTARGETS)
 
 objs: ${OBJS} ${LOBJS}
 
+# features require that subdirs be made *first* to get dependency
+# collection processed in the right order
+.PHONY: features ftobjs ftsubdirs
+features: ftsubdirs ftobjs $(FEATUREFILE)
+ftobjs: $(FTOBJS)
+$(FEATUREFILE): $(FTOBJS) $(top_builddir)/include/net-snmp/feature-details.h
+	cat $(FTOBJS) > $(FEATUREFILE).in
+	$(FEATUREPROCESS) $(FEATUREFILE) $(top_builddir)/include/net-snmp/feature-details.h @FEATURE_REMOVE_FLAGS@ @FEATURE_ADD_FLAGS@
+ftsubdirs:
+	@if test "$(FTSUBDIRS)" != ""; then \
+	    SUBDIRS="$(FTSUBDIRS)" ;        \
+        else 			 	    \
+            SUBDIRS="$(SUBDIRS)" ;          \
+        fi ;                                \
+	if test "$$SUBDIRS" != ""; then \
+		it="$$SUBDIRS" ; \
+		for i in $$it ; do \
+			echo "making features in `pwd`/$$i"; \
+			( cd $$i ; $(MAKE) features ) ; \
+			if test $$? != 0 ; then \
+				exit 1 ; \
+			fi  \
+		done \
+	fi
+
+.PHONY: cleanfeatures cleanfeaturessubdirs
+cleanfeatures: cleanfeaturessubdirs
+	       $(RM) $(FTOBJS)
+	       $(RM) $(FEATUREFILE)
+	       $(RM) $(top_builddir)/include/net-snmp/feature-details.h
+
+cleanfeaturessubdirs:
+	@if test "$(FTSUBDIRS)" != ""; then \
+	    SUBDIRS="$(FTSUBDIRS)" ;        \
+        else 			 	    \
+            SUBDIRS="$(SUBDIRS)" ;          \
+        fi ;                                \
+	if test "$$SUBDIRS" != ""; then \
+		it="$$SUBDIRS" ; \
+		for i in $$it ; do \
+			echo "making cleanfeatures in `pwd`/$$i"; \
+			( cd $$i ; $(MAKE) cleanfeatures ) ; \
+			if test $$? != 0 ; then \
+				exit 1 ; \
+			fi  \
+		done \
+	fi
+
+# feature-check definitions
+.SUFFIXES: .ft
+.c.ft:
+	$(FEATURECHECK) --feature-global $(top_srcdir)/include/net-snmp/feature-details.h $< $@ $(CC) -E $(CPPFLAGS) $(CFLAGS) -c
+
 subdirs:
 	@if test "$(SUBDIRS)" != ""; then \
 		it="$(SUBDIRS)" ; \
@@ -327,7 +380,7 @@ uninstallsubdirs:
 # cleaning targets
 #
 clean: cleansubdirs $(OTHERCLEANTODOS)
-	$(LIBTOOLCLEAN) ${OBJS} ${LOBJS} core $(STANDARDCLEANTARGETS) $(OTHERCLEANTARGETS)
+	$(LIBTOOLCLEAN) ${OBJS} ${LOBJS}  ${FTOBJS} core $(STANDARDCLEANTARGETS) $(OTHERCLEANTARGETS)
 
 cleansubdirs:
 	@if test "$(SUBDIRS)" != ""; then \
@@ -404,5 +457,5 @@ distdependdirs:
 .PHONY: clean cleansubdirs lint \
 	install installprogs installheaders installlibs \
 	installbin installsbin installsubdirs \
-	all subdirs standardall objs \
+	all subdirs standardall objs features \
 	depend nosysdepend distdepend dependdirs nosysdependdirs distdependdirs

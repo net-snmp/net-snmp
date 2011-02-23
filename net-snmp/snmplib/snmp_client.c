@@ -40,6 +40,7 @@ SOFTWARE.
  *  @{
  */
 #include <net-snmp/net-snmp-config.h>
+#include <net-snmp/net-snmp-features.h>
 
 #include <stdio.h>
 #include <errno.h>
@@ -97,6 +98,9 @@ SOFTWARE.
 #include <net-snmp/library/snmp_assert.h>
 #include <net-snmp/pdu_api.h>
 
+netsnmp_feature_provide(snmp_split_pdu)
+netsnmp_feature_provide(snmp_reset_var_types)
+netsnmp_feature_provide(query_set_default_session)
 
 #ifndef BSD4_3
 #define BSD4_2
@@ -566,6 +570,7 @@ snmp_clone_pdu(netsnmp_pdu *pdu)
  * Returns a pointer to the cloned PDU if successful.
  * Returns 0 if failure.
  */
+#ifndef NETSNMP_FEATURE_REMOVE_SNMP_SPLIT_PDU
 netsnmp_pdu    *
 snmp_split_pdu(netsnmp_pdu *pdu, int skip_count, int copy_count)
 {
@@ -576,6 +581,7 @@ snmp_split_pdu(netsnmp_pdu *pdu, int skip_count, int copy_count)
 
     return newpdu;
 }
+#endif /* NETSNMP_FEATURE_REMOVE_SNMP_SPLIT_PDU */
 
 
 /*
@@ -714,6 +720,8 @@ count_varbinds(netsnmp_variable_list * var_ptr)
     return count;
 }
 
+netsnmp_feature_child_of(count_varbinds_of_type, netsnmp_unused)
+#ifndef NETSNMP_FEATURE_REMOVE_COUNT_VARBINDS_OF_TYPE
 int
 count_varbinds_of_type(netsnmp_variable_list * var_ptr, u_char type)
 {
@@ -725,7 +733,10 @@ count_varbinds_of_type(netsnmp_variable_list * var_ptr, u_char type)
 
     return count;
 }
+#endif /* NETSNMP_FEATURE_REMOVE_COUNT_VARBINDS_OF_TYPE */
 
+netsnmp_feature_child_of(find_varind_of_type, netsnmp_unused)
+#ifndef NETSNMP_FEATURE_REMOVE_FIND_VARIND_OF_TYPE
 netsnmp_variable_list *
 find_varbind_of_type(netsnmp_variable_list * var_ptr, u_char type)
 {
@@ -734,6 +745,7 @@ find_varbind_of_type(netsnmp_variable_list * var_ptr, u_char type)
 
     return var_ptr;
 }
+#endif /* NETSNMP_FEATURE_REMOVE_FIND_VARIND_OF_TYPE */
 
 netsnmp_variable_list*
 find_varbind_in_list( netsnmp_variable_list *vblist,
@@ -974,6 +986,7 @@ snmp_replace_var_types(netsnmp_variable_list * vbl, u_char old_type,
     }
 }
 
+#ifndef NETSNMP_FEATURE_REMOVE_SNMP_RESET_VAR_TYPES
 void
 snmp_reset_var_types(netsnmp_variable_list * vbl, u_char new_type)
 {
@@ -982,6 +995,7 @@ snmp_reset_var_types(netsnmp_variable_list * vbl, u_char new_type)
         vbl = vbl->next_variable;
     }
 }
+#endif /* NETSNMP_FEATURE_REMOVE_SNMP_RESET_VAR_TYPES */
 
 int
 snmp_synch_response_cb(netsnmp_session * ss,
@@ -1189,12 +1203,16 @@ snmp_errstring(int errstat)
  *
  */
 #include <net-snmp/library/snmp_debug.h>
+
 static netsnmp_session *_def_query_session = NULL;
+
+#ifndef NETSNMP_FEATURE_REMOVE_QUERY_SET_DEFAULT_SESSION
 void
 netsnmp_query_set_default_session( netsnmp_session *sess) {
     DEBUGMSGTL(("iquery", "set default session %p\n", sess));
     _def_query_session = sess;
 }
+#endif /* NETSNMP_FEATURE_REMOVE_QUERY_SET_DEFAULT_SESSION */
 
 /**
  * Return a pointer to the default internal query session.
@@ -1287,6 +1305,7 @@ retry:
                     DEBUGMSGVAR(("iquery:result", vtmp));
                 DEBUGMSG(("iquery:result", "\n"));
             }
+#ifndef NETSNMP_NO_WRITE_SUPPORT
             if (request != SNMP_MSG_SET &&
                 response->errindex != 0) {
                 DEBUGMSGTL(("iquery", "retrying query (%d, %ld)\n", ret, response->errindex));
@@ -1296,6 +1315,7 @@ retry:
                 if ( pdu != NULL )
                     goto retry;
             }
+#endif /* !NETSNMP_NO_WRITE_SUPPORT */
         } else {
             for (vb1 = response->variables, vb2 = list;
                  vb1;
@@ -1335,10 +1355,12 @@ int netsnmp_query_getnext(netsnmp_variable_list *list,
 }
 
 
+#ifndef NETSNMP_NO_WRITE_SUPPORT
 int netsnmp_query_set(netsnmp_variable_list *list,
                       netsnmp_session       *session){
     return _query( list, SNMP_MSG_SET, session );
 }
+#endif /* !NETSNMP_NO_WRITE_SUPPORT */
 
 /*
  * A walk needs a bit more work.

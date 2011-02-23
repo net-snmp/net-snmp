@@ -30,6 +30,8 @@
 #include <net-snmp/pdu_api.h>
 #include <net-snmp/session_api.h>
 
+#include <net-snmp/net-snmp-features.h>
+
 #ifndef DONT_SHARE_ERROR_WITH_OTHER_THREADS
 #define SET_SNMP_ERROR(x) snmp_errno=(x)
 #else
@@ -391,12 +393,22 @@ typedef struct request_list {
     NETSNMP_IMPORT
     oid            *snmp_duplicate_objid(const oid * objToCopy, size_t);
     NETSNMP_IMPORT
+
+#ifndef NETSNMP_FEATURE_REMOVE_STATISTICS
     u_int           snmp_increment_statistic(int which);
     NETSNMP_IMPORT
     u_int           snmp_increment_statistic_by(int which, int count);
     NETSNMP_IMPORT
     u_int           snmp_get_statistic(int which);
     void            snmp_init_statistics(void);
+#else /* NETSNMP_FEATURE_REMOVE_STATISTICS */
+
+/* allow code to continue referencing API even if statistics are removed */
+#define snmp_increment_statistic(X)
+#define snmp_increment_statistic_by(X)
+
+#endif
+
     int             create_user_from_session(netsnmp_session * session);
     int snmp_get_fd_for_session(struct snmp_session *sessp);
     int snmpv3_probe_contextEngineID_rfc5343(void *slp,
@@ -677,6 +689,16 @@ struct netsnmp_transport_s;
 #define  NETSNMP_STAT_MAX_STATS              (STAT_TLSTM_STATS_END+1)
 /** backwards compatability */
 #define MAX_STATS NETSNMP_STAT_MAX_STATS
+
+    /*
+     * Internal: The list of active/open sessions.
+     */
+    struct session_list {
+       struct session_list *next;
+       netsnmp_session *session;
+       netsnmp_transport *transport;
+       struct snmp_internal_session *internal;
+    };
 
 #ifdef __cplusplus
 }

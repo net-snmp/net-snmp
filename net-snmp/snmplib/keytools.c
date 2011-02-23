@@ -14,6 +14,7 @@
  */
 
 #include <net-snmp/net-snmp-config.h>
+#include <net-snmp/net-snmp-features.h>
 
 #include <stdio.h>
 #include <sys/types.h>
@@ -61,6 +62,10 @@
 #include <net-snmp/library/keytools.h>
 
 #include <net-snmp/library/transform_oids.h>
+
+netsnmp_feature_provide(usm_keytools)
+
+#ifndef NETSNMP_FEATURE_REMOVE_USM_KEYTOOLS
 
 /*******************************************************************-o-******
  * generate_Ku
@@ -640,3 +645,4 @@ decode_keychange(const oid * hashtype, u_int hashtype_len,
 #else
 _KEYTOOLS_NOT_AVAILABLE
 #endif                          /* internal or openssl */
+#endif /* NETSNMP_FEATURE_REMOVE_USM_KEYTOOLS */

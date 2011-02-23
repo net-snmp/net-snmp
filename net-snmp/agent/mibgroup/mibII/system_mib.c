@@ -14,6 +14,7 @@
  */
 
 #include <net-snmp/net-snmp-config.h>
+#include <net-snmp/net-snmp-features.h>
 
 #if HAVE_STDLIB_H
 #include <stdlib.h>
@@ -43,6 +44,8 @@
 #include "util_funcs.h"
 #include "system_mib.h"
 #include "updates.h"
+
+netsnmp_feature_require(watcher_read_only_int_scalar)
 
         /*********************
 	 *
@@ -172,7 +175,8 @@ system_parse_config_sysObjectID(const char *token, char *cptr)
         sysObjectIDByteLength = version_sysoid_len  * sizeof(oid);
         memcpy(sysObjectID, version_sysoid, sysObjectIDByteLength);
     } else
-        sysObjectIDByteLength = sysObjectIDLength * sizeof(oid);
+
+		sysObjectIDByteLength = sysObjectIDLength * sizeof(oid);
 }
 
 
@@ -349,17 +353,28 @@ init_system_mib(void)
     {
         const oid sysContact_oid[] = { 1, 3, 6, 1, 2, 1, 1, 4 };
         static netsnmp_watcher_info sysContact_winfo;
+#ifndef NETSNMP_NO_WRITE_SUPPORT
+        netsnmp_register_watched_scalar(
+            netsnmp_create_update_handler_registration(
+                "mibII/sysContact", sysContact_oid, OID_LENGTH(sysContact_oid), 
+                HANDLER_CAN_RWRITE, &sysContactSet),
+            netsnmp_init_watcher_info(
+                &sysContact_winfo, sysContact, SYS_STRING_LEN - 1,
+                ASN_OCTET_STR, WATCHER_MAX_SIZE | WATCHER_SIZE_STRLEN));
+#else  /* !NETSNMP_NO_WRITE_SUPPORT */
         netsnmp_register_watched_scalar(
             netsnmp_create_update_handler_registration(
                 "mibII/sysContact", sysContact_oid, OID_LENGTH(sysContact_oid),
-                HANDLER_CAN_RWRITE, &sysContactSet),
+                HANDLER_CAN_RONLY, &sysContactSet),
             netsnmp_init_watcher_info(
-		&sysContact_winfo, sysContact, SYS_STRING_LEN - 1,
-		ASN_OCTET_STR, WATCHER_MAX_SIZE | WATCHER_SIZE_STRLEN));
+                &sysContact_winfo, sysContact, SYS_STRING_LEN - 1,
+                ASN_OCTET_STR, WATCHER_MAX_SIZE | WATCHER_SIZE_STRLEN));
+#endif /* !NETSNMP_NO_WRITE_SUPPORT */
     }
     {
         const oid sysName_oid[] = { 1, 3, 6, 1, 2, 1, 1, 5 };
         static netsnmp_watcher_info sysName_winfo;
+#ifndef NETSNMP_NO_WRITE_SUPPORT
         netsnmp_register_watched_scalar(
             netsnmp_create_update_handler_registration(
                 "mibII/sysName", sysName_oid, OID_LENGTH(sysName_oid),
@@ -367,10 +382,20 @@ init_system_mib(void)
             netsnmp_init_watcher_info(
                 &sysName_winfo, sysName, SYS_STRING_LEN - 1, ASN_OCTET_STR,
                 WATCHER_MAX_SIZE | WATCHER_SIZE_STRLEN));
+#else  /* !NETSNMP_NO_WRITE_SUPPORT */
+        netsnmp_register_watched_scalar(
+            netsnmp_create_update_handler_registration(
+                "mibII/sysName", sysName_oid, OID_LENGTH(sysName_oid),
+                HANDLER_CAN_RONLY, &sysNameSet),
+            netsnmp_init_watcher_info(
+                &sysName_winfo, sysName, SYS_STRING_LEN - 1, ASN_OCTET_STR,
+                WATCHER_MAX_SIZE | WATCHER_SIZE_STRLEN));
+#endif /* !NETSNMP_NO_WRITE_SUPPORT */
     }
     {
         const oid sysLocation_oid[] = { 1, 3, 6, 1, 2, 1, 1, 6 };
         static netsnmp_watcher_info sysLocation_winfo;
+#ifndef NETSNMP_NO_WRITE_SUPPORT
         netsnmp_register_watched_scalar(
             netsnmp_create_update_handler_registration(
                 "mibII/sysLocation", sysLocation_oid,
@@ -379,6 +404,16 @@ init_system_mib(void)
             netsnmp_init_watcher_info(
 		&sysLocation_winfo, sysLocation, SYS_STRING_LEN - 1,
 		ASN_OCTET_STR, WATCHER_MAX_SIZE | WATCHER_SIZE_STRLEN));
+#else  /* !NETSNMP_NO_WRITE_SUPPORT */
+        netsnmp_register_watched_scalar(
+            netsnmp_create_update_handler_registration(
+                "mibII/sysLocation", sysLocation_oid,
+                OID_LENGTH(sysLocation_oid),
+                HANDLER_CAN_RONLY, &sysLocationSet),
+            netsnmp_init_watcher_info(
+		&sysLocation_winfo, sysLocation, SYS_STRING_LEN - 1,
+		ASN_OCTET_STR, WATCHER_MAX_SIZE | WATCHER_SIZE_STRLEN));
+#endif /* !NETSNMP_NO_WRITE_SUPPORT */
     }
     {
         const oid sysServices_oid[] = { 1, 3, 6, 1, 2, 1, 1, 7 };

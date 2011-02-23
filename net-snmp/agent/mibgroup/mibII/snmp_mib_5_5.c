@@ -1,4 +1,5 @@
 #include <net-snmp/net-snmp-config.h>
+#include <net-snmp/net-snmp-features.h>
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 #include <net-snmp/agent/sysORTable.h>
@@ -7,6 +8,8 @@
 
 #include "snmp_mib_5_5.h"
 #include "updates.h"
+
+netsnmp_feature_require(helper_statistics)
 
 #define SNMP_OID 1, 3, 6, 1, 2, 1, 11
 
@@ -34,11 +37,13 @@ handle_truthvalue(netsnmp_mib_handler *handler,
                   netsnmp_agent_request_info *reqinfo,
                   netsnmp_request_info *requests)
 {
+#ifndef NETSNMP_NO_WRITE_SUPPORT
     if (reqinfo->mode == MODE_SET_RESERVE1) {
         int res = netsnmp_check_vb_truthvalue(requests->requestvb);
         if (res != SNMP_ERR_NOERROR)
             netsnmp_request_set_error(requests, res);
     }
+#endif /* !NETSNMP_NO_WRITE_SUPPORT */
     return SNMP_ERR_NOERROR;
 }
 
@@ -87,11 +92,20 @@ init_snmp_mib_5_5(void)
         oid snmpEnableAuthenTraps_oid[] = { SNMP_OID, 30, 0 };
 	static netsnmp_watcher_info enableauthen_info;
         netsnmp_handler_registration *reg =
+#ifndef NETSNMP_NO_WRITE_SUPPORT
             netsnmp_create_update_handler_registration(
                 "mibII/snmpEnableAuthenTraps",
                 snmpEnableAuthenTraps_oid,
                 OID_LENGTH(snmpEnableAuthenTraps_oid),
                 HANDLER_CAN_RWRITE, &snmp_enableauthentrapsset);
+#else  /* !NETSNMP_NO_WRITE_SUPPORT */
+            netsnmp_create_update_handler_registration(
+                "mibII/snmpEnableAuthenTraps",
+                snmpEnableAuthenTraps_oid,
+                OID_LENGTH(snmpEnableAuthenTraps_oid),
+                HANDLER_CAN_RONLY, &snmp_enableauthentrapsset);
+#endif /* !NETSNMP_NO_WRITE_SUPPORT */
+
         netsnmp_inject_handler(reg, netsnmp_get_truthvalue());
         netsnmp_register_watched_instance(
             reg,

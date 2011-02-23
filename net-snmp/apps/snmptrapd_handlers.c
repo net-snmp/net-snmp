@@ -802,8 +802,10 @@ int   command_handler( netsnmp_pdu           *pdu,
 	    v2_pdu = convert_v1pdu_to_v2(pdu);
 	else
 	    v2_pdu = pdu;
-        oldquick = snmp_get_quick_print();
-        snmp_set_quick_print(1);
+        oldquick = netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID, 
+                                          NETSNMP_DS_LIB_QUICK_PRINT);
+        netsnmp_ds_set_boolean(NETSNMP_DS_LIBRARY_ID, 
+                               NETSNMP_DS_LIB_QUICK_PRINT, 1);
 
         /*
 	 * Format the trap and pass this string to the external command
@@ -842,7 +844,8 @@ int   command_handler( netsnmp_pdu           *pdu,
          *  and pass this formatted string to the command specified
          */
         run_shell_command(handler->token, (char*)rbuf, NULL, NULL);   /* Not interested in output */
-        snmp_set_quick_print(oldquick);
+        netsnmp_ds_set_boolean(NETSNMP_DS_LIBRARY_ID, 
+                               NETSNMP_DS_LIB_QUICK_PRINT, oldquick);
         if (pdu->command == SNMP_MSG_TRAP)
             snmp_free_pdu(v2_pdu);
         free(rbuf);

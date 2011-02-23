@@ -1,5 +1,7 @@
 #include <net-snmp/net-snmp-config.h>
 
+#include <net-snmp/net-snmp-features.h>
+
 #if HAVE_STRING_H
 #include <string.h>
 #else
@@ -12,6 +14,8 @@
 #include "target_counters_5_5.h"
 
 #include <net-snmp/agent/snmp_get_statistic.h>
+
+netsnmp_feature_require(helper_statistics)
 
 void
 init_target_counters_5_5(void)

@@ -300,6 +300,7 @@ var_snmpNotifyFilterProfileTable(struct variable *vp,
     }
 
     switch (vp->magic) {
+#ifndef NETSNMP_NO_WRITE_SUPPORT
     case SNMPNOTIFYFILTERPROFILENAME:
         *write_method = write_snmpNotifyFilterProfileName;
         break;
@@ -311,7 +312,7 @@ var_snmpNotifyFilterProfileTable(struct variable *vp,
     case SNMPNOTIFYFILTERPROFILEROWSTATUS:
         *write_method = write_snmpNotifyFilterProfileRowStatus;
         break;
-
+#endif /* !NETSNMP_NO_WRITE_SUPPORT */
     default:
         *write_method = NULL;
     }
@@ -341,12 +342,15 @@ var_snmpNotifyFilterProfileTable(struct variable *vp,
     default:
         ERROR_MSG("");
     }
+
     return NULL;
 }
 
 
 
 static struct snmpNotifyFilterProfileTable_data *StorageNew;
+
+#ifndef NETSNMP_NO_WRITE_SUPPORT 
 
 int
 write_snmpNotifyFilterProfileName(int action,
@@ -790,6 +794,8 @@ write_snmpNotifyFilterProfileRowStatus(int action,
     return SNMP_ERR_NOERROR;
 }
 
+
+#endif /* !NETSNMP_NO_WRITE_SUPPORT */ 
 
 
 char           *

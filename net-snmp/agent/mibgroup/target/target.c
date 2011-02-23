@@ -1,4 +1,5 @@
 #include <net-snmp/net-snmp-config.h>
+#include <net-snmp/net-snmp-features.h>
 
 #if HAVE_STRING_H
 #include <string.h>
@@ -24,6 +25,9 @@
 #include "snmpTargetAddrEntry.h"
 #include "snmpTargetParamsEntry.h"
 #include "target.h"
+
+netsnmp_feature_require(tdomain_support)
+netsnmp_feature_require(tdomain_transport_oid)
 
 #define MAX_TAGS 128
 

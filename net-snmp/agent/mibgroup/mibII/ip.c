@@ -674,6 +674,7 @@ ip_handler(netsnmp_mib_handler          *handler,
 
     case MODE_GETNEXT:
     case MODE_GETBULK:
+#ifndef NETSNMP_NO_WRITE_SUPPORT
     case MODE_SET_RESERVE1:
 		/* XXX - Windows currently supports setting this */
     case MODE_SET_RESERVE2:
@@ -684,6 +685,7 @@ ip_handler(netsnmp_mib_handler          *handler,
         snmp_log(LOG_WARNING, "mibII/ip: Unsupported mode (%d)\n",
                                reqinfo->mode);
         break;
+#endif /* !NETSNMP_NO_WRITE_SUPPORT */
     default:
         snmp_log(LOG_WARNING, "mibII/ip: Unrecognised mode (%d)\n",
                                reqinfo->mode);

@@ -451,6 +451,9 @@ static int _access_ipaddress_entry_compare_addr(const void *lhs,
     return memcmp(lh->ia_address, rh->ia_address, lh->ia_address_len);
 }
 
+netsnmp_feature_provide(ipaddress_common_copy_utilities)
+
+#ifndef NETSNMP_FEATURE_REMOVE_IPADDRESS_COMMON_COPY_UTILITIES
 int
 netsnmp_ipaddress_flags_copy(u_long *ipAddressPrefixAdvPreferredLifetime,
                              u_long *ipAddressPrefixAdvValidLifetime,
@@ -495,4 +498,5 @@ netsnmp_ipaddress_prefix_origin_copy(u_long *ipAddressPrefixOrigin,
     }
     return 0;
 }
+#endif /* NETSNMP_FEATURE_REMOVE_IPADDRESS_COMMON_COPY_UTILITIES */
 

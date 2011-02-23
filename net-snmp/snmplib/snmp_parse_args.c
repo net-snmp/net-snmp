@@ -547,6 +547,7 @@ netsnmp_parse_args(int argc,
 
             break;
 
+#ifdef NETSNMP_SECMOD_USM
         case 'a':
 #ifndef NETSNMP_DISABLE_MD5
             if (!strcasecmp(optarg, "MD5")) {
@@ -620,6 +621,7 @@ netsnmp_parse_args(int argc,
 	    }
             break;
 #endif                          /* SNMPV3_CMD_OPTIONS */
+#endif /* NETSNMP_SECMOD_USM */
 
         case '?':
             return (NETSNMP_PARSE_ARGS_ERROR_USAGE);
@@ -679,6 +681,9 @@ netsnmp_parse_args(int argc,
 #endif
         }
     }
+
+#ifdef NETSNMP_SECMOD_USM
+    /* XXX: this should ideally be moved to snmpusm.c somehow */
 
     /*
      * make master key from pass phrases 
@@ -760,6 +765,8 @@ netsnmp_parse_args(int argc,
             return (NETSNMP_PARSE_ARGS_ERROR);
         }
     }
+#endif /* NETSNMP_SECMOD_USM */
+
     /*
      * get the hostname 
      */

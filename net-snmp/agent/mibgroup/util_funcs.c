@@ -9,6 +9,7 @@
  */
 
 #include <net-snmp/net-snmp-config.h>
+#include <net-snmp/net-snmp-features.h>
 
 #if HAVE_IO_H
 #include <io.h>
@@ -96,6 +97,9 @@
 #define setPerrorstatus(x) snmp_log_perror(x)
 #endif
 
+#if defined(HAVE_LINUX_RTNETLINK_H)
+netsnmp_feature_child_of(prefix_info, util_funcs)
+#endif /* HAVE_LINUX_RTNETLINK_H */
 
 #ifdef NETSNMP_EXCACHETIME
 static long     cachetime;
@@ -134,6 +138,8 @@ make_tempfile(void)
     return NULL;
 }
 
+netsnmp_feature_child_of(shell_command, util_funcs)
+#ifndef NETSNMP_FEATURE_REMOVE_SHELL_COMMAND
 int
 shell_command(struct extensible *ex)
 {
@@ -167,6 +173,7 @@ shell_command(struct extensible *ex)
 #endif
     return (ex->result);
 }
+#endif /* NETSNMP_FEATURE_REMOVE_SHELL_COMMAND */
 
 #define MAXOUTPUT 300
 
@@ -193,6 +200,8 @@ exec_command(struct extensible *ex)
     return (ex->result);
 }
 
+netsnmp_feature_child_of(get_exten_instance, util_funcs)
+#ifndef NETSNMP_FEATURE_REMOVE_GET_EXTEN_INSTANCE
 struct extensible *
 get_exten_instance(struct extensible *exten, size_t inst)
 {
@@ -204,6 +213,7 @@ get_exten_instance(struct extensible *exten, size_t inst)
         exten = exten->next;
     return (exten);
 }
+#endif /* NETSNMP_FEATURE_REMOVE_GET_EXTEN_INSTANCE */
 
 void
 wait_on_exec(struct extensible *ex)
@@ -655,6 +665,8 @@ get_exec_pipes(char *cmd, int *fdIn, int *fdOut, netsnmp_pid_t *pid)
     return 0;
 }
 
+netsnmp_feature_child_of(clear_cache, util_funcs)
+#ifndef NETSNMP_FEATURE_REMOVE_CLEAR_CACHE
 int
 clear_cache(int action,
             u_char * var_val,
@@ -677,6 +689,7 @@ clear_cache(int action,
     }
     return SNMP_ERR_NOERROR;
 }
+#endif /* NETSNMP_FEATURE_REMOVE_CLEAR_CACHE */
 
 void
 print_mib_oid(oid name[], size_t len)
@@ -719,6 +732,8 @@ checkmib(struct variable *vp, oid * name, size_t * length,
                                  write_method, max));
 }
 
+netsnmp_feature_child_of(find_field, util_funcs)
+#ifndef NETSNMP_FEATURE_REMOVE_FIND_FIELD
 char           *
 find_field(char *ptr, int field)
 {
@@ -759,7 +774,10 @@ find_field(char *ptr, int field)
     }
     return (NULL);
 }
+#endif /* NETSNMP_FEATURE_REMOVE_FIND_FIELD */
 
+netsnmp_feature_child_of(parse_miboid, util_funcs)
+#ifndef NETSNMP_FEATURE_REMOVE_PARSE_MIBOID
 int
 parse_miboid(const char *buf, oid * oidout)
 {
@@ -780,7 +798,10 @@ parse_miboid(const char *buf, oid * oidout)
      */
     return i;
 }
+#endif /* NETSNMP_FEATURE_REMOVE_PARSE_MIBOID */
 
+netsnmp_feature_child_of(string_append_int, util_funcs)
+#ifndef NETSNMP_FEATURE_REMOVE_STRING_APPEND_INT
 void
 string_append_int(char *s, int val)
 {
@@ -795,6 +816,10 @@ string_append_int(char *s, int val)
     strcpy(s, textVal);
     return;
 }
+#endif /* NETSNMP_FEATURE_REMOVE_STRING_APPEND_INT */
+
+netsnmp_feature_child_of(internal_mib_table, util_funcs)
+#ifndef NETSNMP_FEATURE_REMOVE_INTERNAL_MIB_TABLE
 
 struct internal_mib_table {
     int             max_size;   /* Size of the current data table */
@@ -973,8 +998,11 @@ Retrieve_Table_Data(mib_table_t t, int *max_idx)
     *max_idx = table->next_index - 1;
     return table->data;
 }
+#endif /* NETSNMP_FEATURE_REMOVE_INTERNAL_MIB_TABLE */
 
 #if defined(HAVE_LINUX_RTNETLINK_H)
+
+#ifndef NETSNMP_FEATURE_REMOVE_PREFIX_INFO
 prefix_cbx *net_snmp_create_prefix_info(unsigned long OnLinkFlag,
                                         unsigned long AutonomousFlag,
                                         char *in6ptr)
@@ -1104,5 +1132,6 @@ int net_snmp_delete_prefix_info(prefix_cbx **head,
     }
     return 0;
 }
+#endif /* NETSNMP_FEATURE_REMOVE_PREFIX_INFO */
 #endif
 

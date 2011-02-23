@@ -4,6 +4,7 @@
  */
 
 #include <net-snmp/net-snmp-config.h>
+#include <net-snmp/net-snmp-features.h>
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 #include <net-snmp/agent/agent_callbacks.h>
@@ -11,6 +12,7 @@
 #include "disman/event/mteEvent.h"
 #include "disman/event/mteEventConf.h"
 
+netsnmp_feature_require(iquery)
 
 /** Initializes the mteEventsConf module */
 void

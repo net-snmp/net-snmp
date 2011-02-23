@@ -30,6 +30,7 @@
  * standard Net-SNMP includes 
  */
 #include <net-snmp/net-snmp-config.h>
+#include <net-snmp/net-snmp-features.h>
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 
@@ -45,6 +46,12 @@
 #include "inetNetToMediaTable_interface.h"
 
 #include <ctype.h>
+
+netsnmp_feature_provide(inetNetToMediaTable_external_access)
+netsnmp_feature_require(row_merge)
+netsnmp_feature_require(baby_steps)
+netsnmp_feature_require(table_container_row_insert)
+netsnmp_feature_require(check_all_requests_error)
 
 /**********************************************************************
  **********************************************************************
@@ -82,19 +89,26 @@ static void
                 _inetNetToMediaTable_container_shutdown(inetNetToMediaTable_interface_ctx *
                                                         if_ctx);
 
-
+netsnmp_feature_child_of(inetNetToMediaTable_container_get, inetNetToMediaTable_external_access)
+#ifndef NETSNMP_FEATURE_REMOVE_INETNETTOMEDIATABLE_CONTAINER_GET
 netsnmp_container *
 inetNetToMediaTable_container_get(void)
 {
     return inetNetToMediaTable_if_ctx.container;
 }
+#endif /* NETSNMP_FEATURE_REMOVE_INETNETTOMEDIATABLE_CONTAINER_GET */
 
+netsnmp_feature_child_of(inetNetToMediaTable_registration_get, inetNetToMediaTable_external_access)
+#ifndef NETSNMP_FEATURE_REMOVE_INETNETTOMEDIATABLE_REGISTRATION_GET
 inetNetToMediaTable_registration *
 inetNetToMediaTable_registration_get(void)
 {
     return inetNetToMediaTable_if_ctx.user_ctx;
 }
+#endif /* NETSNMP_FEATURE_REMOVE_INETNETTOMEDIATABLE_REGISTRATION_GET */
 
+netsnmp_feature_child_of(inetNetToMediaTable_registration_set, inetNetToMediaTable_external_access)
+#ifndef NETSNMP_FEATURE_REMOVE_INETNETTOMEDIATABLE_REGISTRATION_SET
 inetNetToMediaTable_registration *
 inetNetToMediaTable_registration_set(inetNetToMediaTable_registration *
                                      newreg)
@@ -104,12 +118,16 @@ inetNetToMediaTable_registration_set(inetNetToMediaTable_registration *
     inetNetToMediaTable_if_ctx.user_ctx = newreg;
     return old;
 }
+#endif /* NETSNMP_FEATURE_REMOVE_INETNETTOMEDIATABLE_REGISTRATION_SET */
 
+netsnmp_feature_child_of(inetNetToMediaTable_container_size, inetNetToMediaTable_external_access)
+#ifndef NETSNMP_FEATURE_REMOVE_INETNETTOMEDIATABLE_CONTAINER_SIZE
 int
 inetNetToMediaTable_container_size(void)
 {
     return CONTAINER_SIZE(inetNetToMediaTable_if_ctx.container);
 }
+#endif /* NETSNMP_FEATURE_REMOVE_INETNETTOMEDIATABLE_CONTAINER_SIZE */
 
 u_int
 inetNetToMediaTable_dirty_get(void)
@@ -1958,6 +1976,7 @@ _inetNetToMediaTable_container_shutdown(inetNetToMediaTable_interface_ctx *
 }                               /* _inetNetToMediaTable_container_shutdown */
 
 
+#ifndef NETSNMP_FEATURE_REMOVE_INETNETTOMEDIATABLE_EXTERNAL_ACCESS
 inetNetToMediaTable_rowreq_ctx *
 inetNetToMediaTable_row_find_by_mib_index(inetNetToMediaTable_mib_index *
                                           mib_idx)
@@ -1985,3 +2004,4 @@ inetNetToMediaTable_row_find_by_mib_index(inetNetToMediaTable_mib_index *
 
     return rowreq_ctx;
 }
+#endif /* NETSNMP_FEATURE_REMOVE_INETNETTOMEDIATABLE_EXTERNAL_ACCESS */

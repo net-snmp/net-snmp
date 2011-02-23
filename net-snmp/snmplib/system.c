@@ -42,6 +42,7 @@ SOFTWARE.
  * System dependent routines go here
  */
 #include <net-snmp/net-snmp-config.h>
+#include <net-snmp/net-snmp-features.h>
 #include <stdio.h>
 #include <ctype.h>
 #include <errno.h>
@@ -169,6 +170,9 @@ SOFTWARE.
 
 #include <net-snmp/library/snmp_api.h>
 #include <net-snmp/library/read_config.h> /* for get_temp_file_pattern() */
+
+netsnmp_feature_provide(user_information)
+netsnmp_feature_provide(calculate_sectime_diff)
 
 #ifndef IFF_LOOPBACK
 #	define IFF_LOOPBACK 0
@@ -859,6 +863,8 @@ setenv(const char *name, const char *value, int overwrite)
 #endif                          /* HAVE_SETENV */
 
 /* returns centiseconds */
+netsnmp_feature_child_of(calculate_time_diff, netsnmp_unused)
+#ifndef NETSNMP_FEATURE_REMOVE_CALCULATE_TIME_DIFF
 int
 calculate_time_diff(const struct timeval *now, const struct timeval *then)
 {
@@ -874,7 +880,9 @@ calculate_time_diff(const struct timeval *now, const struct timeval *then)
     }
     return ((diff.tv_sec * 100) + (diff.tv_usec / 10000));
 }
+#endif /* NETSNMP_FEATURE_REMOVE_CALCULATE_TIME_DIFF */
 
+#ifndef NETSNMP_FEATURE_REMOVE_CALCULATE_SECTIME_DIFF
 /* returns diff in rounded seconds */
 u_int
 calculate_sectime_diff(const struct timeval *now, const struct timeval *then)
@@ -893,6 +901,7 @@ calculate_sectime_diff(const struct timeval *now, const struct timeval *then)
         return diff.tv_sec + 1;
     return  diff.tv_sec;
 }
+#endif /* NETSNMP_FEATURE_REMOVE_CALCULATE_SECTIME_DIFF */
 
 #ifndef HAVE_STRCASESTR
 /*
@@ -1135,6 +1144,8 @@ netsnmp_os_kernel_width(void)
 #endif
 }
 
+netsnmp_feature_child_of(str_to_uid, user_information)
+#ifndef NETSNMP_FEATURE_REMOVE_STR_TO_UID
 int netsnmp_str_to_uid(const char *useroruid) {
     int uid;
 #if HAVE_GETPWNAM && HAVE_PWD_H
@@ -1155,7 +1166,10 @@ int netsnmp_str_to_uid(const char *useroruid) {
     return uid;
     
 }
+#endif /* NETSNMP_FEATURE_REMOVE_STR_TO_UID */
 
+netsnmp_feature_child_of(str_to_gid, user_information)
+#ifndef NETSNMP_FEATURE_REMOVE_STR_TO_GID
 int netsnmp_str_to_gid(const char *grouporgid) {
     int gid;
 #if HAVE_GETGRNAM && HAVE_GRP_H
@@ -1177,3 +1191,4 @@ int netsnmp_str_to_gid(const char *grouporgid) {
 
     return gid;
 }
+#endif /* NETSNMP_FEATURE_REMOVE_STR_TO_GID */

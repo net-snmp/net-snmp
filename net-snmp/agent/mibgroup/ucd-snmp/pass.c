@@ -1,4 +1,5 @@
 #include <net-snmp/net-snmp-config.h>
+#include <net-snmp/net-snmp-features.h>
 
 #if HAVE_STDLIB_H
 #include <stdlib.h>
@@ -34,6 +35,9 @@
 #include "pass.h"
 #include "extensible.h"
 #include "util_funcs.h"
+
+netsnmp_feature_require(get_exten_instance)
+netsnmp_feature_require(parse_miboid)
 
 struct extensible *passthrus = NULL;
 int             numpassthrus = 0;

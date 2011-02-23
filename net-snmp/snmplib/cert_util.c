@@ -1,6 +1,22 @@
 #include <net-snmp/net-snmp-config.h>
+#include <net-snmp/net-snmp-features.h>
 
 #if defined(NETSNMP_USE_OPENSSL) && defined(HAVE_LIBSSL)
+netsnmp_feature_provide(cert_util_all)
+netsnmp_feature_child_of(cert_util, cert_util_all)
+#ifdef NETSNMP_FEATURE_REQUIRE_CERT_UTIL
+netsnmp_feature_require(container_directory)
+netsnmp_feature_require(container_fifo)
+netsnmp_feature_child_of(cert_map_remove, netsnmp_unused)
+netsnmp_feature_child_of(cert_map_find, netsnmp_unused)
+netsnmp_feature_child_of(tlstmparams_external, cert_util_all)
+netsnmp_feature_child_of(tlstmAddr_remove, netsnmp_unused)
+netsnmp_feature_child_of(tlstmaddr_external, cert_util_all)
+netsnmp_feature_child_of(cert_fingerprints, cert_util_all)
+
+#endif /* NETSNMP_FEATURE_REQUIRE_CERT_UTIL */
+
+#ifndef NETSNMP_FEATURE_REMOVE_CERT_UTIL
 
 #include <ctype.h>
 
@@ -1854,12 +1870,7 @@ netsnmp_cert_find(int what, int where, void *hint)
     return result;
 }
 
-int
-netsnmp_cert_validate(int who, int how, X509 *cert)
-{
-    return -1;
-}
-
+#ifndef NETSNMP_FEATURE_REMOVE_CERT_FINGERPRINTS
 int
 netsnmp_cert_check_vb_fingerprint(const netsnmp_variable_list *var)
 {
@@ -1934,6 +1945,7 @@ netsnmp_tls_fingerprint_parse(const u_char *binary_fp, int fp_len,
 
     return SNMPERR_SUCCESS;
 }
+#endif /* NETSNMP_FEATURE_REMOVE_CERT_FINGERPRINTS */
 
 /**
  * combine a hash type and hex fingerprint into a SnmpTLSFingerprint
@@ -2458,6 +2470,7 @@ netsnmp_cert_map_add(netsnmp_cert_map *map)
     return rc;
 }
 
+#ifndef NETSNMP_FEATURE_REMOVE_CERT_MAP_REMOVE
 int
 netsnmp_cert_map_remove(netsnmp_cert_map *map)
 {
@@ -2474,7 +2487,9 @@ netsnmp_cert_map_remove(netsnmp_cert_map *map)
 
     return rc;
 }
+#endif /* NETSNMP_FEATURE_REMOVE_CERT_MAP_REMOVE */
 
+#ifndef NETSNMP_FEATURE_REMOVE_CERT_MAP_FIND
 netsnmp_cert_map *
 netsnmp_cert_map_find(netsnmp_cert_map *map)
 {
@@ -2483,6 +2498,7 @@ netsnmp_cert_map_find(netsnmp_cert_map *map)
 
     return CONTAINER_FIND(_maps, map);
 }
+#endif /* NETSNMP_FEATURE_REMOVE_CERT_MAP_FIND */
 
 static void
 _map_free(netsnmp_cert_map *map, void *context)
@@ -2871,11 +2887,13 @@ _init_tlstmParams(void)
                                 params_help);
 }
 
+#ifndef NETSNMP_FEATURE_REMOVE_TLSTMPARAMS_EXTERNAL
 netsnmp_container *
 netsnmp_tlstmParams_container(void)
 {
     return _tlstmParams;
 }
+#endif /* NETSNMP_FEATURE_REMOVE_TLSTMPARAMS_EXTERNAL */
 
 snmpTlstmParams *
 netsnmp_tlstmParams_create(const char *name, int hashType, const char *fp,
@@ -2979,6 +2997,7 @@ netsnmp_tlstmParams_add(snmpTlstmParams *stp)
     return 0;
 }
 
+#ifndef NETSNMP_FEATURE_REMOVE_TLSTMPARAMS_EXTERNAL
 int
 netsnmp_tlstmParams_remove(snmpTlstmParams *stp)
 {
@@ -3007,6 +3026,7 @@ netsnmp_tlstmParams_find(snmpTlstmParams *stp)
     found = CONTAINER_FIND(_tlstmParams, stp);
     return found;
 }
+#endif /* NETSNMP_FEATURE_REMOVE_TLSTMPARAMS_FIND */
 
 static void
 _parse_params(const char *token, char *line)
@@ -3073,11 +3093,13 @@ _init_tlstmAddr(void)
                             addr_help);
 }
 
+#ifndef NETSNMP_FEATURE_REMOVE_TLSTMADDR_EXTERNAL
 netsnmp_container *
 netsnmp_tlstmAddr_container(void)
 {
     return _tlstmAddr;
 }
+#endif /* NETSNMP_FEATURE_REMOVE_TLSTMADDR_EXTERNAL */
 
 /*
  * create a new row in the table 
@@ -3183,6 +3205,7 @@ netsnmp_tlstmAddr_add(snmpTlstmAddr *entry)
     return 0;
 }
 
+#ifndef NETSNMP_FEATURE_REMOVE_TLSTMADDR_REMOVE
 int
 netsnmp_tlstmAddr_remove(snmpTlstmAddr *entry)
 {
@@ -3196,6 +3219,7 @@ netsnmp_tlstmAddr_remove(snmpTlstmAddr *entry)
 
     return 0;
 }
+#endif /* NETSNMP_FEATURE_REMOVE_TLSTMADDR_REMOVE */
 
 static void
 _parse_addr(const char *token, char *line)
@@ -3250,6 +3274,7 @@ _find_tlstmAddr_fingerprint(const char *name)
     return result->fingerprint;
 }
 
+#ifndef NETSNMP_FEATURE_REMOVE_TLSTMADDR_EXTERNAL
 char *
 netsnmp_tlstmAddr_get_serverId(const char *name)
 {
@@ -3266,10 +3291,13 @@ netsnmp_tlstmAddr_get_serverId(const char *name)
 
     return result->identity;
 }
+#endif /* NETSNMP_FEATURE_REMOVE_TLSTMADDR_EXTERNAL */
 /*
  * END snmpTlstmAddrTable data
  * ***************************************************************************/
 
 #else
-int cert_unused;	/* Suppress "empty translation unit" warning */
+netsnmp_feature_unused(cert_util);
+#endif /* NETSNMP_FEATURE_REMOVE_CERT_UTIL */
+netsnmp_feature_unused(cert_util);
 #endif /* defined(NETSNMP_USE_OPENSSL) && defined(HAVE_LIBSSL) */

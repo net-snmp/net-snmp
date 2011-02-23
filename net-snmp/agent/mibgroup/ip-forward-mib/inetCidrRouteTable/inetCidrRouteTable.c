@@ -14,6 +14,7 @@
  * standard Net-SNMP includes 
  */
 #include <net-snmp/net-snmp-config.h>
+#include <net-snmp/net-snmp-features.h>
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 
@@ -25,6 +26,9 @@
 #include <net-snmp/agent/mib_modules.h>
 
 #include "inetCidrRouteTable_interface.h"
+
+netsnmp_feature_require(inetCidrRouteTable_container_get)
+netsnmp_feature_require(inetCidrRouteTable_container_size)
 
 const oid       inetCidrRouteTable_oid[] = { INETCIDRROUTETABLE_OID };
 const int       inetCidrRouteTable_oid_size =

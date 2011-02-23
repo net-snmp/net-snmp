@@ -4,10 +4,13 @@
  */
 
 #include <net-snmp/net-snmp-config.h>
+#include <net-snmp/net-snmp-features.h>
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 #include "disman/schedule/schedCore.h"
 #include "utilities/iquery.h"
+
+netsnmp_feature_require(iquery)
 
 netsnmp_tdata *schedule_table;
 
@@ -435,11 +438,14 @@ sched_nextTime( struct schedTable_entry *entry )
     return;
 }
 
+netsnmp_feature_child_of(sched_nextrowtime, netsnmp_unused)
+#ifndef NETSNMP_FEATURE_REMOVE_SCHED_NEXTROWTIME
 void
 sched_nextRowTime( netsnmp_tdata_row *row )
 {
     sched_nextTime((struct schedTable_entry *) row->data );
 }
+#endif /* NETSNMP_FEATURE_REMOVE_SCHED_NEXTROWTIME */
 
 /*
  * create a new row in the table 

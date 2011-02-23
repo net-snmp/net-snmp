@@ -1,4 +1,5 @@
 #include <net-snmp/net-snmp-config.h>
+#include <net-snmp/net-snmp-features.h>
 
 #ifdef solaris2
 #define _KMEMUSER               /* Needed by <sys/user.h> */
@@ -813,6 +814,7 @@ sh_count_procs(char *procname)
 }
 #endif                          /* _SLASH_PROC_METHOD_ */
 #else
+netsnmp_feature_require(find_field)
 int
 sh_count_procs(char *procname)
 {

@@ -987,6 +987,7 @@ icmp_handler(netsnmp_mib_handler          *handler,
 
     case MODE_GETNEXT:
     case MODE_GETBULK:
+#ifndef NETSNMP_NO_WRITE_SUPPORT
     case MODE_SET_RESERVE1:
     case MODE_SET_RESERVE2:
     case MODE_SET_ACTION:
@@ -996,6 +997,7 @@ icmp_handler(netsnmp_mib_handler          *handler,
         snmp_log(LOG_WARNING, "mibII/icmp: Unsupported mode (%d)\n",
                                reqinfo->mode);
         break;
+#endif /* !NETSNMP_NO_WRITE_SUPPORT */
     default:
         snmp_log(LOG_WARNING, "mibII/icmp: Unrecognised mode (%d)\n",
                                reqinfo->mode);
@@ -1053,6 +1055,7 @@ icmp_stats_table_handler(netsnmp_mib_handler  *handler,
 			break;
 		case MODE_GETNEXT:
 		case MODE_GETBULK:
+#ifndef NETSNMP_NO_WRITE_SUPPORT
 		case MODE_SET_RESERVE1:
 		case MODE_SET_RESERVE2:
 		case MODE_SET_ACTION:
@@ -1062,6 +1065,7 @@ icmp_stats_table_handler(netsnmp_mib_handler  *handler,
 			snmp_log(LOG_WARNING, "mibII/icmpStatsTable: Unsupported mode (%d)\n",
 				reqinfo->mode);
 			break;
+#endif /* !NETSNMP_NO_WRITE_SUPPORT */
 		default:
 			snmp_log(LOG_WARNING, "mibII/icmpStatsTable: Unrecognised mode (%d)\n",
 				reqinfo->mode);
@@ -1118,6 +1122,7 @@ icmp_msg_stats_table_handler(netsnmp_mib_handler          *handler,
             break;
         case MODE_GETNEXT:
         case MODE_GETBULK:
+#ifndef NETSNMP_NO_WRITE_SUPPORT
         case MODE_SET_RESERVE1:
         case MODE_SET_RESERVE2:
         case MODE_SET_ACTION:
@@ -1127,6 +1132,7 @@ icmp_msg_stats_table_handler(netsnmp_mib_handler          *handler,
             snmp_log(LOG_WARNING, "mibII/icmpStatsTable: Unsupported mode (%d)\n",
                     reqinfo->mode);
             break;
+#endif /* !NETSNMP_NO_WRITE_SUPPORT */
         default:
             snmp_log(LOG_WARNING, "mibII/icmpStatsTable: Unrecognised mode (%d)\n",
                     reqinfo->mode);

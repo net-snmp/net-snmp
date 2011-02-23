@@ -2,6 +2,8 @@
 
 . ../support/simple_eval_tools.sh
 
+SKIPIFNOT NETSNMP_SECMOD_USM
+
 DEFSECURITYLEVEL=authNoPriv
 
 HEADER "SNMPv3 informs (authNoPriv) received and sent by tools"

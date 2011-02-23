@@ -270,13 +270,15 @@ netsnmp_old_api_helper(netsnmp_mib_handler *handler,
     int             status;
 
     struct variable *vp;
+    netsnmp_old_api_cache *cacheptr;
+    netsnmp_agent_session *oldasp = NULL;
+#ifndef NETSNMP_NO_WRITE_SUPPORT
     WriteMethod    *write_method = NULL;
     size_t          len;
     u_char         *access = NULL;
-    netsnmp_old_api_cache *cacheptr;
-    netsnmp_agent_session *oldasp = NULL;
     oid             tmp_name[MAX_OID_LEN];
     size_t          tmp_len;
+#endif /* NETSNMP_NO_WRITE_SUPPORT */
 
     vp = (struct variable *) handler->myvoid;
 
@@ -307,6 +309,7 @@ netsnmp_old_api_helper(netsnmp_mib_handler *handler,
         switch (reqinfo->mode) {
         case MODE_GET:
         case MODE_GETNEXT:
+#ifndef NETSNMP_NO_WRITE_SUPPORT
         case MODE_SET_RESERVE1:
             /*
              * Actually call the old mib-module function 
@@ -381,6 +384,7 @@ netsnmp_old_api_helper(netsnmp_mib_handler *handler,
              * BBB: fall through for everything that is a set (see AAA) 
              */
 
+#endif /* NETSNMP_NO_WRITE_SUPPORT */
         default:
             /*
              * WWW: explicitly list the SET conditions 

@@ -693,6 +693,7 @@ var_snmpNotifyTable(struct variable *vp,
     }
 
     switch (vp->magic) {
+#ifndef NETSNMP_NO_WRITE_SUPPORT
     case SNMPNOTIFYTAG:
         *write_method = write_snmpNotifyTag;
         break;
@@ -705,6 +706,7 @@ var_snmpNotifyTable(struct variable *vp,
     case SNMPNOTIFYROWSTATUS:
         *write_method = write_snmpNotifyRowStatus;
         break;
+#endif /* !NETSNMP_NO_WRITE_SUPPORT */
     default:
         *write_method = NULL;
     }
@@ -713,6 +715,7 @@ var_snmpNotifyTable(struct variable *vp,
         return NULL;
     }
 
+#ifndef NETSNMP_NO_READ_SUPPORT
     switch (vp->magic) {
     case SNMPNOTIFYTAG:
         *var_len = StorageTmp->snmpNotifyTagLen;
@@ -733,6 +736,7 @@ var_snmpNotifyTable(struct variable *vp,
     default:
         ERROR_MSG("");
     }
+#endif /* !NETSNMP_NO_READ_SUPPORT */ 
     return NULL;
 }
 
@@ -760,6 +764,8 @@ snmpTagValid(const char *tag, const size_t tagLen)
 }
 
 static struct snmpNotifyTable_data *StorageNew;
+
+#ifndef NETSNMP_NO_WRITE_SUPPORT 
 
 int
 write_snmpNotifyTag(int action,
@@ -1187,3 +1193,4 @@ write_snmpNotifyRowStatus(int action,
     }
     return SNMP_ERR_NOERROR;
 }
+#endif /* !NETSNMP_NO_WRITE_SUPPORT */

@@ -2,6 +2,7 @@
  *  AgentX sub-agent
  */
 #include <net-snmp/net-snmp-config.h>
+#include <net-snmp/net-snmp-features.h>
 
 #include <sys/types.h>
 #ifdef HAVE_STDLIB_H
@@ -44,6 +45,9 @@
 
 #include "subagent.h"
 
+netsnmp_feature_require(remove_trap_sessionname)
+netsnmp_feature_require(remove_trap_session)
+
 #ifdef USING_AGENTX_SUBAGENT_MODULE
 
 static SNMPCallback subagent_register_ping_alarm;
@@ -53,10 +57,12 @@ void            agentx_unregister_callbacks(netsnmp_session * ss);
 int             handle_subagent_response(int op, netsnmp_session * session,
                                          int reqid, netsnmp_pdu *pdu,
                                          void *magic);
+#ifndef NETSNMP_NO_WRITE_SUPPORT
 int             handle_subagent_set_response(int op,
                                              netsnmp_session * session,
                                              int reqid, netsnmp_pdu *pdu,
                                              void *magic);
+#endif /* !NETSNMP_NO_WRITE_SUPPORT */
 void            subagent_startup_callback(unsigned int clientreg,
                                           void *clientarg);
 int             subagent_open_master_session(void);
@@ -162,6 +168,7 @@ netsnmp_enable_subagent(void) {
                            SUB_AGENT);
 }
 
+#ifndef NETSNMP_NO_WRITE_SUPPORT
 struct agent_netsnmp_set_info *
 save_set_vars(netsnmp_session * ss, netsnmp_pdu *pdu)
 {
@@ -230,6 +237,7 @@ free_set_vars(netsnmp_session * ss, netsnmp_pdu *pdu)
         prev = ptr;
     }
 }
+#endif /* !NETSNMP_NO_WRITE_SUPPORT */
 
 int
 handle_agentx_packet(int operation, netsnmp_session * session, int reqid,
@@ -367,6 +375,7 @@ handle_agentx_packet(int operation, netsnmp_session * session, int reqid,
         DEBUGMSGTL(("agentx/subagent", "  -> response\n"));
         return 1;
 
+#ifndef NETSNMP_NO_WRITE_SUPPORT
     case AGENTX_MSG_TESTSET:
         /*
          * XXXWWW we have to map this twice to both RESERVE1 and RESERVE2 
@@ -439,6 +448,7 @@ handle_agentx_packet(int operation, netsnmp_session * session, int reqid,
         mycallback = handle_subagent_set_response;
         retmagic = asi;
         break;
+#endif /* !NETSNMP_NO_WRITE_SUPPORT */ 
 
     default:
         SNMP_FREE(smagic);
@@ -493,11 +503,13 @@ handle_subagent_response(int op, netsnmp_session * session, int reqid,
                 "handling AgentX response (cmd 0x%02x orig_cmd 0x%02x)\n",
                 pdu->command, smagic->original_command));
 
+#ifndef NETSNMP_NO_WRITE_SUPPORT
     if (pdu->command == SNMP_MSG_INTERNAL_SET_FREE ||
         pdu->command == SNMP_MSG_INTERNAL_SET_UNDO ||
         pdu->command == SNMP_MSG_INTERNAL_SET_COMMIT) {
         free_set_vars(smagic->session, pdu);
     }
+#endif /* !NETSNMP_NO_WRITE_SUPPORT */
 
     if (smagic->original_command == AGENTX_MSG_GETNEXT) {
         DEBUGMSGTL(("agentx/subagent",
@@ -559,6 +571,7 @@ handle_subagent_response(int op, netsnmp_session * session, int reqid,
     return 1;
 }
 
+#ifndef NETSNMP_NO_WRITE_SUPPORT
 int
 handle_subagent_set_response(int op, netsnmp_session * session, int reqid,
                              netsnmp_pdu *pdu, void *magic)
@@ -620,7 +633,7 @@ handle_subagent_set_response(int op, netsnmp_session * session, int reqid,
     DEBUGMSGTL(("agentx/subagent", "  FINISHED\n"));
     return 1;
 }
-
+#endif /* !NETSNMP_NO_WRITE_SUPPORT */
 
 
 int

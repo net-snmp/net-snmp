@@ -1,4 +1,5 @@
 #include <net-snmp/net-snmp-config.h>
+#include <net-snmp/net-snmp-features.h>
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 #include <net-snmp/agent/scalar.h>
@@ -11,6 +12,9 @@
 
 #include <net-snmp/agent/cache_handler.h>
 #include "agent/nsCache.h"
+
+netsnmp_feature_require(cache_get_head)
+
 
 /*
  * use unadvertised function to get cache head. You really should not

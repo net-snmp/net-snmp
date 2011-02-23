@@ -240,12 +240,15 @@ u64UpdateCounter(U64 * pu64out, const U64 * pu64one, const U64 * pu64two)
 /**
  * pu64one = pu64two 
  */
+netsnmp_feature_child_of(u64copy, netsnmp_unused)
+#ifndef NETSNMP_FEATURE_REMOVE_U64COPY
 void
 u64Copy(U64 * pu64one, const U64 * pu64two)
 {
     pu64one->high = pu64two->high;
     pu64one->low =  pu64two->low;
 }
+#endif /* NETSNMP_FEATURE_REMOVE_U64COPY */
 
 /** zeroU64 - set an unsigned 64-bit number to zero
 *

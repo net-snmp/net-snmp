@@ -1208,9 +1208,11 @@ vacm_in_view(netsnmp_pdu *pdu, oid * name, size_t namelen,
     case SNMP_MSG_GETBULK:
         viewtype = VACM_VIEW_READ;
         break;
+#ifndef NETSNMP_NO_WRITE_SUPPORT
     case SNMP_MSG_SET:
         viewtype = VACM_VIEW_WRITE;
         break;
+#endif /* !NETSNMP_NO_WRITE_SUPPORT */
     case SNMP_MSG_TRAP:
     case SNMP_MSG_TRAP2:
     case SNMP_MSG_INFORM:

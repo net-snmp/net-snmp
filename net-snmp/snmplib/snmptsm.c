@@ -67,6 +67,12 @@ init_tsm(void)
                                NETSNMP_DS_LIB_TSM_USE_PREFIX);
 }
 
+/** shutdown the TSM security module */
+void
+shutdown_tsm(void)
+{
+}
+
 /*
  * Initialize specific session information (right now, just set up things to
  * not do an engineID probe)
@@ -530,7 +536,7 @@ tsm_process_in_msg(struct snmp_secmod_incoming_params *parms)
        message.*/
     if (parms->secLevel > tmStateRef->transportSecurityLevel) {
         snmp_increment_statistic(STAT_TSM_SNMPTSMINADEQUATESECURITYLEVELS);
-        DEBUGMSGTL(("tsm", "inadequate security level %d\n", parms->secLevel));
+        DEBUGMSGTL(("tsm", "inadequate security level: %d\n", parms->secLevel));
         /* net-snmp returns error codes not OIDs, which are dealt with later */
         return SNMPERR_UNSUPPORTED_SEC_LEVEL;
     }

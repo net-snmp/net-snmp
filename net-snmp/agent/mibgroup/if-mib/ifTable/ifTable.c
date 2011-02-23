@@ -1783,6 +1783,9 @@ ifSpecific_get(ifTable_rowreq_ctx * rowreq_ctx,
 
 
 /** @} */
+
+#ifndef NETSNMP_NO_WRITE_SUPPORT
+
 /**********************************************************************
  **********************************************************************
  ***
@@ -2348,6 +2351,8 @@ _if_number_handler(netsnmp_mib_handler *handler,
     
     return SNMP_ERR_NOERROR;
 }
+
+#endif /* !NETSNMP_NO_WRITE_SUPPORT */
 
 /** @} */
 /** @{ */

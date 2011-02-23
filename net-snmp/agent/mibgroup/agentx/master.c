@@ -14,6 +14,7 @@
 
 
 #include <net-snmp/net-snmp-config.h>
+#include <net-snmp/net-snmp-features.h>
 #if HAVE_IO_H
 #include <io.h>
 #endif
@@ -49,6 +50,12 @@
 #include "snmpd.h"
 #include "agentx/protocol.h"
 #include "agentx/master_admin.h"
+
+netsnmp_feature_require(handler_mark_requests_as_delegated)
+netsnmp_feature_require(unix_socket_paths)
+netsnmp_feature_require(free_agent_snmp_session_by_session)
+netsnmp_feature_require(set_agent_uptimename)
+
 
 void
 real_init_master(void)
@@ -460,6 +467,7 @@ agentx_master_handler(netsnmp_mib_handler *handler,
         pdu = snmp_pdu_create(AGENTX_MSG_GETNEXT);
         break;
 
+#ifndef NETSNMP_NO_WRITE_SUPPORT
     case MODE_SET_RESERVE1:
         pdu = snmp_pdu_create(AGENTX_MSG_TESTSET);
         break;
@@ -483,6 +491,7 @@ agentx_master_handler(netsnmp_mib_handler *handler,
     case MODE_SET_FREE:
         pdu = snmp_pdu_create(AGENTX_MSG_CLEANUPSET);
         break;
+#endif /* !NETSNMP_NO_WRITE_SUPPORT */
 
     default:
         snmp_log(LOG_WARNING,

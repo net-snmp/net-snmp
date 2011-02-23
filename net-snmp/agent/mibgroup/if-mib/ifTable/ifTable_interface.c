@@ -30,6 +30,7 @@
  * standard Net-SNMP includes 
  */
 #include <net-snmp/net-snmp-config.h>
+#include <net-snmp/net-snmp-features.h>
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 
@@ -46,6 +47,11 @@
 #include "ifTable_interface.h"
 
 #include <ctype.h>
+
+netsnmp_feature_provide(ifTable_external_access)
+netsnmp_feature_require(row_merge)
+netsnmp_feature_require(baby_steps)
+netsnmp_feature_require(check_all_requests_error)
 
 /**********************************************************************
  **********************************************************************
@@ -82,19 +88,26 @@ static void     _ifTable_container_init(ifTable_interface_ctx * if_ctx);
 static void     _ifTable_container_shutdown(ifTable_interface_ctx *
                                             if_ctx);
 
-
+netsnmp_feature_child_of(iftable_container_get, ifTable_external_access)
+#ifndef NETSNMP_FEATURE_REMOVE_IFTABLE_CONTAINER_GET
 netsnmp_container *
 ifTable_container_get(void)
 {
     return ifTable_if_ctx.container;
 }
+#endif /* NETSNMP_FEATURE_REMOVE_IFTABLE_CONTAINER_GET */
 
+netsnmp_feature_child_of(iftable_registration_get, ifTable_external_access)
+#ifndef NETSNMP_FEATURE_REMOVE_IFTABLE_REGISTRATION_GET
 ifTable_registration *
 ifTable_registration_get(void)
 {
     return ifTable_if_ctx.user_ctx;
 }
+#endif /* NETSNMP_FEATURE_REMOVE_IFTABLE_REGISTRATION_GET */
 
+netsnmp_feature_child_of(iftable_registration_set, ifTable_external_access)
+#ifndef NETSNMP_FEATURE_REMOVE_IFTABLE_REGISTRATION_SET
 ifTable_registration *
 ifTable_registration_set(ifTable_registration * newreg)
 {
@@ -102,12 +115,16 @@ ifTable_registration_set(ifTable_registration * newreg)
     ifTable_if_ctx.user_ctx = newreg;
     return old;
 }
+#endif /* NETSNMP_FEATURE_REMOVE_IFTABLE_REGISTRATION_SET */
 
+netsnmp_feature_child_of(iftable_container_size, ifTable_external_access)
+#ifndef NETSNMP_FEATURE_REMOVE_IFTABLE_CONTAINER_SIZE
 int
 ifTable_container_size(void)
 {
     return CONTAINER_SIZE(ifTable_if_ctx.container);
 }
+#endif /* NETSNMP_FEATURE_REMOVE_IFTABLE_CONTAINER_SIZE */
 
 u_int
 ifTable_dirty_get(void)
@@ -1953,6 +1970,7 @@ _ifTable_container_shutdown(ifTable_interface_ctx * if_ctx)
 }                               /* _ifTable_container_shutdown */
 
 
+#ifndef NETSNMP_FEATURE_REMOVE_IFTABLE_EXTERNAL_ACCESS
 ifTable_rowreq_ctx *
 ifTable_row_find_by_mib_index(ifTable_mib_index * mib_idx)
 {
@@ -1978,3 +1996,4 @@ ifTable_row_find_by_mib_index(ifTable_mib_index * mib_idx)
 
     return rowreq_ctx;
 }
+#endif /* NETSNMP_FEATURE_REMOVE_IFTABLE_EXTERNAL_ACCESS */

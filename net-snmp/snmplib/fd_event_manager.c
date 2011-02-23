@@ -4,12 +4,15 @@
 #include <sys/select.h>
 #endif
 #include <net-snmp/net-snmp-includes.h>
+#include <net-snmp/net-snmp-features.h>
 #include <net-snmp/library/snmp_api.h>
 #include <net-snmp/library/fd_event_manager.h>
 #include <net-snmp/library/snmp_logging.h>
 #include <net-snmp/library/large_fd_set.h>
 
+netsnmp_feature_provide(fd_event_manager)
 
+#ifndef NETSNMP_FEATURE_REMOVE_FD_EVENT_MANAGER
 int     external_readfd[NUM_EXTERNAL_FDS],   external_readfdlen   = 0;
 int     external_writefd[NUM_EXTERNAL_FDS],  external_writefdlen  = 0;
 int     external_exceptfd[NUM_EXTERNAL_FDS], external_exceptfdlen = 0;
@@ -289,3 +292,6 @@ void netsnmp_dispatch_external_events2(int *count,
       }
   }
 }
+#else  /*  !NETSNMP_FEATURE_REMOVE_FD_EVENT_MANAGER */
+netsnmp_feature_unused(fd_event_manager);
+#endif /*  !NETSNMP_FEATURE_REMOVE_FD_EVENT_MANAGER */

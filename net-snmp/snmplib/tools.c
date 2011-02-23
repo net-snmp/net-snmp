@@ -14,6 +14,7 @@
 #endif
 
 #include <net-snmp/net-snmp-config.h>
+#include <net-snmp/net-snmp-features.h>
 
 #include <ctype.h>
 #include <stdio.h>
@@ -71,6 +72,9 @@
 #include <net-snmp/library/mib.h>
 #include <net-snmp/library/scapi.h>
 
+netsnmp_feature_provide(memory_wrappers)
+
+#ifndef NETSNMP_FEATURE_REMOVE_MEMORY_WRAPPERS
 /**
  * This function is a wrapper for the strdup function.
  *
@@ -114,6 +118,7 @@ void netsnmp_free( void * ptr)
     if (ptr)
         free(ptr);
 }
+#endif /* NETSNMP_FEATURE_REMOVE_MEMORY_WRAPPERS */
 
 /**
  * This function increase the size of the buffer pointed at by *buf, which is
@@ -203,6 +208,7 @@ free_zero(void *buf, size_t size)
 
 }                               /* end free_zero() */
 
+#ifndef NETSNMP_FEATURE_REMOVE_USM_SCAPI
 /**
  * Returns pointer to allocaed & set buffer on success, size contains
  * number of random bytes filled.  buf is NULL and *size set to KMT
@@ -233,6 +239,7 @@ malloc_random(size_t * size)
     return buf;
 
 }                               /* end malloc_random() */
+#endif /* NETSNMP_FEATURE_REMOVE_USM_SCAPI */
 
 /** Duplicates a memory block.
  *  Copies a existing memory location from a pointer to another, newly
@@ -260,6 +267,8 @@ memdup(u_char ** to, const void * from, size_t size)
 
 }                               /* end memdup() */
 
+netsnmp_feature_child_of(netsnmp_check_definedness, valgrind)
+#ifndef NETSNMP_FEATURE_REMOVE_NETSNMP_CHECK_DEFINEDNESS
 /**
  * When running under Valgrind, check whether all bytes in the range [packet,
  * packet+length) are defined. Let Valgrind print a backtrace if one or more
@@ -290,6 +299,7 @@ netsnmp_check_definedness(const void *packet, size_t length)
 
 #endif
 }
+#endif /* NETSNMP_FEATURE_REMOVE_NETSNMP_CHECK_DEFINEDNESS */
 
 /** copies a (possible) unterminated string of a given length into a
  *  new buffer and null terminates it as well (new buffer MAY be one
@@ -938,6 +948,8 @@ atime_ready(const_marker_t pm, int deltaT)
  * Test: Has (marked time plus delta) exceeded current time (in msec) ?
  * Returns 0 if test fails or cannot be tested (no marker).
  */
+netsnmp_feature_child_of(uatime_ready, netsnmp_unused)
+#ifndef NETSNMP_FEATURE_REMOVE_UATIME_READY
 int
 uatime_ready(const_marker_t pm, unsigned int deltaT)
 {
@@ -955,6 +967,7 @@ uatime_ready(const_marker_t pm, unsigned int deltaT)
 
     return 1;
 }
+#endif /* NETSNMP_FEATURE_REMOVE_UATIME_READY */
 
 
         /*
@@ -975,11 +988,14 @@ marker_tticks(const_marker_t pm)
     return res / 10;            /* atime_diff works in msec, not csec */
 }
 
+netsnmp_feature_child_of(timeval_tticks, netsnmp_unused)
+#ifndef NETSNMP_FEATURE_REMOVE_TIMEVAL_TTICKS
 int
 timeval_tticks(const struct timeval *tv)
 {
     return marker_tticks((const_marker_t) tv);
 }
+#endif /* NETSNMP_FEATURE_REMOVE_TIMEVAL_TTICKS */
 
 /**
  * Non Windows:  Returns a pointer to the desired environment variable  

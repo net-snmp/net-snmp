@@ -56,6 +56,7 @@ netsnmp_arch_tcpconn_entry_copy(netsnmp_tcpconn_entry *lhs,
     return 0;
 }
 
+#ifdef TCPCONN_DELETE_SUPPORTED
 /*
  * delete an entry
  */
@@ -67,7 +68,7 @@ netsnmp_arch_tcpconn_entry_delete(netsnmp_tcpconn_entry *entry)
     /** xxx-rks:9 tcpConn delete not implemented */
     return -1;
 }
-
+#endif /* TCPCONN_DELETE_SUPPORTED */
 
 /**
  *

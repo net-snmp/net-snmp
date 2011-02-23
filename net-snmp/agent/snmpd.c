@@ -36,6 +36,7 @@
  * distributed with the Net-SNMP package.
  */
 #include <net-snmp/net-snmp-config.h>
+#include <net-snmp/net-snmp-features.h>
 #include <net-snmp/types.h>
 
 #if HAVE_IO_H
@@ -162,6 +163,10 @@ typedef long    fd_mask;
 #define WIN32SERVICE
 
 #endif
+
+netsnmp_feature_want(logging_file)
+netsnmp_feature_want(logging_stdio)
+netsnmp_feature_want(logging_syslog)
 
 /*
  * Globals.
@@ -387,9 +392,13 @@ SnmpdCatchRandomSignal(int a)
 {
     /* Disable all logs and log the error via syslog */
     snmp_disable_log();
+#ifndef NETSNMP_FEATURE_REMOVE_LOGGING_SYSLOG
     snmp_enable_syslog();
+#endif /* NETSNMP_FEATURE_REMOVE_LOGGING_SYSLOG */
     snmp_log(LOG_ERR, "Exiting on signal %d\n", a);
+#ifndef NETSNMP_FEATURE_REMOVE_LOGGING_SYSLOG
     snmp_disable_syslog();
+#endif /* NETSNMP_FEATURE_REMOVE_LOGGING_SYSLOG */
     exit(1);
 }
 
@@ -522,11 +531,13 @@ main(int argc, char *argv[])
             argv[i] = option_compatability;            
     }
 
+#ifndef NETSNMP_FEATURE_REMOVE_LOGGING_SYSLOG
 #ifdef WIN32
     snmp_log_syslogname(app_name_long);
 #else
     snmp_log_syslogname(app_name);
 #endif
+#endif /* NETSNMP_FEATURE_REMOVE_LOGGING_SYSLOG */
     netsnmp_ds_set_string(NETSNMP_DS_LIBRARY_ID,
                           NETSNMP_DS_LIB_APPTYPE, app_name);
 
@@ -570,9 +581,9 @@ main(int argc, char *argv[])
             break;
 
         case 'd':
-            snmp_set_dump_packet(++snmp_dump_packet);
-            netsnmp_ds_set_boolean(NETSNMP_DS_APPLICATION_ID, 
-				   NETSNMP_DS_AGENT_VERBOSE, 1);
+            netsnmp_ds_set_boolean(NETSNMP_DS_LIBRARY_ID, 
+                                   NETSNMP_DS_LIB_QUICK_PRINT,
+                                   ++snmp_dump_packet);
             break;
 
         case 'D':
@@ -629,6 +640,7 @@ main(int argc, char *argv[])
             }
             break;
 
+#ifdef NETSNMP_FEATURE_HAS_LOGGING_FILE
         case 'l':
             printf("Warning: -l option is deprecated, use -Lf <file> instead\n");
             if (optarg != NULL) {
@@ -646,6 +658,7 @@ main(int argc, char *argv[])
                 usage(argv[0]);
             }
             break;
+#endif /* NETSNMP_FEATURE_HAS_LOGGING_FILE */
 
         case 'L':
 	    if  (snmp_log_options( optarg, argc, argv ) < 0 ) {
@@ -691,7 +704,8 @@ main(int argc, char *argv[])
             break;
 
         case 'q':
-            snmp_set_quick_print(1);
+            netsnmp_ds_set_boolean(NETSNMP_DS_LIBRARY_ID, 
+                                   NETSNMP_DS_LIB_QUICK_PRINT, 1);
             break;
 
         case 'r':
@@ -699,6 +713,7 @@ main(int argc, char *argv[])
 				      NETSNMP_DS_AGENT_NO_ROOT_ACCESS);
             break;
 
+#ifndef NETSNMP_FEATURE_REMOVE_LOGGING_SYSLOG
         case 's':
             printf("Warning: -s option is deprecated, use -Lsd instead\n");
             snmp_enable_syslog();
@@ -752,6 +767,7 @@ main(int argc, char *argv[])
                 usage(argv[0]);
             }
             break;
+#endif /* NETSNMP_FEATURE_REMOVE_LOGGING_SYSLOG */
 
         case 'U':
             netsnmp_ds_toggle_boolean(NETSNMP_DS_APPLICATION_ID, 
@@ -868,10 +884,12 @@ main(int argc, char *argv[])
     }
 
 #ifdef NETSNMP_LOGFILE
+#ifdef NETSNMP_FEATURE_HAS_LOGGING_FILE
     if (0 == log_set)
         snmp_enable_filelog(NETSNMP_LOGFILE,
                             netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID,
                                                    NETSNMP_DS_LIB_APPEND_LOGFILES));
+#endif /* NETSNMP_FEATURE_HAS_LOGGING_FILE */
 #endif
 
 #ifdef USING_UTIL_FUNCS_RESTART_MODULE
@@ -938,7 +956,13 @@ main(int argc, char *argv[])
     if(!dont_fork) {
         int quit = ! netsnmp_ds_get_boolean(NETSNMP_DS_APPLICATION_ID,
                                             NETSNMP_DS_AGENT_QUIT_IMMEDIATELY);
-        ret = netsnmp_daemonize(quit, snmp_stderrlog_status());
+        ret = netsnmp_daemonize(quit,
+#ifdef NETSNMP_FEATURE_HAS_LOGGING_STDIO
+                                snmp_stderrlog_status()
+#else /* NETSNMP_FEATURE_HAS_LOGGING_STDIO */
+                                0
+#endif /* NETSNMP_FEATURE_HAS_LOGGING_STDIO */
+            );
         /*
          * xxx-rks: do we care if fork fails? I think we should...
          */
@@ -1232,7 +1256,9 @@ receive(void)
         }
 #endif                          /* USING_SMUX_MODULE */
 
+#ifndef NETSNMP_FEATURE_REMOVE_FD_EVENT_MANAGER
         netsnmp_external_event_info2(&numfds, &readfds, &writefds, &exceptfds);
+#endif /* NETSNMP_FEATURE_REMOVE_FD_EVENT_MANAGER */
 
     reselect:
         DEBUGMSGTL(("snmpd/select", "select( numfds=%d, ..., tvp=%p)\n",
@@ -1268,8 +1294,12 @@ receive(void)
             }
 
 #endif                          /* USING_SMUX_MODULE */
+
+#ifndef NETSNMP_FEATURE_REMOVE_FD_EVENT_MANAGER
             netsnmp_dispatch_external_events2(&count, &readfds,
                                               &writefds, &exceptfds);
+#endif /* NETSNMP_FEATURE_REMOVE_FD_EVENT_MANAGER */
+
             /* If there are still events leftover, process them */
             if (count > 0) {
               snmp_read2(&readfds);

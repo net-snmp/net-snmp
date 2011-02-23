@@ -26,11 +26,6 @@ extern          "C" {
     void            engineBoots_conf(const char *, char *);
     void            engineIDType_conf(const char *, char *);
     void            engineIDNic_conf(const char *, char *);
-    void            snmpv3_authtype_conf(const char *word, char *cptr);
-    void            snmpv3_privtype_conf(const char *word, char *cptr);
-    NETSNMP_IMPORT
-    void            usm_parse_create_usmUser(const char *token,
-                                             char *line);
     NETSNMP_IMPORT
     void            init_snmpv3(const char *);
     int             init_snmpv3_post_config(int majorid, int minorid,
@@ -54,10 +49,6 @@ extern          "C" {
     NETSNMP_IMPORT
     u_long          snmpv3_local_snmpEngineTime(void);
     int             get_default_secLevel(void);
-    NETSNMP_IMPORT
-    const oid      *get_default_authtype(size_t *);
-    NETSNMP_IMPORT
-    const oid      *get_default_privtype(size_t *);
     void            snmpv3_set_engineBootsAndTime(int boots, int ttime);
     int             free_engineID(int majorid, int minorid, void *serverarg,
 				  void *clientarg);

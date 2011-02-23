@@ -477,12 +477,6 @@ plural(int n)
 	return (n != 1 ? "s" : "");
 }
 
-const char *
-plurales(int n)
-{
-	return (n != 1 ? "es" : "");
-}
-
 /*
  * Find the protox for the given "well-known" name.
  */

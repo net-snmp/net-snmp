@@ -30,6 +30,7 @@
  * standard Net-SNMP includes 
  */
 #include <net-snmp/net-snmp-config.h>
+#include <net-snmp/net-snmp-features.h>
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 
@@ -45,6 +46,12 @@
 #include "ipv6ScopeZoneIndexTable_interface.h"
 
 #include <ctype.h>
+
+netsnmp_feature_provide(ipv6ScopeZoneIndexTable_external_access)
+netsnmp_feature_require(row_merge)
+netsnmp_feature_require(baby_steps)
+netsnmp_feature_require(table_container_row_insert)
+netsnmp_feature_require(check_all_requests_error)
 
 /**********************************************************************
  **********************************************************************
@@ -84,19 +91,26 @@ _cache_load(netsnmp_cache * cache, void *vmagic);
 static void
 _cache_free(netsnmp_cache * cache, void *magic);
 
-
+netsnmp_feature_child_of(ipv6ScopeZoneIndexTable_container_get, ipv6ScopeZoneIndexTable_external_access)
+#ifndef NETSNMP_FEATURE_REMOVE_IPV6SCOPEZONEINDEXTABLE_CONTAINER_GET
 netsnmp_container *
 ipv6ScopeZoneIndexTable_container_get(void)
 {
     return ipv6ScopeZoneIndexTable_if_ctx.container;
 }
+#endif /* NETSNMP_FEATURE_REMOVE_IPV6SCOPEZONEINDEXTABLE_CONTAINER_GET */
 
+netsnmp_feature_child_of(ipv6ScopeZoneIndexTable_registration_get, ipv6ScopeZoneIndexTable_external_access)
+#ifndef NETSNMP_FEATURE_REMOVE_IPV6SCOPEZONEINDEXTABLE_REGISTRATION_GET
 ipv6ScopeZoneIndexTable_registration *
 ipv6ScopeZoneIndexTable_registration_get(void)
 {
     return ipv6ScopeZoneIndexTable_if_ctx.user_ctx;
 }
+#endif /* NETSNMP_FEATURE_REMOVE_IPV6SCOPEZONEINDEXTABLE_REGISTRATION_GET */
 
+netsnmp_feature_child_of(ipv6ScopeZoneIndexTable_registration_set, ipv6ScopeZoneIndexTable_external_access)
+#ifndef NETSNMP_FEATURE_REMOVE_IPV6SCOPEZONEINDEXTABLE_REGISTRATION_SET
 ipv6ScopeZoneIndexTable_registration *
 ipv6ScopeZoneIndexTable_registration_set
     (ipv6ScopeZoneIndexTable_registration * newreg)
@@ -106,12 +120,16 @@ ipv6ScopeZoneIndexTable_registration_set
     ipv6ScopeZoneIndexTable_if_ctx.user_ctx = newreg;
     return old;
 }
+#endif /* NETSNMP_FEATURE_REMOVE_IPV6SCOPEZONEINDEXTABLE_REGISTRATION_SET */
 
+netsnmp_feature_child_of(ipv6ScopeZoneIndexTable_container_size, ipv6ScopeZoneIndexTable_external_access)
+#ifndef NETSNMP_FEATURE_REMOVE_IPV6SCOPEZONEINDEXTABLE_CONTAINER_SIZE
 int
 ipv6ScopeZoneIndexTable_container_size(void)
 {
     return CONTAINER_SIZE(ipv6ScopeZoneIndexTable_if_ctx.container);
 }
+#endif /* NETSNMP_FEATURE_REMOVE_IPV6SCOPEZONEINDEXTABLE_CONTAINER_SIZE */
 
 /*
  * mfd multiplexer modes
@@ -1057,6 +1075,7 @@ _ipv6ScopeZoneIndexTable_container_shutdown
 }                               /* _ipv6ScopeZoneIndexTable_container_shutdown */
 
 
+#ifndef NETSNMP_FEATURE_REMOVE_IPV6SCOPEZONEINDEXTABLE_EXTERNAL_ACCESS
 ipv6ScopeZoneIndexTable_rowreq_ctx *
 ipv6ScopeZoneIndexTable_row_find_by_mib_index
     (ipv6ScopeZoneIndexTable_mib_index * mib_idx)
@@ -1084,6 +1103,7 @@ ipv6ScopeZoneIndexTable_row_find_by_mib_index
 
     return rowreq_ctx;
 }
+#endif /* NETSNMP_FEATURE_REMOVE_IPV6SCOPEZONEINDEXTABLE_EXTERNAL_ACCESS */
 
 static int
 _cache_load(netsnmp_cache * cache, void *vmagic)

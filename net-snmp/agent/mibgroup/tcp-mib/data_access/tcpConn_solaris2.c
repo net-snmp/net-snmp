@@ -39,6 +39,7 @@ netsnmp_arch_tcpconn_entry_copy(netsnmp_tcpconn_entry *ep1,
     return 0;
 }
 
+#ifdef TCPCONN_DELETE_SUPPORTED
 int 
 netsnmp_arch_tcpconn_entry_delete(netsnmp_tcpconn_entry *ep)
 {
@@ -47,6 +48,7 @@ netsnmp_arch_tcpconn_entry_delete(netsnmp_tcpconn_entry *ep)
      */
     return (-1);
 }
+#endif /* TCPCONN_DELETE_SUPPORTED */
 
 int 
 netsnmp_arch_tcpconn_container_load(netsnmp_container * container, 

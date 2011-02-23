@@ -4,11 +4,14 @@
  */
 
 #include <net-snmp/net-snmp-config.h>
+#include <net-snmp/net-snmp-features.h>
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 #include "utilities/iquery.h"
 #include "disman/expr/expObject.h"
 #include "disman/expr/expObjectConf.h"
+
+netsnmp_feature_require(iquery)
 
 /* Initializes the expObjectConf module */
 void

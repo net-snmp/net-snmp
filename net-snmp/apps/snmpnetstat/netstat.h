@@ -67,7 +67,6 @@ extern int  max_getbulk;  /* specifies the max-repeaters value to use with GETBU
 extern	char *__progname; /* program name, from crt0.o */
 
 const char	*plural(int);
-const char	*plurales(int);
 
 void	tcpprotopr(const char *);
 void	udpprotopr(const char *);

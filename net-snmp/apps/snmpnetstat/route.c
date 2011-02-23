@@ -218,50 +218,6 @@ get_ifname(char *name, int ifIndex)
     strcpy(name, ip->name);
 }
 
-/*
- * Print address family header before a section of the routing table.
- */
-void
-pr_family(int af)
-{
-	const char *afname;
-
-	switch (af) {
-	case AF_INET:
-		afname = "Internet";
-		break;
-#ifdef NETSNMP_ENABLE_IPV6
-	case AF_INET6:
-		afname = "Internet6";
-		break;
-#endif
-    /*
-	case AF_NS:
-		afname = "XNS";
-		break;
-	case AF_IPX:
-		afname = "IPX";
-		break;
-	case AF_CCITT:
-		afname = "X.25";
-		break;
-	case PF_KEY:
-		afname = "Encap";
-		break;
-	case AF_APPLETALK:
-		afname = "AppleTalk";
-		break;
-     */
-	default:
-		afname = NULL;
-		break;
-	}
-	if (afname)
-		printf("\n%s:\n", afname);
-	else
-		printf("\nProtocol Family %d:\n", af);
-}
-
 /* column widths; each followed by one space */
 #ifndef NETSNMP_ENABLE_IPV6
 #define	WID_DST(af)	26	/* width of destination column */

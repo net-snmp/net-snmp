@@ -7,11 +7,16 @@
  */
 
 #include <net-snmp/net-snmp-config.h>
+#include <net-snmp/net-snmp-features.h>
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 #include "utilities/iquery.h"
 #include "disman/expr/expExpression.h"
 #include "disman/expr/expExpressionTable.h"
+
+netsnmp_feature_require(iquery)
+netsnmp_feature_require(table_tdata)
+netsnmp_feature_require(check_vb_type_and_max_size)
 
 /* Initializes the expExpressionTable module */
 void

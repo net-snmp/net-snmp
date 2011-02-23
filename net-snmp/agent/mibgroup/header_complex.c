@@ -485,6 +485,8 @@ header_complex_free_entry(struct header_complex_index *theentry,
 /*
  * completely wipe out all entries in our data store 
  */
+netsnmp_feature_child_of(header_complex_free_all, header_complex)
+#ifndef NETSNMP_FEATURE_REMOVE_HEADER_COMPLEX_FREE_ALL
 void
 header_complex_free_all(struct header_complex_index *thestuff,
                         HeaderComplexCleaner * cleaner)
@@ -496,6 +498,7 @@ header_complex_free_all(struct header_complex_index *thestuff,
         header_complex_free_entry(hciptr, cleaner);
     }
 }
+#endif /* NETSNMP_FEATURE_REMOVE_HEADER_COMPLEX_FREE_ALL */
 
 struct header_complex_index *
 header_complex_find_entry(struct header_complex_index *thestuff,

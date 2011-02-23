@@ -100,8 +100,10 @@ NETSNMP_IMPORT
 int netsnmp_query_getnext( netsnmp_variable_list *, netsnmp_session *);
 NETSNMP_IMPORT
 int netsnmp_query_walk(    netsnmp_variable_list *, netsnmp_session *);
+#ifndef NETSNMP_NO_WRITE_SUPPORT
 NETSNMP_IMPORT
 int netsnmp_query_set(     netsnmp_variable_list *, netsnmp_session *);
+#endif /* !NETSNMP_NO_WRITE_SUPPORT */
 
 /** **************************************************************************
  *

@@ -4,6 +4,7 @@
  */
 
 #include <net-snmp/net-snmp-config.h>
+#include <net-snmp/net-snmp-features.h>
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 
@@ -44,6 +45,8 @@ struct udp6_mib  cached_udp6_mib;
 #define IP6_STATS_PREFIX_LEN	3
 #define ICMP6_STATS_PREFIX_LEN	5
 #define UDP6_STATS_PREFIX_LEN   4
+
+netsnmp_feature_provide(linux_read_ip6_stat)
 
 int
 decode_icmp_msg(char *line, char *data, struct icmp4_msg_mib *msg)
@@ -238,6 +241,7 @@ linux_read_ip_stat(struct ip_mib *ipstat)
     return 0;
 }
 
+#ifndef NETSNMP_FEATURE_REMOVE_LINUX_READ_IP6_STAT
 int linux_read_ip6_stat( struct ip6_mib *ip6stat)
 {
 #ifdef NETSNMP_ENABLE_IPV6
@@ -346,6 +350,7 @@ int linux_read_ip6_stat( struct ip6_mib *ip6stat)
     memcpy((char *) ip6stat, (char *) &cached_ip6_mib, sizeof(*ip6stat));
     return 0;
 }
+#endif /* NETSNMP_FEATURE_REMOVE_LINUX_READ_IP6_STAT */
 
 int
 linux_read_icmp_msg_stat(struct icmp_mib *icmpstat,

@@ -4,6 +4,8 @@
 
 #include <net-snmp/net-snmp-config.h>
 
+#include <net-snmp/net-snmp-features.h>
+
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 #include <net-snmp/agent/sysORTable.h>
@@ -19,6 +21,8 @@ static oid usmStats[] = { snmpUsmMIB, 1, 1 };
 
 static netsnmp_handler_registration* usmStats_reg = NULL;
 static oid usmMIBCompliance[] = { usmMIBCompliances, 1 };
+
+netsnmp_feature_require(helper_statistics)
 
 void
 init_usmStats_5_5(void)

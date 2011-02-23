@@ -51,6 +51,11 @@ init_secmod(void)
 #include "snmpsm_init.h"
 }
 
+void
+shutdown_secmod(void)
+{
+    #include "snmpsm_shutdown.h"
+}
 
 int
 register_sec_mod(int secmod, const char *modname,
@@ -99,6 +104,8 @@ register_sec_mod(int secmod, const char *modname,
     return SNMPERR_SUCCESS;
 }
 
+netsnmp_feature_child_of(unregister_sec_mod, netsnmp_unused)
+#ifndef NETSNMP_FEATURE_REMOVE_UNREGISTER_SEC_MOD
 int
 unregister_sec_mod(int secmod)
 {
@@ -121,6 +128,7 @@ unregister_sec_mod(int secmod)
      */
     return SNMPERR_GENERR;
 }
+#endif /* NETSNMP_FEATURE_REMOVE_UNREGISTER_SEC_MOD */
 
 void            
 clear_sec_mod(void)
@@ -153,6 +161,19 @@ find_sec_mod(int secmod)
     return NULL;
 }
 
+/* try to pick a reasonable security module default based on what was
+   compiled into the net-snmp package */
+#ifdef USM_SEC_MODEL_NUMBER
+#define NETSNMP_SECMOD_DEFAULT_MODEL  USM_SEC_MODEL_NUMBER
+#elif defined(TSM_SEC_MODEL_NUMBER)
+#define NETSNMP_SECMOD_DEFAULT_MODEL  TSM_SEC_MODEL_NUMBER
+#elif defined(KSM_SEC_MODEL_NUMBER)
+#define NETSNMP_SECMOD_DEFAULT_MODEL  KSM_SEC_MODEL_NUMBER
+#else
+/* else we give up and leave it blank */
+#define NETSNMP_SECMOD_DEFAULT_MODEL  -1
+#endif
+
 static int
 set_default_secmod(int major, int minor, void *serverarg, void *clientarg)
 {
@@ -172,11 +193,11 @@ set_default_secmod(int major, int minor, void *serverarg, void *clientarg)
                 snmp_log(LOG_ERR,
                          "unknown security model name: %s.  Forcing USM instead.\n",
                          cptr);
-                sess->securityModel = USM_SEC_MODEL_NUMBER;
+                sess->securityModel = NETSNMP_SECMOD_DEFAULT_MODEL;
                 return SNMPERR_GENERR;
             }
         } else {
-            sess->securityModel = USM_SEC_MODEL_NUMBER;
+            sess->securityModel = NETSNMP_SECMOD_DEFAULT_MODEL;
         }
     }
     return SNMPERR_SUCCESS;

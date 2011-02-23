@@ -8,6 +8,9 @@
 
 #include "sysORTable.h"
 
+netsnmp_feature_require(table_container)
+
+
 /** Typical data structure for a row entry */
 typedef struct sysORTable_entry_s {
     netsnmp_index            oid_index;

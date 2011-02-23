@@ -1,4 +1,5 @@
 #include <net-snmp/net-snmp-config.h>
+#include <net-snmp/net-snmp-features.h>
 
 #include <net-snmp/library/snmpSSHDomain.h>
 
@@ -59,6 +60,8 @@
 #include <net-snmp/library/snmpIPv4BaseDomain.h>
 #include <net-snmp/library/snmpSocketBaseDomain.h>
 #include <net-snmp/library/read_config.h>
+
+netsnmp_feature_require(user_information)
 
 #define MAX_NAME_LENGTH 127
 

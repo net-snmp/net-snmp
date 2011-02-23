@@ -9,6 +9,7 @@
  * distributed with the Net-SNMP package.
  */
 #include <net-snmp/net-snmp-config.h>
+#include <net-snmp/net-snmp-features.h>
 
 #include <sys/types.h>
 
@@ -21,6 +22,7 @@
 
 #include <net-snmp/agent/bulk_to_next.h>
 
+netsnmp_feature_provide(handler_mark_requests_as_delegated)
 
 static netsnmp_mib_handler *_clone_handler(netsnmp_mib_handler *it);
 
@@ -576,6 +578,7 @@ netsnmp_call_handlers(netsnmp_handler_registration *reginfo,
             return SNMP_ERR_NOERROR;    /* legal */
         break;
 
+#ifndef NETSNMP_NO_WRITE_SUPPORT
     case MODE_SET_RESERVE1:
     case MODE_SET_RESERVE2:
     case MODE_SET_ACTION:
@@ -590,6 +593,7 @@ netsnmp_call_handlers(netsnmp_handler_registration *reginfo,
             return SNMP_ERR_NOERROR;
         }
         break;
+#endif /* NETSNMP_NO_WRITE_SUPPORT */
 
     default:
         snmp_log(LOG_ERR, "unknown mode in netsnmp_call_handlers! bug!\n");
@@ -641,6 +645,8 @@ netsnmp_call_next_handler(netsnmp_mib_handler *current,
  *
  *  @return Returns SNMPERR_SUCCESS or SNMP_ERR_* error code.
  */
+netsnmp_feature_child_of(netsnmp_call_next_handler_one_request,netsnmp_unused)
+#ifndef NETSNMP_FEATURE_REMOVE_NETSNMP_CALL_NEXT_HANDLER_ONE_REQUEST
 NETSNMP_INLINE int
 netsnmp_call_next_handler_one_request(netsnmp_mib_handler *current,
                                       netsnmp_handler_registration *reginfo,
@@ -662,6 +668,7 @@ netsnmp_call_next_handler_one_request(netsnmp_mib_handler *current,
     requests->next = request;
     return ret;
 }
+#endif /* NETSNMP_FEATURE_REMOVE_NETSNMP_CALL_NEXT_HANDLER_ONE_REQUEST */
 
 /** Deallocates resources associated with a given handler.
  *  The handler is removed from chain and then freed.
@@ -908,6 +915,7 @@ netsnmp_free_delegated_cache(netsnmp_delegated_cache *dcache)
 }
 
 
+#ifndef NETSNMP_FEATURE_REMOVE_HANDLER_MARK_REQUESTS_AS_DELEGATED
 /** Sets a list of requests as delegated or not delegated.
  *  Sweeps through given chain of requests and sets 'delegated'
  *  flag accordingly to the isdelegaded parameter.
@@ -923,6 +931,7 @@ netsnmp_handler_mark_requests_as_delegated(netsnmp_request_info *requests,
         requests = requests->next;
     }
 }
+#endif /* NETSNMP_FEATURE_REMOVE_HANDLER_MARK_REQUESTS_AS_DELEGATED */
 
 /** Adds data from node list to the request information structure.
  *  Data in the request can be later extracted and used by submodules.
@@ -1260,6 +1269,7 @@ netsnmp_init_handler_conf(void)
     se_add_pair_to_slist("agent_mode", strdup("GET"), MODE_GET);
     se_add_pair_to_slist("agent_mode", strdup("GETNEXT"), MODE_GETNEXT);
     se_add_pair_to_slist("agent_mode", strdup("GETBULK"), MODE_GETBULK);
+#ifndef NETSNMP_NO_WRITE_SUPPORT
     se_add_pair_to_slist("agent_mode", strdup("SET_BEGIN"),
                          MODE_SET_BEGIN);
     se_add_pair_to_slist("agent_mode", strdup("SET_RESERVE1"),
@@ -1300,6 +1310,7 @@ netsnmp_init_handler_conf(void)
     se_add_pair_to_slist("babystep_mode", strdup("post_request"),
                          MODE_BSTEP_POST_REQUEST);
     se_add_pair_to_slist("babystep_mode", strdup("original"), 0xffff);
+#endif /* NETSNMP_NO_WRITE_SUPPORT */
 
     /*
      * xxx-rks: hmmm.. will this work for modes which are or'd together?

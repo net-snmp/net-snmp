@@ -678,29 +678,34 @@ rm -f conftest.$ac_ext module_tmp_header.h
 #
 changequote(, )
 
-for i in module_list_o module_list_c module_list_lo mib_module_list_o mib_module_list_c mib_module_list_lo mibgroup_list_o mibgroup_list_lo agent_module_list_o agent_module_list_c agent_module_list_lo agentgroup_list_o agentgroup_list_lo ; do
+for i in module_list_o module_list_c module_list_lo module_list_ft mib_module_list_o mib_module_list_c mib_module_list_lo mib_module_list_ft mibgroup_list_o mibgroup_list_lo mibgroup_list_ft agent_module_list_o agent_module_list_c agent_module_list_lo agent_module_list_ft agentgroup_list_o agentgroup_list_lo agentgroup_list_ft ; do
   eval "$i=mk/${i}.mk"
 done
 
 $SED 's/^module_list_code/module_list_o/;s/\([^=]\)  *\\/\1.o \\/g'  < $module_list_code  > $module_list_o
 $SED 's/^module_list_code/module_list_c/;s/\([^=]\)  *\\/\1.c \\/g'  < $module_list_code  > $module_list_c
 $SED 's/^module_list_code/module_list_lo/;s/\([^=]\)  *\\/\1.lo \\/g' < $module_list_code  > $module_list_lo
+$SED 's/^module_list_code/module_list_ft/;s/\([^=]\)  *\\/\1.ft \\/g' < $module_list_code  > $module_list_ft
 
 $SED 's/^mib_module_list_code/mib_module_list_o/;s/\([^=]\)  *\\/\1.o \\/g'  < $mib_module_list_code  > $mib_module_list_o
 $SED 's/^mib_module_list_code/mib_module_list_c/;s/\([^=]\)  *\\/\1.c \\/g'  < $mib_module_list_code  > $mib_module_list_c
 $SED 's/^mib_module_list_code/mib_module_list_lo/;s/\([^=]\)  *\\/\1.lo \\/g' < $mib_module_list_code  > $mib_module_list_lo
+$SED 's/^mib_module_list_code/mib_module_list_ft/;s/\([^=]\)  *\\/\1.ft \\/g' < $mib_module_list_code  > $mib_module_list_ft
 
 $SED 's/^mib_module_list_o/mibgroup_list_o/;s@\([^ 	]*\)\.o@mibgroup/\1.o@g' < $mib_module_list_o > $mibgroup_list_o
 $SED 's/^mib_module_list_lo/mibgroup_list_lo/;s@\([^ 	]*\)\.lo@mibgroup/\1.lo@g' < $mib_module_list_lo > $mibgroup_list_lo
+$SED 's/^mib_module_list_ft/mibgroup_list_ft/;s@\([^ 	]*\)\.ft@mibgroup/\1.ft@g' < $mib_module_list_ft > $mibgroup_list_ft
 
 $SED 's/^agent_module_list_code/agent_module_list_o/;s/\([^=]\)  *\\/\1.o \\/g'  < $agent_module_list_code  > $agent_module_list_o
 $SED 's/^agent_module_list_code/agent_module_list_c/;s/\([^=]\)  *\\/\1.c \\/g'  < $agent_module_list_code  > $agent_module_list_c
 $SED 's/^agent_module_list_code/agent_module_list_lo/;s/\([^=]\)  *\\/\1.lo \\/g' < $agent_module_list_code  > $agent_module_list_lo
+$SED 's/^agent_module_list_code/agent_module_list_ft/;s/\([^=]\)  *\\/\1.ft \\/g' < $agent_module_list_code  > $agent_module_list_ft
 
 $SED 's/^agent_module_list_o/agentgroup_list_o/;s@\([^ 	]*\)\.o@mibgroup/\1.o@g' < $agent_module_list_o > $agentgroup_list_o
 $SED 's/^agent_module_list_lo/agentgroup_list_lo/;s@\([^ 	]*\)\.lo@mibgroup/\1.lo@g' < $agent_module_list_lo > $agentgroup_list_lo
+$SED 's/^agent_module_list_ft/agentgroup_list_ft/;s@\([^ 	]*\)\.ft@mibgroup/\1.ft@g' < $agent_module_list_ft > $agentgroup_list_ft
 
-for i in module_list_o module_list_c module_list_lo mib_module_list_o mib_module_list_c mib_module_list_lo mibgroup_list_o mibgroup_list_lo agent_module_list_o agent_module_list_c agent_module_list_lo agentgroup_list_o agentgroup_list_lo ; do
+for i in module_list_o module_list_c module_list_lo module_list_ft mib_module_list_o mib_module_list_c mib_module_list_lo mib_module_list_ft mibgroup_list_o mibgroup_list_lo mibgroup_list_ft agent_module_list_o agent_module_list_c agent_module_list_lo agent_module_list_ft agentgroup_list_o agentgroup_list_lo agentgroup_list_ft ; do
 	# hpux make (at least) doesn't like a trailing \ on the last
 	# line even when the next line contains nothing but
 	# whitespace.
@@ -726,16 +731,21 @@ AC_SUBST_FILE(MODULE_LIST)
 AC_SUBST_FILE(module_list_c)
 AC_SUBST_FILE(module_list_o)
 AC_SUBST_FILE(module_list_lo)
+AC_SUBST_FILE(module_list_ft)
 AC_SUBST_FILE(mib_module_list_c)
 AC_SUBST_FILE(mib_module_list_o)
 AC_SUBST_FILE(mib_module_list_lo)
+AC_SUBST_FILE(mib_module_list_ft)
 AC_SUBST_FILE(agent_module_list_c)
 AC_SUBST_FILE(agent_module_list_o)
 AC_SUBST_FILE(agent_module_list_lo)
+AC_SUBST_FILE(agent_module_list_ft)
 AC_SUBST_FILE(mibgroup_list_o)
 AC_SUBST_FILE(mibgroup_list_lo)
+AC_SUBST_FILE(mibgroup_list_ft)
 AC_SUBST_FILE(agentgroup_list_o)
 AC_SUBST_FILE(agentgroup_list_lo)
+AC_SUBST_FILE(agentgroup_list_ft)
 
 AC_SUBST(default_mibs_install)
 AC_SUBST(dllcleans)

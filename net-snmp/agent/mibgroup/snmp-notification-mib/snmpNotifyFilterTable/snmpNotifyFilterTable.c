@@ -14,6 +14,7 @@
  * standard Net-SNMP includes 
  */
 #include <net-snmp/net-snmp-config.h>
+#include <net-snmp/net-snmp-features.h>
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 
@@ -25,6 +26,8 @@
 #include <net-snmp/agent/mib_modules.h>
 
 #include "snmpNotifyFilterTable_interface.h"
+
+netsnmp_feature_require(check_storage_transition)
 
 const oid       snmpNotifyFilterTable_oid[] =
     { SNMPNOTIFYFILTERTABLE_OID };

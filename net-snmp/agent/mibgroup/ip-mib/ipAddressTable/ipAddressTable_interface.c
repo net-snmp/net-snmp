@@ -30,6 +30,7 @@
  * standard Net-SNMP includes 
  */
 #include <net-snmp/net-snmp-config.h>
+#include <net-snmp/net-snmp-features.h>
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 
@@ -45,6 +46,12 @@
 #include "ipAddressTable_interface.h"
 
 #include <ctype.h>
+
+netsnmp_feature_provide(ipAddressTable_external_access)
+netsnmp_feature_require(row_merge)
+netsnmp_feature_require(baby_steps)
+netsnmp_feature_require(table_container_row_insert)
+netsnmp_feature_require(check_all_requests_error)
 
 /**********************************************************************
  **********************************************************************
@@ -80,19 +87,26 @@ static void     _ipAddressTable_container_init(ipAddressTable_interface_ctx
 static void
                 _ipAddressTable_container_shutdown(ipAddressTable_interface_ctx * if_ctx);
 
-
+netsnmp_feature_child_of(ipAddressTable_container_get, ipAddressTable_external_access)
+#ifndef NETSNMP_FEATURE_REMOVE_IPADDRESSTABLE_CONTAINER_GET
 netsnmp_container *
 ipAddressTable_container_get(void)
 {
     return ipAddressTable_if_ctx.container;
 }
+#endif /* NETSNMP_FEATURE_REMOVE_IPADDRESSTABLE_CONTAINER_GET */
 
+netsnmp_feature_child_of(ipAddressTable_registration_get, ipAddressTable_external_access)
+#ifndef NETSNMP_FEATURE_REMOVE_IPADDRESSTABLE_REGISTRATION_GET
 ipAddressTable_registration *
 ipAddressTable_registration_get(void)
 {
     return ipAddressTable_if_ctx.user_ctx;
 }
+#endif /* NETSNMP_FEATURE_REMOVE_IPADDRESSTABLE_REGISTRATION_GET */
 
+netsnmp_feature_child_of(ipAddressTable_registration_set, ipAddressTable_external_access)
+#ifndef NETSNMP_FEATURE_REMOVE_IPADDRESSTABLE_REGISTRATION_SET
 ipAddressTable_registration *
 ipAddressTable_registration_set(ipAddressTable_registration * newreg)
 {
@@ -100,12 +114,16 @@ ipAddressTable_registration_set(ipAddressTable_registration * newreg)
     ipAddressTable_if_ctx.user_ctx = newreg;
     return old;
 }
+#endif /* NETSNMP_FEATURE_REMOVE_IPADDRESSTABLE_REGISTRATION_SET */
 
+netsnmp_feature_child_of(ipAddressTable_container_size, ipAddressTable_external_access)
+#ifndef NETSNMP_FEATURE_REMOVE_IPADDRESSTABLE_CONTAINER_SIZE
 int
 ipAddressTable_container_size(void)
 {
     return CONTAINER_SIZE(ipAddressTable_if_ctx.container);
 }
+#endif /* NETSNMP_FEATURE_REMOVE_IPADDRESSTABLE_CONTAINER_SIZE */
 
 u_int
 ipAddressTable_dirty_get(void)
@@ -2022,6 +2040,7 @@ _ipAddressTable_container_shutdown(ipAddressTable_interface_ctx * if_ctx)
 }                               /* _ipAddressTable_container_shutdown */
 
 
+#ifndef NETSNMP_FEATURE_REMOVE_IPADDRESSTABLE_EXTERNAL_ACCESS
 ipAddressTable_rowreq_ctx *
 ipAddressTable_row_find_by_mib_index(ipAddressTable_mib_index * mib_idx)
 {
@@ -2047,3 +2066,4 @@ ipAddressTable_row_find_by_mib_index(ipAddressTable_mib_index * mib_idx)
 
     return rowreq_ctx;
 }
+#endif /* NETSNMP_FEATURE_REMOVE_IPADDRESSTABLE_EXTERNAL_ACCESS */

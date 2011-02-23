@@ -154,11 +154,14 @@ netsnmp_table_row_register(netsnmp_handler_registration *reginfo,
 
 
 /** return the row data structure supplied to the table_row helper */
+netsnmp_feature_child_of(table_row_extract,table_row)
+#ifndef NETSNMP_FEATURE_REMOVE_TABLE_ROW_EXTRACT
 void *
 netsnmp_table_row_extract(netsnmp_request_info *request)
 {
     return netsnmp_request_get_list_data(request, TABLE_ROW_DATA);
 }
+#endif /* NETSNMP_FEATURE_REMOVE_TABLE_ROW_EXTRACT */
 /** @cond */
 
 /**********************************************************************

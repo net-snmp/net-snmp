@@ -30,6 +30,8 @@
  * standard Net-SNMP includes 
  */
 #include <net-snmp/net-snmp-config.h>
+#include <net-snmp/net-snmp-features.h>
+#include <net-snmp/net-snmp-features.h>
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 
@@ -47,6 +49,13 @@
 #include "if-mib/ifTable/ifTable_defs.h"
 
 #include <ctype.h>
+
+netsnmp_feature_provide(ifXTable_external_access)
+netsnmp_feature_require(row_merge)
+netsnmp_feature_require(cache_find_by_oid)
+netsnmp_feature_require(baby_steps)
+netsnmp_feature_require(check_all_requests_error)
+netsnmp_feature_require(check_vb_type_and_max_size)
 
 /**********************************************************************
  **********************************************************************
@@ -81,19 +90,26 @@ static void     _ifXTable_container_init(ifXTable_interface_ctx * if_ctx);
 static void     _ifXTable_container_shutdown(ifXTable_interface_ctx *
                                              if_ctx);
 
-
+netsnmp_feature_child_of(ifXTable_container_get, ifXTable_external_access)
+#ifndef NETSNMP_FEATURE_REMOVE_IFXTABLE_CONTAINER_GET
 netsnmp_container *
 ifXTable_container_get(void)
 {
     return ifXTable_if_ctx.container;
 }
+#endif /* NETSNMP_FEATURE_REMOVE_IFXTABLE_CONTAINER_GET */
 
+netsnmp_feature_child_of(ifXTable_registration_get, ifXTable_external_access)
+#ifndef NETSNMP_FEATURE_REMOVE_IFXTABLE_REGISTRATION_GET
 ifXTable_registration *
 ifXTable_registration_get(void)
 {
     return ifXTable_if_ctx.user_ctx;
 }
+#endif /* NETSNMP_FEATURE_REMOVE_IFXTABLE_REGISTRATION_GET */
 
+netsnmp_feature_child_of(ifXTable_registration_set, ifXTable_external_access)
+#ifndef NETSNMP_FEATURE_REMOVE_IFXTABLE_REGISTRATION_SET
 ifXTable_registration *
 ifXTable_registration_set(ifXTable_registration * newreg)
 {
@@ -101,12 +117,16 @@ ifXTable_registration_set(ifXTable_registration * newreg)
     ifXTable_if_ctx.user_ctx = newreg;
     return old;
 }
+#endif /* NETSNMP_FEATURE_REMOVE_IFXTABLE_REGISTRATION_SET */
 
+netsnmp_feature_child_of(ifXTable_container_size, ifXTable_external_access)
+#ifndef NETSNMP_FEATURE_REMOVE_IFXTABLE_CONTAINER_SIZE
 int
 ifXTable_container_size(void)
 {
     return CONTAINER_SIZE(ifXTable_if_ctx.container);
 }
+#endif /* NETSNMP_FEATURE_REMOVE_IFXTABLE_CONTAINER_SIZE */
 
 u_int
 ifXTable_dirty_get(void)
@@ -130,6 +150,7 @@ static Netsnmp_Node_Handler _mfd_ifXTable_pre_request;
 static Netsnmp_Node_Handler _mfd_ifXTable_post_request;
 static Netsnmp_Node_Handler _mfd_ifXTable_object_lookup;
 static Netsnmp_Node_Handler _mfd_ifXTable_get_values;
+#ifndef NETSNMP_NO_WRITE_SUPPORT
 static Netsnmp_Node_Handler _mfd_ifXTable_check_objects;
 static Netsnmp_Node_Handler _mfd_ifXTable_undo_setup;
 static Netsnmp_Node_Handler _mfd_ifXTable_set_values;
@@ -144,6 +165,7 @@ NETSNMP_STATIC_INLINE int _ifXTable_undo_column(ifXTable_rowreq_ctx *
                                                 rowreq_ctx,
                                                 netsnmp_variable_list *
                                                 var, int column);
+#endif /* !NETSNMP_NO_WRITE_SUPPORT */
 
 ifXTable_data  *ifXTable_allocate_data(void);
 
@@ -221,6 +243,7 @@ _ifXTable_initialize_interface(ifXTable_registration * reg_ptr,
     access_multiplexer->post_request = _mfd_ifXTable_post_request;
 
 
+#ifndef NETSNMP_NO_WRITE_SUPPORT
     /*
      * REQUIRED wrappers for set request handling
      */
@@ -243,6 +266,7 @@ _ifXTable_initialize_interface(ifXTable_registration * reg_ptr,
      */
     access_multiplexer->consistency_checks =
         _mfd_ifXTable_check_dependencies;
+#endif /* !NETSNMP_NO_WRITE_SUPPORT */ 
 
     /*************************************************
      *
@@ -270,18 +294,20 @@ _ifXTable_initialize_interface(ifXTable_registration * reg_ptr,
      */
     if (access_multiplexer->object_lookup)
         mfd_modes |= BABY_STEP_OBJECT_LOOKUP;
+#ifndef NETSNMP_NO_WRITE_SUPPORT
     if (access_multiplexer->set_values)
         mfd_modes |= BABY_STEP_SET_VALUES;
     if (access_multiplexer->irreversible_commit)
         mfd_modes |= BABY_STEP_IRREVERSIBLE_COMMIT;
     if (access_multiplexer->object_syntax_checks)
         mfd_modes |= BABY_STEP_CHECK_OBJECT;
-
+#endif /* !NETSNMP_NO_WRITE_SUPPORT */ 
     if (access_multiplexer->pre_request)
         mfd_modes |= BABY_STEP_PRE_REQUEST;
     if (access_multiplexer->post_request)
         mfd_modes |= BABY_STEP_POST_REQUEST;
 
+#ifndef NETSNMP_NO_WRITE_SUPPORT 
     if (access_multiplexer->undo_setup)
         mfd_modes |= BABY_STEP_UNDO_SETUP;
     if (access_multiplexer->undo_cleanup)
@@ -297,6 +323,7 @@ _ifXTable_initialize_interface(ifXTable_registration * reg_ptr,
         mfd_modes |= BABY_STEP_COMMIT;
     if (access_multiplexer->undo_commit)
         mfd_modes |= BABY_STEP_UNDO_COMMIT;
+#endif /* !NETSNMP_NO_WRITE_SUPPORT */ 
 
     handler = netsnmp_baby_steps_handler_get(mfd_modes);
     netsnmp_inject_handler(reginfo, handler);
@@ -343,6 +370,8 @@ _ifXTable_initialize_interface(ifXTable_registration * reg_ptr,
  * @internal
  * Shutdown the table ifXTable
  */
+netsnmp_feature_child_of(ifxtable_shutdown_interface, netsnmp_unused)
+#ifndef NETSNMP_FEATURE_REMOVE_IFXTABLE_SHUTDOWN_INTERFACE
 void
 _ifXTable_shutdown_interface(ifXTable_registration * reg_ptr)
 {
@@ -351,6 +380,7 @@ _ifXTable_shutdown_interface(ifXTable_registration * reg_ptr)
      */
     _ifXTable_container_shutdown(&ifXTable_if_ctx);
 }
+#endif /* NETSNMP_FEATURE_REMOVE_IFXTABLE_SHUTDOWN_INTERFACE */
 
 void
 ifXTable_valid_columns_set(netsnmp_column_info *vc)
@@ -1183,6 +1213,7 @@ _mfd_ifXTable_check_objects(netsnmp_mib_handler *handler,
     return SNMP_ERR_NOERROR;
 }                               /* _mfd_ifXTable_check_objects */
 
+#ifndef NETSNMP_NO_WRITE_SUPPORT
 
 /*----------------------------------------------------------------------
  *
@@ -1700,6 +1731,8 @@ _mfd_ifXTable_irreversible_commit(netsnmp_mib_handler *handler,
     return SNMP_ERR_NOERROR;
 }                               /* _mfd_ifXTable_irreversible_commit */
 
+#endif /* !NETSNMP_NO_WRITE_SUPPORT */
+
 /***********************************************************************
  *
  * DATA ACCESS
@@ -2138,6 +2171,7 @@ _ifXTable_container_col_restore(ifXTable_rowreq_ctx * rowreq_ctx,
 }
 
 
+#ifndef NETSNMP_FEATURE_REMOVE_IFXTABLE_EXTERNAL_ACCESS
 ifXTable_rowreq_ctx *
 ifXTable_row_find_by_mib_index(ifXTable_mib_index * mib_idx)
 {
@@ -2163,3 +2197,4 @@ ifXTable_row_find_by_mib_index(ifXTable_mib_index * mib_idx)
 
     return rowreq_ctx;
 }
+#endif /* NETSNMP_FEATURE_REMOVE_IFXTABLE_EXTERNAL_ACCESS */

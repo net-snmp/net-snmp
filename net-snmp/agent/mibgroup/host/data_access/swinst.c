@@ -180,6 +180,8 @@ netsnmp_swinst_entry_free_cb(netsnmp_swinst_entry *entry, void *context)
 /*
  * remove a row from the table 
  */
+netsnmp_feature_child_of(swinst_entry_remove, netsnmp_unused)
+#ifndef NETSNMP_FEATURE_REMOVE_SWINST_ENTRY_REMOVE
 void
 netsnmp_swinst_entry_remove(netsnmp_container * container,
                             netsnmp_swinst_entry *entry)
@@ -189,6 +191,7 @@ netsnmp_swinst_entry_remove(netsnmp_container * container,
         return;                 /* Nothing to remove */
     CONTAINER_REMOVE(container, entry);
 }
+#endif /* NETSNMP_FEATURE_REMOVE_SWINST_ENTRY_REMOVE */
 
 /* ---------------------------------------------------------------------
  */

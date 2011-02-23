@@ -71,5 +71,6 @@ var_usmStats(struct variable *vp,
         long_ret = snmp_get_statistic(tmagic + STAT_USM_STATS_START);
         return (unsigned char *) &long_ret;
     }
+
     return 0;
 }

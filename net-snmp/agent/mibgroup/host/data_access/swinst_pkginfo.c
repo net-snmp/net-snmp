@@ -3,6 +3,7 @@
  *     hrSWInstalledTable data access:
  */
 #include <net-snmp/net-snmp-config.h>
+#include <net-snmp/net-snmp-features.h>
 
 #include <stdio.h>
 #include <sys/stat.h>
@@ -36,6 +37,8 @@
 #include <net-snmp/library/container.h>
 #include <net-snmp/library/snmp_debug.h>
 #include <net-snmp/data_access/swinst.h>
+
+netsnmp_feature_require(date_n_time)
 
    /*
     * Location of package directory.

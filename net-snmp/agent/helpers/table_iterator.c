@@ -84,6 +84,7 @@
 
 #include <net-snmp/net-snmp-config.h>
 
+#include <net-snmp/net-snmp-features.h>
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 
@@ -98,6 +99,9 @@
 #include <net-snmp/agent/table.h>
 #include <net-snmp/agent/serialize.h>
 #include <net-snmp/agent/stash_cache.h>
+
+netsnmp_feature_child_of(table_iterator_insert_context, table_iterator_all)
+netsnmp_feature_child_of(table_iterator_create_table, table_iterator_all)
 
 /* ==================================
  *
@@ -117,6 +121,7 @@
      *
      * Time will show whether this is a sensible approach or not.
      */
+#ifndef NETSNMP_FEATURE_REMOVE_TABLE_ITERATOR_CREATE_TABLE
 netsnmp_iterator_info *
 netsnmp_iterator_create_table( Netsnmp_First_Data_Point *firstDP,
                                Netsnmp_Next_Data_Point  *nextDP,
@@ -137,6 +142,7 @@ netsnmp_iterator_create_table( Netsnmp_First_Data_Point *firstDP,
 
     return iinfo;
 }
+#endif /* NETSNMP_FEATURE_REMOVE_TABLE_ITERATOR_CREATE_TABLE */
 
 /** Free the memory that was allocated for a table iterator. */
 void
@@ -275,6 +281,7 @@ netsnmp_extract_iterator_context(netsnmp_request_info *request)
     return netsnmp_request_get_list_data(request, TABLE_ITERATOR_NAME);
 }
 
+#ifndef NETSNMP_FEATURE_REMOVE_TABLE_ITERATOR_INSERT_CONTEXT
 /** inserts table_iterator specific data for a newly
  *  created row into a request */
 NETSNMP_INLINE void
@@ -339,6 +346,7 @@ netsnmp_insert_iterator_context(netsnmp_request_info *request, void *data)
         }
     }
 }
+#endif /* NETSNMP_FEATURE_REMOVE_TABLE_ITERATOR_INSERT_CONTEXT */
 
 #define TI_REQUEST_CACHE "ti_cache"
 
@@ -472,6 +480,7 @@ netsnmp_table_iterator_helper_handler(netsnmp_mib_handler *handler,
 
     /* preliminary analysis */
     switch (reqinfo->mode) {
+#ifndef NETSNMP_FEATURE_REMOVE_STASH_CACHE
     case MODE_GET_STASH:
         cinfo = netsnmp_extract_stash_cache(reqinfo);
         table_reg_info = netsnmp_find_table_registration_info(reginfo);
@@ -490,6 +499,7 @@ netsnmp_table_iterator_helper_handler(netsnmp_mib_handler *handler,
         /* remember the indexes that were originally parsed. */
         old_indexes = table_info->indexes;
         break;
+#endif /* NETSNMP_FEATURE_REMOVE_STASH_CACHE */
 
     case MODE_GETNEXT:
         for(request = requests ; request; request = request->next) {
@@ -543,8 +553,11 @@ netsnmp_table_iterator_helper_handler(netsnmp_mib_handler *handler,
      */
     if (reqinfo->mode == MODE_GET ||
         reqinfo->mode == MODE_GETNEXT ||
-        reqinfo->mode == MODE_GET_STASH ||
-        reqinfo->mode == MODE_SET_RESERVE1) {
+        reqinfo->mode == MODE_GET_STASH
+#ifndef NETSNMP_NO_WRITE_SUPPORT
+        || reqinfo->mode == MODE_SET_RESERVE1
+#endif /* NETSNMP_NO_WRITE_SUPPORT */
+        ) {
         /*
          * Count the number of request in the list,
          *   so that we'll know when we're finished
@@ -631,7 +644,9 @@ netsnmp_table_iterator_helper_handler(netsnmp_mib_handler *handler,
 
                     switch(reqinfo->mode) {
                     case MODE_GET:
+#ifndef NETSNMP_NO_WRITE_SUPPORT
                     case MODE_SET_RESERVE1:
+#endif /* NETSNMP_NO_WRITE_SUPPORT */
                         /* looking for exact matches */
                         build_oid_noalloc(myname, MAX_OID_LEN, &myname_len,
                                           coloid, coloid_len, index_search);
@@ -754,12 +769,14 @@ netsnmp_table_iterator_helper_handler(netsnmp_mib_handler *handler,
                         }
                         break;
 
+#ifndef NETSNMP_NO_WRITE_SUPPORT
                     case MODE_SET_RESERVE2:
                     case MODE_SET_FREE:
                     case MODE_SET_UNDO:
                     case MODE_SET_COMMIT:
                         /* needed processing already done in RESERVE1 */
                         break;
+#endif /* NETSNMP_NO_WRITE_SUPPORT */
 
                     default:
                         snmp_log(LOG_ERR,
@@ -822,8 +839,11 @@ netsnmp_table_iterator_helper_handler(netsnmp_mib_handler *handler,
     }
 
     if (reqinfo->mode == MODE_GET ||
-        reqinfo->mode == MODE_GETNEXT ||
-        reqinfo->mode == MODE_SET_RESERVE1) {
+        reqinfo->mode == MODE_GETNEXT
+#ifndef NETSNMP_NO_WRITE_SUPPORT
+        || reqinfo->mode == MODE_SET_RESERVE1
+#endif /* NETSNMP_NO_WRITE_SUPPORT */
+        ) {
         /* per request last minute processing */
         for(request = requests ; request; request = request->next) {
             if (request->processed)
@@ -859,7 +879,9 @@ netsnmp_table_iterator_helper_handler(netsnmp_mib_handler *handler,
                 /* FALL THROUGH */
 
             case MODE_GET:
+#ifndef NETSNMP_NO_WRITE_SUPPORT
             case MODE_SET_RESERVE1:
+#endif /* NETSNMP_NO_WRITE_SUPPORT */
                 if (ti_info->data_context)
                     /* we don't add a free pointer, since it's in the
                        TI_REQUEST_CACHE instead */
@@ -916,6 +938,8 @@ netsnmp_table_iterator_helper_handler(netsnmp_mib_handler *handler,
  *
  * ================================== */
 
+netsnmp_feature_child_of(table_iterator_row_first,table_iterator)
+#ifndef NETSNMP_FEATURE_REMOVE_TABLE_ITERATOR_ROW_FIRST
 void *
 netsnmp_iterator_row_first( netsnmp_iterator_info *iinfo ) {
     netsnmp_variable_list *vp1, *vp2;
@@ -934,6 +958,7 @@ netsnmp_iterator_row_first( netsnmp_iterator_info *iinfo ) {
     snmp_free_varbind( vp1 );
     return ctx2;  /* or *ctx2 ?? */
 }
+#endif /* NETSNMP_FEATURE_REMOVE_TABLE_ITERATOR_ROW_FIRST */
 
 void *
 netsnmp_iterator_row_get( netsnmp_iterator_info *iinfo, void *row )
@@ -1142,6 +1167,8 @@ netsnmp_iterator_row_next_byoid( netsnmp_iterator_info *iinfo,
     return ( vp2 ? ctx2 : NULL );
 }
 
+netsnmp_feature_child_of(netsnmp_iterator_row_count,table_iterator)
+#ifndef NETSNMP_FEATURE_REMOVE_NETSNMP_ITERATOR_ROW_COUNT
 int
 netsnmp_iterator_row_count( netsnmp_iterator_info *iinfo )
 {
@@ -1177,6 +1204,7 @@ netsnmp_iterator_row_count( netsnmp_iterator_info *iinfo )
     snmp_free_varbind( vp1 );
     return i;
 }
+#endif /* NETSNMP_FEATURE_REMOVE_NETSNMP_ITERATOR_ROW_COUNT */
 
 
 /* ==================================

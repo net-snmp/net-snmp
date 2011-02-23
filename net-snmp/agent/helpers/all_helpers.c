@@ -2,6 +2,7 @@
  *  @{ */
 
 #include <net-snmp/net-snmp-config.h>
+#include <net-snmp/net-snmp-features.h>
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 
@@ -20,8 +21,16 @@ netsnmp_init_helpers(void)
     netsnmp_init_serialize();
     netsnmp_init_read_only_helper();
     netsnmp_init_bulk_to_next_helper();
+#ifdef NETSNMP_FEATURE_HAS_TABLE_DATASET
     netsnmp_init_table_dataset();
+#endif
+
+#ifdef NETSNMP_FEATURE_HAS_ROW_MERGE
+    netsnmp_init_row_merge();
+#endif /* NETSNMP_FEATURE_HAS_ROW_MERGE */
+#ifdef NETSNMP_FEATURE_HAS_STASH_CACHE
     netsnmp_init_stash_cache_helper();
+#endif /* NETSNMP_FEATURE_HAS_STASH_CACHE */
 }
 
 /** @defgroup utilities utility_handlers

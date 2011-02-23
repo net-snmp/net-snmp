@@ -1,4 +1,5 @@
 #include <net-snmp/net-snmp-config.h>
+#include <net-snmp/net-snmp-features.h>
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 #include <net-snmp/agent/scalar.h>
@@ -11,6 +12,9 @@
 
 #include <net-snmp/library/snmp_logging.h>
 #include "agent/nsLogging.h"
+
+netsnmp_feature_require(logging_external)
+netsnmp_feature_require(table_iterator_insert_context)
 
 /*
  * OID and columns for the logging table.

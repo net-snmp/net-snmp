@@ -7,6 +7,7 @@
  * distributed with the Net-SNMP package.
  */
 #include <net-snmp/net-snmp-config.h>
+#include <net-snmp/net-snmp-features.h>
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 #include <net-snmp/library/container.h>
@@ -25,6 +26,9 @@
 
 #include <CoreFoundation/CoreFoundation.h>
 #include <ApplicationServices/ApplicationServices.h>
+
+netsnmp_feature_require(container_directory)
+netsnmp_feature_require(date_n_time)
 
 /* ---------------------------------------------------------------------
  */

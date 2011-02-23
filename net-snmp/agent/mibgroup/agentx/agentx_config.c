@@ -2,6 +2,7 @@
  *  AgentX Configuration
  */
 #include <net-snmp/net-snmp-config.h>
+#include <net-snmp/net-snmp-features.h>
 
 #include <stdio.h>
 #include <sys/types.h>
@@ -19,6 +20,8 @@
 #include "snmpd.h"
 #include "agentx/agentx_config.h"
 #include "agentx/protocol.h"
+
+netsnmp_feature_require(user_information)
 
 /* ---------------------------------------------------------------------
  *
@@ -152,11 +155,14 @@ agentx_register_config_handler(const char *token,
     register_config_handler(":agentx", token, parser, releaser, help);
 }
 
+netsnmp_feature_child_of(agentx_unregister_config_handler, netsnmp_unused)
+#ifndef NETSNMP_FEATURE_REMOVE_AGENTX_UNREGISTER_CONFIG_HANDLER
 void
 agentx_unregister_config_handler(const char *token)
 {
     unregister_config_handler(":agentx", token);
 }
+#endif /* NETSNMP_FEATURE_REMOVE_AGENTX_UNREGISTER_CONFIG_HANDLER */
 
 void
 agentx_config_init(void)

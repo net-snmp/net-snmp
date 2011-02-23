@@ -2,6 +2,7 @@
  *  DragonFly kinfo interface
  */
 #include <net-snmp/net-snmp-config.h>
+#include <net-snmp/net-snmp-features.h>
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 #include <net-snmp/agent/hardware/cpu.h>
@@ -13,6 +14,7 @@
 #include <unistd.h>
 #include <sys/sysctl.h>
 
+netsnmp_feature_require(hardware_cpu_copy_stats)
 void _cpu_copy_stats( netsnmp_cpu_info *cpu );
 
     /*

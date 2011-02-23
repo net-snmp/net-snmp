@@ -4,10 +4,13 @@
  */
 
 #include <net-snmp/net-snmp-config.h>
+#include <net-snmp/net-snmp-features.h>
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 
 #include <net-snmp/data_access/ip_scalars.h>
+
+netsnmp_feature_require(register_num_file_instance)
 
 #include "ip_scalars.h"
 

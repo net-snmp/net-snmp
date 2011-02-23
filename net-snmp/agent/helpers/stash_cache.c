@@ -1,11 +1,20 @@
 #include <net-snmp/net-snmp-config.h>
 
+#include <net-snmp/net-snmp-features.h>
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 
-#include <net-snmp/agent/stash_cache.h>
+netsnmp_feature_provide(stash_cache)
+netsnmp_feature_child_of(stash_cache, mib_helpers)
+#ifdef NETSNMP_FEATURE_REQUIRE_STASH_CACHE
+netsnmp_feature_require(oid_stash)
+netsnmp_feature_require(oid_stash_iterate)
+#endif
 
+#ifndef NETSNMP_FEATURE_REMOVE_STASH_CACHE
 #include <net-snmp/agent/stash_to_next.h>
+
+#include <net-snmp/agent/stash_cache.h>
 
 extern NetsnmpCacheLoad _netsnmp_stash_cache_load;
 extern NetsnmpCacheFree _netsnmp_stash_cache_free;
@@ -237,3 +246,6 @@ netsnmp_init_stash_cache_helper(void)
 }
 /**  @} */
 
+#else /* NETSNMP_FEATURE_REMOVE_STASH_CACHE */
+netsnmp_feature_unused(stash_cache);
+#endif /* NETSNMP_FEATURE_REMOVE_STASH_CACHE */

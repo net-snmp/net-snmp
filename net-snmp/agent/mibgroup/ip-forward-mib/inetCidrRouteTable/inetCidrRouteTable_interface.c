@@ -30,6 +30,7 @@
  * standard Net-SNMP includes 
  */
 #include <net-snmp/net-snmp-config.h>
+#include <net-snmp/net-snmp-features.h>
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 
@@ -45,6 +46,12 @@
 #include "inetCidrRouteTable_interface.h"
 
 #include <ctype.h>
+
+netsnmp_feature_provide(inetCidrRouteTable_external_access)
+netsnmp_feature_require(row_merge)
+netsnmp_feature_require(baby_steps)
+netsnmp_feature_require(table_container_row_insert)
+netsnmp_feature_require(check_all_requests_error)
 
 /**********************************************************************
  **********************************************************************
@@ -82,19 +89,26 @@ static void
                 _inetCidrRouteTable_container_shutdown(inetCidrRouteTable_interface_ctx *
                                                        if_ctx);
 
-
+netsnmp_feature_child_of(inetCidrRouteTable_container_get, inetCidrRouteTable_external_access)
+#ifndef NETSNMP_FEATURE_REMOVE_INETCIDRROUTETABLE_CONTAINER_GET
 netsnmp_container *
 inetCidrRouteTable_container_get(void)
 {
     return inetCidrRouteTable_if_ctx.container;
 }
+#endif /* NETSNMP_FEATURE_REMOVE_INETCIDRROUTETABLE_CONTAINER_GET */
 
+netsnmp_feature_child_of(inetCidrRouteTable_registration_get, inetCidrRouteTable_external_access)
+#ifndef NETSNMP_FEATURE_REMOVE_INETCIDRROUTETABLE_REGISTRATION_GET
 inetCidrRouteTable_registration *
 inetCidrRouteTable_registration_get(void)
 {
     return inetCidrRouteTable_if_ctx.user_ctx;
 }
+#endif /* NETSNMP_FEATURE_REMOVE_INETCIDRROUTETABLE_REGISTRATION_GET */
 
+netsnmp_feature_child_of(inetCidrRouteTable_registration_set, inetCidrRouteTable_external_access)
+#ifndef NETSNMP_FEATURE_REMOVE_INETCIDRROUTETABLE_REGISTRATION_SET
 inetCidrRouteTable_registration *
 inetCidrRouteTable_registration_set(inetCidrRouteTable_registration *
                                     newreg)
@@ -104,12 +118,16 @@ inetCidrRouteTable_registration_set(inetCidrRouteTable_registration *
     inetCidrRouteTable_if_ctx.user_ctx = newreg;
     return old;
 }
+#endif /* NETSNMP_FEATURE_REMOVE_INETCIDRROUTETABLE_REGISTRATION_SET */
 
+netsnmp_feature_child_of(inetCidrRouteTable_container_size, inetCidrRouteTable_external_access)
+#ifndef NETSNMP_FEATURE_REMOVE_INETCIDRROUTETABLE_CONTAINER_SIZE
 int
 inetCidrRouteTable_container_size(void)
 {
     return CONTAINER_SIZE(inetCidrRouteTable_if_ctx.container);
 }
+#endif /* NETSNMP_FEATURE_REMOVE_INETCIDRROUTETABLE_CONTAINER_SIZE */
 
 u_int
 inetCidrRouteTable_dirty_get(void)
@@ -2336,6 +2354,7 @@ _inetCidrRouteTable_container_shutdown(inetCidrRouteTable_interface_ctx *
 }                               /* _inetCidrRouteTable_container_shutdown */
 
 
+#ifndef NETSNMP_FEATURE_REMOVE_INETCIDRROUTETABLE_EXTERNAL_ACCESS
 inetCidrRouteTable_rowreq_ctx *
 inetCidrRouteTable_row_find_by_mib_index(inetCidrRouteTable_mib_index *
                                          mib_idx)
@@ -2363,3 +2382,4 @@ inetCidrRouteTable_row_find_by_mib_index(inetCidrRouteTable_mib_index *
 
     return rowreq_ctx;
 }
+#endif /* NETSNMP_FEATURE_REMOVE_INETCIDRROUTETABLE_EXTERNAL_ACCESS */

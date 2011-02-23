@@ -8,6 +8,7 @@
  * This should always be included first before anything else 
  */
 #include <net-snmp/net-snmp-config.h>
+#include <net-snmp/net-snmp-features.h>
 #if HAVE_STDLIB_H
 #include <stdlib.h>
 #endif
@@ -20,6 +21,9 @@
 #include <limits.h>
 #endif
 
+netsnmp_feature_require(mib_snprint_variable)
+netsnmp_feature_require(tdomain_support)
+netsnmp_feature_require(check_vb_uint)
 
 /*
  * minimal include directives 

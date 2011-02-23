@@ -1,4 +1,5 @@
 #include <net-snmp/net-snmp-config.h>
+#include <net-snmp/net-snmp-features.h>
 
 #if HAVE_STDLIB_H
 #include <stdlib.h>
@@ -108,6 +109,9 @@
 #include "mibgroup/util_funcs.h"
 #include "utilities/execute.h"
 #include "util_funcs/header_simple_table.h"
+
+netsnmp_feature_require(get_exten_instance)
+netsnmp_feature_require(parse_miboid)
 
 extern struct myproc *procwatch;        /* moved to proc.c */
 extern int      numprocs;       /* ditto */

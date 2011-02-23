@@ -162,6 +162,7 @@ netsnmp_scalar_helper_handler(netsnmp_mib_handler *handler,
         }
         break;
 
+#ifndef NETSNMP_NO_WRITE_SUPPORT
     case MODE_SET_RESERVE1:
     case MODE_SET_RESERVE2:
     case MODE_SET_ACTION:
@@ -180,6 +181,7 @@ netsnmp_scalar_helper_handler(netsnmp_mib_handler *handler,
             return ret;
         }
         break;
+#endif /* NETSNMP_NO_WRITE_SUPPORT */
 
     case MODE_GETNEXT:
         reginfo->rootoid[reginfo->rootoid_len++] = 0;

@@ -9,6 +9,7 @@
  * distributed with the Net-SNMP package.
  */
 #include <net-snmp/net-snmp-config.h>
+#include <net-snmp/net-snmp-features.h>
 #include <net-snmp/net-snmp-includes.h>
 
 #include <stdio.h>
@@ -47,6 +48,12 @@
 #include <net-snmp/library/file_utils.h>
 #include <net-snmp/library/dir_utils.h>
 
+netsnmp_feature_provide(container_directory)
+#ifdef NETSNMP_FEATURE_REQUIRE_CONTAINER_DIRECTORY
+netsnmp_feature_require(file_utils)
+#endif /* NETSNMP_FEATURE_REQUIRE_DIR_UTILS */
+
+#ifndef NETSNMP_FEATURE_REMOVE_CONTAINER_DIRECTORY
 static int
 _insert_nsfile( netsnmp_container *c, const char *name, struct stat *stats,
                 u_int flags);
@@ -243,3 +250,6 @@ _insert_nsfile( netsnmp_container *c, const char *name, struct stat *stats,
 
     return 0;
 }
+#else  /* NETSNMP_FEATURE_REMOVE_CONTAINER_DIRECTORY */
+netsnmp_feature_unused(container_directory)
+#endif /* NETSNMP_FEATURE_REMOVE_CONTAINER_DIRECTORY */

@@ -11,6 +11,7 @@
  *
  */
 #include <net-snmp/net-snmp-config.h>
+#include <net-snmp/net-snmp-features.h>
 
 #ifdef NETSNMP_USE_MYSQL
 
@@ -53,6 +54,8 @@
 #include <mysql/my_sys.h>
 #include <mysql/mysql.h>
 #include <mysql/errmsg.h>
+
+netsnmp_feature_require(container_fifo)
 
 /*
  * define a structure to hold all the file globals

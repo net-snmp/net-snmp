@@ -19,6 +19,7 @@ config_add_mib(SNMP-COMMUNITY-MIB)
      extern FindVarMethod var_vacm_access;
      extern FindVarMethod var_vacm_view;
 
+#ifndef NETSNMP_NO_WRITE_SUPPORT 
      WriteMethod     write_vacmGroupName;
      WriteMethod     write_vacmSecurityToGroupStatus;
      WriteMethod     write_vacmSecurityToGroupStorageType;
@@ -35,7 +36,6 @@ config_add_mib(SNMP-COMMUNITY-MIB)
      WriteMethod     write_vacmViewStatus;
      WriteMethod     write_vacmViewStorageType;
      WriteMethod     write_vacmViewType;
-
 
      oid            *access_generate_OID(oid * prefix, size_t prefixLen,
                                          struct vacm_accessEntry *aptr,
@@ -67,7 +67,7 @@ config_add_mib(SNMP-COMMUNITY-MIB)
                                     size_t * subtreeLen);
      struct vacm_viewEntry *view_parse_viewEntry(oid * name,
                                                  size_t name_len);
-
+#endif /* !NETSNMP_NO_WRITE_SUPPORT */ 
 
 
 #define OID_SNMPVACMMIB		SNMP_OID_SNMPMODULES, 16

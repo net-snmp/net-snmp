@@ -172,6 +172,7 @@ return_delayed_response(unsigned int clientreg, void *clientarg)
                                  sizeof(delay_time));
         break;
 
+#ifndef NETSNMP_NO_WRITE_SUPPORT
     case MODE_SET_RESERVE1:
         /*
          * check type 
@@ -247,6 +248,7 @@ return_delayed_response(unsigned int clientreg, void *clientarg)
          * we don't have anything to actually do here 
          */
         break;
+#endif /* NETSNMP_NO_WRITE_SUPPORT */
     }
 
     /*

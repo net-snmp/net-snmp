@@ -6,7 +6,9 @@
 
 #include <net-snmp/net-snmp-includes.h>
 
-#if defined(NETSNMP_USE_OPENSSL) && defined(HAVE_LIBSSL)
+netsnmp_feature_provide(cert_util)
+
+#if defined(NETSNMP_USE_OPENSSL) && defined(HAVE_LIBSSL) && !defined(NETSNMP_FEATURE_REMOVE_CERT_UTIL)
 
 #include <ctype.h>
 
@@ -396,6 +398,8 @@ netsnmp_openssl_cert_dump_san(X509 *ocert /*X509_EXTENSION *oext*/)
     }
 }
 
+netsnmp_feature_child_of(openssl_cert_get_subjectAltNames, netsnmp_unused)
+#ifndef NETSNMP_FEATURE_REMOVE_OPENSSL_CERT_GET_SUBJECTALTNAMES
 /** netsnmp_openssl_cert_get_subjectAltName: get subjectAltName for cert.
  * if a pointer to a buffer and its length are specified, they will be
  * used. otherwise, a new buffer will be allocated, which the caller will
@@ -406,6 +410,7 @@ netsnmp_openssl_cert_get_subjectAltNames(X509 *ocert, char **buf, int *len)
 {
     return _cert_get_extension_id_str(ocert, NID_subject_alt_name, buf, len, 0);
 }
+#endif /* NETSNMP_FEATURE_REMOVE_OPENSSL_CERT_GET_SUBJECTALTNAMES */
 
 void
 netsnmp_openssl_cert_dump_extensions(X509 *ocert)
@@ -450,6 +455,8 @@ _nid2ht(int nid)
     return 0;
 }
 
+netsnmp_feature_child_of(openssl_ht2nid, netsnmp_unused)
+#ifndef NETSNMP_FEATURE_REMOVE_OPENSSL_HT2NID
 int
 _ht2nid(int ht)
 {
@@ -457,6 +464,7 @@ _ht2nid(int ht)
         return 0;
     return _htmap[ht];
 }
+#endif /* NETSNMP_FEATURE_REMOVE_OPENSSL_HT2NID */
 
 /**
  * returns allocated pointer caller must free.
@@ -809,6 +817,8 @@ netsnmp_openssl_cert_issued_by(X509 *issuer, X509 *cert)
 }
 
 
+netsnmp_feature_child_of(openssl_err_log, netsnmp_unused)
+#ifndef NETSNMP_FEATURE_REMOVE_OPENSSL_ERR_LOG
 void
 netsnmp_openssl_err_log(const char *prefix)
 {
@@ -819,6 +829,7 @@ netsnmp_openssl_err_log(const char *prefix)
                  ERR_GET_LIB(err), ERR_GET_FUNC(err), ERR_GET_REASON(err));
     }
 }
+#endif /* NETSNMP_FEATURE_REMOVE_OPENSSL_ERR_LOG */
 
 void
 netsnmp_openssl_null_checks(SSL *ssl, int *null_auth, int *null_cipher)
@@ -871,4 +882,4 @@ netsnmp_openssl_null_checks(SSL *ssl, int *null_auth, int *null_cipher)
     }
 }
 
-#endif /* NETSNMP_USE_OPENSSL && HAVE_LIBSSL */
+#endif /* NETSNMP_USE_OPENSSL && HAVE_LIBSSL && !defined(NETSNMP_FEATURE_REMOVE_CERT_UTIL) */

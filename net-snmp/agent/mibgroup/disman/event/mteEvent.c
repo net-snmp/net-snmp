@@ -4,11 +4,14 @@
  */
 
 #include <net-snmp/net-snmp-config.h>
+#include <net-snmp/net-snmp-features.h>
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 #include "disman/event/mteEvent.h"
 #include "disman/event/mteTrigger.h"
 #include "disman/event/mteObjects.h"
+
+netsnmp_feature_provide(disman_debugging)
 
 netsnmp_tdata *event_table_data;
 
@@ -119,6 +122,7 @@ _init_link_mteEvent( const char *event, const char *oname, int specific )
      *
      * =================================================== */
 
+#ifndef NETSNMP_FEATURE_REMOVE_DISMAN_DEBUGGING
 void
 _mteEvent_dump(void)
 {
@@ -140,7 +144,7 @@ _mteEvent_dump(void)
     }
     DEBUGMSGTL(("disman:event:dump", "EventTable %d entries\n", i));
 }
-
+#endif /* NETSNMP_FEATURE_REMOVE_DISMAN_DEBUGGING */
 
 /*
  * Create a new row in the event table 

@@ -1,8 +1,23 @@
 #include <net-snmp/net-snmp-config.h>
 
 #include <net-snmp/net-snmp-includes.h>
+#include <net-snmp/net-snmp-features.h>
 
 #include <net-snmp/library/check_varbind.h>
+
+netsnmp_feature_child_of(check_vb_range, check_varbind_all)
+netsnmp_feature_child_of(check_vb_size_range, check_varbind_all)
+netsnmp_feature_child_of(check_vb_uint, check_varbind_all)
+netsnmp_feature_child_of(check_vb_storagetype, check_varbind_all)
+netsnmp_feature_child_of(check_vb_oid, check_varbind_all)
+netsnmp_feature_child_of(check_vb_type_and_max_size, check_varbind_all)
+netsnmp_feature_child_of(check_vb_type_and_max_size, check_varbind_all)
+netsnmp_feature_child_of(check_vb_rowstatus_with_storagetype, check_varbind_all)
+
+#ifdef NETSNMP_FEATURE_REQUIRE_CHECK_VB_ROWSTATUS_WITH_STORAGETYPE
+netsnmp_feature_require(check_rowstatus_with_storagetype_transition)
+#endif /* NETSNMP_FEATURE_REQUIRES_CHECK_VB_ROWSTATUS_WITH_STORAGETYPE */
+
 
 NETSNMP_INLINE int
 netsnmp_check_vb_type(const netsnmp_variable_list *var, int type )
@@ -49,6 +64,7 @@ netsnmp_check_vb_max_size(const netsnmp_variable_list *var, size_t size )
     return rc;
 }
 
+#ifndef NETSNMP_FEATURE_REMOVE_CHECK_VB_RANGE
 NETSNMP_INLINE int
 netsnmp_check_vb_range(const netsnmp_variable_list *var,
                        size_t low, size_t high )
@@ -64,7 +80,9 @@ netsnmp_check_vb_range(const netsnmp_variable_list *var,
 
     return rc;
 }
+#endif /* NETSNMP_FEATURE_REMOVE_CHECK_VB_RANGE */
 
+#ifndef NETSNMP_FEATURE_REMOVE_CHECK_VB_SIZE_RANGE
 NETSNMP_INLINE int
 netsnmp_check_vb_size_range(const netsnmp_variable_list *var,
                             size_t low, size_t high )
@@ -80,6 +98,7 @@ netsnmp_check_vb_size_range(const netsnmp_variable_list *var,
 
     return rc;
 }
+#endif /* NETSNMP_FEATURE_REMOVE_CHECK_VB_SIZE_RANGE */
 
 NETSNMP_INLINE int
 netsnmp_check_vb_type_and_size(const netsnmp_variable_list *var,
@@ -98,6 +117,7 @@ netsnmp_check_vb_type_and_size(const netsnmp_variable_list *var,
     return rc;
 }
 
+#ifndef NETSNMP_FEATURE_REMOVE_CHECK_VB_TYPE_AND_MAX_SIZE
 NETSNMP_INLINE int
 netsnmp_check_vb_type_and_max_size(const netsnmp_variable_list *var,
                                int type, size_t size)
@@ -114,7 +134,9 @@ netsnmp_check_vb_type_and_max_size(const netsnmp_variable_list *var,
 
     return rc;
 }
+#endif /* NETSNMP_FEATURE_REMOVE_CHECK_VB_TYPE_AND_MAX_SIZE */
 
+#ifndef NETSNMP_FEATURE_REMOVE_CHECK_VB_OID
 NETSNMP_INLINE int
 netsnmp_check_vb_oid(const netsnmp_variable_list *var)
 {
@@ -130,6 +152,7 @@ netsnmp_check_vb_oid(const netsnmp_variable_list *var)
 
     return rc;
 }
+#endif /* NETSNMP_FEATURE_REMOVE_CHECK_VB_OID */
 
 NETSNMP_INLINE int
 netsnmp_check_vb_int(const netsnmp_variable_list *var)
@@ -140,6 +163,7 @@ netsnmp_check_vb_int(const netsnmp_variable_list *var)
     return netsnmp_check_vb_type_and_size(var, ASN_INTEGER, sizeof(long));
 }
 
+#ifndef NETSNMP_FEATURE_REMOVE_CHECK_VB_UINT
 NETSNMP_INLINE int
 netsnmp_check_vb_uint(const netsnmp_variable_list *var)
 {
@@ -148,6 +172,7 @@ netsnmp_check_vb_uint(const netsnmp_variable_list *var)
     
     return netsnmp_check_vb_type_and_size(var, ASN_UNSIGNED, sizeof(long));
 }
+#endif /* NETSNMP_FEATURE_REMOVE_CHECK_VB_UINT */
 
 NETSNMP_INLINE int
 netsnmp_check_vb_int_range(const netsnmp_variable_list *var, int low, int high)
@@ -213,6 +238,7 @@ netsnmp_check_vb_rowstatus(const netsnmp_variable_list *var, int old_value)
     return check_rowstatus_transition(old_value, *var->val.integer);
 }
 
+#ifndef NETSNMP_FEATURE_REMOVE_CHECK_VB_ROWSTATUS_WITH_STORAGETYPE
 int
 netsnmp_check_vb_rowstatus_with_storagetype(const netsnmp_variable_list *var,
                                             int old_value, int old_storage)
@@ -229,7 +255,9 @@ netsnmp_check_vb_rowstatus_with_storagetype(const netsnmp_variable_list *var,
                                                        *var->val.integer,
                                                        old_storage);
 }
+#endif /* NETSNMP_FEATURE_REMOVE_CHECK_VB_ROWSTATUS_WITH_STORAGETYPE */
 
+#ifndef NETSNMP_FEATURE_REMOVE_CHECK_VB_STORAGETYPE
 int
 netsnmp_check_vb_storagetype(const netsnmp_variable_list *var, int old_value)
 {
@@ -247,3 +275,4 @@ netsnmp_check_vb_storagetype(const netsnmp_variable_list *var, int old_value)
         
     return check_storage_transition(old_value, *var->val.integer);
 }
+#endif /* NETSNMP_FEATURE_REMOVE_CHECK_VB_STORAGETYPE */

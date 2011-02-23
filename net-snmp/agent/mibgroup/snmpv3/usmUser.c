@@ -3,6 +3,7 @@
  */
 
 #include <net-snmp/net-snmp-config.h>
+#include <net-snmp/net-snmp-features.h>
 #include <stdlib.h>
 
 #if HAVE_STRING_H
@@ -17,7 +18,11 @@
 #include "util_funcs/header_generic.h"
 #include "usmUser.h"
 
+#ifndef NETSNMP_NO_WRITE_SUPPORT 
 int usmStatusCheck(struct usmUser *uptr);
+#endif  /* !NETSNMP_NO_WRITE_SUPPORT */
+
+netsnmp_feature_provide(init_register_usmUser_context)
 
 struct variable4 usmUser_variables[] = {
     {USMUSERSPINLOCK, ASN_INTEGER, NETSNMP_OLDAPI_RWRITE,
@@ -64,6 +69,7 @@ init_usmUser(void)
                  usmUser_variables_oid);
 }
 
+#ifndef NETSNMP_FEATURE_REMOVE_INIT_REGISTER_USMUSER_CONTEXT
 void
 init_register_usmUser_context(const char *contextName) {
     register_mib_context("snmpv3/usmUser",
@@ -75,6 +81,7 @@ init_register_usmUser_context(const char *contextName) {
                          DEFAULT_MIB_PRIORITY, 0, 0, NULL,
                          contextName, -1, 0);
 }
+#endif /* NETSNMP_FEATURE_REMOVE_INIT_REGISTER_USMUSER_CONTEXT */
 
 /*******************************************************************-o-******
  * usm_generate_OID
@@ -303,8 +310,11 @@ var_usmUser(struct variable * vp,
     if (!vp || !name || !length || !var_len)
         return NULL;
 
-    *write_method = (WriteMethod*)0;    /* assume it isnt writable for the time being */
-    *var_len = sizeof(long_ret);        /* assume an integer and change later if not */
+    /* assume it isnt writable for the time being */
+    *write_method = (WriteMethod*)0;    
+
+    /* assume an integer and change later if not */
+    *var_len = sizeof(long_ret);
 
     if (vp->magic != USMUSERSPINLOCK) {
         oid             newname[MAX_OID_LEN];
@@ -374,6 +384,7 @@ var_usmUser(struct variable * vp,
             indexOid = usm_generate_OID(vp->name, vp->namelen, uptr, &len);
             *length = len;
             memmove(name, indexOid, len * sizeof(oid));
+
             DEBUGMSGTL(("usmUser", "Found user: %s - ", uptr->name));
             for (i = 0; i < (int) uptr->engineIDLen; i++) {
                 DEBUGMSG(("usmUser", " %x", uptr->engineID[i]));
@@ -390,6 +401,7 @@ var_usmUser(struct variable * vp,
     }                           /* endif -- vp->magic != USMUSERSPINLOCK */
 
     switch (vp->magic) {
+#ifndef NETSNMP_NO_WRITE_SUPPORT 
     case USMUSERSPINLOCK:
         *write_method = write_usmUserSpinLock;
         long_ret = usmUserSpinLock;
@@ -485,14 +497,20 @@ var_usmUser(struct variable * vp,
             return (unsigned char *) &long_ret;
         }
         return NULL;
-
     default:
         DEBUGMSGTL(("snmpd", "unknown sub-id %d in var_usmUser\n",
                     vp->magic));
+#else /* !NETSNMP_NO_WRITE_SUPPORT */ 
+    default:
+        DEBUGMSGTL(("snmpd", "no write support for var_usmUser\n"));
+#endif /* !NETSNMP_NO_WRITE_SUPPORT */ 
     }
     return NULL;
 
 }                               /* end var_usmUser() */
+
+
+#ifndef NETSNMP_NO_WRITE_SUPPORT 
 
 /*
  * write_usmUserSpinLock(): called when a set is performed on the
@@ -1272,6 +1290,7 @@ write_usmUserStorageType(int action,
     return SNMP_ERR_NOERROR;
 }                               /* end write_usmUserStorageType() */
 
+
 /*
  * Return 1 if enough objects have been set up to transition rowStatus to
  * notInService(2) or active(1).  
@@ -1478,7 +1497,9 @@ write_usmUserStatus(int action,
     }
 
     return SNMP_ERR_NOERROR;
-}
+}  /* write_usmUserStatus */
+
+#endif /* !NETSNMP_NO_WRITE_SUPPORT */ 
 
 #if 0
 

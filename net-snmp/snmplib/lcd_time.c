@@ -6,6 +6,7 @@
  */
 
 #include <net-snmp/net-snmp-config.h>
+#include <net-snmp/net-snmp-features.h>
 
 #include <sys/types.h>
 #include <stdio.h>
@@ -51,6 +52,10 @@
 #include <net-snmp/library/snmpv3.h>
 
 #include <net-snmp/library/transform_oids.h>
+
+netsnmp_feature_provide(usm_lcd_time)
+
+#ifndef NETSNMP_FEATURE_REMOVE_USM_LCD_TIME
 
 /*
  * Global static hashlist to contain Enginetime entries.
@@ -599,3 +604,4 @@ dump_etimelist(void)
 
 }                               /* end dump_etimelist() */
 #endif                          /* NETSNMP_ENABLE_TESTING_CODE */
+#endif /* NETSNMP_FEATURE_REMOVE_USM_LCD_TIME */

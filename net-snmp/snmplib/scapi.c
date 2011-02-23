@@ -15,6 +15,7 @@
  */
 
 #include <net-snmp/net-snmp-config.h>
+#include <net-snmp/net-snmp-features.h>
 
 #include <sys/types.h>
 #ifdef HAVE_STDLIB_H
@@ -50,6 +51,10 @@
 #include <net-snmp/output_api.h>
 #include <net-snmp/utilities.h>
 
+netsnmp_feature_provide(usm_scapi)
+
+#ifndef NETSNMP_FEATURE_REMOVE_USM_SCAPI
+
 #ifdef NETSNMP_USE_INTERNAL_MD5
 #include <net-snmp/library/md5.h>
 #endif
@@ -68,6 +73,7 @@
 #include <net-snmp/library/openssl_des.h>
 #include <net-snmp/library/openssl_aes.h>
 #endif
+
 #ifdef NETSNMP_USE_OPENSSL
 #include <openssl/hmac.h>
 #include <openssl/evp.h>
@@ -143,6 +149,8 @@ sc_get_properlength(const oid * hashtype, u_int hashtype_len)
     return SNMPERR_GENERR;
 }
 
+netsnmp_feature_child_of(scapi_get_proper_priv_length, netsnmp_unused)
+#ifndef NETSNMP_FEATURE_REMOVE_SCAPI_GET_PROPER_PRIV_LENGTH
 int
 sc_get_proper_priv_length(const oid * privtype, u_int privtype_len)
 {
@@ -159,6 +167,7 @@ sc_get_proper_priv_length(const oid * privtype, u_int privtype_len)
 #endif
     return properlength;
 }
+#endif /* NETSNMP_FEATURE_REMOVE_SCAPI_GET_PROPER_PRIV_LENGTH */
 
 
 /*******************************************************************-o-******
@@ -1351,3 +1360,4 @@ SHA1_hmac(u_char * data, size_t len, u_char * mac, size_t maclen,
     return rc;
 }
 #endif /* NETSNMP_USE_INTERNAL_CRYPTO */
+#endif /*  NETSNMP_FEATURE_REMOVE_USM_SCAPI  */

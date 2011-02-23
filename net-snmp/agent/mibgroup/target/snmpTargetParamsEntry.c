@@ -621,6 +621,7 @@ var_snmpTargetParamsEntry(struct variable * vp,
     struct targetParamTable_struct *temp_struct;
 
     switch (vp->magic) {
+#ifndef NETSNMP_NO_WRITE_SUPPORT
     case SNMPTARGETPARAMSMPMODEL:
         *write_method = write_snmpTargetParamsMPModel;
         break;
@@ -639,11 +640,13 @@ var_snmpTargetParamsEntry(struct variable * vp,
     case SNMPTARGETPARAMSROWSTATUS:
         *write_method = write_snmpTargetParamsRowStatus;
         break;
+#endif /* !NETSNMP_NO_WRITE_SUPPORT */
     default:
         *write_method = NULL;
     }
 
-    *var_len = sizeof(long_ret);        /* assume an integer and change later if not */
+    /* assume an integer and change later if not */
+    *var_len = sizeof(long_ret);
 
     /*
      * look for OID in current table 
@@ -716,9 +719,12 @@ var_snmpTargetParamsEntry(struct variable * vp,
                     "unknown sub-id %d in var_snmpTargetParamsEntry\n",
                     vp->magic));
     }
+
     return NULL;
 }                               /* var_snmpTargetParamsEntry */
 
+
+#ifndef NETSNMP_NO_WRITE_SUPPORT
 /*
  * Assign a value to the mpModel variable.  
  */
@@ -1389,6 +1395,9 @@ write_snmpTargetParamsRowStatus(int action,
     }
     return SNMP_ERR_NOERROR;
 }
+
+#endif /* !NETSNMP_NO_WRITE_SUPPORT */
+
 
 struct targetParamTable_struct *
 get_paramEntry(char *name)

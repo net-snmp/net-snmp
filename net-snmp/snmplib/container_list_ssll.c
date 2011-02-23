@@ -4,6 +4,7 @@
  *
  */
 #include <net-snmp/net-snmp-config.h>
+#include <net-snmp/net-snmp-features.h>
 
 #include <stdio.h>
 #if HAVE_STDLIB_H
@@ -28,6 +29,19 @@
 
 #include <net-snmp/library/container_list_ssll.h>
 
+netsnmp_feature_provide(container_linked_list)
+netsnmp_feature_provide(container_fifo)
+netsnmp_feature_provide(container_lifo)
+
+/* this is a fancy way of cleaning up ifdefs */
+#ifdef NETSNMP_FEATURE_REQUIRE_CONTAINER_FIFO
+netsnmp_feature_require(container_linked_list)
+#endif /* NETSNMP_FEATURE_REQUIRE_CONTAINER_FIFO */
+#ifdef NETSNMP_FEATURE_REQUIRE_CONTAINER_LIFO
+netsnmp_feature_require(container_linked_list)
+#endif /* NETSNMP_FEATURE_REQUIRE_CONTAINER_LIFO */
+
+#ifndef NETSNMP_FEATURE_REMOVE_CONTAINER_LINKED_LIST
 typedef struct sl_node {
    void           *data;
    struct sl_node *next;
@@ -551,3 +565,6 @@ _ssll_iterator_get(netsnmp_container *c)
 
     return (netsnmp_iterator *)it;
 }
+#else /* NETSNMP_FEATURE_REMOVE_CONTAINER_LINKED_LIST */
+netsnmp_feature_unused(container_linked_list);
+#endif /* NETSNMP_FEATURE_REMOVE_CONTAINER_LINKED_LIST */
