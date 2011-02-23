@@ -706,7 +706,7 @@ get_table_entries(netsnmp_session * ss)
                                                           NETSNMP_DS_LIB_OID_OUTPUT_FORMAT)) {
                                 case NETSNMP_OID_OUTPUT_MODULE:
 				case 0:
-                                    name_p = strrchr(buf, ':');
+                                    name_p = strchr(buf, ':');
                                     break;
                                 case NETSNMP_OID_OUTPUT_SUFFIX:
                                     name_p = buf;
