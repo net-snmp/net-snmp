@@ -1,7 +1,5 @@
 /*
- *  udp_endpointTable MIB architecture support
- *
- * $Id: udp_endpoint_linux.c 18994 2010-06-16 13:13:25Z dts12 $
+ *  udp_endpointTable MIB architecture support for OpenBSD
  */
 #include <net-snmp/net-snmp-config.h>
 #include <net-snmp/net-snmp-includes.h>
@@ -133,6 +131,10 @@ _load(netsnmp_container *container, u_int load_flags)
 	prev = next;
 	next = CIRCLEQ_NEXT(&inpcb, inp_queue);
 
+#if !defined(NETSNMP_ENABLE_IPV6)
+        if (inpcb.inp_flags & INP_IPV6)
+            goto skip;
+#endif
         entry = netsnmp_access_udp_endpoint_entry_create();
         if (NULL == entry) {
             rc = -3;
@@ -161,6 +163,9 @@ _load(netsnmp_container *container, u_int load_flags)
          */
         entry->index = CONTAINER_SIZE(container) + 1;
         CONTAINER_INSERT(container, entry);
+#if !defined(NETSNMP_ENABLE_IPV6)
+    skip:
+#endif
 	if (next == head)
 	    break;
     }

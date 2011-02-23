@@ -1,7 +1,5 @@
 /*
- *  tcpConnTable MIB architecture support
- *
- * $Id: tcpConn_linux.c 18994 2010-06-16 13:13:25Z dts12 $
+ *  tcpConnTable MIB architecture support for OpenBSD
  */
 #include <net-snmp/net-snmp-config.h>
 #include <net-snmp/net-snmp-includes.h>
@@ -164,6 +162,11 @@ _load(netsnmp_container *container, u_int load_flags)
 		goto skip;
 	    }
 	}
+
+#if !defined(NETSNMP_ENABLE_IPV6)
+        if (inpcb.inp_flags & INP_IPV6)
+	    goto skip;
+#endif
 
         entry = netsnmp_access_tcpconn_entry_create();
         if(NULL == entry) {

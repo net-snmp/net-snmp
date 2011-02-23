@@ -1,5 +1,5 @@
 /*
- *  udp_endpointTable MIB architecture support
+ *  udp_endpointTable MIB architecture support for NetBSD
  *
  * $Id: udp_endpoint_linux.c 18994 2010-06-16 13:13:25Z dts12 $
  */
@@ -93,7 +93,9 @@ netsnmp_arch_udp_endpoint_container_load(netsnmp_container *container,
     }
 
     rc = _load(container, load_flags, 4);
+#if defined(NETSNMP_ENABLE_IPV6)
     rc = _load(container, load_flags, 6);
+#endif
 
     return rc;
 }
