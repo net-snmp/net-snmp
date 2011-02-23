@@ -1,0 +1,126 @@
+#!/usr/bin/perl
+
+use strict;
+use IO::File;
+
+# should be the feature-details.h file
+my $inputfile = shift @ARGV;
+my $outputfile = shift @ARGV;
+
+my %features;
+my %top;
+my %files;
+my $reqfile;
+
+
+gather_data($inputfile);
+print_bullets($outputfile);
+
+
+
+sub gather_data {
+    my ($inputfile) = @_;
+
+    open(I, $inputfile);
+    while(<I>) {
+	if (/(required|provided|wanted) by (.*) \*/) {
+	    $reqfile = $2;
+	} elsif (/define NETSNMP_FEATURE_PROVIDE_(.*) 1/) {
+	    my $lc = lc($1);
+	    die "no reqfile currently set; bug!" if (!defined($reqfile));
+
+	    add($lc);
+
+	    push @{$files{$reqfile}{'provides'}}, $lc;
+	    push @{$features{$lc}{'providedby'}}, $reqfile;
+
+	} elsif (/define NETSNMP_FEATURE_REQUIRE_(.*) 1/) {
+	    my $lc = lc($1);
+	    die "no reqfile currently set; bug!" if (!defined($reqfile));
+
+	    add($lc);
+
+	    push @{$files{$reqfile}{'requires'}}, $lc;
+	    push @{$features{$lc}{'requiredby'}}, $reqfile;
+
+	} elsif (/define NETSNMP_FEATURE_WANT_(.*) 1/) {
+	    my $lc = lc($1);
+	    die "no reqfile currently set; bug!" if (!defined($reqfile));
+
+	    add($lc);
+
+	    push @{$files{$reqfile}{'wants'}}, $lc;
+	    push @{$features{$lc}{'wantedby'}}, $reqfile;
+
+	} elsif (/define NETSNMP_FEATURE_(.*)_CHILD_OF_(.*) 1/) {
+	    my $child = lc($1);
+	    my $parent = lc($2);
+
+	    add_child($child, $parent);
+	}
+    }
+}
+
+sub add {
+    my ($name) = @_;
+    if (!exists($features{$name})) {
+	# new feature entirely, mark it as a top node
+	$top{$name} = 1;
+    }
+}
+
+sub add_child {
+    my ($child, $parent) = @_;
+
+    add($parent);
+
+    if (exists($top{$child})) {
+	# it's no longer a top node if it's a child of something else
+	delete $top{$child};
+    }
+    push @{$features{$parent}{'children'}}, $child;
+
+    $features{$child}{'providedby'}, $reqfile;
+}
+
+
+sub print_bullets {
+    my ($outputfile) = @_;
+
+    my $fh = new IO::File;
+
+    print "here: $outputfile\n";
+    if (!$fh->open("> $outputfile")) {
+	die "error!\n";
+    }
+
+    foreach my $node (sort keys(%top)) {
+	print_node($fh, $node, "*");
+    }
+}
+
+sub print_node {
+    my ($fh, $node, $prefix) = @_;
+
+    my $spaces = $prefix;
+    $spaces =~ s/./ /g;
+
+    print $fh "$prefix $node\n";
+    if (exists($features{$node}{'providedby'})) {
+	print $fh "$spaces + provided in file: " .
+	    join(", ", @{$features{$node}{'providedby'}}) . "\n";
+    }
+    if (exists($features{$node}{'requiredby'})) {
+	print $fh "$spaces + required in file: " .
+	    join(", ", @{$features{$node}{'requiredby'}}) . "\n";
+    }
+    if (exists($features{$node}{'wantedby'})) {
+	print $fh "$spaces + wanted in file: " .
+	    join(", ", @{$features{$node}{'wantedby'}}) . "\n";
+    }
+    if (exists($features{$node}{'children'})) {
+	foreach my $child (@{$features{$node}{'children'}}) {
+	    print_node($fh, $child, $prefix . "*");
+	}
+    }
+}
