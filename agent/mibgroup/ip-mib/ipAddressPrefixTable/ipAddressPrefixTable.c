@@ -255,7 +255,7 @@ ipAddressPrefixTable_indexes_set_tbl_idx(ipAddressPrefixTable_mib_index *
                                          tbl_idx,
                                          long ipAddressPrefixIfIndex_val,
                                          u_long ipAddressPrefixType_val,
-                                         char
+                                         u_char
                                          *ipAddressPrefixPrefix_val_ptr,
                                          size_t
                                          ipAddressPrefixPrefix_val_ptr_len,
@@ -318,7 +318,7 @@ ipAddressPrefixTable_indexes_set(ipAddressPrefixTable_rowreq_ctx *
                                  rowreq_ctx,
                                  long ipAddressPrefixIfIndex_val,
                                  u_long ipAddressPrefixType_val,
-                                 char *ipAddressPrefixPrefix_val_ptr,
+                                 u_char *ipAddressPrefixPrefix_val_ptr,
                                  size_t ipAddressPrefixPrefix_val_ptr_len,
                                  u_long ipAddressPrefixLength_val)
 {

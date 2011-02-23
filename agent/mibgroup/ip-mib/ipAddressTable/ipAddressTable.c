@@ -333,8 +333,8 @@ The address type of ipAddressAddr.
  *  Otherwise, just do a direct copy.
  */
 int
-ipAddressAddrType_map(u_long * mib_ipAddressAddrType_val_ptr,
-                      u_long raw_ipAddressAddrType_val)
+ipAddressAddrType_map(long * mib_ipAddressAddrType_val_ptr,
+                      long raw_ipAddressAddrType_val)
 {
     netsnmp_assert(NULL != mib_ipAddressAddrType_val_ptr);
 
@@ -382,8 +382,8 @@ ipAddressAddrType_map(u_long * mib_ipAddressAddrType_val_ptr,
  */
 int
 ipAddressTable_indexes_set_tbl_idx(ipAddressTable_mib_index * tbl_idx,
-                                   u_long ipAddressAddrType_val,
-                                   char *ipAddressAddr_val_ptr,
+                                   long ipAddressAddrType_val,
+                                   u_char *ipAddressAddr_val_ptr,
                                    size_t ipAddressAddr_val_ptr_len)
 {
     DEBUGMSGTL(("verbose:ipAddressTable:ipAddressTable_indexes_set_tbl_idx", "called\n"));
@@ -431,7 +431,7 @@ ipAddressTable_indexes_set_tbl_idx(ipAddressTable_mib_index * tbl_idx,
 int
 ipAddressTable_indexes_set(ipAddressTable_rowreq_ctx * rowreq_ctx,
                            u_long ipAddressAddrType_val,
-                           char *ipAddressAddr_val_ptr,
+                           u_char *ipAddressAddr_val_ptr,
                            size_t ipAddressAddr_val_ptr_len)
 {
     DEBUGMSGTL(("verbose:ipAddressTable:ipAddressTable_indexes_set",
