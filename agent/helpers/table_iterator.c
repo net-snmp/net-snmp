@@ -679,6 +679,7 @@ netsnmp_table_iterator_helper_handler(netsnmp_mib_handler *handler,
                         }
                         break;
 
+#ifndef NETSNMP_FEATURE_REMOVE_STASH_CACHE
                     case MODE_GET_STASH:
                         /* collect data for each column for every row */
                         build_oid_noalloc(myname, MAX_OID_LEN, &myname_len,
@@ -730,6 +731,7 @@ netsnmp_table_iterator_helper_handler(netsnmp_mib_handler *handler,
                         }
                         reqinfo->mode = MODE_GET_STASH;
                         break;
+#endif  /* NETSNMP_FEATURE_REMOVE_STASH_CACHE */
 
                     case MODE_GETNEXT:
                         /* looking for "next" matches */
