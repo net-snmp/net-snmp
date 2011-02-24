@@ -55,7 +55,7 @@ foreach my $function (sort { $defined{$a}{'source'} cmp $defined{$b}{'source'} }
 sub dot_os {
     return if (!/\.o$/);
     return if ($File::Find::name =~ /\/.libs\//);
-    return if ($File::Find::name =~ /\/(perl|python)\//);
+#    return if ($File::Find::name =~ /\/(perl|python)\//);
     push @files, $File::Find::name;
 }
 
