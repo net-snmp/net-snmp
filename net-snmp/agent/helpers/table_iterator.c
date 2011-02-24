@@ -103,6 +103,10 @@
 netsnmp_feature_child_of(table_iterator_insert_context, table_iterator_all)
 netsnmp_feature_child_of(table_iterator_create_table, table_iterator_all)
 
+#ifdef NETSNMP_FEATURE_REQUIRE_STASH_CACHE
+netsnmp_feature_require(data_list_get_list_node)
+#endif /* NETSNMP_FEATURE_REQUIRE_STASH_CACHE */
+
 /* ==================================
  *
  * Iterator API: Table maintenance
