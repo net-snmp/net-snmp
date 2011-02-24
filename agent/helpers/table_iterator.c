@@ -250,7 +250,9 @@ int
 netsnmp_register_table_iterator(netsnmp_handler_registration *reginfo,
                                 netsnmp_iterator_info *iinfo)
 {
+#ifndef NETSNMP_FEATURE_REMOVE_STASH_CACHE
     reginfo->modes |= HANDLER_CAN_STASH;
+#endif  /* NETSNMP_FEATURE_REMOVE_STASH_CACHE */
     netsnmp_inject_handler(reginfo,
                            netsnmp_get_table_iterator_handler(iinfo));
     if (!iinfo)
@@ -906,11 +908,13 @@ netsnmp_table_iterator_helper_handler(netsnmp_mib_handler *handler,
         if (reqinfo->mode == MODE_GETNEXT) {
             reqinfo->mode = MODE_GET;
         }
+#ifndef NETSNMP_FEATURE_REMOVE_STASH_CACHE
     } else if (reqinfo->mode == MODE_GET_STASH) {
         netsnmp_free_request_data_sets(reqtmp);
         SNMP_FREE(reqtmp);
         table_info->indexes = old_indexes;
     }
+#endif  /* NETSNMP_FEATURE_REMOVE_STASH_CACHE */
 
 
     /* Finally, we get to call the next handler below us.  Boy, wasn't
