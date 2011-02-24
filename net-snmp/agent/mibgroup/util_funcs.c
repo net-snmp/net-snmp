@@ -98,7 +98,9 @@
 #endif
 
 #if defined(HAVE_LINUX_RTNETLINK_H)
-netsnmp_feature_child_of(prefix_info, util_funcs)
+netsnmp_feature_child_of(prefix_info_all, util_funcs)
+netsnmp_feature_child_of(prefix_info, prefix_info_all)
+netsnmp_feature_child_of(update_prefix_info, prefix_info_all)
 #endif /* HAVE_LINUX_RTNETLINK_H */
 
 #ifdef NETSNMP_EXCACHETIME
@@ -1045,6 +1047,7 @@ int net_snmp_find_prefix_info(prefix_cbx **head,
        return 0;
 }
 
+#ifndef NETSNMP_FEATURE_REMOVE_UPDATE_PREFIX_INFO
 int net_snmp_update_prefix_info(prefix_cbx **head,
                                 prefix_cbx *node_to_update)
 {
@@ -1059,6 +1062,7 @@ int net_snmp_update_prefix_info(prefix_cbx **head,
     } else
        return 0;
 }
+#endif /* NETSNMP_FEATURE_REMOVE_UPDATE_PREFIX_INFO */
 
 int net_snmp_search_update_prefix_info(prefix_cbx **head,
                                        prefix_cbx *node_to_use,
