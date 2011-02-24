@@ -101,11 +101,16 @@ struct utmp    *getutent(void);
 #if defined(solaris2)
 static struct openpromio * op_malloc(size_t size);
 static void op_free(struct openpromio *op);
+
+#ifndef NETSNMP_NO_WRITE_SUPPORT
 static int set_solaris_bootcommand_parameter(int action, u_char * var_val, u_char var_val_type, size_t var_val_len, u_char * statP, oid * name, size_t name_len);
+#endif /* !NETSNMP_NO_WRITE_SUPPORT */
+
 static int set_solaris_eeprom_parameter(const char *key, const char *value, size_t value_len);
 static int get_solaris_eeprom_parameter(const char *parameter, char *output);
 static long     get_max_solaris_processes(void);
 #endif
+
 static int      get_load_dev(void);
 static int      count_users(void);
 extern int      count_processes(void);
@@ -126,6 +131,7 @@ extern int      swrun_count_processes(void);
 #define	HRSYS_MAXPROCS		7
 
 #if defined(solaris2)
+#ifndef NETSNMP_NO_WRITE_SUPPORT
 struct variable2 hrsystem_variables[] = {
     {HRSYS_UPTIME, ASN_TIMETICKS, NETSNMP_OLDAPI_RONLY,
      var_hrsys, 1, {1}},
@@ -142,6 +148,24 @@ struct variable2 hrsystem_variables[] = {
     {HRSYS_MAXPROCS, ASN_INTEGER, NETSNMP_OLDAPI_RONLY,
      var_hrsys, 1, {7}}
 };
+#else /* !NETSNMP_NO_WRITE_SUPPORT */
+struct variable2 hrsystem_variables[] = {
+    {HRSYS_UPTIME, ASN_TIMETICKS, NETSNMP_OLDAPI_RONLY,
+     var_hrsys, 1, {1}},
+    {HRSYS_DATE, ASN_OCTET_STR, NETSNMP_OLDAPI_RONLY,
+     var_hrsys, 1, {2}},
+    {HRSYS_LOAD_DEV, ASN_INTEGER, NETSNMP_OLDAPI_RONLY,
+     var_hrsys, 1, {3}},
+    {HRSYS_LOAD_PARAM, ASN_OCTET_STR, NETSNMP_OLDAPI_RONLY,
+     var_hrsys, 1, {4}},
+    {HRSYS_USERS, ASN_GAUGE, NETSNMP_OLDAPI_RONLY,
+     var_hrsys, 1, {5}},
+    {HRSYS_PROCS, ASN_GAUGE, NETSNMP_OLDAPI_RONLY,
+     var_hrsys, 1, {6}},
+    {HRSYS_MAXPROCS, ASN_INTEGER, NETSNMP_OLDAPI_RONLY,
+     var_hrsys, 1, {7}}
+};
+#endif /* !NETSNMP_NO_WRITE_SUPPORT */
 #else
 struct variable2 hrsystem_variables[] = {
     {HRSYS_UPTIME, ASN_TIMETICKS, NETSNMP_OLDAPI_RONLY,
@@ -160,6 +184,7 @@ struct variable2 hrsystem_variables[] = {
      var_hrsys, 1, {7}}
 };
 #endif
+
 oid             hrsystem_variables_oid[] = { 1, 3, 6, 1, 2, 1, 25, 1 };
 
 
@@ -256,7 +281,9 @@ var_hrsys(struct variable * vp,
         return (u_char *) & long_return;
     case HRSYS_DATE:
 #if defined(HAVE_MKTIME) && defined(HAVE_STIME)
+#ifndef NETSNMP_NO_WRITE_SUPPORT 
         *write_method=ns_set_time;
+#endif /* !NETSNMP_NO_WRITE_SUPPORT */
 #endif
         time(&now);
         return (u_char *) date_n_time(&now, var_len);
@@ -272,7 +299,9 @@ var_hrsys(struct variable * vp,
             return NULL;
         }
 #elif defined(solaris2)
+#ifndef NETSNMP_NO_WRITE_SUPPORT
         *write_method=set_solaris_bootcommand_parameter;
+#endif /* !NETSNMP_NO_WRITE_SUPPORT */
         if ( get_solaris_eeprom_parameter("boot-command",bootparam) ) {
             snmp_log(LOG_ERR,"unable to lookup boot-command from eeprom\n");
             return NULL;
@@ -362,6 +391,7 @@ static void op_free(struct openpromio *op) {
     free(op);
 }
 
+#ifndef NETSNMP_NO_WRITE_SUPPORT
 static int
 set_solaris_bootcommand_parameter(int action,
             u_char * var_val,
@@ -426,6 +456,7 @@ set_solaris_bootcommand_parameter(int action,
     }
     return SNMP_ERR_NOERROR;
 }
+#endif /* !NETSNMP_NO_WRITE_SUPPORT */
 
 static int set_solaris_eeprom_parameter(const char *key, const char *value,
                                         size_t var_val_len) {
@@ -507,6 +538,7 @@ static long get_max_solaris_processes(void) {
 #endif
 
 #if defined(HAVE_MKTIME) && defined(HAVE_STIME)
+#ifndef NETSNMP_NO_WRITE_SUPPORT
 int
 ns_set_time(int action,
             u_char * var_val,
@@ -600,6 +632,7 @@ ns_set_time(int action,
     }
     return SNMP_ERR_NOERROR;
 }
+#endif /* !NETSNMP_NO_WRITE_SUPPORT */
 #endif
 
                 /*
