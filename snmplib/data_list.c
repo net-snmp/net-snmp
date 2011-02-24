@@ -4,7 +4,11 @@
  * $Id$
  */
 #include <net-snmp/net-snmp-config.h>
+#include <net-snmp/net-snmp-features.h>
 #include <net-snmp/net-snmp-includes.h>
+
+netsnmp_feature_child_of(data_list_add_data, data_list_all)
+netsnmp_feature_child_of(data_list_get_list_node, data_list_all)
 
 /** @defgroup data_list generic linked-list data handling with a string as a key.
  * @ingroup library
@@ -131,7 +135,6 @@ netsnmp_add_list_data(netsnmp_data_list **head, netsnmp_data_list *node)
  * @param beer A function that can free the data pointer (in the future)
  * @return a newly created data_list node which was inserted in the list
  */
-netsnmp_feature_child_of(data_list_add_data, data_list)
 #ifndef NETSNMP_FEATURE_REMOVE_DATA_LIST_ADD_DATA
 NETSNMP_INLINE netsnmp_data_list *
 netsnmp_data_list_add_data(netsnmp_data_list **head, const char *name,
@@ -177,6 +180,7 @@ netsnmp_get_list_data(netsnmp_data_list *head, const char *name)
  * @param name the name to find
  * @return a pointer to the data_list node
  */
+#ifndef NETSNMP_FEATURE_REMOVE_DATA_LIST_GET_LIST_NODE
 NETSNMP_INLINE netsnmp_data_list    *
 netsnmp_get_list_node(netsnmp_data_list *head, const char *name)
 {
@@ -189,6 +193,7 @@ netsnmp_get_list_node(netsnmp_data_list *head, const char *name)
         return head;
     return NULL;
 }
+#endif /* NETSNMP_FEATURE_REMOVE_DATA_LIST_GET_LIST_NODE */
 
 /** Removes a named node from a data_list (and frees it)
  * @param realhead a pointer to the head node of a data_list
