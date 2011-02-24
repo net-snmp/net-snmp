@@ -56,12 +56,15 @@ initialize_table_hrSWRunTable(void)
 {
     netsnmp_handler_registration *reg;
     netsnmp_mib_handler *handler = NULL;
-
+#ifndef NETSNMP_NO_WRITE_SUPPORT
 #ifdef NETSNMP_INCLUDE_HRSWRUN_WRITE_SUPPORT
 #  define SWRUN_ACCESS_LEVEL HANDLER_CAN_RWRITE
 #else
 #  define SWRUN_ACCESS_LEVEL HANDLER_CAN_RONLY
 #endif
+#else /* !NETSNMP_NO_WRITE_SUPPORT */ 
+#  define SWRUN_ACCESS_LEVEL HANDLER_CAN_RONLY
+#endif /* !NETSNMP_NO_WRITE_SUPPORT */
     reg =
         netsnmp_create_handler_registration(MYTABLE,
                                             hrSWRunTable_handler,
@@ -226,6 +229,7 @@ hrSWRunTable_handler(netsnmp_mib_handler *handler,
         }
         break;
 
+#ifndef NETSNMP_NO_WRITE_SUPPORT
 #ifdef NETSNMP_INCLUDE_HRSWRUN_WRITE_SUPPORT
         /*
          * Write-support
@@ -338,6 +342,7 @@ hrSWRunTable_handler(netsnmp_mib_handler *handler,
         }
         break;
 #endif /* NETSNMP_INCLUDE_HRSWRUN_WRITE_SUPPORT */
+#endif /* !NETSNMP_NO_WRITE_SUPPORT */
     }
     return SNMP_ERR_NOERROR;
 }
