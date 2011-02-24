@@ -913,8 +913,8 @@ netsnmp_table_iterator_helper_handler(netsnmp_mib_handler *handler,
         netsnmp_free_request_data_sets(reqtmp);
         SNMP_FREE(reqtmp);
         table_info->indexes = old_indexes;
-    }
 #endif  /* NETSNMP_FEATURE_REMOVE_STASH_CACHE */
+    }
 
 
     /* Finally, we get to call the next handler below us.  Boy, wasn't
