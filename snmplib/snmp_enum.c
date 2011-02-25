@@ -23,7 +23,12 @@
 #include <net-snmp/library/tools.h>
 #include <net-snmp/library/snmp_assert.h>
 
-netsnmp_feature_provide(se_find_free_value_in_slist)
+netsnmp_feature_child_of(snmp_enum_all, libnetsnmp)
+
+netsnmp_feature_child_of(se_find_free_value_in_slist, snmp_enum_all)
+netsnmp_feature_child_of(snmp_enum_store_list, snmp_enum_all)
+netsnmp_feature_child_of(snmp_enum_store_slist, snmp_enum_all)
+netsnmp_feature_child_of(snmp_enum_clear, snmp_enum_all)
 
 struct snmp_enum_list_str {
     char           *name;
@@ -187,7 +192,6 @@ se_store_enum_list(struct snmp_enum_list *new_list,
     return;
 }
 
-netsnmp_feature_child_of(snmp_enum_store_list, snmp_enum)
 #ifndef NETSNMP_FEATURE_REMOVE_SNMP_ENUM_STORE_LIST
 void
 se_store_list(unsigned int major, unsigned int minor, char *type)
@@ -440,7 +444,6 @@ se_clear_list(struct snmp_enum_list **list)
     return;
 }
 
-netsnmp_feature_child_of(snmp_enum_store_slist, snmp_enum)
 #ifndef NETSNMP_FEATURE_REMOVE_SNMP_ENUM_STORE_SLIST
 void
 se_store_slist(const char *listname, char *type)
@@ -460,7 +463,6 @@ se_store_slist_callback(int majorID, int minorID,
 }
 #endif /* NETSNMP_FEATURE_REMOVE_SNMP_ENUM_STORE_SLIST */
 
-netsnmp_feature_child_of(snmp_enum_clear, snmp_enum)
 #ifndef NETSNMP_FEATURE_REMOVE_SNMP_ENUM_CLEAR
 void
 se_clear_slist(const char *listname)
