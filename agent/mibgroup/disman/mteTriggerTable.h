@@ -229,7 +229,7 @@ config_error(disman/mteTriggerTable depends on the Callback transport)
      netsnmp_pdu    *mte_get_response(struct mteTriggerTable_data *,
                                       netsnmp_pdu *);
 
-
+#ifndef NETSNMP_NO_WRITE_SUPPORT
      WriteMethod     write_mteTriggerComment;
      WriteMethod     write_mteTriggerTest;
      WriteMethod     write_mteTriggerSampleType;
@@ -243,8 +243,7 @@ config_error(disman/mteTriggerTable depends on the Callback transport)
      WriteMethod     write_mteTriggerObjects;
      WriteMethod     write_mteTriggerEnabled;
      WriteMethod     write_mteTriggerEntryStatus;
-
-     WriteMethod     write_mteTriggerEntryStatus;
+#endif /* !NETSNMP_NO_WRITE_SUPPORT */
 
      void            mte_enable_trigger(struct mteTriggerTable_data *item);
      void            mte_disable_trigger(struct mteTriggerTable_data

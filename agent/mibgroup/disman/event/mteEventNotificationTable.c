@@ -35,11 +35,19 @@ init_mteEventNotificationTable(void)
     /*
      * ... then set up the MIB interface to the mteEventNotificationTable slice
      */
+#ifndef NETSNMP_NO_WRITE_SUPPORT
     reg = netsnmp_create_handler_registration("mteEventNotificationTable",
                                             mteEventNotificationTable_handler,
                                             mteEventNotificationTable_oid,
                                             mteEventNotificationTable_oid_len,
                                             HANDLER_CAN_RWRITE);
+#else /* !NETSNMP_NO_WRITE_SUPPORT */
+    reg = netsnmp_create_handler_registration("mteEventNotificationTable",
+                                            mteEventNotificationTable_handler,
+                                            mteEventNotificationTable_oid,
+                                            mteEventNotificationTable_oid_len,
+                                            HANDLER_CAN_RONLY);
+#endif /* !NETSNMP_NO_WRITE_SUPPORT */
 
     table_info = SNMP_MALLOC_TYPEDEF(netsnmp_table_registration_info);
     netsnmp_table_helper_add_indexes(table_info,
@@ -119,6 +127,8 @@ mteEventNotificationTable_handler(netsnmp_mib_handler *handler,
         }
         break;
 
+
+#ifndef NETSNMP_NO_WRITE_SUPPORT
         /*
          * Write-support
          */
@@ -236,6 +246,7 @@ mteEventNotificationTable_handler(netsnmp_mib_handler *handler,
             }
         }
         break;
+#endif /* !NETSNMP_NO_WRITE_SUPPORT */
     }
     return SNMP_ERR_NOERROR;
 }

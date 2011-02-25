@@ -51,6 +51,7 @@ oid             lookupCtlTable_variables_oid[] =
     { 1, 3, 6, 1, 2, 1, 82, 1, 3 };
 
 
+#ifndef NETSNMP_NO_WRITE_SUPPORT
 struct variable2 lookupCtlTable_variables[] = {
     /*
      * magic number        , variable type , ro/rw , callback fn  , L, oidsuffix 
@@ -68,6 +69,25 @@ struct variable2 lookupCtlTable_variables[] = {
     {COLUMN_LOOKUPCTLROWSTATUS, ASN_INTEGER, NETSNMP_OLDAPI_RWRITE,
      var_lookupCtlTable, 2, {1, 8}}
 };
+#else /* !NETSNMP_NO_WRITE_SUPPORT */
+struct variable2 lookupCtlTable_variables[] = {
+    /*
+     * magic number        , variable type , ro/rw , callback fn  , L, oidsuffix 
+     */
+    {COLUMN_LOOKUPCTLTARGETADDRESSTYPE, ASN_INTEGER, NETSNMP_OLDAPI_RONLY,
+     var_lookupCtlTable, 2, {1, 3}},
+    {COLUMN_LOOKUPCTLTARGETADDRESS,   ASN_OCTET_STR, NETSNMP_OLDAPI_RONLY,
+     var_lookupCtlTable, 2, {1, 4}},
+    {COLUMN_LOOKUPCTLOPERSTATUS, ASN_INTEGER, NETSNMP_OLDAPI_RONLY,
+     var_lookupCtlTable, 2, {1, 5}},
+    {COLUMN_LOOKUPCTLTIME,      ASN_UNSIGNED, NETSNMP_OLDAPI_RONLY,
+     var_lookupCtlTable, 2, {1, 6}},
+    {COLUMN_LOOKUPCTLRC,         ASN_INTEGER, NETSNMP_OLDAPI_RONLY,
+     var_lookupCtlTable, 2, {1, 7}},
+    {COLUMN_LOOKUPCTLROWSTATUS, ASN_INTEGER, NETSNMP_OLDAPI_RONLY,
+     var_lookupCtlTable, 2, {1, 8}}
+};
+#endif /* !NETSNMP_NO_WRITE_SUPPORT */
 
 
 /*
@@ -383,6 +403,7 @@ var_lookupCtlTable(struct variable *vp,
 
 
     struct lookupTable_data *StorageTmp = NULL;
+	*write_method = NULL;
 
     /*
      * this assumes you have registered all your data properly
@@ -402,12 +423,16 @@ var_lookupCtlTable(struct variable *vp,
 
 
     case COLUMN_LOOKUPCTLTARGETADDRESSTYPE:
+#ifndef NETSNMP_NO_WRITE_SUPPORT
         *write_method = write_lookupCtlTargetAddressType;
+#endif /* !NETSNMP_NO_WRITE_SUPPORT */
         *var_len = sizeof(StorageTmp->lookupCtlTargetAddressType);
         return (u_char *) & StorageTmp->lookupCtlTargetAddressType;
 
     case COLUMN_LOOKUPCTLTARGETADDRESS:
+#ifndef NETSNMP_NO_WRITE_SUPPORT
         *write_method = write_lookupCtlTargetAddress;
+#endif /* !NETSNMP_NO_WRITE_SUPPORT */
         *var_len = (StorageTmp->lookupCtlTargetAddressLen);
 
         return (u_char *) StorageTmp->lookupCtlTargetAddress;
@@ -428,7 +453,9 @@ var_lookupCtlTable(struct variable *vp,
         return (u_char *) & StorageTmp->lookupCtlRc;
 
     case COLUMN_LOOKUPCTLROWSTATUS:
+#ifndef NETSNMP_NO_WRITE_SUPPORT
         *write_method = write_lookupCtlRowStatus;
+#endif /* !NETSNMP_NO_WRITE_SUPPORT */
         *var_len = sizeof(StorageTmp->lookupCtlRowStatus);
 
         return (u_char *) & StorageTmp->lookupCtlRowStatus;
@@ -1033,8 +1060,9 @@ lookupResultsTable_del(struct lookupTable_data *thedata)
 }
 
 
+#ifndef NETSNMP_NO_WRITE_SUPPORT
 int
-write_lookupCtlTargetAddressType(int action,
+writelookupCtlTargetAddressType(int action,
                                  u_char * var_val,
                                  u_char var_val_type,
                                  size_t var_val_len,
@@ -1223,9 +1251,6 @@ write_lookupCtlTargetAddress(int action,
     }
     return SNMP_ERR_NOERROR;
 }
-
-
-
 
 
 
@@ -1557,3 +1582,4 @@ write_lookupCtlRowStatus(int action,
     }
     return SNMP_ERR_NOERROR;
 }
+#endif /* !NETSNMP_NO_WRITE_SUPPORT */

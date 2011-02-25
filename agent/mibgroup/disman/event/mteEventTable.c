@@ -36,11 +36,19 @@ init_mteEventTable(void)
     /*
      * ... then set up the MIB interface to the mteEventTable slice
      */
+#ifndef NETSNMP_NO_WRITE_SUPPORT
     reg = netsnmp_create_handler_registration("mteEventTable",
                                             mteEventTable_handler,
                                             mteEventTable_oid,
                                             mteEventTable_oid_len,
                                             HANDLER_CAN_RWRITE);
+#else /* !NETSNMP_NO_WRITE_SUPPORT */
+    reg = netsnmp_create_handler_registration("mteEventTable",
+                                            mteEventTable_handler,
+                                            mteEventTable_oid,
+                                            mteEventTable_oid_len,
+                                            HANDLER_CAN_RONLY);
+#endif /* !NETSNMP_NO_WRITE_SUPPORT */
 
     table_info = SNMP_MALLOC_TYPEDEF(netsnmp_table_registration_info);
     netsnmp_table_helper_add_indexes(table_info,
@@ -121,6 +129,8 @@ mteEventTable_handler(netsnmp_mib_handler *handler,
         }
         break;
 
+
+#ifndef NETSNMP_NO_WRITE_SUPPORT
         /*
          * Write-support
          */
@@ -333,6 +343,8 @@ mteEventTable_handler(netsnmp_mib_handler *handler,
             }
         }
         break;
+#endif /* !NETSNMP_NO_WRITE_SUPPORT */
+
     }
     DEBUGMSGTL(("disman:event:mib", "Table handler, done\n"));
     return SNMP_ERR_NOERROR;
