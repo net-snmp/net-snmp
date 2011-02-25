@@ -75,6 +75,7 @@
 netsnmp_feature_child_of(tools_all, libnetsnmp)
 
 netsnmp_feature_child_of(memory_wrappers, tools_all)
+netsnmp_feature_child_of(valgrind, tools_all)
 netsnmp_feature_child_of(netsnmp_check_definedness, valgrind)
 
 netsnmp_feature_child_of(uatime_ready, netsnmp_unused)
