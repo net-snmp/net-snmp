@@ -16,6 +16,8 @@
 #include <net-snmp/library/container_list_ssll.h>
 #include <net-snmp/library/container_null.h>
 
+netsnmp_feature_child_of(container_all, libnetsnmp)
+
 netsnmp_feature_child_of(container_factories, container_all)
 netsnmp_feature_child_of(container_types, container_all)
 netsnmp_feature_child_of(container_compare, container_all)
