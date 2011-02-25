@@ -425,7 +425,7 @@
 
 	  </text>
 	  <commands>
-	    <command>svn copy -m "{VERSION} release" {BRANCHPATH} https://net-snmp.svn.sourceforge.net/svnroot/net-snmp/tags/Ext-{VERSIONDASHES}/net-snmp</command>
+	    <command>svn copy -m "{VERSION} release" {BRANCHPATH} https://net-snmp.svn.sourceforge.net/svnroot/net-snmp/tags/Ext-{VERSIONDASHES}</command>
 	  </commands>
 	</step>
 	<step prompt="true" type="system" stepname="release:makedist" title="release:makedist">
