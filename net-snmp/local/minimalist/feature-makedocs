@@ -9,7 +9,7 @@ getopts('oh', \%opts) || usage();
 
 usage() if ($opts{'h'});
 
-usage() if ($#ARGV != 2);
+usage() if ($#ARGV != 1);
 
 # should be the feature-details.h file
 my $inputfile = shift @ARGV;
