@@ -7,6 +7,8 @@
 #include <net-snmp/net-snmp-features.h>
 #include <net-snmp/net-snmp-includes.h>
 
+netsnmp_feature_child_of(data_list_all, libnetsnmp)
+
 netsnmp_feature_child_of(data_list_add_data, data_list_all)
 netsnmp_feature_child_of(data_list_get_list_node, data_list_all)
 

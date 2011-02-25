@@ -5,6 +5,8 @@
 
 #include <net-snmp/library/check_varbind.h>
 
+netsnmp_feature_child_of(check_varbind_all, libnetsnmp)
+
 netsnmp_feature_child_of(check_vb_range, check_varbind_all)
 netsnmp_feature_child_of(check_vb_size_range, check_varbind_all)
 netsnmp_feature_child_of(check_vb_uint, check_varbind_all)

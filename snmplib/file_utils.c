@@ -38,7 +38,7 @@
 #include <net-snmp/library/container.h>
 #include <net-snmp/library/file_utils.h>
 
-netsnmp_feature_provide(file_utils)
+netsnmp_feature_child_of(file_utils, libnetsnmp)
 netsnmp_feature_child_of(file_utils, file_utils_all)
 netsnmp_feature_child_of(file_close, file_utils_all)
 

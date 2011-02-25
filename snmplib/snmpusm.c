@@ -74,6 +74,7 @@
 
 netsnmp_feature_child_of(usm_all, libnetsnmp)
 netsnmp_feature_child_of(usm_support, usm_all)
+
 netsnmp_feature_require(usm_support)
 
 oid             usmNoAuthProtocol[10] = { 1, 3, 6, 1, 6, 3, 10, 1, 1, 1 };

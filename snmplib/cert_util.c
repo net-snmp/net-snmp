@@ -2,7 +2,7 @@
 #include <net-snmp/net-snmp-features.h>
 
 #if defined(NETSNMP_USE_OPENSSL) && defined(HAVE_LIBSSL)
-netsnmp_feature_provide(cert_util_all)
+netsnmp_feature_child_of(cert_util_all, libnetsnmp)
 netsnmp_feature_child_of(cert_util, cert_util_all)
 #ifdef NETSNMP_FEATURE_REQUIRE_CERT_UTIL
 netsnmp_feature_require(container_directory)
