@@ -2,6 +2,14 @@
 
 use strict;
 use IO::File;
+use Getopt::Std;
+our %opts;
+
+getopts('oh', \%opts) || usage();
+
+usage() if ($opts{'h'});
+
+usage() if ($#ARGV != 2);
 
 # should be the feature-details.h file
 my $inputfile = shift @ARGV;
@@ -89,7 +97,6 @@ sub print_bullets {
 
     my $fh = new IO::File;
 
-    print "here: $outputfile\n";
     if (!$fh->open("> $outputfile")) {
 	die "error!\n";
     }
@@ -123,4 +130,15 @@ sub print_node {
 	    print_node($fh, $child, $prefix . "*");
 	}
     }
+}
+
+sub usage {
+    print "Usage: $0 [FLAGS] INPUTFILE OUTPUTFILE\n\n";
+    print "FLAGS:\n";
+    print "\t-h\thelp\n";
+    print "\t-o\tOutput style: Org-Mode\n";
+    print "\nINPUT/OUTPUT\n";
+    print "\tINPUTFILE:\tlocation of the include/net-snmp/features-details.h file\n";
+    print "\tOUTPUTFILE:\tthe file to write the results to\n";
+    exit;
 }
