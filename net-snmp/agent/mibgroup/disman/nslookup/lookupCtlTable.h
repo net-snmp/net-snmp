@@ -65,12 +65,13 @@ FindVarMethod   var_lookupCtlTable;
 void            parse_lookupCtlTable(const char *, char *);
 SNMPCallback    store_lookupCtlTable;
 
-
+#ifndef NETSNMP_NO_WRITE_SUPPORT 
 WriteMethod     write_lookupCtlTargetAddressType;
 WriteMethod     write_lookupCtlTargetAddress;
 WriteMethod     write_lookupCtlRowStatus;
 
 WriteMethod     write_lookupCtlRowStatus;
+#endif /* !NETSNMP_NO_WRITE_SUPPORT */
 
 /*
  * column number definitions for table lookupCtlTable 
