@@ -8,7 +8,7 @@
 #include <net-snmp/net-snmp-features.h>
 #include <net-snmp/net-snmp-includes.h>
 
-netsnmp_feature_provide(oid_stash_all)
+netsnmp_feature_child_of(oid_stash_all, libnetsnmp)
 netsnmp_feature_child_of(oid_stash, oid_stash_all)
 netsnmp_feature_child_of(oid_stash_no_free, oid_stash_all)
 
