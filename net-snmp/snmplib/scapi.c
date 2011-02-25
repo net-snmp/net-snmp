@@ -51,6 +51,7 @@
 #include <net-snmp/output_api.h>
 #include <net-snmp/utilities.h>
 
+netsnmp_feature_child_of(usm_support, libnetsnmp)
 netsnmp_feature_child_of(usm_scapi, usm_support)
 
 #ifndef NETSNMP_FEATURE_REMOVE_USM_SCAPI
