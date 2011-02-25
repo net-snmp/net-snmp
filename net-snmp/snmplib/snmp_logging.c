@@ -85,10 +85,10 @@
 #endif
 #endif
 
-netsnmp_feature_provide(logging_file)
-netsnmp_feature_provide(logging_stdio)
-netsnmp_feature_provide(logging_syslog)
-netsnmp_feature_provide(logging_external)
+netsnmp_feature_child_of(logging_file, logging_all)
+netsnmp_feature_child_of(logging_stdio, logging_all)
+netsnmp_feature_child_of(logging_syslog, logging_all)
+netsnmp_feature_child_of(logging_external, logging_all)
 
 /*
  * logh_head:  A list of all log handlers, in increasing order of priority
