@@ -21,6 +21,8 @@ netsnmp_feature_child_of(table_dataset_all, mib_helpers)
 netsnmp_feature_require(table_get_or_create_row_stash)
 netsnmp_feature_require(table_data_delete_table)
 netsnmp_feature_require(table_data)
+netsnmp_feature_require(oid_stash_get_data)
+netsnmp_feature_require(oid_stash_add_data)
 #endif /* NETSNMP_FEATURE_REQUIRE_TABLE_DATASET */
 
 #ifndef NETSNMP_FEATURE_REMOVE_TABLE_DATASET
