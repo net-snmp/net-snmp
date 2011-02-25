@@ -98,9 +98,11 @@ SOFTWARE.
 #include <net-snmp/library/snmp_assert.h>
 #include <net-snmp/pdu_api.h>
 
-netsnmp_feature_provide(snmp_split_pdu)
-netsnmp_feature_provide(snmp_reset_var_types)
-netsnmp_feature_provide(query_set_default_session)
+netsnmp_feature_child_of(snmp_client_all, libnetsnmp)
+
+netsnmp_feature_child_of(snmp_split_pdu, snmp_client_all)
+netsnmp_feature_child_of(snmp_reset_var_types, snmp_client_all)
+netsnmp_feature_child_of(query_set_default_session, snmp_client_all)
 
 #ifndef BSD4_3
 #define BSD4_2

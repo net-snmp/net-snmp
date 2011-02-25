@@ -12,7 +12,7 @@
 #include <net-snmp/library/mib.h>	/* for OID O/P format enums */
 #include <net-snmp/library/ucd_compat.h>
 
-netsnmp_feature_provide(ucd_compatibility)
+netsnmp_feature_child_of(ucd_compatibility, libnetsnmp)
 
 #ifndef NETSNMP_FEATURE_REMOVE_UCD_COMPATIBILITY
 /*

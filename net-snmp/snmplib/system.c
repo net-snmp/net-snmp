@@ -171,8 +171,10 @@ SOFTWARE.
 #include <net-snmp/library/snmp_api.h>
 #include <net-snmp/library/read_config.h> /* for get_temp_file_pattern() */
 
-netsnmp_feature_provide(user_information)
-netsnmp_feature_provide(calculate_sectime_diff)
+netsnmp_feature_child_of(system_all, libnetsnmp)
+
+netsnmp_feature_child_of(user_information, system_all)
+netsnmp_feature_child_of(calculate_sectime_diff, system_all)
 
 #ifndef IFF_LOOPBACK
 #	define IFF_LOOPBACK 0

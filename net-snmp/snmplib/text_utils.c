@@ -43,6 +43,8 @@
 #include <net-snmp/library/file_utils.h>
 #include <net-snmp/library/text_utils.h>
 
+netsnmp_feature_child_of(text_utils, libnetsnmp)
+
 netsnmp_feature_provide(text_utils)
 #ifdef NETSNMP_FEATURE_REQUIRE_TEXT_UTILS
 netsnmp_feature_require(file_utils)

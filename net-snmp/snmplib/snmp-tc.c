@@ -36,6 +36,8 @@
 #include <net-snmp/library/snmp-tc.h>   /* for "internal" definitions */
 #include <net-snmp/library/snmp_api.h>
 
+netsnmp_feature_child_of(snmp_tc_all, libnetsnmp)
+
 netsnmp_feature_child_of(netsnmp_dateandtime_set_buf_from_vars, netsnmp_unused)
 netsnmp_feature_child_of(date_n_time, snmp_tc_all)
 netsnmp_feature_child_of(ctime_to_timet, snmp_tc_all)

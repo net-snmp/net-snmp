@@ -72,7 +72,13 @@
 #include <net-snmp/library/mib.h>
 #include <net-snmp/library/scapi.h>
 
-netsnmp_feature_provide(memory_wrappers)
+netsnmp_feature_child_of(tools_all, libnetsnmp)
+
+netsnmp_feature_child_of(memory_wrappers, tools_all)
+netsnmp_feature_child_of(netsnmp_check_definedness, valgrind)
+
+netsnmp_feature_child_of(uatime_ready, netsnmp_unused)
+netsnmp_feature_child_of(timeval_tticks, netsnmp_unused)
 
 #ifndef NETSNMP_FEATURE_REMOVE_MEMORY_WRAPPERS
 /**
@@ -267,7 +273,6 @@ memdup(u_char ** to, const void * from, size_t size)
 
 }                               /* end memdup() */
 
-netsnmp_feature_child_of(netsnmp_check_definedness, valgrind)
 #ifndef NETSNMP_FEATURE_REMOVE_NETSNMP_CHECK_DEFINEDNESS
 /**
  * When running under Valgrind, check whether all bytes in the range [packet,
@@ -948,7 +953,6 @@ atime_ready(const_marker_t pm, int deltaT)
  * Test: Has (marked time plus delta) exceeded current time (in msec) ?
  * Returns 0 if test fails or cannot be tested (no marker).
  */
-netsnmp_feature_child_of(uatime_ready, netsnmp_unused)
 #ifndef NETSNMP_FEATURE_REMOVE_UATIME_READY
 int
 uatime_ready(const_marker_t pm, unsigned int deltaT)
@@ -988,7 +992,6 @@ marker_tticks(const_marker_t pm)
     return res / 10;            /* atime_diff works in msec, not csec */
 }
 
-netsnmp_feature_child_of(timeval_tticks, netsnmp_unused)
 #ifndef NETSNMP_FEATURE_REMOVE_TIMEVAL_TTICKS
 int
 timeval_tticks(const struct timeval *tv)

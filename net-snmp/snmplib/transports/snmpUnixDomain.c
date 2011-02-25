@@ -36,7 +36,8 @@
 #include <net-snmp/library/snmpSocketBaseDomain.h>
 #include <net-snmp/library/system.h> /* mkdirhier */
 
-netsnmp_feature_provide(unix_socket_paths)
+netsnmp_feature_child_of(transport_unix_socket_all, transport_all)
+netsnmp_feature_child_of(unix_socket_paths, transport_unix_socket_all)
 
 #ifndef NETSNMP_STREAM_QUEUE_LEN
 #define NETSNMP_STREAM_QUEUE_LEN  5

@@ -71,6 +71,8 @@
 #include <net-snmp/library/snmp_service.h>
 #include <net-snmp/library/read_config.h>
 
+netsnmp_feature_child_of(transport_all, libnetsnmp)
+
 netsnmp_feature_child_of(tdomain_support, transport_all)
 netsnmp_feature_child_of(tdomain_transport_oid, transport_all)
 

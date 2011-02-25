@@ -146,7 +146,11 @@
 #include <net-snmp/library/snmp_api.h>
 #include <net-snmp/library/callback.h>
 
-netsnmp_feature_provide(unregister_app_config_handler)
+netsnmp_feature_child_of(read_config_all, libnetsnmp)
+
+netsnmp_feature_child_of(unregister_app_config_handler, read_config_all)
+netsnmp_feature_child_of(read_config_register_app_prenetsnmp_mib_handler, netsnmp_unused)
+netsnmp_feature_child_of(read_config_register_const_config_handler, netsnmp_unused)
 
 static int      config_errors;
 
@@ -255,7 +259,6 @@ register_prenetsnmp_mib_handler(const char *type,
 					    help, PREMIB_CONFIG);
 }
 
-netsnmp_feature_child_of(read_config_register_app_prenetsnmp_mib_handler, netsnmp_unused)
 #ifndef NETSNMP_FEATURE_REMOVE_READ_CONFIG_REGISTER_APP_PRENETSNMP_MIB_HANDLER
 struct config_line *
 register_app_prenetsnmp_mib_handler(const char *token,
@@ -310,7 +313,6 @@ register_config_handler(const char *type,
 					    help, NORMAL_CONFIG);
 }
 
-netsnmp_feature_child_of(read_config_register_const_config_handler, netsnmp_unused)
 #ifndef NETSNMP_FEATURE_REMOVE_READ_CONFIG_REGISTER_CONST_CONFIG_HANDLER
 struct config_line *
 register_const_config_handler(const char *type,
