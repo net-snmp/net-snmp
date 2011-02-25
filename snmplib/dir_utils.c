@@ -48,7 +48,7 @@
 #include <net-snmp/library/file_utils.h>
 #include <net-snmp/library/dir_utils.h>
 
-netsnmp_feature_provide(container_directory)
+netsnmp_feature_child_of(container_directory, container_types)
 #ifdef NETSNMP_FEATURE_REQUIRE_CONTAINER_DIRECTORY
 netsnmp_feature_require(file_utils)
 #endif /* NETSNMP_FEATURE_REQUIRE_DIR_UTILS */

@@ -16,6 +16,15 @@
 #include <net-snmp/library/container_list_ssll.h>
 #include <net-snmp/library/container_null.h>
 
+netsnmp_feature_child_of(container_factories, container_all)
+netsnmp_feature_child_of(container_types, container_all)
+netsnmp_feature_child_of(container_compare, container_all)
+
+netsnmp_feature_child_of(container_compare_cstring, container_compare)
+netsnmp_feature_child_of(container_compare_functions, container_compare)
+
+netsnmp_feature_child_of(container_find_factory, container_factories)
+
 /** @defgroup container container
  */
 
@@ -174,7 +183,6 @@ netsnmp_container_get_factory(const char *type)
     return found ? found->factory : NULL;
 }
 
-netsnmp_feature_child_of(container_find_factory, contaire_fatories)
 #ifndef NETSNMP_FEATURE_REMOVE_CONTAINER_FIND_FACTORY
 netsnmp_factory *
 netsnmp_container_find_factory(const char *type_list)
@@ -558,7 +566,6 @@ netsnmp_compare_cstring(const void * lhs, const void * rhs)
                   ((const container_type*)rhs)->name);
 }
 
-netsnmp_feature_child_of(container_compare_cstring, container_compare)
 #ifndef NETSNMP_FEATURE_REMOVE_CONTAINER_COMPARE_CSTRING
 int
 netsnmp_ncompare_cstring(const void * lhs, const void * rhs)
@@ -582,7 +589,6 @@ netsnmp_compare_direct_cstring(const void * lhs, const void * rhs)
  * compare up to the length of the smaller, and then use length to
  * break any ties.
  */
-netsnmp_feature_child_of(container_compare_functions, container_compare)
 #ifndef NETSNMP_FEATURE_REMOVE_CONTAINER_COMPARE_FUNCTIONS
 int
 netsnmp_compare_mem(const char * lhs, size_t lhs_len,

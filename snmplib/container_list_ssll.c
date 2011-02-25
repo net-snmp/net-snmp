@@ -29,9 +29,9 @@
 
 #include <net-snmp/library/container_list_ssll.h>
 
-netsnmp_feature_provide(container_linked_list)
-netsnmp_feature_provide(container_fifo)
-netsnmp_feature_provide(container_lifo)
+netsnmp_feature_child_of(container_linked_list, container_types)
+netsnmp_feature_child_of(container_fifo, container_types)
+netsnmp_feature_child_of(container_lifo, container_types)
 
 /* this is a fancy way of cleaning up ifdefs */
 #ifdef NETSNMP_FEATURE_REQUIRE_CONTAINER_FIFO
