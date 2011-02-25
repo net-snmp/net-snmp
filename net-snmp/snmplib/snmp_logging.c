@@ -86,7 +86,7 @@
 #endif
 
 netsnmp_feature_child_of(logging_all, libnetsnmp)
-
+netsnmp_feature_want(logging_all)
 
 netsnmp_feature_child_of(logging_file, logging_all)
 netsnmp_feature_child_of(logging_stdio, logging_all)
