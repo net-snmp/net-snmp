@@ -86,7 +86,7 @@ sub add_child {
 	# it's no longer a top node if it's a child of something else
 	delete $top{$child};
     }
-    push @{$features{$parent}{'children'}}, $child;
+    $features{$parent}{'children'}{$child}++;
 
     $features{$child}{'providedby'}, $reqfile;
 }
@@ -126,7 +126,7 @@ sub print_org_node {
 	    join(", ", org_link_files(@{$features{$node}{'wantedby'}})) . "\n";
     }
     if (exists($features{$node}{'children'})) {
-	foreach my $child (@{$features{$node}{'children'}}) {
+	foreach my $child (sort keys(%{$features{$node}{'children'}})) {
 	    print_org_node($fh, $child, $prefix . "*");
 	}
     }
