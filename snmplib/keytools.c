@@ -63,7 +63,7 @@
 
 #include <net-snmp/library/transform_oids.h>
 
-netsnmp_feature_provide(usm_keytools)
+netsnmp_feature_childof(usm_keytools, usm_support)
 
 #ifndef NETSNMP_FEATURE_REMOVE_USM_KEYTOOLS
 
