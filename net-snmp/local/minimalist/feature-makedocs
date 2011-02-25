@@ -115,21 +115,27 @@ sub print_org_node {
     print $fh "$prefix $node\n";
     if (exists($features{$node}{'providedby'})) {
 	print $fh "$spaces + provided in file: " .
-	    join(", ", @{$features{$node}{'providedby'}}) . "\n";
+	    join(", ", org_link_files(@{$features{$node}{'providedby'}})) . "\n";
     }
     if (exists($features{$node}{'requiredby'})) {
 	print $fh "$spaces + required in file: " .
-	    join(", ", @{$features{$node}{'requiredby'}}) . "\n";
+	    join(", ", org_link_files(@{$features{$node}{'requiredby'}})) . "\n";
     }
     if (exists($features{$node}{'wantedby'})) {
 	print $fh "$spaces + wanted in file: " .
-	    join(", ", @{$features{$node}{'wantedby'}}) . "\n";
+	    join(", ", org_link_files(@{$features{$node}{'wantedby'}})) . "\n";
     }
     if (exists($features{$node}{'children'})) {
 	foreach my $child (@{$features{$node}{'children'}}) {
 	    print_org_node($fh, $child, $prefix . "*");
 	}
     }
+}
+
+sub org_link_files {
+    my @files = @_;
+    map { $_ = "[[file:$_][$_]]"; } @files;
+    return @files;
 }
 
 sub usage {
