@@ -138,7 +138,7 @@ sub usage {
     print "\t-h\thelp\n";
     print "\t-o\tOutput style: Org-Mode\n";
     print "\nINPUT/OUTPUT\n";
-    print "\tINPUTFILE:\tlocation of the include/net-snmp/features-details.h file\n";
+    print "\tINPUTFILE:\tlocation of the include/net-snmp/feature-details.h file\n";
     print "\tOUTPUTFILE:\tthe file to write the results to\n";
     exit;
 }
