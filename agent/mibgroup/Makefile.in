@@ -1,4 +1,6 @@
 top_builddir=../..
+mysubdir=agent/mibgroup
+
 # currently assumes gcc:    (XXX: fix via configure tests)
 DLFLAGS=-fPIC -shared
 
