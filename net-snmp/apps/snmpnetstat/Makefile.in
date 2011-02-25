@@ -3,6 +3,8 @@
 #
 
 top_builddir=../..
+mysubdir=apps/snmpnetstat
+
 INSTALLBINPROGS=snmpnetstat$(EXEEXT)
 
 # use GNU vpath, if available, to only set a path for source and headers

@@ -42,6 +42,9 @@ if test "x$1" = "x--feature-global" ; then
     shift
 fi
 
+sourcedir=$1
+shift
+
 source=$1
 shift
 
@@ -66,7 +69,7 @@ firstrequire=1
 for i in `grep NSF_RR $tmpf | sed 's/ NSF_RR//'` ; do
     if test $firstrequire = 1 ; then
 	echo "" >> $destination
-	echo "/* required by $source */" >> $destination
+	echo "/* required by $sourcedir/$source */" >> $destination
 	firstrequire=0
     fi
     upper=`echo $i | tr a-z A-Z`
@@ -78,7 +81,7 @@ firstfeature=1
 for i in `grep NSF_PP $tmpf | sed 's/ NSF_PP//'` ; do
     if test $firstfeature = 1 ; then
 	echo "" >> $destination
-	echo "/* features provided by $source */" >> $destination
+	echo "/* features provided by $sourcedir/$source */" >> $destination
 	firstfeature=0
     fi
     upper=`echo $i | tr a-z A-Z`
@@ -92,7 +95,7 @@ for i in `grep NSF_CO $tmpf | sed 's/ NSF_CO//'` ; do
     child=`echo $i | sed 's/,.*//'`
     if test $firstfeature = 1 ; then
 	echo "" >> $destination
-	echo "/* features provided by $source */" >> $destination
+	echo "/* features provided by $sourcedir/$source */" >> $destination
 	firstfeature=0
     fi
     upperchild=`echo $child | tr a-z A-Z`
@@ -106,7 +109,7 @@ firstfeature=1
 for i in `grep NSF_WW $tmpf | sed 's/ NSF_WW//'` ; do
     if test $firstfeature = 1 ; then
 	echo "" >> $destination
-	echo "/* features wanted by $source */" >> $destination
+	echo "/* features wanted by $sourcedir/$source */" >> $destination
 	firstfeature=0
     fi
     upper=`echo $i | tr a-z A-Z`

@@ -13,6 +13,7 @@
 #
 
 top_builddir=..
+mysubdir=snmplib
 
 # use GNU vpath, if available, to only set a path for source and headers
 # VPATH will pick up objects too, which is bad if you are sharing a
