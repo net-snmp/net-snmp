@@ -136,7 +136,8 @@ SOFTWARE.
 #include <net-snmp/library/snmp_service.h>
 #include <net-snmp/library/vacm.h>
 
-netsnmp_feature_provide(statistics)
+netsnmp_feature_child_of(statistics, libnetsnmp)
+netsnmp_feature_child_of(snmp_api, libnetsnmp)
 netsnmp_feature_child_of(oid_is_subtree, snmp_api)
 
 #if defined(NETSNMP_USE_OPENSSL) && defined(HAVE_LIBSSL)
