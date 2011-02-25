@@ -1,7 +1,49 @@
 
 ----------------------------------------------------------------------
 
-Changes: V5.5 -> V5.5.1.rc1
+Changes: V5.5 -> V5.5.1.rc2
+
+2011-02-25 11:15  dts12
+
+   *  FAQ, README, configure, configure.ac, dist/Makefile,   
+      dist/net-snmp.spec, perl/ASN/ASN.pm,   
+      perl/AnyData_SNMP/Storage.pm, perl/OID/OID.pm, perl/SNMP/SNMP.pm, 
+        perl/TrapReceiver/TrapReceiver.pm,
+      perl/agent/Support/Support.pm,    perl/agent/agent.pm,
+      perl/agent/default_store/default_store.pm,   
+      perl/default_store/default_store.pm:
+
+   Version number update
+
+2011-02-25 11:10  dts12
+
+   * snmplib/snmpv3.c:
+
+   Avoid a possible crash if the engineID is not available or set.
+
+2011-02-23 09:36  nba
+
+   * apps/snmptable.c:
+
+   Fix bug 3118631: snmptable segfaults if index contains : character
+
+2011-02-23 09:30  nba
+
+   * include/net-snmp/system/freebsd8.h:
+
+   FreeBSD 8 support
+
+2011-02-22 15:25  dts12
+
+   * agent/mibgroup/host/hr_swinst.c:
+
+   Revert a bogus change that crept into the code.
+
+2011-02-22 08:55  dts12
+
+   * {everything}:
+
+   Fix 5.5.x branch structure
 
 2011-02-21 13:44  dts12
 
