@@ -22,7 +22,7 @@ my $reqfile;
 
 
 gather_data($inputfile);
-print_bullets($outputfile);
+print_org_mode($outputfile);
 
 
 
@@ -92,7 +92,7 @@ sub add_child {
 }
 
 
-sub print_bullets {
+sub print_org_mode {
     my ($outputfile) = @_;
 
     my $fh = new IO::File;
@@ -102,11 +102,11 @@ sub print_bullets {
     }
 
     foreach my $node (sort keys(%top)) {
-	print_node($fh, $node, "*");
+	print_org_node($fh, $node, "*");
     }
 }
 
-sub print_node {
+sub print_org_node {
     my ($fh, $node, $prefix) = @_;
 
     my $spaces = $prefix;
@@ -127,7 +127,7 @@ sub print_node {
     }
     if (exists($features{$node}{'children'})) {
 	foreach my $child (@{$features{$node}{'children'}}) {
-	    print_node($fh, $child, $prefix . "*");
+	    print_org_node($fh, $child, $prefix . "*");
 	}
     }
 }
