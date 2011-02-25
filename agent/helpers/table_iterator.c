@@ -105,6 +105,7 @@ netsnmp_feature_child_of(table_iterator_create_table, table_iterator_all)
 
 #ifdef NETSNMP_FEATURE_REQUIRE_STASH_CACHE
 netsnmp_feature_require(data_list_get_list_node)
+netsnmp_feature_require(oid_stash_add_data)
 #endif /* NETSNMP_FEATURE_REQUIRE_STASH_CACHE */
 
 /* ==================================
@@ -455,12 +456,14 @@ netsnmp_table_iterator_helper_handler(netsnmp_mib_handler *handler,
     void           *callback_data_context = NULL;
     ti_cache_info  *ti_info = NULL;
     int             request_count = 0;
+#ifndef NETSNMP_FEATURE_REMOVE_STASH_CACHE
     netsnmp_oid_stash_node **cinfo = NULL;
     netsnmp_variable_list *old_indexes = NULL, *vb;
     netsnmp_table_registration_info *table_reg_info = NULL;
     int i;
     netsnmp_data_list    *ldata = NULL;
-    
+#endif /* NETSNMP_FEATURE_REMOVE_STASH_CACHE */
+
     iinfo = (netsnmp_iterator_info *) handler->myvoid;
     if (!iinfo || !reginfo || !reqinfo)
         return SNMP_ERR_GENERR;

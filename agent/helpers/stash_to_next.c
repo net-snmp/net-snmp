@@ -9,6 +9,7 @@ netsnmp_feature_child_of(stash_to_next, mib_helpers)
 
 #ifdef NETSNMP_FEATURE_REQUIRE_STASH_TO_NEXT
 netsnmp_feature_require(oid_stash)
+netsnmp_feature_require(oid_stash_add_data)
 #endif
 
 #ifndef NETSNMP_FEATURE_REMOVE_STASH_TO_NEXT

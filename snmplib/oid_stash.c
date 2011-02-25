@@ -75,6 +75,8 @@ netsnmp_oid_stash_create_node(void)
     return netsnmp_oid_stash_create_sized_node(OID_STASH_CHILDREN_SIZE);
 }
 
+netsnmp_feature_child_of(oid_stash_add_data, oid_stash_all)
+#ifndef NETSNMP_FEATURE_REMOVE_OID_STASH_ADD_DATA
 /** adds data to the stash at a given oid.
 
  * @param root the top of the stash tree
@@ -151,6 +153,7 @@ netsnmp_oid_stash_add_data(netsnmp_oid_stash_node **root,
     tmpp->thedata = mydata;
     return SNMPERR_SUCCESS;
 }
+#endif /* NETSNMP_FEATURE_REMOVE_OID_STASH_ADD_DATA */
 
 /** returns a node associated with a given OID.
  * @param root the top of the stash tree
@@ -279,6 +282,8 @@ netsnmp_oid_stash_getnext_node(netsnmp_oid_stash_node *root,
 }
 #endif /* NETSNMP_FEATURE_REMOVE_OID_STASH_ITERATE */
 
+netsnmp_feature_child_of(oid_stash_get_data, oid_stash_all)
+#ifndef NETSNMP_FEATURE_REMOVE_OID_STASH_GET_DATA
 /** returns a data pointer associated with a given OID.
 
     This is equivelent to netsnmp_oid_stash_get_node, but returns only
@@ -298,6 +303,7 @@ netsnmp_oid_stash_get_data(netsnmp_oid_stash_node *root,
         return ret->thedata;
     return NULL;
 }
+#endif /* NETSNMP_FEATURE_REMOVE_OID_STASH_GET_DATA */
 
 /** a wrapper around netsnmp_oid_stash_store for use with a snmp_alarm.
  * when calling snmp_alarm, you can list this as a callback.  The
