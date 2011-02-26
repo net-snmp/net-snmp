@@ -44,25 +44,6 @@ struct dlmod {
   int             status;
 };
 
-static void            dlmod_load_module(struct dlmod *);
-static void            dlmod_unload_module(struct dlmod *);
-static struct dlmod   *dlmod_create_module(void);
-static void            dlmod_delete_module(struct dlmod *);
-static struct dlmod   *dlmod_get_by_index(int);
-
-static FindVarMethod var_dlmod;
-static FindVarMethod var_dlmodEntry;
-static WriteMethod write_dlmodName;
-static WriteMethod write_dlmodPath;
-static WriteMethod write_dlmodStatus;
-
-#define DLMODNEXTINDEX 		1
-#define DLMODINDEX     		2
-#define DLMODNAME      		3
-#define DLMODPATH      		4
-#define DLMODERROR     		5
-#define DLMODSTATUS    		6
-
 #define DLMOD_LOADED		1
 #define DLMOD_UNLOADED		2
 #define DLMOD_ERROR		3
@@ -74,74 +55,6 @@ static WriteMethod write_dlmodStatus;
 static struct dlmod *dlmods = NULL;
 static unsigned int dlmod_next_index = 1;
 static char     dlmod_path[1024];
-
-static void     dlmod_parse_config(const char *, char *);
-static void     dlmod_free_config(void);
-
-/*
- * this variable defines function callbacks and type return
- * information for the dlmod mib
- */
-static struct variable4 dlmod_variables[] = {
-    {DLMODNEXTINDEX, ASN_INTEGER, NETSNMP_OLDAPI_RONLY,
-     var_dlmod, 1, {1}},
-    {DLMODNAME, ASN_OCTET_STR, NETSNMP_OLDAPI_RWRITE,
-     var_dlmodEntry, 3, {2, 1, 2}},
-    {DLMODPATH, ASN_OCTET_STR, NETSNMP_OLDAPI_RWRITE,
-     var_dlmodEntry, 3, {2, 1, 3}},
-    {DLMODERROR, ASN_OCTET_STR, NETSNMP_OLDAPI_RONLY,
-     var_dlmodEntry, 3, {2, 1, 4}},
-    {DLMODSTATUS, ASN_INTEGER, NETSNMP_OLDAPI_RWRITE,
-     var_dlmodEntry, 3, {2, 1, 5}},
-};
-
-static oid      dlmod_variables_oid[] = { 1, 3, 6, 1, 4, 1, 2021, 13, 14 };
-static int      dlmod_variables_oid_len = 9;
-
-void
-init_dlmod(void)
-{
-    char           *p;
-    int             len;
-
-    REGISTER_MIB("dlmod", dlmod_variables, variable4, dlmod_variables_oid);
-
-    /*
-     * TODO: REGISTER_SYSOR_ENTRY 
-     */
-
-    DEBUGMSGTL(("dlmod", "register mib\n"));
-
-    snmpd_register_config_handler("dlmod", dlmod_parse_config,
-                                  dlmod_free_config,
-                                  "module-name module-path");
-
-    p = getenv("SNMPDLMODPATH");
-    strncpy(dlmod_path, SNMPDLMODPATH, sizeof(dlmod_path));
-    dlmod_path[ sizeof(dlmod_path)-1 ] = 0;
-    if (p) {
-        if (p[0] == ':') {
-            len = strlen(dlmod_path);
-            if (dlmod_path[len - 1] != ':') {
-                strncat(dlmod_path, ":", sizeof(dlmod_path) - len -1);
-                len++;
-            }
-            strncat(dlmod_path, p + 1,   sizeof(dlmod_path) - len);
-        } else
-            strncpy(dlmod_path, p, sizeof(dlmod_path));
-    }
-    dlmod_path[ sizeof(dlmod_path)-1 ] = 0;
-    DEBUGMSGTL(("dlmod", "dlmod_path: %s\n", dlmod_path));
-}
-
-netsnmp_feature_require(snmpd_unregister_config_handler)
-
-void
-shutdown_dlmod(void)
-{
-    unregister_mib(dlmod_variables_oid, dlmod_variables_oid_len);
-    snmpd_unregister_config_handler("dlmod");
-}
 
 static struct dlmod   *
 dlmod_create_module(void)
@@ -281,6 +194,10 @@ dlmod_get_by_index(int iindex)
     return NULL;
 }
 
+/*
+ * Functions to parse config lines
+ */
+
 static void
 dlmod_parse_config(const char *token, char *cptr)
 {
@@ -293,7 +210,7 @@ dlmod_parse_config(const char *token, char *cptr)
         return;
     }
     /*
-     * remove comments 
+     * remove comments
      */
     *(cptr + strcspn(cptr, "#;\r\n")) = '\0';
 
@@ -302,7 +219,7 @@ dlmod_parse_config(const char *token, char *cptr)
         return;
 
     /*
-     * dynamic module name 
+     * dynamic module name
      */
     dlm_name = strtok_r(cptr, "\t ", &st);
     if (dlm_name == NULL) {
@@ -313,7 +230,7 @@ dlmod_parse_config(const char *token, char *cptr)
     strncpy(dlm->name, dlm_name, sizeof(dlm->name));
 
     /*
-     * dynamic module path 
+     * dynamic module path
      */
     dlm_path = strtok_r(NULL, "\t ", &st);
     if (dlm_path)
@@ -341,13 +258,23 @@ dlmod_free_config(void)
     dlmods = NULL;
 }
 
+/*
+ * Functions to handle SNMP management
+ */
+
+#define DLMODNEXTINDEX 		1
+#define DLMODINDEX     		2
+#define DLMODNAME      		3
+#define DLMODPATH      		4
+#define DLMODERROR     		5
+#define DLMODSTATUS    		6
 
 /*
  * header_dlmod(...
  * Arguments:
  * vp     IN      - pointer to variable entry that points here
  * name    IN/OUT  - IN/name requested, OUT/name found
- * length  IN/OUT  - length of IN/OUT oid's 
+ * length  IN/OUT  - length of IN/OUT oid's
  * exact   IN      - TRUE if an exact match was requested
  * var_len OUT     - length of variable or 0 if function returned
  * write_method
@@ -390,7 +317,7 @@ var_dlmod(struct variable * vp,
 {
 
     /*
-     * variables we may use later 
+     * variables we may use later
      */
 
     *write_method = 0;          /* assume it isnt writable for the time being */
@@ -402,7 +329,7 @@ var_dlmod(struct variable * vp,
         return NULL;
 
     /*
-     * this is where we do the value assignments for the mib results. 
+     * this is where we do the value assignments for the mib results.
      */
     switch (vp->magic) {
     case DLMODNEXTINDEX:
@@ -415,111 +342,6 @@ var_dlmod(struct variable * vp,
     return NULL;
 }
 
-
-/*
- * header_dlmodEntry(...
- * Arguments:
- * vp     IN      - pointer to variable entry that points here
- * name    IN/OUT  - IN/name requested, OUT/name found
- * length  IN/OUT  - length of IN/OUT oid's 
- * exact   IN      - TRUE if an exact match was requested
- * var_len OUT     - length of variable or 0 if function returned
- * write_method
- * 
- */
-
-
-static struct dlmod *
-header_dlmodEntry(struct variable *vp,
-                  oid * name,
-                  size_t * length,
-                  int exact, size_t * var_len, WriteMethod ** write_method)
-{
-#define DLMODENTRY_NAME_LENGTH 12
-    oid             newname[MAX_OID_LEN];
-    int             result;
-    struct dlmod   *dlm = NULL;
-    unsigned int    dlmod_index;
-
-    memcpy((char *) newname, (char *) vp->name,
-           (int) vp->namelen * sizeof(oid));
-    *write_method = 0;
-
-    for (dlmod_index = 1; dlmod_index < dlmod_next_index; dlmod_index++) {
-        dlm = dlmod_get_by_index(dlmod_index);
-
-        DEBUGMSGTL(("dlmod", "dlmodEntry dlm: %p dlmod_index: %d\n",
-                    dlm, dlmod_index));
-
-        if (dlm) {
-            newname[12] = dlmod_index;
-            result = snmp_oid_compare(name, *length, newname,
-                                      (int) vp->namelen + 1);
-
-            if ((exact && (result == 0)) || (!exact && (result < 0)))
-                break;
-        }
-    }
-
-    if (dlmod_index >= dlmod_next_index) {
-        if (dlmod_index == dlmod_next_index &&
-            exact && vp->magic == DLMODSTATUS)
-
-            *write_method = write_dlmodStatus;
-        return NULL;
-    }
-
-    memcpy((char *) name, (char *) newname,
-           ((int) vp->namelen + 1) * sizeof(oid));
-    *length = vp->namelen + 1;
-    *var_len = sizeof(long);
-    return dlm;
-}
-
-static u_char         *
-var_dlmodEntry(struct variable * vp,
-               oid * name,
-               size_t * length,
-               int exact, size_t * var_len, WriteMethod ** write_method)
-{
-    /*
-     * variables we may use later 
-     */
-    struct dlmod   *dlm;
-
-    *var_len = sizeof(int);     /* assume an integer and change later
-                                 * if not */
-
-    dlm =
-        header_dlmodEntry(vp, name, length, exact, var_len, write_method);
-    if (dlm == NULL)
-        return NULL;
-
-    /*
-     * this is where we do the value assignments for the mib results. 
-     */
-    switch (vp->magic) {
-    case DLMODNAME:
-        *write_method = write_dlmodName;
-        *var_len = strlen(dlm->name);
-        return (unsigned char *) dlm->name;
-    case DLMODPATH:
-        *write_method = write_dlmodPath;
-        *var_len = strlen(dlm->path);
-        return (unsigned char *) dlm->path;
-    case DLMODERROR:
-        *var_len = strlen(dlm->error);
-        return (unsigned char *) dlm->error;
-    case DLMODSTATUS:
-        *write_method = write_dlmodStatus;
-        long_return = dlm->status;
-        return (unsigned char *) &long_return;
-    default:
-        DEBUGMSGTL(("dlmod", "unknown sub-id %d in var_dlmodEntry\n",
-                    vp->magic));
-    }
-    return NULL;
-}
 
 static int
 write_dlmodName(int action,
@@ -583,7 +405,7 @@ write_dlmodStatus(int action,
                   u_char * statP, oid * name, size_t name_len)
 {
     /*
-     * variables we may use later 
+     * variables we may use later
      */
     struct dlmod   *dlm;
 
@@ -597,8 +419,8 @@ write_dlmodStatus(int action,
     }
     if (action == COMMIT) {
         /*
-         * object identifier in form .1.3.6.1.4.1.2021.13.14.2.1.4.x 
-         * where X is index with offset 12 
+         * object identifier in form .1.3.6.1.4.1.2021.13.14.2.1.4.x
+         * where X is index with offset 12
          */
 
         dlm = dlmod_get_by_index(name[12]);
@@ -630,6 +452,176 @@ write_dlmodStatus(int action,
         }
     }
     return SNMP_ERR_NOERROR;
+}
+
+/*
+ * header_dlmodEntry(...
+ * Arguments:
+ * vp     IN      - pointer to variable entry that points here
+ * name    IN/OUT  - IN/name requested, OUT/name found
+ * length  IN/OUT  - length of IN/OUT oid's
+ * exact   IN      - TRUE if an exact match was requested
+ * var_len OUT     - length of variable or 0 if function returned
+ * write_method
+ *
+ */
+
+
+static struct dlmod *
+header_dlmodEntry(struct variable *vp,
+                  oid * name,
+                  size_t * length,
+                  int exact, size_t * var_len, WriteMethod ** write_method)
+{
+#define DLMODENTRY_NAME_LENGTH 12
+    oid             newname[MAX_OID_LEN];
+    int             result;
+    struct dlmod   *dlm = NULL;
+    unsigned int    dlmod_index;
+
+    memcpy((char *) newname, (char *) vp->name,
+           (int) vp->namelen * sizeof(oid));
+    *write_method = 0;
+
+    for (dlmod_index = 1; dlmod_index < dlmod_next_index; dlmod_index++) {
+        dlm = dlmod_get_by_index(dlmod_index);
+
+        DEBUGMSGTL(("dlmod", "dlmodEntry dlm: %p dlmod_index: %d\n",
+                    dlm, dlmod_index));
+
+        if (dlm) {
+            newname[12] = dlmod_index;
+            result = snmp_oid_compare(name, *length, newname,
+                                      (int) vp->namelen + 1);
+
+            if ((exact && (result == 0)) || (!exact && (result < 0)))
+                break;
+        }
+    }
+
+    if (dlmod_index >= dlmod_next_index) {
+        if (dlmod_index == dlmod_next_index &&
+            exact && vp->magic == DLMODSTATUS)
+
+            *write_method = write_dlmodStatus;
+        return NULL;
+    }
+
+    memcpy((char *) name, (char *) newname,
+           ((int) vp->namelen + 1) * sizeof(oid));
+    *length = vp->namelen + 1;
+    *var_len = sizeof(long);
+    return dlm;
+}
+
+static u_char         *
+var_dlmodEntry(struct variable * vp,
+               oid * name,
+               size_t * length,
+               int exact, size_t * var_len, WriteMethod ** write_method)
+{
+    /*
+     * variables we may use later
+     */
+    struct dlmod   *dlm;
+
+    *var_len = sizeof(int);     /* assume an integer and change later
+                                 * if not */
+
+    dlm =
+        header_dlmodEntry(vp, name, length, exact, var_len, write_method);
+    if (dlm == NULL)
+        return NULL;
+
+    /*
+     * this is where we do the value assignments for the mib results.
+     */
+    switch (vp->magic) {
+    case DLMODNAME:
+        *write_method = write_dlmodName;
+        *var_len = strlen(dlm->name);
+        return (unsigned char *) dlm->name;
+    case DLMODPATH:
+        *write_method = write_dlmodPath;
+        *var_len = strlen(dlm->path);
+        return (unsigned char *) dlm->path;
+    case DLMODERROR:
+        *var_len = strlen(dlm->error);
+        return (unsigned char *) dlm->error;
+    case DLMODSTATUS:
+        *write_method = write_dlmodStatus;
+        long_return = dlm->status;
+        return (unsigned char *) &long_return;
+    default:
+        DEBUGMSGTL(("dlmod", "unknown sub-id %d in var_dlmodEntry\n",
+                    vp->magic));
+    }
+    return NULL;
+}
+
+/*
+ * this variable defines function callbacks and type return
+ * information for the dlmod mib
+ */
+static struct variable4 dlmod_variables[] = {
+    {DLMODNEXTINDEX, ASN_INTEGER, NETSNMP_OLDAPI_RONLY,
+     var_dlmod, 1, {1}},
+    {DLMODNAME, ASN_OCTET_STR, NETSNMP_OLDAPI_RWRITE,
+     var_dlmodEntry, 3, {2, 1, 2}},
+    {DLMODPATH, ASN_OCTET_STR, NETSNMP_OLDAPI_RWRITE,
+     var_dlmodEntry, 3, {2, 1, 3}},
+    {DLMODERROR, ASN_OCTET_STR, NETSNMP_OLDAPI_RONLY,
+     var_dlmodEntry, 3, {2, 1, 4}},
+    {DLMODSTATUS, ASN_INTEGER, NETSNMP_OLDAPI_RWRITE,
+     var_dlmodEntry, 3, {2, 1, 5}},
+};
+
+static oid      dlmod_variables_oid[] = { 1, 3, 6, 1, 4, 1, 2021, 13, 14 };
+static int      dlmod_variables_oid_len = 9;
+
+void
+init_dlmod(void)
+{
+    char           *p;
+    int             len;
+
+    REGISTER_MIB("dlmod", dlmod_variables, variable4, dlmod_variables_oid);
+
+    /*
+     * TODO: REGISTER_SYSOR_ENTRY
+     */
+
+    DEBUGMSGTL(("dlmod", "register mib\n"));
+
+    snmpd_register_config_handler("dlmod", dlmod_parse_config,
+                                  dlmod_free_config,
+                                  "module-name module-path");
+
+    p = getenv("SNMPDLMODPATH");
+    strncpy(dlmod_path, SNMPDLMODPATH, sizeof(dlmod_path));
+    dlmod_path[ sizeof(dlmod_path)-1 ] = 0;
+    if (p) {
+        if (p[0] == ':') {
+            len = strlen(dlmod_path);
+            if (dlmod_path[len - 1] != ':') {
+                strncat(dlmod_path, ":", sizeof(dlmod_path) - len -1);
+                len++;
+            }
+            strncat(dlmod_path, p + 1,   sizeof(dlmod_path) - len);
+        } else
+            strncpy(dlmod_path, p, sizeof(dlmod_path));
+    }
+    dlmod_path[ sizeof(dlmod_path)-1 ] = 0;
+    DEBUGMSGTL(("dlmod", "dlmod_path: %s\n", dlmod_path));
+}
+
+netsnmp_feature_require(snmpd_unregister_config_handler)
+
+void
+shutdown_dlmod(void)
+{
+    snmpd_unregister_config_handler("dlmod");
+    unregister_mib(dlmod_variables_oid, dlmod_variables_oid_len);
 }
 
 #else                           /* no dlopen support */
