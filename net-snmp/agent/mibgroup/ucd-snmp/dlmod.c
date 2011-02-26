@@ -14,16 +14,9 @@
 #else
 #include <strings.h>
 #endif
-#if HAVE_UNISTD_H
-#include <unistd.h>
-#endif
-#include <ctype.h>
 
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
-
-#include "struct.h"
-#include "util_funcs.h"
 
 #if defined(HAVE_DLFCN_H) && defined(HAVE_DLOPEN)
 
