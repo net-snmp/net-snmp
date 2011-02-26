@@ -95,7 +95,7 @@ dlmod_delete_module(struct dlmod *dlm)
 static void
 dlmod_load_module(struct dlmod *dlm)
 {
-    char            sym_init[64];
+    char            sym_init[64 + sizeof("init_")];
     char           *p, tmp_path[255];
     int             (*dl_init) (void);
     char           *st;
@@ -156,7 +156,7 @@ dlmod_load_module(struct dlmod *dlm)
 static void
 dlmod_unload_module(struct dlmod *dlm)
 {
-    char            sym_deinit[64];
+    char            sym_deinit[64 + sizeof("shutdown_")];
     int             (*dl_deinit) (void);
 
     if (!dlm || dlm->status != DLMOD_LOADED)
