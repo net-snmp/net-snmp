@@ -30,6 +30,47 @@
 #include <dlfcn.h>
 #include "dlmod.h"
 
+#ifndef SNMPDLMODPATH
+#define SNMPDLMODPATH "/usr/local/lib/snmp/dlmod"
+#endif
+
+struct dlmod {
+  struct dlmod   *next;
+  int             index;
+  char            name[64 + 1];
+  char            path[255 + 1];
+  char            error[255 + 1];
+  void           *handle;
+  int             status;
+};
+
+static void            dlmod_load_module(struct dlmod *);
+static void            dlmod_unload_module(struct dlmod *);
+static struct dlmod   *dlmod_create_module(void);
+static void            dlmod_delete_module(struct dlmod *);
+static struct dlmod   *dlmod_get_by_index(int);
+
+static FindVarMethod var_dlmod;
+static FindVarMethod var_dlmodEntry;
+static WriteMethod write_dlmodName;
+static WriteMethod write_dlmodPath;
+static WriteMethod write_dlmodStatus;
+
+#define DLMODNEXTINDEX 		1
+#define DLMODINDEX     		2
+#define DLMODNAME      		3
+#define DLMODPATH      		4
+#define DLMODERROR     		5
+#define DLMODSTATUS    		6
+
+#define DLMOD_LOADED		1
+#define DLMOD_UNLOADED		2
+#define DLMOD_ERROR		3
+#define DLMOD_LOAD		4
+#define DLMOD_UNLOAD		5
+#define DLMOD_CREATE		6
+#define DLMOD_DELETE		7
+
 static struct dlmod *dlmods = NULL;
 static unsigned int dlmod_next_index = 1;
 static char     dlmod_path[1024];
@@ -102,7 +143,7 @@ shutdown_dlmod(void)
     snmpd_unregister_config_handler("dlmod");
 }
 
-struct dlmod   *
+static struct dlmod   *
 dlmod_create_module(void)
 {
     struct dlmod  **pdlmod, *dlm;
@@ -121,7 +162,7 @@ dlmod_create_module(void)
     return dlm;
 }
 
-void
+static void
 dlmod_delete_module(struct dlmod *dlm)
 {
     struct dlmod  **pdlmod;
@@ -138,7 +179,7 @@ dlmod_delete_module(struct dlmod *dlm)
         }
 }
 
-void
+static void
 dlmod_load_module(struct dlmod *dlm)
 {
     char            sym_init[64];
@@ -199,7 +240,7 @@ dlmod_load_module(struct dlmod *dlm)
     dlm->status = DLMOD_LOADED;
 }
 
-void
+static void
 dlmod_unload_module(struct dlmod *dlm)
 {
     char            sym_deinit[64];
@@ -228,7 +269,7 @@ dlmod_unload_module(struct dlmod *dlm)
     DEBUGMSGTL(("dlmod", "Module %s unloaded\n", dlm->name));
 }
 
-struct dlmod   *
+static struct dlmod   *
 dlmod_get_by_index(int iindex)
 {
     struct dlmod   *dlmod;
@@ -341,7 +382,7 @@ header_dlmod(struct variable *vp,
 }
 
 
-u_char         *
+static u_char         *
 var_dlmod(struct variable * vp,
           oid * name,
           size_t * length,
@@ -435,7 +476,7 @@ header_dlmodEntry(struct variable *vp,
     return dlm;
 }
 
-u_char         *
+static u_char         *
 var_dlmodEntry(struct variable * vp,
                oid * name,
                size_t * length,
@@ -480,7 +521,7 @@ var_dlmodEntry(struct variable * vp,
     return NULL;
 }
 
-int
+static int
 write_dlmodName(int action,
                 u_char * var_val,
                 u_char var_val_type,
@@ -507,7 +548,7 @@ write_dlmodName(int action,
     return SNMP_ERR_NOERROR;
 }
 
-int
+static int
 write_dlmodPath(int action,
                 u_char * var_val,
                 u_char var_val_type,
@@ -534,7 +575,7 @@ write_dlmodPath(int action,
     return SNMP_ERR_NOERROR;
 }
 
-int
+static int
 write_dlmodStatus(int action,
                   u_char * var_val,
                   u_char var_val_type,
@@ -598,6 +639,11 @@ init_dlmod(void)
 {
     DEBUGMSGTL(("dlmod",
                 "Dynamic modules not support on this platform\n"));
+}
+
+void
+shutdown_dlmod(void)
+{
 }
 
 #endif
