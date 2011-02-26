@@ -5,7 +5,7 @@ use Data::Dumper;
 use Getopt::Std;
 our %opts;
 
-getopts('thl', \%opts) || usage();
+getopts('t:hl', \%opts) || usage();
 
 usage() if ($opts{'h'});
 
@@ -77,10 +77,20 @@ if ($opts{'l'}) {
     exit;
 }
 
+my %types;
+if ($opts{'t'}) {
+    my @types = split(/,\s*/, $opts{'t'});
+    foreach my $type (@types) {
+	$types{$type} = 1;
+    }
+}
+
 my @sets = ({});
 
 foreach my $set (@argumentsets) {
-    @sets = add_in_flags($set, @sets);
+    if (!$opts{'t'} || exists($types{$set->{'title'}})) {
+	@sets = add_in_flags($set, @sets);
+    }
 }
 
 foreach my $set (@sets) {
