@@ -67,6 +67,8 @@
 #include "agentx/client.h"
 #endif
 
+netsnmp_feature_child_of(unregister_mib_table_row, agent_registry)
+
 /** @defgroup agent_lookup_cache Lookup cache, storing the registered OIDs.
  *     Maintain the cache used for locating sub-trees and OIDs.
  *   @ingroup agent_registry
@@ -1752,8 +1754,6 @@ unregister_mib_context(oid * name, size_t len, int priority,
     invalidate_lookup_cache(context);
     return MIB_UNREGISTERED_OK;
 }
-
-netsnmp_feature_provide(unregister_mib_table_row)
 
 #ifndef NETSNMP_FEATURE_REMOVE_UNREGISTER_MIB_TABLE_ROW
 int

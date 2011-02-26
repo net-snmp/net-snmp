@@ -13,7 +13,7 @@ my @sets =
      });
 
 
-getopts('t:hlcD:nj:', \%opts) || usage();
+getopts('t:hlcD:nj:o:', \%opts) || usage();
 
 $opts{'j'} = "-j$opts{j}" if (exists($opts{'j'}));
 
@@ -150,6 +150,12 @@ if ($opts{'c'}) {
     exit;
 }
 
+my $summaryfile;
+if ($opts{'o'} && !$opts{'n'}) {
+    $summaryfile = new IO::File;
+    $summaryfile->open(">$opts{o}");
+}
+
 my $count = 0;
 foreach my $set (@sets) {
     $count++;
@@ -220,6 +226,7 @@ sub build_set {
 	    "./configure " . generate_configure_flags($arguments));
     System ($file, $num, "3-features", "make features");
     System ($file, $num, "4-make", "make $opts{'j'}");
+    System ($file, $num, "5-unused-code", "perl local/minimalist/find-unused-code -g");
 
     if (!$opts{'n'}) {
 	analyze_size($arguments->{'title'}, "$opts{'d'}/$num-9-results");
@@ -253,6 +260,12 @@ sub analyze_size {
     printf("%-50.50s %10s\n", "-" x 49, "-" x 10);
     printf("%-50.50s %10s bytes\n", "TOTAL", $totalsize);
 
+    if (defined($summaryfile)) {
+	my $restricted_title = $title;
+	$restricted_title =~ s/[^a-zA-Z]/_/g;
+	printf $summaryfile "%10s %s \n", $totalsize, $title;
+    }
+
     return $totalsize;
 }
 
@@ -264,6 +277,7 @@ sub usage {
     print "\t-l\tList available types\n";
     print "\t-c\tPrint the configuration flags that would be used\n";
     print "\t-D DIR\tSave data results to this directory\n";
+    print "\t-o FILE\tSave a complete summary chart to FILE\n"; 
     print "\t-n\tDry run -- only show the commands to execute\n";
     print "\t-j NUM\tExecute make with parallel building (-jNUM)\n";
     exit;

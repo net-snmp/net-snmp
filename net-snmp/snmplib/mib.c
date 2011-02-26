@@ -107,10 +107,11 @@ SOFTWARE.
 
 netsnmp_feature_child_of(mib_strings_all, libnetsnmp)
 
-netsnmp_feature_provide(mib_strings_all)
 netsnmp_feature_child_of(mib_snprint, mib_strings_all)
 netsnmp_feature_child_of(mib_snprint_description, mib_strings_all)
 netsnmp_feature_child_of(mib_snprint_variable, mib_strings_all)
+netsnmp_feature_child_of(mib_string_conversions, mib_strings_all)
+netsnmp_feature_child_of(print_mib, mib_strings_all)
 
 /** @defgroup mib_utilities mib parsing and datatype manipulation routines.
  *  @ingroup library
@@ -2918,7 +2919,6 @@ shutdown_mib(void)
  *
  * @param fp   The file descriptor to print to.
  */
-netsnmp_feature_child_of(print_mib, mib_strings)
 #ifndef NETSNMP_FEATURE_REMOVE_PRINT_MIB
 void
 print_mib(FILE * fp)
@@ -6417,7 +6417,6 @@ mib_to_asn_type(int mib_type)
  *
  * @return 0 on Sucess, 1 on failure.
  */
-netsnmp_feature_child_of(mib_string_conversions, mib_strings)
 #ifndef NETSNMP_FEATURE_REMOVE_MIB_STRING_CONVERSIONS
 int
 netsnmp_str2oid(const char *S, oid * O, int L)

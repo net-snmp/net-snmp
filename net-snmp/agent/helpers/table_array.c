@@ -21,6 +21,13 @@
 #include <net-snmp/library/container.h>
 #include <net-snmp/library/snmp_assert.h>
 
+netsnmp_feature_child_of(table_array_all, mib_helpers)
+
+netsnmp_feature_child_of(table_array_register,table_array_all)
+netsnmp_feature_child_of(table_array_find_table_array_handler,table_array_all)
+netsnmp_feature_child_of(table_array_extract_array_context,table_array_all)
+netsnmp_feature_child_of(table_array_check_row_status,table_array_all)
+
 #ifndef NETSNMP_FEATURE_REMOVE_TABLE_CONTAINER
 
 /*
@@ -197,7 +204,6 @@ netsnmp_table_container_register(netsnmp_handler_registration *reginfo,
     return netsnmp_register_table(reginfo, tabreg);
 }
 
-netsnmp_feature_child_of(table_array_register,table_array)
 #ifndef NETSNMP_FEATURE_REMOVE_TABLE_ARRAY_REGISTER
 int
 netsnmp_table_array_register(netsnmp_handler_registration *reginfo,
@@ -215,7 +221,6 @@ netsnmp_table_array_register(netsnmp_handler_registration *reginfo,
 #endif /* NETSNMP_FEATURE_REMOVE_TABLE_ARRAY_REGISTER */
 
 /** find the handler for the table_array helper. */
-netsnmp_feature_child_of(table_array_find_table_array_handler,table_array)
 #ifndef NETSNMP_FEATURE_REMOVE_TABLE_ARRAY_FIND_TABLE_ARRAY_HANDLER
 netsnmp_mib_handler *
 netsnmp_find_table_array_handler(netsnmp_handler_registration *reginfo)
@@ -235,7 +240,6 @@ netsnmp_find_table_array_handler(netsnmp_handler_registration *reginfo)
 #endif /* NETSNMP_FEATURE_REMOVE_TABLE_ARRAY_FIND_TABLE_ARRAY_HANDLER */
 
 /** find the context data used by the table_array helper */
-netsnmp_feature_child_of(table_array_extract_array_context,table_array)
 #ifndef NETSNMP_FEATURE_REMOVE_TABLE_ARRAY_EXTRACT_ARRAY_CONTEXT
 netsnmp_container      *
 netsnmp_extract_array_context(netsnmp_request_info *request)
@@ -245,7 +249,6 @@ netsnmp_extract_array_context(netsnmp_request_info *request)
 #endif /* NETSNMP_FEATURE_REMOVE_TABLE_ARRAY_EXTRACT_ARRAY_CONTEXT */
 
 /** this function is called to validate RowStatus transitions. */
-netsnmp_feature_child_of(table_array_check_row_status,table_array)
 #ifndef NETSNMP_FEATURE_REMOVE_TABLE_ARRAY_CHECK_ROW_STATUS
 int
 netsnmp_table_array_check_row_status(netsnmp_table_array_callbacks *cb,

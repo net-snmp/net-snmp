@@ -22,8 +22,10 @@
 
 #include <net-snmp/agent/cache_handler.h>
 
-netsnmp_feature_provide(cache_find_by_oid)
-netsnmp_feature_provide(cache_get_head)
+netsnmp_feature_child_of(cache_handler, mib_helpers)
+
+netsnmp_feature_child_of(cache_find_by_oid, cache_handler)
+netsnmp_feature_child_of(cache_get_head, cache_handler)
 
 static netsnmp_cache  *cache_head = NULL;
 static int             cache_outstanding_valid = 0;

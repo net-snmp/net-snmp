@@ -13,9 +13,12 @@
 #include <strings.h>
 #endif
 
-netsnmp_feature_provide(table_dataset_all)
-netsnmp_feature_child_of(table_dataset, table_dataset_all)
 netsnmp_feature_child_of(table_dataset_all, mib_helpers)
+netsnmp_feature_child_of(table_dataset, table_dataset_all)
+netsnmp_feature_child_of(table_dataset_remove_row, table_dataset_all)
+netsnmp_feature_child_of(table_data_set_column, table_dataset_all)
+netsnmp_feature_child_of(table_dataset_get_newrow, table_dataset_all)
+netsnmp_feature_child_of(table_set_add_indexes, table_dataset_all)
 
 #ifdef NETSNMP_FEATURE_REQUIRE_TABLE_DATASET
 netsnmp_feature_require(table_get_or_create_row_stash)
@@ -155,7 +158,6 @@ netsnmp_table_dataset_replace_row(netsnmp_table_data_set *table,
 }
 
 /** removes a row from the table, but doesn't delete/free the column values */
-netsnmp_feature_child_of(table_dataset_remove_row,table_dataset_all)
 #ifndef NETSNMP_FEATURE_REMOVE_TABLE_DATASET_REMOVE_ROW
 NETSNMP_INLINE void
 netsnmp_table_dataset_remove_row(netsnmp_table_data_set *table,
@@ -870,7 +872,6 @@ netsnmp_extract_table_data_set(netsnmp_request_info *request)
 /**
  * extracts a netsnmp_table_data_set pointer from a given request
  */
-netsnmp_feature_child_of(table_data_set_column,table_dataset_all)
 #ifndef NETSNMP_FEATURE_REMOVE_TABLE_DATA_SET_COLUMN
 netsnmp_table_data_set_storage *
 netsnmp_extract_table_data_set_column(netsnmp_request_info *request,
@@ -1231,7 +1232,6 @@ netsnmp_table_dataset_get_or_create_stash(netsnmp_agent_request_info *reqinfo,
     return stashp;
 }
 
-netsnmp_feature_child_of(table_dataset_get_newrow,table_dataset_all)
 #ifndef NETSNMP_FEATURE_REMOVE_TABLE_DATASET_GET_NEWROW
 netsnmp_table_row *
 netsnmp_table_dataset_get_newrow(netsnmp_request_info *request,
@@ -1433,7 +1433,6 @@ netsnmp_table_dataset_add_index(netsnmp_table_data_set *table, u_char type)
 
 /** adds multiple indexes to a table_dataset helper object.
  *  To end the list, use a 0 after the list of ASN index types. */
-netsnmp_feature_child_of(table_set_add_indexes,table_dataset_all)
 #ifndef NETSNMP_FEATURE_REMOVE_TABLE_SET_ADD_INDEXES
 void
 netsnmp_table_set_add_indexes(netsnmp_table_data_set *tset,

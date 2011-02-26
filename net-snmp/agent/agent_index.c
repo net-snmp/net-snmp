@@ -49,7 +49,9 @@
 #include "agentx/client.h"
 #endif
 
-netsnmp_feature_provide(remove_index)
+netsnmp_feature_child_of(agent_index_all, libnetsnmpagent)
+
+netsnmp_feature_child_of(remove_index, agent_index_all)
 
         /*
          * Initial support for index allocation

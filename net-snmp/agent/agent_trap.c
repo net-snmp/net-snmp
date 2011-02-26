@@ -65,6 +65,14 @@
 #include "agentx/protocol.h"
 #endif
 
+netsnmp_feature_child_of(agent_trap_all, libnetsnmpagent)
+
+netsnmp_feature_child_of(trap_vars_with_context, agent_trap_all)
+netsnmp_feature_provide(remove_trap_session, agent_trap_all)
+
+netsnmp_feature_child_of(send_v3trap,netsnmp_unused)
+netsnmp_feature_child_of(send_trap_pdu,netsnmp_unused)
+
 struct trap_sink {
     netsnmp_session *sesp;
     struct trap_sink *next;
@@ -106,9 +114,6 @@ char           *snmp_trapcommunity = NULL;
 
 int             snmp_enableauthentraps = SNMP_AUTHENTICATED_TRAPS_DISABLED;
 int             snmp_enableauthentrapsset = 0;
-
-netsnmp_feature_provide(trap_vars_with_context)
-netsnmp_feature_provide(remove_trap_session)
 
 /*
  * Prototypes 
@@ -1049,7 +1054,6 @@ send_v2trap(netsnmp_variable_list * vars)
  *
  * @see send_v2trap
  */
-netsnmp_feature_child_of(send_v3trap,netsnmp_unused)
 #ifndef NETSNMP_FEATURE_REMOVE_SEND_V3TRAP
 void send_v3trap(netsnmp_variable_list *vars, const char *context)
 {
@@ -1059,7 +1063,6 @@ void send_v3trap(netsnmp_variable_list *vars, const char *context)
 }
 #endif /* NETSNMP_FEATURE_REMOVE_SEND_V3TRAP */
 
-netsnmp_feature_child_of(send_trap_pdu,netsnmp_unused)
 #ifndef NETSNMP_FEATURE_REMOVE_SEND_TRAP_PDU
 void
 send_trap_pdu(netsnmp_pdu *pdu)
