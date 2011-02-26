@@ -1,7 +1,15 @@
 #include <net-snmp/net-snmp-config.h>
+#include <net-snmp/net-snmp-features.h>
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 #include <net-snmp/agent/hardware/cpu.h>
+
+netsnmp_feature_child_of(hardware_cpu, libnetsnmpmibs)
+
+netsnmp_feature_child_of(hardware_cpu_copy_stats, hardware_cpu)
+netsnmp_feature_child_of(hardware_cpu_load, hardware_cpu)
+netsnmp_feature_child_of(hardware_cpu_get_cache, hardware_cpu)
+netsnmp_feature_child_of(hardware_cpu_get_byName, hardware_cpu)
 
 extern NetsnmpCacheLoad netsnmp_cpu_arch_load;
 static void _cpu_update_stats( unsigned int, void* );
@@ -114,7 +122,6 @@ netsnmp_cpu_info *netsnmp_cpu_get_byIdx(  int idx, int create ) {
     /*
      * Work with a list of CPU entries, indexed by name
      */
-netsnmp_feature_child_of(hardware_cpu_get_byName, hardware_cpu)
 #ifndef NETSNMP_FEATURE_REMOVE_HARDWARE_CPU_GET_BYNAME
 netsnmp_cpu_info *netsnmp_cpu_get_byName( char *name, int create ) {
     netsnmp_cpu_info *cpu;
@@ -149,14 +156,12 @@ netsnmp_cpu_info *netsnmp_cpu_get_byName( char *name, int create ) {
 }
 #endif /* NETSNMP_FEATURE_REMOVE_HARDWARE_CPU_GET_BYNAME */
 
-netsnmp_feature_child_of(hardware_cpu_get_cache, hardware_cpu)
 #ifndef NETSNMP_FEATURE_REMOVE_HARDWARE_CPU_GET_CACHE
 netsnmp_cache *netsnmp_cpu_get_cache( void ) {
     return _cpu_cache;
 }
 #endif /* NETSNMP_FEATURE_REMOVE_HARDWARE_CPU_GET_CACHE */
 
-netsnmp_feature_child_of(hardware_cpu_load, hardware_cpu)
 #ifndef NETSNMP_FEATURE_REMOVE_HARDWARE_CPU_LOAD
 int netsnmp_cpu_load( void ) {
         /*
@@ -226,7 +231,6 @@ _cpu_update_stats( unsigned int reg, void* magic ) {
     }
 }
 
-netsnmp_feature_child_of(hardware_cpu_copy_stats, hardware_cpu)
 #ifndef NETSNMP_FEATURE_REMOVE_HARDWARE_CPU_COPY_STATS
 void _cpu_copy_stats( netsnmp_cpu_info *cpu )
 {

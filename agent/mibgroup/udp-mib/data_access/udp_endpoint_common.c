@@ -14,6 +14,10 @@
 
 #include "udp_endpoint_private.h"
 
+netsnmp_feature_child_of(udp_endpoint_common, libnetsnmpmibs)
+
+netsnmp_feature_child_of(udp_endpoint_entry_create, udp_endpoint_common)
+
 /**---------------------------------------------------------------------*/
 /*
  * local static vars
@@ -116,7 +120,6 @@ netsnmp_access_udp_endpoint_container_free(netsnmp_container *container,
  */
 /**
  */
-netsnmp_feature_child_of(udp_endpoint_entry_create, udp_endpoint)
 #ifndef NETSNMP_FEATURE_REMOVE_UDP_ENDPOINT_ENTRY_CREATE
 netsnmp_udp_endpoint_entry *
 netsnmp_access_udp_endpoint_entry_create(void)

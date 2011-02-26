@@ -13,6 +13,8 @@ static netsnmp_handler_registration* _myreg = NULL;
 
 netsnmp_feature_require(helper_statistics)
 
+netsnmp_feature_child_of(shutdown_snmptsmsession, netsnmp_unused)
+
 /** Initializes the snmpTsmStats module */
 void
 init_snmpTsmStats(void)
@@ -39,7 +41,6 @@ init_snmpTsmStats(void)
     }
 }
 
-netsnmp_feature_child_of(shutdown_snmptsmsession, netsnmp_unused)
 #ifndef NETSNMP_FEATURE_REMOVE_SHUTDOWN_SNMPTSMSESSION
 void
 shutdown_snmpTsmSession(void)

@@ -68,7 +68,7 @@
 netsnmp_feature_child_of(agent_trap_all, libnetsnmpagent)
 
 netsnmp_feature_child_of(trap_vars_with_context, agent_trap_all)
-netsnmp_feature_provide(remove_trap_session, agent_trap_all)
+netsnmp_feature_child_of(remove_trap_session, agent_trap_all)
 
 netsnmp_feature_child_of(send_v3trap,netsnmp_unused)
 netsnmp_feature_child_of(send_trap_pdu,netsnmp_unused)

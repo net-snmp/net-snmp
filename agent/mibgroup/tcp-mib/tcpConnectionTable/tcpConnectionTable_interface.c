@@ -47,10 +47,17 @@
 
 #include <ctype.h>
 
-netsnmp_feature_provide(tcpConnectionTable_external_access)
+netsnmp_feature_child_of(tcpConnectionTable_external_access, libnetsnmpmibs)
+
 netsnmp_feature_require(row_merge)
 netsnmp_feature_require(baby_steps)
 netsnmp_feature_require(check_all_requests_error)
+
+
+netsnmp_feature_child_of(tcpConnectionTable_container_size, tcpConnectionTable_external_access)
+netsnmp_feature_child_of(tcpConnectionTable_registration_set, tcpConnectionTable_external_access)
+netsnmp_feature_child_of(tcpConnectionTable_registration_get, tcpConnectionTable_external_access)
+netsnmp_feature_child_of(tcpConnectionTable_container_get, tcpConnectionTable_external_access)
 
 /**********************************************************************
  **********************************************************************
@@ -88,7 +95,6 @@ static void
                 _tcpConnectionTable_container_shutdown(tcpConnectionTable_interface_ctx *
                                                        if_ctx);
 
-netsnmp_feature_child_of(tcpConnectionTable_container_get, tcpConnectionTable_external_access)
 #ifndef NETSNMP_FEATURE_REMOVE_TCPCONNECTIONTABLE_CONTAINER_GET
 netsnmp_container *
 tcpConnectionTable_container_get(void)
@@ -97,7 +103,6 @@ tcpConnectionTable_container_get(void)
 }
 #endif /* NETSNMP_FEATURE_REMOVE_TCPCONNECTIONTABLE_CONTAINER_GET */
 
-netsnmp_feature_child_of(tcpConnectionTable_registration_get, tcpConnectionTable_external_access)
 #ifndef NETSNMP_FEATURE_REMOVE_TCPCONNECTIONTABLE_REGISTRATION_GET
 tcpConnectionTable_registration *
 tcpConnectionTable_registration_get(void)
@@ -106,7 +111,6 @@ tcpConnectionTable_registration_get(void)
 }
 #endif /* NETSNMP_FEATURE_REMOVE_TCPCONNECTIONTABLE_REGISTRATION_GET */
 
-netsnmp_feature_child_of(tcpConnectionTable_registration_set, tcpConnectionTable_external_access)
 #ifndef NETSNMP_FEATURE_REMOVE_TCPCONNECTIONTABLE_REGISTRATION_SET
 tcpConnectionTable_registration *
 tcpConnectionTable_registration_set(tcpConnectionTable_registration *
@@ -119,7 +123,6 @@ tcpConnectionTable_registration_set(tcpConnectionTable_registration *
 }
 #endif /* NETSNMP_FEATURE_REMOVE_TCPCONNECTIONTABLE_REGISTRATION_SET */
 
-netsnmp_feature_child_of(tcpConnectionTable_container_size, tcpConnectionTable_external_access)
 #ifndef NETSNMP_FEATURE_REMOVE_TCPCONNECTIONTABLE_CONTAINER_SIZE
 int
 tcpConnectionTable_container_size(void)

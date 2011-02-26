@@ -19,6 +19,7 @@ netsnmp_feature_child_of(table_dataset_remove_row, table_dataset_all)
 netsnmp_feature_child_of(table_data_set_column, table_dataset_all)
 netsnmp_feature_child_of(table_dataset_get_newrow, table_dataset_all)
 netsnmp_feature_child_of(table_set_add_indexes, table_dataset_all)
+netsnmp_feature_child_of(delete_table_data_set, table_dataset_all)
 
 #ifdef NETSNMP_FEATURE_REQUIRE_TABLE_DATASET
 netsnmp_feature_require(table_get_or_create_row_stash)
@@ -198,6 +199,7 @@ netsnmp_create_table_data_set(const char *table_name)
     return table_set;
 }
 
+#ifndef NETSNMP_FEATURE_REMOVE_DELETE_TABLE_DATA_SET
 void netsnmp_delete_table_data_set(netsnmp_table_data_set *table_set)
 {
     netsnmp_table_data_set_storage *ptr, *next;
@@ -216,6 +218,7 @@ void netsnmp_delete_table_data_set(netsnmp_table_data_set *table_set)
     netsnmp_table_data_delete_table(table_set->table);
     free(table_set);
 }
+#endif /* NETSNMP_FEATURE_REMOVE_DELETE_TABLE_DATA_SET */
 
 /** clones a dataset row, including all data. */
 netsnmp_table_row *

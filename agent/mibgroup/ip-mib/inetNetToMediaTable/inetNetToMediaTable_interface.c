@@ -47,11 +47,18 @@
 
 #include <ctype.h>
 
-netsnmp_feature_provide(inetNetToMediaTable_external_access)
+netsnmp_feature_child_of(inetNetToMediaTable_external_access, libnetsnmpmibs)
+
 netsnmp_feature_require(row_merge)
 netsnmp_feature_require(baby_steps)
 netsnmp_feature_require(table_container_row_insert)
 netsnmp_feature_require(check_all_requests_error)
+
+
+netsnmp_feature_child_of(inetNetToMediaTable_container_size, inetNetToMediaTable_external_access)
+netsnmp_feature_child_of(inetNetToMediaTable_registration_set, inetNetToMediaTable_external_access)
+netsnmp_feature_child_of(inetNetToMediaTable_registration_get, inetNetToMediaTable_external_access)
+netsnmp_feature_child_of(inetNetToMediaTable_container_get, inetNetToMediaTable_external_access)
 
 /**********************************************************************
  **********************************************************************
@@ -89,7 +96,6 @@ static void
                 _inetNetToMediaTable_container_shutdown(inetNetToMediaTable_interface_ctx *
                                                         if_ctx);
 
-netsnmp_feature_child_of(inetNetToMediaTable_container_get, inetNetToMediaTable_external_access)
 #ifndef NETSNMP_FEATURE_REMOVE_INETNETTOMEDIATABLE_CONTAINER_GET
 netsnmp_container *
 inetNetToMediaTable_container_get(void)
@@ -98,7 +104,6 @@ inetNetToMediaTable_container_get(void)
 }
 #endif /* NETSNMP_FEATURE_REMOVE_INETNETTOMEDIATABLE_CONTAINER_GET */
 
-netsnmp_feature_child_of(inetNetToMediaTable_registration_get, inetNetToMediaTable_external_access)
 #ifndef NETSNMP_FEATURE_REMOVE_INETNETTOMEDIATABLE_REGISTRATION_GET
 inetNetToMediaTable_registration *
 inetNetToMediaTable_registration_get(void)
@@ -107,7 +112,6 @@ inetNetToMediaTable_registration_get(void)
 }
 #endif /* NETSNMP_FEATURE_REMOVE_INETNETTOMEDIATABLE_REGISTRATION_GET */
 
-netsnmp_feature_child_of(inetNetToMediaTable_registration_set, inetNetToMediaTable_external_access)
 #ifndef NETSNMP_FEATURE_REMOVE_INETNETTOMEDIATABLE_REGISTRATION_SET
 inetNetToMediaTable_registration *
 inetNetToMediaTable_registration_set(inetNetToMediaTable_registration *
@@ -120,7 +124,6 @@ inetNetToMediaTable_registration_set(inetNetToMediaTable_registration *
 }
 #endif /* NETSNMP_FEATURE_REMOVE_INETNETTOMEDIATABLE_REGISTRATION_SET */
 
-netsnmp_feature_child_of(inetNetToMediaTable_container_size, inetNetToMediaTable_external_access)
 #ifndef NETSNMP_FEATURE_REMOVE_INETNETTOMEDIATABLE_CONTAINER_SIZE
 int
 inetNetToMediaTable_container_size(void)
