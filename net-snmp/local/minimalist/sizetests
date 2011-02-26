@@ -3,6 +3,7 @@
 use strict;
 use Data::Dumper;
 use Getopt::Std;
+use IO::File;
 our %opts = (d => 'size-tests');
 
 getopts('t:hlcD:nj:', \%opts) || usage();
@@ -104,8 +105,10 @@ if ($opts{'c'}) {
     exit;
 }
 
+my $count = 0;
 foreach my $set (@sets) {
-    build_set($set);
+    $count++;
+    build_set($count, $set);
 }
 
 sub add_in_flags {
@@ -149,13 +152,29 @@ sub generate_configure_flags {
 }
 
 sub build_set {
-    my ($arguments) = @_;
+    my ($num, $arguments) = @_;
+
+    $num = sprintf("%03d", $num);
+
+    my $file;
+
+    if (!$opts{'n'}) {
+	mkdir $opts{'d'} if (! -d $opts{'d'});
+	die "failed to create the $opts{'d'} directory" if (! -d $opts{'d'});
+
+	$file = new IO::File;
+	$file->open(">$opts{'d'}/$num-cmd-summary");
+	$file->print("Creating output for: $arguments->{'title'}\n");
+    }
 
     print "==================== $arguments->{'title'}\n";
-    System ("make distclean");
-    System ("./configure " . generate_configure_flags($arguments));
-    System ("make features");
-    System ("make $opts{'j'}");
+
+
+    System ($file, $num, "distclean", "make distclean");
+    System ($file, $num, "configure",
+	    "./configure " . generate_configure_flags($arguments));
+    System ($file, $num, "features", "make features");
+    System ($file, $num, "make", "make $opts{'j'}");
 }
 
 sub usage {
@@ -172,6 +191,17 @@ sub usage {
 }
 
 sub System {
-    print "### ", join(" ", @_), "\n";
-    system(@_) if (!$opts{'n'});
+    my $file  = shift;
+    my $num   = shift;
+    my $title = shift;
+    my $pipe = " 2>&1 | tee $opts{'d'}/$num-$title.out\n";
+
+    print "### ", join(" ", @_), $pipe;
+    if (!$opts{'n'} && $file) {
+	print $file "### ", join(" ", @_), "\n";
+    }
+
+    if (!$opts{'n'}) {
+	system(join(" ", @_) . $pipe);
+    }
 }
