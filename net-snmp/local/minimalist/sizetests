@@ -3,9 +3,11 @@
 use strict;
 use Data::Dumper;
 use Getopt::Std;
-our %opts;
+our %opts = (d => 'size-tests');
 
-getopts('t:hl', \%opts) || usage();
+getopts('t:hlcD:nj:', \%opts) || usage();
+
+$opts{'j'} = "-j$opts{j}" if (exists($opts{'j'}));
 
 usage() if ($opts{'h'});
 
@@ -93,9 +95,17 @@ foreach my $set (@argumentsets) {
     }
 }
 
+if ($opts{'c'}) {
+    # print the configure flags
+    foreach my $set (@sets) {
+	print "$set->{'title'}:\n";
+	print " ", generate_configure_flags($set), "\n";
+    }
+    exit;
+}
+
 foreach my $set (@sets) {
-    print "$set->{'title'}:\n";
-    print " ", generate_configure_flags($set), "\n";
+    build_set($set);
 }
 
 sub add_in_flags {
@@ -138,11 +148,30 @@ sub generate_configure_flags {
     return $line;
 }
 
+sub build_set {
+    my ($arguments) = @_;
+
+    print "==================== $arguments->{'title'}\n";
+    System ("make distclean");
+    System ("./configure " . generate_configure_flags($arguments));
+    System ("make features");
+    System ("make $opts{'j'}");
+}
+
 sub usage {
     print "Usage: $0 [FLAGS]\n\n";
     print "FLAGS:\n";
     print "\t-h\thelp\n";
     print "\t-t TYPES\tSelect types to analyze (default = all)\n";
     print "\t-l\tList available types\n";
+    print "\t-c\tPrint the configuration flags that would be used\n";
+    print "\t-D DIR\tSave data results to this directory\n";
+    print "\t-n\tDry run -- only show the commands to execute\n";
+    print "\t-j NUM\tExecute make with parallel building (-jNUM)\n";
     exit;
+}
+
+sub System {
+    print "### ", join(" ", @_), "\n";
+    system(@_) if (!$opts{'n'});
 }
