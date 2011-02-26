@@ -251,5 +251,5 @@ _insert_nsfile( netsnmp_container *c, const char *name, struct stat *stats,
     return 0;
 }
 #else  /* NETSNMP_FEATURE_REMOVE_CONTAINER_DIRECTORY */
-netsnmp_feature_unused(container_directory)
+netsnmp_feature_unused(container_directory);
 #endif /* NETSNMP_FEATURE_REMOVE_CONTAINER_DIRECTORY */
