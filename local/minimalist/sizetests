@@ -1,0 +1,46 @@
+#!/usr/bin/perl
+
+use strict;
+use Data::Dumper;
+
+my @argumentsets =
+    (
+     {
+	 name => 'SNMPv3 Security',
+	 arguments =>
+	     { usm => {
+		 'with-security-modules' => 'usm',
+	       },
+	       dtlsandtls => {
+		 'with-security-modules'     => 'tsm',
+		 'with-out-security-modules' => 'usm',
+		 'with-transports'           => 'DTLSUDP TLSTCP',
+		 'mib-modules'               => 'tlstm-mib tsm-mib'
+	       }
+	     }
+     }
+    );
+
+add_in_flags($argumentsets[0], {});
+
+sub add_in_flags {
+    my ($argumentset, @current_flags) = @_;
+
+    my @new_flags;
+
+    foreach my $flags (@current_flags) {
+	foreach my $newargs (keys(%{$argumentset->{'arguments'}})) {
+	    my %flags = %{$flags};  # copy the existing hash-set of flags
+	    
+	    foreach my $newflag (keys(%{$argumentset->{'arguments'}{$newargs}})) {
+
+		$flags{$newflag} .= " $argumentset->{'arguments'}{$newargs}{$newflag}";
+	    }
+
+	    push @new_flags, \%flags;
+	}
+    }
+
+    print Dumper(\@new_flags);
+}
+
