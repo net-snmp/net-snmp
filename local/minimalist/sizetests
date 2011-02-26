@@ -238,8 +238,8 @@ sub analyze_size {
     printf $outfile ("%-50.50s %10s\n", "-" x 49, "-" x 10);
 
     my $totalsize = 0;
-    foreach my $buildfile (glob("agent/.libs/lib*.so.*.0.0"),
-			   glob("snmplib/.libs/lib*.so.*.0.0"),
+    foreach my $buildfile (glob("snmplib/.libs/lib*.so.*.0.0"),
+			   glob("agent/.libs/lib*.so.*.0.0"),
 			   "agent/.libs/snmpd") {
 
 	my @info = stat($buildfile);
