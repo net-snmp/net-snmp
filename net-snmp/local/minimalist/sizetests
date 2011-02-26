@@ -6,6 +6,13 @@ use Getopt::Std;
 use IO::File;
 our %opts = (d => 'size-tests');
 
+# default arguments go here
+my @sets =
+    ({
+	"with-defaults" => '',
+     });
+
+
 getopts('t:hlcD:nj:', \%opts) || usage();
 
 $opts{'j'} = "-j$opts{j}" if (exists($opts{'j'}));
@@ -67,6 +74,24 @@ my @argumentsets =
 	     }
 	 }
      },
+     {
+	 title => 'perl',
+	 arguments =>
+	 { 
+	     'without-perl-modules' => {
+		 'without-perl-modules'    => '',
+		 'disable-embedded-perl' => '',
+	     },
+	     'with-perl-no-embedding' => {
+		 'with-perl-modules'    => '',
+		 'disable-embedded-perl' => '',
+	     },
+	     'with-perl-and-embedding' => {
+		 'with-perl-modules'    => '',
+		 'enable-embedded-perl' => '',
+	     }
+	 }
+     },
     );
 
 if ($opts{'l'}) {
@@ -87,8 +112,6 @@ if ($opts{'t'}) {
 	$types{$type} = 1;
     }
 }
-
-my @sets = ({});
 
 foreach my $set (@argumentsets) {
     if (!$opts{'t'} || exists($types{$set->{'title'}})) {
@@ -163,18 +186,52 @@ sub build_set {
 	die "failed to create the $opts{'d'} directory" if (! -d $opts{'d'});
 
 	$file = new IO::File;
-	$file->open(">$opts{'d'}/$num-cmd-summary");
+	$file->open(">$opts{'d'}/$num-0-cmd-summary");
 	$file->print("Creating output for: $arguments->{'title'}\n");
     }
 
     print "==================== $arguments->{'title'}\n";
 
 
-    System ($file, $num, "0-distclean", "make distclean");
-    System ($file, $num, "1-configure",
+    System ($file, $num, "1-distclean", "make distclean");
+    System ($file, $num, "2-configure",
 	    "./configure " . generate_configure_flags($arguments));
-    System ($file, $num, "2-features", "make features");
-    System ($file, $num, "3-make", "make $opts{'j'}");
+    System ($file, $num, "3-features", "make features");
+    System ($file, $num, "4-make", "make $opts{'j'}");
+
+    if (!$opts{'n'}) {
+	analyze_size($arguments->{'title'}, "$opts{'d'}/$num-9-results");
+    }
+}
+
+sub analyze_size {
+    my ($title, $filename) = @_;
+
+    my $outfile = new IO::File;
+    $outfile->open(">$filename");
+
+    print "Results for: $title\n";
+    printf $outfile "Results for: $title\n";
+    printf ("%-50.50s %10s\n", "-" x 49, "-" x 10);
+    printf $outfile ("%-50.50s %10s\n", "-" x 49, "-" x 10);
+
+    my $totalsize = 0;
+    foreach my $buildfile (glob("agent/.libs/lib*.so.*.0.0"),
+			   glob("snmplib/.libs/lib*.so.*.0.0"),
+			   "agent/.libs/snmpd") {
+
+	my @info = stat($buildfile);
+	printf $outfile ("%-50.50s %10s\n", $buildfile, $info[7]);
+	printf("%-50.50s %10s\n", $buildfile, $info[7]);
+	$totalsize += $info[7];
+    }
+    printf $outfile ("%-50.50s %10s\n", "-" x 49, "-" x 10);
+    printf $outfile ("%-50.50s %10s\n", "TOTAL", $totalsize);
+
+    printf("%-50.50s %10s\n", "-" x 49, "-" x 10);
+    printf("%-50.50s %10s\n\n", "TOTAL", $totalsize);
+
+    return $totalsize;
 }
 
 sub usage {
