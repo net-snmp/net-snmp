@@ -22,7 +22,9 @@
 
 #include <net-snmp/agent/bulk_to_next.h>
 
-netsnmp_feature_provide(handler_mark_requests_as_delegated)
+netsnmp_feature_child_of(agent_handler, libnetsnmpagent)
+
+netsnmp_feature_child_of(handler_mark_requests_as_delegated, agent_handler)
 
 static netsnmp_mib_handler *_clone_handler(netsnmp_mib_handler *it);
 

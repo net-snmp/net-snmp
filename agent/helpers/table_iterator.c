@@ -100,8 +100,12 @@
 #include <net-snmp/agent/serialize.h>
 #include <net-snmp/agent/stash_cache.h>
 
+netsnmp_feature_child_of(table_iterator_all, mib_helpers)
+
 netsnmp_feature_child_of(table_iterator_insert_context, table_iterator_all)
 netsnmp_feature_child_of(table_iterator_create_table, table_iterator_all)
+netsnmp_feature_child_of(table_iterator_row_first, table_iterator_all)
+netsnmp_feature_child_of(table_iterator_row_count, table_iterator_all)
 
 #ifdef NETSNMP_FEATURE_REQUIRE_STASH_CACHE
 netsnmp_feature_require(data_list_get_list_node)
@@ -951,7 +955,6 @@ netsnmp_table_iterator_helper_handler(netsnmp_mib_handler *handler,
  *
  * ================================== */
 
-netsnmp_feature_child_of(table_iterator_row_first,table_iterator)
 #ifndef NETSNMP_FEATURE_REMOVE_TABLE_ITERATOR_ROW_FIRST
 void *
 netsnmp_iterator_row_first( netsnmp_iterator_info *iinfo ) {
@@ -1180,8 +1183,7 @@ netsnmp_iterator_row_next_byoid( netsnmp_iterator_info *iinfo,
     return ( vp2 ? ctx2 : NULL );
 }
 
-netsnmp_feature_child_of(netsnmp_iterator_row_count,table_iterator)
-#ifndef NETSNMP_FEATURE_REMOVE_NETSNMP_ITERATOR_ROW_COUNT
+#ifndef NETSNMP_FEATURE_REMOVE_TABLE_ITERATOR_ROW_COUNT
 int
 netsnmp_iterator_row_count( netsnmp_iterator_info *iinfo )
 {
@@ -1217,7 +1219,7 @@ netsnmp_iterator_row_count( netsnmp_iterator_info *iinfo )
     snmp_free_varbind( vp1 );
     return i;
 }
-#endif /* NETSNMP_FEATURE_REMOVE_NETSNMP_ITERATOR_ROW_COUNT */
+#endif /* NETSNMP_FEATURE_REMOVE_TABLE_ITERATOR_ROW_COUNT */
 
 
 /* ==================================

@@ -39,10 +39,12 @@ netsnmp_feature_require(oid_stash)
 
 #include <net-snmp/library/snmp_assert.h>
 
-netsnmp_feature_child_of(table_build_result, table_all)
-netsnmp_feature_child_of(table_get_or_create_row_stash, table_all)
 netsnmp_feature_child_of(table_all, mib_helpers)
 
+netsnmp_feature_child_of(table_build_result, table_all)
+netsnmp_feature_child_of(table_get_or_create_row_stash, table_all)
+netsnmp_feature_child_of(registration_owns_table_info, table_all)
+netsnmp_feature_child_of(table_sparse, table_all)
 
 static void     table_helper_cleanup(netsnmp_agent_request_info *reqinfo,
                                      netsnmp_request_info *request,
@@ -133,7 +135,6 @@ void netsnmp_handler_owns_table_info(netsnmp_mib_handler *handler)
  *  netsnmp_handler_free(). Should only be called if reg->handler->myvoid
  *  points to an object of type netsnmp_table_registration_info.
  */
-netsnmp_feature_child_of(registration_owns_table_info,table)
 #ifndef NETSNMP_FEATURE_REMOVE_REGISTRATION_OWNS_TABLE_INFO
 void netsnmp_registration_owns_table_info(netsnmp_handler_registration *reg)
 {
@@ -810,7 +811,6 @@ sparse_table_helper_handler(netsnmp_mib_handler *handler,
 
 /** create sparse table handler
  */
-netsnmp_feature_child_of(table_sparse,table)
 #ifndef NETSNMP_FEATURE_REMOVE_TABLE_SPARSE
 netsnmp_mib_handler *
 netsnmp_sparse_table_handler_get(void)

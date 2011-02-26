@@ -44,6 +44,7 @@ SOFTWARE.
  * @{
  */
 #include <net-snmp/net-snmp-config.h>
+#include <net-snmp/net-snmp-features.h>
 
 #include <sys/types.h>
 #ifdef HAVE_LIMITS_H
@@ -107,6 +108,24 @@ int             deny_severity = LOG_WARNING;
 #include "smux/smux.h"
 #endif
 
+netsnmp_feature_child_of(snmp_agent, libnetsnmpagent)
+netsnmp_feature_child_of(agent_debugging_utilities, libnetsnmpagent)
+
+netsnmp_feature_child_of(allocate_globalcacheid, snmp_agent)
+netsnmp_feature_child_of(free_agent_snmp_session_by_session, snmp_agent)
+netsnmp_feature_child_of(check_all_requests_error, snmp_agent)
+netsnmp_feature_child_of(check_requests_error, snmp_agent)
+netsnmp_feature_child_of(request_set_error_idx, snmp_agent)
+netsnmp_feature_child_of(set_agent_uptime, snmp_agent)
+
+netsnmp_feature_child_of(dump_sess_list, agent_debugging_utilities)
+
+netsnmp_feature_child_of(agent_remove_list_data, netsnmp_unused)
+netsnmp_feature_child_of(set_all_requests_error, netsnmp_unused)
+netsnmp_feature_child_of(addrcache_age, netsnmp_unused)
+
+
+
 NETSNMP_INLINE void
 netsnmp_agent_add_list_data(netsnmp_agent_request_info *ari,
                             netsnmp_data_list *node)
@@ -120,7 +139,6 @@ netsnmp_agent_add_list_data(netsnmp_agent_request_info *ari,
     }
 }
 
-netsnmp_feature_child_of(agent_remove_list_data, netsnmp_unused)
 #ifndef NETSNMP_FEATURE_REMOVE_AGENT_REMOVE_LIST_DATA
 NETSNMP_INLINE int
 netsnmp_agent_remove_list_data(netsnmp_agent_request_info *ari,
@@ -230,7 +248,6 @@ static int      current_globalid = 0;
 
 int      netsnmp_running = 1;
 
-netsnmp_feature_child_of(allocate_globalcacheid, snmp_agent)
 #ifndef NETSNMP_FEATURE_REMOVE_ALLOCATE_GLOBALCACHEID
 int
 netsnmp_allocate_globalcacheid(void)
@@ -834,7 +851,6 @@ netsnmp_addrcache_add(const char *addr)
  *
  * backwards compatability; not used anywhere
  */
-netsnmp_feature_child_of(addrcache_age, netsnmp_unused)
 #ifndef NETSNMP_FEATURE_REMOVE_ADDRCACHE_AGE
 void
 netsnmp_addrcache_age(void)
@@ -1802,7 +1818,6 @@ netsnmp_wrap_up_request(netsnmp_agent_session *asp, int status)
     return 1;
 }
 
-netsnmp_feature_child_of(dump_sess_list, agent_debugging_utilities)
 #ifndef NETSNMP_FEATURE_REMOVE_DUMP_SESS_LIST
 void
 dump_sess_list(void)
@@ -1844,7 +1859,6 @@ netsnmp_remove_and_free_agent_snmp_session(netsnmp_agent_session *asp)
     }
 }
 
-netsnmp_feature_child_of(free_agent_snmp_session_by_session, snmp_agent)
 #ifndef NETSNMP_FEATURE_REMOVE_FREE_AGENT_SNMP_SESSION_BY_SESSION
 void
 netsnmp_free_agent_snmp_session_by_session(netsnmp_session * sess,
@@ -2532,7 +2546,6 @@ netsnmp_delete_request_infos(netsnmp_request_info *reqlist)
     }
 }
 
-netsnmp_feature_child_of(delete_subtree_cache, netsnmp_unused)
 #ifndef NETSNMP_FEATURE_REMOVE_DELETE_SUBTREE_CACHE
 void
 netsnmp_delete_subtree_cache(netsnmp_agent_session *asp)
@@ -2548,7 +2561,6 @@ netsnmp_delete_subtree_cache(netsnmp_agent_session *asp)
 }
 #endif /* NETSNMP_FEATURE_REMOVE_DELETE_SUBTREE_CACHE */
 
-netsnmp_feature_child_of(check_all_requests_error, snmp_agent)
 #ifndef NETSNMP_FEATURE_REMOVE_CHECK_ALL_REQUESTS_ERROR
 /*
  * check all requests for errors
@@ -2582,7 +2594,6 @@ netsnmp_check_all_requests_error(netsnmp_agent_session *asp,
 }
 #endif /* NETSNMP_FEATURE_REMOVE_CHECK_ALL_REQUESTS_ERROR */
 
-netsnmp_feature_child_of(check_requests_error, snmp_agent)
 #ifndef NETSNMP_FEATURE_REMOVE_CHECK_REQUESTS_ERROR
 int
 netsnmp_check_requests_error(netsnmp_request_info *requests)
@@ -3625,7 +3636,6 @@ netsnmp_request_set_error(netsnmp_request_info *request, int error_value)
                               error_value);
 }
 
-netsnmp_feature_child_of(request_set_error_idx, snmp_agent)
 #ifndef NETSNMP_FEATURE_REMOVE_REQUEST_SET_ERROR_IDX
 /** set error for a request within a request list
  * @param request head of the request list
@@ -3750,7 +3760,6 @@ netsnmp_get_agent_uptime(void)
     return netsnmp_timeval_uptime(&now);
 }
 
-netsnmp_feature_child_of(set_agent_uptime, snmp_agent)
 #ifndef NETSNMP_FEATURE_REMOVE_SET_AGENT_UPTIME
 void
 netsnmp_set_agent_uptime(u_long hsec)
@@ -3814,7 +3823,6 @@ netsnmp_set_mode_request_error(int mode, netsnmp_request_info *request,
  * @param error_value error value for requests
  * @return error_value
  */
-netsnmp_feature_child_of(set_all_requests_error, netsnmp_unused)
 #ifndef NETSNMP_FEATURE_REMOVE_SET_ALL_REQUESTS_ERROR
 int
 netsnmp_set_all_requests_error(netsnmp_agent_request_info *reqinfo,

@@ -8,6 +8,7 @@
 #define TABLE_ROW_DATA  "table_row"
 
 #include <net-snmp/net-snmp-config.h>
+#include <net-snmp/net-snmp-features.h>
 
 #if HAVE_STRING_H
 #include <string.h>
@@ -22,6 +23,11 @@
 #include <net-snmp/agent/table_container.h>
 #include <net-snmp/library/container.h>
 #include <net-snmp/library/snmp_assert.h>
+
+netsnmp_feature_child_of(table_row_all, mib_helpers)
+
+netsnmp_feature_child_of(table_row_extract, table_row_all)
+
 
 /*
  * snmp.h:#define SNMP_MSG_INTERNAL_SET_BEGIN        -1 
@@ -154,7 +160,6 @@ netsnmp_table_row_register(netsnmp_handler_registration *reginfo,
 
 
 /** return the row data structure supplied to the table_row helper */
-netsnmp_feature_child_of(table_row_extract,table_row)
 #ifndef NETSNMP_FEATURE_REMOVE_TABLE_ROW_EXTRACT
 void *
 netsnmp_table_row_extract(netsnmp_request_info *request)

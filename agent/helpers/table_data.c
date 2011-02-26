@@ -23,6 +23,16 @@ netsnmp_feature_child_of(extract_table_row_data, table_data_all)
 netsnmp_feature_child_of(insert_table_row, table_data_all)
 netsnmp_feature_child_of(table_data_delete_table, table_data_all)
 
+netsnmp_feature_child_of(table_data_extras, table_data_all)
+
+netsnmp_feature_child_of(table_data_create_table, table_data_extras)
+netsnmp_feature_child_of(table_data_create_row, table_data_extras)
+netsnmp_feature_child_of(table_data_copy_row, table_data_extras)
+netsnmp_feature_child_of(table_data_remove_delete_row, table_data_extras)
+netsnmp_feature_child_of(table_data_unregister, table_data_extras)
+netsnmp_feature_child_of(table_data_row_count, table_data_extras)
+netsnmp_feature_child_of(table_data_row_operations, table_data_extras)
+
 #ifndef NETSNMP_FEATURE_REMOVE_TABLE_DATA
 
 /** @defgroup table_data table_data
@@ -300,7 +310,6 @@ netsnmp_table_data_remove_and_delete_row(netsnmp_table_data *table,
      * Generic API - mostly renamed wrappers
      * ===================================== */
 
-netsnmp_feature_child_of(table_data_create_table,table_data_extras)
 #ifndef NETSNMP_FEATURE_REMOVE_TABLE_DATA_CREATE_TABLE
 netsnmp_table_data *
 netsnmp_table_data_create_table(const char *name, long flags)
@@ -335,7 +344,6 @@ netsnmp_table_data_delete_table( netsnmp_table_data *table )
 }
 #endif /* NETSNMP_FEATURE_REMOVE_TABLE_DATA_DELETE_TABLE */
 
-netsnmp_feature_child_of(table_data_create_row,table_data_extras)
 #ifndef NETSNMP_FEATURE_REMOVE_TABLE_DATA_CREATE_ROW
 netsnmp_table_row *
 netsnmp_table_data_create_row( void* entry )
@@ -349,7 +357,6 @@ netsnmp_table_data_create_row( void* entry )
 
     /* netsnmp_table_data_clone_row() defined above */
 
-netsnmp_feature_child_of(table_data_copy_row,table_data_extras)
 #ifndef NETSNMP_FEATURE_REMOVE_TABLE_DATA_COPY_ROW
 int
 netsnmp_table_data_copy_row( netsnmp_table_row  *old_row,
@@ -378,7 +385,6 @@ netsnmp_table_data_copy_row( netsnmp_table_row  *old_row,
      *     all defined above
      */
 
-netsnmp_feature_child_of(table_data_remove_delete_row,table_data_extras)
 #ifndef NETSNMP_FEATURE_REMOVE_TABLE_DATA_REMOVE_DELETE_ROW
 void *
 netsnmp_table_data_remove_delete_row(netsnmp_table_data *table,
@@ -442,7 +448,6 @@ netsnmp_register_read_only_table_data(netsnmp_handler_registration *reginfo,
 }
 #endif /* NETSNMP_FEATURE_REMOVE_REGISTER_READ_ONLY_TABLE_DATA */
 
-netsnmp_feature_child_of(table_data_unregister,table_data_extras)
 #ifndef NETSNMP_FEATURE_REMOVE_TABLE_DATA_UNREGISTER
 int
 netsnmp_unregister_table_data(netsnmp_handler_registration *reginfo)
@@ -898,7 +903,6 @@ netsnmp_table_data_num_rows(netsnmp_table_data *table)
      * Generic API - mostly renamed wrappers
      * ===================================== */
 
-netsnmp_feature_child_of(table_data_row_first,table_data_extras)
 #ifndef NETSNMP_FEATURE_REMOVE_TABLE_DATA_ROW_FIRST
 netsnmp_table_row *
 netsnmp_table_data_row_first(netsnmp_table_data *table)
@@ -970,7 +974,6 @@ netsnmp_table_data_row_next_byidx(netsnmp_table_data    *table,
     return netsnmp_table_data_row_next_byoid(table, instance, len);
 }
 
-netsnmp_feature_child_of(table_data_row_count,data_extras)
 #ifndef NETSNMP_FEATURE_REMOVE_TABLE_DATA_ROW_COUNT
 int
 netsnmp_table_data_row_count(netsnmp_table_data *table)
@@ -987,7 +990,6 @@ netsnmp_table_data_row_count(netsnmp_table_data *table)
  *
  * ================================== */
 
-netsnmp_feature_child_of(table_data_row_operations,table_data_extras)
 #ifndef NETSNMP_FEATURE_REMOVE_TABLE_DATA_ROW_OPERATIONS
 void *
 netsnmp_table_data_entry_first(netsnmp_table_data *table)
