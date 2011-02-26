@@ -170,11 +170,11 @@ sub build_set {
     print "==================== $arguments->{'title'}\n";
 
 
-    System ($file, $num, "distclean", "make distclean");
-    System ($file, $num, "configure",
+    System ($file, $num, "0-distclean", "make distclean");
+    System ($file, $num, "1-configure",
 	    "./configure " . generate_configure_flags($arguments));
-    System ($file, $num, "features", "make features");
-    System ($file, $num, "make", "make $opts{'j'}");
+    System ($file, $num, "2-features", "make features");
+    System ($file, $num, "3-make", "make $opts{'j'}");
 }
 
 sub usage {
