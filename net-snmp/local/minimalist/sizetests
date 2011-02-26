@@ -8,20 +8,62 @@ my @argumentsets =
      {
 	 name => 'SNMPv3 Security',
 	 arguments =>
-	     { usm => {
+	 {
+	     usm => {
 		 'with-security-modules' => 'usm',
-	       },
-	       dtlsandtls => {
+		 'mib-modules'               => 'usm-mib',
+	     },
+	     dtlsandtls => {
 		 'with-security-modules'     => 'tsm',
 		 'with-out-security-modules' => 'usm',
 		 'with-transports'           => 'DTLSUDP TLSTCP',
 		 'mib-modules'               => 'tlstm-mib tsm-mib'
-	       }
 	     }
-     }
+	 }
+     },
+     {
+	 name => 'minimalist',
+	 arguments =>
+	 { 
+	     minimal => {
+		 'enable-minimalist'    => '',
+	     },
+	     nominimal => {
+	     }
+	 }
+     },
+     {
+	 name => 'mib-loading',
+	 arguments =>
+	 { 
+	     'without-mib-loading' => {
+		 'disable-mib-loading'    => '',
+	     },
+	     'with-mib-loading' => {
+	     }
+	 }
+     },
+     {
+	 name => 'debugging',
+	 arguments =>
+	 { 
+	     'without-debugging' => {
+		 'disable-debugging'    => '',
+	     },
+	     'with-debugging' => {
+	     }
+	 }
+     },
     );
 
-add_in_flags($argumentsets[0], {});
+my @sets = ({});
+
+foreach my $set (@argumentsets) {
+    @sets = add_in_flags($argumentsets[0], @sets);
+}
+
+print Dumper(\@sets);
+
 
 sub add_in_flags {
     my ($argumentset, @current_flags) = @_;
@@ -41,6 +83,6 @@ sub add_in_flags {
 	}
     }
 
-    print Dumper(\@new_flags);
+    return @new_flags;
 }
 
