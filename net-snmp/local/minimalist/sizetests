@@ -11,7 +11,6 @@ my @argumentsets =
 	 {
 	     usm => {
 		 'with-security-modules' => 'usm',
-		 'mib-modules'               => 'usm-mib',
 	     },
 	     dtlsandtls => {
 		 'with-security-modules'     => 'tsm',
@@ -59,11 +58,12 @@ my @argumentsets =
 my @sets = ({});
 
 foreach my $set (@argumentsets) {
-    @sets = add_in_flags($argumentsets[0], @sets);
+    @sets = add_in_flags($set, @sets);
 }
 
-print Dumper(\@sets);
-
+foreach my $set (@sets) {
+    print generate_configure_flags($set), "\n";
+}
 
 sub add_in_flags {
     my ($argumentset, @current_flags) = @_;
@@ -86,3 +86,15 @@ sub add_in_flags {
     return @new_flags;
 }
 
+sub generate_configure_flags {
+    my ($arguments) = @_;
+    my $line = "";
+    foreach my $arg (keys(%$arguments)) {
+	if ($arguments->{$arg} =~ /^\s*$/) {
+	    $line .= " --$arg";
+	} else {
+	    $line .= " --$arg=\"$arguments->{$arg}\"";
+	}
+    }
+    return $line;
+}
