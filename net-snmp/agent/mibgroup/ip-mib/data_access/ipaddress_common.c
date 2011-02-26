@@ -12,6 +12,10 @@
 
 #include "ip-mib/ipAddressTable/ipAddressTable_constants.h"
 
+netsnmp_feature_child_of(ipaddress_common, libnetsnmpmibs)
+
+netsnmp_feature_child_of(ipaddress_common_copy_utilities, ipaddress_common)
+
 /**---------------------------------------------------------------------*/
 /*
  * local static prototypes
@@ -450,8 +454,6 @@ static int _access_ipaddress_entry_compare_addr(const void *lhs,
      */
     return memcmp(lh->ia_address, rh->ia_address, lh->ia_address_len);
 }
-
-netsnmp_feature_provide(ipaddress_common_copy_utilities)
 
 #ifndef NETSNMP_FEATURE_REMOVE_IPADDRESS_COMMON_COPY_UTILITIES
 int

@@ -47,12 +47,16 @@
 
 #include <ctype.h>
 
-netsnmp_feature_provide(inetCidrRouteTable_external_access)
+netsnmp_feature_child_of(inetCidrRouteTable_external_access, libnetsnmpmibs)
 netsnmp_feature_require(row_merge)
 netsnmp_feature_require(baby_steps)
 netsnmp_feature_require(table_container_row_insert)
 netsnmp_feature_require(check_all_requests_error)
 
+netsnmp_feature_child_of(inetCidrRouteTable_container_size, inetCidrRouteTable_external_access)
+netsnmp_feature_child_of(inetCidrRouteTable_registration_set, inetCidrRouteTable_external_access)
+netsnmp_feature_child_of(inetCidrRouteTable_registration_get, inetCidrRouteTable_external_access)
+netsnmp_feature_child_of(inetCidrRouteTable_container_get, inetCidrRouteTable_external_access)
 /**********************************************************************
  **********************************************************************
  ***
@@ -89,7 +93,6 @@ static void
                 _inetCidrRouteTable_container_shutdown(inetCidrRouteTable_interface_ctx *
                                                        if_ctx);
 
-netsnmp_feature_child_of(inetCidrRouteTable_container_get, inetCidrRouteTable_external_access)
 #ifndef NETSNMP_FEATURE_REMOVE_INETCIDRROUTETABLE_CONTAINER_GET
 netsnmp_container *
 inetCidrRouteTable_container_get(void)
@@ -98,7 +101,6 @@ inetCidrRouteTable_container_get(void)
 }
 #endif /* NETSNMP_FEATURE_REMOVE_INETCIDRROUTETABLE_CONTAINER_GET */
 
-netsnmp_feature_child_of(inetCidrRouteTable_registration_get, inetCidrRouteTable_external_access)
 #ifndef NETSNMP_FEATURE_REMOVE_INETCIDRROUTETABLE_REGISTRATION_GET
 inetCidrRouteTable_registration *
 inetCidrRouteTable_registration_get(void)
@@ -107,7 +109,6 @@ inetCidrRouteTable_registration_get(void)
 }
 #endif /* NETSNMP_FEATURE_REMOVE_INETCIDRROUTETABLE_REGISTRATION_GET */
 
-netsnmp_feature_child_of(inetCidrRouteTable_registration_set, inetCidrRouteTable_external_access)
 #ifndef NETSNMP_FEATURE_REMOVE_INETCIDRROUTETABLE_REGISTRATION_SET
 inetCidrRouteTable_registration *
 inetCidrRouteTable_registration_set(inetCidrRouteTable_registration *
@@ -120,7 +121,6 @@ inetCidrRouteTable_registration_set(inetCidrRouteTable_registration *
 }
 #endif /* NETSNMP_FEATURE_REMOVE_INETCIDRROUTETABLE_REGISTRATION_SET */
 
-netsnmp_feature_child_of(inetCidrRouteTable_container_size, inetCidrRouteTable_external_access)
 #ifndef NETSNMP_FEATURE_REMOVE_INETCIDRROUTETABLE_CONTAINER_SIZE
 int
 inetCidrRouteTable_container_size(void)

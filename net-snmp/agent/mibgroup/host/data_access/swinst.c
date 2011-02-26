@@ -7,12 +7,17 @@
  * distributed with the Net-SNMP package.
  */
 #include <net-snmp/net-snmp-config.h>
+#include <net-snmp/net-snmp-features.h>
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 #include <net-snmp/data_access/swinst.h>
 
 #include <stdlib.h>
 #include <unistd.h>
+
+netsnmp_feature_child_of(software_installed, libnetsnmpmibs)
+
+netsnmp_feature_child_of(swrun_max_processes, netsnmp_unused)
 
 /* ---------------------------------------------------------------------
  */
@@ -180,7 +185,6 @@ netsnmp_swinst_entry_free_cb(netsnmp_swinst_entry *entry, void *context)
 /*
  * remove a row from the table 
  */
-netsnmp_feature_child_of(swinst_entry_remove, netsnmp_unused)
 #ifndef NETSNMP_FEATURE_REMOVE_SWINST_ENTRY_REMOVE
 void
 netsnmp_swinst_entry_remove(netsnmp_container * container,

@@ -47,11 +47,18 @@
 
 #include <ctype.h>
 
-netsnmp_feature_provide(ipAddressTable_external_access)
+netsnmp_feature_child_of(ipAddressTable_external_access, libnetsnmpmibs)
+
 netsnmp_feature_require(row_merge)
 netsnmp_feature_require(baby_steps)
 netsnmp_feature_require(table_container_row_insert)
 netsnmp_feature_require(check_all_requests_error)
+
+
+netsnmp_feature_child_of(ipAddressTable_container_size, ipAddressTable_external_access)
+netsnmp_feature_child_of(ipAddressTable_registration_set, ipAddressTable_external_access)
+netsnmp_feature_child_of(ipAddressTable_registration_get, ipAddressTable_external_access)
+netsnmp_feature_child_of(ipAddressTable_container_get, ipAddressTable_external_access)
 
 /**********************************************************************
  **********************************************************************
@@ -87,7 +94,6 @@ static void     _ipAddressTable_container_init(ipAddressTable_interface_ctx
 static void
                 _ipAddressTable_container_shutdown(ipAddressTable_interface_ctx * if_ctx);
 
-netsnmp_feature_child_of(ipAddressTable_container_get, ipAddressTable_external_access)
 #ifndef NETSNMP_FEATURE_REMOVE_IPADDRESSTABLE_CONTAINER_GET
 netsnmp_container *
 ipAddressTable_container_get(void)
@@ -96,7 +102,6 @@ ipAddressTable_container_get(void)
 }
 #endif /* NETSNMP_FEATURE_REMOVE_IPADDRESSTABLE_CONTAINER_GET */
 
-netsnmp_feature_child_of(ipAddressTable_registration_get, ipAddressTable_external_access)
 #ifndef NETSNMP_FEATURE_REMOVE_IPADDRESSTABLE_REGISTRATION_GET
 ipAddressTable_registration *
 ipAddressTable_registration_get(void)
@@ -105,7 +110,6 @@ ipAddressTable_registration_get(void)
 }
 #endif /* NETSNMP_FEATURE_REMOVE_IPADDRESSTABLE_REGISTRATION_GET */
 
-netsnmp_feature_child_of(ipAddressTable_registration_set, ipAddressTable_external_access)
 #ifndef NETSNMP_FEATURE_REMOVE_IPADDRESSTABLE_REGISTRATION_SET
 ipAddressTable_registration *
 ipAddressTable_registration_set(ipAddressTable_registration * newreg)
@@ -116,7 +120,6 @@ ipAddressTable_registration_set(ipAddressTable_registration * newreg)
 }
 #endif /* NETSNMP_FEATURE_REMOVE_IPADDRESSTABLE_REGISTRATION_SET */
 
-netsnmp_feature_child_of(ipAddressTable_container_size, ipAddressTable_external_access)
 #ifndef NETSNMP_FEATURE_REMOVE_IPADDRESSTABLE_CONTAINER_SIZE
 int
 ipAddressTable_container_size(void)

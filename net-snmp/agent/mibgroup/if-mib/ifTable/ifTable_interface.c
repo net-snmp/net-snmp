@@ -48,10 +48,20 @@
 
 #include <ctype.h>
 
-netsnmp_feature_provide(ifTable_external_access)
+netsnmp_feature_child_of(ifTable_external_access, libnetsnmpmibs)
+
 netsnmp_feature_require(row_merge)
 netsnmp_feature_require(baby_steps)
 netsnmp_feature_require(check_all_requests_error)
+netsnmp_feature_child_of(iftable_container_get, ifTable_external_access)
+netsnmp_feature_child_of(ifxtable_shutdown_interface, netsnmp_unused)
+netsnmp_feature_child_of(ifXTable_container_size, ifXTable_external_access)
+netsnmp_feature_child_of(ifXTable_registration_set, ifXTable_external_access)
+netsnmp_feature_child_of(ifXTable_registration_get, ifXTable_external_access)
+netsnmp_feature_child_of(ifXTable_container_get, ifXTable_external_access)
+netsnmp_feature_child_of(iftable_container_size, ifTable_external_access)
+netsnmp_feature_child_of(iftable_registration_set, ifTable_external_access)
+netsnmp_feature_child_of(iftable_registration_get, ifTable_external_access)
 
 /**********************************************************************
  **********************************************************************
@@ -88,7 +98,6 @@ static void     _ifTable_container_init(ifTable_interface_ctx * if_ctx);
 static void     _ifTable_container_shutdown(ifTable_interface_ctx *
                                             if_ctx);
 
-netsnmp_feature_child_of(iftable_container_get, ifTable_external_access)
 #ifndef NETSNMP_FEATURE_REMOVE_IFTABLE_CONTAINER_GET
 netsnmp_container *
 ifTable_container_get(void)
@@ -97,7 +106,6 @@ ifTable_container_get(void)
 }
 #endif /* NETSNMP_FEATURE_REMOVE_IFTABLE_CONTAINER_GET */
 
-netsnmp_feature_child_of(iftable_registration_get, ifTable_external_access)
 #ifndef NETSNMP_FEATURE_REMOVE_IFTABLE_REGISTRATION_GET
 ifTable_registration *
 ifTable_registration_get(void)
@@ -106,7 +114,6 @@ ifTable_registration_get(void)
 }
 #endif /* NETSNMP_FEATURE_REMOVE_IFTABLE_REGISTRATION_GET */
 
-netsnmp_feature_child_of(iftable_registration_set, ifTable_external_access)
 #ifndef NETSNMP_FEATURE_REMOVE_IFTABLE_REGISTRATION_SET
 ifTable_registration *
 ifTable_registration_set(ifTable_registration * newreg)
@@ -117,7 +124,6 @@ ifTable_registration_set(ifTable_registration * newreg)
 }
 #endif /* NETSNMP_FEATURE_REMOVE_IFTABLE_REGISTRATION_SET */
 
-netsnmp_feature_child_of(iftable_container_size, ifTable_external_access)
 #ifndef NETSNMP_FEATURE_REMOVE_IFTABLE_CONTAINER_SIZE
 int
 ifTable_container_size(void)

@@ -47,10 +47,17 @@
 
 #include <ctype.h>
 
-netsnmp_feature_provide(tcpListenerTable_external_access)
+netsnmp_feature_child_of(tcpListenerTable_external_access, libnetsnmpmibs)
+
 netsnmp_feature_require(row_merge)
 netsnmp_feature_require(baby_steps)
 netsnmp_feature_require(check_all_requests_error)
+
+
+netsnmp_feature_child_of(tcpListenerTable_container_size, tcpListenerTable_external_access)
+netsnmp_feature_child_of(tcpListenerTable_registration_set, tcpListenerTable_external_access)
+netsnmp_feature_child_of(tcpListenerTable_registration_get, tcpListenerTable_external_access)
+netsnmp_feature_child_of(tcpListenerTable_container_get, tcpListenerTable_external_access)
 
 /**********************************************************************
  **********************************************************************
@@ -85,7 +92,6 @@ static void
                 _tcpListenerTable_container_shutdown(tcpListenerTable_interface_ctx *
                                                      if_ctx);
 
-netsnmp_feature_child_of(tcpListenerTable_container_get, tcpListenerTable_external_access)
 #ifndef NETSNMP_FEATURE_REMOVE_TCPLISTENERTABLE_CONTAINER_GET
 netsnmp_container *
 tcpListenerTable_container_get(void)
@@ -94,7 +100,6 @@ tcpListenerTable_container_get(void)
 }
 #endif /* NETSNMP_FEATURE_REMOVE_TCPLISTENERTABLE_CONTAINER_GET */
 
-netsnmp_feature_child_of(tcpListenerTable_registration_get, tcpListenerTable_external_access)
 #ifndef NETSNMP_FEATURE_REMOVE_TCPLISTENERTABLE_REGISTRATION_GET
 tcpListenerTable_registration *
 tcpListenerTable_registration_get(void)
@@ -103,7 +108,6 @@ tcpListenerTable_registration_get(void)
 }
 #endif /* NETSNMP_FEATURE_REMOVE_TCPLISTENERTABLE_REGISTRATION_GET */
 
-netsnmp_feature_child_of(tcpListenerTable_registration_set, tcpListenerTable_external_access)
 #ifndef NETSNMP_FEATURE_REMOVE_TCPLISTENERTABLE_REGISTRATION_SET
 tcpListenerTable_registration *
 tcpListenerTable_registration_set(tcpListenerTable_registration * newreg)
@@ -114,7 +118,6 @@ tcpListenerTable_registration_set(tcpListenerTable_registration * newreg)
 }
 #endif /* NETSNMP_FEATURE_REMOVE_TCPLISTENERTABLE_REGISTRATION_SET */
 
-netsnmp_feature_child_of(tcpListenerTable_container_size, tcpListenerTable_external_access)
 #ifndef NETSNMP_FEATURE_REMOVE_TCPLISTENERTABLE_CONTAINER_SIZE
 int
 tcpListenerTable_container_size(void)

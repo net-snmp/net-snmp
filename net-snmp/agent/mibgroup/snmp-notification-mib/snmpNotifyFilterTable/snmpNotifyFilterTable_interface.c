@@ -47,12 +47,19 @@
 
 #include <ctype.h>
 
-netsnmp_feature_provide(snmpNotifyFilterTable_external_access)
+netsnmp_feature_child_of(snmpNotifyFilterTable_external_access, libnetsnmpmibs)
+
 netsnmp_feature_require(row_merge)
 netsnmp_feature_require(baby_steps)
 netsnmp_feature_require(table_container_row_insert)
 netsnmp_feature_require(check_all_requests_error)
 netsnmp_feature_require(check_vb_type_and_max_size)
+
+
+netsnmp_feature_child_of(snmpNotifyFilterTable_container_size, snmpNotifyFilterTable_external_access)
+netsnmp_feature_child_of(snmpNotifyFilterTable_registration_set, snmpNotifyFilterTable_external_access)
+netsnmp_feature_child_of(snmpNotifyFilterTable_registration_get, snmpNotifyFilterTable_external_access)
+netsnmp_feature_child_of(snmpNotifyFilterTable_container_get, snmpNotifyFilterTable_external_access)
 
 /**********************************************************************
  **********************************************************************
@@ -104,7 +111,6 @@ static void
     _snmpNotifyFilterTable_container_shutdown
     (snmpNotifyFilterTable_interface_ctx * if_ctx);
 
-netsnmp_feature_child_of(snmpNotifyFilterTable_container_get, snmpNotifyFilterTable_external_access)
 #ifndef NETSNMP_FEATURE_REMOVE_SNMPNOTIFYFILTERTABLE_CONTAINER_GET
 netsnmp_container *
 snmpNotifyFilterTable_container_get(void)
@@ -113,7 +119,6 @@ snmpNotifyFilterTable_container_get(void)
 }
 #endif /* NETSNMP_FEATURE_REMOVE_SNMPNOTIFYFILTERTABLE_CONTAINER_GET */
 
-netsnmp_feature_child_of(snmpNotifyFilterTable_registration_get, snmpNotifyFilterTable_external_access)
 #ifndef NETSNMP_FEATURE_REMOVE_SNMPNOTIFYFILTERTABLE_REGISTRATION_GET
 snmpNotifyFilterTable_registration *
 snmpNotifyFilterTable_registration_get(void)
@@ -122,7 +127,6 @@ snmpNotifyFilterTable_registration_get(void)
 }
 #endif /* NETSNMP_FEATURE_REMOVE_SNMPNOTIFYFILTERTABLE_REGISTRATION_GET */
 
-netsnmp_feature_child_of(snmpNotifyFilterTable_registration_set, snmpNotifyFilterTable_external_access)
 #ifndef NETSNMP_FEATURE_REMOVE_SNMPNOTIFYFILTERTABLE_REGISTRATION_SET
 snmpNotifyFilterTable_registration *
 snmpNotifyFilterTable_registration_set(snmpNotifyFilterTable_registration *
@@ -135,7 +139,6 @@ snmpNotifyFilterTable_registration_set(snmpNotifyFilterTable_registration *
 }
 #endif /* NETSNMP_FEATURE_REMOVE_SNMPNOTIFYFILTERTABLE_REGISTRATION_SET */
 
-netsnmp_feature_child_of(snmpNotifyFilterTable_container_size, snmpNotifyFilterTable_external_access)
 #ifndef NETSNMP_FEATURE_REMOVE_SNMPNOTIFYFILTERTABLE_CONTAINER_SIZE
 int
 snmpNotifyFilterTable_container_size(void)

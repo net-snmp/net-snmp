@@ -47,10 +47,17 @@
 
 #include <ctype.h>
 
-netsnmp_feature_provide(udpEndpointTable_external_access)
+netsnmp_feature_child_of(udpEndpointTable_external_access, libnetsnmpmibs)
+
 netsnmp_feature_require(row_merge)
 netsnmp_feature_require(baby_steps)
 netsnmp_feature_require(check_all_requests_error)
+
+
+netsnmp_feature_child_of(udpEndpointTable_container_size, udpEndpointTable_external_access)
+netsnmp_feature_child_of(udpEndpointTable_registration_set, udpEndpointTable_external_access)
+netsnmp_feature_child_of(udpEndpointTable_registration_get, udpEndpointTable_external_access)
+netsnmp_feature_child_of(udpEndpointTable_container_get, udpEndpointTable_external_access)
 
 /**********************************************************************
  **********************************************************************
@@ -85,7 +92,6 @@ static void
                 _udpEndpointTable_container_shutdown(udpEndpointTable_interface_ctx *
                                                      if_ctx);
 
-netsnmp_feature_child_of(udpEndpointTable_container_get, udpEndpointTable_external_access)
 #ifndef NETSNMP_FEATURE_REMOVE_UDPENDPOINTTABLE_CONTAINER_GET
 netsnmp_container *
 udpEndpointTable_container_get(void)
@@ -94,7 +100,6 @@ udpEndpointTable_container_get(void)
 }
 #endif /* NETSNMP_FEATURE_REMOVE_UDPENDPOINTTABLE_CONTAINER_GET */
 
-netsnmp_feature_child_of(udpEndpointTable_registration_get, udpEndpointTable_external_access)
 #ifndef NETSNMP_FEATURE_REMOVE_UDPENDPOINTTABLE_REGISTRATION_GET
 udpEndpointTable_registration *
 udpEndpointTable_registration_get(void)
@@ -103,7 +108,6 @@ udpEndpointTable_registration_get(void)
 }
 #endif /* NETSNMP_FEATURE_REMOVE_UDPENDPOINTTABLE_REGISTRATION_GET */
 
-netsnmp_feature_child_of(udpEndpointTable_registration_set, udpEndpointTable_external_access)
 #ifndef NETSNMP_FEATURE_REMOVE_UDPENDPOINTTABLE_REGISTRATION_SET
 udpEndpointTable_registration *
 udpEndpointTable_registration_set(udpEndpointTable_registration * newreg)
@@ -114,7 +118,6 @@ udpEndpointTable_registration_set(udpEndpointTable_registration * newreg)
 }
 #endif /* NETSNMP_FEATURE_REMOVE_UDPENDPOINTTABLE_REGISTRATION_SET */
 
-netsnmp_feature_child_of(udpEndpointTable_container_size, udpEndpointTable_external_access)
 #ifndef NETSNMP_FEATURE_REMOVE_UDPENDPOINTTABLE_CONTAINER_SIZE
 int
 udpEndpointTable_container_size(void)

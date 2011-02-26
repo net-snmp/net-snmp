@@ -12,6 +12,8 @@
 
 netsnmp_feature_require(iquery)
 
+netsnmp_feature_child_of(sched_nextrowtime, netsnmp_unused)
+
 netsnmp_tdata *schedule_table;
 
 
@@ -438,7 +440,6 @@ sched_nextTime( struct schedTable_entry *entry )
     return;
 }
 
-netsnmp_feature_child_of(sched_nextrowtime, netsnmp_unused)
 #ifndef NETSNMP_FEATURE_REMOVE_SCHED_NEXTROWTIME
 void
 sched_nextRowTime( netsnmp_tdata_row *row )

@@ -47,10 +47,17 @@
 
 #include <ctype.h>
 
-netsnmp_feature_provide(ipSystemStatsTable_external_access)
+netsnmp_feature_child_of(ipSystemStatsTable_external_access, libnetsnmpmibs)
+
 netsnmp_feature_require(row_merge)
 netsnmp_feature_require(baby_steps)
 netsnmp_feature_require(check_all_requests_error)
+
+
+netsnmp_feature_child_of(ipSystemStatsTable_container_size, ipSystemStatsTable_external_access)
+netsnmp_feature_child_of(ipSystemStatsTable_registration_set, ipSystemStatsTable_external_access)
+netsnmp_feature_child_of(ipSystemStatsTable_registration_get, ipSystemStatsTable_external_access)
+netsnmp_feature_child_of(ipSystemStatsTable_container_get, ipSystemStatsTable_external_access)
 
 /**********************************************************************
  **********************************************************************
@@ -86,7 +93,6 @@ static void
                 _ipSystemStatsTable_container_shutdown(ipSystemStatsTable_interface_ctx *
                                                        if_ctx);
 
-netsnmp_feature_child_of(ipSystemStatsTable_container_get, ipSystemStatsTable_external_access)
 #ifndef NETSNMP_FEATURE_REMOVE_IPSYSTEMSTATSTABLE_CONTAINER_GET
 netsnmp_container *
 ipSystemStatsTable_container_get(void)
@@ -95,7 +101,6 @@ ipSystemStatsTable_container_get(void)
 }
 #endif /* NETSNMP_FEATURE_REMOVE_IPSYSTEMSTATSTABLE_CONTAINER_GET */
 
-netsnmp_feature_child_of(ipSystemStatsTable_registration_get, ipSystemStatsTable_external_access)
 #ifndef NETSNMP_FEATURE_REMOVE_IPSYSTEMSTATSTABLE_REGISTRATION_GET
 ipSystemStatsTable_registration *
 ipSystemStatsTable_registration_get(void)
@@ -104,7 +109,6 @@ ipSystemStatsTable_registration_get(void)
 }
 #endif /* NETSNMP_FEATURE_REMOVE_IPSYSTEMSTATSTABLE_REGISTRATION_GET */
 
-netsnmp_feature_child_of(ipSystemStatsTable_registration_set, ipSystemStatsTable_external_access)
 #ifndef NETSNMP_FEATURE_REMOVE_IPSYSTEMSTATSTABLE_REGISTRATION_SET
 ipSystemStatsTable_registration *
 ipSystemStatsTable_registration_set(ipSystemStatsTable_registration *
@@ -117,7 +121,6 @@ ipSystemStatsTable_registration_set(ipSystemStatsTable_registration *
 }
 #endif /* NETSNMP_FEATURE_REMOVE_IPSYSTEMSTATSTABLE_REGISTRATION_SET */
 
-netsnmp_feature_child_of(ipSystemStatsTable_container_size, ipSystemStatsTable_external_access)
 #ifndef NETSNMP_FEATURE_REMOVE_IPSYSTEMSTATSTABLE_CONTAINER_SIZE
 int
 ipSystemStatsTable_container_size(void)

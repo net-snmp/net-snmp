@@ -11,7 +11,7 @@
 #include "disman/event/mteTrigger.h"
 #include "disman/event/mteObjects.h"
 
-netsnmp_feature_provide(disman_debugging)
+netsnmp_feature_child_of(disman_debugging, libnetsnmpmibs)
 
 netsnmp_tdata *event_table_data;
 

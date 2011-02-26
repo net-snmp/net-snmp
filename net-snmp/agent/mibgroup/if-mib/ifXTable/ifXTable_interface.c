@@ -50,7 +50,8 @@
 
 #include <ctype.h>
 
-netsnmp_feature_provide(ifXTable_external_access)
+netsnmp_feature_child_of(ifXTable_external_access, libnetsnmpmibs)
+
 netsnmp_feature_require(row_merge)
 netsnmp_feature_require(cache_find_by_oid)
 netsnmp_feature_require(baby_steps)
@@ -90,7 +91,6 @@ static void     _ifXTable_container_init(ifXTable_interface_ctx * if_ctx);
 static void     _ifXTable_container_shutdown(ifXTable_interface_ctx *
                                              if_ctx);
 
-netsnmp_feature_child_of(ifXTable_container_get, ifXTable_external_access)
 #ifndef NETSNMP_FEATURE_REMOVE_IFXTABLE_CONTAINER_GET
 netsnmp_container *
 ifXTable_container_get(void)
@@ -99,7 +99,6 @@ ifXTable_container_get(void)
 }
 #endif /* NETSNMP_FEATURE_REMOVE_IFXTABLE_CONTAINER_GET */
 
-netsnmp_feature_child_of(ifXTable_registration_get, ifXTable_external_access)
 #ifndef NETSNMP_FEATURE_REMOVE_IFXTABLE_REGISTRATION_GET
 ifXTable_registration *
 ifXTable_registration_get(void)
@@ -108,7 +107,6 @@ ifXTable_registration_get(void)
 }
 #endif /* NETSNMP_FEATURE_REMOVE_IFXTABLE_REGISTRATION_GET */
 
-netsnmp_feature_child_of(ifXTable_registration_set, ifXTable_external_access)
 #ifndef NETSNMP_FEATURE_REMOVE_IFXTABLE_REGISTRATION_SET
 ifXTable_registration *
 ifXTable_registration_set(ifXTable_registration * newreg)
@@ -119,7 +117,6 @@ ifXTable_registration_set(ifXTable_registration * newreg)
 }
 #endif /* NETSNMP_FEATURE_REMOVE_IFXTABLE_REGISTRATION_SET */
 
-netsnmp_feature_child_of(ifXTable_container_size, ifXTable_external_access)
 #ifndef NETSNMP_FEATURE_REMOVE_IFXTABLE_CONTAINER_SIZE
 int
 ifXTable_container_size(void)
@@ -370,7 +367,6 @@ _ifXTable_initialize_interface(ifXTable_registration * reg_ptr,
  * @internal
  * Shutdown the table ifXTable
  */
-netsnmp_feature_child_of(ifxtable_shutdown_interface, netsnmp_unused)
 #ifndef NETSNMP_FEATURE_REMOVE_IFXTABLE_SHUTDOWN_INTERFACE
 void
 _ifXTable_shutdown_interface(ifXTable_registration * reg_ptr)

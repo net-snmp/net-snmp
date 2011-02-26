@@ -47,11 +47,18 @@
 
 #include <ctype.h>
 
-netsnmp_feature_provide(ipv6ScopeZoneIndexTable_external_access)
+netsnmp_feature_child_of(ipv6ScopeZoneIndexTable_external_access, libnetsnmpmibs)
+
 netsnmp_feature_require(row_merge)
 netsnmp_feature_require(baby_steps)
 netsnmp_feature_require(table_container_row_insert)
 netsnmp_feature_require(check_all_requests_error)
+
+
+netsnmp_feature_child_of(ipv6ScopeZoneIndexTable_container_size, ipv6ScopeZoneIndexTable_external_access)
+netsnmp_feature_child_of(ipv6ScopeZoneIndexTable_registration_set, ipv6ScopeZoneIndexTable_external_access)
+netsnmp_feature_child_of(ipv6ScopeZoneIndexTable_registration_get, ipv6ScopeZoneIndexTable_external_access)
+netsnmp_feature_child_of(ipv6ScopeZoneIndexTable_container_get, ipv6ScopeZoneIndexTable_external_access)
 
 /**********************************************************************
  **********************************************************************
@@ -91,7 +98,6 @@ _cache_load(netsnmp_cache * cache, void *vmagic);
 static void
 _cache_free(netsnmp_cache * cache, void *magic);
 
-netsnmp_feature_child_of(ipv6ScopeZoneIndexTable_container_get, ipv6ScopeZoneIndexTable_external_access)
 #ifndef NETSNMP_FEATURE_REMOVE_IPV6SCOPEZONEINDEXTABLE_CONTAINER_GET
 netsnmp_container *
 ipv6ScopeZoneIndexTable_container_get(void)
@@ -100,7 +106,6 @@ ipv6ScopeZoneIndexTable_container_get(void)
 }
 #endif /* NETSNMP_FEATURE_REMOVE_IPV6SCOPEZONEINDEXTABLE_CONTAINER_GET */
 
-netsnmp_feature_child_of(ipv6ScopeZoneIndexTable_registration_get, ipv6ScopeZoneIndexTable_external_access)
 #ifndef NETSNMP_FEATURE_REMOVE_IPV6SCOPEZONEINDEXTABLE_REGISTRATION_GET
 ipv6ScopeZoneIndexTable_registration *
 ipv6ScopeZoneIndexTable_registration_get(void)
@@ -109,7 +114,6 @@ ipv6ScopeZoneIndexTable_registration_get(void)
 }
 #endif /* NETSNMP_FEATURE_REMOVE_IPV6SCOPEZONEINDEXTABLE_REGISTRATION_GET */
 
-netsnmp_feature_child_of(ipv6ScopeZoneIndexTable_registration_set, ipv6ScopeZoneIndexTable_external_access)
 #ifndef NETSNMP_FEATURE_REMOVE_IPV6SCOPEZONEINDEXTABLE_REGISTRATION_SET
 ipv6ScopeZoneIndexTable_registration *
 ipv6ScopeZoneIndexTable_registration_set
@@ -122,7 +126,6 @@ ipv6ScopeZoneIndexTable_registration_set
 }
 #endif /* NETSNMP_FEATURE_REMOVE_IPV6SCOPEZONEINDEXTABLE_REGISTRATION_SET */
 
-netsnmp_feature_child_of(ipv6ScopeZoneIndexTable_container_size, ipv6ScopeZoneIndexTable_external_access)
 #ifndef NETSNMP_FEATURE_REMOVE_IPV6SCOPEZONEINDEXTABLE_CONTAINER_SIZE
 int
 ipv6ScopeZoneIndexTable_container_size(void)

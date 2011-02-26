@@ -15,6 +15,9 @@
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 #include <net-snmp/data_access/swrun.h>
 
+netsnmp_feature_child_of(software_running, libnetsnmpmibs)
+
+netsnmp_feature_child_of(swrun_max_processes, software_running)
 
 /**---------------------------------------------------------------------*/
 /*
@@ -79,7 +82,6 @@ swrun_count_processes( void )
     return ( swrun_container ? CONTAINER_SIZE(swrun_container) : 0 );
 }
 
-netsnmp_feature_child_of(swrun_max_processes, netsnmp_unused)
 #ifndef NETSNMP_FEATURE_REMOVE_SWRUN_MAX_PROCESSES
 int
 swrun_max_processes( void )
