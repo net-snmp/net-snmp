@@ -65,7 +65,7 @@ cleanfeaturessubdirs:
 # feature-check definitions
 .SUFFIXES: .ft
 .c.ft:
-	$(FEATURECHECK) --feature-global $(top_srcdir)/include/net-snmp/feature-details.h $(mysubdir) $< $@ $(CC) -E $(CPPFLAGS) $(CFLAGS) -c
+	$(FEATURECHECK) --feature-global $(top_builddir)/include/net-snmp/feature-details.h $(mysubdir) $< $@ $(CC) -E $(CPPFLAGS) $(CFLAGS) -c
 
 subdirs:
 	@if test "$(SUBDIRS)" != ""; then \
