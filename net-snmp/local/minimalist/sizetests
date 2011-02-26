@@ -2,11 +2,17 @@
 
 use strict;
 use Data::Dumper;
+use Getopt::Std;
+our %opts;
+
+getopts('thl', \%opts) || usage();
+
+usage() if ($opts{'h'});
 
 my @argumentsets =
     (
      {
-	 name => 'SNMPv3 Security',
+	 title => 'security-types',
 	 arguments =>
 	 {
 	     usm => {
@@ -17,22 +23,27 @@ my @argumentsets =
 		 'with-out-security-modules' => 'usm',
 		 'with-transports'           => 'DTLSUDP TLSTCP',
 		 'mib-modules'               => 'tlstm-mib tsm-mib'
+	     },
+	     usmanddtlsandtls => {
+		 'with-security-modules'     => 'tsm usm',
+		 'with-transports'           => 'DTLSUDP TLSTCP',
+		 'mib-modules'               => 'tlstm-mib tsm-mib'
 	     }
 	 }
      },
      {
-	 name => 'minimalist',
+	 title => 'minimalist',
 	 arguments =>
 	 { 
 	     minimal => {
 		 'enable-minimalist'    => '',
 	     },
-	     nominimal => {
+	     'not-minimal' => {
 	     }
 	 }
      },
      {
-	 name => 'mib-loading',
+	 title => 'mib-loading',
 	 arguments =>
 	 { 
 	     'without-mib-loading' => {
@@ -43,7 +54,7 @@ my @argumentsets =
 	 }
      },
      {
-	 name => 'debugging',
+	 title => 'debugging',
 	 arguments =>
 	 { 
 	     'without-debugging' => {
@@ -55,6 +66,17 @@ my @argumentsets =
      },
     );
 
+if ($opts{'l'}) {
+    print "Types available:\n";
+    printf("  %-40.40s %s\n", "Test Title", "Number of subtests");
+    printf("  %-40.40s %s\n", "-" x 39, "-" x length("Number of subtests"));
+    foreach my $type (@argumentsets) {
+	my @keys = keys(%{$type->{'arguments'}});
+	printf("  %-40.40s %s\n", $type->{'title'}, $#keys+1);
+    }
+    exit;
+}
+
 my @sets = ({});
 
 foreach my $set (@argumentsets) {
@@ -62,7 +84,8 @@ foreach my $set (@argumentsets) {
 }
 
 foreach my $set (@sets) {
-    print generate_configure_flags($set), "\n";
+    print "$set->{'title'}:\n";
+    print " ", generate_configure_flags($set), "\n";
 }
 
 sub add_in_flags {
@@ -74,6 +97,11 @@ sub add_in_flags {
 	foreach my $newargs (keys(%{$argumentset->{'arguments'}})) {
 	    my %flags = %{$flags};  # copy the existing hash-set of flags
 	    
+	    if (exists($flags{'title'})) {
+		$flags{'title'} .= ", $newargs";
+	    } else {
+		$flags{'title'} .= "$newargs";
+	    }
 	    foreach my $newflag (keys(%{$argumentset->{'arguments'}{$newargs}})) {
 
 		$flags{$newflag} .= " $argumentset->{'arguments'}{$newargs}{$newflag}";
@@ -90,6 +118,7 @@ sub generate_configure_flags {
     my ($arguments) = @_;
     my $line = "";
     foreach my $arg (keys(%$arguments)) {
+	next if ($arg eq 'title');
 	if ($arguments->{$arg} =~ /^\s*$/) {
 	    $line .= " --$arg";
 	} else {
@@ -97,4 +126,13 @@ sub generate_configure_flags {
 	}
     }
     return $line;
+}
+
+sub usage {
+    print "Usage: $0 [FLAGS]\n\n";
+    print "FLAGS:\n";
+    print "\t-h\thelp\n";
+    print "\t-t TYPES\tSelect types to analyze (default = all)\n";
+    print "\t-l\tList available types\n";
+    exit;
 }
