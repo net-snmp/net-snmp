@@ -75,6 +75,28 @@ my @argumentsets =
 	 }
      },
      {
+	 title => 'logging',
+	 arguments =>
+	 { 
+	     'without-logging' => {
+		 'with-out-features'    => 'logging',
+	     },
+	     'with-logging' => {
+	     }
+	 }
+     },
+     {
+	 title => 'agent-mibs',
+	 arguments =>
+	 { 
+	     'full-agent' => {
+	     },
+	     'mini-agent' => {
+		 'enable-mini-agent' => '',
+	     }
+	 }
+     },
+     {
 	 title => 'perl',
 	 arguments =>
 	 { 
@@ -226,10 +248,10 @@ sub analyze_size {
 	$totalsize += $info[7];
     }
     printf $outfile ("%-50.50s %10s\n", "-" x 49, "-" x 10);
-    printf $outfile ("%-50.50s %10s\n", "TOTAL", $totalsize);
+    printf $outfile ("%-50.50s %10s bytes\n", "TOTAL", $totalsize);
 
     printf("%-50.50s %10s\n", "-" x 49, "-" x 10);
-    printf("%-50.50s %10s\n\n", "TOTAL", $totalsize);
+    printf("%-50.50s %10s bytes\n", "TOTAL", $totalsize);
 
     return $totalsize;
 }
