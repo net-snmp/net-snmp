@@ -59,7 +59,8 @@ $compileline '-DNETSNMP_FEATURE_CHECKING=1' \
              '-Dnetsnmp_feature_require(X)=X NSF_RR' \
              '-Dnetsnmp_feature_provide(X)=X NSF_PP' \
              '-Dnetsnmp_feature_child_of(X,Y)=X,Y NSF_CO' \
-             '-Dnetsnmp_feature_want(X)=X NSF_WW' $source | $GREP NSF_ > $tmpf
+             '-Dnetsnmp_feature_want(X)=X NSF_WW' $source | \
+    $GREP NSF_ | $GREP -v '^#define' > $tmpf
 
 $RM -f $destination;
 touch $destination;
