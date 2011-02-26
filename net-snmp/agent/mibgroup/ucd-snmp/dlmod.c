@@ -88,11 +88,6 @@ dlmod_delete_module(struct dlmod *dlm)
 static void
 dlmod_load_module(struct dlmod *dlm)
 {
-    char            sym_init[64 + sizeof("init_")];
-    char           *p, tmp_path[255];
-    int             (*dl_init) (void);
-    char           *st;
-
     DEBUGMSGTL(("dlmod", "dlmod_load_module %s: %s\n", dlm->name,
                 dlm->path));
 
@@ -113,6 +108,8 @@ dlmod_load_module(struct dlmod *dlm)
             return;
         }
     } else {
+        char *st, *p, tmp_path[255];
+
         for (p = strtok_r(dlmod_path, ":", &st); p; p = strtok_r(NULL, ":", &st)) {
             snprintf(tmp_path, sizeof(tmp_path), "%s/%s.so", p, dlm->path);
             DEBUGMSGTL(("dlmod", "p: %s tmp_path: %s\n", p, tmp_path));
@@ -131,17 +128,22 @@ dlmod_load_module(struct dlmod *dlm)
         if (dlm->status == DLMOD_ERROR)
             return;
     }
-    snprintf(sym_init, sizeof(sym_init), "init_%s", dlm->name);
-    dl_init = dlsym(dlm->handle, sym_init);
-    if (dl_init == NULL) {
-        dlclose(dlm->handle);
-        snprintf(dlm->error, sizeof(dlm->error),
-                 "dlsym failed: can't find \'%s\'", sym_init);
-        dlm->status = DLMOD_ERROR;
-        return;
+    {
+        char sym_init[64 + sizeof("init_")];
+        int  (*dl_init) (void);
+
+        snprintf(sym_init, sizeof(sym_init), "init_%s", dlm->name);
+        dl_init = dlsym(dlm->handle, sym_init);
+        if (dl_init == NULL) {
+            dlclose(dlm->handle);
+            snprintf(dlm->error, sizeof(dlm->error),
+                     "dlsym failed: can't find \'%s\'", sym_init);
+            dlm->status = DLMOD_ERROR;
+            return;
+        }
+        dl_init();
     }
 
-    dl_init();
     dlm->error[0] = '\0';
     dlm->status = DLMOD_LOADED;
 }
