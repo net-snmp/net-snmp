@@ -1062,7 +1062,7 @@ lookupResultsTable_del(struct lookupTable_data *thedata)
 
 #ifndef NETSNMP_NO_WRITE_SUPPORT
 int
-writelookupCtlTargetAddressType(int action,
+write_lookupCtlTargetAddressType(int action,
                                  u_char * var_val,
                                  u_char var_val_type,
                                  size_t var_val_len,
