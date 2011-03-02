@@ -165,6 +165,7 @@ struct snmp_secmod_def *find_sec_mod(int);
  */
 int             unregister_sec_mod(int);        /* register a security service */
 void            init_secmod(void);
+NETSNMP_IMPORT
 void            shutdown_secmod(void);
 
 /*
