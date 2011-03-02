@@ -406,6 +406,7 @@ typedef struct request_list {
 /* allow code to continue referencing API even if statistics are removed */
 #define snmp_increment_statistic(X)
 #define snmp_increment_statistic_by(X,Y)
+#define snmp_init_statistics()
 
 #endif
 
