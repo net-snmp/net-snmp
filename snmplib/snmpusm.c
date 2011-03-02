@@ -2150,11 +2150,7 @@ usm_check_and_update_timeliness(u_char * secEngineID,
         if (boots_uint == ENGINEBOOT_MAX
             || boots_uint != myBoots
             || time_difference > USM_TIME_WINDOW) {
-            if (snmp_increment_statistic(STAT_USMSTATSNOTINTIMEWINDOWS) ==
-                0) {
-                DEBUGMSGTL(("usm", "%s\n",
-                            "Failed to increment statistic."));
-            }
+            snmp_increment_statistic(STAT_USMSTATSNOTINTIMEWINDOWS);
 
             DEBUGMSGTL(("usm",
                         "boot_uint %u myBoots %u time_diff %u => not in time window\n",
@@ -2367,16 +2363,10 @@ usm_process_in_msg(int msgProcModel,    /* (UNUSED) */
             /*
              * This indicates a decryptionError.  
              */
-            if (snmp_increment_statistic(STAT_USMSTATSDECRYPTIONERRORS) ==
-                0) {
-                DEBUGMSGTL(("usm", "%s\n",
-                            "Failed to increment statistic."));
-            }
+            snmp_increment_statistic(STAT_USMSTATSDECRYPTIONERRORS);
             return SNMPERR_USM_DECRYPTIONERROR;
         }
-        if (snmp_increment_statistic(STAT_SNMPINASNPARSEERRS) == 0) {
-            DEBUGMSGTL(("usm", "%s\n", "Failed to increment statistic."));
-        }
+        snmp_increment_statistic(STAT_SNMPINASNPARSEERRS);
         return SNMPERR_USM_PARSEERROR;
     }
 
@@ -2387,10 +2377,7 @@ usm_process_in_msg(int msgProcModel,    /* (UNUSED) */
      * calling module.
      */
     if ((secLevel == SNMP_SEC_LEVEL_AUTHPRIV) && (salt_length != 8)) {
-        if (snmp_increment_statistic(STAT_USMSTATSDECRYPTIONERRORS) == 
-            0) {
-            DEBUGMSGTL(("usm", "%s\n", "Failed increment statistic."));
-        }
+        snmp_increment_statistic(STAT_USMSTATSDECRYPTIONERRORS);
         return SNMPERR_USM_DECRYPTIONERROR;
     }
 
@@ -2438,11 +2425,7 @@ usm_process_in_msg(int msgProcModel,    /* (UNUSED) */
         (!sess && (msg_flags & SNMP_MSG_FLAG_RPRT_BIT))) {
         if (ISENGINEKNOWN(secEngineID, *secEngineIDLen) == FALSE) {
             DEBUGMSGTL(("usm", "Unknown Engine ID.\n"));
-            if (snmp_increment_statistic(STAT_USMSTATSUNKNOWNENGINEIDS) ==
-                0) {
-                DEBUGMSGTL(("usm", "%s\n",
-                            "Failed to increment statistic."));
-            }
+            snmp_increment_statistic(STAT_USMSTATSUNKNOWNENGINEIDS);
             return SNMPERR_USM_UNKNOWNENGINEID;
         }
     } else {
@@ -2466,9 +2449,7 @@ usm_process_in_msg(int msgProcModel,    /* (UNUSED) */
                                          (!sess)) ? 0 : 1)))
         == NULL) {
         DEBUGMSGTL(("usm", "Unknown User(%s)\n", secName));
-        if (snmp_increment_statistic(STAT_USMSTATSUNKNOWNUSERNAMES) == 0) {
-            DEBUGMSGTL(("usm", "%s\n", "Failed to increment statistic."));
-        }
+        snmp_increment_statistic(STAT_USMSTATSUNKNOWNUSERNAMES);
         return SNMPERR_USM_UNKNOWNSECURITYNAME;
     }
 
@@ -2486,10 +2467,7 @@ usm_process_in_msg(int msgProcModel,    /* (UNUSED) */
     if (1 == rc) {
         DEBUGMSGTL(("usm", "Unsupported Security Level (%d).\n",
                     secLevel));
-        if (snmp_increment_statistic
-            (STAT_USMSTATSUNSUPPORTEDSECLEVELS) == 0) {
-            DEBUGMSGTL(("usm", "%s\n", "Failed to increment statistic."));
-        }
+        snmp_increment_statistic(STAT_USMSTATSUNSUPPORTEDSECLEVELS);
         return SNMPERR_USM_UNSUPPORTEDSECURITYLEVEL;
     } else if (rc != 0) {
         DEBUGMSGTL(("usm", "Unknown issue.\n"));
@@ -2507,10 +2485,7 @@ usm_process_in_msg(int msgProcModel,    /* (UNUSED) */
                                 signature, signature_length)
             != SNMP_ERR_NOERROR) {
             DEBUGMSGTL(("usm", "Verification failed.\n"));
-            if (snmp_increment_statistic(STAT_USMSTATSWRONGDIGESTS) == 0) {
-                DEBUGMSGTL(("usm", "%s\n",
-                            "Failed to increment statistic."));
-            }
+            snmp_increment_statistic(STAT_USMSTATSWRONGDIGESTS);
 	    snmp_log(LOG_WARNING, "Authentication failed for %s\n",
 				user->name);
             return SNMPERR_USM_AUTHENTICATIONFAILURE;
@@ -2601,9 +2576,7 @@ usm_process_in_msg(int msgProcModel,    /* (UNUSED) */
                                             "encrypted sPDU")) == NULL) {
             DEBUGMSGTL(("usm", "%s\n",
                         "Failed while parsing encrypted sPDU."));
-            if (snmp_increment_statistic(STAT_SNMPINASNPARSEERRS) == 0) {
-                DEBUGMSGTL(("usm", "%s\n", "Failed increment statistic."));
-            }
+            snmp_increment_statistic(STAT_SNMPINASNPARSEERRS);
             usm_free_usmStateReference(*secStateRef);
             *secStateRef = NULL;
             return SNMPERR_USM_PARSEERROR;
@@ -2624,10 +2597,7 @@ usm_process_in_msg(int msgProcModel,    /* (UNUSED) */
                 DEBUGMSGTL(("usm",
                             "Ciphertext is %lu bytes, not an integer multiple of 8 (rem %lu)\n",
                             (unsigned long)remaining, (unsigned long)remaining % 8));
-                if (snmp_increment_statistic(STAT_USMSTATSDECRYPTIONERRORS) ==
-                    0) {
-                    DEBUGMSGTL(("usm", "%s\n", "Failed increment statistic."));
-                }
+                snmp_increment_statistic(STAT_USMSTATSDECRYPTIONERRORS);
                 usm_free_usmStateReference(*secStateRef);
                 *secStateRef = NULL;
                 return SNMPERR_USM_DECRYPTIONERROR;
@@ -2637,10 +2607,7 @@ usm_process_in_msg(int msgProcModel,    /* (UNUSED) */
 
             if ( !user->privKey ) {
                 DEBUGMSGTL(("usm", "No privacy pass phrase for %s\n", user->secName));
-                if (snmp_increment_statistic(STAT_USMSTATSDECRYPTIONERRORS) ==
-                    0) {
-                    DEBUGMSGTL(("usm", "%s\n", "Failed increment statistic."));
-                }
+                snmp_increment_statistic(STAT_USMSTATSDECRYPTIONERRORS);
                 usm_free_usmStateReference(*secStateRef);
                 *secStateRef = NULL;
                 return SNMPERR_USM_DECRYPTIONERROR;
@@ -2672,10 +2639,7 @@ usm_process_in_msg(int msgProcModel,    /* (UNUSED) */
                        value_ptr, remaining, *scopedPdu, scopedPduLen)
             != SNMP_ERR_NOERROR) {
             DEBUGMSGTL(("usm", "%s\n", "Failed decryption."));
-            if (snmp_increment_statistic
-                (STAT_USMSTATSDECRYPTIONERRORS) == 0) {
-                DEBUGMSGTL(("usm", "%s\n", "Failed increment statistic."));
-            }
+            snmp_increment_statistic(STAT_USMSTATSDECRYPTIONERRORS);
             return SNMPERR_USM_DECRYPTIONERROR;
         }
 #ifdef NETSNMP_ENABLE_TESTING_CODE
