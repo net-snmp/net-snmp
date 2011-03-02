@@ -23,7 +23,11 @@ netsnmp_feature_child_of(container_types, container_all)
 netsnmp_feature_child_of(container_compare, container_all)
 
 netsnmp_feature_child_of(container_ncompare_cstring, container_compare)
-netsnmp_feature_child_of(container_compare_functions, container_compare)
+netsnmp_feature_child_of(container_compare_mem, container_compare)
+netsnmp_feature_child_of(container_compare_long, container_compare)
+netsnmp_feature_child_of(container_compare_ulong, container_compare)
+netsnmp_feature_child_of(container_compare_int32, container_compare)
+netsnmp_feature_child_of(container_compare_uint32, container_compare)
 
 netsnmp_feature_child_of(container_find_factory, container_factories)
 
@@ -591,7 +595,7 @@ netsnmp_compare_direct_cstring(const void * lhs, const void * rhs)
  * compare up to the length of the smaller, and then use length to
  * break any ties.
  */
-#ifndef NETSNMP_FEATURE_REMOVE_CONTAINER_COMPARE_FUNCTIONS
+#ifndef NETSNMP_FEATURE_REMOVE_CONTAINER_COMPARE_MEM
 int
 netsnmp_compare_mem(const char * lhs, size_t lhs_len,
                     const char * rhs, size_t rhs_len)
@@ -608,16 +612,16 @@ netsnmp_compare_mem(const char * lhs, size_t lhs_len,
 
     return rc;
 }
+#endif /* NETSNMP_FEATURE_REMOVE_CONTAINER_COMPARE_MEM */
 
-typedef struct dummy_long_s {
-    long                      index;
-} dummy_long;
-
+#ifndef NETSNMP_FEATURE_REMOVE_CONTAINER_COMPARE_LONG
 int
 netsnmp_compare_long(const void * lhs, const void * rhs)
 {
-    const dummy_long *lhd = (const dummy_long*)lhs;
-    const dummy_long *rhd = (const dummy_long*)rhs;
+    typedef struct { long index; } dummy;
+
+    const dummy *lhd = (const dummy*)lhs;
+    const dummy *rhd = (const dummy*)rhs;
 
     if (lhd->index < rhd->index)
         return -1;
@@ -626,16 +630,16 @@ netsnmp_compare_long(const void * lhs, const void * rhs)
 
     return 0;
 }
+#endif /* NETSNMP_FEATURE_REMOVE_CONTAINER_COMPARE_LONG */
 
-typedef struct dummy_ulong_s {
-    u_long                      index;
-} dummy_ulong;
-
+#ifndef NETSNMP_FEATURE_REMOVE_CONTAINER_COMPARE_ULONG
 int
 netsnmp_compare_ulong(const void * lhs, const void * rhs)
 {
-    const dummy_ulong *lhd = (const dummy_ulong*)lhs;
-    const dummy_ulong *rhd = (const dummy_ulong*)rhs;
+    typedef struct { u_long index; } dummy;
+
+    const dummy *lhd = (const dummy*)lhs;
+    const dummy *rhd = (const dummy*)rhs;
 
     if (lhd->index < rhd->index)
         return -1;
@@ -644,16 +648,16 @@ netsnmp_compare_ulong(const void * lhs, const void * rhs)
 
     return 0;
 }
+#endif /* NETSNMP_FEATURE_REMOVE_CONTAINER_COMPARE_ULONG */
 
-typedef struct dummy_int32_s {
-    int32_t                    index;
-} dummy_int32;
-
+#ifndef NETSNMP_FEATURE_REMOVE_CONTAINER_COMPARE_INT32
 int
 netsnmp_compare_int32(const void * lhs, const void * rhs)
 {
-    const dummy_int32 *lhd = (const dummy_int32*)lhs;
-    const dummy_int32 *rhd = (const dummy_int32*)rhs;
+    typedef struct { int32_t index; } dummy;
+
+    const dummy *lhd = (const dummy*)lhs;
+    const dummy *rhd = (const dummy*)rhs;
 
     if (lhd->index < rhd->index)
         return -1;
@@ -662,16 +666,16 @@ netsnmp_compare_int32(const void * lhs, const void * rhs)
 
     return 0;
 }
+#endif /* NETSNMP_FEATURE_REMOVE_CONTAINER_COMPARE_INT32 */
 
-typedef struct dummy_uint32_s {
-    uint32_t                   index;
-} dummy_uint32;
-
+#ifndef NETSNMP_FEATURE_REMOVE_CONTAINER_COMPARE_UINT32
 int
 netsnmp_compare_uint32(const void * lhs, const void * rhs)
 {
-    const dummy_uint32 *lhd = (const dummy_uint32*)lhs;
-    const dummy_uint32 *rhd = (const dummy_uint32*)rhs;
+    typedef struct { uint32_t index; } dummy;
+
+    const dummy *lhd = (const dummy*)lhs;
+    const dummy *rhd = (const dummy*)rhs;
 
     if (lhd->index < rhd->index)
         return -1;
@@ -680,7 +684,7 @@ netsnmp_compare_uint32(const void * lhs, const void * rhs)
 
     return 0;
 }
-#endif /* NETSNMP_FEATURE_REMOVE_CONTAINER_COMPARE_FUNCTIONS */
+#endif /* NETSNMP_FEATURE_REMOVE_CONTAINER_COMPARE_UINT32 */
 
 /*------------------------------------------------------------------
  * netsnmp_container_simple_free
