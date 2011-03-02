@@ -22,7 +22,7 @@ netsnmp_feature_child_of(container_factories, container_all)
 netsnmp_feature_child_of(container_types, container_all)
 netsnmp_feature_child_of(container_compare, container_all)
 
-netsnmp_feature_child_of(container_compare_cstring, container_compare)
+netsnmp_feature_child_of(container_ncompare_cstring, container_compare)
 netsnmp_feature_child_of(container_compare_functions, container_compare)
 
 netsnmp_feature_child_of(container_find_factory, container_factories)
@@ -568,7 +568,7 @@ netsnmp_compare_cstring(const void * lhs, const void * rhs)
                   ((const container_type*)rhs)->name);
 }
 
-#ifndef NETSNMP_FEATURE_REMOVE_CONTAINER_COMPARE_CSTRING
+#ifndef NETSNMP_FEATURE_REMOVE_CONTAINER_NCOMPARE_CSTRING
 int
 netsnmp_ncompare_cstring(const void * lhs, const void * rhs)
 {
@@ -576,7 +576,7 @@ netsnmp_ncompare_cstring(const void * lhs, const void * rhs)
                    ((const container_type*)rhs)->name,
                    strlen(((const container_type*)rhs)->name));
 }
-#endif /* NETSNMP_FEATURE_REMOVE_CONTAINER_COMPARE_CSTRING */
+#endif /* NETSNMP_FEATURE_REMOVE_CONTAINER_NCOMPARE_CSTRING */
 
 int
 netsnmp_compare_direct_cstring(const void * lhs, const void * rhs)
