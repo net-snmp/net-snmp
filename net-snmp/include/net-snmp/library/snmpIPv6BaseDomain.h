@@ -17,8 +17,10 @@ extern          "C" {
  * Prototypes
  */
 
+    NETSNMP_IMPORT
     char *netsnmp_ipv6_fmtaddr(const char *prefix, netsnmp_transport *t,
                                void *data, int len);
+    NETSNMP_IMPORT
     int netsnmp_sockaddr_in6_2(struct sockaddr_in6 *addr,
                                const char *inpeername,
                                const char *default_target);
