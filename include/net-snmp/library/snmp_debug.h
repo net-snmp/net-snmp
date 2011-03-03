@@ -42,6 +42,7 @@ extern          "C" {
     NETSNMP_IMPORT
     void            debugmsg_oid(const char *token, const oid * theoid,
                                  size_t len);
+    NETSNMP_IMPORT
     void            debugmsg_suboid(const char *token, const oid * theoid,
                                     size_t len);
     NETSNMP_IMPORT
