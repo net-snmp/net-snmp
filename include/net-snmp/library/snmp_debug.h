@@ -15,10 +15,6 @@ extern          "C" {
      */
 
 
-    /*
-     * These functions should not be used, if at all possible.  Instead, use
-     * the macros below. 
-     */
 #if !defined(__GNUC__) || __GNUC__ < 2 || (__GNUC__ == 2 && __GNUC_MINOR__ < 8)
 #define NETSNMP_ATTRIBUTE_FORMAT(type, formatArg, firstArg)
 #else
@@ -26,6 +22,10 @@ extern          "C" {
   __attribute__((__format__( __ ## type ## __, formatArg, firstArg )))
 #endif
 
+    /*
+     * These functions should not be used, if at all possible.  Instead, use
+     * the macros below. 
+     */
     NETSNMP_IMPORT
     void            debugmsg(const char *token, const char *format, ...)
                         NETSNMP_ATTRIBUTE_FORMAT(printf, 2, 3);
