@@ -67,7 +67,9 @@
 #include "agentx/client.h"
 #endif
 
-netsnmp_feature_child_of(unregister_mib_table_row, agent_registry)
+netsnmp_feature_child_of(agent_registry_all, libnetsnmpagent)
+
+netsnmp_feature_child_of(unregister_mib_table_row, agent_registry_all)
 
 /** @defgroup agent_lookup_cache Lookup cache, storing the registered OIDs.
  *     Maintain the cache used for locating sub-trees and OIDs.
