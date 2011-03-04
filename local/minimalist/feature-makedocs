@@ -142,7 +142,7 @@ sub usage {
     print "Usage: $0 [FLAGS] INPUTFILE OUTPUTFILE\n\n";
     print "FLAGS:\n";
     print "\t-h\thelp\n";
-    print "\t-o\tOutput style: Org-Mode\n";
+    print "\t-o\tOutput style: Org-Mode [default]\n";
     print "\nINPUT/OUTPUT\n";
     print "\tINPUTFILE:\tlocation of the include/net-snmp/feature-details.h file\n";
     print "\tOUTPUTFILE:\tthe file to write the results to\n";
