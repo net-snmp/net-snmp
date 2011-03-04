@@ -3,9 +3,9 @@
 use strict;
 use IO::File;
 use Getopt::Std;
-our %opts;
+our %opts = (W => 2);
 
-getopts('oh', \%opts) || usage();
+getopts('ohwW:', \%opts) || usage();
 
 usage() if ($opts{'h'});
 
@@ -20,11 +20,12 @@ my %top;
 my %files;
 my $reqfile;
 
-
 gather_data($inputfile);
-print_org_mode($outputfile);
-
-
+if ($opts{'w'}) {
+    print_wiki_mode($outputfile);
+} else {
+    print_org_mode($outputfile);
+}
 
 sub gather_data {
     my ($inputfile) = @_;
@@ -59,7 +60,6 @@ sub gather_data {
 
 	    push @{$files{$reqfile}{'wants'}}, $lc;
 	    push @{$features{$lc}{'wantedby'}}, $reqfile;
-
 	} elsif (/define NETSNMP_FEATURE_(.*)_CHILD_OF_(.*) 1/) {
 	    my $child = lc($1);
 	    my $parent = lc($2);
@@ -91,7 +91,9 @@ sub add_child {
     $features{$child}{'providedby'}, $reqfile;
 }
 
-
+######################################################################
+# org-mode output
+#
 sub print_org_mode {
     my ($outputfile) = @_;
 
@@ -138,11 +140,79 @@ sub org_link_files {
     return @files;
 }
 
+######################################################################
+# wiki output
+#
+sub print_wiki_mode {
+    my ($outputfile) = @_;
+
+    my $fh = new IO::File;
+    my $depth = 0;
+
+    if (!$fh->open("> $outputfile")) {
+	die "error!\n";
+    }
+
+    print $fh "'''The contents of this page is auto-generated from local/minimalist/feature-makedocs; do not edit by hand (changes will be lost)'''\n\n";
+
+    foreach my $node (sort keys(%top)) {
+	print_wiki_node($fh, $node, $depth+1);
+    }
+}
+
+sub print_wiki_node {
+    my ($fh, $node, $depth) = @_;
+
+    my $dataheader;
+    my $depthincrease = 1;
+
+    if ($depth > $opts{'W'}) {
+	print $fh "*" x ($depth - $opts{'W'} + 1) . " $node\n";
+	$dataheader = "*" x ($depth - $opts{'W'} + 2);
+	$depthincrease++;
+    } else {
+	print $fh "=" x $depth . " $node " . "=" x $depth . "\n";
+	$dataheader = "*";
+    }
+
+    if (exists($features{$node}{'providedby'})) {
+	print $fh "$dataheader provided in file: " .
+	    join(", ", wiki_link_files(@{$features{$node}{'providedby'}})) ."\n";
+    }
+    if (exists($features{$node}{'requiredby'})) {
+	print $fh "$dataheader required in file: " .
+	    join(", ", wiki_link_files(@{$features{$node}{'requiredby'}})) ."\n";
+    }
+    if (exists($features{$node}{'wantedby'})) {
+	print $fh "$dataheader wanted in file: " .
+	    join(", ", wiki_link_files(@{$features{$node}{'wantedby'}})) . "\n";
+    }
+    if (exists($features{$node}{'children'})) {
+	if ($depth >= $opts{'W'}) {
+	    print $fh "$dataheader Children:\n";
+	}
+	foreach my $child (sort keys(%{$features{$node}{'children'}})) {
+	    print_wiki_node($fh, $child, $depth + $depthincrease);
+	}
+    }
+}
+
+sub wiki_link_files {
+    my @files = @_;
+    map { $_ = "[http://net-snmp.svn.sourceforge.net/viewvc/net-snmp/trunk/net-snmp/$_?view=markup $_]"; } @files;
+    return @files;
+}
+
+######################################################################
+# help output
+#
 sub usage {
     print "Usage: $0 [FLAGS] INPUTFILE OUTPUTFILE\n\n";
     print "FLAGS:\n";
     print "\t-h\thelp\n";
     print "\t-o\tOutput style: Org-Mode [default]\n";
+    print "\t-w\tOutput style: wiki\n";
+    print "\t-W DEPTH\tWiki header to bullet list depth (default 2)\n";
     print "\nINPUT/OUTPUT\n";
     print "\tINPUTFILE:\tlocation of the include/net-snmp/feature-details.h file\n";
     print "\tOUTPUTFILE:\tthe file to write the results to\n";
