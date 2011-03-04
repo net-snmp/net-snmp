@@ -52,6 +52,7 @@ netsnmp_old_extend *compatability_entries;
 WriteMethod fixExec2Error;
 FindVarMethod var_extensible_old;
 oid  old_extensible_variables_oid[] = { NETSNMP_UCDAVIS_MIB, NETSNMP_SHELLMIBNUM, 1 };
+#ifndef NETSNMP_NO_WRITE_SUPPORT
 struct variable2 old_extensible_variables[] = {
     {MIBINDEX,     ASN_INTEGER,   NETSNMP_OLDAPI_RONLY,
      var_extensible_old, 1, {MIBINDEX}},
@@ -68,6 +69,24 @@ struct variable2 old_extensible_variables[] = {
     {ERRORFIXCMD,  ASN_OCTET_STR, NETSNMP_OLDAPI_RONLY,
      var_extensible_old, 1, {ERRORFIXCMD}}
 };
+#else /* !NETSNMP_NO_WRITE_SUPPORT */
+struct variable2 old_extensible_variables[] = {
+    {MIBINDEX,     ASN_INTEGER,   NETSNMP_OLDAPI_RONLY,
+     var_extensible_old, 1, {MIBINDEX}},
+    {ERRORNAME,    ASN_OCTET_STR, NETSNMP_OLDAPI_RONLY,
+     var_extensible_old, 1, {ERRORNAME}},
+    {SHELLCOMMAND, ASN_OCTET_STR, NETSNMP_OLDAPI_RONLY,
+     var_extensible_old, 1, {SHELLCOMMAND}},
+    {ERRORFLAG,    ASN_INTEGER,   NETSNMP_OLDAPI_RONLY,
+     var_extensible_old, 1, {ERRORFLAG}},
+    {ERRORMSG,     ASN_OCTET_STR, NETSNMP_OLDAPI_RONLY,
+     var_extensible_old, 1, {ERRORMSG}},
+    {ERRORFIX,     ASN_INTEGER,  NETSNMP_OLDAPI_RONLY,
+     var_extensible_old, 1, {ERRORFIX}},
+    {ERRORFIXCMD,  ASN_OCTET_STR, NETSNMP_OLDAPI_RONLY,
+     var_extensible_old, 1, {ERRORFIXCMD}}
+};
+#endif /* !NETSNMP_NO_WRITE_SUPPORT */
 #endif
 
 
@@ -127,9 +146,15 @@ _register_extend( oid *base, size_t len )
     tinfo->min_column = COLUMN_EXTCFG_FIRST_COLUMN;
     tinfo->max_column = COLUMN_EXTCFG_LAST_COLUMN;
     oid_buf[len] = 2;
+#ifndef NETSNMP_NO_WRITE_SUPPORT
     reg   = netsnmp_create_handler_registration(
                 "nsExtendConfigTable", handle_nsExtendConfigTable, 
                 oid_buf, len+1, HANDLER_CAN_RWRITE);
+#else /* !NETSNMP_NO_WRITE_SUPPORT */
+    reg   = netsnmp_create_handler_registration(
+                "nsExtendConfigTable", handle_nsExtendConfigTable, 
+                oid_buf, len+1, HANDLER_CAN_RONLY);
+#endif /* !NETSNMP_NO_WRITE_SUPPORT */
     netsnmp_register_table_data( reg, dinfo, tinfo );
     netsnmp_handler_owns_table_info(reg->handler->next);
     eptr->reg[0] = reg;
@@ -653,6 +678,7 @@ handle_nsExtendConfigTable(netsnmp_mib_handler          *handler,
          *
          **********/
 
+#ifndef NETSNMP_NO_WRITE_SUPPORT
         case MODE_SET_RESERVE1:
             /*
              * Validate the new assignments
@@ -1009,6 +1035,7 @@ handle_nsExtendConfigTable(netsnmp_mib_handler          *handler,
             }
         }
     }
+#endif /* !NETSNMP_NO_WRITE_SUPPORT */ 
 
     return SNMP_ERR_NOERROR;
 }
