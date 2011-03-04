@@ -8,7 +8,7 @@ use Getopt::Std;
 
 my $ID_NOREAD  = "NETSNMP_NO_READ_SUPPORT";
 my $ID_NOWRITE = "NETSNMP_NO_WRITE_SUPPORT";
-my $ID_MIN     = "NETSNMP_MINIMAL_CODE";
+# my $ID_MIN     = "NETSNMP_MINIMAL_CODE";
 
 my($ST_OFF, $ST_IF, $ST_ELSE, $ST_IFN, $ST_ELSEN) =
   ("off", "if", "else", "ifnot", "elsenot");
@@ -19,12 +19,17 @@ my $canwrite = 1; # current write state
 
 my($appname,$apppath) = fileparse($0);
 
+my $minimal_include_path = "include/net-snmp/net-snmp-features.h";
+
+
 if ( (!getopts("rwmi:v",\%opts)) || (1 != $#ARGV) ) {
   print "$appname [options] from-directory to-direpctory\n";
   print "-r     parse out code unneeded by $ID_NOREAD ifdef\n";
-  print "-w     parse out code unneeded by $ID_NOWRITE ifdef\n";
-  print "-m     parse out code unneeded by $ID_MIN ifffdef\n";
-  print "       (defaults to all the above)\n\n";
+  print "-w     parse out code unneeded by $ID_NOWRITE ifdef (DEFAULT)\n";
+  print "-m     parse out code unneeded according minimalist ifdefs\n";
+  print "       requires from-directory to be the top of the net-snmp tree\n";
+  print "       (This is multiple ifdefs auto selected depending\n";
+  print "        on the net-snmp source configuration)\n\n";
   print "-i 'ignore-file'  file of files to ignore (not copy)\n";
   print "-v     print verbose info to standard out\n";
   die "Error: two command line arguments required\n";
@@ -32,26 +37,31 @@ if ( (!getopts("rwmi:v",\%opts)) || (1 != $#ARGV) ) {
 
 #default to everything
 if ( (!exists $opts{r}) && (!exists $opts{w}) && (!exists $opts{m}) ) {
-  %thash = ( "$ID_NOREAD"   => "$ST_OFF",
-              "$ID_NOWRITE"  => "$ST_OFF",
-              "$ID_MIN"      => "$ST_OFF" );
+  $thash{"$ID_NOWRITE"} = "$ST_OFF";
 }
 else {
   $thash{"$ID_NOREAD"}  = "$ST_OFF" if ( exists $opts{r} );
   $thash{"$ID_NOWRITE"} = "$ST_OFF" if ( exists $opts{w} );
-  $thash{"$ID_MIN"}     = "$ST_OFF" if ( exists $opts{m} );
-}
-
-# create search string from tags
-my @tt     = keys %thash;
-my $search = shift @tt;
-my $sstr   = "";
-while ( $sstr = shift @tt) {
-  $search = $search . "|" . $sstr;
+  # xxx check for minimalist below
 }
 
 my $fromdir = $ARGV[0];
 my $todir   = $ARGV[1];
+
+if ( !(-e $fromdir) ) {
+  die "Error: $appname: from directory does not exist: '$fromdir'\n";
+}
+if ( !(-d $fromdir) ) {
+    die "Error: $appname: from directory, '$fromdir', must be a directory\n";
+}
+
+if ( exists $opts{m} ) {
+    load_minamal_ifdefs();
+}
+
+# create search string from tags
+my @tt     = keys %thash;
+my $search = join "|", (keys %thash);
 
 
 # check for and load ignore file
@@ -68,9 +78,6 @@ if ( exists $opts{i} ) {
 }
 
 
-if ( !(-e $fromdir) ) {
-  die "Error: $appname: from directory does not exist: '$fromdir'\n";
-}
 
 if ( -e $todir ) {
   if ( ((-d $fromdir) && !(-d $todir)) ||
@@ -80,9 +87,9 @@ if ( -e $todir ) {
 }
 else {
   if (-d $fromdir) {
-	print "$appname: '$todir' does not exist, creating\n";
+	print "Warning: $appname: '$todir' does not exist, creating\n";
 	mkdir "$todir" or
-      die "Error: Unable to create to-directory '$todir': $!\n";
+      die "Error: $appname: Unable to create to-directory '$todir': $!\n";
   }
 }
 
@@ -151,9 +158,9 @@ sub iswritestate {
 # If there is a state change error return 0, otherwise return 1;
 
 sub checkifdef {
-  my($TF, $line) = @_;
+  my($TF, $line, $fromfilename) = @_;
 
-  if ( $line =~ /(#ifdef|#ifndef|#else|#endif).*($search)/ ) {
+  if ( $line =~ /(#ifdef|#ifndef|#else|#endif).*($search)(\s|$|\*)/ ) {
     my $copt = $1;
     my $tag  = $2;
 
@@ -164,7 +171,7 @@ sub checkifdef {
         $canwrite = iswritestate();
       }
       else {
-        print "Error: Found '#ifdef $tag' with state $thash{$tag}\n";
+        print "Error: $fromfilename: Found '#ifdef $tag' with state $thash{$tag}\n";
         return 0;
       }
     }
@@ -178,7 +185,7 @@ sub checkifdef {
         $canwrite = iswritestate();
       }
       else {
-        print "Error: Found '#ifndef $tag' with state $thash{$tag}\n";
+        print "Error: $fromfilename: Found '#ifndef $tag' with state $thash{$tag}\n";
         return 0;
       }
     }
@@ -197,7 +204,7 @@ sub checkifdef {
         $canwrite = iswritestate();
       }
       else {
-        print "Error: Found '#else (...) $tag' with state $thash{$tag}\n";
+        print "Error: $fromfilename: Found '#else (...) $tag' with state $thash{$tag}\n";
         return 0;
       }
     }
@@ -225,6 +232,7 @@ sub checkifdef {
 sub parsefile {
   my($fname, $tname) = @_;
   my $FF; my $TF;
+  my @fromfile = ();
 
   # ignore file for file names
   if ( (exists $opts{i}) && ("$fname" =~  /$igstring/) ) {
@@ -234,11 +242,15 @@ sub parsefile {
 
   print "Info: Opening '$fname'\n" if ( exists $opts{v} );
   if ( !(open($FF, "< $fname")) ) {
-	print "Error: unable to open input file, skipping: '$fname': $!\n";
+	print "Warning: unable to open input file, skipping: '$fname': $!\n";
 	return 0;
   }
+
+  my @fromfile = <$FF>;
+  $FF->close();
+
   if ( !(open($TF, "> $tname")) ) {
-	print "Error: unable to open output file, skipping: '$tname': $!\n";
+	print "Warning: unable to open output file, skipping: '$tname': $!\n";
 	return 0;
   }
   my $mode = (stat("$fname"))[2];
@@ -248,9 +260,9 @@ sub parsefile {
   my @tout  = ();
   my $retval = 1;
 
-  while ($line = <$FF>) {
+  while ( $line = shift @fromfile ) {
     # check for any ifdef state changes
-	if ( ! checkifdef($TF, $line) ) {
+	if ( ! checkifdef($TF, $line, $fname) ) {
       $FF->close();
       $TF->close();
       die "Error: tag error in file \'$fname\', exiting\n";
@@ -265,9 +277,57 @@ sub parsefile {
 
   }
 
-  $FF->close();
   $TF->close();
 
   return $retval;
 } # parsefile
+
+
+# note, fromdir should have already been checked to exist and be a
+# directory
+sub load_minamal_ifdefs {
+    my @filelist = ();
+    my $MF;
+    
+    if ( !(open($MF, "< $fromdir/$minimal_include_path")) ) {
+        die "Unable to open main minimal feature file: '$fromdir/$minimal_include_path'\n";
+    }
+    my $line;
+    # skip preceding lines
+    while ( ($line = <$MF>) &&
+            ($line !~ /^#else.*NETSNMP_FEATURE_CHECKING/ ) ) {
+    }
+    # grab the fetaure .h files
+    while ( ($line = <$MF>) &&
+            ($line !~ /^#endif.*NET_SNMP_FEATURE_CHECKING/) ) {
+        if ($line =~ /include.*<(.*.h)>/) {
+            push @filelist, $1;
+        }
+    }
+    # printf "file list is '%s'\n", join ("\n", @filelist);
+
+    close($MF);
+
+    while (my $fname = shift @filelist) {
+        if ( !( -e "$fromdir/include/$fname" ) )  {
+            print "Warn: feature file does not exist, skipping: '$fromdir/include/$fname'";
+            next;
+        }
+        if ( !(open($MF, "< $fromdir/include/$fname")) ) {
+            die "Unable to open minimal feature file: '$fromdir/include/$fname'\n";
+        }
+        while ( ($line = <$MF>) ) {
+            if ( $line =~ /^#define.*(NETSNMP_FEATURE_REMOVE[^ ]+) / ) {
+                $thash{"$1"} = $ST_OFF;
+            }
+        }
+        close($MF);
+        # printf "$fname has, '%s'\n", join (", ", (keys %thash));
+    }
+
+        
+} # load_minamal_ifdefs
+
+
+
 
