@@ -43,6 +43,10 @@
 #include "tcp.h"
 #include "tcpTable.h"
 
+netsnmp_feature_child_of(tcptable_all, libnetsnmpmibs)
+
+netsnmp_feature_child_of(tcp_count_connections, tcptable_all)
+
 #ifdef hpux11
 #define	TCPTABLE_ENTRY_TYPE	mib_tcpConnEnt 
 #define	TCPTABLE_STATE		State 
@@ -288,9 +292,6 @@ tcpTable_handler(netsnmp_mib_handler          *handler,
 
     return SNMP_ERR_NOERROR;
 }
-
-netsnmp_feature_provide(tcp_count_connections)
-
 
 #ifndef NETSNMP_FEATURE_REMOVE_TCP_COUNT_CONNECTIONS
 int

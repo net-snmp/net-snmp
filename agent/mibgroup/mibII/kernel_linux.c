@@ -46,7 +46,9 @@ struct udp6_mib  cached_udp6_mib;
 #define ICMP6_STATS_PREFIX_LEN	5
 #define UDP6_STATS_PREFIX_LEN   4
 
-netsnmp_feature_provide(linux_read_ip6_stat)
+netsnmp_feature_child_of(linux_ip6_stat_all, libnetsnmpmibs)
+
+netsnmp_feature_child_of(linux_read_ip6_stat, linux_ip6_stat_all)
 
 int
 decode_icmp_msg(char *line, char *data, struct icmp4_msg_mib *msg)

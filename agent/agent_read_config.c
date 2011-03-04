@@ -103,7 +103,9 @@
 #include "agent_module_includes.h"
 #include "mib_module_includes.h"
 
-netsnmp_feature_provide(snmpd_unregister_config_handler)
+netsnmp_feature_child_of(agent_read_config_all, libnetsnmpagent)
+
+netsnmp_feature_child_of(snmpd_unregister_config_handler, agent_read_config_all)
 
 #ifdef HAVE_UNISTD_H
 void

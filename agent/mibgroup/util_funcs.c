@@ -97,6 +97,16 @@
 #define setPerrorstatus(x) snmp_log_perror(x)
 #endif
 
+netsnmp_feature_child_of(util_funcs, libnetsnmpmibs)
+
+netsnmp_feature_child_of(shell_command, util_funcs)
+netsnmp_feature_child_of(get_exten_instance, util_funcs)
+netsnmp_feature_child_of(clear_cache, util_funcs)
+netsnmp_feature_child_of(find_field, util_funcs)
+netsnmp_feature_child_of(parse_miboid, util_funcs)
+netsnmp_feature_child_of(string_append_int, util_funcs)
+netsnmp_feature_child_of(internal_mib_table, util_funcs)
+
 #if defined(HAVE_LINUX_RTNETLINK_H)
 netsnmp_feature_child_of(prefix_info_all, util_funcs)
 netsnmp_feature_child_of(prefix_info, prefix_info_all)
@@ -140,7 +150,6 @@ make_tempfile(void)
     return NULL;
 }
 
-netsnmp_feature_child_of(shell_command, util_funcs)
 #ifndef NETSNMP_FEATURE_REMOVE_SHELL_COMMAND
 int
 shell_command(struct extensible *ex)
@@ -202,7 +211,6 @@ exec_command(struct extensible *ex)
     return (ex->result);
 }
 
-netsnmp_feature_child_of(get_exten_instance, util_funcs)
 #ifndef NETSNMP_FEATURE_REMOVE_GET_EXTEN_INSTANCE
 struct extensible *
 get_exten_instance(struct extensible *exten, size_t inst)
@@ -667,7 +675,6 @@ get_exec_pipes(char *cmd, int *fdIn, int *fdOut, netsnmp_pid_t *pid)
     return 0;
 }
 
-netsnmp_feature_child_of(clear_cache, util_funcs)
 #ifndef NETSNMP_FEATURE_REMOVE_CLEAR_CACHE
 int
 clear_cache(int action,
@@ -734,7 +741,6 @@ checkmib(struct variable *vp, oid * name, size_t * length,
                                  write_method, max));
 }
 
-netsnmp_feature_child_of(find_field, util_funcs)
 #ifndef NETSNMP_FEATURE_REMOVE_FIND_FIELD
 char           *
 find_field(char *ptr, int field)
@@ -778,7 +784,6 @@ find_field(char *ptr, int field)
 }
 #endif /* NETSNMP_FEATURE_REMOVE_FIND_FIELD */
 
-netsnmp_feature_child_of(parse_miboid, util_funcs)
 #ifndef NETSNMP_FEATURE_REMOVE_PARSE_MIBOID
 int
 parse_miboid(const char *buf, oid * oidout)
@@ -802,7 +807,6 @@ parse_miboid(const char *buf, oid * oidout)
 }
 #endif /* NETSNMP_FEATURE_REMOVE_PARSE_MIBOID */
 
-netsnmp_feature_child_of(string_append_int, util_funcs)
 #ifndef NETSNMP_FEATURE_REMOVE_STRING_APPEND_INT
 void
 string_append_int(char *s, int val)
@@ -820,7 +824,6 @@ string_append_int(char *s, int val)
 }
 #endif /* NETSNMP_FEATURE_REMOVE_STRING_APPEND_INT */
 
-netsnmp_feature_child_of(internal_mib_table, util_funcs)
 #ifndef NETSNMP_FEATURE_REMOVE_INTERNAL_MIB_TABLE
 
 struct internal_mib_table {

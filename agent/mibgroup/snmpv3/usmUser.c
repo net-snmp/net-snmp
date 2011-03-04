@@ -22,7 +22,8 @@
 int usmStatusCheck(struct usmUser *uptr);
 #endif  /* !NETSNMP_NO_WRITE_SUPPORT */
 
-netsnmp_feature_provide(init_register_usmUser_context)
+netsnmp_feature_child_of(usmuser_all, libnetsnmpmibs)
+netsnmp_feature_child_of(init_register_usmuser_context, usmuser_all)
 
 struct variable4 usmUser_variables[] = {
     {USMUSERSPINLOCK, ASN_INTEGER, NETSNMP_OLDAPI_RWRITE,
