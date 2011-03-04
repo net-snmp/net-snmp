@@ -345,7 +345,7 @@ netsnmp_register_read_only_ulong_instance_context(const char *name,
         myreg, netsnmp_create_watcher_info(
             (void *)it, sizeof(u_long), ASN_UNSIGNED, WATCHER_FIXED_SIZE));
 }
-#endif /* NETSNMP_FEATURE_REMOVE_READ_ONLY_ULONG_INSTANCE_CONTEXT */
+#endif /* NETSNMP_FEATURE_REMOVE_REGISTER_READ_ONLY_ULONG_INSTANCE_CONTEXT */
 
 netsnmp_feature_child_of(register_ulong_instance_context,instance)
 #ifndef NETSNMP_FEATURE_REMOVE_REGISTER_ULONG_INSTANCE_CONTEXT
