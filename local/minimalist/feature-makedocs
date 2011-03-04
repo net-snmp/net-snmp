@@ -154,6 +154,7 @@ sub print_wiki_mode {
     }
 
     print $fh "'''The contents of this page is auto-generated from local/minimalist/feature-makedocs; do not edit by hand (changes will be lost)'''\n\n";
+    print $fh "Details of the feature marking system and how it is used can be found at [[Feature Marking and Selection]]\n\n";
 
     foreach my $node (sort keys(%top)) {
 	print_wiki_node($fh, $node, $depth+1);
