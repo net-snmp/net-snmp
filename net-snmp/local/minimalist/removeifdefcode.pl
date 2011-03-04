@@ -42,7 +42,6 @@ if ( (!exists $opts{r}) && (!exists $opts{w}) && (!exists $opts{m}) ) {
 else {
   $thash{"$ID_NOREAD"}  = "$ST_OFF" if ( exists $opts{r} );
   $thash{"$ID_NOWRITE"} = "$ST_OFF" if ( exists $opts{w} );
-  # xxx check for minimalist below
 }
 
 my $fromdir = $ARGV[0];
@@ -60,7 +59,7 @@ if ( exists $opts{m} ) {
 }
 
 # create search string from tags
-my @tt     = keys %thash;
+# minimal must be done before this
 my $search = join "|", (keys %thash);
 
 
@@ -138,7 +137,7 @@ sub parsedirectory {
 } # parsedirectory
 
 
-# returns 1 if current state would be write, 0 otherwise
+# returns 1 if current state for tag is write, 0 otherwise
 sub iswritestate {
   my $tag = "";
 
@@ -304,7 +303,6 @@ sub load_minamal_ifdefs {
             push @filelist, $1;
         }
     }
-    # printf "file list is '%s'\n", join ("\n", @filelist);
 
     close($MF);
 
@@ -322,9 +320,7 @@ sub load_minamal_ifdefs {
             }
         }
         close($MF);
-        # printf "$fname has, '%s'\n", join (", ", (keys %thash));
     }
-
         
 } # load_minamal_ifdefs
 
