@@ -20,7 +20,6 @@
 #include <sys/ioctl.h>
 
 netsnmp_feature_require(prefix_info)
-netsnmp_feature_require(cert_fingerprints)
 netsnmp_feature_require(check_vb_rowstatus_with_storagetype)
 
 #if defined (NETSNMP_ENABLE_IPV6)
