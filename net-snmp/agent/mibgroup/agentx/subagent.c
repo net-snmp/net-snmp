@@ -45,7 +45,6 @@
 
 #include "subagent.h"
 
-netsnmp_feature_require(remove_trap_sessionname)
 netsnmp_feature_require(remove_trap_session)
 
 #ifdef USING_AGENTX_SUBAGENT_MODULE

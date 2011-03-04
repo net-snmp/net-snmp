@@ -140,8 +140,6 @@ netsnmp_feature_child_of(statistics, libnetsnmp)
 netsnmp_feature_child_of(snmp_api, libnetsnmp)
 netsnmp_feature_child_of(oid_is_subtree, snmp_api)
 
-netsnmp_feature_child_of(netsnmp_unused, libnetsnmp)
-
 #if defined(NETSNMP_USE_OPENSSL) && defined(HAVE_LIBSSL)
 extern void netsnmp_certs_init(void);
 extern void netsnmp_certs_shutdown(void);

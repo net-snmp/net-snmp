@@ -5,9 +5,11 @@
 
 #include "utilities/iquery.h"
 
-netsnmp_feature_provide(iquery)
+netsnmp_feature_child_of(iquery_all, libnetsnmpmibs)
+netsnmp_feature_child_of(iquery, iquery_all)
+netsnmp_feature_child_of(iquery_community_session, iquery_all)
+
 netsnmp_feature_require(query_set_default_session)
-netsnmp_feature_child_of(iquery_community_session, netsnmp_unused)
 
 #ifndef NETSNMP_FEATURE_REMOVE_IQUERY
 

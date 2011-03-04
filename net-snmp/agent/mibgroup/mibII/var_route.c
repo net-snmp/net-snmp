@@ -63,6 +63,8 @@ PERFORMANCE OF THIS SOFTWARE.
 #include "interfaces.h"
 #include "struct.h"
 
+netsnmp_feature_child_of(get_routes, libnetsnmpmibs)
+
 #ifndef  MIN
 #define  MIN(a,b)                     (((a) < (b)) ? (a) : (b))
 #endif
@@ -317,8 +319,6 @@ static RTENTRY **rthead = NULL;
 static int      rtsize = 0, rtallocate = 0;
 
 static void     Route_Scan_Reload(void);
-
-netsnmp_feature_provide(get_routes)
 
 #ifndef NETSNMP_FEATURE_REMOVE_GET_ROUTES
 RTENTRY **netsnmp_get_routes(size_t *size) {

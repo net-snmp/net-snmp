@@ -22,7 +22,6 @@
 
 #include "ip-mib/ipAddressTable/ipAddressTable.h"
 
-netsnmp_feature_require(netsnmp_ipaddress_flags_copy)
 netsnmp_feature_require(ipAddressTable_container_get)
 netsnmp_feature_require(ipaddress_common_copy_utilities)
 

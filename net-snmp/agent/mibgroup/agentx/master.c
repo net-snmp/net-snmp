@@ -54,8 +54,6 @@
 netsnmp_feature_require(handler_mark_requests_as_delegated)
 netsnmp_feature_require(unix_socket_paths)
 netsnmp_feature_require(free_agent_snmp_session_by_session)
-netsnmp_feature_require(set_agent_uptimename)
-
 
 void
 real_init_master(void)
