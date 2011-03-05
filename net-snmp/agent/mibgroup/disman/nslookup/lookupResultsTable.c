@@ -14,20 +14,6 @@
 /*
  * This should always be included first before anything else 
  */
-#if HAVE_STDLIB_H
-#include <stdlib.h>
-#endif
-#if HAVE_STRING_H
-#include <string.h>
-#else
-#include <strings.h>
-#endif
-#ifdef HAVE_LIMITS_H
-#include <limits.h>
-#endif
-
-
-
 
 #include <net-snmp/net-snmp-config.h>
 #include <net-snmp/net-snmp-includes.h>
@@ -239,9 +225,15 @@ lookupResultsTable_inadd(struct lookupResultsTable_data *thedata)
 {
     netsnmp_variable_list *vars_list = NULL;
 
-    snmp_varlist_add_variable(&vars_list, NULL, 0, ASN_OCTET_STR, (char *) thedata->lookupCtlOwnerIndex, thedata->lookupCtlOwnerIndexLen);      /* lookupCtlOwnerIndex */
-    snmp_varlist_add_variable(&vars_list, NULL, 0, ASN_OCTET_STR, (char *) thedata->lookupCtlOperationName, thedata->lookupCtlOperationNameLen);        /* lookupCtlOperationName */
-    snmp_varlist_add_variable(&vars_list, NULL, 0, ASN_UNSIGNED, (char *) &thedata->lookupResultsIndex, sizeof(thedata->lookupResultsIndex));   /* lookupResultsIndex */
+    snmp_varlist_add_variable(&vars_list, NULL, 0, ASN_OCTET_STR,
+    		(char *) thedata->lookupCtlOwnerIndex,
+		thedata->lookupCtlOwnerIndexLen);
+    snmp_varlist_add_variable(&vars_list, NULL, 0, ASN_OCTET_STR,
+    		(char *) thedata->lookupCtlOperationName,
+		thedata->lookupCtlOperationNameLen);
+    snmp_varlist_add_variable(&vars_list, NULL, 0, ASN_UNSIGNED,
+    		(char *) &thedata->lookupResultsIndex,
+		sizeof(thedata->lookupResultsIndex));
 
     /*
      * XXX: fill in default row values here into StorageNew 
