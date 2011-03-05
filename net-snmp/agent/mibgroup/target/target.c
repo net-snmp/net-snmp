@@ -28,6 +28,7 @@
 
 netsnmp_feature_require(tdomain_support)
 netsnmp_feature_require(tdomain_transport_oid)
+netsnmp_feature_want(tlstmaddr_external)
 
 #define MAX_TAGS 128
 
@@ -195,7 +196,7 @@ get_target_sessions(char *taglist, TargetFilterFunction * filterfunct,
 #if defined(NETSNMP_TRANSPORT_DTLSUDP_DOMAIN) || defined(NETSNMP_TRANSPORT_TLSTCP_DOMAIN)
                             if (!tls) {
                                 netsnmp_cert *cert;
-                                char         *server_id;
+                                char         *server_id = NULL;
 
                                 DEBUGMSGTL(("target_sessions",
                                             "  looking up our id: %s\n",
@@ -226,8 +227,10 @@ get_target_sessions(char *taglist, TargetFilterFunction * filterfunct,
                                     t->f_config(t, "peerCert",
                                                 cert->fingerprint);
                                 }
+#ifdef NETSNMP_FEATURE_HAS_TLSTMADDR_EXTERNAL
                                 server_id = netsnmp_tlstmAddr_get_serverId(
                                     targaddrs->name);
+#endif /* NETSNMP_FEATURE_HAS_TLSTMADDR_EXTERNAL */
                                 if (server_id) {
                                     DEBUGMSGTL(("target_sessions",
                                             "  found serverId: %s\n", 

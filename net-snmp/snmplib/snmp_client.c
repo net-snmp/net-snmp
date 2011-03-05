@@ -1475,6 +1475,7 @@ netsnmp_state_machine_run( netsnmp_state_machine_input *input)
     return input->last_run->result;
 }
 
+#ifndef NETSNMP_NO_WRITE_SUPPORT
 /** **************************************************************************
  *
  * row create state machine steps
@@ -1851,6 +1852,7 @@ netsnmp_row_create(netsnmp_session *sess, netsnmp_variable_list *vars,
 
     return SNMPERR_SUCCESS;
 }
+#endif /* NETSNMP_NO_WRITE_SUPPORT */
 
 
 /** @} */

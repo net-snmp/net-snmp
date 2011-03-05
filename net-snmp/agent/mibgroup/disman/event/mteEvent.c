@@ -225,10 +225,12 @@ int
 _mteEvent_fire_notify( struct mteEvent    *event,
                        struct mteTrigger  *trigger,
                        oid *suffix, size_t sfx_len );
+#ifndef NETSNMP_NO_WRITE_SUPPORT
 int
 _mteEvent_fire_set(    struct mteEvent    *event,
                        struct mteTrigger  *trigger,
                        oid *suffix, size_t sfx_len );
+#endif /* NETSNMP_NO_WRITE_SUPPORT */
 
 int
 mteEvent_fire( char *owner, char *event,      /* Event to invoke    */
@@ -264,11 +266,13 @@ mteEvent_fire( char *owner, char *event,      /* Event to invoke    */
         _mteEvent_fire_notify( entry, trigger, suffix, s_len );
         fired = 1;
     }
+#ifndef NETSNMP_NO_WRITE_SUPPORT
     if (entry->mteEventActions & MTE_EVENT_SET) {
         DEBUGMSGTL(("disman:event:fire", "Firing set event\n"));
         _mteEvent_fire_set( entry, trigger, suffix, s_len );
         fired = 1;
     }
+#endif /* NETSNMP_NO_WRITE_SUPPORT */
 
     if (!fired)
         DEBUGMSGTL(("disman:event:fire", "Matched event is empty\n"));
@@ -437,6 +441,7 @@ _mteEvent_fire_notify( struct mteEvent   *entry,     /* The event to fire  */
 }
 
 
+#ifndef NETSNMP_NO_WRITE_SUPPORT
 int
 _mteEvent_fire_set( struct mteEvent   *entry,      /* The event to fire */
                     struct mteTrigger *trigger,    /* Trigger that fired */
@@ -480,4 +485,4 @@ _mteEvent_fire_set( struct mteEvent   *entry,      /* The event to fire */
 
     /* XXX - Need to check result */
 }
-
+#endif /* NETSNMP_NO_WRITE_SUPPORT */

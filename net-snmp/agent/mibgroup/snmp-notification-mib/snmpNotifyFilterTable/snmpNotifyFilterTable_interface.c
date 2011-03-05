@@ -271,6 +271,7 @@ void
         _mfd_snmpNotifyFilterTable_post_request;
 
 
+#ifndef NETSNMP_NO_WRITE_SUPPORT
     /*
      * REQUIRED wrappers for set request handling
      */
@@ -296,6 +297,7 @@ void
      */
     access_multiplexer->consistency_checks =
         _mfd_snmpNotifyFilterTable_check_dependencies;
+#endif /* NETSNMP_NO_WRITE_SUPPORT */
 
     /*************************************************
      *
@@ -310,8 +312,11 @@ void
                                             handler,
                                             snmpNotifyFilterTable_oid,
                                             snmpNotifyFilterTable_oid_size,
-                                            HANDLER_CAN_BABY_STEP |
-                                            HANDLER_CAN_RWRITE);
+                                            HANDLER_CAN_BABY_STEP
+#ifndef NETSNMP_NO_WRITE_SUPPORT
+                                            | HANDLER_CAN_RWRITE
+#endif /* NETSNMP_NO_WRITE_SUPPORT */
+            );
     if (NULL == reginfo) {
         snmp_log(LOG_ERR,
                  "error registering table snmpNotifyFilterTable\n");
@@ -325,18 +330,21 @@ void
      */
     if (access_multiplexer->object_lookup)
         mfd_modes |= BABY_STEP_OBJECT_LOOKUP;
+#ifndef NETSNMP_NO_WRITE_SUPPORT
     if (access_multiplexer->set_values)
         mfd_modes |= BABY_STEP_SET_VALUES;
     if (access_multiplexer->irreversible_commit)
         mfd_modes |= BABY_STEP_IRREVERSIBLE_COMMIT;
     if (access_multiplexer->object_syntax_checks)
         mfd_modes |= BABY_STEP_CHECK_OBJECT;
+#endif /* NETSNMP_NO_WRITE_SUPPORT */
 
     if (access_multiplexer->pre_request)
         mfd_modes |= BABY_STEP_PRE_REQUEST;
     if (access_multiplexer->post_request)
         mfd_modes |= BABY_STEP_POST_REQUEST;
 
+#ifndef NETSNMP_NO_WRITE_SUPPORT
     if (access_multiplexer->undo_setup)
         mfd_modes |= BABY_STEP_UNDO_SETUP;
     if (access_multiplexer->undo_cleanup)
@@ -352,6 +360,7 @@ void
         mfd_modes |= BABY_STEP_COMMIT;
     if (access_multiplexer->undo_commit)
         mfd_modes |= BABY_STEP_UNDO_COMMIT;
+#endif /* NETSNMP_NO_WRITE_SUPPORT */
 
     handler = netsnmp_baby_steps_handler_get(mfd_modes);
     netsnmp_inject_handler(reginfo, handler);
@@ -1085,6 +1094,7 @@ _mfd_snmpNotifyFilterTable_get_values(netsnmp_mib_handler *handler, netsnmp_hand
     return SNMP_ERR_NOERROR;
 }                               /* _mfd_snmpNotifyFilterTable_get_values */
 
+#ifndef NETSNMP_NO_WRITE_SUPPORT
 /***********************************************************************
  *
  * SET processing
@@ -1840,6 +1850,7 @@ _mfd_snmpNotifyFilterTable_irreversible_commit(netsnmp_mib_handler
 
     return SNMP_ERR_NOERROR;
 }                               /* _mfd_snmpNotifyFilterTable_irreversible_commit */
+#endif /* NETSNMP_NO_WRITE_SUPPORT */
 
 /***********************************************************************
  *

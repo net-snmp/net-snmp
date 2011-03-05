@@ -30,11 +30,13 @@ handle_truthvalue(netsnmp_mib_handler *handler,
                   netsnmp_agent_request_info *reqinfo,
                   netsnmp_request_info *requests)
 {
+#ifndef NETSNMP_NO_WRITE_SUPPORT
     if (reqinfo->mode == MODE_SET_RESERVE1) {
         int res = netsnmp_check_vb_truthvalue(requests->requestvb);
         if (res != SNMP_ERR_NOERROR)
             netsnmp_request_set_error(requests, res);
     }
+#endif /* NETSNMP_NO_WRITE_SUPPORT */
     return SNMP_ERR_NOERROR;
 }
 
