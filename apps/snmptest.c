@@ -210,9 +210,11 @@ main(int argc, char *argv[])
                     case SNMP_MSG_RESPONSE:
                         printf("Received Get Response ");
                         break;
+#ifndef NETSNMP_NO_WRITE_SUPPORT
                     case SNMP_MSG_SET:
                         printf("Received Set Request ");
                         break;
+#endif /* NETSNMP_NO_WRITE_SUPPORT */
                     case SNMP_MSG_TRAP:
                         printf("Received Trap Request ");
                         break;
@@ -311,10 +313,12 @@ input_variable(netsnmp_variable_list * vp)
             command = SNMP_MSG_GETNEXT;
             printf("Request type is Getnext Request\n");
             break;
+#ifndef NETSNMP_NO_WRITE_SUPPORT
         case 'S':
             command = SNMP_MSG_SET;
             printf("Request type is Set Request\n");
             break;
+#endif /* NETSNMP_NO_WRITE_SUPPORT */
         case 'B':
             command = SNMP_MSG_GETBULK;
             printf("Request type is Bulk Request\n");
@@ -381,8 +385,12 @@ input_variable(netsnmp_variable_list * vp)
 	vp->name = snmp_duplicate_objid(name, vp->name_length);
     }
 
-    if (command == SNMP_MSG_SET || command == SNMP_MSG_INFORM
-        || command == SNMP_MSG_TRAP2) {
+    if (command == SNMP_MSG_INFORM
+        || command == SNMP_MSG_TRAP2
+#ifndef NETSNMP_NO_WRITE_SUPPORT
+        command == SNMP_MSG_SET
+#endif /* NETSNMP_NO_WRITE_SUPPORT */
+        ) {
         printf("Type [i|u|s|x|d|n|o|t|a]: ");
         fflush(stdout);
         if (!fgets(buf, sizeof(buf), stdin)) {
