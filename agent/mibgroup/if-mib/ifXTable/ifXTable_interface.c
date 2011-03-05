@@ -929,6 +929,7 @@ _mfd_ifXTable_get_values(netsnmp_mib_handler *handler,
     return SNMP_ERR_NOERROR;
 }                               /* _mfd_ifXTable_get_values */
 
+#ifndef NETSNMP_NO_WRITE_SUPPORT
 /***********************************************************************
  *
  * SET processing
@@ -1208,8 +1209,6 @@ _mfd_ifXTable_check_objects(netsnmp_mib_handler *handler,
 
     return SNMP_ERR_NOERROR;
 }                               /* _mfd_ifXTable_check_objects */
-
-#ifndef NETSNMP_NO_WRITE_SUPPORT
 
 /*----------------------------------------------------------------------
  *

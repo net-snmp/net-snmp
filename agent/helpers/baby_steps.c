@@ -16,8 +16,6 @@ netsnmp_feature_require(check_requests_error)
 
 #ifndef NETSNMP_FEATURE_REMOVE_BABY_STEPS
 
-#ifndef NETSNMP_NO_WRITE_SUPPORT
-
 #include <net-snmp/agent/baby_steps.h>
 
 #define BABY_STEPS_PER_MODE_MAX     4
@@ -26,6 +24,7 @@ netsnmp_feature_require(check_requests_error)
 static u_short get_mode_map[BABY_STEPS_PER_MODE_MAX] = {
     MODE_BSTEP_PRE_REQUEST, MODE_BSTEP_OBJECT_LOOKUP, BSTEP_USE_ORIGINAL, MODE_BSTEP_POST_REQUEST };
 
+#ifndef NETSNMP_NO_WRITE_SUPPORT
 static u_short set_mode_map[SNMP_MSG_INTERNAL_SET_MAX][BABY_STEPS_PER_MODE_MAX] = {
     /*R1*/
     { MODE_BSTEP_PRE_REQUEST, MODE_BSTEP_OBJECT_LOOKUP, MODE_BSTEP_ROW_CREATE,
@@ -45,6 +44,7 @@ static u_short set_mode_map[SNMP_MSG_INTERNAL_SET_MAX][BABY_STEPS_PER_MODE_MAX] 
     { MODE_BSTEP_UNDO_COMMIT, MODE_BSTEP_UNDO_SET, MODE_BSTEP_UNDO_CLEANUP,
       MODE_BSTEP_POST_REQUEST}
 };
+#endif /* NETSNMP_NO_WRITE_SUPPORT */
 
 static int
 _baby_steps_helper(netsnmp_mib_handler *handler,
@@ -133,6 +133,7 @@ _baby_steps_helper(netsnmp_mib_handler *handler,
 
     switch (reqinfo->mode) {
 
+#ifndef NETSNMP_NO_WRITE_SUPPORT
     case MODE_SET_RESERVE1:
         /*
          * clear completed modes
@@ -150,6 +151,7 @@ _baby_steps_helper(netsnmp_mib_handler *handler,
     case MODE_SET_UNDO:
         mode_map_ptr = set_mode_map[reqinfo->mode];
         break;
+#endif /* NETSNMP_NO_WRITE_SUPPORT */
             
     default:
         /*
@@ -251,6 +253,7 @@ _baby_steps_helper(netsnmp_mib_handler *handler,
         if (BSTEP_USE_ORIGINAL != mode_map_ptr[i]) {
             u_int    mode_flag;
 
+#ifndef NETSNMP_NO_WRITE_SUPPORT
             /*
              * skip undo commit if commit wasn't hit, and
              * undo_cleanup if undo_setup wasn't hit.
@@ -269,6 +272,7 @@ _baby_steps_helper(netsnmp_mib_handler *handler,
                             "   skipping undo cleanup (no undo setup)\n"));
                 continue;
             }
+#endif /* NETSNMP_NO_WRITE_SUPPORT */
 
             reqinfo->mode = mode_map_ptr[i];
             mode_flag = netsnmp_baby_step_mode2flag( mode_map_ptr[i] );
@@ -322,7 +326,10 @@ _baby_steps_helper(netsnmp_mib_handler *handler,
          * in commit, free or undo.)
          */
         if (MODE_IS_GET(save_mode)
-            || (save_mode < SNMP_MSG_INTERNAL_SET_COMMIT)) {
+#ifndef NETSNMP_NO_WRITE_SUPPORT
+            || (save_mode < SNMP_MSG_INTERNAL_SET_COMMIT)
+#endif /* NETSNMP_NO_WRITE_SUPPORT */
+            ) {
             rc = netsnmp_check_requests_error(requests);
             if(rc) {
                 DEBUGMSGTL(("baby_steps", "   ERROR:request error\n"));
@@ -423,6 +430,7 @@ _baby_steps_access_multiplexer(netsnmp_mib_handler *handler,
             method = access_methods->get_values;
         break;
         
+#ifndef NETSNMP_NO_WRITE_SUPPORT
     case MODE_BSTEP_CHECK_VALUE:
         if( access_methods->object_syntax_checks )
             method = access_methods->object_syntax_checks;
@@ -472,6 +480,7 @@ _baby_steps_access_multiplexer(netsnmp_mib_handler *handler,
         if( access_methods->undo_cleanup )
             method = access_methods->undo_cleanup;
         break;
+#endif /* NETSNMP_NO_WRITE_SUPPORT */
         
     case MODE_BSTEP_POST_REQUEST:
         if( access_methods->post_request )
@@ -516,6 +525,7 @@ netsnmp_baby_step_mode2flag( u_int mode )
     switch( mode ) {
         case MODE_BSTEP_OBJECT_LOOKUP:
             return BABY_STEP_OBJECT_LOOKUP;
+#ifndef NETSNMP_NO_WRITE_SUPPORT
         case MODE_BSTEP_SET_VALUE:
             return BABY_STEP_SET_VALUE;
         case MODE_BSTEP_IRREVERSIBLE_COMMIT:
@@ -540,6 +550,7 @@ netsnmp_baby_step_mode2flag( u_int mode )
             return BABY_STEP_COMMIT;
         case MODE_BSTEP_UNDO_COMMIT:
             return BABY_STEP_UNDO_COMMIT;
+#endif /* NETSNMP_NO_WRITE_SUPPORT */
         default:
             netsnmp_assert("unknown flag");
             break;
@@ -548,9 +559,6 @@ netsnmp_baby_step_mode2flag( u_int mode )
 }
 /**  @} */
 
-#else /* NETSNMP_NO_WRITE_SUPPORT */
-netsnmp_feature_unused(baby_steps);
-#endif /* NETSNMP_NO_WRITE_SUPPORT */
 #else  /* NETSNMP_FEATURE_REMOVE_BABY_STEPS */
 netsnmp_feature_unused(baby_steps);
 #endif /* NETSNMP_FEATURE_REMOVE_BABY_STEPS */

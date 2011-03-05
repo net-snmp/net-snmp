@@ -2332,6 +2332,8 @@ ifTable_check_dependencies(ifTable_rowreq_ctx * rowreq_ctx)
 }                               /* ifTable_check_dependencies */
 
 
+#endif /* !NETSNMP_NO_WRITE_SUPPORT */
+
 static int
 _if_number_handler(netsnmp_mib_handler *handler,
                       netsnmp_handler_registration *reginfo,
@@ -2351,8 +2353,6 @@ _if_number_handler(netsnmp_mib_handler *handler,
     
     return SNMP_ERR_NOERROR;
 }
-
-#endif /* !NETSNMP_NO_WRITE_SUPPORT */
 
 /** @} */
 /** @{ */
