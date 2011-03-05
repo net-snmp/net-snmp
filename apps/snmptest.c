@@ -388,7 +388,7 @@ input_variable(netsnmp_variable_list * vp)
     if (command == SNMP_MSG_INFORM
         || command == SNMP_MSG_TRAP2
 #ifndef NETSNMP_NO_WRITE_SUPPORT
-        command == SNMP_MSG_SET
+        || command == SNMP_MSG_SET
 #endif /* NETSNMP_NO_WRITE_SUPPORT */
         ) {
         printf("Type [i|u|s|x|d|n|o|t|a]: ");
