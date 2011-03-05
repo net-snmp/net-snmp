@@ -22929,7 +22929,7 @@ else
     NETSNMP_BUILD_SSH_PROG_TRUE='#'
     NETSNMP_BUILD_SSH_PROG_FALSE=''
 fi
-if test "x$TLSPROG" = "xyes"; then
+if test "x$TLSPROG" = "xyes" -a "x$enable_read_only" != "xyes" ; then
     NETSNMP_BUILD_TLS_PROG_TRUE=''
     NETSNMP_BUILD_TLS_PROG_FALSE='#'
 else
@@ -22937,11 +22937,23 @@ else
     NETSNMP_BUILD_TLS_PROG_FALSE=''
 fi
 if echo " ${security_mod_list} " | grep ' usm ' ; then
-    NETSNMP_BUILD_USM_PROG_TRUE=''
-    NETSNMP_BUILD_USM_PROG_FALSE='#'
+    if "x$enable_read_only" != "xyes" ; then
+    	NETSNMP_BUILD_USM_PROG_TRUE=''
+    	NETSNMP_BUILD_USM_PROG_FALSE='#'
+    else
+    	NETSNMP_BUILD_USM_PROG_TRUE='#'
+    	NETSNMP_BUILD_USM_PROG_FALSE=''
+    fi
 else
     NETSNMP_BUILD_USM_PROG_TRUE='#'
     NETSNMP_BUILD_USM_PROG_FALSE=''
+fi
+if "x$enable_read_only" != "xyes" ; then
+    NETSNMP_BUILD_SET_TRUE=""
+    NETSNMP_BUILD_SET_FALSE="#"
+else
+    NETSNMP_BUILD_SET_TRUE="#"
+    NETSNMP_BUILD_SET_FALSE=""
 fi
 
 
