@@ -28,9 +28,10 @@ foreach my $file (@files) {
 
 
 if ($#ARGV > -1) {
-    print "Dumping found symbol usages:\n";
+    print "Dumping found symbol usages:\n\n";
     foreach my $arg (@ARGV) {
-	print Dumper($defined{$arg}{'usages'});
+	print "$arg:\n";
+	print "  ", join("\n  ", @{$defined{$arg}{'usages'}}),"\n\n";
     }
     exit;
 }
