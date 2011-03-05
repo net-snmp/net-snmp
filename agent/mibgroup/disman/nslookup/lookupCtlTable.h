@@ -24,9 +24,8 @@ config_require(header_complex);
     /*
      * our storage structure(s) 
      */
+
 struct lookupTable_data {
-
-
     char           *lookupCtlOwnerIndex;        /* string */
     size_t          lookupCtlOwnerIndexLen;
     char           *lookupCtlOperationName;     /* string */
@@ -41,10 +40,10 @@ struct lookupTable_data {
     int             storagetype;
 
     struct lookupResultsTable_data *ResultsTable;
-
-
 };
-typedef struct lookupResultsTable_data {
+
+
+struct lookupResultsTable_data {
     struct lookupResultsTable_data *next;
     char           *lookupCtlOwnerIndex;        /* string */
     size_t          lookupCtlOwnerIndexLen;
@@ -55,7 +54,7 @@ typedef struct lookupResultsTable_data {
     char           *lookupResultsAddress;
     size_t          lookupResultsAddressLen;
     int             storagetype;
-} resultsIns;
+};
 
 /*
  * function declarations 
@@ -78,11 +77,11 @@ WriteMethod     write_lookupCtlRowStatus;
  */
 #define COLUMN_LOOKUPCTLOWNERINDEX		1
 #define COLUMN_LOOKUPCTLOPERATIONNAME		2
-#define COLUMN_LOOKUPCTLTARGETADDRESSTYPE		3
+#define COLUMN_LOOKUPCTLTARGETADDRESSTYPE	3
 #define COLUMN_LOOKUPCTLTARGETADDRESS		4
 #define COLUMN_LOOKUPCTLOPERSTATUS		5
-#define COLUMN_LOOKUPCTLTIME		6
-#define COLUMN_LOOKUPCTLRC		7
+#define COLUMN_LOOKUPCTLTIME			6
+#define COLUMN_LOOKUPCTLRC			7
 #define COLUMN_LOOKUPCTLROWSTATUS		8
 
 #endif                          /* LOOKUPMIB_H */
