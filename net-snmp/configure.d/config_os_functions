@@ -70,7 +70,7 @@ case x$target_os in
     ;;
 
   *)
-    AC_CHECK_FUNCS([gai_strerror getaddrinfo gethostbyname gethostname])
+    AC_CHECK_FUNCS([gai_strerror getaddrinfo gethostbyname gethostbyname2 gethostname])
     ;;
 esac
 
