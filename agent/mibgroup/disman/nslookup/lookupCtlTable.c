@@ -108,7 +108,7 @@ create_lookupTable_data(void)
     struct lookupTable_data *StorageNew = NULL;
     StorageNew = SNMP_MALLOC_STRUCT(lookupTable_data);
     if (StorageNew == NULL) {
-	snmp_log(LOG_ERR, "Out in memory in nslookup-mib/create_lookupTable_date\n");
+        snmp_log(LOG_ERR, "Out in memory in nslookup-mib/create_lookupTable_date\n");
         exit(1);
     }
     StorageNew->lookupCtlTargetAddress = strdup("");
@@ -133,11 +133,11 @@ lookupCtlTable_add(struct lookupTable_data *thedata)
      * used by header_complex to index the data 
      */
     snmp_varlist_add_variable(&vars, NULL, 0, ASN_OCTET_STR,
-	(char *) thedata->lookupCtlOwnerIndex,
-	thedata->lookupCtlOwnerIndexLen);
+        (char *) thedata->lookupCtlOwnerIndex,
+        thedata->lookupCtlOwnerIndexLen);
     snmp_varlist_add_variable(&vars, NULL, 0, ASN_OCTET_STR,
-	(char *) thedata->lookupCtlOperationName,
-	thedata->lookupCtlOperationNameLen);
+        (char *) thedata->lookupCtlOperationName,
+        thedata->lookupCtlOperationNameLen);
 
 
     if (header_complex_add_data(&lookupCtlTableStorage, vars, thedata) ==
@@ -160,14 +160,14 @@ lookupResultsTable_add(struct lookupTable_data *thedata)
     if (thedata->ResultsTable != NULL)
         do {
             snmp_varlist_add_variable(&vars_list, NULL, 0, ASN_OCTET_STR,
-		(char *) p->lookupCtlOwnerIndex,
-		p->lookupCtlOwnerIndexLen);
+                (char *) p->lookupCtlOwnerIndex,
+                p->lookupCtlOwnerIndexLen);
             snmp_varlist_add_variable(&vars_list, NULL, 0, ASN_OCTET_STR,
-		(char *) p->lookupCtlOperationName,
-		p->lookupCtlOperationNameLen);
+                (char *) p->lookupCtlOperationName,
+                p->lookupCtlOperationNameLen);
             snmp_varlist_add_variable(&vars_list, NULL, 0, ASN_UNSIGNED,
-		(char *) &p->lookupResultsIndex,
-		sizeof(p->lookupResultsIndex));
+                (char *) &p->lookupResultsIndex,
+                sizeof(p->lookupResultsIndex));
 
             DEBUGMSGTL(("lookupResultsTable", "adding data...  "));
             /*
@@ -425,39 +425,39 @@ var_lookupCtlTable(struct variable *vp,
 
 static struct lookupResultsTable_data *
 add_result(struct lookupTable_data *item, int index,
-	int iatype, const void *data, size_t data_len)
+        int iatype, const void *data, size_t data_len)
 {
     struct lookupResultsTable_data *temp;
     temp = SNMP_MALLOC_STRUCT(lookupResultsTable_data);
     if (temp == NULL) {
-	snmp_log(LOG_ERR, "Out of memory in nslookup-mib/run_lookup\n");
-	return NULL;
+        snmp_log(LOG_ERR, "Out of memory in nslookup-mib/run_lookup\n");
+        return NULL;
     }
     temp->lookupResultsIndex = index;
     temp->next = NULL;
 
     temp->lookupCtlOwnerIndex = malloc(item->lookupCtlOwnerIndexLen + 1);
     if (temp->lookupCtlOwnerIndex == NULL) {
-	snmp_log(LOG_ERR, "Out of memory in nslookup-mib/run_lookup\n");
-	free(temp);
-	return NULL;
+        snmp_log(LOG_ERR, "Out of memory in nslookup-mib/run_lookup\n");
+        free(temp);
+        return NULL;
     }
     memcpy(temp->lookupCtlOwnerIndex,
-	   item->lookupCtlOwnerIndex,
-	   item->lookupCtlOwnerIndexLen + 1);
+           item->lookupCtlOwnerIndex,
+           item->lookupCtlOwnerIndexLen + 1);
     temp->lookupCtlOwnerIndex[item->lookupCtlOwnerIndexLen] = '\0';
     temp->lookupCtlOwnerIndexLen = item->lookupCtlOwnerIndexLen;
 
     temp->lookupCtlOperationName = malloc(item->lookupCtlOperationNameLen + 1);
     if (temp->lookupCtlOperationName == NULL) {
-	snmp_log(LOG_ERR, "Out of memory in nslookup-mib/run_lookup\n");
-	free(temp->lookupCtlOwnerIndex);
-	free(temp);
-	return NULL;
+        snmp_log(LOG_ERR, "Out of memory in nslookup-mib/run_lookup\n");
+        free(temp->lookupCtlOwnerIndex);
+        free(temp);
+        return NULL;
     }
     memcpy(temp->lookupCtlOperationName,
-	   item->lookupCtlOperationName,
-	   item->lookupCtlOperationNameLen + 1);
+           item->lookupCtlOperationName,
+           item->lookupCtlOperationNameLen + 1);
     temp->lookupCtlOperationName[item->lookupCtlOperationNameLen] = '\0';
     temp->lookupCtlOperationNameLen = item->lookupCtlOperationNameLen;
 
@@ -467,7 +467,7 @@ add_result(struct lookupTable_data *item, int index,
     temp->lookupResultsAddress[data_len] = '\0';
     temp->lookupResultsAddressLen = data_len;
     if (!item->ResultsTable)
-	item->ResultsTable = temp;
+        item->ResultsTable = temp;
 
     return temp;
 }
@@ -496,7 +496,7 @@ run_lookup(struct lookupTable_data *item)
 
     if (addressType == INETADDRESSTYPE_IPV4) {
         struct in_addr addr_in;
-	struct hostent *lookup;
+        struct hostent *lookup;
 
         if (!inet_aton(address, &addr_in)) {
             DEBUGMSGTL(("lookupResultsTable", "Invalid argument: %s\n",
@@ -524,14 +524,14 @@ run_lookup(struct lookupTable_data *item)
             modify_lookupCtlRc(item, 0L);
             if (lookup->h_name != NULL) {
                 current = temp = add_result(item, n, INETADDRESSTYPE_DNS,
-			    lookup->h_name, strlen(lookup->h_name));
+                            lookup->h_name, strlen(lookup->h_name));
                 n = n + 1;
             }
 
             i = 0;
             while (lookup->h_aliases[i]) {
                 temp = add_result(item, n, INETADDRESSTYPE_DNS,
-			    lookup->h_aliases[i], strlen(lookup->h_aliases[i]));
+                            lookup->h_aliases[i], strlen(lookup->h_aliases[i]));
                 current->next = temp;
                 current = temp;
                 i = i + 1;
@@ -548,11 +548,11 @@ run_lookup(struct lookupTable_data *item)
     }
 
     else if (addressType == INETADDRESSTYPE_DNS) {
-	struct hostent *lookup;
+        struct hostent *lookup;
 #if HAVE_GETADDRINFO
-	int             res;
-	struct addrinfo *ais;
-	struct addrinfo hints = { 0, AF_INET6, SOCK_DGRAM };
+        int             res;
+        struct addrinfo *ais;
+        struct addrinfo hints = { 0, AF_INET6, SOCK_DGRAM };
 #endif
 
         gettimeofday(&tpstart, NULL);
@@ -567,23 +567,23 @@ run_lookup(struct lookupTable_data *item)
             modify_lookupCtlRc(item, h_errno);
         } else {
             while (lookup->h_addr_list[i]) {
-		char buf[64];
-		int buflen;
+                char buf[64];
+                int buflen;
 
-		inet_ntop(lookup->h_addrtype, lookup->h_addr_list[i], buf, sizeof(buf));
-		buflen = strlen(buf);
-		switch (lookup->h_addrtype) {
-		case AF_INET:
-		    temp = add_result(item, n, INETADDRESSTYPE_IPV4, buf, buflen);
-		    break;
-		case AF_INET6:
-		    temp = add_result(item, n, INETADDRESSTYPE_IPV6, buf, buflen);
-		    break;
-		default:
-		    snmp_log(LOG_ERR, "nslookup-mib/run_lookup: Unknown address type %d\n", lookup->h_addrtype);
-		    temp = add_result(item, n, INETADDRESSTYPE_UNKNOWN, "", 0);
-		    break;
-		}
+                inet_ntop(lookup->h_addrtype, lookup->h_addr_list[i], buf, sizeof(buf));
+                buflen = strlen(buf);
+                switch (lookup->h_addrtype) {
+                case AF_INET:
+                    temp = add_result(item, n, INETADDRESSTYPE_IPV4, buf, buflen);
+                    break;
+                case AF_INET6:
+                    temp = add_result(item, n, INETADDRESSTYPE_IPV6, buf, buflen);
+                    break;
+                default:
+                    snmp_log(LOG_ERR, "nslookup-mib/run_lookup: Unknown address type %d\n", lookup->h_addrtype);
+                    temp = add_result(item, n, INETADDRESSTYPE_UNKNOWN, "", 0);
+                    break;
+                }
 
                 if (n == 1)
                     item->ResultsTable = temp;
@@ -591,49 +591,49 @@ run_lookup(struct lookupTable_data *item)
                     current->next = temp;
                 current = temp;
                 n = n + 1;
-		i = i + 1;
+                i = i + 1;
             }
         }
 
 #if HAVE_GETADDRINFO
         gettimeofday(&tpstart, NULL);
-	res = getaddrinfo(address, NULL, &hints, &ais);
+        res = getaddrinfo(address, NULL, &hints, &ais);
         gettimeofday(&tpend, NULL);
         timeuse6 = 1000000 * (tpend.tv_sec - tpstart.tv_sec) +
             tpend.tv_usec - tpstart.tv_usec;
 
         if (res != 0) {
             DEBUGMSGTL(("lookupCtlTable",
-        		"Can't get a ipv6 network host entry for %s\n",
-        		address));
+                        "Can't get a ipv6 network host entry for %s\n",
+                        address));
             modify_lookupCtlRc(item, res);
         } else {
-	    struct addrinfo *aip = ais;
+            struct addrinfo *aip = ais;
             while (aip) {
-		char buf[64];
-		int buflen;
+                char buf[64];
+                int buflen;
 
-		switch (aip->ai_family) {
-		case AF_INET:
-		    inet_ntop(aip->ai_family,
+                switch (aip->ai_family) {
+                case AF_INET:
+                    inet_ntop(aip->ai_family,
                         &((struct sockaddr_in *)aip->ai_addr)->sin_addr,
-			buf, sizeof(buf));
-		    buflen = strlen(buf);
-		    temp = add_result(item, n, INETADDRESSTYPE_IPV4, buf, buflen);
-		    break;
-		case AF_INET6:
-		    inet_ntop(aip->ai_family,
-			&((struct sockaddr_in6 *)aip->ai_addr)->sin6_addr,
-			buf, sizeof(buf));
-		    buflen = strlen(buf);
-		    temp = add_result(item, n, INETADDRESSTYPE_IPV6, buf, buflen);
-		    break;
-		default:
-		    snmp_log(LOG_ERR, "nslookup-mib/run_lookup: Unknown address type %d\n", aip->ai_family);
-		    temp = add_result(item, n, INETADDRESSTYPE_UNKNOWN, "", 0);
-		    break;
-		}
-		DEBUGMSGTL(("lookupCtlTable", "Adding %d %s\n", n, buf));
+                        buf, sizeof(buf));
+                    buflen = strlen(buf);
+                    temp = add_result(item, n, INETADDRESSTYPE_IPV4, buf, buflen);
+                    break;
+                case AF_INET6:
+                    inet_ntop(aip->ai_family,
+                        &((struct sockaddr_in6 *)aip->ai_addr)->sin6_addr,
+                        buf, sizeof(buf));
+                    buflen = strlen(buf);
+                    temp = add_result(item, n, INETADDRESSTYPE_IPV6, buf, buflen);
+                    break;
+                default:
+                    snmp_log(LOG_ERR, "nslookup-mib/run_lookup: Unknown address type %d\n", aip->ai_family);
+                    temp = add_result(item, n, INETADDRESSTYPE_UNKNOWN, "", 0);
+                    break;
+                }
+                DEBUGMSGTL(("lookupCtlTable", "Adding %d %s\n", n, buf));
 
                 if (n == 1)
                     item->ResultsTable = temp;
@@ -643,7 +643,7 @@ run_lookup(struct lookupTable_data *item)
                 n = n + 1;
                 aip = aip->ai_next;
             }
-	    freeaddrinfo(ais);
+            freeaddrinfo(ais);
         }
 #elif HAVE_GETHOSTBYNAME2
         gettimeofday(&tpstart, NULL);
@@ -658,27 +658,27 @@ run_lookup(struct lookupTable_data *item)
                         address));
             modify_lookupCtlRc(item, h_errno);
         } else {
-	    i = 0;
+            i = 0;
             while (lookup->h_addr_list[i]) {
-		char buf[64];
-		int buflen;
+                char buf[64];
+                int buflen;
 
-		inet_ntop(lookup->h_addrtype, lookup->h_addr_list[i],
-			buf, sizeof(buf));
-		buflen = strlen(buf);
-		switch (lookup->h_addrtype) {
-		case AF_INET:
-		    temp = add_result(item, n, INETADDRESSTYPE_IPV4, buf, buflen);
-		    break;
-		case AF_INET6:
-		    temp = add_result(item, n, INETADDRESSTYPE_IPV6, buf, buflen);
-		    break;
-		default:
-		    snmp_log(LOG_ERR, "nslookup-mib/run_lookup: Unknown address type %d\n", lookup->h_addrtype);
-		    temp = add_result(item, n, INETADDRESSTYPE_UNKNOWN, "", 0);
-		    break;
-		}
-		DEBUGMSGTL(("lookupCtlTable", "Adding %d %s\n", n, buf));
+                inet_ntop(lookup->h_addrtype, lookup->h_addr_list[i],
+                        buf, sizeof(buf));
+                buflen = strlen(buf);
+                switch (lookup->h_addrtype) {
+                case AF_INET:
+                    temp = add_result(item, n, INETADDRESSTYPE_IPV4, buf, buflen);
+                    break;
+                case AF_INET6:
+                    temp = add_result(item, n, INETADDRESSTYPE_IPV6, buf, buflen);
+                    break;
+                default:
+                    snmp_log(LOG_ERR, "nslookup-mib/run_lookup: Unknown address type %d\n", lookup->h_addrtype);
+                    temp = add_result(item, n, INETADDRESSTYPE_UNKNOWN, "", 0);
+                    break;
+                }
+                DEBUGMSGTL(("lookupCtlTable", "Adding %d %s\n", n, buf));
 
                 if (n == 1)
                     item->ResultsTable = temp;
@@ -686,7 +686,7 @@ run_lookup(struct lookupTable_data *item)
                     current->next = temp;
                 current = temp;
                 n = n + 1;
-		i = i + 1;
+                i = i + 1;
             }
         }
 #endif
@@ -707,8 +707,8 @@ run_lookup(struct lookupTable_data *item)
     }
 
     else if (addressType == INETADDRESSTYPE_IPV6) {
-	struct in6_addr addr_in6;
-	struct hostent *lookup;
+        struct in6_addr addr_in6;
+        struct hostent *lookup;
 
         if (inet_pton(AF_INET6, address, &addr_in6) == 1)
             DEBUGMSGTL(("lookupCtlTable", "success! \n"));
@@ -734,14 +734,14 @@ run_lookup(struct lookupTable_data *item)
             modify_lookupCtlRc(item, 0L);
             if (lookup->h_name != NULL) {
                 current = temp = add_result(item, n, INETADDRESSTYPE_DNS,
-			    lookup->h_name, strlen(lookup->h_name));
+                            lookup->h_name, strlen(lookup->h_name));
                 n = n + 1;
             }
 
             i = 0;
             while (lookup->h_aliases[i]) {
                 current = temp = add_result(item, n, INETADDRESSTYPE_DNS,
-			    lookup->h_aliases[i], strlen(lookup->h_aliases[i]));
+                            lookup->h_aliases[i], strlen(lookup->h_aliases[i]));
                 current->next = temp;
                 current = temp;
                 i = i + 1;
@@ -774,10 +774,10 @@ modify_lookupCtlOperStatus(struct lookupTable_data *thedata, long val)
     struct lookupTable_data *StorageTmp = NULL;
 
     snmp_varlist_add_variable(&vars, NULL, 0, ASN_OCTET_STR,
-	(char *) thedata->lookupCtlOwnerIndex, thedata->lookupCtlOwnerIndexLen);
+        (char *) thedata->lookupCtlOwnerIndex, thedata->lookupCtlOwnerIndexLen);
     snmp_varlist_add_variable(&vars, NULL, 0, ASN_OCTET_STR,
-	(char *) thedata->lookupCtlOperationName,
-	thedata->lookupCtlOperationNameLen);
+        (char *) thedata->lookupCtlOperationName,
+        thedata->lookupCtlOperationNameLen);
 
 
     if ((StorageTmp =
@@ -802,10 +802,10 @@ modify_lookupCtlTime(struct lookupTable_data *thedata, unsigned long val)
     struct lookupTable_data *StorageTmp = NULL;
 
     snmp_varlist_add_variable(&vars, NULL, 0, ASN_OCTET_STR,
-	(char *) thedata->lookupCtlOwnerIndex, thedata->lookupCtlOwnerIndexLen);
+        (char *) thedata->lookupCtlOwnerIndex, thedata->lookupCtlOwnerIndexLen);
     snmp_varlist_add_variable(&vars, NULL, 0, ASN_OCTET_STR,
-	(char *) thedata->lookupCtlOperationName,
-	thedata->lookupCtlOperationNameLen);
+        (char *) thedata->lookupCtlOperationName,
+        thedata->lookupCtlOperationNameLen);
 
 
     if ((StorageTmp =
@@ -830,10 +830,10 @@ modify_lookupCtlRc(struct lookupTable_data *thedata, long val)
     struct lookupTable_data *StorageTmp = NULL;
 
     snmp_varlist_add_variable(&vars, NULL, 0, ASN_OCTET_STR,
-	(char *) thedata->lookupCtlOwnerIndex, thedata->lookupCtlOwnerIndexLen);
+        (char *) thedata->lookupCtlOwnerIndex, thedata->lookupCtlOwnerIndexLen);
     snmp_varlist_add_variable(&vars, NULL, 0, ASN_OCTET_STR,
-	(char *) thedata->lookupCtlOperationName,
-	thedata->lookupCtlOperationNameLen);
+        (char *) thedata->lookupCtlOperationName,
+        thedata->lookupCtlOperationNameLen);
 
 
     if ((StorageTmp =
@@ -861,10 +861,10 @@ lookupResultsTable_del(struct lookupTable_data *thedata)
     size_t          newoid_len;
 
     snmp_varlist_add_variable(&vars, NULL, 0, ASN_OCTET_STR,
-	(char *) thedata->lookupCtlOwnerIndex, thedata->lookupCtlOwnerIndexLen);
+        (char *) thedata->lookupCtlOwnerIndex, thedata->lookupCtlOwnerIndexLen);
     snmp_varlist_add_variable(&vars, NULL, 0, ASN_OCTET_STR,
-	(char *) thedata->lookupCtlOperationName,
-	thedata->lookupCtlOperationNameLen);
+        (char *) thedata->lookupCtlOperationName,
+        thedata->lookupCtlOperationNameLen);
     memset(newoid, '\0', MAX_OID_LEN * sizeof(oid));
     header_complex_generate_oid(newoid, &newoid_len, NULL, 0, vars);
 
@@ -1034,7 +1034,7 @@ write_lookupCtlTargetAddress(int action,
 
         if ((StorageTmp->lookupCtlTargetAddress =
              (char *) malloc(var_val_len + 1)) == NULL) {
-	    snmp_log(LOG_ERR, "Out of memory in nslookup-mib/write_lookupCtlTargetAddress\n");
+            snmp_log(LOG_ERR, "Out of memory in nslookup-mib/write_lookupCtlTargetAddress\n");
             exit(1);
         }
         memcpy(StorageTmp->lookupCtlTargetAddress, var_val, var_val_len);
